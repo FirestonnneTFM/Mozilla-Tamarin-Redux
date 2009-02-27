@@ -154,7 +154,7 @@ namespace avmplus
 		// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
 		inline MethodEnv* env() const { return m_env; }
 		// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
-		inline AbstractFunction* info() const { return m_env ? m_env->method : NULL; }
+		inline MethodInfo* info() const { return m_env ? m_env->method : NULL; }
 		inline Stringp fakename() const { return m_fakename; }
 		inline int32_t depth() const { return m_depth; }
 
@@ -222,7 +222,7 @@ namespace avmplus
 
 		struct Element
 		{
-			AbstractFunction*	m_info;			// will be null for fake CallStackNode
+			MethodInfo*			m_info;			// will be null for fake CallStackNode
 			Stringp				m_name;			// same as m_info->name (except for fake CallStackNode)
 			Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 		    int32_t				m_linenum;
@@ -243,7 +243,7 @@ namespace avmplus
 			#endif
 			}
 			// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
-			inline AbstractFunction* info() const { return m_info; }
+			inline MethodInfo* info() const { return m_info; }
 			inline Stringp infoname() const { return m_name; }
 			inline Stringp filename() const { return m_filename; }
 			inline int32_t linenum() const { return m_linenum; }

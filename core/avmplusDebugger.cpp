@@ -164,11 +164,10 @@ namespace avmplus
 		// we didn't decide to stop due to a step, but check if we hit a breakpoint
 		if (!stop && !exited)
 		{
-			AbstractFunction* f = core->callStack->info();
-			if (f && (f->flags & AbstractFunction::ABSTRACT_METHOD) == 0) 
+			MethodInfo* f = core->callStack->info();
+			if (f && (f->flags & MethodInfo::ABSTRACT_METHOD) == 0) 
 			{
-				MethodInfo* m = (MethodInfo*)f;
-				AbcFile* abc = m->file();
+				AbcFile* abc = f->file();
 				if (abc)
 				{
 					SourceFile* source = abc->sourceNamed( core->callStack->filename() );
@@ -248,7 +247,7 @@ namespace avmplus
 		in_trace = false;
 	}
 	
-	void Debugger::traceMethod(AbstractFunction* fnc, bool ignoreArgs)
+	void Debugger::traceMethod(MethodInfo* fnc, bool ignoreArgs)
 	{
 		if (in_trace) return;
 		in_trace = true;
@@ -276,7 +275,7 @@ namespace avmplus
 					core->console << traceArgumentsString();
 
 				core->console << ")";
-				if (!fnc->isFlagSet(AbstractFunction::SUGGEST_INTERP))
+				if (!fnc->isFlagSet(MethodInfo::SUGGEST_INTERP))
 				{
 					core->console << " @ 0x";			
 					core->console.writeHexAddr( (uintptr)fnc->impl32);
@@ -400,16 +399,15 @@ namespace avmplus
 		int mCount = pool->methodCount;
 		for(int i=0; i<mCount; i++)
 		{
-			AbstractFunction* f = pool->methods[i];
+			MethodInfo* f = pool->methods[i];
 			if (f->hasMethodBody())
 			{
 				// yes there is code for this method
-				MethodInfo* m = (MethodInfo*)f;
-				if (m->body_pos)
+				if (f->abc_body_pos())
 				{
 					// if body_pos is null we havent got the body yet or
 					// this is an interface method
-					scanCode(file, pool, m);
+					scanCode(file, pool, f);
 				}
 			}
 		}
@@ -423,7 +421,7 @@ namespace avmplus
 	{
 		const byte *abc_start = &m->pool->code()[0];
 
-		const byte *pos = m->body_pos;
+		const byte *pos = m->abc_body_pos();
 
 		m->setFile(file);
 
@@ -734,7 +732,7 @@ namespace avmplus
 		bool worked = false;
 		if (trace->framep() && trace->info())
 		{
-			((MethodInfo*)trace->info())->boxLocals(trace->framep(), 0, trace->traits(), &a, 0, 1); // pull framep[0] = [this] 
+			trace->info()->boxLocals(trace->framep(), 0, trace->traits(), &a, 0, 1); // pull framep[0] = [this] 
 			worked = true;
 		}
 		else
@@ -760,7 +758,7 @@ namespace avmplus
 			{
 				// pull the args into an array -- skip [0] which is [this]
 				ar = (Atom*) debugger->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
-				MethodInfo* info = (MethodInfo*)trace->info();
+				MethodInfo* info = trace->info();
 				info->boxLocals(trace->framep(), firstArgument, trace->traits(), ar, 0, count);
 			}
 		}
@@ -783,7 +781,7 @@ namespace avmplus
 			if (count > 0 && which < count)
 			{
 				// copy the single arg over
-				MethodInfo* info = (MethodInfo*)trace->info();
+				MethodInfo* info = trace->info();
 				info->unboxLocals(&val, 0, trace->traits(), trace->framep(), firstArgument+which, 1);
 				worked = true;
 			}
@@ -808,14 +806,14 @@ namespace avmplus
 			{
 				// frame looks like [this][param0...paramN][local0...localN]
 				ar = (Atom*) debugger->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
-				MethodInfo* info = (MethodInfo*)trace->info();
+				MethodInfo* info = trace->info();
 				info->boxLocals(trace->framep(), firstLocal, trace->traits(), ar, 0, count);
 
 				// If NEED_REST or NEED_ARGUMENTS is set, and the jit is being used, then the first
 				// local is actually not an atom at all -- it is an ArrayObject*.  So, we need to
 				// convert it to an atom.  (If the interpreter is being used instead of the jit, then
 				// it is stored as an atom.)
-				if (info->flags & (AbstractFunction::NEED_REST | AbstractFunction::NEED_ARGUMENTS))
+				if (info->flags & (MethodInfo::NEED_REST | MethodInfo::NEED_ARGUMENTS))
 				{
 					int atomType = ar[0] & 7;
 					if (atomType == 0) // 0 is not a legal atom type, so ar[0] is not an atom
@@ -844,8 +842,8 @@ namespace avmplus
 			int count = pastLastLocal - firstLocal;
 			if (count > 0 && which < count)
 			{
-				MethodInfo* info = (MethodInfo*)trace->info();
-				if (which == 0 && (info->flags & (AbstractFunction::NEED_REST | AbstractFunction::NEED_ARGUMENTS)))
+				MethodInfo* info = trace->info();
+				if (which == 0 && (info->flags & (MethodInfo::NEED_REST | MethodInfo::NEED_ARGUMENTS)))
 				{
 					// They are trying to modify the first local, but that is actually the special
 					// array for "...rest" or for "arguments".  That is too complicated to allow
@@ -875,7 +873,7 @@ namespace avmplus
 		*firstLocal = indexOfFirstLocal();
 		if (trace->framep() && trace->info())
 		{
-			MethodInfo* info = (MethodInfo*) trace->info();
+			MethodInfo* info = trace->info();
 			*pastLastLocal = info->local_count();
 		}
 		else

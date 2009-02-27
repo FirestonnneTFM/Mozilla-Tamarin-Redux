@@ -82,26 +82,26 @@ namespace avmplus
 		return traits;
 	}
 	
-	AbstractFunction* Domain::getNamedScript(Stringp name, Namespacep ns) const
+	MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns) const
 	{
-		AbstractFunction *f = NULL;
+		MethodInfo* f = NULL;
 		if (base) {
 			f = base->getNamedScript(name, ns);
 		}
 		if (!f) {
-			f = (AbstractFunction*) namedScripts->get(name, ns);
+			f = (MethodInfo*)namedScripts->get(name, ns);
 		}
 		return f;
 	}
 
-	AbstractFunction* Domain::getNamedScript(const Multiname *multiname) const
+	MethodInfo* Domain::getNamedScript(const Multiname *multiname) const
 	{
-		AbstractFunction *f = NULL;
+		MethodInfo* f = NULL;
 		if (base) {
 			f = base->getNamedScript(multiname);
 		}
 		if (!f) {
-			f = (AbstractFunction*) namedScripts->getMulti(multiname);
+			f = (MethodInfo*)namedScripts->getMulti(multiname);
 		}
 		return f;
 	}

@@ -223,7 +223,7 @@ namespace avmplus
 		return *this;
 #endif
 	}
-	PrintWriter& PrintWriter::operator<< (AbstractFunction *obj)
+	PrintWriter& PrintWriter::operator<< (MethodInfo *obj)
 	{
 #ifdef AVMPLUS_VERBOSE
 		if (obj) {
@@ -389,7 +389,7 @@ namespace avmplus
 					formatTypeName(va_arg(ap, Traits*));
 					break;
 				case 'm':
-					*this << va_arg(ap, AbstractFunction*);
+					*this << va_arg(ap, MethodInfo*);
 					break;
 				case 'n':
 					*this << va_arg(ap, Multiname*)->format(m_core, Multiname::MULTI_FORMAT_NAME_ONLY);

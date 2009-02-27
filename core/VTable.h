@@ -47,8 +47,8 @@ namespace avmplus
 	class VTable : public MMgc::GCObject
 #endif
 	{
-		MethodEnv *makeMethodEnv(AbstractFunction *method);
-		void addInterface(AbstractFunction* virt, int disp_id);
+		MethodEnv *makeMethodEnv(MethodInfo *method);
+		void addInterface(MethodInfo* virt, int disp_id);
 
 	public:
 		VTable(Traits* traits, VTable* base, ScopeChain* scope, AbcEnv* abcEnv, Toplevel* toplevel);

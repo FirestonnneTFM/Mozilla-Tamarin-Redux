@@ -82,7 +82,7 @@ namespace avmplus
 		"TMI", 
 		"VTable", 
 		"MethodEnv", 
-		"AbstractFunction" 
+		"MethodInfo" 
 	};
 	static uint32_t g_track_count = 0;
 
@@ -157,10 +157,10 @@ namespace avmplus
 			g_tinfo[TMT_tbi].cached = g_tmcore->tbCache()->count();
 			g_tinfo[TMT_tbi].active = g_tmp.count();
 			
-			printf("\nTraitsMemTrack @ %d:\n",g_track_count);
+			printf("\nTraitsMemTrack @ %d %s:\n",g_track_count,g_tmcore->IsJITEnabled()?"JIT":"INTERP");
 			uint32_t totmem = 0;
 			uint32_t totmem_hw = 0;
-			for (int i = 0; i < TMT_COUNT; ++i)
+			for (int i = 3; i < TMT_COUNT; ++i)
 			{
 				printf("    %-16s live: %d=%dk (%db), hw: %d=%dk (%db) ",
 					g_tinfonm[i],
@@ -224,6 +224,19 @@ namespace avmplus
 		g_tinfo[t].mem -= d;
 	}
 
+	static size_t get_size(TMTTYPE t, const void* inst)
+	{
+		size_t sz = GC::Size(inst);
+		if (t == TMT_vtable || t == TMT_abstractfunction || t == TMT_methodenv)
+		{
+			// remove vtable ptr that only exists in memtrack mode
+			sz -= sizeof(void*);
+			// note, mmgc allocates in 8-byte increments, so saving 4 might allow us to save 8,
+			// we don't try to account for that here
+		}
+		return sz;
+	}
+
 	void tmt_add_inst(TMTTYPE t, const void* inst)
 	{
 		if (!g_tmcore || g_tmcore->GetGC()->Destroying()) return;
@@ -231,7 +244,7 @@ namespace avmplus
 		AvmAssert(g_tinfo[t].live.find(inst) < 0);
 		g_tinfo[t].live.add(inst);
 		
-		tmt_add_mem(t, GC::Size(inst));
+		tmt_add_mem(t, get_size(t, inst));
 
 		if ((++g_track_count % TMT_REPORT_RATE) == 0) 
 			tmt_report();
@@ -244,7 +257,7 @@ namespace avmplus
 		AvmAssert(g_tinfo[t].live.find(inst) >= 0);
 		g_tinfo[t].live.remove(inst);
 
-		tmt_sub_mem(t, GC::Size(inst));
+		tmt_sub_mem(t, get_size(t, inst));
 
 		if ((++g_track_count % TMT_REPORT_RATE) == 0) 
 			tmt_report();
@@ -427,7 +440,7 @@ namespace avmplus
 	}
 #endif // MMGC_DRC
 
-    bool TraitsBindings::checkOverride(AvmCore* core, AbstractFunction* virt, AbstractFunction* over) const
+    bool TraitsBindings::checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const
     {
 		if (over == virt)
 			return true;
@@ -464,7 +477,7 @@ namespace avmplus
 		{
 			if (!this->owner->isMachineType() && virtTraits == core->traits.object_itraits)
 			{
-				over->flags |= AbstractFunction::UNBOX_THIS;
+				over->flags |= MethodInfo::UNBOX_THIS;
 			}
 			else
 			{
@@ -494,10 +507,10 @@ namespace avmplus
             }
         }
 
-		if (virt->flags & AbstractFunction::UNBOX_THIS)
+		if (virt->flags & MethodInfo::UNBOX_THIS)
 		{
 			// the UNBOX_THIS flag is sticky, all the way down the inheritance tree
-			over->flags |= AbstractFunction::UNBOX_THIS;
+			over->flags |= MethodInfo::UNBOX_THIS;
 		}
 
         return true;
@@ -558,8 +571,8 @@ namespace avmplus
 					}
 					case BKIND_METHOD:
 					{
-						AbstractFunction* virt = ifcd->getMethod(AvmCore::bindingToMethodId(iBinding));
-						AbstractFunction* over = this->getMethod(AvmCore::bindingToMethodId(cBinding));
+						MethodInfo* virt = ifcd->getMethod(AvmCore::bindingToMethodId(iBinding));
+						MethodInfo* over = this->getMethod(AvmCore::bindingToMethodId(cBinding));
 						if (!checkOverride(core, virt, over))
 							return false;
 						break;
@@ -574,8 +587,8 @@ namespace avmplus
 							if (!AvmCore::hasGetterBinding(cBinding))
 								return false;
 							
-							AbstractFunction* virt = ifcd->getMethod(AvmCore::bindingToGetterId(iBinding));
-							AbstractFunction* over = this->getMethod(AvmCore::bindingToGetterId(cBinding));
+							MethodInfo* virt = ifcd->getMethod(AvmCore::bindingToGetterId(iBinding));
+							MethodInfo* over = this->getMethod(AvmCore::bindingToGetterId(cBinding));
 							if (!checkOverride(core, virt, over))
 								return false;
 						}
@@ -585,8 +598,8 @@ namespace avmplus
 							if (!AvmCore::hasSetterBinding(cBinding))
 								return false;
 								
-							AbstractFunction* virt = ifcd->getMethod(AvmCore::bindingToSetterId(iBinding));
-							AbstractFunction* over = this->getMethod(AvmCore::bindingToSetterId(cBinding));
+							MethodInfo* virt = ifcd->getMethod(AvmCore::bindingToSetterId(iBinding));
+							MethodInfo* over = this->getMethod(AvmCore::bindingToSetterId(cBinding));
 							if (!checkOverride(core, virt, over))
 								return false;
 						}
@@ -1254,7 +1267,7 @@ namespace avmplus
 					const Binding b = tb->m_bindings->get(name, ns);
 					AvmAssert(b != BIND_NONE);
 					const uint32 disp_id = urshift(b, 3) + (ne.kind == TRAIT_Setter);
-					AbstractFunction* f = this->pool->getMethodInfo(ne.id);
+					MethodInfo* f = this->pool->getMethodInfo(ne.id);
 					AvmAssert(f->declaringTraits == this);
 					tb->setMethodInfo(disp_id, f);
 					break;
@@ -1629,8 +1642,8 @@ namespace avmplus
 
 		// make sure all the methods have resolved types
 		{
-			const TraitsBindings::MethodInfo* tbm		= tb->getMethods();
-			const TraitsBindings::MethodInfo* tbm_end	= tbm + tb->methodCount;
+			const TraitsBindings::BindingMethodInfo* tbm		= tb->getMethods();
+			const TraitsBindings::BindingMethodInfo* tbm_end	= tbm + tb->methodCount;
 			for ( ; tbm < tbm_end; ++tbm) 
 			{
 				// don't assert: could be null if only one of a get/set pair is implemented
@@ -1646,9 +1659,9 @@ namespace avmplus
 		if (tbbase && tbbase->methodCount > 0)
 		{
 			// check concrete overrides
-			const TraitsBindings::MethodInfo* basetbm		= tbbase->getMethods();
-			const TraitsBindings::MethodInfo* basetbm_end	= basetbm + tbbase->methodCount;
-			const TraitsBindings::MethodInfo* tbm			= tb->getMethods();
+			const TraitsBindings::BindingMethodInfo* basetbm		= tbbase->getMethods();
+			const TraitsBindings::BindingMethodInfo* basetbm_end	= basetbm + tbbase->methodCount;
+			const TraitsBindings::BindingMethodInfo* tbm			= tb->getMethods();
 			for ( ; basetbm < basetbm_end; ++basetbm, ++tbm) 
 			{
 				if (basetbm->f != NULL && basetbm->f != tbm->f)
@@ -1677,9 +1690,9 @@ namespace avmplus
 		linked = true;
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
-		const char* xstr = name ? name->toUTF8String()->c_str() : "(null)";
-		rawname = (char*)gc->Alloc(VMPI_strlen(xstr)+1);
-		VMPI_strcpy(rawname, xstr);
+		StUTF8String name8(name);
+		rawname = (char*)gc->Alloc(name8.length()+1);
+		VMPI_strcpy(rawname, name8.c_str());
 #endif
 	}
 
@@ -1784,9 +1797,9 @@ namespace avmplus
 		
 		if (this->init) 
 		{
-			new_init = (MethodInfo*)(AbstractFunction*)this->init;
-			const uint8_t* pos = new_init->body_pos;
-			if (!new_init->body_pos) 
+			new_init = this->init;
+			const uint8_t* pos = new_init->abc_body_pos();
+			if (!pos) 
 				toplevel->throwVerifyError(kCorruptABCError);
 
 			uint32_t maxStack = AvmCore::readU30(pos);
@@ -1813,7 +1826,7 @@ namespace avmplus
 		else 
 		{
 			// make one
-			new_init = new (gc) MethodInfo(-1);
+			new_init = new (gc) MethodInfo(-1, NULL);
 			new_init->declaringTraits = this;
 			new_init->pool = this->pool;
 			new_init->param_count = 0;
@@ -1821,7 +1834,7 @@ namespace avmplus
 			new_init->initParamTypes(1);
 			new_init->setParamType(0, this);	
 			new_init->setReturnType(core->traits.void_itraits);
-			new_init->flags |= AbstractFunction::LINKED;
+			new_init->flags |= MethodInfo::LINKED;
 			this->init = new_init;
 
 			newMethodBody.writeInt(2); // max_stack
@@ -1841,8 +1854,7 @@ namespace avmplus
 		// the verifier and interpreter don't read the activation traits so stop here
 		uint8_t* newBytes = (uint8_t*) gc->Alloc(newMethodBody.size());
 		VMPI_memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
-		//init->body_pos = newBytes;
-		WB(gc, new_init, &new_init->body_pos, newBytes);
+		new_init->set_abc_body_pos_wb(gc, newBytes);
 	}
 
 #ifdef MMGC_DRC
@@ -1911,7 +1923,7 @@ namespace avmplus
 		VMPI_memset(entries, 0, sizeof(ImtEntry*)*Traits::IMT_SIZE);
 	}
 
-	void ImtBuilder::addEntry(AbstractFunction* virt, uint32_t disp_id)
+	void ImtBuilder::addEntry(MethodInfo* virt, uint32_t disp_id)
 	{
 		AvmAssert(virt != NULL);
 		const uint32_t i = uint32_t(virt->iid() % Traits::IMT_SIZE);

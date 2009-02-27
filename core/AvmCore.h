@@ -185,8 +185,8 @@ const int kBufferPadding = 16;
 			bool				passAllExceptionsToDebugger;
 		#endif
 #ifdef AVMPLUS_VERIFYALL
-        List<AbstractFunction*, LIST_GCObjects> verifyQueue;
-		void enqFunction(AbstractFunction* f);
+        List<MethodInfo*, LIST_GCObjects> verifyQueue;
+		void enqFunction(MethodInfo* f);
 		void enqTraits(Traits* t);
 		void verifyEarly(Toplevel* toplevel);
 #endif
@@ -1107,7 +1107,7 @@ const int kBufferPadding = 16;
 		 * strings used for error message output.
 		 */
 		String* toErrorString(int d);
-		String* toErrorString(AbstractFunction* m);
+		String* toErrorString(MethodInfo* m);
 		String* toErrorString(const Multiname& n);
 		String* toErrorString(const Multiname* n);
 		String* toErrorString(Namespacep ns);

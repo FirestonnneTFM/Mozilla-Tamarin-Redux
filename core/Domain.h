@@ -60,12 +60,12 @@ namespace avmplus
 		
 		Traits* getNamedTraits(Stringp name, Namespacep ns, bool recursive/*=true*/) const;
 		Traits* getNamedTraits(const Multiname* multiname, bool recursive/*=true*/) const;
-		AbstractFunction* getNamedScript(Stringp name, Namespacep ns) const;
-		AbstractFunction* getNamedScript(const Multiname* multiname) const;
+		MethodInfo* getNamedScript(Stringp name, Namespacep ns) const;
+		MethodInfo* getNamedScript(const Multiname* multiname) const;
 		
 		Traits* getNamedTrait(Stringp name, Namespace* ns) const { return (Traits*)namedTraits->get(name, ns); }
 		void addNamedTrait(Stringp name, Namespace* ns, Traits* v) { namedTraits->add(name, ns, (Binding)v); }
-		void addNamedScript(Stringp name, Namespace* ns, AbstractFunction* v) { namedScripts->add(name, ns, (Binding)v); }
+		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) { namedScripts->add(name, ns, (Binding)v); }
 
 		/**
 		 * global memory access glue

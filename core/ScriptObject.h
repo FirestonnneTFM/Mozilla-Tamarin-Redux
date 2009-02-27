@@ -80,9 +80,7 @@ namespace avmplus
 			return vtable->toplevel;
 		}
 
-		DomainEnv* domainEnv() const {
-			return vtable->abcEnv->domainEnv();
-		}
+		DomainEnv* domainEnv() const;
 
 		virtual Hashtable* getTable() const {
 			AvmAssert(vtable->traits->getHashtableOffset() != 0);

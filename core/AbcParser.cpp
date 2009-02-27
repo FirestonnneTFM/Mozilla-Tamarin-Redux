@@ -208,12 +208,12 @@ namespace avmplus
 		return index;
 	}
 
-	AbstractFunction *AbcParser::resolveMethodInfo(uint32 index) const
+	MethodInfo* AbcParser::resolveMethodInfo(uint32 index) const
 	{
 		if (index >= pool->methodCount)
 			toplevel->throwVerifyError(kMethodInfoExceedsCountError, core->toErrorString(index), core->toErrorString(pool->methodCount));
 
-		AbstractFunction *f = pool->getMethodInfo(index);
+		MethodInfo* f = pool->getMethodInfo(index);
 		if (!f)
 			toplevel->throwVerifyError(kMethodInfoOrderError, core->toErrorString(index));
 
@@ -300,7 +300,7 @@ namespace avmplus
 									Traits* base, 
 									Namespacep ns, 
 									Stringp name, 
-									AbstractFunction* script, 
+									MethodInfo* script, 
 									TraitsPosPtr traitsPos,
 									TraitsPosType posType, 
 									Namespacep protectedNamespace)
@@ -390,10 +390,10 @@ namespace avmplus
 					if (pool->stripMetadataIndexes.indexOf(index) != -1)
 						skip = true;  // Stripping this definition
 					else if (name == core->kNeedsDxns)
-						flags |= AbstractFunction::NEEDS_DXNS;
+						flags |= MethodInfo::NEEDS_DXNS;
 #ifdef AVMPLUS_VERBOSE
 					else if (name == kVerboseVerify)
-						flags |= AbstractFunction::VERBOSE_VERIFY;
+						flags |= MethodInfo::VERBOSE_VERIFY;
 #endif
 				}
 			}
@@ -431,7 +431,7 @@ namespace avmplus
 					if (class_info >= classCount)
 						toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_info), core->toErrorString(classCount));
 
-					AbstractFunction* cinit = pool->cinits[class_info];
+					MethodInfo* cinit = pool->cinits[class_info];
 					if (!cinit) 
 						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_info));
 
@@ -487,9 +487,9 @@ namespace avmplus
             case TRAIT_Method:
 			{
 				if (kind == TRAIT_Getter)
-					flags |= AbstractFunction::IS_GETTER;
+					flags |= MethodInfo::IS_GETTER;
 				else if (kind == TRAIT_Setter)
-					flags |= AbstractFunction::IS_SETTER;
+					flags |= MethodInfo::IS_SETTER;
 					
 				#ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
@@ -506,7 +506,7 @@ namespace avmplus
 				#endif
 
 				// id is unused here
-				AbstractFunction* f = resolveMethodInfo(method_info);
+				MethodInfo* f = resolveMethodInfo(method_info);
 
 				#if VMCFG_METHOD_NAMES
 				if (core->config.methodNames)
@@ -523,9 +523,9 @@ namespace avmplus
 
 				f->flags |= flags;
 				if (tag & ATTR_final)
-					f->flags |= AbstractFunction::FINAL;
+					f->flags |= MethodInfo::FINAL;
 				if (tag & ATTR_override)
-					f->flags |= AbstractFunction::OVERRIDE;
+					f->flags |= MethodInfo::OVERRIDE;
 				
 				// only export one name for an accessor 
 				if (script && !domain->getNamedScript(name,ns))
@@ -635,15 +635,11 @@ namespace avmplus
 				core->console << "\n        flags=" << flags << "\n";
 			)
 
-			AbstractFunction *info;			
-			if (!(flags & AbstractFunction::NATIVE))
+			const NativeMethodInfo* ni = NULL;
+			if (flags & MethodInfo::NATIVE)
 			{
-				info = new (core->GetGC()) MethodInfo(i);
-			}
-			else
-			{
-				info = natives ? natives->newNativeMethod(i) : NULL;
-				if (!info)
+				ni = natives ? natives->getNativeInfo(i) : NULL;
+				if (!ni)
 				{
 					// If this assert hits, you're missing a native method.  Method "i"
 					// corresponds to the function of the same number in 
@@ -653,7 +649,8 @@ namespace avmplus
 				}
 			}
 
-			info->info_pos = info_pos;
+			MethodInfo* info = new (core->GetGC()) MethodInfo(i, ni);
+			info->abc_info_pos = info_pos;
 			info->pool = pool;
 			info->param_count = param_count;
 			info->initParamTypes(param_count+1);
@@ -665,7 +662,7 @@ namespace avmplus
 			}
 			#endif
 
-			if (flags & AbstractFunction::HAS_OPTIONAL)
+			if (flags & MethodInfo::HAS_OPTIONAL)
 			{
 				int optional_count = readU30(pos);
 
@@ -683,7 +680,7 @@ namespace avmplus
 				}
 			}
 
-			if( flags & AbstractFunction::HAS_PARAM_NAMES)
+			if( flags & MethodInfo::HAS_PARAM_NAMES)
 			{
 				// AVMPlus doesn't care about the param names, just skip past them
 				for( int j = 0; j < info->param_count; ++j )
@@ -789,7 +786,7 @@ namespace avmplus
 #endif
 
 			uint32_t method_info = readU30(pos);
-			AbstractFunction* info = resolveMethodInfo(method_info);
+			MethodInfo* info = resolveMethodInfo(method_info);
 
 			const byte *body_pos = pos;
 
@@ -812,7 +809,6 @@ namespace avmplus
 			(void)max_scope_depth;
 
 			int code_length = readU30(pos);
-
 
 			if (code_length <= 0) 
 			{
@@ -838,11 +834,11 @@ namespace avmplus
 
 			if (exception_count != 0) 
 			{
-				info->flags |= AbstractFunction::HAS_EXCEPTIONS;
+				info->flags |= MethodInfo::HAS_EXCEPTIONS;
 				for (int i=0; i<exception_count; i++) 
 				{
 					// this will be parsed when method is verified.
-					// see AbstractFunction::resolveSignature
+					// see MethodInfo::resolveSignature
 
 					#ifdef AVMPLUS_VERBOSE
 					int from = readU30(pos);
@@ -894,8 +890,6 @@ namespace avmplus
 
 			if (info->hasMethodBody())
 			{
-				MethodInfo *methodInfo = (MethodInfo*) info;
-
 				// Interface methods should not have bodies
 				if (info->declaringTraits && info->declaringTraits->isInterface)
 				{
@@ -905,17 +899,17 @@ namespace avmplus
 #ifdef DEBUGGER
 				if (core->debugger())
 				{
-					methodInfo->initDMI(local_count, code_length, max_scope_depth - init_scope_depth);
+					info->initDMI(local_count, code_length, max_scope_depth - init_scope_depth);
 				}
 #endif
 
 				// if non-zero, we have a duplicate method body - throw a verify error
-				if (methodInfo->body_pos)
+				if (info->abc_body_pos())
 				{
 					toplevel->throwVerifyError(kDuplicateMethodBodyError, core->toErrorString(info));
 				}
 
-				methodInfo->body_pos = body_pos;
+				info->set_abc_body_pos(body_pos);
 
 				// there will be a traits_count here, even if NEED_ACTIVATION is not
 				// set.  So we parse the same way all the time.  We could reduce file size and
@@ -923,7 +917,7 @@ namespace avmplus
 
 				const byte* traits_pos = pos;
 				int nameCount = readU30(pos);
-				if ((methodInfo->flags & AbstractFunction::NEED_ACTIVATION) || nameCount > 0)
+				if ((info->flags & MethodInfo::NEED_ACTIVATION) || nameCount > 0)
 				{
 					pos = traits_pos;
 					Namespacep ns = NULL;
@@ -932,12 +926,12 @@ namespace avmplus
 					if (core->config.methodNames)
 					{
 						ns = core->publicNamespace;
-						name = core->internString(methodInfo->getMethodName());
+						name = core->internString(info->getMethodName());
 					}
 					#endif
 					// activation traits are raw types, not subclasses of object.  this is
 					// okay because they aren't accessable to the programming model.
-					methodInfo->activationTraits = parseTraits(sizeof(ScriptObject), 
+					info->activationTraits = parseTraits(sizeof(ScriptObject), 
 																NULL, 
 																ns, 
 																name, 
@@ -945,8 +939,8 @@ namespace avmplus
 																traits_pos,
 																TRAITSTYPE_ACTIVATION, 
 																NULL);
-					methodInfo->activationTraits->final = true;
-					//methodInfo->activationTraits->resolveSignatures(NULL);
+					info->activationTraits->final = true;
+					//info->activationTraits->resolveSignatures(NULL);
 				}
 				else
 				{
@@ -1357,9 +1351,9 @@ namespace avmplus
 		}
 	}
 	
-	void AbcParser::addNamedScript(Namespacep ns, Stringp name, AbstractFunction* script)
+	void AbcParser::addNamedScript(Namespacep ns, Stringp name, MethodInfo* script)
 	{
-		AbstractFunction* s = (AbstractFunction*) domain->getNamedScript(name, ns);
+		MethodInfo* s = domain->getNamedScript(name, ns);
 		if (!s)
 		{
 			if(ns->isPrivate())
@@ -1424,7 +1418,7 @@ namespace avmplus
 					<< " init_index=" << init_index
 					<< "\n";
 			)
-			AbstractFunction* script = resolveMethodInfo(init_index);
+			MethodInfo* script = resolveMethodInfo(init_index);
 
 			if (script->declaringTraits != NULL)
 			{
@@ -1456,7 +1450,7 @@ namespace avmplus
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the $init methods
-				script->flags |= AbstractFunction::SUGGEST_INTERP;
+				script->flags |= MethodInfo::SUGGEST_INTERP;
 			}
 			#endif
 
@@ -1564,7 +1558,7 @@ namespace avmplus
 			//  - overrides agree with base class signature
 			
             uint32_t iinit_index = readU30(pos);
-			AbstractFunction *iinit = resolveMethodInfo(iinit_index);
+			MethodInfo* iinit = resolveMethodInfo(iinit_index);
 
 			if_verbose(
 				// TODO:  fixup this math here, since the 2's are all wrong
@@ -1672,7 +1666,7 @@ namespace avmplus
 			const byte* class_pos = pos;
 
 			uint32_t cinit_index = readU30(pos);
-            AbstractFunction *cinit = resolveMethodInfo(cinit_index);
+            MethodInfo* cinit = resolveMethodInfo(cinit_index);
 
 			if_verbose(
 				core->console
@@ -1713,7 +1707,7 @@ namespace avmplus
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the class initializer
-				cinit->flags |= AbstractFunction::SUGGEST_INTERP;
+				cinit->flags |= MethodInfo::SUGGEST_INTERP;
 			}
 			#endif
 

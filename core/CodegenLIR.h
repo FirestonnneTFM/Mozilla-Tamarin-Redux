@@ -95,8 +95,6 @@ namespace avmplus
    };
    #endif /* VTUNE */
 
-	class MethodInfo;
-
 	class CodegenLabel {
     public:
 		LIns *bb;
@@ -287,7 +285,7 @@ namespace avmplus
 		void emitDoubleConst(FrameState* state, int index, double* pd);
 		void emitCoerce(FrameState* state, int index, Traits* type);
 		void emitCheckNull(FrameState* state, int index);
-		void emitSetContext(FrameState* state, AbstractFunction* f);
+		void emitSetContext(FrameState* state, MethodInfo* f);
 		void emitSetDxns(FrameState* state);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);

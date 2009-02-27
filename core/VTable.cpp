@@ -93,7 +93,7 @@ namespace avmplus
 		const TraitsBindingsp btd = td->base;
 		for (uint32_t i = 0, n = td->methodCount; i < n; i++)
 		{
-			AbstractFunction* method = td->getMethod(i);
+			MethodInfo* method = td->getMethod(i);
 
 			if (btd && i < btd->methodCount && method == btd->getMethod(i))
 			{
@@ -144,9 +144,18 @@ namespace avmplus
 					else
 					{
 						// create new imt stub
+#if VMCFG_METHODENV_IMPL32
+						MethodEnv* e = new (gc) MethodEnv(MethodEnv::kTrampStub, AvmCore::getITrampAddr(b), this);
+#else
 						//imt[i] = new (gc) MethodEnv((void*)(b&~7));
-						void* tramp = AvmCore::getITrampAddr(b);
-						MethodEnv* e = new (gc) MethodEnv(tramp, this);
+						// note that the only field of this that's really used is _impl32...
+						MethodInfo* mi = new (gc) MethodInfo(AvmCore::getITrampAddr(b));
+						// if we don't fill these in properly, MethodEnv ctor will barf
+						mi->declaringTraits = this->traits;
+						mi->pool = this->traits->pool;
+						mi->flags |= MethodInfo::LINKED;
+						MethodEnv* e = new (gc) MethodEnv(mi, this);
+#endif
 						WB(gc, this, &imt[i], e);
 					}
 				}
@@ -155,7 +164,7 @@ namespace avmplus
 #endif
 	}
 
-	MethodEnv *VTable::makeMethodEnv(AbstractFunction *func)
+	MethodEnv *VTable::makeMethodEnv(MethodInfo *func)
 	{
 		AvmCore *core = traits->core;
 		MethodEnv *methodEnv = new (core->GetGC()) MethodEnv(func, this);
@@ -189,11 +198,11 @@ namespace avmplus
 		const TraitsBindingsp td = traits->getTraitsBindings();
 		const uint32_t n = td->methodCount;
 		const uint32_t baseMethodCount = base ? td->base->methodCount : 0;
-		size += td->methodCount*sizeof(AbstractFunction*);
+		size += td->methodCount*sizeof(MethodInfo*);
 
 		for (uint32_t i=0; i < n; i++)
 		{
-			AbstractFunction* method = td->getMethod(i);
+			MethodInfo* method = td->getMethod(i);
 			
 			if (i < baseMethodCount && td->base && method == td->base->getMethod(i))
 			{

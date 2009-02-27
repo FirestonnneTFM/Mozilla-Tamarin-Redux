@@ -294,13 +294,13 @@ namespace avmplus
 
 		// whack the the non-interruptable bit on all builtin functions
 		for(int i=0, size=builtinPool->methods.size(); i<size; i++)
-			builtinPool->methods[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
+			builtinPool->methods[i]->flags |= MethodInfo::NON_INTERRUPTABLE;
 
 		for(int i=0, size=builtinPool->cinits.size(); i<size; i++)
-			builtinPool->cinits[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
+			builtinPool->cinits[i]->flags |= MethodInfo::NON_INTERRUPTABLE;
 
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
-			builtinPool->scripts[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
+			builtinPool->scripts[i]->flags |= MethodInfo::NON_INTERRUPTABLE;
 
 #ifdef DEBUGGER
 		// sampling can begin now, requires builtinPool
@@ -391,7 +391,7 @@ namespace avmplus
 		// prepare the remaining scriptEnv's
 		for (int i=0, n=pool->scriptCount-1; i < n; i++)
 		{
-			AbstractFunction* script = pool->scripts[i];
+			MethodInfo* script = pool->scripts[i];
 
 			Traits* scriptTraits = script->declaringTraits;
 			// [ed] 3/24/06 why do we really care if a script is dynamic or not?
@@ -904,11 +904,16 @@ return the result of the comparison ToPrimitive(x) == y.
 					// one which will catch this exception.
 					for (callStackNode = callStack; callStackNode; callStackNode = callStackNode->next())
 					{
-						MethodInfo* info = (MethodInfo*) callStackNode->info();
+						MethodInfo* info = callStackNode->info();
+						
+						// native methods don't have exception handlers
+						if (info && info->isNative()) 
+							continue;
+
 #ifdef AVMPLUS_WORD_CODE
-						ExceptionHandlerTable* exceptions = info ? info->word_code.exceptions : NULL;
+						ExceptionHandlerTable* exceptions = info ? info->word_code_exceptions() : NULL;
 #else
-						ExceptionHandlerTable* exceptions = info ? info->exceptions : NULL;
+						ExceptionHandlerTable* exceptions = info ? info->abc_exceptions() : NULL;
 #endif
 						if (exceptions != NULL && callStackNode->eip() && *callStackNode->eip())
 						{
@@ -1059,7 +1064,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return out;
 	}
 
-	String* AvmCore::toErrorString(AbstractFunction* m)
+	String* AvmCore::toErrorString(MethodInfo* m)
 	{
 		String* s = NULL;
 	#ifdef DEBUGGER
@@ -1497,7 +1502,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_newfunction:
 			{
 				int method_id = readU30(pc);
-				AbstractFunction* f = pool->methods[method_id];
+				MethodInfo* f = pool->methods[method_id];
 				buffer << opcodeInfo[opcode].name << " method_id=" << method_id;
 				if (opcode == OP_callstatic)
 				{
@@ -1514,7 +1519,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_newclass: 
 			{
                 uint32_t id = readU30(pc);
-				AbstractFunction* c = pool->cinits[id];
+				MethodInfo* c = pool->cinits[id];
 				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
 			}
@@ -1695,7 +1700,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case WOP_callstatic:
 			case WOP_newfunction: {
 				int method_id = (int)*pc++;
-				AbstractFunction* f = pool->methods[method_id];
+				MethodInfo* f = pool->methods[method_id];
 				buffer << wopAttrs[opcode].name << " method_id=" << method_id;
 				if (opcode == WOP_callstatic)
 					buffer << " argc=" << (int)*pc++; // argc
@@ -1709,7 +1714,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				
 			case WOP_newclass: {
                 uint32_t id = (uint32_t)*pc++;
-				AbstractFunction* c = pool->cinits[id];
+				MethodInfo* c = pool->cinits[id];
 				buffer << wopAttrs[opcode].name << " " << c;
 				break;
 			}
@@ -1874,7 +1879,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		// if no handler found, re-throw the exception from here
 
 		//[ed] we only call this from methods with catch blocks, when exceptions != NULL
-		AvmAssert(info->exceptions != NULL);
+		AvmAssert(info->abc_exceptions() != NULL);
 #ifdef AVMPLUS_WORD_CODE
 		// This is hacky and will go away.  If the target method was not jitted, use
         // word_code.exceptions, otherwise use info->exceptions.  methods may or may
@@ -1882,12 +1887,12 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		ExceptionHandlerTable* exceptions;
         if (info->impl32 == avmplus::interp32 || info->implN == avmplus::interpN)
-            exceptions = info->word_code.exceptions;
+            exceptions = info->word_code_exceptions();
         else
-			exceptions = info->exceptions;
+			exceptions = info->abc_exceptions();
 		AvmAssert(exceptions != NULL);
 #else
-		ExceptionHandlerTable* exceptions = info->exceptions;
+		ExceptionHandlerTable* exceptions = info->abc_exceptions();
 #endif
 		
 		int exception_count = exceptions->exception_count;
@@ -4128,11 +4133,11 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 	
 #ifdef AVMPLUS_VERIFYALL
-	void AvmCore::enqFunction(AbstractFunction* f) {
+	void AvmCore::enqFunction(MethodInfo* f) {
 		if (config.verifyall &&
                 f && !f->isVerified() && 
-                !(f->flags & AbstractFunction::VERIFY_PENDING)) {
-			f->flags |= AbstractFunction::VERIFY_PENDING;
+                !(f->flags & MethodInfo::VERIFY_PENDING)) {
+			f->flags |= MethodInfo::VERIFY_PENDING;
 			verifyQueue.add(f);
 		}
 	}
@@ -4147,12 +4152,12 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
     void AvmCore::verifyEarly(Toplevel* toplevel) {
-        List<AbstractFunction*, LIST_GCObjects> verifyQueue2(GetGC());
+        List<MethodInfo*, LIST_GCObjects> verifyQueue2(GetGC());
 		int verified = 0;
 		do {
 			verified = 0;
 			while (!verifyQueue.isEmpty()) {
-				AbstractFunction* f = verifyQueue.removeLast();
+				MethodInfo* f = verifyQueue.removeLast();
 				if (!f->isVerified()) {
 					if (f->declaringTraits->scope == NULL && f != f->declaringTraits->init) {
 						verifyQueue2.add(f);
@@ -4161,7 +4166,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					verified++;
 					//console << "pre verify " << f << "\n";
 					f->verify(toplevel);
-					f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
+					f->flags = f->flags | MethodInfo::VERIFIED & ~MethodInfo::VERIFY_PENDING;
 				}
 			}
 			while (!verifyQueue2.isEmpty())

@@ -85,7 +85,7 @@ namespace avmplus
 	{
 		AvmAssert(info != NULL);
 
-		const byte* pos = info->body_pos;
+		const byte* pos = info->abc_body_pos();
 		AvmCore::skipU30(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
 		code_start = pos;
 		pool = info->pool;		
@@ -226,12 +226,12 @@ namespace avmplus
 	
 	void WordcodeEmitter::computeExceptionFixups() 
 	{
-		if (info == NULL || info->exceptions == NULL)
+		if (info == NULL || info->abc_exceptions() == NULL)
 			return;
 		
 		DELETE_LIST(catch_info, exception_fixes);
 		
-		ExceptionHandlerTable* old_table = info->exceptions;
+		const ExceptionHandlerTable* old_table = info->abc_exceptions();
 		int exception_count = old_table->exception_count;
 		size_t extra = sizeof(ExceptionHandler)*(exception_count - 1);
 		ExceptionHandlerTable* new_table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
@@ -249,17 +249,17 @@ namespace avmplus
 			catch_info* p[3];
 			
 			p[0] = new catch_info;
-			p[0]->pc = code_start + info->exceptions->exceptions[i].from;
+			p[0]->pc = code_start + old_table->exceptions[i].from;
 			p[0]->is_target = false;
 			p[0]->fixup_loc = (void*)&(new_table->exceptions[i].from);
 			
 			p[1] = new catch_info;
-			p[1]->pc = code_start + info->exceptions->exceptions[i].to;
+			p[1]->pc = code_start + old_table->exceptions[i].to;
 			p[1]->is_target = false;
 			p[1]->fixup_loc = (void*)&(new_table->exceptions[i].to);
 			
 			p[2] = new catch_info;
-			p[2]->pc = code_start + info->exceptions->exceptions[i].target;
+			p[2]->pc = code_start + old_table->exceptions[i].target;
 			p[2]->is_target = true;
 			p[2]->fixup_loc = (void*)&(new_table->exceptions[i].target);
 			
@@ -308,7 +308,7 @@ namespace avmplus
 			}
 		}
 		
-		WB(core->GetGC(), info, &info->word_code.exceptions, new_table);
+		info->set_word_code_exceptions(core->GetGC(), new_table);
 		
 #ifdef _DEBUG
 		if (exception_fixes != NULL) {
@@ -957,7 +957,7 @@ namespace avmplus
 		AvmAssert(exception_fixes == NULL);
 		
 		if (info != NULL)
-			info->word_code.cache_size = next_cache;
+			info->set_word_code_cache_size(next_cache);
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepFlush();
@@ -991,8 +991,7 @@ namespace avmplus
 		AvmAssert(ptr == code + total_size);
 		
 		if (info != NULL) {
-			info->word_code.code_anchor = code_anchor;
-			info->codeStart = code;
+			info->set_word_code_start(core->GetGC(), code_anchor, code);
 #ifdef SUPERWORD_PROFILING
 			WordcodeTranslator::swprofCode(code, code + total_size);
 #endif

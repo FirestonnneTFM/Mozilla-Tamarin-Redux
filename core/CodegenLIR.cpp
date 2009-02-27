@@ -1263,10 +1263,10 @@ namespace avmplus
 		#endif
 
 		// whether this sequence is interruptable or not.
-		interruptable = (info->flags & AbstractFunction::NON_INTERRUPTABLE) ? false : true;
+		interruptable = (info->flags & MethodInfo::NON_INTERRUPTABLE) ? false : true;
 		
 		// then space for the exception frame, be safe if its an init stub
-		if (info->isFlagSet(AbstractFunction::HAS_EXCEPTIONS))
+		if (info->isFlagSet(MethodInfo::HAS_EXCEPTIONS))
 		{
 			// [_save_eip][ExceptionFrame]
 			// offsets of local vars, rel to current ESP
@@ -1321,7 +1321,7 @@ namespace avmplus
 		// have arguments.
 
 		LIns* apArg = ap_param;
-		if (info->flags & AbstractFunction::HAS_OPTIONAL)
+		if (info->flags & MethodInfo::HAS_OPTIONAL)
 		{
 			// compute offset of first optional arg
 			int offset = 0;
@@ -1368,7 +1368,7 @@ namespace avmplus
 		for (int i=0, n=info->param_count-info->optional_count; i <= n && !outOMem(); i++)
 			copyParam(i, offset);
 
-		if (info->flags & AbstractFunction::UNBOX_THIS)
+		if (info->flags & MethodInfo::UNBOX_THIS)
 		{
 			localSet(0, atomToNativeRep(0, localGet(0)));
 		}
@@ -1376,7 +1376,7 @@ namespace avmplus
 		int firstLocal = 1+info->param_count;
 
 		// capture remaining args
-		if (info->flags & AbstractFunction::NEED_REST)
+		if (info->flags & MethodInfo::NEED_REST)
 		{
 			//framep[info->param_count+1] = createRest(env, argv, argc);
 			// use csop so if rest value never used, we don't bother creating array
@@ -1386,7 +1386,7 @@ namespace avmplus
 			localSet(firstLocal, rest);
 			firstLocal++;
 		}
-		else if (info->flags & AbstractFunction::NEED_ARGUMENTS)
+		else if (info->flags & MethodInfo::NEED_ARGUMENTS)
 		{
 			//framep[info->param_count+1] = createArguments(env, argv, argc);
 			// use csop so if arguments never used, we don't create it
@@ -1513,7 +1513,7 @@ namespace avmplus
 		localSet(i, undefConst);
 	}
 
-	void CodegenLIR::emitSetContext(FrameState *state, AbstractFunction *f)
+	void CodegenLIR::emitSetContext(FrameState *state, MethodInfo *f)
 	{
 		if (outOMem()) return;
 		this->state = state;
@@ -1534,7 +1534,7 @@ namespace avmplus
 
 				// used to dump all functions that still say they required DXNS code
 				#if 0//def _DEBUG
-				if (f && (f->flags & AbstractFunction::NATIVE))
+				if (f && (f->flags & MethodInfo::NATIVE))
 				{
 					StringBuffer buffer(core);		
 					buffer << "function is:" << f->name << "\r\n";
@@ -1753,7 +1753,7 @@ namespace avmplus
 		case OP_newclass:
 		{
 		    emitSetDxns(state);
-		    AbstractFunction* cinit = pool->cinits[imm30];
+		    MethodInfo* cinit = pool->cinits[imm30];
 			emit(state, opcode, (uintptr)(void*)cinit, sp, cinit->declaringTraits);
 			break;
 		}
@@ -1762,8 +1762,8 @@ namespace avmplus
 		{
   		    Multiname multiname;
 		    pool->parseMultiname(multiname, imm30);
-		    AbstractFunction* script = (AbstractFunction*)pool->getNamedScript(&multiname);
-			if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
+		    MethodInfo* script = pool->getNamedScript(&multiname);
+			if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
 			{
 			    // found a single matching traits
 				emit(state, opcode, (uintptr)&multiname, sp+1, script->declaringTraits);
@@ -1868,7 +1868,7 @@ namespace avmplus
 
 		case OP_callstatic:
 		{
-			AbstractFunction* m = pool->methods[imm30];
+			MethodInfo* m = pool->methods[imm30];
 			const uint32_t argc = imm30b;
 			emitSetContext(state, m);
 			emitCall(state, OP_callstatic, m->method_id, argc, m->returnTraits());
@@ -1907,14 +1907,14 @@ namespace avmplus
 
 		case OP_newcatch:
 		{
-		    ExceptionHandler* handler = &info->exceptions->exceptions[imm30];
+		    ExceptionHandler* handler = &info->abc_exceptions()->exceptions[imm30];
 			emit(state, opcode, 0, 0, handler->scopeTraits);
 			break;
 		}
 
 		case OP_popscope:
 			#ifdef DEBUGGER
-		    if (core->debugger()) emitKill(state, info->localCount/*scopeBase*/ + state->scopeDepth);
+		    if (core->debugger()) emitKill(state, info->abc_local_count()/*scopeBase*/ + state->scopeDepth);
 			#endif
 			break;
 
@@ -2561,7 +2561,7 @@ namespace avmplus
 			// method_id is pointer to interface method name (multiname)
 			int index = int(method_id % Traits::IMT_SIZE);
 			LIns* vtable = loadVTable(objDisp);
-			method = loadIns(LIR_ldcp, offsetof(VTable, imt)+sizeof(uintptr)*index, vtable);
+			method = loadIns(LIR_ldcp, offsetof(VTable, imt)+sizeof(MethodEnv*)*index, vtable);
 			iid = InsConstPtr((void*)method_id);
 			break;
 		}
@@ -2631,7 +2631,12 @@ namespace avmplus
         // patch the size to what we actually need
 		ap->setSize(disp);
 
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv, impl32), method);
+#if VMCFG_METHODENV_IMPL32
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv,_impl32), method);
+#else
+		LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnv, method), method);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, impl32), meth);
+#endif
 		LIns* apAddr = leaIns(pad, ap);
 
         LIns *out;
@@ -2944,7 +2949,7 @@ namespace avmplus
 				}
 				#endif // DEBUGGER
 
-				if (info->exceptions)
+				if (info->abc_exceptions())
 				{
 					// _ef.endTry();
 					callIns(FUNCTIONID(endTry), 1, _ef);
@@ -3219,7 +3224,7 @@ namespace avmplus
                 uint32_t function_id = (uint32_t) op1;
                 int32_t index = (int32_t) op2;
 				//sp[0] = core->newfunction(env, body, _scopeBase, scopeDepth);
- 				AbstractFunction* func = pool->getMethodInfo(function_id);
+ 				MethodInfo* func = pool->getMethodInfo(function_id);
 				int extraScopes = state->scopeDepth;
 
 				// prepare scopechain args for call
@@ -3458,7 +3463,7 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(newclass",1);
 				// sp[0] = core->newclass(env, cinit, scopeBase, scopeDepth, base)
-				AbstractFunction *cinit = (AbstractFunction*) op1;
+				MethodInfo *cinit = (MethodInfo*) op1;
 				int localindex = int(op2);
 				int extraScopes = state->scopeDepth;
 
@@ -4596,13 +4601,13 @@ namespace avmplus
 			LIns* handler = callIns(FUNCTIONID(beginCatch), 5,
 				coreAddr, _ef, InsConstPtr(info), pc, exptr);
 
-            int handler_count = info->exceptions->exception_count;
+            int handler_count = info->abc_exceptions()->exception_count;
 			// jump to catch handler
             LIns *handler_target = loadIns(LIR_ldp, offsetof(ExceptionHandler, target), handler);
 			// we dont have LIR_ji yet, so do a compare & branch to each possible target.
 			for (int i=0; i < handler_count && !outOMem(); i++)
 			{
-				ExceptionHandler* h = &info->exceptions->exceptions[i];
+				ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
                 intptr_t handler_pc = h->target;
                 if (i+1 < handler_count) {
                     branchIns(LIR_jt, binaryIns(LIR_peq, handler_target, InsConstPtr((void*)handler_pc)), handler_pc);
@@ -5177,7 +5182,7 @@ namespace avmplus
             u.vp = frag->code();
             info->impl32 = u.fp;
             // mark method as been JIT'd
-            info->flags |= AbstractFunction::JIT_IMPL;
+            info->flags |= MethodInfo::JIT_IMPL;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
             if (verbose())
                 printf("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
@@ -5405,7 +5410,12 @@ namespace avmplus
 		// fixme: this should always be == to the one passed into the thunk, right?
 		int32_t offset = (int32_t)(intptr_t)&((VTable*)0)->methods[e->disp_id];
 		LIns *env = lirout->insLoad(LIR_ldcp, vtable, offset);
-		LIns *target = lirout->insLoad(LIR_ldp, env, offsetof(MethodEnv, impl32));
+	#if VMCFG_METHODENV_IMPL32
+		LIns *target = lirout->insLoad(LIR_ldp, env, (int)offsetof(MethodEnv, _impl32));
+	#else
+		LIns *af = lirout->insLoad(LIR_ldp, env, offsetof(MethodEnv, method));
+		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, impl32));
+	#endif
 		LInsp args[] = { ap_param, argc_param, env, target };
 		if (Traits::getBuiltinType(e->virt->returnTraits()) == BUILTIN_number) {
 			lirout->ins1(LIR_fret, lirout->insCall(FUNCTIONID(fcalli), args));

@@ -71,7 +71,7 @@ public:
     static bool isNaN(double x);
 };
 
-class AbstractFunction
+class MethodInfo
 {
 public:
 	static const int NEED_ARGUMENTS		= 0x00000001;

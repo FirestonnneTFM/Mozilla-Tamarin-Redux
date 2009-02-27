@@ -65,7 +65,7 @@ inline void Cogen::startCatch()
 
 inline uint8_t Cogen::getFlags() const 
 {
-	return traits->getCount() > 0 ? AbstractFunction::NEED_ACTIVATION : 0;
+	return traits->getCount() > 0 ? MethodInfo::NEED_ACTIVATION : 0;
 }
 
 inline AbcOpcode Cogen::binopToOpcode(Binop op, bool* isNegated)

@@ -75,7 +75,7 @@ namespace avmplus
 
 	typedef void (AvmObjectT::*AvmThunkNativeMethodHandler)();
 	typedef void (*AvmThunkNativeFunctionHandler)(AvmObject obj);
-	
+
 	const uintptr_t kUnboxMask = ~uintptr_t(7);
 	#define AvmThunkUnbox_AvmReceiver(t,r)	((t)(uintptr_t(r) & kUnboxMask))
 	#define AvmThunkUnbox_AvmObject(r)		((ScriptObject*)(r))
@@ -155,8 +155,8 @@ namespace avmplus
 
 	#define AvmThunkConstant_AvmString(v)		(env->method->pool->cpool_string[v])
 	
-	#define AVMTHUNK_GET_METHOD_HANDLER(env)	(static_cast<NativeMethod*>((env)->method)->handler.method)
-	#define AVMTHUNK_GET_FUNCTION_HANDLER(env)	(static_cast<NativeMethod*>((env)->method)->handler.function)
+	#define AVMTHUNK_GET_METHOD_HANDLER(env)	((env)->method->handler_method())
+	#define AVMTHUNK_GET_FUNCTION_HANDLER(env)	((env)->method->handler_function())
 
 	union AvmThunkNativeHandler
 	{
@@ -186,25 +186,6 @@ namespace avmplus
 	};
 
 
-	class NativeMethod : public AbstractFunction
-	{
-	public:
-		NativeMethod(int _method_id, AvmThunkNativeThunker thunker, AvmThunkNativeHandler handler);
-		virtual ~NativeMethod() {}
-		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
-#ifdef DEBUGGER
-		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#endif
-		virtual void verify(Toplevel* toplevel);
-
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		AvmThunkNativeThunker thunker;
-		AvmThunkNativeHandler handler;
-	// ------------------------ DATA SECTION END
-	};
-
 	// ---------------
 
 	class NativeInitializer
@@ -220,7 +201,7 @@ namespace avmplus
 
 		PoolObject* parseBuiltinABC(Domain* domain, const List<Stringp, LIST_RCObjects>* includes = NULL);
 
-		NativeMethod* newNativeMethod(uint32_t i) const;
+		const NativeMethodInfo* getNativeInfo(uint32_t i) const { return get_method(i); }
 	
 		#ifdef AVMPLUS_NO_STATIC_POINTERS
 			typedef void (*FillInProc)(NativeMethodInfo* m, NativeClassInfo* c);

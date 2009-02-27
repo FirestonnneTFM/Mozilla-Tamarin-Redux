@@ -93,7 +93,7 @@ namespace avmplus
 		List<Atom,LIST_NonGCObjects> cpool_mn;
 
 		/** all methods */
-		List<AbstractFunction*> methods;
+		List<MethodInfo*> methods;
 #if VMCFG_METHOD_NAMES
 		// only allocated & populated if core->config.methodName is true...
 		// if positive, an index into cpool_string; if negative, an index into cpool_mn
@@ -108,8 +108,8 @@ namespace avmplus
 		DWB(Domain*) domain;
 		
 		/** constructors for class objects, for op_newclass */
-		List<AbstractFunction*> cinits;  // TODO just use methods array, dont need new cinits array
-		List<AbstractFunction*> scripts;
+		List<MethodInfo*> cinits;  // TODO just use methods array, dont need new cinits array
+		List<MethodInfo*> scripts;
 
 		/** # of elements in methods array */
 		uint32 methodCount;
@@ -155,9 +155,9 @@ namespace avmplus
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos);
 		~PoolObject();
 
-		AbstractFunction* getMethodInfo(uint32 index);
+		MethodInfo* getMethodInfo(uint32 index);
 
-		AbstractFunction* getNamedScript(const Multiname* multiname) const;
+		MethodInfo* getNamedScript(const Multiname* multiname) const;
 
 		inline const byte* getMetadataInfoPos(uint32 index) { return metadata_infos[index]; }
 		Traits* getTraits(Stringp name, Namespacep ns, bool recursive=true) const;
@@ -166,7 +166,7 @@ namespace avmplus
 
 		Traits* getBuiltinTraits(Stringp name) const;
 
-		void addPrivateNamedScript(Stringp name, Namespacep ns, AbstractFunction *a);
+		void addPrivateNamedScript(Stringp name, Namespacep ns, MethodInfo *a);
 		void addNamedTraits(Stringp name, Namespacep ns, Traits* traits);
 		
 		//

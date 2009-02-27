@@ -80,10 +80,10 @@ namespace avmplus
 #endif
 
         #ifdef AVMPLUS_VERBOSE
-        this->verbose = pool->verbose || (info->flags & AbstractFunction::VERBOSE_VERIFY);
+        this->verbose = pool->verbose || (info->flags & MethodInfo::VERBOSE_VERIFY);
         #endif
 
-        const byte* pos = info->body_pos;
+        const byte* pos = info->abc_body_pos();
         max_stack = AvmCore::readU30(pos);
         local_count = AvmCore::readU30(pos);
         int init_scope_depth = AvmCore::readU30(pos);
@@ -182,20 +182,10 @@ namespace avmplus
         secondTry = false;
         #endif
 
-        info->localCount = local_count;
-        info->maxScopeDepth = max_scope;
-#ifdef AVMPLUS_64BIT
-        info->frameSize = frameSize;
-#else
-        // The interpreter wants this to be padded to a doubleword boundary because
-        // it allocates two objects in a single alloca() request - the frame and
-        // auxiliary storage, in that order - and wants the second object to be
-        // doubleword aligned.
-        info->frameSize = (frameSize + 1) & ~1;
-#endif
+        info->set_abc_frame_info(frameSize, local_count, max_scope);
 #ifndef AVMPLUS_WORD_CODE
         // For word code, it is set by the WordcodeTranslator epilogue
-        info->codeStart = code_pos;
+        info->set_abc_code_start(code_pos);
 #endif
 
 		// FIXME move the following dozen or so lines of pipline configuration 
@@ -239,7 +229,7 @@ namespace avmplus
         for (int i=0, n=frameSize; i < n; i++)
             state->setType(i, NULL);
 
-        if (info->flags & AbstractFunction::NEED_REST)
+        if (info->flags & MethodInfo::NEED_REST)
         {
             // param_count+1 <= max_reg
             checkLocal(info->param_count+1);
@@ -247,14 +237,14 @@ namespace avmplus
             state->setType(info->param_count+1, ARRAY_TYPE, true);
 
             #ifdef AVMPLUS_VERBOSE
-            if (verbose && (info->flags & AbstractFunction::NEED_ARGUMENTS))
+            if (verbose && (info->flags & MethodInfo::NEED_ARGUMENTS))
             {
                 // warning, NEED_ARGUMENTS wins
                 core->console << "WARNING, NEED_REST overrides NEED_ARGUMENTS when both are set\n";
             }
             #endif
         }
-        else if (info->flags & AbstractFunction::NEED_ARGUMENTS)
+        else if (info->flags & MethodInfo::NEED_ARGUMENTS)
         {
             // param_count+1 <= max_reg
             checkLocal(info->param_count+1);
@@ -271,7 +261,7 @@ namespace avmplus
         // initialize method param types.
         // We already verified param_count is a legal register so
         // don't checkLocal(i) inside the loop.
-        // AbstractFunction::verify takes care of resolving param&return type
+        // MethodInfo::verify takes care of resolving param&return type
         // names to Traits pointers, and resolving optional param default values.
         for (int i=0, n=info->param_count; i <= n; i++)
         {
@@ -423,12 +413,12 @@ namespace avmplus
 			state->pc = pc - code_pos;
 			int sp = state->sp();
 
-			if (info->exceptions)
+			if (info->abc_exceptions())
 			{
 				JIT_ONLY( bool jitSavedState = false; )
-				for (int i=0, n=info->exceptions->exception_count; i < n; i++)
+				for (int i=0, n=info->abc_exceptions()->exception_count; i < n; i++)
 				{
-					ExceptionHandler* handler = &info->exceptions->exceptions[i];
+					ExceptionHandler* handler = &info->abc_exceptions()->exceptions[i];
 					if (pc >= code_pos + handler->from && pc <= code_pos + handler->to)
 					{
 						// Set the insideTryBlock flag, so the jit can
@@ -671,7 +661,7 @@ namespace avmplus
 
 			case OP_dxns:
 				//checkStack(0,0)
-				if (!info->isFlagSet(AbstractFunction::SETS_DXNS))
+				if (!info->isFlagSet(MethodInfo::SETS_DXNS))
 					verifyFailed(kIllegalSetDxns, core->toErrorString(info));
 				checkCpoolOperand(imm30, kStringType);
 				coder->write(state, pc, opcode);
@@ -679,7 +669,7 @@ namespace avmplus
 
 			case OP_dxnslate:
 				checkStack(1,0);
-				if (!info->isFlagSet(AbstractFunction::SETS_DXNS))
+				if (!info->isFlagSet(MethodInfo::SETS_DXNS))
 					verifyFailed(kIllegalSetDxns, core->toErrorString(info));
 				// codgen will call intern on the input atom.
 				coder->write(state, pc, opcode);
@@ -795,14 +785,14 @@ namespace avmplus
 			case OP_newfunction: 
 			{
 				checkStack(0,1);
-				AbstractFunction* f = checkMethodInfo(imm30);
+				MethodInfo* f = checkMethodInfo(imm30);
 				// Duplicate function definitions can happen with well formed ABC data.  We need
 				// to clear out data on AbstractionFunction so it can correctly be re-initialized.
 				// If our old function is ever used incorrectly, we throw an verify error in 
 				// MethodEnv::coerceEnter.
 				if (f->declaringTraits)
 				{
-				    f->flags &= ~AbstractFunction::LINKED;
+				    f->flags &= ~MethodInfo::LINKED;
 					f->declaringTraits = NULL;
 				}
 				f->setParamType(0, NULL);
@@ -931,8 +921,8 @@ namespace avmplus
 					verifyFailed(kIllegalOpMultinameError, core->toErrorString(opcode), core->toErrorString(&multiname));
 				}
 				coder->write(state, pc, opcode);
-				AbstractFunction* script = (AbstractFunction*)pool->getNamedScript(&multiname);
-				if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
+				MethodInfo* script = pool->getNamedScript(&multiname);
+				if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
 				{
 					// found a single matching traits
 					state->push(script->declaringTraits, true);
@@ -967,7 +957,7 @@ namespace avmplus
 				if (AvmCore::isSlotBinding(b) && /*jit &&*/
 					// it's a var, or a const being set from the init function
 					(!AvmCore::isConstBinding(b) || 
-						(AbstractFunction*) obj.traits->init == info && opcode == OP_initproperty))
+						obj.traits->init == info && opcode == OP_initproperty))
 				{
 				    emitCoerce(propTraits, state->sp());
 					coder->writeOp2(state, pc, OP_setslot, (uint32_t)AvmCore::bindingToSlotId(b), sp-(n-1), propTraits);
@@ -988,7 +978,7 @@ namespace avmplus
 					// early bind to the setter
 					int disp_id = AvmCore::bindingToSetterId(b);
 					const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
-					AbstractFunction *f = objtd->getMethod(disp_id);
+					MethodInfo *f = objtd->getMethod(disp_id);
 					AvmAssert(f != NULL);
 					emitCoerceArgs(f, 1);
 					jit->emitSetContext(state, f);
@@ -1208,7 +1198,7 @@ namespace avmplus
 
 			case OP_callstatic: 
 			{
-				AbstractFunction* m = checkMethodInfo(imm30);
+				MethodInfo* m = checkMethodInfo(imm30);
 				const uint32_t argc = imm30b;
 
 				checkStack(argc+1, 1);
@@ -1402,7 +1392,7 @@ namespace avmplus
 				if (AvmCore::isMethodBinding(b))
 				{
 					int disp_id = AvmCore::bindingToMethodId(b);
-					AbstractFunction* m = basetd->getMethod(disp_id);
+					MethodInfo* m = basetd->getMethod(disp_id);
 					if( !m ) verifyFailed(kCorruptABCError);
 					emitCoerceArgs(m, argc);
 					Traits* resultType = m->returnTraits();
@@ -1476,7 +1466,7 @@ namespace avmplus
 						// Invoke the getter
 						int disp_id = AvmCore::bindingToGetterId(b);
 						const TraitsBindingsp basetd = base->getTraitsBindings();
-						AbstractFunction *f = basetd->getMethod(disp_id);
+						MethodInfo *f = basetd->getMethod(disp_id);
 						AvmAssert(f != NULL);
 						emitCoerceArgs(f, 0);
 						Traits* resultType = f->returnTraits();
@@ -1554,7 +1544,7 @@ namespace avmplus
 						{
 							// Invoke the setter
 							int disp_id = AvmCore::bindingToSetterId(b);
-							AbstractFunction *f = basetd->getMethod(disp_id);
+							MethodInfo *f = basetd->getMethod(disp_id);
 							AvmAssert(f != NULL);
 							emitCoerceArgs(f, 1);
 							jit->emitSetContext(state, f);
@@ -1592,7 +1582,7 @@ namespace avmplus
 				int32_t ptrIndex = sp-argc;
 				Traits* baseTraits = emitCoerceSuper(ptrIndex); // check receiver
 
-				AbstractFunction *f = baseTraits->init;
+				MethodInfo *f = baseTraits->init;
 				AvmAssert(f != NULL);
 
 				emitCoerceArgs(f, argc);
@@ -1694,7 +1684,7 @@ namespace avmplus
 
 			case OP_newactivation: 
 				checkStack(0, 1);
-				if (!(info->flags & AbstractFunction::NEED_ACTIVATION))
+				if (!(info->flags & MethodInfo::NEED_ACTIVATION))
 					verifyFailed(kInvalidNewActivationError);
 				info->activationTraits->resolveSignatures(toplevel);
 				coder->write(state, pc, opcode);
@@ -1707,10 +1697,10 @@ namespace avmplus
 			case OP_newcatch: 
 			{
 				checkStack(0, 1);
-				if (!info->exceptions || imm30 >= (uint32_t)info->exceptions->exception_count)
+				if (!info->abc_exceptions() || imm30 >= (uint32_t)info->abc_exceptions()->exception_count)
 					verifyFailed(kInvalidNewActivationError);
 					// FIXME better error msg
-				ExceptionHandler* handler = &info->exceptions->exceptions[imm30];
+				ExceptionHandler* handler = &info->abc_exceptions()->exceptions[imm30];
 				coder->write(state, pc, opcode);
 				state->push(handler->scopeTraits, true);
 				break;
@@ -1810,7 +1800,7 @@ namespace avmplus
 			    Value& obj = state->peek(2); // object
 				// if code isn't in pool, its our generated init function which we always
 				// allow early binding on
-				if(pool->isCodePointer(info->body_pos))
+				if(pool->isCodePointer(info->abc_body_pos()))
 				    checkEarlySlotBinding(obj.traits);
 				Traits* slotTraits = checkSlot(obj.traits, imm30-1);
 				emitCoerce(slotTraits, state->sp());
@@ -2258,7 +2248,7 @@ namespace avmplus
 			b = findStringFunction(tb, multiname, b, argc);
 		
 		int disp_id = AvmCore::bindingToMethodId(b);
-		AbstractFunction* m = tb->getMethod(disp_id);
+		MethodInfo* m = tb->getMethod(disp_id);
 		
 		if (!m->argcOk(argc))
 			return false;
@@ -2444,8 +2434,8 @@ namespace avmplus
 				if (index <= 0)
 				{
 					// look at import table for a suitable script
-					AbstractFunction* script = (AbstractFunction*)pool->getNamedScript(&multiname);
-					if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
+					MethodInfo* script = pool->getNamedScript(&multiname);
+					if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
 					{
 						#if defined FEATURE_NANOJIT
 						if (jit)
@@ -2523,7 +2513,7 @@ namespace avmplus
 			// Invoke the getter
 			int disp_id = AvmCore::bindingToGetterId(b);
 			const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
-			AbstractFunction *f = objtd->getMethod(disp_id);
+			MethodInfo *f = objtd->getMethod(disp_id);
 			AvmAssert(f != NULL);
 
 			#if defined FEATURE_NANOJIT
@@ -2731,7 +2721,7 @@ namespace avmplus
 			verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
 	}
 
-	void Verifier::emitCoerceArgs(AbstractFunction* m, int argc, bool isctor)
+	void Verifier::emitCoerceArgs(MethodInfo* m, int argc, bool isctor)
 	{
 		if (!m->argcOk(argc))
 		{
@@ -2828,7 +2818,7 @@ namespace avmplus
 		case BKIND_GETSET:
 		{
 			int m = AvmCore::bindingToGetterId(b);
-			AbstractFunction *f = traits->getTraitsBindings()->getMethod(m);
+			MethodInfo *f = traits->getTraitsBindings()->getMethod(m);
 			return f->returnTraits();
 		}
 		case BKIND_SET:
@@ -2845,7 +2835,7 @@ namespace avmplus
 		}
 	}
 
-	AbstractFunction* Verifier::checkMethodInfo(uint32_t id)
+	MethodInfo* Verifier::checkMethodInfo(uint32_t id)
 	{
 		if (id >= pool->methodCount)
 		{
@@ -2887,14 +2877,14 @@ namespace avmplus
 		return t;
 	}
 
-    AbstractFunction* Verifier::checkDispId(Traits* traits, uint32_t disp_id)
+    MethodInfo* Verifier::checkDispId(Traits* traits, uint32_t disp_id)
     {
 		TraitsBindingsp td = traits->getTraitsBindings();
         if (disp_id > td->methodCount)
 		{
             verifyFailed(kDispIdExceedsCountError, core->toErrorString(disp_id), core->toErrorString(td->methodCount), core->toErrorString(traits));
 		}
-		AbstractFunction* m = td->getMethod(disp_id);
+		MethodInfo* m = td->getMethod(disp_id);
 		if (!m) 
 		{
 			verifyFailed(kDispIdUndefinedError, core->toErrorString(disp_id), core->toErrorString(traits));
@@ -3146,7 +3136,7 @@ namespace avmplus
 		if (AvmCore::isMethodBinding(newb))
 		{
 			int disp_id = AvmCore::bindingToMethodId(newb);
-			AbstractFunction* newf = math->getMethod(disp_id);
+			MethodInfo* newf = math->getMethod(disp_id);
 			if (argc == newf->param_count)
 			{
 				for (int i=state->stackDepth-argc, n=state->stackDepth; i < n; i++)
@@ -3168,7 +3158,7 @@ namespace avmplus
 		if (AvmCore::isMethodBinding(newb))
 		{
 			int disp_id = AvmCore::bindingToMethodId(newb);
-			AbstractFunction* newf = str->getMethod(disp_id);
+			MethodInfo* newf = str->getMethod(disp_id);
 			// We have all required parameters but not more than required.
 			if ((argc >= (newf->param_count - newf->optional_count)) && (argc <= newf->param_count))
 			{
@@ -3271,12 +3261,11 @@ namespace avmplus
 				handler++;
 			}
 
-			//info->exceptions = table;
-			WB(core->GetGC(), info, &info->exceptions, table);
+			info->set_abc_exceptions(core->GetGC(), table);
 		}
 		else
 		{
-			info->exceptions = NULL;
+			info->set_abc_exceptions(core->GetGC(), NULL);
 		}
 	}
 

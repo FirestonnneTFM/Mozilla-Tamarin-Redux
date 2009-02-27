@@ -77,7 +77,7 @@
 //     - ActionBlockConstants data, both opcode definitions and the instruction
 //       attribute table
 //
-//     - AbstractFunction, because eval uses the attribute bits defined therein
+//     - MethodInfo, because eval uses the attribute bits defined therein
 //
 //     - MathUtils, for isNaN (in one case, can be factored into HostContext)
 //

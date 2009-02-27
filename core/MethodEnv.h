@@ -47,8 +47,12 @@ namespace avmplus
 	class MethodEnv : public MMgc::GCObject
 #endif
 	{
+	#if VMCFG_METHODENV_IMPL32
+		friend class MethodInfo;
+		friend class CodegenLIR;
+		friend class CodegenIMT;
 		static Atom delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
-
+	#endif
 	public:
 		/** vtable for the activation scope inside this method */
 		VTable *getActivation();
@@ -57,10 +61,12 @@ namespace avmplus
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
 
-#if defined(FEATURE_NANOJIT)
-		MethodEnv(void* addr, VTable *vtable);
+#if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
+		enum TrampStub { kTrampStub };
+		MethodEnv(TrampStub, void* tramp, VTable* vtable);
 #endif
-		MethodEnv(AbstractFunction* method, VTable *vtable);
+
+		MethodEnv(MethodInfo* method, VTable *vtable);
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK 
 		virtual ~MethodEnv();
@@ -190,7 +196,7 @@ namespace avmplus
 		 * OP_newfunction
 		 * see 13.2 creating function objects
 		 */
-		ClassClosure* newfunction(AbstractFunction *function, 
+		ClassClosure* newfunction(MethodInfo *function, 
 						 ScopeChain* outer,
 						 Atom* scopes) const;
 
@@ -198,7 +204,7 @@ namespace avmplus
 		 * OP_newclass
 		 */
 
-		ClassClosure* newclass(AbstractFunction* cinit,
+		ClassClosure* newclass(MethodInfo* cinit,
 			          ClassClosure* base,
 					  ScopeChain* outer,
 					  Atom* scopes) const;
@@ -316,19 +322,29 @@ namespace avmplus
 		uint64_t invocationCount() const;
 #endif
 
+#if VMCFG_METHODENV_IMPL32
+		inline AtomMethodProc impl32() const { return _impl32; }
+		inline DoubleMethodProc implN() const { return _implN; }
+#else
+		inline AtomMethodProc impl32() const { return method->impl32; }
+		inline DoubleMethodProc implN() const { return method->implN; }
+#endif
+
 	// ------------------------ DATA SECTION BEGIN
+	private:
+#if VMCFG_METHODENV_IMPL32
+		// these are most-frequently accessed so put at offset zero
+		union 
+		{
+			AtomMethodProc _impl32;
+			DoubleMethodProc _implN;
+		};
+#endif
 	public:
 		// pointers are write-once so we don't need WB's
 		VTable* const				vtable;		// the vtable for the scope where this env was declared 
-		AbstractFunction* const		method;		// runtime independent type info for this method 
+		MethodInfo* const		method;		// runtime independent type info for this method 
 		Traits* const				declTraits;
-		union {
-			AtomMethodProc			impl32;	// pointer to invoke trampoline 
-			DoubleMethodProc		implN;
-#if defined(FEATURE_NANOJIT)
-			void*					implV;
-#endif
-		};
 	private:
 		uintptr_t					activationOrMCTable;
 	public:
@@ -347,7 +363,7 @@ namespace avmplus
 	class ScriptEnv : public MethodEnv
 	{
 	public:
-		ScriptEnv(AbstractFunction* _method, VTable * _vtable)
+		ScriptEnv(MethodInfo* _method, VTable * _vtable)
 			: MethodEnv(_method, _vtable)
 		{
 			setIsScriptEnv(); 
@@ -364,7 +380,7 @@ namespace avmplus
 	class FunctionEnv : public MethodEnv
 	{
 	  public:
-		FunctionEnv(AbstractFunction* _method, VTable * _vtable)
+		FunctionEnv(MethodInfo* _method, VTable * _vtable)
 			: MethodEnv(_method, _vtable) {}
 	// ------------------------ DATA SECTION BEGIN
 	  public:

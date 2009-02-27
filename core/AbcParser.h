@@ -75,7 +75,7 @@ namespace avmplus
 
 	protected:
 		PoolObject* parse();
-		AbstractFunction* resolveMethodInfo(uint32 index) const;
+		MethodInfo* resolveMethodInfo(uint32 index) const;
 
 		#ifdef AVMPLUS_VERBOSE
 		void parseTypeName(const byte* &p, Multiname& m) const;
@@ -97,7 +97,7 @@ namespace avmplus
 							Traits* base, 
 							Namespacep ns, 
 							Stringp name, 
-							AbstractFunction* script, 
+							MethodInfo* script, 
 							TraitsPosPtr traitsPos,
 							TraitsPosType posType, 
 							Namespacep protectedNamespace);
@@ -105,7 +105,7 @@ namespace avmplus
 		/**
 		 * add script to VM-wide table
 		 */
-		void addNamedScript(Namespacep ns, Stringp name, AbstractFunction* script);
+		void addNamedScript(Namespacep ns, Stringp name, MethodInfo* script);
 
 		/**
 		 * Adds traits to the VM-wide traits table, for types
