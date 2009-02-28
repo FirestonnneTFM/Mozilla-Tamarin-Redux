@@ -965,10 +965,15 @@ class AbcThunkGen:
 		out_h.println(MPL_HEADER);
 		out_c.println(MPL_HEADER);
 
+		out_h.println('')
 		out_h.println("/* machine generated file -- do not edit */");
+		out_h.println('')
+		out_c.println('')
 		out_c.println("/* machine generated file -- do not edit */");
+		out_c.println('')
 
 		out_h.println("#define AVMTHUNK_VERSION 5");
+		out_h.println('')
 		
 		out_h.println("extern const uint32_t "+name+"_abc_class_count;")
 		out_h.println("extern const uint32_t "+name+"_abc_script_count;")
@@ -983,11 +988,13 @@ class AbcThunkGen:
 
 		out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s)" % (name));
 		
+		out_h.println('')
 		out_h.println("/* classes */");
 		for i in range(0, len(abc.classes)):
 			c = abc.classes[i]
 			self.out_h.println("const uint32_t " + self.class_id_name(c) + " = " + str(c.class_id) + ";");
 
+		out_h.println('')
 		out_h.println("/* methods */");
 		for i in range(0, len(abc.methods)):
 			m = abc.methods[i]
@@ -998,6 +1005,7 @@ class AbcThunkGen:
 				else:
 					# not sure if we want to expose method id's for non-native methods; emit as comments for now
 					out_h.println("/* const uint32_t "+m.native_id_name+" = "+str(m.id)+"; */");
+		out_h.println('')
 
 		unique_thunk_sigs = {}
 		for receiver,m in self.all_thunks:
@@ -1017,6 +1025,7 @@ class AbcThunkGen:
 				users = unique_thunk_sigs[sig]
 				receiver = None;
 				m = None;
+				out_c.println('')
 				for native_name in users:
 					out_c.println("// "+native_name);
 					receiver = users[native_name][0];
