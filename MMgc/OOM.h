@@ -21,6 +21,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,3 +36,42 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+#ifndef __OOM_H__
+#define __OOM_H__
+
+#ifdef MMGC_AVMPLUS
+// don't reinvent the wheel
+#include "../core/avmsetjmp.h"
+#else
+#include <setjmp.h>
+#endif
+
+#define MMGC_ENTER MMgc::EnterFrame _ef;\
+        _ef.status = setjmp(_ef.jmpbuf);
+
+#define MMGC_ENTER_STATUS (_ef.status)
+
+namespace MMgc
+{
+	class EnterFrame
+	{
+		friend class FixedMalloc;
+	public:
+		EnterFrame();
+		~EnterFrame();
+		jmp_buf jmpbuf;
+		int status;
+	};
+
+	
+	typedef enum _MemoryStatus {
+		kNormal,
+		kReserve,
+		kEmpty,
+		kAbort
+	} MemoryStatus;
+}
+
+#endif /* __OOM_H__ */
+

@@ -168,7 +168,7 @@ namespace avmplus
 		AvmAssert(len >= 0);
 		// master cannot be a dependent string
 		AvmAssert(kDependent != master->getType());
-		MMGC_MEM_TYPE( "String: Dependent" );
+		MMGC_MEM_TAG( "String: Dependent" );
 		Stringp s = new(gc)
 					String(len, (master->m_bitsAndFlags & TSTR_WIDTH_MASK) | (kDependent << TSTR_TYPE_SHIFT));
 		WBRC( gc, s, &s->m_master, master );
@@ -222,7 +222,7 @@ namespace avmplus
 	{
 		AvmAssert(kAuto != w);
 		AvmAssert(len >= 0);
-		MMGC_MEM_TYPE( "String: Static" );
+		MMGC_MEM_TAG( "String: Static" );
 		Stringp s = new(gc)
 					String(len, w | (kStatic << TSTR_TYPE_SHIFT));
 		// this also sets the other pointers

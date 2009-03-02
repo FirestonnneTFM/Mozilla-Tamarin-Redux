@@ -238,6 +238,7 @@ const int kBufferPadding = 16;
 		 */
 		virtual void presweep();
 		virtual void postsweep();
+		virtual void oom(MMgc::MemoryStatus status);
 		
 		Config config;
         
@@ -1447,9 +1448,8 @@ const int kBufferPadding = 16;
 
 		// static version for smart pointers
 		static void atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew);
-#ifdef MMGC_DRC
+
 		static void decrementAtomRegion(Atom *ar, int length);
-#endif
 
 	public:
 #ifdef AVMPLUS_VERBOSE
@@ -1583,6 +1583,7 @@ const int kBufferPadding = 16;
 			void presweep() { if(core) core->presweep(); }
 			void postsweep() { if(core) core->postsweep(); }
 			void log(const char *str) { if(core) core->console << str; }
+			void oom(MMgc::MemoryStatus status) { if(core) core->oom(status); }
 		private:
 			AvmCore *core;
 		};

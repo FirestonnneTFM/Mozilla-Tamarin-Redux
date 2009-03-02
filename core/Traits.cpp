@@ -393,8 +393,6 @@ namespace avmplus
         return &set[i];
 	}
 
-#ifdef MMGC_DRC
-
 	void TraitsBindings::buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const
 	{
 		// this is really a compile-time assertion
@@ -438,7 +436,6 @@ namespace avmplus
 			AvmAssert(!slotDestroyInfo.test(0));
 		}
 	}
-#endif // MMGC_DRC
 
     bool TraitsBindings::checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const
     {
@@ -1683,9 +1680,7 @@ namespace avmplus
 			AvmAssert(!"unhandled verify error");
 		}
 
-#ifdef MMGC_DRC
 		tb->buildSlotDestroyInfo(gc, m_slotDestroyInfo);
-#endif
 
 		linked = true;
 
@@ -1857,7 +1852,6 @@ namespace avmplus
 		new_init->set_abc_body_pos_wb(gc, newBytes);
 	}
 
-#ifdef MMGC_DRC
 	void Traits::destroyInstance(ScriptObject* obj) const
 	{
 		AvmAssert(linked);
@@ -1915,7 +1909,6 @@ namespace avmplus
 		}
 		
 	}
-#endif
 
 #if defined FEATURE_NANOJIT
 	ImtBuilder::ImtBuilder(MMgc::GC* _gc) : gc(_gc)

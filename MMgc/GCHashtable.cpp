@@ -38,6 +38,12 @@
 
 #include "MMgc.h"
 
+//#define DOPROF
+
+#ifdef DOPROF
+#include "../vprof/vprof.h"
+#endif
+
 namespace MMgc
 {
 	const void *GCHashtable::DELETED = (const void*)1;
@@ -74,7 +80,7 @@ namespace MMgc
 //#define CONSUME_DELETED_SLOTS
 	// this does solve it completely
 	// FIXME: make this a C++ template option so the hashtable consumer can choose linear or quadratic probe
-#define LINEAR_PROBE
+//#define LINEAR_PROBE
 
 	void GCHashtable::put(const void *key, const void *value)
 	{
@@ -144,32 +150,30 @@ namespace MMgc
 			unsigned hashCode = 0;
 			const char *s = (const char*)key;
 			while (*s++) {
-				hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ ((uintptr)*s << ((uintptr)s & 0x3));
+				hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ ((uintptr_t)*s << ((uintptr_t)s & 0x3));
 			}
 			return hashCode;
 		}
-		return (0x7FFFFFF8 & (uintptr)key) >> 1;
+		return (0x7FFFFFFF & (uintptr_t)key);
 	}
 
 	/* static */
 	int GCHashtable::find(const void *key, const void **table, unsigned int tableSize)
 	{	
 		GCAssert(key != (const void*)DELETED);
-		int bitmask = (tableSize - 1) & ~0x1;
 
 #ifndef LINEAR_PROBE
-    // this is a quadratic probe but we only hit even numbered slots since those hold keys.
-    int n = 7 << 1;
+		// this is a quadratic probe but we only hit even numbered slots since those hold keys.
+		int n = 7 << 1;
 #endif
 
-		#ifdef _DEBUG
+		#if defined(DOPROF) || defined(_DEBUG)
 		unsigned loopCount = 0;
 		#endif
 
-		// Note: Mask off MSB to avoid negative indices.  Mask off bottom
-		// 2 bits because of alignment.  Double it because names, values stored adjacently.
-    unsigned i = hash(key) & bitmask;  
-    const void *k;
+		int bitmask = (tableSize - 1) & ~0x1;
+	    unsigned i = hash(key) & bitmask;  
+		const void *k;
 #ifdef CONSUME_DELETED_SLOTS
 		int firstDeletedSlot = -1;
 #endif
@@ -185,16 +189,21 @@ namespace MMgc
 #else
 			i = (i + (n += 2)) & bitmask;		// quadratic probe
 #endif
-			GCAssert(loopCount++ < tableSize);			// don't scan forever
+#if defined(DOPROF) || defined(_DEBUG)
+			loopCount++;
+#endif
+			GCAssert(loopCount < tableSize);			// don't scan forever
 		}
 #ifdef CONSUME_DELETED_SLOTS
 		if(k == NULL && firstDeletedSlot == (int)i) {
 			i = firstDeletedSlot;
 		}
 #endif
-		//_nvprof("loopCount", loopCount);
+#ifdef DOPROF
+		_nvprof("loopCount", loopCount);
+#endif
 		GCAssert(i <= ((tableSize-1)&~0x1));
-    return i;
+		return i;
 	}
 
 	void GCHashtable::grow()
@@ -202,7 +211,7 @@ namespace MMgc
 		int newTableSize = tableSize;
 
 		unsigned int occupiedSlots = numValues - numDeleted;
-    GCAssert(numValues >= numDeleted);
+		GCAssert(numValues >= numDeleted);
 
 		// grow or shrink as appropriate:
 		// if we're greater than %50 full grow

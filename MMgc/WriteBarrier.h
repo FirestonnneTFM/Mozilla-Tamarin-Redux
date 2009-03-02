@@ -43,8 +43,6 @@
 #ifndef _WRITE_BARRIER_H_
 #define _WRITE_BARRIER_H_
 
-#ifdef WRITE_BARRIERS
-
 // inline write barrier
 #define WB(gc, container, addr, value) gc->writeBarrier(container, addr, (const void *) (value))
 
@@ -56,19 +54,6 @@
 
 // declare an optimized RCObject write barrier
 #define DRCWB(type) MMgc::WriteBarrierRC<type>
-
-#else
-
-#define WB(gc, container, addr, value) *addr = value
-
-#define WBRC(gc, container, addr, value) *addr = value
-
-// declare write barrier
-#define DWB(type) type
-
-#define DVWB(type) type
-
-#endif
 
 namespace MMgc
 {
@@ -111,9 +96,7 @@ namespace MMgc
 		// let us peek at it without a cast
 		inline T value() const { return t; }
 
-#ifdef MMGC_DRC
 		inline operator ZeroPtr<T>() const { return t; }
-#endif
 
 		inline bool operator!=(T other) const { return other != t; }
 
@@ -175,9 +158,7 @@ namespace MMgc
 
 		inline operator T() const { return t; }
 
-#ifdef MMGC_DRC
 		inline operator ZeroPtr<T>() const { return t; }
-#endif
 
 		inline bool operator!=(T other) const { return other != t; }
 
