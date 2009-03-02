@@ -85,6 +85,16 @@ ecma3/Number/e15_7_3_5_3_rt ,   arm-winmobile-tvm-release-arm-Ojit  ,   expected
 
 # inconsistencies in different debug output, need to implement regex matching of diffs
 abcasm/adhoc , .* , skip, 
+# abcasm helper, not a test
+abcasm/abs_helper , .* , skip,
+# Test uses abcasm to check a boundary condition, failure is correct result
+abcasm/traitsSparseSlots , .* , expectedfail , Error 1107 is correct output
+# Test uses abcasm to check a boundary condition, failure is correct result
+abcasm/semanticErrorDuplicateSlotName , .* , expectedfail , Error 1107 is correct output
+# Test not ready for prime-time
+abcasm/mops , .* , skip,
+# Test not ready for prime-time
+abcasm/stringEscapes , .* , skip,
 
 # Bug 473392 -  ARM JIT failures
 ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392

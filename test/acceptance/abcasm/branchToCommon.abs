@@ -44,16 +44,21 @@ function main()
 	debugline 1
     getlocal0
 	pushscope
-    newfunction 1
+    newfunction .function_id(doTest)
 	getlocal0
-	call(0)
+	call 0
 	returnvoid
 }
 
-function jitted()
+function doTest()
 {
     debugfile "branchToCommon.abs"
 	debugline 2
+
+	findpropstrict	START
+	pushstring	"ifeq test, jump target resolution"
+	callproperty	START 1
+
     pushstring "x"
 	dup
 	pushbyte 12
@@ -63,12 +68,18 @@ function jitted()
 	pushstring "y"
 	jump poot
 
+	//  Shouldn't get here.
+	findpropstrict FAIL
+	callproperty FAIL 0
 
 
 poot:
-	findpropstrict print
-	swap
-	callproperty {package,private}::print (1)
+	setlocal1
+	findpropstrict COMPARE_STRICTEQ
+	pushstring "else branch"
+	pushstring "y"
+	getlocal1
+	callproperty COMPARE_STRICTEQ 3
 
 	returnvoid
 }

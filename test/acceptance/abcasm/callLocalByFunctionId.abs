@@ -42,31 +42,38 @@
 .script_info {
 	init: .function_id(main)
 	traits : {
-		.trait { kind: Trait_Slot name: zarquon slot_id:1 type_name:* }
+		.trait { kind: Trait_Slot name: doTest slot_id:1 type_name:* }
 	}
 }
 function main()
 {
 	getlocal0
 	pushscope
-	newfunction .function_id(zarquon)
+	newfunction .function_id(doTest)
  
 	getglobalscope
 	swap
-	setslot             1
+	setslot .slot_id(doTest)
 	getglobalscope
 	getslot 1
 
 	getlocal0
-	call  0
+	call 0
 	returnvoid
     
 }
 
-function zarquon()
+function doTest()
 {
-	findpropstrict      print
+	findpropstrict      START
+	pushstring "calling function by slot and function_id"
+	callproperty START 1
+
+	findpropstrict PASS
 	pushstring          "hello, world."
-	callpropvoid        print (1)
+	callproperty PASS 1
+	findpropstrict END
+	callproperty END 0
+
 	returnvoid
 }

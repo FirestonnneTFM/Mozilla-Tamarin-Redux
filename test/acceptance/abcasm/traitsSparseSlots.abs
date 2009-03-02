@@ -9,7 +9,7 @@
 	//  can also be specified
 	traits: {
 	.trait{ kind:Trait_Slot name:x slot_id:1 type_name:String}
-	.trait{ kind:Trait_Slot name:foo slot_id:2 type_name:*}
+	.trait{ kind:Trait_Slot name:foo slot_id:3 type_name:*}
 	}
 }
 

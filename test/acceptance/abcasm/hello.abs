@@ -41,5 +41,17 @@ function hello()
 
 	pushstring "Hello, world"
 	.print
+
+	findpropstrict START
+	pushstring ".print demo"
+	callproperty START 1
+
+	findpropstrict PASS
+	pushstring "hello"
+	callproperty PASS 1
+
+	findpropstrict END
+	callproperty END 0
+
 	returnvoid
 }
