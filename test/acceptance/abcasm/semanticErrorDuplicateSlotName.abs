@@ -3,7 +3,7 @@
 
 	traits : {
 		.trait { kind: Trait_Slot name: foo slot_id:1 type_name:* }
-		//.trait { kind: Trait_Slot name: foo slot_id:2 type_name:int }
+		.trait { kind: Trait_Slot name: foo slot_id:2 type_name:int }
 	}
 }
 

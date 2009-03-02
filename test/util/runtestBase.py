@@ -76,6 +76,7 @@ class RuntestBase:
     sourceExt = '.as'
     abcasmExt = '.abs'
     abcasmRunner = 'bash ../../utils/abcasm/abcasm.sh'
+    abcasmShell = 'abcasm/abs_helper'
     testconfig = 'testconfig.txt'
     logFileType = 'html'
     
@@ -676,6 +677,11 @@ class RuntestBase:
             child.expect("\(ash\)")
     
             for test in tests:
+                if self.debug:
+                    print cmd
+                else:
+                    print "Compiling ", test
+                    
                 if test.endswith(self.abcasmExt):
                     self.compile_test(test)
                 else:
@@ -703,10 +709,6 @@ class RuntestBase:
                 
                     if exists(testdir+".abc"):
                         os.unlink(testdir+".abc")
-                    if self.debug:
-                        print cmd
-                    else:
-                        print "Compiling ", test
                     child.sendline(cmd)
                     child.expect("\(ash\)")
                     if not exists(testdir+".abc"):
@@ -854,9 +856,7 @@ class RuntestBase:
                     flines.append(line)
             f.close()
         except IOError:
-            flines = []
-        #print 'output: %s' % output
-        #print 'flines: %s' % flines
+            flines = ['IOError Opening .out file']
         if len(output) != len(flines):
             return flines
         # compare lines
@@ -954,17 +954,17 @@ class RuntestBase:
         if isfile("%s.avm_args" % ast):
             testName = " %s %s" % (string.replace(open("%s.avm_args" % ast).readline(), "$DIR", dir), testName)
         
-        (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
+        if ast.endswith(self.abcasmExt):
+            # make sure util file has been compiled
+            if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
+                self.run_pipe('java -jar %s %s' % (self.asc, self.abcasmShell+'.as'))
+            (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, self.abcasmShell+'.abc', testName))
+        else:
+            (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
+            
         if f == "timedOut":
             outputCalls.append((self.fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % self.testTimeOut, self.timeoutmsgs)))
             ltimeout += 1
-        elif ast.endswith(self.abcasmExt):
-            flines = self.compareAbcAsmOutput(ast, f)
-            if flines:
-                lfail += 1
-                outputCalls.append((self.fail,(testName, 'FAILED! :\nExpected:\n'+''.join(flines)+'\nGOT:\n'+''.join(f), self.failmsgs)))
-            else:
-                lpass += 1
         else:
             try:
                 outputLines = []

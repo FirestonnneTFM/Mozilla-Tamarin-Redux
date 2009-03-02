@@ -38,39 +38,69 @@
 /*
  *  Tests arithmetic with the constant pools.
  */
-function main():*
+function main()
 {
+    debugfile "arithmetic.abs"
+	debugline 44
+    getlocal0
+	pushscope
+    newfunction .function_id(doTest)
+	getlocal0
+	call 0
+	returnvoid
+}
+
+function doTest():*
+{
+    debugfile "arithmetic.abs"
+	debugline 55
+
 	getlocal0
 	pushscope
-	findpropstrict	{package}::print
-	setlocal1
+
+	findpropstrict START
+	pushstring "Arithmetic using the int and uint pools"
+	callproperty START 1
 
 	pushstring "byte 9 + short 938="
     pushbyte 9
 	pushshort 938
 	add
-	add // string + int
-	getlocal1
-	swap
-	callproperty print(1)
+	dup
+	setlocal2
+	//  String + int
+	add
+	setlocal3
 
-	pushstring "int 3652147 + uint 0x80000000="
+	findpropstrict COMPARE_STRICTEQ
+	pushstring "byte 9 + short 938"
+	pushshort 947
+	getlocal2
+	callproperty COMPARE_STRICTEQ 3
+
+	findpropstrict COMPARE_STRICTEQ
+	pushstring "add string and previous result"
+	pushstring "byte 9 + short 938=947"
+	getlocal3
+
+	findpropstrict COMPARE_STRICTEQ
+	pushstring "int 3652147 + uint 0x80000000"
 	pushint 3652147
 	pushuint 0x80000000
 	add
-	add
-	getlocal1
-	swap
-	callproperty print(1)
+	pushuint 2151135795
+	callproperty COMPARE_STRICTEQ 3
 
-	pushstring "9.391 / 3.2="
+	findpropstrict COMPARE_STRICTEQ
+	pushstring "9.391 / 3.2"
 	pushdouble 9.391
 	pushdouble 3.2
 	divide
-	add //  String add
-	getlocal1
-	swap
-	callproperty print(1)
+	pushdouble 2.9346875
+	callproperty COMPARE_STRICTEQ 3
+
+	findpropstrict END
+	callproperty END 0
 
 	returnvoid
 }

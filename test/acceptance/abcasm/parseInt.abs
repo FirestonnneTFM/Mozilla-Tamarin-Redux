@@ -36,41 +36,54 @@
  * ***** END LICENSE BLOCK ***** */
 function script0$init():*
 {
-  // local_count=1 max_scope=1 max_stack=3 code_len=24
-  0         getlocal0     	
-  			debugfile "parseIntPrime.abs"
-  1         pushscope     	
-  2         getlocal0     	
-  			debugline 9
-  			//  multiname qualified with one namespace.
-  3         finddef       	{package}::parseInt
-  5         pushstring    	"123456789012345"
-  			debugline 12
-  			//  Bare name, in this case
-			//  it will resolve to a QName.
-  7         callproperty  	parseInt (1)
-            dup
-  10        setlocal 1
-  			debugline 15
-  			//  This unqualified name
-			//  must be a multiname;
-			//  the assembler will synthesize a
-			//  {package,private} nsset.
-  12        findpropstrict	print
-            dup
-			setlocal3
-  14        pushstring    	"result = "
-  17        getlocal1
-  19        add           	
-  			debugline 21
-  20        callproperty  	print (1)
+  			debugfile "parseInt.abs"
+			debugline 1
+            getlocal0     	
+            pushscope     	
 
-			//  Print the result's type.
-            getlocal3
-            pushstring "type is "
+  			debugline 9
+
+			findpropstrict START
+			pushstring "call parseInt"
+			callpropvoid START 1
+
+            finddef       	{package}::parseInt
+            pushstring    	"1234567890"
+			callproperty 	parseInt 1
+            setlocal1
+
+			findpropstrict 	PASS
+			pushstring 		"parseInt"
+			callproperty 	PASS 1
+
+			findpropstrict 	END
+			callproperty 	END 0
+
+  			debugline 12
+
+			findpropstrict START
+			pushstring "parseInt value"
+			callpropvoid START 1
+
+			findpropstrict COMPARE_STRICTEQ
+			pushstring "value"
+			pushuint 1234567890
+			getlocal1
+
+			callproperty COMPARE_STRICTEQ 3
+			findpropstrict END
+			callproperty END 0
+			
+
+			findpropstrict START
+			pushstring "typeof the parseInt result"
+			callpropvoid START 1
+
+			findpropstrict COMPARE_STRICTEQ
+			pushstring "Result should be a Number"
+			pushstring "number"
 			getlocal1
 			typeof
-			add
-			callproperty print(1)
-  23        returnvalue   	
+			callproperty COMPARE_STRICTEQ 3
+            returnvoid
 }
