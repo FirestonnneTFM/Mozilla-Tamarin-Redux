@@ -65,6 +65,7 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/GCAllocObjectWin.cpp \
   $(curdir)/GCDebugWin.cpp \
   $(curdir)/GCHeapWin.cpp \
+  $(curdir)/VMPI-windows.cpp \
   $(NULL)
 endif
 

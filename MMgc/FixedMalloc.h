@@ -46,15 +46,13 @@ namespace MMgc
 	 */
 	class MMGC_API FixedMalloc : public GCAllocObject
 	{
-		friend class GC;
+		friend class GCHeap;
 	public:
-		static void Init();
-		static void Destroy();
+		// FixedMalloc is controlled by GCHeap now, these are just API compat stubs
+		static void Init() {}
+		static void Destroy() {}
 
-		static FixedMalloc *GetInstance() { 
-			GCAssert(instance != NULL);
-			return instance;
-		}
+		static FixedMalloc *GetInstance();
 
 		inline void* Alloc(size_t size)
 		{
@@ -94,7 +92,7 @@ namespace MMgc
 			} else {		
 				size = FixedAlloc::Size(item);
 			}
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 			size -= DebugSize();
 #endif
 			return size;
@@ -102,7 +100,7 @@ namespace MMgc
 
 		void *Calloc(size_t num, size_t elsize)
 		{
-			uint64 size = (uint64)num * (uint64)elsize;
+			uint64_t size = (uint64_t)num * (uint64_t)elsize;
 			if(size > 0xfffffff0) 
 			{
 				GCAssertMsg(false, "Attempted allocation overflows size_t\n");
@@ -115,24 +113,16 @@ namespace MMgc
 		size_t GetBytesInUse();
 		
 	private:
-		FixedMalloc(GCHeap* heap);
-		~FixedMalloc();
-		static FixedMalloc *instance;
+		void _Init(GCHeap *heap);
+		void _Destroy();
 #ifdef MMGC_64BIT
 		const static int kLargestAlloc = 2016;	
 #else
 		const static int kLargestAlloc = 2032;	
 #endif
 		const static int kNumSizeClasses = 41;
-#ifdef BROKEN_OFFSETOF
-		// FIXME: quick hack for compiler issue.
-		const static int kPageUsableSpace = GCHeap::kBlockSize - sizeof(MMgc::FixedAlloc::FixedBlock);
-#else
-		const static int kPageUsableSpace = GCHeap::kBlockSize - offsetof(MMgc::FixedAlloc::FixedBlock, items);
-#endif
-
-		const static int16 kSizeClasses[kNumSizeClasses];
-		const static uint8 kSizeClassIndex[32];
+		const static int16_t kSizeClasses[kNumSizeClasses];
+		const static uint8_t kSizeClassIndex[32];
 
 		GCHeap *m_heap;
 		FixedAllocSafe *m_allocs[kNumSizeClasses];	
@@ -144,7 +134,7 @@ namespace MMgc
 		{
 			// space made in ctor
 			item = GetRealPointer(item);
-			return ((uintptr) item & 0xFFF) == 0;
+			return ((uintptr_t) item & 0xFFF) == 0;
 		}
 
 		void *LargeAlloc(size_t size);	

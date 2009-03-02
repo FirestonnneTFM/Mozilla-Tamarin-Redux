@@ -203,16 +203,6 @@
 // #undef verify, a Mac thing
 #undef verify
 
-#ifdef AVMPLUS_MAC
-	#ifdef AVMPLUS_64BIT
-		// 64-bit Mac builds can't use Carbon
-		#define AVMPLUS_MAC_NO_CARBON
-	#endif
-    #if !defined(TARGET_RT_MAC_MACHO) && !defined(AVMPLUS_MAC_NO_CARBON)
-        #define AVMPLUS_MAC_CARBON
-    #endif
-#endif
-
 #ifndef AVMPLUS_UNALIGNED_ACCESS
     #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
         #define AVMPLUS_UNALIGNED_ACCESS

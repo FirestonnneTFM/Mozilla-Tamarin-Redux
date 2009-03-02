@@ -1220,7 +1220,7 @@
 				AdditionalOptions="/Oy-"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;..\..\nanojit;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;MEMORY_PROFILER"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"

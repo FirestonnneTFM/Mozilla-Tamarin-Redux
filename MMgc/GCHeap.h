@@ -41,6 +41,38 @@
 
 namespace MMgc
 {
+	class MMGC_API GCHeapConfig
+	{
+	public:
+		GCHeapConfig() : 
+		initialSize(128), 
+		heapLimit((size_t)-1), 
+		trimVirtualMemory(true),
+		verbose(false),
+		returnMemory(true),
+#ifdef MMGC_MEMORY_PROFILER			
+		enableProfiler(false),
+#endif
+		gcstats(false), // tracking
+		autoGCStats(false) // auto printing
+		{
+#ifdef MMGC_64BIT
+			trimVirtualMemory = false; // no need
+#endif
+		}
+		
+		size_t initialSize;
+		size_t heapLimit;
+		bool trimVirtualMemory;
+		bool verbose;
+		bool returnMemory;
+#ifdef MMGC_MEMORY_PROFILER
+		bool enableProfiler;
+#endif
+		bool gcstats;
+		bool autoGCStats;
+	};
+	
 	/**
 	 * GCHeap is a heap manager for the Flash Player's garbage collector.
 	 *
@@ -87,11 +119,11 @@ namespace MMgc
 		/** Size of a block */
 		const static int kBlockSize = 4096;
 
-		/** Default size of address space reserved per region */
-#ifdef UNDER_CE
-		const static int kDefaultReserve = 512;
-#else
+		/** Default size of address space reserved per region in blocks */
+#ifdef MMGC_64BIT
 		const static int kDefaultReserve = 4096;
+#else
+		const static int kDefaultReserve = 256;
 #endif
 		
 		/** Sizes up to this many blocks each have their own free list. */
@@ -112,21 +144,24 @@ namespace MMgc
 		/** Minimum heap increment, in blocks */
 		const static int kMinHeapIncrement = 32;
 
-		/** if this much of the heap stays free for kDecommitThresholdMillis decommit some memory */
+		/** if this much of the heap is free decommit some memory */
 		const static int kDecommitThresholdPercentage = 25;
-
-		
-		const static int kDecommitThresholdMillis = 1000;
-
-		/** The native VM page size (in bytes) for the current architecture */
-		int kNativePageSize;
-
-		bool heapVerbose;
+		/** if this much of the heap is free un-reserve it */
+		const static int kReleaseThresholdPercentage = 50;
 
 		/**
 		 * Init must be called to set up the GCHeap singleton
 		 */
-		static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128);
+		static void Init(GCHeapConfig& props);
+		/* legacy API */
+		static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128)
+		{
+			(void)malloc;
+			(void)free;
+			GCHeapConfig props;
+			props.initialSize = initialSize;
+			Init(props);
+		}
 
 		/**
 		 * Destroy the GCHeap singleton
@@ -136,7 +171,9 @@ namespace MMgc
 		/**
 		 * Get the GCHeap singleton
 		 */
-		static GCHeap *GetGCHeap() { GCAssert(instance != NULL); return instance; }
+		inline static GCHeap *GetGCHeap() { GCAssert(instance != NULL); return instance; }
+
+		inline FixedMalloc* GetFixedMalloc() { return &fixedMalloc; }
 
 		/**
 		 * Allocates a block from the heap.
@@ -249,21 +286,70 @@ namespace MMgc
 
 		static size_t GetPrivateBytes();
 		
-		void SetHeapLimit(size_t numpages) { heapLimit = numpages; }
+		void SetHeapLimit(size_t numpages) { config.heapLimit = numpages; }
 
-#ifdef MEMORY_PROFILER
+		/* controls whether AllocHook and FreeHook are called */
+		void EnableHooks() { hooksEnabled = true; }
+		bool HooksEnabled() const { return hooksEnabled; }
+		void AllocHook(const void *item, size_t size);
+		// called when object is determined to be garbage but we can't write to it yet
+		void FinalizeHook(const void *item, size_t size);
+		// called when object is really dead and can be poisoned
+		void FreeHook(const void *item, size_t size, int poison);
+		
+		static void ReleaseMemory(char *address, size_t size);
+		
+#ifdef AVMPLUS_JIT_READONLY
+		// SECURITY: setting executeFlag and writeableFlag at the same time is DANGEROUS! 
+		//           Make sure that you know what you are doing!
+		void SetPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
+#endif /* AVMPLUS_JIT_READONLY */
+		
+#ifdef MMGC_USE_VIRTUAL_MEMORY
+		static char *ReserveMemory(char *address, size_t size);
+		static bool CommitMemory(char *address, size_t size);
+		static bool DecommitMemory(char *address, size_t size);
+		
+		static bool CommitMemoryThatMaySpanRegions(char *address, size_t size);
+		static bool DecommitMemoryThatMaySpanRegions(char *address, size_t size);		
+#else
+		static char *AllocateMemory(size_t size);
+#endif
+
+#ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *GetProfiler() { return profiler; }
-		bool IsProfilingEnabled() { return profilerEnabled; }
+		bool IsProfilingEnabled() { return config.enableProfiler; }
 		void DumpFatties() { profiler->DumpFatties(); }
 #endif
+
+		void AddGC(GC *gc);
+		void RemoveGC(GC *gc);
+		void Abort();
+		MemoryStatus GetStatus() { return status; }
+
+		static bool osSupportsRegionMerging();
+
+		/** The native VM page size (in bytes) for the current architecture */
+		static const int kNativePageSize;
+
+		// OS abstraction to determine native page size
+		static uint32_t vmPageSize();
+
+		GCHeapConfig &Config() { return config; }
+
+		void log_percentage(const char *, size_t bytes, size_t relativeTo);
+
+		FILE* GetSpyFile() { return spyFile; }
+
+		void DumpMemoryInfo();
 
 	private:
 
 		// -- Implementation
 		static GCHeap *instance;
-		GCHeap(GCMallocFuncPtr m, GCFreeFuncPtr f, int initialSize);
+		GCHeap(GCHeapConfig &config);
 		~GCHeap();
-		
+
 		// Heap regions
 		class Region : public GCAllocObject
 		{
@@ -287,26 +373,17 @@ namespace MMgc
 			HeapBlock *next;      // next entry on free list
 			bool committed;   // is block fully committed?
 			bool dirty;		  // needs zero'ing, only valid if committed
-#ifdef MEMORY_PROFILER
+#ifdef MMGC_MEMORY_PROFILER
 			StackTrace *allocTrace;
 			StackTrace *freeTrace;
 #endif
-			bool inUse() { return prev == NULL; }
+			bool inUse() const { return prev == NULL; }
+			char *endAddr() const { return baseAddr + size*kBlockSize; }
 		};
 
 		bool ExpandHeapLocked(int size);
 		bool ExpandHeapLockedUnchecked(int size);
 
-		// Core data structures
-		HeapBlock *blocks;
-		unsigned int blocksLen;
-		unsigned int numDecommitted;
-		HeapBlock freelists[kNumFreeLists];
-		unsigned int numAlloc;
-		size_t heapLimit;
-		bool hooksEnabled;
-		bool profilerEnabled;
-		
 		// Core methods
 		void AddToFreeList(HeapBlock *block);
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
@@ -315,26 +392,25 @@ namespace MMgc
 		void FreeAll();
 	
 		HeapBlock *Split(HeapBlock *block, int size);
+		void RemoveBlock(HeapBlock *block);
 
-#ifdef DECOMMIT_MEMORY
 		void Commit(HeapBlock *block);
-#endif
 
 #ifdef _DEBUG
 		friend class GC;
 #endif
+
 		HeapBlock *AddrToBlock(const void *item) const;
 		Region *AddrToRegion(const void *item) const;
 		void RemoveRegion(Region *r);
 
-		// only used on mac
-		GCMallocFuncPtr m_malloc;
-		GCFreeFuncPtr m_free;
-
 		// debug only freelist consistency checks
 		void CheckFreelist();
 		bool BlocksAreContiguous(void *item1, void *item2);
-
+		
+		// textual heap representation, very nice!
+		void DumpHeapRep();
+		
 		// Remove a block from a free list (inlined for speed)
 		inline void RemoveFromList(HeapBlock *block)
 		{
@@ -343,7 +419,6 @@ namespace MMgc
 			block->next->prev = block->prev;
 			block->next = block->prev = 0;
 		}			
-
 
 		// Map a number of blocks to the appropriate large block free list index
 		// (inlined for speed)
@@ -358,60 +433,58 @@ namespace MMgc
 			}
 		}
 
-		// used for decommit smoothing
-		// millis to wait before decommitting anything
-		uint64 decommitTicks;
-		uint64 decommitThresholdTicks;
+		void StatusChangeNotify(MemoryStatus from, MemoryStatus to);
 
-#ifdef GCHEAP_LOCK
+
+		// data section
+	
+		HeapBlock *blocks;
+		unsigned int blocksLen;
+		unsigned int numDecommitted;
+		HeapBlock freelists[kNumFreeLists];
+		unsigned int numAlloc;
+		FixedMalloc fixedMalloc;
+
+#ifdef MMGC_LOCKING
 		GCSpinLock m_spinlock;
-#endif /* GCHEAP_LOCK */
+#endif /* MMGC_LOCKING */
 
-#ifdef MEMORY_PROFILER
-		MemoryProfiler *profiler;
-#endif
+		size_t committedCodeMemory;
 
-#ifdef MMGC_AVMPLUS
-		// OS abstraction to determine native page size
-		int vmPageSize();
+		GCHeapConfig config;
+		
+public:
+		// TODO: remove legacy var, replaced by env var or GCHeapConfig
+		bool enableMemoryProfiling;
 public:
 
-		/* controls whether AllocHook and FreeHook are called */
-		void EnableHooks() { hooksEnabled = true; }
-		bool HooksEnabled() const { return hooksEnabled; }
-		void AllocHook(const void *item, size_t size);
-		// called when object is determined to be garbage but we can't write to it yet
-		void FinalizeHook(const void *item, size_t size);
-		// called when object is really dead and can be poisoned
-		void FreeHook(const void *item, size_t size, int poison);
+	private:
 
-#ifdef AVMPLUS_JIT_READONLY
-		// SECURITY: setting executeFlag and writeableFlag at the same time is DANGEROUS! 
-		//           Make sure that you know what you are doing!
-		void SetPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
-#endif /* AVMPLUS_JIT_READONLY */
-#endif
-
-#ifdef USE_MMAP
-	public:
-		char *ReserveMemory(char *address, size_t size);
-		bool CommitMemory(char *address, size_t size);
-		bool DecommitMemory(char *address, size_t size);
-		static void ReleaseMemory(char *address, size_t size);
-		
-		bool CommitMemoryThatMaySpanRegions(char *address, size_t size);
-		bool DecommitMemoryThatMaySpanRegions(char *address, size_t size);		
-#else
-		char *AllocateMemory(size_t size);
-		void ReleaseMemory(char *address);
-#endif
-	};
-
-#ifdef FEATURE_OOM
 		GCThreadLocal<EnterFrame*> enterFrame;
-	public:
-		void Abort(int reason);
+		friend class EnterFrame;
+		MemoryStatus status;
+		GC **gcs;
+		uint32_t gcs_count;
+
+#ifdef MMGC_MEMORY_PROFILER
+		MemoryProfiler *profiler;
 #endif
+		bool hooksEnabled;
+		uint32_t signal;
+		FILE *spyFile;		
+		
+		// on some OS's we can only free virtual memory as we allocated it (ie region by region)
+		// so don't allow blocks to span regions for those OS's
+		const bool blocksSpanRegions;
+
+		// on OS's where we don't let blocks span regions also search for oldest block to increase 
+		// chances of complete blocks becoming available
+		const bool searchForOldestBlock;
+
+		// some OS's are loose with how with virtual memory is dealt with and we don't have to track
+		// each region individually (ie multiple contiguous mmap's can be munmap'd all at once)
+		const bool mergeContiguousRegions;
+	};
 }
 
 #endif /* __GCHeap__ */

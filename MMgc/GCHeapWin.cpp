@@ -41,7 +41,7 @@
 
 #include "MMgc.h"
 
-#ifdef MEMORY_PROFILER
+#ifdef MMGC_MEMORY_PROFILER
 #include <malloc.h>
 #include <strsafe.h>
 #include <DbgHelp.h>
@@ -50,7 +50,7 @@
 namespace MMgc
 {
 #ifdef MMGC_AVMPLUS
-	int GCHeap::vmPageSize()
+	uint32_t GCHeap::vmPageSize()
 	{
 		SYSTEM_INFO sysinfo;
 		GetSystemInfo(&sysinfo);
@@ -106,7 +106,7 @@ namespace MMgc
 #endif /* AVMPLUS_JIT_READONLY */
 #endif
 
-	#ifdef USE_MMAP
+	#ifdef MMGC_USE_VIRTUAL_MEMORY
 	char* GCHeap::ReserveMemory(char *address,
 								size_t size)
 	{
@@ -184,13 +184,13 @@ namespace MMgc
 		return success;
 	}
 
-	#else // !USE_MMAP
+	#else // !MMGC_USE_VIRTUAL_MEMORY
 	char* GCHeap::AllocateMemory(size_t size)
 	{
 		return (char*)_aligned_malloc(size, kBlockSize);
 	}
 
-	void GCHeap::ReleaseMemory(char *address)
+	void GCHeap::ReleaseMemory(char *address, size_t)
 	{
 		_aligned_free(address);
 	}	
@@ -212,13 +212,13 @@ namespace MMgc
 			if((mib.State & MEM_COMMIT) && (mib.Type & MEM_PRIVATE))
 				bytes += mib.RegionSize;
 
-			addr = (void*) ((sintptr)mib.BaseAddress + mib.RegionSize);
+			addr = (void*) ((intptr_t)mib.BaseAddress + mib.RegionSize);
 		}
 	
 		return bytes / GCHeap::kBlockSize;
 	}
 
-#ifdef MEMORY_PROFILER
+#ifdef MMGC_MEMORY_PROFILER
 
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -499,5 +499,10 @@ nosym:
 		StringCchPrintfA(buff, buffSize, "0x%x", pc);
 	}
 
-#endif // MEMORY_PROFILER
+#endif // MMGC_MEMORY_PROFILER
+  
+	bool GCHeap::osSupportsRegionMerging()
+	{
+		return false;
+	}
 }

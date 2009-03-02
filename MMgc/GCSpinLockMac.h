@@ -39,21 +39,12 @@
 #ifndef __GCSpinLock__
 #define __GCSpinLock__
 
-#ifdef __GNUC__
-    #if !defined(MMGC_MAC_NO_CORE_SERVICES)
-        #include <CoreServices/CoreServices.h>
-    #endif
-#else // __GNUC__
-#include <Multiprocessing.h>
-#endif // __GNUC__
-
-#if TARGET_RT_MAC_MACHO
+// works going back to 10.1
 extern "C"
 {
 extern void _spin_lock(uint32_t *);
 extern void _spin_unlock(uint32_t *);
 }
-#endif
 
 namespace MMgc
 {
@@ -68,49 +59,26 @@ namespace MMgc
 	public:
 		GCSpinLock()
 		{
-#if TARGET_RT_MAC_MACHO
 			m1 = 0;
-#else
-			OSStatus critErr = ::MPCreateCriticalRegion( &mCriticalRegion );
-			GCAssert( critErr == noErr );
-#endif
 		}
 	
 		~GCSpinLock()
 		{
-#if !TARGET_RT_MAC_MACHO
-			OSStatus critErr = ::MPDeleteCriticalRegion( mCriticalRegion );
-			GCAssert( critErr == noErr );
-#endif
 		}
 
 		inline void Acquire()
 		{
-#if TARGET_RT_MAC_MACHO
 			_spin_lock(&m1);
-#else
-			OSStatus critErr = ::MPEnterCriticalRegion( mCriticalRegion, kDurationForever );
-			GCAssert( critErr == noErr );
-#endif
 		}
 		
 		inline void Release()
 		{
-#if TARGET_RT_MAC_MACHO
 			_spin_unlock(&m1);
-#else
-			OSStatus critErr = ::MPExitCriticalRegion( mCriticalRegion );
-			GCAssert( critErr == noErr );
-#endif
 		}
 
 	private:
 
-#if TARGET_RT_MAC_MACHO
 		uint32_t m1;
-#else
-		MPCriticalRegionID  mCriticalRegion;
-#endif
 	};
 
 	/**

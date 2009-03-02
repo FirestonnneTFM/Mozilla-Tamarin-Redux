@@ -88,15 +88,6 @@ return foo[0];
 #endif
 
 #elif defined AVMPLUS_MAC
-#if !TARGET_RT_MAC_MACHO
-// CodeWarrior makes us jump through some hoops
-// to dereference pointer->method...
-// Convert pointer->method to integer for Carbon.
-#define RETURN_METHOD_PTR(_class, _method) \
-int foo; \
-asm("lwz %0,0(r5)" : "=r" (foo)); \
-return foo;
-#else
 #define RETURN_METHOD_PTR(_class, _method) \
 union { \
     int (_class::*bar)(); \
@@ -104,8 +95,6 @@ union { \
 }; \
 bar = _method; \
 return foo;
-#endif
-
 #else
 #define RETURN_METHOD_PTR(_class, _method) \
 return *((intptr_t*)&_method);
@@ -127,15 +116,6 @@ return foo[1];
 #endif
 
 #elif defined AVMPLUS_MAC
-#if !TARGET_RT_MAC_MACHO
-// CodeWarrior makes us jump through some hoops
-// to dereference pointer->method...
-// Convert pointer->method to integer for Carbon.
-#define RETURN_VOID_METHOD_PTR(_class, _method) \
-int foo; \
-asm("lwz %0,0(r5)" : "=r" (foo)); \
-return foo;
-#else
 #define RETURN_VOID_METHOD_PTR(_class, _method) \
 union { \
     void (_class::*bar)(); \
@@ -143,8 +123,6 @@ union { \
 }; \
 bar = _method; \
 return foo;
-#endif
-
 #else
 #define RETURN_VOID_METHOD_PTR(_class, _method) \
 return *((intptr_t*)&_method);
@@ -183,16 +161,7 @@ namespace avmplus
 		#define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
 		#define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
 		#define CLASSCLOSUREADDR(f)   classClosureAddr((int (ClassClosure::*)())(&f))
-
-	#ifndef AVMPLUS_MAC
 		#define FUNCADDR(addr) (uintptr)addr
-	#else
-		#if TARGET_RT_MAC_MACHO
-			#define FUNCADDR(addr) (uintptr)addr
-		#else
-			#define FUNCADDR(addr) (*((uintptr*)addr))	
-		#endif
-	#endif
 
    #ifdef VTUNE
        extern void VTune_RegisterMethod(AvmCore* core, JITCodeInfo* inf);
@@ -2777,12 +2746,6 @@ namespace avmplus
 		// set
         // use localCopy() to sniff the type and use ldq if it's Number
 		LIns* value = localCopy(sp);					
-
-		#if !defined WRITE_BARRIERS || !defined MMGC_DRC
-			#error "untested in years"
-		#endif
-
-		// the following code assumes WRITE_BARRIERS and MMGC_DRC are enabled
 
 		// if storing to a pointer-typed slot, inline a WB
 		Traits* slotType = tb->getSlotTraits(slot);

@@ -3968,7 +3968,6 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-#ifdef MMGC_DRC
 	/*static*/ 
 	void AvmCore::decrementAtomRegion(Atom *arr, int length)
 	{
@@ -3988,12 +3987,10 @@ return the result of the comparison ToPrimitive(x) == y.
 			arr[i] = 0;
 		}
 	}
-#endif
 
 	/*static*/ 
 	void AvmCore::atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
 	{ 
-#ifdef MMGC_DRC
 		Atom atom = *address;
 		if(!isNull(atom)) {
 			switch(atom&7)
@@ -4006,18 +4003,15 @@ return the result of the comparison ToPrimitive(x) == y.
 					break;
 			}
 		}
-#endif
 
 		switch(atomNew&7)
 		{
 		case kStringType:
 		case kObjectType:
 		case kNamespaceType:
-#ifdef MMGC_DRC
 			if(!isNull(atomNew))
 				((MMgc::RCObject*)(atomNew&~7))->IncrementRef();
 			// fall through
-#endif
 		case kDoubleType:
 			{
 				gc->WriteBarrierNoSubstitute(container, (const void*)atomNew);
@@ -4174,4 +4168,10 @@ return the result of the comparison ToPrimitive(x) == y.
 		} while (verified > 0);
 	}
 #endif
+
+	void AvmCore::oom(MemoryStatus)
+	{
+		// on kReserve ditch native pages and switch from JIT to interpreter
+		// on kEmpty ditch WORDCODE and switch to abc interpreter
+	}
 }

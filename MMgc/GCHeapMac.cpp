@@ -42,13 +42,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef MEMORY_PROFILER
+#ifdef MMGC_MEMORY_PROFILER
 #include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #endif
 
-#ifdef USE_MMAP
+#ifdef MMGC_USE_VIRTUAL_MEMORY
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -64,7 +64,9 @@
 
 namespace MMgc
 {
-#ifndef USE_MMAP
+		static const int kOSX105=9;
+		
+#ifndef MMGC_USE_VIRTUAL_MEMORY
 	void *aligned_malloc(size_t size, size_t align_size, GCMallocFuncPtr m_malloc)
 	{
 		char *ptr, *ptr2, *aligned_ptr;
@@ -90,31 +92,9 @@ namespace MMgc
 		char *unaligned_ptr = (char*) ptr - *ptr2;
 		m_free(unaligned_ptr);
 	}
-#endif /* !USE_MMAP */
+#endif /* !MMGC_USE_VIRTUAL_MEMORY */
 
-#ifdef MMGC_AVMPLUS
-#ifdef USE_MMAP
-	static int get_major_version()
-	{
-		int mib[2];
-		mib[0]=CTL_KERN;
-		mib[1]=KERN_OSRELEASE;
-		char buf[10];
-		size_t siz=sizeof(buf);
-		sysctl(mib, 2, &buf, &siz, NULL, 0);
-		return strtol(buf, 0, 10);
-	}
-
-    static int get_mmap_fdes(int delta)
-	{
-	  // ensure runtime version
-	  if(get_major_version() >= 9) // 9 == 10.5
-		  return VM_MAKE_TAG(VM_MEMORY_APPLICATION_SPECIFIC_1+delta);
-	  else
-		  return -1;
-	}
-
-	int GCHeap::vmPageSize()
+	uint32_t GCHeap::vmPageSize()
 	{
 		long v = sysconf(_SC_PAGESIZE);
 		if (v == -1) v = 4096; // Mac 10.1 needs this
@@ -155,26 +135,28 @@ namespace MMgc
 		(void)retval;
 	}
 #endif /* AVMPLUS_JIT_READONLY */
-	
-#else
-	int GCHeap::vmPageSize()
-	{
-		return 4096;
-	}
 
-#ifdef AVMPLUS_JIT_READONLY
-	void GCHeap::SetExecuteBit(void *,
-							   size_t ,
-							   bool )
+#ifdef MMGC_USE_VIRTUAL_MEMORY
+	static int get_major_version()
 	{
-		// No-op on Mac CFM
+		int mib[2];
+		mib[0]=CTL_KERN;
+		mib[1]=KERN_OSRELEASE;
+		char buf[10];
+		size_t siz=sizeof(buf);
+		sysctl(mib, 2, &buf, &siz, NULL, 0);
+		return strtol(buf, 0, 10);
 	}
-#endif /* AVMPLUS_JIT_READONLY */
 	
-#endif /* USE_MMAP */	
-#endif /* MMGC_AVMPLUS */
-
-#ifdef USE_MMAP
+    static int get_mmap_fdes(int delta)
+	{
+		// ensure runtime version
+		if(get_major_version() >= kOSX105)
+			return VM_MAKE_TAG(VM_MEMORY_APPLICATION_SPECIFIC_1+delta);
+		else
+			return -1;
+	}
+		
 	char* GCHeap::ReserveMemory(char *address, size_t size)
 	{
 		char *addr = (char*)mmap(address,
@@ -196,17 +178,24 @@ namespace MMgc
 
 	bool GCHeap::CommitMemory(char *address, size_t size)
 	{
-		int res = mprotect (address, size, PROT_READ | PROT_WRITE);
-		GCAssert(res == 0);
-		return (res == 0);
+		char *got = (char*)mmap(address,
+					 size,
+				   PROT_READ | PROT_WRITE,
+					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+					 get_mmap_fdes(0), 0);
+		GCAssert(got == address);
+		return (got == address);
 	}
 
 	bool GCHeap::DecommitMemory(char *address, size_t size)
 	{
-		// FIXME: this doesn't actually untie the pages from real memory
-		int res = mprotect (address, size, PROT_NONE);
-		GCAssert(res == 0);
-		return (res == 0);
+		kern_return_t result = vm_deallocate(mach_task_self(), (vm_address_t)address, size);
+		if(result == KERN_SUCCESS) 
+		{
+			result = vm_map(mach_task_self(), (vm_address_t*)&address, size, 0, FALSE, MEMORY_OBJECT_NULL, 0, FALSE, VM_PROT_NONE, VM_PROT_READ|VM_PROT_WRITE|VM_PROT_EXECUTE, VM_INHERIT_NONE);
+		}
+		GCAssert(result == KERN_SUCCESS);
+		return (result == KERN_SUCCESS);
 	}
 
 	bool GCHeap::CommitMemoryThatMaySpanRegions(char *address, size_t size)
@@ -240,7 +229,7 @@ namespace MMgc
 	}
 #endif
 
-#ifdef MEMORY_PROFILER
+#ifdef MMGC_MEMORY_PROFILER
 	
 	void GetFunctionName(uintptr_t pc, char *buff, int buffSize)
 	{
@@ -323,5 +312,18 @@ namespace MMgc
 			private_bytes += info.private_pages_resident;
 		}
 		return private_bytes;
+	}
+
+	bool GCHeap::osSupportsRegionMerging()
+	{
+#ifdef MMGC_64BIT		
+		return true;
+#else
+		// this would be nice to keep the region list short but
+		// doing so would require additional work to perform de-reserve (region splitting), when
+		// that happens turn this back on for 10 5 and up, turning it on effectively disables de-reserve
+		// which is why its on for 64 bit (we're we never de-reserve)
+		return false;//get_major_version() >= kOSX105;
+#endif
 	}
 }

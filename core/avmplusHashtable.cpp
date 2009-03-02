@@ -76,9 +76,7 @@ namespace avmplus
 	{
 		if(atoms) {
 			GC *gc = GC::GetGC(atoms);
-#ifdef MMGC_DRC
 			AvmCore::decrementAtomRegion(atoms, getNumAtoms());
-#endif
 			gc->Free (atoms);
 		}
 		atoms = NULL;

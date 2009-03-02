@@ -67,10 +67,8 @@ namespace avmplus
 
 	ScriptObject::~ScriptObject()
 	{
-#ifdef MMGC_DRC
 		setDelegate(NULL);
 		vtable->traits->destroyInstance(this);
-#endif
 	}
 	
     /**
