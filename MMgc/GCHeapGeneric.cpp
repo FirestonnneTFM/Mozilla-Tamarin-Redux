@@ -110,7 +110,7 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 #endif
 	}
 
-	void GCHeap::ReleaseMemory(char *address)
+	void GCHeap::ReleaseMemory(char *address, size_t)
 	{
 #ifdef MEASURE_MEMORY_HIGHWATER
 		ChunkTracker::s_blocks--;

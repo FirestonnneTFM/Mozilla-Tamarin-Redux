@@ -43,9 +43,9 @@
 #endif
 
 /**
- * Critical section on GCHeap allocations.
+ * Critical sections needed 
  */
-#define GCHEAP_LOCK
+#define MMGC_LOCKING
 
 /**
  * IA-32
@@ -76,12 +76,6 @@
 #endif
 
 /**
- * This turns on incremental collection as well as all of
- * the write barriers.
- */
-#define WRITE_BARRIERS
-
-/**
  * Define this if MMgc is being integrated with avmplus.
  * Activates dynamic profiling support, etc.
  */
@@ -90,18 +84,7 @@
 /**
  * Use VirtualAlloc to reserve/commit memory
  */
-#define USE_MMAP
-
-/**
- *
- */
-#define DECOMMIT_MEMORY
-
-/**
- * Controls whether DRC is in use
- */
-
-#define MMGC_DRC
+#define MMGC_USE_VIRTUAL_MEMORY
 
 /**
  * This makes JIT code buffers read-only to reduce the probability of

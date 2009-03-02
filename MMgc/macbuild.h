@@ -47,7 +47,7 @@
 /**
  * Critical section on GCHeap allocations.
  */
-#define GCHEAP_LOCK
+#define MMGC_LOCKING
 
 /**
  * PowerPC (MacOS)
@@ -70,14 +70,8 @@
  * Define this to get stack traces.  Helps with memory leaks.
  */
 #ifdef DEBUG
-#define MEMORY_INFO
+#define MMGC_MEMORY_INFO
 #endif
-
-/**
- * This turns on incremental collection as well as all of
- * the write barriers.
- */
-#define WRITE_BARRIERS
 
 /**
  * Define this if MMgc is being integrated with avmplus.
@@ -86,20 +80,10 @@
 #define MMGC_AVMPLUS
 
 /**
- *
+ * MMGC_USE_VIRTUAL_MEMORY only for MACHO builds
  */
-#define DECOMMIT_MEMORY
+#define MMGC_USE_VIRTUAL_MEMORY
 
-/**
- * USE_MMAP only for MACHO builds
- */
-#if TARGET_RT_MAC_MACHO
-#ifndef USE_MMAP
-#define USE_MMAP
-#endif
-#endif
-
-#define MMGC_DRC
 
 /**
  * This makes JIT code buffers read-only to reduce the probability of
@@ -107,9 +91,5 @@
  */
 #define AVMPLUS_JIT_READONLY
 
-#define HAVE_PTHREADS
-#define HAVE_STDARG
-
-#ifdef MMGC_64BIT
-#define MMGC_MAC_NO_CORE_SERVICES
-#endif
+#define MMGC_HAVE_PTHREAD_H
+#define MMGC_HAVE_STDARG_H

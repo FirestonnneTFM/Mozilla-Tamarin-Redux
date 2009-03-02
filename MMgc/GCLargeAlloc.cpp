@@ -128,7 +128,7 @@ namespace MMgc
 					GCFinalizable *obj = (GCFinalizable *) item;
 					obj = (GCFinalizable *) GetUserPointer(obj);
 					obj->~GCFinalizable();
-#if defined(_DEBUG) && defined(MMGC_DRC)
+#if defined(_DEBUG)
 					if((b->flags & kRCObject) != 0) {
 						b->gc->RCObjectZeroCheck((RCObject*)obj);
 					}
@@ -161,7 +161,7 @@ namespace MMgc
 	/* static */
 	bool GCLargeAlloc::ConservativeGetMark(const void *item, bool bogusPointerReturnValue)
 	{
-		if(((uintptr) item & 0xfff) == sizeof(LargeBlock))
+		if(((uintptr_t) item & 0xfff) == sizeof(LargeBlock))
 		{
 			return GetMark(item);
 		}

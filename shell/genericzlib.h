@@ -40,6 +40,8 @@
 #ifndef GENERIC_ZLIB_H
 #define GENERIC_ZLIB_H
 
+#include "zlib.h"
+
 namespace avmshell
 {
 	
@@ -47,7 +49,7 @@ namespace avmshell
 #ifndef PLAYERASSERT
 #define PLAYERASSERT AvmAssert
 #endif
-#include "zlib.h"
+
 
 
 inline bool PlatformZlibInflate(

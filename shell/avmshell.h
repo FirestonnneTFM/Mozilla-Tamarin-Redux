@@ -88,7 +88,12 @@ namespace avmplus
 }
 
 namespace avmshell
-{
+{ 
+	// exit codes
+	enum {
+		OUT_OF_MEMORY = 128,
+	};
+	
 	class ShellCodeContext : public CodeContext
 	{
 	  public:

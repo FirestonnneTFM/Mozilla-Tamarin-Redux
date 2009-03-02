@@ -54,16 +54,11 @@
 #define MAP_ANONYMOUS MAP_ANON
 #endif // !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 
-#if defined(MEMORY_INFO) && defined(AVMPLUS_UNIX)
+#if defined(MMGC_MEMORY_INFO) && defined(AVMPLUS_UNIX)
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
 #include <dlfcn.h>
-#endif
-
-// avmplus standalone uses UNIX  
-#ifdef _MAC
-#define MAP_ANONYMOUS MAP_ANON
 #endif
 
 #ifdef SOLARIS
@@ -81,7 +76,7 @@ typedef void *maddr_ptr;
 
 namespace MMgc
 {
-#ifndef USE_MMAP
+#ifndef MMGC_USE_VIRTUAL_MEMORY
 	void *aligned_malloc(size_t size, size_t align_size, GCMallocFuncPtr m_malloc)
 	{
 		char *ptr, *ptr2, *aligned_ptr;
@@ -107,15 +102,7 @@ namespace MMgc
 		char *unaligned_ptr = (char*) ptr - *ptr2;
 		m_free(unaligned_ptr);
 	}
-#endif /* !USE_MMAP */
-
-#ifdef USE_MMAP
-	int GCHeap::vmPageSize()
-	{
-		long v = sysconf(_SC_PAGESIZE);
-		return v;
-	}
-#endif /* USE_MMAP */
+#endif /* !MMGC_USE_VIRTUAL_MEMORY */
 
 #ifdef AVMPLUS_JIT_READONLY
 	/**
@@ -158,20 +145,19 @@ namespace MMgc
 	}
 #endif /* AVMPLUS_JIT_READONLY */
 	
-#ifdef USE_MMAP
-#else
-	int GCHeap::vmPageSize()
+	uint32_t GCHeap::vmPageSize()
 	{
-		return 4096;
+		long v = sysconf(_SC_PAGESIZE);
+		return v;
 	}
-#endif /* USE_MMAP */	
 
-#ifdef USE_MMAP
+#ifdef MMGC_USE_VIRTUAL_MEMORY
+
 	char* GCHeap::ReserveMemory(char *address, size_t size)
 	{
 		char *addr = (char*)mmap((maddr_ptr)address,
 					 size,
-					 PROT_READ | PROT_WRITE,
+					 PROT_NONE,
 					 MAP_PRIVATE | MAP_ANONYMOUS,
 					 -1, 0);
 		if (addr == MAP_FAILED) {
@@ -190,7 +176,7 @@ namespace MMgc
 		char *addr = (char*)mmap(address,
 					size,
 					PROT_READ | PROT_WRITE,
-			                MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
+    				 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
 					-1, 0);
 		GCAssert(addr == address);
 		char* temp_addr = addr;
@@ -240,14 +226,14 @@ namespace MMgc
 		return (char *) aligned_malloc(size, 4096, m_malloc);
 	}
 
-	void GCHeap::ReleaseMemory(char *address)
+	void GCHeap::ReleaseMemory(char *address, size_t)
 	{
 		aligned_free(address, m_free);
 	}	
 #endif
 
 
-#ifdef MEMORY_INFO  
+#ifdef MMGC_MEMORY_INFO  
 	void GetInfoFromPC(int pc, char *buff, int /*buffSize*/) 
 	{
 #ifdef AVMPLUS_UNIX
@@ -342,16 +328,16 @@ namespace MMgc
 	size_t GCHeap::GetPrivateBytes() 
 	{
 #ifdef LINUX
-		uint32 pid = getpid();
+		uint32_t pid = getpid();
 		char buff[32];
 		VMPI_sprintf(buff, "/proc/%d/smaps", pid);
 		int smap_hndl = open(buff, O_RDONLY);
 		size_t priv_bytes = 0;
 		if( smap_hndl != -1 )
 		{
-			uint32 state = state_newline;
+			uint32_t state = state_newline;
 			char size_buff[16];
-			uint32 size_idx = 0;
+			uint32_t size_idx = 0;
 			int read_size = 0;
 			while( (read_size = read(smap_hndl, buff, 32)) )
 			{
@@ -404,8 +390,8 @@ namespace MMgc
 						{
 							size_buff[size_idx] = 0;
 							size_idx = 0;
-							uint32 size = VMPI_atoi(size_buff)*1024;
-							uint32 blocks = size/GCHeap::kBlockSize;
+							uint32_t size = VMPI_atoi(size_buff)*1024;
+							uint32_t blocks = size/GCHeap::kBlockSize;
 							if( size % GCHeap::kBlockSize != 0 )
 								++blocks;
 							priv_bytes += blocks;
@@ -470,5 +456,10 @@ again:
 #else
 	return 0;
 #endif
+	}
+
+	bool GCHeap::osSupportsRegionMerging()
+	{
+		return true;
 	}
 }

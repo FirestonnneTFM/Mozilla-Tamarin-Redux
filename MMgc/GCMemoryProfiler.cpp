@@ -38,16 +38,16 @@
 
 #include "MMgc.h"
 
-#if defined(MEMORY_INFO) || defined(MEMORY_PROFILER)
+#if defined(MMGC_MEMORY_INFO) || defined(MMGC_MEMORY_PROFILER)
 
 namespace MMgc
 {
 
-#ifdef MEMORY_PROFILER
+#ifdef MMGC_MEMORY_PROFILER
 	// increase this to get more info
 	const int kMaxStackTrace = 16; // RtlCaptureStackBackTrace stops working when this is 32
 	const int kNumTypes = 10;
-	const int kNumTracesPerType = 10;
+	const int kNumTracesPerType = 5;
 
 	// include total and swept memory totals in memory profiling dumps as opposed to just "live"
 	const bool showTotal = false;	
@@ -81,6 +81,13 @@ namespace MMgc
 	// print stack trace of caller
 	void DumpStackTrace(int skip=1);
 
+	MemoryProfiler::MemoryProfiler() : 
+		traceTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
+		stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
+		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS)
+	{
+	}
+
 	MemoryProfiler::~MemoryProfiler()
 	{
 		GCHashtableIterator traceIter(&stackTraceMap);
@@ -93,7 +100,7 @@ namespace MMgc
 		GCHashtableIterator nameIter(&nameTable);
 		while((obj = nameIter.nextKey()) != NULL)
 		{
-			free((void*)obj);			
+			free((void*)nameIter.value());			
 		}
 	}
 
@@ -163,7 +170,7 @@ namespace MMgc
 	}
 
 	void MemoryProfiler::Alloc(const void *item, size_t size)
-	{		
+	{
 		StackTrace *trace = GetStackTrace();
 		traceTable.put(item, trace);
 
@@ -180,7 +187,7 @@ namespace MMgc
 
 	void MemoryProfiler::Free(const void *item, size_t size)
 	{
-		StackTrace *trace = (StackTrace*)traceTable.remove(item);
+		StackTrace *trace = (StackTrace*)traceTable.get(item);
 
 		ChangeSize(trace, -1 * int(size));
 		// FIXME: how to know this is a sweep?
@@ -276,6 +283,8 @@ namespace MMgc
 		size_t residentCount=0;
 		size_t packageCount=0;
 
+		FILE *out = GCHeap::GetGCHeap()->GetSpyFile();
+
 		// rip through all allocation sites and sort into package and categories
 		GCHashtableIterator iter(&stackTraceMap);
 		const void *obj;
@@ -353,7 +362,7 @@ namespace MMgc
 			}				
 		}
 
-		fprintf(stdout, "\n\nMemory allocation report for %u allocations, totaling %u kb (%u ave) across %u packages\n", residentCount, residentSize>>10, residentSize / residentCount, packageCount);
+		fprintf(out, "\n\nMemory allocation report for %u allocations, totaling %u kb (%u ave) across %u packages\n", residentCount, residentSize>>10, residentSize / residentCount, packageCount);
 		for(unsigned i=0; i<packageCount; i++)
 		{
 			PackageGroup* pg = packages[i];
@@ -387,7 +396,7 @@ namespace MMgc
 				}			
 			}
 			
-			fprintf(stdout, "%s - %3.1f%% - %u kb %u items, avg %u b\n", pg->name, PERCENT(residentSize, pg->size),  (unsigned int)pg->size>>10, pg->count, (unsigned int)(pg->count ? pg->size/pg->count : 0));
+			fprintf(out, "%s - %3.1f%% - %u kb %u items, avg %u b\n", pg->name, PERCENT(residentSize, pg->size),  (unsigned int)pg->size>>10, pg->count, (unsigned int)(pg->count ? pg->size/pg->count : 0));
 				
 			// result capping
 			if(numTypes > kNumTypes)
@@ -398,7 +407,7 @@ namespace MMgc
 				CategoryGroup *tg = residentFatties[i];
 				if(!tg) 
 					break;
-				fprintf(stdout, "\t%s - %3.1f%% - %u kb %u items, avg %u b\n", tg->name, PERCENT(residentSize, tg->size), (unsigned int)tg->size>>10, tg->count, (unsigned int)(tg->count ? tg->size/tg->count : 0));
+				fprintf(out, "\t%s - %3.1f%% - %u kb %u items, avg %u b\n", tg->name, PERCENT(residentSize, tg->size), (unsigned int)tg->size>>10, tg->count, (unsigned int)(tg->count ? tg->size/tg->count : 0));
 				for(int j=0; j < kNumTracesPerType; j++) {
 					StackTrace *trace = tg->traces[j];
 					if(trace) {
@@ -411,7 +420,7 @@ namespace MMgc
 							size = trace->totalSize;
 							count = trace->totalCount;
 						}
-						fprintf(stdout,"\t\t %3.1f%% - %u kb - %u items - ", PERCENT(tg->size, size), size>>10, count);
+						fprintf(out,"\t\t %3.1f%% - %u kb - %u items - ", PERCENT(tg->size, size), size>>10, count);
 						PrintStackTraceByTrace(trace);
 					}
 				}
@@ -436,6 +445,7 @@ namespace MMgc
 	}
 	void SetMemType(const void *s)
 	{
+		GCAssert(GC::GetGC(s)->IsGCMemory(s));
 		if(memtype == NULL)
 			memtype = s;
 	}
@@ -467,7 +477,7 @@ namespace MMgc
 		*tp++ = '\n';
 		*tp = '\0';
 
-		fputs(out, stdout);
+		fputs(out, GCHeap::GetGCHeap()->GetSpyFile());
 	}
 
 	void PrintStackTraceByTrace(StackTrace *trace)
@@ -526,7 +536,7 @@ namespace MMgc
 #endif
 
 
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 
 // end user servicable parts
  
@@ -588,7 +598,7 @@ namespace MMgc
 		if(size == 0)
 			return;
 
-		if (*endMarker != (int32)0xdeadbeef)
+		if (*endMarker != (int32_t)0xdeadbeef)
 		{
 			// if you get here, you have a buffer overrun.  The stack trace about to
 			// be printed tells you where the block was allocated from.  To find the
@@ -609,8 +619,8 @@ namespace MMgc
 		DebugFreeHelper(item, poison, size);
 		return (void*)item;
 	}
-#endif // defined MEMORY_INFO
+#endif // defined MMGC_MEMORY_INFO
 
 } // namespace MMgc
 
-#endif // defined(MEMORY_INFO) || defined(MEMORY_PROFILER)
+#endif // defined(MMGC_MEMORY_INFO) || defined(MMGC_MEMORY_PROFILER)

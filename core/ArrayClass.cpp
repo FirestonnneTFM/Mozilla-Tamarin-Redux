@@ -80,7 +80,7 @@ namespace avmplus
 		// NOT generic: toString, toLocaleString
 		// unknown: sortOn (our own extension)
 
-#if defined(MMGC_DRC) && defined(_DEBUG)
+#if defined(_DEBUG)
 
 		// AtomArray DRC unit tests, put here b/c this always runs once, has a GC * and
 		// this class has to do with arrays.  this is more convienent that trying to test
