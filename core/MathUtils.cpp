@@ -38,6 +38,15 @@
 #include "avmplus.h"
 #include "BigInteger.h"
 
+//on solairs gcc at least infinity and nan are not defined
+#if defined(__GNUC__)
+# if !defined(INFINITY)
+#  define INFINITY __builtin_inf()
+# endif
+# if !defined(NAN)
+#  define NAN acosh(0)
+# endif
+#endif
 
 //GCC only allows intrinsics if sse2 is enabled
 #if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
