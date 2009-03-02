@@ -39,9 +39,9 @@
 using namespace MMgc;
 
 #ifdef DARWIN
-    #if defined(AVMPLUS_MAC_CARBON)
+//    #if defined(AVMPLUS_MAC_CARBON)
 		#include <Carbon/Carbon.h>
-	#endif
+//	#endif
 #endif
 
 #ifdef AVMPLUS_ROSETTA

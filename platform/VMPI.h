@@ -75,6 +75,7 @@
 #define VMPI_ispunct ispunct	
 #define VMPI_iscntrl iscntrl	
 #define VMPI_isalpha isalpha
+#define VMPI_abort   abort
 
 #include <stddef.h>
 #include <string.h>
@@ -111,6 +112,12 @@
 	#else
 		#include <inttypes.h>
 	#endif
+
+        #ifdef UNDER_CE
+		#undef VMPI_abort
+                #define VMPI_abort() TerminateProcess(GetCurrentProcess(), 0)
+        #endif
+
 #endif /* WIN32 */
 
 #if defined (AVMPLUS_SYMBIAN)
@@ -140,6 +147,8 @@
 #endif /* SOLARIS */
 
 // legacy types
+namespace avmplus
+{
 typedef int64_t		int64;
 typedef int64_t		sint64;
 typedef uint64_t	uint64;
@@ -158,9 +167,17 @@ typedef uintptr_t	uintptr;
 typedef intptr_t	sintptr;
 
 typedef uint8_t		byte;
-
+};
 /* wchar is our version of wchar_t, since wchar_t is different sizes
  on different platforms, but we want to use UTF-16 uniformly. */
 typedef uint16_t wchar;
+
+// not ported or needed elsewhere (yet!)
+#ifdef WIN32
+void VMPI_WriteOnNamedSignal(const char *name, uint32_t *addr);
+void *VMPI_OpenAndConnectToNamedPipe(const char *pipe);
+FILE *VMPI_HandleToStream(void *handle);
+void VMPI_CloseNamedPipe(void *handle);
+#endif
 
 #endif /* __avmplus_VMPI__ */

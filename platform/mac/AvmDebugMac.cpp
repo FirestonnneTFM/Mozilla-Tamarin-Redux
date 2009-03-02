@@ -42,12 +42,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-#ifdef MEMORY_CHECK
-#include <malloc.h>
-#include <DbgHelp.h>
-#include <strsafe.h>
-#endif
-
 #if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
 	void AVMPlusCustomDebugMessageHandler(const char *message);
 #endif
@@ -76,29 +70,11 @@ namespace avmplus
 #ifdef _DEBUG
         #if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
             AVMPlusCustomDebugMessageHandler(p);
-			if (debugBreak)
-				abort();
-		#elif defined(MMGC_MAC_NO_CORE_SERVICES)
-			fprintf(stderr, "%s\n", p);
-			if (debugBreak)
-				abort();
 		#else
-	  	    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
-
-			if(debugBreak)
-			{
-				Str255 buf;
-				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
-				DebugStr(buf);
-				abort();	// ensure we die
-			}
-			else
-			{
-				::CFShow(cfStr);
-			}
-		
-			::CFRelease (cfStr);
+			fprintf(stderr, "%s\n", p);
 		#endif
+			if (debugBreak)
+				abort();
 #else
 		(void)p;
 		(void)debugBreak;

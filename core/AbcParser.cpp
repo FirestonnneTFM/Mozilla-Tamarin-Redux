@@ -1086,11 +1086,10 @@ namespace avmplus
 			// until then, it's not safe.
 			Stringp s = core->internStringUTF8((const char*)pos, len);
 
-#ifdef MMGC_DRC
 			// Jit skips WB on string constants so make them sticky
 			// fixme -- it's incorrect to skip WB's on const's, bug was fixed; is this still required?
 			s->Stick();
-#endif
+
 			cpool_string.set(i, s);
 			pos += len;
 

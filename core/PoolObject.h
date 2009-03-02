@@ -57,10 +57,11 @@ namespace avmplus
 	class PrecomputedMultinames : public MMgc::GCRoot
 	{
 	public:
-        void *operator new(size_t size, size_t extra=0)
-        {
+		void *operator new(size_t size, size_t extra=0)
+		{
+			// 	GCRoot requires this allocation to come from FixedMalloc 
 			return MMgc::FixedMalloc::GetInstance()->Alloc(size+extra);
-        }
+		}
 
 		PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool);		
 		~PrecomputedMultinames();

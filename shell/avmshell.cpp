@@ -78,65 +78,9 @@ bool P4Available();
     void AVMShellWillBeginTest(const char *filename);
 #endif
 
-static MMgc::FixedMalloc* fm = NULL;
-
-#ifndef OVERRIDE_GLOBAL_NEW
-// Custom new and delete operators
-// User-defined operator new.
-
-PRIVATE void *operator new(size_t size)
-{
-	// 10.5 calls new before main
-	if (!fm)
-	{
-		MMgc::GCHeap::Init();
-		MMgc::FixedMalloc::Init();
-
-		fm = MMgc::FixedMalloc::GetInstance();
-	}
-
-    return fm->Alloc(size);
-}
-
-PRIVATE void *operator new[](size_t size)
-{
-	// 10.5 calls new before main
-	if (!fm)
-	{
-		MMgc::GCHeap::Init();
-		MMgc::FixedMalloc::Init();
-
-		fm = MMgc::FixedMalloc::GetInstance();
-	}
-
-    return fm->Alloc(size);
-}
-
-// User-defined operator delete.
-#ifdef _MAC
-	// CW9 wants the C++ official prototype, which means we must have an empty exceptions list for throw.
-	// (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
-	void operator delete( void *p) throw()
-#else
-PRIVATE	void operator delete( void *p)
-#endif
-	{
-		if (fm)
-			fm->Free(p);
-	}
-
-#ifdef _MAC
-    // CW9 wants the C++ official prototype, which means we must have an empty exceptions list for throw.
-    // (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
-    void operator delete[]( void *p) throw()
-#else
-PRIVATE void operator delete[]( void *p )
-#endif
-    {
-		if (fm)
-			fm->Free(p);
-    }
-#endif // OVERRIDE_GLOBAL_NEW
+// [tpr] I removed the override global new stuff, it was apparently added b/c we'd crash when 
+// OS would use our new pre-main that was fixed by making the project not export any 
+// symbols other than main
 
 namespace avmplus {
 	namespace NativeID {
@@ -877,7 +821,8 @@ namespace avmshell
 					}
 				#endif
 					else if (!VMPI_strcmp(arg, "-memstats")) {
-						GetGC()->gcstats = true;
+						GetGC()->GetGCHeap()->Config().gcstats = true;
+						GetGC()->GetGCHeap()->Config().autoGCStats = true;
 					} else if (!VMPI_strcmp(arg, "-memlimit")) {
 						GetGC()->GetGCHeap()->SetHeapLimit(VMPI_strtol(argv[++i], 0, 10));
 					} else if (!VMPI_strcmp(arg, "-log")) {
@@ -1170,42 +1115,43 @@ namespace avmshell
 	}
 }
 
+
+
 #ifdef UNDER_CE
 int _main(int argc, TCHAR *argv[])
 #else
 int _main(int argc, char *argv[])
 #endif
 {
-	if (!fm)
-	{
-		MMgc::GCHeap::Init();
-		MMgc::FixedMalloc::Init();
-
-		fm = MMgc::FixedMalloc::GetInstance();
-	}
-	
-	MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
-
-	// memory zero'ing check
-/*	int *foo = new int[2];
-	AvmAssert(VMPI_memcmp(foo, "\0\0\0\0\0\0\0\0\0\0\0\0", 2*sizeof(int)) == 0);
-	delete foo;*/
+	MMgc::GCHeapConfig conf;
+	//conf.verbose = true;
+	MMgc::GCHeap::Init(conf);
 
 	int exitCode = 0;
 	{
-		MMgc::GC gc(heap);
-		avmshell::shell = new avmshell::Shell(&gc);
-		exitCode = avmshell::shell->main(argc, argv);
-		delete avmshell::shell;
+		
+		MMGC_ENTER;
+		if(MMGC_ENTER_STATUS == 0)
+		{
+			MMgc::GC *gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+			avmshell::shell = new avmshell::Shell(gc);
+			exitCode = avmshell::shell->main(argc, argv);
+			delete avmshell::shell;
+			delete gc;
+		}
+		else
+		{
+			// allowing control to flow below to Destroy results in tons of leak asserts
+			return avmshell::OUT_OF_MEMORY;
+		}	
 	}
 
-    #if defined(AVM_SHELL_PLATFORM_HOOKS)
+
+  #if defined(AVM_SHELL_PLATFORM_HOOKS)
 	    AVMShellPlatformTeardown();
 	#endif
 
-	MMgc::FixedMalloc::Destroy();
 	MMgc::GCHeap::Destroy();
-	fm = 0;
  	return exitCode;
 }
 

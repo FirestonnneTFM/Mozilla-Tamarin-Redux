@@ -188,9 +188,7 @@ namespace avmplus
 
 		static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameHashtable* _bindings, uint32_t slotCount, uint32_t methodCount, uint32_t interfaceCount);
 
-#ifdef MMGC_DRC
 		void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const;
-#endif
 
 		Traitsp getSlotTraits(uint32_t i) const { AvmAssert(i < slotCount); return getSlots()[i].type; }
 		uint32_t getSlotOffset(uint32_t i) const { AvmAssert(i < slotCount); return getSlots()[i].offset(); }
@@ -511,9 +509,7 @@ namespace avmplus
 
 		Stringp formatClassName();
 
-#ifdef MMGC_DRC
 		void destroyInstance(ScriptObject *obj) const;
-#endif
 
 	private:
 		Traitsp* findInterface(Traits* t) const;
@@ -541,9 +537,7 @@ namespace avmplus
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType
 	private:	const byte*				metadata_pos;
 	private:	FixedBitSet				m_skips;	
-	#ifdef MMGC_DRC
 	private:	FixedBitSet				m_slotDestroyInfo;	
-	#endif
 	#if defined FEATURE_NANOJIT
 	private:	Binding					m_imt[Traits::IMT_SIZE];
 	#endif

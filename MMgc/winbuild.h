@@ -38,9 +38,9 @@
 
 
 /**
- * Critical section on GCHeap allocations.
+ * Critical sections needed
  */
-#define GCHEAP_LOCK
+#define MMGC_LOCKING
 
 /**
  * IA32 (Intel architecture)
@@ -58,15 +58,8 @@
  * Define this to get stack traces.  Helps with memory leaks.
  */
 #ifdef _DEBUG
-#define MEMORY_INFO
-#define MEMORY_PROFILER
+#define MMGC_MEMORY_INFO
 #endif
-
-/**
- * This turns on incremental collection as well as all of
- * the write barriers.
- */
-#define WRITE_BARRIERS
 
 /**
  * Define this if MMgc is being integrated with avmplus.
@@ -77,23 +70,7 @@
 /**
  * Use VirtualAlloc to reserve/commit memory
  */
-#define USE_MMAP
-
-/**
- * Define this to track GC pause times
- */
-// uncommenting requires you to link with C runtime
-//#define GC_STATS
-
-/**
- * Turn this on to decommit memory 
- */
-#define DECOMMIT_MEMORY
-
-/**
- * Controls whether DRC is in use
- */
-#define MMGC_DRC
+#define MMGC_USE_VIRTUAL_MEMORY
 
 /**
  * This makes JIT code buffers read-only to reduce the probability of
@@ -103,12 +80,6 @@
 
 // windows builds need malloc.h for alloca
 #define HAVE_MALLOC_H
-
-/**
- * Turns on ability to setjmp out of allocator back to mutator defined entry point
- * when memory is exhausted
- */
-//#define FEATURE_OOM
 
 /**
  * compiled with the /W4 warning level

@@ -42,30 +42,13 @@
 
 #include "GCTypes.h"
 
-#ifdef _MAC
-    #if defined(AVMPLUS_MAC_CARBON)
-        typedef const unsigned char* ConstStr255Param;
-
-        extern "C"
-		{	
-        #if defined(TARGET_RT_MAC_MACHO)	// DBC
-	        //extern pascal void DebugStr(ConstStr255Param aStr);
-        #else
-	        // extern pascal void DebugStr(ConstStr255Param aStr) = 0xABFF;
-			extern pascal void SysBreakStr(ConstStr255Param aStr) = {0x303C, 0xFE15, 0xA9C9};
-        #endif
-        }
-    #endif
-#endif
-
 namespace MMgc
 {
 	void MMGC_API GCDebugMsg(bool debuggerBreak, const char* format, ...);
 	void MMGC_API GCDebugMsg(const char* msg, bool debuggerBreak);
-	void MMGC_API GCDebugMsg(const wchar* msg, bool debuggerBreak);
 
 	#ifdef _DEBUG
-		inline void _GCAssertMsg(int32 assertion, const char* msg)
+		inline void _GCAssertMsg(int32_t assertion, const char* msg)
 		{
 			if (assertion == 0)
 				GCDebugMsg(msg, true);

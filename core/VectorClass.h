@@ -482,9 +482,7 @@ namespace avmplus
 
 		~ObjectVectorObject()
 		{
-#ifdef MMGC_DRC
 			AvmCore::decrementAtomRegion(m_array, m_length);
-#endif
 			m_length = 0;
 			if(m_array) {
 				MMgc::GC::GetGC(m_array)->Free(m_array);

@@ -131,9 +131,7 @@ namespace avmplus
 		sampleSize += sizeof(uint64) * 2;
 		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples_size/3 > (samples + samples_size)
 			&& !core->GetGC()->Collecting() 
-#ifdef MMGC_DRC
 			&& !core->GetGC()->Reaping()
-#endif
 			)		{
 			runningCallback = true;
 			pauseSampling();

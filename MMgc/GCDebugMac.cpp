@@ -39,17 +39,10 @@
 
 #include "MMgc.h"
 
-#if !defined(__MWERKS__) && !defined(MMGC_MAC_NO_CORE_SERVICES)
-    #include <CoreServices/CoreServices.h>
-#endif
-
-#ifndef __MACH__
-	#include <windows.h>
-#endif
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <assert.h>
 
 #if defined(MMGC_CUSTOM_DEBUG_MESSAGE_HANDLER)
 	void MMGCCustomDebugMessageHandler(const char *message);
@@ -57,7 +50,7 @@
 
 namespace MMgc
 {
-	void GCDebugMsg(bool debuggerBreak, const char* format, ...)
+	void GCDebugMsg(bool debugBreak, const char* format, ...)
 	{
 #ifdef _DEBUG
 		char buf[4096];
@@ -66,9 +59,9 @@ namespace MMgc
 
 		vsprintf(buf, format, args);
 		va_end(args);
-		GCDebugMsg(buf, debuggerBreak);
+		GCDebugMsg(buf, debugBreak);
 #else
-		(void)debuggerBreak;
+		(void)debugBreak;
 		(void)format;
 #endif
 	}
@@ -78,26 +71,10 @@ namespace MMgc
 #ifdef _DEBUG
         #if defined(MMGC_CUSTOM_DEBUG_MESSAGE_HANDLER)
 			MMGCCustomDebugMessageHandler(p);
-		#elif defined(MMGC_MAC_NO_CORE_SERVICES)
-			fprintf(stderr, "%s\n", p);
+		#else
+			fprintf(stdout, "%s\n", p);
 			if (debugBreak)
 				abort();
-		#else
-		    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
-
-			if(debugBreak)
-			{
-				Str255 buf;
-				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
-				DebugStr(buf);
-				abort();	// ensure we die
-			}
-			else
-			{
-				::CFShow(cfStr);
-			}
-
-			::CFRelease (cfStr);
 		#endif
 #else
 		(void)p;

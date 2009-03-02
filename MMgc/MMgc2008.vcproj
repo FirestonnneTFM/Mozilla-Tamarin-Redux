@@ -57,6 +57,7 @@
 				AdditionalIncludeDirectories="..\core;..\eval;..\platform"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				TreatWChar_tAsBuiltInType="false"
@@ -1194,7 +1195,7 @@
 				AdditionalOptions="/Oy-"
 				Optimization="2"
 				AdditionalIncludeDirectories=".;..\core;..\eval;..\platform"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CRT_SECURE_NO_DEPRECATE;MEMORY_PROFILER"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -1541,6 +1542,10 @@
 			</File>
 			<File
 				RelativePath=".\GCMemoryProfiler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VMPI-windows.cpp"
 				>
 			</File>
 			<File
