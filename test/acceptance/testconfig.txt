@@ -94,8 +94,8 @@ ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm-Ojit ,   
 
 
 # Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
