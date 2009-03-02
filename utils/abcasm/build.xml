@@ -50,6 +50,9 @@
 		lib.dir=/usr/local/lib/antlr-3.0.1
 	-->
 	<property name="lib.dir" location="Set in build.properties"/>
+	<!-- cygwin build requires explicit location of ANTLR2 -->
+	<property name="lib2.dir" location="${lib.dir}"/>
+	<!-- ANTLR runtime, required to run the assembler -->
 	<property name="antlr.runtime" value="../../other-licenses/ANTLR/antlr-runtime-3.0.1.jar"/>
 
 	<!-- Pull in current environment -->
@@ -66,6 +69,7 @@
 
 	<path id="antlr.classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar" />
+        <fileset dir="${lib2.dir}" includes="**/*.jar" />
 	</path>
 
 	 <path id="compile.classpath">
