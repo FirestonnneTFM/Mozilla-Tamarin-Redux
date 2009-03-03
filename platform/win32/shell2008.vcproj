@@ -915,7 +915,7 @@
 				Optimization="3"
 				FavorSizeOrSpeed="2"
 				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;MEMORY_PROFILER"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
