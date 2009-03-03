@@ -299,11 +299,6 @@ class AbcEmitter
 				AbcWriter blockWriter = new AbcWriter();
 				writers.put(b, blockWriter);
 
-				if (f.labelsByBlock.containsKey(b))
-				{
-					blockWriter.write(OP_label);
-				}
-
 				emitBlock(b, blockWriter);
 				
 				code_len += blockWriter.size();
