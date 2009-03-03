@@ -75,8 +75,8 @@ namespace MMgc
 #ifdef MMGC_MEMORY_PROFILER
 		  profiler(NULL),
 		  signal(0),
-		  spyFile(stdout),
 #endif
+	      spyFile(stdout),
 		  hooksEnabled(false),
 		  blocksSpanRegions(true), // TODO: see if making this false increases heap shrinkage opportunities
 		  searchForOldestBlock(!blocksSpanRegions), 
