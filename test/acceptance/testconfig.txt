@@ -99,3 +99,6 @@ as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatc
 as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
 ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
 ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+
+# Probably killing the stack 
+mmgc/heap_stress,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
