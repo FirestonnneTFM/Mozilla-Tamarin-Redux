@@ -56,6 +56,7 @@ function doTest()
 	setlocal1
 
 loop:
+	label
 	inclocal_i 1
 	getlocal1
 	pushbyte 10

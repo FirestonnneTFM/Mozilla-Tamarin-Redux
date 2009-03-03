@@ -56,6 +56,7 @@ function doTest()
 	setlocal1
 
 loop:
+	label
 	pushbyte 1
 	coerce_a
 	getlocal1

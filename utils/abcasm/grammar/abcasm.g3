@@ -630,7 +630,7 @@ no_operand_insn
 		'greaterequals' | 'greaterthan' |
 		'hasnext' | 
 		'in' | 'increment' | 'increment_i' | 'instanceof' | 'istypelate' |
-		'lessequals' | 'lessthan' | 'lshift' |
+		'label' | 'lessequals' | 'lessthan' | 'lshift' |
 		'modulo' | 'multiply' | 'multiply_i' |
 		'negate' | 'negate_i' | 'newactivation' | 'nextname' | 'nextvalue' | 'nop' | 'not' |
 		'pop' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' | 
