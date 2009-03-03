@@ -2078,7 +2078,7 @@ bail:
 		size_t total = totalGCPages * GCHeap::kBlockSize;
 		heap->log_percentage("[mem] \tmanaged fragmentation ", total-GetBytesInUse(), total);
 		if(markTicks != 0 && bytesMarked != 0) {
-			uint32_t markRate = bytesMarked / (1024 * ticksToMillis(markTicks)); // kb/ms == mb/s
+			uint32_t markRate = (uint32_t) (bytesMarked / (1024 * ticksToMillis(markTicks))); // kb/ms == mb/s
 			fprintf(heap->GetSpyFile(),"[mem] \tmark rate %u mb/s\n", markRate);
 		}
 		fprintf(heap->GetSpyFile(),"[mem] \tmark increments %d\n", marks);
