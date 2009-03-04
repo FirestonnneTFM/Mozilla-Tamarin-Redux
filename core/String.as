@@ -47,7 +47,7 @@ package
 		
 		AS3 native static function fromCharCode(... arguments):String
 		String.fromCharCode = function(... arguments) {
-			return AS3::fromCharCode.apply(String,arguments)
+			return AS3::fromCharCode.AS3::apply(String,arguments)
 		}
 
 		// E262 {DontEnum, DontDelete, ReadOnly}

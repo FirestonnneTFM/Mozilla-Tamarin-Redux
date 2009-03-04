@@ -77,26 +77,20 @@ namespace avmplus
 	 * MethodClosure is invoked, the method is invoked with
 	 * "this" pointing to the remembered instance.
 	 */
-	class MethodClosure : public ScriptObject
+	class MethodClosure : public FunctionObject
 	{
 		friend class MethodClosureClass;
-		MethodClosure(VTable* vtable, ScriptObject* prototype, MethodEnv* env, Atom savedThis);
+		MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis);
+
 	public:
-		DWB(MethodEnv*) env;
-		ATOM_WB savedThis;
-
-
 		// argc is args only, argv[0] = receiver
-		Atom call(int argc, Atom* argv);
-		Atom call_this(Atom);
-		Atom call_this_a(Atom, ArrayObject *a);
-		Atom call_this_aa(Atom, int argc, Atom *argv);
+		virtual Atom call(int argc, Atom* argv);
+		virtual Atom call_this(Atom);
+		virtual Atom call_this_a(Atom, ArrayObject* a);
+		virtual Atom call_this_aa(Atom, int argc, Atom* argv);
 
 		// argc is args only, argv[0] = receiver(ignored)
-		Atom construct(int argc, Atom* argv);
-
-		int MethodClosure_get_length() const;
-		Atom get_savedThis();
+		virtual Atom construct(int argc, Atom* argv);
 
 		virtual bool isMethodClosure() { return true; }
 
@@ -104,9 +98,8 @@ namespace avmplus
 		Stringp format(AvmCore* core) const;
 #endif
 
-#ifdef DEBUGGER
-		virtual MethodEnv* getCallMethodEnv() { return env; }
-#endif
+	protected:
+		ATOM_WB _savedThis;
 	};
 }
 

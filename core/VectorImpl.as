@@ -199,7 +199,7 @@ prototype.pop = function() {
 }
 
 prototype.push = function (...items) {
-    return castToThisType(this).AS3::push.apply(castToThisType(this), items);
+    return castToThisType(this).AS3::push.AS3::apply(castToThisType(this), items);
 }
 
 prototype.reverse = function() {
@@ -232,7 +232,7 @@ prototype.splice = function(start, deleteCount, ...items){
 }
 
 prototype.unshift = function(...items){
-    return castToThisType(this).AS3::unshift.apply(this, items);
+    return castToThisType(this).AS3::unshift.AS3::apply(this, items);
 }
 
 private function clamp(val: Number, len: uint): uint {

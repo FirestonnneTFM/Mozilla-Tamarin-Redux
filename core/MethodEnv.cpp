@@ -1334,10 +1334,9 @@ namespace avmplus
 		VTable* fvtable = core->newVTable(ftraits, functionClass->ivtable(), scope, abcEnv, toplevel());
 		fvtable->resolveSignatures();
 		FunctionEnv *fenv = new (core->GetGC()) FunctionEnv(function, fvtable);
-		fvtable->call = fenv;
 		fvtable->ivtable = toplevel()->object_vtable;
 
-		ClassClosure* c = new (core->GetGC(), fvtable->getExtraSize()) ClassClosure(fvtable);
+		FunctionObject* c = new (core->GetGC(), fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
 		c->setDelegate( functionClass->prototype );
 
 		c->createVanillaPrototype();

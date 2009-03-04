@@ -66,9 +66,19 @@ namespace avmplus
 	class FunctionObject : public ClassClosure
 	{
 	public:
-		FunctionObject(VTable *cvtable) : ClassClosure(cvtable) { }
+		FunctionObject(VTable* cvtable, MethodEnv* call) : ClassClosure(cvtable), _call(call) { AvmAssert(_call != NULL); }
 		Atom AS3_call(Atom thisAtom, Atom *argv, int argc);
 		Atom AS3_apply(Atom thisAtom, Atom argArray);
+#ifdef DEBUGGER
+		virtual MethodEnv* getCallMethodEnv() { return _call; }
+#endif
+		virtual Atom construct(int argc, Atom* argv);
+		virtual Atom call(int argc, Atom* argv);
+		virtual Atom call_this(Atom thisArg);
+		virtual Atom call_this_a(Atom thisArg, ArrayObject *a);
+		int get_length();
+	protected:
+		DWB(MethodEnv*) _call;
 	};
 }
 

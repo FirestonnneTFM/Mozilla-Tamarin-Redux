@@ -75,7 +75,6 @@ namespace avmplus
 	public:
 		DWB(AbcEnv*) abcEnv;
 		DRCWB(Toplevel*) toplevel;   // not const because native ClassClosure ctors modify it
-		DWB(MethodEnv*) call;
 		DWB(MethodEnv*) init;
 		DWB(ScopeChain*) scope;
 		DWB(VTable*) base;
