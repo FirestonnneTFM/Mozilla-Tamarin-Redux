@@ -507,7 +507,7 @@ single_cfg_target_insn
 		'ifeq'  | 'ifne'  | 'iflt'  | 'ifle'  | 'ifgt'  | 'ifge'  | 'ifstricteq'  | 'ifstrictne' |
 		'jump'
 	  )
-	  DECIMAL_LITERAL? ( LPAREN DECIMAL_LITERAL RPAREN )?  //  abcdump stuff for human consumption
+	  DECIMAL_LITERAL? ( LPAREN MINUS? DECIMAL_LITERAL RPAREN )?  //  abcdump stuff for human consumption
 	  label = control_flow_target
 	  {
 	      $decl::method_body_info.insn(opcode, label);
@@ -657,7 +657,8 @@ multiname_insn :
 		'deleteproperty' | 
 		'finddef' | 'findproperty' | 'findpropstrict' |
 		'getdescendants' | 'getlex' | 'getproperty' | 'getsuper' |
-		'istype'
+		'istype' |
+		'setproperty'
 	)
 	name_key = multipart_identifier
 	{
@@ -794,9 +795,9 @@ integer_literal returns [int result]
 	{
 		result = Integer.parseInt($DECIMAL_LITERAL.getText());
 	}
-	| OCTAL_LITERAL
+	| MINUS DECIMAL_LITERAL
 	{
-	    result = Integer.parseInt($OCTAL_LITERAL.getText(), 8);
+		result = - Integer.parseInt($DECIMAL_LITERAL.getText());
 	}
 	| hex_value = hex_literal
 	{
@@ -809,10 +810,6 @@ long_literal returns [long result]
 	{
 		result = Long.parseLong($DECIMAL_LITERAL.getText());
 	}
-	| OCTAL_LITERAL
-	{
-	    result = Long.parseLong($OCTAL_LITERAL.getText(), 8);
-	}
 	| HEX_LITERAL
 	{
 	    result = Long.parseLong($HEX_LITERAL.getText().substring(2), 16);
@@ -822,7 +819,11 @@ long_literal returns [long result]
 double_literal returns [double result]
 	: FLOATING_POINT_LITERAL
 	{
-	    return Double.parseDouble($FLOATING_POINT_LITERAL.getText());
+	    result = Double.parseDouble($FLOATING_POINT_LITERAL.getText());
+	}
+	| MINUS FLOATING_POINT_LITERAL
+	{
+	    result = - Double.parseDouble($FLOATING_POINT_LITERAL.getText());
 	}
 	;
 
@@ -858,6 +859,7 @@ string_literal returns [String result]
 	COMMA	: ',' ;
 	QUOTE	: '"' ;
 	SPLAT	: '*' ; 
+	MINUS	: '-' ;
 
 IDENTIFIER
 	:	LETTER (LETTER|'0'..'9')*
@@ -882,8 +884,6 @@ STRING_LITERAL
 HEX_LITERAL : '0' ('x'|'X') HexDigit+  ;
 
 DECIMAL_LITERAL : ('0' | '1'..'9' '0'..'9'*)  ;
-
-OCTAL_LITERAL : '0' ('0'..'7')+ ;
 
 fragment
 HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
