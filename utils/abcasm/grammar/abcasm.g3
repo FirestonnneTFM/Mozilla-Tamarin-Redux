@@ -289,12 +289,14 @@ method_body_info
 		}
 		| 'code' ':' block
 		| 'traits' ':' LBRACE traits[traits] RBRACE
+		| 'exception' ':' LBRACE exception_info* RBRACE
 	)*
 	RBRACE
 	{
 		asmCore.addMethodBodyInfo($decl::method_body_info);
 	}
 	;
+
 
 function_id returns [Object result]
 	: literal_id = integer_literal
@@ -372,6 +374,41 @@ trait_kind_modifier
 		'ATTR_Final' { result = TRAIT_FLAG_final; }
 	|	'ATTR_Override' { result = TRAIT_FLAG_override; }
 	|	'ATTR_Metadata' { result = TRAIT_FLAG_metadata; }
+	;
+	
+exception_info
+	@init { ExceptionInfo info; }
+	:
+		'.exception' { info = new ExceptionInfo(); }
+		LBRACE
+		(
+			'from' ':' from = control_flow_target
+			{
+				info.from = from;
+			}
+			| 'to' ':' to = control_flow_target
+			{
+				info.to = to;
+			}
+			| 'target' ':' target = control_flow_target
+			{
+				info.target = target;
+			}
+			| ('exc_type' | 'type') ':' exc_type = type_name
+			{
+				info.exc_type = asmCore.getNameId(exc_type);
+			}
+			| 'name' ':' name = IDENTIFIER
+			{
+				info.name_id = asmCore.createPoolId($IDENTIFIER.getText());
+			}
+			
+		)*
+		RBRACE
+		{
+			info.validateSemantics();
+			$decl::method_body_info.addExceptionInfo(info);
+		}
 	;
 
 type_name
