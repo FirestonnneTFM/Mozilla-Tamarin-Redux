@@ -65,27 +65,6 @@ namespace avmplus
 	public:
 
 	    CodeWriter* coder;
-
-		#ifdef FEATURE_NANOJIT
-		CodegenLIR *jit;
-		#endif
-
-#if defined AVMPLUS_WORD_CODE
-		CodeWriter *teeWriter;
-#else
-		CodeWriter *nullWriter;
-#endif
-
-		#ifdef AVMPLUS_WORD_CODE
-		WordcodeTranslator *translator;
-#if 1
-#else
-		int num_caches;			// number of entries in 'caches'
-		int next_cache;			// next free entry in 'caches'
-		uint32_t* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
-#endif
-		#endif
-		
 		AvmCore *core;
 		SortedIntMap<FrameState*>* blockStates;
 		FrameState *state;
@@ -120,18 +99,14 @@ namespace avmplus
 		 * an exception will be thrown, of type VerifyError.
 		 * @param info the method to verify
 		 */
-#if defined FEATURE_NANOJIT
-		void verify(CodegenLIR* volatile);
-#else
-		void verify();
-#endif
+		void verify(CodeWriter *coder);
 		FrameState* getFrameState(sintptr targetpc);
 
 		// provide access to known jitters
 		#if defined FEATURE_NANOJIT
 		Toplevel* getToplevel (CodegenLIR* jit) {
-		    if(jit == this->jit) return toplevel;
-			return NULL;
+		    (void)jit;
+		    return toplevel;
 		}
         #endif
 
@@ -143,16 +118,13 @@ namespace avmplus
 		MethodInfo*  checkMethodInfo(uint32_t method_id);
 		Traits*            checkClassInfo(uint32_t class_id);
 		Traits*            checkTypeName(uint32_t name_index);
-		void verifyFailed(int errorID, Stringp a1=0, Stringp a2=0, Stringp a3=0) const;
 		void checkTarget(const byte* target);
 		Atom checkCpoolOperand(uint32_t index, int requiredAtomType);
 		void checkConstantMultiname(uint32_t index, Multiname &m);
 		bool canAssign(Traits* lhs, Traits* rhs) const;
 		Traits* checkSlot(Traits* traits, int slot_id);
 		Traits* findCommonBase(Traits* t1, Traits* t2);
-		void emitCoerceArgs(MethodInfo* m, int argc, bool isctor=false);
 		void printValue(Value& v);
-		Traits* readBinding(Traits* traits, Binding b);
 		void checkEarlySlotBinding(Traits* traits);
 		Traits* peekType(Traits* requiredType, int n=1);
 		Traits* emitCoerceSuper(int index);
@@ -161,17 +133,15 @@ namespace avmplus
 		void parseExceptionHandlers();
 		void checkStack(uint32_t pop, uint32_t push);
 		void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
-		void emitCoerce(Traits* target, int i);
-		void emitToString(AbcOpcode opcode, int index);
-		void emitCheckNull(int index);
+		void emitToString(AbcOpcode opcode, int index, const byte *pc);
 		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);
 		void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc);
 		void checkGetGlobalScope();
 		void emitNip();
 
 		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
-		bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc);
-		bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc);
+		bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
+		bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const byte *pc);
 #ifdef AVMPLUS_WORD_CODE
 		uint32_t allocateCacheSlot(uint32_t imm30);
 #endif
@@ -188,6 +158,17 @@ namespace avmplus
 
 	private:
 		bool blockEnd;  // share between methods
+
+	public: 
+		// NOTE these methods used to be private but the jit needs access to 
+		// them for now. further refactoring should attempt to remove such back
+		// references
+		void verifyFailed(int errorID, Stringp a1=0, Stringp a2=0, Stringp a3=0) const;
+		void emitCoerceArgs(MethodInfo* m, int argc, bool isctor=false);
+		Traits* readBinding(Traits* traits, Binding b);
+		void emitCoerce(Traits* target, int i);
+		void emitCheckNull(int index);
+
     };
 
 #if defined FEATURE_CFGWRITER

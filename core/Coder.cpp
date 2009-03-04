@@ -42,8 +42,9 @@
 namespace avmplus
 {
 #if defined FEATURE_TEEWRITER
-    TeeWriter::TeeWriter (CoderContext* ctx, CodeWriter* coder1, CodeWriter* coder2)
-        : CodeWriter(ctx), coder1(coder1), coder2(coder2) 
+    TeeWriter::TeeWriter (CodeWriter* coder1, CodeWriter* coder2)
+        : coder1(coder1)
+        , coder2(coder2)
     {
     }
 
@@ -51,9 +52,9 @@ namespace avmplus
     {
     }
 
-    void TeeWriter::write (FrameState* state, const byte* pc, AbcOpcode opcode) {
-        if(coder1) coder1->write (state, pc, opcode);
-        if(coder2) coder2->write (state, pc, opcode);
+    void TeeWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type) {
+        if(coder1) coder1->write (state, pc, opcode, type);
+        if(coder2) coder2->write (state, pc, opcode, type);
     }
 
     void TeeWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type)
@@ -68,10 +69,40 @@ namespace avmplus
         if (coder2) coder2->writeOp2 (state, pc, opcode, opd1, opd2, type);
     }
 
-    void TeeWriter::writePrologue(FrameState* state)
+    void TeeWriter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
     {
-        if (coder1) coder1->writePrologue(state);
-        if (coder2) coder2->writePrologue(state);
+        if (coder1) coder1->writeInterfaceCall (state, pc, opcode, opd1, opd2, type);
+        if (coder2) coder2->writeInterfaceCall (state, pc, opcode, opd1, opd2, type);
+    }
+
+    void TeeWriter::writeNip(FrameState* state, const byte *pc)
+    {
+        if (coder1) coder1->writeNip(state, pc);
+        if (coder2) coder2->writeNip(state, pc);
+    }
+
+    void TeeWriter::writeCheckNull(FrameState* state, uint32_t index)
+    {
+        if (coder1) coder1->writeCheckNull(state, index);
+        if (coder2) coder2->writeCheckNull(state, index);
+    }
+
+    void TeeWriter::writeSetContext(FrameState* state, MethodInfo *f)
+    {
+        if (coder1) coder1->writeSetContext (state, f);
+        if (coder2) coder2->writeSetContext (state, f);
+    }
+
+	void TeeWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    {
+        if (coder1) coder1->writeCoerce (state, index, type);
+        if (coder2) coder2->writeCoerce (state, index, type);
+    }
+
+    void TeeWriter::writePrologue(FrameState* state, const byte *pc)
+    {
+        if (coder1) coder1->writePrologue(state, pc);
+        if (coder2) coder2->writePrologue(state, pc);
     }
 
     void TeeWriter::writeEpilogue(FrameState* state)
@@ -79,19 +110,41 @@ namespace avmplus
         if (coder1) coder1->writeEpilogue(state);
         if (coder2) coder2->writeEpilogue(state);
     }
+
+    void TeeWriter::writeBlockStart(FrameState* state)
+    {
+        if (coder1) coder1->writeBlockStart(state);
+        if (coder2) coder2->writeBlockStart(state);
+    }
+
+    void TeeWriter::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode) {
+        if(coder1) coder1->writeOpcodeVerified (state, pc, opcode);
+        if(coder2) coder2->writeOpcodeVerified (state, pc, opcode);
+    }
+
+    void TeeWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc) {
+        if(coder1) coder1->writeFixExceptionsAndLabels(state, pc);
+        if(coder2) coder2->writeFixExceptionsAndLabels(state, pc);
+    }
+
+    void TeeWriter::formatOperand(PrintWriter& buffer, Value& v) {
+        if(coder1) coder1->formatOperand(buffer, v);
+        if(coder2) coder2->formatOperand(buffer, v);
+    }
+
+
 #endif // FEATURE_TEEWRITER
 
 #if defined FEATURE_NULLWRITER
-    NullWriter::NullWriter (CoderContext* ctx, CodeWriter* coder)
-        : CodeWriter(ctx)
-        , coder(coder) {
+    NullWriter::NullWriter (CodeWriter* coder)
+        : coder(coder) {
     }
 
     NullWriter::~NullWriter () {}
 
-	void NullWriter::write (FrameState* state, const byte* pc, AbcOpcode opcode) 
+	void NullWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type) 
     {
-		if (coder) coder->write (state, pc, opcode);
+		if (coder) coder->write (state, pc, opcode, type);
 	}
 
 	void NullWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
@@ -99,20 +152,66 @@ namespace avmplus
 		if (coder) coder->writeOp1 (state, pc, opcode, opd1, type);
 	}
 
-	void NullWriter::writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+	bool NullWriter::writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
 	{
         if (coder) coder->writeOp2 (state, pc, opcode, opd1, opd2, type);
 	}
 
-	void NullWriter::writePrologue(FrameState* state)
+    void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
+    {
+        if (coder) coder->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
+    }
+
+	bool NullWriter::writeNip(FrameState* state, const byte *pc)
 	{
-        if (coder) coder->writePrologue(state);
+        if (coder) coder->writeNip(state, pc);
+	}
+
+    void NullWriter::writeCheckNull(FrameState* state, uint32_t index)
+    {
+        if (coder) coder->writeCheckNull(state, index);
+    }
+
+    void NullWriter::writeSetContext(FrameState* state, MethodInfo *f)
+    {
+        if (coder) coder->writeSetContext (state, f);
+    }
+
+	void NullWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    {
+        if (coder) coder->writeCoerce (state, index, type);
+    }
+
+
+	void NullWriter::writePrologue(FrameState* state, const byte *pc)
+	{
+        if (coder) coder->writePrologue(state, pc);
 	}
   
     void NullWriter::writeEpilogue(FrameState* state)
     {
         if (coder) coder->writeEpilogue(state);
     }
+
+    void NullWriter::writeBlockStart(FrameState* state)
+    {
+        if (coder) coder->writeBlockStart(state);
+    }
+
+	void NullWriter::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode) 
+    {
+		if (coder) coder->writeOpcodeVerified(state, pc, opcode);
+	}
+
+	void NullWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc)
+    {
+		if (coder) coder->writeFixExceptionsAndLabels(state, pc, opcode);
+	}
+
+    void NullWriter::formatOperand(PrintWriter& buffer, Value& v) {
+        if(coder1) coder->formatOperand(buffer, v);
+    }
+
 #endif // FEATURE_NULLWRITER
 
 }

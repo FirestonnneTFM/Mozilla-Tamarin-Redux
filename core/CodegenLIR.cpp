@@ -1534,11 +1534,6 @@ namespace avmplus
 		storeIns(dxnsAddr, 0, InsConstPtr(&core->dxnsAddr));
 	}
 
-	void CodegenLIR::merge(int i, const Value& current, Value& target) {
-        copier->trackMerge(i, current.ins, target.ins);
-	}
-
-
 	void CodegenLIR::emitBlockStart(FrameState* state)
 	{
 		if (outOMem()) return;
@@ -1593,17 +1588,39 @@ namespace avmplus
 		// from the Verifier.
 	}
 
-	void CodegenLIR::writePrologue(FrameState* state)
+	void CodegenLIR::writePrologue(FrameState* state, const byte *pc)
 	{
-	  prologue(state);
+        (void)pc;
+        if( !prologue(state) ) 
+		{
+			if (!overflow)
+				state->verifier->verifyFailed(kCorruptABCError);
+		}
 	}
 
 	void CodegenLIR::writeEpilogue(FrameState* state)
 	{
-	  epilogue(state);
+        epilogue(state);
 	}
 
-	void CodegenLIR::write(FrameState* state, const byte* pc, AbcOpcode opcode)
+	void CodegenLIR::writeBlockStart(FrameState* state)
+	{
+        emitBlockStart(state);
+	}
+
+	void CodegenLIR::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode)
+	{
+        (void)pc;
+        opcodeVerified(opcode, state);
+    }
+
+	void CodegenLIR::fixExceptionsAndLabels(FrameState* state, const byte* pc)
+	{
+        (void)state;
+        (void)pc;
+    }
+
+	void CodegenLIR::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
 	{
 	  //printf("CodegenLIR::write %x\n", opcode);
 
@@ -1718,6 +1735,12 @@ namespace avmplus
 		case OP_newfunction:
 			emit(state, opcode, imm30, sp+1, pool->methods[imm30]->declaringTraits);
 			break;
+		case OP_lessthan:
+		case OP_greaterthan:
+		case OP_lessequals:
+		case OP_greaterequals:
+            emit(state, opcode, 0, 0, BOOLEAN_TYPE);
+			break;
 
 		case OP_newclass:
 		{
@@ -1727,39 +1750,11 @@ namespace avmplus
 			break;
 		}
 
-		case OP_finddef: 
-		{
-  		    Multiname multiname;
-		    pool->parseMultiname(multiname, imm30);
-		    MethodInfo* script = pool->getNamedScript(&multiname);
-			if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
-			{
-			    // found a single matching traits
-				emit(state, opcode, (uintptr)&multiname, sp+1, script->declaringTraits);
-			}
-			else
-			{
-			    // no traits, or ambiguous reference.  use Object, anticipating
-			    // a runtime exception
-			    emit(state, opcode, (uintptr)&multiname, sp+1, OBJECT_TYPE);
-			}
-			break;
-		}
-
-		case OP_findpropstrict: 
-		case OP_findproperty: 
-		{
-  		    Multiname multiname;
-		    pool->parseMultiname(multiname, imm30);
-			emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE);
-			break;
-		}
-
 		case OP_getdescendants:
 		{
-  		    Multiname multiname;
-		    pool->parseMultiname(multiname, imm30);
-			emit(state, opcode, (uintptr)&multiname, 0, NULL);
+  		    Multiname name;
+		    pool->parseMultiname(name, imm30);
+			emit(state, opcode, (uintptr)&name, 0, NULL);
 			break;
 		}
 
@@ -1772,16 +1767,6 @@ namespace avmplus
   		    Multiname multiname;
 		    pool->parseMultiname(multiname, imm30);
 			emit(state, opcode, (uintptr)&multiname, 0, BOOLEAN_TYPE);
-			break;
-		}
-
-		case OP_setproperty:
-		case OP_initproperty:
-		{
-  		    Multiname multiname;
-		    pool->parseMultiname(multiname, imm30);
-		    emitSetContext(state, NULL);  // FIXME not be necessary in all code paths
-			emit(state, opcode, (uintptr)&multiname);
 			break;
 		}
 
@@ -1804,19 +1789,49 @@ namespace avmplus
 			emit(state, opcode, 0, 0, t);
             break;
 		}
+
 		case OP_coerce:
+            AvmAssert (type!=NULL);
+            state->verifier->emitCoerce(type, state->sp());
+            break;
+
 		case OP_coerce_b:
 		case OP_convert_b:
+            AvmAssert (type==NULL ? true : type==BOOLEAN_TYPE);
+            state->verifier->emitCoerce(BOOLEAN_TYPE, state->sp());
+            break;
+
 		case OP_coerce_o:
+            AvmAssert (type==NULL ? true : type==OBJECT_TYPE);
+            state->verifier->emitCoerce(OBJECT_TYPE, state->sp());
+            break;
+
 		case OP_coerce_a:
+            AvmAssert (type==NULL ? true : false);
+            state->verifier->emitCoerce(NULL, state->sp());
+            break;
+
 		case OP_convert_i:
 		case OP_coerce_i:
+            AvmAssert (type==NULL ? true : type==INT_TYPE);
+            state->verifier->emitCoerce(INT_TYPE, state->sp());
+            break;
+
 		case OP_convert_u:
 		case OP_coerce_u:
+            AvmAssert (type==NULL ? true : type==UINT_TYPE);
+            state->verifier->emitCoerce(UINT_TYPE, state->sp());
+            break;
+
 		case OP_convert_d:
 		case OP_coerce_d:
+            AvmAssert (type==NULL ? true : type==NUMBER_TYPE);
+            state->verifier->emitCoerce(NUMBER_TYPE, state->sp());
+            break;
+
 		case OP_coerce_s:
-            // NOTE coercions has already been done
+            AvmAssert (type==NULL ? true : type==STRING_TYPE);
+            state->verifier->emitCoerce(STRING_TYPE, state->sp());
             break;
 
 		case OP_istype:
@@ -1844,15 +1859,6 @@ namespace avmplus
 			break;
 		}
 
-		case OP_constructprop:
-		{
-			const uint32_t argc = imm30b;
-  		    Multiname name;
-		    pool->parseMultiname(name, imm30);
-			emitSetContext(state, NULL);
-			emit(state, opcode, (uintptr)&name, argc, NULL);
-			break;
-		}
 		case OP_applytype:
 		{
 		    emitSetContext(state, NULL);
@@ -2030,20 +2036,21 @@ namespace avmplus
 			break;
 		}
 
-		case OP_getouterscope:
-			//assert (info->declaringTraits->scope->size > 0);
-		    emitGetscope(state, imm30, sp+1);
-			break;
-
 		case OP_getglobalscope:
 		    emitGetGlobalScope();
 			break;
 
-		case OP_convert_s: 
+		case OP_concat:
+		case OP_add_d:
+		case OP_add:
+            emit(state, opcode, 0, 0, type);
+			break;
+
+		case OP_convert_s:
 		case OP_esc_xelem: 
 		case OP_esc_xattr:
 		case OP_debug:
-            // NOTE already been called
+            // NOTE implemented by writeOp1
             break;
 
 		default:
@@ -2126,13 +2133,6 @@ namespace avmplus
 		case OP_setglobalslot:
 			emit(state, opcode, opd1, state->sp(), type);
 			break;
-		case OP_getproperty:
-		{
-		    Multiname name;
-			pool->parseMultiname(name, opd1);
-            emit(state, OP_getproperty, (uintptr)&name, 0, type);
-			break;
-		}
 		case OP_call:
 		    emitSetContext(state, NULL);
 			emit(state, opcode, opd1 /*argc*/, 0, NULL);
@@ -2154,6 +2154,74 @@ namespace avmplus
 		case OP_getscopeobject:
 		    emitCopy(state, opd1+state->verifier->scopeBase, state->sp()+1);
 			break;
+        case OP_pushscope:
+        case OP_pushwith:
+			emitCopy(state, state->sp(), opd1);
+            break;
+		case OP_convert_s: 
+		case OP_esc_xelem: 
+		case OP_esc_xattr:
+        {
+            // opd1=i, type=in
+            Value& value = state->value(opd1);
+            Traits *in = type;
+            if (opcode == OP_convert_s && in && 
+                (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE))
+			{
+                emitCoerce(state, opd1, STRING_TYPE);
+            }
+            else
+			{
+                emit(state, opcode, opd1, 0, STRING_TYPE);
+			}
+            break;
+		}
+		case OP_findpropstrict: 
+		case OP_findproperty: 
+		{
+            Multiname name;
+            pool->parseMultiname(name, opd1);
+			emit(state, opcode, (uintptr)&name, 0, OBJECT_TYPE);
+			break;
+		}
+		case OP_findpropglobalstrict: 
+		{
+            // NOTE opcode not supported, deoptimizing
+            Multiname name;
+            pool->parseMultiname(name, opd1);
+			emit(state, OP_findpropstrict, (uintptr)&name, 0, OBJECT_TYPE);
+			break;
+		}
+		case OP_findpropglobal: 
+		{
+            // NOTE opcode not supported, deoptimizing
+            Multiname name;
+            pool->parseMultiname(name, opd1);
+			emit(state, OP_findproperty, (uintptr)&name, 0, OBJECT_TYPE);
+			break;
+		}
+
+		case OP_finddef: 
+		{
+            // opd1=name index
+            // type=script->declaringTraits
+  		    Multiname multiname;
+		    pool->parseMultiname(multiname, opd1);
+		    MethodInfo* script = (MethodInfo*)pool->getNamedScript(&multiname);
+			if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
+			{
+			    // found a single matching traits
+				emit(state, opcode, (uintptr)&multiname, state->sp()+1, script->declaringTraits);
+			}
+			else
+			{
+			    // no traits, or ambiguous reference.  use Object, anticipating
+			    // a runtime exception
+			    emit(state, opcode, (uintptr)&multiname, state->sp()+1, OBJECT_TYPE);
+			}
+			break;
+		}
+
 		default:
             AvmAssert(false);
 			// FIXME need error handler here
@@ -2161,10 +2229,273 @@ namespace avmplus
 		}
 	}
 
+	void CodegenLIR::writeNip(FrameState* state, const byte *pc)
+    {
+        (void)pc;
+        emitCopy(state, state->sp(), state->sp()-1);
+    }
+
+	void CodegenLIR::writeCheckNull(FrameState* state, uint32_t index)
+    {
+        emitCheckNull(state, index);
+    }
+
+	void CodegenLIR::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits *type)
+	{
+		(void)pc;
+		switch (opcode) {
+		case OP_callproperty: 
+		case OP_callproplex: 
+		case OP_callpropvoid:
+		    emitCall(state, OP_callinterface, opd1, opd2, type);
+            break;
+        default:
+            AvmAssert(false);
+            break;
+        }
+    }
+
 	void CodegenLIR::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits *type)
 	{
 		(void)pc;
 		switch (opcode) {
+
+        case OP_constructsuper:
+            // opd1=unused, opd2=argc
+			emitCall(state, opcode, 0, opd2, VOID_TYPE);
+            break;
+
+        case OP_setsuper:
+		{
+            const uint32_t index = opd1;
+            const uint32_t n = opd2;
+            Traits* base = type;
+			int32_t ptrIndex = state->sp()-(n-1);
+
+            Multiname name;
+            pool->parseMultiname(name, index);
+
+            Toplevel* toplevel = state->verifier->getToplevel(this);
+            Binding b = toplevel->getBinding(base, &name);
+            Traits* propType = state->verifier->readBinding(base, b);
+			const TraitsBindingsp basetd = base->getTraitsBindings();
+
+            if (AvmCore::isSlotBinding(b))
+			{
+                if (AvmCore::isVarBinding(b))
+				{
+                    int slot_id = AvmCore::bindingToSlotId(b);
+                    state->verifier->emitCoerce(propType, state->sp());
+                    emitSetslot(state, OP_setslot, slot_id, ptrIndex);
+                }
+                // else, ignore write to readonly accessor
+            }
+            else
+			if (AvmCore::isAccessorBinding(b))
+			{
+                if (AvmCore::hasSetterBinding(b))
+				{
+                    // Invoke the setter
+                    int disp_id = AvmCore::bindingToSetterId(b);
+                    MethodInfo *f = basetd->getMethod(disp_id);
+                    AvmAssert(f != NULL);
+                    state->verifier->emitCoerceArgs(f, 1);
+                    emitSetContext(state, f);
+                    emitCall(state, OP_callsuperid, disp_id, 1, f->returnTraits());
+                }
+                // else, ignore write to readonly accessor
+            }
+            else {
+                emitSetContext(state, NULL);
+                emit(state, opcode, (uintptr)&name);
+                #ifdef DEBUG_EARLY_BINDING
+				core->console << "verify setsuper " << base << " " << name.getName() << " from within " << info << "\n";
+                #endif
+            }
+            break;
+        }
+        case OP_getsuper:
+		{
+            const uint32_t index = opd1;
+            const uint32_t n = opd2;
+            Traits* base = type;
+
+            Multiname name;
+            pool->parseMultiname(name, index);
+
+            Toplevel* toplevel = state->verifier->getToplevel(this);
+            Binding b = toplevel->getBinding(base, &name);
+            Traits* propType = state->verifier->readBinding(base, b);
+
+            if (AvmCore::isSlotBinding(b))
+			{
+                int slot_id = AvmCore::bindingToSlotId(b);
+                emitGetslot(state, slot_id, state->sp()-(n-1), propType);
+            }
+            else
+			if (AvmCore::hasGetterBinding(b))
+			{
+                // Invoke the getter
+                int disp_id = AvmCore::bindingToGetterId(b);
+                const TraitsBindingsp basetd = base->getTraitsBindings();
+                MethodInfo *f = basetd->getMethod(disp_id);
+                AvmAssert(f != NULL);
+                state->verifier->emitCoerceArgs(f, 0);
+                Traits* resultType = f->returnTraits();
+                emitSetContext(state, f);
+                emitCall(state, OP_callsuperid, disp_id, 0, resultType);
+            }
+            else {
+                emitSetContext(state, NULL);
+                emit(state, opcode, (uintptr)&name, 0, propType);
+                #ifdef DEBUG_EARLY_BINDING
+                core->console << "verify getsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
+				#endif
+            }
+            break;
+        }
+		case OP_callsuper:
+		case OP_callsupervoid:
+		{
+            const uint32_t index = opd1;
+            const uint32_t argc = opd2;
+			Traits* base = type;
+			const TraitsBindingsp basetd = base->getTraitsBindings();
+
+            Multiname name;
+		    pool->parseMultiname(name, index);
+
+            Toplevel* toplevel = state->verifier->getToplevel(this);
+			Binding b = toplevel->getBinding(base, &name);
+
+			if (AvmCore::isMethodBinding(b))
+			{
+				int disp_id = AvmCore::bindingToMethodId(b);
+				MethodInfo* m = basetd->getMethod(disp_id);
+				state->verifier->emitCoerceArgs(m, argc);
+
+				Traits* resultType = m->returnTraits();
+				emitSetContext(state, m);
+				emitCall(state, OP_callsuperid, disp_id, argc, resultType);
+			}
+			else {
+
+				// TODO optimize other cases
+			    emitSetContext(state, NULL);
+			    emit(state, opcode, (uintptr)&name, argc, NULL);
+			}
+
+            break;
+        }
+
+		case OP_constructprop:
+		{
+			const uint32_t argc = opd2;
+            const uint32_t n = argc+1;
+  		    Multiname name;
+		    pool->parseMultiname(name, opd1);
+
+            Value& obj = state->peek(n); // object
+            Toplevel* toplevel = state->verifier->getToplevel(this);
+            Binding b = toplevel->getBinding(obj.traits, &name);
+
+            if (AvmCore::isSlotBinding(b))
+			{
+                int slot_id = AvmCore::bindingToSlotId(b);
+                emitGetslot(state, slot_id, state->sp()-(n-1), type);
+				obj.notNull = false;
+				obj.traits = type;
+                Traits* itraits = type ? type->itraits : NULL;
+                emitSetContext(state, NULL);
+                if (itraits && !itraits->hasCustomConstruct && itraits->init->argcOk(argc))
+                {
+                    state->verifier->emitCheckNull(state->sp()-(n-1));
+                    state->verifier->emitCoerceArgs(itraits->init, argc, true);
+                    emitCall(state, OP_construct, 0, argc, itraits);
+                }
+                else
+                {
+                    emit(state, OP_construct, argc, 0, itraits);
+                }
+            }
+            else
+			{
+                emitSetContext(state, NULL);
+                emit(state, opcode, (uintptr)&name, argc, NULL);
+            }
+			break;
+		}
+
+		case OP_getproperty:
+		{
+            // NOTE opd2 is the stack offset to the reciever
+		    Multiname name;
+			pool->parseMultiname(name, opd1);
+            Value& obj = state->peek(opd2); // object
+            Toplevel* toplevel = state->verifier->getToplevel(this);
+            Binding b = toplevel->getBinding(obj.traits, &name);
+
+            // early bind accessor
+            if (AvmCore::hasGetterBinding(b))
+            {
+                // Invoke the getter
+                int disp_id = AvmCore::bindingToGetterId(b);
+                const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
+                MethodInfo *f = objtd->getMethod(disp_id);
+                AvmAssert(f != NULL);
+
+                writeSetContext(state, f);
+                if (!obj.traits->isInterface) {
+                    emitCall(state, OP_callmethod, disp_id, 0, type);
+                }
+                else {
+                    // FIXME f->iid() is a 64 bit value, being passed through a 32 bit 
+                    // location. need to understand why this works.
+                    emitCall(state, OP_callinterface, f->iid(), 0, type);
+                }
+                AvmAssert(type == f->returnTraits());
+            }
+            else {
+                emit(state, OP_getproperty, (uintptr)&name, 0, type);
+            }
+			break;
+		}
+
+		case OP_setproperty:
+		case OP_initproperty:
+		{
+            // opd2=n the stack offset to the reciever
+		    Multiname name;
+			pool->parseMultiname(name, opd1);
+            Value& obj = state->peek(opd2); // object
+            Toplevel* toplevel = state->verifier->getToplevel(this);
+            Binding b = toplevel->getBinding(obj.traits, &name);
+
+            // early bind accessor
+            if (AvmCore::hasSetterBinding(b))
+            {
+                // invoke the setter
+                int disp_id = AvmCore::bindingToSetterId(b);
+                const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
+                MethodInfo *f = objtd->getMethod(disp_id);
+                AvmAssert(f != NULL);
+
+                emitSetContext(state, f);
+                if (!obj.traits->isInterface) {
+                    emitCall(state, OP_callmethod, disp_id, 1, type);
+                }
+                else {
+                    // FIXME f->iid() is a 64 bit value, being passed through a 32 bit 
+                    // location. need to understand why this works.
+                    emitCall(state, OP_callinterface, f->iid(), 1, type);
+                }
+            }
+            else {
+                emit(state, opcode, (uintptr)&name);
+            }
+			break;
+		}
+
 		case OP_setslot:
 		    emitSetslot(state, OP_setslot, opd1, opd2);
 			break;
@@ -2203,19 +2534,28 @@ namespace avmplus
 		}
 
 		case OP_callstatic:
-		{
-		    emitCheckNull(state, state->sp()-opd2);
+            // opd1=method_id, opd2=argc
+			state->verifier->emitCheckNull(state->sp()-opd2);
+            emitCheckNull(state, state->sp()-opd2);
 			emitSetContext(state, pool->methods[opd1]);
 			emitCall(state, OP_callstatic, opd1, opd2, type);
 			break;
-		}
 
 		default:
             AvmAssert(false);
-			// FIXME need error handler here
 		    break;
 		}
 	}
+
+    void CodegenLIR::writeSetContext(FrameState* state, MethodInfo *f)
+    {
+        emitSetContext(state, f);
+    }
+
+	void CodegenLIR::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    {
+        emitCoerce(state, index, type);
+    }
 
 	void CodegenLIR::emitIntConst(FrameState* state, int index, int32_t c)
 	{
@@ -2418,13 +2758,10 @@ namespace avmplus
 			// store the result
 			localSet(loc, atomToNativeRep(result, out));
 		}
-
-		state->setType(loc, result, value.notNull);
 	}
 
 	void CodegenLIR::emitCheckNull(FrameState* state, int index)
 	{
-	    if (state->value(index).notNull) return;
 		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
@@ -3722,7 +4059,6 @@ namespace avmplus
 				}
 				break;
 			}
-
 			case OP_initproperty:
 			case OP_setproperty:
 			{
@@ -4732,8 +5068,17 @@ namespace avmplus
 		return NULL;
 	}
 
+	void CodegenLIR::formatOperand(PrintWriter& buffer, Value& v)
+    {
 #ifdef AVMPLUS_VERBOSE
+        if (v.ins) formatOperand(buffer, v.ins);
+#else
+        (void)buffer;
+        (void)v;
+#endif
+    }
 
+#ifdef AVMPLUS_VERBOSE
 	void CodegenLIR::formatOperand(PrintWriter& buffer, LIns* opr)
 	{
         if (opr) {
@@ -4743,7 +5088,6 @@ namespace avmplus
 			buffer << "0";
         }
 	}
-
 #endif /* AVMPLUS_VERBOSE */
 
 	bool CodegenLIR::isCodeContextChanged() const
