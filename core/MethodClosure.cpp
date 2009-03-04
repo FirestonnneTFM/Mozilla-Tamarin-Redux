@@ -48,15 +48,11 @@ namespace avmplus
 	// property for the method. Dont know how important this is, but there you go.
 	// [ed] 9/15/04 we're implementing length as a getter instead of a slot.
 
-    MethodClosure::MethodClosure(VTable* ivtable, ScriptObject* prototype, 
-								 MethodEnv *env, Atom savedThis)
-		: ScriptObject(ivtable, prototype)
+    MethodClosure::MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis)
+		: FunctionObject(cvtable, call), _savedThis(savedThis)
     {
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
-		AvmAssert(env != NULL);
 		AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
-        this->env = env;
-        this->savedThis = savedThis;
     }
 
 	// this = argv[0] (ignored, we use savedThis instead)
@@ -64,23 +60,23 @@ namespace avmplus
 	// argN = argv[argc]
     Atom MethodClosure::call(int argc, Atom* argv)
     {
-		argv[0] = savedThis;
-		return env->coerceEnter(argc, argv);
+		argv[0] = _savedThis;
+		return _call->coerceEnter(argc, argv);
     }
 
 	Atom MethodClosure::call_this(Atom)
 	{
-		return env->coerceEnter(savedThis);
+		return _call->coerceEnter(_savedThis);
 	}
 
 	Atom MethodClosure::call_this_a(Atom, ArrayObject *a)
 	{
-		return env->coerceEnter(savedThis, a);
+		return _call->coerceEnter(_savedThis, a);
 	}
 
 	Atom MethodClosure::call_this_aa(Atom, int argc, Atom *argv)
 	{
-		return env->coerceEnter(savedThis, argc, argv);
+		return _call->coerceEnter(_savedThis, argc, argv);
 	}
 
 	// this = argv[0] (ignored)
@@ -91,27 +87,17 @@ namespace avmplus
         // can't invoke method closure as constructor:
         //     m = o.m;
         //     new m(); // error
-		toplevel()->throwTypeError(kCannotCallMethodAsConstructor, core()->toErrorString(env->method));		
+		toplevel()->throwTypeError(kCannotCallMethodAsConstructor, core()->toErrorString(_call->method));		
         return undefinedAtom;
     }
-
-	int MethodClosure::MethodClosure_get_length() const
-	{
-		return env->method->param_count;
-	}
-
-	Atom MethodClosure::get_savedThis()
-	{
-		return savedThis;
-	}
 
 #ifdef AVMPLUS_VERBOSE
     Stringp MethodClosure::format(AvmCore* core) const
     {
 		Stringp prefix = core->newConstantStringLatin1("MC{");
-		prefix = core->concatStrings(prefix, core->format(savedThis));
+		prefix = core->concatStrings(prefix, core->format(_savedThis));
 		prefix = core->concatStrings(prefix, core->newConstantStringLatin1(" "));
-		prefix = core->concatStrings(prefix, env->method->format(core));
+		prefix = core->concatStrings(prefix, _call->method->format(core));
 		prefix = core->concatStrings(prefix, core->newConstantStringLatin1("}@"));
 		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
     }
@@ -134,15 +120,20 @@ namespace avmplus
 	// argN = argv[argc]
 	MethodClosure* MethodClosureClass::create(MethodEnv* m, Atom obj)
 	{		
-		WeakKeyHashtable *mcTable = m->getMethodClosureTable();		
+		WeakKeyHashtable* mcTable = m->getMethodClosureTable();		
 		Atom mcWeakAtom = mcTable->get(obj);
-		GCWeakRef *ref = (GCWeakRef*)AvmCore::atomToGCObject(mcWeakAtom);
-		MethodClosure *mc;
+		GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGCObject(mcWeakAtom);
+		MethodClosure* mc;
 
-		if(!ref || !ref->get())
+		if (!ref || !ref->get())
 		{
 			VTable* ivtable = this->ivtable();
-			mc = (new (core()->GetGC(), ivtable->getExtraSize()) MethodClosure(ivtable, prototype, m, obj));
+			mc = (new (core()->GetGC(), ivtable->getExtraSize()) MethodClosure(ivtable, m, obj));
+			// since MC inherits from CC, we must explicitly set the prototype and delegate since the
+			// ctor will leave those null (and without delegate set, apply() and friends won't be found
+			// in pure ES3 code)
+			mc->prototype = prototype;
+			mc->setDelegate(prototype);
 			mcWeakAtom = AvmCore::gcObjectToAtom(mc->GetWeakRef());
 			mcTable->add(obj, mcWeakAtom);
 		}

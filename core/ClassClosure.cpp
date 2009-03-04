@@ -46,8 +46,10 @@ namespace avmplus
 		AvmAssert(traits()->getSizeOfInstance() >= sizeof(ClassClosure));
 
 		// prototype will be set by caller
-		AvmAssert(cvtable->traits->itraits != NULL);
-		AvmAssert(ivtable() != NULL);
+		
+		// don't assert here any more: MethodClosure descends 
+		//AvmAssert(cvtable->traits->itraits != NULL);
+		//AvmAssert(ivtable() != NULL);
 	}
 
 	void ClassClosure::createVanillaPrototype()
@@ -88,7 +90,8 @@ namespace avmplus
 	}
 
 	// Called from construct or generated code to alloc a new instance
-	ScriptObject* ClassClosure::newInstance() {
+	ScriptObject* ClassClosure::newInstance() 
+	{
 		VTable* ivtable = this->ivtable();
 		AvmAssert(ivtable != NULL);
 
@@ -111,87 +114,28 @@ namespace avmplus
 
 		ScriptObject* obj = newInstance();
 
-		if (vtable->call != NULL)
-		{
-			// this is a function
-			argv[0] = obj->atom(); // new object is receiver
-			MethodEnv* call = vtable->call;
-			Atom result = call->coerceEnter(argc, argv);
-
-			// for E3 13.2.2 compliance, check result and return it if (Type(result) is Object)
-
-			/* ISSUE does this apply to class constructors too?
-
-			answer: no.  from E4: A constructor may invoke a return statement as long as that 
-			statement does not supply a value; a constructor cannot return a value. The newly 
-			created object is returned automatically. A constructors return type must be omitted. 
-			A constructor always returns a new instance. */
-
-			return AvmCore::isNull(result) || AvmCore::isObject(result) ? result : obj->atom();
-		}
-		else
-		{
-			// this is a class
-			Atom a = obj->atom();
-			argv[0] = a; // new object is receiver
-			ivtable->init->coerceEnter(argc, argv);
-			// this is a class. always return new instance.
-			return a;
-		}
+		Atom a = obj->atom();
+		argv[0] = a; // new object is receiver
+		ivtable->init->coerceEnter(argc, argv);
+		// this is a class. always return new instance.
+		return a;
 	}
 
-	Atom ClassClosure::call_this(Atom thisArg)
+	Atom ClassClosure::call_this(Atom /*thisArg*/)
 	{
-		MethodEnv* call = vtable->call;
-		Toplevel* toplevel = this->toplevel();
-		if (!call)
-			toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString((int)0));
-		// invoke function body
-		// TODO if we kept track of a type's call signature we could do this at verify time
-		if (AvmCore::isNullOrUndefined(thisArg))
-		{
-			// use callee's global object as this.
-			// see E3 15.3.4.4
-			AvmAssert(call->vtable->scope->getSize() > 0);
-			thisArg = call->vtable->scope->getScope(0);
-		}
-
-		// make sure receiver is legal for callee
-		thisArg = toplevel->coerce(thisArg, call->method->paramTraits(0));
-
-		return call->coerceEnter(thisArg);
+		toplevel()->throwArgumentError(kCoerceArgumentCountError, core()->toErrorString((int)0));
+		return undefinedAtom;
 	}
 
-	Atom ClassClosure::call_this_a(Atom thisArg, ArrayObject *a)
+	Atom ClassClosure::call_this_a(Atom /*thisArg*/, ArrayObject *a)
 	{
-		MethodEnv* call = vtable->call;
 		Toplevel* toplevel = this->toplevel();
-		if (call)
+		// explicit coercion of a class object.
+		if (a->getLength() != 1)
 		{
-			// invoke function body
-			// TODO if we kept track of a type's call signature we could do this at verify time
-			if (AvmCore::isNullOrUndefined(thisArg))
-			{
-				// use callee's global object as this.
-				// see E3 15.3.4.4
-				AvmAssert(call->vtable->scope->getSize() > 0);
-				thisArg = call->vtable->scope->getScope(0);
-			}
-
-			// make sure receiver is legal for callee
-			thisArg = toplevel->coerce(thisArg, call->method->paramTraits(0));
-
-			return call->coerceEnter(thisArg, a);
+			toplevel->throwArgumentError(kCoerceArgumentCountError, core()->toErrorString(a->getLength()));
 		}
-		else
-		{
-			// explicit coercion of a class object.
-			if (a->getLength() != 1)
-			{
-				toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString(a->getLength()));
-			}
-			return toplevel->coerce(a->getUintProperty(0), (Traits*)ivtable()->traits);
-		}
+		return toplevel->coerce(a->getUintProperty(0), (Traits*)ivtable()->traits);
 	}
 
 	// this = argv[0]
@@ -199,43 +143,13 @@ namespace avmplus
 	// argN = argv[argc]
 	Atom ClassClosure::call(int argc, Atom* argv)
 	{
-		MethodEnv* call = vtable->call;
 		Toplevel* toplevel = this->toplevel();
-		if (call)
+		// explicit coercion of a class object.
+		if (argc != 1)
 		{
-			// invoke function body
-			// TODO if we kept track of a type's call signature we could do this at verify time
-			if (AvmCore::isNullOrUndefined(argv[0]))
-			{
-				// use callee's global object as this.
-				// see E3 15.3.4.4
-				AvmAssert(call->vtable->scope->getSize() > 0);
-				argv[0] = call->vtable->scope->getScope(0);
-			}
-
-			// make sure receiver is legal for callee
-			argv[0] = toplevel->coerce(argv[0], call->method->paramTraits(0));
-
-			return call->coerceEnter(argc, argv);
+			toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString(argc));
 		}
-		else
-		{
-			// explicit coercion of a class object.
-			if (argc != 1)
-			{
-				toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString(argc));
-			}
-			return toplevel->coerce(argv[1], (Traits*)ivtable()->traits);
-		}
-	}
-
-	int ClassClosure::get_length()
-	{
-		MethodEnv* call = vtable->call;
-		if (call)
-			return call->method->param_count;
-		else
-			return vtable->init->method->param_count;
+		return toplevel->coerce(argv[1], (Traits*)ivtable()->traits);
 	}
 
 #ifdef DEBUGGER

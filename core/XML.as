@@ -318,7 +318,7 @@ public final dynamic class XML extends Object
 	
 	prototype.namespace = function(prefix=null):* {
 		var x:XML = this
-		return x.AS3::namespace.apply(x, arguments)
+		return x.AS3::namespace.AS3::apply(x, arguments)
 	}
 
 	prototype.namespaceDeclarations = function():Array {
@@ -598,7 +598,7 @@ public final dynamic class XMLList extends Object
 	
 	prototype.namespace = function(prefix=null):* {
 		var x:XMLList = this
-		return x.AS3::namespace.apply(x, arguments)
+		return x.AS3::namespace.AS3::apply(x, arguments)
 	}
 
 	prototype.namespaceDeclarations = function():Array {

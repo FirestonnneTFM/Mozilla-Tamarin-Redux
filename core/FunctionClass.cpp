@@ -130,5 +130,88 @@ namespace avmplus
 		else
 			return call_this(thisArg);
 	}
+
+	// this = argv[0] (ignored)
+	// arg1 = argv[1]
+	// argN = argv[argc]
+	Atom FunctionObject::construct(int argc, Atom* argv)
+	{
+		AvmAssert(argv != NULL); // need at least one arg spot passed in
+
+		ScriptObject* obj = newInstance();
+
+		// this is a function
+		argv[0] = obj->atom(); // new object is receiver
+		Atom result = _call->coerceEnter(argc, argv);
+
+		// for E3 13.2.2 compliance, check result and return it if (Type(result) is Object)
+
+		/* ISSUE does this apply to class constructors too?
+
+		answer: no.  from E4: A constructor may invoke a return statement as long as that 
+		statement does not supply a value; a constructor cannot return a value. The newly 
+		created object is returned automatically. A constructors return type must be omitted. 
+		A constructor always returns a new instance. */
+
+		return AvmCore::isNull(result) || AvmCore::isObject(result) ? result : obj->atom();
+	}
  
+	Atom FunctionObject::call_this(Atom thisArg)
+	{
+		// invoke function body
+		// TODO if we kept track of a type's call signature we could do this at verify time
+		if (AvmCore::isNullOrUndefined(thisArg))
+		{
+			// use callee's global object as this.
+			// see E3 15.3.4.4
+			thisArg = _call->vtable->scope->getScope(0);
+		}
+
+		// make sure receiver is legal for callee
+		thisArg = toplevel()->coerce(thisArg, _call->method->paramTraits(0));
+
+		return _call->coerceEnter(thisArg);
+	}
+
+	Atom FunctionObject::call_this_a(Atom thisArg, ArrayObject *a)
+	{
+		Toplevel* toplevel = this->toplevel();
+		// invoke function body
+		// TODO if we kept track of a type's call signature we could do this at verify time
+		if (AvmCore::isNullOrUndefined(thisArg))
+		{
+			// use callee's global object as this.
+			// see E3 15.3.4.4
+			thisArg = _call->vtable->scope->getScope(0);
+		}
+
+		// make sure receiver is legal for callee
+		thisArg = toplevel->coerce(thisArg, _call->method->paramTraits(0));
+
+		return _call->coerceEnter(thisArg, a);
+	}
+
+	Atom FunctionObject::call(int argc, Atom* argv)
+	{
+		Toplevel* toplevel = this->toplevel();
+		// invoke function body
+		// TODO if we kept track of a type's call signature we could do this at verify time
+		if (AvmCore::isNullOrUndefined(argv[0]))
+		{
+			// use callee's global object as this.
+			// see E3 15.3.4.4
+			argv[0] = _call->vtable->scope->getScope(0);
+		}
+
+		// make sure receiver is legal for callee
+		argv[0] = toplevel->coerce(argv[0], _call->method->paramTraits(0));
+
+		return _call->coerceEnter(argc, argv);
+	}
+
+	int FunctionObject::get_length()
+	{
+		return _call->method->param_count;
+	}
+
 }
