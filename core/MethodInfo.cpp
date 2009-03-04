@@ -180,20 +180,32 @@ namespace avmplus
 				toplevel->throwVerifyError(kNotImplementedError, this->pool->core->toErrorString(this));
 			}
 
-			#if defined FEATURE_NANOJIT
+
+		    #if defined FEATURE_NANOJIT
 			Verifier verifier(this, toplevel);
 
 			if ((core->IsJITEnabled()) && !isFlagSet(MethodInfo::SUGGEST_INTERP))
 			{
 				PERFM_NTPROF("verify & IR gen");
 
-				#if defined FEATURE_NANOJIT
 				CodegenLIR jit(this);
-				#endif
+                #if defined AVMPLUS_WORD_CODE
+                #ifdef AVMPLUS_DIRECT_THREADED
+				WordcodeEmitter translator(this, interpGetOpcodeLabels());
+                #else
+				WordcodeEmitter translator(this);
+                #endif
+				TeeWriter teeWriter(&translator, &jit);
+				CodeWriter *coder = &teeWriter;
+                #else
+				NullWriter nullWriter(&jit);
+				CodeWriter *coder = &nullWriter;
+                #endif
 
 				TRY(core, kCatchAction_Rethrow)
 				{
-					verifier.verify(&jit);	// pass 2 - data flow
+				    verifier.verify(coder);	// pass 2 - data flow
+
 					PERFM_TPROF_END();
 			
 					if (!jit.overflow)
@@ -207,7 +219,7 @@ namespace avmplus
 					if (jit.overflow) {
 						setInterpImpl();
 					}
-	#ifdef AVMPLUS_WORD_CODE
+	                #ifdef AVMPLUS_WORD_CODE
 					else {
 						if (_abc.word_code.code_anchor) 
 						{
@@ -218,7 +230,7 @@ namespace avmplus
 							_abc.word_code.exceptions = NULL;
 						}
 					}
-	#endif
+                    #endif
 				}
 				CATCH (Exception *exception) 
 				{
@@ -230,12 +242,25 @@ namespace avmplus
 			}
 			else
 			{
-				verifier.verify(NULL); // pass2 dataflow
+                #if defined AVMPLUS_WORD_CODE
+                #ifdef AVMPLUS_DIRECT_THREADED
+				WordcodeEmitter translator(this, interpGetOpcodeLabels());
+                #else
+				WordcodeEmitter translator(this);
+                #endif
+				CodeWriter *coder = &translator;
+                #else
+				NullWriter nullWriter(NULL);
+				CodeWriter *coder = &nullWriter;
+                #endif
+			    verifier.verify(coder); // pass2 dataflow
 				setInterpImpl();
 			}
 			#else
 			Verifier verifier(this, toplevel);
-			verifier.verify();
+			NullWriter nullWriter(NULL);
+			CodeWriter *coder = &nullWriter;
+			verifier.verify(coder);
 			setInterpImpl();
 			#endif
 			

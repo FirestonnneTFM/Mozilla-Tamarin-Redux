@@ -289,16 +289,25 @@ namespace avmplus
 		void emitSetDxns(FrameState* state);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
-		void merge(int i, const Value& current, Value& target);
 		void localSet(int i, LIns* o);
 		void opcodeVerified(AbcOpcode opcode, FrameState* state);
 
 		// CodeWriter methods
-		void write(FrameState* state, const byte* pc, AbcOpcode opcode);
+		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
 		void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
 		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writePrologue(FrameState* state);
+		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
+		void writeNip(FrameState* state, const byte *pc);
+		void writeCheckNull(FrameState* state, uint32_t index);
+		void writeSetContext(FrameState* state, MethodInfo *f);
+		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
+		void writePrologue(FrameState* state, const byte *pc);
 		void writeEpilogue(FrameState* state);
+		void writeBlockStart(FrameState* state);
+		void writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode);
+		void fixExceptionsAndLabels(FrameState* state, const byte* pc);
+		void formatOperand(PrintWriter& buffer, Value& v);
+
 		void emitGetGlobalScope();
 
 	};
