@@ -1103,21 +1103,13 @@ namespace MMgc
 		// a tick is the unit of GetPerformanceCounter()
 		static uint64_t ticksToMicros(uint64_t ticks) 
 		{ 
-#ifdef WIN32
 			return (ticks*1000000)/GetPerformanceFrequency();
-#else
-			return ticks;
-#endif
 		}
 
 
 		static uint64_t ticksToMillis(uint64_t ticks) 
 		{ 
-#ifdef WIN32
 			return (ticks*1000)/GetPerformanceFrequency();
-#else
-			return ticks/1000;
-#endif
 		}
 
 		/**
