@@ -5090,9 +5090,9 @@ namespace avmplus
 		
         deadvars();
 
-        verbose_only(if (verbose()) {
-            live(gc, frag->lirbuf);
-        })
+        verbose_only(if (verbose())
+            live(gc, frag->lirbuf, /*showLiveRefs*/ false);
+        )
 
         Fragmento *frago = pool->codePages->frago;
         Assembler *assm = frago->assm();
