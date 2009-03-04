@@ -1246,12 +1246,12 @@ namespace MMgc
 			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
 			if(signal) {
+				signal = 0;
 				void *pipe = VMPI_OpenAndConnectToNamedPipe("MMgc_Spy");
 				spyFile = VMPI_HandleToStream(pipe);
 				DumpMemoryInfo();
 				VMPI_CloseNamedPipe(pipe);
 				spyFile = stdout;
-				signal = 0;
 			}
 			profiler->Alloc(item, size);
 #endif
@@ -1391,6 +1391,7 @@ namespace MMgc
 		if(config.enableProfiler)
 			DumpFatties();
 #endif
+		fflush(spyFile);
 	}
 
 	void GCHeap::DumpHeapRep()
