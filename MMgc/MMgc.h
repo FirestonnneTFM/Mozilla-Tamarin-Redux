@@ -110,7 +110,7 @@
  */
 
 #ifdef MMGC_LOCKING
-#define MMGC_LOCK(_x) GCSpinLock _lock(_x)
+#define MMGC_LOCK(_x) GCAcquireSpinlock _lock(_x)
 #ifdef WIN32
 #include "GCSpinLockWin.h"
 #endif
