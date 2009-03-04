@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 class AbcEmitter
 {
@@ -271,6 +272,7 @@ class AbcEmitter
 		w.writeU30(f.getMaxScopeDepth());
 		
 		emitCode(f);
+		
 		emitTraits(w, f.traits);
 	}
 
@@ -279,9 +281,6 @@ class AbcEmitter
 	{		
 			Map<Block,Integer> padding = new HashMap<Block,Integer>();
 			Map<Block,AbcWriter> writers = new HashMap<Block,AbcWriter>();
-			
-			//  Find back edges to see where we need labels
-			BitSet labels = new BitSet();
 
 			// emit the code and leave room for the branch offsets,
 			// and compute the final position of each block.
@@ -347,8 +346,7 @@ class AbcEmitter
 					if (last.target != null)
 					{
 						assert(padding.containsKey(b));
-						assert(f.blocksByLabel.containsKey(last.target));
-						emitBranch(last.opcode, f.blocksByLabel.get(last.target), code_start, pos);
+						emitBranch(last.opcode, f.getBlock(last.target), code_start, pos);
 					}
 
 					if ( OP_lookupswitch == last.opcode )
@@ -358,61 +356,8 @@ class AbcEmitter
 					}
 				}
 			}
-
-			/*
-			//  Input code occasionally contains
-			//  an empty (or non-effecting, and 
-			//  thus effectively empty) try block.
-			//  Elide these.
 			
-			int valid_handlers_count = 0;
-			for (Handler h: m.handlers)
-			{
-				if ( h.entry != null )
-					valid_handlers_count++;
-			}
-			*/
-			
-			w.writeU30(0);
-			/*
-			w.writeU30(valid_handlers_count);
-			for (Handler h: m.handlers)
-			{
-				if ( null == h.entry )
-					continue;
-				
-				int from = code_len;
-				int to = 0;
-				for (Block b: code)
-				{
-					for (Edge x: b.xsucc)
-					{
-						if (x.to == h.entry)
-						{
-							if (pos.get(b) < from)
-								from = pos.get(b);
-							if (blockends.get(b) > to)
-								to = blockends.get(b);
-						}
-					}
-				}
-				w.writeU30(from);
-				w.writeU30(to);
-				
-				int off = pos.get(h.entry);
-		
-				verboseStatus("handler "+h.entry+ " ["+from+","+to+")->"+off);
-				w.writeU30(off);
-				w.writeU30(abc.typeRef(h.type));
-				//  See corresponding logic
-				//  in readCode() where the 
-				//  handler's read in.
-				if ( h.name != null )
-					w.writeU30(abc.namePool.id(h.name));
-				else
-					w.writeU30(0);
-			}
-			*/
+			emitExceptionInfo(f, w, f.exceptions, pos);
 	}
 
 	private void emitBranch(int opcode, Block target, int code_start, Map<Block, Integer> pos)
@@ -566,6 +511,20 @@ class AbcEmitter
 	{
 		w.write(ns.kind);
 		w.writeU30(core.getPoolId(ns.name));
+	}
+	
+	private void emitExceptionInfo(MethodBodyInfo f, AbcWriter w, Vector<ExceptionInfo> exceptions, Map<Block, Integer> pos) 
+	{
+		w.writeU30(exceptions.size());
+		
+		for ( ExceptionInfo ex: exceptions)
+		{
+			w.writeU30(pos.get(f.getBlock(ex.from)));
+			w.writeU30(pos.get(f.getBlock(ex.to)));
+			w.writeU30(pos.get(f.getBlock(ex.target)));
+			w.writeU30(ex.exc_type);
+			w.writeU30(ex.name_id);
+		}
 	}
 
 	class AbcWriter extends ByteArrayOutputStream

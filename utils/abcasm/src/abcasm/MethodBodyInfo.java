@@ -66,8 +66,9 @@ class MethodBodyInfo
 	Traits traits = new Traits();
 	
 	List<Block> blocks = new LinkedList<Block>();
-	Map<Label, Block> blocksByLabel = new TreeMap<Label, Block>();
+	private Map<Label, Block> blocksByLabel = new TreeMap<Label, Block>();
 	Map<Block, String> labelsByBlock = new HashMap<Block, String>();
+	Vector<ExceptionInfo> exceptions = new Vector<ExceptionInfo>();
 	
 	/**
 	 *  Block currently being built; used during the function's construction. 
@@ -216,9 +217,7 @@ class MethodBodyInfo
 			}
 
 			for (Instruction i: b.insns)
-			{
-				boolean ignored_insn = false;
-				
+			{	
 				switch (i.opcode)
 				{
 				case OP_add:
@@ -449,7 +448,6 @@ class MethodBodyInfo
 					break;
 						
 				default:
-					ignored_insn = true;
 						//  no effect on stack, scope, or slots
 				}
 				
@@ -556,8 +554,14 @@ class MethodBodyInfo
 	
 	public Block getBlock(Label target)
 	{
-		assert(this.blocksByLabel.containsKey(target));
-		return this.blocksByLabel.get(target);
+		if (! blocksByLabel.containsKey(target))
+			throw new IllegalArgumentException("Label " + target.toString() + " was referenced, but never defined.");
+		return blocksByLabel.get(target);
+	}
+	
+	public void addExceptionInfo(ExceptionInfo ex)
+	{
+		this.exceptions.add(ex);
 	}
 	
 	/*
@@ -576,7 +580,7 @@ class MethodBodyInfo
 		}
 		
 		if ( !opcodeNameToOpcode.containsKey(opcodeKey) )
-			throw new IllegalArgumentException("Unknown opcode: " + opcodeName);
+			throw new IllegalArgumentException("opcode: \"" + opcodeName + "\" has no value in AbcConstants.");
 		
 		return opcodeNameToOpcode.get(opcodeKey);
 	}
