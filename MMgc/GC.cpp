@@ -2072,9 +2072,6 @@ bail:
 
 	void GC::DumpMemoryInfo()
 	{
-		// for consistency
-		Collect();	
-		
 		size_t total = totalGCPages * GCHeap::kBlockSize;
 		heap->log_percentage("[mem] \tmanaged fragmentation ", total-GetBytesInUse(), total);
 		if(ticksToMillis(markTicks) != 0 && bytesMarked != 0) {
