@@ -37,7 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include "VMPI.h"
+#include "MMgc.h"
 
 #ifdef MMGC_MEMORY_PROFILER
 
@@ -51,7 +51,7 @@
 
 #include <io.h>
 
-class SignalData
+class SignalData : public MMgc::GCAllocObject
 {
 public:
 	SignalData(uint32_t *addr, HANDLE handle) 
