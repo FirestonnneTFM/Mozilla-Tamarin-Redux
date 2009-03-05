@@ -317,15 +317,6 @@
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB70F3ABC5E0031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
-		07A8D2E70F5EEA2B0005E66C /* GCAllocObjectGeneric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D20F5EEA2B0005E66C /* GCAllocObjectGeneric.cpp */; };
-		07A8D2E80F5EEA2B0005E66C /* GCAllocObjectUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D30F5EEA2B0005E66C /* GCAllocObjectUnix.cpp */; };
-		07A8D2E90F5EEA2B0005E66C /* GCAllocObjectWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D40F5EEA2B0005E66C /* GCAllocObjectWin.cpp */; };
-		07A8D2EA0F5EEA2B0005E66C /* GCDebugGeneric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D50F5EEA2B0005E66C /* GCDebugGeneric.cpp */; };
-		07A8D2EB0F5EEA2B0005E66C /* GCDebugUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D60F5EEA2B0005E66C /* GCDebugUnix.cpp */; };
-		07A8D2EC0F5EEA2B0005E66C /* GCDebugWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D70F5EEA2B0005E66C /* GCDebugWin.cpp */; };
-		07A8D2ED0F5EEA2B0005E66C /* GCHeapGeneric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D80F5EEA2B0005E66C /* GCHeapGeneric.cpp */; };
-		07A8D2EE0F5EEA2B0005E66C /* GCHeapUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2D90F5EEA2B0005E66C /* GCHeapUnix.cpp */; };
-		07A8D2EF0F5EEA2B0005E66C /* GCHeapWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07A8D2DA0F5EEA2B0005E66C /* GCHeapWin.cpp */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		D9B8153C0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */; };
@@ -1525,15 +1516,6 @@
 				072EA1020F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */,
 				072EA1030F4C1CE9009F11E6 /* eval-util.cpp in Sources */,
 				0715396E0F507325004E398F /* eval-avmplus.cpp in Sources */,
-				07A8D2E70F5EEA2B0005E66C /* GCAllocObjectGeneric.cpp in Sources */,
-				07A8D2E80F5EEA2B0005E66C /* GCAllocObjectUnix.cpp in Sources */,
-				07A8D2E90F5EEA2B0005E66C /* GCAllocObjectWin.cpp in Sources */,
-				07A8D2EA0F5EEA2B0005E66C /* GCDebugGeneric.cpp in Sources */,
-				07A8D2EB0F5EEA2B0005E66C /* GCDebugUnix.cpp in Sources */,
-				07A8D2EC0F5EEA2B0005E66C /* GCDebugWin.cpp in Sources */,
-				07A8D2ED0F5EEA2B0005E66C /* GCHeapGeneric.cpp in Sources */,
-				07A8D2EE0F5EEA2B0005E66C /* GCHeapUnix.cpp in Sources */,
-				07A8D2EF0F5EEA2B0005E66C /* GCHeapWin.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
