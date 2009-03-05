@@ -74,9 +74,9 @@ namespace avmplus
 #endif
 		virtual Atom construct(int argc, Atom* argv);
 		virtual Atom call(int argc, Atom* argv);
-		virtual Atom call_this(Atom thisArg);
-		virtual Atom call_this_a(Atom thisArg, ArrayObject *a);
 		int get_length();
+	protected:
+		virtual Atom get_coerced_receiver(Atom a);
 	protected:
 		DWB(MethodEnv*) _call;
 	};

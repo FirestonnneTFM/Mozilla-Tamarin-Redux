@@ -121,23 +121,6 @@ namespace avmplus
 		return a;
 	}
 
-	Atom ClassClosure::call_this(Atom /*thisArg*/)
-	{
-		toplevel()->throwArgumentError(kCoerceArgumentCountError, core()->toErrorString((int)0));
-		return undefinedAtom;
-	}
-
-	Atom ClassClosure::call_this_a(Atom /*thisArg*/, ArrayObject *a)
-	{
-		Toplevel* toplevel = this->toplevel();
-		// explicit coercion of a class object.
-		if (a->getLength() != 1)
-		{
-			toplevel->throwArgumentError(kCoerceArgumentCountError, core()->toErrorString(a->getLength()));
-		}
-		return toplevel->coerce(a->getUintProperty(0), (Traits*)ivtable()->traits);
-	}
-
 	// this = argv[0]
 	// arg1 = argv[1]
 	// argN = argv[argc]

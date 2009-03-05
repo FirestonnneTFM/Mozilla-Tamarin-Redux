@@ -530,35 +530,6 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
-	Atom ScriptObject::call_this(Atom thisArg)
-	{
-		Atom newargs[1] = { thisArg };
-		return call(0, newargs);
-	}
-
-	Atom ScriptObject::call_this_aa(Atom thisArg, int argc, Atom *argv)
-	{
-		// argc = # of AS3 arguments
-		AvmAssert(argc >= 0);
-		AvmCore::AllocaAutoPtr _newargs;
-		Atom *newargs = (Atom *) VMPI_alloca(core(), _newargs, sizeof(Atom)*(argc+1));
-		newargs[0] = thisArg;
-		VMPI_memcpy(&newargs[1], argv, argc*sizeof(Atom));
-		return call(argc, newargs);
-	}
-
-	Atom ScriptObject::call_this_a(Atom thisArg, ArrayObject *a)
-	{
-		int count = a->getLength();
-		AvmCore::AllocaAutoPtr _newargs;
-		Atom* newargs = (Atom*) VMPI_alloca(core(), _newargs, sizeof(Atom)*(1+count));
-		newargs[0] = thisArg;
-		for (int i=0; i<count; i++) {
-			newargs[i+1] = a->getUintProperty(i);
-		}
-		return call(count, newargs);
-	}
-
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
