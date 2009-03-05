@@ -99,14 +99,18 @@ namespace avmplus
 	/**
      * Function.prototype.call()
      */
-	Atom FunctionObject::AS3_call(Atom thisArg,
-							 Atom *argv,
-							 int argc)
+	Atom FunctionObject::AS3_call(Atom thisArg, Atom *argv, int argc)
 	{
+		thisArg = get_coerced_receiver(thisArg);
+
 		if (argc > 0) 
-			return call_this_aa(thisArg, argc, argv);
+		{
+			return _call->coerceEnter(thisArg, argc, argv);
+		}
 		else
-			return call_this(thisArg);
+		{
+			return _call->coerceEnter(thisArg);
+		}
 	}
 
 	/**
@@ -114,6 +118,8 @@ namespace avmplus
      */
 	Atom FunctionObject::AS3_apply(Atom thisArg, Atom argArray)
 	{
+		thisArg = get_coerced_receiver(thisArg);
+
 		// when argArray == undefined or null, same as not being there at all
 		// see Function/e15_3_4_3_1.as 
 	
@@ -124,11 +130,13 @@ namespace avmplus
 			if (!core->istype(argArray, ARRAY_TYPE))
 				toplevel()->throwTypeError(kApplyError);
 
-			return call_this_a(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
+			return _call->coerceEnter(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
 			
 		}
 		else
-			return call_this(thisArg);
+		{
+			return _call->coerceEnter(thisArg);
+		}
 	}
 
 	// this = argv[0] (ignored)
@@ -156,56 +164,9 @@ namespace avmplus
 		return AvmCore::isNull(result) || AvmCore::isObject(result) ? result : obj->atom();
 	}
  
-	Atom FunctionObject::call_this(Atom thisArg)
-	{
-		// invoke function body
-		// TODO if we kept track of a type's call signature we could do this at verify time
-		if (AvmCore::isNullOrUndefined(thisArg))
-		{
-			// use callee's global object as this.
-			// see E3 15.3.4.4
-			thisArg = _call->vtable->scope->getScope(0);
-		}
-
-		// make sure receiver is legal for callee
-		thisArg = toplevel()->coerce(thisArg, _call->method->paramTraits(0));
-
-		return _call->coerceEnter(thisArg);
-	}
-
-	Atom FunctionObject::call_this_a(Atom thisArg, ArrayObject *a)
-	{
-		Toplevel* toplevel = this->toplevel();
-		// invoke function body
-		// TODO if we kept track of a type's call signature we could do this at verify time
-		if (AvmCore::isNullOrUndefined(thisArg))
-		{
-			// use callee's global object as this.
-			// see E3 15.3.4.4
-			thisArg = _call->vtable->scope->getScope(0);
-		}
-
-		// make sure receiver is legal for callee
-		thisArg = toplevel->coerce(thisArg, _call->method->paramTraits(0));
-
-		return _call->coerceEnter(thisArg, a);
-	}
-
 	Atom FunctionObject::call(int argc, Atom* argv)
 	{
-		Toplevel* toplevel = this->toplevel();
-		// invoke function body
-		// TODO if we kept track of a type's call signature we could do this at verify time
-		if (AvmCore::isNullOrUndefined(argv[0]))
-		{
-			// use callee's global object as this.
-			// see E3 15.3.4.4
-			argv[0] = _call->vtable->scope->getScope(0);
-		}
-
-		// make sure receiver is legal for callee
-		argv[0] = toplevel->coerce(argv[0], _call->method->paramTraits(0));
-
+		argv[0] = get_coerced_receiver(argv[0]);
 		return _call->coerceEnter(argc, argv);
 	}
 
@@ -214,4 +175,14 @@ namespace avmplus
 		return _call->method->param_count;
 	}
 
+	Atom FunctionObject::get_coerced_receiver(Atom a)
+	{
+		if (AvmCore::isNullOrUndefined(a))
+		{
+			// use callee's global object as this.
+			// see E3 15.3.4.4
+			a = _call->vtable->scope->getScope(0);
+		}
+		return toplevel()->coerce(a, _call->method->paramTraits(0));
+	}
 }

@@ -83,12 +83,6 @@ namespace avmplus
 		MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis);
 
 	public:
-		// argc is args only, argv[0] = receiver
-		virtual Atom call(int argc, Atom* argv);
-		virtual Atom call_this(Atom);
-		virtual Atom call_this_a(Atom, ArrayObject* a);
-		virtual Atom call_this_aa(Atom, int argc, Atom* argv);
-
 		// argc is args only, argv[0] = receiver(ignored)
 		virtual Atom construct(int argc, Atom* argv);
 
@@ -97,6 +91,8 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 		Stringp format(AvmCore* core) const;
 #endif
+	protected:
+		virtual Atom get_coerced_receiver(Atom a);
 
 	protected:
 		ATOM_WB _savedThis;

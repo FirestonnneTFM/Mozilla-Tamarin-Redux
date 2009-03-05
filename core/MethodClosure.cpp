@@ -55,28 +55,9 @@ namespace avmplus
 		AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
     }
 
-	// this = argv[0] (ignored, we use savedThis instead)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-    Atom MethodClosure::call(int argc, Atom* argv)
-    {
-		argv[0] = _savedThis;
-		return _call->coerceEnter(argc, argv);
-    }
-
-	Atom MethodClosure::call_this(Atom)
+	Atom MethodClosure::get_coerced_receiver(Atom /*a*/)
 	{
-		return _call->coerceEnter(_savedThis);
-	}
-
-	Atom MethodClosure::call_this_a(Atom, ArrayObject *a)
-	{
-		return _call->coerceEnter(_savedThis, a);
-	}
-
-	Atom MethodClosure::call_this_aa(Atom, int argc, Atom *argv)
-	{
-		return _call->coerceEnter(_savedThis, argc, argv);
+		return _savedThis;
 	}
 
 	// this = argv[0] (ignored)
