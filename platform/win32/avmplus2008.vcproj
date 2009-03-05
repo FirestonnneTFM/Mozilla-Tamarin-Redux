@@ -954,7 +954,7 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 				CompileForArchitecture="3"
 			/>
 			<Tool
@@ -1127,7 +1127,7 @@
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1211,7 +1211,7 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1298,7 +1298,7 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
