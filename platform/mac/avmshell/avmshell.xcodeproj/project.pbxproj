@@ -197,7 +197,6 @@
 		079DF94D0F3A893C0031D1B4 /* NativeARM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF93E0F3A893C0031D1B4 /* NativeARM.cpp */; };
 		079DF94E0F3A893C0031D1B4 /* Nativei386.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9400F3A893C0031D1B4 /* Nativei386.cpp */; };
 		079DF94F0F3A893C0031D1B4 /* NativePPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9420F3A893C0031D1B4 /* NativePPC.cpp */; };
-		079DF9500F3A893C0031D1B4 /* NativeThumb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9440F3A893C0031D1B4 /* NativeThumb.cpp */; };
 		079DF9510F3A893C0031D1B4 /* NativeX64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9460F3A893C0031D1B4 /* NativeX64.cpp */; };
 		079DF9520F3A893C0031D1B4 /* RegAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9480F3A893C0031D1B4 /* RegAlloc.cpp */; };
 		079DF9530F3A893C0031D1B4 /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9350F3A893C0031D1B4 /* Assembler.cpp */; };
@@ -206,7 +205,6 @@
 		079DF9560F3A893C0031D1B4 /* NativeARM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF93E0F3A893C0031D1B4 /* NativeARM.cpp */; };
 		079DF9570F3A893C0031D1B4 /* Nativei386.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9400F3A893C0031D1B4 /* Nativei386.cpp */; };
 		079DF9580F3A893C0031D1B4 /* NativePPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9420F3A893C0031D1B4 /* NativePPC.cpp */; };
-		079DF9590F3A893C0031D1B4 /* NativeThumb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9440F3A893C0031D1B4 /* NativeThumb.cpp */; };
 		079DF95A0F3A893C0031D1B4 /* NativeX64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9460F3A893C0031D1B4 /* NativeX64.cpp */; };
 		079DF95B0F3A893C0031D1B4 /* RegAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9480F3A893C0031D1B4 /* RegAlloc.cpp */; };
 		079DF9670F3A898A0031D1B4 /* avmshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF95C0F3A898A0031D1B4 /* avmshell.cpp */; };
@@ -598,8 +596,6 @@
 		079DF9410F3A893C0031D1B4 /* Nativei386.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Nativei386.h; path = ../../../nanojit/Nativei386.h; sourceTree = SOURCE_ROOT; };
 		079DF9420F3A893C0031D1B4 /* NativePPC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativePPC.cpp; path = ../../../nanojit/NativePPC.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9430F3A893C0031D1B4 /* NativePPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativePPC.h; path = ../../../nanojit/NativePPC.h; sourceTree = SOURCE_ROOT; };
-		079DF9440F3A893C0031D1B4 /* NativeThumb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeThumb.cpp; path = ../../../nanojit/NativeThumb.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9450F3A893C0031D1B4 /* NativeThumb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeThumb.h; path = ../../../nanojit/NativeThumb.h; sourceTree = SOURCE_ROOT; };
 		079DF9460F3A893C0031D1B4 /* NativeX64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeX64.cpp; path = ../../../nanojit/NativeX64.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9470F3A893C0031D1B4 /* NativeX64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeX64.h; path = ../../../nanojit/NativeX64.h; sourceTree = SOURCE_ROOT; };
 		079DF9480F3A893C0031D1B4 /* RegAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RegAlloc.cpp; path = ../../../nanojit/RegAlloc.cpp; sourceTree = SOURCE_ROOT; };
@@ -1011,8 +1007,6 @@
 				079DF9410F3A893C0031D1B4 /* Nativei386.h */,
 				079DF9420F3A893C0031D1B4 /* NativePPC.cpp */,
 				079DF9430F3A893C0031D1B4 /* NativePPC.h */,
-				079DF9440F3A893C0031D1B4 /* NativeThumb.cpp */,
-				079DF9450F3A893C0031D1B4 /* NativeThumb.h */,
 				079DF9460F3A893C0031D1B4 /* NativeX64.cpp */,
 				079DF9470F3A893C0031D1B4 /* NativeX64.h */,
 				079DF9480F3A893C0031D1B4 /* RegAlloc.cpp */,
@@ -1425,7 +1419,6 @@
 				079DF9560F3A893C0031D1B4 /* NativeARM.cpp in Sources */,
 				079DF9570F3A893C0031D1B4 /* Nativei386.cpp in Sources */,
 				079DF9580F3A893C0031D1B4 /* NativePPC.cpp in Sources */,
-				079DF9590F3A893C0031D1B4 /* NativeThumb.cpp in Sources */,
 				079DF95A0F3A893C0031D1B4 /* NativeX64.cpp in Sources */,
 				079DF95B0F3A893C0031D1B4 /* RegAlloc.cpp in Sources */,
 				079DF96C0F3A898A0031D1B4 /* avmshell.cpp in Sources */,
@@ -1588,7 +1581,6 @@
 				079DF94D0F3A893C0031D1B4 /* NativeARM.cpp in Sources */,
 				079DF94E0F3A893C0031D1B4 /* Nativei386.cpp in Sources */,
 				079DF94F0F3A893C0031D1B4 /* NativePPC.cpp in Sources */,
-				079DF9500F3A893C0031D1B4 /* NativeThumb.cpp in Sources */,
 				079DF9510F3A893C0031D1B4 /* NativeX64.cpp in Sources */,
 				079DF9520F3A893C0031D1B4 /* RegAlloc.cpp in Sources */,
 				079DF9670F3A898A0031D1B4 /* avmshell.cpp in Sources */,
