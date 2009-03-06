@@ -192,7 +192,7 @@ namespace avmshell
 	private:
 		bool activeFlag;
 		char *currentSource;
-		int currentSourceLen;
+		uint32_t currentSourceLen;
 		Stringp currentFile;
 		int breakpointCount;
 

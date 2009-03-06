@@ -159,7 +159,7 @@ namespace avmshell
 	DebugCLI::DebugCLI(AvmCore *core)
 		: Debugger(core)
 	{
-		currentSourceLen = -1;
+		currentSourceLen = 0;
 	}
 
 	DebugCLI::~DebugCLI()
@@ -685,8 +685,7 @@ namespace avmshell
 			printIP();
 			
 			core->console << "(asdb) ";
-			fflush(stdout);
-			fgets(commandLine, kMaxCommandLine, stdin);
+			Platform::GetInstance()->getUserInput(commandLine, kMaxCommandLine);
 
 			commandLine[VMPI_strlen(commandLine)-1] = 0;
 			
@@ -721,7 +720,7 @@ namespace avmshell
 				core->console << "Unknown command.\n";
 				break;
 			case CMD_QUIT:
-				exit(0);
+				Platform::GetInstance()->exit(0);
 				break;
 			case CMD_CONTINUE:
 				return;
@@ -760,20 +759,20 @@ namespace avmshell
 		if (currentSource) {
 			delete [] currentSource;
 			currentSource = NULL;
-			currentSourceLen = -1;
+			currentSourceLen = 0;
 		}
 		
 		// Open this file and suck it into memory
 		StUTF8String currentFileUTF8(currentFile);
 		FileInputStream f(currentFileUTF8.c_str());
-		if (f.valid()) {
-			currentSourceLen = f.available();
+		if (f.valid() && ((uint64_t)file->length() < UINT32_T_MAX)) { //cannot handle files > 4GB
+			currentSourceLen = (uint32_t) f.available();
 			currentSource = new char[currentSourceLen+1];
 			f.read(currentSource, currentSourceLen);
 			currentSource[currentSourceLen] = 0;
 
 			// whip through converting \r\n to space \n
-			for(int i=0; i<currentSourceLen-1;i++) {
+			for(int64_t i=0; i<currentSourceLen-1;i++) {
 				if (currentSource[i] == '\r' && currentSource[i+1] == '\n')
 					currentSource[i] = ' ';
 			}

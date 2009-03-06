@@ -119,7 +119,7 @@ namespace avmshell
 	public:
 		ByteArrayObject(VTable *ivtable, ScriptObject *delegate);
 
-		void fill(const void *b, int len);
+		void fill(const void *b, uint32_t len);
 	
 		void checkNull(void *instance, const char *name);
 

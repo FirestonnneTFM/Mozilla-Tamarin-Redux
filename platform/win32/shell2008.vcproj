@@ -1599,6 +1599,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\shell\avmshellWin.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\ByteArrayGlue.cpp"
 				>
 			</File>
@@ -1694,6 +1698,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath="..\..\shell\WinFile.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1729,6 +1737,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\shell\File.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\FileClass.h"
 				>
 			</File>
@@ -1745,6 +1757,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\shell\Platform.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\SamplerScript.h"
 				>
 			</File>
@@ -1758,6 +1774,10 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\SystemClass.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\shell\WinFile.h"
 				>
 			</File>
 		</Filter>

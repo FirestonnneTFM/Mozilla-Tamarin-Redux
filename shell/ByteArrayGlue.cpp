@@ -605,7 +605,7 @@ namespace avmshell
 		m_byteArray.WriteUTFBytes(value);
 	}
 
-	void ByteArrayObject::fill(const void *b, int len)
+	void ByteArrayObject::fill(const void *b, uint32_t len)
 	{
 		m_byteArray.Write(b, len);
 	}
@@ -644,31 +644,38 @@ namespace avmshell
 			toplevel->throwArgumentError(kNullArgumentError, "filename");
 		}
 		StUTF8String filenameUTF8(filename);
-		FILE *fp = fopen(filenameUTF8.c_str(), "rb");
-		if (fp == NULL) {
+
+		File* fp = Platform::GetInstance()->createFile();
+		if (fp == NULL || !fp->open(filenameUTF8.c_str(), File::OPEN_READ_BINARY)) 
+		{
+			if(fp)
+			{
+				Platform::GetInstance()->destroyFile(fp);
+			}
 			toplevel->throwError(kFileOpenError, filename);
 		}
-		fseek(fp, 0L, SEEK_END);
-		long len = ftell(fp);
-		#ifdef UNDER_CE
-		fseek (fp, 0L, SEEK_SET);
-		#else
-		rewind(fp);
-		#endif	
 
-		unsigned char *c = new unsigned char[len+1];
+		int64_t len = fp->size();
+		if((uint64_t)len >= UINT32_T_MAX) //ByteArray APIs cannot handle files > 4GB
+		{
+			toplevel->throwRangeError(kOutOfRangeError, filename);
+		}
+
+		uint32_t readCount = (uint32_t)len;
+
+		unsigned char *c = new unsigned char[readCount+1];
 
 		Atom args[1] = {nullObjectAtom};
 		ByteArrayObject *b = (ByteArrayObject*)AvmCore::atomToScriptObject(construct(0,args));
 		b->setLength(0);
 
-		while (len > 0)
+		while (readCount > 0)
 		{
-			int actual = (int)fread(c, 1, len, fp);
+			uint32_t actual = (uint32_t) fp->read(c, readCount);
 			if (actual > 0)
 			{
 				b->fill(c, actual);
-				len -= actual;
+				readCount -= readCount;
 			}
 			else
 			{
@@ -678,6 +685,10 @@ namespace avmshell
 		b->seek(0);
 
 		delete [] c;
+
+		fp->close();
+		Platform::GetInstance()->destroyFile(fp);
+
 		return b;
 	}
 
@@ -712,15 +723,26 @@ namespace avmshell
 		}
 
 		StUTF8String filenameUTF8(filename);
-		FILE *fp = fopen(filenameUTF8.c_str(), "wb");
-		if (fp == NULL) {
+
+		File* fp = Platform::GetInstance()->createFile();
+		if (fp == NULL || !fp->open(filenameUTF8.c_str(), File::OPEN_WRITE_BINARY)) 
+		{
+			if(fp)
+			{
+				Platform::GetInstance()->destroyFile(fp);
+			}
 			toplevel->throwError(kFileWriteError, filename);
 		}
 
-		if (fwrite(&(this->GetByteArray())[0], this->get_length(), 1, fp) != 1) {
+		int32_t len = this->get_length();
+		bool success = (int32_t)fp->write(&(this->GetByteArray())[0], len) == len;
+		
+		fp->close();
+		Platform::GetInstance()->destroyFile(fp);
+		
+		if (!success) {
 			toplevel->throwError(kFileWriteError, filename);
 		}
-		fclose(fp);
 	}
 
 

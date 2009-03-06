@@ -89,9 +89,18 @@
 
 #if defined (WIN32)
 
+	#if _MSC_VER > 1000
+		#pragma warning(push)
+		#pragma warning(disable: 4201)
+	#endif
+
 	#include <windows.h>
 	#include <malloc.h>
 	
+	#if _MSC_VER > 1000
+		#pragma warning(pop)
+	#endif
+
 	#ifdef _MSC_VER
 	// MSVC doesn't support inttypes.h or most C99 types directly, so declare them ourself.
 	

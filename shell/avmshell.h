@@ -40,6 +40,8 @@
 
 #include "avmplus.h"
 #include "Selftest.h"
+#include "Platform.h"
+#include "File.h"
 
 using namespace avmplus;
 
@@ -75,6 +77,9 @@ namespace avmplus
 #include "SamplerScript.h"
 #include "JavaGlue.h"
 
+#define INT32_T_MAX		0x7FFFFFFF	//max value for a 32-bit integer
+#define UINT32_T_MAX	0xFFFFFFFF	//max value for a 32-bit unsigned integer
+
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
@@ -109,35 +114,35 @@ namespace avmshell
 	class Shell : public AvmCore
 	{
 	public:
-		Shell(MMgc::GC *gc);
-		void usage();
-#ifdef UNDER_CE
-		int main(int argc, TCHAR *argv[]);
-#else
-		int main(int argc, char *argv[]);
-#endif
+		static int run(int argc, char *argv[]);
 
 		void interrupt(MethodEnv *env);
 		void stackOverflow(MethodEnv *env);
 
-		void initShellPool();
-		Toplevel* initShellBuiltins();
-
 		void setEnv(Toplevel *toplevel, int argc, char *argv[]);
 
-		SystemClass* systemClass;
-		
 		virtual Toplevel* createToplevel(VTable *vtable);
+		Toplevel* initShellBuiltins();
 
 		virtual size_t getToplevelSize() const;
 
+		SystemClass* systemClass;
+		PoolObject* shellPool;
+
+	protected:
+		Shell(MMgc::GC *gc);
+		
+		void initShellPool();
+		void usage();
+
+		bool executeProjector(int argc, char *argv[], int& exitCode);
+
+		static void interruptTimerCallback(void* data);
 #ifdef VMCFG_EVAL
 		void repl(Toplevel* toplevel, DomainEnv* domainEnv);
 		String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
 		virtual String* readFileForEval(String* referencing_filename, String* filename);
 #endif // VMCFG_EVAL
-
-		PoolObject* shellPool;
 
 	private:
 		OutputStream *consoleOutputStream;
@@ -145,9 +150,7 @@ namespace avmshell
 		bool inStackOverflow;
 		int allowDebugger;
 
-		bool executeProjector(int argc, char *argv[], int& exitCode);
-		
-		void computeStackBase();
+		int execute(int argc, char *argv[]);
 		
 	#ifdef DEBUGGER
 	protected:
