@@ -124,6 +124,7 @@
 #include "avmplusTypes.h"
 #include "avmplusVersion.h"
 #include "AvmDebug.h"
+#include "AvmLog.h"
 #include "AtomConstants.h"
 #include "ActionBlockConstants.h"
 #include "wopcodes.h"

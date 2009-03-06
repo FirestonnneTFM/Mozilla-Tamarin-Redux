@@ -52,7 +52,7 @@ namespace avmplus
 	{
 		swprof_code_fp = fopen("superwordprof_code.txt", "wb");
 		if (swprof_code_fp == NULL)
-			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN CODE FILE.\n");
+			AvmLog("SUPERWORD PROFILING: COULD NOT OPEN CODE FILE.\n");
 		else
 		{
 			unsigned int signature = 0xC0DEC0DE;
@@ -60,7 +60,7 @@ namespace avmplus
 		}
 		swprof_sample_fp = fopen("superwordprof_sample.txt", "wb");
 		if (swprof_sample_fp == NULL)
-			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN SAMPLE FILE.\n");
+			AvmLog("SUPERWORD PROFILING: COULD NOT OPEN SAMPLE FILE.\n");
 		else
 		{
 			unsigned int signature = 0xDA1ADA1A;
@@ -91,7 +91,7 @@ namespace avmplus
 #ifdef SUPERWORD_LIMIT
 			if (++sample_count == SUPERWORD_LIMIT) {
 				swprofStop();
-				fprintf(stderr, "SAMPLING HALTED.\n");
+				AvmLog("SAMPLING HALTED.\n");
 			}
 #endif
 		}

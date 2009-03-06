@@ -57,7 +57,7 @@ namespace avmplus
 		}
 		#endif 
 
-		//printf("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
+		//AvmLog("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
 
  		m_tbCache->resize(cs.bindings);	
  		m_tmCache->resize(cs.metadata);

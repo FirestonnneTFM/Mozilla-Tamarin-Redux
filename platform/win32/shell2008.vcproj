@@ -1699,6 +1699,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\shell\WinDebugUtils.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\WinFile.cpp"
 				>
 			</File>

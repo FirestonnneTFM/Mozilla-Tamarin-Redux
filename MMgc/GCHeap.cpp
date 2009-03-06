@@ -323,7 +323,7 @@ namespace MMgc
 					block->dirty = false;
 					decommitSize -= block->size;
 					if(config.verbose) {
-						fprintf(stdout, "decommitted %d page block\n", block->size);
+						GCLog("decommitted %d page block\n", block->size);
 					}
 				}
 				else
@@ -646,7 +646,7 @@ namespace MMgc
 					GCAssert(false);
 				}
 				if(config.verbose)
-					fprintf(stdout, "recommitted %d pages\n", amountRecommitted);
+					GCLog("recommitted %d pages\n", amountRecommitted);
 				numDecommitted -= amountRecommitted;
 				block->committed = true;
 
@@ -706,7 +706,7 @@ namespace MMgc
 				GCAssert(false);
 			}
 			if(config.verbose) {
-				fprintf(stdout, "recommitted %d pages\n", block->size);
+				GCLog("recommitted %d pages\n", block->size);
 				DumpHeapRep();
 			}
 			numDecommitted -= block->size;
@@ -1179,7 +1179,7 @@ namespace MMgc
 				lastRegion = newRegion;
 				
 				if(config.verbose)
-					fprintf(stdout, "reserved new region, %p - %p %s\n",
+					GCLog("reserved new region, %p - %p %s\n",
 						   newRegion->baseAddr,
 						   newRegion->reserveTop,
 						   contiguous ? "contiguous" : "non-contiguous");
@@ -1189,7 +1189,7 @@ namespace MMgc
 		CheckFreelist();
 		
 		if(config.verbose) {
-			fprintf(stdout, "heap expanded by %d pages\n", size);
+			GCLog("heap expanded by %d pages\n", size);
 			DumpHeapRep();
 		}
 			
@@ -1206,7 +1206,7 @@ namespace MMgc
 		ReleaseMemory(region->baseAddr,
 				region->reserveTop-region->baseAddr);		
 		if(config.verbose) {
-			fprintf(stdout, "unreserved region 0x%p - 0x%p (commitTop: %p)\n", region->baseAddr, region->reserveTop, region->commitTop);
+			GCLog("unreserved region 0x%p - 0x%p (commitTop: %p)\n", region->baseAddr, region->reserveTop, region->commitTop);
 			DumpHeapRep();
 		}
 		delete region;

@@ -1622,7 +1622,7 @@ namespace avmplus
 
 	void CodegenLIR::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
 	{
-	  //printf("CodegenLIR::write %x\n", opcode);
+	  //AvmLog("CodegenLIR::write %x\n", opcode);
 
 		const byte* nextpc = pc;
 		unsigned int imm30=0, imm30b=0;
@@ -5293,7 +5293,7 @@ namespace avmplus
 
         // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
         verbose_only( if (verbose()) 
-            printf("killing dead stores after %d LA iterations.\n",iter);
+            AvmLog("killing dead stores after %d LA iterations.\n",iter);
         )
     }
 
@@ -5320,7 +5320,7 @@ namespace avmplus
                         int d = i->immdisp() >> 3;
                         if (!livein.get(d)) {
                             verbose_only(if (names)
-                                printf("- %s\n", names->formatIns(i));)
+                                AvmLog("- %s\n", names->formatIns(i));)
                             i->initOpcode(LIR_neartramp);
                             continue;
                         } else {
@@ -5377,7 +5377,7 @@ namespace avmplus
                     break;
             }
             verbose_only(if (names) {
-                printf("  %s\n", names->formatIns(i));
+                AvmLog("  %s\n", names->formatIns(i));
             })
         }
     }
@@ -5492,7 +5492,7 @@ namespace avmplus
             info->flags |= MethodInfo::JIT_IMPL;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
             if (verbose())
-                printf("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
+                AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
             #endif
         } else {
             // assm puked, or we did something untested, so interpret.
@@ -5501,7 +5501,7 @@ namespace avmplus
             overflow = true;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
             if (verbose())
-                printf("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
+                AvmLog("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
             #endif
             PERFM_NVPROF("lir-error",1);
         }

@@ -100,9 +100,9 @@ namespace avmplus
 		if (m_count >= MAXLIST)
 		{
 			AvmAssert(0);
-			printf("***** WARNING, overflow\n");
-			printf("***** WARNING, overflow\n");
-			printf("***** WARNING, overflow\n");
+			AvmLog("***** WARNING, overflow\n");
+			AvmLog("***** WARNING, overflow\n");
+			AvmLog("***** WARNING, overflow\n");
 			return;
 		}
 		
@@ -157,12 +157,12 @@ namespace avmplus
 			g_tinfo[TMT_tbi].cached = g_tmcore->tbCache()->count();
 			g_tinfo[TMT_tbi].active = g_tmp.count();
 			
-			printf("\nTraitsMemTrack @ %d %s:\n",g_track_count,g_tmcore->IsJITEnabled()?"JIT":"INTERP");
+			AvmLog("\nTraitsMemTrack @ %d %s:\n",g_track_count,g_tmcore->IsJITEnabled()?"JIT":"INTERP");
 			uint32_t totmem = 0;
 			uint32_t totmem_hw = 0;
 			for (int i = 3; i < TMT_COUNT; ++i)
 			{
-				printf("    %-16s live: %d=%dk (%db), hw: %d=%dk (%db) ",
+				AvmLog("    %-16s live: %d=%dk (%db), hw: %d=%dk (%db) ",
 					g_tinfonm[i],
 					g_tinfo[i].live.count(),
 					g_tinfo[i].mem>>10,
@@ -172,16 +172,16 @@ namespace avmplus
 					g_tinfo[i].count_hw?(g_tinfo[i].mem_hw/g_tinfo[i].count_hw):0);
 
 				if (i == TMT_tmi || i == TMT_tbi)
-					printf(" cached=%d(=%d incl bases)",
+					AvmLog(" cached=%d(=%d incl bases)",
 						g_tinfo[i].cached,
 						g_tinfo[i].active);
 
-				printf("\n");
+				AvmLog("\n");
 				totmem += g_tinfo[i].mem;
 				totmem_hw += g_tinfo[i].mem_hw;
 			}
 			// hw total may be inaccurate because different buckets might HW at different times
-			printf("  totmem: %dk (hw estimate: %dk)\n",totmem>>10,totmem_hw>>10);
+			AvmLog("  totmem: %dk (hw estimate: %dk)\n",totmem>>10,totmem_hw>>10);
 
 			// g_tmp still contains the list of all active cached TBI
 			uint32_t rogues = 0;
@@ -190,7 +190,7 @@ namespace avmplus
 				if (g_tmp.find(g_tinfo[TMT_tbi].live[i]) < 0)
 				{
 					//Traitsp o = ((TraitsBindingsp)(g_live_tbi[i]))->owner;
-					//printf("   rogue TBI found: %p size=%d owned by %s %p\n", (void*)g_live_tbi[i], (uint32_t)GC::Size(live_tbi[i]), (char*)o->rawname, (void*)o);
+					//AvmLog("   rogue TBI found: %p size=%d owned by %s %p\n", (void*)g_live_tbi[i], (uint32_t)GC::Size(live_tbi[i]), (char*)o->rawname, (void*)o);
 					#ifdef _DEBUG
 					//g_tmcore->GetGC()->DumpBackPointerChain((void*)live_tbi[i]);
 					#endif
@@ -198,7 +198,7 @@ namespace avmplus
 				}
 			}
 			if (rogues>10)
-			printf(" **** found %d rogues\n",rogues);
+			AvmLog(" **** found %d rogues\n",rogues);
 
 			--g_in_delta;
 		}

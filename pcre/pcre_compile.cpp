@@ -6151,18 +6151,18 @@ case when building a production library. */
 
 #ifdef PCRE_DEBUG
 
-printf("Length = %d top_bracket = %d top_backref = %d\n",
+AvmLog("Length = %d top_bracket = %d top_backref = %d\n",
   length, re->top_bracket, re->top_backref);
 
-printf("Options=%08x\n", re->options);
+AvmLog("Options=%08x\n", re->options);
 
 if ((re->options & PCRE_FIRSTSET) != 0)
   {
   int ch = re->first_byte & 255;
   const char *caseless = ((re->first_byte & REQ_CASELESS) == 0)?
     "" : " (caseless)";
-  if (VMPI_isprint(ch)) printf("First char = %c%s\n", ch, caseless);
-    else printf("First char = \\x%02x%s\n", ch, caseless);
+  if (VMPI_isprint(ch)) AvmLog("First char = %c%s\n", ch, caseless);
+    else AvmLog("First char = \\x%02x%s\n", ch, caseless);
   }
 
 if ((re->options & PCRE_REQCHSET) != 0)
@@ -6170,8 +6170,8 @@ if ((re->options & PCRE_REQCHSET) != 0)
   int ch = re->req_byte & 255;
   const char *caseless = ((re->req_byte & REQ_CASELESS) == 0)?
     "" : " (caseless)";
-  if (VMPI_isprint(ch)) printf("Req char = %c%s\n", ch, caseless);
-    else printf("Req char = \\x%02x%s\n", ch, caseless);
+  if (VMPI_isprint(ch)) AvmLog("Req char = %c%s\n", ch, caseless);
+    else AvmLog("Req char = \\x%02x%s\n", ch, caseless);
   }
 
 pcre_printint(re, stdout, TRUE);

@@ -77,6 +77,10 @@
 #define VMPI_isalpha isalpha
 #define VMPI_abort   abort
 
+#ifdef UNDER_CE
+	#define vsnprintf _vsnprintf
+#endif
+
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -213,5 +217,34 @@ extern double		VMPI_getDate();
 * @return number of milliseconds elapsed
 */
 extern uint64_t		VMPI_getTime();
+
+/**
+* This method is called to output log messages
+* The implementation of this method is platform-defined
+*  @param message NULL-terminated UTF8-encoded string
+* @return none
+*/
+extern void VMPI_Log(const char* message);
+
+/**
+* This method is called to output debugging messages
+* This method is specifically for debugging purposes and is invoked to output useful debug informaton
+* The implementation of this method is platform-defined.  For example, it could be used to output the message to an IDE
+* @param message NULL-terminated UTF8-encoded string
+* @return none
+*/
+extern void VMPI_DebugLog(const char* message);
+
+/**
+* This method is called to interrupt the program execution during debugging
+* Upon a call to this method, the platform execution should interrupt the program execution
+* while maintaining the current call stack and associated program information such as the registers
+* and return the control back to the user/developer
+* This method is specifically for debugging purposes and is invoked to enter a debug interrupt to examine information like the variable values or call stack
+* The implementation of this method is platform-defined.
+* On platforms that cannot support debug interrupts the program execution should be aborted
+* @return none
+*/
+extern void VMPI_DebugBreak();
 
 #endif /* __avmplus_VMPI__ */

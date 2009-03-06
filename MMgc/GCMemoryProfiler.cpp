@@ -470,7 +470,8 @@ namespace MMgc
 			tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
 			*tp++ = '\n';
 			if(tp - out > 1500) {
-				fputs(out, stdout);
+				GCLog(out);
+				GCLog("\n");
 				tp = out;
 			}
 		}

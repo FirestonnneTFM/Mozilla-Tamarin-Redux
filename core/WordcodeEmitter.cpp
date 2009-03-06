@@ -576,7 +576,7 @@ namespace avmplus
 	{
 		(void)state;
 		(void)type;
-	  //printf("WordcodeEmitter::write %x\n", opcode);
+	  //AvmLog("WordcodeEmitter::write %x\n", opcode);
 
 		switch (opcode) {
 		case OP_coerce_a:
