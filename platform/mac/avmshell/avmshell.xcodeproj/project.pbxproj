@@ -329,6 +329,10 @@
 		3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5490F60A0B600E29821 /* GCLog.cpp */; };
 		3FDDC54F0F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
 		3FDDC5500F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
+		D940B6770F61C60300E72086 /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
+		D940B67A0F61C61000E72086 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */; };
+		D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
+		D940B67E0F61C62B00E72086 /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1542,6 +1546,10 @@
 				3FDDC5480F60A09D00E29821 /* GCDebug.cpp in Sources */,
 				3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */,
 				3FDDC5500F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */,
+				D940B6770F61C60300E72086 /* PosixPartialPlatform.cpp in Sources */,
+				D940B67A0F61C61000E72086 /* PosixPortUtils.cpp in Sources */,
+				D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */,
+				D940B67E0F61C62B00E72086 /* avmshellMac.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
