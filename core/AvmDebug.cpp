@@ -36,87 +36,35 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include <sys/time.h>
-#include <math.h> 
-
-#ifdef AVMPLUS_UNIX
-#include <time.h>
-#endif // AVMPLUS_UNIX
-
 #include "avmplus.h"
 
 namespace avmplus
 {
-	/*
-	 * Unix implementation of platform-dependent date and time code
-	 */
-
-#define kMsecPerDay     86400000
-#define kMsecPerHour    3600000
-#define kMsecPerSecond  1000
-#define kMsecPerMinute  60000
- 
-#define DIVCLOCK ( CLOCKS_PER_SEC / 1000 )
- 
-#define kMicroPerSec 1000000.0
-
-	double OSDep::localTZA(double /*ti*/)
+	void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
 	{
-		struct tm* t;
-		time_t current, localSec, globalSec;
+	#ifdef _DEBUG
+		char buf[1024];
+		va_list args;
+		va_start(args, format);
 
-		// The win32 implementation ignores the passed in time
-		// and uses current time instead, so to keep similar
-		// behaviour we will do the same
-		time( &current );
-	
-		t = localtime( &current );
-		localSec = mktime( t );
-
-		t = gmtime( &current );
-		globalSec = mktime( t );
-
-		return double( localSec - globalSec ) * 1000.0;
+		vsnprintf(buf, sizeof(buf), format, args);
+		va_end(args);
+		AvmDebugMsg(buf, debuggerBreak);
+	#else
+		(void)debuggerBreak;
+		(void)format;
+	#endif
 	}
- 
-	double OSDep::getDate()
+
+	void AvmDebugMsg(const char* p, bool debugBreak)
 	{
-		struct timeval tv;
-		struct timezone tz; // Unused
-
-		gettimeofday(&tv, &tz);
-		double v = (tv.tv_sec + (tv.tv_usec/kMicroPerSec)) * kMsecPerSecond;
-		double ip;
-		::modf(v, &ip); // strip fractional part
-		return ip;
-	}
-                  
-	//time is passed in as milliseconds from UTC.
-	double OSDep::daylightSavingTA(double newtime) // R41                           
-	{
-		struct tm *broken_down_time;
-
-		//convert time from milliseconds
-		newtime=newtime/kMsecPerSecond;
-
-		time_t time_t_time=(time_t)newtime;
-
-		//pull out a struct tm
-		broken_down_time = localtime( &time_t_time );
-
-		if (!broken_down_time)
-		{
-			return 0;
-		}
-
-		if (broken_down_time->tm_isdst > 0)
-		{
-			//daylight saving is definitely in effect.
-			//return # of milliseconds in one hour.
-			return kMsecPerHour;
-		}
-
-		//either daylight saving is not in effect, or we don't know (if tm_isdst is negative).
-		return 0;
-	}
+	#ifdef _DEBUG
+		VMPI_DebugLog(p);
+		if(debugBreak)
+			VMPI_DebugBreak();
+	#else
+		(void)p;
+		(void)debugBreak;
+	#endif
+	}	
 }

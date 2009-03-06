@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -12,15 +11,14 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine.].
+ * The Original Code is [Open Source Virtual Machine].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,79 +34,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#include "MMgc.h"
-
-#include <windows.h>
-#include <stdio.h>
-#include <stdarg.h>
-
-#ifdef _DEBUG
-#include <malloc.h>
-#include <strsafe.h>
-#endif
-
-
 /*************************************************************************/
 /******************************* Debugging *******************************/
 /*************************************************************************/
 
-#ifndef MB_SERVICE_NOTIFICATION
-#define MB_SERVICE_NOTIFICATION     0x00200000L
-#endif
+#include "VMPI.h"
 
-namespace MMgc
+void VMPI_DebugLog(const char* message)
 {
-	static const bool logToStdErr = true;
+	VMPI_Log(message);
+}
 
-	void GCDebugMsg(bool debuggerBreak, const char *format, ...)
-	{
-		// [ggrossman 09.24.04]
-		// Changed this to _DEBUG only because we don't link to
-		// CRT in Release builds, so vsprintf is unavailable!!
-#if defined (_DEBUG) && !defined(UNDER_CE)
-		va_list argptr;
-		va_start(argptr, format);
-		int bufferSize = _vscprintf(format, argptr)+1;
-
-		char *buffer = (char*)alloca(bufferSize+2);
-		if (buffer) {
-			StringCbVPrintf(buffer, bufferSize+1, format, argptr);
-			GCDebugMsg(buffer, debuggerBreak);
-		}
-#else
-		(void)debuggerBreak;
-		(void)format;
-#endif
-	}
-	
-	void GCDebugMsg(const char* msg, bool debugBreak)
-	{
-#ifndef UNDER_CE
-		// !!@ only unicode
-		OutputDebugStringA(msg);
-#else
-		DebugBreak();
-#endif
-		if(logToStdErr) {
- 			fprintf( stdout, "%s", msg );
-		}
-
-		if (debugBreak) {
-			DebugBreak();
-		}
-	}
-
-	void GCDebugMsg(const wchar* msg, bool debugBreak)
-	{
-		OutputDebugStringW((LPCWSTR)msg);
-		if(logToStdErr) {
- 			fprintf( stdout, "%S", msg );
-		}
-
-		if (debugBreak) {
-			DebugBreak();
-		}
-	}
-
+void VMPI_DebugBreak()
+{
+	abort();
 }

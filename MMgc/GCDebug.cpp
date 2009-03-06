@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -11,14 +12,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine].
+ * The Original Code is [Open Source Virtual Machine.].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2005-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,69 +36,39 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
 
-/*************************************************************************/
-/******************************* Debugging *******************************/
-/*************************************************************************/
+#include "MMgc.h"
 
-namespace avmplus
+namespace MMgc
 {
-	void AvmDebugMsg(bool debugBreak, const char *format, ...)
+	void GCDebugMsg(bool debuggerBreak, const char* format, ...)
 	{
-#ifdef _DEBUG
+		// [ggrossman 09.24.04]
+		// Changed this to _DEBUG only because we don't link to
+		// CRT in Release builds, so vsprintf is unavailable!!
+	#ifdef _DEBUG
+		char buf[1024];
 		va_list args;
 		va_start(args, format);
-		vfprintf(stderr, format, args);
+
+		vsnprintf(buf, sizeof(buf), format, args);
 		va_end(args);
-		if (debugBreak)
-			abort();
-#else
+		GCDebugMsg(buf, debuggerBreak);
+	#else
+		(void)debuggerBreak;
 		(void)format;
-		(void)debugBreak;
-#endif
-	}
-	
-	void AvmDebugMsg(const char* msg, bool debugBreak)
-	{
-#ifdef _DEBUG
-        fprintf( stderr, "%s", msg );
-		if (debugBreak)
-			abort();
-#else
-		(void)msg;
-		(void)debugBreak;
-#endif
+	#endif
 	}
 
-	size_t wcharStrlen(const wchar* msg)
+	void GCDebugMsg(const char* p, bool debugBreak)
 	{
-		size_t i = 0;
-		while (*msg++)
-			i++;
-		return i;
-	}
-
-	void AvmDebugMsg(const wchar* msg, bool debugBreak)
-	{
-#ifdef _DEBUG
-		// Not everyone can do UTF-8, but it's better than nothing.
-		size_t msgsize = wcharStrlen(msg) + 1;
-		size_t bufsize = 3 * msgsize;
-		uint8 *buf = new uint8[bufsize];
-
-		if (buf) {
-			UnicodeUtils::Utf16ToUtf8(msg, msgsize, buf, bufsize);
-			fprintf(stderr, "%s", reinterpret_cast<char *>(buf));
-			delete[] buf;
-		} else {
-			fprintf(stderr, "Warning: Out of memory in AvmDebugMsg.\n");
-		}
-		if (debugBreak)
-			abort();
-#else
-		(void)msg;
+	#ifdef _DEBUG
+		VMPI_DebugLog(p);
+		if(debugBreak)
+			VMPI_DebugBreak();
+	#else
+		(void)p;
 		(void)debugBreak;
-#endif
+	#endif
 	}
 }
