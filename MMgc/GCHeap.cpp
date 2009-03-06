@@ -270,7 +270,7 @@ namespace MMgc
 		// search from the end of the free list so we decommit big blocks
 		HeapBlock *freelist = freelists+kNumFreeLists-1;
 
-		HeapBlock *endOfBigFreelists = &freelists[GetFreeListIndex(kMinHeapIncrement)];
+		HeapBlock *endOfBigFreelists = &freelists[GetFreeListIndex(1)];
 
 		for (; freelist >= endOfBigFreelists && decommitSize > 0; freelist--)
 		{
