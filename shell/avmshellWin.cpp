@@ -222,9 +222,7 @@ namespace avmshell
 
 			TCHAR* logname = new TCHAR[filenameLen+1];
 
-			int n = mbstowcs(logname, filename, filenameLen);
-
-			_tcscpy(logname+n,_T(".log"));
+			mbstowcs(logname, filename, filenameLen+1);
 
 			_wfreopen(logname, L"w", stdout);
 
