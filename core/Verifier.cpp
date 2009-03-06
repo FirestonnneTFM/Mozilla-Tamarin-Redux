@@ -160,7 +160,7 @@ namespace avmplus
      */
     void Verifier::verify(CodeWriter * volatile coder)
     {
-      //printf("begin verify\n");
+      //AvmLog("begin verify\n");
         SAMPLE_FRAME("[verify]", core);
 
         #ifdef AVMPLUS_VERBOSE
@@ -3052,7 +3052,7 @@ namespace avmplus
 
 	void CFGWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode)
 	{
-	  //printf ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
+	  //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
 	  Block* b = blocks->get(state->pc);
 	  if (b) {
 		current = b;
@@ -3085,13 +3085,13 @@ namespace avmplus
 
 	void CFGWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
 	{
-	  //printf ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
+	  //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
 	  Block* b=blocks->get(state->pc);
 	  if (b) {
 		current = b;
 	  }
 
-	  //printf ("%i: %s %i\n", state->pc, opcodeInfo[opcode].name, opd1);
+	  //AvmLog ("%i: %s %i\n", state->pc, opcodeInfo[opcode].name, opd1);
 		switch (opcode) {
 		case OP_iflt:
 		case OP_ifle:
@@ -3160,13 +3160,13 @@ namespace avmplus
 
 	void CFGWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
 	{
-	  //printf ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
+	  //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
 	  Block* b=blocks->get(state->pc);
 	  if (b) {
 		current = b;
 	  }
 
-	  //printf ("%i: %s %i %i\n", state->pc, opcodeInfo[opcode].name, opd1, opd2);
+	  //AvmLog ("%i: %s %i %i\n", state->pc, opcodeInfo[opcode].name, opd1, opd2);
 	  //ctx->core->console << "  " << (uint32_t)state->pc << ":" << opcodeInfo[opcode].name << " " << opd1 << " " << opd2 << "\n";
 		if (coder) coder->writeOp2 (state, pc, opcode, opd1, opd2, type);
 	}

@@ -66,7 +66,7 @@ be absolutely sure we get our version. */
 #ifndef __MWERKS__
 #undef DPRINTF
 #ifdef PCRE_DEBUG
-#define DPRINTF(p) printf p
+#define DPRINTF(p) avmplus::AvmLog p
 #else
 #define DPRINTF(p) /* Nothing */
 #endif

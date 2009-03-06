@@ -46,6 +46,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/ArrayObject.cpp \
   $(curdir)/AtomArray.cpp \
   $(curdir)/AvmCore.cpp \
+  $(curdir)/AvmLog.cpp \
   $(curdir)/avmplusDebugger.cpp \
   $(curdir)/avmplusHashtable.cpp \
   $(curdir)/avmplusProfiler.cpp \
@@ -117,15 +118,9 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(NULL)
 
 ifdef ENABLE_DEBUG
-ifeq (windows,$(TARGET_OS))
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/AvmDebugWin.cpp \
+  $(curdir)/AvmDebug.cpp \
   $(NULL)
-else
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/AvmDebugUnix.cpp \
-  $(NULL)
-endif
 endif
 
 #  $(curdir)/avmplus.cpp \

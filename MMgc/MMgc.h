@@ -99,6 +99,8 @@
 #endif
 
 #include "GCDebug.h"
+#include "GCLog.h"
+
 /*
  * If _GCHeapLock is defined, a spin lock is used for thread safety
  * on all public API's (Alloc, Free, ExpandHeap)

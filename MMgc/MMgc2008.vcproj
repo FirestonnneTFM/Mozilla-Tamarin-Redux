@@ -1453,11 +1453,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GCDebug.h"
+				RelativePath=".\GCDebug.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCDebugWin.cpp"
+				RelativePath=".\GCDebug.h"
 				>
 			</File>
 			<File
@@ -1486,6 +1486,14 @@
 			</File>
 			<File
 				RelativePath="GCLargeAlloc.h"
+				>
+			</File>
+			<File
+				RelativePath="GCLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="GCLog.h"
 				>
 			</File>
 			<File

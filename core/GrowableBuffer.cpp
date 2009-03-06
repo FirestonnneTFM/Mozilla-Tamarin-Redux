@@ -1155,7 +1155,7 @@ namespace avmplus
     bool BufferGuard::handleException(byte * /*addr*/)
     {
 #ifdef _DEBUG
-        printf("BufferGuard::handleException: not implemented yet\n");
+        AvmLog("BufferGuard::handleException: not implemented yet\n");
 #endif
         return false;
     }

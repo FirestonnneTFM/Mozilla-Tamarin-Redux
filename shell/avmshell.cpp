@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 #include "avmshell.h"
 
 #include "Platform.h"
@@ -84,63 +83,63 @@ namespace avmshell
 
 	void Shell::usage()
 	{
-		printf("avmplus shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n\n");
-		printf("usage: avmplus\n");
+		AvmLog("avmplus shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n\n");
+		AvmLog("usage: avmplus\n");
 		#ifdef DEBUGGER
-			printf("          [-d]          enter debugger on start\n");
+			AvmLog("          [-d]          enter debugger on start\n");
 		#endif
-		printf("          [-memstats]   generate statistics on memory usage\n");
-		printf("          [-memlimit d] limit the heap size to d pages\n");
+		AvmLog("          [-memstats]   generate statistics on memory usage\n");
+		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
 
-		printf("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
-		printf("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
+		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
+		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
 
 		#ifdef _DEBUG
-			printf("          [-Dgreedy]    collect before every allocation\n");
+			AvmLog("          [-Dgreedy]    collect before every allocation\n");
 		#endif /* _DEBUG */
 		#ifdef DEBUGGER
-			printf("          [-Dnogc]      don't collect\n");
-			printf("          [-Dnoincgc]   don't use incremental collection\n");
-			printf("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
-			printf("          [-Dlanguage l] localize runtime errors, languages are:\n");
-			printf("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
+			AvmLog("          [-Dnogc]      don't collect\n");
+			AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+			AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
+			AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
+			AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 		#endif
 
-		printf("          [-Dinterp]    do not generate machine code, interpret instead\n");
+		AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
 
 		#ifdef AVMPLUS_VERBOSE
-			printf("          [-Dverbose]   trace every instruction (verbose!)\n");
-			printf("          [-Dverbose_init] trace the builtins too\n");
-			printf("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
+			AvmLog("          [-Dverbose]   trace every instruction (verbose!)\n");
+			AvmLog("          [-Dverbose_init] trace the builtins too\n");
+			AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
 		#endif
 
     #if defined FEATURE_NANOJIT
-		printf("          [-Ojit]       use jit always, never interp\n");
-		printf("          [-Dnocse]     disable CSE optimization \n");
+		AvmLog("          [-Ojit]       use jit always, never interp\n");
+		AvmLog("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32
-        printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
+        AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         #endif /* AVMPLUS_IA32 */
     #endif
 	#ifdef AVMPLUS_JITMAX
-		printf("          [-jitmax N]   only execute the first N jit'd methods, interpret after.");
+		AvmLog("          [-jitmax N]   only execute the first N jit'd methods, interpret after.");
 	#endif
 		
 		#ifdef AVMPLUS_VERIFYALL
-	    printf("          [-Dverifyall] verify greedily instead of lazily\n");
+	    AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
 		#endif
 		#ifdef AVMPLUS_SELFTEST
-		printf("          [-Dselftest[=component,category,test]]  run selftests\n");
+		AvmLog("          [-Dselftest[=component,category,test]]  run selftests\n");
 		#endif
-		printf("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
-		printf("          [-error]      crash opens debug dialog, instead of dumping\n");
+		AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
+		AvmLog("          [-error]      crash opens debug dialog, instead of dumping\n");
 		#ifdef VMCFG_EVAL
-		printf("          [-repl]       read-eval-print mode\n");
+		AvmLog("          [-repl]       read-eval-print mode\n");
 		#endif // VMCFG_EVAL
-		printf("          [-log]\n");
-		printf("          [-- args]     args passed to AS3 program\n");
-		printf("          [-jargs ... ;] args passed to Java runtime\n");
-		printf("          filename.abc ...\n");
-		printf("          [--] application args\n");
+		AvmLog("          [-log]\n");
+		AvmLog("          [-- args]     args passed to AS3 program\n");
+		AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
+		AvmLog("          filename.abc ...\n");
+		AvmLog("          [--] application args\n");
 		Platform::GetInstance()->exit(1);
 	}
 
@@ -303,7 +302,7 @@ namespace avmshell
 			{
 				String* code_string = NULL;
 				bool record_time = false;
-				fprintf(stdout, "> ");
+				AvmLog("> ");
 
 				if(Platform::GetInstance()->getUserInput(commandLine, kMaxCommandLine) == NULL)
 					return;

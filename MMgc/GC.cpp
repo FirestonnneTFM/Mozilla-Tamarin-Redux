@@ -943,7 +943,7 @@ bail:
 
 #ifdef MMGC_MEMORY_PROFILER
 		if(heap->Config().autoGCStats) {
-			fprintf(stdout, "Before sweep memory info:\n");
+			GCLog("Before sweep memory info:\n");
 			DumpMemoryInfo();
 		}
 #endif
@@ -1008,7 +1008,7 @@ bail:
 
 #ifdef MMGC_MEMORY_PROFILER
 		if(heap->Config().autoGCStats) {			
-			fprintf(stdout, "After sweep memory info:\n");
+			GCLog("After sweep memory info:\n");
 			DumpMemoryInfo();
 		}
 #endif

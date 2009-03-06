@@ -246,7 +246,6 @@
 		079DFAB30F3A96BE0031D1B4 /* GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8D0F3A96BD0031D1B4 /* GC.cpp */; };
 		079DFAB40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8E0F3A96BD0031D1B4 /* GCAlloc.cpp */; };
 		079DFAB50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA910F3A96BD0031D1B4 /* GCAllocObjectMac.cpp */; };
-		079DFAB60F3A96BE0031D1B4 /* GCDebugMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA930F3A96BD0031D1B4 /* GCDebugMac.cpp */; };
 		079DFAB70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */; };
 		079DFAB80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA960F3A96BD0031D1B4 /* GCHashtable.cpp */; };
 		079DFAB90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */; };
@@ -262,7 +261,6 @@
 		079DFAC30F3A96BE0031D1B4 /* GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8D0F3A96BD0031D1B4 /* GC.cpp */; };
 		079DFAC40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8E0F3A96BD0031D1B4 /* GCAlloc.cpp */; };
 		079DFAC50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA910F3A96BD0031D1B4 /* GCAllocObjectMac.cpp */; };
-		079DFAC60F3A96BE0031D1B4 /* GCDebugMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA930F3A96BD0031D1B4 /* GCDebugMac.cpp */; };
 		079DFAC70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */; };
 		079DFAC80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA960F3A96BD0031D1B4 /* GCHashtable.cpp */; };
 		079DFAC90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */; };
@@ -321,8 +319,16 @@
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
-		D9B8153C0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */; };
-		D9B8153D0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */; };
+		3FDDC5420F60A07400E29821 /* AvmDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */; };
+		3FDDC5430F60A07400E29821 /* AvmLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5400F60A07400E29821 /* AvmLog.cpp */; };
+		3FDDC5440F60A07400E29821 /* AvmDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */; };
+		3FDDC5450F60A07400E29821 /* AvmLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5400F60A07400E29821 /* AvmLog.cpp */; };
+		3FDDC5470F60A09D00E29821 /* GCDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5460F60A09D00E29821 /* GCDebug.cpp */; };
+		3FDDC5480F60A09D00E29821 /* GCDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5460F60A09D00E29821 /* GCDebug.cpp */; };
+		3FDDC54B0F60A0B600E29821 /* GCLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5490F60A0B600E29821 /* GCLog.cpp */; };
+		3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5490F60A0B600E29821 /* GCLog.cpp */; };
+		3FDDC54F0F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
+		3FDDC5500F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -406,7 +412,6 @@
 		079DF7C50F3A882D0031D1B4 /* avmbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmbuild.h; path = ../../../core/avmbuild.h; sourceTree = SOURCE_ROOT; };
 		079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmCore.cpp; path = ../../../core/AvmCore.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7C70F3A882D0031D1B4 /* AvmCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmCore.h; path = ../../../core/AvmCore.h; sourceTree = SOURCE_ROOT; };
-		079DF7C80F3A882D0031D1B4 /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmDebug.h; path = ../../../core/AvmDebug.h; sourceTree = SOURCE_ROOT; };
 		079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmplus.cpp; path = ../../../core/avmplus.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7CB0F3A882D0031D1B4 /* avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplus.h; path = ../../../core/avmplus.h; sourceTree = SOURCE_ROOT; };
 		079DF7CC0F3A882D0031D1B4 /* avmplus_stdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplus_stdint.h; path = ../../../core/avmplus_stdint.h; sourceTree = SOURCE_ROOT; };
@@ -657,7 +662,6 @@
 		079DFA900F3A96BD0031D1B4 /* GCAllocObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCAllocObject.h; path = ../../../MMgc/GCAllocObject.h; sourceTree = SOURCE_ROOT; };
 		079DFA910F3A96BD0031D1B4 /* GCAllocObjectMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectMac.cpp; path = ../../../MMgc/GCAllocObjectMac.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA920F3A96BD0031D1B4 /* GCDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDebug.h; path = ../../../MMgc/GCDebug.h; sourceTree = SOURCE_ROOT; };
-		079DFA930F3A96BD0031D1B4 /* GCDebugMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCDebugMac.cpp; path = ../../../MMgc/GCDebugMac.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA950F3A96BD0031D1B4 /* GCGlobalNew.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCGlobalNew.h; path = ../../../MMgc/GCGlobalNew.h; sourceTree = SOURCE_ROOT; };
 		079DFA960F3A96BD0031D1B4 /* GCHashtable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHashtable.cpp; path = ../../../MMgc/GCHashtable.cpp; sourceTree = SOURCE_ROOT; };
@@ -714,9 +718,6 @@
 		07A8D2D20F5EEA2B0005E66C /* GCAllocObjectGeneric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectGeneric.cpp; path = ../../../MMgc/GCAllocObjectGeneric.cpp; sourceTree = SOURCE_ROOT; };
 		07A8D2D30F5EEA2B0005E66C /* GCAllocObjectUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectUnix.cpp; path = ../../../MMgc/GCAllocObjectUnix.cpp; sourceTree = SOURCE_ROOT; };
 		07A8D2D40F5EEA2B0005E66C /* GCAllocObjectWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectWin.cpp; path = ../../../MMgc/GCAllocObjectWin.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2D50F5EEA2B0005E66C /* GCDebugGeneric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCDebugGeneric.cpp; path = ../../../MMgc/GCDebugGeneric.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2D60F5EEA2B0005E66C /* GCDebugUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCDebugUnix.cpp; path = ../../../MMgc/GCDebugUnix.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2D70F5EEA2B0005E66C /* GCDebugWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCDebugWin.cpp; path = ../../../MMgc/GCDebugWin.cpp; sourceTree = SOURCE_ROOT; };
 		07A8D2D80F5EEA2B0005E66C /* GCHeapGeneric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeapGeneric.cpp; path = ../../../MMgc/GCHeapGeneric.cpp; sourceTree = SOURCE_ROOT; };
 		07A8D2D90F5EEA2B0005E66C /* GCHeapUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeapUnix.cpp; path = ../../../MMgc/GCHeapUnix.cpp; sourceTree = SOURCE_ROOT; };
 		07A8D2DA0F5EEA2B0005E66C /* GCHeapWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeapWin.cpp; path = ../../../MMgc/GCHeapWin.cpp; sourceTree = SOURCE_ROOT; };
@@ -733,8 +734,15 @@
 		3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPartialPlatform.cpp; path = ../../../shell/PosixPartialPlatform.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BCB0F54B223009A93FE /* PosixPartialPlatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PosixPartialPlatform.h; path = ../../../shell/PosixPartialPlatform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmshellMac.cpp; path = ../../../shell/avmshellMac.cpp; sourceTree = SOURCE_ROOT; };
+		3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmDebug.cpp; path = ../../../core/AvmDebug.cpp; sourceTree = SOURCE_ROOT; };
+		3FDDC53F0F60A07400E29821 /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmDebug.h; path = ../../../core/AvmDebug.h; sourceTree = SOURCE_ROOT; };
+		3FDDC5400F60A07400E29821 /* AvmLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmLog.cpp; path = ../../../core/AvmLog.cpp; sourceTree = SOURCE_ROOT; };
+		3FDDC5410F60A07400E29821 /* AvmLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmLog.h; path = ../../../core/AvmLog.h; sourceTree = SOURCE_ROOT; };
+		3FDDC5460F60A09D00E29821 /* GCDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCDebug.cpp; path = ../../../MMgc/GCDebug.cpp; sourceTree = SOURCE_ROOT; };
+		3FDDC5490F60A0B600E29821 /* GCLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCLog.cpp; path = ../../../MMgc/GCLog.cpp; sourceTree = SOURCE_ROOT; };
+		3FDDC54A0F60A0B600E29821 /* GCLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCLog.h; path = ../../../MMgc/GCLog.h; sourceTree = SOURCE_ROOT; };
+		3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../shell/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
-		D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmDebugMac.cpp; path = ../AvmDebugMac.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -839,7 +847,10 @@
 				079DF7C50F3A882D0031D1B4 /* avmbuild.h */,
 				079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */,
 				079DF7C70F3A882D0031D1B4 /* AvmCore.h */,
-				079DF7C80F3A882D0031D1B4 /* AvmDebug.h */,
+				3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */,
+				3FDDC53F0F60A07400E29821 /* AvmDebug.h */,
+				3FDDC5400F60A07400E29821 /* AvmLog.cpp */,
+				3FDDC5410F60A07400E29821 /* AvmLog.h */,
 				079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */,
 				079DF7CB0F3A882D0031D1B4 /* avmplus.h */,
 				079DF7CC0F3A882D0031D1B4 /* avmplus_stdint.h */,
@@ -1039,13 +1050,7 @@
 		079DF7B40F3A87020031D1B4 /* shell */ = {
 			isa = PBXGroup;
 			children = (
-				3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */,
 				3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */,
-				3F5B2BC70F54B223009A93FE /* Platform.h */,
-				3F5B2BC80F54B223009A93FE /* PosixFile.cpp */,
-				3F5B2BC90F54B223009A93FE /* PosixFile.h */,
-				3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */,
-				3F5B2BCB0F54B223009A93FE /* PosixPartialPlatform.h */,
 				079DF95C0F3A898A0031D1B4 /* avmshell.cpp */,
 				079DF95D0F3A898A0031D1B4 /* avmshell.h */,
 				079DF95E0F3A898A0031D1B4 /* ConsoleOutputStream.cpp */,
@@ -1057,6 +1062,13 @@
 				079DF9640F3A898A0031D1B4 /* FileInputStream.cpp */,
 				079DF9650F3A898A0031D1B4 /* FileInputStream.h */,
 				079DF9660F3A898A0031D1B4 /* genericzlib.h */,
+				3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */,
+				3F5B2BC70F54B223009A93FE /* Platform.h */,
+				3F5B2BC80F54B223009A93FE /* PosixFile.cpp */,
+				3F5B2BC90F54B223009A93FE /* PosixFile.h */,
+				3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */,
+				3F5B2BCB0F54B223009A93FE /* PosixPartialPlatform.h */,
+				3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */,
 				079DF98C0F3A89FD0031D1B4 /* Profiler.h */,
 				079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */,
 				079DF9920F3A8A320031D1B4 /* SamplerScript.h */,
@@ -1148,7 +1160,6 @@
 		079DF9C20F3A8BC10031D1B4 /* platform */ = {
 			isa = PBXGroup;
 			children = (
-				D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */,
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
 				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
@@ -1192,10 +1203,7 @@
 				07A8D2D30F5EEA2B0005E66C /* GCAllocObjectUnix.cpp */,
 				07A8D2D40F5EEA2B0005E66C /* GCAllocObjectWin.cpp */,
 				079DFA920F3A96BD0031D1B4 /* GCDebug.h */,
-				07A8D2D50F5EEA2B0005E66C /* GCDebugGeneric.cpp */,
-				079DFA930F3A96BD0031D1B4 /* GCDebugMac.cpp */,
-				07A8D2D60F5EEA2B0005E66C /* GCDebugUnix.cpp */,
-				07A8D2D70F5EEA2B0005E66C /* GCDebugWin.cpp */,
+				3FDDC5460F60A09D00E29821 /* GCDebug.cpp */,
 				079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */,
 				079DFA950F3A96BD0031D1B4 /* GCGlobalNew.h */,
 				079DFA960F3A96BD0031D1B4 /* GCHashtable.cpp */,
@@ -1208,6 +1216,8 @@
 				07A8D2DA0F5EEA2B0005E66C /* GCHeapWin.cpp */,
 				079DFA9B0F3A96BD0031D1B4 /* GCLargeAlloc.cpp */,
 				079DFA9C0F3A96BD0031D1B4 /* GCLargeAlloc.h */,
+				3FDDC5490F60A0B600E29821 /* GCLog.cpp */,
+				3FDDC54A0F60A0B600E29821 /* GCLog.h */,
 				079DFA9D0F3A96BD0031D1B4 /* GCMemoryProfiler.cpp */,
 				079DFA9E0F3A96BE0031D1B4 /* GCMemoryProfiler.h */,
 				079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */,
@@ -1483,7 +1493,6 @@
 				079DFAC30F3A96BE0031D1B4 /* GC.cpp in Sources */,
 				079DFAC40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */,
 				079DFAC50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */,
-				079DFAC60F3A96BE0031D1B4 /* GCDebugMac.cpp in Sources */,
 				079DFAC70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */,
 				079DFAC80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */,
 				079DFAC90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */,
@@ -1514,7 +1523,6 @@
 				079DFB300F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */,
 				079DFB310F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */,
 				07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */,
-				D9B8153D0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */,
 				072EA0F70F4C1CE9009F11E6 /* eval-abc.cpp in Sources */,
 				072EA0F80F4C1CE9009F11E6 /* eval-cogen-expr.cpp in Sources */,
 				072EA0F90F4C1CE9009F11E6 /* eval-cogen-stmt.cpp in Sources */,
@@ -1529,6 +1537,11 @@
 				072EA1020F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */,
 				072EA1030F4C1CE9009F11E6 /* eval-util.cpp in Sources */,
 				0715396E0F507325004E398F /* eval-avmplus.cpp in Sources */,
+				3FDDC5440F60A07400E29821 /* AvmDebug.cpp in Sources */,
+				3FDDC5450F60A07400E29821 /* AvmLog.cpp in Sources */,
+				3FDDC5480F60A09D00E29821 /* GCDebug.cpp in Sources */,
+				3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */,
+				3FDDC5500F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1644,7 +1657,6 @@
 				079DFAB30F3A96BE0031D1B4 /* GC.cpp in Sources */,
 				079DFAB40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */,
 				079DFAB50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */,
-				079DFAB60F3A96BE0031D1B4 /* GCDebugMac.cpp in Sources */,
 				079DFAB70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */,
 				079DFAB80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */,
 				079DFAB90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */,
@@ -1675,7 +1687,6 @@
 				079DFB2D0F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */,
 				079DFB2E0F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */,
 				07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */,
-				D9B8153C0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */,
 				072EA0EA0F4C1CE9009F11E6 /* eval-abc.cpp in Sources */,
 				072EA0EB0F4C1CE9009F11E6 /* eval-cogen-expr.cpp in Sources */,
 				072EA0EC0F4C1CE9009F11E6 /* eval-cogen-stmt.cpp in Sources */,
@@ -1694,6 +1705,11 @@
 				3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */,
 				3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */,
 				3F4F95590F6036CD009D9F22 /* PosixPortUtils.cpp in Sources */,
+				3FDDC5420F60A07400E29821 /* AvmDebug.cpp in Sources */,
+				3FDDC5430F60A07400E29821 /* AvmLog.cpp in Sources */,
+				3FDDC5470F60A09D00E29821 /* GCDebug.cpp in Sources */,
+				3FDDC54B0F60A0B600E29821 /* GCLog.cpp in Sources */,
+				3FDDC54F0F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

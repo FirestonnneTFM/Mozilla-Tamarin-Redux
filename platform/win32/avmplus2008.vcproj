@@ -1524,11 +1524,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\AvmDebug.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\AvmDebug.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AvmDebugWin.cpp"
+				RelativePath="..\..\core\AvmLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\AvmLog.h"
 				>
 			</File>
 			<File

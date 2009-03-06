@@ -492,7 +492,7 @@ nosym:
 		}
 
 		StringCchPrintfA(buff, buffSize, "%s", pSym->Name);
-		//printf("%s\n", pSym->Name);
+		//GCLog("%s\n", pSym->Name);
 		return;
 
 nosym:	
