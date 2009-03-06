@@ -11,14 +11,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine].
+ * The Original Code is [Open Source Virtual Machine.].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2005-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,26 +35,36 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
+#include "VMPI.h"
+
+#ifdef _DEBUG
+	#include <windows.h>
+	#include <malloc.h>
+	#ifndef UNDER_CE
+		#include <DbgHelp.h>
+	#endif
+	#include <strsafe.h>
+#endif
 
 /*************************************************************************/
 /******************************* Debugging *******************************/
 /*************************************************************************/
 
-namespace avmplus
+void VMPI_DebugLog(const char* message)
 {
-	void AvmDebugMsg(bool /*debuggerBreak*/, const char *format, ...)
-	{
-		(void)format;
-	}
-	
-	void AvmDebugMsg(const char* msg, bool /*debugBreak*/)
-	{
-		(void)msg;
-	}
+#ifndef UNDER_CE
+	OutputDebugStringA(message);
+#else
+	// !!@ only unicode is supported
+	//OutputDebugStringW(unicode msg);
+	VMPI_Log(message); //for windows mobile
+#endif
 
-	void AvmDebugMsg(const wchar* msg, bool /*debugBreak*/)
-	{
-		(void)msg;
-	}
+	VMPI_Log( message ); //also log to standard output
+}
+
+
+void VMPI_DebugBreak()
+{
+	DebugBreak();
 }

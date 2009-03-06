@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +16,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2007
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -38,22 +39,37 @@
 
 #include "MMgc.h"
 
+#if !defined(__MWERKS__) && !defined(MMGC_MAC_NO_CORE_SERVICES)
+    #include <CoreServices/CoreServices.h>
+#endif
 
+#ifndef __MACH__
+	#include <windows.h>
+#endif
 
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
-/*************************************************************************/
-/******************************* Debugging *******************************/
-/*************************************************************************/
-
-namespace MMgc
+void VMPI_DebugLog(const char* message)
 {
-	void GCDebugMsg(bool /*debuggerBreak*/, const char* format, ...)
-	{
-		(void)format;
-	}
+#ifdef DARWIN
+		VMPI_Log(message);
+#else
+		char buf[256];
+		VMPI_strncpy(buf, message, sizeof(buf)-1);
+		buf[sizeof(buf)-1] = '\0';
+		::CopyCStringToPascal(buf, (StringPtr)buf);
+		DebugStr((StringPtr) buf);
 
-	void GCDebugMsg(const char* p, bool /*debugBreak*/)
-	{
-		(void)p;
-	}
+#endif /* DARWIN */
+}
+
+void VMPI_DebugBreak()
+{
+#ifdef DARWIN
+	abort();
+#else
+	exit(1);
+#endif
 }
