@@ -43,7 +43,7 @@ namespace avmshell
 	int ConsoleOutputStream::write(const void *buffer,
 								   int count)
 	{
-#ifdef NO_CONSOLE_FWRITE
+	#ifdef NO_CONSOLE_FWRITE
 		// Not the most efficient code, but some versions of fwrite to stdout,
 		// fputc, putc and putchar don't seem to work. 
 		int c = count;
@@ -53,10 +53,10 @@ namespace avmshell
 			printf("%c", *out++);
 		}
 		return count;
-#else
+	#else
 		int result = (int) fwrite(buffer, 1, count, stdout);
 		fflush(stdout);
 		return result;
-#endif
+	#endif
 	}
 }

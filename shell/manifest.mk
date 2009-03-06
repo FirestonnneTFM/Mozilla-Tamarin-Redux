@@ -68,3 +68,37 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_avmplus_peephole.cpp \
   $(curdir)/../extensions/ST_mmgc_basics.cpp \
   $(NULL)
+  
+  
+ifeq (windows,$(TARGET_OS))
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/avmshellWin.cpp \
+  $(curdir)/WinFile.cpp \
+  $(NULL)
+endif
+
+ifeq (darwin,$(TARGET_OS))
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/avmshellMac.cpp \
+  $(curdir)/PosixFile.cpp \
+  $(curdir)/PosixPartialPlatform.cpp \
+  $(NULL)
+endif
+
+ifeq (linux,$(TARGET_OS))
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/avmshellUnix.cpp \
+  $(curdir)/PosixFile.cpp \
+  $(curdir)/PosixPartialPlatform.cpp \
+  $(NULL)
+endif
+
+ifeq (sunos,$(TARGET_OS))
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/avmshellUnix.cpp \
+  $(curdir)/PosixFile.cpp \
+  $(curdir)/PosixPartialPlatform.cpp \
+  $(NULL)
+endif
+
+

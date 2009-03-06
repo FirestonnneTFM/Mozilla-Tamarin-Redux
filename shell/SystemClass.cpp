@@ -68,7 +68,7 @@ namespace avmshell
 
 	void SystemClass::exit(int status)
 	{
-		::exit(status);
+		Platform::GetInstance()->exit(status);
 	}
 
 	int SystemClass::exec(Stringp command)
@@ -163,11 +163,7 @@ namespace avmshell
     }
 
 	int SystemClass::user_argc;
-#ifdef UNDER_CE
-	TCHAR **SystemClass::user_argv;
-#else
 	char **SystemClass::user_argv;
-#endif
 
 	ArrayObject * SystemClass::getArgv()
 	{
@@ -177,11 +173,7 @@ namespace avmshell
 
 		ArrayObject *array = toplevel->arrayClass->newArray();
 		for(int i=0; i<user_argc;i++)
-#ifdef UNDER_CE
-			array->setUintProperty(i, core->newStringUTF16(user_argv[i])->atom());
-#else
-			array->setUintProperty(i, core->newStringLatin1(user_argv[i])->atom());
-#endif
+			array->setUintProperty(i, core->newStringUTF8(user_argv[i])->atom());
 
 		return array;
 	}
