@@ -1840,6 +1840,7 @@ namespace avmplus
 		    pool->parseMultiname(name, imm30);
 		    Traits* itraits = pool->getTraits(name, state->verifier->getToplevel(this));
 			emit(state, opcode, (uintptr)itraits, sp, BOOLEAN_TYPE);
+			break;
 		}
 
 		case OP_istypelate: 
