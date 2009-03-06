@@ -1533,7 +1533,7 @@ namespace avmplus
 
 		/* The sequence always starts with 1. */
 		//    pRandomFast->uValue = 1L;
-		pRandomFast->uValue = (uint32_t)(OSDep::currentTimeMillis());
+		pRandomFast->uValue = (uint32_t)(VMPI_getTime());
 
 		/* Figure out the sequence length (2^n - 1). */
 		pRandomFast->uSequenceLength = (1L << n) - 1L;
