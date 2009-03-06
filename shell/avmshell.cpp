@@ -357,10 +357,10 @@ namespace avmshell
 					double then = 0, now = 0;
 					code_string = code_string->appendLatin1("\0", 1);
 					if (record_time) 
-						then = OSDep::getDate();
+						then = VMPI_getDate();
 					Atom result = handleActionSource(code_string, NULL, domainEnv, toplevel, NULL, codeContext);
 					if (record_time) 
-						now = OSDep::getDate();
+						now = VMPI_getDate();
 					if (result != undefinedAtom)
 						console << string(result) << "\n";
 					if (record_time)
@@ -765,7 +765,7 @@ namespace avmshell
 				}
 
 				//if no extension then take the entire filename or 
-				int logFilenameLen = (lastDot == NULL) ? VMPI_strlen(filename) : (lastDot - filename); 
+				size_t logFilenameLen = (lastDot == NULL) ? VMPI_strlen(filename) : (lastDot - filename); 
 
 				char* logFilename = new char[logFilenameLen + 5];  // 5 bytes for ".log" + null char
 				VMPI_strncpy(logFilename,filename,logFilenameLen);

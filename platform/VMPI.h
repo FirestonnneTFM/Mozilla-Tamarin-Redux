@@ -189,4 +189,29 @@ FILE *VMPI_HandleToStream(void *handle);
 void VMPI_CloseNamedPipe(void *handle);
 #endif
 
+/**
+* This method should return the difference in milliseconds between local time and UTC
+* @return offset in milliseconds
+*/
+extern double		VMPI_getLocalTimeOffset();
+
+/**
+* This method should return the Daylight Savings time adjustment in milliseconds
+* @return number of milliseconds corresponding to daylight savings adjustment when active, 0 otherwise
+*/
+extern double		VMPI_getDaylightSavingsTA(double time);
+
+/**
+* This method should return the current UTC date and time in milliseconds
+* @return UTC date and time in milliseconds
+*/
+extern double		VMPI_getDate();
+
+/**
+* This method should return the system time in milliseconds
+* The implementation of this method could either return the time elapsed since the system started or since epoc
+* @return number of milliseconds elapsed
+*/
+extern uint64_t		VMPI_getTime();
+
 #endif /* __avmplus_VMPI__ */

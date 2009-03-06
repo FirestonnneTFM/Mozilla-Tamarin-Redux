@@ -198,12 +198,13 @@ namespace avmplus
 	/* This needs to be publicly available, for Mac edge code. (srj) */
 	double UTC(double t)
 	{
-		return (t - OSDep::localTZA(t) - OSDep::daylightSavingTA(t - OSDep::localTZA(t)));
+		double adj = VMPI_getLocalTimeOffset();
+		return (t - adj - VMPI_getDaylightSavingsTA(t - adj));
 	}
 
 	static double LocalTime(double t)
 	{
-		return (t + OSDep::localTZA(t) + OSDep::daylightSavingTA(t));
+		return (t + VMPI_getLocalTimeOffset() + VMPI_getDaylightSavingsTA(t));
 	}
 
 	// this needs to be publicly available, for data paraser
@@ -306,7 +307,7 @@ namespace avmplus
 
 	Date::Date()
 	{
-		m_time = OSDep::getDate();
+		m_time = VMPI_getDate();
 	}
 		
 	Date::Date(double year,

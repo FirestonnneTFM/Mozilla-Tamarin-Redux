@@ -307,10 +307,8 @@
 		079DFB230F3A97EE0031D1B4 /* pcre_valid_utf8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB010F3A97EE0031D1B4 /* pcre_valid_utf8.cpp */; };
 		079DFB240F3A97EE0031D1B4 /* pcre_version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB020F3A97EE0031D1B4 /* pcre_version.cpp */; };
 		079DFB250F3A97EE0031D1B4 /* pcre_xclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB030F3A97EE0031D1B4 /* pcre_xclass.cpp */; };
-		079DFB2C0F3A98E60031D1B4 /* DateUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB290F3A98E60031D1B4 /* DateUnix.cpp */; };
 		079DFB2D0F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */; };
 		079DFB2E0F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */; };
-		079DFB2F0F3A98E60031D1B4 /* DateUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB290F3A98E60031D1B4 /* DateUnix.cpp */; };
 		079DFB300F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */; };
 		079DFB310F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */; };
 		079DFB680F3A9C350031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
@@ -319,6 +317,7 @@
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
+		3F4F95590F6036CD009D9F22 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
@@ -708,7 +707,6 @@
 		079DFB010F3A97EE0031D1B4 /* pcre_valid_utf8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_valid_utf8.cpp; path = ../../../pcre/pcre_valid_utf8.cpp; sourceTree = SOURCE_ROOT; };
 		079DFB020F3A97EE0031D1B4 /* pcre_version.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_version.cpp; path = ../../../pcre/pcre_version.cpp; sourceTree = SOURCE_ROOT; };
 		079DFB030F3A97EE0031D1B4 /* pcre_xclass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_xclass.cpp; path = ../../../pcre/pcre_xclass.cpp; sourceTree = SOURCE_ROOT; };
-		079DFB290F3A98E60031D1B4 /* DateUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DateUnix.cpp; path = ../../unix/DateUnix.cpp; sourceTree = SOURCE_ROOT; };
 		079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MathUtilsUnix.cpp; path = ../../unix/MathUtilsUnix.cpp; sourceTree = SOURCE_ROOT; };
 		079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OSDepUnix.cpp; path = ../../unix/OSDepUnix.cpp; sourceTree = SOURCE_ROOT; };
 		079DFB670F3A9C350031D1B4 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -728,6 +726,7 @@
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
+		3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../shell/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BC70F54B223009A93FE /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../../shell/Platform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC80F54B223009A93FE /* PosixFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixFile.cpp; path = ../../../shell/PosixFile.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BC90F54B223009A93FE /* PosixFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PosixFile.h; path = ../../../shell/PosixFile.h; sourceTree = SOURCE_ROOT; };
@@ -1040,6 +1039,7 @@
 		079DF7B40F3A87020031D1B4 /* shell */ = {
 			isa = PBXGroup;
 			children = (
+				3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */,
 				3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */,
 				3F5B2BC70F54B223009A93FE /* Platform.h */,
 				3F5B2BC80F54B223009A93FE /* PosixFile.cpp */,
@@ -1149,7 +1149,6 @@
 			isa = PBXGroup;
 			children = (
 				D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */,
-				079DFB290F3A98E60031D1B4 /* DateUnix.cpp */,
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
 				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
@@ -1512,7 +1511,6 @@
 				079DFB230F3A97EE0031D1B4 /* pcre_valid_utf8.cpp in Sources */,
 				079DFB240F3A97EE0031D1B4 /* pcre_version.cpp in Sources */,
 				079DFB250F3A97EE0031D1B4 /* pcre_xclass.cpp in Sources */,
-				079DFB2F0F3A98E60031D1B4 /* DateUnix.cpp in Sources */,
 				079DFB300F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */,
 				079DFB310F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */,
 				07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */,
@@ -1674,7 +1672,6 @@
 				079DFB120F3A97EE0031D1B4 /* pcre_valid_utf8.cpp in Sources */,
 				079DFB130F3A97EE0031D1B4 /* pcre_version.cpp in Sources */,
 				079DFB140F3A97EE0031D1B4 /* pcre_xclass.cpp in Sources */,
-				079DFB2C0F3A98E60031D1B4 /* DateUnix.cpp in Sources */,
 				079DFB2D0F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */,
 				079DFB2E0F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */,
 				07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */,
@@ -1696,6 +1693,7 @@
 				3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */,
 				3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */,
 				3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */,
+				3F4F95590F6036CD009D9F22 /* PosixPortUtils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

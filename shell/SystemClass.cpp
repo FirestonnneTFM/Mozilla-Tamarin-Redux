@@ -56,7 +56,7 @@ namespace avmshell
 		#ifdef PERFORMANCE_GETTIMER
 		initialTime = MMgc::GC::getPerformanceCounter();
 		#else
-		initialTime = OSDep::currentTimeMillis();		
+		initialTime = VMPI_getTime();		
 		#endif // PERFORMANCE_GETTIMER
 
 	}
@@ -157,7 +157,7 @@ namespace avmshell
 					   (double)MMgc::GC::getPerformanceFrequency());
 		return (uint32)time;
 #else
-		return (uint32)(OSDep::currentTimeMillis() - initialTime);
+		return (uint32)(VMPI_getTime() - initialTime);
 #endif /* PERFORMANCE_GETTIMER */
 
     }

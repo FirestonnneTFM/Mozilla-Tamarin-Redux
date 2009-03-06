@@ -45,11 +45,6 @@
 
 namespace avmplus
 {
-	uint64 OSDep::currentTimeMillis()
-	{
-		return timeGetTime();
-	}
-
 	void CALLBACK intWriteTimerProc(UINT, UINT, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
 	{
 		int *i = (int*)dwUser;

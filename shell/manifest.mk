@@ -74,6 +74,7 @@ ifeq (windows,$(TARGET_OS))
 shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellWin.cpp \
   $(curdir)/WinFile.cpp \
+  $(curdir)/WinPortUtils.cpp \
   $(NULL)
 endif
 
@@ -82,6 +83,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellMac.cpp \
   $(curdir)/PosixFile.cpp \
   $(curdir)/PosixPartialPlatform.cpp \
+  $(curdir)/PosixPortUtils.cpp \
   $(NULL)
 endif
 
@@ -90,6 +92,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellUnix.cpp \
   $(curdir)/PosixFile.cpp \
   $(curdir)/PosixPartialPlatform.cpp \
+  $(curdir)/PosixPortUtils.cpp \
   $(NULL)
 endif
 
@@ -98,6 +101,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellUnix.cpp \
   $(curdir)/PosixFile.cpp \
   $(curdir)/PosixPartialPlatform.cpp \
+  $(curdir)/PosixPortUtils.cpp \
   $(NULL)
 endif
 

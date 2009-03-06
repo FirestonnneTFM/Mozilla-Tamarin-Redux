@@ -1702,6 +1702,10 @@
 				RelativePath="..\..\shell\WinFile.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\shell\WinPortUtils.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

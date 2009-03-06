@@ -47,7 +47,7 @@ namespace avmplus
 	Debugger::TraceLevel	Debugger::astrace_console = Debugger::TRACE_OFF;
 	Debugger::TraceLevel	Debugger::astrace_callback = Debugger::TRACE_OFF;
 	bool					Debugger::in_trace = false;
-	uint64					Debugger::astraceStartTime = OSDep::currentTimeMillis();
+	uint64					Debugger::astraceStartTime = VMPI_getTime();
 
 	Debugger::Debugger(AvmCore *core)
 		: core(core)
@@ -261,7 +261,7 @@ namespace avmplus
 			if (fnc)
 			{
 				// WARNING: don't change the format of output since outside utils depend on it
-				uint64 delta = OSDep::currentTimeMillis() - astraceStartTime;
+				uint64 delta = VMPI_getTime() - astraceStartTime;
 				core->console << (uint32)(delta) << " AVMINF: MTHD ";
 				Stringp fname = fnc->getMethodName();
 				if (fname && (fname->length() > 0) )
@@ -302,7 +302,7 @@ namespace avmplus
 			Stringp file = core->callStack->filename();
 
 			// WARNING: don't change the format of output since outside utils depend on it
-			uint64 delta = OSDep::currentTimeMillis() - astraceStartTime;
+			uint64 delta = VMPI_getTime() - astraceStartTime;
 			core->console << (uint32)(delta) << " AVMINF: LINE ";
 			if (file)
 				core->console << "   " << line << "\t\t " << file << "\n";
