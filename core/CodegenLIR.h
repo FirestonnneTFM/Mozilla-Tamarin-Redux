@@ -290,7 +290,6 @@ namespace avmplus
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
 		void localSet(int i, LIns* o);
-		void opcodeVerified(AbcOpcode opcode, FrameState* state);
 
 		// CodeWriter methods
 		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);

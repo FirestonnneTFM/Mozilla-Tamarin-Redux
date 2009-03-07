@@ -39,18 +39,9 @@
 
 #if defined FEATURE_NANOJIT
     #include "CodegenLIR.h"
-    #define JIT_ONLY(x) x
-#else
-    #define JIT_ONLY(x) 
 #endif
 
 #include "FrameState.h"
-
-#ifdef AVMPLUS_WORD_CODE
-    #define XLAT_ONLY(x) x
-#else
-    #define XLAT_ONLY(x)
-#endif
 
 namespace avmplus
 {
@@ -925,7 +916,7 @@ namespace avmplus
 				if (needsSetContext)
 				    coder->writeSetContext(state, NULL);
 		
-				coder->writeOp2(state, pc, OP_setproperty, imm30, n, propTraits);
+				coder->writeOp2(state, pc, opcode, imm30, n, propTraits);
 				state->pop(n);
 				break;
 			}
@@ -1137,6 +1128,7 @@ namespace avmplus
 				}
 
 				Traits *resultType = m->returnTraits();
+				emitCheckNull(sp-argc);
 				coder->writeOp2(state, pc, OP_callstatic, (uint32_t)m->method_id, argc, resultType);
 				state->pop_push(argc+1, resultType);
 				break;
@@ -2068,8 +2060,8 @@ namespace avmplus
 	
 		if (opcode == OP_callpropvoid)
 		{
-		    coder->write(state, pc, OP_pop);
-		    coder->write(state, pc, OP_pop);
+  		    coder->write(state, pc, OP_pop);  // result
+		    coder->write(state, pc, OP_pop);  // function
 			state->pop(2);
 		}
 		else
