@@ -42,9 +42,6 @@
 // FIXME the following is required because FrameState has dependencies on the jitters
 #if defined FEATURE_NANOJIT
     #include "CodegenLIR.h"
-    #define JIT_ONLY(x) x
-#else
-    #define JIT_ONLY(x) 
 #endif
 
 #include "FrameState.h"
@@ -552,7 +549,7 @@ namespace avmplus
 		case OP_getproperty:
 		case OP_setproperty:
 		case OP_initproperty:
-		    emitOp1(wordCode(opcode), opd1);
+		    emitOp1(pc, wordCode(opcode));
 			break;
 
 		case OP_constructprop:

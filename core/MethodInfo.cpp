@@ -198,8 +198,7 @@ namespace avmplus
 				TeeWriter teeWriter(&translator, &jit);
 				CodeWriter *coder = &teeWriter;
                 #else
-				NullWriter nullWriter(&jit);
-				CodeWriter *coder = &nullWriter;
+				CodeWriter *coder = &jit;
                 #endif
 
 				TRY(core, kCatchAction_Rethrow)
@@ -242,6 +241,7 @@ namespace avmplus
 			}
 			else
 			{
+			    // NOTE copied below
                 #if defined AVMPLUS_WORD_CODE
                 #ifdef AVMPLUS_DIRECT_THREADED
 				WordcodeEmitter translator(this, interpGetOpcodeLabels());
@@ -250,19 +250,34 @@ namespace avmplus
                 #endif
 				CodeWriter *coder = &translator;
                 #else
-				NullWriter nullWriter(NULL);
-				CodeWriter *coder = &nullWriter;
+				CodeWriter stubWriter;
+				CodeWriter *coder = &stubWriter;
                 #endif
 			    verifier.verify(coder); // pass2 dataflow
 				setInterpImpl();
+				// NOTE end copy
 			}
-			#else
+            #else // FEATURE_NANOJIT
+
 			Verifier verifier(this, toplevel);
-			NullWriter nullWriter(NULL);
-			CodeWriter *coder = &nullWriter;
-			verifier.verify(coder);
+
+			// NOTE copied from above
+            #if defined AVMPLUS_WORD_CODE
+            #ifdef AVMPLUS_DIRECT_THREADED
+			WordcodeEmitter translator(this, interpGetOpcodeLabels());
+            #else
+			WordcodeEmitter translator(this);
+            #endif
+			CodeWriter *coder = &translator;
+            #else
+			CodeWriter stubWriter;
+			CodeWriter *coder = &stubWriter;
+            #endif
+			verifier.verify(coder); // pass2 dataflow
 			setInterpImpl();
-			#endif
+			// NOTE end copy
+
+            #endif // FEATURE_NANOJIT
 			
 			#ifdef DEBUGGER
 			// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor

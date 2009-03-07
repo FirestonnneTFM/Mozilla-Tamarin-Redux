@@ -39,26 +39,13 @@
 #ifndef __avmplus_Coder__
 #define __avmplus_Coder__
 
-#if defined AVMPLUS_WORD_CODE
+#if defined AVMPLUS_WORD_CODE && defined FEATURE_NANOJIT
   #define FEATURE_TEEWRITER
-#else
-  #define FEATURE_NULLWRITER
 #endif
 
 namespace avmplus
 {
-	class CoderContext {
-	public:
-		AvmCore* core;
-		CoderContext (AvmCore* core)
-			: core(core) 
-		{
-		}
-	};
-
 	class CodeWriter {
-	protected:
-		CoderContext* ctx;     // the fixed state of the translator
 	public:
 
 		CodeWriter ()
@@ -162,7 +149,6 @@ namespace avmplus
             (void)buffer;
             (void)&v;
         }
-
 	};
 
 #if defined FEATURE_TEEWRITER

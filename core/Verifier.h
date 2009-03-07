@@ -117,7 +117,6 @@ namespace avmplus
 		MethodInfo*  checkDispId(Traits* traits, uint32_t disp_id);
 		MethodInfo*  checkMethodInfo(uint32_t method_id);
 		Traits*            checkClassInfo(uint32_t class_id);
-		Traits*            checkTypeName(uint32_t name_index);
 		void checkTarget(const byte* target);
 		Atom checkCpoolOperand(uint32_t index, int requiredAtomType);
 		void checkConstantMultiname(uint32_t index, Multiname &m);
@@ -168,7 +167,7 @@ namespace avmplus
 		Traits* readBinding(Traits* traits, Binding b);
 		void emitCoerce(Traits* target, int i);
 		void emitCheckNull(int index);
-
+		Traits* checkTypeName(uint32_t name_index);
     };
 
 #if defined FEATURE_CFGWRITER

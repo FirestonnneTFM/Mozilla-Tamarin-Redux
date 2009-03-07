@@ -1610,8 +1610,10 @@ namespace avmplus
 
 	void CodegenLIR::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode)
 	{
+        (void)state;
         (void)pc;
-        opcodeVerified(opcode, state);
+        (void)opcode;
+		verbose_only( if (vbWriter) { vbWriter->flush();} )
     }
 
 	void CodegenLIR::fixExceptionsAndLabels(FrameState* state, const byte* pc)
@@ -1840,7 +1842,7 @@ namespace avmplus
 		    pool->parseMultiname(name, imm30);
 		    Traits* itraits = pool->getTraits(name, state->verifier->getToplevel(this));
 			emit(state, opcode, (uintptr)itraits, sp, BOOLEAN_TYPE);
-			break;
+            break;
 		}
 
 		case OP_istypelate: 
@@ -1851,23 +1853,12 @@ namespace avmplus
             // NOTE check null has already been done
 			break;
 
-		case OP_callstatic:
-		{
-			MethodInfo* m = pool->methods[imm30];
-			const uint32_t argc = imm30b;
-			emitSetContext(state, m);
-			emitCall(state, OP_callstatic, m->method_id, argc, m->returnTraits());
-			break;
-		}
-
 		case OP_applytype:
-		{
 		    emitSetContext(state, NULL);
 			// * is ok for the type, as Vector classes have no statics
 			// when we implement type parameters fully, we should do something here.
 			emit(state, opcode, imm30/*argc*/, 0, NULL);
 		    break;
-		}
 
 		case OP_newobject: 
 		    emit(state, opcode, imm30, 0, OBJECT_TYPE);
@@ -2536,8 +2527,6 @@ namespace avmplus
 
 		case OP_callstatic:
             // opd1=method_id, opd2=argc
-			state->verifier->emitCheckNull(state->sp()-opd2);
-            emitCheckNull(state, state->sp()-opd2);
 			emitSetContext(state, pool->methods[opd1]);
 			emitCall(state, OP_callstatic, opd1, opd2, type);
 			break;
@@ -4610,14 +4599,6 @@ namespace avmplus
 		}
 
 	} // emit()
-
-	void CodegenLIR::opcodeVerified(AbcOpcode opcode, FrameState* state)
-	{
-		// flush the buffer after each opcode is processed.
-		(void)opcode;
-		(void) state;
-		verbose_only( if (vbWriter) { vbWriter->flush();} )
-	}
 
 	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, intptr_t target, int a, int b)
 	{
