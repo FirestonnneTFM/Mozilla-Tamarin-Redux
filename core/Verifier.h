@@ -180,10 +180,10 @@ namespace avmplus
 	  List<uint32_t>* succs;
 	  List<uint32_t>* preds;
 	  int pred_count;
-	  Block (CoderContext *ctx, uint32_t label, sintptr begin) 
+	  Block (MMgc::GC *gc, uint32_t label, sintptr begin) 
 		: label(label), begin(begin), pred_count(0)
-		, succs(new (ctx->core->GetGC()) List<uint32_t>())
-		, preds(new (ctx->core->GetGC()) List<uint32_t>()) {}
+		, succs(new (gc) List<uint32_t>())
+		, preds(new (gc) List<uint32_t>()) {}
 	  ~Block() {}
 	};
 
@@ -196,6 +196,7 @@ namespace avmplus
 	};
 
 	class CFGWriter : public CodeWriter {
+		AvmCore *core;
 	    SortedIntMap<Block*>* blocks;
 	    SortedIntMap<Edge*>* edges;
 		uint32_t label;
@@ -204,7 +205,7 @@ namespace avmplus
 		Block* current;
 	public:
 
-		CFGWriter (CoderContext *ctx, CodeWriter* coder);
+		CFGWriter (AvmCore *core, CodeWriter* coder);
 		~CFGWriter ();
 
 		void write (FrameState* state, const byte* pc, AbcOpcode opcode);

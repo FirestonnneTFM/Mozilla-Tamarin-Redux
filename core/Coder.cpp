@@ -137,35 +137,35 @@ namespace avmplus
 
 #endif // FEATURE_TEEWRITER
 
-#if defined FEATURE_NULLWRITER
     NullWriter::NullWriter (CodeWriter* coder)
         : coder(coder) {
         AvmAssert(coder != NULL);
     }
 
-    NullWriter::~NullWriter () {}
+    NullWriter::~NullWriter ()
+	{}
 
 	void NullWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type) 
     {
-		coder->write (state, pc, opcode, type);
+		coder->write(state, pc, opcode, type);
 	}
 
-	void NullWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+	void NullWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd, Traits *type)
 	{
-		coder->writeOp1 (state, pc, opcode, opd1, type);
+		coder->writeOp1(state, pc, opcode, opd, type);
 	}
 
-	bool NullWriter::writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+	void NullWriter::writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
 	{
         coder->writeOp2 (state, pc, opcode, opd1, opd2, type);
 	}
 
-    void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
+    void NullWriter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
     {
         coder->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
     }
 
-	bool NullWriter::writeNip(FrameState* state, const byte *pc)
+	void NullWriter::writeNip(FrameState* state, const byte *pc)
 	{
         coder->writeNip(state, pc);
 	}
@@ -184,7 +184,6 @@ namespace avmplus
     {
         coder->writeCoerce (state, index, type);
     }
-
 
 	void NullWriter::writePrologue(FrameState* state, const byte *pc)
 	{
@@ -208,13 +207,11 @@ namespace avmplus
 
 	void NullWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc)
     {
-		coder->writeFixExceptionsAndLabels(state, pc, opcode);
+		coder->writeFixExceptionsAndLabels(state, pc);
 	}
 
-    void NullWriter::formatOperand(PrintWriter& buffer, Value& v) {
+    void NullWriter::formatOperand(PrintWriter& buffer, Value& v)
+	{
         coder->formatOperand(buffer, v);
     }
-
-#endif // FEATURE_NULLWRITER
-
 }

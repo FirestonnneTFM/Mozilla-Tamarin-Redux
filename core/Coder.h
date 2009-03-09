@@ -176,7 +176,6 @@ namespace avmplus
 	};
 #endif // FEATURE_TEEWRITER
 
-#if defined FEATURE_NULLWRITER
 	class NullWriter : public CodeWriter {
 	public:
 		CodeWriter* coder;       // the next leg of the pipeline
@@ -196,8 +195,7 @@ namespace avmplus
 		void writeBlockStart(FrameState* state);
 		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
 		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
+		void formatOperand(PrintWriter& buffer, Value& v);
 	};
-#endif // FEATURE_NULLWRITER
-
 }
 #endif  /* __avmplus_Coder__ */
