@@ -47,6 +47,40 @@ namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
 
+#ifdef AVMPLUS_VERIFYALL
+	class VerifyallWriter : public NullWriter {
+		MethodInfo *info;
+		AvmCore *core;
+
+	public:
+		VerifyallWriter(MethodInfo *info, CodeWriter *coder) 
+			: NullWriter(coder)
+			, info(info) {
+			core = info->pool->core;
+		}
+
+		void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) {
+			if (opcode == OP_newactivation)
+				core->enqTraits(type);
+			coder->write(state, pc, opcode, type);
+		}
+
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
+			if (opcode == OP_newfunction) {
+				MethodInfo *f = type->pool->methods[opd1];
+				AvmAssert(f->declaringTraits == type);
+				core->enqFunction(f);
+				core->enqTraits(type);
+			}
+			else if (opcode == OP_newclass) {
+				core->enqTraits(type);
+				core->enqTraits(type->itraits);
+			}
+			coder->writeOp1(state, pc, opcode, opd1, type);
+		}
+	};
+#endif // AVMPLUS_VERIFYALL
+
 #ifdef AVMPLUS_WORD_CODE
     inline WordOpcode wordCode(AbcOpcode opcode) {
         return (WordOpcode)opcodeInfo[opcode].wordCode;
@@ -164,6 +198,13 @@ namespace avmplus
 #ifndef AVMPLUS_WORD_CODE
         // For word code, it is set by the WordcodeTranslator epilogue
         info->set_abc_code_start(code_pos);
+#endif
+
+#ifdef AVMPLUS_VERIFYALL
+		// push the verifyall filter onto the front of the coder pipeline
+		VerifyallWriter verifyallWriter(info, coder);
+		if (core->config.verifyall)
+			coder = &verifyallWriter;
 #endif
 
 		this->coder = coder;
@@ -724,11 +765,7 @@ namespace avmplus
 					// ISSUE - if nested functions, need to capture scope, not make a copy
 					f->activationTraits->scope = ftraits->scope;
 				}
-                #ifdef AVMPLUS_VERIFYALL
-				core->enqFunction(f);
-				core->enqTraits(f->declaringTraits);
-				#endif
-				coder->writeOp1(state, pc, opcode, imm30, f->declaringTraits);
+				coder->writeOp1(state, pc, opcode, imm30, ftraits);
 				state->push(ftraits, true);
 				break;
 			}
@@ -801,11 +838,6 @@ namespace avmplus
 
 				ctraits->resolveSignatures(toplevel);
 				itraits->resolveSignatures(toplevel);
-
-				#ifdef AVMPLUS_VERIFYALL
-				core->enqTraits(ctraits);
-				core->enqTraits(itraits);
-				#endif
 
 				emitCoerce(CLASS_TYPE, state->sp()); 
 				coder->writeOp1(state, pc, opcode, imm30, ctraits);
@@ -1438,11 +1470,8 @@ namespace avmplus
 				if (!(info->flags & MethodInfo::NEED_ACTIVATION))
 					verifyFailed(kInvalidNewActivationError);
 				info->activationTraits->resolveSignatures(toplevel);
-				coder->write(state, pc, opcode);
+				coder->write(state, pc, opcode, info->activationTraits);
 				state->push(info->activationTraits, true);
-                #ifdef AVMPLUS_VERIFYALL
-				core->enqTraits(info->activationTraits);
-			    #endif
 				break;
 
 			case OP_newcatch: 
