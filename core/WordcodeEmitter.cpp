@@ -450,6 +450,8 @@ namespace avmplus
 		case OP_call:
 		case OP_construct:
 		case OP_getouterscope:
+		case OP_newfunction: 
+		case OP_newclass:
 		    emitOp1(wordCode(opcode), opd1);
 			break;
 		case OP_getscopeobject:
@@ -685,8 +687,6 @@ namespace avmplus
 		case OP_inclocal_i:
 		case OP_declocal_i:
 		case OP_dxns:
-		case OP_newfunction: 
-		case OP_newclass:
 		case OP_finddef: 
 		case OP_getdescendants:
 		case OP_deleteproperty:
