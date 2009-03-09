@@ -115,36 +115,40 @@ namespace avmplus
 		Create a string using Latin-1 data. Characters are just widened and copied.
 		To create an UTF-8 string, use createUTF8().
 		@param	core				the AvmCore instance to use
-		@param	buffer				the character buffer. may not be null.
-		@param	len					the size in characters. If < 0, assume null termination and calculate.
+		@param	buffer				the character buffer; may not be NULL.
+		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
-		@return						the String instance, or NULL on out-of-memory
+		@return						the String instance
 		*/
 		static	Stringp				createLatin1(AvmCore* core, const char* buffer, int32_t len = -1, Width desiredWidth = kDefaultWidth, bool staticBuf = false);
 
 		/**
-		Create a string using UTF-8 data.
+		Create a string using UTF-8 data. To preserve backwards compatibility, an additional
+		"strict" flag can be set to false. This allows a bug in the UTF-8 conversion routine
+		to prevail, where invalid UTF-8 sequences are copied as single characters.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-8 buffer. may not be null.
-		@param	len					the size in bytes. If < 0, assume null termination and calculate.
+		@param	buffer				the UTF-8 buffer; may not be NULL.
+		@param	len					the size in bytes. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
-		@return						the String instance, or NULL on out-of-memory, or bad characters
+		@param  strict				if false, return NULL on invalid characters (see above)
+		@return						the String instance, or NULL on bad characters
 		*/
 		static	Stringp				createUTF8(AvmCore* core, const utf8_t* buffer, int32_t len = -1, 
-												String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
+												String::Width desiredWidth = String::kDefaultWidth, 
+												bool staticBuf = false, bool strict = true);
 		/**
 		Create a string using UTF-16 data. If the width is k32, and there are surrogate pairs, they
 		will be resolved. If this is not desired, use String::create() instead (only present if
 		FEATURE_UTF32_SUPPORT is defined). If the desired width is too small to fit the source data, 
 		return NULL.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-16 buffer. may not be null.
-		@param	len					the size in characters. If < 0, assume null termination and calculate.
+		@param	buffer				the UTF-16 buffer; may not be NULL.
+		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
-		@return						the String instance, or NULL on out-of-memory, or characters too wide
+		@return						the String instance, or NULL on  characters too wide
 		*/
 		static	Stringp				createUTF16(AvmCore* core, const wchar* buffer, int32_t len = -1, 
 												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
@@ -156,11 +160,11 @@ namespace avmplus
 		because of a possible integer overrun during comparisons. If the desired width is too 
 		small to fit the source data, return NULL.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-32 buffer
-		@param	len					the size in characters. If < 0, assume null termination and calculate.
+		@param	buffer				the UTF-32 buffer; may not be NULL.
+		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
-		@return						the String instance,  or NULL on out-of-memory, or characters too wide
+		@return						the String instance, or NULL if characters are too wide
 		*/
 		static	Stringp				createUTF32(AvmCore* core, const utf32_t* buffer, int32_t len = -1, 
 												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
@@ -170,9 +174,9 @@ namespace avmplus
 		/**
 		Create a string with a given width out of this string. If the width is equal to the current
 		width, return this instance. If the desired width is too narrow to fit, or kAuto is passed
-		in, or there is no memory left, return NULL.
+		in, return NULL.
 		@param	w					the width of the new string(kAuto is not supported)
-		@return						the String instance, or NULL on kAuto, string too wide, or out-of-memory
+		@return						the String instance, or NULL on kAuto, or string too wide
 		*/
 				Stringp	FASTCALL	getFixedWidthString(Width w) const;
 
@@ -402,9 +406,9 @@ namespace avmplus
 		/**
 		Change the case of a string according to the case mapper supplied.
 		If no changes were detected, return this instance, otherwise, return
-		a new instance. Returns NULL on out-of-memory.
+		a new instance.
 		@param	unimapper			the mapping function to call
-		@return						the changed string or NULL on out-of-memory
+		@return						the changed string
 		*/
 				Stringp	FASTCALL	caseChange(uint32_t(*unimapper)(uint32_t));
 		/**

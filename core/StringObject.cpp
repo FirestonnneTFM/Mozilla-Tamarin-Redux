@@ -239,26 +239,36 @@ namespace avmplus
 	{
 	}
 
-	// Create a string out of an 8bit buffer. Characters are just widened and copied, not interpreted as UTF8.
-	String* String::createLatin1(AvmCore* core, const char* buffer, int32_t len, Width desiredWidth, bool staticBuf)
+	// If core->kEmptyString and core->cachedChars are inited,
+	// return cached strings if the width and data match
+
+	static Stringp checkForCachedStrings(AvmCore* core, const char* buffer, int32_t len, String::Width w)
 	{
-		if (len < 0 && buffer != NULL)
+		if (core->publicNamespace && (w == String::k8 || w == String::kAuto))
+		{
+			if (len == 0)
+				return core->kEmptyString;
+
+			if (len == 1 && uint8_t(*buffer) < 128)
+				return core->cachedChars[uint8_t(*buffer)];
+		}
+		return NULL;
+	}
+
+	// Create a string out of an 8bit buffer. Characters are just widened and copied, not interpreted as UTF8.
+	Stringp String::createLatin1(AvmCore* core, const char* buffer, int32_t len, Width desiredWidth, bool staticBuf)
+	{
+		AvmAssert(buffer != NULL);
+		if (len < 0)
 			len = Length((const char*)buffer);
 
 		if (desiredWidth == kAuto)
 			desiredWidth = k8;
 
-		if (core->publicNamespace)	// check this to see if core->kEmptyString and core->cachedChars are inited yet
-		{
-			// for empty strings, return the standard Empty String instance
-			if (buffer == NULL || len == 0)
-				return core->kEmptyString;
+		Stringp s = checkForCachedStrings(core, buffer, len, desiredWidth);
+		if (s)
+			return s;
 
-			if (desiredWidth == k8 && len == 1 && uint8_t(*buffer) < 128)
-				return core->cachedChars[uint8_t(*buffer)];
-		}
-		
-		String* s = NULL;
 		if (staticBuf && desiredWidth == k8)
 		{
 			s = createStatic(core->GetGC(), buffer, len, k8);
@@ -765,7 +775,7 @@ namespace avmplus
 		if (rightStr == NULL || rightStr->m_length == 0)
 			return leftStr;
 
-		String* s = leftStr->append(rightStr, NULL, 0, kAuto);
+		Stringp s = leftStr->append(rightStr, NULL, 0, kAuto);
 		return s;
 	}
 
@@ -2406,20 +2416,17 @@ namespace avmplus
 #endif
 
 	// Create a string out of an UTF-8 buffer.
-	Stringp String::createUTF8(AvmCore* core, const utf8_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf)
+	Stringp String::createUTF8
+		(AvmCore* core, const utf8_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf, bool strict)
 	{
-		AvmAssert(core->kEmptyString != NULL);
-
-		if (len < 0 && buffer != NULL)
+		AvmAssert(buffer != NULL);
+		if (len < 0)
 			len = Length((const char*)buffer);
 
-		// for empty strings, return the standard Empty String instance
-		if (buffer == NULL || len == 0)
-			return core->kEmptyString;
-		if (desiredWidth == k8 && len == 1 && uint8_t(*buffer) < 128)
-			return core->cachedChars[uint8_t(*buffer)];
+		Stringp s = checkForCachedStrings(core, (const char*) buffer, len, desiredWidth);
+		if (s)
+			return s;
 
-		Stringp s = NULL;
 		// determine the string width to use
 		StringWidths widths;
 		if (!_analyzeUtf8(buffer, len, widths))
@@ -2497,7 +2504,8 @@ decodeUtf8:
 							}
 							break;
 						case String::k16:
-							UnicodeUtils::Utf8ToUtf16((const uint8_t*) buffer, len, dst.p16, s->m_length);
+							if (UnicodeUtils::Utf8ToUtf16(buffer, len, dst.p16, s->m_length, strict) < 0)
+								return NULL;
 							break;
 #ifdef FEATURE_UTF32_SUPPORT
 						default:
@@ -2515,16 +2523,17 @@ decodeUtf8:
 	// Create a string out of an UTF-16 buffer.
 	Stringp String::createUTF16(AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth, bool staticBuf)
 	{
-		AvmAssert(core->kEmptyString != NULL);
-
-		if (len < 0 && buffer != NULL)
+		AvmAssert(buffer != NULL);
+		if (len < 0)
 			len = Length(buffer);
 
-		// for empty strings, return the standard Empty String instance
-		if (buffer == NULL || len == 0)
-			return core->kEmptyString;
-		if ((desiredWidth == k8 || desiredWidth == kAuto) && len == 1 && *buffer < 128)
-			return core->cachedChars[*buffer];
+		// need to copy the first char because checkForCachedString() needs a char
+		char c = 0;
+		if (len == 1 && *buffer < 128)
+			c = (char) *buffer;
+		Stringp s = checkForCachedStrings(core, &c, len, desiredWidth);
+		if (s)
+			return s;
 
 		int32_t stringLength = len;
 		if (desiredWidth != k16)
@@ -2568,7 +2577,7 @@ decodeUtf8:
 			return String::createStatic(core->GetGC(), buffer, len, k16);
 
 		// found the width to use, now create that string
-		Stringp s = createDynamic(core->GetGC(), NULL, stringLength, desiredWidth);
+		s = createDynamic(core->GetGC(), NULL, stringLength, desiredWidth);
 
 		String::Pointers ptrs = s->m_buffer;
 		switch (desiredWidth)
@@ -2603,16 +2612,18 @@ decodeUtf8:
 	// Create a string out of an UTF-32 buffer.
 	Stringp String::createUTF32(AvmCore* core, const utf32_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf)
 	{
-		AvmAssert(core->kEmptyString != NULL);
+		AvmAssert(buffer != NULL);
 
-		if (len < 0 && buffer != NULL)
+		if (len < 0)
 			len = Length(buffer);
 
-		// for empty strings, return the standard Empty String instance
-		if (buffer == NULL || len == 0)
-			return core->kEmptyString;
-		if ((desiredWidth == k8 || desiredWidth == kAuto) && len == 1 && *buffer < 128)
-			return core->cachedChars[*buffer];
+		// need to copy the first char because checkForCachedString() needs a char
+		char c = 0;
+		if (len == 1 && *buffer < 128)
+			c = (char) *buffer;
+		Stringp s = checkForCachedStrings(core, &c, len, desiredWidth);
+		if (s)
+			return s;
 
 		StringWidths widths;
 		widths.w32 = 0;
@@ -2645,7 +2656,7 @@ decodeUtf8:
 			stringLen += widths.w32;
 
 		// found the width to use, now create that string
-		Stringp s = createDynamic(core->GetGC(), NULL, stringLen, desiredWidth);
+		s = createDynamic(core->GetGC(), NULL, stringLen, desiredWidth);
 		Pointers ptrs;
 		switch (desiredWidth)
 		{

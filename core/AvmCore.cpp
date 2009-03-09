@@ -3037,7 +3037,9 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifdef DEBUGGER
 	Stringp AvmCore::findInternedString(const char *cs, int len8)
 	{
-		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
+		// NOTE: this works in strict UTF-8 conversion mode
+		int32_t len16 = UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, NULL, 0, true);
+		AvmAssertMsg(len16 >= 0, "Malformed UTF-8 sequence");
 		// use alloca to avoid heap allocations where possible
 		AvmCore::AllocaAutoPtr _buffer;
 		wchar *buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
@@ -3047,7 +3049,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			return NULL;
 		}
 		
-		UnicodeUtils::Utf8ToUtf16((const uint8 *)cs, len8, buffer, len16);
+		UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, buffer, len16, true);
 		buffer[len16] = 0;
 		int i = findString(buffer, len16);
 		Stringp other;
@@ -3559,9 +3561,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		return String::createLatin1(this, s, len);
 	}
 
-	Stringp AvmCore::newStringUTF8(const char* s, int len)
+	Stringp AvmCore::newStringUTF8(const char* s, int len, bool strict)
 	{
-		return String::createUTF8(this, (const utf8_t*)s, len);
+		return String::createUTF8(this, (const utf8_t*)s, len, String::kDefaultWidth, false, strict);
 	}
 
 	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
