@@ -1262,7 +1262,7 @@ namespace avmplus
 				
 				uint32_t n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
-
+ 
 				Traits* base = emitCoerceSuper(sp-(n-1));
 				const TraitsBindingsp basetd = base->getTraitsBindings();
 
@@ -1984,6 +1984,10 @@ namespace avmplus
 		if (!t->isInterface)
 		{
 		    coder->writeOp2(state, pc, OP_callmethod, disp_id, argc, resultType);
+			if (opcode == OP_callpropvoid)
+			{
+				coder->write(state, pc, OP_pop);
+			}
 		}
 		else
 		{
@@ -1995,7 +1999,6 @@ namespace avmplus
 		state->pop_push(n, resultType);
 		if (opcode == OP_callpropvoid)
 		{
-		    coder->write(state, pc, OP_pop);
 			state->pop();
 		}
 
