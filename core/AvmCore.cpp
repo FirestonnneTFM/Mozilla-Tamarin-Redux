@@ -3563,6 +3563,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::newStringUTF8(const char* s, int len, bool strict)
 	{
+		if (!s || !len)
+			return kEmptyString;
 		return String::createUTF8(this, (const utf8_t*)s, len, String::kDefaultWidth, false, strict);
 	}
 
