@@ -400,10 +400,10 @@ namespace avmplus
 		static const char kDaysOfWeek[] = "SunMonTueWedThuFriSat";
 
 		if (MathUtils::isNaN(m_time)) {
-			UnicodeUtils::Utf8ToUtf16( (const uint8 *)"Invalid Date", 
-													 12,
-													 buffer, 
-													 12 );
+			UnicodeUtils::Utf8ToUtf16((const uint8*)"Invalid Date", 
+									  12,
+									  buffer, 
+									  12, true );
 			buffer[len=12] = 0;
 			return true;
 		}

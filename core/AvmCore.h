@@ -1351,7 +1351,7 @@ const int kBufferPadding = 16;
 
 		// String creation. If len is omitted, zero-termination is assumed.
 		Stringp newStringLatin1(const char* str, int len = -1);
-		Stringp newStringUTF8(const char* str, int len = -1);
+		Stringp newStringUTF8(const char* str, int len = -1, bool strict = false);
 		Stringp newStringUTF16(const wchar* str, int len = -1);
 
 		// decodes UTF16LE or UTF16BE.
