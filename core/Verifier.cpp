@@ -727,8 +727,8 @@ namespace avmplus
                 #ifdef AVMPLUS_VERIFYALL
 				core->enqFunction(f);
 				core->enqTraits(f->declaringTraits);
-                #endif
-				coder->write(state, pc, opcode);
+				#endif
+				coder->writeOp1(state, pc, opcode, imm30, f->declaringTraits);
 				state->push(ftraits, true);
 				break;
 			}
@@ -808,7 +808,7 @@ namespace avmplus
 				#endif
 
 				emitCoerce(CLASS_TYPE, state->sp()); 
-				coder->write(state, pc, opcode);
+				coder->writeOp1(state, pc, opcode, imm30, ctraits);
 				state->pop_push(1, ctraits, true);
 				break;
 			}
@@ -2545,14 +2545,8 @@ namespace avmplus
 			// capture the verify trace even if verbose is false.
 			Verifier v2(info, toplevel, true);
 			v2.verbose = true;
-#if defined FEATURE_TEEWRITER // use whatever is available
-			TeeWriter teeWriter(NULL, NULL);
-			CodeWriter *coder = &teeWriter;
-#else
-			NullWriter nullWriter(NULL);
-			CodeWriter *coder = &nullWriter;
-#endif
-			v2.verify(coder);
+			CodeWriter stubWriter;
+			v2.verify(&stubWriter);
 		}
         #endif
 		core->throwErrorV(toplevel->verifyErrorClass(), errorID, arg1, arg2, arg3);

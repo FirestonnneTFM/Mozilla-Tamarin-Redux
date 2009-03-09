@@ -1734,23 +1734,12 @@ namespace avmplus
 		case OP_declocal_i:
 		    emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE);
 			break;
-		case OP_newfunction:
-			emit(state, opcode, imm30, sp+1, pool->methods[imm30]->declaringTraits);
-			break;
 		case OP_lessthan:
 		case OP_greaterthan:
 		case OP_lessequals:
 		case OP_greaterequals:
             emit(state, opcode, 0, 0, BOOLEAN_TYPE);
 			break;
-
-		case OP_newclass:
-		{
-		    emitSetDxns(state);
-		    MethodInfo* cinit = pool->cinits[imm30];
-			emit(state, opcode, (uintptr)(void*)cinit, sp, cinit->declaringTraits);
-			break;
-		}
 
 		case OP_getdescendants:
 		{
@@ -2146,6 +2135,10 @@ namespace avmplus
 		case OP_getscopeobject:
 		    emitCopy(state, opd1+state->verifier->scopeBase, state->sp()+1);
 			break;
+		case OP_newfunction:
+			AvmAssert(pool->methods[opd1]->declaringTraits == type);
+			emit(state, opcode, opd1, state->sp()+1, type);
+			break;
         case OP_pushscope:
         case OP_pushwith:
 			emitCopy(state, state->sp(), opd1);
@@ -2190,6 +2183,15 @@ namespace avmplus
             Multiname name;
             pool->parseMultiname(name, opd1);
 			emit(state, OP_findproperty, (uintptr)&name, 0, OBJECT_TYPE);
+			break;
+		}
+
+		case OP_newclass:
+		{
+		    emitSetDxns(state);
+		    MethodInfo* cinit = pool->cinits[opd1];
+			AvmAssert(type->init == cinit && cinit->declaringTraits == type);
+			emit(state, opcode, (uintptr)(void*)cinit, state->sp(), type);
 			break;
 		}
 
