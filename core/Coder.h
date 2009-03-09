@@ -53,7 +53,7 @@ namespace avmplus
 		}
 
 		virtual ~CodeWriter () {}
-		virtual void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type = NULL) 
+		virtual void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) 
 		{ 
 			(void)state; 
 			(void)pc; 
@@ -61,7 +61,7 @@ namespace avmplus
             (void)type;
 		}
 
-		virtual void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL)
+		virtual void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
 		{
 			(void)state;
 			(void)pc; 
@@ -70,7 +70,7 @@ namespace avmplus
 			(void)type;
 		}
 
-		virtual void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL)
+		virtual void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
 		{
 			(void)state;
 			(void)pc;
@@ -80,7 +80,7 @@ namespace avmplus
 			(void)type;
 		}
 
-		virtual void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL)
+		virtual void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
 		{
 			(void)state;
 			(void)pc;
@@ -149,6 +149,19 @@ namespace avmplus
             (void)buffer;
             (void)&v;
         }
+
+		// convenience functions
+		void write (FrameState* state, const byte *pc, AbcOpcode opcode) {
+			write(state, pc, opcode, NULL);
+		}
+
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1) {
+			writeOp1(state, pc, opcode, opd1, NULL);
+		}
+
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2) {
+			writeOp2(state, pc, opcode, opd1, opd2, NULL);
+		}
 	};
 
 #if defined FEATURE_TEEWRITER
@@ -159,10 +172,10 @@ namespace avmplus
 
 		TeeWriter (CodeWriter* coder1, CodeWriter* coder2);
 		~TeeWriter ();
-		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
-		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
-		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
+		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type);
 		void writeNip(FrameState* state, const byte *pc);
 		void writeCheckNull(FrameState* state, uint32_t index);
 		void writeSetContext(FrameState* state, MethodInfo *f);
@@ -182,10 +195,10 @@ namespace avmplus
 
 		NullWriter (CodeWriter* coder);
 		~NullWriter ();
-		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
-		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);
-		void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
+		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
+		void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type);
 		void writeNip(FrameState* state, const byte *pc);
 		void writeCheckNull(FrameState* state, uint32_t index);
 		void writeSetContext(FrameState* state, MethodInfo *f);
