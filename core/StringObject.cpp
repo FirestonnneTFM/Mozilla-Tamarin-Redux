@@ -2212,7 +2212,7 @@ namespace avmplus
 		if (iPos >= 0 && iPos < m_length)
 			d = (double) charAt(iPos);
 		else
-			d = MathUtils::nan();
+			d = MathUtils::kNaN;
 		return d;
 	}
 

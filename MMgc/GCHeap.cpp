@@ -1348,9 +1348,9 @@ namespace MMgc
 	{
 		bytes_compare = size_t((bytes*100.0)/bytes_compare);
 		if(bytes > 1<<20) {
-			fprintf(spyFile,"%s %u (%.1fM) %u%%\n", name, bytes / GCHeap::kBlockSize, bytes * 1.0 / (1024*1024), bytes_compare);
+			fprintf(spyFile,"%s %u (%.1fM) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), bytes * 1.0 / (1024*1024), (unsigned int)(bytes_compare));
 		} else {
-			fprintf(spyFile,"%s %u (%uK) %u%%\n", name, bytes / GCHeap::kBlockSize, bytes / 1024, bytes_compare);
+			fprintf(spyFile,"%s %u (%uK) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), (unsigned int)(bytes / 1024), (unsigned int)(bytes_compare));
 		}
 	}
 	

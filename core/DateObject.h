@@ -58,7 +58,7 @@ namespace avmplus
 		{
 			SAMPLE_FRAME("Date", core());
 			AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
-			date.setTime(MathUtils::nan());  // Date.prototype should be the "Invalid Date"
+			date.setTime(MathUtils::kNaN);  // Date.prototype should be the "Invalid Date"
 		}
 
 		/**

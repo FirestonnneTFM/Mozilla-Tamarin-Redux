@@ -69,7 +69,7 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		isNumber = false;
-		if (core->getIndexFromAtom(name, &index))
+		if (AvmCore::getIndexFromAtom(name, &index))
 		{
 			isNumber = true;
 			return true;
@@ -300,7 +300,7 @@ namespace avmplus
 		{
 			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
 		}
-		if( core()->istype(argv[1], ivtable()->traits ) )
+		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
 		IntVectorObject* v = (IntVectorObject*)createInstance(ivtable(), prototype);
@@ -349,7 +349,7 @@ namespace avmplus
 			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
 		}
 
-		if( core()->istype(argv[1], ivtable()->traits ) )
+		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
 		UIntVectorObject* v = (UIntVectorObject*)createInstance(ivtable(), prototype);
@@ -397,7 +397,7 @@ namespace avmplus
 			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
 		}
 
-		if( core()->istype(argv[1], ivtable()->traits ) )
+		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
 		DoubleVectorObject* v = (DoubleVectorObject*)createInstance(ivtable(), prototype);
@@ -523,7 +523,7 @@ namespace avmplus
 			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
 		}
 
-		if( core()->istype(argv[1], ivtable()->traits ) )
+		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
 		ObjectVectorObject* v = (ObjectVectorObject*)createInstance(ivtable(), prototype);

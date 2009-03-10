@@ -212,7 +212,7 @@ namespace avmplus
 
 		kuri = internConstantStringLatin1("uri");
 		kprefix = internConstantStringLatin1("prefix");
-		kNaN = doubleToAtom(MathUtils::nan());
+		kNaN = doubleToAtom(MathUtils::kNaN);
 		kNeedsDxns = internConstantStringLatin1("NeedsDxns");
 		kAsterisk = internConstantStringLatin1("*");
 		kVersion = internConstantStringLatin1("Version");
@@ -625,9 +625,9 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		// See E4X 11.5.1, pg 53.  
 		if ((ltype == kObjectType) && (isXMLList(lhs)))
-			return atomToXMLList (lhs)->_equals (rhs);
+			return atomToXMLList(lhs)->_equals(rhs);
 		else if ((rtype == kObjectType) && (isXMLList(rhs)))
-			return atomToXMLList (rhs)->_equals (lhs);
+			return atomToXMLList (rhs)->_equals(lhs);
 
         if (ltype == rtype)
         {
@@ -662,7 +662,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					}	
 					else
 					{
-						return x->getNode()->_equals (this, y->getNode());
+						return x->getNode()->_equals(this, y->getNode());
 					}
 				}
 				else if (isQName(lhs) && isQName(rhs))
@@ -789,8 +789,8 @@ return the result of the comparison ToPrimitive(x) == y.
 					return trueAtom;
 				if (isXML(lhs) && isXML(rhs))
 				{
-					E4XNode *lhn = atomToXML (lhs);
-					E4XNode *rhn = atomToXML (rhs);
+					E4XNode *lhn = atomToXML(lhs);
+					E4XNode *rhn = atomToXML(rhs);
 					return ((lhn == rhn) ? trueAtom : falseAtom);
 				}
 				return falseAtom;
@@ -1210,7 +1210,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		throwAtom(type->construct(2, args));
 	}
 	
-    Atom AvmCore::booleanAtom(Atom atom)
+    /*static*/ Atom AvmCore::booleanAtom(Atom atom)
     {
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
@@ -1242,7 +1242,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 
-	int AvmCore::boolean(Atom atom)
+	/*static*/ int AvmCore::boolean(Atom atom)
     {
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
@@ -1278,7 +1278,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		[[DefaultValue]] method is defined by this specification for all native
 		ECMAScript objects (section 8.6.2.6).
 	*/
-	Atom AvmCore::primitive(Atom atom)
+	/*static*/ Atom AvmCore::primitive(Atom atom)
 	{
 		return isObject(atom) ? atomToScriptObject(atom)->defaultValue() : atom;
 	}
@@ -1318,37 +1318,43 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 	
-    double AvmCore::number(Atom atom) const
+    /*static*/ double AvmCore::number(Atom atom)
     {
-		int kind = atom&7;
-
-		if (kind == kIntegerType)
-			return (double) ((sintptr)atom>>3);
-		if (kind == kDoubleType)
-			return atomToDouble(atom);
-
-		if (!isNull(atom))
+		for (;;)
 		{
+			const int kind = atomKind(atom);
+
+			// kIntegerType is by far the most common
+			if (kind == kIntegerType)
+				return (double) atomInt(atom);
+
+			// kDoubleType is next most common
+			if (kind == kDoubleType)
+				return atomToDouble(atom);
+
+			if (AvmCore::isNull(atom))
+				return 0.0;
+			
+			// all other cases are relatively rare
 			switch (kind)
 			{
 			case kStringType:
 				return atomToString(atom)->toNumber();
 			case kSpecialType:
-				return atomToDouble(kNaN);
+				return MathUtils::kNaN;
 			case kBooleanType:
 				return atom == trueAtom ? 1.0 : 0.0;
 			case kNamespaceType:
-				return number(atomToNamespace(atom)->getURI()->atom());
-			default: // number
+				atom = atomToNamespace(atom)->getURI()->atom();
+				break;	// continue loop, effectively a tailcall
 			case kObjectType:
-				return number(atomToScriptObject(atom)->defaultValue());
+				atom  = AvmCore::atomToScriptObject(atom)->defaultValue();
+				break;	// continue loop, effectively a tailcall
 			}
 		}
-		else
-		{
-			// ES3 9.3, toNumber(null) == 0
-			return 0.0;
-		}
+
+		//AvmAssert(0); // can't get here
+		//return 0.0;
     }
 
     Stringp AvmCore::intern(Atom atom)
@@ -1952,82 +1958,76 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-    bool AvmCore::istype(Atom atom, Traits* itraits)
+    /*static*/ bool AvmCore::istype(Atom atom, Traits* itraits)
     {
 		if (!itraits)
 			return true;
+		
+		const int bt = itraits->builtinType;
+		
+		// cheat and use "kUnusedAtomTag" for all null values (streamlines the test)
+		AvmAssert(atomKind(atom) != kUnusedAtomTag);
+		const int kind = isNull(atom) ? kUnusedAtomTag : atomKind(atom);
 
-		if (isNull(atom))
-			return itraits == traits.null_itraits;
-
-		Traits* lhs;
-
-		switch (atom&7)
+		// check for the easy cases with bitmasks
+		static const int kBTMasks[8] = 
 		{
-		case kNamespaceType:
-			lhs = traits.namespace_itraits;
-			break;
+			(1<<BUILTIN_null),								// kUnusedAtomTag -- recycle for null checking
+			(1<<BUILTIN_object),							// kObjectType
+			(1<<BUILTIN_string) | (1<<BUILTIN_object),		// kStringType
+			(1<<BUILTIN_namespace) | (1<<BUILTIN_object),	// kNamespaceType
+			(1<<BUILTIN_void),								// kSpecialType
+			(1<<BUILTIN_boolean) | (1<<BUILTIN_object),		// kBooleanType
+			(1<<BUILTIN_number) | (1<<BUILTIN_object),		// kIntegerType
+			(1<<BUILTIN_number) | (1<<BUILTIN_object)		// kDoubleType
+		};
+		
+		if ((1<<bt) & kBTMasks[kind])
+			return true;
+		
+		// repeated if-else is better than switch here
+		if (kind == kObjectType)
+		{
+			return atomToScriptObject(atom)->traits()->containsInterface(itraits);
+		}
 
-		case kStringType:
-			lhs = traits.string_itraits;
-			break;
-
-		case kBooleanType:
-			lhs = traits.boolean_itraits;
-			break;
-
-		case kIntegerType:
+		if (kind == kIntegerType)
+		{
 			// ISSUE need special support for number value ranges
-			if (itraits == traits.number_itraits)
-				return true;
-
-			lhs = traits.int_itraits;
-			if (itraits == traits.uint_itraits)
+			if (bt == BUILTIN_uint)
 			{
-				return (atom>>3) >= 0;
+				return atomInt(atom) >= 0;
 			}
-#ifdef AVMPLUS_64BIT
-			if (itraits == traits.int_itraits)
+			if (bt == BUILTIN_int)
 			{
+			#ifdef AVMPLUS_64BIT
 				// this might be a uint
-				if ((int64)(atom>>3)!=(int)(atom>>3))
-					return false;
+				return ((int64_t)atomInt(atom) == (int32_t)atomInt(atom));
+			#else
+				return true;
+			#endif
 			}
-#endif
-			break;
+		}
 
-		case kDoubleType:
-			lhs = traits.number_itraits;
+		if (kind == kDoubleType)
+		{
 			// ISSUE there must be a better way...
-			if (itraits == traits.int_itraits)
+			if (bt == BUILTIN_int)
 			{
-				double d = atomToDouble(atom);
-				int i = MathUtils::real2int(d);
+				const double d = atomToDouble(atom);
+				const int32_t i = MathUtils::real2int(d);
 				return d == (double)i;
 			}
-			if (itraits == traits.uint_itraits)
+			if (bt == BUILTIN_uint)
 			{
-				double d = atomToDouble(atom);
+				const double d = atomToDouble(atom);
 				// ISSUE use real2int?
-				unsigned i = (unsigned)d;
-				return d == (double)i;
+				const uint32_t u = (uint32_t)d;
+				return d == (double)u;
 			}
-			break;
-
-		case kSpecialType:
-			return itraits == traits.void_itraits;
-
-		case kObjectType: {
-			lhs = atomToScriptObject(atom)->traits();
-			break;
 		}
 
-		default:
-			// unexpected atom type
-			AvmAssert(false);
-			return false;
-		}
-		return lhs->containsInterface(itraits);
+		return false;
     }
 
 	Stringp AvmCore::coerce_s(Atom atom)
@@ -2080,47 +2080,17 @@ return the result of the comparison ToPrimitive(x) == y.
 		console.setOutputStream(stream);
 	}
 
-	bool AvmCore::isXML (Atom atm) 
+	/*static*/ bool AvmCore::isBuiltinType(Atom atm, BuiltinType bt)
 	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.xml_itraits || traits.xml_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.xml_itraits);
+		return isObject(atm) && Traits::getBuiltinType(atomToScriptObject(atm)->traits()) == bt;
 	}
 
-	bool AvmCore::isDate(Atom atm)
+	/*static*/ bool AvmCore::isBuiltinTypeMask(Atom atm, int btmask)
 	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.date_itraits || traits.date_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.date_itraits);
+		return isObject(atm) && ((1<<Traits::getBuiltinType(atomToScriptObject(atm)->traits())) & btmask) != 0;
 	}
 
-	bool AvmCore::isXMLList (Atom atm) 
-	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.xmlList_itraits || traits.xmlList_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.xmlList_itraits);
-	}
-
-	bool AvmCore::isQName (Atom atm)
-	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.qName_itraits || traits.qName_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.qName_itraits);
-	}
-
-	bool AvmCore::isDictionary (Atom atm)
+	/*static*/ bool AvmCore::isDictionary(Atom atm)
 	{
 		return isObject(atm) && atomToScriptObject(atm)->vtable->traits->isDictionary;
 	}
@@ -2128,7 +2098,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	// Tables are from http://www.w3.org/TR/2004/REC-xml-20040204/#NT-NameChar
 	// E4X 13.1.2.1, pg 63
 	/* BaseChar = */
-	const wchar letterTable[] = {
+	static const wchar letterTable[] = {
 		0x0041, 0x005A,
 		0x0061, 0x007A,
 		0x00C0, 0x00D6,
@@ -2337,7 +2307,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x3021, 0x3029
 		};
 
-	bool AvmCore::isLetter (wchar c)
+	/*static*/ bool AvmCore::isLetter(wchar c)
 	{
 		int x = sizeof(letterTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2349,7 +2319,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[87]   	CombiningChar	   ::=   	
-	const wchar combiningCharTable[] = {
+	static const wchar combiningCharTable[] = {
 		0x0300, 0x0345,
 		0x0360, 0x0361,
 		0x0483, 0x0486,
@@ -2446,7 +2416,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x3099, 0x3099, // single 
 		0x309A, 0x309A // single 
 		};
-	bool AvmCore::isCombiningChar (wchar c)
+	/*static*/ bool AvmCore::isCombiningChar(wchar c)
 	{
 		int x = sizeof(combiningCharTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2458,7 +2428,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[88]   	Digit	   ::=   	
-	const wchar digitTable[] = {
+	static const wchar digitTable[] = {
 		0x0030, 0x0039,
 		0x0660, 0x0669,
 		0x06F0, 0x06F9,
@@ -2475,7 +2445,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x0ED0, 0x0ED9,
 		0x0F20, 0x0F29};
 
-	bool AvmCore::isDigit (wchar c)
+	/*static*/ bool AvmCore::isDigit(wchar c)
 	{
 		int x = sizeof(digitTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2486,7 +2456,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return false;
 	}
 
-	const wchar extenderTable[] = {
+	static const wchar extenderTable[] = {
 		0x00B7, 0x00B7, // single 
 		0x02D0, 0x02D0, // single 
 		0x02D1, 0x02D1, // single 
@@ -2498,7 +2468,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x3031, 0x3035, 
 		0x309D, 0x309E,
 		0x30FC, 0x30FE};
-	bool AvmCore::isExtender (wchar c)
+	/*static*/ bool AvmCore::isExtender(wchar c)
 	{
 		int x = sizeof(extenderTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2527,7 +2497,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		// e4x excludes ':'
 
 		wchar c = p[0];
-		if (!isLetter (c) && c != '_' /*&& c != ':'*/)
+		if (!isLetter(c) && c != '_' /*&& c != ':'*/)
 			return false;		
 
 		for (int i = 1; i < p->length(); i++)
@@ -2674,36 +2644,24 @@ return the result of the comparison ToPrimitive(x) == y.
 		return newStringUTF8(output.c_str());
 	}
 
-	XMLObject *AvmCore::atomToXMLObject (Atom atm) 
+	/*static*/ XMLObject* AvmCore::atomToXMLObject(Atom atm) 
 	{
-		if (!isXML (atm))
-			return 0;
-
-		return (XMLObject*)(atomToScriptObject(atm));
+		return isXML(atm) ? (XMLObject*)(atomToScriptObject(atm)) : NULL;
 	}
 
-	E4XNode *AvmCore::atomToXML (Atom atm) 
+	/*static*/ E4XNode* AvmCore::atomToXML(Atom atm) 
 	{
-		if (!isXML (atm))
-			return 0;
-
-		return ((XMLObject*)(atomToScriptObject(atm)))->getNode();
+		return isXML(atm) ? ((XMLObject*)(atomToScriptObject(atm)))->getNode() : NULL;
 	}
 
-	XMLListObject *AvmCore::atomToXMLList (Atom atm) 
+	/*static*/ XMLListObject* AvmCore::atomToXMLList(Atom atm) 
 	{
-		if (!isXMLList (atm))
-			return 0;
-
-		return (XMLListObject*)(atomToScriptObject(atm));
+		return isXMLList(atm) ? (XMLListObject*)(atomToScriptObject(atm)) : NULL;
 	}
 
-	QNameObject *AvmCore::atomToQName (Atom atm) 
+	/*static*/ QNameObject* AvmCore::atomToQName(Atom atm) 
 	{
-		if (!isQName (atm))
-			return 0;
-
-		return (QNameObject*)(atomToScriptObject(atm));
+		return isQName(atm) ? (QNameObject*)(atomToScriptObject(atm)) : NULL;
 	}
 
 	Stringp AvmCore::_typeof (Atom arg)
@@ -2714,7 +2672,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 			default:
 			case kObjectType:
-				if (isXML (arg) || isXMLList(arg))
+				if (isXML(arg) || isXMLList(arg))
 				{
 					return kxml;
 				}
@@ -3570,8 +3528,6 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
 	{
-		if (!s || !len)
-			return kEmptyString;
 		return String::createUTF16(this, s, len);
 	}
 
@@ -3664,21 +3620,24 @@ return the result of the comparison ToPrimitive(x) == y.
 	#endif
 	#endif /* DEBUGGER */
 
-	int AvmCore::integer(Atom atom) const
+	/*static*/ int AvmCore::integer(Atom atom)
 	{
-		if ((atom & 7) == kIntegerType || (atom&7) == kBooleanType) {
-			return (int32_t)(atom >> 3);
-		} else {
+		const int kind = atomKind(atom);
+		if ((1<<kind) & ((1<<kIntegerType)|(1<<kBooleanType)))
+		{
+			return (int32_t)atomInt(atom);
+		} 
+		else 
+		{
 			// TODO optimize the code below.
-			double d = number(atom);
-			return (int32_t)integer_d(d);
+			return (int32_t)integer_d(number(atom));
 		}
 	}
 
 	// static
 
 #ifndef AVMPLUS_SSE2_ALWAYS
-	int AvmCore::integer_d(double d)
+	/*static*/ int AvmCore::integer_d(double d)
 	{
 		// Try a simple case first to see if we have a in-range float value
 

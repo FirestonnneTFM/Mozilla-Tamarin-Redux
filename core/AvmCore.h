@@ -730,7 +730,7 @@ const int kBufferPadding = 16;
 		 * ECMA-262 section 9.6, used in many of the
 		 * native core objects
 		 */
-		uint32 toUInt32(Atom atom) const
+		inline static uint32 toUInt32(Atom atom)
 		{
 			return (uint32)integer(atom);
 		}
@@ -740,12 +740,15 @@ const int kBufferPadding = 16;
 		 * ECMA-262 section 9.4, used in many of the
 		 * native core objects
 		 */
-		double toInteger(Atom atom) const
+		inline static double toInteger(Atom atom)
 		{
-			if ((atom & 7) == kIntegerType) {
-				return (double) (atom>>3);
-			} else {
-				return MathUtils::toInt(number(atom));
+			if (atomKind(atom) == kIntegerType) 
+			{
+				return (double) atomInt(atom);
+			} 
+			else 
+			{
+				return MathUtils::toInt(AvmCore::number(atom));
 			}
 		}
 
@@ -756,7 +759,7 @@ const int kBufferPadding = 16;
 		 * and returned.  This is ToInt32() from E3 section 9.5
 		 */
 #ifdef AVMPLUS_64BIT
-		int64	integer64(Atom atom)			{ return (int64)integer(atom); }
+		static	int64 integer64(Atom atom)		{ return (int64)integer(atom); }
 		static	int64 integer64_i(Atom atom)	{ return (int64)integer_i(atom); }
 	#ifdef AVMPLUS_AMD64
 		static	int64 integer64_d(double d)		{ return (int64)integer_d_sse2(d); }
@@ -765,29 +768,33 @@ const int kBufferPadding = 16;
 		static	int64 integer64_d(double d)		{ return (int64)integer_d(d); }
 	#endif
 #endif
-		int integer(Atom atom) const;
+		static int integer(Atom atom);
 
 		// convert atom to integer when we know it is already a legal signed-32 bit int value
-		static int integer_i(Atom a)
+		static int32_t integer_i(Atom a)
 		{
-			if ((a&7) == kIntegerType)
-				return int(a>>3);
+			if (atomKind(a) == kIntegerType)
+			{
+				return (int32_t)atomInt(a);
+			}
 			else
+			{
 				// TODO since we know value is legal int, use faster d->i
 				return MathUtils::real2int(atomToDouble(a));
+			}
 		}
 
 		// convert atom to integer when we know it is already a legal unsigned-32 bit int value
-		static uint32 integer_u(Atom a)
+		static uint32_t integer_u(Atom a)
 		{
-			if ((a&7) == kIntegerType)
+			if (atomKind(a) == kIntegerType)
 			{
-				return uint32(a>>3);
+				return (uint32_t)atomInt(a);
 			}
 			else
 			{
 				// TODO figure out real2int for unsigned
-				return (uint32) atomToDouble(a);
+				return (uint32_t) atomToDouble(a);
 			}
 		}
 
@@ -816,8 +823,8 @@ const int kBufferPadding = 16;
 		{
 			AvmAssert(isNumber(a));
 
-			if ((a&7) == kIntegerType)
-				return (int)(a>>3);
+			if (atomKind(a) == kIntegerType)
+				return (int32_t)atomInt(a);
 			else
 				return atomToDouble(a);
 		}
@@ -828,12 +835,12 @@ const int kBufferPadding = 16;
 		 */
 		Atom intAtom(Atom atom)
 		{
-			return intToAtom(integer(atom));
+			return intToAtom(AvmCore::integer(atom));
 		}
 
 		Atom uintAtom(Atom atom)
 		{
-			return uintToAtom(toUInt32(atom));
+			return uintToAtom(AvmCore::toUInt32(atom));
 		}
 
 		/**
@@ -843,7 +850,7 @@ const int kBufferPadding = 16;
 		 * and returned.
 		 * [ed] 12/28/04 use int because bool is sometimes byte-wide.
 		 */
-		int boolean(Atom atom);
+		static int boolean(Atom atom);
 
 		/**
 		 * Returns the passed atom's string representation.
@@ -859,7 +866,7 @@ const int kBufferPadding = 16;
 		 */
 		static bool isString(Atom atom)
 		{
-			return (atom&0x7) == kStringType && !isNull(atom);
+			return atomKind(atom) == kStringType && !isNull(atom);
 		}
 
 		static bool isName(Atom atom)
@@ -1021,21 +1028,22 @@ const int kBufferPadding = 16;
 		 * instanceof.  returns true/false according to AS rules.  in particular, it will return
 		 * false if value==null.
 		 */
-		bool istype(Atom atom, Traits* itraits);
+		static bool istype(Atom atom, Traits* itraits);
 
 		/**
 		 * this is the implementation of the actionscript "is" operator.  similar to java's
 		 * instanceof.  returns true/false according to AS rules.  in particular, it will return
 		 * false if value==null.
 		 */
-		Atom istypeAtom(Atom atom, Traits* itraits) { 
+		static Atom istypeAtom(Atom atom, Traits* itraits) 
+		{ 
 			return istype(atom, itraits) ? trueAtom : falseAtom; 
 		}
 
 		/**
 		 * implements ECMA as operator.  Returns the same value, or null.
 		 */
-		Atom astype(Atom atom, Traits* expected)
+		static Atom astype(Atom atom, Traits* expected)
 		{
 			return istype(atom, expected) ? atom : nullObjectAtom;
 		}
@@ -1055,10 +1063,10 @@ const int kBufferPadding = 16;
 		/**
 		 * ES3's internal ToPrimitive() function
 		 */
-		Atom primitive(Atom atom);
+		static Atom primitive(Atom atom);
 
 		/** OP_toboolean; ES3 ToBoolean() */
-		Atom booleanAtom(Atom atom);
+		static Atom booleanAtom(Atom atom);
 
 		/** OP_tonumber; ES3 ToNumber */
 		Atom numberAtom(Atom atom);
@@ -1066,7 +1074,7 @@ const int kBufferPadding = 16;
 		/**
 		 * ES3's internal ToNumber() function for internal use
 		 */
-		double number(Atom atom) const;
+		static double number(Atom atom);
 
 		/**
 		 * The interrupt method is called from executing code
@@ -1211,16 +1219,36 @@ const int kBufferPadding = 16;
 		 * Returns true if the passed atom is an XML object,
 		 * as defined in the E4X Specification.
 		 */				
-		bool isXML (Atom atm);
+		inline static bool isXML(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_xml);
+		}
+
+		/**
+		 * Returns true if the passed atom is a XMLList object,
+		 * as defined in the E4X Specification.
+		 */		
+		static bool isXMLList(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_xmlList);
+		}
+
+		inline static bool isXMLorXMLList(Atom atm)
+		{
+			return isBuiltinTypeMask(atm, (1<<BUILTIN_xml)|(1<<BUILTIN_xmlList));
+		}
 
 		/* Returns tru if the atom is a Date object */
-		bool isDate(Atom atm);
+		inline static bool isDate(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_date);
+		}
 
 		// From http://www.w3.org/TR/2004/REC-xml-20040204/#NT-Name
-		bool isLetter (wchar c);
-		bool isDigit (wchar c);
-		bool isCombiningChar (wchar c);
-		bool isExtender (wchar c);
+		static bool isLetter(wchar c);
+		static bool isDigit(wchar c);
+		static bool isCombiningChar(wchar c);
+		static bool isExtender(wchar c);
 
 		Stringp ToXMLString (Atom a);
 		Stringp EscapeElementValue (const Stringp s, bool removeLeadingTrailingWhitespace);
@@ -1230,39 +1258,36 @@ const int kBufferPadding = 16;
 		 * Converts an Atom to a E4XNode if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		E4XNode *atomToXML (Atom atm);
+		static E4XNode* atomToXML(Atom atm);
 
 		/**
 		 * Converts an Atom to a XMLObject if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		XMLObject *atomToXMLObject (Atom atm);
-
-		/**
-		 * Returns true if the passed atom is a XMLList object,
-		 * as defined in the E4X Specification.
-		 */		
-		bool isXMLList (Atom atm);
+		static XMLObject* atomToXMLObject(Atom atm);
 
 		/**
 		 * Converts an Atom to a XMLListObject if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		XMLListObject *atomToXMLList (Atom atm);
+		static XMLListObject* atomToXMLList(Atom atm);
 
 		/**
 		 * Returns true if the passed atom is a QName object,
 		 * as defined in the E4X Specification.
 		 */		
-		bool isQName (Atom atm);
+		static bool isQName(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_qName);
+		}
 
 		/**
 		 * Returns true if the passed atom is a Dictionary object,
 		 * as defined in the E4X Specification.
 		 */		
-		bool isDictionary (Atom atm);
+		static bool isDictionary(Atom atm);
 
-		bool isDictionaryLookup(Atom key, Atom obj)
+		static bool isDictionaryLookup(Atom key, Atom obj)
 		{
 			return isObject(key) && isDictionary(obj);
 		}
@@ -1277,7 +1302,7 @@ const int kBufferPadding = 16;
 		 * Converts an Atom to a QNameObject if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		QNameObject *atomToQName (Atom atm);
+		static QNameObject* atomToQName(Atom atm);
 
 		/** Implementation of OP_typeof */		
 		Stringp _typeof (Atom arg);
@@ -1285,6 +1310,10 @@ const int kBufferPadding = 16;
 		/** The XML entities table, used by E4X */
 		Hashtable *xmlEntities;
 		
+	private:
+		static bool isBuiltinType(Atom atm, BuiltinType bt);
+		static bool isBuiltinTypeMask(Atom atm, int btmask);
+
 	private:
 		//
 		// this used to be Heap
@@ -1397,7 +1426,7 @@ const int kBufferPadding = 16;
 		Stringp findInternedString(const char *s, int len);
 #endif
 
-		bool getIndexFromAtom(Atom a, uint32 *result) const
+		static bool getIndexFromAtom(Atom a, uint32 *result)
 		{
 			if (AvmCore::isInteger(a))
 			{
@@ -1406,8 +1435,8 @@ const int kBufferPadding = 16;
 			}
 			else
 			{
-				AvmAssert (AvmCore::isString(a));
-				return AvmCore::getIndexFromString (atomToString (a), result); 
+				AvmAssert(AvmCore::isString(a));
+				return AvmCore::getIndexFromString(atomToString(a), result); 
 			}
 		}
 

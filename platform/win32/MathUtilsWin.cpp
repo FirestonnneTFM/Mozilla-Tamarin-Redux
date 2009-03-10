@@ -160,7 +160,7 @@ namespace avmplus
 #ifdef X86_MATH
 		switch (isInfinite(value)) {
 		case 1:
-			return infinity();
+			return kInfinity;
 		case -1:
 			return +0;
 		default:
@@ -286,7 +286,7 @@ extern "C" {
 	double MathUtils::mod(double x, double y)
 	{
 		if (!y) {
-			return nan();
+			return kNaN;
 		}
 		return modInternal(x, y);
 	}

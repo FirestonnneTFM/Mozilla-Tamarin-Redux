@@ -125,10 +125,10 @@ namespace avmplus
 
 		Atom x = ToXML (argv[1]);
 		// if args[0] is xml, xmllist or w3c xml, return a deep copy
-		if (core->isXML(argv[1]) || core->isXMLList(argv[1]))
+		if (AvmCore::isXML(argv[1]) || AvmCore::isXMLList(argv[1]))
 		{
 			// return deepCopy of x
-			XMLObject *x2 = core->atomToXMLObject(x);
+			XMLObject *x2 = AvmCore::atomToXMLObject(x);
 			return x2->_deepCopy()->atom();
 		}
 
@@ -162,13 +162,13 @@ namespace avmplus
 											kConvertNullToObjectError);
 			return arg;
 		}
-		else if (core->isXML(arg))
+		else if (AvmCore::isXML(arg))
 		{
 			return arg;
 		}
-		else if (core->isXMLList (arg))
+		else if (AvmCore::isXMLList(arg))
 		{
-			XMLListObject *xl = core->atomToXMLList (arg);
+			XMLListObject *xl = AvmCore::atomToXMLList(arg);
 			if (xl->_length() == 1)
 			{
 				return xl->_getAt(0)->atom();
@@ -331,7 +331,7 @@ namespace avmplus
 		if (argc == 1)
 		{
 			AvmCore* core = this->core();
-			if (core->isObject(argv[1]) && core->istype(argv[1], core->traits.qName_itraits))
+			if (core->isObject(argv[1]) && AvmCore::istype(argv[1], core->traits.qName_itraits))
 				return argv[1];
 		}
 
@@ -348,7 +348,7 @@ namespace avmplus
 
 		if (argc == 1)
 		{
-			if (core->isObject(argv[1]) && core->istype(argv[1], core->traits.qName_itraits))
+			if (core->isObject(argv[1]) && AvmCore::istype(argv[1], core->traits.qName_itraits))
 				return argv[1];
 
 			return (new (core->GetGC(), ivtable()->getExtraSize()) QNameObject(this, argv[1]))->atom();

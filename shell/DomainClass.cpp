@@ -151,7 +151,7 @@ namespace avmshell
 											&multiname,
 											container->vtable);
 
-		if (!core->istype(atom, core->traits.class_itraits)) {
+		if (!AvmCore::istype(atom, core->traits.class_itraits)) {
 			toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
 		}			
 		return (ClassClosure*)AvmCore::atomToScriptObject(atom);

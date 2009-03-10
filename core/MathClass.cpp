@@ -147,7 +147,7 @@ namespace avmplus
 	    }
 		for (uint32_t i=0; i < argc; i++)
 		{
-			y = this->core()->number(argv[i]);
+			y = AvmCore::number(argv[i]);
 			if (MathUtils::isNaN(y)) return y;
 			if (y < x)
 			{
@@ -192,7 +192,7 @@ namespace avmplus
 	    }
 		for (uint32_t i=0; i < argc; i++)
 		{
-			y = this->core()->number(argv[i]);
+			y = AvmCore::number(argv[i]);
 			if (MathUtils::isNaN(y)) return y;
 			if (y > x)
 			{

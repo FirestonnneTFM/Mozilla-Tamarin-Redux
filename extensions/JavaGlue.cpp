@@ -340,7 +340,7 @@ namespace avmplus
 		bool ok = false;
 		if (core->isInteger(a))
 		{
-			*index = core->integer(a);
+			*index = AvmCore::integer(a);
 			ok = true;
 		}
 		else if (core->isString(a))
@@ -1223,7 +1223,7 @@ namespace avmplus
 			else if (core->isInteger(a))
 			{
 				// see if it can be reduced
-				int val = core->integer(a);
+				int val = AvmCore::integer(a);
 				if (val >= -128 && val < 127)
 					*desc++ = 'B';
 				else if (val >= -32768 && val < 32767)
@@ -1235,7 +1235,7 @@ namespace avmplus
 				*desc++ = 'D';
 			else if (core->isNullOrUndefined(a))
 				*desc++ = 'X';
-			else if (core->istype(a, ARRAY_TYPE))
+			else if (AvmCore::istype(a, ARRAY_TYPE))
 				*desc++ = '[';
 			else if (core->isString(a))
 				*desc++ = 'G';
@@ -1308,11 +1308,11 @@ namespace avmplus
 		switch( *type++ )
 		{
 			case 'Z':
-				val.z = (jboolean) ( core->booleanAtom(a) == trueAtom) ?  JNI_TRUE : JNI_FALSE; 
+				val.z = (jboolean) ( AvmCore::booleanAtom(a) == trueAtom) ?  JNI_TRUE : JNI_FALSE; 
 				break;
 
 			case 'B':
-				val.b = (jbyte) ( core->integer(a) );
+				val.b = (jbyte) ( AvmCore::integer(a) );
 				break;
 
 			case 'C':
@@ -1320,11 +1320,11 @@ namespace avmplus
 				break;
 
 			case 'S':
-				val.s = (jshort) ( core->integer(a) );
+				val.s = (jshort) ( AvmCore::integer(a) );
 				break;
 
 			case 'I':
-				val.i = core->integer(a);
+				val.i = AvmCore::integer(a);
 				break;
 
 			case 'J':
@@ -1332,11 +1332,11 @@ namespace avmplus
 				break;
 
 			case 'F':
-				val.f = core->number(a);
+				val.f = AvmCore::number(a);
 				break;
 
 			case 'D':
-				val.d = core->number(a);
+				val.d = AvmCore::number(a);
 				break;
 
 			case '[':
@@ -1373,14 +1373,14 @@ namespace avmplus
 		if (core->isString(a))
 		{
 			String* str = core->string(a);
-			if (core->isDigit(*str[0]) || *str[0] == '-')
+			if (AvmCore::isDigit(*str[0]) || *str[0] == '-')
 			{
 				//@todo need to support -9223372036854775808 to 9223372036854775807, inclusive
 			}
 		}
 
 		// so a string with digits should be converable 
-		val  = (jlong) ( core->integer(a) );
+		val  = (jlong) ( AvmCore::integer(a) );
 	}
 
 	/**

@@ -136,7 +136,7 @@ namespace avmplus
 	
 	/*static*/ ArrayObject* ArrayClass::isArray(Toplevel* toplevel, Atom instance)
 	{
-		if (toplevel->core()->istype(instance, toplevel->arrayClass->ivtable()->traits))
+		if (AvmCore::istype(instance, toplevel->arrayClass->ivtable()->traits))
 			return (ArrayObject*)AvmCore::atomToScriptObject(instance);
 		return NULL;
 	}
@@ -196,7 +196,7 @@ namespace avmplus
 		for (i = 0; i< argc; i++) 
 		{
 			Atom atom = args->getUintProperty(i);
-			if (core->istype(atom, ARRAY_TYPE)) 
+			if (AvmCore::istype(atom, ARRAY_TYPE)) 
 			{
 				ArrayObject *b = (ArrayObject*) AvmCore::atomToScriptObject(atom);
 				newLength += b->getLength();
@@ -228,7 +228,7 @@ namespace avmplus
 		for (i = 0; i< (uint32)argc; i++) 
 		{
 			Atom atom = args->getUintProperty(i);
-			if (core->istype(atom, ARRAY_TYPE)) 
+			if (AvmCore::istype(atom, ARRAY_TYPE)) 
 			{
 				ArrayObject *b = (ArrayObject*) AvmCore::atomToScriptObject(atom);
 				// copy over dense parts
@@ -625,7 +625,7 @@ namespace avmplus
 				// and not strings that can be converted into numbers
 				if(isNumericCompare && !core->isNumber(atoms->getAt(i)))
 				{
-					double val = core->number(atoms->getAt(i));
+					double val = AvmCore::number(atoms->getAt(i));
 					if(MathUtils::isNaN(val))
 						// throw exception (not a Number)
 						toplevel->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(atoms->getAt(i)), core->toErrorString(core->traits.number_itraits));
@@ -946,12 +946,12 @@ namespace avmplus
 		ScriptObject *o = (ScriptObject*) AvmCore::atomToScriptObject(cmpActionScript);
 
 		Atom args[3] = { d->atom(), get(j), get(k) };
-		double result = core->toInteger(o->call(2, args));
-		// cn: don't use core->integer on result of call.  The returned 
+		double result = AvmCore::toInteger(o->call(2, args));
+		// cn: don't use AvmCore::integer on result of call.  The returned 
 		//  value could be bigger than 2^32 and toInt32 will return the 
 		//  ((value % 2^32) - 2^31), which could change the intended sign of the number.
 		//  
-		//return core->integer(o->call(a->atom(), args, 2));
+		//return AvmCore::integer(o->call(a->atom(), args, 2));
 		return (result > 0 ? 1 : (result < 0 ? -1 : 0));
 	}
 
@@ -969,8 +969,8 @@ namespace avmplus
 			return ((int)atmj - (int)atmk);
 		}
 
-		double x = core->number(atmj);
-		double y = core->number(atmk);
+		double x = AvmCore::number(atmj);
+		double y = AvmCore::number(atmk);
 		double diff = x - y;
 
 		if (diff == diff) { // same as !isNaN
@@ -1069,8 +1069,8 @@ namespace avmplus
 					}
 				}
 			} else if (opt & kNumeric) {
-				double lhs = core->number(x);
-				double rhs = core->number(y);
+				double lhs = AvmCore::number(x);
+				double rhs = AvmCore::number(y);
 				double diff = lhs - rhs;
 
 				if (diff == diff) { // same as !isNaN
@@ -1151,7 +1151,7 @@ namespace avmplus
 					Atom arg1 = args->getUintProperty(1);
 					if (core->isNumber(arg1))
 					{
-						opt = core->integer (arg1);
+						opt = AvmCore::integer(arg1);
 					}
 					else
 					{
@@ -1162,7 +1162,7 @@ namespace avmplus
 			}
 			else if (core->isNumber(arg0))
 			{
-				opt = core->integer (arg0);
+				opt = AvmCore::integer(arg0);
 			}
 			else
 			{
@@ -1219,17 +1219,17 @@ namespace avmplus
 		uint32 nFields = 0;
 		int options = 0;
 	
-		if (core->istype(namesAtom, STRING_TYPE))
+		if (AvmCore::istype(namesAtom, STRING_TYPE))
 		{
 			nFields = 1;
 
-			options = core->integer(optionsAtom);
+			options = AvmCore::integer(optionsAtom);
 
 			fn = (ArraySort::FieldName*) core->GetGC()->Alloc(sizeof(ArraySort::FieldName), GC::kZero|GC::kContainsPointers);
 			fn[0].name = core->internString(namesAtom);
 			fn[0].options = options;
 		}
-		else if (core->istype(namesAtom, toplevel->arrayClass->ivtable()->traits /* array itraits */))
+		else if (AvmCore::istype(namesAtom, toplevel->arrayClass->ivtable()->traits /* array itraits */))
 		{
 			ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(namesAtom);
 
@@ -1242,23 +1242,23 @@ namespace avmplus
 				fn[i].options = 0;
 			}
 
-			if (core->istype(optionsAtom, toplevel->arrayClass->ivtable()->traits /* array itraits */))
+			if (AvmCore::istype(optionsAtom, toplevel->arrayClass->ivtable()->traits /* array itraits */))
 			{
 				ArrayObject *obj = (ArrayObject *)AvmCore::atomToScriptObject(optionsAtom);
 				uint32 nOptions = obj->getLength();
 				if (nOptions == nFields)
 				{
 					// The first options are used for uniqueSort and returnIndexedArray option
-					options = core->integer(obj->getUintProperty(0));
+					options = AvmCore::integer(obj->getUintProperty(0));
 					for (uint32 i = 0; i < nFields; i++)
 					{
-						fn[i].options = core->integer(obj->getUintProperty (i));
+						fn[i].options = AvmCore::integer(obj->getUintProperty (i));
 					}
 				}
 			}
 			else
 			{
-				options = core->integer(optionsAtom);
+				options = AvmCore::integer(optionsAtom);
 				for (uint32 i = 0; i < nFields; i++)
 				{
 					fn[i].options = options;
@@ -1287,17 +1287,16 @@ namespace avmplus
 		if (!args->getLength())
 			return 0; 
 
-		AvmCore* core = toplevel->core();
 		if (!AvmCore::isObject(thisAtom))
 			return 0;
 		ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
 
 		uint32 len = getLengthHelper(toplevel, d);
 		
-		uint32 start = NativeObjectHelpers::ClampIndex(core->toInteger(args->getUintProperty(0)),len);
+		uint32 start = NativeObjectHelpers::ClampIndex(AvmCore::toInteger(args->getUintProperty(0)),len);
 
-		double d_deleteCount = args->getLength() > 1 ? core->toInteger(args->getUintProperty(1)) : (len - start); 
-		uint32 deleteCount = (d_deleteCount < 0) ? 0 : core->integer_d(d_deleteCount);
+		double d_deleteCount = args->getLength() > 1 ? AvmCore::toInteger(args->getUintProperty(1)) : (len - start); 
+		uint32 deleteCount = (d_deleteCount < 0) ? 0 : AvmCore::integer_d(d_deleteCount);
 		if (deleteCount > (len - start)) {
 			deleteCount = len - start;
         }
@@ -1579,7 +1578,7 @@ namespace avmplus
 		AvmCore* core = toplevel->core();
 		Multiname mname(core->publicNamespace, core->klength);
 		Atom lenAtm = toplevel->getproperty(d->atom(), &mname, d->vtable);
-		return core->toUInt32(lenAtm);
+		return AvmCore::toUInt32(lenAtm);
 	}
 
 	/*static*/ void ArrayClass::setLengthHelper(Toplevel* toplevel, ScriptObject* d, uint32 newLen)

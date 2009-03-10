@@ -47,7 +47,7 @@ namespace avmplus
 	// if you find bugs here, you might need to update Toplevel::coerce as well (and vice versa).
 	// (Note: toplevel is passed as the final parameter as it's only used in exception cases,
 	// thus preserving our precious FASTCALL args (only 2 on x86-32) for more-frequently used args.)
-	static Atom* FASTCALL unbox1(AvmCore* core, Atom atom, Traits* t, Atom* args, Toplevel* toplevel)
+	static Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args, Toplevel* toplevel)
 	{
 		// using computed-gotos here doesn't move the needle appreciably in my testing
 		switch (Traits::getBuiltinType(t))
@@ -57,15 +57,15 @@ namespace avmplus
 				break;
 
 			case BUILTIN_boolean:
-				atom = core->boolean(atom);
+				atom = AvmCore::boolean(atom);
 				break;
 
 			case BUILTIN_int:
-				atom = core->integer(atom);
+				atom = AvmCore::integer(atom);
 				break;
 
 			case BUILTIN_uint:
-				atom = core->toUInt32(atom);
+				atom = AvmCore::toUInt32(atom);
 				break;
 
 			case BUILTIN_namespace:
@@ -89,7 +89,7 @@ namespace avmplus
 						double d;
 						Atom a;
 					};
-					d = core->number(atom);
+					d = AvmCore::number(atom);
 					atom = a;
 				#else
 					AvmAssert(sizeof(Atom)*2 == sizeof(double));
@@ -98,7 +98,7 @@ namespace avmplus
 						double d;
 						Atom a[2];
 					};
-					d = core->number(atom);
+					d = AvmCore::number(atom);
 					args[0] = a[0];
 					args += 1;
 					atom = a[1];	// fall thru, will be handled at end
@@ -197,7 +197,7 @@ namespace avmplus
 		case BUILTIN_uint:
 			return (atomKind(atom) == kIntegerType && atom >= 0) ? atom : core->uintAtom(atom);
 		case BUILTIN_boolean:
-			return (atomKind(atom) == kBooleanType) ? atom : core->booleanAtom(atom);
+			return (atomKind(atom) == kBooleanType) ? atom : AvmCore::booleanAtom(atom);
 		case BUILTIN_object:
 			return (atom == undefinedAtom) ? nullObjectAtom : atom;
 		case BUILTIN_any:
@@ -316,7 +316,7 @@ namespace avmplus
 		}
 		else
 		{
-			unbox1(core(), thisArg, ms->paramTraits(0), &thisArg, toplevel());
+			unbox1(thisArg, ms->paramTraits(0), &thisArg, toplevel());
 			return endCoerce(0, (uint32*)&thisArg, ms);
 		}
 	}
@@ -453,14 +453,13 @@ namespace avmplus
 	void MethodEnv::unboxCoerceArgs(int argc, Atom* in, uint32 *argv, MethodSignaturep ms)
 	{
 		Toplevel* toplevel = this->toplevel();
-		AvmCore* core = this->core();
 		
 		Atom* args = (Atom*)argv;
 
 		const int param_count = ms->param_count();
 		int end = argc >= param_count ? param_count : argc;
 		for (int i=0; i <= end; i++)
-			args = unbox1(core, in[i], ms->paramTraits(i), args, toplevel);
+			args = unbox1(in[i], ms->paramTraits(i), args, toplevel);
 		while (end < argc)
 			*args++ = in[++end];
 	}
@@ -468,15 +467,14 @@ namespace avmplus
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv, MethodSignaturep ms)
 	{
 		Toplevel* toplevel = this->toplevel();
-		AvmCore* core = this->core();
 		int argc = a->getLength();
 
-		Atom *args = unbox1(core, thisArg, ms->paramTraits(0), (Atom *) argv, toplevel);
+		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv, toplevel);
 
 		const int param_count = ms->param_count();
 		int end = argc >= param_count ? param_count : argc;
 		for (int i=0; i < end; i++)
-			args = unbox1(core, a->getUintProperty(i), ms->paramTraits(i+1), args, toplevel);
+			args = unbox1(a->getUintProperty(i), ms->paramTraits(i+1), args, toplevel);
 		while (end < argc)
 			*args++ = a->getUintProperty(end++);
 	}
@@ -484,14 +482,13 @@ namespace avmplus
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms)
 	{
 		Toplevel* toplevel = this->toplevel();
-		AvmCore* core = this->core();
 
-		Atom *args = unbox1(core, thisArg, ms->paramTraits(0), (Atom *) argv, toplevel);
+		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv, toplevel);
 
 		const int param_count = ms->param_count();
 		int end = argc >= param_count ? param_count : argc;
 		for (int i=0; i < end; i++)
-			args = unbox1(core, in[i], ms->paramTraits(i+1), args, toplevel);
+			args = unbox1(in[i], ms->paramTraits(i+1), args, toplevel);
 		while (end < argc)
 			*args++ = in[end++];
 	}
@@ -717,7 +714,7 @@ namespace avmplus
 				QNameObject* qname = (QNameObject*) i;
 				qname->getMultiname(*multi);
 			}
-			else if(!multi->isRtns() && core()->isDictionary(obj))
+			else if(!multi->isRtns() && AvmCore::isDictionary(obj))
 			{
 				return AvmCore::atomToScriptObject(obj)->getAtomProperty(index);
 			}
@@ -744,7 +741,7 @@ namespace avmplus
 
 		if ((index&7) == kDoubleType)
 		{
-			int i = core()->integer(index);
+			int i = AvmCore::integer(index);
 			uint32 u = (uint32)(i);
 			if ((double)u == AvmCore::atomToDouble(index))
 			{
@@ -789,7 +786,7 @@ namespace avmplus
 
 		if ((index&7) == kDoubleType)
 		{
-			int i = core()->integer(index);
+			int i = AvmCore::integer(index);
 			uint32 u = (uint32)(i);
 			if ((double)u == AvmCore::atomToDouble(index))
 			{
@@ -811,7 +808,7 @@ namespace avmplus
 				QNameObject* qname = (QNameObject*) i;
 				qname->getMultiname(*multi);
 			}	
-			else if(!multi->isRtns() && core()->isDictionary(obj))
+			else if(!multi->isRtns() && AvmCore::isDictionary(obj))
 			{
 				AvmCore::atomToScriptObject(obj)->setAtomProperty(index, value);
 				return;
@@ -835,7 +832,7 @@ namespace avmplus
 
 		if (AvmCore::isObject(obj) && AvmCore::isObject(index))
 		{
-            if( core->isXMLList(index) )
+            if (AvmCore::isXMLList(index) )
             {
                 // Error according to E4X spec, section 11.3.1
                 toplevel()->throwTypeError(kDeleteTypeError, core->toErrorString(toplevel()->toTraits(index)));
@@ -846,7 +843,7 @@ namespace avmplus
 				QNameObject* qname = (QNameObject*) i;
 				qname->getMultiname(*multi);
 			}
-			else if(!multi->isRtns() && core->isDictionary(obj))
+			else if(!multi->isRtns() && AvmCore::isDictionary(obj))
 			{
 				bool res = AvmCore::atomToScriptObject(obj)->deleteAtomProperty(index);
 				return res ? trueAtom : falseAtom;
@@ -870,7 +867,7 @@ namespace avmplus
 		
 		if (AvmCore::isObject(index))
 		{
-            if (core->isXMLList(index))
+            if (AvmCore::isXMLList(index))
             {
                 // Error according to E4X spec, section 11.3.1
                 toplevel()->throwTypeError(kDeleteTypeError, core->toErrorString(toplevel()->toTraits(index)));
