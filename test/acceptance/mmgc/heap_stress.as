@@ -67,7 +67,7 @@ class GCBench
 
 			tFinish = System.getTimer();
 			tElapsed = tFinish-tStart;
-			trace(tElapsed);
+			trace("metric time "+tElapsed);
 
 		}
 

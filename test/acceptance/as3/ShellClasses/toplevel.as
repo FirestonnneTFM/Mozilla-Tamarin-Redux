@@ -80,9 +80,10 @@
       true,
       System.privateMemory>0);
 
-    print("System.totalMemory="+System.totalMemory);
-    print("System.freeMemory="+System.freeMemory);
-    print("System.privateMemory="+System.privateMemory);
+    print("metric System.totalMemory "+System.totalMemory);
+    print("metric System.freeMemory "+System.freeMemory);
+    print("metric System.privateMemory "+System.privateMemory);
+
 
     var err="";
     try {
@@ -100,10 +101,10 @@
       if (ct==1000000) break;
     }
     var time=getTimer();
-    print("getTimer()="+time);
     AddTestCase("System getTimer>0",
       true,
       time>0);
+    print("metric System.getTimer "+getTimer());
 
     test();
 
