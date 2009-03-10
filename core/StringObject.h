@@ -115,7 +115,7 @@ namespace avmplus
 		Create a string using Latin-1 data. Characters are just widened and copied.
 		To create an UTF-8 string, use createUTF8().
 		@param	core				the AvmCore instance to use
-		@param	buffer				the character buffer; may not be NULL.
+		@param	buffer				the character buffer; if NULL, assume an empty string.
 		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
@@ -128,7 +128,7 @@ namespace avmplus
 		"strict" flag can be set to false. This allows a bug in the UTF-8 conversion routine
 		to prevail, where invalid UTF-8 sequences are copied as single characters.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-8 buffer; may not be NULL.
+		@param	buffer				the UTF-8 buffer; if NULL, assume an empty string.
 		@param	len					the size in bytes. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
@@ -144,7 +144,7 @@ namespace avmplus
 		FEATURE_UTF32_SUPPORT is defined). If the desired width is too small to fit the source data, 
 		return NULL.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-16 buffer; may not be NULL.
+		@param	buffer				the UTF-16 buffer; if NULL, assume an empty string.
 		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
@@ -160,7 +160,7 @@ namespace avmplus
 		because of a possible integer overrun during comparisons. If the desired width is too 
 		small to fit the source data, return NULL.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-32 buffer; may not be NULL.
+		@param	buffer				the UTF-32 buffer; if NULL, assume an empty string.
 		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
@@ -511,6 +511,8 @@ private:
 		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
 		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
 
+		// Check for strings with a length of 0 or 1, and return an appropriate string if possible.
+		static	Stringp FASTCALL	checkForTinyStrings(AvmCore* core, const char* buffer, int32_t len, Width w);
 		// Create a string with no buffer.
 		static	Stringp	FASTCALL	createDependent(MMgc::GC* gc, Stringp master, int32_t start, int32_t len);
 		// Create a string with a dynamic buffer.

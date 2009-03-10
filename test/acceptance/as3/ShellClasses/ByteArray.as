@@ -368,5 +368,43 @@
       "dan!",
       bytearray_str.toString());
 
+// bad partial sequence
+    var bytearray_bad : ByteArray = new ByteArray();
+    bytearray_bad[0]=0xE4; // 19968
+    bytearray_bad[1]=0xB8;
+    bytearray_bad[2]=0x80;
+    bytearray_bad[3]=0xE4; // bad sequence
+    bytearray_bad[4]=0xE4; // 19968
+    bytearray_bad[5]=0xB8;
+    bytearray_bad[6]=0x80;
+    AddTestCase(
+      "ByteArray with partial bad utf-8 sequence",
+      "\u4e00\u00E4\u4e00",
+      bytearray_bad.toString());
+
+// truncated utf-8 sequence
+    bytearray_bad = new ByteArray();
+    bytearray_bad[0]=0xE4; // truncated sequence
+    bytearray_bad[1]=0xB8;
+    AddTestCase(
+      "ByteArray with truncated utf-8 sequence",
+      "\u00E4\u00B8",
+      bytearray_bad.toString());
+
+// utf-8 sequence > 0x1FFFF
+    bytearray_bad = new ByteArray();
+    bytearray_bad[0]=0xFB; // character == 0x3FFFF
+    bytearray_bad[1]=0xBF;
+    bytearray_bad[2]=0xBF;
+    bytearray_bad[3]=0xBF;
+    bytearray_bad[4]=0xBF;
+    bytearray_bad[5]=0xE4; // 19968
+    bytearray_bad[6]=0xB8;
+    bytearray_bad[7]=0x80;
+    AddTestCase(
+      "ByteArray with out-of-range utf-8 sequence",
+      "\u00FB\u00BF\u00BF\u00BF\u00BF\u4e00",
+      bytearray_bad.toString());
+
     test();
 
