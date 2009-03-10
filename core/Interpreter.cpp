@@ -1156,7 +1156,7 @@ namespace avmplus
 				else if (IS_INTEGER(a1))
 					sp[0] = a1 == kIntegerType ? falseAtom : trueAtom;
 				else
-					sp[0] = core->booleanAtom(a1);
+					sp[0] = AvmCore::booleanAtom(a1);
 				NEXT;
 			}
 
@@ -1184,14 +1184,14 @@ namespace avmplus
 					}
 				}
 				SAVE_EXPC;
-				sp[0] = core->doubleToAtom(-core->number(a1));
+				sp[0] = core->doubleToAtom(-AvmCore::number(a1));
                 NEXT;
 			}
 
 			INSTR(negate_i) {
 				// OPTIMIZEME - negate_i
 				SAVE_EXPC;
-                sp[0] = core->intToAtom(-core->integer(sp[0]));
+                sp[0] = core->intToAtom(-AvmCore::integer(sp[0]));
                 NEXT;
 			}
 
@@ -1214,7 +1214,7 @@ namespace avmplus
 				else if (IS_INTEGER(a1))
 					a1 = a1 == kIntegerType ? falseAtom : trueAtom;
 				else
-					a1 = core->booleanAtom(a1);
+					a1 = AvmCore::booleanAtom(a1);
                 sp[0] = a1 ^ (trueAtom ^ falseAtom);
                 NEXT;
 			}
@@ -1226,7 +1226,7 @@ namespace avmplus
 					NEXT;
 				}
 				SAVE_EXPC;
-				*sp = core->intToAtom(~core->integer(a1));
+				*sp = core->intToAtom(~AvmCore::integer(a1));
                 NEXT;
 			}
 
@@ -1409,8 +1409,8 @@ namespace avmplus
 				sp--;
 				FAST_ADD_MAYBE(a1,a2,sp[0]);
 				SAVE_EXPC;
-				i1 = core->integer(a1);
-				i2 = core->integer(a2);
+				i1 = AvmCore::integer(a1);
+				i2 = AvmCore::integer(a2);
 				sp[0] = core->intToAtom((int32_t)(i1 + i2));
                 NEXT;
 			}
@@ -1424,8 +1424,8 @@ namespace avmplus
 #endif
 				FAST_SUB_MAYBE(a1, a2, sp[0]);
 				SAVE_EXPC;
-				d1 = core->number(a1);
-				d2 = core->number(a2);
+				d1 = AvmCore::number(a1);
+				d2 = AvmCore::number(a2);
 				sp[0] = core->doubleToAtom(d1 - d2);
 				NEXT;
 			}
@@ -1436,8 +1436,8 @@ namespace avmplus
 				sp--;
 				FAST_SUB_MAYBE(a1,a2,sp[0]);
 				SAVE_EXPC;
-				i1 = core->integer(a1);
-				i2 = core->integer(a2);
+				i1 = AvmCore::integer(a1);
+				i2 = AvmCore::integer(a2);
 				sp[0] = core->intToAtom((int32_t)(i1 - i2));
                 NEXT;
 			}
@@ -1455,8 +1455,8 @@ namespace avmplus
 					NEXT;
 				}
 				SAVE_EXPC;
-				d1 = core->number(a1);
-				d2 = core->number(a2);
+				d1 = AvmCore::number(a1);
+				d2 = AvmCore::number(a2);
 				sp[0] = core->doubleToAtom(d1 * d2);
 				NEXT;
 			}
@@ -1467,8 +1467,8 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-				i1 = core->integer(a1);
-				i2 = core->integer(a2);
+				i1 = AvmCore::integer(a1);
+				i2 = AvmCore::integer(a2);
                 sp[0] = core->intToAtom((int32_t)(i1 * i2));
                 NEXT;
 			}
@@ -1486,8 +1486,8 @@ namespace avmplus
 					NEXT;
 				}
 				SAVE_EXPC;
-				d1 = core->number(a1);
-				d2 = core->number(a2);
+				d1 = AvmCore::number(a1);
+				d2 = AvmCore::number(a2);
 				sp[0] = core->doubleToAtom(d1 / d2);
 				NEXT;
 			}
@@ -1513,8 +1513,8 @@ namespace avmplus
 					NEXT;
 				}
 				SAVE_EXPC;
-				d1 = core->number(a1);
-				d2 = core->number(a2);
+				d1 = AvmCore::number(a1);
+				d2 = AvmCore::number(a2);
 				sp[0] = core->doubleToAtom(MathUtils::mod(d1, d2));
 				NEXT;
 			}
@@ -1532,8 +1532,8 @@ namespace avmplus
 					}
 				}
 				SAVE_EXPC;
-				i1 = core->integer(a1);
-				u2 = core->toUInt32(a2);
+				i1 = AvmCore::integer(a1);
+				u2 = AvmCore::toUInt32(a2);
 				sp[0] = core->intToAtom( (int32_t)(i1 << (u2 & 0x1F)) );
 				NEXT;
 			}
@@ -1548,8 +1548,8 @@ namespace avmplus
 					NEXT;
 				}
 				SAVE_EXPC;
-				i1 = core->integer(a1);
-				u2 = core->toUInt32(a2);
+				i1 = AvmCore::integer(a1);
+				u2 = AvmCore::toUInt32(a2);
 				sp[0] = core->intToAtom( (int32_t)(i1 >> (u2 & 0x1F)) );
 				NEXT;
 			}
@@ -1567,8 +1567,8 @@ namespace avmplus
 					}
 				}
 				SAVE_EXPC;
-				u1 = core->toUInt32(a1);
-				u2 = core->toUInt32(a2);
+				u1 = AvmCore::toUInt32(a1);
+				u2 = AvmCore::toUInt32(a2);
 				sp[0] = core->uintToAtom( (uint32_t)(u1 >> (u2 & 0x1F)) );
 				NEXT;
 			}
@@ -1582,8 +1582,8 @@ namespace avmplus
 		NEXT; \
 	} \
 	SAVE_EXPC; \
-	i1 = core->integer(a1); \
-	i2 = core->integer(a2); \
+	i1 = AvmCore::integer(a1); \
+	i2 = AvmCore::integer(a2); \
 	dest = core->intToAtom((int32_t)(i1 op i2)); \
 	NEXT
 
@@ -1662,7 +1662,7 @@ namespace avmplus
 				else if (IS_INTEGER(a1))
 					a1 = a1 == kIntegerType ? falseAtom : trueAtom;
 				else
-					a1 = core->booleanAtom(a1);  // does not throw or change the XML namespace
+					a1 = AvmCore::booleanAtom(a1);  // does not throw or change the XML namespace
 				i1 = S24ARG;
 				if (a1 == a2)
 				{
@@ -1910,7 +1910,7 @@ namespace avmplus
 					a2 = *(sp--);	// key
 					*sp = AvmCore::atomToScriptObject(*sp)->getUintProperty(UINT32_VALUE(a2));
 				}
-				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) 
+				else if(multiname->isRtns() || !AvmCore::isDictionaryLookup(*sp, *(sp-1))) 
 				{
 					aux_memory->multiname2 = *multiname;
 					sp = initMultiname(env, aux_memory->multiname2, sp);
@@ -1940,7 +1940,7 @@ namespace avmplus
 					a3 = *(sp--);		// object
 					AvmCore::atomToScriptObject(a3)->setUintProperty(UINT32_VALUE(a2), a1);
 				}
-				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1)))
+				else if(multiname->isRtns() || !AvmCore::isDictionaryLookup(*sp, *(sp-1)))
 				{
 					aux_memory->multiname2 = *multiname;
 					sp = initMultiname(env, aux_memory->multiname2, sp);
@@ -2052,7 +2052,7 @@ namespace avmplus
 				u1 = U30ARG;                       // objReg
 				u2  = U30ARG;                      // indexReg
 				a1l = framep[u1];                  // objAtom
-				i32l = core->integer(framep[u2]);  // index
+				i32l = AvmCore::integer(framep[u2]);  // index
 				*(++sp) = env->hasnextproto(a1l, i32l) ? trueAtom : falseAtom;
 				framep[u1] = a1l;
 				framep[u2] = core->intToAtom(i32l);
@@ -2063,19 +2063,19 @@ namespace avmplus
 			// since we are downshifting anyway, integrate final upshift-by-3 into downshift
 			// rather than using MAKE_INTEGER macro.
 			INSTR(sxi1) {
-				i1 = core->integer(sp[0]);
+				i1 = AvmCore::integer(sp[0]);
 				sp[0] = Atom(((i1 << (8*sizeof(Atom)-1)) >> ((8*sizeof(Atom)-1)-3)) | kIntegerType);
 				NEXT;
 			}
 			
 			INSTR(sxi8) {
-				i1 = core->integer(sp[0]);
+				i1 = AvmCore::integer(sp[0]);
 				sp[0] = Atom(((i1 << (8*(sizeof(Atom)-1))) >> ((8*(sizeof(Atom)-1))-3)) | kIntegerType);
 				NEXT;
 			}
 			
 			INSTR(sxi16) {
-				i1 = core->integer(sp[0]);
+				i1 = AvmCore::integer(sp[0]);
 				sp[0] = Atom(((i1 << (8*(sizeof(Atom)-2))) >> ((8*(sizeof(Atom)-2))-3)) | kIntegerType);
 				NEXT;
 			}
@@ -2093,14 +2093,14 @@ namespace avmplus
 			
 			// loads
 			INSTR(li8) {
-				i1 = core->integer(sp[0]);		// i1 = addr
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				MOPS_LOAD(i1, uint8_t, ub2);	// ub2 = result
 				sp[0] = MAKE_INTEGER(ub2);		// always fits in atom
 				NEXT;
 			}
 
 			INSTR(li16) {
-				i1 = core->integer(sp[0]);		// i1 = addr
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				MOPS_LOAD(i1, uint16_t, uh2l);	// uh2l = result
 				MOPS_SWAP_BYTES(&uh2l);
 				sp[0] = MAKE_INTEGER(uh2l);		// always fits in atom
@@ -2108,7 +2108,7 @@ namespace avmplus
 			}
 
 			INSTR(li32) {
-				i1 = core->integer(sp[0]);		// i1 = addr
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				MOPS_LOAD(i1, int32_t, i32l);	// i32l = result
 				MOPS_SWAP_BYTES(&i32l);
 				sp[0] = core->intToAtom(i32l);
@@ -2116,7 +2116,7 @@ namespace avmplus
 			}
 
 			INSTR(lf32) {
-				i1 = core->integer(sp[0]);		// i1 = addr
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				MOPS_LOAD(i1, float, f2l);		// f2l = result
 				MOPS_SWAP_BYTES(&f2l);
 				sp[0] = core->doubleToAtom(f2l);
@@ -2124,7 +2124,7 @@ namespace avmplus
 			}
 
 			INSTR(lf64) {
-				i1 = core->integer(sp[0]);		// i1 = addr
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				MOPS_LOAD(i1, double, d2l);		// d2l = addr
 				MOPS_SWAP_BYTES(&d2l);
 				sp[0] = core->doubleToAtom(d2l);
@@ -2133,16 +2133,16 @@ namespace avmplus
 			
 			// stores
 			INSTR(si8) {
-				i1 = core->integer(sp[0]);		        // i1 = addr
-				ub2 = (uint8_t)core->integer(sp[-1]);	// u2 = value
+				i1 = AvmCore::integer(sp[0]);		        // i1 = addr
+				ub2 = (uint8_t)AvmCore::integer(sp[-1]);	// u2 = value
 				MOPS_STORE(i1, uint8_t, ub2);
 				sp -= 2;
 				NEXT;
 			}
 
 			INSTR(si16) {
-				i1 = core->integer(sp[0]);		// i1 = addr
-				uh2l = (uint16_t)core->integer(sp[-1]);	// uh2l = value
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
+				uh2l = (uint16_t)AvmCore::integer(sp[-1]);	// uh2l = value
 				MOPS_SWAP_BYTES(&uh2l);
 				MOPS_STORE(i1, uint16_t, uh2l);
 				sp -= 2;
@@ -2150,8 +2150,8 @@ namespace avmplus
 			}
 
 			INSTR(si32) {
-				i1 = core->integer(sp[0]);		// i1 = addr
-				i32l = core->integer(sp[-1]);	// i32l = value
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
+				i32l = AvmCore::integer(sp[-1]);	// i32l = value
 				MOPS_SWAP_BYTES(&i32l);
 				MOPS_STORE(i1, uint32_t, i32l);
 				sp -= 2;
@@ -2159,8 +2159,8 @@ namespace avmplus
 			}
 
 			INSTR(sf32) {
-				i1 = core->integer(sp[0]);		// i1 = addr
-				f2l = (float)core->number(sp[-1]);		// d2l = value
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
+				f2l = (float)AvmCore::number(sp[-1]);		// d2l = value
 				MOPS_SWAP_BYTES(&f2l);
 				MOPS_STORE(i1, float, f2l);
 				sp -= 2;
@@ -2168,8 +2168,8 @@ namespace avmplus
 			}
 
 			INSTR(sf64) {
-				i1 = core->integer(sp[0]);
-				d2l = core->number(sp[-1]);
+				i1 = AvmCore::integer(sp[0]);
+				d2l = AvmCore::number(sp[-1]);
 				MOPS_SWAP_BYTES(&d2l);
 				MOPS_STORE(i1, double, d2l);
 				sp -= 2;
@@ -2189,7 +2189,7 @@ namespace avmplus
 					a2 = *(sp--);	// key
 					*sp = AvmCore::atomToScriptObject(*sp)->delUintProperty(UINT32_VALUE(a2)) ? trueAtom : falseAtom;
 				}
-				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) 
+				else if(multiname->isRtns() || !AvmCore::isDictionaryLookup(*sp, *(sp-1))) 
 				{
 					aux_memory->multiname2 = *multiname;
 					sp = initMultinameNoXMLList(env, aux_memory->multiname2, sp);
@@ -2468,7 +2468,7 @@ namespace avmplus
 			INSTR(astype) {
 				SAVE_EXPC;
 				GET_MULTINAME_PTR(multiname, U30ARG);
-				sp[0] = core->astype(sp[0], getTraits(multiname, pool, toplevel, core));
+				sp[0] = AvmCore::astype(sp[0], getTraits(multiname, pool, toplevel, core));
 				NEXT;
 			}
 
@@ -2477,7 +2477,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-				sp[0] = core->astype(a1, toplevel->toClassITraits(a2));
+				sp[0] = AvmCore::astype(a1, toplevel->toClassITraits(a2));
                 NEXT;
 			}
 
@@ -2514,7 +2514,7 @@ namespace avmplus
 				// used when operator "is" RHS is a compile-time type constant
 				GET_MULTINAME_PTR(multiname, U30ARG);
 				t1 = getTraits(multiname, pool, toplevel, core);	// itraits
-				sp[0] = core->istypeAtom(sp[0], t1);
+				sp[0] = AvmCore::istypeAtom(sp[0], t1);
                 NEXT;
 			}
 
@@ -2523,7 +2523,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-				sp[0] = core->istypeAtom(a1, toplevel->toClassITraits(a2));
+				sp[0] = AvmCore::istypeAtom(a1, toplevel->toClassITraits(a2));
                 NEXT;
 			}
 
@@ -3168,7 +3168,7 @@ namespace avmplus
 
 	Atom* initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* sp)
 	{
-		if (name.isRtname() && env->core()->isXMLList(sp[0])) {
+		if (name.isRtname() && AvmCore::isXMLList(sp[0])) {
 			// Error according to E4X spec, section 11.3.1
 			env->toplevel()->throwTypeError(kDeleteTypeError, env->core()->toErrorString(env->toplevel()->toTraits(sp[0])));
 		}

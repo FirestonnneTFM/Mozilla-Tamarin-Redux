@@ -73,7 +73,6 @@ namespace avmplus
 		if (getDenseLength() != m_lowHTentry)
 			return;
 
-		AvmCore *core = this->core();
 		while (getDenseLength() == m_lowHTentry)
 		{
 			AvmAssert (ScriptObject::hasUintProperty (m_lowHTentry));
@@ -111,7 +110,7 @@ namespace avmplus
 					{
 						Atom name = ScriptObject::nextName (index);
 						uint32 nameIndex; 
-						if (core->getIndexFromAtom (name, &nameIndex))
+						if (AvmCore::getIndexFromAtom(name, &nameIndex))
 						{
 							if ((m_lowHTentry == NO_LOW_HTENTRY) || (nameIndex < m_lowHTentry))
 							{
@@ -139,13 +138,13 @@ namespace avmplus
 			AvmCore *core = this->core();
 			// Update the array length.
 			uint32 index;
-			if (core->getIndexFromAtom (name, &index))
+			if (AvmCore::getIndexFromAtom(name, &index))
 			{
 				return _setUintProperty (index, value);
 			}
 			
 			if (name == core->klength->atom())
-				return setLength(core->toUInt32(value));
+				return setLength(AvmCore::toUInt32(value));
 		}
 
 		ScriptObject::setAtomProperty(name, value);
@@ -214,7 +213,7 @@ namespace avmplus
 			if (hasDense())
 			{
 				uint32 index;
-				if (core->getIndexFromAtom (name, &index))
+				if (AvmCore::getIndexFromAtom(name, &index))
 				{
 					// if we get here, we have a valid integer index.
 					if ((index < getDenseLength()))
@@ -267,7 +266,7 @@ namespace avmplus
 			if (hasDense())
 			{
 				uint32 index;
-				if (core()->getIndexFromAtom (name, &index))
+				if (AvmCore::getIndexFromAtom(name, &index))
 				{
 					return delUintProperty(index);
 				}
@@ -313,7 +312,7 @@ namespace avmplus
 			if (hasDense())
 			{
 				uint32 index;
-				if (core()->getIndexFromAtom(name, &index))
+				if (AvmCore::getIndexFromAtom(name, &index))
 				{
 					// {DontEnum} is not supported on the dense portion
 					// of an array.  Those properties are always enumerable.
@@ -333,7 +332,7 @@ namespace avmplus
 			if (hasDense())
 			{
 				uint32 index;
-				if (core()->getIndexFromAtom (name, &index))
+				if (AvmCore::getIndexFromAtom(name, &index))
 				{
 					if (index < getDenseLength())
 						return true;

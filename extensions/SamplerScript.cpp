@@ -101,7 +101,7 @@ namespace avmplus
 			{
 				f = 0;
 			}
-			else if (!core->istype(f->atom(), core->traits.function_itraits)) 
+			else if (!AvmCore::istype(f->atom(), core->traits.function_itraits)) 
 			{
 				toplevel()->argumentErrorClass()->throwError( kInvalidArgumentError, core->toErrorString("Function"));
 				return;
@@ -293,11 +293,11 @@ namespace avmplus
 		}
 		
 		ClassClosure *type;
-		if(obj && core->istype(obj->atom(), CLASS_TYPE))
+		if(obj && AvmCore::istype(obj->atom(), CLASS_TYPE))
 		{
 			type = tl->classClass;
 		} 
-		else if(obj && core->istype(obj->atom(), FUNCTION_TYPE))
+		else if(obj && AvmCore::istype(obj->atom(), FUNCTION_TYPE))
 		{
 			type = tl->functionClass;
 		}
@@ -319,7 +319,7 @@ namespace avmplus
 				if(AvmCore::isObject(ccAtom))
 				{
 					type = (ClassClosure*) AvmCore::atomToScriptObject(ccAtom);
-					if(!core->istype(type->atom(), CLASS_TYPE))
+					if(!AvmCore::istype(type->atom(), CLASS_TYPE))
 					{
 						// obj is a ClassClosure
 						type = tl->classClass;
@@ -332,10 +332,10 @@ namespace avmplus
 		AvmAssert(!obj || 
 			typeOrVTable < 7 || 
 			  (obj->traits()->name && obj->traits()->name->equalsLatin1("global")) ||
-			(core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
+			(AvmCore::istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
 			(obj->traits()->isActivationTraits() && type == tl->objectClass) ||
-			core->istype(obj->atom(), type->traits()->itraits));
-		AvmAssert(core->istype(type->atom(), CLASS_TYPE));	
+			AvmCore::istype(obj->atom(), type->traits()->itraits));
+		AvmAssert(AvmCore::istype(type->atom(), CLASS_TYPE));	
 		return type;	
 	}
 #endif // DEBUGGER
@@ -434,7 +434,7 @@ namespace avmplus
 		if (AvmCore::isObject(o))
 		{
 			Traits *t = AvmCore::atomToScriptObject(o)->traits();
-			if(core->istype(o, CLASS_TYPE) && instanceNames && t->itraits)
+			if(AvmCore::istype(o, CLASS_TYPE) && instanceNames && t->itraits)
 				t = t->itraits;
 			if (s->slotIteratorVTable == NULL)
 				s->slotIteratorVTable = _newVT(self->vtable, sizeof(SlotIterator));
@@ -593,7 +593,7 @@ namespace avmplus
 		{
 			object = AvmCore::atomToScriptObject(a);
 
-			if(core->istype(a, CLASS_TYPE) && !qname) {
+			if(AvmCore::istype(a, CLASS_TYPE) && !qname) {
 				// return constructor count
 				ClassClosure *cc = (ClassClosure*)object;
 				if (cc->vtable->init) // Vector related crash here, Tommy says: I didn't think a type could ever not have a constructor but I guess there's no reason it has to.

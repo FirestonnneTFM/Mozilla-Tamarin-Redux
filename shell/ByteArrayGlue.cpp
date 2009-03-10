@@ -303,16 +303,15 @@ namespace avmshell
 	
 	void ByteArrayObject::setUintProperty(uint32 i, Atom value)
 	{
-		m_byteArray[i] = (U8)(core()->integer(value));
+		m_byteArray[i] = (U8)(AvmCore::integer(value));
 	}
 	
 	Atom ByteArrayObject::getAtomProperty(Atom name) const
 	{
-		AvmCore *core = this->core();
 		uint32 index;
-		if (core->getIndexFromAtom(name, &index)) {
+		if (AvmCore::getIndexFromAtom(name, &index)) {
 			if (index < (uint32) m_byteArray.GetLength()) {
-				return core->intToAtom(m_byteArray[index]);
+				return core()->intToAtom(m_byteArray[index]);
 			} else {
 				return undefinedAtom;
 			}
@@ -323,10 +322,9 @@ namespace avmshell
 	
 	void ByteArrayObject::setAtomProperty(Atom name, Atom value)
 	{
-		AvmCore *core = this->core();
 		uint32 index;
-		if (core->getIndexFromAtom(name, &index)) {
-			int intValue = core->integer(value);
+		if (AvmCore::getIndexFromAtom(name, &index)) {
+			int intValue = AvmCore::integer(value);
 			m_byteArray[index] = (U8)(intValue);
 		} else {
 			ScriptObject::setAtomProperty(name, value);

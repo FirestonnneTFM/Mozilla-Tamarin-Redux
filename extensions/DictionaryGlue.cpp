@@ -90,8 +90,8 @@ namespace avmplus
 
 		// FIXME: this doesn't work, need to convert back to an XMLObject
 		// on the way out or intern XMLObject's somehow
-		//if(core()->isXML(key))
-		//	key = AvmCore::gcObjectToAtom(core()->atomToXML(key));
+		//if(AvmCore::isXML(key))
+		//	key = AvmCore::gcObjectToAtom(AvmCore::atomToXML(key));
 		
 		return key;
 	}

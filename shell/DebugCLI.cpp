@@ -542,7 +542,7 @@ namespace avmshell
 		if (core->isNumber(baseline))
 			return core->numberAtom(a);
 		else if (core->isBoolean(baseline))
-			return core->booleanAtom(a);
+			return AvmCore::booleanAtom(a);
 		
 		return nullStringAtom;
 	}

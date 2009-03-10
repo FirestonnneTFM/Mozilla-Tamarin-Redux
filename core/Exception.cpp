@@ -59,7 +59,7 @@ namespace avmplus
         #ifdef DEBUGGER
 		// If the exception atom is an Error object, copy its stack trace.
 		// Otherwise, generate a new stack trace.
-		if (core->istype(atom, core->traits.error_itraits))
+		if (AvmCore::istype(atom, core->traits.error_itraits))
 		{
 			stackTrace = ((ErrorObject*)AvmCore::atomToScriptObject(atom))->getStackTraceObject();
 		}

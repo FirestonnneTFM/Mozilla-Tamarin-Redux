@@ -127,7 +127,7 @@ namespace avmplus
 		{
 			AvmCore* core = this->core();
 
-			if (!core->istype(argArray, ARRAY_TYPE))
+			if (!AvmCore::istype(argArray, ARRAY_TYPE))
 				toplevel()->throwTypeError(kApplyError);
 
 			return _call->coerceEnter(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));

@@ -52,9 +52,9 @@ namespace avmplus
 	#define kAvmThunkNull		nullObjectAtom
 	#define kAvmThunkUndefined	undefinedAtom
 
-	#define kAvmThunkInfinity		(MathUtils::infinity())
-	#define kAvmThunkNegInfinity	(MathUtils::neg_infinity())
-	#define kAvmThunkNaN			(MathUtils::nan())
+	#define kAvmThunkInfinity		(MathUtils::kInfinity)
+	#define kAvmThunkNegInfinity	(MathUtils::kNegInfinity)
+	#define kAvmThunkNaN			(MathUtils::kNaN)
 	
 	typedef AvmObject		AvmRetType_AvmObject;
 	typedef bool			AvmRetType_AvmBool32;	// bools are passed in as int32, but returned as bool, for historic reasons

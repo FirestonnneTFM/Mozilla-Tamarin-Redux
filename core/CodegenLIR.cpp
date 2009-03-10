@@ -2635,8 +2635,8 @@ namespace avmplus
 			else
 			{
 				// * -> Number
-				localSet(loc, callIns(FUNCTIONID(number), 2,
-					coreAddr, loadAtomRep(loc)));
+				localSet(loc, callIns(FUNCTIONID(number), 1,
+					loadAtomRep(loc)));
 			}
 		}
 		else if (result == INT_TYPE)
@@ -2654,8 +2654,8 @@ namespace avmplus
 			else
 			{
 				// * -> int
-				localSet(loc, callIns(FUNCTIONID(integer), 2,
-					coreAddr, loadAtomRep(loc)));
+				localSet(loc, callIns(FUNCTIONID(integer), 1,
+					loadAtomRep(loc)));
 			}
 		}
 		else if (result == UINT_TYPE)
@@ -2672,8 +2672,8 @@ namespace avmplus
 			else
 			{
 				// * -> uint
-				localSet(loc, callIns(FUNCTIONID(toUInt32), 2,
-					coreAddr, loadAtomRep(loc)));
+				localSet(loc, callIns(FUNCTIONID(toUInt32), 1,
+					loadAtomRep(loc)));
 			}
 		}
 		else if (result == BOOLEAN_TYPE)
@@ -2699,8 +2699,8 @@ namespace avmplus
 			else
 			{
 				// * -> Boolean
-				localSet(loc, callIns(FUNCTIONID(boolean), 2,
-					coreAddr, loadAtomRep(loc)));
+				localSet(loc, callIns(FUNCTIONID(boolean), 1,
+					loadAtomRep(loc)));
 			}
 		}
 		else if (result == STRING_TYPE)
@@ -4372,12 +4372,11 @@ namespace avmplus
 			case OP_astype:
 			{
                 PERFM_NVPROF("emit(astype",1);
-				// sp[0] = core->astype(sp[0], traits)
+				// sp[0] = AvmCore::astype(sp[0], traits)
 				Traits *type = (Traits*) op1;
 				int32_t index = (int32_t) op2;
 				LIns* obj = loadAtomRep(index);
-				LIns* i1 = callIns(FUNCTIONID(astype), 3,
-					coreAddr,
+				LIns* i1 = callIns(FUNCTIONID(astype), 2,
 					obj,
 					InsConstPtr(type));
 
@@ -4398,8 +4397,8 @@ namespace avmplus
 
 				LIns* obj = loadAtomRep(sp-1);
 
-				LIns* i3 = callIns(FUNCTIONID(astype), 3,
-					coreAddr, obj, itraits);
+				LIns* i3 = callIns(FUNCTIONID(astype), 2,
+					obj, itraits);
 
 				i3 = atomToNativeRep(result, i3);
 				localSet(sp-1, i3);
@@ -4514,8 +4513,8 @@ namespace avmplus
                 int32_t index = (int32_t) op2;
 				LIns* obj = loadAtomRep(index);
 				LIns* itraits = InsConstPtr(type);
-				LIns* out = callIns(FUNCTIONID(istypeAtom), 3,
-					coreAddr, obj, itraits);
+				LIns* out = callIns(FUNCTIONID(istypeAtom), 2,
+					obj, itraits);
 				out = atomToNativeRep(result, out);
 				localSet(index, out);
 				break;
@@ -4533,8 +4532,8 @@ namespace avmplus
 
 				LIns* obj = loadAtomRep(sp-1);
 
-				LIns* i3 = callIns(FUNCTIONID(istypeAtom), 3,
-					coreAddr, obj, traits);
+				LIns* i3 = callIns(FUNCTIONID(istypeAtom), 2,
+					obj, traits);
 
 				i3 = atomToNativeRep(result, i3);
 				localSet(sp-1, i3);

@@ -212,7 +212,7 @@ namespace avmplus
 	{		
 		AvmCore* core = this->core();
 
-		if (core->istype(thisAtom, CLASS_TYPE))
+		if (AvmCore::istype(thisAtom, CLASS_TYPE))
 		{
 			ClassClosure *cc = (ClassClosure *)AvmCore::atomToScriptObject(thisAtom);
 			Traits*		t = cc->ivtable()->traits;

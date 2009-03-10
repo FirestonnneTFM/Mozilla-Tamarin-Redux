@@ -243,9 +243,9 @@ namespace avmplus
 				// if AnyName, return the result of calling "ToAttributeName(*)"
 				// if QName, return attributeName
 				// otherwise, do toString, then to default case
-				if (core->isQName(attributeName))
+				if (AvmCore::isQName(attributeName))
 				{
-					QNameObject *q = core->atomToQName (attributeName);
+					QNameObject *q = AvmCore::atomToQName(attributeName);
 					if (q->isAttr())
 						return q;
 					else
@@ -301,9 +301,9 @@ namespace avmplus
 					// if AttributeName, return the input argument
 					// if AnyName, return the result of calling "ToAttributeName(*)"
 					// if QName, return attributeName
-					if (core->isQName(p))
+					if (AvmCore::isQName(p))
 					{
-						QNameObject *q = core->atomToQName (p);
+						QNameObject *q = AvmCore::atomToQName(p);
 
 						m.setAttr(q->isAttr() ? true : false);
 						m.setNamespace(core->newNamespace(q->get_uri()));
@@ -568,7 +568,7 @@ namespace avmplus
 			core->console << "constructprop slot " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			Atom ctor = AvmCore::atomToScriptObject(obj)->getSlotAtom(AvmCore::bindingToSlotId(b));
-			if (!core->istype(ctor, CLASS_TYPE) && !core->istype(ctor, FUNCTION_TYPE))
+			if (!AvmCore::istype(ctor, CLASS_TYPE) && !AvmCore::istype(ctor, FUNCTION_TYPE))
 				throwTypeError(kNotConstructorError, core->toErrorString(multiname));
 			return op_construct(ctor, argc, atomv);
 		}
@@ -615,8 +615,8 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		if ((ctor&7) != kObjectType ||
-			!core->istype(ctor, core->traits.function_itraits) &&
-			!core->istype(ctor, core->traits.class_itraits))
+			!AvmCore::istype(ctor, core->traits.function_itraits) &&
+			!AvmCore::istype(ctor, core->traits.class_itraits))
 		{
 			throwTypeError(kCantUseInstanceofOnNonObjectError);
 		}
@@ -669,7 +669,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		Traits* t = this->toTraits(obj); // includes null check
 
-		if (!core->isDictionaryLookup(nameatom, obj))
+		if (!AvmCore::isDictionaryLookup(nameatom, obj))
 		{
 			Stringp name = core->intern(nameatom);
 
@@ -712,7 +712,7 @@ namespace avmplus
 			case BUILTIN_any:
 				return atom;
 			case BUILTIN_boolean:
-				return core->booleanAtom(atom);
+				return AvmCore::booleanAtom(atom);
 			case BUILTIN_number:
 				return core->numberAtom(atom);
 			case BUILTIN_string:
@@ -798,11 +798,11 @@ namespace avmplus
 			// C++ porting note. if either side is undefined, null or NaN then result must be NaN.
 			// Java's + operator ensures this for double operands.
 			// cn:  null should convert to 0, so I think the above comment is wrong for null.
-			return core->doubleToAtom(core->number(lhs) + core->number(rhs));
+			goto add_numbers;
 		}
-		else if (AvmCore::isString(lhs) || AvmCore::isString(rhs) || core->isDate(lhs) || core->isDate(rhs))
+		else if (AvmCore::isString(lhs) || AvmCore::isString(rhs) || AvmCore::isDate(lhs) || AvmCore::isDate(rhs))
 		{
- 			return core->concatStrings(core->string(lhs), core->string(rhs))->atom();
+			goto concat_strings;
 		}
 
 
@@ -810,13 +810,11 @@ namespace avmplus
 		
 		// E4X, section 11.4.1, pg 53
 		
-		if (core->isObject (lhs) && core->isObject (rhs) && 
-			   (core->isXML(lhs) || core->isXMLList(lhs)) 
-			&& (core->isXML(rhs) || core->isXMLList (rhs)))
+		if (AvmCore::isXMLorXMLList(lhs) && AvmCore::isXMLorXMLList(rhs))
 		{
 			XMLListObject *l = new (core->GetGC()) XMLListObject(xmlListClass());
-			l->_append (lhs);
-			l->_append (rhs);
+			l->_append(lhs);
+			l->_append(rhs);
 			return l->atom();
 		}
 		
@@ -838,17 +836,20 @@ namespace avmplus
 		// the absence of a hint as if the hint Number were given; Date objects handle the absence of a hint as if the hint String were given.
 		// Host objects may handle the absence of a hint in some other manner.
 		
-		Atom lhs_asPrimVal = core->primitive(lhs); // Date is handled above with the String argument case,  we don't have to check for it here.
-		Atom rhs_asPrimVal = core->primitive(rhs);
+		lhs = AvmCore::primitive(lhs); // Date is handled above with the String argument case,  we don't have to check for it here.
+		rhs = AvmCore::primitive(rhs);
 
-		if (AvmCore::isString(lhs_asPrimVal) || AvmCore::isString(rhs_asPrimVal))
+		if (!(AvmCore::isString(lhs) || AvmCore::isString(rhs)))
 		{
-			return core->concatStrings(core->string(lhs_asPrimVal), core->string(rhs_asPrimVal))->atom();
+			goto add_numbers;
 		}
-		else
-		{
-			return core->doubleToAtom(core->number(lhs_asPrimVal) + core->number(rhs_asPrimVal));
-		}
+		// else fall thru to concat_strings
+
+concat_strings:
+		return core->concatStrings(core->string(lhs), core->string(rhs))->atom();
+
+add_numbers:	
+		return core->doubleToAtom(AvmCore::number(lhs) + AvmCore::number(rhs));
     }
 
 	bool Toplevel::hasproperty(Atom obj, const Multiname* multiname, VTable* vtable)
@@ -1246,7 +1247,7 @@ namespace avmplus
 		AvmCore* core = self->core();
 		if (!in) in = core->knull;
 		if (!MathUtils::convertStringToDouble(in, &result, false))
-			result = MathUtils::nan();
+			result = MathUtils::kNaN;
 
 		return result;
     }

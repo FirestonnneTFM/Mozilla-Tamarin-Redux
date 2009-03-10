@@ -91,6 +91,11 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 		Stringp format(AvmCore* core) const;
 #endif
+
+		// Flash needs to peek at these for WeakMethodClosure, alas
+		inline MethodEnv* peek_call() { return _call; }
+		inline Atom peek_savedThis() { return _savedThis; }
+
 	protected:
 		virtual Atom get_coerced_receiver(Atom a);
 
