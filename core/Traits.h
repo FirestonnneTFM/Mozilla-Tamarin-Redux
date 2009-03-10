@@ -50,7 +50,8 @@ namespace avmplus
 		TMT_tmi, 
 		TMT_vtable, 
 		TMT_methodenv, 
-		TMT_abstractfunction, 
+		TMT_methodinfo, 
+		TMT_methodsig, 
 		TMT_COUNT 
 	};
 
@@ -452,7 +453,6 @@ namespace avmplus
 			TraitsBindings* tb;
 			if ((tb = (TraitsBindings*)m_tbref->get()) == NULL)
 				tb = _getTraitsBindings();
-			tb->use();
 			return tb;
 		}
 		inline TraitsMetadatap getTraitsMetadata()
@@ -462,7 +462,6 @@ namespace avmplus
 			TraitsMetadata* tm;
 			if ((tm = (TraitsMetadata*)m_tmref->get()) == NULL)
 				tm = _getTraitsMetadata();
-			tm->use();
 			return tm;
 		}
 		inline bool containsInterface(Traitsp t) { return this == t || this->getTraitsBindings()->containsInterface(t); }

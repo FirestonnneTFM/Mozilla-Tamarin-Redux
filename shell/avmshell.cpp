@@ -93,6 +93,7 @@ namespace avmshell
 
 		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
 		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
+		AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
 
 		#ifdef _DEBUG
 			AvmLog("          [-Dgreedy]    collect before every allocation\n");
@@ -659,6 +660,8 @@ namespace avmshell
 						cacheSizes.bindings = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 					} else if (!VMPI_strcmp(arg, "-cache_metadata")) {
 						cacheSizes.metadata = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
+					} else if (!VMPI_strcmp(arg, "-cache_methods")) {
+						cacheSizes.methods = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 					}
                 #if defined FEATURE_NANOJIT
 					else if (!VMPI_strcmp(arg, "-Ojit")) {

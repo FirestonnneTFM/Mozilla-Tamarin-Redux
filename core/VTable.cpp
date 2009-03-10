@@ -168,16 +168,16 @@ namespace avmplus
 		AvmCore *core = traits->core;
 		MethodEnv *methodEnv = new (core->GetGC()) MethodEnv(func, this);
 		// register this env in the callstatic method table
-		int method_id = func->method_id;
+		int method_id = func->method_id();
 		if (method_id != -1)
 		{
-			AvmAssert(abcEnv->pool() == (PoolObject *) func->pool);
+			AvmAssert(abcEnv->pool() == func->pool());
 			if (abcEnv->getMethod(method_id) == NULL)
 			{
 				abcEnv->setMethod(method_id, methodEnv);
 			}
 			#ifdef AVMPLUS_VERBOSE
-			else if (func->pool->verbose)
+			else if (func->pool()->verbose)
 			{
 				core->console << "WARNING: tried to re-register global MethodEnv for " << func << "\n";
 			}

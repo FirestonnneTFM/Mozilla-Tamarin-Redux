@@ -185,7 +185,7 @@ namespace avmplus
 
 	static Stringp getStackTraceLine(MethodInfo* method, Stringp filename) 
 	{
-		AvmCore *core = method->pool->core;
+		AvmCore *core = method->pool()->core;
 		Stringp s = core->newStringLatin1("\tat ");
 		s = core->concatStrings(s, method->format(core));
 		if (filename)

@@ -162,14 +162,11 @@ namespace avmplus
 
 	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
 	{
-		MethodInfo* const info = env->method;
 		Atom* const atomv = (Atom*)ap;
-		info->boxArgs(argc, (uint32 *)ap, atomv);
-		Atom a = interp(env, argc, atomv);
-		Traits* t = env->method->returnTraits();
-		if (!t)
-			return a; // same as BUILTIN_any
-		const BuiltinType bt = BuiltinType(t->builtinType);
+		MethodSignaturep ms = env->method->getMethodSignature();
+		ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
+		Atom a = interpA(env, argc, atomv, ms);
+		const BuiltinType bt = ms->returnTraitsBT();
 		const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
 		if ((1U<<bt) & ATOM_MASK)
 			return a;
@@ -184,10 +181,10 @@ namespace avmplus
 
 	double interpN(MethodEnv* env, int argc, uint32_t * ap)
 	{
-		MethodInfo* const info = env->method;
 		Atom* const atomv = (Atom*)ap;
-		info->boxArgs(argc, (uint32 *)ap, atomv);
-		Atom a = interp(env, argc, atomv);
+		MethodSignaturep ms = env->method->getMethodSignature();
+		ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
+		Atom a = interpA(env, argc, atomv, ms);
 		return AvmCore::number_d(a);
 	}
 
@@ -200,12 +197,12 @@ namespace avmplus
 #ifdef AVMPLUS_DIRECT_THREADED
 
 	void** interpGetOpcodeLabels() {
-		return (void**)interp(NULL, 0, NULL);
+		return (void**)interpA(NULL, 0, NULL, NULL);
 	}
 	
 #endif // AVMPLUS_DIRECT_THREADED
 
-    Atom interp(register MethodEnv* env, register int _argc, register Atom* _atomv)
+    Atom interpA(register MethodEnv* env, register int _argc, register Atom* _atomv, MethodSignaturep ms)
     {
 #ifdef AVMPLUS_DIRECT_THREADED
 		
@@ -617,7 +614,7 @@ namespace avmplus
  		register AvmCore* const core = env->core();
  		register Toplevel* const toplevel = env->toplevel();
  		register MethodInfo* const info = env->method;
- 		register PoolObject* const pool = info->pool;
+ 		register PoolObject* const pool = info->pool();
 
 #ifdef DEBUGGER
 		const size_t kAuxFrameSize = core->debugger() ? sizeof(InterpreterAuxiliaryFrameWithCSN) : sizeof(InterpreterAuxiliaryFrame);
@@ -656,7 +653,7 @@ namespace avmplus
  		}
  		
  		register List<double*, LIST_GCObjects> const & cpool_double = pool->cpool_double;
- 		register const bool interruptable = !(info->flags & MethodInfo::NON_INTERRUPTABLE);
+ 		register const bool interruptable = !info->isNonInterruptible();
  		register const Domain* envDomain = env->domainEnv()->domain();
  		// I do *not* like making pc 'volatile'; a smart compiler may handle it well
  		// and only spill to memory across a call, but a dumb compiler may not ever
@@ -680,22 +677,22 @@ namespace avmplus
 		// So allocate 8 bytes extra, then round up to a 16-byte boundary.
 		register Atom* const framep = 
 			   (Atom*)VMPI_alloca(core, _framep,
-								  sizeof(Atom)*(info->abc_frame_size())
+								  sizeof(Atom)*(ms->frame_size())
 								+ 8
 								+ kAuxFrameSize);
-		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(((uintptr_t)(framep + info->abc_frame_size()) + 15) & ~15);
+		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(((uintptr_t)(framep + ms->frame_size()) + 15) & ~15);
 #else
 		register Atom* const framep = 
 					   (Atom*)VMPI_alloca(core, _framep,
-										  sizeof(Atom)*(info->abc_frame_size())
+										  sizeof(Atom)*(ms->frame_size())
 										+ kAuxFrameSize);
-		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + info->abc_frame_size());
+		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + ms->frame_size());
 #endif
- 		register Atom* const scopeBase = framep + info->abc_local_count();
+ 		register Atom* const scopeBase = framep + ms->local_count();
  		register Atom* volatile withBase = NULL;
  		NONDEBUGGER_ONLY( register ) int volatile scopeDepth = 0;
  		register ScopeChain* const scope = env->vtable->scope;
- 		register Atom* /* NOT VOLATILE */ sp = scopeBase + info->abc_max_scope_depth() - 1;
+ 		register Atom* /* NOT VOLATILE */ sp = scopeBase + ms->max_scope() - 1;
  		
  		aux_memory->dxns = scope->defaultXmlNamespace;
 		aux_memory->dxnsAddrSave = core->dxnsAddr;
@@ -728,7 +725,8 @@ namespace avmplus
  
  		{
  			// Copy instance and args to local frame
- 			for (int i=0, n = _argc < info->param_count ? _argc : info->param_count; i <= n; i++)
+			const int param_count = ms->param_count();
+ 			for (int i=0, n = _argc < param_count ? _argc : param_count; i <= n; i++)
  				framep[i] = _atomv[i];
  
  			// Store original value of argc for createRest and createArguments.
@@ -737,32 +735,32 @@ namespace avmplus
  
  			// Set optional param values.  these not aliased to arguments[] since arguments[]
  			// only present with traditional prototype functions (no optional args)
- 			if (info->flags & MethodInfo::HAS_OPTIONAL)
+ 			if (info->hasOptional())
  			{
- 				if (_argc < info->param_count)
+ 				if (_argc < param_count)
  				{
  					// initialize default values
- 					for (int i=_argc+1, o=_argc + info->optional_count - info->param_count, n=info->param_count; i <= n; i++, o++)
- 						framep[i] = info->getDefaultValue(o);
- 					_argc = info->param_count;
+ 					for (int i=_argc+1, o=_argc + ms->optional_count() - param_count, n=param_count; i <= n; i++, o++)
+ 						framep[i] = ms->getDefaultValue(o);
+ 					_argc = param_count;
  				}
  			}
  
  			// Set remaining locals to undefined.  Don't have to init scope or stack because
  			// our conservative GC scan knows how to ignore garbage.
- 			for (Atom *p = framep + 1 + info->param_count; p < scopeBase; p++)
+ 			for (Atom *p = framep + 1 + param_count; p < scopeBase; p++)
  				*p = undefinedAtom;
  
  			// Capture arguments or rest array.
- 			if (info->flags & MethodInfo::NEED_REST)
+ 			if (info->needRest())
  			{
- 				framep[info->param_count+1] = env->createRest(_atomv, arguments_argc)->atom();
+ 				framep[param_count+1] = env->createRest(_atomv, arguments_argc)->atom();
  			}
- 			else if (info->flags & MethodInfo::NEED_ARGUMENTS)
+ 			else if (info->needArguments())
  			{
  				// create arguments using atomv[1..argc].
  				// Even tho E3 says create an Object, E4 says create an Array so thats what we will do.
- 				framep[info->param_count+1] = env->createArguments(_atomv, arguments_argc)->atom();
+ 				framep[param_count+1] = env->createArguments(_atomv, arguments_argc)->atom();
  			}
  		}
 
@@ -794,7 +792,7 @@ namespace avmplus
 // Used in the case of exceptions.
 
 #ifdef AVMPLUS_VERBOSE
-#  define VERBOSE  if (pool->verbose) showState(info, codeStart, pc-1, framep, sp, scopeDepth, scopeBase, info->abc_max_scope_depth())
+#  define VERBOSE  if (pool->verbose) showState(info, codeStart, pc-1, framep, sp, scopeDepth, scopeBase, ms->max_scope())
 #else
 #  define VERBOSE
 #endif
@@ -929,7 +927,7 @@ namespace avmplus
 #endif
 				SAVE_EXPC;
 				core->codeContextAtom = aux_memory->savedCodeContext;
-				a1 = toplevel->coerce(a1, info->returnTraits());
+				a1 = toplevel->coerce(a1, ms->returnTraits());
 				core->dxnsAddr = aux_memory->dxnsAddrSave;
 #ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
@@ -3113,7 +3111,7 @@ namespace avmplus
 			pc = codeStart + handler->target;
 #endif
 			scopeDepth = 0;
-			sp = scopeBase + info->abc_max_scope_depth() - 1;
+			sp = scopeBase + ms->max_scope() - 1;
 			*(++sp) = exception->atom;
 			goto MainLoop;
 		}
@@ -3220,7 +3218,7 @@ namespace avmplus
 #else
 		AbcOpcode opcode = (AbcOpcode) *pc;
 #endif
-		PoolObject* pool = info->pool;
+		PoolObject* pool = info->pool();
 		AvmCore* core = pool->core;
 		ptrdiff_t off = pc - code_start;
 		ptrdiff_t sp = spp - framep;

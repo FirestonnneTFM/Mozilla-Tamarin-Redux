@@ -206,15 +206,20 @@ const int kBufferPadding = 16;
 	private:
 		QCache*			m_tbCache;
 		QCache*			m_tmCache;
+		QCache*			m_msCache;
 	public:
 		inline QCache* tbCache() { return m_tbCache; }
 		inline QCache* tmCache() { return m_tmCache; }
+		inline QCache* msCache() { return m_msCache; }
 		struct CacheSizes
 		{
-			uint16_t bindings;	// default to 0 == unlimited
-			uint16_t metadata;	// default to 1
+			enum { DEFAULT_BINDINGS = 32, DEFAULT_METADATA = 1, DEFAULT_METHODS = 32 };
 			
-			inline CacheSizes() : bindings(0), metadata(1) {}
+			uint16_t bindings;
+			uint16_t metadata;
+			uint16_t methods;
+			
+			inline CacheSizes() : bindings(DEFAULT_BINDINGS), metadata(DEFAULT_METADATA), methods(DEFAULT_METHODS) {}
 		};
 		// safe to call at any time, but calling tosses existing caches, thus has a perf hit --
 		// don't call cavalierly

@@ -61,7 +61,10 @@ namespace avmplus
 	 */
 	Atom interp32(MethodEnv* method, int argc, uint32 *ap);		// does not actually return an atom!
 	double interpN(MethodEnv* method, int argc, uint32 *ap);
-	Atom interp(MethodEnv* method, int argc, Atom* ap);	// actually returns an atom!
+	// note, the MethodSignature passed in *must* correspond to method->method->getMethodSignature --
+	// it is an argument because all callers already have the correct MethodSignature available
+	// and it makes a significant speed difference in interp mode (vs re-grabbing from the cache)
+	Atom interpA(MethodEnv* method, int argc, Atom* ap, MethodSignaturep ms);	// actually returns an atom!
 #ifdef AVMPLUS_DIRECT_THREADED
 	void** interpGetOpcodeLabels();
 #endif

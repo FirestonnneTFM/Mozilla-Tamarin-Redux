@@ -74,7 +74,7 @@ namespace avmplus
 
 		inline Toplevel* toplevel() const { return vtable->toplevel; }
 		inline AbcEnv* abcEnv() const { return vtable->abcEnv; }
-		inline AvmCore* core() const { return method->pool->core; }
+		inline AvmCore* core() const { return method->pool()->core; }
 		inline Traits* traits() const { return vtable->traits; }
 		inline DomainEnv* domainEnv() const { return vtable->abcEnv->domainEnv(); }
 
@@ -106,13 +106,14 @@ namespace avmplus
 		Atom coerceEnter(int argc, Atom* argv);
 
 	private:
+		MethodSignaturep get_ms();
 		inline bool isInterpreted();
-		Atom endCoerce(int argc, uint32 *ap);
-		int  startCoerce(int argc);
+		Atom endCoerce(int argc, uint32 *ap, MethodSignaturep ms);
+		int  startCoerce(int argc, MethodSignaturep ms);
 		Atom coerceUnboxEnter(int argc, Atom* atomv);
-		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv);
-		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap);
-		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv);
+		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv, MethodSignaturep ms);
+		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap, MethodSignaturep ms);
+		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms);
 		void FASTCALL nullcheckfail(Atom atom);
 
 	// helper functions used from compiled code
@@ -326,8 +327,8 @@ namespace avmplus
 		inline AtomMethodProc impl32() const { return _impl32; }
 		inline DoubleMethodProc implN() const { return _implN; }
 #else
-		inline AtomMethodProc impl32() const { return method->impl32; }
-		inline DoubleMethodProc implN() const { return method->implN; }
+		inline AtomMethodProc impl32() const { return method->impl32(); }
+		inline DoubleMethodProc implN() const { return method->implN(); }
 #endif
 
 	// ------------------------ DATA SECTION BEGIN
@@ -343,7 +344,7 @@ namespace avmplus
 	public:
 		// pointers are write-once so we don't need WB's
 		VTable* const				vtable;		// the vtable for the scope where this env was declared 
-		MethodInfo* const		method;		// runtime independent type info for this method 
+		MethodInfo* const			method;		// runtime independent type info for this method 
 		Traits* const				declTraits;
 	private:
 		uintptr_t					activationOrMCTable;

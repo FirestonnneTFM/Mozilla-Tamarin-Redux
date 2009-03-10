@@ -79,33 +79,33 @@ namespace avmplus
 		virtual uint32 getLength() const;
 		virtual void setLength(uint32 newLength);
 
-		Atom getAtomProperty(Atom name) const;
-		void setAtomProperty(Atom name, Atom value);
-		bool deleteAtomProperty(Atom name);
-		bool hasAtomProperty(Atom name) const;
+		virtual Atom getAtomProperty(Atom name) const;
+		virtual void setAtomProperty(Atom name, Atom value);
+		virtual bool deleteAtomProperty(Atom name);
+		virtual bool hasAtomProperty(Atom name) const;
 
 		// Faster versions that takes direct indices
-		Atom getUintProperty(uint32 index) const
+		virtual Atom getUintProperty(uint32 index) const
 		{
 			 return _getUintProperty(index);
 		}
-		void setUintProperty(uint32 index, Atom value)
+		virtual void setUintProperty(uint32 index, Atom value)
 		{
 			_setUintProperty(index, value);
 		}
-		bool delUintProperty(uint32 index);
-		bool hasUintProperty(uint32 i) const;
+		virtual bool delUintProperty(uint32 index);
+		virtual bool hasUintProperty(uint32 i) const;
 
-		Atom getIntProperty(int index) const
-		{
-			return _getIntProperty(index);
-		}
-		void setIntProperty(int index, Atom value)
-		{
-			_setIntProperty(index, value);
-		}
+//		Atom getIntProperty(int index) const
+//		{
+//			return _getIntProperty(index);
+//		}
+//		void setIntProperty(int index, Atom value)
+//		{
+//			_setIntProperty(index, value);
+//		}
 
-		bool getAtomPropertyIsEnumerable(Atom name) const;
+		virtual bool getAtomPropertyIsEnumerable(Atom name) const;
 		
 		Atom _getUintProperty(uint32 index) const;
 		void _setUintProperty(uint32 index, Atom value);
@@ -113,9 +113,9 @@ namespace avmplus
 		void _setIntProperty(int index, Atom value);
 
 		// Iterator support - for in, for each
-		Atom nextName(int index);
-		Atom nextValue(int index);
-		int nextNameIndex(int index);
+		virtual Atom nextName(int index);
+		virtual Atom nextValue(int index);
+		virtual int nextNameIndex(int index);
 
 		// native methods
 		Atom AS3_pop(); // pop(...rest)

@@ -56,7 +56,7 @@ namespace avmplus
 		VerifyallWriter(MethodInfo *info, CodeWriter *coder) 
 			: NullWriter(coder)
 			, info(info) {
-			core = info->pool->core;
+			core = info->pool()->core;
 		}
 
 		void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) {
@@ -68,7 +68,7 @@ namespace avmplus
 		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
 			if (opcode == OP_newfunction) {
 				MethodInfo *f = type->pool->methods[opd1];
-				AvmAssert(f->declaringTraits == type);
+				AvmAssert(f->declaringTraits() == type);
 				core->enqFunction(f);
 				core->enqTraits(type);
 			}
@@ -91,34 +91,32 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
         , bool secondTry
 #endif
-        )
+        ) : ms(info->getMethodSignature())
     {
 #ifdef AVMPLUS_VERBOSE
         this->secondTry = secondTry;
 #endif
         this->info   = info;
-		this->core   = info->pool->core;
-        this->pool   = info->pool;
+		this->core   = info->pool()->core;
+        this->pool   = info->pool();
         this->toplevel = toplevel;
 
         #ifdef AVMPLUS_VERBOSE
-        this->verbose = pool->verbose || (info->flags & MethodInfo::VERBOSE_VERIFY);
+        this->verbose = pool->verbose;
         #endif
 
-        const byte* pos = info->abc_body_pos();
-        max_stack = AvmCore::readU30(pos);
-        local_count = AvmCore::readU30(pos);
-        int init_scope_depth = AvmCore::readU30(pos);
-        int max_scope_depth = AvmCore::readU30(pos);
-        max_scope = max_scope_depth - init_scope_depth;
+        max_stack = ms->max_stack();
+        local_count = ms->local_count();
+        max_scope = ms->max_scope();
 
         stackBase = scopeBase + max_scope;
         frameSize = stackBase + max_stack;
 
-        if ((init_scope_depth < 0) || (max_scope_depth < 0) || (max_stack < 0) || 
-            (max_scope < 0) || (local_count < 0) || (frameSize < 0) || (stackBase < 0))
-            verifyFailed(kCorruptABCError);
+        const byte* pos = info->abc_body_pos();
 
+		// note: reading of max_stack, etc (and validating the values)
+		// is now handled by MethodInfo::resolveSignature.
+		AvmCore::skipU30(pos, 4);
         code_length = AvmCore::readU30(pos);
 
         code_pos = pos;
@@ -131,7 +129,7 @@ namespace avmplus
         state       = NULL;
         labelCount = 0;
 
-        if (info->declaringTraits == NULL)
+        if (info->declaringTraits() == NULL)
         {
             // scope hasn't been captured yet.
             verifyFailed(kCannotVerifyUntilReferencedError);
@@ -193,8 +191,15 @@ namespace avmplus
             core->console << "verify " << info << '\n';
         secondTry = false;
         #endif
+		
+		const int param_count = ms->param_count();
+		
+		if (local_count < param_count+1)
+		{
+			// must have enough locals to hold all parameters including this
+			toplevel->throwVerifyError(kCorruptABCError);
+		}
 
-        info->set_abc_frame_info(frameSize, local_count, max_scope);
 #ifndef AVMPLUS_WORD_CODE
         // For word code, it is set by the WordcodeTranslator epilogue
         info->set_abc_code_start(code_pos);
@@ -215,33 +220,33 @@ namespace avmplus
         for (int i=0, n=frameSize; i < n; i++)
             state->setType(i, NULL);
 
-        if (info->flags & MethodInfo::NEED_REST)
+        if (info->needRest())
         {
             // param_count+1 <= max_reg
-            checkLocal(info->param_count+1);
+            checkLocal(param_count+1);
 
-            state->setType(info->param_count+1, ARRAY_TYPE, true);
+            state->setType(param_count+1, ARRAY_TYPE, true);
 
             #ifdef AVMPLUS_VERBOSE
-            if (verbose && (info->flags & MethodInfo::NEED_ARGUMENTS))
+            if (verbose && info->needArguments())
             {
                 // warning, NEED_ARGUMENTS wins
                 core->console << "WARNING, NEED_REST overrides NEED_ARGUMENTS when both are set\n";
             }
             #endif
         }
-        else if (info->flags & MethodInfo::NEED_ARGUMENTS)
+        else if (info->needArguments())
         {
             // param_count+1 <= max_reg
-            checkLocal(info->param_count+1);
+            checkLocal(param_count+1);
 
             // E3 style arguments array is an Object, E4 says Array, E4 wins...
-            state->setType(info->param_count+1, ARRAY_TYPE, true);
+            state->setType(param_count+1, ARRAY_TYPE, true);
         }
         else
         {
             // param_count <= max_reg
-            checkLocal(info->param_count);
+            checkLocal(param_count);
         }
 
         // initialize method param types.
@@ -249,17 +254,17 @@ namespace avmplus
         // don't checkLocal(i) inside the loop.
         // MethodInfo::verify takes care of resolving param&return type
         // names to Traits pointers, and resolving optional param default values.
-        for (int i=0, n=info->param_count; i <= n; i++)
+        for (int i=0; i <= param_count; i++)
         {
             bool notNull = (i==0); // this is not null, but other params could be
-            state->setType(i, info->paramTraits(i), notNull);
+            state->setType(i, ms->paramTraits(i), notNull);
         }
 
         // initial scope chain types 
         int outer_depth = 0;
 
-        ScopeTypeChain* scope = info->declaringTraits->scope;
-        if (!scope && info->declaringTraits->init != info)
+        ScopeTypeChain* scope = info->declaringTraits()->scope;
+        if (!scope && info->declaringTraits()->init != info)
         {
             // this can occur when an activation scope inside a class instance method
             // contains a nested getter, setter, or method.  In that case the scope 
@@ -543,7 +548,7 @@ namespace avmplus
 
 			case OP_returnvalue:
 			    checkStack(1,0);
-				emitCoerce(info->returnTraits(), sp);
+				emitCoerce(ms->returnTraits(), sp);
 				coder->write(state, pc, opcode);
 				state->pop();
 				blockEnd = true;
@@ -607,7 +612,7 @@ namespace avmplus
 
 			case OP_dxns:
 				//checkStack(0,0)
-				if (!info->isFlagSet(MethodInfo::SETS_DXNS))
+				if (!info->setsDxns())
 					verifyFailed(kIllegalSetDxns, core->toErrorString(info));
 				checkCpoolOperand(imm30, kStringType);
 				coder->write(state, pc, opcode);
@@ -615,7 +620,7 @@ namespace avmplus
 
 			case OP_dxnslate:
 				checkStack(1,0);
-				if (!info->isFlagSet(MethodInfo::SETS_DXNS))
+				if (!info->setsDxns())
 					verifyFailed(kIllegalSetDxns, core->toErrorString(info));
 				// codgen will call intern on the input atom.
 				coder->write(state, pc, opcode);
@@ -732,18 +737,9 @@ namespace avmplus
 			{
 				checkStack(0,1);
 				MethodInfo* f = checkMethodInfo(imm30);
-				// Duplicate function definitions can happen with well formed ABC data.  We need
-				// to clear out data on AbstractionFunction so it can correctly be re-initialized.
-				// If our old function is ever used incorrectly, we throw an verify error in 
-				// MethodEnv::coerceEnter.
-				if (f->declaringTraits)
-				{
-				    f->flags &= ~MethodInfo::LINKED;
-					f->declaringTraits = NULL;
-				}
-				f->setParamType(0, NULL);
+				// duplicate-function-definition handling now happens inside makeIntoPrototypeFunction()
 				f->makeIntoPrototypeFunction(toplevel);
-				Traits* ftraits = f->declaringTraits;
+				Traits* ftraits = f->declaringTraits();
 				// make sure the traits of the base vtable matches the base traits
 				// This is also caught by an assert in VTable.cpp, however that turns
 				// out to be too late and may cause crashes
@@ -760,10 +756,10 @@ namespace avmplus
 				{
 					ftraits->scope->setScopeAt(j, state->scopeValue(i).traits, state->scopeValue(i).isWith);
 				}
-				if (f->activationTraits)
+				if (f->activationTraits())
 				{
 					// ISSUE - if nested functions, need to capture scope, not make a copy
-					f->activationTraits->scope = ftraits->scope;
+					f->activationTraits()->scope = ftraits->scope;
 				}
 				coder->writeOp1(state, pc, opcode, imm30, ftraits);
 				state->push(ftraits, true);
@@ -861,7 +857,7 @@ namespace avmplus
 				if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
 				{
 					// found a single matching traits
-					state->push(script->declaringTraits, true);
+					state->push(script->declaringTraits(), true);
 				}
 				else
 				{
@@ -912,8 +908,9 @@ namespace avmplus
 					const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
 					MethodInfo *f = objtd->getMethod(disp_id);
 					AvmAssert(f != NULL);
+					MethodSignaturep fms = f->getMethodSignature();
 					emitCoerceArgs(f, 1);
-					Traits* propType = f->returnTraits();
+					Traits* propType = fms->returnTraits();
 					coder->writeOp2(state, pc, opcode, imm30, n, propType);
 					state->pop(n);
 				    break;
@@ -1154,14 +1151,15 @@ namespace avmplus
 				const uint32_t argc = imm30b;
 				checkStack(argc+1, 1);
 
-				if (!m->paramTraits(0))
+				MethodSignaturep mms = m->getMethodSignature();
+				if (!mms->paramTraits(0))
 				{
 					verifyFailed(kDanglingFunctionError, core->toErrorString(m), core->toErrorString(info));
 				}
 
-				Traits *resultType = m->returnTraits();
+				Traits *resultType = mms->returnTraits();
 				emitCheckNull(sp-argc);
-				coder->writeOp2(state, pc, OP_callstatic, (uint32_t)m->method_id, argc, resultType);
+				coder->writeOp2(state, pc, OP_callstatic, (uint32_t)m->method_id(), argc, resultType);
 				state->pop_push(argc+1, resultType);
 				break;
 			}
@@ -1306,7 +1304,8 @@ namespace avmplus
 					int disp_id = AvmCore::bindingToMethodId(b);
 					MethodInfo* m = basetd->getMethod(disp_id);
 					if( !m ) verifyFailed(kCorruptABCError);
-					resultType = m->returnTraits();
+					MethodSignaturep mms = m->getMethodSignature();
+					resultType = mms->returnTraits();
 				}
 				else {
                     #ifdef DEBUG_EARLY_BINDING
@@ -1349,7 +1348,8 @@ namespace avmplus
 					const TraitsBindingsp basetd = base->getTraitsBindings();
 						MethodInfo *f = basetd->getMethod(disp_id);
 					AvmAssert(f != NULL);
-					Traits* resultType = f->returnTraits();
+					MethodSignaturep fms = f->getMethodSignature();
+					Traits* resultType = fms->returnTraits();
 					state->pop_push(n, resultType);
 				}
 				else 
@@ -1466,14 +1466,15 @@ namespace avmplus
 			}
 
 			case OP_newactivation: 
+			{
 				checkStack(0, 1);
-				if (!(info->flags & MethodInfo::NEED_ACTIVATION))
+				if (!info->needActivation())
 					verifyFailed(kInvalidNewActivationError);
-				info->activationTraits->resolveSignatures(toplevel);
-				coder->write(state, pc, opcode, info->activationTraits);
-				state->push(info->activationTraits, true);
+				info->activationTraits()->resolveSignatures(toplevel);
+				coder->write(state, pc, opcode, info->activationTraits());
+				state->push(info->activationTraits(), true);
 				break;
-
+			}
 			case OP_newcatch: 
 			{
 				checkStack(0, 1);
@@ -1512,7 +1513,7 @@ namespace avmplus
             case OP_getouterscope:
             {
 				checkStack(0,1);
-				ScopeTypeChain* scope = info->declaringTraits->scope;
+				ScopeTypeChain* scope = info->declaringTraits()->scope;
 				int captured_depth = scope->size;
 				if (captured_depth > 0)
 				{
@@ -2002,11 +2003,12 @@ namespace avmplus
 		
 		int disp_id = AvmCore::bindingToMethodId(b);
 		MethodInfo* m = tb->getMethod(disp_id);
+		MethodSignaturep mms = m->getMethodSignature();
 		
-		if (!m->argcOk(argc))
+		if (!mms->argcOk(argc))
 			return false;
 		
-		Traits* resultType = m->returnTraits();
+		Traits* resultType = mms->returnTraits();
 
 		emitCoerceArgs(m, argc);
 		coder->writeSetContext(state, m);
@@ -2111,7 +2113,7 @@ namespace avmplus
 	void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc)
 	{
 		bool skip_translation = false;
-		ScopeTypeChain* scope = info->declaringTraits->scope;
+		ScopeTypeChain* scope = info->declaringTraits()->scope;
 		if (multiname.isBinding())
 		{
 			int index = scopeBase + state->scopeDepth - 1;
@@ -2172,9 +2174,9 @@ namespace avmplus
 						}
 						else // found a single matching traits
 						{
-						    coder->writeOp1(state, pc, OP_finddef, imm30, script->declaringTraits);
+						    coder->writeOp1(state, pc, OP_finddef, imm30, script->declaringTraits());
 						}
-						state->push(script->declaringTraits, true);
+						state->push(script->declaringTraits(), true);
 						return;
 					}
 					else 
@@ -2228,7 +2230,7 @@ namespace avmplus
 			AvmAssert(f != NULL);
 			emitCoerceArgs(f, 0);
 			coder->writeOp2(state, pc, OP_getproperty, imm30, n, propType);
-			AvmAssert(propType == f->returnTraits());
+			AvmAssert(propType == f->getMethodSignature()->returnTraits());
 			state->pop_push(n, propType);
 			return;
 		}
@@ -2272,7 +2274,7 @@ namespace avmplus
 
 	void Verifier::checkGetGlobalScope()
 	{
-		ScopeTypeChain* scope = info->declaringTraits->scope;
+		ScopeTypeChain* scope = info->declaringTraits()->scope;
 		int captured_depth = scope->size;
 		if (captured_depth > 0)
 		{
@@ -2365,7 +2367,7 @@ namespace avmplus
 
 	Traits* Verifier::emitCoerceSuper(int index)
 	{
-		Traits* base = info->declaringTraits->base;
+		Traits* base = info->declaringTraits()->base;
 		if (base != NULL)
 		{
 			emitCoerce(base, index);
@@ -2404,18 +2406,20 @@ namespace avmplus
 
 	void Verifier::emitCoerceArgs(MethodInfo* m, int argc, bool isctor)
 	{
-		if (!m->argcOk(argc))
+		if (!m->isResolved())
+			m->resolveSignature(toplevel);
+	
+		MethodSignaturep mms = m->getMethodSignature();
+		if (!mms->argcOk(argc))
 		{
-			verifyFailed(kWrongArgumentCountError, core->toErrorString(m), core->toErrorString(m->requiredParamCount()), core->toErrorString(argc));
+			verifyFailed(kWrongArgumentCountError, core->toErrorString(m), core->toErrorString(mms->requiredParamCount()), core->toErrorString(argc));
 		}
 
-		m->resolveSignature(toplevel);
-	
 		// coerce parameter types
 		int n=1;
 		while (argc > 0) 
 		{
-			Traits* target = (argc <= m->param_count) ? m->paramTraits(argc) : NULL;
+			Traits* target = (argc <= mms->param_count()) ? mms->paramTraits(argc) : NULL;
 			emitCoerce(target, state->sp()-(n-1));
 			argc--;
 			n++;
@@ -2423,7 +2427,7 @@ namespace avmplus
 
 		// coerce receiver type
 		if (!isctor)  // don't coerce if this is for a ctor, since the ctor will be on the stack instead of the new object
-			emitCoerce(m->paramTraits(0), state->sp()-(n-1));
+			emitCoerce(mms->paramTraits(0), state->sp()-(n-1));
 	}
 
 	bool Verifier::canAssign(Traits* lhs, Traits* rhs) const
@@ -2493,7 +2497,8 @@ namespace avmplus
 		{
 			int m = AvmCore::bindingToGetterId(b);
 			MethodInfo *f = traits->getTraitsBindings()->getMethod(m);
-			return f->returnTraits();
+			MethodSignaturep fms = f->getMethodSignature();
+			return fms->returnTraits();
 		}
 		case BKIND_SET:
 			// TODO lookup type here. get/set must have same type.
@@ -2531,7 +2536,7 @@ namespace avmplus
 		}
 		else
 		{
-			return pool->cinits[id]->declaringTraits;
+			return pool->cinits[id]->declaringTraits();
 		}
 	}
 
@@ -2803,7 +2808,9 @@ namespace avmplus
 		{
 			int disp_id = AvmCore::bindingToMethodId(newb);
 			MethodInfo* newf = math->getMethod(disp_id);
-			if (argc == newf->param_count)
+			MethodSignaturep newfms = newf->getMethodSignature();
+			const int param_count = newfms->param_count();
+			if (argc == param_count)
 			{
 				for (int i=state->stackDepth-argc, n=state->stackDepth; i < n; i++)
 				{
@@ -2826,12 +2833,15 @@ namespace avmplus
 			int disp_id = AvmCore::bindingToMethodId(newb);
 			MethodInfo* newf = str->getMethod(disp_id);
 			// We have all required parameters but not more than required.
-			if ((argc >= (newf->param_count - newf->optional_count)) && (argc <= newf->param_count))
+			MethodSignaturep newfms = newf->getMethodSignature();
+			const int param_count = newfms->param_count();
+			const int optional_count = newfms->optional_count();
+			if ((argc >= (param_count - optional_count)) && (argc <= param_count))
 			{
 				for (int i=state->stackDepth-argc, k = 1, n=state->stackDepth; i < n; i++, k++)
 				{
 					Traits* t = state->stackValue(i).traits;
-					if (t != newf->paramTraits(k))
+					if (t != newfms->paramTraits(k))
 						return b;
 				}
 				b = newb;
@@ -2951,14 +2961,15 @@ namespace avmplus
 
         // scope chain
 		core->console << "                        scope: ";
-		if (info->declaringTraits->scope && info->declaringTraits->scope->size > 0)
+		Traits* declaringTraits = info->declaringTraits();
+		if (declaringTraits->scope && declaringTraits->scope->size > 0)
 		{
 			core->console << "[";
-			for (int i=0, n=info->declaringTraits->scope->size; i < n; i++)
+			for (int i=0, n=declaringTraits->scope->size; i < n; i++)
 			{
 				Value v;
-				v.traits = info->declaringTraits->scope->getScopeTraitsAt(i);
-				v.isWith = info->declaringTraits->scope->getScopeIsWithAt(i);
+				v.traits = declaringTraits->scope->getScopeTraitsAt(i);
+				v.isWith = declaringTraits->scope->getScopeIsWithAt(i);
 				v.killed = false;
 				v.notNull = true;
 				#if defined FEATURE_NANOJIT

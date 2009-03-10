@@ -77,7 +77,6 @@ namespace avmplus
 		friend class QCache;
 	public:
 		inline QCachedItem() : next(NULL) { }
-		inline void use() { }
 	private:
 		QCachedItem*	next;	// written with explicit WB
 	};

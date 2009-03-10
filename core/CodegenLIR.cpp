@@ -592,7 +592,7 @@ namespace avmplus
     }
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc(i->pool->core->gc), core(i->pool->core), pool(i->pool), info(i), patches(gc), 
+		: gc(i->pool()->core->gc), core(i->pool()->core), pool(i->pool()), info(i), ms(i->getMethodSignature()), patches(gc), 
 		  interruptable(true)
 #ifdef VTUNE
            , jitInfoList(i->core()->gc)
@@ -663,12 +663,19 @@ namespace avmplus
 
 	LIns* CodegenLIR::atomToNativeRep(Traits* t, LIns* atom)
 	{
-		if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
+		return atomToNativeRep(bt(t), atom);
+	}
+	
+	LIns* CodegenLIR::atomToNativeRep(BuiltinType bt, LIns* atom)
+	{
+		switch (bt)
 		{
+		case BUILTIN_any:
+		case BUILTIN_object:
+		case BUILTIN_void:
 			return atom;
-		}
-		else if (t == NUMBER_TYPE)
-		{
+
+		case BUILTIN_number:
 			if (atom->isconst()) {
 				Atom a = atom->constval();
 				if (AvmCore::isDouble(a)) {
@@ -680,30 +687,26 @@ namespace avmplus
 			} else {
 				return callIns(FUNCTIONID(number_d), 1, atom);
 			}
-		}
-		else if (t == INT_TYPE)
-		{
+
+		case BUILTIN_int:
 			if (atom->isconst())
 				return InsConst(AvmCore::integer_i(atom->constval()));
 			else
 				return callIns(FUNCTIONID(integer_i), 1, atom);
-		}
-		else if (t == UINT_TYPE)
-		{
+
+		case BUILTIN_uint:
 			if (atom->isconst())
 				return InsConst(AvmCore::integer_u(atom->constval()));
 			else
 				return callIns(FUNCTIONID(integer_u), 1, atom);
-		}
-		else if (t == BOOLEAN_TYPE)
-		{
+
+		case BUILTIN_boolean:
 			if (atom->isconst())
 				return InsConst(urshift(atom->constval(),3));
 			else
 				return p2i(binaryIns(LIR_pursh, atom, InsConst(3)));
-		}
-		else
-		{
+		
+		default:
 			// pointer type
 			if (atom->isconst())
 				return InsConstAtom(atom->constval() & ~7);
@@ -1232,10 +1235,10 @@ namespace avmplus
 		#endif
 
 		// whether this sequence is interruptable or not.
-		interruptable = (info->flags & MethodInfo::NON_INTERRUPTABLE) ? false : true;
+		interruptable = ! info->isNonInterruptible();
 		
 		// then space for the exception frame, be safe if its an init stub
-		if (info->isFlagSet(MethodInfo::HAS_EXCEPTIONS))
+		if (info->hasExceptions())
 		{
 			// [_save_eip][ExceptionFrame]
 			// offsets of local vars, rel to current ESP
@@ -1289,24 +1292,28 @@ namespace avmplus
 		// this whole section only applies to functions that actually
 		// have arguments.
 
+		const int param_count = ms->param_count();
+		const int optional_count = ms->optional_count();
+		const int required_count = param_count - optional_count;
+			
 		LIns* apArg = ap_param;
-		if (info->flags & MethodInfo::HAS_OPTIONAL)
+		if (info->hasOptional())
 		{
 			// compute offset of first optional arg
 			int offset = 0;
-			for (int i=0, n=info->param_count-info->optional_count; i <= n && !outOMem(); i++) {
-                offset += info->paramTraits(i) == NUMBER_TYPE ? sizeof(double) : sizeof(Atom);
+			for (int i=0, n=required_count; i <= n && !outOMem(); i++) {
+                offset += ms->paramTraitsBT(i) == BUILTIN_number ? sizeof(double) : sizeof(Atom);
 			}
 
 			// now copy the default optional values
 			LIns* argcarg = argc_param;
-			for (int i=0, n=info->optional_count; i < n && !outOMem(); i++)
+			for (int i=0, n=optional_count; i < n && !outOMem(); i++)
 			{
 				// first set the local[p+1] = defaultvalue
-				int param = i + info->param_count - info->optional_count; // 0..N
+				int param = i + required_count; // 0..N
 				int loc = param+1;
 
-				LIns* defaultVal = InsConstAtom(info->getDefaultValue(i));
+				LIns* defaultVal = InsConstAtom(ms->getDefaultValue(i));
 				defaultVal = atomToNativeRep(loc, defaultVal);
                 localSet(loc, defaultVal);
 				
@@ -1327,25 +1334,25 @@ namespace avmplus
 		else
 		{
 			// !HAS_OPTIONAL
-			AvmAssert(info->optional_count == 0);
+			AvmAssert(optional_count == 0);
 		}
 
 		// now set up the required args (we can ignore argc)
 		// for (int i=0, n=param_count; i <= n; i++)
 		//     framep[i] = argv[i];
 		int offset = 0;
-		for (int i=0, n=info->param_count-info->optional_count; i <= n && !outOMem(); i++)
+		for (int i=0, n=required_count; i <= n && !outOMem(); i++)
 			copyParam(i, offset);
 
-		if (info->flags & MethodInfo::UNBOX_THIS)
+		if (info->unboxThis())
 		{
 			localSet(0, atomToNativeRep(0, localGet(0)));
 		}
 
-		int firstLocal = 1+info->param_count;
+		int firstLocal = 1+param_count;
 
 		// capture remaining args
-		if (info->flags & MethodInfo::NEED_REST)
+		if (info->needRest())
 		{
 			//framep[info->param_count+1] = createRest(env, argv, argc);
 			// use csop so if rest value never used, we don't bother creating array
@@ -1355,7 +1362,7 @@ namespace avmplus
 			localSet(firstLocal, rest);
 			firstLocal++;
 		}
-		else if (info->flags & MethodInfo::NEED_ARGUMENTS)
+		else if (info->needArguments())
 		{
 			//framep[info->param_count+1] = createArguments(env, argv, argc);
 			// use csop so if arguments never used, we don't create it
@@ -1431,7 +1438,7 @@ namespace avmplus
 
 	void CodegenLIR::copyParam(int i, int& offset) {
 		LIns* apArg = ap_param;
-		switch (bt(info->paramTraits(i))) {
+		switch (bt(ms->paramTraits(i))) {
 		case BUILTIN_number:
 			localSet(i, loadIns(LIR_ldqc, offset, apArg));
 			offset += sizeof(double);
@@ -1460,7 +1467,7 @@ namespace avmplus
 	{
 		if (outOMem()) return;
 		this->state = state;
-		Traits* t = info->declaringTraits->scope->getScopeTraitsAt(scope_index);
+		Traits* t = info->declaringTraits()->scope->getScopeTraitsAt(scope_index);
 		LIns* declVTable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env_param);
 		LIns* scope = loadIns(LIR_ldcp, offsetof(VTable, scope), declVTable);
 		LIns* scopeobj = loadIns(LIR_ldcp, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
@@ -1858,7 +1865,7 @@ namespace avmplus
 			break;
 
 		case OP_newactivation:
-		    emit(state, opcode, 0, 0, info->activationTraits);
+		    emit(state, opcode, 0, 0, info->activationTraits());
 			break;
 
 		case OP_newcatch:
@@ -1870,7 +1877,7 @@ namespace avmplus
 
 		case OP_popscope:
 			#ifdef DEBUGGER
-		    if (core->debugger()) emitKill(state, info->abc_local_count()/*scopeBase*/ + state->scopeDepth);
+		    if (core->debugger()) emitKill(state, ms->local_count()/*scopeBase*/ + state->scopeDepth);
 			#endif
 			break;
 
@@ -2043,7 +2050,7 @@ namespace avmplus
 
 	void CodegenLIR::emitGetGlobalScope()
 	{
-		ScopeTypeChain* scope = info->declaringTraits->scope;
+		ScopeTypeChain* scope = info->declaringTraits()->scope;
 		int captured_depth = scope->size;
 		if (captured_depth > 0)
 		{
@@ -2136,7 +2143,7 @@ namespace avmplus
 		    emitCopy(state, opd1+state->verifier->scopeBase, state->sp()+1);
 			break;
 		case OP_newfunction:
-			AvmAssert(pool->methods[opd1]->declaringTraits == type);
+			AvmAssert(pool->methods[opd1]->declaringTraits() == type);
 			emit(state, opcode, opd1, state->sp()+1, type);
 			break;
         case OP_pushscope:
@@ -2190,7 +2197,7 @@ namespace avmplus
 		{
 		    emitSetDxns(state);
 		    MethodInfo* cinit = pool->cinits[opd1];
-			AvmAssert(type->init == cinit && cinit->declaringTraits == type);
+			AvmAssert(type->init == cinit && cinit->declaringTraits() == type);
 			emit(state, opcode, (uintptr)(void*)cinit, state->sp(), type);
 			break;
 		}
@@ -2205,7 +2212,7 @@ namespace avmplus
 			if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
 			{
 			    // found a single matching traits
-				emit(state, opcode, (uintptr)&multiname, state->sp()+1, script->declaringTraits);
+				emit(state, opcode, (uintptr)&multiname, state->sp()+1, script->declaringTraits());
 			}
 			else
 			{
@@ -2293,9 +2300,10 @@ namespace avmplus
                     int disp_id = AvmCore::bindingToSetterId(b);
                     MethodInfo *f = basetd->getMethod(disp_id);
                     AvmAssert(f != NULL);
+					MethodSignaturep fms = f->getMethodSignature();
                     state->verifier->emitCoerceArgs(f, 1);
                     emitSetContext(state, f);
-                    emitCall(state, OP_callsuperid, disp_id, 1, f->returnTraits());
+                    emitCall(state, OP_callsuperid, disp_id, 1, fms->returnTraits());
                 }
                 // else, ignore write to readonly accessor
             }
@@ -2335,7 +2343,8 @@ namespace avmplus
                 MethodInfo *f = basetd->getMethod(disp_id);
                 AvmAssert(f != NULL);
                 state->verifier->emitCoerceArgs(f, 0);
-                Traits* resultType = f->returnTraits();
+				MethodSignaturep fms = f->getMethodSignature();
+                Traits* resultType = fms->returnTraits();
                 emitSetContext(state, f);
                 emitCall(state, OP_callsuperid, disp_id, 0, resultType);
             }
@@ -2368,7 +2377,8 @@ namespace avmplus
 				MethodInfo* m = basetd->getMethod(disp_id);
 				state->verifier->emitCoerceArgs(m, argc);
 
-				Traits* resultType = m->returnTraits();
+				MethodSignaturep mms = m->getMethodSignature();
+				Traits* resultType = mms->returnTraits();
 				emitSetContext(state, m);
 				emitCall(state, OP_callsuperid, disp_id, argc, resultType);
 			}
@@ -2401,12 +2411,20 @@ namespace avmplus
 				obj.traits = type;
                 Traits* itraits = type ? type->itraits : NULL;
                 emitSetContext(state, NULL);
-                if (itraits && !itraits->hasCustomConstruct && itraits->init->argcOk(argc))
-                {
-                    state->verifier->emitCheckNull(state->sp()-(n-1));
-                    state->verifier->emitCoerceArgs(itraits->init, argc, true);
-                    emitCall(state, OP_construct, 0, argc, itraits);
-                }
+                if (itraits && !itraits->hasCustomConstruct)
+				{
+					itraits->init->resolveSignature(toplevel);
+					if (itraits->init->getMethodSignature()->argcOk(argc))
+					{
+						state->verifier->emitCheckNull(state->sp()-(n-1));
+						state->verifier->emitCoerceArgs(itraits->init, argc, true);
+						emitCall(state, OP_construct, 0, argc, itraits);
+					}
+					else
+					{
+						emit(state, OP_construct, argc, 0, itraits);
+					}
+				}
                 else
                 {
                     emit(state, OP_construct, argc, 0, itraits);
@@ -2447,7 +2465,7 @@ namespace avmplus
                     // location. need to understand why this works.
                     emitCall(state, OP_callinterface, f->iid(), 0, type);
                 }
-                AvmAssert(type == f->returnTraits());
+                AvmAssert(type == f->getMethodSignature()->returnTraits());
             }
             else {
                 emit(state, OP_getproperty, (uintptr)&name, 0, type);
@@ -3035,7 +3053,7 @@ namespace avmplus
 		else
 		{
             // setglobalslot
-			ScopeTypeChain* scopeTypes = info->declaringTraits->scope;
+			ScopeTypeChain* scopeTypes = info->declaringTraits()->scope;
 			if (scopeTypes->size == 0)
 			{
 				// no captured scopes, so global is local scope 0
@@ -3247,7 +3265,7 @@ namespace avmplus
 					callIns(FUNCTIONID(endTry), 1, _ef);
 				}
 
-				Traits* t = info->returnTraits();
+				Traits* t = ms->returnTraits();
 				LIns* retvalue;
 				if (opcode == OP_returnvalue)
 				{
@@ -3268,7 +3286,7 @@ namespace avmplus
 						retvalue = atomToNativeRep(t, retvalue);
 					}
 				}
-				switch (bt(info->returnTraits())) {
+				switch (bt(t)) {
 				case BUILTIN_number:
 					Ins(LIR_fret, retvalue);
 					break;
@@ -5471,9 +5489,9 @@ namespace avmplus
                 void *vp;
             } u;
             u.vp = frag->code();
-            info->impl32 = u.fp;
+            info->_impl32 = u.fp;
             // mark method as been JIT'd
-            info->flags |= MethodInfo::JIT_IMPL;
+            info->_flags |= MethodInfo::JIT_IMPL;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
             if (verbose())
                 AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
@@ -5708,7 +5726,8 @@ namespace avmplus
 		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, impl32));
 	#endif
 		LInsp args[] = { ap_param, argc_param, env, target };
-		if (Traits::getBuiltinType(e->virt->returnTraits()) == BUILTIN_number) {
+		MethodSignaturep ems = e->virt->getMethodSignature();
+		if (ems->returnTraitsBT() == BUILTIN_number) {
 			lirout->ins1(LIR_fret, lirout->insCall(FUNCTIONID(fcalli), args));
 		} else {
 			// this includes the int/uint/bool case, we dont bother truncating and re-widening the result.

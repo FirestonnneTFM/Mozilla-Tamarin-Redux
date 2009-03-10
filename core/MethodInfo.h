@@ -72,6 +72,8 @@ namespace avmplus
 	};
 #endif
 
+	class MethodSignature;
+
 	/**
 	 * MethodInfo is the base class for all functions that
 	 * can be executed by the VM: Actionscript functions,
@@ -83,110 +85,124 @@ namespace avmplus
 	class MethodInfo : public MMgc::GCObject
 #endif
 	{
+		friend class CodegenLIR;
+		friend class CodegenIMT;
 	public:
 		/** @name flags from .abc - limited to a BYTE */
 		/*@{*/
 		/** need arguments[0..argc] */
-		static const int NEED_ARGUMENTS		= 0x00000001;
+		static const int NEED_ARGUMENTS			= 0x00000001;
 
 		/** need activation object */
-		static const int NEED_ACTIVATION	= 0x00000002;
+		static const int NEED_ACTIVATION		= 0x00000002;
 
 		/** need arguments[param_count+1..argc] */		
-		static const int NEED_REST          = 0x00000004;
+		static const int NEED_REST				= 0x00000004;
 
 		/** has optional parameters */
-		static const int HAS_OPTIONAL       = 0x00000008;
+		static const int HAS_OPTIONAL			= 0x00000008;
 
 		/** allow extra args, but dont capture them */
-		static const int IGNORE_REST        = 0x00000010;
+		static const int IGNORE_REST			= 0x00000010;
 
 		/** method is native */
-		static const int NATIVE				= 0x00000020;
+		static const int NATIVE					= 0x00000020;
 
 		/** method sets default namespace */
-		static const int SETS_DXNS			= 0x00000040;
+		static const int SETS_DXNS				= 0x00000040;
 
 		/** method has table for parameter names */
-		static const int HAS_PARAM_NAMES	= 0x00000080;
+		static const int HAS_PARAM_NAMES		= 0x00000080;
 
 		/*@}*/
-
+	private:
 		/** @name internal flags - upper 3 BYTES available */
 		/*@{*/
-		static const int UNUSED_0x00000100	= 0x00000100;
-		static const int UNUSED_0x00000200	= 0x00000200;
-		static const int UNUSED_0x00000400	= 0x00000400;
-		static const int UNUSED_0x00000800	= 0x00000800;
-		static const int UNUSED_0x00001000	= 0x00001000;
-		static const int UNUSED_0x00002000	= 0x00002000;
-
 		// set iff this is a getter
-		static const int IS_GETTER			= 0x00004000;
+		static const int IS_GETTER				= 0x00000100;
 
 		// set iff this is a setter
-		static const int IS_SETTER			= 0x00008000;
+		static const int IS_SETTER				= 0x00000200;
 
-		static const int OVERRIDE           = 0x00010000;
+		static const int OVERRIDE				= 0x00000400;
 
-		static const int NON_INTERRUPTABLE	= 0x00020000;
+		static const int NON_INTERRUPTIBLE		= 0x00000800;
 
-		static const int UNBOX_THIS         = 0x00040000;
+		static const int UNBOX_THIS				= 0x00001000;
 
-		static const int NEEDS_CODECONTEXT  = 0x00080000;
+		static const int NEEDS_CODECONTEXT		= 0x00002000;
 
-		static const int HAS_EXCEPTIONS		= 0x00100000;
+		static const int HAS_EXCEPTIONS			= 0x00004000;
 
-#ifdef AVMPLUS_VERBOSE
-		static const int VERBOSE_VERIFY		= 0x00200000;
-#endif
+		static const int NEEDS_DXNS				= 0x00008000;
 
-		static const int NEEDS_DXNS			= 0x00400000;
-
-		static const int VERIFIED			= 0x00800000;
+		static const int VERIFIED				= 0x00010000;
 
 #ifdef AVMPLUS_VERIFYALL
-		static const int VERIFY_PENDING		= 0x01000000;
+		static const int VERIFY_PENDING			= 0x00020000;
 #endif
 
 		/** indicates method is final, no overrides allowed */
-		static const int FINAL				= 0x02000000;
+		static const int FINAL					= 0x00040000;
 
 		/** indicates the function is a method, that pushes the
 		    receiver object onto the scope chain at method entry */
-		static const int NEED_CLOSURE       = 0x04000000;
+		static const int NEED_CLOSURE			= 0x00080000;
 
 		/** set to indicate that a function has no bytecode body. */
-		static const int ABSTRACT_METHOD	= 0x08000000;
-
-		static const int UNUSED_0x10000000      = 0x10000000;
+		static const int ABSTRACT_METHOD		= 0x00100000;
 
 		/**
 		 * set once the signature types have been resolved and
 		 * override signatures have been checked.
 		 */
-		static const int LINKED             = 0x20000000;
+		static const int RESOLVED				= 0x00200000;
 
 		/**
 		 * set to indictate that a function has been 
 		 * recommended to be interpreted. 
 		 */
-		static const int SUGGEST_INTERP		= 0x40000000;
+		static const int SUGGEST_INTERP			= 0x00400000;
 
 		/**
 		 * set to indicate that a function has been compiled
 		 * to native code by the jit compiler.
 		 */
-		static const int JIT_IMPL			= 0x80000000;
+		static const int JIT_IMPL				= 0x00800000;
+		
+#ifdef AVMPLUS_UNCHECKED_HACK
+		static const int UNCHECKED				= 0x01000000;
+#endif
+
+		// unused:								= 0x02000000;
+		// unused:								= 0x04000000;
+		// unused:								= 0x08000000;
+		// unused:								= 0x10000000;
+		// unused:								= 0x20000000;
+		// unused:								= 0x40000000;
+		// unused:								= 0x80000000;
 
 		/*@}*/
 
-	public:
+    public:
+		// ctor for all normal methods.
+		MethodInfo(int _method_id, 
+					PoolObject* pool, 
+					const uint8_t* abc_info_pos, 
+					uint8_t abcFlags,
+					const NativeMethodInfo* native_info);
+		
+		// special ctor for the methodinfo generated for slot-initialization when no init method is present
+		enum InitMethodStub { kInitMethodStub };
+		MethodInfo(InitMethodStub, Traits* declTraits);
 
-		uintptr iid() const
-		{
-			return ((uintptr)this)>>3;
-		}
+#if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
+		MethodInfo(void* tramp);
+#endif
+
+		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
+
+		inline uintptr_t iid() const { return ((uintptr_t)this)>>3; }
 
 		bool usesCallerContext() const;
 
@@ -194,26 +210,10 @@ namespace avmplus
 		// Builtin + native functions have flags to specify if they need the dxns code
 		bool usesDefaultXmlNamespace() const;
 
-		void initParamTypes(int count);
-		void initDefaultValues(int count);
-
 		void resolveSignature(const Toplevel* toplevel);
 
-		bool argcOk(int argc)
-		{
-			return argc >= param_count-optional_count && 
-				(argc <= param_count || allowExtraArgs());
-		}
-
-    public:
-		MethodInfo(int _method_id, const NativeMethodInfo* native_info);
-#if defined FEATURE_NANOJIT
-		MethodInfo(void* tramp);
-#endif
-
-		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
-
 #ifdef DEBUGGER
+	public:
 		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
@@ -225,8 +225,8 @@ namespace avmplus
 		void setFile(AbcFile* file);
 		void setRegName(int index, Stringp name);
 
-		inline Stringp getLocalName(int index) const { return getRegName(index+param_count); }
-		inline Stringp getArgName(int index) const { return getRegName(index); }
+		Stringp getArgName(int index);
+		Stringp getLocalName(int index);
 
 		AbcFile* file() const;
 		int32_t firstSourceLine() const;
@@ -249,64 +249,50 @@ namespace avmplus
 
 	public:
 		
-		void setParamType(int index, Traits* t);
-		void setDefaultValue(int index, Atom defaultValue);
 		void makeIntoPrototypeFunction(const Toplevel* toplevel);
-
-		Traits* paramTraits(int index) const {
-			AvmAssert(index >= 0 && index <= param_count);
-			return m_types[index];
-		}
-
-		Atom getDefaultValue(int i) const {
-			return m_values[i];
-		}
-
-		void setReturnType(Traits* t) {
-			m_returnType = t;
-		}
-
-		Traits* returnTraits() const {
-			return m_returnType;
-		}
-
-		int requiredParamCount() const {
-			return param_count-optional_count;
-		}
-
-		int allowExtraArgs() const {
-			return isFlagSet(NEED_REST|NEED_ARGUMENTS|IGNORE_REST);
-		}
-
-		int hasMethodBody() const {
-			return !isFlagSet(ABSTRACT_METHOD);
-		}
-
-		int isFlagSet(int f) const {
-			return (flags & f);
-		}
-
-		int hasExceptions() const {
-			return flags & HAS_EXCEPTIONS;
-		}
-
-		int setsDxns() const {
-			return flags & SETS_DXNS;
-		}
-
-		int isNative() const {
-			return flags & NATIVE;
-		}
-
 		bool makeMethodOf(Traits* type);
 
-#ifdef AVMPLUS_VERIFYALL
-		int isVerified() const {
-			return flags & VERIFIED;
+
+		inline int allowExtraArgs() const { return _flags & (NEED_REST|NEED_ARGUMENTS|IGNORE_REST); }
+		inline int hasExceptions() const { return _flags & HAS_EXCEPTIONS; }
+		inline int hasMethodBody() const { return !(_flags & ABSTRACT_METHOD); }
+		inline int hasOptional() const { return _flags & HAS_OPTIONAL; }
+		inline int isNative() const { return _flags & NATIVE; }
+		inline int isNonInterruptible() { return _flags & NON_INTERRUPTIBLE; }
+		inline int isResolved() { return _flags & RESOLVED; }
+		inline int needActivation() const { return _flags & NEED_ACTIVATION; }
+		inline int needArguments() const { return _flags & NEED_ARGUMENTS; }
+		inline int needClosure() const { return _flags & NEED_CLOSURE; }
+		inline int needRest() const { return _flags & NEED_REST; }
+		inline int needRestOrArguments() const { return _flags & (NEED_REST|NEED_ARGUMENTS); }
+		inline int setsDxns() const { return _flags & SETS_DXNS; }
+		inline int suggestInterp() const { return _flags & SUGGEST_INTERP; }
+		inline int unboxThis() const { return _flags & UNBOX_THIS; }
+		inline int isJitImpl() const { return _flags & JIT_IMPL; } // @ todo, Flash needs this for now, remove soon
+
+		inline void setUnboxThis() { _flags |= UNBOX_THIS; }
+		inline void setSuggestInterp() { _flags |= SUGGEST_INTERP; }
+		inline void setHasExceptions() { _flags |= HAS_EXCEPTIONS; }
+		inline void setNeedsDxns() { _flags |= NEEDS_DXNS; }
+		inline void setFinal() { _flags |= FINAL; }
+		inline void setOverride() { _flags |= OVERRIDE; }
+		inline void makeNonInterruptible() { _flags |= NON_INTERRUPTIBLE; }
+
+		inline void setKind(TraitKind kind) 
+		{ 
+			if (kind == TRAIT_Getter)
+				_flags |= MethodInfo::IS_GETTER;
+			else if (kind == TRAIT_Setter)
+				_flags |= MethodInfo::IS_SETTER;
 		}
+		
+#ifdef AVMPLUS_VERIFYALL
+		inline int isVerified() const { return _flags & VERIFIED; }
+		inline int isVerifyPending() { return _flags & VERIFY_PENDING; }
+		inline void setVerified() { _flags = _flags | VERIFIED & ~VERIFY_PENDING; }
+		inline void setVerifyPending() { _flags |= VERIFY_PENDING; }
 #endif
 
-		void boxArgs(int argc, uint32 *ap, Atom* out);
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	protected:
@@ -323,10 +309,12 @@ namespace avmplus
 		Stringp format(AvmCore* core) const;
 #endif
 #ifdef DEBUGGER
-		uint32 size() const;
+		uint32 size();
 #endif
 
 	public:
+
+		inline PoolObject* pool() const { return _pool; }
 
 		inline AvmThunkNativeThunker thunker() const { AvmAssert(isNative()); return _native.thunker; }
 		inline AvmThunkNativeMethodHandler handler_method() const { AvmAssert(isNative()); return _native.handler.method; }
@@ -339,38 +327,16 @@ namespace avmplus
 		inline ExceptionHandlerTable* abc_exceptions() const { AvmAssert(!isNative()); return _abc.exceptions; }
 		inline void set_abc_exceptions(MMgc::GC* gc, ExceptionHandlerTable* e) { AvmAssert(!isNative()); WB(gc, this, &_abc.exceptions, e); }
 
-		inline uint32_t abc_frame_size() const { AvmAssert(!isNative()); return _abc.frameSize; }
-		inline uint32_t abc_local_count() const { AvmAssert(!isNative()); return _abc.localCount; }
-		inline uint32_t abc_max_scope_depth() const { AvmAssert(!isNative()); return _abc.maxScopeDepth; }
-
-		inline void set_abc_frame_info(uint32_t frameSize, uint32_t localCount, uint32_t maxScopeDepth)
-		{
-			AvmAssert(!isNative()); 
-		#ifdef AVMPLUS_64BIT
-			_abc.frameSize = frameSize;
-		#else
-			// The interpreter wants this to be padded to a doubleword boundary because
-			// it allocates two objects in a single alloca() request - the frame and
-			// auxiliary storage, in that order - and wants the second object to be
-			// doubleword aligned.
-			_abc.frameSize = (frameSize + 1) & ~1;
-		#endif
-			_abc.frameSize = frameSize;
-			_abc.localCount = localCount;
-			_abc.maxScopeDepth = maxScopeDepth;
-		}
-
 	#ifdef AVMPLUS_WORD_CODE
 
 		inline ExceptionHandlerTable* word_code_exceptions() const { AvmAssert(!isNative()); return _abc.word_code.exceptions; }
 		inline void set_word_code_exceptions(MMgc::GC* gc, ExceptionHandlerTable* e) { AvmAssert(!isNative()); WB(gc, this, &_abc.word_code.exceptions, e); }
 
-		inline const uintptr_t* word_code_start() const { AvmAssert(!isNative()); return _abc.word_code.codeStart; }
-		inline void set_word_code_start(MMgc::GC* gc, MMgc::GCObject* anchor, const uintptr_t* start) 
+		inline const uintptr_t* word_code_start() const { AvmAssert(!isNative()); return _abc.word_code.translated_code->data; }
+		inline void set_word_code(MMgc::GC* gc, TranslatedCode* translated_code) 
 		{ 
 			AvmAssert(!isNative()); 
-			_abc.word_code.codeStart = start; 
-			WB(gc, this, &_abc.word_code.code_anchor, anchor);
+			WB(gc, this, &_abc.word_code.translated_code, translated_code);
 		}
 
 		inline int word_code_cache_size() const { AvmAssert(!isNative()); return _abc.word_code.cache_size; }
@@ -383,6 +349,31 @@ namespace avmplus
 	
 	#endif
 
+		inline int method_id() const { return _method_id; }
+
+		inline AtomMethodProc impl32() const { return _impl32; }
+		inline DoubleMethodProc implN() const { return _implN; }
+		inline Traits* declaringTraits() const { return _declaringTraits; }
+		inline Traits* activationTraits() const { return _activationTraits; }
+
+		inline void set_activationTraits(Traits* t) { _activationTraits = t; }
+
+		inline MethodSignaturep getMethodSignature()
+		{
+			AvmAssert(isResolved());
+			AvmAssert(_msref != NULL);
+			MethodSignaturep ms;
+			if ((ms = (MethodSignaturep)_msref->get()) == NULL)
+				ms = _getMethodSignature();
+			return ms;
+		}
+
+		void update_max_stack(int max_stack);
+
+	private:
+		MethodSignature* FASTCALL _getMethodSignature();
+		MethodSignature* FASTCALL _buildMethodSignature(const Toplevel* toplevel);
+
 	private:
 		struct NativeInfo
 		{
@@ -394,57 +385,105 @@ namespace avmplus
 		{
 			const uint8_t*			body_pos;
 			ExceptionHandlerTable*	exceptions;		// we write this once, in Verifier, with an explicit WB.  so no DWB.
-			uint32_t				frameSize;			// total size of frame in number of Atoms
-			uint32_t				localCount;			// maximum number of local registers
-			uint32_t				maxScopeDepth;		// maximum depth of local scope stack
 	#ifdef AVMPLUS_WORD_CODE
 			struct 
 			{
-				MMgc::GCObject*			code_anchor;	// The object that contains the code pointed to by body_pos, written with explicit WB
-				const uintptr_t*		codeStart;		// pointer to first instruction
+				TranslatedCode*			translated_code;	// The object that contains the code pointed to by body_pos, written with explicit WB
 				// We write this once, in WordcodeTranslator, with an explicit WB.  so no DWB.
 				// The contents are the same as the 'exceptions' structure above, except the 'from', 'to', and 'target' fields.
 				ExceptionHandlerTable*	exceptions;
 				int						cache_size;     // Number of items in lookup cache
 			} word_code;
 	#else
+			//@todo, this is trivially derived from abc_body_pos and should be cached in MethodSignature
 			const uint8_t*		abc_codeStart;			// pointer to first instruction
 	#endif
 		};
 
 	// ------------------------ DATA SECTION BEGIN
-	public:
-		// these are most-frequently accessed so put at offset zero
+	private:
+		// these are (probably) most-frequently accessed so put at offset zero (allow LIR to generate trivially smaller code)
 		union 
 		{
-			AtomMethodProc impl32;
-			DoubleMethodProc implN;
+			AtomMethodProc		_impl32;
+			DoubleMethodProc	_implN;
 		};
-		DWB(Traits*)		declaringTraits;
-		DWB(Traits*)		activationTraits;
-		DWB(PoolObject*)	pool;
-	private:
-		DWB(Traits*)		m_returnType;
-		DWB(Traits**)		m_types;		// actual length will be 1+param_count
-		DWB(Atom*)			m_values;		// default values for any optional params. size = optional_count
+		DWB(MMgc::GCWeakRef*)	_msref;				// our MethodSignature 
+		DWB(Traits*)			_declaringTraits;
+		DWB(Traits*)			_activationTraits;
+		PoolObject* const		_pool;
 #ifdef DEBUGGER
-		DebuggerMethodInfo*			m_dmi;			// written with explicit DWB
+		DebuggerMethodInfo*		_dmi;				// written with explicit DWB
 #endif
-	public:
-		const byte*	abc_info_pos;			// pointer to abc MethodInfo record 
-		int			param_count;		// number of declared parameters including optionals 
-		int			optional_count;		// last optional_count params are optional 
-		int			restOffset;			// offset to first rest arg, including the instance parameter. this is sum(sizeof(paramType(0..N)))
-		int			flags;				// see bitmask defs above 
-		const int	method_id;
-	private:
+		const uint8_t* const	_abc_info_pos;		// pointer to abc MethodInfo record 
+		int						_flags;				// see bitmask defs above 
+		const int				_method_id;
 		union 
 		{
-			NativeInfo	_native;		// stuff used only for Native methods (formerly in NativeMethod)
-			AbcInfo		_abc;			// stuff used only for bytecode methods (formerly in MethodInfo)
+			NativeInfo			_native;			// stuff used only for Native methods (formerly in NativeMethod)
+			AbcInfo				_abc;				// stuff used only for bytecode methods (formerly in MethodInfo)
 		};
 	// ------------------------ DATA SECTION END
 	};
+
+	class MethodSignature : public QCachedItem
+	{
+		friend class MethodInfo;
+	public:
+#ifdef AVMPLUS_TRAITS_MEMTRACK 
+		MethodSignature();
+		virtual ~MethodSignature();
+#endif
+	private:
+		union AtomOrType
+		{
+			Traits* paramType;
+			Atom defaultValue;
+		};
+		
+	public:
+		inline Traits* returnTraits() const { return _returnTraits; }
+		inline BuiltinType returnTraitsBT() const { return Traits::getBuiltinType(_returnTraits); }
+
+		inline int param_count() const { return _param_count; }
+		inline int optional_count() const { return _optional_count; }
+		inline int rest_offset() const { return _rest_offset; }
+
+		inline int max_stack() const { AvmAssert(!(_flags & MethodInfo::NATIVE)); return _max_stack; }
+		inline int local_count() const { AvmAssert(!(_flags & MethodInfo::NATIVE)); return _local_count; }
+		inline int max_scope() const { AvmAssert(!(_flags & MethodInfo::NATIVE)); return _max_scope; }
+		inline int frame_size() const { AvmAssert(!(_flags & MethodInfo::NATIVE)); return _frame_size; }
+
+		inline int requiredParamCount() const { return _param_count - _optional_count; }
+
+		inline Traits* paramTraits(int i) const { AvmAssert(i >= 0 && i <= _param_count); return _args[i].paramType; }
+		inline BuiltinType paramTraitsBT(int i) const { AvmAssert(i >= 0 && i <= _param_count); return Traits::getBuiltinType(_args[i].paramType); }
+		inline Atom getDefaultValue(int i) const { AvmAssert(i >= 0 && i < _optional_count); return _args[i+_param_count+1].defaultValue; }
+
+		inline bool argcOk(int argc) const
+		{
+			const int ALLOW_EXTRA_ARGS = MethodInfo::NEED_REST | MethodInfo::NEED_ARGUMENTS | MethodInfo::IGNORE_REST;
+			return argc >= (_param_count - _optional_count) && 
+					(argc <= _param_count || (_flags & ALLOW_EXTRA_ARGS));
+		}
+
+		void boxArgs(AvmCore* core, int argc, const uint32_t* ap, Atom* out) const;
+		
+	// ------------------------ DATA SECTION BEGIN
+	private:
+		Traits*		_returnTraits;		// written with explicit WB
+		int			_param_count;		// number of declared parameters including optionals 
+		int			_optional_count;	// last optional_count params are optional 
+		int			_rest_offset;		// offset to first rest arg, including the instance parameter. this is sum(sizeof(paramType(0..N)))
+		int			_flags;				// dupe of owner's flags, for convenience
+		int			_max_stack;			// abc-only: max stack
+		int			_local_count;		// abc-only: maximum number of local registers
+		int			_max_scope;			// abc-only: maximum depth of local scope stack
+		int			_frame_size;		// abc-only: total size of frame in number of Atoms, derived from other values above
+		AtomOrType	_args[1];			// lying, actually 1+param_count+optional_count
+	// ------------------------ DATA SECTION END
+	};
+	
 }
 
 #endif /* __avmplus_MethodInfo__ */

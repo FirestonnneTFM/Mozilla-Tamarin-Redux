@@ -56,6 +56,8 @@ sunspider/.*          , misc    , skip  , skip sunspider
 jsbench/.*            , misc    , skip  , skip jsbench
 v8/.*                 , misc    , skip  , skip v8
 
+misc/.*               , miscdir    , include  , misc testsuite
+
 ## misc-mobile : required since the canaries tests require access to additional abc files which will not be on the device
 sunspider/.*          , misc-mobile    , skip  , skip sunspider
 sunspider/.*          , misc-mobile    , skip  , skip sunspider

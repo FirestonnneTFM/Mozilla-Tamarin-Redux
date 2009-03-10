@@ -153,7 +153,7 @@ namespace avmplus
 
 	#define AvmThunkCoerce_AvmString_AvmBox(v)	((v) ? (v)->atom() : nullStringAtom)
 
-	#define AvmThunkConstant_AvmString(v)		(env->method->pool->cpool_string[v])
+	#define AvmThunkConstant_AvmString(v)		(env->method->pool()->cpool_string[v])
 	
 	#define AVMTHUNK_GET_METHOD_HANDLER(env)	((env)->method->handler_method())
 	#define AVMTHUNK_GET_FUNCTION_HANDLER(env)	((env)->method->handler_function())

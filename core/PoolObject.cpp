@@ -48,6 +48,10 @@ namespace avmplus
 		cpool_string(core->GetGC(), 0),
 		cpool_ns(core->GetGC(), 0),
 		cpool_ns_set(core->GetGC(), 0),
+#ifndef AVMPLUS_64BIT
+		cpool_int_atoms(core->GetGC(), 0),
+		cpool_uint_atoms(core->GetGC(), 0),
+#endif
 		cpool_mn(0),
 		bugFlags(0),
 		methods(core->GetGC(), 0),
@@ -199,7 +203,7 @@ namespace avmplus
 		//return false; // unreachable
 	}
 
-	Atom PoolObject::getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const
+	Atom PoolObject::getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) 
 	{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds
@@ -214,17 +218,77 @@ namespace avmplus
 			switch (kind)
 			{
 			case CONSTANT_Int:
+			{
 				if (index >= (maxcount = constantIntCount))
 					goto range_error;
-				value = core->intToAtom(cpool_int[index]);
+				const int32_t i = cpool_int[index];
+#ifdef AVMPLUS_64BIT
+				value = core->intToAtom(i);
+				AvmAssert(AvmCore::isInteger(value));
+#else
+				// LIR relies on the return values from this being "sticky" so it can insert them inline.
+				// that's true for everything but int/uints that overflow, so special-case them.
+				// @todo this can/should go away when we convert to 64-bit Box atoms.
+				if (!cpool_int_atoms.size())
+				{
+					cpool_int_atoms.ensureCapacity(constantIntCount);
+					for (uint32_t j = 0; j < constantIntCount; ++j)
+						cpool_int_atoms.set(j, 0);
+					AvmAssert(cpool_int_atoms.size() == constantIntCount);
+				}
+				value = (Atom)cpool_int_atoms[index];
+				if (value == 0)
+				{
+					value = core->intToAtom(i);
+					if (AvmCore::isDouble(value))
+					{
+						cpool_int_atoms.set(index, value);
+					}
+					AvmAssert(AvmCore::isNumber(value));
+				}
+				else
+				{
+					AvmAssert(AvmCore::isDouble(value));
+				}
+#endif
 				break;
-
+			}
 			case CONSTANT_UInt:
+			{
 				if (index >= (maxcount = constantUIntCount))
 					goto range_error;
-				value = core->uintToAtom(cpool_uint[index]);
+				const int32_t u = cpool_int[index];
+#ifdef AVMPLUS_64BIT
+				value = core->uintToAtom(u);
+				AvmAssert(AvmCore::isInteger(value));
+#else
+				// LIR relies on the return values from this being "sticky" so it can insert them inline.
+				// that's true for everything but int/uints that overflow, so special-case them.
+				// @todo this can/should go away when we convert to 64-bit Box atoms.
+				if (!cpool_uint_atoms.size())
+				{
+					cpool_uint_atoms.ensureCapacity(constantUIntCount);
+					for (uint32_t j = 0; j < constantUIntCount; ++j)
+						cpool_uint_atoms.set(j, 0);
+					AvmAssert(cpool_uint_atoms.size() == constantUIntCount);
+				}
+				value = (Atom)cpool_uint_atoms[index];
+				if (value == 0)
+				{
+					value = core->uintToAtom(u);
+					if (AvmCore::isDouble(value))
+					{
+						cpool_uint_atoms.set(index, value);
+					}
+					AvmAssert(AvmCore::isNumber(value));
+				}
+				else
+				{
+					AvmAssert(AvmCore::isDouble(value));
+				}
+#endif
 				break;
-
+			}
 			case CONSTANT_Double:
 				if (index >= (maxcount = constantDoubleCount))
 					goto range_error;

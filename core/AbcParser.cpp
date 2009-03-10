@@ -341,7 +341,7 @@ namespace avmplus
 			uint32_t slot_id = 0;
 			uint32_t value_index = 0;
 			uint32_t earlyDispId = 0;
-			int flags = 0;
+			bool needsDxns = false;
 #ifdef AVMPLUS_VERBOSE
 			Multiname typeName;
 #endif
@@ -379,6 +379,7 @@ namespace avmplus
 				// unsupported traits type
 				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
 			}
+
 			const byte* meta_pos = pos;
 			if (tag & ATTR_metadata)
 			{
@@ -390,11 +391,7 @@ namespace avmplus
 					if (pool->stripMetadataIndexes.indexOf(index) != -1)
 						skip = true;  // Stripping this definition
 					else if (name == core->kNeedsDxns)
-						flags |= MethodInfo::NEEDS_DXNS;
-#ifdef AVMPLUS_VERBOSE
-					else if (name == kVerboseVerify)
-						flags |= MethodInfo::VERBOSE_VERIFY;
-#endif
+						needsDxns = true;
 				}
 			}
 			if (skip) 
@@ -435,7 +432,7 @@ namespace avmplus
 					if (!cinit) 
 						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_info));
 
-					Traits* ctraits = cinit->declaringTraits;
+					Traits* ctraits = cinit->declaringTraits();
 
 					#ifdef AVMPLUS_VERBOSE
 					if (pool->verbose)
@@ -486,11 +483,6 @@ namespace avmplus
 			case TRAIT_Setter:
             case TRAIT_Method:
 			{
-				if (kind == TRAIT_Getter)
-					flags |= MethodInfo::IS_GETTER;
-				else if (kind == TRAIT_Setter)
-					flags |= MethodInfo::IS_SETTER;
-					
 				#ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
 				{
@@ -520,12 +512,14 @@ namespace avmplus
 				// since this function is ref'ed here, we know the receiver type.
 				if (!f->makeMethodOf(traits))
 					toplevel->throwVerifyError(kCorruptABCError);
-
-				f->flags |= flags;
+				
+				f->setKind(kind); // sets the IS_GETTER/IS_SETTER flags
 				if (tag & ATTR_final)
-					f->flags |= MethodInfo::FINAL;
+					f->setFinal();
 				if (tag & ATTR_override)
-					f->flags |= MethodInfo::OVERRIDE;
+					f->setOverride();
+				if (needsDxns)
+					f->setNeedsDxns();
 				
 				// only export one name for an accessor 
 				if (script && !domain->getNamedScript(name,ns))
@@ -588,11 +582,11 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
 #endif
-			// MethodInfo
-			int param_count = readU30(pos);
-
 			const byte* info_pos = pos;
 		
+			// MethodInfo
+			const int param_count = readU30(pos);
+
 		// @todo -- we should add an AbcParser equivalent of skipU30;
 		// then the next two clauses would be 			
 		//		skipU30(pos, param_count+1);
@@ -626,17 +620,17 @@ namespace avmplus
             uint32_t name_index = readU30(pos);
             (void)name_index;
 			CHECK_POS(pos);
-			int flags = *pos++;
+			const uint8_t abcFlags = *pos++;
 
 			if_verbose(
 				core->console << "        name_index=" << name_index;
 				if (name_index > 0 && name_index < pool->constantStringCount)
 					core->console << " \"" << pool->cpool_string[name_index] << "\"";
-				core->console << "\n        flags=" << flags << "\n";
+				core->console << "\n        flags=" << abcFlags << "\n";
 			)
 
 			const NativeMethodInfo* ni = NULL;
-			if (flags & MethodInfo::NATIVE)
+			if (abcFlags & MethodInfo::NATIVE)
 			{
 				ni = natives ? natives->getNativeInfo(i) : NULL;
 				if (!ni)
@@ -649,24 +643,18 @@ namespace avmplus
 				}
 			}
 
-			MethodInfo* info = new (core->GetGC()) MethodInfo(i, ni);
-			info->abc_info_pos = info_pos;
-			info->pool = pool;
-			info->param_count = param_count;
-			info->initParamTypes(param_count+1);
-			info->flags |= flags;
+			const int optional_count = (abcFlags & MethodInfo::HAS_OPTIONAL) ? readU30(pos) : 0;
+
+			MethodInfo* info = new (core->GetGC()) MethodInfo(i, pool, info_pos, abcFlags, ni);
 			#if VMCFG_METHOD_NAMES
 			if (core->config.methodNames)
 			{
-				info->pool->method_name_indices.set(i, int32_t(name_index));
+				pool->method_name_indices.set(i, int32_t(name_index));
 			}
 			#endif
 
-			if (flags & MethodInfo::HAS_OPTIONAL)
+			if (abcFlags & MethodInfo::HAS_OPTIONAL)
 			{
-				int optional_count = readU30(pos);
-
-				info->optional_count = optional_count;
 				for( int j = 0; j < optional_count; ++j)
 				{
 					readU30(pos);
@@ -680,10 +668,10 @@ namespace avmplus
 				}
 			}
 
-			if( flags & MethodInfo::HAS_PARAM_NAMES)
+			if (abcFlags & MethodInfo::HAS_PARAM_NAMES)
 			{
 				// AVMPlus doesn't care about the param names, just skip past them
-				for( int j = 0; j < info->param_count; ++j )
+				for( int j = 0; j < param_count; ++j )
 				{
 					readU30(pos);
 				}
@@ -794,12 +782,16 @@ namespace avmplus
             (void)max_stack;
             
             int local_count = readU30(pos);
+			(void)local_count;
 
-			if (local_count < info->param_count+1)
-			{
-				// must have enough locals to hold all parameters including this
-				toplevel->throwVerifyError(kCorruptABCError);
-			}
+			// can't do this check here because param_count isn't available
+			// until the method is resolved. (we could do some tricks to extract
+			// it, but we just defer this check to Verifier::verify instead.)
+			//if (local_count < info->param_count()+1)
+			//{
+			//	// must have enough locals to hold all parameters including this
+			//	toplevel->throwVerifyError(kCorruptABCError);
+			//}
 
 			// TODO change file format, just want local max_scope
 			int init_scope_depth = readU30(pos);
@@ -834,7 +826,7 @@ namespace avmplus
 
 			if (exception_count != 0) 
 			{
-				info->flags |= MethodInfo::HAS_EXCEPTIONS;
+				info->setHasExceptions();
 				for (int i=0; i<exception_count; i++) 
 				{
 					// this will be parsed when method is verified.
@@ -880,7 +872,7 @@ namespace avmplus
 					readU30(pos); // type name
 					if (version != (46<<16|15))
 					{
-						uint32 name_index = readU30(pos); // variable name
+						const uint32 name_index = readU30(pos); // variable name
 						if (name_index >= pool->constantMnCount)
 							toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(name_index), core->toErrorString(pool->constantCount));
 					}
@@ -891,7 +883,7 @@ namespace avmplus
 			if (info->hasMethodBody())
 			{
 				// Interface methods should not have bodies
-				if (info->declaringTraits && info->declaringTraits->isInterface)
+				if (info->declaringTraits() && info->declaringTraits()->isInterface)
 				{
 					toplevel->throwVerifyError(kIllegalInterfaceMethodBodyError, core->toErrorString(info));
 				}
@@ -908,7 +900,8 @@ namespace avmplus
 				{
 					toplevel->throwVerifyError(kDuplicateMethodBodyError, core->toErrorString(info));
 				}
-
+				
+				AvmAssert(!info->isResolved());
 				info->set_abc_body_pos(body_pos);
 
 				// there will be a traits_count here, even if NEED_ACTIVATION is not
@@ -917,7 +910,7 @@ namespace avmplus
 
 				const byte* traits_pos = pos;
 				int nameCount = readU30(pos);
-				if ((info->flags & MethodInfo::NEED_ACTIVATION) || nameCount > 0)
+				if (info->needActivation() || nameCount > 0)
 				{
 					pos = traits_pos;
 					Namespacep ns = NULL;
@@ -931,7 +924,7 @@ namespace avmplus
 					#endif
 					// activation traits are raw types, not subclasses of object.  this is
 					// okay because they aren't accessable to the programming model.
-					info->activationTraits = parseTraits(sizeof(ScriptObject), 
+					Traits* act = parseTraits(sizeof(ScriptObject), 
 																NULL, 
 																ns, 
 																name, 
@@ -939,7 +932,8 @@ namespace avmplus
 																traits_pos,
 																TRAITSTYPE_ACTIVATION, 
 																NULL);
-					info->activationTraits->final = true;
+					act->final = true;
+					info->set_activationTraits(act);
 					//info->activationTraits->resolveSignatures(NULL);
 				}
 				else
@@ -1419,11 +1413,11 @@ namespace avmplus
 			)
 			MethodInfo* script = resolveMethodInfo(init_index);
 
-			if (script->declaringTraits != NULL)
+			if (script->declaringTraits() != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString((Traits*)script->declaringTraits));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString(script->declaringTraits()));
 			}
 
 			Traits* traits = parseTraits(sizeof(ScriptObject), 
@@ -1449,7 +1443,7 @@ namespace avmplus
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the $init methods
-				script->flags |= MethodInfo::SUGGEST_INTERP;
+				script->setSuggestInterp();
 			}
 			#endif
 
@@ -1608,11 +1602,11 @@ namespace avmplus
 				}
 			}
 
-			if (iinit->declaringTraits != NULL)
+			if (iinit->declaringTraits() != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(iinit), core->toErrorString((Traits*)iinit->declaringTraits));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(iinit), core->toErrorString(iinit->declaringTraits()));
 			}
 
 			iinit->makeMethodOf(itraits);
@@ -1689,11 +1683,11 @@ namespace avmplus
 
 			ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
 
-			if (cinit->declaringTraits != NULL)
+			if (cinit->declaringTraits() != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(cinit), core->toErrorString((Traits*)cinit->declaringTraits));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(cinit), core->toErrorString(cinit->declaringTraits()));
 			}
 			
 			cinit->makeMethodOf(ctraits);
@@ -1706,7 +1700,7 @@ namespace avmplus
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the class initializer
-				cinit->flags |= MethodInfo::SUGGEST_INTERP;
+				cinit->setSuggestInterp();
 			}
 			#endif
 

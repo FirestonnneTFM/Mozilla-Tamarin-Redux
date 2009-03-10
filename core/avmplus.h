@@ -187,6 +187,7 @@ namespace avmplus
 	class MethodClosure;
 	class MethodEnv;
 	class MethodInfo;
+	class MethodSignature;
 	class Multiname;
 	class Namespace;
 	class NamespaceSet;
@@ -218,8 +219,11 @@ namespace avmplus
 	class Traits;
 	class TraitsBindings;
 	class TraitsMetadata;
+#ifdef AVMPLUS_WORD_CODE
+	class TranslatedCode;
 	class WordcodeTranslator;
 	class WordcodeEmitter;
+#endif
 	class UnicodeUtils;
 	class Value;
 	class Verifier; 
@@ -243,6 +247,7 @@ namespace avmplus
 	typedef const NamespaceSet* NamespaceSetp;
 	typedef const TraitsBindings* TraitsBindingsp;
 	typedef const TraitsMetadata* TraitsMetadatap;
+	typedef const MethodSignature* MethodSignaturep;
 }
 
 #include "MMgc.h"
@@ -276,6 +281,9 @@ namespace avmplus
 #include "VTable.h"
 #include "ScriptObject.h"
 #include "NativeFunction.h"
+#include "Coder.h"
+#include "WordcodeTranslator.h"
+#include "WordcodeEmitter.h"
 #include "MethodInfo.h"
 #include "PoolObject.h"
 #include "AbcEnv.h"
@@ -285,9 +293,6 @@ namespace avmplus
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
 #include "AtomArray.h"
-#include "Coder.h"
-#include "WordcodeTranslator.h"
-#include "WordcodeEmitter.h"
 #include "Verifier.h"
 #include "ClassClosure.h"
 #include "ClassClass.h"
