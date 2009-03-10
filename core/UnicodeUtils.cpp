@@ -241,7 +241,9 @@ namespace avmplus
 
 			case 15:
 				// 11110xxx  10xxxxxx  10xxxxxx  10xxxxxx
-				if (inLen < 4) {
+				// 111110xx ... is always invalid
+				// 1111110x ... is always invalid
+				if ((c & 0x08) || (inLen < 4)) {
 					// Invalid
 					goto invalid;
 				}
@@ -253,9 +255,9 @@ namespace avmplus
 				}
 				
 				outch = (c<<18     & 0x1C0000 |
-						in[1]<<12 & 0x3F000 |
-						in[2]<<6  & 0xFC0 |
-						in[3]     & 0x3F);
+						 in[1]<<12 & 0x3F000 |
+						 in[2]<<6  & 0xFC0 |
+						 in[3]     & 0x3F);
 				if (outch < 0x10000) {
 					// Overlong sequence, reject as invalid.
 					goto invalid;
