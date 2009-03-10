@@ -56,7 +56,7 @@ namespace avmplus
 
 	ClassClosure* Toplevel::resolveBuiltinClass(int class_id)
 	{
-		Traits *traits = core()->builtinPool->cinits[class_id]->declaringTraits->itraits;
+		Traits *traits = core()->builtinPool->cinits[class_id]->declaringTraits()->itraits;
 		Multiname qname(traits->ns, traits->name);
 		ScriptObject *container = vtable->init->finddef(&qname);
 

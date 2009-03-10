@@ -82,7 +82,8 @@ namespace avmplus
 		"TMI", 
 		"VTable", 
 		"MethodEnv", 
-		"MethodInfo" 
+		"MethodInfo", 
+		"MethodSig" 
 	};
 	static uint32_t g_track_count = 0;
 
@@ -156,11 +157,19 @@ namespace avmplus
 			}
 			g_tinfo[TMT_tbi].cached = g_tmcore->tbCache()->count();
 			g_tinfo[TMT_tbi].active = g_tmp.count();
+
+			g_tmp.reset();
+			for (QCachedItem* td = g_tmcore->msCache()->first(); td; td = g_tmcore->msCache()->next(td))
+			{
+				g_tmp.add(td);
+			}
+			g_tinfo[TMT_methodsig].cached = g_tmcore->msCache()->count();
+			g_tinfo[TMT_methodsig].active = g_tmp.count();
 			
 			AvmLog("\nTraitsMemTrack @ %d %s:\n",g_track_count,g_tmcore->IsJITEnabled()?"JIT":"INTERP");
 			uint32_t totmem = 0;
 			uint32_t totmem_hw = 0;
-			for (int i = 3; i < TMT_COUNT; ++i)
+			for (int i = 0; i < TMT_COUNT; ++i)
 			{
 				AvmLog("    %-16s live: %d=%dk (%db), hw: %d=%dk (%db) ",
 					g_tinfonm[i],
@@ -171,7 +180,7 @@ namespace avmplus
 					g_tinfo[i].mem_hw>>10,
 					g_tinfo[i].count_hw?(g_tinfo[i].mem_hw/g_tinfo[i].count_hw):0);
 
-				if (i == TMT_tmi || i == TMT_tbi)
+				if (i == TMT_tmi || i == TMT_tbi || i == TMT_methodsig)
 					AvmLog(" cached=%d(=%d incl bases)",
 						g_tinfo[i].cached,
 						g_tinfo[i].active);
@@ -227,7 +236,7 @@ namespace avmplus
 	static size_t get_size(TMTTYPE t, const void* inst)
 	{
 		size_t sz = GC::Size(inst);
-		if (t == TMT_vtable || t == TMT_abstractfunction || t == TMT_methodenv)
+		if (t == TMT_vtable || t == TMT_methodinfo || t == TMT_methodenv)
 		{
 			// remove vtable ptr that only exists in memtrack mode
 			sz -= sizeof(void*);
@@ -442,8 +451,11 @@ namespace avmplus
 		if (over == virt)
 			return true;
 			
-        Traits* overTraits = over->returnTraits();
-        Traits* virtTraits = virt->returnTraits();
+		MethodSignaturep overms = over->getMethodSignature();
+		MethodSignaturep virtms = virt->getMethodSignature();
+
+        Traits* overTraits = overms->returnTraits();
+        Traits* virtTraits = virtms->returnTraits();
 
         if (overTraits != virtTraits)
         {
@@ -455,26 +467,26 @@ namespace avmplus
 #endif
             return false;
         }
-
-        if (over->param_count != virt->param_count ||
-            over->optional_count != virt->optional_count)
+		
+        if (overms->param_count() != virtms->param_count() ||
+            overms->optional_count() != virtms->optional_count())
         {
 #ifdef AVMPLUS_VERBOSE
             core->console << "\n";
             core->console << "param count mismatch\n";
-            core->console << "   virt params=" << virt->param_count << " optional=" << virt->optional_count << " " << virt << "\n";
-            core->console << "   over params=" << over->param_count << " optional=" << over->optional_count << " " << virt << "\n";
+            core->console << "   virt params=" << virtms->param_count() << " optional=" << virtms->optional_count() << " " << virt << "\n";
+            core->console << "   over params=" << overms->param_count() << " optional=" << overms->optional_count() << " " << virt << "\n";
 #endif
             return false;
         }
 
 		// allow subclass param 0 to implement or extend base param 0
-		virtTraits = virt->paramTraits(0);
+		virtTraits = virtms->paramTraits(0);
 		if (!containsInterface(virtTraits) || !Traits::isMachineCompatible(this->owner, virtTraits))
 		{
 			if (!this->owner->isMachineType() && virtTraits == core->traits.object_itraits)
 			{
-				over->flags |= MethodInfo::UNBOX_THIS;
+				over->setUnboxThis();
 			}
 			else
 			{
@@ -488,10 +500,10 @@ namespace avmplus
 			}
 		}
 
-        for (int k=1, p=over->param_count; k <= p; k++)
+        for (int k=1, p=overms->param_count(); k <= p; k++)
         {
-            overTraits = over->paramTraits(k);
-            virtTraits = virt->paramTraits(k);
+            overTraits = overms->paramTraits(k);
+            virtTraits = virtms->paramTraits(k);
             if (overTraits != virtTraits)
             {
 				#ifdef AVMPLUS_VERBOSE
@@ -504,10 +516,10 @@ namespace avmplus
             }
         }
 
-		if (virt->flags & MethodInfo::UNBOX_THIS)
+		if (virt->unboxThis())
 		{
 			// the UNBOX_THIS flag is sticky, all the way down the inheritance tree
-			over->flags |= MethodInfo::UNBOX_THIS;
+			over->setUnboxThis();
 		}
 
         return true;
@@ -1246,7 +1258,7 @@ namespace avmplus
 					uint32_t slotid = sic.calc_id(ne.id);
 					// note, for TRAIT_Class, AbcParser::parseTraits has already verified that pool->cinits[ne.info] is not null
 					Traitsp slotType = (ne.kind == TRAIT_Class) ? 
-										(Traitsp)pool->cinits[ne.info]->declaringTraits :
+										(Traitsp)pool->cinits[ne.info]->declaringTraits() :
 										this->pool->resolveTypeName(ne.info, toplevel);
 					uint32_t slotOffset = is8ByteSlot(slotType) ? 
 											pad8(hole, nextSlotOffset) : 
@@ -1265,7 +1277,7 @@ namespace avmplus
 					AvmAssert(b != BIND_NONE);
 					const uint32 disp_id = urshift(b, 3) + (ne.kind == TRAIT_Setter);
 					MethodInfo* f = this->pool->getMethodInfo(ne.id);
-					AvmAssert(f->declaringTraits == this);
+					AvmAssert(f->declaringTraits() == this);
 					tb->setMethodInfo(disp_id, f);
 					break;
 				}
@@ -1468,6 +1480,10 @@ namespace avmplus
 			core->console << this << " end bindings \n";
 		}
 #endif
+		
+		AvmAssert(m_tbref->get() == NULL);
+		m_tbref = thisData->GetWeakRef();
+		core->tbCache()->add(thisData);
 		return thisData;
 	}
 
@@ -1544,6 +1560,9 @@ namespace avmplus
 			}
         } // for i
 			
+		AvmAssert(m_tmref->get() == NULL);
+		m_tmref = tm->GetWeakRef();
+		core->tmCache()->add(tm);
 		return tm;
 	}
 
@@ -1590,9 +1609,7 @@ namespace avmplus
 #endif
 		this->genInitBody(toplevel, gen);
 
-		AvmAssert(tb->owner == this);
-		m_tbref = tb->GetWeakRef();
-		// leave m_tmref as empty
+		// leave m_tmref as empty, we don't need it yet
 
 		// all interfaces should have been resolved inside _buildTraitsBindings, UNLESS we are an interface ourself...
 		// in which case let's do it now
@@ -1788,12 +1805,9 @@ namespace avmplus
 		AbcGen newMethodBody(gc, uint32_t(16 + gen.size()));	// @todo 16 is a magic value that was here before I touched the code -- I don't know the significance
 
 		// insert body preamble
-		MethodInfo* new_init = NULL;
-		
 		if (this->init) 
 		{
-			new_init = this->init;
-			const uint8_t* pos = new_init->abc_body_pos();
+			const uint8_t* pos = this->init->abc_body_pos();
 			if (!pos) 
 				toplevel->throwVerifyError(kCorruptABCError);
 
@@ -1817,20 +1831,17 @@ namespace avmplus
 				code_length--;
 			}
 			gen.abs_jump(pos, code_length);	
+			
+			// this handles an obscure case: we have already resolved the signature for this
+			// and have a MethodSignature cached, but we just (potentially) increased the value of
+			// max_stack above. This updates the cached value of max_stack (iff we have
+			// a MethodSignature cached for this->init)
+			this->init->update_max_stack(maxStack);
 		}
 		else 
 		{
 			// make one
-			new_init = new (gc) MethodInfo(-1, NULL);
-			new_init->declaringTraits = this;
-			new_init->pool = this->pool;
-			new_init->param_count = 0;
-			new_init->restOffset = sizeof(Atom); // sizeof(this)
-			new_init->initParamTypes(1);
-			new_init->setParamType(0, this);	
-			new_init->setReturnType(core->traits.void_itraits);
-			new_init->flags |= MethodInfo::LINKED;
-			this->init = new_init;
+			this->init = new (gc) MethodInfo(MethodInfo::kInitMethodStub, this);
 
 			newMethodBody.writeInt(2); // max_stack
 			newMethodBody.writeInt(1); //local_count
@@ -1849,7 +1860,7 @@ namespace avmplus
 		// the verifier and interpreter don't read the activation traits so stop here
 		uint8_t* newBytes = (uint8_t*) gc->Alloc(newMethodBody.size());
 		VMPI_memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
-		new_init->set_abc_body_pos_wb(gc, newBytes);
+		this->init->set_abc_body_pos_wb(gc, newBytes);
 	}
 
 	void Traits::destroyInstance(ScriptObject* obj) const
@@ -1921,8 +1932,8 @@ namespace avmplus
 		AvmAssert(virt != NULL);
 		const uint32_t i = uint32_t(virt->iid() % Traits::IMT_SIZE);
 #ifdef AVMPLUS_VERBOSE
-		if (entries[i] && virt->pool->verbose)
-			virt->pool->core->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
+		if (entries[i] && virt->pool()->verbose)
+			virt->pool()->core->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
 #endif
 		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
 	}
@@ -2078,8 +2089,6 @@ failure:
 #else
 		TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL);
 #endif
-		m_tbref = tb->GetWeakRef();
-		core->tbCache()->add(tb);
 		return tb;
 	}
 
@@ -2087,8 +2096,6 @@ failure:
 	{ 
 		AvmAssert(this->linked);
 		TraitsMetadata* tm = _buildTraitsMetadata();
-		m_tmref = tm->GetWeakRef();
-		core->tmCache()->add(tm);
  		return tm;
 	}
 }

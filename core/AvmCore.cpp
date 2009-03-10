@@ -61,6 +61,7 @@ namespace avmplus
 
  		m_tbCache->resize(cs.bindings);	
  		m_tmCache->resize(cs.metadata);
+ 		m_msCache->resize(cs.methods);
 	}
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
@@ -77,8 +78,9 @@ namespace avmplus
 		passAllExceptionsToDebugger(false),
 #endif
 		gc(g), 
- 		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
- 		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
+ 		m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g)),	
+ 		m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g)),	
+ 		m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g)),	
 		gcInterface(g)
 #ifdef DEBUGGER
 		, _sampler(NULL)
@@ -294,13 +296,13 @@ namespace avmplus
 
 		// whack the the non-interruptable bit on all builtin functions
 		for(int i=0, size=builtinPool->methods.size(); i<size; i++)
-			builtinPool->methods[i]->flags |= MethodInfo::NON_INTERRUPTABLE;
+			builtinPool->methods[i]->makeNonInterruptible();
 
 		for(int i=0, size=builtinPool->cinits.size(); i<size; i++)
-			builtinPool->cinits[i]->flags |= MethodInfo::NON_INTERRUPTABLE;
+			builtinPool->cinits[i]->makeNonInterruptible();
 
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
-			builtinPool->scripts[i]->flags |= MethodInfo::NON_INTERRUPTABLE;
+			builtinPool->scripts[i]->makeNonInterruptible();
 
 #ifdef DEBUGGER
 		// sampling can begin now, requires builtinPool
@@ -341,7 +343,7 @@ namespace avmplus
 		AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(pool)) AbcEnv(pool, domainEnv, codeContext);
 
 		// entry point is the last script in the file
-		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits;
+		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits();
 
 		// ISSUE can we just make this the public namespace?
 		ScopeChain* emptyScope = ScopeChain::create(GetGC(), mainTraits->scope, NULL, newNamespace(kEmptyString));
@@ -393,7 +395,7 @@ namespace avmplus
 		{
 			MethodInfo* script = pool->scripts[i];
 
-			Traits* scriptTraits = script->declaringTraits;
+			Traits* scriptTraits = script->declaringTraits();
 			// [ed] 3/24/06 why do we really care if a script is dynamic or not?
 			//AvmAssert(scriptTraits->needsHashtable);
 
@@ -406,7 +408,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERIFYALL
 		if (config.verifyall) {
 			for (int i=0, n=pool->scriptCount; i < n; i++)
-				enqTraits(pool->scripts[i]->declaringTraits);
+				enqTraits(pool->scripts[i]->declaringTraits());
 			verifyEarly(toplevel);
 		}
 #endif
@@ -1886,7 +1888,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // not be JITted based on memory, configuration, or heuristics.
 
 		ExceptionHandlerTable* exceptions;
-        if (info->impl32 == avmplus::interp32 || info->implN == avmplus::interpN)
+        if (info->impl32() == avmplus::interp32 || info->implN() == avmplus::interpN)
             exceptions = info->word_code_exceptions();
         else
 			exceptions = info->abc_exceptions();
@@ -3570,6 +3572,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
 	{
+		if (!s || !len)
+			return kEmptyString;
 		return String::createUTF16(this, s, len);
 	}
 
@@ -4133,9 +4137,8 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifdef AVMPLUS_VERIFYALL
 	void AvmCore::enqFunction(MethodInfo* f) {
 		if (config.verifyall &&
-                f && !f->isVerified() && 
-                !(f->flags & MethodInfo::VERIFY_PENDING)) {
-			f->flags |= MethodInfo::VERIFY_PENDING;
+                f && !f->isVerified() && !f->isVerifyPending()) {
+			f->setVerifyPending();
 			verifyQueue.add(f);
 		}
 	}
@@ -4157,14 +4160,14 @@ return the result of the comparison ToPrimitive(x) == y.
 			while (!verifyQueue.isEmpty()) {
 				MethodInfo* f = verifyQueue.removeLast();
 				if (!f->isVerified()) {
-					if (f->declaringTraits->scope == NULL && f != f->declaringTraits->init) {
+					if (f->declaringTraits()->scope == NULL && f != f->declaringTraits()->init) {
 						verifyQueue2.add(f);
 						continue;
 					}
 					verified++;
 					//console << "pre verify " << f << "\n";
 					f->verify(toplevel);
-					f->flags = f->flags | MethodInfo::VERIFIED & ~MethodInfo::VERIFY_PENDING;
+					f->setVerified();
 				}
 			}
 			while (!verifyQueue2.isEmpty())

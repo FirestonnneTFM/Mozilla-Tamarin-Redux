@@ -51,12 +51,6 @@ namespace avmplus
 {
 	using namespace MMgc;
 	
-	class TranslatedCode : public GCObject
-	{
-	public:
-		uintptr_t data[1];  // more follows
-	};
-
 #ifdef AVMPLUS_DIRECT_THREADED
 	WordcodeEmitter::WordcodeEmitter(MethodInfo* info, void** opcode_labels)
 #else
@@ -64,7 +58,7 @@ namespace avmplus
 #endif
 		: WordcodeTranslator()
 		, info(info)
-		, core(info->pool->core)
+		, core(info->pool()->core)
 		, backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)
@@ -85,7 +79,7 @@ namespace avmplus
 		const byte* pos = info->abc_body_pos();
 		AvmCore::skipU30(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
 		code_start = pos;
-		pool = info->pool;		
+		pool = info->pool();		
 		boot();
 	}
 
@@ -1099,7 +1093,7 @@ namespace avmplus
 		AvmAssert(ptr == code + total_size);
 		
 		if (info != NULL) {
-			info->set_word_code_start(core->GetGC(), code_anchor, code);
+			info->set_word_code(core->GetGC(), code_anchor);
 #ifdef SUPERWORD_PROFILING
 			WordcodeTranslator::swprofCode(code, code + total_size);
 #endif

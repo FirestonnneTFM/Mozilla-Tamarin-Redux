@@ -83,12 +83,19 @@ namespace avmplus
 		AvmCore *core;
 
 		/** constants */
-		List<int> cpool_int;
-		List<uint32> cpool_uint;
+		List<int32_t> cpool_int;
+		List<uint32_t> cpool_uint;
 		List<double*, LIST_GCObjects> cpool_double;	// explicitly specify LIST_GCObject b/c these are GC-allocated ptrs
 		List<Stringp> cpool_string;
 		List<Namespacep> cpool_ns;
 		List<NamespaceSetp> cpool_ns_set;
+
+#ifndef AVMPLUS_64BIT
+		// lists to keep int/uint atoms "sticky".
+		// @todo this can/should go away when we convert to 64-bit Box atoms.
+		List<Atom, LIST_GCObjects> cpool_int_atoms;	
+		List<Atom, LIST_GCObjects> cpool_uint_atoms;	
+#endif
 
 		// explicitly specify LIST_NonGCObjects b/c these aren't really atoms, they are offsets
 		List<Atom,LIST_NonGCObjects> cpool_mn;
@@ -207,7 +214,7 @@ namespace avmplus
 		NamespaceSetp getNamespaceSet(int index) const;
 		Stringp getString(int index) const;
 
-		Atom getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const;
+		Atom getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t);
 		static bool isLegalDefaultValue(BuiltinType bt, Atom value);
 
 		Atom posToAtom(const byte* pos) const

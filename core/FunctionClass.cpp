@@ -172,7 +172,8 @@ namespace avmplus
 
 	int FunctionObject::get_length()
 	{
-		return _call->method->param_count;
+		MethodSignaturep ms = _call->method->getMethodSignature();
+		return ms->param_count();
 	}
 
 	Atom FunctionObject::get_coerced_receiver(Atom a)
@@ -183,6 +184,7 @@ namespace avmplus
 			// see E3 15.3.4.4
 			a = _call->vtable->scope->getScope(0);
 		}
-		return toplevel()->coerce(a, _call->method->paramTraits(0));
+		MethodSignaturep ms = _call->method->getMethodSignature();
+		return toplevel()->coerce(a, ms->paramTraits(0));
 	}
 }

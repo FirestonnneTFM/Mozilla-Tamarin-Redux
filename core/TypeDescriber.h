@@ -111,8 +111,8 @@ namespace avmplus
 		ArrayObject* new_array();
 		Traitsp getTraits(Atom value);
 		Stringp describeClassName(Traitsp traits);
-		ScriptObject* describeTraits(Traitsp traits, uint32_t flags);
-		ArrayObject* describeParams(const MethodInfo* af);
+		ScriptObject* describeTraits(Traitsp traits, uint32_t flags, Toplevel* toplevel);
+		ArrayObject* describeParams(MethodInfo* mi, MethodSignaturep ms);
 		void addDescribeMetadata(ArrayObject* a, PoolObject* pool, const uint8_t* meta_pos);
 		ScriptObject* describeMetadataInfo(PoolObject* pool, uint32_t metadata_index);
 		Stringp poolstr(PoolObject* pool, uint32_t index);

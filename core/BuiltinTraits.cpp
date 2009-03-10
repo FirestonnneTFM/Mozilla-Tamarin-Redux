@@ -149,9 +149,9 @@ namespace avmplus
 		for (int i=0, n=pool->cinits.capacity(); i < n; i++) 
 		{
 			MethodInfo* cinit = pool->cinits[i];
-			if (cinit && cinit->declaringTraits->name == name) 
+			if (cinit && cinit->declaringTraits()->name == name) 
 			{
-				return cinit->declaringTraits;
+				return cinit->declaringTraits();
 			}
 		}
 		return NULL;

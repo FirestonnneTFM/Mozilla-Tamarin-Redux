@@ -41,6 +41,12 @@ namespace avmplus
 {
 #ifdef AVMPLUS_WORD_CODE
 
+	class TranslatedCode : public MMgc::GCObject
+	{
+	public:
+		uintptr_t data[1];  // more follows
+	};
+
 	class WordcodeEmitter : public WordcodeTranslator {
 	public:
 #  ifdef AVMPLUS_DIRECT_THREADED

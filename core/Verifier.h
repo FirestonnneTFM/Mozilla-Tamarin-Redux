@@ -84,6 +84,7 @@ namespace avmplus
 		const byte* exceptions_pos;
 
 		MethodInfo *info;
+		const MethodSignaturep ms;
 		PoolObject *pool;
 		int labelCount;
 

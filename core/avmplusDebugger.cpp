@@ -165,7 +165,7 @@ namespace avmplus
 		if (!stop && !exited)
 		{
 			MethodInfo* f = core->callStack->info();
-			if (f && (f->flags & MethodInfo::ABSTRACT_METHOD) == 0) 
+			if (f && f->hasMethodBody()) 
 			{
 				AbcFile* abc = f->file();
 				if (abc)
@@ -234,7 +234,7 @@ namespace avmplus
 		traceMethod(env->method);
 
 		// can't debug native methods
-		if ( !(env->method->flags & MethodInfo::NATIVE) )
+		if (!env->method->isNative())
 			debugMethod(env);
 	}
 
@@ -275,10 +275,10 @@ namespace avmplus
 					core->console << traceArgumentsString();
 
 				core->console << ")";
-				if (!fnc->isFlagSet(MethodInfo::SUGGEST_INTERP))
+				if (!fnc->suggestInterp())
 				{
 					core->console << " @ 0x";			
-					core->console.writeHexAddr( (uintptr)fnc->impl32);
+					core->console.writeHexAddr( (uintptr)fnc->impl32());
 				}
 				core->console << "\n";		
 			}
@@ -419,7 +419,7 @@ namespace avmplus
 	 */
 	bool Debugger::scanCode(AbcFile* file, PoolObject* pool, MethodInfo* m)
 	{
-		const byte *abc_start = &m->pool->code()[0];
+		const byte *abc_start = &m->pool()->code()[0];
 
 		const byte *pos = m->abc_body_pos();
 
@@ -713,7 +713,7 @@ namespace avmplus
 		// use the method info to locate the abcfile / source 
 		if (trace->info() && trace->filename() && debugger)
 		{
-			uintptr index = (uintptr)debugger->pool2abcIndex.get(Atom((PoolObject*)trace->info()->pool));
+			uintptr index = (uintptr)debugger->pool2abcIndex.get(Atom(trace->info()->pool()));
 
 			AbcFile* abc = (AbcFile*)debugger->abcAt((int)index);
 			source = abc->sourceNamed(trace->filename());
@@ -813,7 +813,7 @@ namespace avmplus
 				// local is actually not an atom at all -- it is an ArrayObject*.  So, we need to
 				// convert it to an atom.  (If the interpreter is being used instead of the jit, then
 				// it is stored as an atom.)
-				if (info->flags & (MethodInfo::NEED_REST | MethodInfo::NEED_ARGUMENTS))
+				if (info->needRestOrArguments())
 				{
 					int atomType = ar[0] & 7;
 					if (atomType == 0) // 0 is not a legal atom type, so ar[0] is not an atom
@@ -843,7 +843,7 @@ namespace avmplus
 			if (count > 0 && which < count)
 			{
 				MethodInfo* info = trace->info();
-				if (which == 0 && (info->flags & (MethodInfo::NEED_REST | MethodInfo::NEED_ARGUMENTS)))
+				if (which == 0 && info->needRestOrArguments())
 				{
 					// They are trying to modify the first local, but that is actually the special
 					// array for "...rest" or for "arguments".  That is too complicated to allow
@@ -894,7 +894,10 @@ namespace avmplus
 		// (2) if the caller passed in too few args to a function that has some
 		//     default parameters, we want to display the args with their default
 		//     values.
-		return trace->info() ? 1 + trace->info()->param_count : 0;
+		if (!trace->info())
+			return 0;
+		MethodSignaturep ms = trace->info()->getMethodSignature();
+		return 1 + ms->param_count();
 	}
 
 }

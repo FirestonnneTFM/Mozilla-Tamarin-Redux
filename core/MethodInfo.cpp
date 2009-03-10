@@ -46,8 +46,8 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-#if defined FEATURE_NANOJIT
-	MethodInfo::MethodInfo(void* tramp) : method_id(-1)
+#if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
+	MethodInfo::MethodInfo(void* tramp) : _method_id(-1)
 	{
 		union {
 			void* t;
@@ -58,43 +58,66 @@ namespace avmplus
 	}
 #endif
 
-	MethodInfo::MethodInfo(int _method_id, const NativeMethodInfo* native_info)
-		:  method_id(_method_id)
+	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
+		_impl32(verifyEnter),
+		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
+		_declaringTraits(declTraits),
+		_activationTraits(NULL),
+		_pool(declTraits->pool),
+#ifdef DEBUGGER
+		_dmi(NULL),
+#endif
+		_abc_info_pos(NULL),
+		_flags(RESOLVED),
+		_method_id(-1)
+	{
+	}
+
+	MethodInfo::MethodInfo(int method_id, 
+							PoolObject* pool, 
+							const uint8_t* abc_info_pos, 
+							uint8_t abcFlags,
+							const NativeMethodInfo* native_info) : 
+		_impl32(verifyEnter),
+		_msref(pool->core->GetGC()->emptyWeakRef),
+		_declaringTraits(NULL),
+		_activationTraits(NULL),
+		_pool(pool),
+#ifdef DEBUGGER
+		_dmi(NULL),
+#endif
+		_abc_info_pos(abc_info_pos),
+		_flags(abcFlags),
+		_method_id(method_id)
 	{
 
 #if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
-		MMGC_STATIC_ASSERT(offsetof(MethodInfo, impl32) == 0);
+		MMGC_STATIC_ASSERT(offsetof(MethodInfo, _impl32) == 0);
 #endif
 
-		this->impl32 = verifyEnter;
-		this->flags = 0;
-#ifdef DEBUGGER
-		this->m_dmi = NULL;
-#endif
 		if (native_info)
 		{
 			this->_native.thunker = native_info->thunker;
 			this->_native.handler = native_info->handler;
-			this->flags |= MethodInfo::NEEDS_CODECONTEXT | MethodInfo::NEEDS_DXNS | MethodInfo::ABSTRACT_METHOD;
+			this->_flags |= NEEDS_CODECONTEXT | NEEDS_DXNS | ABSTRACT_METHOD;
 		}
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_abstractfunction, this); )
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_methodinfo, this); )
 	}
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	MethodInfo::~MethodInfo()
 	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( if (m_types) tmt_sub_mem(TMT_abstractfunction, GC::Size(m_types) ); )
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( if (m_values) tmt_sub_mem(TMT_abstractfunction, GC::Size(m_values) ); )
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_abstractfunction, this); )
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_methodinfo, this); )
 	}
 #endif
 
     void MethodInfo::setInterpImpl() 
 	{
-		if (returnTraits() == this->pool->core->traits.number_itraits)
-			implN = avmplus::interpN;
+		MethodSignaturep ms = getMethodSignature();
+		if (ms->returnTraitsBT() == BUILTIN_number)
+			_implN = avmplus::interpN;
 		else
-			impl32 = avmplus::interp32;
+			_impl32 = avmplus::interp32;
     }
 
 #ifdef DEBUGGER
@@ -123,23 +146,23 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERIFYALL
 		// never verify late in verifyall mode
-		AvmAssert(!f->pool->core->config.verifyall);
+		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif
 
 		f->verify(env->vtable->toplevel);
 
-        AvmAssert(f->impl32 != MethodInfo::verifyEnter);
+        AvmAssert(f->impl32() != MethodInfo::verifyEnter);
 #if VMCFG_METHODENV_IMPL32
-		env->_impl32 = f->impl32;
+		env->_impl32 = f->impl32();
 #endif
-		return f->impl32(env, argc, ap);
+		return f->impl32()(env, argc, ap);
 	}
 
 	void MethodInfo::verify(Toplevel *toplevel)
 	{
-		AvmAssert(declaringTraits->isResolved());
+		AvmAssert(declaringTraits()->isResolved());
 		resolveSignature(toplevel);
-		AvmCore* core = this->pool->core;
+		AvmCore* core = this->pool()->core;
 		if (isNative())
 		{
 			union {
@@ -150,7 +173,8 @@ namespace avmplus
 	#ifdef DEBUGGER
 			if (core->debugger())
 			{
-				if (Traits::getBuiltinType(returnTraits()) == BUILTIN_number)
+				MethodSignaturep ms = getMethodSignature();
+				if (ms->returnTraitsBT() == BUILTIN_number)
 					u.thunkerN = MethodInfo::debugEnterExitWrapperN;
 				else
 					u.thunker = MethodInfo::debugEnterExitWrapper32;
@@ -160,7 +184,7 @@ namespace avmplus
 			{
 				u.thunker = this->thunker();
 			}
-			this->impl32 = u.impl32;
+			this->_impl32 = u.impl32;
 		}
 		else
 		{
@@ -171,20 +195,20 @@ namespace avmplus
 			// skip the call to getMethodName(), which is nonzero
 			CallStackNode callStackNode(CallStackNode::kNoOp);
 			if (core->debugger())
-				callStackNode.init(this->pool->core, this->getMethodName());
+				callStackNode.init(this->pool()->core, this->getMethodName());
 			#endif /* DEBUGGER */
 
 			if (!_abc.body_pos)
 			{
 				// no body was supplied in abc
-				toplevel->throwVerifyError(kNotImplementedError, this->pool->core->toErrorString(this));
+				toplevel->throwVerifyError(kNotImplementedError, this->pool()->core->toErrorString(this));
 			}
 
 
 		    #if defined FEATURE_NANOJIT
 			Verifier verifier(this, toplevel);
 
-			if ((core->IsJITEnabled()) && !isFlagSet(MethodInfo::SUGGEST_INTERP))
+			if ((core->IsJITEnabled()) && !suggestInterp())
 			{
 				PERFM_NTPROF("verify & IR gen");
 
@@ -220,9 +244,9 @@ namespace avmplus
 					}
 	                #ifdef AVMPLUS_WORD_CODE
 					else {
-						if (_abc.word_code.code_anchor) 
+						if (_abc.word_code.translated_code) 
 						{
-							set_word_code_start(core->GetGC(), NULL, NULL);
+							set_word_code(core->GetGC(), NULL);
 						}
 						if (_abc.word_code.exceptions) 
 						{
@@ -291,9 +315,9 @@ namespace avmplus
 
 	void MethodInfo::initDMI(int32_t local_count, uint32_t codeSize, int32_t max_scopes)
 	{
-		AvmAssert(m_dmi == NULL);
+		AvmAssert(_dmi == NULL);
 		
-		AvmCore* core = this->pool->core;
+		AvmCore* core = this->pool()->core;
 		MMgc::GC* gc = core->GetGC();
 		const uint32_t extra = (local_count <= 1) ? 0 : (sizeof(Stringp)*(local_count-1));
 
@@ -303,99 +327,109 @@ namespace avmplus
 		{
 			WBRC(gc, dmi, &dmi->localNames[i], undef);
 		}
-		WB(gc, this, &this->m_dmi, dmi);
+		WB(gc, this, &this->_dmi, dmi);
 	}
 
 	AbcFile* MethodInfo::file() const
 	{
-		AvmAssert(m_dmi != NULL);
-		return m_dmi ? (AbcFile*)(m_dmi->file) : NULL;
+		AvmAssert(_dmi != NULL);
+		return _dmi ? (AbcFile*)(_dmi->file) : NULL;
 	}
 	
 	int32_t MethodInfo::firstSourceLine() const
 	{
-		AvmAssert(m_dmi != NULL);
-		return m_dmi ? m_dmi->firstSourceLine : 0;
+		AvmAssert(_dmi != NULL);
+		return _dmi ? _dmi->firstSourceLine : 0;
 	}
 
 	int32_t MethodInfo::lastSourceLine() const
 	{
-		AvmAssert(m_dmi != NULL);
-		return m_dmi ? m_dmi->lastSourceLine : 0;
+		AvmAssert(_dmi != NULL);
+		return _dmi ? _dmi->lastSourceLine : 0;
 	}
 
 	int32_t MethodInfo::offsetInAbc() const
 	{
-		AvmAssert(m_dmi != NULL);
-		return m_dmi ? m_dmi->offsetInAbc : 0;
+		AvmAssert(_dmi != NULL);
+		return _dmi ? _dmi->offsetInAbc : 0;
 	}
 
 	uint32_t MethodInfo::codeSize() const
 	{
-		AvmAssert(m_dmi != NULL);
-		return m_dmi ? m_dmi->codeSize : 0;
+		AvmAssert(_dmi != NULL);
+		return _dmi ? _dmi->codeSize : 0;
 	}
 
 	int32_t MethodInfo::local_count() const
 	{
-		AvmAssert(m_dmi != NULL);
-		return m_dmi ? m_dmi->local_count : 0;
+		AvmAssert(_dmi != NULL);
+		return _dmi ? _dmi->local_count : 0;
 	}
 
 	int32_t MethodInfo::max_scopes() const
 	{
-		AvmAssert(m_dmi != NULL);
-		return m_dmi ? m_dmi->max_scopes : 0;
+		AvmAssert(_dmi != NULL);
+		return _dmi ? _dmi->max_scopes : 0;
 	}
 
 	void MethodInfo::setFile(AbcFile* file) 
 	{
-		AvmAssert(m_dmi != NULL);
-		if (m_dmi)
-			m_dmi->file = file;
+		AvmAssert(_dmi != NULL);
+		if (_dmi)
+			_dmi->file = file;
+	}
+
+	Stringp MethodInfo::getArgName(int index) 
+	{ 
+		return getRegName(index); 
+	}
+
+	Stringp MethodInfo::getLocalName(int index) 
+	{ 
+		return getRegName(index+getMethodSignature()->param_count()); 
 	}
 
 	void MethodInfo::updateSourceLines(int32_t linenum, int32_t offset)
 	{
-		AvmAssert(m_dmi != NULL);
-		if (m_dmi)
+		AvmAssert(_dmi != NULL);
+		if (_dmi)
 		{
-			if (m_dmi->firstSourceLine == 0 || linenum < m_dmi->firstSourceLine)
-				m_dmi->firstSourceLine = linenum;
+			if (_dmi->firstSourceLine == 0 || linenum < _dmi->firstSourceLine)
+				_dmi->firstSourceLine = linenum;
 
-			if (m_dmi->offsetInAbc == 0 || offset < m_dmi->offsetInAbc)
-				m_dmi->offsetInAbc = offset;
+			if (_dmi->offsetInAbc == 0 || offset < _dmi->offsetInAbc)
+				_dmi->offsetInAbc = offset;
 
-			if (m_dmi->lastSourceLine == 0 || linenum > m_dmi->lastSourceLine)
-				m_dmi->lastSourceLine = linenum;
+			if (_dmi->lastSourceLine == 0 || linenum > _dmi->lastSourceLine)
+				_dmi->lastSourceLine = linenum;
 		}
 	}
 
 	Stringp MethodInfo::getRegName(int slot) const 
 	{
-		AvmAssert(m_dmi != NULL);
+		AvmAssert(_dmi != NULL);
 
-		if (m_dmi && slot >= 0 && slot < m_dmi->local_count)
-			return m_dmi->localNames[slot];
+		if (_dmi && slot >= 0 && slot < _dmi->local_count)
+			return _dmi->localNames[slot];
 
-		return this->pool->core->kundefined;
+		return this->pool()->core->kundefined;
 	}
 
 	void MethodInfo::setRegName(int slot, Stringp name)
 	{
-		AvmAssert(m_dmi != NULL);
+		AvmAssert(_dmi != NULL);
 
-		if (!m_dmi || slot < 0 || slot >= m_dmi->local_count)
+		if (!_dmi || slot < 0 || slot >= _dmi->local_count)
 			return;
 
-		AvmCore* core = this->pool->core;
+		AvmCore* core = this->pool()->core;
 
 		// [mmorearty 5/3/05] temporary workaround for bug 123237: if the register
 		// already has a name, don't assign a new one
-		if (m_dmi->localNames[slot] != core->kundefined)
+		if (_dmi->localNames[slot] != core->kundefined)
 			return;
 
-		WBRC(core->GetGC(), m_dmi, &m_dmi->localNames[slot], core->internString(name));
+		WBRC(core->GetGC(), _dmi, &_dmi->localNames[slot], core->internString(name));
 	}
 
 	/**
@@ -414,13 +448,13 @@ namespace avmplus
 
 		// if we are running jit then the types are native and we
 		// need to box em.
-		if (isFlagSet(JIT_IMPL))
+		if (_flags & JIT_IMPL)
 		{
 			// each entry is a pointer into the function's stack frame
 			void **in = (void**)src;			// WARNING this must match with JIT generator
 
 			// now probe each type and do the atom conversion.
-			AvmCore* core = this->pool->core;
+			AvmCore* core = this->pool()->core;
 			for (int i=srcPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
@@ -493,13 +527,13 @@ namespace avmplus
 
 		// If the method has been jit'd then we need to box em, otherwise just
 		// copy them 
-		if (isFlagSet(JIT_IMPL))
+		if (_flags & JIT_IMPL)
 		{
 			// we allocated double sized entry for each local src CodegenJIT
 			void** out = (void**)dest;		// WARNING this must match with JIT generator
 
 			// now probe each type and conversion.
-			AvmCore* core = this->pool->core;
+			AvmCore* core = this->pool()->core;
 			for (int i=destPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
@@ -542,36 +576,7 @@ namespace avmplus
 
 #endif //DEBUGGER
 
-	void MethodInfo::initParamTypes(int count)
-	{
-		MMGC_MEM_TYPE(this);
-		AvmAssert(m_types == NULL);
-		m_types = (Traits**)pool->core->GetGC()->Calloc(count, sizeof(Traits*), GC::kContainsPointers|GC::kZero);
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_types) ); )
-	}
 
-	void MethodInfo::initDefaultValues(int count)
-	{
-		MMGC_MEM_TYPE(this);
-		AvmAssert(m_values == NULL);
-		m_values = (Atom*)pool->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_values) ); )
-	}
-	
-	void MethodInfo::setParamType(int index, Traits* t)
-	{
-		AvmAssert(index >= 0 && index <= param_count);
-		WB(pool->core->GetGC(), m_types, &m_types[index], t);
-	}
-
-	void MethodInfo::setDefaultValue(int index, Atom value)
-	{
-		AvmAssert(index > (param_count-optional_count) && index <= param_count);
-		int i = index-(param_count-optional_count)-1;
-		AvmAssert(i >= 0 && i < optional_count);
-		WBATOM(pool->core->GetGC(), m_values, &m_values[i], value);
-	}
-	
 #ifdef AVMPLUS_VERBOSE
 	Stringp MethodInfo::format(AvmCore* core) const
 	{
@@ -584,25 +589,19 @@ namespace avmplus
 
 	bool MethodInfo::makeMethodOf(Traits* traits)
 	{
-		if (!m_types[0])
+		AvmAssert(!isResolved());
+		
+		if (!_declaringTraits)
 		{
-			declaringTraits = traits;
-			setParamType(0, traits);
-			flags |= NEED_CLOSURE;
-
-			if (traits->final)
-			{
-				// all methods of a final class are final
-				flags |= FINAL;
-			}
-
+			_declaringTraits = traits;
+			_flags |= NEED_CLOSURE;
 			return true;
 		}
 		else
 		{
 			#ifdef AVMPLUS_VERBOSE
-			if (pool->verbose)
-				pool->core->console << "WARNING: method " << this << " was already bound to " << declaringTraits << "\n";
+			if (pool()->verbose)
+				pool()->core->console << "WARNING: method " << this << " was already bound to " << declaringTraits() << "\n";
 			#endif
 
 			return false;
@@ -611,51 +610,27 @@ namespace avmplus
 
 	void MethodInfo::makeIntoPrototypeFunction(const Toplevel* toplevel)
 	{
-		if (declaringTraits == NULL)
+		// Duplicate function definitions can happen with well formed ABC data.  We need
+		// to clear out data on AbstractionFunction so it can correctly be re-initialized.
+		// If our old function is ever used incorrectly, we throw an verify error in 
+		// MethodEnv::coerceEnter.
+		if (this->_declaringTraits)
 		{
-			// make sure param & return types are fully resolved.
-			// this does not set the verified flag, so real verification will
-			// still happen before the function runs the first time.
-			resolveSignature(toplevel);
-
-			// type of F is synthetic subclass of Function, with a unique
-			// [[call]] property and a unique scope
-
-			Traits* ftraits = Traits::newFunctionTraits(toplevel, pool, method_id);
-			this->declaringTraits = ftraits;
-			
-
-#ifdef AVMPLUS_UNCHECKED_HACK
-			// HACK - compiler should do this, and only to toplevel functions
-			// that meet the E4 criteria for being an "unchecked function"
-			// the tests below are too loose
-
-			// if all params and return types are Object then make all params optional=undefined
-			if (param_count == 0)
-				flags |= IGNORE_REST;
-			if (!(flags & HAS_OPTIONAL) && param_count > 0)
-			{
-				if (m_returnType == NULL)
-				{
-					for (int i=1; i <= param_count; i++)
-					{
-						if (m_types[i] != NULL)
-							return;
-					}
-
-					// make this an unchecked function
-					flags |= HAS_OPTIONAL | IGNORE_REST;
-					optional_count = param_count;
-					initDefaultValues(optional_count);
-					for (int i=1; i <= optional_count; i++)
-					{
-						// since the type is object the default value is undefined.
-						setDefaultValue(i, undefinedAtom);
-					}
-				}
-			}
-#endif
+			_flags &= ~RESOLVED;
+			this->_declaringTraits = NULL;
 		}
+
+		// make sure param & return types are fully resolved.
+		// this does not set the verified flag, so real verification will
+		// still happen before the function runs the first time.
+		resolveSignature(toplevel);
+
+		// type of F is synthetic subclass of Function, with a unique
+		// [[call]] property and a unique scope
+
+		const int method_id = this->method_id();
+		Traits* ftraits = Traits::newFunctionTraits(toplevel, pool(), method_id);
+		this->_declaringTraits = ftraits;
 	}
 	
 	/**
@@ -663,155 +638,242 @@ namespace avmplus
 	 * args, not counting the instance which is arg[0].  the
 	 * layout is [instance][arg1..argN]
 	 */
-	void MethodInfo::boxArgs(int argc, uint32 *ap, Atom* out)
+	void MethodSignature::boxArgs(AvmCore* core, int argc, const uint32_t* ap, Atom* out) const
 	{
+		MMGC_STATIC_ASSERT(sizeof(Atom) == sizeof(void*));	// if this ever changes, this function needs smartening
+		typedef const Atom* ConstAtomPtr;
 		// box the typed args, up to param_count
-		AvmCore* core = this->pool->core;
+		const int param_count = this->param_count();
 		for (int i=0; i <= argc; i++)
 		{
-			if (i <= param_count)
+			Atom atom;
+			const BuiltinType bt = (i <= param_count) ? this->paramTraitsBT(i) : BUILTIN_any;
+			switch (bt)
 			{
-				Traits* t = paramTraits(i);
-				AvmAssert(t != VOID_TYPE);
+				case BUILTIN_number:
+					atom =  core->doubleToAtom(*(const double *)ap);
+				#ifdef AVMPLUS_64BIT
+					// nothing
+				#else
+					ap += 1;
+				#endif
+					break;
 
-				if (t == NUMBER_TYPE) 
-				{
-					out[i] =  core->doubleToAtom(*(double *)ap);
-					ap += 2;
-				}
-				else if (t == INT_TYPE)
-				{
-					out[i] = core->intToAtom((int32)*(Atom*) ap);
-					ap += sizeof(Atom) / sizeof(uint32);
-				}
-				else if (t == UINT_TYPE)
-				{
-					out[i] = core->uintToAtom((uint32)*(Atom*) ap);
-					ap += sizeof(Atom) / sizeof(uint32);
-				}
-				else if (t == BOOLEAN_TYPE)
-				{
-					out[i] = (*(Atom*) ap) ? trueAtom : falseAtom;
-					ap += sizeof(Atom) / sizeof(uint32);
-				}
-				else if (!t || t == OBJECT_TYPE)
-				{
-					out[i] = *(Atom *) ap;
-					ap += sizeof(Atom) / sizeof(uint32);
-				}
-				else
-				{
-					// it's a pointer type, possibly null
+				case BUILTIN_int:
+					atom = core->intToAtom((int32_t)*ConstAtomPtr(ap));
+					break;
 
-					void* p = *(void **)ap; // unknown pointer
-					if (t == STRING_TYPE)
-					{
-						out[i] = ((Stringp)p)->atom();
-					}
-					else if (t == NAMESPACE_TYPE)
-					{
-						out[i] = ((Namespace*)p)->atom();
-					}
-					else 
-					{
-						out[i] = ((ScriptObject*)p)->atom();
-					}
-					ap += sizeof(void *) / sizeof(uint32);
+				case BUILTIN_uint:
+					atom = core->uintToAtom((uint32_t)*ConstAtomPtr(ap));
+					break;
+
+				case BUILTIN_boolean:
+					atom = (*ConstAtomPtr(ap)) ? trueAtom : falseAtom;
+					break;
+
+				case BUILTIN_object:
+				case BUILTIN_any:
+					atom = *ConstAtomPtr(ap);
+					break;
+
+				case BUILTIN_string:
+					atom = ((Stringp)*ConstAtomPtr(ap))->atom();
+					break;
+
+				case BUILTIN_namespace:
+					atom = ((Namespacep)*ConstAtomPtr(ap))->atom();
+					break;
+
+				default:
+					atom = ((ScriptObject*)*ConstAtomPtr(ap))->atom();
+					break;
+			}
+			out[i] = atom;
+			ap += sizeof(Atom) / sizeof(uint32_t);
+		}
+	}
+
+	static uint32_t argSize(Traits* t) { return Traits::getBuiltinType(t) == BUILTIN_number ? sizeof(double) : sizeof(Atom); }
+
+	MethodSignature* FASTCALL MethodInfo::_buildMethodSignature(const Toplevel* toplevel) 
+	{ 
+		PoolObject* pool = this->pool();
+		AvmCore* core = pool->core;
+		GC* gc = core->GetGC();
+
+		const byte* pos = this->_abc_info_pos;
+		const uint32_t param_count = pos ? AvmCore::readU30(pos) : 0;
+		uint32_t optional_count = 0;
+		uint32_t rest_offset = 0;
+		Traits* returnType;
+		Traits* receiverType;
+		
+		// we only need param_count+optional_count extra, but we don't know
+		// optional_count yet, so over-allocate for the worst case. (we know optional_count<=param_count).
+		// this wastes space, but since we only cache a few dozen of these, it's preferable to walking the data twice
+		// to get an exact count.
+		const uint32_t extra = sizeof(MethodSignature::AtomOrType) * (param_count + (hasOptional() ? param_count : 0));
+		MethodSignature* ms = new (gc, extra) MethodSignature();
+		if (pos)
+		{
+			returnType = pool->resolveTypeName(pos, toplevel, /*allowVoid=*/true);
+			receiverType = (_flags & NEED_CLOSURE) ? declaringTraits() : core->traits.object_itraits;
+			rest_offset = argSize(receiverType);
+#ifdef AVMPLUS_UNCHECKED_HACK
+			uint32_t untyped_args = 0;
+#endif
+			for (uint32_t i=1; i <= param_count; i++)
+			{
+				Traits* argType = pool->resolveTypeName(pos, toplevel);
+				WB(gc, ms, &ms->_args[i].paramType, argType);
+				rest_offset += argSize(argType);
+#ifdef AVMPLUS_UNCHECKED_HACK
+				untyped_args += (argType == NULL);
+#endif
+			}
+			AvmCore::skipU30(pos); // name_index;
+			pos++; // abcFlags;
+#ifdef AVMPLUS_UNCHECKED_HACK
+			// toplevel!=NULL check is so we only check when resolveSignature calls us (not subsequently)
+			if (toplevel != NULL)
+			{
+				// HACK - compiler should do this, and only to toplevel functions
+				// that meet the E4 criteria for being an "unchecked function"
+				// the tests below are too loose
+
+				// if all params and return types are Object then make all params optional=undefined
+				if (param_count == 0)
+					_flags |= IGNORE_REST;
+				if (!hasOptional() && returnType == NULL && param_count > 0 && untyped_args == param_count)
+				{
+					_flags |= HAS_OPTIONAL | IGNORE_REST | UNCHECKED;
+					// oops -- the ms we allocated is too small, has no space for optional values
+					// but it's easy to re-create, especially since we know the types are all null
+					const uint32_t extra = sizeof(MethodSignature::AtomOrType) * (param_count + param_count);
+					ms = new (gc, extra) MethodSignature();
+					// don't need to re-set paramTypes: they are inited to NULL which is the right value
 				}
 			}
-			else
+			if (_flags & UNCHECKED)
 			{
-				out[i] = *(Atom *) ap;
-				ap += sizeof(Atom) / sizeof(uint32);
+				optional_count = param_count;
+				for (uint32_t j=0; j < optional_count; j++)
+				{
+					//WBATOM(gc, ms, &ms->_args[param_count+1+j].defaultValue, undefinedAtom);
+					// since we know we're going from NULL->undefinedAtom we can skip the WBATOM call
+					ms->_args[param_count+1+j].defaultValue = undefinedAtom;
+				}
 			}
+			else 
+#endif // AVMPLUS_UNCHECKED_HACK
+			if (hasOptional())
+			{
+				optional_count = AvmCore::readU30(pos);
+				for (uint32_t j=0; j < optional_count; j++)
+				{
+					const int param = param_count-optional_count+1+j;
+					const int index = AvmCore::readU30(pos);
+					CPoolKind kind = (CPoolKind)*pos++;
+
+					// check that the default value is legal for the param type
+					Traits* argType = ms->_args[param].paramType;
+					const Atom value = pool->getLegalDefaultValue(toplevel, index, kind, argType);
+					WBATOM(gc, ms, &ms->_args[param_count+1+j].defaultValue, value);
+				}
+			}
+			
+			if (!isNative())
+			{
+				const byte* body_pos = this->abc_body_pos();
+				if (body_pos)
+				{
+					ms->_max_stack = AvmCore::readU30(body_pos);
+					ms->_local_count = AvmCore::readU30(body_pos);
+					const int init_scope_depth = AvmCore::readU30(body_pos);
+					ms->_max_scope = AvmCore::readU30(body_pos) - init_scope_depth;
+				}
+			}
+		}
+		else
+		{
+			AvmAssert(param_count == 0);
+			rest_offset = sizeof(Atom);
+			returnType = pool->core->traits.void_itraits;
+			receiverType = declaringTraits();
+			// values derived from Traits::genInitBody()
+			const int max_stack = 2;
+			const int local_count = 1;
+			const int init_scope_depth = 1;
+			const int max_scope_depth = 1;
+			ms->_max_stack = max_stack;
+			ms->_local_count = local_count;
+			ms->_max_scope = max_scope_depth - init_scope_depth;
+		}
+		ms->_frame_size = ms->_local_count + ms->_max_scope + ms->_max_stack;
+		#ifndef AVMPLUS_64BIT
+		// The interpreter wants this to be padded to a doubleword boundary because
+		// it allocates two objects in a single alloca() request - the frame and
+		// auxiliary storage, in that order - and wants the second object to be
+		// doubleword aligned.
+		ms->_frame_size = (ms->_frame_size + 1) & ~1;
+		#endif
+		ms->_param_count = param_count;
+		ms->_optional_count = optional_count;
+		ms->_rest_offset = rest_offset; 
+		ms->_flags = this->_flags; 
+		WB(gc, ms, &ms->_returnTraits, returnType);
+		WB(gc, ms, &ms->_args[0].paramType, receiverType);
+
+		AvmAssert(_msref->get() == NULL);
+		_msref = ms->GetWeakRef();
+		core->msCache()->add(ms);
+		return ms;
+	}
+
+	MethodSignature* FASTCALL MethodInfo::_getMethodSignature() 
+	{ 
+		AvmAssert(this->isResolved());
+		// note: MethodSignaturep are always built the first time in resolveSignature; this is only 
+		// executed for subsequent re-buildings. Thus we pass NULL for toplevel (it's only used
+		// for verification errors, but those will have been caught prior to this) and for
+		// abcGen and imtBuilder (since those only need to be done once).
+		MethodSignature* ms = _buildMethodSignature(NULL);
+		return ms;
+	}
+
+	void MethodInfo::update_max_stack(int max_stack)
+	{
+		MethodSignature* ms = (MethodSignature*)_msref->get();
+		if (ms)
+		{
+			ms->_max_stack = max_stack;
 		}
 	}
 
 	void MethodInfo::resolveSignature(const Toplevel* toplevel)
 	{
-		if (!(flags & LINKED))
+		if (!(_flags & RESOLVED))
 		{
-			AvmCore* core = this->pool->core;
-			AvmAssert(abc_info_pos != NULL);
-
-			const byte* pos = abc_info_pos;
-
-			Traits* t = pool->resolveTypeName(pos, toplevel, /*allowVoid=*/true);
-
-			m_returnType = t;
-
-			restOffset = 0;
-
-			// param 0 is contextual
-			t = m_types[0];
-			if (!t)
+			MethodSignature* ms = _buildMethodSignature(toplevel);
+			
+			if (!isNative())
 			{
-				setParamType(0, OBJECT_TYPE);
-				restOffset += sizeof(Atom);
-			}
-			else
-			{
-				if (t == NUMBER_TYPE)
-					restOffset += sizeof(double);
-				else
-					restOffset += sizeof(Atom);
-				if (t->isInterface)
-					flags |= ABSTRACT_METHOD;
+				if (ms->frame_size() < 0 || ms->local_count() < 0 || ms->max_scope() < 0)
+					toplevel->throwVerifyError(kCorruptABCError);
 			}
 
-			// param types 1..N come from abc stream
-			for (int i=1, n=param_count; i <= n; i++)
-			{
-				t = pool->resolveTypeName(pos, toplevel);
-				setParamType(i, t);
-				if (t == NUMBER_TYPE)
-					restOffset += sizeof(double);
-				else
-					restOffset += sizeof(Atom);
-			}
+			if (ms->paramTraits(0)->isInterface)
+				_flags |= ABSTRACT_METHOD;
 
-			AvmCore::skipU30(pos); // name_index;
-			pos++; // skip flags
-
-			if (flags & HAS_OPTIONAL)
-			{
-				AvmCore::skipU30(pos); // optional_count
-
-				initDefaultValues(optional_count);
-
-				for (int j=0,n=optional_count; j < n; j++)
-				{
-					int param = param_count-optional_count+1+j;
-					int index = AvmCore::readU30(pos);
-					CPoolKind kind = (CPoolKind)*pos++;
-
-					// check that the default value is legal for the param type
-					Traits* t = this->paramTraits(param);
-					AvmAssert(Traits::getBuiltinType(t) != BUILTIN_void);
-
-					Atom value = pool->getLegalDefaultValue(toplevel, index, kind, t);
-					setDefaultValue(param, value);
-				}
-			}
-
-			/*
-			// Don't need this for anything yet, so no point in wasting time parsing it.  Here just so we don't
-			// forget about it if we add any sections after this one, and need to skip past it.  
-			if( flags & MethodInfo::HAS_PARAM_NAMES)
-			{
-				// AVMPlus doesn't care about the param names, just skip past them
-				AvmCore::skipU30(pos, param_count);
-			}
-			*/
-			flags |= LINKED;
+			_flags |= RESOLVED;
 		}
 	}
 
 #ifdef DEBUGGER
-	uint32 MethodInfo::size() const 
+	uint32 MethodInfo::size()  
 	{
 		uint32 size = sizeof(MethodInfo);
-		size += param_count * 2 * sizeof(Atom);
+		size += getMethodSignature()->param_count() * 2 * sizeof(Atom);
 		size += codeSize();
 		return size;
 	}
@@ -819,23 +881,23 @@ namespace avmplus
 
 	bool MethodInfo::usesCallerContext() const
 	{
-		return pool->isBuiltin && (!(isNative()) || (flags & NEEDS_CODECONTEXT));
+		return pool()->isBuiltin && (!isNative() || (_flags & NEEDS_CODECONTEXT));
 	}
 
 	// Builtin + non-native functions always need the dxns code emitted 
 	// Builtin + native functions have flags to specify if they need the dxns code
 	bool MethodInfo::usesDefaultXmlNamespace() const
 	{
-		return pool->isBuiltin && (!(isNative()) || (flags & NEEDS_DXNS));
+		return pool()->isBuiltin && (!isNative() || (_flags & NEEDS_DXNS));
 	}
 
 #if VMCFG_METHOD_NAMES
 	Stringp MethodInfo::getMethodName() const 
 	{
-		AvmAssert(pool != NULL);
-
 		Stringp name = NULL;
+		const int method_id = this->method_id();
 		
+		PoolObject* pool = this->pool();
 		AvmCore* core = pool->core;
 		if (core->config.methodNames)
 		{
@@ -866,7 +928,7 @@ namespace avmplus
 				name = core->kanonymousFunc;	
 			}
 			
-			Traitsp t = this->declaringTraits;
+			Traitsp t = this->declaringTraits();
 			if (t)
 			{
 				Stringp tname = t->format(core);
@@ -911,9 +973,9 @@ namespace avmplus
 				else if (name)
 				{
 					const char* sep;
-					if (flags & IS_GETTER)
+					if (_flags & IS_GETTER)
 						sep = "/get ";
-					else if (flags & IS_SETTER)
+					else if (_flags & IS_SETTER)
 						sep = "/set ";
 					else 
 						sep = "/";
@@ -929,4 +991,17 @@ namespace avmplus
 		return name;
 	}
 #endif		
+
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	MethodSignature::MethodSignature()
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodsig, this); )
+	}
+
+	MethodSignature::~MethodSignature()
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst( TMT_methodsig, this); )
+	}
+#endif
+
 }

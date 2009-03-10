@@ -179,7 +179,7 @@ namespace avmshell
 
 		ClassClosure* resolveShellClass(int class_id)
 		{
-			Traits *traits = core()->shellPool->cinits[class_id]->declaringTraits->itraits;
+			Traits *traits = core()->shellPool->cinits[class_id]->declaringTraits()->itraits;
 			Multiname qname(traits->ns, traits->name);
 			ScriptObject *container = vtable->init->finddef(&qname);
 
