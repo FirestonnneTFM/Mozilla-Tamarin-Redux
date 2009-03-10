@@ -454,7 +454,9 @@ class MethodBodyInfo
 				if ( i.target != null )
 				{
 					Block target_block = blocksByLabel.get(i.target);
-					assert(target_block != null);
+					if (null == target_block)
+						throw new IllegalArgumentException("Label " + i.target + " was referenced, but never defined.");
+					
 					//  FIXME: Check that these agree.
 					stkin.put(target_block, stkdepth);
 					scpin.put(target_block, scpdepth);

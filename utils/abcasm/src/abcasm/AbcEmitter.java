@@ -420,8 +420,8 @@ class AbcEmitter
 			case OP_inclocal_i:
 			case OP_declocal_i:
 			case OP_newcatch:
-			//case OP_getglobalslot:
-			//case OP_setglobalslot:
+			case OP_getglobalslot:
+			case OP_setglobalslot:
 				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_newclass:
@@ -436,13 +436,9 @@ class AbcEmitter
 				throw new IllegalStateException("Not implemented.");
 				//break;
 			case OP_callstatic:
-			//case OP_callmethod:
-				/*
-				blockWriter.writeU30(abc.methodId(e.m));
-				blockWriter.writeU30(argc(e));
-				*/
-				throw new IllegalStateException("Not implemented.");
-				//break;
+				blockWriter.writeU30(insn.imm[0]);
+				blockWriter.writeU30(insn.imm[1]);
+				break;
 			case OP_pushshort:
 				blockWriter.writeU30(insn.imm[0]);
 				break;
