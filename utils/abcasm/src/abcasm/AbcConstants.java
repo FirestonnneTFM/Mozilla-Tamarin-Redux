@@ -216,6 +216,7 @@ interface AbcConstants {
     int OP_convert_d = 0x75;
     int OP_convert_b = 0x76;
     int OP_convert_o = 0x77;
+    int OP_checkfilter = 0x78;
     int OP_coerce = 0x80;
     int OP_coerce_b = 0x81;
     int OP_coerce_a = 0x82;

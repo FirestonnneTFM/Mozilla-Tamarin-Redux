@@ -121,18 +121,12 @@ class AssemblerCore
 		else if ( value instanceof Double )
 		{
 			Double dKey = (Double)value;
-			if (dKey.isNaN() )
-				return 0;
-			else
-				return doublePool.add(dKey);
+			return doublePool.add(dKey);
 		}
 		else if ( value instanceof String )
 		{
 			String sKey = (String)value;
-			if ( sKey.length() == 0 )
-				return 0;
-			else
-				return stringPool.add(sKey);
+			return stringPool.add(sKey);
 		}
 		else if ( value instanceof Namespace )
 		{
@@ -149,7 +143,9 @@ class AssemblerCore
 	int getPoolId(Object value )
 	{
 		if ( null == value )
-			return 0;
+		{
+			throw new IllegalArgumentException("null object has no pool value");
+		}
 		else if ( value instanceof Integer )
 		{
 			Integer iKey = (Integer)value;
@@ -229,6 +225,11 @@ class AssemblerCore
 		{
 			nsPoolName = "";
 			result = new Namespace(CONSTANT_PrivateNs, "");
+		}
+		else if ( "Namespace".equalsIgnoreCase(nsName))
+		{
+			nsPoolName = "";
+			result = new Namespace(CONSTANT_Namespace, "");
 		}
 		else
 		{
@@ -361,6 +362,11 @@ class AssemblerCore
 
 	Integer translateImmediate(Object immediate_operand)
 	{
+		if ( null == immediate_operand )
+		{
+			throw new IllegalArgumentException("Unable to translate null operand");
+		}
+
 		Integer result = null;
 		if ( immediate_operand instanceof Integer )
 		{
@@ -389,7 +395,7 @@ class AssemblerCore
 
 		if ( null == result )
 		{
-			throw new IllegalArgumentException("Unknown operand " + immediate_operand.toString() + ", type " + immediate_operand.getClass().getCanonicalName());
+			throw new IllegalArgumentException("Unknown operand " + immediate_operand + ", type " + immediate_operand.getClass().getCanonicalName());
 		}
 		
 		return result;

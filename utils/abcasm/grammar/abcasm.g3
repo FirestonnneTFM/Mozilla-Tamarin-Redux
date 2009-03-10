@@ -569,13 +569,12 @@ control_flow_target
 integer_operands_insn
 	: int_opcode = (
 	      'debug' | 'debugline' | 'declocal' | 'declocal_i' |	 
-		  'dxns' | 'dxnslate' |
-		  'esc_xattr' | 'esc_xelem' |
-		  'getlocal' | /* 'getslot' | 'getglobalslot' | */'getscopeobject' |
+		  'getlocal' | 
+		  'getscopeobject' |
 		  'hasnext2' | 
 		  'inclocal' | 'inclocal_i' | 
 		  'kill' |
-		  'newarray' | 'newobject' |
+		  'newarray' | 'newcatch' | 'newobject' |
 		  'pushbyte' | 'pushshort' | 
 		  'setlocal' /* | 'setslot' | 'setglobalslot' */
 	  )
@@ -605,7 +604,7 @@ pool_insn
 	{
 	    $decl::method_body_info.insn(OP_pushnamespace, asmCore.createPoolId(ns));
 	}
-	| opcode = ( 'debugfile' | 'pushstring' )
+	| opcode = ( 'debugfile' | 'dxns'  | 'pushstring' )
 	string_operand = string_literal
 	{
 		$decl::method_body_info.insn(opcode, asmCore.createPoolId(string_operand)); 
@@ -618,8 +617,8 @@ pool_insn
 call_insn
 	:   call_opcode = (
 	        'callmethod' | 'callproplex' | 'callproperty' | 'callpropvoid' |
-			'callstatic' | 'callsuper' | 'callsupervoid' |
-			'construct' | 'constructprop' | 'constructsuper'
+			'callsuper' | 'callsupervoid' |
+			'constructprop'
 	    )
 		callee = identifier 
 		LPAREN? arg_count = integer_literal RPAREN?
@@ -629,6 +628,14 @@ call_insn
 	|  'call' 	LPAREN? arg_count = integer_literal RPAREN? 
 	{
 	    $decl::method_body_info.insn(OP_call, new Object[] { new Integer(arg_count) } );
+	}
+	| 'callstatic' method_id = integer_literal arg_count = integer_literal
+	{
+		$decl::method_body_info.insn(OP_callstatic, new Object[] { new Integer(method_id), new Integer(arg_count) } );
+	}
+	| construct_opcode = ( 'construct' | 'constructsuper' ) arg_count = integer_literal
+	{
+		$decl::method_body_info.insn(construct_opcode, new Object[] { new Integer(arg_count) } );
 	}
 	;
 
@@ -661,7 +668,9 @@ no_operand_insn
 		'checkfilter' | 'coerce_a' | 'coerce_b' | 'coerce_d' | 'coerce_i' | 'coerce_s' |
 		'convert_b' | 'convert_i' | 'convert_d' | 'convert_o' | 'convert_u' | 'convert_s' |
 		'decrement' | 'decrement_i' | 'divide' | 'dup' | 
+	    'dxnslate' |
 		'equals' |
+		'esc_xattr' | 'esc_xelem' |
 		'getglobalscope' | 
 		'getlocal0' | 'getlocal1' | 'getlocal2' | 'getlocal3' |
 		'greaterequals' | 'greaterthan' |
@@ -670,7 +679,7 @@ no_operand_insn
 		'label' | 'lessequals' | 'lessthan' | 'lshift' |
 		'modulo' | 'multiply' | 'multiply_i' |
 		'negate' | 'negate_i' | 'newactivation' | 'nextname' | 'nextvalue' | 'nop' | 'not' |
-		'pop' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' | 
+		'pop' | 'popscope' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' | 
 		'pushundefined' | 'pushwith' |
 		'returnvalue' | 'returnvoid' | 'rshift' |
 		'setlocal0' | 'setlocal1' | 'setlocal2' | 'setlocal3' |
@@ -693,13 +702,17 @@ multiname_insn :
 	    'coerce' | 
 		'deleteproperty' | 
 		'finddef' | 'findproperty' | 'findpropstrict' |
-		'getdescendants' | 'getlex' | 'getproperty' | 'getsuper' |
+		'getlex' | 'getproperty' | 'getsuper' |
 		'istype' |
 		'setproperty'
 	)
 	name_key = multipart_identifier
 	{
 		$decl::method_body_info.insn(opcode, name_key);
+	}
+	| opcode = ('getdescendants') name_key = identifier
+	{
+		$decl::method_body_info.insn(OP_getdescendants, name_key, null);
 	}
 	;
 
@@ -861,6 +874,10 @@ double_literal returns [double result]
 	| MINUS FLOATING_POINT_LITERAL
 	{
 	    result = - Double.parseDouble($FLOATING_POINT_LITERAL.getText());
+	}
+	| 'NaN'
+	{
+		result = Double.NaN;
 	}
 	;
 
