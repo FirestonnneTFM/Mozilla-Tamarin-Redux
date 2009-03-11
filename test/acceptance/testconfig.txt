@@ -102,7 +102,7 @@ abcasm/coverage/I:inclocal_i_double , .* , expectedfail , https://bugzilla.mozil
 abcasm/coverage/I:increment_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 
 # Only fails on some systems
-abcasm/coverage/I:declocal_i - double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
+abcasm/coverage/I:declocal_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 
 # Bug 473392 -  ARM JIT failures
 ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
