@@ -232,6 +232,7 @@ vm avmplus::AbcGen
 vm avmplus::UIntClass
 vm avmplus:VectorClass.obj
 vm avmplus:DescribeTypeClass.obj
+vm eval-abc.obj
 
 builtin avmplus:ScriptObject.obj
 builtin avmplus:ObjectClass.obj
@@ -309,6 +310,9 @@ shell FileInputStream.obj
 shell JavaGlue.obj
 shell vprof.obj
 shell SamplerScript.obj
+shell WinPortUtils.obj
+shell avmshellWin.obj
+shell WinFile.obj
 
 darkMatter <Anon *
 

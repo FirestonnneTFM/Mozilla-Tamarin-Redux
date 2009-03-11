@@ -99,7 +99,8 @@ abcasm/semanticErrorDuplicateSlotName , .* , expectedfail , Error 1107 is correc
 abcasm/stringEscapes , .* , skip,
 
 # Take coverage tests offline: need to analyze failures on tryserver
-abcasm/coverage/A , .* , skip , 
+abcasm/coverage/I , (x64|ppc64).*-debug , skip , investigating
+abcasm/coverage/A , .* , skip , investigating
 abcasm/coverage/I:inclocal_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 abcasm/coverage/I:increment_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 
