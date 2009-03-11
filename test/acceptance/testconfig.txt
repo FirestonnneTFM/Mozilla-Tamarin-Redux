@@ -99,11 +99,9 @@ abcasm/semanticErrorDuplicateSlotName , .* , expectedfail , Error 1107 is correc
 abcasm/stringEscapes , .* , skip,
 
 # Take coverage tests offline: need to analyze failures on tryserver
-abcasm/coverage/.* , .* , skip , 
+abcasm/coverage/A , .* , skip , 
 abcasm/coverage/I:inclocal_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 abcasm/coverage/I:increment_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
-# Only fails on some systems
-abcasm/coverage/D:declocal_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 
 # Bug 473392 -  ARM JIT failures
 ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
