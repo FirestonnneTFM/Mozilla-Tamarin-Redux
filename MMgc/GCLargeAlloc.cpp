@@ -139,7 +139,7 @@ namespace MMgc
 				}
 				
 				if(m_gc->heap->HooksEnabled())
-					m_gc->heap->FreeHook(GetUserPointer(item), b->usableSize - DebugSize(), 0xba);
+					m_gc->heap->FinalizeHook(GetUserPointer(item), b->usableSize - DebugSize());
 				
 				// unlink from list
 				*prev = b->next;
