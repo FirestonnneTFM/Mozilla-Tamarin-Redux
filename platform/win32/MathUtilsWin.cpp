@@ -42,10 +42,11 @@
 #define X86_MATH
 #endif
 
+// warning this code is used by amd64 and arm builds
 
 namespace avmplus
 {
-#ifndef X86_MATH
+#ifdef AVMPLUS_ARM
     const static double PI = 3.141592653589793;
     const static double PI3_BY_4 = 3*PI/4;
     const static double PI_BY_4 = PI/4;
@@ -103,7 +104,7 @@ namespace avmplus
 		_asm fld [y];
 		_asm fld [x];
 		_asm fpatan;
-#else
+#elif defined(AVMPLUS_ARM)
         int32_t zx = isZero(x);
         int32_t zy = isZero(y);
         if (zx==-1 && zy!=0)
@@ -120,6 +121,8 @@ namespace avmplus
                 r = MathUtils::isInfinite(y) * PI3_BY_4;
         }
         return r;
+#else
+        return ::atan2(y,x);
 #endif /* X86_MATH */
 	}
 	
