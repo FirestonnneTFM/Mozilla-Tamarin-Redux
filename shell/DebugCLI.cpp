@@ -54,47 +54,22 @@ namespace avmshell
 	 */
 	DebugCLI::StringIntArray DebugCLI::commandArray[] =
 	{
-		{ "awatch", CMD_AWATCH },
 		{ "break", CMD_BREAK },
 		{ "bt", INFO_STACK_CMD },
         { "continue", CMD_CONTINUE },
-        { "cf", CMD_CF },
-		{ "clear", CMD_CLEAR },
-		{ "commands", CMD_COMMANDS },
-		{ "condition", CMD_CONDITION },
 		{ "delete", CMD_DELETE },
-		{ "disable", CMD_DISABLE },
-		{ "disassemble", CMD_DISASSEMBLE },
-		{ "display", CMD_DISPLAY },
-		{ "enable", CMD_ENABLE },
 		{ "finish", CMD_FINISH },
-		{ "file", CMD_FILE },
 		{ "help", CMD_HELP },
-		{ "halt", CMD_HALT },
-		{ "handle", CMD_HANDLE },
-		{ "home", CMD_HOME },
 		{ "info", CMD_INFO },
-		{ "kill", CMD_KILL },
 		{ "list", CMD_LIST },
 		{ "next", CMD_NEXT },
-		{ "nexti", CMD_NEXT },
-		{ "mctree", CMD_MCTREE },
         { "print", CMD_PRINT },
         { "pwd", CMD_PWD },
 		{ "quit", CMD_QUIT },
-		{ "run", CMD_RUN },
-		{ "rwatch", CMD_RWATCH },
 		{ "step", CMD_STEP },
-		{ "stepi", CMD_STEP },
 		{ "set", CMD_SET },
 		{ "show", CMD_SHOW },
-		{ "source", CMD_SOURCE },
-		{ "tutorial", CMD_TUTORIAL },
-		{ "undisplay", CMD_UNDISPLAY },
 		{ "where", INFO_STACK_CMD },
-		{ "watch", CMD_WATCH },
-		{ "what", CMD_WHAT },
-		{ "viewswf", CMD_VIEW_SWF },
 		{ NULL, 0 }
 	};
 
@@ -105,16 +80,10 @@ namespace avmshell
 	{
 		{ "arguments", INFO_ARGS_CMD },
 		{ "breakpoints", INFO_BREAK_CMD },
-		{ "display", INFO_DISPLAY_CMD },
 		{ "files", INFO_FILES_CMD },
 		{ "functions", INFO_FUNCTIONS_CMD },
-		{ "handle", INFO_HANDLE_CMD },
 		{ "locals", INFO_LOCALS_CMD },
 		{ "stack", INFO_STACK_CMD },
-        { "sources", INFO_SOURCES_CMD },
-        { "swfs", INFO_SWFS_CMD },
-        { "targets", INFO_TARGETS_CMD },
-		{ "variables", INFO_VARIABLES_CMD },
 		{ NULL, 0 }		
 	};
 
@@ -124,42 +93,17 @@ namespace avmshell
 	DebugCLI::StringIntArray DebugCLI::showCommandArray[] =
 	{
 		{ "break", SHOW_BREAK_CMD },
-		{ "files", SHOW_FILES_CMD },
 		{ "functions", SHOW_FUNC_CMD },
 		{ "memory", SHOW_MEM_CMD },
-		{ "net", SHOW_NET_CMD },
-		{ "properties", SHOW_PROPERTIES_CMD },
-		{ "uri", SHOW_URI_CMD },
 		{ "variable", SHOW_VAR_CMD },
 		{ NULL, 0 }		
 	};
 
-	/**
-	 * enable sub-commands
-	 */
-	DebugCLI::StringIntArray DebugCLI::enableCommandArray[] =
-	{
-		{ "breakpoints", CMD_BREAK },
-		{ "display", CMD_DISPLAY },
-		{ "delete", CMD_DELETE },
-		{ "once", ENABLE_ONCE_CMD },
-		{ NULL, 0 }		
-	};
-
-	/**
-	 * disable sub-commands
-	 */
-	DebugCLI::StringIntArray DebugCLI::disableCommandArray[] =
-	{
-		{ "display", CMD_DISPLAY },
-		{ "breakpoints", CMD_BREAK },
-		{ NULL, 0 }		
-	};
-	
 	DebugCLI::DebugCLI(AvmCore *core)
 		: Debugger(core)
 	{
 		currentSourceLen = 0;
+        warnMissingSource = true;
 	}
 
 	DebugCLI::~DebugCLI()
@@ -194,6 +138,8 @@ namespace avmshell
 								   const char *input,
 								   int defCmd)
 	{
+        if (!input) return INFO_UNKNOWN_CMD;
+        
 		int inputLen = (int)VMPI_strlen(input);
 		
 		// first check for a comment
@@ -301,8 +247,9 @@ namespace avmshell
 			for(int i=0; i<count; i++)
 			{
 				// write out the name
-				if ( info && (info->getArgName(i) != core->kundefined) )
-					core->console << info->getArgName(i) << "=";
+                Stringp nm = info->getArgName(i);
+				if (info && (nm != core->kundefined))
+					core->console << nm << "=";
 
 				core->console << core->format(*ptr++);
 				if (i<count-1)
@@ -367,9 +314,12 @@ namespace avmshell
 	void DebugCLI::displayLines(int line, int count)
 	{
 		if (!lineStart(0)) {
-			core->console << "No source available for current instruction\n";
+            if (currentFile) 
+                core->console << currentFile;
+            else
+                core->console << "<unknown>";
+			core->console <<":"<<line<<" ";
 		} else {
-			// Display status
 			int lineAt = line;
 			while(count-- > 0)
 			{
@@ -519,16 +469,16 @@ namespace avmshell
 		MethodInfo* info = functionFor(src, line);
 		if (info)
 		{
-			frame->arguments(ptr, count);
+			frame->locals(ptr, count);
 			for(int i=0; i<count; i++)
 			{
 				// write out the name
-				if (info && (info->getLocalName(i) != core->kundefined) )
-					core->console << info->getLocalName(i) << " = ";
-
-				core->console << core->format(*ptr++);
-				//if (i<count-1)
-					core->console << "\n";
+                Stringp nm = info->getLocalName(i);
+                if (nm != core->kundefined) 
+					core->console << nm;
+                else
+                    core->console << "<local_" << i << ">";
+				core->console << " = " << core->format(*ptr++) << "\n";
 			}
 		}
 	}
@@ -554,7 +504,7 @@ namespace avmshell
 		const char* to = nextToken();
 		if (!to || !equ || !what || *equ != '=')
 		{
-			core->console << " Bad format, should be:  'set {variable} = {value}' ";
+			core->console << " Bad format, should be:  'set {variable} = {value}' \n";
 		}
 		else
 		{
@@ -568,7 +518,7 @@ namespace avmshell
 			frame->sourceLocation(src, line);
 			if (!src)
 			{
-				core->console << "Unable to locate debug information for current source file, so no local or argument names known";
+				core->console << "Unable to locate debug information for current source file, so no local or argument names known\n";
 				return;
 			}
 
@@ -576,7 +526,7 @@ namespace avmshell
 			MethodInfo* info = functionFor(src, line);
 			if (!info)
 			{
-				core->console << "Unable to find method debug information, so no local or argument names known";
+				core->console << "Unable to find method debug information, so no local or argument names known\n";
 				return;
 			}
 
@@ -675,11 +625,6 @@ namespace avmshell
 	void DebugCLI::enterDebugger()
 	{	
 		setCurrentSource( (core->callStack) ? (core->callStack->filename()) : 0 );
-		if (currentSource == NULL)
-		{
-			stepInto();
-			return;
-		}
 
 		for (;;) {
 			printIP();
@@ -776,8 +721,9 @@ namespace avmshell
 				if (currentSource[i] == '\r' && currentSource[i+1] == '\n')
 					currentSource[i] = ' ';
 			}
-		} else {
-			core->console << "Error opening source file " << currentFile << "\n";
+		} else if (warnMissingSource) {
+			core->console << "Could not find '" << currentFile << "'.  Try running in the same directory as the .as file.\n";
+            warnMissingSource = false;
 		}
 	}
 

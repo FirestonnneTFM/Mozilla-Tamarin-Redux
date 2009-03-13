@@ -272,10 +272,7 @@ namespace avmplus
 		ScriptObject* coerceAtom2SO(Atom atom, Traits *expected) const;
 
 #ifdef DEBUGGER
-		void debugEnter(int argc, 
-						uint32_t* ap, 
-						Traits** frameTraits, 
-						int localCount,
+		void debugEnter(Traits** frameTraits, 
 						CallStackNode* callstack,
 						Atom* framep, 
 						volatile sintptr *eip);

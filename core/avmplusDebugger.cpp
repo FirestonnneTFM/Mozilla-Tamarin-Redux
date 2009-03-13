@@ -873,8 +873,8 @@ namespace avmplus
 		*firstLocal = indexOfFirstLocal();
 		if (trace->framep() && trace->info())
 		{
-			MethodInfo* info = trace->info();
-			*pastLastLocal = info->local_count();
+			const MethodSignature* ms = trace->info()->getMethodSignature();
+			*pastLastLocal = ms->local_count();
 		}
 		else
 		{

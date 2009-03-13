@@ -149,7 +149,7 @@ namespace avmplus
         Fragment *frag;
 		LirWriter *lirout;
 		FrameState *state;
-        LIns *vars, *varTraits, *varPtrs;
+        LIns *vars, *varTraits;
         LIns *env_param, *argc_param, *ap_param;
         LIns *_save_eip, *_ef;
         LIns *dxns, *dxnsAddrSave;
@@ -283,7 +283,7 @@ namespace avmplus
 		void emitBlockStart(FrameState* state);
 		void emitBlockEnd(FrameState* state);
 		void emitIntConst(FrameState* state, int index, int32_t c);
-		void emitPtrConst(FrameState* state, int index, void* c);
+		void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
 		void emitDoubleConst(FrameState* state, int index, double* pd);
 		void emitCoerce(FrameState* state, int index, Traits* type);
 		void emitCheckNull(FrameState* state, int index);
@@ -291,7 +291,7 @@ namespace avmplus
 		void emitSetDxns(FrameState* state);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
-		void localSet(int i, LIns* o);
+		void localSet(int i, LIns* o, Traits* type);
 
 		// CodeWriter methods
 		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);

@@ -45,10 +45,7 @@ namespace avmplus
 					MethodEnv*				env
 					, Atom*					framep
 					, Traits**				frameTraits
-					, int					argc
-					, void*					ap
 					, intptr_t volatile*	eip
-					, int32_t volatile*		scopeDepth
 					, bool                  boxed
 			)
 	{
@@ -62,12 +59,6 @@ namespace avmplus
 		m_filename		= NULL;
 		m_framep		= framep;
 		m_traits		= frameTraits;
-		if (boxed)
-			m_ap		= (uint32_t*)ap;
-		else
-			m_atomv		= (Atom*)ap;
-		m_scopeDepth	= scopeDepth;
-		m_argc			= argc;
 		m_linenum		= 0;
 		m_boxed			= boxed;
 	}
@@ -94,9 +85,6 @@ namespace avmplus
 		m_filename		= 0;
 		m_framep		= 0;
 		m_traits		= 0;
-		m_ap			= 0;
-		m_scopeDepth	= 0;
-		m_argc			= 0;
 		m_linenum		= 0;
 		m_boxed			= false;
 	}
@@ -131,7 +119,7 @@ namespace avmplus
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
 		if (m_framep && m_env)
 		{
-			return (void**) (m_framep + m_env->method->local_count());
+			return (void**) (m_framep + m_env->method->getMethodSignature()->local_count());
 		}
 		return NULL;
 	}

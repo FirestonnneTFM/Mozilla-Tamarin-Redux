@@ -124,7 +124,7 @@ namespace avmplus
 	/*static*/ AvmBox MethodInfo::debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 	{
 		CallStackNode csn(CallStackNode::kEmpty); 
-		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
+		env->debugEnter(/*frametraits*/0, &csn, /*framep*/0, /*eip*/0); 
 		const AvmBox result = env->method->thunker()(env, argc, argv);
 		env->debugExit(&csn);
 		return result;
@@ -133,7 +133,7 @@ namespace avmplus
 	/*static*/ double MethodInfo::debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 	{
 		CallStackNode csn(CallStackNode::kEmpty); 
-		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
+		env->debugEnter(/*frametraits*/0, &csn, /*framep*/0, /*eip*/0); 
 		const double result = (reinterpret_cast<AvmThunkNativeThunkerN>(env->method->thunker()))(env, argc, argv);
 		env->debugExit(&csn);
 		return result;
@@ -451,14 +451,14 @@ namespace avmplus
 		if (_flags & JIT_IMPL)
 		{
 			// each entry is a pointer into the function's stack frame
-			void **in = (void**)src;			// WARNING this must match with JIT generator
+			int64_t* in = (int64_t*)src;			// WARNING this must match with JIT generator (endianness issue???)
 
 			// now probe each type and do the atom conversion.
 			AvmCore* core = this->pool()->core;
 			for (int i=srcPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
-				void *p = in[i];
+				void *p = &in[i];   // jit uses 8B per entry
 				if (t == NUMBER_TYPE) 
 				{
 					dest[at] = core->doubleToAtom( *((double*)p) );
@@ -530,14 +530,14 @@ namespace avmplus
 		if (_flags & JIT_IMPL)
 		{
 			// we allocated double sized entry for each local src CodegenJIT
-			void** out = (void**)dest;		// WARNING this must match with JIT generator
+			int64_t* out = (int64_t*)dest;		// WARNING this must match with JIT generator
 
 			// now probe each type and conversion.
 			AvmCore* core = this->pool()->core;
 			for (int i=destPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
-				void *p = out[i];
+				void *p = &out[i];      // JIT uses 8B per entry
 				if (t == NUMBER_TYPE) 
 				{
 					*((double*)p) = AvmCore::number_d(src[at++]);
