@@ -5414,6 +5414,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_JITMAX
     int jitcount = 0;
+    int jitmin = 1;
     int jitmax = 0x7fffffff;
 #endif
 
@@ -5477,9 +5478,9 @@ namespace avmplus
             !assm->error();
     #ifdef AVMPLUS_JITMAX
         jitcount++;
-        keep = keep && jitcount <= jitmax;
+        keep = keep && (jitcount >= jitmin && jitcount <= jitmax);
+        //AvmLog(stderr, "jitcount %d keep %d\n", jitcount, (int)keep);
     #endif
-
         //_nvprof("keep",keep);
         if (keep) {
             // save pointer to generated code

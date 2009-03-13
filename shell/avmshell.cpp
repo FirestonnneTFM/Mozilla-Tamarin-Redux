@@ -65,6 +65,7 @@ namespace avmplus {
 
 #ifdef AVMPLUS_JITMAX
 	extern int jitmax;
+    extern int jitmin;
 #endif
 }
 
@@ -122,7 +123,7 @@ namespace avmshell
         #endif /* AVMPLUS_IA32 */
     #endif
 	#ifdef AVMPLUS_JITMAX
-		AvmLog("          [-jitmax N]   only execute the first N jit'd methods, interpret after.");
+        AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
 	#endif
 		
 		#ifdef AVMPLUS_VERIFYALL
@@ -670,8 +671,22 @@ namespace avmshell
 				#endif
 				#ifdef AVMPLUS_JITMAX
 					else if (!VMPI_strcmp(arg, "-jitmax")) {
-						jitmax = VMPI_atoi(argv[++i]);
-					}
+                        char* val = argv[++i];
+                        char* dash = VMPI_strchr(val,'-');
+                        if (dash) {
+                            if (dash==&val[0]) 
+                                jitmax = VMPI_atoi(&val[1]); // -n form
+                            else {
+                                int32_t hl = VMPI_strlen(dash);
+                                dash[0] = '\0'; // hammer argv ;)  - go boom?
+                                jitmin = VMPI_atoi(val); 
+                                if (hl>1)
+                                    jitmax = VMPI_atoi(&dash[1]); 
+                            }
+                        } else {                                            
+                            jitmax = VMPI_atoi(val);
+                        }
+                    }
 				#endif
 					else if (!VMPI_strcmp(arg, "-memstats")) {
 						GetGC()->GetGCHeap()->Config().gcstats = true;
