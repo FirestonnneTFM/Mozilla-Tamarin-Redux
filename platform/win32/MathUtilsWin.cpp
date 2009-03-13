@@ -45,6 +45,19 @@
 
 namespace avmplus
 {
+#ifndef X86_MATH
+    const static double PI = 3.141592653589793;
+    const static double PI3_BY_4 = 3*PI/4;
+    const static double PI_BY_4 = PI/4;
+    
+    // 0=no, 1=+0, -1=-0  
+    static int32_t isZero(double v)
+    {
+        int32_t r = (MathUtils::isNegZero(v)) ? -1 : (v==0.0)? 1 : 0;
+        return r;
+    }
+#endif
+
 	double MathUtils::abs(double value)
 	{
 #ifdef X86_MATH
@@ -91,7 +104,22 @@ namespace avmplus
 		_asm fld [x];
 		_asm fpatan;
 #else
-		return ::atan2(y, x);
+        int32_t zx = isZero(x);
+        int32_t zy = isZero(y);
+        if (zx==-1 && zy!=0)
+            return zy*PI;  // +-0,-0 case
+        else if (zy==-1 && (x==1.0 || x==-1.0))
+            return -(::atan2(y,x));  // negate result
+
+		double r = ::atan2(y, x);
+        if (MathUtils::isNaN(r)) {
+            int32_t s = MathUtils::isInfinite(x);
+            if (s==1) 
+                r = MathUtils::isInfinite(y) * PI_BY_4;
+            else if (s==-1)
+                r = MathUtils::isInfinite(y) * PI3_BY_4;
+        }
+        return r;
 #endif /* X86_MATH */
 	}
 	
