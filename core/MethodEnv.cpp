@@ -279,7 +279,7 @@ namespace avmplus
 	{
 		return impl32() == interp32 || implN() == interpN;
 	}
-
+	
 	inline MethodSignaturep MethodEnv::get_ms()
 	{
 		if (!method->isResolved())
@@ -561,10 +561,7 @@ namespace avmplus
 #endif
 
 #ifdef DEBUGGER
-	void MethodEnv::debugEnter(int argc, 
-								uint32_t* ap, 
-								Traits** frameTraits, 
-								int localCount,
+	void MethodEnv::debugEnter(	Traits** frameTraits, 
 								CallStackNode* callstack,
 								Atom* framep, 
 								volatile sintptr *eip)
@@ -573,15 +570,17 @@ namespace avmplus
 		AvmAssert(callstack != 0); 
 
 		// dont reset the parameter traits since they are setup in the prologue
-		MethodSignaturep ms = get_ms();
-		const int param_count = ms->param_count();
-		const int firstLocalAt = param_count+1;
-		AvmAssert(!frameTraits || localCount >= firstLocalAt);
-		
-		if (frameTraits)
+		if (frameTraits) {
+            // @todo the traits should be cleared by the jit / interp ?!?
+		    MethodSignaturep ms = get_ms();
+            const int param_count = ms->param_count();
+            const int firstLocalAt = param_count+1;
+            const int localCount = ms->local_count();
+            AvmAssert(localCount >= firstLocalAt);
 			VMPI_memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
+        }
 
-		callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL, /*boxed*/false);
+		callstack->init(this, framep, frameTraits, eip, /*boxed*/false);
 		
 		debugEnterInner();
 	}

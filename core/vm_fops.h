@@ -213,7 +213,7 @@ SSE2_ONLY(
 )
 
 #ifdef DEBUGGER
-    METHOD(ENVADDR(MethodEnv::debugEnter), SIG8(V,P,I,P,P,I,P,P,P), debugEnter)
+    METHOD(ENVADDR(MethodEnv::debugEnter), SIG5(V,P,P,P,P,P), debugEnter)
     METHOD(ENVADDR(MethodEnv::debugExit), SIG2(V,P,P), debugExit)
     METHOD(DEBUGGERADDR(Debugger::debugFile), SIG2(V,P,P), debugFile)
     METHOD(DEBUGGERADDR(Debugger::debugLine), SIG2(V,P,I), debugLine)

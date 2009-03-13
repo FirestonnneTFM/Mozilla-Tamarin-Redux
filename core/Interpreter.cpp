@@ -990,7 +990,7 @@ namespace avmplus
 			INSTR(debugenter) {
 				AvmAssert(core->debugger() != NULL);
 				AvmAssert(callStackNode == NULL);
-				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
+				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, &expc, true);
 				env->debugEnterInner();
 				NEXT;
 			}

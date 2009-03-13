@@ -87,10 +87,7 @@ namespace avmplus
 		void init(MethodEnv*				env
 					, Atom*					framep
 					, Traits**				frameTraits
-					, int					argc
-					, void*				    ap
 					, intptr_t volatile*	eip
-					, int32_t volatile*		scopeDepth
 				    , bool                  boxed
 				);
 
@@ -110,14 +107,11 @@ namespace avmplus
 		inline explicit CallStackNode(MethodEnv*				env
 										, Atom*					framep
 										, Traits**				frameTraits
-										, int					argc
-										, void*					ap
 										, intptr_t volatile*	eip
-										, int32_t volatile*		scopeDepth
 									    , bool                  boxed = false
 								)
 		{
-			init(env, framep, frameTraits, argc, ap, eip, scopeDepth, boxed);
+			init(env, framep, frameTraits, eip, boxed);
 		}
 
 		// ctor used only for Sampling (no MethodEnv)
@@ -162,10 +156,6 @@ namespace avmplus
 		inline Stringp filename() const { return m_filename; }
 		inline Atom* framep() const { return m_framep; }
 		inline Traits** traits() const { return m_traits; }
-		inline const uint32_t* ap() const { AvmAssert(!m_boxed); return m_ap; }
-		inline const Atom* atomv() const { AvmAssert(m_boxed); return m_atomv; }
-		inline const int32_t volatile* scopeDepth() const { return m_scopeDepth; }
-		inline int argc() const { return m_argc; }
 		inline int32_t linenum() const { return m_linenum; }
 		inline bool boxed() const { return m_boxed; }
 
@@ -192,12 +182,6 @@ namespace avmplus
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 	private:	Atom*				m_framep;		// pointer to top of AS registers
 	private:	Traits**			m_traits;		// array of traits for AS registers
-	private:	union {
-					uint32_t*		m_ap;			// unboxed args, iff boxed == false
-					Atom*			m_atomv;		// boxed args, iff boxed == true
-				};
-	private:	int32_t volatile*	m_scopeDepth;	// Only used by the interpreter! With JIT, look for NULL entires in the scopeBase array.
-	private:	int32_t				m_argc;
 	private:	int32_t				m_linenum;
 	private:	bool				m_boxed;
 	// ------------------------ DATA SECTION END
