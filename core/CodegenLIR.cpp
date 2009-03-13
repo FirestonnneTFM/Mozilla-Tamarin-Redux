@@ -445,6 +445,7 @@ namespace avmplus
         Value &v = state->value(i);
         v.ins = o;
         lirout->store(o, vars, i*8);
+        (void)type;
         DEBUGGER_ONLY(
             if (core->debugger() && int(i) < state->verifier->local_count) {
                 lirout->store(InsConstPtr(type), varTraits, i*sizeof(Traits*));
