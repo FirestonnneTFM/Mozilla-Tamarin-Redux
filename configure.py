@@ -245,6 +245,9 @@ if o.getBoolArg('perfm'):
 if o.getBoolArg('disable-nj'):
     APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
 
+if o.getBoolArg('abc-interp'):
+    APP_CPPFLAGS += '-DAVMPLUS_ABC_INTERPRETER '
+
 if o.getBoolArg('selftest'):
     APP_CPPFLAGS += '-DAVMPLUS_SELFTEST '
 
