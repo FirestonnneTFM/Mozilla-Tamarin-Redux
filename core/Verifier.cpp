@@ -1014,7 +1014,7 @@ namespace avmplus
 					if (t && t->isMachineType())
 						resultType = OBJECT_TYPE;
 					coder->write(state, pc, opcode);
-					state->pop_push(1, t);
+					state->pop_push(1, resultType);
 				}
 				break;
 			}
