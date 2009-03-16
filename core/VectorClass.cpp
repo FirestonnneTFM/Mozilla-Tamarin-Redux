@@ -490,8 +490,8 @@ namespace avmplus
 			VTable* objVecIVTable = toplevel()->objectVectorClass->ivtable();
 
 			// Create vtables for the new parameterized type
-			VTable* vtab = core->newVTable(ctraits, toplevel()->class_vtable, objVecVTable->scope, objVecVTable->abcEnv, objVecVTable->toplevel); 
-			VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecIVTable->scope, objVecIVTable->abcEnv, objVecIVTable->toplevel);
+			VTable* vtab = core->newVTable(ctraits, toplevel()->class_vtable, objVecVTable->scope(), objVecVTable->abcEnv, objVecVTable->toplevel); 
+			VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecIVTable->scope(), objVecIVTable->abcEnv, objVecIVTable->toplevel);
 			vtab->ivtable = ivtab;
 			ivtab->init = objVecIVTable->init;
 			vtab->resolveSignatures();

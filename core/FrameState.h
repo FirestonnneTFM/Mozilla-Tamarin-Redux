@@ -105,7 +105,17 @@ namespace avmplus
 			return locals[i];
 		}
 
+		const Value& value(sintptr i) const
+		{
+			return locals[i];
+		}
+
 		Value& scopeValue(int i)
+		{
+			return locals[verifier->scopeBase+i];
+		}
+
+		const Value& scopeValue(int i) const
 		{
 			return locals[verifier->scopeBase+i];
 		}

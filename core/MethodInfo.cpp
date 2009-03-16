@@ -149,7 +149,7 @@ namespace avmplus
 		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif
 
-		f->verify(env->vtable->toplevel);
+		f->verify(env->toplevel());
 
         AvmAssert(f->impl32() != MethodInfo::verifyEnter);
 #if VMCFG_METHODENV_IMPL32

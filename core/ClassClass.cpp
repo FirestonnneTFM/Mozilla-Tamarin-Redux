@@ -46,10 +46,6 @@ namespace avmplus
 	{
 		toplevel()->classClass = this;
 
-		// patch Class's instance vtable scope, since we created it earlier for
-		// bootstrapping
-		ivtable()->scope = cvtable->scope;
-
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(ClassClass));
 
 		createVanillaPrototype();

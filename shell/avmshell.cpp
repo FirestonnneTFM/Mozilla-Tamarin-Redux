@@ -160,7 +160,7 @@ namespace avmshell
 		// actual stack bottom to do this.
 		inStackOverflow = true;
 
-		Toplevel *toplevel = env->vtable->toplevel;
+		Toplevel* toplevel = env->toplevel();
 
 		Stringp errorMessage = getErrorMessage(kStackOverflowError);
 		Atom args[2] = { nullObjectAtom, errorMessage->atom() };
@@ -183,7 +183,7 @@ namespace avmshell
 	{
 		interrupted = false;
 
-		Toplevel *toplevel = env->vtable->toplevel;
+		Toplevel* toplevel = env->toplevel();
 
 		if (gracePeriod) {
 			// This script has already had its chance; it violated

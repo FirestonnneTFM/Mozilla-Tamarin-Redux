@@ -381,8 +381,7 @@ namespace avmplus
 			// create temporary vtable for Class, so we have something for OP_newclass
 			// to use when it creates Object$ and Class$.  once that happens, we replace
 			// with the real Class$ vtable.
-			toplevel->class_vtable = newVTable(traits.class_itraits, 
-				object_vtable, emptyScope, abcEnv, toplevel);
+			toplevel->class_vtable = newVTable(traits.class_itraits, object_vtable, emptyScope, abcEnv, toplevel);
 			toplevel->class_vtable->resolveSignatures();
 
 			traits.function_itraits->resolveSignatures(toplevel);
@@ -3930,7 +3929,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (codeContextAtom == CONTEXT_NONE) {
 			return NULL;
 		} else if (getCodeContextKind(codeContextAtom) == CONTEXTKIND_ENV) {
-			return getCodeContextEnv(codeContextAtom)->vtable->abcEnv->codeContext();
+			return getCodeContextEnv(codeContextAtom)->codeContext();
 		} else {
 			return getCodeContextObject(codeContextAtom);
 		}

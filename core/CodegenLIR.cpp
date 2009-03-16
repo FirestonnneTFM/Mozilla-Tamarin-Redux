@@ -1264,9 +1264,8 @@ namespace avmplus
             })
 
 			// dxns = env->vtable->scope->defaultXmlNamespace
-			LIns* declVTable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env_param);
-			LIns* scope = loadIns(LIR_ldcp, offsetof(VTable, scope), declVTable);
-			LIns* capturedDxns = loadIns(LIR_ldcp, offsetof(ScopeChain, defaultXmlNamespace), scope);
+			LIns* scope = loadScope();
+			LIns* capturedDxns = loadIns(LIR_ldcp, offsetof(ScopeChain,_defaultXmlNamespace), scope);
 			storeIns(capturedDxns, 0, dxns);
 
 			// dxnsSave = AvmCore::dxnsAddr
@@ -1464,9 +1463,8 @@ namespace avmplus
 		if (outOMem()) return;
 		this->state = state;
 		Traits* t = info->declaringTraits()->scope->getScopeTraitsAt(scope_index);
-		LIns* declVTable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env_param);
-		LIns* scope = loadIns(LIR_ldcp, offsetof(VTable, scope), declVTable);
-		LIns* scopeobj = loadIns(LIR_ldcp, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
+		LIns* scope = loadScope();
+		LIns* scopeobj = loadIns(LIR_ldcp, offsetof(ScopeChain,_scopes) + scope_index*sizeof(Atom), scope);
 		localSet(dest, atomToNativeRep(t, scopeobj), t);
 	}
 
@@ -1528,10 +1526,8 @@ namespace avmplus
 
 		if (!info->setsDxns()) {
 			// dxnsAddr = &env->vtable->scope->defaultXmlNamespace
-			LIns* env = env_param;
-			LIns* declVTable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env);
-			LIns* scope = loadIns(LIR_ldcp, offsetof(VTable, scope), declVTable);
-			dxnsAddr = leaIns(offsetof(ScopeChain, defaultXmlNamespace), scope);
+			LIns* scope = loadScope();
+			dxnsAddr = leaIns(offsetof(ScopeChain,_defaultXmlNamespace), scope);
 		}
 
 		storeIns(dxnsAddr, 0, InsConstPtr(&core->dxnsAddr));
@@ -2833,7 +2829,7 @@ namespace avmplus
 		{
 			// env->vtable->base->init->enter32v(argc, ...);
 			LIns* envArg = env_param;
-			LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), envArg);
+			LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), envArg);
 			LIns* base = loadIns(LIR_ldcp, offsetof(VTable,base), vtable);
 			method = loadIns(LIR_ldcp, offsetof(VTable,init), base);
 			break;
@@ -2845,7 +2841,7 @@ namespace avmplus
 			// sp[-argc] = callmethod(disp_id, argc, ...);
 			// method_id is disp_id of virtual method
 			LIns* vtable = loadVTable(objDisp);
-			method = loadIns(LIR_ldcp, offsetof(VTable, methods)+sizeof(uintptr)*method_id, vtable);
+			method = loadIns(LIR_ldcp, offsetof(VTable,methods)+sizeof(uintptr)*method_id, vtable);
 			break;
 		}
 		case OP_callsuperid:
@@ -2853,9 +2849,9 @@ namespace avmplus
 			// stack in: obj arg1..N
 			// stack out: result
 			// method_id is disp_id of super method
-			LIns* declvtable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env_param);
+			LIns* declvtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
 			LIns* basevtable = loadIns(LIR_ldcp, offsetof(VTable, base), declvtable);
-			method = loadIns(LIR_ldcp, offsetof(VTable, methods)+sizeof(uintptr)*method_id, basevtable);
+			method = loadIns(LIR_ldcp, offsetof(VTable,methods)+sizeof(uintptr)*method_id, basevtable);
 			break;
 		}
 		case OP_callstatic:
@@ -2863,7 +2859,7 @@ namespace avmplus
 			// stack in: obj arg1..N
 			// stack out: result
 
-			LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env_param);
+			LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
 			LIns* abcenv = loadIns(LIR_ldcp, offsetof(VTable, abcEnv), vtable);
 			method = loadIns(LIR_ldcp, offsetof(AbcEnv,m_methods)+sizeof(uintptr)*method_id, abcenv);
 			break;
@@ -3063,9 +3059,8 @@ namespace avmplus
 			{
                 // global is outer scope 0
 				t = scopeTypes->getScopeTraitsAt(0);
-				LIns* declVTable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env_param);
-				LIns* scope = loadIns(LIR_ldcp, offsetof(VTable, scope), declVTable);
-				LIns* scopeobj = loadIns(LIR_ldp, offsetof(ScopeChain, scopes) + 0*sizeof(Atom), scope);
+				LIns* scope = loadScope();
+				LIns* scopeobj = loadIns(LIR_ldp, offsetof(ScopeChain,_scopes) + 0*sizeof(Atom), scope);
 				ptr = atomToNativeRep(t, scopeobj);
 			}				
 		}
@@ -3536,12 +3531,10 @@ namespace avmplus
 				// prepare scopechain args for call
 				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-				LIns* envArg = env_param;
-				LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), envArg);
-				LIns* outer = loadIns(LIR_ldcp, offsetof(VTable, scope), vtable);
+				LIns* outer = loadScope();
 
 				LIns* i3 = callIns(FUNCTIONID(newfunction), 4,
-					envArg, InsConstPtr(func), outer, ap);
+					env_param, InsConstPtr(func), outer, ap);
 
 				AvmAssert(!result->isMachineType());
 				localSet(index, i3, result);
@@ -3773,16 +3766,14 @@ namespace avmplus
 				int localindex = int(op2);
 				int extraScopes = state->scopeDepth;
 
-				LIns* envArg = env_param;
-				LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), envArg);
-				LIns* outer = loadIns(LIR_ldcp, offsetof(VTable, scope), vtable);
+				LIns* outer = loadScope();
 				LIns* base = localGetp(localindex);
 
 				// prepare scopechain args for call
 				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
 				LIns* i3 = callIns(FUNCTIONID(newclass), 5, 
-					envArg, InsConstPtr(cinit), base, outer, ap);
+					env_param, InsConstPtr(cinit), base, outer, ap);
 
 				AvmAssert(!result->isMachineType());
 				localSet(localindex, i3, result);
@@ -3833,9 +3824,7 @@ namespace avmplus
 				// prepare scopechain args for call
 				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-				LIns* envArg = env_param;
-				LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,vtable), envArg);
-				LIns* outer = loadIns(LIR_ldcp, offsetof(VTable,scope), vtable);
+				LIns* outer = loadScope();
 
 				LIns* withBase;
 				if (state->withBase == -1)
@@ -3850,7 +3839,7 @@ namespace avmplus
 				// 		return env->findproperty(outer, argv, extraScopes, name, strict);
 
 				LIns* i3 = callIns(FUNCTIONID(findproperty), 7, 
-					envArg, outer, ap, InsConst(extraScopes), multi, 
+					env_param, outer, ap, InsConst(extraScopes), multi, 
 					InsConst((int32_t)(opcode == OP_findpropstrict)),
 					withBase);
 
@@ -5007,8 +4996,15 @@ namespace avmplus
 
 	LIns* CodegenLIR::loadToplevel()
 	{
-		LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv, vtable), env_param);
+		LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
 		return loadIns(LIR_ldcp, offsetof(VTable, toplevel), vtable);
+	}
+
+	LIns* CodegenLIR::loadScope()
+	{
+		LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
+		LIns* scope = loadIns(LIR_ldcp, offsetof(VTable,_scope), vtable);
+		return scope;
 	}
 
 	LIns* CodegenLIR::loadVTable(int i)

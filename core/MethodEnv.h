@@ -72,11 +72,13 @@ namespace avmplus
 		virtual ~MethodEnv();
 #endif
 
-		inline Toplevel* toplevel() const { return vtable->toplevel; }
-		inline AbcEnv* abcEnv() const { return vtable->abcEnv; }
+		inline AbcEnv* abcEnv() const { return _vtable->abcEnv; }
 		inline AvmCore* core() const { return method->pool()->core; }
-		inline Traits* traits() const { return vtable->traits; }
-		inline DomainEnv* domainEnv() const { return vtable->abcEnv->domainEnv(); }
+		inline CodeContext* codeContext() const { return _vtable->abcEnv->codeContext(); }
+		inline DomainEnv* domainEnv() const { return _vtable->abcEnv->domainEnv(); }
+		inline ScopeChain* scope() const { return _vtable->scope(); }
+		inline MethodEnv* super_init() const { AvmAssert(_vtable->base != NULL); return _vtable->base->init; }
+		inline Toplevel* toplevel() const { return _vtable->toplevel; }
 
 		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
@@ -338,9 +340,10 @@ namespace avmplus
 			DoubleMethodProc _implN;
 		};
 #endif
-	public:
+	protected:
 		// pointers are write-once so we don't need WB's
-		VTable* const				vtable;		// the vtable for the scope where this env was declared 
+		VTable* const				_vtable;		// the vtable for the scope where this env was declared 
+	public:
 		MethodInfo* const			method;		// runtime independent type info for this method 
 		Traits* const				declTraits;
 	private:

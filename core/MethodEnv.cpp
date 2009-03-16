@@ -210,7 +210,7 @@ namespace avmplus
 	// helper
 	inline int MethodEnv::startCoerce(int argc, MethodSignaturep ms)
 	{
-		Toplevel* toplevel = vtable->toplevel;
+		Toplevel* toplevel = this->toplevel();
 
 		if (!ms->argcOk(argc))
 		{
@@ -283,7 +283,7 @@ namespace avmplus
 	inline MethodSignaturep MethodEnv::get_ms()
 	{
 		if (!method->isResolved())
-			method->resolveSignature(vtable->toplevel);
+			method->resolveSignature(this->toplevel());
 		return method->getMethodSignature();
 	}
 	
@@ -503,7 +503,7 @@ namespace avmplus
 
 #if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
 	MethodEnv::MethodEnv(TrampStub, void* tramp, VTable *vtable)
-		: vtable(vtable), method(NULL), declTraits(NULL), activationOrMCTable(0)
+		: _vtable(vtable), method(NULL), declTraits(NULL), activationOrMCTable(0)
 	{
 		union { void* v; AtomMethodProc p; };
 		v = tramp;
@@ -513,7 +513,7 @@ namespace avmplus
 #endif
 
 	MethodEnv::MethodEnv(MethodInfo* method, VTable *vtable)
-		: vtable(vtable)
+		: _vtable(vtable)
 		, method(method)
 		, declTraits(method->declaringTraits())
 		, activationOrMCTable(0)
@@ -528,8 +528,8 @@ namespace avmplus
 		_impl32 = delegateInvoke;
 #endif
 
-		AvmCore* core = vtable->traits->core;
-		if (method->declaringTraits() != vtable->traits)
+		AvmCore* core = this->core();
+		if (method->declaringTraits() != this->_vtable->traits)
 		{
 		#ifdef AVMPLUS_VERBOSE
 			core->console << "ERROR " << method->getMethodName() << " " << method->declaringTraits() << " " << vtable->traits << "\n";
@@ -546,7 +546,7 @@ namespace avmplus
 				toplevel()->throwVerifyError(kCorruptABCError);
 			}
 
-			VTable *activation = core->newVTable(method->activationTraits(), NULL, vtable->scope, vtable->abcEnv, toplevel());
+			VTable *activation = core->newVTable(method->activationTraits(), NULL, this->scope(), this->abcEnv(), toplevel());
 			activation->resolveSignatures();
 			setActivationOrMCTable(activation, kActivation);
 		}
@@ -610,7 +610,7 @@ namespace avmplus
 		const int method_id = this->method->method_id();
 		if (method_id >= 0)
 		{
-			vtable->abcEnv->invocationCount(method_id) += 1;	// returns a reference, so this works
+			this->abcEnv()->invocationCount(method_id) += 1;	// returns a reference, so this works
 		}
 	}
 
@@ -643,7 +643,7 @@ namespace avmplus
 	{ 
 		const int method_id = this->method->method_id();
 		if (method_id < 0) return 0;
-		return vtable->abcEnv->invocationCount(method_id);
+		return this->abcEnv()->invocationCount(method_id);
 	}
 #endif // DEBUGGER
 
@@ -669,7 +669,7 @@ namespace avmplus
 
 	void MethodEnv::interrupt()
 	{
-		vtable->traits->core->interrupt(this);
+		this->core()->interrupt(this);
 	}
 
     void MethodEnv::stkover()
@@ -900,7 +900,7 @@ namespace avmplus
 		}
 		else
 		{
-			VTable *vt = core->newVTable(traits, NULL, vtable->scope, vtable->abcEnv, toplevel);
+			VTable *vt = core->newVTable(traits, NULL, this->scope(), this->abcEnv(), toplevel);
 			vt->resolveSignatures();
 			return core->newObject(vt, NULL);
 		}
@@ -983,7 +983,7 @@ namespace avmplus
 
 	ScriptObject* MethodEnv::finddef(const Multiname* multiname) const
 	{
-		Toplevel* toplevel = vtable->toplevel;
+		Toplevel* toplevel = this->toplevel();
 
 		ScriptEnv* script = getScriptEnv(multiname);
 		if (script == (ScriptEnv*)BIND_AMBIGUOUS)
@@ -1029,13 +1029,10 @@ namespace avmplus
 	ScriptObject* ScriptEnv::initGlobal()
 	{
 		// object not defined yet.  define it by running the script that exports it
-		Traits* traits = vtable->traits;
-		vtable->resolveSignatures();
-
-		Toplevel* toplevel = this->toplevel();
-		traits->resolveSignatures(toplevel);
-		ScriptObject* delegate = toplevel->objectClass->prototype;
-		return global = this->core()->newObject(vtable, delegate);
+		this->_vtable->resolveSignatures();
+		// resolving the vtable also resolves the traits, if necessary
+		ScriptObject* delegate = this->toplevel()->objectClass->prototype;
+		return global = this->core()->newObject(this->_vtable, delegate);
 	}
 
     ScriptObject* MethodEnv::op_newobject(Atom* sp, int argc) const
@@ -1317,7 +1314,8 @@ namespace avmplus
 									 Atom* scopes) const
     {
 		AvmCore* core = this->core();
-		AbcEnv* abcEnv = vtable->abcEnv;
+		MMgc::GC* gc = core->GetGC();
+		AbcEnv* abcEnv = this->abcEnv();
 
 		// TODO: if we have already created a function and the scope chain
 		// is the same as last time, re-use the old closure?
@@ -1327,17 +1325,17 @@ namespace avmplus
 		AvmAssert(ftraits != NULL);
 		AvmAssert(ftraits->scope != NULL);
 
-		ScopeChain* scope = ScopeChain::create(core->GetGC(), ftraits->scope, outer, *core->dxnsAddr);
-
-		for (int i=outer->getSize(), n=scope->getSize(); i < n; i++)
+		ScopeChain* fscope = ScopeChain::create(core->GetGC(), ftraits->scope, outer, *core->dxnsAddr);
+		for (int i=outer->getSize(), n=fscope->getSize(); i < n; i++)
 		{
-			scope->setScope(i, *scopes++);
+			fscope->setScope(gc, i, *scopes++);
 		}
+		//core->console<<"New fscope: "<<fscope->format(core)<<"\n";
 
 		FunctionClass* functionClass = toplevel()->functionClass;
 
 		// the vtable for the new function object
-		VTable* fvtable = core->newVTable(ftraits, functionClass->ivtable(), scope, abcEnv, toplevel());
+		VTable* fvtable = core->newVTable(ftraits, functionClass->ivtable(), fscope, abcEnv, toplevel());
 		fvtable->resolveSignatures();
 		FunctionEnv *fenv = new (core->GetGC()) FunctionEnv(function, fvtable);
 		fvtable->ivtable = toplevel()->object_vtable;
@@ -1364,6 +1362,7 @@ namespace avmplus
 							Atom* scopes) const
     {
 		AvmCore* core = this->core();
+		MMgc::GC* gc = core->GetGC();
 		// adds clarity to what is usually just global$init()
 		SAMPLE_FRAME("[newclass]", core);
 		Toplevel* toplevel = this->toplevel();
@@ -1400,18 +1399,17 @@ namespace avmplus
 
 		// class scopechain = [..., class]
 		ScopeChain* cscope = ScopeChain::create(core->GetGC(), ctraits->scope, outer, *core->dxnsAddr);
-
-		int staticScopesCount = 0;
-
 		int i = outer->getSize();
-		for (int n=cscope->getSize()-staticScopesCount; i < n; i++)
+		for (int n=cscope->getSize(); i < n; i++)
 		{
-			cscope->setScope(i, *scopes++);
+			cscope->setScope(gc, i, *scopes++);
 		}
+		//core->console<<"NewClass: "<<ctraits<<"\n";
+		//core->console<<"New cscope: "<<cscope->format(core)<<"\n";
 
 		ScopeChain* iscope = ScopeChain::create(core->GetGC(), itraits->scope, cscope, *core->dxnsAddr);
 
-		AbcEnv *abcEnv = vtable->abcEnv;
+		AbcEnv* abcEnv = this->abcEnv();
 		VTable* cvtable = NULL;
 		VTable* ivtable = NULL;
 
@@ -1420,7 +1418,9 @@ namespace avmplus
 		// i.e. Class$ derives from Class
 		if (itraits == core->traits.class_itraits)
 		{
-			ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, iscope, abcEnv, toplevel);
+			// note that the ivtable gets cscope, not iscope... this allows us to avoid having to patch
+			// scope in the ClassClass ctor like we used to.
+			ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, cscope, abcEnv, toplevel);
 			ivtable->resolveSignatures();
 			cvtable = core->newVTable(ctraits, ivtable, cscope, abcEnv, toplevel);
 			cvtable->resolveSignatures();
@@ -1444,19 +1444,22 @@ namespace avmplus
 
 			// We can finish setting up the toplevel object now that
 			// we have the real Object vtable
-			toplevel->vtable->base = ivtable;
-			toplevel->vtable->linked = false;
-			toplevel->vtable->resolveSignatures();
+			VTable* toplevel_vtable = toplevel->vtable;
+			toplevel_vtable->base = ivtable;
+			toplevel_vtable->linked = false;
+			toplevel_vtable->resolveSignatures();
 		}
-		else if (itraits == core->traits.class_itraits) {
+		else if (itraits == core->traits.class_itraits) 
+		{
 			// we just defined Class
 			toplevel->class_vtable = ivtable;
 			
 			// Can't run the Object$ initializer until after Class is done since
 			// Object$ needs the real Class vtable as its base
-			toplevel->objectClass->vtable->base = ivtable;
-			toplevel->objectClass->vtable->resolveSignatures();
-			toplevel->objectClass->vtable->init->coerceEnter(toplevel->objectClass->atom());
+			VTable* objectClass_vtable = toplevel->objectClass->vtable;
+			objectClass_vtable->base = ivtable;
+			objectClass_vtable->resolveSignatures();
+			objectClass_vtable->init->coerceEnter(toplevel->objectClass->atom());
 		}
 
 		CreateClassClosureProc createClassClosure = cvtable->traits->getCreateClassClosureProc();
@@ -1484,7 +1487,8 @@ namespace avmplus
 		}
 
 		AvmAssert(i == iscope->getSize()-1);
-		iscope->setScope(i, cc->atom());
+		iscope->setScope(gc, i, cc->atom());
+		//core->console<<"New iscope: "<<iscope->format(core)<<"\n";
 		if (toplevel->classClass)
 		{
 			cc->setDelegate( toplevel->classClass->prototype );
@@ -1556,7 +1560,7 @@ namespace avmplus
 
 	Atom MethodEnv::callsuper(const Multiname* multiname, int argc, Atom* atomv) const
 	{
-		VTable* base = vtable->base;
+		VTable* base = this->_vtable->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(base->traits, multiname);
 		switch (AvmCore::bindingKind(b))
@@ -1645,7 +1649,7 @@ namespace avmplus
 	
     Atom MethodEnv::getsuper(Atom obj, const Multiname* multiname) const
     {
-		VTable* vtable = this->vtable->base;
+		VTable* vtable = this->_vtable->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
         switch (AvmCore::bindingKind(b))
@@ -1696,7 +1700,7 @@ namespace avmplus
 	
     void MethodEnv::setsuper(Atom obj, const Multiname* multiname, Atom value) const
     {
-		VTable* vtable = this->vtable->base;
+		VTable* vtable = this->_vtable->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
         switch (AvmCore::bindingKind(b))
@@ -1836,7 +1840,7 @@ namespace avmplus
 				return a;
 		}
 
-		ScopeTypeChain* outerTraits = outer->scopeTraits;
+		const ScopeTypeChain* outerTraits = outer->scopeTraits();
 
 		if (outer_depth > 0 && scopep >= scopes)
 		{

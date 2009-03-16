@@ -41,11 +41,11 @@
 namespace avmplus
 {
 	
-	VTable::VTable(Traits* _traits, VTable* _base, ScopeChain* _scope, AbcEnv* _abcEnv, Toplevel* _toplevel) :
+	VTable::VTable(Traits* _traits, VTable* _base, ScopeChain* scope, AbcEnv* _abcEnv, Toplevel* _toplevel) :
+		_scope(scope),
 		abcEnv(_abcEnv),
 		toplevel(_toplevel),
 		init(NULL),
-		scope(_scope),
 		base(_base),
 		ivtable(NULL),
 		traits(_traits),

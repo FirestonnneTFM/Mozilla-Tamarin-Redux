@@ -182,7 +182,7 @@ namespace avmplus
 		{
 			// use callee's global object as this.
 			// see E3 15.3.4.4
-			a = _call->vtable->scope->getScope(0);
+			a = _call->scope()->getScope(0);
 		}
 		MethodSignaturep ms = _call->method->getMethodSignature();
 		return toplevel()->coerce(a, ms->paramTraits(0));
