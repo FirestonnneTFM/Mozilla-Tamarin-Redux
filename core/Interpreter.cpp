@@ -769,7 +769,7 @@ namespace avmplus
 #ifndef AVMPLUS_WORD_CODE
 		if (core->debugger()) 
 		{
-			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
+			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, &expc, true);
 			env->debugEnterInner();
 		}
 #endif
@@ -3256,7 +3256,7 @@ namespace avmplus
 		}
 #endif
 		core->console << (int)off << ':';
-		core->formatOpcode(core->console, pc, (WordOpcode)((int32_t)opcode&0xffff), off, pool);
+		core->formatOpcode(core->console, pc, opcode, off, pool);
 		core->console << '\n';
     }
 #endif // AVMPLUS_VERBOSE
