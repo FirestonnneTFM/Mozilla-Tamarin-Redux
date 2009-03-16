@@ -57,15 +57,6 @@ es4/vector/nonindexproperty:index -6.*          , .*(Dforcemir|diff)   , expecte
 mops/.*                                                          ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
 abcasm/.*                                                        ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Math.atan2\(Infinity. Infinity\)            ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Math.atan2\(Infinity. -Infinity\)           ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Math.atan2\(-Infinity. Infinity\)           ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Math.atan2\(-Infinity. -Infinity\)          ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Math.atan2\(0. -0\)                         ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Math.atan2\(-0.[\t]*-0\)                    ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Math.atan2\(-0.[\t]*-1\)                    ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-ecma3/Math/e15_8_2_5:Infinity/Math.atan2\(-0. 1\)                ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-
 
 # Recursive PCRE testcases kills the stack on PocketPC builds
 ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
@@ -83,10 +74,6 @@ as3/sampling/ProcessSampling        , .* , skip , https://bugzilla.mozilla.org/s
 as3/sampling/SimpleSampling         , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
 as3/sampling/StartSamplingErrors    , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
 
-# Bug 477228: Try to write readonly Number.NEGATIVE_INFINITY crashes with ARM JIT
-ecma3/Number/e15_7_3_5_3_rt ,   arm-winmobile-tvm-release-arm       ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=477228
-ecma3/Number/e15_7_3_5_3_rt ,   arm-winmobile-tvm-release-arm-Ojit  ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=477228
-
 # inconsistencies in different debug output, need to implement regex matching of diffs
 abcasm/adhoc , .* , skip, 
 # abcasm helper, not a test
@@ -103,13 +90,6 @@ abcasm/coverage/I , (x64|ppc64).*-debug , skip , investigating
 abcasm/coverage/A , .* , skip , investigating
 abcasm/coverage/I:inclocal_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 abcasm/coverage/I:increment_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
-
-# Bug 473392 -  ARM JIT failures
-ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
-ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm-Ojit ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
-ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
-ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm-Ojit ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
-
 
 # Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
 as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
