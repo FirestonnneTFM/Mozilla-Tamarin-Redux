@@ -703,7 +703,7 @@ namespace avmplus
 	{
 		if (ivtable->base)
 		{
-			ScopeChain *scope = vtable->scope;
+			ScopeChain* scope = vtable->scope();
 			if (scope->getSize())
 			{
 				Atom baseAtom = scope->getScope(scope->getSize()-1);

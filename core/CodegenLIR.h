@@ -182,6 +182,7 @@ namespace avmplus
         LIns *branchIns(LOpcode op, LIns *cond, uintptr_t targetpc);
         LIns *retIns(LIns *val);
         LIns *loadToplevel();
+        LIns *loadScope();
         LIns *initMultiname(Multiname* multiname, int& csp, bool isDelete =false);
         LIns *storeAtomArgs(int count, int index);
         LIns *storeAtomArgs(LIns *obj, int count, int index);

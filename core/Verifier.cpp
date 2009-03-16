@@ -750,12 +750,7 @@ namespace avmplus
  					if (toplevel->verifyErrorClass() != NULL)
  						verifyFailed(kInvalidBaseClassError);
 				}
-				int extraScopes = state->scopeDepth;
-				ftraits->scope = ScopeTypeChain::create(core->GetGC(), scope, extraScopes);
-				for (int i=0,j=scope->size, n=state->scopeDepth; i < n; i++, j++)
-				{
-					ftraits->scope->setScopeAt(j, state->scopeValue(i).traits, state->scopeValue(i).isWith);
-				}
+				ftraits->scope = ScopeTypeChain::create(core->GetGC(), scope, state, NULL, NULL);
 				if (f->activationTraits())
 				{
 					// ISSUE - if nested functions, need to capture scope, not make a copy
@@ -802,16 +797,9 @@ namespace avmplus
 				// the class_index operand is resolved from the current pool.
 				AvmAssert(ctraits->pool == pool);
 				Traits *itraits = ctraits->itraits;
-				int captureScopes = state->scopeDepth;
-				ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), scope, captureScopes, 1);
-				int j=scope->size;
-				for (int i=0, n=state->scopeDepth; i < n; i++, j++)
-				{
-					cscope->setScopeAt(j, state->scopeValue(i).traits, state->scopeValue(i).isWith);
-				}
 
 				// add a type constraint for the "this" scope of static methods
-				cscope->setScopeAt(state->scopeDepth, ctraits, false);
+				ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), scope, state, NULL, ctraits);
 
 				if (state->scopeDepth > 0)
 				{
@@ -823,11 +811,8 @@ namespace avmplus
 						verifyFailed(kCorruptABCError);
 				}
 
-				ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), cscope, 1, 1);
-				iscope->setScopeAt(iscope->size-1, ctraits, false);
-
 				// add a type constraint for the "this" scope of instance methods
-				iscope->setScopeAt(iscope->size, itraits, false);
+				ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), cscope, NULL, ctraits, itraits);
 
 				ctraits->scope = cscope;
 				itraits->scope = iscope;

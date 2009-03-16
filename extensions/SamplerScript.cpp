@@ -309,7 +309,7 @@ namespace avmplus
 		{
 			// fallback answer
 			type = tl->objectClass;
-			ScopeChain *sc = vtable->scope;
+			ScopeChain* sc = vtable->scope();
 			
 			if(sc && sc->getSize() <= 1) {
 				if(sc->getSize() == 1)

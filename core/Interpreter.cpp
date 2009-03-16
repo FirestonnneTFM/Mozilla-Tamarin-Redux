@@ -691,10 +691,10 @@ namespace avmplus
  		register Atom* const scopeBase = framep + ms->local_count();
  		register Atom* volatile withBase = NULL;
  		NONDEBUGGER_ONLY( register ) int volatile scopeDepth = 0;
- 		register ScopeChain* const scope = env->vtable->scope;
+ 		register ScopeChain* const scope = env->scope();
  		register Atom* /* NOT VOLATILE */ sp = scopeBase + ms->max_scope() - 1;
  		
- 		aux_memory->dxns = scope->defaultXmlNamespace;
+ 		aux_memory->dxns = scope->getDefaultNamespace();
 		aux_memory->dxnsAddrSave = core->dxnsAddr;
  		if(info->setsDxns()) 
  			aux_memory->dxnsAddr = &aux_memory->dxns;
@@ -2302,7 +2302,7 @@ namespace avmplus
 				i2 = (intptr_t)U30ARG;  // argc
 				env->nullcheck(sp[-i2]);
 				// ISSUE if arg types were checked in verifier, this coerces again.
-				f = env->vtable->abcEnv->getMethod((uint32_t)u1);
+				f = env->abcEnv()->getMethod((uint32_t)u1);
 				a1 = f->coerceEnter((int32_t)i2, sp-i2);
 				*(sp -= i2) = a1;
 				NEXT;
@@ -2452,7 +2452,7 @@ namespace avmplus
 				// stack out: 
 				i1 = (intptr_t)U30ARG;  // argc
 				env->nullcheck(sp[-i1]);
-				env->vtable->base->init->coerceEnter((int32_t)i1, sp-i1);
+				env->super_init()->coerceEnter((int32_t)i1, sp-i1);
 				sp -= i1+1;
 				NEXT;
 			}

@@ -47,6 +47,10 @@ namespace avmplus
 	class VTable : public MMgc::GCObject
 #endif
 	{
+#if defined FEATURE_NANOJIT
+		friend class CodegenLIR;
+#endif
+
 		MethodEnv *makeMethodEnv(MethodInfo *method);
 		void addInterface(MethodInfo* virt, int disp_id);
 
@@ -71,12 +75,15 @@ namespace avmplus
 		uint32 size() const;
 #endif
 
+		inline ScopeChain* scope() const { return _scope; }
+	
 	// ------------------------ DATA SECTION BEGIN
+	private:
+		ScopeChain* const _scope;
 	public:
 		DWB(AbcEnv*) abcEnv;
 		DRCWB(Toplevel*) toplevel;   // not const because native ClassClosure ctors modify it
 		DWB(MethodEnv*) init;
-		DWB(ScopeChain*) scope;
 		DWB(VTable*) base;
 		DWB(VTable*) ivtable;
 		Traits* const traits;
