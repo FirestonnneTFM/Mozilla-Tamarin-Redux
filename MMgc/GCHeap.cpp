@@ -266,7 +266,7 @@ namespace MMgc
 		MMGC_LOCK(m_spinlock);
 
 	restart:
-		
+
 		// search from the end of the free list so we decommit big blocks
 		HeapBlock *freelist = freelists+kNumFreeLists-1;
 
@@ -323,7 +323,7 @@ namespace MMgc
 					block->dirty = false;
 					decommitSize -= block->size;
 					if(config.verbose) {
-						GCLog("decommitted %d page block\n", block->size);
+						GCLog("decommitted %d page block from %p\n", block->size, block->baseAddr);
 					}
 				}
 				else
@@ -397,7 +397,7 @@ namespace MMgc
 #endif
 			}
 		}
-		
+
 		if(config.verbose)
 			DumpHeapRep();
 	}
@@ -413,15 +413,39 @@ namespace MMgc
 		HeapBlock *nextBlock = block + block->size;
 		nextBlock->sizePrevious = block->sizePrevious;
 		
+		int newBlocksLen = blocksLen - block->size;
+
+		bool need_sentinel = (block-blocks > 0);
+
+		// Add space for the sentinel - the remaining blocks won't be contiguous
+		if(need_sentinel)
+			++newBlocksLen;
+
 		// we're removing a region so re-allocate the blocks w/o the blocks for this region
-		HeapBlock *newBlocks = new HeapBlock[blocksLen - block->size];
+		HeapBlock *newBlocks = new HeapBlock[newBlocksLen];
 		
 		// copy blocks before this block
 		memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
 		
+		size_t offset = block-blocks;
+
+		if( need_sentinel ) {
+			offset = block-blocks+1;
+
+			HeapBlock* sentinel = newBlocks +(block-blocks+1);
+			sentinel->baseAddr = NULL;
+			sentinel->size = 0;
+			sentinel->sizePrevious = block->sizePrevious;
+			sentinel->prev = NULL;
+			sentinel->next = NULL;
+#ifdef MMGC_MEMORY_PROFILER
+			sentinel->allocTrace = 0;
+#endif
+		}
+		
 		// copy blocks after
 		size_t lastChunkSize = (char*)(blocks + blocksLen) - (char*)(block + block->size);
-		memcpy(newBlocks + (block - blocks), block + block->size, lastChunkSize);
+		memcpy(newBlocks + offset, block + block->size, lastChunkSize);
 		
 		// Fix up the prev/next pointers of each freelist.  This is a little more complicated
 		// than the similiar code in ExpandHeap because blocks after the one we are free'ing
@@ -737,6 +761,77 @@ namespace MMgc
 			freelist++;
 		}
 #endif
+#if 0
+// Debugging code to find problems with block/region layout
+// This code is slow, but can be useful for tracking down issues
+// It verifies that the memory for each block corresponds to one or more regions
+// and that each region points to a valid starting block
+  		Region* r = lastRegion;
+
+		int block_idx = 0;
+		bool errors =false;
+		for(block_idx = 0; block_idx < blocksLen; ++block_idx){
+			HeapBlock* b = blocks + block_idx;
+			
+			if( !b->size )
+				continue;
+
+			int contig_size = 0;
+			r = lastRegion;
+
+			while( r ){
+				if(b->baseAddr >= r->baseAddr && b->baseAddr < r->reserveTop ) {
+					// starts in this region
+					char* end = b->baseAddr + b->size*kBlockSize;
+					if(end > (r->reserveTop + contig_size) ){
+						GCLog("error, block %d %p %d did not find a matching region\n", block_idx, b->baseAddr, b->size);
+						GCLog("Started in region %p - %p, contig size: %d\n", r->baseAddr, r->reserveTop, contig_size);
+						errors = true;
+						break;
+					}
+				}
+				else if( r->prev && r->prev->reserveTop==r->baseAddr){
+					contig_size +=r->reserveTop - r->baseAddr;
+				}
+				else{
+					contig_size = 0;
+				}
+						
+				r = r->prev;
+			}
+		}
+
+		while(r)
+			{
+				if(!blocks[r->blockId].size){
+                    for( int i = r->blockId-1; i >= 0 ; --i )
+                        if( blocks[i].size){
+							//Look for spanning blocks
+                            if( ((blocks[i].baseAddr + blocks[i].size*kBlockSize) <= r->baseAddr) ) {
+                                GCLog("Invalid block id for region %p-%p %d\n", r->baseAddr, r->reserveTop, i);
+								errors =true;
+								break;
+							}
+                            else
+                                break;
+                        }
+				}
+				r = r->prev;
+		   }
+		if( errors ){
+			r = lastRegion;
+			while(r) {
+				GCLog("%p - %p\n", r->baseAddr, r->reserveTop);
+				r = r->prev;
+			}
+			for(int b = 0; b < blocksLen; ++b ){
+				if(!blocks[b].size)
+					continue;
+				GCLog("%d %p %d\n", b, blocks[b].baseAddr, blocks[b].size); 
+			}
+			asm("int3");
+		}
+#endif	
 	}
 
 	bool GCHeap::BlocksAreContiguous(void *item1, void *item2)
@@ -841,7 +936,6 @@ namespace MMgc
 	bool GCHeap::ExpandHeap(int askSize)
 	{
 		bool retval;
-		
 		{ // lock block
 			MMGC_LOCK(m_spinlock);
 
@@ -866,7 +960,6 @@ namespace MMgc
 		{
 			Abort();
 		}
-
 		return retval;
 	}
 	 
@@ -1436,6 +1529,7 @@ namespace MMgc
 			HeapBlock *hb;
 			while(addr != r->commitTop && (hb = AddrToBlock(addr)) != NULL) {
 				GCAssert(hb->size);
+
 				if(hb->inUse())
 					c = '1';
 				else if(hb->committed)
@@ -1451,7 +1545,7 @@ namespace MMgc
 					}
 				}
 			}
-					
+
 			while(addr != r->reserveTop) {	
 				fputc('-', spyFile);
 				addr += kBlockSize;
