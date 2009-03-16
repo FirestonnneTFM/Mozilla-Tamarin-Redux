@@ -3024,6 +3024,9 @@ return the result of the comparison ToPrimitive(x) == y.
 	Stringp AvmCore::internStringUTF8(const char* cs, int len8, bool constant)
 	{
 		Stringp s = String::createUTF8(this, (const utf8_t*)cs, len8, String::kAuto, constant);
+		// createUTF8() will return NULL if we pass it invalid UTF8 data and its "strict" arg is true
+		// (which it is by default) -- check and bail if that happens.
+		if (!s) return NULL; 
 		int i = findString(s);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
