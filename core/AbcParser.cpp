@@ -387,6 +387,8 @@ namespace avmplus
 				for (uint32_t metadata = 0; metadata < metadataCount; ++metadata)
 				{
 					const uint32_t index = readU30(pos);
+					if (index >= pool->metadataCount || !metaNames)
+						toplevel->throwVerifyError(kCorruptABCError);
 					Stringp name = metaNames[index];
 					if (pool->stripMetadataIndexes.indexOf(index) != -1)
 						skip = true;  // Stripping this definition
@@ -1079,6 +1081,11 @@ namespace avmplus
 			// in an unloaded ABC range, this would be a very worthwhile optimization, but
 			// until then, it's not safe.
 			Stringp s = core->internStringUTF8((const char*)pos, len);
+
+			// internStringUTF8() will return NULL if we pass it invalid UTF8 data and its "strict" arg is true
+			// (which it is by default) -- invalid UTF8 in the ABC == verify error.
+			if (!s)	
+				toplevel->throwVerifyError(kCorruptABCError);
 
 			// Jit skips WB on string constants so make them sticky
 			// fixme -- it's incorrect to skip WB's on const's, bug was fixed; is this still required?
