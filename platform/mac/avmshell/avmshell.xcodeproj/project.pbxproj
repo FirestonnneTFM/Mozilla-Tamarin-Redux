@@ -6,6 +6,21 @@
 	objectVersion = 45;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		07F92ED10F6EA0F600C8EDAD /* shell + shell64 */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 07F92EDB0F6EA15400C8EDAD /* Build configuration list for PBXAggregateTarget "shell + shell64" */;
+			buildPhases = (
+			);
+			dependencies = (
+				07F92ED70F6EA10400C8EDAD /* PBXTargetDependency */,
+				07F92ED90F6EA10900C8EDAD /* PBXTargetDependency */,
+			);
+			name = "shell + shell64";
+			productName = All;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		0715396D0F507325004E398F /* eval-avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0715396B0F507325004E398F /* eval-avmplus.cpp */; };
 		0715396E0F507325004E398F /* eval-avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0715396B0F507325004E398F /* eval-avmplus.cpp */; };
@@ -334,6 +349,23 @@
 		D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		D940B67E0F61C62B00E72086 /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		07F92ED60F6EA10400C8EDAD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DD76F620486A84900D96B5E /* shell */;
+			remoteInfo = shell;
+		};
+		07F92ED80F6EA10900C8EDAD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 079DF7A80F3A86850031D1B4 /* shell64 */;
+			remoteInfo = shell64;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		8DD76F690486A84900D96B5E /* CopyFiles */ = {
@@ -1380,6 +1412,7 @@
 			targets = (
 				8DD76F620486A84900D96B5E /* shell */,
 				079DF7A80F3A86850031D1B4 /* shell64 */,
+				07F92ED10F6EA0F600C8EDAD /* shell + shell64 */,
 			);
 		};
 /* End PBXProject section */
@@ -1723,6 +1756,19 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		07F92ED70F6EA10400C8EDAD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DD76F620486A84900D96B5E /* shell */;
+			targetProxy = 07F92ED60F6EA10400C8EDAD /* PBXContainerItemProxy */;
+		};
+		07F92ED90F6EA10900C8EDAD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 079DF7A80F3A86850031D1B4 /* shell64 */;
+			targetProxy = 07F92ED80F6EA10900C8EDAD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		079DF7AB0F3A86860031D1B4 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1832,6 +1878,41 @@
 			};
 			name = Release_Debugger;
 		};
+		07F92ED20F6EA0F700C8EDAD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = All;
+			};
+			name = Debug;
+		};
+		07F92ED30F6EA0F700C8EDAD /* Debug_Debugger */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = All;
+			};
+			name = Debug_Debugger;
+		};
+		07F92ED40F6EA0F700C8EDAD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = All;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		07F92ED50F6EA0F700C8EDAD /* Release_Debugger */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = All;
+			};
+			name = Release_Debugger;
+		};
 		1DEB923208733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0772CD140F3C3190008DDBB6 /* avmshell32-debug.xcconfig */;
@@ -1888,6 +1969,17 @@
 				079DF9D90F3A8DEE0031D1B4 /* Debug_Debugger */,
 				079DF7AC0F3A86860031D1B4 /* Release */,
 				079DF9DC0F3A8DF80031D1B4 /* Release_Debugger */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		07F92EDB0F6EA15400C8EDAD /* Build configuration list for PBXAggregateTarget "shell + shell64" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07F92ED20F6EA0F700C8EDAD /* Debug */,
+				07F92ED30F6EA0F700C8EDAD /* Debug_Debugger */,
+				07F92ED40F6EA0F700C8EDAD /* Release */,
+				07F92ED50F6EA0F700C8EDAD /* Release_Debugger */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
