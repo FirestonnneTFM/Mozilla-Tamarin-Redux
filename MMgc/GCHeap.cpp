@@ -409,18 +409,33 @@ namespace MMgc
 		GCAssert(region->baseAddr == block->baseAddr);
 		GCAssert(region->reserveTop == block->endAddr());
 		
-		// update nextblock's sizePrevious
-		HeapBlock *nextBlock = block + block->size;
-		nextBlock->sizePrevious = block->sizePrevious;
-		
+
 		int newBlocksLen = blocksLen - block->size;
 
-		//bool need_sentinel = (block-blocks > 0);
-		bool need_sentinel = false;
+		HeapBlock *nextBlock = block + block->size;
 
+		bool need_sentinel = false;
+		bool remove_sentinel = false;
+
+		if( block->sizePrevious && nextBlock->sizePrevious ) {
+			// This block is contiguous with the blocks before and after it
+			// so we need to add a sentinel
+			need_sentinel = true;
+		}
+		else if ( !block->sizePrevious && !nextBlock->sizePrevious ) {
+			// the block is not contigous with the block before or after it - we need to remove a sentinel
+			// since there would already be one on each side.
+			remove_sentinel = true;
+		}
+
+		// update nextblock's sizePrevious
+		nextBlock->sizePrevious = need_sentinel ? 0 : block->sizePrevious;
+		
 		// Add space for the sentinel - the remaining blocks won't be contiguous
 		if(need_sentinel)
 			++newBlocksLen;
+		else if(remove_sentinel)
+			--newBlocksLen;
 
 		// we're removing a region so re-allocate the blocks w/o the blocks for this region
 		HeapBlock *newBlocks = new HeapBlock[newBlocksLen];
@@ -429,11 +444,12 @@ namespace MMgc
 		memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
 		
 		size_t offset = block-blocks;
+		int sen_offset = 0;
 
 		if( need_sentinel ) {
 			offset = block-blocks+1;
-
-			HeapBlock* sentinel = newBlocks +(block-blocks+1);
+			sen_offset = 1;
+			HeapBlock* sentinel = newBlocks + (block-blocks);
 			sentinel->baseAddr = NULL;
 			sentinel->size = 0;
 			sentinel->sizePrevious = block->sizePrevious;
@@ -442,6 +458,10 @@ namespace MMgc
 #ifdef MMGC_MEMORY_PROFILER
 			sentinel->allocTrace = 0;
 #endif
+		}
+		else if( remove_sentinel ) {
+			offset = block-blocks-1;
+			sen_offset = -1;
 		}
 		
 		// copy blocks after
@@ -457,14 +477,14 @@ namespace MMgc
 			do {
 				if (temp->prev != fl) {
 					if(temp->prev > block) {
-						temp->prev = newBlocks + (temp->prev-blocks-block->size);
+						temp->prev = newBlocks + (temp->prev-blocks-block->size) + sen_offset;
 					} else {
 						temp->prev = newBlocks + (temp->prev-blocks);
 					}
 				}
 				if (temp->next != fl) {
 					if(temp->next > block) {
-						temp->next = newBlocks + (temp->next-blocks-block->size);
+						temp->next = newBlocks + (temp->next-blocks-block->size) + sen_offset;
 					} else {
 						temp->next = newBlocks + (temp->next-blocks);
 					}
@@ -477,7 +497,7 @@ namespace MMgc
 		Region *r = lastRegion;
 		while(r) {
 			if(r->blockId > region->blockId) {
-				r->blockId -= block->size;
+				r->blockId -= (block->size-sen_offset);
 			}
 			r = r->prev;
 		}
