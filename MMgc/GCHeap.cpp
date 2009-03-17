@@ -415,7 +415,8 @@ namespace MMgc
 		
 		int newBlocksLen = blocksLen - block->size;
 
-		bool need_sentinel = (block-blocks > 0);
+		//bool need_sentinel = (block-blocks > 0);
+		bool need_sentinel = false;
 
 		// Add space for the sentinel - the remaining blocks won't be contiguous
 		if(need_sentinel)
