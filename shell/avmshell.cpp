@@ -76,8 +76,7 @@ namespace avmshell
 
 	bool show_error = false;
 
-	ShellToplevel::ShellToplevel(VTable* vtable, ScriptObject* delegate)
-		: Toplevel(vtable, delegate)
+	ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
 	{
 		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 	}
@@ -226,14 +225,9 @@ namespace avmshell
 		return toplevel;
 	}
 	
-	Toplevel* Shell::createToplevel(VTable *vtable)
+	Toplevel* Shell::createToplevel(AbcEnv* abcEnv)
 	{
-		return new (vtable->gc(), vtable->getExtraSize()) ShellToplevel(vtable, NULL);
-	}
-
-	size_t Shell::getToplevelSize() const
-	{
-		return sizeof(ShellToplevel);
+		return new (GetGC()) ShellToplevel(abcEnv);
 	}
 
 #ifdef VMCFG_EVAL

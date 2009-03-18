@@ -720,8 +720,7 @@ const int kBufferPadding = 16;
 		 */
 		Toplevel* initTopLevel();		
 
-		virtual size_t getToplevelSize() const;
-		virtual Toplevel* createToplevel(VTable *vtable);
+		virtual Toplevel* createToplevel(AbcEnv* abcEnv);
 		
 	public:
 		/**

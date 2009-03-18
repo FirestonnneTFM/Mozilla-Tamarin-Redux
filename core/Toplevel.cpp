@@ -43,27 +43,69 @@ namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
 
-	Toplevel::Toplevel(VTable* cvtable, ScriptObject* delegate)
-		: ScriptObject(cvtable, delegate)
+	Toplevel::Toplevel(AbcEnv* abcEnv) : 
+		_abcEnv(abcEnv),
+		_builtinClasses(NULL),
+		_global(NULL)
 	{
-		builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->cinits.capacity(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
-		AvmAssert(traits()->getSizeOfInstance() >= sizeof(Toplevel));
+		_builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->cinits.capacity(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+
+		AvmCore* core = this->core();
+		MMgc::GC* gc = core->GetGC();
+		PoolObject* pool = abcEnv->pool();
+		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits();
+
+		// ISSUE can we just make this the public namespace?
+		ScopeChain* emptyScope = ScopeChain::create(gc, mainTraits->scope, NULL, core->newNamespace(core->kEmptyString));
+
+			// create a temp object vtable to use, since the real one isn't created yet
+			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
+			// of Object and Class have the right scope.
+		object_ivtable = core->newVTable(core->traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
+		object_ivtable->resolveSignatures();
+
+		// global objects are subclasses of Object
+		VTable* mainVTable = core->newVTable(mainTraits, object_ivtable, emptyScope, abcEnv, this);
+		ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, mainVTable);
+		mainVTable->init = main;
+		mainVTable->resolveSignatures();
+
+		_global = new (gc, mainVTable->getExtraSize()) ScriptObject(mainVTable, NULL);
+		main->global = _global;
+
+		// create temporary vtable for Class, so we have something for OP_newclass
+		// to use when it creates Object$ and Class$.  once that happens, we replace
+		// with the real Class$ vtable.
+		class_ivtable = core->newVTable(core->traits.class_itraits, object_ivtable, emptyScope, abcEnv, this);
+		class_ivtable->resolveSignatures();
+
+		core->exportDefs(mainTraits, main);
 	}
 
-	Toplevel::~Toplevel()
+	ScriptEnv* Toplevel::mainEntryPoint() const
 	{
+		MethodEnv* me = this->global()->vtable->init;
+		AvmAssert(me->isScriptEnv());
+		return (ScriptEnv*)(me);
+	}
+
+	ClassClosure* Toplevel::findClassInPool(int class_id, PoolObject* pool)
+	{
+		Traits* traits = pool->cinits[class_id]->declaringTraits()->itraits;
+		Multiname qname(traits->ns, traits->name);
+		AvmAssert(_global != NULL);
+		ScriptObject* container = _global->vtable->init->finddef(&qname);
+
+		Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
+		ClassClosure* cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
+		return cc;
 	}
 
 	ClassClosure* Toplevel::resolveBuiltinClass(int class_id)
 	{
-		Traits *traits = core()->builtinPool->cinits[class_id]->declaringTraits()->itraits;
-		Multiname qname(traits->ns, traits->name);
-		ScriptObject *container = vtable->init->finddef(&qname);
-
-		Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
-		ClassClosure *cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
+		ClassClosure* cc = findClassInPool(class_id, core()->builtinPool);
 		//builtinClasses[class_id] = cc;
-		WBRC(core()->GetGC(), builtinClasses, &builtinClasses[class_id], cc);
+		WBRC(core()->GetGC(), _builtinClasses, &_builtinClasses[class_id], cc);
 		return cc;
 	}
 
@@ -366,7 +408,7 @@ namespace avmplus
 		m.setNamespace(core->publicNamespace);
 	}
 
-	void Toplevel::CoerceE4XMultiname(const Multiname *m, Multiname &out) const
+	void Toplevel::CoerceE4XMultiname(const Multiname *m, Multiname &out)
 	{
 		// This function is used to convert raw string access into correct
 		// Multiname types:
@@ -399,7 +441,7 @@ namespace avmplus
 			else
 			{
 				// search for a match in our nsSet for the defaultNamespace
-				Namespace *defaultNs = toplevel()->getDefaultNamespace();
+				Namespace *defaultNs = this->getDefaultNamespace();
 				bool bMatch = false;
 				for (int i=0, n=m->namespaceCount(); i < n; i++)
 				{
@@ -425,7 +467,7 @@ namespace avmplus
 					}
 					//Stringp s1 = string(getDefaultNamespace()->getPrefix());
 					//Stringp s2 = string(getDefaultNamespace()->getURI());
-					nsset->namespaces[newNameCount-1] = toplevel()->getDefaultNamespace();
+					nsset->namespaces[newNameCount-1] = this->getDefaultNamespace();
 					out.setNsset(nsset);
 				}
 				else

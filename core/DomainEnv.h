@@ -72,7 +72,7 @@ namespace avmplus
 		Domain* const				m_domain;		// Domain associated with this DomainEnv 
 		DomainEnv* const			m_base;			// Parent DomainEnv 
 		DWB(MultinameHashtable*)	m_namedScripts;	// table of named program init functions. (ns,name => MethodEnv) 
-		DRCWB(Toplevel*)			m_toplevel;
+		DWB(Toplevel*)				m_toplevel;
 	// ------------------------ DATA SECTION END
 	};
 }

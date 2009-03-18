@@ -225,7 +225,7 @@ namespace avmplus
 #ifdef DEBUGGER
 	static VTable* _newVT(VTable* vt, uint32_t sz)
 	{
-		Toplevel* toplevel = vt->toplevel;
+		Toplevel* toplevel = vt->toplevel();
 		Traits* t = Traits::newTraits(vt->abcEnv->pool(), NULL, sz, 0, TRAITSTYPE_RT);
 		return toplevel->core()->newVTable(t, NULL, NULL, NULL, toplevel);
 	}
@@ -284,8 +284,8 @@ namespace avmplus
 		}
 		
 		VTable *vtable = (VTable*)typeOrVTable;
-		if( vtable && vtable->toplevel )
-			tl = vtable->toplevel;
+		if (vtable && vtable->toplevel())
+			tl = vtable->toplevel();
 
 		ScriptObject *obj=NULL;
 		if (ptr != NULL ) {
@@ -569,7 +569,7 @@ namespace avmplus
 		if(qname)
 			qname->getMultiname(multiname);
 
-		ScriptObject *object = self->toplevel();
+		ScriptObject* object = self->toplevel()->global();
 		if(!AvmCore::isObject(a))
 		{
 			// not sure if this will be true for standalone avmplus

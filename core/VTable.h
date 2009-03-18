@@ -78,13 +78,14 @@ namespace avmplus
 #endif
 
 		inline ScopeChain* scope() const { return _scope; }
+		inline Toplevel* toplevel() const { return _toplevel; }
 	
 	// ------------------------ DATA SECTION BEGIN
 	private:
 		ScopeChain* const _scope;
+		Toplevel* const _toplevel;
 	public:
 		DWB(AbcEnv*) abcEnv;
-		DRCWB(Toplevel*) toplevel;   // not const because native ClassClosure ctors modify it
 		DWB(MethodEnv*) init;
 		DWB(VTable*) base;
 		DWB(VTable*) ivtable;

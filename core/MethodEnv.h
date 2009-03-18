@@ -78,7 +78,9 @@ namespace avmplus
 		inline DomainEnv* domainEnv() const { return _vtable->abcEnv->domainEnv(); }
 		inline ScopeChain* scope() const { return _vtable->scope(); }
 		inline MethodEnv* super_init() const { AvmAssert(_vtable->base != NULL); return _vtable->base->init; }
-		inline Toplevel* toplevel() const { return _vtable->toplevel; }
+		inline Toplevel* toplevel() const { return _vtable->toplevel(); }
+		inline Stringp traitsName() const { return _vtable->traits->name; }
+		inline Namespacep traitsNs() const { return _vtable->traits->ns; }
 
 		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
