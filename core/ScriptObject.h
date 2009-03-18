@@ -77,7 +77,7 @@ namespace avmplus
 		}
 
 		Toplevel* toplevel() const {
-			return vtable->toplevel;
+			return vtable->toplevel();
 		}
 
 		DomainEnv* domainEnv() const;

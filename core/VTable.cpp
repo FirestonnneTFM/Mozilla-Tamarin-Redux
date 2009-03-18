@@ -41,10 +41,10 @@
 namespace avmplus
 {
 	
-	VTable::VTable(Traits* _traits, VTable* _base, ScopeChain* scope, AbcEnv* _abcEnv, Toplevel* _toplevel) :
+	VTable::VTable(Traits* _traits, VTable* _base, ScopeChain* scope, AbcEnv* _abcEnv, Toplevel* toplevel) :
 		_scope(scope),
+		_toplevel(toplevel),
 		abcEnv(_abcEnv),
-		toplevel(_toplevel),
 		init(NULL),
 		base(_base),
 		ivtable(NULL),
@@ -68,7 +68,7 @@ namespace avmplus
 			return;
 		linked = true;
 		if (!traits->isResolved())
-			traits->resolveSignatures(toplevel);
+			traits->resolveSignatures(toplevel());
 
 #if defined(DEBUG) || defined(_DEBUG)
 		// have to use local variables for CodeWarrior
@@ -218,7 +218,7 @@ namespace avmplus
 
 	VTable* VTable::newParameterizedVTable(Traits* param_traits, Stringp fullname)
 	{
-		Toplevel* toplevel = this->toplevel;
+		Toplevel* toplevel = this->toplevel();
 		AvmCore* core = toplevel->core();
 		Namespacep traitsNs = this->traits->ns;
 		PoolObject* traitsPool = this->traits->pool;
@@ -243,10 +243,10 @@ namespace avmplus
 
 		VTable* objVecVTable = toplevel->objectVectorClass->vtable;
 		AbcEnv* objVecAbcEnv = objVecVTable->abcEnv;
-		Toplevel* objVecToplevel = objVecVTable->toplevel;
+		Toplevel* objVecToplevel = objVecVTable->toplevel();
 		VTable* objVecIVTable = objVecVTable->ivtable;
 
-		VTable* cvtab = core->newVTable(ctraits, objVecToplevel->class_vtable, objVecVTable->scope(), objVecAbcEnv, objVecToplevel); 
+		VTable* cvtab = core->newVTable(ctraits, objVecToplevel->class_ivtable, objVecVTable->scope(), objVecAbcEnv, objVecToplevel); 
 		VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecIVTable->scope(), objVecAbcEnv, objVecToplevel);
 		cvtab->ivtable = ivtab;
 		ivtab->init = objVecIVTable->init;

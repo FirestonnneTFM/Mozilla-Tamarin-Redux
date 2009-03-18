@@ -121,10 +121,8 @@ namespace avmshell
 
 		void setEnv(Toplevel *toplevel, int argc, char *argv[]);
 
-		virtual Toplevel* createToplevel(VTable *vtable);
+		virtual Toplevel* createToplevel(AbcEnv* abcEnv);
 		Toplevel* initShellBuiltins();
-
-		virtual size_t getToplevelSize() const;
 
 		SystemClass* systemClass;
 		PoolObject* shellPool;
@@ -164,7 +162,7 @@ namespace avmshell
 	class ShellToplevel : public Toplevel
 	{
 	public:
-		ShellToplevel(VTable* vtable, ScriptObject* delegate);
+		ShellToplevel(AbcEnv* abcEnv);
 
 		Shell* core() const {
 			return (Shell*)Toplevel::core();
@@ -179,12 +177,7 @@ namespace avmshell
 
 		ClassClosure* resolveShellClass(int class_id)
 		{
-			Traits *traits = core()->shellPool->cinits[class_id]->declaringTraits()->itraits;
-			Multiname qname(traits->ns, traits->name);
-			ScriptObject *container = vtable->init->finddef(&qname);
-
-			Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
-			ClassClosure *cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
+			ClassClosure* cc = findClassInPool(class_id, core()->shellPool);
 			WBRC(core()->GetGC(), shellClasses, &shellClasses[class_id], cc);
 			return cc;
 		}

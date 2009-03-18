@@ -340,56 +340,24 @@ namespace avmplus
 		}
 
 		AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(pool)) AbcEnv(pool, domainEnv, codeContext);
+		
+		ScriptEnv* main = NULL;
 
-		// entry point is the last script in the file
-		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits();
-
-		// ISSUE can we just make this the public namespace?
-		ScopeChain* emptyScope = ScopeChain::create(GetGC(), mainTraits->scope, NULL, newNamespace(kEmptyString));
-
-		VTable* object_vtable;
+		int n = pool->scriptCount;
 		if (toplevel == NULL)
 		{
-			// create a temp object vtable to use, since the real one isn't created yet
-			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
-			// of Object and Class have the right scope.
-			object_vtable = newVTable(traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
-			object_vtable->resolveSignatures();
-			mainTraits->resetSizeof(uint32_t(getToplevelSize()));
-		}
-		else
-		{
-			object_vtable = toplevel->object_vtable;
-		}
+			n--; // skip the last one, it's created specially by Toplevel
 
-		// global objects are subclasses of Object
-		VTable* mainVTable = newVTable(mainTraits, object_vtable, emptyScope, abcEnv, toplevel);
-		ScriptEnv* main = new (GetGC()) ScriptEnv(mainTraits->init, mainVTable);
-		mainVTable->init = main;
-
-		if (toplevel == NULL)
-		{
-			mainVTable->resolveSignatures();
-			main->global = toplevel = createToplevel(mainVTable);
+			toplevel = createToplevel(abcEnv);
 
 			// save toplevel since it was initially null 
-			mainVTable->toplevel = toplevel;
-			object_vtable->toplevel = toplevel;
 			domainEnv->setToplevel(toplevel);
-
-			// create temporary vtable for Class, so we have something for OP_newclass
-			// to use when it creates Object$ and Class$.  once that happens, we replace
-			// with the real Class$ vtable.
-			toplevel->class_vtable = newVTable(traits.class_itraits, object_vtable, emptyScope, abcEnv, toplevel);
-			toplevel->class_vtable->resolveSignatures();
-
-			traits.function_itraits->resolveSignatures(toplevel);
+			
+			main = toplevel->mainEntryPoint();
 		}
 
-		exportDefs(mainTraits, main);
-
 		// prepare the remaining scriptEnv's
-		for (int i=0, n=pool->scriptCount-1; i < n; i++)
+		for (int i=0; i < n; i++)
 		{
 			MethodInfo* script = pool->scripts[i];
 
@@ -397,10 +365,14 @@ namespace avmplus
 			// [ed] 3/24/06 why do we really care if a script is dynamic or not?
 			//AvmAssert(scriptTraits->needsHashtable);
 
-			VTable* scriptVTable = newVTable(scriptTraits, object_vtable, emptyScope, abcEnv, toplevel);
+			ScopeChain* emptyScope = ScopeChain::create(gc, scriptTraits->scope, NULL, newNamespace(kEmptyString));
+			VTable* scriptVTable = newVTable(scriptTraits, toplevel->object_ivtable, emptyScope, abcEnv, toplevel);
 			ScriptEnv* scriptEnv = new (GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
 			scriptVTable->init = scriptEnv;
 			exportDefs(scriptTraits, scriptEnv);
+			
+			if (!main)
+				main = scriptEnv;
 		}
 
 #ifdef AVMPLUS_VERIFYALL
@@ -2708,14 +2680,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	size_t AvmCore::getToplevelSize() const
+	Toplevel* AvmCore::createToplevel(AbcEnv* abcEnv)
 	{
-		return sizeof(Toplevel);
-	}
-	
-	Toplevel* AvmCore::createToplevel(VTable *vtable)
-	{
-		return new (GetGC(), vtable->getExtraSize()) Toplevel(vtable, NULL);
+		return new (GetGC()) Toplevel(abcEnv);
 	}
 
 	void AvmCore::presweep()

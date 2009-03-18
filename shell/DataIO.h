@@ -157,8 +157,7 @@ namespace avmshell
 		void ReadByteArray(ByteArray& buffer, uint32 offset, uint32 count);
 
 	protected:
-		// FIXME: make const
-		DRC(Toplevel *) m_toplevel;
+		Toplevel* const m_toplevel;
 
 		void ThrowEOFError();
 		void ThrowMemoryError();
@@ -183,8 +182,7 @@ namespace avmshell
 		void WriteByteArray(ByteArray& buffer, uint32 offset, uint32 count);
 
 	protected:
-		// FIXME: make const
-		DRC(Toplevel *) m_toplevel;
+		Toplevel* const m_toplevel;
 
 		void ThrowRangeError();
 

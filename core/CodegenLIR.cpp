@@ -4998,7 +4998,7 @@ namespace avmplus
 	LIns* CodegenLIR::loadToplevel()
 	{
 		LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
-		return loadIns(LIR_ldcp, offsetof(VTable, toplevel), vtable);
+		return loadIns(LIR_ldcp, offsetof(VTable,_toplevel), vtable);
 	}
 
 	LIns* CodegenLIR::loadScope()

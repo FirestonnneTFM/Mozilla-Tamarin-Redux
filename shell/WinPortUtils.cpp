@@ -82,7 +82,7 @@ double VMPI_getLocalTimeOffset()
 	return -gTimeZoneInfo.Bias * 60.0 * 1000.0;
 }
 
-double ConvertWin32DST(int year, SYSTEMTIME *st)
+static double ConvertWin32DST(int year, SYSTEMTIME *st)
 {
 	// The StandardDate and DaylightDate members of
 	// TIMEZONE_INFORMATION may be specified in two ways:

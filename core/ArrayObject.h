@@ -96,14 +96,14 @@ namespace avmplus
 		virtual bool delUintProperty(uint32 index);
 		virtual bool hasUintProperty(uint32 i) const;
 
-//		Atom getIntProperty(int index) const
-//		{
-//			return _getIntProperty(index);
-//		}
-//		void setIntProperty(int index, Atom value)
-//		{
-//			_setIntProperty(index, value);
-//		}
+		inline Atom getIntProperty(int index) const
+		{
+			return _getIntProperty(index);
+		}
+		inline void setIntProperty(int index, Atom value)
+		{
+			_setIntProperty(index, value);
+		}
 
 		virtual bool getAtomPropertyIsEnumerable(Atom name) const;
 		

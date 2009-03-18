@@ -341,22 +341,6 @@ namespace avmplus
 #endif
 #endif // FEATURE_NANOJIT
 
-		inline void resetSizeof(uint32_t size)
-		{
-			// @todo -- this is a hack for things like FlashPlayer that subclass
-			// Toplevel with a native class; since Toplevel is "special" we have to 
-			// be able to adjust this after creation. Eventually we should make Toplevel
-			// not be a subclass of ScriptObject (this is the case in TT) and at that point
-			// this special case can be removed.
-			AvmAssert(size <= 0xffff);
-			if (linked)
-			{
-				m_totalSize -= m_sizeofInstance;
-				m_totalSize += uint16_t(size);
-			}
-			m_sizeofInstance = uint16_t(size);
-		}
-
 		inline uint32_t getSizeOfInstance() const { return m_sizeofInstance; }
 		inline uint32_t getHashtableOffset() const { AvmAssert(linked); return m_hashTableOffset; }
 		inline uint32_t getTotalSize() const { AvmAssert(linked); return m_totalSize; }

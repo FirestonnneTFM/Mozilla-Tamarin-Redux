@@ -72,7 +72,7 @@ namespace avmplus
 				// coerce undefined -> Namespace should yield null
 				if (AvmCore::isNullOrUndefined(atom))
 				{
-					atom = NULL;
+					atom = 0;
 					break;
 				}
 				if (atomKind(atom) != kNamespaceType)
@@ -117,7 +117,7 @@ namespace avmplus
 			case BUILTIN_null:
 			case BUILTIN_void:
 				AvmAssert(!"illegal, should not happen");
-				atom = NULL;
+				atom = 0;
 				break;
 
 			case BUILTIN_date:
@@ -133,7 +133,7 @@ namespace avmplus
 				// a few intrinsic final classes can skip containsInterface calls
 				if (AvmCore::isNullOrUndefined(atom))
 				{
-					atom = NULL;
+					atom = 0;
 					break;
 				}
 				else if (atomKind(atom) == kObjectType)
@@ -158,7 +158,7 @@ namespace avmplus
 			case BUILTIN_vectorobj:	// unlike other vector types, vectorobj is NOT final
 				if (AvmCore::isNullOrUndefined(atom))
 				{
-					atom = NULL;
+					atom = 0;
 					break;
 				}
 				else if (atomKind(atom) == kObjectType)
@@ -1038,11 +1038,11 @@ namespace avmplus
     ScriptObject* MethodEnv::op_newobject(Atom* sp, int argc) const
     {
 		// pre-size the hashtable since we know how many vars are coming
-		VTable* object_vtable = toplevel()->object_vtable;
+		VTable* object_ivtable = toplevel()->object_ivtable;
 		AvmCore* core = this->core();
 
-		ScriptObject* o = new (core->GetGC(), object_vtable->getExtraSize()) 
-			ScriptObject(object_vtable, toplevel()->objectClass->prototype,
+		ScriptObject* o = new (core->GetGC(), object_ivtable->getExtraSize()) 
+			ScriptObject(object_ivtable, toplevel()->objectClass->prototype,
 					2*argc+1);
 
 		for (; argc-- > 0; sp -= 2)
@@ -1338,7 +1338,7 @@ namespace avmplus
 		VTable* fvtable = core->newVTable(ftraits, functionClass->ivtable(), fscope, abcEnv, toplevel());
 		fvtable->resolveSignatures();
 		FunctionEnv *fenv = new (core->GetGC()) FunctionEnv(function, fvtable);
-		fvtable->ivtable = toplevel()->object_vtable;
+		fvtable->ivtable = toplevel()->object_ivtable;
 
 		FunctionObject* c = new (core->GetGC(), fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
 		c->setDelegate( functionClass->prototype );
@@ -1427,7 +1427,7 @@ namespace avmplus
 		}
 		else
 		{
-			cvtable = core->newVTable(ctraits, toplevel->class_vtable, cscope, abcEnv, toplevel);
+			cvtable = core->newVTable(ctraits, toplevel->class_ivtable, cscope, abcEnv, toplevel);
 			// Don't resolve signatures for Object$ until after Class has been set up
 			// which should happen very soon after Object is setup.
 			if (itraits != core->traits.object_itraits)
@@ -1440,11 +1440,11 @@ namespace avmplus
 		if (itraits == core->traits.object_itraits) 
 		{
 			// we just defined Object
-			toplevel->object_vtable = ivtable;
+			toplevel->object_ivtable = ivtable;
 
 			// We can finish setting up the toplevel object now that
 			// we have the real Object vtable
-			VTable* toplevel_vtable = toplevel->vtable;
+			VTable* toplevel_vtable = toplevel->global()->vtable;
 			toplevel_vtable->base = ivtable;
 			toplevel_vtable->linked = false;
 			toplevel_vtable->resolveSignatures();
@@ -1452,14 +1452,14 @@ namespace avmplus
 		else if (itraits == core->traits.class_itraits) 
 		{
 			// we just defined Class
-			toplevel->class_vtable = ivtable;
+			toplevel->class_ivtable = ivtable;
 			
 			// Can't run the Object$ initializer until after Class is done since
 			// Object$ needs the real Class vtable as its base
-			VTable* objectClass_vtable = toplevel->objectClass->vtable;
-			objectClass_vtable->base = ivtable;
-			objectClass_vtable->resolveSignatures();
-			objectClass_vtable->init->coerceEnter(toplevel->objectClass->atom());
+			VTable* objectclass_ivtable = toplevel->objectClass->vtable;
+			objectclass_ivtable->base = ivtable;
+			objectclass_ivtable->resolveSignatures();
+			objectclass_ivtable->init->coerceEnter(toplevel->objectClass->atom());
 		}
 
 		CreateClassClosureProc createClassClosure = cvtable->traits->getCreateClassClosureProc();

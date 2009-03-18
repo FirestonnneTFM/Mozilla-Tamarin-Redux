@@ -54,7 +54,7 @@ namespace avmshell
  		void set_domainMemory(ScriptObject *mem);
 		
 		DWB(DomainEnv*) domainEnv;
-		DRCWB(Toplevel*) domainToplevel;
+		DWB(Toplevel*) domainToplevel;
 
 	  private:
 	    ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
