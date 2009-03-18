@@ -694,7 +694,6 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kNeedsDxns;
 		DRC(Stringp) kAsterisk;
 		DRC(Stringp) kVersion;
-		DRC(Stringp) kVector;
 #if VMCFG_METHOD_NAMES
 		DRC(Stringp) kanonymousFunc;
 #endif

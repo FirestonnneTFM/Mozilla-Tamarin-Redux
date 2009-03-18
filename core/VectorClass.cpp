@@ -433,69 +433,47 @@ namespace avmplus
 		instantiated_types = new (core()->GetGC(), 0)Hashtable(core()->GetGC());
 	}
 
+	/*static*/ Stringp VectorClass::makeVectorClassName(AvmCore* core, Traits* t)
+	{
+		Stringp s = core->newConstantStringLatin1("Vector.<");
+		s = s->append(t->formatClassName());
+		s = s->append(core->newConstantStringLatin1(">"));
+		// all callers want it interned, so let's do it here
+		return core->internString(s);
+	}
+
 	Atom VectorClass::applyTypeArgs(int argc, Atom* argv)
 	{
 		//Vector only takes 1 type argument
 		AvmAssert(argc==1);
-		if( argc != 1 )
+		if (argc != 1)
 		{
 			toplevel()->typeErrorClass()->throwError(kWrongTypeArgCountError, traits()->formatClassName(), core()->toErrorString(1), core()->toErrorString(argc));
 		}
 		Atom type = argv[0];
-		Stringp fullname = NULL;
 		AvmCore* core = this->core();
-		Traits* param_traits = NULL;
-		if( ISNULL(type) )
+
+		if (ISNULL(type))
 			return toplevel()->objectVectorClass->atom();
-		if( (type&7) == kObjectType )
+
+		if (atomKind(type) != kObjectType)
+			toplevel()->throwVerifyError(kCorruptABCError);
+
+		ScriptObject* so = AvmCore::atomToScriptObject(type);
+
+		if (so == toplevel()->intClass)
+			return toplevel()->intVectorClass->atom();
+		else if (so == toplevel()->numberClass)
+			return toplevel()->doubleVectorClass->atom();
+		else if (so == toplevel()->uintClass)
+			return toplevel()->uintVectorClass->atom();
+
+		Traits* param_traits = so->vtable->ivtable->traits;
+		Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
+
+		if (!instantiated_types->contains(fullname->atom()))
 		{
-			ScriptObject* so = AvmCore::atomToScriptObject(type);
-
-			if (so == (IntClass*)toplevel()->intClass)
-				return toplevel()->intVectorClass->atom();
-			else if( so == (NumberClass*)toplevel()->numberClass )
-				return toplevel()->doubleVectorClass->atom();
-			else if( so == (UIntClass*) toplevel()->uintClass )
-				return toplevel()->uintVectorClass->atom();
-
-			fullname = so->vtable->ivtable->traits->formatClassName();
-			param_traits = so->vtable->ivtable->traits;
-		}
-		fullname = core->intern(core->concatStrings(core->kVector, fullname->appendLatin1(">"))->atom());
-
-		if( !instantiated_types->contains(fullname->atom()) )
-		{
-			Traits* vecobj_traits = toplevel()->objectVectorClass->vtable->traits;
-			Multiname name;
-			name.setName(fullname);
-			name.setNamespace(this->traits()->ns);
-			Stringp classname = core->internString(fullname->appendLatin1("$"));
-			Multiname class_mname;
-			class_mname.setName(classname);
-			class_mname.setNamespace(this->traits()->ns);
-
-			Traits* itraits = traits()->pool->resolveParameterizedType(toplevel(), ivtable()->traits, param_traits);
-
-			Traits* ctraits = traits()->pool->getTraits(class_mname, toplevel());
-			if( !ctraits ){
-				ctraits = vecobj_traits->newParameterizedCTraits(classname, this->traits()->ns);
-			}
-
-			itraits->resolveSignatures(toplevel());
-			ctraits->resolveSignatures(toplevel());
-
-			ctraits->itraits = itraits;
-
-			VTable* objVecVTable = toplevel()->objectVectorClass->vtable;
-			VTable* objVecIVTable = toplevel()->objectVectorClass->ivtable();
-
-			// Create vtables for the new parameterized type
-			VTable* vtab = core->newVTable(ctraits, toplevel()->class_vtable, objVecVTable->scope(), objVecVTable->abcEnv, objVecVTable->toplevel); 
-			VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecIVTable->scope(), objVecIVTable->abcEnv, objVecIVTable->toplevel);
-			vtab->ivtable = ivtab;
-			ivtab->init = objVecIVTable->init;
-			vtab->resolveSignatures();
-			ivtab->resolveSignatures();
+			VTable* vtab = this->vtable->newParameterizedVTable(param_traits, fullname);
 
 			ObjectVectorClass* new_type = new (vtab->gc(), vtab->getExtraSize()) ObjectVectorClass(vtab);
 			new_type->index_type = (ClassClosure*)AvmCore::atomToScriptObject(type);
