@@ -117,3 +117,10 @@ ecma3/FunctionObjects/e15_3_1_1_1_rt , .*diff , expectedfail, known issue Object
 ecma3/FunctionObjects/e15_3_2_1_1_rt , .*diff , expectedfail, known issue Object.toString on release shows [object null] instead of [object Function-n]
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 
+
+# ppc64 debugger builds failing test suite
+# https://bugzilla.mozilla.org/show_bug.cgi?id=483649
+ecma3/TypeConversion/e9_3:Number\(false\),  ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
+ecma3/TypeConversion/e9_3:Number\(0\),      ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
+ecma3/Types/e8_5:var s:Number = 'string',   ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
+
