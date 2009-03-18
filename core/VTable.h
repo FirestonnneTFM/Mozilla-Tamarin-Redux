@@ -61,6 +61,8 @@ namespace avmplus
 #endif
 		void resolveSignatures();
 
+		VTable* newParameterizedVTable(Traits* param_traits, Stringp fullname);
+
 		inline size_t getExtraSize() const { return traits->getExtraSize(); }
 		inline MMgc::GC *gc() const { return traits->core->GetGC(); }
 

@@ -215,4 +215,45 @@ namespace avmplus
 		return size;
 	}
 #endif
+
+	VTable* VTable::newParameterizedVTable(Traits* param_traits, Stringp fullname)
+	{
+		Toplevel* toplevel = this->toplevel;
+		AvmCore* core = toplevel->core();
+		Namespacep traitsNs = this->traits->ns;
+		PoolObject* traitsPool = this->traits->pool;
+
+		Stringp classname = core->internString(fullname->appendLatin1("$"));
+		Traits* ctraits = traitsPool->getTraits(Multiname(traitsNs, classname), toplevel);
+		Traits* itraits;
+		if (!ctraits)
+		{
+			ctraits = this->traits->newParameterizedCTraits(classname, traitsNs);
+			itraits = traitsPool->resolveParameterizedType(toplevel, this->ivtable->traits, param_traits);
+			ctraits->itraits = itraits;
+		}
+		else
+		{
+			itraits = ctraits->itraits;
+		}
+
+		AvmAssert(itraits != NULL);
+		itraits->resolveSignatures(toplevel);
+		ctraits->resolveSignatures(toplevel);
+
+		VTable* objVecVTable = toplevel->objectVectorClass->vtable;
+		AbcEnv* objVecAbcEnv = objVecVTable->abcEnv;
+		Toplevel* objVecToplevel = objVecVTable->toplevel;
+		VTable* objVecIVTable = objVecVTable->ivtable;
+
+		VTable* cvtab = core->newVTable(ctraits, objVecToplevel->class_vtable, objVecVTable->scope(), objVecAbcEnv, objVecToplevel); 
+		VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecIVTable->scope(), objVecAbcEnv, objVecToplevel);
+		cvtab->ivtable = ivtab;
+		ivtab->init = objVecIVTable->init;
+
+		cvtab->resolveSignatures();
+		ivtab->resolveSignatures();
+		
+		return cvtab;
+	}
 }

@@ -216,7 +216,6 @@ namespace avmplus
 		kNeedsDxns = internConstantStringLatin1("NeedsDxns");
 		kAsterisk = internConstantStringLatin1("*");
 		kVersion = internConstantStringLatin1("Version");
-		kVector = internConstantStringLatin1("Vector.<");
 
 #if VMCFG_METHOD_NAMES
 		kanonymousFunc = newConstantStringLatin1("<anonymous>");

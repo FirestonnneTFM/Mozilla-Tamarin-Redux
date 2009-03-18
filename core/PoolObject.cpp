@@ -561,35 +561,37 @@ range_error:
 		return t;
 	}
 
-	Traits* PoolObject::resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* param_traits ) const
+	Traits* PoolObject::resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* param_traits) const
 	{
 		Traits* r = NULL;
-		if( base == core->traits.vector_itraits)
+		if (base == core->traits.vector_itraits)
 		{
 			// Only vector is parameterizable for now...
-			if(!param_traits) // Vector.<*>
-				r = core->traits.vectorobj_itraits;  
-			else if( param_traits == core->traits.int_itraits)
-				r = core->traits.vectorint_itraits;
-			else if (param_traits == core->traits.uint_itraits)
-				r = core->traits.vectoruint_itraits;
-			else if (param_traits == core->traits.number_itraits)
-				r = core->traits.vectordouble_itraits;
-			else
+			switch (Traits::getBuiltinType(param_traits))
 			{
-				Stringp fullname = core->internString( core->concatStrings(core->newConstantStringLatin1("Vector.<"), 
-					core->concatStrings(param_traits->formatClassName(), core->newConstantStringLatin1(">")))->atom());
-
-				Multiname newname;
-				newname.setName(fullname);
-				newname.setNamespace(base->ns);
-
-				r = getTraits(newname, toplevel);
-
-				if( !r )
+				case BUILTIN_any:
+					r = core->traits.vectorobj_itraits;  
+					break;
+				case BUILTIN_int:
+					r = core->traits.vectorint_itraits;
+					break;
+				case BUILTIN_uint:
+					r = core->traits.vectoruint_itraits;
+					break;
+				case BUILTIN_number:
+					r = core->traits.vectordouble_itraits;
+					break;
+				default:
 				{
-					r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns);
-					core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, r);
+					Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
+					r = getTraits(Multiname(base->ns, fullname), toplevel);
+
+					if (!r)
+					{
+						r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns);
+						core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, r);
+					}
+					break;
 				}
 			}
 		}
