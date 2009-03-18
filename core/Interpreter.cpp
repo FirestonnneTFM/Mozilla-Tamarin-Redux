@@ -3256,10 +3256,12 @@ namespace avmplus
 		}
 #endif
 		core->console << (int)off << ':';
+#ifdef AVMPLUS_WORD_CODE
+		core->formatOpcode(core->console, pc, (WordOpcode)((int32_t)opcode&0xffff), off, pool);
+#else
 		core->formatOpcode(core->console, pc, opcode, off, pool);
+#endif
 		core->console << '\n';
     }
 #endif // AVMPLUS_VERBOSE
-			
-
 }
