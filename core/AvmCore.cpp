@@ -320,6 +320,20 @@ namespace avmplus
 		return toplevel;
 	}
 
+	static ScriptEnv* initScript(AvmCore* core, Toplevel* toplevel, AbcEnv* abcEnv, MethodInfo* script)
+	{
+		Traits* scriptTraits = script->declaringTraits();
+		// [ed] 3/24/06 why do we really care if a script is dynamic or not?
+		//AvmAssert(scriptTraits->needsHashtable);
+
+		ScopeChain* scriptScope = ScopeChain::create(core->GetGC(), scriptTraits->scope, NULL, core->newNamespace(core->kEmptyString));
+		VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, scriptScope, abcEnv, toplevel);
+		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
+		scriptVTable->init = scriptEnv;
+		core->exportDefs(scriptTraits, scriptEnv);
+		return scriptEnv;
+	}
+	
 	ScriptEnv* AvmCore::prepareActionPool(PoolObject* pool,
 										  DomainEnv* domainEnv,
 										  Toplevel*& toplevel,
@@ -343,11 +357,8 @@ namespace avmplus
 		
 		ScriptEnv* main = NULL;
 
-		int n = pool->scriptCount;
 		if (toplevel == NULL)
 		{
-			n--; // skip the last one, it's created specially by Toplevel
-
 			toplevel = createToplevel(abcEnv);
 
 			// save toplevel since it was initially null 
@@ -355,24 +366,17 @@ namespace avmplus
 			
 			main = toplevel->mainEntryPoint();
 		}
-
-		// prepare the remaining scriptEnv's
-		for (int i=0; i < n; i++)
+		else
 		{
-			MethodInfo* script = pool->scripts[i];
+			// some code relies on the final script being initialized first, so we
+			// must continue that behavior
+			main = initScript(this, toplevel, abcEnv, pool->scripts[pool->scriptCount-1]);
+		}
 
-			Traits* scriptTraits = script->declaringTraits();
-			// [ed] 3/24/06 why do we really care if a script is dynamic or not?
-			//AvmAssert(scriptTraits->needsHashtable);
-
-			ScopeChain* emptyScope = ScopeChain::create(gc, scriptTraits->scope, NULL, newNamespace(kEmptyString));
-			VTable* scriptVTable = newVTable(scriptTraits, toplevel->object_ivtable, emptyScope, abcEnv, toplevel);
-			ScriptEnv* scriptEnv = new (GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
-			scriptVTable->init = scriptEnv;
-			exportDefs(scriptTraits, scriptEnv);
-			
-			if (!main)
-				main = scriptEnv;
+		// skip the final one, it's already been done
+		for (int i=0, n=pool->scriptCount-1; i < n; i++)
+		{
+			initScript(this, toplevel, abcEnv, pool->scripts[i]);
 		}
 
 #ifdef AVMPLUS_VERIFYALL
