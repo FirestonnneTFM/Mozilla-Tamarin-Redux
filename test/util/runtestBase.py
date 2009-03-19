@@ -1013,6 +1013,7 @@ class RuntestBase:
                     lexpfail += 1
                 elif res2==None:
                     outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d FAILED!' % (exitcodeExp,exitcode), self.failmsgs)))
+                    outputCalls.append((self.fail,(testName, 'captured output: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
                     lfail+= 1
             elif err!=[]:
                 outputCalls.append((self.fail,(testName, "unexpected stderr expected:'%s' actual:'%s'" % ('',err), self.failmsgs)))
