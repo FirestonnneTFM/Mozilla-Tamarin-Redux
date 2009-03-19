@@ -90,6 +90,7 @@ abcasm/coverage/I , (x64|ppc64).*-debug , skip , investigating
 abcasm/coverage/I:inclocal_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 abcasm/coverage/I:increment_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
 abcasm/coverage/StoU , .*-Dinterp , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
+abcasm/coverage/StoU , .*-ppc , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 
 # Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
 as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
