@@ -100,7 +100,8 @@ ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile-tvm.* , expectedfail,
 ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
 
 # Probably killing the stack 
-mmgc/heap_stress,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
+mmgc/heap_stress,   .*winmobile-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
+mmgc/heap_stress,   .*mac-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
 
 # diff failures
 # trim down tests to save time
@@ -124,3 +125,8 @@ ecma3/TypeConversion/e9_3:Number\(false\),  ppc64-mac-tvm-(release|debug)debugge
 ecma3/TypeConversion/e9_3:Number\(0\),      ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
 ecma3/Types/e8_5:var s:Number = 'string',   ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
 
+
+# intermittent failures on a number of platforms most recently win32
+# https://bugzilla.mozilla.org/show_bug.cgi?id=484483
+ecma3/Statements/eregress_74474_002, x86-win-tvm.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=484483
+ecma3/Statements/eregress_74474_003, x86-win-tvm.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=484483
