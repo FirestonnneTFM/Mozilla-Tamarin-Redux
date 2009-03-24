@@ -417,7 +417,7 @@ namespace MMgc
 		bool need_sentinel = false;
 		bool remove_sentinel = false;
 
-		if( block->sizePrevious && nextBlock->sizePrevious ) {
+		if( block->sizePrevious && nextBlock->size ) {
 			// This block is contiguous with the blocks before and after it
 			// so we need to add a sentinel
 			need_sentinel = true;
@@ -441,9 +441,10 @@ namespace MMgc
 		HeapBlock *newBlocks = new HeapBlock[newBlocksLen];
 		
 		// copy blocks before this block
+		GCAssert(block - blocks < newBlocksLen);
 		memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
 		
-		size_t offset = block-blocks;
+		int offset = block-blocks;
 		int sen_offset = 0;
 
 		if( need_sentinel ) {
@@ -465,8 +466,9 @@ namespace MMgc
 		}
 		
 		// copy blocks after
-		size_t lastChunkSize = (char*)(blocks + blocksLen) - (char*)(block + block->size);
-		memcpy(newBlocks + offset, block + block->size, lastChunkSize);
+		int lastChunkSize = (blocks + blocksLen) - (block + block->size);
+		GCAssert(lastChunkSize + offset == newBlocksLen);
+		memcpy(newBlocks + offset, block + block->size, lastChunkSize * sizeof(HeapBlock));
 		
 		// Fix up the prev/next pointers of each freelist.  This is a little more complicated
 		// than the similiar code in ExpandHeap because blocks after the one we are free'ing
@@ -501,13 +503,64 @@ namespace MMgc
 			}
 			r = r->prev;
 		}
-		
-		blocksLen -= block->size;
+
 		
 		delete [] blocks;
 		blocks = newBlocks;
+		blocksLen = newBlocksLen;
 		RemoveRegion(region);
+
+		// make sure we did everything correctly
 		CheckFreelist();
+		ValidateHeapBlocks();
+	}
+
+	void GCHeap::ValidateHeapBlocks()
+	{
+#ifdef _DEBUG
+		// iterate through HeapBlocks making sure:
+		// non-contiguous regions have a sentinel
+		HeapBlock *block = blocks;
+		while(block - blocks < (intptr_t)blocksLen) {
+			Region *r = AddrToRegion(block->baseAddr);
+			if(r && r->baseAddr == block->baseAddr)
+				GCAssert(r->blockId == block-blocks);
+
+			HeapBlock *next = NULL;
+			if(block->size) {
+				next = block + block->size;
+				GCAssert(next->sizePrevious == block->size);
+			}
+			HeapBlock *prev = NULL;
+			if(block->sizePrevious) {
+				prev = block - block->sizePrevious;
+				GCAssert(prev->size == block->sizePrevious);
+			} else if(block != blocks) {
+				// I have no prev and I'm not the first, check sentinel
+				HeapBlock *sentinel = block-1;
+				GCAssert(sentinel->baseAddr == NULL);
+				GCAssert(sentinel->size == 0);
+				GCAssert(sentinel->sizePrevious != 0);
+			}
+			if(block->baseAddr) {
+				if(prev)
+					GCAssert(block->baseAddr == prev->baseAddr + (kBlockSize * prev->size));
+				block = next;
+				// we should always end on a sentinel
+				GCAssert(next - blocks < (int)blocksLen);
+			} else {
+				// block is a sentinel
+				GCAssert(block->size == 0);
+				// make sure last block ends at commitTop
+				Region *prevRegion = AddrToRegion(prev->baseAddr + (prev->size*kBlockSize) - 1);
+				GCAssert(prev->baseAddr + (prev->size*kBlockSize) == prevRegion->commitTop);
+				block++;
+				// either we've reached the end or the next isn't a sentinel
+				GCAssert(block - blocks == (intptr_t)blocksLen || block->size != 0);
+			}
+		}
+		GCAssert(block - blocks == (intptr_t)blocksLen);
+#endif
 	}
 
 	GCHeap::Region *GCHeap::AddrToRegion(const void *item) const
@@ -1227,6 +1280,7 @@ namespace MMgc
 				GCAssert(b >= blocks);
 			}
 			block->sizePrevious = b->size;
+			GCAssert((block - block->sizePrevious)->size == b->size);
 		}
 		block->prev = NULL;
 		block->next = NULL;
@@ -1263,8 +1317,11 @@ namespace MMgc
 		block->sizePrevious = size;
 		block->prev         = NULL;
 		block->next         = NULL;
+		block->committed    = false;
+		block->dirty        = false;
 #ifdef MMGC_MEMORY_PROFILER
 		block->allocTrace = 0;
+		block->freeTrace = 0;
 #endif
 
 		// Replace the blocks list
@@ -1306,6 +1363,7 @@ namespace MMgc
 			GCLog("heap expanded by %d pages\n", size);
 			DumpHeapRep();
 		}
+		ValidateHeapBlocks();
 			
 		// Success!
 		return true;
@@ -1337,7 +1395,6 @@ namespace MMgc
 			delete region;
 		}
 		delete [] blocks;
-
 	}
 	
 	size_t GCHeap::GetTotalHeapSize() const
