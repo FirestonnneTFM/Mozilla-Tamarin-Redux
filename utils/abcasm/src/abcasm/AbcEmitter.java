@@ -432,9 +432,8 @@ class AbcEmitter
 				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_applytype:
-				//blockWriter.writeU30(argc(e));
-				throw new IllegalStateException("Not implemented.");
-				//break;
+				blockWriter.writeU30(insn.imm[0]);
+				break;
 			case OP_callstatic:
 				blockWriter.writeU30(insn.imm[0]);
 				blockWriter.writeU30(insn.imm[1]);
