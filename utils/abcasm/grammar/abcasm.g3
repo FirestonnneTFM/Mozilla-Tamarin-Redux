@@ -568,6 +568,7 @@ control_flow_target
  */
 integer_operands_insn
 	: int_opcode = (
+		  'applytype' |
 	      'debug' | 'debugline' | 'declocal' | 'declocal_i' |	 
 		  'getlocal' | 
 		  'getscopeobject' |
