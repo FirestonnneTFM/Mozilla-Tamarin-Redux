@@ -753,6 +753,20 @@ function MakeDate( day,	time ) {
 	}
 	return ( day * msPerDay	) +	time;
 }
+
+
+// Compare 2 dates, they are considered equal if the difference is less than 1 second
+function compareDate(d1, d2) {
+    //Dates may be off by a second
+    if (d1 == d2) {
+        return true;
+    } else if (Math.abs(new Date(d1) - new Date(d2)) <= 1000) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function TimeClip( t ) {
 	if ( isNaN(	t )	) {
 		return ( Number.NaN	);
