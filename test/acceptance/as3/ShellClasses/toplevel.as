@@ -105,10 +105,53 @@
       true,
       time>0);
     print("metric System.getTimer "+getTimer());
+    
+    
+    // Bug 407894: getTimer() returns values that are a power of 2
+    // https://bug407894.bugzilla.mozilla.org/attachment.cgi?id=293543
+    function notPower2():Boolean {
+        // it is possible that there could be a timer returned that is a power
+        // of 2, so check multiple times in a row that the timer is not a power of 2.
+        var count:int = 0;
+        var sleeper:int = 2;
+        var d1:Date = new Date()
+        for(var i:int = 0; i < 5; i++){
+            var t1:int = getTimer();  
+            var t2:int;
+            while ( (t2 = getTimer()) == t1 ) {
+                // Do some work in order to take up CPU time, keep doing this until the 
+                // a call to getTimer() != what we have in t1
+                for(var j:int = 0; j < sleeper; j++){ var x:Array = [1,2,3,4,5,6,7,8,9,10]; }
+                if (sleeper == 2)
+                    sleeper <<= 2;
+            }
+            // determine if the t1 or t2 are a power of 2
+            if ( (t1 & (t1 -1)) == 0 )
+                count++;
+            if ( (t2 & (t2 -1)) == 0 )
+                count++;
+        }
+        var d2:Date = new Date()
+        trace("DATE FIDD: " + Math.abs(new Date(d1) - new Date(d2)))
+
+        if (count == 10)
+            return false;
+        else
+            return true;
+    }
+    
+    trace(notPower2());
+    AddTestCase("System getTimer NOT power of 2, bug 407894",
+      true,
+      notPower2());
+
 
     test();
 
+    
     System.trace(["trace message ln cr \n\r"]);
     System.trace(["trace message ln \n","trace message cr \r"]);
     System.write("write message to stdout");
     System.exit(0);
+    
+    
