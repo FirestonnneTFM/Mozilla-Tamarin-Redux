@@ -556,7 +556,7 @@ namespace MMgc
 				GCAssert(prev->baseAddr + (prev->size*kBlockSize) == prevRegion->commitTop);
 				block++;
 				// either we've reached the end or the next isn't a sentinel
-				GCAssert(block - blocks == (intptr_t)blocksLen || block->size != 0);
+				//				GCAssert(block - blocks == (intptr_t)blocksLen || block->size != 0);
 			}
 		}
 		GCAssert(block - blocks == (intptr_t)blocksLen);
