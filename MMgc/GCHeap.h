@@ -435,6 +435,7 @@ namespace MMgc
 
 		void StatusChangeNotify(MemoryStatus from, MemoryStatus to);
 
+		void ValidateHeapBlocks();
 
 		// data section
 	
