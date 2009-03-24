@@ -131,17 +131,13 @@
             if ( (t2 & (t2 -1)) == 0 )
                 count++;
         }
-        var d2:Date = new Date()
-        trace("DATE FIDD: " + Math.abs(new Date(d1) - new Date(d2)))
-
         if (count == 10)
             return false;
         else
             return true;
     }
     
-    trace(notPower2());
-    AddTestCase("System getTimer NOT power of 2, bug 407894",
+    AddTestCase("System getTimer bug 407894",
       true,
       notPower2());
 
