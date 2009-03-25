@@ -444,11 +444,11 @@ namespace MMgc
 		GCAssert(block - blocks < newBlocksLen);
 		memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
 		
-		int offset = block-blocks;
+		int offset = int(block-blocks);
 		int sen_offset = 0;
 
 		if( need_sentinel ) {
-			offset = block-blocks+1;
+			offset = int(block-blocks)+1;
 			sen_offset = 1;
 			HeapBlock* sentinel = newBlocks + (block-blocks);
 			sentinel->baseAddr = NULL;
@@ -461,12 +461,12 @@ namespace MMgc
 #endif
 		}
 		else if( remove_sentinel ) {
-			offset = block-blocks-1;
+			offset = int(block-blocks)-1;
 			sen_offset = -1;
 		}
 		
 		// copy blocks after
-		int lastChunkSize = (blocks + blocksLen) - (block + block->size);
+		int lastChunkSize = int(blocks + blocksLen) - int(block + block->size);
 		GCAssert(lastChunkSize + offset == newBlocksLen);
 		memcpy(newBlocks + offset, block + block->size, lastChunkSize * sizeof(HeapBlock));
 		
