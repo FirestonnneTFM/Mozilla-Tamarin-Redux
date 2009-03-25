@@ -47,9 +47,9 @@ namespace avmplus
 	class MethodEnv : public MMgc::GCObject
 #endif
 	{
+		friend class CodegenLIR;
 	#if VMCFG_METHODENV_IMPL32
 		friend class MethodInfo;
-		friend class CodegenLIR;
 		friend class CodegenIMT;
 		static Atom delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
 	#endif
@@ -333,8 +333,8 @@ namespace avmplus
 #endif
 
 	// ------------------------ DATA SECTION BEGIN
-	private:
 #if VMCFG_METHODENV_IMPL32
+	private:
 		// these are most-frequently accessed so put at offset zero
 		union 
 		{

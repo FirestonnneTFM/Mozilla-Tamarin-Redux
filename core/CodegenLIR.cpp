@@ -2944,7 +2944,7 @@ namespace avmplus
 		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv,_impl32), method);
 #else
 		LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnv, method), method);
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, impl32), meth);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, _impl32), meth);
 #endif
 		LIns* apAddr = leaIns(pad, ap);
 
@@ -5717,7 +5717,7 @@ namespace avmplus
 		LIns *target = lirout->insLoad(LIR_ldp, env, (int)offsetof(MethodEnv, _impl32));
 	#else
 		LIns *af = lirout->insLoad(LIR_ldp, env, offsetof(MethodEnv, method));
-		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, impl32));
+		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, _impl32));
 	#endif
 		LInsp args[] = { ap_param, argc_param, env, target };
 		MethodSignaturep ems = e->virt->getMethodSignature();

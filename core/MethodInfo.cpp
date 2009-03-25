@@ -47,14 +47,19 @@ namespace avmplus
 	using namespace MMgc;
 
 #if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
-	MethodInfo::MethodInfo(void* tramp) : _method_id(-1)
+	MethodInfo::MethodInfo(void* tramp, Traits* declTraits) :
+		_pool(declTraits->pool),
+		_declaringTraits(declTraits),
+		_abc_info_pos(NULL),
+		_flags(RESOLVED),
+		_method_id(-1)
 	{
 		union {
 			void* t;
 			AtomMethodProc p;
 		};
 		t = tramp;
-		this->impl32 = p;
+		this->_impl32 = p;
 	}
 #endif
 

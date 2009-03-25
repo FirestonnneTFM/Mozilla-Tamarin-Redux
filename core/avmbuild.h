@@ -406,7 +406,9 @@
 
 // define this to 1 to keep a shadow copy of impl32 in MethodEnv (vs MethodInfo only).
 // more speed, but more memory used... not clear if the tradeoff is worthwhile yet.
-#define VMCFG_METHODENV_IMPL32 1
+#ifndef VMCFG_METHODENV_IMPL32
+#  define VMCFG_METHODENV_IMPL32 1
+#endif
 
 // If you need to build on a system that forbids static initialization of global constant function pointers,
 // define this -- it will change the way native-method-table initialization is done to be compatible (at the

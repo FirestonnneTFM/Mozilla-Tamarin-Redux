@@ -197,7 +197,7 @@ namespace avmplus
 		MethodInfo(InitMethodStub, Traits* declTraits);
 
 #if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
-		MethodInfo(void* tramp);
+		MethodInfo(void* tramp, Traits* declTraits);
 #endif
 
 		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
