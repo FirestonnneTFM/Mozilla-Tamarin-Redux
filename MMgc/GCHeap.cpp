@@ -466,7 +466,7 @@ namespace MMgc
 		}
 		
 		// copy blocks after
-		int lastChunkSize = int(blocks + blocksLen) - int(block + block->size);
+		int lastChunkSize = int(blocks + blocksLen - block + block->size);
 		GCAssert(lastChunkSize + offset == newBlocksLen);
 		memcpy(newBlocks + offset, block + block->size, lastChunkSize * sizeof(HeapBlock));
 		
