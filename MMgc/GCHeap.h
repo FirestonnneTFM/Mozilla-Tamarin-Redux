@@ -47,7 +47,7 @@ namespace MMgc
 		GCHeapConfig() : 
 		initialSize(128), 
 		heapLimit((size_t)-1), 
-		trimVirtualMemory(true),
+		trimVirtualMemory(false),
 		verbose(false),
 		returnMemory(true),
 #ifdef MMGC_MEMORY_PROFILER			
