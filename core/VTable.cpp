@@ -148,11 +148,7 @@ namespace avmplus
 #else
 						//imt[i] = new (gc) MethodEnv((void*)(b&~7));
 						// note that the only field of this that's really used is _impl32...
-						MethodInfo* mi = new (gc) MethodInfo(AvmCore::getITrampAddr(b));
-						// if we don't fill these in properly, MethodEnv ctor will barf
-						mi->declaringTraits = this->traits;
-						mi->pool = this->traits->pool;
-						mi->flags |= MethodInfo::LINKED;
+						MethodInfo* mi = new (gc) MethodInfo(AvmCore::getITrampAddr(b), this->traits);
 						MethodEnv* e = new (gc) MethodEnv(mi, this);
 #endif
 						WB(gc, this, &imt[i], e);
