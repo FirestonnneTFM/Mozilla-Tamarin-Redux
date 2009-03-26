@@ -401,7 +401,6 @@ namespace MMgc
 		if(config.verbose)
 			DumpHeapRep();
 	}
-
 	void GCHeap::RemoveBlock(HeapBlock *block)
 	{	
 		Region *region = AddrToRegion(block->baseAddr);
@@ -422,7 +421,7 @@ namespace MMgc
 			// so we need to add a sentinel
 			need_sentinel = true;
 		}
-		else if ( !block->sizePrevious && !nextBlock->sizePrevious ) {
+		else if ( !block->sizePrevious && !nextBlock->size ) {
 			// the block is not contigous with the block before or after it - we need to remove a sentinel
 			// since there would already be one on each side.
 			remove_sentinel = true;
@@ -441,11 +440,12 @@ namespace MMgc
 		HeapBlock *newBlocks = new HeapBlock[newBlocksLen];
 		
 		// copy blocks before this block
-		GCAssert(block - blocks < newBlocksLen);
+		GCAssert(block - blocks <= newBlocksLen);
 		memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
 		
 		int offset = int(block-blocks);
 		int sen_offset = 0;
+		HeapBlock *src = block + block->size;
 
 		if( need_sentinel ) {
 			offset = int(block-blocks)+1;
@@ -461,15 +461,16 @@ namespace MMgc
 #endif
 		}
 		else if( remove_sentinel ) {
-			offset = int(block-blocks)-1;
+			// skip trailing sentinel
+			src++;
 			sen_offset = -1;
 		}
 		
 		// copy blocks after
-		int lastChunkSize = int(blocks + blocksLen - block + block->size);
+		int lastChunkSize = int((blocks + blocksLen) - src);
 		GCAssert(lastChunkSize + offset == newBlocksLen);
-		memcpy(newBlocks + offset, block + block->size, lastChunkSize * sizeof(HeapBlock));
-		
+		memcpy(newBlocks + offset, src, lastChunkSize * sizeof(HeapBlock));
+
 		// Fix up the prev/next pointers of each freelist.  This is a little more complicated
 		// than the similiar code in ExpandHeap because blocks after the one we are free'ing
 		// are sliding down by block->size
@@ -540,7 +541,7 @@ namespace MMgc
 				HeapBlock *sentinel = block-1;
 				GCAssert(sentinel->baseAddr == NULL);
 				GCAssert(sentinel->size == 0);
-				//FIXME:				GCAssert(sentinel->sizePrevious != 0);
+				GCAssert(sentinel->sizePrevious != 0);
 			}
 			if(block->baseAddr) {
 				if(prev)
@@ -553,11 +554,11 @@ namespace MMgc
 				GCAssert(block->size == 0);
 				// FIXME: the following asserts are firing and we need to understand why, could be bugs
 				// make sure last block ends at commitTop
-				//Region *prevRegion = AddrToRegion(prev->baseAddr + (prev->size*kBlockSize) - 1);
-				//GCAssert(prev->baseAddr + (prev->size*kBlockSize) == prevRegion->commitTop);
+				Region *prevRegion = AddrToRegion(prev->baseAddr + (prev->size*kBlockSize) - 1);
+				GCAssert(prev->baseAddr + (prev->size*kBlockSize) == prevRegion->commitTop);
 				block++;
 				// either we've reached the end or the next isn't a sentinel
-				//				GCAssert(block - blocks == (intptr_t)blocksLen || block->size != 0);
+				GCAssert(block - blocks == (intptr_t)blocksLen || block->size != 0);
 			}
 		}
 		GCAssert(block - blocks == (intptr_t)blocksLen);
