@@ -48,7 +48,7 @@ namespace avmplus
 		_builtinClasses(NULL),
 		_global(NULL)
 	{
-		_builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->cinits.capacity(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+		_builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->classCount(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 
 		AvmCore* core = this->core();
 		MMgc::GC* gc = core->GetGC();
@@ -91,7 +91,7 @@ namespace avmplus
 
 	ClassClosure* Toplevel::findClassInPool(int class_id, PoolObject* pool)
 	{
-		Traits* traits = pool->cinits[class_id]->declaringTraits()->itraits;
+		Traits* traits = pool->getClassTraits(class_id)->itraits;
 		Multiname qname(traits->ns, traits->name);
 		AvmAssert(_global != NULL);
 		ScriptObject* container = _global->vtable->init->finddef(&qname);

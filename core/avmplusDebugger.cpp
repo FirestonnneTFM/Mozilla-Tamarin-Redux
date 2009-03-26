@@ -396,10 +396,9 @@ namespace avmplus
 	void Debugger::scanResources(AbcFile* file, PoolObject* pool)
 	{
 		// walk all methods 
-		int mCount = pool->methodCount;
-		for(int i=0; i<mCount; i++)
+		for(uint32_t i=0, n = pool->methodCount(); i<n; i++)
 		{
-			MethodInfo* f = pool->methods[i];
+			MethodInfo* f = pool->getMethodInfo(i);
 			if (f->hasMethodBody())
 			{
 				// yes there is code for this method

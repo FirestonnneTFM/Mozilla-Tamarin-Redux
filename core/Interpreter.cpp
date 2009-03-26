@@ -662,13 +662,13 @@ namespace avmplus
 	#ifdef AVMPLUS_WORD_CODE
  		register const bytecode_t* volatile codeStart = info->word_code_start();
 	#else
- 		register const bytecode_t* volatile codeStart = info->abc_code_start();
+ 		register const bytecode_t* volatile codeStart = ms->abc_code_start();
 	#endif
 #endif
 #ifdef AVMPLUS_WORD_CODE
  		register const bytecode_t* /* NOT VOLATILE */ pc = info->word_code_start();
 #else
- 		register const bytecode_t* /* NOT VOLATILE */ pc = info->abc_code_start();
+ 		register const bytecode_t* /* NOT VOLATILE */ pc = ms->abc_code_start();
 #endif
  		intptr_t volatile expc=0;
  		MMgc::GC::AllocaAutoPtr _framep;
@@ -2288,9 +2288,9 @@ namespace avmplus
             INSTR(newclass) {
 				SAVE_EXPC;
 				u1 = U30ARG;
-				MethodInfo *cinit = pool->cinits[(uint32_t)u1];
+				Traits* ctraits = pool->getClassTraits((uint32_t)u1);
 				o1 = (ScriptObject*)(~7 & toplevel->coerce(sp[0], CLASS_TYPE));
-				sp[0] = env->newclass(cinit, (ClassClosure*)o1, scope, scopeBase)->atom();
+				sp[0] = env->newclass(ctraits, (ClassClosure*)o1, scope, scopeBase)->atom();
 				NEXT;
 			}
 				

@@ -210,8 +210,9 @@ namespace avmplus
 
 	MethodInfo* AbcParser::resolveMethodInfo(uint32 index) const
 	{
-		if (index >= pool->methodCount)
-			toplevel->throwVerifyError(kMethodInfoExceedsCountError, core->toErrorString(index), core->toErrorString(pool->methodCount));
+		const uint32_t c = pool->methodCount();
+		if (index >= c)
+			toplevel->throwVerifyError(kMethodInfoExceedsCountError, core->toErrorString(index), core->toErrorString(c));
 
 		MethodInfo* f = pool->getMethodInfo(index);
 		if (!f)
@@ -336,8 +337,8 @@ namespace avmplus
             TraitKind kind = (TraitKind) (tag & 0x0f);
 			
 			bool skip = false;
-			uint32_t class_info = 0;
-			uint32_t method_info = 0;
+			uint32_t class_index = 0;
+			uint32_t method_index = 0;
 			uint32_t slot_id = 0;
 			uint32_t value_index = 0;
 			uint32_t earlyDispId = 0;
@@ -367,13 +368,13 @@ namespace avmplus
 				break;
 			case TRAIT_Class:
 				readU30(pos); // slot id
-				class_info = readU30(pos);
+				class_index = readU30(pos);
 				break;
 			case TRAIT_Getter:
 			case TRAIT_Setter:
 			case TRAIT_Method:
 				earlyDispId = readU30(pos);			// disp id
-				method_info = readU30(pos);	
+				method_index = readU30(pos);	
 				break;
 			default:
 				// unsupported traits type
@@ -427,14 +428,12 @@ namespace avmplus
 				if (kind == TRAIT_Class)
 				{
 					// get the class type
-					if (class_info >= classCount)
-						toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_info), core->toErrorString(classCount));
+					if (class_index >= classCount)
+						toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_index), core->toErrorString(classCount));
 
-					MethodInfo* cinit = pool->cinits[class_info];
-					if (!cinit) 
-						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_info));
-
-					Traits* ctraits = cinit->declaringTraits();
+					Traits* ctraits = pool->getClassTraits(class_index);
+					if (!ctraits) 
+						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_index));
 
 					#ifdef AVMPLUS_VERBOSE
 					if (pool->verbose)
@@ -491,7 +490,7 @@ namespace avmplus
 					core->console << "            " << traitNames[kind]
 						<< " name=" << Multiname::format(core, ns, name)
 						<< " disp_id=" << earlyDispId << " (ignored)"
-					    << " method_info=" << method_info
+					    << " method_index=" << method_index
 						<< " attr=" << ((tag&ATTR_final)?"final":"virtual");
 					if (tag&ATTR_override)
 						core->console << "|override";
@@ -500,12 +499,12 @@ namespace avmplus
 				#endif
 
 				// id is unused here
-				MethodInfo* f = resolveMethodInfo(method_info);
+				MethodInfo* f = resolveMethodInfo(method_index);
 
 				#if VMCFG_METHOD_NAMES
 				if (core->config.methodNames)
 				{
-					pool->method_name_indices.set(method_info, -int32_t(qn_index));
+					pool->_method_name_indices.set(method_index, -int32_t(qn_index));
 				}
 				#else
 				(void)qn_index;
@@ -566,14 +565,19 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		MMGC_MEM_TYPE(pool);
-		pool->methods.ensureCapacity(size);
+		pool->_methods.ensureCapacity(size);
+#ifdef DEBUGGER
+		if (core->debugger())
+		{
+			pool->_method_dmi.ensureCapacity(size);
+		}
+#endif
 #if VMCFG_METHOD_NAMES
 		if (core->config.methodNames)
 		{
-			pool->method_name_indices.ensureCapacity(size);
+			pool->_method_name_indices.ensureCapacity(size);
 		}
 #endif
-		pool->methodCount = methodCount;
 
 #ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
@@ -651,7 +655,7 @@ namespace avmplus
 			#if VMCFG_METHOD_NAMES
 			if (core->config.methodNames)
 			{
-				pool->method_name_indices.set(i, int32_t(name_index));
+				pool->_method_name_indices.set(i, int32_t(name_index));
 			}
 			#endif
 
@@ -680,7 +684,7 @@ namespace avmplus
 			}
 
 			// save method info pointer.  we will verify code later.
-			pool->methods.set(i, info);
+			pool->_methods.set(i, info);
 #ifdef DEBUGGER
 			// don't create the corresponding DebuggerMethodInfo yet, we'll do that in parseMethodBodies
 #endif
@@ -775,8 +779,8 @@ namespace avmplus
 			int offset = (int)(pos-startpos);
 #endif
 
-			uint32_t method_info = readU30(pos);
-			MethodInfo* info = resolveMethodInfo(method_info);
+			uint32_t method_index = readU30(pos);
+			MethodInfo* info = resolveMethodInfo(method_index);
 
 			const byte *body_pos = pos;
 
@@ -817,7 +821,7 @@ namespace avmplus
             int exception_count = readU30(pos);
 
 			if_verbose(
-				core->console << "    " << offset << ":method["<<method_info<<"] max_stack=" << max_stack
+				core->console << "    " << offset << ":method["<<method_index<<"] max_stack=" << max_stack
 					<< " local_count=" << local_count 
 					<< " init_scope_depth=" << init_scope_depth 
 					<< " max_scope_depth=" << max_scope_depth
@@ -893,7 +897,8 @@ namespace avmplus
 #ifdef DEBUGGER
 				if (core->debugger())
 				{
-					info->initDMI(local_count, code_length, max_scope_depth - init_scope_depth);
+					DebuggerMethodInfo* dmi = DebuggerMethodInfo::create(core, local_count, code_length, max_scope_depth - init_scope_depth);
+					pool->_method_dmi.set(method_index, dmi);
 				}
 #endif
 
@@ -1484,8 +1489,7 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		// allocate room for class infos early, to handle nested classes
-		pool->cinits.ensureCapacity(classCount);
-		pool->classCount = classCount;
+		pool->_classes.ensureCapacity(classCount);
 
 		instances.ensureCapacity(classCount);
 
@@ -1711,7 +1715,7 @@ namespace avmplus
 			}
 			#endif
 
-			pool->cinits.set(i, cinit);
+			pool->_classes.set(i, ctraits);
         }
     }
 

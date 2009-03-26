@@ -52,7 +52,7 @@ namespace avmplus
 	class AbcFile;
 	class DebuggerMethodInfo : public MMgc::GCObject
 	{
-	public:
+	private:
 		inline explicit DebuggerMethodInfo(int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes) :
 			firstSourceLine(0),
 			lastSourceLine(0),
@@ -60,6 +60,10 @@ namespace avmplus
 			local_count(_local_count), 
 			codeSize(_codeSize), 
 			max_scopes(_max_scopes) {}
+
+	public:
+
+		static DebuggerMethodInfo* create(AvmCore* core, int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes);
 
 		DWB(AbcFile*)			file;				// the abc file from which this method came
 		int32_t					firstSourceLine;	// source line number where function starts
@@ -217,8 +221,6 @@ namespace avmplus
 		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
-		void initDMI(int32_t local_count, uint32_t codeSize, int32_t max_scopes);
-
 		void boxLocals(void* src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length);
 		void unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length);
 
@@ -240,6 +242,7 @@ namespace avmplus
 
 	private:
 		Stringp getRegName(int index) const;
+		DebuggerMethodInfo* dmi() const;
 #endif
 
 	public:
@@ -342,11 +345,6 @@ namespace avmplus
 		inline int word_code_cache_size() const { AvmAssert(!isNative()); return _abc.word_code.cache_size; }
 		inline void set_word_code_cache_size(int s) { AvmAssert(!isNative()); _abc.word_code.cache_size = s; }
 	
-	#else
-
-		inline const uint8_t* abc_code_start() const { AvmAssert(!isNative()); return _abc.abc_codeStart; }
-		inline void set_abc_code_start(const uint8_t* p) { AvmAssert(!isNative()); _abc.abc_codeStart = p; }
-	
 	#endif
 
 		inline int method_id() const { return _method_id; }
@@ -394,9 +392,6 @@ namespace avmplus
 				ExceptionHandlerTable*	exceptions;
 				int						cache_size;     // Number of items in lookup cache
 			} word_code;
-	#else
-			//@todo, this is trivially derived from abc_body_pos and should be cached in MethodSignature
-			const uint8_t*		abc_codeStart;			// pointer to first instruction
 	#endif
 		};
 
@@ -412,9 +407,6 @@ namespace avmplus
 		DWB(Traits*)			_declaringTraits;
 		DWB(Traits*)			_activationTraits;
 		PoolObject* const		_pool;
-#ifdef DEBUGGER
-		DebuggerMethodInfo*		_dmi;				// written with explicit DWB
-#endif
 		const uint8_t* const	_abc_info_pos;		// pointer to abc MethodInfo record 
 		int						_flags;				// see bitmask defs above 
 		const int				_method_id;
@@ -454,6 +446,11 @@ namespace avmplus
 		inline int max_scope() const { AvmAssert(!(_flags & MethodInfo::NATIVE)); return _max_scope; }
 		inline int frame_size() const { AvmAssert(!(_flags & MethodInfo::NATIVE)); return _frame_size; }
 
+	#ifdef AVMPLUS_WORD_CODE
+	#else
+		inline const uint8_t* abc_code_start() const { return _abc_code_start; }
+	#endif
+	
 		inline int requiredParamCount() const { return _param_count - _optional_count; }
 
 		inline Traits* paramTraits(int i) const { AvmAssert(i >= 0 && i <= _param_count); return _args[i].paramType; }
@@ -472,6 +469,10 @@ namespace avmplus
 	// ------------------------ DATA SECTION BEGIN
 	private:
 		Traits*		_returnTraits;		// written with explicit WB
+	#ifdef AVMPLUS_WORD_CODE
+	#else
+		const uint8_t*	_abc_code_start; // start of ABC body
+	#endif
 		int			_param_count;		// number of declared parameters including optionals 
 		int			_optional_count;	// last optional_count params are optional 
 		int			_rest_offset;		// offset to first rest arg, including the instance parameter. this is sum(sizeof(paramType(0..N)))

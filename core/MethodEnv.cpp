@@ -1356,7 +1356,7 @@ namespace avmplus
      * given a classInfo, create a new ClassClosure object and return it on the stack.
      */
 
-	ClassClosure* MethodEnv::newclass(MethodInfo* cinit,
+	ClassClosure* MethodEnv::newclass(Traits* ctraits,
 							ClassClosure *base,
 							ScopeChain* outer,
 							Atom* scopes) const
@@ -1367,7 +1367,6 @@ namespace avmplus
 		SAMPLE_FRAME("[newclass]", core);
 		Toplevel* toplevel = this->toplevel();
 
-		Traits* ctraits = cinit->declaringTraits();
 		Traits* itraits = ctraits->itraits;
 
 		// finish resolving the base class

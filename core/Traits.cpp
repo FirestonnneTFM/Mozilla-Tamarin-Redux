@@ -1258,8 +1258,8 @@ namespace avmplus
 					uint32_t slotid = sic.calc_id(ne.id);
 					// note, for TRAIT_Class, AbcParser::parseTraits has already verified that pool->cinits[ne.info] is not null
 					Traitsp slotType = (ne.kind == TRAIT_Class) ? 
-										(Traitsp)pool->cinits[ne.info]->declaringTraits() :
-										this->pool->resolveTypeName(ne.info, toplevel);
+										pool->getClassTraits(ne.info) :
+										pool->resolveTypeName(ne.info, toplevel);
 					uint32_t slotOffset = is8ByteSlot(slotType) ? 
 											pad8(hole, nextSlotOffset) : 
 											pad4(hole, nextSlotOffset);	// all slots get at least 4 bytes, even bool

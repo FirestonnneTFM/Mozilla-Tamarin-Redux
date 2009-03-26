@@ -69,9 +69,6 @@ namespace avmplus
 		_declaringTraits(declTraits),
 		_activationTraits(NULL),
 		_pool(declTraits->pool),
-#ifdef DEBUGGER
-		_dmi(NULL),
-#endif
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
 		_method_id(-1)
@@ -88,9 +85,6 @@ namespace avmplus
 		_declaringTraits(NULL),
 		_activationTraits(NULL),
 		_pool(pool),
-#ifdef DEBUGGER
-		_dmi(NULL),
-#endif
 		_abc_info_pos(abc_info_pos),
 		_flags(abcFlags),
 		_method_id(method_id)
@@ -318,11 +312,8 @@ namespace avmplus
 
 #ifdef DEBUGGER
 
-	void MethodInfo::initDMI(int32_t local_count, uint32_t codeSize, int32_t max_scopes)
+	/*static*/ DebuggerMethodInfo* DebuggerMethodInfo::create(AvmCore* core, int32_t local_count, uint32_t codeSize, int32_t max_scopes)
 	{
-		AvmAssert(_dmi == NULL);
-		
-		AvmCore* core = this->pool()->core;
 		MMgc::GC* gc = core->GetGC();
 		const uint32_t extra = (local_count <= 1) ? 0 : (sizeof(Stringp)*(local_count-1));
 
@@ -332,56 +323,56 @@ namespace avmplus
 		{
 			WBRC(gc, dmi, &dmi->localNames[i], undef);
 		}
-		WB(gc, this, &this->_dmi, dmi);
+		return dmi;
 	}
 
 	AbcFile* MethodInfo::file() const
 	{
-		AvmAssert(_dmi != NULL);
-		return _dmi ? (AbcFile*)(_dmi->file) : NULL;
+		DebuggerMethodInfo* dmi = this->dmi();
+		return dmi ? (AbcFile*)(dmi->file) : NULL;
 	}
 	
 	int32_t MethodInfo::firstSourceLine() const
 	{
-		AvmAssert(_dmi != NULL);
-		return _dmi ? _dmi->firstSourceLine : 0;
+		DebuggerMethodInfo* dmi = this->dmi();
+		return dmi ? dmi->firstSourceLine : 0;
 	}
 
 	int32_t MethodInfo::lastSourceLine() const
 	{
-		AvmAssert(_dmi != NULL);
-		return _dmi ? _dmi->lastSourceLine : 0;
+		DebuggerMethodInfo* dmi = this->dmi();
+		return dmi ? dmi->lastSourceLine : 0;
 	}
 
 	int32_t MethodInfo::offsetInAbc() const
 	{
-		AvmAssert(_dmi != NULL);
-		return _dmi ? _dmi->offsetInAbc : 0;
+		DebuggerMethodInfo* dmi = this->dmi();
+		return dmi ? dmi->offsetInAbc : 0;
 	}
 
 	uint32_t MethodInfo::codeSize() const
 	{
-		AvmAssert(_dmi != NULL);
-		return _dmi ? _dmi->codeSize : 0;
+		DebuggerMethodInfo* dmi = this->dmi();
+		return dmi ? dmi->codeSize : 0;
 	}
 
 	int32_t MethodInfo::local_count() const
 	{
-		AvmAssert(_dmi != NULL);
-		return _dmi ? _dmi->local_count : 0;
+		DebuggerMethodInfo* dmi = this->dmi();
+		return dmi ? dmi->local_count : 0;
 	}
 
 	int32_t MethodInfo::max_scopes() const
 	{
-		AvmAssert(_dmi != NULL);
-		return _dmi ? _dmi->max_scopes : 0;
+		DebuggerMethodInfo* dmi = this->dmi();
+		return dmi ? dmi->max_scopes : 0;
 	}
 
 	void MethodInfo::setFile(AbcFile* file) 
 	{
-		AvmAssert(_dmi != NULL);
-		if (_dmi)
-			_dmi->file = file;
+		DebuggerMethodInfo* dmi = this->dmi();
+		if (dmi)
+			dmi->file = file;
 	}
 
 	Stringp MethodInfo::getArgName(int index) 
@@ -396,45 +387,62 @@ namespace avmplus
 
 	void MethodInfo::updateSourceLines(int32_t linenum, int32_t offset)
 	{
-		AvmAssert(_dmi != NULL);
-		if (_dmi)
+		DebuggerMethodInfo* dmi = this->dmi();
+		if (dmi)
 		{
-			if (_dmi->firstSourceLine == 0 || linenum < _dmi->firstSourceLine)
-				_dmi->firstSourceLine = linenum;
+			if (dmi->firstSourceLine == 0 || linenum < dmi->firstSourceLine)
+				dmi->firstSourceLine = linenum;
 
-			if (_dmi->offsetInAbc == 0 || offset < _dmi->offsetInAbc)
-				_dmi->offsetInAbc = offset;
+			if (dmi->offsetInAbc == 0 || offset < dmi->offsetInAbc)
+				dmi->offsetInAbc = offset;
 
-			if (_dmi->lastSourceLine == 0 || linenum > _dmi->lastSourceLine)
-				_dmi->lastSourceLine = linenum;
+			if (dmi->lastSourceLine == 0 || linenum > dmi->lastSourceLine)
+				dmi->lastSourceLine = linenum;
 		}
+	}
+
+	// Note: dmi() can legitimately return NULL (for MethodInfo's that were synthesized by Traits::genInitBody).
+	// However: 
+	// -- we assert that the result is not null because we should never be called for such MethodInfo instances.
+	// -- the caller always checks for null (despite the claim above) because crashing the Debugger would be a faux pas,
+	// and historically the Debugger code is riddled with lots of extra such checks-for-null, so why stop now?
+	DebuggerMethodInfo* MethodInfo::dmi() const
+	{
+		// rely on the fact that not-in-pool MethodInfo returns -1,
+		// which will always be > methodCount as uint32
+		const uint32_t method_id = uint32_t(this->method_id());
+		AvmAssert(_pool->core->debugger() != NULL);
+		// getDebuggerMethodInfo quietly returns NULL for out-of-range.
+		DebuggerMethodInfo* d = _pool->getDebuggerMethodInfo(method_id);
+		AvmAssert(d != NULL);
+		return d;
 	}
 
 	Stringp MethodInfo::getRegName(int slot) const 
 	{
-		AvmAssert(_dmi != NULL);
+		DebuggerMethodInfo* dmi = this->dmi();
 
-		if (_dmi && slot >= 0 && slot < _dmi->local_count)
-			return _dmi->localNames[slot];
+		if (dmi && slot >= 0 && slot < dmi->local_count)
+			return dmi->localNames[slot];
 
 		return this->pool()->core->kundefined;
 	}
 
 	void MethodInfo::setRegName(int slot, Stringp name)
 	{
-		AvmAssert(_dmi != NULL);
+		DebuggerMethodInfo* dmi = this->dmi();
 
-		if (!_dmi || slot < 0 || slot >= _dmi->local_count)
+		if (!dmi || slot < 0 || slot >= dmi->local_count)
 			return;
 
 		AvmCore* core = this->pool()->core;
 
 		// [mmorearty 5/3/05] temporary workaround for bug 123237: if the register
 		// already has a name, don't assign a new one
-		if (_dmi->localNames[slot] != core->kundefined)
+		if (dmi->localNames[slot] != core->kundefined)
 			return;
 
-		WBRC(core->GetGC(), _dmi, &_dmi->localNames[slot], core->internString(name));
+		WBRC(core->GetGC(), dmi, &dmi->localNames[slot], core->internString(name));
 	}
 
 	/**
@@ -796,11 +804,17 @@ namespace avmplus
 					ms->_local_count = AvmCore::readU30(body_pos);
 					const int init_scope_depth = AvmCore::readU30(body_pos);
 					ms->_max_scope = AvmCore::readU30(body_pos) - init_scope_depth;
+				#ifdef AVMPLUS_WORD_CODE
+				#else
+					ms->_abc_code_start = body_pos;
+					AvmCore::skipU30(ms->_abc_code_start); // code_length
+				#endif
 				}
 			}
 		}
 		else
 		{
+			// this is a synthesized MethodInfo from genInitBody
 			AvmAssert(param_count == 0);
 			rest_offset = sizeof(Atom);
 			returnType = pool->core->traits.void_itraits;
@@ -813,6 +827,11 @@ namespace avmplus
 			ms->_max_stack = max_stack;
 			ms->_local_count = local_count;
 			ms->_max_scope = max_scope_depth - init_scope_depth;
+		#ifdef AVMPLUS_WORD_CODE
+		#else
+			ms->_abc_code_start = this->abc_body_pos();
+			AvmCore::skipU30(ms->_abc_code_start, 5);
+		#endif
 		}
 		ms->_frame_size = ms->_local_count + ms->_max_scope + ms->_max_stack;
 		#ifndef AVMPLUS_64BIT
@@ -906,28 +925,7 @@ namespace avmplus
 		AvmCore* core = pool->core;
 		if (core->config.methodNames)
 		{
-			if (uint32_t(method_id) < uint32_t(pool->method_name_indices.size()))
-			{
-				const int32_t index = pool->method_name_indices[method_id];
-				if (index >= 0)
-				{
-					name = pool->getString(index);
-				}
-				else
-				{
-#ifdef AVMPLUS_WORD_CODE
-					// PrecomputedMultinames may not be inited yet, but we'll need them eventually,
-					// so go ahead and init them now
-					pool->initPrecomputedMultinames();
-					const Multiname& mn = pool->word_code.cpool_mn->multinames[-index];
-#else
-					Multiname mn;
-					pool->parseMultiname(pool->cpool_mn[-index], mn);
-#endif
-					name = Multiname::format(core, mn.getNamespace(), mn.getName());
-				}
-			}
-
+			name = pool->getMethodInfoName(method_id);
 			if (name && name->length() == 0) 
 			{
 				name = core->kanonymousFunc;	
