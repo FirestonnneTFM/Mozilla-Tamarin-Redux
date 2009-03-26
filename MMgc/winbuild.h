@@ -68,11 +68,6 @@
 #define MMGC_AVMPLUS
 
 /**
- * Use VirtualAlloc to reserve/commit memory
- */
-#define MMGC_USE_VIRTUAL_MEMORY
-
-/**
  * This makes JIT code buffers read-only to reduce the probability of
  * heap overflow attacks.
  */

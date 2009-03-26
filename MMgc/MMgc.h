@@ -75,6 +75,12 @@
 
 #include "VMPI.h"
 
+#if defined(WIN32) && defined(MMGC_64BIT)
+#include <setjmpex.h>
+#else
+#include <setjmp.h>
+#endif
+
 #if defined(SCRIPT_DEBUGGER) || defined(DEBUGGER)
 #define AVMPLUS_SAMPLER
 #endif

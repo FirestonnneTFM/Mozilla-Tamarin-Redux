@@ -87,7 +87,7 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 
 #endif
 	
-	char* GCHeap::AllocateMemory(size_t size)
+	char* GCHeap::AllocateAlignedMemory(size_t size)
 	{
 #ifdef MEASURE_MEMORY_HIGHWATER
 		ChunkTracker::s_total_mem += size;

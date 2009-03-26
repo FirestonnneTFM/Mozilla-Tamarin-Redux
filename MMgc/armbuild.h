@@ -64,10 +64,6 @@
  */
 #define MMGC_AVMPLUS
 
-#if !defined(MMGC_USE_VIRTUAL_MEMORY) && !defined(MMGC_NO_MMAP)
-    #define MMGC_USE_VIRTUAL_MEMORY
-#endif
-
 #if !defined(AVMPLUS_NO_JIT_READONLY)
 	#define AVMPLUS_JIT_READONLY
 #endif
