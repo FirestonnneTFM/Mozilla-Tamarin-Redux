@@ -36,30 +36,68 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <stdlib.h>
-
 #include "MMgc.h"
 
-namespace MMgc
+class SpinLockWin : public MMgc::GCAllocObject
 {
-	void* GCAllocObject::operator new (size_t size)
+public:
+	SpinLockWin()
 	{
-		return malloc(size);
+		sl = 0;
 	}
 
-	void* GCAllocObject::operator new[] (size_t size)
+	inline bool Acquire()
 	{
-		return malloc(size);
+	#ifdef MMGC_64BIT
+		//!!@ fires off for some reason
+		//GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
+		while (_InterlockedCompareExchange64(&sl, 1, 0) != 0) {
+	#else
+		//!!@ fires off for some reason
+		//GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
+		while (InterlockedCompareExchange(&sl, 1, 0) != 0) {
+	#endif
+			Sleep(0);
+		}
+
+		return true;
 	}
 	
-	void GCAllocObject::operator delete (void *ptr)
+	inline bool Release()
 	{
-		free(ptr);
+	#ifdef MMGC_64BIT
+		_InterlockedExchange64(&sl, 0);
+	#else
+		InterlockedExchange(&sl, 0);
+	#endif
+
+		return true;
 	}
 
-	void GCAllocObject::operator delete [] (void *ptr)
-	{
-		free(ptr);
-	}
+private:
+#ifdef MMGC_64BIT
+	volatile LONG64 sl;
+#else
+	long sl;
+#endif
+};
+
+vmpi_spin_lock_t VMPI_lockCreate()
+{
+	return (vmpi_spin_lock_t) (new SpinLockWin);
 }
 
+void VMPI_lockDestroy(vmpi_spin_lock_t lock)
+{
+	delete (SpinLockWin*)lock;
+}
+
+bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockWin*)lock)->Acquire();
+}
+
+bool VMPI_lockRelease(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockWin*)lock)->Release();
+}

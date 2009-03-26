@@ -260,11 +260,9 @@
 		079DFAB20F3A96BE0031D1B4 /* FixedMalloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8B0F3A96BD0031D1B4 /* FixedMalloc.cpp */; };
 		079DFAB30F3A96BE0031D1B4 /* GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8D0F3A96BD0031D1B4 /* GC.cpp */; };
 		079DFAB40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8E0F3A96BD0031D1B4 /* GCAlloc.cpp */; };
-		079DFAB50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA910F3A96BD0031D1B4 /* GCAllocObjectMac.cpp */; };
 		079DFAB70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */; };
 		079DFAB80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA960F3A96BD0031D1B4 /* GCHashtable.cpp */; };
 		079DFAB90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */; };
-		079DFABA0F3A96BE0031D1B4 /* GCHeapMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9A0F3A96BD0031D1B4 /* GCHeapMac.cpp */; };
 		079DFABB0F3A96BE0031D1B4 /* GCLargeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9B0F3A96BD0031D1B4 /* GCLargeAlloc.cpp */; };
 		079DFABC0F3A96BE0031D1B4 /* GCMemoryProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9D0F3A96BD0031D1B4 /* GCMemoryProfiler.cpp */; };
 		079DFABD0F3A96BE0031D1B4 /* GCObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */; };
@@ -275,11 +273,9 @@
 		079DFAC20F3A96BE0031D1B4 /* FixedMalloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8B0F3A96BD0031D1B4 /* FixedMalloc.cpp */; };
 		079DFAC30F3A96BE0031D1B4 /* GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8D0F3A96BD0031D1B4 /* GC.cpp */; };
 		079DFAC40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA8E0F3A96BD0031D1B4 /* GCAlloc.cpp */; };
-		079DFAC50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA910F3A96BD0031D1B4 /* GCAllocObjectMac.cpp */; };
 		079DFAC70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */; };
 		079DFAC80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA960F3A96BD0031D1B4 /* GCHashtable.cpp */; };
 		079DFAC90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */; };
-		079DFACA0F3A96BE0031D1B4 /* GCHeapMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9A0F3A96BD0031D1B4 /* GCHeapMac.cpp */; };
 		079DFACB0F3A96BE0031D1B4 /* GCLargeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9B0F3A96BD0031D1B4 /* GCLargeAlloc.cpp */; };
 		079DFACC0F3A96BE0031D1B4 /* GCMemoryProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9D0F3A96BD0031D1B4 /* GCMemoryProfiler.cpp */; };
 		079DFACD0F3A96BE0031D1B4 /* GCObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */; };
@@ -344,6 +340,12 @@
 		3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5490F60A0B600E29821 /* GCLog.cpp */; };
 		3FDDC54F0F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
 		3FDDC5500F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
+		3FFDEC670F69A52C00E510AB /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */; };
+		3FFDEC680F69A52C00E510AB /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */; };
+		3FFDEC690F69A52C00E510AB /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */; };
+		3FFDEC6A0F69A52C00E510AB /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */; };
+		3FFDEC6D0F69A54F00E510AB /* GCAllocObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */; };
+		3FFDEC6E0F69A54F00E510AB /* GCAllocObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */; };
 		D940B6770F61C60300E72086 /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		D940B67A0F61C61000E72086 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */; };
 		D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
@@ -696,7 +698,6 @@
 		079DFA8E0F3A96BD0031D1B4 /* GCAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAlloc.cpp; path = ../../../MMgc/GCAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA8F0F3A96BD0031D1B4 /* GCAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCAlloc.h; path = ../../../MMgc/GCAlloc.h; sourceTree = SOURCE_ROOT; };
 		079DFA900F3A96BD0031D1B4 /* GCAllocObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCAllocObject.h; path = ../../../MMgc/GCAllocObject.h; sourceTree = SOURCE_ROOT; };
-		079DFA910F3A96BD0031D1B4 /* GCAllocObjectMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectMac.cpp; path = ../../../MMgc/GCAllocObjectMac.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA920F3A96BD0031D1B4 /* GCDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDebug.h; path = ../../../MMgc/GCDebug.h; sourceTree = SOURCE_ROOT; };
 		079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA950F3A96BD0031D1B4 /* GCGlobalNew.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCGlobalNew.h; path = ../../../MMgc/GCGlobalNew.h; sourceTree = SOURCE_ROOT; };
@@ -704,14 +705,12 @@
 		079DFA970F3A96BD0031D1B4 /* GCHashtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCHashtable.h; path = ../../../MMgc/GCHashtable.h; sourceTree = SOURCE_ROOT; };
 		079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeap.cpp; path = ../../../MMgc/GCHeap.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA990F3A96BD0031D1B4 /* GCHeap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCHeap.h; path = ../../../MMgc/GCHeap.h; sourceTree = SOURCE_ROOT; };
-		079DFA9A0F3A96BD0031D1B4 /* GCHeapMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeapMac.cpp; path = ../../../MMgc/GCHeapMac.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA9B0F3A96BD0031D1B4 /* GCLargeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCLargeAlloc.cpp; path = ../../../MMgc/GCLargeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA9C0F3A96BD0031D1B4 /* GCLargeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCLargeAlloc.h; path = ../../../MMgc/GCLargeAlloc.h; sourceTree = SOURCE_ROOT; };
 		079DFA9D0F3A96BD0031D1B4 /* GCMemoryProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCMemoryProfiler.cpp; path = ../../../MMgc/GCMemoryProfiler.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA9E0F3A96BE0031D1B4 /* GCMemoryProfiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCMemoryProfiler.h; path = ../../../MMgc/GCMemoryProfiler.h; sourceTree = SOURCE_ROOT; };
 		079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCObject.cpp; path = ../../../MMgc/GCObject.cpp; sourceTree = SOURCE_ROOT; };
 		079DFAA00F3A96BE0031D1B4 /* GCObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCObject.h; path = ../../../MMgc/GCObject.h; sourceTree = SOURCE_ROOT; };
-		079DFAA10F3A96BE0031D1B4 /* GCSpinLockMac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCSpinLockMac.h; path = ../../../MMgc/GCSpinLockMac.h; sourceTree = SOURCE_ROOT; };
 		079DFAA20F3A96BE0031D1B4 /* GCStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCStack.h; path = ../../../MMgc/GCStack.h; sourceTree = SOURCE_ROOT; };
 		079DFAA30F3A96BE0031D1B4 /* GCTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCTests.cpp; path = ../../../MMgc/GCTests.cpp; sourceTree = SOURCE_ROOT; };
 		079DFAA40F3A96BE0031D1B4 /* GCTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCTests.h; path = ../../../MMgc/GCTests.h; sourceTree = SOURCE_ROOT; };
@@ -751,14 +750,6 @@
 		079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OSDepUnix.cpp; path = ../../unix/OSDepUnix.cpp; sourceTree = SOURCE_ROOT; };
 		079DFB670F3A9C350031D1B4 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		079DFC970F3AB9640031D1B4 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
-		07A8D2D20F5EEA2B0005E66C /* GCAllocObjectGeneric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectGeneric.cpp; path = ../../../MMgc/GCAllocObjectGeneric.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2D30F5EEA2B0005E66C /* GCAllocObjectUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectUnix.cpp; path = ../../../MMgc/GCAllocObjectUnix.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2D40F5EEA2B0005E66C /* GCAllocObjectWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObjectWin.cpp; path = ../../../MMgc/GCAllocObjectWin.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2D80F5EEA2B0005E66C /* GCHeapGeneric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeapGeneric.cpp; path = ../../../MMgc/GCHeapGeneric.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2D90F5EEA2B0005E66C /* GCHeapUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeapUnix.cpp; path = ../../../MMgc/GCHeapUnix.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2DA0F5EEA2B0005E66C /* GCHeapWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCHeapWin.cpp; path = ../../../MMgc/GCHeapWin.cpp; sourceTree = SOURCE_ROOT; };
-		07A8D2DB0F5EEA2B0005E66C /* GCSpinLockUnix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCSpinLockUnix.h; path = ../../../MMgc/GCSpinLockUnix.h; sourceTree = SOURCE_ROOT; };
-		07A8D2DC0F5EEA2B0005E66C /* GCSpinLockWin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCSpinLockWin.h; path = ../../../MMgc/GCSpinLockWin.h; sourceTree = SOURCE_ROOT; };
 		07A8D2DD0F5EEA2B0005E66C /* OOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OOM.h; path = ../../../MMgc/OOM.h; sourceTree = SOURCE_ROOT; };
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
@@ -778,6 +769,10 @@
 		3FDDC5490F60A0B600E29821 /* GCLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCLog.cpp; path = ../../../MMgc/GCLog.cpp; sourceTree = SOURCE_ROOT; };
 		3FDDC54A0F60A0B600E29821 /* GCLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCLog.h; path = ../../../MMgc/GCLog.h; sourceTree = SOURCE_ROOT; };
 		3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../shell/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
+		3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortMac.cpp; path = ../../../MMgc/platform/MMgcPortMac.cpp; sourceTree = SOURCE_ROOT; };
+		3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockMac.cpp; path = ../../../MMgc/platform/SpinLockMac.cpp; sourceTree = SOURCE_ROOT; };
+		3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObject.cpp; path = ../../../MMgc/GCAllocObject.cpp; sourceTree = SOURCE_ROOT; };
+		3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCSpinLock.h; path = ../../../MMgc/GCSpinLock.h; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -1224,6 +1219,7 @@
 		079DFA860F3A965C0031D1B4 /* mmgc */ = {
 			isa = PBXGroup;
 			children = (
+				3FFDEC640F69A50F00E510AB /* platform */,
 				079DFA880F3A96BD0031D1B4 /* armbuild.h */,
 				079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */,
 				079DFA8A0F3A96BD0031D1B4 /* FixedAlloc.h */,
@@ -1233,11 +1229,8 @@
 				079DFA8D0F3A96BD0031D1B4 /* GC.cpp */,
 				079DFA8E0F3A96BD0031D1B4 /* GCAlloc.cpp */,
 				079DFA8F0F3A96BD0031D1B4 /* GCAlloc.h */,
+				3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */,
 				079DFA900F3A96BD0031D1B4 /* GCAllocObject.h */,
-				07A8D2D20F5EEA2B0005E66C /* GCAllocObjectGeneric.cpp */,
-				079DFA910F3A96BD0031D1B4 /* GCAllocObjectMac.cpp */,
-				07A8D2D30F5EEA2B0005E66C /* GCAllocObjectUnix.cpp */,
-				07A8D2D40F5EEA2B0005E66C /* GCAllocObjectWin.cpp */,
 				079DFA920F3A96BD0031D1B4 /* GCDebug.h */,
 				3FDDC5460F60A09D00E29821 /* GCDebug.cpp */,
 				079DFA940F3A96BD0031D1B4 /* GCGlobalNew.cpp */,
@@ -1246,10 +1239,6 @@
 				079DFA970F3A96BD0031D1B4 /* GCHashtable.h */,
 				079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */,
 				079DFA990F3A96BD0031D1B4 /* GCHeap.h */,
-				07A8D2D80F5EEA2B0005E66C /* GCHeapGeneric.cpp */,
-				079DFA9A0F3A96BD0031D1B4 /* GCHeapMac.cpp */,
-				07A8D2D90F5EEA2B0005E66C /* GCHeapUnix.cpp */,
-				07A8D2DA0F5EEA2B0005E66C /* GCHeapWin.cpp */,
 				079DFA9B0F3A96BD0031D1B4 /* GCLargeAlloc.cpp */,
 				079DFA9C0F3A96BD0031D1B4 /* GCLargeAlloc.h */,
 				3FDDC5490F60A0B600E29821 /* GCLog.cpp */,
@@ -1258,9 +1247,7 @@
 				079DFA9E0F3A96BE0031D1B4 /* GCMemoryProfiler.h */,
 				079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */,
 				079DFAA00F3A96BE0031D1B4 /* GCObject.h */,
-				079DFAA10F3A96BE0031D1B4 /* GCSpinLockMac.h */,
-				07A8D2DB0F5EEA2B0005E66C /* GCSpinLockUnix.h */,
-				07A8D2DC0F5EEA2B0005E66C /* GCSpinLockWin.h */,
+				3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */,
 				079DFAA20F3A96BE0031D1B4 /* GCStack.h */,
 				079DFAA30F3A96BE0031D1B4 /* GCTests.cpp */,
 				079DFAA40F3A96BE0031D1B4 /* GCTests.h */,
@@ -1352,6 +1339,15 @@
 				079DF7A90F3A86850031D1B4 /* shell64 */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3FFDEC640F69A50F00E510AB /* platform */ = {
+			isa = PBXGroup;
+			children = (
+				3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */,
+				3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */,
+			);
+			name = platform;
 			sourceTree = "<group>";
 		};
 		C6859E8C029090F304C91782 /* Documentation */ = {
@@ -1529,11 +1525,9 @@
 				079DFAC20F3A96BE0031D1B4 /* FixedMalloc.cpp in Sources */,
 				079DFAC30F3A96BE0031D1B4 /* GC.cpp in Sources */,
 				079DFAC40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */,
-				079DFAC50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */,
 				079DFAC70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */,
 				079DFAC80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */,
 				079DFAC90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */,
-				079DFACA0F3A96BE0031D1B4 /* GCHeapMac.cpp in Sources */,
 				079DFACB0F3A96BE0031D1B4 /* GCLargeAlloc.cpp in Sources */,
 				079DFACC0F3A96BE0031D1B4 /* GCMemoryProfiler.cpp in Sources */,
 				079DFACD0F3A96BE0031D1B4 /* GCObject.cpp in Sources */,
@@ -1583,6 +1577,9 @@
 				D940B67A0F61C61000E72086 /* PosixPortUtils.cpp in Sources */,
 				D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */,
 				D940B67E0F61C62B00E72086 /* avmshellMac.cpp in Sources */,
+				3FFDEC690F69A52C00E510AB /* MMgcPortMac.cpp in Sources */,
+				3FFDEC6A0F69A52C00E510AB /* SpinLockMac.cpp in Sources */,
+				3FFDEC6E0F69A54F00E510AB /* GCAllocObject.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1697,11 +1694,9 @@
 				079DFAB20F3A96BE0031D1B4 /* FixedMalloc.cpp in Sources */,
 				079DFAB30F3A96BE0031D1B4 /* GC.cpp in Sources */,
 				079DFAB40F3A96BE0031D1B4 /* GCAlloc.cpp in Sources */,
-				079DFAB50F3A96BE0031D1B4 /* GCAllocObjectMac.cpp in Sources */,
 				079DFAB70F3A96BE0031D1B4 /* GCGlobalNew.cpp in Sources */,
 				079DFAB80F3A96BE0031D1B4 /* GCHashtable.cpp in Sources */,
 				079DFAB90F3A96BE0031D1B4 /* GCHeap.cpp in Sources */,
-				079DFABA0F3A96BE0031D1B4 /* GCHeapMac.cpp in Sources */,
 				079DFABB0F3A96BE0031D1B4 /* GCLargeAlloc.cpp in Sources */,
 				079DFABC0F3A96BE0031D1B4 /* GCMemoryProfiler.cpp in Sources */,
 				079DFABD0F3A96BE0031D1B4 /* GCObject.cpp in Sources */,
@@ -1751,6 +1746,9 @@
 				3FDDC5470F60A09D00E29821 /* GCDebug.cpp in Sources */,
 				3FDDC54B0F60A0B600E29821 /* GCLog.cpp in Sources */,
 				3FDDC54F0F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */,
+				3FFDEC670F69A52C00E510AB /* MMgcPortMac.cpp in Sources */,
+				3FFDEC680F69A52C00E510AB /* SpinLockMac.cpp in Sources */,
+				3FFDEC6D0F69A54F00E510AB /* GCAllocObject.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

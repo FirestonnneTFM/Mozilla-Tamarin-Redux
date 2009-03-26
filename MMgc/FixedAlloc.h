@@ -121,8 +121,17 @@ namespace MMgc
 	class FixedAllocSafe : public FixedAlloc
 	{
 	public:
-		FixedAllocSafe(int itemSize, GCHeap* heap) : FixedAlloc(itemSize, heap) {}
+		FixedAllocSafe(int itemSize, GCHeap* heap) : FixedAlloc(itemSize, heap) 
+		{
+			m_spinlock = VMPI_lockCreate();
+			GCAssert(m_spinlock != NULL);
+		}
 		
+		~FixedAllocSafe()
+		{
+			VMPI_lockDestroy(m_spinlock);
+		}
+
 		void* Alloc(size_t size)
 		{
 			MMGC_LOCK(m_spinlock);
@@ -143,7 +152,7 @@ namespace MMgc
 	private:
 
 #ifdef MMGC_LOCKING
-		GCSpinLock m_spinlock;
+		vmpi_spin_lock_t m_spinlock;
 #endif
 	};
 

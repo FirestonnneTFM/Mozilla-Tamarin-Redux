@@ -215,6 +215,17 @@ uint64_t VMPI_getTime()
 	return timeGetTime();
 }
 
+
+void* VMPI_alloc(size_t size)
+{
+	return HeapAlloc(GetProcessHeap(), 0, size);
+}
+
+void VMPI_free(void* ptr)
+{
+	HeapFree(GetProcessHeap(), 0, ptr);
+}
+
 void VMPI_Log(const char* message)
 {
 	avmshell::Platform::GetInstance()->logMessage(message);

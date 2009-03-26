@@ -122,6 +122,17 @@ uint64_t VMPI_getTime()
 	return result;
 }
 
+
+void* VMPI_alloc(size_t size)
+{
+	return malloc(size);
+}
+
+void VMPI_free(void* ptr)
+{
+	free(ptr);
+}
+
 void VMPI_Log(const char* message)
 {
 	avmshell::Platform::GetInstance()->logMessage(message);

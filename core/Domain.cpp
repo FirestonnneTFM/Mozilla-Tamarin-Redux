@@ -198,7 +198,7 @@ namespace avmplus
 
 	#if defined(AVMPLUS_WIN32)
 		typedef DWORD PROT_TYPE;
-		typedef DWORD PROT_SIZE;
+		typedef size_t PROT_SIZE;
 	#elif (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX) || defined(AVMPLUS_SYMBIAN))
 		typedef int PROT_TYPE;
 		typedef size_t PROT_SIZE;
@@ -262,7 +262,7 @@ namespace avmplus
 			AvmAssert(r < m_pageSize);
 			void* page = GetPage(p, 0);
 			void* page1 = GetPage(p, r - 1); // might span a page
-			unsigned size = (page == page1) ? m_pageSize : 2 * m_pageSize;
+			size_t size = (page == page1) ? m_pageSize : 2 * m_pageSize;
 
 			#if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX))
 			if (!page)

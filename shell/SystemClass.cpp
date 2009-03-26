@@ -54,7 +54,7 @@ namespace avmshell
 		// todo note this is currently routed to the performance counter
 		// for benchmark purposes.
 		#ifdef PERFORMANCE_GETTIMER
-		initialTime = MMgc::GC::getPerformanceCounter();
+		initialTime = VMPI_getPerformanceCounter();
 		#else
 		initialTime = VMPI_getTime();		
 		#endif // PERFORMANCE_GETTIMER
@@ -153,8 +153,8 @@ namespace avmshell
 	unsigned SystemClass::getTimer()
 	{
 #ifdef PERFORMANCE_GETTIMER
-		double time = ((double) (MMgc::GC::getPerformanceCounter() - initialTime) * 1000.0 /
-					   (double)MMgc::GC::getPerformanceFrequency());
+		double time = ((double) (VMPI_getPerformanceCounter() - initialTime) * 1000.0 /
+					   (double)VMPI_getPerformanceFrequency());
 		return (uint32)time;
 #else
 		return (uint32)(VMPI_getTime() - initialTime);

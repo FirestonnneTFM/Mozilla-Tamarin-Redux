@@ -874,12 +874,9 @@ namespace MMgc
 		/** @access Requires(request || exclusiveGC) */
 		bool IsQueued(const void *item);
 
-		static uint64_t GetPerformanceCounter();
-		static uint64_t GetPerformanceFrequency();
-		
 		static double duration(uint64_t start) 
 		{
-			return (double(GC::GetPerformanceCounter() - start) * 1000) / GC::GetPerformanceFrequency();
+			return (double(VMPI_getPerformanceCounter() - start) * 1000) / VMPI_getPerformanceFrequency();
 		}
 
 #ifndef MMGC_THREADSAFE
@@ -889,16 +886,16 @@ namespace MMgc
 		/** GC initialization time, in ticks.  Used for logging. */
 		const uint64_t t0;
 
-		// a tick is the unit of GetPerformanceCounter()
+		// a tick is the unit of VMPI_getPerformanceFrequency()
 		static uint64_t ticksToMicros(uint64_t ticks) 
 		{ 
-			return (ticks*1000000)/GetPerformanceFrequency();
+			return (ticks*1000000)/VMPI_getPerformanceFrequency();
 		}
 
 
 		static uint64_t ticksToMillis(uint64_t ticks) 
 		{ 
-			return (ticks*1000)/GetPerformanceFrequency();
+			return (ticks*1000)/VMPI_getPerformanceFrequency();
 		}
 
 		/**
@@ -1114,7 +1111,7 @@ namespace MMgc
 		 * This spinlock covers memStart, memEnd, and the contents of pageMap.
 		 */
 #ifdef MMGC_THREADSAFE
-		mutable GCSpinLock pageMapLock;
+		mutable vmpi_spin_lock_t pageMapLock;
 #endif
 
 		inline int GetPageMapValue(uintptr_t addr) const
@@ -1280,7 +1277,7 @@ namespace MMgc
 		GCLargeAlloc::LargeBlock *largeEmptyPageList;
 		
 #ifdef MMGC_LOCKING
-		GCSpinLock m_rootListLock;
+		vmpi_spin_lock_t m_rootListLock;
 #endif
 
 		/** @access Requires(m_rootListLock) */
@@ -1289,7 +1286,7 @@ namespace MMgc
 		void RemoveRoot(GCRoot *root);
 		
 #ifdef MMGC_THREADSAFE
-		GCSpinLock m_callbackListLock;
+		vmpi_spin_lock_t m_callbackListLock;
 #endif
 
 		/**

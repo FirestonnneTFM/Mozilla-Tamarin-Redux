@@ -51,14 +51,14 @@ namespace MMgc
 		inline void _GCAssertMsg(int32_t assertion, const char* msg)
 		{
 			if (assertion == 0)
-				GCDebugMsg(msg, true);
+				MMgc::GCDebugMsg(msg, true);
 		}
 
-		#define GCAssertMsg(x,y)			do { _GCAssertMsg((x), (y)); } while (0) /* no semi */
+		#define GCAssertMsg(x,y)			do { MMgc::_GCAssertMsg((x), (y)); } while (0) /* no semi */
 
 		#define GCAssert(x)					_GCAssert((x), __LINE__,__FILE__)
 		#define _GCAssert(x, line_, file_)	__GCAssert((x), line_, file_)
-		#define __GCAssert(x, line_, file_)	do { _GCAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")"); } while (0) /* no semi */
+		#define __GCAssert(x, line_, file_)	do { MMgc::_GCAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")"); } while (0) /* no semi */
 		
 	#else
 		#define GCAssertMsg(x,y)	do { } while (0) /* no semi */

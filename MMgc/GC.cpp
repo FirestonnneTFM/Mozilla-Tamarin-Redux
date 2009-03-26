@@ -50,10 +50,6 @@
 #include <stdarg.h>
 #endif
 
-#ifdef DARWIN
-	#include <mach/mach_time.h>
-#endif
-
 // get alloca for CleanStack
 #ifdef WIN32
 	#include <malloc.h>
@@ -168,7 +164,7 @@ namespace MMgc
 	/**
 	 * delay between GC incremental marks
 	 */
-	const static uint64_t kIncrementalMarkDelayTicks = int(10 * GC::GetPerformanceFrequency() / 1000);
+	const static uint64_t kIncrementalMarkDelayTicks = int(10 * VMPI_getPerformanceFrequency() / 1000);
 
 	const static uint64_t kMarkSweepBurstTicks = 1515909; // 200 ms on a 2ghz machine
 
@@ -249,7 +245,7 @@ namespace MMgc
 #ifdef MMGC_RCROOT_SUPPORT
 		rcRootSegments(NULL),
 #endif
-		t0(GetPerformanceCounter()),
+		t0(VMPI_getPerformanceCounter()),
 		bytesMarked(0),
 		markTicks(0),
 		lastStartMarkIncrementCount(0),
@@ -322,6 +318,17 @@ namespace MMgc
 			containsPointersRCAllocs[i] = new GCAlloc(this, kSizeClasses[i], true, true, i);
 			noPointersAllocs[i] = new GCAlloc(this, kSizeClasses[i], false, false, i);
 		}
+
+	#ifdef MMGC_THREADSAFE
+		pageMapLock = VMPI_lockCreate();
+		GCAssert(pageMapLock != NULL);
+		m_callbackListLock = VMPI_lockCreate();
+		GCAssert(m_callbackListLock != NULL);
+	#endif //MMGC_THREADSAFE
+	#ifdef MMGC_LOCKING
+		m_rootListLock = VMPI_lockCreate();
+		GCAssert(m_rootListLock != NULL);
+	#endif //MMGC_LOCKING
 		
 		largeAlloc = new GCLargeAlloc(this);
 
@@ -417,6 +424,14 @@ namespace MMgc
 		while(m_callbacks) {
 			m_callbacks->Destroy();			
 		}
+
+	#ifdef MMGC_LOCKING
+		VMPI_lockDestroy(m_rootListLock);
+	#endif //MMGC_LOCKING
+	#ifdef MMGC_THREADSAFE
+		VMPI_lockDestroy(m_callbackListLock);
+		VMPI_lockDestroy(pageMapLock);
+	#endif //MMGC_THREADSAFE
 	}
 
 	void GC::Collect()
@@ -783,7 +798,7 @@ namespace MMgc
 #endif
 
 			// Burst logic to prevent collections from happening back to back.
-			uint64_t now = GetPerformanceCounter();
+			uint64_t now = VMPI_getPerformanceFrequency();
 			if (now - lastSweepTicks <= kMarkSweepBurstTicks)
 				return;
 
@@ -1026,7 +1041,7 @@ bail:
 		SAMPLE_CHECK();
 
 		allocsSinceCollect = 0;
-		lastSweepTicks = GetPerformanceCounter();
+		lastSweepTicks = VMPI_getPerformanceCounter();
 
 		if(heap->Config().gcstats) {
 			int sweepResults = 0;
@@ -1058,7 +1073,7 @@ bail:
 		// perform gc if heap expanded due to fixed memory allocations
 		// utilize burst logic to prevent this from happening back to back
 		// this logic is here to apply to incremental and non-incremental
-		uint64_t now = GetPerformanceCounter();
+		uint64_t now = VMPI_getPerformanceCounter();
 		if(!marking && !collecting &&
 			heapSizeAtLastAlloc > collectThreshold &&
 			now - lastSweepTicks > kMarkSweepBurstTicks && 
@@ -1106,7 +1121,7 @@ bail:
 		MMGC_ASSERT_GC_LOCK(this);
 
 		if(!collecting || incrementalValidation) {
-			uint64_t now = GetPerformanceCounter();
+			uint64_t now = VMPI_getPerformanceCounter();
 			if (marking) {		
 				if(now - lastMarkTicks > kIncrementalMarkDelayTicks) {
 					IncrementalMark();
@@ -1699,7 +1714,7 @@ bail:
 
 		uint64_t start = 0;
 		if(gc->heap->Config().gcstats) {
-			start = GC::GetPerformanceCounter();
+			start = VMPI_getPerformanceCounter();
 		}
 		uint32_t pagesStart = (uint32_t)gc->totalGCPages;
 		uint32_t numObjects=0;
@@ -2261,7 +2276,7 @@ bail:
 
 		GCAssert(m_incrementalWork.Count() == 0);
 	
-		uint64_t start = GetPerformanceCounter();
+		uint64_t start = VMPI_getPerformanceCounter();
 
 		// clean up any pages that need sweeping
 		for(int i=0; i < kNumSizeClasses; i++) {
@@ -2289,7 +2304,7 @@ bail:
 				r = r->next;
 			}
 		}
-		markTicks += GetPerformanceCounter() - start;
+		markTicks += VMPI_getPerformanceCounter() - start;
 		IncrementalMark();
 	}
 
@@ -2646,62 +2661,6 @@ bail:
 		}
 	}
 
-	uint64_t GC::GetPerformanceCounter()
-	{
-  	#if defined(MMGC_PORTING_API)
-  		return MMGC_PortAPI_Time();
-  	#else
-		#ifdef WIN32
-		LARGE_INTEGER value;
-		QueryPerformanceCounter(&value);
-		return value.QuadPart;
-		#elif defined SOLARIS
-		uint64_t retval = gethrtime();
-		return retval;
-		#elif defined(_MAC)
-		return mach_absolute_time();
-		#elif defined(AVMPLUS_UNIX)
-		struct timeval tv;
-		::gettimeofday(&tv, NULL);
-
-        uint64_t seconds = (uint64_t)(tv.tv_sec * 1000000);
-        uint64_t microseconds = (uint64_t)tv.tv_usec;
-        uint64_t result = seconds + microseconds;
-        
-		return result;
-		#else
-		#error "Need high res timer"
-		#endif
-	#endif // MMMGC_PORTING_API
-	}
-
-	uint64_t GC::GetPerformanceFrequency()
-	{
-  	#if defined(MMGC_PORTING_API)
-  		return MMGC_PortAPI_Frequency();
-  	#else
-		#ifdef WIN32
-		static uint64_t gPerformanceFrequency = 0;		
-		if (gPerformanceFrequency == 0) {
-			QueryPerformanceFrequency((LARGE_INTEGER*)&gPerformanceFrequency);
-		}
-		return gPerformanceFrequency;
-		#elif defined(_MAC)
-		static mach_timebase_info_data_t info;
-		static uint64_t frequency = 0;
-		if ( frequency == 0 ) {
-			(void) mach_timebase_info(&info);
-			frequency = (uint64_t) ( 1.0 / ( 1e-9 * (double) info.numer / (double) info.denom ) );
-		}
-		return frequency;
-		#elif defined(AVMPLUS_UNIX)
-		return 1000000;
-		#else
-		#error "need high res time impl"
-		#endif
-	#endif // MMGC_PORTING_API
-	}
-
 	void GC::IncrementalMark()
 	{
 		MMGC_ASSERT_EXCLUSIVE_GC(this);
@@ -2719,12 +2678,12 @@ bail:
 		markIncrements++;
 		// FIXME: tune this so that getPerformanceCounter() overhead is noise
 		static unsigned int checkTimeIncrements = 100;
-		uint64_t start = GetPerformanceCounter();
+		uint64_t start = VMPI_getPerformanceCounter();
 
 		numObjects=0;
 		objSize=0;
 
-		uint64_t ticks = start + time * GetPerformanceFrequency() / 1000;
+		uint64_t ticks = start + time * VMPI_getPerformanceFrequency() / 1000;
 		do {
 			unsigned int count = m_incrementalWork.Count();
 			if (count == 0) {
@@ -2739,9 +2698,9 @@ bail:
  				MarkItem(m_incrementalWork);
 			}
 			SAMPLE_CHECK();
-		} while(GetPerformanceCounter() < ticks);
+		} while(VMPI_getPerformanceCounter() < ticks);
 
-		lastMarkTicks = GetPerformanceCounter();
+		lastMarkTicks = VMPI_getPerformanceCounter();
 		markTicks += lastMarkTicks - start;
 
 		if(heap->Config().gcstats) {
@@ -2767,7 +2726,7 @@ bail:
 		hitZeroObjects = false;
 
 		// finished in Sweep
-		sweepStart = GetPerformanceCounter();
+		sweepStart = VMPI_getPerformanceCounter();
 		
 		// mark roots again, could have changed (alternative is to put WB's on the roots
 		// which we may need to do if we find FinishIncrementalMark taking too long)
