@@ -70,9 +70,13 @@ namespace MMgc
 		m_free(unaligned_ptr);
 	}
 
-	int GCHeap::vmPageSize()
+	uint32_t GCHeap::vmPageSize()
 	{
+#ifdef MMGC_PORTING_API
 		return MMGC_PortAPI_GetPageSize();
+#else
+		return 4096;
+#endif
 	}
 
 #ifdef MEASURE_MEMORY_HIGHWATER
@@ -89,6 +93,13 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 	
 	char* GCHeap::AllocateAlignedMemory(size_t size)
 	{
+		GCMallocFuncPtr m;
+#ifdef MMGC_PORTING_API
+		m = MMGC_PortAPI_Alloc;
+#else
+		m = malloc;
+#endif
+
 #ifdef MEASURE_MEMORY_HIGHWATER
 		ChunkTracker::s_total_mem += size;
 		if (ChunkTracker::s_total_mem > ChunkTracker::s_highwater)
@@ -100,18 +111,25 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 		{
 			ChunkTracker::s_maxblocks = ChunkTracker::s_blocks;
 		}
-		void* block = aligned_malloc(size, vmPageSize(), m_malloc);
+		void* block = aligned_malloc(size, vmPageSize(), m);
 		ChunkTracker* chunk = new ChunkTracker(block, size);
 		chunk->m_pNext = ChunkTracker::s_pHead;
 		ChunkTracker::s_pHead = chunk;
 		return (char*)block;
 #else
-		return (char *) aligned_malloc(size, vmPageSize(), m_malloc);
+		return (char *) aligned_malloc(size, vmPageSize(), m);
 #endif
 	}
 
-	void GCHeap::ReleaseMemory(char *address, size_t)
+	void GCHeap::ReleaseAlignedMemory(char *address, size_t)
 	{
+		GCFreeFuncPtr f;
+#ifdef MMGC_PORTING_API
+		f = MMGC_PortAPI_Free;
+#else
+		f = free;
+#endif
+
 #ifdef MEASURE_MEMORY_HIGHWATER
 		ChunkTracker::s_blocks--;
 		ChunkTracker* chunk = ChunkTracker::s_pHead;
@@ -136,7 +154,7 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 			chunk = chunk->m_pNext;
 		}
 #endif
-		aligned_free(address, m_free);
+		aligned_free(address, f);
 	}	
 
 	void GetStackTrace(int* /* trace */, int /* len */, int /* skip */)
@@ -153,4 +171,23 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 
 	/*static*/
 	size_t GCHeap::GetPrivateBytes() { return 0; } // TODO	
+
+	bool GCHeap::osSupportsRegionMerging()
+	{
+		return false;
+	}
+
+	bool GCHeap::osSupportsVirtualMemory()
+	{
+		return false;
+	}
+
+	
+	char *GCHeap::ReserveMemory(char *, size_t) { GCAssert(false); return NULL; }
+	bool GCHeap::CommitMemory(char *, size_t) { GCAssert(false); return false; }
+	bool GCHeap::DecommitMemory(char *, size_t) { GCAssert(false); return false; }
+	void GCHeap::ReleaseMemory(char *, size_t ) { GCAssert(false); }		
+	
+	bool GCHeap::CommitMemoryThatMaySpanRegions(char *, size_t) { GCAssert(false); return false; }
+	bool GCHeap::DecommitMemoryThatMaySpanRegions(char *, size_t)  { GCAssert(false); return false; }
 }
