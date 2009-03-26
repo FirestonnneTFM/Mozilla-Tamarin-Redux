@@ -48,11 +48,9 @@
 #include <cxxabi.h>
 #endif
 
-#ifdef MMGC_USE_VIRTUAL_MEMORY
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#endif
 
 #if defined(__MACH__)
 #include <mach/mach.h>
@@ -65,34 +63,6 @@
 namespace MMgc
 {
 		static const int kOSX105=9;
-		
-#ifndef MMGC_USE_VIRTUAL_MEMORY
-	void *aligned_malloc(size_t size, size_t align_size, GCMallocFuncPtr m_malloc)
-	{
-		char *ptr, *ptr2, *aligned_ptr;
-		int align_mask = align_size - 1;
-
-		int alloc_size = size + align_size + sizeof(int);
-		ptr=(char *)m_malloc(alloc_size);
-
-		if(ptr==NULL) return(NULL);
-
-		ptr2 = ptr + sizeof(int);
-		aligned_ptr = ptr2 + (align_size - ((size_t)ptr2 & align_mask));
-
-		ptr2 = aligned_ptr - sizeof(int);
-		*((int *)ptr2)=(int)(aligned_ptr - ptr);
-
-		return(aligned_ptr);
-	}
-
-	void aligned_free(void *ptr, GCFreeFuncPtr m_free)
-	{
-		int *ptr2=(int *)ptr - 1;
-		char *unaligned_ptr = (char*) ptr - *ptr2;
-		m_free(unaligned_ptr);
-	}
-#endif /* !MMGC_USE_VIRTUAL_MEMORY */
 
 	uint32_t GCHeap::vmPageSize()
 	{
@@ -136,7 +106,6 @@ namespace MMgc
 	}
 #endif /* AVMPLUS_JIT_READONLY */
 
-#ifdef MMGC_USE_VIRTUAL_MEMORY
 	static int get_major_version()
 	{
 		int mib[2];
@@ -214,20 +183,16 @@ namespace MMgc
 		GCAssert(result == 0);
 		(void)result;
 	}
-#else
 
-	char* GCHeap::AllocateMemory(size_t size)
+	char* GCHeap::AllocateAlignedMemory(size_t size)
 	{
-		return (char *) aligned_malloc(size, 4096, m_malloc);
-		//return (char *) MPAllocateAligned(size, kMPAllocate4096ByteAligned, 0);
+		return (char*) valloc(size); 
 	}
 
-	void GCHeap::ReleaseMemory(char *address)
+	void GCHeap::ReleaseAlignedMemory(char *address, size_t)
 	{
-		aligned_free(address, m_free);
-		//MPFree(address);
+		return free(address);
 	}
-#endif
 
 #ifdef MMGC_MEMORY_PROFILER
 	
@@ -325,5 +290,9 @@ namespace MMgc
 		// which is why its on for 64 bit (we're we never de-reserve)
 		return false;//get_major_version() >= kOSX105;
 #endif
+	}
+	bool GCHeap::osSupportsVirtualMemory()
+	{
+		return get_major_version() >= kOSX105;
 	}
 }

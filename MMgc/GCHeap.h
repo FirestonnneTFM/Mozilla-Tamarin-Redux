@@ -44,25 +44,11 @@ namespace MMgc
 	class MMGC_API GCHeapConfig
 	{
 	public:
-		GCHeapConfig() : 
-		initialSize(128), 
-		heapLimit((size_t)-1), 
-		trimVirtualMemory(false),
-		verbose(false),
-		returnMemory(true),
-#ifdef MMGC_MEMORY_PROFILER			
-		enableProfiler(false),
-#endif
-		gcstats(false), // tracking
-		autoGCStats(false) // auto printing
-		{
-#ifdef MMGC_64BIT
-			trimVirtualMemory = false; // no need
-#endif
-		}
+		GCHeapConfig();
 		
 		size_t initialSize;
 		size_t heapLimit;
+		const bool useVirtualMemory;
 		bool trimVirtualMemory;
 		bool verbose;
 		bool returnMemory;
@@ -297,7 +283,7 @@ namespace MMgc
 		// called when object is really dead and can be poisoned
 		void FreeHook(const void *item, size_t size, int poison);
 		
-		static void ReleaseMemory(char *address, size_t size);
+
 		
 #ifdef AVMPLUS_JIT_READONLY
 		// SECURITY: setting executeFlag and writeableFlag at the same time is DANGEROUS! 
@@ -305,16 +291,18 @@ namespace MMgc
 		void SetPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
 #endif /* AVMPLUS_JIT_READONLY */
 		
-#ifdef MMGC_USE_VIRTUAL_MEMORY
 		static char *ReserveMemory(char *address, size_t size);
 		static bool CommitMemory(char *address, size_t size);
 		static bool DecommitMemory(char *address, size_t size);
-		
+		static void ReleaseMemory(char *address, size_t size);		
+
 		static bool CommitMemoryThatMaySpanRegions(char *address, size_t size);
 		static bool DecommitMemoryThatMaySpanRegions(char *address, size_t size);		
-#else
-		static char *AllocateMemory(size_t size);
-#endif
+
+		// used when useVirtualMemory isn't on
+		static char *AllocateAlignedMemory(size_t size);
+		static void ReleaseAlignedMemory(char *address, size_t size);
+
 
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *GetProfiler() { return profiler; }
@@ -328,6 +316,7 @@ namespace MMgc
 		MemoryStatus GetStatus() { return status; }
 
 		static bool osSupportsRegionMerging();
+		static bool osSupportsVirtualMemory();
 
 		/** The native VM page size (in bytes) for the current architecture */
 		static const int kNativePageSize;
@@ -474,14 +463,6 @@ public:
 		uint32_t signal;
 		FILE *spyFile;		
 		
-		// on some OS's we can only free virtual memory as we allocated it (ie region by region)
-		// so don't allow blocks to span regions for those OS's
-		const bool blocksSpanRegions;
-
-		// on OS's where we don't let blocks span regions also search for oldest block to increase 
-		// chances of complete blocks becoming available
-		const bool searchForOldestBlock;
-
 		// some OS's are loose with how with virtual memory is dealt with and we don't have to track
 		// each region individually (ie multiple contiguous mmap's can be munmap'd all at once)
 		const bool mergeContiguousRegions;

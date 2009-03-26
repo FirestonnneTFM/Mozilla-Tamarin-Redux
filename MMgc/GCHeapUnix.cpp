@@ -76,34 +76,6 @@ typedef void *maddr_ptr;
 
 namespace MMgc
 {
-#ifndef MMGC_USE_VIRTUAL_MEMORY
-	void *aligned_malloc(size_t size, size_t align_size, GCMallocFuncPtr m_malloc)
-	{
-		char *ptr, *ptr2, *aligned_ptr;
-		int align_mask = align_size - 1;
-
-		int alloc_size = size + align_size + sizeof(int);
-		ptr=(char *)m_malloc(alloc_size);
-
-		if(ptr==NULL) return(NULL);
-
-		ptr2 = ptr + sizeof(int);
-		aligned_ptr = ptr2 + (align_size - ((size_t)ptr2 & align_mask));
-
-		ptr2 = aligned_ptr - sizeof(int);
-		*((int *)ptr2)=(int)(aligned_ptr - ptr);
-
-		return(aligned_ptr);
-	}
-
-	void aligned_free(void *ptr, GCFreeFuncPtr m_free)
-	{
-		int *ptr2=(int *)ptr - 1;
-		char *unaligned_ptr = (char*) ptr - *ptr2;
-		m_free(unaligned_ptr);
-	}
-#endif /* !MMGC_USE_VIRTUAL_MEMORY */
-
 #ifdef AVMPLUS_JIT_READONLY
 	/**
 	 * SetPageProtection changes the page access protections on a block of pages,
@@ -150,8 +122,6 @@ namespace MMgc
 		long v = sysconf(_SC_PAGESIZE);
 		return v;
 	}
-
-#ifdef MMGC_USE_VIRTUAL_MEMORY
 
 	char* GCHeap::ReserveMemory(char *address, size_t size)
 	{
@@ -220,18 +190,16 @@ namespace MMgc
 		munmap((maddr_ptr)address, size);
 		GCAssert(result == 0);
 	}
-#else
-	char* GCHeap::AllocateMemory(size_t size)
+
+	char* GCHeap::AllocateAlignedMemory(size_t size)
 	{
-		return (char *) aligned_malloc(size, 4096, m_malloc);
+		return (char*)valloc(size);
 	}
 
-	void GCHeap::ReleaseMemory(char *address, size_t)
+	void GCHeap::ReleaseAlignedMemory(char *address, size_t)
 	{
-		aligned_free(address, m_free);
+		free(address);
 	}	
-#endif
-
 
 #ifdef MMGC_MEMORY_INFO  
 	void GetInfoFromPC(int pc, char *buff, int /*buffSize*/) 
@@ -459,6 +427,10 @@ again:
 	}
 
 	bool GCHeap::osSupportsRegionMerging()
+	{
+		return true;
+	}
+	bool GCHeap::osSupportsVirtualMemory()
 	{
 		return true;
 	}

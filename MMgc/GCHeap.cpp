@@ -53,6 +53,25 @@ namespace MMgc
 	/** The native VM page size (in bytes) for the current architecture */
 	const int GCHeap::kNativePageSize = GCHeap::vmPageSize();
 
+
+	GCHeapConfig::GCHeapConfig() : 
+		initialSize(128), 
+		heapLimit((size_t)-1), 
+		useVirtualMemory(GCHeap::osSupportsVirtualMemory()),
+		trimVirtualMemory(true),
+		verbose(false),
+		returnMemory(true),
+#ifdef MMGC_MEMORY_PROFILER			
+		enableProfiler(false),
+#endif
+		gcstats(false), // tracking
+		autoGCStats(false) // auto printing
+	{
+#ifdef MMGC_64BIT
+		trimVirtualMemory = false; // no need
+#endif
+	}
+
 	void GCHeap::Init(GCHeapConfig& config)
 	{
 		GCAssert(instance == NULL);
@@ -78,8 +97,6 @@ namespace MMgc
 #endif
 	      spyFile(stdout),
 		  hooksEnabled(false),
-		  blocksSpanRegions(true), // TODO: see if making this false increases heap shrinkage opportunities
-		  searchForOldestBlock(!blocksSpanRegions), 
 		  mergeContiguousRegions(osSupportsRegionMerging())
 	{		
 		lastRegion  = 0;
@@ -283,23 +300,21 @@ namespace MMgc
 				if(!block->committed /*|| block->size == 0*/)
 					continue;
 
-#ifdef MMGC_USE_VIRTUAL_MEMORY				
-				RemoveFromList(block);
-				if((size_t)block->size > decommitSize)
+				if(config.useVirtualMemory)
 				{
-					HeapBlock *newBlock = Split(block, (int)decommitSize);
-					AddToFreeList(newBlock);
-				}
-				
-				Region *region = AddrToRegion(block->baseAddr);
-				if(config.trimVirtualMemory &&
-				   freeSize * 100 > heapSize * kReleaseThresholdPercentage &&
-					// if block is as big or bigger than a region, free the whole region
-					block->baseAddr <= region->baseAddr && 
-					region->reserveTop <= block->endAddr())
-				{
-					// trim block if they can span regions
-					if(blocksSpanRegions)
+					RemoveFromList(block);
+					if((size_t)block->size > decommitSize)
+					{
+						HeapBlock *newBlock = Split(block, (int)decommitSize);
+						AddToFreeList(newBlock);
+					}
+					
+					Region *region = AddrToRegion(block->baseAddr);
+					if(config.trimVirtualMemory &&
+					   freeSize * 100 > heapSize * kReleaseThresholdPercentage &&
+					   // if block is as big or bigger than a region, free the whole region
+					   block->baseAddr <= region->baseAddr && 
+					   region->reserveTop <= block->endAddr())
 					{
 						if(block->baseAddr < region->baseAddr)
 						{
@@ -312,95 +327,98 @@ namespace MMgc
 							HeapBlock *newBlock = Split(block, int((region->reserveTop - block->baseAddr) / kBlockSize));
 							AddToFreeList(newBlock);
 						}
+
+						decommitSize -= block->size;
+						RemoveBlock(block);
+						goto restart;
 					}
-					decommitSize -= block->size;
-					RemoveBlock(block);
-					goto restart;
-				}
-				else if(DecommitMemoryThatMaySpanRegions(block->baseAddr, block->size * kBlockSize))
-				{
-					block->committed = false;
-					block->dirty = false;
-					decommitSize -= block->size;
-					if(config.verbose) {
-						GCLog("decommitted %d page block from %p\n", block->size, block->baseAddr);
+					else if(DecommitMemoryThatMaySpanRegions(block->baseAddr, block->size * kBlockSize))
+					{
+						block->committed = false;
+						block->dirty = false;
+						decommitSize -= block->size;
+						if(config.verbose) {
+							GCLog("decommitted %d page block from %p\n", block->size, block->baseAddr);
+						}
 					}
-				}
-				else
-				{
+					else
+					{
 #ifdef _MAC
-					// this can happen on mac where we release and re-reserve the memory and another thread may steal it from us
-					RemoveBlock(block);
-					goto restart;
+						// this can happen on mac where we release and re-reserve the memory and another thread may steal it from us
+						RemoveBlock(block);
+						goto restart;
 #else
-					// if the VM API's fail us bail
-					VMPI_abort(); 
+						// if the VM API's fail us bail
+						VMPI_abort(); 
 #endif
-				}
+					}
+					
+					numDecommitted += block->size;
+					
+					// merge with previous/next if not in use and not committed
+					HeapBlock *prev = block - block->sizePrevious;
+					if(block->sizePrevious != 0 && !prev->committed && !prev->inUse()) {
+						RemoveFromList(prev);
+						
+						prev->size += block->size;
+						
+						block->size = 0;
+						block->sizePrevious = 0;
+						block->baseAddr = 0;
+						
+						block = prev;
+					}
+					
+					HeapBlock *next = block + block->size;
+					if(next->size != 0 && !next->committed && !next->inUse()) {
+						RemoveFromList(next);
+						
+						block->size += next->size;
+						
+						next->size = 0;
+						next->sizePrevious = 0;
+						next->baseAddr = 0;
+					}
+					
+					next = block + block->size;
+					next->sizePrevious = block->size;
+					
+					// add this block to the back of the bus to make sure we consume committed memory
+					// first
+					HeapBlock *backOfTheBus = &freelists[kNumFreeLists-1];
+					HeapBlock *pointToInsert = backOfTheBus;
+					while ((pointToInsert = pointToInsert->next) !=  backOfTheBus) {
+						if (pointToInsert->size >= block->size && !pointToInsert->committed) {
+							break;
+						}
+					}
+					AddToFreeList(block, pointToInsert);
+					
+					// so we keep going through freelist properly
+					block = freelist;
 
-				numDecommitted += block->size;
+				} else { // not using virtual memory
 
-				// merge with previous/next if not in use and not committed
-				HeapBlock *prev = block - block->sizePrevious;
-				if(block->sizePrevious != 0 && !prev->committed && !prev->inUse()) {
-					RemoveFromList(prev);
-
-					prev->size += block->size;
-
-					block->size = 0;
-					block->sizePrevious = 0;
-					block->baseAddr = 0;
-
-					block = prev;
-				}
-
-				HeapBlock *next = block + block->size;
-				if(next->size != 0 && !next->committed && !next->inUse()) {
-					RemoveFromList(next);
-
-					block->size += next->size;
-				
-					next->size = 0;
-					next->sizePrevious = 0;
-					next->baseAddr = 0;
-				}
-				
-				next = block + block->size;
-				next->sizePrevious = block->size;
-				
-				// add this block to the back of the bus to make sure we consume committed memory
-				// first
-				HeapBlock *backOfTheBus = &freelists[kNumFreeLists-1];
-				HeapBlock *pointToInsert = backOfTheBus;
-				while ((pointToInsert = pointToInsert->next) !=  backOfTheBus) {
-					if (pointToInsert->size >= block->size && !pointToInsert->committed) {
-						break;
+					// if we aren't using mmap we can only do something if the block maps to a region
+					// that is completely empty
+					Region *region = AddrToRegion(block->baseAddr);
+					if(block->baseAddr == region->baseAddr && // beginnings match
+					   region->commitTop == block->baseAddr + block->size*kBlockSize) {
+						
+						RemoveFromList(block);
+						
+						RemoveBlock(block);
+						
+						goto restart;
 					}
 				}
-				AddToFreeList(block, pointToInsert);
-
-				// so we keep going through freelist properly
-				block = freelist;
-#else
-				// if we aren't using mmap we can only do something if the block maps to a region
-				// that is completely empty
-				Region *region = AddrToRegion(block->baseAddr);
-				if(block->baseAddr == region->baseAddr && // beginnings match
-					region->commitTop == block->baseAddr + block->size*kBlockSize) {
-
-					RemoveFromList(block);
-					
-					RemoveBlock(block);
-
-					goto restart;
-				}
-#endif
 			}
 		}
 
 		if(config.verbose)
 			DumpHeapRep();
 	}
+
 	void GCHeap::RemoveBlock(HeapBlock *block)
 	{	
 		Region *region = AddrToRegion(block->baseAddr);
@@ -597,9 +615,7 @@ namespace MMgc
 		int startList = GetFreeListIndex(size);
 		HeapBlock *freelist = &freelists[startList];
 
-	#ifdef MMGC_USE_VIRTUAL_MEMORY
 		HeapBlock *decommittedSuitableBlock = NULL;
-	#endif
 		HeapBlock *blockToUse = NULL;
 
 		for (int i = startList; i < kNumFreeLists; i++)
@@ -610,56 +626,49 @@ namespace MMgc
 			{
 				if (block->size >= size && block->committed) 
 				{
-					if(!searchForOldestBlock)
-					{
-						blockToUse = block;
-						goto foundone;
-					}
-					else if(!blockToUse || AddrToRegion(block->baseAddr)->blockId < AddrToRegion(blockToUse->baseAddr)->blockId)
-					{
-						// if we sorted the freelist we could just look at the first item instead of looking at them all
-						blockToUse = block;
-					}
+					blockToUse = block;
+					goto foundone;
 				}
 
-#if defined(MMGC_USE_VIRTUAL_MEMORY)
-				// if the block isn't committed see if this request can be met with by committing
-				// it and combining it with its neighbors
-				if(!block->committed && !decommittedSuitableBlock)
+				if(config.useVirtualMemory)
 				{
-					int totalSize = block->size;
-
-					// first try predecessors
-					HeapBlock *firstFree = block;
-
-					// loop because we could have interleaved committed/non-committed blocks
-					while(totalSize < size && firstFree->sizePrevious != 0)
-					{	
-						HeapBlock *prevBlock = firstFree - firstFree->sizePrevious;
-						if(!prevBlock->inUse() && prevBlock->size > 0) {
-							totalSize += prevBlock->size;
-							firstFree = prevBlock;
-						} else {
-							break;
+					// if the block isn't committed see if this request can be met with by committing
+					// it and combining it with its neighbors
+					if(!block->committed && !decommittedSuitableBlock)
+					{
+						int totalSize = block->size;
+						
+						// first try predecessors
+						HeapBlock *firstFree = block;
+						
+						// loop because we could have interleaved committed/non-committed blocks
+						while(totalSize < size && firstFree->sizePrevious != 0)
+						{	
+							HeapBlock *prevBlock = firstFree - firstFree->sizePrevious;
+							if(!prevBlock->inUse() && prevBlock->size > 0) {
+								totalSize += prevBlock->size;
+								firstFree = prevBlock;
+							} else {
+								break;
+							}
 						}
-					}
-
-					if(totalSize > size) {
-						decommittedSuitableBlock = firstFree;
-					} else {
-						// now try successors
-						HeapBlock *nextBlock = block + block->size;
-						while(nextBlock->size > 0 && !nextBlock->inUse() && totalSize < size) {
-							totalSize += nextBlock->size;
-							nextBlock = nextBlock + nextBlock->size;
-						}
-
+						
 						if(totalSize > size) {
 							decommittedSuitableBlock = firstFree;
+						} else {
+							// now try successors
+							HeapBlock *nextBlock = block + block->size;
+							while(nextBlock->size > 0 && !nextBlock->inUse() && totalSize < size) {
+								totalSize += nextBlock->size;
+								nextBlock = nextBlock + nextBlock->size;
+							}
+							
+							if(totalSize > size) {
+								decommittedSuitableBlock = firstFree;
+							}
 						}
 					}
 				}
-#endif
 			}
 			freelist++;
 		}	
@@ -686,8 +695,7 @@ namespace MMgc
 			return blockToUse;
 		}
 
-#if defined(MMGC_USE_VIRTUAL_MEMORY)
-		if(decommittedSuitableBlock)
+		if(config.useVirtualMemory && decommittedSuitableBlock)
 		{
 			// first handle case where its too big
 			if(decommittedSuitableBlock->size > size)
@@ -770,7 +778,6 @@ namespace MMgc
 
 			return decommittedSuitableBlock;
 		}
-#endif
 	
 		CheckFreelist();
 		return 0;
@@ -795,8 +802,6 @@ namespace MMgc
 		return newBlock;
 	}
 
-	
-#if defined(MMGC_USE_VIRTUAL_MEMORY)
 	void GCHeap::Commit(HeapBlock *block)
 	{
 		if(!block->committed)
@@ -814,8 +819,6 @@ namespace MMgc
 			block->dirty = false;
 		}
 	}
-#endif
-		
 
 	void GCHeap::CheckFreelist()
 	{
@@ -1047,13 +1050,9 @@ namespace MMgc
 		// Turn this switch on to test bridging of contiguous
 		// regions.
 		bool test_bridging = false;
-	#ifdef MMGC_USE_VIRTUAL_MEMORY
 		int defaultReserve = test_bridging ? (size+kMinHeapIncrement) : kDefaultReserve;
-	#endif
 #else
-	#ifdef MMGC_USE_VIRTUAL_MEMORY
 		const int defaultReserve = kDefaultReserve;
-	#endif
 #endif
 		
 		if(GetTotalHeapSize() > config.heapLimit)
@@ -1073,37 +1072,36 @@ namespace MMgc
 		// Round to the nearest kMinHeapIncrement
 		size = ((size + kMinHeapIncrement - 1) / kMinHeapIncrement) * kMinHeapIncrement;
 
-#ifdef MMGC_USE_VIRTUAL_MEMORY
-		Region *region = lastRegion;
-		if (region != NULL)
+		if(config.useVirtualMemory)
 		{
-			commitAvail = (int)((region->reserveTop - region->commitTop) / kBlockSize);
-			
-			// Can this request be satisfied purely by committing more memory that
-			// is already reserved?
-			if (size <= commitAvail) {
-				if (CommitMemory(region->commitTop, size * kBlockSize))
-				{
-					// Succeeded!
-					baseAddr = region->commitTop;
-					contiguous = true;
-
-					// Update the commit top.
-					region->commitTop += size*kBlockSize;
-
-					// Go set up the block list.
-					goto gotMemory;
-				}
-				else
-				{
-					// If we can't commit memory we've already reserved,
-					// no other trick is going to work.  Fail.
-					return false;
-				}
-			}
-
-			if(blocksSpanRegions)
+			Region *region = lastRegion;
+			if (region != NULL)
 			{
+				commitAvail = (int)((region->reserveTop - region->commitTop) / kBlockSize);
+				
+				// Can this request be satisfied purely by committing more memory that
+				// is already reserved?
+				if (size <= commitAvail) {
+					if (CommitMemory(region->commitTop, size * kBlockSize))
+					{
+						// Succeeded!
+						baseAddr = region->commitTop;
+						contiguous = true;
+						
+						// Update the commit top.
+						region->commitTop += size*kBlockSize;
+						
+						// Go set up the block list.
+						goto gotMemory;
+					}
+					else
+					{
+						// If we can't commit memory we've already reserved,
+						// no other trick is going to work.  Fail.
+						return false;
+					}
+				}
+				
 				// Try to reserve a region contiguous to the last region.
 				
 				// - Try for the "default reservation size" if it's larger than
@@ -1161,68 +1159,69 @@ namespace MMgc
 					goto gotMemory;
 				}
 			}
+
+			// We were unable to allocate a contiguous region, or there
+			// was no existing region to be contiguous to because this
+			// is the first-ever expansion.  Allocate a non-contiguous region.
+			
+			// don't waste this uncommitted space, go ahead and commit it
+			if(commitAvail) {
+				ExpandHeapLocked(commitAvail);
+			}
+			
+			// Don't use any of the available space in the current region.
+			commitAvail = 0;
+			
+			// - Go for the default reservation size unless the requested
+			//   size is bigger.
+			if (size < defaultReserve) {
+				newRegionAddr = ReserveMemory(NULL,
+											  defaultReserve*kBlockSize);
+				newRegionSize = defaultReserve;
+			}
+			
+			// - If that failed or the requested size is bigger than default,
+			//   go for the requested size exactly.
+			if (newRegionAddr == NULL) {
+				newRegionAddr = ReserveMemory(NULL,
+											  size*kBlockSize);
+				newRegionSize = size;
+			}
+			
+			// - If that didn't work, give up.
+			if (newRegionAddr == NULL) {
+				return false;
+			}
+			
+			// - Try to commit the memory.
+			if (CommitMemory(newRegionAddr,
+							 size*kBlockSize) == 0)
+			{
+				// Failed.  Un-reserve the memory and fail.
+				ReleaseMemory(newRegionAddr, newRegionSize*kBlockSize);
+				return false;
+			}
+			
+			// If we got here, we've successfully allocated a
+			// non-contiguous region.
+			baseAddr = newRegionAddr;
+			contiguous = false;
+
 		}
-
-		// We were unable to allocate a contiguous region, or there
-		// was no existing region to be contiguous to because this
-		// is the first-ever expansion.  Allocate a non-contiguous region.
-
-		// don't waste this uncommitted space, go ahead and commit it
-		if(commitAvail) {
-			ExpandHeapLocked(commitAvail);
-		}
-		
-		// Don't use any of the available space in the current region.
-		commitAvail = 0;
-
-		// - Go for the default reservation size unless the requested
-		//   size is bigger.
-		if (size < defaultReserve) {
-			newRegionAddr = ReserveMemory(NULL,
-										  defaultReserve*kBlockSize);
-			newRegionSize = defaultReserve;
-		}
-
-		// - If that failed or the requested size is bigger than default,
-		//   go for the requested size exactly.
-		if (newRegionAddr == NULL) {
-			newRegionAddr = ReserveMemory(NULL,
-										  size*kBlockSize);
+		else
+		{		
+			// Allocate the requested amount of space as a new region.
+			newRegionAddr = AllocateAlignedMemory(size * kBlockSize);
+			baseAddr = newRegionAddr;
 			newRegionSize = size;
+			
+			// If that didn't work, give up.
+			if (newRegionAddr == NULL) {
+				return false;
+			}
 		}
 
-		// - If that didn't work, give up.
-		if (newRegionAddr == NULL) {
-			return false;
-		}
-
-		// - Try to commit the memory.
-		if (CommitMemory(newRegionAddr,
-						 size*kBlockSize) == 0)
-		{
-			// Failed.  Un-reserve the memory and fail.
-			ReleaseMemory(newRegionAddr, newRegionSize*kBlockSize);
-			return false;
-		}
-
-		// If we got here, we've successfully allocated a
-		// non-contiguous region.
-		baseAddr = newRegionAddr;
-		contiguous = false;
-
-	  gotMemory:
-
-#else		
-		// Allocate the requested amount of space as a new region.
-		newRegionAddr = AllocateMemory(size * kBlockSize);
-		baseAddr = newRegionAddr;
-		newRegionSize = size;
-
-		// If that didn't work, give up.
-		if (newRegionAddr == NULL) {
-			return false;
-		}
-#endif
+	gotMemory:
 
 		// If we were able to allocate a contiguous block, remove
 		// the old top sentinel.
@@ -1377,8 +1376,12 @@ namespace MMgc
 		while(*next != region) 
 			next = &((*next)->prev);
 		*next = region->prev;
-		ReleaseMemory(region->baseAddr,
-				region->reserveTop-region->baseAddr);		
+		if(config.useVirtualMemory)
+			ReleaseMemory(region->baseAddr,
+						  region->reserveTop-region->baseAddr);		
+		else
+			ReleaseAlignedMemory(region->baseAddr,
+								 region->reserveTop-region->baseAddr);		
 		if(config.verbose) {
 			GCLog("unreserved region 0x%p - 0x%p (commitTop: %p)\n", region->baseAddr, region->reserveTop, region->commitTop);
 			DumpHeapRep();
@@ -1392,8 +1395,12 @@ namespace MMgc
 		while (lastRegion != NULL) {
 			Region *region = lastRegion;
 			lastRegion = lastRegion->prev;
-			ReleaseMemory(region->baseAddr,
-						  region->reserveTop-region->baseAddr);
+			if(config.useVirtualMemory)
+				ReleaseMemory(region->baseAddr,
+							  region->reserveTop-region->baseAddr);
+			else
+				ReleaseAlignedMemory(region->baseAddr,
+									 region->reserveTop-region->baseAddr);
 			delete region;
 		}
 		delete [] blocks;

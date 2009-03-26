@@ -49,7 +49,6 @@
 
 namespace MMgc
 {
-#ifdef MMGC_AVMPLUS
 	uint32_t GCHeap::vmPageSize()
 	{
 		SYSTEM_INFO sysinfo;
@@ -58,6 +57,7 @@ namespace MMgc
 		return sysinfo.dwPageSize;
 	}
 
+#ifdef MMGC_AVMPLUS
 #ifdef AVMPLUS_JIT_READONLY
 	/**
 	 * SetPageProtection changes the page access protections on a block of pages,
@@ -106,7 +106,6 @@ namespace MMgc
 #endif /* AVMPLUS_JIT_READONLY */
 #endif
 
-	#ifdef MMGC_USE_VIRTUAL_MEMORY
 	char* GCHeap::ReserveMemory(char *address,
 								size_t size)
 	{
@@ -184,17 +183,20 @@ namespace MMgc
 		return success;
 	}
 
-	#else // !MMGC_USE_VIRTUAL_MEMORY
-	char* GCHeap::AllocateMemory(size_t size)
+	char* GCHeap::AllocateAlignedMemory(size_t size)
 	{
-		return (char*)_aligned_malloc(size, kBlockSize);
+		return (char*)VirtualAlloc(NULL, size, MEM_COMMIT
+#ifdef _WIN64
+								   | MEM_TOP_DOWN
+#endif //#ifdef _WIN64
+								   ,
+								   PAGE_READWRITE);
 	}
 
-	void GCHeap::ReleaseMemory(char *address, size_t)
+	void GCHeap::ReleaseAlignedMemory(char *address, size_t)
 	{
-		_aligned_free(address);
+		VirtualFree(address, 0, MEM_RELEASE);
 	}	
-	#endif
 
 	/*static*/
 	size_t GCHeap::GetPrivateBytes()
@@ -504,5 +506,10 @@ nosym:
 	bool GCHeap::osSupportsRegionMerging()
 	{
 		return false;
+	}
+
+	bool GCHeap::osSupportsVirtualMemory()
+	{
+		return true;
 	}
 }

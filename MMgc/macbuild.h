@@ -80,12 +80,6 @@
 #define MMGC_AVMPLUS
 
 /**
- * MMGC_USE_VIRTUAL_MEMORY only for MACHO builds
- */
-#define MMGC_USE_VIRTUAL_MEMORY
-
-
-/**
  * This makes JIT code buffers read-only to reduce the probability of
  * heap overflow attacks.
  */
