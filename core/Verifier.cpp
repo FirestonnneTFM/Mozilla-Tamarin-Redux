@@ -67,7 +67,7 @@ namespace avmplus
 
 		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
 			if (opcode == OP_newfunction) {
-				MethodInfo *f = type->pool->methods[opd1];
+				MethodInfo *f = type->pool->getMethodInfo(opd1);
 				AvmAssert(f->declaringTraits() == type);
 				core->enqFunction(f);
 				core->enqTraits(type);
@@ -199,11 +199,6 @@ namespace avmplus
 			// must have enough locals to hold all parameters including this
 			toplevel->throwVerifyError(kCorruptABCError);
 		}
-
-#ifndef AVMPLUS_WORD_CODE
-        // For word code, it is set by the WordcodeTranslator epilogue
-        info->set_abc_code_start(code_pos);
-#endif
 
 #ifdef AVMPLUS_VERIFYALL
 		// push the verifyall filter onto the front of the coder pipeline
@@ -2501,28 +2496,24 @@ namespace avmplus
 
 	MethodInfo* Verifier::checkMethodInfo(uint32_t id)
 	{
-		if (id >= pool->methodCount)
+		const uint32_t c = pool->methodCount();
+		if (id >= c)
 		{
-            verifyFailed(kMethodInfoExceedsCountError, core->toErrorString(id), core->toErrorString(pool->methodCount));
-			return NULL;
+            verifyFailed(kMethodInfoExceedsCountError, core->toErrorString(id), core->toErrorString(c));
 		}
-		else
-		{
-			return pool->methods[id];
-		}
+
+		return pool->getMethodInfo(id);
 	}
 
 	Traits* Verifier::checkClassInfo(uint32_t id)
 	{
-		if (id >= pool->classCount)
+		const uint32_t c = pool->classCount();
+		if (id >= c)
 		{
-            verifyFailed(kClassInfoExceedsCountError, core->toErrorString(id), core->toErrorString(pool->classCount));
-			return NULL;
+            verifyFailed(kClassInfoExceedsCountError, core->toErrorString(id), core->toErrorString(c));
 		}
-		else
-		{
-			return pool->cinits[id]->declaringTraits();
-		}
+
+		return pool->getClassTraits(id);
 	}
 
 	Traits* Verifier::checkTypeName(uint32_t index)

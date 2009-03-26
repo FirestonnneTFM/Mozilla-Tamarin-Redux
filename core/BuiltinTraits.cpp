@@ -146,12 +146,12 @@ namespace avmplus
 	Traits* BuiltinTraits::findCTraits(const char* cname, PoolObject* pool)
 	{
 		Stringp name = pool->core->internConstantStringLatin1(cname);
-		for (int i=0, n=pool->cinits.capacity(); i < n; i++) 
+		for (uint32_t i=0, n=pool->classCount(); i < n; i++) 
 		{
-			MethodInfo* cinit = pool->cinits[i];
-			if (cinit && cinit->declaringTraits()->name == name) 
+			Traits* ctraits = pool->getClassTraits(i);
+			if (ctraits && ctraits->name == name) 
 			{
-				return cinit->declaringTraits();
+				return ctraits;
 			}
 		}
 		return NULL;

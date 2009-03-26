@@ -79,6 +79,8 @@ namespace avmplus
 	 */
 	class PoolObject : public MMgc::GCFinalizedObject
 	{
+		friend class AbcParser;
+		
 	public:
 		AvmCore *core;
 
@@ -100,15 +102,6 @@ namespace avmplus
 		// explicitly specify LIST_NonGCObjects b/c these aren't really atoms, they are offsets
 		List<Atom,LIST_NonGCObjects> cpool_mn;
 
-		/** all methods */
-		List<MethodInfo*> methods;
-#if VMCFG_METHOD_NAMES
-		// only allocated & populated if core->config.methodName is true...
-		// if positive, an index into cpool_string; if negative, an index into cpool_mn
-		// (always safe because those indices are limited to 30 bits)
-		List<int32_t> method_name_indices;	
-#endif
-
 		/** metadata -- ptrs into ABC, not gc-allocated */
 		List<const byte*> metadata_infos;
 
@@ -116,11 +109,7 @@ namespace avmplus
 		DWB(Domain*) domain;
 		
 		/** constructors for class objects, for op_newclass */
-		List<MethodInfo*> cinits;  // TODO just use methods array, dont need new cinits array
 		List<MethodInfo*> scripts;
-
-		/** # of elements in methods array */
-		uint32 methodCount;
 
 		/** # of elements in metadata array */
 		uint32 metadataCount;
@@ -134,9 +123,6 @@ namespace avmplus
 		uint32 constantNsCount;
 		uint32 constantNsSetCount;
 		uint32 constantMnCount;
-
-		/** # of elements in classes array */
-		uint32 classCount;
 
 		/** # of elements in scripts array */
 		uint32 scriptCount;
@@ -162,8 +148,6 @@ namespace avmplus
 
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos);
 		~PoolObject();
-
-		MethodInfo* getMethodInfo(uint32 index);
 
 		MethodInfo* getNamedScript(const Multiname* multiname) const;
 
@@ -219,13 +203,13 @@ namespace avmplus
 
 		Atom posToAtom(const byte* pos) const
 		{
-			return (pos - abcStart)<<3 | kObjectType;
+			return (pos - _abcStart)<<3 | kObjectType;
 		}
 
 		const byte* atomToPos(Atom a) const
 		{
 			AvmAssert((a&7)==kObjectType);
-			return abcStart + urshift(a,3);
+			return _abcStart + urshift(a,3);
 		}
 
 		// Index of the metadata info that means skip the associated definition
@@ -235,26 +219,50 @@ namespace avmplus
 		
 		ScriptBuffer code() 
 		{ 
-			return (ScriptBufferImpl*)m_code; 
+			return (ScriptBufferImpl*)_code; 
 		}
 
 		bool isCodePointer(const byte* pos)
 		{
-			return pos > &code()[0] && pos < m_code->getBuffer() + code().getSize();
+			return pos > &code()[0] && pos < _code->getBuffer() + code().getSize();
 		}
 
+	public:
+		inline uint32_t classCount() const { return _classes.size(); }
+		inline Traits* getClassTraits(uint32_t i) const { return _classes[i]; }
+
+		inline uint32_t methodCount() const { return _methods.size(); }
+		inline MethodInfo* getMethodInfo(uint32_t i) const { return _methods[i]; }
+#ifdef DEBUGGER
+		inline DebuggerMethodInfo* getDebuggerMethodInfo(uint32_t i) const { return (i < _method_dmi.size()) ? _method_dmi[i] : NULL; }
+#endif
+#if VMCFG_METHOD_NAMES
+		Stringp getMethodInfoName(uint32_t i);
+#endif
 		
 	private:
-		DWB(MultinameHashtable*) namedTraits;
-		DWB(MultinameHashtable*) privateNamedScripts;
-		DWB(ScriptBufferImpl*) m_code;
-		const byte * const abcStart;
+		DWB(MultinameHashtable*)					_namedTraits;
+		DWB(MultinameHashtable*)					_privateNamedScripts;
+		DWB(ScriptBufferImpl*)						_code;
+		const byte * const							_abcStart;
+		List<Traits*, LIST_GCObjects>				_classes;
+		List<MethodInfo*, LIST_GCObjects>			_methods;
+#ifdef DEBUGGER
+		List<DebuggerMethodInfo*, LIST_GCObjects>	_method_dmi;
+#endif
+#if VMCFG_METHOD_NAMES
+		// only allocated & populated if core->config.methodName is true...
+		// if positive, an index into cpool_string; if negative, an index into cpool_mn
+		// (always safe because those indices are limited to 30 bits)
+		List<int32_t, LIST_NonGCObjects>			_method_name_indices;	
+#endif
+
 
 	public:
 		// @todo, privatize & make into bitfield (requires API churn)
-		bool	isBuiltin;	// true if this pool is baked into the player.  used to control whether callees will set their context.
+		bool						isBuiltin;	// true if this pool is baked into the player.  used to control whether callees will set their context.
 	#ifdef AVMPLUS_VERBOSE
-		bool	verbose;
+		bool						verbose;
 	#endif
 	};
 }

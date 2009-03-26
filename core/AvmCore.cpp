@@ -292,11 +292,11 @@ namespace avmplus
 		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this);
 
 		// whack the the non-interruptable bit on all builtin functions
-		for(int i=0, size=builtinPool->methods.size(); i<size; i++)
-			builtinPool->methods[i]->makeNonInterruptible();
+		for(int i=0, size=builtinPool->methodCount(); i<size; i++)
+			builtinPool->getMethodInfo(i)->makeNonInterruptible();
 
-		for(int i=0, size=builtinPool->cinits.size(); i<size; i++)
-			builtinPool->cinits[i]->makeNonInterruptible();
+		for(int i=0, size=builtinPool->classCount(); i<size; i++)
+			builtinPool->getClassTraits(i)->init->makeNonInterruptible();
 
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
 			builtinPool->scripts[i]->makeNonInterruptible();
@@ -1482,7 +1482,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_newfunction:
 			{
 				int method_id = readU30(pc);
-				MethodInfo* f = pool->methods[method_id];
+				MethodInfo* f = pool->getMethodInfo(method_id);
 				buffer << opcodeInfo[opcode].name << " method_id=" << method_id;
 				if (opcode == OP_callstatic)
 				{
@@ -1499,7 +1499,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_newclass: 
 			{
                 uint32_t id = readU30(pc);
-				MethodInfo* c = pool->cinits[id];
+				Traits* c = pool->getClassTraits(id);
 				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
 			}
@@ -1680,7 +1680,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case WOP_callstatic:
 			case WOP_newfunction: {
 				int method_id = (int)*pc++;
-				MethodInfo* f = pool->methods[method_id];
+				MethodInfo* f = pool->getMethodInfo(method_id);
 				buffer << wopAttrs[opcode].name << " method_id=" << method_id;
 				if (opcode == WOP_callstatic)
 					buffer << " argc=" << (int)*pc++; // argc
@@ -1694,7 +1694,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				
 			case WOP_newclass: {
                 uint32_t id = (uint32_t)*pc++;
-				MethodInfo* c = pool->cinits[id];
+				Traits* c = pool->getClassTraits(id);
 				buffer << wopAttrs[opcode].name << " " << c;
 				break;
 			}

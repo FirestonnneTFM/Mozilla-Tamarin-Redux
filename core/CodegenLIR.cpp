@@ -2136,7 +2136,7 @@ namespace avmplus
 		    emitCopy(state, opd1+state->verifier->scopeBase, state->sp()+1);
 			break;
 		case OP_newfunction:
-			AvmAssert(pool->methods[opd1]->declaringTraits() == type);
+			AvmAssert(pool->getMethodInfo(opd1)->declaringTraits() == type);
 			emit(state, opcode, opd1, state->sp()+1, type);
 			break;
         case OP_pushscope:
@@ -2189,9 +2189,9 @@ namespace avmplus
 		case OP_newclass:
 		{
 		    emitSetDxns(state);
-		    MethodInfo* cinit = pool->cinits[opd1];
-			AvmAssert(type->init == cinit && cinit->declaringTraits() == type);
-			emit(state, opcode, (uintptr)(void*)cinit, state->sp(), type);
+		    Traits* ctraits = pool->getClassTraits(opd1);
+			AvmAssert(ctraits == type);
+			emit(state, opcode, (uintptr)(void*)ctraits, state->sp(), type);
 			break;
 		}
 
@@ -2540,7 +2540,7 @@ namespace avmplus
 
 		case OP_callstatic:
             // opd1=method_id, opd2=argc
-			emitSetContext(state, pool->methods[opd1]);
+			emitSetContext(state, pool->getMethodInfo(opd1));
 			emitCall(state, OP_callstatic, opd1, opd2, type);
 			break;
 
@@ -3762,8 +3762,8 @@ namespace avmplus
 			case OP_newclass:
 			{
                 PERFM_NVPROF("emit(newclass",1);
-				// sp[0] = core->newclass(env, cinit, scopeBase, scopeDepth, base)
-				MethodInfo *cinit = (MethodInfo*) op1;
+				// sp[0] = core->newclass(env, ctraits, scopeBase, scopeDepth, base)
+				Traits* ctraits = (Traits*) op1;
 				int localindex = int(op2);
 				int extraScopes = state->scopeDepth;
 
@@ -3774,7 +3774,7 @@ namespace avmplus
 				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
 				LIns* i3 = callIns(FUNCTIONID(newclass), 5, 
-					env_param, InsConstPtr(cinit), base, outer, ap);
+					env_param, InsConstPtr(ctraits), base, outer, ap);
 
 				AvmAssert(!result->isMachineType());
 				localSet(localindex, i3, result);

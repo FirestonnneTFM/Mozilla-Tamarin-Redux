@@ -54,18 +54,21 @@ namespace avmplus
 #endif
 		cpool_mn(0),
 		bugFlags(0),
-		methods(core->GetGC(), 0),
-#if VMCFG_METHOD_NAMES
-		method_name_indices(0),
-#endif
 		metadata_infos(0),
-		cinits(core->GetGC(), 0),
 		scripts(core->GetGC(), 0),
-		abcStart(startPos)
+		_namedTraits(new(core->GetGC()) MultinameHashtable()),
+		_privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
+		_code(sb.getImpl()),
+		_abcStart(startPos),
+		_classes(core->GetGC(), 0),
+		_methods(core->GetGC(), 0)
+#ifdef DEBUGGER
+		, _method_dmi(core->GetGC(), 0)
+#endif
+#if VMCFG_METHOD_NAMES
+		, _method_name_indices(0)
+#endif
 	{
-		namedTraits = new(core->GetGC()) MultinameHashtable();
-		privateNamedScripts = new(core->GetGC()) MultinameHashtable();
-		m_code = sb.getImpl();
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 	}
 
@@ -76,16 +79,10 @@ namespace avmplus
 		#endif
 	}
 	
-    MethodInfo* PoolObject::getMethodInfo(uint32 index)
-    {
-		AvmAssert(index < methodCount);
-		return methods[index];
-    }
-
 	Traits* PoolObject::getBuiltinTraits(Stringp name) const
 	{
 		AvmAssert(BIND_NONE == 0);
-		return (Traits*) namedTraits->getName(name);
+		return (Traits*) _namedTraits->getName(name);
 	}
 
 	Traits* PoolObject::getTraits(Stringp name, Namespace* ns, bool recursive/*=true*/) const
@@ -95,7 +92,7 @@ namespace avmplus
 
 		// look for class in current ABC file
 		if (t == NULL)
-			t = (Traits*) namedTraits->get(name, ns);
+			t = (Traits*) _namedTraits->get(name, ns);
 		return t;
 	}
 
@@ -136,7 +133,7 @@ namespace avmplus
 
 	void PoolObject::addNamedTraits(Stringp name, Namespace* ns, Traits* traits)
 	{
-		namedTraits->add(name, ns, (Binding)traits);
+		_namedTraits->add(name, ns, (Binding)traits);
 	}
 
 	Namespace* PoolObject::getNamespace(int index) const
@@ -600,7 +597,7 @@ range_error:
 
 	void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, MethodInfo *script)
 	{
-		privateNamedScripts->add(name, ns, (Binding)script);
+		_privateNamedScripts->add(name, ns, (Binding)script);
 	}
 
 	MethodInfo* PoolObject::getNamedScript(const Multiname* multiname) const
@@ -608,7 +605,7 @@ range_error:
 		MethodInfo* f = domain->getNamedScript(multiname);
 		if (!f)
 		{
-			f = (MethodInfo*)privateNamedScripts->getMulti(multiname);
+			f = (MethodInfo*)_privateNamedScripts->getMulti(multiname);
 		}
 		return f;
 	}
@@ -639,4 +636,32 @@ range_error:
 	}
 #endif
 	
+#if VMCFG_METHOD_NAMES
+	Stringp PoolObject::getMethodInfoName(uint32_t i)
+	{
+		Stringp name = NULL;
+		if (core->config.methodNames && uint32_t(i) < uint32_t(this->_method_name_indices.size()))
+		{
+			const int32_t index = this->_method_name_indices[i];
+			if (index >= 0)
+			{
+				name = this->getString(index);
+			}
+			else
+			{
+#ifdef AVMPLUS_WORD_CODE
+				// PrecomputedMultinames may not be inited yet, but we'll need them eventually,
+				// so go ahead and init them now
+				this->initPrecomputedMultinames();
+				const Multiname& mn = this->word_code.cpool_mn->multinames[-index];
+#else
+				Multiname mn;
+				this->parseMultiname(this->cpool_mn[-index], mn);
+#endif
+				name = Multiname::format(core, mn.getNamespace(), mn.getName());
+			}
+		}
+		return name;
+	}
+#endif	
 }

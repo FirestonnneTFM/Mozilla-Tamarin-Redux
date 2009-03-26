@@ -209,7 +209,7 @@ namespace avmplus
 		 * OP_newclass
 		 */
 
-		ClassClosure* newclass(MethodInfo* cinit,
+		ClassClosure* newclass(Traits* ctraits,
 			          ClassClosure* base,
 					  ScopeChain* outer,
 					  Atom* scopes) const;
