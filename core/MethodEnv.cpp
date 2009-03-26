@@ -338,7 +338,7 @@ namespace avmplus
 		if (isInterpreted())
 		{
 			// Tail call inhibited by local allocation/deallocation
-			AvmCore::AllocaAutoPtr _atomv;
+			MMgc::GC::AllocaAutoPtr _atomv;
 			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
 			atomv[0] = thisArg;
 			for ( int i=0 ; i < argc ; i++ )
@@ -349,7 +349,7 @@ namespace avmplus
 		{
 			const int rest_offset = ms->rest_offset();
 			const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
-			AvmCore::AllocaAutoPtr _ap;
+			MMgc::GC::AllocaAutoPtr _ap;
 			uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 
 			unboxCoerceArgs(thisArg, a, ap, ms);
@@ -379,7 +379,7 @@ namespace avmplus
 		if (isInterpreted())
 		{
 			// Tail call inhibited by local allocation/deallocation
-			AvmCore::AllocaAutoPtr _atomv;
+			MMgc::GC::AllocaAutoPtr _atomv;
 			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
 			atomv[0] = thisArg;
 			VMPI_memcpy(atomv+1, argv, sizeof(Atom)*argc);
@@ -389,7 +389,7 @@ namespace avmplus
 		{
 			const int rest_offset = ms->rest_offset();
 			const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
-			AvmCore::AllocaAutoPtr _ap;
+			MMgc::GC::AllocaAutoPtr _ap;
 			uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 				
 			unboxCoerceArgs(thisArg, argc, argv, ap, ms);
@@ -438,7 +438,7 @@ namespace avmplus
 		const int extra = startCoerce(argc, ms);
 		const int rest_offset = ms->rest_offset();
 		const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
-		AvmCore::AllocaAutoPtr _ap;
+		MMgc::GC::AllocaAutoPtr _ap;
 		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 			
 		unboxCoerceArgs(argc, atomv, ap, ms);
@@ -912,7 +912,7 @@ namespace avmplus
 		// create arguments using argv[1..argc].
 		// Even tho E3 says create an Object, E4 says create an Array so thats what we will do.
 		AvmAssert(argc >= 0);
-		AvmCore::AllocaAutoPtr _atomv;
+		MMgc::GC::AllocaAutoPtr _atomv;
 		Atom* atomv = (Atom*) VMPI_alloca(core(), _atomv, (argc+1) * sizeof(Atom));
 		method->getMethodSignature()->boxArgs(core(), argc, ap, atomv);
 		return createArguments(atomv, argc);

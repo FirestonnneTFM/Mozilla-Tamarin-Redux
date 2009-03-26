@@ -510,7 +510,7 @@ namespace avmplus
 
 		// package up the args
 		int count = argumentCount(constrDesc);
-		AvmCore::AllocaAutoPtr _jargs;
+		MMgc::GC::AllocaAutoPtr _jargs;
 		jvalue* jargs = (jvalue*) VMPI_alloca( core, _jargs, count*sizeof(jvalue) );
 		boxArgs(core, jobj->toplevel(), constrDesc, argc, &argv[0], jargs);
 		for(int i=argc; i<count; i++)
@@ -543,7 +543,7 @@ namespace avmplus
 
 		// package up the args
 		int count = argumentCount(methodDesc);
-		AvmCore::AllocaAutoPtr _jargs;
+		MMgc::GC::AllocaAutoPtr _jargs;
 		jvalue* jargs = (jvalue*) VMPI_alloca( core, _jargs, count*sizeof(jvalue) );
 		const char* rt = boxArgs(core, jobj->toplevel(), methodDesc, argc, &argv[1], jargs);
 		for(int i=argc; i<count; i++)

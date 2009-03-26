@@ -363,20 +363,6 @@
 
 //#define AVMPLUS_SELFTEST
 
-// Enable our own alloca() replacement that always allocates in the heap, this is good on
-// systems with limited memory or limited stack
-
-//#define AVMPLUS_HEAP_ALLOCA
-
-#define AVMPLUS_PARAM_ALLOCA_CUTOFF		4000	// Don't make real alloca() blow the stack; this limit is heuristic
-#define AVMPLUS_PARAM_ALLOCA_DEFSIZE	1000	// Default number of bytes in a stack segment for heap-based alloca()
-
-#ifdef AVMPLUS_HEAP_ALLOCA
-#  define VMPI_alloca(core, autoptr, nbytes)  core->allocaPush(nbytes, autoptr)
-#else
-#  define VMPI_alloca(core, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? core->allocaPush(nbytes, autoptr) : alloca(nbytes))
-#endif
-
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...
 // will be removed soon
 #define AVMPLUS_REDUX_API 1

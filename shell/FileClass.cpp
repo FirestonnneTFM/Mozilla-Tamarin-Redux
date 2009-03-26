@@ -95,7 +95,7 @@ namespace avmshell
 
 		int len = (int)fileSize;
 
-		AvmCore::AllocaAutoPtr _c;
+		MMgc::GC::AllocaAutoPtr _c;
 		uint8_t* c = (uint8_t*)VMPI_alloca(core, _c, len+1);
 
 		len = (int)fp->read(c, len); //need to force since the string creation functions expect an int

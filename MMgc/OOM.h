@@ -40,13 +40,6 @@
 #ifndef __OOM_H__
 #define __OOM_H__
 
-#ifdef MMGC_AVMPLUS
-// don't reinvent the wheel
-#include "../core/avmsetjmp.h"
-#else
-#include <setjmp.h>
-#endif
-
 #define MMGC_ENTER MMgc::EnterFrame _ef;\
         _ef.status = setjmp(_ef.jmpbuf);
 

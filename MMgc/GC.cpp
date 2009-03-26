@@ -352,10 +352,12 @@ namespace MMgc
 		emptyWeakRef = new (this) GCWeakRef(NULL);
 
 		gcheap->AddGC(this);
+ 		allocaInit();
 	}
 
 	GC::~GC()
 	{
+ 		allocaShutdown();
 		heap->RemoveGC(this);
 
 		// Force all objects to be destroyed
@@ -3191,6 +3193,75 @@ bail:
 			pendingStatusChange = false;
 		}
 	}
+
+ 	void GC::allocaInit()
+ 	{
+ 		top_segment = NULL;
+ 		stacktop = NULL;
+ #ifdef _DEBUG
+ 		stackdepth = 0;
+ #endif
+ 		pushAllocaSegment(AVMPLUS_PARAM_ALLOCA_DEFSIZE);
+ 	}
+ 	
+ 	void GC::allocaShutdown()
+ 	{
+ 		while (top_segment != NULL)
+ 			popAllocaSegment();
+ 		top_segment = NULL;
+ 		stacktop = NULL;
+ 	}
+ 	
+ 	void GC::allocaPopToSlow(void* top)
+ 	{
+ 		GCAssert(top_segment != NULL);
+ 		GCAssert(!(top >= top_segment->start && top <= top_segment->limit));
+ 		while (!(top >= top_segment->start && top <= top_segment->limit))
+ 			popAllocaSegment();
+ 		GCAssert(top_segment != NULL);
+ 	}
+ 	
+ 	void* GC::allocaPushSlow(size_t nbytes)
+ 	{
+ 		size_t alloc_nbytes = nbytes;
+ 		if (alloc_nbytes < AVMPLUS_PARAM_ALLOCA_DEFSIZE)
+ 			alloc_nbytes = AVMPLUS_PARAM_ALLOCA_DEFSIZE;
+ 		pushAllocaSegment(alloc_nbytes);
+ 		void *p = stacktop;
+ 		stacktop = (char*)stacktop + nbytes;
+ 		return p;
+ 	}
+ 	
+ 	void GC::pushAllocaSegment(size_t nbytes)
+ 	{
+ 		GCAssert(nbytes % 8 == 0);
+ #ifdef _DEBUG
+ 		stackdepth += nbytes;
+ #endif
+ 		void* memory = AllocRCRoot(nbytes);
+ 		AllocaStackSegment* seg = new AllocaStackSegment;
+ 		seg->start = memory;
+ 		seg->limit = (void*)((char*)memory + nbytes);
+ 		seg->top = NULL;
+ 		seg->prev = top_segment;
+ 		if (top_segment != NULL)
+ 			top_segment->top = stacktop;
+ 		top_segment = seg;
+ 		stacktop = memory;
+ 	}
+ 	
+ 	void GC::popAllocaSegment()
+ 	{
+ #ifdef _DEBUG
+ 		stackdepth -= (char*)top_segment->limit - (char*)top_segment->start;
+ #endif
+ 		FreeRCRoot(top_segment->start);
+ 		AllocaStackSegment* seg = top_segment;
+ 		top_segment = top_segment->prev;
+ 		if (top_segment != NULL)
+ 			stacktop = top_segment->top;
+ 		delete seg;
+ 	} 
 
 	GCAutoExit::GCAutoExit(GC *_gc) : gc(NULL)
 	{
