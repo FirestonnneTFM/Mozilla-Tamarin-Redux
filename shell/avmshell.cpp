@@ -962,6 +962,7 @@ namespace avmshell
 			if(MMGC_ENTER_STATUS == 0)
 			{
 				MMgc::GC *gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+				MMGC_GCENTER(gc);
 				Shell* shell = new Shell(gc);
 				exitCode = shell->execute(argc, argv);
 				delete shell;

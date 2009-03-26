@@ -73,5 +73,6 @@
 #endif
 
 #ifdef _MSC_VER
+    #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
 	#pragma warning(disable:4512) //assignment operator could not be generated
 #endif

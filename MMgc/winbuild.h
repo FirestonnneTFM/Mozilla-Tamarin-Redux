@@ -87,6 +87,7 @@
  */
 #ifdef _MSC_VER
 
+    #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#pragma warning(disable:4512) //assignment operator could not be generated
 	#pragma warning(disable:4511) //can't generate copy ctor
