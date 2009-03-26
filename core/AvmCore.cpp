@@ -161,7 +161,6 @@ namespace avmplus
 		builtinDomain      = NULL;
 
 		GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
-		allocaInit();
 
 		minstack           = 0;
 
@@ -275,7 +274,6 @@ namespace avmplus
 #ifdef SUPERWORD_PROFILING
 		WordcodeTranslator::swprofStop();
 #endif
-		allocaShutdown();
 #ifdef DEBUGGER
 		delete _profiler;
 		_profiler = NULL;
@@ -2970,7 +2968,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int32_t len16 = UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, NULL, 0, true);
 		AvmAssertMsg(len16 >= 0, "Malformed UTF-8 sequence");
 		// use alloca to avoid heap allocations where possible
-		AvmCore::AllocaAutoPtr _buffer;
+		MMgc::GC::AllocaAutoPtr _buffer;
 		wchar *buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
 
 		if(!buffer) {
@@ -3530,7 +3528,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			if (s == NULL || len == 0)
 				return this->kEmptyString;
 
-			AvmCore::AllocaAutoPtr _swapped;
+			MMgc::GC::AllocaAutoPtr _swapped;
 			wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
 			for (int32 i = 0; i < len; i++)
 			{
@@ -3994,75 +3992,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	}		
 #endif // NANOJIT
 
-	void AvmCore::allocaInit()
-	{
-		top_segment = NULL;
-		stacktop = NULL;
-#ifdef _DEBUG
-		stackdepth = 0;
-#endif
-		pushAllocaSegment(AVMPLUS_PARAM_ALLOCA_DEFSIZE);
-	}
-	
-	void AvmCore::allocaShutdown()
-	{
-		while (top_segment != NULL)
-			popAllocaSegment();
-		top_segment = NULL;
-		stacktop = NULL;
-	}
-	
-	void AvmCore::allocaPopToSlow(void* top)
-	{
-		AvmAssert(top_segment != NULL);
-		AvmAssert(!(top >= top_segment->start && top <= top_segment->limit));
-		while (!(top >= top_segment->start && top <= top_segment->limit))
-			popAllocaSegment();
-		AvmAssert(top_segment != NULL);
-	}
-	
-	void* AvmCore::allocaPushSlow(size_t nbytes)
-	{
-		size_t alloc_nbytes = nbytes;
-		if (alloc_nbytes < AVMPLUS_PARAM_ALLOCA_DEFSIZE)
-			alloc_nbytes = AVMPLUS_PARAM_ALLOCA_DEFSIZE;
-		pushAllocaSegment(alloc_nbytes);
-		void *p = stacktop;
-		stacktop = (char*)stacktop + nbytes;
-		return p;
-	}
-	
-	void AvmCore::pushAllocaSegment(size_t nbytes)
-	{
-		AvmAssert(nbytes % 8 == 0);
-#ifdef _DEBUG
-		stackdepth += nbytes;
-#endif
-		void* memory = gc->AllocRCRoot(nbytes);
-		AllocaStackSegment* seg = new AllocaStackSegment;
-		seg->start = memory;
-		seg->limit = (void*)((char*)memory + nbytes);
-		seg->top = NULL;
-		seg->prev = top_segment;
-		if (top_segment != NULL)
-			top_segment->top = stacktop;
-		top_segment = seg;
-		stacktop = memory;
-	}
-	
-	void AvmCore::popAllocaSegment()
-	{
-#ifdef _DEBUG
-		stackdepth -= (char*)top_segment->limit - (char*)top_segment->start;
-#endif
-		gc->FreeRCRoot(top_segment->start);
-		AllocaStackSegment* seg = top_segment;
-		top_segment = top_segment->prev;
-		if (top_segment != NULL)
-			stacktop = top_segment->top;
-		delete seg;
-	}
-	
 #ifdef AVMPLUS_VERIFYALL
 	void AvmCore::enqFunction(MethodInfo* f) {
 		if (config.verifyall &&

@@ -700,7 +700,7 @@ namespace avmplus
 											  int32_t radix,
 											  UnsignedTreatment treatAs)
 	{
-		AvmCore::AllocaAutoPtr _buffer;
+		MMgc::GC::AllocaAutoPtr _buffer;
 		char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForInt64_t_toString);
 		int32_t len = kMinSizeForInt64_t_toString;
 		char* p = convertIntegerToStringBuffer(value, buffer, len, radix, treatAs);
@@ -813,7 +813,7 @@ namespace avmplus
 			return NULL;
 		}
 
-		AvmCore::AllocaAutoPtr _tmp;
+		MMgc::GC::AllocaAutoPtr _tmp;
 		char* tmp = (char*)VMPI_alloca(core, _tmp, kMinSizeForDouble_toString);
 		char *src = tmp + kMinSizeForDouble_toString - 1;
 		char *srcEnd = src;
@@ -887,7 +887,7 @@ namespace avmplus
 		
 		int32_t i, len = 0;
 
-		AvmCore::AllocaAutoPtr _buffer;
+		MMgc::GC::AllocaAutoPtr _buffer;
 		char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForDouble_toString);
 		char *s = buffer;
 		bool negative = false;

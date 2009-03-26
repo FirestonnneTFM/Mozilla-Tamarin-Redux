@@ -70,6 +70,18 @@
 
 #endif // MMGC_PORTING_API
 
+// Enable our own alloca() replacement that always allocates in the heap, this is good on
+// systems with limited memory or limited stack
+#define AVMPLUS_PARAM_ALLOCA_CUTOFF		4000	// Don't make real alloca() blow the stack; this limit is heuristic
+#define AVMPLUS_PARAM_ALLOCA_DEFSIZE	1000	// Default number of bytes in a stack segment for heap-based alloca()
+#ifdef AVMPLUS_HEAP_ALLOCA
+#  define VMPI_alloca(core, autoptr, nbytes)	core->gc->allocaPush(nbytes, autoptr)
+#  define VMPI_alloca_gc(gc, autoptr, nbytes)	gc->allocaPush(nbytes, autoptr)
+#else
+#  define VMPI_alloca(core, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? core->gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
+#  define VMPI_alloca_gc(gc, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? gc->allocaPush(nbytes, autoptr) : alloca(nbytes))
+#endif
+
 namespace avmplus
 {
 	class AvmCore;
@@ -1558,6 +1570,93 @@ public:
 		 */
 		GCCondition m_condNoRequests;
 #endif
+
+		/* A portable replacement for alloca().
+		 *
+		 * Memory is allocated from the heap and not from the stack.  It is freed in 
+		 * one of two ways: If the function returns normally then an auto_ptr like
+		 * mechanism frees the memory.  If the function leaves by throwing an exception
+		 * (or if one of its callees throws an exception) then the exception
+		 * handling mechanism in Exception.{h,cpp} frees the memory by releasing 
+		 * everything that is still allocated that was allocated since the exception
+		 * handler was erected.
+		 *
+		 * The auto_ptr mechanism, based on the class MMgc::GC::AllocaAutoPtr, cannot be
+		 * circumvented, as allocaPush() takes a reference to such an object as an argument.
+		 *
+		 * Typical usage:
+		 *
+		 *    MMgc::GC::AllocaAutoPtr _ptr;                      // by convention prefixed by "_"
+		 *    int* ptr = (int*)core->allocaPush(_ptr, nbytes);  // by convention same name, no "_"
+		 *
+		 * In practice the VMPI_alloca() macro, defined in avmbuild.h, should be used so that
+		 * real alloca() can be used on platforms where that makes sense.
+		 *
+		 * Benchmarks suggest that the performance differences from using this mechanism
+		 * instead of real alloca() are slight to nonexistent, and that the heap allocation
+		 * sometimes provides a performance improvement.
+		 */
+	public:
+		struct AllocaStackSegment
+		{
+			void* start;				// first address; also, the RCRoot pointer
+			void* limit;				// address past data
+			void* top;					// address past live if this segment is not the top
+			AllocaStackSegment* prev;	// segments further from the top
+		};
+		
+		void allocaInit();
+		void allocaShutdown();
+		void allocaPopToSlow(void* top);
+		void* allocaPushSlow(size_t nbytes);
+		void pushAllocaSegment(size_t nbytes);
+		void popAllocaSegment();
+
+		AllocaStackSegment* top_segment;// segment at the stack top
+		void* stacktop;					// current first free word in top_segment
+#ifdef _DEBUG
+		size_t stackdepth;				// useful to have for debugging
+#endif
+		
+	public:
+		/* See documentation above */
+		
+		class AllocaAutoPtr
+		{
+			friend class GC;
+		public:
+			AllocaAutoPtr() : unwindPtr(NULL), gc(NULL) {}  // initialization of 'gc' to pacify gcc
+			~AllocaAutoPtr() { if (unwindPtr) gc->allocaPopTo(unwindPtr); }
+		private:
+			GC* gc;
+			void* unwindPtr;
+		};
+				
+		inline void* allocaTop() 
+		{
+			return stacktop;
+		}
+		
+		inline void allocaPopTo(void* top)
+		{ 
+			if (top >= top_segment->start && top <= top_segment->limit)
+				stacktop = top;
+			else
+				allocaPopToSlow(top);
+		}
+	
+		inline void* allocaPush(size_t nbytes, AllocaAutoPtr& x) 
+		{
+			GCAssert(x.unwindPtr == NULL);
+			x.gc = this;
+			x.unwindPtr = stacktop;
+			nbytes = (nbytes + 7) & ~7;
+			if ((char*)stacktop + nbytes <= top_segment->limit) {
+				stacktop = (char*)stacktop + nbytes;
+				return x.unwindPtr;
+			}
+			return allocaPushSlow(nbytes);
+		}
 	};
 
 	// helper class to wipe out vtable pointer of members for DRC

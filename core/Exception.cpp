@@ -115,8 +115,8 @@ namespace avmplus
 		// from JIT'd code, that is, kCatchAction_SearchForActionScriptExceptionHandler.
 		catchAction = kCatchAction_SearchForActionScriptExceptionHandler;
 
-		this->stacktop = core->allocaTop();
-		
+		this->stacktop = core->gc->allocaTop();
+
 		codeContextAtom = core->codeContextAtom;
 		dxnsAddr = core->dxnsAddr;
 	}
@@ -130,7 +130,7 @@ namespace avmplus
 			// Restore the code context to what it was before the try
 			core->codeContextAtom = codeContextAtom;
 			
-			core->allocaPopTo(this->stacktop);
+			core->gc->allocaPopTo(this->stacktop);
 		}
 	}
 	
@@ -156,7 +156,8 @@ namespace avmplus
 
 		core->callStack = callStack;
 #endif // DEBUGGER
-		core->allocaPopTo(this->stacktop);
+
+		core->gc->allocaPopTo(this->stacktop);
 		core->codeContextAtom = codeContextAtom;
 		core->dxnsAddr = dxnsAddr;
 	}
