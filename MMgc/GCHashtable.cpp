@@ -66,7 +66,7 @@ namespace MMgc
 	{
 		if(options & OPTION_MALLOC) {
 			if(table)
-				free((char*)table);
+				VMPI_free((char*)table);
 		}	else {
 			delete [] table;
 		}
@@ -225,7 +225,7 @@ namespace MMgc
 
 		const void **newTable;
 		if(options & OPTION_MALLOC) {
-			newTable = (const void**)malloc(newTableSize*sizeof(void*));
+			newTable = (const void**)VMPI_alloc(newTableSize*sizeof(void*));
 		} else {
 			newTable = new const void*[newTableSize];
 		}
@@ -255,7 +255,7 @@ namespace MMgc
 		if(table != EMPTY) {
 			if(options & OPTION_MALLOC) {
 				if(table)	
-					free((char*)table);
+					VMPI_free((char*)table);
 			} else {
 				delete [] table;
 			}

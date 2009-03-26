@@ -34,42 +34,30 @@
 #
 # ***** END LICENSE BLOCK *****
 
-ifdef MMGC_DYNAMIC
-DLLS += MMgc
-MMgc_EXTRA_CPPFLAGS += $(DLL_CFLAGS)
-else
-STATIC_LIBRARIES += MMgc
-endif
-MMgc_BUILD_ALL = 1
-
-MMgc_EXTRA_CPPFLAGS += $(MMGC_CPPFLAGS)
-
-MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
-  $(curdir)/MMgc.cpp \
-  $(curdir)/FixedAlloc.cpp \
-  $(curdir)/FixedMalloc.cpp \
-  $(curdir)/GC.cpp \
-  $(curdir)/GCAlloc.cpp \
-  $(curdir)/GCAllocObject.cpp \
-  $(curdir)/GCDebug.cpp \
-  $(curdir)/GCGlobalNew.cpp \
-  $(curdir)/GCHashtable.cpp \
-  $(curdir)/GCHeap.cpp \
-  $(curdir)/GCLargeAlloc.cpp \
-  $(curdir)/GCLog.cpp \
-  $(curdir)/GCMemoryProfiler.cpp \
-  $(curdir)/GCObject.cpp \
-  $(curdir)/GCTests.cpp \
-  $(curdir)/GCThreads.cpp \
-  $(NULL)
-
-ifeq (arm,$(TARGET_CPU))
 ifeq (windows,$(TARGET_OS))
-MMgc_ASMSRCS := $(avmplus_ASMSRCS) \
-  $(curdir)/WinCEUtil.armasm
+MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+  $(curdir)/MMgcPortWin.cpp \
+  $(curdir)/SpinLockWin.cpp \
   $(NULL)
 endif
+
+ifeq (darwin,$(TARGET_OS))
+MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+  $(curdir)/MMgcPortMac.cpp \
+  $(curdir)/SpinLockMac.cpp \
+  $(NULL)
 endif
 
+ifeq (linux,$(TARGET_OS))
+MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+  $(curdir)/MMgcPortUnix.cpp \
+  $(curdir)/SpinLockUnix.cpp \
+  $(NULL)
+endif
 
-$(curdir)/GCDebugMac.$(OBJ_SUFFIX): CXXFLAGS += -Wno-deprecated-declarations
+ifeq (sunos,$(TARGET_OS))
+MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+  $(curdir)/MMgcPortUnix.cpp \
+  $(curdir)/SpinLockUnix.cpp \
+  $(NULL)
+endif

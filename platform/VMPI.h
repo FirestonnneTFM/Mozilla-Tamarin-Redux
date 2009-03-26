@@ -39,6 +39,11 @@
 #define __avmplus_VMPI__
 
 //Placeholder Plaform-specific includes
+
+#ifdef _MSC_VER
+	#define snprintf	_snprintf
+#endif
+
 #define VMPI_memcpy			memcpy
 #define VMPI_memset 		memset	
 #define VMPI_memcmp 		memcmp	
@@ -246,5 +251,208 @@ extern void VMPI_DebugLog(const char* message);
 * @return none
 */
 extern void VMPI_DebugBreak();
+
+/**
+* This method is used to request a block of memory from the system
+* @param size size, in bytes, of memory block requested
+* @return pointer to the start of memory block if allocation was successful, NULL otherwise
+*/
+extern void*		VMPI_alloc(size_t size);
+
+/**
+* This method is used to free a previously allocated block
+* @param ptr pointer to the memory that needs to be released
+* @return none
+*/
+extern void			VMPI_free(void* ptr);
+
+
+/**
+* This method is used to get the size of the memory page of the system
+* @return return the size, if bytes, of memory page
+*/
+extern size_t		VMPI_getVMPageSize();
+
+/**
+* Method to retrieve number of pages in virtual address space of a process
+* @param pageSize size, in bytes, of a page.  This value is the same as the one returned by VMPI_getVMPageSize
+* @return number of pages
+* @see VMPI_getVMPageSize()
+*/
+extern size_t		VMPI_getVMPageCount(size_t pageSize);
+
+/**
+* Method to find whether the platform supports merging of contiguous memory regions from heap
+* @return true if heap merging is supported, false otherwise	
+*/
+extern bool			VMPI_canMergeContiguousHeapRegions();
+
+/**
+* This method is used to reserve region(s) of memory, i.e. one or more memory pages, in the system's virtual address space
+* This method is recommended to be supported on platforms with virtual memory
+* @param address optional argument, indicating the base address of the region to be reserved.
+* The system should treat this address as a hint and try to reserve a region as close to this address as possible
+* If NULL, the system can determine the address of the region.
+* @param size size of region, in bytes, to reserve
+* @return point to base address of the reserved region, NULL otherwise
+* @see VMPI_ReleaseMemoryRegion(), VMPI_CommitMemory()
+*/
+extern void*		VMPI_reserveMemoryRegion(void* address, size_t size);
+
+/**
+* This method is called to release region(s) of memory previously reserved.
+* @param address base address of the region to be released
+* @param size size, in bytes, of the region
+* @return true if the function succeeds, false otherwise
+*/
+extern bool			VMPI_releaseMemoryRegion(void* address, size_t size);
+
+/**
+* This method is used to commit a pages(s) of memory in a previously reserved region
+* @param address base address of the memory region to commit
+* @param size size, in bytes, of the memory to commit 
+* @return true if the function succeeds, false otherwise
+* @see VMPI_ReserveMemoryRegion()
+*/
+extern bool			VMPI_commitMemory(void* address, size_t size);
+
+/**
+* This method is used to de-commit a pages(s) of memory that were previously commited
+* @param address base address of the memory region to decommit
+* @param size, in bytes, of the memory region to decommit
+* @return true if the function succeeds, false otherwise
+* @see VMPI_CommitMemory()
+*/
+extern bool			VMPI_decommitMemory(char *address, size_t size);
+
+/**
+* This method is used to allocate a block of memory with the base address aligned to the system page size
+* This method should be implemented in systems that do not have virtual memory in lieu of APIs to reserve and commit memory regions
+* @param size size, in bytes, of the block of memory to allocate
+* @return pointer to start of the memory block if allocation was successful, NULL otherwise
+* @see VMPI_ReleaseAlignedMemory()
+*/
+extern void*		VMPI_allocateAlignedMemory(size_t size);
+
+/**
+* This method is used to release a block of memory via VMPI_AllocateAlignedMemory
+* @param address pointer to the start of the memory block to be released
+* @return none
+*/
+extern void			VMPI_releaseAlignedMemory(void* address);
+
+/**
+* Method to get the frequency of a high performance counter/timer on the system
+* On platforms where no API to retrieve this information should return a number that closely
+* matches its timer frequency
+* @return 64-bit value indicating the frequency of the system's performance counter or clock with highest resolution
+* @see VMPI_getPerformanceCounter()
+*/
+extern uint64_t 	VMPI_getPerformanceFrequency();
+
+/**
+* Method to get the current value of the system's performance counter/timer
+* Platforms that support a high performance counter should return its current value
+* Platforms that do not have a high performance counter should return the current timer/clock
+* value that was used as a basis to calculate the frequency returned from VMPI_getPerformanceFrequency()
+* @return 64-bit value indicating the current value of the counter
+* @see VMPI_getPerformanceFrequency()
+*/extern uint64_t 	VMPI_getPerformanceCounter();
+
+/**
+* Method to obtain the stack backtrace
+* Used by the MMgc memory profiler to get call stack information
+* @param buffer buffer to fill the call stack data with
+* @param bufferSize size, in bytes, of the buffer passed
+* @param framesToSkip number of function frames to skip from the start of trace 
+* @return true if back trace was captured successfully, false otherwise
+*/
+extern bool			VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip);
+
+/**
+* Method to retrieve the name of the method/function given a specific address in code space
+* Used by the MMgc memory profiler to get and display function names
+* @param pc address whose corresponding function name should be returned
+* @param buffer buffer to write the function name to
+* @param bufferSize size, in bytes, of the buffer passed
+* @return true if the function name was retrieved, false otherwise
+*/
+extern bool			VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize);
+
+/**
+* Method to retrieve the source filename and line number given a specific address in a code space
+* Used by the MMgc memory profiler to display location info of source code
+* @param pc address of code whose corresponding location should be returned
+* @param buffer buffer to write the filename to
+* @param bufferSize size, in bytes, of the buffer for filename
+* @param out param to write the line number to
+* @return true if the file and line number info was retrieved successfully, false otherwise
+*/
+extern bool			VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* lineNumber);
+
+/**
+* Type defintion for an opaque data type representing platform-defined spin lock used by MMgc
+* @see VMPI_lockCreate(), VMPI_lockAcquire()
+*/
+typedef void* vmpi_spin_lock_t;
+
+/**
+* Method to create a new instance of vmpi_spin_lock_t
+* This instance will subsequently be passed to acquire/release lock methods
+* @return newly created vmpi_spin_lock_t instance
+*/
+extern vmpi_spin_lock_t		VMPI_lockCreate();
+
+/**
+* Method to destroy the vmpi_spin_lock_t instance
+* This method is called when MMgc no longer intends to use the vmpi_spin_lock_t
+* instance created and return via VMPI_lockCreate.
+* The implementation can safely destroy the lock instance.
+* @param lock instance of vmpi_spin_lock_t to be destroyed
+* @return none
+* @see VMPI_lockCreate
+*/
+extern void			VMPI_lockDestroy(vmpi_spin_lock_t lock);
+
+/**
+* Method to acquire a lock on a vmpi_spin_lock_t instance
+* If this method returns true, MMgc assumes that the lock was acquired successfully
+* During a call to this method, if the lock was held by some other thread then the
+* implementation should wait until the lock becomes available
+* Return value of false is considered to be an error condition and should only happen
+* in exception situations
+* @param lock instance to acquire the lock on
+* @return true if lock was successfully acquired, false in event of failure
+*/
+extern bool			VMPI_lockAcquire(vmpi_spin_lock_t lock);
+
+/**
+* Method to release a lock on a vmpi_spin_lock_t instance
+* @param lock instance to release the lock on
+* @return true if lock was successfully release, false in event of failure
+*/
+extern bool			VMPI_lockRelease(vmpi_spin_lock_t lock);
+
+/**
+ * can two consecutive calls to VMPI_reserveMemoryRegion be freed with one VMP_releaseMemoryRegion call?
+ * @return true if it can
+ */
+extern bool VMPI_canMergeContiguousRegions();
+
+/**
+ * are the virtual memory API's implemented and usable for this platform/OS?
+ * @return true if they are
+ */
+extern bool VMPI_useVirtualMemory();
+
+/**
+ * spin up a thread on the named signal name and write a 1 to addr when it fires
+ */
+extern void VMPI_WriteOnNamedSignal(const char *name, uint32_t *addr);
+
+/**
+ * connect to a named pipe
+ */
+extern void *VMPI_OpenAndConnectToNamedPipe(const char *pipeName);
 
 #endif /* __avmplus_VMPI__ */

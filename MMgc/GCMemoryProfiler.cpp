@@ -100,7 +100,7 @@ namespace MMgc
 		GCHashtableIterator nameIter(&nameTable);
 		while((obj = nameIter.nextKey()) != NULL)
 		{
-			free((void*)nameIter.value());			
+			VMPI_free((void*)nameIter.value());			
 		}
 	}
 
@@ -117,8 +117,11 @@ namespace MMgc
 			// everytime we lookup an ip cache the result
 			name = (char*)nameTable.get(ip);
 			if(!name) {
-				name = (char*)malloc(256);
-				GetFunctionName(ip, name, 256);
+				name = (char*)VMPI_alloc(256);
+				if(VMPI_getFunctionNameFromPC(ip, name, 256) == false)
+				{
+					VMPI_snprintf(name, 256, "0x%x", ip);
+				}
 				nameTable.put((const void*)ip, name);
 			}
 			// keep going until we hit mutator code
@@ -204,7 +207,7 @@ namespace MMgc
 		uintptr_t trace[kMaxStackTrace];
 		VMPI_memset(trace, 0, sizeof(trace));
 
-		CaptureStackTrace(trace, kMaxStackTrace, 2);
+		VMPI_captureStackTrace(trace, kMaxStackTrace, 2);
 		StackTrace *st = (StackTrace*)stackTraceMap.get(trace); 
 		if(!st) {
 			st = new StackTrace(trace);
@@ -247,7 +250,7 @@ namespace MMgc
 		char *iname = (char*)nameTable.get(buff);
 		if(iname)
 			return iname;
-		iname = (char*)malloc(len+1);
+		iname = (char*)VMPI_alloc(len+1);
 		VMPI_strncpy(iname, name, len);
 		iname[len]='\0';
 		nameTable.put(iname, iname);
@@ -458,13 +461,24 @@ namespace MMgc
 		for(int i=0; trace[i] != 0; i++) {
 			char buff[256];
 			*tp++ = '\t';		*tp++ = '\t';		*tp++ = '\t';		
-			GetFunctionName(trace[i], buff, 256);
-			strncpy(tp, buff, 256);
+			if(VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff)) == false)
+			{
+				VMPI_snprintf(buff, sizeof(buff), "0x%x", trace[i]);
+			}
+			VMPI_strncpy(tp, buff, sizeof(buff));
 			tp += VMPI_strlen(buff);
 
-			GetInfoFromPC(trace[i], buff, 256);
+			uint32_t lineNum;
+			if(VMPI_getFileAndLineInfoFromPC(trace[i], buff, sizeof(buff), &lineNum) == false)
+			{
+				VMPI_snprintf(buff, sizeof(buff), "0x%x", trace[i]);
+			}
+			else
+			{
+				VMPI_snprintf(buff, sizeof(buff), "%s:%d", buff, lineNum);
+			}
 			*tp++ = '(';
-			VMPI_strncpy(tp, buff, 256);
+			VMPI_strncpy(tp, buff, sizeof(buff));
 			tp += VMPI_strlen(buff);
 			*tp++ = ')';
 			tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);

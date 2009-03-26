@@ -55,11 +55,6 @@ namespace MMgc
 	MMGC_API void SetMemType(const void *memtype);
 	MMGC_API void PrintStackTraceByTrace(StackTrace *trace);
 
-	// platform specific helpers
-	void GetInfoFromPC(uintptr_t pc, char *buff, int buffSize);
-	void GetFunctionName(uintptr_t pc, char *buff, int buffSize);
-	void CaptureStackTrace(uintptr_t *trace, int len, int skip);
-
 	class GCStackTraceHashtable : public GCHashtable
 	{
 	public:

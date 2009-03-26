@@ -142,6 +142,7 @@ namespace MMgc
 		/* legacy API */
 		static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128)
 		{
+			GCAssertMsg(false, "Switch to other Init method please");
 			(void)malloc;
 			(void)free;
 			GCHeapConfig props;
@@ -283,27 +284,6 @@ namespace MMgc
 		// called when object is really dead and can be poisoned
 		void FreeHook(const void *item, size_t size, int poison);
 		
-
-		
-#ifdef AVMPLUS_JIT_READONLY
-		// SECURITY: setting executeFlag and writeableFlag at the same time is DANGEROUS! 
-		//           Make sure that you know what you are doing!
-		void SetPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
-#endif /* AVMPLUS_JIT_READONLY */
-		
-		static char *ReserveMemory(char *address, size_t size);
-		static bool CommitMemory(char *address, size_t size);
-		static bool DecommitMemory(char *address, size_t size);
-		static void ReleaseMemory(char *address, size_t size);		
-
-		static bool CommitMemoryThatMaySpanRegions(char *address, size_t size);
-		static bool DecommitMemoryThatMaySpanRegions(char *address, size_t size);		
-
-		// used when useVirtualMemory isn't on
-		static char *AllocateAlignedMemory(size_t size);
-		static void ReleaseAlignedMemory(char *address, size_t size);
-
-
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *GetProfiler() { return profiler; }
 		bool IsProfilingEnabled() { return config.enableProfiler; }
@@ -315,11 +295,8 @@ namespace MMgc
 		void Abort();
 		MemoryStatus GetStatus() { return status; }
 
-		static bool osSupportsRegionMerging();
-		static bool osSupportsVirtualMemory();
-
 		/** The native VM page size (in bytes) for the current architecture */
-		static const int kNativePageSize;
+		static const size_t kNativePageSize;
 
 		// OS abstraction to determine native page size
 		static uint32_t vmPageSize();
@@ -426,6 +403,8 @@ namespace MMgc
 
 		void ValidateHeapBlocks();
 
+		void ReleaseMemory(char *address, size_t size);
+
 		// data section
 	
 		HeapBlock *blocks;
@@ -436,7 +415,7 @@ namespace MMgc
 		FixedMalloc fixedMalloc;
 
 #ifdef MMGC_LOCKING
-		GCSpinLock m_spinlock;
+		vmpi_spin_lock_t m_spinlock;
 #endif /* MMGC_LOCKING */
 
 		size_t committedCodeMemory;

@@ -161,7 +161,7 @@ namespace avmplus
 		CallStackNode *csn = core->callStack;
 		uint32 depth = csn ? csn->depth() : 0;
 		byte *p = currentSample;
-		write(p, GC::ticksToMicros(GC::GetPerformanceCounter()));
+		write(p, GC::ticksToMicros(VMPI_getPerformanceCounter()));
 		write(p, sampleType);
 		if(sampleType != DELETED_OBJECT_SAMPLE)
 		{

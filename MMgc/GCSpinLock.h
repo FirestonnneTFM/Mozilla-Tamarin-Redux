@@ -36,30 +36,53 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <windows.h>
-
-#include "MMgc.h"
+#ifndef __GCSpinLock__
+#define __GCSpinLock__
 
 namespace MMgc
 {
-	void* GCAllocObject::operator new (size_t size)
-	{
-		return HeapAlloc(GetProcessHeap(), 0, size);
-	}
 
-	void* GCAllocObject::operator new[] (size_t size)
+	/**
+	 * GCAcquireSpinlock is a convenience class which acquires
+	 * the specified spinlock at construct time, then releases
+	 * the spinlock at desruct time.  The single statement
+	 *
+	 *    GCAcquireSpinlock acquire(spinlock);
+	 *
+	 * ... will acquire the spinlock at the top of the function
+	 * and release it at the end.  This makes for less error-prone
+	 * code than explicit acquire/release.
+	 */
+	class GCAcquireSpinlock
 	{
-		return HeapAlloc(GetProcessHeap(), 0, size);
-	}
-	
-	void GCAllocObject::operator delete (void *ptr)
-	{
-		HeapFree(GetProcessHeap(), 0, ptr);
-	}
+	public:
+		GCAcquireSpinlock(vmpi_spin_lock_t& spinlock) : m_spinlock(spinlock)
+		{
+		#ifdef _DEBUG
+			bool r =
+		#endif
+			VMPI_lockAcquire(m_spinlock);
 
-	void GCAllocObject::operator delete [] (void *ptr)
-	{
-		HeapFree(GetProcessHeap(), 0, ptr);
-	}
+			GCAssert(r);
+		}
+		~GCAcquireSpinlock()
+		{
+		#ifdef _DEBUG
+			bool r =
+		#endif
+			VMPI_lockRelease(m_spinlock);
+
+			GCAssert(r);
+		}
+
+	private:
+		vmpi_spin_lock_t& m_spinlock;
+
+	private: // not implemented
+		GCAcquireSpinlock();
+		GCAcquireSpinlock(const GCAcquireSpinlock&);
+		GCAcquireSpinlock& operator=(const GCAcquireSpinlock&);
+	};
 }
 
+#endif /* __GCSpinLock__ */

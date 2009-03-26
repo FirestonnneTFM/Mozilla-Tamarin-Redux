@@ -36,77 +36,59 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __GCSpinLock__
-#define __GCSpinLock__
+#include "MMgc.h"
 
-// works going back to 10.1
 extern "C"
 {
-extern void _spin_lock(uint32_t *);
-extern void _spin_unlock(uint32_t *);
+	extern void _spin_lock(uint32_t *);
+	extern void _spin_unlock(uint32_t *);
 }
 
-namespace MMgc
+class SpinLockMac : public MMgc::GCAllocObject
 {
-	/**
-	 * GCSpinLock is a simple spin lock class used by GCHeap to
-	 * ensure mutually exclusive access.  The GCHeap may be accessed
-	 * by multiple threads, so this is necessary to ensure that
-	 * the threads do not step on each other.
-	 */
-	class GCSpinLock
+public:
+	SpinLockMac()
 	{
-	public:
-		GCSpinLock()
-		{
-			m1 = 0;
-		}
+		m1 = 0;
+	}
+
+	~SpinLockMac()
+	{
+	}
+
+	inline bool Acquire()
+	{
+		_spin_lock(&m1);
+		return true;
+	}
 	
-		~GCSpinLock()
-		{
-		}
-
-		inline void Acquire()
-		{
-			_spin_lock(&m1);
-		}
-		
-		inline void Release()
-		{
-			_spin_unlock(&m1);
-		}
-
-	private:
-
-		uint32_t m1;
-	};
-
-	/**
-	 * GCAcquireSpinlock is a convenience class which acquires
-	 * the specified spinlock at construct time, then releases
-	 * the spinlock at desruct time.  The single statement
-	 *
-	 *    GCAcquireSpinlock acquire(spinlock);
-	 *
-	 * ... will acquire the spinlock at the top of the function
-	 * and release it at the end.  This makes for less error-prone
-	 * code than explicit acquire/release.
-	 */
-	class GCAcquireSpinlock
+	inline bool Release()
 	{
-	public:
-		GCAcquireSpinlock(GCSpinLock& spinlock) : m_spinlock(spinlock)
-		{
-			m_spinlock.Acquire();
-		}
-		~GCAcquireSpinlock()
-		{
-			m_spinlock.Release();
-		}
+		_spin_unlock(&m1);
+		return true;
+	}
 
-	private:
-		GCSpinLock& m_spinlock;
-	};
+private:
+	uint32_t m1;
+};
+
+
+vmpi_spin_lock_t VMPI_lockCreate()
+{
+	return (vmpi_spin_lock_t) (new SpinLockMac);
 }
 
-#endif /* __GCSpinLock__ */
+void VMPI_lockDestroy(vmpi_spin_lock_t lock)
+{
+	delete (SpinLockMac*) lock;
+}
+
+bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockMac*)lock)->Acquire();
+}
+
+bool VMPI_lockRelease(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockMac*)lock)->Release();
+}

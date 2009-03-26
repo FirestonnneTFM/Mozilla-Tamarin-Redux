@@ -36,30 +36,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <stdlib.h>
-
 #include "MMgc.h"
 
 namespace MMgc
 {
 	void* GCAllocObject::operator new (size_t size)
 	{
-		return malloc(size);
+		return VMPI_alloc(size);
 	}
 
 	void* GCAllocObject::operator new[] (size_t size)
 	{
-		return malloc(size);
+		return VMPI_alloc(size);
 	}
 	
 	void GCAllocObject::operator delete (void *ptr)
 	{
-		free(ptr);
+		VMPI_free(ptr);
 	}
 
-	void GCAllocObject::operator delete[](void *ptr)
+	void GCAllocObject::operator delete [] (void *ptr)
 	{
-		free(ptr);
+		VMPI_free(ptr);
 	}
 }
 
