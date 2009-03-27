@@ -1259,7 +1259,7 @@ namespace nanojit
 	LInsHashSet::LInsHashSet(GC* gc) : 
 			m_used(0), m_cap(kInitialCap), m_gc(gc)
 	{
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 //		m_list.set_meminfo_name("LInsHashSet.list");
 #endif
         LInsp *list = (LInsp*) gc->Alloc(sizeof(LInsp)*m_cap, GC::kZero);
@@ -1352,7 +1352,7 @@ namespace nanojit
 		const uint32_t newcap = m_cap << 1;
         LInsp *newlist = (LInsp*) m_gc->Alloc(newcap * sizeof(LInsp), GC::kZero);
         LInsp *list = m_list;
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 //		newlist.set_meminfo_name("LInsHashSet.list");
 #endif
 		for (uint32_t i=0, n=m_cap; i < n; i++) {
@@ -1555,7 +1555,7 @@ namespace nanojit
 
         }
 		void add(LInsp i, LInsp use) {
-            if (!i->isconst() && !i->isconstq() && !live.containsKey(i)) {
+            if (!live.containsKey(i)) {
                 live.put(i,use);
             }
 		}
@@ -1579,7 +1579,14 @@ namespace nanojit
 		}
 	};
 
-    void live(GC *gc, LirBuffer *lirbuf)
+	/*
+	 * traverse the LIR buffer and discover which instructions are live
+	 * by starting from instructions with side effects (stores, calls, branches)
+	 * and marking instructions used by them.  Works bottom-up, in one pass.
+	 * if showLiveRefs == true, also print the set of live expressions next to
+	 * each instruction
+	 */
+    void live(GC *gc, LirBuffer *lirbuf, bool showLiveRefs)
 	{
 		// traverse backwards to find live exprs and a few other stats.
 
@@ -1596,7 +1603,8 @@ namespace nanojit
             total++;
 
             // first handle side-effect instructions
-			if (i->isStore() || i->isGuard() || i->isCall() && !i->callInfo()->_cse)
+			if (i->isop(LIR_label) || i->isBranch() || i->isStore() || isRet(i->opcode()) ||
+				i->isGuard() || i->isCall() && !i->callInfo()->_cse)
 			{
 				live.add(i,0);
                 if (i->isGuard())
@@ -1630,9 +1638,10 @@ namespace nanojit
 			}
 		}
  
-		printf("live instruction count %d, total %u, max pressure %d\n",
+		AvmLog("live instruction count %d, total %u, max pressure %d\n",
 			live.retired.size(), total, live.maxlive);
-        printf("side exits %u\n", exits);
+		if (exits > 0)
+			AvmLog("side exits %u\n", exits);
 
 		// print live exprs, going forwards
 		LirNameMap *names = lirbuf->names;
@@ -1643,18 +1652,22 @@ namespace nanojit
             char livebuf[4000], *s=livebuf;
             *s = 0;
             if (!newblock && e->i->isop(LIR_label)) {
-                printf("\n");
+                AvmLog("\n");
             }
             newblock = false;
-            for (int k=0,n=e->live.size(); k < n; k++) {
-				VMPI_strcpy(s, names->formatRef(e->live[k]));
-				s += VMPI_strlen(s);
-				*s++ = ' '; *s = 0;
-				NanoAssert(s < livebuf+sizeof(livebuf));
-            }
-			printf("%-60s %s\n", livebuf, names->formatIns(e->i));
+			if (showLiveRefs) {
+				for (int k=0,n=e->live.size(); k < n; k++) {
+					VMPI_strcpy(s, names->formatRef(e->live[k]));
+					s += VMPI_strlen(s);
+					*s++ = ' '; *s = 0;
+					NanoAssert(s < livebuf+sizeof(livebuf));
+				}
+				AvmLog("%60s %s\n", livebuf, names->formatIns(e->i));
+			} else {
+				AvmLog("    %s\n", names->formatIns(e->i));
+			}
             if (e->i->isGuard() || e->i->isBranch() || isRet(e->i->opcode())) {
-				printf("\n");
+				AvmLog("\n");
                 newblock = true;
             }
 		}
@@ -1717,7 +1730,7 @@ namespace nanojit
 			VMPI_strcat(buf, cname8.c_str());
 		}
 		else if (ref->isconstq()) {
-            VMPI_sprintf(buf, "#0x%llxLL", (int64_t) ref->constvalq());
+            VMPI_sprintf(buf, "#0x%llxLL", (long long unsigned int) ref->constvalq());
 		}
 		else if (ref->isconst()) {
 			formatImm(ref->constval(), buf);
@@ -2026,12 +2039,12 @@ namespace nanojit
 		verbose_only( assm->_outputCache = &asmOutput; )
 
 		verbose_only(if (assm->_verbose && core->config.verbose_live)
-			live(gc, triggerFrag->lirbuf);)
+			live(gc, triggerFrag->lirbuf, /* showLiveRefs */ true);)
 
 		bool treeCompile = core->config.tree_opt && (triggerFrag->kind == BranchTrace);
 		RegAllocMap regMap(gc);
 		NInsList loopJumps(gc);
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 //		loopJumps.set_meminfo_name("LIR loopjumps");
 #endif
 		assm->beginAssembly(triggerFrag, &regMap);
@@ -2350,13 +2363,13 @@ namespace nanojit
 			return "";
 	}
 	
-	static void printLinks(FILE* o, uint32_t num, BBList& l)
+	static void printLinks(uint32_t num, BBList& l)
 	{
 		uint32_t c = l.size();
 		for(uint32_t i=0; i<c; i++)
 		{
 			BBNode* to = l.get(i);
-			fprintf(o, "bb%d -> bb%d [weight=2 %s] \n", num, to->num, BBArrow(num,to));
+			AvmLog("bb%d -> bb%d [weight=2 %s] \n", num, to->num, BBArrow(num,to));
 		}
 	}
 
@@ -2364,23 +2377,22 @@ namespace nanojit
 	{
 		// generate dot info for the graph 
 		//   'dot -Tjpg a.txt > a.jpg'  - will then generate a pretty picture for you
-		FILE* o = stdout;
-		fprintf(o, "digraph \"%s\" {\n", name);
-		fprintf(o, "ratio=fill\n");
-		fprintf(o, "ranksep=.1\n");
-		fprintf(o, "nodesep=.2\n");
-		fprintf(o, "rankdir=LR\n");
-		fprintf(o, "edge [arrowsize=.7,labeldistance=1.0,labelangle=-45,labelfontsize=9]\n");
-		fprintf(o, "node [fontsize=9,shape=box,width=.2,height=.2]\n");
+		AvmLog("digraph \"%s\" {\n", name);
+		AvmLog("ratio=fill\n");
+		AvmLog("ranksep=.1\n");
+		AvmLog("nodesep=.2\n");
+		AvmLog("rankdir=LR\n");
+		AvmLog("edge [arrowsize=.7,labeldistance=1.0,labelangle=-45,labelfontsize=9]\n");
+		AvmLog("node [fontsize=9,shape=box,width=.2,height=.2]\n");
 
 		uint32_t c = _bbs.size();
 		for(uint32_t i=1; i<c; i++)
 		{
 			BBNode* b = _bbs.at(i);  // zero node is repeated starting node so skip it
-			fprintf(o, "bb%d [label=\"BB%d\" %s]\n", (int)i, (int)i, BBShape(b));
-			printLinks(o,b->num,b->succ);
+			AvmLog("bb%d [label=\"BB%d\" %s]\n", (int)i, (int)i, BBShape(b));
+			printLinks(b->num,b->succ);
 		}
-		fprintf(o, "}\n");
+		AvmLog("}\n");
 	}
 	
 	LInsp BlockLocator::ins1(LOpcode v, LIns* a)						{ return update( _out->ins1(v,a) ); }

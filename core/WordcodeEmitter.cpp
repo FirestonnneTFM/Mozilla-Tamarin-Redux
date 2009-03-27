@@ -40,20 +40,8 @@
 #ifdef AVMPLUS_WORD_CODE
 
 // FIXME the following is required because FrameState has dependencies on the jitters
-#if defined AVMPLUS_MIR
-    #include "../codegen/CodegenMIR.h"
-    #define JIT_ONLY(x) x
-    #define MIR_ONLY(x) x
-    #define LIR_ONLY(x)
-#elif defined FEATURE_NANOJIT
-    #include "../codegen/CodegenLIR.h"
-    #define JIT_ONLY(x) x
-    #define MIR_ONLY(x) 
-    #define LIR_ONLY(x) x
-#else
-    #define JIT_ONLY(x) 
-    #define MIR_ONLY(x) 
-    #define LIR_ONLY(x) 
+#if defined FEATURE_NANOJIT
+    #include "CodegenLIR.h"
 #endif
 
 #include "FrameState.h"
@@ -63,12 +51,6 @@ namespace avmplus
 {
 	using namespace MMgc;
 	
-	class TranslatedCode : public GCObject
-	{
-	public:
-		uintptr_t data[1];  // more follows
-	};
-
 #ifdef AVMPLUS_DIRECT_THREADED
 	WordcodeEmitter::WordcodeEmitter(MethodInfo* info, void** opcode_labels)
 #else
@@ -76,7 +58,7 @@ namespace avmplus
 #endif
 		: WordcodeTranslator()
 		, info(info)
-		, core(info->pool->core)
+		, core(info->pool()->core)
 		, backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)
@@ -94,10 +76,10 @@ namespace avmplus
 	{
 		AvmAssert(info != NULL);
 
-		const byte* pos = info->body_pos;
+		const byte* pos = info->abc_body_pos();
 		AvmCore::skipU30(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
 		code_start = pos;
-		pool = info->pool;		
+		pool = info->pool();		
 		boot();
 	}
 
@@ -235,12 +217,12 @@ namespace avmplus
 	
 	void WordcodeEmitter::computeExceptionFixups() 
 	{
-		if (info == NULL || info->exceptions == NULL)
+		if (info == NULL || info->abc_exceptions() == NULL)
 			return;
 		
 		DELETE_LIST(catch_info, exception_fixes);
 		
-		ExceptionHandlerTable* old_table = info->exceptions;
+		const ExceptionHandlerTable* old_table = info->abc_exceptions();
 		int exception_count = old_table->exception_count;
 		size_t extra = sizeof(ExceptionHandler)*(exception_count - 1);
 		ExceptionHandlerTable* new_table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
@@ -258,17 +240,17 @@ namespace avmplus
 			catch_info* p[3];
 			
 			p[0] = new catch_info;
-			p[0]->pc = code_start + info->exceptions->exceptions[i].from;
+			p[0]->pc = code_start + old_table->exceptions[i].from;
 			p[0]->is_target = false;
 			p[0]->fixup_loc = (void*)&(new_table->exceptions[i].from);
 			
 			p[1] = new catch_info;
-			p[1]->pc = code_start + info->exceptions->exceptions[i].to;
+			p[1]->pc = code_start + old_table->exceptions[i].to;
 			p[1]->is_target = false;
 			p[1]->fixup_loc = (void*)&(new_table->exceptions[i].to);
 			
 			p[2] = new catch_info;
-			p[2]->pc = code_start + info->exceptions->exceptions[i].target;
+			p[2]->pc = code_start + old_table->exceptions[i].target;
 			p[2]->is_target = true;
 			p[2]->fixup_loc = (void*)&(new_table->exceptions[i].target);
 			
@@ -317,7 +299,7 @@ namespace avmplus
 			}
 		}
 		
-		WB(core->GetGC(), info, &info->word_code.exceptions, new_table);
+		info->set_word_code_exceptions(core->GetGC(), new_table);
 		
 #ifdef _DEBUG
 		if (exception_fixes != NULL) {
@@ -380,16 +362,44 @@ namespace avmplus
 		return (WordOpcode)opcodeInfo[opcode].wordCode;
 	}
 
-	void WordcodeEmitter::writePrologue(FrameState* state)
+    void WordcodeEmitter::writePrologue(FrameState* state, const byte *pc)
 	{
 		(void)state;
-	  // do nothing
+		(void)pc;
+        #if defined DEBUGGER
+		if (core->debugger()) emitOp0(pc, WOP_debugenter);
+        #endif
+        computeExceptionFixups();
 	}
 
 	void WordcodeEmitter::writeEpilogue(FrameState* state)
 	{
 		(void)state;
 		epilogue();
+	}
+
+	void WordcodeEmitter::writeBlockStart(FrameState* state)
+	{
+		(void)state;
+	}
+
+	void WordcodeEmitter::writeOpcodeVerified(FrameState *state, const byte *pc, AbcOpcode opcode)
+	{
+	    (void)state;
+		(void)pc;
+		(void)opcode;
+	}
+
+    void WordcodeEmitter::writeFixExceptionsAndLabels(FrameState* state, const byte *pc)
+	{
+		(void)state;
+		fixExceptionsAndLabels(pc);
+	}
+
+    void WordcodeEmitter::formatOperand(PrintWriter& buffer, Value& v)
+	{
+		(void)buffer;
+		(void)v;
 	}
 
 	void WordcodeEmitter::writeOp1(FrameState *state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
@@ -431,10 +441,11 @@ namespace avmplus
 		case OP_setglobalslot:
 		    emitOp1(pc, WOP_getglobalslot);
 			break;
-		case OP_getproperty:
 		case OP_call:
 		case OP_construct:
 		case OP_getouterscope:
+		case OP_newfunction: 
+		case OP_newclass:
 		    emitOp1(wordCode(opcode), opd1);
 			break;
 		case OP_getscopeobject:
@@ -444,11 +455,58 @@ namespace avmplus
 		case OP_findpropglobalstrict:
 			emitOp2(wordCode(opcode), opd1, allocateCacheSlot(opd1));
 		    break;
+        case OP_pushscope:
+        case OP_pushwith:
+		    emitOp0(pc, wordCode(opcode));
+		    break;
+		case OP_convert_s:
+		case OP_esc_xelem: 
+		case OP_esc_xattr:
+		    // do nothing, implemented by write()
+		    break;
+
+		case OP_findpropstrict: 
+		case OP_findproperty: 
+		case OP_finddef: 
+		    emitOp1(wordCode(opcode), opd1);
+			break;
+
 		default:
-			// FIXME need error handler here
+   		    AvmAssert (false);
 		    break;
 		}
 	}
+
+	void WordcodeEmitter::writeNip(FrameState* state, const byte *pc)
+	{
+	    write(state, pc, OP_swap);
+		write(state, pc, OP_pop);
+	}
+
+	void WordcodeEmitter::writeCheckNull(FrameState* state, uint32_t index)
+    {
+	    (void)state;
+	    (void)index;
+    }
+
+	void WordcodeEmitter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits *type)
+	{
+		(void)state;
+		(void)opd1;
+		(void)opd2;
+		(void)type;
+		switch (opcode) {
+		case OP_callproperty: 
+		case OP_callproplex: 
+		case OP_callpropvoid:
+		    // opd1=m->iid(), opd2=argc
+		    emitOp2(pc, wordCode(opcode));
+            break;
+        default:
+            AvmAssert(false);
+            break;
+        }
+    }
 
 	void WordcodeEmitter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits *type)
 	{
@@ -461,10 +519,15 @@ namespace avmplus
 			break;
 
 		case OP_callmethod:
+		    // opd1=disp_id
+		    emitOp2(wordCode(opcode), opd1+1, opd2);
+			break;
 		case OP_callproperty: 
 		case OP_callproplex: 
 		case OP_callpropvoid:
 		case OP_callstatic:
+		case OP_callsuper:
+		case OP_callsupervoid:
 		    emitOp2(wordCode(opcode), opd1, opd2);
 			break;
 
@@ -479,16 +542,34 @@ namespace avmplus
 			break;
 		}
 
+		case OP_getproperty:
+		case OP_setproperty:
+		case OP_initproperty:
+		    emitOp1(pc, wordCode(opcode));
+			break;
+
+		case OP_constructprop:
+		case OP_hasnext2:
+		    emitOp2(pc, wordCode(opcode));
+			break;
+
+		case OP_getsuper:
+		case OP_setsuper:
+		case OP_constructsuper:
+		    emitOp1(pc, wordCode(opcode));
+			break;
+
 		default:
-			// FIXME need error handler here
+		    AvmAssert (false);
 		    break;
 		}
 	}
 
-	void WordcodeEmitter::write(FrameState* state, const byte* pc, AbcOpcode opcode)
+	void WordcodeEmitter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
 	{
 		(void)state;
-	  //printf("WordcodeEmitter::write %x\n", opcode);
+		(void)type;
+	  //AvmLog("WordcodeEmitter::write %x\n", opcode);
 
 		switch (opcode) {
 		case OP_coerce_a:
@@ -514,9 +595,6 @@ namespace avmplus
 		case OP_coerce_d:
 		case OP_convert_d:
 		case OP_coerce_s:
-		case OP_convert_s:
-		case OP_esc_xelem: 
-		case OP_esc_xattr:
 		case OP_coerce_o:
 		case OP_convert_o:
 		case OP_istypelate:
@@ -559,7 +637,6 @@ namespace avmplus
 		case OP_nextvalue:
 		case OP_nextname:
 		case OP_hasnext:
-#ifdef AVMPLUS_MOPS
 		case OP_sxi1:
 		case OP_sxi8:
 		case OP_sxi16:
@@ -574,18 +651,26 @@ namespace avmplus
 		case OP_sf32:
 		case OP_sf64:
 		case OP_getglobalscope:
+		case OP_convert_s:
+		case OP_esc_xelem: 
+		case OP_esc_xattr:
   		    emitOp0(pc, wordCode(opcode));
+			break;
+		case OP_concat:
+  		    emitOp0(pc, wordCode(OP_add));
+			break;
+		case OP_add_d:
+  		    emitOp0(pc, wordCode(OP_add));
 			break;
 		case OP_throw:
 		case OP_returnvalue:		  
 		case OP_returnvoid:
-#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER
 			if (core->debugger()) emitOp0(pc, WOP_debugexit);
 #endif
   		    emitOp0(pc, wordCode(opcode));
 			break;
 
-#endif // AVMPLUS_MOPS
 		case OP_pushstring:
 		case OP_pushdouble:
 		case OP_pushnamespace: 
@@ -596,8 +681,6 @@ namespace avmplus
 		case OP_inclocal_i:
 		case OP_declocal_i:
 		case OP_dxns:
-		case OP_newfunction: 
-		case OP_newclass:
 		case OP_finddef: 
 		case OP_getdescendants:
 		case OP_deleteproperty:
@@ -610,14 +693,9 @@ namespace avmplus
 		case OP_newcatch:
 		case OP_getslot:
 		case OP_setslot:
-		case OP_findpropstrict:
-		case OP_findproperty:
-		case OP_setproperty:
-		case OP_initproperty:
 		case OP_getouterscope:
 		    emitOp1(pc, wordCode(opcode));
 			break;
-		case OP_constructprop:
 		case OP_hasnext2:
 		    emitOp2(pc, wordCode(opcode));
 			break;
@@ -701,6 +779,19 @@ namespace avmplus
 		}
 
 	}
+
+    void WordcodeEmitter::writeSetContext(FrameState* state, MethodInfo *f)
+    {
+	    (void)state;
+		(void)f;
+    }
+
+	void WordcodeEmitter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    {
+	    (void) state;
+	    (void) index;
+	    (void) type;
+    }
 
 	void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
 	{
@@ -937,7 +1028,7 @@ namespace avmplus
 	}
 	
 	// 'OP_abs_jump' is an ABC-only construct, it boils away in the translation,
-	// both here and to MIR/LIR.  It says: My first operand (one word in 32-bit
+	// both here and to LIR.  It says: My first operand (one word in 32-bit
 	// mode, two words in 64-bit mode) is a raw pointer into a buffer of ABC code.
 	// My second operand is the number of bytes of code starting at that address.
 	// Continue translating from that address as if it were a linear part
@@ -968,7 +1059,7 @@ namespace avmplus
 		AvmAssert(exception_fixes == NULL);
 		
 		if (info != NULL)
-			info->word_code.cache_size = next_cache;
+			info->set_word_code_cache_size(next_cache);
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepFlush();
@@ -1002,8 +1093,7 @@ namespace avmplus
 		AvmAssert(ptr == code + total_size);
 		
 		if (info != NULL) {
-			info->word_code.code_anchor = code_anchor;
-			info->codeStart = code;
+			info->set_word_code(core->GetGC(), code_anchor);
 #ifdef SUPERWORD_PROFILING
 			WordcodeTranslator::swprofCode(code, code + total_size);
 #endif

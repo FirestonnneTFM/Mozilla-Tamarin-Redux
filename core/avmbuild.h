@@ -162,46 +162,10 @@
 
 //#define FEATURE_UTF32_SUPPORT 1
 
-/// START: CRUFT 
-//
-// guard pages are created for buffers rather than explicit overflow checks
-// this define exists only for the interm In a few days I'll toast the rest
-// of the non-guard logic and we'll see the end of the days of estimatation!
-// [rickr-Jun16,05]
-
-#define FEATURE_BUFFER_GUARD
-
-// FEATURE_BUFFER_GUARD not yet supported on ARM
-#ifdef AVMPLUS_ARM
-  #undef FEATURE_BUFFER_GUARD
-#endif
-
-// FEATURE_BUFFER_GUARD not supported on Mac CFM
-#ifdef AVMPLUS_MAC
-  #if !TARGET_RT_MAC_MACHO
-    #undef FEATURE_BUFFER_GUARD
-  #endif
-  // not supported yet in 64-bit mode
-  #ifdef AVMPLUS_AMD64
-    #undef FEATURE_BUFFER_GUARD
-  #endif
-#endif
-
 #ifndef AVMPLUS_DISABLE_NJ
 #  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC || defined AVMPLUS_SPARC
 #    define FEATURE_NANOJIT
 #  endif
-#endif
-
-// don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
-#if !defined AVMPLUS_DISABLE_MIR && !defined FEATURE_NANOJIT
-#  if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && defined AVMPLUS_WIN32
-#    define AVMPLUS_MIR
-#  endif
-#endif
-
-#if defined AVMPLUS_MIR && defined FEATURE_NANOJIT
-#  error "must not define AVMPLUS_MIR and FEATURE_NANOJIT at the same time"
 #endif
 
 #ifdef FEATURE_NANOJIT
@@ -238,29 +202,6 @@
 
 // #undef verify, a Mac thing
 #undef verify
-
-#ifdef AVMPLUS_MAC
-	#ifdef AVMPLUS_64BIT
-		// 64-bit Mac builds can't use Carbon
-		#define AVMPLUS_MAC_NO_CARBON
-	#endif
-    #if !defined(TARGET_RT_MAC_MACHO) && !defined(AVMPLUS_MAC_NO_CARBON)
-        #define AVMPLUS_MAC_CARBON
-    #endif
-#endif
-
-#ifdef AVMPLUS_MAC
-  #ifdef FEATURE_BUFFER_GUARD
-    #define AVMPLUS_MACH_EXCEPTIONS
-  #endif
-#endif
-
-#ifdef AVMPLUS_MACH_EXCEPTIONS
-  #if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT
-    // Support for running the 32bit PowerPC version under Rosetta
-    #define AVMPLUS_ROSETTA
-  #endif
-#endif
 
 #ifndef AVMPLUS_UNALIGNED_ACCESS
     #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
@@ -308,12 +249,6 @@
 	#endif // DEBUG
 
 #endif
-
-// extra safety checks during parsing
-// this will be turned off for desktop players once we get the gaurd pages in
-// Mobile players that may not be able to use guard pages(exceptions) so will 
-//want to turn this on
-#define SAFE_PARSE
 
 // Enable interfacing Java ; so you can access java methods/properties like native AS; e.g.
 // var hello = JObject.create("java.lang.String", " hello world ");  print(hello.indexOf('o')); 
@@ -369,11 +304,6 @@
 	#define AVM10_BIG_ENDIAN
 #endif
 
-// handle the MOPS opcodes
-#ifndef AVMPLUS_DISABLE_MOPS
-	#define AVMPLUS_MOPS
-#endif
-
 // FASTCALL 
 #ifdef AVMPLUS_IA32
 	#if _MSC_VER
@@ -420,26 +350,18 @@
 #  endif
 #endif
 
+//#define AVMPLUS_FEATURE_EVAL   // supposed to be enabled in some config file...
+
+#ifdef AVMPLUS_FEATURE_EVAL
+#  define VMCFG_EVAL
+#endif
+
 // Enable selftests.  These can be run by -Dselftest at the shell or by calling the
 // global function avmplus::selftests(), see extensions/Selftest.h.
 //
 // Apart from code size considerations this can be enabled for release builds.
 
 //#define AVMPLUS_SELFTEST
-
-// Enable our own alloca() replacement that always allocates in the heap, this is good on
-// systems with limited memory or limited stack
-
-//#define AVMPLUS_HEAP_ALLOCA
-
-#define AVMPLUS_PARAM_ALLOCA_CUTOFF		4000	// Don't make real alloca() blow the stack; this limit is heuristic
-#define AVMPLUS_PARAM_ALLOCA_DEFSIZE	1000	// Default number of bytes in a stack segment for heap-based alloca()
-
-#ifdef AVMPLUS_HEAP_ALLOCA
-#  define VMPI_alloca(core, autoptr, nbytes)  core->allocaPush(nbytes, autoptr)
-#else
-#  define VMPI_alloca(core, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? core->allocaPush(nbytes, autoptr) : alloca(nbytes))
-#endif
 
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...
 // will be removed soon
@@ -468,15 +390,16 @@
 // it will go away at some point in the not-too-distant future, however.
 //#define AVMPLUS_TRAITS_MEMTRACK
 
+// define this to 1 to keep a shadow copy of impl32 in MethodEnv (vs MethodInfo only).
+// more speed, but more memory used... not clear if the tradeoff is worthwhile yet.
+#ifndef VMCFG_METHODENV_IMPL32
+#  define VMCFG_METHODENV_IMPL32 1
+#endif
+
 // If you need to build on a system that forbids static initialization of global constant function pointers,
 // define this -- it will change the way native-method-table initialization is done to be compatible (at the
-// expense of slightly more code size). Note that this cannot be enabled if AVMPLUS_LEGACY_NATIVE_MAPS is defined.
+// expense of slightly more code size). 
 //#define AVMPLUS_NO_STATIC_POINTERS
-
-// If you need support for old code with explicit native-method maps (rather than having nativegen.p
-// generate them), define AVMPLUS_LEGACY_NATIVE_MAPS. It's on by default (for now), but soon will be deprecated 
-// and removed entirely.
-#define AVMPLUS_LEGACY_NATIVE_MAPS
 
 #if defined(AVMPLUS_PORTING_API)
 	// The portapi_avmbuild.h file is used to override

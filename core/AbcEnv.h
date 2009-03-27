@@ -44,9 +44,7 @@ namespace avmplus
 	// runtime info associated with a pool
 	class AbcEnv : public MMgc::GCObject
 	{
-		#if defined AVMPLUS_MIR
-		friend class CodegenMIR;
-		#elif defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif
 
@@ -64,14 +62,15 @@ namespace avmplus
 		inline uint64_t& invocationCount(uint32_t i) 
 		{ 
 			AvmAssert(m_invocationCounts != NULL); 
-			AvmAssert(i < m_pool->methodCount); 
+			AvmAssert(i < m_pool->methodCount()); 
 			return m_invocationCounts[i]; 
 		}
 #endif
 
 		static size_t calcExtra(PoolObject* pool)
 		{
-			return (pool->methodCount <= 1) ? 0 : (sizeof(MethodEnv*)*(pool->methodCount-1));
+			const uint32_t c = pool->methodCount();
+			return (c <= 1) ? 0 : (sizeof(MethodEnv*)*(c-1));
 		}
 		
 		// these peek into the DomainEnv as appropriate

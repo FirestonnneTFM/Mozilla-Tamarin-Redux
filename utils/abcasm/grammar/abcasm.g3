@@ -81,8 +81,8 @@ options
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+package abcasm;
+import static abcasm.AbcConstants.*;
 }
 
 @lexer::header {
@@ -122,7 +122,7 @@ import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 }
 
 
@@ -163,26 +163,303 @@ translation_unit:
     decl*
 	;
 
-decl:
-	function_decl
+decl
+	scope { MethodBodyInfo method_body_info; }
+	:
+	script_info
+	| method_info
+	| method_body_info
+	| sugared_function_decl
 	;
 
-function_decl:
-    function_header block
+method_info
+	@init { MethodInfo mi; }
+	:
+		'.method_info' 
+		{
+			mi = new MethodInfo();
+		}
+		LBRACE
+		(
+			'name' ':' function_name = IDENTIFIER
+			{
+			    mi.methodName = function_name.getText();
+			}
+			| 'return_type' ':' rettype = type_name
+			{
+			    mi.returnType = rettype;
+			}
+			| 'flags' ':' flags = method_info_flags
+			{
+				mi.flags = flags;
+			}
+			| 'param_type' ':' LBRACE method_parameters[mi.paramTypes] RBRACE
+		)*
+		RBRACE
+		{
+			asmCore.addMethodInfo(mi);
+		}
 	;
 
-function_header:
-	'function' IDENTIFIER plist (COLON SPLAT)?
+method_parameters[java.util.Vector<Name> param_types]
+	:
+	(
+		first_type = type_name
+		{
+			param_types.add(first_type);
+		}
+		(
+			COMMA next_type = type_name
+			{
+			    param_types.add(next_type);
+			}
+		)*
+	)?
+	;
+
+method_info_flags
+	returns [byte flags]
+	@init { flags = 0; }
+	:
+	( 
+		('|' | '+' )?
+		'NEED_ARGUMENTS' { flags |= METHOD_Arguments; }
+		| 'NEED_ACTIVATION' { flags |= METHOD_Activation; }
+		| 'NEED_REST' { flags |= METHOD_Needrest;}
+		| 'HAS_OPTIONAL' { flags |= METHOD_HasOptional; }
+		| 'SET_DXNS' { flags |= METHOD_Setsdxns; }
+		| 'SETS_DXNS' { flags |= METHOD_Setsdxns; }
+		| 'HAS_PARAM_NAMES' { flags |= METHOD_HasParamNames; }
+	)*
 	{
-	    asmCore.newFunction($IDENTIFIER.getText() );
+		return flags;
 	}
 	;
 
-block:
+
+attribute[String attr_name]
+	: id = IDENTIFIER { $id.getText().equals(attr_name) }? '=' attribute_value
+	;
+
+script_info
+	returns [ScriptInfo result]
+	@init { result = new ScriptInfo(); }
+	: '.script_info' LBRACE
+	(
+		'init' ':' initial_function = function_id
+		{
+		    result.setInit(initial_function);
+		}
+		| 'traits' ':' LBRACE traits[result.traits] RBRACE
+	)+
+	RBRACE
+	{
+		asmCore.addScript(result);
+	}
+	;
+	
+method_body_info
+	@init { Traits traits; }
+	: '.method_body_info'
+	{
+		$decl::method_body_info = new MethodBodyInfo();
+		traits = $decl::method_body_info.traits;
+	}
+	LBRACE
+	(
+		'method' ':' method_id = function_id
+		{
+			$decl::method_body_info.methodId = method_id;
+		}
+		| 'local_count' ':' max_local = integer_literal
+		{
+			$decl::method_body_info.explicit_max_local = new Integer(max_local);
+		}
+		| 'max_stack' ':' max_stack = integer_literal
+		{
+			$decl::method_body_info.explicit_max_stack = new Integer(max_stack);
+		}
+		| 'max_scope_depth' ':' max_scope = integer_literal
+		{
+			$decl::method_body_info.explicit_max_scope = new Integer(max_scope);
+		}
+		| 'init_scope_depth' ':' init_scope = integer_literal
+		{
+			$decl::method_body_info.explicit_init_scope = new Integer(init_scope);
+		}
+		| 'code' ':' block
+		| 'traits' ':' LBRACE traits[traits] RBRACE
+		| 'exception' ':' LBRACE exception_info* RBRACE
+	)*
+	RBRACE
+	{
+		asmCore.addMethodBodyInfo($decl::method_body_info);
+	}
+	;
+
+
+function_id returns [Object result]
+	: literal_id = integer_literal
+	{
+		result = new Integer(literal_id);
+	}
+	| '.function_id' LPAREN referenced_func = IDENTIFIER RPAREN
+	{
+	    result = new SymbolicReference(SymbolicReference.function_id, referenced_func.getText());
+	}
+	;
+
+
+attribute_value
+	: IDENTIFIER
+	| integer_literal
+	;
+
+traits[Traits traits]
+	:
+	(
+		'.trait' LBRACE
+		te = trait_entry { traits.add(te); }
+		RBRACE
+	)*
+	;
+
+trait_entry
+	returns [Trait result]
+	:
+	   st = slot_trait { result = st; }
+	;
+
+slot_trait
+	returns [Trait result]
+	: 'kind' ':' 'Trait_Slot' kind = trait_kind_modifiers[TRAIT_Var]
+	{
+		result = new Trait(kind);
+	}
+	(
+	  trait_name[result]
+	  |
+	  'slot_id' ':' slot_literal = integer_literal
+	  {
+	  	result.addAttr("slot_id", slot_literal);
+	  }
+	  |
+	  'type_name' ':' trait_type_name = type_name
+	  {
+	  	result.addAttr("type_name", trait_type_name);
+	  }
+	)*
+	;
+
+trait_name[Trait t]
+	:
+		'name' ':' name = identifier
+		{
+			t.addAttr("name", name);
+		}
+	;
+
+trait_kind_modifiers[int initial_kind]
+	returns [int result]
+	@init { result = initial_kind; }
+	:
+	(
+		('+' | '|') modifier = trait_kind_modifier { result |= modifier; }
+	)*
+	;
+
+trait_kind_modifier
+	returns [int result]
+	:
+		'ATTR_Final' { result = TRAIT_FLAG_final; }
+	|	'ATTR_Override' { result = TRAIT_FLAG_override; }
+	|	'ATTR_Metadata' { result = TRAIT_FLAG_metadata; }
+	;
+	
+exception_info
+	@init { ExceptionInfo info; }
+	:
+		'.exception' { info = new ExceptionInfo(); }
+		LBRACE
+		(
+			'from' ':' from = control_flow_target
+			{
+				info.from = from;
+			}
+			| 'to' ':' to = control_flow_target
+			{
+				info.to = to;
+			}
+			| 'target' ':' target = control_flow_target
+			{
+				info.target = target;
+			}
+			| ('exc_type' | 'type') ':' exc_type = type_name
+			{
+				info.exc_type = asmCore.getNameId(exc_type);
+			}
+			| 'name' ':' name = IDENTIFIER
+			{
+				info.name_id = asmCore.createPoolId($IDENTIFIER.getText());
+			}
+			
+		)*
+		RBRACE
+		{
+			info.validateSemantics();
+			$decl::method_body_info.addExceptionInfo(info);
+		}
+	;
+
+type_name
+	returns [Name result]
+	:
+	type_any = '*' 
+	{
+		result = asmCore.getName(type_any.getText());
+	}
+	| mpid = multipart_identifier { result = mpid; }
+	;
+
+
+
+sugared_function_decl
+	:
+    sugared_function_header
+    block
+    {
+    	asmCore.addMethodBodyInfo($decl::method_body_info);
+    }
+	;
+
+sugared_function_header
+	scope { MethodInfo signature; }
+	@init { MethodInfo signature; }
+	:
+	'function' func_name = IDENTIFIER
+	{
+		$sugared_function_header::signature = signature = new MethodInfo();
+		signature.methodName = func_name.getText();
+		
+	} 
+	plist[signature.paramTypes]
+	((COLON rettype = type_name) {signature.returnType = rettype; })?
+	{
+	    asmCore.addMethodInfo(signature);
+	    
+	    //  Tie this header to the corresponding block.
+	    $decl::method_body_info = new MethodBodyInfo();
+	    $decl::method_body_info.methodId = new Integer(signature.methodId);
+	}
+	;
+
+block
+	:
 	LBRACE insn+ RBRACE
 	;
 
-plist: LPAREN RPAREN
+plist[java.util.Vector<Name>param_types]
+	: LPAREN method_parameters[param_types] RPAREN
 	;
 
 insn:
@@ -190,7 +467,7 @@ insn:
 	{
 		//  Put a label on the current block,
 		//  or start a new one.
-	    asmCore.startBlock(label);
+	    $decl::method_body_info.startBlock(label);
 	}
 	|
 	(
@@ -208,11 +485,52 @@ insn:
 			| pool_insn
 			| call_insn
 			| multiname_insn
+			| function_insn
+			| slot_insn
+			| pseudo_insn
+			| mops_insn
 			| ad_hoc_insn
 			| unknown_opcode
 		)
 		
 	)
+	;
+
+slot_insn
+	: opcode = ('getslot' | 'getglobalslot' | 'setslot' | 'setglobalslot' ) operand = slot_id
+	{
+		$decl::method_body_info.insn(opcode, new Object[] { operand } );
+	}
+	;
+
+slot_id
+	returns [Object result]
+	: 
+		literal_id = integer_literal
+		{
+			result = new Integer(literal_id);
+		}
+		| '.slot_id' LPAREN slot_symbol = IDENTIFIER RPAREN
+		{
+			result = new SymbolicReference(SymbolicReference.slot_id, slot_symbol.getText());
+		}
+	;
+
+/*
+ *  Indirect (MOPS) instructions.
+ */
+mops_insn
+	: mops_opcode = 
+	( 
+		'li8' | 'li16' | 'li32'
+		| 'lf32' | 'lf64'
+		| 'si8' | 'si16' | 'si32'
+		| 'sf32' | 'sf64'
+		| 'sxi1' | 'sxi8' | 'sxi16'
+	)
+	{
+		$decl::method_body_info.insn(mops_opcode);
+	}
 	;
 
 
@@ -226,11 +544,11 @@ single_cfg_target_insn
 		'ifeq'  | 'ifne'  | 'iflt'  | 'ifle'  | 'ifgt'  | 'ifge'  | 'ifstricteq'  | 'ifstrictne' |
 		'jump'
 	  )
-	  DECIMAL_LITERAL? ( LPAREN DECIMAL_LITERAL RPAREN )?  //  abcdump stuff for human consumption
+	  DECIMAL_LITERAL? ( LPAREN MINUS? DECIMAL_LITERAL RPAREN )?  //  abcdump stuff for human consumption
 	  label = control_flow_target
 	  {
-	      asmCore.insn(opcode, label);
-		  asmCore.startBlock();
+	      $decl::method_body_info.insn(opcode, label);
+		  $decl::method_body_info.startBlock();
 	  }
 	  ;
 
@@ -250,20 +568,20 @@ control_flow_target
  */
 integer_operands_insn
 	: int_opcode = (
+		  'applytype' |
 	      'debug' | 'debugline' | 'declocal' | 'declocal_i' |	 
-		  'dxns' | 'dxnslate' |
-		  'esc_xattr' | 'esc_xelem' |
-		  'getlocal' | 'getslot' | 'getglobalslot' | 'getscopeobject' |
+		  'getlocal' | 
+		  'getscopeobject' |
 		  'hasnext2' | 
 		  'inclocal' | 'inclocal_i' | 
 		  'kill' |
-		  'newarray' | 'newfunction' | 'newobject' |
+		  'newarray' | 'newcatch' | 'newobject' |
 		  'pushbyte' | 'pushshort' | 
-		  'setlocal' | 'setslot' | 'setglobalslot'
+		  'setlocal' /* | 'setslot' | 'setglobalslot' */
 	  )
 	  operands = integer_operands_list
 	  {
-	      asmCore.insn(int_opcode, operands);
+	      $decl::method_body_info.insn(int_opcode, operands);
 	  }
 	  ;
 
@@ -273,20 +591,24 @@ integer_operands_insn
 pool_insn
 	: 'pushint' int_operand = integer_literal
 	{
-	    asmCore.poolInsn(OP_pushint, new Integer(int_operand));
+	    $decl::method_body_info.insn(OP_pushint, asmCore.createPoolId(new Integer(int_operand)));
 	}
 	| 'pushuint' uint_operand = long_literal
 	{
-	    asmCore.poolInsn(OP_pushuint, new Long(uint_operand));
+	    $decl::method_body_info.insn(OP_pushuint, asmCore.createPoolId(new Long(uint_operand)));
 	}
 	| 'pushdouble' double_operand = double_literal
 	{
-	    asmCore.poolInsn(OP_pushdouble, new Double(double_operand));
+	    $decl::method_body_info.insn(OP_pushdouble, asmCore.createPoolId(new Double(double_operand)));
 	}
-	| opcode = ( 'debugfile' | 'pushstring' )
-	string_op = string_literal
+	| 'pushnamespace' ns = namespace_specification
 	{
-		asmCore.poolInsn(asmCore.decodeOpcodeName(opcode.getText()), string_op); 
+	    $decl::method_body_info.insn(OP_pushnamespace, asmCore.createPoolId(ns));
+	}
+	| opcode = ( 'debugfile' | 'dxns'  | 'pushstring' )
+	string_operand = string_literal
+	{
+		$decl::method_body_info.insn(opcode, asmCore.createPoolId(string_operand)); 
 	}
 	;
 
@@ -296,17 +618,44 @@ pool_insn
 call_insn
 	:   call_opcode = (
 	        'callmethod' | 'callproplex' | 'callproperty' | 'callpropvoid' |
-			'callstatic' | 'callsuper' | 'callsupervoid' |
-			'construct' | 'constructprop' | 'constructsuper'
+			'callsuper' | 'callsupervoid' |
+			'constructprop'
 	    )
 		callee = identifier 
-		LPAREN arg_count = integer_literal RPAREN 
+		LPAREN? arg_count = integer_literal RPAREN?
 	{
-		asmCore.insn(call_opcode, callee, arg_count);
+		$decl::method_body_info.insn(call_opcode, callee, arg_count);
 	}
-	|  'call' 	LPAREN arg_count = integer_literal RPAREN 
+	|  'call' 	LPAREN? arg_count = integer_literal RPAREN? 
 	{
-	    asmCore.insn(OP_call, new int[] { arg_count } );
+	    $decl::method_body_info.insn(OP_call, new Object[] { new Integer(arg_count) } );
+	}
+	| 'callstatic' method_id = integer_literal arg_count = integer_literal
+	{
+		$decl::method_body_info.insn(OP_callstatic, new Object[] { new Integer(method_id), new Integer(arg_count) } );
+	}
+	| construct_opcode = ( 'construct' | 'constructsuper' ) arg_count = integer_literal
+	{
+		$decl::method_body_info.insn(construct_opcode, new Object[] { new Integer(arg_count) } );
+	}
+	;
+
+pseudo_insn
+		:  '.print'
+        {
+			$decl::method_body_info.insn(OP_findproperty, asmCore.getName( asmCore.getUsualSuspectNamespaces(), "print"), new Object[0]);
+            $decl::method_body_info.insn(OP_swap, new Object[0]);
+            $decl::method_body_info.insn(OP_callpropvoid, asmCore.getName( asmCore.getUsualSuspectNamespaces(), "print"), new Object[] { new Integer(1) } );
+		}
+		;
+	
+/*
+ *  TODO: All integer operands should accept .function_id()  .slot_id() etc.
+ */
+function_insn
+	:	'newfunction' fid = function_id
+	{
+		$decl::method_body_info.insn(OP_newfunction, fid);
 	}
 	;
 
@@ -320,16 +669,18 @@ no_operand_insn
 		'checkfilter' | 'coerce_a' | 'coerce_b' | 'coerce_d' | 'coerce_i' | 'coerce_s' |
 		'convert_b' | 'convert_i' | 'convert_d' | 'convert_o' | 'convert_u' | 'convert_s' |
 		'decrement' | 'decrement_i' | 'divide' | 'dup' | 
+	    'dxnslate' |
 		'equals' |
+		'esc_xattr' | 'esc_xelem' |
 		'getglobalscope' | 
 		'getlocal0' | 'getlocal1' | 'getlocal2' | 'getlocal3' |
 		'greaterequals' | 'greaterthan' |
 		'hasnext' | 
 		'in' | 'increment' | 'increment_i' | 'instanceof' | 'istypelate' |
-		'lessequals' | 'lessthan' | 'lshift' |
+		'label' | 'lessequals' | 'lessthan' | 'lshift' |
 		'modulo' | 'multiply' | 'multiply_i' |
 		'negate' | 'negate_i' | 'newactivation' | 'nextname' | 'nextvalue' | 'nop' | 'not' |
-		'pop' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' | 
+		'pop' | 'popscope' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' | 
 		'pushundefined' | 'pushwith' |
 		'returnvalue' | 'returnvoid' | 'rshift' |
 		'setlocal0' | 'setlocal1' | 'setlocal2' | 'setlocal3' |
@@ -339,7 +690,7 @@ no_operand_insn
 
 		)
 	{
-	    asmCore.insn(opcode);
+	    $decl::method_body_info.insn(opcode);
 	}
 	;
 
@@ -352,16 +703,17 @@ multiname_insn :
 	    'coerce' | 
 		'deleteproperty' | 
 		'finddef' | 'findproperty' | 'findpropstrict' |
-		'getdescendants' | 'getlex' | 'getproperty' | 'getsuper' |
-		'istype'
+		'getlex' | 'getproperty' | 'getsuper' |
+		'istype' |
+		'setproperty'
 	)
 	name_key = multipart_identifier
 	{
-		asmCore.insn(opcode, name_key);
+		$decl::method_body_info.insn(opcode, name_key);
 	}
-	| 'pushnamespace' ns = namespace_specification
+	| opcode = ('getdescendants') name_key = identifier
 	{
-	    asmCore.insn(OP_pushnamespace, ns);
+		$decl::method_body_info.insn(OP_getdescendants, name_key, null);
 	}
 	;
 
@@ -371,7 +723,12 @@ multiname_insn :
 ad_hoc_insn
 	: opcode = hex_literal imm_array = integer_operands_list
 	{
-	    asmCore.insn(opcode, imm_array);
+		//  HACK: This insn signature dodges around the lack
+		//  of a token, and the fact that the signature list
+		//  is an ArrayList of Integers (which would match
+		//  the signature (int, Object) better than the correct
+		//  signature (int, ArrayList<Object>
+	    $decl::method_body_info.insn(new Integer(opcode), imm_array);
 	}
 	;
 
@@ -489,9 +846,9 @@ integer_literal returns [int result]
 	{
 		result = Integer.parseInt($DECIMAL_LITERAL.getText());
 	}
-	| OCTAL_LITERAL
+	| MINUS DECIMAL_LITERAL
 	{
-	    result = Integer.parseInt($OCTAL_LITERAL.getText(), 8);
+		result = - Integer.parseInt($DECIMAL_LITERAL.getText());
 	}
 	| hex_value = hex_literal
 	{
@@ -504,10 +861,6 @@ long_literal returns [long result]
 	{
 		result = Long.parseLong($DECIMAL_LITERAL.getText());
 	}
-	| OCTAL_LITERAL
-	{
-	    result = Long.parseLong($OCTAL_LITERAL.getText(), 8);
-	}
 	| HEX_LITERAL
 	{
 	    result = Long.parseLong($HEX_LITERAL.getText().substring(2), 16);
@@ -517,7 +870,15 @@ long_literal returns [long result]
 double_literal returns [double result]
 	: FLOATING_POINT_LITERAL
 	{
-	    return Double.parseDouble($FLOATING_POINT_LITERAL.getText());
+	    result = Double.parseDouble($FLOATING_POINT_LITERAL.getText());
+	}
+	| MINUS FLOATING_POINT_LITERAL
+	{
+	    result = - Double.parseDouble($FLOATING_POINT_LITERAL.getText());
+	}
+	| 'NaN'
+	{
+		result = Double.NaN;
 	}
 	;
 
@@ -553,6 +914,7 @@ string_literal returns [String result]
 	COMMA	: ',' ;
 	QUOTE	: '"' ;
 	SPLAT	: '*' ; 
+	MINUS	: '-' ;
 
 IDENTIFIER
 	:	LETTER (LETTER|'0'..'9')*
@@ -578,8 +940,6 @@ HEX_LITERAL : '0' ('x'|'X') HexDigit+  ;
 
 DECIMAL_LITERAL : ('0' | '1'..'9' '0'..'9'*)  ;
 
-OCTAL_LITERAL : '0' ('0'..'7')+ ;
-
 fragment
 HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
 
@@ -595,10 +955,14 @@ Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 fragment
 FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
+/*
+ *  FIXME: Turn escape sequences into the correct chars
+ */
 fragment
 EscapeSequence
     :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
     |   OctalEscape
+	|   UnicodeEscape
     ;
 
 fragment

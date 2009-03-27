@@ -84,19 +84,15 @@ const int kBufferPadding = 16;
 		bool oldVectorMethodNames;	
 		#endif
 
-		#ifdef AVMPLUS_MIR
-		bool dceopt;
-        #endif
-
 		enum Runmode runmode;
 
-        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+        #if defined FEATURE_NANOJIT
 		/**
-		 * To speed up initialization, we don't use MIR on
+		 * To speed up initialization, we don't use jit on
 		 * $init methods; we use interp instead.  For testing
-		 * purposes, one may want to force the MIR to be used
+		 * purposes, one may want to force the jit to be used
 		 * for all code including $init methods.  The
-		 * jit switch forces all code to run through MIR/LIR
+		 * jit switch forces all code to run through the jit
 		 * instead of interpreter.
 		 */
 		bool cseopt;
@@ -114,7 +110,7 @@ const int kBufferPadding = 16;
 		bool bbgraph;
 		#endif //AVMPLUS_VERBOSE
 
-        #endif // AVMPLUS_MIR || FEATURE_NANOJIT
+        #endif // FEATURE_NANOJIT
 
         /**
 		 * If this switch is set, executing code will check the
@@ -172,7 +168,6 @@ const int kBufferPadding = 16;
 
 		#ifdef DEBUGGER
 		friend class CodegenLIR;
-		friend class CodegenMIR;
 		private:
 			Debugger*		_debugger;
 			Profiler*		_profiler;
@@ -190,8 +185,8 @@ const int kBufferPadding = 16;
 			bool				passAllExceptionsToDebugger;
 		#endif
 #ifdef AVMPLUS_VERIFYALL
-        List<AbstractFunction*, LIST_GCObjects> verifyQueue;
-		void enqFunction(AbstractFunction* f);
+        List<MethodInfo*, LIST_GCObjects> verifyQueue;
+		void enqFunction(MethodInfo* f);
 		void enqTraits(Traits* t);
 		void verifyEarly(Toplevel* toplevel);
 #endif
@@ -211,35 +206,27 @@ const int kBufferPadding = 16;
 	private:
 		QCache*			m_tbCache;
 		QCache*			m_tmCache;
+		QCache*			m_msCache;
 	public:
 		inline QCache* tbCache() { return m_tbCache; }
 		inline QCache* tmCache() { return m_tmCache; }
+		inline QCache* msCache() { return m_msCache; }
 		struct CacheSizes
 		{
-			uint16_t bindings;	// default to 0 == unlimited
-			uint16_t metadata;	// default to 1
+			enum { DEFAULT_BINDINGS = 32, DEFAULT_METADATA = 1, DEFAULT_METHODS = 32 };
 			
-			inline CacheSizes() : bindings(0), metadata(1) {}
+			uint16_t bindings;
+			uint16_t metadata;
+			uint16_t methods;
+			
+			inline CacheSizes() : bindings(DEFAULT_BINDINGS), metadata(DEFAULT_METADATA), methods(DEFAULT_METHODS) {}
 		};
 		// safe to call at any time, but calling tosses existing caches, thus has a perf hit --
 		// don't call cavalierly
 		void setCacheSizes(const CacheSizes& cs);
 
 	public:
-		#ifdef AVMPLUS_MIR
-		// MIR intermediate buffer pool
-		List<GrowableBuffer*> mirBuffers; // mir buffer pool
-		GrowableBuffer* requestNewMirBuffer();	 // create a new buffer
-		GrowableBuffer* requestMirBuffer();	     // get next buffer in list or a create a new one
-		void releaseMirBuffer(GrowableBuffer* buffer);
-		//GCSpinLock mirBufferLock;
-
-		#ifdef AVMPLUS_VERBOSE
-		MMgc::GCHashtable* codegenMethodNames;
-		#endif /* AVMPLUS_VERBOSE */
-		#endif /* MIR */
-
-        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+        #if defined FEATURE_NANOJIT
 		void initMultinameLate(Multiname& name, Atom index);
         #endif
 
@@ -256,6 +243,7 @@ const int kBufferPadding = 16;
 		 */
 		virtual void presweep();
 		virtual void postsweep();
+		virtual void oom(MMgc::MemoryStatus status);
 		
 		Config config;
         
@@ -273,16 +261,16 @@ const int kBufferPadding = 16;
 		inline bool verbose() const { return config.verbose; }
 		#endif
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-	    inline void SetMIREnabled(bool isEnabled) {
+#if defined FEATURE_NANOJIT
+	    inline void SetJITEnabled(bool isEnabled) {
 			config.runmode = (isEnabled) ? RM_mixed : RM_interp_all;
 		}
-        inline bool IsMIREnabled() const {
+        inline bool IsJITEnabled() const {
 			return (config.runmode == RM_mixed || config.runmode == RM_jit_all) ? true : false;
 		}
 #else
-        inline void SetMIREnabled(bool) {}
-        inline bool IsMirEnabled() { return false; }
+        inline void SetJITEnabled(bool) {}
+        inline bool IsJITEnabled() { return false; }
 #endif
 
 		/**
@@ -314,10 +302,18 @@ const int kBufferPadding = 16;
 		/** The location of the currently active defaultNamespace */
 		Namespace *const*dxnsAddr;
 
+		enum InterruptReason {
+			ScriptTimeout = 1,
+			ExternalInterrupt = 2
+		};
+
 		/**
 		 * If this flag is set, an interrupt is in progress.
 		 * This must be type int, not bool, since it will
 		 * be checked by generated code.
+		 * 
+		 * Set to 1 for a timeout interrupt, 2 for
+		 * an external (i.e., signal handler) interrupt.
 		 */
 		int interrupted;
 		
@@ -406,7 +402,63 @@ const int kBufferPadding = 16;
 									const NativeInitializer* ninit,
 									CodeContext *codeContext);
 
-				
+#ifdef VMCFG_EVAL
+		/**
+		 * Compile the source code held in 'code' and then execute it
+		 * as for handleActionBlock() above.
+		 *
+		 * @param code The code to be compiled and executed.  The string must be
+		 *             NUL-terminated and the NUL is not considered part of the
+		 *             input.  If 'code' is not in UTF-16 format it will be converted
+		 *             to UTF-16 format, so it is highly advisable that the caller
+		 *             has created an UTF-16 string.
+		 * @param filename The name of the file originating the code, or
+		 *                 NULL if the source code does not originate from a file.
+		 *                 If not NULL then ActionScript's 'include' directive will
+		 *                 be allowed in the program and files will be loaded
+		 *                 relative to 'filename'.
+		 * @param domainEnv  FIXME
+		 * @param toplevel the Toplevel object to execute against,
+		 *                 or NULL if a Toplevel should be
+		 *                 created.
+		 * @param ninit  FIXME
+		 * @param codeContext  FIXME
+		 * @throws Exception If an error occurs, an Exception object will
+		 *         be thrown using the AVM+ exceptions mechanism.
+		 *         Calls to handleActionBlock should be bracketed
+		 *         in TRY/CATCH.
+		 */
+		Atom handleActionSource(String* code,
+								String* filename,
+								DomainEnv* domainEnv,
+								Toplevel* &toplevel,
+								const NativeInitializer* ninit,
+								CodeContext *codeContext);
+		
+		/**
+		 * Obtain input from a file to handle ActionScript's 'include' directive.
+		 *
+		 * This method invoked by the run-time compiler if the script uses 'include'
+		 * and the use of 'include' is allowed because the script originated from
+		 * a file; see 'handleActionSource()' above.
+		 *
+		 * 'referencingFilename' should be taken into
+		 * account by this method if 'filename' is not an absolute file name.
+		 *
+		 * @param referencingFilename The name of the file from which the script 
+		 *                            containing the 'include' directive was loaded
+		 * @param filename  The filename in the 'include' directive.
+		 * @return  A string representing the contents of the file named by 'filename'.
+		 *          The string must NUL-terminated and the NUL is not considered part
+		 *          of the input.  If the returned string is not in UTF-16 format then
+		 *          it will be converted to UTF-16 format, so it is highly advisable
+		 *          that the method has created an UTF-16 string.  If the file cannot
+		 *          be opened or read then the return value should be NULL, an
+		 *          exception should not be thrown.
+		 */
+		virtual String* readFileForEval(String* referencingFilename, String* filename) = 0;
+#endif // VMCFG_EVAL
+
 		/** Implementation of OP_equals */
 		Atom equals(Atom lhs, Atom rhs);
 		
@@ -520,7 +572,7 @@ const int kBufferPadding = 16;
 			return Binding((uintptr_t(b) & ~7) | BKIND_GETSET);
 		}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		static Binding makeITrampBinding(uintptr_t id)
 		{
 			AvmAssert((id&7)==0); // addr must be 8-aligned
@@ -642,7 +694,6 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kNeedsDxns;
 		DRC(Stringp) kAsterisk;
 		DRC(Stringp) kVersion;
-		DRC(Stringp) kVector;
 #if VMCFG_METHOD_NAMES
 		DRC(Stringp) kanonymousFunc;
 #endif
@@ -669,8 +720,7 @@ const int kBufferPadding = 16;
 		 */
 		Toplevel* initTopLevel();		
 
-		virtual size_t getToplevelSize() const;
-		virtual Toplevel* createToplevel(VTable *vtable);
+		virtual Toplevel* createToplevel(AbcEnv* abcEnv);
 		
 	public:
 		/**
@@ -678,7 +728,7 @@ const int kBufferPadding = 16;
 		 * ECMA-262 section 9.6, used in many of the
 		 * native core objects
 		 */
-		uint32 toUInt32(Atom atom) const
+		inline static uint32 toUInt32(Atom atom)
 		{
 			return (uint32)integer(atom);
 		}
@@ -688,12 +738,15 @@ const int kBufferPadding = 16;
 		 * ECMA-262 section 9.4, used in many of the
 		 * native core objects
 		 */
-		double toInteger(Atom atom) const
+		inline static double toInteger(Atom atom)
 		{
-			if ((atom & 7) == kIntegerType) {
-				return (double) (atom>>3);
-			} else {
-				return MathUtils::toInt(number(atom));
+			if (atomKind(atom) == kIntegerType) 
+			{
+				return (double) atomInt(atom);
+			} 
+			else 
+			{
+				return MathUtils::toInt(AvmCore::number(atom));
 			}
 		}
 
@@ -704,7 +757,7 @@ const int kBufferPadding = 16;
 		 * and returned.  This is ToInt32() from E3 section 9.5
 		 */
 #ifdef AVMPLUS_64BIT
-		int64	integer64(Atom atom)			{ return (int64)integer(atom); }
+		static	int64 integer64(Atom atom)		{ return (int64)integer(atom); }
 		static	int64 integer64_i(Atom atom)	{ return (int64)integer_i(atom); }
 	#ifdef AVMPLUS_AMD64
 		static	int64 integer64_d(double d)		{ return (int64)integer_d_sse2(d); }
@@ -713,29 +766,33 @@ const int kBufferPadding = 16;
 		static	int64 integer64_d(double d)		{ return (int64)integer_d(d); }
 	#endif
 #endif
-		int integer(Atom atom) const;
+		static int integer(Atom atom);
 
 		// convert atom to integer when we know it is already a legal signed-32 bit int value
-		static int integer_i(Atom a)
+		static int32_t integer_i(Atom a)
 		{
-			if ((a&7) == kIntegerType)
-				return int(a>>3);
+			if (atomKind(a) == kIntegerType)
+			{
+				return (int32_t)atomInt(a);
+			}
 			else
+			{
 				// TODO since we know value is legal int, use faster d->i
 				return MathUtils::real2int(atomToDouble(a));
+			}
 		}
 
 		// convert atom to integer when we know it is already a legal unsigned-32 bit int value
-		static uint32 integer_u(Atom a)
+		static uint32_t integer_u(Atom a)
 		{
-			if ((a&7) == kIntegerType)
+			if (atomKind(a) == kIntegerType)
 			{
-				return uint32(a>>3);
+				return (uint32_t)atomInt(a);
 			}
 			else
 			{
 				// TODO figure out real2int for unsigned
-				return (uint32) atomToDouble(a);
+				return (uint32_t) atomToDouble(a);
 			}
 		}
 
@@ -764,8 +821,8 @@ const int kBufferPadding = 16;
 		{
 			AvmAssert(isNumber(a));
 
-			if ((a&7) == kIntegerType)
-				return (int)(a>>3);
+			if (atomKind(a) == kIntegerType)
+				return (int32_t)atomInt(a);
 			else
 				return atomToDouble(a);
 		}
@@ -776,12 +833,12 @@ const int kBufferPadding = 16;
 		 */
 		Atom intAtom(Atom atom)
 		{
-			return intToAtom(integer(atom));
+			return intToAtom(AvmCore::integer(atom));
 		}
 
 		Atom uintAtom(Atom atom)
 		{
-			return uintToAtom(toUInt32(atom));
+			return uintToAtom(AvmCore::toUInt32(atom));
 		}
 
 		/**
@@ -791,7 +848,7 @@ const int kBufferPadding = 16;
 		 * and returned.
 		 * [ed] 12/28/04 use int because bool is sometimes byte-wide.
 		 */
-		int boolean(Atom atom);
+		static int boolean(Atom atom);
 
 		/**
 		 * Returns the passed atom's string representation.
@@ -807,7 +864,7 @@ const int kBufferPadding = 16;
 		 */
 		static bool isString(Atom atom)
 		{
-			return (atom&0x7) == kStringType && !isNull(atom);
+			return atomKind(atom) == kStringType && !isNull(atom);
 		}
 
 		static bool isName(Atom atom)
@@ -969,21 +1026,22 @@ const int kBufferPadding = 16;
 		 * instanceof.  returns true/false according to AS rules.  in particular, it will return
 		 * false if value==null.
 		 */
-		bool istype(Atom atom, Traits* itraits);
+		static bool istype(Atom atom, Traits* itraits);
 
 		/**
 		 * this is the implementation of the actionscript "is" operator.  similar to java's
 		 * instanceof.  returns true/false according to AS rules.  in particular, it will return
 		 * false if value==null.
 		 */
-		Atom istypeAtom(Atom atom, Traits* itraits) { 
+		static Atom istypeAtom(Atom atom, Traits* itraits) 
+		{ 
 			return istype(atom, itraits) ? trueAtom : falseAtom; 
 		}
 
 		/**
 		 * implements ECMA as operator.  Returns the same value, or null.
 		 */
-		Atom astype(Atom atom, Traits* expected)
+		static Atom astype(Atom atom, Traits* expected)
 		{
 			return istype(atom, expected) ? atom : nullObjectAtom;
 		}
@@ -1003,10 +1061,10 @@ const int kBufferPadding = 16;
 		/**
 		 * ES3's internal ToPrimitive() function
 		 */
-		Atom primitive(Atom atom);
+		static Atom primitive(Atom atom);
 
 		/** OP_toboolean; ES3 ToBoolean() */
-		Atom booleanAtom(Atom atom);
+		static Atom booleanAtom(Atom atom);
 
 		/** OP_tonumber; ES3 ToNumber */
 		Atom numberAtom(Atom atom);
@@ -1014,7 +1072,7 @@ const int kBufferPadding = 16;
 		/**
 		 * ES3's internal ToNumber() function for internal use
 		 */
-		double number(Atom atom) const;
+		static double number(Atom atom);
 
 		/**
 		 * The interrupt method is called from executing code
@@ -1061,7 +1119,7 @@ const int kBufferPadding = 16;
 		 * strings used for error message output.
 		 */
 		String* toErrorString(int d);
-		String* toErrorString(AbstractFunction* m);
+		String* toErrorString(MethodInfo* m);
 		String* toErrorString(const Multiname& n);
 		String* toErrorString(const Multiname* n);
 		String* toErrorString(Namespacep ns);
@@ -1159,16 +1217,36 @@ const int kBufferPadding = 16;
 		 * Returns true if the passed atom is an XML object,
 		 * as defined in the E4X Specification.
 		 */				
-		bool isXML (Atom atm);
+		inline static bool isXML(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_xml);
+		}
+
+		/**
+		 * Returns true if the passed atom is a XMLList object,
+		 * as defined in the E4X Specification.
+		 */		
+		static bool isXMLList(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_xmlList);
+		}
+
+		inline static bool isXMLorXMLList(Atom atm)
+		{
+			return isBuiltinTypeMask(atm, (1<<BUILTIN_xml)|(1<<BUILTIN_xmlList));
+		}
 
 		/* Returns tru if the atom is a Date object */
-		bool isDate(Atom atm);
+		inline static bool isDate(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_date);
+		}
 
 		// From http://www.w3.org/TR/2004/REC-xml-20040204/#NT-Name
-		bool isLetter (wchar c);
-		bool isDigit (wchar c);
-		bool isCombiningChar (wchar c);
-		bool isExtender (wchar c);
+		static bool isLetter(wchar c);
+		static bool isDigit(wchar c);
+		static bool isCombiningChar(wchar c);
+		static bool isExtender(wchar c);
 
 		Stringp ToXMLString (Atom a);
 		Stringp EscapeElementValue (const Stringp s, bool removeLeadingTrailingWhitespace);
@@ -1178,39 +1256,36 @@ const int kBufferPadding = 16;
 		 * Converts an Atom to a E4XNode if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		E4XNode *atomToXML (Atom atm);
+		static E4XNode* atomToXML(Atom atm);
 
 		/**
 		 * Converts an Atom to a XMLObject if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		XMLObject *atomToXMLObject (Atom atm);
-
-		/**
-		 * Returns true if the passed atom is a XMLList object,
-		 * as defined in the E4X Specification.
-		 */		
-		bool isXMLList (Atom atm);
+		static XMLObject* atomToXMLObject(Atom atm);
 
 		/**
 		 * Converts an Atom to a XMLListObject if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		XMLListObject *atomToXMLList (Atom atm);
+		static XMLListObject* atomToXMLList(Atom atm);
 
 		/**
 		 * Returns true if the passed atom is a QName object,
 		 * as defined in the E4X Specification.
 		 */		
-		bool isQName (Atom atm);
+		static bool isQName(Atom atm)
+		{
+			return isBuiltinType(atm, BUILTIN_qName);
+		}
 
 		/**
 		 * Returns true if the passed atom is a Dictionary object,
 		 * as defined in the E4X Specification.
 		 */		
-		bool isDictionary (Atom atm);
+		static bool isDictionary(Atom atm);
 
-		bool isDictionaryLookup(Atom key, Atom obj)
+		static bool isDictionaryLookup(Atom key, Atom obj)
 		{
 			return isObject(key) && isDictionary(obj);
 		}
@@ -1225,7 +1300,7 @@ const int kBufferPadding = 16;
 		 * Converts an Atom to a QNameObject if its traits match.
 		 * Otherwise, null is returned. (An exception is NOT thrown)
 		 */
-		QNameObject *atomToQName (Atom atm);
+		static QNameObject* atomToQName(Atom atm);
 
 		/** Implementation of OP_typeof */		
 		Stringp _typeof (Atom arg);
@@ -1233,6 +1308,10 @@ const int kBufferPadding = 16;
 		/** The XML entities table, used by E4X */
 		Hashtable *xmlEntities;
 		
+	private:
+		static bool isBuiltinType(Atom atm, BuiltinType bt);
+		static bool isBuiltinTypeMask(Atom atm, int btmask);
+
 	private:
 		//
 		// this used to be Heap
@@ -1304,7 +1383,7 @@ const int kBufferPadding = 16;
 
 		// String creation. If len is omitted, zero-termination is assumed.
 		Stringp newStringLatin1(const char* str, int len = -1);
-		Stringp newStringUTF8(const char* str, int len = -1);
+		Stringp newStringUTF8(const char* str, int len = -1, bool strict = false);
 		Stringp newStringUTF16(const wchar* str, int len = -1);
 
 		// decodes UTF16LE or UTF16BE.
@@ -1345,7 +1424,7 @@ const int kBufferPadding = 16;
 		Stringp findInternedString(const char *s, int len);
 #endif
 
-		bool getIndexFromAtom(Atom a, uint32 *result) const
+		static bool getIndexFromAtom(Atom a, uint32 *result)
 		{
 			if (AvmCore::isInteger(a))
 			{
@@ -1354,8 +1433,8 @@ const int kBufferPadding = 16;
 			}
 			else
 			{
-				AvmAssert (AvmCore::isString(a));
-				return AvmCore::getIndexFromString (atomToString (a), result); 
+				AvmAssert(AvmCore::isString(a));
+				return AvmCore::getIndexFromString(atomToString(a), result); 
 			}
 		}
 
@@ -1401,9 +1480,8 @@ const int kBufferPadding = 16;
 
 		// static version for smart pointers
 		static void atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew);
-#ifdef MMGC_DRC
+
 		static void decrementAtomRegion(Atom *ar, int length);
-#endif
 
 	public:
 #ifdef AVMPLUS_VERBOSE
@@ -1441,93 +1519,6 @@ const int kBufferPadding = 16;
 		void   invalidateLookupCache() { if (lookup_cache_timestamp != ~0U) ++lookup_cache_timestamp; }
 #endif
 		
-		/* A portable replacement for alloca().
-		 *
-		 * Memory is allocated from the heap and not from the stack.  It is freed in 
-		 * one of two ways: If the function returns normally then an auto_ptr like
-		 * mechanism frees the memory.  If the function leaves by throwing an exception
-		 * (or if one of its callees throws an exception) then the exception
-		 * handling mechanism in Exception.{h,cpp} frees the memory by releasing 
-		 * everything that is still allocated that was allocated since the exception
-		 * handler was erected.
-		 *
-		 * The auto_ptr mechanism, based on the class AvmCore::AllocaAutoPtr, cannot be
-		 * circumvented, as allocaPush() takes a reference to such an object as an argument.
-		 *
-		 * Typical usage:
-		 *
-		 *    AvmCore::AllocaAutoPtr _ptr;                      // by convention prefixed by "_"
-		 *    int* ptr = (int*)core->allocaPush(_ptr, nbytes);  // by convention same name, no "_"
-		 *
-		 * In practice the VMPI_alloca() macro, defined in avmbuild.h, should be used so that
-		 * real alloca() can be used on platforms where that makes sense.
-		 *
-		 * Benchmarks suggest that the performance differences from using this mechanism
-		 * instead of real alloca() are slight to nonexistent, and that the heap allocation
-		 * sometimes provides a performance improvement.
-		 */
-	private:
-		struct AllocaStackSegment
-		{
-			void* start;				// first address; also, the RCRoot pointer
-			void* limit;				// address past data
-			void* top;					// address past live if this segment is not the top
-			AllocaStackSegment* prev;	// segments further from the top
-		};
-		
-		void allocaInit();
-		void allocaShutdown();
-		void allocaPopToSlow(void* top);
-		void* allocaPushSlow(size_t nbytes);
-		void pushAllocaSegment(size_t nbytes);
-		void popAllocaSegment();
-
-		AllocaStackSegment* top_segment;// segment at the stack top
-		void* stacktop;					// current first free word in top_segment
-#ifdef _DEBUG
-		size_t stackdepth;				// useful to have for debugging
-#endif
-		
-	public:
-		/* See documentation above */
-		
-		class AllocaAutoPtr
-		{
-			friend class AvmCore;
-		public:
-			AllocaAutoPtr() : core(NULL), unwindPtr(NULL) {}  // initialization of 'core' to pacify gcc
-			~AllocaAutoPtr() { if (unwindPtr) core->allocaPopTo(unwindPtr); }
-		private:
-			AvmCore* core;
-			void* unwindPtr;
-		};
-				
-		inline void* allocaTop() 
-		{
-			return stacktop;
-		}
-		
-		inline void allocaPopTo(void* top)
-		{ 
-			if (top >= top_segment->start && top <= top_segment->limit)
-				stacktop = top;
-			else
-				allocaPopToSlow(top);
-		}
-		
-		inline void* allocaPush(size_t nbytes, AllocaAutoPtr& x) 
-		{
-			AvmAssert(x.unwindPtr == NULL);
-			x.core = this;
-			x.unwindPtr = stacktop;
-			nbytes = (nbytes + 7) & ~7;
-			if ((char*)stacktop + nbytes <= top_segment->limit) {
-				stacktop = (char*)stacktop + nbytes;
-				return x.unwindPtr;
-			}
-			return allocaPushSlow(nbytes);
-		}
-		
 		// avoid multiple inheritance issues
 		class GCInterface : MMgc::GCCallback
 		{
@@ -1537,6 +1528,7 @@ const int kBufferPadding = 16;
 			void presweep() { if(core) core->presweep(); }
 			void postsweep() { if(core) core->postsweep(); }
 			void log(const char *str) { if(core) core->console << str; }
+			void oom(MMgc::MemoryStatus status) { if(core) core->oom(status); }
 		private:
 			AvmCore *core;
 		};

@@ -50,37 +50,19 @@ namespace avmplus
 	/**
 	 * class Toplevel
 	 */
-    class Toplevel : public ScriptObject
+    class Toplevel : public MMgc::GCObject 
     {
 	public:
-		/**
-		 * Constructor
-		 */
-		Toplevel(VTable* vtable, ScriptObject* delegate);
-		~Toplevel();
-
-		/**
-		 * @name actionscript.lang Classes
-		 * These are the toplevel class closures.
-		 */
-		/*@{*/
-		DRCWB(ArrayClass*)     arrayClass;
-		DRCWB(BooleanClass*)   booleanClass;
-		DRCWB(ClassClass*)     classClass;
-		DRCWB(FunctionClass*)  functionClass;		
-		DRCWB(MethodClosureClass*)  methodClosureClass;		
-		DRCWB(NamespaceClass*) namespaceClass;
-		DRCWB(NumberClass*)    numberClass;
-		DRCWB(IntClass*)       intClass;
-		DRCWB(UIntClass*)      uintClass;
-		DRCWB(ObjectClass*)    objectClass;
-		DRCWB(IntVectorClass*) intVectorClass;
-		DRCWB(DoubleVectorClass*)    doubleVectorClass;
-		DRCWB(UIntVectorClass*)   uintVectorClass;
-		DRCWB(ObjectVectorClass*)    objectVectorClass;
-		DRCWB(VectorClass*)    vectorClass;
-		DRCWB(StringClass*)    stringClass;
-		/*@}*/
+		Toplevel(AbcEnv*);
+		virtual ~Toplevel() {} // silence compiler warnings
+		
+		inline AbcEnv* abcEnv() const { return _abcEnv; }
+		inline DomainEnv* domainEnv() const { return _abcEnv->domainEnv(); }
+		inline AvmCore* core() const { return _abcEnv->pool()->core; }
+		inline MMgc::GC* gc() const { return core()->GetGC(); }
+		inline ScriptObject* global() const { return _global; }
+		inline Atom atom() const { return _global->atom(); }
+		ScriptEnv* mainEntryPoint() const;
 
 		DateClass* dateClass();
 		RegExpClass* regexpClass();
@@ -138,9 +120,6 @@ namespace avmplus
 
 		inline void throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const { throwReferenceError(id, &multiname, traits); }
 		inline void throwReferenceError(int id, const Multiname& multiname) const { throwReferenceError(id, &multiname); }
-
-		DWB(VTable*) object_vtable; // instance vtable
-		DWB(VTable*) class_vtable; // instance vtable
 
 		// 
 		// methods that used to be on AvmCore but depend on the caller's environment
@@ -207,7 +186,7 @@ namespace avmplus
 		/**
 		 * E4X support for coercing regular Multinames into E4X specific ones
 		 */
-		void CoerceE4XMultiname (const Multiname *m, Multiname &out) const;
+		void CoerceE4XMultiname (const Multiname *m, Multiname &out);
 
 		/**
 		 * operator instanceof from ES3
@@ -275,17 +254,8 @@ namespace avmplus
 	    void setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
 	    void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
 
-		bool isXmlBase(Atom obj) const
-		{
-			AvmCore* core = this->core();
-			if (AvmCore::isObject(obj))
-			{
-				ScriptObject* so = AvmCore::atomToScriptObject(obj);
-				Traits* t = so->traits();
-				return t == core->traits.xml_itraits || t == core->traits.xmlList_itraits;
-			}
-			return false;
-		}
+		bool isXmlBase(Atom obj) const { return AvmCore::isXMLorXMLList(obj); }
+
 		/**
 		 * operator +
 		 */
@@ -319,6 +289,11 @@ namespace avmplus
 		/*@}*/
 
 		/**
+		 * E262-3 eval, but for the top level only (no lexical capture)
+		 */
+		static Atom eval(ScriptObject*, Atom in);
+		
+		/**
 		 * This is a variant of escape() which doesn't encode
 		 * Unicode characters using the %u sequence
 		 */
@@ -344,7 +319,7 @@ namespace avmplus
 
         ClassClosure* getBuiltinClass(int class_id) const
         {
-            return builtinClasses[class_id] ? builtinClasses[class_id] : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
+            return _builtinClasses[class_id] ? _builtinClasses[class_id] : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
         }
 		ErrorClass* getErrorClass(int class_id) const { return (ErrorClass*)getBuiltinClass(class_id); }
 
@@ -357,6 +332,9 @@ namespace avmplus
 		// and prohibit certain operations. default implementation always
 		// allows but FlashPlayer takes advantage of this.
 		virtual bool sampler_trusted(ScriptObject* /*sampler*/) { return true; }
+
+	protected:
+		ClassClosure* findClassInPool(int class_id, PoolObject* pool);
 
 	private:
 
@@ -374,7 +352,33 @@ namespace avmplus
 		}
 
 		ClassClosure* resolveBuiltinClass(int class_id);
-		DWB(ClassClosure**) builtinClasses;
+
+	// ------------------------ DATA SECTION BEGIN
+	private:
+		DWB(AbcEnv*)				_abcEnv;
+		DWB(ClassClosure**)			_builtinClasses;
+		DRCWB(ScriptObject*)		_global; // the toplevel script that's run
+	public:
+		DWB(VTable*)				object_ivtable;
+		DWB(VTable*)				class_ivtable;
+	public:
+		DRCWB(ArrayClass*)			arrayClass;
+		DRCWB(BooleanClass*)		booleanClass;
+		DRCWB(ClassClass*)			classClass;
+		DRCWB(FunctionClass*)		functionClass;		
+		DRCWB(MethodClosureClass*)  methodClosureClass;		
+		DRCWB(NamespaceClass*)		namespaceClass;
+		DRCWB(NumberClass*)			numberClass;
+		DRCWB(IntClass*)			intClass;
+		DRCWB(UIntClass*)			uintClass;
+		DRCWB(ObjectClass*)			objectClass;
+		DRCWB(IntVectorClass*)		intVectorClass;
+		DRCWB(DoubleVectorClass*)	doubleVectorClass;
+		DRCWB(UIntVectorClass*)		uintVectorClass;
+		DRCWB(ObjectVectorClass*)	objectVectorClass;
+		DRCWB(VectorClass*)			vectorClass;
+		DRCWB(StringClass*)			stringClass;
+	// ------------------------ DATA SECTION END
 	};
 }
 

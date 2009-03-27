@@ -144,7 +144,7 @@ namespace avmplus
 			BKIND_METHOD			= 1,		// MethodEnv*							001
 			BKIND_VAR				= 2,		// int local slot number (r/w var)		010
 			BKIND_CONST				= 3,		// int local slot number (r/o const)	011
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 			BKIND_ITRAMP			= 4,		// interface trampoline in imt table	100
 #endif
 			BKIND_GET				= 5,		// get-only property					101

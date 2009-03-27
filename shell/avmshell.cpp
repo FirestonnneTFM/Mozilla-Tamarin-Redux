@@ -35,20 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 #include "avmshell.h"
 
-#if defined(DARWIN) || (defined(AVMPLUS_UNIX) && !defined(SOLARIS))
-#include <sys/signal.h>
-#include <unistd.h>
-#endif
-
-#if defined(SOLARIS)
-#include <signal.h>
-#include <unistd.h>
-#include <ucontext.h>
-extern "C" greg_t _getsp(void);
-#endif
+#include "Platform.h"
 
 #ifdef __SUNPRO_CC
 #define PRIVATE __hidden
@@ -57,86 +46,16 @@ extern "C" greg_t _getsp(void);
 #endif
 
 #ifdef WIN32
-#pragma warning(disable: 4201)
-
-#include <Mmsystem.h>
 #ifndef UNDER_CE
-#include "dbghelp.h"
 bool P4Available();
 #endif
 #elif defined AVMPLUS_UNIX
 bool P4Available();
 #endif
 
-#if defined(AVM_SHELL_PLATFORM_HOOKS)
-    void AVMShellDidEndTest();
-    void AVMShellDidTimeout();
-    OutputStream *AVMShellNewConsoleStream(MMgc::GC *gc);
-    int AVMShellPlatformMain(int argc, char **argv);
-    void AVMShellPlatformTeardown();
-    bool AVMShellShouldExitOnException(Exception *exception);
-    void AVMShellWillBeginTest(const char *filename);
-#endif
-
-static MMgc::FixedMalloc* fm = NULL;
-
-#ifndef OVERRIDE_GLOBAL_NEW
-// Custom new and delete operators
-// User-defined operator new.
-
-PRIVATE void *operator new(size_t size)
-{
-	// 10.5 calls new before main
-	if (!fm)
-	{
-		MMgc::GCHeap::Init();
-		MMgc::FixedMalloc::Init();
-
-		fm = MMgc::FixedMalloc::GetInstance();
-	}
-
-    return fm->Alloc(size);
-}
-
-PRIVATE void *operator new[](size_t size)
-{
-	// 10.5 calls new before main
-	if (!fm)
-	{
-		MMgc::GCHeap::Init();
-		MMgc::FixedMalloc::Init();
-
-		fm = MMgc::FixedMalloc::GetInstance();
-	}
-
-    return fm->Alloc(size);
-}
-
-// User-defined operator delete.
-#ifdef _MAC
-	// CW9 wants the C++ official prototype, which means we must have an empty exceptions list for throw.
-	// (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
-	void operator delete( void *p) throw()
-#else
-PRIVATE	void operator delete( void *p)
-#endif
-	{
-		if (fm)
-			fm->Free(p);
-	}
-
-#ifdef _MAC
-    // CW9 wants the C++ official prototype, which means we must have an empty exceptions list for throw.
-    // (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
-    void operator delete[]( void *p) throw()
-#else
-PRIVATE void operator delete[]( void *p )
-#endif
-    {
-		if (fm)
-			fm->Free(p);
-    }
-#endif // OVERRIDE_GLOBAL_NEW
+// [tpr] I removed the override global new stuff, it was apparently added b/c we'd crash when 
+// OS would use our new pre-main that was fixed by making the project not export any 
+// symbols other than main
 
 namespace avmplus {
 	namespace NativeID {
@@ -146,6 +65,7 @@ namespace avmplus {
 
 #ifdef AVMPLUS_JITMAX
 	extern int jitmax;
+    extern int jitmin;
 #endif
 }
 
@@ -154,179 +74,75 @@ namespace avmshell
 	const int kScriptTimeout = 15;
 	const int kScriptGracePeriod = 5;
 
-	Shell *shell = NULL;
 	bool show_error = false;
 
-	#ifdef WIN32
-	void Shell::computeStackBase()
-	{
-#ifdef AVMPLUS_AMD64
-		const int kStackMargin = 262144;
-#elif defined(UNDER_CE)
-		const int kStackMargin = 16384;
-#else
-		const int kStackMargin = 131072;
-#endif
-		
-		SYSTEM_INFO sysinfo;
-		GetSystemInfo(&sysinfo);
-
-		int dummy;
-		uintptr_t sp = (uintptr_t)(&dummy);
-		sp &= ~uintptr_t(sysinfo.dwPageSize-1);
-
-		MEMORY_BASIC_INFORMATION buf;
-		if (VirtualQuery((void*)sp, &buf, sizeof(buf)) == sizeof(buf)) {
-			minstack = (uintptr)buf.AllocationBase + kStackMargin;
-		}
-	}
-	
-	void CALLBACK TimeoutProc(UINT /*uTimerID*/,
-							  UINT /*uMsg*/,
-							  DWORD_PTR dwUser,
-							  DWORD_PTR /*dw1*/,
-							  DWORD_PTR /*dw2*/)
-	{
-		AvmCore *core = (AvmCore*)dwUser;
-		core->interrupted = true;
-	}
-	#else
-	void Shell::computeStackBase()
-	{
-		// A hard limit here is always wrong on every system.
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=456054
-		
-		const int kMaxAvmPlusStack = 4096*1024;  // changed to 4MB for testing purposes, used to be 512KB
-		uintptr_t sp;
-		#ifdef AVMPLUS_PPC
-		asm("mr %0,r1" : "=r" (sp));
-        #elif defined(AVMPLUS_ARM)
-		asm("mov %0,sp" : "=r" (sp));
-		#elif defined SOLARIS
-		sp = _getsp();
-		#else
-		#ifdef AVMPLUS_64BIT
-		asm("mov %%rsp,%0" : "=r" (sp));
-		#else
-		asm("movl %%esp,%0" : "=r" (sp));
-		#endif
-		#endif
-		minstack = sp-kMaxAvmPlusStack;
-	}
-	
-	void alarmProc(int /*signum*/)
-	{
-		shell->interrupted = true;
-	}
-	#endif
-	
-	ShellToplevel::ShellToplevel(VTable* vtable, ScriptObject* delegate)
-		: Toplevel(vtable, delegate)
+	ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
 	{
 		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 	}
 
 	void Shell::usage()
 	{
-		printf("avmplus shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n\n");
-		printf("usage: avmplus\n");
+		AvmLog("avmplus shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n\n");
+		AvmLog("usage: avmplus\n");
 		#ifdef DEBUGGER
-			printf("          [-d]          enter debugger on start\n");
+			AvmLog("          [-d]          enter debugger on start\n");
 		#endif
-		printf("          [-memstats]   generate statistics on memory usage\n");
-		printf("          [-memlimit d] limit the heap size to d pages\n");
+		AvmLog("          [-memstats]   generate statistics on memory usage\n");
+		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
 
-		printf("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
-		printf("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
+		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
+		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
+		AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
 
 		#ifdef _DEBUG
-			printf("          [-Dgreedy]    collect before every allocation\n");
+			AvmLog("          [-Dgreedy]    collect before every allocation\n");
 		#endif /* _DEBUG */
 		#ifdef DEBUGGER
-			printf("          [-Dnogc]      don't collect\n");
-			printf("          [-Dnoincgc]   don't use incremental collection\n");
-			printf("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
-			printf("          [-Dlanguage l] localize runtime errors, languages are:\n");
-			printf("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
+			AvmLog("          [-Dnogc]      don't collect\n");
+			AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+			AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
+			AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
+			AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 		#endif
 
-		printf("          [-Dinterp]    do not generate machine code, interpret instead\n");
+		AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
 
 		#ifdef AVMPLUS_VERBOSE
-			printf("          [-Dverbose]   trace every instruction (verbose!)\n");
-			printf("          [-Dverbose_init] trace the builtins too\n");
-			printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
+			AvmLog("          [-Dverbose]   trace every instruction (verbose!)\n");
+			AvmLog("          [-Dverbose_init] trace the builtins too\n");
+			AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
 		#endif
 
-    #ifdef AVMPLUS_MIR
-		printf("          [-Dmem]       show compiler memory usage \n");
-		printf("          [-Dnodce]     disable DCE optimization \n");
-		#ifdef AVMPLUS_VERBOSE
-	    printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
-		#endif
-    #endif
-    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		printf("          [-Dforcemir]  deprecated, use -Ojit\n");
-		printf("          [-Ojit]       use jit always, never interp\n");
-		printf("          [-Dnocse]     disable CSE optimization \n");
+    #if defined FEATURE_NANOJIT
+		AvmLog("          [-Ojit]       use jit always, never interp\n");
+		AvmLog("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32
-        printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
+        AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         #endif /* AVMPLUS_IA32 */
     #endif
 	#ifdef AVMPLUS_JITMAX
-		printf("          [-jitmax N]   only execute the first N jit'd methods, interpret after.");
+        AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
 	#endif
 		
 		#ifdef AVMPLUS_VERIFYALL
-	    printf("          [-Dverifyall] verify greedily instead of lazily\n");
+	    AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
 		#endif
 		#ifdef AVMPLUS_SELFTEST
-		printf("          [-Dselftest[=component,category,test]]  run selftests\n");
+		AvmLog("          [-Dselftest[=component,category,test]]  run selftests\n");
 		#endif
-		printf("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
-		printf("          [-error]      crash opens debug dialog, instead of dumping\n");
-		#ifdef AVMPLUS_INTERACTIVE
-		printf("          [-i]          interactive mode\n");
-		#endif //AVMPLUS_INTERACTIVE
-		printf("          [-log]\n");
-		printf("          [-- args]     args passed to AS3 program\n");
-		printf("          [-jargs ... ;] args passed to Java runtime\n");
-		printf("          filename.abc ...\n");
-		printf("          [--] application args\n");
-		exit(1);
+		AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
+		AvmLog("          [-error]      crash opens debug dialog, instead of dumping\n");
+		#ifdef VMCFG_EVAL
+		AvmLog("          [-repl]       read-eval-print mode\n");
+		#endif // VMCFG_EVAL
+		AvmLog("          [-log]\n");
+		AvmLog("          [-- args]     args passed to AS3 program\n");
+		AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
+		AvmLog("          filename.abc ...\n");
+		AvmLog("          [--] application args\n");
+		Platform::GetInstance()->exit(1);
 	}
-
-#ifdef UNDER_CE
-	#ifdef VMPI_strcmp
-		#undef VMPI_strcmp
-	#endif
-	#define VMPI_strcmp(_str, _conststr)		_tcscmp(_str, _T(_conststr)) 
-
-	#ifdef VMPI_strrchr
-		#undef VMPI_strrchr
-	#endif
-	#define VMPI_strrchr(_str, _constchr)		_tcsrchr(_str, _T(_constchr))
-
-	#ifdef VMPI_strlen
-		#undef VMPI_strlen
-	#endif
-	#define VMPI_strlen(_str)					_tcslen(_str)
-
-	#ifdef VMPI_strcpy
-		#undef VMPI_strcpy
-	#endif
-	#define VMPI_strcpy(_str, _conststr)		_tcscpy(_str, _conststr)
-
-	#ifdef VMPI_strtol
-		#undef VMPI_strtol
-	#endif
-	#define VMPI_strtol wcstol
-
-	#ifdef VMPI_atoi
-		#undef VMPI_atoi
-	#endif
-	#define VMPI_atoi _wtoi
-#endif
 
 	void Shell::stackOverflow(MethodEnv *env)
 	{
@@ -343,7 +159,7 @@ namespace avmshell
 		// actual stack bottom to do this.
 		inStackOverflow = true;
 
-		Toplevel *toplevel = env->vtable->toplevel;
+		Toplevel* toplevel = env->toplevel();
 
 		Stringp errorMessage = getErrorMessage(kStackOverflowError);
 		Atom args[2] = { nullObjectAtom, errorMessage->atom() };
@@ -357,11 +173,16 @@ namespace avmshell
 		throwException(exception);
 	}
 		
+	void Shell::interruptTimerCallback(void* data)
+	{
+		((AvmCore*)data)->interrupted = true;
+	}
+	
 	void Shell::interrupt(MethodEnv *env)
 	{
 		interrupted = false;
 
-		Toplevel *toplevel = env->vtable->toplevel;
+		Toplevel* toplevel = env->toplevel();
 
 		if (gracePeriod) {
 			// This script has already had its chance; it violated
@@ -379,28 +200,14 @@ namespace avmshell
 		// clean up, and throw an exception.
 		gracePeriod = true;
 
-		#ifdef WIN32
-		timeSetEvent(kScriptGracePeriod*1000,
-					 kScriptGracePeriod*1000,
-					 (LPTIMECALLBACK)TimeoutProc,
-					 (DWORD_PTR)this,
-					 TIME_ONESHOT);
-		#else
-		#ifndef AVMPLUS_ARM // TODO AVMPLUS_ARM
-		alarm(kScriptGracePeriod);
-		#endif
-		#endif
-
-        #if defined(AVM_SHELL_PLATFORM_HOOKS)
-		    AVMShellDidTimeout();
-		#endif
+		Platform::GetInstance()->setTimer(kScriptGracePeriod, interruptTimerCallback, this);
 
 		toplevel->throwError(kScriptTimeoutError);
 	}
 	
 	void Shell::initShellPool()
 	{
-		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this, NULL);
+		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this);
 	}
 
 	Toplevel* Shell::initShellBuiltins()
@@ -418,16 +225,163 @@ namespace avmshell
 		return toplevel;
 	}
 	
-	Toplevel* Shell::createToplevel(VTable *vtable)
+	Toplevel* Shell::createToplevel(AbcEnv* abcEnv)
 	{
-		return new (vtable->gc(), vtable->getExtraSize()) ShellToplevel(vtable, NULL);
+		return new (GetGC()) ShellToplevel(abcEnv);
 	}
 
-	size_t Shell::getToplevelSize() const
+#ifdef VMCFG_EVAL
+
+	// FIXME, this is currently hokey for several reasons:
+	//
+	//  - Does not try to determine whether input is Latin1, UTF8, or indeed, already UTF16,
+	//    but assumes UTF8, which can be dangerous.  Falls back to latin1 if the utf8 conversion
+	//    fails, this seems ill-defined in the string layer though so it's just one more hack.
+	//
+	//  - Does not create an UTF16 string.  The string layer is actually broken on this count,
+	//    because requesting an empty UTF16 string returns a constant that is a Latin1 string,
+	//    and appending to it won't force the representation to UTF16 unless the data require
+	//    that to happen.  See <URL:https://bugzilla.mozilla.org/show_bug.cgi?id=473995>.
+	//
+	//  - May incur copying because the terminating NUL is not accounted for in the original
+	//    creation
+
+	String* Shell::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
 	{
-		return sizeof(ShellToplevel);
+		String* s = newStringUTF8((const char*)bytes, nbytes);
+		if (s == NULL)
+			s = newStringLatin1((const char*)bytes, nbytes);
+		if (terminate)
+			s = s->appendLatin1("\0", 1);
+		return s;
 	}
 
+	String* Shell::readFileForEval(String* referencingFile, String* filename)
+	{
+		// FIXME, filename sanitazion is more complicated than this
+		if (referencingFile != NULL && filename->charAt(0) != '/' && filename->charAt(0) != '\\') {
+			// find the last slash if any, truncate the string there, append the
+			// new filename
+			int32_t x = referencingFile->lastIndexOf(newStringLatin1("/"));
+			if (x != -1)
+				filename = referencingFile->substring(0,x+1)->append(filename);
+		}
+		filename = filename->appendLatin1("\0", 1);
+		
+		// FIXME, not obvious that UTF8 is correct for all operating systems (far from it!)
+		StUTF8String fn(filename);
+		FileInputStream f(fn.c_str());
+		if (!f.valid() || (uint64_t) f.length() >= UINT32_T_MAX)
+			return NULL;
+
+		uint32_t nbytes = (uint32_t) f.available();
+		uint8_t* bytes = new uint8_t[nbytes];
+		f.read(bytes, nbytes);
+		String* str = decodeBytesAsUTF16String(bytes, nbytes, true);
+		delete [] bytes;
+		return str;
+	}
+	
+	void Shell::repl(Toplevel* toplevel, DomainEnv* domainEnv)
+	{
+		const int kMaxCommandLine = 1024;
+		char commandLine[kMaxCommandLine];
+
+		ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
+		codeContext->m_domainEnv = domainEnv;
+
+		console << "avmplus interactive shell\n"
+				<< "Type '?' for help\n\n";
+		for (;;)
+		{
+			TRY(this, kCatchAction_ReportAsError) 
+			{
+				String* code_string = NULL;
+				bool record_time = false;
+				AvmLog("> ");
+
+				if(Platform::GetInstance()->getUserInput(commandLine, kMaxCommandLine) == NULL)
+					return;
+
+				commandLine[kMaxCommandLine-1] = 0;
+				if (VMPI_strncmp(commandLine, "?", 1) == 0) {
+					console << "Text entered at the prompt is compiled and evaluated unless\n"
+							<< "it is one of these commands:\n\n"
+							<< "  ?             print help\n"
+							<< "  .input        collect lines until a line that reads '.end',\n"
+							<< "                then eval the collected lines\n"
+							<< "  .load file    load the file (source or compiled)\n"
+							<< "  .quit         leave the repl\n"
+							<< "  .time expr    evaluate expr and report the time it took.\n\n";
+				}
+				else if (VMPI_strncmp(commandLine, ".load", 5) == 0) {
+					const char* s = commandLine+5;
+					while (*s == ' ' || *s == '\t')
+						s++;
+					// wrong, handles only source code
+					//readFileForEval(NULL, newStringLatin1(s));
+					// FIXME: implement .load
+					// Small amount of generalization of the code currently in the main loop should
+					// take care of it.
+					console << "The .load command is not implemented\n";
+				}
+				else if (VMPI_strncmp(commandLine, ".input", 6) == 0) {
+					code_string = newStringLatin1("");
+					for (;;) {
+						if(Platform::GetInstance()->getUserInput(commandLine, kMaxCommandLine) == NULL)
+							return;
+						commandLine[kMaxCommandLine-1] = 0;
+						if (VMPI_strncmp(commandLine, ".end", 4) == 0)
+							break;
+						code_string = code_string->appendLatin1(commandLine);
+					}
+					goto evaluate;
+				}
+				else if (VMPI_strncmp(commandLine, ".quit", 5) == 0) {
+					return;
+				}
+				else if (VMPI_strncmp(commandLine, ".time", 5) == 0) {
+					record_time = true;
+					code_string = newStringLatin1(commandLine+5);
+					goto evaluate;
+				}
+				else {
+					// Always Latin-1 here so don't use the normal decoder
+					code_string = newStringLatin1(commandLine);
+				evaluate:
+					double then = 0, now = 0;
+					code_string = code_string->appendLatin1("\0", 1);
+					if (record_time) 
+						then = VMPI_getDate();
+					Atom result = handleActionSource(code_string, NULL, domainEnv, toplevel, NULL, codeContext);
+					if (record_time) 
+						now = VMPI_getDate();
+					if (result != undefinedAtom)
+						console << string(result) << "\n";
+					if (record_time)
+						console << "Elapsed time: " << (now - then)/1000 << "s\n";
+				}
+			}
+			CATCH(Exception *exception)
+			{
+#ifdef DEBUGGER
+				if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+				{
+					console << string(exception->atom) << "\n";
+				}
+				if (exception->getStackTrace()) {
+					console << exception->getStackTrace()->format(this) << '\n';
+				}
+#else
+				console << string(exception->atom) << "\n";
+#endif
+			}
+			END_CATCH
+			END_TRY
+		}
+	}
+#endif // VMCFG_EVAL
+	
 	Shell::Shell(MMgc::GC* gc) : AvmCore(gc)
 	{
 		systemClass = NULL;
@@ -437,15 +391,9 @@ namespace avmshell
 
 		allowDebugger = -1;	// aka "not yet set" 
 
-        #if defined(AVM_SHELL_PLATFORM_HOOKS)
-		    consoleOutputStream = AVMShellNewConsoleStream(gc);
-		#else	
 			consoleOutputStream = new (gc) ConsoleOutputStream();
-		#endif
 	
 		setConsoleStream(consoleOutputStream);
-
-		computeStackBase();
 	}
 
 #ifndef UNDER_CE
@@ -455,21 +403,12 @@ namespace avmshell
 		{
 			uint8 header[8];
 
-			#ifdef WIN32
-#ifdef UNDER_CE
-			// !!@windowsmobile untested
-			TCHAR executablePath[256];
-			VMPI_strncpy(executablePath, argv[0], sizeof(executablePath));
-#else
-			char executablePath[256];
-			GetModuleFileName(NULL, executablePath, sizeof(executablePath));
-#endif
-			#else
-			char executablePath[256];
-			VMPI_strncpy(executablePath, argv[0], sizeof(executablePath));
-			#endif
-		   
+			char* executablePath = new char[VMPI_strlen(argv[0])+1];
+			VMPI_strcpy(executablePath, argv[0]);
+
 			FileInputStream file(executablePath);
+			delete [] executablePath;
+
 			if (!file.valid())
 			{
 				return false;
@@ -544,19 +483,16 @@ namespace avmshell
 		return true;
 	}
 #endif
-#ifdef UNDER_CE
-	int Shell::main(int argc, TCHAR *argv[])
-#else
-	int Shell::main(int argc, char *argv[])
-#endif
-	{
-		bool show_mem = false;
 
+	int Shell::execute(int argc, char *argv[])
+	{
 		AvmCore::CacheSizes cacheSizes;	// defaults to unlimited
+
+		minstack = Platform::GetInstance()->getStackBase();
 
 		TRY(this, kCatchAction_ReportAsError)
 		{
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 			#ifdef AVMPLUS_SSE2_ALWAYS
 			config.sse2 = true;
@@ -583,16 +519,13 @@ namespace avmshell
 
 			int filenamesPos = -1;
 			int endFilenamePos = -1;
-#ifdef UNDER_CE
-			TCHAR *filename = NULL;
-#else
 			char *filename = NULL;
-#endif
+
 			bool do_log = false;
 #ifdef DEBUGGER
 			bool enter_debugger_on_launch = false;
 #endif
-			bool do_interactive = false;
+			bool do_repl = false;
 #ifdef AVMPLUS_VERBOSE
 			bool do_verbose = false;
 #endif
@@ -606,11 +539,9 @@ namespace avmshell
 			
 			bool nodebugger = false;
 			for (int i=1; i<argc && endFilenamePos == -1; i++) {
-#ifdef UNDER_CE
-				TCHAR *arg = argv[i];
-#else
+
 				char *arg = argv[i];
-#endif
+
 				// options available to development builds.
 				if (arg[0] == '-') 
 				{
@@ -624,7 +555,7 @@ namespace avmshell
 						}
 						#ifdef AVMPLUS_IA32
 						else if (!VMPI_strcmp(arg+2, "nosse")) {
-                            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                            #if defined FEATURE_NANOJIT
 							config.sse2 = false;
 							#endif
 						}
@@ -700,29 +631,19 @@ namespace avmshell
                         }
 						#endif
 
-	                #ifdef AVMPLUS_MIR
-						else if (!VMPI_strcmp(arg+2, "nodce")) {
-							config.dceopt = false;
-						} else if (!VMPI_strcmp(arg+2, "mem")) {
-							show_mem = true;
-						}
-                    #endif
-
-                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                    #if defined FEATURE_NANOJIT
                         #ifdef AVMPLUS_VERBOSE
 						else if (!VMPI_strcmp(arg+2, "bbgraph")) {
-							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
+							config.bbgraph = true;  // generate basic block graph (only valid with JIT)
                         }
 						#endif
                     #endif
 
-                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-						else if (!VMPI_strcmp(arg+2, "forcemir")) {
-							config.runmode = RM_jit_all;
-						} else if (!VMPI_strcmp(arg+2, "nocse")) {
+                    #if defined FEATURE_NANOJIT
+						else if (!VMPI_strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
 						}
-                        #endif
+					#endif
 
 						else if (!VMPI_strcmp(arg+2, "interp")) {
 							config.runmode = RM_interp_all;
@@ -734,29 +655,46 @@ namespace avmshell
 						cacheSizes.bindings = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 					} else if (!VMPI_strcmp(arg, "-cache_metadata")) {
 						cacheSizes.metadata = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
+					} else if (!VMPI_strcmp(arg, "-cache_methods")) {
+						cacheSizes.methods = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 					}
-                #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                #if defined FEATURE_NANOJIT
 					else if (!VMPI_strcmp(arg, "-Ojit")) {
                         config.runmode = RM_jit_all;
 					} 
 				#endif
 				#ifdef AVMPLUS_JITMAX
 					else if (!VMPI_strcmp(arg, "-jitmax")) {
-						jitmax = VMPI_atoi(argv[++i]);
-					}
+                        char* val = argv[++i];
+                        char* dash = VMPI_strchr(val,'-');
+                        if (dash) {
+                            if (dash==&val[0]) 
+                                jitmax = VMPI_atoi(&val[1]); // -n form
+                            else {
+                                int32_t hl = VMPI_strlen(dash);
+                                dash[0] = '\0'; // hammer argv ;)  - go boom?
+                                jitmin = VMPI_atoi(val); 
+                                if (hl>1)
+                                    jitmax = VMPI_atoi(&dash[1]); 
+                            }
+                        } else {                                            
+                            jitmax = VMPI_atoi(val);
+                        }
+                    }
 				#endif
 					else if (!VMPI_strcmp(arg, "-memstats")) {
-						GetGC()->gcstats = true;
+						GetGC()->GetGCHeap()->Config().gcstats = true;
+						GetGC()->GetGCHeap()->Config().autoGCStats = true;
 					} else if (!VMPI_strcmp(arg, "-memlimit")) {
 						GetGC()->GetGCHeap()->SetHeapLimit(VMPI_strtol(argv[++i], 0, 10));
 					} else if (!VMPI_strcmp(arg, "-log")) {
 						do_log = true;
 					} 
-					#ifdef AVMPLUS_INTERACTIVE
-					else if (!VMPI_strcmp(arg, "-i")) {
-						do_interactive = true;
+					#ifdef VMCFG_EVAL
+					else if (!VMPI_strcmp(arg, "-repl")) {
+						do_repl = true;
 					}
-					#endif //AVMPLUS_INTERACTIVE
+					#endif // VMCFG_EVAL
 					else if (!VMPI_strcmp(arg, "-error")) {
 						show_error = true;
 						#ifdef WIN32
@@ -811,8 +749,7 @@ namespace avmshell
 			
 			this->allowDebugger = nodebugger ? 0 : 1;
 		
-			if (!filename && !do_interactive
-
+			if (!filename && !do_repl
 #ifdef AVMPLUS_SELFTEST
 				&& !do_selftest
 #endif
@@ -824,32 +761,30 @@ namespace avmshell
 			if( do_log )
 			{
 				// open logfile based on last filename
-#ifdef UNDER_CE
-				TCHAR* dot = _tcsrchr(filename, '.');
-				if (!dot)
-					dot = filename+wcslen(filename);
+				char* lastDot = VMPI_strrchr(filename, '.');
+				if(lastDot)
+				{
+					//filename could contain '/' or '\' as their separator, look for both
+					char* lastPathSep1 = VMPI_strrchr(filename, '/');
+					char* lastPathSep2 = VMPI_strrchr(filename, '\\');
+					if(lastPathSep1 < lastPathSep2) //determine the right-most 
+						lastPathSep1 = lastPathSep2;
 
-				TCHAR* logname = new TCHAR[dot-filename+5];  // free upon exit
-				wcscpy(logname,filename);
+					//if dot is before the separator, the filename does not have an extension
+					if(lastDot < lastPathSep1)
+						lastDot = NULL;
+				}
 
-				_tcscpy(logname+(dot-filename),_T(".log"));
-				_wfreopen(logname, L"w", stdout);
-#else
-				const char* dot = VMPI_strrchr(filename, '.');
-				if (!dot)
-					dot = filename+VMPI_strlen(filename);
+				//if no extension then take the entire filename or 
+				size_t logFilenameLen = (lastDot == NULL) ? VMPI_strlen(filename) : (lastDot - filename); 
 
-				char* logname = new char[dot-filename+5];  // free upon exit
-				VMPI_strcpy(logname,filename);
+				char* logFilename = new char[logFilenameLen + 5];  // 5 bytes for ".log" + null char
+				VMPI_strncpy(logFilename,filename,logFilenameLen);
+				VMPI_strcpy(logFilename+logFilenameLen,".log");
 
-				VMPI_strcpy(logname+(dot-filename),".log");
+				Platform::GetInstance()->initializeLogging(logFilename);
 
-				printf("%s\n",filename); // but first print name to default stdout
-				FILE *f = freopen(logname, "w", stdout);
-				if (!f)
-				  printf("freopen %s failed.\n",filename);
-#endif
-				delete [] logname;
+				delete [] logFilename;
 			}
 
 			setCacheSizes(cacheSizes);
@@ -899,18 +834,7 @@ namespace avmshell
 
 			// start the 15 second timeout if applicable
 			if (config.interrupts) {
-				#ifdef WIN32
-				timeSetEvent(kScriptTimeout*1000,
-							 kScriptTimeout*1000,
-							 (LPTIMECALLBACK)TimeoutProc,
-							 (DWORD_PTR)this,
-							 TIME_ONESHOT);
-				#else
-				#ifndef AVMPLUS_ARM // TODO AVMPLUS_ARM
-				signal(SIGALRM, alarmProc);
-				alarm(kScriptTimeout);
-				#endif
-				#endif
+				Platform::GetInstance()->setTimer(kScriptTimeout, interruptTimerCallback, this);
 			}
 
 			if(endFilenamePos == -1)
@@ -943,16 +867,11 @@ namespace avmshell
 				}
 				#endif
 
-                #if defined(AVM_SHELL_PLATFORM_HOOKS)
-				    AVMShellWillBeginTest(filename);
-				#endif
-
 				FileInputStream f(filename);
-				bool isValid = f.valid();
+				bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
 				if (!isValid) {
                     console << "cannot open file: " << filename << "\n";
-					if (!do_interactive) 
-						return(1);
+					return(1);
 				}
 
 				ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
@@ -961,16 +880,25 @@ namespace avmshell
 				// parse new bytecode
 				if (isValid)
 				{
-					ScriptBuffer code = newScriptBuffer(f.available());
-					f.read(code.getBuffer(), f.available());
+					ScriptBuffer code = newScriptBuffer((size_t)f.available());
+					f.read(code.getBuffer(), (size_t)f.available());
+#ifdef VMCFG_EVAL
+					if (AbcParser::canParse(code) == 0)
+						handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
+					else {
+						// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
+						String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
+						String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
+						ScriptBuffer empty;		// With luck: allow the
+						code = empty;			//    buffer to be garbage collected
+						handleActionSource(code_string, filename_string, domainEnv, toplevel, NULL, codeContext);
+					}
+#else
 					handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
+#endif // VMCFG_EVAL
 				}
 
 				lastCodeContext = codeContext;
-
-                #if defined(AVM_SHELL_PLATFORM_HOOKS)
-				    AVMShellDidEndTest();
-				#endif
 			}
 
 			#ifdef MMGC_COUNTERS
@@ -988,215 +916,10 @@ namespace avmshell
 			console << "FreeItemCount     " << MMgc::GCAlloc::FreeItemCount << "\n";
 			#endif
 
-			#ifdef AVMPLUS_INTERACTIVE
-			if (do_interactive)
-			{
-				enum { kMaxCommandLine = 1024 };
-				char commandLine[kMaxCommandLine];
-				enum { kMaxFileName = 1024 };
-				char fileName[kMaxFileName];
-				char imports[kMaxCommandLine];
-				VMPI_strcpy(imports, " ");
-
-				// some defaults
-				addToImports(imports, "C:\\src\\farm\\main\\as\\lib\\shell.abc");
-				addToImports(imports, "C:\\src\\farm\\main\\as\\lib\\global.abc");
-
-				STARTUPINFO si;
-				PROCESS_INFORMATION pi;
-
-				while(do_interactive)
-				{
-					console << "(avmplus) ";
-					fflush(stdout);
-					fgets(commandLine, kMaxCommandLine, stdin);
-
-					commandLine[VMPI_strlen(commandLine)-1] = 0;
-
-					// build up the file that we are going to compile
-					bool compile = true;
-					bool exec = true;
-					fileName[0] = '\0';
-					if (VMPI_strstr(commandLine, ".run ") == commandLine)
-					{
-						// arg 
-						VMPI_strcpy(fileName, &commandLine[5]);
-
-						// search for .as extension
-						const char* dotAt = VMPI_strrchr(fileName, '.');
-						bool fail = true;
-						if (dotAt)
-						{
-							if (VMPI_strcmp(dotAt, ".abc") == 0)
-							{
-								compile = false;
-								fail = false;
-							}
-							else if (VMPI_strcmp(dotAt, ".as") == 0)
-							{
-								fail = false;
-							}
-						}
-
-						if (fail)
-						{
-							console << "only .as and .abc files are supported \n";
-							continue;
-						}
-					}
-					else if (VMPI_strstr(commandLine, ".import ") == commandLine)
-					{
-						// add to the import list
-						VMPI_strcpy(fileName, &commandLine[8]);
-						compile = false;
-						exec = false;
-
-						if (!addToImports(imports, fileName))
-						{
-							console << "file does not exist; not added to import list \n";
-						}
-						console << imports << "\n";
-					}
-					else if (VMPI_strstr(commandLine, ".quit") == commandLine)
-					{
-						return 0;
-					}
-					else if (commandLine[0] == '\0' ||  (VMPI_strstr(commandLine, ".help") == commandLine) )
-					{
-						console << "ActionScript source can be directly entered on the command line.\nIt will be compiled and executed once the enter key is pressed.\nThe following directives are also recognized\n" ;
-						console << ".run [f.as|f.abc]   - runs f, compiles f.as first if required\n" ;
-						console << ".import f           - add f to the -import list for compiling \n" ;
-						console << ".quit               - exits this shell \n" ;
-						console << ".help               - displays help information \n" ;
-						continue;
-					}
-					else
-					{
-						// put our command line contents in a file
-						VMPI_strcpy(fileName, "___file_for_io.as");
-						FILE* f = fopen(fileName , "w");
-						if (!f)
-						{
-							console << "i/o error \n";
-							return 1;
-						}			
-
-						fputs(commandLine, f);
-						fclose(f);
-					}
-
-					// set up for the compile if needed
-					if (compile)
-					{
-						// Set the bInheritHandle flag so pipe handles are inherited. 
-						SECURITY_ATTRIBUTES saAttr; 
-						saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
-						saAttr.bInheritHandle = TRUE; 
-						saAttr.lpSecurityDescriptor = NULL; 
-
-						HANDLE pRd, pWr;
-						CreatePipe(&pRd, &pWr, &saAttr, 64*kMaxCommandLine);
-						SetHandleInformation( pRd, HANDLE_FLAG_INHERIT, 0);  // don't inherit read portion; only allow writes from child proc
-						SetHandleInformation( GetStdHandle(STD_INPUT_HANDLE), HANDLE_FLAG_INHERIT, 0);  // don't inherit stdin 
-
-						ZeroMemory( &si, sizeof(si) );
-						si.cb = sizeof(si);
-						ZeroMemory( &pi, sizeof(pi) );
-						si.hStdError = pWr;
-						si.hStdOutput = pWr;
-						si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-						si.dwFlags = STARTF_USESTDHANDLES;
-
-						// now compile and wait
-						commandLine[0] = '\0';
-						VMPI_strcpy(commandLine, "asc.exe -debug ");
-						VMPI_strcat(commandLine, imports);
-						VMPI_strcat(commandLine, fileName);
-						DWORD err = CreateProcess(0, commandLine, 0,0,TRUE,0,0,0, &si, &pi);
-						if (err)
-						{
-							// Wait until child process exits.
-							WaitForSingleObject( pi.hProcess, 20000 );
-						}
-						else
-						{
-							console << "failed to compile err=0x";
-							console.writeHexAddr(GetLastError());
-							console << "\n";
-							exec = false;
-						}
-
-						// Close process and thread handles. 
-						CloseHandle( pi.hProcess );
-						CloseHandle( pi.hThread );
-
-						// now check the compile 
-						CloseHandle(pWr);  // Close the write end of the pipe before reading from the read end of the pipe.
-						commandLine[0] = '\0';
-						DWORD dwRead = 0; 
-						ReadFile( pRd, commandLine, kMaxCommandLine, &dwRead, NULL);
-						if (dwRead > 0) commandLine[dwRead] = '\0';
-						if ( !VMPI_strstr(commandLine, "bytes written") )
-						{
-							// failed compile						
-							console << commandLine;
-
-							// dump the rest of the message
-							for(;;)
-							{
-								if (!ReadFile( pRd, commandLine, kMaxCommandLine, &dwRead, NULL) || dwRead == 0)
-									break;
-
-								console << commandLine;
-							}
-							exec = false;
-							console << "\n";
-						}
-
-						// now run the abc
-						int afterDot = VMPI_strlen(fileName) - 2;
-						VMPI_strcpy(&fileName[afterDot], "abc");
-					}
-
-					if (exec)
-					{
-						FileInputStream fl(fileName);
-						bool isValid = fl.valid();
-						if (isValid)
-						{
-							TRY(this, kCatchAction_ReportAsError)
-							{
-								ScriptBuffer code = newScriptBuffer(fl.available());
-								fl.read(code.getBuffer(), fl.available());
-								handleActionBlock(code, 0, domainEnv, toplevel, NULL, lastCodeContext);
-							}
-							CATCH(Exception *exception)
-							{
-								#ifdef DEBUGGER
-								if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-								{
-									console << string(exception->atom) << "\n";
-								}
-								if (exception->getStackTrace()) {
-									console << exception->getStackTrace()->format(this) << '\n';
-								}
-								#else
-								// [ed] always show error, even in release mode,
-								// see bug #121382
-								console << string(exception->atom) << "\n";
-								#endif
-							}
-							END_CATCH
-							END_TRY
-						}
-						else
-						{
-							console << "can't find " << fileName << "\n";
-						}
-					}
-				}
-			}
-			#endif //AVMPLUS_INTERACTIVE
+			#ifdef VMCFG_EVAL
+			if (do_repl)
+				repl(toplevel, domainEnv);
+			#endif // VMCFG_EVAL
 		}
 		CATCH(Exception *exception)
 		{
@@ -1214,24 +937,10 @@ namespace avmshell
 			console << string(exception->atom) << "\n";
 			#endif
 
-            #if defined(AVM_SHELL_PLATFORM_HOOKS)
-			    if (AVMShellShouldExitOnException(exception))
-				{
-					exit(1);
-				}
-			#else
-                exit(1);
-			#endif	
+			Platform::GetInstance()->exit(1);
 		}
 		END_CATCH
 		END_TRY
-
-		if (show_mem)
-		{
-			MMgc::GCHeap* heap = GetGC()->GetGCHeap();
-			size_t codeSize = heap->GetCodeMemorySize();
-			console << (int)codeSize << " bytes used by the compiler\n";
-		}
 
 #ifdef AVMPLUS_WITH_JNI
 		if (Java::startup_options) delete Java::startup_options;
@@ -1239,184 +948,35 @@ namespace avmshell
 		return 0;
 	}
 
-	#ifdef AVMPLUS_INTERACTIVE
-	int Shell::addToImports(char* imports, char* addition)
+	/* static */
+	int Shell::run(int argc, char *argv[]) 
 	{
-		int worked = 0;
-		if (addition && addition[0] != '\0')
+		MMgc::GCHeapConfig conf;
+		//conf.verbose = true;
+		MMgc::GCHeap::Init(conf);
+		
+		int exitCode = 0;
 		{
-			FileInputStream fl(addition);
-			if (fl.valid())
+			
+			MMGC_ENTER;
+			if(MMGC_ENTER_STATUS == 0)
 			{
-				VMPI_strcat(imports, " ");
-				VMPI_strcat(imports, " -import \"");
-				VMPI_strcat(imports, addition);
-				VMPI_strcat(imports, "\" ");
-				worked = 1;
+				MMgc::GC *gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+				MMGC_GCENTER(gc);
+				Shell* shell = new Shell(gc);
+				exitCode = shell->execute(argc, argv);
+				delete shell;
+				delete gc;
 			}
+			else
+			{
+				// allowing control to flow below to Destroy results in tons of leak asserts
+				return OUT_OF_MEMORY;
+			}	
 		}
-		return worked;
+
+		MMgc::GCHeap::Destroy();
+	 	return exitCode;
 	}
-	#endif //AVMPLUS_INTERACTIVE
 }
 
-#ifdef UNDER_CE
-int _main(int argc, TCHAR *argv[])
-#else
-int _main(int argc, char *argv[])
-#endif
-{
-	if (!fm)
-	{
-		MMgc::GCHeap::Init();
-		MMgc::FixedMalloc::Init();
-
-		fm = MMgc::FixedMalloc::GetInstance();
-	}
-	
-	MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
-
-	// memory zero'ing check
-/*	int *foo = new int[2];
-	AvmAssert(VMPI_memcmp(foo, "\0\0\0\0\0\0\0\0\0\0\0\0", 2*sizeof(int)) == 0);
-	delete foo;*/
-
-	int exitCode = 0;
-	{
-		MMgc::GC gc(heap);
-		avmshell::shell = new avmshell::Shell(&gc);
-		exitCode = avmshell::shell->main(argc, argv);
-		delete avmshell::shell;
-	}
-
-    #if defined(AVM_SHELL_PLATFORM_HOOKS)
-	    AVMShellPlatformTeardown();
-	#endif
-
-	MMgc::FixedMalloc::Destroy();
-	MMgc::GCHeap::Destroy();
-	fm = 0;
- 	return exitCode;
-}
-
-#if defined(AVMPLUS_WIN32) && !defined(AVMPLUS_ARM)
-unsigned long CrashFilter(LPEXCEPTION_POINTERS pException, int exceptionCode)
-{
-	unsigned long result;
-	if ((result = UnhandledExceptionFilter(pException)) != EXCEPTION_EXECUTE_HANDLER)
-	{
-		return result;
-	}
-	else if (avmshell::show_error)
-	{
-		// if -error option dont do a dump 
-		return EXCEPTION_CONTINUE_SEARCH;
-	}
-
-	printf("avmplus crash: exception 0x%08lX occurred\n", exceptionCode);
-
-	typedef BOOL (WINAPI *MINIDUMP_WRITE_DUMP)(
-		HANDLE hProcess,
-		DWORD ProcessId,
-		HANDLE hFile,
-		MINIDUMP_TYPE DumpType,
-		PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-		PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-		PMINIDUMP_CALLBACK_INFORMATION CallbackParam
-	);
-
-	HMODULE hDbgHelp = LoadLibrary("dbghelp.dll");
-	MINIDUMP_WRITE_DUMP MiniDumpWriteDump_ = (MINIDUMP_WRITE_DUMP)GetProcAddress(hDbgHelp, 
-						"MiniDumpWriteDump");
-
-	if (MiniDumpWriteDump_)
-	{
-		MINIDUMP_EXCEPTION_INFORMATION  M;
-		const char DumpPath[] = "avmplusCrash.dmp";
-
-		M.ThreadId = GetCurrentThreadId();
-		M.ExceptionPointers = pException;
-		M.ClientPointers = 0;
-
-		printf("Writing minidump crash log to %s\n", DumpPath);
-
-		HANDLE hDumpFile = CreateFile(DumpPath, GENERIC_WRITE, 0, 
-							          NULL, CREATE_ALWAYS,
-								      FILE_ATTRIBUTE_NORMAL, NULL);
-
-		MiniDumpWriteDump_(GetCurrentProcess(),
-						   GetCurrentProcessId(),
-						   hDumpFile,
-						   MiniDumpNormal,
-						   (pException) ? &M : NULL, NULL, NULL);
-
-		CloseHandle(hDumpFile);
-	}
-	else
-	{
-		printf("minidump not available, no crash log written.\n");
-	}
-
-	return result;
-}
-
-int main(int argc, char *argv[])
-{
-	SetErrorMode(SEM_NOGPFAULTERRORBOX);
-	int code = 0;
-	__try
-	{
-		code = _main(argc, argv);
-	}
-	__except(CrashFilter(GetExceptionInformation(), GetExceptionCode()))
-	{
-		code = -1;
-	}
-	if (avmshell::show_error) printf("error %d", code);
-	return code;
-}
-#else
-
-#ifdef AVMPLUS_ARM
-// TODO this is a hack until we learn how to determine stack top
-// in ARM
-int StackTop;
-#endif
-
-#ifdef UNDER_CE
-int wmain(int argc, wchar *argv[])
-#else
-int main(int argc, char *argv[])
-#endif
-{
-	#ifdef AVMPLUS_ARM
-	#ifdef UNDER_CE
-	int sp;
-	StackTop = (int) &sp;
-	#else
-	int sp;
-	asm("mov %0,sp" : "=r" (sp));
-	StackTop = sp;
-	#endif
-	#endif
-
-#ifdef AVMPLUS_MACH_EXCEPTIONS
-	GenericGuard::staticInit();
-#endif
-	int code;
-	
-    #if defined(AVM_SHELL_PLATFORM_HOOKS)
-	    code = AVMShellPlatformMain(argc, argv);
-	#else
-	    code = _main(argc, argv);
-	#endif
-	
-	if (avmshell::show_error) printf("error %d", code);
-	
-#ifdef AVMPLUS_MACH_EXCEPTIONS
-	GenericGuard::staticDestroy();
-#endif	
-
-	return code;
-}
-#endif

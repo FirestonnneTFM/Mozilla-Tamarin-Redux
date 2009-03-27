@@ -51,13 +51,20 @@ namespace avmshell
 		if (!filename) {
 			toplevel()->throwArgumentError(kNullArgumentError, "filename");
 		}
+		
+		bool result = false;
+
 		StUTF8String filenameUTF8(filename);
-		FILE *fp = fopen(filenameUTF8.c_str(), "r");
-		if (fp != NULL) {
-			fclose(fp);
-			return true;
+		File* fp = Platform::GetInstance()->createFile();
+		if(fp)
+		{
+			if (fp->open(filenameUTF8.c_str(), File::OPEN_READ)) {
+				result = true;
+				fp->close();
+			}
+			Platform::GetInstance()->destroyFile(fp);
 		}
-		return false;
+		return result;
 	}
 
 	Stringp FileClass::read(Stringp filename)
@@ -69,25 +76,33 @@ namespace avmshell
 			toplevel->throwArgumentError(kNullArgumentError, "filename");
 		}
 		StUTF8String filenameUTF8(filename);
-		FILE *fp = fopen(filenameUTF8.c_str(), "r");
-		if (fp == NULL) {
+		File* fp = Platform::GetInstance()->createFile();
+		if(!fp || !fp->open(filenameUTF8.c_str(), File::OPEN_READ))
+		{
+			if(fp)
+			{
+				Platform::GetInstance()->destroyFile(fp);
+			}
+
 			toplevel->throwError(kFileOpenError, filename);
 		}
-		fseek(fp, 0L, SEEK_END);
-		long len = ftell(fp);
-		#ifdef UNDER_CE
-		fseek (fp, 0L, SEEK_SET);
-		#else
-		rewind(fp);
-		#endif
 
-		AvmCore::AllocaAutoPtr _c;
+		int64_t fileSize = fp->size();
+		if(fileSize >= (int64_t)INT32_T_MAX) //File APIs cannot handle files > 2GB
+		{
+			toplevel->throwRangeError(kOutOfRangeError, filename);
+		}
+
+		int len = (int)fileSize;
+
+		MMgc::GC::AllocaAutoPtr _c;
 		uint8_t* c = (uint8_t*)VMPI_alloca(core, _c, len+1);
 
-		len = (long)fread(c, 1, len, fp);
+		len = (int)fp->read(c, len); //need to force since the string creation functions expect an int
 		c[len] = 0;
 		
-		fclose(fp);
+		fp->close();
+		Platform::GetInstance()->destroyFile(fp);
 
 		if (len >= 3)
 		{
@@ -112,10 +127,9 @@ namespace avmshell
 			}
 		}
 
-		// newStringLatin1, NOT newStringUTF8: the latter might decide the data is invalid
-		// UTF8 format (which is quite likely) and refuse to create the string. Be sure to pass the
-		// explicit len since there might be embedded null characters.
-		return core->newStringLatin1((const char*)c, len);
+		// Use newStringUTF8() with "strict" explicitly set to false to mimick old,
+		// buggy behavior, where malformed UTF-8 sequences are stored as single characters.
+		return core->newStringUTF8((const char*)c, len, false);
 	}
 
 	void FileClass::write(Stringp filename,
@@ -130,14 +144,20 @@ namespace avmshell
 			toplevel->throwArgumentError(kNullArgumentError, "data");
 		}
 		StUTF8String filenameUTF8(filename);
-		FILE *fp = fopen(filenameUTF8.c_str(), "w");
-		if (fp == NULL) {
+		File* fp = Platform::GetInstance()->createFile();
+		if (!fp || !fp->open(filenameUTF8.c_str(), File::OPEN_WRITE)) 
+		{
+			if(fp)
+			{
+				Platform::GetInstance()->destroyFile(fp);
+			}
 			toplevel->throwError(kFileWriteError, filename);
 		}
 		StUTF8String dataUTF8(data);
-		if (fwrite(dataUTF8.c_str(), dataUTF8.length(), 1, fp) != 1) {
+		if ((int32_t)fp->write(dataUTF8.c_str(), dataUTF8.length()) != dataUTF8.length()) {
 			toplevel->throwError(kFileWriteError, filename);
 		}
-		fclose(fp);
+		fp->close();
+		Platform::GetInstance()->destroyFile(fp);
 	}
 }

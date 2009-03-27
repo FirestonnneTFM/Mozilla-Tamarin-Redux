@@ -44,13 +44,19 @@ function tak(x,y,z) {
 }
 
 var results=new Array();
-var start=new Date();
+if (CONFIG::desktop)
+    var start=new Date();
+else  // mobile
+    var start=getTimer();
 for ( var i = 3; i <= 5; i++ ) {
     results['ack'+i]=ack(3,i);
     results['fib'+(17+i)]=fib(17.0+i);
     results['tak'+i]=tak(3*i+3,2*i+2,i+1);
 }
-var totaltime=new Date()-start;
+if (CONFIG::desktop)
+    var totaltime=new Date()-start;
+else  // mobile
+    var totaltime=getTimer()-start;
 
 var expectedresults=new Array();
 expectedresults['ack3']=61;

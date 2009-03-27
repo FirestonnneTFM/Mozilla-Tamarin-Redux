@@ -54,9 +54,16 @@ package {
 	    bitwiseAndValue = bitwiseAndValue & i;
           return bitwiseAndValue;
         }
-        var start:Number=new Date();
-        var res:int=runBitopsBitwiseAnd();
-        var totaltime:Number=new Date()-start;
+        if (CONFIG::desktop) {
+            var start:Number = new Date();
+            var res:int = runBitopsBitwiseAnd();
+            var totaltime:Number = new Date() - start;
+        }
+        else { // mobile
+            var start:Number = getTimer();
+            var res:int = runBitopsBitwiseAnd();
+            var totaltime:Number = getTimer() - start;
+        }
         if (res==0)
   	  print("metric time " + totaltime);
         else

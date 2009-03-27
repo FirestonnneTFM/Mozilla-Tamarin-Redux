@@ -47,7 +47,7 @@ namespace avmplus
 	Debugger::TraceLevel	Debugger::astrace_console = Debugger::TRACE_OFF;
 	Debugger::TraceLevel	Debugger::astrace_callback = Debugger::TRACE_OFF;
 	bool					Debugger::in_trace = false;
-	uint64					Debugger::astraceStartTime = OSDep::currentTimeMillis();
+	uint64					Debugger::astraceStartTime = VMPI_getTime();
 
 	Debugger::Debugger(AvmCore *core)
 		: core(core)
@@ -164,11 +164,10 @@ namespace avmplus
 		// we didn't decide to stop due to a step, but check if we hit a breakpoint
 		if (!stop && !exited)
 		{
-			AbstractFunction* f = core->callStack->info();
-			if (f && (f->flags & AbstractFunction::ABSTRACT_METHOD) == 0) 
+			MethodInfo* f = core->callStack->info();
+			if (f && f->hasMethodBody()) 
 			{
-				MethodInfo* m = (MethodInfo*)f;
-				AbcFile* abc = m->file();
+				AbcFile* abc = f->file();
 				if (abc)
 				{
 					SourceFile* source = abc->sourceNamed( core->callStack->filename() );
@@ -235,7 +234,7 @@ namespace avmplus
 		traceMethod(env->method);
 
 		// can't debug native methods
-		if ( !(env->method->flags & MethodInfo::NATIVE) )
+		if (!env->method->isNative())
 			debugMethod(env);
 	}
 
@@ -248,7 +247,7 @@ namespace avmplus
 		in_trace = false;
 	}
 	
-	void Debugger::traceMethod(AbstractFunction* fnc, bool ignoreArgs)
+	void Debugger::traceMethod(MethodInfo* fnc, bool ignoreArgs)
 	{
 		if (in_trace) return;
 		in_trace = true;
@@ -262,7 +261,7 @@ namespace avmplus
 			if (fnc)
 			{
 				// WARNING: don't change the format of output since outside utils depend on it
-				uint64 delta = OSDep::currentTimeMillis() - astraceStartTime;
+				uint64 delta = VMPI_getTime() - astraceStartTime;
 				core->console << (uint32)(delta) << " AVMINF: MTHD ";
 				Stringp fname = fnc->getMethodName();
 				if (fname && (fname->length() > 0) )
@@ -276,10 +275,10 @@ namespace avmplus
 					core->console << traceArgumentsString();
 
 				core->console << ")";
-				if (!fnc->isFlagSet(AbstractFunction::SUGGEST_INTERP))
+				if (!fnc->suggestInterp())
 				{
 					core->console << " @ 0x";			
-					core->console.writeHexAddr( (uintptr)fnc->impl32);
+					core->console.writeHexAddr( (uintptr)fnc->impl32());
 				}
 				core->console << "\n";		
 			}
@@ -303,7 +302,7 @@ namespace avmplus
 			Stringp file = core->callStack->filename();
 
 			// WARNING: don't change the format of output since outside utils depend on it
-			uint64 delta = OSDep::currentTimeMillis() - astraceStartTime;
+			uint64 delta = VMPI_getTime() - astraceStartTime;
 			core->console << (uint32)(delta) << " AVMINF: LINE ";
 			if (file)
 				core->console << "   " << line << "\t\t " << file << "\n";
@@ -397,19 +396,17 @@ namespace avmplus
 	void Debugger::scanResources(AbcFile* file, PoolObject* pool)
 	{
 		// walk all methods 
-		int mCount = pool->methodCount;
-		for(int i=0; i<mCount; i++)
+		for(uint32_t i=0, n = pool->methodCount(); i<n; i++)
 		{
-			AbstractFunction* f = pool->methods[i];
+			MethodInfo* f = pool->getMethodInfo(i);
 			if (f->hasMethodBody())
 			{
 				// yes there is code for this method
-				MethodInfo* m = (MethodInfo*)f;
-				if (m->body_pos)
+				if (f->abc_body_pos())
 				{
 					// if body_pos is null we havent got the body yet or
 					// this is an interface method
-					scanCode(file, pool, m);
+					scanCode(file, pool, f);
 				}
 			}
 		}
@@ -421,9 +418,9 @@ namespace avmplus
 	 */
 	bool Debugger::scanCode(AbcFile* file, PoolObject* pool, MethodInfo* m)
 	{
-		const byte *abc_start = &m->pool->code()[0];
+		const byte *abc_start = &m->pool()->code()[0];
 
-		const byte *pos = m->body_pos;
+		const byte *pos = m->abc_body_pos();
 
 		m->setFile(file);
 
@@ -715,7 +712,7 @@ namespace avmplus
 		// use the method info to locate the abcfile / source 
 		if (trace->info() && trace->filename() && debugger)
 		{
-			uintptr index = (uintptr)debugger->pool2abcIndex.get(Atom((PoolObject*)trace->info()->pool));
+			uintptr index = (uintptr)debugger->pool2abcIndex.get(Atom(trace->info()->pool()));
 
 			AbcFile* abc = (AbcFile*)debugger->abcAt((int)index);
 			source = abc->sourceNamed(trace->filename());
@@ -734,7 +731,7 @@ namespace avmplus
 		bool worked = false;
 		if (trace->framep() && trace->info())
 		{
-			((MethodInfo*)trace->info())->boxLocals(trace->framep(), 0, trace->traits(), &a, 0, 1); // pull framep[0] = [this] 
+			trace->info()->boxLocals(trace->framep(), 0, trace->traits(), &a, 0, 1); // pull framep[0] = [this] 
 			worked = true;
 		}
 		else
@@ -760,7 +757,7 @@ namespace avmplus
 			{
 				// pull the args into an array -- skip [0] which is [this]
 				ar = (Atom*) debugger->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
-				MethodInfo* info = (MethodInfo*)trace->info();
+				MethodInfo* info = trace->info();
 				info->boxLocals(trace->framep(), firstArgument, trace->traits(), ar, 0, count);
 			}
 		}
@@ -783,7 +780,7 @@ namespace avmplus
 			if (count > 0 && which < count)
 			{
 				// copy the single arg over
-				MethodInfo* info = (MethodInfo*)trace->info();
+				MethodInfo* info = trace->info();
 				info->unboxLocals(&val, 0, trace->traits(), trace->framep(), firstArgument+which, 1);
 				worked = true;
 			}
@@ -808,14 +805,14 @@ namespace avmplus
 			{
 				// frame looks like [this][param0...paramN][local0...localN]
 				ar = (Atom*) debugger->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
-				MethodInfo* info = (MethodInfo*)trace->info();
+				MethodInfo* info = trace->info();
 				info->boxLocals(trace->framep(), firstLocal, trace->traits(), ar, 0, count);
 
-				// If NEED_REST or NEED_ARGUMENTS is set, and the MIR is being used, then the first
+				// If NEED_REST or NEED_ARGUMENTS is set, and the jit is being used, then the first
 				// local is actually not an atom at all -- it is an ArrayObject*.  So, we need to
-				// convert it to an atom.  (If the interpreter is being used instead of the MIR, then
+				// convert it to an atom.  (If the interpreter is being used instead of the jit, then
 				// it is stored as an atom.)
-				if (info->flags & (AbstractFunction::NEED_REST | AbstractFunction::NEED_ARGUMENTS))
+				if (info->needRestOrArguments())
 				{
 					int atomType = ar[0] & 7;
 					if (atomType == 0) // 0 is not a legal atom type, so ar[0] is not an atom
@@ -844,8 +841,8 @@ namespace avmplus
 			int count = pastLastLocal - firstLocal;
 			if (count > 0 && which < count)
 			{
-				MethodInfo* info = (MethodInfo*)trace->info();
-				if (which == 0 && (info->flags & (AbstractFunction::NEED_REST | AbstractFunction::NEED_ARGUMENTS)))
+				MethodInfo* info = trace->info();
+				if (which == 0 && info->needRestOrArguments())
 				{
 					// They are trying to modify the first local, but that is actually the special
 					// array for "...rest" or for "arguments".  That is too complicated to allow
@@ -875,8 +872,8 @@ namespace avmplus
 		*firstLocal = indexOfFirstLocal();
 		if (trace->framep() && trace->info())
 		{
-			MethodInfo* info = (MethodInfo*) trace->info();
-			*pastLastLocal = info->local_count();
+			const MethodSignature* ms = trace->info()->getMethodSignature();
+			*pastLastLocal = ms->local_count();
 		}
 		else
 		{
@@ -896,7 +893,10 @@ namespace avmplus
 		// (2) if the caller passed in too few args to a function that has some
 		//     default parameters, we want to display the args with their default
 		//     values.
-		return trace->info() ? 1 + trace->info()->param_count : 0;
+		if (!trace->info())
+			return 0;
+		MethodSignaturep ms = trace->info()->getMethodSignature();
+		return 1 + ms->param_count();
 	}
 
 }

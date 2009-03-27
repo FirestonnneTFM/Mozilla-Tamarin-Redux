@@ -120,7 +120,7 @@ void ST_mmgc_basics::test3() {
     MyGCObject *mygcobject;
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-//    printf("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
+//    AvmLog("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
 verifyPass((int)gc->GetBytesInUse()==inuse+8, "(int)gc->GetBytesInUse()==inuse+8", __FILE__, __LINE__);
     delete mygcobject;
 
@@ -131,9 +131,9 @@ void ST_mmgc_basics::test4() {
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
 verifyPass((int)gc->GetBytesInUse()>inuse, "(int)gc->GetBytesInUse()>inuse", __FILE__, __LINE__);
     delete mygcobject;
-//    printf("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
+//    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
     gc->Collect();      
-//    printf("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
+//    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
 verifyPass((int)gc->GetBytesInUse()<=inuse, "(int)gc->GetBytesInUse()<=inuse", __FILE__, __LINE__);
 
 }
@@ -152,7 +152,7 @@ verifyPass((int)fa->GetBytesInUse()==2048, "(int)fa->GetBytesInUse()==2048", __F
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
     void *data2=fa->Alloc(4096);
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data2)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data2)==fa", __FILE__, __LINE__);
-//    printf("fa->GetItemSize=%d\n",(int)fa->GetItemSize());
+//    AvmLog("fa->GetItemSize=%d\n",(int)fa->GetItemSize());
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
     fa->Free(data1);
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
@@ -165,24 +165,24 @@ void ST_mmgc_basics::test7() {
     fm=MMgc::FixedMalloc::GetInstance();
     int start=(int)fm->GetBytesInUse();
     int starttotal=(int)fm->GetTotalSize();
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     void *obj=fm->Alloc(8192);
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
 verifyPass((int)fm->GetBytesInUse()==start+8192, "(int)fm->GetBytesInUse()==start+8192", __FILE__, __LINE__);
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
 verifyPass((int)fm->GetTotalSize()==starttotal+2, "(int)fm->GetTotalSize()==starttotal+2", __FILE__, __LINE__);
     fm->Free(obj);
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     obj=fm->Calloc(1024,10);
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
 verifyPass((int)fm->GetBytesInUse()==start+1024*12, "(int)fm->GetBytesInUse()==start+1024*12", __FILE__, __LINE__);
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
 verifyPass((int)fm->GetTotalSize()==starttotal+3, "(int)fm->GetTotalSize()==starttotal+3", __FILE__, __LINE__);
     fm->Free(obj);
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
@@ -194,16 +194,15 @@ void ST_mmgc_basics::test8() {
     MMgc::GCHeap *gh=MMgc::GCHeap::GetGCHeap();
     int startfreeheap=(int)gh->GetFreeHeapSize();
 verifyPass((int)gh->GetTotalHeapSize()==128, "(int)gh->GetTotalHeapSize()==128", __FILE__, __LINE__);
-verifyPass((int)gh->GetCodeMemorySize()==0, "(int)gh->GetCodeMemorySize()==0", __FILE__, __LINE__);
-//    printf("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
+//    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
     gh->SetHeapLimit(1024);
 verifyPass((int)gh->GetTotalHeapSize()==128, "(int)gh->GetTotalHeapSize()==128", __FILE__, __LINE__);
-//    printf("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
+//    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
     gh->Alloc(1024*10,true,true);
 verifyPass((int)gh->GetTotalHeapSize()==10368, "(int)gh->GetTotalHeapSize()==10368", __FILE__, __LINE__);
-//    printf("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
+//    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
 
 }

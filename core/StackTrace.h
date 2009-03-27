@@ -87,10 +87,7 @@ namespace avmplus
 		void init(MethodEnv*				env
 					, Atom*					framep
 					, Traits**				frameTraits
-					, int					argc
-					, void*				    ap
 					, intptr_t volatile*	eip
-					, int32_t volatile*		scopeDepth
 				    , bool                  boxed
 				);
 
@@ -110,14 +107,11 @@ namespace avmplus
 		inline explicit CallStackNode(MethodEnv*				env
 										, Atom*					framep
 										, Traits**				frameTraits
-										, int					argc
-										, void*					ap
 										, intptr_t volatile*	eip
-										, int32_t volatile*		scopeDepth
 									    , bool                  boxed = false
 								)
 		{
-			init(env, framep, frameTraits, argc, ap, eip, scopeDepth, boxed);
+			init(env, framep, frameTraits, eip, boxed);
 		}
 
 		// ctor used only for Sampling (no MethodEnv)
@@ -146,7 +140,7 @@ namespace avmplus
 		
 		inline void sampleCheck() { if (m_core) m_core->sampleCheck(); }
 
-		void** FASTCALL scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
+		void** FASTCALL scopeBase(); // with JIT, array members are (ScriptObject*); with interpreter, they are (Atom).
 
 		void FASTCALL exit();
 
@@ -154,7 +148,7 @@ namespace avmplus
 		// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
 		inline MethodEnv* env() const { return m_env; }
 		// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
-		inline AbstractFunction* info() const { return m_env ? m_env->method : NULL; }
+		inline MethodInfo* info() const { return m_env ? m_env->method : NULL; }
 		inline Stringp fakename() const { return m_fakename; }
 		inline int32_t depth() const { return m_depth; }
 
@@ -162,10 +156,6 @@ namespace avmplus
 		inline Stringp filename() const { return m_filename; }
 		inline Atom* framep() const { return m_framep; }
 		inline Traits** traits() const { return m_traits; }
-		inline const uint32_t* ap() const { AvmAssert(!m_boxed); return m_ap; }
-		inline const Atom* atomv() const { AvmAssert(m_boxed); return m_atomv; }
-		inline const int32_t volatile* scopeDepth() const { return m_scopeDepth; }
-		inline int argc() const { return m_argc; }
 		inline int32_t linenum() const { return m_linenum; }
 		inline bool boxed() const { return m_boxed; }
 
@@ -192,12 +182,6 @@ namespace avmplus
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 	private:	Atom*				m_framep;		// pointer to top of AS registers
 	private:	Traits**			m_traits;		// array of traits for AS registers
-	private:	union {
-					uint32_t*		m_ap;			// unboxed args, iff boxed == false
-					Atom*			m_atomv;		// boxed args, iff boxed == true
-				};
-	private:	int32_t volatile*	m_scopeDepth;	// Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
-	private:	int32_t				m_argc;
 	private:	int32_t				m_linenum;
 	private:	bool				m_boxed;
 	// ------------------------ DATA SECTION END
@@ -222,7 +206,7 @@ namespace avmplus
 
 		struct Element
 		{
-			AbstractFunction*	m_info;			// will be null for fake CallStackNode
+			MethodInfo*			m_info;			// will be null for fake CallStackNode
 			Stringp				m_name;			// same as m_info->name (except for fake CallStackNode)
 			Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 		    int32_t				m_linenum;
@@ -243,7 +227,7 @@ namespace avmplus
 			#endif
 			}
 			// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
-			inline AbstractFunction* info() const { return m_info; }
+			inline MethodInfo* info() const { return m_info; }
 			inline Stringp infoname() const { return m_name; }
 			inline Stringp filename() const { return m_filename; }
 			inline int32_t linenum() const { return m_linenum; }

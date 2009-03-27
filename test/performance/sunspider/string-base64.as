@@ -152,7 +152,10 @@ function base64ToString(data) {
 }
 
 function runStringBase64() {
-var _sunSpiderStartDate = (new Date).getTime();
+if (CONFIG::desktop)
+    var _sunSpiderStartDate = (new Date).getTime();
+else  // mobile
+    var _sunSpiderStartDate = getTimer();
 
 var str = "";
 
@@ -173,7 +176,10 @@ for ( var i = 8192; i <= 16384; i *= 2 ) {
 toBinaryTable = null;
 
 
-var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+if (CONFIG::desktop)
+    var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+else  // mobile
+    var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

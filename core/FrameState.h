@@ -47,12 +47,9 @@ namespace avmplus
 	{
 	public:
 		Traits* traits;
-	#if defined AVMPLUS_MIR
-		OP* ins;  // spot for codegen to hang data.
-		bool stored;  // set if codegen has already stored the OP
-	#elif defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 		LIns* ins;
-	#endif //AVMPLUS_MIR
+	#endif
 		bool notNull;
 		bool isWith;
 		bool killed;
@@ -76,7 +73,7 @@ namespace avmplus
 		int withBase;
 		sintptr pc;
 		Verifier * const verifier;
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 		CodegenLabel label;
 	#endif
 		
@@ -108,7 +105,17 @@ namespace avmplus
 			return locals[i];
 		}
 
+		const Value& value(sintptr i) const
+		{
+			return locals[i];
+		}
+
 		Value& scopeValue(int i)
+		{
+			return locals[verifier->scopeBase+i];
+		}
+
+		const Value& scopeValue(int i) const
 		{
 			return locals[verifier->scopeBase+i];
 		}

@@ -40,10 +40,8 @@
 
 #include "avmplus.h"
 #include "Selftest.h"
-
-// interactive shell requires functional external compiler, not yet
-// present in Tamarin. commented out for now.
-// #define AVMPLUS_INTERACTIVE
+#include "Platform.h"
+#include "File.h"
 
 using namespace avmplus;
 
@@ -79,6 +77,9 @@ namespace avmplus
 #include "SamplerScript.h"
 #include "JavaGlue.h"
 
+#define INT32_T_MAX		0x7FFFFFFF	//max value for a 32-bit integer
+#define UINT32_T_MAX	0xFFFFFFFF	//max value for a 32-bit unsigned integer
+
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #endif
@@ -92,7 +93,12 @@ namespace avmplus
 }
 
 namespace avmshell
-{
+{ 
+	// exit codes
+	enum {
+		OUT_OF_MEMORY = 128,
+	};
+	
 	class ShellCodeContext : public CodeContext
 	{
 	  public:
@@ -108,29 +114,33 @@ namespace avmshell
 	class Shell : public AvmCore
 	{
 	public:
-		Shell(MMgc::GC *gc);
-		void usage();
-#ifdef UNDER_CE
-		int main(int argc, TCHAR *argv[]);
-#else
-		int main(int argc, char *argv[]);
-#endif
+		static int run(int argc, char *argv[]);
 
 		void interrupt(MethodEnv *env);
 		void stackOverflow(MethodEnv *env);
 
-		void initShellPool();
-		Toplevel* initShellBuiltins();
-
 		void setEnv(Toplevel *toplevel, int argc, char *argv[]);
 
+		virtual Toplevel* createToplevel(AbcEnv* abcEnv);
+		Toplevel* initShellBuiltins();
+
 		SystemClass* systemClass;
-		
-		virtual Toplevel* createToplevel(VTable *vtable);
-
-		virtual size_t getToplevelSize() const;
-
 		PoolObject* shellPool;
+
+	protected:
+		Shell(MMgc::GC *gc);
+		
+		void initShellPool();
+		void usage();
+
+		bool executeProjector(int argc, char *argv[], int& exitCode);
+
+		static void interruptTimerCallback(void* data);
+#ifdef VMCFG_EVAL
+		void repl(Toplevel* toplevel, DomainEnv* domainEnv);
+		String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
+		virtual String* readFileForEval(String* referencing_filename, String* filename);
+#endif // VMCFG_EVAL
 
 	private:
 		OutputStream *consoleOutputStream;
@@ -138,15 +148,8 @@ namespace avmshell
 		bool inStackOverflow;
 		int allowDebugger;
 
-		bool executeProjector(int argc, char *argv[], int& exitCode);
+		int execute(int argc, char *argv[]);
 		
-		void computeStackBase();
-		
-		// for interactive
-		#ifdef AVMPLUS_INTERACTIVE
-		int addToImports(char* imports, char* addition);
-		#endif //AVMPLUS_INTERACTIVE
-
 	#ifdef DEBUGGER
 	protected:
 		virtual avmplus::Debugger* createDebugger() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) DebugCLI(this) : NULL; }
@@ -159,7 +162,7 @@ namespace avmshell
 	class ShellToplevel : public Toplevel
 	{
 	public:
-		ShellToplevel(VTable* vtable, ScriptObject* delegate);
+		ShellToplevel(AbcEnv* abcEnv);
 
 		Shell* core() const {
 			return (Shell*)Toplevel::core();
@@ -174,12 +177,7 @@ namespace avmshell
 
 		ClassClosure* resolveShellClass(int class_id)
 		{
-			Traits *traits = core()->shellPool->cinits[class_id]->declaringTraits->itraits;
-			Multiname qname(traits->ns, traits->name);
-			ScriptObject *container = vtable->init->finddef(&qname);
-
-			Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
-			ClassClosure *cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
+			ClassClosure* cc = findClassInPool(class_id, core()->shellPool);
 			WBRC(core()->GetGC(), shellClasses, &shellClasses[class_id], cc);
 			return cc;
 		}

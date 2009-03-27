@@ -39,41 +39,29 @@
 #ifndef __avmplus_Coder__
 #define __avmplus_Coder__
 
-#if defined AVMPLUS_WORD_CODE
+#if defined AVMPLUS_WORD_CODE && defined FEATURE_NANOJIT
   #define FEATURE_TEEWRITER
-#else
-  #define FEATURE_NULLWRITER
 #endif
 
 namespace avmplus
 {
-	class CoderContext {
-	public:
-		AvmCore* core;
-		CoderContext (AvmCore* core)
-			: core(core) 
-		{
-		}
-	};
-
 	class CodeWriter {
-	protected:
-		CoderContext* ctx;     // the fixed state of the translator
 	public:
 
-		CodeWriter (CoderContext* ctx=NULL)
-			: ctx (ctx) {
+		CodeWriter ()
+        {
 		}
 
 		virtual ~CodeWriter () {}
-		virtual void write (FrameState* state, const byte *pc, AbcOpcode opcode) 
+		virtual void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) 
 		{ 
 			(void)state; 
 			(void)pc; 
 			(void)opcode; 
+            (void)type;
 		}
 
-		virtual void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL)
+		virtual void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
 		{
 			(void)state;
 			(void)pc; 
@@ -82,8 +70,7 @@ namespace avmplus
 			(void)type;
 		}
 
-
-		virtual void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL)
+		virtual void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
 		{
 			(void)state;
 			(void)pc;
@@ -93,9 +80,45 @@ namespace avmplus
 			(void)type;
 		}
 
-		virtual void writePrologue(FrameState* state)
+		virtual void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
+		{
+			(void)state;
+			(void)pc;
+			(void)opcode;
+			(void)opd1;
+			(void)opd2;
+			(void)type;
+		}
+
+		virtual void writeNip (FrameState* state, const byte *pc)
+		{
+			(void)state;
+			(void)pc;
+		}
+
+		virtual void writeCheckNull(FrameState* state, uint32_t index)
+        {
+            (void)state;
+            (void)index;
+        }
+
+		virtual void writeSetContext(FrameState* state, MethodInfo *f)
+        {
+			(void)state;
+			(void)f;
+        }
+
+		virtual void writeCoerce(FrameState* state, uint32_t index, Traits* type)
+		{
+			(void)state;
+            (void)index;
+			(void)type;
+		}
+
+		virtual void writePrologue(FrameState* state, const byte *pc)
 		{ 
 			(void)state; 
+            (void)pc;
 		}
 
 		virtual void writeEpilogue(FrameState* state)
@@ -103,7 +126,42 @@ namespace avmplus
 			(void)state; 
 		}
 
+		virtual void writeBlockStart(FrameState* state)
+		{ 
+			(void)state; 
+		}
 
+		virtual void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode)
+        {
+            (void)state;
+            (void)pc;
+            (void)opcode;
+        }
+
+		virtual void writeFixExceptionsAndLabels(FrameState* state, const byte *pc)
+        {
+            (void)state;
+            (void)pc;
+        }
+
+		virtual void formatOperand(PrintWriter& buffer, Value& v)
+        {
+            (void)buffer;
+            (void)&v;
+        }
+
+		// convenience functions
+		void write (FrameState* state, const byte *pc, AbcOpcode opcode) {
+			write(state, pc, opcode, NULL);
+		}
+
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1) {
+			writeOp1(state, pc, opcode, opd1, NULL);
+		}
+
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2) {
+			writeOp2(state, pc, opcode, opd1, opd2, NULL);
+		}
 	};
 
 #if defined FEATURE_TEEWRITER
@@ -112,30 +170,45 @@ namespace avmplus
 		CodeWriter* coder1;  // deleted elsewhere
 		CodeWriter* coder2;
 
-		TeeWriter (CoderContext* ctx, CodeWriter* coder1, CodeWriter* coder2);
+		TeeWriter (CodeWriter* coder1, CodeWriter* coder2);
 		~TeeWriter ();
-		void write (FrameState* state, const byte* pc, AbcOpcode opcode);
-		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
-		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writePrologue(FrameState* state);
+		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type);
+		void writeNip(FrameState* state, const byte *pc);
+		void writeCheckNull(FrameState* state, uint32_t index);
+		void writeSetContext(FrameState* state, MethodInfo *f);
+		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
+		void writePrologue(FrameState* state, const byte *pc);
 		void writeEpilogue(FrameState* state);
+		void writeBlockStart(FrameState* state);
+		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
+		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
+		void formatOperand(PrintWriter& buffer, Value& v);
 	};
 #endif // FEATURE_TEEWRITER
 
-#if defined FEATURE_NULLWRITER
 	class NullWriter : public CodeWriter {
 	public:
 		CodeWriter* coder;       // the next leg of the pipeline
 
-		NullWriter (CoderContext* ctx, CodeWriter* coder);
+		NullWriter (CodeWriter* coder);
 		~NullWriter ();
-		void write (FrameState* state, const byte* pc, AbcOpcode opcode);
-		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);
-		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writePrologue(FrameState* state);
+		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
+		void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type);
+		void writeNip(FrameState* state, const byte *pc);
+		void writeCheckNull(FrameState* state, uint32_t index);
+		void writeSetContext(FrameState* state, MethodInfo *f);
+		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
+		void writePrologue(FrameState* state, const byte *pc);
 		void writeEpilogue(FrameState* state);
+		void writeBlockStart(FrameState* state);
+		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
+		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
+		void formatOperand(PrintWriter& buffer, Value& v);
 	};
-#endif // FEATURE_NULLWRITER
-
 }
 #endif  /* __avmplus_Coder__ */

@@ -43,8 +43,8 @@ from os import path
 from math import floor
 from sys import stderr
 
-parser = OptionParser(usage="usage: %prog [--nativemapname=name] [--uniquethunks] [importfile [, importfile]...] file...")
-parser.add_option("-n", "--nativemapname", help="if using explicit maps for native classes, the name as argument")
+parser = OptionParser(usage="usage: %prog [--uniquethunks] [importfile [, importfile]...] file...")
+parser.add_option("-n", "--nativemapname", help="no longer supported")
 parser.add_option("-u", "--uniquethunks", help="generate a unique thunk for every native method (don't recycle thunks with similar signatures)")
 opts, args = parser.parse_args()
 
@@ -52,9 +52,9 @@ if not args:
 	parser.print_help()
 	exit(2)
 
-if opts.uniquethunks and opts.nativemapname:
-	raise Error("--uniquethunks cannot be used with --nativemapname")
-
+if opts.nativemapname:
+	raise Error("--nativemapname is no longer supported")
+	
 NEED_ARGUMENTS		= 0x01
 NEED_ACTIVATION		= 0x02
 NEED_REST			= 0x04
@@ -327,7 +327,6 @@ class MethodInfo(MemberInfo):
 	native_method_name = None
 	final = False
 	override = False
-	gen_method_map = False
 	receiver = None
 
 	def isNative(self):
@@ -342,7 +341,6 @@ class MethodInfo(MemberInfo):
 	def assign_names(self, traits, prefix):
 		
 		self.receiver = traits
-		self.gen_method_map = traits.ni.gen_method_map
 		
 		if not self.isNative():
 			return
@@ -382,6 +380,7 @@ class NativeInfo:
 	class_name = None
 	instance_name = None
 	gen_method_map = False
+	method_map_name = None
 	
 	def set_class(self, name):
 		if self.class_name != None:
@@ -844,9 +843,9 @@ class Abc:
 						ni.set_instance(md.attrs["instance"])
 					if md.attrs.has_key("methods"):
 						v = md.attrs["methods"]
-						if v != "auto":
-							raise Error("the only legal value for native(methods) is auto")
 						ni.gen_method_map = True
+						if v != "auto":
+							ni.method_map_name = v
 					if (ni.class_name == None) and (ni.instance_name == None):
 						raise Error("native metadata must specify (cls,instance)")
 
@@ -966,10 +965,15 @@ class AbcThunkGen:
 		out_h.println(MPL_HEADER);
 		out_c.println(MPL_HEADER);
 
+		out_h.println('')
 		out_h.println("/* machine generated file -- do not edit */");
+		out_h.println('')
+		out_c.println('')
 		out_c.println("/* machine generated file -- do not edit */");
+		out_c.println('')
 
 		out_h.println("#define AVMTHUNK_VERSION 5");
+		out_h.println('')
 		
 		out_h.println("extern const uint32_t "+name+"_abc_class_count;")
 		out_h.println("extern const uint32_t "+name+"_abc_script_count;")
@@ -982,30 +986,15 @@ class AbcThunkGen:
 		out_c.println("const uint32_t "+name+"_abc_method_count = "+str(len(abc.methods))+";");
 		out_c.println("const uint32_t "+name+"_abc_length = "+str(len(abc.data.data))+";");
 
-		if opts.nativemapname:
-			out_c.println("DECLARE_EXTERN_NATIVE_MAPS(%s)" % (opts.nativemapname));
-			out_h.println("DECLARE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
-			# this section is only needed for legacy glue code that is specifying its native maps
-			# manually; it can be eliminated someday (but does no real harm)
-			out_h.println("/* scripts */");
-			for i in range(0, len(abc.scripts)):
-				script = abc.scripts[i]
-				if script == None:
-					continue
-				# not enough info in the ABC to recover the original name (eg abcpackage_Foo_as) 
-				# so output identifiers based on the native script functions found
-				for j in range(0, len(script.tmethods)):
-					m = script.tmethods[j]
-					if (m != None) and m.isNative():
-						out_h.println("const uint32_t abcscript_"+ to_cname(m.name) + " = " + str(i) + ";") # yes, i, not j
-		else:
-			out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s)" % (name));
+		out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s)" % (name));
 		
+		out_h.println('')
 		out_h.println("/* classes */");
 		for i in range(0, len(abc.classes)):
 			c = abc.classes[i]
 			self.out_h.println("const uint32_t " + self.class_id_name(c) + " = " + str(c.class_id) + ";");
 
+		out_h.println('')
 		out_h.println("/* methods */");
 		for i in range(0, len(abc.methods)):
 			m = abc.methods[i]
@@ -1016,6 +1005,7 @@ class AbcThunkGen:
 				else:
 					# not sure if we want to expose method id's for non-native methods; emit as comments for now
 					out_h.println("/* const uint32_t "+m.native_id_name+" = "+str(m.id)+"; */");
+		out_h.println('')
 
 		unique_thunk_sigs = {}
 		for receiver,m in self.all_thunks:
@@ -1028,33 +1018,26 @@ class AbcThunkGen:
 		if opts.uniquethunks:
 			for receiver,m in self.all_thunks:
 				thunkname = m.native_id_name;
-				self.emitThunkProto(thunkname, receiver, m, False);
-				self.emitThunkBody(thunkname, receiver, m, False, True);
+				self.emitThunkProto(thunkname, receiver, m);
+				self.emitThunkBody(thunkname, receiver, m, True);
 		else:
 			for sig in unique_thunk_sigs:
 				users = unique_thunk_sigs[sig]
 				receiver = None;
 				m = None;
+				out_c.println('')
 				for native_name in users:
 					out_c.println("// "+native_name);
 					receiver = users[native_name][0];
 					m = users[native_name][1];
 				thunkname = name+"_"+sig;
-				self.emitThunkProto(thunkname, receiver, m, False);
-				if opts.nativemapname:
-					# emit both with-cookie and without-cookie versions, since we can't tell at this point which
-					# might be used for a particular method. rely on linker to strip the unused ones. 
-					self.emitThunkProto(thunkname, receiver, m, True);
+				self.emitThunkProto(thunkname, receiver, m);
 				for native_name in users:
 					# use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
 					# (sad but true, happens in some environments)
 					out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
-					if opts.nativemapname:
-						out_h.println("#define "+native_name+"_thunkc "+thunkname+"_thunkc")
 				out_h.println("")
-				self.emitThunkBody(thunkname, receiver, m, False, False);
-				if opts.nativemapname:
-					self.emitThunkBody(thunkname, receiver, m, True, False);
+				self.emitThunkBody(thunkname, receiver, m, False);
 
 		out_c.println("");
 		for i in range(0, len(abc.classes)):
@@ -1071,7 +1054,7 @@ class AbcThunkGen:
 		out_c.indent += 1
 		for i in range(0, len(abc.methods)):
 			m = abc.methods[i]
-			if m.isNative() and m.gen_method_map:
+			if m.isNative() and (m.receiver == None or m.receiver.ni.gen_method_map):
 				assert(m.native_method_name != None)
 				assert(m.native_id_name != None)
 				if m.receiver == None:
@@ -1085,7 +1068,10 @@ class AbcThunkGen:
 						nmout = "AVMTHUNK_NATIVE_METHOD_NAMESPACE"
 					else:
 						nmout = "AVMTHUNK_NATIVE_METHOD"
-					self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, m.receiver.niname, m.native_method_name))
+					method_map_name = m.receiver.niname
+					if m.receiver.ni.method_map_name != None and m.receiver.itraits == None:
+						method_map_name = m.receiver.ni.method_map_name
+					self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, method_map_name, m.native_method_name))
 		out_c.indent -= 1
 		out_c.println("AVMTHUNK_END_NATIVE_METHODS()")
 
@@ -1107,10 +1093,7 @@ class AbcThunkGen:
 		out_c.println("AVMTHUNK_END_NATIVE_TABLES()")
 
 		out_c.println("");
-		if opts.nativemapname:
-			out_c.println("DEFINE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
-		else:
-			out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s)" % (name));
+		out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s)" % (name));
 
 		out_c.println("");
 		out_c.println("/* abc */");
@@ -1131,24 +1114,21 @@ class AbcThunkGen:
 			argtraits.append(self.lookupTraits(m.paramTypes[i]))
 		return argtraits
 
-	def thunkDecl(self, name, cookie, ret):
-		cstr = ""
-		if cookie:
-			cstr = "c"
+	def thunkDecl(self, name, ret):
 		assert(ret != "AvmObject")
 		if ret != "double":
 			ret = "AvmBox"
-		decl = ret+" "+name+"_thunk"+cstr+"(AvmMethodEnv env, uint32_t argc, AvmBox* argv)"
+		decl = ret+" "+name+"_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)"
 		return decl
 
-	def emitThunkProto(self, name, receiver, m, cookie):
+	def emitThunkProto(self, name, receiver, m):
 		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
-		decl = self.thunkDecl(name, cookie, ret)
+		decl = self.thunkDecl(name, ret)
 		self.out_h.println("extern "+decl+";");
 
-	def emitThunkBody(self, name, receiver, m, cookie, directcall):
+	def emitThunkBody(self, name, receiver, m, directcall):
 		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
-		decl = self.thunkDecl(name, cookie, ret)
+		decl = self.thunkDecl(name, ret)
 
 		self.out_c.println(decl);
 		self.out_c.println("{");
@@ -1183,10 +1163,6 @@ class AbcThunkGen:
 		if directcall and argtraits[0].niname != None:
 			val = "(%s*)%s" % (argtraits[0].niname, val)
 		args.append((val, cts))
-		if cookie:
-			assert(opts.nativemapname)
-			assert(not directcall)
-			args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
 
 		for i in range(1, len(argtraits)):
 			cts = ctype_from_traits(argtraits[i], True)

@@ -44,7 +44,7 @@ namespace MMgc
 	MMGC_API void PrintStackTrace(const void *item);
 	MMGC_API const char* GetAllocationName(const void *obj);
 
-#ifdef MEMORY_PROFILER
+#ifdef MMGC_MEMORY_PROFILER
 
 #define MMGC_MEM_TAG(_x) MMgc::SetMemTag(_x)
 #define MMGC_MEM_TYPE(_x) MMgc::SetMemType(_x)
@@ -54,11 +54,6 @@ namespace MMgc
 	MMGC_API void SetMemTag(const char *memtag);
 	MMGC_API void SetMemType(const void *memtype);
 	MMGC_API void PrintStackTraceByTrace(StackTrace *trace);
-
-	// platform specific helpers
-	void GetInfoFromPC(uintptr_t pc, char *buff, int buffSize);
-	void GetFunctionName(uintptr_t pc, char *buff, int buffSize);
-	void CaptureStackTrace(uintptr_t *trace, int len, int skip);
 
 	class GCStackTraceHashtable : public GCHashtable
 	{
@@ -72,10 +67,7 @@ namespace MMgc
 	class MemoryProfiler : public GCAllocObject
 	{
 	public:
-		MemoryProfiler() : 
-				traceTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
-				stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
-				nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS) {}
+		MemoryProfiler();
 		~MemoryProfiler();
 		void Alloc(const void *item, size_t size);
 		void Free(const void *item, size_t size);
@@ -99,14 +91,14 @@ namespace MMgc
 		GCHashtable nameTable;
 	};
 
-#else // MEMORY_PROFILER
+#else // MMGC_MEMORY_PROFILER
 
 #define MMGC_MEM_TAG(_x)
 #define MMGC_MEM_TYPE(_x)
 
-#endif // !MEMORY_PROFILER
+#endif // !MMGC_MEMORY_PROFILER
 
-#ifndef MEMORY_INFO
+#ifndef MMGC_MEMORY_INFO
 
 #define GetRealPointer(_x) _x
 #define GetUserPointer(_x) _x
@@ -136,15 +128,15 @@ namespace MMgc
 	/**
 	* Given a user pointer back up to real beginning
 	*/
-	inline void *GetRealPointer(const void *item) { return (void*)((uintptr) item -  2 * sizeof(int)); }
+	inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int)); }
 
 	/**
 	* Given a user pointer back up to real beginning
 	*/
-	inline void *GetUserPointer(const void *item) { return (void*)((uintptr) item +  2 * sizeof(int)); }
+	inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int)); }
 
 
-#endif //MEMORY_INFO
+#endif //MMGC_MEMORY_INFO
 
 } // namespace MMgc
 

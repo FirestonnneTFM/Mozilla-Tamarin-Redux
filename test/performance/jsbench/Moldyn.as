@@ -21,10 +21,11 @@ var ITERS = 100;
 
     var size;
 
-    var datasizes = new Array(3);
+    var datasizes = new Array(4);
     datasizes[0] = 6;
     datasizes[1] = 8;
     datasizes[2] = 13;
+    datasizes[3] = 3;
 
     var interactions = 0;
 
@@ -549,8 +550,15 @@ class particle {
 
         }
 	}
-	var start=new Date();
-	JGFrun(0);
-	var elapsed=new Date()-start;
+    if (CONFIG::desktop) {
+        var start = new Date();
+        JGFrun(0);
+        var elapsed = new Date() - start;
+    }
+    else { // mobile
+        var start = getTimer();
+        JGFrun(3);
+        var elapsed = getTimer() - start;
+    }
 	print("metric time "+elapsed);
 

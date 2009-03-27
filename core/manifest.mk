@@ -41,12 +41,12 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/AbcEnv.cpp \
   $(curdir)/AbcGen.cpp \
   $(curdir)/AbcParser.cpp \
-  $(curdir)/AbstractFunction.cpp \
   $(curdir)/ActionBlockConstants.cpp \
   $(curdir)/ArrayClass.cpp \
   $(curdir)/ArrayObject.cpp \
   $(curdir)/AtomArray.cpp \
   $(curdir)/AvmCore.cpp \
+  $(curdir)/AvmLog.cpp \
   $(curdir)/avmplusDebugger.cpp \
   $(curdir)/avmplusHashtable.cpp \
   $(curdir)/avmplusProfiler.cpp \
@@ -55,6 +55,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/BuiltinTraits.cpp \
   $(curdir)/ClassClass.cpp \
   $(curdir)/ClassClosure.cpp \
+  $(curdir)/CodegenLIR.cpp \
   $(curdir)/Coder.cpp \
   $(curdir)/DateClass.cpp \
   $(curdir)/DateObject.cpp \
@@ -67,7 +68,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Exception.cpp \
   $(curdir)/FrameState.cpp \
   $(curdir)/FunctionClass.cpp \
-  $(curdir)/GrowableBuffer.cpp \
   $(curdir)/IntClass.cpp \
   $(curdir)/Interpreter.cpp \
   $(curdir)/MathClass.cpp \
@@ -118,15 +118,9 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(NULL)
 
 ifdef ENABLE_DEBUG
-ifeq (windows,$(TARGET_OS))
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/AvmDebugWin.cpp \
+  $(curdir)/AvmDebug.cpp \
   $(NULL)
-else
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/AvmDebugUnix.cpp \
-  $(NULL)
-endif
 endif
 
 #  $(curdir)/avmplus.cpp \

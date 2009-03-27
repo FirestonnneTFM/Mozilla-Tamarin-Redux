@@ -77,11 +77,17 @@ package {
   }
 
   function runMathSpectralNorm():int {
-  var _sunSpiderStartDate:int = (new Date).getTime();
+    if (CONFIG::desktop)
+        var _sunSpiderStartDate:int = (new Date).getTime();
+    else // mobile
+        var _sunSpiderStartDate:int = getTimer();
     for (var i:int = 6; i <= 48; i *= 2) {
       spectralnorm(i);
     }
-    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    if (CONFIG::desktop)
+        var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    else // mobile
+        var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
     return _sunSpiderInterval;
   }
   

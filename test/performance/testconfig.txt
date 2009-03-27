@@ -41,6 +41,7 @@
 # operation:
 #    skip - the test/dir is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase/dir even if the parent has been skipped
+#    largerValuesFaster - test metric larger values indicate faster execution
 
 
 sunspider/.*          , sunspider , include , sunspider testsuite
@@ -54,6 +55,20 @@ canaries/.*           , canaries  , include , canaries testsuite
 sunspider/.*          , misc    , skip  , skip sunspider
 jsbench/.*            , misc    , skip  , skip jsbench
 v8/.*                 , misc    , skip  , skip v8
+
+misc/.*               , miscdir    , include  , misc testsuite
+
+## misc-mobile : required since the canaries tests require access to additional abc files which will not be on the device
+sunspider/.*          , misc-mobile    , skip  , skip sunspider
+sunspider/.*          , misc-mobile    , skip  , skip sunspider
+jsbench/.*            , misc-mobile    , skip  , skip jsbench
+v8/.*                 , misc-mobile    , skip  , skip v8
+canaries/.*           , misc-mobile    , skip  , skip canaries as they require additional files to run which will not be on the device
+.*/canaries/.*        , misc-mobile    , skip  , skip canaries as they require additional files to run which will not be on the device
+
+## sunspider-mobile : required because controlflow-recursive overflows the stack https://bugzilla.mozilla.org/show_bug.cgi?id=458055
+sunspider/.*                , sunspider-mobile , include , sunspider testsuite
+.*/controlflow-recursive.*  , sunspider-mobile , skip , sunspider testsuite
 
 jsbench/Search.as               ,       .*              ,       skip    ,       skip test runs too long and times out buildbot
 .*util.*                        ,       .*              ,       skip    ,       ship internal files
@@ -71,3 +86,6 @@ v8/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_bu
 v8/typed/base.as,   .*, skip, included by test files
 v8/typed/run.as ,   .*, skip, file used to run entire suite at once
 v8/typed/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_bug.cgi?id=464134
+
+# v8 tests: larger values are faster
+v8/.*           ,  .*  , largerValuesFaster, reports v8 metric: http://v8.googlecode.com/svn/data/benchmarks/v3/run.html

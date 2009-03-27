@@ -52,9 +52,9 @@ namespace avmplus
 	#define kAvmThunkNull		nullObjectAtom
 	#define kAvmThunkUndefined	undefinedAtom
 
-	#define kAvmThunkInfinity		(MathUtils::infinity())
-	#define kAvmThunkNegInfinity	(MathUtils::neg_infinity())
-	#define kAvmThunkNaN			(MathUtils::nan())
+	#define kAvmThunkInfinity		(MathUtils::kInfinity)
+	#define kAvmThunkNegInfinity	(MathUtils::kNegInfinity)
+	#define kAvmThunkNaN			(MathUtils::kNaN)
 	
 	typedef AvmObject		AvmRetType_AvmObject;
 	typedef bool			AvmRetType_AvmBool32;	// bools are passed in as int32, but returned as bool, for historic reasons
@@ -75,7 +75,7 @@ namespace avmplus
 
 	typedef void (AvmObjectT::*AvmThunkNativeMethodHandler)();
 	typedef void (*AvmThunkNativeFunctionHandler)(AvmObject obj);
-	
+
 	const uintptr_t kUnboxMask = ~uintptr_t(7);
 	#define AvmThunkUnbox_AvmReceiver(t,r)	((t)(uintptr_t(r) & kUnboxMask))
 	#define AvmThunkUnbox_AvmObject(r)		((ScriptObject*)(r))
@@ -153,14 +153,10 @@ namespace avmplus
 
 	#define AvmThunkCoerce_AvmString_AvmBox(v)	((v) ? (v)->atom() : nullStringAtom)
 
-	#define AvmThunkConstant_AvmString(v)		(env->method->pool->cpool_string[v])
+	#define AvmThunkConstant_AvmString(v)		(env->method->pool()->cpool_string[v])
 	
-	#define AVMTHUNK_GET_METHOD_HANDLER(env)	(static_cast<NativeMethod*>((env)->method)->handler.method)
-	#define AVMTHUNK_GET_FUNCTION_HANDLER(env)	(static_cast<NativeMethod*>((env)->method)->handler.function)
-
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-	#define AVMTHUNK_GET_COOKIE(env)	(static_cast<NativeMethod*>((env)->method)->cookie)
-#endif
+	#define AVMTHUNK_GET_METHOD_HANDLER(env)	((env)->method->handler_method())
+	#define AVMTHUNK_GET_FUNCTION_HANDLER(env)	((env)->method->handler_function())
 
 	union AvmThunkNativeHandler
 	{
@@ -176,19 +172,12 @@ namespace avmplus
 #ifndef AVMPLUS_NO_STATIC_POINTERS
 		int32_t method_id;
 #endif
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-		int32_t cookie;
-		int32_t flags;
-#endif
 	};
 
 	struct NativeClassInfo
 	{
 	public:
 		CreateClassClosureProc createClassClosure;
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-		const NativeMethodInfo* nativeMap;
-#endif
 #ifndef AVMPLUS_NO_STATIC_POINTERS
 		int32_t class_id;
 #endif
@@ -196,28 +185,6 @@ namespace avmplus
 		uint32_t sizeofInstance;
 	};
 
-
-	class NativeMethod : public AbstractFunction
-	{
-	public:
-		NativeMethod(int _method_id, AvmThunkNativeThunker thunker, AvmThunkNativeHandler handler);
-		virtual ~NativeMethod() {}
-		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
-#ifdef DEBUGGER
-		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#endif
-		virtual void verify(Toplevel* toplevel);
-
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		AvmThunkNativeThunker thunker;
-		AvmThunkNativeHandler handler;
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-		int32_t cookie;
-#endif
-	// ------------------------ DATA SECTION END
-	};
 
 	// ---------------
 
@@ -232,9 +199,9 @@ namespace avmplus
 
 		~NativeInitializer();
 
-		PoolObject* parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes = NULL);
+		PoolObject* parseBuiltinABC(Domain* domain, const List<Stringp, LIST_RCObjects>* includes = NULL);
 
-		NativeMethod* newNativeMethod(uint32_t i) const;
+		const NativeMethodInfo* getNativeInfo(uint32_t i) const { return get_method(i); }
 	
 		#ifdef AVMPLUS_NO_STATIC_POINTERS
 			typedef void (*FillInProc)(NativeMethodInfo* m, NativeClassInfo* c);
@@ -275,7 +242,7 @@ namespace avmplus
 		{ return new (cvtable->gc(), cvtable->getExtraSize()) CLS(cvtable); } 
 
 	#define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME) \
-		extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes);
+		extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain, const List<Stringp, LIST_RCObjects>* includes);
 
 #ifdef AVMPLUS_NO_STATIC_POINTERS
 
@@ -320,14 +287,14 @@ namespace avmplus
 	#define AVMTHUNK_END_NATIVE_CLASSES() 
 
 	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
-		PoolObject* initBuiltinABC_##NAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes) { \
+		PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain, const List<Stringp, LIST_RCObjects>* includes) { \
 			NativeInitializer ninit(core, \
 				avmplus::NativeID::NAME##_abc_data, \
 				avmplus::NativeID::NAME##_abc_length, \
 				avmplus::NativeID::NAME##_abc_method_count, \
 				avmplus::NativeID::NAME##_abc_class_count); \
 			ninit.fillIn(fillIn_##NAME); \
-			return ninit.parseBuiltinABC(includes); \
+			return ninit.parseBuiltinABC(domain, includes); \
 		}
 
 #else
@@ -340,14 +307,8 @@ namespace avmplus
 	#define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME) \
 		static const NativeMethodInfo NAME##_methodEntries[] = {
 			
-	#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-		#define _EXTRA_METHOD(COOKIE,FLAGS) ,COOKIE,FLAGS
-	#else
-		#define _EXTRA_METHOD(COOKIE,FLAGS) 
-	#endif
-
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-		{ { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID _EXTRA_METHOD(0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS) },
+		{ { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 
 	#define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
@@ -369,30 +330,24 @@ namespace avmplus
 	}
 
 	#define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
-		{ { _to_method_handler(reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL)) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID _EXTRA_METHOD(0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS) },
+		{ { _to_method_handler(reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL)) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 
 	#define AVMTHUNK_END_NATIVE_METHODS() \
-		{ { NULL }, NULL, -1 _EXTRA_METHOD(0,0) } };
+		{ { NULL }, NULL, -1 } };
 
 	// ---------------
 
 	#define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
 		const NativeClassInfo NAME##_classEntries[] = {
 
-	#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-		#define _EXTRA_CLASS(MAP) MAP,
-	#else
-		#define _EXTRA_CLASS(MAP) 
-	#endif
-
 	#define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, INST) \
-		{ (CreateClassClosureProc)CLS##_createClassClosure, _EXTRA_CLASS(NULL) avmplus::NativeID::CLSID, sizeof(CLS), sizeof(INST) },
+		{ (CreateClassClosureProc)CLS##_createClassClosure, avmplus::NativeID::CLSID, sizeof(CLS), sizeof(INST) },
 
 	#define AVMTHUNK_END_NATIVE_CLASSES() \
-		{ NULL, _EXTRA_CLASS(NULL) -1, 0, 0 } };
+		{ NULL, -1, 0, 0 } };
 
 	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
-		PoolObject* initBuiltinABC_##NAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes) { \
+		PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain, const List<Stringp, LIST_RCObjects>* includes) { \
 			NativeInitializer ninit(core, \
 				avmplus::NativeID::NAME##_abc_data, \
 				avmplus::NativeID::NAME##_abc_length, \
@@ -400,83 +355,16 @@ namespace avmplus
 				avmplus::NativeID::NAME##_abc_class_count); \
 			ninit.fillInClasses(NAME##_classEntries); \
 			ninit.fillInMethods(NAME##_methodEntries); \
-			return ninit.parseBuiltinABC(includes); \
+			return ninit.parseBuiltinABC(domain, includes); \
 		}
 
 #endif // AVMPLUS_NO_STATIC_POINTERS
 
-	#define AVM_INIT_BUILTIN_ABC(MAPNAME, CORE, INCLUDES) \
-		avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (INCLUDES))
+	#define AVM_INIT_BUILTIN_ABC_IN_DOMAIN(MAPNAME, CORE, DOMAIN) \
+		avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (DOMAIN), NULL)
 
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-
-	#ifdef AVMPLUS_NO_STATIC_POINTERS
-		#error "AVMPLUS_LEGACY_NATIVE_MAPS cannot be used in conjunction with AVMPLUS_NO_STATIC_POINTERS"
-	#endif
-
-	#define DECLARE_NATIVE_CLASSES()			/* nothing */
-
-	#define BEGIN_NATIVE_CLASSES(CLS) \
-		const NativeClassInfo CLS##_classEntries[] = {
-
-	#define NATIVE_CLASS(CLSID, CLS, INST) \
-		{ (CreateClassClosureProc)CLS::createClassClosure, CLS::natives, avmplus::NativeID::CLSID, sizeof(CLS), sizeof(INST) },
-
-	#define END_NATIVE_CLASSES() \
-		{ NULL, NULL, -1, 0, 0 } };
-
-	#define BEGIN_NATIVE_MAP(CLS) \
-		/*static*/ const NativeMethodInfo CLS::natives[] = {
-		
-	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
-		reinterpret_cast<AvmThunkNativeMethodHandler>((void(CLS::*)())(PTR))
-
-	#define _NATIVE_METHOD(METHID, IMPL, fl) \
-		{ _NATIVE_METHOD_CAST_PTR(ScriptObject, &IMPL), (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID, 0, fl },
-
-	#define _NATIVE_METHOD1(METHID, IMPL, fl, cookie) \
-		{ _NATIVE_METHOD_CAST_PTR(ScriptObject, &IMPL), (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunkc, avmplus::NativeID::METHID, cookie, fl | AbstractFunction::NATIVE_COOKIE },
-
-	#define NATIVE_METHOD(METHID, IMPL) \
-		_NATIVE_METHOD(METHID, IMPL, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS)
-		
-	#define NATIVE_METHOD_FLAGS(METHID, IMPL, fl) \
-		_NATIVE_METHOD(METHID, IMPL, fl)
-
-	#define NATIVE_METHOD1(METHID, IMPL, cookie) \
-		_NATIVE_METHOD1(METHID, IMPL, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS, cookie)
-		
-	#define NATIVE_METHOD1_FLAGS(METHID, IMPL, cookie, fl) \
-		_NATIVE_METHOD1(METHID, IMPL, fl, cookie)
-
-	#define END_NATIVE_MAP() \
-		{ NULL, NULL, -1, 0, 0 } };
-
-	#define DECLARE_NATIVE_MAP(_Class) \
-		static ClassClosure* createClassClosure(VTable* cvtable) \
-		{ return new (cvtable->gc(), cvtable->getExtraSize()) _Class(cvtable); } \
-		static const NativeMethodInfo natives[];
-
-	#define DECLARE_EXTERN_NATIVE_MAPS(MAPNAME) \
-		extern const NativeClassInfo MAPNAME##_classEntries[]; 
-
-	#define DECLARE_NATIVE_INITIALIZER(NAME, MAPNAME) \
-		extern PoolObject* initBuiltinABC_##MAPNAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes);
-
-	#define DEFINE_NATIVE_INITIALIZER(NAME, MAPNAME) \
-		PoolObject* initBuiltinABC_##MAPNAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes) { \
-			NativeInitializer ninit(core, \
-				avmplus::NativeID::NAME##_abc_data, \
-				avmplus::NativeID::NAME##_abc_length, \
-				avmplus::NativeID::NAME##_abc_method_count, \
-				avmplus::NativeID::NAME##_abc_class_count); \
-			ninit.fillInClasses(MAPNAME##_classEntries); \
-			ninit.fillInClasses(NAME##_classEntries); \
-			ninit.fillInMethods(NAME##_methodEntries); \
-			return ninit.parseBuiltinABC(includes); \
-		}
-
-#endif // AVMPLUS_LEGACY_NATIVE_MAPS
+	#define AVM_INIT_BUILTIN_ABC(MAPNAME, CORE) \
+		avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (CORE)->builtinDomain, NULL)
 
 }	
 

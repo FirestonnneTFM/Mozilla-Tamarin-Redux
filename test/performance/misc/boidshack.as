@@ -691,10 +691,17 @@ dynamic class Boids
 
 
 var numFish = 500;
-var frames = 20;
 var boids = new Boids(numFish);
 
-var t:Number = new Date();
+if (CONFIG::desktop){
+    var frames = 20;
+    var t:Number = new Date();
+} 
+else {// mobile
+    var frames = 5;
+    var t:int = getTimer();
+}
+
 for (var i=0; i < frames; i++)
 {
     for (var j=0; j < numFish; j++)
@@ -703,6 +710,11 @@ for (var i=0; i < frames; i++)
     }
 }
 
-t = new Date() - t;
+
+if (CONFIG::desktop)
+    t = new Date() - t;
+else // mobile
+    t = getTimer() - t;
+
 print("metric time "+t);
 

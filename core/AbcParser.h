@@ -66,9 +66,16 @@ namespace avmplus
 			const NativeInitializer* natives,
 			const List<Stringp>* keepVersions = NULL);
 
+		/** return 0 iff the code starts with a known magic number,
+		  * otherwise an appropriate error code.
+		  *
+		  * Store the magic number in *version if version != NULL
+		  */
+		static int canParse(ScriptBuffer code, int* version = NULL);
+
 	protected:
 		PoolObject* parse();
-		AbstractFunction* resolveMethodInfo(uint32 index) const;
+		MethodInfo* resolveMethodInfo(uint32 index) const;
 
 		#ifdef AVMPLUS_VERBOSE
 		void parseTypeName(const byte* &p, Multiname& m) const;
@@ -90,7 +97,7 @@ namespace avmplus
 							Traits* base, 
 							Namespacep ns, 
 							Stringp name, 
-							AbstractFunction* script, 
+							MethodInfo* script, 
 							TraitsPosPtr traitsPos,
 							TraitsPosType posType, 
 							Namespacep protectedNamespace);
@@ -98,7 +105,7 @@ namespace avmplus
 		/**
 		 * add script to VM-wide table
 		 */
-		void addNamedScript(Namespacep ns, Stringp name, AbstractFunction* script);
+		void addNamedScript(Namespacep ns, Stringp name, MethodInfo* script);
 
 		/**
 		 * Adds traits to the VM-wide traits table, for types
@@ -121,10 +128,8 @@ namespace avmplus
          */
 		int readU16(const byte* p) const
 		{
-#ifdef SAFE_PARSE
 			if (p < abcStart || p+1 >= abcEnd)
 				toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
 			return p[0] | p[1]<<8;
 		}
 
@@ -139,7 +144,6 @@ namespace avmplus
          */
 		int readS32(const byte *&p) const
 		{
-#ifdef SAFE_PARSE
 			// We have added kBufferPadding bytes to the end of the main swf buffer.
 			// Why?  Here we can read from 1 to 5 bytes.  If we were to
 			// put the required safety checks at each byte read, we would slow
@@ -147,7 +151,6 @@ namespace avmplus
 			// top of this function is necessary. (we will read on into our own memory)
 		    if ( p < abcStart || p >= abcEnd )
 				toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
 
 			int result = p[0];
 			if (!(result & 0x00000080))
@@ -197,9 +200,6 @@ namespace avmplus
 		const List<Stringp>*		keepVersions;
 #ifdef AVMPLUS_VERBOSE
 		Stringp 					kVerboseVerify;
-#endif
-#ifdef FEATURE_BUFFER_GUARD // no Carbon
-		BufferGuard*				guard;
 #endif
 		int32_t						version;
 		uint32_t					classCount;

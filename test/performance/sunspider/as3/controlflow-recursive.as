@@ -44,13 +44,21 @@ package {
 	}
 
     var results:Array=new Array();
-    var start:Number=new Date();
+    
+    if (CONFIG::desktop) 
+        var start:Number = new Date();
+    else // mobile
+        var start:int = getTimer();
     for ( var i:int = 3; i <= 5; i++ ) {
         results['ack'+i]=ack(3,i);
         results['fib'+(17+i)]=fib(17.0+i);
         results['tak'+i]=tak(3*i+3,2*i+2,i+1);
     }
-    var totaltime:Number=new Date()-start;
+    if (CONFIG::desktop) 
+        var totaltime:Number = new Date() - start;
+    else // mobile
+        var totaltime:int = getTimer() - start;
+    
 
     var expectedresults:Array=new Array();
     expectedresults['ack3']=61;

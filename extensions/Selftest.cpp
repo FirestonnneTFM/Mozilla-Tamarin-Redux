@@ -144,39 +144,39 @@ namespace avmplus
 	
     void SelftestRunner::logStart()
     {
-		fprintf(stderr, "['start', '%s', '%s']\n", test_component, test_category);
+		AvmLog("['start', '%s', '%s']\n", test_component, test_category);
     }
 	
     void SelftestRunner::logEnd()
     {
-		fprintf(stderr, "['end', '%s', '%s']\n", test_component, test_category);
+		AvmLog("['end', '%s', '%s']\n", test_component, test_category);
     }
 	
     void SelftestRunner::logTest()
     {
-		fprintf(stderr, "['test', '%s', '%s', '%s']\n", test_component, test_category, test_name);
+		AvmLog("['test', '%s', '%s', '%s']\n", test_component, test_category, test_name);
     }
 	
     void SelftestRunner::logPass()
     {
-		fprintf(stderr, "['pass', '%s', '%s', '%s']\n", test_component, test_category, test_name);
+		AvmLog("['pass', '%s', '%s', '%s']\n", test_component, test_category, test_name);
     }
 	
     void SelftestRunner::logFailure(const char* text, const char* file, int line)
     {
-		fprintf(stderr, "['failure', '%s', '%s', '%s', '%s', '%s', %d]\n",
+		AvmLog("['failure', '%s', '%s', '%s', '%s', '%s', %d]\n",
 				test_component, test_category, test_name,
 				text, file, line );
     }
 	
     void SelftestRunner::logException()
     {
-		fprintf(stderr, "['exception', '%s', '%s', '%s']\n", test_component, test_category, test_name);
+		AvmLog("['exception', '%s', '%s', '%s']\n", test_component, test_category, test_name);
     }
 	
     void SelftestRunner::logCrash()
     {
-		fprintf(stderr, "['crash', '%s', '%s']\n", test_component, test_category);
+		AvmLog("['crash', '%s', '%s']\n", test_component, test_category);
     }
 	
     void SelftestRunner::createSelftestClasses()

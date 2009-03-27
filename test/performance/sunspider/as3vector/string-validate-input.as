@@ -112,9 +112,17 @@ function addResult(r:String):void
 }
 
 function runStringValidateInput():int {
-  var _sunSpiderStartDate:int = (new Date).getTime();
-  doTest();
-    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    if (CONFIG::desktop) {
+        var _sunSpiderStartDate:int = (new Date).getTime();
+        doTest();
+        var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    }
+    else { // mobile
+        var _sunSpiderStartDate:int = getTimer();
+        doTest();
+        var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
+    }
+    
     // verify test output - nothing concrete to verify, so make sure output length is correct.
     if (endResult.length != 462000) {
         print('Test verification failed.  Expected: 462000 Got: '+endResult.length);

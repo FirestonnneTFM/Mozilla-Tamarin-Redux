@@ -54,9 +54,9 @@ namespace avmshell
 		// todo note this is currently routed to the performance counter
 		// for benchmark purposes.
 		#ifdef PERFORMANCE_GETTIMER
-		initialTime = MMgc::GC::getPerformanceCounter();
+		initialTime = VMPI_getPerformanceCounter();
 		#else
-		initialTime = OSDep::currentTimeMillis();		
+		initialTime = VMPI_getTime();		
 		#endif // PERFORMANCE_GETTIMER
 
 	}
@@ -68,7 +68,7 @@ namespace avmshell
 
 	void SystemClass::exit(int status)
 	{
-		::exit(status);
+		Platform::GetInstance()->exit(status);
 	}
 
 	int SystemClass::exec(Stringp command)
@@ -153,21 +153,17 @@ namespace avmshell
 	unsigned SystemClass::getTimer()
 	{
 #ifdef PERFORMANCE_GETTIMER
-		double time = ((double) (MMgc::GC::getPerformanceCounter() - initialTime) * 1000.0 /
-					   (double)MMgc::GC::getPerformanceFrequency());
+		double time = ((double) (VMPI_getPerformanceCounter() - initialTime) * 1000.0 /
+					   (double)VMPI_getPerformanceFrequency());
 		return (uint32)time;
 #else
-		return (uint32)(OSDep::currentTimeMillis() - initialTime);
+		return (uint32)(VMPI_getTime() - initialTime);
 #endif /* PERFORMANCE_GETTIMER */
 
     }
 
 	int SystemClass::user_argc;
-#ifdef UNDER_CE
-	TCHAR **SystemClass::user_argv;
-#else
 	char **SystemClass::user_argv;
-#endif
 
 	ArrayObject * SystemClass::getArgv()
 	{
@@ -177,11 +173,7 @@ namespace avmshell
 
 		ArrayObject *array = toplevel->arrayClass->newArray();
 		for(int i=0; i<user_argc;i++)
-#ifdef UNDER_CE
-			array->setUintProperty(i, core->newStringUTF16(user_argv[i])->atom());
-#else
-			array->setUintProperty(i, core->newStringLatin1(user_argv[i])->atom());
-#endif
+			array->setUintProperty(i, core->newStringUTF8(user_argv[i])->atom());
 
 		return array;
 	}

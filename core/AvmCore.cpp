@@ -39,10 +39,6 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
-#ifdef AVMPLUS_MIR
-#include "CodegenMIR.h"
-#endif
-
 //GCC only allows intrinsics if sse2 is enabled
 #if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
@@ -61,10 +57,11 @@ namespace avmplus
 		}
 		#endif 
 
-		//printf("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
+		//AvmLog("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
 
  		m_tbCache->resize(cs.bindings);	
  		m_tmCache->resize(cs.metadata);
+ 		m_msCache->resize(cs.methods);
 	}
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
@@ -81,11 +78,9 @@ namespace avmplus
 		passAllExceptionsToDebugger(false),
 #endif
 		gc(g), 
- 		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
- 		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
-#ifdef AVMPLUS_MIR
-		mirBuffers(g, 4), 
-#endif
+ 		m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g)),	
+ 		m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g)),	
+ 		m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g)),	
 		gcInterface(g)
 #ifdef DEBUGGER
 		, _sampler(NULL)
@@ -137,12 +132,8 @@ namespace avmplus
 			config.verbose_exits = false;
 		#endif
 
-		#ifdef AVMPLUS_MIR
-			config.dceopt = true;
-        #endif
-
-        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			// jit flag forces use of MIR/LIR instead of interpreter
+        #if defined FEATURE_NANOJIT
+			// jit flag forces use of jit-compiler instead of interpreter
     	    config.runmode = RM_mixed;
 			config.cseopt = true;
 
@@ -153,7 +144,7 @@ namespace avmplus
 		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;
 			#endif
-		#endif // AVMPLUS_MIR || FEATURE_NANOJIT
+		#endif // FEATURE_NANOJIT
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();
@@ -170,7 +161,6 @@ namespace avmplus
 		builtinDomain      = NULL;
 
 		GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
-		allocaInit();
 
 		minstack           = 0;
 
@@ -221,11 +211,10 @@ namespace avmplus
 
 		kuri = internConstantStringLatin1("uri");
 		kprefix = internConstantStringLatin1("prefix");
-		kNaN = doubleToAtom(MathUtils::nan());
+		kNaN = doubleToAtom(MathUtils::kNaN);
 		kNeedsDxns = internConstantStringLatin1("NeedsDxns");
 		kAsterisk = internConstantStringLatin1("*");
 		kVersion = internConstantStringLatin1("Version");
-		kVector = internConstantStringLatin1("Vector.<");
 
 #if VMCFG_METHOD_NAMES
 		kanonymousFunc = newConstantStringLatin1("<anonymous>");
@@ -252,10 +241,6 @@ namespace avmplus
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
 
-		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
-		codegenMethodNames = CodegenMIR::initMethodNames(this);
-		#endif
-
 		#ifdef AVMPLUS_WITH_JNI
 		java = NULL;
 		#endif
@@ -277,20 +262,11 @@ namespace avmplus
 			gc->SetGCContextVariable(GC::GCV_AVMCORE, NULL);
 		}
 
-		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
-		delete codegenMethodNames;
-		#endif
-
 		strings = NULL;
 
 		delete [] namespaces;
 		namespaces = NULL;
 
-#ifdef AVMPLUS_MIR
-		// free all the mir buffers
-		while(mirBuffers.size() > 0)
-			delete mirBuffers.removeFirst();
-#endif
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		AvmAssert(g_tmcore == this);
 		g_tmcore = NULL;
@@ -298,7 +274,6 @@ namespace avmplus
 #ifdef SUPERWORD_PROFILING
 		WordcodeTranslator::swprofStop();
 #endif
-		allocaShutdown();
 #ifdef DEBUGGER
 		delete _profiler;
 		_profiler = NULL;
@@ -314,17 +289,17 @@ namespace avmplus
 	
 		builtinDomain = new (GetGC()) Domain(this, NULL);
 		
-		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this, NULL);
+		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this);
 
 		// whack the the non-interruptable bit on all builtin functions
-		for(int i=0, size=builtinPool->methods.size(); i<size; i++)
-			builtinPool->methods[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
+		for(int i=0, size=builtinPool->methodCount(); i<size; i++)
+			builtinPool->getMethodInfo(i)->makeNonInterruptible();
 
-		for(int i=0, size=builtinPool->cinits.size(); i<size; i++)
-			builtinPool->cinits[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
+		for(int i=0, size=builtinPool->classCount(); i<size; i++)
+			builtinPool->getClassTraits(i)->init->makeNonInterruptible();
 
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
-			builtinPool->scripts[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
+			builtinPool->scripts[i]->makeNonInterruptible();
 
 #ifdef DEBUGGER
 		// sampling can begin now, requires builtinPool
@@ -343,6 +318,20 @@ namespace avmplus
 		return toplevel;
 	}
 
+	static ScriptEnv* initScript(AvmCore* core, Toplevel* toplevel, AbcEnv* abcEnv, MethodInfo* script)
+	{
+		Traits* scriptTraits = script->declaringTraits();
+		// [ed] 3/24/06 why do we really care if a script is dynamic or not?
+		//AvmAssert(scriptTraits->needsHashtable);
+
+		ScopeChain* scriptScope = ScopeChain::create(core->GetGC(), scriptTraits->scope, NULL, core->newNamespace(core->kEmptyString));
+		VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, scriptScope, abcEnv, toplevel);
+		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
+		scriptVTable->init = scriptEnv;
+		core->exportDefs(scriptTraits, scriptEnv);
+		return scriptEnv;
+	}
+	
 	ScriptEnv* AvmCore::prepareActionPool(PoolObject* pool,
 										  DomainEnv* domainEnv,
 										  Toplevel*& toplevel,
@@ -363,74 +352,35 @@ namespace avmplus
 		}
 
 		AbcEnv* abcEnv = new (GetGC(), AbcEnv::calcExtra(pool)) AbcEnv(pool, domainEnv, codeContext);
+		
+		ScriptEnv* main = NULL;
 
-		// entry point is the last script in the file
-		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits;
-
-		// ISSUE can we just make this the public namespace?
-		ScopeChain* emptyScope = ScopeChain::create(GetGC(), mainTraits->scope, NULL, newNamespace(kEmptyString));
-
-		VTable* object_vtable;
 		if (toplevel == NULL)
 		{
-			// create a temp object vtable to use, since the real one isn't created yet
-			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
-			// of Object and Class have the right scope.
-			object_vtable = newVTable(traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
-			object_vtable->resolveSignatures();
-			mainTraits->resetSizeof(uint32_t(getToplevelSize()));
+			toplevel = createToplevel(abcEnv);
+
+			// save toplevel since it was initially null 
+			domainEnv->setToplevel(toplevel);
+			
+			main = toplevel->mainEntryPoint();
 		}
 		else
 		{
-			object_vtable = toplevel->object_vtable;
+			// some code relies on the final script being initialized first, so we
+			// must continue that behavior
+			main = initScript(this, toplevel, abcEnv, pool->scripts[pool->scriptCount-1]);
 		}
 
-		// global objects are subclasses of Object
-		VTable* mainVTable = newVTable(mainTraits, object_vtable, emptyScope, abcEnv, toplevel);
-		ScriptEnv* main = new (GetGC()) ScriptEnv(mainTraits->init, mainVTable);
-		mainVTable->init = main;
-
-		if (toplevel == NULL)
-		{
-			mainVTable->resolveSignatures();
-			main->global = toplevel = createToplevel(mainVTable);
-
-			// save toplevel since it was initially null 
-			mainVTable->toplevel = toplevel;
-			object_vtable->toplevel = toplevel;
-			domainEnv->setToplevel(toplevel);
-
-			// create temporary vtable for Class, so we have something for OP_newclass
-			// to use when it creates Object$ and Class$.  once that happens, we replace
-			// with the real Class$ vtable.
-			toplevel->class_vtable = newVTable(traits.class_itraits, 
-				object_vtable, emptyScope, abcEnv, toplevel);
-			toplevel->class_vtable->resolveSignatures();
-
-			traits.function_itraits->resolveSignatures(toplevel);
-		}
-
-		exportDefs(mainTraits, main);
-
-		// prepare the remaining scriptEnv's
+		// skip the final one, it's already been done
 		for (int i=0, n=pool->scriptCount-1; i < n; i++)
 		{
-			AbstractFunction* script = pool->scripts[i];
-
-			Traits* scriptTraits = script->declaringTraits;
-			// [ed] 3/24/06 why do we really care if a script is dynamic or not?
-			//AvmAssert(scriptTraits->needsHashtable);
-
-			VTable* scriptVTable = newVTable(scriptTraits, object_vtable, emptyScope, abcEnv, toplevel);
-			ScriptEnv* scriptEnv = new (GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
-			scriptVTable->init = scriptEnv;
-			exportDefs(scriptTraits, scriptEnv);
+			initScript(this, toplevel, abcEnv, pool->scripts[i]);
 		}
 
 #ifdef AVMPLUS_VERIFYALL
 		if (config.verifyall) {
 			for (int i=0, n=pool->scriptCount; i < n; i++)
-				enqTraits(pool->scripts[i]->declaringTraits);
+				enqTraits(pool->scripts[i]->declaringTraits());
 			verifyEarly(toplevel);
 		}
 #endif
@@ -575,6 +525,19 @@ namespace avmplus
 
 		return handleActionPool(pool, domainEnv, toplevel, codeContext);
 	}
+	
+#ifdef VMCFG_EVAL
+	Atom AvmCore::handleActionSource(String* code,
+									 String* filename,
+									 DomainEnv* domainEnv,
+									 Toplevel* &toplevel,
+									 const NativeInitializer* ninit,
+									 CodeContext *codeContext)
+	{
+		ScriptBuffer buffer = avmplus::compileProgram(this, toplevel, code, filename);
+		return handleActionBlock(buffer, 0, domainEnv, toplevel, ninit, codeContext);
+	}
+#endif // VMCFG_EVAL
 
 /*
 11.9.3 The Abstract Equality Comparison Algorithm
@@ -634,9 +597,9 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		// See E4X 11.5.1, pg 53.  
 		if ((ltype == kObjectType) && (isXMLList(lhs)))
-			return atomToXMLList (lhs)->_equals (rhs);
+			return atomToXMLList(lhs)->_equals(rhs);
 		else if ((rtype == kObjectType) && (isXMLList(rhs)))
-			return atomToXMLList (rhs)->_equals (lhs);
+			return atomToXMLList (rhs)->_equals(lhs);
 
         if (ltype == rtype)
         {
@@ -671,7 +634,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					}	
 					else
 					{
-						return x->getNode()->_equals (this, y->getNode());
+						return x->getNode()->_equals(this, y->getNode());
 					}
 				}
 				else if (isQName(lhs) && isQName(rhs))
@@ -798,8 +761,8 @@ return the result of the comparison ToPrimitive(x) == y.
 					return trueAtom;
 				if (isXML(lhs) && isXML(rhs))
 				{
-					E4XNode *lhn = atomToXML (lhs);
-					E4XNode *rhn = atomToXML (rhs);
+					E4XNode *lhn = atomToXML(lhs);
+					E4XNode *rhn = atomToXML(rhs);
 					return ((lhn == rhn) ? trueAtom : falseAtom);
 				}
 				return falseAtom;
@@ -915,11 +878,16 @@ return the result of the comparison ToPrimitive(x) == y.
 					// one which will catch this exception.
 					for (callStackNode = callStack; callStackNode; callStackNode = callStackNode->next())
 					{
-						MethodInfo* info = (MethodInfo*) callStackNode->info();
+						MethodInfo* info = callStackNode->info();
+						
+						// native methods don't have exception handlers
+						if (info && info->isNative()) 
+							continue;
+
 #ifdef AVMPLUS_WORD_CODE
-						ExceptionHandlerTable* exceptions = info ? info->word_code.exceptions : NULL;
+						ExceptionHandlerTable* exceptions = info ? info->word_code_exceptions() : NULL;
 #else
-						ExceptionHandlerTable* exceptions = info ? info->exceptions : NULL;
+						ExceptionHandlerTable* exceptions = info ? info->abc_exceptions() : NULL;
 #endif
 						if (exceptions != NULL && callStackNode->eip() && *callStackNode->eip())
 						{
@@ -1070,7 +1038,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return out;
 	}
 
-	String* AvmCore::toErrorString(AbstractFunction* m)
+	String* AvmCore::toErrorString(MethodInfo* m)
 	{
 		String* s = NULL;
 	#ifdef DEBUGGER
@@ -1214,7 +1182,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		throwAtom(type->construct(2, args));
 	}
 	
-    Atom AvmCore::booleanAtom(Atom atom)
+    /*static*/ Atom AvmCore::booleanAtom(Atom atom)
     {
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
@@ -1246,7 +1214,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 
-	int AvmCore::boolean(Atom atom)
+	/*static*/ int AvmCore::boolean(Atom atom)
     {
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
@@ -1282,7 +1250,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		[[DefaultValue]] method is defined by this specification for all native
 		ECMAScript objects (section 8.6.2.6).
 	*/
-	Atom AvmCore::primitive(Atom atom)
+	/*static*/ Atom AvmCore::primitive(Atom atom)
 	{
 		return isObject(atom) ? atomToScriptObject(atom)->defaultValue() : atom;
 	}
@@ -1322,37 +1290,43 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 	
-    double AvmCore::number(Atom atom) const
+    /*static*/ double AvmCore::number(Atom atom)
     {
-		int kind = atom&7;
-
-		if (kind == kIntegerType)
-			return (double) ((sintptr)atom>>3);
-		if (kind == kDoubleType)
-			return atomToDouble(atom);
-
-		if (!isNull(atom))
+		for (;;)
 		{
+			const int kind = atomKind(atom);
+
+			// kIntegerType is by far the most common
+			if (kind == kIntegerType)
+				return (double) atomInt(atom);
+
+			// kDoubleType is next most common
+			if (kind == kDoubleType)
+				return atomToDouble(atom);
+
+			if (AvmCore::isNull(atom))
+				return 0.0;
+			
+			// all other cases are relatively rare
 			switch (kind)
 			{
 			case kStringType:
 				return atomToString(atom)->toNumber();
 			case kSpecialType:
-				return atomToDouble(kNaN);
+				return MathUtils::kNaN;
 			case kBooleanType:
 				return atom == trueAtom ? 1.0 : 0.0;
 			case kNamespaceType:
-				return number(atomToNamespace(atom)->getURI()->atom());
-			default: // number
+				atom = atomToNamespace(atom)->getURI()->atom();
+				break;	// continue loop, effectively a tailcall
 			case kObjectType:
-				return number(atomToScriptObject(atom)->defaultValue());
+				atom  = AvmCore::atomToScriptObject(atom)->defaultValue();
+				break;	// continue loop, effectively a tailcall
 			}
 		}
-		else
-		{
-			// ES3 9.3, toNumber(null) == 0
-			return 0.0;
-		}
+
+		//AvmAssert(0); // can't get here
+		//return 0.0;
     }
 
     Stringp AvmCore::intern(Atom atom)
@@ -1508,7 +1482,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_newfunction:
 			{
 				int method_id = readU30(pc);
-				AbstractFunction* f = pool->methods[method_id];
+				MethodInfo* f = pool->getMethodInfo(method_id);
 				buffer << opcodeInfo[opcode].name << " method_id=" << method_id;
 				if (opcode == OP_callstatic)
 				{
@@ -1525,7 +1499,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_newclass: 
 			{
                 uint32_t id = readU30(pc);
-				AbstractFunction* c = pool->cinits[id];
+				Traits* c = pool->getClassTraits(id);
 				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
 			}
@@ -1543,7 +1517,6 @@ return the result of the comparison ToPrimitive(x) == y.
 				}
 				break;
 			}
-				break;
 				
 			case OP_ifnlt:
 			case OP_ifnle:
@@ -1707,7 +1680,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case WOP_callstatic:
 			case WOP_newfunction: {
 				int method_id = (int)*pc++;
-				AbstractFunction* f = pool->methods[method_id];
+				MethodInfo* f = pool->getMethodInfo(method_id);
 				buffer << wopAttrs[opcode].name << " method_id=" << method_id;
 				if (opcode == WOP_callstatic)
 					buffer << " argc=" << (int)*pc++; // argc
@@ -1721,7 +1694,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				
 			case WOP_newclass: {
                 uint32_t id = (uint32_t)*pc++;
-				AbstractFunction* c = pool->cinits[id];
+				Traits* c = pool->getClassTraits(id);
 				buffer << wopAttrs[opcode].name << " " << c;
 				break;
 			}
@@ -1816,7 +1789,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			default:
 				switch (wopAttrs[opcode].width) {
 				case 0: {
-					buffer << "UNKNOWN: " << opcode;
+					buffer << "UNKNOWN: " << (uint32_t)opcode;
 					break;
 				}
 				default:
@@ -1886,20 +1859,20 @@ return the result of the comparison ToPrimitive(x) == y.
 		// if no handler found, re-throw the exception from here
 
 		//[ed] we only call this from methods with catch blocks, when exceptions != NULL
-		AvmAssert(info->exceptions != NULL);
+		AvmAssert(info->abc_exceptions() != NULL);
 #ifdef AVMPLUS_WORD_CODE
 		// This is hacky and will go away.  If the target method was not jitted, use
         // word_code.exceptions, otherwise use info->exceptions.  methods may or may
         // not be JITted based on memory, configuration, or heuristics.
 
 		ExceptionHandlerTable* exceptions;
-        if (info->impl32 == avmplus::interp32 || info->implN == avmplus::interpN)
-            exceptions = info->word_code.exceptions;
+        if (info->impl32() == avmplus::interp32 || info->implN() == avmplus::interpN)
+            exceptions = info->word_code_exceptions();
         else
-			exceptions = info->exceptions;
+			exceptions = info->abc_exceptions();
 		AvmAssert(exceptions != NULL);
 #else
-		ExceptionHandlerTable* exceptions = info->exceptions;
+		ExceptionHandlerTable* exceptions = info->abc_exceptions();
 #endif
 		
 		int exception_count = exceptions->exception_count;
@@ -1957,82 +1930,76 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-    bool AvmCore::istype(Atom atom, Traits* itraits)
+    /*static*/ bool AvmCore::istype(Atom atom, Traits* itraits)
     {
 		if (!itraits)
 			return true;
+		
+		const int bt = itraits->builtinType;
+		
+		// cheat and use "kUnusedAtomTag" for all null values (streamlines the test)
+		AvmAssert(atomKind(atom) != kUnusedAtomTag);
+		const int kind = isNull(atom) ? kUnusedAtomTag : atomKind(atom);
 
-		if (isNull(atom))
-			return itraits == traits.null_itraits;
-
-		Traits* lhs;
-
-		switch (atom&7)
+		// check for the easy cases with bitmasks
+		static const int kBTMasks[8] = 
 		{
-		case kNamespaceType:
-			lhs = traits.namespace_itraits;
-			break;
+			(1<<BUILTIN_null),								// kUnusedAtomTag -- recycle for null checking
+			(1<<BUILTIN_object),							// kObjectType
+			(1<<BUILTIN_string) | (1<<BUILTIN_object),		// kStringType
+			(1<<BUILTIN_namespace) | (1<<BUILTIN_object),	// kNamespaceType
+			(1<<BUILTIN_void),								// kSpecialType
+			(1<<BUILTIN_boolean) | (1<<BUILTIN_object),		// kBooleanType
+			(1<<BUILTIN_number) | (1<<BUILTIN_object),		// kIntegerType
+			(1<<BUILTIN_number) | (1<<BUILTIN_object)		// kDoubleType
+		};
+		
+		if ((1<<bt) & kBTMasks[kind])
+			return true;
+		
+		// repeated if-else is better than switch here
+		if (kind == kObjectType)
+		{
+			return atomToScriptObject(atom)->traits()->containsInterface(itraits);
+		}
 
-		case kStringType:
-			lhs = traits.string_itraits;
-			break;
-
-		case kBooleanType:
-			lhs = traits.boolean_itraits;
-			break;
-
-		case kIntegerType:
+		if (kind == kIntegerType)
+		{
 			// ISSUE need special support for number value ranges
-			if (itraits == traits.number_itraits)
-				return true;
-
-			lhs = traits.int_itraits;
-			if (itraits == traits.uint_itraits)
+			if (bt == BUILTIN_uint)
 			{
-				return (atom>>3) >= 0;
+				return atomInt(atom) >= 0;
 			}
-#ifdef AVMPLUS_64BIT
-			if (itraits == traits.int_itraits)
+			if (bt == BUILTIN_int)
 			{
+			#ifdef AVMPLUS_64BIT
 				// this might be a uint
-				if ((int64)(atom>>3)!=(int)(atom>>3))
-					return false;
+				return ((int64_t)atomInt(atom) == (int32_t)atomInt(atom));
+			#else
+				return true;
+			#endif
 			}
-#endif
-			break;
+		}
 
-		case kDoubleType:
-			lhs = traits.number_itraits;
+		if (kind == kDoubleType)
+		{
 			// ISSUE there must be a better way...
-			if (itraits == traits.int_itraits)
+			if (bt == BUILTIN_int)
 			{
-				double d = atomToDouble(atom);
-				int i = MathUtils::real2int(d);
+				const double d = atomToDouble(atom);
+				const int32_t i = MathUtils::real2int(d);
 				return d == (double)i;
 			}
-			if (itraits == traits.uint_itraits)
+			if (bt == BUILTIN_uint)
 			{
-				double d = atomToDouble(atom);
+				const double d = atomToDouble(atom);
 				// ISSUE use real2int?
-				unsigned i = (unsigned)d;
-				return d == (double)i;
+				const uint32_t u = (uint32_t)d;
+				return d == (double)u;
 			}
-			break;
-
-		case kSpecialType:
-			return itraits == traits.void_itraits;
-
-		case kObjectType: {
-			lhs = atomToScriptObject(atom)->traits();
-			break;
 		}
 
-		default:
-			// unexpected atom type
-			AvmAssert(false);
-			return false;
-		}
-		return lhs->containsInterface(itraits);
+		return false;
     }
 
 	Stringp AvmCore::coerce_s(Atom atom)
@@ -2085,47 +2052,17 @@ return the result of the comparison ToPrimitive(x) == y.
 		console.setOutputStream(stream);
 	}
 
-	bool AvmCore::isXML (Atom atm) 
+	/*static*/ bool AvmCore::isBuiltinType(Atom atm, BuiltinType bt)
 	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.xml_itraits || traits.xml_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.xml_itraits);
+		return isObject(atm) && Traits::getBuiltinType(atomToScriptObject(atm)->traits()) == bt;
 	}
 
-	bool AvmCore::isDate(Atom atm)
+	/*static*/ bool AvmCore::isBuiltinTypeMask(Atom atm, int btmask)
 	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.date_itraits || traits.date_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.date_itraits);
+		return isObject(atm) && ((1<<Traits::getBuiltinType(atomToScriptObject(atm)->traits())) & btmask) != 0;
 	}
 
-	bool AvmCore::isXMLList (Atom atm) 
-	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.xmlList_itraits || traits.xmlList_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.xmlList_itraits);
-	}
-
-	bool AvmCore::isQName (Atom atm)
-	{
-		if (!isObject(atm))
-			return false;
-
-		AvmAssert (!traits.qName_itraits || traits.qName_itraits->final);
-		Traits *lhs = atomToScriptObject(atm)->traits();
-		return (lhs == traits.qName_itraits);
-	}
-
-	bool AvmCore::isDictionary (Atom atm)
+	/*static*/ bool AvmCore::isDictionary(Atom atm)
 	{
 		return isObject(atm) && atomToScriptObject(atm)->vtable->traits->isDictionary;
 	}
@@ -2133,7 +2070,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	// Tables are from http://www.w3.org/TR/2004/REC-xml-20040204/#NT-NameChar
 	// E4X 13.1.2.1, pg 63
 	/* BaseChar = */
-	const wchar letterTable[] = {
+	static const wchar letterTable[] = {
 		0x0041, 0x005A,
 		0x0061, 0x007A,
 		0x00C0, 0x00D6,
@@ -2342,7 +2279,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x3021, 0x3029
 		};
 
-	bool AvmCore::isLetter (wchar c)
+	/*static*/ bool AvmCore::isLetter(wchar c)
 	{
 		int x = sizeof(letterTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2354,7 +2291,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[87]   	CombiningChar	   ::=   	
-	const wchar combiningCharTable[] = {
+	static const wchar combiningCharTable[] = {
 		0x0300, 0x0345,
 		0x0360, 0x0361,
 		0x0483, 0x0486,
@@ -2451,7 +2388,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x3099, 0x3099, // single 
 		0x309A, 0x309A // single 
 		};
-	bool AvmCore::isCombiningChar (wchar c)
+	/*static*/ bool AvmCore::isCombiningChar(wchar c)
 	{
 		int x = sizeof(combiningCharTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2463,7 +2400,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[88]   	Digit	   ::=   	
-	const wchar digitTable[] = {
+	static const wchar digitTable[] = {
 		0x0030, 0x0039,
 		0x0660, 0x0669,
 		0x06F0, 0x06F9,
@@ -2480,7 +2417,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x0ED0, 0x0ED9,
 		0x0F20, 0x0F29};
 
-	bool AvmCore::isDigit (wchar c)
+	/*static*/ bool AvmCore::isDigit(wchar c)
 	{
 		int x = sizeof(digitTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2491,7 +2428,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return false;
 	}
 
-	const wchar extenderTable[] = {
+	static const wchar extenderTable[] = {
 		0x00B7, 0x00B7, // single 
 		0x02D0, 0x02D0, // single 
 		0x02D1, 0x02D1, // single 
@@ -2503,7 +2440,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		0x3031, 0x3035, 
 		0x309D, 0x309E,
 		0x30FC, 0x30FE};
-	bool AvmCore::isExtender (wchar c)
+	/*static*/ bool AvmCore::isExtender(wchar c)
 	{
 		int x = sizeof(extenderTable) / (sizeof(wchar));
 		for (int i = 0; i < x; i += 2)
@@ -2532,7 +2469,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		// e4x excludes ':'
 
 		wchar c = p[0];
-		if (!isLetter (c) && c != '_' /*&& c != ':'*/)
+		if (!isLetter(c) && c != '_' /*&& c != ':'*/)
 			return false;		
 
 		for (int i = 1; i < p->length(); i++)
@@ -2679,36 +2616,24 @@ return the result of the comparison ToPrimitive(x) == y.
 		return newStringUTF8(output.c_str());
 	}
 
-	XMLObject *AvmCore::atomToXMLObject (Atom atm) 
+	/*static*/ XMLObject* AvmCore::atomToXMLObject(Atom atm) 
 	{
-		if (!isXML (atm))
-			return 0;
-
-		return (XMLObject*)(atomToScriptObject(atm));
+		return isXML(atm) ? (XMLObject*)(atomToScriptObject(atm)) : NULL;
 	}
 
-	E4XNode *AvmCore::atomToXML (Atom atm) 
+	/*static*/ E4XNode* AvmCore::atomToXML(Atom atm) 
 	{
-		if (!isXML (atm))
-			return 0;
-
-		return ((XMLObject*)(atomToScriptObject(atm)))->getNode();
+		return isXML(atm) ? ((XMLObject*)(atomToScriptObject(atm)))->getNode() : NULL;
 	}
 
-	XMLListObject *AvmCore::atomToXMLList (Atom atm) 
+	/*static*/ XMLListObject* AvmCore::atomToXMLList(Atom atm) 
 	{
-		if (!isXMLList (atm))
-			return 0;
-
-		return (XMLListObject*)(atomToScriptObject(atm));
+		return isXMLList(atm) ? (XMLListObject*)(atomToScriptObject(atm)) : NULL;
 	}
 
-	QNameObject *AvmCore::atomToQName (Atom atm) 
+	/*static*/ QNameObject* AvmCore::atomToQName(Atom atm) 
 	{
-		if (!isQName (atm))
-			return 0;
-
-		return (QNameObject*)(atomToScriptObject(atm));
+		return isQName(atm) ? (QNameObject*)(atomToScriptObject(atm)) : NULL;
 	}
 
 	Stringp AvmCore::_typeof (Atom arg)
@@ -2719,7 +2644,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 			default:
 			case kObjectType:
-				if (isXML (arg) || isXMLList(arg))
+				if (isXML(arg) || isXMLList(arg))
 				{
 					return kxml;
 				}
@@ -2757,14 +2682,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	size_t AvmCore::getToplevelSize() const
+	Toplevel* AvmCore::createToplevel(AbcEnv* abcEnv)
 	{
-		return sizeof(Toplevel);
-	}
-	
-	Toplevel* AvmCore::createToplevel(VTable *vtable)
-	{
-		return new (GetGC(), vtable->getExtraSize()) Toplevel(vtable, NULL);
+		return new (GetGC()) Toplevel(abcEnv);
 	}
 
 	void AvmCore::presweep()
@@ -3044,9 +2964,11 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifdef DEBUGGER
 	Stringp AvmCore::findInternedString(const char *cs, int len8)
 	{
-		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
+		// NOTE: this works in strict UTF-8 conversion mode
+		int32_t len16 = UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, NULL, 0, true);
+		AvmAssertMsg(len16 >= 0, "Malformed UTF-8 sequence");
 		// use alloca to avoid heap allocations where possible
-		AvmCore::AllocaAutoPtr _buffer;
+		MMgc::GC::AllocaAutoPtr _buffer;
 		wchar *buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
 
 		if(!buffer) {
@@ -3054,7 +2976,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			return NULL;
 		}
 		
-		UnicodeUtils::Utf8ToUtf16((const uint8 *)cs, len8, buffer, len16);
+		UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, buffer, len16, true);
 		buffer[len16] = 0;
 		int i = findString(buffer, len16);
 		Stringp other;
@@ -3069,6 +2991,9 @@ return the result of the comparison ToPrimitive(x) == y.
 	Stringp AvmCore::internStringUTF8(const char* cs, int len8, bool constant)
 	{
 		Stringp s = String::createUTF8(this, (const utf8_t*)cs, len8, String::kAuto, constant);
+		// createUTF8() will return NULL if we pass it invalid UTF8 data and its "strict" arg is true
+		// (which it is by default) -- check and bail if that happens.
+		if (!s) return NULL; 
 		int i = findString(s);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
@@ -3566,9 +3491,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		return String::createLatin1(this, s, len);
 	}
 
-	Stringp AvmCore::newStringUTF8(const char* s, int len)
+	Stringp AvmCore::newStringUTF8(const char* s, int len, bool strict)
 	{
-		return String::createUTF8(this, (const utf8_t*)s, len);
+		return String::createUTF8(this, (const utf8_t*)s, len, String::kDefaultWidth, false, strict);
 	}
 
 	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
@@ -3576,7 +3501,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		return String::createUTF16(this, s, len);
 	}
 
-	inline uint16_t swap16(const uint16_t c)
+	// "swap16" is apparently reserved/defined in some build environments...
+	inline uint16_t avmSwap16(const uint16_t c)
 	{
 		const uint16_t hi = (c >> 8);
 		const uint16_t lo = (c & 0xff);
@@ -3602,11 +3528,11 @@ return the result of the comparison ToPrimitive(x) == y.
 			if (s == NULL || len == 0)
 				return this->kEmptyString;
 
-			AvmCore::AllocaAutoPtr _swapped;
+			MMgc::GC::AllocaAutoPtr _swapped;
 			wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
 			for (int32 i = 0; i < len; i++)
 			{
-				swapped[i] = swap16(s[i]);
+				swapped[i] = avmSwap16(s[i]);
 			}
 			return newStringUTF16(swapped, len);
 		}
@@ -3664,21 +3590,24 @@ return the result of the comparison ToPrimitive(x) == y.
 	#endif
 	#endif /* DEBUGGER */
 
-	int AvmCore::integer(Atom atom) const
+	/*static*/ int AvmCore::integer(Atom atom)
 	{
-		if ((atom & 7) == kIntegerType || (atom&7) == kBooleanType) {
-			return (int32_t)(atom >> 3);
-		} else {
+		const int kind = atomKind(atom);
+		if ((1<<kind) & ((1<<kIntegerType)|(1<<kBooleanType)))
+		{
+			return (int32_t)atomInt(atom);
+		} 
+		else 
+		{
 			// TODO optimize the code below.
-			double d = number(atom);
-			return (int32_t)integer_d(d);
+			return (int32_t)integer_d(number(atom));
 		}
 	}
 
 	// static
 
 #ifndef AVMPLUS_SSE2_ALWAYS
-	int AvmCore::integer_d(double d)
+	/*static*/ int AvmCore::integer_d(double d)
 	{
 		// Try a simple case first to see if we have a in-range float value
 
@@ -3968,41 +3897,12 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (codeContextAtom == CONTEXT_NONE) {
 			return NULL;
 		} else if (getCodeContextKind(codeContextAtom) == CONTEXTKIND_ENV) {
-			return getCodeContextEnv(codeContextAtom)->vtable->abcEnv->codeContext();
+			return getCodeContextEnv(codeContextAtom)->codeContext();
 		} else {
 			return getCodeContextObject(codeContextAtom);
 		}
 	}
 
-#ifdef AVMPLUS_MIR
-	/**
-	 * MIR needs a large intermediate buffer for codegen.
-	 * These routines allow reuse of this buffer(s)
-	 */				  
-	GrowableBuffer* AvmCore::requestMirBuffer()
-	{
-		GrowableBuffer* buffer = 0;
-		if (mirBuffers.size() > 0)
-			buffer = mirBuffers.removeFirst();
-		else
-			buffer = requestNewMirBuffer();
-		return buffer;
-	}
-
-	GrowableBuffer* AvmCore::requestNewMirBuffer()
-	{
-		MMGC_MEM_TAG("JIT");
-		return new GrowableBuffer(GetGC()->GetGCHeap(),true);
-	}
-
-	void AvmCore::releaseMirBuffer(GrowableBuffer* buffer)
-	{
-		 buffer->free();  // free the underlying space
-		mirBuffers.add(buffer);
-	}
-#endif
-
-#ifdef MMGC_DRC
 	/*static*/ 
 	void AvmCore::decrementAtomRegion(Atom *arr, int length)
 	{
@@ -4022,12 +3922,10 @@ return the result of the comparison ToPrimitive(x) == y.
 			arr[i] = 0;
 		}
 	}
-#endif
 
 	/*static*/ 
 	void AvmCore::atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
 	{ 
-#ifdef MMGC_DRC
 		Atom atom = *address;
 		if(!isNull(atom)) {
 			switch(atom&7)
@@ -4040,18 +3938,15 @@ return the result of the comparison ToPrimitive(x) == y.
 					break;
 			}
 		}
-#endif
 
 		switch(atomNew&7)
 		{
 		case kStringType:
 		case kObjectType:
 		case kNamespaceType:
-#ifdef MMGC_DRC
 			if(!isNull(atomNew))
 				((MMgc::RCObject*)(atomNew&~7))->IncrementRef();
 			// fall through
-#endif
 		case kDoubleType:
 			{
 				gc->WriteBarrierNoSubstitute(container, (const void*)atomNew);
@@ -4076,7 +3971,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return (Atom)obj|kDoubleType;
 	}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 
 	void AvmCore::initMultinameLate(Multiname& name, Atom index)
 	{
@@ -4095,83 +3990,13 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		name.setName(intern(index));
 	}		
-#endif // MIR or NANOJIT
+#endif // NANOJIT
 
-	void AvmCore::allocaInit()
-	{
-		top_segment = NULL;
-		stacktop = NULL;
-#ifdef _DEBUG
-		stackdepth = 0;
-#endif
-		pushAllocaSegment(AVMPLUS_PARAM_ALLOCA_DEFSIZE);
-	}
-	
-	void AvmCore::allocaShutdown()
-	{
-		while (top_segment != NULL)
-			popAllocaSegment();
-		top_segment = NULL;
-		stacktop = NULL;
-	}
-	
-	void AvmCore::allocaPopToSlow(void* top)
-	{
-		AvmAssert(top_segment != NULL);
-		AvmAssert(!(top >= top_segment->start && top <= top_segment->limit));
-		while (!(top >= top_segment->start && top <= top_segment->limit))
-			popAllocaSegment();
-		AvmAssert(top_segment != NULL);
-	}
-	
-	void* AvmCore::allocaPushSlow(size_t nbytes)
-	{
-		size_t alloc_nbytes = nbytes;
-		if (alloc_nbytes < AVMPLUS_PARAM_ALLOCA_DEFSIZE)
-			alloc_nbytes = AVMPLUS_PARAM_ALLOCA_DEFSIZE;
-		pushAllocaSegment(alloc_nbytes);
-		void *p = stacktop;
-		stacktop = (char*)stacktop + nbytes;
-		return p;
-	}
-	
-	void AvmCore::pushAllocaSegment(size_t nbytes)
-	{
-		AvmAssert(nbytes % 8 == 0);
-#ifdef _DEBUG
-		stackdepth += nbytes;
-#endif
-		void* memory = gc->AllocRCRoot(nbytes);
-		AllocaStackSegment* seg = new AllocaStackSegment;
-		seg->start = memory;
-		seg->limit = (void*)((char*)memory + nbytes);
-		seg->top = NULL;
-		seg->prev = top_segment;
-		if (top_segment != NULL)
-			top_segment->top = stacktop;
-		top_segment = seg;
-		stacktop = memory;
-	}
-	
-	void AvmCore::popAllocaSegment()
-	{
-#ifdef _DEBUG
-		stackdepth -= (char*)top_segment->limit - (char*)top_segment->start;
-#endif
-		gc->FreeRCRoot(top_segment->start);
-		AllocaStackSegment* seg = top_segment;
-		top_segment = top_segment->prev;
-		if (top_segment != NULL)
-			stacktop = top_segment->top;
-		delete seg;
-	}
-	
 #ifdef AVMPLUS_VERIFYALL
-	void AvmCore::enqFunction(AbstractFunction* f) {
+	void AvmCore::enqFunction(MethodInfo* f) {
 		if (config.verifyall &&
-                f && !f->isVerified() && 
-                !(f->flags & AbstractFunction::VERIFY_PENDING)) {
-			f->flags |= AbstractFunction::VERIFY_PENDING;
+                f && !f->isVerified() && !f->isVerifyPending()) {
+			f->setVerifyPending();
 			verifyQueue.add(f);
 		}
 	}
@@ -4186,21 +4011,21 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
     void AvmCore::verifyEarly(Toplevel* toplevel) {
-        List<AbstractFunction*, LIST_GCObjects> verifyQueue2(GetGC());
+        List<MethodInfo*, LIST_GCObjects> verifyQueue2(GetGC());
 		int verified = 0;
 		do {
 			verified = 0;
 			while (!verifyQueue.isEmpty()) {
-				AbstractFunction* f = verifyQueue.removeLast();
+				MethodInfo* f = verifyQueue.removeLast();
 				if (!f->isVerified()) {
-					if (f->declaringTraits->scope == NULL && f != f->declaringTraits->init) {
+					if (f->declaringTraits()->scope == NULL && f != f->declaringTraits()->init) {
 						verifyQueue2.add(f);
 						continue;
 					}
 					verified++;
 					//console << "pre verify " << f << "\n";
 					f->verify(toplevel);
-					f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
+					f->setVerified();
 				}
 			}
 			while (!verifyQueue2.isEmpty())
@@ -4208,4 +4033,10 @@ return the result of the comparison ToPrimitive(x) == y.
 		} while (verified > 0);
 	}
 #endif
+
+	void AvmCore::oom(MemoryStatus)
+	{
+		// on kReserve ditch native pages and switch from JIT to interpreter
+		// on kEmpty ditch WORDCODE and switch to abc interpreter
+	}
 }

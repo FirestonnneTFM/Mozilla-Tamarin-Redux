@@ -37,16 +37,18 @@
 INCLUDES += \
   -I$(topsrcdir) \
   -I$(topsrcdir)/MMgc \
+  -I$(topsrcdir)/MMgc/platform \
   -I$(topsrcdir)/core \
-  -I$(topsrcdir)/codegen \
   -I$(topsrcdir)/pcre \
+  -I$(topsrcdir)/eval \
   -I$(topsrcdir)/platform \
   $(NULL)
 
 $(call RECURSE_DIRS,MMgc)
+$(call RECURSE_DIRS,MMgc/platform)
 
 ifdef ENABLE_TAMARIN
-$(call RECURSE_DIRS,core pcre codegen vprof)
+$(call RECURSE_DIRS,core pcre vprof)
 ifeq (sparc,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
@@ -79,6 +81,7 @@ $(call RECURSE_DIRS,platform/unix)
 endif
 endif
 
+$(call RECURSE_DIRS,eval)
 $(call RECURSE_DIRS,shell)
 
 echo:

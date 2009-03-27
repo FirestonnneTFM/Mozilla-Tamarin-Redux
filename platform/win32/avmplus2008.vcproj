@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -122,7 +122,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -195,7 +195,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -270,7 +270,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -344,7 +344,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -418,7 +418,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -491,7 +491,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -565,7 +565,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -638,7 +638,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;..\..\..\..\modules\vtune;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;..\..\..\..\modules\vtune;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;VTUNE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -714,7 +714,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -789,8 +789,8 @@
 				AdditionalOptions="/Oy-"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;MEMORY_PROFILER"
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -865,7 +865,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -940,7 +940,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;UNICODE;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_DEBUG;DEBUG;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -954,7 +954,7 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 				CompileForArchitecture="3"
 			/>
 			<Tool
@@ -1025,7 +1025,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;UNICODE;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -1112,7 +1112,7 @@
 				ExecutionBucket="7"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -1127,7 +1127,7 @@
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1197,7 +1197,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;UNICODE;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_DEBUG;DEBUG;_CRT_SECURE_NO_DEPRECATE;DEBUGGER"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -1211,7 +1211,7 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1282,7 +1282,7 @@
 				Optimization="3"
 				InlineFunctionExpansion="0"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;..;..\..\vtune"
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;..;..\..\vtune"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;VTUNE;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -1298,7 +1298,7 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189"
+				DisableSpecificWarnings="4189;4740;4189;4201"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1368,7 +1368,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre;.."
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\eval;.."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;UNICODE;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -1464,14 +1464,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AbstractFunction.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\AbstractFunction.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\Accessor.h"
 				>
 			</File>
@@ -1481,14 +1473,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\ActionBlockConstants.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\Amd64Assembler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\ArmAssembler.cpp"
 				>
 			</File>
 			<File
@@ -1540,11 +1524,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\AvmDebug.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\AvmDebug.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AvmDebugWin.cpp"
+				RelativePath="..\..\core\AvmLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\AvmLog.h"
 				>
 			</File>
 			<File
@@ -1780,19 +1772,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\codegen\CodegenLIR.cpp"
+				RelativePath="..\..\core\CodegenLIR.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\codegen\CodegenLIR.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\CodegenMIR.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\CodegenMIR.h"
+				RelativePath="..\..\core\CodegenLIR.h"
 				>
 			</File>
 			<File
@@ -1833,10 +1817,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\DateObject.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DateWin.cpp"
 				>
 			</File>
 			<File
@@ -1909,18 +1889,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\FunctionClass.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\GrowableBuffer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\GrowableBuffer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\Ia32Assembler.cpp"
 				>
 			</File>
 			<File
@@ -2077,10 +2045,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\PoolObject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\PpcAssembler.cpp"
 				>
 			</File>
 			<File

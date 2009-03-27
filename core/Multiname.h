@@ -41,10 +41,6 @@
 
 namespace avmplus
 {
-	#ifdef AVMPLUS_MIR
-	class CodegenMIR;
-	#endif
-
 	#ifdef FEATURE_NANOJIT
 	class CodegenLIR;
 	#endif
@@ -65,9 +61,6 @@ namespace avmplus
 		const static int NSSET  = 0x10;
 		const static int PUBLICNS = 0x20; // temporary flag to support 46.15; public implied
 		const static int TYPEPARAM = 0x40;
-		#ifdef AVMPLUS_MIR
-		friend class CodegenMIR;
-		#endif
 		#ifdef FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif 

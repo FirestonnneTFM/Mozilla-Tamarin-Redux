@@ -47,7 +47,12 @@ public class SparseCompRow
 	}
 
 }
-var starttime:Number=new Date();
+if (CONFIG::desktop) {
+    var starttime:Number=new Date();
+}
+else { // mobile
+    var starttime:int=getTimer();
+}
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:Number=Constants.SPARSE_SIZE_M;
 var nz:Number=Constants.SPARSE_SIZE_nz;
@@ -97,5 +102,8 @@ for (var i:uint=0; i<nr; i++)
 }
 
 SparseCompRow.matmult(y, val, row, col, x, 400);
-print("metric time "+(new Date()-starttime));
+if (CONFIG::desktop)
+    print("metric time "+(new Date()-starttime));
+else // mobile
+    print("metric time "+(getTimer()-starttime));
 }

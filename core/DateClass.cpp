@@ -57,7 +57,7 @@ namespace avmplus
 		if (argc == 1) {
 			double dateAsDouble = ( core->isString(argv[1]) ?
 									stringToDateDouble(core->string(argv[1])) :
-									core->number(argv[1]) );
+									AvmCore::number(argv[1]) );
 			
 			Date   date(dateAsDouble);
 			return (new (core->GetGC(), ivtable()->getExtraSize()) DateObject(this, date))->atom();
@@ -68,7 +68,7 @@ namespace avmplus
 			if (argc > 7)
 				argc = 7;
 			for (i=0; i<argc; i++) {
-				num[i] = core->number(argv[i+1]);
+				num[i] = AvmCore::number(argv[i+1]);
 			}
 			Date date(num[0],
 					  num[1],
@@ -108,14 +108,13 @@ namespace avmplus
 						Atom hours, Atom minutes, Atom seconds, Atom ms,
 						Atom* /*argv*/, int /*argc*/) // rest
 	{
-		AvmCore* core = this->core();
-		Date d(core->number(year),
-				  core->number(month),
-				  core->number(date),
-				  core->number(hours),
-				  core->number(minutes),
-				  core->number(seconds),
-				  core->number(ms),
+		Date d(AvmCore::number(year),
+				  AvmCore::number(month),
+				  AvmCore::number(date),
+				  AvmCore::number(hours),
+				  AvmCore::number(minutes),
+				  AvmCore::number(seconds),
+				  AvmCore::number(ms),
 				  true);
 		return d.getTime();
 	}
@@ -348,7 +347,7 @@ namespace avmplus
 			{
 				if (parseDateNumber(s,sLength,i,c,prevc,timeZoneOffset,year,month,day,hour,
 								    min,sec) == false)
-					return MathUtils::nan();
+					return MathUtils::kNaN;
 				prevc = 0;
 			}
 
@@ -364,16 +363,16 @@ namespace avmplus
                     i++;
                 }
                 if (i <= st + 1)
-                    return MathUtils::nan();
+                    return MathUtils::kNaN;
 
 				// check keyword substring against known keywords, modify hour/month/timeZoneOffset as appropriate
 				if (parseDateKeyword(s, st, i-st, hour, month, timeZoneOffset) == false)
-					return MathUtils::nan();
+					return MathUtils::kNaN;
                 prevc = 0;
             }
         }
         if (year < 0 || month < 0 || day < 0)
-            return MathUtils::nan();
+            return MathUtils::kNaN;
         if (sec < 0)
             sec = 0;
         if (min < 0)

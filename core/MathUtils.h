@@ -84,6 +84,10 @@ namespace avmplus
 	class MathUtils
 	{
 	public:
+		static const double kNaN;
+		static const double kInfinity;
+		static const double kNegInfinity;
+	public:
 		static double abs(double value);
 		static double acos(double value);
 		static double asin(double value);
@@ -95,8 +99,8 @@ namespace avmplus
 		static double exp(double value);
 		static double floor(double value);
 		static uint64  frexp(double x, int32_t *eptr);
-		static double infinity();
-		static double neg_infinity();
+		inline static double infinity() { return kInfinity; }
+		inline static double neg_infinity() { return kNegInfinity; }
 		/// Return 1 if value is +Infinity, -1 if -Infinity, 0 otherwise.
 		static int32_t isInfinite(double value);
 		static bool isNaN(double value);
@@ -105,7 +109,7 @@ namespace avmplus
 		static double max(double x, double y) { return (x > y) ? x : y; }
 		static double min(double x, double y) { return (x < y) ? x : y; }
 		static double mod(double x, double y);
-		static double nan();
+		inline static double nan() { return kNaN; }
 		static int32_t nextPowerOfTwo(int32_t n);
 		static double parseInt(Stringp s, int32_t radix=10, bool strict=true);
 		static double pow(double x, double y);

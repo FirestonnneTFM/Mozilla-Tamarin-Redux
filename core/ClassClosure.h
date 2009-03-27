@@ -70,17 +70,11 @@ namespace avmplus
 		 * invoke m_call.
 		 */
 		virtual Atom call(int argc, Atom* argv);
-		virtual Atom call_this(Atom thisArg);
-		virtual Atom call_this_a(Atom thisArg, ArrayObject *a);
-
-		// Accessors for Function.length
-		int get_length();
 
 		VTable* ivtable() const;
 
 #ifdef DEBUGGER
 		virtual uint64 size() const;
-		virtual MethodEnv* getCallMethodEnv() { return vtable->call; }
 #endif
 
 #ifdef AVMPLUS_VERBOSE

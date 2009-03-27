@@ -296,16 +296,25 @@ public static function factor(A:Array,  pivot:Array):uint
     private var LU_:Array;
     private var pivot_:Array;
 }
-var starttime:Number=new Date();
+if (CONFIG::desktop) {
+    var starttime:Number=new Date();
+    var cycles:Number=80;
+}
+else { // mobile
+    var starttime:int=getTimer();
+    var cycles:Number=10;
+}
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:Number=Constants.LU_SIZE;
 var A:Array = RandomMatrix(N, N,  R);
 var lu:Array = RandomMatrix(N, N, R);  // doesn't need random but
 var pivot:Array = new Array(N);
-var cycles:Number=80;
 for (var i:int=0;i<cycles;i++) {
   CopyMatrix(lu, A);
   LU.factor(lu, pivot);
 }
-print("metric time "+(new Date()-starttime));
+if (CONFIG::desktop)
+    print("metric time "+(new Date()-starttime));
+else // mobile
+    print("metric time "+(getTimer()-starttime));
 }

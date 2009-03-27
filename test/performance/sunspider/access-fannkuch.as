@@ -84,9 +84,16 @@ function fannkuch(n) {
       }
    }
 }
-var start=new Date();
-var res=fannkuch(8);
-var totaltime=new Date()-start;
+if (CONFIG::desktop) {
+    var start=new Date();
+    var res=fannkuch(8);
+    var totaltime=new Date()-start;
+}
+else { // mobile
+    var start=getTimer();
+    var res=fannkuch(8);
+    var totaltime=getTimer()-start;
+}
 print("fannkuch(8)="+res);
 if (res==22) {
     print("metric time "+totaltime); 
