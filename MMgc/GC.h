@@ -50,12 +50,25 @@
 
 #define MMGC_GCENTER(_gc)  MMgc::GCAutoExit __mmgc_auto_exit(_gc);
 
+#if defined(MMGC_IA32) && defined(_MSC_VER)
+
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
+	jmp_buf __mmgc_env;													\
+	setjmp(__mmgc_env);													\
+	__asm { mov _stack,esp };											\
+	GCAssertMsg(_gc->GetStackEnter() != 0, "Missing MMGC_GCENTER macro"); \
+	_size = (uint32_t)(_gc->GetStackEnter() - (uintptr_t)_stack);
+
+#else
+
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
 	jmp_buf __mmgc_env;													\
 	setjmp(__mmgc_env);													\
 	_stack = &__mmgc_env;												\
 	GCAssertMsg(_gc->GetStackEnter() != 0, "Missing MMGC_GCENTER macro"); \
 	_size = (uint32_t)(_gc->GetStackEnter() - (uintptr_t)_stack);
+
+#endif
 
 #ifdef MMGC_THREADSAFE
 #define MMGC_ASSERT_GC_LOCK(gc)  GCAssert((gc)->m_lock.IsHeld() || (gc)->destroying)
