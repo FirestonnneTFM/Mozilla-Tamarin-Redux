@@ -69,8 +69,8 @@
 
 #define AVMPLUS_MAJOR_VERSION		1				// original open source version
 #define AVMPLUS_MAJOR_DATE			"2007-04-01"	// close enough
-#define AVMPLUS_MINOR_VERSION		2
-#define AVMPLUS_MINOR_DATE			"2009-02-18"
+#define AVMPLUS_MINOR_VERSION		3
+#define AVMPLUS_MINOR_DATE			"2009-03-27"
 
 // The simple user-facing version number
 #define AVMPLUS_VERSION_USER		avmplus_stringify(AVMPLUS_MAJOR_VERSION) "." avmplus_stringify(AVMPLUS_MINOR_VERSION)
