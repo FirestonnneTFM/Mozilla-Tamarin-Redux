@@ -47,13 +47,13 @@ package
 		
 		AS3 native static function fromCharCode(... arguments):String
 		String.fromCharCode = function(... arguments) {
-			return AS3::fromCharCode.apply(String,arguments)
+			return AS3::fromCharCode.AS3::apply(String,arguments)
 		}
 
 		// E262 {DontEnum, DontDelete, ReadOnly}
 		public native function get length():int
 		
-		// indexOf and other _ functions get early bound by MIR
+		// indexOf and other _ functions get early bound by JIT
 		private native function _indexOf(s:String, i:int=0):int	// special-cased in Verifier, don't remove
 		AS3 native function indexOf(s:String="undefined", i:Number=0):int
 		prototype.indexOf = function(s:String="undefined", i:Number=0):int 

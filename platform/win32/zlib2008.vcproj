@@ -472,7 +472,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Oy-"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE;MEMORY_PROFILER"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"

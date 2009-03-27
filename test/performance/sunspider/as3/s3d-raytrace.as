@@ -489,10 +489,16 @@ package {
   }
 
   function run3dRaytrace():int {
-    var _sunSpiderStartDate:int = (new Date).getTime();
+    if (CONFIG::desktop)
+        var _sunSpiderStartDate:int = (new Date).getTime();
+    else // mobile
+        var _sunSpiderStartDate:int = getTimer();
     var pixels:Array = raytraceScene();
     var testOutput:String = arrayToCanvasCommands(pixels);
-    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    if (CONFIG::desktop)
+        var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    else // mobile
+        var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
     
 
     

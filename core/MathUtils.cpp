@@ -38,6 +38,15 @@
 #include "avmplus.h"
 #include "BigInteger.h"
 
+//on solairs gcc at least infinity and nan are not defined
+#if defined(__GNUC__)
+# if !defined(INFINITY)
+#  define INFINITY __builtin_inf()
+# endif
+# if !defined(NAN)
+#  define NAN acosh(0)
+# endif
+#endif
 
 //GCC only allows intrinsics if sse2 is enabled
 #if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
@@ -108,25 +117,28 @@ namespace avmplus
 		return x == y;
 	}
 
-	double MathUtils::infinity()
+	static double _nan()
 	{
-		#ifdef __GNUC__
-		return INFINITY;
-		#else
-		union { float f; uint32_t d; }; d = 0x7F800000;
+		union { float f; uint32_t d; }; d = 0x7FFFFFFF;
 		return f;
-		#endif
 	}
 
-	double MathUtils::neg_infinity()
+	static double _infinity()
 	{
-		#ifdef __GNUC__
-		return 0.0 - INFINITY;
-		#else
+		union { float f; uint32_t d; }; d = 0x7F800000;
+		return f;
+	}
+
+	static double _neg_infinity()
+	{
 		union { float f; uint32_t d; }; d = 0xFF800000;
 		return f;
-		#endif
 	}
+
+
+	/*static*/ const double MathUtils::kNaN = _nan();
+	/*static*/ const double MathUtils::kInfinity = _infinity();
+	/*static*/ const double MathUtils::kNegInfinity = _neg_infinity();
 
 #ifdef UNIX
 	/*
@@ -237,16 +249,6 @@ namespace avmplus
 
 #endif // UNIX
 
-	double MathUtils::nan()
-	{
-#ifdef __GNUC__
-		return NAN;
-#else
-		union { float f; uint32_t d; }; d = 0x7FFFFFFF;
-		return f;
-#endif
-	}
-
 	int32_t MathUtils::nextPowerOfTwo(int32_t n)
 	{
 		int32_t i = 2;
@@ -319,7 +321,7 @@ namespace avmplus
 				
 				index = skipSpaces(s, index); // leading and trailing whitespace is valid.
 				if (strict && index < s->length()) {
-					return MathUtils::nan();
+					return MathUtils::kNaN;
 				}
 
 			if ( result >= 0x20000000000000LL &&  // i.e. if the result may need at least 54 bits of mantissa
@@ -439,7 +441,7 @@ namespace avmplus
 				result = -result;
 			}
 		}
-		return gotDigits ? result : MathUtils::nan();
+		return gotDigits ? result : MathUtils::kNaN;
 	}
 
 	// used by AvmCore::number() and numberAtom() for converting arbitrary string to a number.
@@ -579,7 +581,7 @@ namespace avmplus
 	{
 		if (MathUtils::isNaN(y)) {
 			// x^NaN = NaN
-			return MathUtils::nan();
+			return MathUtils::kNaN;
 		}
 
 		if (y == 0) {
@@ -603,11 +605,11 @@ namespace avmplus
 		}
 		if (absx == 1 && infy != 0) {
 			// (+/-)1^(+/-)Infinity = NaN
-			return MathUtils::nan();
+			return MathUtils::kNaN;
 		}
 		if (infy == 1) {
 			// x^Infinity = Infinity
-			return MathUtils::infinity();
+			return MathUtils::kInfinity;
 		} else if (infy == -1) {
 			// x^-Infinity = +0
 			return +0;
@@ -622,7 +624,7 @@ namespace avmplus
 				return 0;
 			} else {
 				if (y < 1.0) {
-					return MathUtils::infinity();
+					return MathUtils::kInfinity;
 				} else {
 					// y>0
 					// Infinity^y = Infinity
@@ -637,7 +639,7 @@ namespace avmplus
 		if (x < 0.0) {
 			// If y is non-integer, return NaN.
 			if (y != MathUtils::floor(y)) {
-				return MathUtils::nan();
+				return MathUtils::kNaN;
 			}
 			// Switch sign of base
 			x = -x;
@@ -653,7 +655,7 @@ namespace avmplus
 		if (x == 0.0)
 		{
 			if (y < 0.0)
-				return MathUtils::infinity();
+				return MathUtils::kInfinity;
 			else
 				return 0.0;
 		}
@@ -698,7 +700,7 @@ namespace avmplus
 											  int32_t radix,
 											  UnsignedTreatment treatAs)
 	{
-		AvmCore::AllocaAutoPtr _buffer;
+		MMgc::GC::AllocaAutoPtr _buffer;
 		char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForInt64_t_toString);
 		int32_t len = kMinSizeForInt64_t_toString;
 		char* p = convertIntegerToStringBuffer(value, buffer, len, radix, treatAs);
@@ -811,7 +813,7 @@ namespace avmplus
 			return NULL;
 		}
 
-		AvmCore::AllocaAutoPtr _tmp;
+		MMgc::GC::AllocaAutoPtr _tmp;
 		char* tmp = (char*)VMPI_alloca(core, _tmp, kMinSizeForDouble_toString);
 		char *src = tmp + kMinSizeForDouble_toString - 1;
 		char *srcEnd = src;
@@ -885,7 +887,7 @@ namespace avmplus
 		
 		int32_t i, len = 0;
 
-		AvmCore::AllocaAutoPtr _buffer;
+		MMgc::GC::AllocaAutoPtr _buffer;
 		char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForDouble_toString);
 		char *s = buffer;
 		bool negative = false;
@@ -1260,7 +1262,7 @@ namespace avmplus
 				// there may be trailing whitespace
 				if (index < s->length() && skipSpaces(s, index) == index)
 					return false;
-				*value = (negate ? MathUtils::neg_infinity() : MathUtils::infinity());
+				*value = (negate ? MathUtils::kNegInfinity : MathUtils::kInfinity);
 				return true;
 			}
 			return false;
@@ -1524,7 +1526,7 @@ namespace avmplus
 
 		/* The sequence always starts with 1. */
 		//    pRandomFast->uValue = 1L;
-		pRandomFast->uValue = (uint32_t)(OSDep::currentTimeMillis());
+		pRandomFast->uValue = (uint32_t)(VMPI_getTime());
 
 		/* Figure out the sequence length (2^n - 1). */
 		pRandomFast->uSequenceLength = (1L << n) - 1L;

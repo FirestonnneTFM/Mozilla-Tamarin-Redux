@@ -48,47 +48,41 @@ namespace avmplus
 		cpool_string(core->GetGC(), 0),
 		cpool_ns(core->GetGC(), 0),
 		cpool_ns_set(core->GetGC(), 0),
+#ifndef AVMPLUS_64BIT
+		cpool_int_atoms(core->GetGC(), 0),
+		cpool_uint_atoms(core->GetGC(), 0),
+#endif
 		cpool_mn(0),
 		bugFlags(0),
-		methods(core->GetGC(), 0),
-#if VMCFG_METHOD_NAMES
-		method_name_indices(0),
-#endif
 		metadata_infos(0),
-		cinits(core->GetGC(), 0),
 		scripts(core->GetGC(), 0),
-		abcStart(startPos)
-	{
-		namedTraits = new(core->GetGC()) MultinameHashtable();
-		privateNamedScripts = new(core->GetGC()) MultinameHashtable();
-		m_code = sb.getImpl();
-#if defined(AVMPLUS_MIR)
-		MMGC_MEM_TAG("JIT");
-		codeBuffer = new GrowableBuffer(core->GetGC()->GetGCHeap());
+		_namedTraits(new(core->GetGC()) MultinameHashtable()),
+		_privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
+		_code(sb.getImpl()),
+		_abcStart(startPos),
+		_classes(core->GetGC(), 0),
+		_methods(core->GetGC(), 0)
+#ifdef DEBUGGER
+		, _method_dmi(core->GetGC(), 0)
 #endif
+#if VMCFG_METHOD_NAMES
+		, _method_name_indices(0)
+#endif
+	{
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 	}
 
 	PoolObject::~PoolObject()
 	{
-		#ifdef AVMPLUS_MIR
-		delete codeBuffer;
-		#endif
 		#ifdef AVMPLUS_WORD_CODE
 		delete word_code.cpool_mn;
 		#endif
 	}
 	
-    AbstractFunction* PoolObject::getMethodInfo(uint32 index)
-    {
-		AvmAssert(index < methodCount);
-		return methods[index];
-    }
-
 	Traits* PoolObject::getBuiltinTraits(Stringp name) const
 	{
 		AvmAssert(BIND_NONE == 0);
-		return (Traits*) namedTraits->getName(name);
+		return (Traits*) _namedTraits->getName(name);
 	}
 
 	Traits* PoolObject::getTraits(Stringp name, Namespace* ns, bool recursive/*=true*/) const
@@ -98,7 +92,7 @@ namespace avmplus
 
 		// look for class in current ABC file
 		if (t == NULL)
-			t = (Traits*) namedTraits->get(name, ns);
+			t = (Traits*) _namedTraits->get(name, ns);
 		return t;
 	}
 
@@ -139,7 +133,7 @@ namespace avmplus
 
 	void PoolObject::addNamedTraits(Stringp name, Namespace* ns, Traits* traits)
 	{
-		namedTraits->add(name, ns, (Binding)traits);
+		_namedTraits->add(name, ns, (Binding)traits);
 	}
 
 	Namespace* PoolObject::getNamespace(int index) const
@@ -157,59 +151,220 @@ namespace avmplus
 		return cpool_string[index];  
 	}
 
-	Atom PoolObject::getDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const
+	/*static*/ bool PoolObject::isLegalDefaultValue(BuiltinType bt, Atom value)
+	{
+		switch (bt)
+		{
+			case BUILTIN_any:
+				return true;
+
+			case BUILTIN_object:
+				return (value != undefinedAtom);
+
+			case BUILTIN_number:
+				return AvmCore::isNumber(value);
+
+			case BUILTIN_boolean:
+				return AvmCore::isBoolean(value);
+
+			case BUILTIN_uint:
+				if (AvmCore::isDouble(value))
+				{
+					const double d = AvmCore::number_d(value);
+					if (d == (uint32_t)d) 
+						return true;
+				}
+
+				return AvmCore::isInteger(value);
+
+			case BUILTIN_int:
+				if (AvmCore::isDouble(value))
+				{
+					const double d = AvmCore::number_d(value);
+					if (d == (int32_t)d) 
+						return true;
+				}
+
+				return AvmCore::isInteger(value);
+
+			case BUILTIN_string:
+				return AvmCore::isNull(value) || AvmCore::isString(value);
+
+			case BUILTIN_namespace:
+				return AvmCore::isNull(value) || AvmCore::isNamespace(value);
+
+			default:
+				return AvmCore::isNull(value);
+		}
+
+		//return false; // unreachable
+	}
+
+	Atom PoolObject::getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) 
 	{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds
 		//AvmAssert(toplevel != NULL);
-
-		AvmAssert(index != 0);
+		
+		const BuiltinType bt = Traits::getBuiltinType(t);
 		uint32_t maxcount = 0;
-		// Look in the cpool specified by kind
-		switch(kind)
+		Atom value;
+		if (index)
 		{
-		case CONSTANT_Int:
-			if (index >= (maxcount = constantIntCount))
-				goto range_error;
-			return core->intToAtom(cpool_int[index]);
+			// Look in the cpool specified by kind
+			switch (kind)
+			{
+			case CONSTANT_Int:
+			{
+				if (index >= (maxcount = constantIntCount))
+					goto range_error;
+				const int32_t i = cpool_int[index];
+#ifdef AVMPLUS_64BIT
+				value = core->intToAtom(i);
+				AvmAssert(AvmCore::isInteger(value));
+#else
+				// LIR relies on the return values from this being "sticky" so it can insert them inline.
+				// that's true for everything but int/uints that overflow, so special-case them.
+				// @todo this can/should go away when we convert to 64-bit Box atoms.
+				if (!cpool_int_atoms.size())
+				{
+					cpool_int_atoms.ensureCapacity(constantIntCount);
+					for (uint32_t j = 0; j < constantIntCount; ++j)
+						cpool_int_atoms.set(j, 0);
+					AvmAssert(cpool_int_atoms.size() == constantIntCount);
+				}
+				value = (Atom)cpool_int_atoms[index];
+				if (value == 0)
+				{
+					value = core->intToAtom(i);
+					if (AvmCore::isDouble(value))
+					{
+						cpool_int_atoms.set(index, value);
+					}
+					AvmAssert(AvmCore::isNumber(value));
+				}
+				else
+				{
+					AvmAssert(AvmCore::isDouble(value));
+				}
+#endif
+				break;
+			}
+			case CONSTANT_UInt:
+			{
+				if (index >= (maxcount = constantUIntCount))
+					goto range_error;
+				const int32_t u = cpool_int[index];
+#ifdef AVMPLUS_64BIT
+				value = core->uintToAtom(u);
+				AvmAssert(AvmCore::isInteger(value));
+#else
+				// LIR relies on the return values from this being "sticky" so it can insert them inline.
+				// that's true for everything but int/uints that overflow, so special-case them.
+				// @todo this can/should go away when we convert to 64-bit Box atoms.
+				if (!cpool_uint_atoms.size())
+				{
+					cpool_uint_atoms.ensureCapacity(constantUIntCount);
+					for (uint32_t j = 0; j < constantUIntCount; ++j)
+						cpool_uint_atoms.set(j, 0);
+					AvmAssert(cpool_uint_atoms.size() == constantUIntCount);
+				}
+				value = (Atom)cpool_uint_atoms[index];
+				if (value == 0)
+				{
+					value = core->uintToAtom(u);
+					if (AvmCore::isDouble(value))
+					{
+						cpool_uint_atoms.set(index, value);
+					}
+					AvmAssert(AvmCore::isNumber(value));
+				}
+				else
+				{
+					AvmAssert(AvmCore::isDouble(value));
+				}
+#endif
+				break;
+			}
+			case CONSTANT_Double:
+				if (index >= (maxcount = constantDoubleCount))
+					goto range_error;
+				value = kDoubleType|(uintptr)cpool_double[index];
+				break;
 
-		case CONSTANT_UInt:
-			if (index >= (maxcount = constantUIntCount))
-				goto range_error;
-			return core->uintToAtom(cpool_uint[index]);
+			case CONSTANT_Utf8:
+				if (index >= (maxcount = constantStringCount))
+					goto range_error;
+				value = cpool_string[index]->atom();
+				break;
 
-		case CONSTANT_Double:
-			if (index >= (maxcount = constantDoubleCount))
-				goto range_error;
-			return kDoubleType|(uintptr)cpool_double[index];
+			case CONSTANT_True:
+				value = trueAtom;
+				break;
 
-		case CONSTANT_Utf8:
-			if (index >= (maxcount = constantStringCount))
-				goto range_error;
-			return cpool_string[index]->atom();
+			case CONSTANT_False:
+				value = falseAtom;
+				break;
 
-		case CONSTANT_True:
-			return trueAtom;
+			case CONSTANT_Namespace:
+			case CONSTANT_PackageNamespace:
+			case CONSTANT_PackageInternalNs:
+			case CONSTANT_ProtectedNamespace:
+			case CONSTANT_ExplicitNamespace:
+			case CONSTANT_StaticProtectedNs:
+			case CONSTANT_PrivateNs:
+				if (index >= (maxcount = constantNsCount))
+					goto range_error;
+				value = cpool_ns[index]->atom();
+				break;
 
-		case CONSTANT_False:
-			return falseAtom;
+			case CONSTANT_Null:
+				value = nullObjectAtom;
+				break;
 
-		case CONSTANT_Namespace:
-        case CONSTANT_PackageNamespace:
-        case CONSTANT_PackageInternalNs:
-        case CONSTANT_ProtectedNamespace:
-        case CONSTANT_ExplicitNamespace:
-        case CONSTANT_StaticProtectedNs:
-		case CONSTANT_PrivateNs:
-			if (index >= (maxcount = constantNsCount))
-				goto range_error;
-			return cpool_ns[index]->atom();
+			default:
+				// Multinames & NamespaceSets are invalid default values.
+				goto illegal_default_error;
+			}
+		}
+		else
+		{
+			switch (bt)
+			{
+				case BUILTIN_any:
+					value = undefinedAtom;
+					break;
+				case BUILTIN_number:
+					value = core->kNaN;
+					break;
+				case BUILTIN_boolean:
+					value = falseAtom;
+					break;
+				case BUILTIN_int:
+				case BUILTIN_uint:
+					value = (0|kIntegerType);
+					break;
+				case BUILTIN_string:
+					value = nullStringAtom;
+					break;
+				case BUILTIN_namespace:
+					value = nullNsAtom;
+					break;
+				case BUILTIN_object:
+				default:
+					value = nullObjectAtom;
+					break;
+			}
+		}
 
-		case CONSTANT_Null:
-			return nullObjectAtom;
+		if (!isLegalDefaultValue(bt, value))
+			goto illegal_default_error;
+		
+		return value;
 
-		default:
-			// Multinames & NamespaceSets are invalid default values.
+illegal_default_error:
+		if (toplevel)
+		{
 			if (t)
 			{
 				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(Multiname(t->ns, t->name)));
@@ -218,8 +373,9 @@ namespace avmplus
 			{
 				toplevel->throwVerifyError(kCorruptABCError);
 			}
-			return undefinedAtom; // not reached
 		}
+		AvmAssert(!"unhandled verify error");
+		return undefinedAtom; // not reached
 
 range_error:
 		if (toplevel)
@@ -402,52 +558,54 @@ range_error:
 		return t;
 	}
 
-	Traits* PoolObject::resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* param_traits ) const
+	Traits* PoolObject::resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* param_traits) const
 	{
 		Traits* r = NULL;
-		if( base == core->traits.vector_itraits)
+		if (base == core->traits.vector_itraits)
 		{
 			// Only vector is parameterizable for now...
-			if(!param_traits) // Vector.<*>
-				r = core->traits.vectorobj_itraits;  
-			else if( param_traits == core->traits.int_itraits)
-				r = core->traits.vectorint_itraits;
-			else if (param_traits == core->traits.uint_itraits)
-				r = core->traits.vectoruint_itraits;
-			else if (param_traits == core->traits.number_itraits)
-				r = core->traits.vectordouble_itraits;
-			else
+			switch (Traits::getBuiltinType(param_traits))
 			{
-				Stringp fullname = core->internString( core->concatStrings(core->newConstantStringLatin1("Vector.<"), 
-					core->concatStrings(param_traits->formatClassName(), core->newConstantStringLatin1(">")))->atom());
-
-				Multiname newname;
-				newname.setName(fullname);
-				newname.setNamespace(base->ns);
-
-				r = getTraits(newname, toplevel);
-
-				if( !r )
+				case BUILTIN_any:
+					r = core->traits.vectorobj_itraits;  
+					break;
+				case BUILTIN_int:
+					r = core->traits.vectorint_itraits;
+					break;
+				case BUILTIN_uint:
+					r = core->traits.vectoruint_itraits;
+					break;
+				case BUILTIN_number:
+					r = core->traits.vectordouble_itraits;
+					break;
+				default:
 				{
-					r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns);
-					core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, r);
+					Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
+					r = getTraits(Multiname(base->ns, fullname), toplevel);
+
+					if (!r)
+					{
+						r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns);
+						core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, r);
+					}
+					break;
 				}
 			}
 		}
 		return r;
 	}
 
-	void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, AbstractFunction *script)
+	void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, MethodInfo *script)
 	{
-		privateNamedScripts->add(name, ns, (Binding)script);
+		_privateNamedScripts->add(name, ns, (Binding)script);
 	}
 
-	AbstractFunction* PoolObject::getNamedScript(const Multiname* multiname) const
+	MethodInfo* PoolObject::getNamedScript(const Multiname* multiname) const
 	{
-		AbstractFunction *f = domain->getNamedScript(multiname);
-		if(!f)
+		MethodInfo* f = domain->getNamedScript(multiname);
+		if (!f)
 		{
-			f = (AbstractFunction*)privateNamedScripts->getMulti(multiname);
+			f = (MethodInfo*)_privateNamedScripts->getMulti(multiname);
 		}
 		return f;
 	}
@@ -478,4 +636,32 @@ range_error:
 	}
 #endif
 	
+#if VMCFG_METHOD_NAMES
+	Stringp PoolObject::getMethodInfoName(uint32_t i)
+	{
+		Stringp name = NULL;
+		if (core->config.methodNames && uint32_t(i) < uint32_t(this->_method_name_indices.size()))
+		{
+			const int32_t index = this->_method_name_indices[i];
+			if (index >= 0)
+			{
+				name = this->getString(index);
+			}
+			else
+			{
+#ifdef AVMPLUS_WORD_CODE
+				// PrecomputedMultinames may not be inited yet, but we'll need them eventually,
+				// so go ahead and init them now
+				this->initPrecomputedMultinames();
+				const Multiname& mn = this->word_code.cpool_mn->multinames[-index];
+#else
+				Multiname mn;
+				this->parseMultiname(this->cpool_mn[-index], mn);
+#endif
+				name = Multiname::format(core, mn.getNamespace(), mn.getName());
+			}
+		}
+		return name;
+	}
+#endif	
 }

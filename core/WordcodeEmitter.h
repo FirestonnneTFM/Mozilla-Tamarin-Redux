@@ -41,6 +41,12 @@ namespace avmplus
 {
 #ifdef AVMPLUS_WORD_CODE
 
+	class TranslatedCode : public MMgc::GCObject
+	{
+	public:
+		uintptr_t data[1];  // more follows
+	};
+
 	class WordcodeEmitter : public WordcodeTranslator {
 	public:
 #  ifdef AVMPLUS_DIRECT_THREADED
@@ -90,11 +96,20 @@ namespace avmplus
 		virtual void emitAbsJump(const uint8_t *new_pc);
 
 		// CodeWriter
-		void write (FrameState* state, const byte *pc, AbcOpcode opcode);
+		void write(FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type = NULL);
 		void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);
 		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writePrologue(FrameState* state);
+		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
+		void writeNip(FrameState* state, const byte *pc);
+		void writeCheckNull(FrameState* state, uint32_t index);
+		void writeSetContext(FrameState* state, MethodInfo *f);
+		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
+		void writePrologue(FrameState* state, const byte *pc);
 		void writeEpilogue(FrameState* state);
+		void writeBlockStart(FrameState* state);
+		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
+		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
+		void formatOperand(PrintWriter& buffer, Value& v);
 
 	private:
 		// 'backpatches' represent target addresses of forward jumps in the original code,

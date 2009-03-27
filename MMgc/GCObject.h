@@ -92,10 +92,6 @@ namespace MMgc
 		}
 		
 		GCWeakRef *GetWeakRef() const;
-#ifdef MEMORY_INFO
-		// give everyone a vtable for rtti type info purposes
-		virtual ~GCObject() {}
-#endif
 	};
 
 	/**
@@ -135,7 +131,6 @@ namespace MMgc
 		static void operator delete (void *gcObject);
 	};
 
-#ifdef MMGC_DRC
 	class MMGC_API RCObject : public GCFinalizedObject
 	{
 		friend class GC;
@@ -173,7 +168,7 @@ namespace MMgc
 #ifdef _DEBUG
 			// this is a deleted object but 0xca indicates the InZCT flag so we
 			// might erroneously get here for a deleted RCObject
-			if(composite == (int32)0xcacacaca || composite == (int32)0xbabababa)
+			if(composite == 0xcacacaca || composite == 0xbabababa)
 				return;
 #endif
 
@@ -214,7 +209,7 @@ namespace MMgc
 			GCAssert(gc->IsRCObject(this));
 			GCAssert(this == gc->FindBeginning(this));
 			// don't touch swept objects
-			if(composite == (int32)0xcacacaca || composite == (int32)0xbabababa)
+			if(composite == 0xcacacaca || composite == 0xbabababa)
 				return;
 #endif
 
@@ -242,14 +237,14 @@ namespace MMgc
 			GCAssert(gc->IsRCObject(this));
 			GCAssert(this == gc->FindBeginning(this));
 			// don't touch swept objects
-			if(composite == (int32)0xcacacaca || composite == (int32)0xbabababa)
+			if(composite == 0xcacacaca || composite == 0xbabababa)
 				return;
 		
 			if(gc->Destroying())
 				return;
 
 			if(RefCount() == 0) {
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 				DumpHistory();
 #endif
 				GCAssert(false);
@@ -290,18 +285,18 @@ namespace MMgc
 			}
 		}
 		
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 		void DumpHistory();
 #endif
 
-		void setZCTIndex(int index) 
+		void setZCTIndex(uint32_t index) 
 		{
-			GCAssert(index >= 0 && index < (ZCT_INDEX>>8));
+			GCAssert(index < (ZCT_INDEX>>8));
 			GCAssert(index < ZCT_INDEX>>8);
 			composite = (composite&~ZCT_INDEX) | ((index<<8)|ZCTFLAG);
 		}
 
-		int getZCTIndex() const
+		uint32_t getZCTIndex() const
 		{
 			return (composite & ZCT_INDEX) >> 8;
 		}
@@ -318,18 +313,16 @@ namespace MMgc
 		// 1 bit for sticky flag (0x40000000)
 		// 20 bits for ZCT index
 		// 8 bits for RC count (0x000000FF)
-		static const int ZCTFLAG	         = 0x80000000;
-		static const int STICKYFLAG          = 0x40000000;
-		static const int STACK_PIN           = 0x20000000;
-		static const int RCBITS		         = 0x000000FF;
-		static const int ZCT_INDEX           = 0x0FFFFF00;
-#ifdef MMGC_DRC
-		int32 composite;
+		static const uint32_t ZCTFLAG	         = 0x80000000;
+		static const uint32_t STICKYFLAG         = 0x40000000;
+		static const uint32_t STACK_PIN          = 0x20000000;
+		static const uint32_t RCBITS	         = 0x000000FF;
+		static const uint32_t ZCT_INDEX          = 0x0FFFFF00;
+		uint32_t composite;
 #ifdef _DEBUG
 		// addref/decref stack traces
 		GCStack<int,4> history;
 		int padto32bytes;
-#endif
 #endif
 	};
 
@@ -356,10 +349,14 @@ namespace MMgc
 	{
 	public:
 		RCPtr() { t = NULL; }
-		RCPtr(T _t) : t(_t) { if(t && (uintptr)t != 1) t->IncrementRef(); }
+		RCPtr(T _t) : t(_t) 
+		{ 
+			if(valid()) 
+				t->IncrementRef(); 
+		}
 		~RCPtr() 
 		{
-			if(t && t != (T)1)
+			if(valid())
 				t->DecrementRef();
 
 			// 02may06 grandma : I want to enable 
@@ -376,10 +373,10 @@ namespace MMgc
 
 		T operator=(T tNew)
 		{
-			if(t && (uintptr)t != 1)
+			if(valid())
 				t->DecrementRef();
 			t = tNew;
-			if(t && (uintptr)t != 1)
+			if(valid())
 				t->IncrementRef();
 			// this cast is safe b/c other wise compilation would fail
 			return (T) t;
@@ -402,19 +399,14 @@ namespace MMgc
 		void Clear() { t = NULL; }
 
 	private:
+
+		inline bool valid() { return (uintptr_t)t > 1; }
 		T t;
 	};
 
 
 #define DRC(_type) MMgc::RCPtr<_type>
 
-#else // !MMGC_DRC
-
-#define DRC(_type) _type
-
-class RCObject : public GCObject {};
-
-#endif
 }
 
 

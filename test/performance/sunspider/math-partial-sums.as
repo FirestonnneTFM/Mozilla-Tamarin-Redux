@@ -89,11 +89,17 @@ function verifyTest() {
 
 
 function runPartialSums() {
-var _sunSpiderStartDate = (new Date).getTime();
+if (CONFIG::desktop)
+    var _sunSpiderStartDate = (new Date).getTime();
+else  // mobile
+    var _sunSpiderStartDate = getTimer();
 for (var i = 1024; i <= 16384; i *= 2) {
     partial(i);
 }
-var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+if (CONFIG::desktop)
+    var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+else  // mobile
+    var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
 

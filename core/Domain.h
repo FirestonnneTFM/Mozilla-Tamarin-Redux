@@ -54,36 +54,32 @@ namespace avmplus
 	public:
 		/** Parent domain */
 		Domain* const base;
-		
-#ifdef AVMPLUS_MOPS
 		AvmCore* const core;
-#endif	
 	
 		Domain(AvmCore *core, Domain* base);
 		
 		Traits* getNamedTraits(Stringp name, Namespacep ns, bool recursive/*=true*/) const;
 		Traits* getNamedTraits(const Multiname* multiname, bool recursive/*=true*/) const;
-		AbstractFunction* getNamedScript(Stringp name, Namespacep ns) const;
-		AbstractFunction* getNamedScript(const Multiname* multiname) const;
+		MethodInfo* getNamedScript(Stringp name, Namespacep ns) const;
+		MethodInfo* getNamedScript(const Multiname* multiname) const;
 		
 		Traits* getNamedTrait(Stringp name, Namespace* ns) const { return (Traits*)namedTraits->get(name, ns); }
 		void addNamedTrait(Stringp name, Namespace* ns, Traits* v) { namedTraits->add(name, ns, (Binding)v); }
-		void addNamedScript(Stringp name, Namespace* ns, AbstractFunction* v) { namedScripts->add(name, ns, (Binding)v); }
+		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) { namedScripts->add(name, ns, (Binding)v); }
 
-	#ifdef AVMPLUS_MOPS
 		/**
 		 * global memory access glue
 		 */
 		enum {
 			GLOBAL_MEMORY_MIN_SIZE =
-// on IA32, we have HAVE_MIR_SMOPS and can optimize range checks
+// if we have JIT support for MOPS we can optimize range checks
 // against ranges that can fit within the minimum memory size
 // so it's worth burning a little space
-#ifdef AVMPLUS_IA32
-				1024
-#else
+//#ifdef AVMPLUS_IA32
+//				1024
+//#else
 				8
-#endif
+//#endif
 		};
 		// backing store for global memory
 		mutable unsigned char *globalMemoryBase;
@@ -151,7 +147,6 @@ namespace avmplus
 		bool globalMemorySubscribe(ScriptObject *mem) const;
 		// stops "mem" from notifying us if it moves
 		bool globalMemoryUnsubscribe(ScriptObject *mem) const;
-#endif
 	};
 }
 

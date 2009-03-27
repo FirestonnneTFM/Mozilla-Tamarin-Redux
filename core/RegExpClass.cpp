@@ -66,7 +66,7 @@ namespace avmplus
 		// return pattern unchanged.
 		if (argc > 0) {
 			Atom flagsAtom = (argc>1) ? argv[2] : undefinedAtom;
-			if (core()->istype(argv[1], traits()->itraits) && flagsAtom == undefinedAtom) {
+			if (AvmCore::istype(argv[1], traits()->itraits) && flagsAtom == undefinedAtom) {
 				return argv[1];
 			}
 		}
@@ -86,7 +86,7 @@ namespace avmplus
 		Atom patternAtom = (argc>0) ? argv[1] : undefinedAtom;
 		Atom optionsAtom = (argc>1) ? argv[2] : undefinedAtom;
 
-		if (core->istype(patternAtom, traits()->itraits)) {
+		if (AvmCore::istype(patternAtom, traits()->itraits)) {
 			// Pattern is a RegExp object
 			if (optionsAtom != undefinedAtom) {
 				// ECMA 15.10.4.1 says to throw an error if flags specified

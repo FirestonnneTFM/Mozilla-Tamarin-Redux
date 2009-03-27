@@ -131,9 +131,7 @@ namespace avmplus
 		sampleSize += sizeof(uint64) * 2;
 		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples_size/3 > (samples + samples_size)
 			&& !core->GetGC()->Collecting() 
-#ifdef MMGC_DRC
 			&& !core->GetGC()->Reaping()
-#endif
 			)		{
 			runningCallback = true;
 			pauseSampling();
@@ -163,7 +161,7 @@ namespace avmplus
 		CallStackNode *csn = core->callStack;
 		uint32 depth = csn ? csn->depth() : 0;
 		byte *p = currentSample;
-		write(p, GC::ticksToMicros(GC::GetPerformanceCounter()));
+		write(p, GC::ticksToMicros(VMPI_getPerformanceCounter()));
 		write(p, sampleType);
 		if(sampleType != DELETED_OBJECT_SAMPLE)
 		{
@@ -178,7 +176,7 @@ namespace avmplus
 				write(p, csn->filename());
 				write(p, csn->linenum());
 #ifdef AVMPLUS_64BIT
-				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
+				AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 				write(p, (int) 0); // structure padding
 #endif
 				csn = csn->next();
@@ -207,10 +205,10 @@ namespace avmplus
 			read(p, s.stack.depth);
 			s.stack.trace = p;
 #ifndef AVMPLUS_64BIT
-			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t));
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t));
 #else
 			// Extra int because of the structure padding
-			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 #endif
 			p += s.stack.depth * sizeof(StackTrace::Element);
 		}

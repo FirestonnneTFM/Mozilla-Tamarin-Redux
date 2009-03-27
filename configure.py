@@ -86,6 +86,10 @@ selfTest = o.getBoolArg("selftests", False)
 if selfTest:
     APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
 
+memoryProfiler = o.getBoolArg("memory-profiler", False)
+if memoryProfiler:
+    APP_CPPFLAGS += "-DMMGC_MEMORY_PROFILER "
+
 MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', False)
 if MMGC_INTERIOR_PTRS:
     MMGC_DEFINES['MMGC_INTERIOR_PTRS'] = None
@@ -130,6 +134,8 @@ elif config.getCompiler() == 'VS':
             DEBUG_CXXFLAGS = "-Od -EHsc "
         else:
             OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
+        if memoryProfiler:
+            OPT_CXXFLAGS += "-Oy- -Zi "
     DEBUG_CXXFLAGS += "-Zi "
     DEBUG_LDFLAGS += "-DEBUG "
 elif config.getCompiler() == 'SunStudio':
@@ -155,8 +161,7 @@ if os == "darwin":
                          'DARWIN': 1,
                          '_MAC': None,
                          'AVMPLUS_MAC': None,
-                         'TARGET_RT_MAC_MACHO': 1,
-                         'USE_MMAP': None})
+                         'TARGET_RT_MAC_MACHO': 1})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
     if cpu == 'x86_64' or cpu == 'ppc64' or o.getBoolArg("leopard"):
         # use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling
@@ -239,6 +244,9 @@ if o.getBoolArg('perfm'):
     
 if o.getBoolArg('disable-nj'):
     APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
+
+if o.getBoolArg('abc-interp'):
+    APP_CPPFLAGS += '-DAVMPLUS_ABC_INTERPRETER '
 
 if o.getBoolArg('selftest'):
     APP_CPPFLAGS += '-DAVMPLUS_SELFTEST '

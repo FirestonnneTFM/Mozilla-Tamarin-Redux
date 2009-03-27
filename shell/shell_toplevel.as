@@ -54,6 +54,13 @@ package avmplus
 		public function test() { }
 	}
 
+	// this class exists solely to test native classes that use MI.
+	[native(cls="MIClass", instance="MIObject", methods="MIObjectImpl")]
+	internal class MI
+	{
+		public native function plus(i:Number):Number;
+	}
+
 	[native(cls="SystemClass", methods="auto")]
 	public class System
 	{

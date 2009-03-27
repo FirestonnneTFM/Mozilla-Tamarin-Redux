@@ -428,7 +428,7 @@ namespace avmplus
 
 		void disableAllTracing();  // shuts down all tracing operations
 
-		void traceMethod(AbstractFunction* fnc, bool ignoreArgs=false);
+		void traceMethod(MethodInfo* fnc, bool ignoreArgs=false);
 		void traceLine(int linenum);
 
 	protected:

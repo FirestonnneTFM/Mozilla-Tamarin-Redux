@@ -98,7 +98,7 @@ namespace avmplus
 		 *
 		 * @param method  the method being entered
 		 */
-		virtual void sendFunctionEnter(AbstractFunction* method) = 0;
+		virtual void sendFunctionEnter(MethodInfo* method) = 0;
 
 		/**
 		 * This will be called to notify the profiler that a
@@ -116,7 +116,7 @@ namespace avmplus
 		 *
 		 * @param method  the method being entered
 		 */
-		virtual void sendCatch(AbstractFunction* method) = 0;
+		virtual void sendCatch(MethodInfo* method) = 0;
 
 		/**
 		 * Is profiling wanted at all?

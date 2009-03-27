@@ -795,14 +795,14 @@ namespace avmplus
 		// We handle that in callingn functions
 
 		uint32 n = 1;
-		XMLListObject *xl = core->atomToXMLList (value);
+		XMLListObject *xl = AvmCore::atomToXMLList(value);
 		if (xl)
 		{
 			n = xl->_length();
 		}
 		else
 		{
-			E4XNode *x = core->atomToXML (value);
+			E4XNode *x = AvmCore::atomToXML(value);
 			if (x)
 			{
 				E4XNode *n = this;
@@ -829,7 +829,7 @@ namespace avmplus
 			// insert each element of our XMLList into our array
 			for (uint32 j = 0; j < xl->_length(); j++)
 			{
-				E4XNode *child = core->atomToXML (xl->_getAt (j)->atom());
+				E4XNode *child = AvmCore::atomToXML(xl->_getAt(j)->atom());
 
 				// !!@ Not in spec but seems like a good idea
 				E4XNode *n = this;
@@ -886,7 +886,7 @@ namespace avmplus
 		E4XNode *prior = _getAt(i);
 
 		// step 5
-		E4XNode *xml = core->atomToXML (V);
+		E4XNode *xml = AvmCore::atomToXML(V);
 		if (xml && (xml->getClass() & (kElement | kComment | kProcessingInstruction | kText | kCDATA)))
 		{
 			//a.	If V.[[Class]] is "element" and (V is x or an ancestor of x) throw an Error exception
@@ -912,7 +912,7 @@ namespace avmplus
 
 			this->setChildAt (i, xml);
 		}
-		else if (core->atomToXMLList (V))
+		else if (AvmCore::atomToXMLList(V))
 		{
 			_deleteByIndex (i);
 			_insert (core, toplevel, i, V);

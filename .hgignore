@@ -22,6 +22,7 @@ platform/win32/obj*/**
 platform/win32/x64/**
 platform/win32/Windows Mobile*
 platform/mac/*/build*/**
+utils/avmc/build/**
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
@@ -54,4 +55,4 @@ util/lastsizereport.txt
 *.pp
 *.ii
 *.deps
-
+*.class

@@ -47,8 +47,12 @@ namespace avmplus
 	class MethodEnv : public MMgc::GCObject
 #endif
 	{
+		friend class CodegenLIR;
+	#if VMCFG_METHODENV_IMPL32
+		friend class MethodInfo;
+		friend class CodegenIMT;
 		static Atom delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
-
+	#endif
 	public:
 		/** vtable for the activation scope inside this method */
 		VTable *getActivation();
@@ -57,20 +61,26 @@ namespace avmplus
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
 
-#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
-		MethodEnv(void* addr, VTable *vtable);
+#if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
+		enum TrampStub { kTrampStub };
+		MethodEnv(TrampStub, void* tramp, VTable* vtable);
 #endif
-		MethodEnv(AbstractFunction* method, VTable *vtable);
+
+		MethodEnv(MethodInfo* method, VTable *vtable);
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK 
 		virtual ~MethodEnv();
 #endif
 
-		inline Toplevel* toplevel() const { return vtable->toplevel; }
-		inline AbcEnv* abcEnv() const { return vtable->abcEnv; }
-		inline AvmCore* core() const { return method->pool->core; }
-		inline Traits* traits() const { return vtable->traits; }
-		inline DomainEnv* domainEnv() const { return vtable->abcEnv->domainEnv(); }
+		inline AbcEnv* abcEnv() const { return _vtable->abcEnv; }
+		inline AvmCore* core() const { return method->pool()->core; }
+		inline CodeContext* codeContext() const { return _vtable->abcEnv->codeContext(); }
+		inline DomainEnv* domainEnv() const { return _vtable->abcEnv->domainEnv(); }
+		inline ScopeChain* scope() const { return _vtable->scope(); }
+		inline MethodEnv* super_init() const { AvmAssert(_vtable->base != NULL); return _vtable->base->init; }
+		inline Toplevel* toplevel() const { return _vtable->toplevel(); }
+		inline Stringp traitsName() const { return _vtable->traits->name; }
+		inline Namespacep traitsNs() const { return _vtable->traits->ns; }
 
 		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
@@ -100,13 +110,14 @@ namespace avmplus
 		Atom coerceEnter(int argc, Atom* argv);
 
 	private:
+		MethodSignaturep get_ms();
 		inline bool isInterpreted();
-		Atom endCoerce(int argc, uint32 *ap);
-		int  startCoerce(int argc);
+		Atom endCoerce(int argc, uint32 *ap, MethodSignaturep ms);
+		int  startCoerce(int argc, MethodSignaturep ms);
 		Atom coerceUnboxEnter(int argc, Atom* atomv);
-		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv);
-		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap);
-		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv);
+		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv, MethodSignaturep ms);
+		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap, MethodSignaturep ms);
+		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms);
 		void FASTCALL nullcheckfail(Atom atom);
 
 	// helper functions used from compiled code
@@ -127,7 +138,7 @@ namespace avmplus
 		Atom getpropertylate_i(Atom obj, int index) const;
 		Atom getpropertylate_u(Atom obj, uint32 index) const;
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		void setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
 		void initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
 		Atom getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index);
@@ -163,7 +174,6 @@ namespace avmplus
 		/** Implementation of OP_hasnext2 */		
 		int hasnextproto(Atom& objAtom, int& index) const;
 		
-#ifdef AVMPLUS_MOPS
 		/** Implementation of memory op helpers */
 		void mopRangeCheckFailed() const;
 
@@ -171,12 +181,6 @@ namespace avmplus
 		int li8(int addr) const;
 		int li16(int addr) const;
 		int li32(int addr) const;
-#if defined(AVMPLUS_64BIT) && defined(AVMPLUS_MIR)
-		// MIR needs helpers, LIR does not
-		int64 li8_64(int addr) const { return (int64)li8(addr); }
-		int64 li16_64(int addr) const { return (int64)li16(addr); }
-		int64 li32_64(int addr) const { return (int64)li32(addr); }
-#endif
 		double lf32(int addr) const;
 		double lf64(int addr) const;
 
@@ -192,13 +196,12 @@ namespace avmplus
 		//inline static int sxi1(int value) { return (value << 31) >> 31; }
 		//inline static int sxi8(int value) { return (value << 24) >> 24; }
 		//inline static int sxi16(int value) { return (value << 16) >> 16; }
-#endif
 
 		/**
 		 * OP_newfunction
 		 * see 13.2 creating function objects
 		 */
-		ClassClosure* newfunction(AbstractFunction *function, 
+		ClassClosure* newfunction(MethodInfo *function, 
 						 ScopeChain* outer,
 						 Atom* scopes) const;
 
@@ -206,7 +209,7 @@ namespace avmplus
 		 * OP_newclass
 		 */
 
-		ClassClosure* newclass(AbstractFunction* cinit,
+		ClassClosure* newclass(Traits* ctraits,
 			          ClassClosure* base,
 					  ScopeChain* outer,
 					  Atom* scopes) const;
@@ -273,10 +276,7 @@ namespace avmplus
 		ScriptObject* coerceAtom2SO(Atom atom, Traits *expected) const;
 
 #ifdef DEBUGGER
-		void debugEnter(int argc, 
-						uint32_t* ap, 
-						Traits** frameTraits, 
-						int localCount,
+		void debugEnter(Traits** frameTraits, 
 						CallStackNode* callstack,
 						Atom* framep, 
 						volatile sintptr *eip);
@@ -324,19 +324,30 @@ namespace avmplus
 		uint64_t invocationCount() const;
 #endif
 
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		// pointers are write-once so we don't need WB's
-		VTable* const				vtable;		// the vtable for the scope where this env was declared 
-		AbstractFunction* const		method;		// runtime independent type info for this method 
-		Traits* const				declTraits;
-		union {
-			AtomMethodProc			impl32;	// pointer to invoke trampoline 
-			DoubleMethodProc		implN;
-#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
-			void*					implV;
+#if VMCFG_METHODENV_IMPL32
+		inline AtomMethodProc impl32() const { return _impl32; }
+		inline DoubleMethodProc implN() const { return _implN; }
+#else
+		inline AtomMethodProc impl32() const { return method->impl32(); }
+		inline DoubleMethodProc implN() const { return method->implN(); }
 #endif
+
+	// ------------------------ DATA SECTION BEGIN
+#if VMCFG_METHODENV_IMPL32
+	private:
+		// these are most-frequently accessed so put at offset zero
+		union 
+		{
+			AtomMethodProc _impl32;
+			DoubleMethodProc _implN;
 		};
+#endif
+	protected:
+		// pointers are write-once so we don't need WB's
+		VTable* const				_vtable;		// the vtable for the scope where this env was declared 
+	public:
+		MethodInfo* const			method;		// runtime independent type info for this method 
+		Traits* const				declTraits;
 	private:
 		uintptr_t					activationOrMCTable;
 	public:
@@ -355,7 +366,7 @@ namespace avmplus
 	class ScriptEnv : public MethodEnv
 	{
 	public:
-		ScriptEnv(AbstractFunction* _method, VTable * _vtable)
+		ScriptEnv(MethodInfo* _method, VTable * _vtable)
 			: MethodEnv(_method, _vtable)
 		{
 			setIsScriptEnv(); 
@@ -372,7 +383,7 @@ namespace avmplus
 	class FunctionEnv : public MethodEnv
 	{
 	  public:
-		FunctionEnv(AbstractFunction* _method, VTable * _vtable)
+		FunctionEnv(MethodInfo* _method, VTable * _vtable)
 			: MethodEnv(_method, _vtable) {}
 	// ------------------------ DATA SECTION BEGIN
 	  public:
@@ -380,8 +391,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-// probably should go elsewhere, but this is adequate for now.
-#if defined(AVMPLUS_MOPS)
+	// probably should go elsewhere, but this is adequate for now.
 	#if defined(AVMPLUS_BIG_ENDIAN)
 		inline void _swap8(uint8_t& a, uint8_t& b)
 		{
@@ -452,8 +462,6 @@ namespace avmplus
 	#else
 		#define MOPS_SWAP_BYTES(p) do {} while (0)
 	#endif
-#endif
-
 }
 
 #endif // __avmplus_MethodEnv__

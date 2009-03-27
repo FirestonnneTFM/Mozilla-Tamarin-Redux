@@ -56,33 +56,55 @@ namespace avmplus
 		const NativeInitializer* natives,
 		const List<Stringp>* keepVersions)
     {
-		if (code.getSize() < 4)
-			toplevel->throwVerifyError(kCorruptABCError);
-
-		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
-
-        #ifdef AVMPLUS_VERBOSE
+		int version;
+		int result = canParse(code, &version);
+		
+#ifdef AVMPLUS_VERBOSE
 		if (core->config.verbose)
 			core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
-        #endif
-
-		switch (version)
-		{
-		case (46<<16|16):
-		{
-			AbcParser parser(core, code, toplevel, domain, natives, keepVersions);
-			PoolObject *pObject = parser.parse();
- 			if ( !pObject )
- 				toplevel->throwVerifyError( kCorruptABCError );
- 			else
- 				return pObject;
+#endif
+		
+		if (result != 0) {
+			switch (result) {
+				case kInvalidMagicError:
+					toplevel->throwVerifyError(kInvalidMagicError, core->toErrorString(version>>16), core->toErrorString(version&0xFFFF));
+				case kCorruptABCError:
+				default:
+					toplevel->throwVerifyError(kCorruptABCError);
+			}
 		}
-		default:
-			toplevel->throwVerifyError(kInvalidMagicError, core->toErrorString(version>>16), core->toErrorString(version&0xFFFF));
+
+		AbcParser parser(core, code, toplevel, domain, natives, keepVersions);
+		PoolObject *pObject = parser.parse();
+ 		if ( !pObject ) {
+ 			toplevel->throwVerifyError( kCorruptABCError );
+			/*NOTREACHED*/
 			return NULL;
 		}
+ 		else
+ 			return pObject;
     }
 
+	int AbcParser::canParse(ScriptBuffer code, int* version)
+	{
+		if (version != NULL)
+			*version = 0;
+		
+		if (code.getSize() < 4)
+			return kCorruptABCError;
+		
+		int v = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
+		if (version != NULL)
+			*version = v;
+		
+		switch (v) {
+			case (46<<16|16):
+				return 0;
+			default:
+				return kInvalidMagicError;
+		}
+	}
+	
 	AbcParser::AbcParser(AvmCore* core, ScriptBuffer code, 
 		Toplevel* toplevel,
 		Domain* domain,
@@ -186,12 +208,13 @@ namespace avmplus
 		return index;
 	}
 
-	AbstractFunction *AbcParser::resolveMethodInfo(uint32 index) const
+	MethodInfo* AbcParser::resolveMethodInfo(uint32 index) const
 	{
-		if (index >= pool->methodCount)
-			toplevel->throwVerifyError(kMethodInfoExceedsCountError, core->toErrorString(index), core->toErrorString(pool->methodCount));
+		const uint32_t c = pool->methodCount();
+		if (index >= c)
+			toplevel->throwVerifyError(kMethodInfoExceedsCountError, core->toErrorString(index), core->toErrorString(c));
 
-		AbstractFunction *f = pool->getMethodInfo(index);
+		MethodInfo* f = pool->getMethodInfo(index);
 		if (!f)
 			toplevel->throwVerifyError(kMethodInfoOrderError, core->toErrorString(index));
 
@@ -226,85 +249,48 @@ namespace avmplus
 		core->tbCache()->flush();
 		core->tmCache()->flush();
 
-#ifdef FEATURE_BUFFER_GUARD // no Carbon
-		TRY(this->core, kCatchAction_Rethrow)
+		// constant pool
+		parseCpool();
+
+		// parse all methodInfos in one pass.  Nested functions must come before outer functions
+		parseMethodInfos();
+
+		// parse all metadataInfos - AVM+ doesn't care about this, so we are really just skipping them
+		parseMetadataInfos();
+
+		// parse classes.  base classes must come first.
+		if (!parseInstanceInfos()) return NULL;
+
+		bool first = false;
+		if (CLASS_TYPE == NULL)
 		{
-			// catches any access violation exceptions and sends control to
-			// the CATCH block below.
-			BufferGuard guard(&_ef.jmpbuf);			
-			this->guard = &guard;
+			// if we haven't got types from the builtin file yet, do it now.
+			first = true;
+			core->traits.initInstanceTypes(pool);
 
-			if(toplevel == NULL) {
-				this->guard = NULL;
-				guard.disable();
-			}
-			
-#endif // FEATURE_BUFFER_GUARD
-
-			// constant pool
-			parseCpool();
-
-			// parse all methodInfos in one pass.  Nested functions must come before outer functions
-			parseMethodInfos();
-
-			// parse all metadataInfos - AVM+ doesn't care about this, so we are really just skipping them
-			parseMetadataInfos();
-
-			// parse classes.  base classes must come first.
-			if (!parseInstanceInfos()) return NULL;
-
-			bool first = false;
-			if (CLASS_TYPE == NULL)
-			{
-				// if we haven't got types from the builtin file yet, do it now.
-				first = true;
-				core->traits.initInstanceTypes(pool);
-
-				// register "void"
-				addNamedTraits(core->publicNamespace, VOID_TYPE->name, VOID_TYPE);
-			}
-
-			// type information about class objects
-			parseClassInfos();
-
-			if (first)
-			{
-				core->traits.initClassTypes(pool);
-			}
-
-			// scripts
-			if( !parseScriptInfos() ) return NULL;
-
-			// method bodies: code, exception info, and activation traits
-			parseMethodBodies();
-
-#ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
+			// register "void"
+			addNamedTraits(core->publicNamespace, VOID_TYPE->name, VOID_TYPE);
 		}
-		CATCH(Exception *exception)
+
+		// type information about class objects
+		parseClassInfos();
+
+		if (first)
 		{
-		 	guard->disable();
-			guard = NULL;
-			if( exception && exception->isValid()) {
-				// Re-throw if exception exists
-				core->throwException(exception);
-			} else if(toplevel) {
-				// create new exception
-				toplevel->throwVerifyError(kCorruptABCError);
-			} 
+			core->traits.initClassTypes(pool);
 		}
-		END_CATCH
-		END_TRY
-#endif // FEATURE_BUFFER_GUARD
+
+		// scripts
+		if( !parseScriptInfos() ) return NULL;
+
+		// method bodies: code, exception info, and activation traits
+		parseMethodBodies();
 
         return pool;
 	}
 
-#ifdef SAFE_PARSE
 	// check to see if we are trying to read past the file end or the beginning.
 	#define CHECK_POS(pos) do { if ((pos) < abcStart || (pos) >= abcEnd ) toplevel->throwVerifyError(kCorruptABCError); } while (0)
-#else
-	#define CHECK_POS(pos) do {  } while (0)
-#endif //SAFE_PARSE
 
 	/**
 	 * setting up a traits that extends another one.  Two parser passes are required,
@@ -315,7 +301,7 @@ namespace avmplus
 									Traits* base, 
 									Namespacep ns, 
 									Stringp name, 
-									AbstractFunction* script, 
+									MethodInfo* script, 
 									TraitsPosPtr traitsPos,
 									TraitsPosType posType, 
 									Namespacep protectedNamespace)
@@ -351,12 +337,12 @@ namespace avmplus
             TraitKind kind = (TraitKind) (tag & 0x0f);
 			
 			bool skip = false;
-			uint32_t class_info = 0;
-			uint32_t method_info = 0;
+			uint32_t class_index = 0;
+			uint32_t method_index = 0;
 			uint32_t slot_id = 0;
 			uint32_t value_index = 0;
 			uint32_t earlyDispId = 0;
-			int flags = 0;
+			bool needsDxns = false;
 #ifdef AVMPLUS_VERBOSE
 			Multiname typeName;
 #endif
@@ -382,18 +368,19 @@ namespace avmplus
 				break;
 			case TRAIT_Class:
 				readU30(pos); // slot id
-				class_info = readU30(pos);
+				class_index = readU30(pos);
 				break;
 			case TRAIT_Getter:
 			case TRAIT_Setter:
 			case TRAIT_Method:
 				earlyDispId = readU30(pos);			// disp id
-				method_info = readU30(pos);	
+				method_index = readU30(pos);	
 				break;
 			default:
 				// unsupported traits type
 				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
 			}
+
 			const byte* meta_pos = pos;
 			if (tag & ATTR_metadata)
 			{
@@ -401,15 +388,13 @@ namespace avmplus
 				for (uint32_t metadata = 0; metadata < metadataCount; ++metadata)
 				{
 					const uint32_t index = readU30(pos);
+					if (index >= pool->metadataCount || !metaNames)
+						toplevel->throwVerifyError(kCorruptABCError);
 					Stringp name = metaNames[index];
 					if (pool->stripMetadataIndexes.indexOf(index) != -1)
 						skip = true;  // Stripping this definition
 					else if (name == core->kNeedsDxns)
-						flags |= AbstractFunction::NEEDS_DXNS;
-#ifdef AVMPLUS_VERBOSE
-					else if (name == kVerboseVerify)
-						flags |= AbstractFunction::VERBOSE_VERIFY;
-#endif
+						needsDxns = true;
 				}
 			}
 			if (skip) 
@@ -443,14 +428,12 @@ namespace avmplus
 				if (kind == TRAIT_Class)
 				{
 					// get the class type
-					if (class_info >= classCount)
-						toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_info), core->toErrorString(classCount));
+					if (class_index >= classCount)
+						toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_index), core->toErrorString(classCount));
 
-					AbstractFunction* cinit = pool->cinits[class_info];
-					if (!cinit) 
-						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_info));
-
-					Traits* ctraits = cinit->declaringTraits;
+					Traits* ctraits = pool->getClassTraits(class_index);
+					if (!ctraits) 
+						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_index));
 
 					#ifdef AVMPLUS_VERBOSE
 					if (pool->verbose)
@@ -501,18 +484,13 @@ namespace avmplus
 			case TRAIT_Setter:
             case TRAIT_Method:
 			{
-				if (kind == TRAIT_Getter)
-					flags |= AbstractFunction::IS_GETTER;
-				else if (kind == TRAIT_Setter)
-					flags |= AbstractFunction::IS_SETTER;
-					
 				#ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
 				{
 					core->console << "            " << traitNames[kind]
 						<< " name=" << Multiname::format(core, ns, name)
 						<< " disp_id=" << earlyDispId << " (ignored)"
-					    << " method_info=" << method_info
+					    << " method_index=" << method_index
 						<< " attr=" << ((tag&ATTR_final)?"final":"virtual");
 					if (tag&ATTR_override)
 						core->console << "|override";
@@ -521,12 +499,12 @@ namespace avmplus
 				#endif
 
 				// id is unused here
-				AbstractFunction* f = resolveMethodInfo(method_info);
+				MethodInfo* f = resolveMethodInfo(method_index);
 
 				#if VMCFG_METHOD_NAMES
 				if (core->config.methodNames)
 				{
-					pool->method_name_indices.set(method_info, -int32_t(qn_index));
+					pool->_method_name_indices.set(method_index, -int32_t(qn_index));
 				}
 				#else
 				(void)qn_index;
@@ -535,12 +513,14 @@ namespace avmplus
 				// since this function is ref'ed here, we know the receiver type.
 				if (!f->makeMethodOf(traits))
 					toplevel->throwVerifyError(kCorruptABCError);
-
-				f->flags |= flags;
+				
+				f->setKind(kind); // sets the IS_GETTER/IS_SETTER flags
 				if (tag & ATTR_final)
-					f->flags |= AbstractFunction::FINAL;
+					f->setFinal();
 				if (tag & ATTR_override)
-					f->flags |= AbstractFunction::OVERRIDE;
+					f->setOverride();
+				if (needsDxns)
+					f->setNeedsDxns();
 				
 				// only export one name for an accessor 
 				if (script && !domain->getNamedScript(name,ns))
@@ -585,14 +565,19 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		MMGC_MEM_TYPE(pool);
-		pool->methods.ensureCapacity(size);
+		pool->_methods.ensureCapacity(size);
+#ifdef DEBUGGER
+		if (core->debugger())
+		{
+			pool->_method_dmi.ensureCapacity(size);
+		}
+#endif
 #if VMCFG_METHOD_NAMES
 		if (core->config.methodNames)
 		{
-			pool->method_name_indices.ensureCapacity(size);
+			pool->_method_name_indices.ensureCapacity(size);
 		}
 #endif
-		pool->methodCount = methodCount;
 
 #ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
@@ -603,11 +588,11 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
 #endif
-			// MethodInfo
-			int param_count = readU30(pos);
-
 			const byte* info_pos = pos;
 		
+			// MethodInfo
+			const int param_count = readU30(pos);
+
 		// @todo -- we should add an AbcParser equivalent of skipU30;
 		// then the next two clauses would be 			
 		//		skipU30(pos, param_count+1);
@@ -641,24 +626,20 @@ namespace avmplus
             uint32_t name_index = readU30(pos);
             (void)name_index;
 			CHECK_POS(pos);
-			int flags = *pos++;
+			const uint8_t abcFlags = *pos++;
 
 			if_verbose(
 				core->console << "        name_index=" << name_index;
 				if (name_index > 0 && name_index < pool->constantStringCount)
 					core->console << " \"" << pool->cpool_string[name_index] << "\"";
-				core->console << "\n        flags=" << flags << "\n";
+				core->console << "\n        flags=" << abcFlags << "\n";
 			)
 
-			AbstractFunction *info;			
-			if (!(flags & AbstractFunction::NATIVE))
+			const NativeMethodInfo* ni = NULL;
+			if (abcFlags & MethodInfo::NATIVE)
 			{
-				info = new (core->GetGC()) MethodInfo(i);
-			}
-			else
-			{
-				info = natives ? natives->newNativeMethod(i) : NULL;
-				if (!info)
+				ni = natives ? natives->getNativeInfo(i) : NULL;
+				if (!ni)
 				{
 					// If this assert hits, you're missing a native method.  Method "i"
 					// corresponds to the function of the same number in 
@@ -668,23 +649,18 @@ namespace avmplus
 				}
 			}
 
-			info->info_pos = info_pos;
-			info->pool = pool;
-			info->param_count = param_count;
-			info->initParamTypes(param_count+1);
-			info->flags |= flags;
+			const int optional_count = (abcFlags & MethodInfo::HAS_OPTIONAL) ? readU30(pos) : 0;
+
+			MethodInfo* info = new (core->GetGC()) MethodInfo(i, pool, info_pos, abcFlags, ni);
 			#if VMCFG_METHOD_NAMES
 			if (core->config.methodNames)
 			{
-				info->pool->method_name_indices.set(i, int32_t(name_index));
+				pool->_method_name_indices.set(i, int32_t(name_index));
 			}
 			#endif
 
-			if (flags & AbstractFunction::HAS_OPTIONAL)
+			if (abcFlags & MethodInfo::HAS_OPTIONAL)
 			{
-				int optional_count = readU30(pos);
-
-				info->optional_count = optional_count;
 				for( int j = 0; j < optional_count; ++j)
 				{
 					readU30(pos);
@@ -698,17 +674,17 @@ namespace avmplus
 				}
 			}
 
-			if( flags & AbstractFunction::HAS_PARAM_NAMES)
+			if (abcFlags & MethodInfo::HAS_PARAM_NAMES)
 			{
 				// AVMPlus doesn't care about the param names, just skip past them
-				for( int j = 0; j < info->param_count; ++j )
+				for( int j = 0; j < param_count; ++j )
 				{
 					readU30(pos);
 				}
 			}
 
 			// save method info pointer.  we will verify code later.
-			pool->methods.set(i, info);
+			pool->_methods.set(i, info);
 #ifdef DEBUGGER
 			// don't create the corresponding DebuggerMethodInfo yet, we'll do that in parseMethodBodies
 #endif
@@ -803,8 +779,8 @@ namespace avmplus
 			int offset = (int)(pos-startpos);
 #endif
 
-			uint32_t method_info = readU30(pos);
-			AbstractFunction* info = resolveMethodInfo(method_info);
+			uint32_t method_index = readU30(pos);
+			MethodInfo* info = resolveMethodInfo(method_index);
 
 			const byte *body_pos = pos;
 
@@ -812,12 +788,16 @@ namespace avmplus
             (void)max_stack;
             
             int local_count = readU30(pos);
+			(void)local_count;
 
-			if (local_count < info->param_count+1)
-			{
-				// must have enough locals to hold all parameters including this
-				toplevel->throwVerifyError(kCorruptABCError);
-			}
+			// can't do this check here because param_count isn't available
+			// until the method is resolved. (we could do some tricks to extract
+			// it, but we just defer this check to Verifier::verify instead.)
+			//if (local_count < info->param_count()+1)
+			//{
+			//	// must have enough locals to hold all parameters including this
+			//	toplevel->throwVerifyError(kCorruptABCError);
+			//}
 
 			// TODO change file format, just want local max_scope
 			int init_scope_depth = readU30(pos);
@@ -827,7 +807,6 @@ namespace avmplus
 			(void)max_scope_depth;
 
 			int code_length = readU30(pos);
-
 
 			if (code_length <= 0) 
 			{
@@ -842,7 +821,7 @@ namespace avmplus
             int exception_count = readU30(pos);
 
 			if_verbose(
-				core->console << "    " << offset << ":method["<<method_info<<"] max_stack=" << max_stack
+				core->console << "    " << offset << ":method["<<method_index<<"] max_stack=" << max_stack
 					<< " local_count=" << local_count 
 					<< " init_scope_depth=" << init_scope_depth 
 					<< " max_scope_depth=" << max_scope_depth
@@ -853,11 +832,11 @@ namespace avmplus
 
 			if (exception_count != 0) 
 			{
-				info->flags |= AbstractFunction::HAS_EXCEPTIONS;
+				info->setHasExceptions();
 				for (int i=0; i<exception_count; i++) 
 				{
 					// this will be parsed when method is verified.
-					// see AbstractFunction::resolveSignature
+					// see MethodInfo::resolveSignature
 
 					#ifdef AVMPLUS_VERBOSE
 					int from = readU30(pos);
@@ -899,7 +878,7 @@ namespace avmplus
 					readU30(pos); // type name
 					if (version != (46<<16|15))
 					{
-						uint32 name_index = readU30(pos); // variable name
+						const uint32 name_index = readU30(pos); // variable name
 						if (name_index >= pool->constantMnCount)
 							toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(name_index), core->toErrorString(pool->constantCount));
 					}
@@ -909,10 +888,8 @@ namespace avmplus
 
 			if (info->hasMethodBody())
 			{
-				MethodInfo *methodInfo = (MethodInfo*) info;
-
 				// Interface methods should not have bodies
-				if (info->declaringTraits && info->declaringTraits->isInterface)
+				if (info->declaringTraits() && info->declaringTraits()->isInterface)
 				{
 					toplevel->throwVerifyError(kIllegalInterfaceMethodBodyError, core->toErrorString(info));
 				}
@@ -920,17 +897,19 @@ namespace avmplus
 #ifdef DEBUGGER
 				if (core->debugger())
 				{
-					methodInfo->initDMI(local_count, code_length, max_scope_depth - init_scope_depth);
+					DebuggerMethodInfo* dmi = DebuggerMethodInfo::create(core, local_count, code_length, max_scope_depth - init_scope_depth);
+					pool->_method_dmi.set(method_index, dmi);
 				}
 #endif
 
 				// if non-zero, we have a duplicate method body - throw a verify error
-				if (methodInfo->body_pos)
+				if (info->abc_body_pos())
 				{
 					toplevel->throwVerifyError(kDuplicateMethodBodyError, core->toErrorString(info));
 				}
-
-				methodInfo->body_pos = body_pos;
+				
+				AvmAssert(!info->isResolved());
+				info->set_abc_body_pos(body_pos);
 
 				// there will be a traits_count here, even if NEED_ACTIVATION is not
 				// set.  So we parse the same way all the time.  We could reduce file size and
@@ -938,7 +917,7 @@ namespace avmplus
 
 				const byte* traits_pos = pos;
 				int nameCount = readU30(pos);
-				if ((methodInfo->flags & AbstractFunction::NEED_ACTIVATION) || nameCount > 0)
+				if (info->needActivation() || nameCount > 0)
 				{
 					pos = traits_pos;
 					Namespacep ns = NULL;
@@ -947,12 +926,12 @@ namespace avmplus
 					if (core->config.methodNames)
 					{
 						ns = core->publicNamespace;
-						name = core->internString(methodInfo->getMethodName());
+						name = core->internString(info->getMethodName());
 					}
 					#endif
 					// activation traits are raw types, not subclasses of object.  this is
 					// okay because they aren't accessable to the programming model.
-					methodInfo->activationTraits = parseTraits(sizeof(ScriptObject), 
+					Traits* act = parseTraits(sizeof(ScriptObject), 
 																NULL, 
 																ns, 
 																name, 
@@ -960,8 +939,9 @@ namespace avmplus
 																traits_pos,
 																TRAITSTYPE_ACTIVATION, 
 																NULL);
-					methodInfo->activationTraits->final = true;
-					//methodInfo->activationTraits->resolveSignatures(NULL);
+					act->final = true;
+					info->set_activationTraits(act);
+					//info->activationTraits->resolveSignatures(NULL);
 				}
 				else
 				{
@@ -1107,10 +1087,15 @@ namespace avmplus
 			// until then, it's not safe.
 			Stringp s = core->internStringUTF8((const char*)pos, len);
 
-#ifdef MMGC_DRC
-			// MIR skips WB on string constants so make them sticky
+			// internStringUTF8() will return NULL if we pass it invalid UTF8 data and its "strict" arg is true
+			// (which it is by default) -- invalid UTF8 in the ABC == verify error.
+			if (!s)	
+				toplevel->throwVerifyError(kCorruptABCError);
+
+			// Jit skips WB on string constants so make them sticky
+			// fixme -- it's incorrect to skip WB's on const's, bug was fixed; is this still required?
 			s->Stick();
-#endif
+
 			cpool_string.set(i, s);
 			pos += len;
 
@@ -1371,9 +1356,9 @@ namespace avmplus
 		}
 	}
 	
-	void AbcParser::addNamedScript(Namespacep ns, Stringp name, AbstractFunction* script)
+	void AbcParser::addNamedScript(Namespacep ns, Stringp name, MethodInfo* script)
 	{
-		AbstractFunction* s = (AbstractFunction*) domain->getNamedScript(name, ns);
+		MethodInfo* s = domain->getNamedScript(name, ns);
 		if (!s)
 		{
 			if(ns->isPrivate())
@@ -1438,13 +1423,13 @@ namespace avmplus
 					<< " init_index=" << init_index
 					<< "\n";
 			)
-			AbstractFunction* script = resolveMethodInfo(init_index);
+			MethodInfo* script = resolveMethodInfo(init_index);
 
-			if (script->declaringTraits != NULL)
+			if (script->declaringTraits() != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString((Traits*)script->declaringTraits));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString(script->declaringTraits()));
 			}
 
 			Traits* traits = parseTraits(sizeof(ScriptObject), 
@@ -1466,18 +1451,18 @@ namespace avmplus
 			script->makeMethodOf(traits);
 			traits->init = script;
 
-            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+            #if defined FEATURE_NANOJIT
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the $init methods
-				script->flags |= AbstractFunction::SUGGEST_INTERP;
+				script->setSuggestInterp();
 			}
 			#endif
 
 			pool->scripts.set(i, script);
 
 			// initial scope chain is []
-			traits->scope = ScopeTypeChain::create(core->GetGC(),NULL,0);
+			traits->scope = ScopeTypeChain::createEmpty(core->GetGC());
 		}
 
 		return true;
@@ -1504,8 +1489,7 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		// allocate room for class infos early, to handle nested classes
-		pool->cinits.ensureCapacity(classCount);
-		pool->classCount = classCount;
+		pool->_classes.ensureCapacity(classCount);
 
 		instances.ensureCapacity(classCount);
 
@@ -1578,7 +1562,7 @@ namespace avmplus
 			//  - overrides agree with base class signature
 			
             uint32_t iinit_index = readU30(pos);
-			AbstractFunction *iinit = resolveMethodInfo(iinit_index);
+			MethodInfo* iinit = resolveMethodInfo(iinit_index);
 
 			if_verbose(
 				// TODO:  fixup this math here, since the 2's are all wrong
@@ -1629,11 +1613,11 @@ namespace avmplus
 				}
 			}
 
-			if (iinit->declaringTraits != NULL)
+			if (iinit->declaringTraits() != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(iinit), core->toErrorString((Traits*)iinit->declaringTraits));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(iinit), core->toErrorString(iinit->declaringTraits()));
 			}
 
 			iinit->makeMethodOf(itraits);
@@ -1686,7 +1670,7 @@ namespace avmplus
 			const byte* class_pos = pos;
 
 			uint32_t cinit_index = readU30(pos);
-            AbstractFunction *cinit = resolveMethodInfo(cinit_index);
+            MethodInfo* cinit = resolveMethodInfo(cinit_index);
 
 			if_verbose(
 				core->console
@@ -1710,11 +1694,11 @@ namespace avmplus
 
 			ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
 
-			if (cinit->declaringTraits != NULL)
+			if (cinit->declaringTraits() != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(cinit), core->toErrorString((Traits*)cinit->declaringTraits));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(cinit), core->toErrorString(cinit->declaringTraits()));
 			}
 			
 			cinit->makeMethodOf(ctraits);
@@ -1723,15 +1707,15 @@ namespace avmplus
 			ctraits->final = true;
 			ctraits->set_needsHashtable(true);
 
-            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+            #if defined FEATURE_NANOJIT
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the class initializer
-				cinit->flags |= AbstractFunction::SUGGEST_INTERP;
+				cinit->setSuggestInterp();
 			}
 			#endif
 
-			pool->cinits.set(i, cinit);
+			pool->_classes.set(i, ctraits);
         }
     }
 
@@ -1748,11 +1732,9 @@ namespace avmplus
 
 	double AbcParser::readDouble(const byte* &p) const
 	{
-#ifdef SAFE_PARSE
 		// check to see if we are trying to read past the file end.
 		if (p < abcStart || p+7 >= abcEnd )
 			toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
 
 		union {
 			double value;

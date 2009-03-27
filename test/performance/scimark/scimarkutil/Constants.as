@@ -10,8 +10,14 @@ public class Constants
 	//
 	public static  var FFT_SIZE = 1024;  // must be a power of two
 	public static  var SOR_SIZE =100; // NxN grid
-	public static  var SPARSE_SIZE_M = 1000;
-	public static  var SPARSE_SIZE_nz = 5000;
+    if (CONFIG::desktop) {
+        public static  var SPARSE_SIZE_M = 1000;
+	    public static  var SPARSE_SIZE_nz = 5000;
+    }
+    else { // mobile
+        public static  var SPARSE_SIZE_M = 100;
+	    public static  var SPARSE_SIZE_nz = 500;
+    }
 	public static  var LU_SIZE = 100;
 
 	// large (out-of-cache) problem sizes

@@ -332,7 +332,7 @@ namespace avmplus
 
 		void atomToValue(Atom atom, sint16& value)
 		{
-			value = (sint16) core()->integer(atom);						
+			value = (sint16) AvmCore::integer(atom);						
 		}
 		void atomToValue(Atom atom, uint16& value)
 		{
@@ -340,27 +340,27 @@ namespace avmplus
 		}
 		void atomToValue(Atom atom, sint32& value)
 		{
-			value = core()->integer(atom);						
+			value = AvmCore::integer(atom);						
 		}
 		void atomToValue(Atom atom, sint64& value)
 		{
-			value = core()->integer(int(atom));						
+			value = AvmCore::integer(int(atom));						
 		}
 		void atomToValue(Atom atom, uint32& value)
 		{
-			value = core()->toUInt32(atom);			
+			value = AvmCore::toUInt32(atom);			
 		}
 		void atomToValue(Atom atom, float& value)
 		{
-			value = (float) core()->number(atom);
+			value = (float) AvmCore::number(atom);
 		}
 		void atomToValue(Atom atom, double& value)
 		{
-			value = core()->number(atom);
+			value = AvmCore::number(atom);
 		}
 		void atomToValue(Atom atom, ScriptObject*& value)
 		{
-			value = core()->atomToScriptObject(atom);
+			value = AvmCore::atomToScriptObject(atom);
 		}
 
 		Atom valueToAtom(sint16 value) const
@@ -398,7 +398,7 @@ namespace avmplus
 
 		TypedVectorObject<T>* isVector(Atom instance)
 		{
-			if (core()->istype(instance, vtable->traits))
+			if (AvmCore::istype(instance, vtable->traits))
 				return (TypedVectorObject<T>*)AvmCore::atomToScriptObject(instance);
 			return NULL;
 		}
@@ -482,9 +482,7 @@ namespace avmplus
 
 		~ObjectVectorObject()
 		{
-#ifdef MMGC_DRC
 			AvmCore::decrementAtomRegion(m_array, m_length);
-#endif
 			m_length = 0;
 			if(m_array) {
 				MMgc::GC::GetGC(m_array)->Free(m_array);
@@ -520,7 +518,7 @@ namespace avmplus
 	private:
 		ObjectVectorObject* isVector(Atom instance)
 		{
-			if (instance && core()->istype(instance, vtable->traits))
+			if (instance && AvmCore::istype(instance, vtable->traits))
 				return (ObjectVectorObject*)AvmCore::atomToScriptObject(instance);
 			return NULL;
 		}
@@ -590,6 +588,8 @@ namespace avmplus
 		ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
 
 		virtual Atom applyTypeArgs(int argc, Atom* argv);
+	
+		static Stringp makeVectorClassName(AvmCore* core, Traits* t);
 	
 	private:
 		DWB(Hashtable*) instantiated_types;

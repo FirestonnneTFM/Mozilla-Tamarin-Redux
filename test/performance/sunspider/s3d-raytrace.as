@@ -451,10 +451,16 @@ function verifyTest(pixelArray) {
 }
 
 function run3draytrace() {
-  var _sunSpiderStartDate = (new Date).getTime();
+  if (CONFIG::desktop)
+      var _sunSpiderStartDate = (new Date).getTime();
+  else  // mobile
+      var _sunSpiderStartDate = getTimer();
   var pixels = raytraceScene();
   testOutput = arrayToCanvasCommands(pixels);
-  var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  if (CONFIG::desktop)
+      var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  else  // mobile
+      var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   
   //print('pixels: '+pixels);
   // verify test result

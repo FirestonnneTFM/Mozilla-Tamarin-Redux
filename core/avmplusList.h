@@ -204,6 +204,7 @@ namespace avmplus
 			data = NULL;
             len = 0;
             max = 0;
+			gc = 0;
 		}
 		uint32 add(T value)
 		{

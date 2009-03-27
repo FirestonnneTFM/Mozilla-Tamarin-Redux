@@ -53,7 +53,7 @@ namespace avmplus
 			struct {
 				// Number of StackTraceElements in the trace
 				uint32 depth;
-				// Beginning of an array of StackTraceElement.  Basically, an AbstractFunction*, Stringp, Stringp, uint32 for each entry. 
+				// Beginning of an array of StackTraceElement.  Basically, an MethodInfo*, Stringp, Stringp, uint32 for each entry. 
 				void *trace; 
 			} stack;
 			// deleted object size record, instead of stack

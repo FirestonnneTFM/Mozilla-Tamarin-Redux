@@ -59,8 +59,8 @@ namespace avmplus
 	{
 		// patch global.__proto__ = Object.prototype
 		Toplevel* toplevel = this->toplevel();
-		toplevel->setDelegate( prototype );						// global.__proto__ = Object.prototype
-		this->setDelegate( toplevel->classClass->prototype );	// Object.__proto__ = Class.prototype
+		toplevel->global()->setDelegate(prototype);				// global.__proto__ = Object.prototype
+		this->setDelegate(toplevel->classClass->prototype);		// Object.__proto__ = Class.prototype
 	}
 
 	ScriptObject* ObjectClass::construct()
@@ -212,7 +212,7 @@ namespace avmplus
 	{		
 		AvmCore* core = this->core();
 
-		if (core->istype(thisAtom, CLASS_TYPE))
+		if (AvmCore::istype(thisAtom, CLASS_TYPE))
 		{
 			ClassClosure *cc = (ClassClosure *)AvmCore::atomToScriptObject(thisAtom);
 			Traits*		t = cc->ivtable()->traits;

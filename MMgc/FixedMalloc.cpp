@@ -41,8 +41,6 @@
 
 namespace MMgc
 {
-	FixedMalloc *FixedMalloc::instance = NULL;
-
 	// Size classes for our Malloc.  We start with a 4 byte allocator and then from
 	// 8 to 128, size classes are spaced evenly 8 bytes apart, then from 128 to 1968 they
 #ifdef MMGC_64BIT
@@ -57,7 +55,7 @@ namespace MMgc
 	// lowest 8 bytes.  If someone was allocating 801 bytes, it would get rounded
 	// up to 808 and then go into the 4-per-block allocator (4032/808=4.99).
 
-	const int16 FixedMalloc::kSizeClasses[kNumSizeClasses] = {
+	const int16_t FixedMalloc::kSizeClasses[kNumSizeClasses] = {
 		8, 16, 24, 32, 40, 48, 56, 64, 72, 80, //0-9
 		88, 96, 104, 112, 120, 128,	136, 144, 152, 160, //10-19
 		168, 176, 192, 208, 224, 232, 248, 264, 288, 304, //20-29
@@ -67,14 +65,14 @@ namespace MMgc
 
 	// This is an index which indicates that allocator i should be used
 	// if kSizeClassIndex[i] items fit into a 4096 byte page.
-	const uint8 FixedMalloc::kSizeClassIndex[32] = {
+	const uint8_t FixedMalloc::kSizeClassIndex[32] = {
 		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-9
 		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
 		23, 22, 21, 20, 20, 19, 18, 17, 17, 16, //20-29
 		15, 15  //30-31
 	};
 	/*
-	const int16 FixedMalloc::kSizeClasses[kNumSizeClasses] = {
+	const int16_t FixedMalloc::kSizeClasses[kNumSizeClasses] = {
 		4, 8, 16, 24, 32, 40, 48, 56, 64, 72, //0-9
 		80, 88, 96, 104, 112, 120, 128,	144, 160, 168, //10-19
         183, 192, 201, 211, 224, 235, 251, 267, 288, 310, //20-29
@@ -82,7 +80,7 @@ namespace MMgc
 		2032, //40
 	};
 
-	const uint8 FixedMalloc::kSizeClassIndex[32] = {
+	const uint8_t FixedMalloc::kSizeClassIndex[32] = {
 		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-10
 		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
 		22, 21, 20, 19, 19, 18, 18, 18, 17, 17, //20-29
@@ -91,7 +89,7 @@ namespace MMgc
 	*/
 
 #else
-	const int16 FixedMalloc::kSizeClasses[kNumSizeClasses] = {
+	const int16_t FixedMalloc::kSizeClasses[kNumSizeClasses] = {
 		4, 8, 16, 24, 32, 40, 48, 56, 64, 72, //0-9
 		80, 88, 96, 104, 112, 120, 128,	144, 160, 176, //10-19
         184, 192, 200, 208, 224, 232, 248, 264, 288, 312, //20-29
@@ -101,7 +99,7 @@ namespace MMgc
 
 	// This is an index which indicates that allocator i should be used
 	// if kSizeClassIndex[i] items fit into a 4096 byte page.
-	const uint8 FixedMalloc::kSizeClassIndex[32] = {
+	const uint8_t FixedMalloc::kSizeClassIndex[32] = {
 		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-10
 		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
 		22, 21, 20, 19, 19, 18, 18, 18, 17, 17, //20-29
@@ -109,21 +107,15 @@ namespace MMgc
 	};
 
 #endif
-	void FixedMalloc::Init()
+	/*static*/
+	FixedMalloc* FixedMalloc::GetInstance()
 	{
-		GCAssert(instance == NULL);
-		instance = new FixedMalloc(GCHeap::GetGCHeap());
+		return GCHeap::GetGCHeap()->GetFixedMalloc(); 
 	}
 
-	void FixedMalloc::Destroy()
+	void FixedMalloc::_Init(GCHeap* heap)
 	{
-		GCAssert(instance != NULL);
-		delete instance;
-		instance = NULL;
-	}
 
-	FixedMalloc::FixedMalloc(GCHeap* heap)
-	{
 		m_heap = heap;
 		numLargeChunks = 0;
 		// Create all the allocators up front (not lazy)
@@ -138,6 +130,7 @@ namespace MMgc
 		}
 
 #ifdef _DEBUG 
+		const int kPageUsableSpace = GCHeap::kBlockSize - offsetof(MMgc::FixedAlloc::FixedBlock, items);
 		// sanity check our tables
 		for (int size8 = 136; size8 < 2016; size8 += 8)
 		{
@@ -157,7 +150,7 @@ namespace MMgc
 #endif
 	}
 
-	FixedMalloc::~FixedMalloc()
+	void FixedMalloc::_Destroy()
 	{
 		for (int i=0; i<kNumSizeClasses; i++) {
 			FixedAllocSafe *a = m_allocs[i];
@@ -181,7 +174,7 @@ namespace MMgc
 	{
 		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
 
-		uint32 size8 = (uint32)((size+7)&~7); // round up to multiple of 8
+		uint32_t size8 = (uint32_t)((size+7)&~7); // round up to multiple of 8
 
 		// Buckets up to 128 are spaced evenly at 8 bytes.
 		if (size <= 128) {
@@ -203,6 +196,7 @@ namespace MMgc
 		// This is the fast lookup table implementation to
 		// find the right allocator.
 		// FIXME: do this w/o division!
+		const int kPageUsableSpace = GCHeap::kBlockSize - offsetof(MMgc::FixedAlloc::FixedBlock, items);
 		unsigned index = kSizeClassIndex[kPageUsableSpace/size8];
 
 		// assert that I fit

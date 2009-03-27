@@ -297,9 +297,7 @@ namespace avmplus
 
 	void AtomArray::clear()
 	{
-#ifdef MMGC_DRC
 		AvmCore::decrementAtomRegion(m_atoms, m_length);
-#endif
 		m_length = 0;
 		if(m_atoms) {
 			GC::GetGC(m_atoms)->Free(m_atoms);

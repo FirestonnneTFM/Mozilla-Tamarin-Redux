@@ -126,9 +126,16 @@ function cordic( runs:int ):int {
 
   
 function runMathCordic():int {
-    var _sunSpiderStartDate:int = (new Date).getTime();
-    cordic(25000);
-    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    if (CONFIG::desktop) {
+        var _sunSpiderStartDate:int = (new Date).getTime();
+        cordic(25000);
+        var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    }
+    else { // mobile
+        var _sunSpiderStartDate:int = getTimer();
+        cordic(25000);
+        var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
+    }
     return _sunSpiderInterval;
 }
 

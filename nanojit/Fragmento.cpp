@@ -39,7 +39,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "nanojit.h"
-#undef MEMORY_INFO
+#undef MMGC_MEMORY_INFO
 
 namespace nanojit
 {	
@@ -50,7 +50,7 @@ namespace nanojit
 	static uint32_t calcSaneCacheSize(uint32_t in)
 	{
 		if (in < uint32_t(NJ_LOG2_PAGE_SIZE)) return NJ_LOG2_PAGE_SIZE;	// at least 1 page
-		if (in > 30) return 30;	// 1GB should be enough for anyone
+		if (in > uint32_t(Fragmento::MAX_CACHE_SIZE_LOG2)) return Fragmento::MAX_CACHE_SIZE_LOG2;
 		return in;
 	}
 
@@ -64,7 +64,7 @@ namespace nanojit
 		    _max_pages(1 << (calcSaneCacheSize(cacheSizeLog2) - NJ_LOG2_PAGE_SIZE)),
 			_pagesGrowth(16)
 	{
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 		_allocList.set_meminfo_name("Fragmento._allocList");
 #endif
 		NanoAssert(_max_pages > _pagesGrowth); // shrink growth if needed 
@@ -85,7 +85,7 @@ namespace nanojit
 		while( _allocList.size() > 0 )
 		{
 			//fprintf(stderr,"dealloc %x\n", (intptr_t)_allocList.get(_allocList.size()-1));
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 			ChangeSizeExplicit("NanoJitMem", -1, _gcHeap->Size(_allocList.last()));
 #endif
             entry = _allocList.removeLast();
@@ -135,7 +135,7 @@ namespace nanojit
 	void Fragmento::pagesGrow(int32_t count)
 	{
 		NanoAssert(!_freePages.size());
-		MMGC_MEM_TYPE("NanojitFragmentoMem"); 
+		MMGC_MEM_TAG("NanojitFragmentoMem"); 
 		Page* memory = 0;
         GC *gc = _core->GetGC();
 		if (_stats.pages < _max_pages)
@@ -149,13 +149,12 @@ namespace nanojit
                 count = 0;
 			// @todo nastiness that needs a fix'n
 			_gcHeap = gc->GetGCHeap();
-			NanoAssert(int32_t(NJ_PAGE_SIZE)<=_gcHeap->kNativePageSize);
+			NanoAssert(size_t(NJ_PAGE_SIZE)<=_gcHeap->kNativePageSize);
 			
 			// convert _max_pages to gc page count 
-			int32_t gcpages = (count*NJ_PAGE_SIZE) / _gcHeap->kNativePageSize;
-			MMGC_MEM_TYPE("NanoJitMem"); 
+			int32_t gcpages = (int32_t)((count*NJ_PAGE_SIZE) / _gcHeap->kNativePageSize);
 			memory = (Page*)_gcHeap->Alloc(gcpages);
-#ifdef MEMORY_INFO
+#ifdef MMGC_MEMORY_INFO
 			ChangeSizeExplicit("NanoJitMem", 1, _gcHeap->Size(memory));
 #endif
 			NanoAssert((int*)memory == pageTop(memory));

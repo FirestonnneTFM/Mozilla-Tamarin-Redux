@@ -61,9 +61,16 @@ function sieve() {
     return res;
 }
 
-var start=new Date();
-var res=sieve();
-var totaltime=new Date()-start;
+if (CONFIG::desktop) {
+    var start=new Date();
+    var res=sieve();
+    var totaltime=new Date()-start;
+}
+else {  // mobile
+    var start=getTimer();
+    var res=sieve();
+    var totaltime=getTimer()-start;
+}
 print("sieve()="+res);
 if (res==7837) {
    print("metric time "+totaltime);

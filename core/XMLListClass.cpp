@@ -61,13 +61,13 @@ namespace avmplus
 			return arg;
 		}
 
-		if (core->isXMLList(arg))
+		if (AvmCore::isXMLList(arg))
 		{
 			return arg;
 		}
-		else if (core->isXML (arg))
+		else if (AvmCore::isXML(arg))
 		{
-			XMLObject *x = core->atomToXMLObject(arg);
+			XMLObject *x = AvmCore::atomToXMLObject(arg);
 			Multiname m;
 			bool bFound = x->getQName (&m);
 			XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), x->parent(), bFound ? &m : 0);
@@ -129,7 +129,7 @@ namespace avmplus
 		}
 
 		// if args[0] is xmllist, create new list and call append
-		if (core->isXMLList(argv[1]))
+		if (AvmCore::isXMLList(argv[1]))
 		{
 			XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass());
 			l->_append (argv[1]);

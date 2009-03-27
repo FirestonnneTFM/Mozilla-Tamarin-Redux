@@ -43,20 +43,29 @@ namespace avmshell
 	int ConsoleOutputStream::write(const void *buffer,
 								   int count)
 	{
-#ifdef NO_CONSOLE_FWRITE
-		// Not the most efficient code, but some versions of fwrite to stdout,
-		// fputc, putc and putchar don't seem to work. 
-		int c = count;
-		char* out = (char*)buffer;
-		while(c--)
+		//Currently this method is called from avmplus::PrintWriter class
+		//which can pass 1-4 bytes of data at at time.
+		//To do a new/delete for small bursts of data could be inefficient.
+		//So for data < 256 bytes we use a stack buffer to copy and log the message
+		if(count < 256)
 		{
-			printf("%c", *out++);
+			char message[256];
+			VMPI_strncpy(message, (const char*) buffer, count);
+			message[count] = '\0';
+
+			return Platform::GetInstance()->logMessage(message);
 		}
-		return count;
-#else
-		int result = (int) fwrite(buffer, 1, count, stdout);
-		fflush(stdout);
-		return result;
-#endif
+		else
+		{
+			char* message = new char[count+1];
+			VMPI_strncpy(message, (const char*)buffer, count);
+			message[count] = '\0';
+
+			int i = Platform::GetInstance()->logMessage(message);
+
+			delete [] message;
+
+			return i;
+		}
 	}
 }

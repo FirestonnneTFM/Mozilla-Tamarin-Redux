@@ -342,7 +342,10 @@
 	    return ia.join("");
 	}
 
-        var start:Number=new Date();
+    if (CONFIG::desktop) 
+        var start:Number = new Date();
+    else // mobile
+        var start:int = getTimer();
 
 	var date:Date = new Date("1/1/2007 1:11:11");
 
@@ -352,7 +355,10 @@
 	    date.setTime(date.getTime() + 84266956);
 	}
 
-        var totaltime:Number=new Date()-start;
+    if (CONFIG::desktop) 
+        var totaltime:Number = new Date() - start;
+    else // mobile
+        var totaltime:int = getTimer() - start;
         
     if (shortFormat!="2008-05-01") {
         print("error shortFormat expecting 2008-05-01 got "+shortFormat);

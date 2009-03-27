@@ -148,15 +148,15 @@ namespace avmplus
 		return b ? trueAtom : falseAtom;
 	}
 
-	ArrayObject* TypeDescriber::describeParams(const AbstractFunction* af)
+	ArrayObject* TypeDescriber::describeParams(MethodInfo* /*mi*/, MethodSignaturep ms)
 	{
 		ArrayObject* a = new_array();
-		const int requiredParamCount = af->requiredParamCount();
-		for (int i = 1; i <= af->param_count; ++i) 
+		const int requiredParamCount = ms->requiredParamCount();
+		for (int i = 1, n = ms->param_count(); i <= n; ++i) 
 		{
 			ScriptObject* v = new_object();
 			const KVPair props[] = {
-				{ kstrid_type, strAtom(describeClassName(af->paramTraits(i))) },
+				{ kstrid_type, strAtom(describeClassName(ms->paramTraits(i))) },
 				{ kstrid_optional, boolAtom(i > requiredParamCount) },
 			};
 			setpropmulti(v, props, elem_count(props));
@@ -176,7 +176,7 @@ namespace avmplus
 		}
 	}
 	
-	ScriptObject* TypeDescriber::describeTraits(Traitsp traits, uint32_t flags)
+	ScriptObject* TypeDescriber::describeTraits(Traitsp traits, uint32_t flags, Toplevel* toplevel)
 	{
 		if (!(flags & INCLUDE_TRAITS))
 			return NULL;
@@ -236,10 +236,15 @@ namespace avmplus
 		// constructor
 		if (flags & INCLUDE_CONSTRUCTOR)
 		{
-			AbstractFunction* initMethod = traits->init;
-			if (initMethod && initMethod->param_count)
+			MethodInfo* initMethod = traits->init;
+			if (initMethod)
 			{
-				constructor = describeParams(initMethod);
+				initMethod->resolveSignature(toplevel);
+				MethodSignaturep ms = initMethod->getMethodSignature();
+				if (ms->param_count() > 0)
+				{
+					constructor = describeParams(initMethod, ms);
+				}
 			}
 		}
 		
@@ -337,14 +342,16 @@ namespace avmplus
 							continue;
 
 						const uint32_t methodID = AvmCore::bindingToMethodId(binding);
-						const AbstractFunction* af = tb->getMethod(methodID);
+						MethodInfo* mi = tb->getMethod(methodID);
+						mi->resolveSignature(toplevel);
+						MethodSignaturep ms = mi->getMethodSignature();
 
-						Traitsp declaringTraits = af->declaringTraits;
+						Traitsp declaringTraits = mi->declaringTraits();
 
 						const KVPair props[] = {
 							{ kstrid_declaredBy, strAtom(describeClassName(declaringTraits)) },
-							{ kstrid_returnType, strAtom(describeClassName(af->returnTraits())) },
-							{ kstrid_parameters, objAtom(describeParams(af)) },
+							{ kstrid_returnType, strAtom(describeClassName(ms->returnTraits())) },
+							{ kstrid_parameters, objAtom(describeParams(mi, ms)) },
 						};
 						setpropmulti(v, props, elem_count(props));
 						if (!methods) methods = new_array();
@@ -364,13 +371,15 @@ namespace avmplus
 													AvmCore::bindingToGetterId(binding) :
 													AvmCore::bindingToSetterId(binding);
 
-						const AbstractFunction* af = tb->getMethod(methodID);
+						MethodInfo* mi = tb->getMethod(methodID);
+						mi->resolveSignature(toplevel);
+						MethodSignaturep ms = mi->getMethodSignature();
 
-						Traitsp declaringTraits = af->declaringTraits;
+						Traitsp declaringTraits = mi->declaringTraits();
 
 						Traitsp accessorType = AvmCore::hasGetterBinding(binding) ?
-													af->returnTraits() :
-													af->paramTraits(1);
+													ms->returnTraits() :
+													ms->paramTraits(1);
 
 						static const uint8_t bk2str[8] = 
 						{
@@ -532,7 +541,7 @@ namespace avmplus
 			{ kstrid_isDynamic, boolAtom(traits->needsHashtable()) },
 			{ kstrid_isFinal, boolAtom(traits->final) },
 			{ kstrid_isStatic, boolAtom(traits->itraits != NULL) },
-			{ kstrid_traits, objAtom(describeTraits(traits, flags)) },
+			{ kstrid_traits, objAtom(describeTraits(traits, flags, m_toplevel)) },
 		};
 		setpropmulti(o, props, elem_count(props));
 

@@ -62,21 +62,16 @@ completion
 - finish cmov/qcmov with other conditions
 - validate asm_cond with other conditions
 
-mir parity
+better code
 - put R12 back in play as a base register
 - no-disp addr modes (except RBP/R13)
-- disp8 addressing modes
-- disp8 branches
 - disp64 branch/call
-- windows abi
-
-someday
 - spill gp values to xmm registers?
 - prefer xmm registers for copies since gprs are in higher demand?
 - stack arg doubles
 - stack based LIR_param
 
-only for tracing
+tracing
 - asm_adjustBranch
 - asm_loop
 - asm_qjoin
@@ -106,7 +101,7 @@ namespace nanojit
 #ifdef _DEBUG
     #define TODO(x) todo(#x)
     static void todo(const char *s) {
-        verbose_only( printf("%s",s); )
+        verbose_only( avmplus::AvmLog("%s",s); )
         NanoAssertMsgf(false, "%s", s);
     }
 #else
@@ -352,7 +347,7 @@ namespace nanojit
     static bool isImm32(LIns *ins) {
         return ins->isconst() || ins->isconstq() && isS32(ins->constvalq());
     }
-    static int32 getImm32(LIns *ins) {
+    static int32_t getImm32(LIns *ins) {
         return ins->isconst() ? ins->constval() : int32_t(ins->constvalq());
     }
 

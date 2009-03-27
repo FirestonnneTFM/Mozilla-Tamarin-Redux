@@ -124,6 +124,7 @@
 #include "avmplusTypes.h"
 #include "avmplusVersion.h"
 #include "AvmDebug.h"
+#include "AvmLog.h"
 #include "AtomConstants.h"
 #include "ActionBlockConstants.h"
 #include "wopcodes.h"
@@ -142,7 +143,6 @@ namespace avmplus
 	class AbcGen;
 	class AbcEnv;
 	class AbcParser;
-	class AbstractFunction;
 	class Accessor;
 	class ArrayClass;
 	class ArrayObject;
@@ -150,7 +150,6 @@ namespace avmplus
 	class AtomArray;
 	class AvmCore;
 	class BooleanClass;
-	class BufferGuard;
 	class BuiltinTraits;
 	class CallStackNode;
 	class ClassClass;
@@ -176,7 +175,6 @@ namespace avmplus
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
 	class FrameState;
-	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
 	class IntVectorObject;
@@ -189,11 +187,13 @@ namespace avmplus
 	class MethodClosure;
 	class MethodEnv;
 	class MethodInfo;
+	class MethodSignature;
 	class Multiname;
 	class Namespace;
 	class NamespaceSet;
 	class NamespaceClass;
 	class NativeInitializer;
+	struct NativeMethodInfo;
 	class NumberClass;
 	class IntClass;
 	class UIntClass;
@@ -219,8 +219,11 @@ namespace avmplus
 	class Traits;
 	class TraitsBindings;
 	class TraitsMetadata;
+#ifdef AVMPLUS_WORD_CODE
+	class TranslatedCode;
 	class WordcodeTranslator;
 	class WordcodeEmitter;
+#endif
 	class UnicodeUtils;
 	class Value;
 	class Verifier; 
@@ -244,6 +247,7 @@ namespace avmplus
 	typedef const NamespaceSet* NamespaceSetp;
 	typedef const TraitsBindings* TraitsBindingsp;
 	typedef const TraitsMetadata* TraitsMetadatap;
+	typedef const MethodSignature* MethodSignaturep;
 }
 
 #include "MMgc.h"
@@ -251,7 +255,6 @@ namespace avmplus
 #define MMGC_SUBCLASS_DECL : public GCObject
 
 #include "QCache.h"
-#include "GrowableBuffer.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"
 #include "OSDep.h"
@@ -274,23 +277,23 @@ namespace avmplus
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"
 #include "CodeContext.h"
-#include "AbstractFunction.h"
-#include "PoolObject.h"
-#include "AbcEnv.h"
 #include "Traits.h"
-#include "TraitsIterator.h"
 #include "VTable.h"
-#include "MethodEnv.h"
-#include "ScopeChain.h"
 #include "ScriptObject.h"
-#include "avmplusProfiler.h"
-#include "StringBuffer.h"
-#include "AtomArray.h"
+#include "NativeFunction.h"
 #include "Coder.h"
 #include "WordcodeTranslator.h"
 #include "WordcodeEmitter.h"
+#include "MethodInfo.h"
+#include "PoolObject.h"
+#include "AbcEnv.h"
+#include "TraitsIterator.h"
+#include "MethodEnv.h"
+#include "ScopeChain.h"
+#include "avmplusProfiler.h"
+#include "StringBuffer.h"
+#include "AtomArray.h"
 #include "Verifier.h"
-#include "NativeFunction.h"
 #include "ClassClosure.h"
 #include "ClassClass.h"
 #include "FunctionClass.h"
@@ -316,6 +319,7 @@ namespace avmplus
 #include "ObjectClass.h"
 #include "ErrorClass.h"
 #include "MathClass.h"
+#include "eval-avmplus.h"
 #include "Toplevel.h"
 #include "AbcParser.h"
 #include "RegExpObject.h"

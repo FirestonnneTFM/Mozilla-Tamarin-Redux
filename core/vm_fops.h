@@ -103,14 +103,14 @@
     CSEMETHOD(COREADDR(AvmCore::uintToString), SIG2(P,P,U), uintToString) 
     CSEMETHOD(COREADDR(AvmCore::intToString), SIG2(P,P,I), intToString) 
     CSEMETHOD(COREADDR(AvmCore::doubleToAtom), SIG2(A,P,F), doubleToAtom)
-    CSEMETHOD(COREADDR(AvmCore::boolean), SIG2(I,P,A), boolean)
-    CSEMETHOD(COREADDR(AvmCore::toUInt32), SIG2(U,P,A), toUInt32)
+    CSEFUNCTION(FUNCADDR(AvmCore::boolean), SIG1(I,A), boolean)
+    CSEFUNCTION(FUNCADDR(AvmCore::toUInt32), SIG1(U,A), toUInt32)
     CSEFUNCTION(FUNCADDR(AVMCORE_integer_d), SIG1(I,F), integer_d)
     CSEFUNCTION(FUNCADDR(AvmCore::integer_i), SIG1(I,A), integer_i)
     CSEFUNCTION(FUNCADDR(AvmCore::number_d), SIG1(F,A), number_d)
     CSEFUNCTION(FUNCADDR(AvmCore::integer_u), SIG1(U,A), integer_u)
-    CSEMETHOD(COREADDR(AVMCORE_integer), SIG2(I,P,A), integer)
-    CSEMETHOD(COREADDR(AvmCore::number), SIG2(F,P,A), number)
+    CSEFUNCTION(FUNCADDR(AVMCORE_integer), SIG1(I,A), integer)
+    CSEFUNCTION(FUNCADDR(AvmCore::number), SIG1(F,A), number)
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
     METHOD(ENVADDR(MethodEnv::nullcheck), SIG2(V,P,A), nullcheck)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toVTable), SIG2(P,P,A), toVTable)
@@ -118,7 +118,7 @@
     METHOD(ENVADDR(MethodEnv::initproperty), SIG5(V,P,A,P,A,P), initproperty)
     METHOD(COREADDR(AvmCore::newPublicNamespace), SIG2(P,P,P), newPublicNamespace)
     METHOD(COREADDR(AvmCore::intern), SIG2(P,P,A), intern)
-    METHOD(COREADDR(AvmCore::istypeAtom), SIG3(A,P,A,P), istypeAtom)
+    FUNCTION(FUNCADDR(AvmCore::istypeAtom), SIG2(A,A,P), istypeAtom)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toClassITraits), SIG2(P,P,A), toClassITraits)
     METHOD(TOPLEVELADDR(Toplevel::in_operator), SIG3(A,P,A,A), in)
     METHOD(TOPLEVELADDR(Toplevel::instanceof), SIG3(A,P,A,A), instanceof)
@@ -126,7 +126,7 @@
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     CSEMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
     METHOD(TOPLEVELADDR(Toplevel::add2), SIG3(A,P,A,A), add2)
-    CSEMETHOD(COREADDR(AvmCore::astype), SIG3(A,P,A,P), astype)
+    CSEFUNCTION(FUNCADDR(AvmCore::astype), SIG2(A,A,P), astype)
     CSEMETHOD(COREADDR(AvmCore::EscapeAttributeValue), SIG2(P,P,A), EscapeAttributeValue)
     CSEMETHOD(COREADDR(AvmCore::ToXMLString), SIG2(P,P,A), ToXMLString)
     METHOD(ENVADDR(MethodEnv::delpropertyHelper), SIG4(A,P,A,P,A), delpropertyHelper)
@@ -213,14 +213,14 @@ SSE2_ONLY(
 )
 
 #ifdef DEBUGGER
-    METHOD(ENVADDR(MethodEnv::debugEnter), SIG8(V,P,I,P,P,I,P,P,P), debugEnter)
+    METHOD(ENVADDR(MethodEnv::debugEnter), SIG5(V,P,P,P,P,P), debugEnter)
     METHOD(ENVADDR(MethodEnv::debugExit), SIG2(V,P,P), debugExit)
     METHOD(DEBUGGERADDR(Debugger::debugFile), SIG2(V,P,P), debugFile)
     METHOD(DEBUGGERADDR(Debugger::debugLine), SIG2(V,P,I), debugLine)
     METHOD(COREADDR(AvmCore::sampleCheck), SIG1(V,P), sampleCheck)
 #endif
 
-#ifdef AVMPLUS_MOPS
+	// MOPS helper functions
     METHOD(ENVADDR(MethodEnv::li8),  SIG2(I,P,I), li8)
     METHOD(ENVADDR(MethodEnv::li16), SIG2(I,P,I), li16)
     METHOD(ENVADDR(MethodEnv::li32), SIG2(I,P,I), li32)
@@ -231,4 +231,3 @@ SSE2_ONLY(
     METHOD(ENVADDR(MethodEnv::si32), SIG3(V,P,I,I), si32)
     METHOD(ENVADDR(MethodEnv::sf32), SIG3(V,P,F,I), sf32)
     METHOD(ENVADDR(MethodEnv::sf64), SIG3(V,P,F,I), sf64)
-#endif

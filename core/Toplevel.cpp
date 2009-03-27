@@ -43,27 +43,69 @@ namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
 
-	Toplevel::Toplevel(VTable* cvtable, ScriptObject* delegate)
-		: ScriptObject(cvtable, delegate)
+	Toplevel::Toplevel(AbcEnv* abcEnv) : 
+		_abcEnv(abcEnv),
+		_builtinClasses(NULL),
+		_global(NULL)
 	{
-		builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->cinits.capacity(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
-		AvmAssert(traits()->getSizeOfInstance() >= sizeof(Toplevel));
+		_builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->classCount(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+
+		AvmCore* core = this->core();
+		MMgc::GC* gc = core->GetGC();
+		PoolObject* pool = abcEnv->pool();
+		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits();
+
+		// ISSUE can we just make this the public namespace?
+		ScopeChain* emptyScope = ScopeChain::create(gc, mainTraits->scope, NULL, core->newNamespace(core->kEmptyString));
+
+			// create a temp object vtable to use, since the real one isn't created yet
+			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
+			// of Object and Class have the right scope.
+		object_ivtable = core->newVTable(core->traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
+		object_ivtable->resolveSignatures();
+
+		// global objects are subclasses of Object
+		VTable* mainVTable = core->newVTable(mainTraits, object_ivtable, emptyScope, abcEnv, this);
+		ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, mainVTable);
+		mainVTable->init = main;
+		mainVTable->resolveSignatures();
+
+		_global = new (gc, mainVTable->getExtraSize()) ScriptObject(mainVTable, NULL);
+		main->global = _global;
+
+		// create temporary vtable for Class, so we have something for OP_newclass
+		// to use when it creates Object$ and Class$.  once that happens, we replace
+		// with the real Class$ vtable.
+		class_ivtable = core->newVTable(core->traits.class_itraits, object_ivtable, emptyScope, abcEnv, this);
+		class_ivtable->resolveSignatures();
+
+		core->exportDefs(mainTraits, main);
 	}
 
-	Toplevel::~Toplevel()
+	ScriptEnv* Toplevel::mainEntryPoint() const
 	{
+		MethodEnv* me = this->global()->vtable->init;
+		AvmAssert(me->isScriptEnv());
+		return (ScriptEnv*)(me);
+	}
+
+	ClassClosure* Toplevel::findClassInPool(int class_id, PoolObject* pool)
+	{
+		Traits* traits = pool->getClassTraits(class_id)->itraits;
+		Multiname qname(traits->ns, traits->name);
+		AvmAssert(_global != NULL);
+		ScriptObject* container = _global->vtable->init->finddef(&qname);
+
+		Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
+		ClassClosure* cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
+		return cc;
 	}
 
 	ClassClosure* Toplevel::resolveBuiltinClass(int class_id)
 	{
-		Traits *traits = core()->builtinPool->cinits[class_id]->declaringTraits->itraits;
-		Multiname qname(traits->ns, traits->name);
-		ScriptObject *container = vtable->init->finddef(&qname);
-
-		Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
-		ClassClosure *cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
+		ClassClosure* cc = findClassInPool(class_id, core()->builtinPool);
 		//builtinClasses[class_id] = cc;
-		WBRC(core()->GetGC(), builtinClasses, &builtinClasses[class_id], cc);
+		WBRC(core()->GetGC(), _builtinClasses, &_builtinClasses[class_id], cc);
 		return cc;
 	}
 
@@ -243,9 +285,9 @@ namespace avmplus
 				// if AnyName, return the result of calling "ToAttributeName(*)"
 				// if QName, return attributeName
 				// otherwise, do toString, then to default case
-				if (core->isQName(attributeName))
+				if (AvmCore::isQName(attributeName))
 				{
-					QNameObject *q = core->atomToQName (attributeName);
+					QNameObject *q = AvmCore::atomToQName(attributeName);
 					if (q->isAttr())
 						return q;
 					else
@@ -301,9 +343,9 @@ namespace avmplus
 					// if AttributeName, return the input argument
 					// if AnyName, return the result of calling "ToAttributeName(*)"
 					// if QName, return attributeName
-					if (core->isQName(p))
+					if (AvmCore::isQName(p))
 					{
-						QNameObject *q = core->atomToQName (p);
+						QNameObject *q = AvmCore::atomToQName(p);
 
 						m.setAttr(q->isAttr() ? true : false);
 						m.setNamespace(core->newNamespace(q->get_uri()));
@@ -366,7 +408,7 @@ namespace avmplus
 		m.setNamespace(core->publicNamespace);
 	}
 
-	void Toplevel::CoerceE4XMultiname(const Multiname *m, Multiname &out) const
+	void Toplevel::CoerceE4XMultiname(const Multiname *m, Multiname &out)
 	{
 		// This function is used to convert raw string access into correct
 		// Multiname types:
@@ -399,7 +441,7 @@ namespace avmplus
 			else
 			{
 				// search for a match in our nsSet for the defaultNamespace
-				Namespace *defaultNs = toplevel()->getDefaultNamespace();
+				Namespace *defaultNs = this->getDefaultNamespace();
 				bool bMatch = false;
 				for (int i=0, n=m->namespaceCount(); i < n; i++)
 				{
@@ -425,7 +467,7 @@ namespace avmplus
 					}
 					//Stringp s1 = string(getDefaultNamespace()->getPrefix());
 					//Stringp s2 = string(getDefaultNamespace()->getURI());
-					nsset->namespaces[newNameCount-1] = toplevel()->getDefaultNamespace();
+					nsset->namespaces[newNameCount-1] = this->getDefaultNamespace();
 					out.setNsset(nsset);
 				}
 				else
@@ -559,7 +601,7 @@ namespace avmplus
 		{
 			// can't invoke method as constructor
 			MethodEnv* env = vtable->methods[AvmCore::bindingToMethodId(b)];
-			throwTypeError(kCannotCallMethodAsConstructor, core->toErrorString((AbstractFunction*)env->method));
+			throwTypeError(kCannotCallMethodAsConstructor, core->toErrorString(env->method));
 		}
 		case BKIND_VAR:
 		case BKIND_CONST:
@@ -568,7 +610,7 @@ namespace avmplus
 			core->console << "constructprop slot " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			Atom ctor = AvmCore::atomToScriptObject(obj)->getSlotAtom(AvmCore::bindingToSlotId(b));
-			if (!core->istype(ctor, CLASS_TYPE) && !core->istype(ctor, FUNCTION_TYPE))
+			if (!AvmCore::istype(ctor, CLASS_TYPE) && !AvmCore::istype(ctor, FUNCTION_TYPE))
 				throwTypeError(kNotConstructorError, core->toErrorString(multiname));
 			return op_construct(ctor, argc, atomv);
 		}
@@ -615,8 +657,8 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		if ((ctor&7) != kObjectType ||
-			!core->istype(ctor, core->traits.function_itraits) &&
-			!core->istype(ctor, core->traits.class_itraits))
+			!AvmCore::istype(ctor, core->traits.function_itraits) &&
+			!AvmCore::istype(ctor, core->traits.class_itraits))
 		{
 			throwTypeError(kCantUseInstanceofOnNonObjectError);
 		}
@@ -669,7 +711,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		Traits* t = this->toTraits(obj); // includes null check
 
-		if (!core->isDictionaryLookup(nameatom, obj))
+		if (!AvmCore::isDictionaryLookup(nameatom, obj))
 		{
 			Stringp name = core->intern(nameatom);
 
@@ -712,7 +754,7 @@ namespace avmplus
 			case BUILTIN_any:
 				return atom;
 			case BUILTIN_boolean:
-				return core->booleanAtom(atom);
+				return AvmCore::booleanAtom(atom);
 			case BUILTIN_number:
 				return core->numberAtom(atom);
 			case BUILTIN_string:
@@ -798,11 +840,11 @@ namespace avmplus
 			// C++ porting note. if either side is undefined, null or NaN then result must be NaN.
 			// Java's + operator ensures this for double operands.
 			// cn:  null should convert to 0, so I think the above comment is wrong for null.
-			return core->doubleToAtom(core->number(lhs) + core->number(rhs));
+			goto add_numbers;
 		}
-		else if (AvmCore::isString(lhs) || AvmCore::isString(rhs) || core->isDate(lhs) || core->isDate(rhs))
+		else if (AvmCore::isString(lhs) || AvmCore::isString(rhs) || AvmCore::isDate(lhs) || AvmCore::isDate(rhs))
 		{
- 			return core->concatStrings(core->string(lhs), core->string(rhs))->atom();
+			goto concat_strings;
 		}
 
 
@@ -810,13 +852,11 @@ namespace avmplus
 		
 		// E4X, section 11.4.1, pg 53
 		
-		if (core->isObject (lhs) && core->isObject (rhs) && 
-			   (core->isXML(lhs) || core->isXMLList(lhs)) 
-			&& (core->isXML(rhs) || core->isXMLList (rhs)))
+		if (AvmCore::isXMLorXMLList(lhs) && AvmCore::isXMLorXMLList(rhs))
 		{
 			XMLListObject *l = new (core->GetGC()) XMLListObject(xmlListClass());
-			l->_append (lhs);
-			l->_append (rhs);
+			l->_append(lhs);
+			l->_append(rhs);
 			return l->atom();
 		}
 		
@@ -838,17 +878,20 @@ namespace avmplus
 		// the absence of a hint as if the hint Number were given; Date objects handle the absence of a hint as if the hint String were given.
 		// Host objects may handle the absence of a hint in some other manner.
 		
-		Atom lhs_asPrimVal = core->primitive(lhs); // Date is handled above with the String argument case,  we don't have to check for it here.
-		Atom rhs_asPrimVal = core->primitive(rhs);
+		lhs = AvmCore::primitive(lhs); // Date is handled above with the String argument case,  we don't have to check for it here.
+		rhs = AvmCore::primitive(rhs);
 
-		if (AvmCore::isString(lhs_asPrimVal) || AvmCore::isString(rhs_asPrimVal))
+		if (!(AvmCore::isString(lhs) || AvmCore::isString(rhs)))
 		{
-			return core->concatStrings(core->string(lhs_asPrimVal), core->string(rhs_asPrimVal))->atom();
+			goto add_numbers;
 		}
-		else
-		{
-			return core->doubleToAtom(core->number(lhs_asPrimVal) + core->number(rhs_asPrimVal));
-		}
+		// else fall thru to concat_strings
+
+concat_strings:
+		return core->concatStrings(core->string(lhs), core->string(rhs))->atom();
+
+add_numbers:	
+		return core->doubleToAtom(AvmCore::number(lhs) + AvmCore::number(rhs));
     }
 
 	bool Toplevel::hasproperty(Atom obj, const Multiname* multiname, VTable* vtable)
@@ -1246,7 +1289,7 @@ namespace avmplus
 		AvmCore* core = self->core();
 		if (!in) in = core->knull;
 		if (!MathUtils::convertStringToDouble(in, &result, false))
-			result = MathUtils::nan();
+			result = MathUtils::kNaN;
 
 		return result;
     }
@@ -1296,6 +1339,29 @@ namespace avmplus
 		}
 		return core->newStringUTF8(buffer.c_str());
     }
+	
+	Atom Toplevel::eval(ScriptObject* self, Atom input)
+	{
+		(void)self;
+		(void)input;
+#ifdef VMCFG_EVAL
+		if (AvmCore::isString(input)) {
+			AvmCore* core = self->core();
+			CodeContext* codeContext = core->codeContext();
+# ifdef DEBUGGER
+			DomainEnv* domainEnv = codeContext->domainEnv();
+#else
+			DomainEnv* domainEnv = NULL;
+#endif
+			String* filename = NULL;						// should be NULL to denote eval code, for now
+			NativeInitializer* nativeInitializer = NULL;	// "native" not supported for eval code
+			Toplevel* toplevel = (Toplevel*)self;
+			String *newsrc = AvmCore::atomToString(input)->appendLatin1("\0", 1);
+			return core->handleActionSource(newsrc, filename, domainEnv, toplevel, nativeInitializer, codeContext);
+		}
+#endif // VMCFG_EVAL
+		return undefinedAtom;
+	}
 	
 	// Helper function.
 	int Toplevel::parseHexChar(wchar c)

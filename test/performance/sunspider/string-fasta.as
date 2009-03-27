@@ -104,7 +104,10 @@ function fastaRandom(n, table) {
 }
 
 function runStringFasta() {
-  var _sunSpiderStartDate = new Date();
+  if (CONFIG::desktop)
+      var _sunSpiderStartDate = (new Date).getTime();
+  else  // mobile
+      var _sunSpiderStartDate = getTimer();
   
   var ret;
   
@@ -114,7 +117,10 @@ function runStringFasta() {
   ret += fastaRandom(5*count*1000, HomoSap);
   
   
-  var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+  if (CONFIG::desktop)
+      var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+  else  // mobile
+      var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   
   // verify test results
   // we can not verify actual output because tamarin does not guarantee the order of iteration

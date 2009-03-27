@@ -75,24 +75,18 @@
 
 #include "VMPI.h"
 
-#ifdef SCRIPT_DEBUGGER
-#ifndef DEBUGGER
-#define DEBUGGER
+#if defined(WIN32) && defined(MMGC_64BIT)
+#include <setjmpex.h>
+#else
+#include <setjmp.h>
 #endif
+
+#if defined(SCRIPT_DEBUGGER) || defined(DEBUGGER)
+#define AVMPLUS_SAMPLER
 #endif
 
 #ifdef MMGC_AVMPLUS
 #  define MMGC_RCROOT_SUPPORT
-#endif
-
-// wait for it...
-//#define FEATURE_OOM
-
-/**
-* Controls whether MMgc reports alloc/dealloc info to a Sampler
-*/
-#ifdef DEBUGGER
-#define FEATURE_SAMPLER
 #endif
 
 #ifndef _MSC_VER
@@ -111,6 +105,8 @@
 #endif
 
 #include "GCDebug.h"
+#include "GCLog.h"
+
 /*
  * If _GCHeapLock is defined, a spin lock is used for thread safety
  * on all public API's (Alloc, Free, ExpandHeap)
@@ -121,51 +117,47 @@
  * thread-safe.
  */
 
-#ifdef GCHEAP_LOCK
-#ifdef WIN32
-#include "GCSpinLockWin.h"
-#endif
-#ifdef _MAC
-#include "GCSpinLockMac.h"
-#endif
-#ifdef UNIX
-#include "GCSpinLockUnix.h"
-#endif
+#ifdef MMGC_LOCKING
+#define MMGC_LOCK(_x) GCAcquireSpinlock _lock(_x)
+#include "GCSpinLock.h"
+#else
+#define MMGC_LOCK(_x) 
 #endif
 
 namespace MMgc
 {
 	class GC;
-	class GCTraceObject;
 	class RCObject;
 	class GCWeakRef;
 	class GCObject;
 	class GCHashtable;
 	class Cleaner;
 	class GCAlloc;
+	class GCHeap;
 }
 
 #include "GCTypes.h"
+#include "OOM.h"
 #include "GCStack.h"
 #include "GCThreads.h"
 #include "GCAllocObject.h"
 #include "GCHashtable.h"
 #include "GCMemoryProfiler.h"
-#include "GCHeap.h"
-#include "GCAlloc.h"
-#include "GCLargeAlloc.h"
 #include "GCThreadLocal.h"
 #include "FixedAlloc.h"
 #include "FixedMalloc.h"
+#include "GCHeap.h"
+#include "GCAlloc.h"
+#include "GCLargeAlloc.h"
 #include "GCGlobalNew.h"
 #include "GC.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"
 #include "WriteBarrier.h"
 
-#if defined(MMGC_DRC) && !defined(WRITE_BARRIERS)
-#error "Need write barriers for DRC"
-#endif
+// remove these when the player stops using it
+#define MMGC_DRC
+#define WRITE_BARRIERS
 
 #endif /* __MMgc__ */
 

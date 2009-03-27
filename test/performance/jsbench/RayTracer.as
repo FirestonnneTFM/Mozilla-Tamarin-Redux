@@ -56,19 +56,27 @@
 	 */
 	var width;
 
-	var datasizes = new Array(3);
+	var datasizes = new Array(4);
 	datasizes[0] = 50;
 	datasizes[1] = 150;
 	datasizes[2] = 500;
+    datasizes[3] = 7;
 
 	var checksum = 0;
 	var lastValue = 0;
 	var size;
 
 	var numobjects;
-	var start=new Date();
-	JGFrun(0);
-	var elapsed=new Date()-start;
+    if (CONFIG::desktop) {
+        var start = new Date();
+        JGFrun(0);
+        var elapsed = new Date() - start;
+    }
+    else { // mobile
+        var start = getTimer();
+        JGFrun(3);
+        var elapsed = getTimer() - start;
+    }
 	print("metric time "+elapsed);
 	function JGFsetsize(sizel) {
 		size = sizel;
@@ -101,9 +109,11 @@
 
 	function JGFvalidate() {
 		//print("entering JFGvalidate");
-		var refval = new Array(2);
+		var refval = new Array(4);
 		refval[0] = 2676692;
 		refval[1] = 29827635;
+        refval[2] = 29827635;
+        refval[3] = 5158;
 		var dev = checksum - refval[size];
 		if (dev != 0) {
 			print("Validation failed");

@@ -443,7 +443,10 @@ function unescCtrlChars(str:String):String {  // unescape potentially problemati
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-  var start:Number=new Date();
+  if (CONFIG::desktop) 
+      var start:Number = new Date();
+  else // mobile
+      var start:int = getTimer();
 
   var plainText:String = "ROMEO: But, soft! what light through yonder window breaks?\n\
   It is the east, and Juliet is the sun.\n\
@@ -484,7 +487,10 @@ function unescCtrlChars(str:String):String {  // unescape potentially problemati
   var cipherText:String = AESEncryptCtr(plainText, password, 256);
   var decryptedText:String = AESDecryptCtr(cipherText, password, 256);
 
-  var totaltime:Number=new Date()-start;
+  if (CONFIG::desktop) 
+      var totaltime:Number = new Date() - start;
+  else // mobile
+      var totaltime:int = getTimer() - start;
   if (decryptedText==plainText) {
       print("metric time "+totaltime);
   } else {

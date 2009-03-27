@@ -61,10 +61,16 @@ function fannkuch(n:int):int {
    }
 }
 
-var start:Number=new Date();
-var res:int=fannkuch(8);
-var totaltime=new Date()-start;
-
+if (CONFIG::desktop) {
+    var start:Number = new Date();
+    var res:int = fannkuch(8);
+    var totaltime:Number = new Date() - start;
+}
+else { // mobile
+    var start:int = getTimer();
+    var res:int = fannkuch(8);
+    var totaltime:int = getTimer() - start;
+}
 print("fannkuch(8)="+res);
 if (res==22) {
   print("metric time "+totaltime);

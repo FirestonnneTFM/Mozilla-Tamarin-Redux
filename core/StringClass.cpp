@@ -139,7 +139,7 @@ namespace avmplus
 		Stringp out = core->kEmptyString;
 		for (int i=0; i<argc; i++) 
 		{
-			wchar c = wchar(core->integer(argv[i]));
+			wchar c = wchar(AvmCore::integer(argv[i]));
 			// note: this code is allowed to construct a string
 			// containing illegal UTF16 sequences!
 			// (eg, String.fromCharCode(0xD800).charCodeAt(0) -> 0xD800).
@@ -152,7 +152,7 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 
-		if (!core->istype(regexpAtom, core->traits.regexp_itraits))
+		if (!AvmCore::istype(regexpAtom, core->traits.regexp_itraits))
 		{
 			// ECMA-262 15.5.4.10
 			// If the argument is not a RegExp, invoke RegExp(exp)
@@ -171,13 +171,13 @@ namespace avmplus
 
 		ScriptObject *replaceFunction = NULL;
 		Stringp replacement = NULL;
-		if (core->istype(replacementAtom, core->traits.function_itraits)) {
+		if (AvmCore::istype(replacementAtom, core->traits.function_itraits)) {
 			replaceFunction = AvmCore::atomToScriptObject(replacementAtom);
 		} else {
 			replacement = core->string(replacementAtom);
 		}
 
-		if (core->istype(pattern, core->traits.regexp_itraits)) {
+		if (AvmCore::istype(pattern, core->traits.regexp_itraits)) {
 			// RegExp mode
 			RegExpObject *reObj = (RegExpObject*) core->atomToScriptObject(pattern);
 			if (replaceFunction) {
@@ -218,7 +218,7 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 
-		if (!core->istype(regexpAtom, core->traits.regexp_itraits)) {
+		if (!AvmCore::istype(regexpAtom, core->traits.regexp_itraits)) {
 			// ECMA-262 15.5.4.10
 			// If the argument is not a RegExp, invoke RegExp(exp)
 			regexpAtom = core->newRegExp(toplevel()->regexpClass(),
@@ -245,7 +245,7 @@ namespace avmplus
 		}
 
 		// handle RegExp case
-		if (core->istype(delimAtom, core->traits.regexp_itraits))
+		if (AvmCore::istype(delimAtom, core->traits.regexp_itraits))
 		{
 			RegExpObject *reObj = (RegExpObject*) AvmCore::atomToScriptObject(delimAtom);			
 			return reObj->split(in, limit);

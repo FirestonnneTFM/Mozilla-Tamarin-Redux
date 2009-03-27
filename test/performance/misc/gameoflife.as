@@ -55,8 +55,11 @@ package{
 
 		private function Simulation():void{
 			Iterations=0;
-
-			var generations:int=500;
+            if (CONFIG::desktop)
+                var generations:int=500;
+            else // mobile
+                var generations:int=50;
+			
 			for (var i=0;i<generations;i++){
 				Iterations++;
 
@@ -187,8 +190,16 @@ package{
 	}
 	
 	
-	var t:Number = new Date();
+	if (CONFIG::desktop)
+        var t:Number = new Date();
+    else // mobile
+        var t:int = getTimer();
+	
 	var k = new DrawGrid();
-	t = new Date() - t;
+    if (CONFIG::desktop)
+        t = new Date() - t;
+    else // mobile
+        t = getTimer() - t;
+	
 	print("metric time "+t);
 }

@@ -37,6 +37,9 @@
 
 
 #include "avmplus.h"
+#ifdef AVMC_STANDALONE
+#  include "../utils/avmc/avmplus.h"
+#endif
 
 namespace avmplus
 {

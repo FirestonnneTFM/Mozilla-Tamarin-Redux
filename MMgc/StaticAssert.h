@@ -40,7 +40,7 @@
 
 namespace MMgc
 {
-	template <int> struct static_assert {};
+	template <int> struct static_assert_MMgc {};
 	template <bool> struct STATIC_ASSERTION_FAILED;
 	template <> struct STATIC_ASSERTION_FAILED<true> {};
 }
@@ -50,7 +50,7 @@ namespace MMgc
 #define _MMGC_DO_JOIN2(x,y) x##y
 
 #define MMGC_STATIC_ASSERT(condition) \
-	typedef ::MMgc::static_assert<sizeof (::MMgc::STATIC_ASSERTION_FAILED<(bool)(condition)>)> \
+	typedef ::MMgc::static_assert_MMgc<sizeof (::MMgc::STATIC_ASSERTION_FAILED<(bool)(condition)>)> \
 		_MMGC_JOIN(MMgc_static_assert_line_, __LINE__)
 
 #endif /* __StaticAssert__ */

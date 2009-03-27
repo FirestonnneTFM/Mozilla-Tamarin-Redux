@@ -47,17 +47,13 @@ typedef void *maddr_ptr;
 namespace avmplus
 {
 	Domain::Domain(AvmCore *_core, Domain* base) : base(base)
-#ifdef AVMPLUS_MOPS
 		  , core(_core)
 		  , globalMemoryBase(m_gmInfo.globalMemoryScratch)
 		  , globalMemorySize(sizeof(m_gmInfo.globalMemoryScratch))
-#endif
 	{
-#ifdef AVMPLUS_MOPS
 		m_gmInfo.globalMemory = NULL;
 		// should be able to contain largest read or write (currently double)
 		AvmAssert(sizeof(m_gmInfo.globalMemoryScratch) >= sizeof(double));
-#endif
 		namedTraits  = new (_core->GetGC()) MultinameHashtable();
 		namedScripts = new (_core->GetGC()) MultinameHashtable();
 	}
@@ -86,31 +82,30 @@ namespace avmplus
 		return traits;
 	}
 	
-	AbstractFunction* Domain::getNamedScript(Stringp name, Namespacep ns) const
+	MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns) const
 	{
-		AbstractFunction *f = NULL;
+		MethodInfo* f = NULL;
 		if (base) {
 			f = base->getNamedScript(name, ns);
 		}
 		if (!f) {
-			f = (AbstractFunction*) namedScripts->get(name, ns);
+			f = (MethodInfo*)namedScripts->get(name, ns);
 		}
 		return f;
 	}
 
-	AbstractFunction* Domain::getNamedScript(const Multiname *multiname) const
+	MethodInfo* Domain::getNamedScript(const Multiname *multiname) const
 	{
-		AbstractFunction *f = NULL;
+		MethodInfo* f = NULL;
 		if (base) {
 			f = base->getNamedScript(multiname);
 		}
 		if (!f) {
-			f = (AbstractFunction*) namedScripts->getMulti(multiname);
+			f = (MethodInfo*)namedScripts->getMulti(multiname);
 		}
 		return f;
 	}
 
-#ifdef AVMPLUS_MOPS
 	bool Domain::setGlobalMemory(ScriptObject *mem) const
 	{
 		if(!mem)
@@ -203,7 +198,7 @@ namespace avmplus
 
 	#if defined(AVMPLUS_WIN32)
 		typedef DWORD PROT_TYPE;
-		typedef DWORD PROT_SIZE;
+		typedef size_t PROT_SIZE;
 	#elif (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX) || defined(AVMPLUS_SYMBIAN))
 		typedef int PROT_TYPE;
 		typedef size_t PROT_SIZE;
@@ -267,7 +262,7 @@ namespace avmplus
 			AvmAssert(r < m_pageSize);
 			void* page = GetPage(p, 0);
 			void* page1 = GetPage(p, r - 1); // might span a page
-			unsigned size = (page == page1) ? m_pageSize : 2 * m_pageSize;
+			size_t size = (page == page1) ? m_pageSize : 2 * m_pageSize;
 
 			#if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX))
 			if (!page)
@@ -398,7 +393,6 @@ namespace avmplus
 			protHelper.FlushCache();
 		}
 	}
-#endif
 }
 
 

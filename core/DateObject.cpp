@@ -67,13 +67,11 @@ namespace avmplus
 
 	double DateObject::_set(int index, Atom *argv, int argc)
 	{
-		AvmCore* core = this->core();
-
 		double num[7];
 		int i;
 
 		for (i=0; i<7; i++) {
-			num[i] = MathUtils::nan();
+			num[i] = MathUtils::kNaN;
 		}
 		bool utcFlag = (index < 0); 
 		index = (int)MathUtils::abs(index);
@@ -83,10 +81,10 @@ namespace avmplus
 			if (j >= 7) {
 				break;
 			}
-			num[j++] = core->number(argv[i]);
+			num[j++] = AvmCore::number(argv[i]);
 			if (MathUtils::isNaN(num[j-1])) // actually specifying NaN results in a NaN date. Don't pass Nan, however, because we use 
 			{							    //  that value to denote that an optional arg was not supplied.
-				date.setTime(MathUtils::nan());
+				date.setTime(MathUtils::kNaN);
 				return date.getTime();
 			}
 		}

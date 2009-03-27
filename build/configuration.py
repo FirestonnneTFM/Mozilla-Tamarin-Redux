@@ -260,8 +260,21 @@ class Configuration:
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
         elif self._target[0] == 'sunos':
-            self._compiler = 'SunStudio'
-            self._acvars.update({
+	    if options.getBoolArg("gcc", False):
+                self._acvars.update({
+                'CPPFLAGS'     : os.environ.get('CPPFLAGS', '') + "-DBROKEN_OFFSETOF",
+                'CXX'          : os.environ.get('CXX', 'g++'),
+                'CXXFLAGS'     : os.environ.get('CXXFLAGS', ''),
+                'DLL_CFLAGS'   : '-fPIC',
+                'LD'           : 'ar',
+                'LDFLAGS'      : '',
+                'MKSTATICLIB'  : '$(AR) cr $(1)',
+                'MKDLL'        : '$(CXX) -shared -o $(1)',
+                'MKPROGRAM'    : '$(CXX) -o $(1)'
+                })
+ 	    else:
+                self._compiler = 'SunStudio'
+                self._acvars.update({
                 'I_SUFFIX': 'i',
                 'II_SUFFIX': 'i',
                 'CPPFLAGS'     : '',

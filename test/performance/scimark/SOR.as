@@ -42,11 +42,21 @@ class SOR
 		}
 	}
 }
-var starttime:Number=new Date();
+if (CONFIG::desktop) {
+    var starttime:Number=new Date();
+    var cycles:int=1000;
+}
+else { // mobile
+    var starttime:int=getTimer();
+    var cycles:int=100;
+}
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:Number = Constants.SOR_SIZE;
 var G:Array = RandomMatrix(N, N, R);
-var cycles:int=1000;
+
 SOR.execute(1.25, G, cycles);
-print("metric time "+(new Date()-starttime));
+if (CONFIG::desktop)
+    print("metric time "+(new Date()-starttime));
+else // mobile
+    print("metric time "+(getTimer()-starttime));
 }

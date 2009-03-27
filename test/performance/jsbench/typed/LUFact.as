@@ -1,9 +1,10 @@
   var size:int;
 
-  var datasizes:Vector.<int> = new Vector.<int>(3);
+  var datasizes:Vector.<int> = new Vector.<int>(4);
   datasizes[0] = 500;
   datasizes[1] = 1000;
   datasizes[2] = 2000;
+  datasizes[3] = 175;
 
   var a:Vector.<Vector.<Number>>;
 
@@ -20,9 +21,16 @@
   var n:int, i:int, ntimes:int, info:int, lda:int, ldaa:int, kflops:int;
 
   var ipvt:Vector.<int>;
-  var start=new Date();
-  JGFrun(0);
-  var elapsed=new Date()-start;
+  if (CONFIG::desktop) {
+      var start = new Date();
+      JGFrun(0);
+      var elapsed = new Date() - start;
+  }
+  else { // mobile
+      var start = getTimer();
+      JGFrun(3);
+      var elapsed = getTimer() - start;
+  }
   print("metric time "+elapsed);
   
   function abs(d:Number):Number {
@@ -64,10 +72,11 @@
 
     var i:int;
     var eps:Number, residn:Number;
-    var ref:Vector.<Number> = new Vector.<Number>(3);
+    var ref:Vector.<Number> = new Vector.<Number>(4);
     ref[0] = 6.0;
     ref[1] = 12.0;
     ref[2] = 20.0;
+    ref[3] = 3.0;
 
     for (i = 0; i < n; i++) {
       x[i] = b[i];

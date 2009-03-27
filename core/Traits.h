@@ -41,8 +41,6 @@
 
 namespace avmplus
 {
-	typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
-
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	// doesn't really belong here, but needs to go somewhere... good enough for now.
 	enum TMTTYPE 
@@ -52,7 +50,8 @@ namespace avmplus
 		TMT_tmi, 
 		TMT_vtable, 
 		TMT_methodenv, 
-		TMT_abstractfunction, 
+		TMT_methodinfo, 
+		TMT_methodsig, 
 		TMT_COUNT 
 	};
 
@@ -86,42 +85,6 @@ namespace avmplus
 		TRAITSTYPE_RT						= 7			// Traits defined at runtime, e.g. instantiated parameterized types
 	};
 	
-	// Note: we rely on this being <= 32 entries. None of the enumeration values are magic,
-	// so we just keep them in alphabetical order for simplicity.
-	enum BuiltinType
-	{
-		BUILTIN_any,	// this is the "*" type in AS3, corresponds to a NULL Traits in C++ (not the "null" value in AS3")
-		BUILTIN_array,
-		BUILTIN_boolean,
-		BUILTIN_class,	// class Class only, not subclasses of Class
-		BUILTIN_date,
-		BUILTIN_error,
-		BUILTIN_function,
-		BUILTIN_int,
-		BUILTIN_math,
-		BUILTIN_methodClosure,
-		BUILTIN_namespace,
-		BUILTIN_null,	// this is the "null" AS3 value, not a NULL Traits* in C++
-		BUILTIN_number,
-		BUILTIN_object, // this is Object specifically, not a subclass thereof
-		BUILTIN_qName,
-		BUILTIN_regexp,
-		BUILTIN_string,
-		BUILTIN_uint,
-		BUILTIN_vector,
-		BUILTIN_vectordouble,
-		BUILTIN_vectorint,
-		BUILTIN_vectorobj,
-		BUILTIN_vectoruint,
-		BUILTIN_void,
-		BUILTIN_xmlList,
-		BUILTIN_xml,
-
-		BUILTIN_none,		// "none of the above" (ie it's not any of the rest of this enum)
-		
-		BUILTIN_COUNT
-	};
-
 	const uint32_t NOT_DERIVED_OR_XML_MASK = 
 // commented out, why?
 //		(1<<BUILTIN_array) |
@@ -149,7 +112,7 @@ namespace avmplus
 
 	typedef const uint8_t* TraitsPosPtr;
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	class ImtBuilder;
 #endif
 
@@ -186,9 +149,9 @@ namespace avmplus
 			inline uint32_t offset() const { return (offsetAndSST >> 3) << 2; }
 		};
 
-		struct MethodInfo
+		struct BindingMethodInfo
 		{
-			AbstractFunction* f;
+			MethodInfo* f;
 		};
 		
 		struct InterfaceInfo
@@ -226,9 +189,7 @@ namespace avmplus
 
 		static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameHashtable* _bindings, uint32_t slotCount, uint32_t methodCount, uint32_t interfaceCount);
 
-#ifdef MMGC_DRC
 		void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const;
-#endif
 
 		Traitsp getSlotTraits(uint32_t i) const { AvmAssert(i < slotCount); return getSlots()[i].type; }
 		uint32_t getSlotOffset(uint32_t i) const { AvmAssert(i < slotCount); return getSlots()[i].offset(); }
@@ -242,7 +203,7 @@ namespace avmplus
 			return SlotStorageType(offsetAndSST & 7);
 		}
 		inline Traitsp getInterface(uint32 i) const { AvmAssert(i < interfaceCapacity); return getInterfaces()[i].t; }
-		inline AbstractFunction* getMethod(uint32_t i) const { AvmAssert(i < methodCount); return getMethods()[i].f; }
+		inline MethodInfo* getMethod(uint32_t i) const { AvmAssert(i < methodCount); return getMethods()[i].f; }
 		bool containsInterface(Traitsp t) const;
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
@@ -260,8 +221,8 @@ namespace avmplus
 		InterfaceInfo* getInterfaces() { return (InterfaceInfo*)(getSlots() + slotCount); }
 		const InterfaceInfo* getInterfaces() const { return (const InterfaceInfo*)(getSlots() + slotCount); }
 
-		MethodInfo* getMethods() { return (MethodInfo*)(getInterfaces() + interfaceCapacity); }
-		const MethodInfo* getMethods() const { return (const MethodInfo*)(getInterfaces() + interfaceCapacity); }
+		BindingMethodInfo* getMethods() { return (BindingMethodInfo*)(getInterfaces() + interfaceCapacity); }
+		const BindingMethodInfo* getMethods() const { return (const BindingMethodInfo*)(getInterfaces() + interfaceCapacity); }
 
 		inline void setSlotInfo(uint32_t i, Traits* t, SlotStorageType sst, uint32_t offset) 
 		{ 
@@ -274,7 +235,7 @@ namespace avmplus
 			getSlots()[i].offsetAndSST = (offset<<1) | uint32_t(sst);
 		}
 
-		inline void setMethodInfo(uint32_t i, AbstractFunction* f) 
+		inline void setMethodInfo(uint32_t i, MethodInfo* f) 
 		{ 
 			AvmAssert(i < methodCount); 
 			// don't need WB here
@@ -284,9 +245,9 @@ namespace avmplus
 		void addOneInterface(Traitsp intf);
 		InterfaceInfo* findInterfaceAddr(Traitsp intf);
 		inline const InterfaceInfo* findInterfaceAddr(Traitsp intf) const { return const_cast<TraitsBindings*>(this)->findInterfaceAddr(intf); }
-		bool checkOverride(AvmCore* core, AbstractFunction* virt, AbstractFunction* over) const;
+		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel, ImtBuilder* imtBuilder);
 #else
 		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel);
@@ -345,6 +306,8 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
+	typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
+	
 	/**
 	 * Traits objects describe the layout of objects.  Traits are
 	 * used to describe a variety of things in the VM, such as
@@ -360,16 +323,14 @@ namespace avmplus
 	class Traits : public TRAITSBASE 
 	{
 		friend class TraitsBindings;	// for m_sizeofInstance
-		#if defined AVMPLUS_MIR
-		friend class CodegenMIR;
-		#elif defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif
 
 	public:
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
-		// since we use the AbstractFunction pointer as the interface method id
+#if defined FEATURE_NANOJIT
+		// choose a number that is relatively prime to sizeof(MethodInfo)/8
+		// since we use the MethodInfo pointer as the interface method id
 		// smaller = dense table, few large conflict stubs
 		// larger  = sparse table, many small conflict stubs 
 
@@ -378,23 +339,7 @@ namespace avmplus
 #else
 		static const uint32_t IMT_SIZE = 7;  // good for performance
 #endif
-#endif // AVMPLUS_MIR | FEATURE_NANOJIT
-
-		inline void resetSizeof(uint32_t size)
-		{
-			// @todo -- this is a hack for things like FlashPlayer that subclass
-			// Toplevel with a native class; since Toplevel is "special" we have to 
-			// be able to adjust this after creation. Eventually we should make Toplevel
-			// not be a subclass of ScriptObject (this is the case in TT) and at that point
-			// this special case can be removed.
-			AvmAssert(size <= 0xffff);
-			if (linked)
-			{
-				m_totalSize -= m_sizeofInstance;
-				m_totalSize += uint16_t(size);
-			}
-			m_sizeofInstance = uint16_t(size);
-		}
+#endif // FEATURE_NANOJIT
 
 		inline uint32_t getSizeOfInstance() const { return m_sizeofInstance; }
 		inline uint32_t getHashtableOffset() const { AvmAssert(linked); return m_hashTableOffset; }
@@ -428,7 +373,7 @@ namespace avmplus
 									TraitsBindings* tb, 
 									const Toplevel* toplevel,
 									AbcGen* abcGen) const;
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen, ImtBuilder* imtBuilder);
 	#else
 		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen);
@@ -492,7 +437,6 @@ namespace avmplus
 			TraitsBindings* tb;
 			if ((tb = (TraitsBindings*)m_tbref->get()) == NULL)
 				tb = _getTraitsBindings();
-			tb->use();
 			return tb;
 		}
 		inline TraitsMetadatap getTraitsMetadata()
@@ -502,7 +446,6 @@ namespace avmplus
 			TraitsMetadata* tm;
 			if ((tm = (TraitsMetadata*)m_tmref->get()) == NULL)
 				tm = _getTraitsMetadata();
-			tm->use();
 			return tm;
 		}
 		inline bool containsInterface(Traitsp t) { return this == t || this->getTraitsBindings()->containsInterface(t); }
@@ -513,7 +456,7 @@ namespace avmplus
 		// BIND_METHOD+disp_id = no conflict, dispatches to concrete method
 		// BIND_ITRAMP+addr    = conflict, dispatch to conflict resolution stub
 		// IMT table (if we have one, comes after the interfaces)
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 		const Binding* getIMT() const 
 		{
 			// @todo we only need this at vtable-resolution time, could move into TD or gen on demand?
@@ -549,9 +492,7 @@ namespace avmplus
 
 		Stringp formatClassName();
 
-#ifdef MMGC_DRC
 		void destroyInstance(ScriptObject *obj) const;
-#endif
 
 	private:
 		Traitsp* findInterface(Traits* t) const;
@@ -574,20 +515,19 @@ namespace avmplus
 #endif
 	public:		DRCWB(Namespacep)		protectedNamespace;	// protected namespace, if any
 	public:		DWB(ScopeTypeChain*)	scope;				// scope chain types
-	public:		DWB(AbstractFunction*)	init;				// not a call/init union b/c smart pointers and union's don't mix
+	public:		DWB(MethodInfo*)		init;				// not a call/init union b/c smart pointers and union's don't mix
 	private:	CreateClassClosureProc	m_createClassClosure;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType
 	private:	const byte*				metadata_pos;
 	private:	FixedBitSet				m_skips;	
-	#ifdef MMGC_DRC
 	private:	FixedBitSet				m_slotDestroyInfo;	
-	#endif
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 	private:	Binding					m_imt[Traits::IMT_SIZE];
 	#endif
 	private:	DWB(MMgc::GCWeakRef*)	m_tbref;				// our TraitsBindings 
 	private:	DWB(MMgc::GCWeakRef*)	m_tmref;				// our TraitsMetadata
-// @todo -- we should be able to store m_sizeofInstance in 16 bits but MIR doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
+// @todo -- we should be able to store m_sizeofInstance in 16 bits but JIT doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
+// @todo -- what prevents an instance being >64K?
 	private:	uint32_t				m_sizeofInstance;	// sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
 	private:	uint32_t				m_hashTableOffset;	// offset to our hashtable (or 0 if none)
 	private:	uint32_t				m_totalSize;		// total size, including sizeofInstance + slots + hashtable
@@ -608,26 +548,26 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	class ImtBuilder
 	{
 	public:
 		class ImtEntry: public MMgc::GCObject
 		{
 		public:
-			ImtEntry(AbstractFunction* v, ImtEntry* n, uint32_t d) : 
+			ImtEntry(MethodInfo* v, ImtEntry* n, uint32_t d) : 
 				virt(v), 
 				next(n), 
 				disp_id(d) 
 			{
 			}
-			AbstractFunction * const virt;
+			MethodInfo * const virt;
 			ImtEntry * const next;
 			const uint32_t disp_id;
 		};
 
 		ImtBuilder(MMgc::GC *gc);
-		void addEntry(AbstractFunction* virt, uint32_t disp_id);
+		void addEntry(MethodInfo* virt, uint32_t disp_id);
 		void finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel);
 
 	private:

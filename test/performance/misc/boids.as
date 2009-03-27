@@ -37,8 +37,15 @@
 
 package {
   
+    if (CONFIG::desktop) {
         var start:Number=new Date();
-	var b:boids=new boids(100);
+        var b:boids=new boids(100);
+    }
+    else { // mobile
+        var start:int=getTimer();
+        var b:boids=new boids(10);
+    }
+
 	b.width=5000;
 	b.height=5000;
 	var frames:uint=300;
@@ -47,7 +54,12 @@ package {
 	for (var i:int=0;i<frames;i++) {
 		b.move_boids();
 	}
-	print("metric time " + (new Date()-start));
+    
+    if (CONFIG::desktop)
+        print("metric time " + (new Date()-start));
+    else // mobile
+        print("metric time " + (getTimer()-start));
+	
 
 
 	public class boids {

@@ -104,7 +104,7 @@ namespace avmplus
 		~XMLParser()
 		{
 			core = NULL;
-			m_pos = NULL;
+			m_pos = 0;
 			m_ignoreWhite = false;
 			m_condenseWhite = false;
 		}
