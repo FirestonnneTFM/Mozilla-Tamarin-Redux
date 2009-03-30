@@ -1286,13 +1286,13 @@ package abcdump
             udata.position = 0
             /*var swf:Swf =*/ new Swf(udata)
             break
-        case 70|87<<8|83<<16|10<<24: // SWC10
-        case 70|87<<8|83<<16|9<<24: // SWC9
-        case 70|87<<8|83<<16|8<<24: // SWC8
-        case 70|87<<8|83<<16|7<<24: // SWC7
-        case 70|87<<8|83<<16|6<<24: // SWC6
-        case 70|87<<8|83<<16|5<<24: // SWC5
-        case 70|87<<8|83<<16|4<<24: // SWC4
+        case 70|87<<8|83<<16|10<<24: // SWF10
+        case 70|87<<8|83<<16|9<<24: // SWF9
+        case 70|87<<8|83<<16|8<<24: // SWF8
+        case 70|87<<8|83<<16|7<<24: // SWF7
+        case 70|87<<8|83<<16|6<<24: // SWF6
+        case 70|87<<8|83<<16|5<<24: // SWF5
+        case 70|87<<8|83<<16|4<<24: // SWF4
             data.position = 8 // skip header and length
             /*var swf:Swf =*/ new Swf(data)
             break
