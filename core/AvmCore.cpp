@@ -153,7 +153,6 @@ namespace avmplus
 		config.interrupts = false;
 
 		gcInterface.SetCore(this);
-		resources          = NULL;
 		xmlEntities        = NULL;
 		exceptionFrame     = NULL;
 		exceptionAddr      = NULL;
@@ -498,31 +497,14 @@ namespace avmplus
 										 const NativeInitializer* ninit,
 										 CodeContext *codeContext)
     {
-		resources = new (GetGC()) Hashtable(GetGC());
-
-		// have we parsed this before?
-		PoolObject* pool;
-        Atom resourceAtom = resources->get(start+1);
-        if (resourceAtom != undefinedAtom) 
-		{
-			pool = (PoolObject*) resourceAtom;
-		} 
-		else 
-		{
-			Domain* domain = domainEnv ? domainEnv->domain() : builtinDomain;
-			
-			// parse constants and attributes.
-			pool = parseActionBlock(code,
-									start,
-									toplevel,
-									domain,
-									ninit);
-			if (pool != NULL)
-			{
-				resources->put(start+1, pool);
-			}
-		}
-
+		Domain* domain = domainEnv ? domainEnv->domain() : builtinDomain;
+		
+		// parse constants and attributes.
+		PoolObject *pool = parseActionBlock(code,
+								start,
+								toplevel,
+								domain,
+								ninit);
 		return handleActionPool(pool, domainEnv, toplevel, codeContext);
 	}
 	

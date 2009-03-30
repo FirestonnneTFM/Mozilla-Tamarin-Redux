@@ -656,13 +656,6 @@ const int kBufferPadding = 16;
 #endif
 
 		/**
-		 * The resources table tracks what ABC's have been
-		 * decoded, and avoids decoding the same one multiple
-		 * times.
-		 */
-		Hashtable *resources;
-
-		/**
 		 * @name interned constants
 		 * Constants used frequently in the VM; these are typically
 		 * identifiers that are part of the core language semantics
