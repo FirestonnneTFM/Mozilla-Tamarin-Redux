@@ -1659,6 +1659,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\shell\swf.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\SystemClass.cpp"
 				>
 			</File>

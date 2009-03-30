@@ -139,7 +139,7 @@ namespace avmshell
 		AvmLog("          [-log]\n");
 		AvmLog("          [-- args]     args passed to AS3 program\n");
 		AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
-		AvmLog("          filename.abc ...\n");
+		AvmLog("          filename[.abc|.swf] ...\n");
 		AvmLog("          [--] application args\n");
 		Platform::GetInstance()->exit(1);
 	}
@@ -878,23 +878,26 @@ namespace avmshell
 				codeContext->m_domainEnv = domainEnv;
 				
 				// parse new bytecode
-				if (isValid)
-				{
-					ScriptBuffer code = newScriptBuffer((size_t)f.available());
-					f.read(code.getBuffer(), (size_t)f.available());
-#ifdef VMCFG_EVAL
-					if (AbcParser::canParse(code) == 0)
-						handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
-					else {
-						// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
-						String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
-						String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
-						ScriptBuffer empty;		// With luck: allow the
-						code = empty;			//    buffer to be garbage collected
-						handleActionSource(code_string, filename_string, domainEnv, toplevel, NULL, codeContext);
-					}
-#else
+				ScriptBuffer code = newScriptBuffer((size_t)f.available());
+				f.read(code.getBuffer(), (size_t)f.available());
+
+				if (AbcParser::canParse(code) == 0) {
 					handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
+				}
+				else if (isSwf(code)) {
+					handleSwf(filename, code, domainEnv, toplevel, codeContext);
+				}
+				else {
+#ifdef VMCFG_EVAL
+					// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
+					String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
+					String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
+					ScriptBuffer empty;		// With luck: allow the
+					code = empty;			//    buffer to be garbage collected
+					handleActionSource(code_string, filename_string, domainEnv, toplevel, NULL, codeContext);
+#else
+                    console << "unknown file format: " << filename << "\n";
+					return(1);
 #endif // VMCFG_EVAL
 				}
 
@@ -957,7 +960,6 @@ namespace avmshell
 		
 		int exitCode = 0;
 		{
-			
 			MMGC_ENTER;
 			if(MMGC_ENTER_STATUS == 0)
 			{
