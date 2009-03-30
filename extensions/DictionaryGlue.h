@@ -45,10 +45,10 @@ namespace avmplus
 	{
 	public:
 		DictionaryObject(VTable *vtable, ScriptObject *delegate);
-		~DictionaryObject();
+
 		void init(bool weakKeys);
 	
-		virtual Hashtable* getTable() const { return table; }
+		virtual InlineHashtable* getTable() const { return _table->get_ht(); }
 	
 		// multiname and Stringp forms fall through to ScriptObject
 		virtual Atom getAtomProperty(Atom name) const;
@@ -59,13 +59,11 @@ namespace avmplus
 		virtual Atom nextName(int index);
 		virtual int nextNameIndex(int index);
 
-		bool isUsingWeakKeys() const { return weakKeys; }
+		bool isUsingWeakKeys() const { return _table->weakKeys(); }
 	private:
-		DWB(Hashtable*) table;
-		bool weakKeys;
+		DWB(HeapHashtable*) _table;
 
-		Atom getKeyFromObject(Atom object) const;
-		WeakKeyHashtable *weakTable() const { return (WeakKeyHashtable*)(Hashtable*)table; }
+		Atom FASTCALL getKeyFromObject(Atom object) const;
 	};
 
 	class DictionaryClass : public ClassClosure

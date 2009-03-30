@@ -1648,7 +1648,7 @@ namespace avmplus
 			// (eg for bool/int/uint, which have weird sizes)
 			m_totalSize = ((m_totalSize+(sizeof(uintptr_t)-1))&~(sizeof(uintptr_t)-1));
 			m_hashTableOffset = m_totalSize;
-			m_totalSize += sizeof(Hashtable);
+			m_totalSize += sizeof(InlineHashtable);
 			AvmAssert(builtinType == BUILTIN_boolean ? true : (m_hashTableOffset & 3) == 0);
 			AvmAssert((m_hashTableOffset & (sizeof(uintptr_t)-1)) == 0);
 			AvmAssert((m_totalSize & (sizeof(uintptr_t)-1)) == 0);
@@ -1867,7 +1867,7 @@ namespace avmplus
 	{
 		AvmAssert(linked);
 
-		Hashtable* ht = m_hashTableOffset ? obj->getTable() : NULL;
+		InlineHashtable* ht = m_hashTableOffset ? obj->getTable() : NULL;
 
 		// start by clearing native space to zero (except baseclasses)
 		uint32_t* p = (uint32_t*)((char*)obj + sizeof(AvmPlusScriptableObject));

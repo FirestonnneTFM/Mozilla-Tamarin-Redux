@@ -1299,7 +1299,7 @@ const int kBufferPadding = 16;
 		Stringp _typeof (Atom arg);
 
 		/** The XML entities table, used by E4X */
-		Hashtable *xmlEntities;
+		HeapHashtable* xmlEntities;
 		
 	private:
 		static bool isBuiltinType(Atom atm, BuiltinType bt);
@@ -1357,7 +1357,7 @@ const int kBufferPadding = 16;
 			return (ScriptObject*)(atom&~7);
 		}
 	
-		// helper function, allows generic objects to work with Hashtable
+		// helper function, allows generic objects to work with InlineHashtable
 		// and AtomArray, uses double type which is the only non-RC
 		// GCObject type
 		static Atom gcObjectToAtom(const void* obj);
