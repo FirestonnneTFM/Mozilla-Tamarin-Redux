@@ -323,7 +323,7 @@ namespace avmplus
 		// [ed] 3/24/06 why do we really care if a script is dynamic or not?
 		//AvmAssert(scriptTraits->needsHashtable);
 
-		ScopeChain* scriptScope = ScopeChain::create(core->GetGC(), scriptTraits->scope, NULL, core->newNamespace(core->kEmptyString));
+		ScopeChain* scriptScope = ScopeChain::create(core->GetGC(), scriptTraits->scope(), NULL, core->newNamespace(core->kEmptyString));
 		VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, scriptScope, abcEnv, toplevel);
 		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
 		scriptVTable->init = scriptEnv;
@@ -4000,7 +4000,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			while (!verifyQueue.isEmpty()) {
 				MethodInfo* f = verifyQueue.removeLast();
 				if (!f->isVerified()) {
-					if (f->declaringTraits()->scope == NULL && f != f->declaringTraits()->init) {
+					if (f->declaringScope() == NULL && f != f->declaringTraits()->init) {
 						verifyQueue2.add(f);
 						continue;
 					}

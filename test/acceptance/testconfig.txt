@@ -82,6 +82,8 @@ abcasm/abs_helper , .* , skip,
 abcasm/traitsSparseSlots , .* , expectedfail , Error 1107 is correct output
 # Test uses abcasm to check a boundary condition, failure is correct result
 abcasm/semanticErrorDuplicateSlotName , .* , expectedfail , Error 1107 is correct output
+# Test uses abcasm to check a boundary condition, failure is correct result
+abcasm/funcRedef , .* , expectedfail , Error 1107 is correct output
 # Test not ready for prime-time
 abcasm/stringEscapes , .* , skip,
 

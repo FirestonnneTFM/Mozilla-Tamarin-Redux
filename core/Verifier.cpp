@@ -258,7 +258,7 @@ namespace avmplus
         // initial scope chain types 
         int outer_depth = 0;
 
-        ScopeTypeChain* scope = info->declaringTraits()->scope;
+        const ScopeTypeChain* scope = info->declaringScope();
         if (!scope && info->declaringTraits()->init != info)
         {
             // this can occur when an activation scope inside a class instance method
@@ -745,11 +745,11 @@ namespace avmplus
  					if (toplevel->verifyErrorClass() != NULL)
  						verifyFailed(kInvalidBaseClassError);
 				}
-				ftraits->scope = ScopeTypeChain::create(core->GetGC(), scope, state, NULL, NULL);
+				ftraits->set_scope(ScopeTypeChain::create(core->GetGC(), scope, state, NULL, NULL));
 				if (f->activationTraits())
 				{
 					// ISSUE - if nested functions, need to capture scope, not make a copy
-					f->activationTraits()->scope = ftraits->scope;
+					f->activationTraits()->set_scope(ftraits->scope());
 				}
 				coder->writeOp1(state, pc, opcode, imm30, ftraits);
 				state->push(ftraits, true);
@@ -809,8 +809,8 @@ namespace avmplus
 				// add a type constraint for the "this" scope of instance methods
 				ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), cscope, NULL, ctraits, itraits);
 
-				ctraits->scope = cscope;
-				itraits->scope = iscope;
+				ctraits->set_scope(cscope);
+				itraits->set_scope(iscope);
 
 				ctraits->resolveSignatures(toplevel);
 				itraits->resolveSignatures(toplevel);
@@ -1493,7 +1493,7 @@ namespace avmplus
             case OP_getouterscope:
             {
 				checkStack(0,1);
-				ScopeTypeChain* scope = info->declaringTraits()->scope;
+				const ScopeTypeChain* scope = info->declaringScope();
 				int captured_depth = scope->size;
 				if (captured_depth > 0)
 				{
@@ -2093,7 +2093,7 @@ namespace avmplus
 	void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc)
 	{
 		bool skip_translation = false;
-		ScopeTypeChain* scope = info->declaringTraits()->scope;
+		const ScopeTypeChain* scope = info->declaringScope();
 		if (multiname.isBinding())
 		{
 			int index = scopeBase + state->scopeDepth - 1;
@@ -2254,7 +2254,7 @@ namespace avmplus
 
 	void Verifier::checkGetGlobalScope()
 	{
-		ScopeTypeChain* scope = info->declaringTraits()->scope;
+		const ScopeTypeChain* scope = info->declaringScope();
 		int captured_depth = scope->size;
 		if (captured_depth > 0)
 		{
@@ -2937,15 +2937,15 @@ namespace avmplus
 
         // scope chain
 		core->console << "                        scope: ";
-		Traits* declaringTraits = info->declaringTraits();
-		if (declaringTraits->scope && declaringTraits->scope->size > 0)
+		const ScopeTypeChain* declaringScope = info->declaringScope();
+		if (declaringScope && declaringScope->size > 0)
 		{
 			core->console << "[";
-			for (int i=0, n=declaringTraits->scope->size; i < n; i++)
+			for (int i=0, n=declaringScope->size; i < n; i++)
 			{
 				Value v;
-				v.traits = declaringTraits->scope->getScopeTraitsAt(i);
-				v.isWith = declaringTraits->scope->getScopeIsWithAt(i);
+				v.traits = declaringScope->getScopeTraitsAt(i);
+				v.isWith = declaringScope->getScopeIsWithAt(i);
 				v.killed = false;
 				v.notNull = true;
 				#if defined FEATURE_NANOJIT

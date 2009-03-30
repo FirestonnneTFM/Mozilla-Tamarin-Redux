@@ -1462,7 +1462,7 @@ namespace avmplus
 			pool->scripts.set(i, script);
 
 			// initial scope chain is []
-			traits->scope = ScopeTypeChain::createEmpty(core->GetGC());
+			traits->set_scope(ScopeTypeChain::createEmpty(core->GetGC()));
 		}
 
 		return true;

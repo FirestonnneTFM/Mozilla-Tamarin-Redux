@@ -631,6 +631,7 @@ namespace avmplus
 		{
 			_flags &= ~RESOLVED;
 			this->_declaringTraits = NULL;
+			this->_msref = pool()->core->GetGC()->emptyWeakRef;
 		}
 
 		// make sure param & return types are fully resolved.
