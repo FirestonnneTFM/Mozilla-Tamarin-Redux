@@ -106,6 +106,10 @@ namespace avmshell
 		virtual ~ShellCodeContext() {}
 		virtual DomainEnv *domainEnv() const { return m_domainEnv; }
 	};
+
+	// swf support, impl code in swf.cpp
+	bool isSwf(ScriptBuffer);
+	void handleSwf(const char *, ScriptBuffer, DomainEnv*, Toplevel*&, CodeContext*);
 	
 	/**
 	 * A command-line shell around the avmplus core.  This can be

@@ -59,6 +59,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/FileClass.cpp \
   $(curdir)/FileInputStream.cpp \
   $(curdir)/SystemClass.cpp \
+  $(curdir)/swf.cpp \
   $(curdir)/../extensions/DictionaryGlue.cpp \
   $(curdir)/../extensions/JavaGlue.cpp \
   $(curdir)/../extensions/SamplerScript.cpp \
