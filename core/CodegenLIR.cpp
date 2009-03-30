@@ -1462,7 +1462,7 @@ namespace avmplus
 	{
 		if (outOMem()) return;
 		this->state = state;
-		Traits* t = info->declaringTraits()->scope->getScopeTraitsAt(scope_index);
+		Traits* t = info->declaringScope()->getScopeTraitsAt(scope_index);
 		LIns* scope = loadScope();
 		LIns* scopeobj = loadIns(LIR_ldcp, offsetof(ScopeChain,_scopes) + scope_index*sizeof(Atom), scope);
 		localSet(dest, atomToNativeRep(t, scopeobj), t);
@@ -2042,7 +2042,7 @@ namespace avmplus
 
 	void CodegenLIR::emitGetGlobalScope()
 	{
-		ScopeTypeChain* scope = info->declaringTraits()->scope;
+		const ScopeTypeChain* scope = info->declaringScope();
 		int captured_depth = scope->size;
 		if (captured_depth > 0)
 		{
@@ -3046,7 +3046,7 @@ namespace avmplus
 		else
 		{
             // setglobalslot
-			ScopeTypeChain* scopeTypes = info->declaringTraits()->scope;
+			const ScopeTypeChain* scopeTypes = info->declaringScope();
 			if (scopeTypes->size == 0)
 			{
 				// no captured scopes, so global is local scope 0

@@ -352,6 +352,7 @@ namespace avmplus
 		inline AtomMethodProc impl32() const { return _impl32; }
 		inline DoubleMethodProc implN() const { return _implN; }
 		inline Traits* declaringTraits() const { return _declaringTraits; }
+		inline const ScopeTypeChain* declaringScope() const { return _declaringTraits->scope(); }
 		inline Traits* activationTraits() const { return _activationTraits; }
 
 		inline void set_activationTraits(Traits* t) { _activationTraits = t; }

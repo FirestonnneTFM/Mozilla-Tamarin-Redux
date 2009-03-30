@@ -502,6 +502,8 @@ namespace avmplus
 		Stringp format(AvmCore* core) const;
 #endif
 
+		inline const ScopeTypeChain* scope() const { return _scope; }
+		inline void set_scope(const ScopeTypeChain* stc) { WB(MMgc::GC::GetGC(this), this, &_scope, stc); }
 
 	// ------------------------ DATA SECTION BEGIN
 	public:		AvmCore* const			core;		// @todo remove, can get from pool->core
@@ -514,7 +516,7 @@ namespace avmplus
 	public:		DWB(char*)				rawname;
 #endif
 	public:		DRCWB(Namespacep)		protectedNamespace;	// protected namespace, if any
-	public:		DWB(ScopeTypeChain*)	scope;				// scope chain types
+	private:	const ScopeTypeChain*	_scope;				// scope chain types
 	public:		DWB(MethodInfo*)		init;				// not a call/init union b/c smart pointers and union's don't mix
 	private:	CreateClassClosureProc	m_createClassClosure;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType

@@ -347,7 +347,6 @@ namespace avmplus
 		VTable* const				_vtable;		// the vtable for the scope where this env was declared 
 	public:
 		MethodInfo* const			method;		// runtime independent type info for this method 
-		Traits* const				declTraits;
 	private:
 		uintptr_t					activationOrMCTable;
 	public:
