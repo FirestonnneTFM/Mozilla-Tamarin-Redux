@@ -180,7 +180,7 @@ namespace avmshell
 			BasicScriptBufferImpl* newswfbuf = new (gc, swflen) BasicScriptBufferImpl(swflen);
 			ScriptBuffer newswf(newswfbuf);
 			uLongf dlen = swflen;
-			int e = uncompress((Bytef*)&newswf[0], &dlen, (Bytef*)&swf[8], swf.getSize()-8);
+			int e = uncompress((Bytef*)&newswf[0], &dlen, (Bytef*)&swf[8], (uLongf)swf.getSize()-8);
 			if (e != Z_OK) {
 				core->console << filename << ": error decompressing body: " << e << "\n";
 				return;
