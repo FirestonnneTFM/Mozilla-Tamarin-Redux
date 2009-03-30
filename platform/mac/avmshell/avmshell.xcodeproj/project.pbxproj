@@ -324,10 +324,6 @@
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB70F3ABC5E0031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
-		07DA49E30F80C8BC007939FD /* MMgcPortUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DB0F80C8BC007939FD /* MMgcPortUnix.cpp */; };
-		07DA49E40F80C8BC007939FD /* MMgcPortWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DC0F80C8BC007939FD /* MMgcPortWin.cpp */; };
-		07DA49E50F80C8BC007939FD /* SpinLockUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DD0F80C8BC007939FD /* SpinLockUnix.cpp */; };
-		07DA49E60F80C8BC007939FD /* SpinLockWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DE0F80C8BC007939FD /* SpinLockWin.cpp */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
@@ -1600,10 +1596,6 @@
 				3FFDEC690F69A52C00E510AB /* MMgcPortMac.cpp in Sources */,
 				3FFDEC6A0F69A52C00E510AB /* SpinLockMac.cpp in Sources */,
 				3FFDEC6E0F69A54F00E510AB /* GCAllocObject.cpp in Sources */,
-				07DA49E30F80C8BC007939FD /* MMgcPortUnix.cpp in Sources */,
-				07DA49E40F80C8BC007939FD /* MMgcPortWin.cpp in Sources */,
-				07DA49E50F80C8BC007939FD /* SpinLockUnix.cpp in Sources */,
-				07DA49E60F80C8BC007939FD /* SpinLockWin.cpp in Sources */,
 				19BB29A10F8119E100C5F1F7 /* swf.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
