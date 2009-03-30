@@ -592,7 +592,7 @@ namespace avmplus
 		static Stringp makeVectorClassName(AvmCore* core, Traits* t);
 	
 	private:
-		DWB(Hashtable*) instantiated_types;
+		DWB(HeapHashtable*) instantiated_types;
 	};
 
 	class ObjectVectorClass : public ClassClosure

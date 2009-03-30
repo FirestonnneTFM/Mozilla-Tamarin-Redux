@@ -346,7 +346,7 @@ namespace avmplus
 		inline uint32_t getTotalSize() const { AvmAssert(linked); return m_totalSize; }
 
 		// in bytes. includes size for all base classes too.
-		inline uint32_t getSlotAreaSize() const { AvmAssert(linked); return m_totalSize - m_sizeofInstance - (m_hashTableOffset ? sizeof(Hashtable) : 0); }
+		inline uint32_t getSlotAreaSize() const { AvmAssert(linked); return m_totalSize - m_sizeofInstance - (m_hashTableOffset ? sizeof(InlineHashtable) : 0); }
 
 		inline uint32_t getSlotAreaStart() const { return m_sizeofInstance + (base ? base->getSlotAreaSize() : 0); }
 
