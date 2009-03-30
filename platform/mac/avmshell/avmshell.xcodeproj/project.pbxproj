@@ -324,6 +324,10 @@
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB70F3ABC5E0031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
+		07DA49E30F80C8BC007939FD /* MMgcPortUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DB0F80C8BC007939FD /* MMgcPortUnix.cpp */; };
+		07DA49E40F80C8BC007939FD /* MMgcPortWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DC0F80C8BC007939FD /* MMgcPortWin.cpp */; };
+		07DA49E50F80C8BC007939FD /* SpinLockUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DD0F80C8BC007939FD /* SpinLockUnix.cpp */; };
+		07DA49E60F80C8BC007939FD /* SpinLockWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DA49DE0F80C8BC007939FD /* SpinLockWin.cpp */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		3F4F95590F6036CD009D9F22 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */; };
@@ -752,6 +756,12 @@
 		079DFC970F3AB9640031D1B4 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		07A8D2DD0F5EEA2B0005E66C /* OOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OOM.h; path = ../../../MMgc/OOM.h; sourceTree = SOURCE_ROOT; };
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
+		07DA49DA0F80C8BC007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/platform/manifest.mk; sourceTree = SOURCE_ROOT; };
+		07DA49DB0F80C8BC007939FD /* MMgcPortUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortUnix.cpp; path = ../../../MMgc/platform/MMgcPortUnix.cpp; sourceTree = SOURCE_ROOT; };
+		07DA49DC0F80C8BC007939FD /* MMgcPortWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortWin.cpp; path = ../../../MMgc/platform/MMgcPortWin.cpp; sourceTree = SOURCE_ROOT; };
+		07DA49DD0F80C8BC007939FD /* SpinLockUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockUnix.cpp; path = ../../../MMgc/platform/SpinLockUnix.cpp; sourceTree = SOURCE_ROOT; };
+		07DA49DE0F80C8BC007939FD /* SpinLockWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockWin.cpp; path = ../../../MMgc/platform/SpinLockWin.cpp; sourceTree = SOURCE_ROOT; };
+		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
 		3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../shell/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -1264,6 +1274,7 @@
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
+				07DA49E70F80C906007939FD /* manifest.mk */,
 			);
 			name = mmgc;
 			sourceTree = "<group>";
@@ -1345,7 +1356,12 @@
 			isa = PBXGroup;
 			children = (
 				3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */,
+				07DA49DB0F80C8BC007939FD /* MMgcPortUnix.cpp */,
+				07DA49DC0F80C8BC007939FD /* MMgcPortWin.cpp */,
 				3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */,
+				07DA49DD0F80C8BC007939FD /* SpinLockUnix.cpp */,
+				07DA49DE0F80C8BC007939FD /* SpinLockWin.cpp */,
+				07DA49DA0F80C8BC007939FD /* manifest.mk */,
 			);
 			name = platform;
 			sourceTree = "<group>";
@@ -1580,6 +1596,10 @@
 				3FFDEC690F69A52C00E510AB /* MMgcPortMac.cpp in Sources */,
 				3FFDEC6A0F69A52C00E510AB /* SpinLockMac.cpp in Sources */,
 				3FFDEC6E0F69A54F00E510AB /* GCAllocObject.cpp in Sources */,
+				07DA49E30F80C8BC007939FD /* MMgcPortUnix.cpp in Sources */,
+				07DA49E40F80C8BC007939FD /* MMgcPortWin.cpp in Sources */,
+				07DA49E50F80C8BC007939FD /* SpinLockUnix.cpp in Sources */,
+				07DA49E60F80C8BC007939FD /* SpinLockWin.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
