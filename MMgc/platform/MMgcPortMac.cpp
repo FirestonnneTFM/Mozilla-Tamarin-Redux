@@ -209,7 +209,7 @@ uint64_t VMPI_getPerformanceFrequency()
 	static uint64_t frequency = 0;
 	if ( frequency == 0 ) {
 		(void) mach_timebase_info(&info);
-		frequency = (uint64_t) ( 1.0 / ( 1e-9 * (double) info.numer / (double) info.denom ) );
+		frequency = (uint64_t) ( 1e9 / ((double) info.numer / (double) info.denom) );
 	}
 	return frequency;
 }
