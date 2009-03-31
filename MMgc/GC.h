@@ -501,20 +501,6 @@ namespace MMgc
 		void Collect();
 
 		/**
-		 * Perform some GC-related work if needed.  Call this during
-		 * application down time.
-		 *
-		 * In incremental mode, this may result in a call to
-		 * StartIncrementalMark() or IncrementalMark(), which may in turn push
-		 * the current GC cycle to completion.  In non-incremental mode, this
-		 * heuristically decides whether to do a full Collect().
-		 *
-		 * @param callerHasActiveRequest
-		 *     Must be true iff the calling thread is already in a request.
-		 */
-		void MaybeGC(bool callerHasActiveRequest=false);
-
-		/**
 		* flags to be passed as second argument to alloc
 		*/
 		enum AllocFlags
