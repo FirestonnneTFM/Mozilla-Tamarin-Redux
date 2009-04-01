@@ -95,7 +95,7 @@ namespace avmplus
 	{
 		AvmAssert(domain != NULL);
 		
-		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(abcData, abcDataLen));
+		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ConstDataScriptBufferImpl(abcData, abcDataLen));
 
 		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, (const List<Stringp>*)includes);
 	}
