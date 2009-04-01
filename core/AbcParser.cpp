@@ -1062,6 +1062,8 @@ namespace avmplus
 		startpos = pos;
 #endif
 
+		const bool constData = code.getImpl()->isConstant();
+		
 		for(uint32_t i = 1; i < string_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
@@ -1078,14 +1080,11 @@ namespace avmplus
 			// don't need to create an atom for this now, because
 			// each caller will take care of it.
 
-			// These strings are assumed to be constant
-			//Stringp s = core->internStringUTF8((const char*)pos, len, true);
-
-			// @todo: we *cannot* assume these strings are constant, as some client code
-			// may unload this ABC later. If we ever add a way to "un-constant" interned strings
-			// in an unloaded ABC range, this would be a very worthwhile optimization, but
-			// until then, it's not safe.
-			Stringp s = core->internStringUTF8((const char*)pos, len);
+			// @todo: for now we assume that strings from compiled-in ABC data is constant,
+			// but ABC data from any other source is not constant since it may be unloaded.
+			// A further optimization would be to add a way to "un-constant" interned strings
+			// in an unloaded ABC range.
+			Stringp s = core->internStringUTF8((const char*)pos, len, constData);
 
 			// internStringUTF8() will return NULL if we pass it invalid UTF8 data and its "strict" arg is true
 			// (which it is by default) -- invalid UTF8 in the ABC == verify error.
