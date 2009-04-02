@@ -603,6 +603,9 @@ namespace avmplus
 	bool MethodInfo::makeMethodOf(Traits* traits)
 	{
 		AvmAssert(!isResolved());
+// begin AVMPLUS_UNCHECKED_HACK
+		AvmAssert(!(_flags & PROTOFUNC));
+// end AVMPLUS_UNCHECKED_HACK
 		
 		if (!_declaringTraits)
 		{
@@ -629,10 +632,13 @@ namespace avmplus
 		// MethodEnv::coerceEnter.
 		if (this->_declaringTraits)
 		{
-			_flags &= ~RESOLVED;
+			this->_flags &= ~RESOLVED;
 			this->_declaringTraits = NULL;
 			this->_msref = pool()->core->GetGC()->emptyWeakRef;
 		}
+// begin AVMPLUS_UNCHECKED_HACK
+		this->_flags |= PROTOFUNC;
+// end AVMPLUS_UNCHECKED_HACK
 
 		// make sure param & return types are fully resolved.
 		// this does not set the verified flag, so real verification will
@@ -733,23 +739,23 @@ namespace avmplus
 			returnType = pool->resolveTypeName(pos, toplevel, /*allowVoid=*/true);
 			receiverType = (_flags & NEED_CLOSURE) ? declaringTraits() : core->traits.object_itraits;
 			rest_offset = argSize(receiverType);
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 			uint32_t untyped_args = 0;
-#endif
+// end AVMPLUS_UNCHECKED_HACK
 			for (uint32_t i=1; i <= param_count; i++)
 			{
 				Traits* argType = pool->resolveTypeName(pos, toplevel);
 				WB(gc, ms, &ms->_args[i].paramType, argType);
 				rest_offset += argSize(argType);
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 				untyped_args += (argType == NULL);
-#endif
+// end AVMPLUS_UNCHECKED_HACK
 			}
 			AvmCore::skipU30(pos); // name_index;
 			pos++; // abcFlags;
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 			// toplevel!=NULL check is so we only check when resolveSignature calls us (not subsequently)
-			if (toplevel != NULL)
+			if (toplevel != NULL && (_flags & PROTOFUNC))
 			{
 				// HACK - compiler should do this, and only to toplevel functions
 				// that meet the E4 criteria for being an "unchecked function"
@@ -779,7 +785,7 @@ namespace avmplus
 				}
 			}
 			else 
-#endif // AVMPLUS_UNCHECKED_HACK
+// end AVMPLUS_UNCHECKED_HACK
 			if (hasOptional())
 			{
 				optional_count = AvmCore::readU30(pos);

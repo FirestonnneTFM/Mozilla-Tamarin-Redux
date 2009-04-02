@@ -173,11 +173,6 @@
 //#define AVMPLUS_JITMAX
 #endif
 
-// if a function meets the E4 criteria for being unchecked, then make
-// all its parameters optional and add a rest arg.  asc should do this
-// at compile time so we don't have to do it in avmplus.
-#define AVMPLUS_UNCHECKED_HACK
-
 #ifdef DEBUGGER
 #define AVMPLUS_VERIFYALL
 #endif
