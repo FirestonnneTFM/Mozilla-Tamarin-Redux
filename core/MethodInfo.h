@@ -174,11 +174,14 @@ namespace avmplus
 		 */
 		static const int JIT_IMPL				= 0x00800000;
 		
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 		static const int UNCHECKED				= 0x01000000;
-#endif
+		
+		// Note, this means "makeIntoPrototypeFunction has been called on me",
+		// *not* "I am a function on a prototype object".
+		static const int PROTOFUNC				= 0x02000000;
+// end AVMPLUS_UNCHECKED_HACK
 
-		// unused:								= 0x02000000;
 		// unused:								= 0x04000000;
 		// unused:								= 0x08000000;
 		// unused:								= 0x10000000;
