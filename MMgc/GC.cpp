@@ -152,10 +152,17 @@ namespace MMgc
 		, heap(heap)
 		, timeEndOfLastIncrementalMark(0)
 		, timeEndOfLastCollection(0)
+		, timeStartIncrementalMark(0)
+		, timeIncrementalMark(0)
+		, timeFinalRootAndStackScan(0)
+		, timeFinalizeAndSweep(0)
+		, timeReapZCT(0)
 		, blocksAllocatedSinceLastCollection(0)
 		, blocksDeallocatedSinceLastCollection(0)
 		, blocksInHeapAfterPreviousAllocation(heap->GetTotalHeapSize())
 		, blocksOwned(0)
+		, start_time(0)
+		, start_event(NO_EVENT)
 	{
 	}
 	
@@ -263,14 +270,44 @@ namespace MMgc
 		return heap->GetTotalHeapSize() >= lowerLimitHeapBlocks() && queryAllocationLimitReached(); 
 	}
 
-	void GCPolicyManager::signalEndOfIncrementalMark() {
-		timeEndOfLastIncrementalMark = now();
-	}
-	
-	void GCPolicyManager::signalEndOfCollection() {
-		timeEndOfLastCollection = now();
-		blocksAllocatedSinceLastCollection = 0;
-		blocksDeallocatedSinceLastCollection = 0;
+	void GCPolicyManager::signal(PolicyEvent ev) {
+		switch (ev) {
+			case START_StartIncrementalMark:
+			case START_IncrementalMark:
+			case START_FinalRootAndStackScan:
+			case START_FinalizeAndSweep:
+			case START_ReapZCT:
+				start_time = now();
+				start_event = ev;
+				return;	// to circumvent resetting of start_event below
+		}
+		GCAssert(start_event == (PolicyEvent)(ev - 1));
+		start_event = NO_EVENT;
+		switch (ev) {
+			case END_StartIncrementalMark:
+				timeStartIncrementalMark += now() - start_time;
+				break;
+			case END_FinalRootAndStackScan:
+				timeFinalRootAndStackScan += now() - start_time;
+				break;
+			case END_ReapZCT:
+				timeReapZCT += now() - start_time;
+				break;
+			case END_IncrementalMark: {
+				uint64_t t = now();
+				timeIncrementalMark += t - start_time;
+				timeEndOfLastIncrementalMark = t;
+				break;
+			}
+			case END_FinalizeAndSweep: {
+				uint64_t t = now();
+				timeFinalizeAndSweep += t - start_time;
+				timeEndOfLastCollection = t;
+				blocksAllocatedSinceLastCollection = 0;
+				blocksDeallocatedSinceLastCollection = 0;
+				break;
+			}
+		}
 	}
 	
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
@@ -1775,6 +1812,8 @@ bail:
 		if(gc->collecting || reaping || count == 0)
 			return;
 
+		gc->policy.signal(GCPolicyManager::START_ReapZCT);
+		
 		uint64_t start = 0;
 		if(gc->heap->Config().gcstats) {
 			start = VMPI_getPerformanceCounter();
@@ -1916,6 +1955,8 @@ bail:
 			gc->Sweep();
 		}
 #endif
+		
+		gc->policy.signal(GCPolicyManager::END_ReapZCT);
 	}
 
 	void GC::gclog(const char *format, ...)
@@ -2325,6 +2366,8 @@ bail:
 
 	void GC::StartIncrementalMark()
 	{
+		policy.signal(GCPolicyManager::START_StartIncrementalMark);		// garbage collection starts
+		
 		GCAssert(!marking);
 		GCAssert(!collecting);
 
@@ -2355,6 +2398,10 @@ bail:
 		}
 #endif
 	
+		// FIXME (policy): arguably a bug to allow MarkItem to go recursive here without checking for
+		// the time it takes.  Probably better just to push the roots and let IncrementalMark handle
+		// the marking.
+
 		{
 			MMGC_LOCK(m_rootListLock);
 			GCRoot *r = m_roots;
@@ -2366,6 +2413,12 @@ bail:
 			}
 		}
 		markTicks += VMPI_getPerformanceCounter() - start;
+		
+		policy.signal(GCPolicyManager::END_StartIncrementalMark);
+		
+		// FIXME (policy): arguably a bug to do this here if StartIncrementalMark has exhausted its quantum
+		// doing eager sweeping.
+
 		IncrementalMark();
 	}
 
@@ -2736,6 +2789,8 @@ bail:
 			return;
 		} 
 		
+		policy.signal(GCPolicyManager::START_IncrementalMark);
+		
 		markIncrements++;
 		// FIXME: tune this so that getPerformanceCounter() overhead is noise
 		static unsigned int checkTimeIncrements = 100;
@@ -2761,8 +2816,6 @@ bail:
 			SAMPLE_CHECK();
 		} while(VMPI_getPerformanceCounter() < ticks);
 
-		policy.signalEndOfIncrementalMark();
-		
 		markTicks += VMPI_getPerformanceCounter() - start;
 
 		if(heap->Config().gcstats) {
@@ -2772,6 +2825,8 @@ bail:
 				markIncrements-lastStartMarkIncrementCount, numObjects, kb, 
 				uint32_t(double(kb)/millis), millis, duration(t0)/1000);
 		}
+
+		policy.signal(GCPolicyManager::END_IncrementalMark);
 	}
 
 	void GC::FinishIncrementalMark()
@@ -2793,6 +2848,8 @@ bail:
 		// mark roots again, could have changed (alternative is to put WB's on the roots
 		// which we may need to do if we find FinishIncrementalMark taking too long)
 		
+		policy.signal(GCPolicyManager::START_FinalRootAndStackScan);
+		
 		{
 			MMGC_LOCK(m_rootListLock);
 			GCRoot *r = m_roots;
@@ -2809,12 +2866,15 @@ bail:
 		}
 		MarkQueueAndStack(m_incrementalWork);
 
+		policy.signal(GCPolicyManager::END_FinalRootAndStackScan);
+		
 #ifdef _DEBUG
 		// need to traverse all marked objects and make sure they don't contain
 		// pointers to unmarked objects
 		FindMissingWriteBarriers();
 #endif
 
+		policy.signal(GCPolicyManager::START_FinalizeAndSweep);
 		GCAssert(!collecting);
 		collecting = true;
 		GCAssert(m_incrementalWork.Count() == 0);
@@ -2822,7 +2882,7 @@ bail:
 		GCAssert(m_incrementalWork.Count() == 0);
 		collecting = false;
 		marking = false;
-		policy.signalEndOfCollection();
+		policy.signal(GCPolicyManager::END_FinalizeAndSweep);	// garbage collection is finished
 	}
 
 	int GC::IsWhite(const void *item)
