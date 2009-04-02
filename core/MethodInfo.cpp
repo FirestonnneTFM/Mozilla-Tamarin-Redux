@@ -42,6 +42,9 @@
 #include "CodegenLIR.h"
 #endif
 
+//#define DOPROF
+#include "../vprof/vprof.h"
+
 namespace avmplus
 {
 	using namespace MMgc;
@@ -203,7 +206,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kNotImplementedError, this->pool()->core->toErrorString(this));
 			}
 
-
+			_ntprof("verify-ticks");
 		    #if defined FEATURE_NANOJIT
 			Verifier verifier(this, toplevel);
 
@@ -301,6 +304,7 @@ namespace avmplus
 			// NOTE end copy
 
             #endif // FEATURE_NANOJIT
+			_tprof_end();
 			
 			#ifdef DEBUGGER
 			// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor
