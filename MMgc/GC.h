@@ -435,16 +435,26 @@ namespace MMgc
 		 */
 		bool queryRunCollectionAfterAllocBlockFail();
 
-		/**
-		 * Situation: one incremental mark invocation has completed.
-		 */
-		void signalEndOfIncrementalMark();
+		enum PolicyEvent 
+		{
+			NO_EVENT,
+			START_StartIncrementalMark,	// also, start of garbage collection
+			END_StartIncrementalMark,
+			START_IncrementalMark,
+			END_IncrementalMark,
+			START_FinalRootAndStackScan,
+			END_FinalRootAndStackScan,
+			START_FinalizeAndSweep,
+			END_FinalizeAndSweep,		// also, end of garbage collection
+			START_ReapZCT,
+			END_ReapZCT
+		};
 		
 		/**
-		 * Situation: the synchronous sweep phase of the collection has completed, and the
-		 * collector is about to return to its caller.
+		 * Situation: a GC event corresponding to one of the PolicyEvent values occurs.
+		 * Tell the policy manager about it.
 		 */
-		void signalEndOfCollection();
+		void signal(PolicyEvent ev);
 		
 		/**
 		 * Situation: 'numblocks' blocks have just been obtained by this GC from the GCHeap.
@@ -504,6 +514,13 @@ namespace MMgc
 		// The time recorded the last time we received signalEndOfCollection
 		uint64_t timeEndOfLastCollection;
 
+		// The total time for various collection phases across the run
+		uint64_t timeStartIncrementalMark;
+		uint64_t timeIncrementalMark;
+		uint64_t timeFinalRootAndStackScan;
+		uint64_t timeFinalizeAndSweep;
+		uint64_t timeReapZCT;
+
 		// Blocks actually allocated from GCHeap
 		uint64_t blocksAllocatedSinceLastCollection;
 		
@@ -516,6 +533,10 @@ namespace MMgc
 		
 		// The total number of blocks owned by GC
 		uint64_t blocksOwned;
+		
+		// Temporaries for holding the start time / start event until the end event arrives
+		uint64_t start_time;
+		PolicyEvent start_event;
 	};
 
 	
