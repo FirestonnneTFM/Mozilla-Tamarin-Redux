@@ -133,11 +133,6 @@ void sparc_clean_windows()
 
 namespace MMgc
 {
-	// how many objects trigger a reap, should be high
-	// enough that the stack scan time is noise but low enough
-	// so that objects to away in a timely manner
-	const int ZCT::ZCT_REAP_THRESHOLD = 512;
-
 	// size of table in pages
 	const int ZCT::ZCT_START_SIZE = 1;
 
@@ -152,22 +147,145 @@ namespace MMgc
 	const bool dumpSizeClassState = false;
 #endif
 
-	/**
-	 * Free Space Divisor.  This value may be tuned for optimum
- 	 * performance.  The FSD is based on the Boehm collector.
-	 */
-	const static int kFreeSpaceDivisor = 4;
+	GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap)
+		: gc(gc)
+		, heap(heap)
+		, timeEndOfLastIncrementalMark(0)
+		, timeEndOfLastCollection(0)
+		, blocksAllocatedSinceLastCollection(0)
+		, blocksDeallocatedSinceLastCollection(0)
+		, blocksInHeapAfterPreviousAllocation(heap->GetTotalHeapSize())
+		, blocksOwned(0)
+	{
+	}
+	
+	inline uint64_t GCPolicyManager::interIncrementalMarkTicks() {
+		return 10 * VMPI_getPerformanceFrequency() / 1000;	// Ticks.  Value represents 10ms on all platforms
+	}
+	
+	inline uint64_t GCPolicyManager::interCollectionTicks() {
+		/* The following is almost certainly not correct but it's the current policy.
+		 *
+		 * From a conversation with Tommy, it appears that the idea here is that faster machines should
+		 * have lower limits on the time between collections.  The assumption is that a slower
+		 * machine will have a lower frequency performance timer, so a constant ticks value here will
+		 * give more time to a slower machine than to a fast machine.  That's a pretty dodgy assumption
+		 * about the frequency, though.  For example, the Linux platform layer hardwires it at 1MHz
+		 * regardless of the computer's speed, it could be a Maemo or a 4GHz monster.
+		 */
+		return 1515909;										// Ticks.  Old comment says "200 ms on a 2ghz machine" but that's wrong
+	}
+	
+	inline uint32_t GCPolicyManager::freeSpaceDivisor() {
+		return 4;											// Unitless.  Old comment says "4" comes from the Boehm collector
+	}
 
-	// max amount we'll grow by when 
-	const static int kMaxIncrement = 256;
+	inline uint32_t GCPolicyManager::lowerLimitHeapBlocks() {
+		return 256;											// 4KB blocks, that is, 1MB
+	}
 
-	/**
-	 * delay between GC incremental marks
-	 */
-	const static uint64_t kIncrementalMarkDelayTicks = int(10 * VMPI_getPerformanceFrequency() / 1000);
+	inline uint64_t GCPolicyManager::now() {
+		return VMPI_getPerformanceCounter();
+	}
 
-	const static uint64_t kMarkSweepBurstTicks = 1515909; // 200 ms on a 2ghz machine
+	inline bool GCPolicyManager::queryAllocationLimitReached() {
+		return (blocksAllocatedSinceLastCollection >= blocksDeallocatedSinceLastCollection &&
+				(blocksAllocatedSinceLastCollection - blocksDeallocatedSinceLastCollection) * freeSpaceDivisor() >= blocksOwned);
+	}
+	
+	inline bool GCPolicyManager::queryLowerLimitGCBlocksAllocated() {
+		return blocksOwned > lowerLimitHeapBlocks();
+	}
 
+	inline bool GCPolicyManager::querySufficientTimeSinceLastCollection() {
+		return now() - timeEndOfLastCollection > interCollectionTicks();
+	}
+	
+	uint64_t GCPolicyManager::incrementalMarkMilliseconds() {
+		return 5;											// milliseconds
+	}
+
+	uint64_t GCPolicyManager::blocksOwnedByGC() {
+		return blocksOwned;
+	}
+	
+	uint64_t GCPolicyManager::zctNewSize(uint64_t oldZctSize)
+	{
+		return oldZctSize * 2;
+	}
+
+	uint64_t GCPolicyManager::zctNewReapThreshold(uint64_t zctSize, uint64_t zctOccupancy)
+	{
+		// how many objects trigger a reap, should be high
+		// enough that the stack scan time is noise but low enough
+		// so that objects to away in a timely manner
+		
+		const int ZCT_REAP_THRESHOLD = 512;
+		
+		uint64_t zctReapThreshold = zctOccupancy + ZCT_REAP_THRESHOLD;
+		if(zctReapThreshold > zctSize * GCHeap::kBlockSize/sizeof(uintptr_t))
+			zctReapThreshold = zctSize * GCHeap::kBlockSize/sizeof(uintptr_t);
+		return zctReapThreshold;
+	}
+	
+    bool GCPolicyManager::queryStartIncrementalMarkAtAllocBlock()
+    {
+		GCAssert(!gc->IncrementalMarking() && !gc->Collecting());
+		return (queryLowerLimitGCBlocksAllocated() && queryAllocationLimitReached() && querySufficientTimeSinceLastCollection());
+    }
+
+	bool GCPolicyManager::queryIncrementalMarkAtAllocBlock() 
+    {
+		/* This is the existing policy but for fast computers it's better
+		 * just to return 'true', which probably means interIncrementalMarkTicks
+		 * should be really small.
+		 */
+		GCAssert(gc->IncrementalMarking() && !gc->Collecting());
+		return now() - timeEndOfLastIncrementalMark > interIncrementalMarkTicks();
+    }
+	
+	bool GCPolicyManager::queryFinishIncrementalMarkAfterAllocBlockFail()
+	{
+		// this is the existing policy but it's not a good idea
+		return true;
+	}
+
+	bool GCPolicyManager::queryStartCollectionAfterHeapExpansion()
+	{
+		// this is the existing policy but it's not a good idea
+		return (blocksInHeapAfterPreviousAllocation > lowerLimitHeapBlocks() &&
+				blocksInHeapAfterPreviousAllocation < heap->GetTotalHeapSize() && 
+				querySufficientTimeSinceLastCollection());
+	}
+
+	bool GCPolicyManager::queryRunCollectionAfterAllocBlockFail()
+	{
+		return heap->GetTotalHeapSize() >= lowerLimitHeapBlocks() && queryAllocationLimitReached(); 
+	}
+
+	void GCPolicyManager::signalEndOfIncrementalMark() {
+		timeEndOfLastIncrementalMark = now();
+	}
+	
+	void GCPolicyManager::signalEndOfCollection() {
+		timeEndOfLastCollection = now();
+		blocksAllocatedSinceLastCollection = 0;
+		blocksDeallocatedSinceLastCollection = 0;
+	}
+	
+	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
+		blocksAllocatedSinceLastCollection += blocks;
+		blocksOwned += blocks;
+		blocksInHeapAfterPreviousAllocation = heap->GetTotalHeapSize();
+	}
+	
+	void GCPolicyManager::signalBlockDeallocation(size_t blocks) {
+		blocksOwned -= blocks;
+		blocksDeallocatedSinceLastCollection += blocks;
+	}
+
+	
+	
 	// Size classes for our GC.  From 8 to 128, size classes are spaced
 	// evenly 8 bytes apart.  The finest granularity we can achieve is
 	// 8 bytes, as pointers must be 8-byte aligned thanks to our use
@@ -227,6 +345,11 @@ namespace MMgc
 #define USING_PAGE_MAP()         ((void) 0)
 #endif
 
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable:4355) // 'this': used in base member initializer list
+#endif 
+
 	GC::GC(GCHeap *gcheap)
 		:
 		greedy(false),
@@ -234,7 +357,6 @@ namespace MMgc
 		findUnmarkedPointers(false),
 		validateDefRef(false),
 		keepDRCHistory(false),
-		collectThreshold(256),
 		dontAddToZCTDuringCollection(false),
 		incrementalValidation(false),
 #ifdef _DEBUG
@@ -245,6 +367,7 @@ namespace MMgc
 #ifdef MMGC_RCROOT_SUPPORT
 		rcRootSegments(NULL),
 #endif
+		policy(this, gcheap),
 		t0(VMPI_getPerformanceCounter()),
 		bytesMarked(0),
 		markTicks(0),
@@ -258,7 +381,6 @@ namespace MMgc
 		emptyWeakRef(0),
 		emptyWeakRefRoot(0),
 		destroying(false),
-		heapSizeAtLastAlloc(gcheap->GetTotalHeapSize()),
 		stackCleaned(true),
 		rememberedStackTop(0),
 		stackEnter(0),
@@ -266,13 +388,9 @@ namespace MMgc
 		disableThreadCheck(false),
 #endif
 		marking(false),
-		lastMarkTicks(0),
-		lastSweepTicks(0),
 		memStart(MAX_UINTPTR),
 		memEnd(0),
-		totalGCPages(0),
 		heap(gcheap),
-		allocsSinceCollect(0),
 		collecting(false),
 		finalizedValue(true),
 		smallEmptyPageList(NULL),
@@ -362,6 +480,10 @@ namespace MMgc
  		allocaInit();
 	}
 
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif 
+
 	GC::~GC()
 	{
  		allocaShutdown();
@@ -390,7 +512,7 @@ namespace MMgc
 		// Go through page list and free all pages on it
 		while (pageList) {
 			void **next = (void**) *pageList;
-			heap->Free((void*)pageList);
+			heapFree((void*)pageList);
 			pageList = next;
 		}
 
@@ -407,7 +529,7 @@ namespace MMgc
 		// dtors for each GCAlloc will use this
 		pageList = NULL;
 
-		heap->Free(pageMap);
+		heapFree(pageMap);
 
 #ifndef MMGC_THREADSAFE
 		CheckThread();
@@ -1004,9 +1126,6 @@ bail:
 
 		SAMPLE_CHECK();
 
-		allocsSinceCollect = 0;
-		lastSweepTicks = VMPI_getPerformanceCounter();
-
 		if(heap->Config().gcstats) {
 			int sweepResults = 0;
 			GCAlloc::GCBlock *bb = smallEmptyPageList;
@@ -1035,13 +1154,7 @@ bail:
 		GCAssert(size > 0);
 	
 		// perform gc if heap expanded due to fixed memory allocations
-		// utilize burst logic to prevent this from happening back to back
-		// this logic is here to apply to incremental and non-incremental
-		uint64_t now = VMPI_getPerformanceCounter();
-		if(!marking && !collecting &&
-			heapSizeAtLastAlloc > collectThreshold &&
-			now - lastSweepTicks > kMarkSweepBurstTicks && 
-			heapSizeAtLastAlloc < heap->GetTotalHeapSize()) 
+		if(!marking && !collecting && policy.queryStartCollectionAfterHeapExpansion())
 		{
 			if(incremental && !nogc)
 				StartIncrementalMark();
@@ -1056,26 +1169,19 @@ bail:
 		else
 			item = AllocBlockNonIncremental(size, zero);
 
-		if(!item) {				
-			item = heap->Alloc(size, true, zero);
-		}
+		if(!item)
+			item = heapAlloc(size, true, zero);
 
 		GCAssert(item != NULL);
 		if (item != NULL)
 		{
-			allocsSinceCollect += size;
-
 			// mark GC pages in page map, small pages get marked one,
 			// the first page of large pages is 3 and the rest are 2
 			MarkGCPages(item, 1, pageType);
 			if(pageType == kGCLargeAllocPageFirst) {
 				MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
 			}
-			totalGCPages += size;
 		}
-
-		// do this after any heap expansions from GC
-		heapSizeAtLastAlloc = heap->GetTotalHeapSize();
 
 		return item;
 	}
@@ -1084,29 +1190,23 @@ bail:
 	{
 		MMGC_ASSERT_GC_LOCK(this);
 
-		if(!collecting || incrementalValidation) {
-			uint64_t now = VMPI_getPerformanceCounter();
-			if (marking) {		
-				if(now - lastMarkTicks > kIncrementalMarkDelayTicks) {
+		if (!collecting) {
+			if (marking) {
+				if (incrementalValidation || policy.queryIncrementalMarkAtAllocBlock())
 					IncrementalMark();
-				}
-			} else if (incrementalValidation ||
-				(totalGCPages > collectThreshold &&
-				allocsSinceCollect * kFreeSpaceDivisor >= totalGCPages &&
-				// burst detection
-				(now - lastSweepTicks > kMarkSweepBurstTicks))) {
-					StartIncrementalMark();
-			}
+			} 
+			else if (incrementalValidation || policy.queryStartIncrementalMarkAtAllocBlock())
+				StartIncrementalMark();
+		}
+	
+		void *item = heapAlloc(size, false, zero);
+
+		if (item == NULL && marking && !collecting && policy.queryFinishIncrementalMarkAfterAllocBlockFail()) {
+			GCAssert(!nogc);
+			FinishIncrementalMark();
+			item = heapAlloc(size, false, zero);
 		}
 
-		void *item = heap->Alloc(size, false, zero);
-		if(!item && !collecting) {
-			if(marking) {
-				GCAssert(!nogc);
-				FinishIncrementalMark();
-				item = heap->Alloc(size, false, zero);
-			}
-		}
 		return item;
 	}
 
@@ -1114,15 +1214,13 @@ bail:
 	{
 		MMGC_ASSERT_GC_LOCK(this);
 
-		void *item = heap->Alloc(size, false, zero);
-		if (!item) {
-			if (heap->GetTotalHeapSize() >= collectThreshold &&
-				allocsSinceCollect >= totalGCPages / kFreeSpaceDivisor) 
-			{
-				CollectWithBookkeeping(true, true);
-				item = heap->Alloc(size, false, zero);
-			}
+		void *item = heapAlloc(size, false, zero);
+		
+		if (item == NULL && policy.queryRunCollectionAfterAllocBlockFail()) {
+			CollectWithBookkeeping(true, true);
+			item = heapAlloc(size, false, zero);
 		}
+		
 		return item;
 	}
 
@@ -1133,11 +1231,7 @@ bail:
 				 || (m_gcRunning
 					 && m_exclusiveGCThread == GCThread::GetCurrentThread()));
 #endif
-		if(!collecting) {
-			allocsSinceCollect -= size;
-		}
-		totalGCPages -= size;
-		heap->Free(ptr);
+		heapFree(ptr);
 		UnmarkGCPages(ptr, size);
 	}
 
@@ -1218,7 +1312,7 @@ bail:
 
         uint32_t numPagesNeeded = (uint32_t)(((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1);
 		if(numPagesNeeded > heap->Size(pageMap)) {
-			dst = (unsigned char*)heap->Alloc(numPagesNeeded);
+			dst = (unsigned char*)heapAlloc(numPagesNeeded);
 		}
 
 		if(shiftAmount || dst != pageMap) {
@@ -1227,7 +1321,7 @@ bail:
 				VMPI_memset(dst, 0, shiftAmount);
 			}
 			if(dst != pageMap) {
-				heap->Free(pageMap);
+				heapFree(pageMap);
 				pageMap = dst;
 			}
 		}
@@ -1430,14 +1524,14 @@ bail:
 		return false;
 	}
 
-  ZCT::ZCT()
+	ZCT::ZCT()
 	{
 		zctSize = ZCT_START_SIZE;
 		zctFreelist = NULL;
 		reaping = false;
-		gc = NULL;
 		count = 0;
-		zctReapThreshold = ZCT_REAP_THRESHOLD;
+		gc = NULL;				// will be set in SetGC
+		zctReapThreshold = 0;	// will be set in SetGC
 	}
 
 	ZCT::~ZCT()
@@ -1450,6 +1544,7 @@ bail:
 		this->gc = gc;
 		zct = (RCObject**) gc->heapAlloc(zctSize);
 		zctNext = zct;
+		zctReapThreshold = int(gc->policy.zctNewReapThreshold(zctSize, 0));
 	}
 
 	void ZCT::Add(RCObject *obj)
@@ -1515,14 +1610,18 @@ bail:
 				Reap();
 		}
 
-		if(zctNext >= zct + zctSize*4096/sizeof(void *)) {
+		GCAssert(zctNext <= zct + zctSize*4096/sizeof(void *));
+		
+		if(zctNext == zct + zctSize*4096/sizeof(void *)) {
 			// grow 
-			RCObject **newZCT = (RCObject**) gc->heap->Alloc(zctSize*2);
+			// as long as the zct is one linear block the growth factor is for the policy code to decide
+			int newZctSize = (int)gc->policy.zctNewSize(zctSize);
+			RCObject **newZCT = (RCObject**) gc->heapAlloc(newZctSize);
 			VMPI_memcpy(newZCT, zct, zctSize*GCHeap::kBlockSize);
-			gc->heap->Free(zct);
+			gc->heapFree(zct);
 			zctNext = newZCT + (zctNext-zct);
 			zct = newZCT;	
-			zctSize *= 2;
+			zctSize = newZctSize;
 			GCAssert(!zctFreelist);
 		}
 	}
@@ -1680,7 +1779,7 @@ bail:
 		if(gc->heap->Config().gcstats) {
 			start = VMPI_getPerformanceCounter();
 		}
-		uint32_t pagesStart = (uint32_t)gc->totalGCPages;
+		uint32_t pagesStart = (uint32_t)gc->GetNumBlocks();
 		uint32_t numObjects=0;
 		size_t objSize=0;
 
@@ -1792,9 +1891,7 @@ bail:
 		}
 
 		zctNext = zct + nextPinnedIndex;
-		zctReapThreshold = count + ZCT_REAP_THRESHOLD;
-		if(zctReapThreshold > int(zctSize*GCHeap::kBlockSize/sizeof(RCObject*)))
-			zctReapThreshold = zctSize*GCHeap::kBlockSize/sizeof(RCObject*);
+		zctReapThreshold = int(gc->policy.zctNewReapThreshold(zctSize, count));
 		GCAssert(nextPinnedIndex == count);
 		zctIndex = nextPinnedIndex = 0;
 
@@ -1809,7 +1906,7 @@ bail:
 		}
 		if(gc->heap->Config().gcstats && numObjects) {
 			gc->gclog("[mem] DRC reaped %d objects (%d kb) freeing %d pages (%d kb) in %.2f millis (%.4f s)\n", 
-				numObjects, objSize>>10, pagesStart - gc->totalGCPages, gc->totalGCPages*GCHeap::kBlockSize >> 10, 
+				numObjects, objSize>>10, pagesStart - gc->GetNumBlocks(), gc->GetNumBlocks()*GCHeap::kBlockSize >> 10, 
 				GC::duration(start), gc->duration(gc->t0)/1000);
 		}
 		reaping = false;
@@ -1937,7 +2034,7 @@ bail:
 
 	void GC::DumpMemoryInfo()
 	{
-		size_t total = totalGCPages * GCHeap::kBlockSize;
+		size_t total = GetNumBlocks() * GCHeap::kBlockSize;
 		heap->log_percentage("[mem] \tmanaged fragmentation ", total-GetBytesInUse(), total);
 		if(ticksToMillis(markTicks) != 0 && bytesMarked != 0) {
 			uint32_t markRate = (uint32_t) (bytesMarked / (1024 * ticksToMillis(markTicks))); // kb/ms == mb/s
@@ -2628,7 +2725,7 @@ bail:
 	void GC::IncrementalMark()
 	{
 		MMGC_ASSERT_EXCLUSIVE_GC(this);
-		uint32_t time = incrementalValidation ? 1 : 5;
+		uint32_t time = incrementalValidation ? 1 : uint32_t(policy.incrementalMarkMilliseconds());
 #ifdef _DEBUG
 		time = 1;
 #endif
@@ -2664,8 +2761,9 @@ bail:
 			SAMPLE_CHECK();
 		} while(VMPI_getPerformanceCounter() < ticks);
 
-		lastMarkTicks = VMPI_getPerformanceCounter();
-		markTicks += lastMarkTicks - start;
+		policy.signalEndOfIncrementalMark();
+		
+		markTicks += VMPI_getPerformanceCounter() - start;
 
 		if(heap->Config().gcstats) {
 			double millis = duration(start);
@@ -2724,6 +2822,7 @@ bail:
 		GCAssert(m_incrementalWork.Count() == 0);
 		collecting = false;
 		marking = false;
+		policy.signalEndOfCollection();
 	}
 
 	int GC::IsWhite(const void *item)
@@ -2868,7 +2967,7 @@ bail:
 		}
 
 		if(!m_bitsNext)
-			m_bitsNext = (uint32_t*)heap->Alloc(1);
+			m_bitsNext = (uint32_t*)heapAlloc(1);
 
 		int leftOver = GCHeap::kBlockSize - ((uintptr_t)m_bitsNext & 0xfff);
 		if(leftOver >= numBytes) {
@@ -3077,7 +3176,7 @@ bail:
 	{
 		void *ptr = heap->Alloc((int)siz, expand, zero);
 		if(ptr)
-			totalGCPages += siz;
+			policy.signalBlockAllocation(siz);
 		return ptr;
 	}
 	
@@ -3085,9 +3184,9 @@ bail:
 	{
 		if(!siz)
 			siz = heap->Size(ptr);
-		totalGCPages -= siz;
+		policy.signalBlockDeallocation(siz);
 		heap->Free(ptr);
-	}	
+	}
 	
 	size_t GC::GetBytesInUse()
 	{

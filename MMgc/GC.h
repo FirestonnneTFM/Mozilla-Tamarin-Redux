@@ -310,14 +310,221 @@ namespace MMgc
 		uintptr_t val;
 	};
 
+	
+	/**
+	 * A policy manager for garbage collection.
+	 *
+	 * The policy manager centralizes policy decisions about how and when to run garbage
+	 * collection.  It is queried from the collector code, and collector code signals
+	 * to the policy manager at the occurence of certain events.
+	 *
+	 * Typically the GCPolicyManager is simply embedded inside a GC instance, and manages
+	 * policy for that GC.
+	 *
+	 * ----
+	 *
+	 * Notes, 2009-04-01 / lhansen:
+	 *
+	 * This is the first cut, and it incorporates verbatim the policies of collection
+	 * in Tamarin at the time of the March 2009 TR -> TC merge.  More complexity and other
+	 * policies will appear here by and by, this is by no means set in stone.  In particular,
+	 * it will become aware of other GC instances and also more aware of FixedMalloc.
+	 *
+	 * Arguably the doubling in size of the mark stack is also a policy decision
+	 * that should be made here, not something the marker should decide for itself.  But
+	 * the fixed-size mark stack is a bug in itself so wait for that to be fixed.
+	 *
+	 * ZCT reaping times are not bounded, so ZCT reaping may violate any kind of
+	 * incrementality guarantee.
+	 *
+	 * In general, the policy does not guarantee incremental collection, because
+	 * the amount of work performed each mark quantum is tied to a time slice, not to the
+	 * amount of work that needs to be done for the marker to keep up with the mutator.
+	 * The problem is that incremental marking only happens when we allocate fresh blocks,
+	 * not on a finer grain, so a lot of allocation can take place between each time the
+	 * marker gets to run, and then it gets a fixed quantum.  In practice, this biases
+	 * us toward heap expansion, which is not good for small systems.
+	 */
+	class GCPolicyManager {
+	public:
+		GCPolicyManager(GC* gc, GCHeap* heap);
+		
+		/**
+		 * Situation: the GC is about to run the incremental marker.
+		 *
+		 * @return the desired length of an incremental mark quantum.
+		 * @note this can vary from call to call.
+		 */
+		uint64_t incrementalMarkMilliseconds();
+		
+		/**
+		 * @return the number of blocks owned by this GC, as accounted for by calls to
+		 * signalBlockAllocation and signalBlockDeallocation.
+		 */
+		uint64_t blocksOwnedByGC();
+
+		/**
+		 * Compute a new reap threshold for the ZCT based on its current size and occupancy.
+		 *
+		 * @return the new reap threshold (ZCT occupancy upper limit).
+		 *
+		 * (Note, an alternative strategy for the ZCT would be to call a policy function
+		 * every time the ZCT has to be extended, and to shrink the ZCT following a reap.)
+		 */
+		uint64_t zctNewReapThreshold(uint64_t zctSize, uint64_t zctOccupancy);
+		
+		/**
+		 * Compute a new, larger size for the ZCT, based on its old size.
+		 * (As long as the ZCT is a linear array its growth factor is a policy matter.)
+		 *
+		 * @return the size for the new zct table given the old size.
+		 */
+		uint64_t zctNewSize(uint64_t oldZctSize);
+		
+		/**
+		 * Situation: The GC is about to allocate one or more blocks from GCHeap, and 
+		 * does not know if GCHeap may have to expand the heap.  An incremental collection
+		 * is already in progress.  Should we run the marker?
+		 *
+		 * @return true if we should run the incremental marker for one quantum.
+		 */
+		bool queryIncrementalMarkAtAllocBlock();
+		
+		 /**
+		 * Situation: The GC is about to allocate one or more blocks from GCHeap, and
+		 * does not know if GCHeap may have to expand the heap.  An incremental collection
+		 * is /not/ in progress.  Should we start it?
+		 *
+		 * @return true if we should start an incremental collection.
+		 */
+		bool queryStartIncrementalMarkAtAllocBlock();
+
+		/**
+		 * Situation: The GC is about to allocate one or more blocks from GCHeap.
+		 *
+		 * If the heap has been expanded by external agents (FixedMalloc or other
+		 * garbage collectors, or possibly other block-allocating agents) since
+		 * the last time the GC allocated a block, we might want to kick off a
+		 * collection to keep up with the allocator.  Should we start the collection?
+		 *
+		 * @return true if we should start an incremental collection (in incremental mode)
+		 *              or a non-incremental collection (in non-incremental mode)
+		 */
+		 bool queryStartCollectionAfterHeapExpansion();
+		 
+		 /**
+		 * Situation: The GC has just failed to allocate one or more blocks from GCHeap
+		 * without expanding the heap, and an incremental collection is in progress.
+		 * Should we force the collection to finish in order to increase the chance of 
+		 * being able to allocate a block without expanding the heap?
+		 *
+		 * @return true if we should force the collection to finish.
+		 *
+		 * FIXME: This is not good policy.  Essentially it amounts to a stop-the-world
+		 * collection, and I have simple benchmark programs that show huge latencies
+		 * if this is made to happen.  Expect this to go away by and by.
+		 */
+		bool queryFinishIncrementalMarkAfterAllocBlockFail();
+
+		/**
+		 * Situation: The GC has just failed ot allocate one or more blocks from GCHeap
+		 * without expanding the heap, and the system is in non-incremental mode.
+		 * Should we start a collection?
+		 *
+		 * @return true to run a stop-the-world collection.
+		 */
+		bool queryRunCollectionAfterAllocBlockFail();
+
+		/**
+		 * Situation: one incremental mark invocation has completed.
+		 */
+		void signalEndOfIncrementalMark();
+		
+		/**
+		 * Situation: the synchronous sweep phase of the collection has completed, and the
+		 * collector is about to return to its caller.
+		 */
+		void signalEndOfCollection();
+		
+		/**
+		 * Situation: 'numblocks' blocks have just been obtained by this GC from the GCHeap.
+		 */
+		void signalBlockAllocation(size_t numblocks);
+		
+		/** 
+		 * Situation: 'numblocks' blocks have just been returned from this GC to the GCHeap.
+		 */
+		void signalBlockDeallocation(size_t numblocks);
+		
+	private:
+		// Have we allocated "enough" since the the last collection?  Typically a
+		// function of allocation volume and the free space divisor.
+		bool queryAllocationLimitReached();
+		
+		// Is the size of the GC heap large enough to allow collection?
+		bool queryLowerLimitGCBlocksAllocated();
+		
+		// Has enough time passed since the end of the last collection to allow a
+		// new collection to start?
+		bool querySufficientTimeSinceLastCollection();
+
+		// The following parameters can vary not just from machine to machine and
+		// run to run on the same machine, but within a run in response to memory
+		// pressures and other feedback.
+		
+		// A number of ticks that must pass between each call to IncrementalMark.
+		// This parameter helps control the time allocated to the GC and must
+		// be balanced with the value for incrementalMarkTicks(), above.
+		uint64_t interIncrementalMarkTicks();
+		
+		// A number of ticks that must pass between the end of one collection and
+		// the beginning of the next collection.  This parameter helps control GC
+		// overhead in expansive phases, sometimes at a cost in memory.
+		uint64_t interCollectionTicks();
+		
+		// An integer n s.t. if L was the amount of live data at the end of one
+		// collection, then a new collection should have run to completion when
+		// L/n memory has been allocated since that collection.
+		uint32_t freeSpaceDivisor();
+		
+		// The lower limit beyond which we try not to run the garbage collector.
+		uint32_t lowerLimitHeapBlocks();
+		
+		// Get the current time (in ticks).
+		uint64_t now();
+
+		// ----- Private data --------------------------------------
+		
+		GC * const gc;
+		GCHeap * const heap;
+		
+		// The time recorded the last time we received signalEndOfIncrementalMark
+		uint64_t timeEndOfLastIncrementalMark;
+		
+		// The time recorded the last time we received signalEndOfCollection
+		uint64_t timeEndOfLastCollection;
+
+		// Blocks actually allocated from GCHeap
+		uint64_t blocksAllocatedSinceLastCollection;
+		
+		// Blocks actually returned to GCHeap (as a result of calls to Free), note
+		// this may be larger than the number of blocks allocated
+		uint64_t blocksDeallocatedSinceLastCollection;
+		
+		// The total size of GCHeap following the previous allocation from GCHeap
+		uint64_t blocksInHeapAfterPreviousAllocation;
+		
+		// The total number of blocks owned by GC
+		uint64_t blocksOwned;
+	};
+
+	
 	/**
 	 * The Zero Count Table used by DRC.
 	 */
 	class MMGC_API ZCT
 	{
 		friend class GC;
-		// how many items there have to be to trigger a Reap
-		static const int ZCT_REAP_THRESHOLD;
 
 		// size of table in pages
 		static const int ZCT_START_SIZE;
@@ -455,18 +662,6 @@ namespace MMgc
 		*/
 		bool validateDefRef;		
 		bool keepDRCHistory;
-
-		/**
-		 * Expand, don't collect, until we reach this threshold. Units are
-		 * pages, not KB, just like GCHeap::GetTotalHeapSize().
-		 *
-		 * In an MMGC_THREADSAFE build, the GC reads this configuration value
-		 * only when holding the GC lock.  Set it during
-		 * initialization, before the GC is visible to multiple threads.
-		 *
-		 * @access Requires(m_lock)
-		 */
-		size_t collectThreshold;
 
 		bool dontAddToZCTDuringCollection;
 		bool incrementalValidation;
@@ -810,6 +1005,9 @@ namespace MMgc
 		void Poke();
 
 	private:
+		GCPolicyManager policy;
+		
+	private:
 		__forceinline void WriteBarrierWrite(const void *address, const void *value);
 		__forceinline void WriteBarrierWriteRC(const void *address, const void *value);
 
@@ -989,7 +1187,11 @@ namespace MMgc
 
 	private:
 
+		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
+		// if the allocation succeeded.
 		void *heapAlloc(size_t size, bool expand=true, bool zero=true);
+		
+		// heapFree is like heap->Free except that it also calls policy.signalBlockDeallocation.
 		void heapFree(void *ptr, size_t siz=0);
 
 		void gclog(const char *format, ...);
@@ -1023,16 +1225,6 @@ namespace MMgc
 
 		bool destroying;
 
-		/**
-		 * We track the heap size so if it expands due to fixed memory
-		 * allocations we can trigger a mark/sweep. Otherwise we can have lots
-		 * of small GC objects allocating tons of fixed memory, which results
-		 * in huge heaps and possible out of memory situations.
-		 *
-		 * @access Requires(m_lock)
-		 */
-		size_t heapSizeAtLastAlloc;
-
 		// we track the top and bottom of the stack for cleaning purposes.
 		// the top tells us how far up the stack as been dirtied.
 		// the bottom is also tracked so we can ensure we're on the same
@@ -1058,6 +1250,8 @@ namespace MMgc
 		 *
 		 * The GC thread may read and write this flag.  Application threads in
 		 * requests have read-only access.
+		 *
+		 * Note that this is not obviously exclusive with 'collecting'.
 		 */
 		bool marking;
 		GCStack<GCWorkItem> m_incrementalWork;
@@ -1067,11 +1261,6 @@ namespace MMgc
 		/** @access Requires(request || exclusiveGC) */
 		int IsWhite(const void *item);
 		
-		/** @access ReadWrite(request, exclusiveGC) */
-		uint64_t lastMarkTicks;
-		/** @access ReadWrite(request, exclusiveGC) */
-		uint64_t lastSweepTicks;
-
 		const static int16_t kSizeClasses[kNumSizeClasses];		
 		const static uint8_t kSizeClassIndex[246];
 
@@ -1086,9 +1275,6 @@ namespace MMgc
 		uintptr_t memStart;
 		/** @access Requires(pageMapLock) */
 		uintptr_t memEnd;
-
-		/** @access Requires(m_lock) */
-		size_t totalGCPages;
 
 		/**
 		 * The bitmap for what pages are in use.  Any access to either the
@@ -1224,14 +1410,6 @@ namespace MMgc
 		 * @access Requires(request)
 		 */
 		void TrapWrite(const void *black, const void *white);
-
-		/**
-		 * Number of pages allocated from the GCHeap since the start of the
-		 * current GC cycle.
-		 *
-		 * @access Requires((request && m_lock) || exclusiveGC)
-		 */
-		unsigned int allocsSinceCollect;
 
 		/**
 		 * True during the sweep phase of collection.  Several things have to
@@ -1386,7 +1564,7 @@ public:
 
 		int DumpAlloc(GCAlloc*);
 		size_t GetBytesInUse();
-		size_t GetNumBlocks() { return totalGCPages; }
+		size_t GetNumBlocks() { return (size_t)policy.blocksOwnedByGC(); }
 
 
 		bool pendingStatusChange;
