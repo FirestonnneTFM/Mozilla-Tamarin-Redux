@@ -120,6 +120,14 @@ void sparc_clean_windows()
 }
 #endif
 
+// Latency profiling logs information about the latency of each GC phase with each line prefixed by [latency]
+//#define MMGC_PROFILE_LATENCY
+
+#ifdef MMGC_PROFILE_LATENCY
+	#define LATENCY_PROFILING_ONLY(x) x
+#else
+	#define LATENCY_PROFILING_ONLY(x)
+#endif
 
 // Werner mode is a back pointer chain facility for Relase mode
 //#define WERNER_MODE
@@ -147,20 +155,40 @@ namespace MMgc
 	const bool dumpSizeClassState = false;
 #endif
 
+#ifndef max	// good grief
+	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
+#endif
+
 	GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap)
-		: gc(gc)
-		, heap(heap)
-		, timeEndOfLastIncrementalMark(0)
-		, timeEndOfLastCollection(0)
-		, timeStartIncrementalMark(0)
+		// public
+		: timeStartIncrementalMark(0)
 		, timeIncrementalMark(0)
 		, timeFinalRootAndStackScan(0)
 		, timeFinalizeAndSweep(0)
 		, timeReapZCT(0)
+		, timeMaxStartIncrementalMark(0)
+		, timeMaxIncrementalMark(0)
+		, timeMaxFinalRootAndStackScan(0)
+		, timeMaxFinalizeAndSweep(0)
+		, timeMaxReapZCT(0)
+		, timeMaxLatency(0)
+		, eventMaxLatency(NO_EVENT)
+		, countStartIncrementalMark(0)
+		, countIncrementalMark(0)
+		, countFinalRootAndStackScan(0)
+		, countFinalizeAndSweep(0)
+		, countReapZCT(0)
+		// private
+		, gc(gc)
+		, heap(heap)
+		, timeEndOfLastIncrementalMark(0)
+		, timeEndOfLastCollection(0)
 		, blocksAllocatedSinceLastCollection(0)
 		, blocksDeallocatedSinceLastCollection(0)
 		, blocksInHeapAfterPreviousAllocation(heap->GetTotalHeapSize())
 		, blocksOwned(0)
+		, objectsScannedTotal(0)
+		, bytesScannedTotal(0)
 		, start_time(0)
 		, start_event(NO_EVENT)
 	{
@@ -216,6 +244,14 @@ namespace MMgc
 		return blocksOwned;
 	}
 	
+	uint64_t GCPolicyManager::bytesMarked() {
+		return bytesScannedTotal;
+	}
+	
+	uint64_t GCPolicyManager::objectsMarked() {
+		return objectsScannedTotal;
+	}
+
 	uint64_t GCPolicyManager::zctNewSize(uint64_t oldZctSize)
 	{
 		return oldZctSize * 2;
@@ -273,6 +309,7 @@ namespace MMgc
 	void GCPolicyManager::signal(PolicyEvent ev) {
 		switch (ev) {
 			case START_StartIncrementalMark:
+				heap->gcManager.signalStartCollection(gc);
 			case START_IncrementalMark:
 			case START_FinalRootAndStackScan:
 			case START_FinalizeAndSweep:
@@ -281,33 +318,61 @@ namespace MMgc
 				start_event = ev;
 				return;	// to circumvent resetting of start_event below
 		}
+		
 		GCAssert(start_event == (PolicyEvent)(ev - 1));
 		start_event = NO_EVENT;
+		
+		uint64_t t = now();
+		uint64_t elapsed = t - start_time;  
+		LATENCY_PROFILING_ONLY( const char *name = NULL; )
+		
 		switch (ev) {
 			case END_StartIncrementalMark:
-				timeStartIncrementalMark += now() - start_time;
+				LATENCY_PROFILING_ONLY( name = "StartIncrementalMark"; )
+				countStartIncrementalMark++;
+				timeStartIncrementalMark += elapsed;
+				timeMaxStartIncrementalMark = max(timeMaxStartIncrementalMark, elapsed);
 				break;
 			case END_FinalRootAndStackScan:
-				timeFinalRootAndStackScan += now() - start_time;
+				LATENCY_PROFILING_ONLY( name = "FinalRootAndStackScan"; )
+				countFinalRootAndStackScan++;
+				timeFinalRootAndStackScan += elapsed;
+				timeMaxFinalRootAndStackScan = max(timeMaxFinalRootAndStackScan, elapsed);
 				break;
 			case END_ReapZCT:
-				timeReapZCT += now() - start_time;
+				LATENCY_PROFILING_ONLY( name = "ReapZCT"; )
+				countReapZCT++;
+				timeReapZCT += elapsed;
+				timeMaxReapZCT = max(timeMaxReapZCT, elapsed);
 				break;
-			case END_IncrementalMark: {
-				uint64_t t = now();
-				timeIncrementalMark += t - start_time;
+			case END_IncrementalMark:
+				LATENCY_PROFILING_ONLY( name = "IncrementalMark"; )
+				countIncrementalMark++;
+				timeIncrementalMark += elapsed;
+				timeMaxIncrementalMark = max(timeMaxIncrementalMark, elapsed);
 				timeEndOfLastIncrementalMark = t;
 				break;
-			}
-			case END_FinalizeAndSweep: {
-				uint64_t t = now();
-				timeFinalizeAndSweep += t - start_time;
+			case END_FinalizeAndSweep:
+				LATENCY_PROFILING_ONLY( name = "FinalizeAndSweep"; )
+				countFinalizeAndSweep++;
+				timeFinalizeAndSweep += elapsed;
+				timeMaxFinalizeAndSweep = max(timeMaxFinalizeAndSweep, elapsed);
 				timeEndOfLastCollection = t;
 				blocksAllocatedSinceLastCollection = 0;
 				blocksDeallocatedSinceLastCollection = 0;
+				heap->gcManager.signalEndCollection(gc);
 				break;
-			}
 		}
+		if (elapsed > timeMaxLatency) {
+			timeMaxLatency = elapsed;
+			eventMaxLatency = ev;
+		}
+#ifdef MMGC_PROFILE_LATENCY
+		char buf[100];
+		VMPI_snprintf(buf, sizeof(buf), "[latency] %s %.2f\n", name, ((double)elapsed * 1000.0 / (double)VMPI_getPerformanceFrequency()));
+		buf[sizeof(buf)-1] = 0;
+		VMPI_Log(buf);
+#endif
 	}
 	
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
@@ -321,7 +386,21 @@ namespace MMgc
 		blocksDeallocatedSinceLastCollection += blocks;
 	}
 
+	void GCPolicyManager::signalMemoryStatusChange(MemoryStatus from, MemoryStatus to) {
+		(void)from;
+		(void)to;
+		// do nothing for the moment
+	}
+
+	void GCPolicyManager::signalStartCollection(GC* gc) {
+		(void)gc;
+		// do nothing for the moment
+	}
 	
+	void GCPolicyManager::signalEndCollection(GC* gc) {
+		(void)gc;
+		// do nothing for the moment
+	}
 	
 	// Size classes for our GC.  From 8 to 128, size classes are spaced
 	// evenly 8 bytes apart.  The finest granularity we can achieve is
@@ -406,11 +485,7 @@ namespace MMgc
 #endif
 		policy(this, gcheap),
 		t0(VMPI_getPerformanceCounter()),
-		bytesMarked(0),
-		markTicks(0),
 		lastStartMarkIncrementCount(0),
-		markIncrements(0),
-		marks(0),
 		sweeps(0),
 		numObjects(0),
 		sweepStart(0),
@@ -2077,11 +2152,11 @@ bail:
 	{
 		size_t total = GetNumBlocks() * GCHeap::kBlockSize;
 		heap->log_percentage("[mem] \tmanaged fragmentation ", total-GetBytesInUse(), total);
-		if(ticksToMillis(markTicks) != 0 && bytesMarked != 0) {
-			uint32_t markRate = (uint32_t) (bytesMarked / (1024 * ticksToMillis(markTicks))); // kb/ms == mb/s
+		if(ticksToMillis(markTicks()) != 0 && bytesMarked() != 0) {
+			uint32_t markRate = (uint32_t) (bytesMarked() / (1024 * ticksToMillis(markTicks()))); // kb/ms == mb/s
 			fprintf(heap->GetSpyFile(),"[mem] \tmark rate %u mb/s\n", markRate);
 		}
-		fprintf(heap->GetSpyFile(),"[mem] \tmark increments %d\n", marks);
+		fprintf(heap->GetSpyFile(),"[mem] \tmark increments %d\n", marks());
 		fprintf(heap->GetSpyFile(),"[mem] \tsweeps %d mb/s\n", sweeps);
 
 		int waste=0;
@@ -2371,7 +2446,7 @@ bail:
 		GCAssert(!marking);
 		GCAssert(!collecting);
 
-		lastStartMarkIncrementCount = markIncrements;
+		lastStartMarkIncrementCount = markIncrements();
 
 		// set the stack cleaning trigger
 		stackCleaned = false;
@@ -2380,8 +2455,6 @@ bail:
 
 		GCAssert(m_incrementalWork.Count() == 0);
 	
-		uint64_t start = VMPI_getPerformanceCounter();
-
 		// clean up any pages that need sweeping
 		for(int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->SweepNeedsSweeping();
@@ -2412,7 +2485,6 @@ bail:
 				r = r->next;
 			}
 		}
-		markTicks += VMPI_getPerformanceCounter() - start;
 		
 		policy.signal(GCPolicyManager::END_StartIncrementalMark);
 		
@@ -2596,8 +2668,7 @@ bail:
 			//shouldGo = NULL;
 		}
 #endif
-		bytesMarked += size;
-		marks++;
+		policy.signalMarkWork(size, 1);
 
 		uintptr_t *end = p + (size / sizeof(void*));
 		uintptr_t thisPage = (uintptr_t)p & ~0xfff;
@@ -2791,7 +2862,6 @@ bail:
 		
 		policy.signal(GCPolicyManager::START_IncrementalMark);
 		
-		markIncrements++;
 		// FIXME: tune this so that getPerformanceCounter() overhead is noise
 		static unsigned int checkTimeIncrements = 100;
 		uint64_t start = VMPI_getPerformanceCounter();
@@ -2816,17 +2886,15 @@ bail:
 			SAMPLE_CHECK();
 		} while(VMPI_getPerformanceCounter() < ticks);
 
-		markTicks += VMPI_getPerformanceCounter() - start;
+		policy.signal(GCPolicyManager::END_IncrementalMark);
 
 		if(heap->Config().gcstats) {
 			double millis = duration(start);
 			size_t kb = objSize>>10;
 			gclog("[mem] mark(%d) %d objects (%d kb %d mb/s) in %.2f millis (%.4f s)\n", 
-				markIncrements-lastStartMarkIncrementCount, numObjects, kb, 
-				uint32_t(double(kb)/millis), millis, duration(t0)/1000);
+				  markIncrements() - lastStartMarkIncrementCount, numObjects, kb, 
+				  uint32_t(double(kb)/millis), millis, duration(t0)/1000);
 		}
-
-		policy.signal(GCPolicyManager::END_IncrementalMark);
 	}
 
 	void GC::FinishIncrementalMark()
