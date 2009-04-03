@@ -364,6 +364,16 @@ namespace MMgc
 		uint64_t blocksOwnedByGC();
 
 		/**
+		 * @return the number of objects reported marked by signalMarkWork, since startup.
+		 */
+		uint64_t objectsMarked();
+		
+		/**
+		 * @return the number of bytes reported marked by signalMarkWork, since startup.
+		 */
+		uint64_t bytesMarked();
+		
+		/**
 		 * Compute a new reap threshold for the ZCT based on its current size and occupancy.
 		 *
 		 * @return the new reap threshold (ZCT occupancy upper limit).
@@ -457,6 +467,12 @@ namespace MMgc
 		void signal(PolicyEvent ev);
 		
 		/**
+		 * Situation: the memory status of the system changes, and a message is being
+		 * broadcast to make this known.
+		 */
+		void signalMemoryStatusChange(MemoryStatus from, MemoryStatus to);
+		
+		/**
 		 * Situation: 'numblocks' blocks have just been obtained by this GC from the GCHeap.
 		 */
 		void signalBlockAllocation(size_t numblocks);
@@ -465,6 +481,60 @@ namespace MMgc
 		 * Situation: 'numblocks' blocks have just been returned from this GC to the GCHeap.
 		 */
 		void signalBlockDeallocation(size_t numblocks);
+		
+		/**
+		 * Situation: signal that some number of pointer-containing objects, whose combined
+		 * size total nbytes, have been scanned by the garbage collector.
+		 *
+		 * This may only be called between the signals START_StartIncrementalMark and 
+		 * END_FinalizeAndSweep, and mark work signaled after a START event may not be
+		 * reflected in the values returned by objectsMarked() and bytesMarked() until
+		 * after the corresponding END event has been signaled.
+		 */
+		/*inline*/ void signalMarkWork(size_t nbytes, uint64_t nobjects=1);
+		
+		/**
+		 * The collector 'gc' (which is not the collector for this manager) has started
+		 * a garbage collection, indicating perhaps some memory pressure in that heap.
+		 */
+		void signalStartCollection(GC* gc);
+		
+		/**
+		 * The collctor 'gc' (which is not the collector for this manager) has completed
+		 * a garbage collection.
+		 */
+		void signalEndCollection(GC* gc);
+
+		// ----- Public data --------------------------------------
+		
+		// Elapsed time (in ticks) for various collection phases, and the maximum phase time
+		// for each phase.  They are updated when an END event is signaled.  Client code must
+		// not modify these variables.
+
+		// The total time for various collection phases across the run
+		uint64_t timeStartIncrementalMark;
+		uint64_t timeIncrementalMark;
+		uint64_t timeFinalRootAndStackScan;
+		uint64_t timeFinalizeAndSweep;
+		uint64_t timeReapZCT;
+		
+		// The maximum latceny for various collection phases across the run
+		uint64_t timeMaxStartIncrementalMark;
+		uint64_t timeMaxIncrementalMark;
+		uint64_t timeMaxFinalRootAndStackScan;
+		uint64_t timeMaxFinalizeAndSweep;
+		uint64_t timeMaxReapZCT;
+		
+		// The maximum latency across those events, and the end event
+		uint64_t timeMaxLatency;
+		PolicyEvent eventMaxLatency;
+		
+		// The total number of times each phase was run
+		uint64_t countStartIncrementalMark;
+		uint64_t countIncrementalMark;
+		uint64_t countFinalRootAndStackScan;
+		uint64_t countFinalizeAndSweep;
+		uint64_t countReapZCT;
 		
 	private:
 		// Have we allocated "enough" since the the last collection?  Typically a
@@ -514,13 +584,6 @@ namespace MMgc
 		// The time recorded the last time we received signalEndOfCollection
 		uint64_t timeEndOfLastCollection;
 
-		// The total time for various collection phases across the run
-		uint64_t timeStartIncrementalMark;
-		uint64_t timeIncrementalMark;
-		uint64_t timeFinalRootAndStackScan;
-		uint64_t timeFinalizeAndSweep;
-		uint64_t timeReapZCT;
-
 		// Blocks actually allocated from GCHeap
 		uint64_t blocksAllocatedSinceLastCollection;
 		
@@ -534,12 +597,23 @@ namespace MMgc
 		// The total number of blocks owned by GC
 		uint64_t blocksOwned;
 		
+		// The number of objects scanned since startup
+		uint64_t objectsScannedTotal;
+		
+		// The number of bytes scanned since startup
+		uint64_t bytesScannedTotal;
+		
 		// Temporaries for holding the start time / start event until the end event arrives
 		uint64_t start_time;
 		PolicyEvent start_event;
 	};
 
-	
+	inline void GCPolicyManager::signalMarkWork(size_t nbytes, uint64_t nobjects)
+	{
+		objectsScannedTotal += nobjects;
+		bytesScannedTotal += nbytes;
+	}
+
 	/**
 	 * The Zero Count Table used by DRC.
 	 */
@@ -1018,6 +1092,7 @@ namespace MMgc
 
 		void MemoryStatusChange(MemoryStatus from, MemoryStatus to)
 		{
+			policy.signalMemoryStatusChange(from, to);
 			pendingStatusChange = true;
 			statusFrom = from;
 			statusTo = to;
@@ -1025,7 +1100,7 @@ namespace MMgc
 
 		void Poke();
 
-	private:
+	public:
 		GCPolicyManager policy;
 		
 	private:
@@ -1119,29 +1194,26 @@ namespace MMgc
 		/**
 		 * Total number of bytes of pointer-containing memory scanned by this
 		 * GC.  Used to measure marking rate, which is
-		 * <code>bytesMarked/ticksToMillis(markTicks)</code>.
+		 * <code>bytesMarked()/ticksToMillis(markTicks())</code>.
 		 *
 		 * @access ReadWrite(request, exclusiveGC)
 		 */
-		uint64_t bytesMarked;
+		uint64_t bytesMarked() { return policy.bytesMarked(); }
 
 		/**
 		 * Total time spent doing incremental marking, in ticks.  See
 		 * bytesMarked.
-		 *
-		 * @access ReadWrite(request, exclusiveGC)
 		 */
-		uint64_t markTicks;
+		uint64_t markTicks() { return policy.timeStartIncrementalMark + policy.timeIncrementalMark; }
 
 		// calls to mark item
 		uint32_t lastStartMarkIncrementCount;
-		uint32_t markIncrements;
+		uint32_t markIncrements() { return policy.countIncrementalMark; }
 
 		/**
 		 * Number of calls to MarkItem().
-		 * @access ReadWrite(request, exclusiveGC)
 		 */
-		uint32_t marks;
+		uint32_t marks() { return policy.objectsMarked(); }
 
 		/**
 		 * Number of calls to Sweep().
