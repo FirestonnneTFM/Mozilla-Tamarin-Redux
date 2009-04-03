@@ -130,8 +130,6 @@ namespace MMgc
 
 		instance = this;
 
-		gcs = NULL;
-		gcs_count = 0;
 		status = kNormal;
 		
 		bool enableHooks = false;
@@ -161,8 +159,7 @@ namespace MMgc
 
 	GCHeap::~GCHeap()
 	{
-		delete [] gcs;
-
+		gcManager.destroy();
 		fixedMalloc._Destroy();
 
 #ifdef _DEBUG
@@ -1483,32 +1480,6 @@ namespace MMgc
 		heap->enterFrame = NULL;
 	}
 	
-	void GCHeap::AddGC(GC *gc)
-	{
-		// use holes
-		for(uint32_t i=0, n=gcs_count; i<n; i++) {
-			if(gcs[i] == NULL) {
-				gcs[i] = gc;
-				return;
-			}
-		}
-
-		GC **new_gcs = new GC*[gcs_count+1];
-		for(uint32_t i=0, n=gcs_count; i<n; i++)
-			new_gcs[i] = gcs[i];
-		delete [] gcs;
-		gcs = new_gcs;
-		gcs[gcs_count++] = gc;		
-	}
-
-	void GCHeap::RemoveGC(GC *gc)
-	{
-		for(uint32_t i=0, n=gcs_count; i<n; i++) {
-			if(gcs[i] == gc)
-				gcs[i] = NULL;
-		} 
-	}
-
 	void GCHeap::Abort()
 	{
 		EnterFrame *ef = enterFrame;
@@ -1518,13 +1489,6 @@ namespace MMgc
 		VMPI_abort();
 	}
 	
-	void GCHeap::StatusChangeNotify(MemoryStatus from, MemoryStatus to)
-	{
-		for(uint32_t i=0,n=gcs_count; i<n; i++)
-			if(gcs[i] != NULL)
-				gcs[i]->MemoryStatusChange(from , to);
-	}
-
 	void GCHeap::log_percentage(const char *name, size_t bytes, size_t bytes_compare)
 	{
 		bytes_compare = size_t((bytes*100.0)/bytes_compare);
@@ -1543,17 +1507,16 @@ namespace MMgc
 		size_t fixed_alloced = GetFixedMalloc()->GetBytesInUse();
 		size_t gc_total=0;
 		size_t gc_bytes_total =0;
-		for(uint32_t i=0,n=gcs_count; i<n; i++) {
-			if(gcs[i] != NULL) {
+		for(uint32_t i=0,n=gcManager.getCount() ; i<n; i++) {
+			GC* gc = gcManager.getGC(i);
 #ifdef MMGC_MEMORY_PROFILER
-				fprintf(spyFile,"[mem] GC 0x%p:%s\n", gcs[i], GetAllocationName(gcs[i]));
+			fprintf(spyFile,"[mem] GC 0x%p:%s\n", gc, GetAllocationName(gc));
 #else
-				fprintf(spyFile,"[mem] GC 0x%p\n", gcs[i]);
+			fprintf(spyFile,"[mem] GC 0x%p\n", gc);
 #endif
-				gcs[i]->DumpMemoryInfo();
-				gc_bytes_total += gcs[i]->GetBytesInUse();
-				gc_total += gcs[i]->GetNumBlocks() * kBlockSize;
-			}
+			gc->DumpMemoryInfo();
+			gc_bytes_total += gc->GetBytesInUse();
+			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
 		fprintf(spyFile, "[mem] ------- gross stats -----\n");
 		log_percentage("[mem] private", priv, priv);
@@ -1659,4 +1622,68 @@ namespace MMgc
 		}
 	}
 
+	GCManager::GCManager() 
+		: collectors(NULL)
+		, numCollectors(0)
+		, limitCollectors(0)
+	{
+	}
+	
+	void GCManager::destroy()
+	{
+		delete [] collectors;
+		GCAssert(numCollectors == 0);
+		collectors = NULL;
+		limitCollectors = 0;
+	}
+	
+	void GCManager::addGC(GC *gc)
+	{
+		if (numCollectors == limitCollectors) {
+			uint32_t newLimitCollectors = limitCollectors + 1;		// We don't expect a lot of churn in this array, and creating a GC is very heavyweight anyway
+			GC **newCollectors = new GC*[newLimitCollectors];
+			VMPI_memcpy(newCollectors, collectors, sizeof(GC*)*limitCollectors);
+			delete [] collectors;
+			collectors = newCollectors;
+			limitCollectors = newLimitCollectors;
+		}
+		collectors[numCollectors] = gc;
+		numCollectors++;
+	}
+	
+	void GCManager::removeGC(GC *gc)
+	{
+		uint32_t i=0;
+		while (i < numCollectors && collectors[i] != gc)
+			i++;
+		if (i == numCollectors) {
+			GCAssert(!"Bug: should not try to remove a GC that's not registered");
+			return;
+		}
+		while (i < numCollectors-1) {
+			collectors[i] = collectors[i+1];
+			i++;
+		}
+		numCollectors--;
+	}
+	
+	void GCManager::signalMemoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus)
+	{
+		for(uint32_t i=0 ; i < numCollectors ; i++)
+			collectors[i]->MemoryStatusChange(oldStatus, newStatus);
+	}
+	
+	void GCManager::signalStartCollection(GC* gc)
+	{
+		for ( uint32_t i=0 ; i < numCollectors ; i++ )
+			if (collectors[i] != gc)
+				collectors[i]->policy.signalStartCollection(gc);
+	}
+	
+	void GCManager::signalEndCollection(GC* gc)
+	{
+		for ( uint32_t i=0 ; i < numCollectors ; i++ )
+			if (collectors[i] != gc)
+				collectors[i]->policy.signalEndCollection(gc);
+	}
 }

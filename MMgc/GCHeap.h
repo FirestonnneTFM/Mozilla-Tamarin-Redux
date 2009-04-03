@@ -60,6 +60,76 @@ namespace MMgc
 	};
 	
 	/**
+	 * The GCManager centralizes management of all the memory allocators in the
+	 * system, and provides iteration and broadcast facilities.
+	 *
+	 * The GCHeap singleton holds the only instance of this manager.
+	 */	 
+	class GCManager
+	{
+	public:
+		GCManager();
+		
+		/**
+		 * Can't have a destructor as it'll be called too late, call destroy to
+		 * free any resources.
+		 */
+		void destroy();
+
+		/**
+		 * Register the GC with the manager.  GC must not already be registered.
+		 */
+		void addGC(GC* gc);
+		
+		/**
+		 * Unregister the GC with the manager.  The GC must be registered.
+		 */
+		void removeGC(GC* gc);
+		
+		/**
+		 * @return the number of GCs registered.
+		 */
+		uint32_t getCount();
+		
+		/**
+		 * @return the GC at the given index, 0 <= index < getCount().  Reliably returns
+		 * NULL for indices outside the range.
+		 */
+		GC* getGC(uint32_t index);
+		
+		/**
+		 * Signal to all GCs that the memory status in the system goes from oldStatus to
+		 * newStatus.
+		 */
+		void signalMemoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus);
+		
+		/**
+		 * Tell every other GC that 'gc' is starting a collection (ie there may be memory pressure there).
+		 */
+		void signalStartCollection(GC* gc);
+		
+		/**
+		 * Tell every other GC that 'gc' is finished with its collection.
+		 */
+		void signalEndCollection(GC* gc);
+		
+	private:
+		GC** collectors;			// array of collectors
+		uint32_t numCollectors;		// number of active elements in that array
+		uint32_t limitCollectors;	// size of that array
+	};
+	
+	inline uint32_t GCManager::getCount() {
+		return numCollectors;
+	}
+	
+	inline GC* GCManager::getGC(uint32_t index) {
+		if (index >= numCollectors)
+			return NULL;
+		return collectors[index];
+	}
+
+	/**
 	 * GCHeap is a heap manager for the Flash Player's garbage collector.
 	 *
 	 * Memory is allocated from the operating system in large chunks
@@ -290,8 +360,12 @@ namespace MMgc
 		void DumpFatties() { profiler->DumpFatties(); }
 #endif
 
-		void AddGC(GC *gc);
-		void RemoveGC(GC *gc);
+		// Every new GC must register itself with the GCHeap.
+		void AddGC(GC *gc) { gcManager.addGC(gc); }
+		
+		// When the GC is destroyed it must remove itself from the GCHeap.
+		void RemoveGC(GC *gc) { gcManager.removeGC(gc); }
+		
 		void Abort();
 		MemoryStatus GetStatus() { return status; }
 
@@ -308,6 +382,8 @@ namespace MMgc
 		FILE* GetSpyFile() { return spyFile; }
 
 		void DumpMemoryInfo();
+
+		GCManager gcManager;
 
 	private:
 
@@ -399,7 +475,7 @@ namespace MMgc
 			}
 		}
 
-		void StatusChangeNotify(MemoryStatus from, MemoryStatus to);
+		void StatusChangeNotify(MemoryStatus from, MemoryStatus to) { gcManager.signalMemoryStatusChange(from, to); }
 
 		void ValidateHeapBlocks();
 
@@ -422,18 +498,14 @@ namespace MMgc
 
 		GCHeapConfig config;
 		
-public:
+	public:
 		// TODO: remove legacy var, replaced by env var or GCHeapConfig
 		bool enableMemoryProfiling;
-public:
 
 	private:
-
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
 		MemoryStatus status;
-		GC **gcs;
-		uint32_t gcs_count;
 
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *profiler;
