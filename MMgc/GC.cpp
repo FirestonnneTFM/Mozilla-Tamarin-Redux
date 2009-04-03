@@ -155,7 +155,9 @@ namespace MMgc
 	const bool dumpSizeClassState = false;
 #endif
 
+#ifndef max	// good grief
 	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
+#endif
 
 	GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap)
 		// public
@@ -385,14 +387,18 @@ namespace MMgc
 	}
 
 	void GCPolicyManager::signalMemoryStatusChange(MemoryStatus from, MemoryStatus to) {
+		(void)from;
+		(void)to;
 		// do nothing for the moment
 	}
 
 	void GCPolicyManager::signalStartCollection(GC* gc) {
+		(void)gc;
 		// do nothing for the moment
 	}
 	
 	void GCPolicyManager::signalEndCollection(GC* gc) {
+		(void)gc;
 		// do nothing for the moment
 	}
 	

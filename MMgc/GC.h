@@ -1208,12 +1208,12 @@ namespace MMgc
 
 		// calls to mark item
 		uint32_t lastStartMarkIncrementCount;
-		uint32_t markIncrements() { return policy.countIncrementalMark; }
+		uint32_t markIncrements() { return (uint32_t)policy.countIncrementalMark; }
 
 		/**
 		 * Number of calls to MarkItem().
 		 */
-		uint32_t marks() { return policy.objectsMarked(); }
+		uint32_t marks() { return (uint32_t)policy.objectsMarked(); }
 
 		/**
 		 * Number of calls to Sweep().
