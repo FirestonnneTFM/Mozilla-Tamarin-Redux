@@ -278,7 +278,7 @@ namespace avmplus
 				if (!fnc->suggestInterp())
 				{
 					core->console << " @ 0x";			
-					core->console.writeHexAddr( (uintptr)fnc->impl32());
+					core->console.writeHexAddr( (uintptr)fnc->implGPR());
 				}
 				core->console << "\n";		
 			}

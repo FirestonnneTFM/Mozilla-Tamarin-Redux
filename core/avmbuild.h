@@ -385,7 +385,7 @@
 // it will go away at some point in the not-too-distant future, however.
 //#define AVMPLUS_TRAITS_MEMTRACK
 
-// define this to 1 to keep a shadow copy of impl32 in MethodEnv (vs MethodInfo only).
+// define this to 1 to keep a shadow copy of implGPR in MethodEnv (vs MethodInfo only).
 // more speed, but more memory used... not clear if the tradeoff is worthwhile yet.
 #ifndef VMCFG_METHODENV_IMPL32
 #  define VMCFG_METHODENV_IMPL32 1

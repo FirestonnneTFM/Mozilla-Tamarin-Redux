@@ -51,7 +51,7 @@ namespace avmplus
 	#if VMCFG_METHODENV_IMPL32
 		friend class MethodInfo;
 		friend class CodegenIMT;
-		static Atom delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
+		static uintptr_t delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
 	#endif
 	public:
 		/** vtable for the activation scope inside this method */
@@ -325,11 +325,11 @@ namespace avmplus
 #endif
 
 #if VMCFG_METHODENV_IMPL32
-		inline AtomMethodProc impl32() const { return _impl32; }
-		inline DoubleMethodProc implN() const { return _implN; }
+		inline GprMethodProc implGPR() const { return _implGPR; }
+		inline FprMethodProc implFPR() const { return _implFPR; }
 #else
-		inline AtomMethodProc impl32() const { return method->impl32(); }
-		inline DoubleMethodProc implN() const { return method->implN(); }
+		inline GprMethodProc implGPR() const { return method->implGPR(); }
+		inline FprMethodProc implFPR() const { return method->implFPR(); }
 #endif
 
 	// ------------------------ DATA SECTION BEGIN
@@ -338,8 +338,8 @@ namespace avmplus
 		// these are most-frequently accessed so put at offset zero
 		union 
 		{
-			AtomMethodProc _impl32;
-			DoubleMethodProc _implN;
+			GprMethodProc _implGPR;
+			FprMethodProc _implFPR;
 		};
 #endif
 	protected:
