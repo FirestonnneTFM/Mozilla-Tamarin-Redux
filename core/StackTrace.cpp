@@ -89,15 +89,6 @@ namespace avmplus
 		m_boxed			= false;
 	}
 
-	void FASTCALL CallStackNode::exit()
-	{
-		// m_env might be null (for fake CallStackNode), be careful
-		AvmAssert(m_core != NULL);
-		m_core->callStack = m_next;
-		m_next = NULL;
-		m_core = NULL; // so the dtor doesn't call exit() again
-	}
-
 	CallStackNode::~CallStackNode()
 	{
 		// The destructor /must not/ do anything except call reset()
@@ -109,7 +100,10 @@ namespace avmplus
 		AvmCore* core = m_core; // save it since exit() resets to null
 		if (core)
 		{
-			exit();
+			AvmAssert(core != NULL);
+			core->callStack = m_next;
+			m_next = NULL;
+			m_core = NULL; // so the dtor doesn't pop again
 			core->sampleCheck();
 		}
 	}

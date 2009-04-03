@@ -45,8 +45,8 @@
 
 namespace avmplus
 {
-	typedef Atom (*AtomMethodProc)(MethodEnv*, int, uint32 *);
-	typedef double (*DoubleMethodProc)(MethodEnv*, int, uint32 *);
+	typedef uintptr_t (*GprMethodProc)(MethodEnv*, int, uint32 *);
+	typedef double (*FprMethodProc)(MethodEnv*, int, uint32 *);
 
 #ifdef DEBUGGER
 	class AbcFile;
@@ -207,7 +207,7 @@ namespace avmplus
 		MethodInfo(void* tramp, Traits* declTraits);
 #endif
 
-		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
+		static uintptr_t verifyEnter(MethodEnv* env, int argc, uint32* ap);
 
 		inline uintptr_t iid() const { return ((uintptr_t)this)>>3; }
 
@@ -352,8 +352,8 @@ namespace avmplus
 
 		inline int method_id() const { return _method_id; }
 
-		inline AtomMethodProc impl32() const { return _impl32; }
-		inline DoubleMethodProc implN() const { return _implN; }
+		inline GprMethodProc implGPR() const { return _implGPR; }
+		inline FprMethodProc implFPR() const { return _implFPR; }
 		inline Traits* declaringTraits() const { return _declaringTraits; }
 		inline const ScopeTypeChain* declaringScope() const { return _declaringTraits->scope(); }
 		inline Traits* activationTraits() const { return _activationTraits; }
@@ -404,8 +404,8 @@ namespace avmplus
 		// these are (probably) most-frequently accessed so put at offset zero (allow LIR to generate trivially smaller code)
 		union 
 		{
-			AtomMethodProc		_impl32;
-			DoubleMethodProc	_implN;
+			GprMethodProc	_implGPR;
+			FprMethodProc	_implFPR;
 		};
 		DWB(MMgc::GCWeakRef*)	_msref;				// our MethodSignature 
 		DWB(Traits*)			_declaringTraits;

@@ -147,7 +147,7 @@ namespace avmplus
 						MethodEnv* e = new (gc) MethodEnv(MethodEnv::kTrampStub, AvmCore::getITrampAddr(b), this);
 #else
 						//imt[i] = new (gc) MethodEnv((void*)(b&~7));
-						// note that the only field of this that's really used is _impl32...
+						// note that the only field of this that's really used is _implGPR...
 						MethodInfo* mi = new (gc) MethodInfo(AvmCore::getITrampAddr(b), this->traits);
 						MethodEnv* e = new (gc) MethodEnv(mi, this);
 #endif

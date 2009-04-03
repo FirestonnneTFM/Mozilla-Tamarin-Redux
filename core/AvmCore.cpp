@@ -1848,7 +1848,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // not be JITted based on memory, configuration, or heuristics.
 
 		ExceptionHandlerTable* exceptions;
-        if (info->impl32() == avmplus::interp32 || info->implN() == avmplus::interpN)
+        if (info->implGPR() == avmplus::interpGPR || info->implFPR() == avmplus::interpFPR)
             exceptions = info->word_code_exceptions();
         else
 			exceptions = info->abc_exceptions();
