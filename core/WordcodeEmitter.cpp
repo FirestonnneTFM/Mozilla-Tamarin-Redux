@@ -91,7 +91,7 @@ namespace avmplus
 		, buffer_offset(0)
 		, spare_buffer(NULL)
 #ifdef AVMPLUS_DIRECT_THREADED
-		, opcode_labels(opcode_labels)
+		, opcode_labels(interpGetOpcodeLabels())
 #endif
 		, exceptions_consumed(false)
 		, dest(NULL)
