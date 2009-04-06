@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,11 +15,11 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Jason Orendorff
+ *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,4 +35,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// empty
+    var SECTION = "15.5.4.14";
+    var VERSION = "";
+    startTest();
+    var TITLE   = "String.prototype.split https://bugzilla.mozilla.org/show_bug.cgi?id=407156";
+
+    writeHeaderToLog( SECTION + " "+ TITLE);
+
+    var testcases = getTestCases();
+    test();
+
+function getTestCases() {
+    var array = new Array();
+    var item = 0;
+
+    array[item++] = new TestCase(   SECTION,
+                                    "'raaan'.split('aa')",
+                                    "r,an",
+                                    "raaan".split("aa").toString() );
+   
+    return array;
+
+}

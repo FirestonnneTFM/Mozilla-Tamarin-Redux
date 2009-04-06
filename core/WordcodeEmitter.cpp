@@ -51,11 +51,7 @@ namespace avmplus
 {
 	using namespace MMgc;
 	
-#ifdef AVMPLUS_DIRECT_THREADED
-	WordcodeEmitter::WordcodeEmitter(MethodInfo* info, void** opcode_labels)
-#else
 	WordcodeEmitter::WordcodeEmitter(MethodInfo* info)
-#endif
 		: WordcodeTranslator()
 		, info(info)
 		, core(info->pool()->core)
@@ -66,13 +62,13 @@ namespace avmplus
 		, buffer_offset(0)
 		, spare_buffer(NULL)
 #ifdef AVMPLUS_DIRECT_THREADED
-		, opcode_labels(opcode_labels)
+		, opcode_labels(interpGetOpcodeLabels())
 #endif
+		, pool(NULL)
+		, code_start(NULL)
 		, exceptions_consumed(false)
 		, dest(NULL)
 		, dest_limit(NULL)
-		, pool(NULL)
-		, code_start(NULL)
 	{
 		AvmAssert(info != NULL);
 
@@ -84,12 +80,7 @@ namespace avmplus
 	}
 
 #ifdef AVMPLUS_SELFTEST
-#  ifdef AVMPLUS_DIRECT_THREADED
-	WordcodeEmitter::WordcodeEmitter(AvmCore* core, uint8_t* code_start, void** opcode_labels)
-#  else
 	WordcodeEmitter::WordcodeEmitter(AvmCore* core, uint8_t* code_start)
-#  endif
-
 		: WordcodeTranslator()
 		, info(NULL)
 		, core(core)
@@ -100,7 +91,7 @@ namespace avmplus
 		, buffer_offset(0)
 		, spare_buffer(NULL)
 #ifdef AVMPLUS_DIRECT_THREADED
-		, opcode_labels(opcode_labels)
+		, opcode_labels(interpGetOpcodeLabels())
 #endif
 		, exceptions_consumed(false)
 		, dest(NULL)

@@ -50,7 +50,7 @@ namespace MMgc
 	
 	static const void *EMPTY[2] = { NULL, NULL };
 
-	GCHashtable::GCHashtable(unsigned int capacity, int options) : options(options), table(0), numValues(0), numDeleted(0)
+	GCHashtable::GCHashtable(unsigned int capacity, int options) : numValues(0), numDeleted(0), table(0), options(options)
 	{
 		tableSize = capacity*2;
 		if(tableSize > 0)
