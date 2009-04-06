@@ -68,29 +68,27 @@ namespace avmplus
 	extern AvmCore* g_tmcore;
 #endif
 
-	AvmCore::AvmCore(GC* g) : 
-		GCRoot(g), 
-		console(NULL), 
+	AvmCore::AvmCore(GC* g) 
+		: GCRoot(g) 
+		, console(NULL) 
+		, gc(g) 
 #ifdef DEBUGGER
-		_debugger(NULL),
-		_profiler(NULL),
-		langID(-1),
-		passAllExceptionsToDebugger(false),
-#endif
-		gc(g), 
- 		m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g)),	
- 		m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g)),	
- 		m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g)),	
-		gcInterface(g)
-#ifdef DEBUGGER
+		, _debugger(NULL)
+		, _profiler(NULL)
 		, _sampler(NULL)
+		, langID(-1)
+		, passAllExceptionsToDebugger(false)
 #endif
 #ifdef AVMPLUS_VERIFYALL
-		,verifyQueue(g, 0)
+		, verifyQueue(g, 0)
 #endif
+		, m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
+ 		, m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
+ 		, m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))	
 #ifdef AVMPLUS_WORD_CODE
 		, lookup_cache_timestamp(1)
 #endif
+		, gcInterface(g)
     {
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		AvmAssert(g_tmcore == NULL);

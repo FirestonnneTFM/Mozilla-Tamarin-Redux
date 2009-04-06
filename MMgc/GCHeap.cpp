@@ -95,8 +95,8 @@ namespace MMgc
 		  profiler(NULL),
 		  signal(0),
 #endif
-	      spyFile(stdout),
 		  hooksEnabled(false),
+		  spyFile(stdout),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
 		lastRegion  = 0;

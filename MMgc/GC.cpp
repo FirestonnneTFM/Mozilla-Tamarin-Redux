@@ -491,7 +491,6 @@ namespace MMgc
 		sweepStart(0),
 		hitZeroObjects(false),
 		emptyWeakRef(0),
-		emptyWeakRefRoot(0),
 		destroying(false),
 		stackCleaned(true),
 		rememberedStackTop(0),
@@ -499,6 +498,7 @@ namespace MMgc
 #ifndef MMGC_THREADSAFE
 		disableThreadCheck(false),
 #endif
+		emptyWeakRefRoot(0),
 		marking(false),
 		memStart(MAX_UINTPTR),
 		memEnd(0),

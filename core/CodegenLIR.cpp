@@ -592,13 +592,18 @@ namespace avmplus
         }
     }
 
-	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc(i->pool()->core->gc), core(i->pool()->core), pool(i->pool()), info(i), ms(i->getMethodSignature()), patches(gc), 
-		  interruptable(true)
+	CodegenLIR::CodegenLIR(MethodInfo* i) : 
 #ifdef VTUNE
-           , jitInfoList(i->core()->gc)
-           , jitPendingRecords(i->core()->gc)
+		jitInfoList(i->core()->gc),
+		jitPendingRecords(i->core()->gc),
 #endif
+		gc(i->pool()->core->gc),
+		core(i->pool()->core),
+		info(i),
+		ms(i->getMethodSignature()),
+		pool(i->pool()),
+		interruptable(true),
+		patches(gc)
 	{
 		state = NULL;
 

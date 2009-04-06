@@ -57,8 +57,8 @@ namespace avmplus
 			firstSourceLine(0),
 			lastSourceLine(0),
 			offsetInAbc(0),
-			local_count(_local_count), 
 			codeSize(_codeSize), 
+			local_count(_local_count), 
 			max_scopes(_max_scopes) {}
 
 	public:
