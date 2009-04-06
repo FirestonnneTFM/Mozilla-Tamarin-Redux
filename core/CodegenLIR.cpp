@@ -1202,8 +1202,7 @@ namespace avmplus
             LIns* tra = traitsTracker[i];
             NanoAssert(val && tra);
 
-            Traits *start,*t = (Traits*) tra->constvalp(); 
-            AvmAssert((int)t != 2);           
+            Traits *t = (Traits*) tra->constvalp(); 
             bool is = false;
             if (t == NUMBER_TYPE) 
             {
