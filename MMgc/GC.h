@@ -1892,7 +1892,7 @@ public:
 		{
 			friend class GC;
 		public:
-			AllocaAutoPtr() : unwindPtr(NULL), gc(NULL) {}  // initialization of 'gc' to pacify gcc
+			AllocaAutoPtr() : gc(NULL), unwindPtr(NULL) {}  // initialization of 'gc' to pacify gcc
 			~AllocaAutoPtr() { if (unwindPtr) gc->allocaPopTo(unwindPtr); }
 		private:
 			GC* gc;

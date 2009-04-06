@@ -53,9 +53,9 @@ namespace avmplus
 		cpool_uint_atoms(core->GetGC(), 0),
 #endif
 		cpool_mn(0),
-		bugFlags(0),
 		metadata_infos(0),
 		scripts(core->GetGC(), 0),
+		bugFlags(0),
 		_namedTraits(new(core->GetGC()) MultinameHashtable()),
 		_privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
 		_code(sb.getImpl()),
