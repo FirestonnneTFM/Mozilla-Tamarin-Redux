@@ -1179,7 +1179,7 @@ namespace avmplus
 
         void trackStore(LIns *value, int d, bool traits) {
             AvmAssert( (!traits && (d&7) == 0) || (traits && (d&3)==0));
-            int i = (traits) ? d >> 2 : d >> 3;
+            int i = (traits) ? d / sizeof(Traits*) : d >> 3;
             if (i>=nvar) return;
             if (traits)  {
                 traitsTracker[i] = value;
