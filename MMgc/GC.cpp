@@ -453,14 +453,6 @@ namespace MMgc
 	};
 	const size_t kLargestAlloc = 1968;
 
-#ifdef MMGC_THREADSAFE
-#define USING_CALLBACK_LIST(gc)  GCAcquireSpinlock _cblock((gc)->m_callbackListLock)
-#define USING_PAGE_MAP()         GCAcquireSpinlock _pmlock(pageMapLock)
-#else
-#define USING_CALLBACK_LIST(gc)  ((gc)->CheckThread())
-#define USING_PAGE_MAP()         ((void) 0)
-#endif
-
 #ifdef _MSC_VER
 #  pragma warning(push)
 #  pragma warning(disable:4355) // 'this': used in base member initializer list
@@ -495,9 +487,7 @@ namespace MMgc
 		stackCleaned(true),
 		rememberedStackTop(0),
 		stackEnter(0),
-#ifndef MMGC_THREADSAFE
 		disableThreadCheck(false),
-#endif
 		emptyWeakRefRoot(0),
 		marking(false),
 		memStart(MAX_UINTPTR),
@@ -510,14 +500,6 @@ namespace MMgc
 		m_roots(0),
 	    m_callbacks(0),
 		zct()
-		// Expand, don't collect, until we hit this threshold
-#if MMGC_THREADSAFE
-		, m_exclusiveGCThread(NULL)
-		, m_gcRunning(false)
-		, m_condDone(m_lock)
-		, m_requestCount(0)
-		, m_condNoRequests(m_lock)
-#endif
 	{
 		// sanity check for all our types
 		MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
@@ -549,12 +531,6 @@ namespace MMgc
 			noPointersAllocs[i] = new GCAlloc(this, kSizeClasses[i], false, false, i);
 		}
 
-	#ifdef MMGC_THREADSAFE
-		pageMapLock = VMPI_lockCreate();
-		GCAssert(pageMapLock != NULL);
-		m_callbackListLock = VMPI_lockCreate();
-		GCAssert(m_callbackListLock != NULL);
-	#endif //MMGC_THREADSAFE
 	#ifdef MMGC_LOCKING
 		m_rootListLock = VMPI_lockCreate();
 		GCAssert(m_rootListLock != NULL);
@@ -643,9 +619,8 @@ namespace MMgc
 
 		heapFree(pageMap);
 
-#ifndef MMGC_THREADSAFE
 		CheckThread();
-#endif
+		
 		delete emptyWeakRefRoot;
 		GCAssert(!m_roots);
 		GCAssert(!m_callbacks);
@@ -662,172 +637,28 @@ namespace MMgc
 	#ifdef MMGC_LOCKING
 		VMPI_lockDestroy(m_rootListLock);
 	#endif //MMGC_LOCKING
-	#ifdef MMGC_THREADSAFE
-		VMPI_lockDestroy(m_callbackListLock);
-		VMPI_lockDestroy(pageMapLock);
-	#endif //MMGC_THREADSAFE
 	}
 
 	void GC::Collect()
 	{
-		CollectWithBookkeeping(false, false);
-	}
-
-	void GC::CollectWithBookkeeping(bool callerHoldsLock,
-									bool callerHasActiveRequest)
-	{
-#ifdef MMGC_THREADSAFE
-		GCAssert(callerHoldsLock == m_lock.IsHeld());
-#ifdef _DEBUG
-		GCAssert(callerHasActiveRequest == GCThread::GetCurrentThread()->IsInActiveRequest());
-#endif
-#else
-		(void) callerHoldsLock;
-		(void) callerHasActiveRequest;
 		CheckThread();
-#endif
 
-#ifdef MMGC_THREADSAFE
-		if (!callerHoldsLock)
-			m_lock.Acquire();
-
-		if (nogc || m_gcRunning || zct.reaping) {
-			if (!callerHoldsLock)
-				m_lock.Release();
-			return;
-		}
-#else
 		if (nogc || collecting || zct.reaping) {
 			return;
 		}
-#endif
 
-#ifdef MMGC_THREADSAFE
-		GCThread *thisThread = GCThread::GetCurrentThread();
-		if (m_exclusiveGCThread != NULL) {
-			// Someone is already collecting or waiting to collect.
-			//
-			// If it's the current thread, then we're being called
-			// recursively.  This maybe shouldn't happen, but Collect can be
-			// called indirectly from a finalizer.  Don't recurse, just ignore
-			// it.
-			//
-			// If it's some other thread, wait for that thread to finish.
-			//
-			if (m_exclusiveGCThread != thisThread) {
-				GCRoot *stackRoot;
-				void *stack;
-				size_t stackSize;
-
-				// Call this macro here, not under "if
-				// (callerHasActiveRequest)", because it introduces local
-				// variables that must survive for the whole lifetime of
-				// stackRoot.
-				MMGC_GET_STACK_EXTENTS(this, stack, stackSize);
-
-				// Before waiting, this thread must suspend any active
-				// requests.  This avoids a deadlock where m_exclusiveGCThread
-				// is waiting for m_requestCount to go to zero while we're
-				// waiting for m_exclusiveGCThread to be done.
-				//
-				// When we do this, we root the calling thread's stack; this
-				// way each collection scans the stack of every thread that is
-				// in a suspended request.
-				//
-				if (callerHasActiveRequest) {
-					stackRoot = new GCRoot(this, stack, stackSize);
-
-					OnLeaveRequestAlreadyLocked();
-				}
-
-				while (m_exclusiveGCThread != NULL)
-					m_condDone.Wait();
-
-				if (callerHasActiveRequest) {
-					// Resume previously suspended request.
-					delete stackRoot;
-					OnEnterRequestAlreadyLocked();
-				}
-			}
-
-			if (!callerHoldsLock)
-				m_lock.Release();
-			return;
-		}
-
-		// If we get here, this thread will collect.
-		m_exclusiveGCThread = thisThread;
-		if (callerHasActiveRequest) {
-			// We must suspend any active requests on this thread.
-			OnLeaveRequestAlreadyLocked();
-		}
-		// Wait for other threads to suspend or end their active requests,
-		// if any.
-		while (m_requestCount > 0)
-			m_condNoRequests.Wait();
-
-		// These should not have changed while we were waiting, even though we
-		// released the lock.
-		GCAssert(m_requestCount == 0);
-		GCAssert(m_exclusiveGCThread == thisThread);
-
-		// This thread has acquired exclusiveGC.
-		m_gcRunning = true;
-#endif
-
-		{
-			USING_CALLBACK_LIST(this);
-			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-				cb->enterExclusiveGC();
-		}
-
-#ifdef MMGC_THREADSAFE
-		m_lock.Release();
-#endif
-
-		{
-			USING_CALLBACK_LIST(this);
-			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-				cb->enterExclusiveGCNoLock();
-		}
+		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
+			cb->precollection();
 
 		CollectImpl();
 
-#ifdef MMGC_THREADSAFE
-		m_lock.Acquire();
-
-		// These should not have changed during collection,
-		// even though we released the lock.
-		GCAssert(m_requestCount == 0);
-		GCAssert(m_exclusiveGCThread == thisThread);
-#endif
-
-		{
-			USING_CALLBACK_LIST(this);
-			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-				cb->leaveExclusiveGC();
-		}
-
-#ifdef MMGC_THREADSAFE
-		// This thread is relinquishing exclusiveGC.
-		m_gcRunning = false;
-
-		m_exclusiveGCThread = NULL;
-		if (callerHasActiveRequest)
-			OnEnterRequestAlreadyLocked();
-
-		m_condDone.NotifyAll();
-
-		if (!callerHoldsLock)
-			m_lock.Release();
-#endif
+		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
+			cb->postcollection();
 	}
 
 	void GC::CollectImpl()
 	{
-#ifndef MMGC_THREADSAFE
 		ReapZCT();
-#endif
 
 		if(!marking)
 			StartIncrementalMark();
@@ -846,8 +677,6 @@ namespace MMgc
 #ifdef _DEBUG
 	void GC::Trace(const void *stackStart/*=NULL*/, uint32_t stackSize/*=0*/)
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		SAMPLE_FRAME("[mark]", core());
 
 		// Clear all mark bits.
@@ -927,12 +756,7 @@ namespace MMgc
 
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{
-#ifdef MMGC_THREADSAFE
-		GCAutoLock _lock(m_lock);
-		GCAssert(!m_gcRunning);
-#else
 		CheckThread();
-#endif
 		return AllocAlreadyLocked(size, flags);
 	}
 
@@ -948,7 +772,7 @@ namespace MMgc
 #ifdef _DEBUG
 		GCAssert(size + 7 > size);
 		if (GC::greedy) {
-			CollectWithBookkeeping(true, true);
+			Collect();
 		}
 		// always be marking in pedantic mode
 		if(incrementalValidationPedantic) {
@@ -1033,12 +857,7 @@ namespace MMgc
 
 	void GC::Free(const void *item)
 	{
-#ifdef MMGC_THREADSAFE
-		GCAutoLock _lock(m_lock);
-		GCAssert(!m_gcRunning);
-#else
 		CheckThread();
-#endif
 
 		if(item == NULL) {
 			return;
@@ -1106,8 +925,6 @@ bail:
 
 	void GC::ClearMarks()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		for (int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->ClearMarks();
 			containsPointersAllocs[i]->ClearMarks();
@@ -1118,8 +935,6 @@ bail:
 
 	void GC::Finalize()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		for(int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->Finalize();
 			containsPointersAllocs[i]->Finalize();
@@ -1138,8 +953,6 @@ bail:
 
 	void GC::Sweep(bool force)
 	{	
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		// collecting must be true because it indicates allocations should
 		// start out marked, we can't rely on write barriers below since 
 		// presweep could write a new GC object to a root
@@ -1156,17 +969,10 @@ bail:
 			DumpMemoryInfo();
 		}
 #endif
-		
 
 		// invoke presweep on all callbacks
-		{
-			USING_CALLBACK_LIST(this);
-			GCCallback *cb = m_callbacks;
-			while(cb) {
-				cb->presweep();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
+			cb->presweep();
 
 		SAMPLE_CHECK();
 
@@ -1227,14 +1033,8 @@ bail:
 		collecting = false;
 
 		// invoke postsweep callback
-		{
-			USING_CALLBACK_LIST(this);
-			GCCallback *cb = m_callbacks;
-			while(cb) {
-				cb->postsweep();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
+			cb->postsweep();
 
 		SAMPLE_CHECK();
 
@@ -1262,7 +1062,6 @@ bail:
 
 	void* GC::AllocBlock(int size, int pageType, bool zero)
 	{
-		MMGC_ASSERT_GC_LOCK(this);
 		GCAssert(size > 0);
 	
 		// perform gc if heap expanded due to fixed memory allocations
@@ -1271,7 +1070,7 @@ bail:
 			if(incremental && !nogc)
 				StartIncrementalMark();
 			else
-				CollectWithBookkeeping(true, true);
+				Collect();
 		}
 
 		void *item;
@@ -1300,8 +1099,6 @@ bail:
 
 	void* GC::AllocBlockIncremental(int size, bool zero)
 	{
-		MMGC_ASSERT_GC_LOCK(this);
-
 		if (!collecting) {
 			if (marking) {
 				if (incrementalValidation || policy.queryIncrementalMarkAtAllocBlock())
@@ -1324,12 +1121,10 @@ bail:
 
 	void* GC::AllocBlockNonIncremental(int size, bool zero)
 	{
-		MMGC_ASSERT_GC_LOCK(this);
-
 		void *item = heapAlloc(size, false, zero);
 		
 		if (item == NULL && policy.queryRunCollectionAfterAllocBlockFail()) {
-			CollectWithBookkeeping(true, true);
+			Collect();
 			item = heapAlloc(size, false, zero);
 		}
 		
@@ -1338,11 +1133,6 @@ bail:
 
 	void GC::FreeBlock(void *ptr, uint32_t size)
 	{
-#ifdef MMGC_THREADSAFE
-		GCAssert(m_lock.IsHeld() || destroying
-				 || (m_gcRunning
-					 && m_exclusiveGCThread == GCThread::GetCurrentThread()));
-#endif
 		heapFree(ptr);
 		UnmarkGCPages(ptr, size);
 	}
@@ -1388,7 +1178,6 @@ bail:
 
 	void GC::Mark(GCStack<GCWorkItem> &work)
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
 		while(work.Count()) {
 			MarkItem(work);
 		}
@@ -1396,7 +1185,6 @@ bail:
 
 	void GC::MarkGCPages(void *item, uint32_t numPages, int to)
 	{
-		USING_PAGE_MAP();
 		uintptr_t addr = (uintptr_t)item;
 		size_t shiftAmount=0;
 		unsigned char *dst = pageMap;
@@ -1451,7 +1239,6 @@ bail:
 	{
 		uintptr_t addr = (uintptr_t) item;
 
-		USING_PAGE_MAP();
 		while(numpages--)
 		{
 			ClearPageMapValue(addr);
@@ -1617,7 +1404,6 @@ bail:
 		gc = NULL;
 	}
 
-#ifndef MMGC_THREADSAFE
 	void GC::CheckThread()
 	{
 #ifdef _DEBUG
@@ -1626,11 +1412,9 @@ bail:
 #endif
 #endif
 	}
-#endif
 
 	bool GC::IsPointerToGCPage(const void *item)
 	{
-		USING_PAGE_MAP();
 		if((uintptr_t)item >= memStart && (uintptr_t)item < memEnd)
 			return GetPageMapValueAlreadyLocked((uintptr_t) item) != 0;
 		return false;
@@ -1677,14 +1461,8 @@ bail:
 		// note if we add things while reaping we could delete the object
 		// here if we had a way to monitor our stack usage
 		if(reaping && PLENTY_OF_STACK()) {
-			{
-				USING_CALLBACK_LIST(gc);
-				GCCallback *cb = gc->m_callbacks;
-				while(cb) {
-					cb->prereap(obj);
-					cb = cb->nextCB;
-				}
-			}
+			for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+				cb->prereap(obj);
 			if(gc->IsFinalized(obj))
 				((GCFinalizable*)obj)->~GCFinalizable();
 			gc->Free(obj);
@@ -1925,14 +1703,8 @@ bail:
 		nextPinnedIndex = 0;
 
 		// invoke prereap on all callbacks
-		{
-			USING_CALLBACK_LIST(gc);
-			GCCallback *cb = gc->m_callbacks;
-			while(cb) {
-				cb->prereap();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+			cb->prereap();
 
 #ifdef _DEBUG
 		if(gc->validateDefRef) {
@@ -1974,14 +1746,8 @@ bail:
 				}
 #endif
 				// invoke prereap on all callbacks
-				{
-					USING_CALLBACK_LIST(gc);
-					GCCallback *cbb = gc->m_callbacks;
-					while(cbb) {
-						cbb->prereap(rcobj);
-						cbb = cbb->nextCB;
-					}
-				}
+				for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+					cb->prereap(rcobj);
 
 				GCAssert(*(intptr_t*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
@@ -2010,14 +1776,9 @@ bail:
 		zctIndex = nextPinnedIndex = 0;
 
 		// invoke postreap on all callbacks
-		{
-			USING_CALLBACK_LIST(gc);
-			GCCallback *cb = gc->m_callbacks;
-			while(cb) {
-				cb->postreap();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+			cb->postreap();
+
 		if(gc->heap->Config().gcstats && numObjects) {
 			gc->gclog("[mem] DRC reaped %d objects (%d kb) freeing %d pages (%d kb) in %.2f millis (%.4f s)\n", 
 				numObjects, objSize>>10, pagesStart - gc->GetNumBlocks(), gc->GetNumBlocks()*GCHeap::kBlockSize >> 10, 
@@ -2048,14 +1809,9 @@ bail:
 
 		GCAssert(VMPI_strlen(buf) < 4096);
 
-		{
-			USING_CALLBACK_LIST(this);
-			GCCallback *cb = m_callbacks;
-				if(cb) {
-				cb->log(buf);
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
+			cb->log(buf);
+
 		// log gross stats any time anything interesting happens
 		if(!ingclog) {
 			ingclog = true;
@@ -2116,8 +1872,6 @@ bail:
 	{
 		int bits;
 		{
-			USING_PAGE_MAP();
-
 			if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item&0xfff) == 0)
 				return false;
 			bits = GetPageMapValueAlreadyLocked((uintptr_t)item);
@@ -2234,8 +1988,6 @@ bail:
 
 	void GC::FindUnmarkedPointers()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		if(findUnmarkedPointers)
 		{
 			uintptr_t m = memStart;
@@ -2369,11 +2121,6 @@ bail:
 	 */
 	void GC::WhosPointingAtMe(void* me, int recurseDepth, int currentDepth)
 	{
-#ifdef MMGC_THREADSAFE
-		if (currentDepth == 0)
-			pageMapLock.Acquire();
-#endif
-
 		uintptr_t val = (uintptr_t)me;
 		uintptr_t m = memStart;
 
@@ -2429,11 +2176,6 @@ bail:
 			
 			}
 		}
-
-#ifdef MMGC_THREADSAFE
-		if (currentDepth == 0)
-			pageMapLock.Release();
-#endif
 	}
 #undef ALLOCA_AND_FILL_WITH_SPACES
 #endif
@@ -2848,7 +2590,6 @@ bail:
 
 	void GC::IncrementalMark()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
 		uint32_t time = incrementalValidation ? 1 : uint32_t(policy.incrementalMarkMilliseconds());
 #ifdef _DEBUG
 		time = 1;
@@ -2899,8 +2640,6 @@ bail:
 
 	void GC::FinishIncrementalMark()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		// Don't finish an incremental mark (i.e., sweep) if we
 		// are in the midst of a ZCT reap.
 		if (zct.reaping)
@@ -3078,7 +2817,6 @@ bail:
 	{
 		uint32_t *bits;
 
-		MMGC_ASSERT_GC_LOCK(this);
 		GCAssert(numBytes % 4 == 0);
 
 		#ifdef MMGC_64BIT // we use first 8-byte slot for the free list
@@ -3146,8 +2884,6 @@ bail:
 	
 	void GC::AddCallback(GCCallback *cb)
 	{
-		USING_CALLBACK_LIST(this);
-
 		cb->prevCB = NULL;
 		cb->nextCB = m_callbacks;
 		if(m_callbacks)
@@ -3157,8 +2893,6 @@ bail:
 
 	void GC::RemoveCallback(GCCallback *cb)
 	{
-		USING_CALLBACK_LIST(this);
-
 		if( m_callbacks == cb )
 			m_callbacks = cb->nextCB;
 		else
@@ -3182,9 +2916,6 @@ bail:
 	GCWeakRef* GC::GetWeakRef(const void *item) 
 	{
 		GC *gc = GetGC(item);
-#ifdef MMGC_THREADSAFE
-		GCAutoLock _lock(gc->m_lock);
-#endif
 		GCWeakRef *ref = (GCWeakRef*) gc->weakRefs.get(item);
 
 		if(ref == NULL) {
@@ -3250,8 +2981,6 @@ bail:
 
 	void GC::FindMissingWriteBarriers()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		if(!incrementalValidation)
 			return;
 
@@ -3335,11 +3064,8 @@ bail:
 
 		if(pendingStatusChange)
 		{
-			{
-				USING_CALLBACK_LIST(this);
-				for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-					cb->oom(statusTo);
-			}
+			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
+				cb->oom(statusTo);
 			pendingStatusChange = false;
 		}
 	}

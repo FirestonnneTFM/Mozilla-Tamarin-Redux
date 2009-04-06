@@ -99,16 +99,6 @@ if MMGC_DYNAMIC:
     MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
 
-MMGC_THREADSAFE = o.getBoolArg('threadsafe-mmgc', False)
-if MMGC_THREADSAFE:
-    MMGC_DEFINES['MMGC_THREADSAFE'] = None
-    NSPR_INCLUDES = o.getStringArg('nspr-includes')
-    MMGC_CPPFLAGS += NSPR_INCLUDES + " "
-    APP_CPPFLAGS += NSPR_INCLUDES + " "
-
-    NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
-    OS_LDFLAGS += " " + NSPR_LDOPTS
-
 os, cpu = config.getTarget()
 
 # For -Wreorder, see https://bugzilla.mozilla.org/show_bug.cgi?id=475750
