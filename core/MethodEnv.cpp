@@ -577,20 +577,7 @@ namespace avmplus
 	{
 		AvmAssert(this != 0);
 		AvmAssert(callstack != 0); 
-
-		// dont reset the parameter traits since they are setup in the prologue
-		if (frameTraits) {
-            // @todo the traits should be cleared by the jit / interp ?!?
-		    MethodSignaturep ms = get_ms();
-            const int param_count = ms->param_count();
-            const int firstLocalAt = param_count+1;
-            const int localCount = ms->local_count();
-            AvmAssert(localCount >= firstLocalAt);
-			VMPI_memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
-        }
-
-		callstack->init(this, framep, frameTraits, eip, /*boxed*/false);
-		
+		callstack->init(this, framep, frameTraits, eip, /*boxed*/false);		
 		debugEnterInner();
 	}
 	

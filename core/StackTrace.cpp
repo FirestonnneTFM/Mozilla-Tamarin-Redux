@@ -113,7 +113,8 @@ namespace avmplus
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
 		if (m_framep && m_env)
 		{
-			return (void**) (m_framep + m_env->method->getMethodSignature()->local_count());
+            // @todo disabling this for now see https://bugzilla.mozilla.org/show_bug.cgi?id=484039
+			//return (void**) (m_framep + m_env->method->getMethodSignature()->local_count());
 		}
 		return NULL;
 	}
