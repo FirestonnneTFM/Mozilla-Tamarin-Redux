@@ -111,8 +111,9 @@ if MMGC_THREADSAFE:
 
 os, cpu = config.getTarget()
 
+# For -Wreorder, see https://bugzilla.mozilla.org/show_bug.cgi?id=475750
 if config.getCompiler() == 'GCC':
-    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -fno-rtti -fno-exceptions "
+    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wreorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -fno-rtti -fno-exceptions "
     if config.getDebug():
         APP_CXXFLAGS += ""
     else:
