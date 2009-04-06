@@ -582,6 +582,16 @@ namespace MMgc
 		ClearMarks();
 		ForceSweep();
 
+		for (int i=0; i < kNumSizeClasses; i++) {
+			delete containsPointersAllocs[i];
+			delete containsPointersRCAllocs[i];
+			delete noPointersAllocs[i];
+		}
+
+		if (largeAlloc) {
+			delete largeAlloc;
+		}
+
 		// Go through m_bitsFreelist and collect list of all pointers
 		// that are on page boundaries into new list, pageList
 		void **pageList = NULL;
@@ -603,19 +613,6 @@ namespace MMgc
 			heapFree((void*)pageList);
 			pageList = next;
 		}
-
-		for (int i=0; i < kNumSizeClasses; i++) {
-			delete containsPointersAllocs[i];
-			delete containsPointersRCAllocs[i];
-			delete noPointersAllocs[i];
-		}
-
-		if (largeAlloc) {
-			delete largeAlloc;
-		}
-
-		// dtors for each GCAlloc will use this
-		pageList = NULL;
 
 		heapFree(pageMap);
 
