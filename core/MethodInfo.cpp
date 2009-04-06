@@ -59,15 +59,15 @@ namespace avmplus
 	{
 		union {
 			void* t;
-			AtomMethodProc p;
+			GprMethodProc p;
 		};
 		t = tramp;
-		this->_impl32 = p;
+		this->_implGPR = p;
 	}
 #endif
 
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
-		_impl32(verifyEnter),
+		_implGPR(verifyEnter),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
 		_declaringTraits(declTraits),
 		_activationTraits(NULL),
@@ -83,7 +83,7 @@ namespace avmplus
 							const uint8_t* abc_info_pos, 
 							uint8_t abcFlags,
 							const NativeMethodInfo* native_info) : 
-		_impl32(verifyEnter),
+		_implGPR(verifyEnter),
 		_msref(pool->core->GetGC()->emptyWeakRef),
 		_declaringTraits(NULL),
 		_activationTraits(NULL),
@@ -94,7 +94,7 @@ namespace avmplus
 	{
 
 #if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
-		MMGC_STATIC_ASSERT(offsetof(MethodInfo, _impl32) == 0);
+		MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
 #endif
 
 		if (native_info)
@@ -117,9 +117,9 @@ namespace avmplus
 	{
 		MethodSignaturep ms = getMethodSignature();
 		if (ms->returnTraitsBT() == BUILTIN_number)
-			_implN = avmplus::interpN;
+			_implFPR = avmplus::interpFPR;
 		else
-			_impl32 = avmplus::interp32;
+			_implGPR = avmplus::interpGPR;
     }
 
 #ifdef DEBUGGER
@@ -142,7 +142,7 @@ namespace avmplus
 	}
 #endif
 
-	/*static*/ Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32* ap)
+	/*static*/ uintptr_t MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32* ap)
 	{
 		MethodInfo* f = env->method;
 
@@ -153,11 +153,11 @@ namespace avmplus
 
 		f->verify(env->toplevel());
 
-        AvmAssert(f->impl32() != MethodInfo::verifyEnter);
+        AvmAssert(f->implGPR() != MethodInfo::verifyEnter);
 #if VMCFG_METHODENV_IMPL32
-		env->_impl32 = f->impl32();
+		env->_implGPR = f->implGPR();
 #endif
-		return f->impl32()(env, argc, ap);
+		return f->implGPR()(env, argc, ap);
 	}
 
 	void MethodInfo::verify(Toplevel *toplevel)
@@ -168,7 +168,7 @@ namespace avmplus
 		if (isNative())
 		{
 			union {
-				Atom (*impl32)(MethodEnv*, int, uint32 *);
+				GprMethodProc implGPR;
 				AvmThunkNativeThunker thunker;
 				AvmThunkNativeThunkerN thunkerN;
 			} u;
@@ -186,7 +186,7 @@ namespace avmplus
 			{
 				u.thunker = this->thunker();
 			}
-			this->_impl32 = u.impl32;
+			this->_implGPR = u.implGPR;
 		}
 		else
 		{
@@ -216,11 +216,7 @@ namespace avmplus
 
 				CodegenLIR jit(this);
                 #if defined AVMPLUS_WORD_CODE
-                #ifdef AVMPLUS_DIRECT_THREADED
-				WordcodeEmitter translator(this, interpGetOpcodeLabels());
-                #else
 				WordcodeEmitter translator(this);
-                #endif
 				TeeWriter teeWriter(&translator, &jit);
 				CodeWriter *coder = &teeWriter;
                 #else
@@ -269,11 +265,7 @@ namespace avmplus
 			{
 			    // NOTE copied below
                 #if defined AVMPLUS_WORD_CODE
-                #ifdef AVMPLUS_DIRECT_THREADED
-				WordcodeEmitter translator(this, interpGetOpcodeLabels());
-                #else
 				WordcodeEmitter translator(this);
-                #endif
 				CodeWriter *coder = &translator;
                 #else
 				CodeWriter stubWriter;
@@ -289,11 +281,7 @@ namespace avmplus
 
 			// NOTE copied from above
             #if defined AVMPLUS_WORD_CODE
-            #ifdef AVMPLUS_DIRECT_THREADED
-			WordcodeEmitter translator(this, interpGetOpcodeLabels());
-            #else
 			WordcodeEmitter translator(this);
-            #endif
 			CodeWriter *coder = &translator;
             #else
 			CodeWriter stubWriter;
@@ -305,12 +293,6 @@ namespace avmplus
 
             #endif // FEATURE_NANOJIT
 			_tprof_end();
-			
-			#ifdef DEBUGGER
-			// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor
-			// (note that this is true even if we didn't call CallStackNode::init; the dtor is a no-op in that case)
-			//callStackNode.exit();
-			#endif /* DEBUGGER */
 		}
 	}
 

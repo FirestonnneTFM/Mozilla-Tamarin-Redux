@@ -73,7 +73,7 @@ namespace avmplus
 		// term=1  means the instruction terminates control flow (return, throw, lookupswitch)
 		// thro=1  means the instruction may throw an exception
 		// calls=1 means the topmost value on the stack is an argument count
-		// push=n means the instruction pushes n values (after popping).  Current limit is 3
+		// push=n means the instruction pushes n values (after popping).  Current limit is 7
 		// pop=n means the instruction pops n values.  Current limit is 3
 		// pop_ex=1 means the instruction may pop more values than shown in the pop column,
 		//    there is custom logic elsewhere to handle it.  Usually it means there is a

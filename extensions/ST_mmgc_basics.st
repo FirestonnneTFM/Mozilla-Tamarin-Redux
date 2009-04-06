@@ -78,7 +78,7 @@ private:
     MyGCObject *mygcobject;
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-//    printf("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
+//    AvmLog("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
     %%verify (int)gc->GetBytesInUse()==inuse+8
     delete mygcobject;
 
@@ -88,9 +88,9 @@ private:
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
     %%verify (int)gc->GetBytesInUse()>inuse
     delete mygcobject;
-//    printf("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
+//    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
     gc->Collect();      
-//    printf("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
+//    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
     %%verify (int)gc->GetBytesInUse()<=inuse
 
 %%test getgcheap
@@ -107,7 +107,7 @@ private:
     %%verify (int)fa->GetItemSize()==2048
     void *data2=fa->Alloc(4096);
     %%verify MMgc::FixedAlloc::GetFixedAlloc(data2)==fa
-//    printf("fa->GetItemSize=%d\n",(int)fa->GetItemSize());
+//    AvmLog("fa->GetItemSize=%d\n",(int)fa->GetItemSize());
     %%verify (int)fa->GetItemSize()==2048
     fa->Free(data1);
     %%verify (int)fa->GetItemSize()==2048
@@ -119,24 +119,24 @@ private:
     fm=MMgc::FixedMalloc::GetInstance();
     int start=(int)fm->GetBytesInUse();
     int starttotal=(int)fm->GetTotalSize();
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
     %%verify (int)fm->GetBytesInUse()==start
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
     %%verify (int)fm->GetTotalSize()==starttotal
     void *obj=fm->Alloc(8192);
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
     %%verify (int)fm->GetBytesInUse()==start+8192
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
     %%verify (int)fm->GetTotalSize()==starttotal+2
     fm->Free(obj);
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
     %%verify (int)fm->GetBytesInUse()==start
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
     %%verify (int)fm->GetTotalSize()==starttotal
     obj=fm->Calloc(1024,10);
-//    printf("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
+//    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
     %%verify (int)fm->GetBytesInUse()==start+1024*12
-//    printf("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
+//    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
     %%verify (int)fm->GetTotalSize()==starttotal+3
     fm->Free(obj);
     %%verify (int)fm->GetBytesInUse()==start
@@ -147,16 +147,15 @@ private:
     MMgc::GCHeap *gh=MMgc::GCHeap::GetGCHeap();
     int startfreeheap=(int)gh->GetFreeHeapSize();
     %%verify (int)gh->GetTotalHeapSize()==128
-    %%verify (int)gh->GetCodeMemorySize()==0
-//    printf("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
+//    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
     gh->SetHeapLimit(1024);
     %%verify (int)gh->GetTotalHeapSize()==128
-//    printf("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
+//    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
     gh->Alloc(1024*10,true,true);
     %%verify (int)gh->GetTotalHeapSize()==10368
-//    printf("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
+//    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
 
 %%test gcmethods

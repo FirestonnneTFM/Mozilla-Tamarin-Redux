@@ -99,20 +99,11 @@ if MMGC_DYNAMIC:
     MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
 
-MMGC_THREADSAFE = o.getBoolArg('threadsafe-mmgc', False)
-if MMGC_THREADSAFE:
-    MMGC_DEFINES['MMGC_THREADSAFE'] = None
-    NSPR_INCLUDES = o.getStringArg('nspr-includes')
-    MMGC_CPPFLAGS += NSPR_INCLUDES + " "
-    APP_CPPFLAGS += NSPR_INCLUDES + " "
-
-    NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
-    OS_LDFLAGS += " " + NSPR_LDOPTS
-
 os, cpu = config.getTarget()
 
+# For -Wreorder, see https://bugzilla.mozilla.org/show_bug.cgi?id=475750
 if config.getCompiler() == 'GCC':
-    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -fno-rtti -fno-exceptions "
+    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wreorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -fno-rtti -fno-exceptions "
     if config.getDebug():
         APP_CXXFLAGS += ""
     else:

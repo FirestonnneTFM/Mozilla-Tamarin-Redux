@@ -243,12 +243,12 @@ namespace avmplus
 		const int bt = ms->returnTraitsBT();
 		if (bt == BUILTIN_number)
 		{
-			AvmAssert(method->implN() != NULL);
-			return core->doubleToAtom(method->implN()(this, argc, ap));
+			AvmAssert(method->implFPR() != NULL);
+			return core->doubleToAtom(method->implFPR()(this, argc, ap));
 		}
 		
-		AvmAssert(method->impl32() != NULL);
-		const Atom i = method->impl32()(this, argc, ap);
+		AvmAssert(method->implGPR() != NULL);
+		const Atom i = method->implGPR()(this, argc, ap);
 		switch (bt)
 		{
 		case BUILTIN_int:
@@ -277,7 +277,7 @@ namespace avmplus
 	
 	inline bool MethodEnv::isInterpreted()
 	{
-		return impl32() == interp32 || implN() == interpN;
+		return implGPR() == interpGPR || implFPR() == interpFPR;
 	}
 	
 	inline MethodSignaturep MethodEnv::get_ms()
@@ -312,7 +312,7 @@ namespace avmplus
 		if (isInterpreted())
 		{
 			// Tail call inhibited by &thisArg, and also by &thisArg in "else" clause
-			return interpA(this, 0, &thisArg, ms);
+			return interpBoxed(this, 0, &thisArg, ms);
 		}
 		else
 		{
@@ -422,7 +422,7 @@ namespace avmplus
 			const int end = argc >= param_count ? param_count : argc;
 			for ( int i=1 ; i <= end ; i++ )
 				atomv[i] = coerceAtom(core, atomv[i], ms->paramTraits(i), toplevel);
-			return interpA(this, argc, atomv, ms);
+			return interpBoxed(this, argc, atomv, ms);
 		}
 		else
 			return coerceUnboxEnter(argc, atomv);
@@ -494,10 +494,10 @@ namespace avmplus
 	}
 
 #if VMCFG_METHODENV_IMPL32
-	Atom MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
+	uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
 	{
-		env->_impl32 = env->method->impl32();
-		return env->_impl32(env, argc, ap);
+		env->_implGPR = env->method->implGPR();
+		return env->_implGPR(env, argc, ap);
 	}
 #endif // VMCFG_METHODENV_IMPL32
 
@@ -505,9 +505,9 @@ namespace avmplus
 	MethodEnv::MethodEnv(TrampStub, void* tramp, VTable *vtable)
 		: _vtable(vtable), method(NULL), activationOrMCTable(0)
 	{
-		union { void* v; AtomMethodProc p; };
+		union { void* v; GprMethodProc p; };
 		v = tramp;
-		_impl32 = p;
+		_implGPR = p;
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
 #endif
@@ -521,10 +521,10 @@ namespace avmplus
 		
 #if VMCFG_METHODENV_IMPL32
 	#if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
-		MMGC_STATIC_ASSERT(offsetof(MethodEnv, _impl32) == 0);
+		MMGC_STATIC_ASSERT(offsetof(MethodEnv, _implGPR) == 0);
 	#endif
 		// make the first call go to the method impl
-		_impl32 = delegateInvoke;
+		_implGPR = delegateInvoke;
 #endif
 
 		AvmCore* core = this->core();

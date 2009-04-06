@@ -592,13 +592,18 @@ namespace avmplus
         }
     }
 
-	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc(i->pool()->core->gc), core(i->pool()->core), pool(i->pool()), info(i), ms(i->getMethodSignature()), patches(gc), 
-		  interruptable(true)
+	CodegenLIR::CodegenLIR(MethodInfo* i) : 
 #ifdef VTUNE
-           , jitInfoList(i->core()->gc)
-           , jitPendingRecords(i->core()->gc)
+		jitInfoList(i->core()->gc),
+		jitPendingRecords(i->core()->gc),
 #endif
+		gc(i->pool()->core->gc),
+		core(i->pool()->core),
+		info(i),
+		ms(i->getMethodSignature()),
+		pool(i->pool()),
+		interruptable(true),
+		patches(gc)
 	{
 		state = NULL;
 
@@ -2941,10 +2946,10 @@ namespace avmplus
 		ap->setSize(disp);
 
 #if VMCFG_METHODENV_IMPL32
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv,_impl32), method);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv,_implGPR), method);
 #else
 		LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnv, method), method);
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, _impl32), meth);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, _implGPR), meth);
 #endif
 		LIns* apAddr = leaIns(pad, ap);
 
@@ -5479,11 +5484,11 @@ namespace avmplus
         if (keep) {
             // save pointer to generated code
             union {
-                Atom (*fp)(MethodEnv*, int, uint32_t*);
+                GprMethodProc fp;
                 void *vp;
             } u;
             u.vp = frag->code();
-            info->_impl32 = u.fp;
+            info->_implGPR = u.fp;
             // mark method as been JIT'd
             info->_flags |= MethodInfo::JIT_IMPL;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
@@ -5714,10 +5719,10 @@ namespace avmplus
 		int32_t offset = (int32_t)(intptr_t)&((VTable*)0)->methods[e->disp_id];
 		LIns *env = lirout->insLoad(LIR_ldcp, vtable, offset);
 	#if VMCFG_METHODENV_IMPL32
-		LIns *target = lirout->insLoad(LIR_ldp, env, (int)offsetof(MethodEnv, _impl32));
+		LIns *target = lirout->insLoad(LIR_ldp, env, (int)offsetof(MethodEnv, _implGPR));
 	#else
 		LIns *af = lirout->insLoad(LIR_ldp, env, offsetof(MethodEnv, method));
-		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, _impl32));
+		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, _implGPR));
 	#endif
 		LInsp args[] = { ap_param, argc_param, env, target };
 		MethodSignaturep ems = e->virt->getMethodSignature();
