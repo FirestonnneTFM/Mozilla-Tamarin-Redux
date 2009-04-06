@@ -1139,6 +1139,135 @@ namespace avmplus
         }
     };
 
+#if defined(DEBUGGER) && defined(_DEBUG)
+    // The AS debugger requires type information for variables contained
+    // in the AS frame regions (i.e. 'vars').  In the interpreter this 
+    // is not an issues, since the region contains box values (i.e. Atoms)
+    // and so the type information is self-contained.  With the jit, this is
+    // not the case, and thus 'varTraits' is used to track the type of each
+    // variable in 'vars'. 
+    // This filter watches stores to 'vars' and 'varTraits' and upon encountering
+    // debugline (i.e. place where debugger can halt), it ensures that the
+    // varTraits entry is consistent with the value stored in 'vars'
+    class DebuggerCheck : public LirWriter
+    {
+		AvmCore* core;
+        GC *gc;
+        LInsp *tracker,*traitsTracker; // we use WB() macro, so no DWB() here.
+        LIns *vars,*traits;
+        int nvar;
+    public:
+        DebuggerCheck(AvmCore* core, GC *gc, LirWriter *out, int nvar) 
+            : LirWriter(out), core(core), gc(gc), nvar(nvar)
+        {
+            LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
+            WB(gc, this, &tracker, a);
+
+            a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
+            WB(gc, this, &traitsTracker, a);
+        }
+
+        ~DebuggerCheck() {
+            gc->Free(tracker);
+            gc->Free(traitsTracker);
+        }
+
+        void init(LIns *vars, LIns *traits) {
+            this->vars = vars;
+            this->traits = traits;
+        }
+
+        void trackStore(LIns *value, int d, bool traits) {
+            AvmAssert( (!traits && (d&7) == 0) || (traits && (d&3)==0));
+            int i = (traits) ? d / sizeof(Traits*) : d >> 3;
+            if (i>=nvar) return;
+            if (traits)  {
+                traitsTracker[i] = value;
+                value = !isValid(i) ? value : (LIns*)((intptr_t)value|1); // lower bit => validated
+                traitsTracker[i] = value;
+            }
+            else {
+                tracker[i] = value;
+            }
+        }
+
+        void clearState() {
+            VMPI_memset(tracker, 0, nvar*sizeof(LInsp));
+            VMPI_memset(traitsTracker, 0, nvar*sizeof(LInsp));
+        }
+
+        bool isValid(int i) {
+            // @pre tracker[i] has been previously filled
+            LIns* val = tracker[i];
+            LIns* tra = traitsTracker[i];
+            NanoAssert(val && tra);
+
+            Traits *t = (Traits*) tra->constvalp(); 
+            bool is = false;
+            if (t == NUMBER_TYPE) 
+            {
+                is = isFloat(val->opcode()) || val->isQuad();
+                AvmAssert(is);
+            }
+            else if (t == INT_TYPE)
+            {
+                is = !val->isQuad() && !isFloat(val->opcode());
+                AvmAssert(is);
+            }
+            else if (t == UINT_TYPE)
+            {
+                is = !val->isQuad() && !isFloat(val->opcode());
+                AvmAssert(is);
+            }
+            else if (t == BOOLEAN_TYPE)
+            {
+                is = !val->isQuad() && !isFloat(val->opcode());
+                AvmAssert(is);
+            }
+            else
+            {
+                is = val->isPtr();
+                AvmAssert(is);
+            }
+            return is;
+        }
+        
+        void checkState() {
+            for(int i=0; i<this->nvar; i++) {
+                LIns* val = tracker[i];
+                LIns* tra = traitsTracker[i];
+                AvmAssert(val && tra);
+                
+                // isValid should have already been called on everything
+                AvmAssert(((intptr_t)tra&0x1) == 1);
+            }
+        }
+
+        LIns *insCall(const CallInfo *call, LInsp args[]) {
+            if (call == FUNCTIONID(debugLine))
+                checkState();
+            return out->insCall(call,args);
+        }
+
+        LIns *insStore(LIns *value, LIns *base, LIns *disp) {
+            if (base == vars)
+                trackStore(value, disp->constval(),false);
+            else if (base == traits)
+                trackStore(value, disp->constval(),true);            
+            return out->insStore(value, base, disp);
+        }
+
+        LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+            if (base == vars)
+                trackStore(value, d,false);
+            else if (base == traits)
+                trackStore(value, d,true);
+            return out->insStorei(value, base, d);
+        }
+
+    };
+#endif
+    
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
 	{
@@ -1176,6 +1305,11 @@ namespace avmplus
         CopyPropagation *copier = new (gc) CopyPropagation(core, gc, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
+
+        #if defined(DEBUGGER) && defined(_DEBUG)
+        DebuggerCheck *checker = (core->debugger()) ? new (gc) DebuggerCheck(core, gc, lirout, state->verifier->local_count) : 0;
+        lirout = checker ? checker : lirout;
+        #endif
 		
 		emitStart(lirbuf, lirout, overflow);
 
@@ -1231,6 +1365,7 @@ namespace avmplus
 			verbose_only( if (lirbuf->names) {
 				lirbuf->names->addName(varTraits, "varTraits");
 			})
+            debug_only( checker->init(vars,varTraits); )
 		}
 		#endif
 
@@ -1314,7 +1449,7 @@ namespace avmplus
 
 				LIns* defaultVal = InsConstAtom(ms->getDefaultValue(i));
 				defaultVal = atomToNativeRep(loc, defaultVal);
-                localSet(loc, defaultVal, state->value(i).traits);
+                localSet(loc, defaultVal, state->value(loc).traits);
 				
 				// then generate: if (argc > p) local[p+1] = arg[p+1]
 				LIns* cmp = binaryIns(LIR_le, argcarg, InsConst(param));
