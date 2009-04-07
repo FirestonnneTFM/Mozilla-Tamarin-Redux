@@ -125,7 +125,7 @@ namespace MMgc
 	 * GCRoot is root in the reachability graph, it contains a pointer a size 
 	 * and will be searched for things.  
 	 */
-	class MMGC_API GCRoot
+	class GCRoot
 	{
 		friend class GC;
 		GCRoot();
@@ -170,7 +170,7 @@ namespace MMgc
 	 * GCCallback is an interface that allows the application to get
 	 * callbacks at interesting GC points.
 	 */
-	class MMGC_API GCCallback
+	class GCCallback
 	{
 		friend class GC;
 		friend class ZCT;
@@ -567,7 +567,7 @@ namespace MMgc
 	/**
 	 * The Zero Count Table used by DRC.
 	 */
-	class MMGC_API ZCT
+	class ZCT
 	{
 		friend class GC;
 
@@ -650,7 +650,7 @@ namespace MMgc
 	 * to find the optimum value.
 	 *
 	 */
-	class MMGC_API GC
+	class GC
 	{
 		friend class GCRoot;
 		friend class GCCallback;
