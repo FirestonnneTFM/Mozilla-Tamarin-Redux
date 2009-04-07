@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,54 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   File Name:    concat.es
+   Description:  The static concat method collects the vector elements from object followed by the vector
+    elements from the additional items, in order, into a new vector object.  All the items must be objects.
+    returns a new vector object
+   */
 
+var SECTION = " ";
+var VERSION = "AS3";
+startTest();
 
-#ifndef __GCTypes__
-#define __GCTypes__
+writeHeaderToLog( SECTION + " Vector.concat()-using-initializers");
 
-#include "VMPI.h"
+var v1=new <uint>[0,1,2];
+var v2=new <uint>[3,4,5];
+var v3=v1.concat(v2)
+AddTestCase(    "concat uint vector, original vector is unchanged",
+		"0,1,2",
+		v1.toString());
+AddTestCase(	"concat uint vector, new vector concat worked",
+		"0,1,2,3,4,5",
+		v3.toString());
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
-
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
+var v1=new <String>["zero","one","two"];
+var v2=new <int>[0,1,2];
+var errormsg;
+try {
+  var v3=v1.concat(v2);
+} catch (e) {
+  errormsg=e.toString();
 }
+AddTestCase(    "concat two differently typed vectors",
+                "TypeError: Error #1034",
+                parseError(errormsg,"TypeError: Error #1034".length));
+                
 
-#endif /* __GCTypes__ */
+var v1=new <uint>[5,6,7,8,9];
+var v2=new <int>[0,1,2];
+var errormsg;
+try {
+  var v3=v1.concat(v2);
+} catch (e) {
+  errormsg=e.toString();
+}
+AddTestCase(    "concat two differently typed vectors - uint and int",
+                "TypeError: Error #1034",
+                parseError(errormsg,"TypeError: Error #1034".length));
+
+
+test();
+

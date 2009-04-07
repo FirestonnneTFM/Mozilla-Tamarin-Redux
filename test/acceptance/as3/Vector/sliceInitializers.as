@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,37 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+var SECTION="";
+var VERSION = "ECMA_1";
 
+startTest();
 
-#ifndef __GCTypes__
-#define __GCTypes__
+writeHeaderToLog( " Vector.slice()");
 
-#include "VMPI.h"
+AddTestCase(
+		"slice no args on empty vector",
+		"",
+		new<String>[].slice().toString());
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+AddTestCase(
+    "slice startIndex only",
+    "6,7,8,9",
+    new<int>[0,1,2,3,4,5,6,7,8,9].slice(6).toString());
+    
+AddTestCase(
+    "slice -1 to -1",
+    "",
+    new<int>[0,1,2,3,4,5,6,7,8,9].slice(-1,-1).toString());
+    
+AddTestCase(
+    "slice -2 to -1",
+    "8",
+    new<int>[0,1,2,3,4,5,6,7,8,9].slice(-2,-1).toString());
+    
+AddTestCase(
+    "verify return type",
+    true,
+    new<Number>[3.14,2.73,9999,.0001,1e13].slice(3,-1) is Vector.<Number>)
+    
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
-
-#endif /* __GCTypes__ */
+test();

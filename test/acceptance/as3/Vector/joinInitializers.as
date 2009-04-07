@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,33 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   Description:  The elements of this object are converted to strings and
+   these strings are then concatenated, separated by comma
+   characters. The result is the same as if the built-in join
+   method were invoiked for this object with no argument.
+   */
 
+var SECTION = "15.4.4.3-1";
+var VERSION = "ECMA_1";
+startTest();
 
-#ifndef __GCTypes__
-#define __GCTypes__
+writeHeaderToLog( SECTION + " Vector.join()-initializers");
 
-#include "VMPI.h"
+AddTestCase(	"join empty vector",
+		"",
+		new<int>[].join());
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+AddTestCase(	"join vector 0-9",
+		"0,1,2,3,4,5,6,7,8,9",
+		new <int>[0,1,2,3,4,5,6,7,8,9].join());
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
+AddTestCase(	"join vector with 'and' separator",
+		"0 and 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9",
+		new <int>[0,1,2,3,4,5,6,7,8,9].join(" and "));
 
-#endif /* __GCTypes__ */
+AddTestCase(	"join vector with '|' separator",
+		"0|1|2|3|4|5|6|7|8|9",
+		new <int>[0,1,2,3,4,5,6,7,8,9].join("|"));
+
+test();

@@ -328,11 +328,13 @@ trait_entry
 	returns [Trait result]
 	:
 	   st = slot_trait { result = st; }
+	   |
+	   mt = method_trait { result = mt; }
 	;
 
 slot_trait
 	returns [Trait result]
-	: 'kind' ':' 'Trait_Slot' kind = trait_kind_modifiers[TRAIT_Var]
+	: 'kind' ':' ('Trait_Slot' | 'var') kind = trait_kind_modifiers[TRAIT_Var]
 	{
 		result = new Trait(kind);
 	}
@@ -348,6 +350,37 @@ slot_trait
 	  {
 	  	result.addAttr("type_name", trait_type_name);
 	  }
+	)*
+	;
+
+/*
+ *  Parse the various trait kinds that refer to methods.
+ */
+method_trait
+	returns [Trait result]
+	:
+	'kind' ':'
+	(
+		  (('Trait_Method'   | 'method')   kind = trait_kind_modifiers[TRAIT_Method])
+		| (('Trait_Function' | 'function') kind = trait_kind_modifiers[TRAIT_Function])
+		| (('Trait_Getter' | 'get') kind = trait_kind_modifiers[TRAIT_Getter])
+		| (('Trait_Setter' | 'set') kind = trait_kind_modifiers[TRAIT_Setter])
+	)
+	{
+		result = new Trait(kind);
+	}
+	(
+		trait_name[result]
+		|
+		('method_id'|'method') ':' method_id = function_id
+		{
+			result.addAttr("method_id", method_id);
+		}
+		| 
+		'disp_id' ':' disp_id = integer_literal
+		{
+			result.addAttr("disp_id", disp_id);
+		}
 	)*
 	;
 
@@ -630,9 +663,9 @@ call_insn
 	{
 	    $decl::method_body_info.insn(OP_call, new Object[] { new Integer(arg_count) } );
 	}
-	| 'callstatic' method_id = integer_literal arg_count = integer_literal
+	| 'callstatic' method_id = function_id arg_count = integer_literal
 	{
-		$decl::method_body_info.insn(OP_callstatic, new Object[] { new Integer(method_id), new Integer(arg_count) } );
+		$decl::method_body_info.insn(OP_callstatic, new Object[] { method_id, new Integer(arg_count) } );
 	}
 	| construct_opcode = ( 'construct' | 'constructsuper' ) arg_count = integer_literal
 	{

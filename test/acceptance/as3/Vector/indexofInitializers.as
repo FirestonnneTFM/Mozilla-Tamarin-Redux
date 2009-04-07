@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,50 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   File Name:    indexof.es
+   Description:  indexOf(object,value,from=...)
+     compares value with every vector element of object in increasing numerical index order, starting at the 
+     index from, stopping when an vector lement is equial to value by the === operator, From is rounded toward zero 
+     before use.  If from is negative, it is treated as object.length+from, returns vector index from first value or -1 
+     if no such element is found.
+   *
+   */
 
+var SECTION = ""
+var VERSION = "ECMA_1";
 
-#ifndef __GCTypes__
-#define __GCTypes__
+startTest();
 
-#include "VMPI.h"
+writeHeaderToLog( SECTION + " Vector.indexOf()");
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+AddTestCase(	"indexOf empty vector",
+		-1,
+		new <int>[].indexOf(0));
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
+AddTestCase(	"indexOf object not found",
+		-1,
+		new <int>[0,1,2,3,4,5,6,7,8,9].indexOf(10));
 
-#endif /* __GCTypes__ */
+AddTestCase(	"indexOf single match found",
+		4,
+		new <int>[0,1,2,3,4,5,6,7,8,9].indexOf(4));
+
+AddTestCase(	"indexOf first match found",
+		4,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4));
+
+AddTestCase(	"indexOf first match found setting start parameter",
+		4,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,2));
+
+AddTestCase(	"indexOf start parameter greater than vector length",
+		-1,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,100));
+
+AddTestCase(	"indexOf start parameter negative",
+		-1,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,-1));
+
+test();
+
