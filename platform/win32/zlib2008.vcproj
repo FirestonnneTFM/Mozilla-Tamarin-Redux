@@ -668,23 +668,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\adler32.c"
+				RelativePath="..\..\other-licenses\zlib\adler32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\compress.c"
+				RelativePath="..\..\other-licenses\zlib\compress.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\crc32.c"
+				RelativePath="..\..\other-licenses\zlib\crc32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\deflate.c"
+				RelativePath="..\..\other-licenses\zlib\deflate.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\gzio.c"
+				RelativePath="..\..\other-licenses\zlib\gzio.c"
 				>
 				<FileConfiguration
 					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
@@ -712,31 +712,31 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\infback.c"
+				RelativePath="..\..\other-licenses\zlib\infback.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\inffast.c"
+				RelativePath="..\..\other-licenses\zlib\inffast.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\inflate.c"
+				RelativePath="..\..\other-licenses\zlib\inflate.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\inftrees.c"
+				RelativePath="..\..\other-licenses\zlib\inftrees.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\trees.c"
+				RelativePath="..\..\other-licenses\zlib\trees.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\uncompr.c"
+				RelativePath="..\..\other-licenses\zlib\uncompr.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\zutil.c"
+				RelativePath="..\..\other-licenses\zlib\zutil.c"
 				>
 			</File>
 		</Filter>
@@ -746,47 +746,47 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\crc32.h"
+				RelativePath="..\..\other-licenses\zlib\crc32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\deflate.h"
+				RelativePath="..\..\other-licenses\zlib\deflate.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\inffast.h"
+				RelativePath="..\..\other-licenses\zlib\inffast.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\inffixed.h"
+				RelativePath="..\..\other-licenses\zlib\inffixed.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\inflate.h"
+				RelativePath="..\..\other-licenses\zlib\inflate.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\inftrees.h"
+				RelativePath="..\..\other-licenses\zlib\inftrees.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\mozzconf.h"
+				RelativePath="..\..\other-licenses\zlib\mozzconf.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\trees.h"
+				RelativePath="..\..\other-licenses\zlib\trees.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\zconf.h"
+				RelativePath="..\..\other-licenses\zlib\zconf.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\zlib.h"
+				RelativePath="..\..\other-licenses\zlib\zlib.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\modules\zlib\src\zutil.h"
+				RelativePath="..\..\other-licenses\zlib\zutil.h"
 				>
 			</File>
 		</Filter>
