@@ -82,6 +82,8 @@
  */
 #ifdef _MSC_VER
 
+#define REALLY_INLINE __forceinline
+
     #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#pragma warning(disable:4512) //assignment operator could not be generated

@@ -212,7 +212,6 @@ namespace MMgc
 		/* legacy API */
 		static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128)
 		{
-			GCAssertMsg(false, "Switch to other Init method please");
 			(void)malloc;
 			(void)free;
 			GCHeapConfig props;

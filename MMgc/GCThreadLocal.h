@@ -116,28 +116,36 @@ namespace MMgc
 #else
 
 #ifdef HAVE_PTHREADS
-	template<typename T>
-	class GCThreadLocal
-	{
-	public:
-		GCThreadLocal()
-		{
-			GCAssert(sizeof(T) <= sizeof(void*));
-			pthread_key_create(&tlsId, NULL);
-			pthread_setspecific(tlsId, NULL);
-		}
-		T operator=(T tNew)
-		{
-			pthread_setspecific(tlsId, (const void*)tNew);
-			return tNew;
-		}
-		operator T() const
-		{
-			return (T)pthread_getspecific(tlsId);
-		}
-	private:
-		pthread_key_t tlsId ;
-	};
+    template<typename T>
+    class GCThreadLocal
+    {
+    public:
+        GCThreadLocal()
+        {
+            GCAssert(sizeof(T) <= sizeof(void*));
+            const int r = pthread_key_create(&tlsId, NULL);
+            GCAssert(r == 0);
+            (void)r;
+            // we expect the value to default to zero
+            GCAssert((T)pthread_getspecific(tlsId) == 0);
+        }
+        T operator=(T tNew)
+        {
+            GCAssert(tlsId != 0);
+            const int r = pthread_setspecific(tlsId, (const void*)tNew);
+            GCAssert(r == 0);
+            (void)r;
+            GCAssert((T)pthread_getspecific(tlsId) == tNew);
+            return tNew;
+        }
+        operator T() const
+        {
+            GCAssert(tlsId != 0);
+            return (T)pthread_getspecific(tlsId);
+        }
+    private:
+        pthread_key_t tlsId ;
+    };
 #else	//HAVE_PTHREADS
 	template<typename T>
 	class GCThreadLocal

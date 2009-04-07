@@ -519,6 +519,12 @@ namespace MMgc
 		MMGC_STATIC_ASSERT(sizeof(intptr_t) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);	
 		#endif		
+
+		{
+			GCWorkItem item;
+			MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
+			rememberedStackBottom =  (const void *)((const char *)item.ptr + item._size);
+		}
 	
 		zct.SetGC(this);
 
@@ -1245,6 +1251,8 @@ bail:
 
 	void GC::CleanStack(bool force)
 	{
+        (void)force;
+
 #if defined(_MSC_VER) && defined(_DEBUG)
 		// debug builds poison the stack already
 		(void)force;
@@ -1301,7 +1309,7 @@ bail:
     #endif
 #endif //MMGC_ARM
 
-		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)stackEnter > (char*)stackP)) {
+		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)rememberedStackBottom > (char*)stackP)) {
 			size_t amount = (char*) stackP - (char*)rememberedStackTop;
 			void *stack = alloca(amount);
 			if(stack) {
@@ -1334,14 +1342,6 @@ bail:
 
 	void GCRoot::init(GC* _gc, const void *_object, size_t _size)
 	{
-#ifndef _DEBUG
-		// only do the memset on GCRoot subclasses
-		if(_object == this) {
-			size_t s = _gc->GetGCHeap()->GetFixedMalloc()->Size(this);
-			// being a GCRoot its important we are clean
-			VMPI_memset(this, 0, s);
-		}
-#endif
 		gc = _gc;
 		object = _object;
 		size = _size;
@@ -1791,6 +1791,150 @@ bail:
 		
 		gc->policy.signal(GCPolicyManager::END_ReapZCT);
 	}
+
+#ifdef WIN32
+
+	uintptr_t GC::GetStackTop() const
+	{
+		MEMORY_BASIC_INFORMATION __mib;
+		VirtualQuery(&__mib, &__mib, sizeof(MEMORY_BASIC_INFORMATION));
+		return (uintptr_t)__mib.BaseAddress + __mib.RegionSize;
+	}
+
+#elif defined(SOLARIS)
+
+#ifdef MMGC_SPARC
+#define FLUSHWIN() asm("ta 3"); 
+#else
+#define FLUSHWIN() 
+#endif
+#define MAX_FRAMES 500
+
+	static int validaddr(void * addr) 
+	{
+		static long pagemask = -1;
+		char c;
+		if (pagemask == -1) {
+			pagemask = ~(sysconf(_SC_PAGESIZE) - 1);
+		}
+		addr = (void *)((long)addr & pagemask);
+		if (mincore((char *)addr, 1, &c) == -1 && errno == ENOMEM) {
+			return 0;  /* invalid */
+		} else {
+			return 1;  /* valid */
+		}
+	}  /* end of validaddr */
+
+	pthread_key_t stackTopKey = NULL;
+
+	uintptr_t	GC::GetStackTop() const
+	{
+		if(stackTopKey == NULL)
+			{
+				int res = pthread_key_create(&stackTopKey, NULL);
+				GCAssert(res == 0);
+			}
+
+		void *stackTop = pthread_getspecific(stackTopKey);
+		if(stackTop)
+			return (uintptr_t)stackTop;
+
+		struct frame *sp;
+		int i;
+		int *iptr;
+
+		stack_t st;
+		stack_getbounds(&st);
+		uintptr_t stack_base = (uintptr_t)st.ss_sp + st.ss_size;
+
+		FLUSHWIN();
+
+		sp = (struct frame *)_getfp();
+		stackTop = (void *)sp;
+		for (i = 0; i < MAX_FRAMES && sp && (uintptr_t)sp < stack_base; i++) { 
+			if (!validaddr( sp ) || !validaddr(&sp->fr_savpc) || !sp->fr_savpc ) {
+				break;
+			}
+			stackTop = (void *)sp;
+			sp = ( struct frame * )sp->fr_savfp;
+		}
+		pthread_setspecific(stackTopKey, stackTop);
+		return (uintptr_t)stackTop;
+	}
+#elif defined(AVMPLUS_UNIX) // SOLARIS
+	pthread_key_t stackTopKey = 0;
+
+	uintptr_t GC::GetStackTop() const
+	{
+		if(stackTopKey == 0)
+		{
+#ifdef DEBUG		  
+			int res = 
+#endif
+			  pthread_key_create(&stackTopKey, NULL);
+			GCAssert(res == 0);
+		}
+
+		void *stackTop = pthread_getspecific(stackTopKey);
+		if(stackTop)
+			return (uintptr_t)stackTop;
+
+		size_t sz;
+		void *s_base;
+		pthread_attr_t attr;
+		
+		pthread_attr_init(&attr);
+		// WARNING: stupid expensive function, hence the TLS
+#ifdef HAVE_PTHREAD_NP_H
+		int res = pthread_attr_get_np(pthread_self(),&attr);
+#else // HAVE_PTHREAD_NP_H
+		int res = pthread_getattr_np(pthread_self(),&attr);
+#endif // HAVE_PTHREAD_NP_H
+		GCAssert(res == 0);
+		
+		if(res)
+		{
+			// not good
+			return 0;
+		}
+
+		res = pthread_attr_getstack(&attr,&s_base,&sz);
+		GCAssert(res == 0);
+		pthread_attr_destroy(&attr);
+
+		stackTop = (void*) ((size_t)s_base + sz);
+		// stackTop has to be greater than current stack pointer
+		GCAssert(stackTop > &sz);
+		pthread_setspecific(stackTopKey, stackTop);
+		return (uintptr_t)stackTop;
+		
+	}
+#endif // AVMPLUS_UNIX
+
+#if defined(MMGC_PORTING_API)
+uintptr_t	GC::GetStackTop() const
+{
+	return MMGC_PortAPI_GetStackTop();
+}
+#else
+#if defined(_MAC) || defined(MMGC_MAC_NO_CARBON)
+	uintptr_t GC::GetStackTop() const
+	{
+		return (uintptr_t)pthread_get_stackaddr_np(pthread_self());
+	}
+#endif
+
+#if defined(LINUX) && defined(MMGC_ARM) && !defined(AVMPLUS_UNIX)
+	uintptr_t GC::GetStackTop() const
+	{
+		void* sp;
+		pthread_attr_t attr;
+		pthread_getattr_np(pthread_self(), &attr);
+		pthread_attr_getstackaddr(&attr, &sp);
+		return (uintptr_t)sp;
+	}
+#endif
+#endif /*<<GC_PORTING_API*/
 
 	void GC::gclog(const char *format, ...)
 	{

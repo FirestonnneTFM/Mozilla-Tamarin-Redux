@@ -138,10 +138,13 @@ namespace MMgc
 		virtual ~GCRoot();
 
 		// override new and delete so we can know the objects extents (via FixedMalloc::Size())
-    void *operator new(size_t size)
-    {
-			return GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
-    }
+		void *operator new(size_t size)
+		{
+			void *space = GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+			// GCRoots are auto-scanned so clean them, don't rely on ctors to init the object properly
+			VMPI_memset(space, 0, GCHeap::GetGCHeap()->GetFixedMalloc()->Size(space));
+			return space;
+		}
         
 		void operator delete (void *object)
 		{
@@ -1163,8 +1166,18 @@ namespace MMgc
 
 		void ClearWeakRef(const void *obj);
 
-		const void *GetStackTop() const { return (const void*) GetStackEnter(); }
-		uintptr_t GetStackEnter() const { return stackEnter; }
+		// legacy API that gets physical start of OS thread
+		uintptr_t GetStackTop() const;
+
+		// owner stack refers to the stack that created the GC		
+		uintptr_t GetOwnerStackBottom() const { return (uintptr_t)rememberedStackBottom; }
+
+		uintptr_t GetStackEnter() const 
+		{ 
+			if(stackEnter == 0)
+				return GetStackTop();
+			return stackEnter; 
+		}
 		void SetStackEnter(void *enter);
 
 		// for deciding a tree of things should be scanned from presweep
@@ -1213,6 +1226,7 @@ namespace MMgc
 		// tracked and cleaned.
 		bool stackCleaned;
 		const void *rememberedStackTop;
+		const void *rememberedStackBottom;
 		uintptr_t stackEnter;
 
 		// for external which does thread safe multi-thread AS execution

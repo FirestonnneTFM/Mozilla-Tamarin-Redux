@@ -75,6 +75,12 @@
 
 #include "VMPI.h"
 
+#ifdef __GCC__
+#define REALLY_INLINE inline __attribute__((always_inline))
+#elif !defined(REALLY_INLINE)
+#define REALLY_INLINE inline
+#endif
+
 #if defined(WIN32) && defined(MMGC_64BIT)
 #include <setjmpex.h>
 #else
