@@ -307,7 +307,7 @@ uint64_t VMPI_getPerformanceCounter()
 	struct timeval tv;
 	::gettimeofday(&tv, NULL);
 
-	uint64_t seconds = (uint64_t)(tv.tv_sec * 1000000);
+	uint64_t seconds = (uint64_t)tv.tv_sec * 1000000;
 	uint64_t microseconds = (uint64_t)tv.tv_usec;
 	uint64_t result = seconds + microseconds;
 	

@@ -61,7 +61,7 @@ namespace MMgc
 			// overflow detection
 			if(size+3 < size)
 				return NULL;
-			size = (size+3)&~3;
+
 			if (size <= (size_t)kLargestAlloc) {
 				item = FindSizeClass(size)->Alloc(size);
 			} else {

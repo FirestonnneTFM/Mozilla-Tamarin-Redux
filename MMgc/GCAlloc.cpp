@@ -93,8 +93,6 @@ namespace MMgc
 		GCAssertMsg(GetNumAlloc() == 0, "You have leaks");
 
 		while (m_firstBlock) {
-			if(((uintptr_t)m_firstBlock->bits & 0xfff) == 0)
-				m_gc->GetGCHeap()->Free(m_firstBlock->bits);
 #ifdef _DEBUG
 			// go through every item on the free list and make sure it wasn't written to
 			// after being poisoned.
