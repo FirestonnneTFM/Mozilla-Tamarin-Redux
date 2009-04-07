@@ -48,6 +48,7 @@ sunspider/.*          , sunspider , include , sunspider testsuite
 jsbench/.*            , jsbench   , include , jsbench testsuite
 v8/.*                 , v8        , include , v8 testsuite 
 scimark/.*            , scimark   , include , scimark testsuite
+language/.*           , language  , include , language micro-benchmarks testsuite
 
 canaries/.*           , canaries  , include , canaries testsuite
 .*/canaries/.*        , canaries  , include , canaries testsuite
@@ -78,6 +79,15 @@ sunspider/(as3/|)date-format-xparb.as ,.*       ,skip, contains eval
 #sunspider/(as3/|)string-unpack-code.as,.*       ,skip, too slow: javascript compressor code runs slowly https://bugzilla.mozilla.org/show_bug.cgi?id=409225
 sunspider/(as3/|)string-base64.as ,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
 sunspider/(as3/|)string-tagcloud.as ,.*       ,skip, contains eval
+
+# util file for language tests
+language/string/timetest.as, .*, skip, included in test files
+language/string/(typed/|)append_concat.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+language/string/(typed/|)append_equal_plus.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+language/string/(typed/|)append_plus_equal.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+language/string/(typed/|)indexOf.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+language/string/(typed/|)lastIndexOf.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+language/string/(typed/|)split.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
 
 # util files for v8 tests
 v8/base.as,         .*, skip, included by test files
