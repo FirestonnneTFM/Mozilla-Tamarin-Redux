@@ -50,10 +50,12 @@
 #define WBRC(gc, container, addr, value) gc->writeBarrierRC(container, addr, (const void *) (value))
 
 // declare write barrier
-#define DWB(type) MMgc::WriteBarrier<type>
+// put spaces around the template arg to avoid possible digraph warnings
+#define DWB(type) MMgc::WriteBarrier< type >
 
 // declare an optimized RCObject write barrier
-#define DRCWB(type) MMgc::WriteBarrierRC<type>
+// put spaces around the template arg to avoid possible digraph warnings
+#define DRCWB(type) MMgc::WriteBarrierRC< type >
 
 namespace MMgc
 {

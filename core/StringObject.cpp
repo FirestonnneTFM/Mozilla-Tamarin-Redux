@@ -53,7 +53,14 @@ namespace avmplus
 {
 	// Use this constant for 16 and 32 bit strings of zero length
 	// we do not want any string to contain NULL buffer pointers
-	static const utf32_t zero32 = 0;
+	union Zero
+	{
+		uint32_t u32;
+		wchar u16;
+		uint8_t u8;
+		char c8;
+	};
+	static const Zero k_zero = { 0 };
 
 /////////////////////////// Helpers: Widening //////////////////////////////
 
@@ -248,7 +255,7 @@ namespace avmplus
 		if (buffer == NULL)
 		{
 			len = 0;
-			buffer = (const char*) &zero32;
+			buffer = &k_zero.c8;
 			staticBuf = true;
 		}
 		if (len < 0)
@@ -2486,7 +2493,7 @@ namespace avmplus
 		if (buffer == NULL)
 		{
 			len = 0;
-			buffer = (const utf8_t*) &zero32;
+			buffer = &k_zero.u8;
 			staticBuf = true;
 		}
 		if (len < 0)
@@ -2611,7 +2618,7 @@ decodeUtf8:
 		if (buffer == NULL)
 		{
 			len = 0;
-			buffer = (const wchar*) &zero32;
+			buffer = &k_zero.u16;
 			staticBuf = true;
 		}
 		if (len < 0)
@@ -2707,7 +2714,7 @@ decodeUtf8:
 		if (buffer == NULL)
 		{
 			len = 0;
-			buffer = &zero32;
+			buffer = &k_zero.u32;
 			staticBuf = true;
 		}
 		if (len < 0)

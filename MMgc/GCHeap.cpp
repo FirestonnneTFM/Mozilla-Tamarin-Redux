@@ -1510,9 +1510,9 @@ namespace MMgc
 		for(uint32_t i=0,n=gcManager.getCount() ; i<n; i++) {
 			GC* gc = gcManager.getGC(i);
 #ifdef MMGC_MEMORY_PROFILER
-			fprintf(spyFile,"[mem] GC 0x%p:%s\n", gc, GetAllocationName(gc));
+			fprintf(spyFile,"[mem] GC 0x%p:%s\n", (void*)gc, GetAllocationName(gc));
 #else
-			fprintf(spyFile,"[mem] GC 0x%p\n", gc);
+			fprintf(spyFile,"[mem] GC 0x%p\n", (void*)gc);
 #endif
 			gc->DumpMemoryInfo();
 			gc_bytes_total += gc->GetBytesInUse();

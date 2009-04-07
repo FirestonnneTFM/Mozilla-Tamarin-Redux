@@ -39,40 +39,58 @@
 #ifndef __GCGLOBALNEW__
 #define __GCGLOBALNEW__
 
-#ifdef __GNUC__
-#define REALLY_INLINE inline __attribute__((always_inline))
-#elif _MSVC
-#define REALLY_INLINE __forceinline
+#ifdef MMGC_ENABLE_CPP_EXCEPTIONS
+#include <new>
+#define NEW_THROWS_CLAUSE throw (std::bad_alloc)
+#define DELETE_THROWS_CLAUSE throw ()
 #else
-#define REALLY_INLINE inline
+#define NEW_THROWS_CLAUSE 
+#define DELETE_THROWS_CLAUSE 
 #endif
 
-// Custom new and delete operators
-
 // User-defined operator new.
-REALLY_INLINE void *operator new(size_t size)
+REALLY_INLINE void *operator new(size_t size) NEW_THROWS_CLAUSE
 {
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *space = VMPI_alloc(size);
+	return space;
+#else
 	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+#endif
 }
        
-REALLY_INLINE void *operator new[](size_t size)
+REALLY_INLINE void *operator new[](size_t size) NEW_THROWS_CLAUSE
 {
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *space = VMPI_alloc(size);
+	return space;
+#else
 	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+#endif
 }
        
 // User-defined operator delete.
-REALLY_INLINE void operator delete( void *p)
+REALLY_INLINE void operator delete( void *p) DELETE_THROWS_CLAUSE
 {
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	VMPI_free(p);
+#else
 	MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);
+#endif
 }
        
-REALLY_INLINE void operator delete[]( void *p )
+REALLY_INLINE void operator delete[]( void *p ) DELETE_THROWS_CLAUSE
 {
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	VMPI_free(p);
+#else
 	MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);
+#endif
 }
 
-#ifdef __GNUC__
-#undef REALLY_INLINE
-#endif // __GNUC__
+#ifdef MMGC_ENABLE_CPP_EXCEPTIONS
+#undef NEW_THROWS_CLAUSE
+#undef DELETE_THROWS_CLAUSE
+#endif
 
 #endif // __GCGLOBALNEW__

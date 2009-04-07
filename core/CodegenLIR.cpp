@@ -4878,9 +4878,9 @@ namespace avmplus
 				// 32-bit signed and unsigned values fit in 64-bit registers
 				// so we can promote and simply do a signed 64bit compare
 				LOpcode qcmp = LOpcode(icmp | LIR64);
-				NanoAssert(icmp == LIR_eq && qcmp == LIR_qeq ||
-						   icmp == LIR_lt && qcmp == LIR_qlt ||
-						   icmp == LIR_le && qcmp == LIR_qle);
+				NanoAssert((icmp == LIR_eq && qcmp == LIR_qeq) ||
+						   (icmp == LIR_lt && qcmp == LIR_qlt) ||
+						   (icmp == LIR_le && qcmp == LIR_qle));
 				return binaryIns(qcmp, u2p(lhs), i2p(rhs));
 			#else
 				if (rhs->isconst() && rhs->constval() >= 0)
@@ -4895,9 +4895,9 @@ namespace avmplus
 				// 32-bit signed and unsigned values fit in 64-bit registers
 				// so we can promote and simply do a signed 64bit compare
 				LOpcode qcmp = LOpcode(icmp | LIR64);
-				NanoAssert(icmp == LIR_eq && qcmp == LIR_qeq ||
-						   icmp == LIR_lt && qcmp == LIR_qlt ||
-						   icmp == LIR_le && qcmp == LIR_qle);
+				NanoAssert((icmp == LIR_eq && qcmp == LIR_qeq) ||
+						   (icmp == LIR_lt && qcmp == LIR_qlt) ||
+						   (icmp == LIR_le && qcmp == LIR_qle));
 				return binaryIns(qcmp, i2p(lhs), u2p(rhs));
 			#else
 				if (lhs->isconst() && lhs->constval() >= 0)

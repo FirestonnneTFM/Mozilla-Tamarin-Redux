@@ -40,7 +40,6 @@
 #ifndef __GCObject__
 #define __GCObject__
 
-
 // VC++ wants these declared
 //void *operator new(size_t size);
 //void *operator new[] (size_t size);
@@ -405,7 +404,8 @@ namespace MMgc
 	};
 
 
-#define DRC(_type) MMgc::RCPtr<_type>
+// put spaces around the template arg to avoid possible digraph warnings
+#define DRC(_type) MMgc::RCPtr< _type >
 
 }
 
