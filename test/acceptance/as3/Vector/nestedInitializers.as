@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,64 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   File Name:    nested.as
+   Description:  tests nested Vectors: Vector.<Vector.<int>>
+   *
+   */
+var SECTION="";
+var VERSION = "ECMA_1";
+
+startTest();
+
+writeHeaderToLog( " nested Vector-initializers");
+
+var v1:Vector.<Vector.<int>> = new <Vector.<int>> [
+	new <int>[0,1],
+	new <int>[2,3],
+    new <int>[4,5]];
+AddTestCase("push nested vector.<int>",
+            "0,1,2,3,4,5",
+            v1.toString());
+
+var v3:Vector.<Vector.<String>>=new <Vector.<String>>
+[
+	new <String>['one','two'],
+	new <String>['three','four'],
+	new <String>['five','six'],
+]
+AddTestCase("push nested vector.<String>",
+            "one,two,three,four,five,six",
+            v3.toString());
 
 
-#ifndef __GCTypes__
-#define __GCTypes__
+AddTestCase("push nested vector.<String> as value",
+            "one,two,three,four,five,six",
+				new <Vector.<String>>
+				[
+					new <String>['one','two'],
+					new <String>['three','four'],
+					new <String>['five','six'],
+				]
+			.toString());
 
-#include "VMPI.h"
+var v5:Vector.<Vector.<Vector.<int>>> =
+	new <Vector.<Vector.<int>>>[
+	new <Vector.<int>>[ new <int>[0,1]],
+	new <Vector.<int>>[ new <int>[2,3]],
+	new <Vector.<int>>[ new <int>[4,5]],
+	];
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+AddTestCase("push nested vector.<vector.<int>>",
+            "0,1,2,3,4,5",
+            v5.toString());
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
+AddTestCase("nested vector.<vector.<int>> as value",
+            "0,1,2,3,4,5",
+			new <Vector.<Vector.<int>>>[
+				new <Vector.<int>>[ new <int>[0,1]],
+				new <Vector.<int>>[ new <int>[2,3]],
+				new <Vector.<int>>[ new <int>[4,5]],
+			].toString());
 
-#endif /* __GCTypes__ */
+test();

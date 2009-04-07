@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,72 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   Description:  The elements of this object are converted to strings and
+   these strings are then concatenated, separated by comma
+   characters. The result is the same as if the built-in join
+   method were invoiked for this object with no argument.
+   */
 
+var SECTION = "";
+var VERSION = "AS3";
+startTest();
 
-#ifndef __GCTypes__
-#define __GCTypes__
+writeHeaderToLog( SECTION + " Vector.some()-initializers");
 
-#include "VMPI.h"
-
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
-
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
+function greaterThanTen(item, index, vec):Boolean {
+    if (item > 10) {
+        return true;
+    }
+    return false;
 }
 
-#endif /* __GCTypes__ */
+var errormsg="";
+try {
+  result=new <int>[].some();
+} catch (e) {
+  errormsg=e.toString();
+}
+
+AddTestCase(
+		"some no checker",
+		"ArgumentError: Error #1063",
+		parseError(errormsg,"ArgumentError: Error #1063".length));
+
+var checker2="a string";
+var errormsg="";
+try {
+  result=new<int>[1,2,3].some(checker2);
+} catch (e) {
+  errormsg=e.toString();
+}
+AddTestCase(
+		"some checker not a function",
+		"TypeError: Error #1034",
+		parseError(errormsg,"TypeError: Error #1034".length));
+
+AddTestCase(
+    "some empty vector result",
+    false,
+    new<int>[].some(greaterThanTen));
+    
+AddTestCase(
+    "some vector with no match",
+    false,
+    new<int>[-3000,2,3,4,5,-1,9, 10].some(greaterThanTen));
+    
+AddTestCase(
+    "some vector with match",
+    true,
+    new<int>[-3000,2,3,22,4,5,-1,9, 10, 3].some(greaterThanTen));
+    
+function noReturnValue(item, index, vec) {
+    // do nothing
+}
+
+AddTestCase(
+    "some function with no return value",
+    false,
+    new<String>['asdf','hello','out','there'].some(noReturnValue));
+
+test();

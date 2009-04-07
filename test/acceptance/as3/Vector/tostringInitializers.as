@@ -1,4 +1,4 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -12,15 +12,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine.].
+ * The Original Code is Mozilla Communicator client code, released
+ * March 31, 1998.
  *
  * The Initial Developer of the Original Code is
- * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,24 +36,45 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/**
+   File Name:          tostring.js
+   ECMA Section:       Vector.toString()
+   Description:        The elements of this object are converted to strings
+   and these strings are then concatenated, separated by
+   comma characters.  The result is the same as if the
+   built-in join method were invoiked for this object
+   with no argument.
+   Author:             christine@netscape.com 7-Oct-1997
+   Updated:            dschaffe@adobe.com 1-Nov-2007
+*/
 
-#ifndef __GCTypes__
-#define __GCTypes__
+var SECTION = "";
+var VERSION = "ECMA_1";
+startTest();
+var TITLE   = "Vector.toString-initializers";
 
-#include "VMPI.h"
+writeHeaderToLog( SECTION + " "+ TITLE);
+ 
+AddTestCase(
+	      "new <int>[].toString()",     
+	      "",     
+	      new <int>[].toString() );
+AddTestCase(
+	      "(new Vector.<Boolean>(5)).toString()",    
+	      "false,false,false,false,false",    
+	      (new <Boolean>[false,false,false,false,false,]).toString() );
+AddTestCase(
+	      "(new Vector.<String>(2)).toString()",    
+	      ",",    
+	      (new <String>["","",]).toString() );
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+AddTestCase(  
+	      "small vector toString",  
+	      "1.1,3.14,99.99",  
+	      new<Number>[1.1,3.14,99.99].toString() );
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
-
-#endif /* __GCTypes__ */
+AddTestCase(  
+	      "default Number values",
+	      "NaN,NaN",
+	      new<Number>[NaN,NaN,].toString());
+test();

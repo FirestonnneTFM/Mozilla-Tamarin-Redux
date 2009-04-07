@@ -52,7 +52,7 @@ namespace MMgc
 	 *
 	 * The implementation of GCAllocObject is platform-dependent.
 	 */
-	class MMGC_API GCAllocObject
+	class GCAllocObject
 	{
 	public:
 		void* operator new (size_t size);

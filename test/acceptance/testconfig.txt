@@ -49,9 +49,9 @@ util/shell_ats, .*, skip, shell file for ats media creation
 as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile-tvm.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
 
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*Ojit  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-es4/vector/nonindexproperty:index -6.*          , [^ppc].*(Ojit|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(Ojit|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*Dforcemir   , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-es4/vector/nonindexproperty:index -6.*          , .*(Dforcemir|diff)   , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*          , .*(Dforcemir|diff)   , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 # full run for windows mobile - Dell Axim
 mops/.*                                                          ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
@@ -121,14 +121,9 @@ ecma3/FunctionObjects/e15_3_2_1_1_rt , .*diff , expectedfail, known issue Object
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 
 
-# ppc64 debugger builds failing test suite
-# https://bugzilla.mozilla.org/show_bug.cgi?id=483649
-ecma3/TypeConversion/e9_3:Number\(false\),  ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
-ecma3/TypeConversion/e9_3:Number\(0\),      ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
-ecma3/Types/e8_5:var s:Number = 'string',   ppc64-mac-tvm-(release|debug)debugger , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=483649
-
-
 # intermittent failures on a number of platforms most recently win32
 # https://bugzilla.mozilla.org/show_bug.cgi?id=484483
 ecma3/Statements/eregress_74474_002, x86-win-tvm.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=484483
 ecma3/Statements/eregress_74474_003, x86-win-tvm.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=484483
+
+as3/Vector/lastindexofInitializers, (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=487253

@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,33 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   Description:
+   15.4.5.2 length
+   The length property of this Array object is always numerically greater
+   than the name of every property whose name is an array index.
+*/
+
+var SECTION = "15.4.5.2-1";
+var VERSION = "ECMA_1";
+startTest();
+var TITLE   = "Vector.length - initializers";
+
+writeHeaderToLog( SECTION + " "+ TITLE);
 
 
-#ifndef __GCTypes__
-#define __GCTypes__
+AddTestCase(	"length of empty vector",
+		0,
+		new <Object>[].length);
 
-#include "VMPI.h"
+AddTestCase(	"length of initialized vector of size 9",
+		9,
+		new <int>[1,2,3,4,5,6,7,8,9].length);
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+AddTestCase(	"vector initializer is not-fixed size",
+		false,
+		new <int>[1,2,3,4,5,6,7,8,9].fixed);
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
 
-#endif /* __GCTypes__ */
+test();
+

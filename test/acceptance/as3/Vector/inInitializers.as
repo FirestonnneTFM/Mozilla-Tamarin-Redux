@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,60 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+/**
+   File Name:    in.es
+   Description:  test 'in' keyword.
+    the exception is a current issue with properties defined in the prototype.
+   *
+   */
 
+var SECTION = " ";
+var VERSION = "AS3";
+startTest();
+writeHeaderToLog( SECTION + " Vector in statement");
 
-#ifndef __GCTypes__
-#define __GCTypes__
+AddTestCase(    "in value valid index",
+		true,
+		(0 in new <int>["zero","one","two","three","four","five"]));
+AddTestCase(    "in value for empty vector",
+		false,
+		(0 in new <*>[]));
 
-#include "VMPI.h"
+AddTestCase(    "in value valid index does not exist",
+		false,
+		(6 in new <*>[]));
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+AddTestCase(    "in value valid index in string form",
+		true,
+		("2" in new <int>["zero","one","two","three","four","five"]));
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
+err1="no exception";
+try {
+AddTestCase(    "in value is push function index ",
+		true,
+		("push" in new <*>[]));
+AddTestCase(    "in value is concat function index ",
+		true,
+		("concat" in new <*>[]));
+AddTestCase(    "in value negative number index ",
+		false,
+		(-2 in new <*>[]));
+AddTestCase(    "in value decimal index",
+		false,
+		(1.1 in new <*>[]));
+AddTestCase(    "in value decimal in string index",
+		false,
+		("1.1" in new <*>[]));
+AddTestCase(    "in value valid string",
+		false,
+		("string" in new <*>[]));
+} catch(e) {
+  err1=e.toString();
+  AddTestCase(    "in throws exception for invalid vector indexes",
+                  "no exception",
+                  err1);
 }
 
-#endif /* __GCTypes__ */
+test();
+

@@ -228,6 +228,18 @@ class AbcEmitter
 					w.writeU30(0);
 					// w.write(0); //  TODO: write vkind when vindex !0
 				break;
+			case TRAIT_Method:
+			case TRAIT_Function:
+			case TRAIT_Getter:
+			case TRAIT_Setter:
+
+				if (t.hasAttr("disp_id"))
+					w.writeU30(t.getIntAttr("disp_id"));
+				else
+					w.writeU30(0);
+
+				w.writeU30(core.translateImmediate(t.getAttr("method_id")));
+				break;
 			default:
 				throw new IllegalArgumentException("Unknown trait kind " + t.getKind());
 			}

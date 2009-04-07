@@ -41,8 +41,8 @@
 
 namespace MMgc
 {
-	MMGC_API void PrintStackTrace(const void *item);
-	MMGC_API const char* GetAllocationName(const void *obj);
+	void PrintStackTrace(const void *item);
+	const char* GetAllocationName(const void *obj);
 
 #ifdef MMGC_MEMORY_PROFILER
 
@@ -51,9 +51,9 @@ namespace MMgc
 	
 	class StackTrace;
 
-	MMGC_API void SetMemTag(const char *memtag);
-	MMGC_API void SetMemType(const void *memtype);
-	MMGC_API void PrintStackTraceByTrace(StackTrace *trace);
+	void SetMemTag(const char *memtag);
+	void SetMemType(const void *memtype);
+	void PrintStackTraceByTrace(StackTrace *trace);
 
 	class GCStackTraceHashtable : public GCHashtable
 	{
@@ -109,17 +109,18 @@ namespace MMgc
 	/**
 	* Manually set me, for special memory not new/deleted, like the code memory region
 	*/
-	MMGC_API void ChangeSizeForObject(const void *object, int size);
+	void ChangeSizeForObject(const void *object, int size);
 
 	/**
 	* How much extra size does DebugDecorate need?
 	*/
-	MMGC_API size_t DebugSize();
+	size_t DebugSize();
 
 	/**
 	* decorate memory with debug information, return pointer to memory to return to caller
 	*/
-	MMGC_API void DebugDecorate(const void *item, size_t size);
+	void DebugDecorate(const void *item, size_t size);
+	
 	/** 
 	* Given a pointer to user memory do debug checks and return pointer to real memory
 	*/

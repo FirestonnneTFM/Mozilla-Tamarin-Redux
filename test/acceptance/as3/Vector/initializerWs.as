@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,25 +34,51 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   File Name:    initializerWs.as
+   Description:  
+     Test whitespace behavior of Vector initializers.
+*/
+var SECTION="";
+var VERSION = "ECMA_1";
+
+startTest();
+
+writeHeaderToLog( " Vector-initializers-whitespace");
+
+var x:Vector.<int> = 
 
 
-#ifndef __GCTypes__
-#define __GCTypes__
+ new
+  <
+    int
+  >
+  [
+     1
+     ,
+     2
+     ,
+     3
+  ];
 
-#include "VMPI.h"
+AddTestCase("spraddled initializer",
+		"1,2,3",
+		x.toString());
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
+var v:Vector.<XML> = new <  XML
+>
+[
+  <myXml>
+  <test></test>
+  </myXml>,
+  <body><item1>
+  </item1><item2 title="title">
+  </item2></body>
+]
+;
 
-namespace MMgc
-{
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
+AddTestCase("spraddled initializer using xml",
+  '<myXml>  <test/></myXml>,<body>  <item1/>  <item2 title="title"/></body>',
+  v.toString().split('\n').join(''));
 
-#endif /* __GCTypes__ */
+test();
