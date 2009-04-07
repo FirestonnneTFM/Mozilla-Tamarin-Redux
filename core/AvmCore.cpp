@@ -864,12 +864,12 @@ return the result of the comparison ToPrimitive(x) == y.
 						if (info && info->isNative()) 
 							continue;
 
-#ifdef AVMPLUS_WORD_CODE
-						ExceptionHandlerTable* exceptions = info ? info->word_code_exceptions() : NULL;
-#else
-						ExceptionHandlerTable* exceptions = info ? info->abc_exceptions() : NULL;
-#endif
-						if (exceptions != NULL && callStackNode->eip() && *callStackNode->eip())
+						// Note: we only care if the info actually has an exception handler or not...
+						// if WORD_CODE is enabled and this function is jitted, info->word_code_exceptions() will
+						// be null even if we have an exception handler. So always look at info->abc_exceptions()
+						// since it is (currently) always correct.
+						const bool hasExceptionHandler = info && info->abc_exceptions() != NULL;
+						if (hasExceptionHandler && callStackNode->eip() && *callStackNode->eip())
 						{
 							// Check if this particular frame of the callstack
 							// is going to catch the exception.
