@@ -82,12 +82,6 @@ sunspider/(as3/|)string-tagcloud.as ,.*       ,skip, contains eval
 
 # util file for language tests
 language/string/timetest.as, .*, skip, included in test files
-language/string/(typed/|)append_concat.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
-language/string/(typed/|)append_equal_plus.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
-language/string/(typed/|)append_plus_equal.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
-language/string/(typed/|)indexOf.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
-language/string/(typed/|)lastIndexOf.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
-language/string/(typed/|)split.as, .*, skip, shell crashing creating large strings https://bugzilla.mozilla.org/show_bug.cgi?id=483783
 
 # util files for v8 tests
 v8/base.as,         .*, skip, included by test files
