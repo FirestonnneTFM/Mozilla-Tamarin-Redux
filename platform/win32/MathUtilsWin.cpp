@@ -294,6 +294,7 @@ namespace avmplus
 
 #ifdef X86_MATH
 	// utility function for mod
+	#pragma warning ( disable : 4740 ) // flow in or out of inline asm code suppresses global optimization
 	static double modInternal(double x, double y)
 	{
 		_asm    fld [y];
@@ -306,6 +307,7 @@ namespace avmplus
 		_asm _emit 0xDD; // fstp st(1);
 		_asm _emit 0xD9;
 	}
+	#pragma warning ( default : 4740 )
 #elif defined(UNDER_CE)
 	double modInternal(double x, double y) { return ::fmod(x, y); };
 #else

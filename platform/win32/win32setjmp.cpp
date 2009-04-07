@@ -66,6 +66,9 @@ extern "C"
 	// Disable the "ebp was modified" warning.
 	// We really do want to modify it.
     #pragma warning ( disable : 4731 )
+    
+    // flow in or out of inline asm code suppresses global optimization
+	#pragma warning ( disable : 4740 )
 
 	__declspec(noreturn)
 	void __cdecl longjmp(jmp_buf jmpbuf, int result)
@@ -83,4 +86,6 @@ extern "C"
 			jmp DWORD PTR [edx+20]
 		}
 	}
+
+	#pragma warning ( default : 4740 )		
 }
