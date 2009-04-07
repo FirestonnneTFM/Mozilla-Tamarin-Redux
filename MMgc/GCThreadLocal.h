@@ -131,7 +131,6 @@ namespace MMgc
         }
         T operator=(T tNew)
         {
-            GCAssert(tlsId != 0);
             const int r = pthread_setspecific(tlsId, (const void*)tNew);
             GCAssert(r == 0);
             (void)r;
@@ -140,7 +139,6 @@ namespace MMgc
         }
         operator T() const
         {
-            GCAssert(tlsId != 0);
             return (T)pthread_getspecific(tlsId);
         }
     private:
