@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,87 +34,50 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   File Name:    indexof.es
+   Description:  indexOf(object,value,from=...)
+     compares value with every vector element of object in increasing numerical index order, starting at the 
+     index from, stopping when an vector lement is equial to value by the === operator, From is rounded toward zero 
+     before use.  If from is negative, it is treated as object.length+from, returns vector index from first value or -1 
+     if no such element is found.
+   *
+   */
 
+var SECTION = ""
+var VERSION = "ECMA_1";
 
-#include "avmplus.h"
+startTest();
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
+writeHeaderToLog( SECTION + " Vector.indexOf()");
 
-#if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
-	void AVMPlusCustomDebugMessageHandler(const char *message);
-#endif
+AddTestCase(	"indexOf empty vector",
+		-1,
+		new <int>[].indexOf(0));
 
-namespace avmplus
-{
-	#ifdef DARWIN
-	void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
-	{
-#ifdef _DEBUG
-		char buf[4096];
-		va_list args;
-		va_start(args, format);
+AddTestCase(	"indexOf object not found",
+		-1,
+		new <int>[0,1,2,3,4,5,6,7,8,9].indexOf(10));
 
-		vsprintf(buf, format, args);
-		va_end(args);
-		AvmDebugMsg(buf, debuggerBreak);
-#else
-		(void)debuggerBreak;
-		(void)format;
-#endif
-	}
+AddTestCase(	"indexOf single match found",
+		4,
+		new <int>[0,1,2,3,4,5,6,7,8,9].indexOf(4));
 
-	void AvmDebugMsg(const char* p, bool debugBreak)
-	{
-#ifdef _DEBUG
-        #if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
-            AVMPlusCustomDebugMessageHandler(p);
-		#else
-			fprintf(stderr, "%s\n", p);
-		#endif
-			if (debugBreak)
-				abort();
-#else
-		(void)p;
-		(void)debugBreak;
-#endif
-	}	
-	#else
-	void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
-	{
-#ifdef _DEBUG
-		char buf[4096];
-		va_list args;
-		va_start(args, format);
+AddTestCase(	"indexOf first match found",
+		4,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4));
 
-		vsprintf(buf, format, args);
-		va_end(args);
-		if(debuggerBreak)
-		{
-			AvmDebugMsg(buf, debuggerBreak);
-		}
-#else
-		(void)debuggerBreak;
-		(void)format;
-#endif
-	}
+AddTestCase(	"indexOf first match found setting start parameter",
+		4,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,2));
 
-	void AvmDebugMsg(const char* p, bool debugBreak)
-	{
-#ifdef _DEBUG
-		char buf[256];
-		VMPI_strcpy(buf, p);
-		::CopyCStringToPascal(buf, (StringPtr)buf);
-		if(debugBreak)
-		{
-			DebugStr((StringPtr) buf);
-			exit(1);	// ensure we die
-		}
-#else
-		(void)p;
-		(void)debugBreak;
-#endif
-	}
-	#endif
-}
+AddTestCase(	"indexOf start parameter greater than vector length",
+		-1,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,100));
+
+AddTestCase(	"indexOf start parameter negative",
+		-1,
+		new <int>[0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9].indexOf(4,-1));
+
+test();
+

@@ -50,7 +50,7 @@
 namespace MMgc
 {	
 	template<typename T, int defSize=512>
-	class MMGC_API GCStack
+	class GCStack
 	{
 		enum { kDefSize = defSize };
 	public:

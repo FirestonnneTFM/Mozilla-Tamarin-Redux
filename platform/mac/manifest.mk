@@ -37,6 +37,5 @@
 
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/../unix/MathUtilsUnix.cpp \
-  $(curdir)/NativeFunctionMac.cpp \
   $(curdir)/../unix/OSDepUnix.cpp \
   $(NULL)

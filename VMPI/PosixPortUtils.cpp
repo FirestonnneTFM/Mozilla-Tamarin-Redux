@@ -35,7 +35,7 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "avmshell.h"
+#include "avmplus.h"
 
 #include <sys/time.h>
 #include <math.h> 
@@ -44,6 +44,7 @@
 	#include <time.h>
 #endif // AVMPLUS_UNIX
 
+#include <sys/mman.h>
 
 #define kMsecPerDay     86400000
 #define kMsecPerHour    3600000
@@ -135,5 +136,37 @@ void VMPI_free(void* ptr)
 
 void VMPI_Log(const char* message)
 {
-	avmshell::Platform::GetInstance()->logMessage(message);
+	printf("%s",message);
+}
+
+/**
+ * SetPageProtection changes the page access protections on a block of pages,
+ * to make JIT-ted code executable or not.
+ *
+ * If executableFlag is true, the memory is made executable and read-only.
+ *
+ * If executableFlag is false, the memory is made non-executable and
+ * read-write.
+ */
+void VMPI_setPageProtection(void *address,
+							size_t size,
+							bool executableFlag,
+							bool writeableFlag)
+{
+  // mprotect requires that the addresses be aligned on page boundaries
+  void *endAddress = (void*) ((char*)address + size);
+  void *beginPage = (void*) ((size_t)address & ~0xFFF);
+  void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
+  size_t sizePaged = (size_t)endPage - (size_t)beginPage;
+  
+  int flags = PROT_READ;
+  if (executableFlag) {
+	flags |= PROT_EXEC;
+  }
+  if (writeableFlag) {
+	flags |= PROT_WRITE;
+  }
+  int retval = mprotect(beginPage, sizePaged, flags);
+  AvmAssert(retval == 0);
+  (void)retval;
 }

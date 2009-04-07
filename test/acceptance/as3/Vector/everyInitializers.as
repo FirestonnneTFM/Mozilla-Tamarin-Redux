@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2007-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,37 +34,59 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+/**
+   File Name:    every.es
+   Description:  every(object,checker,thisObj=)
+     calls checker on every Vector element of object in increasing numerical index order, stopping
+     as soon as any call returns false.
+     checker is called with three arguments: the property value, the property index
+     and the object itself.  The thisobj is used as the this object in the call.
+     returns true if all the calls to checker returned true values, otherwise it returns false.
+   *
+   */
+var SECTION="";
+var VERSION = "ECMA_1";
 
-#include <stddef.h>
+startTest();
 
-#include "avmplus.h"
+writeHeaderToLog( " Vector.every()-using-initializers");
 
-namespace avmplus
-{
-	/**
-	 * call a native method using powerpc calling conventions.
-	 * we use the traits of the function to figure out what native types
-	 * to convert to, as follows:
-	 *
-	 *  AS type         C++ type
-     *  -------         --------
-	 *  Void            void
-     *  Object          Atom
-	 *  Boolean         bool      (unsigned 1bit)
-	 *  int             int       (signed 32bit)
-	 *  uint            unsigned  (unsigned 32bit)
-	 *  Number          double    (float 64bit)
-	 *  String          String*
-	 *  Class           ClassClosure*
-	 *  MovieClip       MovieClipObject*   (similar for any other class)
-	 *
-	 * The PowerPC uses a standard calling convention with registers
-	 * r3-r10 used for the first 8 non-floating point arguments,
-	 * from left to right.  Floating point registers f1-f13 are used
-	 * for the first 13 floating point arguments.
-	 * The return value is placed in r3 (non-FP) or f1 (FP).
-	 *
-	 * All arguments are pushed on the stack.  
-	 *
-	 */
+function checker1(value,index,obj):Boolean {
+  msg+="checker1("+value+","+index+",["+obj+"])";
+  if (value==0)
+    return false;
+  return true;
 }
+function checker3(value,index,obj):Boolean {
+  msg+=this.message;
+  return true;
+}
+
+var msg="";
+AddTestCase(	"every empty Vector",
+		true,
+		new <int>[].every(checker1));
+
+var msg="";
+AddTestCase(	"every small Vector returns true",
+		true,
+		new <int>[1,2,3].every(checker1));
+
+AddTestCase(	"every small array check function",
+		"checker1(1,0,[1,2,3])checker1(2,1,[1,2,3])checker1(3,2,[1,2,3])",
+		msg);
+
+var msg="";
+AddTestCase(    "every small array returns false on 0",
+                false,
+                new <int>[2,1,0].every(checker1));
+
+var msg="";
+var thisobj=new Object();
+thisobj.message="object";
+new <int>[1,2,3,4,5,].every(checker3,thisobj);
+AddTestCase(	"every small array with a specified this object",
+		"objectobjectobjectobjectobject",
+		msg);
+
+test();
