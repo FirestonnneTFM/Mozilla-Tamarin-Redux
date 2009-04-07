@@ -68,7 +68,7 @@ namespace MMgc
 	/**
 	 * Baseclass for GC managed objects that aren't finalized
 	 */
-	class MMGC_API GCObject
+	class GCObject
 	{
 	public:
 		static void *operator new(size_t size, GC *gc, size_t extra = 0)
@@ -99,7 +99,7 @@ namespace MMgc
 	 * @note This class does not provide operator new/delete: derive from GCFinalizedObject
 	 *       or GCFinalizedObjectOptIn to provide correct handling of "new Class"
 	 */
-	class MMGC_API GCFinalizable
+	class GCFinalizable
 	{
 	public:
 		virtual ~GCFinalizable() { }
@@ -108,7 +108,7 @@ namespace MMgc
 	/**
 	 *	Baseclass for GC managed objects that are finalized 
 	 */
-	class MMGC_API GCFinalizedObject : public GCFinalizable
+	class GCFinalizedObject : public GCFinalizable
 	//: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
 	// the most base class (GCObject) not having any virtual methods)
 	{
@@ -122,7 +122,7 @@ namespace MMgc
 	/**
 	 *	Baseclass for GC managed objects that are finalized 
 	 */
-	class MMGC_API GCFinalizedObjectOptIn : public GCFinalizedObject
+	class GCFinalizedObjectOptIn : public GCFinalizedObject
 	//: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
 	// the most base class (GCObject) not having any virtual methods)
 	{
@@ -131,7 +131,7 @@ namespace MMgc
 		static void operator delete (void *gcObject);
 	};
 
-	class MMGC_API RCObject : public GCFinalizedObject
+	class RCObject : public GCFinalizedObject
 	{
 		friend class GC;
 	public:

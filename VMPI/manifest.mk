@@ -11,14 +11,15 @@
 # for the specific language governing rights and limitations under the
 # License.
 #
-# The Original Code is [Open Source Virtual Machine].
+# The Original Code is [Open Source Virtual Machine.].
 #
 # The Initial Developer of the Original Code is
 # Adobe System Incorporated.
-# Portions created by the Initial Developer are Copyright (C) 2005-2006
+# Portions created by the Initial Developer are Copyright (C) 2006-2008
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
+#   Adobe AS3 Team
 #
 # Alternatively, the contents of this file may be used under the terms of
 # either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,29 +36,39 @@
 # ***** END LICENSE BLOCK *****
 
 ifeq (windows,$(TARGET_OS))
-MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/WinDebugUtils.cpp \
+  $(curdir)/WinPortUtils.cpp \
   $(curdir)/MMgcPortWin.cpp \
   $(curdir)/SpinLockWin.cpp \
   $(NULL)
 endif
 
 ifeq (darwin,$(TARGET_OS))
-MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/MacDebugUtils.cpp \
+  $(curdir)/PosixPortUtils.cpp \
   $(curdir)/MMgcPortMac.cpp \
   $(curdir)/SpinLockMac.cpp \
   $(NULL)
 endif
 
 ifeq (linux,$(TARGET_OS))
-MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/PosixPortUtils.cpp \
+  $(curdir)/UnixDebugUtils.cpp \
   $(curdir)/MMgcPortUnix.cpp \
   $(curdir)/SpinLockUnix.cpp \
   $(NULL)
 endif
 
 ifeq (sunos,$(TARGET_OS))
-MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+shell_CXXSRCS := $(shell_CXXSRCS) \
+  $(curdir)/PosixPortUtils.cpp \
+  $(curdir)/UnixDebugUtils.cpp \
   $(curdir)/MMgcPortUnix.cpp \
   $(curdir)/SpinLockUnix.cpp \
   $(NULL)
 endif
+
+

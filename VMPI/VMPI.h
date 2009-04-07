@@ -185,18 +185,10 @@ typedef uintptr_t	uintptr;
 typedef intptr_t	sintptr;
 
 typedef uint8_t		byte;
-};
+}
 /* wchar is our version of wchar_t, since wchar_t is different sizes
  on different platforms, but we want to use UTF-16 uniformly. */
 typedef uint16_t wchar;
-
-// not ported or needed elsewhere (yet!)
-#ifdef WIN32
-void VMPI_WriteOnNamedSignal(const char *name, uint32_t *addr);
-void *VMPI_OpenAndConnectToNamedPipe(const char *pipe);
-FILE *VMPI_HandleToStream(void *handle);
-void VMPI_CloseNamedPipe(void *handle);
-#endif
 
 /**
 * This method should return the difference in milliseconds between local time and UTC
@@ -324,6 +316,17 @@ extern bool			VMPI_commitMemory(void* address, size_t size);
 * @see VMPI_CommitMemory()
 */
 extern bool			VMPI_decommitMemory(char *address, size_t size);
+
+/**
+ * SetPageProtection changes the page access protections on a block of pages,
+ * to make JIT-ted code executable or not.
+ *
+ * If executableFlag is true, the memory is made executable and read-only.
+ *
+ * If executableFlag is false, the memory is made non-executable and
+ * read-write.
+ */
+extern void VMPI_setPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
 
 /**
 * This method is used to allocate a block of memory with the base address aligned to the system page size

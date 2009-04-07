@@ -50,7 +50,7 @@ namespace MMgc
 	 * FixedAllocLarge allocator which will allocate multiple
 	 * pages at a time to minimize waste.
 	 */
-	class MMGC_API FixedAlloc : public GCAllocObject
+	class FixedAlloc : public GCAllocObject
 	{
 		friend class FixedMalloc;
 		friend class FastAllocator;

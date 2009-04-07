@@ -37,15 +37,15 @@
 INCLUDES += \
   -I$(topsrcdir) \
   -I$(topsrcdir)/MMgc \
-  -I$(topsrcdir)/MMgc/platform \
   -I$(topsrcdir)/core \
   -I$(topsrcdir)/pcre \
   -I$(topsrcdir)/eval \
   -I$(topsrcdir)/platform \
+  -I$(topsrcdir)/VMPI \
   $(NULL)
 
+$(call RECURSE_DIRS,VMPI)
 $(call RECURSE_DIRS,MMgc)
-$(call RECURSE_DIRS,MMgc/platform)
 
 ifdef ENABLE_TAMARIN
 $(call RECURSE_DIRS,core pcre vprof)

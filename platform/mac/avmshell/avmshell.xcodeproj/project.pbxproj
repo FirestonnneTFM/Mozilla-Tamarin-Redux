@@ -328,7 +328,6 @@
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BB29A10F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
-		3F4F95590F6036CD009D9F22 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
@@ -340,18 +339,19 @@
 		3FDDC5480F60A09D00E29821 /* GCDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5460F60A09D00E29821 /* GCDebug.cpp */; };
 		3FDDC54B0F60A0B600E29821 /* GCLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5490F60A0B600E29821 /* GCLog.cpp */; };
 		3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5490F60A0B600E29821 /* GCLog.cpp */; };
-		3FDDC54F0F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
-		3FDDC5500F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */; };
-		3FFDEC670F69A52C00E510AB /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */; };
-		3FFDEC680F69A52C00E510AB /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */; };
-		3FFDEC690F69A52C00E510AB /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */; };
-		3FFDEC6A0F69A52C00E510AB /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */; };
 		3FFDEC6D0F69A54F00E510AB /* GCAllocObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */; };
 		3FFDEC6E0F69A54F00E510AB /* GCAllocObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */; };
 		D940B6770F61C60300E72086 /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
-		D940B67A0F61C61000E72086 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */; };
 		D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		D940B67E0F61C62B00E72086 /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
+		D94236960F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
+		D94236970F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */; };
+		D94236980F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
+		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
+		D942369A0F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */; };
+		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
+		D94236BC0F8ACBD300F97706 /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */; };
+		D94236BD0F8ACBD400F97706 /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -690,7 +690,7 @@
 		079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_avmplus_basics.cpp; path = ../../../extensions/ST_avmplus_basics.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_avmplus_peephole.cpp; path = ../../../extensions/ST_avmplus_peephole.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_basics.cpp; path = ../../../extensions/ST_mmgc_basics.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9C40F3A8BD90031D1B4 /* VMPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VMPI.h; path = ../../VMPI.h; sourceTree = SOURCE_ROOT; };
+		079DF9C40F3A8BD90031D1B4 /* VMPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VMPI.h; path = ../../../VMPI/VMPI.h; sourceTree = SOURCE_ROOT; };
 		079DFA880F3A96BD0031D1B4 /* armbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armbuild.h; path = ../../../MMgc/armbuild.h; sourceTree = SOURCE_ROOT; };
 		079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FixedAlloc.cpp; path = ../../../MMgc/FixedAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA8A0F3A96BD0031D1B4 /* FixedAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FixedAlloc.h; path = ../../../MMgc/FixedAlloc.h; sourceTree = SOURCE_ROOT; };
@@ -754,16 +754,10 @@
 		079DFC970F3AB9640031D1B4 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		07A8D2DD0F5EEA2B0005E66C /* OOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OOM.h; path = ../../../MMgc/OOM.h; sourceTree = SOURCE_ROOT; };
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
-		07DA49DA0F80C8BC007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/platform/manifest.mk; sourceTree = SOURCE_ROOT; };
-		07DA49DB0F80C8BC007939FD /* MMgcPortUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortUnix.cpp; path = ../../../MMgc/platform/MMgcPortUnix.cpp; sourceTree = SOURCE_ROOT; };
-		07DA49DC0F80C8BC007939FD /* MMgcPortWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortWin.cpp; path = ../../../MMgc/platform/MMgcPortWin.cpp; sourceTree = SOURCE_ROOT; };
-		07DA49DD0F80C8BC007939FD /* SpinLockUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockUnix.cpp; path = ../../../MMgc/platform/SpinLockUnix.cpp; sourceTree = SOURCE_ROOT; };
-		07DA49DE0F80C8BC007939FD /* SpinLockWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockWin.cpp; path = ../../../MMgc/platform/SpinLockWin.cpp; sourceTree = SOURCE_ROOT; };
 		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
-		3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../shell/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BC70F54B223009A93FE /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../../shell/Platform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC80F54B223009A93FE /* PosixFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixFile.cpp; path = ../../../shell/PosixFile.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BC90F54B223009A93FE /* PosixFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PosixFile.h; path = ../../../shell/PosixFile.h; sourceTree = SOURCE_ROOT; };
@@ -777,12 +771,21 @@
 		3FDDC5460F60A09D00E29821 /* GCDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCDebug.cpp; path = ../../../MMgc/GCDebug.cpp; sourceTree = SOURCE_ROOT; };
 		3FDDC5490F60A0B600E29821 /* GCLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCLog.cpp; path = ../../../MMgc/GCLog.cpp; sourceTree = SOURCE_ROOT; };
 		3FDDC54A0F60A0B600E29821 /* GCLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCLog.h; path = ../../../MMgc/GCLog.h; sourceTree = SOURCE_ROOT; };
-		3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../shell/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
-		3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortMac.cpp; path = ../../../MMgc/platform/MMgcPortMac.cpp; sourceTree = SOURCE_ROOT; };
-		3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockMac.cpp; path = ../../../MMgc/platform/SpinLockMac.cpp; sourceTree = SOURCE_ROOT; };
 		3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCAllocObject.cpp; path = ../../../MMgc/GCAllocObject.cpp; sourceTree = SOURCE_ROOT; };
 		3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCSpinLock.h; path = ../../../MMgc/GCSpinLock.h; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
+		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
+		D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortMac.cpp; path = ../../../VMPI/MMgcPortMac.cpp; sourceTree = SOURCE_ROOT; };
+		D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../VMPI/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
+		D942369C0F8ACB0600F97706 /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../VMPI/manifest.mk; sourceTree = SOURCE_ROOT; };
+		D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortUnix.cpp; path = ../../../VMPI/MMgcPortUnix.cpp; sourceTree = SOURCE_ROOT; };
+		D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortWin.cpp; path = ../../../VMPI/MMgcPortWin.cpp; sourceTree = SOURCE_ROOT; };
+		D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockMac.cpp; path = ../../../VMPI/SpinLockMac.cpp; sourceTree = SOURCE_ROOT; };
+		D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockUnix.cpp; path = ../../../VMPI/SpinLockUnix.cpp; sourceTree = SOURCE_ROOT; };
+		D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockWin.cpp; path = ../../../VMPI/SpinLockWin.cpp; sourceTree = SOURCE_ROOT; };
+		D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UnixDebugUtils.cpp; path = ../../../VMPI/UnixDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
+		D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinDebugUtils.cpp; path = ../../../VMPI/WinDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
+		D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinPortUtils.cpp; path = ../../../VMPI/WinPortUtils.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1103,13 +1106,11 @@
 				079DF9640F3A898A0031D1B4 /* FileInputStream.cpp */,
 				079DF9650F3A898A0031D1B4 /* FileInputStream.h */,
 				079DF9660F3A898A0031D1B4 /* genericzlib.h */,
-				3FDDC54E0F60A0DB00E29821 /* MacDebugUtils.cpp */,
 				3F5B2BC70F54B223009A93FE /* Platform.h */,
 				3F5B2BC80F54B223009A93FE /* PosixFile.cpp */,
 				3F5B2BC90F54B223009A93FE /* PosixFile.h */,
 				3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */,
 				3F5B2BCB0F54B223009A93FE /* PosixPartialPlatform.h */,
-				3F4F95580F6036CD009D9F22 /* PosixPortUtils.cpp */,
 				079DF98C0F3A89FD0031D1B4 /* Profiler.h */,
 				079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */,
 				079DF9920F3A8A320031D1B4 /* SamplerScript.h */,
@@ -1203,7 +1204,6 @@
 			children = (
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
-				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
 			);
 			name = platform;
 			sourceTree = "<group>";
@@ -1229,7 +1229,6 @@
 		079DFA860F3A965C0031D1B4 /* mmgc */ = {
 			isa = PBXGroup;
 			children = (
-				3FFDEC640F69A50F00E510AB /* platform */,
 				079DFA880F3A96BD0031D1B4 /* armbuild.h */,
 				079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */,
 				079DFA8A0F3A96BD0031D1B4 /* FixedAlloc.h */,
@@ -1337,6 +1336,7 @@
 				079DF7B30F3A86F20031D1B4 /* nanojit */,
 				079DF9C20F3A8BC10031D1B4 /* platform */,
 				079DF99C0F3A8A830031D1B4 /* selftest */,
+				D94236920F8ACAAD00F97706 /* VMPI */,
 				079DF7B40F3A87020031D1B4 /* shell */,
 				079DF9710F3A89910031D1B4 /* shell_builtins */,
 			);
@@ -1352,25 +1352,31 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		3FFDEC640F69A50F00E510AB /* platform */ = {
-			isa = PBXGroup;
-			children = (
-				3FFDEC650F69A52C00E510AB /* MMgcPortMac.cpp */,
-				07DA49DB0F80C8BC007939FD /* MMgcPortUnix.cpp */,
-				07DA49DC0F80C8BC007939FD /* MMgcPortWin.cpp */,
-				3FFDEC660F69A52C00E510AB /* SpinLockMac.cpp */,
-				07DA49DD0F80C8BC007939FD /* SpinLockUnix.cpp */,
-				07DA49DE0F80C8BC007939FD /* SpinLockWin.cpp */,
-				07DA49DA0F80C8BC007939FD /* manifest.mk */,
-			);
-			name = platform;
-			sourceTree = "<group>";
-		};
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = Documentation;
+			sourceTree = "<group>";
+		};
+		D94236920F8ACAAD00F97706 /* VMPI */ = {
+			isa = PBXGroup;
+			children = (
+				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
+				D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */,
+				D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */,
+				D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */,
+				D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */,
+				D942369C0F8ACB0600F97706 /* manifest.mk */,
+				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
+				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
+				D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */,
+				D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */,
+				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
+				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
+				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
+			);
+			name = VMPI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1588,15 +1594,15 @@
 				3FDDC5450F60A07400E29821 /* AvmLog.cpp in Sources */,
 				3FDDC5480F60A09D00E29821 /* GCDebug.cpp in Sources */,
 				3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */,
-				3FDDC5500F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */,
 				D940B6770F61C60300E72086 /* PosixPartialPlatform.cpp in Sources */,
-				D940B67A0F61C61000E72086 /* PosixPortUtils.cpp in Sources */,
 				D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */,
 				D940B67E0F61C62B00E72086 /* avmshellMac.cpp in Sources */,
-				3FFDEC690F69A52C00E510AB /* MMgcPortMac.cpp in Sources */,
-				3FFDEC6A0F69A52C00E510AB /* SpinLockMac.cpp in Sources */,
 				3FFDEC6E0F69A54F00E510AB /* GCAllocObject.cpp in Sources */,
 				19BB29A10F8119E100C5F1F7 /* swf.cpp in Sources */,
+				D94236960F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */,
+				D94236970F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */,
+				D94236980F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */,
+				D94236BD0F8ACBD400F97706 /* SpinLockMac.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1757,16 +1763,16 @@
 				3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */,
 				3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */,
 				3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */,
-				3F4F95590F6036CD009D9F22 /* PosixPortUtils.cpp in Sources */,
 				3FDDC5420F60A07400E29821 /* AvmDebug.cpp in Sources */,
 				3FDDC5430F60A07400E29821 /* AvmLog.cpp in Sources */,
 				3FDDC5470F60A09D00E29821 /* GCDebug.cpp in Sources */,
 				3FDDC54B0F60A0B600E29821 /* GCLog.cpp in Sources */,
-				3FDDC54F0F60A0DB00E29821 /* MacDebugUtils.cpp in Sources */,
-				3FFDEC670F69A52C00E510AB /* MMgcPortMac.cpp in Sources */,
-				3FFDEC680F69A52C00E510AB /* SpinLockMac.cpp in Sources */,
 				3FFDEC6D0F69A54F00E510AB /* GCAllocObject.cpp in Sources */,
 				19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */,
+				D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */,
+				D942369A0F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */,
+				D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */,
+				D94236BC0F8ACBD300F97706 /* SpinLockMac.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
