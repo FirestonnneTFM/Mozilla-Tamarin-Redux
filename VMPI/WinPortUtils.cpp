@@ -35,7 +35,7 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-#include "avmshell.h"
+#include "avmplus.h"
 
 #include <Mmsystem.h>
 
@@ -228,5 +228,36 @@ void VMPI_free(void* ptr)
 
 void VMPI_Log(const char* message)
 {
-	avmshell::Platform::GetInstance()->logMessage(message);
+#ifndef UNDER_CE
+	::OutputDebugStringA(message);
+#endif
+	printf("%s\n",message);
+}
+
+void VMPI_setPageProtection(void *address,
+							size_t size,
+							bool executableFlag,
+							bool writeableFlag)
+{
+	DWORD oldProtectFlags = 0;
+	DWORD newProtectFlags = 0;
+	if ( executableFlag && writeableFlag ) {
+		newProtectFlags = PAGE_EXECUTE_READWRITE;
+	} else if ( executableFlag ) {
+		newProtectFlags = PAGE_EXECUTE_READ;
+	} else if ( writeableFlag ) {
+		newProtectFlags = PAGE_READWRITE;
+	} else {
+		newProtectFlags = PAGE_READONLY;
+	}
+	BOOL retval = VirtualProtect(address,
+								 size,
+								 newProtectFlags,
+								 &oldProtectFlags);
+	
+	(void)retval;
+	GCAssert(retval);
+	
+	// We should not be clobbering PAGE_GUARD protections
+	GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
 }
