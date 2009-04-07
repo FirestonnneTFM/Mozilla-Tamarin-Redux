@@ -72,7 +72,8 @@ sunspider/.*                , sunspider-mobile , include , sunspider testsuite
 .*/controlflow-recursive.*  , sunspider-mobile , skip , sunspider testsuite
 
 jsbench/Search.as               ,       .*              ,       skip    ,       skip test runs too long and times out buildbot
-.*util.*                        ,       .*              ,       skip    ,       ship internal files
+.*util.*                        ,       .*              ,       skip    ,       skip internal files
+
 sunspider/(as3/|)regexp-dna.as  ,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
 #sunspider/(as3/|)date-format-tofte.as  ,.*       ,skip, contains eval
 sunspider/(as3/|)date-format-xparb.as ,.*       ,skip, contains eval
