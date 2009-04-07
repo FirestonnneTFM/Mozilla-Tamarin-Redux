@@ -570,6 +570,8 @@ namespace avmplus
 		if (core->debugger())
 		{
 			pool->_method_dmi.ensureCapacity(size);
+			for (int i = 0; i < size; ++i)
+				pool->_method_dmi.set(i, NULL);
 		}
 #endif
 #if VMCFG_METHOD_NAMES

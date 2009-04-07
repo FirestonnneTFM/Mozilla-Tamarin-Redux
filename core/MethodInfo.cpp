@@ -387,11 +387,8 @@ namespace avmplus
 		}
 	}
 
-	// Note: dmi() can legitimately return NULL (for MethodInfo's that were synthesized by Traits::genInitBody).
-	// However: 
-	// -- we assert that the result is not null because we should never be called for such MethodInfo instances.
-	// -- the caller always checks for null (despite the claim above) because crashing the Debugger would be a faux pas,
-	// and historically the Debugger code is riddled with lots of extra such checks-for-null, so why stop now?
+	// Note: dmi() can legitimately return NULL (for MethodInfo's that were synthesized by Traits::genInitBody,
+	// or for MethodInfo's that have no body, e.g. interface methods).
 	DebuggerMethodInfo* MethodInfo::dmi() const
 	{
 		// rely on the fact that not-in-pool MethodInfo returns -1,
@@ -399,9 +396,7 @@ namespace avmplus
 		const uint32_t method_id = uint32_t(this->method_id());
 		AvmAssert(_pool->core->debugger() != NULL);
 		// getDebuggerMethodInfo quietly returns NULL for out-of-range.
-		DebuggerMethodInfo* d = _pool->getDebuggerMethodInfo(method_id);
-		AvmAssert(d != NULL);
-		return d;
+		return _pool->getDebuggerMethodInfo(method_id);
 	}
 
 	Stringp MethodInfo::getRegName(int slot) const 

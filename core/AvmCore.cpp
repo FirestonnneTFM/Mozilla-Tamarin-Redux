@@ -119,6 +119,13 @@ namespace avmplus
 		config.verbose_addrs = false;
 		#endif
 
+		#if VMCFG_METHOD_NAMES
+		// default to recording method names, if possible. 
+		// (subclass might change this in its ctor if it wants to conserve memory.)
+		config.methodNames = true;
+		config.oldVectorMethodNames = false;
+		#endif
+
 		#ifdef AVMPLUS_VERIFYALL
 	    	config.verifyall = false;
 		#endif
