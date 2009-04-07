@@ -1711,10 +1711,10 @@ namespace avmplus
 	// static
 	bool Traits::isMachineCompatible(const Traits* a, const Traits* b)
 	{
-		return a == b ||
+		return (a == b) ||
 			// *, Object, and Void are each represented as Atom
-			(!a || a->builtinType == BUILTIN_object || a->builtinType == BUILTIN_void) &&
-			(!b || b->builtinType == BUILTIN_object || b->builtinType == BUILTIN_void) ||
+			((!a || a->builtinType == BUILTIN_object || a->builtinType == BUILTIN_void) &&
+			(!b || b->builtinType == BUILTIN_object || b->builtinType == BUILTIN_void)) ||
 			// all other non-pointer types have unique representations
 			(a && b && !a->isMachineType() && !b->isMachineType());
 	}

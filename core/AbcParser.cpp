@@ -632,7 +632,7 @@ namespace avmplus
 				core->console << "        name_index=" << name_index;
 				if (name_index > 0 && name_index < pool->constantStringCount)
 					core->console << " \"" << pool->cpool_string[name_index] << "\"";
-				core->console << "\n        flags=" << abcFlags << "\n";
+				core->console << "\n        flags=" << (uint32_t)abcFlags << "\n";
 			)
 
 			const NativeMethodInfo* ni = NULL;

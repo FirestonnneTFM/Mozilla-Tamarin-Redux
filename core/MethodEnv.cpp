@@ -1380,7 +1380,7 @@ namespace avmplus
 		Traits* baseIvtableTraits = base ? base->ivtable()->traits : 0;
 		Traits* itraitsBase = itraits->base;
 		// make sure the traits of the base vtable matches the base traits
-		if (!(base == NULL && itraits->base == NULL || base != NULL && itraitsBase == baseIvtableTraits))
+		if (!((base == NULL && itraits->base == NULL) || (base != NULL && itraitsBase == baseIvtableTraits)))
 		{
 			ErrorClass *error = toplevel->verifyErrorClass();
 			if( error )

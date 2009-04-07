@@ -657,8 +657,8 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		if ((ctor&7) != kObjectType ||
-			!AvmCore::istype(ctor, core->traits.function_itraits) &&
-			!AvmCore::istype(ctor, core->traits.class_itraits))
+			(!AvmCore::istype(ctor, core->traits.function_itraits) &&
+			!AvmCore::istype(ctor, core->traits.class_itraits)))
 		{
 			throwTypeError(kCantUseInstanceofOnNonObjectError);
 		}

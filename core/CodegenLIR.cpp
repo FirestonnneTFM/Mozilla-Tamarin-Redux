@@ -2761,7 +2761,7 @@ namespace avmplus
 		}
 		else if (result == NUMBER_TYPE)
 		{
-			if (in && in->isNumeric() || in == BOOLEAN_TYPE)
+			if (in && (in->isNumeric() || in == BOOLEAN_TYPE))
 			{
 				localSet(loc, promoteNumberIns(in, loc), result);
 			}
@@ -4834,7 +4834,7 @@ namespace avmplus
 		}
 
         if (cond->isconst()) {
-            if (br == LIR_jt && cond->constval() || br == LIR_jf && !cond->constval()) {
+            if ((br == LIR_jt && cond->constval()) || (br == LIR_jf && !cond->constval())) {
                 // taken
                 br = LIR_j;
                 cond = 0;
@@ -5246,7 +5246,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 	bool CodegenLIR::verbose() 
 	{
-		return state && state->verifier->verbose || pool->verbose;
+		return (state && state->verifier->verbose) || pool->verbose;
 	}
 #endif
 
@@ -5259,7 +5259,7 @@ namespace avmplus
                 op = LOpcode(op ^ 1);
             }
             if (cond->isconst()) {
-                if (op == LIR_jt && cond->constval() || op == LIR_jf && !cond->constval()) {
+                if ((op == LIR_jt && cond->constval()) || (op == LIR_jf && !cond->constval())) {
                     // taken
                     op = LIR_j;
                     cond = 0;
