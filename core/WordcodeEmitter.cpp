@@ -307,7 +307,7 @@ namespace avmplus
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Do not optimize across control flow targets, so flush the peephole window here
-		if (exception_fixes != NULL && exception_fixes->pc == pc || backpatches != NULL && backpatches->target_pc == pc)
+		if (((exception_fixes != NULL) && (exception_fixes->pc == pc)) || ((backpatches != NULL) && (backpatches->target_pc == pc)))
 			peepFlush();
 #endif
 

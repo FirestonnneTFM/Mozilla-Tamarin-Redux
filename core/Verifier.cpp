@@ -869,7 +869,7 @@ namespace avmplus
 				if (AvmCore::isSlotBinding(b) && 
 					// it's a var, or a const being set from the init function
 					(!AvmCore::isConstBinding(b) || 
-						obj.traits->init == info && opcode == OP_initproperty))
+						(obj.traits->init == info && opcode == OP_initproperty)))
 				{
 				    emitCoerce(propTraits, state->sp());
 					coder->writeOp2(state, pc, OP_setslot, (uint32_t)AvmCore::bindingToSlotId(b), sp-(n-1), propTraits);
@@ -1652,7 +1652,7 @@ namespace avmplus
 				Value& lhs = state->peek(2);
 				Traits* lhst = lhs.traits;
 				Traits* rhst = rhs.traits;
-				if (lhst == STRING_TYPE && lhs.notNull || rhst == STRING_TYPE && rhs.notNull)
+				if ((lhst == STRING_TYPE && lhs.notNull) || (rhst == STRING_TYPE && rhs.notNull))
 				{
 				    emitToString(OP_convert_s, sp-1, pc);
 					emitToString(OP_convert_s, sp, pc);
@@ -2662,7 +2662,7 @@ namespace avmplus
 
 				bool notNull = targetValue.notNull && curValue.notNull;
 				if (targetState->pc < state->pc && 
-					(t3 != t1 || t1 && !t1->isNumeric() && notNull != targetValue.notNull))
+					(t3 != t1 || ((t1 && !t1->isNumeric()) && (notNull != targetValue.notNull))))
 				{
 					// failure: merge on back-edge
 					verifyFailed(kCannotMergeTypesError, core->toErrorString(t1), core->toErrorString(t3));

@@ -663,11 +663,11 @@ return the result of the comparison ToPrimitive(x) == y.
 
 			// 18. If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
             if (ltype == kBooleanType)
-                return equals(lhs&~7|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
+                return equals((lhs&~7)|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
 			
 			// 19. If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
             if (rtype == kBooleanType)
-                return equals(lhs, rhs&~7|kIntegerType);  // equal(lhs, toInteger(rhs))
+                return equals(lhs, (rhs&~7)|kIntegerType);  // equal(lhs, toInteger(rhs))
 
 			// 20. If Type(x) is either String or Number and Type(y) is Object,
 			// return the result of the comparison x == ToPrimitive(y).
@@ -753,8 +753,8 @@ return the result of the comparison ToPrimitive(x) == y.
             }
         }
 		// Sometimes ints can hide in double atoms (neg zero for one)
-		else if ((ltype == kIntegerType) && (rtype == kDoubleType) || 
-			(rtype == kIntegerType) && (ltype == kDoubleType))
+		else if (((ltype == kIntegerType) && (rtype == kDoubleType)) || 
+			((rtype == kIntegerType) && (ltype == kDoubleType)))
 		{
 			return number(lhs) == number(rhs) ? trueAtom : falseAtom;
 		}
@@ -1171,7 +1171,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kIntegerType:
 				{
 					Atom i = atom>>3;
-					return urshift(i|-i,28)&~7 | kBooleanType;
+					return (urshift(i|-i,28)&~7) | kBooleanType;
 				}
 			case kBooleanType:
 				return atom;

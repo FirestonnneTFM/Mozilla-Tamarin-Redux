@@ -75,7 +75,7 @@ namespace avmplus
 		Traits* traitsBase = traits->base;
 		Traits* baseTraits = base ? base->traits : 0;
 		// make sure the traits of the base vtable matches the base traits
-		AvmAssert(base == NULL && traits->base == NULL || base != NULL && traitsBase == baseTraits );
+		AvmAssert((base == NULL && traits->base == NULL) || (base != NULL && traitsBase == baseTraits));
 #endif // DEBUG
 
 		AvmCore* core = traits->core;

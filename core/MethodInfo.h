@@ -295,7 +295,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERIFYALL
 		inline int isVerified() const { return _flags & VERIFIED; }
 		inline int isVerifyPending() { return _flags & VERIFY_PENDING; }
-		inline void setVerified() { _flags = _flags | VERIFIED & ~VERIFY_PENDING; }
+		inline void setVerified() { _flags = (_flags | VERIFIED) & ~VERIFY_PENDING; }
 		inline void setVerifyPending() { _flags |= VERIFY_PENDING; }
 #endif
 

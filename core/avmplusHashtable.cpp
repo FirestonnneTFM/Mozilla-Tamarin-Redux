@@ -203,7 +203,7 @@ namespace avmplus
 	{ 
 		// This seems to work very well and the Intel compiler converts both the multiplies
 		// into shift+add operations.
-		return (5*(m_size+1)) >= 2*getCapacity(); // 0.80
+		return uint32_t((5*(m_size+1))) >= uint32_t(2*getCapacity()); // 0.80
 		#if 0
 		//return ((size<<3)+1) >= 3*getCapacity(); // 0.75
 		//return ((40*size)+1) >= 19*getCapacity(); // 0.95

@@ -62,7 +62,7 @@ namespace avmplus
 		byte& operator[] (int index) {
 			return buffer[index];
 		}
-		const bool isConstant() const { return constantData; }
+		bool isConstant() const { return constantData; }
 	protected:
 		ScriptBufferImpl(bool isConstant)
 			: constantData(isConstant) {}

@@ -2315,7 +2315,7 @@ namespace avmplus
 						// Invalid
 						goto invalid;
 					}
-					c = (c<<6 & 0x7C0 | in[1] & 0x3F);
+					c = (((c<<6) & 0x7C0) | (in[1] & 0x3F));
 					if (c < 0x80) {
 						// Overlong sequence, reject as invalid.
 						goto invalid;
@@ -2338,7 +2338,7 @@ namespace avmplus
 						// Invalid
 						goto invalid;
 					}
-					c = (c<<12 & 0xF000 | in[1]<<6 & 0xFC0 | in[2] & 0x3F);
+					c = (((c<<12) & 0xF000) | ((in[1]<<6) & 0xFC0) | (in[2] & 0x3F));
 					if (c < 0x800) {
 						// Overlong sequence, reject as invalid.
 						goto invalid;
@@ -2363,10 +2363,10 @@ namespace avmplus
 						goto invalid;
 					}
 					
-					c = (c<<18     & 0x1C0000 |
-						 in[1]<<12 & 0x3F000 |
-						 in[2]<<6  & 0xFC0 |
-						 in[3]     & 0x3F);
+					c = (((c<<18) & 0x1C0000) |
+						 ((in[1]<<12) & 0x3F000) |
+						 ((in[2]<<6)  & 0xFC0) |
+						 (in[3]     & 0x3F));
 					if (c < 0x10000) {
 						// Overlong sequence, reject as invalid.
 						goto invalid;
