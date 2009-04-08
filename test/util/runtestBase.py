@@ -47,7 +47,7 @@
 # %MOZ_SRC/mozilla/js/tamarin/platform/,
 #
 
-import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform
+import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, shutil
 import subprocess
 from os.path import *
 from os import getcwd,environ
@@ -57,7 +57,7 @@ from sys import argv, exit
 from getopt import getopt
 from itertools import count
 from killableprocess import Popen
-from time import time
+from time import time,sleep
 
 import threadpool
 import subProcess
@@ -81,6 +81,7 @@ class RuntestBase:
     logFileType = 'html'
     
     avm = ''
+    avmce = ''
     asc = ''
     builtinabc = ''
     shellabc = ''
@@ -103,6 +104,7 @@ class RuntestBase:
     args = []
     tests = []
     start_time = None
+    show_time = False
     
     verbose = False
     quiet = False
@@ -115,7 +117,7 @@ class RuntestBase:
     testTimeOut = -1 #by default tests will NOT timeout
     debug = False
     threads = 1
-    
+    winceProcesses = []
     
     
     def __init__(self):
@@ -142,12 +144,18 @@ class RuntestBase:
         self.loadPropertiesFile()
         self.setOptions()
         self.parseOptions()
-        if self.htmlOutput and not self.rebuildtests:
-            self.createOutputFile()
         self.setTimestamp()
+        if re.search('(_arm.exe|_arm_d.exe|Windows Mobile)',self.avm)!=None:
+            self.config='arm-winmobile-emulator-tvm'
         if not self.config:
             self.determineConfig()
-        
+        if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
+            if re.search('^arm-winmobile-emulator',self.config)==None:
+                print 'ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe'
+                sys.exit(1)
+            self.setupCEEmulators()
+        if self.htmlOutput and not self.rebuildtests:
+            self.createOutputFile()
         self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
@@ -215,6 +223,7 @@ class RuntestBase:
         print ' -c --config        sets the config string [default OS-tvm]'
         print ' -q --quiet         display minimum output during testrun'
         print '    --rebuildtests  rebuild the tests only - do not run against VM'
+        print '    --showtimes     shows the time for each test'
         print '    --ascargs       args to pass to asc on rebuild of test files'
         print '    --vmargs        args to pass to vm'
         print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
@@ -227,7 +236,7 @@ class RuntestBase:
         self.options = 'vE:a:g:b:s:x:htfc:dqe'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                   'timeout=', 'rebuildtests','quiet','nohtml','eval']
+                   'timeout=', 'rebuildtests','quiet','nohtml','eval','showtimes']
 
     def parseOptions(self):
         try:
@@ -279,6 +288,8 @@ class RuntestBase:
                 self.quiet = True
             elif o in ('--nohtml',):
                 self.htmlOutput = False
+            elif o in ('--showtimes'):
+                self.show_time = True
         return opts
                 
     def setTimestamp(self):
@@ -306,17 +317,6 @@ class RuntestBase:
         self.osName = ostype
     
     def determineConfig(self):
-        if not self.runSource:
-            self.vmtype = 'release'
-            (f,err,exitcode) = self.run_pipe('%s' % self.avm)
-            try:
-                for line in f:
-                    if line.find('[-d]') != -1:
-                        self.vmtype = 'releasedebugger'
-                        break
-            except:
-                nop = True
-          
         # ================================================
         # Determine the configruation if it has not been 
         # passed into the script:
@@ -328,14 +328,17 @@ class RuntestBase:
         try:
             # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
             cputype = ''
-            (f,err,exitcode) = self.run_pipe('file %s' % (self.avm))
-            if re.search('(32-bit|80386|i386)', f[0]):
+            (f,err,exitcode) = self.run_pipe('file "%s"' % (self.avm))
+            if re.search('\(console\) 32-bit$', f[0]):
+                cputype='arm'
+                self.osName='winmobile-emulator'
+            elif re.search('(32-bit|80386|i386)', f[0]):
                 cputype='x86'
-            if re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f[0]):
+            elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f[0]):
                 cputype='x64'
-            if re.search('(ppc)', f[0]):
+            elif re.search('(ppc)', f[0]):
                 cputype='ppc'
-            if re.search('(ppc64)', f[0]):
+            elif re.search('(ppc64)', f[0]):
                 cputype='ppc64'
             if cputype == '':
                 raise Exception()
@@ -347,6 +350,19 @@ class RuntestBase:
                 print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
                 exit(1)
                 
+        if self.osName=='winmobile-emulator':
+            self.vmtype = 'release'
+        elif not self.runSource:
+            self.vmtype = 'release'
+            (f,err,exitcode) = self.run_pipe('%s' % self.avm)
+            try:
+                for line in f:
+                    if line.find('[-d]') != -1:
+                        self.vmtype = 'releasedebugger'
+                        break
+            except:
+                nop = True
+          
         self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+self.vmargs
     
     ### File and Directory functions ###
@@ -875,7 +891,7 @@ class RuntestBase:
         lunpass = 0
         ltimeout = 0
         lassert = 0
-        
+        starttime=time()
         if ast.startswith('./'):
             ast=ast[2:]
         
@@ -910,13 +926,12 @@ class RuntestBase:
         if includes and not list_match(includes,root):
             return
         
-        outputCalls.append((self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
-        
         # skip entire test if specified
         # TODO: add skip reason to output
         if settings.has_key('.*') and settings['.*'].has_key('skip'):
             outputCalls.append((self.js_print,('  skipping',)))
             self.allskips += 1
+            outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
             
         
@@ -941,6 +956,7 @@ class RuntestBase:
                         outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
                     self.allfails += lfail
                     self.allpasses += lpass
+                    outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
                     return outputCalls
                 else:
                     lfail += 1
@@ -1025,7 +1041,7 @@ class RuntestBase:
                 else:
                     lfail = 1
                     outputCalls.append((self.fail,(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
-        
+                 
         self.allfails += lfail
         self.allpasses += lpass
         self.allexpfails += lexpfail
@@ -1036,6 +1052,12 @@ class RuntestBase:
             outputCalls.append((self.js_print, ('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
         else:
             outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+        if self.show_time:
+            outputCalls.insert(0,(self.js_print,('%d running %s time %.1f' % (testnum, ast,time()-starttime), '<b>', '</b><br/>')));
+        else:
+            outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+        
+
         return outputCalls
     #
     # cleanup
@@ -1113,6 +1135,145 @@ class RuntestBase:
 
         if self.ashErrors:
             exit(1)
+
+    # runs the windows mobile emulators
+    # * for each threads (--numthreads=) start an emulator with emulator $EMULATOR and image $EMULATORIMAGE environment variables or use defaults below
+    # * in emulator map shared directory to local machine, the shared directory gets mapped to /Storage Card on the device
+    # * in shared directory /2755/autorun.exe will autorun when emulator is started
+    # * copy the wmrunner.exe program as autorun.exe
+    # * the wm tamarin shell is copied to /Storage Card/shell/avmshell_arm.exe
+    # * the /Storage Card/nextvm.txt contains the parameters and abc file to compile
+    # * /Storage Card/media is where .abc files are stored
+    # * the wmrunner.exe runs in windows mobile looking for nextvm.txt, runs the avmplus_arm.exe with the arguments in the file
+    # * when -log is a vm parameter the result of running the abc will be in a .log file
+    # * the avm variable is replaced with the ../util/wmemulatorshell.py file, when called it copies the test abc to the wm /Storage Card/media
+    #   directory and creates nextvm.txt, then waits for the wmrunner.exe to delete the nextvm.txt to signal the test is finished
+    #
+    def setupCEEmulators(self):
+        
+        emulator="c:/Program Files/Microsoft Device Emulator/1.0/DeviceEmulator.exe"
+        emulator_image="c:/Program Files/Windows Mobile 6 SDK/PocketPC/DeviceemulationV614/0409/PPC_USA_GSM_VR.BIN"
+        cwd=os.getcwd()
+        # fixes for changing cygwin style paths into DOS
+        if len(cwd)>9 and cwd[0:9]=='/cygdrive':
+            cwd=cwd[9:]
+        if cwd[0]=='/':
+            cwd=cwd[1:]
+        if cwd[1]!=':':
+            cwd=cwd[0:1]+':'+cwd[1:]
+        
+        shared=cwd+"/../util/emulator_files"
+        cerunner=cwd+"/../../utils/wmremote/wmrunner/Release/wmrunner.exe"
+        emthreads=self.threads
+        emulator_args="/memsize 128"
+
+        if 'EMULATORTHREADS' in os.environ:
+            try:
+                emthreads=int(os.environ['EMULATORTHREADS'].strip())
+            except:
+                emthreads=self.threads
+        if 'EMULATOR' in os.environ:
+            emulator=os.environ['EMULATOR'].strip()
+        if 'EMULATORIMAGE' in os.environ:
+            emulator_image=os.environ['EMULATORIMAGE'].strip()
+        if 'CERUNNER' in os.environ:
+            cerunner=os.environ['CERUNNER'].strip()
+        if 'EMULATORDIR' in os.environ:
+            shared=os.environ['EMULATORDIR'].strip()
+        if 'EMULATORARGS' in os.environ:
+            emulator_args=os.environ['EMULATORARGS'].strip()
+
+        if self.avm==None or os.path.isfile(self.avm)==False:
+            print 'ERROR: AVM must be set and point to the avmshell_arm.exe shell'
+            sys.exit(1)
+        if os.path.isfile(emulator)==False:
+            print "ERROR: device emulator does not exist '%s', set EMULATOR environment variable to the correct emulator" % emulator
+            sys.exit(1)
+        if os.path.isfile(emulator_image)==False:
+            print "ERROR: device emulator image does not exist, '%s', set EMULATORIMAGE environment variable to the correct emulator image" % emulator_image
+            sys.exit(1)
+        if os.path.isfile(cerunner)==False:
+            print "ERROR: cerunner tool does not exist '%s', set CERUNNER environment variable to the correct path to cerunner.exe" % cerunner
+            sys.exit(1)
+        if os.path.isdir(shared)==False:
+            os.mkdir(shared)
+
+        self.avmce=self.avm
+        self.avm=cwd+"/../util/wmemulatorshell.py"
+        # create and build version.as
+        versionabc=cwd+"/version.abc"
+        versionfile=open(cwd+"/version.as",'w')
+        versionfile.write('import avmplus.*; print(System.getAvmplusVersion());\n')
+        versionfile.close()
+        self.compile_test(cwd+'/version.as')
+        if os.path.isfile(versionabc)==False:
+            print "ERROR: compiling %s/version.as" % cwd
+            sys.exit(1)
+        if os.path.isdir(shared)==False:
+            os.mkdir(shared)
+        if len(os.listdir(shared))>self.threads:
+            print "ERROR: emulator directory '%s' must be removed before running tests" % shared
+            sys.exit(1)
+
+        for num in range(emthreads):
+            sharedir="%s/share%d" %(shared,num)
+            if os.path.isdir(sharedir)==False:
+                os.mkdir(sharedir)
+            if os.path.isfile(sharedir+'/lock'):
+                print "WARNING: the emulator has an open lock file, removing it"
+                os.unlink(sharedir+"/lock")
+            if os.path.isfile(sharedir+'/running.txt'):
+                print "detected emulator is already running, if not delete %s/running.txt" % sharedir 
+            if os.path.isdir(sharedir+"/shell")==False:
+                os.mkdir(sharedir+"/shell")
+            if os.path.isdir(sharedir+"/media")==False:
+                os.mkdir(sharedir+"/media")
+            # 2577 is the windows mobile autorun directory
+            if os.path.isdir(sharedir+"/2577")==False:
+                os.mkdir(sharedir+"/2577")
+                shutil.copy(cerunner,sharedir+"/2577/autorun.exe")
+                shutil.copy(versionabc,sharedir+"/media/version.abc")
+            shutil.copy(self.avmce,sharedir+"/shell/avmshell_arm.exe")
+            file=open(sharedir+"/nextvm.txt","w")
+            file.write(" -log \"\\Storage Card\\media\\version.abc\" ")
+            file.close()
+        
+        winceProcesses=range(emthreads)
+        for num in range(emthreads):
+            if os.path.isfile("%s/share%d/running.txt" % (shared,num)):
+                winceProcesses[num]="manual"
+            else:
+                args=[emulator]+emulator_args.split()+['/sharedfolder','%s/share%d' %(shared,num),emulator_image]
+                winceProcesses[num]=subprocess.Popen(args)
+        
+        versions=range(emthreads)
+        timestart=time()
+        while len(versions)>0:
+            for i in range(emthreads):
+                versionfile="%s/share%d/media/version.log" % (shared,i)
+                nextfile="%s/share%d/nextvm.txt" % (shared,i)
+                if i in versions and os.path.isfile(nextfile)==False:
+                    versions.remove(i)
+                    try:
+                        f=open(versionfile,"r")
+                        data=f.read().strip()
+                        f.close()
+                    except:
+                        data='unknown'
+                    print " emulator %d shell version => %s" % (i,data)
+            if time()-timestart>60*5:
+                print "ERROR: emulators %s did not start after 5 minutes" % versions
+                print "I'm guessing deleting the files '%s/share?/running.txt' will fix the problem" % (shared)
+                sys.exit(1)
+            sleep(.1)
+        # cleanup version.as and version.abc
+        try:
+            if exists(cwd+"/version.as"):
+                os.unlink(cwd+"/version.as")
+            if exists(cwd+"/version.abc"):
+                os.unlink(cwd+"/version.abc")
+        except:
+            print 'exception deleting %s/version.as or %s/version.abc' % (cwd,cwd)
             
 #if __name__ == '__main__':
 #    test = RuntestBase()

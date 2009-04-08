@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "avmremote", "avmremote\avmr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ceremotedeployer", "ceremotedeployer\ceremotedeployer2008.vcproj", "{769D1ED9-9217-4549-842A-A28A69DB1AA4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wmrunner", "wmrunner\wmrunner.vcproj", "{16AC154D-92E8-42EF-8285-12D16411115B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -54,6 +56,20 @@ Global
 		{769D1ED9-9217-4549-842A-A28A69DB1AA4}.Release|Win32.ActiveCfg = Release|Win32
 		{769D1ED9-9217-4549-842A-A28A69DB1AA4}.Release|Win32.Build.0 = Release|Win32
 		{769D1ED9-9217-4549-842A-A28A69DB1AA4}.Release|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Release|Win32
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Debug|Mixed Platforms.ActiveCfg = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Debug|Mixed Platforms.Build.0 = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Debug|Mixed Platforms.Deploy.0 = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Debug|Win32.ActiveCfg = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Debug|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Debug|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Debug|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Release|Mixed Platforms.ActiveCfg = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Release|Mixed Platforms.Build.0 = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Release|Mixed Platforms.Deploy.0 = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Release|Win32.ActiveCfg = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Release|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Release|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{16AC154D-92E8-42EF-8285-12D16411115B}.Release|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = Release|Windows Mobile 6 Professional SDK (ARMV4I)
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

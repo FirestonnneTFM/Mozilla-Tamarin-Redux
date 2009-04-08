@@ -46,7 +46,7 @@
 util/shell_ats, .*, skip, shell file for ats media creation
 
 # bug #459851:  windows mobile System.privateBytes and -memstats privateBytes always returns 0
-as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile-tvm.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
+as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
 
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*Ojit  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(Ojit|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
@@ -54,18 +54,18 @@ as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*Dforcemir   , expectedfail ,
 as3/Vector/nonindexproperty:index -6.*          , .*(Dforcemir|diff)   , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 # full run for windows mobile - Dell Axim
-mops/.*                                                          ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
-abcasm/.*                                                        ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
-ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+mops/.*                                                          ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
+abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
+ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
 
 # Recursive PCRE testcases kills the stack on PocketPC builds
-ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
+ecma3/RegExp/eregress_119909,   .*winmobile.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 
 # sampling only works on debugger for avmdiff skip
 as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
 
 # sampling failure on winmobile-arm
-as3/sampling/Callback:.*                                         ,   arm-winmobile-tvm.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
+as3/sampling/Callback:.*                                         ,   arm-winmobile.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
 
 
 # Bug 476864 - Intermittent sampling test failures
@@ -94,15 +94,19 @@ abcasm/coverage/I:increment_i_double , .* , expectedfail , https://bugzilla.mozi
 abcasm/coverage/StoU , .*-Dinterp , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 abcasm/coverage/StoU , ppc-.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 
+# emulator is not using DST by default
+ecma3/Date/e15_9_5_14, arm-winmobile-emulator.*, skip, emulator DST problem
+ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator.*, skip, emulator DST problem
+
 # Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile-tvm.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
 
 # Probably killing the stack 
-mmgc/heap_stress,   .*winmobile-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
+mmgc/heap_stress,   .*winmobile.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
 mmgc/heap_stress,   .*mac-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
 
 # diff failures
