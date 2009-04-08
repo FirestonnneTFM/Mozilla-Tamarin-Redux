@@ -38,115 +38,12 @@
 #ifndef __avmbuild__
 #define __avmbuild__
 
-#ifdef UNIX
-  #ifndef AVMPLUS_UNIX
-    #define AVMPLUS_UNIX
-  #endif
-#endif // UNIX
-
-#ifdef _MAC
-  #ifndef AVMPLUS_MAC
-    #define AVMPLUS_MAC
-  #endif
-#endif // _MAC
-
-#ifdef WIN32
-  #ifndef AVMPLUS_WIN32
-    #define AVMPLUS_WIN32
-  #endif
-#endif // WIN32
-
-#if defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)
-  // Are we PowerPC or i386 (Macintel) or x86_64 (64-bit)?
-  #if defined(__i386__) || defined(__i386)
-    #ifndef AVMPLUS_IA32
-      #define AVMPLUS_IA32
-    #endif
-    #ifndef AVMPLUS_CDECL
-      #define AVMPLUS_CDECL
-    #endif
-  #elif defined(__x86_64__)
-    #ifndef AVMPLUS_AMD64
-      #define AVMPLUS_AMD64
-    #endif
-    #ifndef AVMPLUS_64BIT
-	  #define AVMPLUS_64BIT
-    #endif
-  #elif defined(__ppc__) || defined(__powerpc__)
-    #ifndef AVMPLUS_PPC
-      #define AVMPLUS_PPC
-    #endif	
-  #elif (__ppc64__) || (__powerpc64__)
-    #ifndef AVMPLUS_PPC
-      #define AVMPLUS_PPC
-    #endif	
-    #ifndef AVMPLUS_64BIT
-      #define AVMPLUS_64BIT
-    #endif
-  #elif defined(__arm__) || defined(__ARM__)
-    #ifndef AVMPLUS_ARM
-      #define AVMPLUS_ARM
-    #endif	
-  #elif defined(__sparc__) || defined(__sparc)
-    #ifndef AVMPLUS_SPARC
-      #define AVMPLUS_SPARC
-    #endif	
-  #endif
+#ifdef AVMPLUS_DISABLE_NJ
+#  error "AVMPLUS_DISABLE_NJ is no longer supported"
 #endif
 
-#ifdef AVMPLUS_WIN32
-  #ifdef _M_X64
-	#ifndef AVMPLUS_64BIT
-	  #define AVMPLUS_64BIT
-	#endif
-	#ifndef AVMPLUS_AMD64
-	  #define AVMPLUS_AMD64
-	#endif
-  #elif defined(_ARM_)
-    #ifndef AVMPLUS_ARM
-      #define AVMPLUS_ARM
-    #endif
-  #else
-  #ifndef AVMPLUS_IA32
-    #define AVMPLUS_IA32
-  #endif
-#endif
-#endif
-
-#if !defined AVMPLUS_IA32 && !defined AVMPLUS_AMD64 && !defined AVMPLUS_ARM && \
-    !defined AVMPLUS_PPC && !defined AVMPLUS_SPARC
-// Update the CPU detection code above to define the cpu switch
-#  error "unknown target CPU"
-#endif
-
-#if defined AVMPLUS_IA32 && defined AVMPLUS_AMD64
-#  error "must only define AVMPLUS_IA32 or AVMPLUS_AMD64 but not both"
-#endif
-
-#if defined AVMPLUS_IA32 && defined AVMPLUS_64BIT
-#  error "AVMPLUS_IA32 not supported with AVMPLUS_64BIT"
-#endif
-
-#if defined AVMPLUS_AMD64 && !defined AVMPLUS_64BIT
-#  error "AVMPLUS_AMD64 requires AVMPLUS_64BIT"
-#endif
-
-#if !defined AVMPLUS_IA32 && !defined AVMPLUS_AMD64 && !defined AVMPLUS_ARM && \
-    !defined AVMPLUS_PPC && !defined AVMPLUS_SPARC
-// Update the CPU detection code above to define the cpu switch
-#  error "unknown target CPU"
-#endif
-
-#if defined AVMPLUS_IA32 && defined AVMPLUS_AMD64
-#  error "must only define AVMPLUS_IA32 or AVMPLUS_AMD64 but not both"
-#endif
-
-#if defined AVMPLUS_IA32 && defined AVMPLUS_64BIT
-#  error "AVMPLUS_IA32 not supported with AVMPLUS_64BIT"
-#endif
-
-#if defined AVMPLUS_AMD64 && !defined AVMPLUS_64BIT
-#  error "AVMPLUS_AMD64 requires AVMPLUS_64BIT"
+#ifdef AVMPLUS_IA32
+#  define AVMPLUS_CDECL
 #endif
 
 // all x64, and all MacTel machines, always have sse2
@@ -154,27 +51,9 @@
 	#define AVMPLUS_SSE2_ALWAYS
 #endif
 
-// Uncomment the following line to enable support for 32 bit strings. If disabled,
-// only 8 and 16 bits strings are supported. If enabled, string can be 32 bits 
-// internally, and the String method createUTF32() is defined, which also takes
-// care of surrogate pairs, and createUTF16() converts surrogate pairs to UTF-32 
-// if the desired string width is 32 bits.
-
-//#define FEATURE_UTF32_SUPPORT 1
-
-#ifndef AVMPLUS_DISABLE_NJ
-#  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC || defined AVMPLUS_SPARC
-#    define FEATURE_NANOJIT
-#  endif
-#endif
-
 #ifdef FEATURE_NANOJIT
 // enable the jitmax global variables and -jitmax switch, for bisecting nanojit bugs
 //#define AVMPLUS_JITMAX
-#endif
-
-#ifdef DEBUGGER
-#define AVMPLUS_VERIFYALL
 #endif
 
 #ifdef _DEBUG
@@ -184,7 +63,7 @@
 #endif
 
 #if defined(VTUNE) || defined(DEBUG) || defined(DEBUGGER)
-#define AVMPLUS_VERBOSE
+#  define AVMPLUS_VERBOSE
 #endif
 
 #ifndef VMCFG_METHOD_NAMES
@@ -268,32 +147,6 @@
 #define HAVE_ALLOCA_H
 #endif
 
-#if !defined(AVMPLUS_LITTLE_ENDIAN) && !defined(AVMPLUS_BIG_ENDIAN)
-	#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-		#define AVMPLUS_LITTLE_ENDIAN
-	#elif defined(AVMPLUS_ARM)
-		#if defined _MSC_VER
-			#define AVMPLUS_LITTLE_ENDIAN
-		#elif defined __GNUC__
-            #include <endian.h>
-			#if __BYTE_ORDER == LITTLE_ENDIAN
-				#define AVMPLUS_LITTLE_ENDIAN
-			#else
-				#define AVMPLUS_BIG_ENDIAN
-			#endif
-			#if __FLOAT_WORD_ORDER == BIG_ENDIAN
-				// old arm linux abi is little endian, but the two 32bit words
-				// of a double value are in big endian order.
-				#define AVMPLUS_ARM_OLDABI
-			#endif
-		#endif
- 	#elif defined(AVMPLUS_PPC) || defined(AVMPLUS_SPARC)
- 		#define AVMPLUS_BIG_ENDIAN
- 	#else
- 		#error "must define AVMPLUS_LITTLE_ENDIAN or AVMPLUS_BIG_ENDIAN"
- 	#endif
-#endif
-
 #ifdef AVMPLUS_BIG_ENDIAN
 	// define in case any old code relies on this
 	#define AVM10_BIG_ENDIAN
@@ -312,52 +165,6 @@
 	#define FASTCALL
 #endif
 
-// By default, enable translation from ABC byte code to a wider word
-// code that can also be used by a direct threaded interpreter.
-//
-// If you define AVMPLUS_ABC_INTERPRETER the ABC code will be interpreted
-// as-is.  This is usually slower but (a) uses less memory and
-// (b) incurs less start-up overhead, and may be particularly appropriate
-// on very small interpreter-only systems or on systems where only
-// initialization code is interpreted.
-//
-// If you define AVMPLUS_WORD_CODE yourself then you must also deal
-// with whether you want peephole optimization and direct threaded
-// execution.
-
-#if !defined AVMPLUS_WORD_CODE && !defined AVMPLUS_ABC_INTERPRETER
-#  define AVMPLUS_WORD_CODE
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER	// with or without threaded code
-#  ifdef __GNUC__
-#    define AVMPLUS_DIRECT_THREADED     // requires computed goto - some other compilers may have that as well
-#  endif
-#endif
-
-#ifdef AVMPLUS_DIRECT_THREADED
-#  ifndef AVMPLUS_WORD_CODE
-#    error "You must have word code enabled to use direct threading"
-#  endif
-#endif
-
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-#  ifndef AVMPLUS_WORD_CODE
-#    error "You must have word code enabled to perform peephole optimization"
-#  endif
-#endif
-
-//#define AVMPLUS_FEATURE_EVAL   // supposed to be enabled in some config file...
-
-#ifdef AVMPLUS_FEATURE_EVAL
-#  define VMCFG_EVAL
-#endif
-
-// Enable selftests.  These can be run by -Dselftest at the shell or by calling the
-// global function avmplus::selftests(), see extensions/Selftest.h.
-//
-// Apart from code size considerations this can be enabled for release builds.
-
-//#define AVMPLUS_SELFTEST
-
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...
 // will be removed soon
 #define AVMPLUS_REDUX_API 1
@@ -371,7 +178,7 @@
 //#define SUPERWORD_LIMIT 250000000
 
 #ifdef SUPERWORD_PROFILING
-#  ifndef AVMPLUS_WORD_CODE
+#  ifndef VMCFG_WORDCODE
 #    error "You must have word code enabled to perform superword profiling"
 #  endif
 #  ifdef AVMPLUS_DIRECT_THREADED

@@ -34,6 +34,9 @@
 #
 # ***** END LICENSE BLOCK *****
 
+# shell must be included here because that's where avmshell-features.h lives,
+# and in shell builds it is included from platform/VMPI.h.  That's how it
+# is supposed to be.
 INCLUDES += \
   -I$(topsrcdir) \
   -I$(topsrcdir)/MMgc \
@@ -41,7 +44,11 @@ INCLUDES += \
   -I$(topsrcdir)/pcre \
   -I$(topsrcdir)/eval \
   -I$(topsrcdir)/platform \
+<<<<<<< /Users/lhansen/work/redux-config/manifest.mk
+  -I$(topsrcdir)/shell \
+=======
   -I$(topsrcdir)/VMPI \
+>>>>>>> /var/folders/-h/-hVVxQzFFziHstx+JMs+BE+++TI/-Tmp-/manifest.mk~other.W_KWTN
   $(NULL)
 
 $(call RECURSE_DIRS,VMPI)

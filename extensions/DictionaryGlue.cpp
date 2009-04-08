@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#ifdef AVMPLUS_SHELL
+#ifdef AVMSHELL_BUILD
 #include "avmshell.h"
 #else
 // player

@@ -38,7 +38,7 @@
 
 // Adobe patent application tracking #P721, entitled Application Profiling, inventors: T. Reilly
 
-#ifdef AVMPLUS_SHELL
+#ifdef AVMSHELL_BUILD
 #include "avmshell.h"
 #else
 // player
