@@ -44,11 +44,8 @@ INCLUDES += \
   -I$(topsrcdir)/pcre \
   -I$(topsrcdir)/eval \
   -I$(topsrcdir)/platform \
-<<<<<<< /Users/lhansen/work/redux-config/manifest.mk
   -I$(topsrcdir)/shell \
-=======
   -I$(topsrcdir)/VMPI \
->>>>>>> /var/folders/-h/-hVVxQzFFziHstx+JMs+BE+++TI/-Tmp-/manifest.mk~other.W_KWTN
   $(NULL)
 
 $(call RECURSE_DIRS,VMPI)
