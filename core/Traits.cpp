@@ -1598,7 +1598,7 @@ namespace avmplus
 		{
 			ImtBuilder imtBuilder(gc);
 			tb = _buildTraitsBindings(toplevel, &gen, &imtBuilder);
-			imtBuilder.finish(m_imt, pool, toplevel);
+			imtBuilder.finish(m_imt, this, toplevel);
 		}
 		else
 		{
@@ -1938,8 +1938,9 @@ namespace avmplus
 		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
 	}
 
-	void ImtBuilder::finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel)
+	void ImtBuilder::finish(Binding imt[], Traits* traits, const Toplevel *toplevel)
 	{
+		PoolObject* pool = traits->pool;
 		AvmAssert(pool->core->IsJITEnabled());
 
 		for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
@@ -1958,23 +1959,20 @@ namespace avmplus
 			else
 			{
 				// build conflict stub
-				#if defined FEATURE_NANOJIT
 				CodegenIMT imtgen(pool);
-				#endif
-
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
 					void* thunk = imtgen.emitImtThunk(e);
-					imt[i] = AvmCore::makeITrampBinding(uintptr_t(thunk));
+					MethodInfo* mi = new (gc) MethodInfo((GprMethodProc)thunk, traits);
+					Binding b = AvmCore::makeITrampBinding(mi);
+					AvmAssert(imt[i] == NULL);
+					WB(gc, traits, &imt[i], b);
 					if (imtgen.overflow)
 						toplevel->throwError(kOutOfMemoryError);
 				}
 				CATCH (Exception* exception) 
 				{
-					#if defined FEATURE_NANOJIT
 					imtgen.clearBuffers();
-                    #endif
-
 					// re-throw exception
 					pool->core->throwException(exception);
 				}

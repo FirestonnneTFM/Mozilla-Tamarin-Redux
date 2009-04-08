@@ -573,16 +573,16 @@ const int kBufferPadding = 16;
 		}
 
 #if defined FEATURE_NANOJIT
-		static Binding makeITrampBinding(uintptr_t id)
+		static Binding makeITrampBinding(MethodInfo* mi)
 		{
-			AvmAssert((id&7)==0); // addr must be 8-aligned
-			return Binding(id | BKIND_ITRAMP);
+			AvmAssert(mi != 0 && (uintptr_t(mi)&7)==0); // addr must be 8-aligned
+			return Binding(uintptr_t(mi) + BKIND_ITRAMP);
 		}
 
-		static void* getITrampAddr(Binding b)
+		static MethodInfo* getITrampAddr(Binding b)
 		{
 			AvmAssert(bindingKind(b) == BKIND_ITRAMP);
-			return (void*)(uintptr_t(b) & ~7);
+			return (MethodInfo*)(uintptr_t(b) - BKIND_ITRAMP);
 		}
 #endif
 

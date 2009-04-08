@@ -143,14 +143,8 @@ namespace avmplus
 					else
 					{
 						// create new imt stub
-#if VMCFG_METHODENV_IMPL32
-						MethodEnv* e = new (gc) MethodEnv(MethodEnv::kTrampStub, AvmCore::getITrampAddr(b), this);
-#else
-						//imt[i] = new (gc) MethodEnv((void*)(b&~7));
-						// note that the only field of this that's really used is _implGPR...
-						MethodInfo* mi = new (gc) MethodInfo(AvmCore::getITrampAddr(b), this->traits);
-						MethodEnv* e = new (gc) MethodEnv(mi, this);
-#endif
+						MethodInfo *mi = AvmCore::getITrampAddr(b);
+						MethodEnv* e = new (gc) MethodEnv(MethodEnv::kTrampStub, mi, this);
 						WB(gc, this, &imt[i], e);
 					}
 				}

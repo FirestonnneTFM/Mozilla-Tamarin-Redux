@@ -570,7 +570,7 @@ namespace avmplus
 
 		ImtBuilder(MMgc::GC *gc);
 		void addEntry(MethodInfo* virt, uint32_t disp_id);
-		void finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel);
+		void finish(Binding imt[], Traits* traits, const Toplevel *toplevel);
 
 	private:
 		MMgc::GC *gc;

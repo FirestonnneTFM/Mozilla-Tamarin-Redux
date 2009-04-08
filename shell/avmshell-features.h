@@ -61,12 +61,16 @@
 #ifndef AVMFEATURE_WORDCODE_INTERP
 #  define AVMFEATURE_WORDCODE_INTERP 1
 #endif
-#ifndef AVMFEATURE_THREADED_INTERP
-  #ifdef __GNUC__
-    #define AVMFEATURE_THREADED_INTERP 1
-  #else
-    #define AVMFEATURE_THREADED_INTERP 0
-  #endif
+#if AVMFEATURE_WORDCODE_INTERP
+#  ifndef AVMFEATURE_THREADED_INTERP
+#    ifdef __GNUC__
+#      define AVMFEATURE_THREADED_INTERP 1
+#    else
+#      define AVMFEATURE_THREADED_INTERP 0
+#    endif
+#  endif
+#else
+#  define AVMFEATURE_THREADED_INTERP 0
 #endif
 // our build scripts like to set this externally, so let them
 #ifndef AVMFEATURE_SELFTEST

@@ -203,8 +203,8 @@ namespace avmplus
 		enum InitMethodStub { kInitMethodStub };
 		MethodInfo(InitMethodStub, Traits* declTraits);
 
-#if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
-		MethodInfo(void* tramp, Traits* declTraits);
+#if defined FEATURE_NANOJIT
+		MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits);
 #endif
 
 		static uintptr_t verifyEnter(MethodEnv* env, int argc, uint32* ap);
