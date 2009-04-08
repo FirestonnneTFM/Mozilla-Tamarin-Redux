@@ -87,7 +87,7 @@ NSPR_LDOPTS = ""
 
 selfTest = o.getBoolArg("selftests", False)
 if selfTest:
-    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
+    APP_CPPFLAGS += "-DAVMFEATURE_SELFTEST=1 "
 
 memoryProfiler = o.getBoolArg("memory-profiler", False)
 if memoryProfiler:
