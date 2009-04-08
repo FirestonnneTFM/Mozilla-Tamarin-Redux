@@ -80,7 +80,8 @@
  */
  
 #include "VMPI.h"
-#include "avmbuild.h"
+#include "avmfeatures.h"		// new-style configuration
+#include "avmbuild.h"			// old-style configuration, may disappear, handles a few things not yet handled by the feature system
 
 #if defined(_MAC)
 #include <alloca.h>

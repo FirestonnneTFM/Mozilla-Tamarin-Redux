@@ -434,6 +434,10 @@
 		0772CD1A0F3C3190008DDBB6 /* avmshell64-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "avmshell64-release.xcconfig"; path = "../../../build/avmshell64-release.xcconfig"; sourceTree = SOURCE_ROOT; };
 		0772CD4F0F3C3503008DDBB6 /* avmshell-common32.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "avmshell-common32.xcconfig"; path = "../../../build/avmshell-common32.xcconfig"; sourceTree = SOURCE_ROOT; };
 		0772CD500F3C3503008DDBB6 /* avmshell-common64.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "avmshell-common64.xcconfig"; path = "../../../build/avmshell-common64.xcconfig"; sourceTree = SOURCE_ROOT; };
+		077494580F8C9D5E00230F6D /* mac-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "mac-platform.h"; path = "../mac-platform.h"; sourceTree = SOURCE_ROOT; };
+		077494590F8C9D5E00230F6D /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../manifest.mk; sourceTree = SOURCE_ROOT; };
+		0774945A0F8C9DA600230F6D /* avmfeatures.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = avmfeatures.as; path = ../../../core/avmfeatures.as; sourceTree = SOURCE_ROOT; };
+		0774945B0F8C9DA600230F6D /* avmfeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmfeatures.h; path = ../../../core/avmfeatures.h; sourceTree = SOURCE_ROOT; };
 		079DF7A90F3A86850031D1B4 /* shell64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell64; sourceTree = BUILT_PRODUCTS_DIR; };
 		079DF7B50F3A882D0031D1B4 /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7B60F3A882D0031D1B4 /* AbcEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcEnv.cpp; path = ../../../core/AbcEnv.cpp; sourceTree = SOURCE_ROOT; };
@@ -892,6 +896,8 @@
 				079DF7C70F3A882D0031D1B4 /* AvmCore.h */,
 				3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */,
 				3FDDC53F0F60A07400E29821 /* AvmDebug.h */,
+				0774945A0F8C9DA600230F6D /* avmfeatures.as */,
+				0774945B0F8C9DA600230F6D /* avmfeatures.h */,
 				3FDDC5400F60A07400E29821 /* AvmLog.cpp */,
 				3FDDC5410F60A07400E29821 /* AvmLog.h */,
 				079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */,
@@ -1202,8 +1208,10 @@
 		079DF9C20F3A8BC10031D1B4 /* platform */ = {
 			isa = PBXGroup;
 			children = (
+				077494580F8C9D5E00230F6D /* mac-platform.h */,
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
+				077494590F8C9D5E00230F6D /* manifest.mk */,
 			);
 			name = platform;
 			sourceTree = "<group>";
@@ -1364,17 +1372,17 @@
 			children = (
 				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
 				D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */,
-				D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */,
+				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
 				D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */,
-				D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */,
-				D942369C0F8ACB0600F97706 /* manifest.mk */,
 				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
 				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
+				D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */,
 				D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */,
 				D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */,
+				D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */,
 				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
 				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
-				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
+				D942369C0F8ACB0600F97706 /* manifest.mk */,
 			);
 			name = VMPI;
 			sourceTree = "<group>";

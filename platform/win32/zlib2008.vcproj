@@ -47,7 +47,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;_DEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -116,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;_LIB;WIN32_LEAN_AND_MEAN;UNDER_CE=0x501;_WIN32_WCE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;_DEBUG;DEBUG;_LIB;WIN32_LEAN_AND_MEAN;UNDER_CE=0x501;_WIN32_WCE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -195,7 +195,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;_DEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -261,7 +261,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -329,7 +329,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;UNDER_CE=0x501;_WIN32_WCE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;UNDER_CE=0x501;_WIN32_WCE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -406,7 +406,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -472,7 +472,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Oy-"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -540,7 +540,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;UNDER_CE=0x501;_WIN32_WCE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;UNDER_CE=0x501;_WIN32_WCE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -617,7 +617,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;AVMSHELL_BUILD;NDEBUG;_LIB;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
