@@ -3635,7 +3635,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (id != (int)0x80000000)
 			return id;
         #elif defined(SOLARIS)
-        #elif AVMPLUS_UNIX
+        #elif defined AVMPLUS_UNIX
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"
             "movl %%eax, %0" : "=r" (id) : "m" (d) : "%eax");
