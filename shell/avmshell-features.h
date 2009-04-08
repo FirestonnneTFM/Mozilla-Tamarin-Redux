@@ -62,7 +62,10 @@
     #define AVMFEATURE_THREADED_INTERP 0
   #endif
 #endif
-#define AVMFEATURE_SELFTEST          0
+// our build scripts like to set this externally, so let them
+#ifndef AVMFEATURE_SELFTEST
+  #define AVMFEATURE_SELFTEST          0
+#endif
 #define AVMFEATURE_UTF32             0
 #define AVMFEATURE_EVAL              0
 
