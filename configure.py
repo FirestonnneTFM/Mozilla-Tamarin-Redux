@@ -92,6 +92,9 @@ if selfTest:
 if not o.getBoolArg("jit", True):
     APP_CPPFLAGS += "-DAVMFEATURE_JIT=0 "
 
+if not o.getBoolArg("methodenv-impl32", True):
+    APP_CPPFLAGS += "-DVMCFG_METHODENV_IMPL32=0 "
+
 if o.getBoolArg('abc-interp', False):
     APP_CPPFLAGS += '-DAVMFEATURE_ABC_INTERP=1 -DAVMFEATURE_WORDCODE_INTERP=0 '
 

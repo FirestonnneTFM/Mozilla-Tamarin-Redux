@@ -501,13 +501,15 @@ namespace avmplus
 	}
 #endif // VMCFG_METHODENV_IMPL32
 
-#if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
-	MethodEnv::MethodEnv(TrampStub, void* tramp, VTable *vtable)
-		: _vtable(vtable), method(NULL), activationOrMCTable(0)
+#ifdef FEATURE_NANOJIT
+	MethodEnv::MethodEnv(TrampStub, MethodInfo *method, VTable *vtable)
+		: _vtable(vtable), method(method), activationOrMCTable(0)
 	{
-		union { void* v; GprMethodProc p; };
-		v = tramp;
-		_implGPR = p;
+		#if VMCFG_METHODENV_IMPL32
+		// set trampoline to IMT stub; we cannot go through delegateInvoke
+		// because the register holding the IID (interface id) will be clobbered
+		_implGPR = method->implGPR();
+		#endif
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
 #endif

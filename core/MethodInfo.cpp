@@ -49,23 +49,25 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-#if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
-	MethodInfo::MethodInfo(void* tramp, Traits* declTraits) :
-		_pool(declTraits->pool),
+#if defined FEATURE_NANOJIT
+	/**
+	 * MethodInfo wrapper around interface method dispatch (IMT) stub
+	 */
+	MethodInfo::MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits) :
+		_implGPR(interfaceTramp),
 		_declaringTraits(declTraits),
+		_pool(declTraits->pool),
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
 		_method_id(-1)
-	{
-		union {
-			void* t;
-			GprMethodProc p;
-		};
-		t = tramp;
-		this->_implGPR = p;
-	}
+	{}
 #endif
 
+	/**
+	 * MethodInfo wrapper around a system-generated init method.  Used when
+	 * there is no init method defined in the abc; this only occurs for activation
+	 * object traits and catch-block activation traits.
+	 */
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
 		_implGPR(verifyEnter),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
@@ -75,9 +77,11 @@ namespace avmplus
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
 		_method_id(-1)
-	{
-	}
+	{}
 
+	/**
+	 * ordinary MethodInfo for abc or native method.
+	 */
 	MethodInfo::MethodInfo(int method_id, 
 							PoolObject* pool, 
 							const uint8_t* abc_info_pos, 
@@ -153,10 +157,15 @@ namespace avmplus
 
 		f->verify(env->toplevel());
 
-        AvmAssert(f->implGPR() != MethodInfo::verifyEnter);
 #if VMCFG_METHODENV_IMPL32
+		// we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
+		// but next time we want to call the real code, not verifyEnter again.
+		// All other MethodEnv's in their default state will call the target method
+		// directly and never go through verifyEnter().
 		env->_implGPR = f->implGPR();
 #endif
+
+        AvmAssert(f->implGPR() != MethodInfo::verifyEnter);
 		return f->implGPR()(env, argc, ap);
 	}
 

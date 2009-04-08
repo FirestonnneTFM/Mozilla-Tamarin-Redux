@@ -61,9 +61,9 @@ namespace avmplus
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
 
-#if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
+#ifdef FEATURE_NANOJIT
 		enum TrampStub { kTrampStub };
-		MethodEnv(TrampStub, void* tramp, VTable* vtable);
+		MethodEnv(TrampStub, MethodInfo *method, VTable* vtable);
 #endif
 
 		MethodEnv(MethodInfo* method, VTable *vtable);
