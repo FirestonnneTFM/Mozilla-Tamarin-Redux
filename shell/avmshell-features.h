@@ -52,9 +52,15 @@
   #define AVMFEATURE_DEBUGGER        0
 #endif
 #define AVMFEATURE_VTUNE             0
-#define AVMFEATURE_JIT               1
-#define AVMFEATURE_ABC_INTERP        0
-#define AVMFEATURE_WORDCODE_INTERP   1
+#ifndef AVMFEATURE_JIT
+#  define AVMFEATURE_JIT             1
+#endif
+#ifndef AVMFEATURE_ABC_INTERP
+#  define AVMFEATURE_ABC_INTERP      0
+#endif
+#ifndef AVMFEATURE_WORDCODE_INTERP
+#  define AVMFEATURE_WORDCODE_INTERP 1
+#endif
 #ifndef AVMFEATURE_THREADED_INTERP
   #ifdef __GNUC__
     #define AVMFEATURE_THREADED_INTERP 1

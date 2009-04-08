@@ -89,6 +89,12 @@ selfTest = o.getBoolArg("selftests", False)
 if selfTest:
     APP_CPPFLAGS += "-DAVMFEATURE_SELFTEST=1 "
 
+if not o.getBoolArg("jit", True):
+    APP_CPPFLAGS += "-DAVMFEATURE_JIT=0 "
+
+if o.getBoolArg('abc-interp', False):
+    APP_CPPFLAGS += '-DAVMFEATURE_ABC_INTERP=1 -DAVMFEATURE_WORDCODE_INTERP=0 '
+
 memoryProfiler = o.getBoolArg("memory-profiler", False)
 if memoryProfiler:
     APP_CPPFLAGS += "-DMMGC_MEMORY_PROFILER "
@@ -247,21 +253,12 @@ elif cpu == "arm":
 else:
     raise Exception("Unsupported CPU")
 
-if o.getBoolArg("selftests"):
-    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
-
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
 
 if o.getBoolArg('perfm'):
     APP_CPPFLAGS += "-DPERFM "
     
-if o.getBoolArg('disable-nj'):
-    APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
-
-if o.getBoolArg('abc-interp'):
-    APP_CPPFLAGS += '-DAVMPLUS_ABC_INTERPRETER '
-
 if o.getBoolArg('selftest'):
     APP_CPPFLAGS += '-DAVMPLUS_SELFTEST '
 
