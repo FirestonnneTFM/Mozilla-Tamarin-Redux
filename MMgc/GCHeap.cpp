@@ -151,7 +151,7 @@ namespace MMgc
 		if(enableHooks) {
 #ifdef MMGC_MEMORY_PROFILER
 			profiler = new MemoryProfiler();
-			VMPI_WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &signal);
+			VMPI_writeOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &signal);
 #endif
 			hooksEnabled = true; // set only after creating profiler	
 		}
@@ -1425,10 +1425,10 @@ namespace MMgc
 #ifdef MMGC_MEMORY_PROFILER
 			if(signal) {
 				signal = 0;
-				void *pipe = VMPI_OpenAndConnectToNamedPipe("MMgc_Spy");
-				spyFile = VMPI_HandleToStream(pipe);
+				void *pipe = VMPI_openAndConnectToNamedPipe("MMgc_Spy");
+				spyFile = VMPI_handleToStream(pipe);
 				DumpMemoryInfo();
-				VMPI_CloseNamedPipe(pipe);
+				VMPI_closeNamedPipe(pipe);
 				spyFile = stdout;
 			}
 			profiler->Alloc(item, size);

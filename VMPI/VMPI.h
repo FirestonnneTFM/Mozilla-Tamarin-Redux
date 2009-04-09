@@ -87,10 +87,10 @@ typedef uint16_t wchar;
 
 // not ported or needed elsewhere (yet!)
 #ifdef WIN32
-void VMPI_WriteOnNamedSignal(const char *name, uint32_t *addr);
-void *VMPI_OpenAndConnectToNamedPipe(const char *pipe);
-FILE *VMPI_HandleToStream(void *handle);
-void VMPI_CloseNamedPipe(void *handle);
+void VMPI_writeOnNamedSignal(const char *name, uint32_t *addr);
+void *VMPI_openAndConnectToNamedPipe(const char *pipe);
+FILE *VMPI_handleToStream(void *handle);
+void VMPI_closeNamedPipe(void *handle);
 #endif
 
 /**
@@ -124,7 +124,7 @@ extern uint64_t		VMPI_getTime();
 *  @param message NULL-terminated UTF8-encoded string
 * @return none
 */
-extern void VMPI_Log(const char* message);
+extern void VMPI_log(const char* message);
 
 /**
 * This method is called to output debugging messages
@@ -133,7 +133,7 @@ extern void VMPI_Log(const char* message);
 * @param message NULL-terminated UTF8-encoded string
 * @return none
 */
-extern void VMPI_DebugLog(const char* message);
+extern void VMPI_debugLog(const char* message);
 
 /**
 * This method is called to interrupt the program execution during debugging
@@ -145,7 +145,7 @@ extern void VMPI_DebugLog(const char* message);
 * On platforms that cannot support debug interrupts the program execution should be aborted
 * @return none
 */
-extern void VMPI_DebugBreak();
+extern void VMPI_debugBreak();
 
 /**
 * This method is used to request a block of memory from the system
@@ -354,11 +354,11 @@ extern bool VMPI_useVirtualMemory();
 /**
  * spin up a thread on the named signal name and write a 1 to addr when it fires
  */
-extern void VMPI_WriteOnNamedSignal(const char *name, uint32_t *addr);
+extern void VMPI_writeOnNamedSignal(const char *name, uint32_t *addr);
 
 /**
  * connect to a named pipe
  */
-extern void *VMPI_OpenAndConnectToNamedPipe(const char *pipeName);
+extern void *VMPI_openAndConnectToNamedPipe(const char *pipeName);
 
 #endif /* __avmplus_VMPI__ */

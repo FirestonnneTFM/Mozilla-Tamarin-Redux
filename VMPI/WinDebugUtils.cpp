@@ -50,21 +50,21 @@
 /******************************* Debugging *******************************/
 /*************************************************************************/
 
-void VMPI_DebugLog(const char* message)
+void VMPI_debugLog(const char* message)
 {
 #ifndef UNDER_CE
 	OutputDebugStringA(message);
 #else
 	// !!@ only unicode is supported
 	//OutputDebugStringW(unicode msg);
-	VMPI_Log(message); //for windows mobile
+	VMPI_log(message); //for windows mobile
 #endif
 
-	VMPI_Log( message ); //also log to standard output
+	VMPI_log( message ); //also log to standard output
 }
 
 
-void VMPI_DebugBreak()
+void VMPI_debugBreak()
 {
 	DebugBreak();
 }

@@ -491,7 +491,7 @@ DWORD WINAPI WaitForMemorySignal(LPVOID lpParam)
 	return 0;
 }
 
-void VMPI_WriteOnNamedSignal(const char *name, uint32_t *addr)
+void VMPI_writeOnNamedSignal(const char *name, uint32_t *addr)
 {
 	HANDLE m_namedSharedObject;
 
@@ -517,7 +517,7 @@ void VMPI_WriteOnNamedSignal(const char *name, uint32_t *addr)
 	CreateThread(NULL, 0, WaitForMemorySignal, sig_data, 0, NULL);
 }
 
-void *VMPI_OpenAndConnectToNamedPipe(const char *pipeName)
+void *VMPI_openAndConnectToNamedPipe(const char *pipeName)
 {
   char name[256];
   _snprintf(name, sizeof(name), "\\\\.\\pipe\\%s", pipeName);
@@ -526,12 +526,12 @@ void *VMPI_OpenAndConnectToNamedPipe(const char *pipeName)
   return (void*)pipe;
 }
 
-FILE *VMPI_HandleToStream(void *handle)
+FILE *VMPI_handleToStream(void *handle)
 {
 	return _fdopen(_open_osfhandle((intptr_t)handle, 0), "w");
 }
 
-void VMPI_CloseNamedPipe(void *handle)
+void VMPI_closeNamedPipe(void *handle)
 {
 	FlushFileBuffers(handle);
 	CloseHandle((HANDLE)handle);
