@@ -182,6 +182,7 @@ namespace avmplus
 		Stringp s = new(gc)
 					String(len, (master->m_bitsAndFlags & TSTR_WIDTH_MASK) | (kDependent << TSTR_TYPE_SHIFT));
 		WBRC( gc, s, &s->m_master, master );
+		// interior pointer - no need to WB()
 		s->m_buffer.p8 = master->m_buffer.p8 + start * master->getWidth();
 		return s;
 	}
@@ -209,7 +210,7 @@ namespace avmplus
 					String(len, w 
 						   | (kDynamic  << TSTR_TYPE_SHIFT)
 						   | (charsLeft << TSTR_CHARSLEFT_SHIFT));
-		s->m_buffer.pv = buffer;
+		WB(gc, s, &s->m_buffer.pv, buffer);
 
 		if (data != NULL && len != 0)
 			VMPI_memcpy(buffer, data, size_t(len * w));
@@ -235,7 +236,7 @@ namespace avmplus
 		MMGC_MEM_TAG( "String: Static" );
 		Stringp s = new(gc)
 					String(len, w | (kStatic << TSTR_TYPE_SHIFT));
-		// this also sets the other pointers
+		// static data - no WB() needed
 		s->m_buffer.p8 = (char*) data;
 		return s;
 	}
@@ -318,6 +319,7 @@ namespace avmplus
 		switch (getType())
 		{
 			case kDynamic:
+				// no need to WB() NULL here according to treilly
 				gc->Free(m_buffer.pv);
 				break;
 			case kDependent:
@@ -341,9 +343,10 @@ namespace avmplus
 		if (type != kDynamic)
 		{
 			int32_t bytes = length() * getWidth();
-			void* buf = GC::GetGC(this)->Alloc(bytes, 0);
+			GC* gc = GC::GetGC(this);
+			void* buf = gc->Alloc(bytes, 0);
 			VMPI_memcpy(buf, m_buffer.pv, bytes);
-			m_buffer.pv = buf;
+			WB(gc, this, m_buffer.pv, buf);
 			if (type == kDependent)
 				WBRC( _gc(this), this, &m_master, NULL );
 		}
