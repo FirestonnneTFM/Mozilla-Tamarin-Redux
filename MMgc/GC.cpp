@@ -199,7 +199,11 @@ namespace MMgc
 	}
 	
 	inline uint64_t GCPolicyManager::interCollectionTicks() {
-		/* The following is almost certainly not correct but it's the current policy.
+		return 15 * VMPI_getPerformanceFrequency() / 1000;		// Ticks.  Value represents 15ms on all platforms
+		
+		/* Old code, preserved here until we revamp policy as a whole.
+		 *
+		 * The following is almost certainly not correct but it's the current policy.
 		 *
 		 * From a conversation with Tommy, it appears that the idea here is that faster machines should
 		 * have lower limits on the time between collections.  The assumption is that a slower
@@ -207,8 +211,11 @@ namespace MMgc
 		 * give more time to a slower machine than to a fast machine.  That's a pretty dodgy assumption
 		 * about the frequency, though.  For example, the Linux platform layer hardwires it at 1MHz
 		 * regardless of the computer's speed, it could be a Maemo or a 4GHz monster.
+		 *
+		 * Returnin a constant here is known to cause enormous heap bloat on Linux, where it translates
+		 * as 1.5s.
 		 */
-		return 1515909;										// Ticks.  Old comment says "200 ms on a 2ghz machine" but that's wrong
+		//return 1515909;										// Ticks.  Old comment says "200 ms on a 2ghz machine" but that's wrong
 	}
 	
 	inline uint32_t GCPolicyManager::freeSpaceDivisor() {
