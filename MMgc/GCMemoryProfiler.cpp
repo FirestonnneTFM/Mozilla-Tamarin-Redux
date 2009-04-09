@@ -59,7 +59,7 @@ namespace MMgc
 		StackTrace(uintptr_t *trace) 
 		{ 
 			VMPI_memset(this, 0, sizeof(StackTrace));
-			VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(void*));
+			VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(uintptr_t));
 		}
 		uintptr_t ips[kMaxStackTrace];
 		size_t skip;
@@ -77,9 +77,6 @@ namespace MMgc
 
 	GCThreadLocal<const char*> memtag;
 	GCThreadLocal<const void*> memtype;
-	StackTrace *GetStackTrace();
-	// print stack trace of caller
-	void DumpStackTrace(int skip=1);
 
 	MemoryProfiler::MemoryProfiler() : 
 		traceTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
@@ -172,7 +169,7 @@ namespace MMgc
 		}
 	}
 
-	void MemoryProfiler::Alloc(const void *item, size_t size)
+	void MemoryProfiler::RecordAllocation(const void *item, size_t size)
 	{
 		StackTrace *trace = GetStackTrace();
 		traceTable.put(item, trace);
@@ -180,15 +177,19 @@ namespace MMgc
 		ChangeSize(trace, (int)size);
 
 		if(memtype)
+		{
 			trace->master = (StackTrace*)traceTable.get(memtype);
-		memtype = NULL;
+			memtype = NULL;
+		}
 		
 		if(memtag)
+		{
 			trace->category = memtag;
-		memtag = NULL;
+			memtag = NULL;
+		}
 	}
 
-	void MemoryProfiler::Free(const void *item, size_t size)
+	void MemoryProfiler::RecordDeallocation(const void *item, size_t size)
 	{
 		StackTrace *trace = (StackTrace*)traceTable.get(item);
 
@@ -207,7 +208,7 @@ namespace MMgc
 		uintptr_t trace[kMaxStackTrace];
 		VMPI_memset(trace, 0, sizeof(trace));
 
-		VMPI_captureStackTrace(trace, kMaxStackTrace, 2);
+		VMPI_captureStackTrace(trace, kMaxStackTrace, 3);
 		StackTrace *st = (StackTrace*)stackTraceMap.get(trace); 
 		if(!st) {
 			st = new StackTrace(trace);
