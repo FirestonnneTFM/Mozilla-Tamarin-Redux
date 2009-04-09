@@ -346,7 +346,7 @@ namespace MMgc
 
 		/* controls whether AllocHook and FreeHook are called */
 		void EnableHooks() { hooksEnabled = true; }
-		bool HooksEnabled() const { return hooksEnabled; }
+		inline bool HooksEnabled() const { return hooksEnabled; }
 		void AllocHook(const void *item, size_t size);
 		// called when object is determined to be garbage but we can't write to it yet
 		void FinalizeHook(const void *item, size_t size);

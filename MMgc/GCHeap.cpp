@@ -1431,7 +1431,7 @@ namespace MMgc
 				VMPI_closeNamedPipe(pipe);
 				spyFile = stdout;
 			}
-			profiler->Alloc(item, size);
+			profiler->RecordAllocation(item, size);
 #endif
 
 #ifdef MMGC_MEMORY_INFO
@@ -1450,7 +1450,7 @@ namespace MMgc
 		{
 			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
-			profiler->Free(item, size);
+			profiler->RecordDeallocation(item, size);
 #endif
 		}
 		

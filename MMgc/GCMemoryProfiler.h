@@ -69,8 +69,8 @@ namespace MMgc
 	public:
 		MemoryProfiler();
 		~MemoryProfiler();
-		void Alloc(const void *item, size_t size);
-		void Free(const void *item, size_t size);
+		void RecordAllocation(const void *item, size_t size);
+		void RecordDeallocation(const void *item, size_t size);
 		void DumpFatties();
 		const char *GetAllocationName(const void *obj);
 		StackTrace *GetAllocationTrace(const void *obj);
