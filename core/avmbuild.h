@@ -42,10 +42,6 @@
 #  error "AVMPLUS_DISABLE_NJ is no longer supported"
 #endif
 
-#ifdef AVMPLUS_IA32
-#  define AVMPLUS_CDECL
-#endif
-
 // all x64, and all MacTel machines, always have sse2
 #if defined(AVMPLUS_AMD64) || (defined(AVMPLUS_MAC) && defined(AVMPLUS_IA32))
 	#define AVMPLUS_SSE2_ALWAYS
