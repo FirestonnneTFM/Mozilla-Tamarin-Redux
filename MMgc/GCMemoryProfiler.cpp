@@ -287,8 +287,6 @@ namespace MMgc
 		size_t residentCount=0;
 		size_t packageCount=0;
 
-		FILE *out = GCHeap::GetGCHeap()->GetSpyFile();
-
 		// rip through all allocation sites and sort into package and categories
 		GCHashtableIterator iter(&stackTraceMap);
 		const void *obj;
@@ -366,7 +364,7 @@ namespace MMgc
 			}				
 		}
 
-		fprintf(out, "\n\nMemory allocation report for %u allocations, totaling %u kb (%u ave) across %u packages\n", residentCount, residentSize>>10, residentSize / residentCount, packageCount);
+		GCLog("\n\nMemory allocation report for %u allocations, totaling %u kb (%u ave) across %u packages\n", residentCount, residentSize>>10, residentSize / residentCount, packageCount);
 		for(unsigned i=0; i<packageCount; i++)
 		{
 			PackageGroup* pg = packages[i];
@@ -400,7 +398,7 @@ namespace MMgc
 				}			
 			}
 			
-			fprintf(out, "%s - %3.1f%% - %u kb %u items, avg %u b\n", pg->name, PERCENT(residentSize, pg->size),  (unsigned int)pg->size>>10, pg->count, (unsigned int)(pg->count ? pg->size/pg->count : 0));
+			GCLog("%s - %3.1f%% - %u kb %u items, avg %u b\n", pg->name, PERCENT(residentSize, pg->size),  (unsigned int)pg->size>>10, pg->count, (unsigned int)(pg->count ? pg->size/pg->count : 0));
 				
 			// result capping
 			if(numTypes > kNumTypes)
@@ -411,7 +409,7 @@ namespace MMgc
 				CategoryGroup *tg = residentFatties[i];
 				if(!tg) 
 					break;
-				fprintf(out, "\t%s - %3.1f%% - %u kb %u items, avg %u b\n", tg->name, PERCENT(residentSize, tg->size), (unsigned int)tg->size>>10, tg->count, (unsigned int)(tg->count ? tg->size/tg->count : 0));
+				GCLog("\t%s - %3.1f%% - %u kb %u items, avg %u b\n", tg->name, PERCENT(residentSize, tg->size), (unsigned int)tg->size>>10, tg->count, (unsigned int)(tg->count ? tg->size/tg->count : 0));
 				for(int j=0; j < kNumTracesPerType; j++) {
 					StackTrace *trace = tg->traces[j];
 					if(trace) {
@@ -424,7 +422,7 @@ namespace MMgc
 							size = trace->totalSize;
 							count = trace->totalCount;
 						}
-						fprintf(out,"\t\t %3.1f%% - %u kb - %u items - ", PERCENT(tg->size, size), size>>10, count);
+						GCLog("\t\t %3.1f%% - %u kb - %u items - ", PERCENT(tg->size, size), size>>10, count);
 						PrintStackTraceByTrace(trace);
 					}
 				}
@@ -500,7 +498,7 @@ namespace MMgc
 		*tp++ = '\n';
 		*tp = '\0';
 
-		fputs(out, GCHeap::GetGCHeap()->GetSpyFile());
+		GCLog(out);
 	}
 
 	void PrintStackTraceByTrace(StackTrace *trace)

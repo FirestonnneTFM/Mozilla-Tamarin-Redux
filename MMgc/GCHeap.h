@@ -52,9 +52,6 @@ namespace MMgc
 		bool trimVirtualMemory;
 		bool verbose;
 		bool returnMemory;
-#ifdef MMGC_MEMORY_PROFILER
-		bool enableProfiler;
-#endif
 		bool gcstats;
 		bool autoGCStats;
 	};
@@ -355,7 +352,6 @@ namespace MMgc
 		
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *GetProfiler() { return profiler; }
-		bool IsProfilingEnabled() { return config.enableProfiler; }
 		void DumpFatties() { profiler->DumpFatties(); }
 #endif
 
@@ -377,8 +373,6 @@ namespace MMgc
 		GCHeapConfig &Config() { return config; }
 
 		void log_percentage(const char *, size_t bytes, size_t relativeTo);
-
-		FILE* GetSpyFile() { return spyFile; }
 
 		void DumpMemoryInfo();
 
@@ -452,6 +446,9 @@ namespace MMgc
 		// textual heap representation, very nice!
 		void DumpHeapRep();
 		
+		//log a character for "count" times
+		void LogChar(char c, size_t count);
+
 		// Remove a block from a free list (inlined for speed)
 		inline void RemoveFromList(HeapBlock *block)
 		{
@@ -508,10 +505,9 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *profiler;
+		bool hasSpy; //flag indicating whether profiler spy is active or not.  If active, AllocHook will call VMPI_spyCallback
 #endif
 		bool hooksEnabled;
-		uint32_t signal;
-		FILE *spyFile;		
 		
 		// some OS's are loose with how with virtual memory is dealt with and we don't have to track
 		// each region individually (ie multiple contiguous mmap's can be munmap'd all at once)

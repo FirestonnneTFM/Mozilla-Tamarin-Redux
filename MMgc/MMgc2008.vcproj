@@ -1781,6 +1781,10 @@
  					RelativePath="..\VMPI\SpinLockWin.cpp"
  					>
  				</File>
+ 				<File
+ 					RelativePath="..\VMPI\SpyUtilsWin.cpp"
+ 					>
+ 				</File>
  			</Filter>
 		<File
 			RelativePath=".\VTune\MMgc.vpj"

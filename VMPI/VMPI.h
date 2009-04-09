@@ -343,24 +343,21 @@ extern bool VMPI_canMergeContiguousRegions();
  */
 extern bool VMPI_useVirtualMemory();
 
-/**
- * spin up a thread on the named signal name and write a 1 to addr when it fires
- */
-extern void VMPI_writeOnNamedSignal(const char *name, uint32_t *addr);
+/** 
+ * Method to setup a spy channel on MMgc/avmplus
+ * If the platform intends to periodically retrieve information from MMgc/avmplus
+ * then it can perform the necessary setup during this function call and return true
+ * @return true if the spy is setup successfully else false
+ * @see VMPI_spyCallback
+*/
+extern bool VMPI_spySetup();
 
-/**
- * connect to a named pipe
- */
-extern void *VMPI_openAndConnectToNamedPipe(const char *pipeName);
-
-/**
- * Return a FILE type from the passed handle
- */
-extern FILE *VMPI_handleToStream(void *handle);
-
-/**
- * close a named pipe previously opened by VMPI_openAndConnectToNamedPipe
- */
-extern void VMPI_closeNamedPipe(void *handle);
+/** 
+ * Callback method for spy
+ * Currently called on every allocation in MMgc if VMPI_spySetup returned true
+ * @return none
+*/
+extern void VMPI_spyCallback();
+ 
 
 #endif /* __avmplus_VMPI__ */
