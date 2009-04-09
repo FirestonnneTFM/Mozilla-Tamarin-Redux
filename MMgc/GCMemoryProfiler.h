@@ -129,13 +129,18 @@ namespace MMgc
 	/**
 	* Given a user pointer back up to real beginning
 	*/
-	inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int)); }
+	inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int32_t)); }
 
 	/**
-	* Given a user pointer back up to real beginning
+	* Given a real pointer return pointer to user memory
 	*/
-	inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int)); }
+	inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int32_t)); }
 
+	/**
+	* Print errorr messsage and stack traces for allocation/free of memory
+	* that has been written over after being deleted
+	*/
+	void ReportDeletedMemoryWrite(const void* item);
 
 #endif //MMGC_MEMORY_INFO
 
