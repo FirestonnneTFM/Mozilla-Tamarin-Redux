@@ -61,9 +61,6 @@ namespace MMgc
 		trimVirtualMemory(true),
 		verbose(false),
 		returnMemory(true),
-#ifdef MMGC_MEMORY_PROFILER			
-		enableProfiler(false),
-#endif
 		gcstats(false), // tracking
 		autoGCStats(false) // auto printing
 	{
@@ -93,10 +90,8 @@ namespace MMgc
 		  config(c),
 #ifdef MMGC_MEMORY_PROFILER
 		  profiler(NULL),
-		  signal(0),
 #endif
 		  hooksEnabled(false),
-		  spyFile(stdout),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
 		lastRegion  = 0;
@@ -135,14 +130,9 @@ namespace MMgc
 		bool enableHooks = false;
 		
 #ifdef MMGC_MEMORY_PROFILER
-		if(!config.enableProfiler) {
-			const char *env = VMPI_getenv("MMGC_PROFILE");
-			if(env && VMPI_strncmp(env, "1", 1) == 0)
-				config.enableProfiler = true;
-		}
-		enableHooks = config.enableProfiler;
+		enableHooks = hasSpy = VMPI_spySetup();
 #endif
-		
+
 #ifdef MMGC_MEMORY_INFO
 		// always track allocs in DEBUG builds
 		enableHooks = true;
@@ -151,7 +141,6 @@ namespace MMgc
 		if(enableHooks) {
 #ifdef MMGC_MEMORY_PROFILER
 			profiler = new MemoryProfiler();
-			VMPI_writeOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &signal);
 #endif
 			hooksEnabled = true; // set only after creating profiler	
 		}
@@ -1423,13 +1412,8 @@ namespace MMgc
 		{
 			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
-			if(signal) {
-				signal = 0;
-				void *pipe = VMPI_openAndConnectToNamedPipe("MMgc_Spy");
-				spyFile = VMPI_handleToStream(pipe);
-				DumpMemoryInfo();
-				VMPI_closeNamedPipe(pipe);
-				spyFile = stdout;
+			if(hasSpy) {
+				VMPI_spyCallback();
 			}
 			profiler->RecordAllocation(item, size);
 #endif
@@ -1493,9 +1477,9 @@ namespace MMgc
 	{
 		bytes_compare = size_t((bytes*100.0)/bytes_compare);
 		if(bytes > 1<<20) {
-			fprintf(spyFile,"%s %u (%.1fM) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), bytes * 1.0 / (1024*1024), (unsigned int)(bytes_compare));
+			GCLog("%s %u (%.1fM) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), bytes * 1.0 / (1024*1024), (unsigned int)(bytes_compare));
 		} else {
-			fprintf(spyFile,"%s %u (%uK) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), (unsigned int)(bytes / 1024), (unsigned int)(bytes_compare));
+			GCLog("%s %u (%uK) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), (unsigned int)(bytes / 1024), (unsigned int)(bytes_compare));
 		}
 	}
 	
@@ -1510,15 +1494,15 @@ namespace MMgc
 		for(uint32_t i=0,n=gcManager.getCount() ; i<n; i++) {
 			GC* gc = gcManager.getGC(i);
 #ifdef MMGC_MEMORY_PROFILER
-			fprintf(spyFile,"[mem] GC 0x%p:%s\n", (void*)gc, GetAllocationName(gc));
+			GCLog("[mem] GC 0x%p:%s\n", (void*)gc, GetAllocationName(gc));
 #else
-			fprintf(spyFile,"[mem] GC 0x%p\n", (void*)gc);
+			GCLog("[mem] GC 0x%p\n", (void*)gc);
 #endif
 			gc->DumpMemoryInfo();
 			gc_bytes_total += gc->GetBytesInUse();
 			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
-		fprintf(spyFile, "[mem] ------- gross stats -----\n");
+		GCLog("[mem] ------- gross stats -----\n");
 		log_percentage("[mem] private", priv, priv);
 		log_percentage("[mem]\t mmgc", mmgc, priv);
 		log_percentage("[mem]\t\t unmanaged", unmanaged, priv);
@@ -1527,15 +1511,23 @@ namespace MMgc
 		log_percentage("[mem]\t other",  priv - mmgc, priv);
 		log_percentage("[mem] \tunmanaged fragmentation ", unmanaged-fixed_alloced, unmanaged);
 		log_percentage("[mem] \tmanaged fragmentation ", gc_total - gc_bytes_total, gc_total);
-		fprintf(spyFile, "[mem] -------- gross stats end -----\n");
+		GCLog("[mem] -------- gross stats end -----\n");
 		
 		DumpHeapRep();
 		
 #ifdef MMGC_MEMORY_PROFILER
-		if(config.enableProfiler)
+		if(hasSpy)
 			DumpFatties();
 #endif
-		fflush(spyFile);
+	}
+
+	void GCHeap::LogChar(char c, size_t count)
+	{
+		char* buf = (char*)alloca(count+1);
+		VMPI_memset(buf, c, count);
+		buf[count] = '\0';
+
+		GCLog(buf);
 	}
 
 	void GCHeap::DumpHeapRep()
@@ -1560,7 +1552,7 @@ namespace MMgc
 		for(int i=0; i < numRegions; i++)
 		{
 			r = regions[i];
-			fprintf(spyFile, "0x%p -  0x%p\n", r->baseAddr, r->reserveTop);
+			GCLog("0x%p -  0x%p\n", r->baseAddr, r->reserveTop);
 			char c;
 			char *addr = r->baseAddr;
 			
@@ -1570,10 +1562,10 @@ namespace MMgc
 				char *end = spanningBlock->baseAddr + (spanningBlock->size * kBlockSize);
 				if(end > r->reserveTop)
 					end = r->reserveTop;
-				while(addr != end) {
-					fputc(spanningBlock->inUse() ? '1' : '0', spyFile);
-					addr += kBlockSize;
-				}
+
+				LogChar(spanningBlock->inUse() ? '1' : '0', (end - addr)/kBlockSize);
+				addr = end;
+
 				if(addr == spanningBlock->baseAddr + (spanningBlock->size * kBlockSize))
 					spanningBlock = NULL;
 			}
@@ -1587,21 +1579,21 @@ namespace MMgc
 					c = '0';
 				else 
 					c = '-';
-				for(int i=0, n=hb->size; i < n; i++, addr += GCHeap::kBlockSize) {
-					fputc(c, spyFile);
+				int i, n;
+				for(i=0, n=hb->size; i < n; i++, addr += GCHeap::kBlockSize) {
 					if(addr == r->reserveTop) {
 						// end of region!
 						spanningBlock = hb;
 						break;
 					}
 				}
+
+				LogChar(c, i);
 			}
 
-			while(addr != r->reserveTop) {	
-				fputc('-', spyFile);
-				addr += kBlockSize;
-			}				
-			fputc('\n', spyFile);
+			LogChar('-', (r->reserveTop - addr) / kBlockSize);
+
+			GCLog("\n");
 		}
 	}
 

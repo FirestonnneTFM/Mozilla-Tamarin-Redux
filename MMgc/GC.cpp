@@ -2037,7 +2037,7 @@ uintptr_t	GC::GetStackTop() const
 		int maxAlloc =  a->GetMaxAlloc()* a->GetItemSize();
 		int efficiency = maxAlloc > 0 ? inUse * 100 / maxAlloc : 100;
 		if(inUse) {
-			fprintf(heap->GetSpyFile(), "Allocator(%d): %d%% efficiency %d kb out of %d kb\n", a->GetItemSize(), efficiency, inUse>>10, maxAlloc>>10);
+			GCLog("Allocator(%d): %d%% efficiency %d kb out of %d kb\n", a->GetItemSize(), efficiency, inUse>>10, maxAlloc>>10);
 		}
 		return maxAlloc-inUse;
 	}
@@ -2048,10 +2048,10 @@ uintptr_t	GC::GetStackTop() const
 		heap->log_percentage("[mem] \tmanaged fragmentation ", total-GetBytesInUse(), total);
 		if(ticksToMillis(markTicks()) != 0 && bytesMarked() != 0) {
 			uint32_t markRate = (uint32_t) (bytesMarked() / (1024 * ticksToMillis(markTicks()))); // kb/ms == mb/s
-			fprintf(heap->GetSpyFile(),"[mem] \tmark rate %u mb/s\n", markRate);
+			GCLog("[mem] \tmark rate %u mb/s\n", markRate);
 		}
-		fprintf(heap->GetSpyFile(),"[mem] \tmark increments %d\n", marks());
-		fprintf(heap->GetSpyFile(),"[mem] \tsweeps %d mb/s\n", sweeps);
+		GCLog("[mem] \tmark increments %d\n", marks());
+		GCLog("[mem] \tsweeps %d mb/s\n", sweeps);
 
 		int waste=0;
 		for(int i=0; i < kNumSizeClasses; i++)
@@ -2060,7 +2060,7 @@ uintptr_t	GC::GetStackTop() const
 			waste += DumpAlloc(containsPointersRCAllocs[i]);
 			waste += DumpAlloc(noPointersAllocs[i]);
 		}
-		fprintf(heap->GetSpyFile(),"Wasted %d kb\n", waste>>10);
+		GCLog("Wasted %d kb\n", waste>>10);
 	}
 
 #ifdef _DEBUG

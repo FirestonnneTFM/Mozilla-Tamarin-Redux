@@ -41,6 +41,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/WinPortUtils.cpp \
   $(curdir)/MMgcPortWin.cpp \
   $(curdir)/SpinLockWin.cpp \
+  $(curdir)/SpyUtilsWin.cpp \
   $(NULL)
 endif
 
@@ -50,6 +51,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/PosixPortUtils.cpp \
   $(curdir)/MMgcPortMac.cpp \
   $(curdir)/SpinLockMac.cpp \
+  $(curdir)/SpyUtilsMac.cpp \
   $(NULL)
 endif
 
