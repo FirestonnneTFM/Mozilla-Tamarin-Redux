@@ -215,7 +215,6 @@ elif the_os == "linux":
                          'AVMPLUS_UNIX': None,
                          'LINUX': None})
     OS_LIBS.append('pthread')
-    APP_CPPFLAGS += '-DAVMPLUS_CDECL '
     if cpu == "x86_64":
         # workaround https://bugzilla.mozilla.org/show_bug.cgi?id=467776
         OPT_CXXFLAGS += '-fno-schedule-insns2 '
