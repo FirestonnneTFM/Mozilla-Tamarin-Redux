@@ -449,9 +449,16 @@ namespace MMgc
 	}
 	void SetMemType(const void *s)
 	{
-		GCAssert(GC::GetGC(s)->IsGCMemory(s));
-		if(memtype == NULL)
-			memtype = s;
+		if(s == NULL)
+		{
+			memtype = NULL;
+		}
+		else
+		{
+			GCAssert(GC::GetGC(s)->IsGCMemory(s));
+			if(memtype == NULL)
+				memtype = s;
+		}
 	}
 	
 	void DumpStackTraceHelper(uintptr_t *trace)

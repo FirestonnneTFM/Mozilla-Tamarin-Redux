@@ -61,6 +61,8 @@
 #define MMGC_MEMORY_INFO
 #endif
 
+#define MMGC_MEMORY_PROFILER
+
 /**
  * Define this if MMgc is being integrated with avmplus.
  * Activates dynamic profiling support, etc.
