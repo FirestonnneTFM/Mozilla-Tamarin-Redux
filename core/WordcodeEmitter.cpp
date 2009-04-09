@@ -430,7 +430,7 @@ namespace avmplus
 		}
 		case OP_getglobalslot:
 		case OP_setglobalslot:
-		    emitOp1(pc, WOP_getglobalslot);
+		    emitOp1(pc, wordCode(opcode));
 			break;
 		case OP_call:
 		case OP_construct:
