@@ -1001,6 +1001,9 @@ bail:
 		}
 	
 		SAMPLE_CHECK();
+
+		int sweepResults = 0;
+
 		// ISSUE: this could be done lazily at the expense other GC's potentially expanding
 		// unnecessarily, not sure its worth it as this should be pretty fast
 		GCAlloc::GCBlock *b = smallEmptyPageList;
@@ -1010,6 +1013,8 @@ bail:
 			b->alloc->SweepGuts(b);
 #endif
 			b->alloc->FreeChunk(b);
+
+			sweepResults++;
 			b = next;
 		}
 		smallEmptyPageList = NULL;
@@ -1021,7 +1026,10 @@ bail:
 			GCLargeAlloc::LargeBlock *next = lb->next;
 			if(heap->HooksEnabled())
 				heap->FreeHook(GetUserPointer(lb+1), lb->usableSize - DebugSize(), 0xba);
-			FreeBlock(lb, lb->GetNumBlocks());
+
+			int numBlocks = lb->GetNumBlocks();
+			sweepResults += numBlocks;
+			FreeBlock(lb, numBlocks);
 			lb = next;
 		}
 		largeEmptyPageList = NULL;
@@ -1049,18 +1057,6 @@ bail:
 		SAMPLE_CHECK();
 
 		if(heap->Config().gcstats) {
-			int sweepResults = 0;
-			GCAlloc::GCBlock *bb = smallEmptyPageList;
-			while(bb) {
-				sweepResults++;
-				bb = bb->next;
-			}
-			
-			GCLargeAlloc::LargeBlock *lbb = largeEmptyPageList;
-			while(lbb) {
-				sweepResults += lbb->GetNumBlocks();
-				lbb = lbb->next;
-			}
 			// include large pages given back
 			sweepResults += int(heapSize - heap->GetUsedHeapSize());
 			double millis = duration(sweepStart);
@@ -1093,15 +1089,11 @@ bail:
 		if(!item)
 			item = heapAlloc(size, true, zero);
 
-		GCAssert(item != NULL);
-		if (item != NULL)
-		{
-			// mark GC pages in page map, small pages get marked one,
-			// the first page of large pages is 3 and the rest are 2
-			MarkGCPages(item, 1, pageType);
-			if(pageType == kGCLargeAllocPageFirst) {
-				MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
-			}
+		// mark GC pages in page map, small pages get marked one,
+		// the first page of large pages is 3 and the rest are 2
+		MarkGCPages(item, 1, pageType);
+		if(pageType == kGCLargeAllocPageFirst) {
+			MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
 		}
 
 		return item;

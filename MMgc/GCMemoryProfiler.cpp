@@ -568,9 +568,9 @@ namespace MMgc
 	#ifdef MMGC_64BIT
 		// Our writeback pointer is 8 bytes so we need to round up to the next 8 byte
 		// size.  (only 5 DWORDS are used)
-		return 6 * sizeof(int); 
+		return 6 * sizeof(int32_t); 
 	#else
-		return 4 * sizeof(int); 
+		return 4 * sizeof(int32_t); 
 	#endif
 	}
 
@@ -594,9 +594,9 @@ namespace MMgc
 	{
 		item = GetRealPointer(item);
 
-		int *mem = (int*)item;
+		int32_t *mem = (int32_t*)item;
 		// set up the memory
-		*mem++ = (int)size;
+		*mem++ = (int32_t)size;
 		*mem++ = 0;
 		mem += (size>>2);
 		*mem++ = 0xdeadbeef;
@@ -609,9 +609,9 @@ namespace MMgc
 
 	void DebugFreeHelper(const void *item, int poison, size_t wholeSize)
 	{
-		int *ip = (int*) item;
-		int size = *ip;
- 		int *endMarker = ip + 2 + (size>>2);
+		int32_t *ip = (int32_t*) item;
+		int32_t size = *ip;
+ 		int32_t *endMarker = ip + 2 + (size>>2);
 
 		// clean up
 		*ip = 0;
@@ -621,7 +621,7 @@ namespace MMgc
 		if(size == 0)
 			return;
 
-		if (*endMarker != (int32_t)0xdeadbeef)
+		if (*endMarker != 0xdeadbeef)
 		{
 			// if you get here, you have a buffer overrun.  The stack trace about to
 			// be printed tells you where the block was allocated from.  To find the
@@ -638,10 +638,20 @@ namespace MMgc
 
 	void *DebugFree(const void *item, int poison, size_t size)
 	{
-		item = (int*) item - 2;
+		item = (int32_t*) item - 2;
 		DebugFreeHelper(item, poison, size);
 		return (void*)item;
 	}
+
+	void ReportDeletedMemoryWrite(const void* item)
+	{
+		GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:");
+		PrintStackTrace(GetUserPointer(item));
+		GCDebugMsg(false, "Deletion trace:");
+		PrintStackTrace(GetUserPointer(item));
+		GCDebugMsg(true, "Deleted item write violation!");
+	}
+
 #endif // defined MMGC_MEMORY_INFO
 
 } // namespace MMgc

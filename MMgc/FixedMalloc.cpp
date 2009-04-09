@@ -213,14 +213,8 @@ namespace MMgc
 		size += DebugSize();
 		int blocksNeeded = (int)GCHeap::SizeToBlocks(size);
 		void *item = m_heap->Alloc(blocksNeeded, true, false);
-		if(!item)
-		{
-			GCAssertMsg(item != NULL, "Large allocation failed!");
-		}
-		else
-		{
-			numLargeChunks += blocksNeeded;
-		}
+		numLargeChunks += blocksNeeded;
+
 		item = GetUserPointer(item);
 		if(m_heap->HooksEnabled())
 			m_heap->AllocHook(item, Size(item));

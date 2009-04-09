@@ -321,7 +321,7 @@ namespace MMgc
 #ifdef _DEBUG
 		// addref/decref stack traces
 		GCStack<int,4> history;
-		int padto32bytes;
+		int32_t padto32bytes;
 #endif
 	};
 

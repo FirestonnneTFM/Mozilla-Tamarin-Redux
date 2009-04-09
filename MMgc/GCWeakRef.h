@@ -70,13 +70,13 @@ namespace MMgc
 		// private, only GC can access
 		GCWeakRef(const void *obj) : m_obj(obj) 
 		{
-#ifdef _DEBUG
-			obj_creation = obj ? *((int*)GetRealPointer(obj)+1) : 0;
+#ifdef MMGC_MEMORY_INFO
+			obj_creation = obj;
 #endif
 		}
 		const void *m_obj;
-#ifdef _DEBUG
-		int obj_creation;
+#ifdef MMGC_MEMORY_INFO
+		const void* obj_creation;
 #endif
 	};
 

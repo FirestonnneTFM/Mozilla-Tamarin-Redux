@@ -93,31 +93,11 @@ namespace MMgc
 		GCAssertMsg(GetNumAlloc() == 0, "You have leaks");
 
 		while (m_firstBlock) {
-#ifdef _DEBUG
-			// go through every item on the free list and make sure it wasn't written to
-			// after being poisoned.
-			void *item = m_firstBlock->firstFree;
-			while(item) {
-				for(int i=3, n=(m_firstBlock->size>>2)-1; i<n; i++)
-				{
-					uint32_t data = ((uint32_t*)item)[i];
-					if(data != 0xbabababa && data != 0xcacacaca)
-					{
-						GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:");
 #ifdef MMGC_MEMORY_INFO
-						PrintStackTrace((int*)item+2);
-#endif
-						GCDebugMsg(false, "Deletion trace:");
-#ifdef MMGC_MEMORY_INFO
-						PrintStackTrace((int*)item+3);
-#endif
-						GCDebugMsg(true, "Deleted item write violation!");
-					}
-				}
-				// next free item
-				item = *((void**)item);
-			}
-#endif
+			//check where any item within this block wasn't written to after being poisoned
+			VerifyFreeBlockIntegrity(m_firstBlock->firstFree, m_firstBlock->size);
+#endif //MMGC_MEMORY_INFO
+
 			GCBlock *b = m_firstBlock;
 			UnlinkChunk(b);
 			FreeChunk(b);
@@ -262,24 +242,8 @@ start:
 			// clear free list pointer, the rest was zero'd in free
 			*(intptr_t*) item = 0;
 #ifdef MMGC_MEMORY_INFO
-			// ensure previously used item wasn't written to
-			// -1 because write back pointer space isn't poisoned.
-#ifdef MMGC_64BIT			
-			for(int i=3, n=(b->size>>2)-3; i<n; i++)
-#else
-			for(int i=3, n=(b->size>>2)-1; i<n; i++)
-#endif			
-			{
-				uint32_t data = ((uint32_t*)item)[i];
-				if(data != 0xcacacaca && data != 0xbabababa)
-				{
-					GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:", item);
-					PrintStackTrace((int*)item+2);
-					GCDebugMsg(false, "Deletion trace:");
-					PrintStackTrace((int*)item+3);
-					GCDebugMsg(true, "Deleted item write violation!");
-				}
-			}
+			//check for writes on deleted memory
+			VerifyFreeBlockIntegrity(item, b->size);
 #endif
 		} else {
 			item = b->nextItem;
@@ -718,4 +682,37 @@ start:
 		}		
 		return bytes;
 	}
+
+#ifdef MMGC_MEMORY_INFO
+
+	/* static */
+	void GCAlloc::VerifyFreeBlockIntegrity(const void* item, uint32_t size)
+	{
+		// go through every item on the free list and make sure it wasn't written to
+		// after being poisoned.
+		while(item) 
+		{
+#ifdef MMGC_64BIT
+			int n = (size >> 2) - 3;
+#else
+			int n = (size >> 2) - 1;
+#endif
+
+			int startIndex = (int)((uint32_t*)item - (uint32_t*)GetRealPointer(item));
+
+			for(int i=startIndex; i<n; i++)
+			{
+				uint32_t data = ((uint32_t*)item)[i];
+				if(data != 0xbabababa && data != 0xcacacaca)
+				{
+					ReportDeletedMemoryWrite(item);
+					break;
+				}
+			}
+			// next free item
+			item = *((const void**)item);
+		}
+	}
+
+#endif //MMGC_MEMORY_INFO
 }
