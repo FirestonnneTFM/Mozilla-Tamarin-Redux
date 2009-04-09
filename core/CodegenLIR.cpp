@@ -2251,7 +2251,6 @@ namespace avmplus
 		    emitGetslot(state, opd1, state->sp(), type);
 			break;
 		case OP_setglobalslot:
-			emitGetGlobalScope();
 			emitSetslot(state, OP_setglobalslot, opd1, 0 /* computed or ignored */);
 			break;
 		case OP_call:
