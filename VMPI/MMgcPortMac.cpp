@@ -243,7 +243,7 @@ uint64_t VMPI_getPerformanceCounter()
 		if(ret != 0 && sym) {
 			size_t sz=bufferSize;
 			int status=0;
-			char *out = (char*) malloc(buffSize);
+			char *out = (char*) malloc(bufferSize);
 			char *ret = abi::__cxa_demangle(sym, out, &sz, &status);
 			if(ret) {
 				out = ret; // apparently demangle may realloc, so free this instead of out
@@ -272,5 +272,25 @@ uint64_t VMPI_getPerformanceCounter()
 		//		GetFunctionName(pc, buffer, bufferSize);
 		//	VMPI_snprintf(buffer, bufferSize, "0x%u:%s", pc, sym);
 	}
+
+
+void VMPI_writeOnNamedSignal(const char */*name*/, uint32_t */*addr*/)
+{
+
+}
+
+void *VMPI_openAndConnectToNamedPipe(const char */*pipeName*/)
+{
+	return NULL;
+}
+
+FILE *VMPI_handleToStream(void */*handle*/)
+{
+	return NULL;
+}
+
+void VMPI_closeNamedPipe(void *handle)
+{
+}
 
 #endif //MMGC_MEMORY_PROFILER

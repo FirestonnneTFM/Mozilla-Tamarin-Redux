@@ -85,14 +85,6 @@ typedef uint8_t		byte;
  on different platforms, but we want to use UTF-16 uniformly. */
 typedef uint16_t wchar;
 
-// not ported or needed elsewhere (yet!)
-#ifdef WIN32
-void VMPI_writeOnNamedSignal(const char *name, uint32_t *addr);
-void *VMPI_openAndConnectToNamedPipe(const char *pipe);
-FILE *VMPI_handleToStream(void *handle);
-void VMPI_closeNamedPipe(void *handle);
-#endif
-
 /**
 * This method should return the difference in milliseconds between local time and UTC
 * @return offset in milliseconds
@@ -360,5 +352,15 @@ extern void VMPI_writeOnNamedSignal(const char *name, uint32_t *addr);
  * connect to a named pipe
  */
 extern void *VMPI_openAndConnectToNamedPipe(const char *pipeName);
+
+/**
+ * Return a FILE type from the passed handle
+ */
+extern FILE *VMPI_handleToStream(void *handle);
+
+/**
+ * close a named pipe previously opened by VMPI_openAndConnectToNamedPipe
+ */
+extern void VMPI_closeNamedPipe(void *handle);
 
 #endif /* __avmplus_VMPI__ */

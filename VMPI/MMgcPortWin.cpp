@@ -396,7 +396,7 @@ static RtlCaptureStackBackTrace_Function* const RtlCaptureStackBackTrace_fn =
 
 	bool VMPI_captureStackTrace(uintptr_t *buffer, size_t bufferSize, uint32_t framesToSkip)
 	{
-		int num = RtlCaptureStackBackTrace_fn(framesToSkip, bufferSize - 1, (PVOID*)bufferSize, NULL);
+		int num = RtlCaptureStackBackTrace_fn(framesToSkip, (ULONG)bufferSize - 1, (PVOID*)buffer, NULL);
 		buffer[num] = 0;
 		return true;
 	}
@@ -517,10 +517,16 @@ void VMPI_writeOnNamedSignal(const char *name, uint32_t *addr)
 	CreateThread(NULL, 0, WaitForMemorySignal, sig_data, 0, NULL);
 }
 
+ 
+#ifdef _MSC_VER
+	#pragma warning(disable: 4995) //disabling warning for deprecated _snprintf
+#endif
+
+
 void *VMPI_openAndConnectToNamedPipe(const char *pipeName)
 {
   char name[256];
-  _snprintf(name, sizeof(name), "\\\\.\\pipe\\%s", pipeName);
+  VMPI_snprintf(name, sizeof(name), "\\\\.\\pipe\\%s", pipeName);
   HANDLE pipe = CreateNamedPipeA((LPCSTR)name, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE, 1, 4096, 4096, 100, NULL);
   ConnectNamedPipe(pipe, NULL);
   return (void*)pipe;

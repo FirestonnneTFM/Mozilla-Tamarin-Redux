@@ -194,7 +194,7 @@ namespace avmplus
 		AvmAssert(kAuto != w);
 		AvmAssert(len >= 0);
 
-		MMGC_MEM_TYPE( "String: Dynamic" );
+		MMGC_MEM_TAG( "String: Dynamic" );
 		
 		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
 		int32_t alloc = len + extra;
