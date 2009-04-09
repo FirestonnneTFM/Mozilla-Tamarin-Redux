@@ -226,7 +226,7 @@ void VMPI_free(void* ptr)
 	HeapFree(GetProcessHeap(), 0, ptr);
 }
 
-void VMPI_Log(const char* message)
+void VMPI_log(const char* message)
 {
 #ifndef UNDER_CE
 	::OutputDebugStringA(message);

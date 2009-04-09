@@ -134,7 +134,7 @@ void VMPI_free(void* ptr)
 	free(ptr);
 }
 
-void VMPI_Log(const char* message)
+void VMPI_log(const char* message)
 {
 	printf("%s",message);
 }

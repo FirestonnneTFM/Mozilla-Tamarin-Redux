@@ -40,12 +40,12 @@
 
 #include "VMPI.h"
 
-void VMPI_DebugLog(const char* message)
+void VMPI_debugLog(const char* message)
 {
-	VMPI_Log(message);
+	VMPI_log(message);
 }
 
-void VMPI_DebugBreak()
+void VMPI_debugBreak()
 {
 	abort();
 }

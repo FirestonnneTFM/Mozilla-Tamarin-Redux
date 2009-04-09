@@ -51,10 +51,10 @@
 #include <stdarg.h>
 #include <string.h>
 
-void VMPI_DebugLog(const char* message)
+void VMPI_debugLog(const char* message)
 {
 #ifdef DARWIN
-		VMPI_Log(message);
+		VMPI_log(message);
 #else
 		char buf[256];
 		VMPI_strncpy(buf, message, sizeof(buf)-1);
@@ -65,7 +65,7 @@ void VMPI_DebugLog(const char* message)
 #endif /* DARWIN */
 }
 
-void VMPI_DebugBreak()
+void VMPI_debugBreak()
 {
 #ifdef DARWIN
 	abort();
