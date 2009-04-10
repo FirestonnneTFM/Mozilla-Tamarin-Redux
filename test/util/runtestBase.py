@@ -334,11 +334,11 @@ class RuntestBase:
                 self.osName='winmobile-emulator'
             elif re.search('(32-bit|80386|i386)', f[0]):
                 cputype='x86'
-            elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f[0]):
+            if re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f[0]):
                 cputype='x64'
-            elif re.search('(ppc)', f[0]):
+            if re.search('(ppc)', f[0]):
                 cputype='ppc'
-            elif re.search('(ppc64)', f[0]):
+            if re.search('(ppc64)', f[0]):
                 cputype='ppc64'
             if cputype == '':
                 raise Exception()
