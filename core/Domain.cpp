@@ -38,12 +38,6 @@
 
 #include "avmplus.h"
 
-#ifdef SOLARIS
-typedef caddr_t maddr_ptr;
-#else
-typedef void *maddr_ptr;
-#endif
-
 namespace avmplus
 {
 	Domain::Domain(AvmCore *_core, Domain* base) : base(base)

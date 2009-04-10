@@ -166,7 +166,7 @@ void VMPI_setPageProtection(void *address,
   if (writeableFlag) {
 	flags |= PROT_WRITE;
   }
-  int retval = mprotect(beginPage, sizePaged, flags);
+  int retval = mprotect((maddr_ptr)beginPage, (unsigned int)sizePaged, flags);
   AvmAssert(retval == 0);
   (void)retval;
 }

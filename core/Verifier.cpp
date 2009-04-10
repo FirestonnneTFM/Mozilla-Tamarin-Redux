@@ -181,6 +181,8 @@ namespace avmplus
      * @param pool
      * @param info
      */
+	// Sun's C++ compiler wants "volatile" here because the declaration has it
+	// Presumably it's here to remove a warning about variable clobbered by longjmp
     void Verifier::verify(CodeWriter * volatile coder)
     {
       //AvmLog("begin verify\n");

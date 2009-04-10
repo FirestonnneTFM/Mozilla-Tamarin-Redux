@@ -102,6 +102,8 @@
   #include <pthread.h>
 #endif
 
+typedef void *maddr_ptr;
+
 #ifdef AVMPLUS_MAC_CARBON
     /**
 	 * On Mac Carbon, if you compile with Altivec support,

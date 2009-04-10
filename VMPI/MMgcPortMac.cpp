@@ -118,7 +118,7 @@ static int get_mmap_fdes(int delta)
 
 void* VMPI_reserveMemoryRegion(void *address, size_t size)
 {
-	void *addr = (char*)mmap(address,
+	void *addr = (char*)mmap((maddr_ptr)address,
 							 size,
 							 PROT_NONE,
 							 MAP_PRIVATE | MAP_ANONYMOUS,
@@ -137,13 +137,13 @@ void* VMPI_reserveMemoryRegion(void *address, size_t size)
 
 bool VMPI_releaseMemoryRegion(void* address, size_t size)
 {
-	int result = munmap(address, size);
+	int result = munmap((maddr_ptr)address, size);
 	return (result == 0);
 }
 
 bool VMPI_commitMemory(void* address, size_t size)
 {
-	char *got = (char*)mmap(address,
+	char *got = (char*)mmap((maddr_ptr)address,
 							size,
 							PROT_READ | PROT_WRITE,
 							MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
