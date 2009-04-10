@@ -37,8 +37,6 @@
 
 #include "avmshell.h"
 
-#include "Platform.h"
-
 #ifdef __SUNPRO_CC
 #define PRIVATE __hidden
 #else
@@ -401,7 +399,7 @@ namespace avmshell
 	{
 		TRY(this, kCatchAction_ReportAsError)
 		{
-			uint8 header[8];
+			uint8_t header[8];
 
 			char* executablePath = new char[VMPI_strlen(argv[0])+1];
 			VMPI_strcpy(executablePath, argv[0]);

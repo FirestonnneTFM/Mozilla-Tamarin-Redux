@@ -38,16 +38,25 @@
 #ifndef __avmplus_VMPI__
 #define __avmplus_VMPI__
 
+// Include feature settings.  These also perform platform sniffing if platform
+// settings are not provided eg on the command line.
+
 #ifdef AVMSHELL_BUILD
   #include "avmshell-features.h"
 #else
   /* The embedding host must provide this file in some directory that's included in
    * header search paths.  It must define a value (0 or 1) for every feature
    * required by avmplus, see shell/avmshell-features.h for a model, also see
-   * core/avmfeatures.as for documentation on the feature system.
+   * core/avmfeatures.as for documentation of the feature system.
    */
   #include "avmhost-features.h"
 #endif
+
+// Include the feature system here so that the platform files can depend on
+// the internal (VMCFG_, etc) names rather than feature names.  Eases
+// maintainability.
+
+#include "avmfeatures.h"
   
 #if AVMSYSTEM_WIN32
   #include "win32/win32-platform.h"
@@ -59,7 +68,8 @@
   #include "symbian/symbian-platform.h"
 #endif
 
-// legacy types
+// Legacy types used by some embedding host code, eg avmplus::uint64.
+// These types are not to be used inside the avm code.
 namespace avmplus
 {
 typedef int64_t		int64;

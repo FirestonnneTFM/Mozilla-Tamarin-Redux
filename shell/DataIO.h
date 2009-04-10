@@ -49,24 +49,24 @@ namespace avmshell
 		b = t;
 	}
 
-	inline void FlipU16(uint16& value)
+	inline void FlipU16(uint16_t& value)
 	{
-		uint8 *pa = (uint8 *)&(value);
+		uint8_t *pa = (uint8_t*)&(value);
 		CoreSwap(pa[0], pa[1]);
 	}
 
-	inline void FlipU64(uint64& value)
+	inline void FlipU64(uint64_t& value)
 	{
-		uint8 *pa = (uint8 *)&(value);
+		uint8_t *pa = (uint8_t*)&(value);
 		CoreSwap(pa[0], pa[7]);
 		CoreSwap(pa[1], pa[6]);
 		CoreSwap(pa[2], pa[5]);
 		CoreSwap(pa[3], pa[4]);
 	}
 
-	inline void FlipU32(uint32& value)
+	inline void FlipU32(uint32_t& value)
 	{
-		uint8 *pa = (uint8 *)&(value);
+		uint8_t *pa = (uint8_t *)&(value);
 		CoreSwap(pa[0], pa[3]);
 		CoreSwap(pa[1], pa[2]);
 	}
@@ -97,7 +97,7 @@ namespace avmshell
 		Endian GetEndian() const { return m_endian; }
 		void SetEndian(Endian endian) { m_endian = endian; }
 
-		void ConvertU16(uint16& value)
+		void ConvertU16(uint16_t& value)
 		{
 			if (GetEndian() != GetNativeEndian())
 			{
@@ -105,7 +105,7 @@ namespace avmshell
 			}
 		}
 		
-		void ConvertU32(uint32& value)
+		void ConvertU32(uint32_t& value)
 		{
 			if (GetEndian() != GetNativeEndian())
 			{
@@ -113,7 +113,7 @@ namespace avmshell
 			}
 		}
 		
-		void ConvertU64(uint64& value)
+		void ConvertU64(uint64_t& value)
 		{
 			if (GetEndian() != GetNativeEndian())
 			{
@@ -143,25 +143,25 @@ namespace avmshell
 	public:
 		DataInput(Toplevel *toplevel) : m_toplevel(toplevel) {}
 				
-		virtual uint32 Available() = 0;
-		virtual void Read(void *buffer, uint32 count) = 0;
+		virtual uint32_t Available() = 0;
+		virtual void Read(void *buffer, uint32_t count) = 0;
 		
 		bool ReadBoolean();
 		U8 ReadU8();
 		unsigned short ReadU16();
-		uint32 ReadU32();
+		uint32_t ReadU32();
 		float ReadFloat();
 		double ReadDouble();
 		String* ReadUTF();
-		String* ReadUTFBytes(uint32 length);
-		void ReadByteArray(ByteArray& buffer, uint32 offset, uint32 count);
+		String* ReadUTFBytes(uint32_t length);
+		void ReadByteArray(ByteArray& buffer, uint32_t offset, uint32_t count);
 
 	protected:
 		Toplevel* const m_toplevel;
 
 		void ThrowEOFError();
 		void ThrowMemoryError();
-		void CheckEOF(uint32 count);
+		void CheckEOF(uint32_t count);
 	};
 
 	class DataOutput : virtual public DataIOBase
@@ -169,17 +169,17 @@ namespace avmshell
 	public:
 		DataOutput(Toplevel *toplevel) : m_toplevel(toplevel) { }
 
-		virtual void Write(const void *buffer, uint32 count) = 0;
+		virtual void Write(const void *buffer, uint32_t count) = 0;
 
 		void WriteBoolean(bool value);
 		void WriteU8(U8 value);
 		void WriteU16(unsigned short value);
-		void WriteU32(uint32 value);
+		void WriteU32(uint32_t value);
 		void WriteFloat(float value);
 		void WriteDouble(double value);
 		void WriteUTF(String *str);
 		void WriteUTFBytes(String *str);
-		void WriteByteArray(ByteArray& buffer, uint32 offset, uint32 count);
+		void WriteByteArray(ByteArray& buffer, uint32_t offset, uint32_t count);
 
 	protected:
 		Toplevel* const m_toplevel;

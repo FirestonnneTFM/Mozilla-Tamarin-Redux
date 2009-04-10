@@ -3603,7 +3603,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int id = MathUtils::real2int (d);
 		if (id != 0x80000000) 
 			return id;
-#elif AVMPLUS_SPARC
+#elif defined AVMPLUS_SPARC
 		int id = MathUtils::real2int (d);
 		if (id != 0x7fffffff && id != 0x80000000)
 			return id;
