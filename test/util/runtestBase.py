@@ -939,8 +939,8 @@ class RuntestBase:
         if self.forcerebuild and isfile(testName):
             os.unlink(testName)
         if isfile(testName) and getmtime(ast)>getmtime(testName):
-        	self.verbose_print("%s has been modified, recompiling" % ast)
-        	os.unlink(testName)
+            self.verbose_print("%s has been modified, recompiling" % ast)
+            os.unlink(testName)
         if not isfile(testName):
             compileOutput = self.compile_test(ast)
             if not isfile(testName):
