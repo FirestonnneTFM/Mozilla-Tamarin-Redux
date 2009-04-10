@@ -142,6 +142,8 @@
 	typedef unsigned __int32	uintptr_t; 
 #endif
 
+typedef void *maddr_ptr;
+
 #ifdef VMCFG_64BIT
 	#include <setjmpex.h>
 #else

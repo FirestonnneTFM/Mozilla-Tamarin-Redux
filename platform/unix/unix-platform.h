@@ -100,6 +100,12 @@
   #include <alloca.h>
 #endif
 
+#ifdef SOLARIS
+typedef caddr_t maddr_ptr;
+#else
+typedef void *maddr_ptr;
+#endif
+
 #ifdef DEBUGGER
   #include <unistd.h>
   #include <pthread.h>
