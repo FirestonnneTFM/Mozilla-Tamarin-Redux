@@ -1415,7 +1415,8 @@ namespace MMgc
 			if(hasSpy) {
 				VMPI_spyCallback();
 			}
-			profiler->RecordAllocation(item, size);
+			if(profiler)
+				profiler->RecordAllocation(item, size);
 #endif
 
 #ifdef MMGC_MEMORY_INFO
@@ -1434,7 +1435,8 @@ namespace MMgc
 		{
 			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
-			profiler->RecordDeallocation(item, size);
+			if(profiler)
+				profiler->RecordDeallocation(item, size);
 #endif
 		}
 		
