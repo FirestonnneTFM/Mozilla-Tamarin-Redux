@@ -48,6 +48,9 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # bug #459851:  windows mobile System.privateBytes and -memstats privateBytes always returns 0
 as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
 
+as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*Ojit  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(Ojit|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+
 # full run for windows mobile - Dell Axim
 mops/.*                                                          ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
 abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
