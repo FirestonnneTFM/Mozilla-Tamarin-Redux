@@ -1,3 +1,4 @@
+/* -*- tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -38,6 +39,44 @@
 #ifndef __avmplus_win32_platform__
 #define __avmplus_win32_platform__
 
+/**
+ * We have avmplus.vcproj compiled with the /W4 warning level
+ * which is quite picky.  Disable warnings we don't care about.
+ */
+#ifdef _MSC_VER
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#pragma warning(disable:4512) // assignment operator could not be generated
+	#pragma warning(disable:4511) // can't generate copy ctor
+	#pragma warning(disable:4127) // conditional expression is constant - appears to be compiler noise primarily
+	#pragma warning(disable:4611) // interaction between _setjmp and destruct
+	#pragma warning(disable:4725) // instruction may be inaccurate on some Pentiums
+
+	// enable some that are off even in /W4 mode, but are still handy
+	#pragma warning(default:4265)	// 'class' : class has virtual functions, but destructor is not virtual
+	#pragma warning(default:4905)	// wide string literal cast to 'LPSTR'
+	#pragma warning(default:4906)	// string literal cast to 'LPWSTR'
+	#pragma warning(default:4263)	// 'function' : member function does not override any base class virtual member function
+	#pragma warning(default:4264)	// 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden
+	#pragma warning(default:4266)	// 'function' : no override available for virtual member function from base 'type'; function is hidden
+	#pragma warning(default:4242)   // 'identifier' : conversion from 'type1' to 'type2', possible loss of data
+	#pragma warning(default:4263)   // member function does not override any base class virtual member function
+	#pragma warning(default:4296)	// expression is always true (false) (Generally, an unsigned variable was used in a comparison operation with zero.)
+
+	// some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
+//	#pragma warning(error:4820) // 'bytes' bytes padding added after construct 'member_name' (MSFT system headers generate zillions of these, sadly)
+
+	#ifndef DEBUG
+	#include <memory.h>
+	#include <string.h>
+	#pragma intrinsic(memcmp)
+	#pragma intrinsic(memcpy)
+	#pragma intrinsic(memset)
+	#pragma intrinsic(strlen)
+	#pragma intrinsic(strcpy)
+	#pragma intrinsic(strcat)
+	#endif // DEBUG
+#endif
+
 #define VMPI_memcpy			memcpy
 #define VMPI_memset 		memset	
 #define VMPI_memcmp 		memcmp	
@@ -60,20 +99,20 @@
 #define VMPI_sprintf		sprintf
 #define VMPI_snprintf		_snprintf
 
-#define VMPI_atoi	atoi
-#define VMPI_tolower tolower	
-#define VMPI_islower islower	
-#define VMPI_toupper toupper	
-#define VMPI_isupper isupper	
-#define VMPI_isdigit isdigit	
-#define VMPI_isalnum isalnum	
-#define VMPI_isxdigit isxdigit	
-#define VMPI_isspace isspace	
-#define VMPI_isgraph isgraph	
-#define VMPI_isprint isprint	
-#define VMPI_ispunct ispunct	
-#define VMPI_iscntrl iscntrl	
-#define VMPI_isalpha isalpha
+#define VMPI_atoi			atoi
+#define VMPI_tolower 		tolower
+#define VMPI_islower 		islower
+#define VMPI_toupper 		toupper
+#define VMPI_isupper 		isupper
+#define VMPI_isdigit 		isdigit
+#define VMPI_isalnum 		isalnum
+#define VMPI_isxdigit 		isxdigit
+#define VMPI_isspace 		isspace
+#define VMPI_isgraph 		isgraph
+#define VMPI_isprint 		isprint
+#define VMPI_ispunct 		ispunct
+#define VMPI_iscntrl 		iscntrl
+#define VMPI_isalpha 		isalpha
 #ifdef UNDER_CE
 	#define VMPI_abort() TerminateProcess(GetCurrentProcess(), 0)
 #else
@@ -94,22 +133,32 @@
 #include <ctype.h>
 #include <limits.h>
 
-#if _MSC_VER > 1000
-	#pragma warning(push)
-	#pragma warning(disable: 4201)
-#endif
-
 #include <windows.h>
 #include <malloc.h>
 	
-#if _MSC_VER > 1000
-	#pragma warning(pop)
-#endif
-
 #ifdef _ARM_
 	// Windows Mobile doesn't provide intptr_t or uintptr_t
 	typedef __int32				intptr_t; 
 	typedef unsigned __int32	uintptr_t; 
+#endif
+
+#ifdef VMCFG_64BIT
+	#include <setjmpex.h>
+#else
+	#include <setjmp.h>
+#endif
+
+#ifndef UNDER_CE
+  // Newer versions of the Windows SDK set up the intrinsics slightly differently
+  // than VC8. Only include intrin.h if the SDK doesn't declare it.
+  #ifndef InterlockedBitTestAndSet
+    #include <intrin.h>
+  #endif
+  #include <emmintrin.h>
+
+  #ifdef VTUNE
+    #include "JITProfiling.h"
+  #endif
 #endif
 
 // Windows doesn't support inttypes.h or most C99 types directly
@@ -122,4 +171,5 @@ typedef unsigned __int16	uint16_t;
 typedef unsigned __int32	uint32_t; 
 typedef unsigned __int64	uint64_t;
 
-#endif // __avmplus_win32_platform
+#endif // __avmplus_win32_platform__
+

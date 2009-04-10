@@ -183,10 +183,6 @@ namespace avmplus
 		m_gmInfo.globalMemorySizeRefNum++;
 	}
 
-	#if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)) && !defined(AVMPLUS_SYMBIAN)
-	#include <sys/mman.h>
-	#endif
-
 	// junk to toggle protection on code while
 	// updating global memory stuff
 	// TODO get rid of ifdefs (some/most of this

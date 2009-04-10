@@ -1,3 +1,4 @@
+/* -*- tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -82,14 +83,26 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
-
 #include <ctype.h>
 #include <limits.h>
-
+#include <setjmp.h>
 #include <inttypes.h>
+
+// Note, this used to be #ifndef SYMBIAN, but Symbian code belongs in the Symbian platform file.
+// Do *NOT* unfix this.
+#include <stdint.h>
+
+#include <sys/mman.h>
+#include <errno.h>
+#include <stdlib.h>
 
 #ifdef SOLARIS
   #include <alloca.h>
+#endif
+
+#ifdef DEBUGGER
+  #include <unistd.h>
+  #include <pthread.h>
 #endif
 
 #endif

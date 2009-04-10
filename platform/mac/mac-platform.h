@@ -1,3 +1,4 @@
+/* -*- tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -88,5 +89,40 @@
 
 #include <inttypes.h>
 #include <alloca.h>
+
+#include <CoreServices/CoreServices.h>   // for MakeDataExecutable
+#include <mach/mach.h>                   // for vm_protect()
+
+#include <sys/mman.h>
+#include <errno.h>
+#include <stdlib.h>
+
+#ifdef DEBUGGER
+  #include <unistd.h>
+  #include <pthread.h>
+#endif
+
+#ifdef AVMPLUS_MAC_CARBON
+    /**
+	 * On Mac Carbon, if you compile with Altivec support,
+	 * setjmp is redirected to __vec_setjmp and longjmp is redirected
+	 * to __vec_longjmp.  These routines do not gracefully degrade if
+	 * the CPU does not have Altivec... they just crash.
+	 *
+	 * We don't need Altivec support in the places where exceptions
+	 * are thrown and caught, so this code forces the setjmp/longjmp
+	 * implementation to be the old school, non-Altivec versions.
+	 */
+    typedef long *jmp_buf[70];
+    extern "C"
+    {
+    	int __setjmp(jmp_buf jmpbuf);
+    	void longjmp(jmp_buf jmpbuf, int value);
+    }
+
+    #define setjmp __setjmp
+#else
+    #include <setjmp.h>
+#endif
 
 #endif

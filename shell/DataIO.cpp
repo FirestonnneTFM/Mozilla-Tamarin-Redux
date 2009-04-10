@@ -68,9 +68,9 @@ namespace avmshell
 		return value;
 	}
 	
-	uint32 DataInput::ReadU32()
+	uint32_t DataInput::ReadU32()
 	{
-		uint32 value;
+		uint32_t value;
 		Read(&value, 4);
 		ConvertU32(value);
 		return value;
@@ -79,7 +79,7 @@ namespace avmshell
 	float DataInput::ReadFloat()
 	{
 		union {
-			uint32 u;
+			uint32_t u;
 			float f;
 		} ptr;
 		ptr.u = ReadU32();
@@ -89,7 +89,7 @@ namespace avmshell
 	double DataInput::ReadDouble()
 	{
 		union {
-			uint64 u;
+			uint64_t u;
 			double d;
 		} ptr;
 
@@ -98,7 +98,7 @@ namespace avmshell
 		return ptr.d;
 	}
 
-	String* DataInput::ReadUTFBytes(uint32 length)
+	String* DataInput::ReadUTFBytes(uint32_t length)
 	{
 		CheckEOF(length);
 		
@@ -130,10 +130,10 @@ namespace avmshell
 	}
 
 	void DataInput::ReadByteArray(ByteArray& buffer,
-								  uint32 offset,
-								  uint32 count)
+								  uint32_t offset,
+								  uint32_t count)
 	{
-		uint32 available = Available();
+		uint32_t available = Available();
 		
 		if (count == 0) {
 			count = available;
@@ -151,7 +151,7 @@ namespace avmshell
 		Read(buffer.GetBuffer() + offset, count);
 	}
 
-	void DataInput::CheckEOF(uint32 count)
+	void DataInput::CheckEOF(uint32_t count)
 	{
 		if (Available() < count) {
 			ThrowEOFError();
@@ -193,7 +193,7 @@ namespace avmshell
 		Write(&value, 2);
 	}
 
-	void DataOutput::WriteU32(uint32 value)
+	void DataOutput::WriteU32(uint32_t value)
 	{
 		ConvertU32(value);
 		Write(&value, 4);
@@ -202,7 +202,7 @@ namespace avmshell
 	void DataOutput::WriteFloat(float value)
 	{
 		union {
-			uint32 u;
+			uint32_t u;
 			float v;
 		} ptr;
 		ptr.v = value;
@@ -212,7 +212,7 @@ namespace avmshell
 	void DataOutput::WriteDouble(double value)
 	{
 		union {
-			uint64 u;
+			uint64_t u;
 			double v;
 		} ptr;
 		ptr.v = value;
@@ -223,7 +223,7 @@ namespace avmshell
 	void DataOutput::WriteUTF(String *str)
 	{
 		StUTF8String utf8(str);
-		uint32 length = utf8.length();
+		uint32_t length = utf8.length();
 		if (length > 65535) {
 			ThrowRangeError();
 		}
@@ -239,8 +239,8 @@ namespace avmshell
 	}
 	
 	void DataOutput::WriteByteArray(ByteArray& buffer,
-									uint32 offset,
-									uint32 count)
+									uint32_t offset,
+									uint32_t count)
 	{
 		if (buffer.GetLength() < offset)
 			offset = buffer.GetLength();

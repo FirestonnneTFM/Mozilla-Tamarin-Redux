@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <math.h>
-
 #include "avmplus.h"
 
 namespace avmplus

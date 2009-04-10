@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
 #include "avmshell.h"
 #include "JavaGlue.h"
 

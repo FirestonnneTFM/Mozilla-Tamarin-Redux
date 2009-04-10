@@ -155,9 +155,9 @@ namespace avmshell
 #ifdef PERFORMANCE_GETTIMER
 		double time = ((double) (VMPI_getPerformanceCounter() - initialTime) * 1000.0 /
 					   (double)VMPI_getPerformanceFrequency());
-		return (uint32)time;
+		return (uint32_t)time;
 #else
-		return (uint32)(VMPI_getTime() - initialTime);
+		return (uint32_t)(VMPI_getTime() - initialTime);
 #endif /* PERFORMANCE_GETTIMER */
 
     }
