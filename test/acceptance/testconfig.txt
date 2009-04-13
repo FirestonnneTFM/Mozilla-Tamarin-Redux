@@ -56,6 +56,7 @@ mops/.*                                                          ,   .*winmobile
 abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
 mmgc/outofmemory,   .*winmobile.* ,  skip,   winmo is not returning exit code
+mmgc/memlimit   ,   .*winmobile.* ,  skip,   winmo does not run under memlimit
 
 
 # Recursive PCRE testcases kills the stack on PocketPC builds
