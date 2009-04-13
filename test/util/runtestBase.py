@@ -329,6 +329,7 @@ class RuntestBase:
             # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
             cputype = ''
             (f,err,exitcode) = self.run_pipe('file "%s"' % (self.avm))
+            self.verbose_print('determineConfig: %s' % f[0])
             if re.search('\(console\) 32-bit$', f[0]):
                 cputype='arm'
                 self.osName='winmobile-emulator'
@@ -445,6 +446,7 @@ class RuntestBase:
     def run_pipe(self, cmd):
         if self.debug:
             print('cmd: %s' % cmd)
+        self.verbose_print('executing: %s' % cmd)
         try:
             p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.stdout.readlines()
