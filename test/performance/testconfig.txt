@@ -59,6 +59,9 @@ v8/.*                 , misc    , skip  , skip v8
 
 misc/.*               , miscdir    , include  , misc testsuite
 
+## skip fc64, crashes -memstats on windows
+.*fc64.*              , .*      , skip  , skip fc64 bug 488114
+
 ## misc-mobile : required since the canaries tests require access to additional abc files which will not be on the device
 sunspider/.*          , misc-mobile    , skip  , skip sunspider
 sunspider/.*          , misc-mobile    , skip  , skip sunspider

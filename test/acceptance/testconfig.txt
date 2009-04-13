@@ -55,12 +55,16 @@ as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(Ojit|diff)  , expecte
 mops/.*                                                          ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
 abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+mmgc/outofmemory,   .*winmobile.* ,  skip,   winmo is not returning exit code
+
 
 # Recursive PCRE testcases kills the stack on PocketPC builds
 ecma3/RegExp/eregress_119909,   .*winmobile.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 
 # sampling only works on debugger for avmdiff skip
 as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
+# mmgc tests fail on avmdiff, does not support passing args to vm
+mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
 
 # sampling failure on winmobile-arm
 as3/sampling/Callback:.*                                         ,   arm-winmobile.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
@@ -106,6 +110,8 @@ ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, htt
 # Probably killing the stack 
 mmgc/heap_stress,   .*winmobile.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
 mmgc/heap_stress,   .*mac-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
+mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=488124
+
 
 # diff failures
 # trim down tests to save time
