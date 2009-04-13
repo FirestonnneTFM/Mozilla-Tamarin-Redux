@@ -176,7 +176,7 @@ class RunTestLib:
             print "%-30s PASSED" % name
         elif result and type=='expectfail':
             msg=msg + " UNEXPECTED PASS : %s" % notes
-            print "%-30s UNEXPECTED PASS : %s" % name
+            print "%-30s UNEXPECTED PASS : %s" % (name,name)
         elif result==False  and type=='expectfail':
             msg=msg + " EXPECTED FAIL " + notes
             print "%-30s EXPECTED FAIL, see %s.output" % (name,name)
