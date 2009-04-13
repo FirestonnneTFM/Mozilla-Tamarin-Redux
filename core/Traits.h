@@ -52,6 +52,8 @@ namespace avmplus
 		TMT_methodenv, 
 		TMT_methodinfo, 
 		TMT_methodsig, 
+		TMT_scopechain, 
+		TMT_scopetypechain, 
 		TMT_COUNT 
 	};
 

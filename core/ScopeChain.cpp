@@ -75,8 +75,16 @@ namespace avmplus
 			nscope->setScopeAt(j++, extra, false);
 		}
 		AvmAssert(j == nscope->fullsize);
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_scopetypechain, nscope); )
 		return nscope;
 	}
+
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	ScopeTypeChain::~ScopeTypeChain()
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst( TMT_scopetypechain, this); )
+	}
+#endif
 
 	#if VMCFG_METHOD_NAMES
 	Stringp ScopeTypeChain::format(AvmCore* core) const
@@ -107,8 +115,16 @@ namespace avmplus
 		{
 			nscope->setScope(gc, i, outer->_scopes[i]);
 		}
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_scopechain, nscope); )
 		return nscope;
 	}
+
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	ScopeChain::~ScopeChain()
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst( TMT_scopechain, this); )
+	}
+#endif
 
 	void ScopeChain::setScope(MMgc::GC* gc, int i, Atom value)
 	{
