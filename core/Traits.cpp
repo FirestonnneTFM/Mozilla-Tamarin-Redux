@@ -83,7 +83,9 @@ namespace avmplus
 		"VTable", 
 		"MethodEnv", 
 		"MethodInfo", 
-		"MethodSig" 
+		"MethodSig",
+		"ScopeChain", 
+		"STC" 
 	};
 	static uint32_t g_track_count = 0;
 
@@ -236,7 +238,7 @@ namespace avmplus
 	static size_t get_size(TMTTYPE t, const void* inst)
 	{
 		size_t sz = GC::Size(inst);
-		if (t == TMT_vtable || t == TMT_methodinfo || t == TMT_methodenv)
+		if (t != TMT_traits && t != TMT_tbi && t != TMT_tmi)
 		{
 			// remove vtable ptr that only exists in memtrack mode
 			sz -= sizeof(void*);
