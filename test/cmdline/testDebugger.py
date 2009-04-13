@@ -51,15 +51,88 @@ def run():
         print "debugger FAILED"
         return
 
-    r.run_test('debugger basic','%s -d testdata/debug.abc'%r.avmrd,input='quit\n',expectedout=['40:  public class debug','(asdb)'])
-    r.run_test('debugger list','%s -d testdata/debug.abc'%r.avmrd,input='list\nlist 40\nquit\n',expectedout=['44:     public function pubfunc','46:[ ]+privfunc\(\);']);
-    r.run_test('debugger break','%s -d testdata/debug.abc'%r.avmrd,input='break 13\ninfo break\nquit\n',expectedout=['Breakpoint 1: file debug.as, 13.','1 at debug.as:13']);
-    r.run_test('debugger stacktrace','%s -d testdata/debug.abc'%r.avmrd,input='bt\nquit\n',expectedout=['#0   global.*global\$init']);
-    r.run_test('debugger break2','%s -d testdata/debug.abc'%r.avmrd,input='break 13\ndelete 1\nbreak 10\ninfo break\nquit\n',expectedout=['Breakpoint 1 deleted.','2 at debug.as:10']);
-    r.run_test('debugger next','%s -d testdata/debug.abc'%r.avmrd,input='break 13\ncontinue\nnext\nstep\nquit\n',expectedout=['13:.*public function locals','15:.*var local2:int','16:.*local2']);
-    r.run_test('debugger locals','%s -d testdata/debug.abc'%r.avmrd,input='break 13\ncontinue\nnext\nnext\nprint local2\ninfo locals\nquit\n',expectedout=['16:.*local2=15']);
-    r.run_test('debugger exception','%s -d testdata/debug.abc'%r.avmrd,input='continue\nquit\n',expectedout=['Exception has been thrown:']);
-    r.run_test('debugger local exception','%s -d testdata/debug.abc'%r.avmrd,input='break 17\ncontinue\nset local2 = 5\nprint local2\nquit\n',expectedout=['17:']);
+    r.run_test(
+      'debugger basic',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='quit\n',
+      expectedout=['40:  public class debug','(asdb)']
+    )
+
+    r.run_test(
+      'debugger list',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='list\nlist 40\nquit\n',
+      expectedout=['44:     public function pubfunc','46:[ ]+privfunc\(\);']
+    )
+
+    r.run_test(
+      'debugger break',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 45\ninfo break\nquit\n',
+      expectedout=['Breakpoint 1: file testdata.debug.as, 45.']
+    )
+
+    r.run_test(
+      'debugger stacktrace',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='bt\nquit\n',
+      expectedout=['#0   global.*global\$init']
+    )
+
+    r.run_test(
+      'debugger break2',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 45\ndelete 1\nbreak 1\nbreak 49\ninfo break\ncontinue\nquit\n',
+      expectedout=['Breakpoint 1 deleted.','3 at testdata.debug.as:49','Could not locate specified line.']
+    )
+
+    r.run_test(
+      'debugger next',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 42\ncontinue\nnext\nstep\nquit\n',
+      expectedout=['42:.*print\("in constructor\(\)"\);','43:.*}']
+    )
+
+    r.run_test(
+      'debugger locals',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 53\ncontinue\nnext\ninfo locals\nnext\ninfo locals\nquit\n',
+      expectedout=['local1 = undefined','local2 = 10','local2 = 15']
+    )
+
+    r.run_test(
+      'debugger exception',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='continue\nquit\n',
+      expectedout=['Exception has been thrown:']
+    )
+  
+    r.run_test(
+      'debugger where',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 53\ncontinue\nwhere\nquit\n',
+      expectedout=['locals\(\) at testdata.debug.as:53','init\(\) at testdata.debug.as:73']
+    )
+    r.run_test(
+      'debugger bt',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 53\ncontinue\nbt\nquit\n',
+      expectedout=['locals\(\) at testdata.debug.as:53','init\(\) at testdata.debug.as:73']
+    )
+
+    r.run_test(
+      'debugger finish',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 53\ncontinue\nfinish\nwhere\nquit\n',
+      expectedout=['#0   global@[0-9a-z]+.global\$init\(\) at testdata.debug.as:73']
+    )
+
+    r.run_test(
+      'debugger set',
+      '%s -d testdata/debug.abc'%r.avmrd,
+      input='break 53\ncontinue\nnext\nset local2 = 5\ninfo locals\nquit\n',
+      expectedout=['local2 = 5']
+    )
 
 if __name__ == '__main__':
     r=RunTestLib()
