@@ -93,6 +93,7 @@ namespace avmplus
 		/** kDefaultCapacity must be a power of 2 */
 		const static int kDefaultCapacity = 8;
 
+		uint32_t getSize() const { return m_size; }
 		uint32_t getCapacity() const { return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0; }
 
 		uintptr_t hasDontEnumSupport() const { return (m_atomsAndFlags & kDontEnumBit); }
@@ -333,6 +334,11 @@ namespace avmplus
 		virtual ~HeapHashtable() { ht.destroy(); }
 		inline InlineHashtable* get_ht() { return &ht; }
 
+		inline void reset() { ht.reset(); }
+		inline uint32_t getSize() const { return ht.getSize(); }
+		inline int next(int index) { return ht.next(index); }
+		inline Atom keyAt(int index) { return ht.keyAt(index); }
+		inline Atom valueAt(int index) { return ht.valueAt(index); }
 		virtual void add(Atom name, Atom value) { ht.add(name, value); }
 		virtual Atom get(Atom name) { return ht.get(name); }
 		virtual Atom remove(Atom name) { return ht.remove(name); }
