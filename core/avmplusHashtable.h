@@ -335,6 +335,7 @@ namespace avmplus
 		inline InlineHashtable* get_ht() { return &ht; }
 
 		inline void reset() { ht.reset(); }
+		inline uint32_t getCapacity() const { return ht.getCapacity(); }
 		inline uint32_t getSize() const { return ht.getSize(); }
 		inline int next(int index) { return ht.next(index); }
 		inline Atom keyAt(int index) { return ht.keyAt(index); }
