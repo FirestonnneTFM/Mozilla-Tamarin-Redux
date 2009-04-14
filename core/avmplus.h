@@ -281,7 +281,9 @@ namespace avmplus
 #include "ObjectClass.h"
 #include "ErrorClass.h"
 #include "MathClass.h"
+#ifdef VMCFG_EVAL
 #include "eval-avmplus.h"
+#endif
 #include "Toplevel.h"
 #include "AbcParser.h"
 #include "RegExpObject.h"
