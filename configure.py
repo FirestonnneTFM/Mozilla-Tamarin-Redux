@@ -101,7 +101,6 @@ if o.getBoolArg('abc-interp', False):
 memoryProfiler = o.getBoolArg("memory-profiler", False)
 if memoryProfiler:
     APP_CPPFLAGS += "-DMMGC_MEMORY_PROFILER "
-    OS_LIBS.append('advapi32')
 
 MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', False)
 if MMGC_INTERIOR_PTRS:
