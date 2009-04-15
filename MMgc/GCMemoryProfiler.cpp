@@ -442,20 +442,21 @@ namespace MMgc
 	
 	void SetMemTag(const char *s)
 	{
-		if(memtag == NULL)
-			memtag = s;
+		if(GCHeap::GetGCHeap()->GetProfiler() != NULL)
+		{
+			if(memtag == NULL)
+				memtag = s;
+		}
 	}
+
 	void SetMemType(const void *s)
 	{
-		if(s == NULL)
+		if(GCHeap::GetGCHeap()->GetProfiler() != NULL)
 		{
-			memtype = NULL;
-		}
-		else
-		{
-			GCAssert(GC::GetGC(s)->IsGCMemory(s));
-			if(memtype == NULL)
+			GCAssertMsg(MMgc::GetAllocationName(s) != NULL, "Unknown allocation");
+			if(memtype != NULL || s == NULL) {
 				memtype = s;
+			}
 		}
 	}
 	
