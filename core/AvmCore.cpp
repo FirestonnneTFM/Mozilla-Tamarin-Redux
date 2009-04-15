@@ -2720,6 +2720,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (_sampler)
 			_sampler->postsweep();
 #endif
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+		tmt_report();
+#endif
 	}
 
 	int AvmCore::findString(Stringp s)

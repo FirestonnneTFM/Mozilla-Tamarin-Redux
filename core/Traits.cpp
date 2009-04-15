@@ -46,8 +46,6 @@ namespace avmplus
 	using namespace MMgc;
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
-	const uint32_t TMT_REPORT_RATE = 1000;
-
 	AvmCore* g_tmcore = NULL;
 	
 	class TMT_list
@@ -87,7 +85,6 @@ namespace avmplus
 		"ScopeChain", 
 		"STC" 
 	};
-	static uint32_t g_track_count = 0;
 
 	int32_t TMT_list::find(const void* val) const
 	{
@@ -133,12 +130,9 @@ namespace avmplus
 	void tmt_report()
 	{
 		static int g_in_delta = 0;
-		if (g_in_delta == 0)	// bracket to prevent the Collect() call from recursing
+		if (g_in_delta == 0)	// just in case
 		{
 			++g_in_delta;
-			
-			g_tmcore->GetGC()->CleanStack();
-			g_tmcore->GetGC()->Collect(); // flush out dead WeaKRefs first
 			
 			static TMT_list g_tmp;	// static only to avoid crushing the stack
 
@@ -152,6 +146,15 @@ namespace avmplus
 			g_tinfo[TMT_tmi].active = g_tmp.count();
 
 			g_tmp.reset();
+			for (QCachedItem* td = g_tmcore->msCache()->first(); td; td = g_tmcore->msCache()->next(td))
+			{
+				g_tmp.add(td);
+			}
+			g_tinfo[TMT_methodsig].cached = g_tmcore->msCache()->count();
+			g_tinfo[TMT_methodsig].active = g_tmp.count();
+			
+			// NOTE, always process TBI last, as code below relies on that for rogue processing
+			g_tmp.reset();
 			for (QCachedItem* td = g_tmcore->tbCache()->first(); td; td = g_tmcore->tbCache()->next(td))
 			{
 				for (TraitsBindingsp t = (TraitsBindingsp)td; t; t = t->base)
@@ -160,15 +163,7 @@ namespace avmplus
 			g_tinfo[TMT_tbi].cached = g_tmcore->tbCache()->count();
 			g_tinfo[TMT_tbi].active = g_tmp.count();
 
-			g_tmp.reset();
-			for (QCachedItem* td = g_tmcore->msCache()->first(); td; td = g_tmcore->msCache()->next(td))
-			{
-				g_tmp.add(td);
-			}
-			g_tinfo[TMT_methodsig].cached = g_tmcore->msCache()->count();
-			g_tinfo[TMT_methodsig].active = g_tmp.count();
-			
-			AvmLog("\nTraitsMemTrack @ %d %s:\n",g_track_count,g_tmcore->IsJITEnabled()?"JIT":"INTERP");
+			AvmLog("\nTraitsMemTrack %s:\n",g_tmcore->IsJITEnabled()?"JIT":"INTERP");
 			uint32_t totmem = 0;
 			uint32_t totmem_hw = 0;
 			for (int i = 0; i < TMT_COUNT; ++i)
@@ -256,9 +251,6 @@ namespace avmplus
 		g_tinfo[t].live.add(inst);
 		
 		tmt_add_mem(t, get_size(t, inst));
-
-		if ((++g_track_count % TMT_REPORT_RATE) == 0) 
-			tmt_report();
 	}
 
 	void tmt_sub_inst(TMTTYPE t, const void* inst)
@@ -269,9 +261,6 @@ namespace avmplus
 		g_tinfo[t].live.remove(inst);
 
 		tmt_sub_mem(t, get_size(t, inst));
-
-		if ((++g_track_count % TMT_REPORT_RATE) == 0) 
-			tmt_report();
 	}
 #endif
 
