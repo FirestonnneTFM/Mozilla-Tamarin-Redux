@@ -62,6 +62,8 @@ namespace avmplus
 
 	extern void tmt_add_inst(TMTTYPE t, const void* inst);
 	extern void tmt_sub_inst(TMTTYPE t, const void* inst);
+	
+	extern void tmt_report();
 
 	#define AVMPLUS_TRAITS_MEMTRACK_ONLY(x) x
 #else
