@@ -46,8 +46,8 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_PROFILER
 
-#define MMGC_MEM_TAG(_x) MMgc::SetMemTag(_x)
-#define MMGC_MEM_TYPE(_x) MMgc::SetMemType(_x)
+#define MMGC_MEM_TAG(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemTag(_x)
+#define MMGC_MEM_TYPE(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemType(_x)
 	
 	class StackTrace;
 
