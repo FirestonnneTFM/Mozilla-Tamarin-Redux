@@ -59,7 +59,7 @@ namespace avmplus
 		capacity = MathUtils::nextPowerOfTwo(capacity);
 		setCapacity(capacity*2);
 		AvmAssert(getCapacity());
-		MMGC_MEM_TYPE(this);
+		MMGC_MEM_TYPE(gc->FindBeginning(this));
 		setAtoms((Atom *)gc->Calloc(getCapacity(), sizeof(Atom), GC::kContainsPointers|GC::kZero));
 	}
 
@@ -244,7 +244,7 @@ namespace avmplus
 		}
 		const Atom* atoms = getAtoms();
 		GC* gc = GC::GetGC(atoms);
-		MMGC_MEM_TYPE(gc->FindBegining(this));
+		MMGC_MEM_TYPE(gc->FindBeginning(this));
 		Atom* newAtoms = (Atom*)gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers|GC::kZero);
 		m_size = rehash(atoms, oldCapacity, newAtoms, newCapacity);
 		gc->Free(atoms);

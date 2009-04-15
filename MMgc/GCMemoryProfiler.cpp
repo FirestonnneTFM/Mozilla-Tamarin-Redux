@@ -144,7 +144,9 @@ namespace MMgc
 	const char * MemoryProfiler::GetAllocationName(const void *obj)
 	{
 		StackTrace *trace = (StackTrace*)traceTable.get(obj);
-		return GetAllocationNameFromTrace(trace);
+		if(trace)
+			return GetAllocationNameFromTrace(trace);
+		return NULL;
 	}
 
 	const char *MemoryProfiler::GetAllocationCategory(StackTrace *trace)
@@ -453,7 +455,7 @@ namespace MMgc
 	{
 		if(GCHeap::GetGCHeap()->GetProfiler() != NULL)
 		{
-			GCAssertMsg(MMgc::GetAllocationName(s) != NULL, "Unknown allocation");
+			GCAssertMsg(s == NULL || MMgc::GetAllocationName(s) != NULL, "Unknown allocation");
 			if(memtype != NULL || s == NULL) {
 				memtype = s;
 			}
