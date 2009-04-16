@@ -96,5 +96,5 @@
 #undef USE_MMAP
 #endif
 
-#define HAVE_PTHREADS
+#define MMGC_HAVE_PTHREAD_H
 #define HAVE_STDARG

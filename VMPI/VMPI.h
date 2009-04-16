@@ -368,6 +368,39 @@ extern bool VMPI_spySetup();
  * @return none
 */
 extern void VMPI_spyCallback();
- 
+
+/** 
+ * Method to create a thread local storage (TLS) identifier 
+ * This identifier will be used as a key to set/get thread-specific data
+ * @param [out] pointer to store the value of newly created TLS identifier
+ * @return true if TLS identifier was created successfully, false otherwise
+*/
+extern bool VMPI_tlsCreate(uintptr_t* tlsId);
+
+/** 
+ * Method to destroy a previously created TLS identifier
+ * @param tlsId TLS identifier to be destroyed
+ * @return none
+ * @see VMPI_tlsCreate()
+*/
+extern void VMPI_tlsDestroy(uintptr_t tlsId);
+
+/** 
+ * Method to associate a thread-specific data with a TLS identifier
+ * previously created by VMPI_tlsCreate
+ * @param tlsId TLS identifier to associate the data with
+ * @param value data to be associated with id
+ * @return true if value was set successfully, false otherwise
+*/
+extern bool VMPI_tlsSetValue(uintptr_t tlsId, void* value);
+
+/** 
+ * Method to retrieve a data associated with a TLS identifier
+ * that may have been previously set via VMPI_tlsSetValue
+ * @param tlsId TLS identifier for which the associated data should be retrieved
+ * @return the associated data, else NULL if no value was set
+ * @see VMPI_tlsSetValue
+*/
+extern void* VMPI_tlsGetValue(uintptr_t tlsId);
 
 #endif /* __avmplus_VMPI__ */
