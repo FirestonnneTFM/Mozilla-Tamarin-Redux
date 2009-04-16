@@ -234,7 +234,15 @@ namespace MMgc
 		 *             to allocate.
 		 * @return pointer to beginning of block, or NULL if failed.
 		 */
-		void *Alloc(int size, bool expand=true, bool zero=true);
+		void *Alloc(int size, bool expand=true, bool zero=true)
+		{
+			return _Alloc(size, expand, zero, true);
+		}
+
+		void *AllocNoProfile(int size, bool expand, bool zero)
+		{
+			return _Alloc(size, expand, zero, false);
+		}
 
 		/**
 		 * Frees a block.
@@ -242,8 +250,13 @@ namespace MMgc
 		 *             pointer that was previously returned by
 		 *             a call to Alloc.
 		 */
-		void Free(void *item);
-		void Free(void *item, size_t /*ignore*/) { Free(item); }
+		void Free(void *item) { _Free(item, true); }
+		void FreeNoProfile(void *item) { _Free(item, false); }
+
+		/**
+		 * Added for NJ's portability needs cause it doesn't always MMgc 
+		 */
+		void Free(void *item, size_t /*ignore*/) { _Free(item, true); }
 
 
 		size_t Size(const void *item);
@@ -344,7 +357,7 @@ namespace MMgc
 		/* controls whether AllocHook and FreeHook are called */
 		void EnableHooks() { hooksEnabled = true; }
 		inline bool HooksEnabled() const { return hooksEnabled; }
-		void AllocHook(const void *item, size_t size);
+		void AllocHook(const void *item, size_t askSize, size_t gotSize);
 		// called when object is determined to be garbage but we can't write to it yet
 		void FinalizeHook(const void *item, size_t size);
 		// called when object is really dead and can be poisoned
@@ -408,7 +421,7 @@ namespace MMgc
 			HeapBlock *next;      // next entry on free list
 			bool committed;   // is block fully committed?
 			bool dirty;		  // needs zero'ing, only valid if committed
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 			StackTrace *allocTrace;
 			StackTrace *freeTrace;
 #endif
@@ -431,9 +444,10 @@ namespace MMgc
 
 		void Commit(HeapBlock *block);
 
-#ifdef _DEBUG
 		friend class GC;
-#endif
+
+		void *_Alloc(int size, bool expand, bool zero, bool profile);
+		void _Free(void *item, bool track);
 
 		HeapBlock *AddrToBlock(const void *item) const;
 		Region *AddrToRegion(const void *item) const;

@@ -151,7 +151,6 @@ namespace MMgc
 		gcManager.destroy();
 		fixedMalloc._Destroy();
 
-#ifdef _DEBUG
 		if(numAlloc != 0)
 		{
 			for (unsigned int i=0; i<blocksLen; i++) 
@@ -159,8 +158,8 @@ namespace MMgc
 				HeapBlock *block = &blocks[i];
 				if(block->inUse() && block->baseAddr)
 				{
-					GCDebugMsg(false, "Block 0x%x not freed\n", block->baseAddr);
-#ifdef MMGC_MEMORY_PROFILER
+					GCLog("Block 0x%x not freed\n", block->baseAddr);
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 					if(block->allocTrace)
 						PrintStackTrace(block->allocTrace);
 #endif
@@ -168,7 +167,6 @@ namespace MMgc
 			}	
 			GCAssert(false);
 		}
-#endif
 		
 #ifdef MMGC_MEMORY_PROFILER
 		hooksEnabled = false;
@@ -185,8 +183,9 @@ namespace MMgc
 
 	}
 
-	void* GCHeap::Alloc(int size, bool expand/*=true*/, bool zero/*true*/)
+	void* GCHeap::_Alloc(int size, bool expand, bool zero, bool track)
 	{
+		(void)track;
 		GCAssert(size > 0);
 
 		char *baseAddr = 0;
@@ -211,6 +210,17 @@ namespace MMgc
 				// copy baseAddr to a stack variable to fix :
 				// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
 				baseAddr = block->baseAddr;
+
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
+				if(profiler)
+					block->allocTrace = profiler->GetStackTrace();
+#endif
+
+#ifdef MMGC_MEMORY_PROFILER
+				if(track && HooksEnabled() && profiler) {
+					profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
+				}
+#endif
 			}
 		}
 
@@ -233,18 +243,29 @@ namespace MMgc
 		return baseAddr;
 	}
 
-	void GCHeap::Free(void *item)
+	void GCHeap::_Free(void *item, bool track)
 	{
+		(void)track;
 		MMGC_LOCK(m_spinlock);
 
 		HeapBlock *block = AddrToBlock(item);
-		if (block) {
-			// Update metrics
-			GCAssert(numAlloc >= (unsigned int)block->size);
-			numAlloc -= block->size;
-			
-			FreeBlock(block);
+		GCAssertMsg(block != NULL, "Bogus item");
+		// Update metrics
+		GCAssert(numAlloc >= (unsigned int)block->size);
+		numAlloc -= block->size;
+		
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
+		if(profiler)
+			block->freeTrace = profiler->GetStackTrace();
+#endif
+	
+#ifdef MMGC_MEMORY_PROFILER
+		if(track && HooksEnabled() && profiler) {
+			profiler->RecordDeallocation(item, block->size * kBlockSize);
 		}
+#endif
+
+		FreeBlock(block);
 	}
 
 	
@@ -469,7 +490,7 @@ namespace MMgc
 			sentinel->sizePrevious = block->sizePrevious;
 			sentinel->prev = NULL;
 			sentinel->next = NULL;
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 			sentinel->allocTrace = 0;
 #endif
 		}
@@ -1283,7 +1304,7 @@ namespace MMgc
 		block->committed = true;
 		block->dirty = false;
 
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 		block->allocTrace = 0;
 		block->freeTrace = 0;
 #endif
@@ -1300,7 +1321,7 @@ namespace MMgc
 			block->next = NULL;
 			block->committed = false;
 			block->dirty = false;
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 			block->allocTrace = 0;
 			block->freeTrace = 0;
 #endif
@@ -1315,7 +1336,7 @@ namespace MMgc
 		block->next         = NULL;
 		block->committed    = false;
 		block->dirty        = false;
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 		block->allocTrace = 0;
 		block->freeTrace = 0;
 #endif
@@ -1405,10 +1426,11 @@ namespace MMgc
 		return SizeToBlocks(size);
 	}
 
-	void GCHeap::AllocHook(const void *item, size_t size)
+	void GCHeap::AllocHook(const void *item, size_t askSize, size_t gotSize)
 	{
 		(void)item;
-		(void)size;
+		(void)askSize;
+		(void)gotSize;
 		{
 			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
@@ -1416,16 +1438,16 @@ namespace MMgc
 				VMPI_spyCallback();
 			}
 			if(profiler)
-				profiler->RecordAllocation(item, size);
+				profiler->RecordAllocation(item, askSize, gotSize);
 #endif
 
 #ifdef MMGC_MEMORY_INFO
-			DebugDecorate(item, size);
+			DebugDecorate(item, gotSize);
 #endif
 		}
 #ifdef AVMPLUS_SAMPLER
 		// this can't be called with the heap lock locked.
-		avmplus::recordAllocationSample(item, size);
+		avmplus::recordAllocationSample(item, gotSize);
 #endif
 	}
 

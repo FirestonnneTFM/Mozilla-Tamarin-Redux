@@ -193,6 +193,8 @@ uint64_t VMPI_getPerformanceCounter()
 
 #ifdef MMGC_MEMORY_PROFILER
 
+namespace MMgc
+{
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -349,12 +351,13 @@ uint64_t VMPI_getPerformanceCounter()
 		GETPROC(SymGetSymFromAddr64);
 		GETPROC(SymInitialize);
 	}
+}
 
 	// declaring this statically will dynamically load the dll and procs
 	// at startup, and never ever release them... if this ever becomes NON-debug
 	// code, you might want to have a way to toss all this... but for _DEBUG
 	// only, it should be fine
-	static DbgHelpDllHelper g_DbgHelpDll;
+static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 	static const int MaxNameLength = 256;
 
 #ifdef _WIN64 
@@ -396,7 +399,7 @@ static RtlCaptureStackBackTrace_Function* const RtlCaptureStackBackTrace_fn =
 
 	bool VMPI_captureStackTrace(uintptr_t *buffer, size_t bufferSize, uint32_t framesToSkip)
 	{
-		int num = RtlCaptureStackBackTrace_fn(framesToSkip, (ULONG)bufferSize - 1, (PVOID*)buffer, NULL);
+		int num = RtlCaptureStackBackTrace_fn(framesToSkip, (uint32_t)(bufferSize - 1), (PVOID*)buffer, NULL);
 		buffer[num] = 0;
 		return true;
 	}

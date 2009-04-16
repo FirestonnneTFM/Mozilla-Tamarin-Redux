@@ -171,12 +171,14 @@ namespace MMgc
 		}
 	}
 
-	void MemoryProfiler::RecordAllocation(const void *item, size_t size)
+	void MemoryProfiler::RecordAllocation(const void *item, size_t askSize, size_t gotSize)
 	{
+		(void)askSize;
+
 		StackTrace *trace = GetStackTrace();
 		traceTable.put(item, trace);
 
-		ChangeSize(trace, (int)size);
+		ChangeSize(trace, (int)gotSize);
 
 		if(memtype)
 		{
@@ -197,6 +199,11 @@ namespace MMgc
 
 		ChangeSize(trace, -1 * int(size));
 		// FIXME: how to know this is a sweep?
+
+		// store deletion trace
+		StackTrace *deletion_trace = GetStackTrace();
+		traceTable.put((const void*)(uintptr_t(item)+1), deletion_trace);
+
 #if 0
 		if(poison == 0xba) {
 			trace->sweepSize += size;	
@@ -222,7 +229,7 @@ namespace MMgc
 	class PackageGroup : public GCAllocObject
 	{
 	public:
-		PackageGroup(const char *name) : categories(16, GCHashtable::OPTION_MALLOC), name(name), size(0), count(0) {}
+		PackageGroup(const char *name) : name(name), size(0), count(0), categories(16, GCHashtable::OPTION_MALLOC) {}
 		const char *name;
 		size_t size;
 		size_t count;
@@ -425,7 +432,7 @@ namespace MMgc
 							count = trace->totalCount;
 						}
 						GCLog("\t\t %3.1f%% - %u kb - %u items - ", PERCENT(tg->size, size), size>>10, count);
-						PrintStackTraceByTrace(trace);
+						PrintStackTrace(trace);
 					}
 				}
 			}
@@ -493,28 +500,36 @@ namespace MMgc
 			tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
 			*tp++ = '\n';
 			if(tp - out > 1500) {
+				*tp = '\0';
 				GCLog(out);
-				GCLog("\n");
 				tp = out;
 			}
 		}
-		*tp++ = '\n';
 		*tp = '\0';
 
 		GCLog(out);
 	}
 
-	void PrintStackTraceByTrace(StackTrace *trace)
+	void PrintStackTrace(StackTrace *trace)
 	{
 		DumpStackTraceHelper(&trace->ips[trace->skip]);
 	}
 
-	void PrintStackTrace(const void *item)
+	void PrintAllocStackTrace(const void *item)
 	{
 		if(GCHeap::GetGCHeap()->GetProfiler()) {
 			StackTrace *trace = GCHeap::GetGCHeap()->GetProfiler()->GetAllocationTrace(item);
 			GCAssertMsg(trace != NULL, "Trace was null");
-			PrintStackTraceByTrace(trace);
+			PrintStackTrace(trace);
+		}
+	}
+
+	void PrintDeleteStackTrace(const void *item)
+	{
+		if(GCHeap::GetGCHeap()->GetProfiler()) {
+			StackTrace *trace = GCHeap::GetGCHeap()->GetProfiler()->GetAllocationTrace((const void*)(uintptr_t(item)+1));
+			GCAssertMsg(trace != NULL, "Trace was null");
+			PrintStackTrace(trace);
 		}
 	}
 
@@ -553,7 +568,8 @@ namespace MMgc
 
 #else
 
-	void PrintStackTrace(const void *) {}
+	void PrintAllocStackTrace(const void *) {}
+	void PrintDeleteStackTrace(const void *) {}
 	const char* GetAllocationName(const void *) { return NULL; }
 	void ChangeSizeForObject(const void *, int ) {}
 
@@ -622,13 +638,13 @@ namespace MMgc
 		if(size == 0)
 			return;
 
-		if (*endMarker != 0xdeadbeef)
+		if (*endMarker != (int32_t)0xdeadbeef)
 		{
 			// if you get here, you have a buffer overrun.  The stack trace about to
 			// be printed tells you where the block was allocated from.  To find the
 			// overrun, put a memory breakpoint on the location endMarker is pointing to.
 			GCDebugMsg("Memory overwrite detected\n", false);
-			PrintStackTrace(item);
+			PrintAllocStackTrace(item);
 			GCAssert(false);
 		}
 
@@ -639,7 +655,7 @@ namespace MMgc
 
 	void *DebugFree(const void *item, int poison, size_t size)
 	{
-		item = (int32_t*) item - 2;
+		item = GetRealPointer(item);
 		DebugFreeHelper(item, poison, size);
 		return (void*)item;
 	}
@@ -647,9 +663,9 @@ namespace MMgc
 	void ReportDeletedMemoryWrite(const void* item)
 	{
 		GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:");
-		PrintStackTrace(GetUserPointer(item));
+		PrintAllocStackTrace(GetUserPointer(item));
 		GCDebugMsg(false, "Deletion trace:");
-		PrintStackTrace(GetUserPointer(item));
+		PrintDeleteStackTrace(GetUserPointer(item));
 		GCDebugMsg(true, "Deleted item write violation!");
 	}
 
@@ -658,3 +674,4 @@ namespace MMgc
 } // namespace MMgc
 
 #endif // defined(MMGC_MEMORY_INFO) || defined(MMGC_MEMORY_PROFILER)
+

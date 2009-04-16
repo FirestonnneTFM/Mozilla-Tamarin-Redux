@@ -72,7 +72,7 @@
  * Define this to get stack traces.  Helps with memory leaks.
  */
 #ifdef DEBUG
-#define MEMORY_INFO
+#define MMGC_MEMORY_INFO
 #endif
 
 /**

@@ -41,7 +41,8 @@
 
 namespace MMgc
 {
-	void PrintStackTrace(const void *item);
+	void PrintAllocStackTrace(const void *item);
+	void PrintDeleteStackTrace(const void *item);
 	const char* GetAllocationName(const void *obj);
 
 #ifdef MMGC_MEMORY_PROFILER
@@ -53,7 +54,7 @@ namespace MMgc
 
 	void SetMemTag(const char *memtag);
 	void SetMemType(const void *memtype);
-	void PrintStackTraceByTrace(StackTrace *trace);
+	void PrintStackTrace(StackTrace *trace);
 
 	class GCStackTraceHashtable : public GCHashtable
 	{
@@ -69,13 +70,13 @@ namespace MMgc
 	public:
 		MemoryProfiler();
 		~MemoryProfiler();
-		void RecordAllocation(const void *item, size_t size);
+		void RecordAllocation(const void *item, size_t askSize, size_t gotSize);
 		void RecordDeallocation(const void *item, size_t size);
 		void DumpFatties();
 		const char *GetAllocationName(const void *obj);
 		StackTrace *GetAllocationTrace(const void *obj);
-	private:
 		StackTrace *GetStackTrace();
+	private:
 		const char *Intern(const char *name, size_t len);
 		const char *GetPackage(StackTrace *trace);
 		const char *GetAllocationNameFromTrace(StackTrace *trace);

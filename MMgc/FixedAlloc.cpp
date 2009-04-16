@@ -84,7 +84,7 @@ namespace MMgc
 					uint32_t thirdInt32 = *(mem+2);
 					if(thirdInt32 != 0xedededed) {
 						GCDebugMsg(false, "Leaked %d byte item.  Addr: 0x%p\n", GetItemSize(), mem+2);
-						PrintStackTrace(GetUserPointer(mem));
+						PrintAllocStackTrace(GetUserPointer(mem));
 					}
 					mem += (m_itemSize / sizeof(uint32_t));
 				}
@@ -102,7 +102,6 @@ namespace MMgc
 	void* FixedAlloc::Alloc(size_t size)
 	{ 
 		(void)size;
-		
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
 		if(!m_firstFree) {
@@ -155,7 +154,7 @@ namespace MMgc
 
 		item = GetUserPointer(item);
 		if(m_heap->HooksEnabled())
-			m_heap->AllocHook(item, b->size - DebugSize());
+			m_heap->AllocHook(item, size, b->size - DebugSize());
 		return item;
 	}
 
@@ -215,7 +214,7 @@ namespace MMgc
 		// Allocate a new block
 		m_maxAlloc += m_itemsPerBlock;
 
-		FixedBlock* b = (FixedBlock*) m_heap->Alloc(1, true, false);
+		FixedBlock* b = (FixedBlock*) m_heap->AllocNoProfile(1, true, false);
 		
 		GCAssert(m_itemSize <= 0xffff);
 		b->numAlloc = 0;
@@ -280,7 +279,7 @@ namespace MMgc
 			b->nextFree->prevFree = b->prevFree;
 
 		// Free the memory
-		m_heap->Free(b);
+		m_heap->FreeNoProfile(b);
 	}
 
 	size_t FixedAlloc::GetItemSize() const

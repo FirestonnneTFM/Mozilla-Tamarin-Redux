@@ -71,6 +71,7 @@
  */
 #ifdef DEBUG
 #define MMGC_MEMORY_INFO
+#define MMGC_MEMORY_PROFILER
 #endif
 
 /**
