@@ -1204,7 +1204,7 @@ namespace avmplus
 		void Lexer::checkNextCharForNumber() 
 		{
 			int c = *idx;
-			if (c >= '0' && c <= '9' || isUnicodeIdentifierStart(c))
+			if ((c >= '0' && c <= '9') || isUnicodeIdentifierStart(c))
 				compiler->syntaxError(lineno, "Illegal character following numeric literal: %c", c);
 		}
 		

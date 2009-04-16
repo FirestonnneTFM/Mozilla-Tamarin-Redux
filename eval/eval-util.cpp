@@ -47,11 +47,11 @@ namespace avmplus
 	namespace RTC
 	{
 		Allocator::Allocator(Compiler* compiler)
-			: current_chunk(NULL)
+			: compiler(compiler)
+			, free_sbchunks(NULL)
+			, current_chunk(NULL)
 			, current_top(NULL)
 			, current_limit(NULL)
-			, compiler(compiler)
-			, free_sbchunks(NULL)
 		{
 			AvmAssert(offsetof(Chunk, data) % 8 == 0);
 			// Do not refill yet; the first allocation is likely to be the hashtable
