@@ -98,7 +98,7 @@
 #endif
 
 #ifndef AVMFEATURE_EVAL
-  #define AVMFEATURE_EVAL              0
+  #define AVMFEATURE_EVAL              1
 #endif
 
 #endif // __avmshell_features__
