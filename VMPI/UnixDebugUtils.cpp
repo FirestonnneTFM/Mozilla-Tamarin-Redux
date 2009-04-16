@@ -40,6 +40,8 @@
 
 #include "VMPI.h"
 
+#include <signal.h>
+
 void VMPI_debugLog(const char* message)
 {
 	VMPI_log(message);
@@ -47,5 +49,5 @@ void VMPI_debugLog(const char* message)
 
 void VMPI_debugBreak()
 {
-	abort();
+	raise(SIGTRAP);
 }
