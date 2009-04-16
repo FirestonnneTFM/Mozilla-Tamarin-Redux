@@ -382,6 +382,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0709B6490F9733B0001A6E61 /* avmshell-features.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "avmshell-features.h"; path = "../../../shell/avmshell-features.h"; sourceTree = SOURCE_ROOT; };
+		0709B64A0F9733B0001A6E61 /* avmshellUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmshellUnix.cpp; path = ../../../shell/avmshellUnix.cpp; sourceTree = SOURCE_ROOT; };
+		0709B64B0F9733B0001A6E61 /* avmshellWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmshellWin.cpp; path = ../../../shell/avmshellWin.cpp; sourceTree = SOURCE_ROOT; };
+		0709B64C0F9733B0001A6E61 /* File.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = File.h; path = ../../../shell/File.h; sourceTree = SOURCE_ROOT; };
+		0709B64D0F9733B0001A6E61 /* WinFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinFile.cpp; path = ../../../shell/WinFile.cpp; sourceTree = SOURCE_ROOT; };
+		0709B64E0F9733B0001A6E61 /* WinFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WinFile.h; path = ../../../shell/WinFile.h; sourceTree = SOURCE_ROOT; };
+		0709B6570F9734D0001A6E61 /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../shell/manifest.mk; sourceTree = SOURCE_ROOT; };
 		071536DE0F5011CD004E398F /* eval-unicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-unicode.h"; path = "../../../eval/eval-unicode.h"; sourceTree = SOURCE_ROOT; };
 		071536DF0F501242004E398F /* eval-compile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-compile.h"; path = "../../../eval/eval-compile.h"; sourceTree = SOURCE_ROOT; };
 		0715396B0F507325004E398F /* eval-avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-avmplus.cpp"; path = "../../../eval/eval-avmplus.cpp"; sourceTree = SOURCE_ROOT; };
@@ -810,6 +817,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0709B6550F9733B7001A6E61 /* Non-Mac */ = {
+			isa = PBXGroup;
+			children = (
+				0709B6570F9734D0001A6E61 /* manifest.mk */,
+				0709B64D0F9733B0001A6E61 /* WinFile.cpp */,
+				0709B64E0F9733B0001A6E61 /* WinFile.h */,
+				0709B64A0F9733B0001A6E61 /* avmshellUnix.cpp */,
+				0709B64B0F9733B0001A6E61 /* avmshellWin.cpp */,
+			);
+			name = "Non-Mac";
+			sourceTree = "<group>";
+		};
+		0709B6580F9734DF001A6E61 /* Non-Mac */ = {
+			isa = PBXGroup;
+			children = (
+				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
+				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
+				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
+				D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */,
+				D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */,
+				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
+				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
+				D942369C0F8ACB0600F97706 /* manifest.mk */,
+			);
+			name = "Non-Mac";
+			sourceTree = "<group>";
+		};
 		072EA0B70F4C1CA4009F11E6 /* eval */ = {
 			isa = PBXGroup;
 			children = (
@@ -870,13 +904,13 @@
 			name = AS;
 			sourceTree = "<group>";
 		};
-		077494B60F8E2D9B00230F6D /* Other */ = {
+		077494B60F8E2D9B00230F6D /* Non-Mac */ = {
 			isa = PBXGroup;
 			children = (
 				077494B80F8E2DC900230F6D /* unix-platform.h */,
 				077494B70F8E2DBA00230F6D /* win32-platform.h */,
 			);
-			name = Other;
+			name = "Non-Mac";
 			sourceTree = "<group>";
 		};
 		079DF7B00F3A86D50031D1B4 /* core */ = {
@@ -1102,6 +1136,9 @@
 		079DF7B40F3A87020031D1B4 /* shell */ = {
 			isa = PBXGroup;
 			children = (
+				0709B6550F9733B7001A6E61 /* Non-Mac */,
+				0709B6490F9733B0001A6E61 /* avmshell-features.h */,
+				0709B64C0F9733B0001A6E61 /* File.h */,
 				19BB299F0F8119E100C5F1F7 /* swf.cpp */,
 				3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */,
 				079DF95C0F3A898A0031D1B4 /* avmshell.cpp */,
@@ -1211,7 +1248,7 @@
 		079DF9C20F3A8BC10031D1B4 /* platform */ = {
 			isa = PBXGroup;
 			children = (
-				077494B60F8E2D9B00230F6D /* Other */,
+				077494B60F8E2D9B00230F6D /* Non-Mac */,
 				077494580F8C9D5E00230F6D /* mac-platform.h */,
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
@@ -1371,20 +1408,13 @@
 		D94236920F8ACAAD00F97706 /* VMPI */ = {
 			isa = PBXGroup;
 			children = (
+				0709B6580F9734DF001A6E61 /* Non-Mac */,
 				D5F6162C0F8D5F7E0007BA0B /* SpyUtilsMac.cpp */,
 				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
 				D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */,
-				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
 				D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */,
-				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
-				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
 				D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */,
-				D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */,
-				D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */,
 				D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */,
-				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
-				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
-				D942369C0F8ACB0600F97706 /* manifest.mk */,
 			);
 			name = VMPI;
 			sourceTree = "<group>";
