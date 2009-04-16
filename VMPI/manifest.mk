@@ -42,6 +42,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/MMgcPortWin.cpp \
   $(curdir)/SpinLockWin.cpp \
   $(curdir)/SpyUtilsWin.cpp \
+  $(curdir)/ThreadsWin.cpp \
   $(NULL)
 endif
 
@@ -61,6 +62,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/UnixDebugUtils.cpp \
   $(curdir)/MMgcPortUnix.cpp \
   $(curdir)/SpinLockUnix.cpp \
+  $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
 
@@ -70,6 +72,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/UnixDebugUtils.cpp \
   $(curdir)/MMgcPortUnix.cpp \
   $(curdir)/SpinLockUnix.cpp \
+  $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
 

@@ -1785,6 +1785,10 @@
  					RelativePath="..\VMPI\SpyUtilsWin.cpp"
  					>
  				</File>
+				<File
+					RelativePath="..\VMPI\ThreadsWin.cpp"
+					>
+				</File>
  			</Filter>
 		<File
 			RelativePath=".\VTune\MMgc.vpj"
