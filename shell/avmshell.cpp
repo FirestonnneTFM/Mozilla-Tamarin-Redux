@@ -37,17 +37,7 @@
 
 #include "avmshell.h"
 
-#ifdef __SUNPRO_CC
-#define PRIVATE __hidden
-#else
-#define PRIVATE
-#endif
-
-#ifdef WIN32
-#ifndef UNDER_CE
-bool P4Available();
-#endif
-#elif defined AVMPLUS_UNIX
+#if (defined WIN32 && !defined UNDER_CE) || defined AVMPLUS_UNIX
 bool P4Available();
 #endif
 
@@ -76,64 +66,60 @@ namespace avmshell
 
 	ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
 	{
-		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count, 
+																sizeof(ClassClosure*), 
+																MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 	}
 
 	void Shell::usage()
 	{
 		AvmLog("avmplus shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n\n");
 		AvmLog("usage: avmplus\n");
-		#ifdef DEBUGGER
-			AvmLog("          [-d]          enter debugger on start\n");
-		#endif
+#ifdef DEBUGGER
+		AvmLog("          [-d]          enter debugger on start\n");
+#endif
 		AvmLog("          [-memstats]   generate statistics on memory usage\n");
 		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
-
 		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
 		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
 		AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
-
-		#ifdef _DEBUG
-			AvmLog("          [-Dgreedy]    collect before every allocation\n");
-		#endif /* _DEBUG */
-		#ifdef DEBUGGER
-			AvmLog("          [-Dnogc]      don't collect\n");
-			AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
-			AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
-			AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
-			AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
-		#endif
-
+#ifdef _DEBUG
+		AvmLog("          [-Dgreedy]    collect before every allocation\n");
+#endif
+#ifdef DEBUGGER
+		AvmLog("          [-Dnogc]      don't collect\n");
+		AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+		AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
+		AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
+		AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
+#endif
 		AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
-
-		#ifdef AVMPLUS_VERBOSE
-			AvmLog("          [-Dverbose]   trace every instruction (verbose!)\n");
-			AvmLog("          [-Dverbose_init] trace the builtins too\n");
-			AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
-		#endif
-
-    #if defined FEATURE_NANOJIT
+#ifdef AVMPLUS_VERBOSE
+		AvmLog("          [-Dverbose]   trace every instruction (verbose!)\n");
+		AvmLog("          [-Dverbose_init] trace the builtins too\n");
+		AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
+#endif
+#if defined FEATURE_NANOJIT
 		AvmLog("          [-Ojit]       use jit always, never interp\n");
 		AvmLog("          [-Dnocse]     disable CSE optimization \n");
-        #ifdef AVMPLUS_IA32
+    #ifdef AVMPLUS_IA32
         AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
-        #endif /* AVMPLUS_IA32 */
     #endif
-	#ifdef AVMPLUS_JITMAX
+#endif
+#ifdef AVMPLUS_JITMAX
         AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
-	#endif
-		
-		#ifdef AVMPLUS_VERIFYALL
+#endif
+#ifdef AVMPLUS_VERIFYALL
 	    AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
-		#endif
-		#ifdef AVMPLUS_SELFTEST
+#endif
+#ifdef AVMPLUS_SELFTEST
 		AvmLog("          [-Dselftest[=component,category,test]]  run selftests\n");
-		#endif
+#endif
 		AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
 		AvmLog("          [-error]      crash opens debug dialog, instead of dumping\n");
-		#ifdef VMCFG_EVAL
+#ifdef VMCFG_EVAL
 		AvmLog("          [-repl]       read-eval-print mode\n");
-		#endif // VMCFG_EVAL
+#endif
 		AvmLog("          [-log]\n");
 		AvmLog("          [-- args]     args passed to AS3 program\n");
 		AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
@@ -490,26 +476,24 @@ namespace avmshell
 
 		TRY(this, kCatchAction_ReportAsError)
 		{
-#if defined FEATURE_NANOJIT
-			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-			#ifdef AVMPLUS_SSE2_ALWAYS
+#ifdef FEATURE_NANOJIT
+    #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+        #ifdef AVMPLUS_SSE2_ALWAYS
 			config.sse2 = true;
-			#else
+        #else
 			if (!P4Available()) {
 				config.sse2 = false;
 			}
-			#endif
-			#endif
+        #endif
+    #endif
+#endif /* FEATURE_NANOJIT */
+
+#if !defined(UNDER_CE) && !defined(AVM_SHELL_NO_PROJECTOR)
+			int exitCode = 0;
+
+			if (executeProjector(argc, argv, exitCode))
+				return exitCode;
 #endif
-
-            #if !defined(UNDER_CE) && !defined(AVM_SHELL_NO_PROJECTOR)
-			    int exitCode = 0;
-
-				if (executeProjector(argc, argv, exitCode))
-				{
-					return exitCode;
-				}
-            #endif
 						
 			if (argc < 2) {
 				usage();
@@ -551,27 +535,24 @@ namespace avmshell
 							// allow this option even in non-DEBUGGER builds to make test scripts simpler
 							nodebugger = true;
 						}
-						#ifdef AVMPLUS_IA32
+#ifdef AVMPLUS_IA32
 						else if (!VMPI_strcmp(arg+2, "nosse")) {
-                            #if defined FEATURE_NANOJIT
+    #if defined FEATURE_NANOJIT
 							config.sse2 = false;
-							#endif
+    #endif
 						}
-						#endif
-
-	                    #ifdef AVMPLUS_VERIFYALL
+#endif /* AVMPLUS_IA32 */
+#ifdef AVMPLUS_VERIFYALL
 						else if (!VMPI_strcmp(arg+2, "verifyall")) {
 							config.verifyall = true;
 						}
-		                #endif /* AVMPLUS_VERIFYALL */
-
-	                    #ifdef _DEBUG
+#endif /* AVMPLUS_VERIFYALL */
+#ifdef _DEBUG
 						else if (!VMPI_strcmp(arg+2, "greedy")) {
 							GetGC()->greedy = true;
 						}
-		                #endif /* _DEBUG */
-
-	                    #ifdef DEBUGGER
+#endif /* _DEBUG */
+#ifdef DEBUGGER
 						else if (!VMPI_strcmp(arg+2, "nogc")) {
 							GetGC()->nogc = true;
 						} else if (!VMPI_strcmp(arg+2, "noincgc")) {
@@ -591,9 +572,8 @@ namespace avmshell
 							}
 							i++;
 						}
-                    	#endif /* DEBUGGER */
-							
-						#ifdef AVMPLUS_SELFTEST
+#endif /* DEBUGGER */
+#ifdef AVMPLUS_SELFTEST
 						else if (!VMPI_strncmp(arg+2, "selftest", 8)) {
 							do_selftest = true;
 							if (arg[10] == '=') {
@@ -620,29 +600,27 @@ namespace avmshell
 									st_name = NULL;
 							}
 						}
-						#endif
-						#ifdef AVMPLUS_VERBOSE
+#endif /* AVMPLUS_SELFTEST */
+#ifdef AVMPLUS_VERBOSE
 						else if (!VMPI_strcmp(arg+2, "verbose")) {
 							do_verbose = true;
 						} else if (!VMPI_strcmp(arg+2, "verbose_init")) {
                             do_verbose = this->config.verbose = true;
                         }
-						#endif
+#endif /* AVMPLUS_VERBOSE */
 
-                    #if defined FEATURE_NANOJIT
-                        #ifdef AVMPLUS_VERBOSE
+#ifdef FEATURE_NANOJIT
+    #ifdef AVMPLUS_VERBOSE
 						else if (!VMPI_strcmp(arg+2, "bbgraph")) {
 							config.bbgraph = true;  // generate basic block graph (only valid with JIT)
                         }
-						#endif
-                    #endif
-
-                    #if defined FEATURE_NANOJIT
+    #endif
+#endif /* FEATURE_NANOJIT */
+#ifdef FEATURE_NANOJIT
 						else if (!VMPI_strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
 						}
-					#endif
-
+#endif /* FEATURE_NANOJIT */
 						else if (!VMPI_strcmp(arg+2, "interp")) {
 							config.runmode = RM_interp_all;
 						} else {
@@ -656,12 +634,12 @@ namespace avmshell
 					} else if (!VMPI_strcmp(arg, "-cache_methods")) {
 						cacheSizes.methods = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 					}
-                #if defined FEATURE_NANOJIT
+#ifdef FEATURE_NANOJIT
 					else if (!VMPI_strcmp(arg, "-Ojit")) {
                         config.runmode = RM_jit_all;
 					} 
-				#endif
-				#ifdef AVMPLUS_JITMAX
+#endif /* FEATURE_NANOJIT */
+#ifdef AVMPLUS_JITMAX
 					else if (!VMPI_strcmp(arg, "-jitmax")) {
                         char* val = argv[++i];
                         char* dash = VMPI_strchr(val,'-');
@@ -679,7 +657,7 @@ namespace avmshell
                             jitmax = VMPI_atoi(val);
                         }
                     }
-				#endif
+#endif /* AVMPLUS_JITMAX */
 					else if (!VMPI_strcmp(arg, "-memstats")) {
 						GetGC()->GetGCHeap()->Config().gcstats = true;
 						GetGC()->GetGCHeap()->Config().autoGCStats = true;
@@ -688,20 +666,20 @@ namespace avmshell
 					} else if (!VMPI_strcmp(arg, "-log")) {
 						do_log = true;
 					} 
-					#ifdef VMCFG_EVAL
+#ifdef VMCFG_EVAL
 					else if (!VMPI_strcmp(arg, "-repl")) {
 						do_repl = true;
 					}
-					#endif // VMCFG_EVAL
+#endif /* VMCFG_EVAL */
 					else if (!VMPI_strcmp(arg, "-error")) {
 						show_error = true;
-						#ifdef WIN32
-						#ifdef UNDER_CE
-						AvmAssert(0);
-						#else
+#ifdef WIN32
+    #ifdef UNDER_CE
+						AvmAssert(0);     // wtf?
+    #else
 						SetErrorMode(0);  // set to default
-						#endif
-						#endif // WIN32
+    #endif
+#endif /* WIN32 */
 					}
 #ifdef AVMPLUS_WITH_JNI
 					else if (!VMPI_strcmp(arg, "-jargs")) {
@@ -722,12 +700,11 @@ namespace avmshell
 						AvmAssert(VMPI_strlen(Java::startup_options) < 256);
 					}
 #endif /* AVMPLUS_WITH_JNI */
-                                    
-	                #ifdef DEBUGGER
+#ifdef DEBUGGER
 					else if (!VMPI_strcmp(arg, "-d")) {
 						enter_debugger_on_launch = true;
 					}
-		            #endif /* DEBUGGER */
+#endif /* DEBUGGER */
 
 					else if(arg[1] == '-' && arg[2] == 0) {
 						if (endFilenamePos == -1)
@@ -788,19 +765,19 @@ namespace avmshell
 			setCacheSizes(cacheSizes);
 
 #ifdef AVMPLUS_VERBOSE
-#if VMCFG_METHOD_NAMES
+    #if VMCFG_METHOD_NAMES
 			// verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
 			if (do_verbose)
 				this->config.methodNames = true;
-#endif
+    #endif
 #endif
 
 #ifdef DEBUGGER
-#if VMCFG_METHOD_NAMES
+    #if VMCFG_METHOD_NAMES
 			// debugger in avmshell always enables methodnames. 
 			if (this->allowDebugger)
 				this->config.methodNames = true;
-#endif
+    #endif
 #endif
 			
 			initBuiltinPool();
@@ -820,7 +797,7 @@ namespace avmshell
 			}
 #endif
 			
-			#ifdef DEBUGGER
+#ifdef DEBUGGER
 			if (enter_debugger_on_launch)
 			{
 				// Activate the debug CLI and stop at
@@ -828,7 +805,7 @@ namespace avmshell
 				debugCLI()->activate();
 				debugCLI()->stepInto();
 			}
-			#endif
+#endif
 
 			// start the 15 second timeout if applicable
 			if (config.interrupts) {
@@ -859,11 +836,11 @@ namespace avmshell
 			{
 				filename = argv[i];
 
-				#ifdef AVMPLUS_VERBOSE
+#ifdef AVMPLUS_VERBOSE
 				if (config.verbose) {
 					console << "run " << filename << "\n";
 				}
-				#endif
+#endif
 
 				FileInputStream f(filename);
 				bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
@@ -902,7 +879,7 @@ namespace avmshell
 				lastCodeContext = codeContext;
 			}
 
-			#ifdef MMGC_COUNTERS
+#ifdef MMGC_COUNTERS
 			console << "\nGC stats\n";
 			console << "mark item         " << MMgc::GC::MarkItemCount << "\n";
 			console << "mark null ptr     " << MMgc::GC::marknullCount << "\n";
@@ -915,16 +892,16 @@ namespace avmshell
 			console << "SweepBlockCount   " << MMgc::GCAlloc::SweepBlockCount << "\n";
 			console << "AllocCount        " << MMgc::GCAlloc::AllocCount << "\n";
 			console << "FreeItemCount     " << MMgc::GCAlloc::FreeItemCount << "\n";
-			#endif
+#endif /* MMGC_COUNTERS */
 
-			#ifdef VMCFG_EVAL
+#ifdef VMCFG_EVAL
 			if (do_repl)
 				repl(toplevel, domainEnv);
-			#endif // VMCFG_EVAL
+#endif // VMCFG_EVAL
 		}
 		CATCH(Exception *exception)
 		{
-			#ifdef DEBUGGER
+#ifdef DEBUGGER
 			if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
 			{
 				console << string(exception->atom) << "\n";
@@ -932,11 +909,11 @@ namespace avmshell
 			if (exception->getStackTrace()) {
 				console << exception->getStackTrace()->format(this) << '\n';
 			}
-			#else
+#else
 			// [ed] always show error, even in release mode,
 			// see bug #121382
 			console << string(exception->atom) << "\n";
-			#endif
+#endif /* DEBUGGER */
 
 			Platform::GetInstance()->exit(1);
 		}
