@@ -83,18 +83,20 @@ namespace avmplus
 
 		Cogen::Cogen(Compiler *compiler, ABCFile* abc, ABCTraitsTable* traits, ABCMethodBodyInfo* body, uint32_t first_temp) 
 			: compiler(compiler)
-			, allocator(compiler->allocator)
 			, abc(abc)
+			, allocator(compiler->allocator)
 			, code(compiler->allocator)
+			, labels(compiler->allocator)
 			, traits(traits)
 			, body(body)
+			, last_linenum(0)
 			, label_counter(0)
-			, labels(compiler->allocator)
 			, temp_counter(first_temp)
-			, scope_depth(0)
+			, sets_dxns(false)
+			, need_activation(false)
 			, stack_depth(0)
 			, max_stack_depth(0)
-			, last_linenum(0)
+			, scope_depth(0)
 		{
 		}
 

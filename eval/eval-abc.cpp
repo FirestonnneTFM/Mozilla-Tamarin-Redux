@@ -91,13 +91,6 @@ namespace avmplus
 			, NO_VALUE(~0U)
 			, compiler(compiler)
 			, allocator(compiler->allocator)
-			, intBuf(allocator, 16)
-			, uintBuf(allocator, 16)
-			, doubleBuf(allocator, 32)
-			, stringBuf(allocator)
-			, namespaceBuf(allocator, 16)
-			, nssetBuf(allocator, 16)
-			, multinameBuf(allocator, 16)
 			, intCount(1)	    // entry 0 not present
 			, uintCount(1)	    // entry 0 not present
 			, doubleCount(1)    // entry 0 not present
@@ -111,6 +104,13 @@ namespace avmplus
 			, classCount(0)
 			, scriptCount(0)
 			, methodbodyCount(0)
+			, intBuf(allocator, 16)
+			, uintBuf(allocator, 16)
+			, doubleBuf(allocator, 32)
+			, stringBuf(allocator)
+			, namespaceBuf(allocator, 16)
+			, nssetBuf(allocator, 16)
+			, multinameBuf(allocator, 16)
 			, namespaces(allocator)
 			, namespaceSets(allocator)
 			, multinames(allocator)
@@ -422,8 +422,8 @@ namespace avmplus
 		}
 
 		ABCScriptInfo::ABCScriptInfo(Compiler* compiler, ABCMethodInfo* init_method, ABCTraitsTable* traits) 
-			: init_method(init_method)
-			, index(compiler->abc.addScript(this))
+			: index(compiler->abc.addScript(this))
+			, init_method(init_method)
 			, traits(traits)
 		{
 		}
@@ -445,10 +445,10 @@ namespace avmplus
 		
 		ABCMethodBodyInfo::ABCMethodBodyInfo(Compiler* compiler, ABCMethodInfo* method_info, ABCTraitsTable* traits, uint32_t first_temp)
 			: cogen(compiler, &compiler->abc, traits, this, first_temp)
-			, method_info(method_info)
-			, index(compiler->abc.addMethodBody(this))
-			, traits(traits)
 			, exceptions(compiler)
+			, index(compiler->abc.addMethodBody(this))
+			, method_info(method_info)
+			, traits(traits)
 		{
 		}
 	
@@ -527,8 +527,8 @@ namespace avmplus
 		}
 		
 		ABCExceptionTable::ABCExceptionTable(Compiler* compiler)
-			: exceptions(compiler->allocator)
-			, exceptionCount(0)
+			: exceptionCount(0)
+			, exceptions(compiler->allocator)
 		{
 		}
 
