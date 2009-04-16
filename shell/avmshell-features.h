@@ -45,38 +45,60 @@
 #include "system-selection.h"
 
 // vm features for shell builds
+//
+// In general these can and will be set by our external build script, and
+// any external definition should override the ones here.  So every definition
+// here is a default and should be protected by an #ifdef
 
-#ifdef DEBUGGER  // DEBUGGER is typically defined by the project
-  #define AVMFEATURE_DEBUGGER        1
-#else
-  #define AVMFEATURE_DEBUGGER        0
+#ifndef AVMFEATURE_DEBUGGER
+  // DEBUGGER is typically defined by the project file and gets preferenatial
+  // treatment here, but we should get rid of DEBUGGER by and by and switch
+  // to AVMFEATURE_DEBUGGER as the only external control
+  #ifdef DEBUGGER
+    #define AVMFEATURE_DEBUGGER        1
+  #else
+    #define AVMFEATURE_DEBUGGER        0
+  #endif
 #endif
-#define AVMFEATURE_VTUNE             0
+
+#ifndef AVMFEATURE_VTUNE
+  #define AVMFEATURE_VTUNE             0
+#endif
+
 #ifndef AVMFEATURE_JIT
-#  define AVMFEATURE_JIT             1
+  #define AVMFEATURE_JIT               1
 #endif
+
 #ifndef AVMFEATURE_ABC_INTERP
-#  define AVMFEATURE_ABC_INTERP      0
+  #define AVMFEATURE_ABC_INTERP        0
 #endif
+
 #ifndef AVMFEATURE_WORDCODE_INTERP
-#  define AVMFEATURE_WORDCODE_INTERP 1
+  #define AVMFEATURE_WORDCODE_INTERP   1
 #endif
+
 #if AVMFEATURE_WORDCODE_INTERP
-#  ifndef AVMFEATURE_THREADED_INTERP
-#    ifdef __GNUC__
-#      define AVMFEATURE_THREADED_INTERP 1
-#    else
-#      define AVMFEATURE_THREADED_INTERP 0
-#    endif
-#  endif
+  #ifndef AVMFEATURE_THREADED_INTERP
+    #ifdef __GNUC__
+      #define AVMFEATURE_THREADED_INTERP 1
+    #else
+      #define AVMFEATURE_THREADED_INTERP 0
+    #endif
+  #endif
 #else
-#  define AVMFEATURE_THREADED_INTERP 0
+  #define AVMFEATURE_THREADED_INTERP   0
 #endif
-// our build scripts like to set this externally, so let them
+
 #ifndef AVMFEATURE_SELFTEST
   #define AVMFEATURE_SELFTEST          0
 #endif
-#define AVMFEATURE_UTF32             0
-#define AVMFEATURE_EVAL              0
+
+#ifndef AVMFEATURE_UTF32
+  #define AVMFEATURE_UTF32             0
+#endif
+
+#ifndef AVMFEATURE_EVAL
+  #define AVMFEATURE_EVAL              0
+#endif
 
 #endif // __avmshell_features__
