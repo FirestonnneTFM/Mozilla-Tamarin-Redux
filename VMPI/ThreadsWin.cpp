@@ -46,7 +46,7 @@ bool VMPI_tlsCreate(uintptr_t* tlsId)
 
 void VMPI_tlsDestroy(uintptr_t tlsId)
 {
-	TlsFree(tlsId);
+	TlsFree((DWORD)tlsId);
 }
 
 bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)

@@ -53,6 +53,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/MMgcPortMac.cpp \
   $(curdir)/SpinLockMac.cpp \
   $(curdir)/SpyUtilsPosix.cpp \
+  $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
 

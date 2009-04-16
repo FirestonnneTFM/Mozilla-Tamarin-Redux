@@ -37,67 +37,37 @@
 
 #include "MMgc.h"
 
-#ifdef MMGC_HAVE_PTHREAD_H
+#include <pthread.h>
 
-	#include <pthread.h>
-
-	bool VMPI_tlsCreate(uintptr_t* tlsId)
+bool VMPI_tlsCreate(uintptr_t* tlsId)
+{
+	pthread_key_t key;
+	const int r = pthread_key_create(&key, NULL);
+	
+	if(r == 0)
 	{
-		pthread_key_t key;
-		const int r = pthread_key_create(&key, NULL);
-		
-		if(r == 0)
-		{
-			// we expect the value to default to zero
-			GCAssert(pthread_getspecific(key) == 0);
-			*tlsId = (uintptr_t) key;
-			return true;
-		}
-
-		return false;
-	}
-
-	void VMPI_tlsDestroy(uintptr_t tlsId)
-	{
-		pthread_key_delete((pthread_key_t)tlsId);
-	}
-
-	bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
-	{
-		const int r = pthread_setspecific((pthread_key_t)tlsId, value);
-		GCAssert(pthread_getspecific((pthread_key_t)tlsId) == value);
-		return (r == 0);
-	}
-
-	void* VMPI_tlsGetValue(uintptr_t tlsId)
-	{
-		return pthread_getspecific((pthread_key_t)tlsId);
-	}
-
-#else
-
-	bool VMPI_tlsCreate(uintptr_t* tlsId)
-	{
-		intptr_t* id = (intptr_t*) malloc(sizeof(intptr_t*));
-		*tlsId = (uintptr_t)id;
-		
-		return id != NULL;
-	}
-
-	void VMPI_tlsDestroy(uintptr_t tlsId)
-	{
-		free((intptr_t*)tlsId);
-	}
-
-	bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
-	{
-		*((intptr_t*)tlsId) = (intptr_t)value;
+		// we expect the value to default to zero
+		GCAssert(pthread_getspecific(key) == 0);
+		*tlsId = (uintptr_t) key;
 		return true;
 	}
 
-	void* VMPI_tlsGetValue(uintptr_t tlsId)
-	{
-		return (void*) *((intptr_t*)tlsId);
-	}
+	return false;
+}
 
-#endif //MMGC_HAVE_PTHREAD_H
+void VMPI_tlsDestroy(uintptr_t tlsId)
+{
+	pthread_key_delete((pthread_key_t)tlsId);
+}
+
+bool VMPI_tlsSetValue(uintptr_t tlsId, void* value)
+{
+	const int r = pthread_setspecific((pthread_key_t)tlsId, value);
+	GCAssert(pthread_getspecific((pthread_key_t)tlsId) == value);
+	return (r == 0);
+}
+
+void* VMPI_tlsGetValue(uintptr_t tlsId)
+{
+	return pthread_getspecific((pthread_key_t)tlsId);
+}
