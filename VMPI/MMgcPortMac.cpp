@@ -273,55 +273,35 @@ bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t skip)
 	}
 #endif
 
-	bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
-	{
-		Dl_info dlip;
-		int ret = dladdr((void * const)pc, &dlip);
-		const char *sym = dlip.dli_sname;
-		if(ret != 0 && sym) {
-			size_t sz=bufferSize;
-			int status=0;
-			char *out = (char*) malloc(bufferSize);
-			char *ret = abi::__cxa_demangle(sym, out, &sz, &status);
-			if(ret) {
-				out = ret; // apparently demangle may realloc, so free this instead of out
-				VMPI_strncpy(buffer, ret, bufferSize);
-			} else {
-				VMPI_strncpy(buffer, sym, bufferSize);
-			}
-			free(out); 
-			return true;
-		} 
-		return false;
-	}
-
-	bool VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* lineNumber) 
-	{
-		(void)buffer;
-		(void)pc;
-		(void)bufferSize;
-		(void)lineNumber;
-		return false;
-	}
-
-
-void VMPI_writeOnNamedSignal(const char */*name*/, uint32_t */*addr*/)
+bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 {
-
+	Dl_info dlip;
+	int ret = dladdr((void * const)pc, &dlip);
+	const char *sym = dlip.dli_sname;
+	if(ret != 0 && sym) {
+		size_t sz=bufferSize;
+		int status=0;
+		char *out = (char*) malloc(bufferSize);
+		char *ret = abi::__cxa_demangle(sym, out, &sz, &status);
+		if(ret) {
+			out = ret; // apparently demangle may realloc, so free this instead of out
+			VMPI_strncpy(buffer, ret, bufferSize);
+		} else {
+			VMPI_strncpy(buffer, sym, bufferSize);
+		}
+		free(out); 
+		return true;
+	} 
+	return false;
 }
 
-void *VMPI_openAndConnectToNamedPipe(const char */*pipeName*/)
+bool VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* lineNumber) 
 {
-	return NULL;
-}
-
-FILE *VMPI_handleToStream(void */*handle*/)
-{
-	return NULL;
-}
-
-void VMPI_closeNamedPipe(void *handle)
-{
+	(void)buffer;
+	(void)pc;
+	(void)bufferSize;
+	(void)lineNumber;
+	return false;
 }
 
 #endif //MMGC_MEMORY_PROFILER
