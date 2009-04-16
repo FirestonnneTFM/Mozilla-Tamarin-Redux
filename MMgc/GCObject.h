@@ -135,7 +135,7 @@ namespace MMgc
 		friend class GC;
 	public:
 		RCObject()
-#ifdef _DEBUG
+#if 0
 			: history(0)
 #endif
 		{
@@ -152,7 +152,7 @@ namespace MMgc
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this);
 			composite = 0;
-#ifdef _DEBUG
+#if 0
 			padto32bytes = 0;
 #endif
 		}
@@ -318,9 +318,9 @@ namespace MMgc
 		static const uint32_t RCBITS	         = 0x000000FF;
 		static const uint32_t ZCT_INDEX          = 0x0FFFFF00;
 		uint32_t composite;
-#ifdef _DEBUG
+#if 0
 		// addref/decref stack traces
-		GCStack<int,4> history;
+		GCStack<StackTrace*,4> history;
 		int32_t padto32bytes;
 #endif
 	};

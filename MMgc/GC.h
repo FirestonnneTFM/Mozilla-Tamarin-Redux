@@ -1182,15 +1182,24 @@ namespace MMgc
 
 		// for deciding a tree of things should be scanned from presweep
 		void PushWorkItem(GCWorkItem &item) { PushWorkItem(m_incrementalWork, item); }
-
+		
 	private:
+
+		void *heapAllocNoProfile(size_t size, bool expand=true, bool zero=true)
+		{
+			return heapAlloc(size, expand, zero, true);
+		}
+		void heapFreeNoProfile(void *ptr, size_t siz=0)
+		{
+			heapFree(ptr, siz, true);
+		}
 
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
 		// if the allocation succeeded.
-		void *heapAlloc(size_t size, bool expand=true, bool zero=true);
-		
+		void *heapAlloc(size_t size, bool expand=true, bool zero=true, bool internal=false);
+
 		// heapFree is like heap->Free except that it also calls policy.signalBlockDeallocation.
-		void heapFree(void *ptr, size_t siz=0);
+		void heapFree(void *ptr, size_t siz=0, bool internal=false);
 
 		void gclog(const char *format, ...);
 		void log_mem(const char *name, size_t s, size_t comp );

@@ -795,6 +795,8 @@ namespace MMgc
 		if(size+7 < size)
 			return NULL;
 
+		size_t askSize = size;
+
 		size = (size+7)&~7; // round up to multiple of 8
 
 		size += DebugSize();
@@ -834,7 +836,7 @@ namespace MMgc
 		item = GetUserPointer(item);
 
 		if(heap->HooksEnabled()) {
-			heap->AllocHook(item, Size(item));
+			heap->AllocHook(item, askSize, Size(item));
 		}
 
 #ifdef _DEBUG
@@ -1087,7 +1089,7 @@ bail:
 			item = AllocBlockNonIncremental(size, zero);
 
 		if(!item)
-			item = heapAlloc(size, true, zero);
+			item = heapAllocNoProfile(size, true, zero);
 
 		// mark GC pages in page map, small pages get marked one,
 		// the first page of large pages is 3 and the rest are 2
@@ -1110,12 +1112,12 @@ bail:
 				StartIncrementalMark();
 		}
 	
-		void *item = heapAlloc(size, false, zero);
+		void *item = heapAllocNoProfile(size, false, zero);
 
 		if (item == NULL && marking && !collecting && policy.queryFinishIncrementalMarkAfterAllocBlockFail()) {
 			GCAssert(!nogc);
 			FinishIncrementalMark();
-			item = heapAlloc(size, false, zero);
+			item = heapAllocNoProfile(size, false, zero);
 		}
 
 		return item;
@@ -1123,11 +1125,11 @@ bail:
 
 	void* GC::AllocBlockNonIncremental(int size, bool zero)
 	{
-		void *item = heapAlloc(size, false, zero);
+		void *item = heapAllocNoProfile(size, false, zero);
 		
 		if (item == NULL && policy.queryRunCollectionAfterAllocBlockFail()) {
 			Collect();
-			item = heapAlloc(size, false, zero);
+			item = heapAllocNoProfile(size, false, zero);
 		}
 		
 		return item;
@@ -1135,7 +1137,7 @@ bail:
 
 	void GC::FreeBlock(void *ptr, uint32_t size)
 	{
-		heapFree(ptr);
+		heapFreeNoProfile(ptr);
 		UnmarkGCPages(ptr, size);
 	}
 
@@ -1613,9 +1615,7 @@ bail:
 		{
 			if(*p)
 			{
-#ifdef MMGC_MEMORY_INFO
-				PrintStackTrace(item);
-#endif
+				PrintAllocStackTrace(item);
 				GCAssertMsg(false, "RCObject didn't clean up itself.");
 			}
 		}	
@@ -1978,7 +1978,7 @@ uintptr_t	GC::GetStackTop() const
 		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, o);
 		if (proc)
 			proc(context, o, typeName);
-		PrintStackTrace(o);
+		PrintAllocStackTrace(o);
 		GCDebugMsg(false, "---\n");
 		// skip data + endMarker
 		p += 1 + (size>>2);
@@ -1989,7 +1989,7 @@ uintptr_t	GC::GetStackTop() const
 		{
 			GCDebugMsg(false, "GCRoot object: 0x%x\n", container);
 			if((uintptr_t)container >= memStart && (uintptr_t)container < memEnd)
-				PrintStackTrace(container);
+				PrintAllocStackTrace(container);
 		}
 	}
 
@@ -2230,7 +2230,6 @@ uintptr_t	GC::GetStackTop() const
 				}
 
 				int  taggedSize = *ptr;
-				int  traceIndex = *(ptr+1);
 				int* real = (ptr+2);
 
 				char* buffer = 0;
@@ -2239,11 +2238,7 @@ uintptr_t	GC::GetStackTop() const
 				if (buffer) GCDebugMsg(false, buffer);
 				GCDebugMsg(false, "Location: 0x%08x  Object: 0x%08x (size %d)\n", where, real, taggedSize);
 				if (buffer) GCDebugMsg(false, buffer);
-#if 0
-				PrintStackTraceByIndex(traceIndex);
-#else
-				(void)traceIndex;
-#endif
+				PrintAllocStackTrace(real);
 
 				if (recurseDepth > 0)
 					WhosPointingAtMe(real, recurseDepth-1, currentDepth+1);
@@ -3090,8 +3085,7 @@ uintptr_t	GC::GetStackTop() const
 		}
 	}
 
-#ifdef _DEBUG
-	
+#ifdef _DEBUG	
 	void GC::WhitePointerScan(const void *mem, size_t size)
 	{		
 		uintptr_t *p = (uintptr_t *) mem;
@@ -3107,12 +3101,10 @@ uintptr_t	GC::GetStackTop() const
 			   *(((int32_t*)(val&~7))+1) != (int32_t)0xcacacaca && // Free'd
 			   *(((int32_t*)(val&~7))+1) != (int32_t)0xbabababa) // Swept
 			{
-#ifdef MMGC_MEMORY_INFO
 				GCDebugMsg(false, "Object 0x%x allocated here:\n", mem);
-				PrintStackTrace(mem);
+				PrintAllocStackTrace(mem);
 				GCDebugMsg(false, "Didn't mark pointer at 0x%x, object 0x%x allocated here:\n", p, val);
-				PrintStackTrace((const void*)(val&~7));
-#endif
+				PrintAllocStackTrace((const void*)(val&~7));
 				GCAssert(false);
 			}
 			p++;
@@ -3167,22 +3159,22 @@ uintptr_t	GC::GetStackTop() const
 			}
 		}
 	}
-#endif
+#endif //_DEBUG
 
-	void *GC::heapAlloc(size_t siz, bool expand, bool zero)
+	void *GC::heapAlloc(size_t siz, bool expand, bool zero, bool internal)
 	{
-		void *ptr = heap->Alloc((int)siz, expand, zero);
+		void *ptr = heap->_Alloc((int)siz, expand, zero, internal);
 		if(ptr)
 			policy.signalBlockAllocation(siz);
 		return ptr;
 	}
 	
-	void GC::heapFree(void *ptr, size_t siz)
+	void GC::heapFree(void *ptr, size_t siz, bool internal)
 	{
 		if(!siz)
 			siz = heap->Size(ptr);
 		policy.signalBlockDeallocation(siz);
-		heap->Free(ptr);
+		heap->_Free(ptr, internal);
 	}
 	
 	size_t GC::GetBytesInUse()

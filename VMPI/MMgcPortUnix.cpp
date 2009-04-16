@@ -65,6 +65,9 @@
 	#include <procfs.h>
 	#include <sys/stat.h>
 	extern "C" caddr_t _getfp(void);
+	typedef caddr_t maddr_ptr;
+#else
+	typedef void *maddr_ptr;
 #endif
 
 #include <fcntl.h>
@@ -111,7 +114,7 @@ bool VMPI_releaseMemoryRegion(void* address, size_t size)
 
 bool VMPI_commitMemory(void* address, size_t size)
 {
-	char *addr = (char*)mmap((maddr_ptr)address,
+	char *addr = (char*)mmap(address,
 							 size,
 							 PROT_READ | PROT_WRITE,
 							 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,

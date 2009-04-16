@@ -44,7 +44,6 @@
 #include <unistd.h>
 
 #ifdef MMGC_MEMORY_PROFILER
-	#include <execinfo.h>
 	#include <dlfcn.h>
 	#include <cxxabi.h>
 #endif
@@ -118,7 +117,7 @@ static int get_mmap_fdes(int delta)
 
 void* VMPI_reserveMemoryRegion(void *address, size_t size)
 {
-	void *addr = (char*)mmap((maddr_ptr)address,
+	void *addr = (char*)mmap(address,
 							 size,
 							 PROT_NONE,
 							 MAP_PRIVATE | MAP_ANONYMOUS,
@@ -137,13 +136,13 @@ void* VMPI_reserveMemoryRegion(void *address, size_t size)
 
 bool VMPI_releaseMemoryRegion(void* address, size_t size)
 {
-	int result = munmap((maddr_ptr)address, size);
+	int result = munmap(address, size);
 	return (result == 0);
 }
 
 bool VMPI_commitMemory(void* address, size_t size)
 {
-	char *got = (char*)mmap((maddr_ptr)address,
+	char *got = (char*)mmap(address,
 							size,
 							PROT_READ | PROT_WRITE,
 							MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
@@ -221,19 +220,58 @@ uint64_t VMPI_getPerformanceCounter()
 
 #ifdef MMGC_MEMORY_PROFILER
 
-	bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip) 
-	{
-		void *array[18];
-		uint32_t got = backtrace(array, bufferSize);
-		for(uint32_t i=0;i < got-framesToSkip; i++)
-			buffer[i] = (uintptr_t)array[i+framesToSkip];
-		buffer[got-framesToSkip] = 0;
-		Dl_info dlip;
-		if(dladdr((const void*)buffer[got-framesToSkip-1], &dlip) != 0)
-			buffer[got-framesToSkip-1] = 0;
+#ifdef MMGC_PPC
 
+bool VMPI_captureStackTrace(uintptr_t* buffer, size_t len, uint32_t skip) 
+{
+	register int stackp;
+	uintptr_t pc;
+	asm("mr %0,r1" : "=r" (stackp));
+	while(skip--) {
+	    stackp = *(int*)stackp;
+	}
+	int i=0;
+	// save space for 0 terminator
+	len--;
+	while(i<len && stackp) {
+	    pc = *((uintptr_t*)stackp+2);
+	    buffer[i++]=pc;
+	    stackp = *(int*)stackp;
+	}
+	buffer[i] = 0;
+}
+#endif
+
+#if (defined(MMGC_IA32) || defined(MMGC_AMD64))
+	
+bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t skip) 
+	{
+	void **ebp;
+#ifdef MMGC_IA32
+	asm("mov %%ebp, %0" : "=r" (ebp));
+#else
+	asm("mov %%rbp, %0" : "=r" (ebp));
+#endif
+	
+	if (skip)
+		--skip;
+	
+	while(skip-- && *ebp)
+	{
+		ebp = (void**)(*ebp);
+	}
+
+	bufferSize--;
+	size_t i=0;
+	while(i<bufferSize && *ebp)
+	{
+		buffer[i++] = *((uintptr_t*)ebp+1);
+		ebp = (void**)(*ebp);			
+	}
+	buffer[i] = 0;
 		return true;
 	}
+#endif
 
 	bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 	{
@@ -264,13 +302,6 @@ uint64_t VMPI_getPerformanceCounter()
 		(void)bufferSize;
 		(void)lineNumber;
 		return false;
-		/*		uintptr_t array[2] = {pc, 0};
-		char **strs = backtrace_symbols((void*const*)array, 1);
-		VMPI_snprintf(buff, bufferSize, "%s", strs[0]);
-		free(strs);
-		*/
-		//		GetFunctionName(pc, buffer, bufferSize);
-		//	VMPI_snprintf(buffer, bufferSize, "0x%u:%s", pc, sym);
 	}
 
 
