@@ -134,9 +134,19 @@ void VMPI_free(void* ptr)
 	free(ptr);
 }
 
+
+typedef int (*LoggingFunction)(const char*);
+
+LoggingFunction logFunc = NULL;
+
+void RedirectLogOutput(LoggingFunction func)
+{
+	logFunc = func;
+}
+
 void VMPI_log(const char* message)
 {
-	printf("%s",message);
+	logFunc ? logFunc(message) : printf("%s",message);
 }
 
 /**
