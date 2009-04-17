@@ -155,6 +155,12 @@ namespace MMgc
 		item = GetUserPointer(item);
 		if(m_heap->HooksEnabled())
 			m_heap->AllocHook(item, size, b->size - DebugSize());
+
+#ifdef MMGC_MEMORY_INFO
+		// fresh memory poisoning
+		memset(item, 0xfa, b->size - DebugSize());
+#endif
+
 		return item;
 	}
 
