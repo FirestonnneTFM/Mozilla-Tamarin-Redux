@@ -37,6 +37,10 @@
 
 #include "MMgc.h"
 
+#ifndef TLS_OUT_OF_INDEXES
+	#define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
+#endif
+
 bool VMPI_tlsCreate(uintptr_t* tlsId)
 {
 	DWORD id = TlsAlloc();
