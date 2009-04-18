@@ -139,6 +139,7 @@ var FEATURES =
     <name>      AVMSYSTEM_64BIT </name>
 	<precludes> AVMSYSTEM_32BIT </precludes>
 	<defines>   VMCFG_64BIT </defines>
+	<defines>   MMGC_64BIT </defines>
 	<defines>   AVMPLUS_64BIT </defines>	<!-- FIXME: legacy name -->
   </feature>
 
@@ -171,6 +172,7 @@ var FEATURES =
 	<name>      AVMSYSTEM_IA32 </name>
 	<precludes> AVMSYSTEM_64BIT </precludes>
 	<defines>   VMCFG_IA32 </defines>
+	<defines>   MMGC_IA32 </defines>
 	<defines>   AVMPLUS_IA32 </defines>  <!-- FIXME: legacy name -->
   </feature>
   
@@ -180,6 +182,7 @@ var FEATURES =
 	<name>     AVMSYSTEM_AMD64 </name>
 	<requires> AVMSYSTEM_64BIT </requires>
 	<defines>  VMCFG_AMD64 </defines>
+	<defines>  MMGC_AMD64 </defines>
 	<defines>  AVMPLUS_AMD64 </defines>  <!-- FIXME: legacy name -->
   </feature>
 
@@ -189,6 +192,7 @@ var FEATURES =
 	<name>      AVMSYSTEM_ARM </name>
 	<precludes> AVMSYSTEM_64BIT </precludes>
 	<defines>   VMCFG_ARM </defines>
+	<defines>   MMGC_ARM </defines>
 	<defines>   AVMPLUS_ARM </defines>  <!-- FIXME: legacy name -->
   </feature>
   
@@ -198,6 +202,7 @@ var FEATURES =
 		   
 	<name>     AVMSYSTEM_PPC </name>
 	<defines>  VMCFG_PPC </defines>
+	<defines>  MMGC_PPC </defines>
 	<defines>  AVMPLUS_PPC </defines>  <!-- FIXME: legacy name -->
   </feature>
   
@@ -207,6 +212,7 @@ var FEATURES =
 	<name>      AVMSYSTEM_SPARC </name>
 	<precludes> AVMSYSTEM_64BIT </precludes>
 	<defines>   VMCFG_SPARC </defines>
+	<defines>   MMGC_SPARC </defines>
 	<defines>   AVMPLUS_SPARC </defines>  <!-- FIXME: legacy name -->
   </feature>
   
@@ -234,6 +240,7 @@ var FEATURES =
     <desc> Selects MacOS X </desc>
 	<name> AVMSYSTEM_MAC </name>
 	<defines> AVMPLUS_MAC </defines>
+	<defines> MMGC_MAC </defines>
   </feature>
   
   <feature>
@@ -248,25 +255,6 @@ var FEATURES =
 	<name> AVMSYSTEM_WIN32 </name>
   </exactly-one>
 
-
-  <!-- Other system facilities -->
-
-  <!--  
-  <feature>
-    <desc> Asserts that the architecture supports mmap and that AVM+ should use it.
-	       (INSERT: conditions for when it would be right and wrong to do so.)  </desc>
-	
-	<name> AVMSYSTEM_MMAP </name>
-  </feature>
-  
-  <feature>
-    <desc> Asserts that the architecture supports alloca and that AVM+ should use it.
-	       Normally this means that the system has a relatively generous allocation
-		   of stack space. </desc>
-
-	<name> AVMSYSTEM_ALLOCA </name>
-  </feature>
-  -->
 
   <!-- VM facilities: AVMFEATURE_* -->
   
@@ -381,6 +369,56 @@ var FEATURES =
     <defines> VMCFG_EVAL </defines>
   </feature>
 
+  <feature>
+    <desc> Makes JIT code buffers read-only to reduce the probability of heap overflow attacks.
+	       If you select this then the MMgc platform layer must be able to set the protection
+		   on the pages containing JIT code.  </desc>
+	<name> AVMFEATURE_PROTECT_JITMEM </name>
+	<defines> AVMPLUS_JIT_READONLY </defines>
+  </feature>
+
+  <feature>
+    <desc> Selects locking around calls to the memory block manager (GCHeap), allowing multiple
+	       threads to share the block manager.  Any client with more than one thread that uses
+		   MMgc either for garbage collected or manually managed memory wants this; the Flash
+		   Player requires it.  </desc>
+	<name> AVMFEATURE_SHARED_GCHEAP </name>
+	<defines> MMGC_LOCKING </defines>
+  </feature>
+
+  <feature>
+    <desc> Make MMgc's overridden global new and delete operators delegate allocation and
+	       deallocation to VMPI_alloc and VMPI_free instead of going to FixedMalloc.
+		   
+		   Whether you want this or not probably depends on the performance of the
+		   underlying malloc and might depend on memory consumption patterns.  On desktop
+		   systems you probably want this to be disabled.  </desc>
+    <name> AVMFEATURE_USE_SYSTEM_MALLOC </name>
+    <defines> MMGC_USE_SYSTEM_MALLOC </defines>
+  </feature>
+  
+  <feature>
+    <desc> Support C++ exceptions in the MMgc API.  At the time of writing (Apr 2009) 
+	       this means decorating the global new and delete operator with appropriate 'throw'
+		   clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
+		   do not generally support C++ exceptions.  
+		   
+		   FixedMalloc never throws an exception for a failed allocation. </desc>
+		   
+	<name> AVMFEATURE_CPP_EXCEPTIONS </name>
+	<defines> MMGC_ENABLE_CPP_EXCEPTIONS </defines>
+	<requires> AVMFEATURE_USE_SYSTEM_MALLOC </requires>
+  </feature>
+  
+  <feature>
+    <desc> Recognize a pointer or pointer-like value into anywhere in an object as referencing
+	       that object during marking in the garbage collector.
+		   
+		   Enabling this tends to be increase GC cost but it can be a useful debugging aid. </desc>
+	<name> AVMFEATURE_INTERIOR_POINTERS </name>
+	<defines> MMGC_INTERIOR_PTRS </defines>
+  </feature>
+  
 </features>;
 
 /****************************************************************************

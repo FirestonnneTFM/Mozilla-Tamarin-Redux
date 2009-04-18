@@ -40,37 +40,6 @@
 #include "MMgc.h"
 #include "StaticAssert.h"
 
-#ifdef MMGC_HAVE_STDARG_H
-// for va_list
-#include <stdarg.h>
-#endif
-
-#ifdef HAVE_STDARG
-// for va_list
-#include <stdarg.h>
-#endif
-
-// get alloca for CleanStack
-#ifdef WIN32
-	#include <malloc.h>
-#endif
-
-#ifdef MMGC_HAVE_ALLOCA_H
-	#include <alloca.h>
-#endif
-
-#ifdef UNIX
-	#include <sys/time.h>
-#endif // UNIX
-
-#ifdef MMGC_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif // HAVE_PTHREAD_H
-
-#ifdef MMGC_HAVE_PTHREAD_NP_H
-#include <pthread_np.h>
-#endif // HAVE_PTHREAD_NP_H
-
 #ifdef AVMPLUS_SAMPLER
  //sampling support
 #include "avmplus.h"
@@ -479,9 +448,7 @@ namespace MMgc
 		incrementalValidationPedantic(false),
 #endif
 		incremental(true),
-#ifdef MMGC_RCROOT_SUPPORT
 		rcRootSegments(NULL),
-#endif
 		policy(this, gcheap),
 		t0(VMPI_getPerformanceCounter()),
 		lastStartMarkIncrementCount(0),
@@ -721,8 +688,6 @@ namespace MMgc
 	}
 #endif
 
-#ifdef MMGC_RCROOT_SUPPORT
-
 	GC::RCRootSegment::RCRootSegment(GC* gc, void* mem, size_t size) 
 		: GCRoot(gc, mem, size)
 		, mem(mem)
@@ -761,8 +726,6 @@ namespace MMgc
 		delete segment;
 		delete block;
 	}
-
-#endif // MMGC_RCROOT_SUPPORT
 
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{
@@ -1680,16 +1643,12 @@ bail:
 		MMGC_GET_STACK_EXTENTS(gc, item.ptr, item._size);
 		PinStackObjects(item.ptr, item._size);
 
-#ifdef MMGC_RCROOT_SUPPORT
-		
 		GC::RCRootSegment* segment = gc->rcRootSegments;
 		while(segment)
 		{
 			PinStackObjects(segment->mem, segment->size);
 			segment = segment->next;
 		}
-		
-#endif // MMGC_RCROOT_SUPPORT
 
 		// important to do this before calling prereap
 		// use index to iterate in case it grows, as we go through the list we
@@ -1884,11 +1843,7 @@ bail:
 		
 		pthread_attr_init(&attr);
 		// WARNING: stupid expensive function, hence the TLS
-#ifdef HAVE_PTHREAD_NP_H
-		int res = pthread_attr_get_np(pthread_self(),&attr);
-#else // HAVE_PTHREAD_NP_H
 		int res = pthread_getattr_np(pthread_self(),&attr);
-#endif // HAVE_PTHREAD_NP_H
 		GCAssert(res == 0);
 		
 		if(res)
@@ -2869,7 +2824,7 @@ uintptr_t	GC::GetStackTop() const
 	}
 
 	// TODO: fix headers so this can be declared there and inlined
-	void GC::WriteBarrierWriteRC(const void *address, const void *value)
+	REALLY_INLINE void GC::WriteBarrierWriteRC(const void *address, const void *value)
 	{
 			RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
 			if(rc != NULL) {

@@ -101,4 +101,24 @@
   #define AVMFEATURE_EVAL              1
 #endif
 
+#ifndef AVMFEATURE_PROTECT_JITMEM
+  #define AVMFEATURE_PROTECT_JITMEM    1
+#endif
+
+#ifndef AVMFEATURE_SHARED_GCHEAP
+  #define AVMFEATURE_SHARED_GCHEAP     1
+#endif
+
+#ifndef AVMFEATURE_USE_SYSTEM_MALLOC
+  #define AVMFEATURE_USE_SYSTEM_MALLOC 0
+#endif
+
+#ifndef AVMFEATURE_CPP_EXCEPTIONS
+  #define AVMFEATURE_CPP_EXCEPTIONS    0
+#endif
+
+#ifndef AVMFEATURE_INTERIOR_POINTERS
+  #define AVMFEATURE_INTERIOR_POINTERS 0
+#endif
+
 #endif // __avmshell_features__

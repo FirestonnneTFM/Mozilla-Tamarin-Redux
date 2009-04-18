@@ -46,23 +46,30 @@
  * ***** END LICENSE BLOCK *****/
 #undef VMCFG_32BIT
 #undef VMCFG_64BIT
+#undef MMGC_64BIT
 #undef AVMPLUS_64BIT
 #undef VMCFG_BIG_ENDIAN
 #undef AVMPLUS_BIG_ENDIAN
 #undef VMCFG_LITTLE_ENDIAN
 #undef AVMPLUS_LITTLE_ENDIAN
 #undef VMCFG_IA32
+#undef MMGC_IA32
 #undef AVMPLUS_IA32
 #undef VMCFG_AMD64
+#undef MMGC_AMD64
 #undef AVMPLUS_AMD64
 #undef VMCFG_ARM
+#undef MMGC_ARM
 #undef AVMPLUS_ARM
 #undef VMCFG_PPC
+#undef MMGC_PPC
 #undef AVMPLUS_PPC
 #undef VMCFG_SPARC
+#undef MMGC_SPARC
 #undef AVMPLUS_SPARC
 #undef AVMPLUS_UNIX
 #undef AVMPLUS_MAC
+#undef MMGC_MAC
 #undef AVMPLUS_WIN32
 #undef VMCFG_DEBUGGER
 #undef VMCFG_VERIFYALL
@@ -84,6 +91,11 @@
 #undef VMCFG_UTF32
 #undef FEATURE_UTF32_SUPPORT
 #undef VMCFG_EVAL
+#undef AVMPLUS_JIT_READONLY
+#undef MMGC_LOCKING
+#undef MMGC_USE_SYSTEM_MALLOC
+#undef MMGC_ENABLE_CPP_EXCEPTIONS
+#undef MMGC_INTERIOR_PTRS
 
 
 
@@ -296,6 +308,69 @@
 #  error "AVMFEATURE_EVAL must be defined and 0 or 1 (only)."
 #endif
 
+
+/* AVMFEATURE_PROTECT_JITMEM
+ *
+ * Makes JIT code buffers read-only to reduce the probability of heap overflow attacks.
+ * If you select this then the MMgc platform layer must be able to set the protection
+ * on the pages containing JIT code.
+ */
+#if !defined AVMFEATURE_PROTECT_JITMEM || AVMFEATURE_PROTECT_JITMEM != 0 && AVMFEATURE_PROTECT_JITMEM != 1
+#  error "AVMFEATURE_PROTECT_JITMEM must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_SHARED_GCHEAP
+ *
+ * Selects locking around calls to the memory block manager (GCHeap), allowing multiple
+ * threads to share the block manager.  Any client with more than one thread that uses
+ * MMgc either for garbage collected or manually managed memory wants this; the Flash
+ * Player requires it.
+ */
+#if !defined AVMFEATURE_SHARED_GCHEAP || AVMFEATURE_SHARED_GCHEAP != 0 && AVMFEATURE_SHARED_GCHEAP != 1
+#  error "AVMFEATURE_SHARED_GCHEAP must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_USE_SYSTEM_MALLOC
+ *
+ * Make MMgc's overridden global new and delete operators delegate allocation and
+ * deallocation to VMPI_alloc and VMPI_free instead of going to FixedMalloc.
+ * 
+ * Whether you want this or not probably depends on the performance of the
+ * underlying malloc and might depend on memory consumption patterns.  On desktop
+ * systems you probably want this to be disabled.
+ */
+#if !defined AVMFEATURE_USE_SYSTEM_MALLOC || AVMFEATURE_USE_SYSTEM_MALLOC != 0 && AVMFEATURE_USE_SYSTEM_MALLOC != 1
+#  error "AVMFEATURE_USE_SYSTEM_MALLOC must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_CPP_EXCEPTIONS
+ *
+ * Support C++ exceptions in the MMgc API.  At the time of writing (Apr 2009) 
+ * this means decorating the global new and delete operator with appropriate 'throw'
+ * clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
+ * do not generally support C++ exceptions.  
+ * 
+ * FixedMalloc never throws an exception for a failed allocation.
+ */
+#if !defined AVMFEATURE_CPP_EXCEPTIONS || AVMFEATURE_CPP_EXCEPTIONS != 0 && AVMFEATURE_CPP_EXCEPTIONS != 1
+#  error "AVMFEATURE_CPP_EXCEPTIONS must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_INTERIOR_POINTERS
+ *
+ * Recognize a pointer or pointer-like value into anywhere in an object as referencing
+ * that object during marking in the garbage collector.
+ * 
+ * Enabling this tends to be increase GC cost but it can be a useful debugging aid.
+ */
+#if !defined AVMFEATURE_INTERIOR_POINTERS || AVMFEATURE_INTERIOR_POINTERS != 0 && AVMFEATURE_INTERIOR_POINTERS != 1
+#  error "AVMFEATURE_INTERIOR_POINTERS must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -360,6 +435,15 @@
 
 
 
+
+#if AVMFEATURE_CPP_EXCEPTIONS
+#  if !AVMFEATURE_USE_SYSTEM_MALLOC
+#    error "AVMFEATURE_USE_SYSTEM_MALLOC is required for AVMFEATURE_CPP_EXCEPTIONS"
+#  endif
+#endif
+
+
+
 #if AVMSYSTEM_IA32+AVMSYSTEM_AMD64+AVMSYSTEM_ARM+AVMSYSTEM_PPC+AVMSYSTEM_SPARC > 1
 #  error "At most one of AVMSYSTEM_IA32,AVMSYSTEM_AMD64,AVMSYSTEM_ARM,AVMSYSTEM_PPC,AVMSYSTEM_SPARC must be defined."
 #endif
@@ -376,6 +460,9 @@
 #endif
 #if AVMSYSTEM_64BIT
 #  define VMCFG_64BIT
+#endif
+#if AVMSYSTEM_64BIT
+#  define MMGC_64BIT
 #endif
 #if AVMSYSTEM_64BIT
 #  define AVMPLUS_64BIT
@@ -396,10 +483,16 @@
 #  define VMCFG_IA32
 #endif
 #if AVMSYSTEM_IA32
+#  define MMGC_IA32
+#endif
+#if AVMSYSTEM_IA32
 #  define AVMPLUS_IA32
 #endif
 #if AVMSYSTEM_AMD64
 #  define VMCFG_AMD64
+#endif
+#if AVMSYSTEM_AMD64
+#  define MMGC_AMD64
 #endif
 #if AVMSYSTEM_AMD64
 #  define AVMPLUS_AMD64
@@ -408,16 +501,25 @@
 #  define VMCFG_ARM
 #endif
 #if AVMSYSTEM_ARM
+#  define MMGC_ARM
+#endif
+#if AVMSYSTEM_ARM
 #  define AVMPLUS_ARM
 #endif
 #if AVMSYSTEM_PPC
 #  define VMCFG_PPC
 #endif
 #if AVMSYSTEM_PPC
+#  define MMGC_PPC
+#endif
+#if AVMSYSTEM_PPC
 #  define AVMPLUS_PPC
 #endif
 #if AVMSYSTEM_SPARC
 #  define VMCFG_SPARC
+#endif
+#if AVMSYSTEM_SPARC
+#  define MMGC_SPARC
 #endif
 #if AVMSYSTEM_SPARC
 #  define AVMPLUS_SPARC
@@ -427,6 +529,9 @@
 #endif
 #if AVMSYSTEM_MAC
 #  define AVMPLUS_MAC
+#endif
+#if AVMSYSTEM_MAC
+#  define MMGC_MAC
 #endif
 #if AVMSYSTEM_WIN32
 #  define AVMPLUS_WIN32
@@ -490,4 +595,19 @@
 #endif
 #if AVMFEATURE_EVAL
 #  define VMCFG_EVAL
+#endif
+#if AVMFEATURE_PROTECT_JITMEM
+#  define AVMPLUS_JIT_READONLY
+#endif
+#if AVMFEATURE_SHARED_GCHEAP
+#  define MMGC_LOCKING
+#endif
+#if AVMFEATURE_USE_SYSTEM_MALLOC
+#  define MMGC_USE_SYSTEM_MALLOC
+#endif
+#if AVMFEATURE_CPP_EXCEPTIONS
+#  define MMGC_ENABLE_CPP_EXCEPTIONS
+#endif
+#if AVMFEATURE_INTERIOR_POINTERS
+#  define MMGC_INTERIOR_PTRS
 #endif

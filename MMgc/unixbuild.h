@@ -36,65 +36,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifdef DEBUG
-#ifndef _DEBUG
-#define _DEBUG
-#endif
-#endif
-
-/**
- * Critical sections needed 
- */
-#define MMGC_LOCKING
-
-/**
- * IA-32
- */
-#if defined(__i386__) || defined(__i386)
-#define MMGC_IA32
-#elif defined(__x86_64__)
-#define MMGC_AMD64
-#define MMGC_64BIT
-#elif defined(__powerpc__)
-#define MMGC_PPC
-#elif defined(__ppc64__)
-#define MMGC_PPC
-#define MMGC_64BIT
-#elif defined(__sparc__) || defined(__sparc)
-#define MMGC_SPARC
-#elif defined(__arm__)
-#define MMGC_ARM
-#else
-#error Unknown CPU type
-#endif
-
 /**
  * Define this to get stack traces.  Helps with memory leaks.
  */
 #ifdef DEBUG
 #define MMGC_MEMORY_INFO
 #endif
-
-/**
- * Define this if MMgc is being integrated with avmplus.
- * Activates dynamic profiling support, etc.
- */
-#define MMGC_AVMPLUS
-
-/**
- * This makes JIT code buffers read-only to reduce the probability of
- * heap overflow attachs
- */
-
-#define AVMPLUS_JIT_READONLY
-
-/**
- * Do not Use VirtualAlloc to reserve/commit memory for sparc
- * The pagesize of sparc is 8192 which is not supported yet.
- */
-#ifdef MMGC_SPARC
-#undef USE_MMAP
-#endif
-
-#define MMGC_HAVE_PTHREAD_H
-#define HAVE_STDARG

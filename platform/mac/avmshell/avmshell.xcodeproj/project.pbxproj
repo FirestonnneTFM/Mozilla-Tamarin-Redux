@@ -391,6 +391,9 @@
 		0709B64D0F9733B0001A6E61 /* WinFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinFile.cpp; path = ../../../shell/WinFile.cpp; sourceTree = SOURCE_ROOT; };
 		0709B64E0F9733B0001A6E61 /* WinFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WinFile.h; path = ../../../shell/WinFile.h; sourceTree = SOURCE_ROOT; };
 		0709B6570F9734D0001A6E61 /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../shell/manifest.mk; sourceTree = SOURCE_ROOT; };
+		0709B6C50F98DBCB001A6E61 /* unixbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unixbuild.h; path = ../../../MMgc/unixbuild.h; sourceTree = SOURCE_ROOT; };
+		0709B6C60F98DBCB001A6E61 /* winbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = winbuild.h; path = ../../../MMgc/winbuild.h; sourceTree = SOURCE_ROOT; };
+		0709B6C90F98DFD8001A6E61 /* symbian-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "symbian-platform.h"; path = "../../symbian/symbian-platform.h"; sourceTree = SOURCE_ROOT; };
 		071536DE0F5011CD004E398F /* eval-unicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-unicode.h"; path = "../../../eval/eval-unicode.h"; sourceTree = SOURCE_ROOT; };
 		071536DF0F501242004E398F /* eval-compile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-compile.h"; path = "../../../eval/eval-compile.h"; sourceTree = SOURCE_ROOT; };
 		0715396B0F507325004E398F /* eval-avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-avmplus.cpp"; path = "../../../eval/eval-avmplus.cpp"; sourceTree = SOURCE_ROOT; };
@@ -910,6 +913,7 @@
 		077494B60F8E2D9B00230F6D /* Non-Mac */ = {
 			isa = PBXGroup;
 			children = (
+				0709B6C90F98DFD8001A6E61 /* symbian-platform.h */,
 				077494B80F8E2DC900230F6D /* unix-platform.h */,
 				077494B70F8E2DBA00230F6D /* win32-platform.h */,
 			);
@@ -1281,7 +1285,6 @@
 		079DFA860F3A965C0031D1B4 /* mmgc */ = {
 			isa = PBXGroup;
 			children = (
-				079DFA880F3A96BD0031D1B4 /* armbuild.h */,
 				079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */,
 				079DFA8A0F3A96BD0031D1B4 /* FixedAlloc.h */,
 				079DFA8B0F3A96BD0031D1B4 /* FixedMalloc.cpp */,
@@ -1316,12 +1319,15 @@
 				079DFAA70F3A96BE0031D1B4 /* GCThreads.h */,
 				079DFAA80F3A96BE0031D1B4 /* GCTypes.h */,
 				079DFAA90F3A96BE0031D1B4 /* GCWeakRef.h */,
-				079DFAAA0F3A96BE0031D1B4 /* macbuild.h */,
 				079DFAAC0F3A96BE0031D1B4 /* MMgc.h */,
 				07A8D2DD0F5EEA2B0005E66C /* OOM.h */,
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
+				079DFA880F3A96BD0031D1B4 /* armbuild.h */,
+				079DFAAA0F3A96BE0031D1B4 /* macbuild.h */,
+				0709B6C50F98DBCB001A6E61 /* unixbuild.h */,
+				0709B6C60F98DBCB001A6E61 /* winbuild.h */,
 				07DA49E70F80C906007939FD /* manifest.mk */,
 			);
 			name = mmgc;

@@ -40,74 +40,32 @@
 #ifndef __MMgc__
 #define __MMgc__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif // HAVE_CONFIG_H
-
-#ifdef NEED_MMGC_CONFIG_H
-#include "MMgc-config.h"
-#endif
-
-#if defined(MMGC_CUSTOM_BUILD)
-    #include "MMgcCustomBuild.h"
-#else
-	#ifdef WIN32
-		#ifdef ARM
-			#include "armbuild.h"
-		#else
-			#include "winbuild.h"
-		#endif
-	#endif
-
-	#ifdef _MAC
-		#include "macbuild.h"
-	#endif
-
-	#ifdef UNIX
-		#include "unixbuild.h"
-	#endif
-
-	// don't include armbuild.h when MMGC_CUSTOM_BUILD is used
-	#ifdef MMGC_ARM
-		#include "armbuild.h"
-	#endif
-#endif
-
+// VMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
 #include "VMPI.h"
 
-#ifdef __GCC__
-#define REALLY_INLINE inline __attribute__((always_inline))
-#elif !defined(REALLY_INLINE)
-#define REALLY_INLINE inline
+// Some legacy post-processing and fiddling, yet to be factored
+#ifdef AVMPLUS_WIN32
+	#ifdef AVMPLUS_ARM
+		#include "armbuild.h"
+	#else
+		#include "winbuild.h"
+	#endif
 #endif
 
-#if defined(WIN32) && defined(MMGC_64BIT)
-#include <setjmpex.h>
-#else
-#include <setjmp.h>
+#ifdef AVMPLUS_MAC
+	#include "macbuild.h"
+#endif
+
+#ifdef AVMPLUS_UNIX
+	#include "unixbuild.h"
+#endif
+
+#if defined AVMPLUS_ARM && !defined AVMPLUS_WIN32
+    #include "armbuild.h"
 #endif
 
 #if defined(SCRIPT_DEBUGGER) || defined(DEBUGGER)
-#define AVMPLUS_SAMPLER
-#endif
-
-#ifdef MMGC_AVMPLUS
-#  define MMGC_RCROOT_SUPPORT
-#endif
-
-#ifndef _MSC_VER
-#define __forceinline
-#else
-#ifndef DEBUG
-#include <memory.h>
-#include <string.h>
-#pragma intrinsic(memcmp)
-#pragma intrinsic(memcpy)
-#pragma intrinsic(memset)
-#pragma intrinsic(strlen)
-#pragma intrinsic(strcpy)
-#pragma intrinsic(strcat)
-#endif // DEBUG
+    #define AVMPLUS_SAMPLER
 #endif
 
 #include "GCDebug.h"

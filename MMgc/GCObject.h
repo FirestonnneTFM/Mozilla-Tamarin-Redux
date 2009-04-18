@@ -226,7 +226,7 @@ namespace MMgc
 #endif
 		}
 
-		__forceinline void DecrementRef() 
+		REALLY_INLINE void DecrementRef() 
 		{ 
 			if(Sticky() || composite == 0)
 				return;

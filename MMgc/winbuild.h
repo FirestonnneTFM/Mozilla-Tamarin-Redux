@@ -36,24 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-/**
- * Critical sections needed
- */
-#define MMGC_LOCKING
-
-/**
- * IA32 (Intel architecture)
- */
-#if defined (_WIN64)
-	#define MMGC_AMD64
-	#define MMGC_64BIT
-#elif defined(_ARM_)
-	#define MMGC_ARM
-#else
-	#define MMGC_IA32
-#endif
-
 /**
  * Define this to get stack traces.  Helps with memory leaks.
  */
@@ -63,47 +45,3 @@
 
 #define MMGC_MEMORY_PROFILER
 
-/**
- * Define this if MMgc is being integrated with avmplus.
- * Activates dynamic profiling support, etc.
- */
-#define MMGC_AVMPLUS
-
-/**
- * This makes JIT code buffers read-only to reduce the probability of
- * heap overflow attacks.
- */
-#define AVMPLUS_JIT_READONLY
-
-// windows builds need malloc.h for alloca
-#define HAVE_MALLOC_H
-
-/**
- * compiled with the /W4 warning level
- * which is quite picky.  Disable warnings we don't care about.
- */
-#ifdef _MSC_VER
-
-#define REALLY_INLINE __forceinline
-
-    #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
-	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#pragma warning(disable:4512) //assignment operator could not be generated
-	#pragma warning(disable:4511) //can't generate copy ctor
-	#pragma warning(disable:4127) //conditional expression is constant
-	#pragma warning(disable:4251) // X needs to have dll-interface to be used by clients of class Y
-
-	// enable some that are off even in /W4 mode, but are still handy
-	#pragma warning(default:4265)	// 'class' : class has virtual functions, but destructor is not virtual
-	#pragma warning(default:4905)	// wide string literal cast to 'LPSTR'
-	#pragma warning(default:4906)	// string literal cast to 'LPWSTR'
-	#pragma warning(default:4263)	// 'function' : member function does not override any base class virtual member function
-	#pragma warning(default:4264)	// 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden
-	#pragma warning(default:4266)	// 'function' : no override available for virtual member function from base 'type'; function is hidden
-	#pragma warning(default:4242) // 'identifier' : conversion from 'type1' to 'type2', possible loss of data
-	#pragma warning(default:4263) // member function does not override any base class virtual member function
-
-	// some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
-//	#pragma warning(error:4296)	// expression is always true (false) (Generally, an unsigned variable was used in a comparison operation with zero.)
-
-#endif // _MSC_VER

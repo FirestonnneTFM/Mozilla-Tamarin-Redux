@@ -756,8 +756,6 @@ namespace MMgc
 		 */
 		void *Alloc(size_t size, int flags=0);
 
-#ifdef MMGC_RCROOT_SUPPORT
-		
 	private:
 		class RCRootSegment : public GCRoot
 		{
@@ -784,8 +782,6 @@ namespace MMgc
 		 */
 		void FreeRCRoot(void* mem);
 		
-#endif // MMGC_RCROOT_SUPPORT
-
 		void *AllocAlreadyLocked(size_t size, int flags=0);
 
 		
@@ -979,7 +975,7 @@ namespace MMgc
 		 * FIXME: maybe assert that the lower 3 bits are either zero or a pointer type signature,
 		 * this would require the application to tell us what bit patterns are pointers.
 		 */
-		__forceinline void WriteBarrierNoSubstitute(const void *container, const void *value)
+		REALLY_INLINE void WriteBarrierNoSubstitute(const void *container, const void *value)
 		{
 			WriteBarrierTrap(container, (const void*)((uintptr_t)value&~7));
 		}
@@ -988,7 +984,7 @@ namespace MMgc
 		 * AVM+ write barrier, valuePtr is known to be pointer and the caller
 		 * does the write.
 		 */
-		__forceinline void WriteBarrierTrap(const void *container, const void *valuePtr)
+		REALLY_INLINE void WriteBarrierTrap(const void *container, const void *valuePtr)
 		{
 			GCAssert(IsPointerToGCPage(container));
 			GCAssert(((uintptr_t)valuePtr&7) == 0);
@@ -1019,8 +1015,8 @@ namespace MMgc
 		GCPolicyManager policy;
 		
 	private:
-		__forceinline void WriteBarrierWrite(const void *address, const void *value);
-		__forceinline void WriteBarrierWriteRC(const void *address, const void *value);
+		void WriteBarrierWrite(const void *address, const void *value);
+		void WriteBarrierWriteRC(const void *address, const void *value);
 
 	public:
 

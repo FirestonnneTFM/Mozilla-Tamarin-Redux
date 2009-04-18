@@ -38,34 +38,6 @@
 
 #include <AvailabilityMacros.h>
 
-#ifdef DEBUG
-#ifndef _DEBUG
-#define _DEBUG
-#endif
-#endif
-
-/**
- * Critical section on GCHeap allocations.
- */
-#define MMGC_LOCKING
-
-/**
- * PowerPC (MacOS)
- */
-#ifdef __i386__
-  #define MMGC_IA32
-#elif defined (__x86_64__)
-  #define MMGC_AMD64
-  #define MMGC_64BIT
-#elif defined (__ppc__)
-  #define MMGC_PPC
-#elif defined (__ppc64__)
-  #define MMGC_PPC
-  #define MMGC_64BIT
-#endif
-
-#define MMGC_MAC
-
 /**
  * Define this to get stack traces.  Helps with memory leaks.
  */
@@ -74,17 +46,3 @@
 #define MMGC_MEMORY_PROFILER
 #endif
 
-/**
- * Define this if MMgc is being integrated with avmplus.
- * Activates dynamic profiling support, etc.
- */
-#define MMGC_AVMPLUS
-
-/**
- * This makes JIT code buffers read-only to reduce the probability of
- * heap overflow attacks.
- */
-#define AVMPLUS_JIT_READONLY
-
-#define MMGC_HAVE_PTHREAD_H
-#define MMGC_HAVE_STDARG_H
