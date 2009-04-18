@@ -89,4 +89,8 @@
 #include <inttypes.h>
 #include <e32std.h>
 
+#ifdef __GCC__
+#define REALLY_INLINE inline __attribute__((always_inline))
 #endif
+
+#endif // __avmplus_symbian_platform__

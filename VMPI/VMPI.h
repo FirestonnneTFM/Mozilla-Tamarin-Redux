@@ -38,6 +38,20 @@
 #ifndef __avmplus_VMPI__
 #define __avmplus_VMPI__
 
+// Belt and suspenders...
+
+#ifdef DEBUG
+    #ifndef _DEBUG
+        #define _DEBUG
+    #endif
+#endif
+
+#ifdef _DEBUG
+    #ifndef DEBUG
+        #define DEBUG
+    #endif
+#endif
+
 // Include feature settings.  These also perform platform sniffing if platform
 // settings are not provided eg on the command line.
 
@@ -66,6 +80,13 @@
   #include "mac/mac-platform.h"
 #elif defined AVMPLUS_SYMBIAN // needs to become an AVMSYSTEM_ name
   #include "symbian/symbian-platform.h"
+#endif
+
+// Catchall, though in general the platform files are really responsible for giving
+// REALLY_INLINE a definition.
+
+#ifndef REALLY_INLINE
+    #define REALLY_INLINE inline
 #endif
 
 // Legacy types used by some embedding host code, eg avmplus::uint64.

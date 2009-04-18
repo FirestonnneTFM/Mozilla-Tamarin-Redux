@@ -93,8 +93,12 @@
 #include <stdint.h>
 
 #include <sys/mman.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <stdlib.h>
+
+#include <unistd.h>
+#include <pthread.h>
 
 #ifdef SOLARIS
   #include <alloca.h>
@@ -106,9 +110,17 @@ typedef caddr_t maddr_ptr;
 typedef void *maddr_ptr;
 #endif
 
-#ifdef DEBUGGER
-  #include <unistd.h>
-  #include <pthread.h>
+#ifdef SOLARIS
+// "NP" = non-portable.  Origin of code unclear, may be old.  Consider removing it,
+// it's not used by current Solaris builds.
+#ifdef HAVE_PTHREAD_NP_H
+#include <pthread_np.h>
+#define pthread_getattr_np pthread_attr_get_np
+#endif
+#endif // SOLARIS
+
+#ifdef __GCC__
+#define REALLY_INLINE inline __attribute__((always_inline))
 #endif
 
-#endif
+#endif // __avmplus_unix_platform__

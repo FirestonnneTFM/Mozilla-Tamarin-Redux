@@ -50,6 +50,8 @@
 	#pragma warning(disable:4127) // conditional expression is constant - appears to be compiler noise primarily
 	#pragma warning(disable:4611) // interaction between _setjmp and destruct
 	#pragma warning(disable:4725) // instruction may be inaccurate on some Pentiums
+	#pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
+	#pragma warning(disable:4251) // X needs to have dll-interface to be used by clients of class Y
 
 	// enable some that are off even in /W4 mode, but are still handy
 	#pragma warning(default:4265)	// 'class' : class has virtual functions, but destructor is not virtual
@@ -63,18 +65,7 @@
 	#pragma warning(default:4296)	// expression is always true (false) (Generally, an unsigned variable was used in a comparison operation with zero.)
 
 	// some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
-//	#pragma warning(error:4820) // 'bytes' bytes padding added after construct 'member_name' (MSFT system headers generate zillions of these, sadly)
-
-	#ifndef DEBUG
-	#include <memory.h>
-	#include <string.h>
-	#pragma intrinsic(memcmp)
-	#pragma intrinsic(memcpy)
-	#pragma intrinsic(memset)
-	#pragma intrinsic(strlen)
-	#pragma intrinsic(strcpy)
-	#pragma intrinsic(strcat)
-	#endif // DEBUG
+	//	#pragma warning(error:4820) // 'bytes' bytes padding added after construct 'member_name' (MSFT system headers generate zillions of these, sadly)
 #endif
 
 #define VMPI_memcpy			memcpy
@@ -124,6 +115,7 @@
 #endif
 
 #include <stddef.h>
+#include <memory.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -135,7 +127,8 @@
 
 #include <windows.h>
 #include <malloc.h>
-	
+
+
 #ifdef _ARM_
 	// Windows Mobile doesn't provide intptr_t or uintptr_t
 	typedef __int32				intptr_t; 
@@ -172,6 +165,20 @@ typedef unsigned __int8		uint8_t;
 typedef unsigned __int16	uint16_t;
 typedef unsigned __int32	uint32_t; 
 typedef unsigned __int64	uint64_t;
+
+// This must come after all the include files
+#if defined _MSC_VER && !defined DEBUG
+	#pragma intrinsic(memcmp)
+	#pragma intrinsic(memcpy)
+	#pragma intrinsic(memset)
+	#pragma intrinsic(strlen)
+	#pragma intrinsic(strcpy)
+	#pragma intrinsic(strcat)
+#endif
+
+#ifdef _MSC_VER
+    #define REALLY_INLINE __forceinline
+#endif // _MSC_VER
 
 #endif // __avmplus_win32_platform__
 

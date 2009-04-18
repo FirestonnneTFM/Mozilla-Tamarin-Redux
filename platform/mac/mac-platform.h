@@ -97,10 +97,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#ifdef DEBUGGER
-  #include <unistd.h>
-  #include <pthread.h>
-#endif
+#include <unistd.h>
+#include <pthread.h>
 
 typedef void *maddr_ptr;
 
@@ -127,4 +125,8 @@ typedef void *maddr_ptr;
     #include <setjmp.h>
 #endif
 
+#ifdef __GCC__
+#define REALLY_INLINE inline __attribute__((always_inline))
 #endif
+
+#endif // __avmplus_mac_platform__

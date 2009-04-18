@@ -36,39 +36,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#if !defined(MMGC_ARM)
-	#define MMGC_ARM
-#endif
-
-#ifdef DEBUG
-#ifndef _DEBUG
-#define _DEBUG
-#endif
-#endif
-
-/**
- * Critical sections needed
- */
-#define MMGC_LOCKING
-
 /**
  * Define this to get stack traces.  Helps with memory leaks.
  */
 #ifdef DEBUG
 	#define MMGC_MEMORY_INFO
-#endif
-
-/**
- * Define this if MMgc is being integrated with avmplus.
- * Activates dynamic profiling support, etc.
- */
-#define MMGC_AVMPLUS
-
-#if !defined(AVMPLUS_NO_JIT_READONLY)
-	#define AVMPLUS_JIT_READONLY
-#endif
-
-#ifdef _MSC_VER
-    #pragma warning(disable:4611) // interaction between '_setjmp' and C++ object destruction is non-portable
-	#pragma warning(disable:4512) //assignment operator could not be generated
 #endif
