@@ -44,5 +44,8 @@
 #ifdef DEBUG
 #define MMGC_MEMORY_INFO
 #define MMGC_MEMORY_PROFILER
+#if defined(MMGC_PPC) && defined(MMGC_64BIT)
+#undef MMGC_MEMORY_PROFILER
+#endif
 #endif
 
