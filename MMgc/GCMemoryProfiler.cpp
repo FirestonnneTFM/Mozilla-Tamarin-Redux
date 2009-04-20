@@ -117,7 +117,7 @@ namespace MMgc
 				name = (char*)VMPI_alloc(256);
 				if(VMPI_getFunctionNameFromPC(ip, name, 256) == false)
 				{
-					VMPI_snprintf(name, 256, "0x%x", ip);
+					VMPI_snprintf(name, 256, "0x%llx", (unsigned long long)ip);
 				}
 				nameTable.put((const void*)ip, name);
 			}
@@ -479,7 +479,7 @@ namespace MMgc
 			*tp++ = '\t';		*tp++ = '\t';		*tp++ = '\t';		
 			if(VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff)) == false)
 			{
-				VMPI_snprintf(buff, sizeof(buff), "0x%x", trace[i]);
+				VMPI_snprintf(buff, sizeof(buff), "0x%llx", (unsigned long long)trace[i]);
 			}
 			VMPI_strncpy(tp, buff, sizeof(buff));
 			tp += VMPI_strlen(buff);
@@ -487,7 +487,7 @@ namespace MMgc
 			uint32_t lineNum;
 			if(VMPI_getFileAndLineInfoFromPC(trace[i], buff, sizeof(buff), &lineNum) == false)
 			{
-				VMPI_snprintf(buff, sizeof(buff), "0x%x", trace[i]);
+				VMPI_snprintf(buff, sizeof(buff), "0x%llx", (unsigned long long)trace[i]);
 			}
 			else
 			{
