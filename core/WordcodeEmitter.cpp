@@ -93,11 +93,11 @@ namespace avmplus
 #ifdef AVMPLUS_DIRECT_THREADED
 		, opcode_labels(interpGetOpcodeLabels())
 #endif
+		, pool(NULL)
+		, code_start(code_start)
 		, exceptions_consumed(false)
 		, dest(NULL)
 		, dest_limit(NULL)
-		, pool(NULL)
-		, code_start(code_start)
 	{
 		boot();
 	}
