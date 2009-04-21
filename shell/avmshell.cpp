@@ -611,7 +611,10 @@ namespace avmshell
 				// This surely does not belong here?
 				if (Java::startup_options) delete Java::startup_options;
 #endif /* AVMPLUS_WITH_JNI */
-			
+
+#ifdef AVMPLUS_SELFTEST
+			finish:
+#endif
 				delete shell;
 				delete gc;
 			}  // MMGC_GCENTER
