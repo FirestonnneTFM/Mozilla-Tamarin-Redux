@@ -68,6 +68,21 @@ namespace avmplus
 	extern AvmCore* g_tmcore;
 #endif
 
+	const bool AvmCore::verbose_default = false;
+	const bool AvmCore::verbose_addrs_default = false;
+	const bool AvmCore::methodNames_default = true;
+	const bool AvmCore::oldVectorMethodNames_default = true;
+	const bool AvmCore::verifyall_default = false;
+	const bool AvmCore::show_stats_default = false;
+	const bool AvmCore::tree_opt_default = false;
+	const bool AvmCore::verbose_live_default = false;;
+	const bool AvmCore::verbose_exits_default = false;
+	const Runmode AvmCore::runmode_default = RM_mixed;
+	const bool AvmCore::cseopt_default = true;
+	const bool AvmCore::bbgraph_default = false;
+	const bool AvmCore::sse2_default = true;
+	const bool AvmCore::interrupts_default = false;
+
 	AvmCore::AvmCore(GC* g) 
 		: GCRoot(g) 
 		, console(NULL) 
@@ -105,57 +120,55 @@ namespace avmplus
 		MMGC_STATIC_ASSERT(sizeof(uint64) == 8);
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
-		#ifdef AVMPLUS_64BIT
+#ifdef AVMPLUS_64BIT
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == 8);
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == 8);		
-		#else
+#else
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == 4);		
-		#endif	
+#endif	
 			
 		// set default mode flags
-		#ifdef AVMPLUS_VERBOSE
-		config.verbose = false;
-		config.verbose_addrs = false;
-		#endif
+#ifdef AVMPLUS_VERBOSE
+		config.verbose = verbose_default;
+		config.verbose_addrs = verbose_addrs_default;
+#endif
 
-		#if VMCFG_METHOD_NAMES
+#ifdef VMCFG_METHOD_NAMES
 		// default to recording method names, if possible. 
 		// (subclass might change this in its ctor if it wants to conserve memory.)
-		config.methodNames = true;
-		config.oldVectorMethodNames = false;
-		#endif
+		config.methodNames = methodNames_default;
+		config.oldVectorMethodNames = oldVectorMethodNames_default;
+#endif
 
-		#ifdef AVMPLUS_VERIFYALL
-	    	config.verifyall = false;
-		#endif
+#ifdef AVMPLUS_VERIFYALL
+	   	config.verifyall = verifyall_default;
+#endif
 
-		#ifdef FEATURE_NANOJIT
-			config.show_stats = false;
-			config.tree_opt = false;
-			config.verbose_live = false;;
-			config.verbose_exits = false;
-		#endif
+#ifdef FEATURE_NANOJIT
+		config.show_stats = show_stats_default;
+		config.tree_opt = tree_opt_default;
+		config.verbose_live = verbose_live_default;
+		config.verbose_exits = verbose_exits_default;
 
-        #if defined FEATURE_NANOJIT
-			// jit flag forces use of jit-compiler instead of interpreter
-    	    config.runmode = RM_mixed;
-			config.cseopt = true;
+		// jit flag forces use of jit-compiler instead of interpreter
+		config.runmode = runmode_default;
+		config.cseopt = cseopt_default;
 
-			#ifdef AVMPLUS_VERBOSE
-			config.bbgraph = false;
-			#endif
+	#ifdef AVMPLUS_VERBOSE
+		config.bbgraph = bbgraph_default;
+	#endif
 
-		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-    		config.sse2 = true;
-			#endif
-		#endif // FEATURE_NANOJIT
+	#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+		config.sse2 = sse2_default;
+	#endif
+#endif // FEATURE_NANOJIT
 
-	#ifdef VTUNE
-			VTuneStatus = CheckVTuneStatus();
-	#endif // VTUNE
+#ifdef VTUNE
+		VTuneStatus = CheckVTuneStatus();
+#endif // VTUNE
 
-		config.interrupts = false;
+		config.interrupts = interrupts_default;
 
 		gcInterface.SetCore(this);
 		xmlEntities        = NULL;
