@@ -139,6 +139,30 @@ const int kBufferPadding = 16;
 	{
 	public:
 		/**
+		 * Default values for the config parameters.  These need to be visible, because
+		 * the shell's command line parsing needs to know what they are.  Presumably
+		 * other host environments might find them useful too.
+		 *
+		 * These are not conditionally included because the resulting code is a mess
+		 * at no benefit.
+		 */
+		static const bool verbose_default;
+		static const bool verbose_addrs_default;
+		static const bool methodNames_default;
+		static const bool oldVectorMethodNames_default;
+		static const bool verifyall_default;
+		static const bool show_stats_default;
+		static const bool tree_opt_default;
+		static const bool verbose_live_default;
+		static const bool verbose_exits_default;
+		static const Runmode runmode_default;
+		static const bool cseopt_default;
+		static const bool bbgraph_default;
+		static const bool sse2_default;
+		static const bool interrupts_default;
+		
+	public:
+		/**
 		 * The console object.  Text to be displayed to the developer
 		 * or end-user can be directed to console, much like the cout
 		 * object in C++ iostreams.
