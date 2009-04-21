@@ -134,7 +134,7 @@ namespace avmplus
 		config.verbose_addrs = verbose_addrs_default;
 #endif
 
-#ifdef VMCFG_METHOD_NAMES
+#if VMCFG_METHOD_NAMES
 		// default to recording method names, if possible. 
 		// (subclass might change this in its ctor if it wants to conserve memory.)
 		config.methodNames = methodNames_default;
