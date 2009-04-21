@@ -230,7 +230,7 @@ bool VMPI_captureStackTrace(uintptr_t* buffer, size_t len, uint32_t skip)
 	while(skip--) {
 	    stackp = *(int*)stackp;
 	}
-	int i=0;
+	size_t i=0;
 	// save space for 0 terminator
 	len--;
 	while(i<len && stackp) {
@@ -239,6 +239,7 @@ bool VMPI_captureStackTrace(uintptr_t* buffer, size_t len, uint32_t skip)
 	    stackp = *(int*)stackp;
 	}
 	buffer[i] = 0;
+	return true;
 }
 #endif
 
