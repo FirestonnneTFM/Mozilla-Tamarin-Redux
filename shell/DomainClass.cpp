@@ -51,7 +51,7 @@ namespace avmshell
 
 	void DomainObject::init(DomainObject *parentDomain)
 	{
-		Shell *core = (Shell*) this->core();
+		ShellCore *core = (ShellCore*) this->core();
 
 		Domain* baseDomain;
 		if (parentDomain) {
