@@ -43,7 +43,7 @@ namespace avmshell
 	SystemClass::SystemClass(VTable *cvtable)
 		: ClassClosure(cvtable)
     {
-		Shell* core = (Shell*)this->core();
+		ShellCore* core = (ShellCore*)this->core();
 		if (core->systemClass == NULL) {
 			core->systemClass = this;
 		}
