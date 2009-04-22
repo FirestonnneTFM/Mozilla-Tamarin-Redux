@@ -550,7 +550,9 @@ namespace avmshell
 		MMgc::GCHeapConfig conf;
 		//conf.verbose = true;
 		MMgc::GCHeap::Init(conf);
-		
+
+		// Note that output from the command line parser will not go to the log file.
+
 		ShellSettings settings;
 		parseCommandLine(argc, argv, settings);
 		
@@ -561,7 +563,7 @@ namespace avmshell
 			else
 				initializeLogging("AVMLOG");
 		}
-		
+
 		AvmAssert( settings.numworkers == 1 && settings.numthreads == 1 );
 
 		int exitCode = 0;
@@ -735,6 +737,8 @@ namespace avmshell
 	/* static */
 	void Shell::parseCommandLine(int argc, char* argv[], ShellSettings& settings)
 	{
+		bool print_version = false;
+		
 		// options filenames -- args
 		
 		for (int i=1; i < argc ; i++) {
@@ -752,6 +756,9 @@ namespace avmshell
 				if (arg[1] == 'D') {
 					if (!VMPI_strcmp(arg+2, "timeout")) {
 						settings.interrupts = true;
+					}
+					else if (!VMPI_strcmp(arg+2, "version")) {
+						print_version = true;
 					}
 					else if (!VMPI_strcmp(arg+2, "nodebugger")) {
 						// allow this option even in non-DEBUGGER builds to make test scripts simpler
@@ -963,6 +970,13 @@ namespace avmshell
 		
 		AvmAssert(settings.filenamesPos != -1 && settings.endFilenamePos != -1 && settings.filenamesPos <= settings.endFilenamePos);
 
+		if (print_version)
+		{
+			AvmLog("shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n");
+			AvmLog("features %s\n", avmfeatures);
+			Platform::GetInstance()->exit(1);
+		}
+		
 		// Vetting the options
 		
 		if (isValidProjectorFile(argv[0])) {
@@ -1039,12 +1053,12 @@ namespace avmshell
 		AvmLog("          [-Dverbose_init] trace the builtins too\n");
 		AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
 #endif
-#if defined FEATURE_NANOJIT
+#ifdef FEATURE_NANOJIT
 		AvmLog("          [-Ojit]       use jit always, never interp\n");
 		AvmLog("          [-Dnocse]     disable CSE optimization \n");
-#ifdef AVMPLUS_IA32
+	#ifdef AVMPLUS_IA32
         AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
-#endif
+	#endif
 #endif
 #ifdef AVMPLUS_JITMAX
         AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
@@ -1056,6 +1070,7 @@ namespace avmshell
 		AvmLog("          [-Dselftest[=component,category,test]]  run selftests\n");
 #endif
 		AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
+		AvmLog("          [-Dversion]   print the version and the list of compiled-in features and then exit\n");
 #ifdef AVMPLUS_WIN32
 		AvmLog("          [-error]      crash opens debug dialog, instead of dumping\n");
 #endif
