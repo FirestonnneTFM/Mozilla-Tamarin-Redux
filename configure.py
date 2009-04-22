@@ -54,6 +54,7 @@ sys.path.append(thisdir)
 
 from build.configuration import *
 import build.getopt
+import build.avmfeatures
 
 o = build.getopt.Options()
 
@@ -85,18 +86,12 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 
-selfTest = o.getBoolArg("selftests", False)
-if selfTest:
-    APP_CPPFLAGS += "-DAVMFEATURE_SELFTEST=1 "
-
-if not o.getBoolArg("jit", True):
-    APP_CPPFLAGS += "-DAVMFEATURE_JIT=0 "
+# See build/avmfeatures.py for the code that processes switches for
+# standard feature names.
+APP_CPPFLAGS += build.avmfeatures.featureSettings(o)
 
 if not o.getBoolArg("methodenv-impl32", True):
     APP_CPPFLAGS += "-DVMCFG_METHODENV_IMPL32=0 "
-
-if o.getBoolArg('abc-interp', False):
-    APP_CPPFLAGS += '-DAVMFEATURE_ABC_INTERP=1 -DAVMFEATURE_WORDCODE_INTERP=0 '
 
 memoryProfiler = o.getBoolArg("memory-profiler", False)
 if memoryProfiler:
@@ -256,14 +251,8 @@ elif cpu == "arm":
 else:
     raise Exception("Unsupported CPU")
 
-if o.getBoolArg("debugger"):
-    APP_CPPFLAGS += "-DDEBUGGER "
-
 if o.getBoolArg('perfm'):
     APP_CPPFLAGS += "-DPERFM "
-    
-if o.getBoolArg('selftest'):
-    APP_CPPFLAGS += '-DAVMPLUS_SELFTEST '
 
 # We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
