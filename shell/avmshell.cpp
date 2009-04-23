@@ -344,7 +344,9 @@ namespace avmshell
 	#endif
 #endif
 #ifdef AVMPLUS_VERBOSE
+#  ifdef FEATURE_NANOJIT
 		config.bbgraph = settings.bbgraph;
+#  endif
 		config.verbose = settings.do_verbose;
 #endif
 		config.runmode = settings.runmode;
