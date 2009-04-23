@@ -132,3 +132,4 @@ ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/
 
 as3/Vector/lastindexofInitializers, (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=487253
 as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
+as3/Vector/initializerLargeVector, x64-lnx.*-Ojit, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281 intermittent seg fault
