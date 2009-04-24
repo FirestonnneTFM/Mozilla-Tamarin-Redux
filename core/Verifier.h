@@ -100,7 +100,8 @@ namespace avmplus
 		 * an exception will be thrown, of type VerifyError.
 		 * @param info the method to verify
 		 */
-		void verify(CodeWriter *coder);
+		// Sun's C++ compiler wants "volatile" here because the definition has it
+		void verify(CodeWriter * volatile coder);
 		FrameState* getFrameState(sintptr targetpc);
 
 		// provide access to known jitters

@@ -62,29 +62,21 @@ namespace MMgc
 		/**
 		 * When allocating a GCWeakRef, tell the GC we don't contain pointers
 		 * (overriding the default base-class behavior).
-		 *
-		 * In MMGC_THREADSAFE builds, the caller always holds m_lock.
-		 *
-		 * @access Requires(gc->m_lock)
 		 */
 		static void *operator new(size_t size, GC *gc)
 		{
-#ifdef MMGC_THREADSAFE
-			return gc->AllocAlreadyLocked(size, GC::kFinalize);
-#else
 			return gc->Alloc(size, GC::kFinalize);
-#endif
 		}
 		// private, only GC can access
 		GCWeakRef(const void *obj) : m_obj(obj) 
 		{
-#ifdef _DEBUG
-			obj_creation = obj ? *((int*)GetRealPointer(obj)+1) : 0;
+#ifdef MMGC_MEMORY_INFO
+			obj_creation = obj;
 #endif
 		}
 		const void *m_obj;
-#ifdef _DEBUG
-		int obj_creation;
+#ifdef MMGC_MEMORY_INFO
+		const void* obj_creation;
 #endif
 	};
 

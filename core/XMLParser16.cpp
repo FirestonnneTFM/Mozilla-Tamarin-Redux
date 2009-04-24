@@ -411,14 +411,14 @@ namespace avmplus
 		if (!core->xmlEntities)
 		{
 			// Lazy creation of the XML entities table.
-			core->xmlEntities = new (core->GetGC()) Hashtable(core->GetGC());
+			core->xmlEntities = new (core->GetGC()) HeapHashtable(core->GetGC());
 
 			const char *entities = "&amp\0\"quot\0'apos\0<lt\0>gt\0\xA0nbsp\0";
 		
 			while (*entities)
 			{
 				core->xmlEntities->add(core->internConstantStringLatin1(entities+1)->atom(),
-							   (void*)core->intToAtom(*entities));
+							   core->intToAtom(*entities));
 				while (*entities++) {
 					// do nothing
 				}

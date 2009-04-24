@@ -40,68 +40,21 @@
 #ifndef __MMgc__
 #define __MMgc__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif // HAVE_CONFIG_H
-
-#ifdef NEED_MMGC_CONFIG_H
-#include "MMgc-config.h"
-#endif
-
-#if defined(MMGC_CUSTOM_BUILD)
-    #include "MMgcCustomBuild.h"
-#else
-	#ifdef WIN32
-		#ifdef ARM
-			#include "armbuild.h"
-		#else
-			#include "winbuild.h"
-		#endif
-	#endif
-
-	#ifdef _MAC
-		#include "macbuild.h"
-	#endif
-
-	#ifdef UNIX
-		#include "unixbuild.h"
-	#endif
-
-	// don't include armbuild.h when MMGC_CUSTOM_BUILD is used
-	#ifdef MMGC_ARM
-		#include "armbuild.h"
-	#endif
-#endif
-
+// VMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
 #include "VMPI.h"
 
-#if defined(WIN32) && defined(MMGC_64BIT)
-#include <setjmpex.h>
-#else
-#include <setjmp.h>
+// Memory profiling settings
+
+#ifdef DEBUG
+    #define MMGC_MEMORY_INFO
 #endif
 
-#if defined(SCRIPT_DEBUGGER) || defined(DEBUGGER)
-#define AVMPLUS_SAMPLER
+#if defined DEBUG && defined AVMPLUS_MAC && !(defined MMGC_PPC && defined MMGC_64BIT)
+    #define MMGC_MEMORY_PROFILER
 #endif
 
-#ifdef MMGC_AVMPLUS
-#  define MMGC_RCROOT_SUPPORT
-#endif
-
-#ifndef _MSC_VER
-#define __forceinline
-#else
-#ifndef DEBUG
-#include <memory.h>
-#include <string.h>
-#pragma intrinsic(memcmp)
-#pragma intrinsic(memcpy)
-#pragma intrinsic(memset)
-#pragma intrinsic(strlen)
-#pragma intrinsic(strcpy)
-#pragma intrinsic(strcat)
-#endif // DEBUG
+#if defined AVMPLUS_WIN32 && !defined AVMPLUS_ARM // note, does not require DEBUG
+    #define MMGC_MEMORY_PROFILER
 #endif
 
 #include "GCDebug.h"

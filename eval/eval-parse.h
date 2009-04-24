@@ -725,11 +725,11 @@ class ForInStmt : public LabelSetStmt {
 public:
 	ForInStmt(uint32_t pos, Expr* lhs, Expr* init, Expr* obj, Stmt* body, bool is_each) 
 		: LabelSetStmt(pos)
+		, is_each(is_each)
 		, lhs(lhs)
 		, init(init)
 		, obj(obj)
 		, body(body)
-		, is_each(is_each)
 	{
 	}
 	virtual void cogen(Cogen* cogen, Ctx* ctx);

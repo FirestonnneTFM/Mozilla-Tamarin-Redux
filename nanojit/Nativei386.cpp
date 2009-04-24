@@ -38,22 +38,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifdef _MAC
-// for MakeDataExecutable
-#include <CoreServices/CoreServices.h>
-#endif
-
 #include "nanojit.h"
-
-#if defined AVMPLUS_UNIX || defined AVMPLUS_MAC
-#include <sys/mman.h>
-#include <errno.h>
-#include <stdlib.h>
-#endif
-
-#if defined AVMPLUS_MAC
-#  include <mach/mach.h> // for vm_protect()
-#endif
 
 #ifdef _MSC_VER
 	// disable some specific warnings which are normally useful, but pervasive in the code-gen macros
@@ -117,19 +102,8 @@ namespace nanojit
 		MR(FP, SP); // Establish our own FP.
         PUSHr(FP); // Save caller's FP.
 
-        // align the entry point
-        asm_align_code();
-
 		return patchEntry;
 	}
-
-    void Assembler::asm_align_code() {
-        // todo: the intel optimization guide suggests canonical nop 
-        // instructions for sizes from 1..9; use them!
-        while(uintptr_t(_nIns) & 7) {
-            NOP();
-        }
-    }
 
 	void Assembler::nFragExit(LInsp guard)
 	{
@@ -382,7 +356,7 @@ namespace nanojit
             if (i->imm8() < max_regs)
     			prefer &= rmask(argRegs[i->imm8()]);
         }
-        else if (op == LIR_callh || op == LIR_rsh && i->oprnd1()->opcode()==LIR_callh) {
+        else if (op == LIR_callh || (op == LIR_rsh && i->oprnd1()->opcode()==LIR_callh)) {
             prefer &= rmask(retRegs[1]);
         }
         else if (i->isCmp()) {

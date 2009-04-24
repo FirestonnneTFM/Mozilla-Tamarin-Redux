@@ -52,8 +52,3 @@
 
 
 
-debugger break       , expectfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=475345
-debugger break2      , expectfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=475345
-debugger next        , expectfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=475345
-debugger locals      , expectfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=475345
-debugger local exception , expectfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=475345

@@ -46,8 +46,6 @@ namespace avmplus
 	using namespace MMgc;
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
-	const uint32_t TMT_REPORT_RATE = 1000;
-
 	AvmCore* g_tmcore = NULL;
 	
 	class TMT_list
@@ -83,9 +81,10 @@ namespace avmplus
 		"VTable", 
 		"MethodEnv", 
 		"MethodInfo", 
-		"MethodSig" 
+		"MethodSig",
+		"ScopeChain", 
+		"STC" 
 	};
-	static uint32_t g_track_count = 0;
 
 	int32_t TMT_list::find(const void* val) const
 	{
@@ -131,12 +130,9 @@ namespace avmplus
 	void tmt_report()
 	{
 		static int g_in_delta = 0;
-		if (g_in_delta == 0)	// bracket to prevent the Collect() call from recursing
+		if (g_in_delta == 0)	// just in case
 		{
 			++g_in_delta;
-			
-			g_tmcore->GetGC()->CleanStack();
-			g_tmcore->GetGC()->Collect(); // flush out dead WeaKRefs first
 			
 			static TMT_list g_tmp;	// static only to avoid crushing the stack
 
@@ -150,6 +146,15 @@ namespace avmplus
 			g_tinfo[TMT_tmi].active = g_tmp.count();
 
 			g_tmp.reset();
+			for (QCachedItem* td = g_tmcore->msCache()->first(); td; td = g_tmcore->msCache()->next(td))
+			{
+				g_tmp.add(td);
+			}
+			g_tinfo[TMT_methodsig].cached = g_tmcore->msCache()->count();
+			g_tinfo[TMT_methodsig].active = g_tmp.count();
+			
+			// NOTE, always process TBI last, as code below relies on that for rogue processing
+			g_tmp.reset();
 			for (QCachedItem* td = g_tmcore->tbCache()->first(); td; td = g_tmcore->tbCache()->next(td))
 			{
 				for (TraitsBindingsp t = (TraitsBindingsp)td; t; t = t->base)
@@ -158,15 +163,7 @@ namespace avmplus
 			g_tinfo[TMT_tbi].cached = g_tmcore->tbCache()->count();
 			g_tinfo[TMT_tbi].active = g_tmp.count();
 
-			g_tmp.reset();
-			for (QCachedItem* td = g_tmcore->msCache()->first(); td; td = g_tmcore->msCache()->next(td))
-			{
-				g_tmp.add(td);
-			}
-			g_tinfo[TMT_methodsig].cached = g_tmcore->msCache()->count();
-			g_tinfo[TMT_methodsig].active = g_tmp.count();
-			
-			AvmLog("\nTraitsMemTrack @ %d %s:\n",g_track_count,g_tmcore->IsJITEnabled()?"JIT":"INTERP");
+			AvmLog("\nTraitsMemTrack %s:\n",g_tmcore->IsJITEnabled()?"JIT":"INTERP");
 			uint32_t totmem = 0;
 			uint32_t totmem_hw = 0;
 			for (int i = 0; i < TMT_COUNT; ++i)
@@ -236,7 +233,7 @@ namespace avmplus
 	static size_t get_size(TMTTYPE t, const void* inst)
 	{
 		size_t sz = GC::Size(inst);
-		if (t == TMT_vtable || t == TMT_methodinfo || t == TMT_methodenv)
+		if (t != TMT_traits && t != TMT_tbi && t != TMT_tmi)
 		{
 			// remove vtable ptr that only exists in memtrack mode
 			sz -= sizeof(void*);
@@ -254,9 +251,6 @@ namespace avmplus
 		g_tinfo[t].live.add(inst);
 		
 		tmt_add_mem(t, get_size(t, inst));
-
-		if ((++g_track_count % TMT_REPORT_RATE) == 0) 
-			tmt_report();
 	}
 
 	void tmt_sub_inst(TMTTYPE t, const void* inst)
@@ -267,9 +261,6 @@ namespace avmplus
 		g_tinfo[t].live.remove(inst);
 
 		tmt_sub_mem(t, get_size(t, inst));
-
-		if ((++g_track_count % TMT_REPORT_RATE) == 0) 
-			tmt_report();
 	}
 #endif
 
@@ -1598,7 +1589,7 @@ namespace avmplus
 		{
 			ImtBuilder imtBuilder(gc);
 			tb = _buildTraitsBindings(toplevel, &gen, &imtBuilder);
-			imtBuilder.finish(m_imt, pool, toplevel);
+			imtBuilder.finish(m_imt, this, toplevel);
 		}
 		else
 		{
@@ -1648,7 +1639,7 @@ namespace avmplus
 			// (eg for bool/int/uint, which have weird sizes)
 			m_totalSize = ((m_totalSize+(sizeof(uintptr_t)-1))&~(sizeof(uintptr_t)-1));
 			m_hashTableOffset = m_totalSize;
-			m_totalSize += sizeof(Hashtable);
+			m_totalSize += sizeof(InlineHashtable);
 			AvmAssert(builtinType == BUILTIN_boolean ? true : (m_hashTableOffset & 3) == 0);
 			AvmAssert((m_hashTableOffset & (sizeof(uintptr_t)-1)) == 0);
 			AvmAssert((m_totalSize & (sizeof(uintptr_t)-1)) == 0);
@@ -1711,10 +1702,10 @@ namespace avmplus
 	// static
 	bool Traits::isMachineCompatible(const Traits* a, const Traits* b)
 	{
-		return a == b ||
+		return (a == b) ||
 			// *, Object, and Void are each represented as Atom
-			(!a || a->builtinType == BUILTIN_object || a->builtinType == BUILTIN_void) &&
-			(!b || b->builtinType == BUILTIN_object || b->builtinType == BUILTIN_void) ||
+			((!a || a->builtinType == BUILTIN_object || a->builtinType == BUILTIN_void) &&
+			(!b || b->builtinType == BUILTIN_object || b->builtinType == BUILTIN_void)) ||
 			// all other non-pointer types have unique representations
 			(a && b && !a->isMachineType() && !b->isMachineType());
 	}
@@ -1867,7 +1858,7 @@ namespace avmplus
 	{
 		AvmAssert(linked);
 
-		Hashtable* ht = m_hashTableOffset ? obj->getTable() : NULL;
+		InlineHashtable* ht = m_hashTableOffset ? obj->getTable() : NULL;
 
 		// start by clearing native space to zero (except baseclasses)
 		uint32_t* p = (uint32_t*)((char*)obj + sizeof(AvmPlusScriptableObject));
@@ -1938,8 +1929,9 @@ namespace avmplus
 		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
 	}
 
-	void ImtBuilder::finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel)
+	void ImtBuilder::finish(Binding imt[], Traits* traits, const Toplevel *toplevel)
 	{
+		PoolObject* pool = traits->pool;
 		AvmAssert(pool->core->IsJITEnabled());
 
 		for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
@@ -1958,23 +1950,20 @@ namespace avmplus
 			else
 			{
 				// build conflict stub
-				#if defined FEATURE_NANOJIT
 				CodegenIMT imtgen(pool);
-				#endif
-
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
 					void* thunk = imtgen.emitImtThunk(e);
-					imt[i] = AvmCore::makeITrampBinding(uintptr_t(thunk));
+					MethodInfo* mi = new (gc) MethodInfo((GprMethodProc)thunk, traits);
+					Binding b = AvmCore::makeITrampBinding(mi);
+					AvmAssert(imt[i] == NULL);
+					WB(gc, traits, &imt[i], b);
 					if (imtgen.overflow)
 						toplevel->throwError(kOutOfMemoryError);
 				}
 				CATCH (Exception* exception) 
 				{
-					#if defined FEATURE_NANOJIT
 					imtgen.clearBuffers();
-                    #endif
-
 					// re-throw exception
 					pool->core->throwException(exception);
 				}

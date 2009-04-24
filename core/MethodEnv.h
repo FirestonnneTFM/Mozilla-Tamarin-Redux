@@ -51,7 +51,7 @@ namespace avmplus
 	#if VMCFG_METHODENV_IMPL32
 		friend class MethodInfo;
 		friend class CodegenIMT;
-		static Atom delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
+		static uintptr_t delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
 	#endif
 	public:
 		/** vtable for the activation scope inside this method */
@@ -61,9 +61,9 @@ namespace avmplus
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
 
-#if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
+#ifdef FEATURE_NANOJIT
 		enum TrampStub { kTrampStub };
-		MethodEnv(TrampStub, void* tramp, VTable* vtable);
+		MethodEnv(TrampStub, MethodInfo *method, VTable* vtable);
 #endif
 
 		MethodEnv(MethodInfo* method, VTable *vtable);
@@ -325,11 +325,11 @@ namespace avmplus
 #endif
 
 #if VMCFG_METHODENV_IMPL32
-		inline AtomMethodProc impl32() const { return _impl32; }
-		inline DoubleMethodProc implN() const { return _implN; }
+		inline GprMethodProc implGPR() const { return _implGPR; }
+		inline FprMethodProc implFPR() const { return _implFPR; }
 #else
-		inline AtomMethodProc impl32() const { return method->impl32(); }
-		inline DoubleMethodProc implN() const { return method->implN(); }
+		inline GprMethodProc implGPR() const { return method->implGPR(); }
+		inline FprMethodProc implFPR() const { return method->implFPR(); }
 #endif
 
 	// ------------------------ DATA SECTION BEGIN
@@ -338,8 +338,8 @@ namespace avmplus
 		// these are most-frequently accessed so put at offset zero
 		union 
 		{
-			AtomMethodProc _impl32;
-			DoubleMethodProc _implN;
+			GprMethodProc _implGPR;
+			FprMethodProc _implFPR;
 		};
 #endif
 	protected:
@@ -347,7 +347,6 @@ namespace avmplus
 		VTable* const				_vtable;		// the vtable for the scope where this env was declared 
 	public:
 		MethodInfo* const			method;		// runtime independent type info for this method 
-		Traits* const				declTraits;
 	private:
 		uintptr_t					activationOrMCTable;
 	public:
@@ -444,7 +443,7 @@ namespace avmplus
 			_swap8(c[2], c[5]);
 			_swap8(c[3], c[4]);
 		}
-	#elif defined AVMPLUS_ARM_OLDABI
+	#elif defined VMCFG_DOUBLE_MSW_FIRST
 		inline void MOPS_SWAP_BYTES(uint16_t*) {}
 		inline void MOPS_SWAP_BYTES(int32_t*) {}
 		inline void MOPS_SWAP_BYTES(float*) {}

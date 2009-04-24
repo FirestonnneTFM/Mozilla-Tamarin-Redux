@@ -44,8 +44,42 @@ namespace avmplus
 	/**
 	 * common base class for hashtable-like objects.
 	 */
-	class Hashtable : public MMgc::GCFinalizedObject
+	// NOTE NOTE NOTE NOTE
+	// NOTE NOTE NOTE NOTE
+	// NOTE NOTE NOTE NOTE
+	// NOTE NOTE NOTE NOTE
+	//
+	// InlineHashtable is designed to never have its ctors or dtors called directly; it can't be allocated
+	// either on the stack or the heap. For a standalong heap allocation, use HeapHashtable instead.
+	//
+	// The reason for this oddity is that InlineHashtable can be grafted "inline" to a ScriptObject, and
+	// will be manually initialized and destroyed (but not via its ctor/dtor). We also don't want
+	// to descend from any class that might force us to have a vtable (eg by way of a virtual dtor) because
+	// we neither need one nor want to account for the extra pointer-sized space in every instance of ScriptObject.
+	// (It's not large, but it adds up...)
+	//
+	// NOTE NOTE NOTE NOTE
+	// NOTE NOTE NOTE NOTE
+	// NOTE NOTE NOTE NOTE
+	// NOTE NOTE NOTE NOTE
+	class InlineHashtable
 	{
+	private:
+		friend class HeapHashtable;
+		friend class WeakKeyHashtable;
+		friend class WeakValueHashtable;
+		
+		inline InlineHashtable() : m_atomsAndFlags(0), m_size(0), m_logCapacity(0)
+		{
+			// nothing, here only for HeapHashtable, which explicitly calls initialize()
+		}
+
+		// do NOT make this virtual; we want InlineHashtable to NOT have ANY virtual methods, not even a dtor
+		inline ~InlineHashtable()
+		{
+			// nothing, here only for HeapHashtable, which explicitly calls destroy()
+		}
+
 	public:
 		/**
 		 * since identifiers are always interned strings, they can't be 0,
@@ -59,41 +93,44 @@ namespace avmplus
 		/** kDefaultCapacity must be a power of 2 */
 		const static int kDefaultCapacity = 8;
 
-		int getSize() const { return size; }
-		int getNumAtoms() const { return logNumAtoms ? 1<<(logNumAtoms-1) : 0; }
+		uint32_t getSize() const { return m_size; }
+		uint32_t getCapacity() const { return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0; }
 
-		bool hasDontEnumSupport() const { return flags & kDontEnumSupport; }
-		void setDontEnumSupport(bool flag) { flags = (short)((flags & ~kDontEnumSupport) | (flag ? kDontEnumSupport : 0)); }
-
-		int dontEnumMask() const { return hasDontEnumSupport() ? kDontEnumBit : 0; }
+		uintptr_t hasDontEnumSupport() const { return (m_atomsAndFlags & kDontEnumBit); }
+		void setDontEnumSupport() { m_atomsAndFlags |= kDontEnumBit; }
+		//void clrDontEnumSupport() { m_atomsAndFlags &= ~kDontEnumBit; }	// never currently called.
+		Atom removeDontEnumMask(Atom a) const { return Atom(uintptr_t(a) & ~(m_atomsAndFlags & kDontEnumBit)); }
+		bool enumerable(Atom a) const { return a != EMPTY && a != DELETED && !(uintptr_t(a) & (m_atomsAndFlags & kDontEnumBit)); }
 		
 		bool getAtomPropertyIsEnumerable(Atom name) const;
 		void setAtomPropertyIsEnumerable(Atom name, bool enumerable);
 
-		// kDontEnumBit is or'd into atoms to indicate that the property is {DontEnum}
-		enum
+#ifdef DEBUGGER
+		inline uint64 size() const
 		{
-			kDontEnumBit = 1
-		};
+			return m_size * 2 * sizeof(Atom);
+		}
+#endif
 
 	private:
-		// Flags used in the "flags" variable
-		enum
-		{
-			kDontEnumSupport = 1,
-			kHasDeletedItems = 2
-		};
+		// kDontEnumBit is or'd into atoms to indicate that the property is {DontEnum},
+		// and ALSO or'd into m_atomsAndFlags to indicate that the InlineHashtable as a whole supports DontEnum.
+		static const uintptr_t kDontEnumBit		= 0x01;
+		// kHasDeletedItems is or'd into m_atomsAndFlags (but not individual atoms) 
+		static const uintptr_t kHasDeletedItems	= 0x02;
 
-		bool hasDeletedItems() const { return (flags & kHasDeletedItems) != 0; }
+		static const uintptr_t kAtomFlags			= (kDontEnumBit | kHasDeletedItems);
 
-		void setNumAtoms(int numAtoms)
+		uintptr_t hasDeletedItems() const { return (m_atomsAndFlags & kHasDeletedItems); }
+
+		void setCapacity(uint32_t cap)
 		{
-			logNumAtoms = numAtoms ? (short)(FindOneBit(numAtoms)+1) : 0;
-			AvmAssert(getNumAtoms() == numAtoms);
+			m_logCapacity = cap ? (FindOneBit(cap)+1) : 0;
+			AvmAssert(getCapacity() == cap);
 		}
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-		static inline uint32 FindOneBit(uint32 value)
+		static inline uint32_t FindOneBit(uint32_t value)
 		{
 
 #ifndef __GNUC__
@@ -157,32 +194,23 @@ namespace avmplus
 
 #endif
 		
-		void setAtoms(Atom *atoms);
+		void setAtoms(Atom* atoms);
 
 	public:
 
-		Atom* getAtoms() { return atoms; }
-
-		/**
-		 * initialize with a known capacity.  i.e. we can fit minSize
-		 * elements in without rehashing.
-		 * @param heap
-		 * @param capacity  # of logical slots
-		 */
-		Hashtable(MMgc::GC *gc, int capacity = kDefaultCapacity);
+		Atom* getAtoms() { return (Atom*)(m_atomsAndFlags & ~kAtomFlags); }
+		const Atom* getAtoms() const { return (const Atom*)(m_atomsAndFlags & ~kAtomFlags); }
 	
 		void destroy(); 
 
 		void reset()
 		{
-			MMgc::GC *gc = MMgc::GC::GetGC(atoms);
+			MMgc::GC* gc = MMgc::GC::GetGC(getAtoms());
 			destroy();
 			initialize(gc);
 		}
 		
 		void initialize(MMgc::GC *gc, int capacity = kDefaultCapacity);
-
-		virtual ~Hashtable();
 
 		/* See CPP for load factor variants. */
 		bool isFull() const;
@@ -196,25 +224,9 @@ namespace avmplus
 
 		bool contains(Atom name) const
 		{
-			return (atoms[find(name, atoms, getNumAtoms())] & ~dontEnumMask()) == name;
+			const Atom* atoms = getAtoms();
+			return removeDontEnumMask(atoms[find(name, atoms, getCapacity())]) == name;
 		}
-		/*@}*/
-
-		/**
-		 * convenience functions for storing pointers as values.  This is
-		 * safe for internal tables that always store the same kind of
-		 * pointer.
-		 */
-		/*@{*/
-		void put(Atom name, const void *value)
-		{
-			put(name,(Atom)value);
-		}
-
-		void add(Atom name, const void *value)
-		{
-			add(name, (Atom)value);
-		};
 		/*@}*/
 
 		/**
@@ -225,27 +237,27 @@ namespace avmplus
 		 * This is a quadratic probe, but we only hit even-numbered
 		 * slots since those hold keys.
 		 */
-		int find(Atom x, const Atom *t, unsigned tLen) const;
-		int find(Stringp x, const Atom *t, unsigned tLen) const;
-		int find(Atom x) const { return find(x, atoms, getNumAtoms()); }
+		int find(Atom x, const Atom *t, uint32_t tLen) const;
+		int find(Stringp x, const Atom *t, uint32_t tLen) const;
+		int find(Atom x) const { return find(x, getAtoms(), getCapacity()); }
 
 		/**
 		 * Adds a name/value pair to a hash table.  Automatically
 		 * grows the hash table if it is full.
 		 */
-		void add (Atom name, Atom value);
+		void add(Atom name, Atom value);
 
 		/**
-		 * Called to grow the Hashtable, particularly by add.
+		 * Called to grow the InlineHashtable, particularly by add.
 		 *
-		 * - Calculates the needed size for the new Hashtable
+		 * - Calculates the needed size for the new InlineHashtable
 		 *   (typically 2X the current size)
 		 * - Creates a new array of Atoms
 		 * - Rehashes the current table into the new one
 		 * - Deletes the old array of Atoms and sets the Atom
 		 *   pointer to our new array of Atoms
 		 */
-		void grow();
+		bool grow();
 
 		/**
 		 * Allow caller to enumerate all entries in the table.
@@ -255,48 +267,115 @@ namespace avmplus
 		Atom valueAt(int index);
 		//void removeAt(int index);
 
-		void setHasDeletedItems(bool val) { flags = (short)((flags & ~kHasDeletedItems) | (val ? kHasDeletedItems : 0)); }
+		void setHasDeletedItems() { m_atomsAndFlags |= kHasDeletedItems; }
+		void clrHasDeletedItems() { m_atomsAndFlags &= ~kHasDeletedItems; }
 
-	protected:
+	private:
 		void put(Atom name, Atom value);
-		int rehash(Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen);
+		int rehash(const Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen) const;
+
+	private:
+		//
+		// "capacity" is the total number of atoms we allocate.
+		// we use that capacity as name-value pairs, thus the maximum size at any time is always half the capacity.
+		// for 32-bit builds, we want to limit the maximum number of entries to (1<<27)-1,
+		// thus we the max capacity we need is (1<<28)-2. but since capacity is always limited
+		// to a power of two, we'll actually limit capacity to 1<<27... which in turn will limit
+		// maximum number of entries to (1<<26)-1. this has the downside of halving our maximum size,
+		// but the upside of avoiding the need to check m_size for overflow on every put (we only
+		// need to check capacity for overflow on every grow).
+		//
+		// (note: for consistency between 32 and 64-bit builds, we'll artificially limit 64-bit systems
+		// to the same size, even though the m_size field can hold more.)
+		//
+		// How does this compare with pre-existing behavior on 32-bit systems?
+		// theoretically, capacity could have been an allocation of 1<<32 == 4GB max (it's always a power of two)...
+		// but some memory is of course used for other purposes, thus effectively 2GB max.
+		// divide by sizeof(Atom) == 4 to find we had an actual max-capacity of 1<<29 entries.
+		// So it is mathematically possible that a hashtable that was previously possible 
+		// will now prematurely run out of memory... but extraordinarily unlikely.
+		//
+		// (In practice, Win32 limits each process to 2GB, so we can halve the above for those systems,
+		// thus "portable" ABC/SWF code could only rely on a max capacity of 1<<28 entries.)
+		// 
+		// 
+		static const uint32_t MAX_CAPACITY = (1UL<<27);
 
 	// ------------------------ DATA SECTION BEGIN
-	protected:
-		Atom*		atoms;	// property hashtable, this has no DWB on purpose, setAtoms contains the WB
 	private:
-		int32_t		size;
-		int16_t		logNumAtoms;
-		int16_t		flags;
+		uintptr_t m_atomsAndFlags;	/** property hashtable, this has no DWB on purpose, setAtoms contains the WB */
+	#ifdef AVMPLUS_64BIT
+		// on 64-bit systems, padding will force us to 16 bytes here anyway, so let's just use unpacked ints
+		uint32_t m_size;			// number of properties
+		uint32_t m_logCapacity;		// (log2 of capacity) + 1
+	#else
+		uint32_t m_size:27;			// number of properties 
+		uint32_t m_logCapacity:5;	// (log2 of capacity) + 1 -- gives us enough space for 2^32 entries
+	#endif
 	// ------------------------ DATA SECTION END
+	};
+
+	class HeapHashtable : public MMgc::GCFinalizedObject
+	{
+	protected:
+		InlineHashtable ht;
+
+	public:
+		/**
+		 * initialize with a known capacity.  i.e. we can fit minSize
+		 * elements in without rehashing.
+		 * @param heap
+		 * @param capacity  # of logical slots
+		 */
+		HeapHashtable(MMgc::GC* gc, int32_t capacity = InlineHashtable::kDefaultCapacity)
+		{ 
+			ht.initialize(gc, capacity); 
+		}
+		virtual ~HeapHashtable() { ht.destroy(); }
+		inline InlineHashtable* get_ht() { return &ht; }
+
+		inline void reset() { ht.reset(); }
+		inline uint32_t getCapacity() const { return ht.getCapacity(); }
+		inline uint32_t getSize() const { return ht.getSize(); }
+		inline int next(int index) { return ht.next(index); }
+		inline Atom keyAt(int index) { return ht.keyAt(index); }
+		inline Atom valueAt(int index) { return ht.valueAt(index); }
+		virtual void add(Atom name, Atom value) { ht.add(name, value); }
+		virtual Atom get(Atom name) { return ht.get(name); }
+		virtual Atom remove(Atom name) { return ht.remove(name); }
+		virtual bool contains(Atom name) const { return ht.contains(name); }
+		virtual bool weakKeys() const { return false; }
+		virtual bool weakValues() const { return false; }
 	};
 
 	/** 
 	 * If key is an object weak ref's are used
 	 */
-	class WeakKeyHashtable : public Hashtable
+	class WeakKeyHashtable : public HeapHashtable
 	{
 	public:
-		WeakKeyHashtable (MMgc::GC* gc): Hashtable(gc) { };
-		void add(Atom key, Atom value);
-		Atom get(Atom key) { return Hashtable::get(getKey(key)); }
-		void remove(Atom key) { Hashtable::remove(getKey(key)); }
-		bool contains(Atom key) { return Hashtable::contains(getKey(key)); }
+		WeakKeyHashtable(MMgc::GC* _gc) : HeapHashtable(_gc) { }
+		virtual void add(Atom key, Atom value);
+		virtual Atom get(Atom key) { return ht.get(getKey(key)); }
+		virtual Atom remove(Atom key) { return ht.remove(getKey(key)); }
+		virtual bool contains(Atom key) const { return ht.contains(getKey(key)); }
+		virtual bool weakKeys() const { return true; }
 	private:
-		Atom getKey(Atom key);
+		Atom getKey(Atom key) const;
 		void prune();
 	};	
 
 	/** 
-	 * If key is an object weak ref's are used
+	 * If value is an object weak ref's are used
 	 */
-	class WeakValueHashtable : public Hashtable
+	class WeakValueHashtable : public HeapHashtable
 	{
 	public:
-		WeakValueHashtable (MMgc::GC* gc): Hashtable(gc) { };
-		void add(Atom key, Atom value);
-		Atom get(Atom key) { return getValue(key, Hashtable::get(key)); }
-		Atom remove(Atom key) { return getValue(key, Hashtable::remove(key)); }
+		WeakValueHashtable(MMgc::GC* _gc) : HeapHashtable(_gc) { }
+		virtual void add(Atom key, Atom value);
+		virtual Atom get(Atom key) { return getValue(key, ht.get(key)); }
+		virtual Atom remove(Atom key) { return getValue(key, ht.remove(key)); }
+		virtual bool weakValues() const { return true; }
 	private:
 		Atom getValue(Atom key, Atom value);
 		void prune();

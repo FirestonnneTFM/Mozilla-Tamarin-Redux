@@ -225,8 +225,8 @@ public:
 	Seq<T>* get() const;
 	
 private:
+	Allocator* allocator;
 	Seq<T>* items;
 	Seq<T>* last;
-	Allocator* allocator;
 };
 

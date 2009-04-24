@@ -40,14 +40,6 @@
 
 #include "avmplus.h"
 
-#ifdef DEBUGGER
-#include <unistd.h>
-#include <pthread.h>
-#ifdef AVMPLUS_MAC
-#include <CoreServices/CoreServices.h>
-#endif
-#endif
-
 namespace avmplus
 {
 

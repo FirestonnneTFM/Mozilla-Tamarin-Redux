@@ -38,7 +38,7 @@
 
 // Adobe patent application tracking #P721, entitled Application Profiling, inventors: T. Reilly
 
-#ifdef AVMPLUS_SHELL
+#ifdef AVMSHELL_BUILD
 #include "avmshell.h"
 #else
 // player
@@ -181,9 +181,11 @@ namespace avmplus
 	class SlotIterator : public ScriptObject
 	{
 	public:
-		SlotIterator(Traits *t, VTable *vtable) : 
-			currTraits(t ? t->getTraitsBindings() : NULL),
-			ScriptObject(vtable, NULL) {}
+		SlotIterator(Traits *t, VTable *vtable)
+			: ScriptObject(vtable, NULL) 
+			, currTraits(t ? t->getTraitsBindings() : NULL)
+		{
+		}
 
 		int nextNameIndex(int index)
 		{
@@ -716,7 +718,7 @@ namespace avmplus
 
 	
 	NewObjectSampleObject::NewObjectSampleObject(VTable *vtable, ScriptObject *delegate)
-		: size(0), SampleObject(vtable, delegate) 
+		: SampleObject(vtable, delegate), size(0)
 	{}
 
 	Atom NewObjectSampleObject::get_object()

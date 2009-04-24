@@ -212,18 +212,12 @@ namespace MMgc
 	{
 		size += DebugSize();
 		int blocksNeeded = (int)GCHeap::SizeToBlocks(size);
-		void *item = m_heap->Alloc(blocksNeeded, true, false);
-		if(!item)
-		{
-			GCAssertMsg(item != NULL, "Large allocation failed!");
-		}
-		else
-		{
-			numLargeChunks += blocksNeeded;
-		}
+		void *item = m_heap->AllocNoProfile(blocksNeeded, true, false);
+		numLargeChunks += blocksNeeded;
+
 		item = GetUserPointer(item);
 		if(m_heap->HooksEnabled())
-			m_heap->AllocHook(item, Size(item));
+			m_heap->AllocHook(item, size, Size(item));
 		return item;
 	}
 	
@@ -235,7 +229,7 @@ namespace MMgc
 			m_heap->FreeHook(item, Size(item), 0xfa);
 		}
 		numLargeChunks -= GCHeap::SizeToBlocks(LargeSize(item));
-		m_heap->Free(GetRealPointer(item));
+		m_heap->FreeNoProfile(GetRealPointer(item));
 	}
 	
 	size_t FixedMalloc::LargeSize(const void *item)

@@ -95,8 +95,6 @@
 	#pragma warning(disable:4345) // behavior change: an object of POD type constructed with an initializer of the form () will be default-initialized
 #endif
 
-#include <stdarg.h>
-
 #ifdef DEBUG
 #  define DEBUG_ONLY(x) x
 #else

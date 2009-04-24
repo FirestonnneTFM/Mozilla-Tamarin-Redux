@@ -53,9 +53,9 @@ namespace avmplus
 		cpool_uint_atoms(core->GetGC(), 0),
 #endif
 		cpool_mn(0),
-		bugFlags(0),
 		metadata_infos(0),
 		scripts(core->GetGC(), 0),
+		bugFlags(0),
 		_namedTraits(new(core->GetGC()) MultinameHashtable()),
 		_privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
 		_code(sb.getImpl()),
@@ -640,7 +640,7 @@ range_error:
 	Stringp PoolObject::getMethodInfoName(uint32_t i)
 	{
 		Stringp name = NULL;
-		if (core->config.methodNames && uint32_t(i) < uint32_t(this->_method_name_indices.size()))
+		if (core->config.methodNames && (uint32_t(i) < uint32_t(this->_method_name_indices.size())))
 		{
 			const int32_t index = this->_method_name_indices[i];
 			if (index >= 0)

@@ -50,7 +50,7 @@ namespace MMgc
 	 * FixedAllocLarge allocator which will allocate multiple
 	 * pages at a time to minimize waste.
 	 */
-	class MMGC_API FixedAlloc : public GCAllocObject
+	class FixedAlloc : public GCAllocObject
 	{
 		friend class FixedMalloc;
 		friend class FastAllocator;
@@ -104,7 +104,7 @@ namespace MMgc
 		int    m_maxAlloc;
 
 		bool IsFull(FixedBlock *b) const { return b->numAlloc == m_itemsPerBlock; }
-		FixedBlock* CreateChunk();
+		void CreateChunk();
 		void FreeChunk(FixedBlock* b);
 
 		static inline FixedBlock *GetFixedBlock(const void *item)
@@ -116,6 +116,11 @@ namespace MMgc
 		{
 			return GetFixedBlock(item)->size;
 		}
+
+#ifdef MMGC_MEMORY_INFO
+		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
+#endif
+
 	};
 
 	class FixedAllocSafe : public FixedAlloc

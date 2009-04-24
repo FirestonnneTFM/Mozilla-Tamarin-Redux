@@ -41,7 +41,7 @@
 
 namespace MMgc
 {
-	class MMGC_API GCHeapConfig
+	class GCHeapConfig
 	{
 	public:
 		GCHeapConfig();
@@ -52,13 +52,80 @@ namespace MMgc
 		bool trimVirtualMemory;
 		bool verbose;
 		bool returnMemory;
-#ifdef MMGC_MEMORY_PROFILER
-		bool enableProfiler;
-#endif
 		bool gcstats;
 		bool autoGCStats;
 	};
 	
+	/**
+	 * The GCManager centralizes management of all the memory allocators in the
+	 * system, and provides iteration and broadcast facilities.
+	 *
+	 * The GCHeap singleton holds the only instance of this manager.
+	 */	 
+	class GCManager
+	{
+	public:
+		GCManager();
+		
+		/**
+		 * Can't have a destructor as it'll be called too late, call destroy to
+		 * free any resources.
+		 */
+		void destroy();
+
+		/**
+		 * Register the GC with the manager.  GC must not already be registered.
+		 */
+		void addGC(GC* gc);
+		
+		/**
+		 * Unregister the GC with the manager.  The GC must be registered.
+		 */
+		void removeGC(GC* gc);
+		
+		/**
+		 * @return the number of GCs registered.
+		 */
+		uint32_t getCount();
+		
+		/**
+		 * @return the GC at the given index, 0 <= index < getCount().  Reliably returns
+		 * NULL for indices outside the range.
+		 */
+		GC* getGC(uint32_t index);
+		
+		/**
+		 * Signal to all GCs that the memory status in the system goes from oldStatus to
+		 * newStatus.
+		 */
+		void signalMemoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus);
+		
+		/**
+		 * Tell every other GC that 'gc' is starting a collection (ie there may be memory pressure there).
+		 */
+		void signalStartCollection(GC* gc);
+		
+		/**
+		 * Tell every other GC that 'gc' is finished with its collection.
+		 */
+		void signalEndCollection(GC* gc);
+		
+	private:
+		GC** collectors;			// array of collectors
+		uint32_t numCollectors;		// number of active elements in that array
+		uint32_t limitCollectors;	// size of that array
+	};
+	
+	inline uint32_t GCManager::getCount() {
+		return numCollectors;
+	}
+	
+	inline GC* GCManager::getGC(uint32_t index) {
+		if (index >= numCollectors)
+			return NULL;
+		return collectors[index];
+	}
+
 	/**
 	 * GCHeap is a heap manager for the Flash Player's garbage collector.
 	 *
@@ -97,7 +164,7 @@ namespace MMgc
 	 * the address space returned by VirtualAlloc.  Heap regions are
 	 * allocated contiguously if possible to reduce fragmentation.
 	 */
-	class MMGC_API GCHeap : public GCAllocObject
+	class GCHeap : public GCAllocObject
 	{
 	public:
 		// -- Constants
@@ -142,7 +209,6 @@ namespace MMgc
 		/* legacy API */
 		static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128)
 		{
-			GCAssertMsg(false, "Switch to other Init method please");
 			(void)malloc;
 			(void)free;
 			GCHeapConfig props;
@@ -168,7 +234,15 @@ namespace MMgc
 		 *             to allocate.
 		 * @return pointer to beginning of block, or NULL if failed.
 		 */
-		void *Alloc(int size, bool expand=true, bool zero=true);
+		void *Alloc(int size, bool expand=true, bool zero=true)
+		{
+			return _Alloc(size, expand, zero, true);
+		}
+
+		void *AllocNoProfile(int size, bool expand, bool zero)
+		{
+			return _Alloc(size, expand, zero, false);
+		}
 
 		/**
 		 * Frees a block.
@@ -176,8 +250,13 @@ namespace MMgc
 		 *             pointer that was previously returned by
 		 *             a call to Alloc.
 		 */
-		void Free(void *item);
-		void Free(void *item, size_t /*ignore*/) { Free(item); }
+		void Free(void *item) { _Free(item, true); }
+		void FreeNoProfile(void *item) { _Free(item, false); }
+
+		/**
+		 * Added for NJ's portability needs cause it doesn't always MMgc 
+		 */
+		void Free(void *item, size_t /*ignore*/) { _Free(item, true); }
 
 
 		size_t Size(const void *item);
@@ -277,8 +356,8 @@ namespace MMgc
 
 		/* controls whether AllocHook and FreeHook are called */
 		void EnableHooks() { hooksEnabled = true; }
-		bool HooksEnabled() const { return hooksEnabled; }
-		void AllocHook(const void *item, size_t size);
+		inline bool HooksEnabled() const { return hooksEnabled; }
+		void AllocHook(const void *item, size_t askSize, size_t gotSize);
 		// called when object is determined to be garbage but we can't write to it yet
 		void FinalizeHook(const void *item, size_t size);
 		// called when object is really dead and can be poisoned
@@ -286,12 +365,15 @@ namespace MMgc
 		
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *GetProfiler() { return profiler; }
-		bool IsProfilingEnabled() { return config.enableProfiler; }
 		void DumpFatties() { profiler->DumpFatties(); }
 #endif
 
-		void AddGC(GC *gc);
-		void RemoveGC(GC *gc);
+		// Every new GC must register itself with the GCHeap.
+		void AddGC(GC *gc) { gcManager.addGC(gc); }
+		
+		// When the GC is destroyed it must remove itself from the GCHeap.
+		void RemoveGC(GC *gc) { gcManager.removeGC(gc); }
+		
 		void Abort();
 		MemoryStatus GetStatus() { return status; }
 
@@ -305,9 +387,9 @@ namespace MMgc
 
 		void log_percentage(const char *, size_t bytes, size_t relativeTo);
 
-		FILE* GetSpyFile() { return spyFile; }
-
 		void DumpMemoryInfo();
+
+		GCManager gcManager;
 
 	private:
 
@@ -329,7 +411,7 @@ namespace MMgc
 		Region *lastRegion;
 		
 		// Block struct used for free lists and memory traversal
-		class MMGC_API HeapBlock : public GCAllocObject
+		class HeapBlock : public GCAllocObject
 		{
 		public:
 			char *baseAddr;   // base address of block's memory
@@ -339,7 +421,7 @@ namespace MMgc
 			HeapBlock *next;      // next entry on free list
 			bool committed;   // is block fully committed?
 			bool dirty;		  // needs zero'ing, only valid if committed
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 			StackTrace *allocTrace;
 			StackTrace *freeTrace;
 #endif
@@ -362,9 +444,10 @@ namespace MMgc
 
 		void Commit(HeapBlock *block);
 
-#ifdef _DEBUG
 		friend class GC;
-#endif
+
+		void *_Alloc(int size, bool expand, bool zero, bool profile);
+		void _Free(void *item, bool track);
 
 		HeapBlock *AddrToBlock(const void *item) const;
 		Region *AddrToRegion(const void *item) const;
@@ -377,6 +460,9 @@ namespace MMgc
 		// textual heap representation, very nice!
 		void DumpHeapRep();
 		
+		//log a character for "count" times
+		void LogChar(char c, size_t count);
+
 		// Remove a block from a free list (inlined for speed)
 		inline void RemoveFromList(HeapBlock *block)
 		{
@@ -399,7 +485,7 @@ namespace MMgc
 			}
 		}
 
-		void StatusChangeNotify(MemoryStatus from, MemoryStatus to);
+		void StatusChangeNotify(MemoryStatus from, MemoryStatus to) { gcManager.signalMemoryStatusChange(from, to); }
 
 		void ValidateHeapBlocks();
 
@@ -422,25 +508,20 @@ namespace MMgc
 
 		GCHeapConfig config;
 		
-public:
+	public:
 		// TODO: remove legacy var, replaced by env var or GCHeapConfig
 		bool enableMemoryProfiling;
-public:
 
 	private:
-
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
 		MemoryStatus status;
-		GC **gcs;
-		uint32_t gcs_count;
 
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *profiler;
+		bool hasSpy; //flag indicating whether profiler spy is active or not.  If active, AllocHook will call VMPI_spyCallback
 #endif
 		bool hooksEnabled;
-		uint32_t signal;
-		FILE *spyFile;		
 		
 		// some OS's are loose with how with virtual memory is dealt with and we don't have to track
 		// each region individually (ie multiple contiguous mmap's can be munmap'd all at once)

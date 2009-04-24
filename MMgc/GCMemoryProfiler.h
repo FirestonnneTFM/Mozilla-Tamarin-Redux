@@ -41,19 +41,20 @@
 
 namespace MMgc
 {
-	MMGC_API void PrintStackTrace(const void *item);
-	MMGC_API const char* GetAllocationName(const void *obj);
+	void PrintAllocStackTrace(const void *item);
+	void PrintDeleteStackTrace(const void *item);
+	const char* GetAllocationName(const void *obj);
 
 #ifdef MMGC_MEMORY_PROFILER
 
-#define MMGC_MEM_TAG(_x) MMgc::SetMemTag(_x)
-#define MMGC_MEM_TYPE(_x) MMgc::SetMemType(_x)
+#define MMGC_MEM_TAG(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemTag(_x)
+#define MMGC_MEM_TYPE(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemType(_x)
 	
 	class StackTrace;
 
-	MMGC_API void SetMemTag(const char *memtag);
-	MMGC_API void SetMemType(const void *memtype);
-	MMGC_API void PrintStackTraceByTrace(StackTrace *trace);
+	void SetMemTag(const char *memtag);
+	void SetMemType(const void *memtype);
+	void PrintStackTrace(StackTrace *trace);
 
 	class GCStackTraceHashtable : public GCHashtable
 	{
@@ -69,13 +70,13 @@ namespace MMgc
 	public:
 		MemoryProfiler();
 		~MemoryProfiler();
-		void Alloc(const void *item, size_t size);
-		void Free(const void *item, size_t size);
+		void RecordAllocation(const void *item, size_t askSize, size_t gotSize);
+		void RecordDeallocation(const void *item, size_t size);
 		void DumpFatties();
 		const char *GetAllocationName(const void *obj);
 		StackTrace *GetAllocationTrace(const void *obj);
-	private:
 		StackTrace *GetStackTrace();
+	private:
 		const char *Intern(const char *name, size_t len);
 		const char *GetPackage(StackTrace *trace);
 		const char *GetAllocationNameFromTrace(StackTrace *trace);
@@ -109,17 +110,18 @@ namespace MMgc
 	/**
 	* Manually set me, for special memory not new/deleted, like the code memory region
 	*/
-	MMGC_API void ChangeSizeForObject(const void *object, int size);
+	void ChangeSizeForObject(const void *object, int size);
 
 	/**
 	* How much extra size does DebugDecorate need?
 	*/
-	MMGC_API size_t DebugSize();
+	size_t DebugSize();
 
 	/**
 	* decorate memory with debug information, return pointer to memory to return to caller
 	*/
-	MMGC_API void DebugDecorate(const void *item, size_t size);
+	void DebugDecorate(const void *item, size_t size);
+	
 	/** 
 	* Given a pointer to user memory do debug checks and return pointer to real memory
 	*/
@@ -128,13 +130,18 @@ namespace MMgc
 	/**
 	* Given a user pointer back up to real beginning
 	*/
-	inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int)); }
+	inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int32_t)); }
 
 	/**
-	* Given a user pointer back up to real beginning
+	* Given a real pointer return pointer to user memory
 	*/
-	inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int)); }
+	inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int32_t)); }
 
+	/**
+	* Print errorr messsage and stack traces for allocation/free of memory
+	* that has been written over after being deleted
+	*/
+	void ReportDeletedMemoryWrite(const void* item);
 
 #endif //MMGC_MEMORY_INFO
 

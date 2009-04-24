@@ -56,7 +56,7 @@ namespace avmplus
 		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits();
 
 		// ISSUE can we just make this the public namespace?
-		ScopeChain* emptyScope = ScopeChain::create(gc, mainTraits->scope, NULL, core->newNamespace(core->kEmptyString));
+		ScopeChain* emptyScope = ScopeChain::create(gc, mainTraits->scope(), NULL, core->newNamespace(core->kEmptyString));
 
 			// create a temp object vtable to use, since the real one isn't created yet
 			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
@@ -657,8 +657,8 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		if ((ctor&7) != kObjectType ||
-			!AvmCore::istype(ctor, core->traits.function_itraits) &&
-			!AvmCore::istype(ctor, core->traits.class_itraits))
+			(!AvmCore::istype(ctor, core->traits.function_itraits) &&
+			!AvmCore::istype(ctor, core->traits.class_itraits)))
 		{
 			throwTypeError(kCantUseInstanceofOnNonObjectError);
 		}

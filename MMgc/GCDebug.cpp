@@ -63,9 +63,9 @@ namespace MMgc
 	void GCDebugMsg(const char* p, bool debugBreak)
 	{
 	#ifdef _DEBUG
-		VMPI_DebugLog(p);
+		VMPI_debugLog(p);
 		if(debugBreak)
-			VMPI_DebugBreak();
+			VMPI_debugBreak();
 	#else
 		(void)p;
 		(void)debugBreak;

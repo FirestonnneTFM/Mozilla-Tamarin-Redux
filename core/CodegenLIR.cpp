@@ -592,13 +592,18 @@ namespace avmplus
         }
     }
 
-	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc(i->pool()->core->gc), core(i->pool()->core), pool(i->pool()), info(i), ms(i->getMethodSignature()), patches(gc), 
-		  interruptable(true)
+	CodegenLIR::CodegenLIR(MethodInfo* i) : 
 #ifdef VTUNE
-           , jitInfoList(i->core()->gc)
-           , jitPendingRecords(i->core()->gc)
+		jitInfoList(i->core()->gc),
+		jitPendingRecords(i->core()->gc),
 #endif
+		gc(i->pool()->core->gc),
+		core(i->pool()->core),
+		info(i),
+		ms(i->getMethodSignature()),
+		pool(i->pool()),
+		interruptable(true),
+		patches(gc)
 	{
 		state = NULL;
 
@@ -1134,6 +1139,135 @@ namespace avmplus
         }
     };
 
+#if defined(DEBUGGER) && defined(_DEBUG)
+    // The AS debugger requires type information for variables contained
+    // in the AS frame regions (i.e. 'vars').  In the interpreter this 
+    // is not an issues, since the region contains box values (i.e. Atoms)
+    // and so the type information is self-contained.  With the jit, this is
+    // not the case, and thus 'varTraits' is used to track the type of each
+    // variable in 'vars'. 
+    // This filter watches stores to 'vars' and 'varTraits' and upon encountering
+    // debugline (i.e. place where debugger can halt), it ensures that the
+    // varTraits entry is consistent with the value stored in 'vars'
+    class DebuggerCheck : public LirWriter
+    {
+		AvmCore* core;
+        GC *gc;
+        LInsp *tracker,*traitsTracker; // we use WB() macro, so no DWB() here.
+        LIns *vars,*traits;
+        int nvar;
+    public:
+        DebuggerCheck(AvmCore* core, GC *gc, LirWriter *out, int nvar) 
+            : LirWriter(out), core(core), gc(gc), nvar(nvar)
+        {
+            LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
+            WB(gc, this, &tracker, a);
+
+            a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
+            WB(gc, this, &traitsTracker, a);
+        }
+
+        ~DebuggerCheck() {
+            gc->Free(tracker);
+            gc->Free(traitsTracker);
+        }
+
+        void init(LIns *vars, LIns *traits) {
+            this->vars = vars;
+            this->traits = traits;
+        }
+
+        void trackStore(LIns *value, int d, bool traits) {
+            AvmAssert( (!traits && (d&7) == 0) || (traits && (d&3)==0));
+            int i = (traits) ? d / sizeof(Traits*) : d >> 3;
+            if (i>=nvar) return;
+            if (traits)  {
+                traitsTracker[i] = value;
+                value = !isValid(i) ? value : (LIns*)((intptr_t)value|1); // lower bit => validated
+                traitsTracker[i] = value;
+            }
+            else {
+                tracker[i] = value;
+            }
+        }
+
+        void clearState() {
+            VMPI_memset(tracker, 0, nvar*sizeof(LInsp));
+            VMPI_memset(traitsTracker, 0, nvar*sizeof(LInsp));
+        }
+
+        bool isValid(int i) {
+            // @pre tracker[i] has been previously filled
+            LIns* val = tracker[i];
+            LIns* tra = traitsTracker[i];
+            NanoAssert(val && tra);
+
+            Traits *t = (Traits*) tra->constvalp(); 
+            bool is = false;
+            if (t == NUMBER_TYPE) 
+            {
+                is = isFloat(val->opcode()) || val->isQuad();
+                AvmAssert(is);
+            }
+            else if (t == INT_TYPE)
+            {
+                is = !val->isQuad() && !isFloat(val->opcode());
+                AvmAssert(is);
+            }
+            else if (t == UINT_TYPE)
+            {
+                is = !val->isQuad() && !isFloat(val->opcode());
+                AvmAssert(is);
+            }
+            else if (t == BOOLEAN_TYPE)
+            {
+                is = !val->isQuad() && !isFloat(val->opcode());
+                AvmAssert(is);
+            }
+            else
+            {
+                is = val->isPtr();
+                AvmAssert(is);
+            }
+            return is;
+        }
+        
+        void checkState() {
+            for(int i=0; i<this->nvar; i++) {
+                LIns* val = tracker[i];
+                LIns* tra = traitsTracker[i];
+                AvmAssert(val && tra);
+                
+                // isValid should have already been called on everything
+                AvmAssert(((intptr_t)tra&0x1) == 1);
+            }
+        }
+
+        LIns *insCall(const CallInfo *call, LInsp args[]) {
+            if (call == FUNCTIONID(debugLine))
+                checkState();
+            return out->insCall(call,args);
+        }
+
+        LIns *insStore(LIns *value, LIns *base, LIns *disp) {
+            if (base == vars)
+                trackStore(value, disp->constval(),false);
+            else if (base == traits)
+                trackStore(value, disp->constval(),true);            
+            return out->insStore(value, base, disp);
+        }
+
+        LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+            if (base == vars)
+                trackStore(value, d,false);
+            else if (base == traits)
+                trackStore(value, d,true);
+            return out->insStorei(value, base, d);
+        }
+
+    };
+#endif
+    
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
 	{
@@ -1171,6 +1305,11 @@ namespace avmplus
         CopyPropagation *copier = new (gc) CopyPropagation(core, gc, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
+
+        #if defined(DEBUGGER) && defined(_DEBUG)
+        DebuggerCheck *checker = (core->debugger()) ? new (gc) DebuggerCheck(core, gc, lirout, state->verifier->local_count) : 0;
+        lirout = checker ? checker : lirout;
+        #endif
 		
 		emitStart(lirbuf, lirout, overflow);
 
@@ -1206,7 +1345,8 @@ namespace avmplus
 
 		// stack overflow check - use vars address as comparison
 		if (core->minstack) {
-			LIns *c = binaryIns(LIR_pult, vars, InsConstPtr((void*)core->minstack));
+			LIns *d = loadIns(LIR_ldp, 0, InsConstPtr(&core->minstack));
+			LIns *c = binaryIns(LIR_pult, vars, d);
 			LIns *b = branchIns(LIR_jf, c);
 			callIns(FUNCTIONID(stkover), 1, env_param);
 			LIns *label = Ins(LIR_label);
@@ -1226,6 +1366,7 @@ namespace avmplus
 			verbose_only( if (lirbuf->names) {
 				lirbuf->names->addName(varTraits, "varTraits");
 			})
+            debug_only( checker->init(vars,varTraits); )
 		}
 		#endif
 
@@ -1309,7 +1450,7 @@ namespace avmplus
 
 				LIns* defaultVal = InsConstAtom(ms->getDefaultValue(i));
 				defaultVal = atomToNativeRep(loc, defaultVal);
-                localSet(loc, defaultVal, state->value(i).traits);
+                localSet(loc, defaultVal, state->value(loc).traits);
 				
 				// then generate: if (argc > p) local[p+1] = arg[p+1]
 				LIns* cmp = binaryIns(LIR_le, argcarg, InsConst(param));
@@ -1462,7 +1603,7 @@ namespace avmplus
 	{
 		if (outOMem()) return;
 		this->state = state;
-		Traits* t = info->declaringTraits()->scope->getScopeTraitsAt(scope_index);
+		Traits* t = info->declaringScope()->getScopeTraitsAt(scope_index);
 		LIns* scope = loadScope();
 		LIns* scopeobj = loadIns(LIR_ldcp, offsetof(ScopeChain,_scopes) + scope_index*sizeof(Atom), scope);
 		localSet(dest, atomToNativeRep(t, scopeobj), t);
@@ -2042,7 +2183,7 @@ namespace avmplus
 
 	void CodegenLIR::emitGetGlobalScope()
 	{
-		ScopeTypeChain* scope = info->declaringTraits()->scope;
+		const ScopeTypeChain* scope = info->declaringScope();
 		int captured_depth = scope->size;
 		if (captured_depth > 0)
 		{
@@ -2111,7 +2252,6 @@ namespace avmplus
 		    emitGetslot(state, opd1, state->sp(), type);
 			break;
 		case OP_setglobalslot:
-			emitGetGlobalScope();
 			emitSetslot(state, OP_setglobalslot, opd1, 0 /* computed or ignored */);
 			break;
 		case OP_call:
@@ -2621,7 +2761,7 @@ namespace avmplus
 		}
 		else if (result == NUMBER_TYPE)
 		{
-			if (in && in->isNumeric() || in == BOOLEAN_TYPE)
+			if (in && (in->isNumeric() || in == BOOLEAN_TYPE))
 			{
 				localSet(loc, promoteNumberIns(in, loc), result);
 			}
@@ -2941,10 +3081,10 @@ namespace avmplus
 		ap->setSize(disp);
 
 #if VMCFG_METHODENV_IMPL32
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv,_impl32), method);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv,_implGPR), method);
 #else
 		LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnv, method), method);
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, _impl32), meth);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, _implGPR), meth);
 #endif
 		LIns* apAddr = leaIns(pad, ap);
 
@@ -3046,7 +3186,7 @@ namespace avmplus
 		else
 		{
             // setglobalslot
-			ScopeTypeChain* scopeTypes = info->declaringTraits()->scope;
+			const ScopeTypeChain* scopeTypes = info->declaringScope();
 			if (scopeTypes->size == 0)
 			{
 				// no captured scopes, so global is local scope 0
@@ -4694,7 +4834,7 @@ namespace avmplus
 		}
 
         if (cond->isconst()) {
-            if (br == LIR_jt && cond->constval() || br == LIR_jf && !cond->constval()) {
+            if ((br == LIR_jt && cond->constval()) || (br == LIR_jf && !cond->constval())) {
                 // taken
                 br = LIR_j;
                 cond = 0;
@@ -4738,9 +4878,9 @@ namespace avmplus
 				// 32-bit signed and unsigned values fit in 64-bit registers
 				// so we can promote and simply do a signed 64bit compare
 				LOpcode qcmp = LOpcode(icmp | LIR64);
-				NanoAssert(icmp == LIR_eq && qcmp == LIR_qeq ||
-						   icmp == LIR_lt && qcmp == LIR_qlt ||
-						   icmp == LIR_le && qcmp == LIR_qle);
+				NanoAssert((icmp == LIR_eq && qcmp == LIR_qeq) ||
+						   (icmp == LIR_lt && qcmp == LIR_qlt) ||
+						   (icmp == LIR_le && qcmp == LIR_qle));
 				return binaryIns(qcmp, u2p(lhs), i2p(rhs));
 			#else
 				if (rhs->isconst() && rhs->constval() >= 0)
@@ -4755,9 +4895,9 @@ namespace avmplus
 				// 32-bit signed and unsigned values fit in 64-bit registers
 				// so we can promote and simply do a signed 64bit compare
 				LOpcode qcmp = LOpcode(icmp | LIR64);
-				NanoAssert(icmp == LIR_eq && qcmp == LIR_qeq ||
-						   icmp == LIR_lt && qcmp == LIR_qlt ||
-						   icmp == LIR_le && qcmp == LIR_qle);
+				NanoAssert((icmp == LIR_eq && qcmp == LIR_qeq) ||
+						   (icmp == LIR_lt && qcmp == LIR_qlt) ||
+						   (icmp == LIR_le && qcmp == LIR_qle));
 				return binaryIns(qcmp, i2p(lhs), u2p(rhs));
 			#else
 				if (lhs->isconst() && lhs->constval() >= 0)
@@ -5106,7 +5246,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 	bool CodegenLIR::verbose() 
 	{
-		return state && state->verifier->verbose || pool->verbose;
+		return (state && state->verifier->verbose) || pool->verbose;
 	}
 #endif
 
@@ -5119,7 +5259,7 @@ namespace avmplus
                 op = LOpcode(op ^ 1);
             }
             if (cond->isconst()) {
-                if (op == LIR_jt && cond->constval() || op == LIR_jf && !cond->constval()) {
+                if ((op == LIR_jt && cond->constval()) || (op == LIR_jf && !cond->constval())) {
                     // taken
                     op = LIR_j;
                     cond = 0;
@@ -5479,11 +5619,11 @@ namespace avmplus
         if (keep) {
             // save pointer to generated code
             union {
-                Atom (*fp)(MethodEnv*, int, uint32_t*);
+                GprMethodProc fp;
                 void *vp;
             } u;
             u.vp = frag->code();
-            info->_impl32 = u.fp;
+            info->_implGPR = u.fp;
             // mark method as been JIT'd
             info->_flags |= MethodInfo::JIT_IMPL;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
@@ -5714,10 +5854,10 @@ namespace avmplus
 		int32_t offset = (int32_t)(intptr_t)&((VTable*)0)->methods[e->disp_id];
 		LIns *env = lirout->insLoad(LIR_ldcp, vtable, offset);
 	#if VMCFG_METHODENV_IMPL32
-		LIns *target = lirout->insLoad(LIR_ldp, env, (int)offsetof(MethodEnv, _impl32));
+		LIns *target = lirout->insLoad(LIR_ldp, env, (int)offsetof(MethodEnv, _implGPR));
 	#else
 		LIns *af = lirout->insLoad(LIR_ldp, env, offsetof(MethodEnv, method));
-		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, _impl32));
+		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, _implGPR));
 	#endif
 		LInsp args[] = { ap_param, argc_param, env, target };
 		MethodSignaturep ems = e->virt->getMethodSignature();

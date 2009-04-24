@@ -61,12 +61,7 @@ namespace avmplus
 	{
 	}
 
-#ifdef AVMPLUS_NO_STATIC_POINTERS
-	void NativeInitializer::fillIn(NativeInitializer::FillInProc p)
-	{
-		(*p)(methods, classes);
-	}
-#else
+#ifdef AVMPLUS_STATIC_POINTERS
 	void NativeInitializer::fillInMethods(const NativeMethodInfo* _methodEntry)
 	{
 		while (_methodEntry->method_id != -1)
@@ -88,14 +83,18 @@ namespace avmplus
 			_classEntry++;
 		}
 	}
-
-#endif // AVMPLUS_NO_STATIC_POINTERS
+#else
+	void NativeInitializer::fillIn(NativeInitializer::FillInProc p)
+	{
+		(*p)(methods, classes);
+	}
+#endif // AVMPLUS_STATIC_POINTERS
 	
 	PoolObject* NativeInitializer::parseBuiltinABC(Domain* domain, const List<Stringp, LIST_RCObjects>* includes)
 	{
 		AvmAssert(domain != NULL);
 		
-		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(abcData, abcDataLen));
+		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ConstDataScriptBufferImpl(abcData, abcDataLen));
 
 		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, (const List<Stringp>*)includes);
 	}

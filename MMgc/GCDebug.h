@@ -44,8 +44,8 @@
 
 namespace MMgc
 {
-	void MMGC_API GCDebugMsg(bool debuggerBreak, const char* format, ...);
-	void MMGC_API GCDebugMsg(const char* msg, bool debuggerBreak);
+	void GCDebugMsg(bool debuggerBreak, const char* format, ...);
+	void GCDebugMsg(const char* msg, bool debuggerBreak);
 
 	#ifdef _DEBUG
 		inline void _GCAssertMsg(int32_t assertion, const char* msg)

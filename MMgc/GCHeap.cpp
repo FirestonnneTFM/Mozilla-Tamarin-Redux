@@ -61,9 +61,6 @@ namespace MMgc
 		trimVirtualMemory(true),
 		verbose(false),
 		returnMemory(true),
-#ifdef MMGC_MEMORY_PROFILER			
-		enableProfiler(false),
-#endif
 		gcstats(false), // tracking
 		autoGCStats(false) // auto printing
 	{
@@ -93,9 +90,7 @@ namespace MMgc
 		  config(c),
 #ifdef MMGC_MEMORY_PROFILER
 		  profiler(NULL),
-		  signal(0),
 #endif
-	      spyFile(stdout),
 		  hooksEnabled(false),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
@@ -130,21 +125,14 @@ namespace MMgc
 
 		instance = this;
 
-		gcs = NULL;
-		gcs_count = 0;
 		status = kNormal;
 		
 		bool enableHooks = false;
 		
 #ifdef MMGC_MEMORY_PROFILER
-		if(!config.enableProfiler) {
-			const char *env = VMPI_getenv("MMGC_PROFILE");
-			if(env && VMPI_strncmp(env, "1", 1) == 0)
-				config.enableProfiler = true;
-		}
-		enableHooks = config.enableProfiler;
+		enableHooks = hasSpy = VMPI_spySetup();
 #endif
-		
+
 #ifdef MMGC_MEMORY_INFO
 		// always track allocs in DEBUG builds
 		enableHooks = true;
@@ -153,7 +141,6 @@ namespace MMgc
 		if(enableHooks) {
 #ifdef MMGC_MEMORY_PROFILER
 			profiler = new MemoryProfiler();
-			VMPI_WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &signal);
 #endif
 			hooksEnabled = true; // set only after creating profiler	
 		}
@@ -161,11 +148,9 @@ namespace MMgc
 
 	GCHeap::~GCHeap()
 	{
-		delete [] gcs;
-
+		gcManager.destroy();
 		fixedMalloc._Destroy();
 
-#ifdef _DEBUG
 		if(numAlloc != 0)
 		{
 			for (unsigned int i=0; i<blocksLen; i++) 
@@ -173,8 +158,8 @@ namespace MMgc
 				HeapBlock *block = &blocks[i];
 				if(block->inUse() && block->baseAddr)
 				{
-					GCDebugMsg(false, "Block 0x%x not freed\n", block->baseAddr);
-#ifdef MMGC_MEMORY_PROFILER
+					GCLog("Block 0x%x not freed\n", block->baseAddr);
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 					if(block->allocTrace)
 						PrintStackTrace(block->allocTrace);
 #endif
@@ -182,7 +167,6 @@ namespace MMgc
 			}	
 			GCAssert(false);
 		}
-#endif
 		
 #ifdef MMGC_MEMORY_PROFILER
 		hooksEnabled = false;
@@ -199,8 +183,9 @@ namespace MMgc
 
 	}
 
-	void* GCHeap::Alloc(int size, bool expand/*=true*/, bool zero/*true*/)
+	void* GCHeap::_Alloc(int size, bool expand, bool zero, bool track)
 	{
+		(void)track;
 		GCAssert(size > 0);
 
 		char *baseAddr = 0;
@@ -225,6 +210,17 @@ namespace MMgc
 				// copy baseAddr to a stack variable to fix :
 				// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
 				baseAddr = block->baseAddr;
+
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
+				if(profiler)
+					block->allocTrace = profiler->GetStackTrace();
+#endif
+
+#ifdef MMGC_MEMORY_PROFILER
+				if(track && HooksEnabled() && profiler) {
+					profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
+				}
+#endif
 			}
 		}
 
@@ -247,18 +243,29 @@ namespace MMgc
 		return baseAddr;
 	}
 
-	void GCHeap::Free(void *item)
+	void GCHeap::_Free(void *item, bool track)
 	{
+		(void)track;
 		MMGC_LOCK(m_spinlock);
 
 		HeapBlock *block = AddrToBlock(item);
-		if (block) {
-			// Update metrics
-			GCAssert(numAlloc >= (unsigned int)block->size);
-			numAlloc -= block->size;
-			
-			FreeBlock(block);
+		GCAssertMsg(block != NULL, "Bogus item");
+		// Update metrics
+		GCAssert(numAlloc >= (unsigned int)block->size);
+		numAlloc -= block->size;
+		
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
+		if(profiler)
+			block->freeTrace = profiler->GetStackTrace();
+#endif
+	
+#ifdef MMGC_MEMORY_PROFILER
+		if(track && HooksEnabled() && profiler) {
+			profiler->RecordDeallocation(item, block->size * kBlockSize);
 		}
+#endif
+
+		FreeBlock(block);
 	}
 
 	
@@ -483,7 +490,7 @@ namespace MMgc
 			sentinel->sizePrevious = block->sizePrevious;
 			sentinel->prev = NULL;
 			sentinel->next = NULL;
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 			sentinel->allocTrace = 0;
 #endif
 		}
@@ -1297,7 +1304,7 @@ namespace MMgc
 		block->committed = true;
 		block->dirty = false;
 
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 		block->allocTrace = 0;
 		block->freeTrace = 0;
 #endif
@@ -1314,7 +1321,7 @@ namespace MMgc
 			block->next = NULL;
 			block->committed = false;
 			block->dirty = false;
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 			block->allocTrace = 0;
 			block->freeTrace = 0;
 #endif
@@ -1329,7 +1336,7 @@ namespace MMgc
 		block->next         = NULL;
 		block->committed    = false;
 		block->dirty        = false;
-#ifdef MMGC_MEMORY_PROFILER
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 		block->allocTrace = 0;
 		block->freeTrace = 0;
 #endif
@@ -1419,31 +1426,28 @@ namespace MMgc
 		return SizeToBlocks(size);
 	}
 
-	void GCHeap::AllocHook(const void *item, size_t size)
+	void GCHeap::AllocHook(const void *item, size_t askSize, size_t gotSize)
 	{
 		(void)item;
-		(void)size;
+		(void)askSize;
+		(void)gotSize;
 		{
 			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
-			if(signal) {
-				signal = 0;
-				void *pipe = VMPI_OpenAndConnectToNamedPipe("MMgc_Spy");
-				spyFile = VMPI_HandleToStream(pipe);
-				DumpMemoryInfo();
-				VMPI_CloseNamedPipe(pipe);
-				spyFile = stdout;
+			if(hasSpy) {
+				VMPI_spyCallback();
 			}
-			profiler->Alloc(item, size);
+			if(profiler)
+				profiler->RecordAllocation(item, askSize, gotSize);
 #endif
 
 #ifdef MMGC_MEMORY_INFO
-			DebugDecorate(item, size);
+			DebugDecorate(item, gotSize);
 #endif
 		}
 #ifdef AVMPLUS_SAMPLER
 		// this can't be called with the heap lock locked.
-		avmplus::recordAllocationSample(item, size);
+		avmplus::recordAllocationSample(item, gotSize);
 #endif
 	}
 
@@ -1453,7 +1457,8 @@ namespace MMgc
 		{
 			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
-			profiler->Free(item, size);
+			if(profiler)
+				profiler->RecordDeallocation(item, size);
 #endif
 		}
 		
@@ -1483,32 +1488,6 @@ namespace MMgc
 		heap->enterFrame = NULL;
 	}
 	
-	void GCHeap::AddGC(GC *gc)
-	{
-		// use holes
-		for(uint32_t i=0, n=gcs_count; i<n; i++) {
-			if(gcs[i] == NULL) {
-				gcs[i] = gc;
-				return;
-			}
-		}
-
-		GC **new_gcs = new GC*[gcs_count+1];
-		for(uint32_t i=0, n=gcs_count; i<n; i++)
-			new_gcs[i] = gcs[i];
-		delete [] gcs;
-		gcs = new_gcs;
-		gcs[gcs_count++] = gc;		
-	}
-
-	void GCHeap::RemoveGC(GC *gc)
-	{
-		for(uint32_t i=0, n=gcs_count; i<n; i++) {
-			if(gcs[i] == gc)
-				gcs[i] = NULL;
-		} 
-	}
-
 	void GCHeap::Abort()
 	{
 		EnterFrame *ef = enterFrame;
@@ -1518,20 +1497,13 @@ namespace MMgc
 		VMPI_abort();
 	}
 	
-	void GCHeap::StatusChangeNotify(MemoryStatus from, MemoryStatus to)
-	{
-		for(uint32_t i=0,n=gcs_count; i<n; i++)
-			if(gcs[i] != NULL)
-				gcs[i]->MemoryStatusChange(from , to);
-	}
-
 	void GCHeap::log_percentage(const char *name, size_t bytes, size_t bytes_compare)
 	{
 		bytes_compare = size_t((bytes*100.0)/bytes_compare);
 		if(bytes > 1<<20) {
-			fprintf(spyFile,"%s %u (%.1fM) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), bytes * 1.0 / (1024*1024), (unsigned int)(bytes_compare));
+			GCLog("%s %u (%.1fM) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), bytes * 1.0 / (1024*1024), (unsigned int)(bytes_compare));
 		} else {
-			fprintf(spyFile,"%s %u (%uK) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), (unsigned int)(bytes / 1024), (unsigned int)(bytes_compare));
+			GCLog("%s %u (%uK) %u%%\n", name, (unsigned int)(bytes / GCHeap::kBlockSize), (unsigned int)(bytes / 1024), (unsigned int)(bytes_compare));
 		}
 	}
 	
@@ -1543,19 +1515,18 @@ namespace MMgc
 		size_t fixed_alloced = GetFixedMalloc()->GetBytesInUse();
 		size_t gc_total=0;
 		size_t gc_bytes_total =0;
-		for(uint32_t i=0,n=gcs_count; i<n; i++) {
-			if(gcs[i] != NULL) {
+		for(uint32_t i=0,n=gcManager.getCount() ; i<n; i++) {
+			GC* gc = gcManager.getGC(i);
 #ifdef MMGC_MEMORY_PROFILER
-				fprintf(spyFile,"[mem] GC 0x%p:%s\n", gcs[i], GetAllocationName(gcs[i]));
+			GCLog("[mem] GC 0x%p:%s\n", (void*)gc, GetAllocationName(gc));
 #else
-				fprintf(spyFile,"[mem] GC 0x%p\n", gcs[i]);
+			GCLog("[mem] GC 0x%p\n", (void*)gc);
 #endif
-				gcs[i]->DumpMemoryInfo();
-				gc_bytes_total += gcs[i]->GetBytesInUse();
-				gc_total += gcs[i]->GetNumBlocks() * kBlockSize;
-			}
+			gc->DumpMemoryInfo();
+			gc_bytes_total += gc->GetBytesInUse();
+			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
-		fprintf(spyFile, "[mem] ------- gross stats -----\n");
+		GCLog("[mem] ------- gross stats -----\n");
 		log_percentage("[mem] private", priv, priv);
 		log_percentage("[mem]\t mmgc", mmgc, priv);
 		log_percentage("[mem]\t\t unmanaged", unmanaged, priv);
@@ -1564,15 +1535,23 @@ namespace MMgc
 		log_percentage("[mem]\t other",  priv - mmgc, priv);
 		log_percentage("[mem] \tunmanaged fragmentation ", unmanaged-fixed_alloced, unmanaged);
 		log_percentage("[mem] \tmanaged fragmentation ", gc_total - gc_bytes_total, gc_total);
-		fprintf(spyFile, "[mem] -------- gross stats end -----\n");
+		GCLog("[mem] -------- gross stats end -----\n");
 		
 		DumpHeapRep();
 		
 #ifdef MMGC_MEMORY_PROFILER
-		if(config.enableProfiler)
+		if(hasSpy)
 			DumpFatties();
 #endif
-		fflush(spyFile);
+	}
+
+	void GCHeap::LogChar(char c, size_t count)
+	{
+		char* buf = (char*)alloca(count+1);
+		VMPI_memset(buf, c, count);
+		buf[count] = '\0';
+
+		GCLog(buf);
 	}
 
 	void GCHeap::DumpHeapRep()
@@ -1597,7 +1576,7 @@ namespace MMgc
 		for(int i=0; i < numRegions; i++)
 		{
 			r = regions[i];
-			fprintf(spyFile, "0x%p -  0x%p\n", r->baseAddr, r->reserveTop);
+			GCLog("0x%p -  0x%p\n", r->baseAddr, r->reserveTop);
 			char c;
 			char *addr = r->baseAddr;
 			
@@ -1607,10 +1586,10 @@ namespace MMgc
 				char *end = spanningBlock->baseAddr + (spanningBlock->size * kBlockSize);
 				if(end > r->reserveTop)
 					end = r->reserveTop;
-				while(addr != end) {
-					fputc(spanningBlock->inUse() ? '1' : '0', spyFile);
-					addr += kBlockSize;
-				}
+
+				LogChar(spanningBlock->inUse() ? '1' : '0', (end - addr)/kBlockSize);
+				addr = end;
+
 				if(addr == spanningBlock->baseAddr + (spanningBlock->size * kBlockSize))
 					spanningBlock = NULL;
 			}
@@ -1624,21 +1603,21 @@ namespace MMgc
 					c = '0';
 				else 
 					c = '-';
-				for(int i=0, n=hb->size; i < n; i++, addr += GCHeap::kBlockSize) {
-					fputc(c, spyFile);
+				int i, n;
+				for(i=0, n=hb->size; i < n; i++, addr += GCHeap::kBlockSize) {
 					if(addr == r->reserveTop) {
 						// end of region!
 						spanningBlock = hb;
 						break;
 					}
 				}
+
+				LogChar(c, i);
 			}
 
-			while(addr != r->reserveTop) {	
-				fputc('-', spyFile);
-				addr += kBlockSize;
-			}				
-			fputc('\n', spyFile);
+			LogChar('-', (r->reserveTop - addr) / kBlockSize);
+
+			GCLog("\n");
 		}
 	}
 
@@ -1659,4 +1638,68 @@ namespace MMgc
 		}
 	}
 
+	GCManager::GCManager() 
+		: collectors(NULL)
+		, numCollectors(0)
+		, limitCollectors(0)
+	{
+	}
+	
+	void GCManager::destroy()
+	{
+		delete [] collectors;
+		GCAssert(numCollectors == 0);
+		collectors = NULL;
+		limitCollectors = 0;
+	}
+	
+	void GCManager::addGC(GC *gc)
+	{
+		if (numCollectors == limitCollectors) {
+			uint32_t newLimitCollectors = limitCollectors + 1;		// We don't expect a lot of churn in this array, and creating a GC is very heavyweight anyway
+			GC **newCollectors = new GC*[newLimitCollectors];
+			VMPI_memcpy(newCollectors, collectors, sizeof(GC*)*limitCollectors);
+			delete [] collectors;
+			collectors = newCollectors;
+			limitCollectors = newLimitCollectors;
+		}
+		collectors[numCollectors] = gc;
+		numCollectors++;
+	}
+	
+	void GCManager::removeGC(GC *gc)
+	{
+		uint32_t i=0;
+		while (i < numCollectors && collectors[i] != gc)
+			i++;
+		if (i == numCollectors) {
+			GCAssert(!"Bug: should not try to remove a GC that's not registered");
+			return;
+		}
+		while (i < numCollectors-1) {
+			collectors[i] = collectors[i+1];
+			i++;
+		}
+		numCollectors--;
+	}
+	
+	void GCManager::signalMemoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus)
+	{
+		for(uint32_t i=0 ; i < numCollectors ; i++)
+			collectors[i]->MemoryStatusChange(oldStatus, newStatus);
+	}
+	
+	void GCManager::signalStartCollection(GC* gc)
+	{
+		for ( uint32_t i=0 ; i < numCollectors ; i++ )
+			if (collectors[i] != gc)
+				collectors[i]->policy.signalStartCollection(gc);
+	}
+	
+	void GCManager::signalEndCollection(GC* gc)
+	{
+		for ( uint32_t i=0 ; i < numCollectors ; i++ )
+			if (collectors[i] != gc)
+				collectors[i]->policy.signalEndCollection(gc);
+	}
 }

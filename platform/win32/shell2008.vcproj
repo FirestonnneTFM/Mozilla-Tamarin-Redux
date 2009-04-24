@@ -47,8 +47,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -132,8 +132,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -219,8 +219,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -306,8 +306,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -394,8 +394,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -480,8 +480,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -565,8 +565,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -650,8 +650,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -737,8 +737,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;..;..\..\..\..\modules\vtune"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;VTUNE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;..;..\..\..\..\modules\vtune"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;VTUNE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -825,8 +825,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -914,8 +914,8 @@
 				AdditionalOptions="/Oy-"
 				Optimization="3"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -1001,8 +1001,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -1090,8 +1090,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_DEBUG;DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;UNICODE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_DEBUG;DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;UNICODE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -1182,8 +1182,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;UNICODE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;UNICODE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -1276,8 +1276,8 @@
 				ExecutionBucket="7"
 				Optimization="3"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -1367,8 +1367,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="1"
@@ -1519,8 +1519,8 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\..\..\modules\zlib\src;..\..\core;..\..\eval;.;.."
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;UNICODE"
+				AdditionalIncludeDirectories="..\..\VMPI;..\..\shell;..\..\extensions;..\..\MMgc;..\..\other-licenses\zlib;..\..\core;..\..\eval;.;.."
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMSHELL_BUILD;WIN32;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;UNICODE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -1659,6 +1659,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\shell\swf.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\SystemClass.cpp"
 				>
 			</File>
@@ -1699,7 +1703,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\shell\WinDebugUtils.cpp"
+				RelativePath="..\..\VMPI\WinDebugUtils.cpp"
 				>
 			</File>
 			<File
@@ -1707,7 +1711,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\WinPortUtils.cpp"
+				RelativePath="..\..\VMPI\WinPortUtils.cpp"
 				>
 			</File>
 		</Filter>

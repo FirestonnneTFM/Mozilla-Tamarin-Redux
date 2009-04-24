@@ -59,6 +59,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/FileClass.cpp \
   $(curdir)/FileInputStream.cpp \
   $(curdir)/SystemClass.cpp \
+  $(curdir)/swf.cpp \
   $(curdir)/../extensions/DictionaryGlue.cpp \
   $(curdir)/../extensions/JavaGlue.cpp \
   $(curdir)/../extensions/SamplerScript.cpp \
@@ -73,19 +74,15 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
 ifeq (windows,$(TARGET_OS))
 shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellWin.cpp \
-  $(curdir)/WinDebugUtils.cpp \
   $(curdir)/WinFile.cpp \
-  $(curdir)/WinPortUtils.cpp \
   $(NULL)
 endif
 
 ifeq (darwin,$(TARGET_OS))
 shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellMac.cpp \
-  $(curdir)/MacDebugUtils.cpp \
   $(curdir)/PosixFile.cpp \
   $(curdir)/PosixPartialPlatform.cpp \
-  $(curdir)/PosixPortUtils.cpp \
   $(NULL)
 endif
 
@@ -94,8 +91,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellUnix.cpp \
   $(curdir)/PosixFile.cpp \
   $(curdir)/PosixPartialPlatform.cpp \
-  $(curdir)/PosixPortUtils.cpp \
-  $(curdir)/UnixDebugUtils.cpp \
   $(NULL)
 endif
 
@@ -104,8 +99,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellUnix.cpp \
   $(curdir)/PosixFile.cpp \
   $(curdir)/PosixPartialPlatform.cpp \
-  $(curdir)/PosixPortUtils.cpp \
-  $(curdir)/UnixDebugUtils.cpp \
   $(NULL)
 endif
 

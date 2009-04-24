@@ -160,12 +160,12 @@ namespace avmplus
 						  Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep, int max_scope);
 #endif
 
-	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
+	uintptr_t interpGPR(MethodEnv* env, int argc, uint32_t *ap)
 	{
 		Atom* const atomv = (Atom*)ap;
 		MethodSignaturep ms = env->method->getMethodSignature();
 		ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
-		Atom a = interpA(env, argc, atomv, ms);
+		Atom a = interpBoxed(env, argc, atomv, ms);
 		const BuiltinType bt = ms->returnTraitsBT();
 		const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
 		if ((1U<<bt) & ATOM_MASK)
@@ -179,12 +179,12 @@ namespace avmplus
 		return a & ~7; // possibly null pointer
 	}
 
-	double interpN(MethodEnv* env, int argc, uint32_t * ap)
+	double interpFPR(MethodEnv* env, int argc, uint32_t * ap)
 	{
 		Atom* const atomv = (Atom*)ap;
 		MethodSignaturep ms = env->method->getMethodSignature();
 		ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
-		Atom a = interpA(env, argc, atomv, ms);
+		Atom a = interpBoxed(env, argc, atomv, ms);
 		return AvmCore::number_d(a);
 	}
 
@@ -197,12 +197,12 @@ namespace avmplus
 #ifdef AVMPLUS_DIRECT_THREADED
 
 	void** interpGetOpcodeLabels() {
-		return (void**)interpA(NULL, 0, NULL, NULL);
+		return (void**)interpBoxed(NULL, 0, NULL, NULL);
 	}
 	
 #endif // AVMPLUS_DIRECT_THREADED
 
-    Atom interpA(register MethodEnv* env, register int _argc, register Atom* _atomv, MethodSignaturep ms)
+    Atom interpBoxed(register MethodEnv* env, register int _argc, register Atom* _atomv, MethodSignaturep ms)
     {
 #ifdef AVMPLUS_DIRECT_THREADED
 		
@@ -631,7 +631,7 @@ namespace avmplus
  		// OPTIMIZEME - code does not belong here, should be moved off the fast path.
  		//
   		// Should not have to do this on every entry, but the logic that tries to do
-  		// it elsewhere is not currently working - at least the verifier installs an impl32 that
+  		// it elsewhere is not currently working - at least the verifier installs a trampoline
   		// bypasses delegateInvoke, so the structure is not created on all paths.
   		
   		if (info->word_code_cache_size() > 0 && env->lookup_cache == NULL) {

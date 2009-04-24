@@ -50,19 +50,13 @@
 
 #ifdef _DEBUG
 
-#include <stdio.h>
-
 namespace MMgc
 {
 	GC *gc;
 
 	void collect()
 	{
-#ifdef MMGC_THREADSAFE
-		gc->CollectFromRequest();
-#else
 		gc->Collect();
-#endif
 	}
 
 	GCWeakRef* createWeakRef(int extra=0)
@@ -177,17 +171,11 @@ namespace MMgc
 	void RunGCTests(GC *g)
 	{
 		gc = g;
-#ifdef MMGC_THREADSAFE
-		g->OnEnterRequest();
-#endif
 		weakRefSweepSmall();
 		weakRefSweepLarge();
 		weakRefFreeSmall();
 		weakRefFreeLarge();
 		drcApolloTest();
-#ifdef MMGC_THREADSAFE
-		g->OnLeaveRequest();
-#endif
 	}
 }
 

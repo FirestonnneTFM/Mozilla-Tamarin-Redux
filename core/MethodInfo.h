@@ -45,8 +45,8 @@
 
 namespace avmplus
 {
-	typedef Atom (*AtomMethodProc)(MethodEnv*, int, uint32 *);
-	typedef double (*DoubleMethodProc)(MethodEnv*, int, uint32 *);
+	typedef uintptr_t (*GprMethodProc)(MethodEnv*, int, uint32 *);
+	typedef double (*FprMethodProc)(MethodEnv*, int, uint32 *);
 
 #ifdef DEBUGGER
 	class AbcFile;
@@ -57,8 +57,8 @@ namespace avmplus
 			firstSourceLine(0),
 			lastSourceLine(0),
 			offsetInAbc(0),
-			local_count(_local_count), 
 			codeSize(_codeSize), 
+			local_count(_local_count), 
 			max_scopes(_max_scopes) {}
 
 	public:
@@ -174,11 +174,14 @@ namespace avmplus
 		 */
 		static const int JIT_IMPL				= 0x00800000;
 		
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 		static const int UNCHECKED				= 0x01000000;
-#endif
+		
+		// Note, this means "makeIntoPrototypeFunction has been called on me",
+		// *not* "I am a function on a prototype object".
+		static const int PROTOFUNC				= 0x02000000;
+// end AVMPLUS_UNCHECKED_HACK
 
-		// unused:								= 0x02000000;
 		// unused:								= 0x04000000;
 		// unused:								= 0x08000000;
 		// unused:								= 0x10000000;
@@ -200,11 +203,11 @@ namespace avmplus
 		enum InitMethodStub { kInitMethodStub };
 		MethodInfo(InitMethodStub, Traits* declTraits);
 
-#if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
-		MethodInfo(void* tramp, Traits* declTraits);
+#if defined FEATURE_NANOJIT
+		MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits);
 #endif
 
-		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
+		static uintptr_t verifyEnter(MethodEnv* env, int argc, uint32* ap);
 
 		inline uintptr_t iid() const { return ((uintptr_t)this)>>3; }
 
@@ -292,7 +295,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERIFYALL
 		inline int isVerified() const { return _flags & VERIFIED; }
 		inline int isVerifyPending() { return _flags & VERIFY_PENDING; }
-		inline void setVerified() { _flags = _flags | VERIFIED & ~VERIFY_PENDING; }
+		inline void setVerified() { _flags = (_flags | VERIFIED) & ~VERIFY_PENDING; }
 		inline void setVerifyPending() { _flags |= VERIFY_PENDING; }
 #endif
 
@@ -349,9 +352,10 @@ namespace avmplus
 
 		inline int method_id() const { return _method_id; }
 
-		inline AtomMethodProc impl32() const { return _impl32; }
-		inline DoubleMethodProc implN() const { return _implN; }
+		inline GprMethodProc implGPR() const { return _implGPR; }
+		inline FprMethodProc implFPR() const { return _implFPR; }
 		inline Traits* declaringTraits() const { return _declaringTraits; }
+		inline const ScopeTypeChain* declaringScope() const { return _declaringTraits->scope(); }
 		inline Traits* activationTraits() const { return _activationTraits; }
 
 		inline void set_activationTraits(Traits* t) { _activationTraits = t; }
@@ -400,8 +404,8 @@ namespace avmplus
 		// these are (probably) most-frequently accessed so put at offset zero (allow LIR to generate trivially smaller code)
 		union 
 		{
-			AtomMethodProc		_impl32;
-			DoubleMethodProc	_implN;
+			GprMethodProc	_implGPR;
+			FprMethodProc	_implFPR;
 		};
 		DWB(MMgc::GCWeakRef*)	_msref;				// our MethodSignature 
 		DWB(Traits*)			_declaringTraits;

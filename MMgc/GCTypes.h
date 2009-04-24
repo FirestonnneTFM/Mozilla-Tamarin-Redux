@@ -42,38 +42,8 @@
 
 #include "VMPI.h"
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
-
-#if defined(HAVE_VISIBILITY_ATTRIBUTE)
-#define MMGC_VISIBILITY_DEFAULT __attribute__ ((visibility ("default")))
-#else
-#define MMGC_VISIBILITY_DEFAULT
-#endif
-
-#ifdef WIN32
-#define MMGC_EXPORT __declspec(dllexport)
-#define MMGC_IMPORT __declspec(dllimport)
-#else
-#define MMGC_EXPORT MMGC_VISIBILITY_DEFAULT
-#define MMGC_IMPORT MMGC_VISIBILITY_DEFAULT
-#endif
-
-// If we're not making a MMgc DLL, MMGC_API is a no-op
-#ifndef MMGC_DLL
-#define MMGC_API
-#else
-#ifdef MMGC_IMPL
-#define MMGC_API MMGC_EXPORT
-#else
-#define MMGC_API MMGC_IMPORT
-#endif
-#endif // MMGC_DLL
-
 namespace MMgc
 {
-
     typedef void* (*GCMallocFuncPtr)(size_t size);
     typedef void (*GCFreeFuncPtr)(void* mem);
 	

@@ -37,22 +37,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifdef _MAC
-// for MakeDataExecutable
-#include <CoreServices/CoreServices.h>
-#endif
-
 #include "nanojit.h"
 
 // uncomment this to enable _vprof/_nvprof macros
 //#define DOPROF
 #include "../vprof/vprof.h"
-
-#if defined AVMPLUS_UNIX || defined AVMPLUS_MAC
-#include <sys/mman.h>
-#include <errno.h>
-#include <stdlib.h>
-#endif
 
 #if defined FEATURE_NANOJIT && defined NANOJIT_X64
 
@@ -123,7 +112,7 @@ namespace nanojit
     // encode 2-register rex prefix.  dropped if none of its bits are set.
     static inline uint64_t rexrb(uint64_t op, Register r, Register b) {
         int shift = 64 - 8*oplen(op);
-        uint64_t rex = (op >> shift) & 255 | (r&8)>>1 | (b&8)>>3;
+        uint64_t rex = ((op >> shift) & 255) | ((r&8)>>1) | ((b&8)>>3);
         return rex != 0x40 ? op | rex << shift : op - 1;
     }
 
@@ -131,15 +120,15 @@ namespace nanojit
     // keep REX if b >= rsp, to allow uniform use of all 16 8bit registers
     static inline uint64_t rexrb8(uint64_t op, Register r, Register b) {
         int shift = 64 - 8*oplen(op);
-        uint64_t rex = (op >> shift) & 255 | (r&8)>>1 | (b&8)>>3;
-        return ((rex | b&~3) != 0x40) ? op | rex << shift : op - 1;
+        uint64_t rex = ((op >> shift) & 255) | ((r&8)>>1) | ((b&8)>>3);
+        return ((rex | (b & ~3)) != 0x40) ? (op | (rex << shift)) : op - 1;
     }
 
     // encode 2-register rex prefix that follows a manditory prefix (66,F2,F3)
     // [prefix][rex][opcode]
     static inline uint64_t rexprb(uint64_t op, Register r, Register b) {
         int shift = 64 - 8*oplen(op) + 8;
-        uint64_t rex = (op >> shift) & 255 | (r&8)>>1 | (b&8)>>3;
+        uint64_t rex = ((op >> shift) & 255) | ((r&8)>>1) | ((b&8)>>3);
         // to drop rex, we replace rex with manditory prefix, and decrement length
         return rex != 0x40 ? op | rex << shift :
             ((op & ~(255LL<<shift)) | (op>>(shift-8)&255) << shift) - 1;
@@ -345,7 +334,7 @@ namespace nanojit
     }
 
     static bool isImm32(LIns *ins) {
-        return ins->isconst() || ins->isconstq() && isS32(ins->constvalq());
+        return ins->isconst() || (ins->isconstq() && isS32(ins->constvalq()));
     }
     static int32_t getImm32(LIns *ins) {
         return ins->isconst() ? ins->constval() : int32_t(ins->constvalq());
@@ -669,8 +658,8 @@ namespace nanojit
         LIns* iftrue = values->oprnd1();
         LIns* iffalse = values->oprnd2();
 
-        NanoAssert(ins->isop(LIR_qcmov) && iftrue->isQuad() && iffalse->isQuad() ||
-                   ins->isop(LIR_cmov) && !iftrue->isQuad() && !iffalse->isQuad());
+        NanoAssert((ins->isop(LIR_qcmov) && iftrue->isQuad() && iffalse->isQuad()) ||
+                   (ins->isop(LIR_cmov) && !iftrue->isQuad() && !iffalse->isQuad()));
         
         // this code assumes that neither LD nor MR nor MRcc set any of the condition flags.
         // (This is true on Intel, is it true on all architectures?)
@@ -1197,17 +1186,6 @@ namespace nanojit
         MR(FP, RSP);            // Establish our own FP.
         emitr(X64_pushr, FP);   // Save caller's FP.
 
-        // align the entry point
-        // todo: the intel optimization guide suggests canonical nop 
-        // instructions for sizes from 1..9; use them!
-        underrunProtect(8);
-        int code_align = (intptr_t)_nIns & 7;
-        if (code_align) {
-            static const uint64_t nops[8] = {
-                0, X64_nop1, X64_nop2, X64_nop3, X64_nop4, X64_nop5, X64_nop6, X64_nop7
-            };
-            emit(nops[code_align]);
-        }
         return patchEntry;
     }
 

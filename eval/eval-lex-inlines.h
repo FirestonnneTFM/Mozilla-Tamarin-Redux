@@ -126,7 +126,7 @@ inline bool Lexer::hexDigits(int k) { return digits(k, CHAR_ATTR_HEX); }
 // mis-named, isSubsequent would be better?
 inline bool Lexer::notPartOfIdent(int c)
 {
-    return c < 128 && (char_attrs[c] & CHAR_ATTR_SUBSEQUENT) == 0 || !isUnicodeIdentifierPart(c);
+	return (c < 128 && (char_attrs[c] & CHAR_ATTR_SUBSEQUENT) == 0) || !isUnicodeIdentifierPart(c);
 }
 
 inline void Lexer::xmlPushback(wchar c)

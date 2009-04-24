@@ -222,7 +222,7 @@ namespace avmplus
 
 		// Can happen with duplicate function definitions from corrupt ABC data.  F1 is defined
 		// and F2 overrides the F1 slot which is okay as long as F1's MethodEnv is never called again.
-		if (method->declaringTraits() != this->declTraits)
+		if (method->declaringScope() != this->scope()->scopeTraits())
 		{
 			toplevel->throwVerifyError(kCorruptABCError);
 		}
@@ -243,12 +243,12 @@ namespace avmplus
 		const int bt = ms->returnTraitsBT();
 		if (bt == BUILTIN_number)
 		{
-			AvmAssert(method->implN() != NULL);
-			return core->doubleToAtom(method->implN()(this, argc, ap));
+			AvmAssert(method->implFPR() != NULL);
+			return core->doubleToAtom(method->implFPR()(this, argc, ap));
 		}
 		
-		AvmAssert(method->impl32() != NULL);
-		const Atom i = method->impl32()(this, argc, ap);
+		AvmAssert(method->implGPR() != NULL);
+		const Atom i = method->implGPR()(this, argc, ap);
 		switch (bt)
 		{
 		case BUILTIN_int:
@@ -277,7 +277,7 @@ namespace avmplus
 	
 	inline bool MethodEnv::isInterpreted()
 	{
-		return impl32() == interp32 || implN() == interpN;
+		return implGPR() == interpGPR || implFPR() == interpFPR;
 	}
 	
 	inline MethodSignaturep MethodEnv::get_ms()
@@ -312,7 +312,7 @@ namespace avmplus
 		if (isInterpreted())
 		{
 			// Tail call inhibited by &thisArg, and also by &thisArg in "else" clause
-			return interpA(this, 0, &thisArg, ms);
+			return interpBoxed(this, 0, &thisArg, ms);
 		}
 		else
 		{
@@ -422,7 +422,7 @@ namespace avmplus
 			const int end = argc >= param_count ? param_count : argc;
 			for ( int i=1 ; i <= end ; i++ )
 				atomv[i] = coerceAtom(core, atomv[i], ms->paramTraits(i), toplevel);
-			return interpA(this, argc, atomv, ms);
+			return interpBoxed(this, argc, atomv, ms);
 		}
 		else
 			return coerceUnboxEnter(argc, atomv);
@@ -494,20 +494,22 @@ namespace avmplus
 	}
 
 #if VMCFG_METHODENV_IMPL32
-	Atom MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
+	uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
 	{
-		env->_impl32 = env->method->impl32();
-		return env->_impl32(env, argc, ap);
+		env->_implGPR = env->method->implGPR();
+		return env->_implGPR(env, argc, ap);
 	}
 #endif // VMCFG_METHODENV_IMPL32
 
-#if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
-	MethodEnv::MethodEnv(TrampStub, void* tramp, VTable *vtable)
-		: _vtable(vtable), method(NULL), declTraits(NULL), activationOrMCTable(0)
+#ifdef FEATURE_NANOJIT
+	MethodEnv::MethodEnv(TrampStub, MethodInfo *method, VTable *vtable)
+		: _vtable(vtable), method(method), activationOrMCTable(0)
 	{
-		union { void* v; AtomMethodProc p; };
-		v = tramp;
-		_impl32 = p;
+		#if VMCFG_METHODENV_IMPL32
+		// set trampoline to IMT stub; we cannot go through delegateInvoke
+		// because the register holding the IID (interface id) will be clobbered
+		_implGPR = method->implGPR();
+		#endif
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
 #endif
@@ -515,17 +517,16 @@ namespace avmplus
 	MethodEnv::MethodEnv(MethodInfo* method, VTable *vtable)
 		: _vtable(vtable)
 		, method(method)
-		, declTraits(method->declaringTraits())
 		, activationOrMCTable(0)
 	{
 		AvmAssert(method != NULL);
 		
 #if VMCFG_METHODENV_IMPL32
 	#if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
-		MMGC_STATIC_ASSERT(offsetof(MethodEnv, _impl32) == 0);
+		MMGC_STATIC_ASSERT(offsetof(MethodEnv, _implGPR) == 0);
 	#endif
 		// make the first call go to the method impl
-		_impl32 = delegateInvoke;
+		_implGPR = delegateInvoke;
 #endif
 
 		AvmCore* core = this->core();
@@ -540,13 +541,23 @@ namespace avmplus
 
 		if (method->needActivation())
 		{
+			Traits* activationTraits = method->activationTraits();
+
 			// This can happen when the ABC has MethodInfo data but not MethodBody data
-			if (!method->activationTraits())
+			if (!activationTraits)
 			{
 				toplevel()->throwVerifyError(kCorruptABCError);
 			}
+			
+			if (activationTraits->scope() != NULL && activationTraits->scope() != this->scope()->scopeTraits())
+			{
+				AvmAssert(!"unexpected scope for activationTraits");
+				toplevel()->throwVerifyError(kCorruptABCError);
+			}
+			// ensure the ScopeTypeChain is set, we now rely on this later on in startCoerce
+			activationTraits->set_scope(this->scope()->scopeTraits());
 
-			VTable *activation = core->newVTable(method->activationTraits(), NULL, this->scope(), this->abcEnv(), toplevel());
+			VTable *activation = core->newVTable(activationTraits, NULL, this->scope(), this->abcEnv(), toplevel());
 			activation->resolveSignatures();
 			setActivationOrMCTable(activation, kActivation);
 		}
@@ -568,20 +579,7 @@ namespace avmplus
 	{
 		AvmAssert(this != 0);
 		AvmAssert(callstack != 0); 
-
-		// dont reset the parameter traits since they are setup in the prologue
-		if (frameTraits) {
-            // @todo the traits should be cleared by the jit / interp ?!?
-		    MethodSignaturep ms = get_ms();
-            const int param_count = ms->param_count();
-            const int firstLocalAt = param_count+1;
-            const int localCount = ms->local_count();
-            AvmAssert(localCount >= firstLocalAt);
-			VMPI_memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
-        }
-
-		callstack->init(this, framep, frameTraits, eip, /*boxed*/false);
-		
+		callstack->init(this, framep, frameTraits, eip, /*boxed*/false);		
 		debugEnterInner();
 	}
 	
@@ -1323,9 +1321,9 @@ namespace avmplus
 		// declaringTraits must have been filled in by verifier.
 		Traits* ftraits = function->declaringTraits();
 		AvmAssert(ftraits != NULL);
-		AvmAssert(ftraits->scope != NULL);
+		AvmAssert(ftraits->scope() != NULL);
 
-		ScopeChain* fscope = ScopeChain::create(core->GetGC(), ftraits->scope, outer, *core->dxnsAddr);
+		ScopeChain* fscope = ScopeChain::create(core->GetGC(), ftraits->scope(), outer, *core->dxnsAddr);
 		for (int i=outer->getSize(), n=fscope->getSize(); i < n; i++)
 		{
 			fscope->setScope(gc, i, *scopes++);
@@ -1384,7 +1382,7 @@ namespace avmplus
 		Traits* baseIvtableTraits = base ? base->ivtable()->traits : 0;
 		Traits* itraitsBase = itraits->base;
 		// make sure the traits of the base vtable matches the base traits
-		if (!(base == NULL && itraits->base == NULL || base != NULL && itraitsBase == baseIvtableTraits))
+		if (!((base == NULL && itraits->base == NULL) || (base != NULL && itraitsBase == baseIvtableTraits)))
 		{
 			ErrorClass *error = toplevel->verifyErrorClass();
 			if( error )
@@ -1397,7 +1395,7 @@ namespace avmplus
 		itraits->resolveSignatures(toplevel);
 
 		// class scopechain = [..., class]
-		ScopeChain* cscope = ScopeChain::create(core->GetGC(), ctraits->scope, outer, *core->dxnsAddr);
+		ScopeChain* cscope = ScopeChain::create(core->GetGC(), ctraits->scope(), outer, *core->dxnsAddr);
 		int i = outer->getSize();
 		for (int n=cscope->getSize(); i < n; i++)
 		{
@@ -1406,34 +1404,26 @@ namespace avmplus
 		//core->console<<"NewClass: "<<ctraits<<"\n";
 		//core->console<<"New cscope: "<<cscope->format(core)<<"\n";
 
-		ScopeChain* iscope = ScopeChain::create(core->GetGC(), itraits->scope, cscope, *core->dxnsAddr);
+		ScopeChain* iscope = ScopeChain::create(core->GetGC(), itraits->scope(), cscope, *core->dxnsAddr);
 
 		AbcEnv* abcEnv = this->abcEnv();
 		VTable* cvtable = NULL;
 		VTable* ivtable = NULL;
 
-		// We're defining class
-		// This is a little weird, as the cvtable should have the ivtable as its base
+		// Note: iff itraits == class_itraits, we used to use cscope (rather than iscope) for ivtable, 
+		// but that appears to be simply wrong: it doesn't match the expectations of the ScopeTypeChain filled in for Class.
+		ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, iscope, abcEnv, toplevel);
+		ivtable->resolveSignatures();
+		
+		// special-case Class: the cvtable should have the ivtable as its base
 		// i.e. Class$ derives from Class
-		if (itraits == core->traits.class_itraits)
-		{
-			// note that the ivtable gets cscope, not iscope... this allows us to avoid having to patch
-			// scope in the ClassClass ctor like we used to.
-			ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, cscope, abcEnv, toplevel);
-			ivtable->resolveSignatures();
-			cvtable = core->newVTable(ctraits, ivtable, cscope, abcEnv, toplevel);
+		VTable* cbase = (itraits == core->traits.class_itraits) ? ivtable : toplevel->class_ivtable;
+		cvtable = core->newVTable(ctraits, cbase, cscope, abcEnv, toplevel);
+		// Don't resolve signatures for Object$ until after Class has been set up
+		// which should happen very soon after Object is setup.
+		if (itraits != core->traits.object_itraits)
 			cvtable->resolveSignatures();
-		}
-		else
-		{
-			cvtable = core->newVTable(ctraits, toplevel->class_ivtable, cscope, abcEnv, toplevel);
-			// Don't resolve signatures for Object$ until after Class has been set up
-			// which should happen very soon after Object is setup.
-			if (itraits != core->traits.object_itraits)
-				cvtable->resolveSignatures();
-			ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, iscope, abcEnv, toplevel);
-			ivtable->resolveSignatures();
-		}
+
 		cvtable->ivtable = ivtable;
 
 		if (itraits == core->traits.object_itraits) 

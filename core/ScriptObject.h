@@ -50,7 +50,7 @@ namespace avmplus
 	public:
 	
 		ScriptObject(VTable* vtable, ScriptObject* delegate,
-					 int capacity = Hashtable::kDefaultCapacity);
+					 int capacity = InlineHashtable::kDefaultCapacity);
 		~ScriptObject();
 
 		ScriptObject* getDelegate() const { return delegate; }
@@ -82,9 +82,9 @@ namespace avmplus
 
 		DomainEnv* domainEnv() const;
 
-		virtual Hashtable* getTable() const {
+		virtual InlineHashtable* getTable() const {
 			AvmAssert(vtable->traits->getHashtableOffset() != 0);
-			return (Hashtable*)((byte*)this + vtable->traits->getHashtableOffset());
+			return (InlineHashtable*)((byte*)this + vtable->traits->getHashtableOffset());
 		}
 
 		bool isValidDynamicName(const Multiname* m) const {

@@ -51,25 +51,18 @@ private:
 %%prologue
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    int len = WOP_LAST+1;
-    opcode_labels = new void*[len];
-    for ( int i=0 ; i < len ; i++ )
-        opcode_labels[i] = (void*)i;
+	opcode_labels = interpGetOpcodeLabels();
 #endif
 
 %%epilogue
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    delete [] opcode_labels;
+    opcode_labels = NULL; // interpGetOpcodeLables() returns a pointer to static data
 #endif
 
 %%test get2locals
 
-#ifdef AVMPLUS_DIRECT_THREADED
-    WordcodeEmitter* t = new WordcodeEmitter(core, NULL, opcode_labels);
-#else
     WordcodeEmitter* t = new WordcodeEmitter(core, NULL);
-#endif
 
      t->emitOp1(WOP_getlocal, 5);
      t->emitOp1(WOP_getlocal, 4);

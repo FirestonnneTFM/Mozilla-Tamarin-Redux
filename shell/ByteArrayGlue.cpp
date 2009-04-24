@@ -88,11 +88,11 @@ namespace avmshell
 		// m_toplevel->memoryError->throwError(kOutOfMemoryError);
 	}
 
-	bool ByteArray::Grow(uint32 minimumCapacity)
+	bool ByteArray::Grow(uint32_t minimumCapacity)
 	{
 		if (minimumCapacity > m_capacity)
 		{
-			uint32 newCapacity = m_capacity << 1;			
+			uint32_t newCapacity = m_capacity << 1;			
 			if (newCapacity < minimumCapacity)
 			{
 				newCapacity = minimumCapacity;
@@ -119,7 +119,7 @@ namespace avmshell
 		return true;
 	}
 		
-	U8 ByteArray::operator[] (uint32 index) const
+	U8 ByteArray::operator[] (uint32_t index) const
 	{
 		if (m_length <= index)
 		{
@@ -128,7 +128,7 @@ namespace avmshell
 		return m_array[index];
 	}
 
-	U8& ByteArray::operator[] (uint32 index)
+	U8& ByteArray::operator[] (uint32_t index)
 	{
 		if (m_length <= index)
 		{
@@ -149,7 +149,7 @@ namespace avmshell
 		NotifySubscribers();
 	}
 		
-	void ByteArray::Push(const U8 *data, uint32 count)
+	void ByteArray::Push(const U8 *data, uint32_t count)
 	{
 		Grow(m_length + count);
 		VMPI_memcpy(m_array + m_length, data, count);
@@ -157,7 +157,7 @@ namespace avmshell
 		NotifySubscribers();
 	}
 	
-	void ByteArray::SetLength(uint32 newLength)
+	void ByteArray::SetLength(uint32_t newLength)
 	{
  		if(m_subscriberRoot && m_length < Domain::GLOBAL_MEMORY_MIN_SIZE)
  			ThrowMemoryError();
@@ -242,7 +242,7 @@ namespace avmshell
 		m_filePointer = 0;
 	}
 
-	uint32 ByteArrayFile::Available()
+	uint32_t ByteArrayFile::Available()
 	{
 		if (m_filePointer <= m_length) {
 			return m_length - m_filePointer;
@@ -251,7 +251,7 @@ namespace avmshell
 		}
 	}
 
-	void ByteArrayFile::SetLength(uint32 newLength)
+	void ByteArrayFile::SetLength(uint32_t newLength)
 	{
 		ByteArray::SetLength(newLength);
 		if (m_filePointer > newLength) {
@@ -259,7 +259,7 @@ namespace avmshell
 		}
 	}
 	
-	void ByteArrayFile::Read(void *buffer, uint32 count)
+	void ByteArrayFile::Read(void *buffer, uint32_t count)
 	{
 		CheckEOF(count);
 
@@ -270,7 +270,7 @@ namespace avmshell
 		}
 	}
 
-	void ByteArrayFile::Write(const void *buffer, uint32 count)
+	void ByteArrayFile::Write(const void *buffer, uint32_t count)
 	{
 		if (m_filePointer+count >= m_length) {
 			Grow(m_filePointer+count);
@@ -292,25 +292,25 @@ namespace avmshell
 		c.set(&m_byteArray, sizeof(ByteArrayFile));
 	}
 
-	Atom ByteArrayObject::getUintProperty(uint32 i) const
+	Atom ByteArrayObject::getUintProperty(uint32_t i) const
 	{
-		if (i < (uint32)m_byteArray.GetLength()) {
+		if (i < (uint32_t)m_byteArray.GetLength()) {
 			return core()->intToAtom(m_byteArray[i]);
 		} else {
 			return undefinedAtom;
 		}
 	}
 	
-	void ByteArrayObject::setUintProperty(uint32 i, Atom value)
+	void ByteArrayObject::setUintProperty(uint32_t i, Atom value)
 	{
 		m_byteArray[i] = (U8)(AvmCore::integer(value));
 	}
 	
 	Atom ByteArrayObject::getAtomProperty(Atom name) const
 	{
-		uint32 index;
+		uint32_t index;
 		if (AvmCore::getIndexFromAtom(name, &index)) {
-			if (index < (uint32) m_byteArray.GetLength()) {
+			if (index < (uint32_t) m_byteArray.GetLength()) {
 				return core()->intToAtom(m_byteArray[index]);
 			} else {
 				return undefinedAtom;
@@ -322,7 +322,7 @@ namespace avmshell
 	
 	void ByteArrayObject::setAtomProperty(Atom name, Atom value)
 	{
-		uint32 index;
+		uint32_t index;
 		if (AvmCore::getIndexFromAtom(name, &index)) {
 			int intValue = AvmCore::integer(value);
 			m_byteArray[index] = (U8)(intValue);
@@ -336,17 +336,17 @@ namespace avmshell
 		return ScriptObject::hasAtomProperty(name) || getAtomProperty(name) != undefinedAtom;
 	}
 
-	void ByteArrayObject::setLength(uint32 newLength)
+	void ByteArrayObject::setLength(uint32_t newLength)
 	{
 		m_byteArray.SetLength(newLength);
 	}
 
-	uint32 ByteArrayObject::get_length()
+	uint32_t ByteArrayObject::get_length()
 	{
 		return m_byteArray.GetLength();
 	}
 
-	void ByteArrayObject::set_length(uint32 value)
+	void ByteArrayObject::set_length(uint32_t value)
 	{
 		setLength(value);
 	}
@@ -371,7 +371,7 @@ namespace avmshell
 	String* ByteArrayObject::_toString()
 	{
 		uint8_t *c = (uint8_t*)m_byteArray.GetBuffer();
-		uint32 len = m_byteArray.GetLength();
+		uint32_t len = m_byteArray.GetLength();
 
 		if (len >= 3)
 		{
@@ -424,7 +424,7 @@ namespace avmshell
 		return (int)m_byteArray.ReadU32();		
 	}
 
-	uint32 ByteArrayObject::readUnsignedInt()
+	uint32_t ByteArrayObject::readUnsignedInt()
 	{
 		return m_byteArray.ReadU32();		
 	}
@@ -461,10 +461,10 @@ namespace avmshell
 
 	void ByteArrayObject::writeInt(int value)
 	{
-		m_byteArray.WriteU32((uint32)value);
+		m_byteArray.WriteU32((uint32_t)value);
 	}
 
-	void ByteArrayObject::writeUnsignedInt(uint32 value)
+	void ByteArrayObject::writeUnsignedInt(uint32_t value)
 	{
 		m_byteArray.WriteU32(value);
 	}
@@ -551,8 +551,8 @@ namespace avmshell
 		}
 	}	
 	void ByteArrayObject::writeBytes(ByteArrayObject *bytes,
-									 uint32 offset,
-									 uint32 length)
+									 uint32_t offset,
+									 uint32_t length)
 	{
 		checkNull(bytes, "bytes");
 
@@ -566,8 +566,8 @@ namespace avmshell
 	}
 
 	void ByteArrayObject::readBytes(ByteArrayObject *bytes,
-									uint32 offset,
-									uint32 length)
+									uint32_t offset,
+									uint32_t length)
 	{
 		checkNull(bytes, "bytes");
 
@@ -585,7 +585,7 @@ namespace avmshell
 		return m_byteArray.ReadUTF();
 	}
 
-	String* ByteArrayObject::readUTFBytes(uint32 length)
+	String* ByteArrayObject::readUTFBytes(uint32_t length)
 	{
 		return m_byteArray.ReadUTFBytes(length);
 	}
