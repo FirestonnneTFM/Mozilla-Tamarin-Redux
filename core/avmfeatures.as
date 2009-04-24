@@ -150,7 +150,7 @@ var FEATURES =
     <name>      AVMSYSTEM_64BIT </name>
 	<precludes> AVMSYSTEM_32BIT </precludes>
 	<defines>   VMCFG_64BIT </defines>
-	<defines>   MMGC_64BIT </defines>
+	<defines>   MMGC_64BIT </defines>       <!-- FIXME: legacy name -->
 	<defines>   AVMPLUS_64BIT </defines>	<!-- FIXME: legacy name -->
   </feature>
 
@@ -172,9 +172,19 @@ var FEATURES =
 	<precludes> AVMSYSTEM_BIG_ENDIAN </precludes>
 	<defines>   VMCFG_LITTLE_ENDIAN </defines>
 	<defines>   AVMPLUS_LITTLE_ENDIAN </defines>  <!-- FIXME: legacy name -->
+	<defines>   AVM10_BIG_ENDIAN </defines>       <!-- FIXME: legacy name, may be externally visble, should clean up -->
   </feature>
 
-
+  <feature>
+    <desc> Selects a reverse floating-point layout on little-endian systems:
+	       the most significant word (containing the sign, exponent, and most
+		   significant bits of the significand) are at the lower word address.
+		   Each word is stored little-endian, however. </desc>
+	<name>     AVMSYSTEM_DOUBLE_MSW_FIRST </name>
+	<requires> AVMSYSTEM_LITTLE_ENDIAN </requires>
+	<defines>  VMCFG_DOUBLE_MSW_FIRST </defines>
+  </feature>
+  
   <!-- CPU architectures, one of these is required for the JIT -->
 
   <feature>
@@ -183,8 +193,9 @@ var FEATURES =
 	<name>      AVMSYSTEM_IA32 </name>
 	<precludes> AVMSYSTEM_64BIT </precludes>
 	<defines>   VMCFG_IA32 </defines>
-	<defines>   MMGC_IA32 </defines>
+	<defines>   MMGC_IA32 </defines>     <!-- FIXME: legacy name -->
 	<defines>   AVMPLUS_IA32 </defines>  <!-- FIXME: legacy name -->
+    <defines>   AVMPLUS_UNALIGNED_ACCESS </defines>
   </feature>
   
   <feature>
@@ -193,8 +204,9 @@ var FEATURES =
 	<name>     AVMSYSTEM_AMD64 </name>
 	<requires> AVMSYSTEM_64BIT </requires>
 	<defines>  VMCFG_AMD64 </defines>
-	<defines>  MMGC_AMD64 </defines>
+	<defines>  MMGC_AMD64 </defines>     <!-- FIXME: legacy name -->
 	<defines>  AVMPLUS_AMD64 </defines>  <!-- FIXME: legacy name -->
+    <defines>  AVMPLUS_UNALIGNED_ACCESS </defines>
   </feature>
 
   <feature>
@@ -203,7 +215,7 @@ var FEATURES =
 	<name>      AVMSYSTEM_ARM </name>
 	<precludes> AVMSYSTEM_64BIT </precludes>
 	<defines>   VMCFG_ARM </defines>
-	<defines>   MMGC_ARM </defines>
+	<defines>   MMGC_ARM </defines>     <!-- FIXME: legacy name -->
 	<defines>   AVMPLUS_ARM </defines>  <!-- FIXME: legacy name -->
   </feature>
   
@@ -213,7 +225,7 @@ var FEATURES =
 		   
 	<name>     AVMSYSTEM_PPC </name>
 	<defines>  VMCFG_PPC </defines>
-	<defines>  MMGC_PPC </defines>
+	<defines>  MMGC_PPC </defines>     <!-- FIXME: legacy name -->
 	<defines>  AVMPLUS_PPC </defines>  <!-- FIXME: legacy name -->
   </feature>
   
@@ -223,7 +235,7 @@ var FEATURES =
 	<name>      AVMSYSTEM_SPARC </name>
 	<precludes> AVMSYSTEM_64BIT </precludes>
 	<defines>   VMCFG_SPARC </defines>
-	<defines>   MMGC_SPARC </defines>
+	<defines>   MMGC_SPARC </defines>     <!-- FIXME: legacy name -->
 	<defines>   AVMPLUS_SPARC </defines>  <!-- FIXME: legacy name -->
   </feature>
   
@@ -270,23 +282,49 @@ var FEATURES =
   <!-- VM facilities: AVMFEATURE_* -->
   
   <feature>
-    <desc>	Selects the AVM debugger API, including retaining debug information at run-time.
+    <desc>	Selects the AVM debugger API, including retaining debug information at
+	        run-time and human-readable error messages for run-time errors.
 			
-			There is a slight performance penalty to enabling this; clients that want
-			maximal execution performance and don't care about debugging should disable it. </desc>
+			There is a performance penalty to enabling this; clients that want
+			maximal execution performance and don't care about debugging should 
+			disable it.
+			
+			If you enable the debugger you may want to consider enabling support for
+			specific language strings for error messages in order to avoid getting
+			them all.  See the AVMPLUS_ERROR_LANG_ macros in core/ErrorConstants.h.
+			It's easiest to define the ones you want in core/avmbuild.h.
+			</desc>
 
     <name>     AVMFEATURE_DEBUGGER  </name>
     <defines>  VMCFG_DEBUGGER  </defines>
 	<defines>  VMCFG_VERIFYALL </defines>
+	<defines>  AVMPLUS_VERBOSE </defines>
 	<defines>  DEBUGGER </defines>           <!-- FIXME: legacy name -->
 	<defines>  AVMPLUS_VERIFYALL </defines>  <!-- FIXME: legacy name -->
   </feature>
 
   <feature>
-    <desc> Selects vtune profiling.  FIXME more here ... </desc>
+    <desc> Enable the sample-based memory profiler.  This makes allocation a
+	       little more expensive if a sampler callback is not installed, and
+		   more expensive still if it is installed.  
+		   
+		   FIXME: more information needed.
+	
+		   Note that this is enabled always by AVMFEATURE_DEBUGGER.
+
+	       It is known that the Flash Player wants to enable this if SCRIPT_DEBUGGER
+		   is enabled in the Player code. </desc>
+
+	<name> AVMFEATURE_ALLOCATION_SAMPLER </name>
+	<defines> AVMPLUS_SAMPLER </defines>
+  </feature>
+  
+  <feature>
+    <desc> Selects vtune profiling.  FIXME: more information needed. </desc>
 
     <name>     AVMFEATURE_VTUNE  </name>
-    <defines>  VMCFG_VTUNE</defines>
+    <defines>  VTUNE </defines>    <!-- FIXME: legacy name -->
+	<defines>  AVMPLUS_VERBOSE </defines>
   </feature>
 
   <feature>
@@ -428,6 +466,38 @@ var FEATURES =
 		   Enabling this tends to be increase GC cost but it can be a useful debugging aid. </desc>
 	<name> AVMFEATURE_INTERIOR_POINTERS </name>
 	<defines> MMGC_INTERIOR_PTRS </defines>
+  </feature>
+  
+  <feature>
+   <desc> Enable interfacing to Java so you can access java methods/properties like 
+          native AS properties; e.g.
+		     var hello = JObject.create("java.lang.String", " hello world ");  
+			 print(hello.indexOf('o')); 
+		  </desc>
+	<name> AVMFEATURE_JNI </name>
+	<defines> AVMPLUS_WITH_JNI </defines>
+  </feature>
+  
+  <feature>
+    <desc> If enabled then always divert VMPI_alloca() to a separately managed stack,
+	       to avoid blowing the stack on small systems or to support systems that
+		   don't provide alloca().  If disabled then smallish allocations are handled
+		   by the built-in alloca() (which must be provided) and larger allocations
+		   are handled by diverting to a separately managed stack; the latter case is
+		   mainly a security issue, as alloca() will do strange things if given sufficiently
+		   large requests.  </desc>
+	<name> AVMFEATURE_HEAP_ALLOCA </name>
+	<defines> AVMPLUS_HEAP_ALLOCA </defines>
+  </feature>
+  
+  <feature>
+    <desc> Enable this if you are building on a system that allows static
+	       initialization of global constant function pointers (almost all systems
+		   except some mobile-phone and other embedded operating systems).
+		   
+		   Disabling this will increase code size slightly. </desc>
+	<name> AVMFEATURE_STATIC_FUNCTION_PTRS </name>
+	<defines> AVMPLUS_STATIC_POINTERS </defines>
   </feature>
   
 </features>;

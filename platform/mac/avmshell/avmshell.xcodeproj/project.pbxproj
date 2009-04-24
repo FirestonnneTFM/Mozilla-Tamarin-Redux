@@ -396,6 +396,7 @@
 		0709B6C50F98DBCB001A6E61 /* unixbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unixbuild.h; path = ../../../MMgc/unixbuild.h; sourceTree = SOURCE_ROOT; };
 		0709B6C60F98DBCB001A6E61 /* winbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = winbuild.h; path = ../../../MMgc/winbuild.h; sourceTree = SOURCE_ROOT; };
 		0709B6C90F98DFD8001A6E61 /* symbian-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "symbian-platform.h"; path = "../../symbian/symbian-platform.h"; sourceTree = SOURCE_ROOT; };
+		0709B7360F9A2354001A6E61 /* system-selection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "system-selection.h"; path = "../../system-selection.h"; sourceTree = SOURCE_ROOT; };
 		071536DE0F5011CD004E398F /* eval-unicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-unicode.h"; path = "../../../eval/eval-unicode.h"; sourceTree = SOURCE_ROOT; };
 		071536DF0F501242004E398F /* eval-compile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-compile.h"; path = "../../../eval/eval-compile.h"; sourceTree = SOURCE_ROOT; };
 		0715396B0F507325004E398F /* eval-avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-avmplus.cpp"; path = "../../../eval/eval-avmplus.cpp"; sourceTree = SOURCE_ROOT; };
@@ -653,7 +654,6 @@
 		079DF93A0F3A893C0031D1B4 /* LIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LIR.h; path = ../../../nanojit/LIR.h; sourceTree = SOURCE_ROOT; };
 		079DF93B0F3A893C0031D1B4 /* nanojit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nanojit.h; path = ../../../nanojit/nanojit.h; sourceTree = SOURCE_ROOT; };
 		079DF93C0F3A893C0031D1B4 /* Native.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Native.h; path = ../../../nanojit/Native.h; sourceTree = SOURCE_ROOT; };
-		079DF93D0F3A893C0031D1B4 /* NativeAMD64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeAMD64.h; path = ../../../nanojit/NativeAMD64.h; sourceTree = SOURCE_ROOT; };
 		079DF93E0F3A893C0031D1B4 /* NativeARM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeARM.cpp; path = ../../../nanojit/NativeARM.cpp; sourceTree = SOURCE_ROOT; };
 		079DF93F0F3A893C0031D1B4 /* NativeARM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeARM.h; path = ../../../nanojit/NativeARM.h; sourceTree = SOURCE_ROOT; };
 		079DF9400F3A893C0031D1B4 /* Nativei386.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Nativei386.cpp; path = ../../../nanojit/Nativei386.cpp; sourceTree = SOURCE_ROOT; };
@@ -1129,7 +1129,6 @@
 				079DF93A0F3A893C0031D1B4 /* LIR.h */,
 				079DF93B0F3A893C0031D1B4 /* nanojit.h */,
 				079DF93C0F3A893C0031D1B4 /* Native.h */,
-				079DF93D0F3A893C0031D1B4 /* NativeAMD64.h */,
 				079DF93E0F3A893C0031D1B4 /* NativeARM.cpp */,
 				079DF93F0F3A893C0031D1B4 /* NativeARM.h */,
 				079DF9400F3A893C0031D1B4 /* Nativei386.cpp */,
@@ -1261,6 +1260,7 @@
 			children = (
 				077494B60F8E2D9B00230F6D /* Non-Mac */,
 				077494580F8C9D5E00230F6D /* mac-platform.h */,
+				0709B7360F9A2354001A6E61 /* system-selection.h */,
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
 				077494590F8C9D5E00230F6D /* manifest.mk */,

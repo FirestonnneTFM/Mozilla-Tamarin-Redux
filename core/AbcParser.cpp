@@ -1739,7 +1739,7 @@ namespace avmplus
 
 		union {
 			double value;
-			#if defined AVMPLUS_BIG_ENDIAN || defined AVMPLUS_ARM_OLDABI
+			#if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
 				struct { uint32_t hi, lo; } words;
 			#else
 				struct { uint32_t lo, hi; } words;

@@ -1514,18 +1514,6 @@ const int kBufferPadding = 16;
 		// hash set containing namespaces
 		DRC(Namespacep) * namespaces;
 
-#ifdef AVMPLUS_INTERNINT_CACHE
-		// See code in AvmCore::internInt
-		// cache of interned names of nonnegative integers (numeric value % 256)
-		class IndexString : public MMgc::GCObject {
-		public:
-			int value;
-			DRCWB(Stringp) string;
-		};
-		
-		IndexString* index_strings[256];
-#endif
-		
 #ifdef AVMPLUS_WORD_CODE
 	private:
 		// Saturating counter.  

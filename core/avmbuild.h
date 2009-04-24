@@ -38,30 +38,44 @@
 #ifndef __avmbuild__
 #define __avmbuild__
 
+// Note, the goal is to keep this file small and for it to concern itself mostly
+// with debugging settings useful for VM development and other ad-hocery.  In
+// general all externally visible configuration should be handled by the configuration
+// system in core/avmfeatures.as.
+//
+// For sanity's sake, please note the reason for the presence of each clause in the
+// following.
+
+
+// This is here as a sanity check, nuke after a few more release cycles (now == Apr-2009).
 #ifdef AVMPLUS_DISABLE_NJ
-#  error "AVMPLUS_DISABLE_NJ is no longer supported"
+    #error "AVMPLUS_DISABLE_NJ is no longer supported"
 #endif
 
+// This is here because the configuration system does not deal with DEBUG
+#if defined DEBUG && !defined AVMPLUS_VERBOSE
+    #define AVMPLUS_VERBOSE
+#endif
+
+// This is here because the conditional for MacTel can't be expressed by the
+// feature system (yet).
+// FIXME: extend the feature system to handle this.
+//
 // all x64, and all MacTel machines, always have sse2
 #if defined(AVMPLUS_AMD64) || (defined(AVMPLUS_MAC) && defined(AVMPLUS_IA32))
-	#define AVMPLUS_SSE2_ALWAYS
+    #ifndef AVMPLUS_SSE2_ALWAYS
+	    #define AVMPLUS_SSE2_ALWAYS
+    #endif
 #endif
 
+// This is here because it's for VM debugging.
 #ifdef FEATURE_NANOJIT
-// enable the jitmax global variables and -jitmax switch, for bisecting nanojit bugs
+// Enable the jitmax global variables and -jitmax switch to the shell, for bisecting nanojit bugs
 //#define AVMPLUS_JITMAX
 #endif
 
-#ifdef _DEBUG
-#  ifndef DEBUG
-#    define DEBUG 1 // don't use _DEBUG
-#  endif
-#endif
-
-#if defined(VTUNE) || defined(DEBUG) || defined(DEBUGGER)
-#  define AVMPLUS_VERBOSE
-#endif
-
+// This is here because it's not yet been refactored.
+// FIXME: refactor this.
 #ifndef VMCFG_METHOD_NAMES
 	#if defined AVMPLUS_VERBOSE || defined DEBUGGER
 		#define VMCFG_METHOD_NAMES 1
@@ -70,24 +84,22 @@
 	#endif
 #endif
 
-// #undef verify, a Mac thing
-#undef verify
-
-#ifndef AVMPLUS_UNALIGNED_ACCESS
-    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-        #define AVMPLUS_UNALIGNED_ACCESS
-    #else
-        // leave undefined, assume unaligned access is a bad thing
-    #endif
+// This is here because the conditional can't be expressed by the feature system (yet),
+// and because support for this case (word code + jit) is likely to be removed anyway.
+//
+// For word code + jit, define a verifier output module that can drive two code generators.
+#if defined AVMPLUS_WORD_CODE && defined FEATURE_NANOJIT
+    #define FEATURE_TEEWRITER
 #endif
 
-// Enable interfacing Java ; so you can access java methods/properties like native AS; e.g.
-// var hello = JObject.create("java.lang.String", " hello world ");  print(hello.indexOf('o')); 
-//#define AVMPLUS_WITH_JNI
-
+// This is here because it's an always-enabled switch to externally sourced code:
+// PCRE should always be compiled as a statically linked library, never as a shared
+// library.  See pcre/pcre_internal.h, pcre/pcre.h, and pcre/config.h.
 #define PCRE_STATIC
 
-// performance metrics for NJ 
+// The PREFM macros are here because they are for VM debugging.
+//
+// Enable performance metrics for NJ
 //#define PERFM
 
 #ifdef PERFM
@@ -100,11 +112,11 @@
 # define PERFM_TPROF_END() 
 #endif
 
-#ifdef AVMPLUS_BIG_ENDIAN
-	// define in case any old code relies on this
-	#define AVM10_BIG_ENDIAN
-#endif
-
+// This is here because it hasn't yet been refactored - it's platform code.
+// FIXME: refactor this.
+//
+// One wonders why GCC on x86 alone gets fastcall, and not GCC generally.
+//
 // FASTCALL 
 #ifdef AVMPLUS_IA32
 	#if _MSC_VER
@@ -118,11 +130,16 @@
 	#define FASTCALL
 #endif
 
+// This is here because it's a hack that will go away and does not need a permanent solution.
+//
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...
 // will be removed soon
 #define AVMPLUS_REDUX_API 1
 
-// The use of this switch is described in comments at the head of utils/superwordprof.c
+// This is here for VM performance profiling.
+//
+// The use of the SUPERWORD_PROFILING switch is described in comments at the head of
+// utils/superwordprof.c
 //
 // The limit is optional and describes a cutoff for sampling; the program continues to
 // run after sampling ends but data are no longer gathered or stored.  A limit of 250e6
@@ -134,28 +151,43 @@
 #  ifndef VMCFG_WORDCODE
 #    error "You must have word code enabled to perform superword profiling"
 #  endif
-#  ifdef AVMPLUS_DIRECT_THREADED
+#  ifdef VMCFG_WORDCODE_THREADED
 #    error "You must disable direct threading to perform superword profiling"
 #  endif
 #endif
 
+// This is here for VM memory profiling.
+//
 // this can be useful in tracking down memory usage for Traits and Traits-related caches,
 // but is very invasive and should only be used in special engineering builds. It should be
 // be left in place (but disabled) for now, as it's still in use...
 // it will go away at some point in the not-too-distant future, however.
 //#define AVMPLUS_TRAITS_MEMTRACK
 
+// This is here for VM development.
+//
 // define this to 1 to keep a shadow copy of implGPR in MethodEnv (vs MethodInfo only).
 // more speed, but more memory used... not clear if the tradeoff is worthwhile yet.
 #ifndef VMCFG_METHODENV_IMPL32
 #  define VMCFG_METHODENV_IMPL32 1
 #endif
 
-// If you need to build on a system that forbids static initialization of global constant function pointers,
-// define this -- it will change the way native-method-table initialization is done to be compatible (at the
-// expense of slightly more code size). 
-//#define AVMPLUS_NO_STATIC_POINTERS
+// This is here for VM development.
+//
+// Enable support for printing the control flow graph in the JIT.
+//#define FEATURE_CFGWRITER
 
+// This is here for documentation purposes.
+//
+// This must be enabled (probably not in this file) if nanojit is being used outside AVM,
+// eg, in TraceMonkey.
+//#define VMCFG_NANOJIT_STANDALONE
+
+// This is here because it's slated to be deleted, but can't be deleted yet (now == Apr-2009).
+//
+// AVMPLUS_PORTING_API is completely unsupported and it /will/ be removed here and elsewhere
+// in the code.  Embedding software /must/ instead use the common configuration system, see
+// core/avmfeatures.as and core/avmfeatures.h.
 #if defined(AVMPLUS_PORTING_API)
 	// The portapi_avmbuild.h file is used to override
 	// definitions in this file. E.g. turning off

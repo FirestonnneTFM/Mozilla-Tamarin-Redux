@@ -443,7 +443,7 @@ namespace avmplus
 			_swap8(c[2], c[5]);
 			_swap8(c[3], c[4]);
 		}
-	#elif defined AVMPLUS_ARM_OLDABI
+	#elif defined VMCFG_DOUBLE_MSW_FIRST
 		inline void MOPS_SWAP_BYTES(uint16_t*) {}
 		inline void MOPS_SWAP_BYTES(int32_t*) {}
 		inline void MOPS_SWAP_BYTES(float*) {}

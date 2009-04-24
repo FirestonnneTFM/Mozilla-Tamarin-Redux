@@ -43,29 +43,18 @@
 // VMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
 #include "VMPI.h"
 
-// Some legacy post-processing and fiddling, yet to be factored
-#ifdef AVMPLUS_WIN32
-	#ifdef AVMPLUS_ARM
-		#include "armbuild.h"
-	#else
-		#include "winbuild.h"
-	#endif
+// Memory profiling settings
+
+#ifdef DEBUG
+    #define MMGC_MEMORY_INFO
 #endif
 
-#ifdef AVMPLUS_MAC
-	#include "macbuild.h"
+#if defined DEBUG && defined AVMPLUS_MAC && !(defined MMGC_PPC && defined MMGC_64BIT)
+    #define MMGC_MEMORY_PROFILER
 #endif
 
-#ifdef AVMPLUS_UNIX
-	#include "unixbuild.h"
-#endif
-
-#if defined AVMPLUS_ARM && !defined AVMPLUS_WIN32
-    #include "armbuild.h"
-#endif
-
-#if defined(SCRIPT_DEBUGGER) || defined(DEBUGGER)
-    #define AVMPLUS_SAMPLER
+#if defined AVMPLUS_WIN32 && !defined AVMPLUS_ARM // note, does not require DEBUG
+    #define MMGC_MEMORY_PROFILER
 #endif
 
 #include "GCDebug.h"

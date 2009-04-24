@@ -61,6 +61,16 @@
   #endif
 #endif
 
+#ifndef AVMFEATURE_ALLOCATION_SAMPLER
+  // This is compatible with existing behavior: debugging support enables 
+  // sampling support.
+  #if AVMFEATURE_DEBUGGER
+    #define AVMFEATURE_ALLOCATION_SAMPLER 1
+  #else
+    #define AVMFEATURE_ALLOCATION_SAMPLER 0
+  #endif
+#endif
+
 #ifndef AVMFEATURE_VTUNE
   #define AVMFEATURE_VTUNE             0
 #endif
@@ -119,6 +129,18 @@
 
 #ifndef AVMFEATURE_INTERIOR_POINTERS
   #define AVMFEATURE_INTERIOR_POINTERS 0
+#endif
+
+#ifndef AVMFEATURE_JNI
+  #define AVMFEATURE_JNI               0
+#endif
+
+#ifndef AVMFEATURE_HEAP_ALLOCA
+  #define AVMFEATURE_HEAP_ALLOCA       0
+#endif
+
+#ifndef AVMFEATURE_STATIC_FUNCTION_PTRS
+  #define AVMFEATURE_STATIC_FUNCTION_PTRS 1
 #endif
 
 #endif // __avmshell_features__
