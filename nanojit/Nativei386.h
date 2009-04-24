@@ -184,8 +184,7 @@ namespace nanojit
         void asm_farg(LInsp);\
         void asm_arg(ArgSize, LIns*, Register);\
 		void asm_pusharg(LInsp);\
-		void asm_cmp(LIns *cond);\
-        void asm_align_code();
+		void asm_cmp(LIns *cond);
 		
 	#define swapptrs()  { NIns* _tins = _nIns; _nIns=_nExitIns; _nExitIns=_tins; }
 		
@@ -691,7 +690,7 @@ namespace nanojit
 
 #define FPU(o,r)							\
 		underrunProtect(2);					\
-		*(--_nIns) = uint8_t(((uint8_t)(o)&0xff) | r&7);\
+		*(--_nIns) = uint8_t(((uint8_t)(o)&0xff) | (r&7));\
 		*(--_nIns) = (uint8_t)(((o)>>8)&0xff)
 
 #define FPUm(o,d,b)							\

@@ -549,7 +549,7 @@ namespace avmplus
 
 	protected:
 		AvmCore*			core;
-		DWB(Hashtable*)		sourcemap;	// maps filename to that file's index in "sources"
+		DWB(HeapHashtable*)	sourcemap;	// maps filename to that file's index in "sources"
 		List<SourceFile*>	source;		// all source files used in this abc file
 		int					byteCount;	// # bytes of bytecode 
 	};

@@ -278,7 +278,7 @@ namespace avmplus
 				if (!fnc->suggestInterp())
 				{
 					core->console << " @ 0x";			
-					core->console.writeHexAddr( (uintptr)fnc->impl32());
+					core->console.writeHexAddr( (uintptr)fnc->implGPR());
 				}
 				core->console << "\n";		
 			}
@@ -582,7 +582,7 @@ namespace avmplus
 		  source(core->GetGC()),
 		  byteCount(size)
 	{
-		sourcemap = new (core->GetGC()) Hashtable(core->GetGC());
+		sourcemap = new (core->GetGC()) HeapHashtable(core->GetGC());
 	}
 
 	int AbcFile::sourceCount() const

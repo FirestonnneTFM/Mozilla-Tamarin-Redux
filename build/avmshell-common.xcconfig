@@ -35,17 +35,34 @@
 //
 // ***** END LICENSE BLOCK *****
 
+GCC_STRICT_ALIASING = YES
 GCC_ENABLE_CPP_EXCEPTIONS=NO
 GCC_ENABLE_CPP_RTTI=NO
 GCC_PREFIX_HEADER = ../../../core/avmplus.h
 GCC_PRECOMPILE_PREFIX_HEADER = YES
-HEADER_SEARCH_PATHS=../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..
 
-// This should define everything except DEBUG, _DEBUG, DEBUGGER
-COMMON_PREPROCESSOR_DEFINITIONS=AVMPLUS_SHELL SOFT_ASSERTS TARGET_API_MAC_CARBON=1 DARWIN=1 _MAC TARGET_RT_MAC_MACHO=1 USE_MMAP
+// shell is included in this search path only for avmshell-features.h, included from platform/VMPI.h
+HEADER_SEARCH_PATHS=../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../.. ../../../shell
+
+// The following line should define all controlling cpp macros except DEBUG, _DEBUG, and DEBUGGER
+//
+// The following macros are defined here for specific effect:
+//
+//   AVMSHELL_BUILD : we use this for conditional inclusion of headers in shell builds
+//   _MAC : this is how we recognize the MacOS platform
+//
+// The following macros are defined here because they have always been defined here; I don't know if 
+// they can be removed, but they are not used by AVM code at this time (now == Apr-2009):
+//
+//   SOFT_ASSERTS : effect unknown, all Google results point back to Tamarin, probably dead
+//   TARGET_API_MAC_CARBON=1 : apparently triggers something in the MacOS headers
+//   TARGET_RT_MAC_MACHO=1 : apparently triggers something in the MacOS headers
+//   DARWIN=1 : effect unknown, likely used to distinguish MacOS X / MacOS 9 in the old days, probably dead
+
+COMMON_PREPROCESSOR_DEFINITIONS=AVMSHELL_BUILD _MAC SOFT_ASSERTS TARGET_API_MAC_CARBON=1 TARGET_RT_MAC_MACHO=1 DARWIN=1
 
 // warnings
-OTHER_CPLUSPLUSFLAGS = -Wextra -Wno-invalid-offsetof
+OTHER_CPLUSPLUSFLAGS = -Wextra -Wno-invalid-offsetof -Wreorder -Wcast-align -Wdisabled-optimization -Winit-self -Winvalid-pch -Wpointer-arith -Wwrite-strings -Woverloaded-virtual -Wsign-promo -Wno-char-subscripts -Wstrict-aliasing=0 -Wstrict-null-sentinel
 GCC_TREAT_WARNINGS_AS_ERRORS = NO				// can't be "YES" given -Wextra
 GCC_WARN_ABOUT_MISSING_NEWLINE = YES
 GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES

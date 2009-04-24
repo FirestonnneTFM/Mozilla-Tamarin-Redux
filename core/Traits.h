@@ -52,6 +52,8 @@ namespace avmplus
 		TMT_methodenv, 
 		TMT_methodinfo, 
 		TMT_methodsig, 
+		TMT_scopechain, 
+		TMT_scopetypechain, 
 		TMT_COUNT 
 	};
 
@@ -60,6 +62,8 @@ namespace avmplus
 
 	extern void tmt_add_inst(TMTTYPE t, const void* inst);
 	extern void tmt_sub_inst(TMTTYPE t, const void* inst);
+	
+	extern void tmt_report();
 
 	#define AVMPLUS_TRAITS_MEMTRACK_ONLY(x) x
 #else
@@ -346,7 +350,7 @@ namespace avmplus
 		inline uint32_t getTotalSize() const { AvmAssert(linked); return m_totalSize; }
 
 		// in bytes. includes size for all base classes too.
-		inline uint32_t getSlotAreaSize() const { AvmAssert(linked); return m_totalSize - m_sizeofInstance - (m_hashTableOffset ? sizeof(Hashtable) : 0); }
+		inline uint32_t getSlotAreaSize() const { AvmAssert(linked); return m_totalSize - m_sizeofInstance - (m_hashTableOffset ? sizeof(InlineHashtable) : 0); }
 
 		inline uint32_t getSlotAreaStart() const { return m_sizeofInstance + (base ? base->getSlotAreaSize() : 0); }
 
@@ -502,6 +506,8 @@ namespace avmplus
 		Stringp format(AvmCore* core) const;
 #endif
 
+		inline const ScopeTypeChain* scope() const { return _scope; }
+		inline void set_scope(const ScopeTypeChain* stc) { WB(MMgc::GC::GetGC(this), this, &_scope, stc); }
 
 	// ------------------------ DATA SECTION BEGIN
 	public:		AvmCore* const			core;		// @todo remove, can get from pool->core
@@ -514,7 +520,7 @@ namespace avmplus
 	public:		DWB(char*)				rawname;
 #endif
 	public:		DRCWB(Namespacep)		protectedNamespace;	// protected namespace, if any
-	public:		DWB(ScopeTypeChain*)	scope;				// scope chain types
+	private:	const ScopeTypeChain*	_scope;				// scope chain types
 	public:		DWB(MethodInfo*)		init;				// not a call/init union b/c smart pointers and union's don't mix
 	private:	CreateClassClosureProc	m_createClassClosure;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType
@@ -568,7 +574,7 @@ namespace avmplus
 
 		ImtBuilder(MMgc::GC *gc);
 		void addEntry(MethodInfo* virt, uint32_t disp_id);
-		void finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel);
+		void finish(Binding imt[], Traits* traits, const Toplevel *toplevel);
 
 	private:
 		MMgc::GC *gc;

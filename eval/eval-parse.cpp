@@ -126,16 +126,16 @@ namespace avmplus
 
 		Parser::Parser(Compiler* compiler, Lexer* lexer, uint32_t first_line) 
 			: compiler(compiler)
-			, lexer(lexer)
 			, allocator(compiler->allocator)
-			, lexerStack(NULL)
 			, line_offset(first_line-1)
 			, topRib(NULL)
+			, lexerStack(NULL)
+			, lexer(lexer)
 			, T0(T_LAST)
 			, T1(T_LAST)
+			, LP(0)
 			, L0(0)
 			, L1(0)
-			, LP(0)
 			, included_input(NULL)
 		{
 		}

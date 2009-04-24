@@ -44,7 +44,7 @@ namespace MMgc
 	/**
 	 * A general purpose memory allocator using size classes 
 	 */
-	class MMGC_API FixedMalloc : public GCAllocObject
+	class FixedMalloc : public GCAllocObject
 	{
 		friend class GCHeap;
 	public:
@@ -61,7 +61,7 @@ namespace MMgc
 			// overflow detection
 			if(size+3 < size)
 				return NULL;
-			size = (size+3)&~3;
+
 			if (size <= (size_t)kLargestAlloc) {
 				item = FindSizeClass(size)->Alloc(size);
 			} else {

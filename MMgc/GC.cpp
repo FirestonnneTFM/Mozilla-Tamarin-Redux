@@ -40,37 +40,6 @@
 #include "MMgc.h"
 #include "StaticAssert.h"
 
-#ifdef MMGC_HAVE_STDARG_H
-// for va_list
-#include <stdarg.h>
-#endif
-
-#ifdef HAVE_STDARG
-// for va_list
-#include <stdarg.h>
-#endif
-
-// get alloca for CleanStack
-#ifdef WIN32
-	#include <malloc.h>
-#endif
-
-#ifdef MMGC_HAVE_ALLOCA_H
-	#include <alloca.h>
-#endif
-
-#ifdef UNIX
-	#include <sys/time.h>
-#endif // UNIX
-
-#ifdef MMGC_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif // HAVE_PTHREAD_H
-
-#ifdef MMGC_HAVE_PTHREAD_NP_H
-#include <pthread_np.h>
-#endif // HAVE_PTHREAD_NP_H
-
 #ifdef AVMPLUS_SAMPLER
  //sampling support
 #include "avmplus.h"
@@ -120,6 +89,14 @@ void sparc_clean_windows()
 }
 #endif
 
+// Latency profiling logs information about the latency of each GC phase with each line prefixed by [latency]
+//#define MMGC_PROFILE_LATENCY
+
+#ifdef MMGC_PROFILE_LATENCY
+	#define LATENCY_PROFILING_ONLY(x) x
+#else
+	#define LATENCY_PROFILING_ONLY(x)
+#endif
 
 // Werner mode is a back pointer chain facility for Relase mode
 //#define WERNER_MODE
@@ -133,11 +110,6 @@ void sparc_clean_windows()
 
 namespace MMgc
 {
-	// how many objects trigger a reap, should be high
-	// enough that the stack scan time is noise but low enough
-	// so that objects to away in a timely manner
-	const int ZCT::ZCT_REAP_THRESHOLD = 512;
-
 	// size of table in pages
 	const int ZCT::ZCT_START_SIZE = 1;
 
@@ -152,22 +124,260 @@ namespace MMgc
 	const bool dumpSizeClassState = false;
 #endif
 
-	/**
-	 * Free Space Divisor.  This value may be tuned for optimum
- 	 * performance.  The FSD is based on the Boehm collector.
-	 */
-	const static int kFreeSpaceDivisor = 4;
+#ifndef max	// good grief
+	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
+#endif
 
-	// max amount we'll grow by when 
-	const static int kMaxIncrement = 256;
+	GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap)
+		// public
+		: timeStartIncrementalMark(0)
+		, timeIncrementalMark(0)
+		, timeFinalRootAndStackScan(0)
+		, timeFinalizeAndSweep(0)
+		, timeReapZCT(0)
+		, timeMaxStartIncrementalMark(0)
+		, timeMaxIncrementalMark(0)
+		, timeMaxFinalRootAndStackScan(0)
+		, timeMaxFinalizeAndSweep(0)
+		, timeMaxReapZCT(0)
+		, timeMaxLatency(0)
+		, eventMaxLatency(NO_EVENT)
+		, countStartIncrementalMark(0)
+		, countIncrementalMark(0)
+		, countFinalRootAndStackScan(0)
+		, countFinalizeAndSweep(0)
+		, countReapZCT(0)
+		// private
+		, gc(gc)
+		, heap(heap)
+		, timeEndOfLastIncrementalMark(0)
+		, timeEndOfLastCollection(0)
+		, blocksAllocatedSinceLastCollection(0)
+		, blocksDeallocatedSinceLastCollection(0)
+		, blocksInHeapAfterPreviousAllocation(heap->GetTotalHeapSize())
+		, blocksOwned(0)
+		, objectsScannedTotal(0)
+		, bytesScannedTotal(0)
+		, start_time(0)
+		, start_event(NO_EVENT)
+	{
+	}
+	
+	inline uint64_t GCPolicyManager::interIncrementalMarkTicks() {
+		return 10 * VMPI_getPerformanceFrequency() / 1000;	// Ticks.  Value represents 10ms on all platforms
+	}
+	
+	inline uint64_t GCPolicyManager::interCollectionTicks() {
+		return 15 * VMPI_getPerformanceFrequency() / 1000;		// Ticks.  Value represents 15ms on all platforms
+		
+		/* Old code, preserved here until we revamp policy as a whole.
+		 *
+		 * The following is almost certainly not correct but it's the current policy.
+		 *
+		 * From a conversation with Tommy, it appears that the idea here is that faster machines should
+		 * have lower limits on the time between collections.  The assumption is that a slower
+		 * machine will have a lower frequency performance timer, so a constant ticks value here will
+		 * give more time to a slower machine than to a fast machine.  That's a pretty dodgy assumption
+		 * about the frequency, though.  For example, the Linux platform layer hardwires it at 1MHz
+		 * regardless of the computer's speed, it could be a Maemo or a 4GHz monster.
+		 *
+		 * Returnin a constant here is known to cause enormous heap bloat on Linux, where it translates
+		 * as 1.5s.
+		 */
+		//return 1515909;										// Ticks.  Old comment says "200 ms on a 2ghz machine" but that's wrong
+	}
+	
+	inline uint32_t GCPolicyManager::freeSpaceDivisor() {
+		return 4;											// Unitless.  Old comment says "4" comes from the Boehm collector
+	}
 
-	/**
-	 * delay between GC incremental marks
-	 */
-	const static uint64_t kIncrementalMarkDelayTicks = int(10 * VMPI_getPerformanceFrequency() / 1000);
+	inline uint32_t GCPolicyManager::lowerLimitHeapBlocks() {
+		return 256;											// 4KB blocks, that is, 1MB
+	}
 
-	const static uint64_t kMarkSweepBurstTicks = 1515909; // 200 ms on a 2ghz machine
+	inline uint64_t GCPolicyManager::now() {
+		return VMPI_getPerformanceCounter();
+	}
 
+	inline bool GCPolicyManager::queryAllocationLimitReached() {
+		return (blocksAllocatedSinceLastCollection >= blocksDeallocatedSinceLastCollection &&
+				(blocksAllocatedSinceLastCollection - blocksDeallocatedSinceLastCollection) * freeSpaceDivisor() >= blocksOwned);
+	}
+	
+	inline bool GCPolicyManager::queryLowerLimitGCBlocksAllocated() {
+		return blocksOwned > lowerLimitHeapBlocks();
+	}
+
+	inline bool GCPolicyManager::querySufficientTimeSinceLastCollection() {
+		return now() - timeEndOfLastCollection > interCollectionTicks();
+	}
+	
+	uint64_t GCPolicyManager::incrementalMarkMilliseconds() {
+		return 5;											// milliseconds
+	}
+
+	uint64_t GCPolicyManager::blocksOwnedByGC() {
+		return blocksOwned;
+	}
+	
+	uint64_t GCPolicyManager::bytesMarked() {
+		return bytesScannedTotal;
+	}
+	
+	uint64_t GCPolicyManager::objectsMarked() {
+		return objectsScannedTotal;
+	}
+
+	uint64_t GCPolicyManager::zctNewSize(uint64_t oldZctSize)
+	{
+		return oldZctSize * 2;
+	}
+
+	uint64_t GCPolicyManager::zctNewReapThreshold(uint64_t zctSize, uint64_t zctOccupancy)
+	{
+		// how many objects trigger a reap, should be high
+		// enough that the stack scan time is noise but low enough
+		// so that objects to away in a timely manner
+		
+		const int ZCT_REAP_THRESHOLD = 512;
+		
+		uint64_t zctReapThreshold = zctOccupancy + ZCT_REAP_THRESHOLD;
+		if(zctReapThreshold > zctSize * GCHeap::kBlockSize/sizeof(uintptr_t))
+			zctReapThreshold = zctSize * GCHeap::kBlockSize/sizeof(uintptr_t);
+		return zctReapThreshold;
+	}
+	
+    bool GCPolicyManager::queryStartIncrementalMarkAtAllocBlock()
+    {
+		GCAssert(!gc->IncrementalMarking() && !gc->Collecting());
+		return (queryLowerLimitGCBlocksAllocated() && queryAllocationLimitReached() && querySufficientTimeSinceLastCollection());
+    }
+
+	bool GCPolicyManager::queryIncrementalMarkAtAllocBlock() 
+    {
+		/* This is the existing policy but for fast computers it's better
+		 * just to return 'true', which probably means interIncrementalMarkTicks
+		 * should be really small.
+		 */
+		GCAssert(gc->IncrementalMarking() && !gc->Collecting());
+		return now() - timeEndOfLastIncrementalMark > interIncrementalMarkTicks();
+    }
+	
+	bool GCPolicyManager::queryFinishIncrementalMarkAfterAllocBlockFail()
+	{
+		// this is the existing policy but it's not a good idea
+		return true;
+	}
+
+	bool GCPolicyManager::queryStartCollectionAfterHeapExpansion()
+	{
+		// this is the existing policy but it's not a good idea
+		return (blocksInHeapAfterPreviousAllocation > lowerLimitHeapBlocks() &&
+				blocksInHeapAfterPreviousAllocation < heap->GetTotalHeapSize() && 
+				querySufficientTimeSinceLastCollection());
+	}
+
+	bool GCPolicyManager::queryRunCollectionAfterAllocBlockFail()
+	{
+		return heap->GetTotalHeapSize() >= lowerLimitHeapBlocks() && queryAllocationLimitReached(); 
+	}
+
+	void GCPolicyManager::signal(PolicyEvent ev) {
+		switch (ev) {
+			case START_StartIncrementalMark:
+				heap->gcManager.signalStartCollection(gc);
+			case START_IncrementalMark:
+			case START_FinalRootAndStackScan:
+			case START_FinalizeAndSweep:
+			case START_ReapZCT:
+				start_time = now();
+				start_event = ev;
+				return;	// to circumvent resetting of start_event below
+		}
+		
+		GCAssert(start_event == (PolicyEvent)(ev - 1));
+		start_event = NO_EVENT;
+		
+		uint64_t t = now();
+		uint64_t elapsed = t - start_time;  
+		LATENCY_PROFILING_ONLY( const char *name = NULL; )
+		
+		switch (ev) {
+			case END_StartIncrementalMark:
+				LATENCY_PROFILING_ONLY( name = "StartIncrementalMark"; )
+				countStartIncrementalMark++;
+				timeStartIncrementalMark += elapsed;
+				timeMaxStartIncrementalMark = max(timeMaxStartIncrementalMark, elapsed);
+				break;
+			case END_FinalRootAndStackScan:
+				LATENCY_PROFILING_ONLY( name = "FinalRootAndStackScan"; )
+				countFinalRootAndStackScan++;
+				timeFinalRootAndStackScan += elapsed;
+				timeMaxFinalRootAndStackScan = max(timeMaxFinalRootAndStackScan, elapsed);
+				break;
+			case END_ReapZCT:
+				LATENCY_PROFILING_ONLY( name = "ReapZCT"; )
+				countReapZCT++;
+				timeReapZCT += elapsed;
+				timeMaxReapZCT = max(timeMaxReapZCT, elapsed);
+				break;
+			case END_IncrementalMark:
+				LATENCY_PROFILING_ONLY( name = "IncrementalMark"; )
+				countIncrementalMark++;
+				timeIncrementalMark += elapsed;
+				timeMaxIncrementalMark = max(timeMaxIncrementalMark, elapsed);
+				timeEndOfLastIncrementalMark = t;
+				break;
+			case END_FinalizeAndSweep:
+				LATENCY_PROFILING_ONLY( name = "FinalizeAndSweep"; )
+				countFinalizeAndSweep++;
+				timeFinalizeAndSweep += elapsed;
+				timeMaxFinalizeAndSweep = max(timeMaxFinalizeAndSweep, elapsed);
+				timeEndOfLastCollection = t;
+				blocksAllocatedSinceLastCollection = 0;
+				blocksDeallocatedSinceLastCollection = 0;
+				heap->gcManager.signalEndCollection(gc);
+				break;
+		}
+		if (elapsed > timeMaxLatency) {
+			timeMaxLatency = elapsed;
+			eventMaxLatency = ev;
+		}
+#ifdef MMGC_PROFILE_LATENCY
+		char buf[100];
+		VMPI_snprintf(buf, sizeof(buf), "[latency] %s %.2f\n", name, ((double)elapsed * 1000.0 / (double)VMPI_getPerformanceFrequency()));
+		buf[sizeof(buf)-1] = 0;
+		VMPI_Log(buf);
+#endif
+	}
+	
+	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
+		blocksAllocatedSinceLastCollection += blocks;
+		blocksOwned += blocks;
+		blocksInHeapAfterPreviousAllocation = heap->GetTotalHeapSize();
+	}
+	
+	void GCPolicyManager::signalBlockDeallocation(size_t blocks) {
+		blocksOwned -= blocks;
+		blocksDeallocatedSinceLastCollection += blocks;
+	}
+
+	void GCPolicyManager::signalMemoryStatusChange(MemoryStatus from, MemoryStatus to) {
+		(void)from;
+		(void)to;
+		// do nothing for the moment
+	}
+
+	void GCPolicyManager::signalStartCollection(GC* gc) {
+		(void)gc;
+		// do nothing for the moment
+	}
+	
+	void GCPolicyManager::signalEndCollection(GC* gc) {
+		(void)gc;
+		// do nothing for the moment
+	}
+	
 	// Size classes for our GC.  From 8 to 128, size classes are spaced
 	// evenly 8 bytes apart.  The finest granularity we can achieve is
 	// 8 bytes, as pointers must be 8-byte aligned thanks to our use
@@ -219,13 +429,10 @@ namespace MMgc
 	};
 	const size_t kLargestAlloc = 1968;
 
-#ifdef MMGC_THREADSAFE
-#define USING_CALLBACK_LIST(gc)  GCAcquireSpinlock _cblock((gc)->m_callbackListLock)
-#define USING_PAGE_MAP()         GCAcquireSpinlock _pmlock(pageMapLock)
-#else
-#define USING_CALLBACK_LIST(gc)  ((gc)->CheckThread())
-#define USING_PAGE_MAP()         ((void) 0)
-#endif
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable:4355) // 'this': used in base member initializer list
+#endif 
 
 	GC::GC(GCHeap *gcheap)
 		:
@@ -234,7 +441,6 @@ namespace MMgc
 		findUnmarkedPointers(false),
 		validateDefRef(false),
 		keepDRCHistory(false),
-		collectThreshold(256),
 		dontAddToZCTDuringCollection(false),
 		incrementalValidation(false),
 #ifdef _DEBUG
@@ -242,37 +448,25 @@ namespace MMgc
 		incrementalValidationPedantic(false),
 #endif
 		incremental(true),
-#ifdef MMGC_RCROOT_SUPPORT
 		rcRootSegments(NULL),
-#endif
+		policy(this, gcheap),
 		t0(VMPI_getPerformanceCounter()),
-		bytesMarked(0),
-		markTicks(0),
 		lastStartMarkIncrementCount(0),
-		markIncrements(0),
-		marks(0),
 		sweeps(0),
 		numObjects(0),
 		sweepStart(0),
 		hitZeroObjects(false),
 		emptyWeakRef(0),
-		emptyWeakRefRoot(0),
 		destroying(false),
-		heapSizeAtLastAlloc(gcheap->GetTotalHeapSize()),
 		stackCleaned(true),
 		rememberedStackTop(0),
 		stackEnter(0),
-#ifndef MMGC_THREADSAFE
 		disableThreadCheck(false),
-#endif
+		emptyWeakRefRoot(0),
 		marking(false),
-		lastMarkTicks(0),
-		lastSweepTicks(0),
 		memStart(MAX_UINTPTR),
 		memEnd(0),
-		totalGCPages(0),
 		heap(gcheap),
-		allocsSinceCollect(0),
 		collecting(false),
 		finalizedValue(true),
 		smallEmptyPageList(NULL),
@@ -280,14 +474,6 @@ namespace MMgc
 		m_roots(0),
 	    m_callbacks(0),
 		zct()
-		// Expand, don't collect, until we hit this threshold
-#if MMGC_THREADSAFE
-		, m_exclusiveGCThread(NULL)
-		, m_gcRunning(false)
-		, m_condDone(m_lock)
-		, m_requestCount(0)
-		, m_condNoRequests(m_lock)
-#endif
 	{
 		// sanity check for all our types
 		MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
@@ -307,6 +493,12 @@ namespace MMgc
 		MMGC_STATIC_ASSERT(sizeof(intptr_t) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);	
 		#endif		
+
+		{
+			GCWorkItem item;
+			MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
+			rememberedStackBottom =  (const void *)((const char *)item.ptr + item._size);
+		}
 	
 		zct.SetGC(this);
 
@@ -319,12 +511,6 @@ namespace MMgc
 			noPointersAllocs[i] = new GCAlloc(this, kSizeClasses[i], false, false, i);
 		}
 
-	#ifdef MMGC_THREADSAFE
-		pageMapLock = VMPI_lockCreate();
-		GCAssert(pageMapLock != NULL);
-		m_callbackListLock = VMPI_lockCreate();
-		GCAssert(m_callbackListLock != NULL);
-	#endif //MMGC_THREADSAFE
 	#ifdef MMGC_LOCKING
 		m_rootListLock = VMPI_lockCreate();
 		GCAssert(m_rootListLock != NULL);
@@ -362,6 +548,10 @@ namespace MMgc
  		allocaInit();
 	}
 
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif 
+
 	GC::~GC()
 	{
  		allocaShutdown();
@@ -371,6 +561,16 @@ namespace MMgc
 		destroying = true;
 		ClearMarks();
 		ForceSweep();
+
+		for (int i=0; i < kNumSizeClasses; i++) {
+			delete containsPointersAllocs[i];
+			delete containsPointersRCAllocs[i];
+			delete noPointersAllocs[i];
+		}
+
+		if (largeAlloc) {
+			delete largeAlloc;
+		}
 
 		// Go through m_bitsFreelist and collect list of all pointers
 		// that are on page boundaries into new list, pageList
@@ -390,28 +590,14 @@ namespace MMgc
 		// Go through page list and free all pages on it
 		while (pageList) {
 			void **next = (void**) *pageList;
-			heap->Free((void*)pageList);
+			heapFree((void*)pageList);
 			pageList = next;
 		}
 
-		for (int i=0; i < kNumSizeClasses; i++) {
-			delete containsPointersAllocs[i];
-			delete containsPointersRCAllocs[i];
-			delete noPointersAllocs[i];
-		}
+		heapFree(pageMap);
 
-		if (largeAlloc) {
-			delete largeAlloc;
-		}
-
-		// dtors for each GCAlloc will use this
-		pageList = NULL;
-
-		heap->Free(pageMap);
-
-#ifndef MMGC_THREADSAFE
 		CheckThread();
-#endif
+		
 		delete emptyWeakRefRoot;
 		GCAssert(!m_roots);
 		GCAssert(!m_callbacks);
@@ -428,172 +614,28 @@ namespace MMgc
 	#ifdef MMGC_LOCKING
 		VMPI_lockDestroy(m_rootListLock);
 	#endif //MMGC_LOCKING
-	#ifdef MMGC_THREADSAFE
-		VMPI_lockDestroy(m_callbackListLock);
-		VMPI_lockDestroy(pageMapLock);
-	#endif //MMGC_THREADSAFE
 	}
 
 	void GC::Collect()
 	{
-		CollectWithBookkeeping(false, false);
-	}
-
-	void GC::CollectWithBookkeeping(bool callerHoldsLock,
-									bool callerHasActiveRequest)
-	{
-#ifdef MMGC_THREADSAFE
-		GCAssert(callerHoldsLock == m_lock.IsHeld());
-#ifdef _DEBUG
-		GCAssert(callerHasActiveRequest == GCThread::GetCurrentThread()->IsInActiveRequest());
-#endif
-#else
-		(void) callerHoldsLock;
-		(void) callerHasActiveRequest;
 		CheckThread();
-#endif
 
-#ifdef MMGC_THREADSAFE
-		if (!callerHoldsLock)
-			m_lock.Acquire();
-
-		if (nogc || m_gcRunning || zct.reaping) {
-			if (!callerHoldsLock)
-				m_lock.Release();
-			return;
-		}
-#else
 		if (nogc || collecting || zct.reaping) {
 			return;
 		}
-#endif
 
-#ifdef MMGC_THREADSAFE
-		GCThread *thisThread = GCThread::GetCurrentThread();
-		if (m_exclusiveGCThread != NULL) {
-			// Someone is already collecting or waiting to collect.
-			//
-			// If it's the current thread, then we're being called
-			// recursively.  This maybe shouldn't happen, but Collect can be
-			// called indirectly from a finalizer.  Don't recurse, just ignore
-			// it.
-			//
-			// If it's some other thread, wait for that thread to finish.
-			//
-			if (m_exclusiveGCThread != thisThread) {
-				GCRoot *stackRoot;
-				void *stack;
-				size_t stackSize;
-
-				// Call this macro here, not under "if
-				// (callerHasActiveRequest)", because it introduces local
-				// variables that must survive for the whole lifetime of
-				// stackRoot.
-				MMGC_GET_STACK_EXTENTS(this, stack, stackSize);
-
-				// Before waiting, this thread must suspend any active
-				// requests.  This avoids a deadlock where m_exclusiveGCThread
-				// is waiting for m_requestCount to go to zero while we're
-				// waiting for m_exclusiveGCThread to be done.
-				//
-				// When we do this, we root the calling thread's stack; this
-				// way each collection scans the stack of every thread that is
-				// in a suspended request.
-				//
-				if (callerHasActiveRequest) {
-					stackRoot = new GCRoot(this, stack, stackSize);
-
-					OnLeaveRequestAlreadyLocked();
-				}
-
-				while (m_exclusiveGCThread != NULL)
-					m_condDone.Wait();
-
-				if (callerHasActiveRequest) {
-					// Resume previously suspended request.
-					delete stackRoot;
-					OnEnterRequestAlreadyLocked();
-				}
-			}
-
-			if (!callerHoldsLock)
-				m_lock.Release();
-			return;
-		}
-
-		// If we get here, this thread will collect.
-		m_exclusiveGCThread = thisThread;
-		if (callerHasActiveRequest) {
-			// We must suspend any active requests on this thread.
-			OnLeaveRequestAlreadyLocked();
-		}
-		// Wait for other threads to suspend or end their active requests,
-		// if any.
-		while (m_requestCount > 0)
-			m_condNoRequests.Wait();
-
-		// These should not have changed while we were waiting, even though we
-		// released the lock.
-		GCAssert(m_requestCount == 0);
-		GCAssert(m_exclusiveGCThread == thisThread);
-
-		// This thread has acquired exclusiveGC.
-		m_gcRunning = true;
-#endif
-
-		{
-			USING_CALLBACK_LIST(this);
-			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-				cb->enterExclusiveGC();
-		}
-
-#ifdef MMGC_THREADSAFE
-		m_lock.Release();
-#endif
-
-		{
-			USING_CALLBACK_LIST(this);
-			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-				cb->enterExclusiveGCNoLock();
-		}
+		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
+			cb->precollection();
 
 		CollectImpl();
 
-#ifdef MMGC_THREADSAFE
-		m_lock.Acquire();
-
-		// These should not have changed during collection,
-		// even though we released the lock.
-		GCAssert(m_requestCount == 0);
-		GCAssert(m_exclusiveGCThread == thisThread);
-#endif
-
-		{
-			USING_CALLBACK_LIST(this);
-			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-				cb->leaveExclusiveGC();
-		}
-
-#ifdef MMGC_THREADSAFE
-		// This thread is relinquishing exclusiveGC.
-		m_gcRunning = false;
-
-		m_exclusiveGCThread = NULL;
-		if (callerHasActiveRequest)
-			OnEnterRequestAlreadyLocked();
-
-		m_condDone.NotifyAll();
-
-		if (!callerHoldsLock)
-			m_lock.Release();
-#endif
+		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
+			cb->postcollection();
 	}
 
 	void GC::CollectImpl()
 	{
-#ifndef MMGC_THREADSAFE
 		ReapZCT();
-#endif
 
 		if(!marking)
 			StartIncrementalMark();
@@ -612,8 +654,6 @@ namespace MMgc
 #ifdef _DEBUG
 	void GC::Trace(const void *stackStart/*=NULL*/, uint32_t stackSize/*=0*/)
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		SAMPLE_FRAME("[mark]", core());
 
 		// Clear all mark bits.
@@ -647,8 +687,6 @@ namespace MMgc
 		ClearMarks();
 	}
 #endif
-
-#ifdef MMGC_RCROOT_SUPPORT
 
 	GC::RCRootSegment::RCRootSegment(GC* gc, void* mem, size_t size) 
 		: GCRoot(gc, mem, size)
@@ -689,16 +727,9 @@ namespace MMgc
 		delete block;
 	}
 
-#endif // MMGC_RCROOT_SUPPORT
-
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{
-#ifdef MMGC_THREADSAFE
-		GCAutoLock _lock(m_lock);
-		GCAssert(!m_gcRunning);
-#else
 		CheckThread();
-#endif
 		return AllocAlreadyLocked(size, flags);
 	}
 
@@ -714,7 +745,7 @@ namespace MMgc
 #ifdef _DEBUG
 		GCAssert(size + 7 > size);
 		if (GC::greedy) {
-			CollectWithBookkeeping(true, true);
+			Collect();
 		}
 		// always be marking in pedantic mode
 		if(incrementalValidationPedantic) {
@@ -726,6 +757,8 @@ namespace MMgc
 		// overflow detection
 		if(size+7 < size)
 			return NULL;
+
+		size_t askSize = size;
 
 		size = (size+7)&~7; // round up to multiple of 8
 
@@ -766,7 +799,7 @@ namespace MMgc
 		item = GetUserPointer(item);
 
 		if(heap->HooksEnabled()) {
-			heap->AllocHook(item, Size(item));
+			heap->AllocHook(item, askSize, Size(item));
 		}
 
 #ifdef _DEBUG
@@ -786,42 +819,6 @@ namespace MMgc
 		return item;
 	}
 
-	void GC::MaybeGC(bool callerHasActiveRequest)
-	{
-		if (greedy) {
-			CollectWithBookkeeping(false, callerHasActiveRequest);
-		} else if (marking) {
-			IncrementalMark();
-		} else {
-#ifdef MMGC_THREADSAFE
-			GCAutoLock _lock(m_lock);
-#endif
-
-			// Burst logic to prevent collections from happening back to back.
-			uint64_t now = VMPI_getPerformanceFrequency();
-			if (now - lastSweepTicks <= kMarkSweepBurstTicks)
-				return;
-
-			// Definitely start GC if the heap expanded due to FixedMalloc
-			// allocations.  The same heuristic applies to incremental and
-			// non-incremental.
-			bool force = (heapSizeAtLastAlloc > collectThreshold &&
-						  heapSizeAtLastAlloc < heap->GetTotalHeapSize());
-
-			if (incremental) {
-				if (force || (totalGCPages > collectThreshold &&
-							  allocsSinceCollect * kFreeSpaceDivisor >= totalGCPages)) {
-					StartIncrementalMark();
-				}
-			} else {
-				// Collect only if the heap is completely full (a conservative
-				// heuristic).
-				if (force || heap->GetFreeHeapSize() == 0)
-					CollectWithBookkeeping(true, callerHasActiveRequest);
-			}
-		}
-	}
-
 	void *GC::Calloc(size_t num, size_t elsize, int flags)
 	{
 		uint64_t size = (uint64_t)num * (uint64_t)elsize;
@@ -835,12 +832,7 @@ namespace MMgc
 
 	void GC::Free(const void *item)
 	{
-#ifdef MMGC_THREADSAFE
-		GCAutoLock _lock(m_lock);
-		GCAssert(!m_gcRunning);
-#else
 		CheckThread();
-#endif
 
 		if(item == NULL) {
 			return;
@@ -908,8 +900,6 @@ bail:
 
 	void GC::ClearMarks()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		for (int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->ClearMarks();
 			containsPointersAllocs[i]->ClearMarks();
@@ -920,8 +910,6 @@ bail:
 
 	void GC::Finalize()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		for(int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->Finalize();
 			containsPointersAllocs[i]->Finalize();
@@ -940,8 +928,6 @@ bail:
 
 	void GC::Sweep(bool force)
 	{	
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		// collecting must be true because it indicates allocations should
 		// start out marked, we can't rely on write barriers below since 
 		// presweep could write a new GC object to a root
@@ -958,17 +944,10 @@ bail:
 			DumpMemoryInfo();
 		}
 #endif
-		
 
 		// invoke presweep on all callbacks
-		{
-			USING_CALLBACK_LIST(this);
-			GCCallback *cb = m_callbacks;
-			while(cb) {
-				cb->presweep();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
+			cb->presweep();
 
 		SAMPLE_CHECK();
 
@@ -987,6 +966,9 @@ bail:
 		}
 	
 		SAMPLE_CHECK();
+
+		int sweepResults = 0;
+
 		// ISSUE: this could be done lazily at the expense other GC's potentially expanding
 		// unnecessarily, not sure its worth it as this should be pretty fast
 		GCAlloc::GCBlock *b = smallEmptyPageList;
@@ -996,6 +978,8 @@ bail:
 			b->alloc->SweepGuts(b);
 #endif
 			b->alloc->FreeChunk(b);
+
+			sweepResults++;
 			b = next;
 		}
 		smallEmptyPageList = NULL;
@@ -1007,7 +991,10 @@ bail:
 			GCLargeAlloc::LargeBlock *next = lb->next;
 			if(heap->HooksEnabled())
 				heap->FreeHook(GetUserPointer(lb+1), lb->usableSize - DebugSize(), 0xba);
-			FreeBlock(lb, lb->GetNumBlocks());
+
+			int numBlocks = lb->GetNumBlocks();
+			sweepResults += numBlocks;
+			FreeBlock(lb, numBlocks);
 			lb = next;
 		}
 		largeEmptyPageList = NULL;
@@ -1029,33 +1016,12 @@ bail:
 		collecting = false;
 
 		// invoke postsweep callback
-		{
-			USING_CALLBACK_LIST(this);
-			GCCallback *cb = m_callbacks;
-			while(cb) {
-				cb->postsweep();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
+			cb->postsweep();
 
 		SAMPLE_CHECK();
 
-		allocsSinceCollect = 0;
-		lastSweepTicks = VMPI_getPerformanceCounter();
-
 		if(heap->Config().gcstats) {
-			int sweepResults = 0;
-			GCAlloc::GCBlock *bb = smallEmptyPageList;
-			while(bb) {
-				sweepResults++;
-				bb = bb->next;
-			}
-			
-			GCLargeAlloc::LargeBlock *lbb = largeEmptyPageList;
-			while(lbb) {
-				sweepResults += lbb->GetNumBlocks();
-				lbb = lbb->next;
-			}
 			// include large pages given back
 			sweepResults += int(heapSize - heap->GetUsedHeapSize());
 			double millis = duration(sweepStart);
@@ -1067,22 +1033,15 @@ bail:
 
 	void* GC::AllocBlock(int size, int pageType, bool zero)
 	{
-		MMGC_ASSERT_GC_LOCK(this);
 		GCAssert(size > 0);
 	
 		// perform gc if heap expanded due to fixed memory allocations
-		// utilize burst logic to prevent this from happening back to back
-		// this logic is here to apply to incremental and non-incremental
-		uint64_t now = VMPI_getPerformanceCounter();
-		if(!marking && !collecting &&
-			heapSizeAtLastAlloc > collectThreshold &&
-			now - lastSweepTicks > kMarkSweepBurstTicks && 
-			heapSizeAtLastAlloc < heap->GetTotalHeapSize()) 
+		if(!marking && !collecting && policy.queryStartCollectionAfterHeapExpansion())
 		{
 			if(incremental && !nogc)
 				StartIncrementalMark();
 			else
-				CollectWithBookkeeping(true, true);
+				Collect();
 		}
 
 		void *item;
@@ -1092,88 +1051,56 @@ bail:
 		else
 			item = AllocBlockNonIncremental(size, zero);
 
-		if(!item) {				
-			item = heap->Alloc(size, true, zero);
+		if(!item)
+			item = heapAllocNoProfile(size, true, zero);
+
+		// mark GC pages in page map, small pages get marked one,
+		// the first page of large pages is 3 and the rest are 2
+		MarkGCPages(item, 1, pageType);
+		if(pageType == kGCLargeAllocPageFirst) {
+			MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
 		}
-
-		GCAssert(item != NULL);
-		if (item != NULL)
-		{
-			allocsSinceCollect += size;
-
-			// mark GC pages in page map, small pages get marked one,
-			// the first page of large pages is 3 and the rest are 2
-			MarkGCPages(item, 1, pageType);
-			if(pageType == kGCLargeAllocPageFirst) {
-				MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
-			}
-			totalGCPages += size;
-		}
-
-		// do this after any heap expansions from GC
-		heapSizeAtLastAlloc = heap->GetTotalHeapSize();
 
 		return item;
 	}
 
 	void* GC::AllocBlockIncremental(int size, bool zero)
 	{
-		MMGC_ASSERT_GC_LOCK(this);
-
-		if(!collecting || incrementalValidation) {
-			uint64_t now = VMPI_getPerformanceCounter();
-			if (marking) {		
-				if(now - lastMarkTicks > kIncrementalMarkDelayTicks) {
+		if (!collecting) {
+			if (marking) {
+				if (incrementalValidation || policy.queryIncrementalMarkAtAllocBlock())
 					IncrementalMark();
-				}
-			} else if (incrementalValidation ||
-				(totalGCPages > collectThreshold &&
-				allocsSinceCollect * kFreeSpaceDivisor >= totalGCPages &&
-				// burst detection
-				(now - lastSweepTicks > kMarkSweepBurstTicks))) {
-					StartIncrementalMark();
-			}
+			} 
+			else if (incrementalValidation || policy.queryStartIncrementalMarkAtAllocBlock())
+				StartIncrementalMark();
+		}
+	
+		void *item = heapAllocNoProfile(size, false, zero);
+
+		if (item == NULL && marking && !collecting && policy.queryFinishIncrementalMarkAfterAllocBlockFail()) {
+			GCAssert(!nogc);
+			FinishIncrementalMark();
+			item = heapAllocNoProfile(size, false, zero);
 		}
 
-		void *item = heap->Alloc(size, false, zero);
-		if(!item && !collecting) {
-			if(marking) {
-				GCAssert(!nogc);
-				FinishIncrementalMark();
-				item = heap->Alloc(size, false, zero);
-			}
-		}
 		return item;
 	}
 
 	void* GC::AllocBlockNonIncremental(int size, bool zero)
 	{
-		MMGC_ASSERT_GC_LOCK(this);
-
-		void *item = heap->Alloc(size, false, zero);
-		if (!item) {
-			if (heap->GetTotalHeapSize() >= collectThreshold &&
-				allocsSinceCollect >= totalGCPages / kFreeSpaceDivisor) 
-			{
-				CollectWithBookkeeping(true, true);
-				item = heap->Alloc(size, false, zero);
-			}
+		void *item = heapAllocNoProfile(size, false, zero);
+		
+		if (item == NULL && policy.queryRunCollectionAfterAllocBlockFail()) {
+			Collect();
+			item = heapAllocNoProfile(size, false, zero);
 		}
+		
 		return item;
 	}
 
 	void GC::FreeBlock(void *ptr, uint32_t size)
 	{
-#ifdef MMGC_THREADSAFE
-		GCAssert(m_lock.IsHeld() || destroying
-				 || (m_gcRunning
-					 && m_exclusiveGCThread == GCThread::GetCurrentThread()));
-#endif
-		if(!collecting) {
-			allocsSinceCollect -= size;
-		}
-		totalGCPages -= size;
-		heap->Free(ptr);
+		heapFreeNoProfile(ptr);
 		UnmarkGCPages(ptr, size);
 	}
 
@@ -1218,7 +1145,6 @@ bail:
 
 	void GC::Mark(GCStack<GCWorkItem> &work)
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
 		while(work.Count()) {
 			MarkItem(work);
 		}
@@ -1226,7 +1152,6 @@ bail:
 
 	void GC::MarkGCPages(void *item, uint32_t numPages, int to)
 	{
-		USING_PAGE_MAP();
 		uintptr_t addr = (uintptr_t)item;
 		size_t shiftAmount=0;
 		unsigned char *dst = pageMap;
@@ -1254,7 +1179,7 @@ bail:
 
         uint32_t numPagesNeeded = (uint32_t)(((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1);
 		if(numPagesNeeded > heap->Size(pageMap)) {
-			dst = (unsigned char*)heap->Alloc(numPagesNeeded);
+			dst = (unsigned char*)heapAlloc(numPagesNeeded);
 		}
 
 		if(shiftAmount || dst != pageMap) {
@@ -1263,7 +1188,7 @@ bail:
 				VMPI_memset(dst, 0, shiftAmount);
 			}
 			if(dst != pageMap) {
-				heap->Free(pageMap);
+				heapFree(pageMap);
 				pageMap = dst;
 			}
 		}
@@ -1281,7 +1206,6 @@ bail:
 	{
 		uintptr_t addr = (uintptr_t) item;
 
-		USING_PAGE_MAP();
 		while(numpages--)
 		{
 			ClearPageMapValue(addr);
@@ -1291,6 +1215,8 @@ bail:
 
 	void GC::CleanStack(bool force)
 	{
+        (void)force;
+
 #if defined(_MSC_VER) && defined(_DEBUG)
 		// debug builds poison the stack already
 		(void)force;
@@ -1347,7 +1273,7 @@ bail:
     #endif
 #endif //MMGC_ARM
 
-		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)stackEnter > (char*)stackP)) {
+		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)rememberedStackBottom > (char*)stackP)) {
 			size_t amount = (char*) stackP - (char*)rememberedStackTop;
 			void *stack = alloca(amount);
 			if(stack) {
@@ -1380,14 +1306,6 @@ bail:
 
 	void GCRoot::init(GC* _gc, const void *_object, size_t _size)
 	{
-#ifndef _DEBUG
-		// only do the memset on GCRoot subclasses
-		if(_object == this) {
-			size_t s = _gc->GetGCHeap()->GetFixedMalloc()->Size(this);
-			// being a GCRoot its important we are clean
-			VMPI_memset(this, 0, s);
-		}
-#endif
 		gc = _gc;
 		object = _object;
 		size = _size;
@@ -1447,7 +1365,6 @@ bail:
 		gc = NULL;
 	}
 
-#ifndef MMGC_THREADSAFE
 	void GC::CheckThread()
 	{
 #ifdef _DEBUG
@@ -1456,24 +1373,22 @@ bail:
 #endif
 #endif
 	}
-#endif
 
 	bool GC::IsPointerToGCPage(const void *item)
 	{
-		USING_PAGE_MAP();
 		if((uintptr_t)item >= memStart && (uintptr_t)item < memEnd)
 			return GetPageMapValueAlreadyLocked((uintptr_t) item) != 0;
 		return false;
 	}
 
-  ZCT::ZCT()
+	ZCT::ZCT()
 	{
 		zctSize = ZCT_START_SIZE;
 		zctFreelist = NULL;
 		reaping = false;
-		gc = NULL;
 		count = 0;
-		zctReapThreshold = ZCT_REAP_THRESHOLD;
+		gc = NULL;				// will be set in SetGC
+		zctReapThreshold = 0;	// will be set in SetGC
 	}
 
 	ZCT::~ZCT()
@@ -1486,6 +1401,7 @@ bail:
 		this->gc = gc;
 		zct = (RCObject**) gc->heapAlloc(zctSize);
 		zctNext = zct;
+		zctReapThreshold = int(gc->policy.zctNewReapThreshold(zctSize, 0));
 	}
 
 	void ZCT::Add(RCObject *obj)
@@ -1506,14 +1422,8 @@ bail:
 		// note if we add things while reaping we could delete the object
 		// here if we had a way to monitor our stack usage
 		if(reaping && PLENTY_OF_STACK()) {
-			{
-				USING_CALLBACK_LIST(gc);
-				GCCallback *cb = gc->m_callbacks;
-				while(cb) {
-					cb->prereap(obj);
-					cb = cb->nextCB;
-				}
-			}
+			for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+				cb->prereap(obj);
 			if(gc->IsFinalized(obj))
 				((GCFinalizable*)obj)->~GCFinalizable();
 			gc->Free(obj);
@@ -1551,14 +1461,18 @@ bail:
 				Reap();
 		}
 
-		if(zctNext >= zct + zctSize*4096/sizeof(void *)) {
+		GCAssert(zctNext <= zct + zctSize*4096/sizeof(void *));
+		
+		if(zctNext == zct + zctSize*4096/sizeof(void *)) {
 			// grow 
-			RCObject **newZCT = (RCObject**) gc->heap->Alloc(zctSize*2);
+			// as long as the zct is one linear block the growth factor is for the policy code to decide
+			int newZctSize = (int)gc->policy.zctNewSize(zctSize);
+			RCObject **newZCT = (RCObject**) gc->heapAlloc(newZctSize);
 			VMPI_memcpy(newZCT, zct, zctSize*GCHeap::kBlockSize);
-			gc->heap->Free(zct);
+			gc->heapFree(zct);
 			zctNext = newZCT + (zctNext-zct);
 			zct = newZCT;	
-			zctSize *= 2;
+			zctSize = newZctSize;
 			GCAssert(!zctFreelist);
 		}
 	}
@@ -1664,9 +1578,7 @@ bail:
 		{
 			if(*p)
 			{
-#ifdef MMGC_MEMORY_INFO
-				PrintStackTrace(item);
-#endif
+				PrintAllocStackTrace(item);
 				GCAssertMsg(false, "RCObject didn't clean up itself.");
 			}
 		}	
@@ -1712,11 +1624,13 @@ bail:
 		if(gc->collecting || reaping || count == 0)
 			return;
 
+		gc->policy.signal(GCPolicyManager::START_ReapZCT);
+		
 		uint64_t start = 0;
 		if(gc->heap->Config().gcstats) {
 			start = VMPI_getPerformanceCounter();
 		}
-		uint32_t pagesStart = (uint32_t)gc->totalGCPages;
+		uint32_t pagesStart = (uint32_t)gc->GetNumBlocks();
 		uint32_t numObjects=0;
 		size_t objSize=0;
 
@@ -1729,16 +1643,12 @@ bail:
 		MMGC_GET_STACK_EXTENTS(gc, item.ptr, item._size);
 		PinStackObjects(item.ptr, item._size);
 
-#ifdef MMGC_RCROOT_SUPPORT
-		
 		GC::RCRootSegment* segment = gc->rcRootSegments;
 		while(segment)
 		{
 			PinStackObjects(segment->mem, segment->size);
 			segment = segment->next;
 		}
-		
-#endif // MMGC_RCROOT_SUPPORT
 
 		// important to do this before calling prereap
 		// use index to iterate in case it grows, as we go through the list we
@@ -1748,14 +1658,8 @@ bail:
 		nextPinnedIndex = 0;
 
 		// invoke prereap on all callbacks
-		{
-			USING_CALLBACK_LIST(gc);
-			GCCallback *cb = gc->m_callbacks;
-			while(cb) {
-				cb->prereap();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+			cb->prereap();
 
 #ifdef _DEBUG
 		if(gc->validateDefRef) {
@@ -1797,14 +1701,8 @@ bail:
 				}
 #endif
 				// invoke prereap on all callbacks
-				{
-					USING_CALLBACK_LIST(gc);
-					GCCallback *cbb = gc->m_callbacks;
-					while(cbb) {
-						cbb->prereap(rcobj);
-						cbb = cbb->nextCB;
-					}
-				}
+				for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+					cb->prereap(rcobj);
 
 				GCAssert(*(intptr_t*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
@@ -1828,24 +1726,17 @@ bail:
 		}
 
 		zctNext = zct + nextPinnedIndex;
-		zctReapThreshold = count + ZCT_REAP_THRESHOLD;
-		if(zctReapThreshold > int(zctSize*GCHeap::kBlockSize/sizeof(RCObject*)))
-			zctReapThreshold = zctSize*GCHeap::kBlockSize/sizeof(RCObject*);
+		zctReapThreshold = int(gc->policy.zctNewReapThreshold(zctSize, count));
 		GCAssert(nextPinnedIndex == count);
 		zctIndex = nextPinnedIndex = 0;
 
 		// invoke postreap on all callbacks
-		{
-			USING_CALLBACK_LIST(gc);
-			GCCallback *cb = gc->m_callbacks;
-			while(cb) {
-				cb->postreap();
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+			cb->postreap();
+
 		if(gc->heap->Config().gcstats && numObjects) {
 			gc->gclog("[mem] DRC reaped %d objects (%d kb) freeing %d pages (%d kb) in %.2f millis (%.4f s)\n", 
-				numObjects, objSize>>10, pagesStart - gc->totalGCPages, gc->totalGCPages*GCHeap::kBlockSize >> 10, 
+				numObjects, objSize>>10, pagesStart - gc->GetNumBlocks(), gc->GetNumBlocks()*GCHeap::kBlockSize >> 10, 
 				GC::duration(start), gc->duration(gc->t0)/1000);
 		}
 		reaping = false;
@@ -1855,7 +1746,149 @@ bail:
 			gc->Sweep();
 		}
 #endif
+		
+		gc->policy.signal(GCPolicyManager::END_ReapZCT);
 	}
+
+#ifdef WIN32
+
+	uintptr_t GC::GetStackTop() const
+	{
+		MEMORY_BASIC_INFORMATION __mib;
+		VirtualQuery(&__mib, &__mib, sizeof(MEMORY_BASIC_INFORMATION));
+		return (uintptr_t)__mib.BaseAddress + __mib.RegionSize;
+	}
+
+#elif defined(SOLARIS)
+
+#ifdef MMGC_SPARC
+#define FLUSHWIN() asm("ta 3"); 
+#else
+#define FLUSHWIN() 
+#endif
+#define MAX_FRAMES 500
+
+	static int validaddr(void * addr) 
+	{
+		static long pagemask = -1;
+		char c;
+		if (pagemask == -1) {
+			pagemask = ~(sysconf(_SC_PAGESIZE) - 1);
+		}
+		addr = (void *)((long)addr & pagemask);
+		if (mincore((char *)addr, 1, &c) == -1 && errno == ENOMEM) {
+			return 0;  /* invalid */
+		} else {
+			return 1;  /* valid */
+		}
+	}  /* end of validaddr */
+
+	pthread_key_t stackTopKey = NULL;
+
+	uintptr_t	GC::GetStackTop() const
+	{
+		if(stackTopKey == NULL)
+			{
+				int res = pthread_key_create(&stackTopKey, NULL);
+				GCAssert(res == 0);
+			}
+
+		void *stackTop = pthread_getspecific(stackTopKey);
+		if(stackTop)
+			return (uintptr_t)stackTop;
+
+		struct frame *sp;
+		int i;
+		int *iptr;
+
+		stack_t st;
+		stack_getbounds(&st);
+		uintptr_t stack_base = (uintptr_t)st.ss_sp + st.ss_size;
+
+		FLUSHWIN();
+
+		sp = (struct frame *)_getfp();
+		stackTop = (void *)sp;
+		for (i = 0; i < MAX_FRAMES && sp && (uintptr_t)sp < stack_base; i++) { 
+			if (!validaddr( sp ) || !validaddr(&sp->fr_savpc) || !sp->fr_savpc ) {
+				break;
+			}
+			stackTop = (void *)sp;
+			sp = ( struct frame * )sp->fr_savfp;
+		}
+		pthread_setspecific(stackTopKey, stackTop);
+		return (uintptr_t)stackTop;
+	}
+#elif defined(AVMPLUS_UNIX) // SOLARIS
+	pthread_key_t stackTopKey = 0;
+
+	uintptr_t GC::GetStackTop() const
+	{
+		if(stackTopKey == 0)
+		{
+#ifdef DEBUG		  
+			int res = 
+#endif
+			  pthread_key_create(&stackTopKey, NULL);
+			GCAssert(res == 0);
+		}
+
+		void *stackTop = pthread_getspecific(stackTopKey);
+		if(stackTop)
+			return (uintptr_t)stackTop;
+
+		size_t sz;
+		void *s_base;
+		pthread_attr_t attr;
+		
+		pthread_attr_init(&attr);
+		// WARNING: stupid expensive function, hence the TLS
+		int res = pthread_getattr_np(pthread_self(),&attr);
+		GCAssert(res == 0);
+		
+		if(res)
+		{
+			// not good
+			return 0;
+		}
+
+		res = pthread_attr_getstack(&attr,&s_base,&sz);
+		GCAssert(res == 0);
+		pthread_attr_destroy(&attr);
+
+		stackTop = (void*) ((size_t)s_base + sz);
+		// stackTop has to be greater than current stack pointer
+		GCAssert(stackTop > &sz);
+		pthread_setspecific(stackTopKey, stackTop);
+		return (uintptr_t)stackTop;
+		
+	}
+#endif // AVMPLUS_UNIX
+
+#if defined(MMGC_PORTING_API)
+uintptr_t	GC::GetStackTop() const
+{
+	return MMGC_PortAPI_GetStackTop();
+}
+#else
+#if defined(_MAC) || defined(MMGC_MAC_NO_CARBON)
+	uintptr_t GC::GetStackTop() const
+	{
+		return (uintptr_t)pthread_get_stackaddr_np(pthread_self());
+	}
+#endif
+
+#if defined(LINUX) && defined(MMGC_ARM) && !defined(AVMPLUS_UNIX)
+	uintptr_t GC::GetStackTop() const
+	{
+		void* sp;
+		pthread_attr_t attr;
+		pthread_getattr_np(pthread_self(), &attr);
+		pthread_attr_getstackaddr(&attr, &sp);
+		return (uintptr_t)sp;
+	}
+#endif
+#endif /*<<GC_PORTING_API*/
 
 	void GC::gclog(const char *format, ...)
 	{
@@ -1871,14 +1904,9 @@ bail:
 
 		GCAssert(VMPI_strlen(buf) < 4096);
 
-		{
-			USING_CALLBACK_LIST(this);
-			GCCallback *cb = m_callbacks;
-				if(cb) {
-				cb->log(buf);
-				cb = cb->nextCB;
-			}
-		}
+		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
+			cb->log(buf);
+
 		// log gross stats any time anything interesting happens
 		if(!ingclog) {
 			ingclog = true;
@@ -1905,7 +1933,7 @@ bail:
 		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, o);
 		if (proc)
 			proc(context, o, typeName);
-		PrintStackTrace(o);
+		PrintAllocStackTrace(o);
 		GCDebugMsg(false, "---\n");
 		// skip data + endMarker
 		p += 1 + (size>>2);
@@ -1916,7 +1944,7 @@ bail:
 		{
 			GCDebugMsg(false, "GCRoot object: 0x%x\n", container);
 			if((uintptr_t)container >= memStart && (uintptr_t)container < memEnd)
-				PrintStackTrace(container);
+				PrintAllocStackTrace(container);
 		}
 	}
 
@@ -1939,8 +1967,6 @@ bail:
 	{
 		int bits;
 		{
-			USING_PAGE_MAP();
-
 			if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item&0xfff) == 0)
 				return false;
 			bits = GetPageMapValueAlreadyLocked((uintptr_t)item);
@@ -1966,21 +1992,21 @@ bail:
 		int maxAlloc =  a->GetMaxAlloc()* a->GetItemSize();
 		int efficiency = maxAlloc > 0 ? inUse * 100 / maxAlloc : 100;
 		if(inUse) {
-			fprintf(heap->GetSpyFile(), "Allocator(%d): %d%% efficiency %d kb out of %d kb\n", a->GetItemSize(), efficiency, inUse>>10, maxAlloc>>10);
+			GCLog("Allocator(%d): %d%% efficiency %d kb out of %d kb\n", a->GetItemSize(), efficiency, inUse>>10, maxAlloc>>10);
 		}
 		return maxAlloc-inUse;
 	}
 
 	void GC::DumpMemoryInfo()
 	{
-		size_t total = totalGCPages * GCHeap::kBlockSize;
+		size_t total = GetNumBlocks() * GCHeap::kBlockSize;
 		heap->log_percentage("[mem] \tmanaged fragmentation ", total-GetBytesInUse(), total);
-		if(ticksToMillis(markTicks) != 0 && bytesMarked != 0) {
-			uint32_t markRate = (uint32_t) (bytesMarked / (1024 * ticksToMillis(markTicks))); // kb/ms == mb/s
-			fprintf(heap->GetSpyFile(),"[mem] \tmark rate %u mb/s\n", markRate);
+		if(ticksToMillis(markTicks()) != 0 && bytesMarked() != 0) {
+			uint32_t markRate = (uint32_t) (bytesMarked() / (1024 * ticksToMillis(markTicks()))); // kb/ms == mb/s
+			GCLog("[mem] \tmark rate %u mb/s\n", markRate);
 		}
-		fprintf(heap->GetSpyFile(),"[mem] \tmark increments %d\n", marks);
-		fprintf(heap->GetSpyFile(),"[mem] \tsweeps %d mb/s\n", sweeps);
+		GCLog("[mem] \tmark increments %d\n", marks());
+		GCLog("[mem] \tsweeps %d mb/s\n", sweeps);
 
 		int waste=0;
 		for(int i=0; i < kNumSizeClasses; i++)
@@ -1989,7 +2015,7 @@ bail:
 			waste += DumpAlloc(containsPointersRCAllocs[i]);
 			waste += DumpAlloc(noPointersAllocs[i]);
 		}
-		fprintf(heap->GetSpyFile(),"Wasted %d kb\n", waste>>10);
+		GCLog("Wasted %d kb\n", waste>>10);
 	}
 
 #ifdef _DEBUG
@@ -2057,8 +2083,6 @@ bail:
 
 	void GC::FindUnmarkedPointers()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		if(findUnmarkedPointers)
 		{
 			uintptr_t m = memStart;
@@ -2161,7 +2185,6 @@ bail:
 				}
 
 				int  taggedSize = *ptr;
-				int  traceIndex = *(ptr+1);
 				int* real = (ptr+2);
 
 				char* buffer = 0;
@@ -2170,11 +2193,7 @@ bail:
 				if (buffer) GCDebugMsg(false, buffer);
 				GCDebugMsg(false, "Location: 0x%08x  Object: 0x%08x (size %d)\n", where, real, taggedSize);
 				if (buffer) GCDebugMsg(false, buffer);
-#if 0
-				PrintStackTraceByIndex(traceIndex);
-#else
-				(void)traceIndex;
-#endif
+				PrintAllocStackTrace(real);
 
 				if (recurseDepth > 0)
 					WhosPointingAtMe(real, recurseDepth-1, currentDepth+1);
@@ -2192,11 +2211,6 @@ bail:
 	 */
 	void GC::WhosPointingAtMe(void* me, int recurseDepth, int currentDepth)
 	{
-#ifdef MMGC_THREADSAFE
-		if (currentDepth == 0)
-			pageMapLock.Acquire();
-#endif
-
 		uintptr_t val = (uintptr_t)me;
 		uintptr_t m = memStart;
 
@@ -2252,11 +2266,6 @@ bail:
 			
 			}
 		}
-
-#ifdef MMGC_THREADSAFE
-		if (currentDepth == 0)
-			pageMapLock.Release();
-#endif
 	}
 #undef ALLOCA_AND_FILL_WITH_SPACES
 #endif
@@ -2264,10 +2273,12 @@ bail:
 
 	void GC::StartIncrementalMark()
 	{
+		policy.signal(GCPolicyManager::START_StartIncrementalMark);		// garbage collection starts
+		
 		GCAssert(!marking);
 		GCAssert(!collecting);
 
-		lastStartMarkIncrementCount = markIncrements;
+		lastStartMarkIncrementCount = markIncrements();
 
 		// set the stack cleaning trigger
 		stackCleaned = false;
@@ -2276,8 +2287,6 @@ bail:
 
 		GCAssert(m_incrementalWork.Count() == 0);
 	
-		uint64_t start = VMPI_getPerformanceCounter();
-
 		// clean up any pages that need sweeping
 		for(int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->SweepNeedsSweeping();
@@ -2294,6 +2303,10 @@ bail:
 		}
 #endif
 	
+		// FIXME (policy): arguably a bug to allow MarkItem to go recursive here without checking for
+		// the time it takes.  Probably better just to push the roots and let IncrementalMark handle
+		// the marking.
+
 		{
 			MMGC_LOCK(m_rootListLock);
 			GCRoot *r = m_roots;
@@ -2304,7 +2317,12 @@ bail:
 				r = r->next;
 			}
 		}
-		markTicks += VMPI_getPerformanceCounter() - start;
+		
+		policy.signal(GCPolicyManager::END_StartIncrementalMark);
+		
+		// FIXME (policy): arguably a bug to do this here if StartIncrementalMark has exhausted its quantum
+		// doing eager sweeping.
+
 		IncrementalMark();
 	}
 
@@ -2482,8 +2500,7 @@ bail:
 			//shouldGo = NULL;
 		}
 #endif
-		bytesMarked += size;
-		marks++;
+		policy.signalMarkWork(size, 1);
 
 		uintptr_t *end = p + (size / sizeof(void*));
 		uintptr_t thisPage = (uintptr_t)p & ~0xfff;
@@ -2663,8 +2680,7 @@ bail:
 
 	void GC::IncrementalMark()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-		uint32_t time = incrementalValidation ? 1 : 5;
+		uint32_t time = incrementalValidation ? 1 : uint32_t(policy.incrementalMarkMilliseconds());
 #ifdef _DEBUG
 		time = 1;
 #endif
@@ -2675,7 +2691,8 @@ bail:
 			return;
 		} 
 		
-		markIncrements++;
+		policy.signal(GCPolicyManager::START_IncrementalMark);
+		
 		// FIXME: tune this so that getPerformanceCounter() overhead is noise
 		static unsigned int checkTimeIncrements = 100;
 		uint64_t start = VMPI_getPerformanceCounter();
@@ -2700,22 +2717,19 @@ bail:
 			SAMPLE_CHECK();
 		} while(VMPI_getPerformanceCounter() < ticks);
 
-		lastMarkTicks = VMPI_getPerformanceCounter();
-		markTicks += lastMarkTicks - start;
+		policy.signal(GCPolicyManager::END_IncrementalMark);
 
 		if(heap->Config().gcstats) {
 			double millis = duration(start);
 			size_t kb = objSize>>10;
 			gclog("[mem] mark(%d) %d objects (%d kb %d mb/s) in %.2f millis (%.4f s)\n", 
-				markIncrements-lastStartMarkIncrementCount, numObjects, kb, 
-				uint32_t(double(kb)/millis), millis, duration(t0)/1000);
+				  markIncrements() - lastStartMarkIncrementCount, numObjects, kb, 
+				  uint32_t(double(kb)/millis), millis, duration(t0)/1000);
 		}
 	}
 
 	void GC::FinishIncrementalMark()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		// Don't finish an incremental mark (i.e., sweep) if we
 		// are in the midst of a ZCT reap.
 		if (zct.reaping)
@@ -2730,6 +2744,8 @@ bail:
 		
 		// mark roots again, could have changed (alternative is to put WB's on the roots
 		// which we may need to do if we find FinishIncrementalMark taking too long)
+		
+		policy.signal(GCPolicyManager::START_FinalRootAndStackScan);
 		
 		{
 			MMGC_LOCK(m_rootListLock);
@@ -2747,12 +2763,15 @@ bail:
 		}
 		MarkQueueAndStack(m_incrementalWork);
 
+		policy.signal(GCPolicyManager::END_FinalRootAndStackScan);
+		
 #ifdef _DEBUG
 		// need to traverse all marked objects and make sure they don't contain
 		// pointers to unmarked objects
 		FindMissingWriteBarriers();
 #endif
 
+		policy.signal(GCPolicyManager::START_FinalizeAndSweep);
 		GCAssert(!collecting);
 		collecting = true;
 		GCAssert(m_incrementalWork.Count() == 0);
@@ -2760,6 +2779,7 @@ bail:
 		GCAssert(m_incrementalWork.Count() == 0);
 		collecting = false;
 		marking = false;
+		policy.signal(GCPolicyManager::END_FinalizeAndSweep);	// garbage collection is finished
 	}
 
 	int GC::IsWhite(const void *item)
@@ -2804,7 +2824,7 @@ bail:
 	}
 
 	// TODO: fix headers so this can be declared there and inlined
-	void GC::WriteBarrierWriteRC(const void *address, const void *value)
+	REALLY_INLINE void GC::WriteBarrierWriteRC(const void *address, const void *value)
 	{
 			RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
 			if(rc != NULL) {
@@ -2887,7 +2907,6 @@ bail:
 	{
 		uint32_t *bits;
 
-		MMGC_ASSERT_GC_LOCK(this);
 		GCAssert(numBytes % 4 == 0);
 
 		#ifdef MMGC_64BIT // we use first 8-byte slot for the free list
@@ -2904,7 +2923,7 @@ bail:
 		}
 
 		if(!m_bitsNext)
-			m_bitsNext = (uint32_t*)heap->Alloc(1);
+			m_bitsNext = (uint32_t*)heapAlloc(1);
 
 		int leftOver = GCHeap::kBlockSize - ((uintptr_t)m_bitsNext & 0xfff);
 		if(leftOver >= numBytes) {
@@ -2955,8 +2974,6 @@ bail:
 	
 	void GC::AddCallback(GCCallback *cb)
 	{
-		USING_CALLBACK_LIST(this);
-
 		cb->prevCB = NULL;
 		cb->nextCB = m_callbacks;
 		if(m_callbacks)
@@ -2966,8 +2983,6 @@ bail:
 
 	void GC::RemoveCallback(GCCallback *cb)
 	{
-		USING_CALLBACK_LIST(this);
-
 		if( m_callbacks == cb )
 			m_callbacks = cb->nextCB;
 		else
@@ -2991,9 +3006,6 @@ bail:
 	GCWeakRef* GC::GetWeakRef(const void *item) 
 	{
 		GC *gc = GetGC(item);
-#ifdef MMGC_THREADSAFE
-		GCAutoLock _lock(gc->m_lock);
-#endif
 		GCWeakRef *ref = (GCWeakRef*) gc->weakRefs.get(item);
 
 		if(ref == NULL) {
@@ -3028,8 +3040,7 @@ bail:
 		}
 	}
 
-#ifdef _DEBUG
-	
+#ifdef _DEBUG	
 	void GC::WhitePointerScan(const void *mem, size_t size)
 	{		
 		uintptr_t *p = (uintptr_t *) mem;
@@ -3045,12 +3056,10 @@ bail:
 			   *(((int32_t*)(val&~7))+1) != (int32_t)0xcacacaca && // Free'd
 			   *(((int32_t*)(val&~7))+1) != (int32_t)0xbabababa) // Swept
 			{
-#ifdef MMGC_MEMORY_INFO
 				GCDebugMsg(false, "Object 0x%x allocated here:\n", mem);
-				PrintStackTrace(mem);
+				PrintAllocStackTrace(mem);
 				GCDebugMsg(false, "Didn't mark pointer at 0x%x, object 0x%x allocated here:\n", p, val);
-				PrintStackTrace((const void*)(val&~7));
-#endif
+				PrintAllocStackTrace((const void*)(val&~7));
 				GCAssert(false);
 			}
 			p++;
@@ -3059,8 +3068,6 @@ bail:
 
 	void GC::FindMissingWriteBarriers()
 	{
-		MMGC_ASSERT_EXCLUSIVE_GC(this);
-
 		if(!incrementalValidation)
 			return;
 
@@ -3107,23 +3114,23 @@ bail:
 			}
 		}
 	}
-#endif
+#endif //_DEBUG
 
-	void *GC::heapAlloc(size_t siz, bool expand, bool zero)
+	void *GC::heapAlloc(size_t siz, bool expand, bool zero, bool internal)
 	{
-		void *ptr = heap->Alloc((int)siz, expand, zero);
+		void *ptr = heap->_Alloc((int)siz, expand, zero, internal);
 		if(ptr)
-			totalGCPages += siz;
+			policy.signalBlockAllocation(siz);
 		return ptr;
 	}
 	
-	void GC::heapFree(void *ptr, size_t siz)
+	void GC::heapFree(void *ptr, size_t siz, bool internal)
 	{
 		if(!siz)
 			siz = heap->Size(ptr);
-		totalGCPages -= siz;
-		heap->Free(ptr);
-	}	
+		policy.signalBlockDeallocation(siz);
+		heap->_Free(ptr, internal);
+	}
 	
 	size_t GC::GetBytesInUse()
 	{
@@ -3144,11 +3151,8 @@ bail:
 
 		if(pendingStatusChange)
 		{
-			{
-				USING_CALLBACK_LIST(this);
-				for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-					cb->oom(statusTo);
-			}
+			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
+				cb->oom(statusTo);
 			pendingStatusChange = false;
 		}
 	}

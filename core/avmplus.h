@@ -79,47 +79,8 @@
  * https://developer.mozilla.org/En/Tamarin
  */
  
-#include "VMPI.h"
-#include "avmbuild.h"
-
-#if defined(_MAC)
-#include <alloca.h>
-#endif
-
-#ifdef UNIX
-	#ifndef AVMPLUS_SYMBIAN
-		#include <stdint.h>
-	#endif
-	#ifdef HAVE_ALLOCA_H
-		#include <alloca.h>
-	#else // HAVE_ALLOCA_H
-		#include <stdlib.h>
-	#endif // HAVE_ALLOCA_H
-#endif // UNIX
-
-#ifdef WIN32
-	#include <windows.h>
-	#include <malloc.h>
-	#include <math.h>
-	#ifdef AVMPLUS_ARM
-		typedef unsigned int uintptr_t;
-	#else
-		#ifdef AVMPLUS_AMD64
-			#include <setjmpex.h>
-		#endif
-		// Newer versions of the Windows SDK set up the intrinsics slightly differently
-		// than VC8. Only include intrin.h if the SDK doesn't declare it.
-		#ifndef InterlockedBitTestAndSet
-			#include <intrin.h>
-		#endif
-		#include <emmintrin.h>
-		#ifdef VTUNE
-			#include "JITProfiling.h"
-		#endif
-	#endif // AVMPLUS_ARM
-#endif // WIN32
-
-#include "avmsetjmp.h"
+#include "VMPI.h"			// also includes avmfeatures.h
+#include "avmbuild.h"			// old-style configuration, may disappear, handles a few things not yet handled by the feature system
 
 #include "avmplusTypes.h"
 #include "avmplusVersion.h"
@@ -175,8 +136,9 @@ namespace avmplus
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
 	class FrameState;
-	class Hashtable;
+	class HeapHashtable;
 	class HeapMultiname;
+	class InlineHashtable;
 	class IntVectorObject;
 	class DoubleVectorObject;
 	class UIntVectorObject;
@@ -319,7 +281,9 @@ namespace avmplus
 #include "ObjectClass.h"
 #include "ErrorClass.h"
 #include "MathClass.h"
+#ifdef VMCFG_EVAL
 #include "eval-avmplus.h"
+#endif
 #include "Toplevel.h"
 #include "AbcParser.h"
 #include "RegExpObject.h"

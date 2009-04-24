@@ -45,7 +45,7 @@ namespace MMgc
 	/**
 	* simplified version of avmplus hashtable, doesn't shrink or handle deletions for instance
 	*/
-	class MMGC_API GCHashtable
+	class GCHashtable
 	{
 		friend class GCHashtableIterator;
 	public:

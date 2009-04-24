@@ -61,9 +61,9 @@ namespace avmshell
 		void sendHeapDump(String * /*heapDumpName*/) {}
 		int computeStringSize(String * /*myString*/) { return 0; }		
 
-		void sample(uint64 /*time*/, Stringp /*stackTrace*/) {}
-		void allocationSample(uint64 /*time*/, Stringp /*stackTrace*/, uint64 /*allocId*/, Stringp /*type*/) {}
-		void deallocationSample(uint64 /*time*/, uint64 /*id*/) {}
+		void sample(uint64_t /*time*/, Stringp /*stackTrace*/) {}
+		void allocationSample(uint64_t /*time*/, Stringp /*stackTrace*/, uint64_t /*allocId*/, Stringp /*type*/) {}
+		void deallocationSample(uint64_t /*time*/, uint64_t /*id*/) {}
 		void getMembers() {}
 
 	};

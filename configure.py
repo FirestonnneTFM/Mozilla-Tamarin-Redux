@@ -41,8 +41,11 @@
 # This script runs just like a traditional configure script, to do configuration
 # testing and makefile generation.
 
+import os
 import os.path
 import sys
+import build.process
+import re
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,6 +54,7 @@ sys.path.append(thisdir)
 
 from build.configuration import *
 import build.getopt
+import build.avmfeatures
 
 o = build.getopt.Options()
 
@@ -66,7 +70,7 @@ if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
 
-APP_CPPFLAGS = ""
+APP_CPPFLAGS = "-DAVMSHELL_BUILD "
 APP_CXXFLAGS = ""
 OPT_CXXFLAGS = "-O3 "
 OPT_CPPFLAGS = ""
@@ -75,16 +79,19 @@ DEBUG_CXXFLAGS = ""
 DEBUG_LDFLAGS = ""
 OS_LIBS = []
 OS_LDFLAGS = ""
-MMGC_CPPFLAGS = ""
+MMGC_CPPFLAGS = "-DAVMSHELL_BUILD "
 AVMSHELL_CPPFLAGS = ""
 AVMSHELL_LDFLAGS = ""
 MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 
-selfTest = o.getBoolArg("selftests", False)
-if selfTest:
-    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
+# See build/avmfeatures.py for the code that processes switches for
+# standard feature names.
+APP_CPPFLAGS += build.avmfeatures.featureSettings(o)
+
+if not o.getBoolArg("methodenv-impl32", True):
+    APP_CPPFLAGS += "-DVMCFG_METHODENV_IMPL32=0 "
 
 memoryProfiler = o.getBoolArg("memory-profiler", False)
 if memoryProfiler:
@@ -99,20 +106,28 @@ if MMGC_DYNAMIC:
     MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
 
-MMGC_THREADSAFE = o.getBoolArg('threadsafe-mmgc', False)
-if MMGC_THREADSAFE:
-    MMGC_DEFINES['MMGC_THREADSAFE'] = None
-    NSPR_INCLUDES = o.getStringArg('nspr-includes')
-    MMGC_CPPFLAGS += NSPR_INCLUDES + " "
-    APP_CPPFLAGS += NSPR_INCLUDES + " "
+the_os, cpu = config.getTarget()
 
-    NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
-    OS_LDFLAGS += " " + NSPR_LDOPTS
-
-os, cpu = config.getTarget()
-
+# For -Wreorder, see https://bugzilla.mozilla.org/show_bug.cgi?id=475750
 if config.getCompiler() == 'GCC':
-    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -fno-rtti -fno-exceptions "
+    if 'CXX' in os.environ:
+		rawver = build.process.run_for_output(['$CXX', '--version'])
+    else:
+		rawver = build.process.run_for_output(['gcc', '--version'])
+    vre = re.compile(".* ([3-9]\.[0-9]+\.[0-9]+)[ \n]")
+    ver = vre.match(rawver).group(1)
+    ver_arr = ver.split('.')
+    GCC_MAJOR_VERSION = int(ver_arr[0])
+    GCC_MINOR_VERSION = int(ver_arr[1])
+    #  can't enable -Werror for gcc prior to 4.3 due to unavoidable "clobbered" warnings in Interpreter.cpp
+	# warnings have been updated to try to include all those enabled by current Flash/AIR builds -- disable with caution, or risk integration pain
+    APP_CXXFLAGS = "-Wall -Wcast-align -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof -Wno-switch -Wparentheses -Wpointer-arith -Wreorder -Wsign-compare -Wunused-parameter -Wwrite-strings -Wno-ctor-dtor-privacy -Woverloaded-virtual -Wsign-promo -Wno-char-subscripts -fmessage-length=0 -fno-exceptions -fno-rtti -fno-check-new -fstrict-aliasing -fsigned-char  "
+    if GCC_MAJOR_VERSION >= 4:
+        APP_CXXFLAGS += "-Wstrict-null-sentinel "
+        if GCC_MAJOR_VERSION == 4 and GCC_MINOR_VERSION <= 2: # 4.0 - 4.2
+            APP_CXXFLAGS += "-Wstrict-aliasing=0 "
+        else: # gcc 4.3 or later
+            APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
     if config.getDebug():
         APP_CXXFLAGS += ""
     else:
@@ -155,25 +170,30 @@ else:
     AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,z)'
 
 
-if os == "darwin":
-    AVMSHELL_LDFLAGS += " -exported_symbols_list "  + thisdir + "/platform/mac/shell/exports.exp"
+if the_os == "darwin":
+    AVMSHELL_LDFLAGS += " -exported_symbols_list "  + thisdir + "/platform/mac/avmshell/exports.exp"
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
                          '_MAC': None,
                          'AVMPLUS_MAC': None,
                          'TARGET_RT_MAC_MACHO': 1})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
-    if cpu == 'x86_64' or cpu == 'ppc64' or o.getBoolArg("leopard"):
-        # use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling
-        # us to build with gcc4.2 (which requires the 10.5 sdk), since it has a slightly different
-        # set of error & warning sensitivities. Note that we don't override CC/CXX here, the calling script
-        # is expected to do that if desired (thus we can support 10.5sdk with either 4.0 or 4.2)
+    if cpu == 'x86_64' or cpu == 'ppc64':
+        # 64-bit mac targets require the 10.5 sdk.
+        # Note that we don't override CC/CXX here; the calling script is expected to do that if desired 
+        # (thus we can support 10.5sdk with either 4.0 or 4.2)
         APP_CXXFLAGS += "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk "
         config.subst("MACOSX_DEPLOYMENT_TARGET",10.5)
+        if cpu == 'x86_64':
+            APP_CXXFLAGS += "-arch x86_64 "
+            OS_LDFLAGS += "-arch x86_64 "
+        else:
+            APP_CXXFLAGS += "-arch ppc64 "
+            OS_LDFLAGS += "-arch ppc64 "
     else:
         APP_CXXFLAGS += "-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
         config.subst("MACOSX_DEPLOYMENT_TARGET",10.4)
-elif os == "windows" or os == "cygwin":
+elif the_os == "windows" or the_os == "cygwin":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
     OS_LDFLAGS += "-MAP "
@@ -184,20 +204,18 @@ elif os == "windows" or os == "cygwin":
         APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
         OS_LIBS.append('winmm')
         OS_LIBS.append('shlwapi')
-elif os == "linux":
+        OS_LIBS.append('AdvAPI32')
+elif the_os == "linux":
     MMGC_DEFINES.update({'UNIX': None,
                          'AVMPLUS_UNIX': None,
                          'LINUX': None})
     OS_LIBS.append('pthread')
-    APP_CPPFLAGS += '-DAVMPLUS_CDECL '
     if cpu == "x86_64":
         # workaround https://bugzilla.mozilla.org/show_bug.cgi?id=467776
         OPT_CXXFLAGS += '-fno-schedule-insns2 '
-        # these warnings are too noisy
-        APP_CXXFLAGS += ' -Wno-parentheses -Wno-c++0x-compat -Wno-empty-body '
     if config.getDebug():
         OS_LIBS.append("dl")
-elif os == "sunos":
+elif the_os == "sunos":
     if config.getCompiler() != 'GCC':
         APP_CXXFLAGS = ""
         OPT_CXXFLAGS = "-xO5 "
@@ -213,7 +231,7 @@ else:
     raise Exception("Unsupported OS")
 
 if cpu == "i686":
-    if config.getCompiler() == 'GCC' and os == 'darwin':
+    if config.getCompiler() == 'GCC' and the_os == 'darwin':
         #only mactel always has sse2
         APP_CPPFLAGS += "-msse2 "
 elif cpu == "powerpc":
@@ -233,23 +251,8 @@ elif cpu == "arm":
 else:
     raise Exception("Unsupported CPU")
 
-if o.getBoolArg("selftests"):
-    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
-
-if o.getBoolArg("debugger"):
-    APP_CPPFLAGS += "-DDEBUGGER "
-
 if o.getBoolArg('perfm'):
     APP_CPPFLAGS += "-DPERFM "
-    
-if o.getBoolArg('disable-nj'):
-    APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
-
-if o.getBoolArg('abc-interp'):
-    APP_CPPFLAGS += '-DAVMPLUS_ABC_INTERPRETER '
-
-if o.getBoolArg('selftest'):
-    APP_CPPFLAGS += '-DAVMPLUS_SELFTEST '
 
 # We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))

@@ -3212,7 +3212,7 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
    				}
 			}
-          while (++eptr < md->end_subject && (*eptr & 0xc0) == 0x80);
+          while (++eptr < md->end_subject && (*eptr & 0xc0) == 0x80){}
           }
         break;
 
@@ -3246,7 +3246,7 @@ for (;;)
           if (eptr >= md->end_subject ||
              (*eptr < 128 && (md->ctypes[*eptr] & ctype_word) != 0))
             RRETURN(MATCH_NOMATCH);
-          while (++eptr < md->end_subject && (*eptr & 0xc0) == 0x80);
+          while (++eptr < md->end_subject && (*eptr & 0xc0) == 0x80){}
           }
         break;
 

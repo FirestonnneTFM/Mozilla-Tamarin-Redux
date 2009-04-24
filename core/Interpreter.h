@@ -41,17 +41,19 @@
 namespace avmplus
 {
 	/**
-	 * interp32/N() is the main loop of the AVM+ interpreter.
+	 * interpFPR/GPR() are stubs wrapping the main loop of the AVM+
+	 * interpreter: interpBoxed().
 	 *
 	 * The native code compiler is used by default
 	 * for executing AVM+ bytecode, since it is faster by
 	 * nature, but the AVM+ interpreter is used in some cases:
 	 *
-	 * - It is used to execute AVM+ code when the turbo flag is
+	 * - It is used to execute AVM+ code when the jit flag is
 	 *   set to false (-Dinterp in command-line shell)
-	 * - It is also used when a debug session is in progress.
 	 * - It is used when the target platform does not support
 	 *   the native code compiler.
+	 * - Used by default when the method is not likely to run
+	 *   more than once. e.g. script and static-init methods.
 	 *
 	 * @param methodEnv   The method to execute.
 	 * @param argc number of args
@@ -59,12 +61,12 @@ namespace avmplus
 	 * @return The return value of the method that was executed.
 	 * @throws Exception if the method throws an exception.
 	 */
-	Atom interp32(MethodEnv* method, int argc, uint32 *ap);		// does not actually return an atom!
-	double interpN(MethodEnv* method, int argc, uint32 *ap);
+	uintptr_t interpGPR(MethodEnv* method, int argc, uint32 *ap); // returns Atom, int/uint, or a pointer
+	double interpFPR(MethodEnv* method, int argc, uint32 *ap); // really returns double
 	// note, the MethodSignature passed in *must* correspond to method->method->getMethodSignature --
 	// it is an argument because all callers already have the correct MethodSignature available
 	// and it makes a significant speed difference in interp mode (vs re-grabbing from the cache)
-	Atom interpA(MethodEnv* method, int argc, Atom* ap, MethodSignaturep ms);	// actually returns an atom!
+	Atom interpBoxed(MethodEnv* method, int argc, Atom* ap, MethodSignaturep ms);	// actually returns an atom!
 #ifdef AVMPLUS_DIRECT_THREADED
 	void** interpGetOpcodeLabels();
 #endif

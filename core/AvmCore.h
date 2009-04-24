@@ -139,6 +139,30 @@ const int kBufferPadding = 16;
 	{
 	public:
 		/**
+		 * Default values for the config parameters.  These need to be visible, because
+		 * the shell's command line parsing needs to know what they are.  Presumably
+		 * other host environments might find them useful too.
+		 *
+		 * These are not conditionally included because the resulting code is a mess
+		 * at no benefit.
+		 */
+		static const bool verbose_default;
+		static const bool verbose_addrs_default;
+		static const bool methodNames_default;
+		static const bool oldVectorMethodNames_default;
+		static const bool verifyall_default;
+		static const bool show_stats_default;
+		static const bool tree_opt_default;
+		static const bool verbose_live_default;
+		static const bool verbose_exits_default;
+		static const Runmode runmode_default;
+		static const bool cseopt_default;
+		static const bool bbgraph_default;
+		static const bool sse2_default;
+		static const bool interrupts_default;
+		
+	public:
+		/**
 		 * The console object.  Text to be displayed to the developer
 		 * or end-user can be directed to console, much like the cout
 		 * object in C++ iostreams.
@@ -573,16 +597,16 @@ const int kBufferPadding = 16;
 		}
 
 #if defined FEATURE_NANOJIT
-		static Binding makeITrampBinding(uintptr_t id)
+		static Binding makeITrampBinding(MethodInfo* mi)
 		{
-			AvmAssert((id&7)==0); // addr must be 8-aligned
-			return Binding(id | BKIND_ITRAMP);
+			AvmAssert(mi != 0 && (uintptr_t(mi)&7)==0); // addr must be 8-aligned
+			return Binding(uintptr_t(mi) + BKIND_ITRAMP);
 		}
 
-		static void* getITrampAddr(Binding b)
+		static MethodInfo* getITrampAddr(Binding b)
 		{
 			AvmAssert(bindingKind(b) == BKIND_ITRAMP);
-			return (void*)(uintptr_t(b) & ~7);
+			return (MethodInfo*)(uintptr_t(b) - BKIND_ITRAMP);
 		}
 #endif
 
@@ -654,13 +678,6 @@ const int kBufferPadding = 16;
 # endif
 		static void formatMultiname(PrintWriter& out, uint32 index, PoolObject* pool);
 #endif
-
-		/**
-		 * The resources table tracks what ABC's have been
-		 * decoded, and avoids decoding the same one multiple
-		 * times.
-		 */
-		Hashtable *resources;
 
 		/**
 		 * @name interned constants
@@ -1306,7 +1323,7 @@ const int kBufferPadding = 16;
 		Stringp _typeof (Atom arg);
 
 		/** The XML entities table, used by E4X */
-		Hashtable *xmlEntities;
+		HeapHashtable* xmlEntities;
 		
 	private:
 		static bool isBuiltinType(Atom atm, BuiltinType bt);
@@ -1364,7 +1381,7 @@ const int kBufferPadding = 16;
 			return (ScriptObject*)(atom&~7);
 		}
 	
-		// helper function, allows generic objects to work with Hashtable
+		// helper function, allows generic objects to work with InlineHashtable
 		// and AtomArray, uses double type which is the only non-RC
 		// GCObject type
 		static Atom gcObjectToAtom(const void* obj);
@@ -1497,18 +1514,6 @@ const int kBufferPadding = 16;
 		// hash set containing namespaces
 		DRC(Namespacep) * namespaces;
 
-#ifdef AVMPLUS_INTERNINT_CACHE
-		// See code in AvmCore::internInt
-		// cache of interned names of nonnegative integers (numeric value % 256)
-		class IndexString : public MMgc::GCObject {
-		public:
-			int value;
-			DRCWB(Stringp) string;
-		};
-		
-		IndexString* index_strings[256];
-#endif
-		
 #ifdef AVMPLUS_WORD_CODE
 	private:
 		// Saturating counter.  

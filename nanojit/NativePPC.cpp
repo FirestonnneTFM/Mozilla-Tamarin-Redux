@@ -36,18 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifdef _MAC
-// for MakeDataExecutable
-#include <CoreServices/CoreServices.h>
-#endif
-
 #include "nanojit.h"
-
-#if defined AVMPLUS_UNIX || defined AVMPLUS_MAC
-#include <sys/mman.h>
-#include <errno.h>
-#include <stdlib.h>
-#endif
 
 #if defined FEATURE_NANOJIT && defined NANOJIT_PPC
 
@@ -123,16 +112,6 @@ namespace nanojit
 		STP(FP, cr_offset, SP); // cheat and save our FP in linkage.cr
 		STP(R0, lr_offset, SP); // save LR in linkage.lr
 		MFLR(R0);
-
-		// pad start addr to 8byte
-		if (intptr_t(_nIns) & 7) {
-		#if PEDANTIC && defined NANOJIT_64BIT
-			// br_size == 7, 7+nop = 8, so we need 2 nops
-			underrunProtect(8);
-			NOP();
-		#endif
-			NOP();
-		}
 
 		return patchEntry;
 	}
@@ -783,12 +762,13 @@ namespace nanojit
         else if (sz == ARGSIZE_F) {
 			Reservation* rA = getresv(p);
 			if (rA) {
-				if (rA->reg == UnknownReg) {
+				if (rA->reg == UnknownReg || !IsFpReg(rA->reg)) {
 					// load it into the arg reg
 					int d = findMemFor(p);
 					LFD(r, d, FP);
 				} else {
 					// it must be in a saved reg
+					NanoAssert(IsFpReg(r) && IsFpReg(rA->reg));
 					FMR(r, rA->reg);
 				}
 			} 

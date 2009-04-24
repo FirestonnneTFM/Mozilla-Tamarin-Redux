@@ -511,8 +511,6 @@ private:
 		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
 		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
 
-		// Check for strings with a length of 0 or 1, and return an appropriate string if possible.
-		static	Stringp FASTCALL	checkForTinyStrings(AvmCore* core, const char* buffer, int32_t len, Width w);
 		// Create a string with no buffer.
 		static	Stringp	FASTCALL	createDependent(MMgc::GC* gc, Stringp master, int32_t start, int32_t len);
 		// Create a string with a dynamic buffer.

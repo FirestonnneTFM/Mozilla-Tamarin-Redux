@@ -41,7 +41,7 @@ namespace avmplus
 {
 	ScriptObject::ScriptObject(VTable *vtable,
 							   ScriptObject *delegate,
-	                           int capacity /*=Hashtable::kDefaultCapacity*/)
+	                           int capacity /*=InlineHashtable::kDefaultCapacity*/)
 		: 
 #ifdef DEBUGGER 
 			AvmPlusScriptableObject((Atom)vtable), 
@@ -61,7 +61,7 @@ namespace avmplus
 		{
 			MMGC_MEM_TYPE(this);
 			getTable()->initialize(this->gc(), capacity);
-			getTable()->setDontEnumSupport(true);
+			getTable()->setDontEnumSupport();
 		}
 	}
 
@@ -100,10 +100,10 @@ namespace avmplus
 			const ScriptObject *o = this;
 			do
 			{
-				Hashtable *table = o->getTable();
-				const Atom *atoms = table->getAtoms();
-				int i = table->find(name, atoms, table->getNumAtoms());
-				if (atoms[i] != Hashtable::EMPTY)
+				InlineHashtable *table = o->getTable();
+				const Atom* atoms = table->getAtoms();
+				int i = table->find(name, atoms, table->getCapacity());
+				if (atoms[i] != InlineHashtable::EMPTY)
 					return atoms[i+1];
 			}
 			while ((o = o->delegate) != NULL);
@@ -126,9 +126,9 @@ namespace avmplus
 			}
 			do
 			{
-				Atom *atoms = o->getTable()->getAtoms();
-				int i = o->getTable()->find(searchname, atoms, o->getTable()->getNumAtoms());
-				if (atoms[i] != Hashtable::EMPTY)
+				const Atom* atoms = o->getTable()->getAtoms();
+				int i = o->getTable()->find(searchname, atoms, o->getTable()->getCapacity());
+				if (atoms[i] != InlineHashtable::EMPTY)
 					return atoms[i+1];
 			}
 			while ((o = o->delegate) != NULL);
@@ -311,10 +311,10 @@ namespace avmplus
 				const ScriptObject *o = this;
 				do
 				{
-					Hashtable *table = o->getTable();
-					const Atom *atoms = table->getAtoms();
-					int i = table->find(name, atoms, table->getNumAtoms());
-					if (atoms[i] != Hashtable::EMPTY)
+					InlineHashtable *table = o->getTable();
+					const Atom* atoms = table->getAtoms();
+					int i = table->find(name, atoms, table->getCapacity());
+					if (atoms[i] != InlineHashtable::EMPTY)
 						return atoms[i+1];
 				}
 				while ((o = o->delegate) != NULL);
@@ -646,10 +646,11 @@ namespace avmplus
 		AvmAssert(traits()->needsHashtable());
 		AvmAssert(index > 0);
 
-		Hashtable *ht = getTable();
-		if (index-1 >= ht->getNumAtoms()/2)
+		InlineHashtable *ht = getTable();
+		if (uint32_t(index)-1 >= ht->getCapacity()/2)
 			return nullStringAtom;
-		Atom m = ht->getAtoms()[(index-1)<<1] & ~ht->dontEnumMask();
+		const Atom* atoms = ht->getAtoms();
+		Atom m = ht->removeDontEnumMask(atoms[(index-1)<<1]);
 		if (AvmCore::isNullOrUndefined(m))
 			return nullStringAtom;
 		return m;
@@ -660,13 +661,14 @@ namespace avmplus
 		AvmAssert(traits()->needsHashtable());
 		AvmAssert(index > 0);
 
-		Hashtable *ht = getTable();
-		if (index-1 >= ht->getNumAtoms()/2)
+		InlineHashtable *ht = getTable();
+		if (uint32_t(index)-1 >= ht->getCapacity()/2)
 			return undefinedAtom;
-		Atom m = ht->getAtoms()[(index-1)<<1] & ~ht->dontEnumMask();
+		const Atom* atoms = ht->getAtoms();
+		Atom m = ht->removeDontEnumMask(atoms[(index-1)<<1]);
 		if (AvmCore::isNullOrUndefined(m))
 			return nullStringAtom;
-		return getTable()->getAtoms()[((index-1)<<1)+1];
+		return atoms[((index-1)<<1)+1];
 	}
 
 	int ScriptObject::nextNameIndex(int index)
@@ -681,12 +683,12 @@ namespace avmplus
 			index = index<<1;
 		}
 		// Advance to first non-empty slot.
-		Hashtable* table = getTable();
-		int numAtoms = table->getNumAtoms();
-		int dontEnumMask = table->dontEnumMask();
+		InlineHashtable* table = getTable();
+		const Atom* atoms = table->getAtoms();
+		int numAtoms = table->getCapacity();
 		while (index < numAtoms) {
-			Atom m = table->getAtoms()[index];
-			if (m != 0 && m != undefinedAtom && (m & dontEnumMask) != Hashtable::kDontEnumBit)
+			Atom m = atoms[index];
+			if (table->enumerable(m))
 				return (index>>1)+1;
 			index += 2;
 		}
@@ -724,11 +726,10 @@ namespace avmplus
 #ifdef DEBUGGER
 	uint64 ScriptObject::size() const
 	{
-		uint32 size = traits()->getTotalSize();
+		uint64 size = traits()->getTotalSize();
 		if(traits()->needsHashtable())
 		{
-			Hashtable *ht = getTable();
-			size += ht->getSize() * 2 * sizeof(Atom);
+			size += getTable()->size();
 		}
 		size -= sizeof(AvmPlusScriptableObject);
 		return size;

@@ -106,16 +106,74 @@ namespace avmshell
 		virtual ~ShellCodeContext() {}
 		virtual DomainEnv *domainEnv() const { return m_domainEnv; }
 	};
+
+	// swf support, impl code in swf.cpp
+	bool isSwf(ScriptBuffer);
+	void handleSwf(const char *, ScriptBuffer, DomainEnv*, Toplevel*&, CodeContext*);
+
 	
-	/**
-	 * A command-line shell around the avmplus core.  This can be
-	 * used to execute and debug .abc files from the command line.
-	 */
-	class Shell : public AvmCore
+	// Structure for command line arguments.
+
+	struct ShellSettings 
 	{
+		ShellSettings();
+		int filenamesPos;
+		int endFilenamePos;
+		bool nodebugger;
+		bool do_repl;
+		bool do_log;
+		bool do_verbose;	// copy to config
+		bool enter_debugger_on_launch;
+		bool do_selftest;
+		const char* st_component;
+		const char* st_category;
+		const char* st_name;
+		char st_mem[200];		// Ought to be enough for anyone
+		AvmCore::CacheSizes cacheSizes;	// defaults to unlimited
+		int numthreads;
+		int numworkers;
+		bool interrupts;	// copy to config
+		bool verifyall;		// copy to config
+		bool sse2;			// copy to config
+		bool greedy;		// copy to each GC
+		bool nogc;			// copy to each GC
+		bool incremental;	// copy to each GC
+		int langID;			// copy to ShellCore?
+		bool bbgraph;		// copy to config
+		bool cseopt;		// copy to config
+		Runmode runmode;	// copy to config
+		bool do_projector;
+	};
+
+	class ShellCore;
+
+	/**
+	 * Shell driver and command line parser.
+	 */
+	class Shell {
 	public:
 		static int run(int argc, char *argv[]);
 
+	private:
+		static void repl(ShellCore* shellCore);
+		static void initializeLogging(const char* basename);
+		static void parseCommandLine(int argc, char* argv[], ShellSettings& settings);
+		static void usage();
+	};
+	
+	
+	/**
+	 * A structure around the avmplus core.  This can be used to execute and debug .abc files
+	 * from the command line, by help from the Shell driver.
+	 */
+	class ShellCore : public AvmCore
+	{
+	friend class Shell;
+	public:
+		bool setup(int argc, char *argv[], ShellSettings& settings);
+		int execute(const char* filename, ShellSettings& settings);
+		void executeProjector(char *executablePath, int& exitCode);
+		
 		void interrupt(MethodEnv *env);
 		void stackOverflow(MethodEnv *env);
 
@@ -128,16 +186,15 @@ namespace avmshell
 		PoolObject* shellPool;
 
 	protected:
-		Shell(MMgc::GC *gc);
+		ShellCore(MMgc::GC *gc);
 		
 		void initShellPool();
-		void usage();
-
-		bool executeProjector(int argc, char *argv[], int& exitCode);
 
 		static void interruptTimerCallback(void* data);
+		
+		int handleArbitraryExecutableContent(ScriptBuffer& code, const char * filename);
 #ifdef VMCFG_EVAL
-		void repl(Toplevel* toplevel, DomainEnv* domainEnv);
+		void evaluateAtToplevel(String* input, bool record_time);
 		String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
 		virtual String* readFileForEval(String* referencing_filename, String* filename);
 #endif // VMCFG_EVAL
@@ -147,25 +204,27 @@ namespace avmshell
 		bool gracePeriod;
 		bool inStackOverflow;
 		int allowDebugger;
-
-		int execute(int argc, char *argv[]);
-		
-	#ifdef DEBUGGER
+		Toplevel* shell_toplevel;
+		Domain* shell_domain;
+		DomainEnv* shell_domainEnv;
+	
+#ifdef DEBUGGER
 	protected:
 		virtual avmplus::Debugger* createDebugger() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) DebugCLI(this) : NULL; }
 		virtual avmplus::Profiler* createProfiler() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) Profiler(this) : NULL; }
 	private:
 		inline DebugCLI* debugCLI() { return (DebugCLI*)debugger(); }
-	#endif
+#endif
 	};
+
 
 	class ShellToplevel : public Toplevel
 	{
 	public:
 		ShellToplevel(AbcEnv* abcEnv);
 
-		Shell* core() const {
-			return (Shell*)Toplevel::core();
+		ShellCore* core() const {
+			return (ShellCore*)Toplevel::core();
 		}
 
 		virtual ClassClosure *getBuiltinExtensionClass(int class_id) 

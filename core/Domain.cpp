@@ -38,12 +38,6 @@
 
 #include "avmplus.h"
 
-#ifdef SOLARIS
-typedef caddr_t maddr_ptr;
-#else
-typedef void *maddr_ptr;
-#endif
-
 namespace avmplus
 {
 	Domain::Domain(AvmCore *_core, Domain* base) : base(base)
@@ -182,10 +176,6 @@ namespace avmplus
 		refs->refs[mod] = sizeRef;
 		m_gmInfo.globalMemorySizeRefNum++;
 	}
-
-	#if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)) && !defined(AVMPLUS_SYMBIAN)
-	#include <sys/mman.h>
-	#endif
 
 	// junk to toggle protection on code while
 	// updating global memory stuff

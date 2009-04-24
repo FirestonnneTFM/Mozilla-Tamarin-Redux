@@ -430,7 +430,7 @@ namespace avmplus
 	{
 		toplevel()->vectorClass = this;
 		prototype = toplevel()->objectClass->construct();
-		instantiated_types = new (core()->GetGC(), 0)Hashtable(core()->GetGC());
+		instantiated_types = new (core()->GetGC(), 0) HeapHashtable(core()->GetGC());
 	}
 
 	/*static*/ Stringp VectorClass::makeVectorClassName(AvmCore* core, Traits* t)

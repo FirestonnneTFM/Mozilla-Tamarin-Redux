@@ -45,14 +45,12 @@ MMgc_BUILD_ALL = 1
 MMgc_EXTRA_CPPFLAGS += $(MMGC_CPPFLAGS)
 
 MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
-  $(curdir)/MMgc.cpp \
   $(curdir)/FixedAlloc.cpp \
   $(curdir)/FixedMalloc.cpp \
   $(curdir)/GC.cpp \
   $(curdir)/GCAlloc.cpp \
   $(curdir)/GCAllocObject.cpp \
   $(curdir)/GCDebug.cpp \
-  $(curdir)/GCGlobalNew.cpp \
   $(curdir)/GCHashtable.cpp \
   $(curdir)/GCHeap.cpp \
   $(curdir)/GCLargeAlloc.cpp \

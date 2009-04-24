@@ -48,16 +48,16 @@ namespace avmshell
 		ByteArray(const ByteArray &lhs);
 		~ByteArray();
 
-		U8 operator [] (uint32 index) const;
-		U8& operator [] (uint32 index);
+		U8 operator [] (uint32_t index) const;
+		U8& operator [] (uint32_t index);
 		void Push(U8 value);
-		void Push(const U8 *buffer, uint32 count);
-		uint32 GetLength() const { return m_length; }
-		void SetLength(uint32 newLength);
-		bool Grow(uint32 newCapacity);
+		void Push(const U8 *buffer, uint32_t count);
+		uint32_t GetLength() const { return m_length; }
+		void SetLength(uint32_t newLength);
+		bool Grow(uint32_t newCapacity);
 		U8 *GetBuffer() const { return m_array; }
 
- 		typedef void (Domain::*GlobalMemoryNotifyFunc)(unsigned char *, uint32) const;
+ 		typedef void (Domain::*GlobalMemoryNotifyFunc)(unsigned char *, uint32_t) const;
  
  		bool GlobalMemorySubscribe(const Domain *subscriber, GlobalMemoryNotifyFunc notify);
  		bool GlobalMemoryUnsubscribe(const Domain *subscriber);
@@ -87,8 +87,8 @@ namespace avmshell
  		void NotifySubscribers();
 		void ThrowMemoryError();
 
-		uint32 m_capacity;
-		uint32 m_length;
+		uint32_t m_capacity;
+		uint32_t m_length;
 		U8 *m_array;
 
 		enum { kGrowthIncr = 4096 };
@@ -103,15 +103,15 @@ namespace avmshell
 			m_filePointer = 0; 
 		}
 
-		uint32 GetFilePointer() { return m_filePointer; }
-		void Seek(uint32 filePointer) { m_filePointer = filePointer; }
-		void SetLength(uint32 newLength);
-		uint32 Available();
-		void Read(void *buffer, uint32 count);
-		void Write(const void *buffer, uint32 count);
+		uint32_t GetFilePointer() { return m_filePointer; }
+		void Seek(uint32_t filePointer) { m_filePointer = filePointer; }
+		void SetLength(uint32_t newLength);
+		uint32_t Available();
+		void Read(void *buffer, uint32_t count);
+		void Write(const void *buffer, uint32_t count);
 		
 	private:
-		uint32 m_filePointer;
+		uint32_t m_filePointer;
 	};
 	
 	class ByteArrayObject : public ScriptObject
@@ -123,17 +123,17 @@ namespace avmshell
 	
 		void checkNull(void *instance, const char *name);
 
-		uint32 getLength() { return m_byteArray.GetLength(); }
-		void setLength(uint32 newLength);
+		uint32_t getLength() { return m_byteArray.GetLength(); }
+		void setLength(uint32_t newLength);
 
 		virtual bool hasAtomProperty(Atom name) const;
 		virtual void setAtomProperty(Atom name, Atom value);
 		virtual Atom getAtomProperty(Atom name) const;
-		virtual Atom getUintProperty(uint32 i) const;
-		virtual void setUintProperty(uint32 i, Atom value);
+		virtual Atom getUintProperty(uint32_t i) const;
+		virtual void setUintProperty(uint32_t i, Atom value);
 
-		void readBytes(ByteArrayObject *bytes, uint32 offset, uint32 length);
-		void writeBytes(ByteArrayObject *bytes, uint32 offset, uint32 length);
+		void readBytes(ByteArrayObject *bytes, uint32_t offset, uint32_t length);
+		void writeBytes(ByteArrayObject *bytes, uint32_t offset, uint32_t length);
 
 		String* _toString();
 
@@ -145,7 +145,7 @@ namespace avmshell
 		void writeByte(int value);
 		void writeShort(int value);
 		void writeInt(int value);
-		void writeUnsignedInt(uint32 value);
+		void writeUnsignedInt(uint32_t value);
 		void writeFloat(double value);
 		void writeDouble(double value);
 		void writeUTF(String *value);
@@ -157,11 +157,11 @@ namespace avmshell
 		int readShort();
 		int readUnsignedShort();
 		int readInt();
-		uint32 readUnsignedInt();
+		uint32_t readUnsignedInt();
 		double readFloat();
 		double readDouble();
 		String* readUTF();
-		String* readUTFBytes(uint32 length);		
+		String* readUTFBytes(uint32_t length);		
 		
 		int get_bytesAvailable();
 		int get_position();
@@ -170,8 +170,8 @@ namespace avmshell
 		inline int getFilePointer() { return get_position(); }
 		inline void seek(int offset) { set_position(offset); }
 
-		uint32 get_length();
-		void set_length(uint32 value);
+		uint32_t get_length();
+		void set_length(uint32_t value);
 
 		Stringp get_endian();
 		void set_endian(Stringp type);

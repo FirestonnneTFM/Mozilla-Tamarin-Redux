@@ -114,7 +114,6 @@
         // of 2, so check multiple times in a row that the timer is not a power of 2.
         var count:int = 0;
         var sleeper:int = 2;
-        var d1:Date = new Date()
         for(var i:int = 0; i < 5; i++){
             var t1:int = getTimer();  
             var t2:int;

@@ -265,6 +265,24 @@ namespace avmplus
 #endif
 	}	
 
+#if VMCFG_METHOD_NAMES
+	PrintWriter& PrintWriter::operator<< (const ScopeTypeChain* s)
+	{
+		if (s)
+			return *this << s->format(m_core);
+		else
+			return *this << "null";
+	}	
+
+	PrintWriter& PrintWriter::operator<< (const ScopeChain* s)
+	{
+		if (s)
+			return *this << s->format(m_core);
+		else
+			return *this << "null";
+	}	
+#endif
+
 	void PrintWriter::writeHexNibble(uint8 value)
 	{
 		if (value < 10) {

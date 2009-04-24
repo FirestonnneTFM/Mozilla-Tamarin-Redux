@@ -246,6 +246,10 @@ namespace MMgc
 		
 		static GCBlock *GetBlock(const void *item) { return (GCBlock*) ((uintptr_t)item & ~0xFFF); }
 		
+#ifdef MMGC_MEMORY_INFO
+		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
+#endif
+
 		// The list of chunk blocks
 		GCBlock* m_firstBlock; 
 		GCBlock* m_lastBlock;

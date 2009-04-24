@@ -42,29 +42,34 @@
 #include "CodegenLIR.h"
 #endif
 
+//#define DOPROF
+#include "../vprof/vprof.h"
+
 namespace avmplus
 {
 	using namespace MMgc;
 
-#if defined FEATURE_NANOJIT && !VMCFG_METHODENV_IMPL32
-	MethodInfo::MethodInfo(void* tramp, Traits* declTraits) :
-		_pool(declTraits->pool),
+#if defined FEATURE_NANOJIT
+	/**
+	 * MethodInfo wrapper around interface method dispatch (IMT) stub
+	 */
+	MethodInfo::MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits) :
+		_implGPR(interfaceTramp),
 		_declaringTraits(declTraits),
+		_pool(declTraits->pool),
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
 		_method_id(-1)
-	{
-		union {
-			void* t;
-			AtomMethodProc p;
-		};
-		t = tramp;
-		this->_impl32 = p;
-	}
+	{}
 #endif
 
+	/**
+	 * MethodInfo wrapper around a system-generated init method.  Used when
+	 * there is no init method defined in the abc; this only occurs for activation
+	 * object traits and catch-block activation traits.
+	 */
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
-		_impl32(verifyEnter),
+		_implGPR(verifyEnter),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
 		_declaringTraits(declTraits),
 		_activationTraits(NULL),
@@ -72,15 +77,17 @@ namespace avmplus
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
 		_method_id(-1)
-	{
-	}
+	{}
 
+	/**
+	 * ordinary MethodInfo for abc or native method.
+	 */
 	MethodInfo::MethodInfo(int method_id, 
 							PoolObject* pool, 
 							const uint8_t* abc_info_pos, 
 							uint8_t abcFlags,
 							const NativeMethodInfo* native_info) : 
-		_impl32(verifyEnter),
+		_implGPR(verifyEnter),
 		_msref(pool->core->GetGC()->emptyWeakRef),
 		_declaringTraits(NULL),
 		_activationTraits(NULL),
@@ -91,7 +98,7 @@ namespace avmplus
 	{
 
 #if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
-		MMGC_STATIC_ASSERT(offsetof(MethodInfo, _impl32) == 0);
+		MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
 #endif
 
 		if (native_info)
@@ -114,9 +121,9 @@ namespace avmplus
 	{
 		MethodSignaturep ms = getMethodSignature();
 		if (ms->returnTraitsBT() == BUILTIN_number)
-			_implN = avmplus::interpN;
+			_implFPR = avmplus::interpFPR;
 		else
-			_impl32 = avmplus::interp32;
+			_implGPR = avmplus::interpGPR;
     }
 
 #ifdef DEBUGGER
@@ -139,7 +146,7 @@ namespace avmplus
 	}
 #endif
 
-	/*static*/ Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32* ap)
+	/*static*/ uintptr_t MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32* ap)
 	{
 		MethodInfo* f = env->method;
 
@@ -150,11 +157,16 @@ namespace avmplus
 
 		f->verify(env->toplevel());
 
-        AvmAssert(f->impl32() != MethodInfo::verifyEnter);
 #if VMCFG_METHODENV_IMPL32
-		env->_impl32 = f->impl32();
+		// we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
+		// but next time we want to call the real code, not verifyEnter again.
+		// All other MethodEnv's in their default state will call the target method
+		// directly and never go through verifyEnter().
+		env->_implGPR = f->implGPR();
 #endif
-		return f->impl32()(env, argc, ap);
+
+        AvmAssert(f->implGPR() != MethodInfo::verifyEnter);
+		return f->implGPR()(env, argc, ap);
 	}
 
 	void MethodInfo::verify(Toplevel *toplevel)
@@ -165,7 +177,7 @@ namespace avmplus
 		if (isNative())
 		{
 			union {
-				Atom (*impl32)(MethodEnv*, int, uint32 *);
+				GprMethodProc implGPR;
 				AvmThunkNativeThunker thunker;
 				AvmThunkNativeThunkerN thunkerN;
 			} u;
@@ -183,7 +195,7 @@ namespace avmplus
 			{
 				u.thunker = this->thunker();
 			}
-			this->_impl32 = u.impl32;
+			this->_implGPR = u.implGPR;
 		}
 		else
 		{
@@ -203,7 +215,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kNotImplementedError, this->pool()->core->toErrorString(this));
 			}
 
-
+			_ntprof("verify-ticks");
 		    #if defined FEATURE_NANOJIT
 			Verifier verifier(this, toplevel);
 
@@ -213,11 +225,7 @@ namespace avmplus
 
 				CodegenLIR jit(this);
                 #if defined AVMPLUS_WORD_CODE
-                #ifdef AVMPLUS_DIRECT_THREADED
-				WordcodeEmitter translator(this, interpGetOpcodeLabels());
-                #else
 				WordcodeEmitter translator(this);
-                #endif
 				TeeWriter teeWriter(&translator, &jit);
 				CodeWriter *coder = &teeWriter;
                 #else
@@ -266,11 +274,7 @@ namespace avmplus
 			{
 			    // NOTE copied below
                 #if defined AVMPLUS_WORD_CODE
-                #ifdef AVMPLUS_DIRECT_THREADED
-				WordcodeEmitter translator(this, interpGetOpcodeLabels());
-                #else
 				WordcodeEmitter translator(this);
-                #endif
 				CodeWriter *coder = &translator;
                 #else
 				CodeWriter stubWriter;
@@ -286,11 +290,7 @@ namespace avmplus
 
 			// NOTE copied from above
             #if defined AVMPLUS_WORD_CODE
-            #ifdef AVMPLUS_DIRECT_THREADED
-			WordcodeEmitter translator(this, interpGetOpcodeLabels());
-            #else
 			WordcodeEmitter translator(this);
-            #endif
 			CodeWriter *coder = &translator;
             #else
 			CodeWriter stubWriter;
@@ -301,12 +301,7 @@ namespace avmplus
 			// NOTE end copy
 
             #endif // FEATURE_NANOJIT
-			
-			#ifdef DEBUGGER
-			// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor
-			// (note that this is true even if we didn't call CallStackNode::init; the dtor is a no-op in that case)
-			//callStackNode.exit();
-			#endif /* DEBUGGER */
+			_tprof_end();
 		}
 	}
 
@@ -401,11 +396,8 @@ namespace avmplus
 		}
 	}
 
-	// Note: dmi() can legitimately return NULL (for MethodInfo's that were synthesized by Traits::genInitBody).
-	// However: 
-	// -- we assert that the result is not null because we should never be called for such MethodInfo instances.
-	// -- the caller always checks for null (despite the claim above) because crashing the Debugger would be a faux pas,
-	// and historically the Debugger code is riddled with lots of extra such checks-for-null, so why stop now?
+	// Note: dmi() can legitimately return NULL (for MethodInfo's that were synthesized by Traits::genInitBody,
+	// or for MethodInfo's that have no body, e.g. interface methods).
 	DebuggerMethodInfo* MethodInfo::dmi() const
 	{
 		// rely on the fact that not-in-pool MethodInfo returns -1,
@@ -413,9 +405,7 @@ namespace avmplus
 		const uint32_t method_id = uint32_t(this->method_id());
 		AvmAssert(_pool->core->debugger() != NULL);
 		// getDebuggerMethodInfo quietly returns NULL for out-of-range.
-		DebuggerMethodInfo* d = _pool->getDebuggerMethodInfo(method_id);
-		AvmAssert(d != NULL);
-		return d;
+		return _pool->getDebuggerMethodInfo(method_id);
 	}
 
 	Stringp MethodInfo::getRegName(int slot) const 
@@ -603,6 +593,9 @@ namespace avmplus
 	bool MethodInfo::makeMethodOf(Traits* traits)
 	{
 		AvmAssert(!isResolved());
+// begin AVMPLUS_UNCHECKED_HACK
+		AvmAssert(!(_flags & PROTOFUNC));
+// end AVMPLUS_UNCHECKED_HACK
 		
 		if (!_declaringTraits)
 		{
@@ -629,9 +622,13 @@ namespace avmplus
 		// MethodEnv::coerceEnter.
 		if (this->_declaringTraits)
 		{
-			_flags &= ~RESOLVED;
+			this->_flags &= ~RESOLVED;
 			this->_declaringTraits = NULL;
+			this->_msref = pool()->core->GetGC()->emptyWeakRef;
 		}
+// begin AVMPLUS_UNCHECKED_HACK
+		this->_flags |= PROTOFUNC;
+// end AVMPLUS_UNCHECKED_HACK
 
 		// make sure param & return types are fully resolved.
 		// this does not set the verified flag, so real verification will
@@ -732,23 +729,23 @@ namespace avmplus
 			returnType = pool->resolveTypeName(pos, toplevel, /*allowVoid=*/true);
 			receiverType = (_flags & NEED_CLOSURE) ? declaringTraits() : core->traits.object_itraits;
 			rest_offset = argSize(receiverType);
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 			uint32_t untyped_args = 0;
-#endif
+// end AVMPLUS_UNCHECKED_HACK
 			for (uint32_t i=1; i <= param_count; i++)
 			{
 				Traits* argType = pool->resolveTypeName(pos, toplevel);
 				WB(gc, ms, &ms->_args[i].paramType, argType);
 				rest_offset += argSize(argType);
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 				untyped_args += (argType == NULL);
-#endif
+// end AVMPLUS_UNCHECKED_HACK
 			}
 			AvmCore::skipU30(pos); // name_index;
 			pos++; // abcFlags;
-#ifdef AVMPLUS_UNCHECKED_HACK
+// begin AVMPLUS_UNCHECKED_HACK
 			// toplevel!=NULL check is so we only check when resolveSignature calls us (not subsequently)
-			if (toplevel != NULL)
+			if (toplevel != NULL && (_flags & PROTOFUNC))
 			{
 				// HACK - compiler should do this, and only to toplevel functions
 				// that meet the E4 criteria for being an "unchecked function"
@@ -778,7 +775,7 @@ namespace avmplus
 				}
 			}
 			else 
-#endif // AVMPLUS_UNCHECKED_HACK
+// end AVMPLUS_UNCHECKED_HACK
 			if (hasOptional())
 			{
 				optional_count = AvmCore::readU30(pos);

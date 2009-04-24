@@ -53,7 +53,7 @@ namespace avmplus
 			if (match(T_Multiply))
 				return NULL;
 			QualifiedName* n = nameExpression(false);
-			if (n->qualifier != NULL && n->qualifier->tag() != TAG_simpleName ||
+			if ((n->qualifier != NULL && n->qualifier->tag() != TAG_simpleName) ||
 				n->name->tag() != TAG_simpleName)
 				compiler->syntaxError(n->pos, "Illegal type name");
 			return n;

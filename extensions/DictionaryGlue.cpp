@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#ifdef AVMPLUS_SHELL
+#ifdef AVMSHELL_BUILD
 #include "avmshell.h"
 #else
 // player
@@ -68,23 +68,20 @@ namespace avmplus
 		GCAssert(vtable->traits->isDictionary == true);
 	}
 
-	DictionaryObject::~DictionaryObject()
-	{
-		weakKeys = false;
-	}
-
 	void DictionaryObject::init(bool weakKeys)
 	{
 		GCAssert(vtable->traits->isDictionary == true);
-		this->weakKeys = weakKeys;
-		table = weakKeys ? new (gc()) WeakKeyHashtable(gc()) : new (gc()) Hashtable(gc());
+		MMgc::GC* gc = this->gc();
+		_table = weakKeys ? 
+					new (gc) WeakKeyHashtable(gc) : 
+					new (gc) HeapHashtable(gc);
 	}
 
-	Atom DictionaryObject::getKeyFromObject(Atom key) const
+	Atom FASTCALL DictionaryObject::getKeyFromObject(Atom key) const
 	{
 		AvmAssert(AvmCore::isObject(key));
-		ScriptObject *obj = AvmCore::atomToScriptObject(key);
-		AvmAssert(obj->traits() != core()->traits.qName_itraits);
+		ScriptObject* obj = AvmCore::atomToScriptObject(key);
+		AvmAssert(Traits::getBuiltinType(obj->traits()) != BUILTIN_qName);
 		AvmAssert(MMgc::GC::Size(obj) >= sizeof(ScriptObject));
 		(void)obj;
 
@@ -98,66 +95,61 @@ namespace avmplus
 
 	Atom DictionaryObject::getAtomProperty(Atom key) const
 	{
-		if(AvmCore::isObject(key)) {
-			key = getKeyFromObject(key);
-			if(weakKeys)
-				return weakTable()->get(key);
-			else
-				return table->get(key);
-		} else
-			return ScriptObject::getAtomProperty(key);
+		if (AvmCore::isObject(key)) 
+		{
+			return _table->get(getKeyFromObject(key));
+		} 
+
+		return ScriptObject::getAtomProperty(key);
 	}
 
 	bool DictionaryObject::hasAtomProperty(Atom key) const
 	{
-		if(AvmCore::isObject(key)) {
-			key = getKeyFromObject(key);
-			if(weakKeys)
-				return weakTable()->contains(key);
-			else
-				return table->contains(key);
-		} else
-			return ScriptObject::hasAtomProperty(key);
+		if (AvmCore::isObject(key)) 
+		{
+			return _table->contains(getKeyFromObject(key));
+		}
+
+		return ScriptObject::hasAtomProperty(key);
 	}
 
 	bool DictionaryObject::deleteAtomProperty(Atom key)
 	{
-		if(AvmCore::isObject(key)) {
-			key = getKeyFromObject(key);
-			if(weakKeys)
-				weakTable()->remove(key);
-			else
-				table->remove(key);
+		if (AvmCore::isObject(key)) 
+		{
+			_table->remove(getKeyFromObject(key));
 			return true;
-		} else {
-			return ScriptObject::deleteAtomProperty(key);
 		}
+
+		return ScriptObject::deleteAtomProperty(key);
 	}
 
 	void DictionaryObject::setAtomProperty(Atom key, Atom value)
 	{
-		if(AvmCore::isObject(key)) {
-			key = getKeyFromObject(key);
-			if(weakKeys)
-				weakTable()->add(key, value);
-			else
-				table->add(key, value);
-		} else
-			ScriptObject::setAtomProperty(key, value);
+		if (AvmCore::isObject(key)) 
+		{
+			_table->add(getKeyFromObject(key), value);
+			return;
+		}
+		
+		ScriptObject::setAtomProperty(key, value);
 	}
 
 	Atom DictionaryObject::nextName(int index)
 	{
 		Atom k = ScriptObject::nextName(index);
 
-		if(weakKeys && AvmCore::isGCObject(k)) {
-			GCWeakRef *ref = (GCWeakRef*) (k&~7);
-			if(ref->get()) {
-				ScriptObject *key = ((ScriptObject*)ref->get());
+		if (AvmCore::isGCObject(k) && _table->weakKeys()) 
+		{
+			GCWeakRef* ref = (GCWeakRef*)atomPtr(k);
+			ScriptObject* key = ((ScriptObject*)ref->get());
+			if (key) 
+			{
 				AvmAssert(key->traits() != NULL);
 				return key->atom();
-			} else
-				return undefinedAtom;
+			}
+
+			return undefinedAtom;
 		}
 
 		return k;
@@ -167,33 +159,36 @@ namespace avmplus
 	{
 		AvmAssert(index >= 0);
 
-		if (index != 0) {
+		if (index != 0) 
+		{
 			index = index<<1;
 		}
 
-		Hashtable *ht = getTable();
-
 		// this can happen if you break in debugger in a subclasses constructor before super
 		// has been called -- let's do it in all builds, it's better than crashing.
-		if (!ht)
+		if (!_table)
 		{
 			return 0;
 		}
 
 		// Advance to first non-empty slot.
-		int numAtoms = ht->getNumAtoms();
-		while (index < numAtoms) {
-			Atom a = ht->getAtoms()[index];
-			if(weakKeys && AvmCore::isGCObject(a)) {
+		InlineHashtable* ht = _table->get_ht();
+		const Atom* atoms = ht->getAtoms();
+		int numAtoms = ht->getCapacity();
+		while (index < numAtoms) 
+		{
+			Atom a = atoms[index];
+			if (AvmCore::isGCObject(a) && _table->weakKeys()) 
+			{
 				GCWeakRef *weakRef = (GCWeakRef*)AvmCore::atomToGCObject(a);
 				if(weakRef->get())
 					return (index>>1)+1;
 				else {
-					ht->getAtoms()[index] = Hashtable::DELETED;
-					ht->getAtoms()[index+1] = Hashtable::DELETED;
-					ht->setHasDeletedItems(true);
+					ht->getAtoms()[index] = InlineHashtable::DELETED;
+					ht->getAtoms()[index+1] = InlineHashtable::DELETED;
+					ht->setHasDeletedItems();
 				}
-			} else if(a != 0 && a != Hashtable::DELETED) {
+			} else if(a != 0 && a != InlineHashtable::DELETED) {
 					return (index>>1)+1;
 			}
 			index += 2;

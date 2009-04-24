@@ -40,7 +40,6 @@
 #ifndef __GCObject__
 #define __GCObject__
 
-
 // VC++ wants these declared
 //void *operator new(size_t size);
 //void *operator new[] (size_t size);
@@ -68,7 +67,7 @@ namespace MMgc
 	/**
 	 * Baseclass for GC managed objects that aren't finalized
 	 */
-	class MMGC_API GCObject
+	class GCObject
 	{
 	public:
 		static void *operator new(size_t size, GC *gc, size_t extra = 0)
@@ -99,7 +98,7 @@ namespace MMgc
 	 * @note This class does not provide operator new/delete: derive from GCFinalizedObject
 	 *       or GCFinalizedObjectOptIn to provide correct handling of "new Class"
 	 */
-	class MMGC_API GCFinalizable
+	class GCFinalizable
 	{
 	public:
 		virtual ~GCFinalizable() { }
@@ -108,7 +107,7 @@ namespace MMgc
 	/**
 	 *	Baseclass for GC managed objects that are finalized 
 	 */
-	class MMGC_API GCFinalizedObject : public GCFinalizable
+	class GCFinalizedObject : public GCFinalizable
 	//: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
 	// the most base class (GCObject) not having any virtual methods)
 	{
@@ -122,7 +121,7 @@ namespace MMgc
 	/**
 	 *	Baseclass for GC managed objects that are finalized 
 	 */
-	class MMGC_API GCFinalizedObjectOptIn : public GCFinalizedObject
+	class GCFinalizedObjectOptIn : public GCFinalizedObject
 	//: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
 	// the most base class (GCObject) not having any virtual methods)
 	{
@@ -131,12 +130,12 @@ namespace MMgc
 		static void operator delete (void *gcObject);
 	};
 
-	class MMGC_API RCObject : public GCFinalizedObject
+	class RCObject : public GCFinalizedObject
 	{
 		friend class GC;
 	public:
 		RCObject()
-#ifdef _DEBUG
+#if 0
 			: history(0)
 #endif
 		{
@@ -153,7 +152,7 @@ namespace MMgc
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this);
 			composite = 0;
-#ifdef _DEBUG
+#if 0
 			padto32bytes = 0;
 #endif
 		}
@@ -227,7 +226,7 @@ namespace MMgc
 #endif
 		}
 
-		__forceinline void DecrementRef() 
+		REALLY_INLINE void DecrementRef() 
 		{ 
 			if(Sticky() || composite == 0)
 				return;
@@ -319,10 +318,10 @@ namespace MMgc
 		static const uint32_t RCBITS	         = 0x000000FF;
 		static const uint32_t ZCT_INDEX          = 0x0FFFFF00;
 		uint32_t composite;
-#ifdef _DEBUG
+#if 0
 		// addref/decref stack traces
-		GCStack<int,4> history;
-		int padto32bytes;
+		GCStack<StackTrace*,4> history;
+		int32_t padto32bytes;
 #endif
 	};
 
@@ -405,7 +404,8 @@ namespace MMgc
 	};
 
 
-#define DRC(_type) MMgc::RCPtr<_type>
+// put spaces around the template arg to avoid possible digraph warnings
+#define DRC(_type) MMgc::RCPtr< _type >
 
 }
 

@@ -570,6 +570,8 @@ namespace avmplus
 		if (core->debugger())
 		{
 			pool->_method_dmi.ensureCapacity(size);
+			for (int i = 0; i < size; ++i)
+				pool->_method_dmi.set(i, NULL);
 		}
 #endif
 #if VMCFG_METHOD_NAMES
@@ -632,7 +634,7 @@ namespace avmplus
 				core->console << "        name_index=" << name_index;
 				if (name_index > 0 && name_index < pool->constantStringCount)
 					core->console << " \"" << pool->cpool_string[name_index] << "\"";
-				core->console << "\n        flags=" << abcFlags << "\n";
+				core->console << "\n        flags=" << (uint32_t)abcFlags << "\n";
 			)
 
 			const NativeMethodInfo* ni = NULL;
@@ -1062,6 +1064,8 @@ namespace avmplus
 		startpos = pos;
 #endif
 
+		const bool constData = code.getImpl()->isConstant();
+		
 		for(uint32_t i = 1; i < string_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
@@ -1078,14 +1082,11 @@ namespace avmplus
 			// don't need to create an atom for this now, because
 			// each caller will take care of it.
 
-			// These strings are assumed to be constant
-			//Stringp s = core->internStringUTF8((const char*)pos, len, true);
-
-			// @todo: we *cannot* assume these strings are constant, as some client code
-			// may unload this ABC later. If we ever add a way to "un-constant" interned strings
-			// in an unloaded ABC range, this would be a very worthwhile optimization, but
-			// until then, it's not safe.
-			Stringp s = core->internStringUTF8((const char*)pos, len);
+			// @todo: for now we assume that strings from compiled-in ABC data is constant,
+			// but ABC data from any other source is not constant since it may be unloaded.
+			// A further optimization would be to add a way to "un-constant" interned strings
+			// in an unloaded ABC range.
+			Stringp s = core->internStringUTF8((const char*)pos, len, constData);
 
 			// internStringUTF8() will return NULL if we pass it invalid UTF8 data and its "strict" arg is true
 			// (which it is by default) -- invalid UTF8 in the ABC == verify error.
@@ -1462,7 +1463,7 @@ namespace avmplus
 			pool->scripts.set(i, script);
 
 			// initial scope chain is []
-			traits->scope = ScopeTypeChain::createEmpty(core->GetGC());
+			traits->set_scope(ScopeTypeChain::createEmpty(core->GetGC()));
 		}
 
 		return true;
@@ -1738,7 +1739,7 @@ namespace avmplus
 
 		union {
 			double value;
-			#if defined AVMPLUS_BIG_ENDIAN || defined AVMPLUS_ARM_OLDABI
+			#if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
 				struct { uint32_t hi, lo; } words;
 			#else
 				struct { uint32_t lo, hi; } words;

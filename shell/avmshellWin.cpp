@@ -46,6 +46,8 @@
 
 namespace avmshell
 {
+	FILE* currentOutStream = stdout;
+
 	class WinPlatform : public Platform
 	{
 	public:
@@ -100,7 +102,7 @@ namespace avmshell
 
 	int WinPlatform::logMessage(const char* message)
 	{
-		return fprintf(stdout, message);
+		return fprintf(currentOutStream, message);
 	}
 	
 	char* WinPlatform::getUserInput(char* buffer, int bufferSize)
@@ -224,17 +226,22 @@ namespace avmshell
 
 			mbstowcs(logname, filename, filenameLen+1);
 
-			_wfreopen(logname, L"w", stdout);
+			_wfreopen(logname, L"w", currentOutStream);
 
 			delete [] logname;	
 		#else
-			FILE *f = freopen(filename, "w", stdout);
+			FILE *f = freopen(filename, "w", currentOutStream);
 			if (!f)
 				AvmLog("freopen %s failed.\n",filename);
 		#endif /* UNDER_CE */
 		}
 
 } //namespace avmshell
+
+void ChangeLogStream(FILE* stream)
+{
+	avmshell::currentOutStream = stream ? stream : stdout;
+}
 
 avmshell::WinPlatform* gPlatformHandle = NULL; 
 

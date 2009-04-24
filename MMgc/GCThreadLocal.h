@@ -39,164 +39,42 @@
 #ifndef __GCThreadLocal__
 #define __GCThreadLocal__
 
-#ifndef MMGC_PORTING_API
-
-#ifdef HAVE_PTHREADS
-#include <pthread.h>
-#endif
-
 namespace MMgc
 {
-#ifdef WIN32
-	/**
-	 * GCCriticalSection is a simple Critical Section class used by GCMemoryProfiler to
-	 * ensure mutually exclusive access.  GCSpinLock doesn't suffice since its not
-	 * re-entrant and we need that
-	 */
-	class GCCriticalSection
-	{
-	public:
-		GCCriticalSection()
-		{
-			InitializeCriticalSection(&cs);
-		}
-
-		~GCCriticalSection()
-		{
-			DeleteCriticalSection(&cs);
-		}
-
-		inline void Acquire()
-		{
-			EnterCriticalSection(&cs);
-		}
-		
-		inline void Release()
-		{
-			LeaveCriticalSection(&cs);
-		}
-
-	private:
-		CRITICAL_SECTION cs;
-	};
-	
 	template<typename T>
 	class GCThreadLocal
 	{
 	public:
 		GCThreadLocal()
 		{
-			GCAssert(sizeof(T) <= sizeof(LPVOID));
-			tlsId = TlsAlloc();
-			TlsSetValue(tlsId, (LPVOID) NULL);
+			GCAssert(sizeof(T) <= sizeof(void*));
+			bool r = VMPI_tlsCreate(&tlsId);
+			GCAssert(r);
+			(void)r;
+			VMPI_tlsSetValue(tlsId, NULL);
 		}
 
 		~GCThreadLocal()
 		{
-			TlsFree(tlsId);
-			tlsId = 0;
+			VMPI_tlsDestroy(tlsId);
 		}
 
 		T operator=(T tNew)
 		{
-			TlsSetValue(tlsId, (LPVOID) tNew);
+			VMPI_tlsSetValue(tlsId, (void*) tNew);
 			return tNew;
 		}
 		operator T() const
 		{
-			return (T) TlsGetValue(tlsId);
+			return (T) VMPI_tlsGetValue(tlsId);
 		}
 		T operator->() const
 		{
-			return (T) TlsGetValue(tlsId);
+			return (T) VMPI_tlsGetValue(tlsId);
 		}
 	private:
-		DWORD tlsId;
-	};
-#else
-
-#ifdef HAVE_PTHREADS
-	template<typename T>
-	class GCThreadLocal
-	{
-	public:
-		GCThreadLocal()
-		{
-			GCAssert(sizeof(T) <= sizeof(void*));
-			pthread_key_create(&tlsId, NULL);
-			pthread_setspecific(tlsId, NULL);
-		}
-		T operator=(T tNew)
-		{
-			pthread_setspecific(tlsId, (const void*)tNew);
-			return tNew;
-		}
-		operator T() const
-		{
-			return (T)pthread_getspecific(tlsId);
-		}
-	private:
-		pthread_key_t tlsId ;
-	};
-#else	//HAVE_PTHREADS
-	template<typename T>
-	class GCThreadLocal
-	{
-	public:
-		GCThreadLocal()
-		{
-			GCAssert(sizeof(T) <= sizeof(void*));
-		}
-		T operator=(T tNew)
-		{
-			return value=tNew;
-		}
-		operator T() const
-		{
-			return value;
-		}
-	private:
-		T value ;
-	};
-#endif	//HAVE_PTHREADS
-	
-	class GCCriticalSection
-	{
-	public:
-		GCCriticalSection()
-		{
-		}
-
-		inline void Acquire()
-		{
-		}
-		
-		inline void Release()
-		{
-		}
-	};
-#endif
-
-	class GCEnterCriticalSection
-	{
-	public:
-		GCEnterCriticalSection(GCCriticalSection& cs) : m_cs(cs)
-		{
-			m_cs.Acquire();
-		}
-		~GCEnterCriticalSection()
-		{
-			m_cs.Release();
-		}
-
-	private:
-		GCCriticalSection& m_cs;
-
-		GCEnterCriticalSection & operator = (const GCEnterCriticalSection&);
-		GCEnterCriticalSection(const GCEnterCriticalSection&);
+		uintptr_t tlsId;
 	};
 }
-
-#endif // MMGC_PORTING_API
 
 #endif

@@ -64,13 +64,14 @@ namespace avmshell
 
 	int PosixPartialPlatform::logMessage(const char* message)
 	{
-		return fprintf(stdout, message);
+		return fprintf(stdout, "%s", message);
 	}
 	
 	char* PosixPartialPlatform::getUserInput(char* buffer, int bufferSize)
 	{
 		fflush(stdout);
-		fgets(buffer, bufferSize, stdin);
+		if (!fgets(buffer, bufferSize, stdin))
+			*buffer = 0;
 		return buffer;
 	}
 }

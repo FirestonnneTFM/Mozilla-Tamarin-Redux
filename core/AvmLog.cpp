@@ -48,6 +48,6 @@ namespace avmplus
 		vsnprintf(buf, sizeof(buf), format, args);
 		va_end(args);
 
-		VMPI_Log(buf);
+		VMPI_log(buf);
 	}
 }

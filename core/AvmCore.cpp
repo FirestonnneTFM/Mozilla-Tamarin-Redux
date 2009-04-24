@@ -68,29 +68,42 @@ namespace avmplus
 	extern AvmCore* g_tmcore;
 #endif
 
-	AvmCore::AvmCore(GC* g) : 
-		GCRoot(g), 
-		console(NULL), 
+	const bool AvmCore::verbose_default = false;
+	const bool AvmCore::verbose_addrs_default = false;
+	const bool AvmCore::methodNames_default = true;
+	const bool AvmCore::oldVectorMethodNames_default = true;
+	const bool AvmCore::verifyall_default = false;
+	const bool AvmCore::show_stats_default = false;
+	const bool AvmCore::tree_opt_default = false;
+	const bool AvmCore::verbose_live_default = false;;
+	const bool AvmCore::verbose_exits_default = false;
+	const Runmode AvmCore::runmode_default = RM_mixed;
+	const bool AvmCore::cseopt_default = true;
+	const bool AvmCore::bbgraph_default = false;
+	const bool AvmCore::sse2_default = true;
+	const bool AvmCore::interrupts_default = false;
+
+	AvmCore::AvmCore(GC* g) 
+		: GCRoot(g) 
+		, console(NULL) 
+		, gc(g) 
 #ifdef DEBUGGER
-		_debugger(NULL),
-		_profiler(NULL),
-		langID(-1),
-		passAllExceptionsToDebugger(false),
-#endif
-		gc(g), 
- 		m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g)),	
- 		m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g)),	
- 		m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g)),	
-		gcInterface(g)
-#ifdef DEBUGGER
+		, _debugger(NULL)
+		, _profiler(NULL)
 		, _sampler(NULL)
+		, langID(-1)
+		, passAllExceptionsToDebugger(false)
 #endif
 #ifdef AVMPLUS_VERIFYALL
-		,verifyQueue(g, 0)
+		, verifyQueue(g, 0)
 #endif
+		, m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
+ 		, m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
+ 		, m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))	
 #ifdef AVMPLUS_WORD_CODE
 		, lookup_cache_timestamp(1)
 #endif
+		, gcInterface(g)
     {
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		AvmAssert(g_tmcore == NULL);
@@ -107,53 +120,57 @@ namespace avmplus
 		MMGC_STATIC_ASSERT(sizeof(uint64) == 8);
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
-		#ifdef AVMPLUS_64BIT
+#ifdef AVMPLUS_64BIT
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == 8);
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == 8);		
-		#else
+#else
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == 4);		
-		#endif	
+#endif	
 			
 		// set default mode flags
-		#ifdef AVMPLUS_VERBOSE
-		config.verbose = false;
-		config.verbose_addrs = false;
-		#endif
+#ifdef AVMPLUS_VERBOSE
+		config.verbose = verbose_default;
+		config.verbose_addrs = verbose_addrs_default;
+#endif
 
-		#ifdef AVMPLUS_VERIFYALL
-	    	config.verifyall = false;
-		#endif
+#if VMCFG_METHOD_NAMES
+		// default to recording method names, if possible. 
+		// (subclass might change this in its ctor if it wants to conserve memory.)
+		config.methodNames = methodNames_default;
+		config.oldVectorMethodNames = oldVectorMethodNames_default;
+#endif
 
-		#ifdef FEATURE_NANOJIT
-			config.show_stats = false;
-			config.tree_opt = false;
-			config.verbose_live = false;;
-			config.verbose_exits = false;
-		#endif
+#ifdef AVMPLUS_VERIFYALL
+	   	config.verifyall = verifyall_default;
+#endif
 
-        #if defined FEATURE_NANOJIT
-			// jit flag forces use of jit-compiler instead of interpreter
-    	    config.runmode = RM_mixed;
-			config.cseopt = true;
+#ifdef FEATURE_NANOJIT
+		config.show_stats = show_stats_default;
+		config.tree_opt = tree_opt_default;
+		config.verbose_live = verbose_live_default;
+		config.verbose_exits = verbose_exits_default;
 
-			#ifdef AVMPLUS_VERBOSE
-			config.bbgraph = false;
-			#endif
+		// jit flag forces use of jit-compiler instead of interpreter
+		config.runmode = runmode_default;
+		config.cseopt = cseopt_default;
 
-		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-    		config.sse2 = true;
-			#endif
-		#endif // FEATURE_NANOJIT
+	#ifdef AVMPLUS_VERBOSE
+		config.bbgraph = bbgraph_default;
+	#endif
 
-	#ifdef VTUNE
-			VTuneStatus = CheckVTuneStatus();
-	#endif // VTUNE
+	#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+		config.sse2 = sse2_default;
+	#endif
+#endif // FEATURE_NANOJIT
 
-		config.interrupts = false;
+#ifdef VTUNE
+		VTuneStatus = CheckVTuneStatus();
+#endif // VTUNE
+
+		config.interrupts = interrupts_default;
 
 		gcInterface.SetCore(this);
-		resources          = NULL;
 		xmlEntities        = NULL;
 		exceptionFrame     = NULL;
 		exceptionAddr      = NULL;
@@ -231,12 +248,6 @@ namespace avmplus
 
 		booleanStrings[0] = kfalse;
         booleanStrings[1] = ktrue;
-
-#ifdef AVMPLUS_INTERNINT_CACHE
-		// See code in AvmCore::internInt
-		for (int i=0 ; i < 256 ; i++ )
-			index_strings[i] = NULL;
-#endif
 
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
@@ -324,7 +335,7 @@ namespace avmplus
 		// [ed] 3/24/06 why do we really care if a script is dynamic or not?
 		//AvmAssert(scriptTraits->needsHashtable);
 
-		ScopeChain* scriptScope = ScopeChain::create(core->GetGC(), scriptTraits->scope, NULL, core->newNamespace(core->kEmptyString));
+		ScopeChain* scriptScope = ScopeChain::create(core->GetGC(), scriptTraits->scope(), NULL, core->newNamespace(core->kEmptyString));
 		VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, scriptScope, abcEnv, toplevel);
 		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
 		scriptVTable->init = scriptEnv;
@@ -498,31 +509,14 @@ namespace avmplus
 										 const NativeInitializer* ninit,
 										 CodeContext *codeContext)
     {
-		resources = new (GetGC()) Hashtable(GetGC());
-
-		// have we parsed this before?
-		PoolObject* pool;
-        Atom resourceAtom = resources->get(start+1);
-        if (resourceAtom != undefinedAtom) 
-		{
-			pool = (PoolObject*) resourceAtom;
-		} 
-		else 
-		{
-			Domain* domain = domainEnv ? domainEnv->domain() : builtinDomain;
-			
-			// parse constants and attributes.
-			pool = parseActionBlock(code,
-									start,
-									toplevel,
-									domain,
-									ninit);
-			if (pool != NULL)
-			{
-				resources->put(start+1, pool);
-			}
-		}
-
+		Domain* domain = domainEnv ? domainEnv->domain() : builtinDomain;
+		
+		// parse constants and attributes.
+		PoolObject *pool = parseActionBlock(code,
+								start,
+								toplevel,
+								domain,
+								ninit);
 		return handleActionPool(pool, domainEnv, toplevel, codeContext);
 	}
 	
@@ -683,11 +677,11 @@ return the result of the comparison ToPrimitive(x) == y.
 
 			// 18. If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
             if (ltype == kBooleanType)
-                return equals(lhs&~7|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
+                return equals((lhs&~7)|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
 			
 			// 19. If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
             if (rtype == kBooleanType)
-                return equals(lhs, rhs&~7|kIntegerType);  // equal(lhs, toInteger(rhs))
+                return equals(lhs, (rhs&~7)|kIntegerType);  // equal(lhs, toInteger(rhs))
 
 			// 20. If Type(x) is either String or Number and Type(y) is Object,
 			// return the result of the comparison x == ToPrimitive(y).
@@ -773,8 +767,8 @@ return the result of the comparison ToPrimitive(x) == y.
             }
         }
 		// Sometimes ints can hide in double atoms (neg zero for one)
-		else if ((ltype == kIntegerType) && (rtype == kDoubleType) || 
-			(rtype == kIntegerType) && (ltype == kDoubleType))
+		else if (((ltype == kIntegerType) && (rtype == kDoubleType)) || 
+			((rtype == kIntegerType) && (ltype == kDoubleType)))
 		{
 			return number(lhs) == number(rhs) ? trueAtom : falseAtom;
 		}
@@ -884,12 +878,12 @@ return the result of the comparison ToPrimitive(x) == y.
 						if (info && info->isNative()) 
 							continue;
 
-#ifdef AVMPLUS_WORD_CODE
-						ExceptionHandlerTable* exceptions = info ? info->word_code_exceptions() : NULL;
-#else
-						ExceptionHandlerTable* exceptions = info ? info->abc_exceptions() : NULL;
-#endif
-						if (exceptions != NULL && callStackNode->eip() && *callStackNode->eip())
+						// Note: we only care if the info actually has an exception handler or not...
+						// if WORD_CODE is enabled and this function is jitted, info->word_code_exceptions() will
+						// be null even if we have an exception handler. So always look at info->abc_exceptions()
+						// since it is (currently) always correct.
+						const bool hasExceptionHandler = info && info->abc_exceptions() != NULL;
+						if (hasExceptionHandler && callStackNode->eip() && *callStackNode->eip())
 						{
 							// Check if this particular frame of the callstack
 							// is going to catch the exception.
@@ -1191,7 +1185,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kIntegerType:
 				{
 					Atom i = atom>>3;
-					return urshift(i|-i,28)&~7 | kBooleanType;
+					return (urshift(i|-i,28)&~7) | kBooleanType;
 				}
 			case kBooleanType:
 				return atom;
@@ -1866,7 +1860,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // not be JITted based on memory, configuration, or heuristics.
 
 		ExceptionHandlerTable* exceptions;
-        if (info->impl32() == avmplus::interp32 || info->implN() == avmplus::interpN)
+        if (info->implGPR() == avmplus::interpGPR || info->implFPR() == avmplus::interpFPR)
             exceptions = info->word_code_exceptions();
         else
 			exceptions = info->abc_exceptions();
@@ -2733,6 +2727,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (_sampler)
 			_sampler->postsweep();
 #endif
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+		tmt_report();
+#endif
 	}
 
 	int AvmCore::findString(Stringp s)
@@ -2921,31 +2918,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internInt(int value)
     {
-#ifdef AVMPLUS_INTERNINT_CACHE
-		// This simple cache of interned strings representing integers greatly benefits
-		// array-heavy code in the interpreter, at least for the time being (2008-08-13).
-		// But it would be better not to intern integers at all.
-		//
-		// #ifdeffed out on 2008-09-15 because the integer lookup optimizations in the
-		// interpreter ought to make it unnecessary; code should be removed later if it
-		// is not re-enabled.
-		
-		int index = value & 255;
-		if (value >= 0 && index_strings[index] != NULL && index_strings[index]->value == value)
-			return index_strings[index]->string;
-#endif	
-		Stringp s = internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
-
-#ifdef AVMPLUS_INTERNINT_CACHE
-		if (value >= 0) {
-			if (index_strings[index] == NULL)
-				index_strings[index] = new (GetGC()) IndexString;
-			index_strings[index]->value = value;
-			index_strings[index]->string = s;
-		}
-#endif
-
-		return s;
+		return internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
     }
 
 	Stringp AvmCore::internUint32 (uint32 ui)
@@ -3616,7 +3589,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int id = MathUtils::real2int (d);
 		if (id != 0x80000000) 
 			return id;
-#elif AVMPLUS_SPARC
+#elif defined AVMPLUS_SPARC
 		int id = MathUtils::real2int (d);
 		if (id != 0x7fffffff && id != 0x80000000)
 			return id;
@@ -3648,7 +3621,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (id != (int)0x80000000)
 			return id;
         #elif defined(SOLARIS)
-        #elif AVMPLUS_UNIX
+        #elif defined AVMPLUS_UNIX
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"
             "movl %%eax, %0" : "=r" (id) : "m" (d) : "%eax");
@@ -4018,7 +3991,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			while (!verifyQueue.isEmpty()) {
 				MethodInfo* f = verifyQueue.removeLast();
 				if (!f->isVerified()) {
-					if (f->declaringTraits()->scope == NULL && f != f->declaringTraits()->init) {
+					if (f->declaringScope() == NULL && f != f->declaringTraits()->init) {
 						verifyQueue2.add(f);
 						continue;
 					}

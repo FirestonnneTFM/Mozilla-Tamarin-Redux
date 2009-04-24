@@ -104,6 +104,7 @@ namespace avmplus
 				AvmAssert(evicted != NULL && evicted != gen);
 				WB(m_gc, this, &m_head, evicted->next);
 			}
+			evicted->next = NULL;	// never need a WB to write NULL
 			--m_count;
 			#ifdef QCACHE_DEBUG
 			validate();
@@ -119,6 +120,7 @@ namespace avmplus
 		validate();
 		#endif
 		
+		AvmAssert(evicted ? evicted->next == NULL : true);
 		return evicted;
 	}
 	

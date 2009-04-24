@@ -49,17 +49,10 @@ namespace avmplus
 
 	class WordcodeEmitter : public WordcodeTranslator {
 	public:
-#  ifdef AVMPLUS_DIRECT_THREADED
-		WordcodeEmitter(MethodInfo* info, void** opcode_labels);
-#    ifdef AVMPLUS_SELFTEST
-		WordcodeEmitter(AvmCore* core, uint8_t* code_start, void** opcode_labels);
-#    endif
-#  else
 		WordcodeEmitter(MethodInfo* info);
 #    ifdef AVMPLUS_SELFTEST
 		WordcodeEmitter(AvmCore* core, uint8_t* code_start);
 #    endif
-#  endif
 		virtual ~WordcodeEmitter();
 		
 		// In all cases below, pc points to the opcode.

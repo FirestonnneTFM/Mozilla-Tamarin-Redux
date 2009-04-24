@@ -83,7 +83,7 @@ namespace avmshell
 	 */
 	class SystemClass : public ClassClosure
 	{
-		uint64 initialTime;
+		uint64_t initialTime;
  
 	public:
 		SystemClass(VTable* cvtable);

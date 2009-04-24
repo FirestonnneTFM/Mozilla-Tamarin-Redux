@@ -40,7 +40,7 @@
 
 class Label {
 public:
-	Label() : backpatches(NULL), address(~0U) {}
+	Label() : address(~0U), backpatches(NULL) {}
 	uint32_t address;			// either ~0U or the address of the label
 	Seq<uint32_t>* backpatches;	// not a SeqBuilder so that we don't have to spend space on storing an allocator in every label object
 };

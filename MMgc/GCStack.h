@@ -39,18 +39,10 @@
 #ifndef __GCStack__
 #define __GCStack__
 
-#ifdef __SYMBIAN32__
-#include <e32cmn.h>
-#endif
-
-#ifdef UNIX
-#include <string.h>
-#endif
-
 namespace MMgc
 {	
 	template<typename T, int defSize=512>
-	class MMGC_API GCStack
+	class GCStack
 	{
 		enum { kDefSize = defSize };
 	public:
