@@ -393,8 +393,6 @@
 		0709B64D0F9733B0001A6E61 /* WinFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinFile.cpp; path = ../../../shell/WinFile.cpp; sourceTree = SOURCE_ROOT; };
 		0709B64E0F9733B0001A6E61 /* WinFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WinFile.h; path = ../../../shell/WinFile.h; sourceTree = SOURCE_ROOT; };
 		0709B6570F9734D0001A6E61 /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../shell/manifest.mk; sourceTree = SOURCE_ROOT; };
-		0709B6C50F98DBCB001A6E61 /* unixbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unixbuild.h; path = ../../../MMgc/unixbuild.h; sourceTree = SOURCE_ROOT; };
-		0709B6C60F98DBCB001A6E61 /* winbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = winbuild.h; path = ../../../MMgc/winbuild.h; sourceTree = SOURCE_ROOT; };
 		0709B6C90F98DFD8001A6E61 /* symbian-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "symbian-platform.h"; path = "../../symbian/symbian-platform.h"; sourceTree = SOURCE_ROOT; };
 		0709B7360F9A2354001A6E61 /* system-selection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "system-selection.h"; path = "../../system-selection.h"; sourceTree = SOURCE_ROOT; };
 		071536DE0F5011CD004E398F /* eval-unicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-unicode.h"; path = "../../../eval/eval-unicode.h"; sourceTree = SOURCE_ROOT; };
@@ -708,7 +706,6 @@
 		079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_avmplus_peephole.cpp; path = ../../../extensions/ST_avmplus_peephole.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_basics.cpp; path = ../../../extensions/ST_mmgc_basics.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9C40F3A8BD90031D1B4 /* VMPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VMPI.h; path = ../../../VMPI/VMPI.h; sourceTree = SOURCE_ROOT; };
-		079DFA880F3A96BD0031D1B4 /* armbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armbuild.h; path = ../../../MMgc/armbuild.h; sourceTree = SOURCE_ROOT; };
 		079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FixedAlloc.cpp; path = ../../../MMgc/FixedAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		079DFA8A0F3A96BD0031D1B4 /* FixedAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FixedAlloc.h; path = ../../../MMgc/FixedAlloc.h; sourceTree = SOURCE_ROOT; };
 		079DFA8B0F3A96BD0031D1B4 /* FixedMalloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FixedMalloc.cpp; path = ../../../MMgc/FixedMalloc.cpp; sourceTree = SOURCE_ROOT; };
@@ -737,7 +734,6 @@
 		079DFAA70F3A96BE0031D1B4 /* GCThreads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCThreads.h; path = ../../../MMgc/GCThreads.h; sourceTree = SOURCE_ROOT; };
 		079DFAA80F3A96BE0031D1B4 /* GCTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCTypes.h; path = ../../../MMgc/GCTypes.h; sourceTree = SOURCE_ROOT; };
 		079DFAA90F3A96BE0031D1B4 /* GCWeakRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCWeakRef.h; path = ../../../MMgc/GCWeakRef.h; sourceTree = SOURCE_ROOT; };
-		079DFAAA0F3A96BE0031D1B4 /* macbuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = macbuild.h; path = ../../../MMgc/macbuild.h; sourceTree = SOURCE_ROOT; };
 		079DFAAC0F3A96BE0031D1B4 /* MMgc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MMgc.h; path = ../../../MMgc/MMgc.h; sourceTree = SOURCE_ROOT; };
 		079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StaticAssert.h; path = ../../../MMgc/StaticAssert.h; sourceTree = SOURCE_ROOT; };
 		079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeTraits.h; path = ../../../MMgc/TypeTraits.h; sourceTree = SOURCE_ROOT; };
@@ -1328,10 +1324,6 @@
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
-				079DFA880F3A96BD0031D1B4 /* armbuild.h */,
-				079DFAAA0F3A96BE0031D1B4 /* macbuild.h */,
-				0709B6C50F98DBCB001A6E61 /* unixbuild.h */,
-				0709B6C60F98DBCB001A6E61 /* winbuild.h */,
 				07DA49E70F80C906007939FD /* manifest.mk */,
 			);
 			name = mmgc;
