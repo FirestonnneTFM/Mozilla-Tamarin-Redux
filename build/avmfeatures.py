@@ -47,6 +47,8 @@ def featureSettings(o):
     args = ""
     if o.getBoolArg("debugger"):
         args += "-DAVMFEATURE_DEBUGGER=1 "
+    if o.getBoolArg("allocation-sampler"):
+        args += "-DAVMFEATURE_ALLOCATION_SAMPLER=1 "
     if o.getBoolArg("vtune"):
         args += "-DAVMFEATURE_VTUNE=1 "
     if o.getBoolArg("jit"):
@@ -73,4 +75,10 @@ def featureSettings(o):
         args += "-DAVMFEATURE_CPP_EXCEPTIONS=1 "
     if o.getBoolArg("interior-pointers"):
         args += "-DAVMFEATURE_INTERIOR_POINTERS=1 "
+    if o.getBoolArg("jni"):
+        args += "-DAVMFEATURE_JNI=1 "
+    if o.getBoolArg("heap-alloca"):
+        args += "-DAVMFEATURE_HEAP_ALLOCA=1 "
+    if o.getBoolArg("static-function_ptrs"):
+        args += "-DAVMFEATURE_STATIC_FUNCTION_PTRS=1 "
     return args

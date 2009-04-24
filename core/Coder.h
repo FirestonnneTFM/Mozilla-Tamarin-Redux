@@ -39,10 +39,6 @@
 #ifndef __avmplus_Coder__
 #define __avmplus_Coder__
 
-#if defined AVMPLUS_WORD_CODE && defined FEATURE_NANOJIT
-  #define FEATURE_TEEWRITER
-#endif
-
 namespace avmplus
 {
 	class CodeWriter {

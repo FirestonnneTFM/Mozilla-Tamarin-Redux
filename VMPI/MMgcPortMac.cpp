@@ -52,17 +52,10 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
-#if defined(__MACH__)
-	#include <mach/mach.h>
-#endif
+#include <mach/mach.h>
+#include <mach/mach_time.h>
 
-#ifdef DARWIN
-	#include <mach/mach_time.h>
-#endif
-
-#ifdef _MAC
-	#define MAP_ANONYMOUS MAP_ANON
-#endif
+#define MAP_ANONYMOUS MAP_ANON
 
 static const int kOSX105 = 9;
 

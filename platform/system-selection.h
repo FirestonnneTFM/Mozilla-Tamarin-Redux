@@ -152,15 +152,12 @@
     #if __BYTE_ORDER == LITTLE_ENDIAN
       #define AVMSYSTEM_LITTLE_ENDIAN   1
       #define AVMSYSTEM_BIG_ENDIAN      0
-    #else
+      #if __FLOAT_WORD_ORDER == BIG_ENDIAN
+        #define AVMSYSTEM_DOUBLE_MSW_FIRST 1
+      #endif
+	#else
       #define AVMSYSTEM_LITTLE_ENDIAN   0
       #define AVMSYSTEM_BIG_ENDIAN      1
-    #endif
-    // HACK - fixme!  This is a feature just as much as the others.
-    #if __FLOAT_WORD_ORDER == BIG_ENDIAN
-    // old arm linux abi is little endian, but the two 32bit words
-    // of a double value are in big endian order.
-      #define AVMPLUS_ARM_OLDABI
     #endif
   #endif
 #elif AVMSYSTEM_PPC || AVMSYSTEM_SPARC
@@ -168,6 +165,10 @@
   #define AVMSYSTEM_BIG_ENDIAN          1
 #else
   #error "Error in test to determine endianness"
+#endif
+
+#ifndef AVMSYSTEM_DOUBLE_MSW_FIRST
+  #define AVMSYSTEM_DOUBLE_MSW_FIRST 0
 #endif
 
 #endif

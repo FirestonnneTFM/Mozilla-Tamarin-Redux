@@ -88,6 +88,7 @@
 
 #include <inttypes.h>
 #include <e32std.h>
+#include <e32cmn.h>
 
 #ifdef __GCC__
 #define REALLY_INLINE inline __attribute__((always_inline))

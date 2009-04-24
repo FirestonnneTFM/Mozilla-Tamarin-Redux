@@ -42,10 +42,6 @@
 
 #include "VMPI.h"
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
-
 namespace MMgc
 {
     typedef void* (*GCMallocFuncPtr)(size_t size);

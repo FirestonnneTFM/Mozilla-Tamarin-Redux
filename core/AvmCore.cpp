@@ -249,12 +249,6 @@ namespace avmplus
 		booleanStrings[0] = kfalse;
         booleanStrings[1] = ktrue;
 
-#ifdef AVMPLUS_INTERNINT_CACHE
-		// See code in AvmCore::internInt
-		for (int i=0 ; i < 256 ; i++ )
-			index_strings[i] = NULL;
-#endif
-
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
 
@@ -2924,31 +2918,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internInt(int value)
     {
-#ifdef AVMPLUS_INTERNINT_CACHE
-		// This simple cache of interned strings representing integers greatly benefits
-		// array-heavy code in the interpreter, at least for the time being (2008-08-13).
-		// But it would be better not to intern integers at all.
-		//
-		// #ifdeffed out on 2008-09-15 because the integer lookup optimizations in the
-		// interpreter ought to make it unnecessary; code should be removed later if it
-		// is not re-enabled.
-		
-		int index = value & 255;
-		if (value >= 0 && index_strings[index] != NULL && index_strings[index]->value == value)
-			return index_strings[index]->string;
-#endif	
-		Stringp s = internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
-
-#ifdef AVMPLUS_INTERNINT_CACHE
-		if (value >= 0) {
-			if (index_strings[index] == NULL)
-				index_strings[index] = new (GetGC()) IndexString;
-			index_strings[index]->value = value;
-			index_strings[index]->string = s;
-		}
-#endif
-
-		return s;
+		return internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
     }
 
 	Stringp AvmCore::internUint32 (uint32 ui)

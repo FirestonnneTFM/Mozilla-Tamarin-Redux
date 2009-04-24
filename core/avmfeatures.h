@@ -50,12 +50,16 @@
 #undef AVMPLUS_BIG_ENDIAN
 #undef VMCFG_LITTLE_ENDIAN
 #undef AVMPLUS_LITTLE_ENDIAN
+#undef AVM10_BIG_ENDIAN
+#undef VMCFG_DOUBLE_MSW_FIRST
 #undef VMCFG_IA32
 #undef MMGC_IA32
 #undef AVMPLUS_IA32
+#undef AVMPLUS_UNALIGNED_ACCESS
 #undef VMCFG_AMD64
 #undef MMGC_AMD64
 #undef AVMPLUS_AMD64
+#undef AVMPLUS_UNALIGNED_ACCESS
 #undef VMCFG_ARM
 #undef MMGC_ARM
 #undef AVMPLUS_ARM
@@ -71,9 +75,12 @@
 #undef AVMPLUS_WIN32
 #undef VMCFG_DEBUGGER
 #undef VMCFG_VERIFYALL
+#undef AVMPLUS_VERBOSE
 #undef DEBUGGER
 #undef AVMPLUS_VERIFYALL
-#undef VMCFG_VTUNE
+#undef AVMPLUS_SAMPLER
+#undef VTUNE
+#undef AVMPLUS_VERBOSE
 #undef VMCFG_NANOJIT
 #undef FEATURE_NANOJIT
 #undef VMCFG_INTERPRETER
@@ -94,6 +101,9 @@
 #undef MMGC_USE_SYSTEM_MALLOC
 #undef MMGC_ENABLE_CPP_EXCEPTIONS
 #undef MMGC_INTERIOR_PTRS
+#undef AVMPLUS_WITH_JNI
+#undef AVMPLUS_HEAP_ALLOCA
+#undef AVMPLUS_STATIC_POINTERS
 
 
 
@@ -132,6 +142,18 @@
  */
 #if !defined AVMSYSTEM_LITTLE_ENDIAN || AVMSYSTEM_LITTLE_ENDIAN != 0 && AVMSYSTEM_LITTLE_ENDIAN != 1
 #  error "AVMSYSTEM_LITTLE_ENDIAN must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMSYSTEM_DOUBLE_MSW_FIRST
+ *
+ * Selects a reverse floating-point layout on little-endian systems:
+ * the most significant word (containing the sign, exponent, and most
+ * significant bits of the significand) are at the lower word address.
+ * Each word is stored little-endian, however.
+ */
+#if !defined AVMSYSTEM_DOUBLE_MSW_FIRST || AVMSYSTEM_DOUBLE_MSW_FIRST != 0 && AVMSYSTEM_DOUBLE_MSW_FIRST != 1
+#  error "AVMSYSTEM_DOUBLE_MSW_FIRST must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -210,19 +232,44 @@
 
 /* AVMFEATURE_DEBUGGER
  *
- * Selects the AVM debugger API, including retaining debug information at run-time.
+ * Selects the AVM debugger API, including retaining debug information at
+ * run-time and human-readable error messages for run-time errors.
  * 
- * There is a slight performance penalty to enabling this; clients that want
- * maximal execution performance and don't care about debugging should disable it.
+ * There is a performance penalty to enabling this; clients that want
+ * maximal execution performance and don't care about debugging should 
+ * disable it.
+ * 
+ * If you enable the debugger you may want to consider enabling support for
+ * specific language strings for error messages in order to avoid getting
+ * them all.  See the AVMPLUS_ERROR_LANG_ macros in core/ErrorConstants.h.
+ * It's easiest to define the ones you want in core/avmbuild.h.
  */
 #if !defined AVMFEATURE_DEBUGGER || AVMFEATURE_DEBUGGER != 0 && AVMFEATURE_DEBUGGER != 1
 #  error "AVMFEATURE_DEBUGGER must be defined and 0 or 1 (only)."
 #endif
 
 
+/* AVMFEATURE_ALLOCATION_SAMPLER
+ *
+ * Enable the sample-based memory profiler.  This makes allocation a
+ * little more expensive if a sampler callback is not installed, and
+ * more expensive still if it is installed.  
+ * 
+ * FIXME: more information needed.
+ * 
+ * Note that this is enabled always by AVMFEATURE_DEBUGGER.
+ *  * 
+ * It is known that the Flash Player wants to enable this if SCRIPT_DEBUGGER
+ * is enabled in the Player code.
+ */
+#if !defined AVMFEATURE_ALLOCATION_SAMPLER || AVMFEATURE_ALLOCATION_SAMPLER != 0 && AVMFEATURE_ALLOCATION_SAMPLER != 1
+#  error "AVMFEATURE_ALLOCATION_SAMPLER must be defined and 0 or 1 (only)."
+#endif
+
+
 /* AVMFEATURE_VTUNE
  *
- * Selects vtune profiling.  FIXME more here ...
+ * Selects vtune profiling.  FIXME: more information needed.
  */
 #if !defined AVMFEATURE_VTUNE || AVMFEATURE_VTUNE != 0 && AVMFEATURE_VTUNE != 1
 #  error "AVMFEATURE_VTUNE must be defined and 0 or 1 (only)."
@@ -369,6 +416,46 @@
 #  error "AVMFEATURE_INTERIOR_POINTERS must be defined and 0 or 1 (only)."
 #endif
 
+
+/* AVMFEATURE_JNI
+ *
+ * Enable interfacing to Java so you can access java methods/properties like 
+ * native AS properties; e.g.
+ * var hello = JObject.create("java.lang.String", " hello world ");  
+ * print(hello.indexOf('o'));
+ */
+#if !defined AVMFEATURE_JNI || AVMFEATURE_JNI != 0 && AVMFEATURE_JNI != 1
+#  error "AVMFEATURE_JNI must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_HEAP_ALLOCA
+ *
+ * If enabled then always divert VMPI_alloca() to a separately managed stack,
+ * to avoid blowing the stack on small systems or to support systems that
+ * don't provide alloca().  If disabled then smallish allocations are handled
+ * by the built-in alloca() (which must be provided) and larger allocations
+ * are handled by diverting to a separately managed stack; the latter case is
+ * mainly a security issue, as alloca() will do strange things if given sufficiently
+ * large requests.
+ */
+#if !defined AVMFEATURE_HEAP_ALLOCA || AVMFEATURE_HEAP_ALLOCA != 0 && AVMFEATURE_HEAP_ALLOCA != 1
+#  error "AVMFEATURE_HEAP_ALLOCA must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_STATIC_FUNCTION_PTRS
+ *
+ * Enable this if you are building on a system that allows static
+ * initialization of global constant function pointers (almost all systems
+ * except some mobile-phone and other embedded operating systems).
+ * 
+ * Disabling this will increase code size slightly.
+ */
+#if !defined AVMFEATURE_STATIC_FUNCTION_PTRS || AVMFEATURE_STATIC_FUNCTION_PTRS != 0 && AVMFEATURE_STATIC_FUNCTION_PTRS != 1
+#  error "AVMFEATURE_STATIC_FUNCTION_PTRS must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -387,6 +474,11 @@
 #if AVMSYSTEM_LITTLE_ENDIAN
 #  if AVMSYSTEM_BIG_ENDIAN
 #    error "AVMSYSTEM_BIG_ENDIAN is precluded for AVMSYSTEM_LITTLE_ENDIAN"
+#  endif
+#endif
+#if AVMSYSTEM_DOUBLE_MSW_FIRST
+#  if !AVMSYSTEM_LITTLE_ENDIAN
+#    error "AVMSYSTEM_LITTLE_ENDIAN is required for AVMSYSTEM_DOUBLE_MSW_FIRST"
 #  endif
 #endif
 #if AVMSYSTEM_IA32
@@ -410,6 +502,7 @@
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_SPARC"
 #  endif
 #endif
+
 
 
 
@@ -439,6 +532,9 @@
 #    error "AVMFEATURE_USE_SYSTEM_MALLOC is required for AVMFEATURE_CPP_EXCEPTIONS"
 #  endif
 #endif
+
+
+
 
 
 
@@ -477,6 +573,12 @@
 #if AVMSYSTEM_LITTLE_ENDIAN
 #  define AVMPLUS_LITTLE_ENDIAN
 #endif
+#if AVMSYSTEM_LITTLE_ENDIAN
+#  define AVM10_BIG_ENDIAN
+#endif
+#if AVMSYSTEM_DOUBLE_MSW_FIRST
+#  define VMCFG_DOUBLE_MSW_FIRST
+#endif
 #if AVMSYSTEM_IA32
 #  define VMCFG_IA32
 #endif
@@ -486,6 +588,9 @@
 #if AVMSYSTEM_IA32
 #  define AVMPLUS_IA32
 #endif
+#if AVMSYSTEM_IA32
+#  define AVMPLUS_UNALIGNED_ACCESS
+#endif
 #if AVMSYSTEM_AMD64
 #  define VMCFG_AMD64
 #endif
@@ -494,6 +599,9 @@
 #endif
 #if AVMSYSTEM_AMD64
 #  define AVMPLUS_AMD64
+#endif
+#if AVMSYSTEM_AMD64
+#  define AVMPLUS_UNALIGNED_ACCESS
 #endif
 #if AVMSYSTEM_ARM
 #  define VMCFG_ARM
@@ -541,13 +649,22 @@
 #  define VMCFG_VERIFYALL
 #endif
 #if AVMFEATURE_DEBUGGER
+#  define AVMPLUS_VERBOSE
+#endif
+#if AVMFEATURE_DEBUGGER
 #  define DEBUGGER
 #endif
 #if AVMFEATURE_DEBUGGER
 #  define AVMPLUS_VERIFYALL
 #endif
+#if AVMFEATURE_ALLOCATION_SAMPLER
+#  define AVMPLUS_SAMPLER
+#endif
 #if AVMFEATURE_VTUNE
-#  define VMCFG_VTUNE
+#  define VTUNE
+#endif
+#if AVMFEATURE_VTUNE
+#  define AVMPLUS_VERBOSE
 #endif
 #if AVMFEATURE_JIT
 #  define VMCFG_NANOJIT
@@ -608,6 +725,15 @@
 #endif
 #if AVMFEATURE_INTERIOR_POINTERS
 #  define MMGC_INTERIOR_PTRS
+#endif
+#if AVMFEATURE_JNI
+#  define AVMPLUS_WITH_JNI
+#endif
+#if AVMFEATURE_HEAP_ALLOCA
+#  define AVMPLUS_HEAP_ALLOCA
+#endif
+#if AVMFEATURE_STATIC_FUNCTION_PTRS
+#  define AVMPLUS_STATIC_POINTERS
 #endif
 
 #ifdef AVMSHELL_BUILD

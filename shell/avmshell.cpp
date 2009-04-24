@@ -41,7 +41,7 @@
 #  define AVMSHELL_PROJECTOR_SUPPORT
 #endif
 
-#define VMCFG_WORKERTHREADS
+//#define VMCFG_WORKERTHREADS
 
 #if (defined WIN32 && !defined UNDER_CE) || defined AVMPLUS_UNIX
 bool P4Available();

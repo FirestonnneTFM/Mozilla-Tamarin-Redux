@@ -36,12 +36,4 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/**
- * Define this to get stack traces.  Helps with memory leaks.
- */
-#ifdef _DEBUG
-#define MMGC_MEMORY_INFO
-#endif
-
-#define MMGC_MEMORY_PROFILER
-
+// empty file

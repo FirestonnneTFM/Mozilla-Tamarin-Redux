@@ -92,6 +92,7 @@
 
 #include <CoreServices/CoreServices.h>   // for MakeDataExecutable
 #include <mach/mach.h>                   // for vm_protect()
+#include <AvailabilityMacros.h>
 
 #include <sys/mman.h>
 #include <errno.h>
@@ -128,5 +129,10 @@ typedef void *maddr_ptr;
 #ifdef __GCC__
 #define REALLY_INLINE inline __attribute__((always_inline))
 #endif
+
+// "verify" is a Mac thing, it gets in the way of our code
+// FIXME: should clean up our code, as this #undef will leak into the AVM embedder's code
+
+#undef verify
 
 #endif // __avmplus_mac_platform__

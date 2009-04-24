@@ -43,33 +43,16 @@
     #include <CoreServices/CoreServices.h>
 #endif
 
-#ifndef __MACH__
-	#include <windows.h>
-#endif
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
 void VMPI_debugLog(const char* message)
 {
-#ifdef DARWIN
-		VMPI_log(message);
-#else
-		char buf[256];
-		VMPI_strncpy(buf, message, sizeof(buf)-1);
-		buf[sizeof(buf)-1] = '\0';
-		::CopyCStringToPascal(buf, (StringPtr)buf);
-		DebugStr((StringPtr) buf);
-
-#endif /* DARWIN */
+	VMPI_log(message);
 }
 
 void VMPI_debugBreak()
 {
-#ifdef DARWIN
 	abort();
-#else
-	exit(1);
-#endif
 }

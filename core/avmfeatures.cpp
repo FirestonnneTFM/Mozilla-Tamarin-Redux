@@ -62,6 +62,9 @@ const char * const avmfeatures = ""
   #if AVMSYSTEM_LITTLE_ENDIAN
     "AVMSYSTEM_LITTLE_ENDIAN;"
   #endif
+  #if AVMSYSTEM_DOUBLE_MSW_FIRST
+    "AVMSYSTEM_DOUBLE_MSW_FIRST;"
+  #endif
   #if AVMSYSTEM_IA32
     "AVMSYSTEM_IA32;"
   #endif
@@ -88,6 +91,9 @@ const char * const avmfeatures = ""
   #endif
   #if AVMFEATURE_DEBUGGER
     "AVMFEATURE_DEBUGGER;"
+  #endif
+  #if AVMFEATURE_ALLOCATION_SAMPLER
+    "AVMFEATURE_ALLOCATION_SAMPLER;"
   #endif
   #if AVMFEATURE_VTUNE
     "AVMFEATURE_VTUNE;"
@@ -127,6 +133,15 @@ const char * const avmfeatures = ""
   #endif
   #if AVMFEATURE_INTERIOR_POINTERS
     "AVMFEATURE_INTERIOR_POINTERS;"
+  #endif
+  #if AVMFEATURE_JNI
+    "AVMFEATURE_JNI;"
+  #endif
+  #if AVMFEATURE_HEAP_ALLOCA
+    "AVMFEATURE_HEAP_ALLOCA;"
+  #endif
+  #if AVMFEATURE_STATIC_FUNCTION_PTRS
+    "AVMFEATURE_STATIC_FUNCTION_PTRS;"
   #endif
 ;
 

@@ -50,8 +50,6 @@
 
 #ifdef _DEBUG
 
-#include <stdio.h>
-
 namespace MMgc
 {
 	GC *gc;
