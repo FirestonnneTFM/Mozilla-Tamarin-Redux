@@ -158,7 +158,7 @@ namespace avmplus
 
 	void MethodInfo::init_activationTraits(Traits* t) 
 	{ 
-		AvmAssert(_activationScopeOrTraits == uintptr_t(0) | IS_TRAITS);
+		AvmAssert(_activationScopeOrTraits == (uintptr_t(0) | IS_TRAITS));
 		WB(pool()->core->GetGC(), this, &_activationScopeOrTraits, uintptr_t(t) | IS_TRAITS); 
 	}
 
