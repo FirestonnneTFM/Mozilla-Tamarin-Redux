@@ -55,7 +55,9 @@ namespace avmplus
 	 */
 	MethodInfo::MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits) :
 		_implGPR(interfaceTramp),
-		_declaringTraits(declTraits),
+		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
+		_declaringScopeOrTraits(uintptr_t(0) | IS_TRAITS),
+		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
 		_pool(declTraits->pool),
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
@@ -71,8 +73,8 @@ namespace avmplus
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
 		_implGPR(verifyEnter),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
-		_declaringTraits(declTraits),
-		_activationTraits(NULL),
+		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
+		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
 		_pool(declTraits->pool),
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
@@ -89,8 +91,8 @@ namespace avmplus
 							const NativeMethodInfo* native_info) : 
 		_implGPR(verifyEnter),
 		_msref(pool->core->GetGC()->emptyWeakRef),
-		_declaringTraits(NULL),
-		_activationTraits(NULL),
+		_declaringScopeOrTraits(uintptr_t(0) | IS_TRAITS),
+		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
 		_pool(pool),
 		_abc_info_pos(abc_info_pos),
 		_flags(abcFlags),
@@ -116,6 +118,56 @@ namespace avmplus
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_methodinfo, this); )
 	}
 #endif
+
+	Traits* MethodInfo::declaringTraits() const 
+	{ 
+		if (_declaringScopeOrTraits & IS_TRAITS)
+			return (Traits*)(_declaringScopeOrTraits & ~IS_TRAITS);
+
+		return ((const ScopeTypeChain*)(_declaringScopeOrTraits))->traits(); 
+	}
+
+	const ScopeTypeChain* MethodInfo::declaringScope() const 
+	{ 
+		AvmAssert(!(_declaringScopeOrTraits & IS_TRAITS));
+		AvmAssert(_declaringScopeOrTraits != 0);
+		return ((const ScopeTypeChain*)(_declaringScopeOrTraits)); 
+	}
+
+	void MethodInfo::init_declaringScope(const ScopeTypeChain* s) 
+	{ 
+		AvmAssert(_declaringScopeOrTraits & IS_TRAITS);
+		AvmAssert(((Traits*)(_declaringScopeOrTraits & ~IS_TRAITS)) == s->traits());
+		WB(pool()->core->GetGC(), this, &_declaringScopeOrTraits, uintptr_t(s)); 
+	}
+
+	Traits* MethodInfo::activationTraits() const 
+	{ 
+		if (_activationScopeOrTraits & IS_TRAITS)
+			return (Traits*)(_activationScopeOrTraits & ~IS_TRAITS);
+
+		return ((const ScopeTypeChain*)(_activationScopeOrTraits))->traits(); 
+	}
+
+	const ScopeTypeChain* MethodInfo::activationScope() const 
+	{ 
+		AvmAssert(!(_activationScopeOrTraits & IS_TRAITS));
+		AvmAssert(_activationScopeOrTraits != 0);
+		return ((const ScopeTypeChain*)(_activationScopeOrTraits)); 
+	}
+
+	void MethodInfo::init_activationTraits(Traits* t) 
+	{ 
+		AvmAssert(_activationScopeOrTraits == uintptr_t(0) | IS_TRAITS);
+		WB(pool()->core->GetGC(), this, &_activationScopeOrTraits, uintptr_t(t) | IS_TRAITS); 
+	}
+
+	void MethodInfo::init_activationScope(const ScopeTypeChain* s) 
+	{ 
+		AvmAssert(_activationScopeOrTraits & IS_TRAITS);
+		AvmAssert(((Traits*)(_activationScopeOrTraits & ~IS_TRAITS)) == s->traits());
+		WB(pool()->core->GetGC(), this, &_activationScopeOrTraits, uintptr_t(s)); 
+	}
 
     void MethodInfo::setInterpImpl() 
 	{
@@ -597,9 +649,10 @@ namespace avmplus
 		AvmAssert(!(_flags & PROTOFUNC));
 // end AVMPLUS_UNCHECKED_HACK
 		
-		if (!_declaringTraits)
+		AvmAssert(_declaringScopeOrTraits & IS_TRAITS);
+		if (_declaringScopeOrTraits == (uintptr_t(0) | IS_TRAITS))
 		{
-			_declaringTraits = traits;
+			WB(pool()->core->GetGC(), this, &_declaringScopeOrTraits, uintptr_t(traits) | IS_TRAITS); 
 			_flags |= NEED_CLOSURE;
 			return true;
 		}
@@ -614,16 +667,16 @@ namespace avmplus
 		}
 	}
 
-	void MethodInfo::makeIntoPrototypeFunction(const Toplevel* toplevel)
+	Traits* MethodInfo::makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope)
 	{
 		// Duplicate function definitions can happen with well formed ABC data.  We need
 		// to clear out data on AbstractionFunction so it can correctly be re-initialized.
 		// If our old function is ever used incorrectly, we throw an verify error in 
 		// MethodEnv::coerceEnter.
-		if (this->_declaringTraits)
+		if (_declaringScopeOrTraits != (uintptr_t(0) | IS_TRAITS))
 		{
 			this->_flags &= ~RESOLVED;
-			this->_declaringTraits = NULL;
+			this->_declaringScopeOrTraits = uintptr_t(0) | IS_TRAITS;
 			this->_msref = pool()->core->GetGC()->emptyWeakRef;
 		}
 // begin AVMPLUS_UNCHECKED_HACK
@@ -637,10 +690,12 @@ namespace avmplus
 
 		// type of F is synthetic subclass of Function, with a unique
 		// [[call]] property and a unique scope
-
-		const int method_id = this->method_id();
-		Traits* ftraits = Traits::newFunctionTraits(toplevel, pool(), method_id);
-		this->_declaringTraits = ftraits;
+		AvmCore* core = pool()->core;
+		Traits* ftraits = fscope->traits();
+		AvmAssert(fscope->traits() == core->traits.function_itraits);
+		WB(core->GetGC(), this, &_declaringScopeOrTraits, uintptr_t(fscope)); 
+		
+		return ftraits;
 	}
 	
 	/**
@@ -889,6 +944,20 @@ namespace avmplus
 			_flags |= RESOLVED;
 		}
 	}
+	
+	Traits* MethodInfo::resolveActivation(const Toplevel* toplevel)
+	{
+		Traits* atraits = this->activationTraits();
+		
+		const ScopeTypeChain* ascope = this->declaringScope()->cloneWithNewTraits(pool()->core->GetGC(), atraits);
+
+		atraits->resolveSignatures(toplevel);
+		atraits->init_declaringScopes(ascope);
+
+		this->init_activationScope(ascope);
+		
+		return atraits;
+	}
 
 #ifdef DEBUGGER
 	uint32 MethodInfo::size()  
@@ -915,6 +984,11 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES
 	Stringp MethodInfo::getMethodName() const 
 	{
+		return getMethodNameWithTraits(this->declaringTraits());
+	}
+	
+	Stringp MethodInfo::getMethodNameWithTraits(Traits* t) const 
+	{
 		Stringp name = NULL;
 		const int method_id = this->method_id();
 		
@@ -928,7 +1002,6 @@ namespace avmplus
 				name = core->kanonymousFunc;	
 			}
 			
-			Traitsp t = this->declaringTraits();
 			if (t)
 			{
 				Stringp tname = t->format(core);

@@ -74,7 +74,9 @@ namespace avmplus
 #endif
 		virtual Atom construct(int argc, Atom* argv);
 		virtual Atom call(int argc, Atom* argv);
+		virtual CodeContext* getFunctionCodeContext() const;
 		int get_length();
+		virtual Stringp implToString() const;
 	protected:
 		virtual Atom get_coerced_receiver(Atom a);
 	protected:

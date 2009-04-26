@@ -133,6 +133,10 @@ namespace avmplus
 		Traits* boolean_ctraits;
 		Traits* vector_ctraits;
 
+		const ScopeTypeChain*	object_istc;
+		const ScopeTypeChain*	class_istc;
+
+
 	private:
 		Traits* findCTraits(const char* name, PoolObject* pool);
 	};

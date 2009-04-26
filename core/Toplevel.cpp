@@ -53,22 +53,25 @@ namespace avmplus
 		AvmCore* core = this->core();
 		MMgc::GC* gc = core->GetGC();
 		PoolObject* pool = abcEnv->pool();
-		Traits* mainTraits = pool->scripts[pool->scriptCount-1]->declaringTraits();
-
-		// ISSUE can we just make this the public namespace?
-		ScopeChain* emptyScope = ScopeChain::create(gc, mainTraits->scope(), NULL, core->newNamespace(core->kEmptyString));
+		Traits* mainTraits = pool->getScriptTraits(pool->scriptCount()-1);
 
 			// create a temp object vtable to use, since the real one isn't created yet
 			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
 			// of Object and Class have the right scope.
-		object_ivtable = core->newVTable(core->traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
-		object_ivtable->resolveSignatures();
+		object_ivtable = core->newVTable(core->traits.object_itraits, NULL, NULL);
+		ScopeChain* object_iscope = ScopeChain::create(gc, object_ivtable, abcEnv, core->traits.object_istc, NULL, core->newNamespace(core->kEmptyString));
+		object_ivtable->resolveSignatures(object_iscope);
 
 		// global objects are subclasses of Object
-		VTable* mainVTable = core->newVTable(mainTraits, object_ivtable, emptyScope, abcEnv, this);
-		ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, mainVTable);
+		bool wasResolved = mainTraits->isResolved();
+		VTable* mainVTable = core->newVTable(mainTraits, object_ivtable, this);
+		AvmAssert(mainTraits->isResolved());
+		if (!wasResolved)
+			mainTraits->init_declaringScopes(ScopeTypeChain::createEmpty(core->GetGC(), mainTraits));
+		ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, mainVTable, abcEnv);
 		mainVTable->init = main;
-		mainVTable->resolveSignatures();
+		toplevel_scope = ScopeChain::create(gc, mainVTable, abcEnv, mainTraits->init->declaringScope(), NULL, core->newNamespace(core->kEmptyString));
+		mainVTable->resolveSignatures(toplevel_scope);
 
 		_global = new (gc, mainVTable->getExtraSize()) ScriptObject(mainVTable, NULL);
 		main->global = _global;
@@ -76,8 +79,9 @@ namespace avmplus
 		// create temporary vtable for Class, so we have something for OP_newclass
 		// to use when it creates Object$ and Class$.  once that happens, we replace
 		// with the real Class$ vtable.
-		class_ivtable = core->newVTable(core->traits.class_itraits, object_ivtable, emptyScope, abcEnv, this);
-		class_ivtable->resolveSignatures();
+		class_ivtable = core->newVTable(core->traits.class_itraits, object_ivtable, this);
+		ScopeChain* class_iscope = ScopeChain::create(gc, class_ivtable, abcEnv, core->traits.class_istc, NULL, core->newNamespace(core->kEmptyString));
+		class_ivtable->resolveSignatures(class_iscope);
 
 		core->exportDefs(mainTraits, main);
 	}
@@ -92,7 +96,7 @@ namespace avmplus
 	ClassClosure* Toplevel::findClassInPool(int class_id, PoolObject* pool)
 	{
 		Traits* traits = pool->getClassTraits(class_id)->itraits;
-		Multiname qname(traits->ns, traits->name);
+		Multiname qname(traits->ns(), traits->name());
 		AvmAssert(_global != NULL);
 		ScriptObject* container = _global->vtable->init->finddef(&qname);
 

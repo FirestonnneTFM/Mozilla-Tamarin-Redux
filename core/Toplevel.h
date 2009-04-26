@@ -361,6 +361,10 @@ namespace avmplus
 	public:
 		DWB(VTable*)				object_ivtable;
 		DWB(VTable*)				class_ivtable;
+		DWB(ScopeChain*)			object_cscope;
+		DWB(ScopeChain*)			vectorobj_cscope;
+		DWB(ScopeChain*)			vectorobj_iscope;
+		DWB(ScopeChain*)			toplevel_scope;
 	public:
 		DRCWB(ArrayClass*)			arrayClass;
 		DRCWB(BooleanClass*)		booleanClass;

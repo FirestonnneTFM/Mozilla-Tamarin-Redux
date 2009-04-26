@@ -51,7 +51,7 @@ namespace avmplus
 #endif
 	{
 	private:
-		inline ScopeTypeChain(int _size, int _fullsize) : size(_size), fullsize(_fullsize) { }
+		inline ScopeTypeChain(int _size, int _fullsize, Traits* traits) : size(_size), fullsize(_fullsize), _traits(traits) { }
 
 	public:
 
@@ -59,8 +59,12 @@ namespace avmplus
 		virtual ~ScopeTypeChain();
 #endif
 
-		static ScopeTypeChain* create(MMgc::GC* gc, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra);
-		inline static ScopeTypeChain* createEmpty(MMgc::GC* gc) { return create(gc, NULL, NULL, NULL, NULL); }
+		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra);
+		inline static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits) { return create(gc, traits, NULL, NULL, NULL, NULL); }
+
+		const ScopeTypeChain* cloneWithNewTraits(MMgc::GC* gc, Traits* traits) const;
+
+		inline Traits* traits() const { return _traits; }
 
 		inline Traits* getScopeTraitsAt(uint32_t i) const { return (Traits*)(_scopes[i] & ~ISWITH); }
 		inline bool getScopeIsWithAt(uint32_t i) const { return (_scopes[i] & ISWITH) != 0; }
@@ -80,6 +84,7 @@ namespace avmplus
 		const int32_t		size;
 		const int32_t		fullsize;
 	private:
+		Traits* const		_traits;
 		uintptr_t			_scopes[1];	// actual length = fullsize;
 	// ------------------------ DATA SECTION END
     };
@@ -93,8 +98,8 @@ namespace avmplus
 	class ScopeChain : public MMgc::GCObject
 #endif
 	{
-		inline ScopeChain(const ScopeTypeChain* scopeTraits, Namespacep dxns) : 
-			_scopeTraits(scopeTraits), _defaultXmlNamespace(dxns)
+		inline ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns) : 
+			_vtable(vtable), _abcEnv(abcEnv), _scopeTraits(scopeTraits), _defaultXmlNamespace(dxns)
 		{
 		}
 		
@@ -113,8 +118,13 @@ namespace avmplus
 			When it changes, it's new valuable is visible in all closures in scope.
 		*/
 		
-		static ScopeChain* create(MMgc::GC* gc, const ScopeTypeChain* scopeTraits, const ScopeChain* outer, Namespacep dxns);
+		static ScopeChain* create(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, const ScopeChain* outer, Namespacep dxns);
 
+		ScopeChain* cloneWithNewVTable(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits = NULL);
+
+		inline VTable* vtable() const { return _vtable; }
+		inline AbcEnv* abcEnv() const { return _abcEnv; }
+		
 		inline const ScopeTypeChain* scopeTraits() const { return _scopeTraits; }
 		inline int getSize() const { return _scopeTraits->size; }
 		inline Atom getScope(int i) const { AvmAssert(i >= 0 && i < _scopeTraits->size); return _scopes[i]; }
@@ -140,6 +150,8 @@ namespace avmplus
 
 	// ------------------------ DATA SECTION BEGIN
 	private:
+		VTable* const					_vtable;
+		AbcEnv* const					_abcEnv;
 		const ScopeTypeChain* const		_scopeTraits;
 		DRCWB(Namespacep) const			_defaultXmlNamespace;
 		Atom							_scopes[1];			// actual length == size

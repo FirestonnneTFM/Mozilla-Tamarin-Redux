@@ -80,8 +80,6 @@ namespace avmplus
 			return vtable->toplevel();
 		}
 
-		DomainEnv* domainEnv() const;
-
 		virtual InlineHashtable* getTable() const {
 			AvmAssert(vtable->traits->getHashtableOffset() != 0);
 			return (InlineHashtable*)((byte*)this + vtable->traits->getHashtableOffset());
@@ -187,6 +185,8 @@ namespace avmplus
 
 		// return true iff the object is a toplevel script init object.
         bool isGlobalObject() const;
+
+		virtual Stringp implToString() const;
 
 #ifdef AVMPLUS_VERBOSE
 	public:

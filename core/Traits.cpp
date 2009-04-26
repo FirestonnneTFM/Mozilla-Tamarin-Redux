@@ -363,7 +363,6 @@ namespace avmplus
 	void TraitsBindings::addOneInterface(Traitsp intf)
 	{
 		AvmAssert(intf != NULL);
-		AvmAssert(intf->posType() != TRAITSTYPE_FUNCTION);
 		AvmAssert(intf->posType() != TRAITSTYPE_NVA);
 		AvmAssert(intf->posType() != TRAITSTYPE_RT);
 
@@ -767,7 +766,6 @@ namespace avmplus
 #ifdef _DEBUG
 		switch (posType)
 		{
-			case TRAITSTYPE_FUNCTION:
 			case TRAITSTYPE_NVA:
 			case TRAITSTYPE_RT:
 				AvmAssert(m_traitsPos == 0);
@@ -796,7 +794,7 @@ namespace avmplus
 							TraitsPosPtr traitsPos,
 							TraitsPosType posType)
     {
-		AvmAssert(posType != TRAITSTYPE_CATCH && posType != TRAITSTYPE_FUNCTION);
+		AvmAssert(posType != TRAITSTYPE_CATCH);
 		AvmAssert(pool != NULL);
 		Traits* traits = new (pool->core->GetGC()) Traits(pool, base, objectSize, traitsPos, posType);
 		return traits;
@@ -807,30 +805,7 @@ namespace avmplus
 		AvmAssert(pool != NULL);
 		Traits* traits = new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH);
 		traits->final = true;
-		traits->name = name;	
-		traits->ns = ns;
-		traits->resolveSignatures(toplevel);
-		return traits;
-	}
-
-	/*static*/ Traits* Traits::newFunctionTraits(const Toplevel* toplevel, PoolObject* pool, uint32_t method_id)
-	{
-		AvmAssert(pool != NULL);
-		AvmCore* core = pool->core;
-		Traits* base = core->traits.function_itraits;
-		AvmAssert(base->isResolved());
-		Traits* traits = new (pool->core->GetGC()) Traits(pool, base, base->m_sizeofInstance, NULL, TRAITSTYPE_FUNCTION);
-		traits->itraits = core->traits.object_itraits;
-		traits->m_needsHashtable = true;
-		traits->final = true;
-	#ifdef AVMPLUS_VERBOSE
-		traits->ns = core->publicNamespace;
-		traits->name = core->internString(core->concatStrings(core->newConstantStringLatin1("Function-"), core->intToString(method_id)));
-	#else
-		traits->ns = NULL;
-		traits->name = NULL;
-		(void)method_id;
-	#endif
+		traits->set_names(ns, name);
 		traits->resolveSignatures(toplevel);
 		return traits;
 	}
@@ -839,8 +814,7 @@ namespace avmplus
 	{
 		Traits* newtraits = Traits::newTraits(this->pool, _base, this->getSizeOfInstance(), NULL, TRAITSTYPE_RT);
 		newtraits->m_needsHashtable = this->m_needsHashtable;
-		newtraits->name = name;
-		newtraits->ns = ns;
+		newtraits->set_names(ns, name);
 		return newtraits;
 	}
 
@@ -872,7 +846,6 @@ namespace avmplus
 				break;
 
 			case TRAITSTYPE_CATCH:
-			case TRAITSTYPE_FUNCTION:
 			case TRAITSTYPE_NVA:
 			case TRAITSTYPE_RT:
 				pos = NULL;
@@ -1268,7 +1241,7 @@ namespace avmplus
 					AvmAssert(b != BIND_NONE);
 					const uint32 disp_id = urshift(b, 3) + (ne.kind == TRAIT_Setter);
 					MethodInfo* f = this->pool->getMethodInfo(ne.id);
-					AvmAssert(f->declaringTraits() == this);
+					//AvmAssert(f->declaringTraits() == this);
 					tb->setMethodInfo(disp_id, f);
 					break;
 				}
@@ -1403,7 +1376,7 @@ namespace avmplus
 			Traits* t = this->pool->resolveTypeName(pos, toplevel);
 
 			// this assumes we save name/ns in all builds, not just verbose
-			bindings->add(this->name, this->ns, AvmCore::makeSlotBinding(0, BKIND_VAR));
+			bindings->add(this->name(), this->ns(), AvmCore::makeSlotBinding(0, BKIND_VAR));
 
 			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/0);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);
@@ -1557,6 +1530,32 @@ namespace avmplus
 		return tm;
 	}
 
+	void Traits::init_declaringScopes(const ScopeTypeChain* stc) 
+	{ 
+		AvmAssert(linked);
+		if (!linked)
+			return;
+		
+		if (this->init)
+			this->init->init_declaringScope(stc);
+
+		{
+			TraitsBindingsp tb = this->getTraitsBindings();
+			const TraitsBindings::BindingMethodInfo* tbm		= tb->getMethods();
+			const TraitsBindings::BindingMethodInfo* tbm_end	= tbm + tb->methodCount;
+			for ( ; tbm < tbm_end; ++tbm) 
+			{
+				if (tbm->f == NULL)
+					continue;
+					
+				if (tbm->f->declaringTraits() == this)
+				{
+					tbm->f->init_declaringScope(stc);
+				}
+			}
+		}
+	}
+
 	/**
 	 * This must be called before any method is verified or any
 	 * instances are created.  It is not done eagerly in AbcParser
@@ -1625,7 +1624,6 @@ namespace avmplus
 			case TRAITSTYPE_CATCH:
 				m_totalSize = m_sizeofInstance + tb->m_slotSize;
 				break;
-			case TRAITSTYPE_FUNCTION:
 			case TRAITSTYPE_NVA:
 			case TRAITSTYPE_RT:
 				m_totalSize = m_sizeofInstance;
@@ -1644,7 +1642,7 @@ namespace avmplus
 			AvmAssert((m_hashTableOffset & (sizeof(uintptr_t)-1)) == 0);
 			AvmAssert((m_totalSize & (sizeof(uintptr_t)-1)) == 0);
 		}
-
+		
 		// make sure all the methods have resolved types
 		{
 			const TraitsBindings::BindingMethodInfo* tbm		= tb->getMethods();
@@ -1654,7 +1652,9 @@ namespace avmplus
 				// don't assert: could be null if only one of a get/set pair is implemented
 				//AvmAssert(tbm->f != NULL);
 				if (tbm->f != NULL)
+				{
 					tbm->f->resolveSignature(toplevel);
+				}
 			}
 		}
 
@@ -1682,7 +1682,7 @@ namespace avmplus
 		if (!legal)
 		{
 			AvmAssert(!linked);
-			Multiname qname(ns, name);
+			Multiname qname(ns(), name());
 			if (toplevel)
 				toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(&qname), core->toErrorString(this));
 			AvmAssert(!"unhandled verify error");
@@ -1693,7 +1693,7 @@ namespace avmplus
 		linked = true;
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
-		StUTF8String name8(name);
+		StUTF8String name8(name());
 		rawname = (char*)gc->Alloc(name8.length()+1);
 		VMPI_strcpy(rawname, name8.c_str());
 #endif
@@ -1713,10 +1713,10 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES
 	Stringp Traits::format(AvmCore* core) const
 	{
-		if (name != NULL)
-			return Multiname::format(core, ns, name);
-		else
-			return core->concatStrings(core->newConstantStringLatin1("Traits@"),
+		if (name() != NULL)
+			return Multiname::format(core, ns(), name());
+
+		return core->concatStrings(core->newConstantStringLatin1("Traits@"),
 									   core->formatAtomPtr((uintptr)this));
 	}
 #endif
@@ -1976,7 +1976,7 @@ namespace avmplus
 	
 	Stringp Traits::formatClassName()
 	{
-		Multiname qname(ns, name);
+		Multiname qname(ns(), name());
 		qname.setQName();
 		StringBuffer buffer(core);
 		buffer << qname;

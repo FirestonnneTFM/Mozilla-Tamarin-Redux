@@ -735,24 +735,8 @@ namespace avmplus
 				checkStack(0,1);
 				MethodInfo* f = checkMethodInfo(imm30);
 				// duplicate-function-definition handling now happens inside makeIntoPrototypeFunction()
-				f->makeIntoPrototypeFunction(toplevel);
-				Traits* ftraits = f->declaringTraits();
-				// make sure the traits of the base vtable matches the base traits
-				// This is also caught by an assert in VTable.cpp, however that turns
-				// out to be too late and may cause crashes
-				if (toplevel->functionClass != 0 &&
-                    ftraits->base != toplevel->functionClass->ivtable()->traits )
-				{
-					AvmAssertMsg(0, "Verify failed:OP_newfunction");
- 					if (toplevel->verifyErrorClass() != NULL)
- 						verifyFailed(kInvalidBaseClassError);
-				}
-				ftraits->set_scope(ScopeTypeChain::create(core->GetGC(), scope, state, NULL, NULL));
-				if (f->activationTraits())
-				{
-					// ISSUE - if nested functions, need to capture scope, not make a copy
-					f->activationTraits()->set_scope(ftraits->scope());
-				}
+				const ScopeTypeChain* fscope = ScopeTypeChain::create(core->GetGC(), core->traits.function_itraits, scope, state, NULL, NULL);
+				Traits* ftraits = f->makeIntoPrototypeFunction(toplevel, fscope);
 				coder->writeOp1(state, pc, opcode, imm30, ftraits);
 				state->push(ftraits, true);
 				break;
@@ -796,7 +780,7 @@ namespace avmplus
 				Traits *itraits = ctraits->itraits;
 
 				// add a type constraint for the "this" scope of static methods
-				ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), scope, state, NULL, ctraits);
+				const ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), ctraits, scope, state, NULL, ctraits);
 
 				if (state->scopeDepth > 0)
 				{
@@ -809,13 +793,13 @@ namespace avmplus
 				}
 
 				// add a type constraint for the "this" scope of instance methods
-				ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), cscope, NULL, ctraits, itraits);
-
-				ctraits->set_scope(cscope);
-				itraits->set_scope(iscope);
+				const ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), itraits, cscope, NULL, ctraits, itraits);
 
 				ctraits->resolveSignatures(toplevel);
 				itraits->resolveSignatures(toplevel);
+
+				ctraits->init_declaringScopes(cscope);
+				itraits->init_declaringScopes(iscope);
 
 				emitCoerce(CLASS_TYPE, state->sp()); 
 				coder->writeOp1(state, pc, opcode, imm30, ctraits);
@@ -1452,9 +1436,9 @@ namespace avmplus
 				checkStack(0, 1);
 				if (!info->needActivation())
 					verifyFailed(kInvalidNewActivationError);
-				info->activationTraits()->resolveSignatures(toplevel);
-				coder->write(state, pc, opcode, info->activationTraits());
-				state->push(info->activationTraits(), true);
+				Traits* atraits = info->resolveActivation(toplevel);
+				coder->write(state, pc, opcode, atraits);
+				state->push(atraits, true);
 				break;
 			}
 			case OP_newcatch: 

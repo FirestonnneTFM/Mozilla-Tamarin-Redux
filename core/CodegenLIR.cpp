@@ -1405,7 +1405,7 @@ namespace avmplus
             })
 
 			// dxns = env->vtable->scope->defaultXmlNamespace
-			LIns* scope = loadScope();
+			LIns* scope = loadEnvScope();
 			LIns* capturedDxns = loadIns(LIR_ldcp, offsetof(ScopeChain,_defaultXmlNamespace), scope);
 			storeIns(capturedDxns, 0, dxns);
 
@@ -1604,7 +1604,7 @@ namespace avmplus
 		if (outOMem()) return;
 		this->state = state;
 		Traits* t = info->declaringScope()->getScopeTraitsAt(scope_index);
-		LIns* scope = loadScope();
+		LIns* scope = loadEnvScope();
 		LIns* scopeobj = loadIns(LIR_ldcp, offsetof(ScopeChain,_scopes) + scope_index*sizeof(Atom), scope);
 		localSet(dest, atomToNativeRep(t, scopeobj), t);
 	}
@@ -1667,7 +1667,7 @@ namespace avmplus
 
 		if (!info->setsDxns()) {
 			// dxnsAddr = &env->vtable->scope->defaultXmlNamespace
-			LIns* scope = loadScope();
+			LIns* scope = loadEnvScope();
 			dxnsAddr = leaIns(offsetof(ScopeChain,_defaultXmlNamespace), scope);
 		}
 
@@ -2548,18 +2548,18 @@ namespace avmplus
 				{
 					itraits->init->resolveSignature(toplevel);
 					if (itraits->init->getMethodSignature()->argcOk(argc))
-                {
-                    state->verifier->emitCheckNull(state->sp()-(n-1));
-                    state->verifier->emitCoerceArgs(itraits->init, argc, true);
-                    emitCall(state, OP_construct, 0, argc, itraits);
-                }
-                else
-                {
-                    emit(state, OP_construct, argc, 0, itraits);
-                }
-            }
-            else
-			{
+					{
+						state->verifier->emitCheckNull(state->sp()-(n-1));
+						state->verifier->emitCoerceArgs(itraits->init, argc, true);
+						emitCall(state, OP_construct, 0, argc, itraits);
+					}
+					else
+					{
+						emit(state, OP_construct, argc, 0, itraits);
+					}
+				}
+				else
+				{
                     emit(state, OP_construct, argc, 0, itraits);
                 }
             }
@@ -2969,8 +2969,7 @@ namespace avmplus
 		case OP_constructsuper:
 		{
 			// env->vtable->base->init->enter32v(argc, ...);
-			LIns* envArg = env_param;
-			LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), envArg);
+			LIns* vtable = loadEnvVTable();
 			LIns* base = loadIns(LIR_ldcp, offsetof(VTable,base), vtable);
 			method = loadIns(LIR_ldcp, offsetof(VTable,init), base);
 			break;
@@ -2990,7 +2989,7 @@ namespace avmplus
 			// stack in: obj arg1..N
 			// stack out: result
 			// method_id is disp_id of super method
-			LIns* declvtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
+			LIns* declvtable = loadEnvVTable();
 			LIns* basevtable = loadIns(LIR_ldcp, offsetof(VTable, base), declvtable);
 			method = loadIns(LIR_ldcp, offsetof(VTable,methods)+sizeof(uintptr)*method_id, basevtable);
 			break;
@@ -2999,9 +2998,7 @@ namespace avmplus
 		{
 			// stack in: obj arg1..N
 			// stack out: result
-
-			LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
-			LIns* abcenv = loadIns(LIR_ldcp, offsetof(VTable, abcEnv), vtable);
+			LIns* abcenv = loadEnvAbcEnv();
 			method = loadIns(LIR_ldcp, offsetof(AbcEnv,m_methods)+sizeof(uintptr)*method_id, abcenv);
 			break;
 		}
@@ -3200,7 +3197,7 @@ namespace avmplus
 			{
                 // global is outer scope 0
 				t = scopeTypes->getScopeTraitsAt(0);
-				LIns* scope = loadScope();
+				LIns* scope = loadEnvScope();
 				LIns* scopeobj = loadIns(LIR_ldp, offsetof(ScopeChain,_scopes) + 0*sizeof(Atom), scope);
 				ptr = atomToNativeRep(t, scopeobj);
 			}				
@@ -3672,7 +3669,7 @@ namespace avmplus
 				// prepare scopechain args for call
 				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-				LIns* outer = loadScope();
+				LIns* outer = loadEnvScope();
 
 				LIns* i3 = callIns(FUNCTIONID(newfunction), 4,
 					env_param, InsConstPtr(func), outer, ap);
@@ -3907,7 +3904,7 @@ namespace avmplus
 				int localindex = int(op2);
 				int extraScopes = state->scopeDepth;
 
-				LIns* outer = loadScope();
+				LIns* outer = loadEnvScope();
 				LIns* base = localGetp(localindex);
 
 				// prepare scopechain args for call
@@ -3965,7 +3962,7 @@ namespace avmplus
 				// prepare scopechain args for call
 				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-				LIns* outer = loadScope();
+				LIns* outer = loadEnvScope();
 
 				LIns* withBase;
 				if (state->withBase == -1)
@@ -5137,15 +5134,28 @@ namespace avmplus
 
 	LIns* CodegenLIR::loadToplevel()
 	{
-		LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
+		LIns* vtable = loadEnvVTable();
 		return loadIns(LIR_ldcp, offsetof(VTable,_toplevel), vtable);
 	}
 
-	LIns* CodegenLIR::loadScope()
+	LIns* CodegenLIR::loadEnvScope()
 	{
-		LIns* vtable = loadIns(LIR_ldcp, offsetof(MethodEnv,_vtable), env_param);
-		LIns* scope = loadIns(LIR_ldcp, offsetof(VTable,_scope), vtable);
+		LIns* scope = loadIns(LIR_ldcp, offsetof(MethodEnv,_scope), env_param);
 		return scope;
+	}
+
+	LIns* CodegenLIR::loadEnvVTable()
+	{
+		LIns* scope = loadIns(LIR_ldcp, offsetof(MethodEnv,_scope), env_param);
+		LIns* vtable = loadIns(LIR_ldcp, offsetof(ScopeChain,_vtable), scope);
+		return vtable;
+	}
+
+	LIns* CodegenLIR::loadEnvAbcEnv()
+	{
+		LIns* scope = loadIns(LIR_ldcp, offsetof(MethodEnv,_scope), env_param);
+		LIns* abcenv = loadIns(LIR_ldcp, offsetof(ScopeChain,_abcEnv), scope);
+		return abcenv;
 	}
 
 	LIns* CodegenLIR::loadVTable(int i)

@@ -46,6 +46,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/ArrayObject.cpp \
   $(curdir)/AtomArray.cpp \
   $(curdir)/AvmCore.cpp \
+  $(curdir)/avm.cpp \
   $(curdir)/avmfeatures.cpp \
   $(curdir)/AvmLog.cpp \
   $(curdir)/avmplusDebugger.cpp \

@@ -269,7 +269,7 @@ namespace avmplus
 			core->traits.initInstanceTypes(pool);
 
 			// register "void"
-			addNamedTraits(core->publicNamespace, VOID_TYPE->name, VOID_TYPE);
+			addNamedTraits(core->publicNamespace, VOID_TYPE->name(), VOID_TYPE);
 		}
 
 		// type information about class objects
@@ -318,8 +318,7 @@ namespace avmplus
 		#endif
 
 		Traits* traits = Traits::newTraits(pool, base, sizeofInstance, traitsPos, posType);
-		traits->ns = ns;
-		traits->name = name;
+		traits->set_names(ns, name);
 		traits->protectedNamespace = protectedNamespace;
 		
 		bool enableSkips = false;
@@ -891,7 +890,8 @@ namespace avmplus
 			if (info->hasMethodBody())
 			{
 				// Interface methods should not have bodies
-				if (info->declaringTraits() && info->declaringTraits()->isInterface)
+				Traits* declaringTraits = info->declaringTraits();
+				if (declaringTraits && declaringTraits->isInterface)
 				{
 					toplevel->throwVerifyError(kIllegalInterfaceMethodBodyError, core->toErrorString(info));
 				}
@@ -928,7 +928,7 @@ namespace avmplus
 					if (core->config.methodNames)
 					{
 						ns = core->publicNamespace;
-						name = core->internString(info->getMethodName());
+						name = core->internString(info->getMethodNameWithTraits(declaringTraits));
 					}
 					#endif
 					// activation traits are raw types, not subclasses of object.  this is
@@ -942,8 +942,7 @@ namespace avmplus
 																TRAITSTYPE_ACTIVATION, 
 																NULL);
 					act->final = true;
-					info->set_activationTraits(act);
-					//info->activationTraits->resolveSignatures(NULL);
+					info->init_activationTraits(act);
 				}
 				else
 				{
@@ -1408,8 +1407,7 @@ namespace avmplus
 		if (count > (uint32)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		pool->scripts.ensureCapacity(count);
-		pool->scriptCount = count;
+		pool->_scripts.ensureCapacity(count);
 
 		// make global objects subclasses of Object
 
@@ -1425,12 +1423,13 @@ namespace avmplus
 					<< "\n";
 			)
 			MethodInfo* script = resolveMethodInfo(init_index);
+			Traits* declaringTraits = script->declaringTraits();
 
-			if (script->declaringTraits() != NULL)
+			if (declaringTraits != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString(script->declaringTraits()));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString(declaringTraits));
 			}
 
 			Traits* traits = parseTraits(sizeof(ScriptObject), 
@@ -1460,10 +1459,7 @@ namespace avmplus
 			}
 			#endif
 
-			pool->scripts.set(i, script);
-
-			// initial scope chain is []
-			traits->set_scope(ScopeTypeChain::createEmpty(core->GetGC()));
+			pool->_scripts.set(i, traits);
 		}
 
 		return true;
@@ -1614,11 +1610,12 @@ namespace avmplus
 				}
 			}
 
-			if (iinit->declaringTraits() != NULL)
+			Traits* declaringTraits = iinit->declaringTraits();
+			if (declaringTraits != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(iinit), core->toErrorString(iinit->declaringTraits()));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(iinit), core->toErrorString(declaringTraits));
 			}
 
 			iinit->makeMethodOf(itraits);
@@ -1665,8 +1662,8 @@ namespace avmplus
         {
             // CONSTANT_Multiname name of this class
 			Traits* itraits = instances[i];
-			Namespacep ns = itraits->ns;
-			Stringp name = itraits->name;
+			Namespacep ns = itraits->ns();
+			Stringp name = itraits->name();
 
 			const byte* class_pos = pos;
 
@@ -1695,11 +1692,12 @@ namespace avmplus
 
 			ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
 
-			if (cinit->declaringTraits() != NULL)
+			Traits* declaringTraits = cinit->declaringTraits();
+			if (declaringTraits != NULL)
 			{
 				// method has already been bound to a different type.  Can't bind it twice because
 				// it can only have one environment, for its scope chain and super references.
-				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(cinit), core->toErrorString(cinit->declaringTraits()));
+				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(cinit), core->toErrorString(declaringTraits));
 			}
 			
 			cinit->makeMethodOf(ctraits);

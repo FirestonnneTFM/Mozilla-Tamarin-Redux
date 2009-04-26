@@ -224,6 +224,8 @@ namespace avmplus
 		// and F2 overrides the F1 slot which is okay as long as F1's MethodEnv is never called again.
 		if (method->declaringScope() != this->scope()->scopeTraits())
 		{
+			//core()->console<<method<<" "<<int(method->declaringTraits()->posType())<<"\n";
+			//core()->console<<"expected "<<this->scope()->scopeTraits()<<" but got "<<method->declaringScope()<<"\n";
 			toplevel->throwVerifyError(kCorruptABCError);
 		}
 
@@ -502,8 +504,8 @@ namespace avmplus
 #endif // VMCFG_METHODENV_IMPL32
 
 #ifdef FEATURE_NANOJIT
-	MethodEnv::MethodEnv(TrampStub, MethodInfo *method, VTable *vtable)
-		: _vtable(vtable), method(method), activationOrMCTable(0)
+	MethodEnv::MethodEnv(TrampStub, MethodInfo* method, ScopeChain* scope)
+		: _scope(scope), method(NULL), activationOrMCTable(0)
 	{
 		#if VMCFG_METHODENV_IMPL32
 		// set trampoline to IMT stub; we cannot go through delegateInvoke
@@ -514,8 +516,8 @@ namespace avmplus
 	}
 #endif
 
-	MethodEnv::MethodEnv(MethodInfo* method, VTable *vtable)
-		: _vtable(vtable)
+	MethodEnv::MethodEnv(MethodInfo* method, ScopeChain* scope)
+		: _scope(scope)
 		, method(method)
 		, activationOrMCTable(0)
 	{
@@ -529,38 +531,17 @@ namespace avmplus
 		_implGPR = delegateInvoke;
 #endif
 
-		AvmCore* core = this->core();
-		if (method->declaringTraits() != this->_vtable->traits)
+		if (method->declaringTraits() != this->vtable()->traits)
 		{
 		#ifdef AVMPLUS_VERBOSE
-			core->console << "ERROR " << method->getMethodName() << " " << method->declaringTraits() << " " << vtable->traits << "\n";
+			core()->console << "ERROR " << method->getMethodName() << " " << method->declaringTraits() << " " << this->vtable()->traits << "\n";
 		#endif
 			AvmAssertMsg(0, "(method->declaringTraits != vtable->traits)");
 			toplevel()->throwVerifyError(kCorruptABCError);
 		}
-
-		if (method->needActivation())
-		{
-			Traits* activationTraits = method->activationTraits();
-
-			// This can happen when the ABC has MethodInfo data but not MethodBody data
-			if (!activationTraits)
-			{
-				toplevel()->throwVerifyError(kCorruptABCError);
-			}
-			
-			if (activationTraits->scope() != NULL && activationTraits->scope() != this->scope()->scopeTraits())
-			{
-				AvmAssert(!"unexpected scope for activationTraits");
-				toplevel()->throwVerifyError(kCorruptABCError);
-			}
-			// ensure the ScopeTypeChain is set, we now rely on this later on in startCoerce
-			activationTraits->set_scope(this->scope()->scopeTraits());
-
-			VTable *activation = core->newVTable(activationTraits, NULL, this->scope(), this->abcEnv(), toplevel());
-			activation->resolveSignatures();
-			setActivationOrMCTable(activation, kActivation);
-		}
+		
+		// activation info used to be created here, but is now created lazily
+		
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
 	
@@ -898,8 +879,9 @@ namespace avmplus
 		}
 		else
 		{
-			VTable *vt = core->newVTable(traits, NULL, this->scope(), this->abcEnv(), toplevel);
-			vt->resolveSignatures();
+			VTable* vt = core->newVTable(traits, NULL, toplevel);
+			ScopeChain* catchScope = this->scope()->cloneWithNewVTable(core->GetGC(), vt, this->abcEnv());
+			vt->resolveSignatures(catchScope);
 			return core->newObject(vt, NULL);
 		}
 	}
@@ -1024,13 +1006,20 @@ namespace avmplus
 		return finddef(&m);
 	}
 
+	/*static*/ ScopeChain* ScriptEnv::createScriptScope(const ScopeTypeChain* stc, VTable* _vtable, AbcEnv* _abcEnv)
+	{
+		// ISSUE can we just make this the public namespace?
+		AvmCore* core = _vtable->core();
+		return ScopeChain::create(core->GetGC(), _vtable, _abcEnv, stc, NULL, core->newNamespace(core->kEmptyString));
+	}
+
 	ScriptObject* ScriptEnv::initGlobal()
 	{
 		// object not defined yet.  define it by running the script that exports it
-		this->_vtable->resolveSignatures();
+		this->vtable()->resolveSignatures(this->scope());
 		// resolving the vtable also resolves the traits, if necessary
 		ScriptObject* delegate = this->toplevel()->objectClass->prototype;
-		return global = this->core()->newObject(this->_vtable, delegate);
+		return global = this->core()->newObject(this->vtable(), delegate);
 	}
 
     ScriptObject* MethodEnv::op_newobject(Atom* sp, int argc) const
@@ -1311,35 +1300,26 @@ namespace avmplus
 									 ScopeChain* outer,
 									 Atom* scopes) const
     {
-		AvmCore* core = this->core();
+		Toplevel* toplevel = this->toplevel();
+		AvmCore* core = toplevel->core();
 		MMgc::GC* gc = core->GetGC();
-		AbcEnv* abcEnv = this->abcEnv();
 
-		// TODO: if we have already created a function and the scope chain
-		// is the same as last time, re-use the old closure?
+		FunctionClass* functionClass = toplevel->functionClass;
+		VTable* fvtable = functionClass->ivtable();
+		AvmAssert(fvtable->ivtable == NULL || fvtable->ivtable == toplevel->object_ivtable);
+		fvtable->ivtable = toplevel->object_ivtable;
+		AvmAssert(fvtable->linked);
 
-		// declaringTraits must have been filled in by verifier.
-		Traits* ftraits = function->declaringTraits();
-		AvmAssert(ftraits != NULL);
-		AvmAssert(ftraits->scope() != NULL);
-
-		ScopeChain* fscope = ScopeChain::create(core->GetGC(), ftraits->scope(), outer, *core->dxnsAddr);
+		ScopeChain* fscope = ScopeChain::create(gc, fvtable, this->abcEnv(), function->declaringScope(), outer, *core->dxnsAddr);
 		for (int i=outer->getSize(), n=fscope->getSize(); i < n; i++)
 		{
 			fscope->setScope(gc, i, *scopes++);
 		}
-		//core->console<<"New fscope: "<<fscope->format(core)<<"\n";
+		//core->console<<"New fscope: "<<fscope<<"\n";
 
-		FunctionClass* functionClass = toplevel()->functionClass;
-
-		// the vtable for the new function object
-		VTable* fvtable = core->newVTable(ftraits, functionClass->ivtable(), fscope, abcEnv, toplevel());
-		fvtable->resolveSignatures();
-		FunctionEnv *fenv = new (core->GetGC()) FunctionEnv(function, fvtable);
-		fvtable->ivtable = toplevel()->object_ivtable;
-
-		FunctionObject* c = new (core->GetGC(), fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
-		c->setDelegate( functionClass->prototype );
+		FunctionEnv* fenv = new (gc) FunctionEnv(function, fscope);
+		FunctionObject* c = new (gc, fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
+		c->setDelegate(functionClass->prototype);
 
 		c->createVanillaPrototype();
 		c->prototype->setStringProperty(core->kconstructor, c->atom());
@@ -1364,15 +1344,17 @@ namespace avmplus
 		// adds clarity to what is usually just global$init()
 		SAMPLE_FRAME("[newclass]", core);
 		Toplevel* toplevel = this->toplevel();
+		AbcEnv* abcEnv = this->abcEnv();
 
 		Traits* itraits = ctraits->itraits;
+		const BuiltinType bt = Traits::getBuiltinType(itraits);
 
 		// finish resolving the base class
 		if (!base && itraits->base)
 		{
 			// class has a base but no base object was provided
-			ErrorClass *error = toplevel->typeErrorClass();
-			if( error )
+			ErrorClass* error = toplevel->typeErrorClass();
+			if (error)
 				error->throwError(kConvertNullToObjectError);
 			else
 				toplevel->throwTypeError(kCorruptABCError);
@@ -1382,10 +1364,10 @@ namespace avmplus
 		Traits* baseIvtableTraits = base ? base->ivtable()->traits : 0;
 		Traits* itraitsBase = itraits->base;
 		// make sure the traits of the base vtable matches the base traits
-		if (!((base == NULL && itraits->base == NULL) || (base != NULL && itraitsBase == baseIvtableTraits)))
+		if (!(base == NULL && itraits->base == NULL || base != NULL && itraitsBase == baseIvtableTraits))
 		{
-			ErrorClass *error = toplevel->verifyErrorClass();
-			if( error )
+			ErrorClass* error = toplevel->verifyErrorClass();
+			if (error)
 				error->throwError(kInvalidBaseClassError);
 			else
 				toplevel->throwTypeError(kCorruptABCError);
@@ -1394,61 +1376,75 @@ namespace avmplus
 		ctraits->resolveSignatures(toplevel);
 		itraits->resolveSignatures(toplevel);
 
+		VTable* ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, toplevel);
+		
+		// This is a little weird, as the cvtable should have the ivtable as its base
+		// i.e. Class$ derives from Class
+		VTable* cvbase = (bt == BUILTIN_class) ? ivtable : toplevel->class_ivtable;
+		VTable* cvtable = core->newVTable(ctraits, cvbase, toplevel);
+
 		// class scopechain = [..., class]
-		ScopeChain* cscope = ScopeChain::create(core->GetGC(), ctraits->scope(), outer, *core->dxnsAddr);
+		AvmAssert(ctraits->init != NULL);
+		ScopeChain* cscope = ScopeChain::create(gc, cvtable, abcEnv, ctraits->init->declaringScope(), outer, *core->dxnsAddr);
 		int i = outer->getSize();
 		for (int n=cscope->getSize(); i < n; i++)
 		{
 			cscope->setScope(gc, i, *scopes++);
 		}
-		//core->console<<"NewClass: "<<ctraits<<"\n";
-		//core->console<<"New cscope: "<<cscope->format(core)<<"\n";
-
-		ScopeChain* iscope = ScopeChain::create(core->GetGC(), itraits->scope(), cscope, *core->dxnsAddr);
-
-		AbcEnv* abcEnv = this->abcEnv();
-		VTable* cvtable = NULL;
-		VTable* ivtable = NULL;
 
 		// Note: iff itraits == class_itraits, we used to use cscope (rather than iscope) for ivtable, 
 		// but that appears to be simply wrong: it doesn't match the expectations of the ScopeTypeChain filled in for Class.
-		ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, iscope, abcEnv, toplevel);
-		ivtable->resolveSignatures();
-		
-		// special-case Class: the cvtable should have the ivtable as its base
-		// i.e. Class$ derives from Class
-		VTable* cbase = (itraits == core->traits.class_itraits) ? ivtable : toplevel->class_ivtable;
-		cvtable = core->newVTable(ctraits, cbase, cscope, abcEnv, toplevel);
-		// Don't resolve signatures for Object$ until after Class has been set up
-		// which should happen very soon after Object is setup.
-		if (itraits != core->traits.object_itraits)
-			cvtable->resolveSignatures();
+		AvmAssert(itraits->init != NULL);
+		ScopeChain* iscope = ScopeChain::create(gc, ivtable, abcEnv, itraits->init->declaringScope(), cscope, *core->dxnsAddr);
+		ivtable->resolveSignatures(iscope);
+			// Don't resolve signatures for Object$ until after Class has been set up
+			// which should happen very soon after Object is setup.
+		if (bt != BUILTIN_object)
+			cvtable->resolveSignatures(cscope);
 
 		cvtable->ivtable = ivtable;
 
-		if (itraits == core->traits.object_itraits) 
+		switch (itraits->builtinType)
 		{
-			// we just defined Object
-			toplevel->object_ivtable = ivtable;
+			case BUILTIN_object:
+			{
+				// we just defined Object
+				toplevel->object_ivtable = ivtable;
 
-			// We can finish setting up the toplevel object now that
-			// we have the real Object vtable
-			VTable* toplevel_vtable = toplevel->global()->vtable;
-			toplevel_vtable->base = ivtable;
-			toplevel_vtable->linked = false;
-			toplevel_vtable->resolveSignatures();
-		}
-		else if (itraits == core->traits.class_itraits) 
-		{
-			// we just defined Class
-			toplevel->class_ivtable = ivtable;
-			
-			// Can't run the Object$ initializer until after Class is done since
-			// Object$ needs the real Class vtable as its base
-			VTable* objectclass_ivtable = toplevel->objectClass->vtable;
-			objectclass_ivtable->base = ivtable;
-			objectclass_ivtable->resolveSignatures();
-			objectclass_ivtable->init->coerceEnter(toplevel->objectClass->atom());
+				AvmAssert(toplevel->object_cscope == NULL);
+				// save for later
+				toplevel->object_cscope = cscope;
+
+				// We can finish setting up the toplevel object now that
+				// we have the real Object vtable
+				VTable* toplevel_vtable = toplevel->global()->vtable;
+				toplevel_vtable->base = ivtable;
+				toplevel_vtable->linked = false;
+				toplevel_vtable->resolveSignatures(toplevel->toplevel_scope);
+				break;
+			}
+			case BUILTIN_class:
+			{
+				// we just defined Class
+				toplevel->class_ivtable = ivtable;
+				
+				// Can't run the Object$ initializer until after Class is done since
+				// Object$ needs the real Class vtable as its base
+				VTable* objectclass_cvtable = toplevel->objectClass->vtable;
+				objectclass_cvtable->base = ivtable;
+				objectclass_cvtable->resolveSignatures(toplevel->object_cscope);
+				objectclass_cvtable->init->coerceEnter(toplevel->objectClass->atom());
+				break;
+			}
+			case BUILTIN_vectorobj:
+			{
+				AvmAssert(toplevel->vectorobj_cscope == NULL);
+				AvmAssert(toplevel->vectorobj_iscope == NULL);
+				// save for later
+				toplevel->vectorobj_cscope = cscope;
+				toplevel->vectorobj_iscope = iscope;
+				break;
+			}
 		}
 
 		CreateClassClosureProc createClassClosure = cvtable->traits->getCreateClassClosureProc();
@@ -1474,18 +1470,20 @@ namespace avmplus
 			cc->prototype->setStringProperty(core->kconstructor, cc->atom());
 			cc->prototype->setStringPropertyIsEnumerable(core->kconstructor, false);
 		}
+		
+		if (bt != BUILTIN_class)
+		{
+			AvmAssert(i == iscope->getSize()-1);
+			iscope->setScope(gc, i, cc->atom());
+		}
 
-		AvmAssert(i == iscope->getSize()-1);
-		iscope->setScope(gc, i, cc->atom());
-		//core->console<<"New iscope: "<<iscope->format(core)<<"\n";
 		if (toplevel->classClass)
 		{
 			cc->setDelegate( toplevel->classClass->prototype );
 		}
 
 		// Invoke the class init function.
-		// Don't run it for Object - that has to wait until after Class$
-		// is set up
+		// Don't run it for Object - that has to wait until after Class$ is set up
 		if (cvtable != toplevel->objectClass->vtable)
 			cvtable->init->coerceEnter(cc->atom());
 		return cc;
@@ -1549,7 +1547,7 @@ namespace avmplus
 
 	Atom MethodEnv::callsuper(const Multiname* multiname, int argc, Atom* atomv) const
 	{
-		VTable* base = this->_vtable->base;
+		VTable* base = this->vtable()->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(base->traits, multiname);
 		switch (AvmCore::bindingKind(b))
@@ -1638,7 +1636,7 @@ namespace avmplus
 	
     Atom MethodEnv::getsuper(Atom obj, const Multiname* multiname) const
     {
-		VTable* vtable = this->_vtable->base;
+		VTable* vtable = this->vtable()->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
         switch (AvmCore::bindingKind(b))
@@ -1689,7 +1687,7 @@ namespace avmplus
 	
     void MethodEnv::setsuper(Atom obj, const Multiname* multiname, Atom value) const
     {
-		VTable* vtable = this->_vtable->base;
+		VTable* vtable = this->vtable()->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
         switch (AvmCore::bindingKind(b))
@@ -2043,23 +2041,59 @@ namespace avmplus
 		return NULL;
     }
 
-	VTable *MethodEnv::getActivation()
+	VTable* MethodEnv::buildActivationVTable()
 	{
-		int type = getType();
-		switch(type)
+		const ScopeTypeChain* activationScopeTraits = method->activationScope();
+
+		// This can happen when the ABC has MethodInfo data but not MethodBody data
+		if (!activationScopeTraits)
 		{
-		case kActivation:
-			return (VTable *)(activationOrMCTable&~7);
-		case kActivationMethodTablePair:
-			return getPair()->activation;
-		default:
-			return NULL;
+			toplevel()->throwVerifyError(kCorruptABCError);
 		}
+		
+		Traits* activationTraits = activationScopeTraits->traits();
+		AvmAssert(activationTraits != NULL);
+		
+		AvmCore* core = this->core();
+		VTable* activation = core->newVTable(activationTraits, NULL, toplevel());
+		ScopeChain* activationScope = this->scope()->cloneWithNewVTable(core->GetGC(), activation, this->abcEnv(), activationScopeTraits);
+		activation->resolveSignatures(activationScope);
+		return activation;
+	}
+
+	VTable* MethodEnv::getActivationVTable()
+	{
+		if (!method->needActivation())
+			return NULL;
+
+		VTable* activation;
+		const int type = getType();
+		if (!activationOrMCTable)
+		{
+			activation = buildActivationVTable();		
+			setActivationOrMCTable(activation, kActivation);
+		}
+		else if (type == kMethodTable)
+		{
+			activation = buildActivationVTable();		
+			ActivationMethodTablePair *amtp = new (core()->GetGC()) ActivationMethodTablePair(activation, getMethodClosureTable());					
+			setActivationOrMCTable(amtp, kActivationMethodTablePair);
+		}
+		else if (type == kActivationMethodTablePair)
+		{
+			activation = getPair()->activation;
+		}
+		else
+		{
+			activation = (VTable*)(activationOrMCTable&~7);
+		}
+		AvmAssert(activation != NULL);
+		return activation;
 	}
 
     ScriptObject *MethodEnv::newActivation()
     {
-        VTable *vtable = getActivation();
+        VTable *vtable = getActivationVTable();
 		AvmCore *core = this->core();
         MMgc::GC *gc = core->GetGC();
 		SAMPLE_FRAME("[activation-object]", core);
@@ -2082,7 +2116,7 @@ namespace avmplus
 		else if(type == kActivation)
 		{
 			WeakKeyHashtable *wkh = new (core()->GetGC()) WeakKeyHashtable(core()->GetGC());
-			ActivationMethodTablePair *amtp = new (core()->GetGC()) ActivationMethodTablePair(getActivation(), wkh);					
+			ActivationMethodTablePair *amtp = new (core()->GetGC()) ActivationMethodTablePair(getActivationVTable(), wkh);					
 			setActivationOrMCTable(amtp, kActivationMethodTablePair);
 			return wkh;
 		}

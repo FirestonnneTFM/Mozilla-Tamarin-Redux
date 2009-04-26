@@ -343,6 +343,8 @@
 		D5AD1DAE0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
 		D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
 		D5AD1E2C0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
+		D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D935BDEB0FA0EBA7001E3E70 /* avm.cpp */; };
+		D935BDED0FA0EBA7001E3E70 /* avm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D935BDEB0FA0EBA7001E3E70 /* avm.cpp */; };
 		D940B6770F61C60300E72086 /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		D940B67C0F61C61A00E72086 /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		D940B67E0F61C62B00E72086 /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
@@ -786,6 +788,8 @@
 		8DD76F6C0486A84900D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsPosix.cpp; path = ../../../VMPI/SpyUtilsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
+		D935BDEB0FA0EBA7001E3E70 /* avm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avm.cpp; path = ../../../core/avm.cpp; sourceTree = SOURCE_ROOT; };
+		D935BDEE0FA0EC17001E3E70 /* avm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avm.h; path = ../../../core/avm.h; sourceTree = SOURCE_ROOT; };
 		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortMac.cpp; path = ../../../VMPI/MMgcPortMac.cpp; sourceTree = SOURCE_ROOT; };
 		D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPortUtils.cpp; path = ../../../VMPI/PosixPortUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -937,6 +941,8 @@
 				079DF7C30F3A882D0031D1B4 /* AtomConstants.h */,
 				079DF7C40F3A882D0031D1B4 /* AtomWriteBarrier.h */,
 				079DF7C50F3A882D0031D1B4 /* avmbuild.h */,
+				D935BDEB0FA0EBA7001E3E70 /* avm.cpp */,
+				D935BDEE0FA0EC17001E3E70 /* avm.h */,
 				079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */,
 				079DF7C70F3A882D0031D1B4 /* AvmCore.h */,
 				3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */,
@@ -1650,6 +1656,7 @@
 				D5AD1DAE0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */,
 				D5AD1E2C0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */,
 				079C96F10F9EF0E900B2E653 /* avmfeatures.cpp in Sources */,
+				D935BDED0FA0EBA7001E3E70 /* avm.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1821,6 +1828,7 @@
 				D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */,
 				D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */,
 				079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */,
+				D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

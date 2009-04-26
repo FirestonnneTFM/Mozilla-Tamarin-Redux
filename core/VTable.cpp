@@ -41,14 +41,12 @@
 namespace avmplus
 {
 	
-	VTable::VTable(Traits* _traits, VTable* _base, ScopeChain* scope, AbcEnv* _abcEnv, Toplevel* toplevel) :
-		_scope(scope),
+	VTable::VTable(Traits* traits, VTable* _base, Toplevel* toplevel) :
 		_toplevel(toplevel),
-		abcEnv(_abcEnv),
 		init(NULL),
 		base(_base),
 		ivtable(NULL),
-		traits(_traits),
+		traits(traits),
 		linked(false)
 	{
 		AvmAssert(traits != NULL);
@@ -62,13 +60,18 @@ namespace avmplus
 	}
 #endif
 
-	void VTable::resolveSignatures()
+	void VTable::resolveSignatures(ScopeChain* scope)
 	{
+		AvmAssert(scope != NULL);
+
 		if( this->linked )
 			return;
 		linked = true;
 		if (!traits->isResolved())
+		{
 			traits->resolveSignatures(toplevel());
+			traits->init_declaringScopes(scope->scopeTraits());
+		}
 
 #if defined(DEBUG) || defined(_DEBUG)
 		// have to use local variables for CodeWarrior
@@ -83,7 +86,7 @@ namespace avmplus
 
 		if (traits->init && !this->init)
 		{
-			this->init = makeMethodEnv(traits->init);
+			this->init = makeMethodEnv(traits->init, scope);
 		}
 
 		// populate method table
@@ -105,7 +108,7 @@ namespace avmplus
 			if (method != NULL)
 			{
 				//this->methods[i] = new (gc) MethodEnv(method, this);
-				WB(gc, this, &methods[i], makeMethodEnv(method));
+				WB(gc, this, &methods[i], makeMethodEnv(method, scope));
 				continue;
 			}
 			#ifdef AVMPLUS_VERBOSE
@@ -144,7 +147,7 @@ namespace avmplus
 					{
 						// create new imt stub
 						MethodInfo *mi = AvmCore::getITrampAddr(b);
-						MethodEnv* e = new (gc) MethodEnv(MethodEnv::kTrampStub, mi, this);
+						MethodEnv* e = new (gc) MethodEnv(MethodEnv::kTrampStub, mi, scope);
 						WB(gc, this, &imt[i], e);
 					}
 				}
@@ -153,10 +156,11 @@ namespace avmplus
 #endif
 	}
 
-	MethodEnv *VTable::makeMethodEnv(MethodInfo *func)
+	MethodEnv* VTable::makeMethodEnv(MethodInfo* func, ScopeChain* scope)
 	{
-		AvmCore *core = traits->core;
-		MethodEnv *methodEnv = new (core->GetGC()) MethodEnv(func, this);
+		AvmCore* core = this->core();
+		AbcEnv* abcEnv = scope->abcEnv();
+		MethodEnv* methodEnv = new (core->GetGC()) MethodEnv(func, scope);
 		// register this env in the callstatic method table
 		int method_id = func->method_id();
 		if (method_id != -1)
@@ -210,7 +214,7 @@ namespace avmplus
 	{
 		Toplevel* toplevel = this->toplevel();
 		AvmCore* core = toplevel->core();
-		Namespacep traitsNs = this->traits->ns;
+		Namespacep traitsNs = this->traits->ns();
 		PoolObject* traitsPool = this->traits->pool;
 
 		Stringp classname = core->internString(fullname->appendLatin1("$"));
@@ -232,17 +236,20 @@ namespace avmplus
 		ctraits->resolveSignatures(toplevel);
 
 		VTable* objVecVTable = toplevel->objectVectorClass->vtable;
-		AbcEnv* objVecAbcEnv = objVecVTable->abcEnv;
+		AbcEnv* objVecAbcEnv = toplevel->vectorobj_cscope->abcEnv();
 		Toplevel* objVecToplevel = objVecVTable->toplevel();
 		VTable* objVecIVTable = objVecVTable->ivtable;
 
-		VTable* cvtab = core->newVTable(ctraits, objVecToplevel->class_ivtable, objVecVTable->scope(), objVecAbcEnv, objVecToplevel); 
-		VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecIVTable->scope(), objVecAbcEnv, objVecToplevel);
+		VTable* cvtab = core->newVTable(ctraits, objVecToplevel->class_ivtable, objVecToplevel); 
+		ScopeChain* cvtab_cscope = toplevel->vectorobj_cscope->cloneWithNewVTable(core->GetGC(), cvtab, objVecAbcEnv);
+
+		VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecToplevel);
+		ScopeChain* ivtab_iscope = toplevel->vectorobj_iscope->cloneWithNewVTable(core->GetGC(), ivtab, objVecAbcEnv);
 		cvtab->ivtable = ivtab;
 		ivtab->init = objVecIVTable->init;
 
-		cvtab->resolveSignatures();
-		ivtab->resolveSignatures();
+		cvtab->resolveSignatures(cvtab_cscope);
+		ivtab->resolveSignatures(ivtab_iscope);
 		
 		return cvtab;
 	}

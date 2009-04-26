@@ -223,7 +223,7 @@ namespace avmplus
 		return *this;
 #endif
 	}
-	PrintWriter& PrintWriter::operator<< (MethodInfo *obj)
+	PrintWriter& PrintWriter::operator<< (const MethodInfo *obj)
 	{
 #ifdef AVMPLUS_VERBOSE
 		if (obj) {
@@ -331,12 +331,14 @@ namespace avmplus
 			t = t->itraits;
 			*this << "class ";
 		}
-
-		if (t->ns != NULL && t->ns != m_core->publicNamespace)
-			*this << t->ns << ".";
-
-		if (t->name)
-			*this << t->name;
+		
+		Namespacep ns = t->ns();
+		if (ns != NULL && ns != m_core->publicNamespace)
+			*this << ns << ".";
+		
+		Stringp n = t->name();
+		if (n)
+			*this << n;
 		else
 			*this << "(null)";
 	}

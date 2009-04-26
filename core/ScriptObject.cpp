@@ -454,7 +454,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 	Stringp ScriptObject::format(AvmCore* core) const
 	{
-		if (traits()->name != NULL) {
+		if (traits()->name() != NULL) {
 			return core->concatStrings(traits()->format(core),
 									   core->concatStrings(core->newConstantStringLatin1("@"),
 														   core->formatAtomPtr(atom())));
@@ -705,7 +705,7 @@ namespace avmplus
 	{
 		if (ivtable->base)
 		{
-			ScopeChain* scope = vtable->scope();
+			ScopeChain* scope = vtable->init->scope();
 			if (scope->getSize())
 			{
 				Atom baseAtom = scope->getScope(scope->getSize()-1);
@@ -738,9 +738,11 @@ namespace avmplus
 	
 #endif
 
-	DomainEnv* ScriptObject::domainEnv() const 
+	Stringp ScriptObject::implToString() const
 	{
-		return vtable->abcEnv->domainEnv();
+		AvmCore* core = this->core();
+		Traits* t = this->traits();
+		Stringp s = core->concatStrings(core->newConstantStringLatin1("[object "), t->name());
+		return core->concatStrings(s, core->newConstantStringLatin1("]"));
 	}
-
 }

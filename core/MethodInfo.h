@@ -219,6 +219,8 @@ namespace avmplus
 
 		void resolveSignature(const Toplevel* toplevel);
 
+		Traits* resolveActivation(const Toplevel* toplevel);
+
 #ifdef DEBUGGER
 	public:
 		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -255,7 +257,7 @@ namespace avmplus
 
 	public:
 		
-		void makeIntoPrototypeFunction(const Toplevel* toplevel);
+		Traits* makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope);
 		bool makeMethodOf(Traits* type);
 
 
@@ -308,6 +310,7 @@ namespace avmplus
 	public:
 
 #if VMCFG_METHOD_NAMES
+		Stringp FASTCALL getMethodNameWithTraits(Traits* declaringTraits) const;
 		Stringp FASTCALL getMethodName() const;
 #endif		
 
@@ -354,11 +357,16 @@ namespace avmplus
 
 		inline GprMethodProc implGPR() const { return _implGPR; }
 		inline FprMethodProc implFPR() const { return _implFPR; }
-		inline Traits* declaringTraits() const { return _declaringTraits; }
-		inline const ScopeTypeChain* declaringScope() const { return _declaringTraits->scope(); }
-		inline Traits* activationTraits() const { return _activationTraits; }
+		Traits* declaringTraits() const;
+		const ScopeTypeChain* declaringScope() const;
+		Traits* activationTraits() const;
+		const ScopeTypeChain* activationScope() const;
 
-		inline void set_activationTraits(Traits* t) { _activationTraits = t; }
+		// note, these are called "init" (rather than "set") because they 
+		// should be called exactly once per MethodInfo.
+		void init_activationTraits(Traits* t);
+		void init_declaringScope(const ScopeTypeChain* s);
+		
 
 		inline MethodSignaturep getMethodSignature()
 		{
@@ -375,6 +383,8 @@ namespace avmplus
 	private:
 		MethodSignature* FASTCALL _getMethodSignature();
 		MethodSignature* FASTCALL _buildMethodSignature(const Toplevel* toplevel);
+
+		void init_activationScope(const ScopeTypeChain* s);
 
 	private:
 		struct NativeInfo
@@ -399,6 +409,9 @@ namespace avmplus
 	#endif
 		};
 
+	private:
+		static const uintptr_t IS_TRAITS = 0x01;
+	
 	// ------------------------ DATA SECTION BEGIN
 	private:
 		// these are (probably) most-frequently accessed so put at offset zero (allow LIR to generate trivially smaller code)
@@ -407,9 +420,9 @@ namespace avmplus
 			GprMethodProc	_implGPR;
 			FprMethodProc	_implFPR;
 		};
-		DWB(MMgc::GCWeakRef*)	_msref;				// our MethodSignature 
-		DWB(Traits*)			_declaringTraits;
-		DWB(Traits*)			_activationTraits;
+		DWB(MMgc::GCWeakRef*)	_msref;						// our MethodSignature 
+		uintptr_t				_declaringScopeOrTraits;	// if LSB set, Traits*   if LSB clr, ScopeTypeChain*
+		uintptr_t				_activationScopeOrTraits;	// if LSB set, Traits*   if LSB clr, ScopeTypeChain*
 		PoolObject* const		_pool;
 		const uint8_t* const	_abc_info_pos;		// pointer to abc MethodInfo record 
 		int						_flags;				// see bitmask defs above 
