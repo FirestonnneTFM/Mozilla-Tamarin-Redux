@@ -1458,7 +1458,7 @@ const int kBufferPadding = 16;
 		static bool getIndexFromString(Stringp s, uint32 *result);
 			
 		ScriptBufferImpl* newScriptBuffer(size_t size);
-		VTable* newVTable(Traits* traits, VTable* base, ScopeChain* scope, AbcEnv* abcEnv, Toplevel* toplevel);
+		VTable* newVTable(Traits* traits, VTable* base, Toplevel* toplevel);
 
 		RegExpObject* newRegExp(RegExpClass* regExpClass,
 								Stringp pattern,

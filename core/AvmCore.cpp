@@ -309,8 +309,8 @@ namespace avmplus
 		for(int i=0, size=builtinPool->classCount(); i<size; i++)
 			builtinPool->getClassTraits(i)->init->makeNonInterruptible();
 
-		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
-			builtinPool->scripts[i]->makeNonInterruptible();
+		for(int i=0, size=builtinPool->scriptCount(); i<size; i++)
+			builtinPool->getScriptTraits(i)->init->makeNonInterruptible();
 
 #ifdef DEBUGGER
 		// sampling can begin now, requires builtinPool
@@ -329,15 +329,17 @@ namespace avmplus
 		return toplevel;
 	}
 
-	static ScriptEnv* initScript(AvmCore* core, Toplevel* toplevel, AbcEnv* abcEnv, MethodInfo* script)
+	static ScriptEnv* initScript(AvmCore* core, Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits)
 	{
-		Traits* scriptTraits = script->declaringTraits();
 		// [ed] 3/24/06 why do we really care if a script is dynamic or not?
 		//AvmAssert(scriptTraits->needsHashtable);
 
-		ScopeChain* scriptScope = ScopeChain::create(core->GetGC(), scriptTraits->scope(), NULL, core->newNamespace(core->kEmptyString));
-		VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, scriptScope, abcEnv, toplevel);
-		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
+		bool wasResolved = scriptTraits->isResolved();
+		VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, toplevel);
+		AvmAssert(scriptTraits->isResolved());
+		if (!wasResolved)
+			scriptTraits->init_declaringScopes(ScopeTypeChain::createEmpty(core->GetGC(), scriptTraits));
+		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable, abcEnv);
 		scriptVTable->init = scriptEnv;
 		core->exportDefs(scriptTraits, scriptEnv);
 		return scriptEnv;
@@ -351,7 +353,7 @@ namespace avmplus
 		AvmAssert(pool != NULL);
 
 		// get the main entry point and its global traits
-		if (pool->scriptCount == 0)
+		if (pool->scriptCount() == 0)
 		{
 			toplevel->verifyErrorClass()->throwError(kMissingEntryPointError);
 		}
@@ -379,19 +381,19 @@ namespace avmplus
 		{
 			// some code relies on the final script being initialized first, so we
 			// must continue that behavior
-			main = initScript(this, toplevel, abcEnv, pool->scripts[pool->scriptCount-1]);
+			main = initScript(this, toplevel, abcEnv, pool->getScriptTraits(pool->scriptCount()-1));
 		}
 
 		// skip the final one, it's already been done
-		for (int i=0, n=pool->scriptCount-1; i < n; i++)
+		for (int i=0, n=pool->scriptCount()-1; i < n; i++)
 		{
-			initScript(this, toplevel, abcEnv, pool->scripts[i]);
+			initScript(this, toplevel, abcEnv, pool->getScriptTraits(i));
 		}
 
 #ifdef AVMPLUS_VERIFYALL
 		if (config.verifyall) {
-			for (int i=0, n=pool->scriptCount; i < n; i++)
-				enqTraits(pool->scripts[i]->declaringTraits());
+			for (int i=0, n=pool->scriptCount(); i < n; i++)
+				enqTraits(pool->getScriptTraits(i));
 			verifyEarly(toplevel);
 		}
 #endif
@@ -1110,12 +1112,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			s = kEmptyString;
 		}
-
-		if (t->ns != NULL && t->ns != publicNamespace)
-			s = concatStrings(s, concatStrings(toErrorString(t->ns), newConstantStringLatin1("."))); 
-
-		if (t->name)
-			s = concatStrings(s, t->name);
+		
+		Namespacep ns = t->ns();
+		if (ns != NULL && ns != publicNamespace)
+			s = concatStrings(s, concatStrings(toErrorString(ns), newConstantStringLatin1("."))); 
+		
+		Stringp n = t->name();
+		if (n)
+			s = concatStrings(s, n);
 		else
 			s = concatStrings(s, newConstantStringLatin1("(null)"));
 		return s;
@@ -3107,13 +3111,12 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC(), size) BasicScriptBufferImpl(size);
 	}
 	
-	VTable* AvmCore::newVTable(Traits* traits, VTable* base, ScopeChain* scope,
-		AbcEnv* abcEnv, Toplevel* toplevel)
+	VTable* AvmCore::newVTable(Traits* traits, VTable* base, Toplevel* toplevel)
 	{
 		traits->resolveSignatures(toplevel);
 		const uint32_t count = traits->getTraitsBindings()->methodCount;
 		size_t extraSize = sizeof(MethodEnv*)*(count > 0 ? count-1 : 0);
-		return new (GetGC(), extraSize) VTable(traits, base, scope, abcEnv, toplevel);
+		return new (GetGC(), extraSize) VTable(traits, base, toplevel);
 	}
 
 	RegExpObject* AvmCore::newRegExp(RegExpClass* regexpClass,

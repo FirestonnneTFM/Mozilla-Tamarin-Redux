@@ -225,11 +225,10 @@ namespace avmplus
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
-	static VTable* _newVT(VTable* vt, uint32_t sz)
+	static VTable* _newVT(Toplevel* toplevel, PoolObject* pool, uint32_t sz)
 	{
-		Toplevel* toplevel = vt->toplevel();
-		Traits* t = Traits::newTraits(vt->abcEnv->pool(), NULL, sz, 0, TRAITSTYPE_RT);
-		return toplevel->core()->newVTable(t, NULL, NULL, NULL, toplevel);
+		Traits* t = Traits::newTraits(pool, NULL, sz, 0, TRAITSTYPE_RT);
+		return toplevel->core()->newVTable(t, NULL, toplevel);
 	}
 #endif
 
@@ -242,7 +241,7 @@ namespace avmplus
 			return undefinedAtom;
 		
 		if (s->sampleIteratorVTable == NULL)
-			s->sampleIteratorVTable = _newVT(self->vtable, sizeof(SampleIterator));
+			s->sampleIteratorVTable = _newVT(self->toplevel(), self->traits()->pool, sizeof(SampleIterator));
 		ScriptObject *iter = new (self->gc()) SampleIterator(s, self, s->sampleIteratorVTable);
 		return iter->atom();
 #else
@@ -311,7 +310,16 @@ namespace avmplus
 		{
 			// fallback answer
 			type = tl->objectClass;
-			ScopeChain* sc = vtable->scope();
+			
+			// note that note all types will have an init method,
+			// so those types may get reported as "objectClass" rather
+			// than something more specific. However, it's not clear
+			// that the Sampler ever really cared about reporting those
+			// objects well in the first place (eg activation or catch objects),
+			// so it doesn't seem we're a lot worse off than before.
+			ScopeChain* sc = NULL;
+			if (vtable->init)
+				sc = vtable->init->scope();
 			
 			if(sc && sc->getSize() <= 1) {
 				if(sc->getSize() == 1)
@@ -333,7 +341,7 @@ namespace avmplus
 		// associate an object with some "type" and failed.  You can ignore it.
 		AvmAssert(!obj || 
 			typeOrVTable < 7 || 
-			  (obj->traits()->name && obj->traits()->name->equalsLatin1("global")) ||
+			  (obj->traits()->name() && obj->traits()->name()->equalsLatin1("global")) ||
 			(AvmCore::istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
 			(obj->traits()->isActivationTraits() && type == tl->objectClass) ||
 			AvmCore::istype(obj->atom(), type->traits()->itraits));
@@ -439,7 +447,7 @@ namespace avmplus
 			if(AvmCore::istype(o, CLASS_TYPE) && instanceNames && t->itraits)
 				t = t->itraits;
 			if (s->slotIteratorVTable == NULL)
-				s->slotIteratorVTable = _newVT(self->vtable, sizeof(SlotIterator));
+				s->slotIteratorVTable = _newVT(self->toplevel(), self->traits()->pool, sizeof(SlotIterator));
 			return (new (gc) SlotIterator(t, s->slotIteratorVTable))->atom();			   
 		}
 #else

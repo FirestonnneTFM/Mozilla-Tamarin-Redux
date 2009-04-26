@@ -170,6 +170,11 @@ namespace avmplus
 		return _call->coerceEnter(argc, argv);
 	}
 
+	CodeContext* FunctionObject::getFunctionCodeContext() const 
+	{ 
+		return _call->scope()->abcEnv()->codeContext(); 
+	}
+
 	int FunctionObject::get_length()
 	{
 		MethodSignaturep ms = _call->method->getMethodSignature();
@@ -186,5 +191,12 @@ namespace avmplus
 		}
 		MethodSignaturep ms = _call->method->getMethodSignature();
 		return toplevel()->coerce(a, ms->paramTraits(0));
+	}
+
+	Stringp FunctionObject::implToString() const
+	{
+		AvmCore* core = this->core();
+		Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(_call->method->method_id()));
+		return core->concatStrings(s, core->newConstantStringLatin1("]"));
 	}
 }

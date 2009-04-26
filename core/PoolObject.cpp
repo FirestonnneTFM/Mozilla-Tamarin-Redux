@@ -54,13 +54,13 @@ namespace avmplus
 #endif
 		cpool_mn(0),
 		metadata_infos(0),
-		scripts(core->GetGC(), 0),
 		bugFlags(0),
 		_namedTraits(new(core->GetGC()) MultinameHashtable()),
 		_privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
 		_code(sb.getImpl()),
 		_abcStart(startPos),
 		_classes(core->GetGC(), 0),
+		_scripts(core->GetGC(), 0),
 		_methods(core->GetGC(), 0)
 #ifdef DEBUGGER
 		, _method_dmi(core->GetGC(), 0)
@@ -367,7 +367,7 @@ illegal_default_error:
 		{
 			if (t)
 			{
-				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(Multiname(t->ns, t->name)));
+				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(Multiname(t->ns(), t->name())));
 			}
 			else
 			{
@@ -581,12 +581,12 @@ range_error:
 				default:
 				{
 					Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
-					r = getTraits(Multiname(base->ns, fullname), toplevel);
+					r = getTraits(Multiname(base->ns(), fullname), toplevel);
 
 					if (!r)
 					{
-						r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns);
-						core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, r);
+						r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
+						core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns(), r);
 					}
 					break;
 				}

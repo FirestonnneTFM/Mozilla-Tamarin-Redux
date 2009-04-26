@@ -55,32 +55,31 @@ namespace avmplus
 	#endif
 	public:
 		/** vtable for the activation scope inside this method */
-		VTable *getActivation();
-        ScriptObject *newActivation();
+        ScriptObject* newActivation();
 
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
 
 #ifdef FEATURE_NANOJIT
 		enum TrampStub { kTrampStub };
-		MethodEnv(TrampStub, MethodInfo *method, VTable* vtable);
+		MethodEnv(TrampStub, MethodInfo* method, ScopeChain* scope);
 #endif
 
-		MethodEnv(MethodInfo* method, VTable *vtable);
+		MethodEnv(MethodInfo* method, ScopeChain* scope);
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK 
 		virtual ~MethodEnv();
 #endif
 
-		inline AbcEnv* abcEnv() const { return _vtable->abcEnv; }
+		inline AbcEnv* abcEnv() const { return _scope->abcEnv(); }
 		inline AvmCore* core() const { return method->pool()->core; }
-		inline CodeContext* codeContext() const { return _vtable->abcEnv->codeContext(); }
-		inline DomainEnv* domainEnv() const { return _vtable->abcEnv->domainEnv(); }
-		inline ScopeChain* scope() const { return _vtable->scope(); }
-		inline MethodEnv* super_init() const { AvmAssert(_vtable->base != NULL); return _vtable->base->init; }
-		inline Toplevel* toplevel() const { return _vtable->toplevel(); }
-		inline Stringp traitsName() const { return _vtable->traits->name; }
-		inline Namespacep traitsNs() const { return _vtable->traits->ns; }
+		inline CodeContext* codeContext() const { return abcEnv()->codeContext(); }
+		inline DomainEnv* domainEnv() const { return abcEnv()->domainEnv(); }
+		inline ScopeChain* scope() const { return _scope; }
+		inline MethodEnv* super_init() const { AvmAssert(vtable()->base != NULL); return vtable()->base->init; }
+		inline Toplevel* toplevel() const { return vtable()->toplevel(); }
+		inline Stringp traitsName() const { return vtable()->traits->name(); }
+		inline Namespacep traitsNs() const { return vtable()->traits->ns(); }
 
 		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
@@ -119,6 +118,9 @@ namespace avmplus
 		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap, MethodSignaturep ms);
 		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms);
 		void FASTCALL nullcheckfail(Atom atom);
+
+		VTable* getActivationVTable();
+		VTable* buildActivationVTable();
 
 	// helper functions used from compiled code
 	public:
@@ -332,6 +334,10 @@ namespace avmplus
 		inline FprMethodProc implFPR() const { return method->implFPR(); }
 #endif
 
+	protected:
+
+		inline VTable* vtable() const { return _scope->vtable(); }
+
 	// ------------------------ DATA SECTION BEGIN
 #if VMCFG_METHODENV_IMPL32
 	private:
@@ -344,7 +350,7 @@ namespace avmplus
 #endif
 	protected:
 		// pointers are write-once so we don't need WB's
-		VTable* const				_vtable;		// the vtable for the scope where this env was declared 
+		ScopeChain* const			_scope;			
 	public:
 		MethodInfo* const			method;		// runtime independent type info for this method 
 	private:
@@ -365,14 +371,17 @@ namespace avmplus
 	class ScriptEnv : public MethodEnv
 	{
 	public:
-		ScriptEnv(MethodInfo* _method, VTable * _vtable)
-			: MethodEnv(_method, _vtable)
+		ScriptEnv(MethodInfo* _method, VTable* _vtable, AbcEnv* _abcEnv)
+			: MethodEnv(_method, createScriptScope(_method->declaringScope(), _vtable, _abcEnv))
 		{
 			setIsScriptEnv(); 
 		}
 
 		ScriptObject* initGlobal();
-
+	
+	private:
+		static ScopeChain* createScriptScope(const ScopeTypeChain* stc, VTable* _vtable, AbcEnv* _abcEnv);
+		
 	// ------------------------ DATA SECTION BEGIN
 	public:
 		DRCWB(ScriptObject*) global; // initially null, set after initialization
@@ -382,8 +391,10 @@ namespace avmplus
 	class FunctionEnv : public MethodEnv
 	{
 	  public:
-		FunctionEnv(MethodInfo* _method, VTable * _vtable)
-			: MethodEnv(_method, _vtable) {}
+		FunctionEnv(MethodInfo* _method, ScopeChain* _scope)
+			: MethodEnv(_method, _scope) 
+		{
+		}
 	// ------------------------ DATA SECTION BEGIN
 	  public:
 		DRCWB(ClassClosure*) closure;

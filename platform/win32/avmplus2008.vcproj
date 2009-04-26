@@ -1516,6 +1516,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\avm.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\avm.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\AvmCore.cpp"
 				>
 			</File>

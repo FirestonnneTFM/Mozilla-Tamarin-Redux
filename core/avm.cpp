@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +16,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 1993-2007
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,67 +36,58 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_VTable__
-#define __avmplus_VTable__
+#include "avmplus.h"
 
+namespace avm {
 
-namespace avmplus
-{
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class VTable : public MMgc::GCFinalizedObject
-#else
-	class VTable : public MMgc::GCObject
-#endif
+	// you probably don't want to open this namespace.
+	// using namespace avmplus;
+
+	// -------- AvmObject --------
+
+	bool isFunction(Object o)
 	{
-#if defined FEATURE_NANOJIT
-		friend class CodegenLIR;
-#endif
-	private:
-		MethodEnv* makeMethodEnv(MethodInfo* method, ScopeChain* scope);
-		void addInterface(MethodInfo* virt, int disp_id);
+		avmplus::ScriptObject* so = avmplus::avmFromObject(o);
+		return so && so->core()->isFunction(so->atom());
+	}
 
-	public:
-		VTable(Traits* traits, VTable* base, Toplevel* toplevel);
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		virtual ~VTable();
-#endif
-		void resolveSignatures(ScopeChain* scope);
+	CodeContext getFunctionCodeContext(Object o)
+	{
+		if (!isFunction(o))
+		{
+			AvmAssert(!"Only Function is legal here.");
+			return NULL;
+		}
+		avmplus::ScriptObject* so = avmplus::avmFromObject(o);
+		avmplus::CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
+		return avmToCodeContext(cc);
+	}
 
-		VTable* newParameterizedVTable(Traits* param_traits, Stringp fullname);
+	CodeContext getClassCodeContext(Object o)
+	{
+		if (!o)
+			return NULL;
+		avmplus::ScriptObject* so = avmplus::avmFromObject(o);
+		if (so->core()->isFunction(so->atom()))
+		{
+			AvmAssert(!"Function or MC is not legal here.");
+			return NULL;
+		}
+		avmplus::TraitsPosType t = so->traits()->posType();
+		if (t == avmplus::TRAITSTYPE_CATCH || t == avmplus::TRAITSTYPE_ACTIVATION)
+		{
+			AvmAssert(!"Activation and Catch objects are not legal here.");
+			return NULL;
+		}
+		avmplus::MethodEnv* init = so->vtable->init;
+		if (!init)
+		{
+			AvmAssert(!"init method is null, should not be possible.");
+			return NULL;
+		}
+		avmplus::CodeContext* cc = init->scope()->abcEnv()->codeContext();
+		return avmToCodeContext(cc);
+	}
 
-		inline size_t getExtraSize() const { return traits->getExtraSize(); }
-		inline MMgc::GC* gc() const { return traits->core->GetGC(); }
-		inline AvmCore* core() const { return traits->core; }
-
-#ifdef AVMPLUS_VERBOSE
-		Stringp format(AvmCore* core) const { return traits->format(core); }
-#endif
-
-#ifdef DEBUGGER
-		uint32 size() const;
-#endif
-
-		inline Toplevel* toplevel() const { return _toplevel; }
-	
-	// ------------------------ DATA SECTION BEGIN
-	private:
-		Toplevel* const _toplevel;
-	public:
-		DWB(MethodEnv*) init;
-		DWB(VTable*) base;
-		DWB(VTable*) ivtable;
-		Traits* const traits;
-		bool linked;	// @todo -- surely there's a spare bit we can use for this.
-		bool pad[3];
-
-#if defined FEATURE_NANOJIT
-		MethodEnv* imt[Traits::IMT_SIZE];
-#endif
-		MethodEnv* methods[1]; // virtual method table
-	// ------------------------ DATA SECTION END
-	};
-
-}
-
-#endif // __avmplus_VTable__
+} // namespace avm
 

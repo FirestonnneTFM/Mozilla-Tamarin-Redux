@@ -84,9 +84,9 @@ namespace avmplus
 		TRAITSTYPE_SCRIPT_FROM_ABC			= 2,
 		TRAITSTYPE_CATCH					= 3,
 		TRAITSTYPE_ACTIVATION				= 4,
-		TRAITSTYPE_FUNCTION					= 5,		// prototype function -- traitsPos will always be null
-		TRAITSTYPE_NVA						= 6,		// null/void/any -- traitsPos will always be null
-		TRAITSTYPE_RT						= 7			// Traits defined at runtime, e.g. instantiated parameterized types
+		TRAITSTYPE_NVA						= 5,		// null/void/any -- traitsPos will always be null
+		TRAITSTYPE_RT						= 6			// Traits defined at runtime, e.g. instantiated parameterized types
+		//TRAITSTYPE_unused					= 7
 	};
 	
 	const uint32_t NOT_DERIVED_OR_XML_MASK = 
@@ -419,7 +419,6 @@ namespace avmplus
 #endif
 
 		static Traits* newCatchTraits(const Toplevel* toplevel, PoolObject* pool, TraitsPosPtr traitsPos, Stringp name, Namespacep ns);
-		static Traits* newFunctionTraits(const Toplevel* toplevel, PoolObject* pool, uint32_t method_id);
 		Traits* newParameterizedITraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this); }
 		Traits* newParameterizedCTraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this->base); }
 
@@ -505,22 +504,26 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core) const;
 #endif
-
-		inline const ScopeTypeChain* scope() const { return _scope; }
-		inline void set_scope(const ScopeTypeChain* stc) { WB(MMgc::GC::GetGC(this), this, &_scope, stc); }
+		
+		// call init_declaringScope for each method that we own. this should be
+		// called exactly once per Traits, *after* the Traits has been resolved.
+		void init_declaringScopes(const ScopeTypeChain* stc);
+		
+		inline Namespacep ns() const { return _ns; }
+		inline Stringp name() const { return _name; }
+		void set_names(Namespacep p_ns, Stringp p_name) { _ns = p_ns; _name = p_name; }
 
 	// ------------------------ DATA SECTION BEGIN
 	public:		AvmCore* const			core;		// @todo remove, can get from pool->core
 	public:		Traits* const			base;		// Pointer to the base traits; that is, the traits of the base class
 	public:		PoolObject* const		pool;		// The constant pool owning this definition. never null.
 	public:		Traits*					itraits;	// if this type is a factory, itraits is non-null and points to the type created by this factory.
-	public:		DRCWB(Namespacep)		ns;			// The namespace of the class described by this traits object
-	public:		DRCWB(Stringp)			name;		// The name of the class described by this traits object
+	private:	DRCWB(Namespacep)		_ns;			// The namespace of the class described by this traits object
+	private:	DRCWB(Stringp)			_name;		// The name of the class described by this traits object
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	public:		DWB(char*)				rawname;
 #endif
 	public:		DRCWB(Namespacep)		protectedNamespace;	// protected namespace, if any
-	private:	const ScopeTypeChain*	_scope;				// scope chain types
 	public:		DWB(MethodInfo*)		init;				// not a call/init union b/c smart pointers and union's don't mix
 	private:	CreateClassClosureProc	m_createClassClosure;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType

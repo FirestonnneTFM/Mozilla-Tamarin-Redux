@@ -147,15 +147,21 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 	Stringp ClassClosure::format(AvmCore* core) const
 	{
-		if (traits()->name)
+		if (traits()->name())
 		{
 			return traits()->format(core);
 		}
-		else
-		{
-			Stringp prefix = core->newConstantStringLatin1("CC{}@");
-			return core->concatStrings(prefix, core->formatAtomPtr(atom()));
-		}
+
+		Stringp prefix = core->newConstantStringLatin1("CC{}@");
+		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
 	}
 #endif
+
+	Stringp ClassClosure::implToString() const
+	{
+		AvmCore* core = this->core();
+		Traits* t = this->traits()->itraits;
+		Stringp s = core->concatStrings(core->newConstantStringLatin1("[class "), t->name());
+		return core->concatStrings(s, core->newConstantStringLatin1("]"));
+	}
 }

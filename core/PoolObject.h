@@ -108,9 +108,6 @@ namespace avmplus
 		/** domain */
 		DWB(Domain*) domain;
 		
-		/** constructors for class objects, for op_newclass */
-		List<MethodInfo*> scripts;
-
 		/** # of elements in metadata array */
 		uint32 metadataCount;
 
@@ -123,9 +120,6 @@ namespace avmplus
 		uint32 constantNsCount;
 		uint32 constantNsSetCount;
 		uint32 constantMnCount;
-
-		/** # of elements in scripts array */
-		uint32 scriptCount;
 
 		/** flags to control certain bugfix behavior */
 		uint32 bugFlags;
@@ -231,6 +225,9 @@ namespace avmplus
 		inline uint32_t classCount() const { return _classes.size(); }
 		inline Traits* getClassTraits(uint32_t i) const { return _classes[i]; }
 
+		inline uint32_t scriptCount() const { return _scripts.size(); }
+		inline Traits* getScriptTraits(uint32_t i) const { return _scripts[i]; }
+
 		inline uint32_t methodCount() const { return _methods.size(); }
 		inline MethodInfo* getMethodInfo(uint32_t i) const { return _methods[i]; }
 #ifdef DEBUGGER
@@ -246,6 +243,7 @@ namespace avmplus
 		DWB(ScriptBufferImpl*)						_code;
 		const byte * const							_abcStart;
 		List<Traits*, LIST_GCObjects>				_classes;
+		List<Traits*, LIST_GCObjects>				_scripts;
 		List<MethodInfo*, LIST_GCObjects>			_methods;
 #ifdef DEBUGGER
 		List<DebuggerMethodInfo*, LIST_GCObjects>	_method_dmi;
