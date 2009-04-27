@@ -264,9 +264,16 @@ class AssemblerCore
 		
 		return getNsset(namespaces);
 	}
+	
 	Label getLabel(String labelName)
 	{
 		return new Label(labelName);
+	}
+	
+	int generated_label_serial = 0;
+	Label generateLabel(String labelPrefix)
+	{
+		return getLabel(labelPrefix + " #" + generated_label_serial++);
 	}
 	
 	void addScript(ScriptInfo s)
