@@ -313,6 +313,11 @@ class AbcEmitter
 				emitBlock(b, blockWriter);
 				
 				code_len += blockWriter.size();
+				
+				//  Blocks with no instructions are
+				//  valid assembly constructs.
+				if ( b.insns.size() == 0)
+					continue;
 		
 				//  If the last instruction in the block
 				//  is a jump, leave room for the instruction,

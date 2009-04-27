@@ -67,7 +67,7 @@ class MethodBodyInfo
 	
 	List<Block> blocks = new LinkedList<Block>();
 	private Map<Label, Block> blocksByLabel = new TreeMap<Label, Block>();
-	Map<Block, String> labelsByBlock = new HashMap<Block, String>();
+	Map<Block, Label> labelsByBlock = new HashMap<Block, Label>();
 	Vector<ExceptionInfo> exceptions = new Vector<ExceptionInfo>();
 	
 	/**
@@ -110,7 +110,7 @@ class MethodBodyInfo
 		}
 	
 		blocksByLabel.put(block_label, currentBlock);
-		labelsByBlock.put(currentBlock, block_label.toString());
+		labelsByBlock.put(currentBlock, block_label);
 	}
 
 	void startBlock()
@@ -209,7 +209,12 @@ class MethodBodyInfo
 
 		for ( Block b: blocks )
 		{	
-			if ( stkin.containsKey(b))
+			if ( isCatchTarget(b))
+			{
+				stkdepth = 1;
+				scpdepth = 0;
+			}
+			else if ( stkin.containsKey(b))
 			{
 				//  FIXME: should check that these agree.
 				stkdepth = stkin.get(b);
@@ -463,6 +468,22 @@ class MethodBodyInfo
 				}
 			}
 		}
+	}
+
+	private boolean isCatchTarget(Block b)
+	{
+		Label block_label = labelsByBlock.get(b);
+
+		if ( block_label != null )
+		{
+			for ( ExceptionInfo info: this.exceptions)
+			{
+				if ( info.target.equals(block_label))
+					return true;
+			}
+		}
+		
+		return false;
 	}
 
 	private void adjustMaxLocal(int idx)

@@ -488,7 +488,11 @@ sugared_function_header
 
 block
 	:
-	LBRACE insn+ RBRACE
+	//  NB: unknown_element is last for a reason;
+	//  it translates the current line as an error.  
+	//  try_block is internally guarded but still is 
+	//  better off following all rules except unknown_element.
+	LBRACE (insn |pseudo_insn | try_block | unknown_element )+ RBRACE
 	;
 
 plist[java.util.Vector<Name>param_types]
@@ -520,10 +524,8 @@ insn:
 			| multiname_insn
 			| function_insn
 			| slot_insn
-			| pseudo_insn
 			| mops_insn
 			| ad_hoc_insn
-			| unknown_opcode
 		)
 		
 	)
@@ -768,7 +770,7 @@ ad_hoc_insn
 /*
  *  Emit a more informative diagnostic.
  */
-unknown_opcode
+unknown_element
 	: bad_opcode = IDENTIFIER
 	{
 	    String diagnostic = "line ";
@@ -784,6 +786,53 @@ unknown_opcode
 	}
 	;
 
+try_block
+	@init 
+	{
+		Label try_start_label = null;
+		Label try_end_label = null;
+		Label catch_target_label = null; 
+
+		ExceptionInfo info = null;
+
+		if ( TRY == input.LA(1) )
+		{
+			info = new ExceptionInfo();
+			info.name_id  = new Integer(0);
+			info.exc_type = new Integer(0);
+
+			try_start_label = asmCore.generateLabel("start try block");
+			try_end_label = asmCore.generateLabel("end try block");
+			catch_target_label = asmCore.generateLabel("catch target");
+
+			$decl::method_body_info.startBlock(try_start_label);
+		}
+	}
+	:
+	TRY block
+	{
+		$decl::method_body_info.startBlock(try_end_label);
+		$decl::method_body_info.startBlock(catch_target_label);
+	}
+	CATCH 
+
+	//  Name of the exception to catch, defaults to *
+	(
+		exc_type = type_name
+		{
+			info.exc_type = asmCore.getNameId(exc_type);
+		}
+	)?
+
+	block
+	{
+		info.from     = try_start_label;
+		info.to       = try_end_label;
+		info.target   = catch_target_label;
+
+		$decl::method_body_info.addExceptionInfo(info);
+	}
+	;
 /*
  *  **************************
  *  ** Section: identifiers **
@@ -948,6 +997,9 @@ string_literal returns [String result]
 	QUOTE	: '"' ;
 	SPLAT	: '*' ; 
 	MINUS	: '-' ;
+
+	TRY		: '.try';
+	CATCH	: '.catch';
 
 IDENTIFIER
 	:	LETTER (LETTER|'0'..'9')*
