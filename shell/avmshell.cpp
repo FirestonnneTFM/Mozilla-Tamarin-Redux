@@ -37,515 +37,55 @@
 
 #include "avmshell.h"
 
-#if !defined(UNDER_CE) && !defined(AVM_SHELL_NO_PROJECTOR)
-#  define AVMSHELL_PROJECTOR_SUPPORT
-#endif
-
-//#define VMCFG_WORKERTHREADS
-
-#if (defined WIN32 && !defined UNDER_CE) || defined AVMPLUS_UNIX
-bool P4Available();
-#endif
-
-// [tpr] I removed the override global new stuff, it was apparently added b/c we'd crash when 
-// OS would use our new pre-main that was fixed by making the project not export any 
-// symbols other than main
-
-namespace avmplus {
-	namespace NativeID {
-		using namespace avmshell;
-		#include "shell_toplevel.cpp"
-	}
-
-#ifdef AVMPLUS_JITMAX
-	extern int jitmax;
-    extern int jitmin;
-#endif
-}
-
 namespace avmshell
 {
-	const int kScriptTimeout = 15;
-	const int kScriptGracePeriod = 5;
-
 #ifdef AVMPLUS_WIN32
-	// An ugly hack
-	bool show_error = false;
+	extern bool show_error;	// in avmshellWin.cpp
 #endif
-
-	static bool isValidProjectorFile(const char* filename)
-	{
-		FileInputStream file(filename);
-		uint8_t header[8];
-		
-		if (!file.valid())
-			return false;
-		
-		file.seek(file.length() - 8);
-		file.read(header, 8);
-		
-		// Check the magic number
-		if (header[0] != 0x56 || header[1] != 0x34 || header[2] != 0x12 || header[3] != 0xFA)
-			return false;
-		
-		return true;
-	}
-	
-	ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
-	{
-		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count, 
-																sizeof(ClassClosure*), 
-																MMgc::GC::kZero | MMgc::GC::kContainsPointers);
-	}
-	
-	void ShellCore::stackOverflow(MethodEnv *env)
-	{
-		if (inStackOverflow)
-		{
-			// Already handling a stack overflow, so do not
-			// re-enter handler.
-			return;
-		}
-			
-		// Temporarily disable stack overflow checks
-		// so that we can construct an exception object.
-		// There should be plenty of margin before the
-		// actual stack bottom to do this.
-		inStackOverflow = true;
-
-		Toplevel* toplevel = env->toplevel();
-
-		Stringp errorMessage = getErrorMessage(kStackOverflowError);
-		Atom args[2] = { nullObjectAtom, errorMessage->atom() };
-		Atom errorAtom = toplevel->errorClass()->construct(1, args);
-		Exception *exception = new (GetGC()) Exception(this, errorAtom);
-
-		// Restore stack overflow checks
-		inStackOverflow = false;
-
-		// Throw the stack overflow exception
-		throwException(exception);
-	}
-	
-	/* static */
-	void ShellCore::interruptTimerCallback(void* data)
-	{
-		((AvmCore*)data)->interrupted = true;
-	}
-	
-	void ShellCore::interrupt(MethodEnv *env)
-	{
-		interrupted = false;
-
-		Toplevel* toplevel = env->toplevel();
-
-		if (gracePeriod) {
-			// This script has already had its chance; it violated
-			// the grace period.
-			// Throw an exception it cannot catch.
-			Stringp errorMessage = getErrorMessage(kScriptTerminatedError);
-			Atom args[2] = { nullObjectAtom, errorMessage->atom() };
-			Atom errorAtom = toplevel->errorClass()->construct(1, args);
-			Exception *exception = new (GetGC()) Exception(this, errorAtom);
-			exception->flags |= Exception::EXIT_EXCEPTION;
-			throwException(exception);
-		}
-
-		// Give the script an additional grace period to
-		// clean up, and throw an exception.
-		gracePeriod = true;
-
-		Platform::GetInstance()->setTimer(kScriptGracePeriod, interruptTimerCallback, this);
-
-		toplevel->throwError(kScriptTimeoutError);
-	}
-	
-	void ShellCore::initShellPool()
-	{
-		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this);
-	}
-
-	Toplevel* ShellCore::initShellBuiltins()
-	{
-		// Initialize a new Toplevel.  This will also create a new
-		// DomainEnv based on the builtinDomain.
-		Toplevel* toplevel = initTopLevel();
-
-		// Initialize the shell builtins in the new Toplevel
-		handleActionPool(shellPool,
-						 toplevel->domainEnv(),
-						 toplevel,
-						 NULL);
-
-		return toplevel;
-	}
-	
-	Toplevel* ShellCore::createToplevel(AbcEnv* abcEnv)
-	{
-		return new (GetGC()) ShellToplevel(abcEnv);
-	}
-
-#ifdef VMCFG_EVAL
-
-	// FIXME, this is currently hokey for several reasons:
-	//
-	//  - Does not try to determine whether input is Latin1, UTF8, or indeed, already UTF16,
-	//    but assumes UTF8, which can be dangerous.  Falls back to latin1 if the utf8 conversion
-	//    fails, this seems ill-defined in the string layer though so it's just one more hack.
-	//
-	//  - Does not create an UTF16 string.  The string layer is actually broken on this count,
-	//    because requesting an empty UTF16 string returns a constant that is a Latin1 string,
-	//    and appending to it won't force the representation to UTF16 unless the data require
-	//    that to happen.  See <URL:https://bugzilla.mozilla.org/show_bug.cgi?id=473995>.
-	//
-	//  - May incur copying because the terminating NUL is not accounted for in the original
-	//    creation
-
-	String* ShellCore::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
-	{
-		String* s = newStringUTF8((const char*)bytes, nbytes);
-		if (s == NULL)
-			s = newStringLatin1((const char*)bytes, nbytes);
-		if (terminate)
-			s = s->appendLatin1("\0", 1);
-		return s;
-	}
-
-	String* ShellCore::readFileForEval(String* referencingFile, String* filename)
-	{
-		// FIXME, filename sanitazion is more complicated than this
-		if (referencingFile != NULL && filename->charAt(0) != '/' && filename->charAt(0) != '\\') {
-			// find the last slash if any, truncate the string there, append the
-			// new filename
-			int32_t x = referencingFile->lastIndexOf(newStringLatin1("/"));
-			if (x != -1)
-				filename = referencingFile->substring(0,x+1)->append(filename);
-		}
-		filename = filename->appendLatin1("\0", 1);
-		
-		// FIXME, not obvious that UTF8 is correct for all operating systems (far from it!)
-		StUTF8String fn(filename);
-		FileInputStream f(fn.c_str());
-		if (!f.valid() || (uint64_t) f.length() >= UINT32_T_MAX)
-			return NULL;
-
-		uint32_t nbytes = (uint32_t) f.available();
-		uint8_t* bytes = new uint8_t[nbytes];
-		f.read(bytes, nbytes);
-		String* str = decodeBytesAsUTF16String(bytes, nbytes, true);
-		delete [] bytes;
-		return str;
-	}
-	
-	// input is always NUL-terminated
-	void ShellCore::evaluateAtToplevel(String* input, bool record_time)
-	{
-		minstack = Platform::GetInstance()->getMainThreadStackLimit();
-		
-		ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-		codeContext->m_domainEnv = shell_domainEnv;
-
-		TRY(this, kCatchAction_ReportAsError) 
-		{
-			// Always Latin-1 here
-			input = input->appendLatin1("\0", 1);
-			double then = 0, now = 0;
-			if (record_time) 
-				then = VMPI_getDate();
-			Atom result = handleActionSource(input, NULL, shell_domainEnv, shell_toplevel, NULL, codeContext);
-			if (record_time) 
-				now = VMPI_getDate();
-			if (result != undefinedAtom)
-				console << string(result) << "\n";
-			if (record_time)
-				console << "Elapsed time: " << (now - then)/1000 << "s\n";
-		}
-		CATCH(Exception *exception)
-		{
-#ifdef DEBUGGER
-			if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-			{
-				console << string(exception->atom) << "\n";
-			}
-			if (exception->getStackTrace()) {
-				console << exception->getStackTrace()->format(this) << '\n';
-			}
-#else
-			console << string(exception->atom) << "\n";
-#endif
-		}
-		END_CATCH
-		END_TRY
-	}
-	
-#endif // VMCFG_EVAL
-	
-	ShellCore::ShellCore(MMgc::GC* gc) : AvmCore(gc)
-	{
-		systemClass = NULL;
-		
-		gracePeriod = false;
-		inStackOverflow = false;
-
-		allowDebugger = -1;	// aka "not yet set" 
-
-		consoleOutputStream = new (gc) ConsoleOutputStream();
-	
-		setConsoleStream(consoleOutputStream);
-	}
-
-#ifdef AVMSHELL_PROJECTOR_SUPPORT
-	
-	// Run a known projector file
-	void ShellCore::executeProjector(char *executablePath, int& exitCode)
-	{
-		AvmAssert(isValidProjectorFile(executablePath));
-		
-		uint8_t header[8];
-		
-		FileInputStream file(executablePath);
-		
-		file.seek(file.length() - 8);
-		file.read(header, 8);
-		
-		int abcLength = (header[4]     |
-						 header[5]<<8  |
-						 header[6]<<16 |
-						 header[7]<<24);
-		
-		ScriptBuffer code = newScriptBuffer(abcLength);
-		file.seek(file.length() - 8 - abcLength);
-		file.read(code.getBuffer(), abcLength);
-		
-		exitCode = handleArbitraryExecutableContent(code, executablePath);
-	}
-	
-#endif // AVMSHELL_PROJECTOR_SUPPORT
-
-	bool ShellCore::setup(int argc, char** argv, ShellSettings& settings)
-	{
-#if defined FEATURE_NANOJIT && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-	#ifdef AVMPLUS_SSE2_ALWAYS
-		config.sse2 = true;
-	#else
-		if (!P4Available())
-			config.sse2 = false;
-	#endif
-#endif
-		
-		config.interrupts = settings.interrupts;
-#ifdef AVMPLUS_VERIFYALL
-		config.verifyall = settings.verifyall;
-#endif
-#if defined FEATURE_NANOJIT
-		config.cseopt = settings.cseopt;
-	#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-		config.sse2 = settings.sse2;
-	#endif
-#endif
-#ifdef AVMPLUS_VERBOSE
-#  ifdef FEATURE_NANOJIT
-		config.bbgraph = settings.bbgraph;
-#  endif
-		config.verbose = settings.do_verbose;
-#endif
-		config.runmode = settings.runmode;
-		
-#ifdef DEBUGGER
-	#if VMCFG_METHOD_NAMES
-		// debugger in avmshell always enables methodnames. 
-		if (allowDebugger)
-			config.methodNames = true;
-	#endif
-#endif
-			
-#ifdef AVMPLUS_VERBOSE
-	#if VMCFG_METHOD_NAMES
-		// verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
-		if (settings.do_verbose)
-			config.methodNames = true;
-	#endif
-#endif
-
-#ifdef DEBUGGER
-		langID = settings.langID;
-#endif
-
-		GetGC()->greedy = settings.greedy;
-		GetGC()->nogc = settings.nogc;
-		GetGC()->incremental = settings.incremental;
-		
-		TRY(this, kCatchAction_ReportAsError)
-		{
-			minstack = Platform::GetInstance()->getMainThreadStackLimit();
-			
-			allowDebugger = !settings.nodebugger;
-			
-			setCacheSizes(settings.cacheSizes);
-
-			initBuiltinPool();
-			initShellPool();
-			
-			// init toplevel internally
-			shell_toplevel = initShellBuiltins();
-			
-			// Create a new Domain for the user code
-			shell_domain = new (GetGC()) Domain(this, builtinDomain);
-			
-			// Return a new DomainEnv for the user code
-			shell_domainEnv = new (GetGC()) DomainEnv(this, shell_domain, shell_toplevel->domainEnv());
-			
-			SystemClass::user_argc = argc-settings.endFilenamePos-1; 
-			SystemClass::user_argv = &argv[settings.endFilenamePos+1];
-
-			return true;
-		}
-		CATCH(Exception *exception)
-		{
-#ifdef DEBUGGER
-			if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-				console << string(exception->atom) << "\n";
-			
-			if (exception->getStackTrace())
-				console << exception->getStackTrace()->format(this) << '\n';
-#else
-			// [ed] always show error, even in release mode,
-			// see bug #121382
-			console << string(exception->atom) << "\n";
-#endif /* DEBUGGER */
-			return false;
-		}
-		END_CATCH
-		END_TRY
-	}
-	
-	int ShellCore::execute(const char* filename, ShellSettings& settings)
-	{
-		if (config.interrupts)
-			Platform::GetInstance()->setTimer(kScriptTimeout, interruptTimerCallback, this);
-		
-#ifdef AVMPLUS_VERBOSE
-		if (config.verbose)
-			console << "run " << filename << "\n";
-#endif
-		
-		FileInputStream f(filename);
-		bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
-		if (!isValid) {
-			console << "cannot open file: " << filename << "\n";
-			return(1);
-		}
-		
-		// parse new bytecode
-		ScriptBuffer code = newScriptBuffer((size_t)f.available());
-		f.read(code.getBuffer(), (size_t)f.available());
-		
-#ifdef DEBUGGER
-		if (settings.enter_debugger_on_launch)
-		{
-			// Activate the debug CLI and stop at
-			// start of program
-			debugCLI()->activate();
-			debugCLI()->stepInto();
-		}
-#else
-		(void)settings.enter_debugger_on_launch;
-#endif
-		
-		return handleArbitraryExecutableContent(code, filename);
-	}
-
-	int ShellCore::handleArbitraryExecutableContent(ScriptBuffer& code, const char * filename)
-	{
-		minstack = Platform::GetInstance()->getMainThreadStackLimit();
-		
-		TRY(this, kCatchAction_ReportAsError)
-		{
-			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-			codeContext->m_domainEnv = shell_domainEnv;
-			
-			if (AbcParser::canParse(code) == 0) {
-				handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext);
-			}
-			else if (isSwf(code)) {
-				handleSwf(filename, code, shell_domainEnv, shell_toplevel, codeContext);
-			}
-			else {
-#ifdef VMCFG_EVAL
-				// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
-				String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
-				String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
-				ScriptBuffer empty;		// With luck: allow the
-				code = empty;			//    buffer to be garbage collected
-				handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext);
-#else
-				console << "unknown input format in file: " << filename << "\n";
-				return(1);
-#endif // VMCFG_EVAL
-			}
-		}
-		CATCH(Exception *exception)
-		{
-#ifdef DEBUGGER
-			if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-			{
-				console << string(exception->atom) << "\n";
-			}
-			if (exception->getStackTrace()) {
-				console << exception->getStackTrace()->format(this) << '\n';
-			}
-#else
-			// [ed] always show error, even in release mode,
-			// see bug #121382
-			console << string(exception->atom) << "\n";
-#endif /* DEBUGGER */
-			
-			return 1;
-		}
-		END_CATCH
-		END_TRY
-		
-		return 0;
-	}
-
-	
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//
-	// Driver code - Shell
-
-	// Try not to have conditional fields in this, just leave the defaults to "off".
-	// Client code can discriminate, and the command line parser will discriminate too.
-	//
-	// FIXME: A naming disaster.  Clean up.
-	
+  
 	ShellSettings::ShellSettings()
-		: filenamesPos(-1)
-		, endFilenamePos(-1)
-		, nodebugger(false)
+		: ShellCoreSettings()
+		, programFilename(NULL)
+		, filenames(NULL)
+		, numfiles(-1)
+		, do_selftest(false)
 		, do_repl(false)
 		, do_log(false)
-		, do_verbose(false)
-		, enter_debugger_on_launch(false)
-		, do_selftest(false)
-		, st_component(NULL)
-		, st_category(NULL)
-		, st_name(NULL)
+		, do_projector(false)
 		, numthreads(1)
 		, numworkers(1)
-		, interrupts(AvmCore::interrupts_default)
-		, verifyall(AvmCore::verifyall_default)
-		, sse2(AvmCore::sse2_default)
-		, greedy(false)
-		, nogc(false)
-		, incremental(true)
-		, langID(-1)
-		, bbgraph(AvmCore::bbgraph_default)
-		, cseopt(AvmCore::cseopt_default)
-		, runmode(AvmCore::runmode_default)
-		, do_projector(false)
+		, repeats(1)
 	{
-	}
-	
+  	}
+  
+	ShellCoreImpl::ShellCoreImpl(MMgc::GC* gc, bool mainthread)
+		: ShellCore(gc)
+		, mainthread(mainthread)
+  	{
+  	}
+  
+	/* virtual */
+	void ShellCoreImpl::setStackLimit()
+  	{
+#ifdef VMCFG_WORKERTHREADS
+		if (mainthread)
+			minstack = Platform::GetInstance()->getMainThreadStackLimit();
+		else {
+			// Here we really depend on being called fairly high up on
+			// the thread's stack, because we don't know where the highest
+			// stack address is.
+			size_t stackheight;
+			pthread_attr_t attr;
+			pthread_attr_init(&attr);
+			pthread_attr_getstacksize(&attr, &stackheight);
+			pthread_attr_destroy(&attr);
+			minstack = uintptr_t(&stackheight) - stackheight + avmshell::kStackMargin;
+  		}
+#else
+		minstack = Platform::GetInstance()->getMainThreadStackLimit();
+#endif
+  	}
+  	
 	/* static */
 	int Shell::run(int argc, char *argv[]) 
 	{
@@ -553,22 +93,16 @@ namespace avmshell
 		//conf.verbose = true;
 		MMgc::GCHeap::Init(conf);
 
-		// Note that output from the command line parser will not go to the log file.
+		// Note that output from the command line parser (usage messages, error messages,
+		// and printed version number / feature list) will not go to the log file.  We
+		// could fix this if it's a hardship.
 
 		ShellSettings settings;
 		parseCommandLine(argc, argv, settings);
 		
 		if (settings.do_log)
-		{
-			if (settings.filenamesPos < settings.endFilenamePos)
-				initializeLogging(argv[settings.filenamesPos]);
-			else
-				initializeLogging("AVMLOG");
-		}
+			initializeLogging(settings.numfiles > 0 ? settings.filenames[0] : "AVMLOG");
 
-		AvmAssert( settings.numworkers == 1 && settings.numthreads == 1 );
-
-		int exitCode = 0;
 		{
 			MMGC_ENTER;
 			if(MMGC_ENTER_STATUS != 0) {
@@ -576,58 +110,383 @@ namespace avmshell
 				return OUT_OF_MEMORY;
 			}
 			
-			{
-				MMgc::GC *gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
-				MMGC_GCENTER(gc);
+#ifdef VMCFG_WORKERTHREADS
+			if (settings.numworkers == 1 && settings.numthreads == 1 && settings.repeats == 1)
+				singleWorker(settings);
+			else
+				multiWorker(settings);
+#else
+			singleWorker(settings);
+#endif			
+		}
+		
+#ifdef AVMPLUS_WITH_JNI
+		// This surely does not belong here?
+		if (Java::startup_options) delete Java::startup_options;
+#endif /* AVMPLUS_WITH_JNI */
+		
+		MMgc::GCHeap::Destroy();
+	 	return 0;
+	}
 
-				ShellCore* shell = new ShellCore(gc);
+	// In the single worker case everything is run on the main thread.  This
+	// is where we handler the repl, selftest, and projectors.
 
-				if (!shell->setup(argc, argv, settings))
-					Platform::GetInstance()->exit(1);
-				
+	/* static */
+	void Shell::singleWorker(ShellSettings& settings)
+	{
+		MMgc::GC *gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+		MMGC_GCENTER(gc);
+		
+		ShellCore* shell = new ShellCoreImpl(gc, true);
+		
+		if (!shell->setup(settings))
+			Platform::GetInstance()->exit(1);
+		
 #ifdef AVMPLUS_SELFTEST
-				if (settings.do_selftest) {
-					// need minstack
-					::selftests(shell, settings.st_component, settings.st_category, settings.st_name);
-					goto finish;
-				}
+		if (settings.do_selftest) {
+			shell->executeSelftest(settings);
+			goto finish;
+		}
 #endif
-				
+		
 #ifdef AVMSHELL_PROJECTOR_SUPPORT
-				if (settings.do_projector)
-					shell->executeProjector(argv[0], exitCode);
+		if (settings.do_projector) {
+			AvmAssert(settings.programFilename != NULL);
+			int exitCode = shell->executeProjector(settings.programFilename);
+			if (exitCode != 0)
+				Platform::GetInstance()->exit(exitCode);
+		}
 #endif
-				
-				// execute each abc file
-				for (int i=settings.filenamesPos; i < settings.endFilenamePos; i++) {
-					exitCode = shell->execute(argv[i], settings);
-					if (exitCode != 0) {
-						// do something?
+		
+		// execute each abc file
+		for (int i=0 ; i < settings.numfiles ; i++ ) {
+			int exitCode = shell->evaluateFile(settings, settings.filenames[i]);
+			if (exitCode != 0) 
+				Platform::GetInstance()->exit(exitCode);
+		}
+		
+#ifdef VMCFG_EVAL
+		if (settings.do_repl)
+			repl(shell);
+#endif
+
+#ifdef AVMPLUS_SELFTEST
+	finish:
+#endif
+		delete shell;
+		delete gc;
+	}
+
+#ifdef VMCFG_WORKERTHREADS
+
+//#define LOGGING(x)    x
+#define LOGGING(x)
+
+	// When we have more than one worker then we spawn as many threads as
+	// called for and create a number of ShellCores corresponding to
+	// the number of workers.  Those cores are scheduled on the threads.
+	// The main thread acts as a supervisor, handing out work and scheduling
+	// cores on the threads.
+	//
+	// At this time pthreads is required.  Windows Vista provides condition
+	// variables and it is a straightforward exercise to map from pthread types
+	// and calls to the Vista types and calls.  For older Win32 the situation
+	// is grimmer.  If you need to run this code on older Win32, please download
+	// and install the available open-source pthreads libraries for Win32.
+
+	struct MultiworkerState;
+
+	struct CoreNode 
+	{
+		CoreNode(ShellCore* core, int id) 
+			: core(core)
+			, id(id)
+			, next(NULL)
+		{
+		}
+
+		~CoreNode()
+		{
+			// Destruction order matters.
+			MMgc::GC* gc = core->GetGC();
+			delete core;
+			delete gc;
+		}
+		
+		ShellCore * const	core;
+		const int			id;
+		CoreNode *			next;		// For the LRU list of available cores
+	};
+	
+	struct ThreadNode
+	{
+		ThreadNode(MultiworkerState& state, int id)
+			: state(state)
+			, id(id)
+			, corenode(NULL)
+			, filename(NULL)
+			, next(NULL)
+		{
+			// 'thread' is initialized after construction
+			pthread_cond_init(&c, NULL);
+			pthread_mutex_init(&m, NULL);
+		}
+
+		~ThreadNode()
+		{
+			pthread_cond_destroy(&c);
+			pthread_mutex_destroy(&m);
+		}
+		
+		// Called from master, which should not be holding m.
+		void startWork(CoreNode* corenode, const char* filename)
+		{
+			pthread_mutex_lock(&m);
+			this->corenode = corenode;
+			this->filename = filename;
+			pthread_cond_signal(&c);
+			pthread_mutex_unlock(&m);
+		}
+		
+		MultiworkerState& state;
+		pthread_t thread;
+		const int id;
+		pthread_cond_t c;
+		pthread_mutex_t m;			// Protects corenode, filename, next, c
+		CoreNode* corenode;			// The core running (or about to run, or just finished running) on this thread
+		const char* filename;		// The work given to that core
+		ThreadNode * next;			// For the LRU list of available threads 
+	};
+	
+	struct MultiworkerState 
+	{
+		MultiworkerState(ShellSettings& settings)
+			: settings(settings)
+			, numthreads(settings.numthreads)
+			, numcores(settings.numworkers)
+			, free_threads(NULL)
+			, free_threads_last(NULL)
+			, free_cores(NULL)
+			, free_cores_last(NULL)
+			, num_free_threads(0)
+		{
+			pthread_mutex_init(&m, NULL);
+			pthread_cond_init(&c, NULL);
+		}
+		
+		~MultiworkerState()
+		{
+			pthread_mutex_destroy(&m);
+			pthread_cond_destroy(&c);
+		}
+
+		// Called from the slave threads, which should not be holding m.
+		void freeThread(ThreadNode* t)
+		{
+			pthread_mutex_lock(&m);
+			
+			if (free_threads_last != NULL)
+				free_threads_last->next = t;
+			else
+				free_threads = t;
+			free_threads_last = t;
+			
+			if (t->corenode != NULL) {
+				if (free_cores_last != NULL)
+					free_cores_last->next = t->corenode;
+				else
+					free_cores = t->corenode;
+				free_cores_last = t->corenode;
+			}
+
+			num_free_threads++;
+
+			pthread_cond_signal(&c);
+			pthread_mutex_unlock(&m);
+		}
+
+		// Called from the master thread, which must already hold m.
+		bool getThreadAndCore(ThreadNode** t, CoreNode** c)
+		{
+			if (free_threads == NULL || free_cores == NULL)
+				return false;
+			
+			*t = free_threads;
+			free_threads = free_threads->next;
+			if (free_threads == NULL)
+				free_threads_last = NULL;
+			(*t)->next = NULL;
+			
+			*c = free_cores;
+			free_cores = free_cores->next;
+			if (free_cores == NULL)
+				free_cores_last = NULL;
+			(*c)->next = NULL;
+			
+			num_free_threads--;
+
+			return true;
+		}
+			
+		ShellSettings&		settings;
+		int					numthreads;
+		int					numcores;
+
+		// Queues of available threads and cores.  Protected by m, availability signaled on c.
+		pthread_mutex_t		m;
+		pthread_cond_t		c;
+		ThreadNode*			free_threads;
+		ThreadNode*			free_threads_last;
+		CoreNode*			free_cores;
+		CoreNode*			free_cores_last;
+		int					num_free_threads;
+	};
+
+	static void masterThread(MultiworkerState& state);
+	static void* slaveThread(void *arg);
+
+	/* static */
+	void Shell::multiWorker(ShellSettings& settings)
+	{
+		AvmAssert(!settings.do_repl && !settings.do_projector && !settings.do_selftest);
+		
+		MultiworkerState	state(settings);
+		const int			numthreads(state.numthreads);
+		const int			numcores(state.numcores);
+		ThreadNode** const	threads(new ThreadNode*[numthreads]);
+		CoreNode** const	cores(new CoreNode*[numcores]);
+		
+		// Going multi-threaded.
+
+		// Create and start threads.  They add themselves to the free list.
+		for ( int i=0 ; i < numthreads ; i++ )	{
+			threads[i] = new ThreadNode(state, i);
+			pthread_create(&threads[i]->thread, NULL, slaveThread, threads[i]);
+		}
+
+		// Create collectors and cores.
+		// Extra credit: perform setup in parallel on the threads.
+		for ( int i=0 ; i < numcores ; i++ ) {
+			MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+			MMGC_GCENTER(gc);
+			cores[i] = new CoreNode(new ShellCoreImpl(gc, false), i);
+			if (!cores[i]->core->setup(settings))
+				Platform::GetInstance()->exit(1);
+		}
+
+		// Add the cores to the free list.
+		for ( int i=numcores-1 ; i >= 0 ; i-- ) {
+			cores[i]->next = state.free_cores;
+			state.free_cores = cores[i];
+		}
+		state.free_cores_last = cores[numcores-1];
+
+		// No locks are held by the master at this point
+		masterThread(state);
+		// No locks are held by the master at this point
+
+		// Some threads may still be computing, so just wait for them
+		pthread_mutex_lock(&state.m);
+		while (state.num_free_threads < numthreads)
+			pthread_cond_wait(&state.c, &state.m);
+		pthread_mutex_unlock(&state.m);
+		
+		// Shutdown: feed NULL to all threads to make them exit.
+		for ( int i=0 ; i < numthreads ; i++ )
+			threads[i]->startWork(NULL,NULL);
+		
+		// Wait for all threads to exit.
+		for ( int i=0 ; i < numthreads ; i++ ) {
+			pthread_join(threads[i]->thread, NULL);
+			LOGGING( AvmLog("T%d: joined the main thread\n", i); )
+		}
+
+		// Single threaded again.
+		
+		for ( int i=0 ; i < numthreads ; i++ )
+			delete threads[i];
+		
+		for ( int i=0 ; i < numcores ; i++ )
+			delete cores[i];
+		
+		delete [] threads;
+		delete [] cores;
+	}
+	
+	static void masterThread(MultiworkerState& state)
+	{
+		const int numfiles(state.settings.numfiles);
+		const int repeats(state.settings.repeats);
+		char** const filenames(state.settings.filenames);
+		
+		pthread_mutex_lock(&state.m);
+		int r=0;
+		for (;;) {
+			int nextfile = 0;
+			for (;;) {
+				ThreadNode* threadnode;
+				CoreNode* corenode;
+				while (state.getThreadAndCore(&threadnode, &corenode)) {
+					LOGGING( AvmLog("Scheduling %s on T%d with C%d\n", filenames[nextfile], threadnode->id, corenode->id); )
+					threadnode->startWork(corenode, filenames[nextfile]);
+					nextfile++;
+					if (nextfile == numfiles) {
+						r++;
+						if (r == repeats)
+							goto finish;
+						nextfile = 0;
 					}
 				}
 				
-#ifdef VMCFG_EVAL
-				if (settings.do_repl)
-					repl(shell);
-#endif
-				
-#ifdef AVMPLUS_WITH_JNI
-				// This surely does not belong here?
-				if (Java::startup_options) delete Java::startup_options;
-#endif /* AVMPLUS_WITH_JNI */
+				LOGGING( AvmLog("Waiting for available threads.\n"); )
+				pthread_cond_wait(&state.c, &state.m);
+			}
+		}
+	finish:
+		pthread_mutex_unlock(&state.m);
+	}
 
-#ifdef AVMPLUS_SELFTEST
-			finish:
-#endif
-				delete shell;
-				delete gc;
-			}  // MMGC_GCENTER
-		}  // MMGC_ENTER
+	static void* slaveThread(void *arg)
+	{
+		MMGC_ENTER;
+		if(MMGC_ENTER_STATUS != 0) {
+			pthread_exit(NULL);
+		}
 
-		MMgc::GCHeap::Destroy();
-	 	return exitCode;
+		ThreadNode* self = (ThreadNode*)arg;
+		MultiworkerState& state = self->state;
+		
+		for (;;) {
+			// Signal that we're ready for more work: add self to the list of free threads
+			
+			state.freeThread(self);
+
+			// Obtain more work.  We have to hold self->m here but the master won't touch corenode and
+			// filename until we register for more work, so they don't have to be copied out of
+			// the thread structure.
+			
+			pthread_mutex_lock(&self->m);
+			pthread_cond_wait(&self->c, &self->m);
+			pthread_mutex_unlock(&self->m);
+
+			if (self->corenode == NULL) {
+				LOGGING( AvmLog("T%d: Exiting\n", self->id); )
+				pthread_exit(NULL);
+			}
+
+			// Perform work
+			LOGGING( AvmLog("T%d: Work starting\n", self->id); )
+			{
+				MMGC_GCENTER(self->corenode->core->GetGC());
+				self->corenode->core->evaluateFile(state.settings, self->filename);	// Ignore the exit code for now
+			}
+			LOGGING( AvmLog("T%d: Work completed\n", self->id); )
+		}
 	}
 	
+#endif  // VMCFG_WORKERTHREADS
+
 #ifdef VMCFG_EVAL
 
 	/* static */
@@ -696,11 +555,11 @@ namespace avmshell
 				input = shellCore->newStringLatin1(commandLine+5);
 				goto compute;
 			}
-			
+
 			input = shellCore->newStringLatin1(commandLine);
 
 		compute:
-			shellCore->evaluateAtToplevel(input, record_time);
+			shellCore->evaluateString(input, record_time);
 		}
 	}
 
@@ -743,15 +602,19 @@ namespace avmshell
 		
 		// options filenames -- args
 		
+		settings.programFilename = argv[0];		// How portable / reliable is this?
 		for (int i=1; i < argc ; i++) {
 			const char * const arg = argv[i];
 			
 			if (arg[0] == '-') 
 			{
 				if (arg[1] == '-' && arg[2] == 0) {
-					if (settings.filenamesPos == -1)
-						settings.filenamesPos = i;
-					settings.endFilenamePos = i;
+					if (settings.filenames == NULL)
+						settings.filenames = &argv[i];
+					settings.numfiles = &argv[i] - settings.filenames;
+					i++;
+					settings.arguments = &argv[i];
+					settings.numargs = argc - i;
 					break;
 				}
 				
@@ -875,6 +738,9 @@ namespace avmshell
 #endif /* FEATURE_NANOJIT */
 #ifdef AVMPLUS_JITMAX
 				else if (!VMPI_strcmp(arg, "-jitmax")) {
+					extern int jitmin;
+					extern int jitmax;
+					
 					char* val = argv[++i];
 					char* dash = VMPI_strchr(val,'-');
 					if (dash) {
@@ -913,9 +779,12 @@ namespace avmshell
 					int nchar;
 					if (val == NULL)
 						val = "";
-					if (sscanf(val, "%d,%d%n", &settings.numthreads, &settings.numworkers, &nchar) != 2 || 
-						settings.numthreads < 1 || 
+					if (sscanf(val, "%d,%d,%d%n", &settings.numworkers, &settings.numthreads, &settings.repeats, &nchar) != 3)
+						if (sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2)
+							usage();
+					if (settings.numthreads < 1 || 
 						settings.numworkers < settings.numthreads || 
+						settings.repeats < 1 ||
 						size_t(nchar) != VMPI_strlen(val))
 						usage();
 				}
@@ -959,19 +828,25 @@ namespace avmshell
 				}
 			}
 			else {
-				if (settings.filenamesPos == -1)
-					settings.filenamesPos = i;
+				if (settings.filenames == NULL)
+					settings.filenames = &argv[i];
 			}
 		}
 		
-		if (settings.filenamesPos == -1)
-			settings.filenamesPos = argc;
+		if (settings.filenames == NULL)
+			settings.filenames = &argv[argc];
 		
-		if (settings.endFilenamePos == -1)
-			settings.endFilenamePos = argc;
+		if (settings.numfiles == -1)
+			settings.numfiles = &argv[argc] - settings.filenames;
 		
-		AvmAssert(settings.filenamesPos != -1 && settings.endFilenamePos != -1 && settings.filenamesPos <= settings.endFilenamePos);
+		if (settings.arguments == NULL) {
+			settings.arguments = &argv[argc];
+			settings.numargs = 0;
+		}
 
+		AvmAssert(settings.filenames != NULL && settings.numfiles != -1);
+		AvmAssert(settings.arguments != NULL && settings.numargs != -1);
+	
 		if (print_version)
 		{
 			AvmLog("shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n");
@@ -981,8 +856,9 @@ namespace avmshell
 		
 		// Vetting the options
 		
-		if (isValidProjectorFile(argv[0])) {
-			if (settings.do_selftest || settings.do_repl || settings.filenamesPos < settings.endFilenamePos) {
+#ifdef AVMSHELL_PROJECTOR_SUPPORT
+		if (settings.programFilename != NULL && ShellCore::isValidProjectorFile(settings.programFilename)) {
+			if (settings.do_selftest || settings.do_repl || settings.numfiles > 0) {
 				AvmLog("Projector files can't be used with -repl, -Dselftest, or program file arguments.\n");
 				usage();
 			}
@@ -993,8 +869,9 @@ namespace avmshell
 			settings.do_projector = 1;
 			return;
 		}
+#endif
 
-		if (settings.filenamesPos == settings.endFilenamePos) {
+		if (settings.numfiles == 0) {
 			// no files, so we need something more
 			if (!settings.do_selftest && !settings.do_repl) {
 				AvmLog("You must provide input files, -repl, or -Dselftest, or the executable must be a projector file.\n");
@@ -1016,7 +893,7 @@ namespace avmshell
 		if (settings.do_selftest)
 		{
 			// Presumably we'd want to use the selftest harness to test multiple workers eventually.
-			if (settings.numthreads > 1 || settings.numworkers > 1 || settings.filenamesPos < settings.endFilenamePos) {
+			if (settings.numthreads > 1 || settings.numworkers > 1 || settings.numfiles > 0) {
 				AvmLog("The selftest harness requires exactly one worker on one thread, and no input files.\n");
 				usage();
 			}
@@ -1052,7 +929,8 @@ namespace avmshell
 		AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
 #ifdef AVMPLUS_VERBOSE
 		AvmLog("          [-Dverbose]   trace every instruction (verbose!)\n");
-		AvmLog("          [-Dverbose_init] trace the builtins too\n");
+		AvmLog("          [-Dverbose_init]");
+		AvmLog("                        trace the builtins too\n");
 		AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
 #endif
 #ifdef FEATURE_NANOJIT
@@ -1069,7 +947,8 @@ namespace avmshell
 	    AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
 #endif
 #ifdef AVMPLUS_SELFTEST
-		AvmLog("          [-Dselftest[=component,category,test]]  run selftests\n");
+		AvmLog("          [-Dselftest[=component,category,test]]");
+		AvmLog("                        run selftests\n");
 #endif
 		AvmLog("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
 		AvmLog("          [-Dversion]   print the version and the list of compiled-in features and then exit\n");
@@ -1080,12 +959,14 @@ namespace avmshell
 		AvmLog("          [-repl]       read-eval-print mode\n");
 #endif
 #ifdef VMCFG_WORKERTHREADS
-		AvmLog("          [-workers W,T]  Spawn W worker VMs on T threads where W >= T and T >= 1.\n");
-		AvmLog("                          The files provided are handed off to the workers in the order given,\n");
-		AvmLog("                          as workers become available, and these workers are scheduled onto threads\n");
-		AvmLog("                          in a deterministic order that prevents them from having affinity to a thread.\n");
-		AvmLog("                          To test this functionality you want many more files than workers and many more\n");
-		AvmLog("                          workers than threads, and at least two threads.\n");
+		AvmLog("          [-workers W,T[,R]]\n");
+		AvmLog("                        Spawn W worker VMs on T threads where W >= T and T >= 1.\n");
+		AvmLog("                        The files provided are handed off to the workers in the order given,\n");
+		AvmLog("                        as workers become available, and these workers are scheduled onto threads\n");
+		AvmLog("                        in a deterministic order that prevents them from having affinity to a thread.\n");
+		AvmLog("                        To test this functionality you want many more files than workers and many more\n");
+		AvmLog("                        workers than threads, and at least two threads.\n");
+		AvmLog("                        If R > 0 is provided then it is the number of times the list of files is repeated.\n");
 #endif
 		AvmLog("          [-log]\n");
 		AvmLog("          [-jargs ... ;] args passed to Java runtime\n");
@@ -1094,4 +975,3 @@ namespace avmshell
 		Platform::GetInstance()->exit(1);
 	}
 }
-

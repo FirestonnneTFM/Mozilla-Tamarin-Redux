@@ -50,6 +50,8 @@
 		072EA1010F4C1CE9009F11E6 /* eval-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E30F4C1CE9009F11E6 /* eval-parse.cpp */; };
 		072EA1020F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E50F4C1CE9009F11E6 /* eval-unicode.cpp */; };
 		072EA1030F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
+		078F536B0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
+		078F536C0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
 		079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
 		079C96F10F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
 		079DF8350F3A882D0031D1B4 /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7B50F3A882D0031D1B4 /* AbcData.cpp */; };
@@ -453,6 +455,8 @@
 		0774945B0F8C9DA600230F6D /* avmfeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmfeatures.h; path = ../../../core/avmfeatures.h; sourceTree = SOURCE_ROOT; };
 		077494B70F8E2DBA00230F6D /* win32-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "win32-platform.h"; path = "../../win32/win32-platform.h"; sourceTree = SOURCE_ROOT; };
 		077494B80F8E2DC900230F6D /* unix-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "unix-platform.h"; path = "../../unix/unix-platform.h"; sourceTree = SOURCE_ROOT; };
+		078F53690FA473C50064216F /* ShellCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShellCore.cpp; path = ../../../shell/ShellCore.cpp; sourceTree = SOURCE_ROOT; };
+		078F536A0FA473C50064216F /* ShellCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShellCore.h; path = ../../../shell/ShellCore.h; sourceTree = SOURCE_ROOT; };
 		079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmfeatures.cpp; path = ../../../core/avmfeatures.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7A90F3A86850031D1B4 /* shell64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell64; sourceTree = BUILT_PRODUCTS_DIR; };
 		079DF7B50F3A882D0031D1B4 /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
@@ -1172,6 +1176,8 @@
 				079DF98C0F3A89FD0031D1B4 /* Profiler.h */,
 				079DF9910F3A8A320031D1B4 /* SamplerScript.cpp */,
 				079DF9920F3A8A320031D1B4 /* SamplerScript.h */,
+				078F53690FA473C50064216F /* ShellCore.cpp */,
+				078F536A0FA473C50064216F /* ShellCore.h */,
 				07DC69640F4032F200E3CC37 /* vprof.cpp */,
 				07DA81A00F40335500288C8F /* vprof.h */,
 			);
@@ -1657,6 +1663,7 @@
 				D5AD1E2C0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */,
 				079C96F10F9EF0E900B2E653 /* avmfeatures.cpp in Sources */,
 				D935BDED0FA0EBA7001E3E70 /* avm.cpp in Sources */,
+				078F536C0FA473C50064216F /* ShellCore.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1829,6 +1836,7 @@
 				D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */,
 				079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */,
 				D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */,
+				078F536B0FA473C50064216F /* ShellCore.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

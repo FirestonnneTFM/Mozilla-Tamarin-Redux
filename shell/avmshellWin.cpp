@@ -46,6 +46,10 @@
 
 namespace avmshell
 {
+#ifdef AVMPLUS_WIN32
+	bool show_error = false;
+#endif
+
 	FILE* currentOutStream = stdout;
 
 	class WinPlatform : public Platform
@@ -145,8 +149,6 @@ namespace avmshell
 	#if !defined (AVMPLUS_ARM)
 
 		#include "dbghelp.h"
-
-		extern bool show_error;
 
 		unsigned long CrashFilter(LPEXCEPTION_POINTERS pException, int exceptionCode)
 		{
