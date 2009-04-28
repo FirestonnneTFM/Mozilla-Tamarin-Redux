@@ -58,6 +58,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/DomainClass.cpp \
   $(curdir)/FileClass.cpp \
   $(curdir)/FileInputStream.cpp \
+  $(curdir)/ShellCore.cpp \
   $(curdir)/SystemClass.cpp \
   $(curdir)/swf.cpp \
   $(curdir)/../extensions/DictionaryGlue.cpp \
