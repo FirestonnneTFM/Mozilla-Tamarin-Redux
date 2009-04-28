@@ -125,8 +125,6 @@ as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatc
 as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , .*diff , expectedfail, known issue
 ecma3/Exceptions/exception_010_rt , .*diff , expectedfail, known issue
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
-ecma3/FunctionObjects/e15_3_1_1_1_rt , .*diff , expectedfail, known issue Object.toString on release shows [object null] instead of [object Function-n]
-ecma3/FunctionObjects/e15_3_2_1_1_rt , .*diff , expectedfail, known issue Object.toString on release shows [object null] instead of [object Function-n]
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 
 
