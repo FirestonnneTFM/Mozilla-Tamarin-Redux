@@ -56,3 +56,5 @@ util/lastsizereport.txt
 *.ii
 *.deps
 *.class
+.buildbot-sourcedata
+build/buildbot/slaves/scripts/*
