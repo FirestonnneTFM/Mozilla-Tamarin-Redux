@@ -64,7 +64,6 @@ const int kBufferPadding = 16;
 
 	struct Config
 	{
-		#ifdef AVMPLUS_VERBOSE
 		/**
 		 * The verbose flag may be set to display each bytecode
 		 * instruction as it is executed, along with a snapshot of
@@ -73,20 +72,16 @@ const int kBufferPadding = 16;
 		 */
 		bool verbose;
 		bool verbose_addrs;
-		#endif /* AVMPLUS_VERBOSE */
 
-		#if VMCFG_METHOD_NAMES
 		// if true, record original names of methods at runtime.
 		// if false, don't (Function.toString will return things like "Function-21")
 		bool methodNames;
 		
 		// give "Vector.<*>" instead of "Vector$object", etc
 		bool oldVectorMethodNames;	
-		#endif
 
 		enum Runmode runmode;
 
-        #if defined FEATURE_NANOJIT
 		/**
 		 * To speed up initialization, we don't use jit on
 		 * $init methods; we use interp instead.  For testing
@@ -97,20 +92,14 @@ const int kBufferPadding = 16;
 		 */
 		bool cseopt;
 
-        #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		bool sse2;
 		bool use_cmov;
-		#endif
 
-		#ifdef AVMPLUS_VERBOSE
 		/**
 		 * Genearate a graph for the basic blocks.  Can be used by
 		 * 'dot' utility to generate a jpg.
 		 */
 		bool bbgraph;
-		#endif //AVMPLUS_VERBOSE
-
-        #endif // FEATURE_NANOJIT
 
         /**
 		 * If this switch is set, executing code will check the
@@ -119,16 +108,12 @@ const int kBufferPadding = 16;
 		 */
 		bool interrupts;
 
-#ifdef AVMPLUS_VERIFYALL
 		bool verifyall;
-#endif
 
-#ifdef FEATURE_NANOJIT
         bool show_stats;
         bool tree_opt;
         bool verbose_live;
         bool verbose_exits;
-#endif
 	};
 
 	/**

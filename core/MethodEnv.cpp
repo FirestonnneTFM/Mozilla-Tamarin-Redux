@@ -505,7 +505,7 @@ namespace avmplus
 
 #ifdef FEATURE_NANOJIT
 	MethodEnv::MethodEnv(TrampStub, MethodInfo* method, ScopeChain* scope)
-		: _scope(scope), method(NULL), activationOrMCTable(0)
+		: _scope(scope), method(method), activationOrMCTable(0)
 	{
 		#if VMCFG_METHODENV_IMPL32
 		// set trampoline to IMT stub; we cannot go through delegateInvoke
