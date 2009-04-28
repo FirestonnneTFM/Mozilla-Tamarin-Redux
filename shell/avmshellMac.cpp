@@ -42,38 +42,30 @@
 
 #include <sys/signal.h>
 #include <unistd.h>
+#include <sys/resource.h>
 
 namespace avmshell
 {
 	class MacPlatform : public PosixPartialPlatform
 	{
 	public:
-
+		MacPlatform(void* stackbase) : stackbase(stackbase) {}
 		virtual ~MacPlatform() {}
 		
 		virtual void setTimer(int seconds, AvmTimerCallback callback, void* callbackData);
-		virtual uintptr_t getStackBase();
+		virtual uintptr_t getMainThreadStackLimit();
+		
+	private:
+		void* stackbase;
 	};
 
-	uintptr_t MacPlatform::getStackBase()
+	uintptr_t MacPlatform::getMainThreadStackLimit()
 	{
-		// A hard limit here is always wrong on every system.
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=456054
-
-		const int kMaxAvmPlusStack = 512*1024;
-		uintptr_t sp;
-		
-	#ifdef AVMPLUS_PPC
-		asm("mr %0,r1" : "=r" (sp));
-	#else
-		#ifdef AVMPLUS_64BIT
-			asm("mov %%rsp,%0" : "=r" (sp));
-		#else
-			asm("movl %%esp,%0" : "=r" (sp));
-		#endif
-	#endif
-	
-		return sp-kMaxAvmPlusStack;
+		struct rlimit r;
+		size_t stackheight = avmshell::kStackSizeFallbackValue;
+		if (getrlimit(RLIMIT_STACK, &r) == 0)
+			stackheight = size_t(r.rlim_cur);
+		return uintptr_t(stackbase) - stackheight + avmshell::kStackMargin;
 	}
 
 	AvmTimerCallback pCallbackFunc = 0;
@@ -111,7 +103,8 @@ int main(int argc, char *argv[])
 	GenericGuard::staticInit();
 #endif
 
-	avmshell::MacPlatform platformInstance;
+	char* dummy;
+	avmshell::MacPlatform platformInstance(&dummy);
 	gPlatformHandle = &platformInstance;
 	
 	int code = avmshell::Shell::run(argc, argv);

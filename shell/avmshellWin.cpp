@@ -65,7 +65,7 @@ namespace avmshell
 		virtual char* getUserInput(char* buffer, int bufferSize);
 
 		virtual void setTimer(int seconds, AvmTimerCallback callback, void* callbackData);
-		virtual uintptr_t getStackBase();
+		virtual uintptr_t getMainThreadStackLimit();
 	};
 
 	struct TimerCallbackInfo
@@ -125,16 +125,8 @@ namespace avmshell
 			TIME_ONESHOT);
 	}
 
-	uintptr_t WinPlatform::getStackBase()
+	uintptr_t WinPlatform::getMainThreadStackLimit()
 	{
-	#ifdef AVMPLUS_AMD64
-		const int kStackMargin = 262144;
-	#elif defined(UNDER_CE)
-		const int kStackMargin = 16384;
-	#else
-		const int kStackMargin = 131072;
-	#endif
-
 		SYSTEM_INFO sysinfo;
 		GetSystemInfo(&sysinfo);
 
@@ -144,7 +136,7 @@ namespace avmshell
 
 		MEMORY_BASIC_INFORMATION buf;
 		if (VirtualQuery((void*)sp, &buf, sizeof(buf)) == sizeof(buf)) {
-			return (uintptr_t)buf.AllocationBase + kStackMargin;
+			return (uintptr_t)buf.AllocationBase + avmshell::kStackMargin;
 		}
 
 		return 0;

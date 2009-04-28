@@ -52,40 +52,33 @@
 	extern "C" greg_t _getsp(void);
 #endif
 
+#include <sys/resource.h>
+
 namespace avmshell
 {
 	class UnixPlatform : public PosixPartialPlatform
 	{
 	public:
-
+		UnixPlatform(void* stackbase) : stackbase(stackbase) {}
 		virtual ~UnixPlatform() {}
 
 		virtual void setTimer(int seconds, AvmTimerCallback callback, void* callbackData);
-		virtual uintptr_t getStackBase();
+		virtual uintptr_t getMainThreadStackLimit();
+		
+	private:
+		void* stackbase;
 	};
 
 	AvmTimerCallback pCallbackFunc = 0;
 	void* pCallbackData = 0;
 	
-	uintptr_t UnixPlatform::getStackBase()
+	uintptr_t UnixPlatform::getMainThreadStackLimit()
 	{
-		// A hard limit here is always wrong on every system.
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=456054
-
-		const int kMaxAvmPlusStack = 512*1024;
-		uintptr_t sp;
-		
-		#if defined SOLARIS
-			sp = _getsp();
-		#else
-			#ifdef AVMPLUS_64BIT
-				asm("mov %%rsp,%0" : "=r" (sp));
-			#else
-				asm("movl %%esp,%0" : "=r" (sp));
-			#endif
-		#endif
-		
-		return sp-kMaxAvmPlusStack;
+		struct rlimit r;
+		size_t stackheight = avmshell::kStackSizeFallbackValue;
+		if (getrlimit(RLIMIT_STACK, &r) == 0)
+			stackheight = size_t(r.rlim_cur);
+		return uintptr_t(&stackbase) - stackheight + avmshell::kStackMargin;
 	}
 	
 	void UnixPlatform::setTimer(int seconds, AvmTimerCallback callback, void* callbackData)
@@ -117,7 +110,8 @@ avmshell::Platform* avmshell::Platform::GetInstance()
 
 int main(int argc, char *argv[])
 {
-	avmshell::UnixPlatform platformInstance;
+	char* dummy;
+	avmshell::UnixPlatform platformInstance(&dummy);
 	gPlatformHandle = &platformInstance;
 	
 	int code = avmshell::Shell::run(argc, argv);
