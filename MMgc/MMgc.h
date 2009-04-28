@@ -50,7 +50,9 @@
 #endif
 
 #if defined AVMPLUS_MAC && !(defined MMGC_PPC && defined MMGC_64BIT)
-    #define MMGC_MEMORY_PROFILER
+	#ifdef DEBUG
+		#define MMGC_MEMORY_PROFILER
+	#endif
 #endif
 
 #if defined AVMPLUS_WIN32 && !defined AVMPLUS_ARM // note, does not require DEBUG

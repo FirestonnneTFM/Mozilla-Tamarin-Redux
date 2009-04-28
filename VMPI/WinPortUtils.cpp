@@ -241,9 +241,13 @@ void VMPI_log(const char* message)
 
 bool VMPI_isMemoryProfilingEnabled()
 {
+#ifndef UNDER_CE
 	//read the mmgc profiling option switch
 	const char *env = getenv("MMGC_PROFILE");
 	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+#else
+	return false;
+#endif
 
 }
 

@@ -45,6 +45,7 @@
 #endif // AVMPLUS_UNIX
 
 #include <sys/mman.h>
+#include <malloc/malloc.h>
 
 #define kMsecPerDay     86400000
 #define kMsecPerHour    3600000
