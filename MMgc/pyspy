@@ -91,9 +91,9 @@ def PosixSpyRoutine():
 	s.connect("/tmp/MMgc_Spy")
 
 	while True:
-		data = s.recv(1024);
-		if not data: break;
-		sys.stdout.write(repr(data))
+		data = s.recv(1024)
+		if not data: break
+		sys.stdout.write(data)
 
 	s.close()
 
