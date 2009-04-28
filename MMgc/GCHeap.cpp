@@ -50,6 +50,10 @@ namespace MMgc
 {
 	GCHeap *GCHeap::instance = NULL;
 
+#ifdef MMGC_MEMORY_PROFILER
+	MemoryProfiler* GCHeap::profiler = (MemoryProfiler*)-1;
+#endif
+
 	/** The native VM page size (in bytes) for the current architecture */
 	const size_t GCHeap::kNativePageSize = VMPI_getVMPageSize();
 
@@ -88,9 +92,6 @@ namespace MMgc
 		  numDecommitted(0),
 		  numAlloc(0),
 		  config(c),
-#ifdef MMGC_MEMORY_PROFILER
-		  profiler(NULL),
-#endif
 		  hooksEnabled(false),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
@@ -128,20 +129,26 @@ namespace MMgc
 		status = kNormal;
 		
 		bool enableHooks = false;
-		
+
 #ifdef MMGC_MEMORY_PROFILER
-		enableHooks = hasSpy = VMPI_spySetup();
+		enableHooks = VMPI_isMemoryProfilingEnabled();
+		hasSpy = enableHooks && VMPI_spySetup();
 #endif
 
 #ifdef MMGC_MEMORY_INFO
-		// always track allocs in DEBUG builds
-		enableHooks = true;
+		enableHooks = true; // always track allocs in DEBUG builds
 #endif
-		
-		if(enableHooks) {
+
+		if(enableHooks) 
+		{
 #ifdef MMGC_MEMORY_PROFILER
-			profiler = new MemoryProfiler();
+			//create profiler if not already created
+			if(!IsProfilerInitialized())
+			{
+				InitProfiler();
+			}
 #endif
+
 			hooksEnabled = true; // set only after creating profiler	
 		}
 	}
@@ -1637,6 +1644,58 @@ namespace MMgc
 			VMPI_releaseAlignedMemory(address);
 		}
 	}
+
+#ifdef MMGC_MEMORY_PROFILER
+
+	/* static */
+	void GCHeap::InitProfiler()
+	{
+		GCAssert(IsProfilerInitialized() == false);
+		profiler = NULL;
+
+#ifdef MMGC_MEMORY_INFO
+		bool profilingEnabled = true;
+#else
+		bool profilingEnabled = VMPI_isMemoryProfilingEnabled();
+#endif
+		if(profilingEnabled)
+		{
+			profiler = new MemoryProfiler();
+		}
+	}
+
+#endif //MMGC_MEMORY_PROFILER
+
+#ifdef MMGC_USE_SYSTEM_MALLOC
+
+	/* static */
+	void GCHeap::TrackSystemAlloc(void *addr, size_t askSize)
+	{
+		(void)addr;
+		(void)askSize;
+	#ifdef MMGC_MEMORY_PROFILER
+		if(!IsProfilerInitialized())
+		{
+			InitProfiler();
+		}
+		if(profiler)
+			profiler->RecordAllocation(addr, askSize, VMPI_size(addr));
+	#endif //MMGC_MEMORY_PROFILER
+
+	}
+
+	/* static */
+	void GCHeap::TrackSystemFree(void *addr)
+	{
+		(void)addr;
+	#ifdef MMGC_MEMORY_PROFILER
+		if(addr && profiler)
+			profiler->RecordDeallocation(addr, VMPI_size(addr));
+	#endif //MMGC_MEMORY_PROFILER
+		
+	}
+
+#endif //MMGC_USE_SYSTEM_MALLOC
 
 	GCManager::GCManager() 
 		: collectors(NULL)

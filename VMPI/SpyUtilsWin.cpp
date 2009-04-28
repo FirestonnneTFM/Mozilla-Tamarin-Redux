@@ -152,14 +152,8 @@ void VMPI_spyCallback()
 
 bool VMPI_spySetup()
 {
-	//read the mmgc profiling option switch
-	const char *env = getenv("MMGC_PROFILE");
-	if(env && (VMPI_strncmp(env, "1", 1) == 0))
-	{
-		WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
-		return true;
-	}
-	return false;
+	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
+	return true;
 }
 
 #endif //MMGC_MEMORY_PROFILER

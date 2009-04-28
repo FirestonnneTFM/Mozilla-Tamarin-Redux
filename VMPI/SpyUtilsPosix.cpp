@@ -163,15 +163,8 @@ void VMPI_spyCallback()
 
 bool VMPI_spySetup()
 {
-	//read the mmgc profiling option switch
-	const char *env = getenv("MMGC_PROFILE");
-	if(env && (VMPI_strncmp(env, "1", 1) == 0))
-	{
-		//setup server socket for spy connections
-		return SetupSpyServer();
-	}
-
-	return false;
+	//setup server socket for spy connections
+	return SetupSpyServer();
 }
 
 #endif //MMGC_MEMORY_PROFILER

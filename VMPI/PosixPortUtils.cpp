@@ -134,6 +134,10 @@ void VMPI_free(void* ptr)
 	free(ptr);
 }
 
+size_t VMPI_size(void *ptr)
+{
+	return malloc_size(ptr);
+}
 
 typedef int (*LoggingFunction)(const char*);
 
@@ -147,6 +151,14 @@ void RedirectLogOutput(LoggingFunction func)
 void VMPI_log(const char* message)
 {
 	logFunc ? logFunc(message) : printf("%s",message);
+}
+
+bool VMPI_isMemoryProfilingEnabled()
+{
+	//read the mmgc profiling option switch
+	const char *env = getenv("MMGC_PROFILE");
+	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+
 }
 
 /**
