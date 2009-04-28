@@ -415,5 +415,9 @@ uint64_t VMPI_getPerformanceCounter()
 	}
 
 
+	void VMPI_setupPCResolution() { }
+	
+	void VMPI_desetupPCResolution() { }
+
 #endif //MEMORY_PROFILER
 

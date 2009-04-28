@@ -424,4 +424,19 @@ extern bool VMPI_tlsSetValue(uintptr_t tlsId, void* value);
 */
 extern void* VMPI_tlsGetValue(uintptr_t tlsId);
 
+/**
+ * Method to perform any initialization activities to assist
+ * the program counter to symbols resolution for MMgc memory profiler
+ * @return none
+ */
+extern void VMPI_setupPCResolution();
+
+/**
+ * Method to perform any cleanup of items that were created/setup
+ * for program counter to symbols resolution for MMgc memory profiler
+ * @return none
+ * @see VMPI_setupPCResolution
+*/
+extern void VMPI_desetupPCResolution();
+
 #endif /* __avmplus_VMPI__ */

@@ -83,6 +83,7 @@ namespace MMgc
 		stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
 		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS)
 	{
+		VMPI_setupPCResolution();
 	}
 
 	MemoryProfiler::~MemoryProfiler()
@@ -99,6 +100,7 @@ namespace MMgc
 		{
 			VMPI_free((void*)nameIter.value());			
 		}
+		VMPI_desetupPCResolution();		
 	}
 
 	const char *MemoryProfiler::GetAllocationNameFromTrace(StackTrace *trace)

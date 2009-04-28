@@ -466,4 +466,8 @@ static RtlCaptureStackBackTrace_Function* const RtlCaptureStackBackTrace_fn =
 		return true;
 	}
 
+	void VMPI_setupPCResolution() { }
+
+	void VMPI_desetupPCResolution() { }
+
 #endif // MMGC_MEMORY_PROFILER
