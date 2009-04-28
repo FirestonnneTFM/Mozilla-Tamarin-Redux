@@ -389,6 +389,11 @@ namespace MMgc
 
 		void DumpMemoryInfo();
 
+#ifdef MMGC_USE_SYSTEM_MALLOC
+		static void TrackSystemAlloc(void *addr, size_t askSize);
+		static void TrackSystemFree(void *addr);
+#endif //MMGC_USE_SYSTEM_MALLOC
+
 		GCManager gcManager;
 
 	private:
@@ -397,6 +402,14 @@ namespace MMgc
 		static GCHeap *instance;
 		GCHeap(GCHeapConfig &config);
 		~GCHeap();
+
+#ifdef MMGC_MEMORY_PROFILER
+		static void InitProfiler();
+		inline static bool IsProfilerInitialized()
+		{
+			return profiler != (MemoryProfiler*)-1;
+		}
+#endif
 
 		// Heap regions
 		class Region : public GCAllocObject
@@ -508,17 +521,13 @@ namespace MMgc
 
 		GCHeapConfig config;
 		
-	public:
-		// TODO: remove legacy var, replaced by env var or GCHeapConfig
-		bool enableMemoryProfiling;
-
 	private:
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
 		MemoryStatus status;
 
 #ifdef MMGC_MEMORY_PROFILER
-		MemoryProfiler *profiler;
+		static MemoryProfiler *profiler;
 		bool hasSpy; //flag indicating whether profiler spy is active or not.  If active, AllocHook will call VMPI_spyCallback
 #endif
 		bool hooksEnabled;

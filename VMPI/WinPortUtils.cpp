@@ -226,12 +226,25 @@ void VMPI_free(void* ptr)
 	HeapFree(GetProcessHeap(), 0, ptr);
 }
 
+size_t VMPI_size(void* ptr)
+{
+	return HeapSize(GetProcessHeap(), 0, ptr);
+}
+
 void VMPI_log(const char* message)
 {
 #ifndef UNDER_CE
 	::OutputDebugStringA(message);
 #endif
 	printf("%s\n",message);
+}
+
+bool VMPI_isMemoryProfilingEnabled()
+{
+	//read the mmgc profiling option switch
+	const char *env = getenv("MMGC_PROFILE");
+	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+
 }
 
 void VMPI_setPageProtection(void *address,

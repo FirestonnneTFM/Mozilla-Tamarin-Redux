@@ -53,6 +53,7 @@ REALLY_INLINE void *operator new(size_t size) NEW_THROWS_CLAUSE
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void *space = VMPI_alloc(size);
+	MMgc::GCHeap::TrackSystemAlloc(space, size);
 	return space;
 #else
 	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
@@ -63,6 +64,7 @@ REALLY_INLINE void *operator new[](size_t size) NEW_THROWS_CLAUSE
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void *space = VMPI_alloc(size);
+	MMgc::GCHeap::TrackSystemAlloc(space, size);
 	return space;
 #else
 	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
@@ -73,6 +75,7 @@ REALLY_INLINE void *operator new[](size_t size) NEW_THROWS_CLAUSE
 REALLY_INLINE void operator delete( void *p) DELETE_THROWS_CLAUSE
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
+	MMgc::GCHeap::TrackSystemFree(p);
 	VMPI_free(p);
 #else
 	MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);
@@ -82,6 +85,7 @@ REALLY_INLINE void operator delete( void *p) DELETE_THROWS_CLAUSE
 REALLY_INLINE void operator delete[]( void *p ) DELETE_THROWS_CLAUSE
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
+	MMgc::GCHeap::TrackSystemFree(p);
 	VMPI_free(p);
 #else
 	MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);

@@ -186,6 +186,14 @@ extern void			VMPI_free(void* ptr);
 
 
 /**
+* This method is used to free a previously allocated block
+* @param ptr pointer to the memory that needs to be released
+* @return none
+*/
+extern size_t			VMPI_size(void* ptr);
+
+
+/**
 * This method is used to get the size of the memory page of the system
 * @return return the size, if bytes, of memory page
 */
@@ -373,6 +381,12 @@ extern bool VMPI_canMergeContiguousRegions();
  * @return true if they are
  */
 extern bool VMPI_useVirtualMemory();
+
+/**
+* Method to check whether MMgc memory profiling is turned on or not
+* @return true if profiling is enabled, false otherwise
+*/
+extern bool VMPI_isMemoryProfilingEnabled();
 
 /** 
  * Method to setup a spy channel on MMgc/avmplus
