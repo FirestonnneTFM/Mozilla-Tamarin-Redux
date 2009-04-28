@@ -129,23 +129,15 @@ namespace avmplus
 #endif	
 			
 		// set default mode flags
-#ifdef AVMPLUS_VERBOSE
 		config.verbose = verbose_default;
 		config.verbose_addrs = verbose_addrs_default;
-#endif
 
-#if VMCFG_METHOD_NAMES
 		// default to recording method names, if possible. 
 		// (subclass might change this in its ctor if it wants to conserve memory.)
 		config.methodNames = methodNames_default;
 		config.oldVectorMethodNames = oldVectorMethodNames_default;
-#endif
 
-#ifdef AVMPLUS_VERIFYALL
 	   	config.verifyall = verifyall_default;
-#endif
-
-#ifdef FEATURE_NANOJIT
 		config.show_stats = show_stats_default;
 		config.tree_opt = tree_opt_default;
 		config.verbose_live = verbose_live_default;
@@ -154,15 +146,9 @@ namespace avmplus
 		// jit flag forces use of jit-compiler instead of interpreter
 		config.runmode = runmode_default;
 		config.cseopt = cseopt_default;
-
-	#ifdef AVMPLUS_VERBOSE
 		config.bbgraph = bbgraph_default;
-	#endif
 
-	#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		config.sse2 = sse2_default;
-	#endif
-#endif // FEATURE_NANOJIT
 
 #ifdef VTUNE
 		VTuneStatus = CheckVTuneStatus();
