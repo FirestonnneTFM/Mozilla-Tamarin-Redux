@@ -611,7 +611,7 @@ namespace avmshell
 				if (arg[1] == '-' && arg[2] == 0) {
 					if (settings.filenames == NULL)
 						settings.filenames = &argv[i];
-					settings.numfiles = &argv[i] - settings.filenames;
+					settings.numfiles = int(&argv[i] - settings.filenames);
 					i++;
 					settings.arguments = &argv[i];
 					settings.numargs = argc - i;
@@ -837,7 +837,7 @@ namespace avmshell
 			settings.filenames = &argv[argc];
 		
 		if (settings.numfiles == -1)
-			settings.numfiles = &argv[argc] - settings.filenames;
+			settings.numfiles = int(&argv[argc] - settings.filenames);
 		
 		if (settings.arguments == NULL) {
 			settings.arguments = &argv[argc];
