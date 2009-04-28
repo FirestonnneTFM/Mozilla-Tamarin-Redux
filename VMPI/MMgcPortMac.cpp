@@ -280,6 +280,7 @@ pid_t atos_pid = -1;	//process id for child process executing atos
 
 void VMPI_setupPCResolution()
 {
+#ifndef _DEBUG
 	bool child2parent_open = false;
 	
 	bool parent2child_open = pipe(parent2child) >= 0;
@@ -320,7 +321,7 @@ void VMPI_setupPCResolution()
 		
 		//Invoke atos in interactive mode
 		execl("/usr/bin/atos", "/usr/bin/atos", "-p", pid_str, (char*)0); 
-		
+					
 		exit(0); //exit child process
 	}
 	
@@ -344,10 +345,12 @@ exit_cleanly:
 		close(CHILD_READ_END);
 		close(CHILD_WRITE_END);
 	}
+#endif
 }
 
 void VMPI_desetupPCResolution()
 {
+#ifndef _DEBUG
 	if(IS_ATOS_RUNNING)
 	{
 		kill(atos_pid, SIGINT); //send a termination signal to 
@@ -359,11 +362,13 @@ void VMPI_desetupPCResolution()
 		close(PARENT_WRITE_END);
 		close(CHILD_READ_END);
 	}
+#endif
 }
 
 bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 {
-/**
+#ifdef _DEBUG
+
 	Dl_info dlip;
 	int ret = dladdr((void * const)pc, &dlip);
 	const char *sym = dlip.dli_sname;
@@ -381,8 +386,10 @@ bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 		free(out); 
 		return true;
 	}
-**/
 
+
+#else
+	
 	if(IS_ATOS_RUNNING)
 	{
 		char buf[128];
@@ -392,7 +399,7 @@ bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 		VMPI_snprintf(buf, sizeof(buf), "0x%x\n", (uint32_t)pc);
 	#endif
 		write((PARENT_WRITE_END), buf, strlen(buf)); //send the address to atos
-		
+
 		//start reading into the return buffer i.e. "buffer"
 		char* b = buffer;
 		size_t readCount = bufferSize-1; //leave space for null character
@@ -437,6 +444,8 @@ bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 		
 		return (b != buffer); //return true if we atleast have some data
 	}
+
+#endif
 	
 	return false;
 }
