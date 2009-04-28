@@ -121,11 +121,22 @@ namespace avmshell
 		virtual char* getUserInput(char* buffer, int bufferSize) = 0;
 
 		/**
-		* Method to retrieve the address of the base of the program stack
-		* This is used by garbage collector during mark phase to identify the execution stack bounds
-		* @return address indicating base of the current program's execution stack
+		* Method to retrieve the lowest address (the limit) of the program stack pointer
+		* for the main program thread.  This function makes /no sense/ on any other thread.
+		* The limit returned has been adjusted so that some amount of space is available
+		* at addresses below the limit, for use by native code.
+		*
+		* The amount of space made available for native code will typically depend on the
+		* platform class (64-bit, 32-bit, embedded), and is heuristic - we have no true
+		* estimation at this time (now == Apr-2009) for how much space native code might need.
+		*
+		* The returned value is used by the VM execution engines to check heuristically
+		* (and conservatively) for stack overflow.
+		*
+		* @return address indicating the lower limit of the current program's execution stack,
+		*         less a safety margin.
 		*/
-		virtual uintptr_t getStackBase() = 0;
+		virtual uintptr_t getMainThreadStackLimit() = 0;
 
 		/**
 		* Method to set a platform-specific timer for a callback after specific interval of time

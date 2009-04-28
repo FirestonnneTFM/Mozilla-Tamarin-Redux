@@ -94,6 +94,25 @@ namespace avmplus
 
 namespace avmshell
 { 
+	// The stack margin is the amount of stack that should be available to native
+	// code that does not itself check for stack overflow.  The execution engines
+	// in the VM will reserve this amount of stack.
+	
+#ifdef AVMPLUS_64BIT
+	const size_t kStackMargin = 262144;
+#elif (defined AVMPLUS_WIN32 && defined UNDER_CE) || defined AVMPLUS_SYMBIAN
+	// FIXME: all embedded platforms, but we have no way of expressing that now
+	const size_t kStackMargin = 32768;
+#else
+	const size_t kStackMargin = 131072;
+#endif
+	
+	// The fallback stack size is probably not safe but is used by the shell code
+	// if it fails to obtain the stack size from the operating system.
+	// 512KB is the traditional value.
+
+	const size_t kStackSizeFallbackValue = 512*1024;
+
 	// exit codes
 	enum {
 		OUT_OF_MEMORY = 128,

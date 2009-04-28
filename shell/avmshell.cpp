@@ -240,7 +240,7 @@ namespace avmshell
 	// input is always NUL-terminated
 	void ShellCore::evaluateAtToplevel(String* input, bool record_time)
 	{
-		minstack = Platform::GetInstance()->getStackBase();
+		minstack = Platform::GetInstance()->getMainThreadStackLimit();
 		
 		ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
 		codeContext->m_domainEnv = shell_domainEnv;
@@ -377,7 +377,7 @@ namespace avmshell
 		
 		TRY(this, kCatchAction_ReportAsError)
 		{
-			minstack = Platform::GetInstance()->getStackBase();
+			minstack = Platform::GetInstance()->getMainThreadStackLimit();
 			
 			allowDebugger = !settings.nodebugger;
 			
@@ -457,7 +457,7 @@ namespace avmshell
 
 	int ShellCore::handleArbitraryExecutableContent(ScriptBuffer& code, const char * filename)
 	{
-		minstack = Platform::GetInstance()->getStackBase();
+		minstack = Platform::GetInstance()->getMainThreadStackLimit();
 		
 		TRY(this, kCatchAction_ReportAsError)
 		{
