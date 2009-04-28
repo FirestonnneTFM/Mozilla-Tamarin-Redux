@@ -843,7 +843,7 @@ namespace avmplus
 #  define INSTR(op) case OP_##op: VERBOSE;
 
 #  define NEXT              continue
-#  define U30ARG            (readU30(pc))
+#  define U30ARG            (tmp_pc=pc, tmp_u30 = uint32_t(readU30(tmp_pc)), pc = tmp_pc, tmp_u30)
 #  define U8ARG             (*pc++)
 #  define S24ARG            (pc+=3, readS24(pc-3))
 #  define SAVE_EXPC	        expc = pc-1-codeStart
@@ -885,6 +885,10 @@ namespace avmplus
 		float f2l;					// ditto
 		double d2l;					// ditto
 		Atom a1l;					// ditto
+#ifndef AVMPLUS_WORD_CODE
+		register uint32_t tmp_u30;
+		const bytecode_t* tmp_pc;
+#endif
 		
 	MainLoop:
 #ifdef AVMPLUS_WORD_CODE
@@ -1056,7 +1060,8 @@ namespace avmplus
 			}
 
             INSTR(getlocal) {
-				*(++sp) = framep[U30ARG];
+				u1 = U30ARG;
+				*(++sp) = framep[u1];
 				NEXT;
 			}
 
@@ -1197,7 +1202,8 @@ namespace avmplus
 
 #ifndef AVMPLUS_WORD_CODE
 			INSTR(kill) {
-				framep[U30ARG] = undefinedAtom;
+				u1 = U30ARG;
+				framep[u1] = undefinedAtom;
 				NEXT;
 			}
 #endif
@@ -1231,7 +1237,8 @@ namespace avmplus
 			}
 
             INSTR(setlocal) {
-                framep[U30ARG] = *(sp--);
+				u1 = U30ARG;
+                framep[u1] = *(sp--);
                 NEXT;
 			}
 
@@ -1647,7 +1654,7 @@ namespace avmplus
 				// safe to assume int since verifier checks for int
 				uint32_t index = AvmCore::integer_u(*(sp--));
 				const uint8_t* switch_pc = pc+3;
-				uint32_t case_count = readU30(switch_pc) + 1;
+				uint32_t case_count = uint32_t(readU30(switch_pc)) + 1;
                 pc = base+readS24( index < case_count ? (switch_pc + 3*index) : pc );
 #endif
 				NEXT;
@@ -2682,14 +2689,13 @@ namespace avmplus
 					env->interrupt();
 				}
 #  ifdef AVMPLUS_64BIT
-				uint32_t base = AvmCore::readU30(pc);
-				uint8_t *target = (uint8_t *) ((uintptr_t(AvmCore::readU30(pc)) << 32));
-				target = (uint8_t*)((uintptr_t)target | base);
-				codeStart = pc = (const uint8_t*) target;
+				uint32_t target_lo = U30ARG;
+				uint32_t target_hi = U30ARG;
+				const uint8_t *target = (const uint8_t *)((uint64_t(target_hi) << 32) | uint64_t(target_lo));
 #  else // !AVMPLUS_64BIT
 				const uint8_t *target = (const uint8_t *) U30ARG;
-				codeStart = pc = target;
 #  endif // AVMPLUS_64BIT
+				codeStart = pc = target;
 				NEXT;
             }
 					
