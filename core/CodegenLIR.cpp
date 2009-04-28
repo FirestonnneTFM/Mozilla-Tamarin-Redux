@@ -1068,8 +1068,7 @@ namespace avmplus
 	void emitStart(LirBuffer *lirbuf, LirWriter* &lirout, bool &overflow) {
         debug_only(
             // catch problems before they hit the buffer
-			GC *gc = lirbuf->_frago->core()->gc;
-            lirout = new (gc) ValidateWriter(lirout);
+            lirout = new (lirbuf->gc) ValidateWriter(lirout);
         )
 		if (lirbuf->outOMem())
 			overflow = true;
@@ -1086,8 +1085,8 @@ namespace avmplus
 	}
 
 #ifdef AVMPLUS_VERBOSE
-    VerboseWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf) {
-        lirbuf->names = new (gc) LirNameMap(gc, lirbuf->_frago->labels);
+    VerboseWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf, LabelMap* labels) {
+        lirbuf->names = new (gc) LirNameMap(gc, labels);
         return new (gc) VerboseWriter(gc, lirout, lirbuf->names);
     }
 #endif
@@ -1276,9 +1275,8 @@ namespace avmplus
 		abcEnd   = abcStart + state->verifier->code_length;
         framesize = state->verifier->frameSize;
 
-        Fragmento *frago = pool->codePages->frago;
         frag = new (gc) Fragment(abcStart);
-        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago);
+        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(gc);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
 		verbose_only(if (core->config.bbgraph) {
@@ -1290,7 +1288,8 @@ namespace avmplus
         verbose_only(
 			vbWriter = 0;
 			if (verbose()) {
-				lirout = vbWriter = pushVerboseWriter(gc, lirout, lirbuf);
+				Fragmento *frago = pool->codePages->frago;
+				lirout = vbWriter = pushVerboseWriter(gc, lirout, lirbuf, frago->labels);
 			}
 		)
         #ifdef NJ_SOFTFLOAT
@@ -5758,14 +5757,14 @@ namespace avmplus
         Fragment *frag = frago->getAnchor(e->virt);
         gc->Free(frag->mergeCounts);
         frag->mergeCounts = 0;
-        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago);
+        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(gc);
         lirbuf->abi = ABI_FASTCALL;
         LirWriter *lirout = new (gc) LirBufWriter(lirbuf);
         debug_only(
             lirout = new (gc) ValidateWriter(lirout);
         )
         verbose_only(if (pool->verbose) {
-            lirout = pushVerboseWriter(gc, lirout, lirbuf);
+            lirout = pushVerboseWriter(gc, lirout, lirbuf, frago->labels);
         })
 #ifdef NJ_SOFTFLOAT
         lirout = new (gc) SoftFloatFilter(lirout);
