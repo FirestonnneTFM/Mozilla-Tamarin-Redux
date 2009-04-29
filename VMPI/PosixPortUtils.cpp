@@ -44,8 +44,11 @@
 	#include <time.h>
 #endif // AVMPLUS_UNIX
 
+#ifdef AVMPLUS_MAC
+	#include <malloc/malloc.h>
+#endif //AVMPLUS_MAC
+
 #include <sys/mman.h>
-#include <malloc/malloc.h>
 
 #define kMsecPerDay     86400000
 #define kMsecPerHour    3600000
@@ -137,7 +140,12 @@ void VMPI_free(void* ptr)
 
 size_t VMPI_size(void *ptr)
 {
+#ifdef AVMPLUS_MAC
 	return malloc_size(ptr);
+#else
+	(void)ptr;
+	return 0;
+#endif
 }
 
 typedef int (*LoggingFunction)(const char*);
