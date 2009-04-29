@@ -58,29 +58,34 @@
 
 
 ##
-# Download the AVMSHELL
+# Download the AVMSHELL if it does not exist
 ##
-echo "Download AVMSHELL"
-../all/util-download.sh $vmbuilds/$branch-${changeid}/$change/$platform/$shell_release $buildsdir/$change-${changeid}/$platform/$shell_release
-ret=$?
-test "$ret" = "0" || {
-    echo "Downloading of $shell_release failed"
-    exit 1
-}
-chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
+    echo "Download AVMSHELL"
+    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release $buildsdir/$change-${changeid}/$platform/$shell_release
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of $shell_release failed"
+        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release
+        exit 1
+    }
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
+fi
 
 
-
 ##
-# Download the latest asc.jar
+# Download the latest asc.jar if it does not exist
 ##
-echo "Download asc.jar"
-../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
-ret=$?
-test "$ret" = "0" || {
-    echo "Downloading of asc.jar failed"
-    exit 1
-}
+if [ ! -e "$basedir/utils/asc.jar" ]; then
+    echo "Download asc.jar"
+    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of asc.jar failed"
+        rm -f $basedir/utils/asc.jar
+        exit 1
+    }
+fi
 
 echo ""
 echo "Building ABC files using the following ASC version:"
