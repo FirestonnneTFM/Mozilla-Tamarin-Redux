@@ -392,6 +392,9 @@ namespace avmshell
 			
 			setCacheSizes(settings.cacheSizes);
 
+			SystemClass::user_argc = settings.numargs;
+			SystemClass::user_argv = settings.arguments;
+
 			initBuiltinPool();
 			initShellPool();
 			
@@ -404,9 +407,6 @@ namespace avmshell
 			// Return a new DomainEnv for the user code
 			shell_domainEnv = new (GetGC()) DomainEnv(this, shell_domain, shell_toplevel->domainEnv());
 			
-			SystemClass::user_argc = settings.numargs;
-			SystemClass::user_argv = settings.arguments;
-
 			return true;
 		}
 		CATCH(Exception *exception)
