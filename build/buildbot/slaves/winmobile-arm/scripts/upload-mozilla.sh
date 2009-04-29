@@ -51,7 +51,7 @@
 
 
 # Since all is good, lets post the builds
-ssh stage.mozilla.org "~/setupbuilds.sh $branch $change"
+ssh stage.mozilla.org "~/setupbuilds.sh $branch $change-$changeid"
 
 
 # Release_ARM
