@@ -17,7 +17,7 @@
 #
 # The Initial Developer of the Original Code is
 # Adobe System Incorporated..
-# Portions created by the Initial Developer are Copyright (C) 2009
+# Portions created by the Initial Developer are Copyright (C) 2008
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
@@ -89,14 +89,13 @@ def log(msg):
     logfile.write("%s\n" % msg)
     logfile.close()
 
-def triggerBuild(build):
+def triggerBuild(build, branch='tamarin-redux'):
     
     s = open(PROCESSED_BUILDS +"/" + build)
     comments=''
     username=''
     revision=''
     files=''
-    branch='tamarin-redux'
     user='unknown'
     files = ['']
 
@@ -130,6 +129,21 @@ def triggerBuild(build):
     
     time.sleep(1)
 
+def getPriorityRequests(files):
+    requests = []
+    for file in files:
+        if file.find('change-') != -1:
+            requests.append(file)
+    return requests
+
+def getSandboxRequests(files):
+    requests = []
+    for file in files:
+        if file.find('change-') == -1:
+            requests.append(file)
+    return requests
+
+
 server = xmlrpclib.Server(SERVER_URL)
 while True:
     log(time.ctime(time.time()))
@@ -139,29 +153,41 @@ while True:
     try:
         # Is there an active buildset?
         active = server.isBuildSetActive(['compile','test','compile-sandbox','test-sandbox'])
-        
+
         log("active: %s" % active)
-        
+
         if not active:
             log("Look for pending builds")
+
             files = os.listdir(PENDING_BUILDS)
             if len(files) > 0:
                 files.sort() # files are in arbitary order be default
                 log("found the following: %s" % files)
-                for change in files:
+
+                ## First look for 'change-XXXX' files, these are tamarin-redux builds and
+                ## have the highest priority.
+                priorityRequests = getPriorityRequests(files)
+                if len(priorityRequests) > 0:
+                    #log("PRIORITY: %s" % priorityRequests)
+                    for change in priorityRequests:
+                        log("going to build: %s" % change)
+                        # TODO: Should catch any errors in triggereing the build and
+                        # then move the file back into PENDING_BUILDS
+                        shutil.move("%s/%s" % (PENDING_BUILDS, change), PROCESSED_BUILDS)
+                        triggerBuild(change)
+                    log("No more pending changes")
+                else: # there must be sandbox builds
+                    sandboxRequests = getSandboxRequests(files)
+                    #log("SANDBOX: %s" % sandboxRequests)
+                    change = sandboxRequests[0]
                     log("going to build: %s" % change)
                     # TODO: Should catch any errors in triggereing the build and
                     # then move the file back into PENDING_BUILDS
                     shutil.move("%s/%s" % (PENDING_BUILDS, change), PROCESSED_BUILDS)
-                    triggerBuild(change)
-                    #try:
-                    #    triggerBuild(build)
-                    #except: 
-                    #    print "triggerBuild() failed, moving build back to PENDING_BUILDS"
-                    #    shutil.move("%s/%s" % (PROCESSED_BUILDS, build), PENDING_BUILDS)
-                log("No more pending changes")
+                    triggerBuild(change, 'sandbox')
             else:
                 log("There are no pending builds.")
+
     except:
         log("server is offline: %s" % SERVER_URL)
     time.sleep(INTERVAL_TIMER)
