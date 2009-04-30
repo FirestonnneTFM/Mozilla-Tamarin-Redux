@@ -92,6 +92,9 @@ namespace MMgc
 		  numDecommitted(0),
 		  numAlloc(0),
 		  config(c),
+	#ifdef MMGC_MEMORY_PROFILER
+		  hasSpy(false),
+	#endif
 		  hooksEnabled(false),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
