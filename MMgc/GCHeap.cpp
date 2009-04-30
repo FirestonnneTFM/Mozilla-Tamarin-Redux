@@ -127,30 +127,25 @@ namespace MMgc
 		instance = this;
 
 		status = kNormal;
-		
-		bool enableHooks = false;
 
 #ifdef MMGC_MEMORY_PROFILER
-		enableHooks = VMPI_isMemoryProfilingEnabled();
-		hasSpy = enableHooks && VMPI_spySetup();
-#endif
-
-#ifdef MMGC_MEMORY_INFO
-		enableHooks = true; // always track allocs in DEBUG builds
-#endif
-
-		if(enableHooks) 
+		//create profiler if turned on and if it is not already created
+		if(!IsProfilerInitialized())
 		{
-#ifdef MMGC_MEMORY_PROFILER
-			//create profiler if not already created
-			if(!IsProfilerInitialized())
-			{
-				InitProfiler();
-			}
+			InitProfiler();
+		}
+
+		if(profiler)
+		{
+			hooksEnabled = true; // set only after creating profiler
+			hasSpy = VMPI_spySetup();
+		}
+#endif
+		
+#ifdef MMGC_MEMORY_INFO
+		hooksEnabled = true; // always track allocs in DEBUG builds
 #endif
 
-			hooksEnabled = true; // set only after creating profiler	
-		}
 	}
 
 	GCHeap::~GCHeap()
