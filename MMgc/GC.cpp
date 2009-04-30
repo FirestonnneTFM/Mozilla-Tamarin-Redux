@@ -1578,9 +1578,7 @@ bail:
 		{
 			if(*p)
 			{
-#ifdef MMGC_MEMORY_INFO
 				PrintAllocStackTrace(item);
-#endif
 				GCAssertMsg(false, "RCObject didn't clean up itself.");
 			}
 		}	
@@ -2195,9 +2193,7 @@ uintptr_t	GC::GetStackTop() const
 				if (buffer) GCDebugMsg(false, buffer);
 				GCDebugMsg(false, "Location: 0x%08x  Object: 0x%08x (size %d)\n", where, real, taggedSize);
 				if (buffer) GCDebugMsg(false, buffer);
-#ifdef MMGC_MEMORY_INFO
 				PrintAllocStackTrace(real);
-#endif
 
 				if (recurseDepth > 0)
 					WhosPointingAtMe(real, recurseDepth-1, currentDepth+1);
@@ -3061,13 +3057,9 @@ uintptr_t	GC::GetStackTop() const
 			   *(((int32_t*)(val&~7))+1) != (int32_t)0xbabababa) // Swept
 			{
 				GCDebugMsg(false, "Object 0x%x allocated here:\n", mem);
-#ifdef MMGC_MEMORY_INFO
 				PrintAllocStackTrace(mem);
-#endif
 				GCDebugMsg(false, "Didn't mark pointer at 0x%x, object 0x%x allocated here:\n", p, val);
-#ifdef MMGC_MEMORY_INFO
 				PrintAllocStackTrace((const void*)(val&~7));
-#endif
 				GCAssert(false);
 			}
 			p++;
