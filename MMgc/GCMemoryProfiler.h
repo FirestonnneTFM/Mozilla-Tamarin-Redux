@@ -41,12 +41,10 @@
 
 namespace MMgc
 {
-#ifdef MMGC_MEMORY_INFO
 	void PrintAllocStackTrace(const void *item);
 	void PrintDeleteStackTrace(const void *item);
 	const char* GetAllocationName(const void *obj);
-#endif
-	
+
 #ifdef MMGC_MEMORY_PROFILER
 
 #define MMGC_MEM_TAG(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemTag(_x)
