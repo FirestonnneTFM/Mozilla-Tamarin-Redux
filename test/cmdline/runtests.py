@@ -49,6 +49,7 @@ class RunTests (RunTestLib):
         r.compile("testdata/readline.as")
         r.compile("testdata/trace1.as")
         r.compile("testdata/write.as")
+        r.compile("testdata/argv.as")
         # for testAvmShell.py
         r.compile("testdata/sleep.as")
         # for testDebuggerShell.py

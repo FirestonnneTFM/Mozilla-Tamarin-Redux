@@ -43,11 +43,13 @@ import os
 
 def run():
     r=RunTestLib()
-    r.run_test(' trace','%s testdata/trace1.abc'  % r.avm,expectedout=['single line','array line1,array line2','arg1 arg2 arg3','null'])
-    r.run_test(' write','%s testdata/write.abc' %r.avm,expectedout=['part1part2'])
-    r.run_test(' exit','%s testdata/exit.abc' %r.avm,expectedcode=5)
-    r.run_test(' readline','%s testdata/readline.abc' %r.avm,input='test input\n',expectedout=['line=test input'])
-    r.run_test(' exec','%s testdata/exec.abc' %r.avm,expectedout=['result=0'])
+    r.run_test('trace','%s testdata/trace1.abc'  % r.avm,expectedout=['single line','array line1,array line2','arg1 arg2 arg3','null'])
+    r.run_test('write','%s testdata/write.abc' %r.avm,expectedout=['part1part2'])
+    r.run_test('exit','%s testdata/exit.abc' %r.avm,expectedcode=5)
+    r.run_test('readline','%s testdata/readline.abc' %r.avm,input='test input\n',expectedout=['line=test input'])
+    r.run_test('exec','%s testdata/exec.abc' %r.avm,expectedout=['result=0'])
+    r.run_test('argv 0','%s testdata/argv.abc --' %r.avm,expectedout=['argv.length=0'])
+    r.run_test('argv n','%s testdata/argv.abc -- zero one two"' %r.avm,expectedout=['argv.length=3','argv\[0\]=zero','argv\[1\]=one','argv\[2\]=two'])
 
 if __name__ == '__main__':
     r=RunTestLib()
@@ -56,4 +58,5 @@ if __name__ == '__main__':
     r.compile("testdata/readline.as")
     r.compile("testdata/trace1.as")
     r.compile("testdata/write.as")
+    r.compile("testdata/argv.as")
     run()
