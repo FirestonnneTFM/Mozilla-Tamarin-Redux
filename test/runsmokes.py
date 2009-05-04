@@ -195,8 +195,10 @@ class RunSmokes():
         else:
             status="passed"
         print "%s %ds %s %s" % (status,tm,command,detail)
-        self.allpasses+=passes
-        self.allfails+=fails
+        if fails>0:
+            self.allfails+=1
+        else:
+            self.allpasses+=1
 
 ## main
 r = RunSmokes()
