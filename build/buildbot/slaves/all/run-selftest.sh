@@ -40,7 +40,7 @@
 . ./environment.sh
 
 . ../all/util-calculate-change.sh $1
-AVM=$buildsdir/$change-${changeid}/$platform/$shell_selftests
+AVM=$buildsdir/$change-${changeid}/$platform/$shell_selftest
 
 $AVM -Dselftest > selftest.out 2>&1
 ret=$?

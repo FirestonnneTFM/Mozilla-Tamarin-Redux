@@ -152,7 +152,7 @@ while True:
         break
     try:
         # Is there an active buildset?
-        active = server.isBuildSetActive(['compile','test','compile-sandbox','test-sandbox'])
+        active = server.isBuildSetActive(['compile','smoke','test','compile-sandbox','smoke-sandbox','test-sandbox'])
 
         log("active: %s" % active)
 

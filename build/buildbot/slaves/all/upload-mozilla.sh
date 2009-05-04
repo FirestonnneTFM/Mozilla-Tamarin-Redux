@@ -56,36 +56,33 @@ ssh stage.mozilla.org "~/setupbuilds.sh $branch $change-$changeid"
 
 # Release
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release $scp_mozilla/$branch/latest/$platform/$shell_release
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release $shell_release"
 
 # Release_Debugger
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release_debugger
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $scp_mozilla/$branch/latest/$platform/$shell_release_debugger
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release_debugger $shell_release_debugger"
 
 # Debug
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_debug
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $scp_mozilla/$branch/latest/$platform/$shell_debug
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_debug $shell_debug"
 
 #Debug_Debugger
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_debug_debugger
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $scp_mozilla/$branch/latest/$platform/$shell_debug_debugger
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_debug_debugger $shell_debug_debugger"
+
+# SelfTest
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_selftest $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_selftest
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_selftest $shell_selftest"
 
 # Release-vprof
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release_vprof
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $scp_mozilla/$branch/latest/$platform/$shell_release_vprof
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release_vprof $shell_release_vprof"
 
 # builtin.abc
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$builtinABC $scp_mozilla/$branch/$change-${changeid}/$builtinABC
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$builtinABC $scp_mozilla/$branch/latest/$builtinABC
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$builtinABC $builtinABC"
 
 # toplevel.abc
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$shellABC $scp_mozilla/$branch/$change-${changeid}/$shellABC
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$shellABC $scp_mozilla/$branch/latest/$shellABC
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$shellABC $shellABC"
 

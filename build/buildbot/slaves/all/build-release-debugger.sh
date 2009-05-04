@@ -49,60 +49,14 @@
 . ../all/util-calculate-change.sh $1
 
 
-
-##
-# Update the version string
-##
-. ../all/util-update-version.sh
-
-
-
-##
-# Make sure that there are no left over directories from previous compile
-##
-cd $basedir
-test -d objdir-releasedebugger && {
-    echo Remove directory $basedir/objdir-releasedebugger
-    rm -rf $basedir/objdir-releasedebugger
+filename=$3
+test "$filename" = "" && {
+    filename=$shell_release_debugger
 }
 
-mkdir objdir-releasedebugger
+##
+# Execute the common build script.
+##
+../all/build-generic.sh $change "--enable-shell --enable-debugger $2" $filename
 
-cd objdir-releasedebugger
-
-python ../configure.py --enable-shell --enable-debugger $2
-
-topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
-CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
-echo ""
-echo compiler version: 
-eval ${CXX} --version
-echo ""
-echo ""
-
-make $make_opt clean
-make $make_opt 
-res=$?
-
-test "$res" = "0" || {
-    echo "build failed return value $res"
-}
-test -f shell/$shell_release || {
-    echo "avmshell is missing, build failed"
-    cd $basedir/core
-    hg revert avmplusVersion.h
-    exit 1
-}
-
-mkdir -p $buildsdir/${change}-${changeid}/$platform
-chmod 777 $buildsdir/${change}-${changeid}/$platform
-cp shell/$shell_release $buildsdir/${change}-${changeid}/$platform/$shell_release_debugger
-chmod 777 $buildsdir/${change}-${changeid}/$platform/$shell_release_debugger
-
-cd $basedir/core
-hg revert avmplusVersion.h
-
-echo "build succeeded"
-rm -rf $basedir/objdir-releasedebugger
-exit 0
 

@@ -37,28 +37,84 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=mac
-export basedir=/Users/build/buildbot/$branch/${platform}-intel-10_4/$branch
-export buildsdir=$basedir/../builds
-
-export shell_release=${shell_release}_104
-export shell_debug=${shell_debug}_104
-export shell_release_debugger=${shell_release_debugger}_104
-export shell_debug_debugger=${shell_debug_debugger}_104
-export shell_selftest=${shell_selftest}_104
-export shell_release_vprof=${shell_release_vprof}_104
+. ./environment.sh
 
 
-## Used by make in the build scripts
-export make_opt="-j4"
-export test_threads=3
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
+
+
+config=$2
+test "$config" = "" && {
+    echo "usage: build-generic.sh <change> <config> <filename>"
+    exit 1
+}
+filename=$3
+test "$filename" = "" && {
+    echo "usage: build-generic.sh <change> <config> <filename>"
+    exit 1
+}
+
+
+
+##
+# Update the version string
+##
+. ../all/util-update-version.sh
+
+
+##
+# Make sure that there are no left over directories from previous compile
+##
+cd $basedir
+test -d objdir && {
+    echo Remove directory $basedir/objdir
+    rm -rf $basedir/objdir
+}
+
+mkdir objdir
+
+cd objdir
+
+python ../configure.py $config
+
+topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
+CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
+echo ""
+echo compiler version: 
+eval ${CXX} --version
+echo ""
+echo ""
+
+make $make_opt clean
+make $make_opt 
+res=$?
+
+test "$res" = "0" || {
+    echo "build failed return value $res"
+}
+test -f shell/$shell || {
+    echo "avmshell is missing, build failed"
+    cd $basedir/core
+    hg revert avmplusVersion.h
+    exit 1
+}
+
+mkdir -p $buildsdir/${change}-${changeid}/$platform
+chmod 777 $buildsdir/${change}-${changeid}/$platform
+cp shell/$shell $buildsdir/${change}-${changeid}/$platform/$filename
+chmod 777 $buildsdir/${change}-${changeid}/$platform/$filename
+
+cd $basedir/core
+hg revert avmplusVersion.h
+
+echo "build succeeded"
+rm -rf $basedir/objdir
+exit 0
+

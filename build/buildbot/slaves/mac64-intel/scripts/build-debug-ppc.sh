@@ -37,6 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
@@ -49,46 +50,10 @@
 . ../all/util-calculate-change.sh $1
 
 
-fail=0
-
-
-# Release
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
-  echo "message: Release Failed"
-  fail=1
-}
-
-# Release_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
-  echo "message: Release_Debugger Failed"
-  fail=1
-}
-
-# Debug
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug || {
-  echo "message: Debug Failed"
-  fail=1
-}
-
-#Debug_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
-  echo "message: Debug_Debugger Failed"
-  fail=1
-}
-
-
-# builtin.abc
-test -f $basedir/core/$builtinABC || {
-  echo "message: builtin.abc Failed"
-  fail=1
-}
-
-
-
-if test "${fail}" = 1; then
-   echo Failing the build
-   exit 1
-fi
-
-
+##
+# Execute the common build script.
+# Just need to pass in the additional arguments for PPC
+##
+cd $basedir/build/buildbot/slaves/scripts/
+../all/build-debug.sh $change "--target=ppc64-darwin --enable-leopard" ${shell_debug}_ppc
 

@@ -49,25 +49,50 @@
 . ../all/util-calculate-change.sh $1
 
 
+##
+# Determine if the intel compiles failed
+##
+. ../all/build-check.sh $change
+
+fail=0
+
 
 # Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_ppc
-
-# Release-vprof
-#. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_vprof}_ppc
+test -f $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc || {
+  echo "message: Release PPC Failed"
+  fail=1
+}
 
 # Release_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
+test -f $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc || {
+  echo "message: Release_Debugger PPC Failed"
+  fail=1
+}
 
 # Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
+test -f $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc || {
+  echo "message: Debug PPC Failed"
+  fail=1
+}
 
 #Debug_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
+test -f $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc || {
+  echo "message: Debug_Debugger PPC Failed"
+  fail=1
+}
 
 
-# builtin.abc
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$builtinABC $ftp_asteam/$branch/$change-${changeid}/$builtinABC
+# SelfTest
+test -f $buildsdir/$change-${changeid}/$platform/${shell_selftest}_ppc || {
+  echo "message: SelfTest PPC Failed"
+  fail=1
+}
 
-# toplevel.abc
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$shellABC $ftp_asteam/$branch/$change-${changeid}/$shellABC
+
+if test "${fail}" = 1; then
+   echo Failing the build
+   exit 1
+fi
+
+
+

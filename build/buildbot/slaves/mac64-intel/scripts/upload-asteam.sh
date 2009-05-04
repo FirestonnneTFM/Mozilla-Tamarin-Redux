@@ -49,22 +49,19 @@
 . ../all/util-calculate-change.sh $1
 
 
+## Upload the normal binaries for this machine
+../all/upload-asteam.sh $change
 
+# Upload the PPC compiled binaries
 # Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_64
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_ppc
 
 # Release_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_64
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
 
 # Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug}_64
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
 
 #Debug_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_64
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
 
-
-# builtin.abc
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$builtinABC $ftp_asteam/$branch/$change-${changeid}/$builtinABC
-
-# toplevel.abc
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$shellABC $ftp_asteam/$branch/$change-${changeid}/$shellABC

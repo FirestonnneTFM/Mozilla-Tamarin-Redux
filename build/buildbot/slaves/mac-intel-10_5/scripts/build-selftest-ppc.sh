@@ -37,6 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
@@ -49,17 +50,10 @@
 . ../all/util-calculate-change.sh $1
 
 
-
-# Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_ppc
-
-# Release_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
-
-# Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
-
-#Debug_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
-
+##
+# Execute the common build script.
+# Just need to pass in the additional arguments for PPC
+##
+cd $basedir/build/buildbot/slaves/scripts/
+../all/build-selftest.sh $change "--target=ppc-darwin" ${shell_selftest}_ppc
 

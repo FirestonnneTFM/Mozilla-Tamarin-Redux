@@ -57,7 +57,7 @@
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_vprof
 
 # Release_Debugger
-. ../all/all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
 
 # Debug
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug
@@ -65,6 +65,8 @@
 #Debug_Debugger
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_debugger
 
+# SelfTest
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_selftest $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_selftest
 
 # builtin.abc
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$builtinABC $ftp_asteam/$branch/$change-${changeid}/$builtinABC

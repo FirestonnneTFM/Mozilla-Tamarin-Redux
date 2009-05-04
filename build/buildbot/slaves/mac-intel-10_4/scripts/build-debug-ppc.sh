@@ -37,28 +37,23 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=mac
-export basedir=/Users/build/buildbot/$branch/${platform}-intel-10_4/$branch
-export buildsdir=$basedir/../builds
-
-export shell_release=${shell_release}_104
-export shell_debug=${shell_debug}_104
-export shell_release_debugger=${shell_release_debugger}_104
-export shell_debug_debugger=${shell_debug_debugger}_104
-export shell_selftest=${shell_selftest}_104
-export shell_release_vprof=${shell_release_vprof}_104
+. ./environment.sh
 
 
-## Used by make in the build scripts
-export make_opt="-j4"
-export test_threads=3
+##
+# Calculate the change number and change id
+##
+. ../all/util-calculate-change.sh $1
+
+
+##
+# Execute the common build script.
+# Just need to pass in the additional arguments for PPC
+##
+cd $basedir/build/buildbot/slaves/scripts/
+../all/build-debug.sh $change "--target=ppc-darwin" ${shell_debug}_ppc
+

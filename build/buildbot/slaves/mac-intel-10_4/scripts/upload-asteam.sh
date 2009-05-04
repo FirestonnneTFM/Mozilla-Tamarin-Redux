@@ -37,7 +37,6 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-
 ##
 # Bring in the environment variables
 ##
@@ -49,11 +48,22 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+## Upload the normal binaries for this machine
+../all/upload-asteam.sh $change
 
-##
-# Execute the common build script.
-# Just need to pass in the target to get the 64bit builds
-##
-cd $basedir/build/buildbot/slaves/scripts/
-../all/build-release.sh $change "--target=ppc64-darwin"
+# Upload the PPC compiled binaries
+# Release
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_ppc
+
+# Release_Debugger
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
+
+# Debug
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
+
+#Debug_Debugger
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
+
+#SelfTest
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_selftest}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_selftest}_ppc
 
