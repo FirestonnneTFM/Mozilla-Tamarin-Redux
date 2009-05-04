@@ -58,12 +58,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   fail=1
 }
 
-# Release-vprof
-#test -f $buildsdir/$change-${changeid}/$platform/$shell_release_vprof || {
-#  echo "message: Release-vprof Failed"
-#  fail=1
-#}
-
 # Release_Debugger
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
   echo "message: Release_Debugger Failed"
@@ -97,4 +91,29 @@ if test "${fail}" = 1; then
 fi
 
 
+
+
+# Release PPC
+test -f $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc || {
+  echo "message: Release PPC Failed"
+  fail=1
+}
+
+# Release_Debugger PPC
+test -f $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc || {
+  echo "message: Release_Debugger PPC Failed"
+  fail=1
+}
+
+# Debug PPC
+test -f $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc || {
+  echo "message: Debug PPC Failed"
+  fail=1
+}
+
+#Debug_Debugger PPC
+test -f $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc || {
+  echo "message: Debug_Debugger PPC Failed"
+  fail=1
+}
 

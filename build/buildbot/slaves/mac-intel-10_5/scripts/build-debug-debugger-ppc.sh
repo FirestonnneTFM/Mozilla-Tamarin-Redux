@@ -52,8 +52,8 @@
 
 ##
 # Execute the common build script.
-# Just need to pass in the target to get the 64bit builds
+# Just need to pass in the additional arguments for PPC
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/build-release-debugger.sh $change "--target=ppc64-darwin"
+../all/build-debug-debugger.sh $change "--target=ppc-darwin" ${shell_debug_debugger}_ppc
 

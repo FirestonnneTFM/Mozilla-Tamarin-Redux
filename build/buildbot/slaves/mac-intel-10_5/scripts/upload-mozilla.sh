@@ -49,52 +49,25 @@
 . ../all/util-calculate-change.sh $1
 
 
-fail=0
+## Upload the normal binaries for this machine
+../all/upload-mozilla.sh $change
 
-
+# Upload the PPC compiled binaries
 # Release
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
-  echo "message: Release Failed"
-  fail=1
-}
-
-# Release-vprof
-#test -f $buildsdir/$change-${changeid}/$platform/$shell_release_vprof || {
-#  echo "message: Release-vprof Failed"
-#  fail=1
-#}
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release}_ppc
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release}_ppc ${shell_release}_ppc"
 
 # Release_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
-  echo "message: Release_Debugger Failed"
-  fail=1
-}
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc ${shell_release_debugger}_ppc"
 
 # Debug
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug || {
-  echo "message: Debug Failed"
-  fail=1
-}
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_debug}_ppc ${shell_debug}_ppc"
 
 #Debug_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
-  echo "message: Debug_Debugger Failed"
-  fail=1
-}
-
-
-# builtin.abc
-test -f $basedir/core/$builtinABC || {
-  echo "message: builtin.abc Failed"
-  fail=1
-}
-
-
-
-if test "${fail}" = 1; then
-   echo Failing the build
-   exit 1
-fi
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc ${shell_debug_debugger}_ppc"
 
 
 

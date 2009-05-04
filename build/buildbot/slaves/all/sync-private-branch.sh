@@ -73,4 +73,4 @@ cp -Rv ./ $basedir
 echo ""
 
 ## Return back to the scripts direcotry
-cd $basedir/build/buildbot/slave/scripts
+cd $basedir/build/buildbot/slaves/scripts

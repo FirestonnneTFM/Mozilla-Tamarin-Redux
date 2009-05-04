@@ -51,6 +51,13 @@ export platform=mac
 export basedir=/Users/build/buildbot/$branch/mac-ppc-10_5/$branch
 export buildsdir=$basedir/../builds
 
+export shell_release=${shell_release}_ppc
+export shell_debug=${shell_debug}_ppc
+export shell_release_debugger=${shell_release_debugger}_ppc
+export shell_debug_debugger=${shell_debug_debugger}_ppc
+export shell_selftest=${shell_selftest}_ppc
+export shell_release_vprof=${shell_release_vprof}_ppc
+
 ## Used by make in the build scripts
 export make_opt="-j2"
 export test_threads=3

@@ -82,13 +82,13 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
   fail=1
 }
 
-#selftests
-test -f $buildsdir/$change-${changeid}/$platform/$shell_selftests || {
+#selftest
+test -f $buildsdir/$change-${changeid}/$platform/$shell_selftest || {
   if [ "$platform" = "mac64-ppc" -o "$platform" = "mac64-intel" -o "$platform" = "windows64" -o "$platform" = "linux64" ]
   then
-    echo "message: warning not building selftests shell on $platform platform"
+    echo "message: warning not building selftest shell on $platform platform"
   else
-    echo "message: selftests Failed"
+    echo "message: selftest Failed"
     fail=1
   fi
 }

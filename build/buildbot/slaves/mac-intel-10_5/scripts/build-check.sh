@@ -49,24 +49,50 @@
 . ../all/util-calculate-change.sh $1
 
 
+##
+# Determine if the intel compiles failed
+##
+. ../all/build-check.sh $change
 
-# Since all is good, lets post the builds
-ssh stage.mozilla.org "~/setupbuilds.sh $branch $change-$changeid"
+fail=0
 
 
 # Release
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release}_ppc
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release}_ppc ${shell_release}_ppc"
+test -f $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc || {
+  echo "message: Release PPC Failed"
+  fail=1
+}
 
 # Release_Debugger
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc ${shell_release_debugger}_ppc"
+test -f $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc || {
+  echo "message: Release_Debugger PPC Failed"
+  fail=1
+}
 
 # Debug
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_debug}_ppc
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_debug}_ppc ${shell_debug}_ppc"
+test -f $buildsdir/$change-${changeid}/$platform/${shell_debug}_ppc || {
+  echo "message: Debug PPC Failed"
+  fail=1
+}
 
 #Debug_Debugger
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc ${shell_debug_debugger}_ppc"
+test -f $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc || {
+  echo "message: Debug_Debugger PPC Failed"
+  fail=1
+}
+
+
+# SelfTest
+test -f $buildsdir/$change-${changeid}/$platform/${shell_selftest}_ppc || {
+  echo "message: SelfTest PPC Failed"
+  fail=1
+}
+
+
+if test "${fail}" = 1; then
+   echo Failing the build
+   exit 1
+fi
+
+
 
