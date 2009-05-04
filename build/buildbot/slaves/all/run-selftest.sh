@@ -37,9 +37,35 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
+##
+# Bring in the environment variables
+##
 . ./environment.sh
 
+
+##
+# Calculate the change number and change id
+##
 . ../all/util-calculate-change.sh $1
+
+
+##
+# Download the AVMSHELL if it does not exist
+##
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_selftest" ]; then
+    echo "Download AVMSHELL"
+    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_selftest $buildsdir/$change-${changeid}/$platform/$shell_selftest
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of $shell_selftest failed"
+        rm -f $buildsdir/$change-${changeid}/$platform/$shell_selftest
+        exit 1
+    }
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_selftest
+fi
+
+
 AVM=$buildsdir/$change-${changeid}/$platform/$shell_selftest
 
 $AVM -Dselftest > selftest.out 2>&1
