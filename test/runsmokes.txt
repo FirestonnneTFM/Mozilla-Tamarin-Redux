@@ -90,7 +90,6 @@ cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} regress
 
 cd ./acceptance;./runtests.py --nohtml --avm=${avmr} abcasm
 cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} abcasm
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} abcasm
 cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} abcasm
 
 cd ./acceptance;./runtests.py --nohtml --avm=${avmr} mops
