@@ -37,8 +37,8 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-export vmbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds
-#export vmbuilds=http://10.60.48.47/builds
+#export vmbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds
+export vmbuilds=http://10.60.48.47/builds
 #export ascbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds/asc/latest
 export ascbuilds=http://10.60.48.47/builds/asc/latest/
 
