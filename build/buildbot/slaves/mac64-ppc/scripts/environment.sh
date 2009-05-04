@@ -47,8 +47,8 @@ export shell_extension=
 ##
 . ../all/environment.sh
 
-export platform=mac64
-export basedir=/Users/build/buildbot/$branch/${platform}-ppc/$branch
+export platform=mac
+export basedir=/Users/build/buildbot/$branch/${platform}64-ppc/$branch
 export buildsdir=$basedir/../builds
 
 export shell_release=${shell_release}_64_ppc
