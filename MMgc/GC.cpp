@@ -160,6 +160,7 @@ namespace MMgc
 		, bytesScannedTotal(0)
 		, start_time(0)
 		, start_event(NO_EVENT)
+		, collectThreshold(256) // 4KB blocks, that is, 1MB
 	{
 	}
 	
@@ -191,8 +192,12 @@ namespace MMgc
 		return 4;											// Unitless.  Old comment says "4" comes from the Boehm collector
 	}
 
+	inline void GCPolicyManager::setCollectThreshold(uint32_t blocks) {
+		collectThreshold = blocks;
+	}
+
 	inline uint32_t GCPolicyManager::lowerLimitHeapBlocks() {
-		return 256;											// 4KB blocks, that is, 1MB
+		return collectThreshold;
 	}
 
 	inline uint64_t GCPolicyManager::now() {
