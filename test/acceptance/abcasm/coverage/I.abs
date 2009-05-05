@@ -41,19 +41,67 @@ function main() {
 	findproperty START 
 	pushstring "Opcodes that start with the letter I" 
 	callpropvoid START 1
-	newfunction .function_id(runTest)
+
+	newfunction .function_id(runTest1)
 	getlocal0
 	call 0
+
+	newfunction .function_id(runTest2)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest3)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest4)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest5)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest6)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest7)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest8)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest9)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest10)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest11)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest12)
+	getlocal0
+	call 0
+
+	newfunction .function_id(runTest13)
+	getlocal0
+	call 0
+
 	findproperty END
 	callpropvoid END 0
 	returnvoid
 }
 
+/* Limit this to seven tests per function */
 
-
-
-
-function runTest()
+function runTest1()
 {
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifeq int and int"
@@ -164,6 +212,11 @@ if_false_undef_succeeded: findproperty PASS
 	callpropvoid PASS 1
 if_false_undef_endit: 
 
+	returnvoid
+}
+
+function runTest2()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "iffalse true"
 		pushtrue
@@ -275,6 +328,11 @@ ifge_abc_abcd_fail: findproperty FAIL
 	callpropvoid FAIL 3
 ifge_abc_abcd_endit: 
 
+	returnvoid
+}
+
+function runTest3()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifgt int and eq int"
 		pushint 7
@@ -387,6 +445,11 @@ ifle_i7i7_succeeded: findproperty PASS
 	callpropvoid PASS 1
 ifle_i7i7_endit: 
 
+    returnvoid
+}
+
+function runTest4()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifle int and lt int"
 		pushint 7
@@ -499,6 +562,11 @@ iflt_i7i2_fail: findproperty FAIL
 	callpropvoid FAIL 3
 iflt_i7i2_endit: 
 
+    returnvoid
+}
+
+function runTest5()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "iflt int and gt int"
 		pushint 7
@@ -613,6 +681,11 @@ ifnge_i7i799_succeeded: findproperty PASS
 	callpropvoid PASS 1
 ifnge_i7i799_endit: 
 
+    returnvoid
+}
+
+function runTest6()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifnge int and double"
 		pushint 9
@@ -725,6 +798,11 @@ ifngt_i7d9_2_succeeded: findproperty PASS
 	callpropvoid PASS 1
 ifngt_i7d9_2_endit: 
 
+    returnvoid
+}
+
+function runTest7()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifngt string and string"
 		pushstring "abc"
@@ -837,6 +915,11 @@ ifnle_abc_abc_fail: findproperty FAIL
 	callpropvoid FAIL 3
 ifnle_abc_abc_endit: 
 
+    returnvoid
+}
+
+function runTest8()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifnle prefix string and string"
 		pushstring "abc"
@@ -949,7 +1032,11 @@ ifnlt_abc_abcd_fail: findproperty FAIL
 	callpropvoid FAIL 3
 ifnlt_abc_abcd_endit: 
 
+    returnvoid
+}
 
+function runTest9()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifne int and int"
 		pushint 7
@@ -1062,6 +1149,11 @@ ifstricteq_null_null_succeeded: findproperty PASS
 	callpropvoid PASS 1
 ifstricteq_null_null_endit: 
 
+    returnvoid
+}
+
+function runTest10()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "ifstricteq null and undef"
 		pushnull
@@ -1172,6 +1264,11 @@ if_true_null_fail: findproperty FAIL
 	callpropvoid FAIL 3
 if_true_null_endit: 
 
+    returnvoid
+}
+
+function runTest11()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "iftrue undef"
 		pushundefined
@@ -1249,6 +1346,11 @@ if_true_9_endit:
 		getlocal2
 		callpropvoid COMPARE_STRICTEQ 3
 
+    returnvoid
+}
+
+function runTest12()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "inclocal int"
 		pushint 20 // expected
@@ -1316,6 +1418,11 @@ if_true_9_endit:
 		instanceof
 		callpropvoid COMPARE_STRICTEQ 3
 
+    returnvoid
+}
+
+function runTest13()
+{
 		findproperty COMPARE_STRICTEQ
 	pushstring "Array instanceof Object"
 		pushtrue // expected
