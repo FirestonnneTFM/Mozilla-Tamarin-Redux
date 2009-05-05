@@ -64,17 +64,17 @@ namespace MMgc
 			VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(uintptr_t));
 		}
 		uintptr_t ips[kMaxStackTrace];
-		size_t skip;
 		size_t size;
 		size_t totalSize;
 		size_t sweepSize;
 		const char *package;
 		const char *category;
 		const char *name;
-		size_t count;
-		size_t totalCount;
-		size_t sweepCount;
+		uint64_t count;
+		uint64_t totalCount;
+		uint64_t sweepCount;
 		StackTrace *master;
+		uint8_t skip;
 	};
 
 	GCThreadLocal<const char*> memtag;
@@ -237,7 +237,7 @@ namespace MMgc
 		PackageGroup(const char *name) : name(name), size(0), count(0), categories(16, GCHashtable::OPTION_MALLOC) {}
 		const char *name;
 		size_t size;
-		size_t count;
+		uint64_t count;
 		GCHashtable categories; // key == category name, value == CategoryGroup*
 	};
 
@@ -251,7 +251,7 @@ namespace MMgc
 		}
 		const char *name;
 		size_t size;
-		size_t count;
+		uint64_t count;
 		// biggest kNumTracesPerType traces
 		StackTrace *traces[kNumTracesPerType ? kNumTracesPerType : 1];
 	};
@@ -304,7 +304,7 @@ namespace MMgc
 		GCHashtable packageTable(128, GCHashtable::OPTION_MALLOC);
 
 		size_t residentSize=0;
-		size_t residentCount=0;
+		uint64_t residentCount=0;
 		size_t packageCount=0;
 
 		// rip through all allocation sites and sort into package and categories
@@ -328,7 +328,7 @@ namespace MMgc
 
 			residentSize += size;
 
-			size_t count = trace->master != NULL ? 0 : trace->count;
+			uint64_t count = trace->master != NULL ? 0 : trace->count;
 			residentCount += trace->count;
 
 			const char *pack = GetPackage(trace);
@@ -434,7 +434,7 @@ namespace MMgc
 					StackTrace *trace = tg->traces[j];
 					if(trace) {
 						size_t size = trace->size;
-						size_t count = trace->count;
+						uint64_t count = trace->count;
 						if(showSwept) {
 							size = trace->sweepSize;
 							count = trace->sweepCount;
@@ -604,16 +604,6 @@ namespace MMgc
 		return NULL;
 	}
 
-	void ChangeSizeForObject(const void *object, int size)
-	{
-		if(GCHeap::GetGCHeap()->GetProfiler()) {
-			StackTrace *st = GCHeap::GetGCHeap()->GetProfiler()->GetAllocationTrace(object);
-			if(st)
-				st->size += size;
-			GCAssert(int(st->size) >= 0);
-		}
-	}
-
 	unsigned GCStackTraceHashtable::equals(const void *k, const void *k2)
 	{
 		if(k == NULL || k2 == NULL)
@@ -635,7 +625,6 @@ namespace MMgc
 	void PrintAllocStackTrace(const void *) {}
 	void PrintDeleteStackTrace(const void *) {}
 	const char* GetAllocationName(const void *) { return NULL; }
-	void ChangeSizeForObject(const void *, int ) {}
 
 #endif
 
