@@ -480,7 +480,7 @@ namespace MMgc
 			++num_traces;
 			StackTrace *trace = (StackTrace*)iter.value();
 			size_t size;
-			size_t count;
+			uint64_t count;
 
 			if(showSwept) {
 				size = trace->sweepSize;
