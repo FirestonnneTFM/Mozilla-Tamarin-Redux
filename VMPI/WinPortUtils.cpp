@@ -231,12 +231,25 @@ size_t VMPI_size(void* ptr)
 	return HeapSize(GetProcessHeap(), 0, ptr);
 }
 
+FILE* logStream = stdout;
+
+void RedirectLogOutput(FILE* file)
+{
+	logStream = file;
+}
 void VMPI_log(const char* message)
 {
+	if( logStream )
+	{
+		fprintf(logStream, "%s\n", message );
+	}
+	else
+	{
 #ifndef UNDER_CE
-	::OutputDebugStringA(message);
+		::OutputDebugStringA(message);
 #endif
-	printf("%s\n",message);
+		printf("%s\n",message);
+	}
 }
 
 bool VMPI_isMemoryProfilingEnabled()

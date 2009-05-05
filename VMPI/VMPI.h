@@ -405,6 +405,12 @@ extern bool VMPI_spySetup();
 extern void VMPI_spyCallback();
 
 /** 
+ * MEthod to determine whether we have access to symbol information
+ * @return a bool indicating whether we have 
+*/
+extern bool VMPI_hasSymbols();
+
+/** 
  * Method to create a thread local storage (TLS) identifier 
  * This identifier will be used as a key to set/get thread-specific data
  * @param [out] pointer to store the value of newly created TLS identifier

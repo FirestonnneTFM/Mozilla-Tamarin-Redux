@@ -41,6 +41,7 @@
 
 #include "stdafx.h"
 #include <rapi.h>
+#include <io.h>
 
 typedef struct _wait_info
 {
@@ -48,7 +49,129 @@ typedef struct _wait_info
 	DWORD dwTimeout;
 } wait_info;
 
+typedef unsigned int uint32_t;
+
+class SignalData
+{
+public:
+	SignalData(uint32_t *addr, HANDLE handle) 
+		: signal(addr), eventHandle(handle) {}
+	uint32_t *signal;
+	HANDLE eventHandle;
+};
+
+DWORD WINAPI WaitForMemorySignal(LPVOID lpParam)
+{
+	SignalData *sig_data = (SignalData*)lpParam;
+	while(true) {
+		WaitForSingleObject(sig_data->eventHandle, INFINITE);
+		*(sig_data->signal) = true;
+	}
+	delete sig_data;
+	return 0;
+}
+
+void WriteOnNamedSignal(const char *name, uint32_t *addr)
+{
+	HANDLE m_namedSharedObject;
+
+	SECURITY_DESCRIPTOR sd;
+	InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+	SetSecurityDescriptorDacl(&sd, TRUE, 0, FALSE);
+
+	SECURITY_ATTRIBUTES sa;
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.bInheritHandle = FALSE;
+	sa.lpSecurityDescriptor = &sd;
+
+	m_namedSharedObject = CreateEventA(&sa, FALSE, FALSE, name);
+	if(m_namedSharedObject == NULL){
+		LPVOID lpMsgBuf;
+		FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+			(LPTSTR) &lpMsgBuf, 0, NULL );
+		fputs((const char*)lpMsgBuf, stderr);
+		return;
+	}
+	SignalData *sig_data = new SignalData(addr, m_namedSharedObject);
+	CreateThread(NULL, 0, WaitForMemorySignal, sig_data, 0, NULL);
+}
+
+FILE *HandleToStream(void *handle)
+{
+	return _fdopen(_open_osfhandle((intptr_t)handle, 0), "wb");
+}
+
+void* OpenAndConnectToNamedPipe(const char *pipeName)
+{
+	char name[256];
+	_snprintf(name, sizeof(name), "\\\\.\\pipe\\%s", pipeName);
+
+	HANDLE pipe = CreateNamedPipeA((LPCSTR)name, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE, 1, 4096, 4096, 100, NULL);
+	ConnectNamedPipe(pipe, NULL);
+	return (void*)pipe;
+}
+
+
+void CloseNamedPipe(void *handle)
+{
+	FlushFileBuffers(handle);
+	CloseHandle((HANDLE)handle);
+}
+
+void DoMemProfiler()
+{
+	DWORD dwAttr;
+	DWORD dwBufsize;
+	DWORD dwFilesize;
+	DWORD dwRead;
+
+	char localBuf[4096];
+
+	//printf("got mmgc spy signal\n");
+	DWORD t;
+	BYTE* b;
+	CeRapiInvoke(L"\\Windows\\avmremote.dll", L"RunMemProfiler",
+		0, NULL, &t, &b, NULL, 0);		
+	dwAttr = CeGetFileAttributes(L"\\Temp\\gcstats.txt");
+	if( dwAttr==-1)
+		printf("no gcstats file\n");
+	else
+	{
+		//Sleep(10000);
+		//printf("getting gcstats file...\n");
+
+		void *pipe = OpenAndConnectToNamedPipe("MMgc_Spy");
+		FILE* spyStream = HandleToStream(pipe);
+
+		HANDLE statsFile = CeCreateFile(L"\\Temp\\gcstats.txt", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		dwBufsize = 4096;
+		dwFilesize = CeGetFileSize(statsFile, NULL);
+		if (dwFilesize<4096)
+			dwBufsize = dwFilesize;
+
+		//printf("reading gcstats files, size is %d\n", dwFilesize);
+
+		while (CeReadFile(statsFile, localBuf, dwBufsize, &dwRead, NULL))
+		{
+
+			fwrite((void*)localBuf, 1, dwRead, spyStream);
+
+			dwFilesize -= dwRead;
+			if (dwFilesize<4096)
+				dwBufsize = dwFilesize;
+			if (dwBufsize<=0)
+				break;
+		}
+		fflush(spyStream);
+		CloseNamedPipe(pipe);
+	}
+}
+
 #define PROCESS_TIMEOUT 300000
+
+static uint32_t mmgc_spy_signal = 0;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -79,6 +202,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		CeRapiUninit();
 		return -1;
 	}
+
+	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
 
 	// remove the log file from previous run if it exists.
 	// It is left in place in the event that you need to debug
@@ -150,7 +275,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	DWORD dwInterval = 1000;
 	info.dwTimeout = dwInterval;
 	info.proc_id = hProcess;
-//	printf("calling wait for avmshell...\n");
+	//printf("calling wait for avmshell...\n");
 	while (CeRapiInvoke(L"\\Windows\\avmremote.dll", L"WaitForAVMShell",
 						sizeof(wait_info), (BYTE*)&info,  
 						&cbOut, ( BYTE ** ) &pOut, NULL, 0)==S_OK)
@@ -162,6 +287,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		if (dwCode==WAIT_TIMEOUT)
 		{
 			dwTimeout += dwInterval;
+			if( mmgc_spy_signal )
+			{
+				mmgc_spy_signal = 0;
+				DoMemProfiler();
+			}
 			if (dwTimeout>=PROCESS_TIMEOUT)
 			{
 				// Kill the process if we don't end in a decent amount of time (e.g. 60 seconds)

@@ -73,6 +73,7 @@ namespace MMgc
 		void RecordAllocation(const void *item, size_t askSize, size_t gotSize);
 		void RecordDeallocation(const void *item, size_t size);
 		void DumpFatties();
+		void DumpSimple();
 		const char *GetAllocationName(const void *obj);
 		StackTrace *GetAllocationTrace(const void *obj);
 		StackTrace *GetStackTrace();
