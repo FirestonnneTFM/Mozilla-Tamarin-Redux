@@ -192,7 +192,7 @@ namespace MMgc
 		return 4;											// Unitless.  Old comment says "4" comes from the Boehm collector
 	}
 
-	inline void GCPolicyManager::setCollectThreshold(uint32_t blocks) {
+	void GCPolicyManager::setCollectThreshold(uint32_t blocks) {
 		collectThreshold = blocks;
 	}
 
