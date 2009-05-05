@@ -930,9 +930,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
 		int index = mapTable[2*lo+1];
-		int id = mapTable[2*lo];
+		int ident = mapTable[2*lo];
 
-		if (id == errorID) {
+		if (ident == errorID) {
 			return newStringUTF8(errorTable[index]);
 		} else {
 			return NULL;
@@ -3242,13 +3242,13 @@ return the result of the comparison ToPrimitive(x) == y.
 		// we never use a rounded value, only cleanly converted values.
 		#if defined(WIN32) || defined(__ICC) 
 		#ifdef AVMPLUS_AMD64
-		int32_t id = _mm_cvttsd_si32(_mm_set_sd(n));
-		if (id == n) {
+		int32_t intval = _mm_cvttsd_si32(_mm_set_sd(n));
+		if (intval == n) {
 			// make sure its not -0
-			if (id == 0 && MathUtils::isNegZero(n)) {
+			if (intval == 0 && MathUtils::isNegZero(n)) {
 				return allocDouble(n);
 			} else {
-				return (intptr_t(id)<<3) | kIntegerType;
+				return (intptr_t(intval)<<3) | kIntegerType;
 			}
 		}
 		return allocDouble(n);
@@ -3257,9 +3257,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		__asm {
 			movsd xmm0,n
 			cvttsd2si ecx,xmm0
-			shl ecx,3		// id<<3
+			shl ecx,3		// intval<<3
 			mov eax,ecx
-			sar ecx,3		// id>>3
+			sar ecx,3		// intval>>3
 			cvtsi2sd xmm1,ecx
 			ucomisd xmm0,xmm1
             jne d2a_alloc   // < or >
@@ -3278,20 +3278,20 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		#endif
 		#elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-		int id = _mm_cvttsd_si32(_mm_set_sd(n));
+		int intval = _mm_cvttsd_si32(_mm_set_sd(n));
 		// MacTel is luckily always using SSE2, there
 		// are no intrinsics to check for unordered 
 		// mode here using any of the _mm_ucominXXX
 		// instructions
-		if (((id<<3)>>3) == n) {
+		if (((intval<<3)>>3) == n) {
 			// make sure its not -0
-			if (id == 0 && MathUtils::isNegZero(n)) {
+			if (intval == 0 && MathUtils::isNegZero(n)) {
 				return allocDouble(n);
 			} else {
 #ifdef AVMPLUS_64BIT
-				return (id<<3) | kIntegerType;
+				return (intval<<3) | kIntegerType;
 #else
-				return uint32((id<<3) | kIntegerType);
+				return uint32((intval<<3) | kIntegerType);
 #endif
 
 			}
@@ -3301,13 +3301,13 @@ return the result of the comparison ToPrimitive(x) == y.
 		return AvmCore::doubleToAtom(n); // This needs to be optimized for solaris.
 		#elif defined(AVMPLUS_UNIX)
 		#ifdef __amd64__
-		int32_t id = _mm_cvttsd_si32(_mm_set_sd(n));
-		if (id == n) {
+		int32_t intval = _mm_cvttsd_si32(_mm_set_sd(n));
+		if (intval == n) {
 			// make sure its not -0
-			if (id == 0 && MathUtils::isNegZero(n)) {
+			if (intval == 0 && MathUtils::isNegZero(n)) {
 				return allocDouble(n);
 			} else {
-				return (intptr_t(id)<<3) | kIntegerType;
+				return (intptr_t(intval)<<3) | kIntegerType;
 			}
 		}
 		return allocDouble(n);
@@ -3346,34 +3346,34 @@ return the result of the comparison ToPrimitive(x) == y.
 		// handle integer values w/out allocation
 		#if defined(WIN32) && !defined(_ARM_)
 		#ifdef AVMPLUS_AMD64
-		int id = _mm_cvttsd_si32(_mm_set_sd(n));
+		int intval = _mm_cvttsd_si32(_mm_set_sd(n));
 		#else
 		// this logic rounds in the wrong direction for E3, but
 		// we never use a rounded value, only cleanly converted values.
-		int id;
+		int intval;
 		_asm {
 			fld [n];
-			fistp [id];
+			fistp [intval];
 		}
 		#endif
 		#elif defined(_MAC) && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-		int id = _mm_cvttsd_si32(_mm_set_sd(n));
+		int intval = _mm_cvttsd_si32(_mm_set_sd(n));
 		#else
-		int id = MathUtils::real2int(n);
+		int intval = MathUtils::real2int(n);
 		#endif
 
 		// make sure n is integer value that fits in 29 bits
-		if (((id<<3)>>3) == n)
+		if (((intval<<3)>>3) == n)
 		{
 			// make sure its not -0
-			if (id == 0 && MathUtils::isNegZero(n))
+			if (intval == 0 && MathUtils::isNegZero(n))
 				return allocDouble(n);
 			else
 			{
 #ifdef AVMPLUS_64BIT
-				return (id<<3) | kIntegerType;
+				return (intval<<3) | kIntegerType;
 #else
-				return uint32((id<<3) | kIntegerType);
+				return uint32((intval<<3) | kIntegerType);
 #endif
 			}
 		}
@@ -3575,13 +3575,13 @@ return the result of the comparison ToPrimitive(x) == y.
 
 #ifdef WIN32 // should be any intel build
 		// WIN32's real2int returns 0x80000000 if d is not in a valid integer range
-		int id = MathUtils::real2int (d);
-		if (id != 0x80000000) 
-			return id;
-#elif defined AVMPLUS_SPARC
-		int id = MathUtils::real2int (d);
-		if (id != 0x7fffffff && id != 0x80000000)
-			return id;
+		int intval = MathUtils::real2int (d);
+		if (intval != 0x80000000) 
+			return intval;
+#elif AVMPLUS_SPARC
+		int intval = MathUtils::real2int (d);
+		if (intval != 0x7fffffff && intval != 0x80000000)
+			return intval;
 #endif
 
 		return doubleToInt32(d);
@@ -3591,31 +3591,31 @@ return the result of the comparison ToPrimitive(x) == y.
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 	int AvmCore::integer_d_sse2(double d)
 	{
-		int id;
+		int intval;
 		#ifdef WIN32 
 		#ifdef AVMPLUS_AMD64
-		id = _mm_cvttsd_si32(_mm_set_sd(d));
-		if (id != (int)0x80000000)
-			return id;
+		intval = _mm_cvttsd_si32(_mm_set_sd(d));
+		if (intval != (int)0x80000000)
+			return intval;
 		#else
 		_asm {
 			cvttsd2si eax,d
-			mov id,eax
+			mov intval,eax
 		}
-		if (id != 0x80000000)
-			return id;
+		if (intval != 0x80000000)
+			return intval;
 		#endif
 		#elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))		
-		id = _mm_cvttsd_si32(_mm_set_sd(d));
-		if (id != (int)0x80000000)
-			return id;
+		intval = _mm_cvttsd_si32(_mm_set_sd(d));
+		if (intval != (int)0x80000000)
+			return intval;
         #elif defined(SOLARIS)
-        #elif defined AVMPLUS_UNIX
+        #elif defined(AVMPLUS_UNIX)
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"
-            "movl %%eax, %0" : "=r" (id) : "m" (d) : "%eax");
-        if (id != (int) 0x80000000)
-            return id;
+            "movl %%eax, %0" : "=r" (intval) : "m" (d) : "%eax");
+        if (intval != (int) 0x80000000)
+            return intval;
 		#endif
 
 		return doubleToInt32(d);
