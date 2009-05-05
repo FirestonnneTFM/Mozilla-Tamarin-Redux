@@ -37,12 +37,6 @@
 
 #include "avmplus.h"
 
-#ifdef AVMPLUS_VERBOSE
-#define if_verbose(...) if (pool->verbose) { __VA_ARGS__ }
-#else
-#define if_verbose(...)
-#endif
-
 namespace avmplus
 {
     /**
@@ -554,9 +548,11 @@ namespace avmplus
     {
         int methodCount = readU30(pos);
 
-		if_verbose(
+		#ifdef AVMPLUS_VERBOSE
+		if(pool->verbose) {
 			core->console << "method_count=" << methodCount << "\n";
-		)
+		}
+		#endif
 
 		int size = methodCount == 0 ? 1 : methodCount;
 
@@ -601,12 +597,12 @@ namespace avmplus
 			#ifdef AVMPLUS_VERBOSE
 			Multiname returnTypeName;
 			parseTypeName(pos, returnTypeName);
-			if_verbose(
+			if(pool->verbose) {
 				core->console << "    " << offset << ":method["<<i<<"]\n"
 					<< "        returnType=" << returnTypeName << "\n"
 					<< "        param_count=" << param_count 
 				    << "\n";
-			)
+			}
 			#else
 			readU30(pos);// return type name
 			#endif
@@ -616,9 +612,9 @@ namespace avmplus
 				#ifdef AVMPLUS_VERBOSE
 				Multiname multiname;
 				parseTypeName(pos, multiname);
-				if_verbose(
+				if(pool->verbose) {
 					core->console << "            paramType["<<j<<"]="<< multiname << "\n";
-				)
+				}
 				#else
 				readU30(pos);
 				#endif
@@ -629,12 +625,14 @@ namespace avmplus
 			CHECK_POS(pos);
 			const uint8_t abcFlags = *pos++;
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "        name_index=" << name_index;
 				if (name_index > 0 && name_index < pool->constantStringCount)
 					core->console << " \"" << pool->cpool_string[name_index] << "\"";
 				core->console << "\n        flags=" << (uint32_t)abcFlags << "\n";
-			)
+			}
+			#endif
 
 			const NativeMethodInfo* ni = NULL;
 			if (abcFlags & MethodInfo::NATIVE)
@@ -697,9 +695,11 @@ namespace avmplus
     {
         uint32_t metadataCount = readU30(pos);
 
-		if_verbose(
+		#ifdef AVMPLUS_VERBOSE
+		if(pool->verbose) {
 			core->console << "metadata_count=" << metadataCount << "\n";
-		)
+		}
+		#endif
 
 		if (metadataCount > uint32_t(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
@@ -724,15 +724,20 @@ namespace avmplus
 				// constant pool names are stuck and always reachable via PoolObject, DRC or WB
 				metaNames[i] = name;
 
-				if_verbose(
+				#ifdef AVMPLUS_VERBOSE
+				if(pool->verbose) {
 					core->console << "    " << name;
-				)
+				}
+				#endif
+
 				int values_count = readU30(pos);
 				if (values_count > 0)
 				{
-					if_verbose(
+					#ifdef AVMPLUS_VERBOSE
+					if(pool->verbose) {
 						core->console << "(";
-					)
+					}
+					#endif
 					for(int q = 0; q < values_count; ++q)
 					{
 						uint32_t a = readU30(pos);
@@ -745,19 +750,25 @@ namespace avmplus
 							// Found the metadata to strip
 							pool->stripMetadataIndexes.add(i);
 						}
-						if_verbose(
+						#ifdef AVMPLUS_VERBOSE
+						if(pool->verbose) {
 							core->console << a << "," << b;
 							if (q+1 < values_count)
 								core->console << " ";
-						)
+						}
+						#endif
 					}
-					if_verbose(
+					#ifdef AVMPLUS_VERBOSE
+					if(pool->verbose) {
 						core->console << ")";
-					)
+					}
+					#endif
 				}
-				if_verbose(
+				#ifdef AVMPLUS_VERBOSE
+				if(pool->verbose) {
 					core->console << "\n";
-				)
+				}
+				#endif
 			}
 		}
     }
@@ -766,9 +777,11 @@ namespace avmplus
     {
         int bodyCount = readU30(pos);
 
-		if_verbose(
+		#ifdef AVMPLUS_VERBOSE
+		if(pool->verbose) {
 			core->console << "bodies_count=" << bodyCount << "\n";
-		)
+		}
+		#endif
 
 #ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
@@ -821,7 +834,8 @@ namespace avmplus
 
             int exception_count = readU30(pos);
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":method["<<method_index<<"] max_stack=" << max_stack
 					<< " local_count=" << local_count 
 					<< " init_scope_depth=" << init_scope_depth 
@@ -829,7 +843,8 @@ namespace avmplus
 					<< " code_length=" << code_length
 					<< " exception_count=" << exception_count
 				    << "\n";
-			)
+			}
+			#endif
 
 			if (exception_count != 0) 
 			{
@@ -988,11 +1003,13 @@ namespace avmplus
 #endif
 			// S32 value
 			cpool_int.set(i, readS32(pos));
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_int["<<(uint32_t)i<<"]="
 					<<constantNames[CONSTANT_Int] << " ";
 				core->console << cpool_int[i] << "\n";
-			)
+			}
+			#endif
 		}
 
 		uint32 uint_count = readU30(pos);
@@ -1015,12 +1032,14 @@ namespace avmplus
 			// U32 value
 			cpool_uint.set(i, (unsigned)readS32(pos));
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_uint["<<i<<"]="
 					<<constantNames[CONSTANT_UInt] << " ";
 				core->console << (double)cpool_uint[i];
 				core->console << "\n";
-			)
+			}
+			#endif
 		}
 
 		uint32 double_count = readU30(pos);
@@ -1042,12 +1061,14 @@ namespace avmplus
 #endif
 			double value = readDouble(pos);
 			cpool_double.set(i, (double*)(core->allocDouble(value)&~7));
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_double["<<i<<"]="
 					<<constantNames[CONSTANT_Double] << " ";
 				core->console << *cpool_double[i];
 				core->console << "\n";
-			)
+			}
+			#endif
 		}
 
 		uint32 string_count = readU30(pos);
@@ -1099,12 +1120,14 @@ namespace avmplus
 			cpool_string.set(i, s);
 			pos += len;
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_string["<<i<<"]="
 					<<constantNames[CONSTANT_Utf8] << " ";
 				core->console << core->format(cpool_string[i]->atom());
 				core->console << "\n";
-			)
+			}
+			#endif
 		}
 
 		uint32 ns_count = readU30(pos);
@@ -1181,12 +1204,14 @@ namespace avmplus
 					toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(i));
 				}
 			}
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_ns["<<i<<"]="
 					<<constantNames[kind] << " ";
 				core->console << core->format(cpool_ns[i]->atom());
 				core->console << "\n";
-			)
+			}
+			#endif
 		}
 
 		uint32 ns_set_count = readU30(pos);
@@ -1223,12 +1248,14 @@ namespace avmplus
 			}
 			cpool_ns_set.set(i, namespace_set);
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_ns_set["<<i<<"]="
 					<<constantNames[CONSTANT_NamespaceSet] << " ";
 				core->console << cpool_ns_set[i]->format(core);
 				core->console << "\n";
-			)
+			}
+			#endif
 		}
 
 		uint32 mn_count = readU30(pos);
@@ -1331,14 +1358,16 @@ namespace avmplus
 			default:
 				toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(i));
 			}
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_mn["<<i<<"]="
 					<<constantNames[kind] << " ";
 				Multiname name;
 				pool->parseMultiname(name, i);
 				core->console << name;
 				core->console << "\n";
-			)
+			}
+			#endif
 		}
     }
 
@@ -1391,9 +1420,11 @@ namespace avmplus
 
 		uint32_t count = readU30(pos);
 
-		if_verbose(
+		#ifdef AVMPLUS_VERBOSE
+		if(pool->verbose) {
 			core->console << "script_count=" << count << "\n";
-		)
+		}
+		#endif
 
 #ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
@@ -1417,11 +1448,13 @@ namespace avmplus
 
 			int init_index = readU30(pos);
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console << "    " << (int)(script_pos-startpos) << ":script[" << i << "]"
 					<< " init_index=" << init_index
 					<< "\n";
-			)
+			}
+			#endif
 			MethodInfo* script = resolveMethodInfo(init_index);
 			Traits* declaringTraits = script->declaringTraits();
 
@@ -1468,10 +1501,11 @@ namespace avmplus
 	bool AbcParser::parseInstanceInfos()
     {
         classCount = readU30(pos);
-
-		if_verbose(
+		#ifdef AVMPLUS_VERBOSE
+		if(pool->verbose) {
 			core->console << "class_count=" << classCount <<"\n";
-		)
+		}
+		#endif
 
 #ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
@@ -1512,9 +1546,11 @@ namespace avmplus
 				(FUNCTION_TYPE != NULL && baseTraits == FUNCTION_TYPE && !pool->isBuiltin))
 			{
 				// error - attempt to extend final class
-				if_verbose(
+				#ifdef AVMPLUS_VERBOSE
+				if(pool->verbose) {
 					core->console << qname << " can't extend final class " << baseTraits << "\n";
-				)
+				}
+				#endif
 				toplevel->throwVerifyError(kCannotExtendFinalClass, core->toErrorString(&qname));
 			}
 
@@ -1561,7 +1597,8 @@ namespace avmplus
             uint32_t iinit_index = readU30(pos);
 			MethodInfo* iinit = resolveMethodInfo(iinit_index);
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				// TODO:  fixup this math here, since the 2's are all wrong
 				core->console
 					<< "    " << (int)(instancepos-startpos) << ":instance[" << i << "]"
@@ -1574,7 +1611,8 @@ namespace avmplus
 					<< " interface_count=" << interfaceCount
 					<< " iinit_index=" << iinit_index
 					<< "\n";
-			)
+			}
+			#endif
 
 			Traits* itraits = parseTraits(computeInstanceSize(i, baseTraits), 
 											baseTraits, 
@@ -1626,9 +1664,11 @@ namespace avmplus
 			{
 				Traits *interfaceTraits = pool->resolveTypeName(interfacePos, toplevel);
 				(void)interfaceTraits;
-				if_verbose(
+				#ifdef AVMPLUS_VERBOSE
+				if(pool->verbose) {
 					core->console << "        interface["<<j<<"]=" << interfaceTraits <<"\n";
-				)
+				}
+				#endif
 			}
 						
 			instances.set(i, itraits);
@@ -1670,7 +1710,8 @@ namespace avmplus
 			uint32_t cinit_index = readU30(pos);
             MethodInfo* cinit = resolveMethodInfo(cinit_index);
 
-			if_verbose(
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
 				core->console
 					<< "    " << (int)(class_pos-startpos) << ":class[" << i << "]"
 					<< " " << ns << "::" << name;
@@ -1678,7 +1719,8 @@ namespace avmplus
 				core->console
 					<< " cinit_index=" << cinit_index
 					<< "\n";
-			)
+			}
+			#endif
 
 			const NativeClassInfo* nativeEntry = natives ? natives->get_class(i) : NULL;
 			Traits* ctraits = parseTraits(nativeEntry && nativeEntry->sizeofClass ? nativeEntry->sizeofClass : sizeof(ClassClosure),
