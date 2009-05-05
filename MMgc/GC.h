@@ -398,6 +398,12 @@ namespace MMgc
 		 */
 		bool queryRunCollectionAfterAllocBlockFail();
 
+		/**
+		 * Set the lower limit beyond which we try not to run the garbage collector.
+		 * The value is specified in 4k blocks, thus 256 == 1MB.
+		 */
+		void setCollectThreshold(uint32_t blocks);
+
 		enum PolicyEvent 
 		{
 			NO_EVENT,
@@ -559,6 +565,9 @@ namespace MMgc
 		// Temporaries for holding the start time / start event until the end event arrives
 		uint64_t start_time;
 		PolicyEvent start_event;
+
+		// value returned by lowerLimitHeapBlocks().
+		uint32_t collectThreshold;
 	};
 
 	inline void GCPolicyManager::signalMarkWork(size_t nbytes, uint64_t nobjects)
