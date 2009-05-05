@@ -38,8 +38,6 @@
 
 #include "MMgc.h"
 
-#if defined(MMGC_MEMORY_INFO) || defined(MMGC_MEMORY_PROFILER)
-
 namespace MMgc
 {
 
@@ -626,7 +624,7 @@ namespace MMgc
 	void PrintDeleteStackTrace(const void *) {}
 	const char* GetAllocationName(const void *) { return NULL; }
 
-#endif
+#endif //MMGC_MEMORY_PROFILER
 
 
 #ifdef MMGC_MEMORY_INFO
@@ -726,5 +724,4 @@ namespace MMgc
 
 } // namespace MMgc
 
-#endif // defined(MMGC_MEMORY_INFO) || defined(MMGC_MEMORY_PROFILER)
 
