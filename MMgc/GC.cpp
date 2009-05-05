@@ -775,12 +775,7 @@ namespace MMgc
 		}
 
 		void *item;
-		// Buckets up to 128 are spaced evenly at 8 bytes.
-		if (size <= 128) {
-			GCAlloc *b = (GCAlloc*)allocs[(size >> 3) - 1];
-			GCAssert(size <= b->GetItemSize());
-			item = b->Alloc(size, flags);
-		} else if (size <= kLargestAlloc) {				
+		if (size <= kLargestAlloc) {				
 			// This is the fast lookup table implementation to
 			// find the right allocator.
 			unsigned index = kSizeClassIndex[(size>>3)-1];
@@ -789,7 +784,7 @@ namespace MMgc
 			GCAssert(size <= allocs[index]->GetItemSize());
 
 			// assert that I don't fit (makes sure we don't waste space)
-			GCAssert(size > allocs[index-1]->GetItemSize());
+			GCAssert( (index==0) || (size > allocs[index-1]->GetItemSize()));
 
 			item = allocs[index]->Alloc(size, flags);
 		} else {
