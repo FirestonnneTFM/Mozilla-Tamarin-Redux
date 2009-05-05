@@ -396,8 +396,6 @@ namespace MMgc
 
 		GCManager gcManager;
 
-	private:
-
 		// -- Implementation
 		static GCHeap *instance;
 		GCHeap(GCHeapConfig &config);
@@ -423,6 +421,8 @@ namespace MMgc
 		};
 		Region *lastRegion;
 		
+	private:
+
 		// Block struct used for free lists and memory traversal
 		class HeapBlock : public GCAllocObject
 		{
