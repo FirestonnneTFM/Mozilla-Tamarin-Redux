@@ -44,8 +44,10 @@
 #ifdef MMGC_MEMORY_PROFILER
 	#include <malloc.h>
 	#include <strsafe.h>
+#ifndef UNDER_CE  // Not available on WinMo builds
 	#include <DbgHelp.h>
     #include <io.h>
+#endif
 #endif
 
 size_t VMPI_getVMPageSize()
@@ -193,8 +195,11 @@ uint64_t VMPI_getPerformanceCounter()
 
 #ifdef MMGC_MEMORY_PROFILER
 
+#ifndef UNDER_CE
 namespace MMgc
 {
+	// This relies on headers that don't exist in winmo builds
+
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -352,12 +357,13 @@ namespace MMgc
 		GETPROC(SymInitialize);
 	}
 }
-
 	// declaring this statically will dynamically load the dll and procs
 	// at startup, and never ever release them... if this ever becomes NON-debug
 	// code, you might want to have a way to toss all this... but for _DEBUG
 	// only, it should be fine
 static MMgc::DbgHelpDllHelper g_DbgHelpDll;
+#endif
+
 	static const int MaxNameLength = 256;
 
 #ifdef _WIN64 
@@ -370,6 +376,7 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 	{
 		static bool inited = false;
 		if(!inited) {
+#ifndef UNDER_CE
 			if(!g_DbgHelpDll.m_SymInitialize ||
 				!(*g_DbgHelpDll.m_SymInitialize)(GetCurrentProcess(), NULL, true)) {
 					LPVOID lpMsgBuf;
@@ -382,10 +389,31 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 					}			
 					return false;
 			}
+#endif // ifn UNDER_CE
 			inited = true;
 		}
 		return true;
 	}
+
+#ifdef UNDER_CE
+typedef ULONG NTAPI RtlCaptureStackBackTrace_Function(
+	IN HANDLE hThrd,
+	IN ULONG dwMaxFrames,
+	OUT void* lpFrames,
+	IN DWORD dwFlags,
+	IN DWORD dwSkip);
+
+static RtlCaptureStackBackTrace_Function* const RtlCaptureStackBackTrace_fn = 
+	(RtlCaptureStackBackTrace_Function*)
+	GetProcAddress(LoadLibrary(_T("coredll.dll")), _T("GetThreadCallStack"));
+
+typedef struct _CallSnapshot {
+	DWORD dwReturnAddr;
+} CallSnapshot;
+
+#define STACKSNAP_EXTENDED_INFO 2
+
+#else // UNDER_CE
 
 typedef USHORT NTAPI RtlCaptureStackBackTrace_Function(
 	IN ULONG frames_to_skip,
@@ -397,15 +425,45 @@ static RtlCaptureStackBackTrace_Function* const RtlCaptureStackBackTrace_fn =
 	(RtlCaptureStackBackTrace_Function*)
 	GetProcAddress(GetModuleHandleA("ntdll.dll"), "RtlCaptureStackBackTrace");
 
+#endif // UNDER_CE
+
+#ifdef UNDER_CE
+#include <cmnintrin.h>
+extern "C" unsigned long* get_frame_pointer();
+#endif
+
 	bool VMPI_captureStackTrace(uintptr_t *buffer, size_t bufferSize, uint32_t framesToSkip)
 	{
+#ifdef UNDER_CE
+
+		CallSnapshot lpFrames[32];
+		DWORD dwCnt = RtlCaptureStackBackTrace_fn(GetCurrentThread(), bufferSize >= 32 ? 32 : bufferSize, (void*)&lpFrames,0, framesToSkip);
+
+		size_t i = 0;
+		for( ; i < dwCnt && i < bufferSize ; ++i )
+		{
+			buffer[i] = lpFrames[i].dwReturnAddr;
+		}
+
+#else
+
 		int num = RtlCaptureStackBackTrace_fn(framesToSkip, (uint32_t)(bufferSize - 1), (PVOID*)buffer, NULL);
 		buffer[num] = 0;
+
+#endif //UNDER_CE
 		return true;
 	}
 
 	bool VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *filenameBuffer, size_t bufferSize, uint32_t* lineNumber)
 	{
+#ifdef UNDER_CE
+		(void)pc;
+		(void)lineNumber;
+		(void)filenameBuffer;
+		(void)bufferSize;
+
+		return false;
+#else
 		if(!InitDbgHelp())
 			return false;
 
@@ -443,10 +501,18 @@ static RtlCaptureStackBackTrace_Function* const RtlCaptureStackBackTrace_fn =
 		*lineNumber = line.LineNumber;
 
 		return true;
+#endif // UNDER_CE
 	}
 
 	bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 	{
+#ifdef UNDER_CE
+		(void)pc;
+		(void)buffer;
+		(void)bufferSize;
+		return false;
+#else
+
 		if(!InitDbgHelp())
 			return false;
 
@@ -464,6 +530,8 @@ static RtlCaptureStackBackTrace_Function* const RtlCaptureStackBackTrace_fn =
 		StringCchPrintfA(buffer, bufferSize, "%s", pSym->Name);
 		//printf("%s\n", pSym->Name);
 		return true;
+#endif //UNDER_CE
+
 	}
 
 	void VMPI_setupPCResolution() { }

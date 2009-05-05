@@ -53,6 +53,8 @@ namespace MMgc
 	const bool showTotal = false;	
 	const bool showSwept = false;
 
+	bool simpleDump;
+
 	class StackTrace : public GCAllocObject
 	{
 	public:
@@ -84,6 +86,7 @@ namespace MMgc
 		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS)
 	{
 		VMPI_setupPCResolution();
+		simpleDump = !VMPI_hasSymbols();
 	}
 
 	MemoryProfiler::~MemoryProfiler()
@@ -292,6 +295,12 @@ namespace MMgc
 
 	void MemoryProfiler::DumpFatties()
 	{
+		if( simpleDump ) 
+		{
+			DumpSimple();
+			return;
+		}
+
 		GCHashtable packageTable(128, GCHashtable::OPTION_MALLOC);
 
 		size_t residentSize=0;
@@ -451,6 +460,50 @@ namespace MMgc
 		}
 	}
 	
+	void MemoryProfiler::DumpSimple()
+	{
+		// rip through all allocation sites and dump them all without any sorting
+		// useful on WinMo or other platforms where we don't have symbol names
+		// at runtime, and just need to dump the raw addresses (which makes sorting impossible)
+		GCHashtableIterator iter(&stackTraceMap);
+		const void *obj;
+		size_t num_traces = 0; 
+		// Get a stack trace with VMPI_captureStackTrace as the top address - this will be used to calculate the
+		// base address to translate the addresses into relative addresses later
+		uintptr_t trace[kMaxStackTrace];
+		VMPI_memset(trace, 0, sizeof(trace));
+
+		VMPI_captureStackTrace(trace, kMaxStackTrace, 1);
+
+		GCLog("ReferenceAddress VMPI_captureStackTrace 0x%x", trace[0]);
+
+		while((obj = iter.nextKey()) != NULL)
+		{
+			++num_traces;
+			StackTrace *trace = (StackTrace*)iter.value();
+			size_t size;
+			size_t count;
+
+			if(showSwept) {
+				size = trace->sweepSize;
+				count = trace->sweepCount;
+			} else if(showTotal) {
+				size = trace->totalSize;
+				count = trace->totalCount;
+			} else {
+				size = trace->size;
+				count = trace->count;
+			}
+
+			if(size == 0)
+				continue;
+
+			GCLog("%u b - %u items - ", size, count);
+			PrintStackTrace(trace);
+		}
+		GCLog("%u traces");
+	}
+
 	void SetMemTag(const char *s)
 	{
 		if(GCHeap::GetGCHeap()->GetProfiler() != NULL)
@@ -478,8 +531,12 @@ namespace MMgc
 		*tp++ = '\n';
 		for(int i=0; trace[i] != 0; i++) {
 			char buff[256];
+			if( !simpleDump )
+			{
 			*tp++ = '\t';		*tp++ = '\t';		*tp++ = '\t';		
-			if(VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff)) == false)
+			}
+			bool found_name;
+			if((found_name = VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff))) == false)
 			{
 				VMPI_snprintf(buff, sizeof(buff), "0x%llx", (unsigned long long)trace[i]);
 			}
@@ -495,13 +552,18 @@ namespace MMgc
 			{
 				VMPI_snprintf(buff, sizeof(buff), "%s:%d", buff, lineNum);
 			}
+			if( found_name )
+			{
+				// Don't bother with file, linenumber, and address if we're just printing the address anyways
 			*tp++ = '(';
 			VMPI_strncpy(tp, buff, sizeof(buff));
 			tp += VMPI_strlen(buff);
 			*tp++ = ')';
 			tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
+			}
 			*tp++ = '\n';
-			if(tp - out > 1500) {
+
+			if(tp - out > 200) {
 				*tp = '\0';
 				GCLog(out);
 				tp = out;

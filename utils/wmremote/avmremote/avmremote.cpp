@@ -41,6 +41,7 @@
 
 #include "stdafx.h"
 #include <rapi.h>
+#include <Msgqueue.h>
 
 BOOL APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
@@ -135,5 +136,32 @@ STDAPI KillAVMShell(
 	HANDLE hProcess = (HANDLE)*pInput;
 	TerminateProcess(hProcess, 0);
 
+	return S_OK;
+}
+
+STDAPI RunMemProfiler(
+	DWORD cbInput,
+	BYTE  *pInput,
+	DWORD *pcbOutput,
+	BYTE  **ppOutput,
+	IRAPIStream *pIRAPIStream )
+{
+	HANDLE m_queue;
+	MSGQUEUEOPTIONS msgopts;
+	
+	msgopts.dwFlags = MSGQUEUE_NOPRECOMMIT;
+	msgopts.dwMaxMessages = 1;
+	msgopts.cbMaxMessage = 256;
+	msgopts.bReadAccess = false;
+	msgopts.dwSize = sizeof(MSGQUEUEOPTIONS);
+
+	WCHAR* wName = L"MMgc::MemoryProfiler::DumpFatties";
+
+	m_queue = CreateMsgQueue(wName, &msgopts);
+	
+	char buff = 'P';
+	WriteMsgQueue(m_queue, &buff, 1, 0, 0);
+
+	CloseMsgQueue(m_queue);
 	return S_OK;
 }

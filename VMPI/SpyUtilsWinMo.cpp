@@ -40,7 +40,7 @@
 
 #ifdef MMGC_MEMORY_PROFILER
 
-#include <io.h>
+#include <Msgqueue.h>
 
 /**
 * compiled with the /W4 warning level
@@ -59,12 +59,25 @@ public:
 	HANDLE eventHandle;
 };
 
+void WriteOnNamedSignal(const char* name, uint32_t *addr);
+
 DWORD WINAPI WaitForMemorySignal(LPVOID lpParam)
 {
 	SignalData *sig_data = (SignalData*)lpParam;
 	while(true) {
 		WaitForSingleObject(sig_data->eventHandle, INFINITE);
 		*(sig_data->profilerAddr) = true;
+
+		// For some reason ReadMsgQueue does not clear the signal on the handle (even though it should), and we 
+		// end up setting the profilerAddr constantly, which makes the VM hang, since all it is doing is writing out profile data.
+		// so we have to call CloseMsgQueue, and then open a new queue, and wait on that.  
+		//char buff[256];
+		//DWORD bytesread;
+		//ReadMsgQueue(sig_data->eventHandle, buff, 256, &bytesread, INFINITE, 0);
+		CloseMsgQueue(sig_data->eventHandle);
+		WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", sig_data->profilerAddr);
+		break;
+
 	}
 	delete sig_data;
 	return 0;
@@ -74,24 +87,20 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 {
 	HANDLE m_namedSharedObject;
 
-	SECURITY_DESCRIPTOR sd;
-	InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
-	SetSecurityDescriptorDacl(&sd, TRUE, 0, FALSE);
+	MSGQUEUEOPTIONS msgopts;
 
-	SECURITY_ATTRIBUTES sa;
-	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-	sa.bInheritHandle = FALSE;
-	sa.lpSecurityDescriptor = &sd;
+	msgopts.dwFlags = MSGQUEUE_NOPRECOMMIT;
+	msgopts.dwMaxMessages = 1;
+	msgopts.cbMaxMessage = 256;
+	msgopts.bReadAccess = TRUE;
+	msgopts.dwSize = sizeof(MSGQUEUEOPTIONS);
 
-	m_namedSharedObject = CreateEventA(&sa, FALSE, FALSE, name);
-	if(m_namedSharedObject == NULL){
-		LPVOID lpMsgBuf;
-		FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf, 0, NULL );
-		fputs((const char*)lpMsgBuf, stderr);
-		return;
-	}
+	WCHAR wName[256];
+	
+	MultiByteToWideChar(CP_ACP, 0, name, -1, wName, 256);
+
+	m_namedSharedObject = CreateMsgQueue(wName, &msgopts);
+
 	SignalData *sig_data = new SignalData(addr, m_namedSharedObject);
 	CreateThread(NULL, 0, WaitForMemorySignal, sig_data, 0, NULL);
 }
@@ -103,31 +112,9 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 #endif
 
 
-FILE *HandleToStream(void *handle)
-{
-	return _fdopen(_open_osfhandle((intptr_t)handle, 0), "w");
-}
-
-void* OpenAndConnectToNamedPipe(const char *pipeName)
-{
-	char name[256];
-	VMPI_snprintf(name, sizeof(name), "\\\\.\\pipe\\%s", pipeName);
-
-	HANDLE pipe = CreateNamedPipeA((LPCSTR)name, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE, 1, 4096, 4096, 100, NULL);
-	ConnectNamedPipe(pipe, NULL);
-	return (void*)pipe;
-}
-
-
-void CloseNamedPipe(void *handle)
-{
-	FlushFileBuffers(handle);
-	CloseHandle((HANDLE)handle);
-}
-
 static uint32_t mmgc_spy_signal = 0;
 
-extern void ChangeLogStream(FILE*); //defined by the platform porting layer
+extern void RedirectLogOutput(FILE*);
 
 void VMPI_spyCallback()
 {
@@ -135,19 +122,19 @@ void VMPI_spyCallback()
 	{
 		mmgc_spy_signal = 0;
 
-		void *pipe = OpenAndConnectToNamedPipe("MMgc_Spy");
+		FILE* spyStream = fopen("Temp\\gcstats.txt", "w");
 
-		FILE* spyStream = HandleToStream(pipe);
 		GCAssert(spyStream != NULL);
-		ChangeLogStream(spyStream);
+		RedirectLogOutput(spyStream);
 
 		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
 
 		fflush(spyStream);
 
-		CloseNamedPipe(pipe);
-		ChangeLogStream(NULL);
-	}
+		fclose(spyStream);
+
+		RedirectLogOutput(NULL);
+ 	}
 }
 
 bool VMPI_spySetup()
@@ -158,7 +145,7 @@ bool VMPI_spySetup()
 
 bool VMPI_hasSymbols()
 {
-	return true;
+	return false;
 }
 
 #endif //MMGC_MEMORY_PROFILER
