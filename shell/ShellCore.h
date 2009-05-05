@@ -80,6 +80,7 @@ namespace avmshell
 		int langID;						// copy to ShellCore?
 		bool bbgraph;					// copy to config
 		bool cseopt;					// copy to config
+		bool jitordie;					// copy to config
 		Runmode runmode;				// copy to config
 		AvmCore::CacheSizes cacheSizes;	// Default to unlimited
 		const char* st_component;

@@ -299,6 +299,11 @@ namespace avmplus
 
 					// mark it as interpreted and try to limp along
 					if (jit.overflow) {
+						if (core->JITMustSucceed()) {
+							Exception* e = new (core->GetGC()) Exception(core, core->newStringLatin1("JIT failed")->atom());
+							e->flags |= Exception::EXIT_EXCEPTION;
+							core->throwException(e);
+						}
 						setInterpImpl();
 					}
 	                #ifdef AVMPLUS_WORD_CODE
