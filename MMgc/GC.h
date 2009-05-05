@@ -1183,19 +1183,19 @@ namespace MMgc
 
 		void *heapAllocNoProfile(size_t size, bool expand=true, bool zero=true)
 		{
-			return heapAlloc(size, expand, zero, true);
+			return heapAlloc(size, expand, zero, false);
 		}
 		void heapFreeNoProfile(void *ptr, size_t siz=0)
 		{
-			heapFree(ptr, siz, true);
+			heapFree(ptr, siz, false);
 		}
 
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
 		// if the allocation succeeded.
-		void *heapAlloc(size_t size, bool expand=true, bool zero=true, bool internal=false);
+		void *heapAlloc(size_t size, bool expand=true, bool zero=true, bool track=true);
 
 		// heapFree is like heap->Free except that it also calls policy.signalBlockDeallocation.
-		void heapFree(void *ptr, size_t siz=0, bool internal=false);
+		void heapFree(void *ptr, size_t siz=0, bool track=true);
 
 		void gclog(const char *format, ...);
 		void log_mem(const char *name, size_t s, size_t comp );

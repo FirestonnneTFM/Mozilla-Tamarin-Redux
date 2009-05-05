@@ -38,8 +38,6 @@
 
 #include "MMgc.h"
 
-#if defined(MMGC_MEMORY_INFO) || defined(MMGC_MEMORY_PROFILER)
-
 namespace MMgc
 {
 
@@ -53,6 +51,8 @@ namespace MMgc
 	const bool showTotal = false;	
 	const bool showSwept = false;
 
+	bool simpleDump;
+
 	class StackTrace : public GCAllocObject
 	{
 	public:
@@ -62,17 +62,17 @@ namespace MMgc
 			VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(uintptr_t));
 		}
 		uintptr_t ips[kMaxStackTrace];
-		size_t skip;
 		size_t size;
 		size_t totalSize;
 		size_t sweepSize;
 		const char *package;
 		const char *category;
 		const char *name;
-		size_t count;
-		size_t totalCount;
-		size_t sweepCount;
+		uint64_t count;
+		uint64_t totalCount;
+		uint64_t sweepCount;
 		StackTrace *master;
+		uint8_t skip;
 	};
 
 	GCThreadLocal<const char*> memtag;
@@ -84,6 +84,7 @@ namespace MMgc
 		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS)
 	{
 		VMPI_setupPCResolution();
+		simpleDump = !VMPI_hasSymbols();
 	}
 
 	MemoryProfiler::~MemoryProfiler()
@@ -234,7 +235,7 @@ namespace MMgc
 		PackageGroup(const char *name) : name(name), size(0), count(0), categories(16, GCHashtable::OPTION_MALLOC) {}
 		const char *name;
 		size_t size;
-		size_t count;
+		uint64_t count;
 		GCHashtable categories; // key == category name, value == CategoryGroup*
 	};
 
@@ -248,7 +249,7 @@ namespace MMgc
 		}
 		const char *name;
 		size_t size;
-		size_t count;
+		uint64_t count;
 		// biggest kNumTracesPerType traces
 		StackTrace *traces[kNumTracesPerType ? kNumTracesPerType : 1];
 	};
@@ -292,10 +293,16 @@ namespace MMgc
 
 	void MemoryProfiler::DumpFatties()
 	{
+		if( simpleDump ) 
+		{
+			DumpSimple();
+			return;
+		}
+
 		GCHashtable packageTable(128, GCHashtable::OPTION_MALLOC);
 
 		size_t residentSize=0;
-		size_t residentCount=0;
+		uint64_t residentCount=0;
 		size_t packageCount=0;
 
 		// rip through all allocation sites and sort into package and categories
@@ -319,7 +326,7 @@ namespace MMgc
 
 			residentSize += size;
 
-			size_t count = trace->master != NULL ? 0 : trace->count;
+			uint64_t count = trace->master != NULL ? 0 : trace->count;
 			residentCount += trace->count;
 
 			const char *pack = GetPackage(trace);
@@ -425,7 +432,7 @@ namespace MMgc
 					StackTrace *trace = tg->traces[j];
 					if(trace) {
 						size_t size = trace->size;
-						size_t count = trace->count;
+						uint64_t count = trace->count;
 						if(showSwept) {
 							size = trace->sweepSize;
 							count = trace->sweepCount;
@@ -451,6 +458,50 @@ namespace MMgc
 		}
 	}
 	
+	void MemoryProfiler::DumpSimple()
+	{
+		// rip through all allocation sites and dump them all without any sorting
+		// useful on WinMo or other platforms where we don't have symbol names
+		// at runtime, and just need to dump the raw addresses (which makes sorting impossible)
+		GCHashtableIterator iter(&stackTraceMap);
+		const void *obj;
+		size_t num_traces = 0; 
+		// Get a stack trace with VMPI_captureStackTrace as the top address - this will be used to calculate the
+		// base address to translate the addresses into relative addresses later
+		uintptr_t trace[kMaxStackTrace];
+		VMPI_memset(trace, 0, sizeof(trace));
+
+		VMPI_captureStackTrace(trace, kMaxStackTrace, 1);
+
+		GCLog("ReferenceAddress VMPI_captureStackTrace 0x%x", trace[0]);
+
+		while((obj = iter.nextKey()) != NULL)
+		{
+			++num_traces;
+			StackTrace *trace = (StackTrace*)iter.value();
+			size_t size;
+			uint64_t count;
+
+			if(showSwept) {
+				size = trace->sweepSize;
+				count = trace->sweepCount;
+			} else if(showTotal) {
+				size = trace->totalSize;
+				count = trace->totalCount;
+			} else {
+				size = trace->size;
+				count = trace->count;
+			}
+
+			if(size == 0)
+				continue;
+
+			GCLog("%u b - %u items - ", size, count);
+			PrintStackTrace(trace);
+		}
+		GCLog("%u traces");
+	}
+
 	void SetMemTag(const char *s)
 	{
 		if(GCHeap::GetGCHeap()->GetProfiler() != NULL)
@@ -478,8 +529,12 @@ namespace MMgc
 		*tp++ = '\n';
 		for(int i=0; trace[i] != 0; i++) {
 			char buff[256];
+			if( !simpleDump )
+			{
 			*tp++ = '\t';		*tp++ = '\t';		*tp++ = '\t';		
-			if(VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff)) == false)
+			}
+			bool found_name;
+			if((found_name = VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff))) == false)
 			{
 				VMPI_snprintf(buff, sizeof(buff), "0x%llx", (unsigned long long)trace[i]);
 			}
@@ -495,13 +550,18 @@ namespace MMgc
 			{
 				VMPI_snprintf(buff, sizeof(buff), "%s:%d", buff, lineNum);
 			}
+			if( found_name )
+			{
+				// Don't bother with file, linenumber, and address if we're just printing the address anyways
 			*tp++ = '(';
 			VMPI_strncpy(tp, buff, sizeof(buff));
 			tp += VMPI_strlen(buff);
 			*tp++ = ')';
 			tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
+			}
 			*tp++ = '\n';
-			if(tp - out > 1500) {
+
+			if(tp - out > 200) {
 				*tp = '\0';
 				GCLog(out);
 				tp = out;
@@ -542,16 +602,6 @@ namespace MMgc
 		return NULL;
 	}
 
-	void ChangeSizeForObject(const void *object, int size)
-	{
-		if(GCHeap::GetGCHeap()->GetProfiler()) {
-			StackTrace *st = GCHeap::GetGCHeap()->GetProfiler()->GetAllocationTrace(object);
-			if(st)
-				st->size += size;
-			GCAssert(int(st->size) >= 0);
-		}
-	}
-
 	unsigned GCStackTraceHashtable::equals(const void *k, const void *k2)
 	{
 		if(k == NULL || k2 == NULL)
@@ -573,9 +623,8 @@ namespace MMgc
 	void PrintAllocStackTrace(const void *) {}
 	void PrintDeleteStackTrace(const void *) {}
 	const char* GetAllocationName(const void *) { return NULL; }
-	void ChangeSizeForObject(const void *, int ) {}
 
-#endif
+#endif //MMGC_MEMORY_PROFILER
 
 
 #ifdef MMGC_MEMORY_INFO
@@ -675,5 +724,4 @@ namespace MMgc
 
 } // namespace MMgc
 
-#endif // defined(MMGC_MEMORY_INFO) || defined(MMGC_MEMORY_PROFILER)
 

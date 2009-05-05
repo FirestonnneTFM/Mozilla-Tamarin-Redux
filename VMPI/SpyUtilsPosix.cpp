@@ -167,4 +167,9 @@ bool VMPI_spySetup()
 	return SetupSpyServer();
 }
 
+bool VMPI_hasSymbols()
+{
+	return true;
+}
+
 #endif //MMGC_MEMORY_PROFILER

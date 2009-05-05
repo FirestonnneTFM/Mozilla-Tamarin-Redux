@@ -46,7 +46,7 @@ from StringIO import StringIO
 
 MASTER = "10.171.22.12:9750" #localhost:9850
 SERVER_URL = "http://10.171.22.12:8750/xmlrpc" #http://localhost:8850/xmlrpc
-INTERVAL_TIMER = 60
+INTERVAL_TIMER = 120
 MASTER_ROOT = 'e:/AVMTeam/buildbot/master-tamarin-redux'
 PENDING_BUILDS = MASTER_ROOT+'/changes/pending'
 PROCESSED_BUILDS = MASTER_ROOT+'/changes/processed'
