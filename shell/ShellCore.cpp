@@ -68,6 +68,7 @@ namespace avmshell
 		, langID(-1)
 		, bbgraph(AvmCore::bbgraph_default)
 		, cseopt(AvmCore::cseopt_default)
+		, jitordie(AvmCore::jitordie_default)
 		, runmode(AvmCore::runmode_default)
 		, st_component(NULL)
 		, st_category(NULL)
@@ -350,6 +351,7 @@ namespace avmshell
 #endif
 #if defined FEATURE_NANOJIT
 		config.cseopt = settings.cseopt;
+		config.jitordie = settings.jitordie;
 	#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		config.sse2 = settings.sse2;
 	#endif

@@ -714,6 +714,10 @@ namespace avmshell
 					else if (!VMPI_strcmp(arg+2, "nocse")) {
 						settings.cseopt = false;
 					}
+					else if (!VMPI_strcmp(arg+2, "jitordie")) {
+						settings.runmode = RM_jit_all;
+						settings.jitordie = true;
+					}
 #endif /* FEATURE_NANOJIT */
 					else if (!VMPI_strcmp(arg+2, "interp")) {
 						settings.runmode = RM_interp_all;
@@ -934,7 +938,8 @@ namespace avmshell
 		AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
 #endif
 #ifdef FEATURE_NANOJIT
-		AvmLog("          [-Ojit]       use jit always, never interp\n");
+		AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
+		AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");
 		AvmLog("          [-Dnocse]     disable CSE optimization \n");
 	#ifdef AVMPLUS_IA32
         AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");

@@ -114,6 +114,8 @@ const int kBufferPadding = 16;
         bool tree_opt;
         bool verbose_live;
         bool verbose_exits;
+		
+		bool jitordie;		// Always JIT, and if the JIT fails then abort
 	};
 
 	/**
@@ -145,6 +147,7 @@ const int kBufferPadding = 16;
 		static const bool bbgraph_default;
 		static const bool sse2_default;
 		static const bool interrupts_default;
+		static const bool jitordie_default;
 		
 	public:
 		/**
@@ -277,9 +280,14 @@ const int kBufferPadding = 16;
         inline bool IsJITEnabled() const {
 			return (config.runmode == RM_mixed || config.runmode == RM_jit_all) ? true : false;
 		}
+		inline bool JITMustSucceed() const {
+			return config.jitordie;
+		}
 #else
         inline void SetJITEnabled(bool) {}
         inline bool IsJITEnabled() { return false; }
+		inline bool JITMustSucceed() const { return false; }
+		}
 #endif
 
 		/**

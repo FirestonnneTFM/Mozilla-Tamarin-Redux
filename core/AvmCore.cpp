@@ -82,7 +82,8 @@ namespace avmplus
 	const bool AvmCore::bbgraph_default = false;
 	const bool AvmCore::sse2_default = true;
 	const bool AvmCore::interrupts_default = false;
-
+	const bool AvmCore::jitordie_default = false;
+	
 	AvmCore::AvmCore(GC* g) 
 		: GCRoot(g) 
 		, console(NULL) 
@@ -147,6 +148,7 @@ namespace avmplus
 		config.runmode = runmode_default;
 		config.cseopt = cseopt_default;
 		config.bbgraph = bbgraph_default;
+		config.jitordie = jitordie_default;
 
 		config.sse2 = sse2_default;
 
