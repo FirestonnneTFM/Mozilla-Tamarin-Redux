@@ -3111,20 +3111,20 @@ uintptr_t	GC::GetStackTop() const
 	}
 #endif //_DEBUG
 
-	void *GC::heapAlloc(size_t siz, bool expand, bool zero, bool internal)
+	void *GC::heapAlloc(size_t siz, bool expand, bool zero, bool track)
 	{
-		void *ptr = heap->_Alloc((int)siz, expand, zero, internal);
+		void *ptr = heap->_Alloc((int)siz, expand, zero, track);
 		if(ptr)
 			policy.signalBlockAllocation(siz);
 		return ptr;
 	}
 	
-	void GC::heapFree(void *ptr, size_t siz, bool internal)
+	void GC::heapFree(void *ptr, size_t siz, bool track)
 	{
 		if(!siz)
 			siz = heap->Size(ptr);
 		policy.signalBlockDeallocation(siz);
-		heap->_Free(ptr, internal);
+		heap->_Free(ptr, track);
 	}
 	
 	size_t GC::GetBytesInUse()
