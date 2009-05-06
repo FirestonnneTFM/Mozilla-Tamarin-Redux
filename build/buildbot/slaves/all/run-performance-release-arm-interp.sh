@@ -99,7 +99,7 @@ echo ""
 
 
 
-export AVM=../all/tools/ceremoteshell.exe
+export AVM=$basedir/build/buildbot/slaves/all/tools/ceremoteshell.exe
 export ASC=$basedir/utils/asc.jar
 export GLOBALABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
