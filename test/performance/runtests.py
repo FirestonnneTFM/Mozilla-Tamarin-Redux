@@ -170,14 +170,14 @@ class PerformanceRuntest(RuntestBase):
             (f,err,exitcode) = self.run_pipe("%s" % self.avm)
             try:
                 for line in f:
-                    version = line.split()
-                    version = version[len(version)-1]
-                    if version.find(":") != -1:     # if this is an actual build we need to remove the hash
-                        version = version.split(":")
-                        version = version[0]
-                    VM_version = version
-                    self.vmversion = version
-                    break
+                    if re.search(" build ",line):
+                        version = line.split()
+                        version = version[len(version)-1]
+                        if version.find(":") != -1:     # if this is an actual build we need to remove the hash
+                            version = version.split(":")
+                            version = version[0]
+                        self.vmversion = version
+                        break
             except:
                 self.vmversion = 'unknown'
     

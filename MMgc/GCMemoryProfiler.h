@@ -109,11 +109,6 @@ namespace MMgc
 #else 
 
 	/**
-	* Manually set me, for special memory not new/deleted, like the code memory region
-	*/
-	void ChangeSizeForObject(const void *object, int size);
-
-	/**
 	* How much extra size does DebugDecorate need?
 	*/
 	size_t DebugSize();
