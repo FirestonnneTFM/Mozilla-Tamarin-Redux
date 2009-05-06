@@ -101,6 +101,7 @@ abcasm/coverage/I:increment_i_double , .*-Dinterp , expectedfail , https://bugzi
 abcasm/coverage/I:Array istype Array , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
 abcasm/coverage/I:Array istype Object , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
 abcasm/coverage/I:Array istype Number , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
+abcasm/coverage/I, ppc64.*(?<!-Dinterp) , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
 abcasm/coverage/StoU , .*-Dinterp , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 abcasm/coverage/StoU , ppc-.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 
