@@ -1378,7 +1378,7 @@ const int kBufferPadding = 16;
 		// and AtomArray, uses double type which is the only non-RC
 		// GCObject type
 		static Atom gcObjectToAtom(const void* obj);
-		static MMgc::GCObject* atomToGCObject(Atom a) { return (MMgc::GCObject*)(void*)(a&~7); }
+		static const void* atomToGCObject(Atom a) { return (const void*)(a&~7); }
 		static bool isGCObject(Atom a) { return (a&7)==kDoubleType; }
 
 	private:
