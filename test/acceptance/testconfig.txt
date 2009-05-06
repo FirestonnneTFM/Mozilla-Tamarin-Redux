@@ -90,10 +90,17 @@ abcasm/funcRedef , .* , expectedfail , Error 1107 is correct output
 # Test not ready for prime-time
 abcasm/stringEscapes , .* , skip,
 
+# Note that distinctions on interp or not are brittle; must run with
+# -Djitordie from time to time to ensure that all abs coverage tests
+# remain jittable.
+
 # Take coverage tests offline: need to analyze failures on tryserver
 abcasm/coverage/I , (x64|ppc64).*-debug , skip , investigating
-abcasm/coverage/I:inclocal_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
-abcasm/coverage/I:increment_i_double , .* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
+abcasm/coverage/I:inclocal_i_double , .*-Dinterp , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
+abcasm/coverage/I:increment_i_double , .*-Dinterp , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
+abcasm/coverage/I:Array istype Array , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
+abcasm/coverage/I:Array istype Object , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
+abcasm/coverage/I:Array istype Number , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
 abcasm/coverage/StoU , .*-Dinterp , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 abcasm/coverage/StoU , ppc-.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 
