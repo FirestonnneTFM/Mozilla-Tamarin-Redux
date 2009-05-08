@@ -222,6 +222,12 @@ namespace MMgc
 		 * This method is called before an RC object is reaped
 		 */
 		virtual void prereap(void* /*rcobj*/) {}
+
+		/**
+		 * Called at the top of StartIncrementalMark
+		 */
+		virtual void premark() {}
+
 		virtual void log(const char* /*str*/) {}
 		virtual void oom(MemoryStatus) {}
 
@@ -758,8 +764,8 @@ namespace MMgc
 		};
 
 		/**
-		 * Main interface for allocating memory.  Default flags is no
-		 * finalization, contains pointers is set and zero is set.
+		 * Main interface for allocating memory.  Default flags are
+		 * no finalization, not containing pointers, not zero'd, and not ref-counted
 		 *
 		 * Do not call this from a finalizer.
 		 */
