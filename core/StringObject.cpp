@@ -665,29 +665,97 @@ namespace avmplus
 		Width w1 = getWidth();
 		Width w2 = substr->getWidth();
 
-		Pointers buffer = m_buffer;
-		buffer.p8 += start * w1;
+		Pointers selfBuf = m_buffer;
+		selfBuf.p8 += start * w1;
+		Pointers subBuf = substr->m_buffer;
 
-		for ( ; start <= right; ++start)
+		// For maximum performance, use different cases for k8/k16 combinations
+		switch ((w1 << 3) + w2)
 		{
-			int32_t res = compare(buffer, w1, substr->m_buffer, w2, substr->m_length);
-			if (res == 0)
-				return start;
-			buffer.p8 += w1;
+			case (k8 << 3) + k8:
+				for ( ; start <= right; start++)
+				{
+					int32_t j;
+					for (j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p8[j] != subBuf.p8[j])
+							break;
+					}
+
+					if (j == sublen)
+						return start;
+					selfBuf.p8++;
+				}
+				break;
+			case (k8 << 3) + k16:
+				for ( ; start <= right; start++)
+				{
+					int32_t j;
+					for (j = 0; j < sublen; j++)
+					{
+						if ((utf8_t) selfBuf.p8[j] != subBuf.p16[j])
+							break;
+					}
+
+					if (j == sublen)
+						return start;
+					selfBuf.p8++;
+				}
+				break;
+			case (k16 << 3) + k8:
+				for ( ; start <= right; start++)
+				{
+					int32_t j;
+					for (j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p16[j] != (utf8_t) subBuf.p8[j])
+							break;
+					}
+
+					if (j == sublen)
+						return start;
+					selfBuf.p16++;
+				}
+				break;
+			case (k16 << 3) + k16:
+				for ( ; start <= right; start++)
+				{
+					int32_t j;
+					for (j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p16[j] != subBuf.p16[j])
+							break;
+					}
+
+					if (j == sublen)
+						return start;
+					selfBuf.p16++;
+				}
+				break;
+			default: ;
+#ifdef FEATURE_UTF32_SUPPORT
+				for ( ; start <= right; ++start)
+				{
+					int32_t res = compare(selfBuf, w1, subBuf, w2, sublen);
+					if (res == 0)
+						return start;
+					selfBuf.p8 += w1;
+				}
+#endif
 		}
 		return -1;
 	}
 
-	int32_t String::lastIndexOf(Stringp substr, int32_t startPos) const
+	int32_t String::lastIndexOf(Stringp substr, int32_t start) const
 	{
 		if (substr == NULL)
 			return -1;
 			
 		int32_t len = this->length();
-		if (startPos < 0)
-			startPos = 0;
-		if (startPos > len)
-			startPos = len;
+		if (start < 0)
+			start = 0;
+		if (start > len)
+			start = len;
 
 		int32_t sublen = substr->length();
 
@@ -697,21 +765,84 @@ namespace avmplus
 		
 		// bug 78346: argv[1] might be greater than right
 		//	(similar reasons to above apply).
-		if (startPos > right) 
-			startPos = right;
+		if (start > right) 
+			start = right;
+
+		if (sublen == 0)
+			return start;
 
 		Width w1 = getWidth();
 		Width w2 = substr->getWidth();
 
-		Pointers buffer = m_buffer;
-		buffer.p8 += startPos * w1;
+		Pointers selfBuf = m_buffer;
+		selfBuf.p8 += start * w1;
+		Pointers subBuf = substr->m_buffer;
 
-		for ( ; startPos >= 0 ; --startPos )
+		// For maximum performance, use different cases for k8/k16 combinations
+		switch ((w1 << 3) + w2)
 		{
-			int32_t res = compare(buffer, w1, substr->m_buffer, w2, substr->m_length);
-			if (res == 0)
-				return startPos;
-			buffer.p8 -= w1;
+			case (k8 << 3) + k8:
+				for ( ; start >= 0; start--)
+				{
+					for (int j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p8[j] != subBuf.p8[j])
+							break;
+						if (j == (sublen - 1))
+							return start;
+					}
+					selfBuf.p8--;
+				}
+				break;
+			case (k8 << 3) + k16:
+				for ( ; start >= 0; start--)
+				{
+					for (int j = 0; j < sublen; j++)
+					{
+						if ((utf8_t) selfBuf.p8[j] != subBuf.p16[j])
+							break;
+						if (j == (sublen - 1))
+							return start;
+					}
+					selfBuf.p8--;
+				}
+				break;
+			case (k16 << 3) + k8:
+				for ( ; start >= 0; start--)
+				{
+					for (int j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p16[j] != (utf8_t) subBuf.p8[j])
+							break;
+						if (j == (sublen - 1))
+							return start;
+					}
+					selfBuf.p16--;
+				}
+				break;
+			case (k16 << 3) + k16:
+				for ( ; start >= 0; start--)
+				{
+					for (int j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p16[j] != subBuf.p16[j])
+							break;
+						if (j == (sublen - 1))
+							return start;
+					}
+					selfBuf.p16--;
+				}
+				break;
+			default: ;
+#ifdef FEATURE_UTF32_SUPPORT
+			for ( ; start >= 0 ; --start )
+			{
+				int32_t res = compare(selfBuf, w1, subBuf, w2, sublen);
+				if (res == 0)
+					return start;
+				selfBuf.p8 -= w1;
+			}
+#endif
 		}
 		return -1;
 	}
@@ -736,18 +867,55 @@ namespace avmplus
 
 		Width w = getWidth();
 
-		Pointers buffer = m_buffer;
-		buffer.p8 += start * w;
+		Pointers selfBuf = m_buffer;
+		selfBuf.p8 += start * w;
 
-		Pointers test;
-		test.p8 = (char*) p;
-
-		for ( ; start <= right; ++start)
+		switch (w)
 		{
-			int32_t res = compare(buffer, w, test, k8, sublen);
-			if (res == 0)
-				return start;
-			buffer.p8 += w;
+			case k8:
+				for ( ; start <= right; start++)
+				{
+					int32_t j;
+					for (j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p8[j] != p[j])
+							break;
+					}
+
+					if (j == sublen)
+						return start;
+					selfBuf.p8++;
+				}
+				break;
+			case k16:
+				for ( ; start <= right; start++)
+				{
+					int32_t j;
+					for (j = 0; j < sublen; j++)
+					{
+						if (selfBuf.p16[j] != (utf8_t) p[j])
+							break;
+					}
+
+					if (j == sublen)
+						return start;
+					selfBuf.p16++;
+				}
+				break;
+			default: ;
+#ifdef FEATURE_UTF32_SUPPORT
+			{
+				Pointers test;
+				test.p8 = (char*) p;
+				for ( ; start <= right; ++start)
+				{
+					int32_t res = compare(buffer, w, test, k8, sublen);
+					if (res == 0)
+						return start;
+					buffer.p8 += w;
+				}
+			}
+#endif
 		}
 		return -1;
 	}
