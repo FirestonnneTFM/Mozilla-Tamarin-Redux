@@ -2274,6 +2274,10 @@ uintptr_t	GC::GetStackTop() const
 	void GC::StartIncrementalMark()
 	{
 		policy.signal(GCPolicyManager::START_StartIncrementalMark);		// garbage collection starts
+
+		// call premark on all callbacks
+		for (GCCallback* cb = m_callbacks; cb; cb = cb->nextCB)
+			cb->premark();
 		
 		GCAssert(!marking);
 		GCAssert(!collecting);
