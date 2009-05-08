@@ -50,7 +50,7 @@ namespace avmplus
 	/**
 	 * class Toplevel
 	 */
-    class Toplevel : public MMgc::GCObject 
+    class Toplevel : public MMgc::GCFinalizedObject
     {
 	public:
 		Toplevel(AbcEnv*);
