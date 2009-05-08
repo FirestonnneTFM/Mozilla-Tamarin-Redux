@@ -62,7 +62,9 @@ namespace avmplus
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
 		_method_id(-1)
-	{}
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_methodinfo, this); )
+	}
 #endif
 
 	/**
@@ -79,7 +81,9 @@ namespace avmplus
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
 		_method_id(-1)
-	{}
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_methodinfo, this); )
+	}
 
 	/**
 	 * ordinary MethodInfo for abc or native method.

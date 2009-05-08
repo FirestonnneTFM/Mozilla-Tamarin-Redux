@@ -193,12 +193,14 @@ namespace avmplus
 			uint32_t rogues = 0;
 			for (uint32_t i = 0; i < g_tinfo[TMT_tbi].live.count(); ++i)
 			{
-				if (g_tmp.find(g_tinfo[TMT_tbi].live[i]) < 0)
+				const void* tbi = g_tinfo[TMT_tbi].live[i];
+				if (g_tmp.find(tbi) < 0)
 				{
+					AvmLog("   rogue TBI found: %p size %d\n", (void*)tbi, (uint32_t)GC::Size(tbi));
 					//Traitsp o = ((TraitsBindingsp)(g_live_tbi[i]))->owner;
 					//AvmLog("   rogue TBI found: %p size=%d owned by %s %p\n", (void*)g_live_tbi[i], (uint32_t)GC::Size(live_tbi[i]), (char*)o->rawname, (void*)o);
 					#ifdef _DEBUG
-					//g_tmcore->GetGC()->DumpBackPointerChain((void*)live_tbi[i]);
+					//g_tmcore->GetGC()->DumpBackPointerChain((void*)tbi);
 					#endif
 					++rogues;
 				}
@@ -212,8 +214,6 @@ namespace avmplus
 
 	void tmt_add_mem(TMTTYPE t, size_t d)
 	{
-		if (!g_tmcore || g_tmcore->GetGC()->Destroying()) return;
-		
 		g_tinfo[t].mem += d;
 		
 		if (g_tinfo[t].mem_hw < g_tinfo[t].mem)
@@ -225,8 +225,6 @@ namespace avmplus
 
 	void tmt_sub_mem(TMTTYPE t, size_t d)
 	{
-		if (!g_tmcore || g_tmcore->GetGC()->Destroying()) return;
-		
 		g_tinfo[t].mem -= d;
 	}
 
@@ -245,20 +243,18 @@ namespace avmplus
 
 	void tmt_add_inst(TMTTYPE t, const void* inst)
 	{
-		if (!g_tmcore || g_tmcore->GetGC()->Destroying()) return;
-		
 		AvmAssert(g_tinfo[t].live.find(inst) < 0);
 		g_tinfo[t].live.add(inst);
+		AvmAssert(g_tinfo[t].live.find(inst) >= 0);
 		
 		tmt_add_mem(t, get_size(t, inst));
 	}
 
 	void tmt_sub_inst(TMTTYPE t, const void* inst)
 	{
-		if (!g_tmcore || g_tmcore->GetGC()->Destroying()) return;
-		
 		AvmAssert(g_tinfo[t].live.find(inst) >= 0);
 		g_tinfo[t].live.remove(inst);
+		AvmAssert(g_tinfo[t].live.find(inst) < 0);
 
 		tmt_sub_mem(t, get_size(t, inst));
 	}
@@ -781,10 +777,7 @@ namespace avmplus
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	Traits::~Traits()
 	{
-		if (!GC::GetGC(this)->Destroying())
-		{
-			AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_traits, this); )
-		}
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_traits, this); )
 	}
 #endif
 
