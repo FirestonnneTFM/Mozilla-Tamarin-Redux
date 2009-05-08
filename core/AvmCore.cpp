@@ -254,6 +254,21 @@ namespace avmplus
 		delete _sampler;
 		_sampler = NULL;
 #endif
+
+		m_tbCache->flush(); 
+		m_tmCache->flush(); 
+		m_msCache->flush(); 
+
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+		tmt_report();
+		AvmAssert(g_tmcore == this);
+		g_tmcore = NULL;
+#endif
+
+		m_tbCache = NULL;
+		m_tmCache = NULL;
+		m_msCache = NULL;
+		
 		// Free the numbers and strings tables
 		delete [] strings;
 		if (gc) 
@@ -266,10 +281,6 @@ namespace avmplus
 		delete [] namespaces;
 		namespaces = NULL;
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-		AvmAssert(g_tmcore == this);
-		g_tmcore = NULL;
-#endif
 #ifdef SUPERWORD_PROFILING
 		WordcodeTranslator::swprofStop();
 #endif

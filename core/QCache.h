@@ -81,11 +81,12 @@ namespace avmplus
 		QCachedItem*	next;	// written with explicit WB
 	};
 
-	class QCache : public MMgc::GCObject
+	class QCache : public MMgc::GCFinalizedObject
 	{
 	public:
 
 		QCache(uint32_t _max, MMgc::GC* _gc);
+		~QCache();
 		
 		inline uint32_t count() const { return m_count; }
 		inline uint32_t maxcount() const { return m_max; }	// sadly, "max" is a macro in some environments

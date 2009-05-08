@@ -50,6 +50,11 @@ namespace avmplus
 		MathUtils::RandomFastInit(&m_rand);
 		resize(_max);
 	}
+	
+	QCache::~QCache()
+	{
+		flush();
+	}
 
 	void QCache::flush() 
 	{
