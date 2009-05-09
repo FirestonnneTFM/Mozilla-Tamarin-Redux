@@ -1021,7 +1021,7 @@ namespace avmplus
 					charsLeft = 0;
 				break;
 			case kDependent:
-				start = int32_t(m_buffer.p8 - master->m_buffer.p8);
+				start = int32_t(m_buffer.p8 - master->m_buffer.p8) / thisWidth;
 				if ((start + m_length) != master->m_length + charsUsed)
 					charsLeft = 0;
 				break;
