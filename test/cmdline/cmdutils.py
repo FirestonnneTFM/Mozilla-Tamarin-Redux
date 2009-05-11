@@ -37,7 +37,7 @@
 #*
 #* ***** END LICENSE BLOCK ***** */
 #
-import os,re,subprocess,os.path,sys
+import os,re,subprocess,os.path,sys,time
 
 class RunTestLib:
     "base class to run cmdline tests"
@@ -93,6 +93,17 @@ class RunTestLib:
         (stdo,stde)=proc.communicate()
         return (proc.returncode,stdo,stde)
 
+    def run_command_async(self,cwd=None,command=None,input=None,sleep=None):
+        self.verbose_print(command)
+        if cwd==None:
+            cwd=os.getcwd()
+        proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE,stdin=subprocess.PIPE, shell=False,cwd=cwd)
+        if input!=None:
+            proc.stdin.write(input)
+        if sleep!=None:
+            time.sleep(sleep)
+        return proc
+
     def compile(self,file,imports=None,args=None):
         print "compiling %s" % file
         if imports==None:
@@ -117,8 +128,9 @@ class RunTestLib:
     def replace_crlf(self,s):
         return s.replace('\r','<cr>').replace('\n','<lf>')
 
-    def run_test(self,name,command,cwd=None,input=None,expectedout=None,expectederr=None,expectedcode=None):
-        (actualcode,actualout,actualerr)=self.run_command(cwd,command,input)
+    def run_test(self,name,command=None,cwd=None,input=None,expectedout=None,expectederr=None,expectedcode=None,actualcode=None,actualout=None,actualerr=None):
+        if command!=None:
+            (actualcode,actualout,actualerr)=self.run_command(cwd,command,input)
         result=True
         msg=''
         if cwd:
@@ -132,7 +144,7 @@ class RunTestLib:
             else:
                 result=False
                 msg+=" exit code expected '%d' got '%d'\n" % (expectedcode,actualcode)
-        elif self.verbose:
+        elif self.verbose and actualcode!=None:
             msg+=" exit code=%d\n" % actualcode
         if expectedout!=None:
             for eout in expectedout:

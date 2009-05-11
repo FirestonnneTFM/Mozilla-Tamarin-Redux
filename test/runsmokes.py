@@ -59,6 +59,9 @@ class RunSmokes():
 
     startTime=time.time()
 
+    # list of actual env variables
+    envsubs=[]
+
     def usage(self):
         print 'usage: %s [options]' % os.path.basename(sys.argv[0])
         print '-t --time       time in seconds to run,  tests will keep running until the time has been exceeded'
@@ -103,7 +106,6 @@ class RunSmokes():
                 continue
             if time.time()-self.startTime>self.timeout:
                 break
-            test=self.replaceEnv(test)
             self.runtest(test)
         if time.time()-self.startTime<self.timeout:
             print '\ntests finished after %d seconds, did not exceed timeout of %d seconds' % (time.time()-self.startTime,self.timeout)
@@ -112,6 +114,9 @@ class RunSmokes():
         infile.close()
 
     def showstats(self):
+        print "\nenvironment variables:"
+        for env in self.envsubs:
+            print "    %s = %s" % (env,os.environ[env])
         print "\npasses             : %d" % self.allpasses
         print "failures           : %d" % self.allfails
         if self.allfails>0:
@@ -124,13 +129,25 @@ class RunSmokes():
             if os.environ.has_key(env)==False:
                 print "ERROR: environment variable '%s' is not defined, exiting" % env
                 sys.exit(1)
+            if (env in self.envsubs)==False:
+                self.envsubs.append(env)
             val=os.environ[env]
             if val==None:
                 continue
             line=re.sub('\$\{%s\}' % env, val, line)
         return line
 
-    def runtest(self,command):
+    def scrub(self,out):
+        out=re.sub('passes',' passes',out)
+        out=re.sub('failures',' failures',out)
+        out=re.sub('assertions',' assertions',out)
+        out=re.sub('tests skipped',' tests skipped',out)
+        return out
+
+    def runtest(self,rawcommand):
+        command=self.replaceEnv(rawcommand)
+        if os.name=='nt':
+            command=command.replace(';','&&')
         detail=""
         out=err=""
         try:
@@ -152,9 +169,10 @@ class RunSmokes():
         if exitcode!=0:
             detail+=" exitcode=%d" % exitcode
         if self.verbose:
-            print "<OUTPUT %s>" % command
+            print "[OUTPUT %s]" % command
+            out=self.scrub(out)
             print out
-            print "<END %s>" % command
+            print "[ENDOUTPUT %s]" % command
         for line in out.splitlines():
             line=line.strip()
             if re.search('time$',line):
@@ -175,15 +193,19 @@ class RunSmokes():
                     fails+=1
             if re.search("^expected failures",line):
                 passes+=1
+                expectfail=int(line.split()[3])
                 detail+=" ef: %d" % expectfail
             if re.search("^unexpected passes",line):
                 fails+=1
+                unpass=int(line.split()[3])
                 detail+=" up: %d" % unpass
             if re.search("^assertions",line):
                 fails+=1
+                asserts=int(line.split()[2])
                 detail+=" as: %d" % asserts
             if re.search("^skips",line):
                 passes+=1
+                skips=int(line.split()[2])
                 detail+=" sk: %d" % skips
         detail="p:%d f:%d %s" % (passes,fails,detail)
         if passes==0 or fails>0 or exitcode!=0:
@@ -191,10 +213,11 @@ class RunSmokes():
                 fails+=1
             status="failed"
             self.failed=True
-            self.failures+=command+"\n"
+            out=self.scrub(out)
+            self.failures+="%s\n%s\n[OUTPUT]\n%s%s\n[END OUTPUT]\n" % (rawcommand,command,out,err)
         else:
             status="passed"
-        print "%s %ds %s %s" % (status,tm,command,detail)
+        print "%s %ds %s %s" % (status,tm,rawcommand,detail)
         if fails>0:
             self.allfails+=1
         else:

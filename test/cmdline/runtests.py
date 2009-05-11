@@ -54,6 +54,8 @@ class RunTests (RunTestLib):
         r.compile("testdata/sleep.as")
         # for testDebuggerShell.py
         r.compile("testdata/debug.as",None,"-d")
+        # for testMemstats.py
+        r.compile("testdata/memstats.as",None)
 
     def runAll(self):
         list=os.listdir(".")

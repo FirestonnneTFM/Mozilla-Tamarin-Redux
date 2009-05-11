@@ -141,8 +141,18 @@ export avmdd=$buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
 export AVM=$avmr
 export AVMRD=$avmrd
 
+# If available, use windows python (instead of cygwin python)
+# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
+# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
+if [ -z "$PYTHONWIN" ]
+then
+    export py=python
+else
+    export py=$PYTHONWIN
+fi
+
 cd $basedir/test
-./runsmokes.py --testfile=./runsmokes.txt --time=120
+$py ./runsmokes.py --testfile=./runsmokes.txt --time=120
 ret=$?
 
 exitcode=0

@@ -43,81 +43,89 @@
 # directory = directory to start, most test suites require starting in the directory
 # commands = all commands and parameters to run testsuite
 # any variable enclosed as ${var} will be replaced with the environment variable
-# the common shell variables are: avmr, avmrd, avmd, avmd   (r=release, rd=release-debugger, d=debug, dd=debug-debugger)
+# the common shell variables are: py, avmr, avmrd, avmd, avmd   
+#     (py=python r=release, rd=release-debugger, d=debug, dd=debug-debugger)
 #
+# windows platforms using native python have problems in subprocess.Popen. 
+# follow these guidelines:
+# - do not use ./ unless it is a parameter to an executable 
+#   e.g. do not use cd ./acceptance
+#        do use ${py} ./runtests.py ...
+# - specify python with the ${py} environment variable
+
+# adding new memstats/pyspy testcase, want to make sure it is stable
+cd cmdline;${py} ./testMemstats.py
 
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=491489
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} abcasm
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} abcasm
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} abcasm
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} abcasm
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} abcasm
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} abcasm
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} as3/Vector
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} as3/Vector
 
-cd ./performance;./runtests.py --nohtml --avm=${avmr} sunspider/as3
+cd performance;${py} ./runtests.py --nohtml --avm=${avmr} sunspider/as3
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} --vmargs=-Ojit as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} --vmargs=-Dinterp as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} --vmargs=-Ojit as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} --vmargs=-Dinterp as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} --vmargs=-Ojit as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} --vmargs=-Dinterp as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} --vmargs=-Ojit as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} --vmargs=-Dinterp as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} --vmargs=-Ojit as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} --vmargs=-Dinterp as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} --vmargs=-Ojit as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} --vmargs=-Dinterp as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} --vmargs=-Ojit as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} --vmargs=-Dinterp as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} --vmargs=-Ojit as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} --vmargs=-Dinterp as3/AbcDecoder/simple.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} mmgc/memlimit.as mmgc/outofmemory.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} --vmargs=-Dinterp mmgc/memlimit.as mmgc/outofmemory.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} mmgc/memlimit.as mmgc/outofmemory.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} --vmargs=-Dinterp mmgc/memlimit.as mmgc/outofmemory.as
+#
+cd performance;${py} ./runtests.py --nohtml --avm=${avmr}  language/string/split.as language/string/typed/split.as
+#
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} ecma3/FunctionObjects
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} mmgc/memlimit.as mmgc/outofmemory.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} --vmargs=-Dinterp mmgc/memlimit.as mmgc/outofmemory.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} mmgc/memlimit.as mmgc/outofmemory.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} --vmargs=-Dinterp mmgc/memlimit.as mmgc/outofmemory.as
+cd cmdline;${py} ./testShellSystem.py
 
-cd ./performance;./runtests.py --nohtml --avm=${avmr}  language/string/split.as language/string/typed/split.as
+cd cmdline;${py} ./testDebugger.py
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} ecma3/FunctionObjects
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} regress
 
-cd ./cmdline;./testShellSystem.py
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} as3/sampling
 
-cd ./cmdline;./testDebugger.py
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} regress
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} regress
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} regress
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} regress
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} mops
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} mops
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} as3/ShellClasses
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} as3/ShellClasses
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} as3/ShellClasses
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} as3/ShellClasses
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} as3/sampling
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} ecma3/String
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} ecma3/String
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} ecma3/String
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} ecma3/String
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} regress
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} regress
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} regress
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} ecma3/Math
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} ecma3/Math
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} ecma3/Math
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} ecma3/Math
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} mops
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} mops
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} ecma3/RegExp
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} ecma3/RegExp
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} ecma3/RegExp
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} ecma3/RegExp
 
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} as3/ShellClasses
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} as3/ShellClasses
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} as3/ShellClasses
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} as3/ShellClasses
-
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} ecma3/String
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} ecma3/String
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} ecma3/String
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} ecma3/String
-
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} ecma3/Math
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} ecma3/Math
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} ecma3/Math
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} ecma3/Math
-
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} ecma3/RegExp
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} ecma3/RegExp
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} ecma3/RegExp
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} ecma3/RegExp
-
-cd ./acceptance;./runtests.py --nohtml --avm=${avmr} ecma3/Statements
-cd ./acceptance;./runtests.py --nohtml --avm=${avmrd} ecma3/Statements
-cd ./acceptance;./runtests.py --nohtml --avm=${avmd} ecma3/Statements
-cd ./acceptance;./runtests.py --nohtml --avm=${avmdd} ecma3/Statements
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} ecma3/Statements
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} ecma3/Statements
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} ecma3/Statements
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} ecma3/Statements
