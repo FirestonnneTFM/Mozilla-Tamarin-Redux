@@ -3591,7 +3591,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int intval = MathUtils::real2int (d);
 		if (intval != 0x80000000) 
 			return intval;
-#elif AVMPLUS_SPARC
+#elif defined(AVMPLUS_SPARC)
 		int intval = MathUtils::real2int (d);
 		if (intval != 0x7fffffff && intval != 0x80000000)
 			return intval;
