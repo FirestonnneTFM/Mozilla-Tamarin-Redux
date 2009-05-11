@@ -53,6 +53,10 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
+# rev 1863:fa7476a03d9c assert fails on mac64 and mac-intel-10.4
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} as3/sampling/InvocationSampling.as
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} as3/sampling/InvocationSampling.as
+
 # adding new memstats/pyspy testcase, want to make sure it is stable
 cd cmdline;${py} ./testMemstats.py
 
