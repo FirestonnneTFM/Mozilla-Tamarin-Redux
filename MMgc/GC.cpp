@@ -1865,12 +1865,6 @@ bail:
 	}
 #endif // AVMPLUS_UNIX
 
-#if defined(MMGC_PORTING_API)
-uintptr_t	GC::GetStackTop() const
-{
-	return MMGC_PortAPI_GetStackTop();
-}
-#else
 #if defined(_MAC) || defined(MMGC_MAC_NO_CARBON)
 	uintptr_t GC::GetStackTop() const
 	{
@@ -1888,7 +1882,6 @@ uintptr_t	GC::GetStackTop() const
 		return (uintptr_t)sp;
 	}
 #endif
-#endif /*<<GC_PORTING_API*/
 
 	void GC::gclog(const char *format, ...)
 	{

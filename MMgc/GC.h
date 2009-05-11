@@ -40,14 +40,6 @@
 #ifndef __GC__
 #define __GC__
 
-#if defined(MMGC_PORTING_API)
-	// When the porting API is in use, we exclude
-	// stdlib functions or use them through
-	// #defines for portability to platforms
-	// that don't have them.
-	#include "portapi_mmgc.h"
-#else
-
 #define MMGC_GCENTER(_gc)  MMgc::GCAutoExit __mmgc_auto_exit(_gc);
 
 #if defined(MMGC_IA32) && defined(_MSC_VER)
@@ -69,8 +61,6 @@
 	_size = (uint32_t)(_gc->GetStackEnter() - (uintptr_t)_stack);
 
 #endif
-
-#endif // MMGC_PORTING_API
 
 // Enable our own alloca() replacement that always allocates in the heap, this is good on
 // systems with limited memory or limited stack
