@@ -67,7 +67,7 @@ cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} abcasm
 
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} as3/Vector
 
-cd performance;${py} ./runtests.py --nohtml --avm=${avmr} sunspider/as3
+cd performance;${py} ./runtests.py --nohtml --avm=${avmr} --builtinabc=${GLOBALABC} sunspider/as3
 
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
@@ -89,7 +89,7 @@ cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} --vmargs=-Dinterp mmgc/
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} mmgc/memlimit.as mmgc/outofmemory.as
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} --vmargs=-Dinterp mmgc/memlimit.as mmgc/outofmemory.as
 #
-cd performance;${py} ./runtests.py --nohtml --avm=${avmr}  language/string/split.as language/string/typed/split.as
+cd performance;${py} ./runtests.py --nohtml --avm=${avmr}  language/string/split.as --builtinabc=${GLOBALABC} language/string/typed/split.as
 #
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_4.as ecma3/Date/e15_9_2_2_5.as ecma3/Date/e15_e15_9_2_2_6.as ecma3/Date/e15_9_5_10_1.as ecma3/Date/e15_9_5_12_1.as ecma3/Date/e15_9_5_34_1.as
