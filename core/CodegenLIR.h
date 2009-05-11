@@ -105,9 +105,10 @@ namespace avmplus
 
     class PageMgr : public GCFinalizedObject {
     public:
-        DWB(Fragmento*) frago;
+        DWB(CodeAlloc*) codeAlloc;
+		verbose_only( DWB(LabelMap*) labels; )
         PageMgr();
-        virtual ~PageMgr();
+        ~PageMgr();
     };
 
     class Patch {

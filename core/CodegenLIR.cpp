@@ -580,15 +580,14 @@ namespace avmplus
             GC *gc = core->gc;
 			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
 			// @todo, we really need to limit growth system-wide, rather than per-Fragmento
-            mgr->frago = new (gc) Fragmento(core, Fragmento::MAX_CACHE_SIZE_LOG2);	
-			verbose_only(
-                mgr->frago->assm()->_verbose = pool->verbose;
-                if (pool->verbose) {
-				    LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
-				    labels->add(core, sizeof(AvmCore), 0, "core");
-                    labels->add(&core->codeContextAtom, sizeof(CodeContextAtom), 0, "codeContextAtom");
-                }
-			)
+			mgr->codeAlloc = new (gc) CodeAlloc(gc);
+#ifdef AVMPLUS_VERBOSE
+			if (pool->verbose) {
+				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, 0);
+				labels->add(core, sizeof(AvmCore), 0, "core");
+				labels->add(&core->codeContextAtom, sizeof(CodeContextAtom), 0, "codeContextAtom");
+			}
+#endif
         }
     }
 
@@ -1288,8 +1287,7 @@ namespace avmplus
         verbose_only(
 			vbWriter = 0;
 			if (verbose()) {
-				Fragmento *frago = pool->codePages->frago;
-				lirout = vbWriter = pushVerboseWriter(gc, lirout, lirbuf, frago->labels);
+				lirout = vbWriter = pushVerboseWriter(gc, lirout, lirbuf, pool->codePages->labels);
 			}
 		)
         #ifdef NJ_SOFTFLOAT
@@ -5308,11 +5306,11 @@ namespace avmplus
         return lirout->insAlloc(size >= 4 ? size : 4);
     }
 
-    PageMgr::PageMgr() : frago(0)
+    PageMgr::PageMgr() : codeAlloc(0)
+		verbose_only(, labels(0))
     {}
 
     PageMgr::~PageMgr() {
-        frago->clearFrags();
     }
 
 #ifdef _DEBUG
@@ -5583,8 +5581,11 @@ namespace avmplus
             live(gc, frag->lirbuf, /*showLiveRefs*/ false);
         )
 
-        Fragmento *frago = pool->codePages->frago;
-        Assembler *assm = frago->assm();
+		PageMgr *mgr = pool->codePages;
+        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core);
+	#ifdef AVMPLUS_VERBOSE
+		assm->_verbose = pool->verbose;
+	#endif
         #ifdef VTUNE
         assm->cgen = this;
         #endif
@@ -5642,7 +5643,7 @@ namespace avmplus
         } else {
             // assm puked, or we did something untested, so interpret.
             // fixme: need to remove this frag from Fragmento and free everything.
-            frag->releaseCode(frago);
+            frag->releaseCode(mgr->codeAlloc);
             overflow = true;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
             if (verbose())
@@ -5750,13 +5751,11 @@ namespace avmplus
         count_imt();
 
         initCodePages(pool);
-        Fragmento *frago = pool->codePages->frago;
 		AvmCore *core = pool->core;
 		GC *gc = core->gc;
 
-        Fragment *frag = frago->getAnchor(e->virt);
-        gc->Free(frag->mergeCounts);
-        frag->mergeCounts = 0;
+		PageMgr *mgr = pool->codePages;
+		Fragment *frag = new (gc) Fragment(e->virt);
         LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(gc);
         lirbuf->abi = ABI_FASTCALL;
         LirWriter *lirout = new (gc) LirBufWriter(lirbuf);
@@ -5764,7 +5763,7 @@ namespace avmplus
             lirout = new (gc) ValidateWriter(lirout);
         )
         verbose_only(if (pool->verbose) {
-            lirout = pushVerboseWriter(gc, lirout, lirbuf, frago->labels);
+            lirout = pushVerboseWriter(gc, lirout, lirbuf, mgr->labels);
         })
 #ifdef NJ_SOFTFLOAT
         lirout = new (gc) SoftFloatFilter(lirout);
@@ -5817,8 +5816,7 @@ namespace avmplus
 			LIns *br = lirout->insBranch(LIR_jf, cmp, 0);
 			emitCall(lirout, vtable, e);
 			br->target(lirout->ins0(LIR_label));
-
-			pool->core->GetGC()->Free(e);
+			gc->Free(e);
 			e = next;
 		}
 
@@ -5827,10 +5825,12 @@ namespace avmplus
         frag->lastIns = lirbuf->next()-1;
 
 		// now actually generate machine code
-        Assembler *assm = frago->assm();
-
-		verbose_only( StringList asmOutput(gc); )
-		verbose_only( assm->_outputCache = &asmOutput; )
+		Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core);
+#ifdef AVMPLUS_VERBOSE
+		assm->_verbose = pool->verbose;
+		StringList asmOutput(gc);
+		assm->_outputCache = &asmOutput;
+#endif
 
         RegAllocMap regMap(gc);
         NInsList loopJumps(gc);
@@ -5838,12 +5838,11 @@ namespace avmplus
         assm->beginAssembly(frag, &regMap);
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
-		verbose_only(
-            assm->_outputCache = 0;
-            for (int i=asmOutput.size()-1; i>=0; --i) {
-                assm->outputf("%s",asmOutput.get(i)); 
-            }
-        );
+#ifdef AVMPLUS_VERBOSE
+		assm->_outputCache = 0;
+		for (int i=asmOutput.size()-1; i>=0; --i)
+			assm->outputf("%s",asmOutput.get(i)); 
+#endif
         frag->releaseLirBuffer();
 		if (assm->error() != None)
 		{

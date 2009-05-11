@@ -1443,6 +1443,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\nanojit\CodeAlloc.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\nanojit\Fragmento.cpp"
 				>
 			</File>
@@ -1782,6 +1786,10 @@
 			>
 			<File
 				RelativePath="..\..\nanojit\Assembler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\nanojit\CodeAlloc.h"
 				>
 			</File>
 			<File
