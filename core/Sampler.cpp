@@ -503,6 +503,18 @@ namespace avmplus
 					core->gc->PushWorkItem(item);
 				}
 			}
+#ifdef _DEBUG
+#define NULL_OR_MARKED(_x) GCAssert(_x == NULL || GC::GetMark(_x))
+			if(s.sampleType != DELETED_OBJECT_SAMPLE)
+			{
+				StackTrace::Element *e = (StackTrace::Element*)s.stack.trace;
+				for(uint32_t i=0; i < s.stack.depth; i++, e++)
+				{
+					NULL_OR_MARKED(e->infoname());
+					NULL_OR_MARKED(e->filename());
+				}
+			}
+#endif
 		}
 	}
 
