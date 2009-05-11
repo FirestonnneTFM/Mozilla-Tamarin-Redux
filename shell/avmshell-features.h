@@ -107,8 +107,15 @@
   #define AVMFEATURE_UTF32             0
 #endif
 
-#ifndef AVMFEATURE_EVAL
-  #define AVMFEATURE_EVAL              1
+// https://bugzilla.mozilla.org/show_bug.cgi?id=491866
+// eval is causing insteresting compilation errors that appear
+// to be caused by a compiler bug.
+#ifndef SOLARIS
+  #ifndef AVMFEATURE_EVAL
+    #define AVMFEATURE_EVAL              1
+  #endif
+#else
+  #define AVMFEATURE_EVAL              0
 #endif
 
 #ifndef AVMFEATURE_PROTECT_JITMEM

@@ -483,6 +483,7 @@ namespace avmshell
 			}
 			LOGGING( AvmLog("T%d: Work completed\n", self->id); )
 		}
+		return (void*) NULL;
 	}
 	
 #endif  // VMCFG_WORKERTHREADS
