@@ -61,4 +61,13 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/GCThreads.cpp \
   $(NULL)
 
+ifeq (arm,$(TARGET_CPU))
+ifeq (windows,$(TARGET_OS))
+MMgc_ASMSRCS := $(avmplus_ASMSRCS) \
+  $(curdir)/WinCEUtil.armasm
+  $(NULL)
+endif
+endif
+
+
 $(curdir)/GCDebugMac.$(OBJ_SUFFIX): CXXFLAGS += -Wno-deprecated-declarations
