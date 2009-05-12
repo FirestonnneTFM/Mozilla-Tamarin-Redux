@@ -1545,6 +1545,106 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WinCEUtil.armasm"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MemoryProfiler|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\WriteBarrier.h"
 				>
 			</File>
