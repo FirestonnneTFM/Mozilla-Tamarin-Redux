@@ -74,3 +74,8 @@ echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changei
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release_vprof} $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_vprof_64}
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_vprof_64} ${shell_release_vprof_64}"
 
+
+# Test media
+. ../all/util-upload-scp-mozilla.sh $basedir/test/acceptance/acceptance-tests-abcs.zip $scp_mozilla/$branch/$change-${changeid}/acceptance-tests-abcs.zip
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/acceptance-tests-abcs.zip acceptance-tests-abcs.zip"
+
