@@ -81,11 +81,9 @@ else
     python ./runtests.py --rebuildtests --threads=$test_threads
 fi
 
-# create zip of .abc files, upload to asteam
+# create zip of .abc files
 files=`find . -name "*.abc"`
 zip -q -r acceptance-tests-abcs.zip $files
-
-$basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh acceptance-tests-abcs.zip $ftp_asteam/$branch/$change-${changeid}/acceptance-tests-abcs.zip
 
 exit 0
 

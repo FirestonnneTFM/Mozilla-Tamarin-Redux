@@ -38,10 +38,10 @@
 from twisted.application import service
 from buildbot.slave.bot import BuildSlave
 
-basedir = r'/export/home/build/buildbot/tamarin-redux/solaris-sparc'
-host = '10.171.22.12'
+basedir = r'/home/build/buildbot/tamarin-redux/solaris-sparc'
+host = '192.150.18.127'
 port = 9750
-slavename = 'asteamsol1'
+slavename = 'flashcastqa1'
 passwd = 'asteam'
 keepalive = 600
 usepty = 1

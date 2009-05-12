@@ -64,3 +64,6 @@
 
 # Release-VProf
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_vprof_64}
+
+# Test media
+. ../all/util-upload-ftp-asteam.sh $basedir/test/acceptance/acceptance-tests-abcs.zip $ftp_asteam/$branch/$change-${changeid}/acceptance-tests-abcs.zip

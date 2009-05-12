@@ -44,11 +44,11 @@ then
     change=$1
     test "$change" = "" && {
       change=`hg identify -n | awk -F+ '{print $1}'`
-      echo "change number no passed using tip: $change"
+      echo "change number not passed using tip: $change"
     }
     change=`echo $change | awk -F: '{print $1}'`
 
-    changeid=`hg log -r $change | grep -m 1 changeset | awk -F: '{print $3}'`
+    changeid=`hg log -r $change | head -n 1 | awk -F: '{print $3}'`
     echo "running $platform build for change: $change changeid: $changeid"
 
 else
