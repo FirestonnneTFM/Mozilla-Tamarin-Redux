@@ -89,7 +89,6 @@
 .*/build/cygwin-wrapper\.sh
 .*/eval/backlog\.txt
 .*/eval/documentation\.txt
-.*/MMgc/WinCEUtil\.armasm
 .*/test/acceptance/util/.*\.py
 .*/test/acceptance/util/shell_ats\.as
 .*/platform/mac/shell/exports\.exp
