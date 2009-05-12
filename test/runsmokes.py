@@ -203,9 +203,9 @@ class RunSmokes():
                 fails+=1
                 asserts=int(line.split()[2])
                 detail+=" as: %d" % asserts
-            if re.search("^skips",line):
+            if re.search("^tests skipped",line):
                 passes+=1
-                skips=int(line.split()[2])
+                skips=int(line.split()[3])
                 detail+=" sk: %d" % skips
         detail="p:%d f:%d %s" % (passes,fails,detail)
         if passes==0 or fails>0 or exitcode!=0:
