@@ -98,7 +98,14 @@ void sparc_clean_windows()
 	#define LATENCY_PROFILING_ONLY(x)
 #endif
 
-// Werner mode is a back pointer chain facility for Relase mode
+// Werner mode is a back pointer chain facility for Relase mode.
+//
+// *** NOTE ON THREAD SAFETY ***
+// Werner mode has unprotected global (or function-static) state and is not
+// thread safe.  Do not use in situations where multiple AvmCores may be
+// running on multiple threads at the same time; the results will not be
+// reliable.
+//
 //#define WERNER_MODE
 
 #ifdef WERNER_MODE
@@ -1768,8 +1775,16 @@ bail:
 #endif
 #define MAX_FRAMES 500
 
+	// Call validaddr() once to initialize its cache; avoids thread safety issues.
+	static int unused_value = validaddr(0);
+	
 	static int validaddr(void * addr) 
 	{
+		// *** NOTE ABOUT THREAD SAFETY ***
+		//
+		// This static ought to be safe because it is initialized by a call at startup
+		// (see lines above this function), before any AvmCores are created.
+		
 		static long pagemask = -1;
 		char c;
 		if (pagemask == -1) {
@@ -1885,8 +1900,6 @@ bail:
 
 	void GC::gclog(const char *format, ...)
 	{
-		static bool ingclog=false;
-		
 		(void)format;
 		char buf[4096];
 		va_list argptr;
@@ -1901,10 +1914,20 @@ bail:
 			cb->log(buf);
 
 		// log gross stats any time anything interesting happens
-		if(!ingclog) {
-			ingclog = true;
+		static bool ingclog=false;
+		bool doit;
+		{
+			GCAcquireSpinlock sl(heap->gclog_spinlock);
+			doit = !ingclog;
+			if (doit)
+				ingclog = true;
+		}
+		if(!doit) {
 			heap->DumpMemoryInfo();
-			ingclog = false;
+			{
+				GCAcquireSpinlock sl(heap->gclog_spinlock);
+				ingclog = false;
+			}
 		}
 	}
 
@@ -2691,7 +2714,14 @@ bail:
 		policy.signal(GCPolicyManager::START_IncrementalMark);
 		
 		// FIXME: tune this so that getPerformanceCounter() overhead is noise
-		static unsigned int checkTimeIncrements = 100;
+		//
+		// *** NOTE ON THREAD SAFETY ***
+		//
+		// If anyone feels like writing code that updates checkTimeIncrements (it
+		// used to be 'static' instead of 'const'), beware that using a static var
+		// here requires a lock.  It may also be wrong to have one shared global for
+		// the value, and in any case it may belong in the policy manager.
+		const unsigned int checkTimeIncrements = 100;
 		uint64_t start = VMPI_getPerformanceCounter();
 
 		numObjects=0;

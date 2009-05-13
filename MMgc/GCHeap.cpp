@@ -149,6 +149,7 @@ namespace MMgc
 		hooksEnabled = true; // always track allocs in DEBUG builds
 #endif
 
+		gclog_spinlock = VMPI_lockCreate();
 	}
 
 	GCHeap::~GCHeap()
@@ -171,6 +172,8 @@ namespace MMgc
 				}
 			}	
 			GCAssert(false);
+			
+			VMPI_lockDestroy(gclog_spinlock);
 		}
 		
 #ifdef MMGC_MEMORY_PROFILER

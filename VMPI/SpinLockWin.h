@@ -37,24 +37,44 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "MMgc.h"
-#include "SpinLockWin.h"
 
-vmpi_spin_lock_t VMPI_lockCreate()
+class SpinLockWin : public MMgc::GCAllocObject
 {
-	return (vmpi_spin_lock_t) (new SpinLockWin);
+public:
+	SpinLockWin() : sl(0) {}
+	bool Acquire();
+	bool Release();
+
+private:
+#ifdef MMGC_64BIT
+	volatile LONG64 sl;
+#else
+	long sl;
+#endif
+};
+
+inline bool SpinLockWin::Acquire()
+{
+#ifdef MMGC_64BIT
+	//!!@ fires off for some reason
+	//GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
+	while (_InterlockedCompareExchange64(&sl, 1, 0) != 0)
+		Sleep(0);
+#else
+	//!!@ fires off for some reason
+	//GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
+	while (InterlockedCompareExchange(&sl, 1, 0) != 0)
+		Sleep(0);
+#endif
+	return true;
 }
-
-void VMPI_lockDestroy(vmpi_spin_lock_t lock)
+	
+inline bool SpinLockWin::Release()
 {
-	delete (SpinLockWin*)lock;
-}
-
-bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockWin*)lock)->Acquire();
-}
-
-bool VMPI_lockRelease(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockWin*)lock)->Release();
+#ifdef MMGC_64BIT
+	_InterlockedExchange64(&sl, 0);
+#else
+	InterlockedExchange(&sl, 0);
+#endif
+	return true;
 }

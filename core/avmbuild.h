@@ -97,9 +97,15 @@
 // library.  See pcre/pcre_internal.h, pcre/pcre.h, and pcre/config.h.
 #define PCRE_STATIC
 
-// The PREFM macros are here because they are for VM debugging.
+// The PERFM macros are here because they are for VM debugging.
 //
 // Enable performance metrics for NJ
+//
+// *** NOTE ON THREAD SAFETY ***
+// PERFM is not supported in configurations where more than one AvmCore is
+// instantiated in the same process, as the monitoring code is not thread
+// safe and the results will be unpredictable.
+
 //#define PERFM
 
 #ifdef PERFM
@@ -144,6 +150,12 @@
 // The limit is optional and describes a cutoff for sampling; the program continues to
 // run after sampling ends but data are no longer gathered or stored.  A limit of 250e6
 // produces 1GB of sample data.  There is one sample per VM instruction executed.
+//
+// *** NOTE ON THREAD SAFETY ***
+// SUPERWORD_PROFILING is not supported in configurations where more than one
+// AvmCore is instantiated in the same process, as the monitoring code is not
+// thread safe and the results will be unpredictable.
+
 //#define SUPERWORD_PROFILING
 //#define SUPERWORD_LIMIT 250000000
 
@@ -162,6 +174,12 @@
 // but is very invasive and should only be used in special engineering builds. It should be
 // be left in place (but disabled) for now, as it's still in use...
 // it will go away at some point in the not-too-distant future, however.
+//
+// *** NOTE ON THREAD SAFETY ***
+// AVMPLUS_TRAITS_MEMTRACK is not supported in configurations where more than one
+// AvmCore is instantiated in the same process, as the monitoring code is not
+// thread safe and the results will be unpredictable.
+
 //#define AVMPLUS_TRAITS_MEMTRACK
 
 // This is here for VM development.

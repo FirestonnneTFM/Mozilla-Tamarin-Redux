@@ -36,6 +36,7 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
+#include "SpinLockWin.h"
 
 #include <Mmsystem.h>
 
@@ -51,18 +52,20 @@ namespace avmplus
 /*
 * Windows implementation of platform-dependent date and time code
 */
-static TIME_ZONE_INFORMATION gTimeZoneInfo;
-static SYSTEMTIME gGmtCache;
+static const double kMsecPerDay       = 86400000;
+static const double kMsecPerHour      = 3600000;
+static const double kMsecPerSecond    = 1000;
+static const double kMsecPerMinute    = 60000;
 
-static double kMsecPerDay       = 86400000;
-static double kMsecPerHour      = 3600000;
-static double kMsecPerSecond    = 1000;
-static double kMsecPerMinute    = 60000;
-
-static void UpdateTimeZoneInfo()
+static TIME_ZONE_INFORMATION UpdateTimeZoneInfo()
 {
+	static SpinLockWin gTimeZoneInfoLock;		// protects gTimeZoneInfo and gGmtCache
+	static TIME_ZONE_INFORMATION gTimeZoneInfo;
+	static SYSTEMTIME gGmtCache;
+	
 	SYSTEMTIME gmt;
 	GetSystemTime(&gmt);
+	gTimeZoneInfoLock.Acquire();
 	if ((gmt.wMinute != gGmtCache.wMinute) ||
 		(gmt.wHour != gGmtCache.wHour) ||
 		(gmt.wDay != gGmtCache.wDay) ||
@@ -74,12 +77,15 @@ static void UpdateTimeZoneInfo()
 		GetTimeZoneInformation(&gTimeZoneInfo);
 		gGmtCache = gmt;
 	}
+	TIME_ZONE_INFORMATION tz = gTimeZoneInfo;
+	gTimeZoneInfoLock.Release();
+	return tz;
 }
 
 double VMPI_getLocalTimeOffset()
 {
-	UpdateTimeZoneInfo();
-	return -gTimeZoneInfo.Bias * 60.0 * 1000.0;
+	TIME_ZONE_INFORMATION tz = UpdateTimeZoneInfo();
+	return -tz.Bias * 60.0 * 1000.0;
 }
 
 static double ConvertWin32DST(int year, SYSTEMTIME *st)
@@ -138,8 +144,8 @@ double VMPI_getDaylightSavingsTA(double time)
 {
 	// On Windows, ask the OS what the daylight saving time bias
 	// is.  If it's zero, perform no adjustment.
-	UpdateTimeZoneInfo();
-	if (gTimeZoneInfo.DaylightBias != -60 || gTimeZoneInfo.DaylightDate.wMonth == 0) {
+	TIME_ZONE_INFORMATION tz = UpdateTimeZoneInfo();
+	if (tz.DaylightBias != -60 || tz.DaylightDate.wMonth == 0) {
 		return 0;
 	}
 
@@ -151,10 +157,10 @@ double VMPI_getDaylightSavingsTA(double time)
 	int year = avmplus::YearFromTime(time);
 
 	// 2. Compute time that daylight saving time begins
-	double timeD = ConvertWin32DST(year, &gTimeZoneInfo.DaylightDate);
+	double timeD = ConvertWin32DST(year, &tz.DaylightDate);
 
 	// 3. Compute time that standard time begins
-	double timeS = ConvertWin32DST(year, &gTimeZoneInfo.StandardDate);
+	double timeS = ConvertWin32DST(year, &tz.StandardDate);
 
 	// Subtract the daylight bias from the standard transition time
 	timeS -= kMsecPerHour;

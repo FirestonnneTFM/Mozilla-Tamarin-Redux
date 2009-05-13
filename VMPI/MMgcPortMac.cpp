@@ -195,8 +195,16 @@ size_t VMPI_getVMPageCount(size_t /*pageSize*/)
 	return private_bytes;
 }
 
+// Call VMPI_getPerformanceFrequency() once to initialize its cache; avoids thread safety issues.
+static uint64_t unused_value = VMPI_getPerformanceFrequency();
+
 uint64_t VMPI_getPerformanceFrequency()
 {
+	// *** NOTE ABOUT THREAD SAFETY ***
+	//
+	// These statics ought to be safe because they are initialized by a call at startup
+	// (see lines above this function), before any AvmCores are created.
+	
 	static mach_timebase_info_data_t info;
 	static uint64_t frequency = 0;
 	if ( frequency == 0 ) {
