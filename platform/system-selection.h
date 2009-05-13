@@ -59,6 +59,11 @@
 #else
   #define AVMSYSTEM_WIN32 0
 #endif
+#ifdef __SYMBIAN32__ // defined by Symbian S60 tool chain
+  #define AVMSYSTEM_SYMBIAN 1
+#else
+  #define AVMSYSTEM_SYMBIAN 0
+#endif
 
 // cpu, word size
 
@@ -128,6 +133,26 @@
 
 #endif  // win32
 
+#if AVMSYSTEM_SYMBIAN
+
+  #define AVMSYSTEM_PPC		0
+  #define AVMSYSTEM_AMD64	0
+  #define AVMSYSTEM_SPARC	0
+
+  #if defined(__ARMCC__)
+    #define AVMSYSTEM_ARM    1
+  #else
+    #define AVMSYSTEM_ARM    0
+  #endif
+
+  #if !AVMSYSTEM_ARM
+    #define AVMSYSTEM_IA32 1
+  #else
+    #define AVMSYSTEM_IA32 0
+  #endif
+
+#endif // symbian
+
 #ifdef SIXTYFOURBIT
   #define AVMSYSTEM_32BIT 0
   #define AVMSYSTEM_64BIT 1
@@ -159,6 +184,9 @@
       #define AVMSYSTEM_LITTLE_ENDIAN   0
       #define AVMSYSTEM_BIG_ENDIAN      1
     #endif
+  #elif defined __ARMCC__
+    #define AVMSYSTEM_LITTLE_ENDIAN   1
+    #define AVMSYSTEM_BIG_ENDIAN      0
   #endif
 #elif AVMSYSTEM_PPC || AVMSYSTEM_SPARC
   #define AVMSYSTEM_LITTLE_ENDIAN       0

@@ -78,7 +78,7 @@
   #include "unix/unix-platform.h"
 #elif AVMSYSTEM_MAC
   #include "mac/mac-platform.h"
-#elif defined AVMPLUS_SYMBIAN // needs to become an AVMSYSTEM_ name
+#elif AVMSYSTEM_SYMBIAN
   #include "symbian/symbian-platform.h"
 #endif
 

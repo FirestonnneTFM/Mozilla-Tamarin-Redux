@@ -53,7 +53,7 @@
 #endif
 
 // This is here because the configuration system does not deal with DEBUG
-#if defined DEBUG && !defined AVMPLUS_VERBOSE
+#if defined DEBUG && !defined AVMPLUS_VERBOSE && !defined SYMBIAN
     #define AVMPLUS_VERBOSE
 #endif
 
