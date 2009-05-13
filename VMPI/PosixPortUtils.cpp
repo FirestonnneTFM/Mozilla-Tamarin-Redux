@@ -184,6 +184,7 @@ void VMPI_setPageProtection(void *address,
 							bool executableFlag,
 							bool writeableFlag)
 {
+#ifndef VMCFG_SYMBIAN // JIT is not used on Symbian and this code does not compile.
   // mprotect requires that the addresses be aligned on page boundaries
   void *endAddress = (void*) ((char*)address + size);
   void *beginPage = (void*) ((size_t)address & ~0xFFF);
@@ -200,4 +201,5 @@ void VMPI_setPageProtection(void *address,
   int retval = mprotect((maddr_ptr)beginPage, (unsigned int)sizePaged, flags);
   AvmAssert(retval == 0);
   (void)retval;
+#endif //!VMCFG_SYMBIAN
 }

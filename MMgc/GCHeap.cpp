@@ -1553,6 +1553,19 @@ namespace MMgc
 #endif
 	}
 
+#ifdef VMCFG_SYMBIAN
+	
+	void GCHeap::LogChar(char c, size_t count)
+	{
+		// TODO: implement without alloca.
+	}
+	void GCHeap::DumpHeapRep()
+	{
+		// TODO: implement without alloca.
+	}
+	
+#else
+	
 	void GCHeap::LogChar(char c, size_t count)
 	{
 		char* buf = (char*)alloca(count+1);
@@ -1629,6 +1642,8 @@ namespace MMgc
 		}
 	}
 
+#endif // VMCFG_SYMBIAN
+	
 	size_t GCHeap::GetPrivateBytes()
 	{
 		return VMPI_getVMPageCount(kBlockSize);

@@ -1219,6 +1219,15 @@ bail:
 			addr += GCHeap::kBlockSize;
 		}
 	}
+	
+#ifdef VMCFG_SYMBIAN
+
+	void GC::CleanStack(bool /*force*/)
+	{
+		// TODO: implement without alloca. Add new VMPI API for cleaning up the stack.
+	}
+	
+#else
 
 	void GC::CleanStack(bool force)
 	{
@@ -1290,8 +1299,10 @@ bail:
 #endif
 			}
 		}
-#endif // __MSC_VER && _DEBUG
+#endif // __MSC_VER && _DEBUG		
 	}
+	
+#endif // VMCFG_SYMBIAN
 
 	#if defined(MMGC_PPC) && defined(__GNUC__)
 	__attribute__((noinline)) 
@@ -1898,6 +1909,16 @@ bail:
 	}
 #endif
 
+#ifdef VMCFG_SYMBIAN
+	uintptr_t GC::GetStackTop() const
+	{
+		TThreadStackInfo info;
+		RThread mythread;
+		mythread.StackInfo(info);
+		return uintptr_t(info.iBase);
+	}
+#endif // VMCFG_SYMBIAN
+
 	void GC::gclog(const char *format, ...)
 	{
 		(void)format;
@@ -2137,12 +2158,20 @@ bail:
 		}
 	}
 
+#ifdef VMCFG_SYMBIAN
+
+#define ALLOCA_AND_FILL_WITH_SPACES(b, i) {} \
+
+#else
+
 /* macro to stack allocate a string containing 3*i (indent) spaces */
 #define ALLOCA_AND_FILL_WITH_SPACES(b, i) \
 	{ b = (char*)alloca((3*(i))+1); \
 	int n = 0; \
 	for(; n<3*(i); n++) b[n] = ' '; \
 	b[n] = '\0'; }
+
+#endif // VMCFG_SYMBIAN
 
 	void GC::ProbeForMatch(const void *mem, size_t size, uintptr_t value, int recurseDepth, int currentDepth)
 	{

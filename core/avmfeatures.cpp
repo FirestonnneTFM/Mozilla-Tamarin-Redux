@@ -89,6 +89,9 @@ const char * const avmfeatures = ""
   #if AVMSYSTEM_WIN32
     "AVMSYSTEM_WIN32;"
   #endif
+  #if AVMSYSTEM_SYMBIAN
+    "AVMSYSTEM_SYMBIAN;"
+  #endif
   #if AVMFEATURE_DEBUGGER
     "AVMFEATURE_DEBUGGER;"
   #endif

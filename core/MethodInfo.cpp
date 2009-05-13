@@ -271,7 +271,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kNotImplementedError, this->pool()->core->toErrorString(this));
 			}
 
-			_ntprof("verify-ticks");
+			PERFM_NTPROF("verify-ticks");
 		    #if defined FEATURE_NANOJIT
 			Verifier verifier(this, toplevel);
 
@@ -362,7 +362,7 @@ namespace avmplus
 			// NOTE end copy
 
             #endif // FEATURE_NANOJIT
-			_tprof_end();
+			PERFM_TPROF_END();
 		}
 	}
 

@@ -238,7 +238,7 @@ var FEATURES =
 	<defines>   MMGC_SPARC </defines>     <!-- FIXME: legacy name -->
 	<defines>   AVMPLUS_SPARC </defines>  <!-- FIXME: legacy name -->
   </feature>
-  
+
   <at-most-one>
     <!-- architectures are all mutually exclusive, but there can be "none", I believe (need to verify) -->
 	<name> AVMSYSTEM_IA32 </name>
@@ -271,11 +271,19 @@ var FEATURES =
 	<name> AVMSYSTEM_WIN32 </name>
 	<defines> AVMPLUS_WIN32 </defines>
   </feature>
-  
+
+  <feature>
+    <desc> Selects Symbian </desc>
+	<name> AVMSYSTEM_SYMBIAN </name>
+	<defines> AVMPLUS_SYMBIAN </defines>	<!-- FIXME: legacy name -->
+	<defines> VMCFG_SYMBIAN </defines>
+  </feature>
+
   <exactly-one>
 	<name> AVMSYSTEM_UNIX </name>
 	<name> AVMSYSTEM_MAC </name>
 	<name> AVMSYSTEM_WIN32 </name>
+	<name> AVMSYSTEM_SYMBIAN </name>
   </exactly-one>
 
 

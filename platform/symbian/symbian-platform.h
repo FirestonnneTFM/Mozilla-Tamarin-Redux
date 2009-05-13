@@ -90,8 +90,15 @@
 #include <e32std.h>
 #include <e32cmn.h>
 
+#include <setjmp.h> // for OOM.h
+
 #ifdef __GCC__
 #define REALLY_INLINE inline __attribute__((always_inline))
+#endif
+
+#ifdef __WINSCW__
+#undef _WIN32
+#undef __MWERKS__
 #endif
 
 #endif // __avmplus_symbian_platform__
