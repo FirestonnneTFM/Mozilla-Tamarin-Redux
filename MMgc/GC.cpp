@@ -1775,15 +1775,12 @@ bail:
 #endif
 #define MAX_FRAMES 500
 
-	// Call validaddr() once to initialize its cache; avoids thread safety issues.
-	static int unused_value = validaddr(0);
-	
 	static int validaddr(void * addr) 
 	{
 		// *** NOTE ABOUT THREAD SAFETY ***
 		//
 		// This static ought to be safe because it is initialized by a call at startup
-		// (see lines above this function), before any AvmCores are created.
+		// (see lines below this function), before any AvmCores are created.
 		
 		static long pagemask = -1;
 		char c;
@@ -1798,6 +1795,9 @@ bail:
 		}
 	}  /* end of validaddr */
 
+	// Call validaddr() once to initialize its cache; avoids thread safety issues.
+	static int unused_value = validaddr(0);
+	
 	pthread_key_t stackTopKey = NULL;
 
 	uintptr_t	GC::GetStackTop() const
