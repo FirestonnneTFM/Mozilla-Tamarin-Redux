@@ -92,6 +92,12 @@ namespace avmplus
 	{
 		SAMPLE_FRAME("XML", this->core());
 		#if 0//def _DEBUG
+		// *** NOTE ON THREAD SAFETY ***
+		//
+		// Enabling this code means that there may be a race to initialize 'once' on different
+		// threads, or, alternatively, that only one core gets to run this code, not each core
+		// individually.  This may or may not be OK, but needs to be considered before enabling
+		// the code.
 		static bool once = false;
 		if (!once)
 		{

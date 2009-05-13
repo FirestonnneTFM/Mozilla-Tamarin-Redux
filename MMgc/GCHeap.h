@@ -535,6 +535,9 @@ namespace MMgc
 		// some OS's are loose with how with virtual memory is dealt with and we don't have to track
 		// each region individually (ie multiple contiguous mmap's can be munmap'd all at once)
 		const bool mergeContiguousRegions;
+		
+	public:
+		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 	};
 }
 

@@ -197,6 +197,24 @@ namespace avmplus
 #ifdef AVMPLUS_DIRECT_THREADED
 
 	void** interpGetOpcodeLabels() {
+		// *** NOTE ON THREAD SAFETY ***
+		//
+		// If we ever enable direct threading for a platform where the thread jump targets
+		// cannot be constants in a vector but must be written into a vector the first time
+		// interpGetOpcodeLabels() is called, then the following call must be within a
+		// critical section (or some startup code must make an initial call to make sure
+		// the vector is initialized in a thread safe way).  At this time, Visual C++
+		// requires this, but we're not using direct threading with Visual C++, so there
+		// is no critical section here.
+		//
+		// The startup code to make the initial call can simply call this function and
+		// assign the result to a dummy static global variable; that trick is not portable
+		// but it can be used for many platforms (and is used elsewhere).
+
+    #if defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
+        #error "interpGetOpcodeLabels needs a critical section or eager initialization for this compiler / platform combination"
+    #endif
+		
 		return (void**)interpBoxed(NULL, 0, NULL, NULL);
 	}
 	

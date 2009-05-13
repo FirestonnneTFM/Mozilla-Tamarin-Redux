@@ -40,6 +40,7 @@
 #include <windows.h>
 
 #include "MMgc.h"
+#include "SpinLockWin.h"
 
 #ifdef MMGC_MEMORY_PROFILER
 	#include <malloc.h>
@@ -177,8 +178,16 @@ size_t VMPI_getVMPageCount(size_t pageSize)
 	return bytes / pageSize;
 }
 
+// Call VMPI_getPerformanceFrequency() once to initialize its cache; avoids thread safety issues.
+static uint64_t unused_value = VMPI_getPerformanceFrequency();
+
 uint64_t VMPI_getPerformanceFrequency()
 {
+	// *** NOTE ABOUT THREAD SAFETY ***
+	//
+	// This static ought to be safe because it is initialized by a call at startup
+	// (see lines above this function), before any AvmCores are created.
+	
 	static uint64_t gPerformanceFrequency = 0;		
 	if (gPerformanceFrequency == 0) {
 		QueryPerformanceFrequency((LARGE_INTEGER*)&gPerformanceFrequency);
@@ -374,7 +383,15 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 
 	bool InitDbgHelp()
 	{
+		static SpinLockWin dbgHelpLock;	// protects access to inited
 		static bool inited = false;
+	
+		// We must hold the lock for the entire initialization process:
+		//  - if we set inited to true and Release the lock then other
+		//    threads may forge ahead without initialization having occured
+		//  - if we leave it false and Release then other threads
+		//    may try to perform initialization as well.
+		dbgHelpLock.Acquire();
 		if(!inited) {
 #ifndef UNDER_CE
 			if(!g_DbgHelpDll.m_SymInitialize ||
@@ -387,11 +404,13 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 						MMgc::GCDebugMsg("See lpMsgBuf", true);
 						LocalFree(lpMsgBuf);
 					}			
+					dbgHelpLock.Release();
 					return false;
 			}
 #endif // ifn UNDER_CE
 			inited = true;
 		}
+		dbgHelpLock.Release();
 		return true;
 	}
 
