@@ -533,31 +533,29 @@ namespace MMgc
 			{
 			*tp++ = '\t';		*tp++ = '\t';		*tp++ = '\t';		
 			}
+
 			bool found_name;
 			if((found_name = VMPI_getFunctionNameFromPC(trace[i], buff, sizeof(buff))) == false)
 			{
 				VMPI_snprintf(buff, sizeof(buff), "0x%llx", (unsigned long long)trace[i]);
 			}
-			VMPI_strncpy(tp, buff, sizeof(buff));
+			VMPI_strcpy(tp, buff);
 			tp += VMPI_strlen(buff);
 
 			uint32_t lineNum;
-			if(VMPI_getFileAndLineInfoFromPC(trace[i], buff, sizeof(buff), &lineNum) == false)
-			{
-				VMPI_snprintf(buff, sizeof(buff), "0x%llx", (unsigned long long)trace[i]);
-			}
-			else
+			if(VMPI_getFileAndLineInfoFromPC(trace[i], buff, sizeof(buff), &lineNum))
 			{
 				VMPI_snprintf(buff, sizeof(buff), "%s:%d", buff, lineNum);
-			}
-			if( found_name )
-			{
+
 				// Don't bother with file, linenumber, and address if we're just printing the address anyways
-			*tp++ = '(';
-			VMPI_strncpy(tp, buff, sizeof(buff));
-			tp += VMPI_strlen(buff);
-			*tp++ = ')';
-			tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
+				if( found_name )
+				{
+					*tp++ = '(';
+					VMPI_strcpy(tp, buff);
+					tp += VMPI_strlen(buff);
+					*tp++ = ')';
+					tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
+				}
 			}
 			*tp++ = '\n';
 
