@@ -309,6 +309,8 @@ extern bool			VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint3
 /**
 * Method to retrieve the name of the method/function given a specific address in code space
 * Used by the MMgc memory profiler to get and display function names
+* This method is expected to write a null terminated string representing the function name 
+* in to the buffer
 * @param pc address whose corresponding function name should be returned
 * @param buffer buffer to write the function name to
 * @param bufferSize size, in bytes, of the buffer passed
@@ -319,6 +321,8 @@ extern bool			VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t buff
 /**
 * Method to retrieve the source filename and line number given a specific address in a code space
 * Used by the MMgc memory profiler to display location info of source code
+* This method is expected to write a null terminated string representing the file name 
+* in to the buffer
 * @param pc address of code whose corresponding location should be returned
 * @param buffer buffer to write the filename to
 * @param bufferSize size, in bytes, of the buffer for filename
