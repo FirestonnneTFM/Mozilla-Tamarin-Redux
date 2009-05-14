@@ -36,7 +36,7 @@
 #
 # ***** END LICENSE BLOCK *****
 
-import subprocess,sys,datetime
+import subprocess,sys,datetime,re
 from os import environ
 from glob import glob
 from getopt import getopt
@@ -78,6 +78,8 @@ def printResult(out):
         tokens=line.split()
         if len(tokens)>2:
             print "%s %-7s %-10s %-5s" % (globs['prefix'],tokens[0],tokens[1],tokens[2])
+            if re.search("(\.obj|\.dll)", tokens[1]): # look for unclassified files
+                print "buildbot_status: WARNINGS" # produce a buildbot warning if any are found
 
 def saveResult(out):
     out="version: %s\n%s" % (globs['version'],out)
@@ -105,6 +107,8 @@ def printResultDiff(out):
             else:
                 res='n/a'
             print "%-8s %-6s %-5s %-6s" % (tokens[1],convertK(tokens[0]),res,tokens[2])
+            if re.search("(\.obj|\.dll)", tokens[1]): # look for unclassified files
+                print "buildbot_status: WARNINGS" # produce a buildbot warning if any are found
 
 def printResultDiffSummary(out):                
     lastlines=open('lastsizereport.txt','r').readlines()
