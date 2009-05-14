@@ -148,7 +148,7 @@ size_t VMPI_size(void *ptr)
 #endif
 }
 
-typedef int (*LoggingFunction)(const char*);
+typedef void (*LoggingFunction)(const char*);
 
 LoggingFunction logFunc = NULL;
 
@@ -159,7 +159,10 @@ void RedirectLogOutput(LoggingFunction func)
 
 void VMPI_log(const char* message)
 {
-	logFunc ? logFunc(message) : printf("%s",message);
+	if(logFunc)
+		logFunc(message);
+	else
+		printf("%s",message);
 }
 
 bool VMPI_isMemoryProfilingEnabled()

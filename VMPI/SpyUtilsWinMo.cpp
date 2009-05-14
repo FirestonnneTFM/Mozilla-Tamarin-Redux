@@ -114,7 +114,14 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 
 static uint32_t mmgc_spy_signal = 0;
 
-extern void RedirectLogOutput(FILE*);
+FILE* spyStream = NULL;
+
+void SpyLog(const char* message)
+{
+	fprintf(spyStream, "%s", message);
+}
+
+extern void RedirectLogOutput(void (*)(const char*));
 
 void VMPI_spyCallback()
 {
@@ -122,18 +129,18 @@ void VMPI_spyCallback()
 	{
 		mmgc_spy_signal = 0;
 
-		FILE* spyStream = fopen("Temp\\gcstats.txt", "w");
+		spyStream = fopen("Temp\\gcstats.txt", "w");
 
 		GCAssert(spyStream != NULL);
-		RedirectLogOutput(spyStream);
+		RedirectLogOutput(SpyLog);
 
 		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
 
 		fflush(spyStream);
 
 		fclose(spyStream);
-
 		RedirectLogOutput(NULL);
+		spyStream = NULL;	
  	}
 }
 
