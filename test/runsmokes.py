@@ -218,6 +218,7 @@ class RunSmokes():
         else:
             status="passed"
         print "%s %ds %s %s" % (status,tm,rawcommand,detail)
+        sys.stdout.flush()
         if fails>0:
             self.allfails+=1
         else:
