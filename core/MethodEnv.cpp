@@ -1896,6 +1896,12 @@ namespace avmplus
 	
 	ScriptObject* MethodEnv::findglobalproperty(ScriptObject* target_global, const Multiname* multiname)
 	{
+		// in theory, anyname shouldn't get passed to us, but in practice, sometimes it does.
+		// it will always fail later on, but will generate an assert further downstream,
+		// so let's just check and bail now.
+		if (multiname->isAnyName())
+			return NULL;
+
 		Toplevel* toplevel = this->toplevel();
 		
 		// look for imported definition (similar logic to OP_finddef).  This will
