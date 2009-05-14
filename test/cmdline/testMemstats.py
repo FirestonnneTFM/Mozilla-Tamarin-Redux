@@ -67,34 +67,34 @@ def run():
         if failed==False:
             os.putenv('MMGC_PROFILE','1')
             proc=r.run_command_async(command="%s testdata/memstats.abc" % r.avm,sleep=2)
+# pyspy source       
             e = "MMgc::MemoryProfiler::DumpFatties"
             h = None
             try:
-	        h = win32event.OpenEvent(win32event.EVENT_MODIFY_STATE, False, e)
+                h = win32event.OpenEvent(win32event.EVENT_MODIFY_STATE, False, e)
             except Exception:
-                failed=True
-	        print "pyspy No registered event: %s FAILED" % e
-        if failed==False:
-            out=""
+                print "Error: No registered event: %s FAILED!" % e
+                sys.exit(1)
+
             win32event.SetEvent(h)
+
             pipe = "\\\\.\\pipe\MMgc_Spy" 
             readHandle = None
             while True:
-	        try:
+                try:
                     readHandle = win32file.CreateFile(pipe, win32file.GENERIC_READ, 0, None, win32file.OPEN_EXISTING, 0, None)
                     win32pipe.WaitNamedPipe(pipe, 100)
                 except Exception:
-		    pass
+                    pass
                 if readHandle:
                     break
-            (stdo,stde)=proc.communicate()
-            r.run_test('pyspy',
-                     actualout=stdo,
-                     expectedout=['managed fragmentation',
-                            'gross stats',
-                            'private',
-                            'Memory allocation report for [0-9]+ allocations, totaling [0-9]+ kb',
-                            ])
+
+                while True:
+                    try:
+                        data = win32file.ReadFile(readHandle, 128)
+                        sys.stdout.write(data[1])
+                    except:
+                        break
 
 # by specifying a main can run this test individually
 if __name__ == '__main__':
