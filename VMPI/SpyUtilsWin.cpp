@@ -127,7 +127,15 @@ void CloseNamedPipe(void *handle)
 
 static uint32_t mmgc_spy_signal = 0;
 
-extern void ChangeLogStream(FILE*); //defined by the platform porting layer
+//log redirector function for outputting log messages to the spy
+FILE* spyStream = NULL;
+
+void SpyLog(const char* message)
+{
+	fprintf(spyStream, "%s", message);
+}
+
+extern void RedirectLogOutput(void (*)(const char*));
 
 void VMPI_spyCallback()
 {
@@ -137,16 +145,17 @@ void VMPI_spyCallback()
 
 		void *pipe = OpenAndConnectToNamedPipe("MMgc_Spy");
 
-		FILE* spyStream = HandleToStream(pipe);
+		spyStream = HandleToStream(pipe);
 		GCAssert(spyStream != NULL);
-		ChangeLogStream(spyStream);
+		RedirectLogOutput(SpyLog);
 
 		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
 
 		fflush(spyStream);
 
 		CloseNamedPipe(pipe);
-		ChangeLogStream(NULL);
+		RedirectLogOutput(NULL);
+		spyStream = NULL;	
 	}
 }
 

@@ -237,25 +237,26 @@ size_t VMPI_size(void* ptr)
 	return HeapSize(GetProcessHeap(), 0, ptr);
 }
 
-FILE* logStream = stdout;
 
-void RedirectLogOutput(FILE* file)
+typedef void (*LoggingFunction)(const char*);
+
+LoggingFunction logFunc = NULL;
+
+void RedirectLogOutput(LoggingFunction func)
 {
-	logStream = file;
+	logFunc = func;
 }
+
 void VMPI_log(const char* message)
 {
-	if( logStream )
-	{
-		fprintf(logStream, "%s\n", message );
-	}
-	else
-	{
 #ifndef UNDER_CE
-		::OutputDebugStringA(message);
+	::OutputDebugStringA(message);
 #endif
-		printf("%s\n",message);
-	}
+
+	if(logFunc)
+		logFunc(message);
+	else
+		printf("%s",message);
 }
 
 bool VMPI_isMemoryProfilingEnabled()

@@ -133,12 +133,12 @@ bool SetupSpyServer()
 }
 
 //log redirector function for outputting log messages to the spy
-int SpyLog(const char* message)
+void SpyLog(const char* message)
 {
-	return send(clientSocket, message, VMPI_strlen(message)+1, 0);
+	send(clientSocket, message, VMPI_strlen(message)+1, 0);
 }
 
-extern void RedirectLogOutput(int (*)(const char*));
+extern void RedirectLogOutput(void (*)(const char*));
 
 void VMPI_spyCallback()
 {
