@@ -715,9 +715,11 @@ namespace avmplus
 		AvmCore* core = this->core();
 		Traits* t = this->toTraits(obj); // includes null check
 
+		bool has_interned = false;
 		if (!AvmCore::isDictionaryLookup(nameatom, obj))
 		{
 			Stringp name = core->intern(nameatom);
+			has_interned = true;
 
 			// ISSUE should we try this on each object on the proto chain or just the first?
 			TraitsBindingsp td = t->getTraitsBindings();
@@ -734,6 +736,14 @@ namespace avmplus
 		{
 			if (o->hasAtomProperty(nameatom))
 				return trueAtom;
+
+			// First hasAtomProperty call can be a dictionary and take any 
+			// type of object but the rest need an interned string.
+			if (!has_interned)
+			{
+				nameatom=core->intern(nameatom)->atom();
+				has_interned = true;
+			}
 		}
 		while ((o = o->getDelegate()) != NULL);
 		return falseAtom;
