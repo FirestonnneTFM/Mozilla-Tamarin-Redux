@@ -446,12 +446,16 @@ class RuntestBase:
     def run_pipe(self, cmd):
         if self.debug:
             print('cmd: %s' % cmd)
+        if sys.platform=='win32':
+            cmd=cmd.replace('/','\\')
         self.verbose_print('executing: %s' % cmd)
         try:
             p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.stdout.readlines()
             err = p.stderr.readlines()
             starttime=time()
+            self.verbose_print('output: %s' % output)
+            self.verbose_print('error : %s' % err)
             exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return 'timedOut'
@@ -879,7 +883,9 @@ class RuntestBase:
             return flines
         # compare lines
         for i in range(0,len(output)):
-            if output[i].strip() != flines[i].strip():
+            line=output[i].strip()
+            line=line.replace('\\','/')
+            if line != flines[i].strip():
                 return flines
         return
                                                 
