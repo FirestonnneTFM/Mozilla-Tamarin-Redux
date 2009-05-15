@@ -244,6 +244,16 @@ bool VMPI_captureStackTrace(uintptr_t* buffer, size_t len, uint32_t skip)
 }
 #endif
 
+#ifdef MMGC_ARM
+bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip) 
+{
+	(void) buffer;
+	(void) bufferSize;
+	(void) framesToSkip;
+	return false;
+}
+#endif
+
 #if (defined(MMGC_IA32) || defined(MMGC_AMD64))
 
 bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t skip) 
