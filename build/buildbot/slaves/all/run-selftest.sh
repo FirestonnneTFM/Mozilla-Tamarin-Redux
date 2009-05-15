@@ -76,8 +76,9 @@ cat selftest.out
 passes=`grep pass selftest.out | wc -l`
 fails=`grep fail selftest.out | wc -l`
 
-echo "passes   : $passes"
-echo "fails    : $fails"
+echo "passes            : $passes"
+echo "failures          : $fails"
+
 rm selftest.out
 exit $ret
  
