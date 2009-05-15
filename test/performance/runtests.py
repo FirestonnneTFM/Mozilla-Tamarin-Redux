@@ -530,7 +530,10 @@ class PerformanceRuntest(RuntestBase):
                             if perfm1Dict['verify']:    # only calc if data present
                                 #calc confidence and mean for each stat
                                 def calcConf(list):
-                                  return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
+                                  if mean(list) != 0:   # protect against division by zero
+                                    return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
+                                  else:
+                                    return 0;
                                 def perfmSocketlog(metric,key):
                                   self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % 
                                            (testName, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
