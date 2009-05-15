@@ -54,6 +54,11 @@ mmgc avmplus:FixedMalloc.obj
 mmgc MMgc:: *
 mmgc MMgc: *
 mmgc operator *
+mmgc MMgcPortWin.obj
+mmgc SpyUtilsWin.obj
+mmgc AdvAPI32:ADVAPI32.dll
+mmgc ThreadsWin.obj
+mmgc SpinLockWin.obj
 
 nanojit avmplus:CodegenMIR.obj
 nanojit avmplus:Ia32Assembler.obj
@@ -61,6 +66,7 @@ nanojit win32cpuid.obj
 nanojit avmplus::CodegenMIR
 nanojit avmplus::ArmAssembler
 nanojit avmplus::ImtBuilder
+nanojit avmplus:CodeAlloc.obj
 nanojit avmplus:CodegenLIR.obj
 nanojit avmplus:WordcodeEmitter.obj
 nanojit avmplus:TypeDescriber.obj
@@ -232,7 +238,23 @@ vm avmplus::AbcGen
 vm avmplus::UIntClass
 vm avmplus:VectorClass.obj
 vm avmplus:DescribeTypeClass.obj
-vm eval-abc.obj
+vm avmplus:ScopeChain.obj
+vm avmplus:avmfeatures.obj
+
+eval eval-abc.obj
+eval eval-avmplus.obj
+eval eval-parse-expr.obj
+eval eval-parse.obj
+eval eval-parse-stmt.obj
+eval eval-cogen-expr.obj
+eval eval-cogen-stmt.obj
+eval eval-parse-xml.obj
+eval eval-cogen.obj
+eval eval-compile.obj
+eval eval-util.obj
+eval eval-lex.obj
+eval eval-lex-xml.obj
+eval eval-unicode.obj
 
 builtin avmplus:ScriptObject.obj
 builtin avmplus:ObjectClass.obj
@@ -310,6 +332,8 @@ shell FileInputStream.obj
 shell JavaGlue.obj
 shell vprof.obj
 shell SamplerScript.obj
+shell ShellCore.obj
+shell swf.obj
 shell WinPortUtils.obj
 shell avmshellWin.obj
 shell WinFile.obj
