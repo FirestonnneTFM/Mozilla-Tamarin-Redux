@@ -113,16 +113,23 @@ def make_vmlist(buildfile):
             print(v)
     
     return vms
-
-signames = {
-    # if you see a process die with SIG123, then add more entries below
-    signal.SIGINT:  'SIGINT',
-    signal.SIGILL:  'SIGILL',
-    signal.SIGTERM: 'SIGTERM',
-    signal.SIGABRT: 'SIGABRT',
-    signal.SIGKILL: 'SIGKILL',
-    signal.SIGBUS:  'SIGBUS',
-}
+try:
+    signames = {
+       # if you see a process die with SIG123, then add more entries below
+       signal.SIGINT:  'SIGINT',
+       signal.SIGILL:  'SIGILL',
+       signal.SIGTERM: 'SIGTERM',
+       signal.SIGABRT: 'SIGABRT',
+       signal.SIGKILL: 'SIGKILL',
+       signal.SIGBUS:  'SIGBUS',
+    }
+except:
+    signames = {
+       signal.SIGINT:  'SIGINT',
+       signal.SIGILL:  'SIGILL',
+       signal.SIGTERM: 'SIGTERM',
+       signal.SIGABRT: 'SIGABRT',
+    }
 
 def signame(sig):
     if sig in signames:

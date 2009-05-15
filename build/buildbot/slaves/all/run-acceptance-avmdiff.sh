@@ -127,18 +127,36 @@ export shell_release_debugger=$buildsdir/$change-${changeid}/$platform/$shell_re
 export shell_debug=$buildsdir/$change-${changeid}/$platform/$shell_debug
 export shell_debug_debugger=$buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
 
-export AVM=$basedir/utils/avmdiff.py
-echo "`$AVM`"
-test -f $AVM || {
-  echo "ERROR: $AVM not found"
-  exit 1
-}
-chmod +x $AVM
-
 cd $basedir/test/acceptance
 
-echo "message: python ./runtests.py --config=${platform}-diff --nohtml"
-python ./runtests.py --config=${platorm}-diff --nohtml
+# If available, use windows python (instead of cygwin python)
+# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
+# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
+if [ -z "$PYTHONWIN" ]
+then
+    py=python
+    export AVM=$basedir/utils/avmdiff.py
+    test -f $AVM || {
+        echo "ERROR: $AVM not found"
+        exit 1
+    }
+    echo "`$AVM`"
+    chmod +x $AVM
+else
+    py=$PYTHONWIN
+    pywin=`cygpath -w $PYTHONWIN`
+    avmdiff=`cygpath -w $basedir/utils/avmdiff.py`
+    test -f $basedir/utils/avmdiff.py || {
+        echo "ERROR: $basedir/utils/avmdiff.py not found"
+        exit 1
+    }
+    export AVM="$py $avmdiff"
+    echo "`$py $avmdiff`"
+fi
+
+
+echo "message: $py ./runtests.py --config=${platform}-diff --threads=$test_threads --nohtml"
+$py ./runtests.py --config=${platform}-diff --threads=$test_threads --nohtml
 
 exit 0
 
