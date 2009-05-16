@@ -5824,6 +5824,11 @@ namespace avmplus
 		emitCall(lirout, vtable, e);
         frag->lastIns = lirbuf->next()-1;
 
+		// print LIR if verbose
+		verbose_only(if (pool->verbose)
+			live(gc, frag->lirbuf, /*showLiveRefs*/ false);
+		)
+
 		// now actually generate machine code
 		Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core);
 #ifdef AVMPLUS_VERBOSE
