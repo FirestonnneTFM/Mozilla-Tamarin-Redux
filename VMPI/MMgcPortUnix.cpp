@@ -71,8 +71,12 @@
 
 size_t VMPI_getVMPageSize()
 {
+#ifdef MMGC_SPARC
+	return 4096;
+#else
 	long v = sysconf(_SC_PAGESIZE);
 	return v;
+#endif
 }
 
 bool VMPI_canMergeContiguousRegions()
@@ -82,6 +86,9 @@ bool VMPI_canMergeContiguousRegions()
 
 bool VMPI_useVirtualMemory()
 {
+#ifdef MMGC_SPARC
+	return false;
+#endif
 	return true;
 }
 
@@ -142,7 +149,11 @@ bool VMPI_decommitMemory(char *address, size_t size)
 
 void* VMPI_allocateAlignedMemory(size_t size)
 {
-	return valloc(size);
+	void* result = valloc(size);
+#ifdef MMGC_SPARC
+	memset(result, 0, size);
+#endif
+	return result;
 }
 
 void VMPI_releaseAlignedMemory(void* address)
