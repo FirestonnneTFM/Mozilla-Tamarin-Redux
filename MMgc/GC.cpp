@@ -1784,35 +1784,12 @@ bail:
 #else
 #define FLUSHWIN() 
 #endif
-#define MAX_FRAMES 500
-
-	static int validaddr(void * addr) 
-	{
-		// *** NOTE ABOUT THREAD SAFETY ***
-		//
-		// This static ought to be safe because it is initialized by a call at startup
-		// (see lines below this function), before any AvmCores are created.
-		
-		static long pagemask = -1;
-		char c;
-		if (pagemask == -1) {
-			pagemask = ~(sysconf(_SC_PAGESIZE) - 1);
-		}
-		addr = (void *)((long)addr & pagemask);
-		if (mincore((char *)addr, 1, &c) == -1 && errno == ENOMEM) {
-			return 0;  /* invalid */
-		} else {
-			return 1;  /* valid */
-		}
-	}  /* end of validaddr */
-
-	// Call validaddr() once to initialize its cache; avoids thread safety issues.
-	static int unused_value = validaddr(0);
-	
 	pthread_key_t stackTopKey = NULL;
 
 	uintptr_t	GC::GetStackTop() const
 	{
+		FLUSHWIN();
+
 		if(stackTopKey == NULL)
 			{
 				int res = pthread_key_create(&stackTopKey, NULL);
@@ -1830,20 +1807,8 @@ bail:
 		stack_t st;
 		stack_getbounds(&st);
 		uintptr_t stack_base = (uintptr_t)st.ss_sp + st.ss_size;
-
-		FLUSHWIN();
-
-		sp = (struct frame *)_getfp();
-		stackTop = (void *)sp;
-		for (i = 0; i < MAX_FRAMES && sp && (uintptr_t)sp < stack_base; i++) { 
-			if (!validaddr( sp ) || !validaddr(&sp->fr_savpc) || !sp->fr_savpc ) {
-				break;
-			}
-			stackTop = (void *)sp;
-			sp = ( struct frame * )sp->fr_savfp;
-		}
-		pthread_setspecific(stackTopKey, stackTop);
-		return (uintptr_t)stackTop;
+		pthread_setspecific(stackTopKey, (void*)stack_base);
+		return (uintptr_t)stack_base;
 	}
 #elif defined(AVMPLUS_UNIX) // SOLARIS
 	pthread_key_t stackTopKey = 0;

@@ -188,10 +188,11 @@ void VMPI_setPageProtection(void *address,
 							bool writeableFlag)
 {
 #ifndef VMCFG_SYMBIAN // JIT is not used on Symbian and this code does not compile.
+  int bitmask = sysconf(_SC_PAGESIZE) - 1;
   // mprotect requires that the addresses be aligned on page boundaries
   void *endAddress = (void*) ((char*)address + size);
-  void *beginPage = (void*) ((size_t)address & ~0xFFF);
-  void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
+  void *beginPage = (void*) ((size_t)address & ~bitmask);
+  void *endPage   = (void*) (((size_t)endAddress + bitmask) & ~bitmask);
   size_t sizePaged = (size_t)endPage - (size_t)beginPage;
   
   int flags = PROT_READ;

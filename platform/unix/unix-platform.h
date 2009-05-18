@@ -123,4 +123,8 @@ typedef void *maddr_ptr;
 #define REALLY_INLINE inline __attribute__((always_inline))
 #endif
 
+#if defined __SUNPRO_C || defined __SUNPRO_CC
+#define REALLY_INLINE inline __attribute__((always_inline)) __hidden
+#endif
+
 #endif // __avmplus_unix_platform__
