@@ -127,3 +127,10 @@ endif
 
 #  $(curdir)/avmplus.cpp \
 #  $(curdir)/AtomConstants.cpp \
+
+$(avmplus_CXXSRCS): $(curdir)/builtin.h
+
+$(curdir)/builtin.h $(curdir)/builtin.cpp: $(curdir)/builtin.as
+	cd $(topsrcdir)/core; python builtin.py
+
+$(curdir)/AbcData.cpp: $(curdir)/builtin.cpp

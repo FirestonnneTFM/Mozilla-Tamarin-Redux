@@ -103,4 +103,9 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(NULL)
 endif
 
+$(shell_CXXSRCS): $(curdir)/shell_toplevel.h
 
+$(curdir)/shell_toplevel.h $(curdir)/shell_toplevel.cpp: $(curdir)/shell_toplevel.as
+	cd $(topsrcdir)/shell; python shell_toplevel.py
+
+$(curdir)/ShellCore.cpp: $(curdir)/shell_toplevel.cpp
