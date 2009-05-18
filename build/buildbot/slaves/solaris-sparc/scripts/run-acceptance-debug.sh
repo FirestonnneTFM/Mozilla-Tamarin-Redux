@@ -35,7 +35,7 @@
 #  the terms of any one of the MPL, the GPL or the LGPL.
 # 
 #  ***** END LICENSE BLOCK ****
-set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
+(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 
 ##
