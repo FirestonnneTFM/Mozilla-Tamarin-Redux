@@ -287,7 +287,6 @@ const int kBufferPadding = 16;
         inline void SetJITEnabled(bool) {}
         inline bool IsJITEnabled() { return false; }
 		inline bool JITMustSucceed() const { return false; }
-		}
 #endif
 
 		/**
