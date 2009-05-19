@@ -135,9 +135,6 @@ namespace MMgc
 		friend class GC;
 	public:
 		RCObject()
-#if 0
-			: history(0)
-#endif
 		{
 			// composite == 0 is special, it means a deleted object in Release builds
 			// b/c RCObjects have a vtable we know composite isn't the first 4 byte and thus

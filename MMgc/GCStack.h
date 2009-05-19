@@ -41,88 +41,108 @@
 
 namespace MMgc
 {	
-	template<typename T, int defSize=512>
+	// Optimize the number of elements in a mark stack segments for GCStack<GCWorkItem>.  
+	// Each GCWorkItem is two words.  There's a one-word overhead in the segment data
+	// structure, and on a 32-bit system there's one word of alignment.  Ergo we have
+	// space for (4k-8)/2w items in a block, where w(ordsize) is 4 or 8.  (FixedMalloc 
+	// does not add further overhead in Release builds.)
+#ifdef AVMPLUS_64BIT
+	enum { kDefaultMarkStackItems=255 };
+#else
+	enum { kDefaultMarkStackItems=511 };
+#endif
+
+	// Invariant: m_topSegment, m_base, m_top, and m_limit are never NULL following construction.
+	// Invariant: m_base <= m_top <= m_limit
+	// Invariant: m_base == m_topSegment->m_items
+	// Invariant: m_limit == m_topSegment->m_items + kMarkStackItems
+	
+	template<typename T, int kMarkStackItems=kDefaultMarkStackItems>
 	class GCStack
 	{
-		enum { kDefSize = defSize };
 	public:
-		GCStack(int defaultSize=kDefSize) : m_iCount(0), m_iAllocSize(defaultSize), m_items(NULL) 
-		{
-			Alloc();
-		}
+		GCStack();
+		~GCStack();
 
-		~GCStack()
-		{
-			if ( m_items )
-			{
-				delete [] m_items;
-				m_items = NULL;
-			}
-			m_iCount = m_iAllocSize = 0;
-		}
+		/** Push 'item' onto the stack.  This always succeeds. */
+		void Push(T item);
 
-		void Push(T item)
-		{
-			if ( ( m_iCount + 1 ) > m_iAllocSize ) 
-			{
-				// need to allocate a new block first
-				m_iAllocSize = m_iAllocSize ? m_iAllocSize*2 : (unsigned int)kDefSize;
-				Alloc();
-			}
+		/** Pop one item off the stack and return it.  Precondition: The stack must not be empty. */
+		T Pop();
 
-			m_items[m_iCount++] = item;
-		}
+		/** @return the top element.  Precondition: The stack must not be empty. */
+		T Peek();
 
-		T Pop()
-		{
-			T t = m_items[--m_iCount];
-#ifdef _DEBUG
-			VMPI_memset(&m_items[m_iCount], 0, sizeof(T));
-#endif
-			return t;
-		}
+		/** @return the number of elements on the stack. */
+		uint32_t Count();
 
-		T Peek()
-		{
-#ifdef _DEBUG
-			GCAssert(m_iCount>=0);
-#endif
-			T t = m_items[m_iCount-1];
-			return t;
-		}
-
-		unsigned int Count() { return m_iCount; }
-
-		void Keep(unsigned int num)
-		{
-			GCAssert(num <= m_iCount);
-			m_iCount = num;
-		}
-
-		T* GetData() { return m_items; }
+		/** Pop all elements off the stack, discard the cached extra segment. */
+		void Clear();
 
 	protected:
-		// no impl
-		GCStack(const GCStack& other);
-		GCStack& operator=(const GCStack& other);
+		// no implementation of these
+		GCStack(const GCStack<T, kMarkStackItems>& other);
+		GCStack<T, kMarkStackItems>& operator=(const GCStack<T, kMarkStackItems>& other);
 
 	private:
-		void Alloc() 
+		
+		struct GCStackSegment
 		{
-			// need to allocate a new block first
-			if(m_iAllocSize) {
-				T* items = new T[ m_iAllocSize ];
-				if ( items )
-				{
-					VMPI_memcpy(items, m_items, m_iCount * sizeof(T));
-				}
-				delete [] m_items;
-				m_items = items;
-			}
-		}
-		unsigned int m_iCount, m_iAllocSize;
-		T *m_items;
+			T				m_items[kMarkStackItems];
+			GCStackSegment* m_prev;
+		};
+		
+		T*					m_base;			// first entry in m_topSegment
+		T*					m_top;			// first free entry in m_topSegment
+		T*					m_limit;		// first entry following m_topSegment
+		GCStackSegment*	    m_topSegment;	// current stack segment, older segments linked through 'prev'
+		uint32_t			m_hiddenCount;	// number of elements in those older segments
+		GCStackSegment*		m_extraSegment;	// single-element cache used to avoid hysteresis
+
+		// The current segment must be NULL or full (top == limit).  Push a new segment onto the stack,
+		// and update all instance vars.
+		void PushSegment();
+		
+		// The current segment is discarded and the previous segment, if any, reinstated.
+		// Update all instance vars.
+		void PopSegment();
 	};
+	
+	template<typename T, int kMarkStackItems> 
+	inline void GCStack<T, kMarkStackItems>::Push(T item)
+	{
+		if (m_top == m_limit) 
+			PushSegment();
+		GCAssert(m_top < m_limit);
+		*m_top++ = item;
+	}
+	
+	template<typename T, int kMarkStackItems> 
+	inline T GCStack<T, kMarkStackItems>::Pop()
+	{
+		GCAssert(m_top > m_base);
+		T t = *--m_top;
+#ifdef _DEBUG
+		VMPI_memset(m_top, 0, sizeof(T));
+#endif
+		if (m_top == m_base)
+			if (m_topSegment->m_prev != NULL)
+				PopSegment();
+		return t;
+	}
+	
+	template<typename T, int kMarkStackItems> 
+	inline T GCStack<T, kMarkStackItems>::Peek()
+	{
+		GCAssert(m_top > m_base);
+		return *(m_top-1);
+	}
+	
+	template<typename T, int kMarkStackItems> 
+	inline uint32_t GCStack<T, kMarkStackItems>::Count()
+	{
+		return uint32_t(m_top - m_base) + m_hiddenCount;
+	}
 }
 
 #endif /* __GCStack__ */
