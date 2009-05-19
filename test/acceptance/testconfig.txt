@@ -40,6 +40,10 @@
 #    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase even if the parent has been skipped
 
+# To specify that a configuration string DOES NOT contain certain strings use Zero-width negative lookahead: (?!regex)
+#   For example, to set an expected failure for all test runs EXCEPT when -Dinterp is used, use the following:
+#       ^((?!Dinterp).)*$
+
 # Example:
 # ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-Dinterp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
 
@@ -94,6 +98,8 @@ abcasm/stringEscapes , .* , skip,
 # -Djitordie from time to time to ensure that all abs coverage tests
 # remain jittable.
 
+abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=491056
+
 # Take coverage tests offline: need to analyze failures on tryserver
 abcasm/coverage/I , (x64|ppc64).*-debug , skip , investigating
 abcasm/coverage/I:inclocal_i_double , .*-Dinterp , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
@@ -138,7 +144,7 @@ ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/
 
 as3/Vector/lastindexofInitializers, (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=487253
 as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
-as3/Vector/initializerLargeVector, x64-lnx.*-Ojit, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281 intermittent seg fault
+as3/Vector/initializerLargeVector, x64.*-Ojit, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281 intermittent seg fault
 
 # https://bugzilla.mozilla.org/show_bug.cgi?id=487027
 # Sampler failure, started with changeset 1863:fa7476a03d9c
