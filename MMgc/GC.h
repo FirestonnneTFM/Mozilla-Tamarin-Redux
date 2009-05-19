@@ -94,6 +94,8 @@ namespace avmplus
 
 namespace MMgc
 {
+	class GCAutoEnter;
+
 	/**
 	 * Conservative collector unit of work
 	 */
