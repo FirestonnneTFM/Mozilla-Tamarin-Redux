@@ -1513,6 +1513,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GCStack.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GCStack.h"
 				>
 			</File>
@@ -1655,48 +1659,6 @@
 			<File
 				RelativePath="..\VMPI\MMgcPortWin.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="VTune|Windows Mobile 6 Professional SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\VMPI\SpinLockWin.cpp"

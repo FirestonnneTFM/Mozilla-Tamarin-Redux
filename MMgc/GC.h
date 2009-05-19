@@ -96,6 +96,10 @@ namespace MMgc
 	class GCWorkItem
 	{
 	public:
+		// FIXME? The initialization is redundant for most locals and for the mark stack we
+		// don't want to have to init all the elements in the array as it makes allocating a mark
+		// stack segment expensive.  I believe we could safely get rid of the two initializing
+		// clauses here.  --lars
 		GCWorkItem() : ptr(NULL), _size(0) { }
 		inline GCWorkItem(const void *p, uint32_t s, bool isGCItem);
 

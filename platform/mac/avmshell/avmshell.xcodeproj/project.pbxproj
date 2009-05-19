@@ -326,6 +326,8 @@
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
+		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
+		07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
 		191659990FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
@@ -775,6 +777,7 @@
 		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
+		07ED27EF0FBD78C4007E3950 /* GCStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCStack.cpp; path = ../../../MMgc/GCStack.cpp; sourceTree = SOURCE_ROOT; };
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
@@ -1329,6 +1332,7 @@
 				079DFA9F0F3A96BE0031D1B4 /* GCObject.cpp */,
 				079DFAA00F3A96BE0031D1B4 /* GCObject.h */,
 				3FFDEC6C0F69A54F00E510AB /* GCSpinLock.h */,
+				07ED27EF0FBD78C4007E3950 /* GCStack.cpp */,
 				079DFAA20F3A96BE0031D1B4 /* GCStack.h */,
 				079DFAA30F3A96BE0031D1B4 /* GCTests.cpp */,
 				079DFAA40F3A96BE0031D1B4 /* GCTests.h */,
@@ -1671,6 +1675,7 @@
 				D935BDED0FA0EBA7001E3E70 /* avm.cpp in Sources */,
 				078F536C0FA473C50064216F /* ShellCore.cpp in Sources */,
 				191659990FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */,
+				07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1845,6 +1850,7 @@
 				D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */,
 				078F536B0FA473C50064216F /* ShellCore.cpp in Sources */,
 				191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */,
+				07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

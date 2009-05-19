@@ -1683,7 +1683,7 @@ bail:
 		if(gc->validateDefRef) {
 			// kill incremental mark since we're gonna wipe the marks
 			gc->marking = false;
-			gc->m_incrementalWork.Keep(0);
+			gc->m_incrementalWork.Clear();
 
 			CleanEntireStack();
 			gc->Trace(item.ptr, item._size);
@@ -2783,6 +2783,7 @@ bail:
 			}
 		}
 		MarkQueueAndStack(m_incrementalWork);
+		m_incrementalWork.Clear();				// Frees any cached resources
 
 		policy.signal(GCPolicyManager::END_FinalRootAndStackScan);
 		
