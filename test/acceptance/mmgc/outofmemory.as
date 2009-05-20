@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+import avmplus.*;
 
 		/****  inner class Node  ***/
 		class Node 
@@ -50,10 +51,20 @@
 print("before out-of-memory PASSED!");
 var data:Array=new Array();
 var last:Node=new Node();
-for (var i=0;i<100000;i++) {
+var counter:int = 0;
+var memWatcher:Number = 0;
+while (true) {
     var node=new Node(last,last);
     data.push(node);
     last=node;
+    counter++;
+    if ((counter % 20000) == 0){
+        if (System.totalMemory < memWatcher){
+            print("memory stopped growing, something wrong?");
+            break;
+        }
+        memWatcher = System.totalMemory
+    }
 }
 
 // if reaches this point did not run out of memory
