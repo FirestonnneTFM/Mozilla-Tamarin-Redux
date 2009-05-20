@@ -47,7 +47,10 @@ function main() {
 	findproperty START 
 	pushstring "Instructions that start with the letter C" 
 	callpropvoid START 1
-	newfunction .function_id(runTest)
+	newfunction .function_id(runTest1)
+	getlocal0
+	call 0
+	newfunction .function_id(runTest2)
 	getlocal0
 	call 0
 	findproperty END
@@ -55,10 +58,10 @@ function main() {
 	returnvoid
 }
 
-.method_info { name: runTest }
+.method_info { name: runTest1 }
 .method_body_info {
 
-	method: .function_id(runTest)
+	method: .function_id(runTest1)
 
 	exception: { 
 		.exception { 
@@ -273,54 +276,6 @@ function main() {
 	end_invalid_checkfilter:
 		pop			//  lose appeasement
 
-		findproperty COMPARE_STRICTEQ
-	pushstring "coerce int to String"
-		pushstring "7" // expected
-		pushint 7
-		coerce String
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "coerce int to uint"
-		pushint 87 // expected
-		pushint 87
-		coerce uint
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "coerce uint to int"
-		pushint 79 // expected
-		pushuint 79
-		coerce int
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "coerce String to int"
-		pushint 79 // expected
-		pushstring "79"
-		coerce int
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "coerce String to boolean"
-		pushtrue // expected
-		pushstring "79"
-		coerce Boolean
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "coerce false String to boolean"
-		pushtrue // expected
-		pushstring "false"
-		coerce Boolean
-		callpropvoid COMPARE_STRICTEQ 3
-
-		findproperty COMPARE_STRICTEQ
-	pushstring "coerce String to Object"
-		pushstring "s to o" // expected
-		pushstring "s to o"
-		coerce Object
-		callpropvoid COMPARE_STRICTEQ 3
 
 
 	try_invalid_coerce_XML:
@@ -342,6 +297,45 @@ function main() {
 
 	end_invalid_coerce_XML:
 		pop	//  lose appeasment
+
+
+		/*findproperty COMPARE_STRICTEQ
+	pushstring "convert_o int"*/
+		pushint 7
+		convert_o
+		findproperty PASS
+	swap
+	callpropvoid PASS 1
+
+	try_invalid_convert_o:
+		pushnull
+		convert_o
+		pop
+	end_try_invalid_convert_o:
+		pushstring "convert_o null"
+		findproperty FAIL
+	swap
+	callpropvoid FAIL 1
+		jump end_invalid_convert_o
+
+		catch_invalid_convert_o:
+		getlocal0
+		pushscope
+		findproperty PASS
+	swap
+	callpropvoid PASS 1
+
+	end_invalid_convert_o:
+	
+
+		returnvoid
+	}
+} // .method_body_info
+
+function runTest2()
+{
+		getlocal0
+		pushscope
 
 		findproperty COMPARE_STRICTEQ
 	pushstring "coerce_i uint to int"
@@ -555,34 +549,55 @@ function main() {
 		convert_i
 		callpropvoid COMPARE_STRICTEQ 3
 
-		/*findproperty COMPARE_STRICTEQ
-	pushstring "convert_o int"*/
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce int to String"
+		pushstring "7" // expected
 		pushint 7
-		convert_o
-		findproperty PASS
-	swap
-	callpropvoid PASS 1
+		coerce String
+		callpropvoid COMPARE_STRICTEQ 3
 
-	try_invalid_convert_o:
-		pushnull
-		convert_o
-		pop
-	end_try_invalid_convert_o:
-		pushstring "convert_o null"
-		findproperty FAIL
-	swap
-	callpropvoid FAIL 1
-		jump end_invalid_convert_o
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce int to uint"
+		pushint 87 // expected
+		pushint 87
+		coerce uint
+		callpropvoid COMPARE_STRICTEQ 3
 
-		catch_invalid_convert_o:
-		getlocal0
-		pushscope
-		findproperty PASS
-	swap
-	callpropvoid PASS 1
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce uint to int"
+		pushint 79 // expected
+		pushuint 79
+		coerce int
+		callpropvoid COMPARE_STRICTEQ 3
 
-	end_invalid_convert_o:
-	
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce String to int"
+		pushint 79 // expected
+		pushstring "79"
+		coerce int
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce String to boolean"
+		pushtrue // expected
+		pushstring "79"
+		coerce Boolean
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce false String to boolean"
+		pushtrue // expected
+		pushstring "false"
+		coerce Boolean
+		callpropvoid COMPARE_STRICTEQ 3
+
+		findproperty COMPARE_STRICTEQ
+	pushstring "coerce String to Object"
+		pushstring "s to o" // expected
+		pushstring "s to o"
+		coerce Object
+		callpropvoid COMPARE_STRICTEQ 3
+
 		findproperty COMPARE_STRICTEQ
 	pushstring "convert_u double"
 		pushdouble 4294967295. // expected
@@ -634,11 +649,8 @@ function main() {
 		convert_s
 		callpropvoid COMPARE_STRICTEQ 3
 
-
-		returnvoid
-	}
-} // .method_body_info
-
+	returnvoid
+}
 
 function noArgs()
 {
