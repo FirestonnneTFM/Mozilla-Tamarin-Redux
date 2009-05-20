@@ -53,6 +53,11 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
+# Bug https://bugzilla.mozilla.org/show_bug.cgi?id=491489
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} --vmargs="-Dinterp" abcasm/coverage
+# Bug https://bugzilla.mozilla.org/show_bug.cgi?id=494016
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} --vmargs="-Dinterp" as3/ShellClasses/toplevel.as
+
 # rev 1863:fa7476a03d9c assert fails on mac64 and mac-intel-10.4
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} as3/sampling/InvocationSampling.as
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} as3/sampling/InvocationSampling.as
