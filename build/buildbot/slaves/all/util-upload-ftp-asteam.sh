@@ -59,7 +59,7 @@ echo "Uploading $source to $dest"
 
 ## Just quickly make sure that the permisions are fully open on the file
 chmod 777 $source
-curl --ftp-create-dirs -T $source ftp://adobenet\\${ASTEAM_CRED}@${dest}
+curl --ftp-create-dirs -T $source ftp://${dest}
 echo ""
 echo ""
 
