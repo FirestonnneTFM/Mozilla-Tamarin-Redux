@@ -622,7 +622,7 @@ function runTest2()
 		callpropvoid COMPARE_STRICTEQ 3
 
 		findproperty COMPARE_STRICTEQ
-	pushstring "convert_i long"
+	pushstring "convert_u long"
 		pushuint 4294967295 // expected
 		pushuint 4294967295
 		convert_u
