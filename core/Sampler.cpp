@@ -500,7 +500,11 @@ namespace avmplus
 				if (s.typeOrVTable > 7 && !GC::GetMark((void*)s.typeOrVTable))
 				{
 					GCWorkItem item((void*)s.typeOrVTable, (uint32)GC::Size((void*)s.typeOrVTable), true);
-					core->gc->PushWorkItem(item);
+					// NOTE that PushWorkItem_MayFail can fail due to mark stack overflow in tight memory situations.
+					// This failure is visible as GC::m_markStackOverflow being true.  The GC compensates
+					// for that but it seems hard to compensate for it here.  The most credible workaround
+					// is likely to test that flag at the end of presweep and disable the sampler if it is set.
+					core->gc->PushWorkItem_MayFail(item);
 				}
 			}
 #ifdef _DEBUG

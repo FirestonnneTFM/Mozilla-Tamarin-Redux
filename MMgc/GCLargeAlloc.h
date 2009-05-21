@@ -47,6 +47,7 @@ namespace MMgc
 	class GCLargeAlloc : public GCAllocObject
 	{
 		friend class GC;
+		friend class GCLargeAllocIterator;
 	private:
 		enum {
 			kMarkFlag         = 0x1,
@@ -175,6 +176,12 @@ namespace MMgc
 			return (block->flags & kFinalizeFlag) != 0;
 		}			
 		
+		static void ClearQueued(const void *item)
+		{
+			LargeBlock *block = GetBlockHeader(item);
+			block->flags &= ~kQueuedFlag;
+		}
+		
 		// The list of chunk blocks
 		LargeBlock* m_blocks;
 		bool m_startedFinalize;
@@ -183,6 +190,42 @@ namespace MMgc
 	protected:
 		GC *m_gc;
 	
+	};
+
+	/**
+	 * A utility class used by the marker to handle mark stack overflow: it abstracts
+	 * iterating across marked, non-free objects in one allocator instance.
+	 *
+	 * No blocks must be added or removed during the iteration.  If an object's
+	 * bits are changed, those changes will visible to the iterator if the object has
+	 * not yet been reached by the iteration. 
+	 */
+	class GCLargeAllocIterator
+	{
+	public:
+		GCLargeAllocIterator(MMgc::GCLargeAlloc* alloc) 
+			: alloc(alloc)
+			, block(alloc->m_blocks)
+		{
+		}
+		
+		bool GetNextMarkedObject(void*& out_ptr, uint32_t& out_size)
+		{
+			while (block != NULL) {
+				GCLargeAlloc::LargeBlock* b = block;
+				block = block->next;
+				if ((b->flags & (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) == (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) {
+					out_ptr = GetUserPointer(b+1);
+					out_size = b->usableSize - (uint32_t)DebugSize();
+					return true;
+				}
+			}
+			return false;
+		}
+		
+	private:
+		GCLargeAlloc* const alloc;
+		GCLargeAlloc::LargeBlock* block;
 	};
 }
 

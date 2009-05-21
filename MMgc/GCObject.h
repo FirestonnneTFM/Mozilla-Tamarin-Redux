@@ -219,7 +219,7 @@ namespace MMgc
 			
 #if 0
 			if(gc->keepDRCHistory)
-				history.Push(GetStackTraceIndex(2));
+				history.Push(GetStackTraceIndex(2));				// FIXME: Observe that the Push can fail
 #endif
 		}
 
@@ -272,7 +272,7 @@ namespace MMgc
 			// are smaller the ScopeChain was already finalized, thus the
 			// push crashes b/c the history object has been destructed.
 			if(gc->keepDRCHistory)
-				history.Push(GetStackTraceIndex(1));
+				history.Push(GetStackTraceIndex(1));					// FIXME: observe that the push can fail
 #endif
 
 			// composite == 1 is the same as (rc == 1 && !notSticky && !notInZCT)

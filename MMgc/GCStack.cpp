@@ -38,8 +38,37 @@
 
 #include "MMgc.h"
 
+//#define TESTING_MARKSTACK
+#define MARKSTACK_ALLOWANCE  1
+
+inline void* operator new(size_t, void* p) { return p; }
+
 namespace MMgc
 {
+#ifdef TESTING_MARKSTACK
+	static int markstack_allowance = MARKSTACK_ALLOWANCE;
+#endif
+
+	// FIXME: This must use FixedMalloc::PleaseAlloc.
+	static inline void* AllocStackSegment(size_t nbytes)
+	{
+#ifdef TESTING_MARKSTACK
+		if (markstack_allowance == 0)
+			return NULL;
+		--markstack_allowance;
+#endif
+		nbytes = (nbytes + 4095) & ~4095;
+		return FixedMalloc::GetInstance()->Alloc(nbytes);
+	}
+
+	static inline void FreeStackSegment(void* p)
+	{
+#ifdef TESTING_MARKSTACK
+		++markstack_allowance;
+#endif
+		FixedMalloc::GetInstance()->Free(p);
+	}
+	
 	template<typename T, int kMarkStackItems>
 	GCStack<T, kMarkStackItems>::GCStack()
 		: m_base(NULL)
@@ -57,7 +86,8 @@ namespace MMgc
 	{
 		while (m_topSegment != NULL)
 			PopSegment();
-		delete m_extraSegment;
+		if (m_extraSegment)
+			FreeStackSegment(m_extraSegment);
 	}
 
 	template<typename T, int kMarkStackItems>
@@ -70,27 +100,32 @@ namespace MMgc
 
 		// Discard the cached segment
 		if (m_extraSegment != NULL) {
-			delete m_extraSegment;
+			FreeStackSegment(m_extraSegment);
 			m_extraSegment = NULL;
 		}
 	}
 
 	template<typename T, int kMarkStackItems> 
-	void GCStack<T, kMarkStackItems>::PushSegment()
+	bool GCStack<T, kMarkStackItems>::PushSegment()
 	{
 		GCAssert(sizeof(GCStackSegment) <= 4096);
 		GCAssert(m_top == m_limit);
+		if (m_extraSegment == NULL) {
+			void *memory = AllocStackSegment(sizeof(GCStackSegment));
+			if (memory == NULL)
+				return false;
+			m_extraSegment = new (memory) GCStackSegment();
+		}
 		if (m_topSegment != NULL)
 			m_hiddenCount += kMarkStackItems;
 		GCStackSegment* seg = m_extraSegment;
 		m_extraSegment = NULL;
-		if (seg == NULL)
-			seg = new GCStackSegment();
 		seg->m_prev = m_topSegment;
 		m_topSegment = seg;
 		m_base = m_topSegment->m_items;
 		m_limit = m_base + kMarkStackItems;
 		m_top = m_base;
+		return true;
 	}
 
 	template<typename T, int kMarkStackItems>
@@ -107,7 +142,7 @@ namespace MMgc
 			m_extraSegment = seg;
 		}
 		else
-			delete seg;
+			FreeStackSegment(seg);
 	}
 
 	// Visual C++ 2008 requires the copy constructor and assignment operator to be present

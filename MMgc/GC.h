@@ -865,6 +865,19 @@ namespace MMgc
 			}
 		}
 
+		void ClearQueued(const void *item)
+		{
+#ifdef MMGC_MEMORY_INFO
+			item = GetRealPointer(item);
+			GCAssert(IsPointerToGCPage(item));
+#endif 			
+			if (GCLargeAlloc::IsLargeBlock(item)) {
+				GCLargeAlloc::ClearQueued(item);
+			} else {
+				GCAlloc::ClearQueued(item);
+			}
+		}
+		
 		static void ClearFinalized(const void *item)
 		{
 #ifdef MMGC_MEMORY_INFO
@@ -1201,7 +1214,7 @@ namespace MMgc
 		}
 
 		// for deciding a tree of things should be scanned from presweep
-		void PushWorkItem(GCWorkItem &item) { PushWorkItem(m_incrementalWork, item); }
+		void PushWorkItem_MayFail(GCWorkItem &item);
 		
 	private:
 
@@ -1282,6 +1295,10 @@ namespace MMgc
 		void StartIncrementalMark();
 		void FinishIncrementalMark();
 
+		bool m_markStackOverflow;
+		void HandleMarkStackOverflow();
+		void SignalMarkStackOverflow(GCStack<GCWorkItem> &stack, GCWorkItem& item);
+		
 		int IsWhite(const void *item);
 		
 		const static int16_t kSizeClasses[kNumSizeClasses];		
@@ -1366,14 +1383,16 @@ namespace MMgc
 
 #ifdef _DEBUG
 		public:
-		// sometimes useful for mutator to call this
-		void Trace(const void *stackStart=NULL, uint32_t stackSize=0);
+		// Sometimes useful for mutator to call this.  Returns true if it succeeded, false if there was
+		// a mark stack overflow.
+		bool Trace(const void *stackStart=NULL, uint32_t stackSize=0);
 		private:
 #endif
 
 		void Finalize();
 		void Sweep(bool force=false);
 		void ForceSweep() { Sweep(true); }
+		void MarkAllRoots(GCStack<GCWorkItem>& work);
 		void Mark(GCStack<GCWorkItem> &work);
 		void MarkQueueAndStack(GCStack<GCWorkItem> &work);
 		void MarkItem(GCStack<GCWorkItem> &work)
@@ -1455,7 +1474,7 @@ private:
 
 		void CheckThread();
 
-		void PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item);
+		void PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item);		// defined in GC.cpp, always inlined in callers there
 
 #ifdef _DEBUG		
 		void CheckFreelist(GCAlloc *gca);
