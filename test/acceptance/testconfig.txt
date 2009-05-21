@@ -101,6 +101,9 @@ abcasm/stringEscapes , .* , skip,
 abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=491056
 
 # Take coverage tests offline: need to analyze failures on tryserver
+abcasm/coverage/B:not uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
+abcasm/coverage/B:int or uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
+abcasm/coverage/B:int xor uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
 abcasm/coverage/C:convert_i long , x64.*-(lnx|win).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493922
 abcasm/coverage/C:convert_i long bis , x64.*-(lnx|win).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493922
 abcasm/coverage/C:convert_i long , ppc64.*-mac.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493922
