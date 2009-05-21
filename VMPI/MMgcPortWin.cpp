@@ -157,7 +157,7 @@ void VMPI_releaseAlignedMemory(void* address)
 	VMPI_releaseMemoryRegion(address, 0);
 }
 
-size_t VMPI_getVMPageCount(size_t pageSize)
+size_t VMPI_getPrivateResidentPageCount(size_t pageSize)
 {
 	void *addr = 0;
 	size_t ret;
