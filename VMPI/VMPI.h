@@ -205,7 +205,7 @@ extern size_t		VMPI_getVMPageSize();
 * @return number of pages
 * @see VMPI_getVMPageSize()
 */
-extern size_t		VMPI_getVMPageCount(size_t pageSize);
+extern size_t		VMPI_getPrivateResidentPageCount(size_t pageSize);
 
 /**
 * Method to find whether the platform supports merging of contiguous memory regions from heap
