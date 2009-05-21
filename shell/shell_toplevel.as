@@ -83,8 +83,14 @@ package avmplus
 		private native static function getArgv():Array
 		public static const argv:Array = getArgv();
 		public native static function readLine():String;
+
+		// Amount of real memory we've aqcuired from the OS
 		public native static function get totalMemory():Number;
+
+		// Part of totalMemory we aren't using
 		public native static function get freeMemory():Number;
+
+		// process wide size of resident private memory 
 		public native static function get privateMemory():Number;
 
 		// function exists solely to test native-methods with custom namespaces
