@@ -104,11 +104,7 @@ namespace avmshell
 			initializeLogging(settings.numfiles > 0 ? settings.filenames[0] : "AVMLOG");
 
 		{
-			MMGC_ENTER;
-			if(MMGC_ENTER_STATUS != 0) {
-				// allowing control to flow below to Destroy results in tons of leak asserts
-				return OUT_OF_MEMORY;
-			}
+			MMGC_ENTER_RETURN(OUT_OF_MEMORY);
 			
 #ifdef VMCFG_WORKERTHREADS
 			if (settings.numworkers == 1 && settings.numthreads == 1 && settings.repeats == 1)
@@ -449,10 +445,7 @@ namespace avmshell
 
 	static void* slaveThread(void *arg)
 	{
-		MMGC_ENTER;
-		if(MMGC_ENTER_STATUS != 0) {
-			pthread_exit(NULL);
-		}
+		MMGC_ENTER_RETURN(NULL);
 
 		ThreadNode* self = (ThreadNode*)arg;
 		MultiworkerState& state = self->state;

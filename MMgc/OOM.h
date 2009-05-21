@@ -40,10 +40,22 @@
 #ifndef __OOM_H__
 #define __OOM_H__
 
-#define MMGC_ENTER MMgc::EnterFrame _ef;\
-        _ef.status = setjmp(_ef.jmpbuf);
+#define MMGC_ENTER_VOID							\
+	if(MMgc::GCHeap::GetGCHeap() == NULL)		\
+		return;									\
+	MMgc::EnterFrame _ef;						\
+	_ef.status = setjmp(_ef.jmpbuf);            \
+	if(_ef.status != 0)							\
+		return;
 
-#define MMGC_ENTER_STATUS (_ef.status)
+
+#define MMGC_ENTER_RETURN(_val)					\
+	if(MMgc::GCHeap::GetGCHeap() == NULL)		\
+		return _val;							\
+	MMgc::EnterFrame _ef;						\
+	_ef.status = setjmp(_ef.jmpbuf);            \
+	if(_ef.status != 0)							\
+		return _val;
 
 namespace MMgc
 {
