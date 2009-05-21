@@ -176,8 +176,3 @@ ecma3/String/e15_5_3_2_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla
 ecma3/String/e15_5_3_2_2, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 ecma3/TypeConversion/e9_3_1_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 ecma3/Unicode/uc_006, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-
-
-# https://bugzilla.mozilla.org/show_bug.cgi?id=494016
-# the test asserts:  System.freeMemory > 0
-as3/ShellClasses/toplevel, (x64|ppc64).*mac.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=494016
