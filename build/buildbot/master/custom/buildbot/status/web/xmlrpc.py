@@ -29,6 +29,61 @@ class XMLRPCServer(xmlrpc.XMLRPC):
         lastbuild = builder.getBuild(-1)
         return Results[lastbuild.getResults()]
 
+    def xmlrpc_isBuildSetActive(self, scheduler_names):
+        """Return whether the build is currently active. Treat builders that
+        are offline as not building, which means they will be skipped.
+        """
+        
+        #log.msg("isBuildSetActive() called for : %s" % (scheduler_names))
+        if scheduler_names == '':
+            # Get a list of builders
+            buildNames = self.status.getBuilderNames()
+            for builder in buildNames:
+                state = self.status.getBuilder(builder).getState()[0]
+                #log.msg("isBuildSetActive(): [%s] state: %s" % (builder, state))
+                # If any builder is in 'building' state then we are active so return
+                # Possible states are:
+                #   building -> instantly return True, don't need to check any other builders
+                #   idle -> we might return False if nobody is 'building'
+                #   offline -> treat as idle, don't hold up any additional build requests
+                #               This means that the build MAY be skipped if another request
+                #               if another request comes in before it comes online
+                if state == "building":
+                    #log.msg("isBuildSetActive(): [%s] is building, return True" % builder)
+                    return True
+            
+            # We found NO builders in a 'building' state. The means:
+            #       a) all builders are in an idle state
+            #    OR b) one or more builders are 'oflline' and other are in 'idle' state
+            return False
+        else:
+            # Get a list of scheudulers
+            schedulers = self.status.getSchedulers()
+            for scheduler in schedulers:
+                if scheduler.name in scheduler_names:
+                    # Get a list of builders
+                    buildNames = scheduler.listBuilderNames()
+                    for builder in buildNames:
+                        state = self.status.getBuilder(builder).getState()[0]
+                        #log.msg("isBuildSetActive(): [%s-%s] state: %s" % (scheduler.name, builder, state))
+                        # If any builder is in 'building' state then we are active so return
+                        # Possible states are:
+                        #   building -> instantly return True, don't need to check any other builders
+                        #   idle -> we might return False if nobody is 'building'
+                        #   offline -> treat as idle, don't hold up any additional build requests
+                        #               This means that the build MAY be skipped if another request
+                        #               if another request comes in before it comes online
+                        if state == "building":
+                            #log.msg("isBuildSetActive(): [%s-%s] is building, return True" % (scheduler.name, builder))
+                            return True
+            
+            # We found NO builders in a 'building' state. The means:
+            #       a) all builders are in an idle state
+            #    OR b) one or more builders are 'oflline' and other are in 'idle' state
+            #log.msg("isBuildSetActive(): False")
+            return False
+
+
     def xmlrpc_getLastBuilds(self, builder_name, num_builds):
         """Return the last N completed builds for the given builder.
         'builder_name' is the name of the builder to query
@@ -52,7 +107,7 @@ class XMLRPCServer(xmlrpc.XMLRPC):
             if branch is None:
                 branch = ""
             try:
-                revision = build.getProperty("got_revision")
+                revision = build.getSourceStamp().revision
             except KeyError:
                 revision = ""
             revision = str(revision)
