@@ -1646,7 +1646,7 @@ namespace MMgc
 	
 	size_t GCHeap::GetPrivateBytes()
 	{
-		return VMPI_getVMPageCount(kBlockSize);
+		return VMPI_getPrivateResidentPageCount(kBlockSize);
 	}
 
 

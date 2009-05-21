@@ -168,7 +168,7 @@ void VMPI_releaseAlignedMemory(void* address)
 #define state_Private 6
 #define state_size 7
 
-size_t VMPI_getVMPageCount(size_t pageSize)
+size_t VMPI_getPrivateResidentPageCount(size_t pageSize)
 {
 #ifdef LINUX
 		uint32_t pid = getpid();
