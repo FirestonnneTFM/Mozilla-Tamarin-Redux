@@ -40,7 +40,7 @@
 #ifndef __GC__
 #define __GC__
 
-#define MMGC_GCENTER(_gc)  MMgc::GCAutoExit __mmgc_auto_exit(_gc);
+#define MMGC_GCENTER(_gc)  MMgc::GCAutoEnter __mmgc_auto_enter(_gc);
 
 #if defined(MMGC_IA32) && defined(_MSC_VER)
 
@@ -48,8 +48,7 @@
 	jmp_buf __mmgc_env;													\
 	setjmp(__mmgc_env);													\
 	__asm { mov _stack,esp };											\
-	GCAssertMsg(_gc->GetStackEnter() != 0, "Missing MMGC_GCENTER macro"); \
-	_size = (uint32_t)(_gc->GetStackEnter() - (uintptr_t)_stack);
+	_size = (uint32_t)(_gc->GetStackTop() - (uintptr_t)_stack);
 
 #else
 
@@ -57,10 +56,24 @@
 	jmp_buf __mmgc_env;													\
 	setjmp(__mmgc_env);													\
 	_stack = &__mmgc_env;												\
-	GCAssertMsg(_gc->GetStackEnter() != 0, "Missing MMGC_GCENTER macro"); \
-	_size = (uint32_t)(_gc->GetStackEnter() - (uintptr_t)_stack);
+	_size = (uint32_t)(_gc->GetStackTop() - (uintptr_t)_stack);
 
 #endif
+
+// This macro creates a GC root of the current threads stack, there
+// are two use cases for this: 
+//
+// 1) the main thread is halting to let another thread run doing
+// possible GC activity (debugger use case)
+//
+// 2) the stack is moving to another area of memory (stack switching)
+// but the old stack must still get scanned
+#define MMGC_GC_ROOT_THREAD(_gc)						\
+	void *__stack;										\
+	size_t __stackSize;									\
+	MMGC_GET_STACK_EXTENTS(_gc, __stack, __stackSize);	\
+	GCRoot root(_gc, __stack, __stackSize);             \
+	MMgc::GCAutoEnterPause __mmgc_enter_pause(_gc);
 
 // Enable our own alloca() replacement that always allocates in the heap, this is good on
 // systems with limited memory or limited stack
@@ -81,15 +94,6 @@ namespace avmplus
 
 namespace MMgc
 {
-	class GCAutoExit
-	{
-	public:
-		GCAutoExit(GC *_gc);
-		~GCAutoExit();
-	private:
-		GC* gc;
-	};
-
 	/**
 	 * Conservative collector unit of work
 	 */
@@ -739,6 +743,11 @@ namespace MMgc
 		void Collect();
 
 		/**
+		 * Do a full collection at the next MMGC_GCENTER macro site
+		 */
+		void QueueCollection() { fullCollectionQueued = true; }
+
+		/**
 		* flags to be passed as second argument to alloc
 		*/
 		enum AllocFlags
@@ -1155,6 +1164,8 @@ namespace MMgc
 		 */
 		bool hitZeroObjects;
 
+		bool fullCollectionQueued;
+
 		// called at some apropos moment from the mututor, ideally at a point
 		// where all possible GC references will be below the current stack pointer
 		// (ie in memory we can safely zero).  This will return right away if
@@ -1172,18 +1183,22 @@ namespace MMgc
 		void ClearWeakRef(const void *obj);
 
 		// legacy API that gets physical start of OS thread
-		uintptr_t GetStackTop() const;
+		uintptr_t GetOSStackTop() const;
+		uintptr_t GetStackTop() const
+		{
+			// temporary crutch until we're moved over to the MMGC_GCENTER system
+			if(stackEnter == NULL)
+				return GetOSStackTop();
+			return GetStackEnter();
+		}
 
 		// owner stack refers to the stack that created the GC		
 		uintptr_t GetOwnerStackBottom() const { return (uintptr_t)rememberedStackBottom; }
 
 		uintptr_t GetStackEnter() const 
 		{ 
-			if(stackEnter == 0)
-				return GetStackTop();
-			return stackEnter; 
+			return (uintptr_t)stackEnter; 
 		}
-		void SetStackEnter(void *enter);
 
 		// for deciding a tree of things should be scanned from presweep
 		void PushWorkItem(GCWorkItem &item) { PushWorkItem(m_incrementalWork, item); }
@@ -1205,6 +1220,11 @@ namespace MMgc
 
 		// heapFree is like heap->Free except that it also calls policy.signalBlockDeallocation.
 		void heapFree(void *ptr, size_t siz=0, bool track=true);
+
+		friend class GCAutoEnter;
+		friend class GCAutoEnterPause;
+		void SetStackEnter(GCAutoEnter *enter);
+		GCAutoEnter *GetAutoEnter() { return stackEnter; }
 
 		void gclog(const char *format, ...);
 		void log_mem(const char *name, size_t s, size_t comp );
@@ -1241,7 +1261,7 @@ namespace MMgc
 		bool stackCleaned;
 		const void *rememberedStackTop;
 		const void *rememberedStackBottom;
-		uintptr_t stackEnter;
+		GCAutoEnter* stackEnter;
 
 		// for external which does thread safe multi-thread AS execution
 		bool disableThreadCheck;
@@ -1617,6 +1637,33 @@ public:
 		}
 #endif
 	}
+
+	/**
+	 * Stack object that takes care of many things including defining stack
+	 * boundaries, doing low stack queued collections/ZCT reaps and stack cleaning
+	 */
+	class GCAutoEnter
+	{
+	public:
+		GCAutoEnter(GC *gc);
+		~GCAutoEnter();
+		void Destroy() { gc = NULL; }
+	private:
+		GC* gc;
+	};
+
+	/**
+	 * Undoes the affects of GCAutoEnter on entry and reapplies them upon exit
+	 */
+	class GCAutoEnterPause
+	{
+	public:
+		GCAutoEnterPause(GC *gc);
+		~GCAutoEnterPause();
+	private:
+		GC* gc;
+		GCAutoEnter *enterSave;
+	};
 }
 
 #endif /* __GC__ */
