@@ -1770,7 +1770,7 @@ bail:
 
 #ifdef WIN32
 
-	uintptr_t GC::GetStackTop() const
+	uintptr_t GC::GetOSStackTop() const
 	{
 		MEMORY_BASIC_INFORMATION __mib;
 		VirtualQuery(&__mib, &__mib, sizeof(MEMORY_BASIC_INFORMATION));
@@ -1786,7 +1786,7 @@ bail:
 #endif
 	pthread_key_t stackTopKey = NULL;
 
-	uintptr_t	GC::GetStackTop() const
+	uintptr_t	GC::GetOSStackTop() const
 	{
 		FLUSHWIN();
 
@@ -1813,7 +1813,7 @@ bail:
 #elif defined(AVMPLUS_UNIX) // SOLARIS
 	pthread_key_t stackTopKey = 0;
 
-	uintptr_t GC::GetStackTop() const
+	uintptr_t GC::GetOSStackTop() const
 	{
 		if(stackTopKey == 0)
 		{
@@ -1857,14 +1857,14 @@ bail:
 #endif // AVMPLUS_UNIX
 
 #if defined(_MAC) || defined(MMGC_MAC_NO_CARBON)
-	uintptr_t GC::GetStackTop() const
+	uintptr_t GC::GetOSStackTop() const
 	{
 		return (uintptr_t)pthread_get_stackaddr_np(pthread_self());
 	}
 #endif
 
 #if defined(LINUX) && defined(MMGC_ARM) && !defined(AVMPLUS_UNIX)
-	uintptr_t GC::GetStackTop() const
+	uintptr_t GC::GetOSStackTop() const
 	{
 		void* sp;
 		pthread_attr_t attr;
@@ -1875,7 +1875,7 @@ bail:
 #endif
 
 #ifdef VMCFG_SYMBIAN
-	uintptr_t GC::GetStackTop() const
+	uintptr_t GC::GetOSStackTop() const
 	{
 		TThreadStackInfo info;
 		RThread mythread;
@@ -3248,24 +3248,37 @@ bail:
  		delete seg;
  	} 
 
-	GCAutoExit::GCAutoExit(GC *_gc) : gc(NULL)
-	{
-		// we only resest the stack if its not already set
-		if(_gc->GetStackEnter() == 0) {
-			gc = _gc;
-			_gc->SetStackEnter(this);
+	GCAutoEnter::GCAutoEnter(GC *gc) : gc(NULL) 
+	{ 
+		if(gc->GetStackEnter() == 0) {
+			this->gc = gc;
+			gc->SetStackEnter(this); 
 		}
 	}
 	
-	GCAutoExit::~GCAutoExit()
-	{
+	GCAutoEnter::~GCAutoEnter() 
+	{ 
 		if(gc)
-			gc->SetStackEnter(0);
+			gc->SetStackEnter(NULL); 
 	}
 
-	void GC::SetStackEnter(void *enter) 
+	GCAutoEnterPause::GCAutoEnterPause(GC *gc) : gc(gc), enterSave(gc->GetAutoEnter())
 	{ 
-		if(stackEnter == 0 || enter == 0)
-			stackEnter = (uintptr_t)enter; 
+		GCAssert(gc->GetStackEnter() != 0);
+		gc->SetStackEnter(NULL);
 	}
+	
+	GCAutoEnterPause::~GCAutoEnterPause() 
+	{ 
+		gc->SetStackEnter(enterSave); 
+	}
+
+ 	void GC::SetStackEnter(GCAutoEnter *enter) 
+	{
+ 		if(enter == NULL && stackEnter != 0) {
+ 			stackEnter = NULL;
+ 		} else if(stackEnter == 0) {
+ 			stackEnter = enter;
+ 		} 
+ 	}
 }
