@@ -64,13 +64,23 @@ namespace MMgc
 		GCStack();
 		~GCStack();
 
-		/** Push 'item' onto the stack.  This always succeeds. */
-		void Push(T item);
+		/** 
+		 * Push 'item' onto the stack. 
+		 * @return true if the item could be pushed, false if the system
+		 *		   is out of memory and the item was not pushed.
+		 */
+		bool Push(T item);
 
-		/** Pop one item off the stack and return it.  Precondition: The stack must not be empty. */
+		/**
+		 * Pop one item off the stack.  Precondition: The stack must not be empty.
+		 * @return the popped element.
+		 */
 		T Pop();
 
-		/** @return the top element.  Precondition: The stack must not be empty. */
+		/**
+		 * @return the top element.  
+		 * Precondition: The stack must not be empty.
+		 */
 		T Peek();
 
 		/** @return the number of elements on the stack. */
@@ -99,9 +109,12 @@ namespace MMgc
 		uint32_t			m_hiddenCount;	// number of elements in those older segments
 		GCStackSegment*		m_extraSegment;	// single-element cache used to avoid hysteresis
 
-		// The current segment must be NULL or full (top == limit).  Push a new segment onto the stack,
-		// and update all instance vars.
-		void PushSegment();
+		/**
+		 * The current segment must be NULL or full (top == limit).  Push a new segment onto the 
+		 * stack, and update all instance vars.
+		 * @return true if the segment could be pushed or false if not (if it could not be allocated).
+		 */
+		bool PushSegment();
 		
 		// The current segment is discarded and the previous segment, if any, reinstated.
 		// Update all instance vars.
@@ -109,12 +122,14 @@ namespace MMgc
 	};
 	
 	template<typename T, int kMarkStackItems> 
-	inline void GCStack<T, kMarkStackItems>::Push(T item)
+	inline bool GCStack<T, kMarkStackItems>::Push(T item)
 	{
 		if (m_top == m_limit) 
-			PushSegment();
+			if (!PushSegment())
+				return false;
 		GCAssert(m_top < m_limit);
 		*m_top++ = item;
+		return true;
 	}
 	
 	template<typename T, int kMarkStackItems> 

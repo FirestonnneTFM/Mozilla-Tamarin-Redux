@@ -76,6 +76,7 @@ namespace MMgc
 	class GCAlloc : public GCAllocObject
 	{
 		friend class GC;
+		friend class GCAllocIterator;
 	public:
 		enum ItemBit { kMark=1, kQueued=2, kFinalize=4, kHasWeakRef=8, kFreelist=kMark|kQueued };
 
@@ -384,11 +385,63 @@ namespace MMgc
 			block->GetBits()[index>>3] &= ~mask;
 		}
 
+		static void ClearQueued(const void *item)
+		{
+			GCBlock *block = GetBlock(item);
+			ClearBits(block, GetIndex(block, item), kQueued);
+		}
+		
 		void ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft);
 
 	protected:
 		GC *m_gc;
 
+	};
+
+	/**
+	 * A utility class used by the marker to handle mark stack overflow: it abstracts
+	 * iterating across marked, non-free objects in one allocator instance.
+	 *
+	 * No blocks must be added or removed during the iteration.  If an object's
+	 * bits are changed, those changes will visible to the iterator if the object has
+	 * not yet been reached by the iteration. 
+	 */
+	class GCAllocIterator
+	{
+	public:
+		GCAllocIterator(MMgc::GCAlloc* alloc) 
+			: alloc(alloc)
+			, block(alloc->m_firstBlock)
+			, idx(0)
+			, limit(alloc->m_itemsPerBlock)
+			, size(alloc->m_itemSize)
+		{
+		}
+		
+		bool GetNextMarkedObject(void*& out_ptr, uint32_t& out_size)
+		{
+			for (;;) {
+				if (idx == limit) {
+					idx = 0;
+					block = block->next;
+				}
+				if (block == NULL)
+					return false;
+				uint32_t i = idx++;
+				if (GCAlloc::GetBit(block, i, MMgc::GCAlloc::kMark) && !GCAlloc::GetBit(block, i, MMgc::GCAlloc::kQueued)) {
+					out_ptr = GetUserPointer(block->items + i*size);
+					out_size = size - (uint32_t)DebugSize();
+					return true;
+				}
+			}
+		}
+		
+	private:
+		GCAlloc* const alloc;
+		GCAlloc::GCBlock* block;
+		uint32_t idx;
+		uint32_t limit;
+		uint32_t size;
 	};
 }
 
