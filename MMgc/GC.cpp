@@ -167,7 +167,7 @@ namespace MMgc
 		, bytesScannedTotal(0)
 		, start_time(0)
 		, start_event(NO_EVENT)
-		, collectThreshold(256) // 4KB blocks, that is, 1MB
+		, collectionThreshold(256) // 4KB blocks, that is, 1MB
 	{
 	}
 	
@@ -199,12 +199,12 @@ namespace MMgc
 		return 4;											// Unitless.  Old comment says "4" comes from the Boehm collector
 	}
 
-	void GCPolicyManager::setCollectThreshold(uint32_t blocks) {
-		collectThreshold = blocks;
+	void GCPolicyManager::setLowerLimitCollectionThreshold(uint32_t blocks) {
+		collectionThreshold = blocks;
 	}
 
-	inline uint32_t GCPolicyManager::lowerLimitHeapBlocks() {
-		return collectThreshold;
+	inline uint32_t GCPolicyManager::lowerLimitCollectionThreshold() {
+		return collectionThreshold;
 	}
 
 	inline uint64_t GCPolicyManager::now() {
@@ -217,7 +217,7 @@ namespace MMgc
 	}
 	
 	inline bool GCPolicyManager::queryLowerLimitGCBlocksAllocated() {
-		return blocksOwned > lowerLimitHeapBlocks();
+		return blocksOwned > lowerLimitCollectionThreshold();
 	}
 
 	inline bool GCPolicyManager::querySufficientTimeSinceLastCollection() {
@@ -284,14 +284,14 @@ namespace MMgc
 	bool GCPolicyManager::queryStartCollectionAfterHeapExpansion()
 	{
 		// this is the existing policy but it's not a good idea
-		return (blocksInHeapAfterPreviousAllocation > lowerLimitHeapBlocks() &&
+		return (blocksInHeapAfterPreviousAllocation > lowerLimitCollectionThreshold() &&
 				blocksInHeapAfterPreviousAllocation < heap->GetTotalHeapSize() && 
 				querySufficientTimeSinceLastCollection());
 	}
 
 	bool GCPolicyManager::queryRunCollectionAfterAllocBlockFail()
 	{
-		return heap->GetTotalHeapSize() >= lowerLimitHeapBlocks() && queryAllocationLimitReached(); 
+		return heap->GetTotalHeapSize() >= lowerLimitCollectionThreshold() && queryAllocationLimitReached(); 
 	}
 
 	void GCPolicyManager::signal(PolicyEvent ev) {

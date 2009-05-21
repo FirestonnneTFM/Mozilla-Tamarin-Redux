@@ -402,7 +402,7 @@ namespace MMgc
 		 * Set the lower limit beyond which we try not to run the garbage collector.
 		 * The value is specified in 4k blocks, thus 256 == 1MB.
 		 */
-		void setCollectThreshold(uint32_t blocks);
+		void setLowerLimitCollectionThreshold(uint32_t blocks);
 
 		enum PolicyEvent 
 		{
@@ -527,7 +527,7 @@ namespace MMgc
 		uint32_t freeSpaceDivisor();
 		
 		// The lower limit beyond which we try not to run the garbage collector.
-		uint32_t lowerLimitHeapBlocks();
+		uint32_t lowerLimitCollectionThreshold();
 		
 		// Get the current time (in ticks).
 		uint64_t now();
@@ -566,8 +566,8 @@ namespace MMgc
 		uint64_t start_time;
 		PolicyEvent start_event;
 
-		// value returned by lowerLimitHeapBlocks().
-		uint32_t collectThreshold;
+		// value returned by lowerLimitCollectionThreshold() and set by setLowerLimitCollectionThreshold()
+		uint32_t collectionThreshold;
 	};
 
 	inline void GCPolicyManager::signalMarkWork(size_t nbytes, uint64_t nobjects)
