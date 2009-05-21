@@ -7,6 +7,7 @@ import urllib
 
 import time
 import operator
+import os
 
 from buildbot import interfaces, util
 from buildbot import version
@@ -122,8 +123,17 @@ class BuildBox(components.Adapter):
         number = b.getNumber()
         url = path_to_build(req, b)
         reason = b.getReason()
-        text = ('<a title="Reason: %s" href="%s">Build %d</a>'
-                % (html.escape(reason), url, number))
+
+        # Update the buildbot BuildStatus so that it displays the hg revision number as the build number
+        changedesc='(%d)' % number
+        revision=b.getSourceStamp().revision
+        if (len(b.changes)>0):
+            changedesc='%s (%d)' % (b.changes[0].revision,number)
+        if (revision):
+            changedesc="%s (%d)" % (revision,number)
+        text = ('<a title="Reason: %s" href="%s">Build %s</a>'
+                % (html.escape(reason), url, changedesc)) 
+
         class_ = "start"
         if b.isFinished() and not b.getSteps():
             # the steps have been pruned, so there won't be any indication
@@ -579,7 +589,22 @@ class WaterfallStatusResource(HtmlResource):
                                time.localtime(util.now()))
                  + "\n")
         data += '</div>\n'
+        return "%s %s" % (self.GetAnnounce(), data)
+
+    def GetAnnounce(self):
+      """Creates DIV that provides visuals on tree status.
+      """
+      ANNOUNCEMENT_FILE = 'public_html/announce.html'
+      return self.GetStaticFileContent(ANNOUNCEMENT_FILE)
+    
+    def GetStaticFileContent(self,file):
+      if os.path.exists(file):
+        announce = open(file, 'rb')
+        data = announce.read().strip()
+        announce.close()
         return data
+      else:
+    return ''
 
     def body0(self, request, builders):
         # build the waterfall display

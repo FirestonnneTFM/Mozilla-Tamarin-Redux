@@ -26,7 +26,21 @@ class StatusResourceBuild(HtmlResource):
         return ("Buildbot: %s Build #%d" %
                 (html.escape(self.build_status.getBuilder().getName()),
                  self.build_status.getNumber()))
-
+    
+    def formatTime(self,time):
+        res=""
+        if time>60*60*24:
+            res="%dd" % (time/(60*60*24))
+            time=time%(60*60*24)
+        if time>60*60:
+            res="%s %dh" % (res,time/(60*60))
+            time=time%(60*60)
+        if time>60:
+            res="%s %dm" % (res,time/60)
+            time=time%60
+        res="%s %ds" % (res,time)
+        return res
+    
     def body(self, req):
         b = self.build_status
         status = self.getStatus(req)
@@ -104,13 +118,31 @@ class StatusResourceBuild(HtmlResource):
 #            text.append('[<a href="%s" class="%s">%s</a>]' %
 #                        (target, ex_url_class, html.escape(name)))
         if b.getLogs():
+            # track time
+            firsttime=time.time()
+            lasttime=0
+            
             data += "<ol>\n"
             for s in b.getSteps():
                 name = s.getName()
-                data += (" <li><a href=\"%s\">%s</a> [%s]\n"
+                (started,finished) = s.getTimes()
+                if started==None:
+                    eltime="not started yet..."
+                else:
+                    firsttime=min(firsttime,started)
+                    if finished==None:
+                        lasttime=max(lasttime,time.time())
+                        eltime="current running time..."+self.formatTime(time.time()-started)
+                    else:
+                        lasttime=max(lasttime,finished)
+                        eltime="total time..."+self.formatTime(finished-started)
+                data += (" <li><a href=\"%s\">%s</a> [%s] %s\n"
                          % (req.childLink("steps/%s" % urllib.quote(name)),
                             name,
-                            " ".join(s.getText())))
+                            " ".join(s.getText()),
+                            eltime
+                            )
+                        )
                 if s.getLogs():
                     data += "  <ol>\n"
                     for logfile in s.getLogs():
@@ -123,6 +155,7 @@ class StatusResourceBuild(HtmlResource):
                     data += "  </ol>\n"
                 data += " </li>\n"
             data += "</ol>\n"
+            data += "total elapsed time: " + self.formatTime(lasttime-firsttime)
 
         data += "<h2>Build Properties:</h2>\n"
         data += "<table><tr><th valign=\"left\">Name</th><th valign=\"left\">Value</th><th valign=\"left\">Source</th></tr>\n"
@@ -214,7 +247,7 @@ class StatusResourceBuild(HtmlResource):
         data += '</div>\n'
 
         return data
-
+        
     def stop(self, req):
         b = self.build_status
         c = self.build_control
