@@ -128,6 +128,7 @@ class P4Source(base.ChangeSource, util.ComparableMixin):
         else:
             args.extend(['-m', '1', '%s...' % (self.p4base,)])
         env = {}
+        log.msg('P4 args:',''.join(args));
         return getProcessOutput(self.p4bin, args, env)
 
     def _process_changes(self, result):
@@ -143,6 +144,7 @@ class P4Source(base.ChangeSource, util.ComparableMixin):
                 log.msg('P4Poller: starting at change %d' % num)
                 self.last_change = num
                 return []
+            log.msg('P4Poller: last poll is: %d' % num)
             changelists.append(num)
         changelists.reverse() # oldest first
 
