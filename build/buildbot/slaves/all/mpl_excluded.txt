@@ -39,6 +39,7 @@
 .*/.hg/.*
 .*/axscript/.*
 .*/build/buildbot/slaves/scripts/.*
+.*/build/buildbot/master/custom/.*
 .*/doc/mmgc/audit-2009/.*
 .*/esc/.*
 .*/MMgc/Windows.*/.*
