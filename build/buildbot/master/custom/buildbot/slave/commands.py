@@ -431,7 +431,17 @@ class ShellCommand:
         msg = " argv: %s" % (self.fake_command,)
         log.msg(" " + msg)
         self.sendStatus({'header': msg+"\n"})
-        
+
+        # then the environment, since it sometimes causes problems
+        if self.logEnviron:
+            msg = " environment:\n"
+            env_names = self.environ.keys()
+            env_names.sort()
+            for name in env_names:
+                msg += "  %s=%s\n" % (name, self.environ[name])
+            log.msg(" environment: %s" % (self.environ,))
+            self.sendStatus({'header': msg})
+
         if self.initialStdin:
             msg = " writing %d bytes to stdin" % len(self.initialStdin)
             log.msg(" " + msg)
@@ -1370,7 +1380,7 @@ class SourceBase(Command):
                                            ".buildbot-sourcedata")
 
         d = defer.succeed(None)
-
+        self.maybeClobber(d)
         if not (self.sourcedirIsUpdateable() and self.sourcedataMatches()):
             # the directory cannot be updated, so we have to clobber it.
             # Perhaps the master just changed modes from 'export' to
@@ -2431,11 +2441,15 @@ class Mercurial(SourceBase):
         self.stderr = ""
 
     def sourcedirIsUpdateable(self):
+        if os.path.exists(os.path.join(self.builder.basedir,
+                                       self.srcdir, ".buildbot-patched")):
+            return False
         # like Darcs, to check out a specific (old) revision, we have to do a
         # full checkout. TODO: I think 'hg pull' plus 'hg update' might work
         if self.revision:
             return False
-        return os.path.isdir(os.path.join(self.builder.basedir,".hg"))
+        return os.path.isdir(os.path.join(self.builder.basedir,
+                                          self.srcdir, ".hg"))
 
     def doVCUpdate(self):
         d = os.path.join(self.builder.basedir, self.srcdir)
@@ -2760,17 +2774,13 @@ class P4Sync(P4Base):
         if self.revision:
             command.extend(['@' + self.revision])
         env = {}
-        
-        if not os.path.exists(d):
-            os.makedirs(d)
-        
         c = ShellCommand(self.builder, command, d, environ=env,
                          sendRC=False, timeout=self.timeout, usePTY=False)
         self.command = c
         return c.start()
 
     def doVCUpdate(self):
-        return self._doVC(force=True)
+        return self._doVC(force=False)
 
     def doVCFull(self):
         return self._doVC(force=True)
