@@ -62,8 +62,15 @@ namespace MMgc
 		void* Alloc(size_t size);
 		static void Free(void *item);
 
+		//This method returns the number bytes allocated by FixedAlloc
 		size_t GetBytesInUse();
-
+		
+		//This method is for more fine grained allocation details
+		//It reports the total number of bytes requested (i.e. ask size) and
+		//the number of bytes actually allocated.  The latter is the same
+		//number as reported by GetBytesInUse()
+		void GetUsageInfo(size_t& totalAsk, size_t& totalAllocated);
+		
 		size_t GetItemSize() const;
 		int GetMaxAlloc() const { return m_maxAlloc; }
 
@@ -102,6 +109,9 @@ namespace MMgc
 		FixedBlock* m_firstFree;
 
 		int    m_maxAlloc;
+	#ifdef MMGC_MEMORY_PROFILER
+		size_t m_totalAskSize;
+	#endif
 
 		bool IsFull(FixedBlock *b) const { return b->numAlloc == m_itemsPerBlock; }
 		void CreateChunk();

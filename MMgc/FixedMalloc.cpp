@@ -118,6 +118,10 @@ namespace MMgc
 
 		m_heap = heap;
 		numLargeChunks = 0;
+	#ifdef MMGC_MEMORY_PROFILER
+		totalAskSizeLargeAllocs = 0;
+	#endif
+
 		// Create all the allocators up front (not lazy)
 		// so that we don't have to check the pointers for
 		// NULL on every allocation.
@@ -160,14 +164,32 @@ namespace MMgc
 
 	size_t FixedMalloc::GetBytesInUse()
 	{
-		size_t bytes = 0;
+		size_t ask;
+		size_t allocated;
+		GetUsageInfo(ask, allocated);
+		(void)ask;
+		return allocated;		
+	}
+	
+	void FixedMalloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
+	{
+		totalAllocated = 0;
 		for (int i=0; i<kNumSizeClasses; i++) {
-			FixedAllocSafe *a = m_allocs[i];
-			bytes += a->GetBytesInUse();
+			size_t allocated = 0;
+			size_t ask = 0;
+			m_allocs[i]->GetUsageInfo(ask, allocated);
+			totalAskSize += ask;
+			totalAllocated += allocated;
 		}
+
+#ifdef MMGC_MEMORY_PROFILER
+		totalAskSize += totalAskSizeLargeAllocs;
+#else
+		totalAskSize = 0;
+#endif
+
 		// not entirely accurate
-		bytes += numLargeChunks * GCHeap::kBlockSize;
-		return bytes;
+		totalAllocated += numLargeChunks * GCHeap::kBlockSize;
 	}
 
 	FixedAllocSafe *FixedMalloc::FindSizeClass(size_t size) const
@@ -217,7 +239,12 @@ namespace MMgc
 
 		item = GetUserPointer(item);
 		if(m_heap->HooksEnabled())
-			m_heap->AllocHook(item, size, Size(item));
+		{
+		#ifdef MMGC_MEMORY_PROFILER
+			totalAskSizeLargeAllocs += (size - DebugSize());
+		#endif
+			m_heap->AllocHook(item, size - DebugSize(), Size(item));
+		}
 		return item;
 	}
 	
@@ -225,6 +252,10 @@ namespace MMgc
 	void FixedMalloc::LargeFree(void *item)
 	{
 		if(m_heap->HooksEnabled()) {
+	#ifdef MMGC_MEMORY_PROFILER
+			if(m_heap->GetProfiler())
+				totalAskSizeLargeAllocs -= m_heap->GetProfiler()->GetAskSize(item);
+	#endif
 			m_heap->FinalizeHook(item, Size(item));
 			m_heap->FreeHook(item, Size(item), 0xfa);
 		}

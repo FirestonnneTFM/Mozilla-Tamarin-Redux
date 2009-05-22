@@ -216,7 +216,7 @@ void ST_mmgc_basics::test10() {
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
     MMgc::GCLargeAlloc *gcl=new MMgc::GCLargeAlloc(gc);
-    void *obj=gcl->Alloc(1024,0);
+    void *obj=gcl->Alloc(1024,1024,0);
 verifyPass(MMgc::GCLargeAlloc::IsLargeBlock(obj)==true, "MMgc::GCLargeAlloc::IsLargeBlock(obj)==true", __FILE__, __LINE__);
 verifyPass(MMgc::GCLargeAlloc::FindBeginning(obj)==obj, "MMgc::GCLargeAlloc::FindBeginning(obj)==obj", __FILE__, __LINE__);
 verifyPass(MMgc::GCLargeAlloc::IsFinalized(obj)==false, "MMgc::GCLargeAlloc::IsFinalized(obj)==false", __FILE__, __LINE__);

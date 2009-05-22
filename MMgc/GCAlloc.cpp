@@ -60,6 +60,10 @@ namespace MMgc
 		m_numBlocks = 0;
 		m_finalized = false;
 
+#ifdef MMGC_MEMORY_PROFILER
+		m_totalAskSize = 0;
+#endif
+
 		// The number of items per block is kBlockSize minus
 		// the # of pointers at the base of each page.
 
@@ -298,6 +302,11 @@ start:
 		GCAssert((uintptr_t(item) & ~0xfff) == (uintptr_t) b);
 		GCAssert((uintptr_t(item) & 7) == 0);
 
+#ifdef MMGC_MEMORY_PROFILER
+		if(m_gc->GetGCHeap()->HooksEnabled())
+			m_totalAskSize += size;
+#endif
+
 		return item;
 	}
 
@@ -307,6 +316,17 @@ start:
 		GCBlock *b = GetBlock(item);
 		GCAlloc *a = b->alloc;
 	
+		if(b->gc->GetGCHeap()->HooksEnabled())
+		{
+			const void* p = GetUserPointer(item);
+			GCHeap* heap = b->gc->GetGCHeap();
+#ifdef MMGC_MEMORY_PROFILER
+			if(heap->GetProfiler())
+				a->m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
+#endif
+			heap->FinalizeHook(p, GC::Size(p));
+		}
+
 #ifdef _DEBUG		
 		// check that its not already been freed
 		void *free = b->firstFree;
@@ -398,8 +418,15 @@ start:
 					void* item = (char*)b->items + m_itemSize*((i*8)+j);
 
 					if(m_gc->heap->HooksEnabled())
+					{
+					#ifdef MMGC_MEMORY_PROFILER
+						if(m_gc->heap->GetProfiler())
+							m_totalAskSize -= m_gc->heap->GetProfiler()->GetAskSize(GetUserPointer(item));
+					#endif
+
  						m_gc->heap->FinalizeHook(GetUserPointer(item), m_itemSize - DebugSize());
-  
+					}
+
 					if(!(marks & (kFinalize|kHasWeakRef)))
 						continue;
         
@@ -681,6 +708,17 @@ start:
 			b = b->next;
 		}		
 		return bytes;
+	}
+	
+	void GCAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)	
+	{
+#ifdef MMGC_MEMORY_PROFILER
+		totalAskSize = m_totalAskSize;
+#else
+		totalAskSize = 0;		
+#endif
+		
+		totalAllocated = GetBytesInUse();
 	}
 
 #ifdef MMGC_MEMORY_INFO

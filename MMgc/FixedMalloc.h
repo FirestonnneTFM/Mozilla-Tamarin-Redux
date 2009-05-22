@@ -110,7 +110,15 @@ namespace MMgc
 		}
 
 		size_t GetTotalSize();
+		
+		//This method returns the number bytes allocated by FixedMalloc
 		size_t GetBytesInUse();
+		
+		//This method is for more fine grained allocation details
+		//It reports the total number of bytes requested (i.e. ask size) and
+		//the number of bytes actually allocated.  The latter is the same
+		//number as reported by GetBytesInUse()
+		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 		
 	private:
 		void _Init(GCHeap *heap);
@@ -127,6 +135,10 @@ namespace MMgc
 		GCHeap *m_heap;
 		FixedAllocSafe *m_allocs[kNumSizeClasses];	
 		size_t numLargeChunks;
+
+#ifdef MMGC_MEMORY_PROFILER
+		size_t totalAskSizeLargeAllocs;
+#endif
 
 		FixedAllocSafe *FindSizeClass(size_t size) const;
 

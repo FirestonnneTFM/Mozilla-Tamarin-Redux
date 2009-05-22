@@ -44,11 +44,16 @@ namespace MMgc
 	{
 		m_blocks = NULL;
 		m_startedFinalize = false;
+#ifdef MMGC_MEMORY_PROFILER
+		m_totalAskSize = 0;
+#endif
 	}
 
-	void* GCLargeAlloc::Alloc(size_t size, int flags)
+	void* GCLargeAlloc::Alloc(size_t originalSize, size_t requestSize, int flags)
 	{
-		int blocks = (int)((size+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize);
+		(void)originalSize;
+
+		int blocks = (int)((requestSize+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize);
 		
 		LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, GC::kGCLargeAllocPageFirst, (flags&GC::kZero) != 0);
 		void *item = NULL;
@@ -72,11 +77,16 @@ namespace MMgc
 			if (flags & GC::kZero)
 			{
 				// AllocBlock should take care of this
-				for(int i=0, n=(int)(size/sizeof(int)); i<n; i++) {
+				for(int i=0, n=(int)(requestSize/sizeof(int)); i<n; i++) {
 					if(((int*)item)[i] != 0)
 						GCAssert(false);
 				}
 			}
+#endif
+
+#ifdef MMGC_MEMORY_PROFILER
+			if(m_gc->GetGCHeap()->HooksEnabled())
+				m_totalAskSize += originalSize;
 #endif
 		}
 		return item;
@@ -86,6 +96,17 @@ namespace MMgc
 	void GCLargeAlloc::Free(const void *item)
 	{
 		LargeBlock *b = GetBlockHeader(item);
+
+		GCHeap* heap = m_gc->GetGCHeap();
+		if(heap->HooksEnabled())
+		{
+			const void* p = GetUserPointer(item);
+#ifdef MMGC_MEMORY_PROFILER
+			if(heap->GetProfiler())
+				m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
+#endif
+			heap->FinalizeHook(p, GC::Size(p));
+		}
 
 		if(b->flags & kHasWeakRef)
 			b->gc->ClearWeakRef(GetUserPointer(item));
@@ -136,8 +157,15 @@ namespace MMgc
 				}
 				
 				if(m_gc->heap->HooksEnabled())
+				{
+				#ifdef MMGC_MEMORY_PROFILER
+					if(m_gc->GetGCHeap()->GetProfiler())
+						m_totalAskSize -= m_gc->GetGCHeap()->GetProfiler()->GetAskSize(GetUserPointer(item));
+				#endif
+
 					m_gc->heap->FinalizeHook(GetUserPointer(item), b->usableSize - DebugSize());
-				
+				}
+
 				// unlink from list
 				*prev = b->next;
 				b->gc->AddToLargeEmptyBlockList(b);
@@ -174,5 +202,16 @@ namespace MMgc
 			block = block->next;
 		}		
 		return bytes;
+	}
+	
+	void GCLargeAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
+	{
+#ifdef MMGC_MEMORY_PROFILER
+		totalAskSize = m_totalAskSize;
+#else
+		totalAskSize = 0;
+#endif
+
+		totalAllocated = GetBytesInUse();
 	}
 }

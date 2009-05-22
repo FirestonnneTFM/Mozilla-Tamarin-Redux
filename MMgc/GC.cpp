@@ -816,9 +816,9 @@ namespace MMgc
 			// assert that I don't fit (makes sure we don't waste space)
 			GCAssert( (index==0) || (size > allocs[index-1]->GetItemSize()));
 
-			item = allocs[index]->Alloc(size, flags);
+			item = allocs[index]->Alloc(askSize, flags);
 		} else {
-			item = largeAlloc->Alloc(size, flags);
+			item = largeAlloc->Alloc(askSize, size, flags);
 		}
 
 		item = GetUserPointer(item);
@@ -892,7 +892,6 @@ namespace MMgc
 #endif
 
 		if(heap->HooksEnabled()) {
-			heap->FinalizeHook(item, GC::Size(item));
 			heap->FreeHook(item, GC::Size(item), 0xca);
 		}
 	
@@ -2007,21 +2006,43 @@ bail:
 		}
 	}
 
-	int GC::DumpAlloc(GCAlloc *a)
+	void GC::DumpAlloc(GCAlloc *a, size_t& internal_waste, size_t& overhead)
 	{
 		int inUse =  a->GetNumAlloc() * a->GetItemSize();
 		int maxAlloc =  a->GetMaxAlloc()* a->GetItemSize();
+
+		overhead = maxAlloc-inUse;
+		internal_waste = 0;
+
 		int efficiency = maxAlloc > 0 ? inUse * 100 / maxAlloc : 100;
 		if(inUse) {
-			GCLog("Allocator(%d): %d%% efficiency %d kb out of %d kb\n", a->GetItemSize(), efficiency, inUse>>10, maxAlloc>>10);
+			GCLog("Allocator(%d):   %d%% efficiency %d bytes (%d kb) in use out of %d bytes (%d kb)\n", a->GetItemSize(), efficiency, inUse, inUse>>10, maxAlloc, maxAlloc>>10);
+#ifdef MMGC_MEMORY_PROFILER
+			if(heap->HooksEnabled())
+			{
+				size_t askSize = a->GetTotalAskSize();
+				internal_waste = inUse - askSize;
+				size_t internal_efficiency = askSize * 100 / inUse;
+				GCLog("\t\t\t\t %u%% internal efficiency %u bytes (%u kb) actually requested out of %d bytes(%d kb)\n", internal_efficiency, (uint32_t) askSize, (uint32_t)(askSize>>10), inUse, inUse>>10);
+			}
+#endif
 		}
-		return maxAlloc-inUse;
 	}
 
 	void GC::DumpMemoryInfo()
 	{
 		size_t total = GetNumBlocks() * GCHeap::kBlockSize;
-		heap->log_percentage("[mem] \tmanaged fragmentation ", total-GetBytesInUse(), total);
+
+		size_t ask;
+		size_t allocated;
+		GetUsageInfo(ask, allocated);
+
+		heap->log_percentage("[mem] \tmanaged overhead ", total-allocated, total);
+#ifdef MMGC_MEMORY_PROFILER
+		if(heap->HooksEnabled())
+			heap->log_percentage("[mem] \tmanaged internal wastage", allocated-ask, allocated);
+#endif
+
 		if(ticksToMillis(markTicks()) != 0 && bytesMarked() != 0) {
 			uint32_t markRate = (uint32_t) (bytesMarked() / (1024 * ticksToMillis(markTicks()))); // kb/ms == mb/s
 			GCLog("[mem] \tmark rate %u mb/s\n", markRate);
@@ -2029,14 +2050,27 @@ bail:
 		GCLog("[mem] \tmark increments %d\n", marks());
 		GCLog("[mem] \tsweeps %d mb/s\n", sweeps);
 
-		int waste=0;
-		for(int i=0; i < kNumSizeClasses; i++)
+		size_t total_overhead = 0;
+		size_t total_internal_waste = 0;
+		GCAlloc** allocators[] = {containsPointersRCAllocs, containsPointersAllocs, noPointersAllocs};
+		for(int j = 0;j<3;j++)
 		{
-			waste += DumpAlloc(containsPointersAllocs[i]);
-			waste += DumpAlloc(containsPointersRCAllocs[i]);
-			waste += DumpAlloc(noPointersAllocs[i]);
+			GCAlloc** gc_alloc = allocators[j]; 
+
+			for(int i=0; i < kNumSizeClasses; i++)
+			{
+				size_t internal_waste;
+				size_t overhead;
+				DumpAlloc(gc_alloc[i], internal_waste, overhead);
+				total_internal_waste += internal_waste;
+				total_overhead += overhead;
+			}
 		}
-		GCLog("Wasted %d kb\n", waste>>10);
+		GCLog("Overhead %u bytes (%u kb)\n", (uint32_t)total_overhead, (uint32_t)(total_overhead>>10));
+#ifdef MMGC_MEMORY_PROFILER
+		if(heap->HooksEnabled())
+			GCLog("Internal Wastage %u bytes (%u kb)\n", (uint32_t)total_internal_waste, (uint32_t)(total_internal_waste>>10));
+#endif
 	}
 
 #ifdef _DEBUG
@@ -3307,14 +3341,37 @@ bail:
 	
 	size_t GC::GetBytesInUse()
 	{
-		size_t bytes=0;
-		for(int i=0; i < kNumSizeClasses; i++) {
-			bytes += containsPointersRCAllocs[i]->GetBytesInUse();
-			bytes += containsPointersAllocs[i]->GetBytesInUse();
-			bytes += noPointersAllocs[i]->GetBytesInUse();
+		size_t ask;
+		size_t allocated;
+		GetUsageInfo(ask, allocated);
+		(void)ask;
+		return allocated;
+	}
+	
+	void GC::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
+	{
+		totalAskSize = 0;
+		totalAllocated = 0;
+
+		size_t ask;
+		size_t allocated;
+
+		GCAlloc** allocators[] = {containsPointersRCAllocs, containsPointersAllocs, noPointersAllocs};
+		for(int j = 0;j<3;j++)
+		{
+			GCAlloc** gc_alloc = allocators[j]; 
+
+			for(int i=0; i < kNumSizeClasses; i++) 
+			{
+				gc_alloc[i]->GetUsageInfo(ask, allocated);
+				totalAskSize += ask;
+				totalAllocated += allocated;
+			}
 		}
-		bytes += largeAlloc->GetBytesInUse();
-		return bytes;
+		
+		largeAlloc->GetUsageInfo(ask, allocated);
+		totalAskSize += ask;
+		totalAllocated += allocated;
 	}
 
 	void GC::Poke()
