@@ -598,13 +598,13 @@ class WaterfallStatusResource(HtmlResource):
       return self.GetStaticFileContent(ANNOUNCEMENT_FILE)
     
     def GetStaticFileContent(self,file):
-      if os.path.exists(file):
-        announce = open(file, 'rb')
-        data = announce.read().strip()
-        announce.close()
-        return data
-      else:
-    return ''
+        if os.path.exists(file):
+            announce = open(file, 'rb')
+            data = announce.read().strip()
+            announce.close()
+            return data
+        else:
+            return ''
 
     def body0(self, request, builders):
         # build the waterfall display
