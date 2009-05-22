@@ -50,6 +50,14 @@
 	__asm { mov _stack,esp };											\
 	_size = (uint32_t)(_gc->GetStackTop() - (uintptr_t)_stack);
 
+#elif AVMSYSTEM_SPARC == 1
+
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
+	jmp_buf __mmgc_env;													\
+	setjmp(__mmgc_env);													\
+	_stack = (void*)_getsp();											\
+	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
+
 #else
 
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
