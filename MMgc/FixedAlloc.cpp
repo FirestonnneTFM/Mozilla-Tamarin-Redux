@@ -57,6 +57,10 @@ namespace MMgc
 
 		m_itemSize      = itemSize;
 
+#ifdef MMGC_MEMORY_PROFILER
+		m_totalAskSize = 0;
+#endif
+
 		// The number of items per block is kBlockSize minus
 		// the # of pointers at the base of each page.
 		size_t usableSpace = GCHeap::kBlockSize - kBlockHeadSize;
@@ -154,7 +158,13 @@ namespace MMgc
 
 		item = GetUserPointer(item);
 		if(m_heap->HooksEnabled())
+		{
+		#ifdef MMGC_MEMORY_PROFILER
+			m_totalAskSize += size;
+		#endif
+
 			m_heap->AllocHook(item, size, b->size - DebugSize());
+		}
 
 #ifdef MMGC_MEMORY_INFO
 		// fresh memory poisoning
@@ -171,6 +181,11 @@ namespace MMgc
 
 		GCHeap *heap = b->alloc->m_heap;
 		if(heap->HooksEnabled()) {
+		#ifdef MMGC_MEMORY_PROFILER
+			if(heap->GetProfiler())
+				b->alloc->m_totalAskSize -= heap->GetProfiler()->GetAskSize(item);
+		#endif
+
 			heap->FinalizeHook(item, b->size - DebugSize());
 			heap->FreeHook(item, b->size - DebugSize(), 0xed);
 		}
@@ -213,6 +228,17 @@ namespace MMgc
 			b = b->next;
 		}
 		return bytes;
+	}
+	
+	void FixedAlloc::GetUsageInfo(size_t& totalAsk, size_t& totalAllocated)
+	{
+#ifdef MMGC_MEMORY_PROFILER
+		totalAsk  = m_totalAskSize;
+#else
+		totalAsk = 0;
+#endif
+
+		totalAllocated = GetBytesInUse();
 	}
 
 	void FixedAlloc::CreateChunk()

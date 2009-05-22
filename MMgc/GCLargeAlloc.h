@@ -62,7 +62,7 @@ namespace MMgc
 		GCLargeAlloc(GC* gc);
 		~GCLargeAlloc();
 
-		void* Alloc(size_t size, int flags);
+		void* Alloc(size_t originalSize, size_t requestSize, int flags);
 		void Free(const void *ptr);
 		void Finalize();
 		void ClearMarks();
@@ -153,7 +153,14 @@ namespace MMgc
 			return (block->flags & kRCObject) != 0;
 		}
 
+		//This method returns the number bytes allocated by FixedMalloc
 		size_t GetBytesInUse();
+		
+		//This method is for more fine grained allocation details
+		//It reports the total number of bytes requested (i.e. ask size) and
+		//the number of bytes actually allocated.  The latter is the same
+		//number as reported by GetBytesInUse()
+		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 
 	private:
 		struct LargeBlock
@@ -184,6 +191,10 @@ namespace MMgc
 		
 		// The list of chunk blocks
 		LargeBlock* m_blocks;
+#ifdef MMGC_MEMORY_PROFILER
+		size_t m_totalAskSize;
+#endif
+
 		bool m_startedFinalize;
 		static bool ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
 

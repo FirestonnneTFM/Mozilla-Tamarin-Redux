@@ -75,13 +75,23 @@ namespace MMgc
 		uint8_t skip;
 	};
 
+	struct AllocInfo : public GCAllocObject
+	{
+		//possible memory optimization: we could unionize askSize and deleteTrace
+		//since askSize is N/A once the object is deleted
+		//This would save 8 bytes per AllocInfo unit on 32-bit systems
+		size_t askSize;
+		StackTrace* allocTrace;
+		StackTrace* deleteTrace;
+	};
+
 	GCThreadLocal<const char*> memtag;
 	GCThreadLocal<const void*> memtype;
 
 	MemoryProfiler::MemoryProfiler() : 
-		traceTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
 		stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
-		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS)
+		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS),
+		allocInfoTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT)
 	{
 		VMPI_setupPCResolution();
 		simpleDump = !VMPI_hasSymbols();
@@ -100,6 +110,12 @@ namespace MMgc
 		while((obj = nameIter.nextKey()) != NULL)
 		{
 			VMPI_free((void*)nameIter.value());			
+		}
+
+		GCHashtableIterator allocIter(&allocInfoTable);
+		while((obj = allocIter.nextKey()) != NULL)
+		{
+			delete (AllocInfo*)allocIter.value();
 		}
 		VMPI_desetupPCResolution();		
 	}
@@ -141,14 +157,23 @@ namespace MMgc
 
 	StackTrace *MemoryProfiler::GetAllocationTrace(const void *obj)
 	{
-		return (StackTrace*)traceTable.get(obj);
+		AllocInfo* info = (AllocInfo*)allocInfoTable.get(obj);
+		GCAssert(info != NULL);
+		return info ? info->allocTrace : NULL;
+	}
+
+	StackTrace *MemoryProfiler::GetDeletionTrace(const void *obj)
+	{
+		AllocInfo* info = (AllocInfo*)allocInfoTable.get(obj);
+		GCAssert(info != NULL);
+		return info ? info->deleteTrace : NULL;
 	}
 
 	const char * MemoryProfiler::GetAllocationName(const void *obj)
 	{
-		StackTrace *trace = (StackTrace*)traceTable.get(obj);
-		if(trace)
-			return GetAllocationNameFromTrace(trace);
+		AllocInfo *info = (AllocInfo*)allocInfoTable.get(obj);
+		if(info)
+			return GetAllocationNameFromTrace(info->allocTrace);
 		return NULL;
 	}
 
@@ -179,13 +204,23 @@ namespace MMgc
 		(void)askSize;
 
 		StackTrace *trace = GetStackTrace();
-		traceTable.put(item, trace);
 
 		ChangeSize(trace, (int)gotSize);
 
+		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
+		if(!info)
+		{
+			info = new AllocInfo;
+			allocInfoTable.put(item, info);
+		}
+
+		info->askSize = askSize;
+		info->allocTrace = trace;
+		info->deleteTrace = NULL;
+
 		if(memtype)
 		{
-			trace->master = (StackTrace*)traceTable.get(memtype);
+			trace->master = GetAllocationTrace(memtype);
 			memtype = NULL;
 		}
 		
@@ -198,14 +233,14 @@ namespace MMgc
 
 	void MemoryProfiler::RecordDeallocation(const void *item, size_t size)
 	{
-		StackTrace *trace = (StackTrace*)traceTable.get(item);
+		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
+		GCAssert(info != NULL);
 
-		ChangeSize(trace, -1 * int(size));
+		ChangeSize(info->allocTrace, -1 * int(size));
 		// FIXME: how to know this is a sweep?
 
 		// store deletion trace
-		StackTrace *deletion_trace = GetStackTrace();
-		traceTable.put((const void*)(uintptr_t(item)+1), deletion_trace);
+		info->deleteTrace = GetStackTrace();
 
 #if 0
 		if(poison == 0xba) {
@@ -229,6 +264,15 @@ namespace MMgc
 		return st;
 	}
 	
+	size_t MemoryProfiler::GetAskSize(const void* item)
+	{
+		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
+		//failing this assert means that either FinalizeHook() was called before GetAsk()
+		//or this item is being double deleted
+		GCAssert(info != NULL); 
+		return info ? info->askSize : 0;
+	}
+
 	class PackageGroup : public GCAllocObject
 	{
 	public:
@@ -587,7 +631,7 @@ namespace MMgc
 	void PrintDeleteStackTrace(const void *item)
 	{
 		if(GCHeap::GetGCHeap()->GetProfiler()) {
-			StackTrace *trace = GCHeap::GetGCHeap()->GetProfiler()->GetAllocationTrace((const void*)(uintptr_t(item)+1));
+			StackTrace *trace = GCHeap::GetGCHeap()->GetProfiler()->GetDeletionTrace(item);
 			GCAssertMsg(trace != NULL, "Trace was null");
 			PrintStackTrace(trace);
 		}

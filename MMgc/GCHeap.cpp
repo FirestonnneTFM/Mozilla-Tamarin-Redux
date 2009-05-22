@@ -1520,9 +1520,13 @@ namespace MMgc
 		size_t priv = GCHeap::GetPrivateBytes() * GCHeap::kBlockSize;
 		size_t mmgc = GetTotalHeapSize() * GCHeap::kBlockSize;
 		size_t unmanaged = GetFixedMalloc()->GetTotalSize() * GCHeap::kBlockSize;
-		size_t fixed_alloced = GetFixedMalloc()->GetBytesInUse();
+		size_t fixed_alloced;
+		size_t fixed_asksize;
+		GetFixedMalloc()->GetUsageInfo(fixed_asksize, fixed_alloced);
+
 		size_t gc_total=0;
-		size_t gc_bytes_total =0;
+		size_t gc_allocated_total =0;
+		size_t gc_ask_total = 0;
 		for(uint32_t i=0,n=gcManager.getCount() ; i<n; i++) {
 			GC* gc = gcManager.getGC(i);
 #ifdef MMGC_MEMORY_PROFILER
@@ -1531,7 +1535,13 @@ namespace MMgc
 			GCLog("[mem] GC 0x%p\n", (void*)gc);
 #endif
 			gc->DumpMemoryInfo();
-			gc_bytes_total += gc->GetBytesInUse();
+
+			size_t ask;
+			size_t allocated;
+			gc->GetUsageInfo(ask, allocated);
+			gc_ask_total += ask;
+			gc_allocated_total += allocated;
+
 			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
 		GCLog("[mem] ------- gross stats -----\n");
@@ -1541,8 +1551,15 @@ namespace MMgc
 		log_percentage("[mem]\t\t managed", gc_total, priv);
 		log_percentage("[mem]\t\t free",  (size_t)GetFreeHeapSize() * GCHeap::kBlockSize, priv);
 		log_percentage("[mem]\t other",  priv - mmgc, priv);
-		log_percentage("[mem] \tunmanaged fragmentation ", unmanaged-fixed_alloced, unmanaged);
-		log_percentage("[mem] \tmanaged fragmentation ", gc_total - gc_bytes_total, gc_total);
+		log_percentage("[mem] \tunmanaged overhead ", unmanaged-fixed_alloced, unmanaged);
+		log_percentage("[mem] \tmanaged overhead ", gc_total - gc_allocated_total, gc_total);
+#ifdef MMGC_MEMORY_PROFILER
+		if(HooksEnabled())
+		{
+			log_percentage("[mem] \tunmanaged internal wastage", fixed_alloced - fixed_asksize, fixed_alloced);
+			log_percentage("[mem] \tmanaged internal wastage", gc_allocated_total - gc_ask_total, gc_allocated_total);
+		}
+#endif
 		GCLog("[mem] -------- gross stats end -----\n");
 		
 		DumpHeapRep();

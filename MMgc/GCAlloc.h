@@ -192,7 +192,18 @@ namespace MMgc
 			}
 		}
 
+		//This method returns the number bytes allocated for GC objects
 		size_t GetBytesInUse();
+		
+		//This method is for more fine grained allocation details
+		//It reports the total number of bytes requested (i.e. ask size) and
+		//the number of bytes actually allocated.  The latter is the same
+		//number as reported by GetBytesInUse()
+		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
+		
+#ifdef MMGC_MEMORY_PROFILER	
+		size_t GetTotalAskSize() const { return m_totalAskSize; }
+#endif
 
 	private:
 		const static int kBlockSize = 4096;
@@ -265,6 +276,10 @@ namespace MMgc
 		uint32_t    m_itemSize;
 		int m_numBitmapBytes;
 		int m_sizeClassIndex;
+
+#ifdef MMGC_MEMORY_PROFILER
+		size_t m_totalAskSize;
+#endif
 
 		bool m_bitsInPage; 
 

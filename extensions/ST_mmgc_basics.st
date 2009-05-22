@@ -167,7 +167,7 @@ private:
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
     MMgc::GCLargeAlloc *gcl=new MMgc::GCLargeAlloc(gc);
-    void *obj=gcl->Alloc(1024,0);
+    void *obj=gcl->Alloc(1024,1024,0);
     %%verify MMgc::GCLargeAlloc::IsLargeBlock(obj)==true
     %%verify MMgc::GCLargeAlloc::FindBeginning(obj)==obj
     %%verify MMgc::GCLargeAlloc::IsFinalized(obj)==false

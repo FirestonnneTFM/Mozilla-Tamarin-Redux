@@ -76,21 +76,24 @@ namespace MMgc
 		void DumpSimple();
 		const char *GetAllocationName(const void *obj);
 		StackTrace *GetAllocationTrace(const void *obj);
+		StackTrace *GetDeletionTrace(const void *obj);
 		StackTrace *GetStackTrace();
+		size_t GetAskSize(const void* item);
+
 	private:
 		const char *Intern(const char *name, size_t len);
 		const char *GetPackage(StackTrace *trace);
 		const char *GetAllocationNameFromTrace(StackTrace *trace);
 		const char *GetAllocationCategory(StackTrace *trace);
 
-		// map memory addresses of allocated objects to StackTrace*
-		GCHashtable traceTable;
-
 		// intern table of StackTrace*
 		GCStackTraceHashtable stackTraceMap;
 
 		// intern table of names
 		GCHashtable nameTable;
+
+		//table to store allocation specific information
+		GCHashtable allocInfoTable;
 	};
 
 #else // MMGC_MEMORY_PROFILER

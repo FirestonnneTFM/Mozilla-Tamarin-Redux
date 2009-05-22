@@ -1543,8 +1543,17 @@ public:
     	void ProbeForMatch(const void *mem, size_t size, uintptr_t value, int recurseDepth, int currentDepth);
 #endif
 
-		int DumpAlloc(GCAlloc*);
+		void DumpAlloc(GCAlloc *a, size_t& internal_waste, size_t& overhead);
+		
+		//This method returns the number bytes allocated for GC objects
 		size_t GetBytesInUse();
+		
+		//This method is for more fine grained allocation details
+		//It reports the total number of bytes requested (i.e. ask size) and
+		//the number of bytes actually allocated.  The latter is the same
+		//number as reported by GetBytesInUse()
+		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
+
 		size_t GetNumBlocks() { return (size_t)policy.blocksOwnedByGC(); }
 
 		bool pendingStatusChange;
