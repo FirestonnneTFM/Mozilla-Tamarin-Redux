@@ -213,7 +213,11 @@ class OneBoxPerBuilder(HtmlResource):
                 b = builds[0]
                 url = (base_builder_url + "/builds/%d" % b.getNumber())
                 try:
-                    label = b.getProperty("got_revision")
+                    revision=b.getSourceStamp().revision
+                    if (len(b.changes)>0):
+                        label = b.changes[0].revision
+                    if (revision):
+                        label = revision
                 except KeyError:
                     label = None
                 if not label or len(str(label)) > 20:
