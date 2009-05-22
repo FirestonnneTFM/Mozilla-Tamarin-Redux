@@ -48,7 +48,7 @@ def run():
                command="%s -memstats testdata/memstats.abc" % r.avm,
                expectedout=[
                             'gross stats',
-                            'managed fragmentation',
+                            'managed overhead',
                             'gross stats end',
                             'sweep\\([0-9]+\\) reclaimed [0-9]+ whole pages'
                             ]
