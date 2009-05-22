@@ -559,6 +559,7 @@ class Build:
         # TODO: include 'reason' in this point event
         self.builder.builder_status.addPointEvent(['interrupt'])
         self.currentStep.interrupt(reason)
+        self.steps = []
         if 0:
             # TODO: maybe let its deferred do buildFinished
             if self.currentStep and self.currentStep.progress:
