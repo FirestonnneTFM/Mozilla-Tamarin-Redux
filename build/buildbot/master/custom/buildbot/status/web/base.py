@@ -371,7 +371,11 @@ class OneLineMixin:
         results = build.getResults()
         text = build.getText()
         try:
-            rev = build.getProperty("got_revision")
+            revision=build.getSourceStamp().revision
+            if (len(build.changes)>0):
+                rev = build.changes[0].revision
+            if (revision):
+                rev = revision
             if rev is None:
                 rev = "??"
         except KeyError:
