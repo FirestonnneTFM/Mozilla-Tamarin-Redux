@@ -13,6 +13,7 @@ from buildbot.interfaces import IControl, IStatusReceiver
 from buildbot.status.web.base import HtmlResource, Box, \
      build_get_class, ICurrentBox, OneLineMixin, map_branches, \
      make_stop_form, make_force_build_form
+from buildbot.status.web.base import *
 from buildbot.status.web.feeds import Rss20StatusResource, \
      Atom10StatusResource
 from buildbot.status.web.waterfall import WaterfallStatusResource
@@ -246,7 +247,37 @@ class OneBoxPerBuilder(HtmlResource):
 
         return data
 
+class HorizontalOneBoxPerBuilder(HtmlResource):
+    """This shows a table with one cell per build. The color of the cell is
+    the state of the most recently completed build. If there is a build in
+    progress, the ETA is shown in table cell. The table cell links to the page
+    for that builder. They are layed out, you guessed it, horizontally.
 
+    builder=: show only builds for this builder. Multiple builder= arguments
+              can be used to see builds from any builder in the set. If no
+              builder= is given, shows them all.
+    """
+
+    def body(self, request):
+      status = self.getStatus(request)
+      builders = request.args.get("builder", status.getBuilderNames())
+
+      data = "<table style='width:100%'><tr>"
+
+      for builder_name in builders:
+        builder = status.getBuilder(builder_name)
+        classname = ITopBox(builder).getBox(request).class_
+        title = builder_name
+
+        url = (self.path_to_root(request) + "waterfall?builder=" +
+               urllib.quote(builder_name, safe=''))
+        link = '<a href="%s" class="%s" title="%s" \
+            target=_blank> </a>' % (url, classname, title)
+        data += '<td valign=bottom class=mini-box>%s</td>' % link
+
+      data += "</tr></table>"
+
+      return data
 
 HEADER = '''
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -470,6 +501,7 @@ class WebStatus(service.MultiService):
         #self.putChild("schedulers", SchedulersResource())
         self.putChild("one_line_per_build", OneLinePerBuild())
         self.putChild("one_box_per_builder", OneBoxPerBuilder())
+        self.putChild("horizontal_one_box_per_builder", HorizontalOneBoxPerBuilder())
         self.putChild("xmlrpc", XMLRPCServer())
         self.putChild("about", AboutBuildbot())
 
