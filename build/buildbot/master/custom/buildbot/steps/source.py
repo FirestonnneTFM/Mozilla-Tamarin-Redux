@@ -919,7 +919,10 @@ class Mercurial(Source):
             if branch:
                 self.args['branch'] = branch
         else:
-            self.args['repourl'] = self.baseURL + branch
+            if branch is None:
+                self.args['repourl'] = self.baseURL
+            else:
+                self.args['repourl'] = self.baseURL + branch
         self.args['revision'] = revision
         self.args['patch'] = patch
 
@@ -1044,7 +1047,6 @@ class P4Sync(Source):
     name = "p4sync"
 
     def __init__(self, p4port, p4user, p4passwd, p4client, **kwargs):
-        assert kwargs['mode'] == "copy", "P4Sync can only be used in mode=copy"
         self.branch = None
         Source.__init__(self, **kwargs)
         self.addFactoryArguments(p4port=p4port,
