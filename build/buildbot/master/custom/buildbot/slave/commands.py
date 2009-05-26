@@ -275,7 +275,7 @@ class ShellCommand:
                  workdir, environ=None,
                  sendStdout=True, sendStderr=True, sendRC=True,
                  timeout=None, initialStdin=None, keepStdinOpen=False,
-                 keepStdout=False, keepStderr=False, logEnviron=True,
+                 keepStdout=False, keepStderr=False, logEnviron=False,
                  logfiles={}, usePTY="slave-config"):
         """
 
