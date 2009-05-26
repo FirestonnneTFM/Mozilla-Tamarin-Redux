@@ -1207,7 +1207,10 @@ class RuntestBase:
             os.mkdir(shared)
 
         self.avmce=self.avm
-        self.avm=cwd+"/../util/wmemulatorshell.py"
+        if os.environ.has_key('PYTHONWIN'):
+            self.avm=os.environ['PYTHONWIN']+"  "+cwd+"/../util/wmemulatorshell.py"
+        else:
+            self.avm=cwd+"/../util/wmemulatorshell.py"
         # create and build version.as
         versionabc=cwd+"/version.abc"
         versionfile=open(cwd+"/version.as",'w')
