@@ -23,64 +23,44 @@
 # 
 # ***** END LICENSE BLOCK ***** */
 
-
-
-# comments begin with #
-# fields are: TESTNAME, CONFIGURATION, COMMANDS, DETAILS
-# each field separate by , and whitespace is removed before/after from each field
+# DOCUMENTATION:
+#    the acceptance/testconfig.txt controls when test files and test cases are marked as expected failure and skip for a specific configuration.
 #
-# TESTNAME may contain : testcase (for the vm tests) : is the separator
-# TESTNAME and testcase are regular expressions and can match multiple test files / test cases
+#    the general format for non-comment lines in this file is comma separated:
+#       test ,  configuration  ,  command (expectedfailure, skip,include)   ,  comments
 #
-# CONFIGURATION is also a regular expression
-# CONFIGURATION format is {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+# test is a regular expression consisting of path to file relative from test/acceptance  ':' (separator) testcase
 #
-# COMMANDS are currently : asc.args, expectedfailure, skip
-#    expectedfailure - expects the test to fail, details should provide bug number and a comment
+# configuration is a regular expression with the format {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+#
+# command are currently one of : asc.args, expectedfailure, skip, include
+#    expectedfailure - expects the test to fail, comments should provide bug number and a comment
 #    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase even if the parent has been skipped
+#
+# comments: please include bug reference, date, and reason for the entry
 
+# NOTES:
 # To specify that a configuration string DOES NOT contain certain strings use Zero-width negative lookahead: (?!regex)
 #   For example, to set an expected failure for all test runs EXCEPT when -Dinterp is used, use the following:
 #       ^((?!Dinterp).)*$
 
-# Example:
-# ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-Dinterp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
-
+#  PERMANENT ENTRIES:
 util/shell_ats, .*, skip, shell file for ats media creation
 
-# bug #459851:  windows mobile System.privateBytes and -memstats privateBytes always returns 0
-as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
 
+# BUGS:
+# Grouped by feature or platform
+
+####################
+# force JIT -Ojit
+####################
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*jit.*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(jit.*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
-# full run for windows mobile - Dell Axim
-mops/.*                                                          ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
-abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
-ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-mmgc/outofmemory,   .*winmobile.* ,  skip,   winmo is not returning exit code
-mmgc/memlimit   ,   .*winmobile.* ,  skip,   winmo does not run under memlimit
-
-
-# Recursive PCRE testcases kills the stack on PocketPC builds
-ecma3/RegExp/eregress_119909,   .*winmobile.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
-
-# sampling only works on debugger for avmdiff skip
-as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
-# mmgc tests fail on avmdiff, does not support passing args to vm
-mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
-
-# sampling failure on winmobile-arm
-as3/sampling/Callback:.*                                         ,   arm-winmobile.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
-
-
-# Bug 476864 - Intermittent sampling test failures
-as3/sampling/Callback               , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-as3/sampling/ProcessSampling        , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-as3/sampling/SimpleSampling         , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-as3/sampling/StartSamplingErrors    , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-
+####################
+# abcasm:
+####################
 # inconsistencies in different debug output, need to implement regex matching of diffs
 abcasm/adhoc , .* , skip, 
 # abcasm helper, not a test
@@ -93,13 +73,7 @@ abcasm/semanticErrorDuplicateSlotName , .* , expectedfail , Error 1107 is correc
 abcasm/funcRedef , .* , expectedfail , Error 1107 is correct output
 # Test not ready for prime-time
 abcasm/stringEscapes , .* , skip,
-
-# Note that distinctions on interp or not are brittle; must run with
-# -Djitordie from time to time to ensure that all abs coverage tests
-# remain jittable.
-
 abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=491056
-
 # Take coverage tests offline: need to analyze failures on tryserver
 abcasm/coverage/B:not uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
 abcasm/coverage/B:int or uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
@@ -118,24 +92,24 @@ abcasm/coverage/I, ppc64.*(?<!-Dinterp) , skip , https://bugzilla.mozilla.org/sh
 abcasm/coverage/StoU , .*-Dinterp , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 abcasm/coverage/StoU , ppc-.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 
-# emulator is not using DST by default
-ecma3/Date/e15_9_5_14, arm-winmobile-emulator.*, skip, emulator DST problem
-ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator.*, skip, emulator DST problem
+####################
+# Sampling
+####################
+# Bug 476864 - Intermittent sampling test failures
+as3/sampling/Callback               , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+as3/sampling/ProcessSampling        , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+as3/sampling/SimpleSampling         , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+as3/sampling/StartSamplingErrors    , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+# https://bugzilla.mozilla.org/show_bug.cgi?id=487027 sampler failure, started with changeset 1863:fa7476a03d9c
+as3/sampling/InvocationSampling, .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487027
 
-# Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-
-# Probably killing the stack 
-mmgc/heap_stress,   .*winmobile.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
-mmgc/heap_stress,   .*mac-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
-mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=488124
-
-
-# diff failures
+####################
+# Differential testing (avmdiff.py)
+####################
+# sampling only works on debugger for avmdiff skip
+as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
+# mmgc tests fail on avmdiff, does not support passing args to vm
+mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
 # trim down tests to save time
 ecma3/Unicode/.*, .*diff, skip , trim down tests
 ecma3/Date/.*, .*diff, skip, trim down tests
@@ -148,16 +122,25 @@ ecma3/Exceptions/exception_010_rt , .*diff , expectedfail, known issue
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 
+####################
+# mmgc
+####################
+# Probably killing the stack 
+mmgc/heap_stress,   .*winmobile.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
+mmgc/heap_stress,   .*mac-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
+mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=488124
 
+####################
+# Vector
+####################
 as3/Vector/lastindexofInitializers, (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=487253
 as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
 as3/Vector/initializerLargeVector, x64.*jit.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281 intermittent seg fault
 
-# https://bugzilla.mozilla.org/show_bug.cgi?id=487027
-# Sampler failure, started with changeset 1863:fa7476a03d9c
-as3/sampling/InvocationSampling, .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487027
 
-
+####################
+# -Djitordie
+####################
 # The following testcases are not able to be jitted
 # https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 as3/Definitions/Function/functionReturnTypes, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
@@ -176,3 +159,34 @@ ecma3/String/e15_5_3_2_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla
 ecma3/String/e15_5_3_2_2, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 ecma3/TypeConversion/e9_3_1_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 ecma3/Unicode/uc_006, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+
+####################
+# Windows Mobile
+####################
+# limitations of ceremoteshell.exe for running tests on windows mobile devices
+mops/.*                                                          ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
+abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
+mmgc/outofmemory,   .*winmobile.* ,  skip,   winmo is not returning exit code
+mmgc/memlimit   ,   .*winmobile.* ,  skip,   winmo does not run under memlimit
+# recursive PCRE testcases kills the stack on PocketPC builds
+ecma3/RegExp/eregress_119909,   .*winmobile.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
+# bug #459851:  windows mobile System.privateBytes and -memstats privateBytes always returns 0
+as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
+ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+# sampling failure on winmobile-arm
+as3/sampling/Callback:.*                                         ,   arm-winmobile.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
+# Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+
+
+####################
+# Windows Mobile Emulator
+####################
+# emulator is not using DST by default
+ecma3/Date/e15_9_5_14, arm-winmobile-emulator.*, skip, emulator DST problem
+ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator.*, skip, emulator DST problem
+
