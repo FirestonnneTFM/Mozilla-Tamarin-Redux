@@ -145,7 +145,8 @@ for arg in sys.argv[1:-1]:
 abc=sys.argv[-1]
     
 # flatten the directory path
-base=abc[0:abc.rfind('.')].replace('/','_')
+abc=abc.replace('/','\\')
+base=abc[0:abc.rfind('.')].replace('\\','_')
 
 # find an available emulator, all emulators representing by directories under dirbase
 dirbase=cwd+"/../util/emulator_files"

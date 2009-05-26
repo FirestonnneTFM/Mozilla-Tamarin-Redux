@@ -6,6 +6,7 @@ CVS/**
 *.jar
 test/**.abc
 test/acceptance/test.*
+test/util/emulator_files
 *.pyc
 *~
 pcre/doc/*.1

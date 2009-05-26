@@ -80,3 +80,4 @@ export mobile_dir=Windows\ Mobile\ 6\ Professional\ SDK\ \(ARMV4I\)
 ## Used by make in the build scripts
 export make_opt="-j2"
 export test_threads=1
+export test_emulator_threads=2
