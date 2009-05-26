@@ -6,7 +6,8 @@ CVS/**
 *.jar
 test/**.abc
 test/acceptance/test.*
-test/util/emulator_files
+test/util/emulator_files/**
+test/util/flashrunner/working/**
 *.pyc
 *~
 pcre/doc/*.1
