@@ -397,6 +397,8 @@ class ShellCommandToken(BaseShellCommand):
 
 
 class SandboxClone(BaseShellCommand):
+    changeDir = ""
+    dest = ""
 
     def __init__(self, dest=".", changeDir=".", **kwargs):
         """arguments:
