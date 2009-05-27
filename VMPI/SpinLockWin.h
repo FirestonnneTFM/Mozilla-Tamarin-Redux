@@ -41,40 +41,64 @@
 class SpinLockWin : public MMgc::GCAllocObject
 {
 public:
-	SpinLockWin() : sl(0) {}
+	SpinLockWin() : sl(0)
+#ifdef _DEBUG
+		, ownerThread(0)
+#endif 
+	{}
+
+#ifdef _DEBUG
+	~SpinLockWin()
+	{
+		GCAssert(sl == 0 && ownerThread == 0); // unlocked?
+	}
+#endif // _DEBUG
+
 	bool Acquire();
 	bool Release();
+	bool Try();
 
 private:
-#ifdef MMGC_64BIT
-	volatile LONG64 sl;
-#else
-	long sl;
+	volatile PVOID sl;
+#ifdef _DEBUG
+	DWORD	ownerThread;
 #endif
 };
 
 inline bool SpinLockWin::Acquire()
 {
-#ifdef MMGC_64BIT
-	//!!@ fires off for some reason
-	//GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
-	while (_InterlockedCompareExchange64(&sl, 1, 0) != 0)
+	GCAssert(ownerThread != GetCurrentThreadId()); // recursive deadlock?
+
+	while (InterlockedCompareExchangePointer(&sl, (PVOID)1, 0) != 0)
 		Sleep(0);
-#else
-	//!!@ fires off for some reason
-	//GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
-	while (InterlockedCompareExchange(&sl, 1, 0) != 0)
-		Sleep(0);
+
+#ifdef _DEBUG
+		ownerThread = GetCurrentThreadId();
 #endif
+
 	return true;
 }
 	
 inline bool SpinLockWin::Release()
 {
-#ifdef MMGC_64BIT
-	_InterlockedExchange64(&sl, 0);
-#else
-	InterlockedExchange(&sl, 0);
+#ifdef _DEBUG
+	GCAssert(ownerThread == GetCurrentThreadId()); // unlocked by same thread?
+	ownerThread = 0;
 #endif
+	InterlockedExchangePointer(&sl, 0);
 	return true;
+}
+
+inline bool SpinLockWin::Try()
+{
+	GCAssert(ownerThread != GetCurrentThreadId()); // recursive deadlock?
+
+	if (InterlockedCompareExchangePointer(&sl, (PVOID)1, 0) == 0) {
+#ifdef _DEBUG
+		ownerThread = GetCurrentThreadId();
+#endif
+		return true;
+	} else {
+		return false;
+	}
 }

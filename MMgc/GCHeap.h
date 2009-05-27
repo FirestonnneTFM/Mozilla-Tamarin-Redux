@@ -65,7 +65,7 @@ namespace MMgc
 	class GCManager
 	{
 	public:
-		GCManager();
+		GCManager() {}
 		
 		/**
 		 * Can't have a destructor as it'll be called too late, call destroy to
@@ -76,30 +76,13 @@ namespace MMgc
 		/**
 		 * Register the GC with the manager.  GC must not already be registered.
 		 */
-		void addGC(GC* gc);
+		void addGC(GC* gc) { collectors.Add(gc); }
 		
 		/**
 		 * Unregister the GC with the manager.  The GC must be registered.
 		 */
-		void removeGC(GC* gc);
-		
-		/**
-		 * @return the number of GCs registered.
-		 */
-		uint32_t getCount();
-		
-		/**
-		 * @return the GC at the given index, 0 <= index < getCount().  Reliably returns
-		 * NULL for indices outside the range.
-		 */
-		GC* getGC(uint32_t index);
-		
-		/**
-		 * Signal to all GCs that the memory status in the system goes from oldStatus to
-		 * newStatus.
-		 */
-		void signalMemoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus);
-		
+		void removeGC(GC* gc) { collectors.Remove(gc); }
+				
 		/**
 		 * Tell every other GC that 'gc' is starting a collection (ie there may be memory pressure there).
 		 */
@@ -110,21 +93,11 @@ namespace MMgc
 		 */
 		void signalEndCollection(GC* gc);
 		
+		const BasicList<GC*>& gcs() { return collectors; }
+
 	private:
-		GC** collectors;			// array of collectors
-		uint32_t numCollectors;		// number of active elements in that array
-		uint32_t limitCollectors;	// size of that array
+		BasicList<GC*> collectors;			// array of collectors
 	};
-	
-	inline uint32_t GCManager::getCount() {
-		return numCollectors;
-	}
-	
-	inline GC* GCManager::getGC(uint32_t index) {
-		if (index >= numCollectors)
-			return NULL;
-		return collectors[index];
-	}
 
 	/**
 	 * GCHeap is a heap manager for the Flash Player's garbage collector.
@@ -373,6 +346,10 @@ namespace MMgc
 		
 		// When the GC is destroyed it must remove itself from the GCHeap.
 		void RemoveGC(GC *gc) { gcManager.removeGC(gc); }
+
+		void AddOOMCallback(OOMCallback *p) { callbacks.Add(p); }
+
+		void RemoveOOMCallback(OOMCallback *p) { callbacks.Remove(p); }
 		
 		void Abort();
 		MemoryStatus GetStatus() { return status; }
@@ -393,8 +370,6 @@ namespace MMgc
 		static void TrackSystemAlloc(void *addr, size_t askSize);
 		static void TrackSystemFree(void *addr);
 #endif //MMGC_USE_SYSTEM_MALLOC
-
-		GCManager gcManager;
 
 		// -- Implementation
 		static GCHeap *instance;
@@ -458,6 +433,7 @@ namespace MMgc
 		void Commit(HeapBlock *block);
 
 		friend class GC;
+		friend class GCPolicyManager;
 
 		void *_Alloc(int size, bool expand, bool zero, bool profile);
 		void _Free(void *item, bool track);
@@ -498,7 +474,7 @@ namespace MMgc
 			}
 		}
 
-		void StatusChangeNotify(MemoryStatus from, MemoryStatus to) { gcManager.signalMemoryStatusChange(from, to); }
+		void StatusChangeNotify(MemoryStatus to);
 
 		void ValidateHeapBlocks();
 
@@ -512,16 +488,15 @@ namespace MMgc
 		HeapBlock freelists[kNumFreeLists];
 		unsigned int numAlloc;
 		FixedMalloc fixedMalloc;
+		GCHeapConfig config;
+		GCManager gcManager;		
+ 		BasicList<OOMCallback*> callbacks;
+ 		vmpi_spin_lock_t callbacks_lock;	
 
 #ifdef MMGC_LOCKING
 		vmpi_spin_lock_t m_spinlock;
 #endif /* MMGC_LOCKING */
-
-		size_t committedCodeMemory;
-
-		GCHeapConfig config;
 		
-	private:
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
 		MemoryStatus status;

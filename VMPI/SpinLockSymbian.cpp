@@ -110,6 +110,11 @@ private:
 //		return pthread_spin_unlock( &m1 ) == 0;
 	}
 
+	inline bool Try()
+	{
+		return true;
+	}
+
 private:
 //	pthread_spinlock_t m1;
 
@@ -134,4 +139,9 @@ bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
 bool VMPI_lockRelease(vmpi_spin_lock_t lock)
 {
 	return ((SpinLockSymbian*)lock)->Release();
+}
+
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockSymbian*)lock)->Try();
 }

@@ -129,7 +129,7 @@ namespace MMgc
 
 		instance = this;
 
-		status = kNormal;
+		status = kMemNormal;
 
 #ifdef MMGC_MEMORY_PROFILER
 		//create profiler if turned on and if it is not already created
@@ -1043,18 +1043,18 @@ namespace MMgc
 			MMGC_LOCK(m_spinlock);
 
 			retval = ExpandHeapLocked(askSize);
-			if(!retval && status == kNormal)
+			if(!retval && status == kMemNormal)
 			{
 				// invoke callbacks
-				StatusChangeNotify(kNormal, kReserve);
+				StatusChangeNotify(kMemReserve);
 
 				retval = ExpandHeapLocked(askSize);
 				// try again
 				if(!retval) { 
-					status = kReserve;
+					status = kMemReserve;
 				}
 			} else {
-				status = kEmpty;
+				status = kMemAbort;
 
 			}
 		}
@@ -1527,21 +1527,23 @@ namespace MMgc
 		size_t gc_total=0;
 		size_t gc_allocated_total =0;
 		size_t gc_ask_total = 0;
-		for(uint32_t i=0,n=gcManager.getCount() ; i<n; i++) {
-			GC* gc = gcManager.getGC(i);
+		BasicListIterator<GC*> iter(gcManager.gcs());
+		GC* gc;
+		while((gc = iter.next()) != NULL)
+		{
 #ifdef MMGC_MEMORY_PROFILER
 			GCLog("[mem] GC 0x%p:%s\n", (void*)gc, GetAllocationName(gc));
 #else
 			GCLog("[mem] GC 0x%p\n", (void*)gc);
 #endif
 			gc->DumpMemoryInfo();
-
+			
 			size_t ask;
 			size_t allocated;
 			gc->GetUsageInfo(ask, allocated);
 			gc_ask_total += ask;
 			gc_allocated_total += allocated;
-
+			
 			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
 		GCLog("[mem] ------- gross stats -----\n");
@@ -1663,7 +1665,7 @@ namespace MMgc
 	
 	size_t GCHeap::GetPrivateBytes()
 	{
-		return VMPI_getPrivateResidentPageCount(kBlockSize);
+		return VMPI_getPrivateResidentPageCount();
 	}
 
 
@@ -1729,69 +1731,52 @@ namespace MMgc
 	}
 
 #endif //MMGC_USE_SYSTEM_MALLOC
-
-	GCManager::GCManager() 
-		: collectors(NULL)
-		, numCollectors(0)
-		, limitCollectors(0)
-	{
-	}
 	
 	void GCManager::destroy()
 	{
-		delete [] collectors;
-		GCAssert(numCollectors == 0);
-		collectors = NULL;
-		limitCollectors = 0;
-	}
-	
-	void GCManager::addGC(GC *gc)
-	{
-		if (numCollectors == limitCollectors) {
-			uint32_t newLimitCollectors = limitCollectors + 1;		// We don't expect a lot of churn in this array, and creating a GC is very heavyweight anyway
-			GC **newCollectors = new GC*[newLimitCollectors];
-			VMPI_memcpy(newCollectors, collectors, sizeof(GC*)*limitCollectors);
-			delete [] collectors;
-			collectors = newCollectors;
-			limitCollectors = newLimitCollectors;
-		}
-		collectors[numCollectors] = gc;
-		numCollectors++;
-	}
-	
-	void GCManager::removeGC(GC *gc)
-	{
-		uint32_t i=0;
-		while (i < numCollectors && collectors[i] != gc)
-			i++;
-		if (i == numCollectors) {
-			GCAssert(!"Bug: should not try to remove a GC that's not registered");
-			return;
-		}
-		while (i < numCollectors-1) {
-			collectors[i] = collectors[i+1];
-			i++;
-		}
-		numCollectors--;
-	}
-	
-	void GCManager::signalMemoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus)
-	{
-		for(uint32_t i=0 ; i < numCollectors ; i++)
-			collectors[i]->MemoryStatusChange(oldStatus, newStatus);
+		collectors.Destroy();
 	}
 	
 	void GCManager::signalStartCollection(GC* gc)
 	{
-		for ( uint32_t i=0 ; i < numCollectors ; i++ )
-			if (collectors[i] != gc)
-				collectors[i]->policy.signalStartCollection(gc);
+		BasicListIterator<GC*> iter(collectors);
+		GC* otherGC;
+		while((otherGC = iter.next()) != NULL) 
+			otherGC->policy.signalStartCollection(gc);
 	}
 	
 	void GCManager::signalEndCollection(GC* gc)
 	{
-		for ( uint32_t i=0 ; i < numCollectors ; i++ )
-			if (collectors[i] != gc)
-				collectors[i]->policy.signalEndCollection(gc);
+		BasicListIterator<GC*> iter(collectors);
+		GC* otherGC;
+		while((otherGC = iter.next()) != NULL) 
+			otherGC->policy.signalStartCollection(gc);
+	}
+
+	/* this method is the heart of the OOM system.
+	   its here that we call out to the mutator which may call
+	   back in to free memory or try to get more.
+	*/
+	void GCHeap::StatusChangeNotify(MemoryStatus to)
+	{
+		MemoryStatus oldStatus = status;
+		status = to;
+		
+		// unlock the heap so that memory operations are allowed
+		VMPI_lockRelease(m_spinlock);
+		
+		BasicListIterator<OOMCallback*> iter(callbacks);
+		OOMCallback *cb = NULL;
+		do {
+			{
+				MMGC_LOCK(callbacks_lock);
+				cb = iter.next();
+			}
+			if(cb)
+				cb->memoryStatusChange(oldStatus, to);
+			if(status == kMemAbort)
+				break;
+		} while(cb != NULL);
+		VMPI_lockAcquire(m_spinlock);
 	}
 }

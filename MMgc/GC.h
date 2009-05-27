@@ -676,7 +676,7 @@ namespace MMgc
 	 * to find the optimum value.
 	 *
 	 */
-	class GC
+	class GC : public OOMCallback
 	{
 		friend class GCRoot;
 		friend class GCCallback;
@@ -744,7 +744,7 @@ namespace MMgc
 
 		// -- Interface
 		GC(GCHeap *heap);
-		~GC();
+		virtual ~GC();
 		
 		/**
 		 * Causes an immediate stop-the-world garbage collection (or finishes any
@@ -809,9 +809,6 @@ namespace MMgc
 		 * Free memory allocated with AllocRCRoot.
 		 */
 		void FreeRCRoot(void* mem);
-		
-		void *AllocAlreadyLocked(size_t size, int flags=0);
-
 		
 		/**
 		 * overflow checking way to call Alloc for a # of n size'd items,
@@ -1042,16 +1039,6 @@ namespace MMgc
 				WriteBarrierNoSubstitute(FindBeginning(address), value);
 		}
 
-		void MemoryStatusChange(MemoryStatus from, MemoryStatus to)
-		{
-			policy.signalMemoryStatusChange(from, to);
-			pendingStatusChange = true;
-			statusFrom = from;
-			statusTo = to;
-		}
-
-		void Poke();
-
 	public:
 		GCPolicyManager policy;
 		
@@ -1248,6 +1235,14 @@ namespace MMgc
 		friend class GCAutoEnterPause;
 		void SetStackEnter(GCAutoEnter *enter);
 		GCAutoEnter *GetAutoEnter() { return stackEnter; }
+
+ 		vmpi_spin_lock_t const m_gcLock;
+
+ 		bool onThread() { return VMPI_currentThread() == m_gcThread; }
+
+		// store a handle to the thread that create the GC to ensure thread safety
+		vmpi_thread_t m_gcThread;
+
 
 		void gclog(const char *format, ...);
 		void log_mem(const char *name, size_t s, size_t comp );
@@ -1482,8 +1477,6 @@ public:
 		void DumpMemoryInfo();
 private:
 
-		void CheckThread();
-
 		void PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item);		// defined in GC.cpp, always inlined in callers there
 
 #ifdef _DEBUG		
@@ -1516,10 +1509,7 @@ private:
 		 * it has no pointers to white objects.
 		 */
 		void FindMissingWriteBarriers();
-#ifdef WIN32
-		// store a handle to the thread that create the GC to ensure thread safety
-		DWORD m_gcThread;
-#endif
+
 #endif
 
 public:
@@ -1556,8 +1546,7 @@ public:
 
 		size_t GetNumBlocks() { return (size_t)policy.blocksOwnedByGC(); }
 
-		bool pendingStatusChange;
-		MemoryStatus statusFrom, statusTo;		
+		virtual void memoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus);
 
 		/* A portable replacement for alloca().
 		 *

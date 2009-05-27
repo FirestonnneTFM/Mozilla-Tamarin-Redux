@@ -63,3 +63,7 @@ void* VMPI_tlsGetValue(uintptr_t tlsId)
 	return TlsGetValue((DWORD)tlsId);
 }
 
+vmpi_thread_t VMPI_currentThread()
+{
+	return (vmpi_thread_t) (uintptr_t)GetCurrentThreadId();
+}

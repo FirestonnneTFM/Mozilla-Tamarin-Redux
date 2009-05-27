@@ -163,7 +163,7 @@ void VMPI_releaseAlignedMemory(void* address)
 	free(address);
 }
 
-size_t VMPI_getPrivateResidentPageCount(size_t /*pageSize*/)
+size_t VMPI_getPrivateResidentPageCount()
 {
 	size_t private_bytes = 0;
 	kern_return_t ret;

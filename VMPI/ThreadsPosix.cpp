@@ -71,3 +71,8 @@ void* VMPI_tlsGetValue(uintptr_t tlsId)
 {
 	return pthread_getspecific((pthread_key_t)tlsId);
 }
+
+vmpi_thread_t VMPI_currentThread()
+{
+	return (void*)pthread_self();
+}
