@@ -88,8 +88,8 @@ export AVMRD=$buildsdir/$change-${changeid}/$platform/$shell_release_debugger
 
 echo AVM=$AVM
 echo AVMRD=$AVMRD
-export GLOBALABC=$basedir/core/$builtinABC
-echo GLOBALABC=$GLOBALABC
+export BUILTINABC=$basedir/core/$builtinABC
+echo BUILTINABC=$BUILTINABC
 export SHELLABC=$basedir/shell/$shellABC
 echo SHELLABC=$SHELLABC
 
