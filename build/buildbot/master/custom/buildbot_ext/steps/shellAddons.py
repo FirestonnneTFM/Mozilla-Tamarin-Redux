@@ -408,8 +408,6 @@ class SandboxClone(BaseShellCommand):
         """
         self.changeDir = changeDir
         self.dest = dest
-        kwargs['changeDir'] = changeDir
-        kwargs['dest'] = dest
         BaseShellCommand.__init__(self, **kwargs)
         
     
