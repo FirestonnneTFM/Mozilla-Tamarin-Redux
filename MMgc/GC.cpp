@@ -480,6 +480,7 @@ namespace MMgc
 		emptyWeakRefRoot(0),
 		marking(false),
 		m_markStackOverflow(false),
+		mark_item_recursion_control(20),	// About 3KB as measured with GCC 4.1 on MacOS X (144 bytes / frame), May 2009
 		memStart(MAX_UINTPTR),
 		memEnd(0),
 		heap(gcheap),
@@ -2777,20 +2778,17 @@ bail:
 						realItem = GetUserPointer(realItem);
 						itemSize -= (uint32_t)DebugSize();
 						#endif
-						if(((uintptr_t)realItem & ~0xfff) != thisPage)
+						GCWorkItem newItem(realItem, itemSize, true);
+						if(((uintptr_t)realItem & ~0xfff) != thisPage || mark_item_recursion_control == 0)
 						{							
 							*pbits = bits2 | (GCAlloc::kQueued << shift);
-							block->gc->PushWorkItem(work, GCWorkItem(realItem, itemSize, true));
+							PushWorkItem(work, newItem);
 						}
 						else
 						{
-							// clear queued bit
-							*pbits = bits2 & ~(GCAlloc::kQueued << shift);
-							// skip stack for same page items, this recursion is naturally limited by
-							// how many item can appear on a page, worst case is 8 byte linked list or
-							// 512
-							GCWorkItem newItem(realItem, itemSize, true);
+							mark_item_recursion_control--;
 							MarkItem(newItem, work);
+							mark_item_recursion_control++;
 						}
 					}
 					else
@@ -2844,7 +2842,7 @@ bail:
 						realItem = GetUserPointer(item);
 						usize -= (uint32_t)DebugSize();
 						#endif
-						b->gc->PushWorkItem(work, GCWorkItem(realItem, usize, true));
+						PushWorkItem(work, GCWorkItem(realItem, usize, true));
 					} 
 					else
 					{

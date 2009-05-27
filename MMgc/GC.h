@@ -1304,6 +1304,10 @@ namespace MMgc
 		void HandleMarkStackOverflow();
 		void SignalMarkStackOverflow(GCStack<GCWorkItem> &stack, GCWorkItem& item);
 		
+		// Set at initialization to the deepest recursion level MarkItem is allowed to
+		// reach.  Managed entirely within MarkItem.
+		uint32_t mark_item_recursion_control;
+		
 		int IsWhite(const void *item);
 		
 		const static int16_t kSizeClasses[kNumSizeClasses];		
