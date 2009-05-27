@@ -580,7 +580,7 @@ namespace avmplus
             GC *gc = core->gc;
 			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
 			// @todo, we really need to limit growth system-wide, rather than per-Fragmento
-			mgr->codeAlloc = new (gc) CodeAlloc(gc);
+			mgr->codeAlloc = new (gc) CodeAlloc(gc->GetGCHeap());
 #ifdef AVMPLUS_VERBOSE
 			if (pool->verbose) {
 				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, 0);
