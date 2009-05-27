@@ -412,6 +412,11 @@ class SandboxClone(BaseShellCommand):
         self.dest = dest
         BaseShellCommand.__init__(self, **kwargs)
         
+        # need to explicitly tell add our custom arguments to the factory
+        self.addFactoryArguments(changeDir=changeDir,
+                                 dest=dest)
+        
+        
     
     def start(self):
         changes = self.step_status.build.getChanges()
