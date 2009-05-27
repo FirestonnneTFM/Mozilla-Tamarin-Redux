@@ -89,7 +89,7 @@ echo ""
 
 export AVM=$basedir/build/buildbot/slaves/all/tools/ceremoteshell.exe
 export ASC=$basedir/utils/asc.jar
-export GLOBALABC=$basedir/core/$builtinABC
+export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
 
 echo "Setting up the device with build #$change"

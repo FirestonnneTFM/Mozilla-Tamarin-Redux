@@ -54,7 +54,7 @@ class RunTestLib:
         self.avm=self.checkenv('AVM','path to vm shell')
         self.avmrd=self.checkenv('AVMRD','path to debugger vm shell',False)
         self.asc=self.checkenv('ASC','path to actionscript compiler asc.jar')
-        self.gabc=self.checkenv('GLOBALABC','path to core/builtin.abc')
+        self.gabc=self.checkenv('BUILTINABC','path to core/builtin.abc')
         self.sabc=self.checkenv('SHELLABC','path to shell/shell_toplevel.abc')
         self.loadConfig()
 

@@ -69,7 +69,7 @@ echo ""
 
 
 export ASC=$basedir/utils/asc.jar
-export GLOBALABC=$basedir/core/$builtinABC
+export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
 export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_release_debugger}_cov
 export COVFILE=$buildsdir/avm.cov

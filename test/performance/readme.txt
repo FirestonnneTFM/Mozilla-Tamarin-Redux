@@ -45,7 +45,7 @@ usage example:
 $ export AVM=c:/dev/tamarin-central/platform/win32/obj_8/shell/Release/avmplus.exe
 $ export AVM2=c:/dev/tamarin-tracing/platform/win32/obj_8/shell/Release/avmplus.exe
 $ export ASC=c:/dev/asc/asc.jar
-$ export GLOBALABC=c:/dev/tamarin-central/core/builtin.abc
+$ export BUILTINABC=c:/dev/tamarin-central/core/builtin.abc
 $ ./runtests.py
 
 

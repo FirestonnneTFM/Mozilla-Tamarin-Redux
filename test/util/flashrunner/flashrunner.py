@@ -255,7 +255,7 @@ if os.path.exists(swffile)==False or os.path.getmtime(infile)>os.path.getmtime(s
     #print("generated %s" % outfile)
 
     #ascline="java -jar %s %s -swf %s,550,400 %s" % (environ['ASC'].strip(),environ['ASCARGS'].strip(),classname,outfile)
-    ascline="java -jar %s -import %s -import %s -swf %s,550,400 %s" % (environ['ASC'].strip(),environ['GLOBALABC'].strip(),environ['PLAYERGLOBALABC'].strip(),classname,outfile)
+    ascline="java -jar %s -import %s -import %s -swf %s,550,400 %s" % (environ['ASC'].strip(),environ['BUILTINABC'].strip(),environ['PLAYERGLOBALABC'].strip(),classname,outfile)
 
     p=subprocess.Popen(ascline,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,shell=True)
     p.communicate()

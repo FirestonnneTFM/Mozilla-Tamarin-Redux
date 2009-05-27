@@ -124,7 +124,7 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     }
 fi
 export ASC=$basedir/utils/asc.jar
-export GLOBALABC=$basedir/core/$builtinABC
+export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
 
 echo ""
