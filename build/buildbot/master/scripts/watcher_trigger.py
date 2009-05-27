@@ -107,6 +107,8 @@ def triggerBuild(build, branch='tamarin-redux'):
             user = line[line.find(":")+1:].strip()
         elif line.startswith("changeset:"):
             revision = line[line.find(":")+1:].strip()
+            if revision.find(':') != -1:
+                revision = revision[:revision.find(":")].strip()
         elif line.startswith("files:"):
             files = line[line.find(":")+1:].strip().split()
         elif line.startswith("description:"):
