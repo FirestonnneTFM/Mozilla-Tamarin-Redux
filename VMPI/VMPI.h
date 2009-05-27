@@ -205,7 +205,7 @@ extern size_t		VMPI_getVMPageSize();
 * @return number of pages
 * @see VMPI_getVMPageSize()
 */
-extern size_t		VMPI_getPrivateResidentPageCount(size_t pageSize);
+extern size_t		VMPI_getPrivateResidentPageCount();
 
 /**
 * Method to find whether the platform supports merging of contiguous memory regions from heap
@@ -375,6 +375,13 @@ extern bool			VMPI_lockAcquire(vmpi_spin_lock_t lock);
 extern bool			VMPI_lockRelease(vmpi_spin_lock_t lock);
 
 /**
+* Method to obtain a lock on a vmpi_spin_lock_t instance if it isn't locked
+* @param lock instance to release the lock on
+* @return true if lock was successfully aqcuired, false if another thread has it
+*/
+extern bool			VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock);
+
+/**
  * can two consecutive calls to VMPI_reserveMemoryRegion be freed with one VMP_releaseMemoryRegion call?
  * @return true if it can
  */
@@ -447,6 +454,14 @@ extern bool VMPI_tlsSetValue(uintptr_t tlsId, void* value);
  * @see VMPI_tlsSetValue
 */
 extern void* VMPI_tlsGetValue(uintptr_t tlsId);
+
+typedef void * vmpi_thread_t;
+
+/**
+ * Obtain current thread identifier
+ * @return thread id
+ */
+extern vmpi_thread_t VMPI_currentThread();
 
 /**
  * Method to perform any initialization activities to assist

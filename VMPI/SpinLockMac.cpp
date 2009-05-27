@@ -42,6 +42,7 @@ extern "C"
 {
 	extern void _spin_lock(uint32_t *);
 	extern void _spin_unlock(uint32_t *);
+	extern uint32_t _spin_lock_try(uint32_t *);
 }
 
 class SpinLockMac : public MMgc::GCAllocObject
@@ -68,6 +69,11 @@ public:
 		return true;
 	}
 
+	inline bool Try()
+	{
+		return _spin_lock_try(&m1);
+	}
+
 private:
 	uint32_t m1;
 };
@@ -91,4 +97,9 @@ bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
 bool VMPI_lockRelease(vmpi_spin_lock_t lock)
 {
 	return ((SpinLockMac*)lock)->Release();
+}
+
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockMac*)lock)->Try();
 }

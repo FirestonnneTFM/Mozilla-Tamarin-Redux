@@ -58,3 +58,8 @@ bool VMPI_lockRelease(vmpi_spin_lock_t lock)
 {
 	return ((SpinLockWin*)lock)->Release();
 }
+
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockWin*)lock)->Try();
+}

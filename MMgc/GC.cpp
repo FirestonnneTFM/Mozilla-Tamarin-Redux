@@ -470,6 +470,8 @@ namespace MMgc
 		sweepStart(0),
 		hitZeroObjects(false),
 		emptyWeakRef(0),
+		m_gcLock(VMPI_lockCreate()),
+		m_gcThread(NULL),
 		destroying(false),
 		stackCleaned(true),
 		rememberedStackTop(0),
@@ -546,20 +548,15 @@ namespace MMgc
 			SetGCContextVariable(i, NULL);
 		}
 
-#ifdef _DEBUG
-#ifdef WIN32
-		m_gcThread = GetCurrentThreadId();
-#endif
-#endif
-
 		// keep GC::Size honest
 		GCAssert(offsetof(GCLargeAlloc::LargeBlock, usableSize) == offsetof(GCAlloc::GCBlock, size));
 
-		emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef)),
-		emptyWeakRef = new (this) GCWeakRef(NULL);
-
 		gcheap->AddGC(this);
  		allocaInit();
+
+		MMGC_GCENTER(this);
+		emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef)),
+		emptyWeakRef = new (this) GCWeakRef(NULL);
 	}
 
 #ifdef _MSC_VER
@@ -610,7 +607,7 @@ namespace MMgc
 
 		heapFree(pageMap);
 
-		CheckThread();
+		GCAssertMsg(onThread(), "GC called from different thread!");
 		
 		delete emptyWeakRefRoot;
 		GCAssert(!m_roots);
@@ -632,7 +629,7 @@ namespace MMgc
 
 	void GC::Collect()
 	{
-		CheckThread();
+		GCAssertMsg(onThread(), "GC called from different thread!");
 
 		if (nogc || collecting || zct.reaping) {
 			return;
@@ -759,12 +756,7 @@ namespace MMgc
 
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{
-		CheckThread();
-		return AllocAlreadyLocked(size, flags);
-	}
-
-	void *GC::AllocAlreadyLocked(size_t size, int flags/*0*/)
-	{
+		GCAssertMsg(onThread(), "GC called from different thread!");
 #ifdef AVMPLUS_SAMPLER
 		avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 		if(core)
@@ -857,7 +849,7 @@ namespace MMgc
 
 	void GC::Free(const void *item)
 	{
-		CheckThread();
+		GCAssertMsg(onThread(), "GC called from different thread!");
 
 		if(item == NULL) {
 			return;
@@ -1399,15 +1391,6 @@ bail:
 			gc->RemoveCallback(this);
 		}
 		gc = NULL;
-	}
-
-	void GC::CheckThread()
-	{
-#ifdef _DEBUG
-#ifdef WIN32
-		GCAssertMsg(disableThreadCheck || m_gcThread == GetCurrentThreadId(), "Unsafe access to GC from wrong thread!");
-#endif
-#endif
 	}
 
 	bool GC::IsPointerToGCPage(const void *item)
@@ -3374,19 +3357,6 @@ bail:
 		totalAllocated += allocated;
 	}
 
-	void GC::Poke()
-	{
-		ReapZCT();
-		heap->Decommit();
-
-		if(pendingStatusChange)
-		{
-			for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-				cb->oom(statusTo);
-			pendingStatusChange = false;
-		}
-	}
-
  	void GC::allocaInit()
  	{
  		top_segment = NULL;
@@ -3485,8 +3455,34 @@ bail:
 	{
  		if(enter == NULL && stackEnter != 0) {
  			stackEnter = NULL;
+			m_gcThread = NULL;
  		} else if(stackEnter == 0) {
  			stackEnter = enter;
+			m_gcThread = VMPI_currentThread();
  		} 
  	}
+ 
+ 	void GC::memoryStatusChange(MemoryStatus, MemoryStatus to)
+ 	{
+ 		// ZCT blockage: what if we get here from zct growth?
+ 		
+ 		// Mark/sweep blockage: what about mark stack,
+ 		// presweep,post-sweep,finalize allocations?
+ 		
+ 		// if ZCT or GC can't complete we can't free memory! currently
+ 		// we do nothing, which means we rely on reserve or other
+ 		// listeners to free memory or head straight to abort
+ 
+ 		if(to == kMemReserve) {
+ 			if(onThread()) {
+ 				Collect();
+ 			} else {
+ 				if(VMPI_lockTestAndAcquire(m_gcLock)) {
+ 					Collect();
+ 					VMPI_lockRelease(m_gcLock);
+ 				}		
+ 				// else nothing can be done
+ 			}
+  		}
+	}
 }

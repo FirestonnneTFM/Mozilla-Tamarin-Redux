@@ -21,7 +21,6 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
- *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,83 +36,100 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __MMgc__
-#define __MMgc__
-
-// VMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
-#include "VMPI.h"
-
-// Memory profiling settings
-
-#ifdef DEBUG
-    #define MMGC_MEMORY_INFO
-#endif
-
-#if defined AVMPLUS_MAC && !(defined MMGC_PPC && defined MMGC_64BIT)
-	#ifdef DEBUG
-		#define MMGC_MEMORY_PROFILER
-	#endif
-#endif
-
-#if defined AVMPLUS_WIN32 && !defined AVMPLUS_ARM // note, does not require DEBUG
-    #define MMGC_MEMORY_PROFILER
-#endif
-
-#include "GCDebug.h"
-#include "GCLog.h"
-
-/*
- * If _GCHeapLock is defined, a spin lock is used for thread safety
- * on all public API's (Alloc, Free, ExpandHeap)
- *
- * Warning:
- * We may use GCHeap for allocation on other threads, hence the
- * spinlock, but the MMgc garbage collector in general is not
- * thread-safe.
- */
-
-#ifdef MMGC_LOCKING
-#define MMGC_LOCK(_x) GCAcquireSpinlock _lock(_x)
-#include "GCSpinLock.h"
-#else
-#define MMGC_LOCK(_x) 
-#endif
+#ifndef __BasicList__
+#define __BasicList__
 
 namespace MMgc
-{
-	class GC;
-	class RCObject;
-	class GCWeakRef;
-	class GCObject;
-	class GCHashtable;
-	class Cleaner;
-	class GCAlloc;
-	class GCHeap;
+{	
+	template<typename T, int growthIncrement=4>
+	class BasicList
+	{
+	public:
+		BasicList() : count(0), capacity(0), items(NULL) 
+		{
+		}
+		
+		~BasicList()
+		{
+			Destroy();
+		}
+		
+		void Destroy()
+		{
+			if ( items )
+			{
+				delete [] items;
+				items = NULL;
+			}
+			count = capacity = 0;
+		}
+		
+		void Add(T item)
+		{
+			if(count == capacity)
+			{
+				capacity += growthIncrement;
+				T* newItems = new T[ capacity ];
+				if(items)
+					VMPI_memcpy(newItems, items, count * sizeof(T));
+				delete [] items;
+				items = newItems;
+			}
+			items[count] = item;
+			count++;
+		}
+		
+		void Remove(T item)
+		{
+			uint32_t i=0;
+			while (i < count && items[i] != item)
+				i++;
+			if (i == count) {
+				GCAssertMsg(false, "Bug: should not try to remove something that's not in the list");
+				return;
+			}
+			while (i < count-1) {
+				items[i] = items[i+1];
+				i++;
+			}
+			count--;
+		}
+		
+		T Get(uint32_t i) const
+		{ 
+			GCAssertMsg(i < count, "Index out of bounds");
+			return items[i]; 
+		}
+		
+		uint32_t Count() const { return count; }
+		
+		//		T* GetData() const { return items; }
+		
+	protected:
+		// no impl
+		BasicList(const BasicList& other);
+		BasicList& operator=(const BasicList& other);
+
+	private:
+		uint32_t count, capacity;
+		T *items;
+	};
+
+	template<typename T>
+	class BasicListIterator
+	{
+	public:
+		BasicListIterator(const BasicList<T>& bl) : index(0), bl(bl) {}
+		T next() { return index < bl.Count() ? bl.Get(index++) : NULL; }
+		T next(vmpi_spin_lock_t lock) 
+		{
+			MMGC_LOCK(lock);
+			return next();
+		}
+	private:
+		uint32_t index;
+		const BasicList<T> &bl;
+	};
 }
 
-#include "GCTypes.h"
-#include "OOM.h"
-#include "BasicList.h"
-#include "GCStack.h"
-#include "GCThreads.h"
-#include "GCAllocObject.h"
-#include "GCHashtable.h"
-#include "GCMemoryProfiler.h"
-#include "GCThreadLocal.h"
-#include "FixedAlloc.h"
-#include "FixedMalloc.h"
-#include "GCHeap.h"
-#include "GCAlloc.h"
-#include "GCLargeAlloc.h"
-#include "GCGlobalNew.h"
-#include "GC.h"
-#include "GCObject.h"
-#include "GCWeakRef.h"
-#include "WriteBarrier.h"
-
-// remove these when the player stops using it
-#define MMGC_DRC
-#define WRITE_BARRIERS
-
-#endif /* __MMgc__ */
-
+#endif /* __GCStack__ */

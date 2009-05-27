@@ -75,6 +75,16 @@ public:
 		return true;
 	}
 
+
+	inline bool Try()
+	{
+		__asm__ volatile("" : : : "memory");
+		if(X86_TestAndSet(&lock, 1) != 0)
+			return false;
+		return true;
+	}
+
+
 private:
 
 	inline int X86_TestAndSet(volatile int *ptr, int val) {
@@ -111,6 +121,11 @@ private:
 		return pthread_mutex_unlock( &m1 ) == 0;
 	}
 
+	inline bool Try()
+	{
+		return pthread_mutex_trylock( &m1 ) == 0;
+	}
+
 private:
 	pthread_mutex_t m1;
 
@@ -134,6 +149,11 @@ private:
 	inline bool Release()
 	{
 		return pthread_spin_unlock( &m1 ) == 0;
+	}
+
+	inline bool Try()
+	{
+		return pthread_spin_trylock( &m1 ) == 0;
 	}
 
 private:
@@ -161,4 +181,9 @@ bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
 bool VMPI_lockRelease(vmpi_spin_lock_t lock)
 {
 	return ((SpinLockUnix*)lock)->Release();
+}
+
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
+{
+	return ((SpinLockUnix*)lock)->Try();
 }

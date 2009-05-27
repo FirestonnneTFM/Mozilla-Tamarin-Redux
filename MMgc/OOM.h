@@ -67,15 +67,25 @@ namespace MMgc
 		~EnterFrame();
 		jmp_buf jmpbuf;
 		int status;
+	private:
+		GCHeap *m_heap;
 	};
-
 	
 	typedef enum _MemoryStatus {
-		kNormal,
-		kReserve,
-		kEmpty,
-		kAbort
+		kMemNormal,
+		kMemReserve,
+		kMemAbort
 	} MemoryStatus;
+
+	/**
+	 * Mutator oom callback mechanism, subclass and call GCHeap::AddOOMCallback
+	 */
+	class OOMCallback
+	{
+	public:
+		virtual ~OOMCallback() {}
+		virtual void memoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus) = 0;
+	};
 }
 
 #endif /* __OOM_H__ */

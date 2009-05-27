@@ -277,8 +277,9 @@ void VMPI_releaseAlignedMemory(void* address)
 #endif // USE_RCHUNK
 }
 
-size_t VMPI_getPrivateResidentPageCount(size_t pageSize)
+size_t VMPI_getPrivateResidentPageCount()
 {
+	size_t pageSize = VMPI_getVMPageSize();
 	TInt freeRAM;
 	HAL::Get(HAL::EMemoryRAMFree, freeRAM);
 	if(pageSize > 0)
