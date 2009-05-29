@@ -39,6 +39,10 @@
 #ifndef __avmplus_NewString__
 #define __avmplus_NewString__
 
+#ifdef FEATURE_UTF32_SUPPORT
+#error This feature is scheduled for removal - do not use!
+#endif
+
 namespace avmplus 
 {
 	class ByteArray;
@@ -225,9 +229,9 @@ namespace avmplus
 		/// Return the string typex.
 		inline	int32_t				getType() const { return ((m_bitsAndFlags & TSTR_TYPE_MASK) >> TSTR_TYPE_SHIFT); }
 		/// Is this an interned string?
-		inline	bool				isInterned() const { return 0 != (m_bitsAndFlags & TSTR_FLAG_INTERNED); }
+		inline	bool				isInterned() const { return (m_bitsAndFlags & TSTR_INTERNED_FLAG) != 0; }
 		/// Mark this string as interned.
-		inline	void				setInterned() { m_bitsAndFlags |= TSTR_FLAG_INTERNED; }
+		inline	void				setInterned() { m_bitsAndFlags |= TSTR_INTERNED_FLAG; }
 		/**
 		Return the character at the given position. No index checks!
 		@param	index				the index
@@ -494,18 +498,18 @@ private:
 				Pointers		m_buffer;	// buffer pointer (dynamic, static, or into master)
 
 				int32_t			m_length;					// length in characters
-		mutable	uint32_t		m_bitsAndFlags;				// various bits and flags, see below(must be unsigned)
+		mutable	uint32_t		m_bitsAndFlags;				// various bits and flags, see below (must be unsigned)
 				enum {
-					TSTR_WIDTH_MASK			= 0x00000007,	// string width(right-aligned for fast access)
-					TSTR_FLAG_INTERNED		= 0x00000008,	// this string is interned
-					TSTR_TYPE_MASK			= 0x000000F0,	// type index, 4 bits
-					TSTR_TYPE_SHIFT			= 4,
-					TSTR_NOINT_FLAG			= 0x00000100,	// set in getIntAtom() if the string is not an 28-bit integer
-					TSTR_NOUINT_FLAG		= 0x00000200,	// set in parseIndex() if the string is not an unsigned integer
-					TSTR_UINT28_FLAG		= 0x00000400,	// set if m_index contains valud for getIntAtom()
-					TSTR_UINT32_FLAG		= 0x00000800,	// set if m_index contains valud for parseIndex()
-					TSTR_CHARSLEFT_MASK		= 0xFFFFF000,	// characters left in buffer field(for inplace concat)
-					TSTR_CHARSLEFT_SHIFT	= 12
+					TSTR_WIDTH_MASK			= 0x00000003,	// string width (right-aligned for fast access)
+					TSTR_TYPE_MASK			= 0x0000000C,	// type index, 2 bits
+					TSTR_TYPE_SHIFT			= 2,
+					TSTR_INTERNED_FLAG		= 0x00000010,	// this string is interned
+					TSTR_NOINT_FLAG			= 0x00000020,	// set in getIntAtom() if the string is not an 28-bit integer
+					TSTR_NOUINT_FLAG		= 0x00000040,	// set in parseIndex() if the string is not an unsigned integer
+					TSTR_UINT28_FLAG		= 0x00000080,	// set if m_index contains value for getIntAtom()
+					TSTR_UINT32_FLAG		= 0x00000100,	// set if m_index contains value for parseIndex()
+					TSTR_CHARSLEFT_MASK		= 0xFFFFFE00,	// characters left in buffer field (for inplace concat)
+					TSTR_CHARSLEFT_SHIFT	= 9
 				};
 		inline	void			setType(char index)			{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_TYPE_MASK) |(index << TSTR_TYPE_SHIFT); }
 		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
