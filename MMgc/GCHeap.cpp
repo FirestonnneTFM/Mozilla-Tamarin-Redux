@@ -92,6 +92,7 @@ namespace MMgc
 		  numDecommitted(0),
 		  numAlloc(0),
 		  config(c),
+		  callbacks_lock(VMPI_lockCreate()),
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
 	#endif
@@ -123,7 +124,10 @@ namespace MMgc
 	#endif //MMGC_LOCKING
 
 		// Create the initial heap
-		ExpandHeap((int)config.initialSize);
+		{
+			MMGC_LOCK(m_spinlock);
+			ExpandHeap((int)config.initialSize);
+		}
 
 		fixedMalloc._Init(this);
 
@@ -174,6 +178,7 @@ namespace MMgc
 			GCAssert(false);
 			
 			VMPI_lockDestroy(gclog_spinlock);
+			VMPI_lockDestroy(callbacks_lock);
 		}
 		
 #ifdef MMGC_MEMORY_PROFILER
@@ -191,22 +196,25 @@ namespace MMgc
 
 	}
 
-	void* GCHeap::_Alloc(int size, bool expand, bool zero, bool track)
+	void* GCHeap::Alloc(int size, int flags)
 	{
-		(void)track;
 		GCAssert(size > 0);
 
 		char *baseAddr = 0;
-
+		bool zero = (flags & kZero) != 0;
 		// nested block to keep memset/memory commit out of critical section
 		{
 			MMGC_LOCK(m_spinlock);
 
 			HeapBlock *block = AllocBlock(size, zero);
 
-			if (!block && expand) {
-				ExpandHeapLocked(size);		
+			if (!block && (flags & kExpand)) {
+				ExpandHeap(size, (flags & kCanFail) != 0);
 				block = AllocBlock(size, zero);
+				if(!block) {
+					GCAssert(flags & kCanFail);
+					return NULL;
+				}
 			}
 
 			if (block) 
@@ -225,14 +233,14 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_MEMORY_PROFILER
-				if(track && HooksEnabled() && profiler) {
+				if((flags & kProfile) && HooksEnabled() && profiler) {
 					profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 				}
 #endif
 			}
 		}
 
-		if(!baseAddr && expand) {
+		if(!baseAddr && (flags & kExpand)) {
 			Abort();
 		}
 		
@@ -251,9 +259,9 @@ namespace MMgc
 		return baseAddr;
 	}
 
-	void GCHeap::_Free(void *item, bool track)
+	void GCHeap::FreeInternal(const void *item, bool profile)
 	{
-		(void)track;
+		(void)profile;
 		MMGC_LOCK(m_spinlock);
 
 		HeapBlock *block = AddrToBlock(item);
@@ -268,7 +276,7 @@ namespace MMgc
 #endif
 	
 #ifdef MMGC_MEMORY_PROFILER
-		if(track && HooksEnabled() && profiler) {
+		if(profile && HooksEnabled() && profiler) {
 			profiler->RecordDeallocation(item, block->size * kBlockSize);
 		}
 #endif
@@ -1036,37 +1044,24 @@ namespace MMgc
 		CheckFreelist();
 	}
 
-	bool GCHeap::ExpandHeap(int askSize)
+	void GCHeap::ExpandHeap(int askSize, bool canFail)
 	{
-		bool retval;
-		{ // lock block
-			MMGC_LOCK(m_spinlock);
-
-			retval = ExpandHeapLocked(askSize);
-			if(!retval && status == kMemNormal)
-			{
-				// invoke callbacks
-				StatusChangeNotify(kMemReserve);
-
-				retval = ExpandHeapLocked(askSize);
-				// try again
-				if(!retval) { 
-					status = kMemReserve;
-				}
-			} else {
-				status = kMemAbort;
-
-			}
-		}
-
-		if(!retval) 
+		bool result = ExpandHeapInternal(askSize);
+		if(!result && status == kMemNormal)
 		{
-			Abort();
+			// invoke callbacks
+			StatusChangeNotify(kMemReserve);
+	
+			// try again
+			result = ExpandHeapInternal(askSize);
+			if(!result && canFail)
+				return;
+			else
+				Abort();
 		}
-		return retval;
 	}
 	 
-	bool GCHeap::ExpandHeapLocked(int askSize)
+	bool GCHeap::ExpandHeapInternal(int askSize)
 	{
 		int size = askSize;
 
@@ -1190,7 +1185,7 @@ namespace MMgc
 			
 			// don't waste this uncommitted space, go ahead and commit it
 			if(commitAvail) {
-				ExpandHeapLocked(commitAvail);
+				ExpandHeapInternal(commitAvail);
 			}
 			
 			// Don't use any of the available space in the current region.

@@ -59,7 +59,7 @@ namespace MMgc
 		FixedAlloc(int itemSize, GCHeap* heap);
 		~FixedAlloc();
 
-		void* Alloc(size_t size);
+		void* Alloc(size_t size, bool canFail=false);
 		static void Free(void *item);
 
 		//This method returns the number bytes allocated by FixedAlloc
@@ -114,7 +114,7 @@ namespace MMgc
 	#endif
 
 		bool IsFull(FixedBlock *b) const { return b->numAlloc == m_itemsPerBlock; }
-		void CreateChunk();
+		void CreateChunk(bool canFail);
 		void FreeChunk(FixedBlock* b);
 
 		static inline FixedBlock *GetFixedBlock(const void *item)
@@ -147,10 +147,10 @@ namespace MMgc
 			VMPI_lockDestroy(m_spinlock);
 		}
 
-		void* Alloc(size_t size)
+		void* Alloc(size_t size, bool canFail=false)
 		{
 			MMGC_LOCK(m_spinlock);
-			return FixedAlloc::Alloc(size); 
+			return FixedAlloc::Alloc(size, canFail); 
 		}
 
 		void Free(void *ptr)

@@ -55,7 +55,8 @@ namespace MMgc
 
 		int blocks = (int)((requestSize+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize);
 		
-		LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, GC::kGCLargeAllocPageFirst, (flags&GC::kZero) != 0);
+		LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, GC::kGCLargeAllocPageFirst, 
+														   (flags&GC::kZero) != 0, (flags&GC::kCanFail) != 0);
 		void *item = NULL;
 
 		if (block)

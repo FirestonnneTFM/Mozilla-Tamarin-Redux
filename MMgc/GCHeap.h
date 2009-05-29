@@ -139,6 +139,10 @@ namespace MMgc
 	 */
 	class GCHeap : public GCAllocObject
 	{
+		friend class GC;
+		friend class FixedAlloc;		
+		friend class FixedMalloc;		
+		friend class GCPolicyManager;
 	public:
 		// -- Constants
 		
@@ -202,20 +206,23 @@ namespace MMgc
 		inline FixedMalloc* GetFixedMalloc() { return &fixedMalloc; }
 
 		/**
+		* flags to be passed as second argument to alloc
+		*/
+		enum AllocFlags
+		{
+			kExpand=1,
+			kZero=2,
+			kProfile=4,
+			kCanFail=8
+		};
+
+		/**
 		 * Allocates a block from the heap.
 		 * @param size the number of pages (kBlockSize bytes apiece)
 		 *             to allocate.
 		 * @return pointer to beginning of block, or NULL if failed.
 		 */
-		void *Alloc(int size, bool expand=true, bool zero=true)
-		{
-			return _Alloc(size, expand, zero, true);
-		}
-
-		void *AllocNoProfile(int size, bool expand, bool zero)
-		{
-			return _Alloc(size, expand, zero, false);
-		}
+		void *Alloc(int size, int flags=kExpand | kZero | kProfile);
 
 		/**
 		 * Frees a block.
@@ -223,75 +230,16 @@ namespace MMgc
 		 *             pointer that was previously returned by
 		 *             a call to Alloc.
 		 */
-		void Free(void *item) { _Free(item, true); }
-		void FreeNoProfile(void *item) { _Free(item, false); }
+		void Free(void *item) { FreeInternal(item, true); }
+		void FreeNoProfile(void *item) { FreeInternal(item, false); }
 
 		/**
 		 * Added for NJ's portability needs cause it doesn't always MMgc 
 		 */
-		void Free(void *item, size_t /*ignore*/) { _Free(item, true); }
+		void Free(void *item, size_t /*ignore*/) { FreeInternal(item, true); }
 
 
 		size_t Size(const void *item);
-
-		/**
-		 * Expands the heap by size pages.
-		 *
-		 * Expands the heap by "size" blocks, such that a single contiguous
-		 * allocation of "size" blocks can be performed.  This method is
-		 * also called to create the initial heap.
-		 *
-		 * On Windows, this uses the VirtualAlloc API to obtain memory.
-		 * VirtualAlloc can _reserve_ memory, _commit_ memory or both at
-		 * the same time.  Reserved memory is just virtual address space.
-		 * It consumes the address space of the process but isn't really
-		 * allocated yet; there are no pages committed to it yet.
-		 * Memory allocation really occurs when reserved pages are
-		 * committed.  Our strategy in GCHeap is to reserve a fairly large
-		 * chunk of address space, and then commit pages from it as needed.
-		 * By doing this, we're more likely to get contiguous regions in
-		 * memory for our heap.
-		 *
-		 * By default, we reserve 16MB (4096 pages) per heap region.
-		 * The amount to reserve by default is controlled by kDefaultReserve.
-		 * That shouldn't be a big deal, as the process address space is 2GB.
-		 * As we're usually a plug-in, however, we don't want to make it too
-		 * big because it's not all our memory.
-		 *
-		 * The goal of reserving so much address space is so that subsequent
-		 * expansions of the heap are able to obtain contiguous memory blocks.
-		 * If we can keep the heap contiguous, that reduces fragmentation
-		 * and the possibility of many small "Balkanized" heap regions.
-		 *
-		 * Algorithm: When an allocation is requested,
-		 * 1. If there is enough reserved but uncommitted memory in the
-		 *    last-created region to satisfy the request, commit that memory
-		 *    and exit with success, also check decommitted list
-		 * 2. Try to reserve a new region contiguous with the last-created
-		 *    region.  Go for a 16MB reservation or the requested size,
-		 *    whichever is bigger.
-		 * 3. If we tried for 16MB reserved space and it didn't work, try
-		 *    to reserve again, but for the requested size.
-		 * 4. If we were able to retrieve a contiguous region in Step 2 or 3,
-		 *    commit any leftover memory from the last-created region,
-		 *    commit the remainer from the newly created region, and exit
-		 *    with success.
-		 * 5. OK, the contiguous region didn't work out, so allocate a
-		 *    non-contiguous region.  Go for 16MB or the requested size
-		 *    again, whichever is bigger.
-		 * 6. If we tried for 16MB reserved space and it didn't work, try
-		 *    to reserve again, but for the requested size.
-		 * 7. Commit the requested size out of the newly created region
-		 *    and exit with success.
-		 *
-		 * If we are able to reserve memory but can't commit it, then, well
-		 * there isn't enough memory.  We free the reserved memory and
-		 * exit with failure.
-		 *
-		 * @param size the number of pages to expand the heap by
-		 */	 
-		bool ExpandHeap(int size);
-
 
 		/**
 		 * Returns the used heap size, that is, the total
@@ -371,19 +319,6 @@ namespace MMgc
 		static void TrackSystemFree(void *addr);
 #endif //MMGC_USE_SYSTEM_MALLOC
 
-		// -- Implementation
-		static GCHeap *instance;
-		GCHeap(GCHeapConfig &config);
-		~GCHeap();
-
-#ifdef MMGC_MEMORY_PROFILER
-		static void InitProfiler();
-		inline static bool IsProfilerInitialized()
-		{
-			return profiler != (MemoryProfiler*)-1;
-		}
-#endif
-
 		// Heap regions
 		class Region : public GCAllocObject
 		{
@@ -398,6 +333,76 @@ namespace MMgc
 		
 	private:
 
+		GCHeap(GCHeapConfig &config);
+		~GCHeap();
+
+#ifdef MMGC_MEMORY_PROFILER
+		static void InitProfiler();
+		inline static bool IsProfilerInitialized()
+		{
+			return profiler != (MemoryProfiler*)-1;
+		}
+#endif
+
+		/**
+		 * Expands the heap by size pages.
+		 *
+		 * Expands the heap by "size" blocks, such that a single contiguous
+		 * allocation of "size" blocks can be performed.  This method is
+		 * also called to create the initial heap.
+		 *
+		 * On Windows, this uses the VirtualAlloc API to obtain memory.
+		 * VirtualAlloc can _reserve_ memory, _commit_ memory or both at
+		 * the same time.  Reserved memory is just virtual address space.
+		 * It consumes the address space of the process but isn't really
+		 * allocated yet; there are no pages committed to it yet.
+		 * Memory allocation really occurs when reserved pages are
+		 * committed.  Our strategy in GCHeap is to reserve a fairly large
+		 * chunk of address space, and then commit pages from it as needed.
+		 * By doing this, we're more likely to get contiguous regions in
+		 * memory for our heap.
+		 *
+		 * By default, we reserve 16MB (4096 pages) per heap region.
+		 * The amount to reserve by default is controlled by kDefaultReserve.
+		 * That shouldn't be a big deal, as the process address space is 2GB.
+		 * As we're usually a plug-in, however, we don't want to make it too
+		 * big because it's not all our memory.
+		 *
+		 * The goal of reserving so much address space is so that subsequent
+		 * expansions of the heap are able to obtain contiguous memory blocks.
+		 * If we can keep the heap contiguous, that reduces fragmentation
+		 * and the possibility of many small "Balkanized" heap regions.
+		 *
+		 * Algorithm: When an allocation is requested,
+		 * 1. If there is enough reserved but uncommitted memory in the
+		 *    last-created region to satisfy the request, commit that memory
+		 *    and exit with success, also check decommitted list
+		 * 2. Try to reserve a new region contiguous with the last-created
+		 *    region.  Go for a 16MB reservation or the requested size,
+		 *    whichever is bigger.
+		 * 3. If we tried for 16MB reserved space and it didn't work, try
+		 *    to reserve again, but for the requested size.
+		 * 4. If we were able to retrieve a contiguous region in Step 2 or 3,
+		 *    commit any leftover memory from the last-created region,
+		 *    commit the remainer from the newly created region, and exit
+		 *    with success.
+		 * 5. OK, the contiguous region didn't work out, so allocate a
+		 *    non-contiguous region.  Go for 16MB or the requested size
+		 *    again, whichever is bigger.
+		 * 6. If we tried for 16MB reserved space and it didn't work, try
+		 *    to reserve again, but for the requested size.
+		 * 7. Commit the requested size out of the newly created region
+		 *    and exit with success.
+		 *
+		 * If we are able to reserve memory but can't commit it, then, well
+		 * there isn't enough memory.  We free the reserved memory and
+		 * exit with failure.
+		 *
+		 * @param size the number of pages to expand the heap by
+		 */	 
+		void ExpandHeap(int size, bool canFail=false);
+		bool ExpandHeapInternal(int size);
+		
 		// Block struct used for free lists and memory traversal
 		class HeapBlock : public GCAllocObject
 		{
@@ -417,26 +422,19 @@ namespace MMgc
 			char *endAddr() const { return baseAddr + size*kBlockSize; }
 		};
 
-		bool ExpandHeapLocked(int size);
-		bool ExpandHeapLockedUnchecked(int size);
-
 		// Core methods
 		void AddToFreeList(HeapBlock *block);
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
 		HeapBlock *AllocBlock(int size, bool& zero);
 		void FreeBlock(HeapBlock *block);
 		void FreeAll();
+
+		void FreeInternal(const void *item, bool profile);
 	
 		HeapBlock *Split(HeapBlock *block, int size);
 		void RemoveBlock(HeapBlock *block);
 
 		void Commit(HeapBlock *block);
-
-		friend class GC;
-		friend class GCPolicyManager;
-
-		void *_Alloc(int size, bool expand, bool zero, bool profile);
-		void _Free(void *item, bool track);
 
 		HeapBlock *AddrToBlock(const void *item) const;
 		Region *AddrToRegion(const void *item) const;
@@ -481,6 +479,7 @@ namespace MMgc
 		void ReleaseMemory(char *address, size_t size);
 
 		// data section
+		static GCHeap *instance;
 	
 		HeapBlock *blocks;
 		unsigned int blocksLen;
