@@ -38,14 +38,15 @@
 
 #include "avmplus.h"
 
-// When creating a new string during concatenation, this is the maximum
-// value of extra characters (not bytes) appended to the buffer to
-// support in-place concatenation. The minimum of extra characters 
-// is 32, then it is twice the new length, up to the maximum defined
-// here. This value can be tweaked for platforms with memory constraints
-// in favor of more copying operations.
-
-#define MAX_EXTRA_CHARS 0x8000
+// This is the maximum value for the characters Left field in the
+// m_bitsAndFlags field of the String instance. Strings grow by
+// by doubling the available buffer size until the characters left
+// exceeds the size of the field. From there on, the buffer grows
+// linear. Note that this number is divided by two to make sure that
+// the counter actually, spans the entire buffer area; if this would 
+// not be done, the calculation of characters left (using GC::Size())
+// would return a wrong number.
+#define TSTR_MAX_CHARSLEFT ((uint32_t)TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT >> 1)
 
 using namespace MMgc;
 
@@ -199,12 +200,14 @@ namespace avmplus
 		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
 		int32_t alloc = len + extra;
 		if (alloc < 1) alloc = 1;
+		// TBD: Use PleaseAlloc(), and if you get NULL, lower the "extra" value to a maximum
+		// still to be defined, and retry using Alloc()
 		void* buffer = gc->Alloc(alloc * w, 0);
 
 		int32_t bufLen = (int32_t) (GC::Size (buffer) / w);
 		int32_t charsLeft = bufLen - len;
-		if (charsLeft > int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT))
-			charsLeft = int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT);
+		// the extra character must not exceed the available field size
+		AvmAssert(charsLeft <= int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT));
 
 		Stringp s = new(gc)
 					String(len, w 
@@ -1056,10 +1059,13 @@ namespace avmplus
 		}
 
 		// fall thru - string does not fit
-		// so create a new kDynamic string containing the concatenated string
-		// assume that concatenation may happen more than once, so request extra
-		// characters at the end; at least 32 bytes, or the current length
-		int32_t extra = (newLen < 32) ? 32 : ((newLen > MAX_EXTRA_CHARS) ? MAX_EXTRA_CHARS : newLen);
+		// create a new kDynamic string containing the concatenated string
+		// See the definition of TSTR_MAX_CHARSLEFT above for an explanation
+		// of this algorithm
+		int32_t newSize = (newLen < 32) ? 32 : (newLen << 1);
+		int32_t extra   = newSize - newLen;
+		if (extra > TSTR_MAX_CHARSLEFT)
+			extra = TSTR_MAX_CHARSLEFT;
 
 		newStr = createDynamic(gc, NULL, newLen, newWidth, extra);
 		// copy leftStr
