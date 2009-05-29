@@ -108,7 +108,7 @@ namespace MMgc
 		}
 	}
 
-	GCAlloc::GCBlock* GCAlloc::CreateChunk()
+	GCAlloc::GCBlock* GCAlloc::CreateChunk(int flags)
 	{
 		// Get space in the bitmap.  Do this before allocating the actual block,
 		// since we might call GC::AllocBlock for more bitmap space and thus
@@ -123,7 +123,7 @@ namespace MMgc
 		m_numBlocks++;
 
 		int numBlocks = kBlockSize/GCHeap::kBlockSize;
-		GCBlock* b = (GCBlock*) m_gc->AllocBlock(numBlocks, GC::kGCAllocPage);
+		GCBlock* b = (GCBlock*) m_gc->AllocBlock(numBlocks, GC::kGCAllocPage, /*zero*/true,  (flags&GC::kCanFail) != 0);
 
 		if (b) 
 		{
@@ -212,11 +212,13 @@ namespace MMgc
 
 	void* GCAlloc::Alloc(size_t size, int flags)
 	{
+		bool canFail = (flags & GC::kCanFail) != 0;
 		(void)size;
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 start:
 		if (m_firstFree == NULL && m_needsSweeping == NULL) {
-			if (CreateChunk() == NULL) {
+			if (CreateChunk(canFail) == NULL) {
+				GCAssert(canFail);
 				return NULL;
 			}
 		}
@@ -226,7 +228,10 @@ start:
 		// lazy sweeping
 		if(b->needsSweeping) {
 			if(m_gc->collecting) {
-				CreateChunk();
+				if(CreateChunk(canFail) == NULL) {
+					GCAssert(canFail);
+					return NULL;
+				}					
 				b = m_firstFree;
 			}
 			else if(Sweep(b)) {

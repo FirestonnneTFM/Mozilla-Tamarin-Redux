@@ -103,13 +103,17 @@ namespace MMgc
 		}
 	}
 
-	void* FixedAlloc::Alloc(size_t size)
+	void* FixedAlloc::Alloc(size_t size, bool canFail)
 	{ 
 		(void)size;
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
 		if(!m_firstFree) {
-			CreateChunk(); //exception will be thrown in case of OOM 
+			CreateChunk(canFail);
+			if(!m_firstFree) {
+				GCAssertMsg(canFail, "Memory allocation failed to abort properly");
+				return NULL;
+			}
 		}
 
 		FixedBlock* b = m_firstFree;
@@ -152,8 +156,6 @@ namespace MMgc
 
 			if (m_firstFree)
 				m_firstFree->prevFree = 0;
-			else
-				CreateChunk();
 		}
 
 		item = GetUserPointer(item);
@@ -241,14 +243,18 @@ namespace MMgc
 		totalAllocated = GetBytesInUse();
 	}
 
-	void FixedAlloc::CreateChunk()
+	void FixedAlloc::CreateChunk(bool canFail)
 	{
 		// Allocate a new block
 		m_maxAlloc += m_itemsPerBlock;
 
-		FixedBlock* b = (FixedBlock*) m_heap->AllocNoProfile(1, true, false);
+		FixedBlock* b = (FixedBlock*) m_heap->Alloc(1, GCHeap::kExpand | (canFail ? GCHeap::kCanFail : 0));
 		
 		GCAssert(m_itemSize <= 0xffff);
+
+		if(!b)
+			return;
+		
 		b->numAlloc = 0;
 		b->size = (uint16_t)m_itemSize;
 		b->firstFree = 0;

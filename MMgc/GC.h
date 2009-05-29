@@ -765,7 +765,8 @@ namespace MMgc
 			kZero=1,
 			kContainsPointers=2,
 			kFinalize=4,
-			kRCObject=8
+			kRCObject=8,
+			kCanFail=16			
 		};
 
 		enum PageType
@@ -783,6 +784,14 @@ namespace MMgc
 		 * Do not call this from a finalizer.
 		 */
 		void *Alloc(size_t size, int flags=0);
+
+		/**
+		 * Just like Alloc but can return NULL
+		 */
+		void *PleaseAlloc(size_t size, int flags=0)
+		{
+			return Alloc(size, flags | kCanFail);			
+		}
 
 	private:
 		class RCRootSegment : public GCRoot
@@ -954,7 +963,7 @@ namespace MMgc
 		/**
 		 * Used by sub-allocators to obtain memory.
 		 */
-		void* AllocBlock(int size, int pageType, bool zero=true);
+		void* AllocBlock(int size, int pageType, bool zero=true, bool canFail=false);
 
 		void FreeBlock(void *ptr, uint32_t size);
 
@@ -1215,21 +1224,12 @@ namespace MMgc
 		
 	private:
 
-		void *heapAllocNoProfile(size_t size, bool expand=true, bool zero=true)
-		{
-			return heapAlloc(size, expand, zero, false);
-		}
-		void heapFreeNoProfile(void *ptr, size_t siz=0)
-		{
-			heapFree(ptr, siz, false);
-		}
-
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
 		// if the allocation succeeded.
-		void *heapAlloc(size_t size, bool expand=true, bool zero=true, bool track=true);
+		void *heapAlloc(size_t size, int flags=GCHeap::kExpand|GCHeap::kZero|GCHeap::kProfile);
 
 		// heapFree is like heap->Free except that it also calls policy.signalBlockDeallocation.
-		void heapFree(void *ptr, size_t siz=0, bool track=true);
+		void heapFree(void *ptr, size_t siz=0, bool profile=true);
 
 		friend class GCAutoEnter;
 		friend class GCAutoEnterPause;

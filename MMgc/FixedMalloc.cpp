@@ -230,20 +230,23 @@ namespace MMgc
 	  return m_allocs[index];
 	}
 
-	void *FixedMalloc::LargeAlloc(size_t size)
+	void *FixedMalloc::LargeAlloc(size_t size, bool canFail)
 	{
 		size += DebugSize();
 		int blocksNeeded = (int)GCHeap::SizeToBlocks(size);
-		void *item = m_heap->AllocNoProfile(blocksNeeded, true, false);
-		numLargeChunks += blocksNeeded;
-
-		item = GetUserPointer(item);
-		if(m_heap->HooksEnabled())
+		void *item = m_heap->Alloc(blocksNeeded, GCHeap::kExpand | (canFail ? GCHeap::kCanFail : 0));
+		if(item)
 		{
-		#ifdef MMGC_MEMORY_PROFILER
-			totalAskSizeLargeAllocs += (size - DebugSize());
-		#endif
-			m_heap->AllocHook(item, size - DebugSize(), Size(item));
+			numLargeChunks += blocksNeeded;
+			
+			item = GetUserPointer(item);
+			if(m_heap->HooksEnabled())
+			{
+#ifdef MMGC_MEMORY_PROFILER
+				totalAskSizeLargeAllocs += (size - DebugSize());
+#endif
+				m_heap->AllocHook(item, size - DebugSize(), Size(item));
+			}
 		}
 		return item;
 	}

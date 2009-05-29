@@ -153,7 +153,7 @@ private:
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
-    gh->Alloc(1024*10,true,true);
+		gh->Alloc(1024*10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
     %%verify (int)gh->GetTotalHeapSize()>startfreeheap
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 

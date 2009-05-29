@@ -54,20 +54,17 @@ namespace MMgc
 
 		static FixedMalloc *GetInstance();
 
-		inline void* Alloc(size_t size)
+		REALLY_INLINE void* Alloc(size_t size)
 		{
-			void *item;
-			GCAssert(size + 3 > size);
-			// overflow detection
-			if(size+3 < size)
-				return NULL;
+			return Alloc(size, false);
+		}
 
-			if (size <= (size_t)kLargestAlloc) {
-				item = FindSizeClass(size)->Alloc(size);
-			} else {
-				item = LargeAlloc(size);
-			}
-			return item;
+		/**
+		 * Unlike Alloc this can return NULL
+		 */
+		REALLY_INLINE void *PleaseAlloc(size_t size)
+		{	
+			return Alloc(size, true);
 		}
 
 		inline void Free(void *item)
@@ -140,6 +137,22 @@ namespace MMgc
 		size_t totalAskSizeLargeAllocs;
 #endif
 
+		REALLY_INLINE void *Alloc(size_t size, bool canFail)
+		{
+			void *item;
+			GCAssert(size + 3 > size);
+			// overflow detection
+			if(size+3 < size)
+				return NULL;
+
+			if (size <= (size_t)kLargestAlloc) {
+				item = FindSizeClass(size)->Alloc(size, canFail);
+			} else {
+				item = LargeAlloc(size, canFail);
+			}
+			return item;
+		}
+
 		FixedAllocSafe *FindSizeClass(size_t size) const;
 
 		static bool IsLargeAlloc(const void *item)
@@ -149,7 +162,7 @@ namespace MMgc
 			return ((uintptr_t) item & 0xFFF) == 0;
 		}
 
-		void *LargeAlloc(size_t size);	
+		void *LargeAlloc(size_t size, bool canFail);	
 		void LargeFree(void *item);
 		size_t LargeSize(const void *item);
 	};

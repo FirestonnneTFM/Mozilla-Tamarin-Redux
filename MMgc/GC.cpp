@@ -814,11 +814,15 @@ namespace MMgc
 			item = largeAlloc->Alloc(askSize, size, flags);
 		}
 
-		item = GetUserPointer(item);
+		if(item != NULL) {
+			item = GetUserPointer(item);
 
-		if(heap->HooksEnabled()) {
-			heap->AllocHook(item, askSize, Size(item));
+			if(heap->HooksEnabled()) {
+				heap->AllocHook(item, askSize, Size(item));
+			}
 		}
+
+		GCAssert(item != NULL || (flags & kCanFail) != 0);
 
 #ifdef _DEBUG
 		bool shouldZero = (flags & kZero) || incrementalValidationPedantic;
@@ -1049,7 +1053,7 @@ bail:
 		}
 	}
 
-	void* GC::AllocBlock(int size, int pageType, bool zero)
+	void* GC::AllocBlock(int size, int pageType, bool zero, bool canFail)
 	{
 		GCAssert(size > 0);
 	
@@ -1070,13 +1074,15 @@ bail:
 			item = AllocBlockNonIncremental(size, zero);
 
 		if(!item)
-			item = heapAllocNoProfile(size, true, zero);
+			item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? kCanFail : 0));
 
 		// mark GC pages in page map, small pages get marked one,
 		// the first page of large pages is 3 and the rest are 2
-		MarkGCPages(item, 1, pageType);
-		if(pageType == kGCLargeAllocPageFirst) {
-			MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
+		if(item) {
+			MarkGCPages(item, 1, pageType);
+			if(pageType == kGCLargeAllocPageFirst) {
+				MarkGCPages((char*)item+GCHeap::kBlockSize, size - 1, kGCLargeAllocPageRest);
+			}
 		}
 
 		return item;
@@ -1093,12 +1099,12 @@ bail:
 				StartIncrementalMark();
 		}
 	
-		void *item = heapAllocNoProfile(size, false, zero);
+		void *item = heapAlloc(size, zero ? GCHeap::kZero : 0);
 
 		if (item == NULL && marking && !collecting && policy.queryFinishIncrementalMarkAfterAllocBlockFail()) {
 			GCAssert(!nogc);
 			FinishIncrementalMark();
-			item = heapAllocNoProfile(size, false, zero);
+			item = heapAlloc(size, zero ? GCHeap::kZero : 0);
 		}
 
 		return item;
@@ -1106,11 +1112,11 @@ bail:
 
 	void* GC::AllocBlockNonIncremental(int size, bool zero)
 	{
-		void *item = heapAllocNoProfile(size, false, zero);
+		void *item = heapAlloc(size, zero ? GCHeap::kZero : 0);
 		
 		if (item == NULL && policy.queryRunCollectionAfterAllocBlockFail()) {
 			Collect();
-			item = heapAllocNoProfile(size, false, zero);
+			item = heapAlloc(size, zero ? GCHeap::kZero : 0);
 		}
 		
 		return item;
@@ -1118,7 +1124,7 @@ bail:
 
 	void GC::FreeBlock(void *ptr, uint32_t size)
 	{
-		heapFreeNoProfile(ptr);
+		heapFree(ptr, size, false);
 		UnmarkGCPages(ptr, size);
 	}
 
@@ -3304,20 +3310,20 @@ bail:
 	}
 #endif //_DEBUG
 
-	void *GC::heapAlloc(size_t siz, bool expand, bool zero, bool track)
+	void *GC::heapAlloc(size_t siz, int flags)
 	{
-		void *ptr = heap->_Alloc((int)siz, expand, zero, track);
+		void *ptr = heap->Alloc((int)siz, flags);
 		if(ptr)
 			policy.signalBlockAllocation(siz);
 		return ptr;
 	}
 	
-	void GC::heapFree(void *ptr, size_t siz, bool track)
+	void GC::heapFree(void *ptr, size_t siz, bool profile)
 	{
 		if(!siz)
 			siz = heap->Size(ptr);
 		policy.signalBlockDeallocation(siz);
-		heap->_Free(ptr, track);
+		heap->FreeInternal(ptr, profile);
 	}
 	
 	size_t GC::GetBytesInUse()

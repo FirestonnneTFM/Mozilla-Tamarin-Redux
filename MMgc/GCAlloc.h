@@ -300,7 +300,7 @@ namespace MMgc
 			return b->nextFree != NULL || b->prevFree != NULL || b == m_firstFree || b == m_needsSweeping;
 		}
 
-		GCBlock* CreateChunk();
+		GCBlock* CreateChunk(int flags);
 		void UnlinkChunk(GCBlock *b);
 		void FreeChunk(GCBlock* b);
 		void AddToFreeList(GCBlock *b)
