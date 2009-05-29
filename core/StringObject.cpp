@@ -1064,8 +1064,8 @@ namespace avmplus
 		// of this algorithm
 		int32_t newSize = (newLen < 32) ? 32 : (newLen << 1);
 		int32_t extra   = newSize - newLen;
-		if (extra > TSTR_MAX_CHARSLEFT)
-			extra = TSTR_MAX_CHARSLEFT;
+		if (extra > (int32_t) TSTR_MAX_CHARSLEFT)
+			extra = (int32_t) TSTR_MAX_CHARSLEFT;
 
 		newStr = createDynamic(gc, NULL, newLen, newWidth, extra);
 		// copy leftStr
