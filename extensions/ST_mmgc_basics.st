@@ -111,8 +111,8 @@ private:
     %%verify (int)fa->GetItemSize()==2048
     fa->Free(data1);
     %%verify (int)fa->GetItemSize()==2048
-    %%verify (int)fa->GetMaxAlloc()==2
-    %%verify (int)fa->GetNumChunks()==2
+    %%verify (int)fa->GetMaxAlloc()==1
+    %%verify (int)fa->GetNumChunks()==1
     gc->Collect();
 
 %%test fixedMalloc

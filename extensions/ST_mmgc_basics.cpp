@@ -156,8 +156,8 @@ verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data2)==fa, "MMgc::FixedAlloc::GetFix
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
     fa->Free(data1);
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
-verifyPass((int)fa->GetMaxAlloc()==2, "(int)fa->GetMaxAlloc()==2", __FILE__, __LINE__);
-verifyPass((int)fa->GetNumChunks()==2, "(int)fa->GetNumChunks()==2", __FILE__, __LINE__);
+verifyPass((int)fa->GetMaxAlloc()==1, "(int)fa->GetMaxAlloc()==1", __FILE__, __LINE__);
+verifyPass((int)fa->GetNumChunks()==1, "(int)fa->GetNumChunks()==1", __FILE__, __LINE__);
     gc->Collect();
 
 }
