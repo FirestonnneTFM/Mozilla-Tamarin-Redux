@@ -61,6 +61,7 @@ except ImportError:
 class AcceptanceRuntest(RuntestBase):
     runESC = False
     escbin = '../../esc/bin/'
+    
 
     def __init__(self):
         # Set threads to # of available cpus/cores
@@ -77,13 +78,14 @@ class AcceptanceRuntest(RuntestBase):
         print '    --esc           run esc instead of avm'
         print '    --escbin        location of esc/bin directory - defaults to ../../esc/bin'
         print '    --ext           set the testfile extension (defaults to .as)'
+        print '    --ats           generate ats swfs instead of running tests'
+        print '    --atsdir        base output directory for ats swfs - defaults to ATS_SWFS'
         print '    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially'
         exit(c)
     
     def setOptions(self):
         RuntestBase.setOptions(self)
-        # self.options += ''
-        self.longOptions.extend(['ext=','esc','escbin=','threads='])
+        self.longOptions.extend(['ext=','esc','escbin=','threads=','ats','atsdir='])
     
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -96,6 +98,10 @@ class AcceptanceRuntest(RuntestBase):
                 self.escbin = v
             elif o in ('--threads'):
                 self.threads=int(v)
+            elif o in ('--ats'):
+                self.genAtsSwfs = True
+            elif o in ('--atsdir'):
+                self.atsDir = v
     
     def detectCPUs(self):
         """
