@@ -331,8 +331,10 @@ namespace avmplus
 	{
 		// this gets a weak ref number, ie double keys, okay I guess
 		if(AvmCore::isPointer(key)) {
-			GCWeakRef *weakRef = ((GCObject*)(key&~7))->GetWeakRef();
-			key = AvmCore::gcObjectToAtom(weakRef);
+			// Don't know if key is GCObject or GCFinalizedObject so can't go via the
+			// GetWeakRef methods on those classes; go directly to GC
+			GCWeakRef *weakRef = GC::GetWeakRef(atomPtr(key));
+			key = AvmCore::genericObjectToAtom(weakRef);
 		}
 		return key;
 	}
@@ -351,8 +353,8 @@ namespace avmplus
 	{
 		Atom* atoms = ht.getAtoms();
 		for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
-			if(AvmCore::isGCObject(atoms[i])) {
-				GCWeakRef *ref = (GCWeakRef*)(atoms[i]&~7);
+			if(AvmCore::isGenericObject(atoms[i])) {
+				GCWeakRef *ref = (GCWeakRef*)AvmCore::atomToGenericObject(atoms[i]);
 				if(ref && ref->get() == NULL) {
 					// inlined delete
 					atoms[i] = InlineHashtable::DELETED;
@@ -365,8 +367,8 @@ namespace avmplus
 	
 	Atom WeakValueHashtable::getValue(Atom key, Atom value)
 	{
-		if(AvmCore::isGCObject(value)) {
-			GCWeakRef *wr = (GCWeakRef*)(value&~7);
+		if(AvmCore::isGenericObject(value)) {
+			GCWeakRef *wr = (GCWeakRef*)AvmCore::atomToGenericObject(value);
 			if(wr->get() != NULL) {
 				// note wr could be a pointer to a double, that's what this is for
 				Atom* atoms = ht.getAtoms();
@@ -391,8 +393,10 @@ namespace avmplus
 				return;
 		}
 		if(AvmCore::isPointer(value)) {
-			GCWeakRef* wf = ((GCObject*)(value&~7))->GetWeakRef();
-			value = AvmCore::gcObjectToAtom(wf);
+			// Don't know if value is GCObject or GCFinalizedObject so can't go via the
+			// GetWeakRef methods on those classes; go directly to GC
+			GCWeakRef *wf = GC::GetWeakRef(atomPtr(value));
+			value = AvmCore::genericObjectToAtom(wf);
 		}
 		ht.put(key, value);
 	}
@@ -402,7 +406,7 @@ namespace avmplus
 		Atom* atoms = ht.getAtoms();
 		for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
 			if(AvmCore::isPointer(atoms[i+1])) {
-				GCWeakRef *ref = (GCWeakRef*)(atoms[i+1]&~7);
+				GCWeakRef *ref = (GCWeakRef*)atomPtr(atoms[i+1]);
 				if(ref && ref->get() == NULL) {
 					// inlined delete
 					atoms[i] = InlineHashtable::DELETED;

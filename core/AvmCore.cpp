@@ -3932,19 +3932,19 @@ return the result of the comparison ToPrimitive(x) == y.
 		*address = atomNew;
 	}
 
-	Atom AvmCore::gcObjectToAtom(const void* obj)
-	{
 #ifdef _DEBUG
+	Atom AvmCore::genericObjectToAtom(const void* obj)
+	{
 		// We get a null obj here through ElementE4XNode::_insert
-		if (obj)
+		if (obj != NULL)
 		{
 			GC* gc = GC::GetGC(obj);
 			AvmAssert(!gc->IsRCObject(obj));
 		}
-#endif		
 		// return a non-RC atom, makes atomWriteBarrier do the right thing
 		return (Atom)obj|kDoubleType;
 	}
+#endif		
 
 #if defined FEATURE_NANOJIT
 

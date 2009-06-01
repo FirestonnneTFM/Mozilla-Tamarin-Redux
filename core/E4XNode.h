@@ -322,7 +322,7 @@ namespace avmplus
 
 		uint32 numAttributes() const { return (m_attributes ? m_attributes->getLength() : 0); };
 		AtomArray *getAttributes() const { return m_attributes; };
-		E4XNode *getAttribute(uint32 index) const { return (E4XNode *)AvmCore::atomToGCObject(m_attributes->getAt(index)); };
+		E4XNode *getAttribute(uint32 index) const { return (E4XNode *)AvmCore::atomToGenericObject(m_attributes->getAt(index)); };
 		void addAttribute (E4XNode *x);
 
 		uint32 numNamespaces() const { return (m_namespaces ? m_namespaces->getLength() : 0); };
