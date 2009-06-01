@@ -58,6 +58,7 @@ from getopt import getopt
 from itertools import count
 from killableprocess import Popen
 from time import time,sleep
+import shutil
 
 import threadpool
 import subProcess
@@ -119,6 +120,9 @@ class RuntestBase:
     threads = 1
     winceProcesses = []
     
+    genAtsSwfs = False
+    atsDir = 'ATS_SWFS'
+    
     
     def __init__(self):
         # Result Vars
@@ -162,6 +166,8 @@ class RuntestBase:
         self.preProcessTests()
         if self.rebuildtests:
             self.rebuildTests()
+        elif self.genAtsSwfs:
+            self.generateAtsSwfs()
         else:
             self.runTests(self.tests)
         self.cleanup()
@@ -577,6 +583,42 @@ class RuntestBase:
                         pass
         return arglist
     
+    def generateAtsSwfs(self):
+        if not exists(self.atsDir):
+            os.mkdir(self.atsDir)
+        
+        # ats template code 
+        atstemplate = [
+            'import flash.display.*;\n',
+            'import flash.util.*;\n',
+            'var fileName:String ="_";\n', # this line will get replaced with the actual filename
+            'this[fileName] = new Array();\n',
+            'this[fileName+"Str"] = new Array();\n',
+            'this[fileName+"Ans"] = new Array();\n'
+            ]
+        print 'Compiling ATS Swfs:'
+        for test in self.tests:
+            (dir, file) = split(test)
+            (name, ext) = splitext(file)
+            # insert filename into template
+            atstemplate[2] = 'var fileName:String = "%s_";\n' % name
+            # write out the template file
+            ats_inc = open('./ats_temp.as','w')
+            ats_inc.writelines(atstemplate)
+            ats_inc.close()
+            
+            self.ascargs += ' -AS3 -swf 200,200 -d -in ./ats_temp.as '
+            print '  %s/%s.swf' % (dir,name)
+            self.compile_test(test)
+            
+            # move the swf to the swfs dir
+            try:
+                atsOut = self.atsDir+'/'+dir 
+                os.makedirs(atsOut)
+            except:
+                pass
+            shutil.move('%s/%s.swf' % (dir,name),'%s/%s_.swf' % (atsOut,name))
+        os.remove('./ats_temp.as')
         
     def compile_test(self, as_file, extraArgs=[]):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
@@ -739,6 +781,9 @@ class RuntestBase:
         end_time = datetime.today()
         #print("finished compile of %d tests at %s elapsed time is %s" % (len(tests),start_time,end_time-start_time))
 
+
+        
+    
     def build_incfiles(self, as_file):
         files=[]
         (dir, file) = split(as_file)

@@ -40,8 +40,13 @@
  * then load the test script.
  */
 
+// import flash.system in order to determine what we are being run in
+import flash.system.Capabilities;
+var playerType:String = Capabilities.playerType;
+
+
 var	completed =	false;
-var	testcases; // ISSUE:: need to know why we need to comment this out
+var	testcases; 
 var tc = 0;
 //var version; // ISSUE:: need to know why we need to comment this out
 
@@ -219,19 +224,39 @@ function writeTestCaseResult( expect, actual, string ) {
     var passed = getTestCaseResult(expect,actual);
     var s = string;
     if (passed == "true") {
-	s += PASSED;
+        s += PASSED;
     } else if (passed == "false") {
-	s += FAILED + expect;
+        s += FAILED + expect;
     } else if (passed == "type error") {
-	s += FAILED + expect + " Type Mismatch - Expected Type: "+ typeof(expect) + ", Result Type: "+ typeof(actual);
+        s += FAILED + expect + " Type Mismatch - Expected Type: "+ typeof(expect) + ", Result Type: "+ typeof(actual);
     } else { //should never happen
-	s += FAILED + " UNEXPECTED ERROR - see shell.as:writeTestCaseResult()"
+        s += FAILED + " UNEXPECTED ERROR - see shell.as:writeTestCaseResult()"
     }
 
-    //s += ( passed ) ? PASSED : FAILED + expect;
-    writeLineToLog(s);
+    if (playerType == 'AVMPlus') {
+        writeLineToLog(s);
+    } else { // not running in avm, so must in ATS
+        // instead of passing the expected and actual to the ATS and having
+        // the ATS do the comparison, we are passing the pass / fail string
+        // so that we are guarenteed that test results are the same in the avm
+        // and in the ATS
+        addToATS(string + PASSED, s, string);
+    }
     return passed;
 }
+
+
+function addToATS(expected, actual, description) {
+    // Testcase Description
+    this[fileName+"Str"].push(description);
+
+    // Testcase Actual Values returned
+    this[fileName].push(actual);
+
+    // Testcase Expected Values Return
+    this[fileName+"Ans"].push(expected);
+}
+
 
 //redundant, but leaving in in case its used elsewhere
 /*
@@ -256,8 +281,15 @@ function writeHeaderToLog( string )	{
 //  When running in the shell, run the garbage collector after the
 //  test has completed.
 
-
-function stopTest()	{
+function stopTest(){
+    // Call ATS Function if not running in AVM
+    if (playerType != 'AVMPlus') {
+        try
+        {
+            ATS.testOver2(this[fileName+"Str"],this[fileName+"Ans"],this[fileName],fileName);
+        } catch ( e ) {
+        }
+    }
 }
 
 
@@ -831,52 +863,25 @@ function BUG(bug)
   printBugNumber(bug);
 }
 
+function reportFailure (section, msg)
+{
+    print(FAILED + inSection(section)+"\n"+msg);
+    /*var lines = msg.split ("\n");
+    for (var i=0; i<lines.length; i++)
+        print(FAILED + lines[i]);
+    */
+}
+
 function TEST(section, expected, actual)
 {
-	/*if( actual == "this will never match"){
-		// hack for strict mode
-		var fileName;
-	}*/
+    AddTestCase(section, expected, actual);
+}
 
-
-    // Testcase Description
-    this[fileName+"Str"].push(section);
-
-    // Testcase Actual Values Returned
-    this[fileName].push(actual);
-
-    // Testcase Expected Values Returned
-    this[fileName+"Ans"].push(expected);
-
-    var expected_t = typeof expected;
-    var actual_t = typeof actual;
-    var output = "";
-
-    // Testcase Description
-    this[fileName+"Str"].push(section + "type test");
-
-    // Testcase Actual Values Returned
-    this[fileName].push(actual_t);
-
-    // Testcase Expected Values Returned
-    this[fileName+"Ans"].push(expected_t);
-
-    if (expected_t != actual_t)
-        output += "Type mismatch, expected type " + expected_t +
-            ", actual type " + actual_t + "\n";
-    else if (VERBOSE)
-        printStatus ("Expected type '" + actual_t + "' matched actual " +
-                     "type '" + expected_t + "'");
-
-    if (expected != actual) {
-	output += "Expected value:\n" + toPrinted(expected) + "\nActual value:\n" + toPrinted(actual) + "\n";
-    }
-    else if (VERBOSE)
-        printStatus ("Expected value '" + toPrinted(actual) + "' matched actual value");
-
-    if (output != "")
-    {
-        reportFailure (output);
+function myGetNamespace (obj, ns) {
+    if (ns != undefined) {
+        return obj.namespace(ns);
+    } else {
+        return obj.namespace();
     }
 }
 
@@ -1032,7 +1037,7 @@ function reportCompare (expected, actual, description)
 }
 // encapsulate output in shell
 function _print(s) {
-  print(s);
+  trace(s);
 //  trace(s);
 }
 // workaround for Debugger vm where error contains more details
