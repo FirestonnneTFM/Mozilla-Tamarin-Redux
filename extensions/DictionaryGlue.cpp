@@ -88,7 +88,7 @@ namespace avmplus
 		// FIXME: this doesn't work, need to convert back to an XMLObject
 		// on the way out or intern XMLObject's somehow
 		//if(AvmCore::isXML(key))
-		//	key = AvmCore::gcObjectToAtom(AvmCore::atomToXML(key));
+		//	key = AvmCore::genericObjectToAtom(AvmCore::atomToXML(key));
 		
 		return key;
 	}
@@ -139,9 +139,9 @@ namespace avmplus
 	{
 		Atom k = ScriptObject::nextName(index);
 
-		if (AvmCore::isGCObject(k) && _table->weakKeys()) 
+		if (AvmCore::isGenericObject(k) && _table->weakKeys()) 
 		{
-			GCWeakRef* ref = (GCWeakRef*)atomPtr(k);
+			GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(k);
 			ScriptObject* key = ((ScriptObject*)ref->get());
 			if (key) 
 			{
@@ -178,9 +178,9 @@ namespace avmplus
 		while (index < numAtoms) 
 		{
 			Atom a = atoms[index];
-			if (AvmCore::isGCObject(a) && _table->weakKeys()) 
+			if (AvmCore::isGenericObject(a) && _table->weakKeys()) 
 			{
-				GCWeakRef *weakRef = (GCWeakRef*)AvmCore::atomToGCObject(a);
+				GCWeakRef *weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
 				if(weakRef->get())
 					return (index>>1)+1;
 				else {

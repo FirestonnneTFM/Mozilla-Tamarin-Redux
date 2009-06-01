@@ -93,7 +93,7 @@ namespace avmplus
 		}
 
 		AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-		aa->push (AvmCore::gcObjectToAtom(childNode));
+		aa->push (AvmCore::genericObjectToAtom(childNode));
 	}
 
 	uint32 ElementE4XNode::numChildren() const
@@ -126,7 +126,7 @@ namespace avmplus
 		{
 			E4XNode *firstChild = (E4XNode *) (m_children & ~SINGLECHILDBIT);
 			AtomArray *aa = new (gc()) AtomArray(2);
-			aa->push (AvmCore::gcObjectToAtom(firstChild));
+			aa->push (AvmCore::genericObjectToAtom(firstChild));
 			m_children = uintptr(aa);
 		}
 		else if (!m_children)
@@ -140,7 +140,7 @@ namespace avmplus
 		// m_children->insert (i, a)
 		convertToAtomArray();
 		AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-		aa->insert (i, AvmCore::gcObjectToAtom(x));
+		aa->insert (i, AvmCore::genericObjectToAtom(x));
 	}
 
 	void ElementE4XNode::removeChild (uint32 i)
@@ -161,7 +161,7 @@ namespace avmplus
 		{
 			convertToAtomArray();
 			AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-			aa->setAt (i, AvmCore::gcObjectToAtom(x));
+			aa->setAt (i, AvmCore::genericObjectToAtom(x));
 		}
 	}
 
@@ -177,7 +177,7 @@ namespace avmplus
 		else
 		{
 			AtomArray *aa = (AtomArray *)(uintptr)this->m_children;
-			E4XNode *x = (E4XNode *) AvmCore::atomToGCObject(aa->getAt(i));
+			E4XNode *x = (E4XNode *) AvmCore::atomToGenericObject(aa->getAt(i));
 			return x;
 		}
 	}
@@ -342,7 +342,7 @@ namespace avmplus
 		//     set the node prefix to undefined
 		for (unsigned int i = 0; i < numAttributes(); i++)
 		{
-			E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGCObject(m_attributes->getAt(i)));
+			E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
 			Multiname ma;
 			curAttr->getQName (core, &ma);
 			if (!ma.isAnyNamespace() && ma.getNamespace()->getPrefix() == ns->getPrefix())
@@ -473,7 +473,7 @@ namespace avmplus
 		if (!m_attributes)
 			m_attributes = new (gc()) AtomArray (1);
 
-		m_attributes->push (AvmCore::gcObjectToAtom(x));
+		m_attributes->push (AvmCore::genericObjectToAtom(x));
 	}
 
 	void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag)
@@ -557,7 +557,7 @@ namespace avmplus
 			attrObj->getQName(core, &m2);
 			for (unsigned int i = 0; i < numAttributes(); i++)
 			{
-				E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGCObject(m_attributes->getAt(i)));
+				E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
 				Multiname m;
 				curAttr->getQName(core, &m);
 				if (m.matches(&m2))
@@ -566,7 +566,7 @@ namespace avmplus
 				}
 			}
 
-			m_attributes->push(AvmCore::gcObjectToAtom(attrObj));
+			m_attributes->push(AvmCore::genericObjectToAtom(attrObj));
 		}
 	}
 

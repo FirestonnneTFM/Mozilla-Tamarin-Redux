@@ -1373,12 +1373,17 @@ const int kBufferPadding = 16;
 			return (ScriptObject*)(atom&~7);
 		}
 	
-		// helper function, allows generic objects to work with InlineHashtable
-		// and AtomArray, uses double type which is the only non-RC
-		// GCObject type
-		static Atom gcObjectToAtom(const void* obj);
-		static const void* atomToGCObject(Atom a) { return (const void*)(a&~7); }
-		static bool isGCObject(Atom a) { return (a&7)==kDoubleType; }
+		// Helper function, allows generic objects to work with InlineHashtable
+		// and AtomArray, uses double type which is the only non-RC pointer tag.
+		// The key here is that these methods round-trip any pointer value to the
+		// same pointer value, there is no casting that might adjust the pointer.
+#ifdef _DEBUG
+		static Atom genericObjectToAtom(const void* obj);
+#else
+		static Atom genericObjectToAtom(const void* obj) { return (Atom)obj|kDoubleType; }
+#endif			
+		static const void* atomToGenericObject(Atom a) { return atomPtr(a); }
+		static bool isGenericObject(Atom a) { return atomKind(a)==kDoubleType; }
 
 	private:
 		/** search the string intern table */
