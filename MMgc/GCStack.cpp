@@ -49,7 +49,6 @@ namespace MMgc
 	static int markstack_allowance = MARKSTACK_ALLOWANCE;
 #endif
 
-	// FIXME: This must use FixedMalloc::PleaseAlloc.
 	static inline void* AllocStackSegment(size_t nbytes)
 	{
 #ifdef TESTING_MARKSTACK
@@ -58,7 +57,7 @@ namespace MMgc
 		--markstack_allowance;
 #endif
 		nbytes = (nbytes + 4095) & ~4095;
-		return FixedMalloc::GetInstance()->Alloc(nbytes);
+		return FixedMalloc::GetInstance()->PleaseAlloc(nbytes);
 	}
 
 	static inline void FreeStackSegment(void* p)
