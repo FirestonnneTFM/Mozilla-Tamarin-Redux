@@ -37,34 +37,61 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=mac
-export basedir=/Users/build/buildbot/$branch/${platform}64-intel/$branch
-export buildsdir=$basedir/../builds
-
-export shell_release=${shell_release}_64
-export shell_debug=${shell_debug}_64
-export shell_release_debugger=${shell_release_debugger}_64
-export shell_debug_debugger=${shell_debug_debugger}_64
-export shell_selftest=${shell_selftest}_64
-export shell_release_vprof=${shell_release_vprof}_64
-
-## Used by make in the build scripts
-export make_opt="-j4"
-export test_threads=3
+. ./environment.sh
 
 
-# List of processes that should NEVER be running when the build is not
-# currently running any tests. This list of process will be killed if the
-# process is found. Process must not contain extension as cygwin will return
-# the process without the extension. Used in all/util-process-clean.sh
-export proc_names="avmshell.*_64$"
+##
+# Make sure that there are no processes running that should not be
+##
+
+for process in ${proc_names}
+do
+    prevPID=-0
+    while [ 1 ]
+    do
+        if [[ `uname` == *CYGWIN* ]]; then
+            PID=`ps -aW | grep "${process}" | grep -v grep | grep -v ps |\
+                 tail -1 | awk '{print $1}'`
+        else
+            PID=`ps -Ac | grep "${process}" | grep -v grep | grep -v ps |\
+                 tail -1 | awk '{print $1}'`
+        fi
+
+        if [ "$prevPID" == "$PID" ]; then
+            echo 
+            echo "Unable to kill zombie ${process} process with pid $PID"
+            echo "buildbot_status: WARNINGS"
+            echo
+            break
+        fi
+        if [ "" != "$PID" ]; then
+            echo
+            echo "There is a zombie ${process} [pid $PID] still running."
+            echo "Attempting to kill process $PID"
+            echo "message: zombie ${process} process found"
+            echo "buildbot_status: WARNINGS"
+            echo
+
+            if [[ `uname` == *CYGWIN* ]]; then
+                echo "`ps -W -p $PID`"
+                # bash: kill: (####) - No such process" error using kill 
+                # command in Cygwin
+                # http://www-01.ibm.com/support/docview.wss?uid=swg21205470
+                /bin/kill -f $PID
+            else
+                echo "`ps -fp $PID`"
+                kill -9 $PID
+            fi
+            
+            prevPID=$PID
+            sleep 10
+        else
+            break
+        fi
+    done
+done
+

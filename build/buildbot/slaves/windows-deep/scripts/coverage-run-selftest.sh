@@ -54,7 +54,17 @@ export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_selftest_cov}
 export COVFILE=$buildsdir/${change}-${changeid}/$platform/selftest.cov
 
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
 $AVM -Dselftest
 $bullseyedir/covdir -q
 
-
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh

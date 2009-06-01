@@ -93,6 +93,13 @@ echo BUILTINABC=$BUILTINABC
 export SHELLABC=$basedir/shell/$shellABC
 echo SHELLABC=$SHELLABC
 
+
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
 cd $basedir/test/cmdline
 echo "starting cmdline testsuite..."
 
@@ -131,4 +138,11 @@ echo "tests skipped     : $skips"
 }
 
 rm cmdline.txt
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
+
 exit $ret

@@ -127,6 +127,15 @@ export shell_release_debugger=$buildsdir/$change-${changeid}/$platform/$shell_re
 export shell_debug=$buildsdir/$change-${changeid}/$platform/$shell_debug
 export shell_debug_debugger=$buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
 
+
+
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
+
 cd $basedir/test/acceptance
 
 # If available, use windows python (instead of cygwin python)
@@ -157,6 +166,12 @@ fi
 
 echo "message: $py ./runtests.py --config=${platform}-diff --threads=$test_threads --nohtml"
 $py ./runtests.py --config=${platform}-diff --threads=$test_threads --nohtml
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
 
 exit 0
 

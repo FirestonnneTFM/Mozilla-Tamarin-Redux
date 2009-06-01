@@ -86,6 +86,12 @@ test -f $AVM || {
 echo AVM=$AVM
 echo "`$AVM`"
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
 cd ${basedir}/test/acceptance
 
 # If available, use windows python (instead of cygwin python)
@@ -102,4 +108,8 @@ echo "message: $py ./runtests.py --config=x86-win-tvm-cov-debugdebugger --thread
 $py ./runtests.py --config=x86-win-tvm-cov-debugdebugger --threads=$test_threads --nohtml
 $bullseyedir/covdir -q
 
-
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh

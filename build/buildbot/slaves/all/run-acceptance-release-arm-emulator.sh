@@ -93,6 +93,12 @@ export ASC=$basedir/utils/asc.jar
 export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
 cd $basedir/test/acceptance
 # If available, use windows python (instead of cygwin python)
 # Threading only works with windows python, $PYTHONWIN env variable must point to windows install
@@ -106,6 +112,12 @@ else
 fi
 echo "message: $py ./runtests.py --threads=$test_emulator_threads --nohtml"
 $py ./runtests.py --threads=$test_emulator_threads --nohtml
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
 
 exit 0
 
