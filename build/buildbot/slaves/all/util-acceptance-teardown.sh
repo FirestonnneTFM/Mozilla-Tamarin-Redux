@@ -37,34 +37,22 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Set any variables that my be needed higher up the chain
-##
-export shell_extension=
 
 ##
-# Bring in the BRANCH environment variables
+# Bring in the environment variables
 ##
-. ../all/environment.sh
-
-export platform=mac
-export basedir=/Users/build/buildbot/$branch/${platform}64-intel/$branch
-export buildsdir=$basedir/../builds
-
-export shell_release=${shell_release}_64
-export shell_debug=${shell_debug}_64
-export shell_release_debugger=${shell_release_debugger}_64
-export shell_debug_debugger=${shell_debug_debugger}_64
-export shell_selftest=${shell_selftest}_64
-export shell_release_vprof=${shell_release_vprof}_64
-
-## Used by make in the build scripts
-export make_opt="-j4"
-export test_threads=3
+. ./environment.sh
 
 
-# List of processes that should NEVER be running when the build is not
-# currently running any tests. This list of process will be killed if the
-# process is found. Process must not contain extension as cygwin will return
-# the process without the extension. Used in all/util-process-clean.sh
-export proc_names="avmshell.*_64$"
+
+echo
+echo "+++++++++++++++++++++++++++++++++++++++++++++"
+echo "Ensure that the system is torn down and clean"
+echo "+++++++++++++++++++++++++++++++++++++++++++++"
+echo
+##
+# Make sure that there are no processes running that should not be
+##
+../all/util-process-clean.sh
+
+echo; echo;

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #  ***** BEGIN LICENSE BLOCK *****
 #  Version: MPL 1.1/GPL 2.0/LGPL 2.1
 # 
@@ -35,30 +35,26 @@
 #  the terms of any one of the MPL, the GPL or the LGPL.
 # 
 #  ***** END LICENSE BLOCK ****
+(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-# allow to run script from tamarin-redux outside buildbot
-test "$basedir" = "" && 
-    basedir="."
 
-# downloads kernel files for fc64 canary testcase
-kerneldir=$basedir/other-licenses/test/performance/canaries/fc64util/kernel
+##
+# Bring in the environment variables
+##
+. ./environment.sh
 
-# create dir if does not exist
-test -d "$kerneldir" || 
-    mkdir -p $kerneldir
 
-# only download new kernel files if they don't exist
-test -f $kerneldir/basic.901226-01.bin || {
-    echo "downloading $kerneldir/basic.901226-01.bin"
-    wget --quiet --output-file=$kerneldir/basic.901226-01.bin http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/basic.901226-01.bin
-}
 
-test -f $kerneldir/characters.901225-01.bin || {
-    echo "downloading $kerneldir/characters.901225-01.bin"
-    wget --quiet --output-file=$kerneldir/characters.901225-01.bin http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/characters.901225-01.bin
-}
+echo
+echo "+++++++++++++++++++++++++++++++++++++++++"
+echo "Ensure that the system is clean and ready"
+echo "+++++++++++++++++++++++++++++++++++++++++"
+echo
+##
+# Make sure that there are no processes running that should not be
+##
+../all/util-process-clean.sh
 
-test -f $kerneldir/kernal.901227-03.bin || {
-    echo "downloading $kerneldir/kernal.901227-03.bin"
-    wget --quiet --output-file=$kerneldir/kernal.901227-03.bin http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/kernal.901227-03.bin
-}
+echo; echo;
+
+

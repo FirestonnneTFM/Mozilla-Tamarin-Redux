@@ -141,6 +141,12 @@ export avmdd=$buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
 export AVM=$avmr
 export AVMRD=$avmrd
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
 # If available, use windows python (instead of cygwin python)
 # Threading only works with windows python, $PYTHONWIN env variable must point to windows install
 # $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
@@ -158,6 +164,12 @@ ret=$?
 exitcode=0
 test "$ret" = "0" ||
    exitcode=1
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
 
 exit $exitcode
 

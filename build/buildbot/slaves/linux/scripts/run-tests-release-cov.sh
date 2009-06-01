@@ -83,6 +83,11 @@ test -f $AVM || {
 echo AVM=$AVM
 echo "`$AVM`"
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
 
 $bullseyedir/covclear
 
@@ -112,4 +117,10 @@ cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
 echo "message: total function coverage:           $fnpct"
 echo "message: total condition/decision coverage: $cdpct"
 echo "url: http://10.60.48.47/builds/$branch/$change/linux/avm.cov code coverage data file avm.cov"
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
 

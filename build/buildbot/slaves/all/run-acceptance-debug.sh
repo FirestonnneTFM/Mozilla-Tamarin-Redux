@@ -107,6 +107,12 @@ test -f $AVM || {
   exit 1
 }
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
 
 cd $basedir/test/acceptance
 # If available, use windows python (instead of cygwin python)
@@ -120,6 +126,12 @@ else
 fi
 echo "message: $py ./runtests.py --config=$config --threads=$test_threads --nohtml"
 $py ./runtests.py --config=$config --threads=$test_threads --nohtml
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
 
 exit 0
 

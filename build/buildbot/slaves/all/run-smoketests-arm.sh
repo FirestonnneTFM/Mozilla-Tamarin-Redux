@@ -94,6 +94,13 @@ export ASC=$basedir/utils/asc.jar
 export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
 
+
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
 echo "Setting up the device with build #$change"
 ../all/avmshell-arm-setup.sh $change
 
@@ -105,6 +112,12 @@ ret=$?
 exitcode=0
 test "$ret" = "0" ||
    exitcode=1
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
 
 exit $exitcode
 

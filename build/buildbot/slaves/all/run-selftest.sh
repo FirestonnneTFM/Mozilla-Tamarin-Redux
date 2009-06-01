@@ -65,6 +65,11 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_selftest" ]; then
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_selftest
 fi
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
 
 AVM=$buildsdir/$change-${changeid}/$platform/$shell_selftest
 
@@ -80,5 +85,12 @@ echo "passes            : $passes"
 echo "failures          : $fails"
 
 rm selftest.out
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
+
 exit $ret
  
