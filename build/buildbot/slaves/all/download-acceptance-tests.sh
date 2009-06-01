@@ -91,9 +91,9 @@ echo "Rebuilding ABC test media"
 
 if [[ $AVM == *ceremoteshell* ]]
 then
-    python ./runtests.py --rebuildtests -c arm-winmobile-tvm-release-arm --threads=$test_threads
+    python ./runtests.py --rebuildtests -c arm-winmobile-tvm-release-arm 
 else
-    python ./runtests.py --rebuildtests --threads=$test_threads
+    python ./runtests.py --rebuildtests 
 fi
 
 fi # manually rebuild tests

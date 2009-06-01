@@ -47,7 +47,6 @@ export sleeptime=`expr $RANDOM % 60 + 60`
 
 ## Used by make in the build scripts
 export make_opt=""
-export test_threads=1
 
 export branch=tamarin-redux
 

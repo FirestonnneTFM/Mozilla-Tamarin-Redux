@@ -61,4 +61,3 @@ export shell_release_vprof=${shell_release_vprof}_104
 
 ## Used by make in the build scripts
 export make_opt="-j4"
-export test_threads=3

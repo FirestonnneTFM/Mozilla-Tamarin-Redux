@@ -116,8 +116,8 @@ then
 else
     py=$PYTHONWIN
 fi
-echo "message: $py ./runtests.py --vmargs=$jit --threads=$test_threads --nohtml"
-$py ./runtests.py --vmargs=$jit --threads=$test_threads --nohtml
+echo "message: $py ./runtests.py --vmargs=$jit  --nohtml"
+$py ./runtests.py --vmargs=$jit  --nohtml
 
 ##
 # Ensure that the system is torn down and clean

@@ -104,8 +104,8 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp --threads=$test_threads --nohtml"
-$py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp --vmargs=${interp} --threads=$test_threads --nohtml
+echo "message: $py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp  --nohtml"
+$py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp --vmargs=${interp}  --nohtml
 $bullseyedir/covdir -q
 
 ##

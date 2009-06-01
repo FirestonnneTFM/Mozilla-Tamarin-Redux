@@ -105,8 +105,8 @@ else
 fi
 
 
-echo "message: $py ./runtests.py --config=x86-win-tvm-cov-debug --threads=$test_threads --nohtml"
-$py ./runtests.py --config=x86-win-tvm-cov-debug --threads=$test_threads --nohtml
+echo "message: $py ./runtests.py --config=x86-win-tvm-cov-debug  --nohtml"
+$py ./runtests.py --config=x86-win-tvm-cov-debug  --nohtml
 $bullseyedir/covdir -q
 
 ##

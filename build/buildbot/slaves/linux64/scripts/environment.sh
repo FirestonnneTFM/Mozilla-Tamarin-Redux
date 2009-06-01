@@ -53,5 +53,4 @@ export buildsdir=$basedir/../builds
 
 ## Used by make in the build scripts
 export make_opt="-j2"
-export test_threads=3
 

@@ -104,7 +104,7 @@ echo "Setting up the device with build #$change"
 
 
 cd $basedir/test/acceptance
-./runtests.py --vmargs=$interp --config=arm-winmobile-tvm-release-arm$interp  --nohtml
+./runtests.py --vmargs=$interp --config=arm-winmobile-tvm-release-arm$interp  --nohtml --threads=$test_threads
 
 ##
 # Ensure that the system is torn down and clean

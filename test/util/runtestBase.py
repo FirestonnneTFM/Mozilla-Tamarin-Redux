@@ -454,8 +454,6 @@ class RuntestBase:
             output = p.stdout.readlines()
             err = p.stderr.readlines()
             starttime=time()
-            self.verbose_print('output: %s' % output)
-            self.verbose_print('error : %s' % err)
             exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return 'timedOut'

@@ -61,4 +61,3 @@ export LIBPATH="C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x64;$VS_HOME\VC
 
 ## Used by make in the build scripts
 export make_opt="-j2"
-export test_threads=3
