@@ -53,7 +53,6 @@ export buildsdir=$basedir/../builds
 
 ## Used by make in the build scripts
 export make_opt="-j4"
-export test_threads=3
 
 # List of processes that should NEVER be running when the build is not
 # currently running any tests. This list of process will be killed if the

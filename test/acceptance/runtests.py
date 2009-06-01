@@ -46,7 +46,7 @@ from glob import glob
 from sys import argv, exit
 from getopt import getopt
 from itertools import count
-from subprocess import PIPE,STDOUT
+from subprocess import Popen, PIPE,STDOUT
 from time import time
 
 # add parent dir to python module search path
@@ -63,6 +63,8 @@ class AcceptanceRuntest(RuntestBase):
     escbin = '../../esc/bin/'
 
     def __init__(self):
+        # Set threads to # of available cpus/cores
+        self.threads = self.detectCPUs()
         RuntestBase.__init__(self)
 
     def setEnvironVars(self):
@@ -75,7 +77,7 @@ class AcceptanceRuntest(RuntestBase):
         print '    --esc           run esc instead of avm'
         print '    --escbin        location of esc/bin directory - defaults to ../../esc/bin'
         print '    --ext           set the testfile extension (defaults to .as)'
-        print '    --threads       number of threads to run (default=1), set to 1 to have tests finish sequentially'
+        print '    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially'
         exit(c)
     
     def setOptions(self):
@@ -94,5 +96,26 @@ class AcceptanceRuntest(RuntestBase):
                 self.escbin = v
             elif o in ('--threads'):
                 self.threads=int(v)
+    
+    def detectCPUs(self):
+        """
+        Detects the number of CPUs on a system.
+        """
+        # Linux, Unix and MacOS:
+        if hasattr(os, "sysconf"):
+            if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+                # Linux & Unix:
+                ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
+                if isinstance(ncpus, int) and ncpus > 0:
+                    return ncpus
+            else: # OSX:
+                p = Popen("sysctl -n hw.ncpu", shell=True, close_fds=True, stdin=PIPE, stdout=PIPE)
+                return int(p.stdout.read())
+        # Windows:
+        if os.environ.has_key("NUMBER_OF_PROCESSORS"):
+            ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
+            if ncpus > 0:
+                return ncpus
+        return 1 # Default                
 
 runtest = AcceptanceRuntest()

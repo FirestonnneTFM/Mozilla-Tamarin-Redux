@@ -164,8 +164,8 @@ else
 fi
 
 
-echo "message: $py ./runtests.py --config=${platform}-diff --threads=$test_threads --nohtml"
-$py ./runtests.py --config=${platform}-diff --threads=$test_threads --nohtml
+echo "message: $py ./runtests.py --config=${platform}-diff  --nohtml"
+$py ./runtests.py --config=${platform}-diff  --nohtml
 
 ##
 # Ensure that the system is torn down and clean

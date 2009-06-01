@@ -122,8 +122,8 @@ then
 else
     py=$PYTHONWIN
 fi
-echo "message: $py ./runtests.py --config=$config --threads=$test_threads --nohtml"
-$py ./runtests.py --config=$config --threads=$test_threads --nohtml
+echo "message: $py ./runtests.py --config=$config  --nohtml"
+$py ./runtests.py --config=$config  --nohtml
 
 ##
 # Ensure that the system is torn down and clean

@@ -60,4 +60,3 @@ export shell_release_vprof=${shell_release_vprof}_64_ppc
 
 ## Used by make in the build scripts
 export make_opt="-j2"
-export test_threads=3
