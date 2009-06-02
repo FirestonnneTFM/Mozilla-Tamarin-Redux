@@ -132,17 +132,25 @@ namespace avmshell
 	void Shell::singleWorker(ShellSettings& settings)
 	{
 		MMgc::GC *gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
-		MMGC_GCENTER(gc);
-		
-		ShellCore* shell = new ShellCoreImpl(gc, true);
-		
+		{
+			MMGC_GCENTER(gc);			
+			ShellCore* shell = new ShellCoreImpl(gc, true);
+			Shell::singleWorkerHelper(shell, settings);			
+			delete shell;
+		}
+		delete gc;
+	}
+
+	/* static */
+	void Shell::singleWorkerHelper(ShellCore* shell, ShellSettings& settings)
+	{
 		if (!shell->setup(settings))
 			Platform::GetInstance()->exit(1);
 		
 #ifdef AVMPLUS_SELFTEST
 		if (settings.do_selftest) {
 			shell->executeSelftest(settings);
-			goto finish;
+			return;
 		}
 #endif
 		
@@ -166,14 +174,8 @@ namespace avmshell
 		if (settings.do_repl)
 			repl(shell);
 #endif
-
-#ifdef AVMPLUS_SELFTEST
-	finish:
-#endif
-		delete shell;
-		delete gc;
 	}
-
+	
 #ifdef VMCFG_WORKERTHREADS
 
 //#define LOGGING(x)    x

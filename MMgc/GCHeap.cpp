@@ -1050,17 +1050,24 @@ namespace MMgc
 	void GCHeap::ExpandHeap(int askSize, bool canFail)
 	{
 		bool result = ExpandHeapInternal(askSize);
-		if(!result && status == kMemNormal)
-		{
-			// invoke callbacks
-			StatusChangeNotify(kMemReserve);
-	
-			// try again
-			result = ExpandHeapInternal(askSize);
-			if(!result && canFail)
-				return;
-			else
-				Abort();
+		if(!result)
+		{ 
+			// random policy choice: don't invoke OOM callbacks for
+			// canFail allocs
+			if(status == kMemNormal && !canFail) {
+				// invoke callbacks
+				StatusChangeNotify(kMemReserve);
+				
+				// try again
+				result = ExpandHeapInternal(askSize);
+			}
+
+			if(!result) {
+				if(canFail)
+					return;
+				else 
+					Abort();
+			}
 		}
 	}
 	 

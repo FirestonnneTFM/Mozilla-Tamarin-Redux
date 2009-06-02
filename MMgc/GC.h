@@ -237,7 +237,6 @@ namespace MMgc
 		virtual void premark() {}
 
 		virtual void log(const char* /*str*/) {}
-		virtual void oom(MemoryStatus) {}
 
 	private:
 		GC *gc;
@@ -478,6 +477,18 @@ namespace MMgc
 		 */
 		void signalEndCollection(GC* gc);
 
+		/**
+		 * Request a full collection happen at the next GC edge (enter/exit)
+		 */
+		void queueFullCollection() { fullCollectionQueued = true; }
+
+		/**
+		 * called after a full collection is done
+		 */
+		void fullCollectionComplete() { fullCollectionQueued = false; }
+
+		bool queryFullCollectionQueued() { return fullCollectionQueued; }
+
 		// ----- Public data --------------------------------------
 		
 		// Elapsed time (in ticks) for various collection phases, and the maximum phase time
@@ -582,6 +593,8 @@ namespace MMgc
 
 		// value returned by lowerLimitCollectionThreshold() and set by setLowerLimitCollectionThreshold()
 		uint32_t collectionThreshold;
+
+		bool fullCollectionQueued;
 	};
 
 	inline void GCPolicyManager::signalMarkWork(size_t nbytes, uint64_t nobjects)
@@ -604,7 +617,7 @@ namespace MMgc
 		~ZCT();
 		void Add(RCObject *obj);
 		void Remove(RCObject *obj);
-		void Reap();
+		void Reap(bool scanStack=true);
 	private:
 		// for MMGC_GET_STACK_EXTENTS
 		uintptr_t StackTop;
@@ -750,12 +763,12 @@ namespace MMgc
 		 * Causes an immediate stop-the-world garbage collection (or finishes any
 		 * incremental collection underway).
 		 */
-		void Collect();
+		void Collect(bool scanStack=true);
 
 		/**
 		 * Do a full collection at the next MMGC_GCENTER macro site
 		 */
-		void QueueCollection() { fullCollectionQueued = true; }
+		void QueueCollection() { policy.queueFullCollection(); }
 
 		/**
 		* flags to be passed as second argument to alloc
@@ -969,7 +982,7 @@ namespace MMgc
 
 		GCHeap *GetGCHeap() const { return heap; }
 
-		void ReapZCT() { zct.Reap(); }
+		void ReapZCT(bool scanStack=true) { zct.Reap(scanStack); }
 		bool Reaping() { return zct.reaping; }
 #ifdef _DEBUG
 		void RCObjectZeroCheck(RCObject *);
@@ -983,7 +996,7 @@ namespace MMgc
 		/**
 		 * Do as much marking as possible in time milliseconds
 		 */
-		void IncrementalMark();
+		void IncrementalMark(bool scanStack=true);
 
 		/**
 		 * Are we currently marking
@@ -1183,8 +1196,6 @@ namespace MMgc
 		 */
 		bool hitZeroObjects;
 
-		bool fullCollectionQueued;
-
 		// called at some apropos moment from the mututor, ideally at a point
 		// where all possible GC references will be below the current stack pointer
 		// (ie in memory we can safely zero).  This will return right away if
@@ -1210,9 +1221,6 @@ namespace MMgc
 				return GetOSStackTop();
 			return GetStackEnter();
 		}
-
-		// owner stack refers to the stack that created the GC		
-		uintptr_t GetOwnerStackBottom() const { return (uintptr_t)rememberedStackBottom; }
 
 		uintptr_t GetStackEnter() const 
 		{ 
@@ -1278,7 +1286,6 @@ namespace MMgc
 		// tracked and cleaned.
 		bool stackCleaned;
 		const void *rememberedStackTop;
-		const void *rememberedStackBottom;
 		GCAutoEnter* stackEnter;
 
 		// for external which does thread safe multi-thread AS execution
@@ -1297,8 +1304,8 @@ namespace MMgc
 		 */
 		bool marking;
 		GCStack<GCWorkItem> m_incrementalWork;
-		void StartIncrementalMark();
-		void FinishIncrementalMark();
+		void StartIncrementalMark(bool scanStack=true);
+		void FinishIncrementalMark(bool scanStack=true);
 
 		bool m_markStackOverflow;
 		void HandleMarkStackOverflow();
@@ -1375,10 +1382,6 @@ namespace MMgc
 		void* AllocBlockNonIncremental(int size, bool zero=true);
 
 	private:
-		/**
-		 * Just collect.
-		 */
-		void CollectImpl();
 
 #ifdef _DEBUG
 		public:
@@ -1403,7 +1406,7 @@ namespace MMgc
 		void ForceSweep() { Sweep(true); }
 		void MarkAllRoots(GCStack<GCWorkItem>& work);
 		void Mark(GCStack<GCWorkItem> &work);
-		void MarkQueueAndStack(GCStack<GCWorkItem> &work);
+		void MarkQueueAndStack(GCStack<GCWorkItem> &work, bool scanStack=true);
 		void MarkItem(GCStack<GCWorkItem> &work)
 		{
 			GCWorkItem workitem = work.Pop();
