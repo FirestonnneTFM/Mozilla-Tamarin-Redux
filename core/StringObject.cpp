@@ -1054,11 +1054,11 @@ namespace avmplus
 		int64_t n = 0;
 		wchar wch;
 		Pointers ptrs = m_buffer;
+		Width w = getWidth();
 		if (m_length == 0 || m_length > 10)
 			goto bad;
 
 		// collect the value
-		Width w = getWidth();
 		for (int32_t i = 0; i < m_length; i++)
 		{
 			if (w == k8)
@@ -1100,11 +1100,9 @@ namespace avmplus
 		int32_t n = 0;
 		wchar wch;
 		Pointers ptrs = m_buffer;
-
+		Width w = getWidth();
 		if (m_length == 0 || m_length > 10)
 			goto bad;
-
-		Width w = getWidth();
 
 		// collect the value
 		for (int32_t i = 0; i < m_length; i++)
