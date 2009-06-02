@@ -46,6 +46,7 @@ from sys import stderr
 parser = OptionParser(usage="usage: %prog [--uniquethunks] [importfile [, importfile]...] file...")
 parser.add_option("-n", "--nativemapname", help="no longer supported")
 parser.add_option("-u", "--uniquethunks", help="generate a unique thunk for every native method (don't recycle thunks with similar signatures)")
+parser.add_option("-e", "--externmethodandclassetables", action="store_true", default=False, help="generate extern decls for method and class tables")
 opts, args = parser.parse_args()
 
 if not args:
@@ -54,7 +55,7 @@ if not args:
 
 if opts.nativemapname:
 	raise Error("--nativemapname is no longer supported")
-	
+
 NEED_ARGUMENTS		= 0x01
 NEED_ACTIVATION		= 0x02
 NEED_REST			= 0x04
@@ -1094,6 +1095,11 @@ class AbcThunkGen:
 
 		out_c.println("");
 		out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s)" % (name));
+
+		if opts.externmethodandclassetables:
+			out_c.println("");
+			out_c.println("extern const NativeClassInfo* "+name+"_classEntriesExtern = "+name+"_classEntries;");
+			out_c.println("extern const NativeMethodInfo* "+name+"_methodEntriesExtern = "+name+"_methodEntries;");
 
 		out_c.println("");
 		out_c.println("/* abc */");

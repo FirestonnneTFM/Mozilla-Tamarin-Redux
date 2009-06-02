@@ -721,7 +721,7 @@ namespace avmplus
 		core->dxnsAddr = aux_memory->dxnsAddr;
 		
  		aux_memory->savedCodeContext = core->codeContextAtom;
- 		if (pool->domain->base != NULL)
+		if (!pool->isBuiltin)
  			core->codeContextAtom = makeCodeContextAtom(env);
   
  		// OPTIMIZEME - opportunities for streamlining the function entry code.
