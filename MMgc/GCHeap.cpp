@@ -71,6 +71,9 @@ namespace MMgc
 #ifdef MMGC_64BIT
 		trimVirtualMemory = false; // no need
 #endif
+		const char *envValue = VMPI_getenv("MMGC_HEAP_LIMIT");
+		if(envValue)
+			heapLimit = VMPI_strtol(envValue, 0, 10);
 	}
 
 	void GCHeap::Init(GCHeapConfig& config)

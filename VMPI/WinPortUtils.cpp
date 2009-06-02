@@ -261,14 +261,9 @@ void VMPI_log(const char* message)
 
 bool VMPI_isMemoryProfilingEnabled()
 {
-#ifndef UNDER_CE
 	//read the mmgc profiling option switch
-	const char *env = getenv("MMGC_PROFILE");
+	const char *env = VMPI_getenv("MMGC_PROFILE");
 	return (env && (VMPI_strncmp(env, "1", 1) == 0));
-#else
-	return false;
-#endif
-
 }
 
 void VMPI_setPageProtection(void *address,
@@ -297,4 +292,14 @@ void VMPI_setPageProtection(void *address,
 	
 	// We should not be clobbering PAGE_GUARD protections
 	GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
+}
+
+char *VMPI_getenv(const char *name)
+{
+#ifdef UNDER_CE
+	(void)name;
+	return NULL;
+#else
+	return getenv(name);
+#endif
 }
