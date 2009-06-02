@@ -65,56 +65,22 @@ namespace avmplus
 
 /////////////////////////// Helpers: Widening //////////////////////////////
 
-	inline void _widen8_16(const char* src, wchar* dst, int32_t len)
+	inline void _widen8_16(const uint8_t* src, wchar* dst, int32_t len)
 	{
 		while (len-- > 0)
-			*dst++ = wchar(*src++ & 0xFF);
+			*dst++ = wchar(*src++);
 	}
-
-#ifdef FEATURE_UTF32_SUPPORT
-	inline void _widen8_32(const char* src, uint32_t* dst, int32_t len)
-	{
-		while (len-- > 0)
-			*dst++ = uint32_t(*src++ & 0xFF);
-	}
-
-	inline void _widen16_32(const wchar* src, uint32_t* dst, int32_t len)
-	{
-		while (len-- > 0)
-			*dst++ = uint32_t(*src++);
-	}
-#endif
 
 /////////////////////////// Helpers: Narrowing //////////////////////////////
 
-	inline void _narrow16_8(const wchar* src, char* dst, int32_t len)
+	inline void _narrow16_8(const wchar* src, uint8_t* dst, int32_t len)
 	{
 		while (len-- > 0)
 		{
 			AvmAssert(*src <= 0xFF);
-			*dst++ = (char) *src++;
+			*dst++ = (uint8_t) *src++;
 		}
 	}
-
-#ifdef FEATURE_UTF32_SUPPORT
-	inline void _narrow32_8(const uint32_t* src, char* dst, int32_t len)
-	{
-		while (len-- > 0)
-		{
-			AvmAssert(*src <= 0xFF);
-			*dst++ = (char) *src++;
-		}
-	}
-
-	inline bool _narrow32_16(const uint32_t* src, wchar* dst, int32_t len)
-	{
-		while (len-- > 0)
-		{
-			AvmAssert(*src <= 0xFFFF);
-			*dst++ = (wchar) *src++;
-		}
-	}
-#endif
 
 /////////////////////////// Helpers: Copying ///////////////////////////////
 
@@ -124,35 +90,10 @@ namespace avmplus
 	{
 		if (srcWidth == dstWidth)
 			VMPI_memcpy(dst, src, srcLen * srcWidth);
+		else if (srcWidth == String::k8)
+			_widen8_16((const uint8_t*) src, (wchar*) dst, srcLen);
 		else
-		{
-			switch (srcWidth)
-			{
-				case String::k8:
-					if (dstWidth == String::k16)
-						_widen8_16((const char*) src, (wchar*) dst, srcLen);
-	#ifdef FEATURE_UTF32_SUPPORT
-					else	// String::k32:
-						_widen8_32((const char*) src, (uint32_t*) dst, srcLen);
-	#endif
-					break;
-				case String::k16:
-					if (dstWidth == String::k8)
-						_narrow16_8((const wchar*) src, (char*) dst, srcLen);
-	#ifdef FEATURE_UTF32_SUPPORT
-					else	// String::k32:
-						_widen16_32((const wchar*) src, (uint32_t*) dst, srcLen);
-					break;
-	#endif
-				default: ;
-	#ifdef FEATURE_UTF32_SUPPORT
-					if (dstWidth == String::k8)
-						_narrow32_8((const uint32_t*) src, (char*) dst, srcLen);
-					else	// String::k16
-						_narrow32_16((const uint32_t*) src, (wchar*) dst, srcLen);
-	#endif
-			}
-		}
+			_narrow16_8((const wchar*) src, (uint8_t*) dst, srcLen);
 		// return the new buffer pointer
 		return (char*) dst + (srcLen * dstWidth);
 	}
@@ -220,11 +161,11 @@ namespace avmplus
 #ifdef _DEBUG
 		// Terminate string with 0 for better debugging display
 		if (charsLeft)
-		  switch (w)
 		{
-			case k8:  s->m_buffer.p8[len] = 0; break;
-			case k16: s->m_buffer.p16[len] = 0; break;
-			default : s->m_buffer.p32[len] = 0; break;
+			if (w == k8)
+				s->m_buffer.p8[len] = 0;
+			else
+				s->m_buffer.p16[len] = 0;
 		}
 #endif
 		return s;
@@ -240,7 +181,7 @@ namespace avmplus
 		Stringp s = new(gc)
 					String(len, w | (kStatic << TSTR_TYPE_SHIFT));
 		// static data - no WB() needed
-		s->m_buffer.p8 = (char*) data;
+		s->m_buffer.p8 = (uint8_t*) data;
 		return s;
 	}
 
@@ -367,67 +308,34 @@ namespace avmplus
 		Pointers r1 = p1;
 		Pointers r2 = p2;
 		int32_t res = 0;
-		if (len > 0) switch (w1)
+		if (len > 0)
 		{
-			case k8:
-				switch (w2)
+			if (w1 == k8)
+			{
+				if (w2 == k8)
 				{
-					case k8:
-						while (len-- > 0 && 0 == res)
-							res = int32_t(wchar (*r2.p8++ & 0xFF) - wchar (*r1.p8++ & 0xFF));
-						break;
-					case k16:
-						while (len-- > 0 && 0 == res)
-							res = int32_t(*r2.p16++ - wchar (*r1.p8++ & 0xFF));
-						break;
-#ifdef FEATURE_UTF32_SUPPORT
-					default: // k32
-						while (len-- > 0 && 0 == res)
-							res = int32_t(*r2.p32++ - uint32_t(*r1.p8++ & 0xFF));
-#else
-					default: ;
-#endif				
-				}
-				break;
-			case k16:
-				switch (w2)
+					while (len-- > 0 && 0 == res)
+						res = int32_t(*r2.p8++ - *r1.p8++);
+				} 
+				else 
 				{
-					case k8:
-						while (len-- > 0 && 0 == res)
-							res = int32_t(wchar (*r2.p8++ & 0xFF) - *r1.p16++);
-						break;
-					case k16:
-						while (len-- > 0 && 0 == res)
-							res = int32_t(*r2.p16++ - *r1.p16++);
-						break;
-#ifdef FEATURE_UTF32_SUPPORT
-					default: // k32
-						while (len-- > 0 && 0 == res)
-							res = int32_t((uint32_t) *r2.p32++ - *r1.p16++);
-#else
-					default:;
-#endif
+					while (len-- > 0 && 0 == res)
+						res = int32_t(*r2.p16++ - *r1.p8++);
 				}
-				break;
-			default:
-				switch (w2)
+			}
+			else 
+			{
+				if (w2 == k8)
 				{
-					case k8:
-						while (len-- > 0 && 0 == res)
-							res = int32_t(*r2.p32++ - uint32_t(*r1.p8++ & 0xFF));
-						break;
-					case k16:
-						while (len-- > 0 && 0 == res)
-							res = int32_t(*r2.p32++ - uint32_t(*r1.p16++));
-						break;
-#ifdef FEATURE_UTF32_SUPPORT
-					default: // k32
-						while (len-- > 0 && 0 == res)
-							res = int32_t(*r2.p32++ - *r1.p32++);
-#else
-					default: ;
-#endif
+					while (len-- > 0 && 0 == res)
+						res = int32_t(*r2.p8++ - *r1.p16++);
 				}
+				else
+				{
+					while (len-- > 0 && 0 == res)
+						res = int32_t(*r2.p16++ - *r1.p16++);
+				}
+			}
 		}
 		return res;
 	}
@@ -471,18 +379,12 @@ namespace avmplus
 
 		bool ok = true;
 		Pointers ptrs = m_buffer;
-		switch (getWidth())
+		if (getWidth() == k8)
+			ok = !VMPI_memcmp(ptrs.p8, p, len);
+		else
 		{
-			case k8:
-				ok = !VMPI_memcmp(ptrs.p8, p, len);
-				break;
-			case k16:
-				while (ok && len-- != 0)
-					ok = (wchar(*p++ & 0xFF) == *ptrs.p16++); 
-				break;
-			default:
-				while (ok && len-- != 0)
-					ok = (utf32_t(*p++ & 0xFF) == *ptrs.p32++);
+			while (ok && len-- != 0)
+				ok = (*((uint8_t*) p++) == *ptrs.p16++);
 		}
 		return ok;
 	}
@@ -494,18 +396,14 @@ namespace avmplus
 
 		Pointers ptrs = m_buffer;
 		bool ok = true;
-		switch (getWidth())
+		if (getWidth() == k8)
 		{
-			case k8:
-				while (ok && len-- != 0)
-					ok = (*p++ == wchar(*ptrs.p8++ & 0xFF)); 
-				break;
-			case k16:
-				ok = !VMPI_memcmp(ptrs.p16, p, len * sizeof(wchar));
-				break;
-			default:
-				while (ok && len-- != 0)
-					ok = (utf32_t(*p++) == *ptrs.p32++);
+			while (ok && len-- != 0)
+				ok = (*p++ == *ptrs.p8++);
+		}
+		else
+		{
+			ok = !VMPI_memcmp(ptrs.p16, p, len * sizeof(wchar));
 		}
 		return ok;
 	}
@@ -531,17 +429,12 @@ namespace avmplus
 
 		for (int32_t i = length(); i > 0; i--)
 		{
-			utf32_t ch1, ch2;
-			switch (w)
-			{
-				case k8:  ch1 = utf32_t(*ptrs.p8++ & 0xFF); break;
-				case k16: ch1 = utf32_t(*ptrs.p16++); break;
-				default:  ch1 = *ptrs.p32++;
-			}
+			wchar ch1 = (w == k8) ? wchar(*ptrs.p8++) : *ptrs.p16++;
+			uint32_t ch2;
 			if ((*buf & 0x7FF) < 0x80)
 			{
 				// ASCII
-				ch2 = utf32_t(*buf++);
+				ch2 = uint32_t(*buf++);
 				bytes--;
 			}
 			else
@@ -568,8 +461,8 @@ namespace avmplus
 		uint32_t hashCode = 0; // must be uint32!
 		while (len) 
 		{
-			utf32_t ch;
-			if ((*buf & 0xFF) < 0x80)
+			uint32_t ch;
+			if (*buf < 0x80)
 				// ASCII
 				ch = *buf++, len--;
 			else
@@ -602,19 +495,15 @@ namespace avmplus
 			Pointers ptrs = m_buffer;
 			int32_t len = m_length;
 
-			switch (getWidth())
+			if (getWidth() == k8)
 			{
-				case k8:
-					while (len--)
-						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ (uint8_t(*ptrs.p8++) & 0xFF);
-					break;
-				case k16:
-					while (len--)
-						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p16++;
-					break;
-				default:
-					while (len--)
-						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p32++;
+				while (len--)
+					hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p8++;
+			}
+			else
+			{
+				while (len--)
+					hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p16++;
 			}
 		}
 		return hashCode;
@@ -626,14 +515,7 @@ namespace avmplus
 	{
 		AvmAssert(index >= 0 && index < m_length);
 
-		utf32_t ch;
-		switch (getWidth())
-		{
-			case k8:	ch = uint32_t(m_buffer.p8[index] & 0xFF); break;
-			case k16:	ch = uint32_t(m_buffer.p16[index]); break;
-			default:	ch = m_buffer.p32[index]; break;
-		}
-		return (String::CharAtType)ch;
+		return (getWidth() == k8) ? CharAtType(m_buffer.p8[index]) : CharAtType(m_buffer.p16[index]);
 	}
 
 	int32_t String::indexOf(Stringp substr, int32_t start) const
@@ -736,15 +618,6 @@ namespace avmplus
 				}
 				break;
 			default: ;
-#ifdef FEATURE_UTF32_SUPPORT
-				for ( ; start <= right; ++start)
-				{
-					int32_t res = compare(selfBuf, w1, subBuf, w2, sublen);
-					if (res == 0)
-						return start;
-					selfBuf.p8 += w1;
-				}
-#endif
 		}
 		return -1;
 	}
@@ -837,15 +710,6 @@ namespace avmplus
 				}
 				break;
 			default: ;
-#ifdef FEATURE_UTF32_SUPPORT
-			for ( ; start >= 0 ; --start )
-			{
-				int32_t res = compare(selfBuf, w1, subBuf, w2, sublen);
-				if (res == 0)
-					return start;
-				selfBuf.p8 -= w1;
-			}
-#endif
 		}
 		return -1;
 	}
@@ -873,52 +737,37 @@ namespace avmplus
 		Pointers selfBuf = m_buffer;
 		selfBuf.p8 += start * w;
 
-		switch (w)
+		if (w == k8)
 		{
-			case k8:
-				for ( ; start <= right; start++)
-				{
-					int32_t j;
-					for (j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p8[j] != p[j])
-							break;
-					}
-
-					if (j == sublen)
-						return start;
-					selfBuf.p8++;
-				}
-				break;
-			case k16:
-				for ( ; start <= right; start++)
-				{
-					int32_t j;
-					for (j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p16[j] != (utf8_t) p[j])
-							break;
-					}
-
-					if (j == sublen)
-						return start;
-					selfBuf.p16++;
-				}
-				break;
-			default: ;
-#ifdef FEATURE_UTF32_SUPPORT
+			for ( ; start <= right; start++)
 			{
-				Pointers test;
-				test.p8 = (char*) p;
-				for ( ; start <= right; ++start)
+				int32_t j;
+				for (j = 0; j < sublen; j++)
 				{
-					int32_t res = compare(buffer, w, test, k8, sublen);
-					if (res == 0)
-						return start;
-					buffer.p8 += w;
+					if (selfBuf.p8[j] != p[j])
+						break;
 				}
+
+				if (j == sublen)
+					return start;
+				selfBuf.p8++;
 			}
-#endif
+		}
+		else
+		{
+			for ( ; start <= right; start++)
+			{
+				int32_t j;
+				for (j = 0; j < sublen; j++)
+				{
+					if (selfBuf.p16[j] != (utf8_t) p[j])
+						break;
+				}
+
+				if (j == sublen)
+					return start;
+				selfBuf.p16++;
+			}
 		}
 		return -1;
 	}
@@ -936,9 +785,9 @@ namespace avmplus
 		StringIndexer self(this);
 		while (len--)
 		{
-			utf32_t ch1 = self[pos++];
-			utf32_t ch2 = utf32_t(*p++ & 0xFF);
-			if (caseless && unicharToUpper(ch1) != unicharToUpper(ch2))
+			wchar ch1 = self[pos++];
+			wchar ch2 = wchar(*((uint8_t*) p++));
+			if (caseless && wCharToUpper(ch1) != wCharToUpper(ch2))
 				return false;
 			else if (ch1 != ch2)
 				return false;
@@ -1047,12 +896,10 @@ namespace avmplus
 			if (charsLeft)
 			{
 				int32_t end = master->m_length + charsUsed;
-				switch (newWidth)
-				{
-					case k8:  master->m_buffer.p8[end] = 0; break;
-					case k16: master->m_buffer.p16[end] = 0; break;
-					default : master->m_buffer.p32[end] = 0; break;
-				}
+				if (newWidth == k8)
+					master->m_buffer.p8[end] = 0;
+				else
+					master->m_buffer.p16[end] = 0;
 			}
 #endif
 			return createDependent(gc, master, start, newLen);
@@ -1083,12 +930,10 @@ namespace avmplus
 		// Terminate string with 0 for better debugging display
 		if (newStr->getCharsLeft())
 		{
-			switch (newWidth)
-			{
-				case k8:  newStr->m_buffer.p8[newStr->m_length] = 0; break;
-				case k16: newStr->m_buffer.p16[newStr->m_length] = 0; break;
-				default : newStr->m_buffer.p32[newStr->m_length] = 0; break;
-			}
+			if (newWidth == k8)
+				newStr->m_buffer.p8[newStr->m_length] = 0; 
+			else
+				newStr->m_buffer.p16[newStr->m_length] = 0;
 		}
 #endif
 		return newStr;
@@ -1121,7 +966,7 @@ namespace avmplus
 		// for single characters < 128, return the cached string
 		if (end == (start + 1))
 		{
-			uint32_t ch = charAt(start);
+			CharAtType ch = charAt(start);
 			if (ch < 128)
 				return core->cachedChars[ch];
 		}
@@ -1207,29 +1052,22 @@ namespace avmplus
 		}
 
 		int64_t n = 0;
-		uint32_t uch;
+		wchar wch;
 		Pointers ptrs = m_buffer;
-
 		if (m_length == 0 || m_length > 10)
 			goto bad;
 
 		// collect the value
+		Width w = getWidth();
 		for (int32_t i = 0; i < m_length; i++)
 		{
-			switch (getWidth())
-			{
-				case k8:
-					uch = uint32_t(*ptrs.p8++ & 0xFF);
-					break;
-				case k16:
-					uch = uint32_t(*ptrs.p16++);
-					break;
-				default:
-					uch = *ptrs.p32++;
-			}
-			n = (n * 10) + uch - '0';
+			if (w == k8)
+				wch = wchar(*ptrs.p8++);
+			else
+				wch = *ptrs.p16++;
+			n = (n * 10) + wch - '0';
 			// bad character, or more than one leading zero?
-			if (uch < '0' || uch > '9' || (i == 1 && n == 0))
+			if (wch < '0' || wch > '9' || (i == 1 && n == 0))
 				goto bad;
 		}
 		// out of range?
@@ -1260,29 +1098,24 @@ namespace avmplus
 			return Atom((m_index << 3) | AtomConstants::kIntegerType);
 
 		int32_t n = 0;
-		uint32_t uch;
+		wchar wch;
 		Pointers ptrs = m_buffer;
 
 		if (m_length == 0 || m_length > 10)
 			goto bad;
 
+		Width w = getWidth();
+
 		// collect the value
 		for (int32_t i = 0; i < m_length; i++)
 		{
-			switch (getWidth())
-			{
-				case k8:
-					uch = uint32_t(*ptrs.p8++ & 0xFF);
-					break;
-				case k16:
-					uch = uint32_t(*ptrs.p16++);
-					break;
-				default:
-					uch = *ptrs.p32++;
-			}
-			n = (n * 10) + uch - '0';
+			if (w == k8)
+				wch = wchar(*ptrs.p8++);
+			else
+				wch = *ptrs.p16++;
+			n = (n * 10) + wch - '0';
 			// bad character, or more than one leading zero?
-			if (uch < '0' || uch > '9' || (i == 1 && n == 0))
+			if (wch < '0' || wch > '9' || (i == 1 && n == 0))
 				goto bad;
 			if (n & ScriptObject::MAX_INTEGER_MASK)
 				goto bad;
@@ -2096,44 +1929,30 @@ namespace avmplus
 
 		int32_t i;
 		uint32_t ch1, ch2;
-		switch (getWidth())
+		if (getWidth() == k8)
 		{
-			case k8:
-				for (i = 0; i < m_length; i++)
-				{
-					ch1 = uint32_t(*src.p8++ & 0xFF);
-					ch2 = unimapper (ch1);
-					if (w == k16)
-						*dst.p16++ = wchar(ch2);
-					else
-						*dst.p8++ = char(ch2);
-					if (ch1 != ch2)
-						changed = true;
-				}
-				break;
-			case k16:
-				for (i = 0; i < m_length; i++)
-				{
-					ch1 = uint32_t(*src.p16++);
-					ch2 = unimapper(ch1);
+			for (i = 0; i < m_length; i++)
+			{
+				ch1 = uint32_t(*src.p8++);
+				ch2 = unimapper (ch1);
+				if (w == k16)
 					*dst.p16++ = wchar(ch2);
-					if (ch1 != ch2)
-						changed = true;
-				}
-				break;
-#ifdef FEATURE_UTF32_SUPPORT
-			default:	// k32
-				for (i = 0; i < m_length; i++)
-				{
-					ch1 = *src.p32++;
-					ch2 = unimapper(ch1);
-					*dst.p32++ = ch2;
-					if (ch1 != ch2)
-						changed = true;
-				}
-#else
-			default: ;
-#endif
+				else
+					*dst.p8++ = uint8_t(ch2);
+				if (ch1 != ch2)
+					changed = true;
+			}
+		}
+		else
+		{
+			for (i = 0; i < m_length; i++)
+			{
+				ch1 = uint32_t(*src.p16++);
+				ch2 = unimapper(ch1);
+				*dst.p16++ = wchar(ch2);
+				if (ch1 != ch2)
+					changed = true;
+			}
 		}
 		return changed ? newStr : this;
 	}
@@ -2154,8 +1973,8 @@ namespace avmplus
 		StringIndexer self((Stringp) this);
 		for (int32_t i = 0 ; i < length(); i++)
 		{
-			utf32_t ch = self[i];
-			if (ch > 0xFFFF || !isSpace((wchar) ch))
+			wchar ch = self[i];
+			if (!isSpace(ch))
 				return false;
 		}
 		return true;
@@ -2357,11 +2176,8 @@ namespace avmplus
 		if (iPos < 0 || iPos >= m_length)
 			return core->kEmptyString;
 
-		utf32_t ch = charAt(iPos);
-		// TODO: 32 bit support
-		AvmAssert(ch <= 0xFFFF);
-		wchar wch = (wchar) ch;
-		return core->newStringUTF16(&wch, 1);
+		wchar ch = (wchar) charAt(iPos);
+		return core->newStringUTF16(&ch, 1);
 	}
 
 	Stringp String::AS3_charAt(double dPos)
@@ -2415,30 +2231,19 @@ namespace avmplus
 	StringIndexer::StringIndexer(Stringp s) : m_str(s) 
 	{ 
 		AvmAssert(s != NULL);
-		switch (s->getWidth())
-		{
-			case String::k8:	m_getter = &get8; break;
-			case String::k16:	m_getter = &get16; break;
-			default:			m_getter = &get32; break;
-		}
+		m_getter = (s->getWidth() == String::k8) ? &get8 : &get16;
 	}
 
 	String::CharAtType StringIndexer::get8(Stringp s, int index)
 	{
 		AvmAssert(index >= 0 && index < s->length());
-		return (String::CharAtType) (s->m_buffer.p8[index] & 0xFF);
+		return (String::CharAtType) s->m_buffer.p8[index];
 	}
 
 	String::CharAtType StringIndexer::get16(Stringp s, int index)
 	{
 		AvmAssert(index >= 0 && index < s->length());
 		return (String::CharAtType) s->m_buffer.p16[index];
-	}
-
-	String::CharAtType StringIndexer::get32(Stringp s, int index)
-	{
-		AvmAssert(index >= 0 && index < s->length());
-		return (String::CharAtType) s->m_buffer.p32[index];
 	}
 
 ////////////////////////////// Helpers: Width Analysis /////////////////////////////////
@@ -2594,75 +2399,6 @@ namespace avmplus
 		return true;
 	}
 
-#ifdef FEATURE_UTF32_SUPPORT
-	// Analyze a UTF-32 string buffer and find out about the character widths.
-	// chars >= 0x10000 are encoded as 0xD800 + (upper 10 bits) and 0xDC00 + (lower 10 bits)
-	// Return false if a character is > 0x10FFFF.
-
-	static bool _analyzeUtf32(const utf32_t* p, int32_t len, StringWidths& r)
-	{
-		r.ascii = r.w8 = r.w16 = r.w32 = 0;
-		while (len-- > 0)
-		{
-			utf32_t ch = *p++;
-			if (ch <= 0x7F)
-				r.ascii++;
-			if (ch <= 0xFF)
-				r.w8++;
-			else if (ch <= 0xFFFF)
-				r.w16++;
-			else if (ch <= 0x10FFFF)
-				r.w32++;
-			else
-				return false;	// cannot squeeze into UTF-16
-		}
-		return true;
-	}
-
-	static void _utf8ToUcs4(const utf8_t* src, int32_t srcLen, utf32_t* dst, int32_t dstLen)
-	{
-		while (srcLen > 0 && dstLen > 0)
-		{
-			int len = UnicodeUtils::Utf8ToUcs4(src, srcLen, dst);
-			srcLen -= len;
-			src += len;
-			dstLen--;
-			dst++;
-		}
-		AvmAssert(srcLen == 0 && dstLen == 0);
-	}
-
-	static int32_t _ucs4ToUtf8(const utf32_t* src, int32_t srcLen, utf8_t* dst, int32_t dstLen)
-	{
-		int32_t totalLen = 0;
-		if (dst == NULL)
-		{
-			// compute size
-			utf8_t buffer[8];
-			while (srcLen > 0)
-			{
-				totalLen += UnicodeUtils::Ucs4ToUtf8(*src, buffer);
-				srcLen--;
-				src++;
-			}
-		}
-		else
-		{
-			while (srcLen > 0 && dstLen > 0)
-			{
-				int len = UnicodeUtils::Ucs4ToUtf8(*src, dst);
-				totalLen += len;
-				dstLen =- len;
-				dst += len;
-				srcLen--;
-				src++;
-			}
-			AvmAssert(0 == srcLen && 0 == dstLen);
-		}
-		return totalLen;
-	}
-#endif
-
 	// Create a string out of an UTF-8 buffer.
 	Stringp String::createUTF8
 		(AvmCore* core, const utf8_t* buffer, int32_t len, Width desiredWidth, bool staticBuf, bool strict)
@@ -2687,19 +2423,10 @@ namespace avmplus
 
 		if (desiredWidth == kAuto)
 		{
-#ifdef FEATURE_UTF32_SUPPORT
-			if (widths.w32 != 0)
-				desiredWidth = String::k32;
-			else if (widths.w16 != 0)
-				desiredWidth = String::k16;
-			else
-				desiredWidth = String::k8;
-#else
 			if (widths.w32 != 0 || widths.w16 != 0)
 				desiredWidth = String::k16;
 			else
 				desiredWidth = String::k8;
-#endif
 		}
 
 		if (core->publicNamespace && desiredWidth == String::k8)
@@ -2714,77 +2441,54 @@ namespace avmplus
 
 		Stringp s = NULL;
 		GC* gc = core->GetGC();
-		switch (desiredWidth)
+		if (desiredWidth == k8)
 		{
-			case String::k8:
-				if (widths.w16 != 0 || widths.w32 != 0)
-					// cannot do 8-bit string with this data
-					// TODO: string-too-wide error
-					s = NULL;
-				else if (staticBuf && widths.ascii == widths.w8)
-					// works, because we only have 7-bit ASCII
-					return String::createStatic(gc, buffer, widths.w8, String::k8);
-				else
-					s = String::createDynamic(gc, buffer, widths.w8, String::k8);
-				goto decodeUtf8;
-			case String::k16:
-				// surrogate pairs need 2 characters
-				s = String::createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16);
-				goto decodeUtf8;
-			default: ;
-#ifdef FEATURE_UTF32_SUPPORT
-				// surrogate pairs need 2 characters
-				s = String::createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k32);
-#endif
-decodeUtf8:
-				if (s != NULL)
+			if (widths.w16 != 0 || widths.w32 != 0)
+				// cannot do 8-bit string with this data
+				// TODO: string-too-wide error
+				s = NULL;
+			else if (staticBuf && widths.ascii == widths.w8)
+				// works, because we only have 7-bit ASCII
+				return createStatic(gc, buffer, widths.w8, String::k8);
+			else
+			{
+				s = createDynamic(gc, buffer, widths.w8, String::k8);
+				uint32_t uch;
+				int32_t bytesRead;
+				Pointers dst = s->m_buffer;
+				while (len > 0)
 				{
-
-					utf32_t uch;
-					int32_t bytesRead;
-					String::Pointers dst = s->m_buffer;
-					switch (desiredWidth)
+					if (*((int8_t*) buffer) > 0)
 					{
-						case String::k8:
-							while (len > 0)
-							{
-								if (*((int8_t*) buffer) > 0)
-								{
-									// ASCII
-									*dst.p8++ = char (*buffer++);
-									len--;
-								}
-								else
-								{
-									bytesRead = UnicodeUtils::Utf8ToUcs4 (buffer, len, &uch);
-									if (bytesRead == 0)
-									{
-										// invalid sequence (only if strict was false)
-										*dst.p8++ = char (*buffer++);
-										len--;
-									}
-									else
-									{
-										buffer += bytesRead;
-										len -= bytesRead;
-										*dst.p8++ = char (uch);
-									}
-								}
-							}
-							break;
-						case String::k16:
-							if (UnicodeUtils::Utf8ToUtf16(buffer, len, dst.p16, s->m_length, strict) < 0)
-								return NULL;
-							break;
-#ifdef FEATURE_UTF32_SUPPORT
-						default:
-							_utf8ToUcs4 (buffer, len, dst.p32, s->m_length);
-#else
-						default: ;
-#endif
+						// ASCII
+						*dst.p8++ = char (*buffer++);
+						len--;
+					}
+					else
+					{
+						bytesRead = UnicodeUtils::Utf8ToUcs4 (buffer, len, &uch);
+						if (bytesRead == 0)
+						{
+							// invalid sequence (only if strict was false)
+							*dst.p8++ = char (*buffer++);
+							len--;
+						}
+						else
+						{
+							buffer += bytesRead;
+							len -= bytesRead;
+							*dst.p8++ = char (uch);
+						}
 					}
 				}
-				break;
+			}
+		}
+		else
+		{
+			// surrogate pairs need 2 characters
+			s = createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16);
+			if (UnicodeUtils::Utf8ToUtf16(buffer, len, s->m_buffer.p16, s->m_length, strict) < 0)
+				return NULL;
 		}
 		return s;
 	}
@@ -2814,29 +2518,15 @@ decodeUtf8:
 
 			if (desiredWidth == kAuto)
 			{
-#ifdef FEATURE_UTF32_SUPPORT
-				if (widths.w32 != 0)
-					desiredWidth = k32;
-				else if (widths.w16 != 0)
-					desiredWidth = k16;
-				else
-					desiredWidth = k8;
-#else
 				if (widths.w32 != 0 || widths.w16 != 0)
 					desiredWidth = k16;
 				else
 					desiredWidth = k8;
-#endif
 			}
 			else if (desiredWidth == k8 && (widths.w16 != 0 || widths.w32 != 0))
 				// cannot do 8-bit string with this data
 				// TODO: string-too-wide error
 				return NULL;
-#ifdef FEATURE_UTF32_SUPPORT
-			else if (desiredWidth == k32)
-				// recompute the string length - surrogate pairs may be resolved
-				stringLength = widths.w8 + widths.w16 + widths.w32;
-#endif
 		}
 
 		if (core->publicNamespace && desiredWidth == k8)
@@ -2856,118 +2546,17 @@ decodeUtf8:
 		Stringp s = createDynamic(core->GetGC(), NULL, stringLength, desiredWidth);
 
 		String::Pointers ptrs = s->m_buffer;
-		switch (desiredWidth)
+		if (desiredWidth == k8)
 		{
-			case String::k8:
-				while (len-- > 0)
-					*ptrs.p8++ = (char) *buffer++;
-				break;
-			case String::k16:
-				VMPI_memcpy(s->m_buffer.pv, buffer, len * desiredWidth);
-				break;
-#ifdef FEATURE_UTF32_SUPPORT
-			default:
-				ptrs.p32 = s->m_buffer.p32;
-				while (len-- > 0)
-				{
-					wchar ch = *buffer++;
-					// _analyzeUtf16() has already checked the validity of surrogate pairs
-					if (ch >= 0xD800 && ch <= 0xDBFF)
-						*ptrs.p32++ = utf32_t(((ch & 0x3FF) << 10) | (*buffer++ & 0x3FF)), len--;
-					else
-						*ptrs.p32++ = utf32_t(ch);
-				}
-#else
-			default: ;
-#endif
+			while (len-- > 0)
+				*ptrs.p8++ = (char) *buffer++;
+		}
+		else
+		{
+			VMPI_memcpy(s->m_buffer.pv, buffer, len * desiredWidth);
 		}
 		return s;
 	}
-
-#ifdef FEATURE_UTF32_SUPPORT
-	// Create a string out of an UTF-32 buffer.
-	Stringp String::createUTF32(AvmCore* core, const utf32_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf)
-	{
-		if (buffer == NULL)
-		{
-			len = 0;
-			buffer = &k_zero.u32;
-			staticBuf = true;
-		}
-		if (len < 0)
-			len = Length(buffer);
-
-		StringWidths widths;
-		widths.w32 = 0;
-		if (desiredWidth != k32)
-		{
-			// determine the string width to use
-			if (!_analyzeUtf32(buffer, len, widths))
-				// TODO: bad character sequence error (here: out of range)
-				return NULL;
-
-			if (desiredWidth == kAuto)
-			{
-				if (widths.w32 != 0)
-					desiredWidth = k32;
-				else if (widths.w16 != 0)
-					desiredWidth = k16;
-				else
-					desiredWidth = k8;
-			}
-			if (desiredWidth == k8 && (widths.w16 != 0 || widths.w32 != 0))
-				// string too wide
-				return NULL;
-		}
-
-		if (core->publicNamespace && desiredWidth == String::k8)
-		{
-			// core has been initialized, check for cached characters
-			if (len == 0)
-				return core->kEmptyString;
-
-			if (len == 1 && *buffer < 128)
-				return core->cachedChars[*buffer];
-		}
-
-		if (desiredWidth == k32 && staticBuf)
-			return createStatic(core->GetGC(), buffer, len, k32);
-		int32_t stringLen = len;
-		if (desiredWidth == k16)
-			// make room for surrogate pairs
-			stringLen += widths.w32;
-
-		// found the width to use, now create that string
-		Stringp s = createDynamic(core->GetGC(), NULL, stringLen, desiredWidth);
-		Pointers ptrs;
-		switch (desiredWidth)
-		{
-			case k8:
-				ptrs.p8 = s->m_buffer.p8;
-				while (len-- > 0)
-					*ptrs.p8++ = (char) *buffer++;
-				break;
-			case k16:
-				ptrs.p16 = s->m_direct.c16;
-				while (len-- > 0)
-				{
-					utf32_t ch = *buffer++;
-					if (ch > 0xFFFF)
-					{
-						*ptrs.p16++ = wchar(0xD800 + ((ch >> 10) & 0x3FF));
-						*ptrs.p16++ = wchar(0xDC00 + (ch & 0x3FF));
-					}
-					else
-						*ptrs.p16++ = wchar (ch);
-				}
-				break;
-			case k32:
-				VMPI_memcpy(s->m_direct.c32, buffer, len * sizeof(utf32_t));
-				break;
-		}
-		return s;
-	}
-#endif // FEATURE_UTF32_SUPPORT
 
 	///////////////////////////////////////////////////////////////////////////////////
 
@@ -2996,55 +2585,39 @@ decodeUtf8:
 		m_length = 0;
 
 		MMgc::GC* gc = _gc(str);
-		switch (str->getWidth())
+		if (str->getWidth() == String::k8)
 		{
-			case String::k8:
+			const uint8_t* buf = (const uint8_t*) str->m_buffer.p8;
+			for (i = 0; i < str->m_length; i++, buf++)
+				m_length += (*buf > 127) ? 2 : 1;
+			
+			char* dstBuf = (char*) gc->Alloc(m_length+1, 0);
+			m_buffer = dstBuf;
+			dstBuf[m_length] = 0;
+
+			buf = (const uint8_t*) str->m_buffer.p8;
+
+			for (i = 0; i < str->m_length; i++, buf++)
 			{
-				const uint8_t* buf = (const uint8_t*) str->m_buffer.p8;
-				for (i = 0; i < str->m_length; i++, buf++)
-					m_length += (*buf > 127) ? 2 : 1;
-				
-				char* dstBuf = (char*) gc->Alloc(m_length+1, 0);
-				m_buffer = dstBuf;
-				dstBuf[m_length] = 0;
-
-				buf = (const uint8_t*) str->m_buffer.p8;
-
-				for (i = 0; i < str->m_length; i++, buf++)
+				wchar ch = wchar (*buf);
+				if (ch >= 128)
 				{
-					wchar ch = wchar (*buf);
-					if (ch >= 128)
-					{
-						*dstBuf++ = char(0xC0 + ((ch >> 6) & 0x3));
-						*dstBuf++ = char(0x80 + (ch & 0x3F));
-						ch <<= 32-12;
-					}
-					else
-						*dstBuf++ = char(ch);
+					*dstBuf++ = char(0xC0 + ((ch >> 6) & 0x3));
+					*dstBuf++ = char(0x80 + (ch & 0x3F));
+					ch <<= 32-12;
 				}
-				break;
+				else
+					*dstBuf++ = char(ch);
 			}
-			case String::k16:
-			{
-				const wchar* data = str->m_buffer.p16;
-				m_length = UnicodeUtils::Utf16ToUtf8(data, str->length(), NULL, 0);
-				char* dstBuf = (char*) gc->Alloc(m_length + 1, 0);
-				m_buffer = dstBuf;
-				dstBuf[m_length] = 0;
-				UnicodeUtils::Utf16ToUtf8(data, str->length(), (uint8_t*) dstBuf, m_length);
-				break;
-			}
-			default: ;
-#ifdef FEATURE_UTF32_SUPPORT
-			{
-				const utf32_t* data = str->m_buffer.p32;
-				m_length = _ucs4ToUtf8(data, str->length(), NULL, 0);
-				char* dstBuf = (char*) gc->Alloc(m_length + 1, 0);
-				m_buffer = dstBuf;
-				dstBuf[m_length] = 0;
-				_ucs4ToUtf8(data, str->length(), (utf8_t*) dstBuf, m_length);
-			}
-#endif
+		}
+		else
+		{
+			const wchar* data = str->m_buffer.p16;
+			m_length = UnicodeUtils::Utf16ToUtf8(data, str->length(), NULL, 0);
+			char* dstBuf = (char*) gc->Alloc(m_length + 1, 0);
+			m_buffer = dstBuf;
+			dstBuf[m_length] = 0;
+			UnicodeUtils::Utf16ToUtf8(data, str->length(), (uint8_t*) dstBuf, m_length);
 		}
 	}
 
@@ -3065,44 +2638,12 @@ decodeUtf8:
 			return;
 		}
 		MMgc::GC* gc = _gc(str);
-		switch (str->getWidth())
-		{
-			case String::k8:
-			case String::k16:
-			{
-				m_length = str->m_length;
-				wchar* dst = (wchar*) gc->Alloc((m_length + 1) * String::k16, 0);
-				m_buffer = dst;
-				dst[m_length] = 0;
-				_copyBuffers(str->m_buffer.pv, dst, m_length, str->getWidth(), String::k16);
-				break;
-			}
-			default: ;
-#ifdef FEATURE_UTF32_SUPPORT
-			{
-				const utf32_t* src = str->m_buffer.p32;
-				const utf32_t* p = src;
-				int32_t count = 0, len = m_length;
-				while (len--)
-					count += (*p++ > 0xFFFF) ? 2 : 1;
-				wchar* dst = gc->Alloc((m_length + 1) * String::k16, 0);
-				m_buffer = dst;
-				dst[m_length] = 0;
-				len = m_length;
-				while (len--)
-				{
-					utf32_t ch = *src++;
-					if (ch > 0xFFFF)
-					{
-						*dst++ = (wchar) (((ch-0x10000)>>10) & 0x3FF) + 0xD800;
-						*dst++ = (wchar) ((ch-0x10000) & 0x3FF) + 0xDC00;
-					}
-					else
-						*dst++ = (wchar) ch;
-				}
-			}
-#endif
-		}
+
+		m_length = str->m_length;
+		wchar* dst = (wchar*) gc->Alloc((m_length + 1) * String::k16, 0);
+		m_buffer = dst;
+		dst[m_length] = 0;
+		_copyBuffers(str->m_buffer.pv, dst, m_length, str->getWidth(), String::k16);
 	}
 
 	StUTF16String::~StUTF16String()
@@ -3145,7 +2686,7 @@ decodeUtf8:
 		for (int32_t i = m_lastPos; i < pos; i++)
 		{
 			utf8_t ch = *p;
-			if ((ch & 0xFF) < 128)
+			if (ch < 128)
 				p++, utf8Pos++;	// ASCII
 			else
 			{
