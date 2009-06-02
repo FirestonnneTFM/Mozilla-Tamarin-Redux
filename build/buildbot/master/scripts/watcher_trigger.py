@@ -110,7 +110,7 @@ def triggerBuild(build, branch='tamarin-redux'):
             if revision.find(':') != -1:
                 revision = revision[:revision.find(":")].strip()
         elif line.startswith("files:"):
-            files = line[line.find(":")+1:].strip().split()
+            files = line[line.find(":")+1:].strip()
         elif line.startswith("description:"):
             comments = "".join(s.readlines())
             if comments[-1] == "\n":

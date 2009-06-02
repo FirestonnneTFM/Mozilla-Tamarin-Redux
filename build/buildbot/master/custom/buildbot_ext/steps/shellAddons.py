@@ -424,7 +424,7 @@ class SandboxClone(BaseShellCommand):
         if len(changes) < 1:
             return SKIPPED
 
-        changefile = changes[0].files[0][1:-1] # need to trim [ and ] from the string
+        changefile = changes[0].files[0]
         f = open(self.changeDir +"/" + changefile)
         for line in f.readlines():
             if line.startswith("url:"):
