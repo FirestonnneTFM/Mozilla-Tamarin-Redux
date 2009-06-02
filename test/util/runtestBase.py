@@ -247,6 +247,7 @@ class RuntestBase:
     def parseOptions(self):
         try:
             opts, self.args = getopt(argv[1:], self.options, self.longOptions )
+            print opts
         except:
             self.usage(2)
         
@@ -335,24 +336,42 @@ class RuntestBase:
             # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
             cputype = ''
             (f,err,exitcode) = self.run_pipe('file "%s"' % (self.avm))
-            self.verbose_print('determineConfig: %s' % f[0])
-            if re.search('\(console\) 32-bit$', f[0]):
+            f = ' '.join(f)
+            self.verbose_print('determineConfig: %s' % f)
+            
+            if re.search('\(console\) 32-bit', f):
                 cputype='arm'
                 self.osName='winmobile-emulator'
-            elif re.search('(32-bit|80386|i386)', f[0]):
+            elif re.search('(Mach-O universal binary)', f):
+                # multiple architectures
+                machine = platform.machine()
+                if re.search('(x86_64|ppc64)',f):
+                    if machine == 'Power Macintosh':
+                        cputype = 'ppc64'
+                    elif machine == 'i386':
+                        cputype = 'x64'
+                elif re.search('(i386|ppc)',f):
+                    if machine == 'Power Macintosh':
+                        cputype = 'ppc'
+                    elif machine == 'i386':
+                        cputype = 'x86'
+            elif re.search('(32-bit|80386|i386)', f):
                 cputype='x86'
-            if re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f[0]):
+            elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f):
                 cputype='x64'
-            if re.search('(ppc)', f[0]):
-                cputype='ppc'
-            if re.search('(ppc64)', f[0]):
+            elif re.search('(ppc64)', f):
                 cputype='ppc64'
+            elif re.search('(ppc)', f):
+                cputype='ppc'
+                
             if cputype == '':
                 raise Exception()
                 
         except:
             try:
-                cputype={'x86':'x86','i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','':'x86'}[platform.machine()]
+                cputype={'AMD64':'x86','x86':'x86','i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','':'x86'}[platform.machine()]
+                if cputype == 'x86' and splitext(self.avm)[0][-2:] == '64':
+                    cputype == 'x64'
             except:
                 print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
                 exit(1)
