@@ -1635,23 +1635,23 @@ namespace avmplus
 				// core->codeContext = env;
 				storeIns(env_param, 0, InsConstPtr(&core->codeContextAtom));
 			}
+		}
 
-			if (!f || f->usesDefaultXmlNamespace())
+		if (!f || !f->usesDefaultXmlNamespace())
+		{
+			emitSetDxns(state);
+
+			// used to dump all functions that still say they required DXNS code
+			#if 0//def _DEBUG
+			if (f && (f->flags & MethodInfo::NATIVE))
 			{
-				emitSetDxns(state);
+				StringBuffer buffer(core);		
+				buffer << "function is:" << f->name << "\r\n";
 
-				// used to dump all functions that still say they required DXNS code
-				#if 0//def _DEBUG
-				if (f && (f->flags & MethodInfo::NATIVE))
-				{
-					StringBuffer buffer(core);		
-					buffer << "function is:" << f->name << "\r\n";
-
-					AvmDebugMsg (false, buffer.c_str());
-					//core->console << " f->
-				}
-				#endif
+				AvmDebugMsg (false, buffer.c_str());
+				//core->console << " f->
 			}
+			#endif
 		}
 	}
 
@@ -5232,7 +5232,7 @@ namespace avmplus
 
 	bool CodegenLIR::isCodeContextChanged() const
 	{
-		return pool->domain->base != NULL;
+		return !pool->isBuiltin;
 	}
 
 	/* set position of label */
