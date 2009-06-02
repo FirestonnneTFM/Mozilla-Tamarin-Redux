@@ -247,7 +247,6 @@ class RuntestBase:
     def parseOptions(self):
         try:
             opts, self.args = getopt(argv[1:], self.options, self.longOptions )
-            print opts
         except:
             self.usage(2)
         
