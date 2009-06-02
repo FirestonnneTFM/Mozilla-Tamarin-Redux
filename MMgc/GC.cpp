@@ -169,6 +169,7 @@ namespace MMgc
 		, start_time(0)
 		, start_event(NO_EVENT)
 		, collectionThreshold(256) // 4KB blocks, that is, 1MB
+		, fullCollectionQueued(false)
 	{
 	}
 	
@@ -511,12 +512,6 @@ namespace MMgc
 		MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);	
 		#endif		
 
-		{
-			GCWorkItem item;
-			MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
-			rememberedStackBottom =  (const void *)((const char *)item.ptr + item._size);
-		}
-	
 		zct.SetGC(this);
 
 		// Create all the allocators up front (not lazy)
@@ -572,7 +567,11 @@ namespace MMgc
 		// Force all objects to be destroyed
 		destroying = true;
 		ClearMarks();
-		ForceSweep();
+
+		{
+			MMGC_GCENTER(this);
+			ForceSweep();
+		}
 
 		for (int i=0; i < kNumSizeClasses; i++) {
 			delete containsPointersAllocs[i];
@@ -608,8 +607,6 @@ namespace MMgc
 
 		heapFree(pageMap);
 
-		GCAssertMsg(onThread(), "GC called from different thread!");
-		
 		delete emptyWeakRefRoot;
 		GCAssert(!m_roots);
 		GCAssert(!m_callbacks);
@@ -624,35 +621,28 @@ namespace MMgc
 		}
 
 	#ifdef MMGC_LOCKING
+		VMPI_lockDestroy(m_gcLock);
 		VMPI_lockDestroy(m_rootListLock);
 	#endif //MMGC_LOCKING
 	}
 
-	void GC::Collect()
+	void GC::Collect(bool scanStack)
 	{
-		GCAssertMsg(onThread(), "GC called from different thread!");
+		GCAssertMsg(!scanStack || onThread(), "Full collection with stack scan requested however the GC isn't associated with a thread, missing MMGC_GCENTER macro.");
 
 		if (nogc || collecting || zct.reaping) {
 			return;
 		}
-
+		
 		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
 			cb->precollection();
 
-		CollectImpl();
-
-		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-			cb->postcollection();
-	}
-
-	void GC::CollectImpl()
-	{
-		ReapZCT();
+		ReapZCT(scanStack);
 
 		if(!marking)
-			StartIncrementalMark();
+			StartIncrementalMark(scanStack);
 		if(marking)
-			FinishIncrementalMark();
+			FinishIncrementalMark(scanStack);
 
 #ifdef _DEBUG
 		// Dumping the stack trace at GC time can be very helpful with stack walk bugs
@@ -661,6 +651,11 @@ namespace MMgc
 		//DumpStackTrace();
 		FindUnmarkedPointers();
 #endif
+
+		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
+			cb->postcollection();
+			
+		policy.fullCollectionComplete();
 	}
 
 #ifdef RECURSIVE_MARK
@@ -854,7 +849,7 @@ namespace MMgc
 
 	void GC::Free(const void *item)
 	{
-		GCAssertMsg(onThread(), "GC called from different thread!");
+		GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
 
 		if(item == NULL) {
 			return;
@@ -1306,7 +1301,7 @@ bail:
     #endif
 #endif //MMGC_ARM
 
-		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)rememberedStackBottom > (char*)stackP)) {
+		if( ((char*) stackP > (char*)rememberedStackTop)) {
 			size_t amount = (char*) stackP - (char*)rememberedStackTop;
 			void *stack = alloca(amount);
 			if(stack) {
@@ -1324,18 +1319,19 @@ bail:
 	#if defined(MMGC_PPC) && defined(__GNUC__)
 	__attribute__((noinline)) 
 	#endif
-	void GC::MarkQueueAndStack(GCStack<GCWorkItem>& work)
+	void GC::MarkQueueAndStack(GCStack<GCWorkItem>& work, bool scanStack)
 	{
 		GCWorkItem item;
 
 		MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
 
 		// this is where we will clear to when CleanStack is called
-		if(rememberedStackTop == 0 || rememberedStackTop > item.ptr) {
+		if(rememberedStackTop < item.ptr) {
 			rememberedStackTop = item.ptr;
 		}
 
-		PushWorkItem(work, item);
+		if(scanStack)
+			PushWorkItem(work, item);
 		Mark(work);
 	}
 
@@ -1645,7 +1641,7 @@ bail:
 	}
 #endif // _DEBUG
 
-	void ZCT::Reap()
+	void ZCT::Reap(bool scanStack)
 	{
 		if(gc->collecting || reaping || count == 0)
 			return;
@@ -1667,7 +1663,8 @@ bail:
 		// start by pinning live stack objects
 		GCWorkItem item;
 		MMGC_GET_STACK_EXTENTS(gc, item.ptr, item._size);
-		PinStackObjects(item.ptr, item._size);
+		if(scanStack)
+			PinStackObjects(item.ptr, item._size);
 
 		GC::RCRootSegment* segment = gc->rcRootSegments;
 		while(segment)
@@ -2324,7 +2321,7 @@ bail:
 #endif
 
 
-	void GC::StartIncrementalMark()
+	void GC::StartIncrementalMark(bool scanStack)
 	{
 		policy.signal(GCPolicyManager::START_StartIncrementalMark);		// garbage collection starts
 
@@ -2367,7 +2364,7 @@ bail:
 		// FIXME (policy): arguably a bug to do this here if StartIncrementalMark has exhausted its quantum
 		// doing eager sweeping.
 
-		IncrementalMark();
+		IncrementalMark(scanStack);
 	}
 
 	// The mark stack overflow logic depends on this calling MarkItem directly 
@@ -2863,7 +2860,7 @@ bail:
 		}
 	}
 
-	void GC::IncrementalMark()
+	void GC::IncrementalMark(bool scanStack)
 	{
 		uint32_t time = incrementalValidation ? 1 : uint32_t(policy.incrementalMarkMilliseconds());
 #ifdef _DEBUG
@@ -2872,7 +2869,7 @@ bail:
 
 		SAMPLE_FRAME("[mark]", core());
 		if(m_incrementalWork.Count() == 0 || hitZeroObjects) {
-			FinishIncrementalMark();
+			FinishIncrementalMark(scanStack);
 			return;
 		} 
 		
@@ -2920,7 +2917,7 @@ bail:
 		}
 	}
 
-	void GC::FinishIncrementalMark()
+	void GC::FinishIncrementalMark(bool scanStack)
 	{
 		// Don't finish an incremental mark (i.e., sweep) if we
 		// are in the midst of a ZCT reap.
@@ -2951,7 +2948,7 @@ bail:
 		GCAssert(!m_markStackOverflow);
 		
 		MarkAllRoots(m_incrementalWork);
-		MarkQueueAndStack(m_incrementalWork);
+		MarkQueueAndStack(m_incrementalWork, scanStack);
 		
 		// Force repeated restarts and marking until we're done.  For discussion
 		// of completion, see the comments above HandleMarkStackOverflow.  Note
@@ -2964,7 +2961,7 @@ bail:
 		while (m_markStackOverflow) {
 			m_markStackOverflow = false;
 			HandleMarkStackOverflow();				// may set m_markStackOverflow
-			MarkQueueAndStack(m_incrementalWork);	//    to true again
+			MarkQueueAndStack(m_incrementalWork, scanStack);	//    to true again
 		}
 		m_incrementalWork.Clear();				// Frees any cached resources
 
@@ -3457,14 +3454,36 @@ bail:
 
  	void GC::SetStackEnter(GCAutoEnter *enter) 
 	{
- 		if(enter == NULL && stackEnter != 0) {
+		bool edge = false;
+		bool releaseThread = false;
+ 		if(enter == NULL && stackEnter != NULL) {
  			stackEnter = NULL;
-			m_gcThread = NULL;
- 		} else if(stackEnter == 0) {
+			edge = true;
+			releaseThread = true;
+ 		} else if(stackEnter == NULL) {
  			stackEnter = enter;
+			edge = true;
 			m_gcThread = VMPI_currentThread();
- 		} 
- 	}
+			VMPI_lockAcquire(m_gcLock);
+ 		}
+
+		if(edge) {
+			if(policy.queryFullCollectionQueued())
+				Collect(false);
+			else
+				ReapZCT(false);
+
+			if(!stackCleaned)
+				CleanStack();			
+		}
+
+		if(releaseThread) {
+			// cleared so we remain thread ambivalent
+			rememberedStackTop = NULL; 					
+			m_gcThread = NULL;
+			VMPI_lockRelease(m_gcLock);
+		}
+	}
  
  	void GC::memoryStatusChange(MemoryStatus, MemoryStatus to)
  	{

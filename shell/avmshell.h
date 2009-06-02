@@ -163,6 +163,7 @@ namespace avmshell
 
 	private:
 		static void singleWorker(ShellSettings& settings);
+		static void singleWorkerHelper(ShellCore* shell, ShellSettings& settings);
 #ifdef VMCFG_WORKERTHREADS
 		static void multiWorker(ShellSettings& settings);
 #endif
