@@ -39,10 +39,6 @@
 #ifndef __avmplus_NewString__
 #define __avmplus_NewString__
 
-#ifdef FEATURE_UTF32_SUPPORT
-#error This feature is scheduled for removal - do not use!
-#endif
-
 namespace avmplus 
 {
 	class ByteArray;
@@ -76,8 +72,7 @@ namespace avmplus
 	as ordinary characters. Use the createUTFxx() methods to deal with surrogate pairs and 
 	UTF-8 encoding. If the kAuto type is used during creation, a quick scan is made to
 	see if a string would fit into a narrower width than the buffer suggests, i.e. if
-	a 16-bit buffer only contains 8-bit characters. UTF-32 support needs to be enabled
-	by defining the value FEATURE_UTF32_SUPPORT in avmbuild.h.
+	a 16-bit buffer only contains 8-bit characters.
 	<p>
 	Strings cannot be deleted, since the create() methods may choose to return standard
 	string constants, or interned strings, or other strings that other code depends on.
@@ -86,11 +81,7 @@ namespace avmplus
 	{
 	public:
 
-#ifdef FEATURE_UTF32_SUPPORT
-		typedef utf32_t CharAtType;
-#else
 		typedef wchar CharAtType;
-#endif
 
 		/// String type constants.
 		enum Type
@@ -105,9 +96,6 @@ namespace avmplus
 			kAuto	= 0,	// only used in APIs
 			k8		= 1,
 			k16		= 2
-#ifdef FEATURE_UTF32_SUPPORT
-			,k32	= 4
-#endif		
 		};
 		/**
 		Use this constant to define the default width for this system. If you use anything
@@ -143,9 +131,7 @@ namespace avmplus
 												String::Width desiredWidth = String::kDefaultWidth, 
 												bool staticBuf = false, bool strict = true);
 		/**
-		Create a string using UTF-16 data. If the width is k32, and there are surrogate pairs, they
-		will be resolved. If this is not desired, use String::create() instead (only present if
-		FEATURE_UTF32_SUPPORT is defined). If the desired width is too small to fit the source data, 
+		Create a string using UTF-16 data. If the desired width is too small to fit the source data, 
 		return NULL.
 		@param	avm					the AvmCore instance to use
 		@param	buffer				the UTF-16 buffer; if NULL, assume an empty string.
@@ -157,22 +143,6 @@ namespace avmplus
 		static	Stringp				createUTF16(AvmCore* core, const wchar* buffer, int32_t len = -1, 
 												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
 
-#ifdef FEATURE_UTF32_SUPPORT
-		/**
-		Create a string using UTF-32 data. Characters > 0xFFFF are encoded into UTF-16 surrogate
-		pairs if the desired width is k16. Note that UTF-32 characters > 0x10FFFF are rejected
-		because of a possible integer overrun during comparisons. If the desired width is too 
-		small to fit the source data, return NULL.
-		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-32 buffer; if NULL, assume an empty string.
-		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
-		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
-		@param	staticBuf			if true, the buffer is static, and may be used by the string
-		@return						the String instance, or NULL if characters are too wide
-		*/
-		static	Stringp				createUTF32(AvmCore* core, const utf32_t* buffer, int32_t len = -1, 
-												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
-#endif
 		virtual						~String();
 
 		/**
@@ -351,14 +321,6 @@ namespace avmplus
 		*/
 		inline	Stringp				append16(const wchar* p) { return append(NULL, p, Length(p), k16); }
 		inline	Stringp				append16(const wchar* p, int32_t len) { return append(NULL, p, len, k16); }
-#ifdef FEATURE_UTF32_SUPPORT
-		/*
-		Append a 32-bit-wide string. Do not use character values > 0x10FFFF, since these values cannot
-		be expressed as UTF-16 surrogate pairs.
-		*/
-		inline	Stringp				append32(const utf32_t* p) { return append(NULL, p, Length(p), k32); }
-		inline	Stringp				append32(const utf32_t* p, int32_t len) { return append(NULL, p, len, k32); }
-#endif
 		/**
 		Implement String.substr(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
@@ -414,7 +376,7 @@ namespace avmplus
 		@param	unimapper			the mapping function to call
 		@return						the changed string
 		*/
-				Stringp	FASTCALL	caseChange(uint32_t(*unimapper)(uint32_t));
+				Stringp	FASTCALL	caseChange(utf32_t(*unimapper)(utf32_t));
 		/**
 		Returns a kIntegerAtom Atom if the string holds an integer that fits into
 		such an atom. For use in our ScriptObject HashTable implementation.  If we 
@@ -462,8 +424,8 @@ namespace avmplus
 				Stringp				AS3_toLowerCase();
 
 		// Useful utilities used by the core code.
-		static	wchar				wCharToUpper(wchar ch) { return (wchar) unicharToUpper((utf32_t) ch); }
-		static	wchar				wCharToLower(wchar ch) { return (wchar) unicharToLower((utf32_t) ch); }
+		static	wchar				wCharToUpper(wchar ch) { return (wchar) unicharToUpper(ch); }
+		static	wchar				wCharToLower(wchar ch) { return (wchar) unicharToLower(ch); }
 		static	utf32_t				unicharToUpper(utf32_t ch);
 		static	utf32_t				unicharToLower(utf32_t ch);
 #ifdef DEBUGGER
@@ -484,9 +446,8 @@ private:
 			union
 			{
 				void*			pv;
-				char*			p8;
+				uint8_t*		p8;
 				wchar*			p16;
-				utf32_t*		p32;
 			};
 		};
 		
@@ -594,7 +555,6 @@ private:
 				void		operator delete(void*); // unimplemented
 		static	String::CharAtType get8(Stringp s, int index);
 		static	String::CharAtType get16(Stringp s, int index);
-		static	String::CharAtType get32(Stringp s, int index);
 	};
 
 	/**
@@ -618,7 +578,6 @@ private:
 				int32_t				m_length;
 		static	void				create8 (Stringp s);
 		static	void				create16(Stringp s);
-		static	void				create32(Stringp s);
 		// do not create on the heap
 		inline	void*				operator new(size_t) throw() { return NULL; }
 		inline	void				operator delete(void*) {}		
