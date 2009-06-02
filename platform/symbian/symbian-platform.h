@@ -55,8 +55,6 @@
 #define VMPI_strtol			strtol
 #define VMPI_strstr			strstr
 
-#define VMPI_getenv			getenv
-
 #define VMPI_sprintf		sprintf
 #define VMPI_snprintf		snprintf
 

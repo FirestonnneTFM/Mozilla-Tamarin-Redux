@@ -37,6 +37,7 @@
 
 #include "avmplus.h"
 
+#include <stdlib.h>
 #include <sys/time.h>
 #include <math.h> 
 
@@ -206,4 +207,10 @@ void VMPI_setPageProtection(void *address,
   AvmAssert(retval == 0);
   (void)retval;
 #endif //!VMCFG_SYMBIAN
+}
+
+
+char *VMPI_getenv(const char *name)
+{
+	return getenv(name);
 }

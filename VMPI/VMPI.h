@@ -478,4 +478,10 @@ extern void VMPI_setupPCResolution();
 */
 extern void VMPI_desetupPCResolution();
 
+/**
+ * wrapper around getenv function, return's NULL on platforms with no env vars
+ * @return value of env var
+ */
+extern char *VMPI_getenv(const char *name);
+
 #endif /* __avmplus_VMPI__ */
