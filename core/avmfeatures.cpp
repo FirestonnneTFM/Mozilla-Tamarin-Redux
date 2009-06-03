@@ -116,9 +116,6 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_SELFTEST
     "AVMFEATURE_SELFTEST;"
   #endif
-  #if AVMFEATURE_UTF32
-    "AVMFEATURE_UTF32;"
-  #endif
   #if AVMFEATURE_EVAL
     "AVMFEATURE_EVAL;"
   #endif

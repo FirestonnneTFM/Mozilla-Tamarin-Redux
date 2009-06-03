@@ -95,8 +95,6 @@
 #undef AVMPLUS_DIRECT_THREADED
 #undef VMCFG_SELFTEST
 #undef AVMPLUS_SELFTEST
-#undef VMCFG_UTF32
-#undef FEATURE_UTF32_SUPPORT
 #undef VMCFG_EVAL
 #undef AVMPLUS_JIT_READONLY
 #undef MMGC_LOCKING
@@ -343,18 +341,6 @@
 #endif
 
 
-/* AVMFEATURE_UTF32
- *
- * Select support for 32 bit strings. If disabled, only 8 and 16 bits strings are supported. 
- * If enabled, string can be 32 bits internally, and the String method createUTF32() is defined, 
- * which also takes care of surrogate pairs, and createUTF16() converts surrogate pairs to UTF-32 
- * if the desired string width is 32 bits.
- */
-#if !defined AVMFEATURE_UTF32 || AVMFEATURE_UTF32 != 0 && AVMFEATURE_UTF32 != 1
-#  error "AVMFEATURE_UTF32 must be defined and 0 or 1 (only)."
-#endif
-
-
 /* AVMFEATURE_EVAL
  *
  * Select support for the AS3 run-time compiler.  NOT RECOMMENDED.  The run-time compiler
@@ -533,7 +519,6 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
-
 
 
 
@@ -719,12 +704,6 @@
 #endif
 #if AVMFEATURE_SELFTEST
 #  define AVMPLUS_SELFTEST
-#endif
-#if AVMFEATURE_UTF32
-#  define VMCFG_UTF32
-#endif
-#if AVMFEATURE_UTF32
-#  define FEATURE_UTF32_SUPPORT
 #endif
 #if AVMFEATURE_EVAL
 #  define VMCFG_EVAL

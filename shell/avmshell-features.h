@@ -103,10 +103,6 @@
   #define AVMFEATURE_SELFTEST          0
 #endif
 
-#ifndef AVMFEATURE_UTF32
-  #define AVMFEATURE_UTF32             0
-#endif
-
 // https://bugzilla.mozilla.org/show_bug.cgi?id=491866
 // eval is causing insteresting compilation errors that appear
 // to be caused by a compiler bug.

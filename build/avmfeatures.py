@@ -61,8 +61,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_THREADED_INTERP=1 "
     if o.getBoolArg("selftest"):
         args += "-DAVMFEATURE_SELFTEST=1 "
-    if o.getBoolArg("utf32"):
-        args += "-DAVMFEATURE_UTF32=1 "
     if o.getBoolArg("eval"):
         args += "-DAVMFEATURE_EVAL=1 "
     if o.getBoolArg("protect-jitmem"):

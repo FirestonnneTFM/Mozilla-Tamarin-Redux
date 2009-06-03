@@ -408,17 +408,6 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc> Select support for 32 bit strings. If disabled, only 8 and 16 bits strings are supported. 
-	       If enabled, string can be 32 bits internally, and the String method createUTF32() is defined, 
-		   which also takes care of surrogate pairs, and createUTF16() converts surrogate pairs to UTF-32 
-           if the desired string width is 32 bits.  </desc>
-
-    <name> AVMFEATURE_UTF32 </name>
-	<defines> VMCFG_UTF32 </defines>
-	<defines> FEATURE_UTF32_SUPPORT </defines>  <!-- FIXME: legacy name -->
-  </feature>
-
-  <feature>
     <desc> Select support for the AS3 run-time compiler.  NOT RECOMMENDED.  The run-time compiler
            is still undergoing development.  </desc>
 
