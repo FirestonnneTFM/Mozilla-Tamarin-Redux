@@ -205,11 +205,6 @@ namespace MMgc
 		 */
 		virtual void postsweep() {}
 
-		/**
-		 * This method is called whenever the collector decides to expand the heap
-		 */
-		virtual void heapgrew() {}
-
 		// called before a ZCT reap begins
 		virtual void prereap() {}
 
@@ -217,26 +212,9 @@ namespace MMgc
 		virtual void postreap() {}
 
 		/**
-		 * This callback is the first thing a stop-the-world collection calls.
-		 */
-		virtual void precollection() {}
-
-		/**
-		 * This callback is the last thing a stop-the-world collection calls.
-		 */
-		virtual void postcollection() {}
-
-		/**
 		 * This method is called before an RC object is reaped
 		 */
 		virtual void prereap(void* /*rcobj*/) {}
-
-		/**
-		 * Called at the top of StartIncrementalMark
-		 */
-		virtual void premark() {}
-
-		virtual void log(const char* /*str*/) {}
 
 	private:
 		GC *gc;
