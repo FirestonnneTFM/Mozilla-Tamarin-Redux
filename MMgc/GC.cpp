@@ -634,9 +634,6 @@ namespace MMgc
 			return;
 		}
 		
-		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-			cb->precollection();
-
 		ReapZCT(scanStack);
 
 		if(!marking)
@@ -651,9 +648,6 @@ namespace MMgc
 		//DumpStackTrace();
 		FindUnmarkedPointers();
 #endif
-
-		for (GCCallback *cb = m_callbacks; cb; cb = cb->nextCB)
-			cb->postcollection();
 			
 		policy.fullCollectionComplete();
 	}
@@ -1901,8 +1895,7 @@ bail:
 
 		GCAssert(VMPI_strlen(buf) < 4096);
 
-		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
-			cb->log(buf);
+		VMPI_log(buf);
 
 		// log gross stats any time anything interesting happens
 		static bool ingclog=false;
@@ -2324,10 +2317,6 @@ bail:
 	void GC::StartIncrementalMark(bool scanStack)
 	{
 		policy.signal(GCPolicyManager::START_StartIncrementalMark);		// garbage collection starts
-
-		// call premark on all callbacks
-		for (GCCallback* cb = m_callbacks; cb; cb = cb->nextCB)
-			cb->premark();
 		
 		GCAssert(!marking);
 		GCAssert(!collecting);
