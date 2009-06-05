@@ -48,6 +48,13 @@
 // would return a wrong number.
 #define TSTR_MAX_CHARSLEFT ((uint32_t)TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT >> 1)
 
+// This is the maximum value of extra bytes to allocate during a
+// string concatenation operation if PleaseAlloc() fails. The number
+// is quite small to not kill the app just because of a large extra 
+// chunk of RAM being allocated just in case there are more concatenation 
+// operations.
+#define TSTR_MAX_LOMEM_EXTRABYTES 16384
+
 using namespace MMgc;
 
 namespace avmplus
@@ -136,20 +143,29 @@ namespace avmplus
 		AvmAssert(kAuto != w);
 		AvmAssert(len >= 0);
 
-		MMGC_MEM_TAG( "String: Dynamic" );
 		
 		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
 		int32_t alloc = len + extra;
 		if (alloc < 1) alloc = 1;
-		// TBD: Use PleaseAlloc(), and if you get NULL, lower the "extra" value to a maximum
-		// still to be defined, and retry using Alloc()
-		void* buffer = gc->Alloc(alloc * w, 0);
+
+		// First, use PleaseAlloc(), and if the call fails, reduce the amount of extra data
+		// to TSTR_MAX_EXTRA_BYTES_IN_LOW_MEMORY and do an Alloc(), which may fail.
+		MMGC_MEM_TAG( "String: Dynamic buffer" );
+		void* buffer = gc->PleaseAlloc(alloc * w, 0);
+		if (buffer == NULL)
+		{
+			if (extra > (TSTR_MAX_LOMEM_EXTRABYTES / w))
+				extra = TSTR_MAX_LOMEM_EXTRABYTES / w;
+			alloc = len + extra;
+			buffer = gc->Alloc(alloc * w, 0);
+		}
 
 		int32_t bufLen = (int32_t) (GC::Size (buffer) / w);
 		int32_t charsLeft = bufLen - len;
 		// the extra character must not exceed the available field size
 		AvmAssert(charsLeft <= int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT));
 
+		MMGC_MEM_TAG( "String: Dynamic" );
 		Stringp s = new(gc)
 					String(len, w 
 						   | (kDynamic  << TSTR_TYPE_SHIFT)
