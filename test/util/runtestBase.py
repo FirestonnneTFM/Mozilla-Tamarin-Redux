@@ -149,6 +149,7 @@ class RuntestBase:
         self.setOptions()
         self.parseOptions()
         self.setTimestamp()
+        self.checkPath()
         if re.search('(_arm.exe|_arm_d.exe|Windows Mobile)',self.avm)!=None:
             self.config='arm-winmobile-emulator-tvm'
         if not self.config:
@@ -298,6 +299,24 @@ class RuntestBase:
                 self.show_time = True
         return opts
                 
+    def checkPath(self):
+        '''Check to see if running using windows python and if so, convert any cygwin paths to win paths'''
+        if platform.system() == 'Windows':
+            def convertFromCygwin(cygpath):
+                if cygpath[:9] == '/cygdrive':
+                    cygpath = '%s:/%s' % (cygpath[10],cygpath[11:])
+                return cygpath
+            
+            selfVarsToCheck = ['avm','asc','builtinabc','shellabc']
+            for var in selfVarsToCheck:
+                setattr(self, var, convertFromCygwin(getattr(self,var)))
+                
+            newargs = []
+            for t in self.args:
+                newargs.append(convertFromCygwin(t))
+            self.args = newargs
+            
+    
     def setTimestamp(self):
         if self.timestamps:
             # get the start time
@@ -470,8 +489,6 @@ class RuntestBase:
     def run_pipe(self, cmd):
         if self.debug:
             print('cmd: %s' % cmd)
-        if sys.platform=='win32':
-            cmd=cmd.replace('/','\\')
         self.verbose_print('executing: %s' % cmd)
         try:
             p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
