@@ -103,7 +103,7 @@ namespace avmplus
 		
 		void fixReplaceLastIndex(const char *src,
 								 int subjectLength,
-								 int lastIndex,
+								 int matchLen,
 								 int& newLastIndex,
 								 StringBuffer& resultBuffer);
 

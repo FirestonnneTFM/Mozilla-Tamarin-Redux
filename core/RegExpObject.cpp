@@ -553,7 +553,7 @@ namespace avmplus
 			// prevents infinite looping in certain cases
 			fixReplaceLastIndex(src,
 								subjectLength,
-								lastIndex,
+								matchLen,
 								newLastIndex,
 								resultBuffer);
 
@@ -632,7 +632,7 @@ namespace avmplus
 			// prevents infinite looping in certain cases
 			fixReplaceLastIndex(src,
 								subjectLength,
-								lastIndex,
+								matchLen,
 								newLastIndex,
 								resultBuffer);
 
@@ -653,23 +653,23 @@ namespace avmplus
 
 	void RegExpObject::fixReplaceLastIndex(const char *src,
 										   int subjectLength,
-										   int lastIndex,
+										   int matchLen,
 										   int& newLastIndex,
 										   StringBuffer& resultBuffer)
 	{
-		if (lastIndex == newLastIndex && get_global())
+		if (matchLen == 0 && get_global())
 		{
 			// Advance one character
-			if (lastIndex < subjectLength)
+			if (newLastIndex < subjectLength)
 			{
 				uint32 ch;
-				int n = UnicodeUtils::Utf8ToUcs4((const uint8*)src+lastIndex, subjectLength-lastIndex, &ch);
+				int n = UnicodeUtils::Utf8ToUcs4((const uint8*)src+newLastIndex, subjectLength-newLastIndex, &ch);
 				if (n <= 0)
 				{
 					// Invalid UTF8 sequence, advance one byte
 					n = 1;
 				}
-				resultBuffer.write(src+lastIndex, n);
+				resultBuffer.write(src+newLastIndex, n);
 				newLastIndex += n;
 			}
 			else
