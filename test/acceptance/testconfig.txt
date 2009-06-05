@@ -74,6 +74,9 @@ abcasm/funcRedef , .* , expectedfail , Error 1107 is correct output
 # Test not ready for prime-time
 abcasm/stringEscapes , .* , skip,
 abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=491056
+# Bug 496643 - x64 smoke test failures
+abcasm/mops, x64-win.*, expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=496643
+abcasm/coverage/I, ppc64-mac.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=496643
 # Take coverage tests offline: need to analyze failures on tryserver
 abcasm/coverage/B:not uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
 abcasm/coverage/B:int or uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924

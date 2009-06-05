@@ -373,14 +373,14 @@ class RuntestBase:
                         cputype = 'ppc'
                     elif machine == 'i386':
                         cputype = 'x86'
-            elif re.search('(32-bit|80386|i386)', f):
-                cputype='x86'
-            elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f):
-                cputype='x64'
             elif re.search('(ppc64)', f):
                 cputype='ppc64'
             elif re.search('(ppc)', f):
                 cputype='ppc'
+            elif re.search('(32-bit|80386|i386)', f):
+                cputype='x86'
+            elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f):
+                cputype='x64'
                 
             if cputype == '':
                 raise Exception()
