@@ -127,7 +127,7 @@ namespace avmplus
 		AvmAssert(len >= 0);
 		// master cannot be a dependent string
 		AvmAssert(kDependent != master->getType());
-		MMGC_MEM_TAG( "String: Dependent" );
+		MMGC_MEM_TAG( "Strings" );
 		Stringp s = new(gc)
 					String(len, (master->m_bitsAndFlags & TSTR_WIDTH_MASK) | (kDependent << TSTR_TYPE_SHIFT));
 		WBRC( gc, s, &s->m_master, master );
@@ -143,20 +143,24 @@ namespace avmplus
 		AvmAssert(kAuto != w);
 		AvmAssert(len >= 0);
 
-		
 		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
 		int32_t alloc = len + extra;
 		if (alloc < 1) alloc = 1;
 
+		MMGC_MEM_TAG( "Strings" );
+		Stringp s = new(gc)
+					String(len, w | (kDynamic  << TSTR_TYPE_SHIFT));
+
 		// First, use PleaseAlloc(), and if the call fails, reduce the amount of extra data
 		// to TSTR_MAX_EXTRA_BYTES_IN_LOW_MEMORY and do an Alloc(), which may fail.
-		MMGC_MEM_TAG( "String: Dynamic buffer" );
+		MMGC_MEM_TYPE( s );
 		void* buffer = gc->PleaseAlloc(alloc * w, 0);
 		if (buffer == NULL)
 		{
 			if (extra > (TSTR_MAX_LOMEM_EXTRABYTES / w))
 				extra = TSTR_MAX_LOMEM_EXTRABYTES / w;
 			alloc = len + extra;
+			MMGC_MEM_TYPE( s );
 			buffer = gc->Alloc(alloc * w, 0);
 		}
 
@@ -165,12 +169,8 @@ namespace avmplus
 		// the extra character must not exceed the available field size
 		AvmAssert(charsLeft <= int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT));
 
-		MMGC_MEM_TAG( "String: Dynamic" );
-		Stringp s = new(gc)
-					String(len, w 
-						   | (kDynamic  << TSTR_TYPE_SHIFT)
-						   | (charsLeft << TSTR_CHARSLEFT_SHIFT));
 		WB(gc, s, &s->m_buffer.pv, buffer);
+		s->setCharsLeft(charsLeft);
 
 		if (data != NULL && len != 0)
 			VMPI_memcpy(buffer, data, size_t(len * w));
@@ -193,7 +193,7 @@ namespace avmplus
 	{
 		AvmAssert(kAuto != w);
 		AvmAssert(len >= 0);
-		MMGC_MEM_TAG( "String: Static" );
+		MMGC_MEM_TAG( "Strings" );
 		Stringp s = new(gc)
 					String(len, w | (kStatic << TSTR_TYPE_SHIFT));
 		// static data - no WB() needed
@@ -304,6 +304,7 @@ namespace avmplus
 		{
 			int32_t bytes = length() * getWidth();
 			GC* gc = GC::GetGC(this);
+			MMGC_MEM_TYPE( this );
 			void* buf = gc->Alloc(bytes, 0);
 			VMPI_memcpy(buf, m_buffer.pv, bytes);
 			WB(gc, this, m_buffer.pv, buf);
