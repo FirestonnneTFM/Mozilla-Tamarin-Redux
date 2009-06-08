@@ -581,12 +581,12 @@ range_error:
 				default:
 				{
 					Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
-					r = getTraits(Multiname(base->ns(), fullname), toplevel);
+					r = param_traits->pool->getTraits(Multiname(base->ns(), fullname), toplevel);
 
 					if (!r)
 					{
 						r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
-						core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns(), r);
+						param_traits->pool->domain->addNamedTrait(fullname, base->ns(), r);
 					}
 					break;
 				}

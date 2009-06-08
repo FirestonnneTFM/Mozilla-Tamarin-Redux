@@ -469,10 +469,11 @@ namespace avmplus
 			return toplevel()->uintVectorClass->atom();
 
 		Traits* param_traits = so->vtable->ivtable->traits;
-		Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
 
-		if (!instantiated_types->contains(fullname->atom()))
+		if (!instantiated_types->contains(type))
 		{
+			Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
+
 			VTable* vtab = this->vtable->newParameterizedVTable(param_traits, fullname);
 
 			ObjectVectorClass* new_type = new (vtab->gc(), vtab->getExtraSize()) ObjectVectorClass(vtab);
@@ -481,9 +482,9 @@ namespace avmplus
 
 			// Is this right?  Should each instantiation get its own prototype?
 			new_type->prototype = toplevel()->objectVectorClass->prototype;
-			instantiated_types->add(fullname->atom(), new_type->atom());
+			instantiated_types->add(type, new_type->atom());
 		}
-		return (Atom)instantiated_types->get(fullname->atom());
+		return (Atom)instantiated_types->get(type);
 	}
 
 
