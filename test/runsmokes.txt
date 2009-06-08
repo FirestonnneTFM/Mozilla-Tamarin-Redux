@@ -53,6 +53,9 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
+# Bug https://bugzilla.mozilla.org/show_bug.cgi?id=496633
+cd acceptance;${py} ./runtests.py --nohtml --avm=${avmrd} regress/vector_domain_bug.as
+
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=491489
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} --vmargs="-Dinterp" abcasm/coverage
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=494016
