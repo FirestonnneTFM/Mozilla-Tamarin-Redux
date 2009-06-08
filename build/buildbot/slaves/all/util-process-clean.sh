@@ -53,7 +53,11 @@ do
     prevPID=-0
     while [ 1 ]
     do
-        if [[ `uname` == *CYGWIN* ]]; then
+        if [[ `uname` == *-WOW64* ]]; then
+            # If running on win64 make sure to install plist from 
+            # http://technet.microsoft.com/en-us/sysinternals/bb896682.aspx
+            PID=`pslist ${process} | tail -1 | awk '{print $2}'`
+        elif [[ `uname` == *CYGWIN* ]]; then
             PID=`ps -aW | grep "${process}" | grep -v grep | grep -v ps |\
                  tail -1 | awk '{print $1}'`
         else
@@ -76,7 +80,13 @@ do
             echo "buildbot_status: WARNINGS"
             echo
 
-            if [[ `uname` == *CYGWIN* ]]; then
+            if [[ `uname` == *-WOW64* ]]; then
+                echo "`pslist $PID`"
+                # bash: kill: (####) - No such process" error using kill 
+                # command in Cygwin
+                # http://www-01.ibm.com/support/docview.wss?uid=swg21205470
+                /bin/kill -f $PID
+            elif [[ `uname` == *CYGWIN* ]]; then
                 echo "`ps -W -p $PID`"
                 # bash: kill: (####) - No such process" error using kill 
                 # command in Cygwin
