@@ -555,12 +555,12 @@ namespace avmplus
 #ifdef DEBUGGER
 	void MethodEnv::debugEnter(	Traits** frameTraits, 
 								CallStackNode* callstack,
-								Atom* framep, 
+								FramePtr framep, 
 								volatile sintptr *eip)
 	{
 		AvmAssert(this != 0);
 		AvmAssert(callstack != 0); 
-		callstack->init(this, framep, frameTraits, eip, /*boxed*/false);		
+		callstack->init(this, framep, frameTraits, eip);		
 		debugEnterInner();
 	}
 	
@@ -1711,7 +1711,8 @@ namespace avmplus
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setsuper slot " << vtable->traits << " " << multiname->name << "\n";
 			#endif
-			AvmCore::atomToScriptObject(obj)->setSlotAtom(AvmCore::bindingToSlotId(b), value);
+			// @todo, this does a redundant coercion -- no harm done, just slightly more work than necessary
+			AvmCore::atomToScriptObject(obj)->coerceAndSetSlotAtom(AvmCore::bindingToSlotId(b), value);
             return;
 
 		case BKIND_SET: 
@@ -1980,31 +1981,6 @@ namespace avmplus
 			toplevel()->throwTypeError(kDescendentsError, core()->toErrorString(toplevel()->toTraits(obj)));
 			return undefinedAtom; // not reached
 		}
-	}
-
-	Atom MethodEnv::getdescendantslate(Atom obj, Atom index, bool attr)
-	{
-		if (AvmCore::isObject(index))
-		{
-			ScriptObject* i = AvmCore::atomToScriptObject(index);
-			if (i->traits() == core()->traits.qName_itraits)
-			{
-				QNameObject* qname = (QNameObject*) i;
-				Multiname n2;
-				qname->getMultiname(n2);
-				if (attr)
-					n2.setAttr(attr);
-				return getdescendants(obj, &n2);
-			}
-		}
-
-		// convert index to string
-
-		AvmCore* core = this->core();
-		Multiname name(core->publicNamespace, core->intern(index));
-		if (attr)
-			name.setAttr();
-		return getdescendants(obj, &name);
 	}
 
 	void MethodEnv::checkfilter(Atom obj)

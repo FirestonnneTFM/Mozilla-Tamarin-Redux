@@ -280,6 +280,7 @@ extern AvmBox shell_toplevel_i2a_oi_opti2_thunk(AvmMethodEnv env, uint32_t argc,
 #define flash_trace_Trace_getLevel_thunk  shell_toplevel_i2a_oi_opti2_thunk
 
 extern AvmBox shell_toplevel_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define avmplus_Domain_domainMemory_set_thunk  shell_toplevel_v2a_oo_thunk
 #define avmplus_System_trace_thunk  shell_toplevel_v2a_oo_thunk
 #define avmplus_Domain_private_init_thunk  shell_toplevel_v2a_oo_thunk
 
@@ -311,6 +312,5 @@ extern double shell_toplevel_func_d2d_oaou_thunk(AvmMethodEnv env, uint32_t argc
 extern AvmBox shell_toplevel_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_JObject_toArray_thunk  shell_toplevel_a2a_oo_thunk
 #define avmplus_Domain_loadBytes_thunk  shell_toplevel_a2a_oo_thunk
-#define avmplus_Domain_domainMemory_set_thunk  shell_toplevel_a2a_oo_thunk
 #define flash_trace_Trace_setListener_thunk  shell_toplevel_a2a_oo_thunk
 

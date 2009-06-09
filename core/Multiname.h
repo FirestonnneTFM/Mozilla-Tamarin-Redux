@@ -65,13 +65,14 @@ namespace avmplus
 		friend class CodegenLIR;
 		#endif 
 		friend class HeapMultiname;
-		int flags;
+
 		Stringp name;
 		union
 		{
 			Namespacep ns;
 			NamespaceSetp nsset;
 		};
+		int flags;
 		uint32 next_index;
 
 	public:
@@ -150,7 +151,14 @@ namespace avmplus
 			this->next_index = index;
 		}
 
-		Multiname();
+		inline Multiname()
+		{
+			this->name = NULL;
+			this->ns = NULL;
+			this->flags = 0;
+			this->next_index = 0;
+		}
+
 
 		Multiname(NamespaceSetp nsset);
 
@@ -162,11 +170,11 @@ namespace avmplus
 
 		Multiname(Namespacep ns, Stringp name, bool qualified=false);
 
-		~Multiname()
+		inline ~Multiname()
 		{
-			flags = 0;
 			name = NULL;
 			nsset = NULL;
+			flags = 0;
 			next_index = 0;
 		}
 

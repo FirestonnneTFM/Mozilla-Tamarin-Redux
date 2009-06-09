@@ -1030,6 +1030,22 @@ const int kBufferPadding = 16;
 			#endif
 		}
 
+	private:
+		static const int k_atomDoesNotNeedCoerce_Masks[8];
+	
+	public:
+		// note, return of true means we definitely DO NOT need a coerce, 
+		// but return of false still means we *might* need to (ie, negating the result of this function 
+		// isn't "needscoerce")
+		inline static bool atomDoesNotNeedCoerce(Atom a, BuiltinType bt)
+		{
+			// cheat and use "kUnusedAtomTag" for all null values (streamlines the test)
+			AvmAssert(atomKind(a) != kUnusedAtomTag);
+			const int kind = isNull(a) ? kUnusedAtomTag : atomKind(a);
+			return ((1<<bt) & k_atomDoesNotNeedCoerce_Masks[kind]) != 0;
+		}
+		
+
 		/**
 		 * this is the implementation of the actionscript "is" operator.  similar to java's
 		 * instanceof.  returns true/false according to AS rules.  in particular, it will return

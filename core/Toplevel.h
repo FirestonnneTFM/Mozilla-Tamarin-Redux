@@ -217,7 +217,24 @@ namespace avmplus
 		 * @throws Exception if the value is not in the type's value
 		 *                   set.
 		 */
-		Atom coerce(Atom atom, Traits* expected) const;
+	private:
+		Atom coerceImpl(Atom atom, Traits* expected) const;
+
+	public:
+		inline Atom coerce(Atom atom, Traits* expected) const
+		{
+			// do a couple of quick checks to see if we can bail early, since it's often the case
+			// that the type is already what we expect (and we can determine that quickly
+			// by checks against the Traits BuiltinType)
+			if (!expected)
+				return atom;
+
+			if (AvmCore::atomDoesNotNeedCoerce(atom, BuiltinType(expected->builtinType)))
+				return atom;
+
+			return coerceImpl(atom, expected);
+		}
+
 		void coerceobj(ScriptObject* obj, Traits* expected) const;
 
 		/**

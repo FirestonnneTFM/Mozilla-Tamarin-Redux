@@ -609,6 +609,14 @@ namespace avmplus
 			toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
 	}
 
+	// using VMPI_memset to clear an atom range to zero is not really right and will generate assertions in Box
+	// code. Let's set it to what we really want, a nullObjectAtom.
+	static void nullAtomRange(Atom* a, size_t count)
+	{
+		while (count--)
+			*a++ = nullObjectAtom;
+	}
+
 	void ObjectVectorObject::set_length(uint32 newLength)
 	{
 		if (newLength > m_length)
@@ -623,7 +631,7 @@ namespace avmplus
 			if( m_fixed )
 				toplevel()->throwRangeError(kVectorFixedError);
 
-			VMPI_memset(m_array+newLength, 0, (m_length-newLength)*sizeof(Atom));
+			nullAtomRange(m_array+newLength, (m_length-newLength));
 			//_spliceHelper (newLength, 0, (m_length - newLength), 0, 0);
 		}
 		m_length = newLength;
@@ -647,7 +655,8 @@ namespace avmplus
 				newCapacity = newCapacity + (newCapacity >>2);
 			//newCapacity = ((newCapacity+kGrowthIncr)/kGrowthIncr)*kGrowthIncr;
 			GC* gc = GC::GetGC(this);
-			Atom* newArray = (Atom*) gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+			Atom* newArray = (Atom*) gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers);
+			nullAtomRange(newArray, newCapacity);
 			Atom* oldAtoms = m_array;
 			if (!newArray)
 			{
@@ -656,7 +665,7 @@ namespace avmplus
 			if (m_array)
 			{
 				VMPI_memcpy(newArray, m_array, m_length * sizeof(Atom));
-				VMPI_memset(oldAtoms, 0, m_length*sizeof(Atom));
+				nullAtomRange(oldAtoms, m_length);
 				gc->Free(oldAtoms);
 			}
 			m_array = newArray;
@@ -686,15 +695,15 @@ namespace avmplus
 
 			// shift elements down
 			int toMove = m_length - insertPoint - deleteCount;
-			VMPI_memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
+			VMPI_memmove(arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
 
-			VMPI_memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(Atom));
+			nullAtomRange(arr + m_length - numberBeingDeleted, numberBeingDeleted);
 		}
 		else if (l_shiftAmount > 0)
 		{
-			VMPI_memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
+			VMPI_memmove(arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
 			//clear for gc purposes
-			VMPI_memset (arr + insertPoint, 0, l_shiftAmount * sizeof(Atom));
+			nullAtomRange(arr + insertPoint, l_shiftAmount);
 		}
 
 		set_length(m_length + l_shiftAmount);
@@ -748,9 +757,9 @@ namespace avmplus
 				toplevel()->throwRangeError(kVectorFixedError);
 			grow (m_length + argc);
 			Atom *arr = m_array;
-			VMPI_memmove (arr + argc, arr, m_length * sizeof(Atom));
+			VMPI_memmove(arr + argc, arr, m_length * sizeof(Atom));
 			// clear moved element for RC purposes
-			VMPI_memset (arr, 0, argc * sizeof(Atom));
+			nullAtomRange(arr, argc);
 			m_length += argc;
 			for(int i=0; i<argc; i++) {
 				_setUintProperty(i, argv[i]);

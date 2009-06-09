@@ -207,7 +207,8 @@ namespace avmplus
 		MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits);
 #endif
 
-		static uintptr_t verifyEnter(MethodEnv* env, int argc, uint32* ap);
+		static uintptr_t verifyEnterGPR(MethodEnv* env, int argc, uint32* ap);
+		static double verifyEnterFPR(MethodEnv* env, int argc, uint32* ap);
 
 		inline uintptr_t iid() const { return ((uintptr_t)this)>>3; }
 
@@ -226,8 +227,8 @@ namespace avmplus
 		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
-		void boxLocals(void* src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length);
-		void unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length);
+		void boxLocals(FramePtr src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length);
+		void unboxLocals(const Atom* src, int srcPos, Traits** traitArr, FramePtr dest, int destPos, int length);
 
 		void setFile(AbcFile* file);
 		void setRegName(int index, Stringp name);

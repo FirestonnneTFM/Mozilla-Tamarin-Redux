@@ -719,7 +719,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (isString(lhs) && isString(rhs))
         {
             // string compare. todo optimize!
-			return *string(lhs) < *string(rhs) ? trueAtom : falseAtom;
+			// we already know they are strings, call atomToString() rather than string()
+			return *atomToString(lhs) < *atomToString(rhs) ? trueAtom : falseAtom;
         }
 
 		// numeric compare
@@ -1927,39 +1928,42 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
+	// check for the easy cases with bitmasks
+	/*static*/ const int AvmCore::k_atomDoesNotNeedCoerce_Masks[8] = 
+	{
+		(1<<BUILTIN_null),																	// kUnusedAtomTag -- recycle for null checking
+		(1<<BUILTIN_object),																// kObjectType
+		(1<<BUILTIN_string) | (1<<BUILTIN_object),											// kStringType
+		(1<<BUILTIN_namespace) | (1<<BUILTIN_object),										// kNamespaceType
+		(1<<BUILTIN_void),																	// kSpecialType
+		(1<<BUILTIN_boolean) | (1<<BUILTIN_object),											// kBooleanType
+		(1<<BUILTIN_number) | (1<<BUILTIN_object),											// kIntegerType
+		(1<<BUILTIN_number) | (1<<BUILTIN_object)											// kDoubleType
+	};
+		
     /*static*/ bool AvmCore::istype(Atom atom, Traits* itraits)
     {
 		if (!itraits)
 			return true;
 		
 		const int bt = itraits->builtinType;
+
+		// conceptually, this is atomDoesNotNeedCoerce() inlined, so we don't have to 
+		// re-grab bt and kind
 		
 		// cheat and use "kUnusedAtomTag" for all null values (streamlines the test)
 		AvmAssert(atomKind(atom) != kUnusedAtomTag);
 		const int kind = isNull(atom) ? kUnusedAtomTag : atomKind(atom);
 
-		// check for the easy cases with bitmasks
-		static const int kBTMasks[8] = 
-		{
-			(1<<BUILTIN_null),								// kUnusedAtomTag -- recycle for null checking
-			(1<<BUILTIN_object),							// kObjectType
-			(1<<BUILTIN_string) | (1<<BUILTIN_object),		// kStringType
-			(1<<BUILTIN_namespace) | (1<<BUILTIN_object),	// kNamespaceType
-			(1<<BUILTIN_void),								// kSpecialType
-			(1<<BUILTIN_boolean) | (1<<BUILTIN_object),		// kBooleanType
-			(1<<BUILTIN_number) | (1<<BUILTIN_object),		// kIntegerType
-			(1<<BUILTIN_number) | (1<<BUILTIN_object)		// kDoubleType
-		};
-		
-		if ((1<<bt) & kBTMasks[kind])
+		if ((1<<bt) & k_atomDoesNotNeedCoerce_Masks[kind])
 			return true;
-		
+
 		// repeated if-else is better than switch here
 		if (kind == kObjectType)
 		{
 			return atomToScriptObject(atom)->traits()->containsInterface(itraits);
 		}
-
+		
 		if (kind == kIntegerType)
 		{
 			// ISSUE need special support for number value ranges
@@ -2641,7 +2645,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 			default:
 			case kObjectType:
-				if (isXML(arg) || isXMLList(arg))
+				if (isXMLorXMLList(arg))
 				{
 					return kxml;
 				}
@@ -2650,10 +2654,10 @@ return the result of the comparison ToPrimitive(x) == y.
 					return kfunction; // No special type code for functions, but we need to
 									//  special case to return 'function' here.
 				}
-				else
-				{
-					return kobject;
-				}
+				// else fall thru and return kobject
+
+			case kNamespaceType:
+				return kobject;
 
 			case kBooleanType:
 				return kboolean;
@@ -2668,8 +2672,6 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kStringType:
 				return kstring;
 
-			case kNamespaceType:
-				return kobject;
 			}
 		}
 		else

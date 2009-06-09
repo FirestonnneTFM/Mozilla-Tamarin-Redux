@@ -83,12 +83,17 @@ namespace avmplus
 	class CallStackNode
 	{
 	public:
-
+		
+		// Note that the framep you hand to CallStackNode 
+		// varies depending on whether the Method
+		// in question is jitted or interped: if jitted, framep points
+		// to a series of 8-byte native values. if interped, framep
+		// points to a series of Atom. 
+		
 		void init(MethodEnv*				env
-					, Atom*					framep
+					, FramePtr				framep
 					, Traits**				frameTraits
 					, intptr_t volatile*	eip
-				    , bool                  boxed
 				);
 
 		void init(AvmCore* core, Stringp name);
@@ -98,20 +103,14 @@ namespace avmplus
 		 * the CallStackNode representing the previous call stack
 		 * must be specified.  The source file and line number
 		 * will be unset, initially.
-		 * @param info the currently executing method
-		 * @param next the CallStackNode representing the previous
-		 *             call stack
-		 * @param  ap  the arguments pointer.  This is an Atom* if
-		 *             'boxed' is true, and an uint32_t* otherwise.
 		 */
 		inline explicit CallStackNode(MethodEnv*				env
-										, Atom*					framep
+										, FramePtr				framep
 										, Traits**				frameTraits
 										, intptr_t volatile*	eip
-									    , bool                  boxed = false
 								)
 		{
-			init(env, framep, frameTraits, eip, boxed);
+			init(env, framep, frameTraits, eip);
 		}
 
 		// ctor used only for Sampling (no MethodEnv)
@@ -152,10 +151,9 @@ namespace avmplus
 
 		inline intptr_t volatile* eip() const { return m_eip; }
 		inline Stringp filename() const { return m_filename; }
-		inline Atom* framep() const { return m_framep; }
+		inline FramePtr framep() const { return m_framep; }
 		inline Traits** traits() const { return m_traits; }
 		inline int32_t linenum() const { return m_linenum; }
-		inline bool boxed() const { return m_boxed; }
 
 		inline void set_filename(Stringp s) { m_filename = s; }
 		inline void set_linenum(int32_t i) { m_linenum = i; }
@@ -178,10 +176,9 @@ namespace avmplus
 	private:	int32_t				m_depth;
 	private:	intptr_t volatile*	m_eip;			// ptr to where the current pc is stored
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
-	private:	Atom*				m_framep;		// pointer to top of AS registers
+	private:	FramePtr			m_framep;		// pointer to top of AS registers
 	private:	Traits**			m_traits;		// array of traits for AS registers
 	private:	int32_t				m_linenum;
-	private:	bool				m_boxed;
 	// ------------------------ DATA SECTION END
 	};
 

@@ -43,10 +43,9 @@ namespace avmplus
 #ifdef DEBUGGER
 	void CallStackNode::init(
 					MethodEnv*				env
-					, Atom*					framep
+					, FramePtr				framep
 					, Traits**				frameTraits
 					, intptr_t volatile*	eip
-					, bool                  boxed
 			)
 	{
 		AvmAssert(env != NULL);
@@ -60,7 +59,6 @@ namespace avmplus
 		m_framep		= framep;
 		m_traits		= frameTraits;
 		m_linenum		= 0;
-		m_boxed			= boxed;
 	}
 
 	void CallStackNode::init(AvmCore* core, Stringp name)
@@ -86,7 +84,6 @@ namespace avmplus
 		m_framep		= 0;
 		m_traits		= 0;
 		m_linenum		= 0;
-		m_boxed			= false;
 	}
 
 	CallStackNode::~CallStackNode()

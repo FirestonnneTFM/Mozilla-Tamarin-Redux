@@ -47,13 +47,6 @@ namespace avmplus
 		this->name = NULL;
 	}
 
-	Multiname::Multiname()
-	{
-		this->flags = 0;
-		this->name = NULL;
-		this->ns = NULL;
-	}
-
 	Multiname::Multiname(Namespacep ns, Stringp name, bool qualified)
 	{
 		this->flags = 0;
