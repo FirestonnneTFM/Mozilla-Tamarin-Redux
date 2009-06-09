@@ -73,7 +73,7 @@ namespace avmplus
 	 * object traits and catch-block activation traits.
 	 */
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
-		_implGPR(verifyEnter),
+		_implGPR(verifyEnterGPR),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
 		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
 		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
@@ -93,7 +93,7 @@ namespace avmplus
 							const uint8_t* abc_info_pos, 
 							uint8_t abcFlags,
 							const NativeMethodInfo* native_info) : 
-		_implGPR(verifyEnter),
+		_implGPR(verifyEnterGPR),
 		_msref(pool->core->GetGC()->emptyWeakRef),
 		_declaringScopeOrTraits(uintptr_t(0) | IS_TRAITS),
 		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
@@ -202,7 +202,7 @@ namespace avmplus
 	}
 #endif
 
-	/*static*/ uintptr_t MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32* ap)
+	/*static*/ uintptr_t MethodInfo::verifyEnterGPR(MethodEnv* env, int argc, uint32* ap)
 	{
 		MethodInfo* f = env->method;
 
@@ -221,8 +221,31 @@ namespace avmplus
 		env->_implGPR = f->implGPR();
 #endif
 
-        AvmAssert(f->implGPR() != MethodInfo::verifyEnter);
+        AvmAssert(f->implGPR() != MethodInfo::verifyEnterGPR);
 		return f->implGPR()(env, argc, ap);
+	}
+
+	/*static*/ double MethodInfo::verifyEnterFPR(MethodEnv* env, int argc, uint32* ap)
+	{
+		MethodInfo* f = env->method;
+
+		#ifdef AVMPLUS_VERIFYALL
+		// never verify late in verifyall mode
+		AvmAssert(!f->pool()->core->config.verifyall);
+		#endif
+
+		f->verify(env->toplevel());
+
+#if VMCFG_METHODENV_IMPL32
+		// we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
+		// but next time we want to call the real code, not verifyEnter again.
+		// All other MethodEnv's in their default state will call the target method
+		// directly and never go through verifyEnter().
+		env->_implFPR = f->implFPR();
+#endif
+
+        AvmAssert(f->implFPR() != MethodInfo::verifyEnterFPR);
+		return f->implFPR()(env, argc, ap);
 	}
 
 	void MethodInfo::verify(Toplevel *toplevel)
@@ -505,7 +528,7 @@ namespace avmplus
 	 *
 	 * If the method is interpreted then we just copy the Atom, no conversion is needed.
 	 */
-	void MethodInfo::boxLocals(void* src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length)
+	void MethodInfo::boxLocals(FramePtr src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length)
 	{
 		int size = srcPos+length;
 		int at = destPos;
@@ -522,7 +545,7 @@ namespace avmplus
 			for (int i=srcPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
-				void *p = &in[i];   // jit uses 8B per entry
+				const void* p = &in[i];   // jit uses 8B per entry
 				if (t == NUMBER_TYPE) 
 				{
 					dest[at] = core->doubleToAtom( *((double*)p) );
@@ -581,7 +604,7 @@ namespace avmplus
 	 *
 	 * If the method is interpreted then we just copy the Atom, no conversion is needed.
 	 */
-	void MethodInfo::unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length)
+	void MethodInfo::unboxLocals(const Atom* src, int srcPos, Traits** traitArr, FramePtr dest, int destPos, int length)
 	{
 		#ifdef AVMPLUS_64BIT
 		AvmAssertMsg(false, "are these ops right for 64-bit?  alignment of int/uint/bool?\n");
@@ -951,6 +974,9 @@ namespace avmplus
 				_flags |= ABSTRACT_METHOD;
 
 			_flags |= RESOLVED;
+			
+			if (ms->returnTraitsBT() == BUILTIN_number && _implGPR == MethodInfo::verifyEnterGPR)
+				_implFPR = MethodInfo::verifyEnterFPR;
 		}
 	}
 	

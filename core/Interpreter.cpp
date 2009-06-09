@@ -711,6 +711,9 @@ namespace avmplus
  		NONDEBUGGER_ONLY( register ) int volatile scopeDepth = 0;
  		register ScopeChain* const scope = env->scope();
  		register Atom* /* NOT VOLATILE */ sp = scopeBase + ms->max_scope() - 1;
+		// Note: scopes can be anything but null or undefined... but scope0 (the global scope) will always be a ScriptObject*.
+		// Code that uses lots of global variables accesses this frequently, so it's worth caching.
+		ScriptObject* /* NOT VOLATILE */ globalScope = (scope->getSize() > 0) ? AvmCore::atomToScriptObject(scope->getScope(0)) : NULL;
  		
  		aux_memory->dxns = scope->getDefaultNamespace();
 		aux_memory->dxnsAddrSave = core->dxnsAddr;
@@ -787,7 +790,7 @@ namespace avmplus
 #ifndef AVMPLUS_WORD_CODE
 		if (core->debugger()) 
 		{
-			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, &expc, true);
+			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, (FramePtr)framep, /*frameTraits*/0, &expc);
 			env->debugEnterInner();
 		}
 #endif
@@ -896,7 +899,6 @@ namespace avmplus
 		WORD_CODE_ONLY(register ScriptObject* o2;)
 		register const Multiname* multiname;
 		register MethodEnv* f;
-		register const TraitsBindings* td;
 		register Traits* t1;
 		uint16_t uh2l;				// not register - its address /can/ be taken
 		int32_t i32l;				// ditto
@@ -1012,7 +1014,7 @@ namespace avmplus
 			INSTR(debugenter) {
 				AvmAssert(core->debugger() != NULL);
 				AvmAssert(callStackNode == NULL);
-				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, &expc, true);
+				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, (FramePtr)framep, /*frameTraits*/0, &expc);
 				env->debugEnterInner();
 				NEXT;
 			}
@@ -2234,10 +2236,8 @@ namespace avmplus
 				a2 = sp[0];
 				sp -= 2;
 				env->nullcheck(a1);
-				u1 = U30ARG-1;  // slot_id
-				o1 = AvmCore::atomToScriptObject(a1);
-				td = o1->traits()->getTraitsBindings();
-				o1->setSlotAtom((uint32_t)u1, toplevel->coerce(a2, td->getSlotTraits((uint32_t)u1)));
+				u1 = U30ARG-1;    // slot_id
+				AvmCore::atomToScriptObject(a1)->coerceAndSetSlotAtom((uint32_t)u1, a2);
 				NEXT;
 			}
 
@@ -2253,29 +2253,26 @@ namespace avmplus
 			INSTR(setglobalslot) {
 				SAVE_EXPC;
 				// find the global activation scope (object at depth 0 on scope chain)
-				// o1 = global
-				o1 = AvmCore::atomToScriptObject(scope->getSize() == 0 ? scopeBase[0] : scope->getScope(0));
+				AvmAssert(globalScope != NULL);
 
 				// OPTIMIZEME - cleanup after ABC interpreter defenestration.
 				// Perform the -1 adjustment in the bytecode translator, not here every time.
 				u1 = U30ARG-1;    // slot_id
 				a1 = sp[0];       // value
 				sp--;
-				td = o1->traits()->getTraitsBindings();
-				o1->setSlotAtom((uint32_t)u1, toplevel->coerce(a1, td->getSlotTraits((uint32_t)u1)));
+				globalScope->coerceAndSetSlotAtom((uint32_t)u1, a1);
 				NEXT;
 			}
 
 			INSTR(getglobalslot) {
 				SAVE_EXPC;
 				// find the global activation scope (object at depth 0 on scope chain)
-				// o1 = global
-				o1 = AvmCore::atomToScriptObject(scope->getSize() == 0 ? scopeBase[0] : scope->getScope(0));
+				AvmAssert(globalScope != NULL);
 
 				// OPTIMIZMEME - cleanup after ABC interpreter defenestration.
 				// Perform the -1 adjustment in the bytecode translator, not here every time.
 				sp++;
-				sp[0] = o1->getSlotAtom((uint32_t)(U30ARG-1));
+				sp[0] = globalScope->getSlotAtom((uint32_t)(U30ARG-1));
 				NEXT;
 			}
 
@@ -2572,7 +2569,8 @@ namespace avmplus
             }
 
             INSTR(getglobalscope) {
-				*(++sp) = (scope->getSize() > 0) ? scope->getScope(0) : scopeBase[0];
+				AvmAssert(globalScope != NULL);
+				*(++sp) = globalScope->atom();
 				NEXT;
 			}
 
@@ -2582,6 +2580,11 @@ namespace avmplus
 				if (AvmCore::isNullOrUndefined(a1)) {
 					SAVE_EXPC;
 					env->nullcheck(a1);
+				}
+				if (scopeDepth == 0 && globalScope == NULL)
+				{
+					AvmAssert(scope->getSize() == 0);
+					globalScope = AvmCore::atomToScriptObject(a1);
 				}
 				scopeBase[scopeDepth++] = a1;
 				NEXT;
@@ -2596,6 +2599,12 @@ namespace avmplus
 				}
 				if (!withBase)
 					withBase = scopeBase+scopeDepth;
+				// is it possible to have pushWith for scope 0? not sure, let's do this just in case
+				if (scopeDepth == 0 && globalScope == NULL)
+				{
+					AvmAssert(scope->getSize() == 0);
+					globalScope = AvmCore::atomToScriptObject(a1);
+				}
 				scopeBase[scopeDepth++] = a1;
 				NEXT;
 			}
@@ -2619,7 +2628,8 @@ namespace avmplus
 			}
 
             INSTR(popscope) {
-				scopeDepth--;
+				if (!--scopeDepth)
+					globalScope = NULL;
 				if (withBase >= scopeBase + scopeDepth)
 					withBase = NULL;
 				NEXT;
@@ -3075,14 +3085,14 @@ namespace avmplus
 				SAVE_EXPC;
 				GET_MULTINAME_PTR(multiname, u1);
 				AvmAssert(multiname->isBinding());
-				o1 = AvmCore::atomToScriptObject((scope->getSize() > 0) ? scope->getScope(0) : scopeBase[0]); // global
-				o2 = env->findglobalproperty(o1, multiname);  // container
+				AvmAssert(globalScope != NULL);
+				o2 = env->findglobalproperty(globalScope, multiname);  // container
 				if (o2 == NULL) 
 				{
 					if (b1)
 						toplevel->throwReferenceError(kUndefinedVarError, multiname);
 					else
-						*(++sp) = o1->atom();
+						*(++sp) = globalScope->atom();
 				}
 				else
 				{
@@ -3135,6 +3145,7 @@ namespace avmplus
 			pc = codeStart + handler->target;
 #endif
 			scopeDepth = 0;
+			globalScope = (scope->getSize() > 0) ? AvmCore::atomToScriptObject(scope->getScope(0)) : NULL;
 			sp = scopeBase + ms->max_scope() - 1;
 			*(++sp) = exception->atom;
 			goto MainLoop;

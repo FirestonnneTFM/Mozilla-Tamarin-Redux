@@ -687,27 +687,19 @@ namespace avmplus
 	
 	Traits* Toplevel::toClassITraits(Atom atom)
 	{
-		switch (atom&7)
+		if (!AvmCore::isObject(atom)) // includes null check
 		{
-		case kObjectType:
-		{
-			if( !AvmCore::isNull(atom) )
-			{
-				Traits* itraits = AvmCore::atomToScriptObject(atom)->traits()->itraits;
-				if (itraits == NULL)
-					throwTypeError(kIsTypeMustBeClassError);
-				return itraits;
-			}
-			// else fall through and report an error
-		}
-		default:
             // TypeError in ECMA
 			// ISSUE the error message should say "whatever" is not a class
 			throwTypeError(
 					   (atom == undefinedAtom) ? kConvertUndefinedToObjectError :
 											kConvertNullToObjectError);
-			return NULL;
 		}
+
+		Traits* itraits = AvmCore::atomToScriptObject(atom)->traits()->itraits;
+		if (itraits == NULL)
+			throwTypeError(kIsTypeMustBeClassError);
+		return itraits;
 	}
 
 	Atom Toplevel::in_operator(Atom nameatom, Atom obj) 
@@ -756,17 +748,17 @@ namespace avmplus
 	 
 	 // NOTE: parts of this function have been explicitly inlined into MethodEnv::unbox1 for
 	 // efficiency. If you change/fix this method, you may need to change/fix MethodEnv::unbox1 as well.
-    Atom Toplevel::coerce(Atom atom, Traits* expected) const
+    Atom Toplevel::coerceImpl(Atom atom, Traits* expected) const
     {
+		AvmAssert(expected != NULL);
+		AvmAssert(!AvmCore::atomDoesNotNeedCoerce(atom, BuiltinType(expected->builtinType)));
+
 		Traits* actual;
 		AvmCore* core = this->core();
 
 		// these types always succeed
-		const BuiltinType ebt = Traits::getBuiltinType(expected);
-		switch (ebt)
+		switch (expected->builtinType)
 		{
-			case BUILTIN_any:
-				return atom;
 			case BUILTIN_boolean:
 				return AvmCore::booleanAtom(atom);
 			case BUILTIN_number:
@@ -783,28 +775,28 @@ namespace avmplus
 		// else fall thru
 
 		if (AvmCore::isNullOrUndefined(atom))
-			return (ebt == BUILTIN_void) ? undefinedAtom : nullObjectAtom;
+			return (expected->builtinType == BUILTIN_void) ? undefinedAtom : nullObjectAtom;
 
 		switch (atomKind(atom))
 		{
 		case kStringType:
-			actual = STRING_TYPE;
+			actual = core->traits.string_itraits;
 			break;
 
 		case kBooleanType:
-			actual = BOOLEAN_TYPE;
+			actual = core->traits.boolean_itraits;
 			break;
 
 		case kDoubleType:
-			actual = NUMBER_TYPE;
+			actual = core->traits.number_itraits;
 			break;
 
 		case kIntegerType:
-			actual = INT_TYPE;
+			actual = core->traits.int_itraits;
 			break;
 
 		case kNamespaceType:
-			actual = NAMESPACE_TYPE;
+			actual = core->traits.namespace_itraits;
 			break;
 
 		case kObjectType:
@@ -814,22 +806,19 @@ namespace avmplus
 		default:
 			// unexpected atom type
 			AvmAssert(false);
-			return false;
+			return nullObjectAtom;
 		}
 
-		if (actual->containsInterface(expected))
-		{
-			return atom;
-		}
-		else
+		if (!actual->containsInterface(expected))
 		{
 			// failed
 #ifdef AVMPLUS_VERBOSE
 			//core->console << "checktype failed " << expected << " <- " << atom << "\n";
 #endif
 			throwTypeError(kCheckTypeFailedError, core->atomToErrorString(atom), core->toErrorString(expected));
-			return atom;//unreachable
 		}
+
+		return atom;
     }
 
 	void Toplevel::coerceobj(ScriptObject* obj, Traits* expected) const
@@ -1120,9 +1109,7 @@ add_numbers:
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
-			int slot = AvmCore::bindingToSlotId(b);
-			const TraitsBindingsp td = vtable->traits->getTraitsBindings();
-			AvmCore::atomToScriptObject(obj)->setSlotAtom(slot, coerce(value, td->getSlotTraits(slot)));
+			AvmCore::atomToScriptObject(obj)->coerceAndSetSlotAtom(AvmCore::bindingToSlotId(b), value);
             return;
 		}
 

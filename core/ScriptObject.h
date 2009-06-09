@@ -90,7 +90,10 @@ namespace avmplus
 		}
 		
 		Atom getSlotAtom(uint32_t slot);
-		void setSlotAtom(uint32_t slot, Atom atom);
+
+		// NOTE, this now does the equivalent of Toplevel::coerce() internally;
+		// it is not necessary to call coerce() prior to calling this!
+		void coerceAndSetSlotAtom(uint32_t slot, Atom atom);
 
 		virtual Atom getDescendants(const Multiname* name) const;
 

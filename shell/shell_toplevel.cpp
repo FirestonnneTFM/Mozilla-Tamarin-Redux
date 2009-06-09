@@ -569,6 +569,7 @@ AvmBox shell_toplevel_i2a_oi_opti2_thunk(AvmMethodEnv env, uint32_t argc, AvmBox
     );
 }
 
+// avmplus_Domain_domainMemory_set
 // avmplus_System_trace
 // avmplus_Domain_private_init
 AvmBox shell_toplevel_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
@@ -676,7 +677,6 @@ double shell_toplevel_func_d2d_oaou_thunk(AvmMethodEnv env, uint32_t argc, AvmBo
 
 // avmplus_JObject_toArray
 // avmplus_Domain_loadBytes
-// avmplus_Domain_domainMemory_set
 // flash_trace_Trace_setListener
 AvmBox shell_toplevel_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {

@@ -600,7 +600,9 @@ namespace avmplus
 		}
 	}
 
-	void ScriptObject::setSlotAtom(uint32_t slot, Atom value)
+	// note: coerceAndSetSlotAtom now includes a simplified and streamlined version
+	// of Toplevel::coerce. If you modify that code, you might need to modify this code.
+	void ScriptObject::coerceAndSetSlotAtom(uint32_t slot, Atom value)
 	{
 		Traits* traits = this->traits();
 		const TraitsBindingsp td = traits->getTraitsBindings();
@@ -610,35 +612,60 @@ namespace avmplus
 		// SST_atom is most common case, put it first
 		if (sst == SST_atom)
 		{
-			AvmAssert(atomKind(value) != 0);
+			// no call to coerce() needed, since anything will fit here... with one exception:
+			// BUILTIN_object needs to convert undefined->null (though BUILTIN_any does not).
+			// it's cheaper to do that here than call out to coerce().
+			AvmAssert(td->getSlotTraits(slot) == NULL || td->getSlotTraits(slot)->builtinType == BUILTIN_object);
+			if (value == undefinedAtom && td->getSlotTraits(slot) != NULL)
+				value = nullObjectAtom;
 			WBATOM(traits->core->GetGC(), this, (Atom*)p, value);
 		}
 		else if (sst == SST_double)
 		{
-			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
-			*((double*)p) = AvmCore::number_d(value);
+			*((double*)p) = AvmCore::number(value);
 		}
 		else if (sst == SST_int32)
 		{
-			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
-			*((int32_t*)p) = AvmCore::integer_i(value);
+			*((int32_t*)p) = AvmCore::integer(value);
 		}
 		else if (sst == SST_uint32)
 		{
-			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
-			*((uint32_t*)p) = AvmCore::integer_u(value);
+			*((uint32_t*)p) = AvmCore::toUInt32(value);
 		}
 		else if (sst == SST_bool32)
 		{
-			AvmAssert(atomKind(value) == kBooleanType);
-			*((int32_t*)p) = urshift(value,3);
+			*((int32_t*)p) = AvmCore::boolean(value);
 		}
 		else 
 		{
-			AvmAssert(sst == SST_scriptobject || sst == SST_string || sst == SST_namespace);
-			AvmAssert(atomKind(value) == kStringType || atomKind(value) == kNamespaceType || atomKind(value) == kObjectType);
-			WBRC(traits->core->GetGC(), this, p, value & ~7);
+			// null/undefined -> NULL for all of these
+			if (AvmCore::isNullOrUndefined(value))
+			{
+				value = (Atom)0; // don't bother setting tag bits 
+			}
+			else if (sst == SST_string)
+			{
+				value = (Atom)traits->core->string(value); // don't bother setting tag bits 
+			}
+			else if (sst == SST_namespace)
+			{
+				// Namespace is final, so we don't have to do the hard work
+				if (atomKind(value) != kNamespaceType)
+					goto failure;
+			}
+			else // if (sst == SST_scriptobject)
+			{
+				AvmAssert(sst == SST_scriptobject);
+				if (atomKind(value) != kObjectType || !AvmCore::atomToScriptObject(value)->traits()->containsInterface(td->getSlotTraits(slot)))
+					goto failure;
+			}
+			WBRC(traits->core->GetGC(), this, p, atomPtr(value));
 		}
+		return;
+
+	failure:
+		toplevel()->throwTypeError(kCheckTypeFailedError, traits->core->atomToErrorString(value), traits->core->toErrorString(td->getSlotTraits(slot)));
+		return;
 	}
 
 	Atom ScriptObject::nextName(int index)

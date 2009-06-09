@@ -60,3 +60,4 @@ utils/lastsizereport.txt
 *.class
 .buildbot-sourcedata
 build/buildbot/slaves/scripts/*
+*.rej

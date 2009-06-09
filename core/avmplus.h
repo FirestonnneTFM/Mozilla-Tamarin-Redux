@@ -210,6 +210,8 @@ namespace avmplus
 	typedef const TraitsBindings* TraitsBindingsp;
 	typedef const TraitsMetadata* TraitsMetadatap;
 	typedef const MethodSignature* MethodSignaturep;
+	
+	typedef struct FramePtr_* FramePtr;
 }
 
 #include "avm.h"

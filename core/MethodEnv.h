@@ -268,7 +268,6 @@ namespace avmplus
 		 * E4X descendants operator (..)
 		 */
 		Atom getdescendants(Atom obj, const Multiname* multiname);
-		Atom getdescendantslate(Atom obj, Atom name, bool attr);
 
 		/**
 		 * E4X filter operator
@@ -280,7 +279,7 @@ namespace avmplus
 #ifdef DEBUGGER
 		void debugEnter(Traits** frameTraits, 
 						CallStackNode* callstack,
-						Atom* framep, 
+						FramePtr framep, 
 						volatile sintptr *eip);
 
 		void debugEnterInner();

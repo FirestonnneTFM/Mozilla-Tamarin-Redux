@@ -352,7 +352,7 @@ class MethodInfo(MemberInfo):
 		assert(isinstance(self.name, QName))
 		self.native_id_name = prefix + ns_prefix(self.name.ns, False) + self.name.name
 		self.native_method_name = self.name.name
-
+		
 		if self.kind == TRAIT_Getter:
 			self.native_id_name += "_get"
 			self.native_method_name = "get_" + self.native_method_name
@@ -1129,11 +1129,17 @@ class AbcThunkGen:
 
 	def emitThunkProto(self, name, receiver, m):
 		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
+		# see note in thunkSig() about setter return types
+		if m.kind == TRAIT_Setter:
+			ret = "void"
 		decl = self.thunkDecl(name, ret)
 		self.out_h.println("extern "+decl+";");
 
 	def emitThunkBody(self, name, receiver, m, directcall):
 		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
+		# see note in thunkSig() about setter return types
+		if m.kind == TRAIT_Setter:
+			ret = "void"
 		decl = self.thunkDecl(name, ret)
 
 		self.out_c.println(decl);
@@ -1194,12 +1200,6 @@ class AbcThunkGen:
 		if directcall:
 			self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
 			self.out_c.println("%s* obj = %s;" % (m.receiver.niname, args[0][0]))
-			# many setters are declared as returning "undefined" in as3 but return "void" in C++.
-			# quietly ignore the C++ result. likewise, native ctors always return "undefined" in AS3
-			# but typically are void in C++. (can't do this for non-directcall as sig might be shared between
-			# a setter and nonsetter)
-			if m.kind == TRAIT_Setter or m == m.receiver.init:
-				ret = "void"
 			if ret != "void":
 				self.out_c.prnt("const %s ret = (%s)" % (ret, ret))
 			self.out_c.println("obj->%s(" % m.native_method_name)
@@ -1279,7 +1279,14 @@ class AbcThunkGen:
 		return self.lookup_traits[name]
 		
 	def thunkSig(self, receiver, m):
-		sig = sigchar_from_traits(self.lookupTraits(m.returnType), False)+"2";
+		sig = sigchar_from_traits(self.lookupTraits(m.returnType), False);
+		# many setters are declared as returning "undefined" in as3 but return "void" in C++.
+		# we could force them to be explicitly "void" in AS3, but I'm loathe to risk compatibility issues...
+		# so let's just force their native impl (and sig) to return void. (modifying the sig is important,
+		# otherwise we might combine some setters with some non-setters, which could have disastrous results)
+		if m.kind == TRAIT_Setter:
+			sig = "v"
+		sig += "2"
 		if m.returnType.name == "Number":
 			sig += "d"
 		else:
