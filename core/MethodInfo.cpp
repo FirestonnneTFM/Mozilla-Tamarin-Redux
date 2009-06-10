@@ -304,7 +304,7 @@ namespace avmplus
 
 				CodegenLIR jit(this);
                 #if defined AVMPLUS_WORD_CODE
-				WordcodeEmitter translator(this);
+				WordcodeEmitter translator(this, toplevel);
 				TeeWriter teeWriter(&translator, &jit);
 				CodeWriter *coder = &teeWriter;
                 #else
@@ -358,7 +358,7 @@ namespace avmplus
 			{
 			    // NOTE copied below
                 #if defined AVMPLUS_WORD_CODE
-				WordcodeEmitter translator(this);
+				WordcodeEmitter translator(this, toplevel);
 				CodeWriter *coder = &translator;
                 #else
 				CodeWriter stubWriter;
