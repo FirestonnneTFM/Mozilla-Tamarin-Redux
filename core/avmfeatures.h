@@ -394,7 +394,11 @@
  * this means decorating the global new and delete operator with appropriate 'throw'
  * clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
  * do not generally support C++ exceptions.  
- * 
+ *  * 
+ * Note that even if this is enabled, the global new and delete operators may
+ * not throw exceptions when memory can't be allocated, because the out-of-memory
+ * handling in MMgc may take precedence.
+ *  * 
  * FixedMalloc never throws an exception for a failed allocation.
  */
 #if !defined AVMFEATURE_CPP_EXCEPTIONS || AVMFEATURE_CPP_EXCEPTIONS != 0 && AVMFEATURE_CPP_EXCEPTIONS != 1
@@ -524,11 +528,7 @@
 
 
 
-#if AVMFEATURE_CPP_EXCEPTIONS
-#  if !AVMFEATURE_USE_SYSTEM_MALLOC
-#    error "AVMFEATURE_USE_SYSTEM_MALLOC is required for AVMFEATURE_CPP_EXCEPTIONS"
-#  endif
-#endif
+
 
 
 
