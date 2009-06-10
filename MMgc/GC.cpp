@@ -1397,6 +1397,25 @@ bail:
 		return false;
 	}
 
+#ifdef _DEBUG
+    bool GC::IsPointerIntoGCObject(const void *item)
+	{
+		if(!IsPointerToGCPage(item))
+			return false;
+		int bits = GetPageMapValue((uintptr_t)item); 
+		switch(bits) {
+			case kGCAllocPage:
+				return GCAlloc::IsPointerIntoGCObject(item);
+			case kGCLargeAllocPageFirst:
+				return item >= GCLargeAlloc::FindBeginning(item);
+			case kGCLargeAllocPageRest:
+				return true;
+			default:
+				return false;
+		}
+    }
+#endif
+
 	ZCT::ZCT()
 	{
 		zctSize = ZCT_START_SIZE;
@@ -2998,6 +3017,7 @@ bail:
 	void GC::WriteBarrierWrite(const void *address, const void *value)
 	{
 		GCAssert(!IsRCObject(value));
+		GCAssert(IsPointerIntoGCObject(address));
 		*(uintptr_t*)address = (uintptr_t) value;
 	}
 
@@ -3023,6 +3043,7 @@ bail:
 				GCAssert(IsRCObject(rc));
 				rc->DecrementRef();
 			}
+		GCAssert(IsPointerIntoGCObject(address));
 		*(uintptr_t*)address = (uintptr_t) value;
 			rc = (RCObject*)Pointer(value);
 			if(rc != NULL) {

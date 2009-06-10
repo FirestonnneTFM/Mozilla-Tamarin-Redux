@@ -977,6 +977,11 @@ namespace MMgc
 	     */
 		bool IsPointerToGCPage(const void *item);
 
+#ifdef _DEBUG
+		// Test whether 'item' points into a non-free object in the gc'd heap.
+		bool IsPointerIntoGCObject(const void* item);
+#endif
+
 		/**
 		 * Do as much marking as possible in time milliseconds
 		 */
