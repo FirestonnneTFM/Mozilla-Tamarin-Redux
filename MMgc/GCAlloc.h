@@ -406,6 +406,16 @@ namespace MMgc
 			ClearBits(block, GetIndex(block, item), kQueued);
 		}
 		
+#ifdef _DEBUG
+		static bool IsPointerIntoGCObject(const void *item)
+		{
+			GCBlock *block = GetBlock(item);
+			if(item < block->items)
+				return false;
+			return GetBit(block, GetIndex(block, item), kFreelist) != kFreelist;
+		}
+#endif
+
 		void ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft);
 
 	protected:
