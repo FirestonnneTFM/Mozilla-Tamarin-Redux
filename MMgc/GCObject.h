@@ -149,7 +149,7 @@ namespace MMgc
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this);
 			composite = 0;
-#if 0
+#if 0  // no justification for this
 			padto32bytes = 0;
 #endif
 		}
@@ -217,9 +217,9 @@ namespace MMgc
 				GC::GetGC(this)->RemoveFromZCT(this);
 			}
 			
-#if 0
-			if(gc->keepDRCHistory)
-				history.Push(GetStackTraceIndex(2));				// FIXME: Observe that the Push can fail
+#ifdef MMGC_RC_HISTORY
+			if(GC::GetGC(this)->keepDRCHistory)
+				history.Add(GC::GetGC(this)->GetGCHeap()->GetProfiler()->GetStackTrace());
 #endif
 		}
 
@@ -240,7 +240,7 @@ namespace MMgc
 				return;
 
 			if(RefCount() == 0) {
-#ifdef MMGC_MEMORY_INFO
+#ifdef MMGC_RC_HISTORY
 				DumpHistory();
 #endif
 				GCAssert(false);
@@ -263,7 +263,12 @@ namespace MMgc
 			
 			composite--; 
 
-#if 0
+#ifdef MMGC_RC_HISTORY
+			if(GC::GetGC(this)->keepDRCHistory)
+				history.Add(GC::GetGC(this)->GetGCHeap()->GetProfiler()->GetStackTrace());
+#endif
+			// ??? unclear what the following comment pertains to -- lars, 2009-06-09
+			
 			// the delete flag works around the fact that DecrementRef
 			// may be called after ~RCObject since all dtors are called
 			// in one pass.  For example a FunctionScriptObject may be
@@ -271,17 +276,14 @@ namespace MMgc
 			// ~FunctionScriptObject during a sweep, but since ScopeChain's
 			// are smaller the ScopeChain was already finalized, thus the
 			// push crashes b/c the history object has been destructed.
-			if(gc->keepDRCHistory)
-				history.Push(GetStackTraceIndex(1));					// FIXME: observe that the push can fail
-#endif
-
+			
 			// composite == 1 is the same as (rc == 1 && !notSticky && !notInZCT)
 			if(RefCount() == 0) {
 				GC::GetGC(this)->AddToZCT(this);
 			}
 		}
 		
-#ifdef MMGC_MEMORY_INFO
+#ifdef MMGC_RC_HISTORY
 		void DumpHistory();
 #endif
 
@@ -315,11 +317,13 @@ namespace MMgc
 		static const uint32_t RCBITS	         = 0x000000FF;
 		static const uint32_t ZCT_INDEX          = 0x0FFFFF00;
 		uint32_t composite;
-#if 0
+#ifdef MMGC_RC_HISTORY
 		// addref/decref stack traces
-		GCStack<StackTrace*,4> history;
+		BasicList<StackTrace*> history;
+#if 0  // no justification exists for this
 		int32_t padto32bytes;
 #endif
+#endif // MMGC_MEMORY_INFO
 	};
 
 	template<class T> 
