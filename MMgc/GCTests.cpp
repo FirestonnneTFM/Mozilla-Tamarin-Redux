@@ -168,6 +168,7 @@ namespace MMgc
 			delete wr->get();
 	}
 
+	// See comments in header file regarding what might happen if this is called.
 	void RunGCTests(GC *g)
 	{
 		gc = g;
