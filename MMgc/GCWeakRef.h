@@ -67,6 +67,7 @@ namespace MMgc
 		{
 			return gc->Alloc(size, GC::kFinalize);
 		}
+
 		// private, only GC can access
 		GCWeakRef(const void *obj) : m_obj(obj) 
 		{

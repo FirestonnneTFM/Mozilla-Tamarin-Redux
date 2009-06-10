@@ -237,7 +237,6 @@ size_t VMPI_size(void* ptr)
 	return HeapSize(GetProcessHeap(), 0, ptr);
 }
 
-
 typedef void (*LoggingFunction)(const char*);
 
 LoggingFunction logFunc = NULL;
@@ -261,9 +260,13 @@ void VMPI_log(const char* message)
 
 bool VMPI_isMemoryProfilingEnabled()
 {
+#if defined (UNDER_CE) && defined(MMGC_MEMORY_PROFILER)
+	return true;
+#else
 	//read the mmgc profiling option switch
 	const char *env = VMPI_getenv("MMGC_PROFILE");
 	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+#endif
 }
 
 void VMPI_setPageProtection(void *address,
@@ -294,12 +297,12 @@ void VMPI_setPageProtection(void *address,
 	GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
 }
 
-char *VMPI_getenv(const char *name)
-{
-#ifdef UNDER_CE
-	(void)name;
-	return NULL;
-#else
-	return getenv(name);
+const char *VMPI_getenv(const char *env) 
+{ 
+	const char *val = NULL;
+#ifndef UNDER_CE
+	(void)env;
+	val = getenv(env);
 #endif
+	return val;
 }

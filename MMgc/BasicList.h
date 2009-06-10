@@ -103,8 +103,6 @@ namespace MMgc
 		
 		uint32_t Count() const { return count; }
 		
-		//		T* GetData() const { return items; }
-		
 	protected:
 		// no impl
 		BasicList(const BasicList& other);
