@@ -161,10 +161,18 @@ namespace MMgc
 			delete a;
 		}		
 	}
+
+	size_t FixedMalloc::GetBytesInUse()
+	{
+		size_t ask;
+		size_t allocated;
+		GetUsageInfo(ask, allocated);
+		(void)ask;
+		return allocated;		
+	}
 	
 	void FixedMalloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
 	{
-		totalAskSize = 0;
 		totalAllocated = 0;
 		for (int i=0; i<kNumSizeClasses; i++) {
 			size_t allocated = 0;
@@ -176,6 +184,8 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_PROFILER
 		totalAskSize += totalAskSizeLargeAllocs;
+#else
+		totalAskSize = 0;
 #endif
 
 		// not entirely accurate

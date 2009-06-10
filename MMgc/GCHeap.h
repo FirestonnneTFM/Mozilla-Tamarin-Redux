@@ -54,12 +54,11 @@ namespace MMgc
 		bool returnMemory;
 		bool gcstats;
 		bool autoGCStats;
-		static const size_t kDefaultHeapLimit = (size_t)-1;
 	};
 	
 	/**
 	 * The GCManager centralizes management of all the memory allocators in the
-	 * system, and provides iteration facilities.
+	 * system, and provides iteration and broadcast facilities.
 	 *
 	 * The GCHeap singleton holds the only instance of this manager.
 	 */	 
@@ -154,7 +153,7 @@ namespace MMgc
 #ifdef MMGC_64BIT
 		const static int kDefaultReserve = 4096;
 #else
-		const static int kDefaultReserve = 512;
+		const static int kDefaultReserve = 256;
 #endif
 		
 		/** Sizes up to this many blocks each have their own free list. */
@@ -183,8 +182,7 @@ namespace MMgc
 		/**
 		 * Init must be called to set up the GCHeap singleton
 		 */
-		static void Init(const GCHeapConfig& props);
-
+		static void Init(GCHeapConfig& props);
 		/* legacy API */
 		static void Init(GCMallocFuncPtr malloc = NULL, GCFreeFuncPtr free = NULL, int initialSize=128)
 		{
@@ -273,6 +271,10 @@ namespace MMgc
 
 		static size_t SizeToBlocks(size_t bytes) { return ((bytes + kBlockSize - 1) & ~(kBlockSize-1)) / kBlockSize; }
 
+		static size_t GetPrivateBytes();
+		
+		void SetHeapLimit(size_t numpages) { config.heapLimit = numpages; }
+
 		/* controls whether AllocHook and FreeHook are called */
 		void EnableHooks() { hooksEnabled = true; }
 		inline bool HooksEnabled() const { return hooksEnabled; }
@@ -288,18 +290,10 @@ namespace MMgc
 #endif
 
 		// Every new GC must register itself with the GCHeap.
-		void AddGC(GC *gc)
-		{ 
-			gcManager.addGC(gc); 
-			callbacks.Add((OOMCallback*)gc);
-		}		
+		void AddGC(GC *gc) { gcManager.addGC(gc); }
 		
 		// When the GC is destroyed it must remove itself from the GCHeap.
-		void RemoveGC(GC *gc) 
-		{ 
-			gcManager.removeGC(gc); 
-			callbacks.Remove((OOMCallback*)gc);
-		}
+		void RemoveGC(GC *gc) { gcManager.removeGC(gc); }
 
 		void AddOOMCallback(OOMCallback *p) { callbacks.Add(p); }
 
@@ -325,17 +319,7 @@ namespace MMgc
 		static void TrackSystemFree(void *addr);
 #endif //MMGC_USE_SYSTEM_MALLOC
 
-		void *GetStackEntryAddress() { return (void*)GetEnterFrame(); }
-		EnterFrame *GetEnterFrame() { return enterFrame; }
-
-		inline bool StackEnteredCheck() { return !entryChecksEnabled || GetEnterFrame() != NULL; }
-		
-		// remove this and make them always enabled once its possible
-		inline void SetEntryChecks(bool to) { entryChecksEnabled = to; }
-
 		// Heap regions
-		// (ought to be private but some VMPI implementations 
-		// currently need to peek at it)
 		class Region : public GCAllocObject
 		{
 		public:
@@ -349,7 +333,7 @@ namespace MMgc
 		
 	private:
 
-		GCHeap(const GCHeapConfig &config);
+		GCHeap(GCHeapConfig &config);
 		~GCHeap();
 
 #ifdef MMGC_MEMORY_PROFILER
@@ -436,16 +420,6 @@ namespace MMgc
 #endif
 			bool inUse() const { return prev == NULL; }
 			char *endAddr() const { return baseAddr + size*kBlockSize; }
-			void FreelistInit()
-			{
-				baseAddr     = NULL;
-				size         = 0;
-				sizePrevious = 0;
-				prev         = this;
-				next         = this;
-				committed    = true;
-				dirty 	    = true;
-			}
 		};
 
 		// Core methods
@@ -504,9 +478,6 @@ namespace MMgc
 
 		void ReleaseMemory(char *address, size_t size);
 
- 		void Enter(EnterFrame *frame);
- 		void Leave();
-
 		// data section
 		static GCHeap *instance;
 	
@@ -516,32 +487,31 @@ namespace MMgc
 		HeapBlock freelists[kNumFreeLists];
 		unsigned int numAlloc;
 		FixedMalloc fixedMalloc;
-		vmpi_spin_lock_t const m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
  		BasicList<OOMCallback*> callbacks;
- 		vmpi_spin_lock_t const callbacks_lock;
+ 		vmpi_spin_lock_t callbacks_lock;	
 
+#ifdef MMGC_LOCKING
+		vmpi_spin_lock_t m_spinlock;
+#endif /* MMGC_LOCKING */
+		
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
 		MemoryStatus status;
- 		uint32_t enterCount;
- 		vmpi_thread_t const primordialThread;
 
-		vmpi_spin_lock_t const gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
-	
 #ifdef MMGC_MEMORY_PROFILER
 		static MemoryProfiler *profiler;
-		bool hasSpy; //flag indicating whether profiler spy is active or not.  If active, AllocHook will call VMPI_spyAllocationEvent
+		bool hasSpy; //flag indicating whether profiler spy is active or not.  If active, AllocHook will call VMPI_spyCallback
 #endif
 		bool hooksEnabled;
 		
-		bool entryChecksEnabled;
- 		bool abortStatusNotificationSent;
-
 		// some OS's are loose with how with virtual memory is dealt with and we don't have to track
 		// each region individually (ie multiple contiguous mmap's can be munmap'd all at once)
 		const bool mergeContiguousRegions;
+		
+	public:
+		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 	};
 }
 

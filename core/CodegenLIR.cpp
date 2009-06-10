@@ -707,7 +707,7 @@ namespace avmplus
 
 		case BUILTIN_boolean:
 			if (atom->isconst())
-				return InsConst(urshift(atom->constval(),3));
+				return InsConst(int32_t(atom->constval()) >> 3);
 			else
 				return p2i(binaryIns(LIR_pursh, atom, InsConst(3)));
 		

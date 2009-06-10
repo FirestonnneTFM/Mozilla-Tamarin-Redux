@@ -79,11 +79,6 @@ bool VMPI_canMergeContiguousRegions()
 #endif
 }
 
-bool VMPI_areNewPagesDirty()
-{
-	return false;
-}
-
 static int get_major_version()
 {
 	int mib[2];
@@ -219,13 +214,6 @@ uint64_t VMPI_getPerformanceFrequency()
 	return frequency;
 }
 
-void VMPI_cleanStack(size_t amount)
-{
-	void *space = alloca(amount);
-	if(space)
-		VMPI_memset(space, 0, amount);
-}
-
 uint64_t VMPI_getPerformanceCounter()
 {
 	return mach_absolute_time();
@@ -347,7 +335,7 @@ void VMPI_setupPCResolution()
 		close(CHILD_WRITE_END);
 		
 		char pid_str[16];
-		VMPI_sprintf(pid_str, "%u", current_pid);
+		sprintf(pid_str, "%u", current_pid);
 		
 		//Invoke atos in interactive mode
 		execl("/usr/bin/atos", "/usr/bin/atos", "-p", pid_str, (char*)0); 

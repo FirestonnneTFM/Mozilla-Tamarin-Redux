@@ -93,19 +93,19 @@ namespace avmshell
 		//conf.verbose = true;
 		MMgc::GCHeap::Init(conf);
 
+		// Note that output from the command line parser (usage messages, error messages,
+		// and printed version number / feature list) will not go to the log file.  We
+		// could fix this if it's a hardship.
+
+		ShellSettings settings;
+		parseCommandLine(argc, argv, settings);
+		
+		if (settings.do_log)
+			initializeLogging(settings.numfiles > 0 ? settings.filenames[0] : "AVMLOG");
+
 		{
 			MMGC_ENTER_RETURN(OUT_OF_MEMORY);
 			
-			// Note that output from the command line parser (usage messages, error messages,
-			// and printed version number / feature list) will not go to the log file.  We
-			// could fix this if it's a hardship.
-
-			ShellSettings settings;
-			parseCommandLine(argc, argv, settings);
-			
-			if (settings.do_log)
-				initializeLogging(settings.numfiles > 0 ? settings.filenames[0] : "AVMLOG");
-
 #ifdef VMCFG_WORKERTHREADS
 			if (settings.numworkers == 1 && settings.numthreads == 1 && settings.repeats == 1)
 				singleWorker(settings);
@@ -763,7 +763,7 @@ namespace avmshell
 					MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
 				}
 				else if (!VMPI_strcmp(arg, "-memlimit")) {
-					MMgc::GCHeap::GetGCHeap()->Config().heapLimit = VMPI_strtol(argv[++i], 0, 10);
+					MMgc::GCHeap::GetGCHeap()->SetHeapLimit(VMPI_strtol(argv[++i], 0, 10));
 				}
 				else if (!VMPI_strcmp(arg, "-log")) {
 					settings.do_log = true;

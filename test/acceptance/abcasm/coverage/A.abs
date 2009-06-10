@@ -120,7 +120,6 @@ function runTest()
 	findproperty COMPARE_STRICTEQ
 	pushstring "add_i ints"
 	pushint 44 // expected
-
 	pushint 33
 	pushint 11
 	add_i
@@ -131,6 +130,22 @@ function runTest()
 	pushint 0x34508918 // expected
 	pushint 0x00008918
 	pushuint 0x34500000
+	add_i
+	callpropvoid COMPARE_STRICTEQ 3
+
+	findproperty COMPARE_STRICTEQ
+	pushstring "add_i uint/int [1]"
+	pushint 0x7FFFFFFD // expected
+	pushuint 0xFFFFFFFF
+	pushint  0x7ffffffe
+	add_i
+	callpropvoid COMPARE_STRICTEQ 3
+
+	findproperty COMPARE_STRICTEQ
+	pushstring "add_i uint/int [2]"
+	pushint 0x7FFFFFFD // expected
+	pushint -1
+	pushuint  0x7ffffffe
 	add_i
 	callpropvoid COMPARE_STRICTEQ 3
 
