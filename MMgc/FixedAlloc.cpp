@@ -72,7 +72,7 @@ namespace MMgc
 		// Free all of the blocks
  		while (m_firstBlock) {
 #ifdef MMGC_MEMORY_INFO
-			if(m_firstBlock->numAlloc > 0 && m_heap->GetStatus() != kMemAbort) {
+			if(m_firstBlock->numAlloc > 0) {
 				// go through every memory location, if the third 4 bytes cast as
 				// an integer isn't 0xedededed then its allocated space and the integer is
 				// an index into the stack trace table, the first 4 bytes will contain
@@ -106,7 +106,6 @@ namespace MMgc
 	void* FixedAlloc::Alloc(size_t size, bool canFail)
 	{ 
 		(void)size;
-		GCAssertMsg(m_heap->StackEnteredCheck(), "MMGC_ENTER must be on the stack");
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
 		if(!m_firstFree) {
@@ -221,20 +220,27 @@ namespace MMgc
 		}
 	}
 
-	void FixedAlloc::GetUsageInfo(size_t& totalAsk, size_t& totalAllocated)
+	size_t FixedAlloc::GetBytesInUse()
 	{
-		totalAsk = totalAllocated = 0;
-
+		size_t bytes = 0;
 		FixedBlock *b = m_firstBlock;
 		while(b)
 		{
-			totalAllocated += b->numAlloc * b->size;
+			bytes += b->numAlloc * b->size;
 			b = b->next;
 		}
+		return bytes;
+	}
 	
+	void FixedAlloc::GetUsageInfo(size_t& totalAsk, size_t& totalAllocated)
+	{
 #ifdef MMGC_MEMORY_PROFILER
 		totalAsk  = m_totalAskSize;
+#else
+		totalAsk = 0;
 #endif
+
+		totalAllocated = GetBytesInUse();
 	}
 
 	void FixedAlloc::CreateChunk(bool canFail)

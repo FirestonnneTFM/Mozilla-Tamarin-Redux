@@ -56,7 +56,6 @@ REALLY_INLINE void *operator new(size_t size) NEW_THROWS_CLAUSE
 	MMgc::GCHeap::TrackSystemAlloc(space, size);
 	return space;
 #else
-	GCAssertMsg(MMgc::GCHeap::GetGCHeap()->StackEnteredCheck(), "MMGC_ENTER macro must exist on the stack");
 	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
 #endif
 }
@@ -68,7 +67,6 @@ REALLY_INLINE void *operator new[](size_t size) NEW_THROWS_CLAUSE
 	MMgc::GCHeap::TrackSystemAlloc(space, size);
 	return space;
 #else
-	GCAssertMsg(MMgc::GCHeap::GetGCHeap()->StackEnteredCheck(), "MMGC_ENTER macro must exist on the stack");
 	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
 #endif
 }

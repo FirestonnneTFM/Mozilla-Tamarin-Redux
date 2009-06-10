@@ -465,9 +465,6 @@ namespace MMgc
 		 */
 		void fullCollectionComplete() { fullCollectionQueued = false; }
 
-		/**
-		 * called to find out if a full collection has been requested
-		 */
 		bool queryFullCollectionQueued() { return fullCollectionQueued; }
 
 		// ----- Public data --------------------------------------
@@ -595,7 +592,7 @@ namespace MMgc
 		static const int ZCT_START_SIZE;
 	public:
 		ZCT();
-		void Destroy();
+		~ZCT();
 		void Add(RCObject *obj);
 		void Remove(RCObject *obj);
 		void Reap(bool scanStack=true);
@@ -1120,6 +1117,8 @@ namespace MMgc
 			return (double(VMPI_getPerformanceCounter() - start) * 1000) / VMPI_getPerformanceFrequency();
 		}
 
+		void DisableThreadCheck() { disableThreadCheck = true; }
+
 		/** GC initialization time, in ticks.  Used for logging. */
 		const uint64_t t0;
 
@@ -1241,6 +1240,7 @@ namespace MMgc
 		// store a handle to the thread that create the GC to ensure thread safety
 		vmpi_thread_t m_gcThread;
 
+
 		void gclog(const char *format, ...);
 		void log_mem(const char *name, size_t s, size_t comp );
 
@@ -1277,9 +1277,8 @@ namespace MMgc
 		const void *rememberedStackTop;
 		GCAutoEnter* stackEnter;
 
-#ifdef _DEBUG
-		bool requireGCEnter; // controls whether alloc fail if no MMGC_GCENTER is on the stack
-#endif
+		// for external which does thread safe multi-thread AS execution
+		bool disableThreadCheck;
 
 		GCRoot* emptyWeakRefRoot;
 
@@ -1444,7 +1443,9 @@ namespace MMgc
 		 */
 		GCLargeAlloc::LargeBlock *largeEmptyPageList;
 		
-		vmpi_spin_lock_t const m_rootListLock;
+#ifdef MMGC_LOCKING
+		vmpi_spin_lock_t m_rootListLock;
+#endif
 
 		GCRoot *m_roots;
 		void AddRoot(GCRoot *root);

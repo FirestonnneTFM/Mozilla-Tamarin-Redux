@@ -160,12 +160,10 @@ void RedirectLogOutput(LoggingFunction func)
 
 void VMPI_log(const char* message)
 {
-#ifndef VMCFG_SYMBIAN
 	if(logFunc)
 		logFunc(message);
 	else
 		printf("%s",message);
-#endif
 }
 
 bool VMPI_isMemoryProfilingEnabled()
@@ -173,6 +171,7 @@ bool VMPI_isMemoryProfilingEnabled()
 	//read the mmgc profiling option switch
 	const char *env = getenv("MMGC_PROFILE");
 	return (env && (VMPI_strncmp(env, "1", 1) == 0));
+
 }
 
 /**
@@ -211,7 +210,7 @@ void VMPI_setPageProtection(void *address,
 }
 
 
-const char *VMPI_getenv(const char *name)
+char *VMPI_getenv(const char *name)
 {
 	return getenv(name);
 }

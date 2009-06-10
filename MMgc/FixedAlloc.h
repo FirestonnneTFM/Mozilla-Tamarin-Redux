@@ -63,12 +63,7 @@ namespace MMgc
 		static void Free(void *item);
 
 		//This method returns the number bytes allocated by FixedAlloc
-		size_t GetBytesInUse()
-		{
-			size_t totalAskSize, totalAllocated;  
-			GetUsageInfo(totalAskSize, totalAllocated);
-			return totalAllocated;			
-		}
+		size_t GetBytesInUse();
 		
 		//This method is for more fine grained allocation details
 		//It reports the total number of bytes requested (i.e. ask size) and
@@ -141,10 +136,10 @@ namespace MMgc
 	class FixedAllocSafe : public FixedAlloc
 	{
 	public:
-		FixedAllocSafe(int itemSize, GCHeap* heap) : 
-			FixedAlloc(itemSize, heap),
-			m_spinlock(VMPI_lockCreate())
+		FixedAllocSafe(int itemSize, GCHeap* heap) : FixedAlloc(itemSize, heap) 
 		{
+			m_spinlock = VMPI_lockCreate();
+			GCAssert(m_spinlock != NULL);
 		}
 		
 		~FixedAllocSafe()
@@ -171,7 +166,9 @@ namespace MMgc
 
 	private:
 
-		vmpi_spin_lock_t const m_spinlock;
+#ifdef MMGC_LOCKING
+		vmpi_spin_lock_t m_spinlock;
+#endif
 	};
 
 	/**

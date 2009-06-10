@@ -56,8 +56,7 @@ namespace MMgc
 	class GCAcquireSpinlock
 	{
 	public:
-		GCAcquireSpinlock(vmpi_spin_lock_t const& spinlock) : 
-			m_spinlock(spinlock)
+		GCAcquireSpinlock(vmpi_spin_lock_t& spinlock) : m_spinlock(spinlock)
 		{
 		#ifdef _DEBUG
 			bool r =
@@ -77,7 +76,7 @@ namespace MMgc
 		}
 
 	private:
-		vmpi_spin_lock_t const& m_spinlock;
+		vmpi_spin_lock_t& m_spinlock;
 
 	private: // not implemented
 		GCAcquireSpinlock();
