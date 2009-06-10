@@ -209,7 +209,7 @@ def translateTraces(traces, addrs):
 		new_trace = [];
 		for item in trace:
 			addrinfo = findAddr(addrs, item);
-			if str(addrinfo[1]["func"]).startswith(("Alloc", "GetStackTrace", "LargeAlloc", "Calloc", "operator new", "RecordAlloc")) == False:
+			if str(addrinfo[1]["func"]).startswith(("Alloc", "GetStackTrace", "LargeAlloc", "Calloc", "operator new")) == False:
 				new_trace.append(addrinfo[1]);
 		t["trace"] = new_trace;
 

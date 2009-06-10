@@ -1080,9 +1080,8 @@ namespace avmplus
 				// resolve operand into a traits, and test if value is that type
 				checkTypeName(imm30); // CONSTANT_Multiname
 				coder->write(state, pc, opcode);
-				state->pop(2);
-				state->push(OBJECT_TYPE);
-				state->push(INT_TYPE);
+				state->pop(1);
+				state->push(BOOLEAN_TYPE);
 				break;
 
 			case OP_istypelate: 
@@ -1949,7 +1948,7 @@ namespace avmplus
 	callproperty_done:
 		;
         #ifdef DEBUG_EARLY_BINDING
-		core->console << "verify callproperty " << t << " " << multiname->getName() << " from within " << info << "\n";
+		core->console << "verify callproperty " << t << " " << multiname.getName() << " from within " << info << "\n";
         #endif
 	}
 

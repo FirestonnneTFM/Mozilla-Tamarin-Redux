@@ -77,23 +77,6 @@ abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https:/
 # Bug 496643 - x64 smoke test failures
 abcasm/mops, x64-win.*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=496643
 abcasm/coverage/I, ppc64-mac.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=496643
-# Take coverage tests offline: need to analyze failures on tryserver
-abcasm/coverage/B:not uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
-abcasm/coverage/B:int or uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
-abcasm/coverage/B:int xor uint , (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493924
-abcasm/coverage/C:convert_i long , x64.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493922
-abcasm/coverage/C:convert_i long bis , x64.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493922
-abcasm/coverage/C:convert_i long , ppc64.*-mac.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493922
-abcasm/coverage/C:convert_i long bis , ppc64.*-mac.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493922
-abcasm/coverage/I , (x64|ppc64).*-debug , skip , investigating
-abcasm/coverage/I:inclocal_i_double , .*-Dinterp , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
-abcasm/coverage/I:increment_i_double , .*-Dinterp , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=482506
-abcasm/coverage/I:Array istype Array , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
-abcasm/coverage/I:Array istype Object , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
-abcasm/coverage/I:Array istype Number , .*(?<!-Dinterp) , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
-abcasm/coverage/I, ppc64.*(?<!-Dinterp) , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=491489
-abcasm/coverage/StoU , .*-Dinterp , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
-abcasm/coverage/StoU , ppc-.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=483809
 
 ####################
 # Sampling
@@ -136,7 +119,6 @@ mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/sh
 ####################
 # Vector
 ####################
-as3/Vector/lastindexofInitializers, (x64|ppc64).*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=487253
 as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
 as3/Vector/initializerLargeVector, x64.*jit.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281 intermittent seg fault
 
