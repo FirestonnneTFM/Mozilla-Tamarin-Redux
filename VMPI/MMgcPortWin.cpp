@@ -69,6 +69,11 @@ bool VMPI_useVirtualMemory()
 	return true;
 }
 
+bool VMPI_areNewPagesDirty()
+{
+	return false;
+}
+
 void* VMPI_reserveMemoryRegion(void* address, size_t size)
 {
 	return VirtualAlloc(address,
@@ -157,6 +162,14 @@ void VMPI_releaseAlignedMemory(void* address)
 	VMPI_releaseMemoryRegion(address, 0);
 }
 
+#ifdef UNDER_CE
+	typedef DWORD (*pTGetProcessIndexFromID)(HANDLE hProc);
+	static pTGetProcessIndexFromID gGetID=NULL;
+#if _WIN32_WCE>=0x600
+	THIS WILL NOT WORK ON WINCE 6.0 AND ABOVE
+#endif
+#endif
+
 size_t VMPI_getPrivateResidentPageCount()
 {
 	size_t pageSize = VMPI_getVMPageSize();
@@ -201,6 +214,15 @@ uint64_t VMPI_getPerformanceCounter()
 	LARGE_INTEGER value;
 	QueryPerformanceCounter(&value);
 	return value.QuadPart;
+}
+
+void VMPI_cleanStack(size_t amt)
+{
+	void *space = alloca(amt);
+	if(space)
+	{
+		VMPI_memset(space, 0, amt);
+	}
 }
 
 #ifdef MMGC_MEMORY_PROFILER
@@ -402,7 +424,7 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 						NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 						(LPTSTR) &lpMsgBuf, 0, NULL )) 
 					{
-						MMgc::GCDebugMsg("See lpMsgBuf", true);
+						GCAssertMsg(false, "See lpMsgBuf");
 						LocalFree(lpMsgBuf);
 					}			
 					dbgHelpLock.Release();
@@ -550,8 +572,8 @@ extern "C" unsigned long* get_frame_pointer();
 		StringCchPrintfA(buffer, bufferSize, "%s", pSym->Name);
 		//printf("%s\n", pSym->Name);
 		return true;
-#endif //UNDER_CE
 
+#endif //UNDER_CE
 	}
 
 	void VMPI_setupPCResolution() { }

@@ -137,7 +137,7 @@ void SpyLog(const char* message)
 
 extern void RedirectLogOutput(void (*)(const char*));
 
-void VMPI_spyCallback()
+void VMPI_spyAllocationEvent()
 {
 	if(mmgc_spy_signal) 
 	{

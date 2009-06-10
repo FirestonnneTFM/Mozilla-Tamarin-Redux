@@ -178,7 +178,7 @@ namespace MMgc
 	}
 	
 	inline uint64_t GCPolicyManager::interCollectionTicks() {
-		return 15 * VMPI_getPerformanceFrequency() / 1000;		// Ticks.  Value represents 15ms on all platforms
+		return 200 * VMPI_getPerformanceFrequency() / 1000;		// Ticks.  Value represents 200ms on all platforms
 		
 		/* Old code, preserved here until we revamp policy as a whole.
 		 *
@@ -477,7 +477,9 @@ namespace MMgc
 		stackCleaned(true),
 		rememberedStackTop(0),
 		stackEnter(0),
-		disableThreadCheck(false),
+#ifdef DEBUG
+		requireGCEnter(false),
+#endif
 		emptyWeakRefRoot(0),
 		marking(false),
 		m_markStackOverflow(false),
@@ -489,8 +491,9 @@ namespace MMgc
 		finalizedValue(true),
 		smallEmptyPageList(NULL),
 		largeEmptyPageList(NULL),
+		m_rootListLock(VMPI_lockCreate()),
 		m_roots(0),
-	    m_callbacks(0),
+		m_callbacks(0),
 		zct()
 	{
 		// sanity check for all our types
@@ -522,11 +525,6 @@ namespace MMgc
 			containsPointersRCAllocs[i] = new GCAlloc(this, kSizeClasses[i], true, true, i);
 			noPointersAllocs[i] = new GCAlloc(this, kSizeClasses[i], false, false, i);
 		}
-
-	#ifdef MMGC_LOCKING
-		m_rootListLock = VMPI_lockCreate();
-		GCAssert(m_rootListLock != NULL);
-	#endif //MMGC_LOCKING
 		
 		largeAlloc = new GCLargeAlloc(this);
 
@@ -550,8 +548,8 @@ namespace MMgc
 		gcheap->AddGC(this);
  		allocaInit();
 
+		emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef));
 		MMGC_GCENTER(this);
-		emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef)),
 		emptyWeakRef = new (this) GCWeakRef(NULL);
 	}
 
@@ -619,11 +617,16 @@ namespace MMgc
 		while(m_callbacks) {
 			m_callbacks->Destroy();			
 		}
+		
+		zct.Destroy();
+			
+		GCAssertMsg(policy.blocksOwnedByGC() == 0, "GC accounting off");
 
-	#ifdef MMGC_LOCKING
+		if(stackEnter != NULL)
+			stackEnter->Destroy();
+
 		VMPI_lockDestroy(m_gcLock);
 		VMPI_lockDestroy(m_rootListLock);
-	#endif //MMGC_LOCKING
 	}
 
 	void GC::Collect(bool scanStack)
@@ -755,9 +758,13 @@ namespace MMgc
 		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
 
 #ifdef _DEBUG
+		if(!nogc && stackEnter == 0 && requireGCEnter) {
+			GCAssertMsg(false, "A MMGC_GC_ENTER macro must exist on the stack");
+			return NULL;
+		}
 		GCAssert(size + 7 > size);
 		if (GC::greedy) {
-			Collect();
+			Collect(true);
 		}
 		// always be marking in pedantic mode
 		if(incrementalValidationPedantic) {
@@ -1226,106 +1233,40 @@ bail:
 		}
 	}
 	
-#ifdef VMCFG_SYMBIAN
-
-	void GC::CleanStack(bool /*force*/)
-	{
-		// TODO: implement without alloca. Add new VMPI API for cleaning up the stack.
-	}
-	
-#else
 
 	void GC::CleanStack(bool force)
 	{
-        (void)force;
-
-#if defined(_MSC_VER) && defined(_DEBUG)
-		// debug builds poison the stack already
-		(void)force;
-		return;
-#else
 		if(!force && (stackCleaned || rememberedStackTop == 0))
 			return;
 
 		stackCleaned = true;
 		
 		register void *stackP = 0;
+		size_t size;
 
-#if defined MMGC_IA32
-		#ifdef WIN32
-		__asm {
-			mov stackP,esp
-		}
-		#elif defined SOLARIS
-		stackP = (void *) _getsp();
-		#else
-		asm("movl %%esp,%0" : "=r" (stackP));
-		#endif
-#endif
+		MMGC_GET_STACK_EXTENTS(this, stackP, size);
 
-#if defined MMGC_AMD64
-	#ifdef WIN32
-		int foo;
-		stackP = &foo;
-	#else
-		asm("mov %%rsp,%0" : "=r" (stackP));
-	#endif
-#endif
-
-#if defined MMGC_SPARC
-		stackP = (void *) _getsp();
-#endif
-
-#if defined MMGC_PPC
-		// save off sp
-	#ifdef _MAC
-			asm("mr %0,r1" : "=r" (stackP));
-	#else // _MAC
-			asm("mr %0,%%r1" : "=r" (stackP));
-	#endif // _MAC
-#endif // MMGC_PPC
-
-#if defined MMGC_ARM
-    #ifdef _MSC_VER
-        // no inline asm available
-        int foo;
-        stackP = &foo;
-    #else
-        asm("mov %0,sp" : "=r" (stackP));
-    #endif
-#endif //MMGC_ARM
-
-		if( ((char*) stackP > (char*)rememberedStackTop)) {
+		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)stackEnter > (char*)stackP)) {
 			size_t amount = (char*) stackP - (char*)rememberedStackTop;
-			void *stack = alloca(amount);
-			if(stack) {
-				VMPI_memset(stack, 0, amount);
-#ifdef MMGC_SPARC
-				sparc_clean_windows();
-#endif
-			}
+			VMPI_cleanStack(amount);
 		}
-#endif // __MSC_VER && _DEBUG		
 	}
-	
-#endif // VMCFG_SYMBIAN
 
 	#if defined(MMGC_PPC) && defined(__GNUC__)
 	__attribute__((noinline)) 
 	#endif
 	void GC::MarkQueueAndStack(GCStack<GCWorkItem>& work, bool scanStack)
 	{
-		GCWorkItem item;
+		if(scanStack) {
+			GCWorkItem item;
+			MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
 
-		MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
-
-		// this is where we will clear to when CleanStack is called
-		if(rememberedStackTop < item.ptr) {
-			rememberedStackTop = item.ptr;
-		}
-
-		if(scanStack)
+			// this is where we will clear to when CleanStack is called
+			if(rememberedStackTop < item.ptr) {
+				rememberedStackTop = item.ptr;
+			}
 			PushWorkItem(work, item);
+		}
 		Mark(work);
 	}
 
@@ -1426,7 +1367,7 @@ bail:
 		zctReapThreshold = 0;	// will be set in SetGC
 	}
 
-	ZCT::~ZCT()
+	void ZCT::Destroy()
 	{
 		gc->heapFree(zct, zctSize);
 	}
@@ -3516,6 +3457,6 @@ bail:
  				}		
  				// else nothing can be done
  			}
-  		}
+  	}
 	}
 }
