@@ -90,7 +90,8 @@ namespace MMgc
 
 	MemoryProfiler::MemoryProfiler() : 
 		stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
-		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS),
+		stringsTable(4, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS),
+		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
 		allocInfoTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT)
 	{
 		VMPI_setupPCResolution();
@@ -304,13 +305,13 @@ namespace MMgc
 		char *buff = (char*)alloca(len+1);
 		VMPI_strncpy(buff, name, len);
 		buff[len]='\0';
-		char *iname = (char*)nameTable.get(buff);
+		char *iname = (char*)stringsTable.get(buff);
 		if(iname)
 			return iname;
 		iname = (char*)VMPI_alloc(len+1);
 		VMPI_strncpy(iname, name, len);
 		iname[len]='\0';
-		nameTable.put(iname, iname);
+		stringsTable.put(iname, iname);
 		return iname;
 	}
 
