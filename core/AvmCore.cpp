@@ -1189,7 +1189,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kIntegerType:
 				{
 					Atom i = atom>>3;
-					return (urshift(i|-i,28)&~7) | kBooleanType;
+					return ((uint32_t(i|-i) >> 28)&~7) | kBooleanType;
 				}
 			case kBooleanType:
 				return atom;
@@ -3245,7 +3245,16 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 	}
 
+#ifdef AVMPLUS_64BIT
+	#define CAN_BE_INT_ATOM(intval,n) (intval == n && !(intval == 0 && MathUtils::isNegZero(n)))
+#else
+	#define CAN_BE_INT_ATOM(intval,n) (((intval<<3)>>3) == n && !(intval == 0 && MathUtils::isNegZero(n)))
+#endif
+
+#define MAKE_INT_ATOM(intval) ((intptr_t(intval)<<3) | kIntegerType)
+
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+
 	// ignore warning that inline asm disables global optimization in this function
 	#ifdef _MSC_VER
 	#pragma warning(disable: 4740) 
@@ -3255,19 +3264,15 @@ return the result of the comparison ToPrimitive(x) == y.
 		// handle integer values w/out allocation
 		// this logic rounds in the wrong direction for E3, but
 		// we never use a rounded value, only cleanly converted values.
-		#if defined(WIN32) || defined(__ICC) 
-		#ifdef AVMPLUS_AMD64
-		int32_t intval = _mm_cvttsd_si32(_mm_set_sd(n));
-		if (intval == n) {
-			// make sure its not -0
-			if (intval == 0 && MathUtils::isNegZero(n)) {
-				return allocDouble(n);
-			} else {
-				return (intptr_t(intval)<<3) | kIntegerType;
-			}
-		}
+#if defined(WIN32) || defined(__ICC) 
+	#ifdef AVMPLUS_AMD64
+
+		int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
+		if (CAN_BE_INT_ATOM(intval, n)) 
+			return MAKE_INT_ATOM(intval);
 		return allocDouble(n);
-		#else
+
+	#else // x86
 		int id3;
 		__asm {
 			movsd xmm0,n
@@ -3291,42 +3296,32 @@ return the result of the comparison ToPrimitive(x) == y.
 			__asm d2a_alloc:
 			return allocDouble(n);
 		}
-		#endif
-		#elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-		int intval = _mm_cvttsd_si32(_mm_set_sd(n));
-		// MacTel is luckily always using SSE2, there
-		// are no intrinsics to check for unordered 
-		// mode here using any of the _mm_ucominXXX
-		// instructions
-		if (((intval<<3)>>3) == n) {
-			// make sure its not -0
-			if (intval == 0 && MathUtils::isNegZero(n)) {
-				return allocDouble(n);
-			} else {
-#ifdef AVMPLUS_64BIT
-				return (intval<<3) | kIntegerType;
-#else
-				return uint32((intval<<3) | kIntegerType);
-#endif
+	#endif
 
-			}
-		}
+#elif defined(_MAC)
+
+		// MacTel always has SSE2 available
+		int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
+		if (CAN_BE_INT_ATOM(intval, n)) 
+			return MAKE_INT_ATOM(intval);
+
 		return allocDouble(n);
-		#elif defined(SOLARIS)
+
+#elif defined(SOLARIS)
+
 		return AvmCore::doubleToAtom(n); // This needs to be optimized for solaris.
-		#elif defined(AVMPLUS_UNIX)
-		#ifdef __amd64__
-		int32_t intval = _mm_cvttsd_si32(_mm_set_sd(n));
-		if (intval == n) {
-			// make sure its not -0
-			if (intval == 0 && MathUtils::isNegZero(n)) {
-				return allocDouble(n);
-			} else {
-				return (intptr_t(intval)<<3) | kIntegerType;
-			}
-		}
+
+#elif defined(AVMPLUS_UNIX)
+
+	#ifdef AVMPLUS_AMD64
+
+		int32_t const intval = _mm_cvttsd_si32(_mm_set_sd(n));
+		if (CAN_BE_INT_ATOM(intval, n)) 
+			return MAKE_INT_ATOM(intval);
+
 		return allocDouble(n);
-		#else // __amd64__
+
+	#else // not AVMPLUS_AMD64
 		int id3;
 		asm("movups %1, %%xmm0;"
 			"cvttsd2si %%xmm0, %%ecx;"
@@ -3346,10 +3341,10 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		asm("d2a_alloc:");
 		return allocDouble(n);
-		#endif // __amd64__
-		#endif // defined(AVMPLUS_UNIX)
+	#endif // AVMPLUS_AMD64
+#endif // defined(AVMPLUS_UNIX)
 	}
-#endif
+#endif // x86 or x64
 
 #ifndef AVMPLUS_SSE2_ALWAYS
 	Atom AvmCore::doubleToAtom(double n)
@@ -3359,7 +3354,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // they are regular numeric values.
 
 		// handle integer values w/out allocation
-		#if defined(WIN32) && !defined(_ARM_)
+	#if defined(WIN32) && !defined(_ARM_)
 		#ifdef AVMPLUS_AMD64
 		int intval = _mm_cvttsd_si32(_mm_set_sd(n));
 		#else
@@ -3371,31 +3366,17 @@ return the result of the comparison ToPrimitive(x) == y.
 			fistp [intval];
 		}
 		#endif
-		#elif defined(_MAC) && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
+	#elif defined(_MAC) && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 		int intval = _mm_cvttsd_si32(_mm_set_sd(n));
-		#else
+	#else
 		int intval = MathUtils::real2int(n);
-		#endif
+	#endif
 
 		// make sure n is integer value that fits in 29 bits
-		if (((intval<<3)>>3) == n)
-		{
-			// make sure its not -0
-			if (intval == 0 && MathUtils::isNegZero(n))
-				return allocDouble(n);
-			else
-			{
-#ifdef AVMPLUS_64BIT
-				return (intval<<3) | kIntegerType;
-#else
-				return uint32((intval<<3) | kIntegerType);
-#endif
-			}
-		}
-		else
-		{
-			return allocDouble(n);
-		}
+		if (CAN_BE_INT_ATOM(intval, n)) 
+			return MAKE_INT_ATOM(intval);
+
+		return allocDouble(n);
 	}
 #endif // not AVMPLUS_SSE2_ALWAYS
 

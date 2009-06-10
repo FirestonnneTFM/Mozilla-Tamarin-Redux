@@ -1232,7 +1232,7 @@ namespace avmplus
 				{
 					const Binding b = tb->m_bindings->get(name, ns);
 					AvmAssert(b != BIND_NONE);
-					const uint32 disp_id = urshift(b, 3) + (ne.kind == TRAIT_Setter);
+					const uint32 disp_id = uint32(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
 					MethodInfo* f = this->pool->getMethodInfo(ne.id);
 					//AvmAssert(f->declaringTraits() == this);
 					tb->setMethodInfo(disp_id, f);
@@ -1504,7 +1504,7 @@ namespace avmplus
 						this->pool->resolveQName(ne.qni, qn, /*toplevel*/NULL);
 						const Binding b = td->findBinding(qn.getName(), qn.getNamespace());
 						AvmAssert(b != BIND_NONE);
-						const uint32 disp_id = urshift(b,3) + (ne.kind == TRAIT_Setter);
+						const uint32 disp_id = uint32(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
 						tm->methodMetadataPos[disp_id] = ne.meta_pos;
 					}
 					break;
@@ -1739,7 +1739,7 @@ namespace avmplus
 			}
 			case BUILTIN_boolean:
 			{
-				AvmAssert(urshift(falseAtom,3) == 0);
+				AvmAssert((uintptr_t(falseAtom)>>3) == 0);
 				if (value == falseAtom)
 					return;
 				
