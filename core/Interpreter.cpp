@@ -58,14 +58,18 @@ namespace avmplus
 #define IS_DOUBLE(v)         (((v) & 7) == kDoubleType)
 #define IS_BOOLEAN(v)        (((v) & 7) == kBooleanType)
 #define IS_STRING(v)		 (((v) & 7) == kStringType)
-#define FITS_IN_INTEGER(v)   (((int32_t(v) << 3) >> 3) == int32_t(v))				// FIXME: incorrect on 64-bit systems, where we have a 32-bit payload
+#ifdef AVMPLUS_64BIT
+#  define FITS_IN_INTEGER(v)   (true)
+#  define SIGN_EXTEND(v)       ((intptr_t(v) << 29) >> 29)	
+#else
+#  define FITS_IN_INTEGER(v)   (((intptr_t(v) << 3) >> 3) == intptr_t(v))
+#  define SIGN_EXTEND(v)       (intptr_t(v))
+#endif
 #define MAKE_INTEGER(v)      ((intptr_t(v) << 3) | kIntegerType)
-#define INTEGER_VALUE(v)     (intptr_t(v) >> 3)
-#define INT32_VALUE(v)       int32_t(INTEGER_VALUE(v))
-#define UINT32_VALUE(v)      uint32_t(INTEGER_VALUE(v))
+#define INT32_VALUE(v)       int32_t(intptr_t(v) >> 3)
+#define UINT32_VALUE(v)      uint32_t(intptr_t(v) >> 3)
 #define DOUBLE_VALUE(v)		 (*(double*)((v) ^ kDoubleType))
 #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0) // less control flow but more registers -- which is better?
-//#define IS_BOTH_INTEGER(a,b) ((IS_INTEGER(a) && IS_INTEGER(b))
 #define IS_BOTH_DOUBLE(a,b)  ((((a ^ kDoubleType) | (b ^ kDoubleType)) & 7) == 0)
 
 #ifdef AVMPLUS_WORD_CODE
@@ -1202,10 +1206,17 @@ namespace avmplus
             INSTR(negate) {
 				a1 = sp[0];
 				if (IS_INTEGER(a1) && a1 != MAKE_INTEGER(0)) {
-					i1 = -INTEGER_VALUE(a1);
-					if (FITS_IN_INTEGER(i1)) {
-						sp[0] = MAKE_INTEGER(i1);
-						NEXT;
+					i1 = INT32_VALUE(a1);
+				#ifdef AVMPLUS_64BIT
+					// -2147483648 will fit in an integer, but 2147483648 won't. 
+					if (i1 > (int32_t)0x80000000)
+				#endif
+					{
+						i1 = -i1;
+						if (FITS_IN_INTEGER(i1)) {
+							sp[0] = MAKE_INTEGER(i1);
+							NEXT;
+						}
 					}
 				}
 				SAVE_EXPC;
@@ -1248,7 +1259,7 @@ namespace avmplus
 			INSTR(bitnot) {
 				a1 = sp[0];
 				if (IS_INTEGER(a1)) {
-					sp[0] = ~a1 ^ 7;
+					sp[0] = SIGN_EXTEND(~a1 ^ 7);
 					NEXT;
 				}
 				SAVE_EXPC;
@@ -1282,23 +1293,7 @@ namespace avmplus
                 NEXT;
 			}	
 
-// Add a1 and a2 if they are both fixnums and computation does not overflow,
-// or if they are both flonums.  On success, store the result in dest, and NEXT.
 
-#define FAST_ADD_MAYBE(a1,a2,dest) \
-	if (IS_BOTH_INTEGER(a1, a2)) { \
-		u1t = a1 ^ kIntegerType; \
-		u2t = a2 ^ kIntegerType; \
-		u3t = u1t + u2t; \
-		if ((int32_t)(u1t ^ u2t) < 0 || (int32_t)(u1t ^ u3t) >= 0) { \
-			dest = u3t | kIntegerType; \
-			NEXT; \
-		} \
-	} \
-	else if (IS_BOTH_DOUBLE(a1, a2)) { \
-		dest = core->doubleToAtom(DOUBLE_VALUE(a1) + DOUBLE_VALUE(a2)); \
-		NEXT; \
-	}
 
 // Add 1 to a1 if it is a fixnum and computation does not overflow, or
 // if a1 is a flonum.  On success, store the result in dest, and NEXT.
@@ -1307,7 +1302,7 @@ namespace avmplus
 	if (IS_INTEGER(a1)) { \
 		u1t = a1 ^ kIntegerType; \
 		u3t = u1t + (1 << 3); \
-		if ((int32_t)u1t < 0 || (int32_t)(u3t ^ u1t) >= 0) { \
+		if ((intptr_t)u1t < 0 || (intptr_t)(u3t ^ u1t) >= 0) { \
 			dest = u3t | kIntegerType; \
 			NEXT; \
 		} \
@@ -1318,35 +1313,30 @@ namespace avmplus
 	}
 
 #define ADD_TWO_VALUES_AND_NEXT(a1, a2, dest) \
-	FAST_ADD_MAYBE(a1,a2,dest); \
-	SAVE_EXPC; \
-	dest = toplevel->add2(a1, a2); \
-	NEXT
-
-// Subtract a2 from a1 if they are both fixnums and computation does not overflow.
-// On success, store the result in dest, and NEXT.
-#define FAST_SUB_MAYBE(a1,a2,dest) \
 	if (IS_BOTH_INTEGER(a1, a2)) { \
 		u1t = a1 ^ kIntegerType; \
 		u2t = a2 ^ kIntegerType; \
-		u3t = u1t - u2t; \
-		if ((int32_t)(u1t ^ u2t) >= 0 || (int32_t)(u1t ^ u3t) >= 0) { \
+		u3t = u1t + u2t; \
+		if ((intptr_t)(u1t ^ u2t) < 0 || (intptr_t)(u1t ^ u3t) >= 0) { \
 			dest = u3t | kIntegerType; \
 			NEXT; \
 		} \
 	} \
 	else if (IS_BOTH_DOUBLE(a1, a2)) { \
-		dest = core->doubleToAtom(DOUBLE_VALUE(a1) - DOUBLE_VALUE(a2)); \
+		dest = core->doubleToAtom(DOUBLE_VALUE(a1) + DOUBLE_VALUE(a2)); \
 		NEXT; \
-	}
+	} \
+	SAVE_EXPC; \
+	dest = toplevel->add2(a1, a2); \
+	NEXT
 
 // Subtract 1 from a1 if a1 is a fixnum and computation does not overflow.
-// On success, store the result in dest, and NEXT.
+// On success, store the result in dest, and NEXT. 
 #define FAST_DEC_MAYBE(a1,dest) \
 	if (IS_INTEGER(a1)) { \
 		u1t = a1 ^ kIntegerType; \
 		u3t = u1t - (1 << 3); \
-		if ((int32_t)u1t >= 0 || (int32_t)(u1t ^ u3t) >= 0) { \
+		if ((intptr_t)u1t >= 0 || (intptr_t)(u1t ^ u3t) >= 0) { \
 			dest = u3t | kIntegerType; \
 			NEXT; \
 		} \
@@ -1378,6 +1368,9 @@ namespace avmplus
 				a2p = sp;
 			increment_i_impl:
 				a1 = *a2p;
+ 				if (!IS_INTEGER(a1)) {
+ 					a1 = core->intAtom(a1);
+ 				}
 				FAST_INC_MAYBE(a1,*a2p);	// note, *a2p is lvalue here
 				core->increment_i(a2p, 1);
 				NEXT;
@@ -1434,10 +1427,22 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-				FAST_ADD_MAYBE(a1,a2,sp[0]);
+				if (IS_BOTH_INTEGER(a1, a2)) {
+					u1t = a1 ^ kIntegerType;
+					u2t = a2 ^ kIntegerType;
+					u3t = u1t + u2t;
+					sp[0] = SIGN_EXTEND(u3t | kIntegerType);
+					NEXT;
+				}
+				if (IS_BOTH_DOUBLE(a1, a2)) { 
+					i1 = (int32_t)AvmCore::integer_d(DOUBLE_VALUE(a1));
+					i2 = (int32_t)AvmCore::integer_d(DOUBLE_VALUE(a2));
+					goto finish_add_i;
+				}
 				SAVE_EXPC;
 				i1 = AvmCore::integer(a1);
 				i2 = AvmCore::integer(a2);
+			finish_add_i:
 				sp[0] = core->intToAtom((int32_t)(i1 + i2));
                 NEXT;
 			}
@@ -1449,7 +1454,19 @@ namespace avmplus
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 			sub_two_values_and_next:
 #endif
-				FAST_SUB_MAYBE(a1, a2, sp[0]);
+				if (IS_BOTH_INTEGER(a1, a2)) { 
+					u1t = a1 ^ kIntegerType; 
+					u2t = a2 ^ kIntegerType;
+					u3t = u1t - u2t; 
+					if ((intptr_t)(u1t ^ u2t) >= 0 || (intptr_t)(u1t ^ u3t) >= 0) { 
+						sp[0] = u3t | kIntegerType; 
+						NEXT; 
+					} 
+				} 
+				if (IS_BOTH_DOUBLE(a1, a2)) { 
+					sp[0] = core->doubleToAtom(DOUBLE_VALUE(a1) - DOUBLE_VALUE(a2)); 
+					NEXT; 
+				}
 				SAVE_EXPC;
 				d1 = AvmCore::number(a1);
 				d2 = AvmCore::number(a2);
@@ -1461,10 +1478,22 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-				FAST_SUB_MAYBE(a1,a2,sp[0]);
+				if (IS_BOTH_INTEGER(a1, a2)) {
+					u1t = a1 ^ kIntegerType;
+					u2t = a2 ^ kIntegerType;
+					u3t = u1t - u2t;
+					sp[0] = SIGN_EXTEND(u3t | kIntegerType);
+					NEXT;
+				}
+				if (IS_BOTH_DOUBLE(a1, a2)) { 
+					i1 = (int32_t)AvmCore::integer_d(DOUBLE_VALUE(a1));
+					i2 = (int32_t)AvmCore::integer_d(DOUBLE_VALUE(a2));
+					goto finish_subtract_i;
+				}
 				SAVE_EXPC;
 				i1 = AvmCore::integer(a1);
 				i2 = AvmCore::integer(a2);
+			finish_subtract_i:
 				sp[0] = core->intToAtom((int32_t)(i1 - i2));
                 NEXT;
 			}
@@ -1529,7 +1558,7 @@ namespace avmplus
 			mod_two_values_and_next:
 #endif
 				if (IS_BOTH_INTEGER(a1, a2) && a2 != kIntegerType) {
-					i1 = INTEGER_VALUE(a1) % INTEGER_VALUE(a2);
+					i1 = INT32_VALUE(a1) % INT32_VALUE(a2);
 					if (FITS_IN_INTEGER(i1)) {
 						sp[0] = MAKE_INTEGER(i1);
 						NEXT;
@@ -1554,7 +1583,7 @@ namespace avmplus
 				if (IS_BOTH_INTEGER(a1,a2)) {
 					i1 = INT32_VALUE(a1) << (INT32_VALUE(a2) & 0x1F);
 					if (FITS_IN_INTEGER(i1)) {
-						sp[0] = MAKE_INTEGER(i1);
+						sp[0] = SIGN_EXTEND(MAKE_INTEGER(i1));
 						NEXT;
 					}
 				}
@@ -1605,7 +1634,7 @@ namespace avmplus
 
 #define BITOP_TWO_VALUES_AND_NEXT(op, a1, a2, dest, tag) \
 	if (IS_BOTH_INTEGER(a1,a2)) { \
-		dest = (a1 op a2) | tag; \
+		dest = SIGN_EXTEND((intptr_t(a1) op intptr_t(a2)) | tag); \
 		NEXT; \
 	} \
 	SAVE_EXPC; \
@@ -2642,6 +2671,28 @@ namespace avmplus
  					SAVE_EXPC;
  					sp[0] = core->intAtom(a1);
  				}
+			#ifdef AVMPLUS_64BIT
+				/*
+					what's up with the  "a1 > 0" check?
+
+					consider that in 64-bit builds, an int atom can have the
+					range of -2147483648 (0xffffffff80000000) to 4294967295 (0x00000000ffffffff).
+					[actually, shifted up 3 bits, but you get the idea]
+
+					If the value is <= 2147483647 then the atom is treated as a signed int;
+					otherwise it's considered unsigned. 
+
+					if the source for convert_i is an unsigned int, it retains the same 32-bit
+					pattern but is treated as signed instead of unsigned. so what we have to do is
+					ensure that the int atoms in the range 0x0000000080000000..0x00000000ffffffff
+					get their sign bit propagated so that they are treated as signed. 
+					
+					checking for ">0" is overkill (handles atoms that don't need it) but is likely 
+					to be cheaper than a more precise check.
+				*/
+				else if (a1 > 0)
+					sp[0] = SIGN_EXTEND(a1);
+			#endif
 				NEXT;
 			}
 
@@ -3260,6 +3311,16 @@ namespace avmplus
 		ptrdiff_t scopep = scopebasep + scopeDepth - 1 - framep;
 		ptrdiff_t scopeBase = scopebasep - framep;
 		ptrdiff_t stackBase = scopebasep + max_scope - framep;
+
+// this is handy for debugging 64-specific interpreter bugs.
+//#ifdef AVMPLUS_64BIT
+//		core->console << "                        stack-raw:";
+//		for (ptrdiff_t i=stackBase; i <= sp; i++) {
+//			core->console << " 0x" << MathUtils::convertDoubleToStringRadix(core, framep[i]>>32, 16) << 
+//									MathUtils::convertDoubleToStringRadix(core, framep[i]&0xffffffff, 16);
+//		}
+//		core->console << '\n';
+//#endif
 
 		// stack
 		core->console << "                        stack:";

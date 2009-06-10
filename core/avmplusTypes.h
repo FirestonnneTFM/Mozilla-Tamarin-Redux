@@ -67,21 +67,6 @@ namespace avmplus
 	
 	typedef struct Binding_* Binding;
 	typedef struct CodeContextAtom_* CodeContextAtom;
-
-	inline uint32 urshift(Atom atom, int amount)
-	{
-		return ((uint32)atom >> amount);
-	}
-
-	inline uint32 urshift(Binding b, int amount)
-	{
-		return (uint32_t(uintptr_t(b)) >> amount);
-	}
-
-	inline uint32 urshift(CodeContextAtom c, int amount)
-	{
-		return (uint32_t(uintptr_t(c)) >> amount);
-	}
 }
 
 #endif /* __avmplus_types__ */

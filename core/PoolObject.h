@@ -203,7 +203,7 @@ namespace avmplus
 		const byte* atomToPos(Atom a) const
 		{
 			AvmAssert((a&7)==kObjectType);
-			return _abcStart + urshift(a,3);
+			return _abcStart + (uintptr_t(a) >> 3);
 		}
 
 		// Index of the metadata info that means skip the associated definition
