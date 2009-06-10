@@ -448,12 +448,15 @@ var FEATURES =
 	       this means decorating the global new and delete operator with appropriate 'throw'
 		   clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
 		   do not generally support C++ exceptions.  
-		   
+
+           Note that even if this is enabled, the global new and delete operators may
+           not throw exceptions when memory can't be allocated, because the out-of-memory
+           handling in MMgc may take precedence.
+
 		   FixedMalloc never throws an exception for a failed allocation. </desc>
 		   
 	<name> AVMFEATURE_CPP_EXCEPTIONS </name>
 	<defines> MMGC_ENABLE_CPP_EXCEPTIONS </defines>
-	<requires> AVMFEATURE_USE_SYSTEM_MALLOC </requires>
   </feature>
   
   <feature>
