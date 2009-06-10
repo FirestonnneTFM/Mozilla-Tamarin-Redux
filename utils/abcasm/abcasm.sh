@@ -41,27 +41,27 @@
 ABCASM_HOME=`dirname $0`
 ANTLR_HOME=$ABCASM_HOME/../../other-licenses/ANTLR
 ANTLR_RUNTIME=$ANTLR_HOME/antlr-runtime-3.0.1.jar
+JAVA=java
 
 # enable setting asc.jar using -a switch
-while getopts "a:" OPTION
+while getopts "j:" OPTION
     do
         case $OPTION in
-            a)
-                # $ASC deprecated and ignored
-                shift 2
-                ;;
+            j) JAVA="$OPTARG" ;;
+                
         esac
     done
+shift $(($OPTIND - 1))
     
 echo "$*"
 case `uname -s` in
 	CYGWIN*)
 		# Classpath set for Cygwin systems
-		java -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ANTLR_RUNTIME abcasm.Main $*
+		"$JAVA" -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ANTLR_RUNTIME abcasm.Main $*
 		;;
 	*)
 		# 'NIX systems use this classpath
-		java -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ANTLR_RUNTIME abcasm.Main $*
+		"$JAVA" -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ANTLR_RUNTIME abcasm.Main $*
 		;;
 esac
 
