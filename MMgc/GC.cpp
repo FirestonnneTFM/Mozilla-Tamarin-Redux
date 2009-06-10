@@ -1727,8 +1727,10 @@ bail:
 #ifdef _DEBUG
 				if(gc->validateDefRef) {
 					if(gc->GetMark(rcobj)) {	
-#ifdef MMGC_MEMORY_INFO
+#ifdef MMGC_RC_HISTORY
 						rcobj->DumpHistory();
+#endif
+#ifdef MMGC_MEMORY_INFO
 						GCDebugMsg(false, "Back pointer chain:");
 						gc->DumpBackPointerChain(rcobj);
 #endif
