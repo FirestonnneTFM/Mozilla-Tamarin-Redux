@@ -51,10 +51,11 @@ namespace avmplus
 {
 	using namespace MMgc;
 	
-	WordcodeEmitter::WordcodeEmitter(MethodInfo* info)
+	WordcodeEmitter::WordcodeEmitter(MethodInfo* info, Toplevel* avm_toplevel)
 		: WordcodeTranslator()
 		, info(info)
 		, core(info->pool()->core)
+		, avm_toplevel(avm_toplevel)
 		, backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)
@@ -174,7 +175,12 @@ namespace avmplus
 			label_info* l = labels;
 			while (l != NULL && l->old_offset != old_offset)
 				l = l->next;
-			AvmAssert(l != NULL);
+			// See https://bugzilla.mozilla.org/show_bug.cgi?id=481171.  Arguably this is a verification
+			// error, but work around the lack of a verification error here.
+			if (avm_toplevel != NULL)
+				core->throwErrorV(avm_toplevel->verifyErrorClass(), kInvalidBranchTargetError);
+			else
+				core->throwAtom(core->newStringLatin1("word code translator: missing LABEL for backward branch")->atom());
 			*dest++ = l->new_offset - base_offset;
 		}
 		else

@@ -49,7 +49,7 @@ namespace avmplus
 
 	class WordcodeEmitter : public WordcodeTranslator {
 	public:
-		WordcodeEmitter(MethodInfo* info);
+		WordcodeEmitter(MethodInfo* info, Toplevel* toplevel);
 #    ifdef AVMPLUS_SELFTEST
 		WordcodeEmitter(AvmCore* core, uint8_t* code_start);
 #    endif
@@ -162,6 +162,7 @@ namespace avmplus
 		
 		MethodInfo* info;
 		AvmCore* core;
+		Toplevel* avm_toplevel;				// for error classes; may be NULL
 		backpatch_info* backpatches;	// in address order
 		label_info* labels;				// in reverse offset order
 		catch_info* exception_fixes;	// in address order
