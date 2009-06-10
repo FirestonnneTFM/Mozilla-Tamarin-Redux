@@ -194,19 +194,25 @@ namespace MMgc
 		return bogusPointerReturnValue;
 	}
 	
-	void GCLargeAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
+	size_t GCLargeAlloc::GetBytesInUse()
 	{
-		totalAskSize = 0;
-		totalAllocated = 0;
-
+		size_t bytes=0; 
 		LargeBlock *block = m_blocks;
 		while (block) {
-			totalAllocated += block->usableSize;
+			bytes += block->usableSize;
 			block = block->next;
 		}		
+		return bytes;
+	}
 	
+	void GCLargeAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
+	{
 #ifdef MMGC_MEMORY_PROFILER
-		totalAskSize += m_totalAskSize;
+		totalAskSize = m_totalAskSize;
+#else
+		totalAskSize = 0;
 #endif
+
+		totalAllocated = GetBytesInUse();
 	}
 }
