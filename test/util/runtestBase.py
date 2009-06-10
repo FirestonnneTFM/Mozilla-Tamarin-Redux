@@ -80,6 +80,7 @@ class RuntestBase:
     abcasmShell = 'abcasm/abs_helper'
     testconfig = 'testconfig.txt'
     logFileType = 'html'
+    java = 'java'
     
     avm = ''
     avmce = ''
@@ -234,7 +235,8 @@ class RuntestBase:
         print '    --ascargs       args to pass to asc on rebuild of test files'
         print '    --vmargs        args to pass to vm'
         print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
-        print '    --nohtml        do not create a html output file' 
+        print '    --nohtml        do not create a html output file'
+        print '    --java          location of java executable (default=java)'
         
 
     def setOptions(self):
@@ -243,7 +245,7 @@ class RuntestBase:
         self.options = 'vE:a:g:b:s:x:htfc:dqe'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                   'timeout=', 'rebuildtests','quiet','nohtml','eval','showtimes']
+                   'timeout=', 'rebuildtests','quiet','nohtml','eval','showtimes','java=']
 
     def parseOptions(self):
         try:
@@ -297,6 +299,8 @@ class RuntestBase:
                 self.htmlOutput = False
             elif o in ('--showtimes'):
                 self.show_time = True
+            elif o in ('--java'):
+                self.java = v
         return opts
                 
     def checkPath(self):
@@ -307,7 +311,7 @@ class RuntestBase:
                     cygpath = '%s:/%s' % (cygpath[10],cygpath[11:])
                 return cygpath
             
-            selfVarsToCheck = ['avm','asc','builtinabc','shellabc']
+            selfVarsToCheck = ['avm','asc','builtinabc','shellabc','java']
             for var in selfVarsToCheck:
                 setattr(self, var, convertFromCygwin(getattr(self,var)))
                 
@@ -683,7 +687,7 @@ class RuntestBase:
                 exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
         
             if asc.endswith('.jar'):
-                cmd = 'java -jar ' + asc
+                cmd = '"%s" -jar %s' % (self.java,asc)
             else:
                 cmd = asc
                 
@@ -713,7 +717,7 @@ class RuntestBase:
                 cmd += ' -in %s' % string.replace(util, '$', '\$')
                 
         elif as_file.endswith(self.abcasmExt):
-            cmd = self.abcasmRunner
+            cmd = '%s -j "%s" ' % (self.abcasmRunner,self.java)
             
         try:
             self.verbose_print('%s %s' % (cmd,as_file))
@@ -768,17 +772,12 @@ class RuntestBase:
                       self.ashErrors.append("abc files %s.abc not created" % (testdir))
                   total -= 1;
         else:  #pexpect available
-            child = pexpect.spawn("java -classpath %s macromedia.asc.embedding.Shell" % self.asc)
+            child = pexpect.spawn('"%s" -classpath %s macromedia.asc.embedding.Shell' % (self.java,self.asc))
             child.logfile = None
             child.expect("\(ash\)")
             child.expect("\(ash\)")
     
             for test in tests:
-                if self.debug:
-                    print cmd
-                else:
-                    print "Compiling ", test
-                    
                 if test.endswith(self.abcasmExt):
                     self.compile_test(test)
                 else:
@@ -803,7 +802,12 @@ class RuntestBase:
                     for util in deps + glob(join(dir,"*Util.as")):
                         cmd += " -in %s" % util #no need to prepend \ to $ when using ash
                     cmd += " %s" % test
-                
+                    
+                    if self.debug:
+                        print cmd
+                    else:
+                        print "Compiling ", test
+                    
                     if exists(testdir+".abc"):
                         os.unlink(testdir+".abc")
                     child.sendline(cmd)
@@ -1059,7 +1063,7 @@ class RuntestBase:
         if ast.endswith(self.abcasmExt):
             # make sure util file has been compiled
             if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
-                self.run_pipe('java -jar %s %s' % (self.asc, self.abcasmShell+'.as'))
+                self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
             (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, self.abcasmShell+'.abc', testName))
         else:
             (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
