@@ -300,8 +300,8 @@ void VMPI_setPageProtection(void *address,
 const char *VMPI_getenv(const char *env) 
 { 
 	const char *val = NULL;
-#ifndef UNDER_CE
 	(void)env;
+#ifndef UNDER_CE
 	val = getenv(env);
 #endif
 	return val;

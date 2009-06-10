@@ -160,10 +160,12 @@ void RedirectLogOutput(LoggingFunction func)
 
 void VMPI_log(const char* message)
 {
+#ifndef VMCFG_SYMBIAN
 	if(logFunc)
 		logFunc(message);
 	else
 		printf("%s",message);
+#endif
 }
 
 bool VMPI_isMemoryProfilingEnabled()
