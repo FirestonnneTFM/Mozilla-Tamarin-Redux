@@ -71,17 +71,16 @@ namespace MMgc
 		GC::GetGC(gcObject)->Free(gcObject);
 	}		
 
-#if defined(MMGC_MEMORY_INFO)
+#ifdef MMGC_RC_HISTORY
+	
 	void RCObject::DumpHistory()
 	{			
 		GCDebugMsg(false, "Ref count modification history for object 0x%x:\n", this);
-#if 0
-		StackTrace **traces = history.GetData();
-		for(int i=0, n=history.Count(); i<n; i++)
+		for(uint32_t i=0, n=history.Count(); i<n; i++)
 		{
-			PrintStackTrace(traces[i]);
+			PrintStackTrace(history.Get(i));
 		}
-#endif
 	}
+
 #endif
 }

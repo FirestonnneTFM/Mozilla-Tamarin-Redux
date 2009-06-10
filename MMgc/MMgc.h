@@ -59,6 +59,10 @@
     #define MMGC_MEMORY_PROFILER
 #endif
 
+#if defined MMGC_MEMORY_INFO && defined MMGC_MEMORY_PROFILER
+    #define MMGC_RC_HISTORY
+#endif
+
 #include "GCDebug.h"
 #include "GCLog.h"
 

@@ -719,6 +719,12 @@ namespace MMgc
 		* any objects that get marked, debug builds only
 		*/
 		bool validateDefRef;		
+		
+		/**
+		 * turn on code that keeps the call stacks of all IncrementRef and DecrementRef operations
+		 * on each RC object, and prints this history when the reference count is already zero
+		 * on entry to DecrementRef, debug builds only.
+		 */
 		bool keepDRCHistory;
 
 		bool dontAddToZCTDuringCollection;
