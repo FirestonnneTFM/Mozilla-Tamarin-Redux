@@ -89,7 +89,10 @@ namespace MMgc
 		// intern table of StackTrace*
 		GCStackTraceHashtable stackTraceMap;
 
-		// intern table of names
+		// intern table of strings used by Profiler
+		GCHashtable stringsTable;
+
+		// hash table for address -> name lookup
 		GCHashtable nameTable;
 
 		//table to store allocation specific information
