@@ -98,6 +98,7 @@ namespace MMgc
 		  config(c),
 		  callbacks_lock(VMPI_lockCreate()),
  		  status(kMemNormal),
+		  enterCount(0),
 		  primordialThread(VMPI_currentThread()),
 		  gclog_spinlock(VMPI_lockCreate()),
 	#ifdef MMGC_MEMORY_PROFILER
