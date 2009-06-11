@@ -140,7 +140,7 @@ void SpyLog(const char* message)
 
 extern void RedirectLogOutput(void (*)(const char*));
 
-void VMPI_spyAllocationEvent()
+void VMPI_spyCallback()
 {
 	pthread_mutex_lock(&spy_mutex);
 

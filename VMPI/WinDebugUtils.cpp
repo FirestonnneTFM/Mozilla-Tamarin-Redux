@@ -57,6 +57,7 @@ void VMPI_debugLog(const char* message)
 #else
 	// !!@ only unicode is supported
 	//OutputDebugStringW(unicode msg);
+	VMPI_log(message); //for windows mobile
 #endif
 
 	VMPI_log( message ); //also log to standard output
@@ -65,5 +66,5 @@ void VMPI_debugLog(const char* message)
 
 void VMPI_debugBreak()
 {
-	::DebugBreak();
+	DebugBreak();
 }

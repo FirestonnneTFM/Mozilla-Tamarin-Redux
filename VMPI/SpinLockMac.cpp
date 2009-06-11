@@ -45,63 +45,37 @@ extern "C"
 	extern uint32_t _spin_lock_try(uint32_t *);
 }
 
-#define NOTHREAD ((pthread_t)0)
-
 class SpinLockMac : public MMgc::GCAllocObject
 {
 public:
 	SpinLockMac()
 	{
 		m1 = 0;
-#ifdef _DEBUG
-		ownerThread = NOTHREAD;
-#endif
 	}
 
-#ifdef _DEBUG
 	~SpinLockMac()
 	{
-		GCAssert(m1 == 0 && ownerThread == NOTHREAD); // unlocked?
 	}
-#endif // _DEBUG
-	
+
 	inline bool Acquire()
 	{
-		GCAssert(ownerThread != pthread_self()); // recursive deadlock?
 		_spin_lock(&m1);
-#ifdef _DEBUG
-		ownerThread = pthread_self();
-#endif
 		return true;
 	}
 	
 	inline bool Release()
 	{
-#ifdef _DEBUG
-		GCAssert(ownerThread == pthread_self()); // unlocked by same thread?
-		ownerThread = NOTHREAD;
-#endif
 		_spin_unlock(&m1);
 		return true;
 	}
 
 	inline bool Try()
 	{
-		GCAssert(ownerThread != pthread_self()); // recursive deadlock?
-		if (_spin_lock_try(&m1)) {
-#ifdef _DEBUG
-			ownerThread = pthread_self();
-#endif
-			return true;
-		}
-		return false;
+		return _spin_lock_try(&m1);
 	}
 
 private:
 	uint32_t m1;
-#ifdef _DEBUG
-	pthread_t ownerThread;
-#endif
 };
 
 
