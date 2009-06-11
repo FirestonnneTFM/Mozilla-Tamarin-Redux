@@ -38,9 +38,22 @@
 
 #include "MMgc.h"
 
-#include <pthread.h>
-// Looks like Symbian SDK does not support pthread spinlock
-#define USE_PTHREAD_MUTEX
+// This is a copy from Unix code.
+// TODO: implement on S60
+
+/*
+Threads and hybrid applications
+
+The pthread and RThread APIs do not mix. Symbian OS heaps are managed thread-wise whereas P.I.P.S. heaps are managed process-wise. Mixing pthread and RThread may result in panics due to data being lost or orphaned. So, do not mix the two unless you know what you're doing.
+
+User libraries or executables written using P.I.P.S. must not allocate resources in the context of the calling thread as the thread might be using a private heap which is inaccessible to other threads and might have a different lifetime.
+
+To minimise the risks avoid using RThread APIs in primarily POSIX applications or libraries (those entering via main()), and avoid using pthread in primarily Symbian OS applications or libraries (those entering via E32Main()).
+
+http://developer.symbian.com/main/documentation/sdl/symbian94/sdk/doc_source/guide/P.I.P.S.-subsystem-guide/PIPS/UsingPIPSForYourApps/HybridApps.html
+*/
+
+//#include <pthread.h>
 
 class SpinLockSymbian : public MMgc::GCAllocObject
 {
@@ -50,27 +63,24 @@ public:
 
 	SpinLockSymbian()
 	{
-		pthread_mutex_init( &m1, 0 );
+//		pthread_mutex_init( &m1, 0 );
 	}
 
 	~SpinLockSymbian()
 	{
-		pthread_mutex_destroy( &m1 );
+//		pthread_mutex_destroy( &m1 );
 	}
 
 	inline bool Acquire()
 	{
-		return pthread_mutex_lock( &m1 ) == 0;
+		return true;
+//		return pthread_mutex_lock( &m1 ) == 0;
 	}
 	
 	inline bool Release()
 	{
-		return pthread_mutex_unlock( &m1 ) == 0;
-	}
-
-	inline bool Try()
-	{
-		return pthread_mutex_trylock( &m1 ) == 0;
+		return true;
+//		return pthread_mutex_unlock( &m1 ) == 0;
 	}
 
 private:

@@ -134,8 +134,6 @@ if config.getCompiler() == 'GCC':
         APP_CXXFLAGS += "-Wuninitialized "
     DEBUG_CXXFLAGS += "-g "
 elif config.getCompiler() == 'VS':
-	# Must not enable exception handling here if using the MS implementation of longjmp,
-	# as it unwinds the stack in a manner consistent with exception handling(!).  
     if cpu == "arm":
         APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 -fp:fast -GF -GS- -Zc:wchar_t- "
         OS_LDFLAGS += "-MAP "
@@ -148,7 +146,7 @@ elif config.getCompiler() == 'VS':
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
         OS_LDFLAGS += "-SAFESEH:NO -MAP "
         if config.getDebug():
-            DEBUG_CXXFLAGS = "-Od "
+            DEBUG_CXXFLAGS = "-Od -EHsc "
         else:
             OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
         if memoryProfiler:

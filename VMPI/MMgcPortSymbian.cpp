@@ -280,10 +280,10 @@ void VMPI_releaseAlignedMemory(void* address)
 size_t VMPI_getPrivateResidentPageCount()
 {
 	size_t pageSize = VMPI_getVMPageSize();
+	TInt freeRAM;
+	HAL::Get(HAL::EMemoryRAMFree, freeRAM);
 	if(pageSize > 0)
 	{
-		TInt freeRAM;
-		HAL::Get(HAL::EMemoryRAMFree, freeRAM);
 		return freeRAM/pageSize;
 	} else
 	{
@@ -309,21 +309,6 @@ uint64_t VMPI_getPerformanceCounter()
 */
 	TUint32 counter = User::FastCounter();
 	return counter;
-}
-
-void VMPI_cleanStack(size_t amt)
-{
-	// TODO
-}
-
-void VMPI_setupPCResolution()
-{
-	// TODO
-}
-
-void VMPI_desetupPCResolution()
-{
-	// TODO
 }
 
 #ifdef MMGC_MEMORY_PROFILER

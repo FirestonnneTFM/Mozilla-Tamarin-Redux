@@ -459,13 +459,6 @@
 		0774945B0F8C9DA600230F6D /* avmfeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmfeatures.h; path = ../../../core/avmfeatures.h; sourceTree = SOURCE_ROOT; };
 		077494B70F8E2DBA00230F6D /* win32-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "win32-platform.h"; path = "../../win32/win32-platform.h"; sourceTree = SOURCE_ROOT; };
 		077494B80F8E2DC900230F6D /* unix-platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "unix-platform.h"; path = "../../unix/unix-platform.h"; sourceTree = SOURCE_ROOT; };
-		07822BDE0FDFD9240007ABA8 /* MMgcPortSymbian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortSymbian.cpp; path = ../../../VMPI/MMgcPortSymbian.cpp; sourceTree = SOURCE_ROOT; };
-		07822BDF0FDFD9240007ABA8 /* SpinLockSymbian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockSymbian.cpp; path = ../../../VMPI/SpinLockSymbian.cpp; sourceTree = SOURCE_ROOT; };
-		07822BE00FDFD9240007ABA8 /* SpinLockWin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpinLockWin.h; path = ../../../VMPI/SpinLockWin.h; sourceTree = SOURCE_ROOT; };
-		07822BE10FDFD9240007ABA8 /* SpyUtilsWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsWin.cpp; path = ../../../VMPI/SpyUtilsWin.cpp; sourceTree = SOURCE_ROOT; };
-		07822BE20FDFD9240007ABA8 /* SpyUtilsWinMo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsWinMo.cpp; path = ../../../VMPI/SpyUtilsWinMo.cpp; sourceTree = SOURCE_ROOT; };
-		07822BE30FDFD9240007ABA8 /* SymbianDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbianDebugUtils.cpp; path = ../../../VMPI/SymbianDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
-		07822BE40FDFD9240007ABA8 /* ThreadsWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsWin.cpp; path = ../../../VMPI/ThreadsWin.cpp; sourceTree = SOURCE_ROOT; };
 		078F53690FA473C50064216F /* ShellCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShellCore.cpp; path = ../../../shell/ShellCore.cpp; sourceTree = SOURCE_ROOT; };
 		078F536A0FA473C50064216F /* ShellCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShellCore.h; path = ../../../shell/ShellCore.h; sourceTree = SOURCE_ROOT; };
 		079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmfeatures.cpp; path = ../../../core/avmfeatures.cpp; sourceTree = SOURCE_ROOT; };
@@ -860,20 +853,13 @@
 		0709B6580F9734DF001A6E61 /* Non-Mac */ = {
 			isa = PBXGroup;
 			children = (
-				07822BDE0FDFD9240007ABA8 /* MMgcPortSymbian.cpp */,
+				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
 				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
 				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
-				07822BDF0FDFD9240007ABA8 /* SpinLockSymbian.cpp */,
 				D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */,
-				07822BE00FDFD9240007ABA8 /* SpinLockWin.h */,
 				D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */,
-				07822BE10FDFD9240007ABA8 /* SpyUtilsWin.cpp */,
-				07822BE20FDFD9240007ABA8 /* SpyUtilsWinMo.cpp */,
-				07822BE40FDFD9240007ABA8 /* ThreadsWin.cpp */,
-				07822BE30FDFD9240007ABA8 /* SymbianDebugUtils.cpp */,
 				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
 				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
-				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
 				D942369C0F8ACB0600F97706 /* manifest.mk */,
 			);
 			name = "Non-Mac";
