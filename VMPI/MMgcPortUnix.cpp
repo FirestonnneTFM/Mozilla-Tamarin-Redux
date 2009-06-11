@@ -65,6 +65,9 @@
 	#include <procfs.h>
 	#include <sys/stat.h>
 	extern "C" caddr_t _getfp(void);
+	typedef caddr_t maddr_ptr;
+#else
+	typedef void *maddr_ptr;
 #endif
 
 #include <fcntl.h>
@@ -90,6 +93,11 @@ bool VMPI_useVirtualMemory()
 	return false;
 #endif
 	return true;
+}
+
+bool VMPI_areNewPagesDirty()
+{
+	return false;
 }
 
 void* VMPI_reserveMemoryRegion(void* address, size_t size)
@@ -149,11 +157,7 @@ bool VMPI_decommitMemory(char *address, size_t size)
 
 void* VMPI_allocateAlignedMemory(size_t size)
 {
-	void* result = valloc(size);
-#ifdef MMGC_SPARC
-	memset(result, 0, size);
-#endif
-	return result;
+	return valloc(size);
 }
 
 void VMPI_releaseAlignedMemory(void* address)
@@ -433,3 +437,12 @@ uint64_t VMPI_getPerformanceCounter()
 
 #endif //MEMORY_PROFILER
 
+
+void VMPI_cleanStack(size_t amt)
+{
+	void *space = alloca(amt);
+	if(space)
+	{
+		VMPI_memset(space, 0, amt);
+	}
+}

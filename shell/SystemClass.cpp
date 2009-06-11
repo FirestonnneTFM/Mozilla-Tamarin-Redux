@@ -203,7 +203,7 @@ namespace avmshell
 	double SystemClass::get_totalMemory()
 	{
 		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
-		return double(gcheap->GetUsedHeapSize() * MMgc::GCHeap::kBlockSize);
+		return double(gcheap->GetTotalHeapSize() * MMgc::GCHeap::kBlockSize);
 	}
 
 	double SystemClass::get_freeMemory()
@@ -214,7 +214,7 @@ namespace avmshell
 	
 	double SystemClass::get_privateMemory()
 	{
-		return double(MMgc::GCHeap::GetPrivateBytes() * MMgc::GCHeap::kBlockSize);
+		return double(VMPI_getPrivateResidentPageCount() * MMgc::GCHeap::kBlockSize);
 	}
 
 	bool SystemClass::isGlobal(Atom o)

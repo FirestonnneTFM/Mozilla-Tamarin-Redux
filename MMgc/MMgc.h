@@ -68,7 +68,7 @@
 
 /*
  * If _GCHeapLock is defined, a spin lock is used for thread safety
- * on all public API's (Alloc, Free, ExpandHeap)
+ * on all public API's (Alloc, Free)
  *
  * Warning:
  * We may use GCHeap for allocation on other threads, hence the
