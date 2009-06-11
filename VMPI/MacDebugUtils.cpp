@@ -39,10 +39,6 @@
 
 #include "MMgc.h"
 
-#if !defined(__MWERKS__) && !defined(MMGC_MAC_NO_CORE_SERVICES)
-    #include <CoreServices/CoreServices.h>
-#endif
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>

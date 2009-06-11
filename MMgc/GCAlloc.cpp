@@ -127,6 +127,7 @@ namespace MMgc
 
 		if (b) 
 		{
+			b->firstFree = 0;
 			b->gc = m_gc;
 			b->alloc = this;
 			b->size = m_itemSize;
@@ -704,26 +705,19 @@ start:
 		*((void**)item) = oldFree;	
 	}
 	
-	size_t GCAlloc::GetBytesInUse()
-	{
-		size_t bytes=0;
-		GCBlock *b=m_firstBlock;
-		while (b) {
-			bytes += b->numItems * m_itemSize;
-			b = b->next;
-		}		
-		return bytes;
-	}
-	
 	void GCAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)	
 	{
+		totalAskSize = totalAllocated = 0;
+
+		GCBlock *b=m_firstBlock;
+		while (b) {
+			totalAllocated += b->numItems * m_itemSize;
+			b = b->next;
+		}		
+	
 #ifdef MMGC_MEMORY_PROFILER
 		totalAskSize = m_totalAskSize;
-#else
-		totalAskSize = 0;		
 #endif
-		
-		totalAllocated = GetBytesInUse();
 	}
 
 #ifdef MMGC_MEMORY_INFO

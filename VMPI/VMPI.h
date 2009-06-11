@@ -279,6 +279,13 @@ extern void*		VMPI_allocateAlignedMemory(size_t size);
 extern void			VMPI_releaseAlignedMemory(void* address);
 
 /**
+* This method is used to determind should MMgc zero initalize newly allocated memory,
+* either allocated with VMPI_commitMemory or VMPI_allocateAlignedMemory.
+* @return false if the memory is zero initialized by the OS, otherwise true
+*/
+extern bool			VMPI_areNewPagesDirty();
+
+/**
 * Method to get the frequency of a high performance counter/timer on the system
 * On platforms where no API to retrieve this information should return a number that closely
 * matches its timer frequency
@@ -399,21 +406,13 @@ extern bool VMPI_useVirtualMemory();
 */
 extern bool VMPI_isMemoryProfilingEnabled();
 
-/** 
- * Method to setup a spy channel on MMgc/avmplus
- * If the platform intends to periodically retrieve information from MMgc/avmplus
- * then it can perform the necessary setup during this function call and return true
- * @return true if the spy is setup successfully else false
- * @see VMPI_spyCallback
-*/
-extern bool VMPI_spySetup();
-
-/** 
- * Callback method for spy
- * Currently called on every allocation in MMgc if VMPI_spySetup returned true
- * @return none
-*/
-extern void VMPI_spyCallback();
+/**
+ * Clean space beyond the current stack pointer (ie into the free area) by 'amt' bytes.
+ * The function can be a no-op but the consequence of that may be increased retention
+ * of storage and false positives in debug builds.
+ * @param the amout of bytes to clear
+ */
+extern void VMPI_cleanStack(size_t amt);
 
 /** 
  * MEthod to determine whether we have access to symbol information
@@ -463,7 +462,22 @@ typedef void * vmpi_thread_t;
  */
 extern vmpi_thread_t VMPI_currentThread();
 
-/**
+/** 
+ * Method to setup a spy channel on MMgc/avmplus
+ * If the platform intends to periodically retrieve information from MMgc/avmplus
+ * then it can perform the necessary setup during this function call and return true
+ * @return true if the spy is setup successfully else false
+ * @see VMPI_spyAllocationEvent
+ */
+extern bool VMPI_spySetup();
+
+/** 
+ * Called on every allocation in MMgc if VMPI_spySetup returned true
+ * @return none
+ */
+extern void VMPI_spyAllocationEvent();
+
+/*
  * Method to perform any initialization activities to assist
  * the program counter to symbols resolution for MMgc memory profiler
  * @return none
@@ -482,6 +496,6 @@ extern void VMPI_desetupPCResolution();
  * wrapper around getenv function, return's NULL on platforms with no env vars
  * @return value of env var
  */
-extern char *VMPI_getenv(const char *name);
+extern const char *VMPI_getenv(const char *name);
 
 #endif /* __avmplus_VMPI__ */
