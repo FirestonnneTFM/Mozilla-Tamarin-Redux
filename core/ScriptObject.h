@@ -50,7 +50,7 @@ namespace avmplus
 	public:
 	
 		ScriptObject(VTable* vtable, ScriptObject* delegate,
-					 int capacity = InlineHashtable::kDefaultCapacity);
+					 int capacity = 0);
 		~ScriptObject();
 
 		ScriptObject* getDelegate() const { return delegate; }
@@ -80,11 +80,23 @@ namespace avmplus
 			return vtable->toplevel();
 		}
 
-		virtual InlineHashtable* getTable() const {
-			AvmAssert(vtable->traits->getHashtableOffset() != 0);
-			return (InlineHashtable*)((byte*)this + vtable->traits->getHashtableOffset());
-		}
-
+		InlineHashtable* getTable() const;
+		
+		inline InlineHashtable* getTableNoInit() const
+		{
+			uintptr_t* tableOffset = (uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
+			if(!vtable->traits->isDictionary)
+			{
+				return (InlineHashtable*)tableOffset;
+			}
+			else
+			{
+				//DictionaryObjects store pointer to HeapHashtable at
+				//the hashtable offset
+				return ((HeapHashtable*)*tableOffset)->get_ht();
+			}
+		}		
+		
 		bool isValidDynamicName(const Multiname* m) const {
 			return m->contains(core()->publicNamespace) && !m->isAnyName() && !m->isAttr();
 		}
@@ -190,7 +202,7 @@ namespace avmplus
         bool isGlobalObject() const;
 
 		virtual Stringp implToString() const;
-
+		
 #ifdef AVMPLUS_VERBOSE
 	public:
 		virtual Stringp format(AvmCore* core) const;
@@ -201,6 +213,10 @@ namespace avmplus
 		virtual uint64 size() const;
 		virtual MethodEnv* getCallMethodEnv() { return NULL; }
 #endif
+		
+	private:
+		void initHashtable(int capacity = InlineHashtable::kDefaultCapacity);
+		
 	// ------------------------ DATA SECTION BEGIN
 	public:		VTable* const		vtable;
 	private:	ScriptObject*		delegate;     // __proto__ in AS2, archetype in semantics

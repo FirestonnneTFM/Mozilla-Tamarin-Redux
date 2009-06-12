@@ -91,7 +91,7 @@ namespace avmplus
 		const static Atom DELETED = undefinedAtom;
 
 		/** kDefaultCapacity must be a power of 2 */
-		const static int kDefaultCapacity = 8;
+		const static int kDefaultCapacity = 2;
 
 		uint32_t getSize() const { return m_size; }
 		uint32_t getCapacity() const { return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0; }

@@ -48,8 +48,6 @@ namespace avmplus
 
 		void init(bool weakKeys);
 	
-		virtual InlineHashtable* getTable() const { return _table->get_ht(); }
-	
 		// multiname and Stringp forms fall through to ScriptObject
 		virtual Atom getAtomProperty(Atom name) const;
 		virtual bool hasAtomProperty(Atom name) const;
@@ -59,10 +57,13 @@ namespace avmplus
 		virtual Atom nextName(int index);
 		virtual int nextNameIndex(int index);
 
-		bool isUsingWeakKeys() const { return _table->weakKeys(); }
-	private:
-		DWB(HeapHashtable*) _table;
+		bool isUsingWeakKeys() const { return getHeapHashtable()->weakKeys(); }
 
+	private:
+		inline HeapHashtable* getHeapHashtable() const {
+			return (HeapHashtable*)*(uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
+		}
+		
 		Atom FASTCALL getKeyFromObject(Atom object) const;
 	};
 

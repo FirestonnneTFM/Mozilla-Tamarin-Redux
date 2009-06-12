@@ -72,9 +72,14 @@ namespace avmplus
 	{
 		GCAssert(vtable->traits->isDictionary == true);
 		MMgc::GC* gc = this->gc();
-		_table = weakKeys ? 
-					new (gc) WeakKeyHashtable(gc) : 
-					new (gc) HeapHashtable(gc);
+		
+		HeapHashtable* ht = weakKeys ? new (gc) WeakKeyHashtable(gc) 
+									: new (gc) HeapHashtable(gc);
+
+		//store pointer of newly created hashtable, encapsulated with writebarrier, 
+		//at the hashtable offset address of the corresponding traits
+		uintptr_t* addr = (uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
+		WB(gc, this, addr, ht);
 	}
 
 	Atom FASTCALL DictionaryObject::getKeyFromObject(Atom key) const
@@ -97,7 +102,7 @@ namespace avmplus
 	{
 		if (AvmCore::isObject(key)) 
 		{
-			return _table->get(getKeyFromObject(key));
+			return getHeapHashtable()->get(getKeyFromObject(key));
 		} 
 
 		return ScriptObject::getAtomProperty(key);
@@ -107,7 +112,7 @@ namespace avmplus
 	{
 		if (AvmCore::isObject(key)) 
 		{
-			return _table->contains(getKeyFromObject(key));
+			return getHeapHashtable()->contains(getKeyFromObject(key));
 		}
 
 		return ScriptObject::hasAtomProperty(key);
@@ -117,7 +122,7 @@ namespace avmplus
 	{
 		if (AvmCore::isObject(key)) 
 		{
-			_table->remove(getKeyFromObject(key));
+			getHeapHashtable()->remove(getKeyFromObject(key));
 			return true;
 		}
 
@@ -128,7 +133,7 @@ namespace avmplus
 	{
 		if (AvmCore::isObject(key)) 
 		{
-			_table->add(getKeyFromObject(key), value);
+			getHeapHashtable()->add(getKeyFromObject(key), value);
 			return;
 		}
 		
@@ -139,7 +144,7 @@ namespace avmplus
 	{
 		Atom k = ScriptObject::nextName(index);
 
-		if (AvmCore::isGenericObject(k) && _table->weakKeys()) 
+		if (AvmCore::isGenericObject(k) && getHeapHashtable()->weakKeys()) 
 		{
 			GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(k);
 			ScriptObject* key = ((ScriptObject*)ref->get());
@@ -166,19 +171,19 @@ namespace avmplus
 
 		// this can happen if you break in debugger in a subclasses constructor before super
 		// has been called -- let's do it in all builds, it's better than crashing.
-		if (!_table)
+		if (!getHeapHashtable())
 		{
 			return 0;
 		}
 
 		// Advance to first non-empty slot.
-		InlineHashtable* ht = _table->get_ht();
+		InlineHashtable* ht = getHeapHashtable()->get_ht();
 		const Atom* atoms = ht->getAtoms();
 		int numAtoms = ht->getCapacity();
 		while (index < numAtoms) 
 		{
 			Atom a = atoms[index];
-			if (AvmCore::isGenericObject(a) && _table->weakKeys()) 
+			if (AvmCore::isGenericObject(a) && getHeapHashtable()->weakKeys()) 
 			{
 				GCWeakRef *weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
 				if(weakRef->get())
