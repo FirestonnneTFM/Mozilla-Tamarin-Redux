@@ -211,9 +211,9 @@ elif the_os == "linux":
                          'AVMPLUS_UNIX': None,
                          'LINUX': None})
     OS_LIBS.append('pthread')
-    if cpu == "x86_64":
-        # workaround https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-        OPT_CXXFLAGS += '-fno-schedule-insns2 '
+#    if cpu == "x86_64":
+#        # workaround https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+#        OPT_CXXFLAGS += '-fno-schedule-insns2 '
     if config.getDebug():
         OS_LIBS.append("dl")
 elif the_os == "sunos":
