@@ -57,7 +57,8 @@ export shell_release_thumb=avmshell_thumb$shell_extension
 export shell_debug_arm=avmshell_arm_d$shell_extension
 export shell_debug_thumb=avmshell_thumb_d$shell_extension
 
-
+export EMULATOR="c:/Program Files (x86)/Microsoft Device Emulator/1.0/DeviceEmulator.exe"
+export EMULATORIMAGE="c:/Program Files (x86)/Windows Mobile 6 SDK/PocketPC/DeviceemulationV650/0409/PPC_USA_GSM_VR.BIN"
 
 VS_HOME_PATH="/c/Program Files/Microsoft Visual Studio 9.0"
 VS_HOME="c:\Program Files\Microsoft Visual Studio 9.0"

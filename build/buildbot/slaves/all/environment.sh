@@ -53,6 +53,9 @@ export branch=tamarin-redux
 export shellABC=shell_toplevel.abc
 export builtinABC=builtin.abc
 
+# builds for windows mobile (used by emulator)
+export shell_release_arm=avmshell_arm$shell_extension
+
 # builds for -vprof data
 export shell_release_vprof=avmshell-vprof$shell_extension
 export shell_release_vprof_64=avmshell-vprof-64$shell_extension
