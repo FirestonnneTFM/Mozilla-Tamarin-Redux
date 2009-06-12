@@ -255,10 +255,13 @@ extern bool			VMPI_decommitMemory(char *address, size_t size);
  * SetPageProtection changes the page access protections on a block of pages,
  * to make JIT-ted code executable or not.
  *
- * If executableFlag is true, the memory is made executable and read-only.
- *
- * If executableFlag is false, the memory is made non-executable and
- * read-write.
+ * @param address pointer to start of memory block.  It is possible that the memory block pointed to by address
+ * could be acquired from more than one calls to VMPI_reserveMemoryRegion.  The implementation of this method 
+ * is expected to handle such cases and identify the region boundaries if the underlying system requires
+ * setting the protection flags on blocks individually if they were allocated separately.
+ * @param executableFlag If executableFlag is true, the memory is made executable and read-only.
+ * If executableFlag is false, the memory is made non-executable and read-write.
+ * @param writeableFlag If true memory block is made read-write
  */
 extern void VMPI_setPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
 

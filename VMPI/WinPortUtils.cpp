@@ -282,13 +282,19 @@ void VMPI_setPageProtection(void *address,
 	} else {
 		newProtectFlags = PAGE_READONLY;
 	}
-	BOOL retval = VirtualProtect(address,
-								 size,
-								 newProtectFlags,
-								 &oldProtectFlags);
 	
-	(void)retval;
-	GCAssert(retval);
+	BOOL retval;
+	MEMORY_BASIC_INFORMATION mbi;	
+	do {
+		VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
+		size_t markSize = size > mbi.RegionSize ? mbi.RegionSize : size;
+		
+		retval = VirtualProtect(address, markSize, newProtectFlags, &oldProtectFlags);
+		GCAssert(retval);
+		
+		address = (char*) address + markSize;
+		size -= markSize;
+	} while(size > 0 && retval);
 	
 	// We should not be clobbering PAGE_GUARD protections
 	GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
