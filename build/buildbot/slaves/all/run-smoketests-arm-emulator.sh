@@ -54,8 +54,9 @@
 # Download the AVMSHELL if it does not exist
 ##
 echo "$buildsdir/$change-${changeid}/$platform/$shell_release_arm"
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_arm" ]; then
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
     echo "Download AVMSHELL"
+    mkdir -p $buildsdir/$change-${changeid}/$platform
     ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release_arm $buildsdir/$change-${changeid}/$platform/$shell_release_arm
     ret=$?
     test "$ret" = "0" || {
@@ -86,11 +87,14 @@ echo "Building ABC files using the following ASC version:"
 echo "`java -jar $basedir/utils/asc.jar`"
 echo ""
 
+
+
 export CERUNNER=$basedir/build/buildbot/slaves/all/tools/wmrunner.exe
 export AVM=$buildsdir/$change-${changeid}/$platform/$shell_release_arm
 export ASC=$basedir/utils/asc.jar
 export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
+
 
 ##
 # Ensure that the system is clean and ready
@@ -98,25 +102,13 @@ export SHELLABC=$basedir/shell/$shellABC
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean.sh
 
-cd $basedir/test/acceptance
-# If available, use windows python (instead of cygwin python)
-# Threading only works with windows python, $PYTHONWIN env variable must point to windows install
-# $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
-if [ -z "$PYTHONWIN" ]
-then
-    py=python
-else
-    py=$PYTHONWIN
-fi
+cd $basedir/test
+./runsmokes.py --testfile=./runsmokes-arm.txt --time=120
+ret=$?
 
-echo "message: $py ./runtests.py --nohtml"
-$py ./runtests.py --nohtml
-
-echo "message: $py ./runtests.py --nohtml --vmargs=-Ojit"
-$py ./runtests.py --nohtml --vmargs=-Ojit
-
-echo "message: $py ./runtests.py --nohtml --vmargs=-Dinterp"
-$py ./runtests.py --nohtml --vmargs=-Dinterp
+exitcode=0
+test "$ret" = "0" ||
+   exitcode=1
 
 ##
 # Ensure that the system is torn down and clean
@@ -124,5 +116,5 @@ $py ./runtests.py --nohtml --vmargs=-Dinterp
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
 
-exit 0
+exit $exitcode
 
