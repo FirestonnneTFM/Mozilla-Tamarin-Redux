@@ -41,7 +41,7 @@ namespace avmplus
 {
 	ScriptObject::ScriptObject(VTable *vtable,
 							   ScriptObject *delegate,
-	                           int capacity /*=InlineHashtable::kDefaultCapacity*/)
+	                           int capacity /*= 0*/)
 		: 
 #ifdef DEBUGGER 
 			AvmPlusScriptableObject((Atom)vtable), 
@@ -57,11 +57,10 @@ namespace avmplus
 
  		setDelegate(delegate);
 
-		if (traits->needsHashtable())
+		//if capacity not specified then initialize the hashtable lazily
+		if( traits->needsHashtable() && capacity )
 		{
-			MMGC_MEM_TYPE(this);
-			getTable()->initialize(this->gc(), capacity);
-			getTable()->setDontEnumSupport();
+			initHashtable(capacity);
 		}
 	}
 
@@ -69,6 +68,35 @@ namespace avmplus
 	{
 		setDelegate(NULL);
 		vtable->traits->destroyInstance(this);
+	}
+	
+	void ScriptObject::initHashtable(int capacity /*=InlineHashtable::kDefaultCapacity*/)
+	{
+		AvmAssert(vtable->traits->isDictionary == 0); //should not be called DictionaryObject uses HeapHashtable
+		
+		MMGC_MEM_TYPE(this);
+		InlineHashtable* ht = (InlineHashtable*)((byte*)this + vtable->traits->getHashtableOffset());
+		ht->initialize(this->gc(), capacity);
+		ht->setDontEnumSupport();
+	}
+	
+	InlineHashtable* ScriptObject::getTable() const
+	{
+		AvmAssert(vtable->traits->getHashtableOffset() != 0);
+		uintptr_t* tableOffset = (uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
+		if(!vtable->traits->isDictionary)
+		{
+			InlineHashtable* table = (InlineHashtable*)tableOffset;
+			if(table->getCapacity() == 0)
+				((ScriptObject*)this)->initHashtable(); //intentionally removing constness
+			return table;
+		}
+		else
+		{
+			//DictionaryObjects store pointer to HeapHashtable at
+			//the hashtable offset
+			return ((HeapHashtable*)*tableOffset)->get_ht();
+		}
 	}
 	
     /**

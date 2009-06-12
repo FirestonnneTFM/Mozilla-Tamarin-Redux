@@ -1851,7 +1851,7 @@ namespace avmplus
 	{
 		AvmAssert(linked);
 
-		InlineHashtable* ht = m_hashTableOffset ? obj->getTable() : NULL;
+		InlineHashtable* ht = m_hashTableOffset ? obj->getTableNoInit() : NULL;
 
 		// start by clearing native space to zero (except baseclasses)
 		uint32_t* p = (uint32_t*)((char*)obj + sizeof(AvmPlusScriptableObject));
@@ -1898,11 +1898,17 @@ namespace avmplus
 		}
 
 		// finally, zap the hashtable (if any)
-		if (ht)
+		if(ht)
 		{
 			ht->destroy();
 		}
-		
+		//for DictionaryObject also zero out the 
+		//hashtable pointer stored at the offset address;
+		if(isDictionary)
+		{
+			uintptr_t* ptr = (uintptr_t*)((char*)obj + m_hashTableOffset);
+			*ptr = 0;
+		}
 	}
 
 #if defined FEATURE_NANOJIT
