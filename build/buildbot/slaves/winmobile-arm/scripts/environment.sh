@@ -51,6 +51,7 @@ export platform=winmobile
 export basedir=c:/buildbot/$branch/$platform-arm/$branch
 export buildsdir=c:/buildbot/$branch/$platform-arm/builds
 export uploadbuildsdir=/c/buildbot/$branch/$platform-arm/builds
+export EMULATORDIR=c:/buildbot/$branch/$platform-arm/emulator
 
 export shell_release_arm=avmshell_arm$shell_extension
 export shell_release_thumb=avmshell_thumb$shell_extension
