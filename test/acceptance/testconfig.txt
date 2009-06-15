@@ -75,7 +75,7 @@ abcasm/funcRedef , .* , expectedfail , Error 1107 is correct output
 abcasm/stringEscapes , .* , skip,
 abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=491056
 # Bug 496643 - x64 smoke test failures
-abcasm/mops, x64-win.*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=496643
+abcasm/mops, x64-(win|mac).*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=496643
 abcasm/coverage/I, ppc64-mac.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=496643
 
 ####################
