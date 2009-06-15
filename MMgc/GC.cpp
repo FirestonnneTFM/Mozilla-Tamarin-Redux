@@ -177,7 +177,7 @@ namespace MMgc
 	}
 	
 	inline uint64_t GCPolicyManager::interCollectionTicks() {
-		return 15 * VMPI_getPerformanceFrequency() / 1000;		// Ticks.  Value represents 15ms on all platforms
+		return 200 * VMPI_getPerformanceFrequency() / 1000;		// Ticks.  Value represents 200ms on all platforms
 		
 		/* Old code, preserved here until we revamp policy as a whole.
 		 *
