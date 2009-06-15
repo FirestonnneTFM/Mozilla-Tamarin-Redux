@@ -2571,6 +2571,9 @@ return the result of the comparison ToPrimitive(x) == y.
 			case '&':
 				output << "&amp;";
 				break;
+			case 0x0000:
+				output << "&#x0;"; // extension of ECMA-357
+				break;
 			default:
 				output << (s[i]);
 			}
@@ -2578,7 +2581,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			i++;
 		}
 
-		return newStringUTF8(output.c_str());
+		return newStringUTF8(output.c_str(), output.length());
 	}
 
 	Stringp AvmCore::EscapeAttributeValue(Atom v)
@@ -2609,12 +2612,15 @@ return the result of the comparison ToPrimitive(x) == y.
 			case 0x0009:
 				output << "&#x9;";
 				break;
+			case 0x0000:
+				output << "&#x0;"; // extension of ECMA-357
+				break;
 			default:
 				output << (s[i]);
 			}
 		}
 
-		return newStringUTF8(output.c_str());
+		return newStringUTF8(output.c_str(), output.length());
 	}
 
 	/*static*/ XMLObject* AvmCore::atomToXMLObject(Atom atm) 
