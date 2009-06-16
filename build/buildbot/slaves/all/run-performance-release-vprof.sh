@@ -121,18 +121,18 @@ if [ $2 ]
 then
     echo ""
     echo "===========   Custom Run: $2   ==========="
-    # determine what memlimit to apply based on testname
+    # determine what iter to apply based on testname
     if [[ $2 == jsbench* ]] ; then
         # skip js
         exit 0
     elif [[ $2 == sunspider* ]] ; then
-        vmargs="$sunspider_memlimit"
+        vmargs=""
         iter=3
     elif [[ $2 == v8* ]] ; then
         # skip v8
         exit 0
     else
-        vmargs="$misc_memlimit"
+        vmargs=""
         iter=3
     fi
     python ./runtests.py -r ${branch}-vprof --perfm -k -f -i $iter --vmargs="$vmargs" $2

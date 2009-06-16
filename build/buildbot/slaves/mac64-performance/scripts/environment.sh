@@ -62,12 +62,6 @@ export hostip=10.60.147.196
 
 PATH=/usr/local/bin/:$PATH
 
-# memlimit is number of 4k blocks to set heap limit
-export sunspider_memlimit="-memlimit 1281"
-export misc_memlimit=""
-export jsbench_memlimit="-memlimit 46080"
-export v8_memlimit="-memlimit 768"
-
 baselineBranchTime=tamarin-central
 baselineConfigTime=
 baselineBuildTime=707

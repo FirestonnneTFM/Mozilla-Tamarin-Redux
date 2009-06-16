@@ -123,18 +123,18 @@ if [ $2 ]
 then
     echo ""
     echo "===========   Custom Run: $2   ==========="
-    # determine what memlimit to apply based on testname
+    # determine what iter to apply based on testname
     if [[ $2 == jsbench* ]] ; then
-        vmargs="$jsbench_memlimit"
+        vmargs=""
         iter=3
     elif [[ $2 == sunspider* ]] ; then
-        vmargs="$sunspider_memlimit"
+        vmargs=""
         iter=10
     elif [[ $2 == v8* ]] ; then
-        vmargs="$v8_memlimit"
+        vmargs=""
         iter=10
     else
-        vmargs="$misc_memlimit"
+        vmargs=""
         iter=3
     fi
     python ./runtests.py -r $branch -k -f -i $iter --vmargs="$jit $vmargs" $2
@@ -153,7 +153,7 @@ else
 # standard performance run
     echo ""
     echo "===========   JSBench   ==========="
-    python ./runtests.py --config=jsbench -r $branch -k -f -i 3 --vmargs="$jit $jsbench_memlimit"
+    python ./runtests.py --config=jsbench -r $branch -k -f -i 3 --vmargs="$jit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="jsbench time test run failed. " 
@@ -168,7 +168,7 @@ else
     
     echo ""
     echo "===========   Misc   ==========="
-    python ./runtests.py --config=misc -r $branch -k -f -i 3 --vmargs="$jit $misc_memlimit"
+    python ./runtests.py --config=misc -r $branch -k -f -i 3 --vmargs="$jit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="${resultmessage} \nmisc time test run failed. " 
@@ -183,7 +183,7 @@ else
     
     echo ""
     echo "===========   SunSpider   ==========="
-    python ./runtests.py --config=sunspider -r $branch -k -f -i 10 --vmargs="$jit $sunspider_memlimit"
+    python ./runtests.py --config=sunspider -r $branch -k -f -i 10 --vmargs="$jit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="${resultmessage} \nsunspider time test run failed. " 
@@ -198,7 +198,7 @@ else
     
     echo ""
     echo "===========   V8   ==========="
-    python ./runtests.py --config=v8 -r $branch -k -f -i 10 --larger --vmargs="$jit $v8_memlimit"
+    python ./runtests.py --config=v8 -r $branch -k -f -i 10 --larger --vmargs="$jit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="${resultmessage} \nv8 time test run failed. " 

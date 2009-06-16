@@ -61,16 +61,6 @@ export slavename="$branch-$platform-performance"
 
 export hostip=10.60.147.192
 
-# memlimit is number of 4k blocks to set heap limit
-# sunspider limit is 8mb
-# misc limit is 80mb
-# jsbench limit is 180 mb 
-# v8 limit is 3mb
-export sunspider_memlimit="-memlimit 2048"
-export misc_memlimit=""
-export jsbench_memlimit="-memlimit 8192"
-export v8_memlimit="-memlimit 4096"
-
 baselineBranchTime=tamarin-central
 baselineConfigTime=
 baselineBuildTime=707
