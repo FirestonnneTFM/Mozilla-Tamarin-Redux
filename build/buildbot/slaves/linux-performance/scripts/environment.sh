@@ -59,9 +59,3 @@ export slavename="$branch-$platform-performance"
 export hostip=10.60.147.198
 
 PATH=/usr/local/bin/:$PATH
-
-# memlimit is number of 4k blocks to set heap limit
-export sunspider_memlimit="-memlimit 6144"
-export misc_memlimit=""
-export jsbench_memlimit="-memlimit 46080"
-export v8_memlimit="-memlimit 12240"

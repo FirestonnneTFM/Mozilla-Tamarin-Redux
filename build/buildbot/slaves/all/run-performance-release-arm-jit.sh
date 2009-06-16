@@ -118,18 +118,18 @@ if [ $2 ]
 then
     echo ""
     echo "===========   Custom Run: $2   ==========="
-    # determine what memlimit to apply based on testname
+    # determine what iter to apply based on testname
     if [[ $2 == jsbench* ]] ; then
-        vmargs="$jsbench_memlimit"
+        vmargs=""
         iter=3
     elif [[ $2 == sunspider* ]] ; then
-        vmargs="$sunspider_memlimit"
+        vmargs=""
         iter=10
     elif [[ $2 == v8* ]] ; then
-        vmargs="$v8_memlimit"
+        vmargs=""
         iter=10
     else
-        vmargs="$misc_memlimit"
+        vmargs=""
         iter=3
     fi
     echo "python ./runtests.py -r $branch -k -f -i $iter --vmargs='$vmargs' $2"
@@ -149,7 +149,7 @@ else
 # standard performance run
     echo ""
     echo "===========   JSBench   ==========="
-    python ./runtests.py --config=jsbench --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Ojit \"$jsbench_memlimit\""
+    python ./runtests.py --config=jsbench --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Ojit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="jsbench time test run failed. " 
@@ -163,7 +163,7 @@ else
     }
     echo ""
     echo "===========   Misc   ==========="
-    python ./runtests.py --config=misc-mobile --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Ojit \"$misc_memlimit\""
+    python ./runtests.py --config=misc-mobile --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Ojit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nmisc time test run failed. " 
@@ -177,7 +177,7 @@ else
     }
     echo ""
     echo "===========   SunSpider   ==========="
-    python ./runtests.py --config=sunspider-mobile --vmversion=${change} -r $branch -k -f -i 10 --vmargs="-Ojit \"$sunspider_memlimit\""
+    python ./runtests.py --config=sunspider-mobile --vmversion=${change} -r $branch -k -f -i 10 --vmargs="-Ojit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nsunspider time test run failed. " 
@@ -192,7 +192,7 @@ else
     
     echo ""
     echo "===========   V8   ==========="
-    python ./runtests.py --config=v8 --vmversion=${change} -r $branch -k -f -i 3 --larger --vmargs="-Ojit \"$v8_memlimit\""
+    python ./runtests.py --config=v8 --vmversion=${change} -r $branch -k -f -i 3 --larger --vmargs="-Ojit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nv8 time test run failed. " 

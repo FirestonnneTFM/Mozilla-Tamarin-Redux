@@ -61,8 +61,3 @@ export hostip=10.60.147.221
 
 PATH=/usr/local/bin/:$PATH
 
-# memlimit is number of 4k blocks to set heap limit
-export sunspider_memlimit="-memlimit 1024"
-export misc_memlimit=""
-export jsbench_memlimit="-memlimit 46080"
-export v8_memlimit="-memlimit 768"

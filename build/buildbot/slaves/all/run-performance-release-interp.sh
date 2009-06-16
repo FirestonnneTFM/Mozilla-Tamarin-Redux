@@ -124,18 +124,18 @@ if [ $2 ]
 then
     echo ""
     echo "===========   Custom Run: $2   ==========="
-    # determine what memlimit to apply based on testname
+    # determine what iter to apply based on testname
     if [[ $2 == jsbench* ]] ; then
         # don't run jsbench
         exit 0
     elif [[ $2 == sunspider* ]] ; then
-        vmargs="$sunspider_memlimit"
+        vmargs=""
         iter=10
     elif [[ $2 == v8* ]] ; then
         # don't run v8
         exit 0
     else
-        vmargs="$misc_memlimit"
+        vmargs=""
         iter=3
     fi
     python ./runtests.py -r $branch -k -f -i $iter --vmargs="$interp $vmargs" $2
@@ -154,7 +154,7 @@ else
     # standard performance run
     #echo ""
     #echo "===========   JSBench   ==========="
-    #python ./runtests.py --config=jsbench -r $branch -k -f -i 3 --vmargs="$interp $jsbench_memlimit"
+    #python ./runtests.py --config=jsbench -r $branch -k -f -i 3 --vmargs="$interp"
     #test "$?" = "0" || { 
     #    result="1"; 
     #    resultmessage="jsbench time test run failed. " 
@@ -169,7 +169,7 @@ else
     
     echo ""
     echo "===========   Misc   ==========="
-    python ./runtests.py --config=misc -r $branch -k -f -i 3 --vmargs="$interp $misc_memlimit"
+    python ./runtests.py --config=misc -r $branch -k -f -i 3 --vmargs="$interp"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="${resultmessage} \nmisc time test run failed. " 
@@ -184,7 +184,7 @@ else
     
     echo ""
     echo "===========   SunSpider   ==========="
-    python ./runtests.py --config=sunspider -r $branch -k -f -i 10 --vmargs="$interp $sunspider_memlimit"
+    python ./runtests.py --config=sunspider -r $branch -k -f -i 10 --vmargs="$interp"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="${resultmessage} \nsunspider time test run failed. " 
