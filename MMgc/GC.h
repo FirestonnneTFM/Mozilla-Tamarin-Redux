@@ -80,7 +80,7 @@
 	void *__stack;										\
 	size_t __stackSize;									\
 	MMGC_GET_STACK_EXTENTS(_gc, __stack, __stackSize);	\
-	GCRoot root(_gc, __stack, __stackSize);             \
+	MMgc::GCRoot root(_gc, __stack, __stackSize);		\
 	MMgc::GCAutoEnterPause __mmgc_enter_pause(_gc);
 
 // Enable our own alloca() replacement that always allocates in the heap, this is good on
