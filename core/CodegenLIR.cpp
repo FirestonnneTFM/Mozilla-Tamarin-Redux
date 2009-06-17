@@ -3125,7 +3125,6 @@ namespace avmplus
 		if (outOMem()) return;
         this->state = state;
         emitPrep();
-        PERFM_NVPROF("emitGetslot",1);
 		
 		Traits *t = state->value(ptr_index).traits;
 		LIns *ptr = localGetp(ptr_index);
@@ -3166,7 +3165,6 @@ namespace avmplus
         emitPrep();
         int sp = state->sp();
 
-        PERFM_NVPROF("emitSetslot",1);
 		Traits* t;
 		LIns* ptr;
 		
@@ -3316,7 +3314,6 @@ namespace avmplus
 
 			case OP_jump:
 			{
-                PERFM_NVPROF("emit(jump",1);
 				// spill everything first
 				intptr_t targetpc = op1;
 
@@ -3335,7 +3332,6 @@ namespace avmplus
 
 			case OP_lookupswitch:
 			{
-                PERFM_NVPROF("emit(switch",1);
 				//int index = integer(*(sp--));
 				//pc += readS24(index < readU16(pc+4) ? 
 				//	(pc+6+3*index) :	// matched case
@@ -3365,7 +3361,6 @@ namespace avmplus
 			case OP_returnvoid:
 			case OP_returnvalue:
 			{
-                PERFM_NVPROF("emit(return",1);
 				// ISSUE if a method has multiple returns this causes some bloat
 
 				// restore AvmCore::dxnsAddr if we set it to a stack addr in our frame
@@ -3432,7 +3427,6 @@ namespace avmplus
 
 			case OP_typeof:
 			{
-                PERFM_NVPROF("emit(unary",1);
 				//sp[0] = typeof(sp[0]);
 				int32_t index = (int32_t) op1;
 				LIns* value = loadAtomRep(index);
@@ -3445,7 +3439,6 @@ namespace avmplus
 
 			case OP_not:
 			{
-                PERFM_NVPROF("emit(unary",1);
 				int32_t index = (int32_t) op1;
 				AvmAssert(state->value(index).traits == BOOLEAN_TYPE);
 				LIns* value = localGet(index);
@@ -3455,14 +3448,12 @@ namespace avmplus
 			}
 
             case OP_negate: {
-                PERFM_NVPROF("emit(unary",1);
 				int32_t index = (int32_t) op1;
 				localSet(index, Ins(LIR_fneg, localGetq(index)),result);
 				break;
 			}
 
             case OP_negate_i: {
-                PERFM_NVPROF("emit(unary",1);
 				//framep[op1] = -framep[op1]
 				int32_t index = (int32_t) op1;
 				AvmAssert(state->value(index).traits == INT_TYPE);
@@ -3474,7 +3465,6 @@ namespace avmplus
 			case OP_decrement:
 			case OP_inclocal:
             case OP_declocal: {
-                PERFM_NVPROF("emit(unary",1);
 				int32_t index = (int32_t) op1;
 				int32_t incr = (int32_t) op2; // 1 or -1
 				localSet(index, binaryIns(LIR_fadd, localGetq(index), i2dIns(InsConst(incr))), result);
@@ -3485,7 +3475,6 @@ namespace avmplus
 			case OP_declocal_i:
 			case OP_increment_i:
             case OP_decrement_i: {
-                PERFM_NVPROF("emit(unary",1);
 				int32_t index = (int32_t) op1;
 				int32_t incr = (int32_t) op2;
 				AvmAssert(state->value(index).traits == INT_TYPE);
@@ -3494,7 +3483,6 @@ namespace avmplus
 			}
 
             case OP_bitnot: {
-                PERFM_NVPROF("emit(unary",1);
 				// *sp = core->intToAtom(~integer(*sp));
 				int32_t index = (int32_t) op1;
 				AvmAssert(state->value(index).traits == INT_TYPE);
@@ -3503,7 +3491,6 @@ namespace avmplus
 			}
 
             case OP_modulo: {
-                PERFM_NVPROF("emit(binary",1);
 				LIns* out = callIns(FUNCTIONID(mod), 2,
 					localGetq(sp-1), localGetq(sp));
 				localSet(sp-1,	out, result);
@@ -3514,7 +3501,6 @@ namespace avmplus
             case OP_multiply:
             case OP_subtract:
             case OP_add_d: {
-                PERFM_NVPROF("emit(binary",1);
 				LOpcode op;
 				switch (opcode) {
 					default:
@@ -3537,7 +3523,6 @@ namespace avmplus
 			case OP_bitor:
 			case OP_bitxor:
 			{
-                PERFM_NVPROF("emit(binary",1);
 				LOpcode op;
 				switch (opcode) {
                     default:
@@ -3560,7 +3545,6 @@ namespace avmplus
 
 			case OP_throw:
 			{
-                PERFM_NVPROF("emit(throw",1);
 				//throwAtom(*sp--);
 				int32_t index = (int32_t) op1;
 				callIns(FUNCTIONID(throwAtom), 2, coreAddr, loadAtomRep(index));
@@ -3569,7 +3553,6 @@ namespace avmplus
 
 			case OP_getsuper:
 			{
-                PERFM_NVPROF("emit(getsuper",1);
 				// stack in: obj [ns [name]]
 				// stack out: value
 				// sp[0] = env->getsuper(sp[0], multiname)
@@ -3589,7 +3572,6 @@ namespace avmplus
 
 			case OP_setsuper:
 			{
-                PERFM_NVPROF("emit(setsuper",1);
 				// stack in: obj [ns [name]] value
 				// stack out: nothing
 				// core->setsuper(sp[-1], multiname, sp[0], env->vtable->base)
@@ -3609,7 +3591,6 @@ namespace avmplus
 			case OP_nextname:
 			case OP_nextvalue:
 			{
-                PERFM_NVPROF("emit(next",1);
 				// sp[-1] = next[name|value](sp[-1], sp[0]);
 				LIns* obj = loadAtomRep(sp-1);
 				AvmAssert(state->value(sp).traits == INT_TYPE);
@@ -3622,7 +3603,6 @@ namespace avmplus
 
 			case OP_hasnext: 
 			{
-                PERFM_NVPROF("emit(hasnext",1);
 				// sp[-1] = hasnext(sp[-1], sp[0]);
 				LIns* obj = loadAtomRep(sp-1);
 				AvmAssert(state->value(sp).traits == INT_TYPE);
@@ -3636,7 +3616,6 @@ namespace avmplus
 
 			case OP_hasnext2: 
 			{
-                PERFM_NVPROF("emit(hasnext2",1);
                 // fixme - if obj is already Atom, or index is already int,
                 // easier to directly reference space in vars.
 				int32_t obj_index = (int32_t) op1;
@@ -3656,7 +3635,6 @@ namespace avmplus
 			
 			case OP_newfunction:
 			{
-                PERFM_NVPROF("emit(newfunction",1);
                 uint32_t function_id = (uint32_t) op1;
                 int32_t index = (int32_t) op2;
 				//sp[0] = core->newfunction(env, body, _scopeBase, scopeDepth);
@@ -3678,7 +3656,6 @@ namespace avmplus
 
 			case OP_call:
 			{
-                PERFM_NVPROF("emit(call",1);
 				// stack in: method obj arg1..N
 				// sp[-argc-1] = call(env, sp[-argc], argc, ...)
 				int argc = int(op1);
@@ -3702,7 +3679,6 @@ namespace avmplus
 			case OP_callproplex:
 			case OP_callpropvoid:
 			{
-                PERFM_NVPROF("emit(callprop",1);
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
 
@@ -3734,7 +3710,6 @@ namespace avmplus
 
 			case OP_constructprop:
 			{
-                PERFM_NVPROF("emit(constructprop",1);
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
 
@@ -3764,7 +3739,6 @@ namespace avmplus
 			case OP_callsuper:
 			case OP_callsupervoid:
 			{
-                PERFM_NVPROF("emit(callsuper",1);
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
 				// null check must have already happened.
@@ -3789,7 +3763,6 @@ namespace avmplus
 
 			case OP_construct:
  			{
-                PERFM_NVPROF("emit(construct",1);
 				// stack in: method arg1..N
 				// sp[-argc] = construct(env, sp[-argc], argc, null, arg1..N)
  				int argc = int(op1);
@@ -3812,7 +3785,6 @@ namespace avmplus
 
 			case OP_applytype:
 			{
-                PERFM_NVPROF("emit(applytype",1);
 				// stack in: method arg1..N
 				// sp[-argc] = applytype(env, sp[-argc], argc, null, arg1..N)
 				int argc = int(op1);
@@ -3836,7 +3808,6 @@ namespace avmplus
 
 			case OP_newobject:
 			{
-                PERFM_NVPROF("emit(newobject",1);
  				// result = env->op_newobject(sp, argc)
  				int argc = int(op1);
  				int dest = sp - (2*argc-1);
@@ -3854,7 +3825,6 @@ namespace avmplus
 
 			case OP_newactivation:
 			{
-                PERFM_NVPROF("emit(newactivation",1);
  				// result = env->newActivation()
 				LIns* activation = callIns(FUNCTIONID(newActivation), 1, env_param);
 				localSet(sp+1, ptrToNativeRep(result, activation), result);
@@ -3863,7 +3833,6 @@ namespace avmplus
 
 			case OP_newcatch:
 			{
-                PERFM_NVPROF("emit(newcatch",1);
  				// result = core->newObject(env->activation, NULL);
  				int dest = sp+1;
 
@@ -3876,7 +3845,6 @@ namespace avmplus
 
  			case OP_newarray:
  			{
-                PERFM_NVPROF("emit(newarray",1);
 				// sp[-argc+1] = core->arrayClass->newarray(sp-argc+1, argc)
  				int argc = int(op1);
  				int arg0 = sp - 1*argc+1;
@@ -3895,7 +3863,6 @@ namespace avmplus
 
 			case OP_newclass:
 			{
-                PERFM_NVPROF("emit(newclass",1);
 				// sp[0] = core->newclass(env, ctraits, scopeBase, scopeDepth, base)
 				Traits* ctraits = (Traits*) op1;
 				int localindex = int(op2);
@@ -3917,7 +3884,6 @@ namespace avmplus
 
 			case OP_getdescendants:
 			{
-                PERFM_NVPROF("emit(getdesc",1);
 				// stack in: obj [ns [name]]
 				// stack out: value
 				//sp[0] = core->getdescendants(sp[0], name);
@@ -3938,7 +3904,6 @@ namespace avmplus
 			}
 
             case OP_checkfilter: {
-                PERFM_NVPROF("emit(checkfilter",1);
 				int32_t index = (int32_t) op1;
 				callIns(FUNCTIONID(checkfilter), 2, env_param, loadAtomRep(index));
 				break;
@@ -3947,7 +3912,6 @@ namespace avmplus
 			case OP_findpropstrict: 
 			case OP_findproperty: 
 			{
-                PERFM_NVPROF("emit(findprop",1);
 				// stack in: [ns [name]]
 				// stack out: obj
 				// sp[1] = env->findproperty(scopeBase, scopedepth, name, strict)
@@ -3984,7 +3948,6 @@ namespace avmplus
 
 			case OP_finddef: 
 			{
-                PERFM_NVPROF("emit(finddef",1);
 				// stack in: 
 				// stack out: obj
 				// framep[op2] = env->finddef(name)
@@ -4014,7 +3977,6 @@ namespace avmplus
 
 			case OP_getproperty:
 			{
-                PERFM_NVPROF("emit(getproperty",1);
 				// stack in: obj [ns] [name]
 				// stack out: value
 				// obj=sp[0]
@@ -4192,7 +4154,6 @@ namespace avmplus
 			case OP_initproperty:
 			case OP_setproperty:
 			{
-                PERFM_NVPROF("emit(setproperty",1);
 				// stack in: obj [ns] [name] value
 				// stack out:
 				// obj = sp[-1]
@@ -4403,7 +4364,6 @@ namespace avmplus
 
 			case OP_deleteproperty:
 			{
-                PERFM_NVPROF("emit(delproperty",1);
 				// stack in: obj [ns] [name]
 				// stack out: Boolean
 				//sp[0] = delproperty(sp[0], multiname);
@@ -4456,7 +4416,6 @@ namespace avmplus
 
 			case OP_convert_s:
 			{
-                PERFM_NVPROF("emit(unary",1);
 				int32_t index = (int32_t) op1;
 				localSet(index, callIns(FUNCTIONID(string), 2,
 					coreAddr, loadAtomRep(index)), result);
@@ -4465,7 +4424,6 @@ namespace avmplus
 
 			case OP_esc_xelem: // ToXMLString will call EscapeElementValue
 			{
-                PERFM_NVPROF("emit(unary",1);
 				//sp[0] = core->ToXMLString(sp[0]);
 				int32_t index = (int32_t) op1;
 				LIns* value = loadAtomRep(index);
@@ -4478,7 +4436,6 @@ namespace avmplus
 
 			case OP_esc_xattr:
 			{
-                PERFM_NVPROF("emit(unary",1);
 				//sp[0] = core->EscapeAttributeValue(sp[0]);
 				int32_t index = (int32_t) op1;
 				LIns* value = loadAtomRep(index);
@@ -4491,7 +4448,6 @@ namespace avmplus
 
 			case OP_astype:
 			{
-                PERFM_NVPROF("emit(astype",1);
 				// sp[0] = AvmCore::astype(sp[0], traits)
 				Traits *type = (Traits*) op1;
 				int32_t index = (int32_t) op2;
@@ -4507,7 +4463,6 @@ namespace avmplus
 
 			case OP_astypelate:
 			{
-                PERFM_NVPROF("emit(astypelate",1);
 				//sp[-1] = astype(sp[-1], toClassITraits(sp[0]));
 				//sp--;
 				LIns* type = loadAtomRep(sp);
@@ -4528,7 +4483,6 @@ namespace avmplus
 
 			case OP_add:
 			{
-                PERFM_NVPROF("emit(binary",1);
 				LIns* lhs = loadAtomRep(sp-1);
 				LIns* rhs = loadAtomRep(sp);
 				LIns* toplevel = loadToplevel();
@@ -4540,7 +4494,6 @@ namespace avmplus
 
 			case OP_concat:
 			{
-                PERFM_NVPROF("emit(binary",1);
 				LIns* lhs = localGetp(sp-1);
 				LIns* rhs = localGetp(sp);
 				LIns* out = callIns(FUNCTIONID(concatStrings), 3,
@@ -4551,7 +4504,6 @@ namespace avmplus
 
 			case OP_strictequals:
 			{
-                PERFM_NVPROF("emit(compare",1);
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp-1, cmpEq(FUNCTIONID(stricteq), sp-1, sp), result);
 				break;
@@ -4559,7 +4511,6 @@ namespace avmplus
 
 			case OP_equals:
 			{
-                PERFM_NVPROF("emit(compare",1);
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp-1, cmpEq(FUNCTIONID(equals), sp-1, sp), result);
 				break;
@@ -4567,7 +4518,6 @@ namespace avmplus
 
 			case OP_lessthan:
 			{
-                PERFM_NVPROF("emit(compare",1);
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp-1, cmpLt(sp-1, sp), result);
 				break;
@@ -4575,7 +4525,6 @@ namespace avmplus
 
 			case OP_lessequals:
 			{
-                PERFM_NVPROF("emit(compare",1);
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp-1, cmpLe(sp-1, sp), result);
 				break;
@@ -4583,7 +4532,6 @@ namespace avmplus
 
 			case OP_greaterthan:
 			{
-                PERFM_NVPROF("emit(compare",1);
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp-1, cmpLt(sp, sp-1), result);
 				break;
@@ -4591,7 +4539,6 @@ namespace avmplus
 
 			case OP_greaterequals: 
 			{
-                PERFM_NVPROF("emit(compare",1);
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp-1, cmpLe(sp, sp-1), result);
 				break;
@@ -4599,7 +4546,6 @@ namespace avmplus
 
 			case OP_instanceof:
 			{
-                PERFM_NVPROF("emit(instanceof",1);
 				LIns* lhs = loadAtomRep(sp-1);
 				LIns* rhs = loadAtomRep(sp);
 				LIns* toplevel = loadToplevel();
@@ -4612,7 +4558,6 @@ namespace avmplus
 
 			case OP_in:
 			{
-                PERFM_NVPROF("emit(in",1);
 				LIns* lhs = loadAtomRep(sp-1);
 				LIns* rhs = loadAtomRep(sp);
 				LIns* toplevel = loadToplevel();
@@ -4625,7 +4570,6 @@ namespace avmplus
 
 			case OP_istype:
 			{			
-                PERFM_NVPROF("emit(istype",1);
 				// expects a CONSTANT_Multiname cpool index
 				// used when operator "is" RHS is a compile-time type constant
 				//sp[0] = istype(sp[0], itraits);
@@ -4642,7 +4586,6 @@ namespace avmplus
 
 			case OP_istypelate:
 			{
-                PERFM_NVPROF("emit(istypelate",1);
 				//sp[-1] = istype(sp[-1], toClassITraits(sp[0]));
 				//sp--;
 				LIns* type = loadAtomRep(sp);
@@ -4662,7 +4605,6 @@ namespace avmplus
 
 			case OP_dxns:
 			{
-                PERFM_NVPROF("emit(dxns",1);
 				LIns* uri = InsConstPtr((String*)op1); // uri
 				LIns* ns = callIns(FUNCTIONID(newPublicNamespace), 
 					2, 
@@ -4674,7 +4616,6 @@ namespace avmplus
 
 			case OP_dxnslate:
 			{
-                PERFM_NVPROF("emit(dxnslate",1);
 				int32_t index = (int32_t) op1;
 				LIns* atom = loadAtomRep(index);				
 				LIns* uri = callIns(FUNCTIONID(intern), 2,
@@ -4692,7 +4633,6 @@ namespace avmplus
 			 */
 			case OP_debugfile:
 			{
-                PERFM_NVPROF("emit(debugfile",1);
 			#ifdef DEBUGGER
 			if (core->debugger())
 			{
@@ -4712,7 +4652,6 @@ namespace avmplus
 
 			case OP_debugline:
 			{
-                PERFM_NVPROF("emit(debugline",1);
 			#ifdef DEBUGGER
 			if (core->debugger())
 			{
