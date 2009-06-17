@@ -41,7 +41,9 @@
 //#define TESTING_MARKSTACK
 #define MARKSTACK_ALLOWANCE  1
 
+#ifndef MMGC_ENABLE_CPP_EXCEPTIONS
 inline void* operator new(size_t, void* p) { return p; }
+#endif
 
 namespace MMgc
 {
