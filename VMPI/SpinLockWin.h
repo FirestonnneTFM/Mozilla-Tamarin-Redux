@@ -67,10 +67,23 @@ private:
 
 inline bool SpinLockWin::Acquire()
 {
+	int tries = 0;
 	GCAssert(ownerThread != GetCurrentThreadId()); // recursive deadlock?
 
 	while (InterlockedCompareExchangePointer(&sl, (PVOID)1, 0) != 0)
-		Sleep(0);
+	{
+		++tries;
+		if(tries == 100 )
+		{
+			// Having trouble getting the lock, give other, perhaps lower priority, threads a chance to run
+			Sleep(1);
+			tries = 0;
+		}
+		else
+		{
+			Sleep(0);
+		}
+	}
 
 #ifdef _DEBUG
 		ownerThread = GetCurrentThreadId();
