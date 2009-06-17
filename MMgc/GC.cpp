@@ -3544,12 +3544,13 @@ bail:
 
 	GCAutoEnterPause::GCAutoEnterPause(GC *gc) : gc(gc), enterSave(gc->GetAutoEnter())
 	{ 
-		GCAssert(gc->GetStackEnter() != 0);
+		GCAssertMsg(gc->GetStackEnter() != 0, "Invalid MMGC_GC_ROOT_THREAD usage, GC not already entered, random crashes will ensue");
 		gc->SetStackEnter(NULL);
 	}
 	
 	GCAutoEnterPause::~GCAutoEnterPause() 
 	{ 
+		GCAssertMsg(gc->GetStackEnter() == 0, "Invalid MMGC_GC_ROOT_THREAD usage, GC not exitted properly, random crashes will ensue");
 		gc->SetStackEnter(enterSave); 
 	}
 
