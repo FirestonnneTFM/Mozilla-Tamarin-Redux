@@ -46,6 +46,7 @@
 #ifdef MMGC_MEMORY_PROFILER
 #include <dlfcn.h>
 #include <cxxabi.h>
+#include <mach-o/dyld.h>
 #endif
 
 #include <sys/mman.h>
@@ -285,185 +286,206 @@ bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t skip)
 }
 #endif
 
-int parent2child[2];	//pipe to send data from parent to child
-int child2parent[2];	//pipe to send data from child to parent
+pid_t gdb_pid = -1;	//process id for child process executing gdb
+#define IS_GDB_RUNNING	(gdb_pid > 0) //macro to check whether gdb was launched successfully during setup
 
-#define PARENT_READ_END		parent2child[0]
-#define PARENT_WRITE_END	parent2child[1]
-#define CHILD_READ_END		child2parent[0]
-#define CHILD_WRITE_END		child2parent[1]
+//FILE handles to read/write to/from gdb process
+FILE* read_handle = NULL;
+FILE* write_handle = NULL;
 
-pid_t atos_pid = -1;	//process id for child process executing atos
-#define IS_ATOS_RUNNING	(atos_pid > 0) //macro to check whether atos was launched successfully during setup
-
-void VMPI_setupPCResolution()
+bool startGDBProcess()
 {
-#ifndef _DEBUG
-	bool child2parent_open = false;
+	int pipe1[2];	//pipe to send data from parent to child
+	int pipe2[2];	//pipe to send data from child to parent
 	
-	bool parent2child_open = pipe(parent2child) >= 0;
-	if(!parent2child_open)
+	bool pipe2_open = false;
+	char buf[128];
+	char pathBuffer[PATH_MAX];
+	uint32_t pathSize = PATH_MAX;
+	
+	bool pipe1_open = pipe(pipe1) >= 0;
+	if(!pipe1_open)
 	{
 		goto exit_cleanly;
 	}
 	
-	child2parent_open = pipe(child2parent) >= 0;
-	if(!child2parent_open)
+	pipe2_open = pipe(pipe2) >= 0;
+	if(!pipe2_open)
 	{
 		goto exit_cleanly;
 	}
 	
-	pid_t current_pid = getpid();
+	_NSGetExecutablePath(pathBuffer, &pathSize);
 	
-	//fork a child process to launch atos
-	if((atos_pid = fork()) == -1) 
+	//fork a child process to launch gdb
+	if((gdb_pid = fork()) == -1) 
 	{ 
 		goto exit_cleanly;
 	}
 	
-	if(atos_pid == 0) //child process - for atos
+	if(gdb_pid == 0) //child process - for gdb
 	{
 		//close unused pipe ends for child process
-		close(PARENT_WRITE_END);
-		close(CHILD_READ_END);
+		close(pipe1[1]);
+		close(pipe2[0]);
 		
-		dup2(PARENT_READ_END, 0); //tie parent's read end to stdin
-		dup2(CHILD_WRITE_END, 1); //tie child's write end to stdout
+		dup2(pipe1[0], 0); //tie pipe1's read end to stdin
+		dup2(pipe2[1], 1); //tie pipe2's write end to stdout
 		
 		//close duped pipe ends
-		close(PARENT_READ_END);
-		close(CHILD_WRITE_END);
+		close(pipe1[0]);
+		close(pipe2[1]);
 		
-		char pid_str[16];
-		sprintf(pid_str, "%u", current_pid);
+		//Launch gdb
+		execlp("gdb", pathBuffer, (char*)0); 
 		
-		//Invoke atos in interactive mode
-		execl("/usr/bin/atos", "/usr/bin/atos", "-p", pid_str, (char*)0); 
-					
 		exit(0); //exit child process
 	}
 	
 	//parent process
 	
 	//close unused pipe ends for parent process
-	close(PARENT_READ_END);
-	close(CHILD_WRITE_END);
+	close(pipe1[0]);
+	close(pipe2[1]);
+
+	//get FILE* handles
+	read_handle = fdopen(pipe2[0], "r");
+	write_handle = fdopen(pipe1[1], "w");
 	
-	return;
+	
+	if(!read_handle || !write_handle)
+		goto exit_cleanly;
+	
+	{
+		//make read non-blocking temporarily
+		//to read gdb output during startup
+		fcntl(pipe2[0], F_SETFL, O_NONBLOCK);
+		
+		do 
+		{
+			if(!fgets(buf, sizeof(buf), read_handle))
+			{
+				//check if gdb is still starting
+				if(errno != EAGAIN)
+					goto exit_cleanly;
+			}
+			else if(strstr(buf, "(gdb)")) //check if we got the prompt
+			{
+				break;
+			}
+		}while(1);
+		
+		//this is basically a hack
+		//for some reason launching gdb with app name "gdb <pathBuffer>" (see execlp call above)
+		//is not proving sufficient for address resolution.  gdb always returns "No symbols matches ..."
+		//Issuing the "file <pathBuffer>" forces gdb to read the symbol table which seems to work
+		fprintf(write_handle, "file '%s'\n", pathBuffer);
+		fflush(write_handle);
+		
+		//revert read to be blocking
+		int flags = fcntl(pipe2[0], F_GETFL);
+		fcntl(pipe2[0], F_SETFL, flags & ~O_NONBLOCK);
+	}
+	
+	return true;
 	
 exit_cleanly:
-	if(parent2child_open)
+	//error occurred, cleanup
+	
+	//kill gdb process if started
+	if(IS_GDB_RUNNING)
 	{
-		close(PARENT_READ_END);
-		close(PARENT_WRITE_END);
+		kill(gdb_pid, SIGABRT); //send a termination signal to 
+		gdb_pid = -1;
 	}
 	
-	if(child2parent_open)
+	if(pipe1_open)
 	{
-		close(CHILD_READ_END);
-		close(CHILD_WRITE_END);
+		close(pipe1[0]);
+		close(pipe1[1]);
 	}
-#endif
+	
+	if(pipe2_open)
+	{
+		close(pipe2[0]);
+		close(pipe2[1]);
+	}
+	
+	if(read_handle)
+	{
+		fclose(read_handle);
+		read_handle = NULL;
+	}
+	
+	if(write_handle)
+	{
+		fclose(write_handle);
+		write_handle = NULL;
+	}
+	
+	return false;
 }
+
+void VMPI_setupPCResolution() { }
 
 void VMPI_desetupPCResolution()
 {
-#ifndef _DEBUG
-	if(IS_ATOS_RUNNING)
+	if(IS_GDB_RUNNING)
 	{
-		kill(atos_pid, SIGINT); //send a termination signal to 
+		kill(gdb_pid, SIGABRT); //send a termination signal to 
+		gdb_pid = -1;
 		
-		int status;
-		waitpid(atos_pid, &status, 0); //wait for child process to terminate
+		//close file streams
+		fclose(read_handle);
+		fclose(write_handle);
 		
-		//close open pipe ends
-		close(PARENT_WRITE_END);
-		close(CHILD_READ_END);
+		read_handle = write_handle = NULL;
 	}
-#endif
 }
 
 bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 {
-#ifdef _DEBUG
-
-	Dl_info dlip;
-	int ret = dladdr((void * const)pc, &dlip);
-	const char *sym = dlip.dli_sname;
-	if(ret != 0 && sym) {
-		size_t sz=bufferSize;
-		int status=0;
-		char *out = (char*) malloc(bufferSize);
-		char *ret = abi::__cxa_demangle(sym, out, &sz, &status);
-		if(ret) {
-			out = ret; // apparently demangle may realloc, so free this instead of out
-			VMPI_strncpy(buffer, ret, bufferSize);
-		} else {
-			VMPI_strncpy(buffer, sym, bufferSize);
-		}
-		free(out); 
-		return true;
-	}
-
-
-#else
+	static bool isFirstCall = false;
 	
-	if(IS_ATOS_RUNNING)
+	//attempt launch of gdb for the first time
+	//if it fails for some reason we never reattempt it
+	if(!isFirstCall)
 	{
-		char buf[128];
-	#ifdef MMGC_64BIT
-		VMPI_snprintf(buf, sizeof(buf), "0x%x\n", (uint64_t)pc);
-	#else
-		VMPI_snprintf(buf, sizeof(buf), "0x%x\n", (uint32_t)pc);
-	#endif
-		write((PARENT_WRITE_END), buf, strlen(buf)); //send the address to atos
-
-		//start reading into the return buffer i.e. "buffer"
-		char* b = buffer;
-		size_t readCount = bufferSize-1; //leave space for null character
+		startGDBProcess();
+		isFirstCall = true;
+	}
+	
+	if(IS_GDB_RUNNING)
+	{
+		char buf[512];
+		VMPI_snprintf(buf, sizeof(buf), "info symbol %p\n", (void*)pc);
 		
-		int r;
-		do
+		fprintf(write_handle, buf); 
+		fflush(write_handle); //flush to ensure gdb receives the data
+		
+		//blocking read
+		if(!fgets(buf, sizeof(buf), read_handle))
 		{
-			int r  = read(CHILD_READ_END, b, readCount); //read the results from atos
-			if(r <= 0)
-				break;
+			return false;
+		}
+		else if(strstr(buf, "(gdb)")) //look for gdb prompt to correctly parse the info we are looking for
+		{
+			//extract the function name from gdb output
 			
-			b[readCount] = '\0'; //null terminate for strrchr
-			char* p = VMPI_strrchr(b, '\n'); //look for a newline character
+			//skip over gdb prompt
+			char* b = strstr(buf, "(gdb)");
+			b  = b ? (b + sizeof("(gdb)")) : buf;
 			
-			if(p)
+			//look for '+' following the method name
+			char* pos = strchr(b, '+');
+			if(pos)
 			{
-				//replace trailing newline with null character
-				//note: the caller is not expecting the buffer to be null terminated
-				//but for formatting purposes we don't want to return a string with a 
-				//trailing newline
-				*p = '\0';
+				*pos = '\0';
+				snprintf(buffer, bufferSize, "%s", b);
 				return true;
 			}
-			else
-			{
-				readCount -= r;
-				if(readCount == 0) 
-				{
-					//if we run out of buffer then use the local buffer
-					//this data would be thrown away but we want to ensure
-					//that the pipe is empty before we return
-					b = buf;
-					readCount = sizeof(buf) - 1; //leave space for null character
-				}
-				else
-				{
-					b += r; //continue read in the current buffer
-				}
-			}
 		}
-		while(true);
-		
-		return (b != buffer); //return true if we atleast have some data
 	}
-
-#endif
 	
 	return false;
 }
