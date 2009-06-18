@@ -217,6 +217,16 @@ namespace avmshell
 		return double(MMgc::GCHeap::GetPrivateBytes() * MMgc::GCHeap::kBlockSize);
 	}
 
+	void SystemClass::forceFullCollection()
+	{
+		core()->GetGC()->Collect();
+	}
+
+	void SystemClass::queueCollection()
+	{
+		core()->GetGC()->QueueCollection();
+	}
+
 	bool SystemClass::isGlobal(Atom o)
 	{
 		return AvmCore::isObject(o) ? AvmCore::atomToScriptObject(o)->isGlobalObject() : false;
