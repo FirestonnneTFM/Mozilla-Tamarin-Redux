@@ -585,7 +585,6 @@ namespace avmplus
 			if (pool->verbose) {
 				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, 0);
 				labels->add(core, sizeof(AvmCore), 0, "core");
-				labels->add(&core->codeContextAtom, sizeof(CodeContextAtom), 0, "codeContextAtom");
 			}
 #endif
         }
@@ -1383,6 +1382,18 @@ namespace avmplus
             })
 		}
 
+		methodFrame = InsAlloc(sizeof(MethodFrame));
+		verbose_only( if (lirbuf->names) {
+			lirbuf->names->addName(methodFrame, "methodFrame");
+		})
+		
+		// replicate MethodFrame ctor inline
+		LIns* currentMethodFrame = loadIns(LIR_ldp, offsetof(AvmCore,currentMethodFrame), coreAddr);
+		storeIns(env_param, offsetof(MethodFrame,envOrCodeContext), methodFrame); // implicitly leave IS_EXPLICIT_CODECONTEXT clear
+		storeIns(InsConstPtr(0), offsetof(MethodFrame,dxns), methodFrame);
+		storeIns(currentMethodFrame, offsetof(MethodFrame,next), methodFrame);
+		storeIns(methodFrame, 0, InsConstPtr(&core->currentMethodFrame));
+
 		#ifdef DEBUGGER
 		if (core->debugger())
 		{
@@ -1393,22 +1404,6 @@ namespace avmplus
 			})
 		}
 		#endif
-
-		if (info->setsDxns())
-		{
-			dxns = InsAlloc(sizeof(Namespace*));
-            verbose_only( if (lirbuf->names) {
-                lirbuf->names->addName(dxns, "dxns");
-            })
-
-			// dxns = env->vtable->scope->defaultXmlNamespace
-			LIns* scope = loadEnvScope();
-			LIns* capturedDxns = loadIns(LIR_ldcp, offsetof(ScopeChain,_defaultXmlNamespace), scope);
-			storeIns(capturedDxns, 0, dxns);
-
-			// dxnsSave = AvmCore::dxnsAddr
-			dxnsAddrSave = loadIns(LIR_ldcp, offsetof(AvmCore, dxnsAddr), coreAddr);
-		}
 
 		for (int i=0, n = state->verifier->stackBase+state->stackDepth; i < n; i++)
 		{
@@ -1619,56 +1614,6 @@ namespace avmplus
 		if (outOMem()) return;
 		this->state = state;
 		localSet(i, undefConst, VOID_TYPE);
-	}
-
-	void CodegenLIR::emitSetContext(FrameState *state, MethodInfo *f)
-	{
-		if (outOMem()) return;
-		this->state = state;
-		//
-		// initialize the code context
-		//
-		if (isCodeContextChanged())
-		{
- 			if (!f || f->usesCallerContext())
-			{
-				// core->codeContext = env;
-				storeIns(env_param, 0, InsConstPtr(&core->codeContextAtom));
-			}
-		}
-
-		if (!f || !f->usesDefaultXmlNamespace())
-		{
-			emitSetDxns(state);
-
-			// used to dump all functions that still say they required DXNS code
-			#if 0//def _DEBUG
-			if (f && (f->flags & MethodInfo::NATIVE))
-			{
-				StringBuffer buffer(core);		
-				buffer << "function is:" << f->name << "\r\n";
-
-				AvmDebugMsg (false, buffer.c_str());
-				//core->console << " f->
-			}
-			#endif
-		}
-	}
-
-	void CodegenLIR::emitSetDxns(FrameState* state)
-	{
-		if (outOMem()) return;
-		this->state = state;
-
-		LIns* dxnsAddr = dxns;
-
-		if (!info->setsDxns()) {
-			// dxnsAddr = &env->vtable->scope->defaultXmlNamespace
-			LIns* scope = loadEnvScope();
-			dxnsAddr = leaIns(offsetof(ScopeChain,_defaultXmlNamespace), scope);
-		}
-
-		storeIns(dxnsAddr, 0, InsConstPtr(&core->dxnsAddr));
 	}
 
 	void CodegenLIR::emitBlockStart(FrameState* state)
@@ -1980,7 +1925,6 @@ namespace avmplus
 			break;
 
 		case OP_applytype:
-		    emitSetContext(state, NULL);
 			// * is ok for the type, as Vector classes have no statics
 			// when we implement type parameters fully, we should do something here.
 			emit(state, opcode, imm30/*argc*/, 0, NULL);
@@ -2252,7 +2196,6 @@ namespace avmplus
 			emitSetslot(state, OP_setglobalslot, opd1, 0 /* computed or ignored */);
 			break;
 		case OP_call:
-		    emitSetContext(state, NULL);
 			emit(state, opcode, opd1 /*argc*/, 0, NULL);
 			break;
 
@@ -2323,7 +2266,6 @@ namespace avmplus
 
 		case OP_newclass:
 		{
-		    emitSetDxns(state);
 		    Traits* ctraits = pool->getClassTraits(opd1);
 			AvmAssert(ctraits == type);
 			emit(state, opcode, (uintptr)(void*)ctraits, state->sp(), type);
@@ -2430,13 +2372,11 @@ namespace avmplus
                     AvmAssert(f != NULL);
 					MethodSignaturep fms = f->getMethodSignature();
                     state->verifier->emitCoerceArgs(f, 1);
-                    emitSetContext(state, f);
                     emitCall(state, OP_callsuperid, disp_id, 1, fms->returnTraits());
                 }
                 // else, ignore write to readonly accessor
             }
             else {
-                emitSetContext(state, NULL);
                 emit(state, opcode, (uintptr)&name);
                 #ifdef DEBUG_EARLY_BINDING
 				core->console << "verify setsuper " << base << " " << name.getName() << " from within " << info << "\n";
@@ -2473,11 +2413,9 @@ namespace avmplus
                 state->verifier->emitCoerceArgs(f, 0);
 				MethodSignaturep fms = f->getMethodSignature();
                 Traits* resultType = fms->returnTraits();
-                emitSetContext(state, f);
                 emitCall(state, OP_callsuperid, disp_id, 0, resultType);
             }
             else {
-                emitSetContext(state, NULL);
                 emit(state, opcode, (uintptr)&name, 0, propType);
                 #ifdef DEBUG_EARLY_BINDING
                 core->console << "verify getsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
@@ -2507,13 +2445,11 @@ namespace avmplus
 
 				MethodSignaturep mms = m->getMethodSignature();
 				Traits* resultType = mms->returnTraits();
-				emitSetContext(state, m);
 				emitCall(state, OP_callsuperid, disp_id, argc, resultType);
 			}
 			else {
 
 				// TODO optimize other cases
-			    emitSetContext(state, NULL);
 			    emit(state, opcode, (uintptr)&name, argc, NULL);
 			}
 
@@ -2542,7 +2478,6 @@ namespace avmplus
             }
             else
 			{
-                emitSetContext(state, NULL);
                 emit(state, opcode, (uintptr)&name, argc, NULL);
             }
 			break;
@@ -2566,7 +2501,6 @@ namespace avmplus
                 MethodInfo *f = objtd->getMethod(disp_id);
                 AvmAssert(f != NULL);
 
-                writeSetContext(state, f);
                 if (!obj.traits->isInterface) {
                     emitCall(state, OP_callmethod, disp_id, 0, type);
                 }
@@ -2602,7 +2536,6 @@ namespace avmplus
                 MethodInfo *f = objtd->getMethod(disp_id);
                 AvmAssert(f != NULL);
 
-                emitSetContext(state, f);
                 if (!obj.traits->isInterface) {
                     emitCall(state, OP_callmethod, disp_id, 1, type);
                 }
@@ -2650,14 +2583,12 @@ namespace avmplus
 		{
 		    Multiname name;
 			pool->parseMultiname(name, opd1);
-		    emitSetContext(state, NULL);
 			emit(state, opcode, (uintptr)&name, opd2, NULL);
 			break;
 		}
 
 		case OP_callstatic:
             // opd1=method_id, opd2=argc
-			emitSetContext(state, pool->getMethodInfo(opd1));
 			emitCall(state, OP_callstatic, opd1, opd2, type);
 			break;
 
@@ -2666,11 +2597,6 @@ namespace avmplus
 		    break;
 		}
 	}
-
-    void CodegenLIR::writeSetContext(FrameState* state, MethodInfo *f)
-    {
-        emitSetContext(state, f);
-    }
 
 	void CodegenLIR::writeCoerce(FrameState* state, uint32_t index, Traits *type)
     {
@@ -3241,7 +3167,6 @@ namespace avmplus
 				Toplevel* toplevel = state->verifier->getToplevel(this);
 				itraits->init->resolveSignature(toplevel);
 				if (itraits->init->getMethodSignature()->argcOk(argc)) {
-					emitSetContext(state, NULL);
 					state->verifier->emitCheckNull(ctor_index);
 					state->verifier->emitCoerceArgs(itraits->init, argc, true);
 					emitCall(state, OP_construct, 0, argc, itraits);
@@ -3253,7 +3178,6 @@ namespace avmplus
 		// generic path, could not early bind to a constructor method
 		// stack in: ctor-object arg1..N
 		// sp[-argc] = construct(env, sp[-argc], argc, null, arg1..N)
-		emitSetContext(state, NULL);
 		LIns* func = loadAtomRep(ctor_index);
 		LIns* args = storeAtomArgs(InsConstAtom(nullObjectAtom), argc, ctor_index+1);
 		LIns* toplevel = loadToplevel();
@@ -3383,11 +3307,6 @@ namespace avmplus
 			{
 				// ISSUE if a method has multiple returns this causes some bloat
 
-				// restore AvmCore::dxnsAddr if we set it to a stack addr in our frame
-				if(info->setsDxns()) {
-					storeIns(dxnsAddrSave, 0, InsConstPtr(&core->dxnsAddr));
-				}
-
 				#ifdef DEBUGGER
 				if (core->debugger())
 				{
@@ -3405,6 +3324,10 @@ namespace avmplus
 					// _ef.endTry();
 					callIns(FUNCTIONID(endTry), 1, _ef);
 				}
+
+				// replicate MethodFrame dtor inline -- must come after endTry call (if any)
+				LIns* nextMethodFrame = loadIns(LIR_ldp, offsetof(MethodFrame,next), methodFrame);
+				storeIns(nextMethodFrame, 0, InsConstPtr(&core->currentMethodFrame));
 
 				Traits* t = ms->returnTraits();
 				LIns* retvalue;
@@ -4608,7 +4531,7 @@ namespace avmplus
 					2, 
 					coreAddr, 
 					uri);
-				storeIns(ns, 0, dxns);
+				storeIns(ns, offsetof(MethodFrame,dxns), methodFrame);
 				break;
 			}
 
@@ -4622,7 +4545,7 @@ namespace avmplus
 					2, 
 					coreAddr, 
 					uri);
-				storeIns(ns, 0, dxns);
+				storeIns(ns, offsetof(MethodFrame,dxns), methodFrame);
 				break;
 			}
 
@@ -4986,11 +4909,7 @@ namespace avmplus
             Ins(LIR_live, _save_eip);
         }
 
-		if (info->setsDxns()) {
-			Ins(LIR_live, dxns);
-			// dxnsAddrSave might not need to be marked as live -- erring on side of conservatism
-			Ins(LIR_live, dxnsAddrSave);
-		}
+		Ins(LIR_live, methodFrame);
 
 		#ifdef DEBUGGER
 		if (core->debugger())
@@ -5166,11 +5085,6 @@ namespace avmplus
         }
 	}
 #endif /* AVMPLUS_VERBOSE */
-
-	bool CodegenLIR::isCodeContextChanged() const
-	{
-		return !pool->isBuiltin;
-	}
 
 	/* set position of label */
 	void CodegenLIR::setLabelPos(CodegenLabel& l, LIns* bb) {

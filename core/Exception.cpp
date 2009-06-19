@@ -116,9 +116,8 @@ namespace avmplus
 		catchAction = kCatchAction_SearchForActionScriptExceptionHandler;
 
 		this->stacktop = core->gc->allocaTop();
-
-		codeContextAtom = core->codeContextAtom;
-		dxnsAddr = core->dxnsAddr;
+		
+		savedMethodFrame = core->currentMethodFrame;
 	}
 
 	void ExceptionFrame::endTry()
@@ -127,10 +126,9 @@ namespace avmplus
 			// ISSUE do we need to check core if it is set in constructor?
 			core->exceptionFrame = prevFrame;
 
-			// Restore the code context to what it was before the try
-			core->codeContextAtom = codeContextAtom;
-			
 			core->gc->allocaPopTo(this->stacktop);
+
+			core->currentMethodFrame = savedMethodFrame;
 		}
 	}
 	
@@ -157,8 +155,8 @@ namespace avmplus
 		core->callStack = callStack;
 #endif // DEBUGGER
 
+		core->currentMethodFrame = savedMethodFrame;
+
 		core->gc->allocaPopTo(this->stacktop);
-		core->codeContextAtom = codeContextAtom;
-		core->dxnsAddr = dxnsAddr;
 	}
 }
