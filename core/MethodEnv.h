@@ -42,15 +42,40 @@
 namespace avmplus
 {
 #ifdef AVMPLUS_TRAITS_MEMTRACK
-	class MethodEnv : public MMgc::GCFinalizedObject
+	class MethodEnvProcHolder : public MMgc::GCFinalizedObject
 #else
-	class MethodEnv : public MMgc::GCObject
+	class MethodEnvProcHolder : public MMgc::GCObject
 #endif
+	{
+		friend class CodegenLIR;
+
+#if VMCFG_METHODENV_IMPL32
+	protected:
+		inline MethodEnvProcHolder(GprMethodProc p) : _implGPR(p) { }
+	public:
+		inline GprMethodProc implGPR() const { return _implGPR; }
+		inline FprMethodProc implFPR() const { return _implFPR; }
+	protected:
+		union {
+			GprMethodProc _implGPR;
+			FprMethodProc _implFPR;
+		};
+#else
+	protected:
+		inline MethodEnvProcHolder(MethodInfo* m) : method(m) { }
+	public:
+		inline GprMethodProc implGPR() const { return method->implGPR(); }
+		inline FprMethodProc implFPR() const { return method->implFPR(); }
+	public:
+		MethodInfo* const method;
+#endif
+	};
+	
+	class MethodEnv : public MethodEnvProcHolder
 	{
 		friend class CodegenLIR;
 	#if VMCFG_METHODENV_IMPL32
 		friend class MethodInfo;
-		friend class CodegenIMT;
 		static uintptr_t delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
 	#endif
 	public:
@@ -59,11 +84,6 @@ namespace avmplus
 
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
-
-#ifdef FEATURE_NANOJIT
-		enum TrampStub { kTrampStub };
-		MethodEnv(TrampStub, MethodInfo* method, ScopeChain* scope);
-#endif
 
 		MethodEnv(MethodInfo* method, ScopeChain* scope);
 
@@ -325,33 +345,21 @@ namespace avmplus
 		uint64_t invocationCount() const;
 #endif
 
-#if VMCFG_METHODENV_IMPL32
-		inline GprMethodProc implGPR() const { return _implGPR; }
-		inline FprMethodProc implFPR() const { return _implFPR; }
-#else
-		inline GprMethodProc implGPR() const { return method->implGPR(); }
-		inline FprMethodProc implFPR() const { return method->implFPR(); }
-#endif
-
 	protected:
 
 		inline VTable* vtable() const { return _scope->vtable(); }
 
 	// ------------------------ DATA SECTION BEGIN
 #if VMCFG_METHODENV_IMPL32
-	private:
-		// these are most-frequently accessed so put at offset zero
-		union 
-		{
-			GprMethodProc _implGPR;
-			FprMethodProc _implFPR;
-		};
+	public:
+		MethodInfo* const method;
+#else
+	// inherit "method" from MethodEnvProcHolder. yeah, this is ugly,
+	// but allows us to eliminate an otherwise-useless field from ImtThunkEnv.
 #endif
 	protected:
 		// pointers are write-once so we don't need WB's
 		ScopeChain* const			_scope;			
-	public:
-		MethodInfo* const			method;		// runtime independent type info for this method 
 	private:
 		uintptr_t					activationOrMCTable;
 	public:
@@ -471,6 +479,79 @@ namespace avmplus
 	#else
 		#define MOPS_SWAP_BYTES(p) do {} while (0)
 	#endif
+
+#if defined FEATURE_NANOJIT
+	struct ImtThunkEntry
+	{
+		uintptr_t iid;
+		uintptr_t disp_id; // only needs to be uint32_t, is this size for alignment purposes
+	};
+
+	class ImtThunkEnv;
+	
+	// returning uint64_t here rather than uintptr_t is a trick: normally
+	// we provide both GPR and FPR versions of calls, on the theory that
+	// this is necessary to ensure the return value is always correct. in practice,
+	// this seems to be a mostly defunct assumption, as every architecture we're interested
+	// in returns values in registers (or register pairs), whether the result is fp or not.
+	// still, this dichotomy has been maintained, mostly because it works and
+	// hasn't been to painful. with new, table-based thunks this becomes hard to implement,
+	// though, as a given IMT thunk can contain both kinds of calls, but C++ can't define
+	// a function to return multiple types... however, in practice (as mentioned before) 
+	// this seems to mostly be an historical artifact, with a notable exception of 
+	// 32-bit NJ_SOFTFLOAT systems (eg ARM without VFP) -- if the compiler decides not
+	// to tail-call (MSVC, I'm looking at you), the upper word of the softfloat result
+	// can theoretically be clobbered by the compiler. declaring the result as uint64_t 
+	// quietly ensures that won't be the case.
+	//
+	// admittedly, this is a bit fragile, but seems to be the least-objectionable
+	// solution to this issue at the present time.
+	typedef uint64_t (*GprImtThunkProc)(ImtThunkEnv*, int, uint32*, uintptr_t);
+
+	class ImtThunkEnv : public MethodEnvProcHolder
+	{
+	public:
+#if VMCFG_METHODENV_IMPL32
+		inline ImtThunkEnv(GprImtThunkProc p, VTable* v) : 
+			MethodEnvProcHolder((GprMethodProc)p), 
+			vtable(v) 
+		{ 
+		}
+		inline ImtThunkEnv(GprImtThunkProc p, uint32_t c) : 
+			MethodEnvProcHolder((GprMethodProc)p), 
+			imtMapCount(c) 
+		{ 
+		}
+#else
+		inline ImtThunkEnv(GprImtThunkProc p, VTable* v) : 
+			MethodEnvProcHolder((MethodInfo*)&methodProcHolder), 
+			vtable(v),
+			methodProcHolder((GprMethodProc)p)
+		{ 
+		}
+		inline ImtThunkEnv(GprImtThunkProc p, uint32_t c) : 
+			MethodEnvProcHolder((MethodInfo*)&methodProcHolder), 
+			imtMapCount(c),
+			methodProcHolder((GprMethodProc)p)
+		{ 
+		}
+#endif
+		inline GprImtThunkProc implImtGPR() const { return (GprImtThunkProc)this->implGPR(); }
+		inline ImtThunkEntry* entries() const { return (ImtThunkEntry*)(this+1); }
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		union 
+		{
+			VTable* vtable;
+			uint32_t imtMapCount;
+		};
+#if !VMCFG_METHODENV_IMPL32
+		MethodInfoProcHolder methodProcHolder;
+#endif
+	// ------------------------ DATA SECTION END
+	};
+#endif // FEATURE_NANOJIT
 
 }
 

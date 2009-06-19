@@ -49,31 +49,13 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-#if defined FEATURE_NANOJIT
-	/**
-	 * MethodInfo wrapper around interface method dispatch (IMT) stub
-	 */
-	MethodInfo::MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits) :
-		_implGPR(interfaceTramp),
-		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
-		_declaringScopeOrTraits(uintptr_t(0) | IS_TRAITS),
-		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
-		_pool(declTraits->pool),
-		_abc_info_pos(NULL),
-		_flags(RESOLVED),
-		_method_id(-1)
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_methodinfo, this); )
-	}
-#endif
-
 	/**
 	 * MethodInfo wrapper around a system-generated init method.  Used when
 	 * there is no init method defined in the abc; this only occurs for activation
 	 * object traits and catch-block activation traits.
 	 */
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
-		_implGPR(verifyEnterGPR),
+		MethodInfoProcHolder(verifyEnterGPR),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
 		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
 		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
@@ -93,7 +75,7 @@ namespace avmplus
 							const uint8_t* abc_info_pos, 
 							uint8_t abcFlags,
 							const NativeMethodInfo* native_info) : 
-		_implGPR(verifyEnterGPR),
+		MethodInfoProcHolder(verifyEnterGPR),
 		_msref(pool->core->GetGC()->emptyWeakRef),
 		_declaringScopeOrTraits(uintptr_t(0) | IS_TRAITS),
 		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),

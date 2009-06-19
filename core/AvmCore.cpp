@@ -440,14 +440,13 @@ namespace avmplus
 		DomainEnv* domainEnv = abcEnv->domainEnv();
 
 		// iterate thru each of the definitions exported by this script
-		int i=0;
-		TraitsBindingsp tb = scriptTraits->getTraitsBindings();
-		while((i=tb->next(i)) != 0)
+		StTraitsBindingsIterator iter(scriptTraits->getTraitsBindings());
+		while (iter.next())
 		{
 			// don't need to check for DELETED because we never remove trait bindings
-			AvmAssert(tb->keyAt(i) != NULL);
-			Stringp name = tb->keyAt(i);
-			Namespacep ns = tb->nsAt(i);
+			Stringp name = iter.key();
+			if (!name) continue;
+			Namespacep ns = iter.ns();
 				
 			// not already in the table then export it 
 			// otherwise we keep the first one that was encountered.

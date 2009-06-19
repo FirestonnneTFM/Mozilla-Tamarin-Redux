@@ -814,6 +814,8 @@
 		D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UnixDebugUtils.cpp; path = ../../../VMPI/UnixDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinDebugUtils.cpp; path = ../../../VMPI/WinDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinPortUtils.cpp; path = ../../../VMPI/WinPortUtils.cpp; sourceTree = SOURCE_ROOT; };
+		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
+		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1135,6 +1137,8 @@
 		079DF7B30F3A86F20031D1B4 /* nanojit */ = {
 			isa = PBXGroup;
 			children = (
+				D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */,
+				D96013A80FE03CC5002DBDCF /* NativeSparc.h */,
 				191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */,
 				191659970FB88A1400F3DCD3 /* CodeAlloc.h */,
 				079DF9350F3A893C0031D1B4 /* Assembler.cpp */,

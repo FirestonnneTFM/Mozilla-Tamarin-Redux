@@ -41,6 +41,10 @@
 
 namespace avmplus
 {
+#if defined FEATURE_NANOJIT
+	class ImtThunkEnv;
+#endif
+
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	class VTable : public MMgc::GCFinalizedObject
 #else
@@ -49,10 +53,33 @@ namespace avmplus
 	{
 #if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
+		friend class ImtThunkEnv;
 #endif
 	private:
 		MethodEnv* makeMethodEnv(MethodInfo* method, ScopeChain* scope);
-		void addInterface(MethodInfo* virt, int disp_id);
+
+#if defined FEATURE_NANOJIT
+		void resolveImtSlot(uint32_t slot);
+
+		// return uint64_t, not uintptr_t: see note for GprImtThunkProc
+		static uint64_t resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
+		static uint64_t dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
+
+	public:
+#if defined FEATURE_NANOJIT
+		// choose a number that is relatively prime to sizeof(MethodInfo)/8
+		// since we use the MethodInfo pointer as the interface method id
+		// smaller = dense table, few large conflict stubs
+		// larger  = sparse table, many small conflict stubs 
+
+	#ifdef _DEBUG
+		enum { IMT_SIZE = 3 };  // good for testing all code paths
+	#else
+		enum { IMT_SIZE = 7 };  // good for performance
+	#endif
+#endif // FEATURE_NANOJIT
+
+#endif
 
 	public:
 		VTable(Traits* traits, VTable* base, Toplevel* toplevel);
@@ -89,12 +116,11 @@ namespace avmplus
 		bool pad[3];
 
 #if defined FEATURE_NANOJIT
-		MethodEnv* imt[Traits::IMT_SIZE];
+		ImtThunkEnv* imt[VTable::IMT_SIZE];
 #endif
 		MethodEnv* methods[1]; // virtual method table
 	// ------------------------ DATA SECTION END
 	};
-
 }
 
 #endif // __avmplus_VTable__

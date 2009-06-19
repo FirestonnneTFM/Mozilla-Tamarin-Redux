@@ -80,9 +80,9 @@
     FUNCTION(CALL_INDIRECT, SIG4(U,P,P,I,P), icalli)
     FUNCTION(CALL_INDIRECT, SIG4(A,P,P,I,P), acalli)
     FUNCTION(CALL_INDIRECT, SIG4(F,P,P,I,P), fcalli)
-    FUNCTION(CALL_IMT, SIG5(I,P,P,P,I,P), icallimt)
-    FUNCTION(CALL_IMT, SIG5(A,P,P,P,I,P), acallimt)
-    FUNCTION(CALL_IMT, SIG5(F,P,P,P,I,P), fcallimt)
+    FUNCTION(CALL_INDIRECT, SIG5(I,P,P,I,P,P), icallimt)
+    FUNCTION(CALL_INDIRECT, SIG5(A,P,P,I,P,P), acallimt)
+    FUNCTION(CALL_INDIRECT, SIG5(F,P,P,I,P,P), fcallimt)
 
     METHOD(ENVADDR(MethodEnv::newActivation), SIG1(P,P), newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), SIG2(P,P,P), newcatch)
