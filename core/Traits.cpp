@@ -37,9 +37,6 @@
 
 
 #include "avmplus.h"
-#ifdef FEATURE_NANOJIT
-#include "CodegenLIR.h"
-#endif
 
 namespace avmplus
 {
@@ -520,7 +517,7 @@ namespace avmplus
 			(1<<BKIND_METHOD),										// BKIND_METHOD
 			0,														// BKIND_VAR
 			0,														// BKIND_CONST
-			0,														// BKIND_ITRAMP
+			0,														// unused
 			(1<<BKIND_GET) | (1<<BKIND_SET) | (1<<BKIND_GETSET),	// BKIND_GET
 			(1<<BKIND_GET) | (1<<BKIND_SET) | (1<<BKIND_GETSET),	// BKIND_SET
 			(1<<BKIND_GET) | (1<<BKIND_SET) | (1<<BKIND_GETSET)		// BKIND_GETSET
@@ -540,11 +537,13 @@ namespace avmplus
 				continue;
 
 			TraitsBindingsp ifcd = ifc->getTraitsBindings();
-			for (int32_t j = ifcd->next(0); j != 0; j = ifcd->next(j))
+			StTraitsBindingsIterator iter(ifcd);
+			while (iter.next())
 			{
-				Stringp name = ifcd->keyAt(j);
-				Namespacep ns = ifcd->nsAt(j);
-				Binding iBinding = ifcd->valueAt(j);
+				Stringp name = iter.key();
+				if (!name) continue;
+				Namespacep ns = iter.ns();
+				Binding iBinding = iter.value();
 				const BindingKind iBindingKind = AvmCore::bindingKind(iBinding);
 
 				Binding cBinding = this->findBinding(name, ns);
@@ -607,24 +606,14 @@ namespace avmplus
 		return true;
 	}
 	
-#if defined FEATURE_NANOJIT
-	void TraitsBindings::fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel, ImtBuilder* imtBuilder)
-#else
 	void TraitsBindings::fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel)
-#endif
 	{
 		if (owner->isInterface)
 			return;
-		
-	#if defined FEATURE_NANOJIT
-		for (TraitsBindingsp self = this; self; self = self->base)
-	#else
-		// only need this to be a loop if we are building IMT, which never happens in non-jit mode
-		TraitsBindingsp self = this;
-	#endif
+
 		{
-			const TraitsBindings::InterfaceInfo* tbi		= self->getInterfaces();
-			const TraitsBindings::InterfaceInfo* tbi_end	= tbi + self->interfaceCapacity;
+			const TraitsBindings::InterfaceInfo* tbi		= this->getInterfaces();
+			const TraitsBindings::InterfaceInfo* tbi_end	= tbi + this->interfaceCapacity;
 			for ( ; tbi < tbi_end; ++tbi) 
 			{
 				Traitsp ifc = tbi->t;
@@ -640,54 +629,26 @@ namespace avmplus
 				}
 
 				TraitsBindingsp ifcd = ifc->getTraitsBindings();
-				for (int32_t j = ifcd->next(0); j != 0; j = ifcd->next(j))
+				StTraitsBindingsIterator iter(ifcd);
+				while (iter.next())
 				{
-					Stringp name = ifcd->keyAt(j);
-					Namespacep ns = ifcd->nsAt(j);
-					Binding iBinding = ifcd->valueAt(j);
+					Stringp name = iter.key();
+					if (!name) continue;
+					Namespacep ns = iter.ns();
+					Binding iBinding = iter.value();
 					const BindingKind iBindingKind = AvmCore::bindingKind(iBinding);
-
-					Binding cBinding = self->findBinding(name, ns);
+					const Binding cBinding = this->findBinding(name, ns);
 					if (!isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)))
 					{
 						// Try again with public namespace
-						const Binding pBinding = self->findBinding(name, core->publicNamespace);
+						const Binding pBinding = this->findBinding(name, core->publicNamespace);
 						if (isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(pBinding)))
 						{
-							// don't need to add bindings for ancestors
-							if (self == this)
-								this->m_bindings->add(name, ns, pBinding);
-							cBinding = pBinding;
+							this->m_bindings->add(name, ns, pBinding);
 						}
 					}
-					AvmAssert(isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)));
-	#if defined FEATURE_NANOJIT
-					// don't need to add bindings for ancestors, but we do need to add ancestor interfaces
-					// to the IMT if we are building that.
-					if (imtBuilder)
-					{
-						if (AvmCore::isMethodBinding(iBinding))
-						{
-							imtBuilder->addEntry(ifcd->getMethod(AvmCore::bindingToMethodId(iBinding)), AvmCore::bindingToMethodId(cBinding));
-						}
-						if (AvmCore::hasGetterBinding(iBinding))
-						{
-							imtBuilder->addEntry(ifcd->getMethod(AvmCore::bindingToGetterId(iBinding)), AvmCore::bindingToGetterId(cBinding));
-						}
-						if (AvmCore::hasSetterBinding(iBinding))
-						{
-							imtBuilder->addEntry(ifcd->getMethod(AvmCore::bindingToSetterId(iBinding)), AvmCore::bindingToSetterId(cBinding));
-						}
-					}
-	#endif
 				} // for j
 			} // for tbi
-			//
-	#if defined FEATURE_NANOJIT
-			// if not building IMT, we're done after one iteration.
-			if (!imtBuilder) 
-				break;
-	#endif
 		}
 	}
 		
@@ -1338,11 +1299,7 @@ namespace avmplus
 		return capLog;
 	}
 
-#if defined FEATURE_NANOJIT
-	TraitsBindings* Traits::_buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen, ImtBuilder* imtBuilder)
-#else
 	TraitsBindings* Traits::_buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen)
-#endif
 	{
 		// no, this can be called before the resolved bit is set
 		//AvmAssert(this->linked);
@@ -1392,11 +1349,13 @@ namespace avmplus
 			// Copy protected traits from base class into new protected namespace
 			if (basetb && base->protectedNamespace && this->protectedNamespace)
 			{
-				for (int i=0; (i = basetb->next(i)) != 0; )
+				StTraitsBindingsIterator iter(basetb);
+				while (iter.next())
 				{
-					if (basetb->nsAt(i) == base->protectedNamespace)
+					if (!iter.key()) continue;
+					if (iter.ns() == base->protectedNamespace)
 					{
-						bindings->add(basetb->keyAt(i), this->protectedNamespace, basetb->valueAt(i));
+						bindings->add(iter.key(), this->protectedNamespace, iter.value());
 					}
 				}
 			}
@@ -1409,11 +1368,7 @@ namespace avmplus
 			
 			thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen) - m_sizeofInstance;
 			addInterfaces(thisData);
-#if defined FEATURE_NANOJIT
-			thisData->fixInterfaceBindings(core, toplevel, imtBuilder);
-#else
 			thisData->fixInterfaceBindings(core, toplevel);
-#endif
 		}
 
 		// hashtable (if we have one) must start on pointer-sized boundary...
@@ -1431,9 +1386,10 @@ namespace avmplus
 		if (pool->verbose)
 		{
 			core->console << this << " bindings\n";
-			for (int32_t i = thisData->m_bindings->next(0); i != 0; i = thisData->m_bindings->next(i))
+			StTraitsBindingsIterator iter(thisData);
+			while (iter.next())
 			{
-				core->console << thisData->m_bindings->keyAt(i) << ":" << (uint32_t)(uintptr_t)(thisData->m_bindings->valueAt(i)) << "\n";
+				core->console << iter.key() << ":" << (uint32_t)(uintptr_t)(iter.value()) << "\n";
 			}
 			core->console << this << " end bindings \n";
 		}
@@ -1576,21 +1532,7 @@ namespace avmplus
 		}
 
 		AbcGen gen(gc);	
-		TraitsBindings* tb;
-#if defined FEATURE_NANOJIT
-		if (core->IsJITEnabled())
-		{
-			ImtBuilder imtBuilder(gc);
-			tb = _buildTraitsBindings(toplevel, &gen, &imtBuilder);
-			imtBuilder.finish(m_imt, this, toplevel);
-		}
-		else
-		{
-			tb = _buildTraitsBindings(toplevel, &gen, NULL);
-		}
-#else
-		tb = _buildTraitsBindings(toplevel, &gen);
-#endif
+		TraitsBindings* tb = _buildTraitsBindings(toplevel, &gen);
 		this->genInitBody(toplevel, gen);
 
 		// leave m_tmref as empty, we don't need it yet
@@ -1912,68 +1854,6 @@ namespace avmplus
 		}
 	}
 
-#if defined FEATURE_NANOJIT
-	ImtBuilder::ImtBuilder(MMgc::GC* _gc) : gc(_gc)
-	{
-		VMPI_memset(entries, 0, sizeof(ImtEntry*)*Traits::IMT_SIZE);
-	}
-
-	void ImtBuilder::addEntry(MethodInfo* virt, uint32_t disp_id)
-	{
-		AvmAssert(virt != NULL);
-		const uint32_t i = uint32_t(virt->iid() % Traits::IMT_SIZE);
-#ifdef AVMPLUS_VERBOSE
-		if (entries[i] && virt->pool()->verbose)
-			virt->pool()->core->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
-#endif
-		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
-	}
-
-	void ImtBuilder::finish(Binding imt[], Traits* traits, const Toplevel *toplevel)
-	{
-		PoolObject* pool = traits->pool;
-		AvmAssert(pool->core->IsJITEnabled());
-
-		for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
-		{
-			ImtEntry *e = entries[i];
-			if (e == NULL)
-			{
-				imt[i] = BIND_NONE;
-			}
-			else if (e->next == NULL)
-			{
-				// single entry, no conflict
-				imt[i] = AvmCore::makeMGSBinding(e->disp_id, BKIND_METHOD);
-				gc->Free(e);
-			}
-			else
-			{
-				// build conflict stub
-				CodegenIMT imtgen(pool);
-				TRY(pool->core, kCatchAction_Rethrow)
-				{
-					void* thunk = imtgen.emitImtThunk(e);
-					MethodInfo* mi = new (gc) MethodInfo((GprMethodProc)thunk, traits);
-					Binding b = AvmCore::makeITrampBinding(mi);
-					AvmAssert(imt[i] == NULL);
-					WB(gc, traits, &imt[i], b);
-					if (imtgen.overflow)
-						toplevel->throwError(kOutOfMemoryError);
-				}
-				CATCH (Exception* exception) 
-				{
-					imtgen.clearBuffers();
-					// re-throw exception
-					pool->core->throwException(exception);
-				}
-				END_CATCH
-				END_TRY
-			}
-		}
-	}
-#endif 
-	
 	Stringp Traits::formatClassName()
 	{
 		Multiname qname(ns(), name());
@@ -2027,7 +1907,7 @@ namespace avmplus
 			(1<<BKIND_METHOD),										// BKIND_METHOD
 			0,														// BKIND_VAR
 			0,														// BKIND_CONST
-			0,														// BKIND_ITRAMP
+			0,														// unused
 			(1<<BKIND_GET) | (1<<BKIND_SET),						// BKIND_GET
 			(1<<BKIND_GET) | (1<<BKIND_SET),						// BKIND_SET
 			(1<<BKIND_GET) | (1<<BKIND_SET)							// BKIND_GETSET
@@ -2043,7 +1923,7 @@ namespace avmplus
 			(1<<BKIND_METHOD),										// BKIND_METHOD
 			0,														// BKIND_VAR
 			0,														// BKIND_CONST
-			0,														// BKIND_ITRAMP
+			0,														// unused
 			(1<<BKIND_GET),											// BKIND_GET
 			(1<<BKIND_SET),											// BKIND_SET
 			(1<<BKIND_GET) | (1<<BKIND_SET)							// BKIND_GETSET
@@ -2072,12 +1952,8 @@ failure:
 		// note: TraitsBindings are always built the first time in resolveSignature; this is only 
 		// executed for subsequent re-buildings. Thus we pass NULL for toplevel (it's only used
 		// for verification errors, but those will have been caught prior to this) and for
-		// abcGen and imtBuilder (since those only need to be done once).
-#if defined FEATURE_NANOJIT
-		TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL, /*imtBuilder*/NULL);
-#else
+		// abcGen (since it only needs to be done once).
 		TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL);
-#endif
 		return tb;
 	}
 
@@ -2087,4 +1963,5 @@ failure:
 		TraitsMetadata* tm = _buildTraitsMetadata();
  		return tm;
 	}
+
 }

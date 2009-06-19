@@ -2908,9 +2908,10 @@ namespace avmplus
 		case OP_callinterface:
 		{
 			// method_id is pointer to interface method name (multiname)
-			int index = int(method_id % Traits::IMT_SIZE);
+			int index = int(method_id % VTable::IMT_SIZE);
 			LIns* vtable = loadVTable(objDisp);
-			method = loadIns(LIR_ldcp, offsetof(VTable, imt)+sizeof(MethodEnv*)*index, vtable);
+			// note, could be MethodEnv* or ImtThunkEnv*
+			method = loadIns(LIR_ldcp, offsetof(VTable,imt)+sizeof(ImtThunkEnv*)*index, vtable);
 			iid = InsConstPtr((void*)method_id);
 			break;
 		}
@@ -2981,10 +2982,10 @@ namespace avmplus
 		ap->setSize(disp);
 
 #if VMCFG_METHODENV_IMPL32
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnv,_implGPR), method);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodEnvProcHolder,_implGPR), method);
 #else
-		LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnv, method), method);
-		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfo, _implGPR), meth);
+		LIns* meth = loadIns(LIR_ldp, offsetof(MethodEnvProcHolder, method), method);
+		LIns* target = loadIns(LIR_ldp, offsetof(MethodInfoProcHolder, _implGPR), meth);
 #endif
 		LIns* apAddr = leaIns(pad, ap);
 
@@ -3017,7 +3018,7 @@ namespace avmplus
 				fid = FUNCTIONID(acallimt);
 				break;
 			}
-		    out = callIns(fid, 5, target, iid, method, InsConst(argc), apAddr);
+		    out = callIns(fid, 5, target, method, InsConst(argc), apAddr, iid);
         }
 
 		if (opcode != OP_constructsuper && opcode != OP_construct)
@@ -5586,152 +5587,6 @@ namespace avmplus
 
 #endif
 
-	CodegenIMT::CodegenIMT(PoolObject *pool)
-		: pool(pool), overflow(false)
-	{}
-
-	CodegenIMT::~CodegenIMT()
-	{}
-
-	void CodegenIMT::clearBuffers()
-	{}
-
-
-	void* CodegenIMT::emitImtThunk(ImtBuilder::ImtEntry *e)
-	{
-        count_imt();
-
-        initCodePages(pool);
-		AvmCore *core = pool->core;
-		GC *gc = core->gc;
-
-		PageMgr *mgr = pool->codePages;
-		Fragment *frag = new (gc) Fragment(e->virt);
-        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(gc);
-        lirbuf->abi = ABI_FASTCALL;
-        LirWriter *lirout = new (gc) LirBufWriter(lirbuf);
-        debug_only(
-            lirout = new (gc) ValidateWriter(lirout);
-        )
-        verbose_only(if (pool->verbose) {
-            lirout = pushVerboseWriter(gc, lirout, lirbuf, mgr->labels);
-        })
-#ifdef NJ_SOFTFLOAT
-        lirout = new (gc) SoftFloatFilter(lirout);
-#endif
-
-		// x86-specific notes:
-		// the thunk we're generating is really a CDECL function.  We mark
-		// it as fastcall to enable the incoming iid arg in EDX.  Assembler
-		// doesn't actually know how to pop stack args, so this will end
-		// up doing the right thing.  this is very fragile and should be fixed!
-
-		emitStart(lirbuf, lirout, overflow);
-		if (overflow)
-			return false;
-
-	#ifdef AVMPLUS_IA32
-		LIns *iid_param = lirout->insParam(1, 0); // edx
-		//env_param = lirout->insParam(2, 0); // stack
-		argc_param = lirout->insParam(3, 0); // stack
-		ap_param = lirout->insParam(4, 0); // stack
-	#else
-		// works for abi's that have at least 4 parameter registers
-		//env_param = lirout->insParam(0, 0);
-		argc_param = lirout->insParam(1, 0);
-		ap_param = lirout->insParam(2, 0);
-		LIns *iid_param = lirout->insParam(3, 0);
-	#endif
-
-	#ifdef NANOJIT_64BIT
-		argc_param = lirout->ins1(LIR_qlo, argc_param);
-	#endif
-	
-		LIns *obj = lirout->insLoad(LIR_ldp, ap_param, 0);
-		LIns *vtable = lirout->insLoad(LIR_ldcp, obj, offsetof(ScriptObject,vtable));
-
-        verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(argc_param, "argc");
-            lirbuf->names->addName(ap_param, "ap");
-            lirbuf->names->addName(obj, "this");
-            lirbuf->names->addName(vtable, "vtable");
-            lirbuf->names->addName(iid_param, "iid");
-        })
-
-		AvmAssert(e->next != NULL); // must have 2 or more entries
-		while (e->next)
-		{
-			ImtBuilder::ImtEntry *next = e->next;
-
-			LIns *cmp = lirout->ins2(LIR_peq, iid_param, lirout->insImmPtr((void*)e->virt->iid()));
-			LIns *br = lirout->insBranch(LIR_jf, cmp, 0);
-			emitCall(lirout, vtable, e);
-			br->target(lirout->ins0(LIR_label));
-			gc->Free(e);
-			e = next;
-		}
-
-		// last one is unconditional
-		emitCall(lirout, vtable, e);
-        frag->lastIns = lirbuf->next()-1;
-
-		// print LIR if verbose
-		verbose_only(if (pool->verbose)
-			live(gc, frag->lirbuf, /*showLiveRefs*/ false);
-		)
-
-		// now actually generate machine code
-		Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core);
-#ifdef AVMPLUS_VERBOSE
-		assm->_verbose = pool->verbose;
-		StringList asmOutput(gc);
-		assm->_outputCache = &asmOutput;
-#endif
-
-        RegAllocMap regMap(gc);
-        NInsList loopJumps(gc);
-        assm->hasLoop = false;
-        assm->beginAssembly(frag, &regMap);
-        assm->assemble(frag, loopJumps);
-        assm->endAssembly(frag, loopJumps);
-#ifdef AVMPLUS_VERBOSE
-		assm->_outputCache = 0;
-		for (int i=asmOutput.size()-1; i>=0; --i)
-			assm->outputf("%s",asmOutput.get(i)); 
-#endif
-        frag->releaseLirBuffer();
-		if (assm->error() != None)
-		{
-			overflow = true;
-		}
-		return frag->code();
-	}
-
-	void CodegenIMT::emitCall(LirWriter *lirout, LIns *vtable, ImtBuilder::ImtEntry *e)
-	{
-		verbose_only( if (pool->verbose) {
-			AvmCore *core = pool->core;
-			core->console << "              disp_id="<< e->disp_id << " " << e->virt << " iid " << (uint64_t)e->virt->iid() << "\n";
-		})
-		// load the concrete env.
-		// fixme: this should always be == to the one passed into the thunk, right?
-		int32_t offset = (int32_t)(intptr_t)&((VTable*)0)->methods[e->disp_id];
-		LIns *env = lirout->insLoad(LIR_ldcp, vtable, offset);
-	#if VMCFG_METHODENV_IMPL32
-		LIns *target = lirout->insLoad(LIR_ldp, env, (int)offsetof(MethodEnv, _implGPR));
-	#else
-		LIns *af = lirout->insLoad(LIR_ldp, env, offsetof(MethodEnv, method));
-		LIns *target = lirout->insLoad(LIR_ldp, af, (int)offsetof(MethodInfo, _implGPR));
-	#endif
-		LInsp args[] = { ap_param, argc_param, env, target };
-		MethodSignaturep ems = e->virt->getMethodSignature();
-		if (ems->returnTraitsBT() == BUILTIN_number) {
-			lirout->ins1(LIR_fret, lirout->insCall(FUNCTIONID(fcalli), args));
-		} else {
-			// this includes the int/uint/bool case, we dont bother truncating and re-widening the result.
-			lirout->ins1(LIR_ret, lirout->insCall(FUNCTIONID(acalli), args));
-		}
-	}
 }
 
 namespace nanojit
