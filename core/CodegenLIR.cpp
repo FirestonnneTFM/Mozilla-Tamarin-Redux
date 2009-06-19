@@ -2259,11 +2259,9 @@ namespace avmplus
 		case OP_construct:
 		{
 			const uint32_t argc = opd1;
-  		    Traits* ctraits = state->peek(argc+1).traits;
-			// don't need null check, AvmCore::construct() uses toFunction() for null check.
-			Traits* itraits = ctraits ? ctraits->itraits : NULL;
-			emitSetContext(state, NULL);
-			emit(state, opcode, argc, 0, itraits);
+			int ctor_index = state->sp() - argc;
+  		    Traits* ctraits = state->value(ctor_index).traits;
+			emitConstruct(state, argc, ctor_index, ctraits);
 			break;
 		}
 		case OP_getouterscope:
@@ -2536,29 +2534,11 @@ namespace avmplus
             if (AvmCore::isSlotBinding(b))
 			{
                 int slot_id = AvmCore::bindingToSlotId(b);
-                emitGetslot(state, slot_id, state->sp()-(n-1), type);
+				int ctor_index = state->sp()-(n-1);
+                emitGetslot(state, slot_id, ctor_index, type);
 				obj.notNull = false;
 				obj.traits = type;
-                Traits* itraits = type ? type->itraits : NULL;
-                emitSetContext(state, NULL);
-                if (itraits && !itraits->hasCustomConstruct)
-				{
-					itraits->init->resolveSignature(toplevel);
-					if (itraits->init->getMethodSignature()->argcOk(argc))
-					{
-						state->verifier->emitCheckNull(state->sp()-(n-1));
-						state->verifier->emitCoerceArgs(itraits->init, argc, true);
-						emitCall(state, OP_construct, 0, argc, itraits);
-					}
-					else
-					{
-						emit(state, OP_construct, argc, 0, itraits);
-					}
-				}
-				else
-				{
-                    emit(state, OP_construct, argc, 0, itraits);
-                }
+				emitConstruct(state, argc, ctor_index, type);
             }
             else
 			{
@@ -3241,6 +3221,46 @@ namespace avmplus
 		}
     }
 
+	/**
+	 * emit a constructor call, or a late bound constructor call.
+	 * early binding is possible when we know the constructor (class) being
+	 * used, and we know that it doesn't use custom native instance initializer
+	 * code, as indicated by the itraits->hasCustomConstruct flag.
+	*/
+	void CodegenLIR::emitConstruct(FrameState* state, int argc, int ctor_index, Traits* ctraits)
+	{
+		if (outOMem()) return;
+		this->state = state;
+		emitPrep();
+
+		// attempt to early bind to constructor method.
+		Traits* itraits = NULL;
+		if (ctraits) {
+			itraits = ctraits->itraits;
+			if (itraits && !itraits->hasCustomConstruct) {
+				Toplevel* toplevel = state->verifier->getToplevel(this);
+				itraits->init->resolveSignature(toplevel);
+				if (itraits->init->getMethodSignature()->argcOk(argc)) {
+					emitSetContext(state, NULL);
+					state->verifier->emitCheckNull(ctor_index);
+					state->verifier->emitCoerceArgs(itraits->init, argc, true);
+					emitCall(state, OP_construct, 0, argc, itraits);
+					return;
+				}
+			}
+		}
+		
+		// generic path, could not early bind to a constructor method
+		// stack in: ctor-object arg1..N
+		// sp[-argc] = construct(env, sp[-argc], argc, null, arg1..N)
+		emitSetContext(state, NULL);
+		LIns* func = loadAtomRep(ctor_index);
+		LIns* args = storeAtomArgs(InsConstAtom(nullObjectAtom), argc, ctor_index+1);
+		LIns* toplevel = loadToplevel();
+		LIns* newobj = callIns(FUNCTIONID(op_construct), 4, toplevel, func, InsConst(argc), args);
+		localSet(ctor_index, atomToNativeRep(itraits, newobj), itraits);
+	}
+
     typedef const CallInfo *CallInfop;
 
 	void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
@@ -3760,28 +3780,6 @@ namespace avmplus
 				localSet(objDisp, atomToNativeRep(result, i3), result);
 				break;
 			}
-
-			case OP_construct:
- 			{
-				// stack in: method arg1..N
-				// sp[-argc] = construct(env, sp[-argc], argc, null, arg1..N)
- 				int argc = int(op1);
- 				int funcDisp = sp - argc;
- 				int dest = funcDisp;
-
-				LIns* func = loadAtomRep(funcDisp);
-
-				// convert args to Atom[] for the call
-				LIns* ap = storeAtomArgs(InsConstAtom(nullObjectAtom), argc, funcDisp+1);
-
-				LIns* toplevel = loadToplevel();
-
-				LIns* i3 = callIns(FUNCTIONID(op_construct), 4,
-					toplevel, func, InsConst(argc), ap);
-
-				localSet(dest, atomToNativeRep(result, i3), result);
-				break;
- 			}
 
 			case OP_applytype:
 			{
