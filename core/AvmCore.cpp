@@ -88,6 +88,7 @@ namespace avmplus
 		: GCRoot(g) 
 		, console(NULL) 
 		, gc(g) 
+		, currentMethodFrame(NULL)
 #ifdef DEBUGGER
 		, _debugger(NULL)
 		, _profiler(NULL)
@@ -169,13 +170,12 @@ namespace avmplus
 
 		minstack           = 0;
 
+#ifdef DEBUGGER
 		callStack          = NULL;
+#endif
 
 		interrupted        = false;
 
-		codeContextAtom    = CONTEXT_NONE;
-		dxnsAddr		   = NULL;
-		
 		strings			= NULL;
 		numStrings		= 0;
 		namespaces		= NULL;
@@ -440,14 +440,13 @@ namespace avmplus
 		DomainEnv* domainEnv = abcEnv->domainEnv();
 
 		// iterate thru each of the definitions exported by this script
-		int i=0;
-		TraitsBindingsp tb = scriptTraits->getTraitsBindings();
-		while((i=tb->next(i)) != 0)
+		StTraitsBindingsIterator iter(scriptTraits->getTraitsBindings());
+		while (iter.next())
 		{
 			// don't need to check for DELETED because we never remove trait bindings
-			AvmAssert(tb->keyAt(i) != NULL);
-			Stringp name = tb->keyAt(i);
-			Namespacep ns = tb->nsAt(i);
+			Stringp name = iter.key();
+			if (!name) continue;
+			Namespacep ns = iter.ns();
 				
 			// not already in the table then export it 
 			// otherwise we keep the first one that was encountered.
@@ -3856,15 +3855,24 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s->parseIndex((uint32_t&) *result);
 	}
 
-	CodeContext* AvmCore::codeContext() const
+	Namespace* AvmCore::dxns() const
 	{
-		if (codeContextAtom == CONTEXT_NONE) {
-			return NULL;
-		} else if (getCodeContextKind(codeContextAtom) == CONTEXTKIND_ENV) {
-			return getCodeContextEnv(codeContextAtom)->codeContext();
-		} else {
-			return getCodeContextObject(codeContextAtom);
+		for (MethodFrame* f = currentMethodFrame; f != NULL; f = f->next)
+		{
+			// explicit dxns set here? if so, it's the winner
+			Namespace* ns = f->dxns;
+			if (ns != NULL)
+				return ns;
+			
+			// if not -- is this a frame with an env? if so, return its default ns, even if null.
+			MethodEnv* env = f->env();
+			if (env)
+				return env->scope()->getDefaultNamespace();
+				
+			// if not, keep going...
 		}
+		// NULL is ok to return here -- Toplevel::getDefaultNamespace() will throw
+		return NULL;
 	}
 
 	/*static*/ 
@@ -4002,5 +4010,22 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		// on kReserve ditch native pages and switch from JIT to interpreter
 		// on kEmpty ditch WORDCODE and switch to abc interpreter
+	}
+
+	CodeContext* AvmCore::codeContext() const
+	{
+		for (MethodFrame* f = currentMethodFrame; f != NULL; f = f->next)
+		{
+			// has someone overridden the CodeContext at this level (via EnterCodeContext)?
+			CodeContext* cc = f->cc();
+			if (cc)
+				return cc;
+			
+			MethodEnv* env = f->env();
+			if (env && !env->method->pool()->isBuiltin)
+				return env->codeContext();
+		}
+
+		return NULL;
 	}
 }

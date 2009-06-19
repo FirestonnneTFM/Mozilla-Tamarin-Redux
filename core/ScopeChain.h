@@ -133,17 +133,6 @@ namespace avmplus
 
 		inline Namespacep getDefaultNamespace() const { return _defaultXmlNamespace; }
 
-		//
-		// Shut up these false positives:
-		//
-		// In member function avmplus::Namespacep* avmplus::ScopeChain::getDefaultNamespaceAddr() const:
-		// warning: dereferencing type-punned pointer might break strict-aliasing rules
- 		//
-		#ifdef __GNUC__
-		#pragma GCC system_header
-		#endif // __GNUC__
-		inline Namespacep* getDefaultNamespaceAddr() const { return (Namespacep*)(&_defaultXmlNamespace); }
-
 		#if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core) const;
 		#endif

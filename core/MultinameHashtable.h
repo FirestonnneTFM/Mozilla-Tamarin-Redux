@@ -58,6 +58,8 @@ namespace avmplus
 	class MultinameHashtable : public MMgc::GCObject
 #endif
 	{
+		friend class StMNHTIterator;
+		
 	private:
 		class Quad // 33% better!
 		{
@@ -166,13 +168,12 @@ namespace avmplus
 		 */
 		void add(Stringp name, Namespacep ns, Binding value);
 
-		/**
-		 * Allow caller to enumerate all entries in the table.
-		 */
-		int next(int index) const;
-		Stringp keyAt(int index) const;
-		Namespacep nsAt(int index) const;
-		Binding valueAt(int index) const;
+		// note: if you are just doing a single iteration thru a single MNHT,
+		// it's more efficient (and easier) to use StMNHTIterator instead.
+		int FASTCALL next(int index) const;
+		inline Stringp keyAt(int index) const { AvmAssert(m_quads[index-1].name != NULL); return m_quads[index-1].name; }
+		inline Namespacep nsAt(int index) const { return m_quads[index-1].ns; }
+		inline Binding valueAt(int index) const { return m_quads[index-1].value; }
 		
 		size_t allocatedSize() const { return numQuads * sizeof(Quad); }
 
@@ -187,6 +188,56 @@ namespace avmplus
 	private:	mutable Quad m_cache1;	// single-level cache
 #endif
 	// ------------------------ DATA SECTION END
+	};
+	
+	
+	// Note: unlike MNHT::next(), StMNHTIterator::next()
+	// doesn't advance past empty entries. it's the caller's
+	// responsibility to call StMNHTIterator::key() and skip null
+	// entries -- this is a useful optimization since the caller
+	// typically is looping and extracting this value anyway -- this is
+	// a substantial win since it avoids the loop-within-a-loop scenario.
+	// proper usage is:
+	//
+	//		StMNHTIterator iter(mnht);
+	//		while (iter.next()) {
+	//			if (!iter.key()) continue;
+	//			.. rest of loop ..
+	//		}
+	//
+	class StMNHTIterator
+	{
+	private:
+		const MultinameHashtable::Quad* m_cur;
+		const MultinameHashtable::Quad* const m_end; // one past the end
+	
+	public:
+		inline StMNHTIterator(MultinameHashtable* mnht) : 
+			m_cur(mnht->m_quads - 1), 
+			m_end(mnht->m_quads + mnht->numQuads)
+		{
+		}
+		
+		inline bool next() 
+		{
+			return ++m_cur < m_end;
+		}
+
+		inline Stringp key() const
+		{
+			AvmAssert(m_cur < m_end);
+			return m_cur->name;
+		}
+
+		inline Namespacep ns() const
+		{
+			return m_cur->ns;
+		}
+
+		inline Binding value() const
+		{
+			return m_cur->value;
+		}
 	};
 }
 

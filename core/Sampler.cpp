@@ -269,8 +269,13 @@ namespace avmplus
 		{
 			// Turn on momentarily to record the alloc for this object.
 			samplingAllAllocs = true;
-			recordAllocationSample(obj, 0);
+			uint64 uid = recordAllocationSample(obj, 0);
 			samplingAllAllocs = false;
+			if( !uid )
+			{
+				// allocation must have failed because the buffer was full
+				return 0;
+			}
 		}
 
 		byte* old_sample = lastAllocSample;

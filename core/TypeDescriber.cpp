@@ -170,9 +170,11 @@ namespace avmplus
 		if (!tb) return;
 		if ((flags & TypeDescriber::HIDE_OBJECT) && !tb->base) return;
 		addBindings(bindings, tb->base, flags);
-		for (int32_t index = 0; (index = tb->next(index)) != 0; )
+		StTraitsBindingsIterator iter(tb);
+		while (iter.next())
 		{
-			bindings->add(tb->keyAt(index), tb->nsAt(index), tb->valueAt(index));
+			if (!iter.key()) continue;
+			bindings->add(iter.key(), iter.ns(), iter.value());
 		}
 	}
 	
@@ -268,11 +270,11 @@ namespace avmplus
 					if (ti && ti->isInterface)
 					{
 						TraitsBindingsp tbi = ti->getTraitsBindings();
-						for (int32_t index = 0; (index = tbi->next(index)) != 0; )
+						StTraitsBindingsIterator iter(tbi);
+						while (iter.next())
 						{
-							Stringp name = tbi->keyAt(index);
-							Namespacep ns = tbi->nsAt(index);
-							mybind->add(name, ns, BIND_NONE);
+							if (!iter.key()) continue;
+							mybind->add(iter.key(), iter.ns(), BIND_NONE);
 						}
 					}
 				}
@@ -284,9 +286,11 @@ namespace avmplus
 			{
 				for (TraitsBindingsp tbi = tb->base; tbi; tbi = tbi->base) 
 				{
-					for (int32_t index = 0; (index = tbi->next(index)) != 0; )
+					StTraitsBindingsIterator iter(tbi);
+					while (iter.next())
 					{
-						Namespacep ns = tbi->nsAt(index);
+						if (!iter.key()) continue;
+						Namespacep ns = iter.ns();
 						if (ns->getURI()->length() > 0 && nsremoval.indexOf(ns) < 0)
 						{
 							nsremoval.add(ns);
@@ -295,11 +299,13 @@ namespace avmplus
 				}
 			}
 
-			for (int32_t index = 0; (index = mybind->next(index)) != 0; )
+			StMNHTIterator iter(mybind);
+			while (iter.next())
 			{
-				Binding binding = mybind->valueAt(index);
-				Stringp name = mybind->keyAt(index);
-				Namespacep ns = mybind->nsAt(index);
+				if (!iter.key()) continue;
+				Stringp name = iter.key();
+				Namespacep ns = iter.ns();
+				Binding binding = iter.value();
 				Stringp nsuri = ns->getURI();
 				TraitsMetadata::MetadataPtr md1 = NULL;
 				TraitsMetadata::MetadataPtr md2 = NULL;
@@ -387,7 +393,7 @@ namespace avmplus
 							uint8_t(kstrid_emptyString),	// BKIND_METHOD
 							uint8_t(kstrid_emptyString),	// BKIND_VAR
 							uint8_t(kstrid_emptyString),	// BKIND_CONST
-							uint8_t(kstrid_emptyString),	// BKIND_ITRAMP
+							uint8_t(kstrid_emptyString),	// unused
 							uint8_t(kstrid_readonly),		// BKIND_GET
 							uint8_t(kstrid_writeonly),		// BKIND_SET
 							uint8_t(kstrid_readwrite)		// BKIND_GETSET

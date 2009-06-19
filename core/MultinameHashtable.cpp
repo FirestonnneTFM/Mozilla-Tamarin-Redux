@@ -302,25 +302,9 @@ found1:
 		}
 	}
 
-	Stringp MultinameHashtable::keyAt(int index) const
-	{
-		AvmAssert(m_quads[index-1].name != NULL);
-		return m_quads[index-1].name;
-	}
-
-	Namespacep MultinameHashtable::nsAt(int index) const
-	{
-		return m_quads[index-1].ns;
-	}
-
-	Binding MultinameHashtable::valueAt(int index) const
-	{
-		return m_quads[index-1].value;
-	}
-
 	// call this method using the previous value returned
 	// by this method starting with 0, until 0 is returned.
-	int MultinameHashtable::next(int index) const
+	int FASTCALL MultinameHashtable::next(int index) const
 	{
 		// Advance to first non-empty slot.
 		const Quad* t = m_quads;

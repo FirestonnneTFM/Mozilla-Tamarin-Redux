@@ -144,9 +144,7 @@ namespace avmplus
 			BKIND_METHOD			= 1,		// MethodEnv*							001
 			BKIND_VAR				= 2,		// int local slot number (r/w var)		010
 			BKIND_CONST				= 3,		// int local slot number (r/o const)	011
-#if defined FEATURE_NANOJIT
-			BKIND_ITRAMP			= 4,		// interface trampoline in imt table	100
-#endif
+			BKIND_unused			= 4,		// not in use							100
 			BKIND_GET				= 5,		// get-only property					101
 			BKIND_SET				= 6,		// set-only property					110
 			BKIND_GETSET			= 7			// readwrite property					111
