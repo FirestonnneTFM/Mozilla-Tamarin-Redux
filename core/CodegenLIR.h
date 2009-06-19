@@ -268,7 +268,10 @@ namespace avmplus
 
 
 		bool outOMem();
-		
+
+		/** emit a constructor call, and early bind if possible */
+		void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
+
 	public:
 		CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
