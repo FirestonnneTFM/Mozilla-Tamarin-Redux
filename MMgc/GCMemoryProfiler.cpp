@@ -560,7 +560,7 @@ namespace MMgc
 	{
 		if(GCHeap::GetGCHeap()->GetProfiler() != NULL)
 		{
-			GCAssertMsg(s == NULL || MMgc::GetAllocationName(s) != NULL, "Unknown allocation");
+			GCAssertMsg(s == NULL || GCHeap::GetGCHeap()->GetProfiler()->GetAllocationTrace(s) != NULL, "Unknown allocation");
 			if(memtype != NULL || s == NULL) {
 				memtype = s;
 			}
