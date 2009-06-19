@@ -184,8 +184,7 @@ namespace avmplus
 		jmp_buf				jmpbuf;
 		AvmCore*			core;
 		ExceptionFrame*		prevFrame;
-		Namespace* const *	dxnsAddr;
-		CodeContextAtom		codeContextAtom;
+		MethodFrame*		savedMethodFrame;
 		void*				stacktop;
 #ifdef DEBUGGER
 		CallStackNode*		callStack;

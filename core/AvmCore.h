@@ -118,12 +118,20 @@ const int kBufferPadding = 16;
 		bool jitordie;		// Always JIT, and if the JIT fails then abort
 	};
 
+	class MethodFrame;
+	
 	/**
 	 * The main class of the AVM+ virtual machine.  This is the
 	 * main entry point to the VM for running ActionScript code.
 	 */
 	class AvmCore : public MMgc::GCRoot
 	{
+		friend class MethodFrame;
+		friend class CodegenLIR;
+		friend class EnterCodeContext;
+		friend class EnterMethodEnv;
+		friend class ExceptionFrame;
+
 	public:
 		/**
 		 * Default values for the config parameters.  These need to be visible, because
@@ -177,9 +185,11 @@ const int kBufferPadding = 16;
 		 * The GC used by this AVM instance
 		 */
 		MMgc::GC * const gc;
+		
+		private:
+			MethodFrame*		currentMethodFrame;
 
 		#ifdef DEBUGGER
-		friend class CodegenLIR;
 		private:
 			Debugger*		_debugger;
 			Profiler*		_profiler;
@@ -202,7 +212,8 @@ const int kBufferPadding = 16;
 		void enqTraits(Traits* t);
 		void verifyEarly(Toplevel* toplevel);
 #endif
-
+	
+	public:
 		void branchCheck(MethodEnv *env, bool interruptable, int go)
 		{
 			if(go < 0)
@@ -315,9 +326,6 @@ const int kBufferPadding = 16;
 		/** Domain for built-in classes */
 		Domain* builtinDomain;
 		
-		/** The location of the currently active defaultNamespace */
-		Namespace *const*dxnsAddr;
-
 		enum InterruptReason {
 			ScriptTimeout = 1,
 			ExternalInterrupt = 2
@@ -1192,14 +1200,14 @@ const int kBufferPadding = 16;
 		#ifdef _DEBUG
 		void dumpStackTrace();
 		#endif
-#endif /* DEBUGGER */
 
 		/** The call stack of currently executing code. */
 		CallStackNode *callStack;
 
-		CodeContextAtom codeContextAtom;
+#endif /* DEBUGGER */
 
 		CodeContext* codeContext() const;
+		Namespace* dxns() const;
 
 		/** env of the highest catch handler on the call stack, or NULL */
 		ExceptionFrame *exceptionFrame;
@@ -1552,6 +1560,72 @@ const int kBufferPadding = 16;
 		};
 		GCInterface gcInterface;
 	};
+
+	/*
+		MethodFrame is a way of maintaining CodeContext and DXNS in a uniform way
+		in both Interpreter and JIT modes. CodeContext is a poorly-documented
+		structure that is exercised very little in current acceptance tests, but is
+		used extensively for Flash and AIR. The theory of operation:
+		-- Normally, the "active" CodeContext is that of the most-recently-called
+			non-builtin MethodEnv on the call stack.
+		-- native C++ code can override the current CodeContext by using EnterCodeContext(),
+			which just pushes another MethodFrame onto the stack...
+			it overrides the current CodeContext, but subsequent nested calls to non-builtin
+			methods will in turn override this.
+		-- The implementation is a bit convoluted, in the name of saving stack space.
+			A single field can contain either a MethodEnv* (for a normal MethodFrame)
+			or a CodeContext* (for one pushed by EnterCodeContext). This means that the top-of-stack
+			may not have the current MethodEnv* handy, so walking down the stack is necessary
+			to find it.
+		-- Note that MethodFrame doesn't contain a pointer to AvmCore*; this is by design 
+			(as a stack-saving measure), as CodegenLIR doesn't need to save it (it can emit the proper constant value), 
+			and	all other callers have ready access to one.
+	*/
+	class MethodFrame
+	{
+		friend class AvmCore;
+		friend class CodegenLIR;
+		friend class EnterCodeContext;
+		friend class EnterMethodEnv;
+
+		// deliberately no ctor or dtor here.
+		
+		// NOTE, the code in enter/exit is replicated in CodegenLIR.cpp;
+		// if you make changes here, you may need to make changes there as well.
+		inline void enter(AvmCore* core, MethodEnv* e)
+		{
+			this->envOrCodeContext = uintptr_t(e); // implicitly leave IS_EXPLICIT_CODECONTEXT clear
+			this->dxns = NULL;
+			this->next = core->currentMethodFrame;
+			core->currentMethodFrame = this;
+		}
+
+		inline void enter(AvmCore* core, CodeContext* cc)
+		{
+			this->envOrCodeContext = uintptr_t(cc) | IS_EXPLICIT_CODECONTEXT;
+			this->dxns = NULL;
+			this->next = core->currentMethodFrame;
+			core->currentMethodFrame = this;
+		}
+
+		inline void exit(AvmCore* core)
+		{
+			AvmAssert(core->currentMethodFrame == this);
+			core->currentMethodFrame = this->next;
+		}
+
+		inline CodeContext* cc() const { return (envOrCodeContext & IS_EXPLICIT_CODECONTEXT) ? (CodeContext*)(envOrCodeContext & ~IS_EXPLICIT_CODECONTEXT) : NULL; }
+		inline MethodEnv* env() const { return (envOrCodeContext & IS_EXPLICIT_CODECONTEXT) ? NULL : (MethodEnv*)(envOrCodeContext); }
+
+	private:
+
+	private:
+		enum { IS_EXPLICIT_CODECONTEXT = 0x1 };
+		uintptr_t		envOrCodeContext;
+		Namespace*		dxns; // NOTE: this struct is always stack-allocated (or via VMPI_alloca, which is just as good), so no DRC needed
+		MethodFrame*	next;
+	};
+
 }
 
 #endif /* __avmplus_AvmCore__ */

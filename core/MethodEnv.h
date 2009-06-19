@@ -471,6 +471,7 @@ namespace avmplus
 	#else
 		#define MOPS_SWAP_BYTES(p) do {} while (0)
 	#endif
+
 }
 
 #endif // __avmplus_MethodEnv__

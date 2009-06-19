@@ -40,24 +40,8 @@
 
 namespace avmplus
 {
-	enum CodeContextKind 
-	{
-		CONTEXTKIND_ENV = 0,	// MethodEnv* pointer
-		CONTEXTKIND_OBJECT = 1	// CodeContext* object
-	};
-
-	const CodeContextAtom CONTEXT_NONE   = 0; // No CodeContext present
-
-	inline CodeContextKind getCodeContextKind(CodeContextAtom c) { return CodeContextKind(uintptr_t(c) & 7); }
-
-	inline MethodEnv* getCodeContextEnv(CodeContextAtom c) { AvmAssert(getCodeContextKind(c) == CONTEXTKIND_ENV); return (MethodEnv*)(uintptr_t(c) & ~7); }
-	inline CodeContext* getCodeContextObject(CodeContextAtom c) { AvmAssert(getCodeContextKind(c) == CONTEXTKIND_OBJECT); return (CodeContext*)(uintptr_t(c) & ~7); }
-
-	inline CodeContextAtom makeCodeContextAtom(MethodEnv* e) { return CodeContextAtom(uintptr_t(e) | CONTEXTKIND_ENV); }
-	inline CodeContextAtom makeCodeContextAtom(CodeContext* c) { return CodeContextAtom(uintptr_t(c) | CONTEXTKIND_OBJECT); }
-
 	// CodeContext is used to track which security context we are in.
-	// When an AS3 method is called, the AS3 method will set core->codeContext to its code context.
+	// When an AS3 method is called, the AS3 method will ensure that core->codeContext() will return its context.
 	class CodeContext : public MMgc::GCObject
 	{
 	public:		
@@ -70,31 +54,17 @@ namespace avmplus
 	class EnterCodeContext
 	{
 	public:
-		EnterCodeContext(AvmCore * _core, MethodEnv *env)
+		inline explicit EnterCodeContext(AvmCore* core, CodeContext* new_cc) : m_core(core)
 		{
-			initialize(_core, makeCodeContextAtom(env));
+			m_frame.enter(m_core, new_cc);
 		}
-		EnterCodeContext(AvmCore * _core, CodeContext *codeContext)
+		inline ~EnterCodeContext()
 		{
-			initialize(_core, makeCodeContextAtom(codeContext));
-		}
-		~EnterCodeContext()
-		{
-			finish();
-		}
-		void finish()
-		{
-			core->codeContextAtom = savedCodeContextAtom;
+			m_frame.exit(m_core);
 		}
 	private:
-		void initialize(AvmCore * _core, CodeContextAtom atom)
-		{
-			this->core = _core;
-			savedCodeContextAtom = _core->codeContextAtom;
-			_core->codeContextAtom = atom;
-		}
-		CodeContextAtom savedCodeContextAtom;
-		AvmCore *core;
+		AvmCore* const m_core;
+		MethodFrame m_frame;
 	};
 }
 

@@ -777,12 +777,6 @@ namespace avmplus
 
 	}
 
-    void WordcodeEmitter::writeSetContext(FrameState* state, MethodInfo *f)
-    {
-	    (void)state;
-		(void)f;
-    }
-
 	void WordcodeEmitter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
     {
 	    (void) state;

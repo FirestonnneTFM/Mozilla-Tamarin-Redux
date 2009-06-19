@@ -89,12 +89,6 @@ namespace avmplus
         coder2->writeCheckNull(state, index);
     }
 
-    void TeeWriter::writeSetContext(FrameState* state, MethodInfo *f)
-    {
-        coder1->writeSetContext (state, f);
-        coder2->writeSetContext (state, f);
-    }
-
 	void TeeWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
     {
         coder1->writeCoerce (state, index, type);
@@ -173,11 +167,6 @@ namespace avmplus
     void NullWriter::writeCheckNull(FrameState* state, uint32_t index)
     {
         coder->writeCheckNull(state, index);
-    }
-
-    void NullWriter::writeSetContext(FrameState* state, MethodInfo *f)
-    {
-        coder->writeSetContext (state, f);
     }
 
 	void NullWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
