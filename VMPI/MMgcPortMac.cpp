@@ -445,6 +445,7 @@ void VMPI_desetupPCResolution()
 
 bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 {
+#if 0
 	static bool isFirstCall = false;
 	
 	//attempt launch of gdb for the first time
@@ -486,6 +487,7 @@ bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 			}
 		}
 	}
+#endif //if 0
 	
 	return false;
 }
