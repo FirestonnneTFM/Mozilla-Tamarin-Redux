@@ -144,6 +144,12 @@ namespace avmshell
 		double get_freeMemory();
 		double get_privateMemory();
 
+		// Initiate a garbage collection; future versions will not return before completed.
+		void forceFullCollection();
+
+		// Queue a garbage collection request.
+		void queueCollection();
+
 		// function exists solely to test native-methods with custom namespaces
 		void ns_example_nstest() { }
 

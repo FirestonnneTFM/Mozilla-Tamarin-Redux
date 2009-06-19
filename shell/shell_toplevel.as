@@ -93,6 +93,12 @@ package avmplus
 		// process wide size of resident private memory 
 		public native static function get privateMemory():Number;
 
+        // Initiate a garbage collection; future versions will not return before completed.
+        public native static function forceFullCollection():void;
+
+        // Queue a garbage collection request.
+        public native static function queueCollection():void;
+
 		// function exists solely to test native-methods with custom namespaces
 		ns_example native static function nstest():void;
 
