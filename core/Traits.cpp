@@ -375,8 +375,9 @@ namespace avmplus
         // this is a quadratic probe
         int32_t n = 7;
 		const uint32_t bitMask = this->interfaceCapacity - 1;
-
-		uint32_t i = (uintptr_t(intf)) & bitMask;
+		
+		// skip lower 3 bits since they are always zero and don't contribute to hash
+		uint32_t i = (uintptr_t(intf) >> 3) & bitMask;
 		AvmAssert(i < this->interfaceCapacity);
         Traitsp k;
         while ((k = set[i].t) != intf && k != NULL)
