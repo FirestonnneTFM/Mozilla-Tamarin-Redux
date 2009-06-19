@@ -53,6 +53,24 @@
 
 namespace avmplus
 {	
+	// an auto-ptr for managing MethodFrame calls.
+	class EnterMethodEnv
+	{
+	public:
+		inline explicit EnterMethodEnv(AvmCore* core, MethodEnv* env, MethodFrame& frame) : m_core(core), m_frame(frame)
+		{
+			m_frame.enter(m_core, env);
+		}
+		inline ~EnterMethodEnv()
+		{
+			m_frame.exit(m_core);
+		}
+		inline void set_dxns(Namespace* ns) { m_frame.dxns = ns; }
+	private:
+		AvmCore* m_core;
+		MethodFrame& m_frame;
+	};
+
 
 #define IS_INTEGER(v)        (((v) & 7) == kIntegerType)
 #define IS_DOUBLE(v)         (((v) & 7) == kDoubleType)
@@ -607,11 +625,8 @@ namespace avmplus
  		
  		struct InterpreterAuxiliaryFrame
  		{
+			MethodFrame methodFrame;
  			ExceptionFrame ef;
- 			CodeContextAtom savedCodeContext;
-			Namespace** dxnsAddr;
- 			Namespace* dxns;
- 			Namespace* const * dxnsAddrSave;
  			Multiname multiname2;
  		};
 
@@ -710,6 +725,14 @@ namespace avmplus
 										+ kAuxFrameSize);
 		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + ms->frame_size());
 #endif
+
+		// It's essential that the MethodFrame is cleaned up upon normal exit, to keep core->currentMethodFrame
+		// in order. (a throw past the frame will not perform cleanup.) A manual call just before returning 
+		// is *not* adequate, as we need to be able to call aux_memory->methodFrame->exit() *after* our TRY/CATCH
+		//  code has completed (otherwise, it may attempt to "restore" currentStack to a bogus value). 
+		// Using a real dtor here ensures we are called after any endTry().
+		EnterMethodEnv methodFrame(core, env, aux_memory->methodFrame);
+
  		register Atom* const scopeBase = framep + ms->local_count();
  		register Atom* volatile withBase = NULL;
  		NONDEBUGGER_ONLY( register ) int volatile scopeDepth = 0;
@@ -719,18 +742,6 @@ namespace avmplus
 		// Code that uses lots of global variables accesses this frequently, so it's worth caching.
 		ScriptObject* /* NOT VOLATILE */ globalScope = (scope->getSize() > 0) ? AvmCore::atomToScriptObject(scope->getScope(0)) : NULL;
  		
- 		aux_memory->dxns = scope->getDefaultNamespace();
-		aux_memory->dxnsAddrSave = core->dxnsAddr;
- 		if(info->setsDxns()) 
- 			aux_memory->dxnsAddr = &aux_memory->dxns;
- 		else 
- 			aux_memory->dxnsAddr = scope->getDefaultNamespaceAddr();	// just the address of a member of *scope
-		core->dxnsAddr = aux_memory->dxnsAddr;
-		
- 		aux_memory->savedCodeContext = core->codeContextAtom;
-		if (!pool->isBuiltin)
- 			core->codeContextAtom = makeCodeContextAtom(env);
-  
  		// OPTIMIZEME - opportunities for streamlining the function entry code.
  		// 
  		// * With unbox/box optimization introduced and alloca removed so that the parameter
@@ -954,9 +965,7 @@ namespace avmplus
 				}
 #endif
 				SAVE_EXPC;
-				core->codeContextAtom = aux_memory->savedCodeContext;
 				a1 = toplevel->coerce(a1, ms->returnTraits());
-				core->dxnsAddr = aux_memory->dxnsAddrSave;
 #ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
 					core->console << "exit " << info << '\n';
@@ -2746,14 +2755,14 @@ namespace avmplus
 			INSTR(dxns) {
 				AvmAssert(info->setsDxns());
 				SAVE_EXPC;
-				aux_memory->dxns = core->newPublicNamespace(pool->cpool_string[(uint32_t)U30ARG]);
+				methodFrame.set_dxns(core->newPublicNamespace(pool->cpool_string[(uint32_t)U30ARG]));
 				NEXT;
 			}
 
 			INSTR(dxnslate) {
 				AvmAssert(info->setsDxns());
 				SAVE_EXPC;
-				aux_memory->dxns = core->newPublicNamespace(core->intern(*sp));
+				methodFrame.set_dxns(core->newPublicNamespace(core->intern(*sp)));
 				sp--;
 				NEXT;
 			}

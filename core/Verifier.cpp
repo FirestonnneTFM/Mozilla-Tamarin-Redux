@@ -847,7 +847,6 @@ namespace avmplus
 
 				Value& obj = state->peek(n);
 				Binding b = toplevel->getBinding(obj.traits, &multiname);
-				bool needsSetContext = true;
 				Traits* propTraits = readBinding(obj.traits, b);
 
 				emitCheckNull(sp-(n-1));
@@ -896,7 +895,6 @@ namespace avmplus
 
 					if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
 					{
-						needsSetContext = false;
 						if(obj.traits == VECTORINT_TYPE)
 							emitCoerce(INT_TYPE, state->sp());
 						else if(obj.traits == VECTORUINT_TYPE)
@@ -908,9 +906,6 @@ namespace avmplus
 
 				// default - do getproperty at runtime
 
-				if (needsSetContext)
-				    coder->writeSetContext(state, NULL);
-		
 				coder->writeOp2(state, pc, opcode, imm30, n, propTraits);
 				state->pop(n);
 				break;
@@ -1356,7 +1351,6 @@ namespace avmplus
 				AvmAssert(f != NULL);
 
 				emitCoerceArgs(f, argc);
-				coder->writeSetContext(state, f);
 				emitCheckNull(sp-argc);
 				coder->writeOp2(state, pc, opcode, 0, argc, baseTraits);				
 				state->pop(argc+1);
@@ -1976,7 +1970,6 @@ namespace avmplus
 		Traits* resultType = mms->returnTraits();
 
 		emitCoerceArgs(m, argc);
-		coder->writeSetContext(state, m);
 		if (!t->isInterface)
 		{
 		    coder->writeOp2(state, pc, OP_callmethod, disp_id, argc, resultType);
@@ -2204,7 +2197,6 @@ namespace avmplus
 		core->console << "verify getproperty " << obj.traits << " " << multiname->getName() << " from within " << info << "\n";
 		#endif
 
-		bool needsSetContext = true;
 		if( !propType )
 		{
 			if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
@@ -2217,7 +2209,6 @@ namespace avmplus
 
 				if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
 				{
-					needsSetContext = false;
 					if(obj.traits == VECTORINT_TYPE)
 						propType = INT_TYPE;
 					else if(obj.traits == VECTORUINT_TYPE)
@@ -2230,9 +2221,6 @@ namespace avmplus
 
 		// default - do getproperty at runtime
 
-		if (needsSetContext)
-			coder->writeSetContext(state, NULL);
-		
 		coder->writeOp2(state, pc, OP_getproperty, imm30, n, propType);
 		state->pop_push(n, propType);
 	}

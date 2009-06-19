@@ -499,38 +499,23 @@ namespace avmplus
 	uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
 	{
 		env->_implGPR = env->method->implGPR();
+		AvmAssert(env->_implGPR != (GprMethodProc)MethodEnv::delegateInvoke);
 		return env->_implGPR(env, argc, ap);
 	}
 #endif // VMCFG_METHODENV_IMPL32
 
-#ifdef FEATURE_NANOJIT
-	MethodEnv::MethodEnv(TrampStub, MethodInfo* method, ScopeChain* scope)
-		: _scope(scope), method(method), activationOrMCTable(0)
-	{
-		#if VMCFG_METHODENV_IMPL32
-		// set trampoline to IMT stub; we cannot go through delegateInvoke
-		// because the register holding the IID (interface id) will be clobbered
-		_implGPR = method->implGPR();
-		#endif
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
-	}
+	MethodEnv::MethodEnv(MethodInfo* method, ScopeChain* scope) : 
+#if VMCFG_METHODENV_IMPL32
+		MethodEnvProcHolder(delegateInvoke),
+		method(method),
+#else
+		MethodEnvProcHolder(method),
 #endif
-
-	MethodEnv::MethodEnv(MethodInfo* method, ScopeChain* scope)
-		: _scope(scope)
-		, method(method)
-		, activationOrMCTable(0)
+		_scope(scope),
+		activationOrMCTable(0)
 	{
 		AvmAssert(method != NULL);
 		
-#if VMCFG_METHODENV_IMPL32
-	#if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
-		MMGC_STATIC_ASSERT(offsetof(MethodEnv, _implGPR) == 0);
-	#endif
-		// make the first call go to the method impl
-		_implGPR = delegateInvoke;
-#endif
-
 		if (method->declaringTraits() != this->vtable()->traits)
 		{
 		#ifdef AVMPLUS_VERBOSE
@@ -1310,7 +1295,7 @@ namespace avmplus
 		fvtable->ivtable = toplevel->object_ivtable;
 		AvmAssert(fvtable->linked);
 
-		ScopeChain* fscope = ScopeChain::create(gc, fvtable, this->abcEnv(), function->declaringScope(), outer, *core->dxnsAddr);
+		ScopeChain* fscope = ScopeChain::create(gc, fvtable, this->abcEnv(), function->declaringScope(), outer, core->dxns());
 		for (int i=outer->getSize(), n=fscope->getSize(); i < n; i++)
 		{
 			fscope->setScope(gc, i, *scopes++);
@@ -1385,7 +1370,7 @@ namespace avmplus
 
 		// class scopechain = [..., class]
 		AvmAssert(ctraits->init != NULL);
-		ScopeChain* cscope = ScopeChain::create(gc, cvtable, abcEnv, ctraits->init->declaringScope(), outer, *core->dxnsAddr);
+		ScopeChain* cscope = ScopeChain::create(gc, cvtable, abcEnv, ctraits->init->declaringScope(), outer, core->dxns());
 		int i = outer->getSize();
 		for (int n=cscope->getSize(); i < n; i++)
 		{
@@ -1395,7 +1380,7 @@ namespace avmplus
 		// Note: iff itraits == class_itraits, we used to use cscope (rather than iscope) for ivtable, 
 		// but that appears to be simply wrong: it doesn't match the expectations of the ScopeTypeChain filled in for Class.
 		AvmAssert(itraits->init != NULL);
-		ScopeChain* iscope = ScopeChain::create(gc, ivtable, abcEnv, itraits->init->declaringScope(), cscope, *core->dxnsAddr);
+		ScopeChain* iscope = ScopeChain::create(gc, ivtable, abcEnv, itraits->init->declaringScope(), cscope, core->dxns());
 		ivtable->resolveSignatures(iscope);
 			// Don't resolve signatures for Object$ until after Class has been set up
 			// which should happen very soon after Object is setup.

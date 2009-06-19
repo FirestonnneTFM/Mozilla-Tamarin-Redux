@@ -78,19 +78,34 @@ namespace avmplus
 
 	class MethodSignature;
 
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	class MethodInfoProcHolder : public MMgc::GCFinalizedObject
+#else
+	class MethodInfoProcHolder : public MMgc::GCObject
+#endif
+	{
+		friend class CodegenLIR;
+		friend class ImtThunkEnv;
+	protected:
+		union 
+		{
+			GprMethodProc _implGPR;
+			FprMethodProc _implFPR;
+		};
+		inline MethodInfoProcHolder(GprMethodProc p) : _implGPR(p) { }
+	public:
+		inline GprMethodProc implGPR() const { return _implGPR; }
+		inline FprMethodProc implFPR() const { return _implFPR; }
+	};
+
 	/**
 	 * MethodInfo is the base class for all functions that
 	 * can be executed by the VM: Actionscript functions,
 	 * native functions, etc.
 	 */
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class MethodInfo : public MMgc::GCFinalizedObject
-#else
-	class MethodInfo : public MMgc::GCObject
-#endif
+	class MethodInfo : public MethodInfoProcHolder
 	{
 		friend class CodegenLIR;
-		friend class CodegenIMT;
 	public:
 		/** @name flags from .abc - limited to a BYTE */
 		/*@{*/
@@ -202,10 +217,6 @@ namespace avmplus
 		// special ctor for the methodinfo generated for slot-initialization when no init method is present
 		enum InitMethodStub { kInitMethodStub };
 		MethodInfo(InitMethodStub, Traits* declTraits);
-
-#if defined FEATURE_NANOJIT
-		MethodInfo(GprMethodProc interfaceTramp, Traits* declTraits);
-#endif
 
 		static uintptr_t verifyEnterGPR(MethodEnv* env, int argc, uint32* ap);
 		static double verifyEnterFPR(MethodEnv* env, int argc, uint32* ap);
@@ -356,8 +367,6 @@ namespace avmplus
 
 		inline int method_id() const { return _method_id; }
 
-		inline GprMethodProc implGPR() const { return _implGPR; }
-		inline FprMethodProc implFPR() const { return _implFPR; }
 		Traits* declaringTraits() const;
 		const ScopeTypeChain* declaringScope() const;
 		Traits* activationTraits() const;
@@ -415,12 +424,6 @@ namespace avmplus
 	
 	// ------------------------ DATA SECTION BEGIN
 	private:
-		// these are (probably) most-frequently accessed so put at offset zero (allow LIR to generate trivially smaller code)
-		union 
-		{
-			GprMethodProc	_implGPR;
-			FprMethodProc	_implFPR;
-		};
 		DWB(MMgc::GCWeakRef*)	_msref;						// our MethodSignature 
 		uintptr_t				_declaringScopeOrTraits;	// if LSB set, Traits*   if LSB clr, ScopeTypeChain*
 		uintptr_t				_activationScopeOrTraits;	// if LSB set, Traits*   if LSB clr, ScopeTypeChain*

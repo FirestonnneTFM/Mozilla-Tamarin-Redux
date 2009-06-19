@@ -153,7 +153,7 @@ namespace avmplus
         LIns *vars, *varTraits;
         LIns *env_param, *argc_param, *ap_param;
         LIns *_save_eip, *_ef;
-        LIns *dxns, *dxnsAddrSave;
+        LIns *methodFrame;
         LIns *csn;
         LIns *undefConst;
 		LIns *coreAddr;
@@ -202,7 +202,6 @@ namespace avmplus
         bool verbose();
         void patchLater(LIns *br, CodegenLabel &);
         void patchLater(LIns *br, intptr_t pc);
-        bool isCodeContextChanged() const;
         void setLabelPos(CodegenLabel &l, LIns *target);
         void deadvars();
         void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
@@ -268,7 +267,10 @@ namespace avmplus
 
 
 		bool outOMem();
-		
+
+		/** emit a constructor call, and early bind if possible */
+		void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
+
 	public:
 		CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
@@ -291,8 +293,6 @@ namespace avmplus
 		void emitDoubleConst(FrameState* state, int index, double* pd);
 		void emitCoerce(FrameState* state, int index, Traits* type);
 		void emitCheckNull(FrameState* state, int index);
-		void emitSetContext(FrameState* state, MethodInfo* f);
-		void emitSetDxns(FrameState* state);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
 		void localSet(int i, LIns* o, Traits* type);
@@ -304,7 +304,6 @@ namespace avmplus
 		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
 		void writeNip(FrameState* state, const byte *pc);
 		void writeCheckNull(FrameState* state, uint32_t index);
-		void writeSetContext(FrameState* state, MethodInfo *f);
 		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
 		void writePrologue(FrameState* state, const byte *pc);
 		void writeEpilogue(FrameState* state);
@@ -315,19 +314,6 @@ namespace avmplus
 
 		void emitGetGlobalScope();
 
-	};
-
-	class CodegenIMT
-	{
-		PoolObject *pool;
-		LIns *ap_param, *argc_param;
-		void emitCall(LirWriter *lirout, LIns *vtable, ImtBuilder::ImtEntry *e);
-	public:
-		bool overflow;
-		CodegenIMT(PoolObject *pool);
-		~CodegenIMT();
-		void clearBuffers();
-		void* emitImtThunk(ImtBuilder::ImtEntry *e);
 	};
 }
 

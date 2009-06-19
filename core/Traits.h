@@ -116,10 +116,6 @@ namespace avmplus
 
 	typedef const uint8_t* TraitsPosPtr;
 
-#if defined FEATURE_NANOJIT
-	class ImtBuilder;
-#endif
-
 	// Note: we rely on this being <= 8 entries.
 	enum SlotStorageType
 	{
@@ -140,6 +136,7 @@ namespace avmplus
 	class TraitsBindings : public QCachedItem
 	{
 		friend class Traits;
+		friend class StTraitsBindingsIterator;
 	
 	private:
 		struct SlotInfo
@@ -213,10 +210,12 @@ namespace avmplus
 		Binding findBinding(Stringp name, Namespacep ns) const;
 		Binding findBinding(Stringp name, NamespaceSetp nsset) const;
 
+		// note: if you are just doing a single iteration thru a single TraitsBindings,
+		// it's more efficient (and easier) to use StTraitsBindingsIterator instead.
 		inline int32_t next(int32_t index) const { return m_bindings->next(index); }
 		inline Stringp keyAt(int32_t index) const { return m_bindings->keyAt(index); }
 		inline Namespacep nsAt(int32_t index) const { return m_bindings->nsAt(index); }
-		inline Binding valueAt(int32_t index) const { return Binding(m_bindings->valueAt(index)); }
+		inline Binding valueAt(int32_t index) const { return m_bindings->valueAt(index); }
 
 	private:
 		SlotInfo* getSlots() { return (SlotInfo*)(this + 1); }
@@ -251,11 +250,7 @@ namespace avmplus
 		inline const InterfaceInfo* findInterfaceAddr(Traitsp intf) const { return const_cast<TraitsBindings*>(this)->findInterfaceAddr(intf); }
 		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
-#if defined FEATURE_NANOJIT
-		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel, ImtBuilder* imtBuilder);
-#else
 		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel);
-#endif
 
 	// ------------------------ DATA SECTION BEGIN
 		public:		const Traitsp					owner;
@@ -268,6 +263,24 @@ namespace avmplus
 		// plus extra at end
 	// ------------------------ DATA SECTION END
 
+	};
+	
+	// NOTE: caller must check for null key, eg,
+	//
+	//		StTraitsBindingsIterator iter(mnht);
+	//		while (iter.next()) {
+	//			if (!iter.key()) continue;
+	//			.. rest of loop ..
+	//		}
+	//
+	class StTraitsBindingsIterator : public StMNHTIterator
+	{
+	private:
+		TraitsBindingsp const _tb;	// kept just to ensure it doesn't get collected
+	public:
+		inline StTraitsBindingsIterator(TraitsBindingsp tb) : StMNHTIterator(tb->m_bindings), _tb(tb)
+		{
+		}
 	};
 
 	class TraitsMetadata : public QCachedItem
@@ -332,18 +345,6 @@ namespace avmplus
 		#endif
 
 	public:
-#if defined FEATURE_NANOJIT
-		// choose a number that is relatively prime to sizeof(MethodInfo)/8
-		// since we use the MethodInfo pointer as the interface method id
-		// smaller = dense table, few large conflict stubs
-		// larger  = sparse table, many small conflict stubs 
-
-#ifdef _DEBUG
-		static const uint32_t IMT_SIZE = 3;  // good for testing all code paths
-#else
-		static const uint32_t IMT_SIZE = 7;  // good for performance
-#endif
-#endif // FEATURE_NANOJIT
 
 		inline uint32_t getSizeOfInstance() const { return m_sizeofInstance; }
 		inline uint32_t getHashtableOffset() const { AvmAssert(linked); return m_hashTableOffset; }
@@ -366,8 +367,6 @@ namespace avmplus
 		}
 
 	private:
-
-	private:
 		void buildBindings(TraitsBindingsp basetb, 
 							MultinameHashtable* bindings, 
 							uint32_t& slotCount, 
@@ -377,11 +376,7 @@ namespace avmplus
 									TraitsBindings* tb, 
 									const Toplevel* toplevel,
 									AbcGen* abcGen) const;
-	#if defined FEATURE_NANOJIT
-		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen, ImtBuilder* imtBuilder);
-	#else
 		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen);
-	#endif
 
 		TraitsMetadata* _buildTraitsMetadata();
 
@@ -454,18 +449,6 @@ namespace avmplus
 		inline bool containsInterface(Traitsp t) { return this == t || this->getTraitsBindings()->containsInterface(t); }
 		
 	public:
-		// table of interface dispatch stubs.
-		// BIND_NONE   = no entry
-		// BIND_METHOD+disp_id = no conflict, dispatches to concrete method
-		// BIND_ITRAMP+addr    = conflict, dispatch to conflict resolution stub
-		// IMT table (if we have one, comes after the interfaces)
-	#if defined FEATURE_NANOJIT
-		const Binding* getIMT() const 
-		{
-			// @todo we only need this at vtable-resolution time, could move into TD or gen on demand?
-			return m_imt;
-		}
-	#endif
 
 		void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;
 		void genInitBody(const Toplevel* toplevel, AbcGen& gen);
@@ -530,9 +513,6 @@ namespace avmplus
 	private:	const byte*				metadata_pos;
 	private:	FixedBitSet				m_skips;	
 	private:	FixedBitSet				m_slotDestroyInfo;	
-	#if defined FEATURE_NANOJIT
-	private:	Binding					m_imt[Traits::IMT_SIZE];
-	#endif
 	private:	DWB(MMgc::GCWeakRef*)	m_tbref;				// our TraitsBindings 
 	private:	DWB(MMgc::GCWeakRef*)	m_tmref;				// our TraitsMetadata
 // @todo -- we should be able to store m_sizeofInstance in 16 bits but JIT doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
@@ -556,34 +536,6 @@ namespace avmplus
 										// If it is false, the JIT will early bind to the AS defined constructor. 
 	// ------------------------ DATA SECTION END
 	};
-
-#if defined FEATURE_NANOJIT
-	class ImtBuilder
-	{
-	public:
-		class ImtEntry: public MMgc::GCObject
-		{
-		public:
-			ImtEntry(MethodInfo* v, ImtEntry* n, uint32_t d) : 
-				virt(v), 
-				next(n), 
-				disp_id(d) 
-			{
-			}
-			MethodInfo * const virt;
-			ImtEntry * const next;
-			const uint32_t disp_id;
-		};
-
-		ImtBuilder(MMgc::GC *gc);
-		void addEntry(MethodInfo* virt, uint32_t disp_id);
-		void finish(Binding imt[], Traits* traits, const Toplevel *toplevel);
-
-	private:
-		MMgc::GC *gc;
-		ImtEntry *entries[Traits::IMT_SIZE];
-	};
-#endif
 }
 
 #endif /* __avmplus_Traits__ */

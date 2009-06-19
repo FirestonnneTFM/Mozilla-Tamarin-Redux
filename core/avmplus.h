@@ -110,6 +110,7 @@ namespace avmplus
 	class Atan2Method;
 	class AtomArray;
 	class AvmCore;
+	class MethodFrame;
 	class BooleanClass;
 	class BuiltinTraits;
 	class CallStackNode;
@@ -258,7 +259,6 @@ namespace avmplus
 #include "AvmCore.h"
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"
-#include "CodeContext.h"
 #include "Traits.h"
 #include "VTable.h"
 #include "ScriptObject.h"
@@ -272,6 +272,7 @@ namespace avmplus
 #include "TraitsIterator.h"
 #include "ScopeChain.h"
 #include "MethodEnv.h"
+#include "CodeContext.h"
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
 #include "AtomArray.h"

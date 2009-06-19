@@ -1170,12 +1170,10 @@ add_numbers:
 		// restore the defaultNamespace location as we enter/leave methods, so we
 		// always can get to the current value.
 		AvmCore* core = this->core();
-#ifdef _DEBUG
-		AvmAssert(!core->dxnsAddr || (uintptr)(*core->dxnsAddr) != 0xcccccccc);
-#endif
-		if (!core->dxnsAddr || !(*core->dxnsAddr))
+		Namespace* dxns = core->dxns();
+		if (!dxns)
 			throwTypeError(kNoDefaultNamespaceError);
-		return *core->dxnsAddr;
+		return dxns;
 	}
 
 	/**
