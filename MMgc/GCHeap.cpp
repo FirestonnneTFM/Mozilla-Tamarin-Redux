@@ -59,8 +59,8 @@ namespace MMgc
 
 
 	GCHeapConfig::GCHeapConfig() : 
-		initialSize(128), 
-		heapLimit((size_t)-1), 
+		initialSize(512), 
+		heapLimit(kDefaultHeapLimit), 
 		useVirtualMemory(VMPI_useVirtualMemory()),
 		trimVirtualMemory(true),
 		verbose(false),
@@ -76,7 +76,7 @@ namespace MMgc
 			heapLimit = VMPI_strtol(envValue, 0, 10);
 	}
 
-	void GCHeap::Init(GCHeapConfig& config)
+	void GCHeap::Init(const GCHeapConfig& config)
 	{
 		GCAssert(instance == NULL);
 		instance = new GCHeap(config);
@@ -89,17 +89,23 @@ namespace MMgc
 		instance = NULL;
 	}
 
-	GCHeap::GCHeap(GCHeapConfig& c)
+	GCHeap::GCHeap(const GCHeapConfig& c)
 		: blocks(NULL),
 		  blocksLen(0),
 		  numDecommitted(0),
 		  numAlloc(0),
+		  m_spinlock(VMPI_lockCreate()),
 		  config(c),
 		  callbacks_lock(VMPI_lockCreate()),
+ 		  status(kMemNormal),
+		  primordialThread(VMPI_currentThread()),
+		  gclog_spinlock(VMPI_lockCreate()),
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
 	#endif
 		  hooksEnabled(false),
+		  entryChecksEnabled(true),
+		  abortStatusNotificationSent(false),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
 		lastRegion  = 0;
@@ -111,21 +117,10 @@ namespace MMgc
 		// Initialize free lists
 		HeapBlock *block = freelists;
 		for (int i=0; i<kNumFreeLists; i++) {
-			block->baseAddr     = NULL;
-			block->size         = 0;
-			block->sizePrevious = 0;
-			block->prev         = block;
-			block->next         = block;
-			block->committed    = true;
-			block->dirty 	    = true;
+			block->FreelistInit();
 			block++;
 		}
 		
-	#ifdef MMGC_LOCKING
-		m_spinlock = VMPI_lockCreate();
-		GCAssert(m_spinlock != NULL);
-	#endif //MMGC_LOCKING
-
 		// Create the initial heap
 		{
 			MMGC_LOCK(m_spinlock);
@@ -135,8 +130,6 @@ namespace MMgc
 		fixedMalloc._Init(this);
 
 		instance = this;
-
-		status = kMemNormal;
 
 #ifdef MMGC_MEMORY_PROFILER
 		//create profiler if turned on and if it is not already created
@@ -155,16 +148,15 @@ namespace MMgc
 #ifdef MMGC_MEMORY_INFO
 		hooksEnabled = true; // always track allocs in DEBUG builds
 #endif
-
-		gclog_spinlock = VMPI_lockCreate();
 	}
 
 	GCHeap::~GCHeap()
 	{
 		gcManager.destroy();
+		callbacks.Destroy();
 		fixedMalloc._Destroy();
 
-		if(numAlloc != 0)
+		if(numAlloc != 0 && status != kMemAbort)
 		{
 			for (unsigned int i=0; i<blocksLen; i++) 
 			{
@@ -179,9 +171,6 @@ namespace MMgc
 				}
 			}	
 			GCAssert(false);
-			
-			VMPI_lockDestroy(gclog_spinlock);
-			VMPI_lockDestroy(callbacks_lock);
 		}
 		
 #ifdef MMGC_MEMORY_PROFILER
@@ -193,10 +182,9 @@ namespace MMgc
 
 		FreeAll();
 
-	#ifdef MMGC_LOCKING
+		VMPI_lockDestroy(gclog_spinlock);
 		VMPI_lockDestroy(m_spinlock);
-	#endif //MMGC_LOCKING
-
+		VMPI_lockDestroy(callbacks_lock);
 	}
 
 	void* GCHeap::Alloc(int size, int flags)
@@ -211,52 +199,41 @@ namespace MMgc
 
 			HeapBlock *block = AllocBlock(size, zero);
 
-			if (!block && (flags & kExpand)) {
+			if(!block) {
+				if((flags & kExpand) == 0)
+					return NULL;
+
 				ExpandHeap(size, (flags & kCanFail) != 0);
 				block = AllocBlock(size, zero);
 				if(!block) {
-					GCAssert(flags & kCanFail);
+					GCAssertMsg(flags & kCanFail, "Internal error: ExpandHeap should have aborted if it can't satisfy the request");
 					return NULL;
 				}
 			}
 
-			if (block) 
-			{			
-				GCAssert(block->size == size);
+			GCAssert(block->size == size);
 			
-				numAlloc += size;
-
-				// copy baseAddr to a stack variable to fix :
-				// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
-				baseAddr = block->baseAddr;
-
+			numAlloc += size;
+			
+			// copy baseAddr to a stack variable to fix :
+			// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
+			baseAddr = block->baseAddr;
+			
 #if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
-				if(profiler)
-					block->allocTrace = profiler->GetStackTrace();
+			if(profiler)
+				block->allocTrace = profiler->GetStackTrace();
 #endif
-
+			
 #ifdef MMGC_MEMORY_PROFILER
-				if((flags & kProfile) && HooksEnabled() && profiler) {
-					profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
-				}
-#endif
+			if((flags & kProfile) && HooksEnabled() && profiler) {
+				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
+#endif
 		}
 
-		if(!baseAddr && (flags & kExpand)) {
-			Abort();
-		}
-		
-		if(baseAddr)
-		{
-			// Zero out the memory, if requested to do so
-			// FIXME: if we know that this memory was just committed we shouldn't do this
-			// maybe zero should pass deeper into the system so that on initial expansions
-			// and re-commit we avoid this, should be a noise optimization over all but
-			// possibly a big win for startup
-			if (zero) {
-				VMPI_memset(baseAddr, 0, size * kBlockSize);
-			}
+		// Zero out the memory, if requested to do so
+		if (zero) {
+			VMPI_memset(baseAddr, 0, size * kBlockSize);
 		}
 		
 		return baseAddr;
@@ -269,6 +246,7 @@ namespace MMgc
 
 		HeapBlock *block = AddrToBlock(item);
 		GCAssertMsg(block != NULL, "Bogus item");
+
 		// Update metrics
 		GCAssert(numAlloc >= (unsigned int)block->size);
 		numAlloc -= block->size;
@@ -283,6 +261,15 @@ namespace MMgc
 			profiler->RecordDeallocation(item, block->size * kBlockSize);
 		}
 #endif
+
+		if(status == kMemReserve)
+		{
+			// we aren't sending a status notification here, wait for
+			// need to arise.  We could be in the middle of sending
+			// the kMemReserve notifications and there's other
+			// complications
+			status = kMemNormal;
+		}
 
 		FreeBlock(block);
 	}
@@ -549,7 +536,7 @@ namespace MMgc
 			fl++;
 		}
 		
-		// need to decrement blockId for regions in blocks after block
+		// Need to decrement blockId for regions in blocks after block
 		Region *r = lastRegion;
 		while(r) {
 			if(r->blockId > region->blockId) {
@@ -558,7 +545,6 @@ namespace MMgc
 			r = r->prev;
 		}
 
-		
 		delete [] blocks;
 		blocks = newBlocks;
 		blocksLen = newBlocksLen;
@@ -1315,7 +1301,7 @@ namespace MMgc
 		block->prev = NULL;
 		block->next = NULL;
 		block->committed = true;
-		block->dirty = false;
+		block->dirty = VMPI_areNewPagesDirty();
 
 #if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 		block->allocTrace = 0;
@@ -1489,27 +1475,68 @@ namespace MMgc
 	}
 
 
-	EnterFrame::EnterFrame()
+	EnterFrame::EnterFrame() : m_heap(NULL)
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
-		heap->enterFrame = this;
+		if(heap->GetStackEntryAddress() == NULL) {
+			m_heap = heap;
+			heap->Enter(this);
+		}
 	}
 	
 	EnterFrame::~EnterFrame()
 	{
-		GCHeap *heap = GCHeap::GetGCHeap();
-		heap->enterFrame = NULL;
+		if(m_heap)
+			m_heap->Leave();
 	}
 	
 	void GCHeap::Abort()
 	{
+		status = kMemAbort;
 		EnterFrame *ef = enterFrame;
+		GCLog("error: out of memory\n");
 		if(ef != NULL)
+		{
+			VMPI_lockRelease(m_spinlock);
 			longjmp(ef->jmpbuf, 1);
+		}
 		GCAssertMsg(false, "MMGC_ENTER missing!");
 		VMPI_abort();
 	}
 	
+	void GCHeap::Enter(EnterFrame *frame)
+	{
+		MMGC_LOCK(m_spinlock);
+		enterCount++;
+		enterFrame = frame;
+	}
+
+	void GCHeap::Leave()
+	{
+		bool lastOneOut = false;
+		{
+			MMGC_LOCK(m_spinlock);
+			enterCount--;
+			enterFrame = NULL;
+
+			// only safe to run bail out code on primary thread
+			if(VMPI_currentThread() == primordialThread && 
+			   status == kMemAbort && !abortStatusNotificationSent) {
+				abortStatusNotificationSent = true;
+				StatusChangeNotify(kMemAbort);
+			}
+
+			if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
+				// last one out of the pool pulls the plug
+				lastOneOut = true;
+			}
+		}
+		if(lastOneOut) {
+			// any thread can call this, just need to make sure all other
+			// threads are done, hence the ref counting
+			Destroy();
+		}
+	}
 	void GCHeap::log_percentage(const char *name, size_t bytes, size_t bytes_compare)
 	{
 		bytes_compare = size_t((bytes*100.0)/bytes_compare);
@@ -1522,7 +1549,7 @@ namespace MMgc
 	
 	void GCHeap::DumpMemoryInfo()
 	{
-		size_t priv = GCHeap::GetPrivateBytes() * GCHeap::kBlockSize;
+		size_t priv = VMPI_getPrivateResidentPageCount() * GCHeap::kBlockSize;
 		size_t mmgc = GetTotalHeapSize() * GCHeap::kBlockSize;
 		size_t unmanaged = GetFixedMalloc()->GetTotalSize() * GCHeap::kBlockSize;
 		size_t fixed_alloced;
@@ -1668,23 +1695,6 @@ namespace MMgc
 
 #endif // VMCFG_SYMBIAN
 	
-	size_t GCHeap::GetPrivateBytes()
-	{
-		return VMPI_getPrivateResidentPageCount();
-	}
-
-
-	void GCHeap::ReleaseMemory(char *address, size_t size)
-	{
-		if(config.useVirtualMemory) {
-			bool success = VMPI_releaseMemoryRegion(address, size);
-			GCAssert(success);
-			(void)success;
-		} else {
-			VMPI_releaseAlignedMemory(address);
-		}
-	}
-
 #ifdef MMGC_MEMORY_PROFILER
 
 	/* static */
@@ -1737,6 +1747,17 @@ namespace MMgc
 
 #endif //MMGC_USE_SYSTEM_MALLOC
 	
+	void GCHeap::ReleaseMemory(char *address, size_t size)
+	{
+		if(config.useVirtualMemory) {
+			bool success = VMPI_releaseMemoryRegion(address, size);
+			GCAssert(success);
+			(void)success;
+		} else {
+			VMPI_releaseAlignedMemory(address);
+		}
+	}
+
 	void GCManager::destroy()
 	{
 		collectors.Destroy();

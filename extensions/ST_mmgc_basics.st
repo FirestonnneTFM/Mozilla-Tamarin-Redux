@@ -149,7 +149,7 @@ private:
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
-    gh->SetHeapLimit(1024);
+    gh->Config().heapLimit = 1024;
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
