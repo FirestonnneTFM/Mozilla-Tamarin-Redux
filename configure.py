@@ -146,7 +146,7 @@ elif config.getCompiler() == 'VS':
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
         OS_LDFLAGS += "-SAFESEH:NO -MAP "
         if config.getDebug():
-            DEBUG_CXXFLAGS = "-Od -EHsc "
+            DEBUG_CXXFLAGS = "-Od "
         else:
             OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
         if memoryProfiler:
