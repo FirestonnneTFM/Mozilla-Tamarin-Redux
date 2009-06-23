@@ -186,3 +186,17 @@ ecma3/Unicode/uAC00_HangulSyllables, arm-winmobile-emulator.*, skip, tests run t
 ecma3/Date/e15_9_5_10, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
 as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+
+####################
+# skip slow tests in test phase
+####################
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/uE000_PrivateUseArea, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/uAC00_HangulSyllables, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+mops/mops, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+mmgc/heap_stress,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests

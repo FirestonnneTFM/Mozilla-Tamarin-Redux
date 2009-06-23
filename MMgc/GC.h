@@ -465,6 +465,9 @@ namespace MMgc
 		 */
 		void fullCollectionComplete() { fullCollectionQueued = false; }
 
+		/**
+		 * called to find out if a full collection has been requested
+		 */
 		bool queryFullCollectionQueued() { return fullCollectionQueued; }
 
 		// ----- Public data --------------------------------------
@@ -588,7 +591,7 @@ namespace MMgc
 	{
 	public:
 		ZCT();
-		~ZCT();
+		void Destroy();
 		
 		// Associate the ZCT with 'gc' and perform final initialization of the ZCT.  To be 
 		// called exactly once after the GC has been properly constructed: SetGC() uses
@@ -870,7 +873,12 @@ namespace MMgc
 		void Free(const void *ptr);
 
 		/**
-		 * return the size of a piece of memory, may be bigger than what was asked for
+		 * return the size of a piece of memory, may be bigger than what was asked for.
+		 *
+		 * NOTE! This happens to work because the usableSize field of a large block is of the
+		 * same type and at the same offset as the size field of a non-large block...
+		 * none of which is documented anywhere.  Deriving GCBlock and LargeBlock from some
+		 * common base type in GC would have been rather cleaner.
 		 */
 		static size_t Size(const void *ptr)
 		{
@@ -1154,8 +1162,6 @@ namespace MMgc
 			return (double(VMPI_getPerformanceCounter() - start) * 1000) / VMPI_getPerformanceFrequency();
 		}
 
-		void DisableThreadCheck() { disableThreadCheck = true; }
-
 		/** GC initialization time, in ticks.  Used for logging. */
 		const uint64_t t0;
 
@@ -1277,7 +1283,6 @@ namespace MMgc
 		// store a handle to the thread that create the GC to ensure thread safety
 		vmpi_thread_t m_gcThread;
 
-
 		void gclog(const char *format, ...);
 		void log_mem(const char *name, size_t s, size_t comp );
 
@@ -1313,9 +1318,6 @@ namespace MMgc
 		bool stackCleaned;
 		const void *rememberedStackTop;
 		GCAutoEnter* stackEnter;
-
-		// for external which does thread safe multi-thread AS execution
-		bool disableThreadCheck;
 
 		GCRoot* emptyWeakRefRoot;
 
@@ -1480,9 +1482,7 @@ namespace MMgc
 		 */
 		GCLargeAlloc::LargeBlock *largeEmptyPageList;
 		
-#ifdef MMGC_LOCKING
-		vmpi_spin_lock_t m_rootListLock;
-#endif
+		vmpi_spin_lock_t const m_rootListLock;
 
 		GCRoot *m_roots;
 		void AddRoot(GCRoot *root);

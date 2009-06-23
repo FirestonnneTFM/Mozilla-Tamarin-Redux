@@ -80,6 +80,11 @@ bool VMPI_canMergeContiguousRegions()
 #endif
 }
 
+bool VMPI_areNewPagesDirty()
+{
+	return false;
+}
+
 static int get_major_version()
 {
 	int mib[2];
@@ -213,6 +218,13 @@ uint64_t VMPI_getPerformanceFrequency()
 		frequency = (uint64_t) ( 1e9 / ((double) info.numer / (double) info.denom) );
 	}
 	return frequency;
+}
+
+void VMPI_cleanStack(size_t amount)
+{
+	void *space = alloca(amount);
+	if(space)
+		VMPI_memset(space, 0, amount);
 }
 
 uint64_t VMPI_getPerformanceCounter()
