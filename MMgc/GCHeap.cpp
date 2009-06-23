@@ -1301,7 +1301,7 @@ namespace MMgc
 		block->prev = NULL;
 		block->next = NULL;
 		block->committed = true;
-		block->dirty = VMPI_areNewPagesDirty();
+		block->dirty = config.useVirtualMemory ? VMPI_areNewPagesDirty() : true;
 
 #if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 		block->allocTrace = 0;
