@@ -206,7 +206,7 @@ namespace avmplus
 		return map;
 	}
 
-	/*static*/ uint64_t VTable::dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid)
+	/*static*/ GprImtThunkProcRetType VTable::dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid)
 	{
 		AvmAssert(ite->imtMapCount > 1);
 		const ImtThunkEntry* const m = ite->entries();
@@ -230,7 +230,7 @@ namespace avmplus
 		return (*env->implGPR())(env, argc, ap);
 	}
 
-	/*static*/ uint64_t VTable::resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid)
+	/*static*/ GprImtThunkProcRetType VTable::resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid)
 	{
 		const uint32_t slot = iid % IMT_SIZE;
 
