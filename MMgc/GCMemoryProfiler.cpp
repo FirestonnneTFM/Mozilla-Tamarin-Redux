@@ -68,9 +68,9 @@ namespace MMgc
 		const char *package;
 		const char *category;
 		const char *name;
-		uint64_t count;
-		uint64_t totalCount;
-		uint64_t sweepCount;
+		uint32_t count;
+		uint32_t totalCount;
+		uint32_t sweepCount;
 		StackTrace *master;
 		uint8_t skip;
 	};
@@ -280,7 +280,7 @@ namespace MMgc
 		PackageGroup(const char *name) : name(name), size(0), count(0), categories(16, GCHashtable::OPTION_MALLOC) {}
 		const char *name;
 		size_t size;
-		uint64_t count;
+		uint32_t count;
 		GCHashtable categories; // key == category name, value == CategoryGroup*
 	};
 
@@ -294,7 +294,7 @@ namespace MMgc
 		}
 		const char *name;
 		size_t size;
-		uint64_t count;
+		uint32_t count;
 		// biggest kNumTracesPerType traces
 		StackTrace *traces[kNumTracesPerType ? kNumTracesPerType : 1];
 	};
@@ -347,7 +347,7 @@ namespace MMgc
 		GCHashtable packageTable(128, GCHashtable::OPTION_MALLOC);
 
 		size_t residentSize=0;
-		uint64_t residentCount=0;
+		uint32_t residentCount=0;
 		size_t packageCount=0;
 
 		// rip through all allocation sites and sort into package and categories
@@ -371,7 +371,7 @@ namespace MMgc
 
 			residentSize += size;
 
-			uint64_t count = trace->master != NULL ? 0 : trace->count;
+			uint32_t count = trace->master != NULL ? 0 : trace->count;
 			residentCount += trace->count;
 
 			const char *pack = GetPackage(trace);
@@ -461,7 +461,7 @@ namespace MMgc
 				}			
 			}
 			
-			GCLog("%s - %3.1f%% - %u kb %u items, avg %u b\n", pg->name, PERCENT(residentSize, pg->size),  (unsigned int)pg->size>>10, pg->count, (unsigned int)(pg->count ? pg->size/pg->count : 0));
+			GCLog("%s - %3.1f%% - %u kb %u items, avg %u b\n", pg->name, PERCENT(residentSize, pg->size),  (unsigned int)(pg->size>>10), pg->count, (unsigned int)(pg->count ? pg->size/pg->count : 0));
 				
 			// result capping
 			if(numTypes > kNumTypes)
@@ -472,12 +472,12 @@ namespace MMgc
 				CategoryGroup *tg = residentFatties[i];
 				if(!tg) 
 					break;
-				GCLog("\t%s - %3.1f%% - %u kb %u items, avg %u b\n", tg->name, PERCENT(residentSize, tg->size), (unsigned int)tg->size>>10, tg->count, (unsigned int)(tg->count ? tg->size/tg->count : 0));
+				GCLog("\t%s - %3.1f%% - %u kb %u items, avg %u b\n", tg->name, PERCENT(residentSize, tg->size), (unsigned int)(tg->size>>10), tg->count, (unsigned int)(tg->count ? tg->size/tg->count : 0));
 				for(int j=0; j < kNumTracesPerType; j++) {
 					StackTrace *trace = tg->traces[j];
 					if(trace) {
 						size_t size = trace->size;
-						uint64_t count = trace->count;
+						uint32_t count = trace->count;
 						if(showSwept) {
 							size = trace->sweepSize;
 							count = trace->sweepCount;
@@ -518,7 +518,7 @@ namespace MMgc
 
 		VMPI_captureStackTrace(trace, kMaxStackTrace, 1);
 
-		GCLog("ReferenceAddress VMPI_captureStackTrace 0x%x", trace[0]);
+		GCLog("ReferenceAddress VMPI_captureStackTrace 0x%x \n", trace[0]);
 
 		while((obj = iter.nextKey()) != NULL)
 		{
@@ -720,9 +720,9 @@ namespace MMgc
 
 	void DebugFreeHelper(const void *item, int poison, size_t wholeSize)
 	{
-		int32_t *ip = (int32_t*) item;
-		int32_t size = *ip;
- 		int32_t *endMarker = ip + 2 + (size>>2);
+		uint32_t *ip = (uint32_t*) item;
+		uint32_t size = *ip;
+ 		uint32_t *endMarker = ip + 2 + (size>>2);
 
 		// clean up
 		*ip = 0;
@@ -732,7 +732,7 @@ namespace MMgc
 		if(size == 0)
 			return;
 
-		if (*endMarker != (int32_t)0xdeadbeef)
+		if (*endMarker != 0xdeadbeef)
 		{
 			// if you get here, you have a buffer overrun.  The stack trace about to
 			// be printed tells you where the block was allocated from.  To find the

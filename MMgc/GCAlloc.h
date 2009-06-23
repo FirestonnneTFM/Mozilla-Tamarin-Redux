@@ -216,7 +216,7 @@ namespace MMgc
 		{
 			GC *gc;
 			GCBlock* next;
-			uint32_t size;
+			uint32_t size;			// GC::Size depends on this field being same type / offset as LargeBlock::usableSize...
 			GCAlloc *alloc;			
 			GCBlock* prev;
 			char*  nextItem;
