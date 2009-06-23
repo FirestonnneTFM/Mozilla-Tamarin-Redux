@@ -167,7 +167,7 @@ namespace MMgc
 		{
 			GC *gc;
 			LargeBlock *next;
-			uint32_t usableSize;
+			uint32_t usableSize;	// GC::Size depends on this field being same type / offset as GCBlock::size...
 			uint32_t flags;
 
 			int GetNumBlocks() const { return (usableSize + sizeof(LargeBlock)) / GCHeap::kBlockSize; }

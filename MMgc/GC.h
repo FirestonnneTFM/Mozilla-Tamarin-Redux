@@ -873,7 +873,12 @@ namespace MMgc
 		void Free(const void *ptr);
 
 		/**
-		 * return the size of a piece of memory, may be bigger than what was asked for
+		 * return the size of a piece of memory, may be bigger than what was asked for.
+		 *
+		 * NOTE! This happens to work because the usableSize field of a large block is of the
+		 * same type and at the same offset as the size field of a non-large block...
+		 * none of which is documented anywhere.  Deriving GCBlock and LargeBlock from some
+		 * common base type in GC would have been rather cleaner.
 		 */
 		static size_t Size(const void *ptr)
 		{
