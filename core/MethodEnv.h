@@ -488,25 +488,6 @@ namespace avmplus
 	};
 
 	class ImtThunkEnv;
-	
-	// returning uint64_t here rather than uintptr_t is a trick: normally
-	// we provide both GPR and FPR versions of calls, on the theory that
-	// this is necessary to ensure the return value is always correct. in practice,
-	// this seems to be a mostly defunct assumption, as every architecture we're interested
-	// in returns values in registers (or register pairs), whether the result is fp or not.
-	// still, this dichotomy has been maintained, mostly because it works and
-	// hasn't been to painful. with new, table-based thunks this becomes hard to implement,
-	// though, as a given IMT thunk can contain both kinds of calls, but C++ can't define
-	// a function to return multiple types... however, in practice (as mentioned before) 
-	// this seems to mostly be an historical artifact, with a notable exception of 
-	// 32-bit NJ_SOFTFLOAT systems (eg ARM without VFP) -- if the compiler decides not
-	// to tail-call (MSVC, I'm looking at you), the upper word of the softfloat result
-	// can theoretically be clobbered by the compiler. declaring the result as uint64_t 
-	// quietly ensures that won't be the case.
-	//
-	// admittedly, this is a bit fragile, but seems to be the least-objectionable
-	// solution to this issue at the present time.
-	typedef uint64_t (*GprImtThunkProc)(ImtThunkEnv*, int, uint32*, uintptr_t);
 
 	class ImtThunkEnv : public MethodEnvProcHolder
 	{
