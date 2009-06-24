@@ -270,37 +270,33 @@ namespace avmplus
 				callStackNode.init(this->pool()->core, this->getMethodName());
 			#endif /* DEBUGGER */
 
-			if (!_abc.body_pos)
-			{
-				// no body was supplied in abc
-				toplevel->throwVerifyError(kNotImplementedError, this->pool()->core->toErrorString(this));
-			}
-
 			PERFM_NTPROF("verify-ticks");
 		    #if defined FEATURE_NANOJIT
 			Verifier verifier(this, toplevel);
-
-			if ((core->IsJITEnabled()) && !suggestInterp())
+			TRY(core, kCatchAction_Rethrow)
 			{
-				PERFM_NTPROF("verify & IR gen");
-
-				CodegenLIR jit(this);
-                #if defined AVMPLUS_WORD_CODE
-				WordcodeEmitter translator(this, toplevel);
-				TeeWriter teeWriter(&translator, &jit);
-				CodeWriter *coder = &teeWriter;
-                #else
-				CodeWriter *coder = &jit;
-                #endif
-
-				TRY(core, kCatchAction_Rethrow)
+				if ((core->IsJITEnabled()) && !suggestInterp())
 				{
-				    verifier.verify(coder);	// pass 2 - data flow
+					PERFM_NTPROF("verify & IR gen");
+
+					CodegenLIR jit(this);
+					#if defined AVMPLUS_WORD_CODE
+					WordcodeEmitter translator(this, toplevel);
+					TeeWriter teeWriter(&translator, &jit);
+					CodeWriter *coder = &teeWriter;
+					#else
+					CodeWriter *coder = &jit;
+					#endif
+
+					// analyze code and generate LIR
+				    verifier.verify(coder);
 
 					PERFM_TPROF_END();
 			
-					if (!jit.overflow)
-						jit.emitMD(); // pass 3 - generate code
+					if (!jit.overflow) {
+						// assembler LIR into native code
+						jit.emitMD();
+					}
 
 					// the MD buffer can overflow so we need to re-iterate
 					// over the whole thing, since we aren't yet robust enough
@@ -328,45 +324,46 @@ namespace avmplus
 					}
                     #endif
 				}
-				CATCH (Exception *exception) 
+				else
 				{
-					// re-throw exception
-					core->throwException(exception);
+					// NOTE copied below
+					#if defined AVMPLUS_WORD_CODE
+					WordcodeEmitter translator(this, toplevel);
+					CodeWriter *coder = &translator;
+					#else
+					CodeWriter stubWriter;
+					CodeWriter *coder = &stubWriter;
+					#endif
+					verifier.verify(coder); // pass2 dataflow
+					setInterpImpl();
+					// NOTE end copy
 				}
-				END_CATCH
-				END_TRY
-			}
-			else
-			{
-			    // NOTE copied below
-                #if defined AVMPLUS_WORD_CODE
-				WordcodeEmitter translator(this, toplevel);
+				#else // FEATURE_NANOJIT
+
+				Verifier verifier(this, toplevel);
+
+				// NOTE copied from above
+				#if defined AVMPLUS_WORD_CODE
+				WordcodeEmitter translator(this);
 				CodeWriter *coder = &translator;
-                #else
+				#else
 				CodeWriter stubWriter;
 				CodeWriter *coder = &stubWriter;
-                #endif
-			    verifier.verify(coder); // pass2 dataflow
+				#endif
+				verifier.verify(coder); // pass2 dataflow
 				setInterpImpl();
 				// NOTE end copy
+				#endif // FEATURE_NANOJIT
 			}
-            #else // FEATURE_NANOJIT
-
-			Verifier verifier(this, toplevel);
-
-			// NOTE copied from above
-            #if defined AVMPLUS_WORD_CODE
-			WordcodeEmitter translator(this);
-			CodeWriter *coder = &translator;
-            #else
-			CodeWriter stubWriter;
-			CodeWriter *coder = &stubWriter;
-            #endif
-			verifier.verify(coder); // pass2 dataflow
-			setInterpImpl();
-			// NOTE end copy
-
-            #endif // FEATURE_NANOJIT
+			CATCH (Exception *exception) 
+			{
+				// clean up verifier
+				verifier.~Verifier();
+				// re-throw exception
+				core->throwException(exception);
+			}
+			END_CATCH
+			END_TRY
 			PERFM_TPROF_END();
 		}
 	}

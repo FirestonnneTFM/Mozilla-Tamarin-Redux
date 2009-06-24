@@ -60,74 +60,69 @@ namespace avmplus
 		* the frame state consists of the types of each local, each entry on the
 		* scope chain, and each operand stack slot.
 		*/
-	class FrameState: public MMgc::GCObject
+	class FrameState
 	{
-
+		// info about each local var in this frame.
+		// length is verifier->frameSize, one entry per local, scope, and stack operand
+		Value *locals;
 	public:
-		bool initialized;
-		bool targetOfBackwardsBranch;
-		bool insideTryBlock;
-        bool unused1;
-		int scopeDepth;
-		int stackDepth;
-		int withBase;
-		sintptr pc;
-		Verifier * const verifier;
+		Verifier *verifier;
 	#if defined FEATURE_NANOJIT
 		CodegenLabel label;
 	#endif
+		int pc; // offset from code_start 
+		int scopeDepth;
+		int stackDepth;
+		int withBase;
+		bool initialized;
+		bool targetOfBackwardsBranch;
+		bool insideTryBlock;
 		
-	private:
-		Value locals[1]; // actual length is verifier->frameSize.  one entry for each
-			       // local, scope-entry, and operand stack entry.
-
 	public:
-		FrameState(Verifier *v) : verifier(v)
-		{
-			this->withBase  = -1;
-		}
+		FrameState(Verifier*);
+		~FrameState();
 
-		bool init(FrameState* other)
+		void init(FrameState* other)
 		{
-			if( verifier != other->verifier ){
-				AvmAssertMsg(0, "(verifier == other->verifier)");
-				return false;
-			}
+			AvmAssert(other->verifier == this->verifier);
 			scopeDepth = other->scopeDepth;
 			stackDepth = other->stackDepth;
 			withBase = other->withBase;
 			VMPI_memcpy(locals, other->locals, verifier->frameSize*sizeof(Value));
-			return true;
 		}
 
-		Value& value(sintptr i)
+		Value& value(int i)
 		{
+			AvmAssert(i >= 0 && i < verifier->frameSize);
 			return locals[i];
 		}
 
-		const Value& value(sintptr i) const
+		const Value& value(int i) const
 		{
+			AvmAssert(i >= 0 && i < verifier->frameSize);
 			return locals[i];
 		}
 
 		Value& scopeValue(int i)
 		{
-			return locals[verifier->scopeBase+i];
+			AvmAssert(i >= 0 && i < scopeDepth);
+			return value(verifier->scopeBase+i);
 		}
 
 		const Value& scopeValue(int i) const
 		{
-			return locals[verifier->scopeBase+i];
+			AvmAssert(i >= 0 && i < scopeDepth);
+			return value(verifier->scopeBase+i);
 		}
 
 		Value& stackValue(int i)
 		{
-			AvmAssert(i >= 0);
-			return locals[verifier->stackBase+i];
+			AvmAssert(i >= 0 && i < stackDepth);
+			return value(verifier->stackBase+i);
 		}
 
 		Value& stackTop() {
-			return locals[verifier->stackBase+stackDepth-1];
+			return value(verifier->stackBase+stackDepth-1);
 		}
 
 		int sp() const {
@@ -136,10 +131,10 @@ namespace avmplus
 
 		void setType(int i, Traits* t, bool notNull=false, bool isWith=false)
 		{
-			//this->traits = t;
-			WB(verifier->core->GetGC(), this, &locals[i].traits, t);
-			locals[i].notNull = notNull;
-			locals[i].isWith = isWith;
+			Value& v = value(i);
+			v.traits = t;
+			v.notNull = notNull;
+			v.isWith = isWith;
 		}
 
 		void pop(int n=1)
@@ -150,8 +145,7 @@ namespace avmplus
 
 		Value& peek(int n=1)
 		{
-			AvmAssert(stackDepth-n >= 0);
-			return locals[verifier->stackBase+stackDepth-n];
+			return value(verifier->stackBase+stackDepth-n);
 		}
 
 		void pop_push(int n, Traits* type, bool notNull=false)

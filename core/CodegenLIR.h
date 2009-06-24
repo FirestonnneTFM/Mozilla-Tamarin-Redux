@@ -180,7 +180,7 @@ namespace avmplus
         LIns *localGetq(int i);
         LIns *localCopy(int i); // sniff's type
         LIns *branchIns(LOpcode op, LIns *cond);
-        LIns *branchIns(LOpcode op, LIns *cond, uintptr_t targetpc);
+        LIns *branchIns(LOpcode op, LIns *cond, int target_off);
         LIns *retIns(LIns *val);
         LIns *loadToplevel();
         LIns *loadEnvScope();
@@ -201,7 +201,7 @@ namespace avmplus
         void emitSampleCheck();
         bool verbose();
         void patchLater(LIns *br, CodegenLabel &);
-        void patchLater(LIns *br, intptr_t pc);
+        void patchLater(LIns *br, int pc_off);
         void setLabelPos(CodegenLabel &l, LIns *target);
         void deadvars();
         void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
@@ -281,7 +281,7 @@ namespace avmplus
 		bool prologue(FrameState* state);
 		void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
 		void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
-		void emitIf(FrameState* state, AbcOpcode opcode, intptr_t target, int lhs, int rhs);
+		void emitIf(FrameState* state, AbcOpcode opcode, int target_off, int lhs, int rhs);
 		void emitSwap(FrameState* state, int i, int j);
 		void emitCopy(FrameState* state, int src, int dest);
 		void emitGetscope(FrameState* state, int scope, int dest);
