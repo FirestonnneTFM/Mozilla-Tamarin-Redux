@@ -3260,18 +3260,18 @@ namespace avmplus
 			case OP_jump:
 			{
 				// spill everything first
-				intptr_t targetpc = op1;
+				int targetpc_off = (int)op1;
 
 #ifdef DEBUGGER
 				Sampler* s = core->get_sampler();
-				if (s && s->sampling() && targetpc < state->pc)
+				if (s && s->sampling() && targetpc_off < state->pc)
 				{
 					emitSampleCheck();
 				}
 #endif
 
 				// relative branch
-				branchIns(LIR_j, 0, targetpc); // will be patched
+				branchIns(LIR_j, 0, targetpc_off); // will be patched
 				break;
 			}
 
@@ -3282,13 +3282,13 @@ namespace avmplus
 				//	(pc+6+3*index) :	// matched case
 				//	(pc+1));			// default
 				int count = int(1 + op2);
-				intptr_t targetpc = op1;
+				int targetpc_off = (int)op1;
 
 				AvmAssert(state->value(sp).traits == INT_TYPE);
 
 				LIns* input = localGet(sp);
 				LIns* cmp = binaryIns(LIR_ult, input, InsConst(count));
-				branchIns(LIR_jf, cmp, targetpc); // will be patched
+				branchIns(LIR_jf, cmp, targetpc_off); // will be patched
 
                 // fixme - this is just a bunch of if's
 
@@ -3297,7 +3297,7 @@ namespace avmplus
 
 				for (int i=0; i < count && !outOMem(); i++)
 				{
-					intptr_t target = state->pc + AvmCore::readS24(pc+3*i);
+					int target = state->pc + AvmCore::readS24(pc+3*i);
                     branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)), target);
 				}
 				break;
@@ -4600,14 +4600,14 @@ namespace avmplus
 
 	} // emit()
 
-	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, intptr_t target, int a, int b)
+	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, int target_off, int a, int b)
 	{
 		if (outOMem()) return;
 		this->state = state;
 
 #ifdef DEBUGGER
 		Sampler* s = core->get_sampler();
-		if (s && s->sampling() && target < state->pc)
+		if (s && s->sampling() && target_off < state->pc)
 		{
 			emitSampleCheck();
 		}
@@ -4700,7 +4700,7 @@ namespace avmplus
             }
         }
 
-        branchIns(br, cond, target);
+        branchIns(br, cond, target_off);
 	} // emitIf()
 	
 	// Faster compares for ints, uint, doubles
@@ -4889,11 +4889,11 @@ namespace avmplus
 			for (int i=0; i < handler_count && !outOMem(); i++)
 			{
 				ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
-                intptr_t handler_pc = h->target;
+                int handler_pc_off = (int)h->target;
                 if (i+1 < handler_count) {
-                    branchIns(LIR_jt, binaryIns(LIR_peq, handler_target, InsConstPtr((void*)handler_pc)), handler_pc);
+                    branchIns(LIR_jt, binaryIns(LIR_peq, handler_target, InsConstPtr((void*)handler_pc_off)), handler_pc_off);
                 } else {
-                    branchIns(LIR_j, 0, handler_pc);
+                    branchIns(LIR_j, 0, handler_pc_off);
                 }
 			}
         }
@@ -5132,15 +5132,15 @@ namespace avmplus
         return lirout->insBranch(op, cond, 0);
     }
 
-    LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond, uintptr_t pc) {
+    LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond, int pc_off) {
         LIns *br = branchIns(op, cond);
-        patchLater(br, pc);
+        patchLater(br, pc_off);
         return br;
     }
 
 	/* patch the location 'where' with the value of the label */
-	void CodegenLIR::patchLater(LIns* br, intptr_t pc)	{
-        patchLater(br, state->verifier->getFrameState(pc)->label);
+	void CodegenLIR::patchLater(LIns* br, int pc_off)	{
+        patchLater(br, state->verifier->getFrameState(pc_off)->label);
 	}
 
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
@@ -5469,6 +5469,7 @@ namespace avmplus
             delete w;
         }
         delete lirbuf;
+		lirbuf = NULL;
 
         bool keep = //!info->hasExceptions() && 
             !assm->error();
@@ -5522,6 +5523,8 @@ namespace avmplus
            jitInfoList.clear();
        }
        #endif /* VTUNE */
+
+		delete assm;
     }
 
 #ifdef VTUNE

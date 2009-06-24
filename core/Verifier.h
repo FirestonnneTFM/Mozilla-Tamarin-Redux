@@ -63,10 +63,9 @@ namespace avmplus
 	class Verifier
 	{
 	public:
-
 	    CodeWriter* coder;
 		AvmCore *core;
-		SortedIntMap<FrameState*>* blockStates;
+		SortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
 		FrameState *state;
 
 		int max_scope;
@@ -102,7 +101,7 @@ namespace avmplus
 		 */
 		// Sun's C++ compiler wants "volatile" here because the definition has it
 		void verify(CodeWriter * volatile coder);
-		FrameState* getFrameState(sintptr targetpc);
+		FrameState* getFrameState(int pc_off);
 
 		// provide access to known jitters
 		#if defined FEATURE_NANOJIT
@@ -114,7 +113,6 @@ namespace avmplus
 
 	private:
 		Toplevel* toplevel;
-		FrameState* newFrameState();
 		Value& checkLocal(int local);
 		MethodInfo*  checkDispId(Traits* traits, uint32_t disp_id);
 		MethodInfo*  checkMethodInfo(uint32_t method_id);

@@ -91,7 +91,8 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
         , bool secondTry
 #endif
-        ) : ms(info->getMethodSignature())
+        ) : blockStates(NULL)
+		  , ms(info->getMethodSignature())
     {
 #ifdef AVMPLUS_VERBOSE
         this->secondTry = secondTry;
@@ -100,6 +101,16 @@ namespace avmplus
 		this->core   = info->pool()->core;
         this->pool   = info->pool();
         this->toplevel = toplevel;
+
+		// do these checks early before we allocate any resources.
+		if (!info->abc_body_pos()) {
+			// no body was supplied in abc
+			toplevel->throwVerifyError(kNotImplementedError, core->toErrorString(info));
+		}
+        if (info->declaringTraits() == NULL) {
+            // scope hasn't been captured yet.
+            verifyFailed(kCannotVerifyUntilReferencedError);
+        }
 
         #ifdef AVMPLUS_VERBOSE
         this->verbose = pool->verbose;
@@ -125,33 +136,18 @@ namespace avmplus
         
         exceptions_pos = pos;
 
-        blockStates = NULL;
         state       = NULL;
         labelCount = 0;
-
-        if (info->declaringTraits() == NULL)
-        {
-            // scope hasn't been captured yet.
-            verifyFailed(kCannotVerifyUntilReferencedError);
-        }
     }
 
     Verifier::~Verifier()
     {
-        if (blockStates)
-        {
-            MMgc::GC* gc = core->GetGC();
-            for(int i=0, n=blockStates->size(); i<n; i++)
-            {
-                FrameState* state = blockStates->at(i);
-                if (state)
-                {
-                    gc->Free(state);
-                }
-            }
-            blockStates->clear();
-            delete blockStates;
-        }
+		delete this->state;
+		if (blockStates) {
+			for(int i = 0, n=blockStates->size(); i < n; i++)
+				delete blockStates->at(i);
+			delete blockStates;
+		}
     }
 
     /**
@@ -211,11 +207,7 @@ namespace avmplus
 
 		this->coder = coder;
 
-        if ( (state = newFrameState()) == 0 ){
-            verifyFailed(kCorruptABCError);
-        }
-        for (int i=0, n=frameSize; i < n; i++)
-            state->setType(i, NULL);
+        state = new FrameState(this);
 
         if (info->needRest())
         {
@@ -276,16 +268,8 @@ namespace avmplus
         // resolve catch block types
         parseExceptionHandlers();
 
-        // Save initial state
-        FrameState* initialState = newFrameState();
-        if( !initialState->init(state) ) 
-            verifyFailed(kCorruptABCError);
-
         int actualCount = 0;
         blockEnd = false;    // extended basic block ending
-
-        // always load the entry state, no merge on second pass
-    	state->init(initialState);
 
 		TRY(core, kCatchAction_Rethrow) {
 
@@ -314,8 +298,8 @@ namespace avmplus
 			}
 
 			bool unreachable = false;
-			FrameState* blockState;
-			if ( blockStates && (blockState = blockStates->get((uintptr)pc)) != 0 )
+			FrameState* blockState = blockStates ? blockStates->get(pc) : NULL;
+			if (blockState)
 			{
 				if (!blockEnd || !blockState->initialized)
 				{
@@ -330,7 +314,7 @@ namespace avmplus
 				// now load the merged state
 				state->init(blockState);
 				state->targetOfBackwardsBranch = blockState->targetOfBackwardsBranch;
-				state->pc = pc - code_pos;
+				state->pc = (int)(pc - code_pos);
 
 				// found the start of a new basic block
 				coder->writeBlockStart(state);
@@ -347,8 +331,8 @@ namespace avmplus
                         // free the block early.
                     #else
                         // lir and translator are okay with this
-						blockStates->remove((uintptr)pc);
-						core->GetGC()->Free(blockState);
+						blockStates->remove(pc);
+						delete blockState;
                     #endif
 				}
 			}
@@ -364,7 +348,7 @@ namespace avmplus
 				}
 			}
 
-			state->pc = pc - code_pos;
+			state->pc = (int)(pc - code_pos);
 			int sp = state->sp();
 
 			if (info->abc_exceptions())
@@ -385,9 +369,9 @@ namespace avmplus
 							// TODO check stack is empty because catch handlers assume so.
 							int saveStackDepth = state->stackDepth;
 							int saveScopeDepth = state->scopeDepth;
+							Value stackEntryZero = saveStackDepth > 0 ? state->stackValue(0) : state->value(0);
 							state->stackDepth = 0;
 							state->scopeDepth = outer_depth;
-							Value stackEntryZero = state->stackValue(0);
 
 							// add edge from try statement to catch block
 							const byte* target = code_pos + handler->target;
@@ -399,13 +383,14 @@ namespace avmplus
 
 							state->stackDepth = saveStackDepth;
 							state->scopeDepth = saveScopeDepth;
-							state->stackValue(0) = stackEntryZero;
+							if (saveStackDepth > 0)
+								state->stackValue(0) = stackEntryZero;
 
 							// Search forward for OP_killreg in the try block
 							// Set these registers to killed in the catch state
 							if (pc == code_pos + handler->from)
 							{
-								FrameState *catchState = blockStates->get((uintptr)target);
+								FrameState *catchState = blockStates->get(target);
 								AvmAssert(catchState != 0);
 
                                 for (const byte *temp = pc; temp <= code_pos + handler->to; )
@@ -2253,20 +2238,18 @@ namespace avmplus
 		}
 	}
 
-	FrameState *Verifier::getFrameState(sintptr targetpc)
+	FrameState *Verifier::getFrameState(int target_off)
 	{
-		const byte *target = code_pos + targetpc;
+		if (!blockStates)
+			blockStates = new SortedMap<const byte*, FrameState*, LIST_NonGCObjects>(NULL, 128);
+		const byte *target = code_pos + target_off;
 		FrameState *targetState;
 		// get state for target address or create a new one if none exists
-		if (!blockStates)
+		if ( (targetState = blockStates->get(target)) == 0 ) 
 		{
-			blockStates = new (core->GetGC()) SortedIntMap<FrameState*>(core->GetGC(), 128);
-		}
-		if ( (targetState = blockStates->get((uintptr)target)) == 0 ) 
-		{
-			targetState = newFrameState();
-			targetState->pc = target - code_pos;
-			blockStates->put((uintptr)target, targetState);
+			targetState = new FrameState(this);
+			targetState->pc = int(target - code_pos);
+			blockStates->put(target, targetState);
 			labelCount++;
 		}
 		return targetState;
@@ -2540,8 +2523,7 @@ namespace avmplus
 
     void Verifier::checkTarget(const byte* target)
     {
-		FrameState *targetState = getFrameState(target-code_pos);
-		AvmAssert(targetState != 0);
+		FrameState *targetState = getFrameState((int)(target-code_pos));
 		if (!targetState->initialized)
 		{
 			//if (verbose)
@@ -2602,8 +2584,6 @@ namespace avmplus
 
 			const int scopeTop  = scopeBase + targetState->scopeDepth;
 			const int stackTop  = stackBase + targetState->stackDepth;
-			Value* targetValues = &targetState->value(0);
-			Value* curValues = &state->value(0);
 			for (int i=0, n=stackTop; i < n; i++)
 			{
 				if (i >= scopeTop && i < stackBase) 
@@ -2612,8 +2592,8 @@ namespace avmplus
 					continue;
 				}
 
-				Value& curValue = curValues[i];
-				Value& targetValue = targetValues[i];
+				Value& curValue = state->value(i);
+				Value& targetValue = targetState->value(i);
 				if (curValue.killed || targetValue.killed) 
 				{
 					// this reg has been killed in one or both states;
@@ -2881,7 +2861,7 @@ namespace avmplus
 				WB(core->GetGC(), table, &handler->scopeTraits, scopeTraits);
 
 				
-				getFrameState(handler->target)->targetOfBackwardsBranch = true;
+				getFrameState((int)handler->target)->targetOfBackwardsBranch = true;
 
 				handler++;
 			}
@@ -2976,10 +2956,18 @@ namespace avmplus
 	}
     #endif /* AVMPLUS_VERBOSE */
 
-	FrameState* Verifier::newFrameState()
+	FrameState::FrameState(Verifier* verifier)
+		: verifier(verifier), label(),
+		  pc(0), scopeDepth(0), stackDepth(0), withBase(-1),
+		  initialized(false), targetOfBackwardsBranch(false),
+		  insideTryBlock(false)
 	{
-		size_t extra = (frameSize-1)*sizeof(Value);
-		return new (core->GetGC(), extra) FrameState(this);
+		locals = new Value[verifier->frameSize];
+		memset(locals, 0, verifier->frameSize * sizeof(Value));
+	}
+
+	FrameState::~FrameState() {
+		delete [] locals;
 	}
 
 #if defined FEATURE_CFGWRITER

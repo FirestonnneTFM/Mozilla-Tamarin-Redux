@@ -304,6 +304,24 @@ namespace avmplus
 	 *   get() is an O(logN) binary search.
 	 * 
 	 * no duplicates are allowed.
+     *
+	 * MEMORY MANAGEMENT:
+	 * this class can be instantiated on the stack or by a plain
+	 * new allocation, or embedded as a field in the class.
+	 * it allocates memory with global new/delete if gc == NULL.
+	 *
+	 * therefore, when gc == NULL, to avoid memory leaks, one MUST
+	 * ensure the destructor runs, one way or another:
+	 *
+	 *   with stack allocation, as long as nobody longjmp's over
+	 *   the destructor, C++ compiler ensures the destructor is called.
+	 *
+	 *   with heap allocation, ~SortedMap is eventually called, somehow
+	 *   by deleting the object.  explicit Free is not enough.
+	 *
+	 *   with gc allocation, by embedding as a field in a GCFinalizedObject.
+	 *   use GCSortedMap (below) to get a standalone gc-destructable
+	 *   sorted map.
 	 */
   template <class K, class T, ListElementType valType>
 	class SortedMap 
@@ -432,14 +450,6 @@ namespace avmplus
 			}
 			return -(lo + 1);  // key not found, low is the insertion point
 		}
-	private:
-		// cannot instantiate dynamically, use GCSortedMap instead
-		void* operator new(size_t size); // unimplemented
-		void* operator new(size_t size, MMgc::GC* gc); // unimplemented
-#if defined(REQUIRE_DELETE_OPERATOR)
-		void operator delete(void*) {}
-		void operator delete(void*, MMgc::GC*) {}
-#endif
 	};
 
 	template <class K, class T, ListElementType valType>
