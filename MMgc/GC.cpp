@@ -1470,7 +1470,7 @@ bail:
 			item = AllocBlockNonIncremental(size, zero);
 
 		if(!item)
-			item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? kCanFail : 0));
+			item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? GCHeap::kCanFail : 0));
 
 		// mark GC pages in page map, small pages get marked one,
 		// the first page of large pages is 3 and the rest are 2
