@@ -109,8 +109,9 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --nohtml"
-$py ./runtests.py --nohtml
+echo "message: $py ./runtests.py --nohtml --vmargs=-Ojit"
+$py ./runtests.py --nohtml --vmargs=-Ojit
+
 
 ##
 # Ensure that the system is torn down and clean
