@@ -44,10 +44,10 @@
 #define _WRITE_BARRIER_H_
 
 // inline write barrier
-#define WB(gc, container, addr, value) gc->writeBarrier(container, addr, (const void *) (value))
+#define WB(gc, container, addr, value) gc->privateWriteBarrier(container, addr, (const void *) (value))
 
 // fast manual RC write barrier
-#define WBRC(gc, container, addr, value) gc->writeBarrierRC(container, addr, (const void *) (value))
+#define WBRC(gc, container, addr, value) gc->privateWriteBarrierRC(container, addr, (const void *) (value))
 
 // declare write barrier
 // put spaces around the template arg to avoid possible digraph warnings
@@ -59,6 +59,72 @@
 
 namespace MMgc
 {
+	/*private*/
+	REALLY_INLINE void GC::WriteBarrierWriteRC(const void *address, const void *value)
+	{
+		RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
+		if(rc != NULL) {
+			GCAssert(rc == FindBeginning(rc));
+			GCAssert(IsRCObject(rc));
+			rc->DecrementRef();
+		}
+		GCAssert(IsPointerIntoGCObject(address));
+		*(uintptr_t*)address = (uintptr_t) value;
+		rc = (RCObject*)Pointer(value);
+		if(rc != NULL) {
+			GCAssert(IsRCObject(rc));
+			GCAssert(rc == FindBeginning(value));
+			rc->IncrementRef();
+		}
+	}
+
+	/*private*/
+	REALLY_INLINE void GC::WriteBarrierWrite(const void *address, const void *value)
+	{
+		GCAssert(!IsRCObject(value));
+		GCAssert(IsPointerIntoGCObject(address));
+		*(uintptr_t*)address = (uintptr_t) value;
+	}
+
+	/*private*/
+	REALLY_INLINE void GC::InlineWriteBarrierTrap(const void *container, const void *value)
+	{
+		// OPTIMIZEME: GetMark and IsWhite are not obviously inlinable and could be optimized,
+		// for example, IsWhite gets the page map value twice.  That function is 'const' but
+		// we want to check that the compilers make use of that.  On the other hand, the whole
+		// problem may go away if we start using card marking.
+
+		GCAssert(IsPointerToGCPage(container));
+		GCAssert(((uintptr_t)value & 7) == 0);
+		if(marking && value && GetMark(container) && IsWhite(value))
+			TrapWrite(container, value);
+	}
+
+	REALLY_INLINE void GC::privateInlineWriteBarrier(const void *container, const void *address, const void *value)
+	{
+		GCAssert(!container || IsPointerToGCPage(container));
+		GCAssert(((uintptr_t)address & 3) == 0);
+		
+		if (container) {
+			GCAssert(address >= container);
+			GCAssert(address < (char*)container + Size(container));
+			InlineWriteBarrierTrap(container, Pointer(value));
+		}
+		WriteBarrierWrite(address, value);
+	}
+
+	REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *container, const void *address, const void *value)
+	{
+		GCAssert(IsPointerToGCPage(container));
+		GCAssert(((uintptr_t)container & 3) == 0);
+		GCAssert(((uintptr_t)address & 2) == 0);
+		GCAssert(address >= container);
+		GCAssert(address < (char*)container + Size(container));
+		
+		InlineWriteBarrierTrap(container, Pointer(value));
+		WriteBarrierWriteRC(address, value);
+	}
+
 	/**
 	 * WB is a smart pointer write barrier meant to be used on any field of a GC object that
 	 * may point to another GC object.  A write barrier may only be avoided if if the field is
@@ -67,60 +133,59 @@ namespace MMgc
 	 */
 	template<class T> class WriteBarrier
 	{
+	private:
+		// Always pay for a single real function call; then inline & optimize massively in WriteBarrier()
+		REALLY_INLINE
+		T set(const T tNew)
+		{
+			GC::WriteBarrier(&t, (const void*)tNew);	// updates 't'
+			return tNew;
+		}
 	public:
-		explicit inline WriteBarrier() : t(0)  
+		explicit REALLY_INLINE WriteBarrier() : t(0)  
 		{
 		}
 
-		explicit inline WriteBarrier(T _t) : t(_t)
+		explicit REALLY_INLINE WriteBarrier(T _t) : t(_t)
 		{ 
 			//set(_t); not necessary
 		}
 
-		inline ~WriteBarrier() 
+		REALLY_INLINE ~WriteBarrier() 
 		{ 
 			t = 0;
 		}
 
-		inline T operator=(const WriteBarrier<T>& wb)
+		REALLY_INLINE T operator=(const WriteBarrier<T>& wb)
 		{
 			return set(wb.t);	
 		}
 
-		inline T operator=(T tNew)
+		REALLY_INLINE T operator=(T tNew)
 		{
 			return set(tNew);
 		}
 
 		// BEHOLD ... The weird power of C++ operator overloading
-		inline operator T() const { return t; }
+		REALLY_INLINE operator T() const { return t; }
 
 		// let us peek at it without a cast
-		inline T value() const { return t; }
+		REALLY_INLINE T value() const { return t; }
 
-		inline operator ZeroPtr<T>() const { return t; }
+		REALLY_INLINE operator ZeroPtr<T>() const { return t; }
 
-		inline bool operator!=(T other) const { return other != t; }
+		REALLY_INLINE bool operator!=(T other) const { return other != t; }
 
-		inline T operator->() const
+		REALLY_INLINE T operator->() const
 		{
 			return t;
 		}
 
 	private:
-
-		// private to prevent its use and someone adding it, GCC creates
-		// WriteBarrier's on the stack with it
+		// Private constructor to prevent its use and someone adding it, GCC creates
+		// WriteBarriers on the stack with it
 		WriteBarrier(const WriteBarrier<T>& toCopy);	// unimplemented
 		
-		T set(const T tNew)
-		{
-			if(t != tNew && tNew != 0)
-				GC::WriteBarrier(this, (const void*)tNew);
-			else
-				t = tNew;
-			return tNew;
-		}
 		T t;
 	};
 
@@ -130,17 +195,26 @@ namespace MMgc
 	 */
 	template<class T> class WriteBarrierRC
 	{
+	private:
+		// Always pay for a single real function call; then inline & optimize massively in WriteBarrierRC()
+		REALLY_INLINE 		
+		T set(const T tNew)
+		{
+			GC::WriteBarrierRC(&t, (const void*)tNew);	// updates 't'
+			return tNew;
+		}
+		
 	public:
-		explicit inline WriteBarrierRC() : t(0) 
+		explicit REALLY_INLINE WriteBarrierRC() : t(0) 
 		{
 		}
 		
-		explicit inline WriteBarrierRC(T _t) : t(0)
+		explicit REALLY_INLINE WriteBarrierRC(T _t) : t(0)
 		{ 
 			set(_t);
 		}
 
-		inline ~WriteBarrierRC() 
+		REALLY_INLINE ~WriteBarrierRC() 
 		{
 			if(t != 0) {
 				((RCObject*)t)->DecrementRef();
@@ -148,39 +222,33 @@ namespace MMgc
 			}
 		}
 
-		inline T operator=(const WriteBarrierRC<T>& wb)
+		REALLY_INLINE T operator=(const WriteBarrierRC<T>& wb)
 		{
 			return set(wb.t);	
 		}
 
-		inline T operator=(T tNew)
+		REALLY_INLINE T operator=(T tNew)
 		{
 			return set(tNew);
 		}
 
-		inline operator T() const { return t; }
+		REALLY_INLINE operator T() const { return t; }
 
-		inline operator ZeroPtr<T>() const { return t; }
+		REALLY_INLINE operator ZeroPtr<T>() const { return t; }
 
-		inline bool operator!=(T other) const { return other != t; }
+		REALLY_INLINE bool operator!=(T other) const { return other != t; }
 
-		inline T operator->() const
+		REALLY_INLINE T operator->() const
 		{
 			return t;
 		}
 
-		inline void Clear() { t = 0; }
+		REALLY_INLINE void Clear() { t = 0; }
 	private:
-
-		// see note for WriteBarrier
+		// Private constructor to prevent its use and someone adding it, GCC creates
+		// WriteBarrierRCs on the stack with it
 		WriteBarrierRC(const WriteBarrierRC<T>& toCopy);
 		
-		T set(const T tNew)
-		{
-			GC *gc = GC::GetGC(this);
-			gc->writeBarrierRC(gc->FindBeginning(this), this, (const void*)tNew);
-			return tNew;
-		}
 		T t;
 	};
 }

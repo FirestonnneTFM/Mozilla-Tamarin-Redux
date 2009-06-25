@@ -1037,71 +1037,128 @@ namespace MMgc
 		 */
 		inline bool IncrementalMarking() const { return marking; }
 
+		//////////////////////////////////////////////////////////////////////////
+		//
+		// Write barrier.  Those that are REALLY_INLINE are defined in WriteBarrier.h,
+		// to handle circularity problems: RCObject is not yet defined in GC.h.
+
+	private:
 		/**
-		 * A magical write barrier that finds the container's address and the
-		 * GC, just make sure @a address is a pointer to a GC page. Only used
-		 * by WB smart pointers.
+		 * Perform the actual store of value into *address, adjusting reference counts.
+		 */
+		/*REALLY_INLINE*/ void WriteBarrierWriteRC(const void *address, const void *value);
+		
+		/**
+		 * Perform the actual store of value into *address.  (This is just a store, but there
+		 * is additional error checking in debug builds.)
+		 */
+		/*REALLY_INLINE*/ void WriteBarrierWrite(const void *address, const void *value);
+
+		/**
+		 * Implementation of WriteBarrierTrap; too large to be inlined everywhere.
+		 */
+		/*REALLY_INLINE*/ void InlineWriteBarrierTrap(const void *container, const void *value);
+
+		/**
+		 * Implementation of privateWriteBarrier; too large to be inlined everywhere.
+		 */
+		/*REALLY_INLINE*/ void privateInlineWriteBarrier(const void *container, const void *address, const void *value);
+
+		/**
+		 * Implementation of privateWriteBarrierRC; too large to be inlined everywhere.
+		 */
+		/*REALLY_INLINE*/ void privateInlineWriteBarrierRC(const void *container, const void *address, const void *value);
+
+		/**
+		 * Queue the white object for marking.  The black object is not needed for the operation,
+		 * only for debugging.
+		 */
+		void TrapWrite(const void* black, const void* white);
+
+	public:
+		/**
+		 * General, conditional write barrier trap.  Tests that incremental marking is in fact ongoing
+		 * and that the container is black (marked, not queued) and the value is white (not marked or
+		 * queued) and if so queues the value for marking.
+		 *
+		 * Does /not/ write the value into the object; the caller must do that.
+		 *
+		 * Container must be a non-NULL untagged pointer to the beginning of an object on a page
+		 * owned by this GC.
+		 *
+		 * Value must be untagged (8-byte aligned).
+		 * Value may be NULL.
+		 * Value need not point to the beginning of an object, nor need it point into a page
+		 * owned by this GC, and that is probably a feature.  (Consider fields that can
+		 * contain pointers to GC'd storage or to static storage, like pointers from the
+		 * String object to string data.)
+		 */
+		void WriteBarrierTrap(const void *container, const void *value);
+		
+		/**
+		 * Standard write barrier write for non-RC values.  If marking is ongoing, and the 'container'
+		 * is black (ie marked and not queued) and the 'value' is white (ie unmarked and not queued) 
+		 * then make sure to queue value for marking.
+		 *
+		 * Finally stores value into *address.
+		 *
+		 * 'container' may be NULL, in which case this is just a store and 'address' can be arbitrary.
+		 *
+		 * If 'container' is not NULL then it is constrained as for WriteBarrierTrap, and 'address'
+		 * must point into the object referenced by 'container'.
+		 *
+		 * 'value' is constrained as for WriteBarrierTrap.
+		 *
+		 * This is called by the WB macro in WriteBarrier.h - not an API to be used otherwise.
+		 */
+		void privateWriteBarrier(const void *container, const void *address, const void *value);
+
+		/**
+		 * A write barrier that finds the container's address and the container's
+		 * GC and then performs a standard write barrier operation (see privateWriteBarrier).
+		 * Finally stores value into *address.
 		 */
 		static void WriteBarrier(const void *address, const void *value);
-
-		static void WriteBarrierNoSub(const void *address, const void *value);
-
-		void writeBarrier(const void *container, const void *address, const void *value)
-		{
-			GCAssert(!container || IsPointerToGCPage(container));
-			GCAssert(((uintptr_t)address & 3) == 0);
-
-			if (container) {
-				GCAssert(address >= container);
-				GCAssert(address < (char*)container + Size(container));
-				WriteBarrierNoSubstitute(container, value);
-			}
-			WriteBarrierWrite(address, value);
-		}
-
+		
 		/**
-		 * optimized version with no RC checks or pointer masking
+		 * Standard write barrier write for RC values.  If marking is ongoing, and the 'container'
+		 * is black (ie marked and not queued) and the 'value' is white (ie unmarked and not queued) 
+		 * then make sure to queue value for marking.
+		 *
+		 * Finally stores value into *address, adjusting the reference counts of both the old value
+		 * and the new value.
+		 *
+		 * 'container' is constrained as for WriteBarrierTrap.
+		 *
+		 * 'address' must point into the object referenced by 'container'.  The value there, if not
+		 * NULL, must be a (possibly tagged) pointer to an RC object.
+		 *
+		 * 'value', if not NULL, must point to an RC object owned by this GC.
+		 * 
+		 * This is called by the WBRC macro in WriteBarrier.h - not an API to be used otherwise.
 		 */
-		void writeBarrierRC(const void *container, const void *address, const void *value);
-
+		void privateWriteBarrierRC(const void *container, const void *address, const void *value);
+		
 		/**
-		 * Write barrier when the value could be a pointer with anything in the lower 3 bits
-		 * FIXME: maybe assert that the lower 3 bits are either zero or a pointer type signature,
-		 * this would require the application to tell us what bit patterns are pointers.
+		 * A write barrier that finds the container's address and the container's GC
+		 * and then performs a standard RC write barrier operation (see privateWriteBarrierRC).
 		 */
-		REALLY_INLINE void WriteBarrierNoSubstitute(const void *container, const void *value)
-		{
-			WriteBarrierTrap(container, (const void*)((uintptr_t)value&~7));
-		}
-			
+		static void WriteBarrierRC(const void *address, const void *value);
+		
 		/**
-		 * AVM+ write barrier, valuePtr is known to be pointer and the caller
-		 * does the write.
+		 * Host API: if 'address' points to a GC page (it can point into an object, not just
+		 * to the start of one), and 'value' points to a GC page as well, record that 'value'
+		 * has been stored into the object containing 'address'.
+		 *
+		 * The function does /not/ perform the store (this is what NoSubstitute means).
+		 *
+		 * The function works for both RCObjects and GCObjects.
 		 */
-		REALLY_INLINE void WriteBarrierTrap(const void *container, const void *valuePtr)
-		{
-			GCAssert(IsPointerToGCPage(container));
-			GCAssert(((uintptr_t)valuePtr&7) == 0);
-			GCAssert(IsPointerToGCPage(container));
-			if(marking && valuePtr && GetMark(container) && IsWhite(valuePtr))
-			{
-				TrapWrite(container, valuePtr);
-			}
-		}
-
-		void ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
-		{
-			if(IsPointerToGCPage(address))
-				WriteBarrierNoSubstitute(FindBeginning(address), value);
-		}
-
+		void ConservativeWriteBarrierNoSubstitute(const void *address, const void *value);
+		
 	public:
 		GCPolicyManager policy;
 		
-	private:
-		void WriteBarrierWrite(const void *address, const void *value);
-		void WriteBarrierWriteRC(const void *address, const void *value);
-
 	public:
 
 		bool ContainsPointers(const void *item);
@@ -1441,11 +1498,6 @@ namespace MMgc
 			MarkItem(workitem, work);
 		}
 		void MarkItem(GCWorkItem &workitem, GCStack<GCWorkItem> &work);
-
-		/**
-		 * Write barrier slow path. Queues the white object.
-		 */
-		void TrapWrite(const void *black, const void *white);
 
 		/**
 		 * True during the sweep phase of collection.  Several things have to
