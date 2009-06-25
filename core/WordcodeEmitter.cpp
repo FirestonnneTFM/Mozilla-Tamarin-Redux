@@ -177,10 +177,12 @@ namespace avmplus
 				l = l->next;
 			// See https://bugzilla.mozilla.org/show_bug.cgi?id=481171.  Arguably this is a verification
 			// error, but work around the lack of a verification error here.
-			if (avm_toplevel != NULL)
-				core->throwErrorV(avm_toplevel->verifyErrorClass(), kInvalidBranchTargetError);
-			else
-				core->throwAtom(core->newStringLatin1("word code translator: missing LABEL for backward branch")->atom());
+			if (l == NULL) {
+				if (avm_toplevel != NULL)
+					core->throwErrorV(avm_toplevel->verifyErrorClass(), kInvalidBranchTargetError);
+				else
+					core->throwAtom(core->newStringLatin1("word code translator: missing LABEL for backward branch")->atom());
+			}
 			*dest++ = l->new_offset - base_offset;
 		}
 		else
