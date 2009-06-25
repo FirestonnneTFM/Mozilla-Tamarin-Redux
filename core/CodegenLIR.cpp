@@ -3131,7 +3131,7 @@ namespace avmplus
 		if (core->GetGC()->incremental &&
 			(!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE))
 		{
-			const CallInfo *wbAddr = FUNCTIONID(writeBarrierRC);
+			const CallInfo *wbAddr = FUNCTIONID(privateWriteBarrierRC);
 			if(slotType == NULL || slotType == OBJECT_TYPE) {
 				// use fast atom wb
 				// TODO: inline pointer check

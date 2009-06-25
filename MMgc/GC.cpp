@@ -3041,65 +3041,6 @@ bail:
 		}
 		return false;
 	}
-	
-	// TODO: fix headers so this can be declared there and inlined
-	void GC::WriteBarrierWrite(const void *address, const void *value)
-	{
-		GCAssert(!IsRCObject(value));
-		GCAssert(IsPointerIntoGCObject(address));
-		*(uintptr_t*)address = (uintptr_t) value;
-	}
-
-	// optimized version with no RC checks or pointer swizzling
-	void GC::writeBarrierRC(const void *container, const void *address, const void *value)
-	{
-		GCAssert(IsPointerToGCPage(container));
-		GCAssert(((uintptr_t)container & 3) == 0);
-		GCAssert(((uintptr_t)address & 2) == 0);
-		GCAssert(address >= container);
-		GCAssert(address < (char*)container + Size(container));
-
-		WriteBarrierNoSubstitute(container, value);
-		WriteBarrierWriteRC(address, value);
-	}
-
-	// TODO: fix headers so this can be declared there and inlined
-	REALLY_INLINE void GC::WriteBarrierWriteRC(const void *address, const void *value)
-	{
-			RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
-			if(rc != NULL) {
-				GCAssert(rc == FindBeginning(rc));
-				GCAssert(IsRCObject(rc));
-				rc->DecrementRef();
-			}
-		GCAssert(IsPointerIntoGCObject(address));
-		*(uintptr_t*)address = (uintptr_t) value;
-			rc = (RCObject*)Pointer(value);
-			if(rc != NULL) {
-				GCAssert(IsRCObject(rc));
-				GCAssert(rc == FindBeginning(value));
-				rc->IncrementRef();
-			}
-	}
-
-	void GC::WriteBarrier(const void *address, const void *value)
-	{
-		GC* gc = GC::GetGC(address);
-		if(Pointer(value) != NULL && gc->marking) {
-			void *container = gc->FindBeginning(address);
-			gc->WriteBarrierNoSubstitute(container, value);
-		}
-		gc->WriteBarrierWrite(address, value);
-	}
-
-	void GC::WriteBarrierNoSub(const void *address, const void *value)
-	{
-		GC *gc = NULL;
-		if(value != NULL && (gc = GC::GetGC(address))->marking) {
-			void *container = gc->FindBeginning(address);
-			gc->WriteBarrierNoSubstitute(container, value);		
-		}
-	}
 
 	void GC::TrapWrite(const void *black, const void *white)
 	{
@@ -3108,21 +3049,62 @@ bail:
 		GCAssert(marking);
 		GCAssert(GetMark(black));
 		GCAssert(IsWhite(white));
-		// currently using the simplest finest grained implementation,
-		// which could result in huge work queues.  should try the
+
+		// Currently using the simplest finest grained implementation,
+		// which could result in huge work queues.  Should try the
 		// more granular approach of moving the black object to grey
 		// (smaller work queue, less frequent wb slow path) but if the
 		// black object is big we end up doing useless redundant
-		// marking.  optimal approach from lit is card marking (mark a
-		// region of the black object as needing to be re-marked)
+		// marking.  Optimal approach from lit is card marking (mark a
+		// region of the black object as needing to be re-marked).
+		
 		if(ContainsPointers(white)) {
 			SetQueued(white);
 			PushWorkItem(m_incrementalWork, GCWorkItem(white, (uint32_t)Size(white), true));
-		} else {
+		} 
+		else
 			SetMark(white);
-		}
+	}
+	
+	void GC::WriteBarrierTrap(const void *container, const void *value)
+	{
+		InlineWriteBarrierTrap(container, value);
+	}
+	
+	void GC::privateWriteBarrier(const void *container, const void *address, const void *value)
+	{
+		privateInlineWriteBarrier(container, address, value);
+	}
+	
+	void GC::privateWriteBarrierRC(const void *container, const void *address, const void *value)
+	{
+		privateInlineWriteBarrierRC(container, address, value);
 	}
 
+	/* static */ void GC::WriteBarrierRC(const void *address, const void *value)
+	{
+		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
+		// worry about, so we should be able to optimize (and inline).
+		GC* gc = GC::GetGC(address);
+		gc->privateInlineWriteBarrierRC(gc->FindBeginning(address), address, value);
+	}
+	
+	/* static */ void GC::WriteBarrier(const void *address, const void *value)
+	{
+		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
+		// worry about, so we should be able to optimize (and inline).
+		GC* gc = GC::GetGC(address);
+		gc->privateInlineWriteBarrier(gc->FindBeginning(address), address, value);
+	}
+
+	void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
+	{
+		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
+		// worry about, so we should be able to optimize (and inline).
+		if(IsPointerToGCPage(address))
+			InlineWriteBarrierTrap(FindBeginning(address), Pointer(value));
+	}
+	
 	bool GC::ContainsPointers(const void *item)
 	{
 		item = GetRealPointer(item);
@@ -3546,6 +3528,6 @@ bail:
  				}		
  				// else nothing can be done
  			}
-  	}
+		}
 	}
 }

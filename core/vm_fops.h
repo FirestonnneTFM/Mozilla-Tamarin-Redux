@@ -190,7 +190,7 @@
     CSEFUNCTION(FUNCADDR(MathUtils::mod), SIG2(F,F,F), mod)
     CSEMETHOD(COREADDR(AvmCore::_typeof), SIG2(P,P,A), typeof)
     FUNCTION(FUNCADDR(AvmCore::atomWriteBarrier), SIG4(V,P,P,P,A), atomWriteBarrier)
-    METHOD(GCADDR(GC::writeBarrierRC), SIG4(V,P,P,P,P), writeBarrierRC)
+    METHOD(GCADDR(GC::privateWriteBarrierRC), SIG4(V,P,P,P,P), privateWriteBarrierRC)
     CSEMETHOD(COREADDR(AvmCore::uintToAtom), SIG2(A,P,U), uintToAtom)
     CSEMETHOD(COREADDR(AvmCore::intToAtom), SIG2(A,P,I), intToAtom)
     METHOD(COREADDR(AvmCore::compare), SIG3(A,P,A,A), compare)

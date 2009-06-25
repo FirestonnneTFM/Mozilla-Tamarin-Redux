@@ -3921,7 +3921,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			// fall through
 		case kDoubleType:
 			{
-				gc->WriteBarrierNoSubstitute(container, (const void*)atomNew);
+				gc->WriteBarrierTrap(container, (const void*)(atomNew & ~7));
 			}
 			break;	
 
