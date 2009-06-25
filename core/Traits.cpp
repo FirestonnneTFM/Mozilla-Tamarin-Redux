@@ -310,16 +310,6 @@ namespace avmplus
 	}
 #endif
 
-	bool TraitsBindings::containsInterface(Traitsp t) const 
-	{ 
-		for (TraitsBindingsp self = this; self; self = self->base)
-		{
-			if (self->owner == t || self->findInterfaceAddr(t)->t != NULL) 
-				return true;
-		}
-		return false;
-	}
-
 	Binding TraitsBindings::findBinding(Stringp name) const
 	{
 		for (TraitsBindingsp self = this; self; self = self->base)
@@ -353,20 +343,25 @@ namespace avmplus
 		return BIND_NONE;
 	}
 
-	void TraitsBindings::addOneInterface(Traitsp intf)
+	bool TraitsBindings::addOneInterface(Traitsp intf)
 	{
 		AvmAssert(intf != NULL);
-		AvmAssert(intf->posType() != TRAITSTYPE_NVA);
-		AvmAssert(intf->posType() != TRAITSTYPE_RT);
 
 		// since this is in the cache, no need for WB: ifc isn't going to go
 		// away before we do
 		InterfaceInfo* addr = findInterfaceAddr(intf);
 		AvmAssert(addr->t == NULL || addr->t == intf);
+		const bool added = (addr->t == NULL);
 		addr->t = intf;
+		return added;
 	}
 
-	TraitsBindings::InterfaceInfo* TraitsBindings::findInterfaceAddr(Traitsp intf)
+	// note that findInterfaceAddr() always returns a nonnull InterfaceInfo* --
+	// this is expected and required by all callers! This is ensured by the fact
+	// that we allocate enough space (via countInterfaces) to hold exactly
+	// the right number of interfaces. overflow is not checked for in normal builds
+	// (only via assertions in debug builds).
+	TraitsBindings::InterfaceInfo* FASTCALL TraitsBindings::findInterfaceAddr(Traitsp intf)
 	{
 		InterfaceInfo* set = getInterfaces();
         // this is a quadratic probe
@@ -536,6 +531,10 @@ namespace avmplus
 			if (!ifc || !ifc->isInterface)
 				continue;
 
+			// don't need to bother checking interfaces in our parent.
+			if (this->base && this->base->containsInterface(ifc))
+				continue;
+
 			TraitsBindingsp ifcd = ifc->getTraitsBindings();
 			StTraitsBindingsIterator iter(ifcd);
 			while (iter.next())
@@ -606,50 +605,39 @@ namespace avmplus
 		return true;
 	}
 	
-	void TraitsBindings::fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel)
+	void TraitsBindings::fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel)
 	{
 		if (owner->isInterface)
 			return;
 
+		if (!ifc->linked) 
 		{
-			const TraitsBindings::InterfaceInfo* tbi		= this->getInterfaces();
-			const TraitsBindings::InterfaceInfo* tbi_end	= tbi + this->interfaceCapacity;
-			for ( ; tbi < tbi_end; ++tbi) 
-			{
-				Traitsp ifc = tbi->t;
-				if (!ifc || !ifc->isInterface)
-					continue;
-
-				if (!ifc->linked) 
-				{
-					// toplevel will be non-null only for the first call (will be null afterwards) --
-					// but all our interfaces will be resolved by then
-					AvmAssert(toplevel != NULL);
-					ifc->resolveSignatures(toplevel);
-				}
-
-				TraitsBindingsp ifcd = ifc->getTraitsBindings();
-				StTraitsBindingsIterator iter(ifcd);
-				while (iter.next())
-				{
-					Stringp name = iter.key();
-					if (!name) continue;
-					Namespacep ns = iter.ns();
-					Binding iBinding = iter.value();
-					const BindingKind iBindingKind = AvmCore::bindingKind(iBinding);
-					const Binding cBinding = this->findBinding(name, ns);
-					if (!isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)))
-					{
-						// Try again with public namespace
-						const Binding pBinding = this->findBinding(name, core->publicNamespace);
-						if (isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(pBinding)))
-						{
-							this->m_bindings->add(name, ns, pBinding);
-						}
-					}
-				} // for j
-			} // for tbi
+			// toplevel will be non-null only for the first call (will be null afterwards) --
+			// but all our interfaces will be resolved by then
+			AvmAssert(toplevel != NULL);
+			ifc->resolveSignatures(toplevel);
 		}
+
+		TraitsBindingsp ifcd = ifc->getTraitsBindings();
+		StTraitsBindingsIterator iter(ifcd);
+		while (iter.next())
+		{
+			Stringp name = iter.key();
+			if (!name) continue;
+			Namespacep ns = iter.ns();
+			Binding iBinding = iter.value();
+			const BindingKind iBindingKind = AvmCore::bindingKind(iBinding);
+			const Binding cBinding = this->findBinding(name, ns);
+			if (!isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)))
+			{
+				// Try again with public namespace
+				const Binding pBinding = this->findBinding(name, ifc->core->publicNamespace);
+				if (isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(pBinding)))
+				{
+					this->m_bindings->add(name, ns, pBinding);
+				}
+			}
+		} 
 	}
 		
 	// -------------------------------------------------------------------
@@ -1230,62 +1218,81 @@ namespace avmplus
 		return nextSlotOffset;
 	}
 
-
+	static const uint8_t* skipToInterfaceCount(const uint8_t* pos)
+	{
+		AvmAssert(pos != NULL);
+		AvmCore::skipU30(pos, 2);		// skip the QName + basetraits
+		const uint8_t theflags = *pos++;		
+		if (theflags & 8)
+			AvmCore::skipU30(pos);	// skip protected namespace
+		return pos;
+	}
+	
 	// Flex apps often have many interfaces redundantly listed, so first time thru,
 	// eliminate redundant ones.
-	void Traits::countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_NonGCObjects>& seen) const
+	void Traits::countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_NonGCObjects>& seen)
 	{
-		if (this->base && seen.indexOf(this->base) < 0)
-			seen.add(this->base);
-
-		const uint8_t* pos = (this->posType() == TRAITSTYPE_INSTANCE_FROM_ABC) ? m_traitsPos : NULL;
-		if (pos)
+		for (Traitsp self = this; self != NULL; self = self->base)
 		{
-			AvmCore::skipU30(pos, 2);		// skip the QName + basetraits
-			const uint8_t theflags = *pos++;		
-			if (theflags & 8)
-				AvmCore::skipU30(pos);	// skip protected namespace
-			
-			const uint32_t interfaceCount = AvmCore::readU30(pos);
-			for (uint32_t j = 0; j < interfaceCount; j++)
+			if (seen.indexOf(self) < 0)
+				seen.add(self);
+
+			if (self->posType() == TRAITSTYPE_INSTANCE_FROM_ABC)
 			{
-				Traitsp intf = this->pool->resolveTypeName(pos, toplevel);
-				AvmAssert(intf && intf->isInterface);
-				if (intf && intf->isInterface && seen.indexOf(intf) < 0)
+				const uint8_t* pos = skipToInterfaceCount(self->m_traitsPos);
+				const uint32_t interfaceCount = AvmCore::readU30(pos);
+				for (uint32_t j = 0; j < interfaceCount; j++)
 				{
-					seen.add(intf);
+					Traitsp intf = self->pool->resolveTypeName(pos, toplevel);
+					AvmAssert(intf && intf->isInterface);
+					// an interface can "extend" multiple other interfaces, so we must recurse here.
 					intf->countInterfaces(toplevel, seen);
 				}
 			}
 		}
 	}
-
-	void Traits::addInterfaces(TraitsBindings* tb) const
+	
+	// Note that the interface list for a given TraitsBindings is flat and inclusive.
+	// in the original version of Tamarin, the interface list was flat, and included
+	// all Interfaces implemented by the Traits, as well as all parent Traits... but
+	// not the Traits itself (ie "this" is missing). 
+	//
+	// when TraitsBindings were added, we changed the interface list to be hierarchical,
+	// so that only the interfaces not implemented by parents were in the list... thus
+	// you had to walk up the tree to check for interface implementation. this proved
+	// to be too slow (eg for containsInterface which is used heavily by coerceEnter),
+	// thus the current implementation has gone back to a flat implementation, but
+	// with 'this' included in the list this time.
+	//
+	// aside from containsInterface, this affected a few other areas of the code that
+	// thought they had to walk the TraitsBindings inheritance tree to get all
+	// interfaces (notable IMT thunk generation and TypeDescriber).
+	bool Traits::addInterfaces(TraitsBindings* tb, const Toplevel* toplevel)
 	{
-		if (this->base)
-			tb->addOneInterface(this->base);
-
-		const uint8_t* pos = (this->posType() == TRAITSTYPE_INSTANCE_FROM_ABC) ? m_traitsPos : NULL;
-		if (pos)
+		bool addedNewInterface = false;
+		
+		if (this->posType() == TRAITSTYPE_INSTANCE_FROM_ABC)
 		{
-			AvmCore::skipU30(pos, 2);		// skip the QName + basetraits
-			const uint8_t theflags = *pos++;		
-			if (theflags & 8)
-				AvmCore::skipU30(pos);	// skip protected namespace
-			
+			const uint8_t* pos = skipToInterfaceCount(this->m_traitsPos);
 			const uint32_t interfaceCount = AvmCore::readU30(pos);
 			for (uint32_t j = 0; j < interfaceCount; j++)
 			{
 				// never need to pass toplevel here: we've already validated the typenames in AbcParser::parseInstanceInfos
-				Traitsp intf = this->pool->resolveTypeName(pos, /*toplevel*/NULL);
-				AvmAssert(intf && intf->isInterface);
-				if (intf && intf->isInterface)
+				Traitsp ifc = this->pool->resolveTypeName(pos, /*toplevel*/NULL);
+				AvmAssert(ifc && ifc->isInterface);
+				if (tb->addOneInterface(ifc))
 				{
-					tb->addOneInterface(intf);
-					intf->addInterfaces(tb);
+					addedNewInterface = true;
+					tb->fixOneInterfaceBindings(ifc, toplevel);
 				}
+
+				// an interface can "extend" multiple other interfaces, so we must recurse here.
+				if (ifc->addInterfaces(tb, toplevel))
+					addedNewInterface = true;
 			}
 		}
+
+		return addedNewInterface;
 	}
 
 	static uint8_t calcLog2(uint32_t cap)
@@ -1367,8 +1374,21 @@ namespace avmplus
 			thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount, (1U << m_interfaceCapLog2));
 			
 			thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen) - m_sizeofInstance;
-			addInterfaces(thisData);
-			thisData->fixInterfaceBindings(core, toplevel);
+
+			// we implement everything our parent does, so re-add from there 
+			// rather than walking the whole hierarchy:
+			if (basetb)
+			{
+				const TraitsBindings::InterfaceInfo* tbi = basetb->getInterfaces();
+				const TraitsBindings::InterfaceInfo* tbi_end = tbi + basetb->interfaceCapacity;
+				for ( ; tbi < tbi_end; ++tbi) 
+				{
+					if (tbi->t)
+						thisData->addOneInterface(tbi->t);
+				}
+			}
+			thisData->addOneInterface(this);
+			this->m_implementsNewInterfaces = addInterfaces(thisData, toplevel);
 		}
 
 		// hashtable (if we have one) must start on pointer-sized boundary...
@@ -1546,7 +1566,7 @@ namespace avmplus
 			for ( ; tbi < tbi_end; ++tbi) 
 			{
 				Traits* ti = tbi->t;
-				if (!ti || ti->linked) continue;
+				if (!ti || ti->linked || ti == this) continue;
 				ti->resolveSignatures(toplevel);
 			}
 		}

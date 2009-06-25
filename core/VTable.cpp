@@ -59,20 +59,6 @@ namespace avmplus
 	// AvmCore::bindingToMethodId will assert inapproppriately
 	static inline uint32_t getRawDispID(Binding b) { return  uint32_t(uintptr_t(b))>>3; }
 	
-	static bool implementsNewInterfaces(TraitsBindingsp tb)
-	{
-		AvmAssert(tb->base != NULL); // only Object has null base, and it has no Interfaces
-		for (uint32_t k = 0; k < tb->interfaceCapacity ; ++k) 
-		{
-			Traitsp ifc = tb->getInterface(k);
-			if (ifc && ifc->isInterface && !tb->base->containsInterface(ifc))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	static void sortImtThunkEntries(ImtThunkEntry* map, uint32_t count)
 	{
 		// intervals suggested by http://www.research.att.com/~njas/sequences/A108870
@@ -136,70 +122,59 @@ namespace avmplus
 		// first check to see if we added any interfaces. if not, we can just inherit.
 		// do this first, since it's pretty common and allows us to skip lots of hashtable lookups
 		// and memory allocations.
-		TraitsBindingsp tb = traits->getTraitsBindings();
-		if (!implementsNewInterfaces(tb))
+		if (!traits->implementsNewInterfaces())
 			return NULL;
 		
-		// You can see duplicate interfaces as you walk the inheritance tree,
-		// but we don't need them... keep a list of ones we've seen so we can
-		// skip the dupes, keeping generated data smaller
-		List<Traitsp> seen(gc);
-		for (; tb; tb = tb->base)
+		TraitsBindingsp tb = traits->getTraitsBindings();
+		for (uint32_t k = 0; k < tb->interfaceCapacity ; ++k) 
 		{
-			for (uint32_t k = 0; k < tb->interfaceCapacity ; ++k) 
+			Traitsp ifc = tb->getInterface(k);
+			if (!ifc || !ifc->isInterface)
+				continue;
+			
+			TraitsBindingsp ifcd = ifc->getTraitsBindings();
+			StTraitsBindingsIterator iter(ifcd);
+			while (iter.next())
 			{
-				Traitsp ifc = tb->getInterface(k);
-				if (!ifc || !ifc->isInterface)
+				const Stringp name = iter.key();
+				if (name == NULL)
 					continue;
+
+				const Namespacep ns = iter.ns();
+				const Binding iBinding = iter.value();
+
+				// taking some liberties here in the name of compact code...
+				// the opaque AvmCore accessors aren't flexible enough here,
+				// rely on knowledge of current Binding structure
+				const uint32_t iDispID = getRawDispID(iBinding);
+				const BindingKind ibk = AvmCore::bindingKind(iBinding);
+				Binding cBinding = BIND_NONE;
 				
-				if (seen.indexOf(ifc) >= 0)
-					continue;
-				
-				seen.add(ifc);
-				TraitsBindingsp ifcd = ifc->getTraitsBindings();
-				StTraitsBindingsIterator iter(ifcd);
-				while (iter.next())
+				MethodInfo* v0 = ((1<<ibk) & ((1<<BKIND_METHOD)|(1<<BKIND_GET)|(1<<BKIND_GETSET))) ? 
+									ifcd->getMethod(iDispID) :
+									NULL;
+
+				if (v0 && uint32_t(v0->iid() % VTable::IMT_SIZE) == slot)
 				{
-					const Stringp name = iter.key();
-					if (name == NULL)
-						continue;
+					if (cBinding == BIND_NONE)
+						cBinding = tb->findBinding(name, ns);
+					AvmAssert(cBinding != BIND_NONE);
+					map = new (gc) ImtEntry(map, v0, getRawDispID(cBinding));
+					++count;
+				}
 
-					const Namespacep ns = iter.ns();
-					const Binding iBinding = iter.value();
-
-					// taking some liberties here in the name of compact code...
-					// the opaque AvmCore accessors aren't flexible enough here,
-					// rely on knowledge of current Binding structure
-					const uint32_t iDispID = getRawDispID(iBinding);
-					const BindingKind ibk = AvmCore::bindingKind(iBinding);
-					Binding cBinding = BIND_NONE;
-					
-					MethodInfo* v0 = ((1<<ibk) & ((1<<BKIND_METHOD)|(1<<BKIND_GET)|(1<<BKIND_GETSET))) ? 
-										ifcd->getMethod(iDispID) :
-										NULL;
-
-					if (v0 && uint32_t(v0->iid() % VTable::IMT_SIZE) == slot)
-					{
-						if (cBinding == BIND_NONE)
-							cBinding = tb->findBinding(name, ns);
-						AvmAssert(cBinding != BIND_NONE);
-						map = new (gc) ImtEntry(map, v0, getRawDispID(cBinding));
-						++count;
-					}
-
-					MethodInfo* v1 = ((1<<ibk) & ((1<<BKIND_SET)|(1<<BKIND_GETSET))) ? 
-										ifcd->getMethod(iDispID+1) :
-										NULL;
-					if (v1 && uint32_t(v1->iid() % VTable::IMT_SIZE) == slot)
-					{
-						if (cBinding == BIND_NONE)
-							cBinding = tb->findBinding(name, ns);
-						AvmAssert(cBinding != BIND_NONE);
-						map = new (gc) ImtEntry(map, v1, getRawDispID(cBinding)+1);
-						++count;
-					}
-				} // for j
-			} // for tbi
+				MethodInfo* v1 = ((1<<ibk) & ((1<<BKIND_SET)|(1<<BKIND_GETSET))) ? 
+									ifcd->getMethod(iDispID+1) :
+									NULL;
+				if (v1 && uint32_t(v1->iid() % VTable::IMT_SIZE) == slot)
+				{
+					if (cBinding == BIND_NONE)
+						cBinding = tb->findBinding(name, ns);
+					AvmAssert(cBinding != BIND_NONE);
+					map = new (gc) ImtEntry(map, v1, getRawDispID(cBinding)+1);
+					++count;
+				}
+			} // for j
 		}
 		
 		AvmAssert(map != NULL);
@@ -291,7 +266,7 @@ namespace avmplus
 			else
 			{
 				ite = new (gc, imtMapCount * sizeof(ImtThunkEntry)) ImtThunkEnv(VTable::dispatchImt, imtMapCount);
-
+				//_nvprof("IMT ",MMgc::GC::Size(ite));
 				ImtThunkEntry* m = ite->entries();
 				ImtEntry* e = imtMap;
 				while (e)

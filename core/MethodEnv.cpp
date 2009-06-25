@@ -179,7 +179,7 @@ namespace avmplus
 
 	failure:
 		#ifdef AVMPLUS_VERBOSE
-		// core->console << "checktype failed " << t << " <- " << atom << "\n";
+		//toplevel->core()->console << "checktype failed " << t << " <- " << toplevel->core()->format(atom) << "\n";
 		#endif
 		toplevel->throwTypeError(kCheckTypeFailedError, toplevel->core()->atomToErrorString(atom), toplevel->core()->toErrorString(t));
 		return NULL;	// unreachable
