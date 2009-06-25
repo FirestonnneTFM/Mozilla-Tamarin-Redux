@@ -151,8 +151,6 @@ class RuntestBase:
         self.parseOptions()
         self.setTimestamp()
         self.checkPath()
-        if re.search('(_arm.exe|_arm_d.exe|Windows Mobile)',self.avm)!=None:
-            self.config='arm-winmobile-emulator-tvm'
         if not self.config:
             self.determineConfig()
         if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
