@@ -217,20 +217,12 @@ namespace avmplus
 		if (flags & INCLUDE_INTERFACES)
 		{
 			interfaces = new_array();
-			// our TraitsBindings only includes our own interfaces, not any we might have inherited, 
-			// so walk the tree. there might be redundant interfaces listed in the inheritance, 
-			// so use a list to remove dupes
-			List<Traitsp> unique(gc);
-			for (TraitsBindingsp tbi = tb; tbi; tbi = tbi->base) 
+			for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
 			{
-				for (uint32_t i = 0; i < tbi->interfaceCapacity; ++i)
+				Traitsp ti = tb->getInterface(i);
+				if (ti && ti->isInterface)
 				{
-					Traitsp ti = tbi->getInterface(i);
-					if (ti && ti->isInterface && unique.indexOf(ti) < 0)
-					{
-						unique.add(ti);
-						pushstr(interfaces, describeClassName(ti));
-					}
+					pushstr(interfaces, describeClassName(ti));
 				}
 			}
 		}
@@ -260,22 +252,18 @@ namespace avmplus
 			addBindings(mybind, tb, flags);
 
 			// Don't want interface methods, so post-process and wipe out any
-			// bindings that were added. Be sure to walk up the inheritance
-			// chain to get interfaces implemented by our ancestors but not us.
-			for (TraitsBindingsp bb = tb; bb; bb = bb->base) 
+			// bindings that were added.
+			for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
 			{
-				for (uint32_t i = 0; i < bb->interfaceCapacity; ++i)
+				Traitsp ti = tb->getInterface(i);
+				if (ti && ti->isInterface)
 				{
-					Traitsp ti = bb->getInterface(i);
-					if (ti && ti->isInterface)
+					TraitsBindingsp tbi = ti->getTraitsBindings();
+					StTraitsBindingsIterator iter(tbi);
+					while (iter.next())
 					{
-						TraitsBindingsp tbi = ti->getTraitsBindings();
-						StTraitsBindingsIterator iter(tbi);
-						while (iter.next())
-						{
-							if (!iter.key()) continue;
-							mybind->add(iter.key(), iter.ns(), BIND_NONE);
-						}
+						if (!iter.key()) continue;
+						mybind->add(iter.key(), iter.ns(), BIND_NONE);
 					}
 				}
 			}

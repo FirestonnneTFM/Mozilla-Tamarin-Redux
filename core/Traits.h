@@ -186,8 +186,6 @@ namespace avmplus
 
 	public:
 		
-		void addOneInterface(const Traits* intf);
-
 		static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameHashtable* _bindings, uint32_t slotCount, uint32_t methodCount, uint32_t interfaceCount);
 
 		void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const;
@@ -205,7 +203,7 @@ namespace avmplus
 		}
 		inline Traitsp getInterface(uint32 i) const { AvmAssert(i < interfaceCapacity); return getInterfaces()[i].t; }
 		inline MethodInfo* getMethod(uint32_t i) const { AvmAssert(i < methodCount); return getMethods()[i].f; }
-		bool containsInterface(Traitsp t) const;
+		inline bool containsInterface(Traitsp t) const { return findInterfaceAddr(t)->t != NULL; }
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
 		Binding findBinding(Stringp name, NamespaceSetp nsset) const;
@@ -245,13 +243,13 @@ namespace avmplus
 			getMethods()[i].f = f;
 		}
 
-		void addOneInterface(Traitsp intf);
-		InterfaceInfo* findInterfaceAddr(Traitsp intf);
+		bool addOneInterface(Traitsp intf);
+		InterfaceInfo* FASTCALL findInterfaceAddr(Traitsp intf);
 		inline const InterfaceInfo* findInterfaceAddr(Traitsp intf) const { return const_cast<TraitsBindings*>(this)->findInterfaceAddr(intf); }
 		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
-		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel);
-
+		void fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel);
+		
 	// ------------------------ DATA SECTION BEGIN
 		public:		const Traitsp					owner;
 		public:		const TraitsBindingsp			base; 
@@ -382,8 +380,8 @@ namespace avmplus
 
 		TraitsPosPtr traitsPosStart() const;
 		TraitsPosPtr skipToInstanceInitPos(TraitsPosPtr pos) const;
-		void countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_NonGCObjects>& seen) const;
-		void addInterfaces(TraitsBindings* tb) const;
+		void countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_NonGCObjects>& seen);
+		bool addInterfaces(TraitsBindings* tb, const Toplevel* toplevel);
 		Binding getOverride(TraitsBindingsp basetb, Namespacep ns, Stringp name, int tag, const Toplevel *toplevel) const;
 
 	private:
@@ -495,6 +493,10 @@ namespace avmplus
 		inline Namespacep ns() const { return _ns; }
 		inline Stringp name() const { return _name; }
 		void set_names(Namespacep p_ns, Stringp p_name) { _ns = p_ns; _name = p_name; }
+		
+		// this returns true iff we implement an interface that is not implemented by our parent.
+		// essential for efficient building of IMT thunks.
+		inline bool implementsNewInterfaces() const { AvmAssert(linked); return m_implementsNewInterfaces; }
 
 	// ------------------------ DATA SECTION BEGIN
 	public:		AvmCore* const			core;		// @todo remove, can get from pool->core
@@ -532,6 +534,7 @@ namespace avmplus
 	public:		uint32_t				commonBase:1;				// used for Verify::findCommonBase */
 	public:		uint32_t				isDictionary:1;				// how we implement dictionary or strict style lookups
 	public:		uint32_t				hasCustomConstruct:1;		// does this type use the default ClassClosure::construct method or not?
+	private:	uint32_t				m_implementsNewInterfaces:1; // does this type implement interfaces not implemented by its base?
 										// If the traits are for a type that implements its own construct method, this must be set to true.  
 										// If it is false, the JIT will early bind to the AS defined constructor. 
 	// ------------------------ DATA SECTION END
