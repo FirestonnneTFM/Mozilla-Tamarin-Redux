@@ -147,8 +147,7 @@ namespace avmplus
 		struct catch_info
 		{
 			const uint8_t* pc;			// address in ABC code to trigger use of this structure
-			void *fixup_loc;		// points to a location to update
-			bool is_target;			// The 'target' field is a intptr_t, not an int (sigh).
+			int32_t *fixup_loc;			// points to a location to update in an ExceptionHandler
 			catch_info* next;
 		};
 		
