@@ -50,7 +50,6 @@
     ForIn_3( { length:4, company:"netscape", year:2000, 0:"zero" } );
 
 //    ForIn_6({ length:4, company:"netscape", year:2000, 0:"zero" });
-//    ForIn_7({ length:4, company:"netscape", year:2000, 0:"zero" });
     ForIn_8({ length:4, company:"netscape", year:2000, 0:"zero" });
 
     test();
@@ -316,41 +315,6 @@
             true,
             result3 == 0 );
     }
-
-    function ForIn_7( object ) {
-        var result1 = 0;
-        var result2 = 0;
-        var result3 = 0;
-        var result4 = 0;
-        var i = 0;
-        var property = new Array();
-
-        //bigredbird:
-            for each( property[i++] in object ) {
-                result2++;
-                continue;
-                result4++;
-            }
-
-        testcases[tc++] = new TestCase(
-            SECTION,
-            "verify statements in for loop are evaluated",
-            true,
-            result2 == i );
-
-        testcases[tc++] = new TestCase(
-            SECTION,
-            "verify break out of labeled for each in loop",
-            true,
-            result4 == 0 );
-
-        testcases[tc++] = new TestCase(
-            SECTION,
-            "verify break out of labeled block",
-            true,
-            result3 == 1 );
-    }
-
 
     function ForIn_8( object ) {
         var checkBreak = "pass";

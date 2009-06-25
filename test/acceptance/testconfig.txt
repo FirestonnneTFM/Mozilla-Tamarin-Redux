@@ -200,3 +200,9 @@ ecma3/Unicode/uE000_PrivateUseArea, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-de
 ecma3/Unicode/uAC00_HangulSyllables, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 mops/mops, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 mmgc/heap_stress,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+
+####################
+# verifier
+####################
+ecma3/Statements/eforin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
+as3/Statements/for-each-in/eforeachin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
