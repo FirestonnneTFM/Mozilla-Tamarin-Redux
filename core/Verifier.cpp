@@ -2823,7 +2823,7 @@ namespace avmplus
 				{
 					core->console << "            exception["<<i<<"] from="<< handler->from
 						<< " to=" << handler->to
-						<< " target=" << (uint64_t)handler->target 
+						<< " target=" << handler->target 
 						<< " type=" << t
 						<< " name=";
 					if (name_index != 0)
@@ -2861,7 +2861,7 @@ namespace avmplus
 				WB(core->GetGC(), table, &handler->scopeTraits, scopeTraits);
 
 				
-				getFrameState((int)handler->target)->targetOfBackwardsBranch = true;
+				getFrameState(handler->target)->targetOfBackwardsBranch = true;
 
 				handler++;
 			}

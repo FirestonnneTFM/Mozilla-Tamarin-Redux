@@ -4884,14 +4884,14 @@ namespace avmplus
 
             int handler_count = info->abc_exceptions()->exception_count;
 			// jump to catch handler
-            LIns *handler_target = loadIns(LIR_ldp, offsetof(ExceptionHandler, target), handler);
+            LIns *handler_target = loadIns(LIR_ld, offsetof(ExceptionHandler, target), handler);
 			// we dont have LIR_ji yet, so do a compare & branch to each possible target.
 			for (int i=0; i < handler_count && !outOMem(); i++)
 			{
 				ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
-                int handler_pc_off = (int)h->target;
+                int handler_pc_off = h->target;
                 if (i+1 < handler_count) {
-                    branchIns(LIR_jt, binaryIns(LIR_peq, handler_target, InsConstPtr((void*)handler_pc_off)), handler_pc_off);
+                    branchIns(LIR_jt, binaryIns(LIR_eq, handler_target, InsConst(handler_pc_off)), handler_pc_off);
                 } else {
                     branchIns(LIR_j, 0, handler_pc_off);
                 }

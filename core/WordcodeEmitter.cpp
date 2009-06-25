@@ -240,18 +240,15 @@ namespace avmplus
 			
 			p[0] = new catch_info;
 			p[0]->pc = code_start + old_table->exceptions[i].from;
-			p[0]->is_target = false;
-			p[0]->fixup_loc = (void*)&(new_table->exceptions[i].from);
+			p[0]->fixup_loc = &(new_table->exceptions[i].from);
 			
 			p[1] = new catch_info;
 			p[1]->pc = code_start + old_table->exceptions[i].to;
-			p[1]->is_target = false;
-			p[1]->fixup_loc = (void*)&(new_table->exceptions[i].to);
+			p[1]->fixup_loc = &(new_table->exceptions[i].to);
 			
 			p[2] = new catch_info;
 			p[2]->pc = code_start + old_table->exceptions[i].target;
-			p[2]->is_target = true;
-			p[2]->fixup_loc = (void*)&(new_table->exceptions[i].target);
+			p[2]->fixup_loc = &(new_table->exceptions[i].target);
 			
 			if (p[0]->pc > p[1]->pc) {
 				catch_info* tmp = p[0];
@@ -322,10 +319,7 @@ namespace avmplus
 		while (exception_fixes != NULL && exception_fixes->pc <= pc) {
 			AvmAssert(exception_fixes->pc == pc);
 			exceptions_consumed = true;
-			if (exception_fixes->is_target)
-				*(intptr_t*)(exception_fixes->fixup_loc) = (intptr_t)(buffer_offset + (dest - buffers->data));
-			else
-				*(int*)(exception_fixes->fixup_loc) = (int)(buffer_offset + (dest - buffers->data));
+			*exception_fixes->fixup_loc = (int)(buffer_offset + (dest - buffers->data));
 			catch_info* tmp = exception_fixes;
 			exception_fixes = exception_fixes->next;
 			delete tmp;
