@@ -1967,7 +1967,7 @@ bail:
 	{
 		int *p = (int*)GetRealPointer ( o ) ;
 		int size = *p++;
-		*p++; // skip old trace index slot
+		p++; // skip old trace index slot
 		//if(*(p+1) == 0xcacacaca || *(p+1) == 0xbabababa) {
 			// bail, object was deleted
 		//	return;
