@@ -870,7 +870,7 @@ class RuntestBase:
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
             for t in testList:
                 testnum -= 1
-                o = self.runTest((t, testnum))
+                o = self.runTestPrep((t, testnum))
                 self.printOutput(None, o)
         else: # run using threads
             #Assign test numbers
@@ -879,7 +879,7 @@ class RuntestBase:
             for i,t in enumerate(testList):
               testsTuples.append([t,testsLen-i])
             # generate threadpool
-            requests = threadpool.makeRequests(self.runTest, testsTuples, self.printOutput)
+            requests = threadpool.makeRequests(self.runTestPrep, testsTuples, self.printOutput)
             main = threadpool.ThreadPool(self.threads)
             # que requests
             [main.putRequest(req) for req in requests]
@@ -969,7 +969,7 @@ class RuntestBase:
                 return flines
         return
                                                 
-    def runTest(self, testAndNum):
+    def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
         testnum = testAndNum[1]
         outputCalls = [] #queue all output calls so that output is written in a block
@@ -979,7 +979,8 @@ class RuntestBase:
         lunpass = 0
         ltimeout = 0
         lassert = 0
-        starttime=time()
+        extraVmArgs = ''
+        abcargs = ''
         if ast.startswith('./'):
             ast=ast[2:]
         
@@ -1022,7 +1023,6 @@ class RuntestBase:
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
             
-        
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName):
             os.unlink(testName)
@@ -1055,16 +1055,46 @@ class RuntestBase:
             for incfile in incfiles:
                 testName=incfile+" "+testName
         
-        if isfile("%s.avm_args" % ast):
-            testName = " %s %s" % (string.replace(open("%s.avm_args" % ast).readline(), "$DIR", dir), testName)
+        # read any extra avm arguments, each line will execute the avm with those args
+        if isfile('%s.avm_args' % ast):
+            avm_args_file = open('%s.avm_args' % ast,'r')
+            index = 0
+            for line in avm_args_file:
+                line = line.strip()
+                if line.startswith('#'):
+                    continue
+                index += 1
+                line = string.replace(line, "$DIR", dir)
+                if line.find('--') != -1:
+                    (extraVmArgs, abcargs) = line.split('--')
+                else:
+                    extraVmArgs = line
+                outputCalls.extend(self.runTest(ast, root, testName, '%s.%s' % (testnum, index), settings, extraVmArgs, abcargs))
+        else:
+            outputCalls.extend(self.runTest(ast, root, testName, testnum, settings))
+        
+        return outputCalls
+        
+    def runTest(self, ast, root, testName, testnum, settings, extraVmArgs='', abcargs=''):
+        outputCalls = []
+        lpass = 0
+        lfail = 0
+        lexpfail = 0
+        lunpass = 0
+        ltimeout = 0
+        lassert = 0
+        starttime=time()
         
         if ast.endswith(self.abcasmExt):
             # make sure util file has been compiled
             if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
                 self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
-            (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, self.abcasmShell+'.abc', testName))
+            (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, self.abcasmShell+'.abc', testName))
         else:
-            (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
+            if abcargs:
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs))
+            else:
+                (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName))
             
         if f == "timedOut":
             outputCalls.append((self.fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % self.testTimeOut, self.timeoutmsgs)))
@@ -1077,7 +1107,7 @@ class RuntestBase:
                     outputCalls.append((self.verbose_print,(line.strip(),)))
                     if 'Assertion failed:' in line:
                         lassert += 1
-                        outputCalls.append((self.fail,(testName, line, self.assertmsgs)))
+                        outputCalls.append((self.fail,(testName+extraVmArgs, line, self.assertmsgs)))
                     testcase=''
                     if len(line)>9:
                         testcase=line.strip()
@@ -1099,7 +1129,7 @@ class RuntestBase:
                             lexpfail += 1
                         else:
                             lfail += 1
-                            outputCalls.append((self.fail,(testName, line, self.failmsgs)))
+                            outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
             except:
                 print 'exception running avm'
                 exit(1)
@@ -1141,9 +1171,9 @@ class RuntestBase:
         else:
             outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
         if self.show_time:
-            outputCalls.insert(0,(self.js_print,('%d running %s time %.1f' % (testnum, ast,time()-starttime), '<b>', '</b><br/>')));
+            outputCalls.insert(0,(self.js_print,('%s running %s %s %s time %.1f' % (testnum, ast, extraVmArgs, abcargs, time()-starttime), '<b>', '</b><br/>')));
         else:
-            outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+            outputCalls.insert(0,(self.js_print,('%s running %s %s %s' % (testnum, ast, extraVmArgs, abcargs), '<b>', '</b><br/>')));
         
 
         return outputCalls
