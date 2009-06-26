@@ -1042,13 +1042,15 @@ class RuntestBase:
                     else:
                         lpass += 1
                         outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
-                    self.allfails += lfail
-                    self.allpasses += lpass
                     outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
                     return outputCalls
                 else:
                     lfail += 1
                     outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
+        
+        self.allfails += lfail
+        self.allpasses += lpass
+        
         if self.runSource or self.eval:
             incfiles=self.build_incfiles(testName)
             incfiles.append("shell" + self.sourceExt)
