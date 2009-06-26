@@ -45,6 +45,9 @@
 # the common shell variables are: avmr, avmrd, avmd, avmd   (r=release, rd=release-debugger, d=debug, dd=debug-debugger)
 #
 
+# Bug https://bugzilla.mozilla.org/show_bug.cgi?id=500195
+cd ./acceptance;./runtests.py --nohtml ecma3/TypeConversion/e9_3_1_3_rt.as
+
 cd ./acceptance;./runtests.py --nohtml as3/AbcDecoder/simple.as
 cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp as3/AbcDecoder/simple.as
 cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit as3/AbcDecoder/simple.as
