@@ -45,71 +45,71 @@
 # the common shell variables are: avmr, avmrd, avmd, avmd   (r=release, rd=release-debugger, d=debug, dd=debug-debugger)
 #
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp as3/AbcDecoder/simple.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit as3/AbcDecoder/simple.as
+cd ./acceptance;./runtests.py --nohtml as3/AbcDecoder/simple.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp as3/AbcDecoder/simple.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit as3/AbcDecoder/simple.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/Date/e15_9_2_2_4.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_2_2_4.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/Date/e15_9_2_2_4.as
+cd ./acceptance;./runtests.py --nohtml ecma3/Date/e15_9_2_2_4.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_2_2_4.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/Date/e15_9_2_2_4.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/Date/e15_9_2_2_5.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_2_2_5.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/Date/e15_9_2_2_5.as
+cd ./acceptance;./runtests.py --nohtml ecma3/Date/e15_9_2_2_5.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_2_2_5.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/Date/e15_9_2_2_5.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml as3/Vector/reverse.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp as3/Vector/reverse.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit as3/Vector/reverse.as
+cd ./acceptance;./runtests.py --nohtml as3/Vector/reverse.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp as3/Vector/reverse.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit as3/Vector/reverse.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml as3/ShellClasses/ByteArray.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp as3/ShellClasses/ByteArray.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit as3/ShellClasses/ByteArray.as
+cd ./acceptance;./runtests.py --nohtml as3/ShellClasses/ByteArray.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp as3/ShellClasses/ByteArray.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit as3/ShellClasses/ByteArray.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/FunctionObjects/e15_3_1_1_1_rt.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/FunctionObjects/e15_3_1_1_1_rt.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/FunctionObjects/e15_3_1_1_1_rt.as
+cd ./acceptance;./runtests.py --nohtml ecma3/FunctionObjects/e15_3_1_1_1_rt.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/FunctionObjects/e15_3_1_1_1_rt.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/FunctionObjects/e15_3_1_1_1_rt.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/Date/e15_9_2_2_6.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_2_2_6.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/Date/e15_9_2_2_6.as
+cd ./acceptance;./runtests.py --nohtml ecma3/Date/e15_9_2_2_6.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_2_2_6.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/Date/e15_9_2_2_6.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml e4x/Statements/e12_1.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp e4x/Statements/e12_1.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit e4x/Statements/e12_1.as
+cd ./acceptance;./runtests.py --nohtml e4x/Statements/e12_1.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp e4x/Statements/e12_1.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit e4x/Statements/e12_1.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/Unicode/u0000_BasicLatin.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/Unicode/u0000_BasicLatin.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/Unicode/u0000_BasicLatin.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/Unicode/u0000_BasicLatin.as
+cd ./acceptance;./runtests.py --nohtml ecma3/Unicode/u0000_BasicLatin.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/Unicode/u0000_BasicLatin.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/Date/e15_9_5_12_1.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_5_12_1.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/Date/e15_9_5_12_1.as
+cd ./acceptance;./runtests.py --nohtml ecma3/Date/e15_9_5_12_1.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_5_12_1.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/Date/e15_9_5_12_1.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/Date/e15_9_5_34_1.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_5_34_1.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/Date/e15_9_5_34_1.as
+cd ./acceptance;./runtests.py --nohtml ecma3/Date/e15_9_5_34_1.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/Date/e15_9_5_34_1.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/Date/e15_9_5_34_1.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml mmgc/memstats.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp mmgc/memstats.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit mmgc/memstats.as
+cd ./acceptance;./runtests.py --nohtml mmgc/memstats.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp mmgc/memstats.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit mmgc/memstats.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml as3/DescribeType/describeType.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp as3/DescribeType/describeType.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit as3/DescribeType/describeType.as
+cd ./acceptance;./runtests.py --nohtml as3/DescribeType/describeType.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp as3/DescribeType/describeType.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit as3/DescribeType/describeType.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/TypeConversion/e9_7.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/TypeConversion/e9_7.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/TypeConversion/e9_7.as
+cd ./acceptance;./runtests.py --nohtml ecma3/TypeConversion/e9_7.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/TypeConversion/e9_7.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/TypeConversion/e9_7.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml as3/MethodClosures/MethodClosureFunc.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp as3/MethodClosures/MethodClosureFunc.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit as3/MethodClosures/MethodClosureFunc.as
+cd ./acceptance;./runtests.py --nohtml as3/MethodClosures/MethodClosureFunc.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp as3/MethodClosures/MethodClosureFunc.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit as3/MethodClosures/MethodClosureFunc.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml ecma3/Number/tostring_001.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp ecma3/Number/tostring_001.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit ecma3/Number/tostring_001.as
+cd ./acceptance;./runtests.py --nohtml ecma3/Number/tostring_001.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp ecma3/Number/tostring_001.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit ecma3/Number/tostring_001.as
 
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml regress/bug_460872.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Dinterp regress/bug_460872.as
-cd ./acceptance;./runtests.py --config=arm-winmobile-tvm-release-arm --nohtml --vmargs=-Ojit regress/bug_460872.as
+cd ./acceptance;./runtests.py --nohtml regress/bug_460872.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Dinterp regress/bug_460872.as
+cd ./acceptance;./runtests.py --nohtml --vmargs=-Ojit regress/bug_460872.as
 
