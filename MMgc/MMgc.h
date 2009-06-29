@@ -61,6 +61,13 @@
     #define MMGC_RC_HISTORY
 #endif
 
+// Policy profiler settings (for MMgc development mostly)
+
+// Enable to help profile GC policy - some assembly required.  With this enabled, GCLog
+// output goes to a file (set up in the GCHeap.cpp constructor).  Enabling this and 
+// MMGC_MEMORY_INFO at the same time is probably not a good idea.
+//#define MMGC_POLICY_PROFILING
+
 #include "GCDebug.h"
 #include "GCLog.h"
 

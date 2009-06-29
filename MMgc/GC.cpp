@@ -89,15 +89,6 @@ void sparc_clean_windows()
 }
 #endif
 
-// Latency profiling logs information about the latency of each GC phase with each line prefixed by [latency]
-//#define MMGC_PROFILE_LATENCY
-
-#ifdef MMGC_PROFILE_LATENCY
-	#define LATENCY_PROFILING_ONLY(x) x
-#else
-	#define LATENCY_PROFILING_ONLY(x)
-#endif
-
 // Werner mode is a back pointer chain facility for Relase mode.
 //
 // *** NOTE ON THREAD SAFETY ***
@@ -131,6 +122,12 @@ namespace MMgc
 	const bool dumpSizeClassState = false;
 #endif
 
+#ifdef MMGC_POLICY_PROFILING
+	// This is ad hoc but OK for the use it's put to
+	static uint64_t could_be_pointer = 0;
+	static uint64_t actually_is_pointer = 0;
+#endif
+	
 #ifndef max	// good grief
 	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
 #endif
@@ -142,13 +139,18 @@ namespace MMgc
 		, timeFinalRootAndStackScan(0)
 		, timeFinalizeAndSweep(0)
 		, timeReapZCT(0)
+		, timeInLastCollection(0)
+		, timeEndToEndLastCollection(0)
 		, timeMaxStartIncrementalMark(0)
 		, timeMaxIncrementalMark(0)
 		, timeMaxFinalRootAndStackScan(0)
 		, timeMaxFinalizeAndSweep(0)
 		, timeMaxReapZCT(0)
-		, timeMaxLatency(0)
-		, eventMaxLatency(NO_EVENT)
+		, timeMaxStartIncrementalMarkLastCollection(0)
+		, timeMaxIncrementalMarkLastCollection(0)
+		, timeMaxFinalRootAndStackScanLastCollection(0)
+		, timeMaxFinalizeAndSweepLastCollection(0)
+		, timeMaxReapZCTLastCollection(0)
 		, countStartIncrementalMark(0)
 		, countIncrementalMark(0)
 		, countFinalRootAndStackScan(0)
@@ -158,6 +160,7 @@ namespace MMgc
 		, gc(gc)
 		, heap(heap)
 		, timeEndOfLastIncrementalMark(0)
+		, timeStartOfLastCollection(0)
 		, timeEndOfLastCollection(0)
 		, blocksAllocatedSinceLastCollection(0)
 		, blocksDeallocatedSinceLastCollection(0)
@@ -169,6 +172,9 @@ namespace MMgc
 		, start_event(NO_EVENT)
 		, collectionThreshold(256) // 4KB blocks, that is, 1MB
 		, fullCollectionQueued(false)
+#ifdef MMGC_POLICY_PROFILING
+		, bytesUsedBeforeSweep(0)
+#endif
 	{
 	}
 	
@@ -212,6 +218,12 @@ namespace MMgc
 		return VMPI_getPerformanceCounter();
 	}
 
+#ifdef MMGC_POLICY_PROFILING
+	inline double GCPolicyManager::ticksToMillis(uint64_t ticks) {
+		return double(ticks) * 1000.0 / double(VMPI_getPerformanceFrequency());
+	}
+#endif
+
 	inline bool GCPolicyManager::queryAllocationLimitReached() {
 		return (blocksAllocatedSinceLastCollection >= blocksDeallocatedSinceLastCollection &&
 				(blocksAllocatedSinceLastCollection - blocksDeallocatedSinceLastCollection) * freeSpaceDivisor() >= blocksOwned);
@@ -225,7 +237,7 @@ namespace MMgc
 		return now() - timeEndOfLastCollection > interCollectionTicks();
 	}
 	
-	uint64_t GCPolicyManager::incrementalMarkMilliseconds() {
+	uint32_t GCPolicyManager::incrementalMarkMilliseconds() {
 		return 5;											// milliseconds
 	}
 
@@ -300,10 +312,23 @@ namespace MMgc
 		switch (ev) {
 			case START_StartIncrementalMark:
 				heap->gcManager.signalStartCollection(gc);
+				timeStartOfLastCollection = now();
+				timeInLastCollection = 0;
+				timeMaxStartIncrementalMarkLastCollection = 0;
+				timeMaxIncrementalMarkLastCollection = 0;
+				timeMaxFinalRootAndStackScanLastCollection = 0;
+				timeMaxFinalizeAndSweepLastCollection = 0;
+				timeMaxReapZCTLastCollection = 0;
+				goto common_actions;
 			case START_IncrementalMark:
 			case START_FinalRootAndStackScan:
 			case START_FinalizeAndSweep:
+#ifdef MMGC_POLICY_PROFILING
+				bytesUsedBeforeSweep = gc->GetBytesInUse();
+#endif
+				goto common_actions;
 			case START_ReapZCT:
+			common_actions:
 				start_time = now();
 				start_event = ev;
 				return;	// to circumvent resetting of start_event below
@@ -314,55 +339,83 @@ namespace MMgc
 		
 		uint64_t t = now();
 		uint64_t elapsed = t - start_time;  
-		LATENCY_PROFILING_ONLY( const char *name = NULL; )
 		
 		switch (ev) {
 			case END_StartIncrementalMark:
-				LATENCY_PROFILING_ONLY( name = "StartIncrementalMark"; )
 				countStartIncrementalMark++;
 				timeStartIncrementalMark += elapsed;
 				timeMaxStartIncrementalMark = max(timeMaxStartIncrementalMark, elapsed);
+				timeMaxStartIncrementalMarkLastCollection = max(timeMaxStartIncrementalMarkLastCollection, elapsed);
 				break;
 			case END_FinalRootAndStackScan:
-				LATENCY_PROFILING_ONLY( name = "FinalRootAndStackScan"; )
 				countFinalRootAndStackScan++;
 				timeFinalRootAndStackScan += elapsed;
 				timeMaxFinalRootAndStackScan = max(timeMaxFinalRootAndStackScan, elapsed);
+				timeMaxFinalRootAndStackScanLastCollection = max(timeMaxFinalRootAndStackScanLastCollection, elapsed);
 				break;
 			case END_ReapZCT:
-				LATENCY_PROFILING_ONLY( name = "ReapZCT"; )
 				countReapZCT++;
 				timeReapZCT += elapsed;
 				timeMaxReapZCT = max(timeMaxReapZCT, elapsed);
+				timeMaxReapZCTLastCollection = max(timeMaxReapZCTLastCollection, elapsed);
 				break;
 			case END_IncrementalMark:
-				LATENCY_PROFILING_ONLY( name = "IncrementalMark"; )
 				countIncrementalMark++;
 				timeIncrementalMark += elapsed;
 				timeMaxIncrementalMark = max(timeMaxIncrementalMark, elapsed);
+				timeMaxIncrementalMarkLastCollection = max(timeMaxIncrementalMarkLastCollection, elapsed);
 				timeEndOfLastIncrementalMark = t;
 				break;
 			case END_FinalizeAndSweep:
-				LATENCY_PROFILING_ONLY( name = "FinalizeAndSweep"; )
 				countFinalizeAndSweep++;
 				timeFinalizeAndSweep += elapsed;
 				timeMaxFinalizeAndSweep = max(timeMaxFinalizeAndSweep, elapsed);
+				timeMaxFinalizeAndSweepLastCollection = max(timeMaxFinalizeAndSweepLastCollection, elapsed);
 				timeEndOfLastCollection = t;
+				timeEndToEndLastCollection = timeEndOfLastCollection - timeStartOfLastCollection;
 				blocksAllocatedSinceLastCollection = 0;
 				blocksDeallocatedSinceLastCollection = 0;
 				heap->gcManager.signalEndCollection(gc);
 				break;
 		}
-		if (elapsed > timeMaxLatency) {
-			timeMaxLatency = elapsed;
-			eventMaxLatency = ev;
+		if (ev != END_ReapZCT)
+			timeInLastCollection += elapsed;
+#ifdef MMGC_POLICY_PROFILING
+		if (ev == END_FinalizeAndSweep)
+		{
+			GCLog("[HISTORY] GC #%u heap-total=%u heap-used=%u gc-total=%u gc-used=%u\n",
+				  (unsigned)countFinalizeAndSweep,
+				  (unsigned)heap->GetTotalHeapSize(), (unsigned)(heap->GetTotalHeapSize() - heap->GetFreeHeapSize()), 
+				  (unsigned)gc->GetNumBlocks(), (unsigned)gc->GetBytesInUse()/4096);
+			GCLog("[HISTORY] Heap now: bytes-before-sweep (effective HL)=%uK actual H=%uK computed L=%.2f\n", 
+				  unsigned(bytesUsedBeforeSweep/1024), 
+				  unsigned(gc->GetBytesInUse()/1024),
+				  double(bytesUsedBeforeSweep)/double(gc->GetBytesInUse()));
+			GCLog("[HISTORY] Time last: IN=%.1f E2E=%.1f %.2f%%\n", 
+				  ticksToMillis(timeInLastCollection),
+				  ticksToMillis(timeEndToEndLastCollection),
+				  double(timeInLastCollection) * 100.0 / double(timeEndToEndLastCollection));
+			GCLog("[HISTORY] Pause last: SIM=%.1f IM=%.1f FRSS=%.1f FS=%.1f RZCT=%.1f\n",
+				  ticksToMillis(timeMaxStartIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxFinalRootAndStackScanLastCollection),
+				  ticksToMillis(timeMaxFinalizeAndSweepLastCollection),
+				  ticksToMillis(timeMaxReapZCTLastCollection));
+			GCLog("[HISTORY] Time total: all=%.1f SIM=%.1f IM=%.1f FRSS=%.1f FS=%.1f RZCT=%.1f\n",
+				  ticksToMillis(timeStartIncrementalMark + timeIncrementalMark + timeFinalRootAndStackScan + timeFinalizeAndSweep + timeReapZCT),
+				  ticksToMillis(timeStartIncrementalMark),
+				  ticksToMillis(timeIncrementalMark),
+				  ticksToMillis(timeFinalRootAndStackScan),
+				  ticksToMillis(timeFinalizeAndSweep),
+				  ticksToMillis(timeReapZCT));
+			GCLog("[HISTORY] Pause total: SIM=%.1f IM=%.1f FRSS=%.1f FS=%.1f RZCT=%.1f\n",
+				  ticksToMillis(timeMaxStartIncrementalMark),
+				  ticksToMillis(timeMaxIncrementalMark),
+				  ticksToMillis(timeMaxFinalRootAndStackScan),
+				  ticksToMillis(timeMaxFinalizeAndSweep),
+				  ticksToMillis(timeMaxReapZCT));
 		}
-#ifdef MMGC_PROFILE_LATENCY
-		char buf[100];
-		VMPI_snprintf(buf, sizeof(buf), "[latency] %s %.2f\n", name, ((double)elapsed * 1000.0 / (double)VMPI_getPerformanceFrequency()));
-		buf[sizeof(buf)-1] = 0;
-		VMPI_Log(buf);
-#endif
+#endif // MMGC_POLICY_PROFILING
 	}
 	
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
@@ -2076,7 +2129,7 @@ bail:
 		}
 		GCLog("[mem] \tmark increments %d\n", marks());
 		GCLog("[mem] \tsweeps %d mb/s\n", sweeps);
-
+		
 		size_t total_overhead = 0;
 		size_t total_internal_waste = 0;
 		GCAlloc** allocators[] = {containsPointersRCAllocs, containsPointersAllocs, noPointersAllocs};
@@ -2099,6 +2152,34 @@ bail:
 			GCLog("Internal Wastage %u bytes (%u kb)\n", (uint32_t)total_internal_waste, (uint32_t)(total_internal_waste>>10));
 #endif
 	}
+
+#ifdef MMGC_MEMORY_PROFILER
+	// It only makes sense to call this after a END_FinalizeAndSweep event and
+	// before the next START_StartIncrementalMark event.
+	void GC::DumpPauseInfo()
+	{
+		if (!nogc && incremental) {
+			GCLog("[mem] \tpauses in GC, most recent (ms): startmark=%.2f incrementalmark=%.2f finalscan=%.2f finishmark=%.2f reap=%.2f\n",
+				  double(ticksToMicros(policy.timeMaxStartIncrementalMarkLastCollection)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxIncrementalMarkLastCollection)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxFinalRootAndStackScanLastCollection)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxFinalizeAndSweepLastCollection)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxReapZCTLastCollection)) / 1000.0);
+			GCLog("[mem] \tpauses in GC, entire run (ms): startmark=%.2f incrementalmark=%.2f finalscan=%.2f finishmark=%.2f reap=%.2f\n",
+				  double(ticksToMicros(policy.timeMaxStartIncrementalMark)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxIncrementalMark)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxFinalRootAndStackScan)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxFinalizeAndSweep)) / 1000.0,
+				  double(ticksToMicros(policy.timeMaxReapZCT)) / 1000.0);
+			GCLog("[mem] \tpause clustering in GC, most recent: gctime=%.2fms end-to-end=%.2fms;  mutator efficacy: %.2f%%\n", 
+				  double(ticksToMicros(policy.timeInLastCollection)) / 1000.0,
+				  double(ticksToMicros(policy.timeEndToEndLastCollection)) / 1000.0,
+				  policy.timeInLastCollection == 0 ? // Sometimes there are no collections
+				  100.0 :
+				  double(policy.timeEndToEndLastCollection - policy.timeInLastCollection) * 100.0 / double(policy.timeEndToEndLastCollection));
+		}
+	}
+#endif // MMGC_MEMORY_PROFILER
 
 #ifdef _DEBUG
 
@@ -2762,6 +2843,10 @@ bail:
 			if(val < _memStart || val >= _memEnd)
 				continue;
 
+#ifdef MMGC_POLICY_PROFILING
+			could_be_pointer+=sizeof(uintptr_t);
+#endif
+
 			// normalize and divide by 4K to get index
 			int bits = GetPageMapValue(val); 
 						
@@ -2801,6 +2886,9 @@ bail:
 				}
 #endif
 
+#ifdef MMGC_POLICY_PROFILING
+				actually_is_pointer+=sizeof(uintptr_t);
+#endif
 				// inline IsWhite/SetBit
 				// FIXME: see if using 32 bit values is faster
 				uint32_t *pbits = &block->GetBits()[itemNum>>3];
@@ -2869,6 +2957,9 @@ bail:
 					continue;
 #endif
 
+#ifdef MMGC_POLICY_PROFILING
+				actually_is_pointer+=sizeof(uintptr_t);
+#endif
 				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetBlockHeader(item);
 				if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
 				{
@@ -3019,6 +3110,11 @@ bail:
 		collecting = false;
 		marking = false;
 		policy.signal(GCPolicyManager::END_FinalizeAndSweep);	// garbage collection is finished
+#ifdef MMGC_MEMORY_PROFILER
+		if(heap->Config().autoGCStats)
+			DumpPauseInfo();
+#endif
+		
 	}
 
 	int GC::IsWhite(const void *item)
