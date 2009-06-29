@@ -107,6 +107,8 @@ export SHELLABC=$basedir/shell/$shellABC
 echo ""
 echo AVM=$AVM
 echo "`$AVM`"
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
 echo ""
 
 

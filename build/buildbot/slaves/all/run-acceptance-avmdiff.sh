@@ -149,8 +149,10 @@ then
         echo "ERROR: $AVM not found"
         exit 1
     }
-    echo "`$AVM`"
     chmod +x $AVM
+    echo "`$AVM`"
+    echo; echo "AVM built with the following options:"
+    echo "`$AVM -Dversion`"
 else
     py=$PYTHONWIN
     pywin=`cygpath -w $PYTHONWIN`
