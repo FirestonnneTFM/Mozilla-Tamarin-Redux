@@ -58,6 +58,10 @@
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release}_ppc
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release}_ppc ${shell_release}_ppc"
 
+# Release-wordcode
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release_wordcode}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_wordcode}_ppc
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_wordcode}_ppc ${shell_release_wordcode}_ppc"
+
 # Release_Debugger
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_debugger}_ppc ${shell_release_debugger}_ppc"

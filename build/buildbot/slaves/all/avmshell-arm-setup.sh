@@ -49,11 +49,15 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+filename=$2
+test "$filename" = "" && {
+    filename=$shell_release_arm
+}
 
 echo""
-echo "Installing $shell_release_arm"
+echo "Installing $filename"
 cd ../all/tools
-./ceremotedeployer.exe $buildsdir/$change-${changeid}/$platform/$shell_release_arm
+./ceremotedeployer.exe $buildsdir/$change-${changeid}/$platform/$filename
 
 
 echo `./ceremoteshell.exe version.abc`

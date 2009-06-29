@@ -58,6 +58,12 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   fail=1
 }
 
+# Release
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
+  echo "message: Release-wordcode Failed"
+  fail=1
+}
+
 # Release_Debugger
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
   echo "message: Release_Debugger Failed"
@@ -96,6 +102,12 @@ fi
 # Release PPC
 test -f $buildsdir/$change-${changeid}/$platform/${shell_release}_ppc || {
   echo "message: Release PPC Failed"
+  fail=1
+}
+
+# Release-wordcode PPC
+test -f $buildsdir/$change-${changeid}/$platform/${shell_release_wordcode}_ppc || {
+  echo "message: Release-wordcode PPC Failed"
   fail=1
 }
 

@@ -53,6 +53,9 @@
 # Release_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_arm
 
+# Release-wordcode_ARM
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode_arm
+
 # Debug_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_arm
 

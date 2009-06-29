@@ -37,6 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
@@ -49,74 +50,64 @@
 . ../all/util-calculate-change.sh $1
 
 
-fail=0
-
-
-# Release
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
-  echo "message: Release Failed"
-  fail=1
-}
-
-# Release-wordcode
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
-  echo "message: ReleaseWordCode Failed"
-  fail=1
-}
-
-# Release-vprof
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_vprof || {
-  echo "message: Release-vprof Failed"
-  fail=1
-}
-
-# Release_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
-  echo "message: Release_Debugger Failed"
-  fail=1
-}
-
-# Debug
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug || {
-  echo "message: Debug Failed"
-  fail=1
-}
-
-#Debug_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
-  echo "message: Debug_Debugger Failed"
-  fail=1
-}
-
-#selftest
-test -f $buildsdir/$change-${changeid}/$platform/$shell_selftest || {
-  if [ "$platform" = "mac64-ppc" -o "$platform" = "mac64-intel" -o "$platform" = "windows64" -o "$platform" = "linux64" ]
-  then
-    echo "message: warning not building selftest shell on $platform platform"
-  else
-    echo "message: selftest Failed"
-    fail=1
-  fi
-}
-
-# builtin.abc
-test -f $basedir/core/$builtinABC || {
-  echo "message: builtin.abc Failed"
-  fail=1
-}
-
-# toplevel.abc
-test -f $basedir/shell/$shellABC || {
-  echo "message: toplevel.abc Failed"
-  fail=1
-}
-
-
-
-if test "${fail}" = 1; then
-   echo Failing the build
-   exit 1
+##
+# Download the AVMSHELL if it does not exist
+##
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm" ]; then
+    echo "Download AVMSHELL"
+    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release_wordcode_arm $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of $shell_release_wordcode_arm failed"
+        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm
+        exit 1
+    }
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm
 fi
 
 
+##
+# Download the latest asc.jar if it does not exist
+##
+if [ ! -e "$basedir/utils/asc.jar" ]; then
+    echo "Download asc.jar"
+    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of asc.jar failed"
+        rm -f $basedir/utils/asc.jar
+        exit 1
+    }
+fi
 
+echo ""
+echo "Building ABC files using the following ASC version:"
+echo "`java -jar $basedir/utils/asc.jar`"
+echo ""
+
+
+
+export AVM=$basedir/build/buildbot/slaves/all/tools/ceremoteshell.exe
+export ASC=$basedir/utils/asc.jar
+export BUILTINABC=$basedir/core/$builtinABC
+export SHELLABC=$basedir/shell/$shellABC
+
+
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
+echo "Setting up the device with build #$change"
+../all/avmshell-arm-setup.sh $change $shell_release_wordcode_arm
+
+
+cd $basedir/test/acceptance
+./runtests.py --vmargs=$interp --config=arm-winmobile-tvm-release-arm$interp  --nohtml --threads=$test_threads
+
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh

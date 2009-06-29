@@ -58,6 +58,12 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
   fail=1
 }
 
+# Release-wordcode
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
+  echo "message: ReleaseWordCode Failed"
+  fail=1
+}
+
 # Release-Vprof
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release_vprof || {
   echo "message: Release-vprof Failed"

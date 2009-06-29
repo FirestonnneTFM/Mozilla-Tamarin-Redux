@@ -54,6 +54,7 @@ export uploadbuildsdir=/c/buildbot/$branch/$platform-arm/builds
 export EMULATORDIR=c:/buildbot/$branch/$platform-arm/emulator
 
 export shell_release_arm=avmshell_arm$shell_extension
+export shell_release_wordcode_arm=avmshell_wordcode_arm$shell_extension
 export shell_release_thumb=avmshell_thumb$shell_extension
 export shell_debug_arm=avmshell_arm_d$shell_extension
 export shell_debug_thumb=avmshell_thumb_d$shell_extension

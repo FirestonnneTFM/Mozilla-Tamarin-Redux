@@ -37,6 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
@@ -49,74 +50,10 @@
 . ../all/util-calculate-change.sh $1
 
 
-fail=0
-
-
-# Release
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release || {
-  echo "message: Release Failed"
-  fail=1
-}
-
-# Release-wordcode
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
-  echo "message: ReleaseWordCode Failed"
-  fail=1
-}
-
-# Release-vprof
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_vprof || {
-  echo "message: Release-vprof Failed"
-  fail=1
-}
-
-# Release_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
-  echo "message: Release_Debugger Failed"
-  fail=1
-}
-
-# Debug
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug || {
-  echo "message: Debug Failed"
-  fail=1
-}
-
-#Debug_Debugger
-test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
-  echo "message: Debug_Debugger Failed"
-  fail=1
-}
-
-#selftest
-test -f $buildsdir/$change-${changeid}/$platform/$shell_selftest || {
-  if [ "$platform" = "mac64-ppc" -o "$platform" = "mac64-intel" -o "$platform" = "windows64" -o "$platform" = "linux64" ]
-  then
-    echo "message: warning not building selftest shell on $platform platform"
-  else
-    echo "message: selftest Failed"
-    fail=1
-  fi
-}
-
-# builtin.abc
-test -f $basedir/core/$builtinABC || {
-  echo "message: builtin.abc Failed"
-  fail=1
-}
-
-# toplevel.abc
-test -f $basedir/shell/$shellABC || {
-  echo "message: toplevel.abc Failed"
-  fail=1
-}
-
-
-
-if test "${fail}" = 1; then
-   echo Failing the build
-   exit 1
-fi
-
-
+##
+# Execute the common build script.
+# Just need to pass in the additional arguments for PPC
+##
+cd $basedir/build/buildbot/slaves/scripts/
+../all/build-release-wordcode.sh $change "--target=ppc64-darwin --enable-leopard --enable-wordcode-interp" ${shell_release_wordcode}_ppc
 

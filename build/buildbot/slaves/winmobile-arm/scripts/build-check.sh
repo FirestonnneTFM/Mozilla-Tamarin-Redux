@@ -58,6 +58,12 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release_arm || {
   fail=1
 }
 
+# Release-wordcode_ARM
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm || {
+  echo "message: Release-wordcode Failed"
+  fail=1
+}
+
 # Debug_ARM
 test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_arm || {
   echo "message: Debug Failed"
