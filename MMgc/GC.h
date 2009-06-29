@@ -296,10 +296,12 @@ namespace MMgc
 		/**
 		 * Situation: the GC is about to run the incremental marker.
 		 *
-		 * @return the desired length of an incremental mark quantum.
-		 * @note this can vary from call to call.
+		 * @return the desired length of the next incremental mark quantum.
+		 * @note the result can vary from call to call; the function should
+		 *       be called as an incremental mark is about to start and the
+		 *       result should not be cached.
 		 */
-		uint64_t incrementalMarkMilliseconds();
+		uint32_t incrementalMarkMilliseconds();
 		
 		/**
 		 * @return the number of blocks owned by this GC, as accounted for by calls to
@@ -482,7 +484,14 @@ namespace MMgc
 		uint64_t timeFinalRootAndStackScan;
 		uint64_t timeFinalizeAndSweep;
 		uint64_t timeReapZCT;
-		
+
+		// The total time doing collection work (sum of the variables above except the ZCT reap
+		// time) and the elapsed time from the start of StartIncrementalMark to the end of
+		// FinalizeAndSweep.  Together they provide a crude approximation to a measure of 
+		// pause clustering.
+		uint64_t timeInLastCollection;
+		uint64_t timeEndToEndLastCollection;
+
 		// The maximum latceny for various collection phases across the run
 		uint64_t timeMaxStartIncrementalMark;
 		uint64_t timeMaxIncrementalMark;
@@ -490,10 +499,13 @@ namespace MMgc
 		uint64_t timeMaxFinalizeAndSweep;
 		uint64_t timeMaxReapZCT;
 		
-		// The maximum latency across those events, and the end event
-		uint64_t timeMaxLatency;
-		PolicyEvent eventMaxLatency;
-		
+		// The maximum latcency for various collection phases during the previous collection cycle
+		uint64_t timeMaxStartIncrementalMarkLastCollection;
+		uint64_t timeMaxIncrementalMarkLastCollection;
+		uint64_t timeMaxFinalRootAndStackScanLastCollection;
+		uint64_t timeMaxFinalizeAndSweepLastCollection;
+		uint64_t timeMaxReapZCTLastCollection;
+
 		// The total number of times each phase was run
 		uint64_t countStartIncrementalMark;
 		uint64_t countIncrementalMark;
@@ -538,6 +550,11 @@ namespace MMgc
 		// Get the current time (in ticks).
 		uint64_t now();
 
+#ifdef MMGC_POLICY_PROFILING
+		// Convert ticks to milliseconds, as a double (used for printing)
+		double ticksToMillis(uint64_t ticks);
+#endif
+
 		// ----- Private data --------------------------------------
 		
 		GC * const gc;
@@ -545,7 +562,10 @@ namespace MMgc
 		
 		// The time recorded the last time we received signalEndOfIncrementalMark
 		uint64_t timeEndOfLastIncrementalMark;
-		
+
+		// The time recorded the last time we received signalStartOfCollection
+		uint64_t timeStartOfLastCollection;
+
 		// The time recorded the last time we received signalEndOfCollection
 		uint64_t timeEndOfLastCollection;
 
@@ -575,7 +595,13 @@ namespace MMgc
 		// value returned by lowerLimitCollectionThreshold() and set by setLowerLimitCollectionThreshold()
 		uint32_t collectionThreshold;
 
+		// true if a forced garbage collection has been requested
 		bool fullCollectionQueued;
+
+#ifdef MMGC_POLICY_PROFILING
+		// Records the heap population before we sweep, used to compute the actual L
+		size_t bytesUsedBeforeSweep;
+#endif
 	};
 
 	inline void GCPolicyManager::signalMarkWork(size_t nbytes, uint64_t nobjects)
@@ -1560,6 +1586,10 @@ private:
 
 public:
 		void DumpMemoryInfo();
+#ifdef MMGC_MEMORY_PROFILER
+		void DumpPauseInfo();
+#endif
+		
 private:
 
 		void PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item);		// defined in GC.cpp, always inlined in callers there

@@ -46,6 +46,33 @@ namespace avmplus
 }
 #endif
 
+#ifdef MMGC_POLICY_PROFILING
+extern void RedirectLogOutput(void (*)(const char*));
+static FILE* fp = NULL;
+
+void logToFile(const char* s)
+{
+	fprintf(fp, "%s", s);
+	fflush(fp);
+}
+
+static void startGCLogToFile()
+{
+	fp = fopen("mmgc-policy.txt", "a");
+	if (fp != NULL)
+		RedirectLogOutput(logToFile);
+}
+
+static void endGCLogToFile()
+{
+	RedirectLogOutput(NULL);
+	if (fp != NULL) {
+		fclose(fp);
+		fp = NULL;
+	}
+}
+#endif // MMGC_POLICY_PROFILING
+
 namespace MMgc
 {
 	GCHeap *GCHeap::instance = NULL;
@@ -148,10 +175,18 @@ namespace MMgc
 #ifdef MMGC_MEMORY_INFO
 		hooksEnabled = true; // always track allocs in DEBUG builds
 #endif
+
+#ifdef MMGC_POLICY_PROFILING
+		startGCLogToFile();
+#endif
 	}
 
 	GCHeap::~GCHeap()
 	{
+#ifdef MMGC_POLICY_PROFILING
+		endGCLogToFile();
+#endif
+
 		gcManager.destroy();
 		callbacks.Destroy();
 		fixedMalloc._Destroy();
