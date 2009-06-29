@@ -108,7 +108,9 @@ int main(int argc, char *argv[])
 	gPlatformHandle = &platformInstance;
 	
 	int code = avmshell::Shell::run(argc, argv);
-	
+	if (code == avmshell::OUT_OF_MEMORY)
+		write(1, "OUT OF MEMORY\n", 14);
+
 #ifdef AVMPLUS_MACH_EXCEPTIONS
 	GenericGuard::staticDestroy();
 #endif	

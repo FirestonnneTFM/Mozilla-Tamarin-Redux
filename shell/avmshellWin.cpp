@@ -247,6 +247,8 @@ avmshell::Platform* avmshell::Platform::GetInstance()
 		__try
 		{
 			code = avmshell::Shell::run(argc, argv);
+			if (code == avmshell::OUT_OF_MEMORY)
+				::OutputDebugStringA("OUT OF MEMORY\n");
 		}
 		__except(avmshell::CrashFilter(GetExceptionInformation(), GetExceptionCode()))
 		{
@@ -292,6 +294,8 @@ avmshell::Platform* avmshell::Platform::GetInstance()
 			wcstombs(argArray[i], argv[i], len);
 		}
 		int code = avmshell::Shell::run(argc, argArray);
+		if (code == avmshell::OUT_OF_MEMORY)
+			::OutputDebugStringW(L"OUT OF MEMORY\n");
 
 		for(int i=0;i<argc;++i)
 		{
