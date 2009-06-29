@@ -113,11 +113,14 @@ int main(int argc, char *argv[])
 	char* dummy;
 	avmshell::UnixPlatform platformInstance(&dummy);
 	gPlatformHandle = &platformInstance;
-	
+
 	int code = avmshell::Shell::run(argc, argv);
 	if (code == avmshell::OUT_OF_MEMORY) {
-		// Fascistic warnings settings for Linux64 compile require the (void) cast'
-		(void)write(1, "OUT OF MEMORY\n", 14);
+		// Fascistic warnings settings for Linux64 require the value to be
+		// inspected, and a (void) cast is not sufficient.
+		if (write(1, "OUT OF MEMORY\n", 14) > 1) {
+			// do nothing
+		}
 	}
 	return code;
 }
