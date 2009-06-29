@@ -97,6 +97,9 @@ test -f $AVM || {
   echo "ERROR: $AVM not found"
   exit 1
 }
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
+
 
 ##
 # Ensure that the system is clean and ready
