@@ -85,6 +85,9 @@ test -f $AVM || {
 
 echo AVM=$AVM
 echo "`$AVM`"
+echo; echo "AVM built with the following options:"
+echo "`$AVM -Dversion`"
+
 
 ##
 # Ensure that the system is clean and ready
