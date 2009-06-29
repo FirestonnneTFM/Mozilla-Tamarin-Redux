@@ -368,6 +368,9 @@ namespace avmplus
 
 	private:
 
+		List<T,kElementType>& operator=(const List<T,kElementType>& other);	// unimplemented
+		List(const List<T,kElementType>& other);							// unimplemented
+
 		void grow()
 		{
 			// growth is fast at first, then slows at larger list sizes.
