@@ -111,6 +111,7 @@ class RuntestBase:
     verbose = False
     quiet = False
     htmlOutput = True
+    timestampcheck = True
     timestamps = True
     forcerebuild = False
     eval = False      # Run the source file (.as, .js) but, do not magically prepend included files
@@ -234,6 +235,7 @@ class RuntestBase:
         print '    --vmargs        args to pass to vm'
         print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
         print '    --nohtml        do not create a html output file'
+        print '    --notimecheck   do not recompile .abc if timestamp is older than .as'
         print '    --java          location of java executable (default=java)'
         
 
@@ -243,7 +245,7 @@ class RuntestBase:
         self.options = 'vE:a:g:b:s:x:htfc:dqe'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                   'timeout=', 'rebuildtests','quiet','nohtml','eval','showtimes','java=']
+                   'timeout=', 'rebuildtests','quiet','nohtml','notimecheck','eval','showtimes','java=']
 
     def parseOptions(self):
         try:
@@ -295,6 +297,8 @@ class RuntestBase:
                 self.quiet = True
             elif o in ('--nohtml',):
                 self.htmlOutput = False
+            elif o in ('--notimecheck',):
+                self.timestampcheck = False
             elif o in ('--showtimes'):
                 self.show_time = True
             elif o in ('--java'):
@@ -1026,7 +1030,7 @@ class RuntestBase:
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName):
             os.unlink(testName)
-        if isfile(testName) and getmtime(ast)>getmtime(testName):
+        if isfile(testName) and getmtime(ast)>getmtime(testName) and self.timestampcheck:
             self.verbose_print("%s has been modified, recompiling" % ast)
             os.unlink(testName)
         if not isfile(testName):

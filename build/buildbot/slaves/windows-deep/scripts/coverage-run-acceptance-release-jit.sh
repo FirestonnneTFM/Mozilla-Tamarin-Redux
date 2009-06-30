@@ -108,8 +108,8 @@ else
 fi
 
 
-echo "message: $py ./runtests.py --config=x86-win-tvm-cov-release-Ojit  --nohtml"
-$py ./runtests.py --config=x86-win-tvm-cov-release-Ojit --vmargs=${jit}  --nohtml
+echo "message: $py ./runtests.py --config=x86-win-tvm-cov-release-Ojit  --nohtml --notimecheck"
+$py ./runtests.py --config=x86-win-tvm-cov-release-Ojit --vmargs=${jit}  --nohtml --notimecheck
 $bullseyedir/covdir -q
 
 ##

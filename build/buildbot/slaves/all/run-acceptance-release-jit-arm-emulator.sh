@@ -109,8 +109,8 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --nohtml --vmargs=-Ojit"
-$py ./runtests.py --nohtml --vmargs=-Ojit
+echo "message: $py ./runtests.py --nohtml --vmargs=-Ojit --notimecheck"
+$py ./runtests.py --nohtml --vmargs=-Ojit --notimecheck
 
 
 ##
