@@ -122,12 +122,6 @@ namespace MMgc
 	const bool dumpSizeClassState = false;
 #endif
 
-#ifdef MMGC_POLICY_PROFILING
-	// This is ad hoc but OK for the use it's put to
-	static uint64_t could_be_pointer = 0;
-	static uint64_t actually_is_pointer = 0;
-#endif
-	
 #ifndef max	// good grief
 	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
 #endif
@@ -141,6 +135,7 @@ namespace MMgc
 		, timeReapZCT(0)
 		, timeInLastCollection(0)
 		, timeEndToEndLastCollection(0)
+		, timeReapZCTLastCollection(0)
 		, timeMaxStartIncrementalMark(0)
 		, timeMaxIncrementalMark(0)
 		, timeMaxFinalRootAndStackScan(0)
@@ -172,8 +167,14 @@ namespace MMgc
 		, start_event(NO_EVENT)
 		, collectionThreshold(256) // 4KB blocks, that is, 1MB
 		, fullCollectionQueued(false)
+		, pendingClearZCTStats(false)
 #ifdef MMGC_POLICY_PROFILING
 		, bytesUsedBeforeSweep(0)
+#endif
+#ifdef MMGC_POINTINESS_PROFILING
+		, candidateWords(0)
+		, couldBePointer(0)
+		, actuallyIsPointer(0)
 #endif
 	{
 	}
@@ -219,6 +220,10 @@ namespace MMgc
 	}
 
 #ifdef MMGC_POLICY_PROFILING
+	inline bool GCPolicyManager::summarizeGCBehavior() {
+		return GCHeap::GetGCHeap()->Config().gcbehavior;
+	}
+	
 	inline double GCPolicyManager::ticksToMillis(uint64_t ticks) {
 		return double(ticks) * 1000.0 / double(VMPI_getPerformanceFrequency());
 	}
@@ -318,8 +323,12 @@ namespace MMgc
 				timeMaxIncrementalMarkLastCollection = 0;
 				timeMaxFinalRootAndStackScanLastCollection = 0;
 				timeMaxFinalizeAndSweepLastCollection = 0;
-				timeMaxReapZCTLastCollection = 0;
-				goto common_actions;
+#ifdef MMGC_POINTINESS_PROFILING
+				candidateWords = 0;
+				couldBePointer = 0;
+				actuallyIsPointer = 0;
+#endif
+				goto clear_zct_stats;
 			case START_IncrementalMark:
 			case START_FinalRootAndStackScan:
 			case START_FinalizeAndSweep:
@@ -328,6 +337,13 @@ namespace MMgc
 #endif
 				goto common_actions;
 			case START_ReapZCT:
+			clear_zct_stats:
+				if (pendingClearZCTStats) {
+					pendingClearZCTStats = false;
+					timeReapZCTLastCollection = 0;
+					timeMaxReapZCTLastCollection = 0;
+				}
+				/*FALLTHROUGH*/
 			common_actions:
 				start_time = now();
 				start_event = ev;
@@ -356,6 +372,7 @@ namespace MMgc
 			case END_ReapZCT:
 				countReapZCT++;
 				timeReapZCT += elapsed;
+				timeReapZCTLastCollection += elapsed;
 				timeMaxReapZCT = max(timeMaxReapZCT, elapsed);
 				timeMaxReapZCTLastCollection = max(timeMaxReapZCTLastCollection, elapsed);
 				break;
@@ -375,49 +392,72 @@ namespace MMgc
 				timeEndToEndLastCollection = timeEndOfLastCollection - timeStartOfLastCollection;
 				blocksAllocatedSinceLastCollection = 0;
 				blocksDeallocatedSinceLastCollection = 0;
+				pendingClearZCTStats = true;
 				heap->gcManager.signalEndCollection(gc);
 				break;
 		}
 		if (ev != END_ReapZCT)
 			timeInLastCollection += elapsed;
+		
 #ifdef MMGC_POLICY_PROFILING
-		if (ev == END_FinalizeAndSweep)
+		if (summarizeGCBehavior() && ev == END_FinalizeAndSweep)
 		{
-			GCLog("[HISTORY] GC #%u heap-total=%u heap-used=%u gc-total=%u gc-used=%u\n",
-				  (unsigned)countFinalizeAndSweep,
+			GCLog("--------------------\n");
+			GCLog("[gcbehavior] gc=%p gcno=%u\n", (void*)gc, (unsigned)countFinalizeAndSweep);
+			GCLog("[gcbehavior] occupancy: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
 				  (unsigned)heap->GetTotalHeapSize(), (unsigned)(heap->GetTotalHeapSize() - heap->GetFreeHeapSize()), 
 				  (unsigned)gc->GetNumBlocks(), (unsigned)gc->GetBytesInUse()/4096);
-			GCLog("[HISTORY] Heap now: bytes-before-sweep (effective HL)=%uK actual H=%uK computed L=%.2f\n", 
+			GCLog("[gcbehavior] user-data: kbytes-before-sweep=%u kbytes-after-sweep=%u ratio=%.2f\n", 
 				  unsigned(bytesUsedBeforeSweep/1024), 
 				  unsigned(gc->GetBytesInUse()/1024),
 				  double(bytesUsedBeforeSweep)/double(gc->GetBytesInUse()));
-			GCLog("[HISTORY] Time last: IN=%.1f E2E=%.1f %.2f%%\n", 
+#ifdef MMGC_POINTINESS_PROFILING
+			GCLog("[gcbehavior] pointiness: candidates=%u inrange=%u actual=%u\n",
+				  unsigned(candidateWords),
+				  unsigned(couldBePointer),
+				  unsigned(actuallyIsPointer));
+#endif
+			GCLog("[gcbehavior] time-zct-reap: last-cycle=%.1f total=%.1f\n",
+				  ticksToMillis(timeReapZCTLastCollection),
+				  ticksToMillis(timeReapZCT));
+			GCLog("[gcbehavior] pause-zct-reap: last-cycle=%.1f overall=%.1f\n",
+				  ticksToMillis(timeMaxReapZCTLastCollection),
+				  ticksToMillis(timeMaxReapZCT));
+			GCLog("[gcbehavior] time-last-gc: in-gc=%.1f end2end=%.1f mutator-efficiency=%.2f%%\n", 
 				  ticksToMillis(timeInLastCollection),
 				  ticksToMillis(timeEndToEndLastCollection),
-				  double(timeInLastCollection) * 100.0 / double(timeEndToEndLastCollection));
-			GCLog("[HISTORY] Pause last: SIM=%.1f IM=%.1f FRSS=%.1f FS=%.1f RZCT=%.1f\n",
-				  ticksToMillis(timeMaxStartIncrementalMarkLastCollection),
-				  ticksToMillis(timeMaxIncrementalMarkLastCollection),
-				  ticksToMillis(timeMaxFinalRootAndStackScanLastCollection),
-				  ticksToMillis(timeMaxFinalizeAndSweepLastCollection),
-				  ticksToMillis(timeMaxReapZCTLastCollection));
-			GCLog("[HISTORY] Time total: all=%.1f SIM=%.1f IM=%.1f FRSS=%.1f FS=%.1f RZCT=%.1f\n",
-				  ticksToMillis(timeStartIncrementalMark + timeIncrementalMark + timeFinalRootAndStackScan + timeFinalizeAndSweep + timeReapZCT),
+				  (timeEndToEndLastCollection == 0.0 ?	// edge cases
+				   100.0 :
+				   double(timeEndToEndLastCollection - timeInLastCollection) * 100.0 / double(timeEndToEndLastCollection)));
+			GCLog("[gcbehavior] time-all-gc: total=%.1f start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
+				  ticksToMillis(timeStartIncrementalMark + timeIncrementalMark + timeFinalRootAndStackScan + timeFinalizeAndSweep),
 				  ticksToMillis(timeStartIncrementalMark),
 				  ticksToMillis(timeIncrementalMark),
 				  ticksToMillis(timeFinalRootAndStackScan),
-				  ticksToMillis(timeFinalizeAndSweep),
-				  ticksToMillis(timeReapZCT));
-			GCLog("[HISTORY] Pause total: SIM=%.1f IM=%.1f FRSS=%.1f FS=%.1f RZCT=%.1f\n",
+				  ticksToMillis(timeFinalizeAndSweep));
+			GCLog("[gcbehavior] pause-last-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
+				  ticksToMillis(timeMaxStartIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxFinalRootAndStackScanLastCollection),
+				  ticksToMillis(timeMaxFinalizeAndSweepLastCollection));
+			GCLog("[gcbehavior] pause-all-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
 				  ticksToMillis(timeMaxStartIncrementalMark),
 				  ticksToMillis(timeMaxIncrementalMark),
 				  ticksToMillis(timeMaxFinalRootAndStackScan),
-				  ticksToMillis(timeMaxFinalizeAndSweep),
-				  ticksToMillis(timeMaxReapZCT));
+				  ticksToMillis(timeMaxFinalizeAndSweep));
 		}
 #endif // MMGC_POLICY_PROFILING
 	}
 	
+#ifdef MMGC_POINTINESS_PROFILING
+	inline void GCPolicyManager::signalDemographics(size_t candidate_words, size_t could_be_pointer, size_t actually_is_pointer)
+	{
+		candidateWords += candidate_words;
+		couldBePointer += could_be_pointer;
+		actuallyIsPointer += actually_is_pointer;
+	}
+#endif
+
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
 		blocksAllocatedSinceLastCollection += blocks;
 		blocksOwned += blocks;
@@ -2806,6 +2846,10 @@ bail:
 
 		uintptr_t *end = p + (size / sizeof(void*));
 		uintptr_t thisPage = (uintptr_t)p & ~0xfff;
+#ifdef MMGC_POINTINESS_PROFILING
+		uint32_t could_be_pointer = 0;
+		uint32_t actually_is_pointer = 0;
+#endif
 
 		// set the mark bits on this guy
 		if(wi.IsGCItem())
@@ -2843,8 +2887,8 @@ bail:
 			if(val < _memStart || val >= _memEnd)
 				continue;
 
-#ifdef MMGC_POLICY_PROFILING
-			could_be_pointer+=sizeof(uintptr_t);
+#ifdef MMGC_POINTINESS_PROFILING
+			could_be_pointer++;
 #endif
 
 			// normalize and divide by 4K to get index
@@ -2886,8 +2930,8 @@ bail:
 				}
 #endif
 
-#ifdef MMGC_POLICY_PROFILING
-				actually_is_pointer+=sizeof(uintptr_t);
+#ifdef MMGC_POINTINESS_PROFILING
+				actually_is_pointer++;
 #endif
 				// inline IsWhite/SetBit
 				// FIXME: see if using 32 bit values is faster
@@ -2957,8 +3001,8 @@ bail:
 					continue;
 #endif
 
-#ifdef MMGC_POLICY_PROFILING
-				actually_is_pointer+=sizeof(uintptr_t);
+#ifdef MMGC_POINTINESS_PROFILING
+				actually_is_pointer++;
 #endif
 				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetBlockHeader(item);
 				if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
@@ -2985,6 +3029,9 @@ bail:
 				}
 			}
 		}
+#ifdef MMGC_POINTINESS_PROFILING
+		policy.signalDemographics(size/sizeof(void*), could_be_pointer, actually_is_pointer);
+#endif
 	}
 
 	void GC::IncrementalMark(bool scanStack)

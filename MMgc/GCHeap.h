@@ -54,6 +54,7 @@ namespace MMgc
 		bool returnMemory;
 		bool gcstats;
 		bool autoGCStats;
+		bool gcbehavior;		// gross history and policy decisions (MMGC_POLICY_PROFILING)
 		static const size_t kDefaultHeapLimit = (size_t)-1;
 	};
 	

@@ -445,6 +445,16 @@ namespace MMgc
 		 */
 		/*inline*/ void signalMarkWork(size_t nbytes, uint64_t nobjects=1);
 		
+#ifdef MMGC_POINTINESS_PROFILING
+		/**
+		 * Situation: signal that 'words' words have been scanned; that 'could_be_pointer'
+		 * number of these words passed the initial heap range checks; and that 
+		 * 'actually_is_pointer' number of these words were conservatively found to
+		 * be pointers to heap objects.
+		 */
+		/*inline*/ void signalDemographics(size_t words, size_t could_be_pointer, size_t actually_is_pointer);
+#endif
+
 		/**
 		 * The collector 'gc' (which is not the collector for this manager) has started
 		 * a garbage collection, indicating perhaps some memory pressure in that heap.
@@ -491,6 +501,10 @@ namespace MMgc
 		// pause clustering.
 		uint64_t timeInLastCollection;
 		uint64_t timeEndToEndLastCollection;
+
+		// Time for ZCT reaping during the last collection cycle (end of one FinalizeAndSweep
+		// to the end of the next one).
+		uint64_t timeReapZCTLastCollection;
 
 		// The maximum latceny for various collection phases across the run
 		uint64_t timeMaxStartIncrementalMark;
@@ -553,6 +567,9 @@ namespace MMgc
 #ifdef MMGC_POLICY_PROFILING
 		// Convert ticks to milliseconds, as a double (used for printing)
 		double ticksToMillis(uint64_t ticks);
+		
+		// @return true if we should print policy data
+		bool summarizeGCBehavior();
 #endif
 
 		// ----- Private data --------------------------------------
@@ -598,9 +615,24 @@ namespace MMgc
 		// true if a forced garbage collection has been requested
 		bool fullCollectionQueued;
 
+		// true if the ZCT statistics for the current GC cycle should be cleared;
+		// this is required because the ZCT stats may need to be updated before
+		// StartIncrementalMark but can't be cleared at the end of FinalizeAndSweep.
+		bool pendingClearZCTStats;
+
 #ifdef MMGC_POLICY_PROFILING
 		// Records the heap population before we sweep, used to compute the actual L
 		size_t bytesUsedBeforeSweep;
+#endif
+#ifdef MMGC_POINTINESS_PROFILING
+		// Track the number of scannable words, the number that passes the initial range
+		// check, and the number that turn out to be (conservative) pointers.
+		//
+		// These are cleared at the start of each GC so stats are only valid for one
+		// GC cycle.
+		uint64_t candidateWords;
+		uint64_t couldBePointer;
+		uint64_t actuallyIsPointer;
 #endif
 	};
 
