@@ -46,7 +46,7 @@ namespace avmplus
 }
 #endif
 
-#ifdef MMGC_POLICY_PROFILING
+#if defined MMGC_POLICY_PROFILING && !defined AVMSHELL_BUILD
 extern void RedirectLogOutput(void (*)(const char*));
 static FILE* fp = NULL;
 
@@ -58,7 +58,7 @@ void logToFile(const char* s)
 
 static void startGCLogToFile()
 {
-	fp = fopen("mmgc-policy.txt", "a");
+	fp = fopen("gcbehavior.txt", "w");
 	if (fp != NULL)
 		RedirectLogOutput(logToFile);
 }
@@ -71,7 +71,7 @@ static void endGCLogToFile()
 		fp = NULL;
 	}
 }
-#endif // MMGC_POLICY_PROFILING
+#endif // MMGC_POLICY_PROFILING && !AVMSHELL_BUILD
 
 namespace MMgc
 {
@@ -93,7 +93,12 @@ namespace MMgc
 		verbose(false),
 		returnMemory(true),
 		gcstats(false), // tracking
-		autoGCStats(false) // auto printing
+		autoGCStats(false), // auto printing
+#ifdef AVMSHELL_BUILD
+		gcbehavior(false)	// controlled by command line switch
+#else
+		gcbehavior(true)	// unconditional, if MMGC_POLICY_PROFILING is on
+#endif
 	{
 #ifdef MMGC_64BIT
 		trimVirtualMemory = false; // no need
@@ -176,14 +181,14 @@ namespace MMgc
 		hooksEnabled = true; // always track allocs in DEBUG builds
 #endif
 
-#ifdef MMGC_POLICY_PROFILING
+#if defined MMGC_POLICY_PROFILING && !defined AVMSHELL_BUILD
 		startGCLogToFile();
 #endif
 	}
 
 	GCHeap::~GCHeap()
 	{
-#ifdef MMGC_POLICY_PROFILING
+#if defined MMGC_POLICY_PROFILING && !defined AVMSHELL_BUILD
 		endGCLogToFile();
 #endif
 

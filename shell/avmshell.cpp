@@ -764,6 +764,11 @@ namespace avmshell
 				else if (!VMPI_strcmp(arg, "-memlimit")) {
 					MMgc::GCHeap::GetGCHeap()->Config().heapLimit = VMPI_strtol(argv[++i], 0, 10);
 				}
+#ifdef MMGC_POLICY_PROFILING
+				else if (!VMPI_strcmp(arg, "-gcbehavior")) {
+					MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = true;
+				}
+#endif
 				else if (!VMPI_strcmp(arg, "-log")) {
 					settings.do_log = true;
 				} 
@@ -912,6 +917,9 @@ namespace avmshell
 #endif
 		AvmLog("          [-memstats]   generate statistics on memory usage\n");
 		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
+#ifdef MMGC_POLICY_PROFILING
+		AvmLog("          [-gcbehavior] summarize GC behavior and policy computation\n"); 
+#endif
 		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
 		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
 		AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");

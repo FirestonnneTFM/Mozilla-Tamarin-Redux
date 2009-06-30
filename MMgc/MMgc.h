@@ -62,11 +62,23 @@
 #endif
 
 // Policy profiler settings (for MMgc development mostly)
+//
+// Enabling this and MMGC_MEMORY_INFO at the same time is probably not a good idea.
+//
+// If AVMSHELL_BUILD is enabled then the output can be enabled/disabled with the -gcbehavior
+// switch in the shell; the output is directed to whatever channel is used by GCLog.
+//
+// If AVMSHELL_BUILD is disabled then the output of policy info is unconditional and is
+// directed to a file gcbehavior.txt in the working directory.
 
-// Enable to help profile GC policy - some assembly required.  With this enabled, GCLog
-// output goes to a file (set up in the GCHeap.cpp constructor).  Enabling this and 
-// MMGC_MEMORY_INFO at the same time is probably not a good idea.
-//#define MMGC_POLICY_PROFILING
+#ifdef AVMSHELL_BUILD
+    #define MMGC_POLICY_PROFILING
+#endif
+
+#ifdef MMGC_POLICY_PROFILING
+	// Profile the pointer density of scanned memory - really for the specially interested
+    //#define MMGC_POINTINESS_PROFILING
+#endif
 
 #include "GCDebug.h"
 #include "GCLog.h"
