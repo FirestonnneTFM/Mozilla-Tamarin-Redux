@@ -254,8 +254,10 @@ void VMPI_log(const char* message)
 
 	if(logFunc)
 		logFunc(message);
-	else
+	else {
 		printf("%s",message);
+		fflush(stdout);
+	}
 }
 
 bool VMPI_isMemoryProfilingEnabled()
