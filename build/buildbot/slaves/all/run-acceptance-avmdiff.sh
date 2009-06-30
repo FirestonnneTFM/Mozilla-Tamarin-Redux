@@ -166,8 +166,8 @@ else
 fi
 
 
-echo "message: $py ./runtests.py --config=${platform}-diff  --nohtml"
-$py ./runtests.py --config=${platform}-diff  --nohtml
+echo "message: $py ./runtests.py --config=${platform}-diff  --nohtml --notimecheck"
+$py ./runtests.py --config=${platform}-diff  --nohtml --notimecheck
 
 ##
 # Ensure that the system is torn down and clean

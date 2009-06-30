@@ -97,14 +97,14 @@ $bullseyedir/covclear
 cd $basedir/test/acceptance
 
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py"
-python ./runtests.py --config=x86-lnx-tvm-cov-releasedebugger
+echo "message: python ./runtests.py --nothml --notimecheck"
+python ./runtests.py --config=x86-lnx-tvm-cov-releasedebugger --nothml  --notimecheck
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Dinterp"
-python ./runtests.py --vmargs=-Dinterp --config=x86-lnx-tvm-cov-releasedebugger-Dinterp
+echo "message: python ./runtests.py --vmargs=-Dinterp --nothml  --notimecheck"
+python ./runtests.py --vmargs=-Dinterp --config=x86-lnx-tvm-cov-releasedebugger-Dinterp --nothml  --notimecheck
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Ojit"
-python ./runtests.py --vmargs=-Ojit --config=x86-lnx-tvm-cov-releasedebugger-Ojit
+echo "message: python ./runtests.py --vmargs=-Ojit --nothml  --notimecheck"
+python ./runtests.py --vmargs=-Ojit --config=x86-lnx-tvm-cov-releasedebugger-Ojit --nothml  --notimecheck
 $bullseyedir/covdir -q
 
 fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
