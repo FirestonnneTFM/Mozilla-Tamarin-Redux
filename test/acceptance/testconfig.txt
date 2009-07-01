@@ -109,14 +109,6 @@ ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 
 ####################
-# mmgc
-####################
-# Probably killing the stack 
-mmgc/heap_stress,   .*winmobile.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
-mmgc/heap_stress,   .*mac-tvm.* ,  skip,   https://bugzilla.mozilla.org/show_bug.cgi?id=481072
-mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=488124
-
-####################
 # Vector
 ####################
 as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
