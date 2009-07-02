@@ -57,6 +57,12 @@
 // put spaces around the template arg to avoid possible digraph warnings
 #define DRCWB(type) MMgc::WriteBarrierRC< type >
 
+#ifdef MMGC_POLICY_PROFILING
+    #define POLICY_PROFILING_ONLY(x) x
+#else
+    #define POLICY_PROFILING_ONLY(x)
+#endif
+
 namespace MMgc
 {
 	/*private*/
@@ -96,8 +102,18 @@ namespace MMgc
 
 		GCAssert(IsPointerToGCPage(container));
 		GCAssert(((uintptr_t)value & 7) == 0);
-		if(marking && value && GetMark(container) && IsWhite(value))
-			TrapWrite(container, value);
+		POLICY_PROFILING_ONLY(int stage=0;)
+		if(marking && value) {
+			POLICY_PROFILING_ONLY(stage=1;)
+			if (GetMark(container)) {
+				POLICY_PROFILING_ONLY(stage=2;)
+				if (IsWhite(value)) {
+					POLICY_PROFILING_ONLY(stage=3;)
+					TrapWrite(container, value);
+				}
+			}
+		}
+		POLICY_PROFILING_ONLY( policy.signalWriteBarrierWork(stage); )
 	}
 
 	REALLY_INLINE void GC::privateInlineWriteBarrier(const void *container, const void *address, const void *value)
