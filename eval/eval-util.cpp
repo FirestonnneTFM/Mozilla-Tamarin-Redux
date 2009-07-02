@@ -71,7 +71,11 @@ namespace avmplus
 
 		void Allocator::refill(size_t nbytes)
 		{
-			Chunk* c = (Chunk*)(new uint8_t[sizeof(Chunk) + nbytes - 1]);
+			union {
+				uint8_t* c_8;
+				Chunk* c;
+			};
+			c_8 = new uint8_t[sizeof(Chunk) + nbytes - 1];
 			c->prev = current_chunk;
 			current_chunk = c;
 			current_top = c->data;

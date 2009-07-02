@@ -888,7 +888,11 @@ namespace avmplus
 		// create rest Array using argv[param_count..argc]
 		MethodSignaturep ms = get_ms();
 		const int rest_offset = ms->rest_offset();
-		Atom* extra = (Atom*) (rest_offset + (char*)ap);
+		union {
+			char* extra_8;
+			Atom* extra;
+		};
+		extra_8 = (char*)ap + rest_offset;
 		const int param_count = ms->param_count();
 		const int extra_count = argc > param_count ? argc - param_count : 0;
 		return toplevel()->arrayClass->newarray(extra, extra_count);
@@ -1168,7 +1172,12 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-		uint16_t result = *(uint16_t *)(dom->globalMemoryBase + addr);
+		union {
+			uint8_t* p_8;
+			uint16_t* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		uint16_t result = *p;
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1182,8 +1191,12 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-		// TODO is using raw "int" type correct?
-		int32_t result = *(int32_t *)(dom->globalMemoryBase + addr);
+		union {
+			uint8_t* p_8;
+			int32_t* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		int32_t result = *p;
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1197,7 +1210,12 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-		float result = *(float *)(dom->globalMemoryBase + addr);
+		union {
+			uint8_t* p_8;
+			float* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		float result = *p;
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1211,7 +1229,12 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 8) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-		double result = *(double *)(dom->globalMemoryBase + addr);
+		union {
+			uint8_t* p_8;
+			double* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		double result = *p;
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1235,11 +1258,16 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-		uint16 svalue = (uint16)value;
+		uint16_t svalue = (uint16_t)value;
 
 		MOPS_SWAP_BYTES(&svalue);
 
-		*(uint16 *)(dom->globalMemoryBase + addr) = svalue;
+		union {
+			uint8_t* p_8;
+			uint16_t* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		*p = svalue;
 	}
 
 	void MethodEnv::si32(int value, int addr) const
@@ -1251,7 +1279,12 @@ namespace avmplus
 
 		MOPS_SWAP_BYTES(&value);
 
-		*(int *)(dom->globalMemoryBase + addr) = value;
+		union {
+			uint8_t* p_8;
+			int32_t* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		*p = value;
 	}
 
 	void MethodEnv::sf32(double value, int addr) const
@@ -1265,7 +1298,12 @@ namespace avmplus
 
 		MOPS_SWAP_BYTES(&fvalue);
 
-		*(float *)(dom->globalMemoryBase + addr) = fvalue;
+		union {
+			uint8_t* p_8;
+			float* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		*p = fvalue;
 	}
 
 	void MethodEnv::sf64(double value, int addr) const
@@ -1277,7 +1315,12 @@ namespace avmplus
 
 		MOPS_SWAP_BYTES(&value);
 
-		*(double *)(dom->globalMemoryBase + addr) = value;
+		union {
+			uint8_t* p_8;
+			double* p;
+		};
+		p_8 = dom->globalMemoryBase + addr;
+		*p = value;
 	}
 
 	// see 13.2 creating function objects

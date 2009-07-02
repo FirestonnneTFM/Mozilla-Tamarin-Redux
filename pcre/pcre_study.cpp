@@ -500,7 +500,10 @@ pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
 uschar start_bits[32];
 pcre_extra *extra;
-pcre_study_data *study;
+union {
+	char* study_char_ptr;
+	pcre_study_data *study;
+};
 const uschar *tables;
 uschar *code;
 compile_data compile_block;
@@ -564,7 +567,8 @@ if (extra == NULL)
   return NULL;
   }
 
-study = (pcre_study_data *)((char *)extra + sizeof(pcre_extra));
+//study = (pcre_study_data *)((char *)extra + sizeof(pcre_extra));
+study_char_ptr = (char *)extra + sizeof(pcre_extra);
 extra->flags = PCRE_EXTRA_STUDY_DATA;
 extra->study_data = study;
 

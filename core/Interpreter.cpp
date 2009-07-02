@@ -723,7 +723,12 @@ namespace avmplus
 					   (Atom*)VMPI_alloca(core, _framep,
 										  sizeof(Atom)*(ms->frame_size())
 										+ kAuxFrameSize);
-		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + ms->frame_size());
+		union {
+			Atom* fa;
+			InterpreterAuxiliaryFrame* fi;
+		};
+		fa = framep + ms->frame_size();
+		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)fi;
 #endif
 
 		// It's essential that the MethodFrame is cleaned up upon normal exit, to keep core->currentMethodFrame
@@ -2150,11 +2155,15 @@ namespace avmplus
 
 #define MOPS_LOAD(addr, type, result) \
 		MOPS_RANGE_CHECK(addr, type) \
-		result = *(const type*)(envDomain->globalMemoryBase + (addr));
+		union { const uint8_t* p8; const type* p; }; \
+		p8 = envDomain->globalMemoryBase + (addr); \
+		result = *p;
 
 #define MOPS_STORE(addr, type, value) \
 		MOPS_RANGE_CHECK(addr, type) \
-		*(type*)(envDomain->globalMemoryBase + (addr)) = (type)(value);
+		union { uint8_t* p8; type* p; }; \
+		p8 = envDomain->globalMemoryBase + (addr); \
+		*p = (type)(value);
 			
 			// loads
 			INSTR(li8) {

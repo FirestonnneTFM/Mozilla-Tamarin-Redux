@@ -44,6 +44,57 @@ namespace avmplus
 {
 	using namespace MMgc;
 
+	template<class T>
+	static void inline read(uint8_t*& p, T& u)
+	{
+		// weirdly, declaring a naked union here causes the ARM gcc compiler
+		// to issue bogus "unused" warnings for p8 and pT. Declaring it as
+		// a type and using that doesn't. yay, buggy compilers.
+		union Foo {
+			const uint8_t* p8;
+			const T* pT;
+		};
+		Foo foo;
+		foo.p8 = p;
+		u = *foo.pT;
+		p += sizeof(T);
+
+	}
+
+	template<class T>
+	static void inline write(uint8_t*& p, T u)
+	{
+		// weirdly, declaring a naked union here causes the ARM gcc compiler
+		// to issue bogus "unused" warnings for p8 and pT. Declaring it as
+		// a type and using that doesn't. yay, buggy compilers.
+		union Foo {
+			uint8_t* p8;
+			T* pT;
+		};
+		Foo foo;
+		foo.p8 = p;
+		*foo.pT = u;
+		p += sizeof(T);
+	}
+	
+	// aligns to an 8-byte boundary -- apparently assumes input is at least 4-byte aligned.
+	static void inline align(uint8_t*& p)
+	{
+		AvmAssert((uintptr_t(p) & 3) == 0);
+		if (uintptr_t(p) & 4)
+		{
+#ifdef DEBUG
+			union {
+				uint8_t* p8;
+				int32_t* p32;
+			};
+			p8 = p;
+			*p32 = 0xaaaaaaaa;
+#endif
+			p += sizeof(int32_t);
+		}
+	}
+	
 	// store this in a thread local to capture FixedAlloc alloc traffic
 	GCThreadLocal<avmplus::Sampler*> tls_sampler;
 
