@@ -109,6 +109,12 @@ ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 
 ####################
+# mmgc
+####################
+# Probably killing the stack 
+mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=488124
+
+####################
 # Vector
 ####################
 as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
@@ -191,7 +197,6 @@ ecma3/Unicode/u9000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-t
 ecma3/Unicode/uE000_PrivateUseArea, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 ecma3/Unicode/uAC00_HangulSyllables, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 mops/mops, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
-mmgc/heap_stress,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 
 ####################
 # verifier
