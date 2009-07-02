@@ -294,6 +294,12 @@ namespace MMgc
 		GCPolicyManager(GC* gc, GCHeap* heap);
 		
 		/**
+		 * Clean up and print any final statistics.  Should be called from the very
+		 * start of the GC's destructor.
+		 */
+		void shutdown();
+		
+		/**
 		 * Situation: the GC is about to run the incremental marker.
 		 *
 		 * @return the desired length of the next incremental mark quantum.
@@ -581,6 +587,9 @@ namespace MMgc
 		
 		// @return true if we should print policy data
 		bool summarizeGCBehavior();
+
+		// Print policy data.  At shutdown, afterCollection will be passed as false.
+		void PrintGCBehaviorStats(bool afterCollection=true);
 #endif
 
 		// ----- Private data --------------------------------------
@@ -607,8 +616,9 @@ namespace MMgc
 		// The total size of GCHeap following the previous allocation from GCHeap
 		uint64_t blocksInHeapAfterPreviousAllocation;
 		
-		// The total number of blocks owned by GC
+		// The total number of blocks owned by GC, and the maximum such number
 		uint64_t blocksOwned;
+		uint64_t maxBlocksOwned;
 		
 		// The number of objects scanned since startup (which is equivalent to the number
 		// of calls to GC::MarkItem), less the number scanned during the last
