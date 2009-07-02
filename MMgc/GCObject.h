@@ -382,6 +382,16 @@ namespace MMgc
 			return (T) t;
 		}
 
+		RCPtr<T>& operator=(const RCPtr<T>& other)
+		{
+			if(valid())
+				t->DecrementRef();
+			t = other.t;
+			if(valid())
+				t->IncrementRef();
+			return *this;
+		}
+		
 		operator T() const
 		{
 			return (T) t;
@@ -399,6 +409,8 @@ namespace MMgc
 		void Clear() { t = NULL; }
 
 	private:
+		// Hidden and meant not to be used at all.
+		RCPtr(const RCPtr<T>& other);
 
 		inline bool valid() { return (uintptr_t)t > 1; }
 		T t;
