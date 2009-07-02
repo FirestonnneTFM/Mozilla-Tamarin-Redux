@@ -540,7 +540,7 @@ namespace MMgc
 	REALLY_INLINE void GCPolicyManager::signalMarkWork(size_t nbytes)
 	{
 		objectsScannedLastCollection++;
-		bytesScannedLastCollection += nbytes;
+		bytesScannedLastCollection += uint32_t(nbytes);
 	}
 
 #ifdef MMGC_POLICY_PROFILING
