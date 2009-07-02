@@ -105,13 +105,13 @@ GARBAGE += \
   $(NULL)
 
 $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_DEPS)
-	test -d $$(dir $$@) || mkdir -p $$(dir $$@)
-	$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) \
-	  $$< > $$@
-	$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@ > /dev/null
+	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	@echo "Compiling $$*"
+	@$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
+	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@ > /dev/null
 
 $$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.$(II_SUFFIX) $$(GLOBAL_DEPS)
-	$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
+	@$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $$($(1)_ASMOBJS): %.$(OBJ_SUFFIX): %.armasm $$(GLOBAL_DEPS)
 	$(ASM) -o $$@ $$($(1)_ASMFLAGS) $$<
@@ -129,7 +129,8 @@ define STATIC_LIBRARY_RULES
   $(1)_NAME = $(LIB_PREFIX)$$($(1)_BASENAME).$(LIB_SUFFIX)
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_ASMOBJS)
-	$(call MKSTATICLIB,$$@) $$($(1)_CXXOBJS) $$($(1)_ASMOBJS)
+	@echo "Library $$*"
+	@$(call MKSTATICLIB,$$@) $$($(1)_CXXOBJS) $$($(1)_ASMOBJS)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)
 
@@ -186,7 +187,8 @@ define PROGRAM_RULES
     $(NULL)
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
-	$(call MKPROGRAM,$$@) \
+	@echo "Link $$@"
+	@$(call MKPROGRAM,$$@) \
 	  $$($(1)_CXXOBJS) \
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
 	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
