@@ -96,7 +96,11 @@ namespace avmshell
 		int len = (int)fileSize;
 
 		MMgc::GC::AllocaAutoPtr _c;
-		uint8_t* c = (uint8_t*)VMPI_alloca(core, _c, len+1);
+		union {
+			uint8_t* c;
+			wchar* c_w;
+		};
+		c = (uint8_t*)VMPI_alloca(core, _c, len+1);
 
 		len = (int)fp->read(c, len); //need to force since the string creation functions expect an int
 		c[len] = 0;
@@ -116,14 +120,14 @@ namespace avmshell
 				//UTF-16 big endian
 				c += 2;
 				len = (len - 2) >> 1;
-				return core->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
+				return core->newStringEndianUTF16(/*littleEndian*/false, c_w, len);
 			}
 			else if ((c[0] == 0xff) && (c[1] == 0xfe))
 			{
 				//UTF-16 little endian
 				c += 2;
 				len = (len - 2) >> 1;
-				return core->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
+				return core->newStringEndianUTF16(/*littleEndian*/true, c_w, len);
 			}
 		}
 

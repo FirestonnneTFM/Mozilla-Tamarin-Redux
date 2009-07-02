@@ -84,16 +84,21 @@ namespace avmplus
 		
 		inline InlineHashtable* getTableNoInit() const
 		{
-			uintptr_t* tableOffset = (uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
+			union {
+				uint8_t* p;
+				InlineHashtable* iht;
+				HeapHashtable** hht;
+			};
+			p = (uint8_t*)this + vtable->traits->getHashtableOffset();
 			if(!vtable->traits->isDictionary)
 			{
-				return (InlineHashtable*)tableOffset;
+				return iht;
 			}
 			else
 			{
 				//DictionaryObjects store pointer to HeapHashtable at
 				//the hashtable offset
-				return ((HeapHashtable*)*tableOffset)->get_ht();
+				return (*hht)->get_ht();
 			}
 		}		
 		

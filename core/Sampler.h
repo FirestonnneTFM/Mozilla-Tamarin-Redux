@@ -119,32 +119,6 @@ namespace avmplus
 
 	private:	
 		
-		static void inline align(byte*&b)
-		{
-			if((sintptr)b & 4)
-			{
-#ifdef DEBUG
-				*(int32*)b = 0xaaaaaaaa;
-#endif
-				b += sizeof(int32);
-			}
-		}
-		
-		template<class T>
-		static void inline read(byte *&p, T &u)
-		{
-			u = *(T*)p;
-			p += sizeof(T);
-		}
-
-		template<class T>
-		static void inline write(byte *&p, T u)
-		{
-			*(T*)p = u;
-			p += sizeof(T);
-		}
-		
-		
 		void sample();
 
 		void rewind(byte*&b, uint32 amount)

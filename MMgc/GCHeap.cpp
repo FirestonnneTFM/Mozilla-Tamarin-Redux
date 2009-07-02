@@ -755,7 +755,17 @@ namespace MMgc
 			
 			zero = blockToUse->dirty && zero;
 			
-			GCAssert(!blockToUse->dirty ? *(uint32_t*)blockToUse->baseAddr == 0 : true);
+			#ifdef _DEBUG
+			if (!blockToUse->dirty)
+			{
+				union {
+					const char* base_c;
+					const uint32_t* base_u;
+				};
+				base_c = blockToUse->baseAddr;
+				GCAssert(*base_u == 0);
+			}
+			#endif
 			return blockToUse;
 		}
 
