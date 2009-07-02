@@ -162,14 +162,19 @@ namespace MMgc
 		, blocksInHeapAfterPreviousAllocation(heap->GetTotalHeapSize())
 		, blocksOwned(0)
 		, objectsScannedTotal(0)
+		, objectsScannedLastCollection(0)
 		, bytesScannedTotal(0)
+		, bytesScannedLastCollection(0)
 		, start_time(0)
 		, start_event(NO_EVENT)
 		, collectionThreshold(256) // 4KB blocks, that is, 1MB
 		, fullCollectionQueued(false)
 		, pendingClearZCTStats(false)
 #ifdef MMGC_POLICY_PROFILING
-		, bytesUsedBeforeSweep(0)
+		, heapAllocatedBeforeSweep(0)
+		, heapUsedBeforeSweep(0)
+		, gcAllocatedBeforeSweep(0)
+		, gcBytesUsedBeforeSweep(0)
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		, candidateWords(0)
@@ -177,6 +182,12 @@ namespace MMgc
 		, actuallyIsPointer(0)
 #endif
 	{
+#ifdef MMGC_POLICY_PROFILING
+		for ( int i=0 ; i <= 3 ; i++ ) {
+			barrierStageTotal[i] = 0;
+			barrierStageLastCollection[i] = 0;
+		}
+#endif
 	}
 	
 	inline uint64_t GCPolicyManager::interIncrementalMarkTicks() {
@@ -251,11 +262,11 @@ namespace MMgc
 	}
 	
 	uint64_t GCPolicyManager::bytesMarked() {
-		return bytesScannedTotal;
+		return bytesScannedTotal + bytesScannedLastCollection;
 	}
 	
 	uint64_t GCPolicyManager::objectsMarked() {
-		return objectsScannedTotal;
+		return objectsScannedTotal + objectsScannedLastCollection;
 	}
 
 	// how many objects trigger a reap, should be high
@@ -323,6 +334,10 @@ namespace MMgc
 				timeMaxIncrementalMarkLastCollection = 0;
 				timeMaxFinalRootAndStackScanLastCollection = 0;
 				timeMaxFinalizeAndSweepLastCollection = 0;
+				objectsScannedTotal += objectsScannedLastCollection;
+				objectsScannedLastCollection = 0;
+				bytesScannedTotal += bytesScannedLastCollection;
+				bytesScannedLastCollection = 0;
 #ifdef MMGC_POINTINESS_PROFILING
 				candidateWords = 0;
 				couldBePointer = 0;
@@ -333,7 +348,10 @@ namespace MMgc
 			case START_FinalRootAndStackScan:
 			case START_FinalizeAndSweep:
 #ifdef MMGC_POLICY_PROFILING
-				bytesUsedBeforeSweep = gc->GetBytesInUse();
+				heapAllocatedBeforeSweep = heap->GetTotalHeapSize();
+				heapUsedBeforeSweep = (heap->GetTotalHeapSize() - heap->GetFreeHeapSize());
+				gcAllocatedBeforeSweep = gc->GetNumBlocks();
+				gcBytesUsedBeforeSweep = gc->GetBytesInUse();
 #endif
 				goto common_actions;
 			case START_ReapZCT:
@@ -402,21 +420,45 @@ namespace MMgc
 #ifdef MMGC_POLICY_PROFILING
 		if (summarizeGCBehavior() && ev == END_FinalizeAndSweep)
 		{
+			size_t bytesInUse = gc->GetBytesInUse();
+			size_t heapAllocated = heap->GetTotalHeapSize();
+
 			GCLog("--------------------\n");
 			GCLog("[gcbehavior] gc=%p gcno=%u\n", (void*)gc, (unsigned)countFinalizeAndSweep);
-			GCLog("[gcbehavior] occupancy: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
-				  (unsigned)heap->GetTotalHeapSize(), (unsigned)(heap->GetTotalHeapSize() - heap->GetFreeHeapSize()), 
-				  (unsigned)gc->GetNumBlocks(), (unsigned)gc->GetBytesInUse()/4096);
+			GCLog("[gcbehavior] occupancy-before: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
+				  (unsigned)heapAllocatedBeforeSweep, (unsigned)heapUsedBeforeSweep,
+				  (unsigned)gcAllocatedBeforeSweep, (unsigned)(gcBytesUsedBeforeSweep + 4095)/4096);
+			GCLog("[gcbehavior] occupancy-after: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
+				  (unsigned)heapAllocated, (unsigned)(heapAllocated - heap->GetFreeHeapSize()), 
+				  (unsigned)gc->GetNumBlocks(), (unsigned)(bytesInUse + 4095)/4096);
 			GCLog("[gcbehavior] user-data: kbytes-before-sweep=%u kbytes-after-sweep=%u ratio=%.2f\n", 
-				  unsigned(bytesUsedBeforeSweep/1024), 
-				  unsigned(gc->GetBytesInUse()/1024),
-				  double(bytesUsedBeforeSweep)/double(gc->GetBytesInUse()));
+				  unsigned(gcBytesUsedBeforeSweep/1024), 
+				  unsigned(bytesInUse/1024),
+				  double(gcBytesUsedBeforeSweep)/double(bytesInUse));
 #ifdef MMGC_POINTINESS_PROFILING
 			GCLog("[gcbehavior] pointiness: candidates=%u inrange=%u actual=%u\n",
 				  unsigned(candidateWords),
 				  unsigned(couldBePointer),
 				  unsigned(actuallyIsPointer));
 #endif
+			GCLog("[gcbehavior] markitem-last-gc: objects=%u bytes=%u\n",
+				  unsigned(objectsScannedLastCollection),
+				  unsigned(bytesScannedLastCollection));
+			GCLog("[gcbehavior] markitem-all-gc: objects=%.0f bytes=%.0f\n",
+				  double(objectsScannedLastCollection + objectsScannedTotal),
+				  double(bytesScannedLastCollection + bytesScannedTotal));
+			GCLog("[gcbehavior] barrier-last-gc: stage0=%u stage1=%u stage2=%u stage3=%u hit-ratio=%.2f\n",
+				  unsigned(barrierStageLastCollection[0]),
+				  unsigned(barrierStageLastCollection[1]),
+				  unsigned(barrierStageLastCollection[2]),
+				  unsigned(barrierStageLastCollection[3]),
+				  double(barrierStageLastCollection[3])/double(barrierStageLastCollection[0]));
+			GCLog("[gcbehavior] barrier-all-gc: stage0=%.0f stage1=%.0f stage2=%.0f stage3=%.0f hit-ratio=%.2f\n",
+				  double(barrierStageLastCollection[0] + barrierStageTotal[0]),
+				  double(barrierStageLastCollection[1] + barrierStageTotal[1]),
+				  double(barrierStageLastCollection[2] + barrierStageTotal[2]),
+				  double(barrierStageLastCollection[3] + barrierStageTotal[3]),
+				  double(barrierStageLastCollection[3] + barrierStageTotal[3])/double(barrierStageLastCollection[0] + barrierStageTotal[0]));
 			GCLog("[gcbehavior] time-zct-reap: last-cycle=%.1f total=%.1f\n",
 				  ticksToMillis(timeReapZCTLastCollection),
 				  ticksToMillis(timeReapZCT));
@@ -447,6 +489,16 @@ namespace MMgc
 				  ticksToMillis(timeMaxFinalizeAndSweep));
 		}
 #endif // MMGC_POLICY_PROFILING
+#ifdef MMGC_POLICY_PROFILING
+		// Need to clear these before any writes can occur, so that means right here: if earlier,
+		// we'd not have them for reporting.
+		if (ev == END_FinalizeAndSweep) {
+			for ( int i=0 ; i <= 3 ; i++ ) {
+				barrierStageTotal[i] += barrierStageLastCollection[i];
+				barrierStageLastCollection[i] = 0;
+			}
+		}
+#endif
 	}
 	
 #ifdef MMGC_POINTINESS_PROFILING
@@ -485,6 +537,19 @@ namespace MMgc
 		// do nothing for the moment
 	}
 	
+	REALLY_INLINE void GCPolicyManager::signalMarkWork(size_t nbytes)
+	{
+		objectsScannedLastCollection++;
+		bytesScannedLastCollection += nbytes;
+	}
+
+#ifdef MMGC_POLICY_PROFILING
+	REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
+	{
+		barrierStageLastCollection[stage]++;
+	}
+#endif
+
 	////////////// ZCT /////////////////////////////////////////////////////////////////////////////
 	
 //#define ZCT_TESTING					// Test the handling of a failure to extend the ZCT
@@ -2842,7 +2907,7 @@ bail:
 			//shouldGo = NULL;
 		}
 #endif
-		policy.signalMarkWork(size, 1);
+		policy.signalMarkWork(size);
 
 		uintptr_t *end = p + (size / sizeof(void*));
 		uintptr_t thisPage = (uintptr_t)p & ~0xfff;

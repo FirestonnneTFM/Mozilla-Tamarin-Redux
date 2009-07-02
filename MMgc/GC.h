@@ -435,16 +435,27 @@ namespace MMgc
 		void signalBlockDeallocation(size_t numblocks);
 		
 		/**
-		 * Situation: signal that some number of pointer-containing objects, whose combined
-		 * size total nbytes, have been scanned by the garbage collector.
+		 * Situation: signal that one pointer-containing objects, whose size is nbytes,
+		 * has been scanned by the garbage collector.
 		 *
 		 * This may only be called between the signals START_StartIncrementalMark and 
 		 * END_FinalizeAndSweep, and mark work signaled after a START event may not be
 		 * reflected in the values returned by objectsMarked() and bytesMarked() until
 		 * after the corresponding END event has been signaled.
 		 */
-		/*inline*/ void signalMarkWork(size_t nbytes, uint64_t nobjects=1);
+		/*REALLY_INLINE*/ void signalMarkWork(size_t nbytes);
 		
+#ifdef MMGC_POLICY_PROFILING
+		/**
+		 * Situation: signal that one write has been examined by the write barrier and made
+		 * it to the given stage (0..3) of the barrier.   Stages are:
+		 *  0 - entered the write barrier
+		 *  1 - passed cheap filtering
+		 *  2 - passed GetMark filtering (lhs is marked)
+		 *  3 - passed IsWhite filtering (rhs is not marked)
+		 */
+		/*REALLY_INLINE*/ void signalWriteBarrierWork(int stage);
+#endif
 #ifdef MMGC_POINTINESS_PROFILING
 		/**
 		 * Situation: signal that 'words' words have been scanned; that 'could_be_pointer'
@@ -599,17 +610,27 @@ namespace MMgc
 		// The total number of blocks owned by GC
 		uint64_t blocksOwned;
 		
-		// The number of objects scanned since startup
+		// The number of objects scanned since startup (which is equivalent to the number
+		// of calls to GC::MarkItem), less the number scanned during the last
+		// collection cycle.
 		uint64_t objectsScannedTotal;
 		
-		// The number of bytes scanned since startup
+		// The number of objects scanned during the last collection cycle.
+		uint32_t objectsScannedLastCollection;
+		
+		// The number of bytes scanned since startup less the ones scanned during the 
+		// last collection cycle.
 		uint64_t bytesScannedTotal;
 		
+		// The number of bytes scanned during the last collection cycle.
+		uint32_t bytesScannedLastCollection;
+
 		// Temporaries for holding the start time / start event until the end event arrives
 		uint64_t start_time;
 		PolicyEvent start_event;
 
-		// value returned by lowerLimitCollectionThreshold() and set by setLowerLimitCollectionThreshold()
+		// Value returned by lowerLimitCollectionThreshold() and set by setLowerLimitCollectionThreshold():
+		// the heap size, in blocks, below which we do not collect.
 		uint32_t collectionThreshold;
 
 		// true if a forced garbage collection has been requested
@@ -621,8 +642,16 @@ namespace MMgc
 		bool pendingClearZCTStats;
 
 #ifdef MMGC_POLICY_PROFILING
-		// Records the heap population before we sweep, used to compute the actual L
-		size_t bytesUsedBeforeSweep;
+		// Records the heap population before we sweep.  Unit is blocks except where noted.
+		size_t heapAllocatedBeforeSweep;
+		size_t heapUsedBeforeSweep;
+		size_t gcAllocatedBeforeSweep;
+		size_t gcBytesUsedBeforeSweep;
+		
+		// Barrier stages hit (writes examined by InlineWriteBarrierTrap) overall, less the last
+		// collection cycle, and for the last collection cycle. 
+		uint64_t barrierStageTotal[4];
+		uint32_t barrierStageLastCollection[4];
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		// Track the number of scannable words, the number that passes the initial range
@@ -635,12 +664,6 @@ namespace MMgc
 		uint64_t actuallyIsPointer;
 #endif
 	};
-
-	inline void GCPolicyManager::signalMarkWork(size_t nbytes, uint64_t nobjects)
-	{
-		objectsScannedTotal += nobjects;
-		bytesScannedTotal += nbytes;
-	}
 
 	/**
 	 * The Zero Count Table used by DRC.
