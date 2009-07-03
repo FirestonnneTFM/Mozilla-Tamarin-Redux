@@ -82,7 +82,11 @@ namespace MMgc
 				// 1st 4 bytes - size
 				// 2nd 4 bytes - unused
 				// 3rd 4 bytes - 0xedededed if freed correctly
-				uint32_t *mem = (uint32_t*) m_firstBlock->items;
+				union {
+					char* mem_c;
+					uint32_t* mem;
+				};
+				mem_c = m_firstBlock->items;
 				unsigned int itemNum = 0;
 				while(itemNum++ < m_itemsPerBlock) {
 					uint32_t thirdInt32 = *(mem+2);

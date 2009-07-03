@@ -104,7 +104,10 @@ namespace avmplus
 		WeakKeyHashtable* mcTable = m->getMethodClosureTable();		
 		Atom mcWeakAtom = mcTable->get(obj);
 		GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(mcWeakAtom);
-		MethodClosure* mc;
+		union {
+			GCObject* mc_o;
+			MethodClosure* mc;
+		};
 
 		if (!ref || !ref->get())
 		{
@@ -120,7 +123,7 @@ namespace avmplus
 		}
 		else
 		{
-			mc = (MethodClosure*)ref->get();
+			mc_o = ref->get();
 		}
 		return mc;
 	}

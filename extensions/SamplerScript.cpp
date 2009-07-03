@@ -368,18 +368,28 @@ namespace avmplus
 		
 		SampleClass *cc = (SampleClass*) self->toplevel()->getBuiltinExtensionClass(clsId);
 		SampleObject *sam = (SampleObject*)cc->createInstance(cc->ivtable(), NULL);
-		*(double*)((char*)sam + cc->timeOffset) = (double)sample.micros;
+		union {
+			char* off_c;
+			double* off_d;
+			uint32_t* off_u;
+		};
+		off_c = (char*)sam + cc->timeOffset;
+		*off_d = (double)sample.micros;
 
 		if(sample.sampleType != Sampler::RAW_SAMPLE)
 		{
 			AvmAssertMsg(sample.id != 0, "Didn't get id!");
-			*(double*)((char*)sam + cc->idOffset) = (double)sample.id;
+			off_c = (char*)sam + cc->idOffset;
+			*off_d = (double)sample.id;
 		}
 
 		if(sample.sampleType == Sampler::DELETED_OBJECT_SAMPLE)
 		{
 			if (cc->sizeOffset > 0)
-			*(double*)((char*)sam + cc->sizeOffset) = (double)sample.size;
+			{
+				off_c = (char*)sam + cc->sizeOffset;
+				*off_d = (double)sample.size;
+			}
 			return sam;
 		}
 		
@@ -403,7 +413,8 @@ namespace avmplus
 				WBRC(gc, f, ((char*)f + cc->nameOffset), uintptr(e->infoname()));	// NOT e->info()->name() 
 				if(e->filename()) {
 					WBRC(gc, f, ((char*)f + cc->fileOffset), e->filename());
-					*(uint32*)((char*)f + cc->lineOffset) = e->linenum();
+					off_c = (char*)f + cc->lineOffset;
+					*off_u = e->linenum();
 				}
 				stack->setUintProperty(i, f->atom());
 			}			
@@ -811,3 +822,4 @@ namespace avmplus
 		return new (core()->gc, ivtable->getExtraSize()) NewObjectSampleObject(ivtable, prototype);
 	}
 }
+

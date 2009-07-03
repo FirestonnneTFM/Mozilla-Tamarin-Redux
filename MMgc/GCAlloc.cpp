@@ -136,8 +136,13 @@ namespace MMgc
 				b->finalizeState = m_gc->finalizedValue;
 			else 
 				b->finalizeState = !m_gc->finalizedValue;
-
-			b->bits = m_bitsInPage ? (uint32_t*)((char*)b + sizeof(GCBlock)) : bits;
+			
+			union {
+				char* b_8;
+				uint32_t* b_32;
+			};
+			b_8 = (char*)b + sizeof(GCBlock);
+			b->bits = m_bitsInPage ? b_32 : bits;
 
 			// Link the block at the end of the list
 			b->prev = m_lastBlock;
