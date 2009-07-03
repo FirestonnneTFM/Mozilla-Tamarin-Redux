@@ -1436,12 +1436,16 @@ namespace MMgc
 	void* GC::AllocRCRoot(size_t size)
 	{
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
-		char* block = new char[size + hdr_size];
+		union {
+			char* block;
+			uintptr_t* block_u;
+		};
+		block = new char[size + hdr_size];
 		// FIXME: should allocate with zeroing, probably.
 		VMPI_memset(block, 0, size + hdr_size);
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
-		*(uintptr_t*)block = (uintptr_t)segment;
+		*block_u = (uintptr_t)segment;
 		segment->next = rcRootSegments;
 		if (rcRootSegments)
 			rcRootSegments->prev = segment;
@@ -1452,8 +1456,12 @@ namespace MMgc
 	void GC::FreeRCRoot(void* mem)
 	{
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
-		char* block = (char*)mem - hdr_size;
-		RCRootSegment* segment = (RCRootSegment*)*(uintptr_t*)block;
+		union {
+			char* block;
+			RCRootSegment** segmentp;
+		};
+		block = (char*)mem - hdr_size;
+		RCRootSegment* segment = *segmentp;
 		if (segment->next != NULL)
 			segment->next->prev = segment->prev;
 		if (segment->prev != NULL)
@@ -2581,7 +2589,11 @@ bail:
 						if (block->size == 1)
 						{
 							// fixed sized entries find out the size of the block
-							FixedAlloc::FixedBlock* fixed = (FixedAlloc::FixedBlock*) block->baseAddr;
+							union { 
+								char* fixed_c;
+								FixedAlloc::FixedBlock* fixed;
+							};
+							fixed_c = block->baseAddr;
 							int fixedsize = fixed->size;
 
 							// now compute which element we are 
@@ -2593,7 +2605,12 @@ bail:
 						else
 						{
 							// fixed large allocs ; start is after the block 
-							ptr = (int*) block->baseAddr;
+							union { 
+								char* ptr_c;
+								int* ptr_i;
+							};
+							ptr_c = block->baseAddr;
+							ptr = ptr_i;
 						}
 					}
 					break;
@@ -3885,3 +3902,4 @@ bail:
 		}
 	}
 }
+		

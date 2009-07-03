@@ -60,8 +60,14 @@ namespace avmplus
 		bool isUsingWeakKeys() const { return getHeapHashtable()->weakKeys(); }
 
 	private:
-		inline HeapHashtable* getHeapHashtable() const {
-			return (HeapHashtable*)*(uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
+		inline HeapHashtable* getHeapHashtable() const 
+		{
+			union {
+				uint8_t* p;
+				HeapHashtable** hht;
+			};
+			p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+			return *hht;
 		}
 		
 		Atom FASTCALL getKeyFromObject(Atom object) const;

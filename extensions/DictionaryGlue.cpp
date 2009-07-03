@@ -78,8 +78,12 @@ namespace avmplus
 
 		//store pointer of newly created hashtable, encapsulated with writebarrier, 
 		//at the hashtable offset address of the corresponding traits
-		uintptr_t* addr = (uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
-		WB(gc, this, addr, ht);
+		union {
+			uint8_t* p;
+			HeapHashtable** hht;
+		};
+		p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+		WB(gc, this, hht, ht);
 	}
 
 	Atom FASTCALL DictionaryObject::getKeyFromObject(Atom key) const
@@ -147,7 +151,11 @@ namespace avmplus
 		if (AvmCore::isGenericObject(k) && getHeapHashtable()->weakKeys()) 
 		{
 			GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(k);
-			ScriptObject* key = ((ScriptObject*)ref->get());
+			union {
+				GCObject* key_o;
+				ScriptObject* key;
+			};
+			key_o = ref->get();
 			if (key) 
 			{
 				AvmAssert(key->traits() != NULL);
