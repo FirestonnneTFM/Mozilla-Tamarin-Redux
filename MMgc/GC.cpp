@@ -157,9 +157,6 @@ namespace MMgc
 		, timeEndOfLastIncrementalMark(0)
 		, timeStartOfLastCollection(0)
 		, timeEndOfLastCollection(0)
-		, blocksAllocatedSinceLastCollection(0)
-		, blocksDeallocatedSinceLastCollection(0)
-		, blocksInHeapAfterPreviousAllocation(heap->GetTotalHeapSize())
 		, blocksOwned(0)
 		, maxBlocksOwned(0)
 		, objectsScannedTotal(0)
@@ -182,6 +179,17 @@ namespace MMgc
 		, couldBePointer(0)
 		, actuallyIsPointer(0)
 #endif
+		, P(0.005)			// seconds; 5ms.  The marker /will/ overshoot this significantly
+		, R(1000000.0)		// bytes/second; will be updated on-line
+		, L_ideal(2.0)
+		, L_actual(L_ideal)
+		, T(0.25)
+		, G(0.25)
+		, remainingMajorAllocationBudget(0)
+		, minorAllocationBudget(0)
+		, remainingMinorAllocationBudget(0)
+		, adjustR_startTime(0)
+		, adjustR_totalTime(0)
 	{
 #ifdef MMGC_POLICY_PROFILING
 		for ( int i=0 ; i <= 3 ; i++ ) {
@@ -199,33 +207,165 @@ namespace MMgc
 #endif
 	}
 
-	inline uint64_t GCPolicyManager::interIncrementalMarkTicks() {
-		return 10 * VMPI_getPerformanceFrequency() / 1000;	// Ticks.  Value represents 10ms on all platforms
+	// Garbage collection policy.
+	//
+	// Garbage collection is incremental and driven by allocation, heap pressure, and a
+	// number of parameter settings.  The policy is documented and analyzed in doc/mmgc/policy.pdf,
+	// this is a recap.
+	//
+	// Given parameters:
+	//
+	// P (max pause) can be tuned but within a limited range, but we treat it as constant
+	// G (max GC fraction of time)  can be tuned within a limited range, but we treat it
+	//                              as constant.  This effectively controls pause clustering.
+	// F (floor)  size of heap below which we don't collect, can be tuned but in limited ways,
+	//            host code actually changes it.  Returned by lowerLimitCollectionThreshold().
+	// R (rate of marking) is given by the hardware mainly, updated on-line
+	// V (voracity of new block allocation) is given by the program, ratio of blocks
+	//   gcheap allocates from OS to ratio it allocates from already committed memory
+	// H (heap)  size of heap at the end of one collection cycle
+	//
+	// Tunable parameters:
+	//
+	// L (inverse load factor) ratio of heap size just before finishing a collection
+	//   (before any reclamation) to the heap size just after finishing the previous
+	//   collection (following any reclamation) (range 1..infty).  Effectively expresses
+	//   the ratio of memory used to live program data.
+	// T (allocation trigger) fraction of allocation budget to use before triggering
+	//   the first mark increment (range 0..1).  With T=1 we have nonincremental GC;
+	//   with T=0 the GC is always running.  A low T is desirable except that it puts
+	//   more pressure on the write barrier.
+	//
+	// We wish the heap size just before finishing a collection cycle to be HL, and
+	// the allocation budget following a collection is H(L-1), and we work to make
+	// that true in the steady state.
+	//
+	// Facts:
+	//
+	// W = L/((1-T)(L-1)) : bytes to be scanned per byte allocated when gc is active
+	// M = PR : max mark work per mark increment
+	// A = M/W : max bytes allocated between mark increments (because W work is
+	//   needed for every allocated byte); if allocation proceeds faster than this then
+	//   the marker cannot keep up to honor both L and P in the steady state
+	//
+	// How these constrain each other:
+	//
+	// If T is too high or L is too low then sticking to P may be futile as we will have
+	// excessive pause clustering, which is no better.
+	//
+	// G < 1 is meant to constrain L: if G can't be met then L is effectively raised so 
+	// that G can be met.  This is typically the case during system warmup, where a lot
+	// of allocation in a smallish heap leads to a lot of GC activity with little gain.
+	// The computation is like this:
+	//    a = t(end of FinishIncrementalMark) - t(start of StartIncrementalMark)
+	//    b = sum of time spent in StartIncrementalMark, IncrementalMark, FinishIncrementalMark
+	// If b > aG then we must throttle GC activity for the next cycle.  G controls clustering.
+
+	// Open issues / to do:
+	//  - precise semantics of V, specifically, what is the interval over which it's computed
+	//  - incorporate V in the computations
+
+	double GCPolicyManager::W()
+	{
+		return L_actual / ((1 - T) * (L_actual - 1)); 
+  	}
+
+	double GCPolicyManager::A() {
+		return P * R / W();
 	}
-	
-	inline uint64_t GCPolicyManager::interCollectionTicks() {
-		return 200 * VMPI_getPerformanceFrequency() / 1000;		// Ticks.  Value represents 200ms on all platforms
-		
-		/* Old code, preserved here until we revamp policy as a whole.
-		 *
-		 * The following is almost certainly not correct but it's the current policy.
-		 *
-		 * From a conversation with Tommy, it appears that the idea here is that faster machines should
-		 * have lower limits on the time between collections.  The assumption is that a slower
-		 * machine will have a lower frequency performance timer, so a constant ticks value here will
-		 * give more time to a slower machine than to a fast machine.  That's a pretty dodgy assumption
-		 * about the frequency, though.  For example, the Linux platform layer hardwires it at 1MHz
-		 * regardless of the computer's speed, it could be a Maemo or a 4GHz monster.
-		 *
-		 * Returnin a constant here is known to cause enormous heap bloat on Linux, where it translates
-		 * as 1.5s.
-		 */
-		//return 1515909;										// Ticks.  Old comment says "200 ms on a 2ghz machine" but that's wrong
+
+  	// Called when an incremental mark starts
+	void GCPolicyManager::startAdjustingR()
+	{
+		adjustR_startTime = now();
 	}
-	
-	inline uint32_t GCPolicyManager::freeSpaceDivisor() {
-		return 4;											// Unitless.  Old comment says "4" comes from the Boehm collector
+
+	// Called when an incremental mark ends
+	void GCPolicyManager::endAdjustingR()
+	{
+		adjustR_totalTime += now() - adjustR_startTime;
+		R = double(bytesScannedTotal) / (double(adjustR_totalTime) / double(VMPI_getPerformanceFrequency()));
+		// Less than 1MB/sec is not credible and is probably a measurement error / measurement noise.
+		if (R < 1000000)
+			R = 1000000;
 	}
+
+	// The throttles here guard against excessive growth.  growth <= 1 and L_actual <= 3*L_ideal
+	// are just guesses, but the exact numbers are probably less important than having some sort
+	// of throttle.
+
+	void GCPolicyManager::adjustL()
+	{
+		double a = double(timeEndToEndLastCollection);
+  		double b = double(timeInLastCollection);
+		if (b > a*G) {
+			double growth = (L_actual - 1) * (1 + timeInLastCollection/timeEndToEndLastCollection);
+			if (growth > 1)
+				growth = 1;
+			L_actual = L_actual + growth;
+			if (L_actual > 3*L_ideal)
+				L_actual = 3*L_ideal;
+		}
+ 		else
+ 			L_actual = (L_actual + L_ideal) / 2;
+ 	}
+
+ 	// Called when a collection ends
+ 	void GCPolicyManager::adjustPolicyForNextMajorCycle()
+ 	{
+  		// Compute L_actual, which takes into account how much time we spent in GC
+		// during the last cycle
+		adjustL();
+
+  		// The budget is H(L-1), with a floor
+		double H = double(gc->GetBytesInUse());
+		double remainingBeforeGC = double(lowerLimitCollectionThreshold()) * 4096.0 - H;
+		remainingMajorAllocationBudget = H * (L_actual - 1.0);
+		if (remainingMajorAllocationBudget < remainingBeforeGC)
+			remainingMajorAllocationBudget = remainingBeforeGC;
+  		remainingMinorAllocationBudget = minorAllocationBudget = int64_t(remainingMajorAllocationBudget * T);
+ 		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
+#ifdef MMGC_POLICY_PROFILING
+		if (summarizeGCBehavior())
+			GCLog("[gcbehavior] policy: mark-rate=%.2f (MB/sec) adjusted-L=%.2f kbytes-live=%.0f kbytes-target=%.0f\n", 
+				  R / (1024*1024),
+				  L_actual, 
+				  H / 1024.0, 
+				  (H+remainingMajorAllocationBudget) / 1024.0);
+#endif
+  	}
+ 
+ 	// Called when an incremental mark ends
+ 	void GCPolicyManager::adjustPolicyForNextMinorCycle()
+ 	{
+ 		remainingMinorAllocationBudget = minorAllocationBudget = size_t(A());
+ 		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
+ 	}
+ 
+ 	REALLY_INLINE bool GCPolicyManager::queryCollectionWork()
+ 	{
+ 		return remainingMinorAllocationBudget <= 0;
+ 	}
+ 
+ 	// Called when an incremental mark is about to start.  The premise is that if the
+ 	// application stays within the budget then the value returned here will correspond
+ 	// to the desired time slice.  But if the application allocates some huge block that
+ 	// blows the budget then we up the mark work here, /even if/ that means violating
+ 	// the budget.  The idea is that that won't happen very often, and that it's more
+ 	// important not to overshoot the total heap size target than to stick to the
+ 	// time slice always.  The other alternative is to adjust the amount of allocation
+ 	// allowed before the next mark downward, but as soon as we do that aggressively
+ 	// we get into pause clustering issues and it will seem like one long GC pause anyway.
+ 
+ 	uint32_t GCPolicyManager::incrementalMarkMilliseconds()
+ 	{
+ 		return uint32_t(P * 1000.0 * double(minorAllocationBudget - remainingMinorAllocationBudget) / double(minorAllocationBudget));
+ 	}
+ 
+ 	bool GCPolicyManager::queryEndOfCollectionCycle()
+ 	{
+ 		return remainingMajorAllocationBudget <= 0;
+  	}
 
 	void GCPolicyManager::setLowerLimitCollectionThreshold(uint32_t blocks) {
 		collectionThreshold = blocks;
@@ -248,23 +388,6 @@ namespace MMgc
 		return double(ticks) * 1000.0 / double(VMPI_getPerformanceFrequency());
 	}
 #endif
-
-	inline bool GCPolicyManager::queryAllocationLimitReached() {
-		return (blocksAllocatedSinceLastCollection >= blocksDeallocatedSinceLastCollection &&
-				(blocksAllocatedSinceLastCollection - blocksDeallocatedSinceLastCollection) * freeSpaceDivisor() >= blocksOwned);
-	}
-	
-	inline bool GCPolicyManager::queryLowerLimitGCBlocksAllocated() {
-		return blocksOwned > lowerLimitCollectionThreshold();
-	}
-
-	inline bool GCPolicyManager::querySufficientTimeSinceLastCollection() {
-		return now() - timeEndOfLastCollection > interCollectionTicks();
-	}
-	
-	uint32_t GCPolicyManager::incrementalMarkMilliseconds() {
-		return 5;											// milliseconds
-	}
 
 	uint64_t GCPolicyManager::blocksOwnedByGC() {
 		return blocksOwned;
@@ -297,41 +420,6 @@ namespace MMgc
 		// grow it if it can't accomodate the reap threshold
 		return (zctBlocks*CAPACITY(RCObject*) - zctOccupancy) < uint64_t(ZCT_REAP_THRESHOLD);
 	}
-		
-    bool GCPolicyManager::queryStartIncrementalMarkAtAllocBlock()
-    {
-		GCAssert(!gc->IncrementalMarking() && !gc->Collecting());
-		return (queryLowerLimitGCBlocksAllocated() && queryAllocationLimitReached() && querySufficientTimeSinceLastCollection());
-    }
-
-	bool GCPolicyManager::queryIncrementalMarkAtAllocBlock() 
-    {
-		/* This is the existing policy but for fast computers it's better
-		 * just to return 'true', which probably means interIncrementalMarkTicks
-		 * should be really small.
-		 */
-		GCAssert(gc->IncrementalMarking() && !gc->Collecting());
-		return now() - timeEndOfLastIncrementalMark > interIncrementalMarkTicks();
-    }
-	
-	bool GCPolicyManager::queryFinishIncrementalMarkAfterAllocBlockFail()
-	{
-		// this is the existing policy but it's not a good idea
-		return true;
-	}
-
-	bool GCPolicyManager::queryStartCollectionAfterHeapExpansion()
-	{
-		// this is the existing policy but it's not a good idea
-		return (blocksInHeapAfterPreviousAllocation > lowerLimitCollectionThreshold() &&
-				blocksInHeapAfterPreviousAllocation < heap->GetTotalHeapSize() && 
-				querySufficientTimeSinceLastCollection());
-	}
-
-	bool GCPolicyManager::queryRunCollectionAfterAllocBlockFail()
-	{
-		return heap->GetTotalHeapSize() >= lowerLimitCollectionThreshold() && queryAllocationLimitReached(); 
-	}
 
 	void GCPolicyManager::signal(PolicyEvent ev) {
 		switch (ev) {
@@ -352,9 +440,14 @@ namespace MMgc
 				couldBePointer = 0;
 				actuallyIsPointer = 0;
 #endif
+				startAdjustingR();
 				goto clear_zct_stats;
 			case START_IncrementalMark:
+				startAdjustingR();
+				goto common_actions;
 			case START_FinalRootAndStackScan:
+				startAdjustingR();
+				goto common_actions;
 			case START_FinalizeAndSweep:
 #ifdef MMGC_POLICY_PROFILING
 				heapAllocatedBeforeSweep = heap->GetTotalHeapSize();
@@ -389,12 +482,14 @@ namespace MMgc
 				timeStartIncrementalMark += elapsed;
 				timeMaxStartIncrementalMark = max(timeMaxStartIncrementalMark, elapsed);
 				timeMaxStartIncrementalMarkLastCollection = max(timeMaxStartIncrementalMarkLastCollection, elapsed);
+				endAdjustingR();
 				break;
 			case END_FinalRootAndStackScan:
 				countFinalRootAndStackScan++;
 				timeFinalRootAndStackScan += elapsed;
 				timeMaxFinalRootAndStackScan = max(timeMaxFinalRootAndStackScan, elapsed);
 				timeMaxFinalRootAndStackScanLastCollection = max(timeMaxFinalRootAndStackScanLastCollection, elapsed);
+				endAdjustingR();
 				break;
 			case END_ReapZCT:
 				countReapZCT++;
@@ -409,6 +504,7 @@ namespace MMgc
 				timeMaxIncrementalMark = max(timeMaxIncrementalMark, elapsed);
 				timeMaxIncrementalMarkLastCollection = max(timeMaxIncrementalMarkLastCollection, elapsed);
 				timeEndOfLastIncrementalMark = t;
+				endAdjustingR();
 				break;
 			case END_FinalizeAndSweep:
 				countFinalizeAndSweep++;
@@ -417,8 +513,6 @@ namespace MMgc
 				timeMaxFinalizeAndSweepLastCollection = max(timeMaxFinalizeAndSweepLastCollection, elapsed);
 				timeEndOfLastCollection = t;
 				timeEndToEndLastCollection = timeEndOfLastCollection - timeStartOfLastCollection;
-				blocksAllocatedSinceLastCollection = 0;
-				blocksDeallocatedSinceLastCollection = 0;
 				pendingClearZCTStats = true;
 				heap->gcManager.signalEndCollection(gc);
 				break;
@@ -440,6 +534,14 @@ namespace MMgc
 			}
 		}
 #endif
+		switch (ev) {
+			case END_IncrementalMark:
+				adjustPolicyForNextMinorCycle();
+				break;
+			case END_FinalizeAndSweep:
+				adjustPolicyForNextMajorCycle();
+				break;
+		}
 	}
 	
 #ifdef MMGC_POLICY_PROFILING
@@ -558,17 +660,24 @@ namespace MMgc
 	}
 #endif
 
+	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
+	{
+		remainingMinorAllocationBudget -= nbytes;
+	}
+
+	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
+	{
+		remainingMinorAllocationBudget += nbytes;
+	}
+	
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
-		blocksAllocatedSinceLastCollection += blocks;
 		blocksOwned += blocks;
 		if (blocksOwned > maxBlocksOwned)
 			maxBlocksOwned = blocksOwned;
-		blocksInHeapAfterPreviousAllocation = heap->GetTotalHeapSize();
 	}
 	
 	void GCPolicyManager::signalBlockDeallocation(size_t blocks) {
 		blocksOwned -= blocks;
-		blocksDeallocatedSinceLastCollection += blocks;
 	}
 
 	void GCPolicyManager::signalMemoryStatusChange(MemoryStatus from, MemoryStatus to) {
@@ -1080,7 +1189,6 @@ namespace MMgc
 		sweeps(0),
 		numObjects(0),
 		sweepStart(0),
-		hitZeroObjects(false),
 		emptyWeakRef(0),
 		m_gcLock(VMPI_lockCreate()),
 		m_gcThread(NULL),
@@ -1229,7 +1337,7 @@ namespace MMgc
 		
 		zct.Destroy();
 			
-		GCAssertMsg(policy.blocksOwnedByGC() == 0, "GC accounting off");
+		GCAssertMsg(GetNumBlocks() == 0, "GC accounting off");
 
 		if(stackEnter != NULL)
 			stackEnter->Destroy();
@@ -1249,7 +1357,7 @@ namespace MMgc
 		ReapZCT(scanStack);
 
 		if(!marking)
-			StartIncrementalMark(scanStack);
+			StartIncrementalMark();
 		if(marking)
 			FinishIncrementalMark(scanStack);
 
@@ -1328,12 +1436,16 @@ namespace MMgc
 	void* GC::AllocRCRoot(size_t size)
 	{
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
-		char* block = new char[size + hdr_size];
+		union {
+			char* block;
+			uintptr_t* block_u;
+		};
+		block = new char[size + hdr_size];
 		// FIXME: should allocate with zeroing, probably.
 		VMPI_memset(block, 0, size + hdr_size);
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
-		*(uintptr_t*)block = (uintptr_t)segment;
+		*block_u = (uintptr_t)segment;
 		segment->next = rcRootSegments;
 		if (rcRootSegments)
 			rcRootSegments->prev = segment;
@@ -1344,8 +1456,12 @@ namespace MMgc
 	void GC::FreeRCRoot(void* mem)
 	{
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
-		char* block = (char*)mem - hdr_size;
-		RCRootSegment* segment = (RCRootSegment*)*(uintptr_t*)block;
+		union {
+			char* block;
+			RCRootSegment** segmentp;
+		};
+		block = (char*)mem - hdr_size;
+		RCRootSegment* segment = *segmentp;
 		if (segment->next != NULL)
 			segment->next->prev = segment->prev;
 		if (segment->prev != NULL)
@@ -1356,9 +1472,34 @@ namespace MMgc
 		delete block;
 	}
 
+	void GC::CollectionWork()
+	{
+		if (nogc)
+			return;
+		
+		if (incremental) {
+			if (!collecting) {
+				if (!marking)
+					StartIncrementalMark();
+				else if (policy.queryEndOfCollectionCycle())
+					FinishIncrementalMark(true);
+				else
+					IncrementalMark();
+			}
+		}
+		else {
+			// non-incremental collection
+			Collect();
+		}
+	}
+
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{
 		GCAssertMsg(onThread(), "GC called from different thread!");
+
+		if (policy.queryCollectionWork())
+			CollectionWork();
+
 #ifdef AVMPLUS_SAMPLER
 		avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 		if(core)
@@ -1420,10 +1561,12 @@ namespace MMgc
 		}
 
 		if(item != NULL) {
+			size_t real_size = Size(item);
+			policy.signalAllocWork(real_size);
 			item = GetUserPointer(item);
 
 			if(heap->HooksEnabled()) {
-				heap->AllocHook(item, askSize, Size(item));
+				heap->AllocHook(item, askSize, real_size);
 			}
 		}
 
@@ -1493,16 +1636,21 @@ namespace MMgc
 		}
 #endif
 
-		if(heap->HooksEnabled()) {
-			heap->FreeHook(item, GC::Size(item), 0xca);
+		{
+			size_t real_size = Size(item);
+			policy.signalFreeWork(real_size);
+			
+			if(heap->HooksEnabled()) {
+				heap->FreeHook(item, real_size, 0xca);
+			}
+		
+			if (isLarge) {
+				largeAlloc->Free(GetRealPointer(item));
+			} else {
+				GCAlloc::Free(GetRealPointer(item));
+			}
+			return;
 		}
-	
-		if (isLarge) {
-			largeAlloc->Free(GetRealPointer(item));
-		} else {
-			GCAlloc::Free(GetRealPointer(item));
-		}
-		return;
 
 bail:
 
@@ -1662,21 +1810,7 @@ bail:
 	{
 		GCAssert(size > 0);
 	
-		// perform gc if heap expanded due to fixed memory allocations
-		if(!marking && !collecting && policy.queryStartCollectionAfterHeapExpansion())
-		{
-			if(incremental && !nogc)
-				StartIncrementalMark();
-			else
-				Collect();
-		}
-
-		void *item;
-
-		if(incremental && !nogc)
-			item = AllocBlockIncremental(size, zero);
-		else
-			item = AllocBlockNonIncremental(size, zero);
+		void *item = heapAlloc(size, zero ? GCHeap::kZero : 0);
 
 		if(!item)
 			item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? GCHeap::kCanFail : 0));
@@ -1690,40 +1824,6 @@ bail:
 			}
 		}
 
-		return item;
-	}
-
-	void* GC::AllocBlockIncremental(int size, bool zero)
-	{
-		if (!collecting) {
-			if (marking) {
-				if (incrementalValidation || policy.queryIncrementalMarkAtAllocBlock())
-					IncrementalMark();
-			} 
-			else if (incrementalValidation || policy.queryStartIncrementalMarkAtAllocBlock())
-				StartIncrementalMark();
-		}
-	
-		void *item = heapAlloc(size, zero ? GCHeap::kZero : 0);
-
-		if (item == NULL && marking && !collecting && policy.queryFinishIncrementalMarkAfterAllocBlockFail()) {
-			GCAssert(!nogc);
-			FinishIncrementalMark();
-			item = heapAlloc(size, zero ? GCHeap::kZero : 0);
-		}
-
-		return item;
-	}
-
-	void* GC::AllocBlockNonIncremental(int size, bool zero)
-	{
-		void *item = heapAlloc(size, zero ? GCHeap::kZero : 0);
-		
-		if (item == NULL && policy.queryRunCollectionAfterAllocBlockFail()) {
-			Collect();
-			item = heapAlloc(size, zero ? GCHeap::kZero : 0);
-		}
-		
 		return item;
 	}
 
@@ -2417,7 +2517,7 @@ bail:
 					GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
 					const void *item = GetUserPointer((const void*)(lb+1));
 					if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(GetRealPointer(item))) {
-						UnmarkedScan(item, GC::Size(item));
+						UnmarkedScan(item, Size(item));
 					}
 					m += lb->GetNumBlocks() * GCHeap::kBlockSize;
 				} else if(bits == kGCAllocPage) {
@@ -2489,7 +2589,11 @@ bail:
 						if (block->size == 1)
 						{
 							// fixed sized entries find out the size of the block
-							FixedAlloc::FixedBlock* fixed = (FixedAlloc::FixedBlock*) block->baseAddr;
+							union { 
+								char* fixed_c;
+								FixedAlloc::FixedBlock* fixed;
+							};
+							fixed_c = block->baseAddr;
 							int fixedsize = fixed->size;
 
 							// now compute which element we are 
@@ -2501,7 +2605,12 @@ bail:
 						else
 						{
 							// fixed large allocs ; start is after the block 
-							ptr = (int*) block->baseAddr;
+							union { 
+								char* ptr_c;
+								int* ptr_i;
+							};
+							ptr_c = block->baseAddr;
+							ptr = ptr_i;
 						}
 					}
 					break;
@@ -2564,7 +2673,7 @@ bail:
 				{
 					if(GCLargeAlloc::ContainsPointers(GetRealPointer(item))) 
 					{
-						ProbeForMatch(item, GC::Size(item), val, recurseDepth, currentDepth);
+						ProbeForMatch(item, Size(item), val, recurseDepth, currentDepth);
 					}
 				}
 				m += lb->GetNumBlocks() * GCHeap::kBlockSize;
@@ -2598,7 +2707,7 @@ bail:
 #endif
 
 
-	void GC::StartIncrementalMark(bool scanStack)
+	void GC::StartIncrementalMark()
 	{
 		policy.signal(GCPolicyManager::START_StartIncrementalMark);		// garbage collection starts
 		
@@ -2637,7 +2746,7 @@ bail:
 		// FIXME (policy): arguably a bug to do this here if StartIncrementalMark has exhausted its quantum
 		// doing eager sweeping.
 
-		IncrementalMark(scanStack);
+		IncrementalMark();
 	}
 
 	// The mark stack overflow logic depends on this calling MarkItem directly 
@@ -3150,18 +3259,24 @@ bail:
 #endif
 	}
 
-	void GC::IncrementalMark(bool scanStack)
+	void GC::IncrementalMark()
 	{
-		uint32_t time = incrementalValidation ? 1 : uint32_t(policy.incrementalMarkMilliseconds());
+		uint32_t time = incrementalValidation ? 1 : policy.incrementalMarkMilliseconds();
 #ifdef _DEBUG
 		time = 1;
 #endif
 
 		SAMPLE_FRAME("[mark]", core());
-		if(m_incrementalWork.Count() == 0 || hitZeroObjects) {
-			FinishIncrementalMark(scanStack);
+
+		// Don't force collections to finish if the mark stack is empty; 
+		// let the allocation budget be used up.
+
+		if(m_incrementalWork.Count() == 0) {
+			// Policy triggers off these signals, so we still need to send them.
+			policy.signal(GCPolicyManager::START_IncrementalMark);
+			policy.signal(GCPolicyManager::END_IncrementalMark);
 			return;
-		} 
+		}
 		
 		policy.signal(GCPolicyManager::START_IncrementalMark);
 		
@@ -3183,7 +3298,6 @@ bail:
 		do {
 			unsigned int count = m_incrementalWork.Count();
 			if (count == 0) {
-				hitZeroObjects = true;
 				break;
 			}
 			if (count > checkTimeIncrements) {
@@ -3216,8 +3330,6 @@ bail:
 			return;
 		}
 		
-		hitZeroObjects = false;
-
 		// Force repeated restarts and marking until we're done.  For discussion
 		// of completion, see the comments above HandleMarkStackOverflow.
 
@@ -3790,3 +3902,4 @@ bail:
 		}
 	}
 }
+		

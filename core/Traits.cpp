@@ -1817,7 +1817,11 @@ namespace avmplus
 		InlineHashtable* ht = m_hashTableOffset ? obj->getTableNoInit() : NULL;
 
 		// start by clearing native space to zero (except baseclasses)
-		uint32_t* p = (uint32_t*)((char*)obj + sizeof(AvmPlusScriptableObject));
+		union {
+			char* p_8;
+			uint32_t* p;
+		};
+		p_8 = (char*)obj + sizeof(AvmPlusScriptableObject);
 		AvmAssert((uintptr_t(p) & 0x3) == 0);
 		const uint32_t mysize = m_sizeofInstance - uint32_t(sizeof(AvmPlusScriptableObject));
 		AvmAssert((mysize & 0x3) == 0); // we assume all sizes are multiples of 4
@@ -1869,7 +1873,11 @@ namespace avmplus
 		//hashtable pointer stored at the offset address;
 		if(isDictionary)
 		{
-			uintptr_t* ptr = (uintptr_t*)((char*)obj + m_hashTableOffset);
+			union {
+				char* p_8;
+				uintptr_t* ptr;
+			};
+			p_8 = (char*)obj + m_hashTableOffset;
 			*ptr = 0;
 		}
 	}
