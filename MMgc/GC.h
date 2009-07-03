@@ -267,27 +267,14 @@ namespace MMgc
 	 *
 	 * ----
 	 *
-	 * Notes, 2009-04-01 / lhansen:
+	 * Notes, 2009-06-23 / lhansen:
 	 *
-	 * This is the first cut, and it incorporates verbatim the policies of collection
-	 * in Tamarin at the time of the March 2009 TR -> TC merge.  More complexity and other
-	 * policies will appear here by and by, this is by no means set in stone.  In particular,
-	 * it will become aware of other GC instances and also more aware of FixedMalloc.
-	 *
-	 * Arguably the doubling in size of the mark stack is also a policy decision
-	 * that should be made here, not something the marker should decide for itself.  But
-	 * the fixed-size mark stack is a bug in itself so wait for that to be fixed.
+	 * This is the second cut, and it implements an allocation-driven policy that is
+	 * documented extensively in GC.cpp and in doc/mmgc/policy.pdf.  The policy improves
+	 * on the first-cut policy by running the GC less often and having lower pause times.
 	 *
 	 * ZCT reaping times are not bounded, so ZCT reaping may violate any kind of
-	 * incrementality guarantee.
-	 *
-	 * In general, the policy does not guarantee incremental collection, because
-	 * the amount of work performed each mark quantum is tied to a time slice, not to the
-	 * amount of work that needs to be done for the marker to keep up with the mutator.
-	 * The problem is that incremental marking only happens when we allocate fresh blocks,
-	 * not on a finer grain, so a lot of allocation can take place between each time the
-	 * marker gets to run, and then it gets a fixed quantum.  In practice, this biases
-	 * us toward heap expansion, which is not good for small systems.
+	 * incrementality guarantee.  This will be fixed by and by.
 	 */
 	class GCPolicyManager {
 	public:
@@ -344,60 +331,6 @@ namespace MMgc
 		bool queryZctShouldGrowAfterReap(uint64_t zctBlocks, uint64_t zctOccupancy);
 		
 		/**
-		 * Situation: The GC is about to allocate one or more blocks from GCHeap, and 
-		 * does not know if GCHeap may have to expand the heap.  An incremental collection
-		 * is already in progress.  Should we run the marker?
-		 *
-		 * @return true if we should run the incremental marker for one quantum.
-		 */
-		bool queryIncrementalMarkAtAllocBlock();
-		
-		 /**
-		 * Situation: The GC is about to allocate one or more blocks from GCHeap, and
-		 * does not know if GCHeap may have to expand the heap.  An incremental collection
-		 * is /not/ in progress.  Should we start it?
-		 *
-		 * @return true if we should start an incremental collection.
-		 */
-		bool queryStartIncrementalMarkAtAllocBlock();
-
-		/**
-		 * Situation: The GC is about to allocate one or more blocks from GCHeap.
-		 *
-		 * If the heap has been expanded by external agents (FixedMalloc or other
-		 * garbage collectors, or possibly other block-allocating agents) since
-		 * the last time the GC allocated a block, we might want to kick off a
-		 * collection to keep up with the allocator.  Should we start the collection?
-		 *
-		 * @return true if we should start an incremental collection (in incremental mode)
-		 *              or a non-incremental collection (in non-incremental mode)
-		 */
-		 bool queryStartCollectionAfterHeapExpansion();
-		 
-		 /**
-		 * Situation: The GC has just failed to allocate one or more blocks from GCHeap
-		 * without expanding the heap, and an incremental collection is in progress.
-		 * Should we force the collection to finish in order to increase the chance of 
-		 * being able to allocate a block without expanding the heap?
-		 *
-		 * @return true if we should force the collection to finish.
-		 *
-		 * FIXME: This is not good policy.  Essentially it amounts to a stop-the-world
-		 * collection, and I have simple benchmark programs that show huge latencies
-		 * if this is made to happen.  Expect this to go away by and by.
-		 */
-		bool queryFinishIncrementalMarkAfterAllocBlockFail();
-
-		/**
-		 * Situation: The GC has just failed ot allocate one or more blocks from GCHeap
-		 * without expanding the heap, and the system is in non-incremental mode.
-		 * Should we start a collection?
-		 *
-		 * @return true to run a stop-the-world collection.
-		 */
-		bool queryRunCollectionAfterAllocBlockFail();
-
-		/**
 		 * Set the lower limit beyond which we try not to run the garbage collector.
 		 * The value is specified in 4k blocks, thus 256 == 1MB.
 		 */
@@ -441,7 +374,7 @@ namespace MMgc
 		void signalBlockDeallocation(size_t numblocks);
 		
 		/**
-		 * Situation: signal that one pointer-containing objects, whose size is nbytes,
+		 * Situation: signal that one pointer-containing object, whose size is nbytes,
 		 * has been scanned by the garbage collector.
 		 *
 		 * This may only be called between the signals START_StartIncrementalMark and 
@@ -451,6 +384,37 @@ namespace MMgc
 		 */
 		/*REALLY_INLINE*/ void signalMarkWork(size_t nbytes);
 		
+		/**
+		 * Situation: signal that some number of bytes have just been successfully
+		 * allocated and are about to be returned to the caller of the allocator.
+		 */
+		/*REALLY_INLINE*/ void signalAllocWork(size_t nbytes);
+
+		/**
+		 * Situation: signal that some number of bytes have just been successfully
+		 * freed.
+		 */
+		/*REALLY_INLINE*/ void signalFreeWork(size_t nbytes);
+
+		/**
+		 * Situation: we've just entered the allocator and we need to know whether the
+		 * allocation budget has already been exhausted so that collection work should
+		 * be triggered.
+		 *
+		 * Note the decision is independent of the request size; consequently, we only
+		 * react /after/ the budget is exhausted, and this may cause us to overallocate
+		 * a little (typically) or more than that (rarely).
+		 */
+		/*REALLY_INLINE*/ bool queryCollectionWork();
+
+		/**
+		 * Situation: the incremental marker has been started, and we need to know whether
+		 * to run another mark increment or push the conclusion to a finish (because the
+ 		 * total allocation budget for the collection cycle has been exhausted).  This
+		 * predicate returns true in the latter case.
+		 */
+		bool queryEndOfCollectionCycle();
+
 #ifdef MMGC_POLICY_PROFILING
 		/**
 		 * Situation: signal that one write has been examined by the write barrier and made
@@ -545,35 +509,9 @@ namespace MMgc
 		uint64_t countReapZCT;
 		
 	private:
-		// Have we allocated "enough" since the the last collection?  Typically a
-		// function of allocation volume and the free space divisor.
-		bool queryAllocationLimitReached();
-		
-		// Is the size of the GC heap large enough to allow collection?
-		bool queryLowerLimitGCBlocksAllocated();
-		
-		// Has enough time passed since the end of the last collection to allow a
-		// new collection to start?
-		bool querySufficientTimeSinceLastCollection();
-
 		// The following parameters can vary not just from machine to machine and
 		// run to run on the same machine, but within a run in response to memory
 		// pressures and other feedback.
-		
-		// A number of ticks that must pass between each call to IncrementalMark.
-		// This parameter helps control the time allocated to the GC and must
-		// be balanced with the value for incrementalMarkTicks(), above.
-		uint64_t interIncrementalMarkTicks();
-		
-		// A number of ticks that must pass between the end of one collection and
-		// the beginning of the next collection.  This parameter helps control GC
-		// overhead in expansive phases, sometimes at a cost in memory.
-		uint64_t interCollectionTicks();
-		
-		// An integer n s.t. if L was the amount of live data at the end of one
-		// collection, then a new collection should have run to completion when
-		// L/n memory has been allocated since that collection.
-		uint32_t freeSpaceDivisor();
 		
 		// The lower limit beyond which we try not to run the garbage collector.
 		uint32_t lowerLimitCollectionThreshold();
@@ -592,6 +530,36 @@ namespace MMgc
 		void PrintGCBehaviorStats(bool afterCollection=true);
 #endif
 
+ 		// Various private methods for the GC policy follow.  See comment in GC.cpp for details.
+ 
+ 		// Amount of GC work to perform (bytes to scan) per byte allocated while the GC is active
+ 		double W();
+ 
+ 		// Amount of allocation to allow between two invocations of IncrementalMark
+ 		double A();
+ 
+ 		// Called from the policy event handler to start computing adjustments to R: before any
+ 		// mark work is performed.
+ 		void startAdjustingR();
+ 
+ 		// Called from the policy event handler to finish computing adjustments to R: after all
+ 		// mark work has been performed.
+ 		void endAdjustingR();
+ 
+ 		// Called from adjustPolicyForNextMajorCycle to compute the effective L for the next
+ 		// collection cycle
+ 		void adjustL();
+ 
+ 		// Called from the policy event handler to compute the GC policy for the next 
+ 		// major collection cycle (from the end of one FinishIncrementalMark to the start
+ 		// of the next one)
+ 		void adjustPolicyForNextMajorCycle();
+ 
+ 		// Called from the policy event handler to compute the GC policy for the next
+ 		// minor collection cycle (from the end of one IncrementalMark to the start of the
+ 		// next one)
+ 		void adjustPolicyForNextMinorCycle();
+ 
 		// ----- Private data --------------------------------------
 		
 		GC * const gc;
@@ -606,16 +574,6 @@ namespace MMgc
 		// The time recorded the last time we received signalEndOfCollection
 		uint64_t timeEndOfLastCollection;
 
-		// Blocks actually allocated from GCHeap
-		uint64_t blocksAllocatedSinceLastCollection;
-		
-		// Blocks actually returned to GCHeap (as a result of calls to Free), note
-		// this may be larger than the number of blocks allocated
-		uint64_t blocksDeallocatedSinceLastCollection;
-		
-		// The total size of GCHeap following the previous allocation from GCHeap
-		uint64_t blocksInHeapAfterPreviousAllocation;
-		
 		// The total number of blocks owned by GC, and the maximum such number
 		uint64_t blocksOwned;
 		uint64_t maxBlocksOwned;
@@ -673,6 +631,44 @@ namespace MMgc
 		uint64_t couldBePointer;
 		uint64_t actuallyIsPointer;
 #endif
+
+		// Various policy parameters.  For more documentation, see comments in GC.cpp.
+		
+		// max pause time in seconds
+		double P;
+
+		// approximate mark rate in bytes/sec, [1M,infty)
+		double R;
+
+		// requested inverse load factor (1,infty)
+		double L_ideal;
+		
+		// adjusted inverse load factor (adjusted for heap pressure, growth, etc)
+		double L_actual;
+		
+		// gc trigger as fraction of allocation budget to use before triggering GC [0,1]
+		double T;
+
+		// ratio of gc work to mutator work while the gc is running
+		double G;
+
+		// the remaining allocation budget for the major GC cycle.  (This can go negative
+		// and the variable must accomodate negative values.  It's not frequently accessed.)
+		double remainingMajorAllocationBudget;
+
+		// the allocation budget for the minor GC cycle.  This variable remains constant
+		// throughout the minor cycle.
+		int64_t minorAllocationBudget;
+		
+		// the remaining allocation budget for the minor GC cycle.  Initially this has the
+		// value of minorAllocationBudget; the allocation request size is subtracted for
+		// every allocation.  This variable can go negative because we can overshoot the
+		// budget.
+		int64_t remainingMinorAllocationBudget;
+		
+		// Temporaries used to compute R
+		uint64_t adjustR_startTime;
+		uint64_t adjustR_totalTime;
 	};
 
 	/**
@@ -1121,7 +1117,12 @@ namespace MMgc
 		/**
 		 * Do as much marking as possible in time milliseconds
 		 */
-		void IncrementalMark(bool scanStack=true);
+		void IncrementalMark();
+
+		/**
+		 * Perform some garbage collection work: the allocation budget has been exhausted.
+		 */
+		void CollectionWork();
 
 		/**
 		 * Are we currently marking
@@ -1369,13 +1370,6 @@ namespace MMgc
 		 */
 		uint64_t sweepStart;
 
-		/**
-		 * True if we emptied the work queue during the most recent
-		 * incremental mark.  This means the next mark will force the GC cycle
-		 * through to completion.
-		 */
-		bool hitZeroObjects;
-
 		// called at some apropos moment from the mututor, ideally at a point
 		// where all possible GC references will be below the current stack pointer
 		// (ie in memory we can safely zero).  This will return right away if
@@ -1480,8 +1474,8 @@ namespace MMgc
 		 */
 		bool marking;
 		GCStack<GCWorkItem> m_incrementalWork;
-		void StartIncrementalMark(bool scanStack=true);
-		void FinishIncrementalMark(bool scanStack=true);
+		void StartIncrementalMark();
+		void FinishIncrementalMark(bool scanStack);
 
 		bool m_markStackOverflow;
 		void HandleMarkStackOverflow();
@@ -1552,10 +1546,6 @@ namespace MMgc
 		GCAlloc *noPointersAllocs[kNumSizeClasses];
 		GCLargeAlloc *largeAlloc;
 		GCHeap *heap;
-
-		void* AllocBlockIncremental(int size, bool zero=true);
-
-		void* AllocBlockNonIncremental(int size, bool zero=true);
 
 	private:
 
