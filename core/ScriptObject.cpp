@@ -75,27 +75,35 @@ namespace avmplus
 		AvmAssert(vtable->traits->isDictionary == 0); //should not be called DictionaryObject uses HeapHashtable
 		
 		MMGC_MEM_TYPE(this);
-		InlineHashtable* ht = (InlineHashtable*)((byte*)this + vtable->traits->getHashtableOffset());
-		ht->initialize(this->gc(), capacity);
-		ht->setDontEnumSupport();
+		union {
+			uint8_t* p;
+			InlineHashtable* iht;
+		};
+		p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+		iht->initialize(this->gc(), capacity);
+		iht->setDontEnumSupport();
 	}
 	
 	InlineHashtable* ScriptObject::getTable() const
 	{
 		AvmAssert(vtable->traits->getHashtableOffset() != 0);
-		uintptr_t* tableOffset = (uintptr_t*)((byte*)this + vtable->traits->getHashtableOffset());
+		union {
+			uint8_t* p;
+			InlineHashtable* iht;
+			HeapHashtable** hht;
+		};
+		p = (uint8_t*)this + vtable->traits->getHashtableOffset();
 		if(!vtable->traits->isDictionary)
 		{
-			InlineHashtable* table = (InlineHashtable*)tableOffset;
-			if(table->getCapacity() == 0)
-				((ScriptObject*)this)->initHashtable(); //intentionally removing constness
-			return table;
+			if (iht->getCapacity() == 0)
+				const_cast<ScriptObject*>(this)->initHashtable(); 
+			return iht;
 		}
 		else
 		{
 			//DictionaryObjects store pointer to HeapHashtable at
 			//the hashtable offset
-			return ((HeapHashtable*)*tableOffset)->get_ht();
+			return (*hht)->get_ht();
 		}
 	}
 	

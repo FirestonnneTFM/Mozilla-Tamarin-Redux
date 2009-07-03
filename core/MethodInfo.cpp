@@ -709,6 +709,36 @@ namespace avmplus
 		return ftraits;
 	}
 	
+	inline double unpack_double(const uint32_t* ap)
+	{
+	#if defined(AVMPLUS_64BIT)
+		AvmAssert(sizeof(Atom) == sizeof(double));
+		union {
+			const uint32_t* b;
+			const double* d;
+		};
+		b = ap;
+		return *d;
+	#elif defined(AVMPLUS_UNALIGNED_ACCESS)
+		AvmAssert(sizeof(Atom)*2 == sizeof(double));
+		union {
+			const uint32_t* b;
+			const double* d;
+		};
+		b = ap;
+		return *d;
+	#else
+		AvmAssert(sizeof(Atom)*2 == sizeof(double));
+		union {
+			AvmBox b[2];
+			double d;
+		} u;
+		u.b[0] = ap[0];
+		u.b[1] = ap[1];
+		return u.d;
+	#endif
+	}
+
 	/**
 	 * convert native args to atoms.  argc is the number of
 	 * args, not counting the instance which is arg[0].  the
@@ -727,7 +757,7 @@ namespace avmplus
 			switch (bt)
 			{
 				case BUILTIN_number:
-					atom =  core->doubleToAtom(*(const double *)ap);
+					atom =  core->doubleToAtom(unpack_double(ap));
 				#ifdef AVMPLUS_64BIT
 					// nothing
 				#else

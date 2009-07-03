@@ -373,7 +373,12 @@ namespace avmplus
 				// note wr could be a pointer to a double, that's what this is for
 				Atom* atoms = ht.getAtoms();
 				if(GC::GetGC(atoms)->IsRCObject(wr->get())) {
-					value = ((AvmPlusScriptableObject*)wr->get())->toAtom();
+					union {
+						GCObject* o;
+						AvmPlusScriptableObject* so;
+					};
+					o = wr->get();
+					value = so->toAtom();
 				} else {
 					AvmAssert(false);
 				}
