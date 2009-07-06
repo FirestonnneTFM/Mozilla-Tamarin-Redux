@@ -718,7 +718,9 @@ namespace avmplus
 				return binaryIns(LIR_piand, atom, InsConstAtom(~7));
 		}
 		
-		return 0;	// satisfy GCC, although we should never get here
+#ifdef __GNUC__
+        return 0;// satisfy GCC, although we should never get here
+#endif
 	}
 
 #ifdef _DEBUG
