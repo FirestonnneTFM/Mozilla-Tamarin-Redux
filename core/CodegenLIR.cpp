@@ -718,9 +718,7 @@ namespace avmplus
 				return binaryIns(LIR_piand, atom, InsConstAtom(~7));
 		}
 		
-#ifdef __GNUC__
 		return 0;	// satisfy GCC, although we should never get here
-#endif
 	}
 
 #ifdef _DEBUG
@@ -1073,12 +1071,15 @@ namespace avmplus
 		else
 		{
 			lirout->ins0(LIR_start);
-			// create params for saved regs -- processor specific
-			for (int i=0; i < NumSavedRegs; i++) {
-				LIns *p = lirout->insParam(i, 1); (void) p;
-				verbose_only(if (lirbuf->names)
-					lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
-			}
+
+            if (CalleeRegsNeedExplicitSaving) {
+                // create params for saved regs -- processor specific
+                for (int i=0; i < NumSavedRegs; i++) {
+                    LIns *p = lirout->insParam(i, 1); (void) p;
+                    verbose_only(if (lirbuf->names)
+                        lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
+                }
+            }
 		}
 	}
 
@@ -2938,7 +2939,7 @@ namespace avmplus
 
         // LIR_alloc of any size >= 8 is always 8-aligned.
         // if the first double arg would be unaligned, add padding to align it.
-	#if !defined NANOJIT_64BIT
+	#if !defined AVMPLUS_64BIT
         for (int i=0; i <= argc; i++) {
             if (state->value(index+i).traits == NUMBER_TYPE) {
                 if ((disp&7) != 0) {
