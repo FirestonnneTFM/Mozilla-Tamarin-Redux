@@ -170,6 +170,88 @@ void VMPI_releaseAlignedMemory(void* address)
 #endif
 #endif
 
+#ifdef UNDER_CE
+
+// The WinCE version of getPrivateResidentPageCount must do some specific things to get
+// an accurate picture of private bytes due to how WinCE lays out memory for the process. 
+// see http://msdn.microsoft.com/en-us/library/bb331824.aspx for a desccription of how the memory is laid out.
+// Note that we are running on Windows Mobile 6.0, but that is based on WinCE 5.0.
+// Basically, first we walk the memory for the process slot, from 0x10000 to 0x2000000.  Then we walk the memory
+// in the large memory area (0x42000000 - 0x80000000), as this is where gcheap allocates memory from.
+
+size_t VMPI_getPrivateResidentPageCount()
+{
+	void  *addr = (void*)(0x00010000);
+	void  *endAddr = (void*)(0x02000000);
+
+	size_t ret;
+	size_t bytes=0;
+	MEMORY_BASIC_INFORMATION mib;
+	while(true)
+	{
+		ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+		if(ret == 0)
+			break;
+
+		if((mib.State & MEM_COMMIT))
+			if ((DWORD)mib.BaseAddress + mib.RegionSize > (DWORD)endAddr)
+				bytes += (DWORD)endAddr - (DWORD)mib.BaseAddress;
+			else
+
+			bytes += mib.RegionSize;
+
+			addr = (void*) ((intptr_t)mib.BaseAddress + mib.RegionSize);
+			if (addr>=endAddr)
+				break;
+	}
+
+	MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
+
+	// We need to also walk the shared memory regions to make sure we
+	// count the blocks we've allocated there
+	MMgc::GCHeap::Region* curRegion = heap->lastRegion;
+	if (curRegion)
+		addr = curRegion->baseAddr;
+	else
+		addr = NULL;
+
+	while (curRegion!=NULL)
+	{
+		addr = curRegion->baseAddr;
+		if (addr < (void*)0x42000000)
+		{
+			// Not in the shared regions
+			curRegion = curRegion->prev;
+			continue;
+		}
+
+		while(true)
+		{
+			ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+			if(ret == 0)
+				break;
+
+			if((mib.State & MEM_COMMIT)) // && (mib.Type & MEM_PRIVATE))
+			{
+				if ((DWORD)mib.BaseAddress + mib.RegionSize > (DWORD)curRegion->reserveTop)
+					bytes += (DWORD)curRegion->reserveTop - (DWORD)mib.BaseAddress;
+				else
+					bytes += mib.RegionSize;
+			}
+
+			addr = (void*) ((intptr_t)mib.BaseAddress + mib.RegionSize);
+
+			if (addr>=curRegion->reserveTop)
+				break;
+		}
+		curRegion = curRegion->prev;
+	}
+
+	return bytes / VMPI_getVMPageSize();
+}
+
+#else // UNDER_CE
+
 size_t VMPI_getPrivateResidentPageCount()
 {
 	size_t pageSize = VMPI_getVMPageSize();
@@ -191,6 +273,7 @@ size_t VMPI_getPrivateResidentPageCount()
 
 	return bytes / pageSize;
 }
+#endif //UNDER_CE
 
 // Call VMPI_getPerformanceFrequency() once to initialize its cache; avoids thread safety issues.
 static uint64_t unused_value = VMPI_getPerformanceFrequency();
