@@ -1564,10 +1564,11 @@ namespace MMgc
 			size_t real_size = Size(item);
 			policy.signalAllocWork(real_size);
 			item = GetUserPointer(item);
-
+#ifdef MMGC_HOOKS
 			if(heap->HooksEnabled()) {
 				heap->AllocHook(item, askSize, real_size);
 			}
+#endif
 		}
 
 		GCAssert(item != NULL || (flags & kCanFail) != 0);
@@ -1608,15 +1609,11 @@ namespace MMgc
 			return;
 		}
 
-		bool isLarge;
-
 		// we can't allow free'ing something during Sweeping, otherwise alloc counters
 		// get decremented twice and destructors will be called twice.
 		if(collecting) {
 			goto bail;
 		}
-
-		isLarge = GCLargeAlloc::IsLargeBlock(GetRealPointer(item));
 
 		if (marking) {
 			// if its on the work queue don't delete it, if this item is
@@ -1626,25 +1623,25 @@ namespace MMgc
 		}
 
 #ifdef _DEBUG
-
 		// RCObject have constract that they must clean themselves, since they 
 		// have to scan themselves to decrement other RCObjects they might as well
 		// clean themselves too, better than suffering a memset later
-		if(isLarge ? GCLargeAlloc::IsRCObject(item) : GCAlloc::IsRCObject(item))
+		if(IsRCObject(item))
 		{
 			 RCObjectZeroCheck((RCObject*)item);
 		}
 #endif
-
 		{
 			size_t real_size = Size(item);
 			policy.signalFreeWork(real_size);
 			
+#ifdef MMGC_HOOKS
 			if(heap->HooksEnabled()) {
 				heap->FreeHook(item, real_size, 0xca);
 			}
-		
-			if (isLarge) {
+#endif
+
+			if (GCLargeAlloc::IsLargeBlock(GetRealPointer(item))) {
 				largeAlloc->Free(GetRealPointer(item));
 			} else {
 				GCAlloc::Free(GetRealPointer(item));
@@ -1764,9 +1761,10 @@ bail:
 		GCLargeAlloc::LargeBlock *lb = largeEmptyPageList;		
 		while(lb) {
 			GCLargeAlloc::LargeBlock *next = lb->next;
+#ifdef MMGC_HOOKS
 			if(heap->HooksEnabled())
 				heap->FreeHook(GetUserPointer(lb+1), lb->usableSize - DebugSize(), 0xba);
-
+#endif
 			int numBlocks = lb->GetNumBlocks();
 			sweepResults += numBlocks;
 			FreeBlock(lb, numBlocks);

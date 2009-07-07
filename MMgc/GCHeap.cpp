@@ -1485,6 +1485,7 @@ namespace MMgc
 		return SizeToBlocks(size);
 	}
 
+#ifdef MMGC_HOOKS
 	void GCHeap::AllocHook(const void *item, size_t askSize, size_t gotSize)
 	{
 		(void)item;
@@ -1533,7 +1534,7 @@ namespace MMgc
 		DebugFree(item, poison, size);
 #endif
 	}
-
+#endif // MMGC_HOOKS
 
 	EnterFrame::EnterFrame() : m_heap(NULL)
 	{

@@ -61,6 +61,12 @@
     #define MMGC_RC_HISTORY
 #endif
 
+#if defined DEBUGGER || defined MMGC_MEMORY_PROFILER
+    #ifndef MMGC_HOOKS
+        #define MMGC_HOOKS
+    #endif
+#endif
+
 // Policy profiler settings (for MMgc development mostly)
 //
 // Enabling this and MMGC_MEMORY_INFO at the same time is probably not a good idea.

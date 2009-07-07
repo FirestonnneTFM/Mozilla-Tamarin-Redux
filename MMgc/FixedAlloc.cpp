@@ -164,6 +164,7 @@ namespace MMgc
 		}
 
 		item = GetUserPointer(item);
+#ifdef MMGC_HOOKS
 		if(m_heap->HooksEnabled())
 		{
 		#ifdef MMGC_MEMORY_PROFILER
@@ -172,6 +173,7 @@ namespace MMgc
 
 			m_heap->AllocHook(item, size, b->size - DebugSize());
 		}
+#endif
 
 #ifdef MMGC_MEMORY_INFO
 		// fresh memory poisoning
@@ -186,6 +188,7 @@ namespace MMgc
 	{
 		FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
 
+#ifdef MMGC_HOOKS
 		GCHeap *heap = b->alloc->m_heap;
 		if(heap->HooksEnabled()) {
 		#ifdef MMGC_MEMORY_PROFILER
@@ -196,6 +199,7 @@ namespace MMgc
 			heap->FinalizeHook(item, b->size - DebugSize());
 			heap->FreeHook(item, b->size - DebugSize(), 0xed);
 		}
+#endif
 		item = GetRealPointer(item);
 
 		// Add this item to the free list

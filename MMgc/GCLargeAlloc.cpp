@@ -98,6 +98,7 @@ namespace MMgc
 	{
 		LargeBlock *b = GetBlockHeader(item);
 
+#ifdef MMGC_HOOKS
 		GCHeap* heap = m_gc->GetGCHeap();
 		if(heap->HooksEnabled())
 		{
@@ -108,6 +109,7 @@ namespace MMgc
 #endif
 			heap->FinalizeHook(p, GC::Size(p));
 		}
+#endif
 
 		if(b->flags & kHasWeakRef)
 			b->gc->ClearWeakRef(GetUserPointer(item));
@@ -156,7 +158,8 @@ namespace MMgc
 				if(b->flags & kHasWeakRef) {
 					b->gc->ClearWeakRef(GetUserPointer(item));
 				}
-				
+
+#ifdef MMGC_HOOKS
 				if(m_gc->heap->HooksEnabled())
 				{
 				#ifdef MMGC_MEMORY_PROFILER
@@ -166,6 +169,7 @@ namespace MMgc
 
 					m_gc->heap->FinalizeHook(GetUserPointer(item), b->usableSize - DebugSize());
 				}
+#endif
 
 				// unlink from list
 				*prev = b->next;
