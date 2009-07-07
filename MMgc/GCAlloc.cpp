@@ -327,6 +327,7 @@ start:
 		GCBlock *b = GetBlock(item);
 		GCAlloc *a = b->alloc;
 	
+#ifdef MMGC_HOOKS
 		if(b->gc->GetGCHeap()->HooksEnabled())
 		{
 			const void* p = GetUserPointer(item);
@@ -337,6 +338,7 @@ start:
 #endif
 			heap->FinalizeHook(p, GC::Size(p));
 		}
+#endif
 
 #ifdef _DEBUG		
 		// check that its not already been freed
@@ -428,6 +430,7 @@ start:
 
 					void* item = (char*)b->items + m_itemSize*((i*8)+j);
 
+#ifdef MMGC_HOOKS
 					if(m_gc->heap->HooksEnabled())
 					{
 					#ifdef MMGC_MEMORY_PROFILER
@@ -437,6 +440,7 @@ start:
 
  						m_gc->heap->FinalizeHook(GetUserPointer(item), m_itemSize - DebugSize());
 					}
+#endif
 
 					if(!(marks & (kFinalize|kHasWeakRef)))
 						continue;
@@ -518,10 +522,10 @@ start:
 
 				// garbage, freelist it
 				void *item = (char*)b->items + m_itemSize*(i*8+j);
-
+#ifdef MMGC_HOOKS
 				if(m_gc->heap->HooksEnabled())
 					m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), 0xba);
-
+#endif
 				b->FreeItem(item, (i*8+j));
 			}
 		}

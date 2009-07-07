@@ -281,6 +281,9 @@ namespace MMgc
 
 		static size_t SizeToBlocks(size_t bytes) { return ((bytes + kBlockSize - 1) & ~(kBlockSize-1)) / kBlockSize; }
 
+#ifdef MMGC_HOOKS
+		/* Hooks are normally disabled in RELEASE builds, as there is a slight cost added
+		   to some hot paths.  */
 		/* controls whether AllocHook and FreeHook are called */
 		void EnableHooks() { hooksEnabled = true; }
 		inline bool HooksEnabled() const { return hooksEnabled; }
@@ -289,7 +292,8 @@ namespace MMgc
 		void FinalizeHook(const void *item, size_t size);
 		// called when object is really dead and can be poisoned
 		void FreeHook(const void *item, size_t size, int poison);
-		
+#endif
+
 #ifdef MMGC_MEMORY_PROFILER
 		MemoryProfiler *GetProfiler() { return profiler; }
 		void DumpFatties() { profiler->DumpFatties(); }

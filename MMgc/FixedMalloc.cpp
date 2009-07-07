@@ -230,6 +230,7 @@ namespace MMgc
 			numLargeChunks += blocksNeeded;
 			
 			item = GetUserPointer(item);
+#ifdef MMGC_HOOKS
 			if(m_heap->HooksEnabled())
 			{
 #ifdef MMGC_MEMORY_PROFILER
@@ -237,6 +238,7 @@ namespace MMgc
 #endif
 				m_heap->AllocHook(item, size - DebugSize(), Size(item));
 			}
+#endif
 		}
 		return item;
 	}
@@ -244,6 +246,7 @@ namespace MMgc
 	
 	void FixedMalloc::LargeFree(void *item)
 	{
+#ifdef MMGC_HOOKS
 		if(m_heap->HooksEnabled()) {
 	#ifdef MMGC_MEMORY_PROFILER
 			if(m_heap->GetProfiler())
@@ -252,6 +255,7 @@ namespace MMgc
 			m_heap->FinalizeHook(item, Size(item));
 			m_heap->FreeHook(item, Size(item), 0xfa);
 		}
+#endif
 		numLargeChunks -= GCHeap::SizeToBlocks(LargeSize(item));
 		m_heap->FreeNoProfile(GetRealPointer(item));
 	}
