@@ -61,7 +61,7 @@
     #define MMGC_RC_HISTORY
 #endif
 
-#if defined DEBUGGER || defined MMGC_MEMORY_PROFILER
+#if defined DEBUGGER || defined MMGC_MEMORY_PROFILER || defined MMGC_MEMORY_INFO
     #ifndef MMGC_HOOKS
         #define MMGC_HOOKS
     #endif

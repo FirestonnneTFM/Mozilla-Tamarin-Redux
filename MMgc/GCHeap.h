@@ -549,8 +549,10 @@ namespace MMgc
 #ifdef MMGC_POLICY_PROFILING
 		size_t maxTotalHeapSize;
 #endif
+#ifdef MMGC_HOOKS
 		bool hooksEnabled;
-		
+#endif
+
 		bool entryChecksEnabled;
  		bool abortStatusNotificationSent;
 
