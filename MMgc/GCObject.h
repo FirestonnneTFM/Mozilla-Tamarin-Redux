@@ -289,8 +289,7 @@ namespace MMgc
 
 		void setZCTIndex(uint32_t index) 
 		{
-			GCAssert(index < (ZCT_INDEX>>8));
-			GCAssert(index < ZCT_INDEX>>8);
+			GCAssert(index <= (ZCT_INDEX>>8));
 			composite = (composite&~ZCT_INDEX) | ((index<<8)|ZCTFLAG);
 		}
 
