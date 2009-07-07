@@ -138,7 +138,9 @@ namespace MMgc
 	#ifdef MMGC_POLICY_PROFILING
 		  maxTotalHeapSize(0),
 	#endif
+    #ifdef MMGC_HOOKS
 	hooksEnabled(false),
+    #endif
 		  entryChecksEnabled(true),
 		  abortStatusNotificationSent(false),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
