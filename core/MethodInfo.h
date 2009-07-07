@@ -374,6 +374,8 @@ namespace avmplus
 		Traits* activationTraits() const;
 		const ScopeTypeChain* activationScope() const;
 
+        bool hasNoScopeAndNotClassInitializer() const;
+    
 		// note, these are called "init" (rather than "set") because they 
 		// should be called exactly once per MethodInfo.
 		void init_activationTraits(Traits* t);

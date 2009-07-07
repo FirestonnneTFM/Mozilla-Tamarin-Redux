@@ -67,7 +67,7 @@ namespace avmplus
 
 		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
 			if (opcode == OP_newfunction) {
-				MethodInfo *f = type->pool->getMethodInfo(opd1);
+				MethodInfo *f = info->pool()->getMethodInfo(opd1);
 				AvmAssert(f->declaringTraits() == type);
 				core->enqFunction(f);
 				core->enqTraits(type);
@@ -252,8 +252,7 @@ namespace avmplus
         // initial scope chain types 
         int outer_depth = 0;
 
-        const ScopeTypeChain* scope = info->declaringScope();
-        if (!scope && info->declaringTraits()->init != info)
+        if (info->hasNoScopeAndNotClassInitializer())
         {
             // this can occur when an activation scope inside a class instance method
             // contains a nested getter, setter, or method.  In that case the scope 
@@ -263,6 +262,7 @@ namespace avmplus
             verifyFailed(kNoScopeError, core->toErrorString(info));
         }
 
+        const ScopeTypeChain* scope = info->declaringScope();
         state->scopeDepth = outer_depth;
 
         // resolve catch block types
