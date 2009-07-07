@@ -73,8 +73,10 @@ namespace avmplus
 	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 	typedef double (*AvmThunkNativeThunkerN)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	typedef void (AvmObjectT::*AvmThunkNativeMethodHandler)();
 	typedef void (*AvmThunkNativeFunctionHandler)(AvmObject obj);
+#endif
 
 	const uintptr_t kUnboxMask = ~uintptr_t(7);
 	#define AvmThunkUnbox_AvmReceiver(t,r)	((t)(uintptr_t(r) & kUnboxMask))
@@ -155,19 +157,25 @@ namespace avmplus
 
 	#define AvmThunkConstant_AvmString(v)		(env->method->pool()->cpool_string[v])
 	
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	#define AVMTHUNK_GET_METHOD_HANDLER(env)	((env)->method->handler_method())
 	#define AVMTHUNK_GET_FUNCTION_HANDLER(env)	((env)->method->handler_function())
+#endif
 
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	union AvmThunkNativeHandler
 	{
 		AvmThunkNativeMethodHandler method;
 		AvmThunkNativeFunctionHandler function;
 	};
+#endif
 
 	struct NativeMethodInfo
 	{
 	public:
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 		AvmThunkNativeHandler handler;
+#endif
 		AvmThunkNativeThunker thunker;
 #ifdef AVMPLUS_STATIC_POINTERS
 		int32_t method_id;
@@ -234,8 +242,10 @@ namespace avmplus
 		const uint32_t			classCount;
 	};
 
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
 		reinterpret_cast<AvmThunkNativeMethodHandler>((void(CLS::*)())(PTR))
+#endif
 
 	#define AVMTHUNK_NATIVE_CLASS_GLUE(CLS) \
 		static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
@@ -254,8 +264,13 @@ namespace avmplus
 	#define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME) \
 		static const NativeMethodInfo NAME##_methodEntries[] = {
 			
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
 		{ { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+#else
+	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+#endif
 
 	#define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
@@ -266,6 +281,7 @@ namespace avmplus
 	#define AVMTHUNK_NATIVE_METHOD_NAMESPACE(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(avmplus::Namespace, METHID, IMPL)
 
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	// C++ won't let us auto-init a union to a field other than the first one, nor will it
 	// allow us to reliably cast between a pointer-to-function and pointer-to-member-function,
 	// thus this inline function to massage the few places that need it.
@@ -281,6 +297,15 @@ namespace avmplus
 
 	#define AVMTHUNK_END_NATIVE_METHODS() \
 		{ { NULL }, NULL, -1 } };
+#else
+
+	#define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+
+	#define AVMTHUNK_END_NATIVE_METHODS() \
+		{ NULL, -1 } };
+
+#endif
 
 	// ---------------
 
@@ -316,9 +341,14 @@ namespace avmplus
 
 	#define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME) 
 
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
 		m[METHID].handler.method = _NATIVE_METHOD_CAST_PTR(CLS, &IMPL); \
 		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; 
+#else
+	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
+		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; 
+#endif
 
 	#define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
@@ -329,9 +359,14 @@ namespace avmplus
 	#define AVMTHUNK_NATIVE_METHOD_NAMESPACE(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(avmplus::Namespace, METHID, IMPL)
 
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	#define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
 		m[METHID].handler.function = reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL); \
 		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; 
+#else
+	#define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
+		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; 
+#endif
 
 	#define AVMTHUNK_END_NATIVE_METHODS() 
 

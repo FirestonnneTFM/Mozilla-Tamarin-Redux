@@ -185,12 +185,12 @@ namespace avmshell
  		return Domain::GLOBAL_MEMORY_MIN_SIZE;
  	}
 
- 	ScriptObject *DomainObject::get_domainMemory() const
+ 	ByteArrayObject* DomainObject::get_domainMemory() const
  	{
- 		return domainEnv->domain()->globalMemory();
+ 		return (ByteArrayObject*)domainEnv->domain()->globalMemory();
  	}
  
- 	void DomainObject::set_domainMemory(ScriptObject *mem)
+ 	void DomainObject::set_domainMemory(ByteArrayObject* mem)
  	{
  		if(!domainEnv->domain()->setGlobalMemory(mem))
  			toplevel()->throwError(kEndOfFileError);

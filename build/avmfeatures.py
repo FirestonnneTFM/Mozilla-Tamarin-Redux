@@ -79,4 +79,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_HEAP_ALLOCA=1 "
     if o.getBoolArg("static-function_ptrs"):
         args += "-DAVMFEATURE_STATIC_FUNCTION_PTRS=1 "
+    if o.getBoolArg("indirect-native_thunks"):
+        args += "-DAVMFEATURE_INDIRECT_NATIVE_THUNKS=1 "
     return args

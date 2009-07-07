@@ -146,4 +146,8 @@
   #define AVMFEATURE_STATIC_FUNCTION_PTRS 1
 #endif
 
+#ifndef AVMFEATURE_INDIRECT_NATIVE_THUNKS
+  #define AVMFEATURE_INDIRECT_NATIVE_THUNKS 1
+#endif
+
 #endif // __avmshell_features__

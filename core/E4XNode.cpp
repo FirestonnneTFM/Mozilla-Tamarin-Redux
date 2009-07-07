@@ -41,7 +41,7 @@ namespace avmplus
 {
 	extern wchar *stripPrefix (const wchar *str, const char *pre);
 
-	E4XNodeAux::E4XNodeAux (Stringp s, Namespace *ns, ScriptObject* notify)
+	E4XNodeAux::E4XNodeAux(Stringp s, Namespace *ns, FunctionObject* notify)
 	{
 		m_name = s;
 		m_ns = ns;
@@ -942,7 +942,7 @@ namespace avmplus
 		return prior;
 	}
 
-	void ElementE4XNode::setNotification(AvmCore *core, ScriptObject* f) 
+	void ElementE4XNode::setNotification(AvmCore *core, FunctionObject* f) 
 	{ 
 		uintptr nameOrAux = m_nameOrAux;
 		// We already have an aux structure
@@ -961,7 +961,7 @@ namespace avmplus
 		}
 	}
 
-	ScriptObject* ElementE4XNode::getNotification() const 
+	FunctionObject* ElementE4XNode::getNotification() const 
 	{ 
 		uintptr nameOrAux = m_nameOrAux;
 		if (AUXBIT & m_nameOrAux)

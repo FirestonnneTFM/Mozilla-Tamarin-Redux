@@ -338,8 +338,10 @@ namespace avmplus
 		inline PoolObject* pool() const { return _pool; }
 
 		inline AvmThunkNativeThunker thunker() const { AvmAssert(isNative()); return _native.thunker; }
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 		inline AvmThunkNativeMethodHandler handler_method() const { AvmAssert(isNative()); return _native.handler.method; }
 		inline AvmThunkNativeFunctionHandler handler_function() const { AvmAssert(isNative()); return _native.handler.function; }
+#endif
 
 		inline const uint8_t* abc_body_pos() const { AvmAssert(!isNative()); return _abc.body_pos; }
 		inline void set_abc_body_pos(const uint8_t* p) { AvmAssert(!isNative()); _abc.body_pos = p; }
@@ -400,7 +402,9 @@ namespace avmplus
 		struct NativeInfo
 		{
 			AvmThunkNativeThunker thunker;
+#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 			AvmThunkNativeHandler handler;
+#endif
 		};
 
 		struct AbcInfo

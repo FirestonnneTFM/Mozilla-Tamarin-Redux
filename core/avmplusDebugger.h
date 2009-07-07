@@ -422,7 +422,7 @@ namespace avmplus
 		//typedef void (*TraceCallback_i)( Stringp fileName, int linenum, Stringp methodName, Stringp methodArgs );
 		static TraceLevel			astrace_console; 
 		static TraceLevel			astrace_callback;
-		DRCWB(ScriptObject*)		trace_callback;
+		DRCWB(FunctionObject*)		trace_callback;
 		static bool					in_trace;
 		static uint64				astraceStartTime;
 

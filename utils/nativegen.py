@@ -43,9 +43,10 @@ from os import path
 from math import floor
 from sys import stderr
 
-parser = OptionParser(usage="usage: %prog [--uniquethunks] [importfile [, importfile]...] file...")
+parser = OptionParser(usage="usage: %prog [--directthunks] [importfile [, importfile]...] file...")
 parser.add_option("-n", "--nativemapname", help="no longer supported")
-parser.add_option("-u", "--uniquethunks", help="generate a unique thunk for every native method (don't recycle thunks with similar signatures)")
+parser.add_option("-u", "--directthunks", action="store_true", default=False, help="generate a unique (direct) thunk for every native method (don't recycle thunks with similar signatures)")
+parser.add_option("-v", "--thunkvprof", action="store_true", default=False)
 parser.add_option("-e", "--externmethodandclassetables", action="store_true", default=False, help="generate extern decls for method and class tables")
 opts, args = parser.parse_args()
 
@@ -1016,12 +1017,25 @@ class AbcThunkGen:
 			unique_thunk_sigs[sig][m.native_id_name] = (receiver, m)
 		out_c.println("");
 		out_c.println("/* thunks (%d unique signatures, %d total) */" % (len(unique_thunk_sigs.keys()), len(self.all_thunks)));
-		if opts.uniquethunks:
+		if opts.thunkvprof:
+			out_c.println("#define DOPROF")
+			out_c.println('#include "../vprof/vprof.h"')
+		if opts.directthunks:
+			out_c.println("")
+			out_c.println("#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS")
+			out_c.println("  #error nativegen.py: --directthunks requires AVMFEATURE_INDIRECT_NATIVE_THUNKS=0")
+			out_c.println("#endif")
+			out_c.println("")
 			for receiver,m in self.all_thunks:
 				thunkname = m.native_id_name;
 				self.emitThunkProto(thunkname, receiver, m);
 				self.emitThunkBody(thunkname, receiver, m, True);
 		else:
+			out_c.println("")
+			out_c.println("#ifndef AVMPLUS_INDIRECT_NATIVE_THUNKS")
+			out_c.println("  #error nativegen.py: --directthunks requires AVMFEATURE_INDIRECT_NATIVE_THUNKS=1")
+			out_c.println("#endif")
+			out_c.println("")
 			for sig in unique_thunk_sigs:
 				users = unique_thunk_sigs[sig]
 				receiver = None;
@@ -1136,7 +1150,8 @@ class AbcThunkGen:
 		self.out_h.println("extern "+decl+";");
 
 	def emitThunkBody(self, name, receiver, m, directcall):
-		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
+		rettraits = self.lookupTraits(m.returnType)
+		ret = ctype_from_traits(rettraits, False);
 		# see note in thunkSig() about setter return types
 		if m.kind == TRAIT_Setter:
 			ret = "void"
@@ -1145,6 +1160,9 @@ class AbcThunkGen:
 		self.out_c.println(decl);
 		self.out_c.println("{");
 		self.out_c.indent += 1;
+
+		if opts.thunkvprof:
+			self.out_c.println('_nvprof("%s", 1);' % name)
 
 		param_count = len(m.paramTypes);
 		optional_count = m.optional_count;
@@ -1188,6 +1206,8 @@ class AbcThunkGen:
 				if dts != cts:
 					defval = "AvmThunkCoerce_"+dts+"_"+cts+"("+defval+")";
 				val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
+				if directcall and cts == "AvmObject" and argtraits[i].niname != None:
+					val = "(%s*)%s" % (argtraits[i].niname, val)
 			args.append((val, cts))
 
 		if m.needRest():
@@ -1199,17 +1219,40 @@ class AbcThunkGen:
 
 		if directcall:
 			self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
-			self.out_c.println("%s* obj = %s;" % (m.receiver.niname, args[0][0]))
+			if m.receiver == None:
+				recname = "ScriptObject"
+			else:
+				recname = m.receiver.niname
+			self.out_c.println("%s* const obj = %s;" % (recname, args[0][0]))
 			if ret != "void":
-				self.out_c.prnt("const %s ret = (%s)" % (ret, ret))
-			self.out_c.println("obj->%s(" % m.native_method_name)
-			self.out_c.indent += 1
-			for i in range(1, len(args)):
-				if i > 1:
-					self.out_c.prnt(", ")
-				self.out_c.println(args[i][0]);
-			self.out_c.indent -= 1
+				if rettraits.ctype == CTYPE_OBJECT:
+					self.out_c.prnt("%s* const ret = " % (rettraits.niname))
+				else:
+					self.out_c.prnt("%s const ret = " % (ret))
+			if m.receiver == None:
+				self.out_c.prnt("%s(obj" % m.native_method_name)
+				need_comma = True
+			else:
+				native_method_name = m.native_method_name
+				if m.receiver.ni.method_map_name != None and m.receiver.itraits == None:
+					native_method_name = m.receiver.ni.method_map_name + "::" + m.native_method_name
+				self.out_c.prnt("obj->%s(" % native_method_name)
+				need_comma = False
+			if len(args) > 1:
+				self.out_c.println("")
+				self.out_c.indent += 1
+				for i in range(1, len(args)):
+					if need_comma:
+						self.out_c.prnt(", ")
+					self.out_c.println("%s" % args[i][0]);
+					need_comma = True
+				self.out_c.indent -= 1
 			self.out_c.println(");")
+			if ret != "void":
+				if ret == "double":
+					self.out_c.println("return ret;")
+				else:
+					self.out_c.println("return (AvmBox) ret;")
 		else:
 			if m.receiver == None:
 				self.out_c.prnt("typedef AvmRetType_%s (*FuncType)(AvmObject" % (ret))

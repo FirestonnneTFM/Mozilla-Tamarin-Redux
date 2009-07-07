@@ -44,6 +44,11 @@ const uint32_t shell_toplevel_abc_length = 6860;
 
 /* thunks (39 unique signatures, 87 total) */
 
+#ifndef AVMPLUS_INDIRECT_NATIVE_THUNKS
+  #error nativegen.py: --directthunks requires AVMFEATURE_INDIRECT_NATIVE_THUNKS=1
+#endif
+
+
 // avmplus_JObject_methodSignature
 AvmBox shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {

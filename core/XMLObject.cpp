@@ -2588,7 +2588,7 @@ namespace avmplus
 		return m_node->getQName(core(), m); 
 	}
 
-	void XMLObject::AS3_setNotification(ScriptObject* f)
+	Atom XMLObject::AS3_setNotification(FunctionObject* f)
 	{
 		AvmCore* core  = this->core();
 
@@ -2597,9 +2597,11 @@ namespace avmplus
 			toplevel()->throwArgumentError( kInvalidArgumentError, "f");
 		else
 			m_node->setNotification(core, f);
+		// since AS3 sez this returns an Atom, our implementation must do so.
+		return undefinedAtom;
 	}
 
-	ScriptObject* XMLObject::AS3_notification()
+	FunctionObject* XMLObject::AS3_notification()
 	{
 		return m_node->getNotification();
 	}

@@ -44,6 +44,11 @@ const uint32_t builtin_abc_length = 43451;
 
 /* thunks (74 unique signatures, 291 total) */
 
+#ifndef AVMPLUS_INDIRECT_NATIVE_THUNKS
+  #error nativegen.py: --directthunks requires AVMFEATURE_INDIRECT_NATIVE_THUNKS=1
+#endif
+
+
 // Array_private__filter
 // Array_private__map
 AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)

@@ -185,8 +185,8 @@ namespace avmplus
 		Atom AS3_insertChildBefore (Atom child1, Atom child2);
 
 		// non-E4X extensions
-		ScriptObject* AS3_notification();
-		void AS3_setNotification(ScriptObject* f);
+		FunctionObject* AS3_notification();
+		Atom AS3_setNotification(FunctionObject* f); // AS3 declaration sez this returns an Atom
 
 		Atom AS3_localName ();
 		Atom AS3_name ();
@@ -229,8 +229,8 @@ namespace avmplus
 		inline Atom insertChildBefore (Atom child1, Atom child2) { return AS3_insertChildBefore (child1, child2); }
 
 		// non-E4X extensions
-		inline ScriptObject* notification() { return AS3_notification(); }
-		inline void setNotification(ScriptObject* f) { return AS3_setNotification(f); }
+		inline FunctionObject* notification() { return AS3_notification(); }
+		inline void setNotification(FunctionObject* f) { AS3_setNotification(f); }
 
 		inline Atom localName () { return AS3_localName (); }
 		inline Atom name () { return AS3_name (); }
