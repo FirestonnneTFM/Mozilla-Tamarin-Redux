@@ -48,9 +48,9 @@ namespace avmplus
 		TraceClass(VTable* cvtable);
 
 		int getLevel(int target);
-		void setLevel(int lvl, int target);
-		void setListener(ScriptObject* f);
-		ScriptObject* getListener();
+		Atom setLevel(int lvl, int target);
+		Atom setListener(FunctionObject* f);
+		FunctionObject* getListener();
     };
 
 	class SamplerScript

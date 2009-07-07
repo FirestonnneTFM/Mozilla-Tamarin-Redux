@@ -74,7 +74,7 @@ namespace avmplus
 		return lvl;
 	}
 	
-	void TraceClass::setLevel(int lvl, int target)
+	Atom TraceClass::setLevel(int lvl, int target)
 	{
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
@@ -88,9 +88,10 @@ namespace avmplus
 	#endif /* DEBUGGER */
 		(void)lvl;
 		(void)target;
+		return undefinedAtom;
 	}
 
-	void TraceClass::setListener(ScriptObject* f)
+	Atom TraceClass::setListener(FunctionObject* f)
 	{
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
@@ -104,7 +105,7 @@ namespace avmplus
 			else if (!AvmCore::istype(f->atom(), core->traits.function_itraits)) 
 			{
 				toplevel()->argumentErrorClass()->throwError( kInvalidArgumentError, core->toErrorString("Function"));
-				return;
+				return undefinedAtom;
 			}
 			
 			//MethodClosure* mc = f->toplevel()->methodClosureClass->create(f->getCallMethodEnv(), f->atom());
@@ -112,11 +113,12 @@ namespace avmplus
 		}
 	#endif /* DEBUGGER */
 		(void)f;
+		return undefinedAtom;
 	}
 
-	ScriptObject* TraceClass::getListener()
+	FunctionObject* TraceClass::getListener()
 	{
-		ScriptObject* f = 0;
+		FunctionObject* f = 0;
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
 		if (core->debugger())

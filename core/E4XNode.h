@@ -118,13 +118,13 @@ namespace avmplus
 		DRCWB(Namespace*)		m_ns;
 				
 		/** callback on changes to children, attribute, name or namespace */
-		DRCWB(ScriptObject*)	m_notification;
+		DRCWB(FunctionObject*)	m_notification;
 
 		friend class E4XNode;
 		friend class ElementE4XNode;
 
 	public:
-		E4XNodeAux (Stringp s, Namespace *ns, ScriptObject* notify=0);
+		E4XNodeAux(Stringp s, Namespace* ns, FunctionObject* notify = NULL);
 	};
 
 	///////////////////////////////////////////////////
@@ -200,8 +200,8 @@ namespace avmplus
 		virtual void addAttribute (E4XNode *x);
 
 		// Should this silently fail or assert?
-		virtual void setNotification(AvmCore* /*core*/, ScriptObject* /*f*/) { return; }
-		virtual ScriptObject* getNotification() const { return 0; }
+		virtual void setNotification(AvmCore* /*core*/, FunctionObject* /*f*/) { return; }
+		virtual FunctionObject* getNotification() const { return NULL; }
 
 		// used to determine child number in notifications
 		virtual uint32 childIndex()  const { return 0; };
@@ -340,8 +340,8 @@ namespace avmplus
 		Stringp getValue() const { return 0; };
 		void setValue (String *s) { (void)s; AvmAssert(s == 0); }
 
-		void setNotification(AvmCore *core, ScriptObject* f);
-		ScriptObject* getNotification() const;
+		void setNotification(AvmCore* core, FunctionObject* f);
+		FunctionObject* getNotification() const;
 
 		// used to determine child number in notifications
 		uint32 childIndex()  const;

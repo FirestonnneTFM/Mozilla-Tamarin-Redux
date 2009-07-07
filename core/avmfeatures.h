@@ -104,6 +104,7 @@
 #undef AVMPLUS_WITH_JNI
 #undef AVMPLUS_HEAP_ALLOCA
 #undef AVMPLUS_STATIC_POINTERS
+#undef AVMPLUS_INDIRECT_NATIVE_THUNKS
 
 
 
@@ -267,7 +268,7 @@
  * FIXME: more information needed.
  * 
  * Note that this is enabled always by AVMFEATURE_DEBUGGER.
- *  * 
+ * 
  * It is known that the Flash Player wants to enable this if SCRIPT_DEBUGGER
  * is enabled in the Player code.
  */
@@ -394,11 +395,11 @@
  * this means decorating the global new and delete operator with appropriate 'throw'
  * clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
  * do not generally support C++ exceptions.  
- *  * 
+ * 
  * Note that even if this is enabled, the global new and delete operators may
  * not throw exceptions when memory can't be allocated, because the out-of-memory
  * handling in MMgc may take precedence.
- *  * 
+ * 
  * FixedMalloc never throws an exception for a failed allocation.
  */
 #if !defined AVMFEATURE_CPP_EXCEPTIONS || AVMFEATURE_CPP_EXCEPTIONS != 0 && AVMFEATURE_CPP_EXCEPTIONS != 1
@@ -455,6 +456,17 @@
  */
 #if !defined AVMFEATURE_STATIC_FUNCTION_PTRS || AVMFEATURE_STATIC_FUNCTION_PTRS != 0 && AVMFEATURE_STATIC_FUNCTION_PTRS != 1
 #  error "AVMFEATURE_STATIC_FUNCTION_PTRS must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_INDIRECT_NATIVE_THUNKS
+ *
+ * Enabling this will recycle native thunks with similar signatures.
+ * This decreases code size at the expense of slightly slower thunks
+ * and an extra field in NativeMethodInfo.
+ */
+#if !defined AVMFEATURE_INDIRECT_NATIVE_THUNKS || AVMFEATURE_INDIRECT_NATIVE_THUNKS != 0 && AVMFEATURE_INDIRECT_NATIVE_THUNKS != 1
+#  error "AVMFEATURE_INDIRECT_NATIVE_THUNKS must be defined and 0 or 1 (only)."
 #endif
 
 #if AVMSYSTEM_32BIT
@@ -523,6 +535,7 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
 
 
 
@@ -731,6 +744,9 @@
 #endif
 #if AVMFEATURE_STATIC_FUNCTION_PTRS
 #  define AVMPLUS_STATIC_POINTERS
+#endif
+#if AVMFEATURE_INDIRECT_NATIVE_THUNKS
+#  define AVMPLUS_INDIRECT_NATIVE_THUNKS
 #endif
 
 #ifdef AVMSHELL_BUILD
