@@ -106,7 +106,18 @@ namespace avmplus
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_methodinfo, this); )
 	}
 #endif
-
+ 
+    // WARNING the logic 'declaringTraits()->init' appears to imply 
+    // a class initializer, but the condition could be generated for
+    // some other combination of traits and methods - short of it is 
+    // don't trust the name of this function.
+    bool MethodInfo::hasNoScopeAndNotClassInitializer() const
+    {
+        AvmAssert(_declaringScopeOrTraits != 0);
+        bool b = ((_declaringScopeOrTraits & IS_TRAITS)==1) && declaringTraits()->init != this;
+        return b;
+    }
+ 
 	Traits* MethodInfo::declaringTraits() const 
 	{ 
 		if (_declaringScopeOrTraits & IS_TRAITS)

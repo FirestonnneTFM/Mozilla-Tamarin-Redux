@@ -3990,7 +3990,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			while (!verifyQueue.isEmpty()) {
 				MethodInfo* f = verifyQueue.removeLast();
 				if (!f->isVerified()) {
-					if (f->declaringScope() == NULL && f != f->declaringTraits()->init) {
+					if (f->hasNoScopeAndNotClassInitializer()) {
 						verifyQueue2.add(f);
 						continue;
 					}
