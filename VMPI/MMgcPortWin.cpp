@@ -487,9 +487,13 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 #define MACHINETYPE IMAGE_FILE_MACHINE_I386
 #endif
 
+	// dbgHelpLock is not declared inside the InitDbgHelp() because 
+	// doing so triggers a MSVC compiler warning C4640
+	// https://bugzilla.mozilla.org/show_bug.cgi?id=503052
+	static SpinLockWin dbgHelpLock;	// protects access to inited
 	bool InitDbgHelp()
 	{
-		static SpinLockWin dbgHelpLock;	// protects access to inited
+
 		static bool inited = false;
 	
 		// We must hold the lock for the entire initialization process:

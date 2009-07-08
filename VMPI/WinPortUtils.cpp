@@ -57,9 +57,13 @@ static const double kMsecPerHour      = 3600000;
 static const double kMsecPerSecond    = 1000;
 static const double kMsecPerMinute    = 60000;
 
+// gTimeZoneInfoLock is not declared inside the UpdateTimeZoneInfo() because 
+// doing so triggers a MSVC compiler warning C4640
+// https://bugzilla.mozilla.org/show_bug.cgi?id=503052
+static SpinLockWin gTimeZoneInfoLock;		// protects gTimeZoneInfo and gGmtCache
 static TIME_ZONE_INFORMATION UpdateTimeZoneInfo()
 {
-	static SpinLockWin gTimeZoneInfoLock;		// protects gTimeZoneInfo and gGmtCache
+
 	static TIME_ZONE_INFORMATION gTimeZoneInfo;
 	static SYSTEMTIME gGmtCache;
 	
