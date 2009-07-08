@@ -286,6 +286,7 @@ namespace avmplus
 			PERFM_NTPROF("verify-ticks");
 		    #if defined FEATURE_NANOJIT
 			Verifier verifier(this, toplevel);
+			CodeWriter *coder = NULL;
 			TRY(core, kCatchAction_Rethrow)
 			{
 				if ((core->IsJITEnabled()) && !suggestInterp())
@@ -296,14 +297,18 @@ namespace avmplus
 					#if defined AVMPLUS_WORD_CODE
 					WordcodeEmitter translator(this, toplevel);
 					TeeWriter teeWriter(&translator, &jit);
-					CodeWriter *coder = &teeWriter;
+					coder = &teeWriter;
 					#else
-					CodeWriter *coder = &jit;
+					coder = &jit;
 					#endif
 
+				#ifdef FEATURE_CFGWRITER
 					// analyze code and generate LIR
-				    verifier.verify(coder);
+					CFGWriter cfg(this, coder); 
+					coder = &cfg;
+				#endif
 
+				    verifier.verify(coder);
 					PERFM_TPROF_END();
 			
 					if (!jit.overflow) {
@@ -342,10 +347,10 @@ namespace avmplus
 					// NOTE copied below
 					#if defined AVMPLUS_WORD_CODE
 					WordcodeEmitter translator(this, toplevel);
-					CodeWriter *coder = &translator;
+					coder = &translator;
 					#else
 					CodeWriter stubWriter;
-					CodeWriter *coder = &stubWriter;
+					coder = &stubWriter;
 					#endif
 					verifier.verify(coder); // pass2 dataflow
 					setInterpImpl();
@@ -358,10 +363,10 @@ namespace avmplus
 				// NOTE copied from above
 				#if defined AVMPLUS_WORD_CODE
 				WordcodeEmitter translator(this);
-				CodeWriter *coder = &translator;
+				coder = &translator;
 				#else
 				CodeWriter stubWriter;
-				CodeWriter *coder = &stubWriter;
+				coder = &stubWriter;
 				#endif
 				verifier.verify(coder); // pass2 dataflow
 				setInterpImpl();
@@ -372,6 +377,9 @@ namespace avmplus
 			{
 				// clean up verifier
 				verifier.~Verifier();
+				// call cleanup all the way down the chain
+				// each stage calls cleanup on the next one
+				coder->cleanup();
 				// re-throw exception
 				core->throwException(exception);
 			}

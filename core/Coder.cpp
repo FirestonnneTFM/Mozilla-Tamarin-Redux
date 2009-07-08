@@ -128,6 +128,10 @@ namespace avmplus
         coder2->formatOperand(buffer, v);
     }
 
+	void TeeWriter::cleanup() {
+		coder1->cleanup();
+		coder2->cleanup();
+	}
 
 #endif // FEATURE_TEEWRITER
 
@@ -203,4 +207,9 @@ namespace avmplus
 	{
         coder->formatOperand(buffer, v);
     }
+
+	void NullWriter::cleanup()
+	{
+		coder->cleanup();
+	}
 }

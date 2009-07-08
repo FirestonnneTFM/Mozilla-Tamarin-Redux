@@ -45,10 +45,10 @@ namespace avmplus
 	public:
 
 		CodeWriter ()
-        {
-		}
+        { }
+		virtual ~CodeWriter ()
+		{ }
 
-		virtual ~CodeWriter () {}
 		virtual void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) 
 		{ 
 			(void)state; 
@@ -140,6 +140,10 @@ namespace avmplus
             (void)&v;
         }
 
+		virtual void cleanup() {
+			// empty
+		}
+
 		// convenience functions
 		void write (FrameState* state, const byte *pc, AbcOpcode opcode) {
 			write(state, pc, opcode, NULL);
@@ -175,6 +179,7 @@ namespace avmplus
 		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
 		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
 		void formatOperand(PrintWriter& buffer, Value& v);
+		void cleanup();
 	};
 #endif // FEATURE_TEEWRITER
 
@@ -197,6 +202,7 @@ namespace avmplus
 		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
 		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
 		void formatOperand(PrintWriter& buffer, Value& v);
+		void cleanup();
 	};
 }
 #endif  /* __avmplus_Coder__ */

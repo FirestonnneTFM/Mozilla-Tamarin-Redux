@@ -579,7 +579,6 @@ namespace avmplus
             AvmCore *core = pool->core;
             GC *gc = core->gc;
 			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
-			// @todo, we really need to limit growth system-wide, rather than per-Fragmento
 			mgr->codeAlloc = new (gc) CodeAlloc(gc->GetGCHeap());
 #ifdef AVMPLUS_VERBOSE
 			if (pool->verbose) {
@@ -621,19 +620,27 @@ namespace avmplus
         initCodePages(pool);
 	}
 
-	CodegenLIR::~CodegenLIR()
-	{
+	CodegenLIR::~CodegenLIR() {
+		cleanup();
 	}
 
-	void CodegenLIR::clearBuffers()
+	void CodegenLIR::cleanup()
 	{
-		// free scratch buffers explicitly.  None of these have any pointers
-		// in them, and none of them will have escaped into other objects.
-		// freeing them now reduces GC pressure at startup time.
+		// clean up the LirWriter pipeline
+        for (LirWriter *w = lirout, *wnext; w != 0; w = wnext) {
+            wnext = w->out;
+            delete w;
+        }
+		lirout = NULL;
 
-		// return the buffer back to the global list
-		if (frag) 
+		// clean up partially generated LIR
+		if (frag) {
+			LirBuffer *lirbuf = frag->lirbuf;
 			frag->releaseLirBuffer();
+			delete frag;
+			frag = NULL;
+			delete lirbuf;
+		}
 	}
 
 	bool CodegenLIR::outOMem()
@@ -5471,6 +5478,7 @@ namespace avmplus
             wnext = w->out;
             delete w;
         }
+		lirout = NULL;
         delete lirbuf;
 		lirbuf = NULL;
 
@@ -5498,7 +5506,6 @@ namespace avmplus
             #endif
         } else {
             // assm puked, or we did something untested, so interpret.
-            // fixme: need to remove this frag from Fragmento and free everything.
             frag->releaseCode(mgr->codeAlloc);
             overflow = true;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
@@ -5508,27 +5515,25 @@ namespace avmplus
             PERFM_NVPROF("lir-error",1);
         }
 
-       #ifdef VTUNE
-       if (keep) 
-       {
-           AvmAssert(!jitPendingRecords.size());  // all should be resolved by now
-           int32_t count = jitInfoList.size(); 
-           uint32_t id = 0;        
-           for(int i=0; i<count; i++) 
-           {
-               JITCodeInfo* jitInfo = jitInfoList.get(i);
-               if (jitInfo->lineNumTable.size()) {
-                   jitInfo->sid = id++;
-                   VTune_RegisterMethod(core, jitInfo);
-               }
-               jitInfo->clear();
-           }
-           jitInfoList.clear();
-       }
-       #endif /* VTUNE */
+		#ifdef VTUNE
+		if (keep) x{
+			AvmAssert(!jitPendingRecords.size());  // all should be resolved by now
+			int32_t count = jitInfoList.size(); 
+			uint32_t id = 0;        
+			for(int i=0; i<count; i++) {
+				JITCodeInfo* jitInfo = jitInfoList.get(i);
+				if (jitInfo->lineNumTable.size()) {
+					jitInfo->sid = id++;
+					VTune_RegisterMethod(core, jitInfo);
+				}
+				jitInfo->clear();
+			}
+			jitInfoList.clear();
+		}
+		#endif /* VTUNE */
 
 		delete assm;
-    }
+	}
 
 #ifdef VTUNE
    JITCodeInfo* CodegenLIR::jitCurrentInfo()
@@ -5590,7 +5595,6 @@ namespace avmplus
        if (!inf->endAddr) inf->endAddr = pos;
        inf->startAddr = pos;
    }
-
 #endif
 
 }

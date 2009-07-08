@@ -201,7 +201,7 @@ namespace avmplus
 		ML.method_size = methodSize;	// Size in memory - Must be exact
 
 		// md position / line number table
-       SortedIntMap<LineNumberRecord*>* tbl = &inf->lineNumTable;
+       SortedMap<int,LineNumberRecord*,LIST_GCObjects>* tbl = &inf->lineNumTable;
 		int size = tbl->size();
 		LineNumberInfo* lines = 0;
 		if (size)

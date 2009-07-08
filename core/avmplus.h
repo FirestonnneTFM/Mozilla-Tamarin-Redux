@@ -245,7 +245,7 @@ namespace avmplus
 #include "ScriptBuffer.h"
 #include "avmplusList.h"
 #include "avmplusStack.h"
-#include "SortedIntMap.h"
+#include "SortedMap.h"
 #include "BitSet.h"
 #include "AvmPlusScriptableObject.h"
 #include "Namespace.h"

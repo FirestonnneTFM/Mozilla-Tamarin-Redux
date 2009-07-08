@@ -2124,7 +2124,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\SortedIntMap.h"
+				RelativePath="..\..\core\SortedMap.h"
 				>
 			</File>
 			<File
