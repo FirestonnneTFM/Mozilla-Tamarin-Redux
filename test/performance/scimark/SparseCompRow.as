@@ -54,8 +54,8 @@ else { // mobile
     var starttime:int=getTimer();
 }
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
-var N:Number=Constants.SPARSE_SIZE_M;
-var nz:Number=Constants.SPARSE_SIZE_nz;
+var N:int=Constants.SPARSE_SIZE_M;
+var nz:int=Constants.SPARSE_SIZE_nz;
 
 var x:Array = RandomVector(N, R);
 var y:Array = new Array(N);
@@ -80,8 +80,8 @@ var y:Array = new Array(N);
 // (as best reproducible with integer artihmetic)
 // Note that the first nr rows will have elements past
 // the diagonal.
-var nr:Number = nz/N; 		// average number of nonzeros per row
-var anz:Number = nr *N;   // _actual_ number of nonzeros
+var nr:int = nz/N; 		// average number of nonzeros per row
+var anz:int = nr *N;   // _actual_ number of nonzeros
 		
 var val:Array = RandomVector(anz, R);
 var col:Array = Array(anz);
@@ -93,7 +93,7 @@ for (r=0; r<N; r++)
 // initialize elements for row r
 var rowr:int = row[r];
 row[r+1] = rowr + nr;
-var step:Number = r/ nr;
+var step:int = r/ nr;
 if (step < 1) step = 1;   // take at least unit steps
 
 
