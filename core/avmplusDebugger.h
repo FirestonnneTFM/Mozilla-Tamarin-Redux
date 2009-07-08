@@ -499,7 +499,7 @@ namespace avmplus
 		/**
 		 * A line - offset pair should be recorded 
 		 */
-		void addLine(AvmCore* core, int linenum, MethodInfo* function, int offset);
+		void addLine(int linenum, MethodInfo* function, int offset);
 
 		bool setBreakpoint(int linenum);
 		bool clearBreakpoint(int linenum);
@@ -508,8 +508,8 @@ namespace avmplus
 	protected:
 		Stringp							named;
 		List<MethodInfo*>				functions;
-		DWB(BitSet*)					sourceLines;	// lines that have source code on them
-		DWB(BitSet*)					breakpoints;
+		BitSet							sourceLines;	// lines that have source code on them
+		BitSet*							breakpoints;
 	};
 
 	class AbcFile : public AbcInfo

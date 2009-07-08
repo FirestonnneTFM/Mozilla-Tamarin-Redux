@@ -931,7 +931,7 @@ namespace avmplus
         bool hasExceptions;
     public:
         CopyPropagation(AvmCore* core, GC *gc, LirWriter *out, int nvar, bool ex) 
-            : LirWriter(out), core(core), gc(gc), nvar(nvar), dirty(gc,nvar), hasExceptions(ex)
+            : LirWriter(out), core(core), gc(gc), nvar(nvar), dirty(nvar), hasExceptions(ex)
         {
             LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
             WB(gc, this, &tracker, a);
@@ -971,7 +971,7 @@ namespace avmplus
             AvmAssert((d&7) == 0);
             int i = d >> 3;
             tracker[i] = value;
-            dirty.set(gc, i);
+            dirty.set(i);
         }
 
         void trackMerge(int i, LIns *cur, LIns *target) {
@@ -5203,7 +5203,7 @@ namespace avmplus
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LIns *vars = lirbuf->sp;
         InsList looplabels(gc);
-        BitSet livein(gc, framesize);
+        BitSet livein(framesize);
 
         verbose_only(int iter = 0;)
         bool again;
@@ -5233,7 +5233,7 @@ namespace avmplus
                 case LIR_ldqc:
                     if (i->oprnd1() == vars) {
                         int d = i->oprnd2()->constval() >> 3;
-                        livein.set(gc, d);
+                        livein.set(d);
                     }
                     break;
                 case LIR_label: {
@@ -5241,10 +5241,10 @@ namespace avmplus
                     // so it can be propagated to predecessors
                     BitSet *lset = labels.get(i);
                     if (!lset) {
-                        lset = new (gc) BitSet(gc, framesize);
+                        lset = new BitSet(framesize);
                         labels.put(i, lset);
                     }
-                    if (lset->setFrom(gc, livein) && !again) {
+                    if (lset->setFrom(livein) && !again) {
                         for (int j=0, n=looplabels.size(); j < n; j++) {
                             if (looplabels[j] == i) {
                                 again = true;
@@ -5265,7 +5265,7 @@ namespace avmplus
                     LIns *label = i->getTarget();
                     BitSet *lset = labels.get(label);
                     if (lset) {
-                        livein.setFrom(gc, *lset);
+                        livein.setFrom(*lset);
                     } else {
                         AvmAssert(iter == 0);
                         looplabels.add(label);
@@ -5284,7 +5284,7 @@ namespace avmplus
                         // that won't throw.
                         BitSet *lset = labels.get(catcher);
                         if (lset)
-                            livein.setFrom(gc, *lset);
+                            livein.setFrom(*lset);
                     }
                     break;
                 }
@@ -5305,7 +5305,7 @@ namespace avmplus
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *vars = lirbuf->sp;
-        BitSet livein(gc, framesize);
+        BitSet livein(framesize);
         LirReader in(lirbuf);
         for (LIns *i = in.read(); i != 0; i = in.read()) {
             LOpcode op = i->opcode();
@@ -5336,7 +5336,7 @@ namespace avmplus
                 case LIR_ldqc:
                     if (i->oprnd1() == vars) {
                         int d = i->oprnd2()->constval() >> 3;
-                        livein.set(gc, d);
+                        livein.set(d);
                     }
                     break;
                 case LIR_label: {
@@ -5344,7 +5344,7 @@ namespace avmplus
                     // so it can be propagated to predecessors
                     BitSet *lset = labels.get(i);
                     AvmAssert(lset != 0); // all labels have been seen by deadvars_analyze()
-                    lset->setFrom(gc, livein);
+                    lset->setFrom(livein);
                     break;
                 }
                 case LIR_j:
@@ -5359,7 +5359,7 @@ namespace avmplus
                     AvmAssert(lset != 0); // all labels have been seen by deadvars_analyze()
                     // the target LiveIn set (lset) is non-empty,
                     // union it with fall-through set (live).
-                    livein.setFrom(gc, *lset);
+                    livein.setFrom(*lset);
                     break;
                 }
                 case LIR_qcall:
@@ -5374,7 +5374,7 @@ namespace avmplus
                         AvmAssert(lset != 0); // this is a forward branch, we have seen the label.
                         // the target LiveIn set (lset) is non-empty,
                         // union it with fall-through set (live).
-                        livein.setFrom(gc, *lset);
+                        livein.setFrom(*lset);
                     }
                     break;
             }

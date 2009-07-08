@@ -490,7 +490,7 @@ namespace avmplus
 					if (active == NULL)
 						AvmAssert(0 == 1); // means OP_debugline appeared before OP_debugfile which is WRONG!  Fix compiler
 					else
-						active->addLine(core, line, m, (int)(pc - abc_start));
+						active->addLine(line, m, (int)(pc - abc_start));
  					break;
 				}
 
@@ -639,7 +639,7 @@ namespace avmplus
 	/**
 	 * A line - offset pair should be recorded 
 	 */
-	void SourceFile::addLine(AvmCore* core, int linenum, MethodInfo* func, int offset)
+	void SourceFile::addLine(int linenum, MethodInfo* func, int offset)
 	{
 		// Add the function to our list if it doesn't exist.  Use lastIndexOf() instead of
 		// indexOf(), because this will be faster in the very common case where the function
@@ -652,11 +652,7 @@ namespace avmplus
 		// order -- for example, I've seen them come out of order if a function
 		// contains an inner anonymous function -- so, update every time we get called
 		func->updateSourceLines(linenum, offset);
-
-        MMgc::GC *gc = core->GetGC();
-		if (sourceLines == NULL)
-			sourceLines = new (gc) BitSet();
-		sourceLines->set(gc,linenum);
+		sourceLines.set(linenum);
 	}
 
 	int SourceFile::functionCount() const 
@@ -671,19 +667,15 @@ namespace avmplus
 
 	bool SourceFile::setBreakpoint(int linenum)
 	{
-		if (sourceLines == NULL || !sourceLines->get(linenum))
+		if (!sourceLines.get(linenum))
 			return false;
-
-        MMgc::GC *gc = GC::GetGC(this);
-		if (breakpoints == NULL)
-			breakpoints = new (gc) BitSet();
-		breakpoints->set(gc, linenum);
+		breakpoints->set(linenum);
 		return true;
 	}
 
 	bool SourceFile::clearBreakpoint(int linenum)
 	{
-		if (breakpoints == NULL || !breakpoints->get(linenum))
+		if (!breakpoints->get(linenum))
 			return false;
 		breakpoints->clear(linenum);
 		return true;
