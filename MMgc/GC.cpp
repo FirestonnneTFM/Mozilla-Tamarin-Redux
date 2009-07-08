@@ -3474,6 +3474,14 @@ bail:
 			InlineWriteBarrierTrap(FindBeginning(address), Pointer(value));
 	}
 	
+	void GC::WriteBarrierNoSubstitute(const void *container, const void *value)
+	{
+		GCAssert(container != NULL);
+		GCAssert(IsPointerToGCPage(container));
+		GCAssert(FindBeginning(container) == container);
+		InlineWriteBarrierTrap(container, Pointer(value));
+	}
+
 	bool GC::ContainsPointers(const void *item)
 	{
 		item = GetRealPointer(item);
