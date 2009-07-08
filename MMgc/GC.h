@@ -1236,7 +1236,7 @@ namespace MMgc
 		 * and then performs a standard RC write barrier operation (see privateWriteBarrierRC).
 		 */
 		static void WriteBarrierRC(const void *address, const void *value);
-		
+
 		/**
 		 * Host API: if 'address' points to a GC page (it can point into an object, not just
 		 * to the start of one), and 'value' points to a GC page as well, record that 'value'
@@ -1247,6 +1247,17 @@ namespace MMgc
 		 * The function works for both RCObjects and GCObjects.
 		 */
 		void ConservativeWriteBarrierNoSubstitute(const void *address, const void *value);
+
+		/**
+		 * Host API: 'container' must be a non-NULL untagged pointer to the beginning of an
+		 * object on a page owned by this GC.  Record that 'value' has been stored into
+		 * 'container'.
+		 *
+		 * The function does /not/ perform the store (this is what NoSubstitute means).
+		 *
+		 * The function works for both RCObjects and GCObjects.
+		 */
+		void WriteBarrierNoSubstitute(const void *container, const void *value);
 		
 	public:
 		GCPolicyManager policy;
