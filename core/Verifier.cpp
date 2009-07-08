@@ -2241,7 +2241,7 @@ namespace avmplus
 	FrameState *Verifier::getFrameState(int target_off)
 	{
 		if (!blockStates)
-			blockStates = new SortedMap<const byte*, FrameState*, LIST_NonGCObjects>(NULL, 128);
+			blockStates = new SortedMap<const byte*, FrameState*, LIST_NonGCObjects>();
 		const byte *target = code_pos + target_off;
 		FrameState *targetState;
 		// get state for target address or create a new one if none exists
@@ -2800,7 +2800,7 @@ namespace avmplus
 			size_t extra = sizeof(ExceptionHandler)*(exception_count-1);
 			ExceptionHandlerTable* table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
 			ExceptionHandler *handler = table->exceptions;
-			for (int i=0; i<exception_count; i++) 
+			for (int i=0; i < exception_count; i++, handler++) 
 			{
 				handler->from = toplevel->readU30(pos);
 				handler->to = toplevel->readU30(pos);
@@ -2846,24 +2846,12 @@ namespace avmplus
 				// handler->traits = t
 				WB(core->GetGC(), table, &handler->traits, t);
 
-				Traits* scopeTraits;
-				
-				if (name_index == 0)
-				{
-					scopeTraits = OBJECT_TYPE;
-				}
-				else
-				{
-					scopeTraits = Traits::newCatchTraits(toplevel, pool, scopePosInPool, qn.getName(), qn.getNamespace());
-				}
-				
+				Traits* scopeTraits = name_index == 0 ? OBJECT_TYPE :
+					Traits::newCatchTraits(toplevel, pool, scopePosInPool, qn.getName(), qn.getNamespace());
+
 				// handler->scopeTraits = scopeTraits
 				WB(core->GetGC(), table, &handler->scopeTraits, scopeTraits);
-
-				
 				getFrameState(handler->target)->targetOfBackwardsBranch = true;
-
-				handler++;
 			}
 
 			info->set_abc_exceptions(core->GetGC(), table);
@@ -2971,55 +2959,54 @@ namespace avmplus
 	}
 
 #if defined FEATURE_CFGWRITER
-    CFGWriter::CFGWriter (AvmCore *core, CodeWriter* coder) 
-	    : core(core), coder(coder), label(0), edge(0) {
-	    this->blocks = new (core->GetGC()) SortedIntMap<Block*>(core->GetGC(), 128);
-	    this->edges = new (core->GetGC()) SortedIntMap<Edge*>(core->GetGC(), 128);
-		blocks->put(0, new (core->GetGC()) Block(core->GetGC(), label++, 0));
-		current = blocks->at(0);
+    CFGWriter::CFGWriter (MethodInfo* info, CodeWriter* coder) 
+	    : NullWriter(coder), info(info), label(0), edge(0) {
+		blocks.put(0, new Block(label++, 0));
+		current = blocks.at(0);
 		current->pred_count = -1;
     }
 
-	CFGWriter::~CFGWriter () 
-	{
-	    Block* b;
-		core->console << "\n";
-		for (int i = 0; i < blocks->size(); i++) {
-		  b = blocks->at(i);
-		  core->console << "B" << b->label << " @"; // << (int)b->begin << ", @" << (int)b->end;
-		  core->console << " preds=[";
-		  for (uint32_t j = 0; j < b->preds->size(); j++) {
-			if(j!=0) core->console << ",";
-			core->console << "B" << b->preds->get(j);
-		  }
-		  core->console << "] succs=[";
-		  for (uint32_t j = 0; j < b->succs->size(); j++) {
-			if(j!=0) core->console << ",";
-			core->console << "B" << b->succs->get(j);
-		  }
-		  core->console << "]\n";
-		}
-		Edge* e;
-		for (int i = 0; i < edges->size(); i++) {
-		  e = edges->at(i);
-		  core->console << "E" << i << ": " << "B" << e->src << " --> " << "B" << e->snk << "\n";
-		}
-	}
-
-	void CFGWriter::writePrologue(FrameState* state)
-	{
-		(void)state;
+	CFGWriter::~CFGWriter() {
+		for (int i=0, n=blocks.size(); i < n; i++)
+			delete blocks.at(i);
+		for (int i=0, n=edges.size(); i < n; i++)
+			delete edges.at(i);
 	}
 
 	void CFGWriter::writeEpilogue(FrameState* state)
 	{
-		(void)state;
+	    Block* b;
+		AvmCore *core = info->pool()->core;
+		core->console << "CFG " << info << "\n";
+		for (int i = 0; i < blocks.size(); i++) {
+		  b = blocks.at(i);
+		  core->console << "B" << b->label; // << " @" << (int)b->begin << ", @" << (int)b->end;
+		  core->console << " preds=[";
+		  for (uint32_t j = 0; j < b->preds.size(); j++) {
+			if(j!=0) core->console << ",";
+			core->console << "B" << b->preds.get(j);
+		  }
+		  core->console << "] succs=[";
+		  for (uint32_t j = 0; j < b->succs.size(); j++) {
+			if(j!=0) core->console << ",";
+			core->console << "B" << b->succs.get(j);
+		  }
+		  core->console << "]\n";
+		}
+		Edge* e;
+		for (int i = 0; i < edges.size(); i++) {
+		  e = edges.at(i);
+		  core->console << "E" << i << ": " << "B" << e->src << " --> " << "B" << e->snk << "\n";
+		}
+		core->console << "\n";
+
+		coder->writeEpilogue(state);
 	}
 
-	void CFGWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode)
+	void CFGWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits*type)
 	{
 	  //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
-	  Block* b = blocks->get(state->pc);
+	  Block* b = blocks.get(state->pc);
 	  if (b) {
 		current = b;
 	  }
@@ -3029,12 +3016,12 @@ namespace avmplus
 	  {
 	    //core->console << "  " << (uint32_t)state->pc << ":" << opcodeInfo[opcode].name << "\n";
 		//core->console << "label @ " << (uint32_t)state->pc << "\n";
-		Block *b = blocks->get(state->pc);
+		Block *b = blocks.get(state->pc);
 		// if there isn't a block for the current pc, then create one
 		if (!b) {
-		  b = new (core->GetGC()) Block(core->GetGC(), label++, state->pc);
+		  b = new Block(label++, state->pc);
 		  //b->pred_count++;
-		  blocks->put(state->pc, b);
+		  blocks.put(state->pc, b);
 		  current = b;
 		}
 		break;
@@ -3046,13 +3033,13 @@ namespace avmplus
 		break;
 	  }
 
-		if (coder) coder->write(state, pc, opcode);
+		coder->write(state, pc, opcode, type);
 	}
 
 	void CFGWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
 	{
 	  //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
-	  Block* b=blocks->get(state->pc);
+	  Block* b=blocks.get(state->pc);
 	  if (b) {
 		current = b;
 	  }
@@ -3077,26 +3064,26 @@ namespace avmplus
 		{
 		  //core->console << "  " << (uint32_t)state->pc << ":" << opcodeInfo[opcode].name;
 		  //core->console << " " << (uint32_t)state->pc+opd1+4 << "\n";
-		  Block *b = blocks->get(state->pc+4);
+		  Block *b = blocks.get(state->pc+4);
 
 		  // if there isn't a block for the next pc, then create one
 		  if (!b) {
-			b = new (core->GetGC()) Block(core->GetGC(), label++, state->pc+4);
-			blocks->put(state->pc+4, b);
+			b = new Block(label++, state->pc+4);
+			blocks.put(state->pc+4, b);
 		  }
 		  if (opcode != OP_jump) {
 			  b->pred_count++;
-			  b->preds->add(current->label);
-			  current->succs->add(b->label);
-			  edges->put(edge++, new (core->GetGC()) Edge(current->label, b->label));
+			  b->preds.add(current->label);
+			  current->succs.add(b->label);
+			  edges.put(edge++, new Edge(current->label, b->label));
 		  }
 			  
 
 		  // if there isn't a block for target then create one
-		  b = blocks->get(state->pc+4+opd1);
+		  b = blocks.get(state->pc+4+opd1);
 		  if (!b) {
-			b = new (core->GetGC()) Block(core->GetGC(), label++, state->pc+4+opd1);
-			blocks->put(state->pc+4+opd1, b);
+			b = new Block(label++, state->pc+4+opd1);
+			blocks.put(state->pc+4+opd1, b);
 		  }
 
 		  if ((int)opd1>0) 
@@ -3107,10 +3094,10 @@ namespace avmplus
 		  { 
 			  b->pred_count = -1;
 		  }
-		  b->preds->add(current->label);
-		  current->succs->add(b->label);
+		  b->preds.add(current->label);
+		  current->succs.add(b->label);
 		  current->end = state->pc+4;
-		  edges->put(edge++, new (core->GetGC()) Edge(current->label, b->label));
+		  edges.put(edge++, new Edge(current->label, b->label));
 
 		  //core->console << "label " << (uint32_t)state->pc+opd1+4 << "\n";
 		  //core->console << "    edge " << (uint32_t)state->pc << " -> " << (uint32_t)state->pc+opd1+4 << "\n";
@@ -3120,21 +3107,21 @@ namespace avmplus
 		  //core->console << " " << (int)opd1 << "\n";
 		    break;
         }
-		if (coder) coder->writeOp1(state, pc, opcode, opd1, type);
 
+		coder->writeOp1(state, pc, opcode, opd1, type);
 	}
 
 	void CFGWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
 	{
 	  //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
-	  Block* b=blocks->get(state->pc);
+	  Block* b=blocks.get(state->pc);
 	  if (b) {
 		current = b;
 	  }
 
 	  //AvmLog ("%i: %s %i %i\n", state->pc, opcodeInfo[opcode].name, opd1, opd2);
 	  //core->console << "  " << (uint32_t)state->pc << ":" << opcodeInfo[opcode].name << " " << opd1 << " " << opd2 << "\n";
-		if (coder) coder->writeOp2 (state, pc, opcode, opd1, opd2, type);
+		coder->writeOp2 (state, pc, opcode, opd1, opd2, type);
 	}
     #endif // FEATURE_CFGWRITER
 }

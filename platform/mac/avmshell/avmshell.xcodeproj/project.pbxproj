@@ -556,7 +556,7 @@
 		079DF8170F3A882D0031D1B4 /* ScriptBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScriptBuffer.h; path = ../../../core/ScriptBuffer.h; sourceTree = SOURCE_ROOT; };
 		079DF8180F3A882D0031D1B4 /* ScriptObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptObject.cpp; path = ../../../core/ScriptObject.cpp; sourceTree = SOURCE_ROOT; };
 		079DF8190F3A882D0031D1B4 /* ScriptObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScriptObject.h; path = ../../../core/ScriptObject.h; sourceTree = SOURCE_ROOT; };
-		079DF81A0F3A882D0031D1B4 /* SortedIntMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SortedIntMap.h; path = ../../../core/SortedIntMap.h; sourceTree = SOURCE_ROOT; };
+		079DF81A0F3A882D0031D1B4 /* SortedMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SortedMap.h; path = ../../../core/SortedMap.h; sourceTree = SOURCE_ROOT; };
 		079DF81B0F3A882D0031D1B4 /* StackTrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StackTrace.cpp; path = ../../../core/StackTrace.cpp; sourceTree = SOURCE_ROOT; };
 		079DF81C0F3A882D0031D1B4 /* StackTrace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StackTrace.h; path = ../../../core/StackTrace.h; sourceTree = SOURCE_ROOT; };
 		079DF81D0F3A882D0031D1B4 /* StringBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringBuffer.cpp; path = ../../../core/StringBuffer.cpp; sourceTree = SOURCE_ROOT; };
@@ -1044,7 +1044,7 @@
 				079DF8170F3A882D0031D1B4 /* ScriptBuffer.h */,
 				079DF8180F3A882D0031D1B4 /* ScriptObject.cpp */,
 				079DF8190F3A882D0031D1B4 /* ScriptObject.h */,
-				079DF81A0F3A882D0031D1B4 /* SortedIntMap.h */,
+				079DF81A0F3A882D0031D1B4 /* SortedMap.h */,
 				079DF81B0F3A882D0031D1B4 /* StackTrace.cpp */,
 				079DF81C0F3A882D0031D1B4 /* StackTrace.h */,
 				079DF81D0F3A882D0031D1B4 /* StringBuffer.cpp */,

@@ -71,7 +71,7 @@ namespace avmplus
            JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
 
            MethodInfo* method;
-           SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
+           SortedMap<int, LineNumberRecord*, LIST_GCObjects> lineNumTable;       // populated during code generation 
            uintptr startAddr;
            uintptr endAddr;
            iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
@@ -274,7 +274,6 @@ namespace avmplus
 	public:
 		CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
-		void clearBuffers();
 		void emitMD();
 	    void formatOperand(PrintWriter& buffer, LIns* oprnd);
 		void epilogue(FrameState* state);
@@ -295,6 +294,7 @@ namespace avmplus
 		void emitCheckNull(FrameState* state, int index);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
+		void emitGetGlobalScope();
 		void localSet(int i, LIns* o, Traits* type);
 
 		// CodeWriter methods
@@ -311,9 +311,7 @@ namespace avmplus
 		void writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode);
 		void fixExceptionsAndLabels(FrameState* state, const byte* pc);
 		void formatOperand(PrintWriter& buffer, Value& v);
-
-		void emitGetGlobalScope();
-
+		void cleanup();
 	};
 }
 

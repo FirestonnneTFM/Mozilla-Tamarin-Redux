@@ -102,6 +102,7 @@ namespace avmplus
 		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
 		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
 		void formatOperand(PrintWriter& buffer, Value& v);
+		void cleanup();
 
 	private:
 		// 'backpatches' represent target addresses of forward jumps in the original code,
@@ -177,7 +178,6 @@ namespace avmplus
 		uintptr_t *dest;
 		uintptr_t *dest_limit;
 
-		void cleanup();
 		void refill();
 		void emitRelativeOffset(uintptr_t base_offset, const uint8_t *pc, intptr_t offset);
 		void makeAndInsertBackpatch(const uint8_t* target_pc, uintptr_t patch_offset);

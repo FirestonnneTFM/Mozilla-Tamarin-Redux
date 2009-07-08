@@ -120,8 +120,6 @@ namespace avmplus
 	
 	WordcodeEmitter::~WordcodeEmitter()
 	{
-		delete [] caches;
-		caches = NULL;
 		cleanup();
 	}
 
@@ -138,6 +136,10 @@ namespace avmplus
 	
 	void WordcodeEmitter::cleanup() 
 	{
+		if (caches) {
+			delete [] caches;
+			caches = NULL;
+		}
 		DELETE_LIST(backpatch_info, backpatches);
 		DELETE_LIST(label_info, labels);
 		DELETE_LIST(catch_info, exception_fixes);
