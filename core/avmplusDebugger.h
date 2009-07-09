@@ -509,7 +509,7 @@ namespace avmplus
 		Stringp							named;
 		List<MethodInfo*>				functions;
 		BitSet							sourceLines;	// lines that have source code on them
-		BitSet*							breakpoints;
+		BitSet							breakpoints;
 	};
 
 	class AbcFile : public AbcInfo
