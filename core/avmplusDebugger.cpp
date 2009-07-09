@@ -669,21 +669,21 @@ namespace avmplus
 	{
 		if (!sourceLines.get(linenum))
 			return false;
-		breakpoints->set(linenum);
+		breakpoints.set(linenum);
 		return true;
 	}
 
 	bool SourceFile::clearBreakpoint(int linenum)
 	{
-		if (!breakpoints->get(linenum))
+		if (!breakpoints.get(linenum))
 			return false;
-		breakpoints->clear(linenum);
+		breakpoints.clear(linenum);
 		return true;
 	}
 
 	bool SourceFile::hasBreakpoint(int linenum)
 	{
-		return (breakpoints != NULL && breakpoints->get(linenum));
+		return breakpoints.get(linenum);
 	}
 
 	DebugStackFrame::DebugStackFrame(int nbr, CallStackNode* tr, Debugger* debug)
