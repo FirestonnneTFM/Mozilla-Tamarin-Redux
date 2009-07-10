@@ -1047,12 +1047,12 @@ namespace avmplus
 	}
 
 #if VMCFG_METHOD_NAMES
-	Stringp MethodInfo::getMethodName() const 
+	Stringp MethodInfo::getMethodName(bool includeAllNamespaces) const 
 	{
-		return getMethodNameWithTraits(this->declaringTraits());
+		return getMethodNameWithTraits(this->declaringTraits(), includeAllNamespaces);
 	}
 	
-	Stringp MethodInfo::getMethodNameWithTraits(Traits* t) const 
+	Stringp MethodInfo::getMethodNameWithTraits(Traits* t, bool includeAllNamespaces) const 
 	{
 		Stringp name = NULL;
 		const int method_id = this->method_id();
@@ -1069,7 +1069,7 @@ namespace avmplus
 			
 			if (t)
 			{
-				Stringp tname = t->format(core);
+				Stringp tname = t->format(core, includeAllNamespaces);
 				if (core->config.oldVectorMethodNames)
 				{
 					// Tamarin used to incorrectly return the internal name of these

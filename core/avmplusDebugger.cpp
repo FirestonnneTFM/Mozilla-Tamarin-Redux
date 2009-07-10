@@ -324,7 +324,10 @@ namespace avmplus
 		MethodEnv* env = core->callStack->env();
 		if (env->method)
 		{
-			name = env->method->getMethodName();
+			// normally, getMethodName omits nonpublic namespaces, but for this purpose,
+			// we want to include all namespaces.
+			const bool includeAllNamespaces = true;
+			name = env->method->getMethodName(includeAllNamespaces);
 			if (!name)
 				name = core->kEmptyString;
 			if ((line == 0) && (astrace_callback == TRACE_METHODS_WITH_ARGS || astrace_callback == TRACE_METHODS_AND_LINES_WITH_ARGS))

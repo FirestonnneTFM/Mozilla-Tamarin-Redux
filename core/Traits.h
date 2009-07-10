@@ -483,7 +483,7 @@ namespace avmplus
 
 	public:
 #if VMCFG_METHOD_NAMES
-		Stringp format(AvmCore* core) const;
+		Stringp format(AvmCore* core, bool includeAllNamespaces = false) const;
 #endif
 		
 		// call init_declaringScope for each method that we own. this should be
