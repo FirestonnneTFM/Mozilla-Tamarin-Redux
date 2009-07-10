@@ -322,8 +322,8 @@ namespace avmplus
 	public:
 
 #if VMCFG_METHOD_NAMES
-		Stringp FASTCALL getMethodNameWithTraits(Traits* declaringTraits) const;
-		Stringp FASTCALL getMethodName() const;
+		Stringp FASTCALL getMethodNameWithTraits(Traits* declaringTraits, bool includeAllNamespaces = false) const;
+		Stringp FASTCALL getMethodName(bool includeAllNamespaces = false) const;
 #endif		
 
 #ifdef AVMPLUS_VERBOSE

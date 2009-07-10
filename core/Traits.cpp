@@ -1667,10 +1667,10 @@ namespace avmplus
 	}
 
 #if VMCFG_METHOD_NAMES
-	Stringp Traits::format(AvmCore* core) const
+	Stringp Traits::format(AvmCore* core, bool includeAllNamespaces) const
 	{
 		if (name() != NULL)
-			return Multiname::format(core, ns(), name());
+			return Multiname::format(core, ns(), name(), false, !includeAllNamespaces);
 
 		return core->concatStrings(core->newConstantStringLatin1("Traits@"),
 									   core->formatAtomPtr((uintptr)this));
