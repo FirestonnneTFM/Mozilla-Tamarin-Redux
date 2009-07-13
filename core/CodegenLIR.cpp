@@ -579,7 +579,7 @@ namespace avmplus
             AvmCore *core = pool->core;
             GC *gc = core->gc;
 			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
-			mgr->codeAlloc = new (gc) CodeAlloc(gc->GetGCHeap());
+			mgr->codeAlloc = new (gc) CodeAlloc();
 #ifdef AVMPLUS_VERBOSE
 			if (pool->verbose) {
 				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, 0);
@@ -5627,6 +5627,17 @@ namespace nanojit
 			mergeCounts = 0;
 			lirbuf = 0;
 		}
+	}
+
+	// static
+	void* CodeAlloc::allocCodeChunk(size_t nbytes) {
+		size_t npages = (nbytes + GCHeap::kBlockSize - 1) / GCHeap::kBlockSize;
+		return GCHeap::GetGCHeap()->Alloc((int)npages);
+	}
+
+	// static
+	void CodeAlloc::freeCodeChunk(void* addr, size_t) {
+		return GCHeap::GetGCHeap()->Free(addr);
 	}
 }
 
