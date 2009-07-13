@@ -614,7 +614,7 @@ namespace avmplus
 				if (imm30 == 0 || imm30 >= pool->constantStringCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantStringCount));
 				coder->write(state, pc, opcode);
-				state->push(STRING_TYPE, pool->cpool_string[imm30] != NULL);
+				state->push(STRING_TYPE, pool->getString(imm30) != NULL);
 				break;
 
 			case OP_pushint: 
@@ -2707,7 +2707,7 @@ namespace avmplus
 				verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantStringCount));
 				return undefinedAtom;
 			}
-			return pool->cpool_string[index]->atom();
+			return pool->getString(index)->atom();
 
 		case kObjectType:
 			if( !index || index >= pool->constantMnCount )

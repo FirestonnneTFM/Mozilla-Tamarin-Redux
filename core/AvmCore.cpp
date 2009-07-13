@@ -1403,9 +1403,11 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
-				String *s = format(pool->cpool_string[index]->atom());
-				if (index < pool->cpool_string.size())
+				if (index < pool->constantStringCount)
+				{
+					String *s = format(pool->getString(index)->atom());
 					buffer << " " << s;
+				}
 				break;
 			}
 			case OP_pushbyte:
@@ -1591,8 +1593,8 @@ return the result of the comparison ToPrimitive(x) == y.
 			case WOP_pushstring: {
 				buffer << wopAttrs[opcode].name;
 				uint32 index = (uint32)*pc++;
-				if (index < pool->cpool_string.size())
-					buffer << " " << format(pool->cpool_string[index]->atom());
+				if (index < pool->constantStringCount)
+					buffer << " " << format(pool->getString(index)->atom());
 				else
 					buffer << " OUT OF RANGE: " << index;
 				break;

@@ -45,7 +45,6 @@ namespace avmplus
 		cpool_int(0),
 		cpool_uint(0),
 		cpool_double(core->GetGC(), 0),
-		cpool_string(core->GetGC(), 0),
 		cpool_ns(core->GetGC(), 0),
 		cpool_ns_set(core->GetGC(), 0),
 #ifndef AVMPLUS_64BIT
@@ -59,6 +58,9 @@ namespace avmplus
 		_privateNamedScripts(new(core->GetGC()) MultinameHashtable()),
 		_code(sb.getImpl()),
 		_abcStart(startPos),
+		_abcStringStart(NULL),
+		_abcStringEnd(NULL),
+		_abcStrings(core->GetGC()),
 		_classes(core->GetGC(), 0),
 		_scripts(core->GetGC(), 0),
 		_methods(core->GetGC(), 0)
@@ -77,6 +79,19 @@ namespace avmplus
 		#ifdef AVMPLUS_WORD_CODE
 		delete word_code.cpool_mn;
 		#endif
+
+		if (!MMgc::GC::GetGC(this)->Destroying())
+		{
+			// make all strings created so far dynamic,
+			// making sure that no pointers into ABC data persist
+			ConstantStringData* dataP = _abcStrings.data;
+			for (uint32_t i = 0; i < constantStringCount; i++)
+			{
+				++dataP;
+				if (dataP->abcPtr < _abcStringStart || dataP->abcPtr >= _abcStringEnd)
+					dataP->str->makeDynamic();
+			}
+		}
 	}
 	
 	Traits* PoolObject::getBuiltinTraits(Stringp name) const
@@ -146,9 +161,27 @@ namespace avmplus
 		return cpool_ns_set[index];  
 	}
 
+	////////////////////////////////////////////////////////////////////
+
+	void PoolObject::setupConstantStrings(uint32_t count)
+	{
+		_abcStrings.setup(count);
+		constantStringCount = count;
+	}
+
 	Stringp PoolObject::getString(int index) const
 	{
-		return cpool_string[index];  
+		ConstantStringData* dataP = _abcStrings.data + index;
+		if (dataP->abcPtr >= _abcStringStart && dataP->abcPtr < _abcStringEnd)
+		{
+			// String not created yet; grab the pointer to the (verified) ABC data
+			uint32_t len = AvmCore::readU30(dataP->abcPtr);
+			Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, true);
+			// must be made sticky for now...
+			s->Stick();
+			dataP->str = s;
+		}
+		return dataP->str;
 	}
 
 	/*static*/ bool PoolObject::isLegalDefaultValue(BuiltinType bt, Atom value)
@@ -295,7 +328,7 @@ namespace avmplus
 			case CONSTANT_Utf8:
 				if (index >= (maxcount = constantStringCount))
 					goto range_error;
-				value = cpool_string[index]->atom();
+				value = getString(index)->atom();
 				break;
 
 			case CONSTANT_True:

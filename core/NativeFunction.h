@@ -155,7 +155,7 @@ namespace avmplus
 
 	#define AvmThunkCoerce_AvmString_AvmBox(v)	((v) ? (v)->atom() : nullStringAtom)
 
-	#define AvmThunkConstant_AvmString(v)		(env->method->pool()->cpool_string[v])
+	#define AvmThunkConstant_AvmString(v)		(env->method->pool()->getString(v))
 	
 #ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	#define AVMTHUNK_GET_METHOD_HANDLER(env)	((env)->method->handler_method())
