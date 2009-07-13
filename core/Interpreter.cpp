@@ -1069,7 +1069,7 @@ namespace avmplus
 			}
 
             INSTR(pushstring) {
-                *(++sp) = pool->cpool_string[(uint32_t)U30ARG]->atom();
+                *(++sp) = pool->getString((uint32_t)U30ARG)->atom();
                 NEXT;
 			}
 
@@ -2764,7 +2764,7 @@ namespace avmplus
 			INSTR(dxns) {
 				AvmAssert(info->setsDxns());
 				SAVE_EXPC;
-				methodFrame.set_dxns(core->newPublicNamespace(pool->cpool_string[(uint32_t)U30ARG]));
+				methodFrame.set_dxns(core->newPublicNamespace(pool->getString((uint32_t)U30ARG)));
 				NEXT;
 			}
 

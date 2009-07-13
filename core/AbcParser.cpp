@@ -219,7 +219,7 @@ namespace avmplus
 	{
 		if (index > 0 && index < pool->constantStringCount)
 		{
-			return pool->cpool_string[index];
+			return pool->getString(index);
 		}
 		toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantStringCount));
 		return NULL;
@@ -629,7 +629,7 @@ namespace avmplus
 			if(pool->verbose) {
 				core->console << "        name_index=" << name_index;
 				if (name_index > 0 && name_index < pool->constantStringCount)
-					core->console << " \"" << pool->cpool_string[name_index] << "\"";
+					core->console << " \"" << pool->getString(name_index) << "\"";
 				core->console << "\n        flags=" << (uint32_t)abcFlags << "\n";
 			}
 			#endif
@@ -1075,23 +1075,23 @@ namespace avmplus
 		if (string_count > (uint32)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		List<Stringp> &cpool_string = pool->cpool_string;
 		MMGC_MEM_TYPE(pool);
-		cpool_string.ensureCapacity(string_count);
-		pool->constantStringCount = string_count;
+		pool->setupConstantStrings(string_count);
 
 #ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
-		const bool constData = code.getImpl()->isConstant();
-		
+		pool->_abcStringStart = pos;
+
+		PoolObject::ConstantStringData* dataP = pool->_abcStrings.data;
 		for(uint32_t i = 1; i < string_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
 #endif
-
+			// save the byte position into the cpool array
+			(++dataP)->abcPtr = pos;
 			// number of characters
 			// todo - is compiler emitting no. of chars or no. of bytes?
 			int len = readU30(pos);
@@ -1099,36 +1099,22 @@ namespace avmplus
 			// check to see if we are trying to read past the file end or the beginning.
 			if (pos < abcStart || pos+len >= abcEnd )
 				toplevel->throwVerifyError(kCorruptABCError);
-			// don't need to create an atom for this now, because
-			// each caller will take care of it.
-
-			// @todo: for now we assume that strings from compiled-in ABC data is constant,
-			// but ABC data from any other source is not constant since it may be unloaded.
-			// A further optimization would be to add a way to "un-constant" interned strings
-			// in an unloaded ABC range.
-			Stringp s = core->internStringUTF8((const char*)pos, len, constData);
-
-			// internStringUTF8() will return NULL if we pass it invalid UTF8 data and its "strict" arg is true
-			// (which it is by default) -- invalid UTF8 in the ABC == verify error.
-			if (!s)	
+			// verify the UTF-8 sequence
+			if (UnicodeUtils::Utf8ToUtf16((const uint8*) pos, len, NULL, 0, true) < 0)
 				toplevel->throwVerifyError(kCorruptABCError);
 
-			// Jit skips WB on string constants so make them sticky
-			// fixme -- it's incorrect to skip WB's on const's, bug was fixed; is this still required?
-			s->Stick();
-
-			cpool_string.set(i, s);
-			pos += len;
-
-			#ifdef AVMPLUS_VERBOSE
+#ifdef AVMPLUS_VERBOSE
 			if(pool->verbose) {
 				core->console << "    " << offset << ":" << "cpool_string["<<i<<"]="
-					<<constantNames[CONSTANT_Utf8] << " ";
-				core->console << core->format(cpool_string[i]->atom());
+					<< constantNames[CONSTANT_Utf8] << " ";
+				core->console.write(pos, len);
 				core->console << "\n";
 			}
-			#endif
+#endif
+			// skip the UTF-8 string
+			pos += len;
 		}
+		pool->_abcStringEnd = pos;
 
 		uint32 ns_count = readU30(pos);
 		if (ns_count > (uint32)(abcEnd - pos))

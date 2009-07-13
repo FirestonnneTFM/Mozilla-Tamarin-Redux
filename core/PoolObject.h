@@ -88,7 +88,6 @@ namespace avmplus
 		List<int32_t> cpool_int;
 		List<uint32_t> cpool_uint;
 		List<double*, LIST_GCObjects> cpool_double;	// explicitly specify LIST_GCObject b/c these are GC-allocated ptrs
-		List<Stringp> cpool_string;
 		List<Namespacep> cpool_ns;
 		List<NamespaceSetp> cpool_ns_set;
 
@@ -109,20 +108,20 @@ namespace avmplus
 		DWB(Domain*) domain;
 		
 		/** # of elements in metadata array */
-		uint32 metadataCount;
+		uint32_t metadataCount;
 
 		/** # of elements in cpool array */
-		uint32 constantCount;
-		uint32 constantIntCount;
-		uint32 constantUIntCount;
-		uint32 constantDoubleCount;
-		uint32 constantStringCount;
-		uint32 constantNsCount;
-		uint32 constantNsSetCount;
-		uint32 constantMnCount;
+		uint32_t constantCount;
+		uint32_t constantIntCount;
+		uint32_t constantUIntCount;
+		uint32_t constantDoubleCount;
+		uint32_t constantStringCount;
+		uint32_t constantNsCount;
+		uint32_t constantNsSetCount;
+		uint32_t constantMnCount;
 
 		/** flags to control certain bugfix behavior */
-		uint32 bugFlags;
+		uint32_t bugFlags;
 		// Numbers here correspond to Bugzilla bug numbers (i.e. bugzilla bug 444630 is kbug444630
 		enum {
 			kbug444630 = 0x00000001
@@ -190,6 +189,10 @@ namespace avmplus
 
 		Namespacep getNamespace(int index) const;
 		NamespaceSetp getNamespaceSet(int index) const;
+		inline bool hasString(int index) const {
+			// AbcParser stores pointers into all locations
+			return (index >= 1 && index < (int) constantStringCount);
+		}
 		Stringp getString(int index) const;
 
 		Atom getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t);
@@ -238,10 +241,36 @@ namespace avmplus
 #endif
 		
 	private:
+		union ConstantStringData
+		{
+			Stringp		str;
+			const byte*	abcPtr;
+		};
+		class ConstantStrings : public MMgc::GCRoot
+		{
+		public:
+			ConstantStrings(MMgc::GC* gc) 
+				: GCRoot (gc, NULL, 0), data(NULL) {}
+			~ConstantStrings() { MMgc::FixedMalloc::GetInstance()->Free(data); }
+			void setup(uint32_t size)
+			{
+				AvmAssert(data == NULL);
+				size *= sizeof(ConstantStringData);
+				// GCRoot requires this allocation to come from FixedMalloc 
+				data = (ConstantStringData*) MMgc::FixedMalloc::GetInstance()->Alloc(size);
+				Set(data, size);
+			}
+			ConstantStringData* data;
+		};
 		DWB(MultinameHashtable*)					_namedTraits;
 		DWB(MultinameHashtable*)					_privateNamedScripts;
 		DWB(ScriptBufferImpl*)						_code;
 		const byte * const							_abcStart;
+		// start of static ABC string data
+		const byte *								_abcStringStart;
+		// points behind end of ABC string data - see AbcParser.cpp
+		const byte *								_abcStringEnd;
+		ConstantStrings								_abcStrings;
 		List<Traits*, LIST_GCObjects>				_classes;
 		List<Traits*, LIST_GCObjects>				_scripts;
 		List<MethodInfo*, LIST_GCObjects>			_methods;
@@ -254,8 +283,7 @@ namespace avmplus
 		// (always safe because those indices are limited to 30 bits)
 		List<int32_t, LIST_NonGCObjects>			_method_name_indices;	
 #endif
-
-
+				void								setupConstantStrings(uint32_t count);
 	public:
 		// @todo, privatize & make into bitfield (requires API churn)
 		bool						isBuiltin;	// true if this pool is baked into the player.  used to control whether callees will set their context.

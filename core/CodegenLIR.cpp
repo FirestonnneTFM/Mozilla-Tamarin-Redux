@@ -1767,7 +1767,7 @@ namespace avmplus
 			emitIntConst(state, sp+1, (signed char)imm8);
 			break;
 	    case OP_pushstring:
-			emitPtrConst(state, sp+1, pool->cpool_string[imm30], STRING_TYPE);
+			emitPtrConst(state, sp+1, pool->getString(imm30), STRING_TYPE);
 			break;
 	    case OP_pushnamespace:
 			emitPtrConst(state, sp+1, pool->cpool_ns[imm30], NAMESPACE_TYPE);
@@ -1800,14 +1800,14 @@ namespace avmplus
 			#else
 			const bool do_emit = core->debugger() != NULL;
 			#endif
-		    Stringp str = pool->cpool_string[imm30];  // assume been checked already
+		    Stringp str = pool->getString(imm30);  // assume been checked already
 			if(do_emit) emit(state, opcode, (uintptr)str);
 #endif
 			break;
 		}
 		case OP_dxns:
 		{
-		    Stringp str = pool->cpool_string[imm30];  // assume been checked already
+		    Stringp str = pool->getString(imm30);  // assume been checked already
 			emit(state, opcode, (uintptr)str);
 		    break;
 		}

@@ -508,8 +508,7 @@ namespace avmplus
 
 	Stringp TypeDescriber::poolstr(PoolObject* pool, uint32_t index)
 	{
-		Stringp name = index < pool->cpool_string.size() ? pool->cpool_string[index] : NULL;
-		return name ? name : str(kstrid_emptyString);
+		return index < pool->constantStringCount ? pool->getString(index) : str(kstrid_emptyString);
 	}
 	
 	ScriptObject* TypeDescriber::describeType(Atom value, uint32_t flags)
