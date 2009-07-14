@@ -671,13 +671,13 @@ namespace MMgc
 
 		// the allocation budget for the minor GC cycle.  This variable remains constant
 		// throughout the minor cycle.
-		int64_t minorAllocationBudget;
+		int32_t minorAllocationBudget;
 		
 		// the remaining allocation budget for the minor GC cycle.  Initially this has the
 		// value of minorAllocationBudget; the allocation request size is subtracted for
 		// every allocation.  This variable can go negative because we can overshoot the
 		// budget.
-		int64_t remainingMinorAllocationBudget;
+		int32_t remainingMinorAllocationBudget;
 		
 		// Temporaries used to compute R
 		uint64_t adjustR_startTime;
