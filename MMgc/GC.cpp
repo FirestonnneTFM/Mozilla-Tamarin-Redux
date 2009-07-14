@@ -173,6 +173,9 @@ namespace MMgc
 		, heapUsedBeforeSweep(0)
 		, gcAllocatedBeforeSweep(0)
 		, gcBytesUsedBeforeSweep(0)
+		, objectsReaped(0)
+		, bytesReaped(0)
+		, objectsPinned(0)
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		, candidateWords(0)
@@ -192,7 +195,7 @@ namespace MMgc
 		, adjustR_totalTime(0)
 	{
 #ifdef MMGC_POLICY_PROFILING
-		for ( int i=0 ; i <= 3 ; i++ ) {
+		for ( size_t i=0 ; i < ARRAY_SIZE(barrierStageTotal) ; i++ ) {
 			barrierStageTotal[i] = 0;
 			barrierStageLastCollection[i] = 0;
 		}
@@ -324,7 +327,6 @@ namespace MMgc
 		if (remainingMajorAllocationBudget < remainingBeforeGC)
 			remainingMajorAllocationBudget = remainingBeforeGC;
   		remainingMinorAllocationBudget = minorAllocationBudget = int64_t(remainingMajorAllocationBudget * T);
- 		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
 #ifdef MMGC_POLICY_PROFILING
 		if (summarizeGCBehavior())
 			GCLog("[gcbehavior] policy: mark-rate=%.2f (MB/sec) adjusted-L=%.2f kbytes-live=%.0f kbytes-target=%.0f\n", 
@@ -333,6 +335,7 @@ namespace MMgc
 				  H / 1024.0, 
 				  (H+remainingMajorAllocationBudget) / 1024.0);
 #endif
+ 		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
   	}
  
  	// Called when an incremental mark ends
@@ -528,7 +531,7 @@ namespace MMgc
 		// Need to clear these before any writes can occur, so that means right here: if earlier,
 		// we'd not have them for reporting.
 		if (ev == END_FinalizeAndSweep) {
-			for ( int i=0 ; i <= 3 ; i++ ) {
+			for ( size_t i=0 ; i < ARRAY_SIZE(barrierStageTotal) ; i++ ) {
 				barrierStageTotal[i] += barrierStageLastCollection[i];
 				barrierStageLastCollection[i] = 0;
 			}
@@ -548,14 +551,24 @@ namespace MMgc
 	/**
 	 * Note, gcno=0 is special and means statistics dumped at the end of the run,
 	 * just as the GC is about to shut down.
+	 *
+	 * Note that a lot of the stats for the last GC cycle do make sense even if
+	 * afterCollection is false, because they would be stats for an unfinished
+	 * incremental collection.  But they only make sense if gc->IncrementalMarking()
+	 * is true.
+	 *
+	 * TODO: alloc/free volumes might be helpful.
 	 */
 	void GCPolicyManager::PrintGCBehaviorStats(bool afterCollection)
 	{
 		size_t bytesInUse = gc->GetBytesInUse();
 		size_t heapAllocated = heap->GetTotalHeapSize();
+		char buf[256];
+		uint32_t utotal;
+		double dtotal;
 		
 		GCLog("--------------------\n");
-		GCLog("[gcbehavior] gc=%p gcno=%u\n", (void*)gc, afterCollection ? (unsigned)countFinalizeAndSweep : 0);
+		GCLog("[gcbehavior] gc=%p gcno=%u incremental-marks=%u\n", (void*)gc, afterCollection ? (unsigned)countFinalizeAndSweep : 0, (unsigned)countIncrementalMark);
 		if (afterCollection)
 		{
 			GCLog("[gcbehavior] occupancy-before: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
@@ -589,35 +602,52 @@ namespace MMgc
 			  unsigned(couldBePointer),
 			  unsigned(actuallyIsPointer));
 #endif
-		// Note that a lot of the stats for the last GC cycle do make sense even if
-		// afterCollection is false, because they would be stats for an unfinished
-		// incremental collection.
-		GCLog("[gcbehavior] markitem-last-gc: objects=%u bytes=%u\n",
-			  unsigned(objectsScannedLastCollection),
-			  unsigned(bytesScannedLastCollection));
+		if (afterCollection || gc->IncrementalMarking())
+		{
+			GCLog("[gcbehavior] markitem-last-gc: objects=%u bytes=%u\n",
+				  unsigned(objectsScannedLastCollection),
+				  unsigned(bytesScannedLastCollection));
+		}
 		GCLog("[gcbehavior] markitem-all-gc: objects=%.0f bytes=%.0f\n",
 			  double(objectsScannedLastCollection + objectsScannedTotal),
 			  double(bytesScannedLastCollection + bytesScannedTotal));
-		GCLog("[gcbehavior] barrier-last-gc: total=%u stage0=%u stage1=%u stage2=%u stage3=%u hit-ratio=%.2f\n",
-			  unsigned(barrierStageLastCollection[0] + barrierStageLastCollection[1] + barrierStageLastCollection[2] + barrierStageLastCollection[3]),
-			  unsigned(barrierStageLastCollection[0]),
-			  unsigned(barrierStageLastCollection[1]),
-			  unsigned(barrierStageLastCollection[2]),
-			  unsigned(barrierStageLastCollection[3]),
-			  double(barrierStageLastCollection[3])/double(barrierStageLastCollection[0]));
-		GCLog("[gcbehavior] barrier-all-gc: total=%.0f stage0=%.0f stage1=%.0f stage2=%.0f stage3=%.0f hit-ratio=%.2f\n",
-			  double(barrierStageLastCollection[0] + barrierStageLastCollection[1] + barrierStageLastCollection[2] + barrierStageLastCollection[3] +
-					 barrierStageTotal[0] + barrierStageTotal[1] + barrierStageTotal[2] + barrierStageTotal[3]),
-			  double(barrierStageLastCollection[0] + barrierStageTotal[0]),
-			  double(barrierStageLastCollection[1] + barrierStageTotal[1]),
-			  double(barrierStageLastCollection[2] + barrierStageTotal[2]),
-			  double(barrierStageLastCollection[3] + barrierStageTotal[3]),
-			  double(barrierStageLastCollection[3] + barrierStageTotal[3])/double(barrierStageLastCollection[0] + barrierStageTotal[0]));
+
+		size_t blimit = ARRAY_SIZE(barrierStageLastCollection);
+		utotal = 0;
+		VMPI_sprintf(buf, "[gcbehavior] barrier-last-gc:");
+		for ( size_t i=0 ; i < blimit ; i++ )
+			utotal += barrierStageLastCollection[i];
+		VMPI_sprintf(buf + strlen(buf), " total=%u", unsigned(utotal));
+		for ( size_t i=0 ; i < blimit ; i++ )
+			VMPI_sprintf(buf + strlen(buf), " stage%d=%u", unsigned(i), unsigned(barrierStageLastCollection[i]));
+		VMPI_sprintf(buf + strlen(buf), " hit-ratio=%.2f\n", 
+					 double(barrierStageLastCollection[blimit-1])/double(utotal));
+		GCLog(buf);
+	
+		dtotal = 0;
+		VMPI_sprintf(buf, "[gcbehavior] barrier-all-gc: ");
+		for ( size_t i=0 ; i < blimit ; i++ )
+			dtotal += double(barrierStageLastCollection[i] + barrierStageTotal[i]);
+		VMPI_sprintf(buf + strlen(buf), " total=%.0f", dtotal);
+		for ( size_t i=0 ; i < blimit ; i++ )
+			VMPI_sprintf(buf + strlen(buf), " stage%d=%.0f", unsigned(i), double(barrierStageLastCollection[i] + barrierStageTotal[i]));
+		VMPI_sprintf(buf + strlen(buf), " hit-ratio=%.2f\n", 
+					 double(barrierStageLastCollection[blimit-1] + barrierStageTotal[blimit-1])/double(dtotal));
+		GCLog(buf);
+
 		GCLog("[gcbehavior] time-zct-reap: last-cycle=%.1f total=%.1f\n",
 			  ticksToMillis(timeReapZCTLastCollection),
 			  ticksToMillis(timeReapZCT));
+		GCLog("[gcbehavior] work-zct-reap: reaps=%u objects-reaped=%.0f kbytes-reaped=%.0f objects-pinned=%.0f reaped-to-pinned=%.2f objects-reaped-per-ms=%.2f kbytes-reaped-per-ms=%.1f\n",
+			  unsigned(countReapZCT),
+			  double(objectsReaped),
+			  double(bytesReaped)/1024,
+			  double(objectsPinned),
+			  countReapZCT > 0 ? double(objectsReaped)/double(objectsPinned) : 0,
+			  countReapZCT > 0 ? double(objectsReaped)/ticksToMillis(timeReapZCT) : 0,
+			  countReapZCT > 0 ? (double(bytesReaped)/1024)/ticksToMillis(timeReapZCT) : 0);
 		GCLog("[gcbehavior] pause-zct-reap: last-cycle=%.1f overall=%.1f\n",
-			  ticksToMillis(timeMaxReapZCTLastCollection),
+			  pendingClearZCTStats ? 0.0 : ticksToMillis(timeMaxReapZCTLastCollection),
 			  ticksToMillis(timeMaxReapZCT));
 		if (afterCollection)
 		{
@@ -638,11 +668,13 @@ namespace MMgc
 			  ticksToMillis(timeIncrementalMark),
 			  ticksToMillis(timeFinalRootAndStackScan),
 			  ticksToMillis(timeFinalizeAndSweep));
-		GCLog("[gcbehavior] pause-last-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
-			  ticksToMillis(timeMaxStartIncrementalMarkLastCollection),
-			  ticksToMillis(timeMaxIncrementalMarkLastCollection),
-			  ticksToMillis(timeMaxFinalRootAndStackScanLastCollection),
-			  ticksToMillis(timeMaxFinalizeAndSweepLastCollection));
+		if (afterCollection || gc->IncrementalMarking()) {
+			GCLog("[gcbehavior] pause-last-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
+				  ticksToMillis(timeMaxStartIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxFinalRootAndStackScanLastCollection),
+				  ticksToMillis(timeMaxFinalizeAndSweepLastCollection));
+		}
 		GCLog("[gcbehavior] pause-all-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
 			  ticksToMillis(timeMaxStartIncrementalMark),
 			  ticksToMillis(timeMaxIncrementalMark),
@@ -705,8 +737,16 @@ namespace MMgc
 #ifdef MMGC_POLICY_PROFILING
 	REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
 	{
+		GCAssert(ARRAY_SIZE(barrierStageLastCollection) > stage);
 		barrierStageLastCollection[stage]++;
 	}
+
+	void GCPolicyManager::signalReapWork(uint32_t objects_reaped, uint32_t bytes_reaped, uint32_t objects_pinned)
+	{
+		objectsReaped += objects_reaped;
+		bytesReaped += bytes_reaped;
+		objectsPinned += objects_pinned;
+ 	}
 #endif
 
 	////////////// ZCT /////////////////////////////////////////////////////////////////////////////
@@ -1000,6 +1040,11 @@ namespace MMgc
 		while (HasFree())
 			Put(GrabFree(), NULL);
 		
+#ifdef MMGC_POLICY_PROFILING
+		uint32_t objects_reaped = 0;
+		uint32_t objects_pinned = 0;
+#endif
+		
 		while(zctIndex < zctNext) {
 			SAMPLE_CHECK();
 			RCObject *rcobj = Get(zctIndex++);
@@ -1030,6 +1075,9 @@ namespace MMgc
 				((GCFinalizable*)rcobj)->~GCFinalizable();
 				numObjects++;
 				objSize += GC::Size(rcobj);
+#ifdef MMGC_POLICY_PROFILING
+				objects_reaped++;
+#endif
 				gc->Free(rcobj);
 				
 				GCAssert(gc->weakRefs.get(rcobj) == NULL);
@@ -1037,6 +1085,9 @@ namespace MMgc
 			else if(rcobj) {
 				// move it to front
 				rcobj->Unpin();
+#ifdef MMGC_POLICY_PROFILING
+				objects_pinned++;
+#endif
 				if(nextPinnedIndex != zctIndex-1) {
 					rcobj->setZCTIndex(nextPinnedIndex);
 					GCAssert(Get(nextPinnedIndex) == NULL);
@@ -1069,6 +1120,9 @@ namespace MMgc
 		}
 #endif
 		
+#ifdef MMGC_POLICY_PROFILING
+		gc->policy.signalReapWork(objects_reaped, objSize, objects_pinned);
+#endif
 		gc->policy.signal(GCPolicyManager::END_ReapZCT);
 	}
 	

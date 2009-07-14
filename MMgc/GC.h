@@ -425,6 +425,11 @@ namespace MMgc
 		 *  3 - passed IsWhite filtering (rhs is not marked)
 		 */
 		/*REALLY_INLINE*/ void signalWriteBarrierWork(int stage);
+
+		/**
+		 * Situation: signal that the ZCT reaper has run and performed some work.
+		 */
+		void signalReapWork(uint32_t objects_reaped, uint32_t bytes_reaped, uint32_t objects_pinned);
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		/**
@@ -620,6 +625,11 @@ namespace MMgc
 		// collection cycle, and for the last collection cycle. 
 		uint64_t barrierStageTotal[4];
 		uint32_t barrierStageLastCollection[4];
+
+		// Reap work, overall
+		uint64_t objectsReaped;
+		uint64_t bytesReaped;
+		uint64_t objectsPinned;
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		// Track the number of scannable words, the number that passes the initial range
