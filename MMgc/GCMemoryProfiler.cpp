@@ -234,7 +234,7 @@ namespace MMgc
 
 	void MemoryProfiler::RecordDeallocation(const void *item, size_t size)
 	{
-		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
+		AllocInfo* info = (AllocInfo*) allocInfoTable.remove(item);
 		GCAssert(info != NULL);
 
 		ChangeSize(info->allocTrace, -1 * int(size));
