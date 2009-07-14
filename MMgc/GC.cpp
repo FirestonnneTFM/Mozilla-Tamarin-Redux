@@ -767,12 +767,6 @@ namespace MMgc
 	}
 
 #ifdef MMGC_POLICY_PROFILING
-	REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
-	{
-		GCAssert(ARRAY_SIZE(barrierStageLastCollection) > stage);
-		barrierStageLastCollection[stage]++;
-	}
-
 	void GCPolicyManager::signalReapWork(uint32_t objects_reaped, uint32_t bytes_reaped, uint32_t objects_pinned)
 	{
 		objectsReaped += objects_reaped;
@@ -1062,6 +1056,7 @@ namespace MMgc
 			// kill incremental mark since we're gonna wipe the marks
 			gc->marking = false;
 			gc->m_incrementalWork.Clear();
+			gc->m_barrierWork.Clear();
 			gc->Trace(item.ptr, item._size);
 		}
 #endif
@@ -1459,19 +1454,24 @@ namespace MMgc
 	}
 
 #ifdef RECURSIVE_MARK
-	inline void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
+	REALLY_INLINE void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
 	{
 		if (item.ptr)
 			MarkItem(item, stack);
 	}
 #else	
-	inline void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
+	REALLY_INLINE void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
 	{
 		if(item.ptr)
 			if (!stack.Push(item))
 				SignalMarkStackOverflow(stack, item);
 	}
 #endif
+
+	void GC::PushBarrierItem(GCWorkItem &item)
+	{
+		PushWorkItem(m_barrierWork, item);
+	}
 
 	void GC::PushWorkItem_MayFail(GCWorkItem &item)
 	{
@@ -1812,6 +1812,7 @@ bail:
 		// if force is true we're being called from ~GC and this isn't necessary
 		if(!force) {
 			// we just executed mutator code which could have fired some WB's
+			FlushBarrierWork();
 			Mark(m_incrementalWork);
 		}
 
@@ -1820,6 +1821,7 @@ bail:
 		// if force is true we're being called from ~GC and this isn't necessary
 		if(!force) {
 			// we just executed mutator code which could have fired some WB's
+			FlushBarrierWork();
 			Mark(m_incrementalWork);
 		}
 	
@@ -2806,6 +2808,7 @@ bail:
 		marking = true;
 
 		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 	
 		// clean up any pages that need sweeping
 		for(int i=0; i < kNumSizeClasses; i++) {
@@ -3356,10 +3359,13 @@ bail:
 		// let the allocation budget be used up.
 
 		if(m_incrementalWork.Count() == 0) {
-			// Policy triggers off these signals, so we still need to send them.
-			policy.signal(GCPolicyManager::START_IncrementalMark);
-			policy.signal(GCPolicyManager::END_IncrementalMark);
-			return;
+			CheckBarrierWork();
+			if (m_incrementalWork.Count() == 0) {
+				// Policy triggers off these signals, so we still need to send them.
+				policy.signal(GCPolicyManager::START_IncrementalMark);
+				policy.signal(GCPolicyManager::END_IncrementalMark);
+				return;
+			}
 		}
 		
 		policy.signal(GCPolicyManager::START_IncrementalMark);
@@ -3382,7 +3388,10 @@ bail:
 		do {
 			unsigned int count = m_incrementalWork.Count();
 			if (count == 0) {
-				break;
+				CheckBarrierWork();
+				count = m_incrementalWork.Count();
+				if (count == 0)
+					break;
 			}
 			if (count > checkTimeIncrements) {
 				count = checkTimeIncrements;
@@ -3419,8 +3428,9 @@ bail:
 
 		while (m_markStackOverflow) {
 			m_markStackOverflow = false;
-			HandleMarkStackOverflow();		// may set m_markStackOverflow
-			Mark(m_incrementalWork);		//    to true again
+			HandleMarkStackOverflow();		// may set
+			FlushBarrierWork();				//    m_markStackOverflow
+			Mark(m_incrementalWork);		//       to true again
 		}
 
 		// finished in Sweep
@@ -3433,6 +3443,7 @@ bail:
 		
 		GCAssert(!m_markStackOverflow);
 		
+		FlushBarrierWork();
 		MarkAllRoots(m_incrementalWork);
 		MarkQueueAndStack(m_incrementalWork, scanStack);
 		
@@ -3446,10 +3457,12 @@ bail:
 		
 		while (m_markStackOverflow) {
 			m_markStackOverflow = false;
-			HandleMarkStackOverflow();				// may set m_markStackOverflow
-			MarkQueueAndStack(m_incrementalWork, scanStack);	//    to true again
+			HandleMarkStackOverflow();							// may set
+			FlushBarrierWork();									//    m_markStackOverflow
+			MarkQueueAndStack(m_incrementalWork, scanStack);	//       to true again
 		}
 		m_incrementalWork.Clear();				// Frees any cached resources
+		m_barrierWork.Clear();
 		zct.Prune();							// Frees unused memory
 		
 		policy.signal(GCPolicyManager::END_FinalRootAndStackScan);
@@ -3464,8 +3477,10 @@ bail:
 		GCAssert(!collecting);
 		collecting = true;
 		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 		Sweep();
 		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 		collecting = false;
 		marking = false;
 		policy.signal(GCPolicyManager::END_FinalizeAndSweep);	// garbage collection is finished
@@ -3497,33 +3512,39 @@ bail:
 		return false;
 	}
 
-	void GC::TrapWrite(const void *black, const void *white)
-	{
-		// assert fast path preconditions
-		(void)black;
-		GCAssert(marking);
-		GCAssert(GetMark(black));
-		GCAssert(IsWhite(white));
+	// Here the purpose is to shift some work from the barrier mark stack to the regular
+	// mark stack /provided/ the barrier mark stack seems very full.  The regular mark stack
+	// is normally empty.
+	//
+	// To avoid copying data, we will only move entire (full) segments, because they can
+	// be moved by changing some pointers and counters.  We will never move a non-full
+	// segment.
 
-		// Currently using the simplest finest grained implementation,
-		// which could result in huge work queues.  Should try the
-		// more granular approach of moving the black object to grey
-		// (smaller work queue, less frequent wb slow path) but if the
-		// black object is big we end up doing useless redundant
-		// marking.  Optimal approach from lit is card marking (mark a
-		// region of the black object as needing to be re-marked).
-		
-		if(ContainsPointers(white)) {
-			SetQueued(white);
-			PushWorkItem(m_incrementalWork, GCWorkItem(white, (uint32_t)Size(white), true));
-		} 
-		else
-			SetMark(white);
+	void GC::CheckBarrierWork()
+	{
+		if (m_barrierWork.EntirelyFullSegments() < 9)	// 9 is pretty arbitrary
+			return;
+		m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork);
 	}
 	
-	void GC::WriteBarrierTrap(const void *container, const void *value)
+	// Here the purpose is to shift all the work from the barrier mark stack to the regular
+	// mark stack, unconditionally.  This may mean copying mark work from one stack to
+	// the other (for work that's in a non-full segment), but full segments can just be
+	// moved by changing some pointers and counters.
+
+	void GC::FlushBarrierWork()
 	{
-		InlineWriteBarrierTrap(container, value);
+		for ( uint32_t numfull = m_barrierWork.EntirelyFullSegments() ; numfull > 0 ; --numfull )
+			m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork);
+		while (m_barrierWork.Count() > 0) {
+			GCWorkItem item = m_barrierWork.Pop();
+			PushWorkItem(m_incrementalWork, item);
+		}
+	}
+	
+	void GC::WriteBarrierTrap(const void *container)
+	{
+		InlineWriteBarrierTrap(container);
 	}
 	
 	void GC::privateWriteBarrier(const void *container, const void *address, const void *value)
@@ -3554,18 +3575,22 @@ bail:
 
 	void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
 	{
+		(void)value;  // Can't get rid of this parameter now; part of an existing API
+		
 		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
 		// worry about, so we should be able to optimize (and inline).
 		if(IsPointerToGCPage(address))
-			InlineWriteBarrierTrap(FindBeginning(address), Pointer(value));
+			InlineWriteBarrierTrap(FindBeginning(address));
 	}
 	
 	void GC::WriteBarrierNoSubstitute(const void *container, const void *value)
 	{
+		(void)value;  // Can't get rid of this parameter now; part of an existing API
+		
 		GCAssert(container != NULL);
 		GCAssert(IsPointerToGCPage(container));
 		GCAssert(FindBeginning(container) == container);
-		InlineWriteBarrierTrap(container, Pointer(value));
+		InlineWriteBarrierTrap(container);
 	}
 
 	bool GC::ContainsPointers(const void *item)

@@ -89,6 +89,15 @@ namespace MMgc
 		/** Pop all elements off the stack, discard the cached extra segment. */
 		void Clear();
 
+		/** @return the number of elements in a segment */
+		uint32_t ElementsPerSegment();
+	
+		/** @return the number of entirely full segments */
+		uint32_t EntirelyFullSegments();
+
+		/** Move one entirely full segment from 'other' and insert it into our segment list */
+		void TransferOneFullSegmentFrom(GCStack<T, kMarkStackItems>& other);
+
 	protected:
 		// no implementation of these
 		GCStack(const GCStack<T, kMarkStackItems>& other);
@@ -157,6 +166,18 @@ namespace MMgc
 	inline uint32_t GCStack<T, kMarkStackItems>::Count()
 	{
 		return uint32_t(m_top - m_base) + m_hiddenCount;
+	}
+
+	template<typename T, int kMarkStackItems> 
+	inline uint32_t GCStack<T, kMarkStackItems>::ElementsPerSegment()
+	{
+		return kMarkStackItems;
+	}
+
+	template<typename T, int kMarkStackItems>
+	uint32_t GCStack<T, kMarkStackItems>::EntirelyFullSegments()
+	{
+		return Count() / kMarkStackItems;
 	}
 }
 
