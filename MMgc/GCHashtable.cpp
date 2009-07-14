@@ -226,9 +226,13 @@ namespace MMgc
 		const void **newTable;
 		if(options & OPTION_MALLOC) {
 			newTable = (const void**)VMPI_alloc(newTableSize*sizeof(void*));
+			if( !newTable )
+				// ran out of memory...
+				GCHeap::GetGCHeap()->Abort();
 		} else {
 			newTable = new const void*[newTableSize];
 		}
+		
 		VMPI_memset(newTable, 0, newTableSize*sizeof(void*));
 
 		numValues = 0;
