@@ -54,7 +54,10 @@ namespace MMgc
 		bool returnMemory;
 		bool gcstats;
 		bool autoGCStats;
-		bool gcbehavior;		// gross history and policy decisions (MMGC_POLICY_PROFILING)
+		bool gcbehavior;		// Print gross history and policy decisions (MMGC_POLICY_PROFILING)
+		double gcLoad;			// GC load factor: policy aims for a heap size that is gcLoad*H where H is the live size following GC
+		double gcLoadCeiling;	// Max multiple of gcLoad policy should use after adjusting L for various factors (0=unlimited)
+		double gcEfficiency;    // Max fraction of time to spend in the collector while the incremental collector is active
 		static const size_t kDefaultHeapLimit = (size_t)-1;
 	};
 	
