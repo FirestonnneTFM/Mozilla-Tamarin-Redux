@@ -1427,7 +1427,7 @@ namespace MMgc
 
 		// item represents a container object, now marked 'Queued', that should be re-scanned 
 		// at some later time because it's been stored into.
-		void GC::PushBarrierItem(GCWorkItem &item);
+		void PushBarrierItem(GCWorkItem &item);
 		
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
 		// if the allocation succeeded.
