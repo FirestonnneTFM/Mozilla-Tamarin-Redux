@@ -595,6 +595,7 @@ namespace avmplus
 		jitPendingRecords(i->core()->gc),
 #endif
 		gc(i->pool()->core->gc),
+		lir_alloc(new Allocator()),
 		core(i->pool()->core),
 		info(i),
 		ms(i->getMethodSignature()),
@@ -641,6 +642,8 @@ namespace avmplus
 			frag = NULL;
 			delete lirbuf;
 		}
+
+		delete lir_alloc;
 	}
 
 	bool CodegenLIR::outOMem()
@@ -1070,10 +1073,12 @@ namespace avmplus
         }
     };
 
-	void emitStart(LirBuffer *lirbuf, LirWriter* &lirout, bool &overflow) {
+	void emitStart(GC* gc, LirBuffer *lirbuf, LirWriter* &lirout, bool &overflow) {
+		(void)gc;
+		(void)lirbuf;
         debug_only(
             // catch problems before they hit the buffer
-            lirout = new (lirbuf->gc) ValidateWriter(lirout);
+            lirout = new (gc) ValidateWriter(lirout);
         )
 		if (lirbuf->outOMem())
 			overflow = true;
@@ -1284,7 +1289,7 @@ namespace avmplus
         framesize = state->verifier->frameSize;
 
         frag = new (gc) Fragment(abcStart);
-        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(gc);
+        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
 		verbose_only(if (core->config.bbgraph) {
@@ -1317,7 +1322,7 @@ namespace avmplus
         lirout = checker ? checker : lirout;
         #endif
 		
-		emitStart(lirbuf, lirout, overflow);
+		emitStart(gc, lirbuf, lirout, overflow);
 
 		if (overflow)
 			return false;
@@ -5628,6 +5633,14 @@ namespace nanojit
 			lirbuf = 0;
 		}
 	}
+
+    void* Allocator::allocChunk(size_t size) {
+        return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+    }
+
+    void Allocator::freeChunk(void* p) {
+        return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);
+    }
 
 	// static
 	void* CodeAlloc::allocCodeChunk(size_t nbytes) {

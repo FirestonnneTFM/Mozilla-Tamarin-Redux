@@ -143,6 +143,7 @@ namespace avmplus
 
 	private:
         GC *gc;
+		Allocator* lir_alloc; // allocator with LIR buffer lifetime
         AvmCore *core;
         MethodInfo *info;
 		const MethodSignaturep ms;
