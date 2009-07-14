@@ -234,7 +234,10 @@ namespace MMgc
 
 	void MemoryProfiler::RecordDeallocation(const void *item, size_t size)
 	{
-		AllocInfo* info = (AllocInfo*) allocInfoTable.remove(item);
+		// This should be a remove, but calling remove a lot has performance issues
+		// When we fix the perf issues with GCHashtable::remove, we should change this back to a remove.
+		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
+
 		GCAssert(info != NULL);
 
 		ChangeSize(info->allocTrace, -1 * int(size));
