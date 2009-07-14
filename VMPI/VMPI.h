@@ -89,6 +89,8 @@
     #define REALLY_INLINE inline
 #endif
 
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+
 // Legacy types used by some embedding host code, eg avmplus::uint64.
 // These types are not to be used inside the avm code.
 namespace avmplus

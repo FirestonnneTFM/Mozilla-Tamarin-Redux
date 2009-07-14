@@ -783,8 +783,8 @@ namespace avmshell
 					int nchar;
 					if (val == NULL)
 						val = "";
-					if (sscanf(val, "%d,%d,%d%n", &settings.numworkers, &settings.numthreads, &settings.repeats, &nchar) != 3)
-						if (sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2)
+					if (VMPI_sscanf(val, "%d,%d,%d%n", &settings.numworkers, &settings.numthreads, &settings.repeats, &nchar) != 3)
+						if (VMPI_sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2)
 							usage();
 					if (settings.numthreads < 1 || 
 						settings.numworkers < settings.numthreads || 
