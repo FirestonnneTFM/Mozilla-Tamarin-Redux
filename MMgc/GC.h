@@ -1315,8 +1315,6 @@ namespace MMgc
 
 		bool IsGCMemory (const void *);
 
-		bool IsQueued(const void *item);
-
 		static double duration(uint64_t start) 
 		{
 			return (double(VMPI_getPerformanceCounter() - start) * 1000) / VMPI_getPerformanceFrequency();
@@ -1498,6 +1496,15 @@ namespace MMgc
 		
 		int IsWhite(const void *item);
 		
+		REALLY_INLINE bool IsQueued(const void* userptr)
+		{
+			const void* realptr = GetRealPointer(userptr);
+			if (GCLargeAlloc::IsLargeBlock(realptr))
+				return GCLargeAlloc::IsQueued(realptr);
+			else
+				return GCAlloc::IsQueued(realptr);
+		}
+
 		const static int16_t kSizeClasses[kNumSizeClasses];		
 		const static uint8_t kSizeClassIndex[246];
 

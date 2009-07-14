@@ -142,6 +142,14 @@ namespace MMgc
 			return block->items + block->size * GetIndex(block, item);
 		}
 
+		REALLY_INLINE static bool IsQueued(const void *item)
+		{
+			GCBlock *block = GetBlock(item);
+			int index = GetIndex(block, item);
+			uint32_t* bits = block->GetBits() + (index >> 3);
+			return (*bits & (kQueued << ((index&7)<<2))) != 0;
+		}
+
 		static void ClearFinalized(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
