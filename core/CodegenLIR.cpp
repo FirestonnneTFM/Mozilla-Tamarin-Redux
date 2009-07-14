@@ -553,7 +553,7 @@ namespace avmplus
 	LIns* CodegenLIR::storeAtomArgs(int count, int index)
 	{
 		LIns* ap = InsAlloc(sizeof(Atom)*count);
-		for (int i=0; i < count && !outOMem(); i++)
+		for (int i=0; i < count; i++)
 			storeIns(loadAtomRep(index++), i * sizeof(Atom), ap);
 		return ap;
 	}
@@ -566,7 +566,7 @@ namespace avmplus
 		#endif
 		LIns* ap = InsAlloc(sizeof(Atom)*(count+1));
 		storeIns(receiver, 0, ap);
-		for (int i=1; i <= count && !outOMem(); i++)
+		for (int i=1; i <= count; i++)
 		{
 			LIns* v = loadAtomRep(index++);
 			storeIns(v, sizeof(Atom)*i, ap);
@@ -644,12 +644,6 @@ namespace avmplus
 		}
 
 		delete lir_alloc;
-	}
-
-	bool CodegenLIR::outOMem()
-	{
-		overflow = frag->lirbuf->outOMem();  // OOM mean overflowed the buffer 
-		return overflow;
 	}
 
 	#ifdef AVMPLUS_MAC_CARBON
@@ -1073,27 +1067,22 @@ namespace avmplus
         }
     };
 
-	void emitStart(GC* gc, LirBuffer *lirbuf, LirWriter* &lirout, bool &overflow) {
+	void emitStart(GC* gc, LirBuffer *lirbuf, LirWriter* &lirout) {
 		(void)gc;
 		(void)lirbuf;
         debug_only(
             // catch problems before they hit the buffer
             lirout = new (gc) ValidateWriter(lirout);
         )
-		if (lirbuf->outOMem())
-			overflow = true;
-		else
-		{
-			lirout->ins0(LIR_start);
+		lirout->ins0(LIR_start);
 
-            if (CalleeRegsNeedExplicitSaving) {
-                // create params for saved regs -- processor specific
-                for (int i=0; i < NumSavedRegs; i++) {
-                    LIns *p = lirout->insParam(i, 1); (void) p;
-                    verbose_only(if (lirbuf->names)
-                        lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
-                }
-            }
+		if (CalleeRegsNeedExplicitSaving) {
+			// create params for saved regs -- processor specific
+			for (int i=0; i < NumSavedRegs; i++) {
+				LIns *p = lirout->insParam(i, 1); (void) p;
+				verbose_only(if (lirbuf->names)
+					lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
+			}
 		}
 	}
 
@@ -1322,7 +1311,7 @@ namespace avmplus
         lirout = checker ? checker : lirout;
         #endif
 		
-		emitStart(gc, lirbuf, lirout, overflow);
+		emitStart(gc, lirbuf, lirout);
 
 		if (overflow)
 			return false;
@@ -1443,13 +1432,13 @@ namespace avmplus
 		{
 			// compute offset of first optional arg
 			int offset = 0;
-			for (int i=0, n=required_count; i <= n && !outOMem(); i++) {
+			for (int i=0, n=required_count; i <= n; i++) {
                 offset += ms->paramTraitsBT(i) == BUILTIN_number ? sizeof(double) : sizeof(Atom);
 			}
 
 			// now copy the default optional values
 			LIns* argcarg = argc_param;
-			for (int i=0, n=optional_count; i < n && !outOMem(); i++)
+			for (int i=0, n=optional_count; i < n; i++)
 			{
 				// first set the local[p+1] = defaultvalue
 				int param = i + required_count; // 0..N
@@ -1483,7 +1472,7 @@ namespace avmplus
 		// for (int i=0, n=param_count; i <= n; i++)
 		//     framep[i] = argv[i];
 		int offset = 0;
-		for (int i=0, n=required_count; i <= n && !outOMem(); i++)
+		for (int i=0, n=required_count; i <= n; i++)
 			copyParam(i, offset);
 
 		if (info->unboxThis())
@@ -1518,7 +1507,7 @@ namespace avmplus
 		if (firstLocal < state->verifier->local_count)
 		{
 			// set remaining locals to undefined
-			for (int i=firstLocal, n=state->verifier->local_count; i < n && !outOMem(); i++)
+			for (int i=firstLocal, n=state->verifier->local_count; i < n; i++)
 			{
 				if(!(state->value(i).traits == NULL)){ // expecting *
  					AvmAssertMsg(0,"(state->value(i).traits != NULL)");
@@ -1531,7 +1520,7 @@ namespace avmplus
 		#ifdef DEBUGGER
 		if (core->debugger())
 		{
-			for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope && !outOMem(); ++i)
+			for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
 			{
 				localSet(i, undefConst, VOID_TYPE);
 			}
@@ -1601,14 +1590,12 @@ namespace avmplus
 	}
 
 	void CodegenLIR::emitCopy(FrameState* state, int src, int dest) {
-		if (outOMem()) return;
 		this->state = state;
 		localSet(dest, localCopy(src), state->value(src).traits);
 	}
 
 	void CodegenLIR::emitGetscope(FrameState* state, int scope_index, int dest)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		Traits* t = info->declaringScope()->getScopeTraitsAt(scope_index);
 		LIns* scope = loadEnvScope();
@@ -1617,7 +1604,6 @@ namespace avmplus
 	}
 
 	void CodegenLIR::emitSwap(FrameState* state, int i, int j) {
-		if (outOMem()) return;
 		this->state = state;
 		LIns* t = localCopy(i);
 		localSet(i, localCopy(j), state->value(j).traits);
@@ -1626,15 +1612,12 @@ namespace avmplus
 
 	void CodegenLIR::emitKill(FrameState* state, int i)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		localSet(i, undefConst, VOID_TYPE);
 	}
 
 	void CodegenLIR::emitBlockStart(FrameState* state)
 	{
-		if (outOMem()) return;
-
 		// our new extended BB now starts here, this means that any branch targets
 		// should hit the next instruction our bb start instruction
 		LIns* bb = Ins(LIR_label); // mark start of block
@@ -2620,21 +2603,18 @@ namespace avmplus
 
 	void CodegenLIR::emitIntConst(FrameState* state, int index, int32_t c)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		localSet(index, lirout->insImm(c), INT_TYPE);
 	}
 
 	void CodegenLIR::emitPtrConst(FrameState* state, int index, void* c, Traits* type)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		localSet(index, lirout->insImmPtr(c), type);
 	}
 
 	void CodegenLIR::emitDoubleConst(FrameState* state, int index, double* pd)
 	{
-		if (outOMem()) return;
 		this->state = state;
         uint64_t *pquad = (uint64_t*) pd;
 		localSet(index, lirout->insImmq(*pquad), NUMBER_TYPE);
@@ -2642,7 +2622,6 @@ namespace avmplus
 
 	void CodegenLIR::emitCoerce(FrameState* state, int loc, Traits* result)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -2823,7 +2802,6 @@ namespace avmplus
 
 	void CodegenLIR::emitCheckNull(FrameState* state, int index)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -2868,7 +2846,6 @@ namespace avmplus
 
 	void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -2969,7 +2946,7 @@ namespace avmplus
 	#endif
         
         disp = pad;
-		for (int i=0; i <= argc && !outOMem(); i++)
+		for (int i=0; i <= argc; i++)
 		{
 			// load and widen the argument
 			LIns *v;
@@ -3044,7 +3021,6 @@ namespace avmplus
 
     void CodegenLIR::emitGetslot(FrameState *state, int slot, int ptr_index, Traits *result)
     {
-		if (outOMem()) return;
         this->state = state;
         emitPrep();
 		
@@ -3082,7 +3058,6 @@ namespace avmplus
 
     void CodegenLIR::emitSetslot(FrameState *state, AbcOpcode opcode, int slot, int ptr_index)
     {
-		if (outOMem()) return;
         this->state = state;
         emitPrep();
         int sp = state->sp();
@@ -3171,7 +3146,6 @@ namespace avmplus
 	*/
 	void CodegenLIR::emitConstruct(FrameState* state, int argc, int ctor_index, Traits* ctraits)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -3205,7 +3179,6 @@ namespace avmplus
 
 	void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
 	{
-		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -3310,7 +3283,7 @@ namespace avmplus
 				const byte* pc = 4 + abcStart + state->pc;
                 AvmCore::readU30(pc);
 
-				for (int i=0; i < count && !outOMem(); i++)
+				for (int i=0; i < count; i++)
 				{
 					int target = state->pc + AvmCore::readS24(pc+3*i);
                     branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)), target);
@@ -4617,7 +4590,6 @@ namespace avmplus
 
 	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, int target_off, int a, int b)
 	{
-		if (outOMem()) return;
 		this->state = state;
 
 #ifdef DEBUGGER
@@ -4863,7 +4835,6 @@ namespace avmplus
 
 	void CodegenLIR::epilogue(FrameState *state)
 	{
-		if (outOMem()) return;
 		this->state = state;
 
         if (npe_label.preds) {
@@ -4901,7 +4872,7 @@ namespace avmplus
 			// jump to catch handler
             LIns *handler_target = loadIns(LIR_ld, offsetof(ExceptionHandler, target), handler);
 			// we dont have LIR_ji yet, so do a compare & branch to each possible target.
-			for (int i=0; i < handler_count && !outOMem(); i++)
+			for (int i=0; i < handler_count; i++)
 			{
 				ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
                 int handler_pc_off = h->target;
