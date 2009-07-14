@@ -126,6 +126,18 @@ namespace MMgc
 	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
 #endif
 
+	// Scanning rates (bytes/sec).
+	//
+	// Less than R_LOWER_LIMIT is not credible and is probably a measurement error / measurement
+	// noise.  A too low value will tend to throw policy out of whack.
+	// 
+	// 10MB/sec is the typical observed rate on the HTC Fuze, a mid-range 2009 smartphone.
+	// 400MB/sec is the typical observed rate on a 2.6GHz MacBook Pro.
+	// 100MB/sec seems like a reasonable approximation to let the application get off the ground.
+
+#define R_LOWER_LIMIT (10*1024*1024)
+#define R_INITIAL_VALUE (10*R_LOWER_LIMIT)
+
 	GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap)
 		// public
 		: timeStartIncrementalMark(0)
@@ -182,11 +194,11 @@ namespace MMgc
 		, couldBePointer(0)
 		, actuallyIsPointer(0)
 #endif
-		, P(0.005)			// seconds; 5ms.  The marker /will/ overshoot this significantly
-		, R(1000000.0)		// bytes/second; will be updated on-line
+		, P(0.005)				// seconds; 5ms.  The marker /will/ overshoot this significantly
+		, R(R_INITIAL_VALUE)	// bytes/second; will be updated on-line
 		, L_ideal(heap->Config().gcLoad)
 		, L_actual(L_ideal)
-		, T(0.25)
+		, T(1.0-(1.0/L_ideal))
 		, G(heap->Config().gcEfficiency)
 		, X(heap->Config().gcLoadCeiling)
 		, remainingMajorAllocationBudget(0)
@@ -217,30 +229,43 @@ namespace MMgc
 	// number of parameter settings.  The policy is documented and analyzed in doc/mmgc/policy.pdf,
 	// this is a recap.
 	//
-	// Given parameters:
+	// Parameters fixed in the code:
 	//
-	// P (max pause) can be tuned but within a limited range, but we treat it as constant
-	// G (max GC fraction of time)  can be tuned within a limited range, but we treat it
-	//                              as constant.  This effectively controls pause clustering.
+	// P (max pause)  can be tuned but within a limited range, but we treat it as
+	//   constant.  Right now we use it to limit pauses in incremental marking only;
+	//   it does not control ZCT reaping, final root and stack scan, or finalize
+	//   and sweep.  (Those are all bugs.)  On a desktop system the marker sticks
+	//   to P pretty well; on phones it has trouble with that, either because of
+	//   clock resolution (P=5ms normally) or because of its recursive behavior
+	//   that means the timeout is not checked sufficiently often, or because large
+	//   objects take a long time to scan.
 	// F (floor)  size of heap below which we don't collect, can be tuned but in limited ways,
-	//            host code actually changes it.  Returned by lowerLimitCollectionThreshold().
-	// R (rate of marking) is given by the hardware mainly, updated on-line
+	//   host code actually changes it.  Returned by lowerLimitCollectionThreshold().
+	// R (rate of marking) is given by the hardware mainly (MB/s), updated on-line
 	// V (voracity of new block allocation) is given by the program, ratio of blocks
 	//   gcheap allocates from OS to ratio it allocates from already committed memory
 	// H (heap)  size of heap at the end of one collection cycle
 	// X (multiplier)  largest multiple of L to which the effective L should be allowed to
-	//            grow to meet G.
-	//
-	// Tunable parameters:
-	//
-	// L (inverse load factor) ratio of heap size just before finishing a collection
-	//   (before any reclamation) to the heap size just after finishing the previous
-	//   collection (following any reclamation) (range 1..infty).  Effectively expresses
-	//   the ratio of memory used to live program data.
+	//   grow to meet G.
 	// T (allocation trigger) fraction of allocation budget to use before triggering
 	//   the first mark increment (range 0..1).  With T=1 we have nonincremental GC;
 	//   with T=0 the GC is always running.  A low T is desirable except that it puts
-	//   more pressure on the write barrier.
+	//   more pressure on the write barrier.  A good T is (1-(1/L)) where L is the
+	//   initial or given L.
+	//
+	// Tunable parameters:
+	//
+	// L (load factor)  ratio of heap size just before finishing a collection
+	//   (before any reclamation) to the heap size just after finishing the previous
+	//   collection (following any reclamation) (range 1..infty).  Effectively expresses
+	//   the ratio of memory used to live program data.
+	//
+	// G (max GC fraction of time)  ceiling on ratio of GC time to total time in the
+	//   interval when the incremental GC is running.  This controls pause clustering
+	//   to some extent by recomputing a new and larger L if the GC time does not
+	//   stay below the ceiling.  (It /could/ be used to reduce T if L can't be
+	//   increased because it is up against its own ceiling, but experiments have
+	//   not shown that to be fruitful so we don't do it yet.)
 	//
 	// We wish the heap size just before finishing a collection cycle to be HL, and
 	// the allocation budget following a collection is H(L-1), and we work to make
@@ -259,7 +284,7 @@ namespace MMgc
 	// If T is too high or L is too low then sticking to P may be futile as we will have
 	// excessive pause clustering, which is no better.
 	//
-	// G < 1 is meant to constrain L: if G can't be met then L is effectively raised so 
+	// G is meant to constrain L: if G can't be met then L is effectively raised so 
 	// that G can be met.  This is typically the case during system warmup, where a lot
 	// of allocation in a smallish heap leads to a lot of GC activity with little gain.
 	// The computation is like this:
@@ -276,24 +301,29 @@ namespace MMgc
 		return L_actual / ((1 - T) * (L_actual - 1)); 
   	}
 
+	// Warning: GIGO applies with full force: if R is badly mispredicted (based on too little data) 
+	// or the marker is too far off from P, then the value of A can be bad.  In particular A may be
+	// very low, which will tend to increase GC overhead because the marker will run too often.
+
 	double GCPolicyManager::A() {
 		return P * R / W();
 	}
 
   	// Called when an incremental mark starts
+	
 	void GCPolicyManager::startAdjustingR()
 	{
 		adjustR_startTime = now();
 	}
 
 	// Called when an incremental mark ends
+	
 	void GCPolicyManager::endAdjustingR()
 	{
 		adjustR_totalTime += now() - adjustR_startTime;
 		R = double(bytesScannedTotal) / (double(adjustR_totalTime) / double(VMPI_getPerformanceFrequency()));
-		// Less than 1MB/sec is not credible and is probably a measurement error / measurement noise.
-		if (R < 1000000)
-			R = 1000000;
+		if (R < R_LOWER_LIMIT)
+			R = R_LOWER_LIMIT;
 	}
 
 	// The throttles here guard against excessive growth.
@@ -327,7 +357,7 @@ namespace MMgc
 		remainingMajorAllocationBudget = H * (L_actual - 1.0);
 		if (remainingMajorAllocationBudget < remainingBeforeGC)
 			remainingMajorAllocationBudget = remainingBeforeGC;
-  		remainingMinorAllocationBudget = minorAllocationBudget = int64_t(remainingMajorAllocationBudget * T);
+  		remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
 #ifdef MMGC_POLICY_PROFILING
 		if (summarizeGCBehavior())
 			GCLog("[gcbehavior] policy: mark-rate=%.2f (MB/sec) adjusted-L=%.2f kbytes-live=%.0f kbytes-target=%.0f\n", 
@@ -342,7 +372,8 @@ namespace MMgc
  	// Called when an incremental mark ends
  	void GCPolicyManager::adjustPolicyForNextMinorCycle()
  	{
- 		remainingMinorAllocationBudget = minorAllocationBudget = size_t(A());
+ 		remainingMinorAllocationBudget += int32_t(A());
+		minorAllocationBudget = remainingMinorAllocationBudget;
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
  	}
  
@@ -695,12 +726,12 @@ namespace MMgc
 
 	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
 	{
-		remainingMinorAllocationBudget -= nbytes;
+		remainingMinorAllocationBudget -= int32_t(nbytes);
 	}
 
 	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
 	{
-		remainingMinorAllocationBudget += nbytes;
+		remainingMinorAllocationBudget += int32_t(nbytes);
 	}
 	
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
@@ -1122,7 +1153,7 @@ namespace MMgc
 #endif
 		
 #ifdef MMGC_POLICY_PROFILING
-		gc->policy.signalReapWork(objects_reaped, objSize, objects_pinned);
+		gc->policy.signalReapWork(objects_reaped, uint32_t(objSize), objects_pinned);
 #endif
 		gc->policy.signal(GCPolicyManager::END_ReapZCT);
 	}
