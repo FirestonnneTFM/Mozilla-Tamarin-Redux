@@ -95,10 +95,13 @@ namespace MMgc
 		gcstats(false), // tracking
 		autoGCStats(false), // auto printing
 #ifdef AVMSHELL_BUILD
-		gcbehavior(false)	// controlled by command line switch
+		gcbehavior(false),	// controlled by command line switch
 #else
-		gcbehavior(true)	// unconditional, if MMGC_POLICY_PROFILING is on
+		gcbehavior(true),	// unconditional, if MMGC_POLICY_PROFILING is on
 #endif
+		gcLoad(2.0),
+		gcLoadCeiling(3.0),
+		gcEfficiency(0.25)
 	{
 #ifdef MMGC_64BIT
 		trimVirtualMemory = false; // no need

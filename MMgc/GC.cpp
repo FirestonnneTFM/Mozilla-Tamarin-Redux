@@ -184,10 +184,11 @@ namespace MMgc
 #endif
 		, P(0.005)			// seconds; 5ms.  The marker /will/ overshoot this significantly
 		, R(1000000.0)		// bytes/second; will be updated on-line
-		, L_ideal(2.0)
+		, L_ideal(heap->Config().gcLoad)
 		, L_actual(L_ideal)
 		, T(0.25)
-		, G(0.25)
+		, G(heap->Config().gcEfficiency)
+		, X(heap->Config().gcLoadCeiling)
 		, remainingMajorAllocationBudget(0)
 		, minorAllocationBudget(0)
 		, remainingMinorAllocationBudget(0)
@@ -227,6 +228,8 @@ namespace MMgc
 	// V (voracity of new block allocation) is given by the program, ratio of blocks
 	//   gcheap allocates from OS to ratio it allocates from already committed memory
 	// H (heap)  size of heap at the end of one collection cycle
+	// X (multiplier)  largest multiple of L to which the effective L should be allowed to
+	//            grow to meet G.
 	//
 	// Tunable parameters:
 	//
@@ -293,9 +296,7 @@ namespace MMgc
 			R = 1000000;
 	}
 
-	// The throttles here guard against excessive growth.  growth <= 1 and L_actual <= 3*L_ideal
-	// are just guesses, but the exact numbers are probably less important than having some sort
-	// of throttle.
+	// The throttles here guard against excessive growth.
 
 	void GCPolicyManager::adjustL()
 	{
@@ -306,8 +307,8 @@ namespace MMgc
 			if (growth > 1)
 				growth = 1;
 			L_actual = L_actual + growth;
-			if (L_actual > 3*L_ideal)
-				L_actual = 3*L_ideal;
+			if (X != 0 && L_actual > X*L_ideal)
+				L_actual = X*L_ideal;
 		}
  		else
  			L_actual = (L_actual + L_ideal) / 2;

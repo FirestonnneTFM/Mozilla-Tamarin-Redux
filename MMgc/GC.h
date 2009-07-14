@@ -662,6 +662,9 @@ namespace MMgc
 		// ratio of gc work to mutator work while the gc is running
 		double G;
 
+		// largest multiple of L_ideal to which L_actual can grow (unless 0, which means unlimited)
+		double X;
+
 		// the remaining allocation budget for the major GC cycle.  (This can go negative
 		// and the variable must accomodate negative values.  It's not frequently accessed.)
 		double remainingMajorAllocationBudget;
