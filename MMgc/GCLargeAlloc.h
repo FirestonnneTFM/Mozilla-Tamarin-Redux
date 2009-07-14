@@ -123,6 +123,12 @@ namespace MMgc
 			return (block->flags & (kMarkFlag|kQueuedFlag)) == 0;
 		}
 
+		REALLY_INLINE static bool IsQueued(const void *item)
+		{
+			LargeBlock *block = GetBlockHeader(item);
+			return (block->flags & kQueuedFlag) != 0;
+		}
+
 		static void* FindBeginning(const void *item)
 		{
 			LargeBlock *block = GetBlockHeader(item);

@@ -3498,11 +3498,6 @@ bail:
 		return (bits != 0);
 	}
 
-	bool GC::IsQueued(const void *item)
-	{
-		return !GetMark(item) && !IsWhite(item);
-	}
-
 	uint32_t *GC::GetBits(int numBytes, int sizeClass)
 	{
 		uint32_t *bits;
