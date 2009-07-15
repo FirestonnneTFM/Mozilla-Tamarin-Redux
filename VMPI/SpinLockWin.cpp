@@ -51,12 +51,7 @@ void VMPI_lockInit(vmpi_spin_lock_t* lock)
 void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
 	GCAssert(lock->owner == NULL);
-#ifdef DEBUG
-	lock->lock = (void*)0xdeadbeef;
-	lock->owner = (vmpi_thread_t*)0xdeadbeef;
-#else
-	*lock = NULL;
-#endif
+	GCAssert(lock->lock == NULL);
 }
 
 bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)

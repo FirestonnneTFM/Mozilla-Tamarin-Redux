@@ -44,7 +44,7 @@
 
 #if defined(USE_PTHREAD_MUTEX)
 
-void VMPI_lockInit(vmpi_spin_lock_t lock)
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
 	pthread_mutex_init( (pthread_mutex_t*)lock, 0 );
 }
@@ -71,7 +71,7 @@ bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 
 #else // USE_PTHREAD_MUTEX
 
-void VMPI_lockInit(vmpi_spin_lock_t lock)
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
 }
 
