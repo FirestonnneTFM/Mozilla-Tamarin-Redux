@@ -77,12 +77,14 @@ namespace MMgc
 
 	struct AllocInfo : public GCAllocObject
 	{
-		//possible memory optimization: we could unionize askSize and deleteTrace
-		//since askSize is N/A once the object is deleted
-		//This would save 8 bytes per AllocInfo unit on 32-bit systems
-		size_t askSize;
 		StackTrace* allocTrace;
-		StackTrace* deleteTrace;
+
+		// memory optimization:  askSize is N/A after the object is deleted,
+		// and deleteTrace is only used to report writing to deleted memory,
+		union {
+			size_t askSize;
+			StackTrace* deleteTrace;
+		};
 	};
 
 	GCThreadLocal<const char*> memtag;
@@ -217,7 +219,6 @@ namespace MMgc
 
 		info->askSize = askSize;
 		info->allocTrace = trace;
-		info->deleteTrace = NULL;
 
 		if(memtype)
 		{
