@@ -425,6 +425,11 @@ namespace MMgc
 		 *  3 - passed IsWhite filtering (rhs is not marked)
 		 */
 		/*REALLY_INLINE*/ void signalWriteBarrierWork(int stage);
+
+		/**
+		 * Situation: signal that the ZCT reaper has run and performed some work.
+		 */
+		void signalReapWork(uint32_t objects_reaped, uint32_t bytes_reaped, uint32_t objects_pinned);
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		/**
@@ -618,8 +623,13 @@ namespace MMgc
 		
 		// Barrier stages hit (writes examined by InlineWriteBarrierTrap) overall, less the last
 		// collection cycle, and for the last collection cycle. 
-		uint64_t barrierStageTotal[4];
-		uint32_t barrierStageLastCollection[4];
+		uint64_t barrierStageTotal[3];
+		uint32_t barrierStageLastCollection[3];
+
+		// Reap work, overall
+		uint64_t objectsReaped;
+		uint64_t bytesReaped;
+		uint64_t objectsPinned;
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		// Track the number of scannable words, the number that passes the initial range
@@ -652,25 +662,38 @@ namespace MMgc
 		// ratio of gc work to mutator work while the gc is running
 		double G;
 
+		// largest multiple of L_ideal to which L_actual can grow (unless 0, which means unlimited)
+		double X;
+
 		// the remaining allocation budget for the major GC cycle.  (This can go negative
 		// and the variable must accomodate negative values.  It's not frequently accessed.)
 		double remainingMajorAllocationBudget;
 
 		// the allocation budget for the minor GC cycle.  This variable remains constant
 		// throughout the minor cycle.
-		int64_t minorAllocationBudget;
+		int32_t minorAllocationBudget;
 		
 		// the remaining allocation budget for the minor GC cycle.  Initially this has the
 		// value of minorAllocationBudget; the allocation request size is subtracted for
 		// every allocation.  This variable can go negative because we can overshoot the
 		// budget.
-		int64_t remainingMinorAllocationBudget;
+		int32_t remainingMinorAllocationBudget;
 		
 		// Temporaries used to compute R
 		uint64_t adjustR_startTime;
 		uint64_t adjustR_totalTime;
 	};
 
+#ifdef MMGC_POLICY_PROFILING
+	// Must be here (and not in GC.cpp) because it's accessed from the inline write 
+	// barrier in WriteBarrier.h
+	REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
+	{
+		GCAssert(ARRAY_SIZE(barrierStageLastCollection) > size_t(stage));
+		barrierStageLastCollection[stage]++;
+	}
+#endif
+	
 	/**
 	 * The Zero Count Table used by DRC.
 	 */
@@ -1146,11 +1169,7 @@ namespace MMgc
 		 */
 		/*REALLY_INLINE*/ void WriteBarrierWrite(const void *address, const void *value);
 
-		/**
-		 * Implementation of WriteBarrierTrap; too large to be inlined everywhere.
-		 */
-		/*REALLY_INLINE*/ void InlineWriteBarrierTrap(const void *container, const void *value);
-
+	private:
 		/**
 		 * Implementation of privateWriteBarrier; too large to be inlined everywhere.
 		 */
@@ -1161,31 +1180,22 @@ namespace MMgc
 		 */
 		/*REALLY_INLINE*/ void privateInlineWriteBarrierRC(const void *container, const void *address, const void *value);
 
-		/**
-		 * Queue the white object for marking.  The black object is not needed for the operation,
-		 * only for debugging.
-		 */
-		void TrapWrite(const void* black, const void* white);
-
 	public:
 		/**
 		 * General, conditional write barrier trap.  Tests that incremental marking is in fact ongoing
-		 * and that the container is black (marked, not queued) and the value is white (not marked or
-		 * queued) and if so queues the value for marking.
-		 *
-		 * Does /not/ write the value into the object; the caller must do that.
+		 * and that the container is black (marked, not queued); if so, it makes the container gray
+		 * by scheduling it for rescanning at some appropriate time.
 		 *
 		 * Container must be a non-NULL untagged pointer to the beginning of an object on a page
 		 * owned by this GC.
-		 *
-		 * Value must be untagged (8-byte aligned).
-		 * Value may be NULL.
-		 * Value need not point to the beginning of an object, nor need it point into a page
-		 * owned by this GC, and that is probably a feature.  (Consider fields that can
-		 * contain pointers to GC'd storage or to static storage, like pointers from the
-		 * String object to string data.)
 		 */
-		void WriteBarrierTrap(const void *container, const void *value);
+		void WriteBarrierTrap(const void *container);
+		
+		/**
+		 * Inline implementation of WriteBarrierTrap; probably too large to be inlined everywhere
+		 * so use sparingly.  AvmCore::atomWriteBarrier benefits substantially from inlining it.
+		 */
+		/*REALLY_INLINE*/ void InlineWriteBarrierTrap(const void *container);
 		
 		/**
 		 * Standard write barrier write for non-RC values.  If marking is ongoing, and the 'container'
@@ -1199,7 +1209,7 @@ namespace MMgc
 		 * If 'container' is not NULL then it is constrained as for WriteBarrierTrap, and 'address'
 		 * must point into the object referenced by 'container'.
 		 *
-		 * 'value' is constrained as for WriteBarrierTrap.
+		 * Value can be anything except a reference to an RCObject.
 		 *
 		 * This is called by the WB macro in WriteBarrier.h - not an API to be used otherwise.
 		 */
@@ -1315,8 +1325,6 @@ namespace MMgc
 
 		bool IsGCMemory (const void *);
 
-		bool IsQueued(const void *item);
-
 		static double duration(uint64_t start) 
 		{
 			return (double(VMPI_getPerformanceCounter() - start) * 1000) / VMPI_getPerformanceFrequency();
@@ -1417,6 +1425,10 @@ namespace MMgc
 		
 	private:
 
+		// item represents a container object, now marked 'Queued', that should be re-scanned 
+		// at some later time because it's been stored into.
+		void PushBarrierItem(GCWorkItem &item);
+		
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
 		// if the allocation succeeded.
 		void *heapAlloc(size_t size, int flags=GCHeap::kExpand|GCHeap::kZero|GCHeap::kProfile);
@@ -1429,7 +1441,7 @@ namespace MMgc
 		void SetStackEnter(GCAutoEnter *enter);
 		GCAutoEnter *GetAutoEnter() { return stackEnter; }
 
- 		vmpi_spin_lock_t const m_gcLock;
+ 		vmpi_spin_lock_t m_gcLock;
 
  		bool onThread() { return VMPI_currentThread() == m_gcThread; }
 
@@ -1492,12 +1504,36 @@ namespace MMgc
 		void HandleMarkStackOverflow();
 		void SignalMarkStackOverflow(GCStack<GCWorkItem> &stack, GCWorkItem& item);
 		
+		GCStack<GCWorkItem> m_barrierWork;
+		void CheckBarrierWork();
+		void FlushBarrierWork();
+
 		// Set at initialization to the deepest recursion level MarkItem is allowed to
 		// reach.  Managed entirely within MarkItem.
 		uint32_t mark_item_recursion_control;
 		
 		int IsWhite(const void *item);
-		
+
+		// Used heavily by the write barrier.
+		REALLY_INLINE bool IsMarkedThenMakeQueued(const void* userptr)
+		{
+			const void* realptr = GetRealPointer(userptr);
+			if (GCLargeAlloc::IsLargeBlock(realptr))
+				return GCLargeAlloc::IsMarkedThenMakeQueued(realptr);
+			else
+				return GCAlloc::IsMarkedThenMakeQueued(realptr);
+		}
+
+		// Used heavily by GC::Free.
+		REALLY_INLINE bool IsQueued(const void* userptr)
+		{
+			const void* realptr = GetRealPointer(userptr);
+			if (GCLargeAlloc::IsLargeBlock(realptr))
+				return GCLargeAlloc::IsQueued(realptr);
+			else
+				return GCAlloc::IsQueued(realptr);
+		}
+
 		const static int16_t kSizeClasses[kNumSizeClasses];		
 		const static uint8_t kSizeClassIndex[246];
 
@@ -1626,7 +1662,7 @@ namespace MMgc
 		 */
 		GCLargeAlloc::LargeBlock *largeEmptyPageList;
 		
-		vmpi_spin_lock_t const m_rootListLock;
+		vmpi_spin_lock_t m_rootListLock;
 
 		GCRoot *m_roots;
 		void AddRoot(GCRoot *root);

@@ -126,6 +126,18 @@ namespace MMgc
 	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
 #endif
 
+	// Scanning rates (bytes/sec).
+	//
+	// Less than R_LOWER_LIMIT is not credible and is probably a measurement error / measurement
+	// noise.  A too low value will tend to throw policy out of whack.
+	// 
+	// 10MB/sec is the typical observed rate on the HTC Fuze, a mid-range 2009 smartphone.
+	// 400MB/sec is the typical observed rate on a 2.6GHz MacBook Pro.
+	// 100MB/sec seems like a reasonable approximation to let the application get off the ground.
+
+#define R_LOWER_LIMIT (10*1024*1024)
+#define R_INITIAL_VALUE (10*R_LOWER_LIMIT)
+
 	GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap)
 		// public
 		: timeStartIncrementalMark(0)
@@ -173,18 +185,22 @@ namespace MMgc
 		, heapUsedBeforeSweep(0)
 		, gcAllocatedBeforeSweep(0)
 		, gcBytesUsedBeforeSweep(0)
+		, objectsReaped(0)
+		, bytesReaped(0)
+		, objectsPinned(0)
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		, candidateWords(0)
 		, couldBePointer(0)
 		, actuallyIsPointer(0)
 #endif
-		, P(0.005)			// seconds; 5ms.  The marker /will/ overshoot this significantly
-		, R(1000000.0)		// bytes/second; will be updated on-line
-		, L_ideal(2.0)
+		, P(0.005)				// seconds; 5ms.  The marker /will/ overshoot this significantly
+		, R(R_INITIAL_VALUE)	// bytes/second; will be updated on-line
+		, L_ideal(heap->Config().gcLoad)
 		, L_actual(L_ideal)
-		, T(0.25)
-		, G(0.25)
+		, T(1.0-(1.0/L_ideal))
+		, G(heap->Config().gcEfficiency)
+		, X(heap->Config().gcLoadCeiling)
 		, remainingMajorAllocationBudget(0)
 		, minorAllocationBudget(0)
 		, remainingMinorAllocationBudget(0)
@@ -192,7 +208,7 @@ namespace MMgc
 		, adjustR_totalTime(0)
 	{
 #ifdef MMGC_POLICY_PROFILING
-		for ( int i=0 ; i <= 3 ; i++ ) {
+		for ( size_t i=0 ; i < ARRAY_SIZE(barrierStageTotal) ; i++ ) {
 			barrierStageTotal[i] = 0;
 			barrierStageLastCollection[i] = 0;
 		}
@@ -213,28 +229,43 @@ namespace MMgc
 	// number of parameter settings.  The policy is documented and analyzed in doc/mmgc/policy.pdf,
 	// this is a recap.
 	//
-	// Given parameters:
+	// Parameters fixed in the code:
 	//
-	// P (max pause) can be tuned but within a limited range, but we treat it as constant
-	// G (max GC fraction of time)  can be tuned within a limited range, but we treat it
-	//                              as constant.  This effectively controls pause clustering.
+	// P (max pause)  can be tuned but within a limited range, but we treat it as
+	//   constant.  Right now we use it to limit pauses in incremental marking only;
+	//   it does not control ZCT reaping, final root and stack scan, or finalize
+	//   and sweep.  (Those are all bugs.)  On a desktop system the marker sticks
+	//   to P pretty well; on phones it has trouble with that, either because of
+	//   clock resolution (P=5ms normally) or because of its recursive behavior
+	//   that means the timeout is not checked sufficiently often, or because large
+	//   objects take a long time to scan.
 	// F (floor)  size of heap below which we don't collect, can be tuned but in limited ways,
-	//            host code actually changes it.  Returned by lowerLimitCollectionThreshold().
-	// R (rate of marking) is given by the hardware mainly, updated on-line
+	//   host code actually changes it.  Returned by lowerLimitCollectionThreshold().
+	// R (rate of marking) is given by the hardware mainly (MB/s), updated on-line
 	// V (voracity of new block allocation) is given by the program, ratio of blocks
 	//   gcheap allocates from OS to ratio it allocates from already committed memory
 	// H (heap)  size of heap at the end of one collection cycle
-	//
-	// Tunable parameters:
-	//
-	// L (inverse load factor) ratio of heap size just before finishing a collection
-	//   (before any reclamation) to the heap size just after finishing the previous
-	//   collection (following any reclamation) (range 1..infty).  Effectively expresses
-	//   the ratio of memory used to live program data.
+	// X (multiplier)  largest multiple of L to which the effective L should be allowed to
+	//   grow to meet G.
 	// T (allocation trigger) fraction of allocation budget to use before triggering
 	//   the first mark increment (range 0..1).  With T=1 we have nonincremental GC;
 	//   with T=0 the GC is always running.  A low T is desirable except that it puts
-	//   more pressure on the write barrier.
+	//   more pressure on the write barrier.  A good T is (1-(1/L)) where L is the
+	//   initial or given L.
+	//
+	// Tunable parameters:
+	//
+	// L (load factor)  ratio of heap size just before finishing a collection
+	//   (before any reclamation) to the heap size just after finishing the previous
+	//   collection (following any reclamation) (range 1..infty).  Effectively expresses
+	//   the ratio of memory used to live program data.
+	//
+	// G (max GC fraction of time)  ceiling on ratio of GC time to total time in the
+	//   interval when the incremental GC is running.  This controls pause clustering
+	//   to some extent by recomputing a new and larger L if the GC time does not
+	//   stay below the ceiling.  (It /could/ be used to reduce T if L can't be
+	//   increased because it is up against its own ceiling, but experiments have
+	//   not shown that to be fruitful so we don't do it yet.)
 	//
 	// We wish the heap size just before finishing a collection cycle to be HL, and
 	// the allocation budget following a collection is H(L-1), and we work to make
@@ -253,7 +284,7 @@ namespace MMgc
 	// If T is too high or L is too low then sticking to P may be futile as we will have
 	// excessive pause clustering, which is no better.
 	//
-	// G < 1 is meant to constrain L: if G can't be met then L is effectively raised so 
+	// G is meant to constrain L: if G can't be met then L is effectively raised so 
 	// that G can be met.  This is typically the case during system warmup, where a lot
 	// of allocation in a smallish heap leads to a lot of GC activity with little gain.
 	// The computation is like this:
@@ -270,29 +301,32 @@ namespace MMgc
 		return L_actual / ((1 - T) * (L_actual - 1)); 
   	}
 
+	// Warning: GIGO applies with full force: if R is badly mispredicted (based on too little data) 
+	// or the marker is too far off from P, then the value of A can be bad.  In particular A may be
+	// very low, which will tend to increase GC overhead because the marker will run too often.
+
 	double GCPolicyManager::A() {
 		return P * R / W();
 	}
 
   	// Called when an incremental mark starts
+	
 	void GCPolicyManager::startAdjustingR()
 	{
 		adjustR_startTime = now();
 	}
 
 	// Called when an incremental mark ends
+	
 	void GCPolicyManager::endAdjustingR()
 	{
 		adjustR_totalTime += now() - adjustR_startTime;
 		R = double(bytesScannedTotal) / (double(adjustR_totalTime) / double(VMPI_getPerformanceFrequency()));
-		// Less than 1MB/sec is not credible and is probably a measurement error / measurement noise.
-		if (R < 1000000)
-			R = 1000000;
+		if (R < R_LOWER_LIMIT)
+			R = R_LOWER_LIMIT;
 	}
 
-	// The throttles here guard against excessive growth.  growth <= 1 and L_actual <= 3*L_ideal
-	// are just guesses, but the exact numbers are probably less important than having some sort
-	// of throttle.
+	// The throttles here guard against excessive growth.
 
 	void GCPolicyManager::adjustL()
 	{
@@ -303,8 +337,8 @@ namespace MMgc
 			if (growth > 1)
 				growth = 1;
 			L_actual = L_actual + growth;
-			if (L_actual > 3*L_ideal)
-				L_actual = 3*L_ideal;
+			if (X != 0 && L_actual > X*L_ideal)
+				L_actual = X*L_ideal;
 		}
  		else
  			L_actual = (L_actual + L_ideal) / 2;
@@ -323,8 +357,7 @@ namespace MMgc
 		remainingMajorAllocationBudget = H * (L_actual - 1.0);
 		if (remainingMajorAllocationBudget < remainingBeforeGC)
 			remainingMajorAllocationBudget = remainingBeforeGC;
-  		remainingMinorAllocationBudget = minorAllocationBudget = int64_t(remainingMajorAllocationBudget * T);
- 		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
+  		remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
 #ifdef MMGC_POLICY_PROFILING
 		if (summarizeGCBehavior())
 			GCLog("[gcbehavior] policy: mark-rate=%.2f (MB/sec) adjusted-L=%.2f kbytes-live=%.0f kbytes-target=%.0f\n", 
@@ -333,12 +366,14 @@ namespace MMgc
 				  H / 1024.0, 
 				  (H+remainingMajorAllocationBudget) / 1024.0);
 #endif
+ 		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
   	}
  
  	// Called when an incremental mark ends
  	void GCPolicyManager::adjustPolicyForNextMinorCycle()
  	{
- 		remainingMinorAllocationBudget = minorAllocationBudget = size_t(A());
+ 		remainingMinorAllocationBudget += int32_t(A());
+		minorAllocationBudget = remainingMinorAllocationBudget;
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
  	}
  
@@ -528,7 +563,7 @@ namespace MMgc
 		// Need to clear these before any writes can occur, so that means right here: if earlier,
 		// we'd not have them for reporting.
 		if (ev == END_FinalizeAndSweep) {
-			for ( int i=0 ; i <= 3 ; i++ ) {
+			for ( size_t i=0 ; i < ARRAY_SIZE(barrierStageTotal) ; i++ ) {
 				barrierStageTotal[i] += barrierStageLastCollection[i];
 				barrierStageLastCollection[i] = 0;
 			}
@@ -548,14 +583,24 @@ namespace MMgc
 	/**
 	 * Note, gcno=0 is special and means statistics dumped at the end of the run,
 	 * just as the GC is about to shut down.
+	 *
+	 * Note that a lot of the stats for the last GC cycle do make sense even if
+	 * afterCollection is false, because they would be stats for an unfinished
+	 * incremental collection.  But they only make sense if gc->IncrementalMarking()
+	 * is true.
+	 *
+	 * TODO: alloc/free volumes might be helpful.
 	 */
 	void GCPolicyManager::PrintGCBehaviorStats(bool afterCollection)
 	{
 		size_t bytesInUse = gc->GetBytesInUse();
 		size_t heapAllocated = heap->GetTotalHeapSize();
+		char buf[256];
+		uint32_t utotal;
+		double dtotal;
 		
 		GCLog("--------------------\n");
-		GCLog("[gcbehavior] gc=%p gcno=%u\n", (void*)gc, afterCollection ? (unsigned)countFinalizeAndSweep : 0);
+		GCLog("[gcbehavior] gc=%p gcno=%u incremental-marks=%u\n", (void*)gc, afterCollection ? (unsigned)countFinalizeAndSweep : 0, (unsigned)countIncrementalMark);
 		if (afterCollection)
 		{
 			GCLog("[gcbehavior] occupancy-before: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
@@ -589,35 +634,52 @@ namespace MMgc
 			  unsigned(couldBePointer),
 			  unsigned(actuallyIsPointer));
 #endif
-		// Note that a lot of the stats for the last GC cycle do make sense even if
-		// afterCollection is false, because they would be stats for an unfinished
-		// incremental collection.
-		GCLog("[gcbehavior] markitem-last-gc: objects=%u bytes=%u\n",
-			  unsigned(objectsScannedLastCollection),
-			  unsigned(bytesScannedLastCollection));
+		if (afterCollection || gc->IncrementalMarking())
+		{
+			GCLog("[gcbehavior] markitem-last-gc: objects=%u bytes=%u\n",
+				  unsigned(objectsScannedLastCollection),
+				  unsigned(bytesScannedLastCollection));
+		}
 		GCLog("[gcbehavior] markitem-all-gc: objects=%.0f bytes=%.0f\n",
 			  double(objectsScannedLastCollection + objectsScannedTotal),
 			  double(bytesScannedLastCollection + bytesScannedTotal));
-		GCLog("[gcbehavior] barrier-last-gc: total=%u stage0=%u stage1=%u stage2=%u stage3=%u hit-ratio=%.2f\n",
-			  unsigned(barrierStageLastCollection[0] + barrierStageLastCollection[1] + barrierStageLastCollection[2] + barrierStageLastCollection[3]),
-			  unsigned(barrierStageLastCollection[0]),
-			  unsigned(barrierStageLastCollection[1]),
-			  unsigned(barrierStageLastCollection[2]),
-			  unsigned(barrierStageLastCollection[3]),
-			  double(barrierStageLastCollection[3])/double(barrierStageLastCollection[0]));
-		GCLog("[gcbehavior] barrier-all-gc: total=%.0f stage0=%.0f stage1=%.0f stage2=%.0f stage3=%.0f hit-ratio=%.2f\n",
-			  double(barrierStageLastCollection[0] + barrierStageLastCollection[1] + barrierStageLastCollection[2] + barrierStageLastCollection[3] +
-					 barrierStageTotal[0] + barrierStageTotal[1] + barrierStageTotal[2] + barrierStageTotal[3]),
-			  double(barrierStageLastCollection[0] + barrierStageTotal[0]),
-			  double(barrierStageLastCollection[1] + barrierStageTotal[1]),
-			  double(barrierStageLastCollection[2] + barrierStageTotal[2]),
-			  double(barrierStageLastCollection[3] + barrierStageTotal[3]),
-			  double(barrierStageLastCollection[3] + barrierStageTotal[3])/double(barrierStageLastCollection[0] + barrierStageTotal[0]));
+
+		size_t blimit = ARRAY_SIZE(barrierStageLastCollection);
+		utotal = 0;
+		VMPI_sprintf(buf, "[gcbehavior] barrier-last-gc:");
+		for ( size_t i=0 ; i < blimit ; i++ )
+			utotal += barrierStageLastCollection[i];
+		VMPI_sprintf(buf + strlen(buf), " total=%u", unsigned(utotal));
+		for ( size_t i=0 ; i < blimit ; i++ )
+			VMPI_sprintf(buf + strlen(buf), " stage%d=%u", unsigned(i), unsigned(barrierStageLastCollection[i]));
+		VMPI_sprintf(buf + strlen(buf), " hit-ratio=%.2f\n", 
+					 double(barrierStageLastCollection[blimit-1])/double(utotal));
+		GCLog(buf);
+	
+		dtotal = 0;
+		VMPI_sprintf(buf, "[gcbehavior] barrier-all-gc: ");
+		for ( size_t i=0 ; i < blimit ; i++ )
+			dtotal += double(barrierStageLastCollection[i] + barrierStageTotal[i]);
+		VMPI_sprintf(buf + strlen(buf), " total=%.0f", dtotal);
+		for ( size_t i=0 ; i < blimit ; i++ )
+			VMPI_sprintf(buf + strlen(buf), " stage%d=%.0f", unsigned(i), double(barrierStageLastCollection[i] + barrierStageTotal[i]));
+		VMPI_sprintf(buf + strlen(buf), " hit-ratio=%.2f\n", 
+					 double(barrierStageLastCollection[blimit-1] + barrierStageTotal[blimit-1])/double(dtotal));
+		GCLog(buf);
+
 		GCLog("[gcbehavior] time-zct-reap: last-cycle=%.1f total=%.1f\n",
 			  ticksToMillis(timeReapZCTLastCollection),
 			  ticksToMillis(timeReapZCT));
+		GCLog("[gcbehavior] work-zct-reap: reaps=%u objects-reaped=%.0f kbytes-reaped=%.0f objects-pinned=%.0f reaped-to-pinned=%.2f objects-reaped-per-ms=%.2f kbytes-reaped-per-ms=%.1f\n",
+			  unsigned(countReapZCT),
+			  double(objectsReaped),
+			  double(bytesReaped)/1024,
+			  double(objectsPinned),
+			  countReapZCT > 0 ? double(objectsReaped)/double(objectsPinned) : 0,
+			  countReapZCT > 0 ? double(objectsReaped)/ticksToMillis(timeReapZCT) : 0,
+			  countReapZCT > 0 ? (double(bytesReaped)/1024)/ticksToMillis(timeReapZCT) : 0);
 		GCLog("[gcbehavior] pause-zct-reap: last-cycle=%.1f overall=%.1f\n",
-			  ticksToMillis(timeMaxReapZCTLastCollection),
+			  pendingClearZCTStats ? 0.0 : ticksToMillis(timeMaxReapZCTLastCollection),
 			  ticksToMillis(timeMaxReapZCT));
 		if (afterCollection)
 		{
@@ -638,11 +700,13 @@ namespace MMgc
 			  ticksToMillis(timeIncrementalMark),
 			  ticksToMillis(timeFinalRootAndStackScan),
 			  ticksToMillis(timeFinalizeAndSweep));
-		GCLog("[gcbehavior] pause-last-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
-			  ticksToMillis(timeMaxStartIncrementalMarkLastCollection),
-			  ticksToMillis(timeMaxIncrementalMarkLastCollection),
-			  ticksToMillis(timeMaxFinalRootAndStackScanLastCollection),
-			  ticksToMillis(timeMaxFinalizeAndSweepLastCollection));
+		if (afterCollection || gc->IncrementalMarking()) {
+			GCLog("[gcbehavior] pause-last-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
+				  ticksToMillis(timeMaxStartIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxIncrementalMarkLastCollection),
+				  ticksToMillis(timeMaxFinalRootAndStackScanLastCollection),
+				  ticksToMillis(timeMaxFinalizeAndSweepLastCollection));
+		}
 		GCLog("[gcbehavior] pause-all-gc: start-incremental-mark=%.1f incremental-mark=%.1f final-root-stack-scan=%.1f finalize-sweep=%.1f\n",
 			  ticksToMillis(timeMaxStartIncrementalMark),
 			  ticksToMillis(timeMaxIncrementalMark),
@@ -662,12 +726,12 @@ namespace MMgc
 
 	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
 	{
-		remainingMinorAllocationBudget -= nbytes;
+		remainingMinorAllocationBudget -= int32_t(nbytes);
 	}
 
 	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
 	{
-		remainingMinorAllocationBudget += nbytes;
+		remainingMinorAllocationBudget += int32_t(nbytes);
 	}
 	
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
@@ -703,10 +767,12 @@ namespace MMgc
 	}
 
 #ifdef MMGC_POLICY_PROFILING
-	REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
+	void GCPolicyManager::signalReapWork(uint32_t objects_reaped, uint32_t bytes_reaped, uint32_t objects_pinned)
 	{
-		barrierStageLastCollection[stage]++;
-	}
+		objectsReaped += objects_reaped;
+		bytesReaped += bytes_reaped;
+		objectsPinned += objects_pinned;
+ 	}
 #endif
 
 	////////////// ZCT /////////////////////////////////////////////////////////////////////////////
@@ -990,6 +1056,7 @@ namespace MMgc
 			// kill incremental mark since we're gonna wipe the marks
 			gc->marking = false;
 			gc->m_incrementalWork.Clear();
+			gc->m_barrierWork.Clear();
 			gc->Trace(item.ptr, item._size);
 		}
 #endif
@@ -999,6 +1066,11 @@ namespace MMgc
 		// reaping couldn't be a linear scan)
 		while (HasFree())
 			Put(GrabFree(), NULL);
+		
+#ifdef MMGC_POLICY_PROFILING
+		uint32_t objects_reaped = 0;
+		uint32_t objects_pinned = 0;
+#endif
 		
 		while(zctIndex < zctNext) {
 			SAMPLE_CHECK();
@@ -1030,6 +1102,9 @@ namespace MMgc
 				((GCFinalizable*)rcobj)->~GCFinalizable();
 				numObjects++;
 				objSize += GC::Size(rcobj);
+#ifdef MMGC_POLICY_PROFILING
+				objects_reaped++;
+#endif
 				gc->Free(rcobj);
 				
 				GCAssert(gc->weakRefs.get(rcobj) == NULL);
@@ -1037,6 +1112,9 @@ namespace MMgc
 			else if(rcobj) {
 				// move it to front
 				rcobj->Unpin();
+#ifdef MMGC_POLICY_PROFILING
+				objects_pinned++;
+#endif
 				if(nextPinnedIndex != zctIndex-1) {
 					rcobj->setZCTIndex(nextPinnedIndex);
 					GCAssert(Get(nextPinnedIndex) == NULL);
@@ -1069,6 +1147,9 @@ namespace MMgc
 		}
 #endif
 		
+#ifdef MMGC_POLICY_PROFILING
+		gc->policy.signalReapWork(objects_reaped, uint32_t(objSize), objects_pinned);
+#endif
 		gc->policy.signal(GCPolicyManager::END_ReapZCT);
 	}
 	
@@ -1190,7 +1271,7 @@ namespace MMgc
 		numObjects(0),
 		sweepStart(0),
 		emptyWeakRef(0),
-		m_gcLock(VMPI_lockCreate()),
+
 		m_gcThread(NULL),
 		destroying(false),
 		stackCleaned(true),
@@ -1207,7 +1288,6 @@ namespace MMgc
 		finalizedValue(true),
 		smallEmptyPageList(NULL),
 		largeEmptyPageList(NULL),
-		m_rootListLock(VMPI_lockCreate()),
 		m_roots(0),
 		m_callbacks(0),
 		zct()
@@ -1232,6 +1312,9 @@ namespace MMgc
 		#endif		
 
 		zct.SetGC(this);
+
+		VMPI_lockInit(&m_gcLock);
+		VMPI_lockInit(&m_rootListLock);
 
 		// Create all the allocators up front (not lazy)
 		// so that we don't have to check the pointers for
@@ -1342,8 +1425,8 @@ namespace MMgc
 		if(stackEnter != NULL)
 			stackEnter->Destroy();
 
-		VMPI_lockDestroy(m_gcLock);
-		VMPI_lockDestroy(m_rootListLock);
+		VMPI_lockDestroy(&m_gcLock);
+		VMPI_lockDestroy(&m_rootListLock);
 	}
 
 	void GC::Collect(bool scanStack)
@@ -1373,19 +1456,24 @@ namespace MMgc
 	}
 
 #ifdef RECURSIVE_MARK
-	inline void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
+	REALLY_INLINE void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
 	{
 		if (item.ptr)
 			MarkItem(item, stack);
 	}
 #else	
-	inline void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
+	REALLY_INLINE void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
 	{
 		if(item.ptr)
 			if (!stack.Push(item))
 				SignalMarkStackOverflow(stack, item);
 	}
 #endif
+
+	void GC::PushBarrierItem(GCWorkItem &item)
+	{
+		PushWorkItem(m_barrierWork, item);
+	}
 
 	void GC::PushWorkItem_MayFail(GCWorkItem &item)
 	{
@@ -1726,6 +1814,7 @@ bail:
 		// if force is true we're being called from ~GC and this isn't necessary
 		if(!force) {
 			// we just executed mutator code which could have fired some WB's
+			FlushBarrierWork();
 			Mark(m_incrementalWork);
 		}
 
@@ -1734,6 +1823,7 @@ bail:
 		// if force is true we're being called from ~GC and this isn't necessary
 		if(!force) {
 			// we just executed mutator code which could have fired some WB's
+			FlushBarrierWork();
 			Mark(m_incrementalWork);
 		}
 	
@@ -2255,7 +2345,7 @@ bail:
 		static bool ingclog=false;
 		bool doit;
 		{
-			GCAcquireSpinlock sl(heap->gclog_spinlock);
+			MMGC_LOCK(heap->gclog_spinlock);
 			doit = !ingclog;
 			if (doit)
 				ingclog = true;
@@ -2263,7 +2353,7 @@ bail:
 		if(!doit) {
 			heap->DumpMemoryInfo();
 			{
-				GCAcquireSpinlock sl(heap->gclog_spinlock);
+				MMGC_LOCK(heap->gclog_spinlock);
 				ingclog = false;
 			}
 		}
@@ -2720,6 +2810,7 @@ bail:
 		marking = true;
 
 		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 	
 		// clean up any pages that need sweeping
 		for(int i=0; i < kNumSizeClasses; i++) {
@@ -3270,10 +3361,13 @@ bail:
 		// let the allocation budget be used up.
 
 		if(m_incrementalWork.Count() == 0) {
-			// Policy triggers off these signals, so we still need to send them.
-			policy.signal(GCPolicyManager::START_IncrementalMark);
-			policy.signal(GCPolicyManager::END_IncrementalMark);
-			return;
+			CheckBarrierWork();
+			if (m_incrementalWork.Count() == 0) {
+				// Policy triggers off these signals, so we still need to send them.
+				policy.signal(GCPolicyManager::START_IncrementalMark);
+				policy.signal(GCPolicyManager::END_IncrementalMark);
+				return;
+			}
 		}
 		
 		policy.signal(GCPolicyManager::START_IncrementalMark);
@@ -3296,7 +3390,10 @@ bail:
 		do {
 			unsigned int count = m_incrementalWork.Count();
 			if (count == 0) {
-				break;
+				CheckBarrierWork();
+				count = m_incrementalWork.Count();
+				if (count == 0)
+					break;
 			}
 			if (count > checkTimeIncrements) {
 				count = checkTimeIncrements;
@@ -3333,8 +3430,9 @@ bail:
 
 		while (m_markStackOverflow) {
 			m_markStackOverflow = false;
-			HandleMarkStackOverflow();		// may set m_markStackOverflow
-			Mark(m_incrementalWork);		//    to true again
+			HandleMarkStackOverflow();		// may set
+			FlushBarrierWork();				//    m_markStackOverflow
+			Mark(m_incrementalWork);		//       to true again
 		}
 
 		// finished in Sweep
@@ -3347,6 +3445,7 @@ bail:
 		
 		GCAssert(!m_markStackOverflow);
 		
+		FlushBarrierWork();
 		MarkAllRoots(m_incrementalWork);
 		MarkQueueAndStack(m_incrementalWork, scanStack);
 		
@@ -3360,10 +3459,12 @@ bail:
 		
 		while (m_markStackOverflow) {
 			m_markStackOverflow = false;
-			HandleMarkStackOverflow();				// may set m_markStackOverflow
-			MarkQueueAndStack(m_incrementalWork, scanStack);	//    to true again
+			HandleMarkStackOverflow();							// may set
+			FlushBarrierWork();									//    m_markStackOverflow
+			MarkQueueAndStack(m_incrementalWork, scanStack);	//       to true again
 		}
 		m_incrementalWork.Clear();				// Frees any cached resources
+		m_barrierWork.Clear();
 		zct.Prune();							// Frees unused memory
 		
 		policy.signal(GCPolicyManager::END_FinalRootAndStackScan);
@@ -3378,8 +3479,10 @@ bail:
 		GCAssert(!collecting);
 		collecting = true;
 		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 		Sweep();
 		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 		collecting = false;
 		marking = false;
 		policy.signal(GCPolicyManager::END_FinalizeAndSweep);	// garbage collection is finished
@@ -3411,33 +3514,39 @@ bail:
 		return false;
 	}
 
-	void GC::TrapWrite(const void *black, const void *white)
-	{
-		// assert fast path preconditions
-		(void)black;
-		GCAssert(marking);
-		GCAssert(GetMark(black));
-		GCAssert(IsWhite(white));
+	// Here the purpose is to shift some work from the barrier mark stack to the regular
+	// mark stack /provided/ the barrier mark stack seems very full.  The regular mark stack
+	// is normally empty.
+	//
+	// To avoid copying data, we will only move entire (full) segments, because they can
+	// be moved by changing some pointers and counters.  We will never move a non-full
+	// segment.
 
-		// Currently using the simplest finest grained implementation,
-		// which could result in huge work queues.  Should try the
-		// more granular approach of moving the black object to grey
-		// (smaller work queue, less frequent wb slow path) but if the
-		// black object is big we end up doing useless redundant
-		// marking.  Optimal approach from lit is card marking (mark a
-		// region of the black object as needing to be re-marked).
-		
-		if(ContainsPointers(white)) {
-			SetQueued(white);
-			PushWorkItem(m_incrementalWork, GCWorkItem(white, (uint32_t)Size(white), true));
-		} 
-		else
-			SetMark(white);
+	void GC::CheckBarrierWork()
+	{
+		if (m_barrierWork.EntirelyFullSegments() < 9)	// 9 is pretty arbitrary
+			return;
+		m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork);
 	}
 	
-	void GC::WriteBarrierTrap(const void *container, const void *value)
+	// Here the purpose is to shift all the work from the barrier mark stack to the regular
+	// mark stack, unconditionally.  This may mean copying mark work from one stack to
+	// the other (for work that's in a non-full segment), but full segments can just be
+	// moved by changing some pointers and counters.
+
+	void GC::FlushBarrierWork()
 	{
-		InlineWriteBarrierTrap(container, value);
+		for ( uint32_t numfull = m_barrierWork.EntirelyFullSegments() ; numfull > 0 ; --numfull )
+			m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork);
+		while (m_barrierWork.Count() > 0) {
+			GCWorkItem item = m_barrierWork.Pop();
+			PushWorkItem(m_incrementalWork, item);
+		}
+	}
+	
+	void GC::WriteBarrierTrap(const void *container)
+	{
+		InlineWriteBarrierTrap(container);
 	}
 	
 	void GC::privateWriteBarrier(const void *container, const void *address, const void *value)
@@ -3468,18 +3577,22 @@ bail:
 
 	void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
 	{
+		(void)value;  // Can't get rid of this parameter now; part of an existing API
+		
 		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
 		// worry about, so we should be able to optimize (and inline).
 		if(IsPointerToGCPage(address))
-			InlineWriteBarrierTrap(FindBeginning(address), Pointer(value));
+			InlineWriteBarrierTrap(FindBeginning(address));
 	}
 	
 	void GC::WriteBarrierNoSubstitute(const void *container, const void *value)
 	{
+		(void)value;  // Can't get rid of this parameter now; part of an existing API
+		
 		GCAssert(container != NULL);
 		GCAssert(IsPointerToGCPage(container));
 		GCAssert(FindBeginning(container) == container);
-		InlineWriteBarrierTrap(container, Pointer(value));
+		InlineWriteBarrierTrap(container);
 	}
 
 	bool GC::ContainsPointers(const void *item)
@@ -3496,11 +3609,6 @@ bail:
 	{
 		int bits = GetPageMapValue((uintptr_t)item);
 		return (bits != 0);
-	}
-
-	bool GC::IsQueued(const void *item)
-	{
-		return !GetMark(item) && !IsWhite(item);
 	}
 
 	uint32_t *GC::GetBits(int numBytes, int sizeClass)
@@ -3863,7 +3971,7 @@ bail:
  			stackEnter = enter;
 			edge = true;
 			m_gcThread = VMPI_currentThread();
-			VMPI_lockAcquire(m_gcLock);
+			VMPI_lockAcquire(&m_gcLock);
  		}
 
 		if(edge) {
@@ -3880,7 +3988,7 @@ bail:
 			// cleared so we remain thread ambivalent
 			rememberedStackTop = NULL; 					
 			m_gcThread = NULL;
-			VMPI_lockRelease(m_gcLock);
+			VMPI_lockRelease(&m_gcLock);
 		}
 	}
  
@@ -3899,9 +4007,9 @@ bail:
  			if(onThread()) {
  				Collect();
  			} else {
- 				if(VMPI_lockTestAndAcquire(m_gcLock)) {
+ 				if(VMPI_lockTestAndAcquire(&m_gcLock)) {
  					Collect();
- 					VMPI_lockRelease(m_gcLock);
+ 					VMPI_lockRelease(&m_gcLock);
  				}		
  				// else nothing can be done
  			}

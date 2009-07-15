@@ -87,6 +87,7 @@
 
 #define VMPI_sprintf		sprintf
 #define VMPI_snprintf		_snprintf
+#define VMPI_sscanf			sscanf
 
 #define VMPI_atoi			atoi
 #define VMPI_tolower 		tolower

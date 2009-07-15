@@ -142,6 +142,26 @@ namespace MMgc
 			return block->items + block->size * GetIndex(block, item);
 		}
 
+		REALLY_INLINE static bool IsMarkedThenMakeQueued(const void *item)
+		{
+			GCBlock *block = GetBlock(item);
+			int index = GetIndex(block, item);
+			uint32_t* bits = block->GetBits() + (index >> 3);
+			if (*bits & (kMark << ((index&7)<<2))) {
+				*bits ^= (kMark|kQueued) << ((index&7)<<2);
+				return true;
+			}
+			return false;
+		}
+
+		REALLY_INLINE static bool IsQueued(const void *item)
+		{
+			GCBlock *block = GetBlock(item);
+			int index = GetIndex(block, item);
+			uint32_t* bits = block->GetBits() + (index >> 3);
+			return (*bits & (kQueued << ((index&7)<<2))) != 0;
+		}
+
 		static void ClearFinalized(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
@@ -238,7 +258,7 @@ namespace MMgc
 				}
 			}
 
-			uint32_t *GetBits() const
+			REALLY_INLINE uint32_t *GetBits() const
 			{
 				return bits;
 			}
@@ -256,7 +276,7 @@ namespace MMgc
 			}
 		};
 		
-		static GCBlock *GetBlock(const void *item) { return (GCBlock*) ((uintptr_t)item & ~0xFFF); }
+		REALLY_INLINE static GCBlock *GetBlock(const void *item) { return (GCBlock*) ((uintptr_t)item & ~0xFFF); }
 		
 #ifdef MMGC_MEMORY_INFO
 		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
@@ -366,7 +386,7 @@ namespace MMgc
 
 		static int ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
 		
-		static int GetIndex(const GCBlock *block, const void *item)
+		REALLY_INLINE static int GetIndex(const GCBlock *block, const void *item)
 		{
 			int index = (int)((((char*) item - block->items) * block->alloc->multiple) >> block->alloc->shift);
 #ifdef _DEBUG

@@ -1,4 +1,5 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -12,11 +13,11 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [Open Source Virtual Machine.].
+ * The Original Code is [Open Source Virtual Machine].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2007
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -36,82 +37,47 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "MMgc.h"
+#include "nanojit.h"
 
-class SpinLockWin : public MMgc::GCAllocObject
+namespace nanojit
 {
-public:
-	SpinLockWin() : sl(0)
-#ifdef _DEBUG
-		, ownerThread(0)
-#endif 
-	{}
+    Allocator::Allocator()
+        : current_chunk(NULL)
+        , current_top(NULL)
+        , current_limit(NULL)
+    { }
 
-#ifdef _DEBUG
-	~SpinLockWin()
-	{
-		GCAssert(sl == 0 && ownerThread == 0); // unlocked?
-	}
-#endif // _DEBUG
+    Allocator::~Allocator()
+    {
+        Chunk *c = current_chunk;
+        while (c) {
+            Chunk *prev = c->prev;
+            freeChunk(c);
+            c = prev;
+        }
+    }
 
-	bool Acquire();
-	bool Release();
-	bool Try();
+    void* Allocator::allocSlow(size_t nbytes)
+    {
+        NanoAssert((nbytes & 7) == 0);
+        fill(nbytes);
+        NanoAssert(current_top + nbytes <= current_limit);
+        void* p = current_top;
+        current_top += nbytes;
+        return p;
+    }
 
-private:
-	volatile PVOID sl;
-#ifdef _DEBUG
-	DWORD	ownerThread;
-#endif
-};
-
-inline bool SpinLockWin::Acquire()
-{
-	int tries = 0;
-	GCAssert(ownerThread != GetCurrentThreadId()); // recursive deadlock?
-
-	while (InterlockedCompareExchangePointer(&sl, (PVOID)1, 0) != 0)
-	{
-		++tries;
-		if(tries == 100 )
-		{
-			// Having trouble getting the lock, give other, perhaps lower priority, threads a chance to run
-			Sleep(1);
-			tries = 0;
-		}
-		else
-		{
-			Sleep(0);
-		}
-	}
-
-#ifdef _DEBUG
-		ownerThread = GetCurrentThreadId();
-#endif
-
-	return true;
-}
-	
-inline bool SpinLockWin::Release()
-{
-#ifdef _DEBUG
-	GCAssert(ownerThread == GetCurrentThreadId()); // unlocked by same thread?
-	ownerThread = 0;
-#endif
-	InterlockedExchangePointer(&sl, 0);
-	return true;
-}
-
-inline bool SpinLockWin::Try()
-{
-	GCAssert(ownerThread != GetCurrentThreadId()); // recursive deadlock?
-
-	if (InterlockedCompareExchangePointer(&sl, (PVOID)1, 0) == 0) {
-#ifdef _DEBUG
-		ownerThread = GetCurrentThreadId();
-#endif
-		return true;
-	} else {
-		return false;
-	}
+    void Allocator::fill(size_t nbytes)
+    {
+        const size_t minChunk = 2000;
+        if (nbytes < minChunk)
+            nbytes = minChunk;
+        size_t chunkbytes = sizeof(Chunk) + nbytes - sizeof(int64_t);
+        void* mem = allocChunk(chunkbytes);
+        Chunk* chunk = (Chunk*) mem;
+        chunk->prev = current_chunk;
+        current_chunk = chunk;
+        current_top = (char*)chunk->data;
+        current_limit = (char*)mem + chunkbytes;
+    }
 }

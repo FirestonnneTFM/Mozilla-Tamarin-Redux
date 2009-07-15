@@ -50,6 +50,7 @@ platform/mac/*/build*/**
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
+esc/build/results.log
 esc/safebin
 esc/src/*.es.abc
 esc/safebin*

@@ -58,6 +58,7 @@
 
 #define VMPI_sprintf		sprintf
 #define VMPI_snprintf		snprintf
+#define VMPI_sscanf			sscanf
 
 #define VMPI_atoi	atoi
 #define VMPI_tolower tolower	
@@ -121,8 +122,12 @@ typedef void *maddr_ptr;
 #define REALLY_INLINE inline __attribute__((always_inline))
 #endif
 
+// inline __attribute__((always_inline)) is supposed to work for SunStudio.
+// Currently SunStudio C++ compiler has a bug which can not parse keyword 
+// inline and __attribute__((always_inline)) together. It will be added back
+// when this bug got fixed.
 #if defined __SUNPRO_C || defined __SUNPRO_CC
-#define REALLY_INLINE inline __attribute__((always_inline)) __hidden
+#define REALLY_INLINE inline __hidden
 #endif
 
 #endif // __avmplus_unix_platform__

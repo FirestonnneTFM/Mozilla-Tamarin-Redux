@@ -37,29 +37,70 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "MMgc.h"
-#include "SpinLockWin.h"
 
-vmpi_spin_lock_t VMPI_lockCreate()
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
-	return (vmpi_spin_lock_t) (new SpinLockWin);
+#ifdef DEBUG
+	lock->lock = NULL;
+	lock->owner = NULL;
+#else
+	*lock = NULL;
+#endif
 }
 
-void VMPI_lockDestroy(vmpi_spin_lock_t lock)
+void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
-	delete (SpinLockWin*)lock;
+	(void)lock;
+	GCAssert(lock->owner == NULL);
+	GCAssert(lock->lock == NULL);
 }
 
-bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
+bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 {
-	return ((SpinLockWin*)lock)->Acquire();
+	int tries = 0;
+
+	while (InterlockedCompareExchangePointer((volatile PVOID*)lock, (PVOID)1, 0) != 0)
+	{
+		++tries;
+		if(tries == 100 )
+		{
+			// Having trouble getting the lock, give other, perhaps lower priority, threads a chance to run
+			Sleep(1);
+			tries = 0;
+		}
+		else
+		{
+			Sleep(0);
+		}
+	}
+
+	#ifdef DEBUG
+	GCAssert(lock->owner == NULL);
+	lock->owner = VMPI_currentThread();
+	#endif
+
+	return true;
 }
 
-bool VMPI_lockRelease(vmpi_spin_lock_t lock)
+bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
 {
-	return ((SpinLockWin*)lock)->Release();
+	#ifdef DEBUG
+	GCAssert(lock->owner == VMPI_currentThread());
+	lock->owner = NULL;
+	#endif
+	InterlockedExchangePointer((volatile PVOID*)lock, 0);
+	return true;
 }
 
-bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
-	return ((SpinLockWin*)lock)->Try();
+	if (InterlockedCompareExchangePointer((volatile PVOID*)lock, (PVOID)1, 0) == 0) {
+		#ifdef DEBUG
+		GCAssert(lock->owner == NULL);
+		lock->owner = VMPI_currentThread();
+		#endif
+		return true;
+	} else {
+		return false;
+	}
 }

@@ -94,12 +94,11 @@ namespace nanojit
     #define counter_value(x)        x
 #endif /* NJ_PROFILE */
 
-    LirBuffer::LirBuffer(GC *gc)
-        : abi(ABI_FASTCALL), gc(gc), _segments(gc)
+    LirBuffer::LirBuffer(Allocator& alloc)
+        : abi(ABI_FASTCALL), allocator(alloc), _allocatedBytes(0)
     {
         clear();
-        primeNewSegment();
-        if (!outOMem()) transitionToNewSegment();
+        transitionToNewSegment();
     }
 
     LirBuffer::~LirBuffer()
@@ -111,13 +110,9 @@ namespace nanojit
     void LirBuffer::clear()
     {
         // free all the memory and clear the stats
-        while(_segments.size()>0)
-            gc->Free( _segments.removeLast() );
-        NanoAssert(!_segments.size());
         _currentSegment = 0;
         _idx = 0;
         _stats.lir = 0;
-        _noMem = 0;
     }
 
     int32_t LirBuffer::insCount()
@@ -128,34 +123,20 @@ namespace nanojit
 
     size_t LirBuffer::byteCount()
     {
-        size_t sz = (segmentsInUse()-1)*LIR_BUF_SEGMENT_SIZE;
-        sz += idx()*sizeof(LIns);
-        return sz;
-    }
-
-    void LirBuffer::primeNewSegment()
-    {
-        NanoAssert(!segmentWaiting());
-        LInsp segment = (LIns*)gc->Alloc(LIR_BUF_SEGMENT_SIZE);
-        if (segment)
-            _segments.add(segment);
-        else
-            _noMem = true;
+        return _allocatedBytes - (maxIdx() - idx()) * sizeof(LIns);
     }
 
     void LirBuffer::transitionToNewSegment()
     {
-        NanoAssert(segmentWaiting());
-        _currentSegment = _segments.last();
+        _currentSegment = (LIns*) allocator.alloc(LIR_BUF_SEGMENT_SIZE);
+        NanoAssert(_currentSegment != NULL); // never fails, see Allocator contract in util.h
+        _allocatedBytes += LIR_BUF_SEGMENT_SIZE;
         _idx = 0;
     }
 
     LInsp       LirBuffer::next()           { return &_currentSegment[_idx];  }
     uint32_t    LirBuffer::idx()            { return _idx; }
     uint32_t    LirBuffer::maxIdx()         { return LIR_BUF_SEGMENT_SIZE/sizeof(LIns); }
-    uint32_t    LirBuffer::thresholdIdx()   { NanoAssert(maxIdx()>MAX_LIR_COMMIT); return maxIdx()-MAX_LIR_COMMIT; }
-    bool        LirBuffer::segmentWaiting() { return (_segments.size()>0 && _currentSegment!=_segments.last()); }
-    uint32_t    LirBuffer::segmentsInUse() { return segmentWaiting() ? _segments.size()-1 : _segments.size(); }
     void        LirBuffer::commit(uint32_t count) { _idx+=count; NanoAssert(count<MAX_LIR_COMMIT && _idx<maxIdx()); }
 
     void LirBufWriter::ensureRoom(size_t count)
@@ -166,16 +147,7 @@ namespace nanojit
             // we need to transition to threshold list
             LInsp before = _buf->next();
             _buf->transitionToNewSegment();
-            NanoAssert(!_buf->outOMem() && !_buf->segmentWaiting());
-
             insLinkTo(LIR_skip,before-1);
-        }
-        else if (after > _buf->thresholdIdx())
-        {
-            // not overflowing yet , but prime the new list (OOM set if not able to)
-            if (!_buf->segmentWaiting())  // <= if this shows up in profiling , then use a flag(?) rather than _segments.last()
-                _buf->primeNewSegment();
-            NanoAssert(_buf->outOMem() || _buf->segmentWaiting());
         }
     }
 
@@ -1661,34 +1633,13 @@ namespace nanojit
         }
     }
 
-    LabelMap::Entry::~Entry()
-    {
-    }
-
-    LirNameMap::Entry::~Entry()
-    {
-    }
-
-    LirNameMap::~LirNameMap()
-    {
-        Entry *e;
-
-        while ((e = names.removeLast()) != NULL) {
-            NJ_DELETE(e);
-        }
-    }
-
-    bool LirNameMap::addName(LInsp i, Stringp name) {
+    void LirNameMap::addName(LInsp i, const char* name) {
         if (!names.containsKey(i)) {
-            Entry *e = NJ_NEW(labels->core->gc, Entry)(name);
+            char *copy = new (allocator) char[VMPI_strlen(name)+1];
+            VMPI_strcpy(copy, name);
+            Entry *e = new (allocator) Entry(copy);
             names.put(i, e);
-            return true;
         }
-        return false;
-    }
-    void LirNameMap::addName(LInsp i, const char *name) {
-        Stringp new_name = labels->core->newStringLatin1(name);
-        addName(i, new_name);
     }
 
     void LirNameMap::copyName(LInsp i, const char *s, int suffix) {
@@ -1699,7 +1650,7 @@ namespace nanojit
         } else {
             VMPI_sprintf(s2,"%s%d", s, suffix);
         }
-        addName(i, labels->core->newStringLatin1(s2));
+        addName(i, s2);
     }
 
     void LirNameMap::formatImm(int32_t c, char *buf) {
@@ -1714,8 +1665,8 @@ namespace nanojit
         char buffer[200], *buf=buffer;
         buf[0]=0;
         if (names.containsKey(ref)) {
-            StUTF8String cname8 (names.get(ref)->name);
-            VMPI_strcat(buf, cname8.c_str());
+            const char* name = names.get(ref)->name;
+            VMPI_strcat(buf, name);
         }
         else if (ref->isconstq()) {
             VMPI_sprintf(buf, "#0x%llxLL", (long long unsigned int) ref->constvalq());
@@ -1729,8 +1680,8 @@ namespace nanojit
             } else {
                 copyName(ref, lirNames[ref->opcode()], lircounts.add(ref->opcode()));
             }
-            StUTF8String cname8(names.get(ref)->name);
-            VMPI_strcat(buf, cname8.c_str());
+            const char* name = names.get(ref)->name;
+            VMPI_strcat(buf, name);
         }
         return labels->dup(buffer);
     }
@@ -2146,31 +2097,17 @@ namespace nanojit
     #endif /* FEATURE_NANOJIT */
 
 #if defined(NJ_VERBOSE)
-    LabelMap::LabelMap(AvmCore *core, LabelMap* parent)
-        : parent(parent), names(core->gc), addrs(core->config.verbose_addrs), end(buf), core(core)
+    LabelMap::LabelMap(AvmCore* core, Allocator& a, LabelMap* parent)
+        : allocator(a), parent(parent), names(core->gc), addrs(core->config.verbose_addrs), end(buf)
     {}
-
-    LabelMap::~LabelMap()
-    {
-        Entry *e;
-
-        while ((e = names.removeLast()) != NULL) {
-            NJ_DELETE(e);
-        }
-    }
 
     void LabelMap::add(const void *p, size_t size, size_t align, const char *name)
     {
         if (!this || names.containsKey(p))
             return;
-        add(p, size, align, core->newStringLatin1(name));
-    }
-
-    void LabelMap::add(const void *p, size_t size, size_t align, Stringp name)
-    {
-        if (!this || names.containsKey(p))
-            return;
-        Entry *e = NJ_NEW(core->gc, Entry)(name, size<<align, align);
+        char* copy = new (allocator) char[VMPI_strlen(name)+1];
+        VMPI_strcpy(copy, name);
+        Entry *e = new (allocator) Entry(copy, size << align, align);
         names.put(p, e);
     }
 
@@ -2183,8 +2120,7 @@ namespace nanojit
             const void *start = names.keyAt(i);
             Entry *e = names.at(i);
             const void *end = (const char*)start + e->size;
-            StUTF8String cname8(e->name);
-            const char *name = cname8.c_str();
+            const char *name = e->name;
             if (p == start) {
                 if (addrs)
                     VMPI_sprintf(b,"%p %s",p,name);
