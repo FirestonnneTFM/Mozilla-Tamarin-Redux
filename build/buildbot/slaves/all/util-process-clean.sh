@@ -93,7 +93,7 @@ do
                 # http://www-01.ibm.com/support/docview.wss?uid=swg21205470
                 /bin/kill -f $PID
             else
-                echo "`ps -fp $PID`"
+                echo "`ps -p $PID`"
                 kill -9 $PID
             fi
             
