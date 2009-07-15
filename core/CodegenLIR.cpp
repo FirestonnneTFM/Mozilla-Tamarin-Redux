@@ -582,7 +582,7 @@ namespace avmplus
 			mgr->codeAlloc = new (gc) CodeAlloc();
 #ifdef AVMPLUS_VERBOSE
 			if (pool->verbose) {
-				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, 0);
+				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, mgr->allocator, 0);
 				labels->add(core, sizeof(AvmCore), 0, "core");
 			}
 #endif
@@ -1086,13 +1086,6 @@ namespace avmplus
 		}
 	}
 
-#ifdef AVMPLUS_VERBOSE
-    VerboseWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf, LabelMap* labels) {
-        lirbuf->names = new (gc) LirNameMap(gc, labels);
-        return new (gc) VerboseWriter(gc, lirout, lirbuf->names);
-    }
-#endif
-
     /**
      * Specializer holds specializations of certian calls into inline code sequences.
      * this could just as easily be a standalone filter instead of subclassing
@@ -1290,7 +1283,8 @@ namespace avmplus
         verbose_only(
 			vbWriter = 0;
 			if (verbose()) {
-				lirout = vbWriter = pushVerboseWriter(gc, lirout, lirbuf, pool->codePages->labels);
+				lirbuf->names = new (gc) LirNameMap(gc, *lir_alloc, pool->codePages->labels);
+				lirout = vbWriter = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
 			}
 		)
         #ifdef NJ_SOFTFLOAT
