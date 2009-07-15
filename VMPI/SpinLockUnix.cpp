@@ -92,9 +92,9 @@ bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 
 #elif defined (USE_PTHREAD_MUTEX) //defined(MMGC_IA32) || defined(MMGC_AMD64)
 
-void VMPI_lockInit(vmpi_spin_lock_t lock)
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
-	pthread_mutex_init( (pthread__t*)lock, 0 );
+	pthread_mutex_init( (pthread_mutex_t*)lock, 0 );
 }
 
 void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
@@ -120,7 +120,7 @@ bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 #else //defined(MMGC_IA32) || defined(MMGC_AMD64)
 
 
-void VMPI_lockInit(vmpi_spin_lock_t lock)
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
 	pthread_spin_init( (pthread_spinlock_t*)lock, 0 );
 }
