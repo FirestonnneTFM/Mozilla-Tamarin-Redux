@@ -86,67 +86,55 @@ make clean
 ##
 # First compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "First compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc initial build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 1st esc compile itself: $time"
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
+
+
 
 
 ##
 # Second compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "Second compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc 2nd build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 2nd esc compile itself: $time"
-
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
+
 
 
 ##
 # Third compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "Third compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc 3rd build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 3rd esc compile itself: $time"
-
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
+
 
 
 ##
 # Fourth compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "Fourth compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc 4th build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 4th esc compile itself: $time"
-
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-
 
