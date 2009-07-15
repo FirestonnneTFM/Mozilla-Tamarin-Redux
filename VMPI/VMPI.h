@@ -89,6 +89,8 @@
     #define REALLY_INLINE inline
 #endif
 
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+
 // Legacy types used by some embedding host code, eg avmplus::uint64.
 // These types are not to be used inside the avm code.
 namespace avmplus
@@ -115,6 +117,21 @@ typedef uint8_t		byte;
 /* wchar is our version of wchar_t, since wchar_t is different sizes
  on different platforms, but we want to use UTF-16 uniformly. */
 typedef uint16_t wchar;
+
+typedef void * vmpi_thread_t;
+
+/**
+* Type defintion for an opaque data type representing platform-defined spin lock used by MMgc
+* @see VMPI_lockCreate(), VMPI_lockAcquire()
+*/
+#ifdef _DEBUG
+typedef struct {
+	void *lock;
+	vmpi_thread_t owner;	
+} vmpi_spin_lock_t;
+#else
+typedef void* vmpi_spin_lock_t;
+#endif
 
 /**
 * This method should return the difference in milliseconds between local time and UTC
@@ -342,17 +359,11 @@ extern bool			VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t buff
 extern bool			VMPI_getFileAndLineInfoFromPC(uintptr_t pc, char *buffer, size_t bufferSize, uint32_t* lineNumber);
 
 /**
-* Type defintion for an opaque data type representing platform-defined spin lock used by MMgc
-* @see VMPI_lockCreate(), VMPI_lockAcquire()
-*/
-typedef void* vmpi_spin_lock_t;
-
-/**
 * Method to create a new instance of vmpi_spin_lock_t
 * This instance will subsequently be passed to acquire/release lock methods
 * @return newly created vmpi_spin_lock_t instance
 */
-extern vmpi_spin_lock_t		VMPI_lockCreate();
+extern void			VMPI_lockInit(vmpi_spin_lock_t* lock);
 
 /**
 * Method to destroy the vmpi_spin_lock_t instance
@@ -363,7 +374,7 @@ extern vmpi_spin_lock_t		VMPI_lockCreate();
 * @return none
 * @see VMPI_lockCreate
 */
-extern void			VMPI_lockDestroy(vmpi_spin_lock_t lock);
+extern void			VMPI_lockDestroy(vmpi_spin_lock_t* lock);
 
 /**
 * Method to acquire a lock on a vmpi_spin_lock_t instance
@@ -375,21 +386,21 @@ extern void			VMPI_lockDestroy(vmpi_spin_lock_t lock);
 * @param lock instance to acquire the lock on
 * @return true if lock was successfully acquired, false in event of failure
 */
-extern bool			VMPI_lockAcquire(vmpi_spin_lock_t lock);
+extern bool			VMPI_lockAcquire(vmpi_spin_lock_t* lock);
 
 /**
 * Method to release a lock on a vmpi_spin_lock_t instance
 * @param lock instance to release the lock on
 * @return true if lock was successfully release, false in event of failure
 */
-extern bool			VMPI_lockRelease(vmpi_spin_lock_t lock);
+extern bool			VMPI_lockRelease(vmpi_spin_lock_t* lock);
 
 /**
 * Method to obtain a lock on a vmpi_spin_lock_t instance if it isn't locked
 * @param lock instance to release the lock on
 * @return true if lock was successfully aqcuired, false if another thread has it
 */
-extern bool			VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock);
+extern bool			VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock);
 
 /**
  * can two consecutive calls to VMPI_reserveMemoryRegion be freed with one VMP_releaseMemoryRegion call?
@@ -470,8 +481,6 @@ extern bool VMPI_tlsSetValue(uintptr_t tlsId, void* value);
  * @see VMPI_tlsSetValue
 */
 extern void* VMPI_tlsGetValue(uintptr_t tlsId);
-
-typedef void * vmpi_thread_t;
 
 /**
  * Obtain current thread identifier

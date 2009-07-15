@@ -84,6 +84,7 @@ nanojit avmplus:wopcodes.obj
 nanojit avmplus:QCache.obj
 nanojit nanojit:RegAlloc.obj
 nanojit avmplus:RegAlloc.obj
+nanojit avmplus:Allocator.obj
 
 vm avmplus:Interpreter.obj
 vm avmplus::Interpreter

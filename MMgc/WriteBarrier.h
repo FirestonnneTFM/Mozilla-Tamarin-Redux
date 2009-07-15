@@ -93,24 +93,29 @@ namespace MMgc
 	}
 
 	/*private*/
-	REALLY_INLINE void GC::InlineWriteBarrierTrap(const void *container, const void *value)
+	REALLY_INLINE void GC::InlineWriteBarrierTrap(const void *container)
 	{
-		// OPTIMIZEME: GetMark and IsWhite are not obviously inlinable and could be optimized,
-		// for example, IsWhite gets the page map value twice.  That function is 'const' but
-		// we want to check that the compilers make use of that.  On the other hand, the whole
-		// problem may go away if we start using card marking.
-
 		GCAssert(IsPointerToGCPage(container));
-		GCAssert(((uintptr_t)value & 7) == 0);
+		
 		POLICY_PROFILING_ONLY(int stage=0;)
-		if(marking && value) {
+		// If the object is black then it needs to be gray, because we just stored
+		// something into it.
+		// Need to check 'marking' for correctness.  (Not clear to me yet why.)
+		// It's /sometimes/ useful to check 'value' for NULL - depends on the program, obviously.
+		if (marking) {
 			POLICY_PROFILING_ONLY(stage=1;)
-			if (GetMark(container)) {
+			if (IsMarkedThenMakeQueued(container)) {
 				POLICY_PROFILING_ONLY(stage=2;)
-				if (IsWhite(value)) {
-					POLICY_PROFILING_ONLY(stage=3;)
-					TrapWrite(container, value);
-				}
+				// Now just push the gray object onto the barrier mark stack.
+				// IncrementalMark may move a segment off the secondary mark stack;
+				// FinishIncrementalMark will take care of what remains.
+				// We don't care what 'value' is - the marker will perform a more efficient
+				// check for pointers to GC objects than we can do here anyway.
+				// Observe that if this push fails, then the item is just pushed onto
+				// the regular mark stack as part of the normal stack overflow handling.
+				// That is what we want.
+				GCWorkItem item(container, (uint32_t)Size(container), true);
+				PushBarrierItem(item);
 			}
 		}
 		POLICY_PROFILING_ONLY( policy.signalWriteBarrierWork(stage); )
@@ -124,7 +129,7 @@ namespace MMgc
 		if (container) {
 			GCAssert(address >= container);
 			GCAssert(address < (char*)container + Size(container));
-			InlineWriteBarrierTrap(container, Pointer(value));
+			InlineWriteBarrierTrap(container);
 		}
 		WriteBarrierWrite(address, value);
 	}
@@ -137,7 +142,7 @@ namespace MMgc
 		GCAssert(address >= container);
 		GCAssert(address < (char*)container + Size(container));
 		
-		InlineWriteBarrierTrap(container, Pointer(value));
+		InlineWriteBarrierTrap(container);
 		WriteBarrierWriteRC(address, value);
 	}
 

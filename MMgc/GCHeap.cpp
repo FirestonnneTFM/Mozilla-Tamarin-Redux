@@ -95,10 +95,13 @@ namespace MMgc
 		gcstats(false), // tracking
 		autoGCStats(false), // auto printing
 #ifdef AVMSHELL_BUILD
-		gcbehavior(false)	// controlled by command line switch
+		gcbehavior(false),	// controlled by command line switch
 #else
-		gcbehavior(true)	// unconditional, if MMGC_POLICY_PROFILING is on
+		gcbehavior(true),	// unconditional, if MMGC_POLICY_PROFILING is on
 #endif
+		gcLoad(2.0),
+		gcLoadCeiling(3.0),
+		gcEfficiency(0.25)
 	{
 #ifdef MMGC_64BIT
 		trimVirtualMemory = false; // no need
@@ -126,12 +129,9 @@ namespace MMgc
 		  blocksLen(0),
 		  numDecommitted(0),
 		  numAlloc(0),
-		  m_spinlock(VMPI_lockCreate()),
 		  config(c),
-		  callbacks_lock(VMPI_lockCreate()),
  		  status(kMemNormal),
 		  primordialThread(VMPI_currentThread()),
-		  gclog_spinlock(VMPI_lockCreate()),
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
 	#endif
@@ -150,6 +150,10 @@ namespace MMgc
 		numAlloc    = 0;
 		numDecommitted = 0;
 		blocks      = NULL;
+
+		VMPI_lockInit(&m_spinlock);
+		VMPI_lockInit(&callbacks_lock);
+		VMPI_lockInit(&gclog_spinlock);
 
 		// Initialize free lists
 		HeapBlock *block = freelists;
@@ -227,9 +231,9 @@ namespace MMgc
 
 		FreeAll();
 
-		VMPI_lockDestroy(gclog_spinlock);
-		VMPI_lockDestroy(m_spinlock);
-		VMPI_lockDestroy(callbacks_lock);
+		VMPI_lockDestroy(&gclog_spinlock);
+		VMPI_lockDestroy(&m_spinlock);
+		VMPI_lockDestroy(&callbacks_lock);
 	}
 
 	void* GCHeap::Alloc(int size, int flags)
@@ -1560,7 +1564,7 @@ namespace MMgc
 		GCLog("error: out of memory\n");
 		if(ef != NULL)
 		{
-			VMPI_lockRelease(m_spinlock);
+			VMPI_lockRelease(&m_spinlock);
 			longjmp(ef->jmpbuf, 1);
 		}
 		GCAssertMsg(false, "MMGC_ENTER missing!");
@@ -1852,7 +1856,7 @@ namespace MMgc
 		status = to;
 		
 		// unlock the heap so that memory operations are allowed
-		VMPI_lockRelease(m_spinlock);
+		VMPI_lockRelease(&m_spinlock);
 		
 		BasicListIterator<OOMCallback*> iter(callbacks);
 		OOMCallback *cb = NULL;
@@ -1866,6 +1870,6 @@ namespace MMgc
 			if(status == kMemAbort)
 				break;
 		} while(cb != NULL);
-		VMPI_lockAcquire(m_spinlock);
+		VMPI_lockAcquire(&m_spinlock);
 	}
 }

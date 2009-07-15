@@ -51,26 +51,28 @@
 . ../all/util-calculate-change.sh $1
 
 
-##
-# Run any slave specific code PRE performance
-##
-. ./run-performance-pre.sh
 
-
+export scriptsdir=`pwd`
 echo scriptsdir: $scriptsdir
 
+##
+# Download the AVMSHELL if it does not exist
+##
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
+    echo "Download AVMSHELL"
+    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release $buildsdir/$change-${changeid}/$platform/$shell_release
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of $shell_release failed"
+        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release
+        exit 1
+    }
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
+fi
 
-##
-# Download the AVMSHELL
-##
-echo "Download AVMSHELL"
-../all/util-download.sh $vmbuilds/$branch/$change/$platform/$shell_release $basedir/esc/bin/shell.exe
-ret=$?
-test "$ret" = "0" || {
-    echo "Downloading of $shell_release failed"
-    exit 1
-}
+cp $buildsdir/$change-${changeid}/$platform/$shell_release $basedir/esc/bin/shell.exe
 chmod +x $basedir/esc/bin/shell.exe
+
 echo ""
 echo AVM=$basedir/esc/bin/shell.exe
 echo "`$basedir/esc/bin/shell.exe`"
@@ -84,91 +86,55 @@ make clean
 ##
 # First compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "First compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc initial build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 1st esc compile itself: $time"
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
+
+
 
 
 ##
 # Second compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "Second compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc 2nd build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 2nd esc compile itself: $time"
-$scriptsdir/../all/util-esc-socketlog.py $change compile-time-esc=$time
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
+
 
 
 ##
 # Third compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "Third compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc 3rd build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 3rd esc compile itself: $time"
-$scriptsdir/../all/util-esc-socketlog.py $change compile-time-esc=$time
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
+
 
 
 ##
 # Fourth compilation of ESC
 ##
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
-/usr/bin/time -v -o $scriptsdir/timing.txt make
+echo; echo "Fourth compilation of ESC"; echo
+make
 ret=$?
 test "$ret" = "0" || {
   echo "esc 4th build failed..."
   exit 1
 }
-time=`cat $scriptsdir/timing.txt | grep "Elapsed" | awk '{print $8}' | awk -F: '{print $1*60+$2}'`
-echo "message: 4th esc compile itself: $time"
-$scriptsdir/../all/util-esc-socketlog.py $change compile-time-esc=$time
 make clean
-test -f $scriptsdir/timing.txt && rm $scriptsdir/timing.txt
 
-
-echo url: http://tamarin-builds.mozilla.org/performance/esc_10build_report.jsp?buildNumber=$change View 10 build Perf
-
-test -f results.log && rm results.log
-wget -O results.log -q "http://tamarin-builds.mozilla.org/performance/esc_10build_report.jsp?buildNumber=$change"
-retry="0"
-perfchg=""
-while true
- do
-  test -f results.log && {
-    perfchg=`cat results.log | grep '<th id="1build">' | sed -e 's/^[ \t]*//;s/<th id="1build">//;s/<th id="1build" class="bad">//;s/<th id="1build" class="good">//;s*</th>**;'`
-    break
-  }
-  retry=`echo $retry | awk '{ print $1+1 }'`
-  test "$retry" = "20" && break
-  sleep 1
-done
-echo "perfchange: ${perfchg}"
-
-
-##
-# Run any slave specific code PRE performance
-##
-cd $scriptsdir
-. ./run-performance-post.sh

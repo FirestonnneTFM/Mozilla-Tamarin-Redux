@@ -119,7 +119,7 @@ namespace MMgc
 	public:
 		BasicListIterator(const BasicList<T>& bl) : index(0), bl(bl) {}
 		T next() { return index < bl.Count() ? bl.Get(index++) : NULL; }
-		T next(vmpi_spin_lock_t lock) 
+		T next(vmpi_spin_lock_t& lock) 
 		{
 			MMGC_LOCK(lock);
 			return next();

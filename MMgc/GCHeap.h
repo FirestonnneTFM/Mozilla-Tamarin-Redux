@@ -54,7 +54,10 @@ namespace MMgc
 		bool returnMemory;
 		bool gcstats;
 		bool autoGCStats;
-		bool gcbehavior;		// gross history and policy decisions (MMGC_POLICY_PROFILING)
+		bool gcbehavior;		// Print gross history and policy decisions (MMGC_POLICY_PROFILING)
+		double gcLoad;			// GC load factor: policy aims for a heap size that is gcLoad*H where H is the live size following GC
+		double gcLoadCeiling;	// Max multiple of gcLoad policy should use after adjusting L for various factors (0=unlimited)
+		double gcEfficiency;    // Max fraction of time to spend in the collector while the incremental collector is active
 		static const size_t kDefaultHeapLimit = (size_t)-1;
 	};
 	
@@ -528,11 +531,11 @@ namespace MMgc
 		HeapBlock freelists[kNumFreeLists];
 		unsigned int numAlloc;
 		FixedMalloc fixedMalloc;
-		vmpi_spin_lock_t const m_spinlock;
+		vmpi_spin_lock_t m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
  		BasicList<OOMCallback*> callbacks;
- 		vmpi_spin_lock_t const callbacks_lock;
+ 		vmpi_spin_lock_t callbacks_lock;
 
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
@@ -540,7 +543,7 @@ namespace MMgc
  		uint32_t enterCount;
  		vmpi_thread_t const primordialThread;
 
-		vmpi_spin_lock_t const gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
+		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 	
 #ifdef MMGC_MEMORY_PROFILER
 		static MemoryProfiler *profiler;

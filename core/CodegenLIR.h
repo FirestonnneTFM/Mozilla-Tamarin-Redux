@@ -105,6 +105,7 @@ namespace avmplus
 
     class PageMgr : public GCFinalizedObject {
     public:
+		Allocator allocator;
         DWB(CodeAlloc*) codeAlloc;
 		verbose_only( DWB(LabelMap*) labels; )
         PageMgr();
@@ -143,6 +144,7 @@ namespace avmplus
 
 	private:
         GC *gc;
+		Allocator* lir_alloc; // allocator with LIR buffer lifetime
         AvmCore *core;
         MethodInfo *info;
 		const MethodSignaturep ms;

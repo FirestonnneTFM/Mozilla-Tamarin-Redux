@@ -42,96 +42,56 @@
 // Looks like Symbian SDK does not support pthread spinlock
 #define USE_PTHREAD_MUTEX
 
-class SpinLockSymbian : public MMgc::GCAllocObject
-{
-public:
-
 #if defined(USE_PTHREAD_MUTEX)
 
-	SpinLockSymbian()
-	{
-		pthread_mutex_init( &m1, 0 );
-	}
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
+{
+	pthread_mutex_init( (pthread_mutex_t*)lock, 0 );
+}
 
-	~SpinLockSymbian()
-	{
-		pthread_mutex_destroy( &m1 );
-	}
+void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
+{
+	pthread_mutex_destroy( (pthread_mutex_t*)lock );
+}
 
-	inline bool Acquire()
-	{
-		return pthread_mutex_lock( &m1 ) == 0;
-	}
-	
-	inline bool Release()
-	{
-		return pthread_mutex_unlock( &m1 ) == 0;
-	}
+bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_lock( (pthread_mutex_t*)lock ) == 0;
+}
 
-	inline bool Try()
-	{
-		return pthread_mutex_trylock( &m1 ) == 0;
-	}
+bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_unlock( (pthread_mutex_t*)lock ) == 0;
+}
 
-private:
-	pthread_mutex_t m1;
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_trylock( (pthread_mutex_t*)lock ) == 0;
+}
 
 #else // USE_PTHREAD_MUTEX
 
-	SpinLockSymbian()
-	{
-//		pthread_spin_init( &m1, 0 );
-	}
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
+{
+}
 
-	~SpinLockSymbian()
-	{
-//		pthread_spin_destroy( &m1 );
-	}
+void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
+{
+}
 
-	inline bool Acquire()
-	{
-		return true;
-//		return pthread_spin_lock( &m1 ) == 0;
-	}
-	
-	inline bool Release()
-	{
-		return true;
-//		return pthread_spin_unlock( &m1 ) == 0;
-	}
+bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	return true;
+}
 
-	inline bool Try()
-	{
-		return true;
-	}
+bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	return true;
+}
 
-private:
-//	pthread_spinlock_t m1;
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	return true;
+}
 
 #endif
-};
-
-vmpi_spin_lock_t VMPI_lockCreate()
-{
-	return (vmpi_spin_lock_t) (new SpinLockSymbian);
-}
-
-void VMPI_lockDestroy(vmpi_spin_lock_t lock)
-{
-	delete (SpinLockSymbian*)lock;
-}
-
-bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockSymbian*)lock)->Acquire();
-}
-
-bool VMPI_lockRelease(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockSymbian*)lock)->Release();
-}
-
-bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockSymbian*)lock)->Try();
-}

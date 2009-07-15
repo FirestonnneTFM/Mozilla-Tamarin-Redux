@@ -230,7 +230,7 @@ while true
  do
   test -f results.log && {
     sleep 10
-    perfchg=`cat results.log | grep -m1 "perfchange_ratio:" | awk -F"perfchange_ratio:" '{print $2}' | awk '{print $1}'`
+    perfchg=`cat results.log | grep -m1 "perfchange_ratio_time:" | awk -F"perfchange_ratio_time:" '{print $2}' | awk '{print $1}'`
     break
   }
   retry=`echo $retry | awk '{ print $1+1 }'`

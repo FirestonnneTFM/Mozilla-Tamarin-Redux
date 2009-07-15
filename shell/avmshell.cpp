@@ -769,6 +769,33 @@ namespace avmshell
 					MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = true;
 				}
 #endif
+				else if (!VMPI_strcmp(arg, "-load")) {
+					double load;
+					double limit;
+					int nchar;
+					const char* val = argv[++i];
+					size_t len = VMPI_strlen(val);
+					// limit=0 is legal, it means unlimited
+					if (VMPI_sscanf(val, "%lf,%lf%n", &load, &limit, &nchar) == 2 && size_t(nchar) == len && load > 1.0 && limit >= 0.0) {
+						MMgc::GCHeap::GetGCHeap()->Config().gcLoad = load;
+						MMgc::GCHeap::GetGCHeap()->Config().gcLoadCeiling = limit;
+					}
+					else if (VMPI_sscanf(val, "%lf%n", &load, &nchar) == 1 && size_t(nchar) == len && load > 1.0) {
+						MMgc::GCHeap::GetGCHeap()->Config().gcLoad = load;
+					}
+					else
+						usage();
+				}
+				else if (!VMPI_strcmp(arg, "-gcwork")) {
+					double work;
+					int nchar;
+					const char* val = argv[++i];
+					if (VMPI_sscanf(val, "%lf%n", &work, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && work > 0.0 && work <= 1.0) {
+						MMgc::GCHeap::GetGCHeap()->Config().gcEfficiency = work;
+					}
+					else
+						usage();
+				}
 				else if (!VMPI_strcmp(arg, "-log")) {
 					settings.do_log = true;
 				} 
@@ -783,8 +810,8 @@ namespace avmshell
 					int nchar;
 					if (val == NULL)
 						val = "";
-					if (sscanf(val, "%d,%d,%d%n", &settings.numworkers, &settings.numthreads, &settings.repeats, &nchar) != 3)
-						if (sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2)
+					if (VMPI_sscanf(val, "%d,%d,%d%n", &settings.numworkers, &settings.numthreads, &settings.repeats, &nchar) != 3)
+						if (VMPI_sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2)
 							usage();
 					if (settings.numthreads < 1 || 
 						settings.numworkers < settings.numthreads || 
@@ -920,6 +947,8 @@ namespace avmshell
 #ifdef MMGC_POLICY_PROFILING
 		AvmLog("          [-gcbehavior] summarize GC behavior and policy computation\n"); 
 #endif
+		AvmLog("          [-load L[,X]] GC load factor (default 2.0) and max multiplier (default 3.0)\n");
+		AvmLog("          [-gcwork G]   Max fraction of time (default 0.25) we're willing to spend in GC\n");
 		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
 		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
 		AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");

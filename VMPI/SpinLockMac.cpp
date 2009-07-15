@@ -45,61 +45,54 @@ extern "C"
 	extern uint32_t _spin_lock_try(uint32_t *);
 }
 
-class SpinLockMac : public MMgc::GCAllocObject
+void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
-public:
-	SpinLockMac()
-	{
-		m1 = 0;
-	}
-
-	~SpinLockMac()
-	{
-	}
-
-	inline bool Acquire()
-	{
-		_spin_lock(&m1);
-		return true;
-	}
-	
-	inline bool Release()
-	{
-		_spin_unlock(&m1);
-		return true;
-	}
-
-	inline bool Try()
-	{
-		return _spin_lock_try(&m1);
-	}
-
-private:
-	uint32_t m1;
-};
-
-
-vmpi_spin_lock_t VMPI_lockCreate()
-{
-	return (vmpi_spin_lock_t) (new SpinLockMac);
+#ifdef DEBUG
+	lock->lock = NULL;
+	lock->owner = NULL;
+#else
+	*lock = NULL;
+#endif
 }
 
-void VMPI_lockDestroy(vmpi_spin_lock_t lock)
+void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
-	delete (SpinLockMac*) lock;
+	GCAssert(lock->owner == NULL);
+#ifdef DEBUG
+	lock->lock = (void*)0xdeadbeef;
+	lock->owner = (void*)0xdeadbeef;
+#else
+	*lock = NULL;
+#endif
 }
 
-bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
+bool VMPI_lockAcquire(vmpi_spin_lock_t* lock)
 {
-	return ((SpinLockMac*)lock)->Acquire();
+	_spin_lock((uint32_t*)lock);
+	#ifdef DEBUG
+	GCAssert(lock->owner == NULL);
+	lock->owner = VMPI_currentThread();
+	#endif
+	return true;
 }
 
-bool VMPI_lockRelease(vmpi_spin_lock_t lock)
+bool VMPI_lockRelease(vmpi_spin_lock_t* lock)
 {
-	return ((SpinLockMac*)lock)->Release();
+	_spin_unlock((uint32_t*)lock);
+	#ifdef DEBUG
+	GCAssert(lock->owner == VMPI_currentThread());
+	lock->owner = NULL;
+	#endif
+	return true;
 }
 
-bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock)
 {
-	return ((SpinLockMac*)lock)->Try();
+	if(_spin_lock_try((uint32_t*)lock)) {
+		#ifdef DEBUG
+		GCAssert(lock->owner == NULL);
+		lock->owner = VMPI_currentThread();
+		#endif
+	}
+	return false;
 }

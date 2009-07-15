@@ -332,6 +332,8 @@
 		191659990FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BB29A10F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
+		19BDA443100CC20200172A70 /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BDA441100CC20200172A70 /* Allocator.cpp */; };
+		19BDA444100CC20200172A70 /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BDA441100CC20200172A70 /* Allocator.cpp */; };
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
@@ -782,6 +784,8 @@
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
+		19BDA441100CC20200172A70 /* Allocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Allocator.cpp; path = ../../../nanojit/Allocator.cpp; sourceTree = SOURCE_ROOT; };
+		19BDA442100CC20200172A70 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = ../../../nanojit/Allocator.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC70F54B223009A93FE /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../../shell/Platform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BC80F54B223009A93FE /* PosixFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixFile.cpp; path = ../../../shell/PosixFile.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BC90F54B223009A93FE /* PosixFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PosixFile.h; path = ../../../shell/PosixFile.h; sourceTree = SOURCE_ROOT; };
@@ -1137,6 +1141,8 @@
 		079DF7B30F3A86F20031D1B4 /* nanojit */ = {
 			isa = PBXGroup;
 			children = (
+				19BDA441100CC20200172A70 /* Allocator.cpp */,
+				19BDA442100CC20200172A70 /* Allocator.h */,
 				D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */,
 				D96013A80FE03CC5002DBDCF /* NativeSparc.h */,
 				191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */,
@@ -1682,6 +1688,7 @@
 				078F536C0FA473C50064216F /* ShellCore.cpp in Sources */,
 				191659990FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */,
 				07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */,
+				19BDA444100CC20200172A70 /* Allocator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1857,6 +1864,7 @@
 				078F536B0FA473C50064216F /* ShellCore.cpp in Sources */,
 				191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */,
 				07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */,
+				19BDA443100CC20200172A70 /* Allocator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -36,7 +36,6 @@
 * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
-#include "SpinLockWin.h"
 
 #include <Mmsystem.h>
 
@@ -57,19 +56,15 @@ static const double kMsecPerHour      = 3600000;
 static const double kMsecPerSecond    = 1000;
 static const double kMsecPerMinute    = 60000;
 
-// gTimeZoneInfoLock is not declared inside the UpdateTimeZoneInfo() because 
-// doing so triggers a MSVC compiler warning C4640
-// https://bugzilla.mozilla.org/show_bug.cgi?id=503052
-static SpinLockWin gTimeZoneInfoLock;		// protects gTimeZoneInfo and gGmtCache
 static TIME_ZONE_INFORMATION UpdateTimeZoneInfo()
 {
-
+	static vmpi_spin_lock_t gTimeZoneInfoLock;		// protects gTimeZoneInfo and gGmtCache
 	static TIME_ZONE_INFORMATION gTimeZoneInfo;
 	static SYSTEMTIME gGmtCache;
 	
 	SYSTEMTIME gmt;
 	GetSystemTime(&gmt);
-	gTimeZoneInfoLock.Acquire();
+	MMGC_LOCK(gTimeZoneInfoLock);
 	if ((gmt.wMinute != gGmtCache.wMinute) ||
 		(gmt.wHour != gGmtCache.wHour) ||
 		(gmt.wDay != gGmtCache.wDay) ||
@@ -82,7 +77,6 @@ static TIME_ZONE_INFORMATION UpdateTimeZoneInfo()
 		gGmtCache = gmt;
 	}
 	TIME_ZONE_INFORMATION tz = gTimeZoneInfo;
-	gTimeZoneInfoLock.Release();
 	return tz;
 }
 

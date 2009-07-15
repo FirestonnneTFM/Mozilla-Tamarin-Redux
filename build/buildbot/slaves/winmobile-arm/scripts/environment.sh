@@ -62,8 +62,8 @@ export shell_debug_thumb=avmshell_thumb_d$shell_extension
 export EMULATOR="c:/Program Files (x86)/Microsoft Device Emulator/1.0/DeviceEmulator.exe"
 export EMULATORIMAGE="c:/Program Files (x86)/Windows Mobile 6 SDK/PocketPC/DeviceemulationV650/0409/PPC_USA_GSM_VR.BIN"
 
-VS_HOME_PATH="/c/Program Files/Microsoft Visual Studio 9.0"
-VS_HOME="c:\Program Files\Microsoft Visual Studio 9.0"
+VS_HOME_PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0"
+VS_HOME="c:\Program Files (x86)\Microsoft Visual Studio 9.0"
 
 export PATH="$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
 export INCLUDE="C:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
@@ -72,7 +72,7 @@ export LIBPATH="C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atl
 
 
 export PATH="$VS_HOME_PATH/VC/ce/bin/x86_arm:$PATH"
-MOBILE_SDK_DIR="c:/Program Files/Windows Mobile 6 SDK/PocketPC"
+MOBILE_SDK_DIR="c:/Program Files (x86)/Windows Mobile 6 SDK/PocketPC"
 
 export INCLUDE="$MOBILE_SDK_DIR\Include\Armv4i;$INCLUDE;$VS_HOME\VC\ce\include"
 export LIB="$MOBILE_SDK_DIR\Lib\ARMV4I;$VS_HOME\VC\ce\lib\armv4i;$LIB"
@@ -81,6 +81,6 @@ export LIBPATH="$MOBILE_SDK_DIR\Lib\ARMV4I;$VS_HOME\VC\ce\lib\armv4i;$LIBPATH"
 export mobile_dir=Windows\ Mobile\ 6\ Professional\ SDK\ \(ARMV4I\)
 
 ## Used by make in the build scripts
-export make_opt="-j2"
+export make_opt="-j16"
 export test_threads=1
 export test_emulator_threads=2

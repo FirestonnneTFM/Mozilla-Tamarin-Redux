@@ -146,6 +146,37 @@ namespace MMgc
 			FreeStackSegment(seg);
 	}
 
+	template<typename T, int kMarkStackItems>
+	void GCStack<T, kMarkStackItems>::TransferOneFullSegmentFrom(GCStack<T, kMarkStackItems>& other)
+	{
+		GCAssert(other.EntirelyFullSegments() > 0);
+		GCStackSegment* seg;
+
+		if (other.m_topSegment->m_prev == NULL) {
+			// Picking off the only segment
+			seg = other.m_topSegment;
+			other.m_topSegment = NULL;
+			other.m_top = NULL;
+			other.m_limit = NULL;
+			other.PushSegment();
+		}
+		else {
+			// Picking off the one below the top always
+			seg = other.m_topSegment->m_prev;
+			other.m_topSegment->m_prev = seg->m_prev;
+			other.m_hiddenCount -= kMarkStackItems;
+		}
+
+		// Insert it below our top segment
+		seg->m_prev = m_topSegment->m_prev;
+		m_topSegment->m_prev = seg;
+		m_hiddenCount += kMarkStackItems;
+
+		// Special case that occurs if a segment was inserted into an empty stack.
+		if (m_top == m_base)
+			PopSegment();
+	}
+
 	// Visual C++ 2008 requires the copy constructor and assignment operator to be present
 	// for the explicit template instantiation below to work; GCC doesn't.  But GCC requires
 	// the explicit template instantiation.

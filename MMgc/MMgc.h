@@ -100,7 +100,7 @@
  */
 
 #ifdef MMGC_LOCKING
-#define MMGC_LOCK(_x) GCAcquireSpinlock _lock(_x)
+#define MMGC_LOCK(_x) MMgc::GCAcquireSpinlock _lock(&_x)
 #include "GCSpinLock.h"
 #else
 #define MMGC_LOCK(_x) 
