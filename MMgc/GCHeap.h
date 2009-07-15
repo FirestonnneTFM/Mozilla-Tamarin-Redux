@@ -531,11 +531,11 @@ namespace MMgc
 		HeapBlock freelists[kNumFreeLists];
 		unsigned int numAlloc;
 		FixedMalloc fixedMalloc;
-		vmpi_spin_lock_t const m_spinlock;
+		vmpi_spin_lock_t m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
  		BasicList<OOMCallback*> callbacks;
- 		vmpi_spin_lock_t const callbacks_lock;
+ 		vmpi_spin_lock_t callbacks_lock;
 
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
@@ -543,7 +543,7 @@ namespace MMgc
  		uint32_t enterCount;
  		vmpi_thread_t const primordialThread;
 
-		vmpi_spin_lock_t const gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
+		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 	
 #ifdef MMGC_MEMORY_PROFILER
 		static MemoryProfiler *profiler;

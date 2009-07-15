@@ -1441,7 +1441,7 @@ namespace MMgc
 		void SetStackEnter(GCAutoEnter *enter);
 		GCAutoEnter *GetAutoEnter() { return stackEnter; }
 
- 		vmpi_spin_lock_t const m_gcLock;
+ 		vmpi_spin_lock_t m_gcLock;
 
  		bool onThread() { return VMPI_currentThread() == m_gcThread; }
 
@@ -1662,7 +1662,7 @@ namespace MMgc
 		 */
 		GCLargeAlloc::LargeBlock *largeEmptyPageList;
 		
-		vmpi_spin_lock_t const m_rootListLock;
+		vmpi_spin_lock_t m_rootListLock;
 
 		GCRoot *m_roots;
 		void AddRoot(GCRoot *root);
