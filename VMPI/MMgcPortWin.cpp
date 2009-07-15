@@ -40,7 +40,6 @@
 #include <windows.h>
 
 #include "MMgc.h"
-#include "SpinLockWin.h"
 
 #ifdef MMGC_MEMORY_PROFILER
 	#include <malloc.h>
@@ -487,13 +486,9 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 #define MACHINETYPE IMAGE_FILE_MACHINE_I386
 #endif
 
-	// dbgHelpLock is not declared inside the InitDbgHelp() because 
-	// doing so triggers a MSVC compiler warning C4640
-	// https://bugzilla.mozilla.org/show_bug.cgi?id=503052
-	static SpinLockWin dbgHelpLock;	// protects access to inited
 	bool InitDbgHelp()
 	{
-
+		static vmpi_spin_lock_t lock;
 		static bool inited = false;
 	
 		// We must hold the lock for the entire initialization process:
@@ -501,7 +496,7 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 		//    threads may forge ahead without initialization having occured
 		//  - if we leave it false and Release then other threads
 		//    may try to perform initialization as well.
-		dbgHelpLock.Acquire();
+		MMGC_LOCK(lock);
 		if(!inited) {
 #ifndef UNDER_CE
 			if(!g_DbgHelpDll.m_SymInitialize ||
@@ -513,14 +508,12 @@ static MMgc::DbgHelpDllHelper g_DbgHelpDll;
 					{
 						GCAssertMsg(false, "See lpMsgBuf");
 						LocalFree(lpMsgBuf);
-					}			
-					dbgHelpLock.Release();
+					}
 					return false;
 			}
 #endif // ifn UNDER_CE
 			inited = true;
 		}
-		dbgHelpLock.Release();
 		return true;
 	}
 

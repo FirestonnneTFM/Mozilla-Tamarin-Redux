@@ -1271,7 +1271,7 @@ namespace MMgc
 		numObjects(0),
 		sweepStart(0),
 		emptyWeakRef(0),
-		m_gcLock(VMPI_lockCreate()),
+
 		m_gcThread(NULL),
 		destroying(false),
 		stackCleaned(true),
@@ -1288,7 +1288,6 @@ namespace MMgc
 		finalizedValue(true),
 		smallEmptyPageList(NULL),
 		largeEmptyPageList(NULL),
-		m_rootListLock(VMPI_lockCreate()),
 		m_roots(0),
 		m_callbacks(0),
 		zct()
@@ -1313,6 +1312,9 @@ namespace MMgc
 		#endif		
 
 		zct.SetGC(this);
+
+		VMPI_lockInit(&m_gcLock);
+		VMPI_lockInit(&m_rootListLock);
 
 		// Create all the allocators up front (not lazy)
 		// so that we don't have to check the pointers for
@@ -1423,8 +1425,8 @@ namespace MMgc
 		if(stackEnter != NULL)
 			stackEnter->Destroy();
 
-		VMPI_lockDestroy(m_gcLock);
-		VMPI_lockDestroy(m_rootListLock);
+		VMPI_lockDestroy(&m_gcLock);
+		VMPI_lockDestroy(&m_rootListLock);
 	}
 
 	void GC::Collect(bool scanStack)
@@ -2343,7 +2345,7 @@ bail:
 		static bool ingclog=false;
 		bool doit;
 		{
-			GCAcquireSpinlock sl(heap->gclog_spinlock);
+			MMGC_LOCK(heap->gclog_spinlock);
 			doit = !ingclog;
 			if (doit)
 				ingclog = true;
@@ -2351,7 +2353,7 @@ bail:
 		if(!doit) {
 			heap->DumpMemoryInfo();
 			{
-				GCAcquireSpinlock sl(heap->gclog_spinlock);
+				MMGC_LOCK(heap->gclog_spinlock);
 				ingclog = false;
 			}
 		}
@@ -3969,7 +3971,7 @@ bail:
  			stackEnter = enter;
 			edge = true;
 			m_gcThread = VMPI_currentThread();
-			VMPI_lockAcquire(m_gcLock);
+			VMPI_lockAcquire(&m_gcLock);
  		}
 
 		if(edge) {
@@ -3986,7 +3988,7 @@ bail:
 			// cleared so we remain thread ambivalent
 			rememberedStackTop = NULL; 					
 			m_gcThread = NULL;
-			VMPI_lockRelease(m_gcLock);
+			VMPI_lockRelease(&m_gcLock);
 		}
 	}
  
@@ -4005,9 +4007,9 @@ bail:
  			if(onThread()) {
  				Collect();
  			} else {
- 				if(VMPI_lockTestAndAcquire(m_gcLock)) {
+ 				if(VMPI_lockTestAndAcquire(&m_gcLock)) {
  					Collect();
- 					VMPI_lockRelease(m_gcLock);
+ 					VMPI_lockRelease(&m_gcLock);
  				}		
  				// else nothing can be done
  			}

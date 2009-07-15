@@ -40,150 +40,109 @@
 
 #include <pthread.h>
 
-class SpinLockUnix : public MMgc::GCAllocObject
-{
-public:
 #if defined(__GNUC__) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
 
-	SpinLockUnix()
-	{
-		lock = 0;
-		__asm__ volatile("" : : : "memory");
-	}
+void VMPI_lockInit(vmpi_spin_lock_t *lock)
+{
+	*(volatile int*)lock = 0;
+	__asm__ volatile("" : : : "memory");
+}
 
-	~SpinLockUnix()
-	{
-		lock = 0;
-		__asm__ volatile("" : : : "memory");
-	}
+void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
+{
+	*(volatile int*)lock = 0;
+	__asm__ volatile("" : : : "memory");
+}
 
-	inline bool Acquire()
-	{
-		while ( X86_TestAndSet(&lock, 1) != 0 ) {
-			X86_Pause();
-		}
-		__asm__ volatile("" : : : "memory");
+inline int X86_TestAndSet(volatile int *ptr, int val) {
+	__asm__ volatile("xchgl %0, (%2)" :"=r"(val) : "0"(val), "r"(ptr));
+	return val;
+}
 
-		return true;
+inline void X86_Pause(void)
+{
+	__asm__ volatile("pause");
+}
+
+bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	while ( X86_TestAndSet((volatile int*)lock, 1) != 0 ) {
+		X86_Pause();
 	}
+	__asm__ volatile("" : : : "memory");
 	
-	inline bool Release()
-	{
-		__asm__ volatile("" : : : "memory");
-		lock = 0;
+	return true;
+}
 
-		return true;
-	}
+bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	__asm__ volatile("" : : : "memory");
+	*(volatile int*)lock = 0;
+	
+	return true;
+}
 
-
-	inline bool Try()
-	{
-		__asm__ volatile("" : : : "memory");
-		if(X86_TestAndSet(&lock, 1) != 0)
-			return false;
-		return true;
-	}
-
-
-private:
-
-	inline int X86_TestAndSet(volatile int *ptr, int val) {
-		__asm__ volatile("xchgl %0, (%2)" :"=r"(val) : "0"(val), "r"(ptr));
-		return val;
-	}
-
-	inline void X86_Pause(void)
-	{
-		__asm__ volatile("pause");
-	}
-
-	volatile int lock;
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	__asm__ volatile("" : : : "memory");
+	if(X86_TestAndSet((volatile int*)lock, 1) != 0)
+		return false;
+	return true;
+}
 
 #elif defined (USE_PTHREAD_MUTEX) //defined(MMGC_IA32) || defined(MMGC_AMD64)
 
-	SpinLockUnix()
-	{
-		pthread_mutex_init( &m1, 0 );
-	}
+void VMPI_lockInit(vmpi_spin_lock_t lock)
+{
+	pthread_mutex_init( (pthread__t*)lock, 0 );
+}
 
-	~SpinLockUnix()
-	{
-		pthread_mutex_destroy( &m1 );
-	}
+void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
+{
+	pthread_mutex_destroy( (pthread_mutex_t*)lock );
+}
 
-	inline bool Acquire()
-	{
-		return pthread_mutex_lock( &m1 ) == 0;
-	}
-	
-	inline bool Release()
-	{
-		return pthread_mutex_unlock( &m1 ) == 0;
-	}
+bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_lock( (pthread_mutex_t*)lock ) == 0;
+}
 
-	inline bool Try()
-	{
-		return pthread_mutex_trylock( &m1 ) == 0;
-	}
+bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_unlock( (pthread_mutex_t*)lock ) == 0;
+}
 
-private:
-	pthread_mutex_t m1;
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_trylock( (pthread_mutex_t*)lock ) == 0;
+}
 
 #else //defined(MMGC_IA32) || defined(MMGC_AMD64)
 
-	SpinLockUnix()
-	{
-		pthread_spin_init( &m1, 0 );
-	}
 
-	~SpinLockUnix()
-	{
-		pthread_spin_destroy( &m1 );
-	}
+void VMPI_lockInit(vmpi_spin_lock_t lock)
+{
+	pthread_spin_init( (pthread_spinlock_t*)lock, 0 );
+}
 
-	inline bool Acquire()
-	{
-		return pthread_spin_lock( &m1 ) == 0;
-	}
-	
-	inline bool Release()
-	{
-		return pthread_spin_unlock( &m1 ) == 0;
-	}
+void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
+{
+	pthread_spin_destroy( (pthread_spinlock_t*)lock );
+}
 
-	inline bool Try()
-	{
-		return pthread_spin_trylock( &m1 ) == 0;
-	}
+bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_spin_lock( (pthread_spinlock_t*)lock ) == 0;
+}
 
-private:
-	pthread_spinlock_t m1;
+bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	return pthread_spin_unlock( (pthread_spinlock_t*)lock ) == 0;
+}
+
+bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_spin_trylock( (pthread_spinlock_t*)lock ) == 0;
+}
 
 #endif //defined(MMGC_IA32) || defined(MMGC_AMD64)
-};
-
-
-vmpi_spin_lock_t VMPI_lockCreate()
-{
-	return (vmpi_spin_lock_t) (new SpinLockUnix);
-}
-
-void VMPI_lockDestroy(vmpi_spin_lock_t lock)
-{
-	delete (SpinLockUnix*)lock;
-}
-
-bool VMPI_lockAcquire(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockUnix*)lock)->Acquire();
-}
-
-bool VMPI_lockRelease(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockUnix*)lock)->Release();
-}
-
-bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t lock)
-{
-	return ((SpinLockUnix*)lock)->Try();
-}

@@ -142,14 +142,14 @@ namespace MMgc
 	{
 	public:
 		FixedAllocSafe(int itemSize, GCHeap* heap) : 
-			FixedAlloc(itemSize, heap),
-			m_spinlock(VMPI_lockCreate())
+			FixedAlloc(itemSize, heap)
 		{
+			VMPI_lockInit(&m_spinlock);
 		}
 		
 		~FixedAllocSafe()
 		{
-			VMPI_lockDestroy(m_spinlock);
+			VMPI_lockDestroy(&m_spinlock);
 		}
 
 		void* Alloc(size_t size, bool canFail=false)
@@ -171,7 +171,7 @@ namespace MMgc
 
 	private:
 
-		vmpi_spin_lock_t const m_spinlock;
+		vmpi_spin_lock_t m_spinlock;
 	};
 
 	/**
