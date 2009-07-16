@@ -48,17 +48,17 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=windows
-export basedir=e:/buildbot/$branch/$platform/$branch
-export buildsdir=e:/buildbot/$branch/$platform/builds
+export basedir=c:/buildbot/$branch/$platform/$branch
+export buildsdir=c:/buildbot/$branch/$platform/builds
 
 
-VS_HOME_PATH="/e/Program Files/Microsoft Visual Studio 9.0"
-VS_HOME="e:\Program Files\Microsoft Visual Studio 9.0"
+VS_HOME_PATH="/c/Program Files/Microsoft Visual Studio 9.0"
+VS_HOME="c:\Program Files\Microsoft Visual Studio 9.0"
 
 export PATH="$VS_HOME_PATH/Common7/IDE:$VS_HOME_PATH/VC/bin:$VS_HOME_PATH\Common7\Tools:$VS_HOME_PATH/VC/VCPackages:$PATH"
-export INCLUDE="E:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
-export LIB="E:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib"
-export LIBPATH="E:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;"
+export INCLUDE="c:\Program Files\Microsoft SDKs\Windows\v6.0\Include;$VS_HOME\VC\atlmfc\include;$VS_HOME\VC\include;"
+export LIB="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib"
+export LIBPATH="c:\Program Files\Microsoft SDKs\Windows\v6.0\Lib;$VS_HOME\VC\atlmfc\lib;$VS_HOME\VC\lib;"
 
 ## Used by make in the build scripts
 export make_opt="-j4"
