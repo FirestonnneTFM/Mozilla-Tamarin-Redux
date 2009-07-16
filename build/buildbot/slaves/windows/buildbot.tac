@@ -38,10 +38,10 @@
 from twisted.application import service
 from buildbot.slave.bot import BuildSlave
 
-basedir = r'/e/buildbot/tamarin-redux/windows'
+basedir = r'/c/buildbot/tamarin-redux/windows'
 host = '10.171.22.12'
-port = 9750
-slavename = 'asteam'
+port = 1000
+slavename = 'asteamwin2'
 passwd = 'asteam'
 keepalive = 600
 usepty = 1
