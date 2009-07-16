@@ -130,4 +130,22 @@ typedef void *maddr_ptr;
 #define REALLY_INLINE inline __hidden
 #endif
 
+// ifdef's are suspect copied from SpinLockUnix
+#if defined(__GNUC__) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
+    typedef volatile int * vmpi_spin_lock_unix_t;
+#elif defined (USE_PTHREAD_MUTEX) //defined(MMGC_IA32) || defined(MMGC_AMD64)
+    typedef pthread_mutex_t vmpi_spin_lock_unix_t;
+#else //defined(MMGC_IA32) || defined(MMGC_AMD64)
+    typedef pthread_spinlock_t vmpi_spin_lock_unix_t;
+#endif
+
+#ifdef _DEBUG
+typedef struct {
+	vmpi_spin_lock_unix_t lock;
+	vmpi_thread_t owner;	
+} vmpi_spin_lock_t;
+#else
+typedef vmpi_spin_lock_unix_t vmpi_spin_lock_t;
+#endif
+
 #endif // __avmplus_unix_platform__
