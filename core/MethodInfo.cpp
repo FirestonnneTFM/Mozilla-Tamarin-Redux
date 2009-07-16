@@ -43,7 +43,14 @@
 #endif
 
 //#define DOPROF
-#include "../vprof/vprof.h"
+//#include "../vprof/vprof.h"
+
+#ifndef MMGC_ENABLE_CPP_EXCEPTIONS
+// if MMGC_ENABLE_CPP_EXCEPTIONS is defined, we already include <new> and get placement-new from there
+// if MMGC_ENABLE_CPP_EXCEPTIONS is not defined, we don't want to to include <new> so we need our own placement-new
+// (@todo, this should probably be moved to GCGlobalNew.h)
+inline void* operator new(size_t, void* p) { return p; }
+#endif
 
 namespace avmplus
 {
@@ -284,36 +291,77 @@ namespace avmplus
 			#endif /* DEBUGGER */
 
 			PERFM_NTPROF("verify-ticks");
-		    #if defined FEATURE_NANOJIT
+
+			CodeWriter* coder = NULL;
 			Verifier verifier(this, toplevel);
-			CodeWriter *coder = NULL;
+
+			/*
+				These "buf" declarations are an unfortunate but expedient hack:
+				the existing CodeWriter classes (eg CodegenLIR, etc) have historically
+				always been stack-allocated, thus they have no WB protection on member
+				fields. Recent changes were made to allow for explicit cleanup() of them
+				in the event of exception, but there was a latent bug waiting to happen:
+				the actual automatic var was going out of scope, but still being referenced
+				(via the 'coder' pointer) in the exception handler, but the area being 
+				pointed to may or may not still be valid. The ideal fix for this would 
+				simply be to heap-allocate the CodeWriters, but that would require going
+				thru the existing code carefully and inserting WB where appropriate.
+				Instead, this "expedient" hack uses placement new to ensure the memory
+				stays valid into the exception handler. 
+				
+				Note: the lack of a call to the dtor of the CodeWriter(s) is not an oversight.
+				Calling cleanup() on coder is equivalent to running the dtor for all
+				of the CodeWriters here.
+				
+				Note: allocated using arrays of intptr_t (rather than char) to ensure alignment is acceptable.
+			*/
+		#define MAKE_BUF(name, type) \
+			intptr_t name[(sizeof(type)+sizeof(intptr_t)-1)/sizeof(intptr_t)]
+
+		#if defined FEATURE_NANOJIT
+			MAKE_BUF(jit_buf, CodegenLIR);
+			#if defined AVMPLUS_WORD_CODE
+			MAKE_BUF(teeWriter_buf, TeeWriter);
+			#endif
+			#ifdef FEATURE_CFGWRITER
+			MAKE_BUF(cfg_buf, CFGWriter);
+			#endif
+		#endif
+			#if defined AVMPLUS_WORD_CODE
+			MAKE_BUF(translator_buf, WordcodeEmitter);
+			#else
+			MAKE_BUF(stubWriter_buf, CodeWriter);
+			#endif
+
 			TRY(core, kCatchAction_Rethrow)
 			{
+#if defined FEATURE_NANOJIT
 				if ((core->IsJITEnabled()) && !suggestInterp())
 				{
 					PERFM_NTPROF("verify & IR gen");
-
-					CodegenLIR jit(this);
+					
+					// note placement-new usage!
+					CodegenLIR* jit = new(jit_buf) CodegenLIR(this);
 					#if defined AVMPLUS_WORD_CODE
-					WordcodeEmitter translator(this, toplevel);
-					TeeWriter teeWriter(&translator, &jit);
-					coder = &teeWriter;
+					WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
+					teeWriter = new(teeWriter_buf) TeeWriter(translator, jit);
+					coder = teeWriter;
 					#else
-					coder = &jit;
+					coder = jit;
 					#endif
 
 				#ifdef FEATURE_CFGWRITER
 					// analyze code and generate LIR
-					CFGWriter cfg(this, coder); 
-					coder = &cfg;
+					CFGWriter* cfg = new(cfg_buf) CFGWriter(this, coder); 
+					coder = cfg;
 				#endif
 
 				    verifier.verify(coder);
 					PERFM_TPROF_END();
 			
-					if (!jit.overflow) {
+					if (!jit->overflow) {
 						// assembler LIR into native code
-						jit.emitMD();
+						jit->emitMD();
 					}
 
 					// the MD buffer can overflow so we need to re-iterate
@@ -321,7 +369,7 @@ namespace avmplus
 					// to just rebuild the MD code.
 
 					// mark it as interpreted and try to limp along
-					if (jit.overflow) {
+					if (jit->overflow) {
 						if (core->JITMustSucceed()) {
 							Exception* e = new (core->GetGC()) Exception(core, core->newStringLatin1("JIT failed")->atom());
 							e->flags |= Exception::EXIT_EXCEPTION;
@@ -346,40 +394,48 @@ namespace avmplus
 				{
 					// NOTE copied below
 					#if defined AVMPLUS_WORD_CODE
-					WordcodeEmitter translator(this, toplevel);
-					coder = &translator;
+					WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
+					coder = translator;
 					#else
-					CodeWriter stubWriter;
-					coder = &stubWriter;
+					CodeWriter* stubWriter = new(stubWriter_buf) CodeWriter();
+					coder = stubWriter;
 					#endif
 					verifier.verify(coder); // pass2 dataflow
 					setInterpImpl();
 					// NOTE end copy
 				}
-				#else // FEATURE_NANOJIT
-
-				Verifier verifier(this, toplevel);
+#else // FEATURE_NANOJIT
 
 				// NOTE copied from above
 				#if defined AVMPLUS_WORD_CODE
-				WordcodeEmitter translator(this);
-				coder = &translator;
+				WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this);
+				coder = translator;
 				#else
-				CodeWriter stubWriter;
-				coder = &stubWriter;
+				CodeWriter* stubWriter = new(stubWriter_buf) CodeWriter();
+				coder = stubWriter;
 				#endif
 				verifier.verify(coder); // pass2 dataflow
 				setInterpImpl();
 				// NOTE end copy
-				#endif // FEATURE_NANOJIT
+
+#endif // FEATURE_NANOJIT
+				
+				if (coder)
+				{
+					coder->cleanup();
+					coder = NULL;
+				}
 			}
 			CATCH (Exception *exception) 
 			{
 				// clean up verifier
 				verifier.~Verifier();
+
 				// call cleanup all the way down the chain
 				// each stage calls cleanup on the next one
-				coder->cleanup();
+				if (coder)
+					coder->cleanup();
+
 				// re-throw exception
 				core->throwException(exception);
 			}
