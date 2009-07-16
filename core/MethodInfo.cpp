@@ -344,7 +344,7 @@ namespace avmplus
 					CodegenLIR* jit = new(jit_buf) CodegenLIR(this);
 					#if defined AVMPLUS_WORD_CODE
 					WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
-					teeWriter = new(teeWriter_buf) TeeWriter(translator, jit);
+					TeeWriter* teeWriter = new(teeWriter_buf) TeeWriter(translator, jit);
 					coder = teeWriter;
 					#else
 					coder = jit;
