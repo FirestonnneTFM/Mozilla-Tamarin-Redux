@@ -70,15 +70,12 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
 fi
 
-cp $buildsdir/$change-${changeid}/$platform/$shell_release $basedir/esc/bin/shell.exe
-chmod +x $basedir/esc/bin/shell.exe
+chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
 
 echo ""
-echo AVM=$basedir/esc/bin/shell.exe
-echo "`$basedir/esc/bin/shell.exe`"
-echo ""
-
-
+cp $buildsdir/$change-${changeid}/$platform/$shell_release $basedir/esc/bin/shell${shell_extension}
+export AVM=$basedir/esc/bin/shell${shell_extension}
+chmod +x $AVM
 
 cd $basedir/esc/build
 make clean
