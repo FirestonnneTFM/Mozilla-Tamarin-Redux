@@ -1085,6 +1085,8 @@ namespace avmplus
 		pool->_abcStringStart = pos;
 
 		PoolObject::ConstantStringData* dataP = pool->_abcStrings.data;
+		AvmAssert(core->kEmptyString != NULL);
+		dataP->str = core->kEmptyString;
 		for(uint32_t i = 1; i < string_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE

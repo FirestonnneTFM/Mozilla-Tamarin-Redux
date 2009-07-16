@@ -84,12 +84,27 @@ namespace avmplus
 		{
 			// make all strings created so far dynamic,
 			// making sure that no pointers into ABC data persist
+			// (string 0 is always core->kEmptyString: skip it)
 			ConstantStringData* dataP = _abcStrings.data;
-			for (uint32_t i = 0; i < constantStringCount; i++)
+			for (uint32_t i = 1; i < constantStringCount; i++)
 			{
 				++dataP;
 				if (dataP->abcPtr < _abcStringStart || dataP->abcPtr >= _abcStringEnd)
-					dataP->str->makeDynamic();
+				{
+					// in theory, only index 0 should be the empty string... but in practice,
+					// any index could be empty, and makeDynamic doesn't work on zero-length strings.
+					// since that call doesn't have easy access to an AvmCore, do the check here.
+					if (!dataP->str->isEmpty())
+					{
+						dataP->str->makeDynamic();
+					}
+					else
+					{
+						// all zero-length strings should be kEmptyString.
+						AvmAssert(dataP->str == core->kEmptyString);
+					}
+						
+				}
 			}
 		}
 	}
