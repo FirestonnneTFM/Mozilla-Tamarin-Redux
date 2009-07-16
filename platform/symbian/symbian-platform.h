@@ -100,4 +100,13 @@
 #undef __MWERKS__
 #endif
 
+#ifdef _DEBUG
+typedef struct {
+	pthread_mutex_t lock;
+	vmpi_thread_t owner;	
+} vmpi_spin_lock_t;
+#else
+typedef pthread_mutex_t vmpi_spin_lock_t;
+#endif
+
 #endif // __avmplus_symbian_platform__
