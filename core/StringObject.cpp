@@ -307,9 +307,9 @@ namespace avmplus
 			MMGC_MEM_TYPE( this );
 			void* buf = gc->Alloc(bytes, 0);
 			VMPI_memcpy(buf, m_buffer.pv, bytes);
-			WB(gc, this, m_buffer.pv, buf);
+			WB(gc, this, &this->m_buffer.pv, buf);
 			if (type == kDependent)
-				WBRC( _gc(this), this, &m_master, NULL );
+				WBRC(gc, this, &m_master, NULL);
 		}
 	}
 
