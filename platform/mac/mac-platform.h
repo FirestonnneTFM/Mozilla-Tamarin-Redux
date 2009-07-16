@@ -134,4 +134,17 @@ typedef void *maddr_ptr;
 
 #undef verify
 
+/**
+* Type defintion for an opaque data type representing platform-defined spin lock 
+* @see VMPI_lockCreate(), VMPI_lockAcquire()
+*/
+#ifdef _DEBUG
+typedef struct {
+	uint32_t lock;
+	vmpi_thread_t owner;	
+} vmpi_spin_lock_t;
+#else
+typedef uint32_t vmpi_spin_lock_t;
+#endif
+
 #endif // __avmplus_mac_platform__

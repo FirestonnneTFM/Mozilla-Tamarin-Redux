@@ -48,22 +48,17 @@ extern "C"
 void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
 #ifdef DEBUG
-	lock->lock = NULL;
+	lock->lock = 0;
 	lock->owner = NULL;
 #else
-	*lock = NULL;
+	*lock = 0;
 #endif
 }
 
 void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
+	GCAssert(lock->lock == 0);
 	GCAssert(lock->owner == NULL);
-#ifdef DEBUG
-	lock->lock = (void*)0xdeadbeef;
-	lock->owner = (void*)0xdeadbeef;
-#else
-	*lock = NULL;
-#endif
 }
 
 bool VMPI_lockAcquire(vmpi_spin_lock_t* lock)

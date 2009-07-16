@@ -71,7 +71,10 @@
 // maintainability.
 
 #include "avmfeatures.h"
-  
+
+// used by platform headers below
+typedef void * vmpi_thread_t;
+
 #if AVMSYSTEM_WIN32
   #include "win32/win32-platform.h"
 #elif AVMSYSTEM_UNIX
@@ -117,21 +120,6 @@ typedef uint8_t		byte;
 /* wchar is our version of wchar_t, since wchar_t is different sizes
  on different platforms, but we want to use UTF-16 uniformly. */
 typedef uint16_t wchar;
-
-typedef void * vmpi_thread_t;
-
-/**
-* Type defintion for an opaque data type representing platform-defined spin lock used by MMgc
-* @see VMPI_lockCreate(), VMPI_lockAcquire()
-*/
-#ifdef _DEBUG
-typedef struct {
-	void *lock;
-	vmpi_thread_t owner;	
-} vmpi_spin_lock_t;
-#else
-typedef void* vmpi_spin_lock_t;
-#endif
 
 /**
 * This method should return the difference in milliseconds between local time and UTC

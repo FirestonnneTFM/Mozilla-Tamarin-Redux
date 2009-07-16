@@ -179,5 +179,14 @@ typedef unsigned __int64	uint64_t;
     #define REALLY_INLINE __forceinline
 #endif // _MSC_VER
 
+#ifdef _DEBUG
+typedef struct {
+	void *lock;
+	vmpi_thread_t owner;	
+} vmpi_spin_lock_t;
+#else
+typedef void *vmpi_spin_lock_t;
+#endif
+
 #endif // __avmplus_win32_platform__
 
