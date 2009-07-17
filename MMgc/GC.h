@@ -80,7 +80,7 @@
 	void *__stack;										\
 	size_t __stackSize;									\
 	MMGC_GET_STACK_EXTENTS(_gc, __stack, __stackSize);	\
-	MMgc::GCRoot root(_gc, __stack, __stackSize);		\
+	MMgc::GC::AutoRCRootSegment __root(_gc, __stack, __stackSize);	\
 	MMgc::GCAutoEnterPause __mmgc_enter_pause(_gc);
 
 // Enable our own alloca() replacement that always allocates in the heap, this is good on
@@ -826,6 +826,7 @@ namespace MMgc
 		friend class RCObject;
 		friend class GCInterval;
 		friend class ZCT;
+		friend class AutoRCRootSegment;
 	public:
 
 		/**
@@ -953,7 +954,33 @@ namespace MMgc
 		
 		RCRootSegment* rcRootSegments;
 		
+		void AddRCRootSegment(RCRootSegment *segment)
+		{
+			segment->next = rcRootSegments;
+			if (rcRootSegments)
+				rcRootSegments->prev = segment;
+			rcRootSegments = segment;
+		}
+
+		void RemoveRCRootSegment(RCRootSegment *segment)
+		{
+			if (segment->next != NULL)
+				segment->next->prev = segment->prev;
+			if (segment->prev != NULL)
+				segment->prev->next = segment->next;
+			else
+				rcRootSegments = segment->next;
+		}
+
 	public:
+
+		class AutoRCRootSegment : public RCRootSegment
+		{
+		public:
+			AutoRCRootSegment(GC* gc, void* mem, size_t size);
+			~AutoRCRootSegment();			
+		};
+
 		
 		/**
 		 * Allocate memory that will be scanned for pointers to GC memory
@@ -1438,7 +1465,7 @@ namespace MMgc
 
 		friend class GCAutoEnter;
 		friend class GCAutoEnterPause;
-		void SetStackEnter(GCAutoEnter *enter);
+		void SetStackEnter(GCAutoEnter *enter, bool doCollectionWork=true);
 		GCAutoEnter *GetAutoEnter() { return stackEnter; }
 
  		vmpi_spin_lock_t m_gcLock;
