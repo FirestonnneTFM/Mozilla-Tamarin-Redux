@@ -1545,10 +1545,7 @@ namespace MMgc
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
 		*block_u = (uintptr_t)segment;
-		segment->next = rcRootSegments;
-		if (rcRootSegments)
-			rcRootSegments->prev = segment;
-		rcRootSegments = segment;
+		AddRCRootSegment(segment);
 		return mem;
 	}
 	
@@ -1561,12 +1558,7 @@ namespace MMgc
 		};
 		block = (char*)mem - hdr_size;
 		RCRootSegment* segment = *segmentp;
-		if (segment->next != NULL)
-			segment->next->prev = segment->prev;
-		if (segment->prev != NULL)
-			segment->prev->next = segment->next;
-		else
-			rcRootSegments = segment->next;
+		RemoveRCRootSegment(segment);
 		delete segment;
 		delete block;
 	}
@@ -3961,16 +3953,16 @@ bail:
 	GCAutoEnterPause::GCAutoEnterPause(GC *gc) : gc(gc), enterSave(gc->GetAutoEnter())
 	{ 
 		GCAssertMsg(gc->GetStackEnter() != 0, "Invalid MMGC_GC_ROOT_THREAD usage, GC not already entered, random crashes will ensue");
-		gc->SetStackEnter(NULL);
+		gc->SetStackEnter(NULL, false);
 	}
 	
 	GCAutoEnterPause::~GCAutoEnterPause() 
 	{ 
 		GCAssertMsg(gc->GetStackEnter() == 0, "Invalid MMGC_GC_ROOT_THREAD usage, GC not exitted properly, random crashes will ensue");
-		gc->SetStackEnter(enterSave); 
+		gc->SetStackEnter(enterSave, false); 
 	}
 
- 	void GC::SetStackEnter(GCAutoEnter *enter) 
+ 	void GC::SetStackEnter(GCAutoEnter *enter, bool doCollectionWork) 
 	{
 		bool edge = false;
 		bool releaseThread = false;
@@ -3985,7 +3977,7 @@ bail:
 			VMPI_lockAcquire(&m_gcLock);
  		}
 
-		if(edge) {
+		if(edge && doCollectionWork) {
 			if(policy.queryFullCollectionQueued())
 				Collect(false);
 			else
@@ -4025,6 +4017,17 @@ bail:
  				// else nothing can be done
  			}
 		}
+	}
+
+	GC::AutoRCRootSegment::AutoRCRootSegment(GC* gc, void* mem, size_t size)
+		: RCRootSegment(gc, mem, size)
+	{
+		gc->AddRCRootSegment(this);
+	}
+
+	GC::AutoRCRootSegment::~AutoRCRootSegment()
+	{
+		GetGC()->RemoveRCRootSegment(this);
 	}
 }
 		

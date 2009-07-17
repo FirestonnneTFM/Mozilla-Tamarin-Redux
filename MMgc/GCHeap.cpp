@@ -1695,6 +1695,7 @@ namespace MMgc
 
 	void GCHeap::DumpHeapRep()
 	{
+		MMGC_LOCK(m_spinlock);
 		Region **regions;
 		Region *r = lastRegion;
 		int numRegions = 0;
