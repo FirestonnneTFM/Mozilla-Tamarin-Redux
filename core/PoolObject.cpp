@@ -74,12 +74,19 @@ namespace avmplus
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 	}
 
+// currently buggy: MMgc doesn't reliably support allocations from a finalizer 
+// (which is required for this to work). Disabled for now; we either need to make
+// MMgc support this reliably or redesign this feature to dynamic-ize the strings
+// elsewhere. (srj)
+#define USE_STATIC_ABC_STRINGS 0
+
 	PoolObject::~PoolObject()
 	{
 		#ifdef AVMPLUS_WORD_CODE
 		delete word_code.cpool_mn;
 		#endif
 
+#if USE_STATIC_ABC_STRINGS
 		if (!MMgc::GC::GetGC(this)->Destroying())
 		{
 			// make all strings created so far dynamic,
@@ -107,6 +114,7 @@ namespace avmplus
 				}
 			}
 		}
+#endif
 	}
 	
 	Traits* PoolObject::getBuiltinTraits(Stringp name) const
@@ -191,7 +199,11 @@ namespace avmplus
 		{
 			// String not created yet; grab the pointer to the (verified) ABC data
 			uint32_t len = AvmCore::readU30(dataP->abcPtr);
+#if USE_STATIC_ABC_STRINGS
 			Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, true);
+#else
+			Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, false);
+#endif
 			// must be made sticky for now...
 			s->Stick();
 			dataP->str = s;
