@@ -949,7 +949,7 @@ namespace avmplus
                 if (!v) 
                     continue;
                 if (dirty.get(i)) {
-                    if (v->isLoad() && v->oprnd1() == vars && v->oprnd2()->isconstval(i*sizeof(double))) {
+                    if (v->isLoad() && v->oprnd1() == vars && v->disp() == int32_t(i*sizeof(double))) {
                         // not modified
                         continue;
                     }
@@ -5190,7 +5190,7 @@ namespace avmplus
                 case LIR_stq:
                 case LIR_stqi:
                     if (i->oprnd2() == vars) {
-                        int d = i->immdisp() >> 3;
+                        int d = i->disp() >> 3;
                         livein.clear(d);
                     }
                     break;
@@ -5199,7 +5199,7 @@ namespace avmplus
                 case LIR_ldq:
                 case LIR_ldqc:
                     if (i->oprnd1() == vars) {
-                        int d = i->oprnd2()->imm32() >> 3;
+                        int d = i->disp() >> 3;
                         livein.set(d);
                     }
                     break;
@@ -5286,7 +5286,7 @@ namespace avmplus
                 case LIR_stq:
                 case LIR_stqi:
                     if (i->oprnd2() == vars) {
-                        int d = i->immdisp() >> 3;
+                        int d = i->disp() >> 3;
                         if (!livein.get(d)) {
                             verbose_only(if (names)
                                 AvmLog("- %s\n", names->formatIns(i));)
@@ -5302,7 +5302,7 @@ namespace avmplus
                 case LIR_ldq:
                 case LIR_ldqc:
                     if (i->oprnd1() == vars) {
-                        int d = i->oprnd2()->imm32() >> 3;
+                        int d = i->disp() >> 3;
                         livein.set(d);
                     }
                     break;
