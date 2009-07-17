@@ -115,6 +115,12 @@ ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/
 mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=488124
 
 ####################
+# String
+####################
+ecma3/String/split_504567:'abab',    .*   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
+ecma3/String/split_504567:'babab',   .*   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
+
+####################
 # Vector
 ####################
 as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281

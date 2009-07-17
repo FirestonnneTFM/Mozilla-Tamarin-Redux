@@ -362,7 +362,7 @@ namespace avmplus
                 args[i] = split(args[i]);
             }
 
-            if ((argt & ARGSIZE_MASK) == ARGSIZE_F) {
+            if ((argt & ARGSIZE_MASK_ANY) == ARGSIZE_F) {
                 // this function returns a double as two 32bit values, so replace
                 // call with qjoin(qhi(call), call)
                 return split(ci, args);
@@ -497,21 +497,21 @@ namespace avmplus
 		{
 			if (t == INT_TYPE)
 			{
-				Atom a = core->intToAtom(int(native->constval()));
+				Atom a = core->intToAtom(int(native->imm32()));
 				if(AvmCore::isInteger(a))
 					return InsConstAtom(a);
 			}
 
 			if (t == UINT_TYPE)
 			{
-				Atom a = core->uintToAtom(native->constval());
+				Atom a = core->uintToAtom(native->imm32());
 				if(AvmCore::isInteger(a))
 					return InsConstAtom(a);
 			}
 
 			if (t == BOOLEAN_TYPE)
 			{
-				return InsConstAtom(native->constval() ? trueAtom : falseAtom);
+				return InsConstAtom(native->imm32() ? trueAtom : falseAtom);
 			}
 		}
 
@@ -582,7 +582,7 @@ namespace avmplus
 			mgr->codeAlloc = new (gc) CodeAlloc();
 #ifdef AVMPLUS_VERBOSE
 			if (pool->verbose) {
-				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, mgr->allocator, 0);
+				LabelMap *labels = mgr->labels = new (gc) LabelMap(core, mgr->allocator);
 				labels->add(core, sizeof(AvmCore), 0, "core");
 			}
 #endif
@@ -685,7 +685,7 @@ namespace avmplus
 
 		case BUILTIN_number:
 			if (atom->isconst()) {
-				Atom a = atom->constval();
+				Atom a = atom->imm32();
 				if (AvmCore::isDouble(a)) {
 					return loadIns(LIR_ldqc, 0, InsConstAtom(a&~7));
 				} else {
@@ -698,26 +698,26 @@ namespace avmplus
 
 		case BUILTIN_int:
 			if (atom->isconst())
-				return InsConst(AvmCore::integer_i(atom->constval()));
+				return InsConst(AvmCore::integer_i(atom->imm32()));
 			else
 				return callIns(FUNCTIONID(integer_i), 1, atom);
 
 		case BUILTIN_uint:
 			if (atom->isconst())
-				return InsConst(AvmCore::integer_u(atom->constval()));
+				return InsConst(AvmCore::integer_u(atom->imm32()));
 			else
 				return callIns(FUNCTIONID(integer_u), 1, atom);
 
 		case BUILTIN_boolean:
 			if (atom->isconst())
-				return InsConst(int32_t(atom->constval()) >> 3);
+				return InsConst(int32_t(atom->imm32()) >> 3);
 			else
 				return p2i(binaryIns(LIR_pursh, atom, InsConst(3)));
 		
 		default:
 			// pointer type
 			if (atom->isconst())
-				return InsConstAtom(atom->constval() & ~7);
+				return InsConstAtom(atom->imm32() & ~7);
 			else
 				return binaryIns(LIR_piand, atom, InsConstAtom(~7));
 		}
@@ -901,7 +901,7 @@ namespace avmplus
             uint32_t argt = call->_argtypes;
             for (uint32_t i = 0; i < MAXARGS; i++) {
                 argt >>= ARGSIZE_SHIFT;
-                ArgSize sz = ArgSize(argt & ARGSIZE_MASK);
+                ArgSize sz = ArgSize(argt & ARGSIZE_MASK_ANY);
                 if (sz == ARGSIZE_NONE)
                     break;
 				AvmAssert((sz == ARGSIZE_I || sz == ARGSIZE_U || sz == ARGSIZE_Q || sz == ARGSIZE_F) &&
@@ -949,7 +949,7 @@ namespace avmplus
                 if (!v) 
                     continue;
                 if (dirty.get(i)) {
-                    if (v->isLoad() && v->oprnd1() == vars && v->oprnd2()->isconstval(i*sizeof(double))) {
+                    if (v->isLoad() && v->oprnd1() == vars && v->disp() == int32_t(i*sizeof(double))) {
                         // not modified
                         continue;
                     }
@@ -981,7 +981,7 @@ namespace avmplus
 
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
             if (base == vars) {
-                int d = disp->constval();
+                int d = disp->imm32();
                 AvmAssert((d&7) == 0);
                 int i = d >> 3;
                 LIns *val = tracker[i];
@@ -996,7 +996,7 @@ namespace avmplus
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
             if (base == vars) {
-                trackStore(value, disp->constval());
+                trackStore(value, disp->imm32());
                 DEFER_STORES(return 0;)
             }
             return out->insStore(value, base, disp);
@@ -1118,7 +1118,7 @@ namespace avmplus
                 }
 				else if (op == LIR_quad) {
 					// const fold
-					return insImm(AvmCore::integer_d(v->constvalf()));
+					return insImm(AvmCore::integer_d(v->imm64f()));
 				}
             }
 
@@ -1200,22 +1200,22 @@ namespace avmplus
             bool is = false;
             if (t == NUMBER_TYPE) 
             {
-                is = isFloat(val->opcode()) || val->isQuad();
+                is = val->isFloat() || val->isQuad();
                 AvmAssert(is);
             }
             else if (t == INT_TYPE)
             {
-                is = !val->isQuad() && !isFloat(val->opcode());
+                is = !val->isQuad() && !val->isFloat();
                 AvmAssert(is);
             }
             else if (t == UINT_TYPE)
             {
-                is = !val->isQuad() && !isFloat(val->opcode());
+                is = !val->isQuad() && !val->isFloat();
                 AvmAssert(is);
             }
             else if (t == BOOLEAN_TYPE)
             {
-                is = !val->isQuad() && !isFloat(val->opcode());
+                is = !val->isQuad() && !val->isFloat();
                 AvmAssert(is);
             }
             else
@@ -1245,9 +1245,9 @@ namespace avmplus
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
             if (base == vars)
-                trackStore(value, disp->constval(),false);
+                trackStore(value, disp->imm32(),false);
             else if (base == traits)
-                trackStore(value, disp->constval(),true);            
+                trackStore(value, disp->imm32(),true);            
             return out->insStore(value, base, disp);
         }
 
@@ -1274,9 +1274,6 @@ namespace avmplus
         LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
-		verbose_only(if (core->config.bbgraph) {
-			lirout = frag->cfg = new (gc) BlockLocator(gc, lirout);
-		})
         debug_only(
             lirout = new (gc) ValidateWriter(lirout);
         )
@@ -1345,7 +1342,7 @@ namespace avmplus
 			callIns(FUNCTIONID(stkover), 1, env_param);
 			LIns *label = Ins(LIR_label);
 			verbose_only( if (lirbuf->names) { lirbuf->names->addName(label, "begin");	})
-			b->target(label);
+			b->setTarget(label);
 		}
 
 		coreAddr = InsConstPtr(core);
@@ -1453,7 +1450,7 @@ namespace avmplus
 					VMPI_sprintf(str,"param_%d",i);
 					lirbuf->names->addName(label,str);
 				})
-				br->target(label);
+				br->setTarget(label);
 			}
 		}
 		else
@@ -4670,7 +4667,7 @@ namespace avmplus
 		}
 
         if (cond->isconst()) {
-            if ((br == LIR_jt && cond->constval()) || (br == LIR_jf && !cond->constval())) {
+            if ((br == LIR_jt && cond->imm32()) || (br == LIR_jf && !cond->imm32())) {
                 // taken
                 br = LIR_j;
                 cond = 0;
@@ -4719,7 +4716,7 @@ namespace avmplus
 						   (icmp == LIR_le && qcmp == LIR_qle));
 				return binaryIns(qcmp, u2p(lhs), i2p(rhs));
 			#else
-				if (rhs->isconst() && rhs->constval() >= 0)
+				if (rhs->isconst() && rhs->imm32() >= 0)
 					return binaryIns(ucmp, lhs, rhs);
 			#endif
 			}
@@ -4736,7 +4733,7 @@ namespace avmplus
 						   (icmp == LIR_le && qcmp == LIR_qle));
 				return binaryIns(qcmp, i2p(lhs), u2p(rhs));
 			#else
-				if (lhs->isconst() && lhs->constval() >= 0)
+				if (lhs->isconst() && lhs->imm32() >= 0)
 					return binaryIns(ucmp, lhs, rhs);
 			#endif
 			}
@@ -4848,7 +4845,7 @@ namespace avmplus
         if (info->hasExceptions()) {
             LIns *catchlabel = Ins(LIR_label);
 			verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(catchlabel, "catch");	})
-            exBranch->target(catchlabel);
+            exBranch->setTarget(catchlabel);
 
 			// exception case
 			LIns *exptr = loadIns(LIR_ldp, offsetof(AvmCore, exceptionAddr), coreAddr);
@@ -4903,7 +4900,7 @@ namespace avmplus
         for (int i=0, n=patches.size(); i < n; i++) {
             Patch p = patches[i];
             AvmAssert(p.label->bb != 0);
-            p.br->target(p.label->bb);
+            p.br->setTarget(p.label->bb);
         }
 
         frag->lastIns = frag->lirbuf->next()-1;
@@ -5098,7 +5095,7 @@ namespace avmplus
                 op = LOpcode(op ^ 1);
             }
             if (cond->isconst()) {
-                if ((op == LIR_jt && cond->constval()) || (op == LIR_jf && !cond->constval())) {
+                if ((op == LIR_jt && cond->imm32()) || (op == LIR_jf && !cond->imm32())) {
                     // taken
                     op = LIR_j;
                     cond = 0;
@@ -5127,7 +5124,7 @@ namespace avmplus
         if (!br) return; // occurs if branch was unconditional and thus never emitted.
         l.preds++;
         if (l.bb != 0) {
-            br->target(l.bb);
+            br->setTarget(l.bb);
         } else {
             patches.add(Patch(br, l));
         }
@@ -5193,7 +5190,7 @@ namespace avmplus
                 case LIR_stq:
                 case LIR_stqi:
                     if (i->oprnd2() == vars) {
-                        int d = i->immdisp() >> 3;
+                        int d = i->disp() >> 3;
                         livein.clear(d);
                     }
                     break;
@@ -5202,7 +5199,7 @@ namespace avmplus
                 case LIR_ldq:
                 case LIR_ldqc:
                     if (i->oprnd1() == vars) {
-                        int d = i->oprnd2()->constval() >> 3;
+                        int d = i->disp() >> 3;
                         livein.set(d);
                     }
                     break;
@@ -5289,7 +5286,7 @@ namespace avmplus
                 case LIR_stq:
                 case LIR_stqi:
                     if (i->oprnd2() == vars) {
-                        int d = i->immdisp() >> 3;
+                        int d = i->disp() >> 3;
                         if (!livein.get(d)) {
                             verbose_only(if (names)
                                 AvmLog("- %s\n", names->formatIns(i));)
@@ -5305,7 +5302,7 @@ namespace avmplus
                 case LIR_ldq:
                 case LIR_ldqc:
                     if (i->oprnd1() == vars) {
-                        int d = i->oprnd2()->constval() >> 3;
+                        int d = i->disp() >> 3;
                         livein.set(d);
                     }
                     break;
@@ -5401,12 +5398,6 @@ namespace avmplus
             {}
         )
 
-		verbose_only( if (core->config.bbgraph) { 
-			StUTF8String cname(info->format(core));
-			frag->cfg->fin();
-			frag->cfg->print((char*)cname.c_str());
-		});
-		
         deadvars();
 
         verbose_only(if (verbose())
