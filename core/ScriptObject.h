@@ -207,6 +207,11 @@ namespace avmplus
         bool isGlobalObject() const;
 
 		virtual Stringp implToString() const;
+
+		// this really shouldn't exist here, but AIR currently plays some games with subclassing
+		// "Function" that use C++ classes that don't descend from FunctionObject. Easier to fix
+		// by rooting this method here than by fixing AIR at this time. 
+		virtual CodeContext* getFunctionCodeContext() const { AvmAssert(0); return NULL; }
 		
 #ifdef AVMPLUS_VERBOSE
 	public:

@@ -59,7 +59,10 @@ namespace avm {
 			return NULL;
 		}
 		avmplus::ScriptObject* so = avmplus::avmFromObject(o);
-		avmplus::CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
+	//	avmplus::CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
+	// getFunctionCodeContext() has been temporarily relocated to ScriptObject, as AIR defines
+	// some classes that are subclasses of Function (in AS3) but not of FunctionObject (in C++)...
+		avmplus::CodeContext* cc = ((avmplus::ScriptObject*)so)->getFunctionCodeContext();
 		return avmToCodeContext(cc);
 	}
 
