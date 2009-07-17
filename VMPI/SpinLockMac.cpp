@@ -73,11 +73,11 @@ bool VMPI_lockAcquire(vmpi_spin_lock_t* lock)
 
 bool VMPI_lockRelease(vmpi_spin_lock_t* lock)
 {
-	_spin_unlock((uint32_t*)lock);
 	#ifdef DEBUG
 	GCAssert(lock->owner == VMPI_currentThread());
 	lock->owner = NULL;
 	#endif
+	_spin_unlock((uint32_t*)lock);
 	return true;
 }
 
