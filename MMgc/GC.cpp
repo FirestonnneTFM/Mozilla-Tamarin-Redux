@@ -1472,6 +1472,17 @@ namespace MMgc
 
 	void GC::PushBarrierItem(GCWorkItem &item)
 	{
+		if (collecting)
+		{
+			// It's the job of the allocators to make sure the rhs is marked if
+			// it is allocated on a page that's not yet swept.  In particular,
+			// the barrier is not needed to make sure that that object is kept
+			// alive.
+			//
+			// Ergo all we need to do here is revert the lhs to marked and return.
+			SetMark(item.ptr);
+			return;
+		}
 		PushWorkItem(m_barrierWork, item);
 	}
 
