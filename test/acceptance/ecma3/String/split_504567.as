@@ -63,12 +63,6 @@ function getTestCases() {
                                     "'babab'.split(/a*/)",
                                     "b,b,b",
                                     'babab'.split(/a*/).toString() );
-    
-    array[item++] = new TestCase(   SECTION,
-                                    "fff",
-                                    "b,b,b",
-                                    'abab'.replace("/a*/", "g").toString() );
-    
    
     return array;
 
