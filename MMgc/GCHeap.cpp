@@ -1113,12 +1113,20 @@ namespace MMgc
 					Abort();
 			}
 		}
-		// GetTotalHeapSize is probably fairly cheap; even so this strikes me
-		// as a bit of a hack.
-		size_t heapSizeNow = GetTotalHeapSize() * kBlockSize;
-		if (heapSizeNow > maxTotalHeapSize) {
-			maxTotalHeapSize = heapSizeNow;
-			maxPrivateMemory = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
+
+		// The guard on instance being non-NULL is a hack, to be fixed later (now=2009-07-20).
+		// Some VMPI layers (WinMo is at least one of them) try to grab the GCHeap instance to get
+		// at the map of private pages.  But the GCHeap instance is not available during the initial
+		// call to ExpandHeap.  So sidestep that problem here.
+
+		if (instance != NULL) {
+			// GetTotalHeapSize is probably fairly cheap; even so this strikes me
+			// as a bit of a hack.
+			size_t heapSizeNow = GetTotalHeapSize() * kBlockSize;
+			if (heapSizeNow > maxTotalHeapSize) {
+				maxTotalHeapSize = heapSizeNow;
+				maxPrivateMemory = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
+			}
 		}
 	}
 	 
