@@ -377,11 +377,6 @@ namespace MMgc
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
  	}
  
- 	REALLY_INLINE bool GCPolicyManager::queryCollectionWork()
- 	{
- 		return remainingMinorAllocationBudget <= 0;
- 	}
- 
  	// Called when an incremental mark is about to start.  The premise is that if the
  	// application stays within the budget then the value returned here will correspond
  	// to the desired time slice.  But if the application allocates some huge block that
@@ -728,11 +723,6 @@ namespace MMgc
 		actuallyIsPointer += actually_is_pointer;
 	}
 #endif
-
-	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
-	{
-		remainingMinorAllocationBudget -= int32_t(nbytes);
-	}
 
 	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
 	{
@@ -1585,6 +1575,9 @@ namespace MMgc
 			Collect();
 		}
 	}
+
+	// Note, the interaction with the policy manager in Alloc() should
+	// be the same as in AllocDouble(), which is defined in GC.h.
 
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{

@@ -218,38 +218,31 @@ namespace MMgc
 
 	void* GCAlloc::Alloc(size_t size, int flags)
 	{
-		bool canFail = (flags & GC::kCanFail) != 0;
 		(void)size;
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
-start:
-		if (m_firstFree == NULL && m_needsSweeping == NULL) {
-			if (CreateChunk(canFail) == NULL) {
+
+		GCBlock* b = m_firstFree;
+	start:
+		if (b == NULL) {
+			if (m_needsSweeping && !m_gc->collecting) {
+				Sweep(m_needsSweeping);
+				b = m_firstFree;
+				goto start;
+			}
+			
+			bool canFail = (flags & GC::kCanFail) != 0;
+			CreateChunk(canFail);
+			b = m_firstFree;
+			if (b == NULL) {
 				GCAssert(canFail);
 				return NULL;
 			}
 		}
-
-		GCBlock* b = m_firstFree ? m_firstFree : m_needsSweeping;
-
-		// lazy sweeping
-		if(b->needsSweeping) {
-			if(m_gc->collecting) {
-				if(CreateChunk(canFail) == NULL) {
-					GCAssert(canFail);
-					return NULL;
-				}					
-				b = m_firstFree;
-			}
-			else if(Sweep(b)) {
-				goto start;
-			}
-		}
-
+		
 		GCAssert(!b->needsSweeping);
 		GCAssert(b == m_firstFree);
-
 		GCAssert(b && !b->IsFull());
-
+		
 		void *item;
 		if(b->firstFree) {
 			item = b->firstFree;
@@ -263,7 +256,7 @@ start:
 		} else {
 			item = b->nextItem;
 			if(((uintptr_t)((char*)item + b->size) & 0xfff) != 0) {
-				b->nextItem = (char*)item +  b->size;
+				b->nextItem = (char*)item + b->size;
 			} else {
 				b->nextItem = NULL;
 			}
@@ -277,12 +270,10 @@ start:
 
 		// this assumes what we assert
 		GCAssert((unsigned long)GC::kFinalize == (unsigned long)GCAlloc::kFinalize);
-		int index = GetIndex(b, item);
 		
+		int index = GetIndex(b, item);
 		GCAssert(index >= 0);
-
-		ClearBits(b, index, 0xf);
-		SetBit(b, index, flags & kFinalize);
+		Clear4BitsAndSet(b, index, flags & kFinalize);
 
 		b->numItems++;
 #ifdef MMGC_MEMORY_INFO
@@ -290,7 +281,10 @@ start:
 #endif
 
 		// If we're out of free items, be sure to remove ourselves from the
-		// list of blocks with free items.  
+		// list of blocks with free items.  TODO Minor optimization: when we
+		// carve an item off the end of the block, we don't need to check here
+		// unless we just set b->nextItem to NULL.
+
 		if (b->IsFull()) {
 			m_firstFree = b->nextFree;
 			b->nextFree = NULL;
@@ -303,7 +297,7 @@ start:
 		// prevent mid-collection (ie destructor) allocations on un-swept pages from
 		// getting swept.  If the page is finalized and doesn't need sweeping we don't want
 		// to set the mark otherwise it will be marked when we start the next marking phase
-		// and write barrier's won't fire (since its black)
+		// and write barriers won't fire (since its black)
 		if(m_gc->collecting)
 		{ 
 			if((b->finalizeState != m_gc->finalizedValue) || b->needsSweeping)
@@ -353,7 +347,6 @@ start:
 		if(GetBit(b, index, kHasWeakRef)) {
 			b->gc->ClearWeakRef(GetUserPointer(item));
 		}
-		
 
 		bool wasFull = b->IsFull();
 
@@ -708,6 +701,15 @@ start:
 		// memset rest of item not including free list pointer, in _DEBUG
 		// we poison the memory (and clear in Alloc)
 		// FIXME: can we do something faster with MMX here?
+		//
+		// BTW, experiments show that clearing on alloc instead of on free 
+		// benefits microbenchmark that do massive amounts of double-boxing,
+		// but nothing else enough to worry about it.  (The trick is that
+		// no clearing on alloc is needed when carving objects off the end
+		// of a block, whereas every object is cleared on free even if the
+		// page is subsequently emptied out and returned to the block manager.
+		// Massively boxing programs have alloc/free patterns that are biased
+		// toward non-RC objects carved off the ends of blocks.)
 		if(!alloc->ContainsRCObjects())
 			VMPI_memset((char*)item, 0, size);
 #endif
