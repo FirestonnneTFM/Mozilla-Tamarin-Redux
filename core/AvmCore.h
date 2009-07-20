@@ -1488,13 +1488,13 @@ const int kBufferPadding = 16;
 		Atom uintToAtom(uint32 n);
 		Atom intToAtom(int n);
 
-		Atom allocDouble(double n)
+		REALLY_INLINE Atom allocDouble(double n)
 		{
 			union { 
 				double *d;
 				void *v;
 			};
-			v = GetGC()->Alloc(sizeof(double), 0);
+			v = GetGC()->AllocDouble();
 			*d = n;
 			return kDoubleType | (uintptr)v;
 		}

@@ -681,15 +681,27 @@ namespace MMgc
 		uint64_t adjustR_totalTime;
 	};
 
+	// The following inline functions must be here (and not in GC.cpp with the rest of them)
+	// because they are accessed from various inline functions in this file or in
+	// WriteBarrier.h, typically.
+	
 #ifdef MMGC_POLICY_PROFILING
-	// Must be here (and not in GC.cpp) because it's accessed from the inline write 
-	// barrier in WriteBarrier.h
 	REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
 	{
 		GCAssert(ARRAY_SIZE(barrierStageLastCollection) > size_t(stage));
 		barrierStageLastCollection[stage]++;
 	}
 #endif
+	
+ 	REALLY_INLINE bool GCPolicyManager::queryCollectionWork()
+ 	{
+ 		return remainingMinorAllocationBudget <= 0;
+ 	}
+	
+	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
+	{
+		remainingMinorAllocationBudget -= int32_t(nbytes);
+	}
 	
 	/**
 	 * The Zero Count Table used by DRC.
@@ -938,6 +950,30 @@ namespace MMgc
 			return Alloc(size, flags | kCanFail);			
 		}
 
+#if !defined _DEBUG && !defined MMGC_MEMORY_INFO && !defined AVMPLUS_SAMPLER && !defined MMGC_HOOKS
+		/**
+		 * Like Alloc but optimized for the case of allocating one
+		 * 8-byte non-pointer-containing non-finalizable non-rc
+		 * non-zeroed object (a box for an IEEE double).
+		 *
+		 * Note, the interaction with the policy manager, sampler, profiler etc
+		 * in AllocDouble() should be the same as in Alloc(), which is defined
+		 * in GC.cpp.
+		 */
+		REALLY_INLINE void* AllocDouble()
+		{
+			if (policy.queryCollectionWork())
+				CollectionWork();
+			policy.signalAllocWork(8);
+			return GetUserPointer(noPointersAllocs[0]->Alloc(8,0));
+		}
+#else
+		REALLY_INLINE void* AllocDouble()
+		{
+			return Alloc(8,0);
+		}
+#endif
+			
 	private:
 		class RCRootSegment : public GCRoot
 		{

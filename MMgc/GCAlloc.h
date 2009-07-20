@@ -436,13 +436,18 @@ namespace MMgc
 			return block->GetBits()[index>>3] & mask;
 		}
 
-		// not a hot method
-		static void ClearBits(GCBlock *block, int index, int bits)
+		REALLY_INLINE static void ClearBits(GCBlock *block, int index, int bits)
 		{
 			int mask = bits << ((index&7)<<2);
 			block->GetBits()[index>>3] &= ~mask;
 		}
 
+		REALLY_INLINE static void Clear4BitsAndSet(GCBlock *block, int index, int bit)
+		{
+			uint32_t *bitp = &(block->GetBits()[index>>3]);
+			*bitp = (*bitp & ~(15 << ((index & 7) << 2))) | (bit << ((index & 7) << 2));
+		}
+		
 		// not a hot method
 		static void ClearQueued(const void *item)
 		{
