@@ -261,12 +261,16 @@ namespace MMgc
 		 */
 		size_t GetFreeHeapSize() const { return GetTotalHeapSize()-numAlloc; }
 
-#ifdef MMGC_POLICY_PROFILING
 		/**
-		 * Returns the peak value for the total amount of space managed by the heap.
+		 * Returns the peak value for the total amount of space managed by the heap
+		 * and the amount of private memory at the point where the maximum heap
+		 * number was recorded.
 		 */
-		size_t GetMaxTotalHeapSize() { return maxTotalHeapSize; }
-#endif
+		void GetMaxTotalHeapSize(size_t& heapBlocks, size_t& privateBlocks)
+		{
+			heapBlocks = maxTotalHeapSize / kBlockSize;
+			privateBlocks = maxPrivateMemory / kBlockSize;
+		}
 
 		/**
 		 * Returns the total heap size, that is, the total amount
@@ -549,9 +553,10 @@ namespace MMgc
 		static MemoryProfiler *profiler;
 		bool hasSpy; //flag indicating whether profiler spy is active or not.  If active, AllocHook will call VMPI_spyCallback
 #endif
-#ifdef MMGC_POLICY_PROFILING
-		size_t maxTotalHeapSize;
-#endif
+
+		size_t maxTotalHeapSize;	// in bytes
+		size_t maxPrivateMemory;	// in bytes
+
 #ifdef MMGC_HOOKS
 		bool hooksEnabled;
 #endif
