@@ -5154,7 +5154,7 @@ namespace avmplus
 			case LIR_jt:
 			case LIR_jf:
 			case LIR_j: 
-				AvmAssert(*i->targetAddr() != 0 && *i->targetAddr() == i->oprnd2() && i->oprnd2()->isop(LIR_label));
+				AvmAssert(i->getTarget() != NULL && i->getTarget() == i->oprnd2() && i->oprnd2()->isop(LIR_label));
 				break;
 			}
             return i;
