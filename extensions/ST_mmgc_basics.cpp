@@ -106,15 +106,6 @@ verifyPass(mygcobject->i==10, "mygcobject->i==10", __FILE__, __LINE__);
 
 }
 void ST_mmgc_basics::test2() {
-    MyGCObject *mygcobject;
-    MyObject *myobject;
-    mygcobject = (MyGCObject *)new (gc) MyGCObject();
-    myobject = (MyObject *)new(MyObject);
-verifyPass(gc->IsGCMemory(mygcobject) == true, "gc->IsGCMemory(mygcobject) == true", __FILE__, __LINE__);
-verifyPass(gc->IsGCMemory(myobject) == false, "gc->IsGCMemory(myobject) == false", __FILE__, __LINE__);
-    delete myobject;
-    delete mygcobject;
-
 }
 void ST_mmgc_basics::test3() {
     MyGCObject *mygcobject;
@@ -234,10 +225,6 @@ verifyPass(MMgc::GCLargeAlloc::HasWeakRef(obj)==false, "MMgc::GCLargeAlloc::HasW
 verifyPass(MMgc::GCLargeAlloc::GetMark(obj)==false, "MMgc::GCLargeAlloc::GetMark(obj)==false", __FILE__, __LINE__);
     MMgc::GCLargeAlloc::SetMark(obj);
 verifyPass(MMgc::GCLargeAlloc::GetMark(obj)==true, "MMgc::GCLargeAlloc::GetMark(obj)==true", __FILE__, __LINE__);
-    MMgc::GCLargeAlloc::SetQueued(obj);
-verifyPass(MMgc::GCLargeAlloc::IsRCObject(obj)==false, "MMgc::GCLargeAlloc::IsRCObject(obj)==false", __FILE__, __LINE__);
-verifyPass(MMgc::GCLargeAlloc::IsWhite(obj)==false, "MMgc::GCLargeAlloc::IsWhite(obj)==false", __FILE__, __LINE__);
-verifyPass(MMgc::GCLargeAlloc::IsWhite(mygcobject)==false, "MMgc::GCLargeAlloc::IsWhite(mygcobject)==false", __FILE__, __LINE__);
 
 
 

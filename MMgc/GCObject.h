@@ -203,7 +203,7 @@ namespace MMgc
 #ifdef _DEBUG
 			GC* gc = GC::GetGC(this);
 			GCAssert(gc->IsRCObject(this));
-			GCAssert(this == gc->FindBeginning(this));
+			GCAssert(this == gc->FindBeginningGuarded(this));
 			// don't touch swept objects
 			if(composite == 0xcacacaca || composite == 0xbabababa)
 				return;
@@ -219,7 +219,7 @@ namespace MMgc
 			
 #ifdef MMGC_RC_HISTORY
 			if(GC::GetGC(this)->keepDRCHistory)
-				history.Add(GC::GetGC(this)->GetGCHeap()->GetProfiler()->GetStackTrace());
+				history.Add(GCHeap::GetGCHeap()->GetProfiler()->GetStackTrace());
 #endif
 		}
 
@@ -231,7 +231,7 @@ namespace MMgc
 #ifdef _DEBUG
 			GC* gc = GC::GetGC(this);
 			GCAssert(gc->IsRCObject(this));
-			GCAssert(this == gc->FindBeginning(this));
+			GCAssert(this == gc->FindBeginningGuarded(this));
 			// don't touch swept objects
 			if(composite == 0xcacacaca || composite == 0xbabababa)
 				return;
@@ -265,7 +265,7 @@ namespace MMgc
 
 #ifdef MMGC_RC_HISTORY
 			if(GC::GetGC(this)->keepDRCHistory)
-				history.Add(GC::GetGC(this)->GetGCHeap()->GetProfiler()->GetStackTrace());
+				history.Add(GCHeap::GetGCHeap()->GetProfiler()->GetStackTrace());
 #endif
 			// ??? unclear what the following comment pertains to -- lars, 2009-06-09
 			

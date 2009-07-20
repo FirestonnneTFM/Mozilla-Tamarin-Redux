@@ -1346,9 +1346,6 @@ namespace MMgc
 			SetGCContextVariable(i, NULL);
 		}
 
-		// keep GC::Size honest
-		GCAssert(offsetof(GCLargeAlloc::LargeBlock, usableSize) == offsetof(GCAlloc::GCBlock, size));
-
 		gcheap->AddGC(this);
  		allocaInit();
 
@@ -1719,7 +1716,7 @@ namespace MMgc
 		}
 
 #ifdef _DEBUG
-		// RCObject have constract that they must clean themselves, since they 
+		// RCObject have contract that they must clean themselves, since they 
 		// have to scan themselves to decrement other RCObjects they might as well
 		// clean themselves too, better than suffering a memset later
 		if(IsRCObject(item))
@@ -1753,16 +1750,6 @@ bail:
 			ClearFinalized(item);
 		if(HasWeakRef(item))
 			ClearWeakRef(item);
-	}
-
-	/*static*/ int GC::GetMark(const void *item)
-	{
-		item = GetRealPointer(item);
-		if (GCLargeAlloc::IsLargeBlock(item)) {
-			return GCLargeAlloc::GetMark(item);
-		} else {
-			return GCAlloc::GetMark(item);
-		}
 	}
 
 	void GC::ClearMarks()
@@ -1843,7 +1830,7 @@ bail:
 		// unnecessarily, not sure its worth it as this should be pretty fast
 		GCAlloc::GCBlock *b = smallEmptyPageList;
 		while(b) {
-			GCAlloc::GCBlock *next = b->next;
+			GCAlloc::GCBlock *next = GCAlloc::Next(b);
 #ifdef _DEBUG
 			b->alloc->SweepGuts(b);
 #endif
@@ -1858,10 +1845,10 @@ bail:
 
 		GCLargeAlloc::LargeBlock *lb = largeEmptyPageList;		
 		while(lb) {
-			GCLargeAlloc::LargeBlock *next = lb->next;
+			GCLargeAlloc::LargeBlock *next = GCLargeAlloc::Next(lb);
 #ifdef MMGC_HOOKS
 			if(heap->HooksEnabled())
-				heap->FreeHook(GetUserPointer(lb+1), lb->usableSize - DebugSize(), 0xba);
+				heap->FreeHook(GetUserPointer(lb+1), lb->size - DebugSize(), 0xba);
 #endif
 			int numBlocks = lb->GetNumBlocks();
 			sweepResults += numBlocks;
@@ -1929,23 +1916,6 @@ bail:
 		UnmarkGCPages(ptr, size);
 	}
 
-	int GC::GetPageMapValueAlreadyLocked(uintptr_t addr) const
-	{
-		uintptr_t index = (addr-memStart) >> 12;
-
-#ifdef MMGC_64BIT
-		GCAssert((index >> 2) < uintptr_t(64*65536) * uintptr_t(GCHeap::kBlockSize));
-#else
-		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
-#endif
-		// shift amount to determine position in the byte (times 2 b/c 2 bits per page)
-		uint32_t shiftAmount = (index&0x3) * 2;
-		// 3 ... is mask for 2 bits, shifted to the left by shiftAmount
-		// finally shift back by shift amount to get the value 0, 1 or 3
-		//return (pageMap[addr >> 2] & (3<<shiftAmount)) >> shiftAmount;
-		return (pageMap[index >> 2] >> shiftAmount) & 3;
-	}
-
 	void GC::SetPageMapValue(uintptr_t addr, int val)
 	{
 		uintptr_t index = (addr-memStart) >> 12;
@@ -1968,6 +1938,36 @@ bail:
 		pageMap[index >> 2] &= ~(3<<((index&0x3)*2));
 	}	
 
+	void *GC::FindBeginningGuarded(const void *gcItem)
+	{
+		void *realItem = NULL;
+		int bits = GetPageMapValueGuarded((uintptr_t)gcItem);
+		switch(bits)
+		{
+			case kGCAllocPage:
+				realItem = GCAlloc::FindBeginning(gcItem);
+				break;
+			case kGCLargeAllocPageFirst:
+				realItem = GCLargeAlloc::FindBeginning(gcItem);
+				break;
+			case kGCLargeAllocPageRest:
+				while(bits == kGCLargeAllocPageRest)
+				{
+					gcItem = (void*) ((uintptr_t)gcItem - GCHeap::kBlockSize);
+					bits = GetPageMapValue((uintptr_t)gcItem);
+				}
+				realItem = GCLargeAlloc::FindBeginning(gcItem);
+				break;
+			default:
+				GCAssertMsg(false, "FindBeginningGuarded must not be called on non-managed addresses");
+				return NULL;
+		}		
+#ifdef MMGC_MEMORY_INFO
+		realItem = GetUserPointer(realItem);
+#endif
+		return realItem;
+	}
+	
 	void GC::Mark(GCStack<GCWorkItem> &work)
 	{
 		while(work.Count()) {
@@ -2021,7 +2021,7 @@ bail:
 		addr = (uintptr_t)item;
 		while(numPages--)
 		{
-			GCAssert(GetPageMapValueAlreadyLocked(addr) == 0);
+			GCAssert(GetPageMapValue(addr) == 0);
 			SetPageMapValue(addr, to);
 			addr += GCHeap::kBlockSize;
 		}
@@ -2136,19 +2136,10 @@ bail:
 		gc = NULL;
 	}
 
-	bool GC::IsPointerToGCPage(const void *item)
-	{
-		if((uintptr_t)item >= memStart && (uintptr_t)item < memEnd)
-			return GetPageMapValueAlreadyLocked((uintptr_t) item) != 0;
-		return false;
-	}
-
 #ifdef _DEBUG
     bool GC::IsPointerIntoGCObject(const void *item)
 	{
-		if(!IsPointerToGCPage(item))
-			return false;
-		int bits = GetPageMapValue((uintptr_t)item); 
+		int bits = GetPageMapValueGuarded((uintptr_t)item); 
 		switch(bits) {
 			case kGCAllocPage:
 				return GCAlloc::IsPointerIntoGCObject(item);
@@ -2193,8 +2184,9 @@ bail:
 
 	void GC::RCObjectZeroCheck(RCObject *item)
 	{
-		size_t size = Size(item)/sizeof(int);
+		size_t size = Size(item)/sizeof(uint32_t);
 		uint32_t *p = (uint32_t*)item;
+		uint32_t *limit = p+size;
 		// skip vtable, first 4 bytes are cleared in Alloc
 		p++;
 #ifdef MMGC_64BIT
@@ -2207,7 +2199,7 @@ bail:
 			if(*p == 0xcacacaca)
 				return;
 		}
-		for(int i=1; i<(int)size; i++,p++)
+		for ( ; p < limit ; p++ )
 		{
 			if(*p)
 			{
@@ -2417,19 +2409,14 @@ bail:
 
 	bool GC::IsRCObject(const void *item)
 	{
-		int bits;
-		{
-			if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item&0xfff) == 0)
-				return false;
-			bits = GetPageMapValueAlreadyLocked((uintptr_t)item);
-		}
-
+		if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item&0xfff) == 0)
+			return false;
+		
+		int bits = GetPageMapValue((uintptr_t)item);
 		item = GetRealPointer(item);
 		switch(bits)
 		{
 		case kGCAllocPage:
-			if((char*)item < ((GCAlloc::GCBlock*)((uintptr_t)item&~0xfff))->items)
-				return false;
 			return GCAlloc::IsRCObject(item);
 		case kGCLargeAllocPageFirst:
 			return GCLargeAlloc::IsRCObject(item);
@@ -2577,7 +2564,7 @@ bail:
 				continue;
 			
 			// normalize and divide by 4K to get index
-			int bits = GetPageMapValueAlreadyLocked(val);
+			int bits = GetPageMapValue(val);
 			switch(bits)
 			{
 			case 0:
@@ -2712,7 +2699,7 @@ bail:
 					break;
 
 				default:
-					ptr = ((int*)FindBeginning(where)) - 2;
+					ptr = ((int*)FindBeginningGuarded(where)) - 2;
 					break;
 				}
 
@@ -2754,7 +2741,7 @@ bail:
 		while(m < memEnd)
 		{
 			// divide by 4K to get index
-			int bits = GetPageMapValueAlreadyLocked(m);
+			int bits = GetPageMapValue(m);
 			if(bits == kNonGC) 
 			{
 				ProbeForMatch((const void*)m, GCHeap::kBlockSize, val, recurseDepth, currentDepth);
@@ -3326,10 +3313,10 @@ bail:
 #ifdef MMGC_POINTINESS_PROFILING
 				actually_is_pointer++;
 #endif
-				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetBlockHeader(item);
+				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetLargeBlock(item);
 				if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
 				{
-					uint32_t usize = b->usableSize;
+					uint32_t usize = b->size;
 					if((b->flags & GCLargeAlloc::kContainsPointers) != 0) 
 					{
 						b->flags |= GCLargeAlloc::kQueuedFlag;
@@ -3501,15 +3488,13 @@ bail:
 		
 	}
 
-	int GC::IsWhite(const void *item)
+#ifdef _DEBUG
+	bool GC::IsWhite(const void *item)
 	{
 		// back up to real beginning
 		item = GetRealPointer((const void*) item);
 
-		// normalize and divide by 4K to get index
-		if(!IsPointerToGCPage(item))
-			return false;
-		int bits = GetPageMapValue((uintptr_t)item);	
+		int bits = GetPageMapValueGuarded((uintptr_t)item);	
 		switch(bits) {
 		case 1:
 			return GCAlloc::IsWhite(item);
@@ -3521,6 +3506,7 @@ bail:
 		}
 		return false;
 	}
+#endif // _DEBUG
 
 	// Here the purpose is to shift some work from the barrier mark stack to the regular
 	// mark stack /provided/ the barrier mark stack seems very full.  The regular mark stack
@@ -3569,28 +3555,22 @@ bail:
 
 	/* static */ void GC::WriteBarrierRC(const void *address, const void *value)
 	{
-		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
-		// worry about, so we should be able to optimize (and inline).
 		GC* gc = GC::GetGC(address);
-		gc->privateInlineWriteBarrierRC(gc->FindBeginning(address), address, value);
+		gc->privateInlineWriteBarrierRC(gc->FindBeginningFast(address), address, value);
 	}
 	
 	/* static */ void GC::WriteBarrier(const void *address, const void *value)
 	{
-		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
-		// worry about, so we should be able to optimize (and inline).
 		GC* gc = GC::GetGC(address);
-		gc->privateInlineWriteBarrier(gc->FindBeginning(address), address, value);
+		gc->privateInlineWriteBarrier(gc->FindBeginningFast(address), address, value);
 	}
 
 	void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
 	{
 		(void)value;  // Can't get rid of this parameter now; part of an existing API
 		
-		// OPTIMIZEME: address is much more constrained than FindBeginning normally needs to
-		// worry about, so we should be able to optimize (and inline).
 		if(IsPointerToGCPage(address))
-			InlineWriteBarrierTrap(FindBeginning(address));
+			InlineWriteBarrierTrap(FindBeginningFast(address));
 	}
 	
 	void GC::WriteBarrierNoSubstitute(const void *container, const void *value)
@@ -3599,7 +3579,7 @@ bail:
 		
 		GCAssert(container != NULL);
 		GCAssert(IsPointerToGCPage(container));
-		GCAssert(FindBeginning(container) == container);
+		GCAssert(FindBeginningGuarded(container) == container);
 		InlineWriteBarrierTrap(container);
 	}
 
@@ -3611,12 +3591,6 @@ bail:
 		} else {
 			return GCAlloc::ContainsPointers(item);
 		}
-	}
-
-	bool GC::IsGCMemory (const void *item)
-	{
-		int bits = GetPageMapValue((uintptr_t)item);
-		return (bits != 0);
 	}
 
 	uint32_t *GC::GetBits(int numBytes, int sizeClass)
@@ -3791,7 +3765,7 @@ bail:
 					GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
 					const void *item = GetUserPointer((const void*)(lb+1));
 					if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
-						WhitePointerScan(item, lb->usableSize - DebugSize());
+						WhitePointerScan(item, lb->size - DebugSize());
 					}
 					m += lb->GetNumBlocks() * GCHeap::kBlockSize;
 				}

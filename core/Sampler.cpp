@@ -137,7 +137,7 @@ namespace avmplus
 		autoStartSampling(false),
 		_sampling(true)
 	{
-		_core->GetGC()->GetGCHeap()->EnableHooks();
+		GCHeap::GetGCHeap()->EnableHooks();
  		tls_sampler = this;
 	}
 

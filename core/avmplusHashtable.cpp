@@ -59,7 +59,7 @@ namespace avmplus
 		capacity = MathUtils::nextPowerOfTwo(capacity);
 		setCapacity(capacity*2);
 		AvmAssert(getCapacity());
-		MMGC_MEM_TYPE(gc->FindBeginning(this));
+		MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
 		setAtoms((Atom *)gc->Calloc(getCapacity(), sizeof(Atom), GC::kContainsPointers|GC::kZero));
 	}
 
@@ -80,7 +80,7 @@ namespace avmplus
 	{
 		GC *gc = GC::GetGC(newAtoms);
 		uintptr_t newVal = uintptr_t(newAtoms) | (m_atomsAndFlags & kAtomFlags);
-		WB(gc, gc->FindBeginning(this), &m_atomsAndFlags, (void*)newVal);
+		WB(gc, gc->FindBeginningFast(this), &m_atomsAndFlags, (void*)newVal);
 	}
 
 	void InlineHashtable::put(Atom name, Atom value)
@@ -244,7 +244,7 @@ namespace avmplus
 		}
 		const Atom* atoms = getAtoms();
 		GC* gc = GC::GetGC(atoms);
-		MMGC_MEM_TYPE(gc->FindBeginning(this));
+		MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
 		Atom* newAtoms = (Atom*)gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers|GC::kZero);
 		m_size = rehash(atoms, oldCapacity, newAtoms, newCapacity);
 		gc->Free(atoms);

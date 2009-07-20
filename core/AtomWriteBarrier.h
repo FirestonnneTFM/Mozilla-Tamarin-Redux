@@ -76,7 +76,7 @@ namespace avmplus
 				if(atom == atomNew)
 					return atom;			
 				MMgc::GC *gc = MMgc::GC::GetGC(this);
-				AvmCore::atomWriteBarrier(gc, gc->FindBeginning(this), (Atom*)this, atomNew);
+				AvmCore::atomWriteBarrier(gc, gc->FindBeginningFast(this), (Atom*)this, atomNew);
 				return atom;
 			}
 			Atom atom;

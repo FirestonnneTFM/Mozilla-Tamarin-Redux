@@ -183,15 +183,15 @@ namespace MMgc
 
 		// Unlink the block from the list
 		if (b == m_firstBlock) {
-			m_firstBlock = b->next;
+			m_firstBlock = Next(b);
 		} else {
-			b->prev->next = b->next;
+			b->prev->next = Next(b);
 		}
 		
 		if (b == m_lastBlock) {
 			m_lastBlock = b->prev;
 		} else {
-			b->next->prev = b->prev;
+			Next(b)->prev = b->prev;
 		}
 
 		if(b->nextFree || b->prevFree || b == m_firstFree) {
@@ -314,7 +314,7 @@ start:
 		GCAssert((uintptr_t(item) & 7) == 0);
 
 #ifdef MMGC_MEMORY_PROFILER
-		if(m_gc->GetGCHeap()->HooksEnabled())
+		if(GCHeap::GetGCHeap()->HooksEnabled())
 			m_totalAskSize += size;
 #endif
 
@@ -328,10 +328,10 @@ start:
 		GCAlloc *a = b->alloc;
 	
 #ifdef MMGC_HOOKS
-		if(b->gc->GetGCHeap()->HooksEnabled())
+		if(GCHeap::GetGCHeap()->HooksEnabled())
 		{
 			const void* p = GetUserPointer(item);
-			GCHeap* heap = b->gc->GetGCHeap();
+			GCHeap* heap = GCHeap::GetGCHeap();
 #ifdef MMGC_MEMORY_PROFILER
 			if(heap->GetProfiler())
 				a->m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
@@ -358,10 +358,11 @@ start:
 		bool wasFull = b->IsFull();
 
 		if(b->needsSweeping) {
-			bool gone = a->Sweep(b);
-			if(gone) {
-				GCAssertMsg(false, "How can a page I'm about to free an item on be empty?");
-			}
+#ifdef _DEBUG
+			bool gone =
+#endif
+				a->Sweep(b);
+			GCAssertMsg(!gone, "How can a page I'm about to free an item on be empty?");
 			wasFull = false;
 		}
 
@@ -388,7 +389,7 @@ start:
 		for (GCBlock* b = m_firstBlock; b != NULL; b = next)
 		{
 			// we can unlink block below
-			next = b->next;
+			next = Next(b);
 
 			GCAssert(!b->needsSweeping);
 
@@ -453,7 +454,7 @@ start:
 						bits[i] &= ~(kFinalize<<(j*4));
 
 #if defined(_DEBUG)
-						if(b->alloc->IsRCObject()) {
+						if(b->alloc->ContainsRCObjects()) {
 							m_gc->RCObjectZeroCheck((RCObject*)obj);
 						}
 #endif
@@ -585,7 +586,7 @@ start:
 		GCBlock *block = m_firstBlock;
 start:
 		while (block) {
-			GCBlock *next = block->next;
+			GCBlock *next = Next(block);
 
 			if(block->needsSweeping) {
 				if(Sweep(block)) {
@@ -609,7 +610,7 @@ start:
 		GCBlock *b = m_firstBlock;
 
 		while (b) {
-			GCBlock *next = b->next;
+			GCBlock *next = Next(b);
 			GCAssertMsg(!b->needsSweeping, "All needsSweeping should have been swept at this point.");
 
 			// TODO: MMX version for IA32
@@ -635,7 +636,6 @@ start:
 			b = next;
 		}
 	}	
-#endif
 
 	/*static*/
 	int GCAlloc::ConservativeGetMark(const void *item, bool bogusPointerReturnValue)
@@ -664,7 +664,8 @@ start:
 
 		return GetMark(item);
 	}
-
+#endif // _DEBUG
+	
 	// allows us to avoid division in GetItemIndex, kudos to Tinic
 	void GCAlloc::ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft) 
 	{
@@ -679,7 +680,7 @@ start:
 		muli = (uint16_t) m;
 	}
 
-	void GCAlloc::GCBlock::FreeItem(const void *item, int index)
+	REALLY_INLINE void GCAlloc::GCBlock::FreeItem(const void *item, int index)
 	{
 #ifdef MMGC_MEMORY_INFO
 		GCAssert(alloc->m_numAlloc != 0);
@@ -707,7 +708,7 @@ start:
 		// memset rest of item not including free list pointer, in _DEBUG
 		// we poison the memory (and clear in Alloc)
 		// FIXME: can we do something faster with MMX here?
-		if(!alloc->IsRCObject())
+		if(!alloc->ContainsRCObjects())
 			VMPI_memset((char*)item, 0, size);
 #endif
 		// Add this item to the free list
@@ -721,7 +722,7 @@ start:
 		GCBlock *b=m_firstBlock;
 		while (b) {
 			totalAllocated += b->numItems * m_itemSize;
-			b = b->next;
+			b = Next(b);
 		}		
 	
 #ifdef MMGC_MEMORY_PROFILER

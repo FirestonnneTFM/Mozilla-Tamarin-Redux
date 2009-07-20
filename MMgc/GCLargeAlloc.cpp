@@ -66,7 +66,7 @@ namespace MMgc
 			block->flags |= ((flags&GC::kRCObject) != 0) ? kRCObject : 0;
 			block->gc = this->m_gc;
 			block->next = m_blocks;
-			block->usableSize = blocks*GCHeap::kBlockSize - sizeof(LargeBlock);
+			block->size = blocks*GCHeap::kBlockSize - sizeof(LargeBlock);
 			m_blocks = block;
 			
 			item = (void*)(block+1);
@@ -86,7 +86,7 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_MEMORY_PROFILER
-			if(m_gc->GetGCHeap()->HooksEnabled())
+			if(GCHeap::GetGCHeap()->HooksEnabled())
 				m_totalAskSize += originalSize;
 #endif
 		}
@@ -96,10 +96,10 @@ namespace MMgc
 	
 	void GCLargeAlloc::Free(const void *item)
 	{
-		LargeBlock *b = GetBlockHeader(item);
+		LargeBlock *b = GetLargeBlock(item);
 
 #ifdef MMGC_HOOKS
-		GCHeap* heap = m_gc->GetGCHeap();
+		GCHeap* heap = GCHeap::GetGCHeap();
 		if(heap->HooksEnabled())
 		{
 			const void* p = GetUserPointer(item);
@@ -119,11 +119,11 @@ namespace MMgc
 		{
 			if(b == *prev)
 			{
-				*prev = b->next;
+				*prev = Next(b);
 				m_gc->FreeBlock(b, b->GetNumBlocks());
 				return;
 			}
-			prev = &(*prev)->next;
+			prev = (LargeBlock**)(&(*prev)->next);
 		}
 		GCAssertMsg(false, "Bad free!");
 	}
@@ -133,7 +133,7 @@ namespace MMgc
 		LargeBlock *block = m_blocks;
 		while (block) {
 			block->flags &= ~(kMarkFlag|kQueuedFlag);
-			block = block->next;
+			block = Next(block);
 		}
 	}
 
@@ -163,22 +163,22 @@ namespace MMgc
 				if(m_gc->heap->HooksEnabled())
 				{
 				#ifdef MMGC_MEMORY_PROFILER
-					if(m_gc->GetGCHeap()->GetProfiler())
-						m_totalAskSize -= m_gc->GetGCHeap()->GetProfiler()->GetAskSize(GetUserPointer(item));
+					if(GCHeap::GetGCHeap()->GetProfiler())
+						m_totalAskSize -= GCHeap::GetGCHeap()->GetProfiler()->GetAskSize(GetUserPointer(item));
 				#endif
 
-					m_gc->heap->FinalizeHook(GetUserPointer(item), b->usableSize - DebugSize());
+					m_gc->heap->FinalizeHook(GetUserPointer(item), b->size - DebugSize());
 				}
 #endif
 
 				// unlink from list
-				*prev = b->next;
+				*prev = Next(b);
 				b->gc->AddToLargeEmptyBlockList(b);
 				continue;
 			}
 			// clear marks
 			b->flags &= ~(kMarkFlag|kQueuedFlag);
-			prev = &b->next;
+			prev = (LargeBlock**)(&b->next);
 		}
 		m_startedFinalize = false;
 	}
@@ -188,6 +188,7 @@ namespace MMgc
 		GCAssert(!m_blocks);
 	}
 
+#ifdef _DEBUG
 	/* static */
 	bool GCLargeAlloc::ConservativeGetMark(const void *item, bool bogusPointerReturnValue)
 	{
@@ -197,7 +198,8 @@ namespace MMgc
 		}
 		return bogusPointerReturnValue;
 	}
-	
+#endif
+
 	void GCLargeAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
 	{
 		totalAskSize = 0;
@@ -205,8 +207,8 @@ namespace MMgc
 
 		LargeBlock *block = m_blocks;
 		while (block) {
-			totalAllocated += block->usableSize;
-			block = block->next;
+			totalAllocated += block->size;
+			block = Next(block);
 		}		
 	
 #ifdef MMGC_MEMORY_PROFILER

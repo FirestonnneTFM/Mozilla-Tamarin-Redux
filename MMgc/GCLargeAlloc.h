@@ -67,65 +67,64 @@ namespace MMgc
 		void Finalize();
 		void ClearMarks();
 
+		// not a hot method
 		static void SetHasWeakRef(const void *item, bool to)
 		{
 			if(to) {
-				GetBlockHeader(item)->flags |= kHasWeakRef;
+				GetLargeBlock(item)->flags |= kHasWeakRef;
 			} else {
-				GetBlockHeader(item)->flags &= ~kHasWeakRef;
+				GetLargeBlock(item)->flags &= ~kHasWeakRef;
 			}
 		}
 
+		// not a hot method
 		static bool HasWeakRef(const void *item)
 		{
-			return (GetBlockHeader(item)->flags & kHasWeakRef) != 0;
+			return (GetLargeBlock(item)->flags & kHasWeakRef) != 0;
 		}
 
-		static bool IsLargeBlock(const void *item)
+		REALLY_INLINE static bool IsLargeBlock(const void *item)
 		{
 			// The pointer should be 4K aligned plus 16 bytes
-		        // Mac inserts 16 bytes for new[] so make it more general
+			// Mac inserts 16 bytes for new[] so make it more general
 			return (((uintptr_t)item & 0xFFF) == sizeof(LargeBlock));
 		}
 
-		static bool SetMark(const void *item)
+		REALLY_INLINE static bool SetMark(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			bool oldMark = (block->flags & kMarkFlag) != 0;
 			block->flags |= kMarkFlag;
 			block->flags &= ~kQueuedFlag;
 			return oldMark;
 		}
 
-		static void SetQueued(const void *item)
+		// Not a hot method but always inlining probably shrinks the code
+		REALLY_INLINE static void SetFinalize(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
-			block->flags |= kQueuedFlag;
-		}
-
-		static void SetFinalize(const void *item)
-		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			block->flags |= kFinalizeFlag;
 		}
 		
-		static bool GetMark(const void *item)
+		REALLY_INLINE static bool GetMark(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			return (block->flags & kMarkFlag) != 0;
 		}
 
+#ifdef _DEBUG
 		static bool IsWhite(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			if(!IsLargeBlock(item))
 				return false;
 			return (block->flags & (kMarkFlag|kQueuedFlag)) == 0;
 		}
-
+#endif
+	
 		REALLY_INLINE static bool IsMarkedThenMakeQueued(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			if ((block->flags & kMarkFlag) != 0) {
 				block->flags ^= kMarkFlag|kQueuedFlag;
 				return true;
@@ -135,37 +134,41 @@ namespace MMgc
 
 		REALLY_INLINE static bool IsQueued(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			return (block->flags & kQueuedFlag) != 0;
 		}
 
-		static void* FindBeginning(const void *item)
+		REALLY_INLINE static void* FindBeginning(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			return (void*) (block+1);
 		}
 
+		// not a hot method
 		static void ClearFinalized(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			block->flags &= ~kFinalizeFlag;
 		}
 
+		// Not hot, because GC::MarkItem open-codes it
 		static bool ContainsPointers(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			return (block->flags & kContainsPointers) != 0;
 		}
 		
+		// not a hot method
 		static bool IsFinalized(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			return (block->flags & kFinalizeFlag) != 0;
 		}
 
-		static bool IsRCObject(const void *item)
+		// Can be hot - used by PinStackObjects
+		REALLY_INLINE static bool IsRCObject(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			return (block->flags & kRCObject) != 0;
 		}
 
@@ -179,29 +182,31 @@ namespace MMgc
 		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 
 	private:
-		struct LargeBlock
+		struct LargeBlock : GCBlockHeader
 		{
-			GC *gc;
-			LargeBlock *next;
-			uint32_t usableSize;	// GC::Size depends on this field being same type / offset as GCBlock::size...
 			uint32_t flags;
 
-			int GetNumBlocks() const { return (usableSize + sizeof(LargeBlock)) / GCHeap::kBlockSize; }
+			int GetNumBlocks() const
+			{
+				return (size + sizeof(LargeBlock)) / GCHeap::kBlockSize;
+			}
 		};
 
-		static LargeBlock* GetBlockHeader(const void *addr)
+		REALLY_INLINE static LargeBlock* GetLargeBlock(const void *addr)
 		{
-			return (LargeBlock*) ((uintptr_t)addr & ~0xFFF);
+			return (LargeBlock*)GetBlockHeader(addr);
 		}
 		
+		// not a hot method
 		static bool NeedsFinalize(LargeBlock *block)
 		{
 			return (block->flags & kFinalizeFlag) != 0;
 		}			
 		
+		// not a hot method
 		static void ClearQueued(const void *item)
 		{
-			LargeBlock *block = GetBlockHeader(item);
+			LargeBlock *block = GetLargeBlock(item);
 			block->flags &= ~kQueuedFlag;
 		}
 		
@@ -212,11 +217,19 @@ namespace MMgc
 #endif
 
 		bool m_startedFinalize;
+		
+#ifdef _DEBUG
 		static bool ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
+#endif
 
 	protected:
 		GC *m_gc;
-	
+
+	public:
+		REALLY_INLINE static LargeBlock* Next(LargeBlock* b)
+		{
+			return (LargeBlock*)b->next;
+		}
 	};
 
 	/**
@@ -240,10 +253,10 @@ namespace MMgc
 		{
 			while (block != NULL) {
 				GCLargeAlloc::LargeBlock* b = block;
-				block = block->next;
+				block = GCLargeAlloc::Next(block);
 				if ((b->flags & (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) == (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) {
 					out_ptr = GetUserPointer(b+1);
-					out_size = b->usableSize - (uint32_t)DebugSize();
+					out_size = b->size - (uint32_t)DebugSize();
 					return true;
 				}
 			}

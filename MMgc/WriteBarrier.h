@@ -70,8 +70,8 @@ namespace MMgc
 	{
 		RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
 		if(rc != NULL) {
-			GCAssert(rc == FindBeginning(rc));
 			GCAssert(IsRCObject(rc));
+			GCAssert(rc == FindBeginningGuarded(rc));
 			rc->DecrementRef();
 		}
 		GCAssert(IsPointerIntoGCObject(address));
@@ -79,7 +79,7 @@ namespace MMgc
 		rc = (RCObject*)Pointer(value);
 		if(rc != NULL) {
 			GCAssert(IsRCObject(rc));
-			GCAssert(rc == FindBeginning(value));
+			GCAssert(rc == FindBeginningGuarded(value));
 			rc->IncrementRef();
 		}
 	}
