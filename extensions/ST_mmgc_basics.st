@@ -151,7 +151,8 @@ private:
 
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-    %%verify (MyGCObject *)gc->FindBeginning(mygcobject)==mygcobject
+    %%verify (MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject
+    %%verify (MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject
 
 %%test gcLargeAlloc
     MyGCObject *mygcobject;
