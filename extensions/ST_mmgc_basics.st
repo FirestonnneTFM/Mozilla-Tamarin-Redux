@@ -64,16 +64,6 @@ private:
     mygcobject->i=10;
     %%verify mygcobject->i==10
 
-%%test is_gc_memory
-    MyGCObject *mygcobject;
-    MyObject *myobject;
-    mygcobject = (MyGCObject *)new (gc) MyGCObject();
-    myobject = (MyObject *)new(MyObject);
-    %%verify gc->IsGCMemory(mygcobject) == true
-    %%verify gc->IsGCMemory(myobject) == false
-    delete myobject;
-    delete mygcobject;
-
 %%test get_bytesinuse
     MyGCObject *mygcobject;
     int inuse=(int)gc->GetBytesInUse();
@@ -185,9 +175,5 @@ private:
     %%verify MMgc::GCLargeAlloc::GetMark(obj)==false
     MMgc::GCLargeAlloc::SetMark(obj);
     %%verify MMgc::GCLargeAlloc::GetMark(obj)==true
-    MMgc::GCLargeAlloc::SetQueued(obj);
-    %%verify MMgc::GCLargeAlloc::IsRCObject(obj)==false
-    %%verify MMgc::GCLargeAlloc::IsWhite(obj)==false
-    %%verify MMgc::GCLargeAlloc::IsWhite(mygcobject)==false
 
 

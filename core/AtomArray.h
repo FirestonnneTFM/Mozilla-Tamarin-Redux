@@ -125,7 +125,7 @@ namespace avmplus
 
 		void setAtoms(MMgc::GC *gc, Atom *atoms)
 		{
-			WB(gc, gc->FindBeginning(this), &m_atoms, atoms);
+			WB(gc, gc->FindBeginningFast(this), &m_atoms, atoms);
 		}
 	};
 }

@@ -418,11 +418,8 @@ namespace MMgc
 #ifdef MMGC_POLICY_PROFILING
 		/**
 		 * Situation: signal that one write has been examined by the write barrier and made
-		 * it to the given stage (0..3) of the barrier.   Stages are:
-		 *  0 - entered the write barrier
-		 *  1 - passed cheap filtering
-		 *  2 - passed GetMark filtering (lhs is marked)
-		 *  3 - passed IsWhite filtering (rhs is not marked)
+		 * it to the given stage of the barrier.   See the barrier code to find out what the
+		 * stages are.
 		 */
 		/*REALLY_INLINE*/ void signalWriteBarrierWork(int stage);
 
@@ -1010,29 +1007,37 @@ namespace MMgc
 		void Free(const void *ptr);
 
 		/**
-		 * return the size of a piece of memory, may be bigger than what was asked for.
-		 *
-		 * NOTE! This happens to work because the usableSize field of a large block is of the
-		 * same type and at the same offset as the size field of a non-large block...
-		 * none of which is documented anywhere.  Deriving GCBlock and LargeBlock from some
-		 * common base type in GC would have been rather cleaner.
+		 * @return the size of a managed object given a user or real pointer to its
+		 * beginning.  The returned value may be bigger than what was asked for.
 		 */
-		static size_t Size(const void *ptr)
+		REALLY_INLINE static size_t Size(const void *ptr)
 		{
-			GCAssert(GetGC(ptr)->IsGCMemory(ptr));			
-			size_t size = GCLargeAlloc::GetBlockHeader(ptr)->usableSize;
-			size -= DebugSize();
-			return size;
-
+			return GetBlockHeader(ptr)->size - DebugSize();
 		}
 
+		/**
+		 * @return the GC object associated with a managed object.
+		 */
+		REALLY_INLINE static GC* GetGC(const void *item)
+		{
+			return GetBlockHeader(item)->gc;
+		}
+		
 		/**
 		 * Tracers should employ GetMark and SetMark to
 		 * set the mark bits during the mark pass.
 		 */
-		static int GetMark(const void *item);
-
-		static int SetMark(const void *item)
+		REALLY_INLINE static int GetMark(const void *item)
+		{
+			item = GetRealPointer(item);
+			if (GCLargeAlloc::IsLargeBlock(item)) {
+				return GCLargeAlloc::GetMark(item);
+			} else {
+				return GCAlloc::GetMark(item);
+			}
+		}
+		
+		REALLY_INLINE static int SetMark(const void *item)
 		{
 			GCAssert(item != NULL);
 #ifdef MMGC_MEMORY_INFO
@@ -1046,20 +1051,8 @@ namespace MMgc
 				return GCAlloc::SetMark(item);
 			}
 		}
-		
-		void SetQueued(const void *item)
-		{
-#ifdef MMGC_MEMORY_INFO
-			item = GetRealPointer(item);
-			GCAssert(IsPointerToGCPage(item));
-#endif 			
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				GCLargeAlloc::SetQueued(item);
-			} else {
-				GCAlloc::SetQueued(item);
-			}
-		}
 
+		// Not a hot method
 		void ClearQueued(const void *item)
 		{
 #ifdef MMGC_MEMORY_INFO
@@ -1073,6 +1066,7 @@ namespace MMgc
 			}
 		}
 		
+		// not a hot method
 		static void ClearFinalized(const void *item)
 		{
 #ifdef MMGC_MEMORY_INFO
@@ -1087,6 +1081,7 @@ namespace MMgc
 			}
 		}
 
+		// not a hot method
 		static void SetFinalize(const void *item)
 		{
 #ifdef MMGC_MEMORY_INFO
@@ -1101,6 +1096,7 @@ namespace MMgc
 			}
 		}
 
+		// not a hot method
 		static int IsFinalized(const void *item)
 		{
 #ifdef MMGC_MEMORY_INFO
@@ -1115,6 +1111,7 @@ namespace MMgc
 			}
 		}
 
+		// not a hot method
 		static int HasWeakRef(const void *item)
 		{
 #ifdef MMGC_MEMORY_INFO
@@ -1130,42 +1127,38 @@ namespace MMgc
 		}
 
 		/**
-		 * Utility function: Returns the GC object
-		 * associated with an allocated object
-		 */
-		static GC* GetGC(const void *item)
-		{
-			GC **gc = (GC**) ((uintptr_t)item&~0xfff);
-			return *gc;
-		}
-
-		/**
 		 * Used by sub-allocators to obtain memory.
 		 */
 		void* AllocBlock(int size, int pageType, bool zero=true, bool canFail=false);
 
 		void FreeBlock(void *ptr, uint32_t size);
 
-		GCHeap *GetGCHeap() const { return heap; }
+		// Host API: this should go away but Player code is currently using it.  VM code should not use it.
+		REALLY_INLINE GCHeap *GetGCHeap() const
+		{ 
+			return heap;
+		}
 
-		void ReapZCT(bool scanStack=true) { zct.Reap(scanStack); }
-		bool Reaping() { return zct.IsReaping(); }
+		REALLY_INLINE void ReapZCT(bool scanStack=true)
+		{
+			zct.Reap(scanStack);
+		}
+		
+		REALLY_INLINE bool Reaping()
+		{
+			return zct.IsReaping();
+		}
+
 #ifdef _DEBUG
+		// Test whether the RCObject cleaned itself properly by zeroing everything.
 		void RCObjectZeroCheck(RCObject *);
-#endif
 
-		/**
-		 * debugging tool
-	     */
-		bool IsPointerToGCPage(const void *item);
-
-#ifdef _DEBUG
 		// Test whether 'item' points into a non-free object in the gc'd heap.
 		bool IsPointerIntoGCObject(const void* item);
 #endif
 
 		/**
-		 * Do as much marking as possible in time milliseconds
+		 * Do as much marking as possible in the allotted time slice
 		 */
 		void IncrementalMark();
 
@@ -1175,9 +1168,12 @@ namespace MMgc
 		void CollectionWork();
 
 		/**
-		 * Are we currently marking
+		 * Are we currently marking?
 		 */
-		inline bool IncrementalMarking() const { return marking; }
+		REALLY_INLINE bool IncrementalMarking()
+		{
+			return marking;
+		}
 
 		//////////////////////////////////////////////////////////////////////////
 		//
@@ -1301,56 +1297,50 @@ namespace MMgc
 		
 	public:
 
+		// not a hot method
 		bool ContainsPointers(const void *item);
 
-		void *FindBeginning(const void *gcItem)
-		{
-			GCAssert(gcItem != NULL);
-			GCAssert(GetPageMapValue((uintptr_t)gcItem) != 0);
-			void *realItem = NULL;
-			if((uintptr_t)gcItem < memStart || (uintptr_t)gcItem >= memEnd)
-				return NULL;
-			int bits = GetPageMapValue((uintptr_t)gcItem);
-			switch(bits)
-			{
-			case kGCAllocPage:
-				realItem = GCAlloc::FindBeginning(gcItem);
-				break;
-			case kGCLargeAllocPageFirst:
-				realItem = GCLargeAlloc::FindBeginning(gcItem);
-				break;
-			case kGCLargeAllocPageRest:
-				while(bits == kGCLargeAllocPageRest)
-				{
-					gcItem = (void*) ((uintptr_t)gcItem - GCHeap::kBlockSize);
-					bits = GetPageMapValue((uintptr_t)gcItem);
-				}
-				realItem = GCLargeAlloc::FindBeginning(gcItem);
-				break;
-			default:
-				return NULL;
-			}		
-#ifdef MMGC_MEMORY_INFO
-			realItem = GetUserPointer(realItem);
-#endif
-			return realItem;
-		}
+		// not a hot method.  Will reliably return NULL if gcItem does not point into managed
+		// memory (and _DEBUG code will also assert if that happens - it should not).
+		void *FindBeginningGuarded(const void *gcItem);
 
+		// Used on the critical path of the write barrier path.  gcItem must point into
+		// managed memory, and NULL is never returned.  Don't use this for GCAssert and
+		// similar purposes, but use it when speed is key.
+		REALLY_INLINE void *FindBeginningFast(const void *gcItem)
+		{
+			int bits = GetPageMapValue((uintptr_t)gcItem);
+			if (bits == kGCAllocPage)
+				return GetUserPointer(GCAlloc::FindBeginning(gcItem));
+			while (bits == kGCLargeAllocPageRest)
+			{
+				gcItem = (void*) ((uintptr_t)gcItem - GCHeap::kBlockSize);
+				bits = GetPageMapValue((uintptr_t)gcItem);
+			}
+			return GetUserPointer(GCLargeAlloc::FindBeginning(gcItem));
+		}
+		
+		// not a hot method; PinStackObjects goes directly to GCAlloc::IsRCObject/GCLargeAlloc::IsRCObject.
 		bool IsRCObject(const void *);
 
 		/**
 		 * True during Sweep phase.  Application code can use this to
 		 * determine if it's being called (directly or indirectly) from a
 		 * finalizer.
-		 *
-		 * @see IsGCRunning()
 		 */
-		bool Collecting() const
+		REALLY_INLINE bool Collecting()
 		{
 			return collecting;
 		}
 
-		bool IsGCMemory (const void *);
+		/**
+		 * @return true if the item points to a page containing managed objects.
+		 * Any pointer can be passed in here.
+		 */
+		REALLY_INLINE bool IsPointerToGCPage(const void *item)
+		{
+			return GetPageMapValueGuarded((uintptr_t)item) != 0;
+		}
 
 		static double duration(uint64_t start) 
 		{
@@ -1365,7 +1355,6 @@ namespace MMgc
 		{ 
 			return (ticks*1000000)/VMPI_getPerformanceFrequency();
 		}
-
 
 		static uint64_t ticksToMillis(uint64_t ticks) 
 		{ 
@@ -1423,7 +1412,10 @@ namespace MMgc
 		// a lot without impacting performance
 		void CleanStack(bool force=false);
 
-		bool Destroying() { return destroying; }
+		REALLY_INLINE bool Destroying()
+		{
+			return destroying;
+		}
 
 		static GCWeakRef *GetWeakRef(const void *obj);
 		
@@ -1434,6 +1426,7 @@ namespace MMgc
 
 		// legacy API that gets physical start of OS thread
 		uintptr_t GetOSStackTop() const;
+
 		uintptr_t GetStackTop() const
 		{
 			// temporary crutch until we're moved over to the MMGC_GCENTER system
@@ -1466,11 +1459,18 @@ namespace MMgc
 		friend class GCAutoEnter;
 		friend class GCAutoEnterPause;
 		void SetStackEnter(GCAutoEnter *enter, bool doCollectionWork=true);
-		GCAutoEnter *GetAutoEnter() { return stackEnter; }
+
+		REALLY_INLINE GCAutoEnter *GetAutoEnter()
+		{
+			return stackEnter;
+		}
 
  		vmpi_spin_lock_t m_gcLock;
 
- 		bool onThread() { return VMPI_currentThread() == m_gcThread; }
+ 		bool onThread()
+		{
+			return VMPI_currentThread() == m_gcThread;
+		}
 
 		// store a handle to the thread that create the GC to ensure thread safety
 		vmpi_thread_t m_gcThread;
@@ -1488,7 +1488,8 @@ namespace MMgc
 		void FreeBits(uint32_t *bits, int sizeClass)
 		{
 #ifdef _DEBUG
-			for(int i=0, n=noPointersAllocs[sizeClass]->m_numBitmapBytes; i<n;i++) GCAssert(((uint8_t*)bits)[i] == 0);
+			for(int i=0, n=noPointersAllocs[sizeClass]->m_numBitmapBytes; i<n;i++) 
+				GCAssert(((uint8_t*)bits)[i] == 0);
 #endif
 			*(uint32_t**)bits = m_bitsFreelists[sizeClass];
 			m_bitsFreelists[sizeClass] = bits;
@@ -1539,7 +1540,9 @@ namespace MMgc
 		// reach.  Managed entirely within MarkItem.
 		uint32_t mark_item_recursion_control;
 		
-		int IsWhite(const void *item);
+#ifdef _DEBUG
+		bool IsWhite(const void *item);
+#endif
 
 		// Used heavily by the write barrier.
 		REALLY_INLINE bool IsMarkedThenMakeQueued(const void* userptr)
@@ -1588,12 +1591,31 @@ namespace MMgc
 		 */
 		unsigned char *pageMap;
 
-		inline int GetPageMapValue(uintptr_t addr) const
+		// This is very hot
+		REALLY_INLINE int GetPageMapValue(uintptr_t addr) const
 		{
-			return GetPageMapValueAlreadyLocked(addr);
+			GCAssert(addr >= memStart && addr < memEnd);
+			uintptr_t index = (addr-memStart) >> 12;
+#ifdef MMGC_64BIT
+			GCAssert((index >> 2) < uintptr_t(64*65536) * uintptr_t(GCHeap::kBlockSize));
+#else
+			GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
+#endif
+			// shift amount to determine position in the byte (times 2 b/c 2 bits per page)
+			uint32_t shiftAmount = (index&0x3) * 2;
+			// 3 ... is mask for 2 bits, shifted to the left by shiftAmount
+			// finally shift back by shift amount to get the value 0, 1 or 3
+			//return (pageMap[addr >> 2] & (3<<shiftAmount)) >> shiftAmount;
+			return (pageMap[index >> 2] >> shiftAmount) & 3;
 		}
 
-		int GetPageMapValueAlreadyLocked(uintptr_t addr) const;
+		// This is warm - used in IsPointerToGCPage and in FindBeginningGuarded
+		REALLY_INLINE int GetPageMapValueGuarded(uintptr_t addr)
+		{
+			if(addr >= memStart && addr < memEnd)
+				return GetPageMapValue(addr);
+			return 0;
+		}
 
 		/**
 		 * Set the pageMap bits for the given address.  Those bits must be
@@ -1667,7 +1689,7 @@ namespace MMgc
  
 		bool finalizedValue;
 
-		void AddToSmallEmptyBlockList(GCAlloc::GCBlock *b)
+		REALLY_INLINE void AddToSmallEmptyBlockList(GCAlloc::GCBlock *b)
 		{
 			b->next = smallEmptyPageList;
 			smallEmptyPageList = b;
@@ -1678,7 +1700,7 @@ namespace MMgc
 		 */
 		GCAlloc::GCBlock *smallEmptyPageList;
 		
-		void AddToLargeEmptyBlockList(GCLargeAlloc::LargeBlock *lb)
+		REALLY_INLINE void AddToLargeEmptyBlockList(GCLargeAlloc::LargeBlock *lb)
 		{
 			lb->next = largeEmptyPageList;
 			largeEmptyPageList = lb;
@@ -1705,13 +1727,21 @@ namespace MMgc
 		// Deferred ref counting implementation
 		ZCT zct;
 		void AddToZCT(RCObject *obj) { zct.Add(obj); }
-		// public for one hack from Interval.cpp - no one else should call
-		// this out of the GC
-public:
-		void RemoveFromZCT(RCObject *obj) { zct.Remove(obj); }
-private:
 
-		static const void *Pointer(const void *p) { return (const void*)(((uintptr_t)p)&~7); }
+		// Public for one hack from splay.cpp - no one else should call
+		// this out of the GC.  (The usage pattern in that file could be
+		// abstracted into a better API function here, probably.)
+public:
+		REALLY_INLINE void RemoveFromZCT(RCObject *obj)
+		{
+			zct.Remove(obj);
+		}
+		
+private:
+		REALLY_INLINE static const void *Pointer(const void *p) 
+		{
+			return (const void*)(((uintptr_t)p)&~7);
+		}
 
 public:
 		void DumpMemoryInfo();
@@ -1726,7 +1756,6 @@ private:
 #ifdef _DEBUG		
 		void CheckFreelist(GCAlloc *gca);
 		void CheckFreelists();
-
 
 		int m_gcLastStackTrace;
 
@@ -1788,7 +1817,10 @@ public:
 		//number as reported by GetBytesInUse()
 		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 
-		size_t GetNumBlocks() { return (size_t)policy.blocksOwnedByGC(); }
+		size_t GetNumBlocks()
+		{
+			return (size_t)policy.blocksOwnedByGC();
+		}
 
 		virtual void memoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus);
 
@@ -1904,7 +1936,7 @@ public:
 	{
 #ifdef _DEBUG
 		if (IsGCItem()) {
-			GCAssert(GC::GetGC(p)->FindBeginning(p) == p);
+			GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
 		}
 #endif
 	}

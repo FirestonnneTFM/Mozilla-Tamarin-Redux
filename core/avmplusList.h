@@ -349,7 +349,7 @@ namespace avmplus
 				}
 				if(gc && gc->IsPointerToGCPage(this)) {
 					// data = newData;
-					WB(gc, gc->FindBeginning(this), &data, newData);
+					WB(gc, gc->FindBeginningFast(this), &data, newData);
 				} else {
 					data = newData;
 				}

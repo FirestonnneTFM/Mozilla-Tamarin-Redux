@@ -42,6 +42,24 @@
 
 namespace MMgc
 {
+	// Some common functionality for GCAlloc and GCLargeAlloc follows.  (Could be
+	// in a separate header file.)
+	
+	/**
+	 * Common block header for GCAlloc and GCLargeAlloc.
+	 */
+	struct GCBlockHeader
+	{
+		GC*				gc;		// The GC that owns this block
+		GCBlockHeader*	next;	// The next block in the list of blocks for the allocator
+		uint32_t		size;	// Size of objects stored in this block
+	};
+	
+	REALLY_INLINE GCBlockHeader* GetBlockHeader(const void* item)
+	{
+		return (GCBlockHeader*)(uintptr_t(item) & ~0xFFF);
+	}
+
 	/**
 	 *
 	 * This is a fast, fixed-size memory allocator for garbage-collected
@@ -92,7 +110,7 @@ namespace MMgc
 		void CheckMarks();
 #endif
 
-		static int SetMark(const void *item)
+		REALLY_INLINE static int SetMark(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			int index = GetIndex(block, item);
@@ -104,19 +122,15 @@ namespace MMgc
 			return set;
 		}
 
-		static int SetQueued(const void *item)
-		{
-			GCBlock *block = GetBlock(item);
-			return SetBit(block, GetIndex(block, item), kQueued);
-		}
-		
+		// Not a hot method
 		static int SetFinalize(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			return SetBit(block, GetIndex(block, item), kFinalize);
 		}
 		
-		static int IsWhite(const void *item)
+#ifdef _DEBUG
+		static bool IsWhite(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			// not a real item
@@ -128,15 +142,15 @@ namespace MMgc
 
 			return IsWhite(block, GetIndex(block, item));
 		}
+#endif // _DEBUG
 
-
-		static int GetMark(const void *item)
+		REALLY_INLINE static int GetMark(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			return GetBit(block, GetIndex(block, item), kMark);
 		}
 
-		static void *FindBeginning(const void *item)
+		REALLY_INLINE static void *FindBeginning(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			return block->items + block->size * GetIndex(block, item);
@@ -162,33 +176,39 @@ namespace MMgc
 			return (*bits & (kQueued << ((index&7)<<2))) != 0;
 		}
 
+		// not a hot method
 		static void ClearFinalized(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			ClearBits(block, GetIndex(block, item), kFinalize);
 		}		
 
+		// not a hot method
 		static int IsFinalized(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			return GetBit(block, GetIndex(block, item), kFinalize);
-		}		
+		}
+
+		// not a hot method
 		static int HasWeakRef(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			return GetBit(block, GetIndex(block, item), kHasWeakRef);
 		}		
 		
-		static bool ContainsPointers(const void *item)
+		// Very hot: called in the inner loop of GC::MarkItem
+		REALLY_INLINE static bool ContainsPointers(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
 			return block->alloc->ContainsPointers();
 		}
 
-		static bool IsRCObject(const void *item)
+		// Can be hot - used by PinStackObjects
+		REALLY_INLINE static bool IsRCObject(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
-			return item >= block->items && block->alloc->IsRCObject();
+			return item >= block->items && block->alloc->ContainsRCObjects();
 		}
 
 		static bool IsUnmarkedPointer(const void *val);
@@ -198,10 +218,11 @@ namespace MMgc
 		int GetNumBlocks() const { return m_numBlocks; }
 
 		bool ContainsPointers() const { return containsPointers; }
-		bool IsRCObject() const { return containsRCObjects; }
+		bool ContainsRCObjects() const { return containsRCObjects; }
 
 		void GetBitsPages(void **pages);
 
+		// not a hot method
 		static void SetHasWeakRef(const void *item, bool to)
 		{
 			GCBlock *block = GetBlock(item);
@@ -222,21 +243,17 @@ namespace MMgc
 		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 		
 #ifdef MMGC_MEMORY_PROFILER	
-		size_t GetTotalAskSize() const { return m_totalAskSize; }
+		size_t GetTotalAskSize()
+		{
+			return m_totalAskSize;
+		}
 #endif
 
 	private:
 		const static int kBlockSize = 4096;
 
-		struct GCBlock;
-
-		friend struct GCAlloc::GCBlock;
-
-		struct GCBlock
+		struct GCBlock : GCBlockHeader
 		{
-			GC *gc;
-			GCBlock* next;
-			uint32_t size;			// GC::Size depends on this field being same type / offset as LargeBlock::usableSize...
 			GCAlloc *alloc;			
 			GCBlock* prev;
 			char*  nextItem;
@@ -249,7 +266,7 @@ namespace MMgc
 			bool finalizeState:1;  // whether we've been visited during the Finalize stage
 			char   *items;
 
-			int GetCount() const
+			REALLY_INLINE int GetCount() const
 			{
 				if (nextItem) {
 					return GCAlloc::GetIndex(this, nextItem);
@@ -265,7 +282,7 @@ namespace MMgc
 			
 			void FreeItem(const void *item, int index);
 
-			bool IsFull() const
+			REALLY_INLINE bool IsFull()
 			{
 				bool full = (nextItem == firstFree);
 				// the only time nextItem and firstFree should be equal is when they
@@ -276,7 +293,10 @@ namespace MMgc
 			}
 		};
 		
-		REALLY_INLINE static GCBlock *GetBlock(const void *item) { return (GCBlock*) ((uintptr_t)item & ~0xFFF); }
+		REALLY_INLINE static GCBlock *GetBlock(const void *item)
+		{ 
+			return (GCBlock*)GetBlockHeader(item);
+		}
 		
 #ifdef MMGC_MEMORY_INFO
 		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
@@ -315,14 +335,18 @@ namespace MMgc
 		bool containsRCObjects;
 		bool m_finalized;
 		
+#ifdef _DEBUG
 		bool IsOnEitherList(GCBlock *b)
 		{
 			return b->nextFree != NULL || b->prevFree != NULL || b == m_firstFree || b == m_needsSweeping;
 		}
+#endif
 
 		GCBlock* CreateChunk(int flags);
 		void UnlinkChunk(GCBlock *b);
 		void FreeChunk(GCBlock* b);
+		
+		// not a hot method
 		void AddToFreeList(GCBlock *b)
 		{
 			GCAssert(!IsOnEitherList(b) && !b->needsSweeping);
@@ -335,6 +359,7 @@ namespace MMgc
 			m_firstFree = b;			
 		}
 
+		// not a hot method
 		void RemoveFromFreeList(GCBlock *b)
 		{
 			GCAssert(m_firstFree == b || b->prevFree != NULL);
@@ -348,6 +373,7 @@ namespace MMgc
 			b->nextFree = b->prevFree = NULL;
 		}
 
+		// not a hot method
 		void AddToSweepList(GCBlock *b)
 		{
 			GCAssert(!IsOnEitherList(b) && !b->needsSweeping);
@@ -361,6 +387,7 @@ namespace MMgc
 			b->needsSweeping = true;
 		}
 
+		// not a hot method
 		void RemoveFromSweepList(GCBlock *b)
 		{
 			GCAssert(m_needsSweeping == b || b->prevFree != NULL);
@@ -377,15 +404,15 @@ namespace MMgc
 
 		bool Sweep(GCBlock *b);
 		void SweepGuts(GCBlock *b);
-		
 
 		void ClearMarks(GCAlloc::GCBlock* block);
 		void SweepNeedsSweeping();
 
-		bool IsLastFreeBlock(GCBlock *b) { return m_firstFree == NULL || (m_firstFree == b && b->nextFree == NULL); }
-
+#ifdef _DEBUG
 		static int ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
-		
+#endif
+
+		// very hot
 		REALLY_INLINE static int GetIndex(const GCBlock *block, const void *item)
 		{
 			int index = (int)((((char*) item - block->items) * block->alloc->multiple) >> block->alloc->shift);
@@ -395,12 +422,7 @@ namespace MMgc
 			return index;
 		}			
 
-		static int IsWhite(GCBlock *block, int index)
-		{
-			return (block->GetBits()[index>>3] & ((kMark|kQueued)<<((index&7)<<2))) == 0;
-		}
-
-		static int SetBit(GCBlock *block, int index, int bit)
+		REALLY_INLINE static int SetBit(GCBlock *block, int index, int bit)
 		{
 			int mask = bit << ((index&7)<<2);
 			int set = (block->GetBits()[index>>3] & mask);
@@ -408,18 +430,20 @@ namespace MMgc
 			return set;
 		}
 
-		static int GetBit(GCBlock *block, int index, int bit)
+		REALLY_INLINE static int GetBit(GCBlock *block, int index, int bit)
 		{
 			int mask = bit << ((index&7)<<2);
 			return block->GetBits()[index>>3] & mask;
 		}
 
+		// not a hot method
 		static void ClearBits(GCBlock *block, int index, int bits)
 		{
 			int mask = bits << ((index&7)<<2);
 			block->GetBits()[index>>3] &= ~mask;
 		}
 
+		// not a hot method
 		static void ClearQueued(const void *item)
 		{
 			GCBlock *block = GetBlock(item);
@@ -434,6 +458,11 @@ namespace MMgc
 				return false;
 			return GetBit(block, GetIndex(block, item), kFreelist) != kFreelist;
 		}
+
+		static int IsWhite(GCBlock *block, int index)
+		{
+			return (block->GetBits()[index>>3] & ((kMark|kQueued)<<((index&7)<<2))) == 0;
+		}
 #endif
 
 		void ComputeMultiplyShift(uint16_t d, uint16_t &muli, uint16_t &shft);
@@ -441,6 +470,11 @@ namespace MMgc
 	protected:
 		GC *m_gc;
 
+	public:
+		REALLY_INLINE static GCBlock* Next(GCBlock* b)
+		{
+			return (GCBlock*)b->next;
+		}
 	};
 
 	/**
@@ -468,7 +502,7 @@ namespace MMgc
 			for (;;) {
 				if (idx == limit) {
 					idx = 0;
-					block = block->next;
+					block = GCAlloc::Next(block);
 				}
 				if (block == NULL)
 					return false;

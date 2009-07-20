@@ -202,13 +202,13 @@ namespace avmshell
 
 	double SystemClass::get_totalMemory()
 	{
-		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
+		MMgc::GCHeap* gcheap = MMgc::GCHeap::GetGCHeap();
 		return double(gcheap->GetTotalHeapSize() * MMgc::GCHeap::kBlockSize);
 	}
 
 	double SystemClass::get_freeMemory()
 	{
-		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
+		MMgc::GCHeap* gcheap = MMgc::GCHeap::GetGCHeap();
 		return double(gcheap->GetFreeHeapSize() * MMgc::GCHeap::kBlockSize);
 	}
 	
