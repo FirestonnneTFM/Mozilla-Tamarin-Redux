@@ -616,9 +616,14 @@ namespace MMgc
 		}
 		else
 		{
-			GCLog("[gcbehavior] peak-occupancy: blocks-heap-allocated=%u blocks-gc-allocated=%u\n",
-				  (unsigned)heap->GetMaxTotalHeapSize(),
-				  (unsigned)maxBlocksOwned);
+			size_t maxHeapBlocks;
+			size_t maxPrivateBlocks;
+			
+			heap->GetMaxTotalHeapSize(maxHeapBlocks, maxPrivateBlocks);
+			GCLog("[gcbehavior] peak-occupancy: blocks-heap-allocated=%u blocks-gc-allocated=%u blocks-private=%u\n",
+				  (unsigned)maxHeapBlocks,
+				  (unsigned)maxBlocksOwned,
+				  (unsigned)maxPrivateBlocks);
 			GCLog("[gcbehavior] occupancy: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u, blocks-gc-peak=%u\n",
 				  (unsigned)heapAllocated, 
 				  (unsigned)(heapAllocated - heap->GetFreeHeapSize()), 

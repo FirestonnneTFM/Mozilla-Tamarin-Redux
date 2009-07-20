@@ -135,11 +135,10 @@ namespace MMgc
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
 	#endif
-	#ifdef MMGC_POLICY_PROFILING
 		  maxTotalHeapSize(0),
-	#endif
+ 		  maxPrivateMemory(0),
     #ifdef MMGC_HOOKS
-	hooksEnabled(false),
+		  hooksEnabled(false),
     #endif
 		  entryChecksEnabled(true),
 		  abortStatusNotificationSent(false),
@@ -1114,13 +1113,13 @@ namespace MMgc
 					Abort();
 			}
 		}
-#ifdef MMGC_POLICY_PROFILING
 		// GetTotalHeapSize is probably fairly cheap; even so this strikes me
 		// as a bit of a hack.
-		size_t heapSizeNow = GetTotalHeapSize();
-		if (heapSizeNow > maxTotalHeapSize)
+		size_t heapSizeNow = GetTotalHeapSize() * kBlockSize;
+		if (heapSizeNow > maxTotalHeapSize) {
 			maxTotalHeapSize = heapSizeNow;
-#endif
+			maxPrivateMemory = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
+		}
 	}
 	 
 	bool GCHeap::ExpandHeapInternal(int askSize)
