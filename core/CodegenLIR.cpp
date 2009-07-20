@@ -4887,13 +4887,13 @@ namespace avmplus
             Ins(LIR_live, _save_eip);
         }
 
-		Ins(LIR_live, methodFrame);
+		LIns* last = Ins(LIR_live, methodFrame);
 
 		#ifdef DEBUGGER
 		if (core->debugger())
 		{
 			Ins(LIR_live, csn);
-			Ins(LIR_live, varTraits);
+			last = Ins(LIR_live, varTraits);
 		}
 		#endif
 
@@ -4903,7 +4903,7 @@ namespace avmplus
             p.br->setTarget(p.label->bb);
         }
 
-        frag->lastIns = frag->lirbuf->next()-1;
+        frag->lastIns = last;
 	}
 
 	LIns* CodegenLIR::initMultiname(Multiname* multiname, int& csp, bool isDelete /*=false*/)
@@ -5150,15 +5150,13 @@ namespace avmplus
 
         LIns* read() {
             LIns *i = in->read();
-            if (i) {
-                switch (i->opcode()) {
-                case LIR_jt:
-                case LIR_jf:
-                case LIR_j: 
-                    AvmAssert(*i->targetAddr() != 0 && *i->targetAddr() == i->oprnd2() && i->oprnd2()->isop(LIR_label));
-                    break;
-                }
-            }
+			switch (i->opcode()) {
+			case LIR_jt:
+			case LIR_jf:
+			case LIR_j: 
+				AvmAssert(*i->targetAddr() != 0 && *i->targetAddr() == i->oprnd2() && i->oprnd2()->isop(LIR_label));
+				break;
+			}
             return i;
         }
     };
@@ -5177,8 +5175,8 @@ namespace avmplus
         do {
             again = false;
             livein.reset();
-            LirReader in(lirbuf);
-            for (LIns *i = in.read(); i != 0; i = in.read()) {
+            LirReader in(frag->lastIns);
+            for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
                 LOpcode op = i->opcode();
                 switch (op) {
                 case LIR_ret:
@@ -5273,8 +5271,8 @@ namespace avmplus
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *vars = lirbuf->sp;
         BitSet livein(framesize);
-        LirReader in(lirbuf);
-        for (LIns *i = in.read(); i != 0; i = in.read()) {
+        LirReader in(frag->lastIns);
+        for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
             LOpcode op = i->opcode();
             switch (op) {
                 case LIR_ret:
@@ -5392,16 +5390,16 @@ namespace avmplus
     {
         PERFM_NTPROF("compile");
         debug_only(
-            LirReader reader(frag->lirbuf);
+            LirReader reader(frag->lastIns);
             ValidateReader validator(&reader);
-            while (validator.read())
-            {}
+			for (LIns* i = validator.read(); !i->isop(LIR_start); i = validator.read())
+			{ }
         )
 
         deadvars();
 
         verbose_only(if (verbose())
-            live(gc, frag->lirbuf, /*showLiveRefs*/ false);
+            live(gc, frag, /*showLiveRefs*/ false);
         )
 
 		PageMgr *mgr = pool->codePages;
