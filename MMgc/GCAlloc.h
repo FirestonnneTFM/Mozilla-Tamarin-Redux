@@ -464,7 +464,7 @@ namespace MMgc
 			return GetBit(block, GetIndex(block, item), kFreelist) != kFreelist;
 		}
 
-		static int IsWhite(GCBlock *block, int index)
+		static bool IsWhite(GCBlock *block, int index)
 		{
 			return (block->GetBits()[index>>3] & ((kMark|kQueued)<<((index&7)<<2))) == 0;
 		}
