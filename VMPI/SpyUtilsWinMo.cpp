@@ -62,7 +62,7 @@ public:
 void WriteOnNamedSignal(const char* name, uint32_t *addr);
 
 static SignalData *sig_data=NULL;
-static bool spyRunning;
+static bool spyRunning=false;
 
 DWORD WINAPI WaitForMemorySignal(LPVOID)
 {
@@ -105,6 +105,7 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 	m_namedSharedObject = CreateMsgQueue(wName, &msgopts);
 
 	sig_data = new SignalData(addr, m_namedSharedObject);
+	spyRunning = true;
 	CreateThread(NULL, 0, WaitForMemorySignal, NULL, 0, NULL);
 }
 
