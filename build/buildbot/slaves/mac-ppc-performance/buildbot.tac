@@ -40,7 +40,7 @@ from buildbot.slave.bot import BuildSlave
 
 basedir = r'/Users/build/buildbot/tamarin-redux/mac-ppc-performance'
 host = '10.171.22.12'
-port = 9750
+port = 1000
 slavename = 'asteammac3'
 passwd = 'asteam'
 keepalive = 600
