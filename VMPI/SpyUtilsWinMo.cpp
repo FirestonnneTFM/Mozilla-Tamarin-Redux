@@ -134,7 +134,7 @@ void VMPI_spyCallback()
 		GCAssert(spyStream != NULL);
 		RedirectLogOutput(SpyLog);
 
-		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
+		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfoLocked();
 
 		fflush(spyStream);
 

@@ -338,6 +338,7 @@ namespace MMgc
 		void log_percentage(const char *, size_t bytes, size_t relativeTo);
 
 		void DumpMemoryInfo();
+		void DumpMemoryInfoLocked();
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
 		static void TrackSystemAlloc(void *addr, size_t askSize);

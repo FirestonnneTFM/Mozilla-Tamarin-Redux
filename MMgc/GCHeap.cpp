@@ -1623,6 +1623,12 @@ namespace MMgc
 	
 	void GCHeap::DumpMemoryInfo()
 	{
+		MMGC_LOCK(m_spinlock);
+		DumpMemoryInfoLocked();
+	}
+
+	void GCHeap::DumpMemoryInfoLocked()
+	{
 		size_t priv = VMPI_getPrivateResidentPageCount() * GCHeap::kBlockSize;
 		size_t mmgc = GetTotalHeapSize() * GCHeap::kBlockSize;
 		size_t unmanaged = GetFixedMalloc()->GetTotalSize() * GCHeap::kBlockSize;
@@ -1702,7 +1708,6 @@ namespace MMgc
 
 	void GCHeap::DumpHeapRep()
 	{
-		MMGC_LOCK(m_spinlock);
 		Region **regions;
 		Region *r = lastRegion;
 		int numRegions = 0;

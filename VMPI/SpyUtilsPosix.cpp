@@ -149,7 +149,7 @@ void VMPI_spyCallback()
 		spy_connected = false;
 
 		RedirectLogOutput(SpyLog);
-		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
+		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfoLocked();
 		RedirectLogOutput(NULL);
 		
 		//we are done dumping memory info to the spy
