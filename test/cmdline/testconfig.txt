@@ -48,7 +48,10 @@
 #             as expectedfailure the result will be unexpectedfailure
 #        skip will ignore whether the test passes or failed, this is used for intermittent problems
 #             where the test does not reliably pass
-# name, type [expectedfailure|skip], notes
+# name, type [skip], notes
+
+testMemstats.py , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=505436
+
 
 
 

@@ -61,6 +61,11 @@ class RunTests (RunTestLib):
         list=os.listdir(".")
         for f in list:
             if re.match("test.*\.py$",f):
+                if self.testconfig.has_key(f):
+                    (type,notes)=self.testconfig[f]
+                    if type=='skip':
+                        print "%-30s SKIPPED, %s" % (f,notes)
+                        continue
                 cl=f[0:f.rindex('.')]
                 exec "import " + cl
                 print "%s.run()" % cl

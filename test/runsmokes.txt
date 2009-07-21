@@ -69,7 +69,8 @@ cd acceptance;${py} ./runtests.py --nohtml --avm=${avmd} as3/sampling/Invocation
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmdd} as3/sampling/InvocationSampling.as
 
 # adding new memstats/pyspy testcase, want to make sure it is stable
-cd cmdline;${py} ./testMemstats.py
+# skip test due to intermittent hang https://bugzilla.mozilla.org/show_bug.cgi?id=505436
+#cd cmdline;${py} ./testMemstats.py
 
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=491489
 cd acceptance;${py} ./runtests.py --nohtml --avm=${avmr} abcasm
