@@ -145,6 +145,12 @@ return *((intptr_t*)&_method);
 #define PTR_SCALE 2
 #endif
 
+namespace nanojit
+{
+	// table of LIR instruction sizes
+	extern const uint8_t insSizes[];
+}
+
 namespace avmplus
 {
 		#define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
@@ -444,11 +450,11 @@ namespace avmplus
 	{
         Value &v = state->value(i);
         v.ins = o;
-        lirout->store(o, vars, i*8);
+        lirout->insStorei(o, vars, i*8);
         (void)type;
         DEBUGGER_ONLY(
             if (core->debugger() && int(i) < state->verifier->local_count) {
-                lirout->store(InsConstPtr(type), varTraits, i*sizeof(Traits*));
+                lirout->insStorei(InsConstPtr(type), varTraits, i*sizeof(Traits*));
 			}
         )
 	}
@@ -603,6 +609,7 @@ namespace avmplus
 		interruptable(true),
 		patches(gc)
 	{
+		log.lcbits = 0;
 		state = NULL;
 
 		#ifdef AVMPLUS_MAC_CARBON
@@ -738,10 +745,7 @@ namespace avmplus
         {}
         LIns *ins0(LOpcode op) {
             switch (op) {
-                case LIR_tramp: AvmAssert(false); break;
-                case LIR_neartramp: AvmAssert(false); break;
                 case LIR_skip: AvmAssert(false); break;
-                case LIR_nearskip: AvmAssert(false); break;
                 case LIR_label: break;
                 case LIR_start: break;
                 default:AvmAssert(false);
@@ -851,24 +855,20 @@ namespace avmplus
             return out->ins2(op, a, b);
         }
 
-        LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
+        LIns *insLoad(LOpcode op, LIns *base, int32_t disp) {
             switch (op) {
                 case LIR_ld:
                 case LIR_ldq:
                 case LIR_ldc:
                 case LIR_ldqc:
-					AvmAssert(base->isPtr() && !disp->isQuad());
+					// all loads require base to be a pointer, regardless of the value size
+					AvmAssert(base->isPtr());
 					break;
                 default:
 					AvmAssert(false);
 					break;
             }
             return out->insLoad(op, base, disp);
-        }
-
-        LIns *insStore(LIns *value, LIns *base, LIns *disp) {
-            AvmAssert(base && value && base->isPtr() && !disp->isQuad());
-            return out->insStore(value, base, disp);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
@@ -887,7 +887,7 @@ namespace avmplus
             return out->insBranch(op, cond, to);
         }
 
-        LIns *insGuard(LOpcode v, LIns *cond, SideExit *x) {
+        LIns *insGuard(LOpcode v, LIns *cond, LIns *x) {
             AvmAssert(false);
             return out->insGuard(v, cond, x);
         }
@@ -953,7 +953,7 @@ namespace avmplus
                         // not modified
                         continue;
                     }
-                    out->store(v, vars, i*sizeof(double));
+                    out->insStorei(v, vars, i*sizeof(double));
                     dirty.clear(i);
                 }
             }
@@ -979,27 +979,18 @@ namespace avmplus
             }*/
         }
 
-        LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
+        LIns *insLoad(LOpcode op, LIns *base, int32_t d) {
             if (base == vars) {
-                int d = disp->imm32();
                 AvmAssert((d&7) == 0);
                 int i = d >> 3;
                 LIns *val = tracker[i];
 				if (!val) {
-					val = out->insLoad(op, base, disp);
+					val = out->insLoad(op, base, d);
 					tracker[i] = val;
 				}
 				return val;
             }
-            return out->insLoad(op, base, disp);
-        }
-
-        LIns *insStore(LIns *value, LIns *base, LIns *disp) {
-            if (base == vars) {
-                trackStore(value, disp->imm32());
-                DEFER_STORES(return 0;)
-            }
-            return out->insStore(value, base, disp);
+            return out->insLoad(op, base, d);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
@@ -1104,6 +1095,23 @@ namespace avmplus
             return (op & ~1) == LIR_i2f;
         }
 
+        LIns *imm2Int(LIns* imm) {
+            // return LIns* if we can fit the constant into a i32
+            if (imm->isconst())
+                ; // just use imm
+            else if (imm->isconstq()) {
+                double val = imm->imm64f();
+                double cvt = (int)val;
+                if (val == 0 || val == cvt)
+                    imm = out->insImm((int32_t)cvt);
+                else
+                    imm = 0; // can't convert
+            } else {
+                imm = 0; // non-imm
+            }            
+            return imm;
+        }
+        
         LIns *insCall(const CallInfo *call, LInsp args[]) {
             if (call == FUNCTIONID(integer_d)) {
                 LIns *v = args[0];
@@ -1113,8 +1121,10 @@ namespace avmplus
                 if (op == LIR_fadd || op == LIR_fsub || op == LIR_fmul) {
                     LIns *a = v->oprnd1();
                     LIns *b = v->oprnd2();
-                    if (isPromote(a->opcode()) && isPromote(b->opcode()))
-                        return out->ins2(LOpcode(op & ~LIR64), a->oprnd1(), b->oprnd1());
+                    a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
+                    b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
+                    if (a && b)
+                        return out->ins2(LOpcode(op & ~LIR64), a, b);
                 }
 				else if (op == LIR_quad) {
 					// const fold
@@ -1243,14 +1253,6 @@ namespace avmplus
             return out->insCall(call,args);
         }
 
-        LIns *insStore(LIns *value, LIns *base, LIns *disp) {
-            if (base == vars)
-                trackStore(value, disp->imm32(),false);
-            else if (base == traits)
-                trackStore(value, disp->imm32(),true);            
-            return out->insStore(value, base, disp);
-        }
-
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
             if (base == vars)
                 trackStore(value, d,false);
@@ -1280,8 +1282,9 @@ namespace avmplus
         verbose_only(
 			vbWriter = 0;
 			if (verbose()) {
+				log.lcbits = 0xffff; // turn everything on
 				lirbuf->names = new (gc) LirNameMap(gc, *lir_alloc, pool->codePages->labels);
-				lirout = vbWriter = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
+				lirout = vbWriter = new (gc) VerboseWriter(gc, lirout, lirbuf->names, &log);
 			}
 		)
         #ifdef NJ_SOFTFLOAT
@@ -2633,7 +2636,7 @@ namespace avmplus
                     // v == undefinedAtom ? nullObjectAtom : v;
                     LIns *v = localGetp(loc);
                     v = lirout->ins_choose(binaryIns(LIR_peq, v, undefConst),
-                        InsConstAtom(nullObjectAtom), v);
+                        InsConstAtom(nullObjectAtom), v, true /* use_cmov */);
                     localSet(loc, v, result);
                 }
 			}
@@ -5183,9 +5186,7 @@ namespace avmplus
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_st:
                 case LIR_sti:
-                case LIR_stq:
                 case LIR_stqi:
                     if (i->oprnd2() == vars) {
                         int d = i->disp() >> 3;
@@ -5279,16 +5280,16 @@ namespace avmplus
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_st:
                 case LIR_sti:
-                case LIR_stq:
                 case LIR_stqi:
                     if (i->oprnd2() == vars) {
                         int d = i->disp() >> 3;
                         if (!livein.get(d)) {
                             verbose_only(if (names)
                                 AvmLog("- %s\n", names->formatIns(i));)
-                            i->initOpcode(LIR_neartramp);
+							// erase the store by rewriting it as a skip
+							LIns* prevIns = (LIns*) (uintptr_t(i) - insSizes[op]);
+							i->initLInsSk(prevIns);
                             continue;
                         } else {
                             livein.clear(d);
@@ -5399,7 +5400,7 @@ namespace avmplus
         deadvars();
 
         verbose_only(if (verbose())
-            live(gc, frag, /*showLiveRefs*/ false);
+            live(gc, frag, &log);
         )
 
 		PageMgr *mgr = pool->codePages;
