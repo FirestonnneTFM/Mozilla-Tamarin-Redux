@@ -188,11 +188,26 @@ namespace MMgc
 		, objectsReaped(0)
 		, bytesReaped(0)
 		, objectsPinned(0)
+		, objectsAllocated(0)
+		, bytesAllocated(0)
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		, candidateWords(0)
 		, couldBePointer(0)
 		, actuallyIsPointer(0)
+#endif
+#ifdef MMGC_REFCOUNT_PROFILING
+		, incrementRefTotal(0)
+		, incrementRefLastCollection(0)
+		, decrementRefTotal(0)
+		, decrementRefLastCollection(0)
+		, zctPeakSize(0)
+		, addZCTTotal(0)
+		, addZCTLastCollection(0)
+		, removeZCTTotal(0)
+		, removeZCTLastCollection(0)
+		, addZCTInitialTotal(0)
+		, removeZCTFinalTotal(0)
 #endif
 		, P(0.005)				// seconds; 5ms.  The marker /will/ overshoot this significantly
 		, R(R_INITIAL_VALUE)	// bytes/second; will be updated on-line
@@ -564,6 +579,18 @@ namespace MMgc
 			}
 		}
 #endif
+#ifdef MMGC_REFCOUNT_PROFILING
+		// Need to clear these before any refcount operations can occur, so that means right here:
+		// if earlier, we'd not have them for reporting.
+		incrementRefTotal += incrementRefLastCollection;
+		incrementRefLastCollection = 0;
+		decrementRefTotal += decrementRefLastCollection;
+		decrementRefTotal = 0;
+		addZCTTotal += addZCTLastCollection;
+		addZCTLastCollection = 0;
+		removeZCTTotal += removeZCTLastCollection;
+		removeZCTLastCollection = 0;
+#endif
 		switch (ev) {
 			case END_IncrementalMark:
 				adjustPolicyForNextMinorCycle();
@@ -595,7 +622,10 @@ namespace MMgc
 		double dtotal;
 		
 		GCLog("--------------------\n");
-		GCLog("[gcbehavior] gc=%p gcno=%u incremental-marks=%u\n", (void*)gc, afterCollection ? (unsigned)countFinalizeAndSweep : 0, (unsigned)countIncrementalMark);
+		GCLog("[gcbehavior] tag: gc=%p gcno=%u incremental-marks=%u\n", (void*)gc, afterCollection ? (unsigned)countFinalizeAndSweep : 0, (unsigned)countIncrementalMark);
+		GCLog("[gcbehavior] allocation-work: objects=%.0f bytes=%.0f\n", 
+			  double(objectsAllocated),
+			  double(bytesAllocated));
 		if (afterCollection)
 		{
 			GCLog("[gcbehavior] occupancy-before: blocks-heap-allocated=%u blocks-heap-used=%u blocks-gc-allocated=%u blocks-gc-used=%u\n",
@@ -666,6 +696,24 @@ namespace MMgc
 		VMPI_sprintf(buf + strlen(buf), " hit-ratio=%.2f\n", 
 					 double(barrierStageLastCollection[blimit-1] + barrierStageTotal[blimit-1])/double(dtotal));
 		GCLog(buf);
+
+#ifdef MMGC_REFCOUNT_PROFILING
+		GCLog("[gcbehavior] refcount-last-gc: increment=%.0f decrement=%.0f\n",
+			  double(incrementRefLastCollection),
+			  double(decrementRefLastCollection));
+		GCLog("[gcbehavior] refcount-all-gc: increment=%.0f decrement=%.0f\n",
+			  double(incrementRefLastCollection + incrementRefTotal),
+			  double(decrementRefLastCollection + decrementRefTotal));
+		GCLog("[gcbehavior] zct-traffic-last-gc: add=%.0f remove=%.0f\n",
+			  double(addZCTLastCollection),
+			  double(removeZCTLastCollection));
+		GCLog("[gcbehavior] zct-traffic-all-gc: peak=%u add=%.0f add-initial-ratio=%.3f remove=%.0f remove-final-ratio=%.3f\n",
+			  unsigned(zctPeakSize),
+			  double(addZCTLastCollection + addZCTTotal),
+			  double(addZCTInitialTotal) / double(addZCTLastCollection + addZCTTotal),
+			  double(removeZCTLastCollection + removeZCTTotal),
+			  double(removeZCTFinalTotal) / double(removeZCTLastCollection + removeZCTTotal));
+#endif
 
 		GCLog("[gcbehavior] time-zct-reap: last-cycle=%.1f total=%.1f\n",
 			  ticksToMillis(timeReapZCTLastCollection),
@@ -885,8 +933,9 @@ namespace MMgc
 		zctReapThreshold = int(gc->policy.zctNewReapThreshold(blocktop - blocktable, 0));
 	}
 	
-	void ZCT::Add(RCObject *obj)
+	void ZCT::Add(RCObject *obj REFCOUNT_PROFILING_ARG(bool initial))
 	{
+		REFCOUNT_PROFILING_ONLY( gc->policy.signalZCTAdd(initial, count); )
 		if(gc->collecting)
 		{
 			// this is a vestige from FP8 to fix bug 165100, it has the affect of delaying 
@@ -954,8 +1003,9 @@ namespace MMgc
 			Grow();
 	}
 	
-	void ZCT::Remove(RCObject *obj)
+	void ZCT::Remove(RCObject *obj REFCOUNT_PROFILING_ARG(bool final))
 	{
+		REFCOUNT_PROFILING_ONLY( gc->policy.signalZCTRemove(final); )
 		int index = obj->getZCTIndex();
 		GCAssert(Get(index) == obj);
 		

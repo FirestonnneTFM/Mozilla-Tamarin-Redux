@@ -140,14 +140,14 @@ namespace MMgc
 			// b/c RCObjects have a vtable we know composite isn't the first 4 byte and thus
 			// won't be trampled by the freelist
 			composite = 1;
-			GC::GetGC(this)->AddToZCT(this);
+			GC::GetGC(this)->AddToZCT(this REFCOUNT_PROFILING_ARG(true));
 		}
 
 		~RCObject()
 		{
 			// for explicit deletion
 			if (InZCT())
-				GC::GetGC(this)->RemoveFromZCT(this);
+				GC::GetGC(this)->RemoveFromZCT(this REFCOUNT_PROFILING_ARG(true));
 			composite = 0;
 #if 0  // no justification for this
 			padto32bytes = 0;
@@ -197,9 +197,9 @@ namespace MMgc
 
 		void IncrementRef() 
 		{
+			REFCOUNT_PROFILING_ONLY( GC::GetGC(this)->policy.signalIncrementRef(); )
 			if(Sticky() || composite == 0)
 				return;
-
 #ifdef _DEBUG
 			GC* gc = GC::GetGC(this);
 			GCAssert(gc->IsRCObject(this));
@@ -225,6 +225,7 @@ namespace MMgc
 
 		REALLY_INLINE void DecrementRef() 
 		{ 
+			REFCOUNT_PROFILING_ONLY( GC::GetGC(this)->policy.signalDecrementRef(); )
 			if(Sticky() || composite == 0)
 				return;
 

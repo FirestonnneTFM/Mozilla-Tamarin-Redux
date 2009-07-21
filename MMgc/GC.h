@@ -437,6 +437,32 @@ namespace MMgc
 		 */
 		/*inline*/ void signalDemographics(size_t words, size_t could_be_pointer, size_t actually_is_pointer);
 #endif
+#ifdef MMGC_REFCOUNT_PROFILING
+		/**
+		 * Situation: signal that IncrementRef has been called on an object.
+		 */
+		/*REALLY_INLINE*/ void signalIncrementRef();
+		
+		/**
+		 * Situation: signal that DecrementRef has been called on an object.
+		 */
+		/*REALLY_INLINE*/ void signalDecrementRef();
+		
+		/**
+		 * Situation: signal that one reference is being added to the ZCT.  If 'initial'
+		 * is true then the object is freshly allocated and the adding is from RCObject's
+		 * constructor.  'population' is the number of elements in the table at the time
+		 * ZCT::Add is entered.
+		 */
+		/*REALLY_INLINE*/ void signalZCTAdd(bool initial, uint32_t population);
+		
+		/**
+		 * Situation: signal that one reference is being removed from the ZCT.  If 'final'
+		 * is true then the object is being deleted and the removal is from RCObject's
+		 * destructor.
+		 */
+		/*REALLY_INLINE*/ void signalZCTRemove(bool final);
+#endif
 
 		/**
 		 * The collector 'gc' (which is not the collector for this manager) has started
@@ -627,6 +653,10 @@ namespace MMgc
 		uint64_t objectsReaped;
 		uint64_t bytesReaped;
 		uint64_t objectsPinned;
+		
+		// Allocation work, overall
+		uint64_t objectsAllocated;
+		uint64_t bytesAllocated;
 #endif
 #ifdef MMGC_POINTINESS_PROFILING
 		// Track the number of scannable words, the number that passes the initial range
@@ -637,6 +667,19 @@ namespace MMgc
 		uint64_t candidateWords;
 		uint64_t couldBePointer;
 		uint64_t actuallyIsPointer;
+#endif
+#ifdef MMGC_REFCOUNT_PROFILING
+		uint64_t incrementRefTotal;
+		uint64_t incrementRefLastCollection;
+		uint64_t decrementRefTotal;
+		uint64_t decrementRefLastCollection;
+		uint32_t zctPeakSize;
+		uint64_t addZCTTotal;
+		uint64_t addZCTLastCollection;
+		uint64_t removeZCTTotal;
+		uint64_t removeZCTLastCollection;
+		uint64_t addZCTInitialTotal;
+		uint64_t removeZCTFinalTotal;
 #endif
 
 		// Various policy parameters.  For more documentation, see comments in GC.cpp.
@@ -692,6 +735,33 @@ namespace MMgc
 		barrierStageLastCollection[stage]++;
 	}
 #endif
+#ifdef MMGC_REFCOUNT_PROFILING
+	REALLY_INLINE void GCPolicyManager::signalIncrementRef()
+	{
+		incrementRefLastCollection++;
+	}
+	
+	REALLY_INLINE void GCPolicyManager::signalDecrementRef()
+	{
+		decrementRefLastCollection++;
+	}
+	
+	REALLY_INLINE void GCPolicyManager::signalZCTAdd(bool initial, uint32_t population)
+	{
+		addZCTLastCollection++;
+		if (initial)
+			addZCTInitialTotal++;
+		if (population > zctPeakSize)
+			zctPeakSize = population;
+	}
+	
+	REALLY_INLINE void GCPolicyManager::signalZCTRemove(bool final)
+	{
+		removeZCTLastCollection++;
+		if (final)
+			removeZCTFinalTotal++;
+	}
+#endif
 	
  	REALLY_INLINE bool GCPolicyManager::queryCollectionWork()
  	{
@@ -700,6 +770,10 @@ namespace MMgc
 	
 	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
 	{
+#ifdef MMGC_POLICY_PROFILING
+		objectsAllocated++;
+		bytesAllocated += nbytes;
+#endif
 		remainingMinorAllocationBudget -= int32_t(nbytes);
 	}
 	
@@ -719,11 +793,11 @@ namespace MMgc
 		
 		// Add obj to the ZCT; it must not already be in the ZCT.  This method can fail silently,
 		// leaving the GC to reap the object in case its reference count stays zero.
-		void Add(RCObject *obj);
-		
+		void Add(RCObject *obj REFCOUNT_PROFILING_ARG(bool initial=false));
+
 		// Remove obj from the ZCT; it must already be in the ZCT.
-		void Remove(RCObject *obj);
-		
+		void Remove(RCObject *obj REFCOUNT_PROFILING_ARG(bool final=false));
+
 		// Reap the ZCT: destroy every object in the ZCT that is not referenced from the
 		// calling thread's stack or specially marked stack-like data structures in the GC
 		// (see GC::allocaPush() and associated code).
@@ -1758,17 +1832,22 @@ namespace MMgc
 
 		// Deferred ref counting implementation
 		ZCT zct;
+#ifdef MMGC_REFCOUNT_PROFILING
+		void AddToZCT(RCObject *obj, bool initial=false) { zct.Add(obj, initial); }
+#else
 		void AddToZCT(RCObject *obj) { zct.Add(obj); }
+#endif
 
 		// Public for one hack from splay.cpp - no one else should call
 		// this out of the GC.  (The usage pattern in that file could be
 		// abstracted into a better API function here, probably.)
 public:
-		REALLY_INLINE void RemoveFromZCT(RCObject *obj)
-		{
-			zct.Remove(obj);
-		}
-		
+#ifdef MMGC_REFCOUNT_PROFILING
+		REALLY_INLINE void RemoveFromZCT(RCObject *obj, bool final=false) { zct.Remove(obj, final); }
+#else
+		REALLY_INLINE void RemoveFromZCT(RCObject *obj) { zct.Remove(obj); }
+#endif
+
 private:
 		REALLY_INLINE static const void *Pointer(const void *p) 
 		{

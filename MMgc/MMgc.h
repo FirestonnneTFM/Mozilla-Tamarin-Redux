@@ -67,7 +67,10 @@
     #endif
 #endif
 
-// Policy profiler settings (for MMgc development mostly)
+// Policy profiler settings (for MMgc development mostly).
+//
+// On MacOS X desktop MMGC_POLICY_PROFILING incurs a 5% execution overhead on the
+// benchmark test/performance/mmgc/gcbench.as.
 //
 // Enabling this and MMGC_MEMORY_INFO at the same time is probably not a good idea.
 //
@@ -82,8 +85,24 @@
 #endif
 
 #ifdef MMGC_POLICY_PROFILING
-	// Profile the pointer density of scanned memory - really for the specially interested
+	// Really for the specially interested!  These switches incur measurable overhead,
+	// so be careful when benchmarking.
+
+	// Profile the pointer density of scanned memory
     //#define MMGC_POINTINESS_PROFILING
+
+	// Profile reference count traffic.  This feature adds about 8% execution time overhead
+	// to the overhead already added by MMGC_POLICY_PROFILING, on the gcbench benchmark,
+	// measured on MacOS X desktop.
+	//#define MMGC_REFCOUNT_PROFILING
+#endif
+
+#ifdef MMGC_REFCOUNT_PROFILING
+	#define REFCOUNT_PROFILING_ONLY(x) x
+	#define REFCOUNT_PROFILING_ARG(x) , x
+#else
+	#define REFCOUNT_PROFILING_ONLY(x)
+	#define REFCOUNT_PROFILING_ARG(x)
 #endif
 
 #include "GCDebug.h"
