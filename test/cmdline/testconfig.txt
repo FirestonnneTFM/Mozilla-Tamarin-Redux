@@ -50,7 +50,6 @@
 #             where the test does not reliably pass
 # name, type [skip], notes
 
-testMemstats.py , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=505436
 
 
 
