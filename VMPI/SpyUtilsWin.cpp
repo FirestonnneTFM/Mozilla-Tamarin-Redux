@@ -173,8 +173,6 @@ bool VMPI_spySetup()
 void VMPI_spyTeardown()
 {
 	spyRunning = false;
-	if(sig_data)
-		SetEvent(sig_data->eventHandle);
 }
 
 bool VMPI_hasSymbols()
