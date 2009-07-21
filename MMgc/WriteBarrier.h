@@ -100,22 +100,20 @@ namespace MMgc
 		POLICY_PROFILING_ONLY(int stage=0;)
 		// If the object is black then it needs to be gray, because we just stored
 		// something into it.
-		// Need to check 'marking' for correctness.  (Not clear to me yet why.)
-		// It's /sometimes/ useful to check 'value' for NULL - depends on the program, obviously.
+		//
+		// It's good to check 'marking' because it provides a performance boost if it is
+		// true less than maybe 2/3 of the time - it avoids more expensive computation.
+		// We don't check 'collecting' because that's much less often true; it's checked
+		// inside WriteBarrierHit.
+		//
+		// Testing shows that it's /sometimes/ useful to check the right hand side of the
+		// assignment for NULL, but this depends on the program and for the time being
+		// the right hand side isn't available here and isn't checked.
 		if (marking) {
 			POLICY_PROFILING_ONLY(stage=1;)
 			if (IsMarkedThenMakeQueued(container)) {
 				POLICY_PROFILING_ONLY(stage=2;)
-				// Now just push the gray object onto the barrier mark stack.
-				// IncrementalMark may move a segment off the secondary mark stack;
-				// FinishIncrementalMark will take care of what remains.
-				// We don't care what 'value' is - the marker will perform a more efficient
-				// check for pointers to GC objects than we can do here anyway.
-				// Observe that if this push fails, then the item is just pushed onto
-				// the regular mark stack as part of the normal stack overflow handling.
-				// That is what we want.
-				GCWorkItem item(container, (uint32_t)Size(container), true);
-				PushBarrierItem(item);
+				WriteBarrierHit(container);
 			}
 		}
 		POLICY_PROFILING_ONLY( policy.signalWriteBarrierWork(stage); )
