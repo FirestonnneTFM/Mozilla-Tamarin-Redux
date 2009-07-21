@@ -96,6 +96,8 @@ namespace MMgc
 	
 	void GCLargeAlloc::Free(const void *item)
 	{
+		GCAssertMsg(!m_startedFinalize, "GCLargeAlloc::Free is not allowed during finalization; caller must guard against this.");
+
 		LargeBlock *b = GetLargeBlock(item);
 
 #ifdef MMGC_HOOKS
@@ -144,6 +146,17 @@ namespace MMgc
 		while (*prev) {			
 			LargeBlock *b = *prev;
 			if ((b->flags & kMarkFlag) == 0) {
+				GC* gc = b->gc;
+				
+				// Large blocks may be allocated by finalizers for large blocks, creating contention
+				// for the block list.  Yet the block list must be live, since eg GetUsageInfo may be
+				// called by the finalizers (or their callees).
+				//
+				// Unlink the block from the list early to avoid contention.
+				
+				*prev = Next(b);
+				b->next = NULL;
+
 				void *item = b+1;
 				if (NeedsFinalize(b)) {
 					GCFinalizable *obj = (GCFinalizable *) item;
@@ -151,12 +164,12 @@ namespace MMgc
 					obj->~GCFinalizable();
 #if defined(_DEBUG)
 					if((b->flags & kRCObject) != 0) {
-						b->gc->RCObjectZeroCheck((RCObject*)obj);
+						gc->RCObjectZeroCheck((RCObject*)obj);
 					}
 #endif
 				}
 				if(b->flags & kHasWeakRef) {
-					b->gc->ClearWeakRef(GetUserPointer(item));
+					gc->ClearWeakRef(GetUserPointer(item));
 				}
 
 #ifdef MMGC_HOOKS
@@ -171,9 +184,8 @@ namespace MMgc
 				}
 #endif
 
-				// unlink from list
-				*prev = Next(b);
-				b->gc->AddToLargeEmptyBlockList(b);
+				// The block is not empty until now, so now add it.
+				gc->AddToLargeEmptyBlockList(b);
 				continue;
 			}
 			// clear marks
