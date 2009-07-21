@@ -51,6 +51,7 @@
 const char* spy_socket_channel = "/tmp/MMgc_Spy"; //name of unix domain for spy connections
 
 bool spy_connected  = false; 
+bool spy_running = false;
 
 pthread_cond_t spy_cond; //condition variable for synchronizing spy signalling and socket communication
 pthread_mutex_t spy_mutex; //mutex for spy_signal and spy_cond condition variable
@@ -64,7 +65,7 @@ void* SpyConnectionLoop(void*)
 	struct sockaddr_un sockAddr;
 
 	socklen_t len = sizeof(sockAddr.sun_family) + strlen(sockAddr.sun_path)+1;
-	while(true)
+	while(spy_running)
 	{
 		//wait for spy socket connection
 		if((clientSocket = accept(serverSocket, (struct sockaddr*)&sockAddr, &len)) >= 0)
@@ -169,7 +170,13 @@ bool VMPI_spySetup()
 
 void VMPI_spyTeardown()
 {
-	pthread_exit(&spy_thread);
+	spy_running = false;
+
+	if(spy_connected)
+	{
+		spy_connected = false;
+		pthread_cond_signal(&spy_cond);
+	}		
 }
 
 bool VMPI_hasSymbols()
