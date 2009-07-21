@@ -203,6 +203,19 @@ ecma3/Unicode/uAC00_HangulSyllables, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-d
 mops/mops, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 
 ####################
+# run slow tests in deep test phase
+####################
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/uE000_PrivateUseArea,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/uAC00_HangulSyllables,.*deep, include, include slow tests in deep phase
+mops/mops,.*deep, include, include slow tests in deep phase
+
+####################
 # verifier
 ####################
 ecma3/Statements/eforin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476

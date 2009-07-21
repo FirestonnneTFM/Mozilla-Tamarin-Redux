@@ -1,3 +1,4 @@
+#!/bin/bash
 #  ***** BEGIN LICENSE BLOCK *****
 #  Version: MPL 1.1/GPL 2.0/LGPL 2.1
 # 
@@ -34,21 +35,29 @@
 #  the terms of any one of the MPL, the GPL or the LGPL.
 # 
 #  ***** END LICENSE BLOCK ****
+(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-from twisted.application import service
-from buildbot.slave.bot import BuildSlave
+##
+# Set any variables that my be needed higher up the chain
+##
+export shell_extension=
 
-basedir = r'/c/buildbot/tamarin-redux/winmobile-performance'
-host = '10.171.22.12'
-port = 1000
-slavename = 'asteamwin5'
-passwd = 'asteam'
-keepalive = 600
-usepty = 1
-umask = None
+##
+# Bring in the BRANCH environment variables
+##
+. ../all/environment.sh
 
-application = service.Application('buildslave')
-s = BuildSlave(host, port, slavename, passwd, basedir, keepalive, usepty,
-               umask=umask)
-s.setServiceParent(application)
+export platform=mac
+export basedir=/Users/build/buildbot/$branch/mac-ppc-deep/$branch
+export buildsdir=$basedir/../builds
 
+export shell_release=${shell_release}_ppc
+export shell_release_wordcode=${shell_release_wordcode}_ppc
+export shell_debug=${shell_debug}_ppc
+export shell_release_debugger=${shell_release_debugger}_ppc
+export shell_debug_debugger=${shell_debug_debugger}_ppc
+export shell_selftest=${shell_selftest}_ppc
+export shell_release_vprof=${shell_release_vprof}_ppc
+
+## Used by make in the build scripts
+export make_opt="-j2"
