@@ -1462,22 +1462,6 @@ namespace MMgc
 	}
 #endif
 
-	void GC::PushBarrierItem(GCWorkItem &item)
-	{
-		if (collecting)
-		{
-			// It's the job of the allocators to make sure the rhs is marked if
-			// it is allocated on a page that's not yet swept.  In particular,
-			// the barrier is not needed to make sure that that object is kept
-			// alive.
-			//
-			// Ergo all we need to do here is revert the lhs to marked and return.
-			SetMark(item.ptr);
-			return;
-		}
-		PushWorkItem(m_barrierWork, item);
-	}
-
 	void GC::PushWorkItem_MayFail(GCWorkItem &item)
 	{
 		PushWorkItem(m_incrementalWork, item);
@@ -3576,6 +3560,32 @@ bail:
 		InlineWriteBarrierTrap(container);
 	}
 
+	// Add 'container' to the remembered set.
+	//
+	// IncrementalMark may move a segment off the remembered set;
+	// FinishIncrementalMark will take care of what remains.
+	//
+	// Observe that if adding the item to the remembered set (a secondary mark stack)
+	// fails, then the item is just pushed onto the regular mark stack as part of the
+	// normal stack overflow handling.  That is what we want.
+	
+	void GC::WriteBarrierHit(const void* container)
+	{
+		if (collecting)
+		{
+			// It's the job of the allocators to make sure the rhs is marked if
+			// it is allocated on a page that's not yet swept.  In particular,
+			// the barrier is not needed to make sure that that object is kept
+			// alive.
+			//
+			// Ergo all we need to do here is revert the lhs to marked and return.
+			SetMark(container);
+			return;
+		}
+		GCWorkItem item(container, (uint32_t)Size(container), true);
+		PushWorkItem(m_barrierWork, item);
+	}
+	
 	bool GC::ContainsPointers(const void *item)
 	{
 		item = GetRealPointer(item);

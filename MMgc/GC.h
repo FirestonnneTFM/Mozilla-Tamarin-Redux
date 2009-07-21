@@ -936,9 +936,7 @@ namespace MMgc
 
 		/**
 		 * Main interface for allocating memory.  Default flags are
-		 * no finalization, not containing pointers, not zero'd, and not ref-counted
-		 *
-		 * Do not call this from a finalizer.
+		 * no finalization, not containing pointers, not zero'd, and not ref-counted.
 		 */
 		void *Alloc(size_t size, int flags=0);
 
@@ -1030,15 +1028,11 @@ namespace MMgc
 		 * overflow checking way to call Alloc for a # of n size'd items,
 		 * all instance of Alloc(num*sizeof(thing)) should be replaced with:
 		 * Calloc(num, sizeof(thing))
-		 *
-		 * Do not call this from a finalizer.
 		 */
 		void *Calloc(size_t num, size_t elsize, int flags=0);
 
 		/**
-		 * One can free a GC allocated pointer, this will throw an assertion
-		 * if called during the Sweep phase (ie via a finalizer) it can only be
-		 * used outside the scope of a collection
+		 * One can free a GC allocated pointer.
 		 */
 		void Free(const void *ptr);
 
@@ -1228,6 +1222,12 @@ namespace MMgc
 		 */
 		/*REALLY_INLINE*/ void WriteBarrierWrite(const void *address, const void *value);
 
+		/**
+		 * The marker is running and the container object has just been transitioned from
+		 * 'marked' to 'queued'.
+		 */
+		void WriteBarrierHit(const void* container);
+		
 	private:
 		/**
 		 * Implementation of privateWriteBarrier; too large to be inlined everywhere.
@@ -1481,10 +1481,6 @@ namespace MMgc
 		
 	private:
 
-		// item represents a container object, now marked 'Queued', that should be re-scanned 
-		// at some later time because it's been stored into.
-		void PushBarrierItem(GCWorkItem &item);
-		
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
 		// if the allocation succeeded.
 		void *heapAlloc(size_t size, int flags=GCHeap::kExpand|GCHeap::kZero|GCHeap::kProfile);
