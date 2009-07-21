@@ -145,6 +145,7 @@ namespace avmplus
 	private:
         GC *gc;
 		Allocator* lir_alloc; // allocator with LIR buffer lifetime
+		LogControl log;
         AvmCore *core;
         MethodInfo *info;
 		const MethodSignaturep ms;
@@ -225,7 +226,7 @@ namespace avmplus
             return lirout->ins1(op, a);
         }
         void storeIns(LIns *val, int32_t disp, LIns *base) {
-            lirout->store(val, base, disp);
+            lirout->insStorei(val, base, disp);
         }
         LIns *i2dIns(LIns* v) {
             return lirout->ins1(LIR_i2f, v);

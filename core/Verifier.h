@@ -226,6 +226,7 @@ namespace nanojit {
         Fragment *from, *target;
         void *jmp, *origTarget;
         GuardRecord *next, *outgoing;
+        struct SideExit *exit;
     };
     #define GuardRecordSize(r) sizeof(GuardRecord)
 
