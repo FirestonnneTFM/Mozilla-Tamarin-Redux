@@ -61,25 +61,28 @@ public:
 
 void WriteOnNamedSignal(const char* name, uint32_t *addr);
 
-DWORD WINAPI WaitForMemorySignal(LPVOID lpParam)
-{
-	SignalData *sig_data = (SignalData*)lpParam;
-	while(true) {
-		WaitForSingleObject(sig_data->eventHandle, INFINITE);
-		*(sig_data->profilerAddr) = true;
+static SignalData *sig_data=NULL;
+static bool spyRunning;
 
+DWORD WINAPI WaitForMemorySignal(LPVOID)
+{
+	SignalData *sd = sig_data;
+	while(spyRunning) {
+		WaitForSingleObject(sig_data->eventHandle, INFINITE);	
 		// For some reason ReadMsgQueue does not clear the signal on the handle (even though it should), and we 
 		// end up setting the profilerAddr constantly, which makes the VM hang, since all it is doing is writing out profile data.
 		// so we have to call CloseMsgQueue, and then open a new queue, and wait on that.  
 		//char buff[256];
 		//DWORD bytesread;
 		//ReadMsgQueue(sig_data->eventHandle, buff, 256, &bytesread, INFINITE, 0);
-		CloseMsgQueue(sig_data->eventHandle);
-		WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", sig_data->profilerAddr);
-		break;
-
-	}
-	delete sig_data;
+		CloseMsgQueue(sd->eventHandle);
+		if(spyRunning) {
+			*(sig_data->profilerAddr) = true;		
+			WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", sd->profilerAddr);
+			break;
+		}
+	}		
+	delete sd;
 	return 0;
 }
 
@@ -101,8 +104,8 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 
 	m_namedSharedObject = CreateMsgQueue(wName, &msgopts);
 
-	SignalData *sig_data = new SignalData(addr, m_namedSharedObject);
-	CreateThread(NULL, 0, WaitForMemorySignal, sig_data, 0, NULL);
+	sig_data = new SignalData(addr, m_namedSharedObject);
+	CreateThread(NULL, 0, WaitForMemorySignal, NULL, 0, NULL);
 }
 
 #include "windows.h"
@@ -148,6 +151,13 @@ bool VMPI_spySetup()
 {
 	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
 	return true;
+}
+
+void VMPI_spyTeardown()
+{
+	spyRunning = false;
+	if(sig_data)
+		SetEvent(sig_data->eventHandle);
 }
 
 bool VMPI_hasSymbols()

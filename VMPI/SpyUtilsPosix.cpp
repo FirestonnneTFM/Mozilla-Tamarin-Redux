@@ -54,6 +54,7 @@ bool spy_connected  = false;
 
 pthread_cond_t spy_cond; //condition variable for synchronizing spy signalling and socket communication
 pthread_mutex_t spy_mutex; //mutex for spy_signal and spy_cond condition variable
+pthread_t spy_thread;
 
 int serverSocket = -1; //fd for spy server socket
 int clientSocket = -1; //fd for spy socket connection (one at a time)
@@ -122,8 +123,7 @@ bool SetupSpyServer()
 	pthread_cond_init(&spy_cond, NULL);
 	
 	//wait for spy connections on a separate thread
-	pthread_t threadId;
-	if(pthread_create(&threadId, NULL, SpyConnectionLoop, NULL))
+	if(pthread_create(&spy_thread, NULL, SpyConnectionLoop, NULL))
 	{
 		close(serverSocket);
 		return false;
@@ -165,6 +165,11 @@ bool VMPI_spySetup()
 {
 	//setup server socket for spy connections
 	return SetupSpyServer();
+}
+
+void VMPI_spyTeardown()
+{
+	pthread_exit(&spy_thread);
 }
 
 bool VMPI_hasSymbols()
