@@ -59,13 +59,17 @@ public:
 	HANDLE eventHandle;
 };
 
-DWORD WINAPI WaitForMemorySignal(LPVOID lpParam)
+static bool spyRunning=false;
+static SignalData *sig_data;
+
+DWORD WINAPI WaitForMemorySignal(LPVOID)
 {
-	SignalData *sig_data = (SignalData*)lpParam;
-	while(true) {
+	while(spyRunning) {
 		WaitForSingleObject(sig_data->eventHandle, INFINITE);
-		*(sig_data->profilerAddr) = true;
+		if(spyRunning)
+			*(sig_data->profilerAddr) = true;
 	}
+	CloseHandle(sig_data->eventHandle);
 	delete sig_data;
 	return 0;
 }
@@ -92,8 +96,9 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 		fputs((const char*)lpMsgBuf, stderr);
 		return;
 	}
-	SignalData *sig_data = new SignalData(addr, m_namedSharedObject);
-	CreateThread(NULL, 0, WaitForMemorySignal, sig_data, 0, NULL);
+	sig_data = new SignalData(addr, m_namedSharedObject);
+	spyRunning = true;
+	CreateThread(NULL, 0, WaitForMemorySignal, NULL, 0, NULL);
 }
 
 #include "windows.h"
@@ -163,6 +168,13 @@ bool VMPI_spySetup()
 {
 	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
 	return true;
+}
+
+void VMPI_spyTeardown()
+{
+	spyRunning = false;
+	if(sig_data)
+		SetEvent(sig_data->eventHandle);
 }
 
 bool VMPI_hasSymbols()

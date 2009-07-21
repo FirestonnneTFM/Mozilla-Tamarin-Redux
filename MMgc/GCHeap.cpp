@@ -225,6 +225,8 @@ namespace MMgc
 		hooksEnabled = false;
 		if(profiler)
 			delete profiler;
+		if(hasSpy)
+			VMPI_spyTeardown();
 		profiler = NULL;
 #endif
 

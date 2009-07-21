@@ -484,6 +484,7 @@ extern vmpi_thread_t VMPI_currentThread();
  * @see VMPI_spyCallback
 */
 extern bool VMPI_spySetup();
+extern void VMPI_spyTeardown();
 
 /** 
  * Callback method for spy
