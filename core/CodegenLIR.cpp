@@ -834,15 +834,6 @@ namespace avmplus
 				case LIR_ge:	case LIR_uge:
 					AvmAssert(!a->isQuad() && !b->isQuad());
 					break;
-				case LIR_2:
-					AvmAssert(a->isQuad() == b->isQuad());
-					break;
-                case LIR_cmov:
-					AvmAssert(isCondOrConst(a) && b->isop(LIR_2) && !b->oprnd1()->isQuad() && !b->oprnd2()->isQuad()); 
-					break;
-                case LIR_qcmov:
-					AvmAssert(isCondOrConst(a) && b->isop(LIR_2) && b->oprnd1()->isQuad() && b->oprnd2()->isQuad()); 
-					break;
 				case LIR_qilsh:
                 case LIR_qirsh:
                 case LIR_qursh:
@@ -854,6 +845,21 @@ namespace avmplus
             }
             return out->ins2(op, a, b);
         }
+
+		LIns *ins3(LOpcode op, LIns* a, LIns* b, LIns* c) {
+			switch (op) {
+                case LIR_cmov:
+					AvmAssert(isCondOrConst(a) && !b->isQuad() && !c->isQuad()); 
+					break;
+                case LIR_qcmov:
+					AvmAssert(isCondOrConst(a) && b->isQuad() && c->isQuad()); 
+					break;
+				default:
+					AvmAssert(false);
+					break;
+			}
+			return out->ins3(op, a, b, c);
+		}
 
         LIns *insLoad(LOpcode op, LIns *base, int32_t disp) {
             switch (op) {
