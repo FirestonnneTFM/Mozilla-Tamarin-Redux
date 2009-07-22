@@ -163,7 +163,7 @@ else
     #}
     echo ""
     echo "===========   Misc   ==========="
-    python ./runtests.py --config=misc-mobile --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Dinterp"
+    python ./runtests.py --config=misc-mobile-Dinterp --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Dinterp"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nmisc time test run failed. " 
@@ -177,7 +177,7 @@ else
     }
     echo ""
     echo "===========   SunSpider   ==========="
-    python ./runtests.py --config=sunspider-mobile --vmversion=${change} -r $branch -k -f -i 10 --vmargs="-Dinterp"
+    python ./runtests.py --config=sunspider-mobile-Dinterp --vmversion=${change} -r $branch -k -f -i 10 --vmargs="-Dinterp"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nsunspider time test run failed. " 

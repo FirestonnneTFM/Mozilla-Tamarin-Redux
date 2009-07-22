@@ -163,7 +163,7 @@ else
     }
     echo ""
     echo "===========   Misc   ==========="
-    python ./runtests.py --config=misc-mobile --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Ojit"
+    python ./runtests.py --config=misc-mobile-Ojit --vmversion=${change} -r $branch -k -f -i 3 --vmargs="-Ojit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nmisc time test run failed. " 
@@ -177,7 +177,7 @@ else
     }
     echo ""
     echo "===========   SunSpider   ==========="
-    python ./runtests.py --config=sunspider-mobile --vmversion=${change} -r $branch -k -f -i 10 --vmargs="-Ojit"
+    python ./runtests.py --config=sunspider-mobile-Ojit --vmversion=${change} -r $branch -k -f -i 10 --vmargs="-Ojit"
     test "$?" = "0" || { 
         result="1"; 
         resultmessage="$resultmessage \nsunspider time test run failed. " 
