@@ -83,6 +83,69 @@ class XMLRPCServer(xmlrpc.XMLRPC):
             #log.msg("isBuildSetActive(): False")
             return False
 
+    def xmlrpc_stopSchedulers(self, scheduler_names):
+        """Stops any active builders in the specified schedulers
+        """
+        if scheduler_names == '':
+            # Get a list of builders
+            buildNames = self.status.getBuilderNames()
+            for builder in buildNames:
+                state = self.status.getBuilder(builder).getState()[0]
+                #log.msg("isBuildSetActive(): [%s] state: %s" % (builder, state))
+                # If any builder is in 'building' state then we are active so return
+                # Possible states are:
+                #   building -> instantly return True, don't need to check any other builders
+                #   idle -> we might return False if nobody is 'building'
+                #   offline -> treat as idle, don't hold up any additional build requests
+                #               This means that the build MAY be skipped if another request
+                #               if another request comes in before it comes online
+                if state == "building":
+                    # get the internal BUILD number:
+                    currBuildNum = self.status.getBuilder(builder).getCurrentBuilds()[0].getNumber()
+                    
+                    # Get all of the processBuilder objects, these actaully control the build and
+                    # are not just objects that collect status, these are what we can actually stop
+                    allProcBuilders = self.status.botmaster.getBuilders()
+                    
+                    # loop through ALL of the builders and find the one that matches the status builder 
+                    # that we have found to be actively building
+                    for procBuilder in allProcBuilders:
+                        if procBuilder.name == builder:
+                            # get the actual process.Build and stop it
+                            procBuilder.getBuild(currBuildNum).stopBuild("Stopping build by user request")
+            
+        else:
+            # Get a list of scheudulers
+            schedulers = self.status.getSchedulers()
+            for scheduler in schedulers:
+                if scheduler.name in scheduler_names:
+                    # Get a list of builders
+                    buildNames = scheduler.listBuilderNames()
+                    for builder in buildNames:
+                        state = self.status.getBuilder(builder).getState()[0]
+                        # If any builder is in 'building' state then we are going to stop it
+                        # Possible states are:
+                        #   building -> instantly return True, don't need to check any other builders
+                        #   idle -> we might return False if nobody is 'building'
+                        #   offline -> treat as idle, don't hold up any additional build requests
+                        #               This means that the build MAY be skipped if another request
+                        #               if another request comes in before it comes online
+                        if state == "building":
+                            # get the internal BUILD number:
+                            currBuildNum = self.status.getBuilder(builder).getCurrentBuilds()[0].getNumber()
+                            
+                            # Get all of the processBuilder objects, these actaully control the build and
+                            # are not just objects that collect status, these are what we can actually stop
+                            allProcBuilders = self.status.botmaster.getBuilders()
+                            
+                            # loop through ALL of the builders and find the one that matches the status builder 
+                            # that we have found to be actively building
+                            for procBuilder in allProcBuilders:
+                                if procBuilder.name == builder:
+                                    # get the actual process.Build and stop it
+                                    procBuilder.getBuild(currBuildNum).stopBuild("Stopping build by user request")
+
+
 
     def xmlrpc_getLastBuilds(self, builder_name, num_builds):
         """Return the last N completed builds for the given builder.
