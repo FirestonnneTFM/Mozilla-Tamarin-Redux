@@ -1414,6 +1414,12 @@ namespace MMgc
 		// memory (and _DEBUG code will also assert if that happens - it should not).
 		void *FindBeginningGuarded(const void *gcItem);
 
+		// Legacy public API.  DO NOT USE from within AVM code.
+		REALLY_INLINE void *FindBeginning(const void *gcItem)
+		{
+			return FindBeginningGuarded(gcItem);
+		}
+
 		// Used on the critical path of the write barrier path.  gcItem must point into
 		// managed memory, and NULL is never returned.  Don't use this for GCAssert and
 		// similar purposes, but use it when speed is key.
