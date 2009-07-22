@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -59,12 +61,12 @@
 #endif
 
 #if _MSC_VER
-	#define ABI_FUNCTION ABI_CDECL
-	#define ABI_METHOD   ABI_THISCALL
+    #define ABI_FUNCTION ABI_CDECL
+    #define ABI_METHOD   ABI_THISCALL
 #else
-	// gcc, probably
-	#define ABI_FUNCTION ABI_CDECL
-	#define ABI_METHOD   ABI_CDECL
+    // gcc, probably
+    #define ABI_FUNCTION ABI_CDECL
+    #define ABI_METHOD   ABI_CDECL
 #endif
 
 #define FUNCTION(f, sig, name) \
@@ -220,7 +222,7 @@ SSE2_ONLY(
     METHOD(COREADDR(AvmCore::sampleCheck), SIG1(V,P), sampleCheck)
 #endif
 
-	// MOPS helper functions
+    // MOPS helper functions
     METHOD(ENVADDR(MethodEnv::li8),  SIG2(I,P,I), li8)
     METHOD(ENVADDR(MethodEnv::li16), SIG2(I,P,I), li16)
     METHOD(ENVADDR(MethodEnv::li32), SIG2(I,P,I), li32)

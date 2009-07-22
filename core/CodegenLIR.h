@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -50,7 +52,7 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	using namespace nanojit;
+    using namespace nanojit;
 
    #ifdef VTUNE
    class LineNumberRecord : public MMgc::GCObject
@@ -95,19 +97,19 @@ namespace avmplus
    };
    #endif /* VTUNE */
 
-	class CodegenLabel {
+    class CodegenLabel {
     public:
-		LIns *bb;
-		int preds;
+        LIns *bb;
+        int preds;
         CodegenLabel() : bb(0), preds(0)
         {}
-	};
+    };
 
     class PageMgr : public GCFinalizedObject {
     public:
-		Allocator allocator;
+        Allocator allocator;
         DWB(CodeAlloc*) codeAlloc;
-		verbose_only( DWB(LabelMap*) labels; )
+        verbose_only( DWB(LabelMap*) labels; )
         PageMgr();
         ~PageMgr();
     };
@@ -123,11 +125,11 @@ namespace avmplus
 
     class CopyPropagation;
 
-	class CodegenLIR : public CodeWriter {
-	public:
-		bool overflow;
-		const byte *abcStart;
-		const byte *abcEnd;
+    class CodegenLIR : public CodeWriter {
+    public:
+        bool overflow;
+        const byte *abcStart;
+        const byte *abcEnd;
 
        #ifdef VTUNE
        bool hasDebugInfo;
@@ -142,24 +144,24 @@ namespace avmplus
        void jitCodePosUpdate(uint32_t pos);
        #endif /* VTUNE */
 
-	private:
+    private:
         GC *gc;
-		Allocator* lir_alloc; // allocator with LIR buffer lifetime
-		LogControl log;
+        Allocator* lir_alloc; // allocator with LIR buffer lifetime
+        LogControl log;
         AvmCore *core;
         MethodInfo *info;
-		const MethodSignaturep ms;
+        const MethodSignaturep ms;
         PoolObject *pool;
         Fragment *frag;
-		LirWriter *lirout;
-		FrameState *state;
+        LirWriter *lirout;
+        FrameState *state;
         LIns *vars, *varTraits;
         LIns *env_param, *argc_param, *ap_param;
         LIns *_save_eip, *_ef;
         LIns *methodFrame;
         LIns *csn;
         LIns *undefConst;
-		LIns *coreAddr;
+        LIns *coreAddr;
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
         intptr_t lastPcSave;
@@ -168,7 +170,7 @@ namespace avmplus
         LIns *setjmpResult;
         CopyPropagation *copier;
         int framesize;
-		verbose_only(VerboseWriter *vbWriter;)
+        verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);
         LIns *atomToNativeRep(int loc, LIns *i);
@@ -179,7 +181,7 @@ namespace avmplus
         LIns *callIns(const CallInfo *, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *localGet(int i);
-		LIns *localGetp(int i);
+        LIns *localGetp(int i);
         LIns *localGetq(int i);
         LIns *localCopy(int i); // sniff's type
         LIns *branchIns(LOpcode op, LIns *cond);
@@ -194,9 +196,9 @@ namespace avmplus
         LIns *storeAtomArgs(LIns *obj, int count, int index);
         LIns *promoteNumberIns(Traits *t, int i);
         LIns *loadVTable(int i);
-    	LIns *cmpEq(const CallInfo *fid, int lhsi, int rhsi);
-    	LIns *cmpLt(int lhsi, int rhsi);
-    	LIns *cmpLe(int lhsi, int rhsi);
+        LIns *cmpEq(const CallInfo *fid, int lhsi, int rhsi);
+        LIns *cmpLt(int lhsi, int rhsi);
+        LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
         debug_only( bool isPointer(int i); )
         void label(CodegenLabel &label, LIns *bb);
@@ -209,11 +211,11 @@ namespace avmplus
         void deadvars();
         void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
         void deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
-		void copyParam(int i, int &offset);
+        void copyParam(int i, int &offset);
 
-		static BuiltinType bt(Traits *t) {
-			return Traits::getBuiltinType(t);
-		}
+        static BuiltinType bt(Traits *t) {
+            return Traits::getBuiltinType(t);
+        }
 
         LIns *loadIns(LOpcode op, size_t disp, LIns *base) {
             AvmAssert(isS32(disp));
@@ -241,81 +243,81 @@ namespace avmplus
             return lirout->insImm(c);
         }
         LIns *InsConstPtr(const void *p) {
-			return lirout->insImmPtr(p);
-		}
-		LIns *InsConstAtom(Atom c) {
-			return lirout->insImmPtr((void*)c);
-		}
-	#ifdef NANOJIT_64BIT
-		LIns *i2p(LIns *i) {
-			return lirout->ins1(LIR_i2q, i);
-		}
-		LIns *u2p(LIns *i) {
-			return lirout->ins1(LIR_u2q, i);
-		}
-		LIns *p2i(LIns *i) {
-			return lirout->ins1(LIR_qlo, i);
-		}
-	#else
-		LIns *i2p(LIns *i) {
-			return i;
-		}
-		LIns *u2p(LIns *i) {
-			return i;
-		}
-		LIns *p2i(LIns *i) {
-			return i;
-		}
-	#endif
+            return lirout->insImmPtr(p);
+        }
+        LIns *InsConstAtom(Atom c) {
+            return lirout->insImmPtr((void*)c);
+        }
+    #ifdef NANOJIT_64BIT
+        LIns *i2p(LIns *i) {
+            return lirout->ins1(LIR_i2q, i);
+        }
+        LIns *u2p(LIns *i) {
+            return lirout->ins1(LIR_u2q, i);
+        }
+        LIns *p2i(LIns *i) {
+            return lirout->ins1(LIR_qlo, i);
+        }
+    #else
+        LIns *i2p(LIns *i) {
+            return i;
+        }
+        LIns *u2p(LIns *i) {
+            return i;
+        }
+        LIns *p2i(LIns *i) {
+            return i;
+        }
+    #endif
 
 
-		bool outOMem();
+        bool outOMem();
 
-		/** emit a constructor call, and early bind if possible */
-		void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
+        /** emit a constructor call, and early bind if possible */
+        void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
 
-	public:
-		CodegenLIR(MethodInfo* info);
+    public:
+        CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
-		void emitMD();
-	    void formatOperand(PrintWriter& buffer, LIns* oprnd);
-		void epilogue(FrameState* state);
-		bool prologue(FrameState* state);
-		void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
-		void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
-		void emitIf(FrameState* state, AbcOpcode opcode, int target_off, int lhs, int rhs);
-		void emitSwap(FrameState* state, int i, int j);
-		void emitCopy(FrameState* state, int src, int dest);
-		void emitGetscope(FrameState* state, int scope, int dest);
-		void emitKill(FrameState* state, int i);
-		void emitBlockStart(FrameState* state);
-		void emitBlockEnd(FrameState* state);
-		void emitIntConst(FrameState* state, int index, int32_t c);
-		void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
-		void emitDoubleConst(FrameState* state, int index, double* pd);
-		void emitCoerce(FrameState* state, int index, Traits* type);
-		void emitCheckNull(FrameState* state, int index);
+        void emitMD();
+        void formatOperand(PrintWriter& buffer, LIns* oprnd);
+        void epilogue(FrameState* state);
+        bool prologue(FrameState* state);
+        void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
+        void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
+        void emitIf(FrameState* state, AbcOpcode opcode, int target_off, int lhs, int rhs);
+        void emitSwap(FrameState* state, int i, int j);
+        void emitCopy(FrameState* state, int src, int dest);
+        void emitGetscope(FrameState* state, int scope, int dest);
+        void emitKill(FrameState* state, int i);
+        void emitBlockStart(FrameState* state);
+        void emitBlockEnd(FrameState* state);
+        void emitIntConst(FrameState* state, int index, int32_t c);
+        void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
+        void emitDoubleConst(FrameState* state, int index, double* pd);
+        void emitCoerce(FrameState* state, int index, Traits* type);
+        void emitCheckNull(FrameState* state, int index);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
-		void emitGetGlobalScope();
-		void localSet(int i, LIns* o, Traits* type);
+        void emitGetGlobalScope();
+        void localSet(int i, LIns* o, Traits* type);
 
-		// CodeWriter methods
-		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
-		void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
-		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
-		void writeNip(FrameState* state, const byte *pc);
-		void writeCheckNull(FrameState* state, uint32_t index);
-		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
-		void writePrologue(FrameState* state, const byte *pc);
-		void writeEpilogue(FrameState* state);
-		void writeBlockStart(FrameState* state);
-		void writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode);
-		void fixExceptionsAndLabels(FrameState* state, const byte* pc);
-		void formatOperand(PrintWriter& buffer, Value& v);
-		void cleanup();
-	};
+        // CodeWriter methods
+        void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
+        void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
+        void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
+        void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
+        void writeNip(FrameState* state, const byte *pc);
+        void writeCheckNull(FrameState* state, uint32_t index);
+        void writeCoerce(FrameState* state, uint32_t index, Traits *type);
+        void writePrologue(FrameState* state, const byte *pc);
+        void writeEpilogue(FrameState* state);
+        void writeBlockStart(FrameState* state);
+        void writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode);
+        void fixExceptionsAndLabels(FrameState* state, const byte* pc);
+        void formatOperand(PrintWriter& buffer, Value& v);
+        void cleanup();
+    };
 }
 
 #endif /* __avmplus_CodegenLIR__ */
