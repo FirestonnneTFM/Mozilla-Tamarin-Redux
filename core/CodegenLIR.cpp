@@ -5579,14 +5579,6 @@ namespace nanojit
     }
     #endif
 
-    void Assembler::asm_bailout(LIns*, Register) {
-        AvmAssert(false);
-    }
-
-    void Assembler::initGuardRecord(LIns*, GuardRecord*) {
-        AvmAssert(false);
-    }
-
     void Fragment::onDestroy() {
         if (root == this) {
             delete mergeCounts;
