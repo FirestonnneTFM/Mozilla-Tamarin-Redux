@@ -47,6 +47,6 @@ export shell_extension=
 ##
 . ../all/environment.sh
 export platform=solaris
-export basedir=/home/build/buildbot/$branch/${platform}-sparc-deep/$branch
+export basedir=/export/home/build/buildbot/$branch/${platform}-sparc-deep/$branch
 export buildsdir=$basedir/../builds
 
