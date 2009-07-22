@@ -46,6 +46,7 @@ public:
 ST_mmgc_basics(AvmCore* core);
 virtual void run(int n);
 virtual void prologue();
+virtual void epilogue();
 private:
 static const char* ST_names[];
 void test0();
@@ -91,11 +92,18 @@ void ST_mmgc_basics::prologue() {
 	}
 
 }
+void ST_mmgc_basics::epilogue() {
+delete gc;
+
+}
+using namespace MMgc;
+
 void ST_mmgc_basics::test0() {
 verifyPass(gc != NULL, "gc != NULL", __FILE__, __LINE__);
 
 }
 void ST_mmgc_basics::test1() {
+    MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
 verifyPass(mygcobject!=NULL, "mygcobject!=NULL", __FILE__, __LINE__);
@@ -104,15 +112,17 @@ verifyPass(mygcobject->i==10, "mygcobject->i==10", __FILE__, __LINE__);
 
 }
 void ST_mmgc_basics::test2() {
+    MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
 //    AvmLog("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
-verifyPass((int)gc->GetBytesInUse()==inuse+8, "(int)gc->GetBytesInUse()==inuse+8", __FILE__, __LINE__);
+verifyPass(gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize(), "gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize()", __FILE__, __LINE__);
     delete mygcobject;
 
 }
 void ST_mmgc_basics::test3() {
+    MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
@@ -130,14 +140,14 @@ verifyPass(gc->GetGCHeap()!=NULL, "gc->GetGCHeap()!=NULL", __FILE__, __LINE__);
 }
 void ST_mmgc_basics::test5() {
     MMgc::FixedAlloc *fa;
-    fa=new MMgc::FixedAlloc(2048,MMgc::GCHeap::GetGCHeap());                                        
+	fa=new MMgc::FixedAlloc(2048,MMgc::GCHeap::GetGCHeap());                                        
 verifyPass((int)fa->GetMaxAlloc()==0, "(int)fa->GetMaxAlloc()==0", __FILE__, __LINE__);
 verifyPass((int)fa->GetNumChunks()==0, "(int)fa->GetNumChunks()==0", __FILE__, __LINE__);
-    void *data1=fa->Alloc(4096);
+    void *data1=fa->Alloc(2048);
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data1)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data1)==fa", __FILE__, __LINE__);
-verifyPass((int)fa->GetBytesInUse()==2048, "(int)fa->GetBytesInUse()==2048", __FILE__, __LINE__);
-verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
-    void *data2=fa->Alloc(4096);
+verifyPass(fa->GetBytesInUse()==DebugSize()+2048, "fa->GetBytesInUse()==DebugSize()+2048", __FILE__, __LINE__);
+verifyPass(fa->GetItemSize()==2048, "fa->GetItemSize()==2048", __FILE__, __LINE__);
+    void *data2=fa->Alloc(2048);
 verifyPass(MMgc::FixedAlloc::GetFixedAlloc(data2)==fa, "MMgc::FixedAlloc::GetFixedAlloc(data2)==fa", __FILE__, __LINE__);
 //    AvmLog("fa->GetItemSize=%d\n",(int)fa->GetItemSize());
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
@@ -145,7 +155,8 @@ verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE_
 verifyPass((int)fa->GetItemSize()==2048, "(int)fa->GetItemSize()==2048", __FILE__, __LINE__);
 verifyPass((int)fa->GetMaxAlloc()==1, "(int)fa->GetMaxAlloc()==1", __FILE__, __LINE__);
 verifyPass((int)fa->GetNumChunks()==1, "(int)fa->GetNumChunks()==1", __FILE__, __LINE__);
-    gc->Collect();
+    fa->Free(data2);
+    delete fa;								  
 
 }
 void ST_mmgc_basics::test6() {
@@ -158,9 +169,9 @@ verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", _
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     void *obj=fm->Alloc(8192);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
-verifyPass((int)fm->GetBytesInUse()==start+8192, "(int)fm->GetBytesInUse()==start+8192", __FILE__, __LINE__);
+//    %%verify fm->GetBytesInUse()==start + 8192 + MMgc::DebugSize()
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
-verifyPass((int)fm->GetTotalSize()==starttotal+2, "(int)fm->GetTotalSize()==starttotal+2", __FILE__, __LINE__);
+//    %%verify (int)fm->GetTotalSize()==starttotal+2
     fm->Free(obj);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
@@ -174,7 +185,6 @@ verifyPass((int)fm->GetTotalSize()==starttotal+3, "(int)fm->GetTotalSize()==star
     fm->Free(obj);
 verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", __FILE__, __LINE__);
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
-    gc->Collect();
 
 }
 void ST_mmgc_basics::test7() {
@@ -187,13 +197,14 @@ verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize(
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
-		gh->Alloc(1024*10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
+	   void *data = gh->Alloc(1024*10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
 verifyPass((int)gh->GetTotalHeapSize()>startfreeheap, "(int)gh->GetTotalHeapSize()>startfreeheap", __FILE__, __LINE__);
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
+	   gh->FreeNoProfile(data);												   
 
 }
 void ST_mmgc_basics::test8() {
-
+    MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
 verifyPass((MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject, "(MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject", __FILE__, __LINE__);
@@ -201,17 +212,16 @@ verifyPass((MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject, "(MyGCOb
 
 }
 void ST_mmgc_basics::test9() {
+    MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
-    MMgc::GCLargeAlloc *gcl=new MMgc::GCLargeAlloc(gc);
-    void *obj=gcl->Alloc(1024,1024,0);
-verifyPass(MMgc::GCLargeAlloc::IsLargeBlock(obj)==true, "MMgc::GCLargeAlloc::IsLargeBlock(obj)==true", __FILE__, __LINE__);
-verifyPass(MMgc::GCLargeAlloc::FindBeginning(obj)==obj, "MMgc::GCLargeAlloc::FindBeginning(obj)==obj", __FILE__, __LINE__);
+    void *obj=gc->Alloc(10024,0);
+verifyPass(MMgc::GCLargeAlloc::IsLargeBlock(GetRealPointer(obj))==true, "MMgc::GCLargeAlloc::IsLargeBlock(GetRealPointer(obj))==true", __FILE__, __LINE__);
+verifyPass(MMgc::GCLargeAlloc::FindBeginning(obj)==GetRealPointer(obj), "MMgc::GCLargeAlloc::FindBeginning(obj)==GetRealPointer(obj)", __FILE__, __LINE__);
 verifyPass(MMgc::GCLargeAlloc::IsFinalized(obj)==false, "MMgc::GCLargeAlloc::IsFinalized(obj)==false", __FILE__, __LINE__);
     MMgc::GCLargeAlloc::SetFinalize(obj);
 verifyPass(MMgc::GCLargeAlloc::IsFinalized(obj)==true, "MMgc::GCLargeAlloc::IsFinalized(obj)==true", __FILE__, __LINE__);
     MMgc::GCLargeAlloc::ClearFinalized(obj);
-    gcl->Free(obj);
 verifyPass(MMgc::GCLargeAlloc::IsFinalized(obj)==false, "MMgc::GCLargeAlloc::IsFinalized(obj)==false", __FILE__, __LINE__);
 verifyPass(MMgc::GCLargeAlloc::ContainsPointers(obj)==false, "MMgc::GCLargeAlloc::ContainsPointers(obj)==false", __FILE__, __LINE__);
 verifyPass(MMgc::GCLargeAlloc::HasWeakRef(obj)==false, "MMgc::GCLargeAlloc::HasWeakRef(obj)==false", __FILE__, __LINE__);
