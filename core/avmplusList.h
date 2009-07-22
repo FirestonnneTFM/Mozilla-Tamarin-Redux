@@ -106,18 +106,30 @@ namespace avmplus
 		static const ListElementType kElementType = _ListElementType<_isGCObject::value, _isGCFinalizedObject::value, _isRCObject::value>::kElementType;
 	};
 
-	template<class T, ListElementType kElementType>
-	class ListBase;
+	class ListAllocPolicy_GC
+    {
+    public:
+		typedef MMgc::GCObject Base;
+    };
 
-	template<class T>
-	class ListBase<T, LIST_NonGCObjects> : public MMgc::GCObject
+	class ListAllocPolicy_InsideRCObject
+	{
+    public:
+        class Base {};
+    };
+	
+	template<class T, ListElementType kElementType, class ListAllocPolicy>
+	class ListBase;
+	
+	template<class T, class ListAllocPolicy>
+	class ListBase<T, LIST_NonGCObjects, ListAllocPolicy> : public ListAllocPolicy::Base
 	{
 	protected:
 		T *data;
 		uint32 len;
 		uint32 max;
 		MMgc::GC* gc;
-
+		
 		void wb(uint32 index, T value)
 		{
 			AvmAssert(index < max);
@@ -125,9 +137,9 @@ namespace avmplus
 			data[index] = value;
 		}
 	};
-
-	template<class T>
-	class ListBase<T, LIST_GCObjects> : public MMgc::GCObject
+	
+	template<class T, class ListAllocPolicy>
+	class ListBase<T, LIST_GCObjects, ListAllocPolicy> : public ListAllocPolicy::Base
 	{
 	protected:
 		T *data;
@@ -143,8 +155,8 @@ namespace avmplus
 		}
 	};
 
-	template<class T>
-	class ListBase<T, LIST_RCObjects> : public MMgc::GCObject
+	template<class T, class ListAllocPolicy>
+	class ListBase<T, LIST_RCObjects, ListAllocPolicy> : public ListAllocPolicy::Base
 	{
 	protected:
 		T *data;
@@ -160,14 +172,14 @@ namespace avmplus
 		}
 	};
 
-	template <class T, ListElementType kElementType = _ListElementTypeHelper<T>::kElementType>
-	class List : public ListBase<T, kElementType>
+	template <class T, ListElementType kElementType = _ListElementTypeHelper<T>::kElementType, class ListAllocPolicy = ListAllocPolicy_GC>
+	class List : public ListBase<T, kElementType, ListAllocPolicy>
 	{
-		using ListBase<T, kElementType>::data;
-		using ListBase<T, kElementType>::len;
-		using ListBase<T, kElementType>::max;
-		using ListBase<T, kElementType>::gc;
-		using ListBase<T, kElementType>::wb;
+		using ListBase<T, kElementType, ListAllocPolicy>::data;
+		using ListBase<T, kElementType, ListAllocPolicy>::len;
+		using ListBase<T, kElementType, ListAllocPolicy>::max;
+		using ListBase<T, kElementType, ListAllocPolicy>::gc;
+		using ListBase<T, kElementType, ListAllocPolicy>::wb;
 
 	public:
 		enum { kInitialCapacity = 128 };		
@@ -200,7 +212,8 @@ namespace avmplus
 				gc->Free(data);
 			} else
 				delete [] data;
-			// list can be a stack object so this can help the gc
+			// List can be a stack object, or it can be inside an RCObject, so clearing it
+			// can help the gc or indeed be required.
 			data = NULL;
             len = 0;
             max = 0;
