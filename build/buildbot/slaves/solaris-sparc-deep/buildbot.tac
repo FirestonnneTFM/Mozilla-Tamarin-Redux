@@ -38,7 +38,7 @@
 from twisted.application import service
 from buildbot.slave.bot import BuildSlave
 
-basedir = r'/home/build/buildbot/tamarin-redux/solaris-sparc-deep'
+basedir = r'/export/home/build/buildbot/tamarin-redux/solaris-sparc-deep'
 host = '10.171.22.12'
 port = 1000
 slavename = 'asteamsol1'
