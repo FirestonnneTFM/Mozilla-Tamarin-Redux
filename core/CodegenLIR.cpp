@@ -1280,6 +1280,7 @@ namespace avmplus
         framesize = state->verifier->frameSize;
 
         frag = new (gc) Fragment(abcStart);
+        frag->root = frag;
         LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
