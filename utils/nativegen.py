@@ -287,7 +287,39 @@ class Multiname:
 		self.name = name
 	def __str__(self):
 		assert(0)
-		return "FOO"
+		return "Foo"
+
+def stripVersion(ns):
+	# version markers are 3 bytes beginning with 0xE0 or greater
+	if len(ns.uri) < 3:
+	    return ns
+	if ns.uri[len(ns.uri)-3] > chr(0xE0):
+	    ns.uri = ns.uri[0:len(ns.uri)-3]
+	return ns
+
+def qname(name):
+	if isinstance(name, QName):
+            return name
+	if len(name.nsset) == 0:
+	    return QName(Namespace("", CONSTANT_Namespace), name.name)
+        return QName(stripVersion(name.nsset[0]), name.name)
+
+def isVersionedNamespace(ns):
+	# version markers are 3 bytes beginning with 0xE0 or greater
+	if len(ns.uri) < 3:
+	    return False
+	if ns.uri[len(ns.uri)-3] > chr(0xE0):
+	    ns.uri = ns.uri[0:len(ns.uri)-3]
+	    return True
+	return False
+
+def isVersionedName(name):
+	if isinstance(name, QName):
+            return isVersionedNamespace(name.ns)
+	for ns in name.nsset:
+            if isVersionedNamespace(ns):
+                return True
+        return False
 
 class TypeName:
 	name = ""
@@ -341,7 +373,6 @@ class MethodInfo(MemberInfo):
 		return (self.flags & HAS_OPTIONAL) != 0
 
 	def assign_names(self, traits, prefix):
-		
 		self.receiver = traits
 		
 		if not self.isNative():
@@ -530,7 +561,7 @@ class Abc:
 			raise Error("Bad Abc Version")
 
 		self.parseCpool()
-		
+
 		self.defaults = [ (None, 0) ] * 32
 		self.defaults[CONSTANT_Utf8] = (self.strings, CTYPE_STRING)
 		self.defaults[CONSTANT_Int] = (self.ints, CTYPE_INT)
@@ -671,7 +702,6 @@ class Abc:
 							CONSTANT_ExplicitNamespace,
 							CONSTANT_StaticProtectedNs]:
 				self.namespaces[i] = Namespace(self.strings[self.data.readU30()], nskind)
-
 			elif nskind in [CONSTANT_PrivateNs]:
 				self.data.readU30() # skip
 				self.namespaces[i] = Namespace("private", CONSTANT_PrivateNs)
@@ -783,12 +813,14 @@ class Abc:
 			t.init.kind = TRAIT_Method
 			t.init.id = methid
 			self.parseTraits(t)
-	
+
 	def parseTraits(self, t):
 		namecount = self.data.readU30()
 		t.members = [ None ] * namecount
 		for i in range(0, namecount):
-			name = self.names[self.data.readU30()]
+			name_index = self.data.readU30()
+			name = self.names[name_index]
+                        name = qname(name)
 			tag = self.data.readU8()
 			kind = tag & 0xf
 			member = None

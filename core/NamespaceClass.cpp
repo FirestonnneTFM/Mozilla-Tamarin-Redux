@@ -59,7 +59,7 @@ namespace avmplus
 
 		// See E4X 13.2.2, pg 65
 		if (argc < 1)
-			return core->newNamespace(core->kEmptyString)->atom();
+			return core->newNamespace(core->kEmptyString->atom())->atom();
 		else if (argc == 1)
 			return core->newNamespace(argv[1])->atom();
 		else

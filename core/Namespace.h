@@ -65,10 +65,12 @@ namespace avmplus
 		~Namespace();
 
 		inline Atom getPrefix() const { return get_prefix(); }
-		inline Stringp getURI() const { return get_uri(); }
-
+		Stringp getURI(bool stripVersion=false) const;
 		Atom get_prefix() const { return m_prefix; }
-		Stringp get_uri() const;
+		Stringp get_uri() const
+		{
+			return getURI(true);
+		}
 
 		Atom  atom() const { return AtomConstants::kNamespaceType | (Atom)this; }
 
@@ -83,12 +85,15 @@ namespace avmplus
 
 		bool hasPrefix () const;
 
+		bool isPublic() const;
+
 		bool EqualTo(const Namespace* other) const;
 
 		bool isPrivate() const 
 		{
 			return ISNULL(m_prefix);
 		}
+
         NamespaceType getType() const
         {
             return (NamespaceType)(((sint32)m_uri)&7);

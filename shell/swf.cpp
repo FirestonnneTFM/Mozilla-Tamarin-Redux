@@ -148,10 +148,13 @@ namespace avmshell
 		int abclen = taglen - (parser.pos - tagstart);
 		ReadOnlyScriptBufferImpl* abcbuf = new (gc) ReadOnlyScriptBufferImpl(&parser.swf[parser.pos], abclen);
 		ScriptBuffer code(abcbuf);
+
+		// FIXME get this from the SWF
+		uint32_t api = core->getAPI(NULL);
 		if (flags & kDoAbcLazyInitializeFlag) {
-			core->parseActionBlock(code, 0, toplevel, domainEnv->domain(), NULL);
+			core->parseActionBlock(code, 0, toplevel, domainEnv->domain(), NULL, api);
 		} else {
-			core->handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
+			core->handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext, api);
 		}
 		parser.pos += abclen;
 	}

@@ -762,7 +762,7 @@ namespace avmplus {
 		// have a traits with a builtin pool
 		if(cur)
 		{
-			Stringp uri = core->internConstantStringLatin1("flash.utils");
+			Stringp uri = ApiUtils::getVersionedURI(core, t->pool, core->internConstantStringLatin1("flash.utils"), Namespace::NS_Public);
 			Namespace* ns = core->internNamespace(core->newNamespace(uri));
 			// try to get traits from flash.utils.ByteArray
 			Traits *baTraits = cur->pool->getTraits(core->internConstantStringLatin1("ByteArray"), ns);

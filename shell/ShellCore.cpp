@@ -48,6 +48,10 @@ namespace avmplus {
 	}
 }
 
+#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
+  #include "api-versions.h"
+#endif
+
 namespace avmshell
 {
 	const int kScriptTimeout = 15;
@@ -73,6 +77,7 @@ namespace avmshell
 		, st_component(NULL)
 		, st_category(NULL)
 		, st_name(NULL)
+		, api(0)
 	{
 	}
 
@@ -82,8 +87,9 @@ namespace avmshell
 																sizeof(ClassClosure*), 
 																MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 	}
-	
-	ShellCore::ShellCore(MMgc::GC* gc) : AvmCore(gc)
+
+	ShellCore::ShellCore(MMgc::GC* gc) 
+		: AvmCore(gc)
 	{
 		systemClass = NULL;
 		
@@ -95,6 +101,17 @@ namespace avmshell
 		consoleOutputStream = new (gc) ConsoleOutputStream();
 		
 		setConsoleStream(consoleOutputStream);
+
+#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
+		setAPIInfo(_min_version_num,
+				   (const uint32_t*) _versions_count,
+				   _max_version_num-_min_version_num+1,
+				   (const uint32_t**) _versions,
+				   _uris_count,
+				   (const char**) _uris);
+		defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];	 
+#endif
+				   
 	}
 	
 	void ShellCore::stackOverflow(MethodEnv *env)
@@ -251,7 +268,8 @@ namespace avmshell
 			double then = 0, now = 0;
 			if (record_time) 
 				then = VMPI_getDate();
-			Atom result = handleActionSource(input, NULL, shell_domainEnv, shell_toplevel, NULL, codeContext);
+			uint32_t api = this->getAPI(NULL);
+			Atom result = handleActionSource(input, NULL, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
 			if (record_time) 
 				now = VMPI_getDate();
 			if (result != undefinedAtom)
@@ -463,7 +481,17 @@ namespace avmshell
 		// placate MSVC - settings is unreferenced if this is not here
 		(void)settings.enter_debugger_on_launch;
 #endif
-		
+
+#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
+		// set the default api version
+		if (defaultAPIVersion == _versions[0][_versions_count[0]-1]) {
+		    if (settings.api >= _min_version_num && 
+			    settings.api <= _max_version_num) {
+			    this->defaultAPIVersion = settings.api;
+		    }
+		}
+#endif
+
 		return handleArbitraryExecutableContent(code, filename);
 	}
 
@@ -475,9 +503,10 @@ namespace avmshell
 		{
 			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
 			codeContext->m_domainEnv = shell_domainEnv;
-			
+
 			if (AbcParser::canParse(code) == 0) {
-				handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext);
+				uint32_t api = this->getAPI(NULL);
+				handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
 			}
 			else if (isSwf(code)) {
 				handleSwf(filename, code, shell_domainEnv, shell_toplevel, codeContext);
@@ -489,7 +518,8 @@ namespace avmshell
 				String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
 				ScriptBuffer empty;		// With luck: allow the
 				code = empty;			//    buffer to be garbage collected
-				handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext);
+				uint32_t api = this->getAPI(NULL);
+				handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
 #else
 				console << "unknown input format in file: " << filename << "\n";
 				return(1);
@@ -519,5 +549,6 @@ namespace avmshell
 		
 		return 0;
 	}
+
 }
 

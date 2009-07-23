@@ -548,11 +548,15 @@ namespace avmplus
 				Binding cBinding = this->findBinding(name, ns);
 				if (!isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)))
 				{
-					// Try again with public namespace
-					const Binding pBinding = this->findBinding(name, core->publicNamespace);
+					// Try again with public namespace that matches the version of the current traits
+					const Binding pBinding = this->findBinding(name, core->getPublicNamespace(owner->pool));
 					if (isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(pBinding)))
 						cBinding = pBinding;
 				}
+
+				if (iBinding == cBinding) 
+					continue;
+
 				if (!isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)))
 					return false;
 
@@ -630,8 +634,8 @@ namespace avmplus
 			const Binding cBinding = this->findBinding(name, ns);
 			if (!isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)))
 			{
-				// Try again with public namespace
-				const Binding pBinding = this->findBinding(name, ifc->core->publicNamespace);
+				// Try again with public namespace that matches the version of the current traits
+				const Binding pBinding = this->findBinding(name, ifc->core->getPublicNamespace(owner->pool));
 				if (isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(pBinding)))
 				{
 					this->m_bindings->add(name, ns, pBinding);
@@ -640,6 +644,30 @@ namespace avmplus
 		} 
 	}
 		
+	static void addVersionedBindings(MultinameHashtable* bindings,
+									 Stringp name,
+									 NamespaceSetp nss,
+									 Binding binding,
+									 AvmCore* core)
+	{
+		// Add a binding for each version that is larger
+		// (compatible with) the version of the current namespace.
+		const NamespaceSet* compat_nss = ApiUtils::getCompatibleNamespaces(core, nss);
+		for (int i=0; i<compat_nss->size; ++i) {
+			bindings->add(name, compat_nss->namespaces[i], binding);
+		}
+	}
+
+	static void addVersionedBindings(MultinameHashtable* bindings,
+									 Stringp name,
+									 Namespacep ns,
+									 Binding binding,
+									 AvmCore* core)
+	{
+		NamespaceSet* nss = new (core->GetGC()) NamespaceSet(ns);
+		addVersionedBindings(bindings, name, nss, binding, core);
+	}
+
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
 
@@ -759,15 +787,6 @@ namespace avmplus
 		newtraits->m_needsHashtable = this->m_needsHashtable;
 		newtraits->set_names(ns, name);
 		return newtraits;
-	}
-
-	void Traits::enableSkips(uint32_t nameCount) 
-	{ 
-		AvmAssert(!m_skips.test(0)); 
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_mem(TMT_traits, m_skips.allocatedSize() ); )
-		m_skips.resize(core->GetGC(), nameCount+1); 
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_traits, m_skips.allocatedSize() ); )
-		m_skips.set(0); 
 	}
 
 	TraitsPosPtr Traits::traitsPosStart() const
@@ -992,27 +1011,24 @@ namespace avmplus
 		NameEntry ne;
 		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
 		for (uint32_t i = 0; i < nameCount; i++)
-        {
+		{
 			ne.readNameEntry(pos);
-			if (testSkip(i))
-			{
-				//Multiname qn;
-				//this->pool->resolveQName_index(qni, qn, toplevel);
-				//Namespacep ns = qn.getNamespace();
-				//Stringp name = qn.getName();
-				//core->console << "BB skipping definition " << i << " for " << this << " name=" << Multiname::format(core,ns,name) << "\n";
-				continue;
+			Multiname mn;
+			this->pool->resolveQName(ne.qni, mn, toplevel);
+			Stringp name = mn.getName();
+			Namespacep ns;
+			NamespaceSet* nss;
+			if (mn.namespaceCount() > 1) {
+				nss = (NamespaceSet*) mn.getNsset();
+				ns = nss->namespaces[0];
 			}
-			
-			// Didn't skip the trait, so do set up for the definition now.
-
-			Multiname qn;
-			this->pool->resolveQName(ne.qni, qn, toplevel);
-			Namespacep ns = qn.getNamespace();
-			Stringp name = qn.getName();
+			else {
+				ns = mn.getNamespace();
+				nss = new (core->GetGC()) NamespaceSet(ns);
+			}
 
 			switch (ne.kind)
-            {
+			{
 				case TRAIT_Slot:
 				case TRAIT_Const:
 				case TRAIT_Class:
@@ -1032,7 +1048,7 @@ namespace avmplus
 						
 						// slots are final.
 						if (basetb && slot_id < basetb->slotCount) 
-							toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(qn), core->toErrorString(base));
+							toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(mn), core->toErrorString(base));
 
 						// a slot cannot override anything else.
 						if (bindings->get(name, ns) != BIND_NONE)
@@ -1051,7 +1067,7 @@ namespace avmplus
 					AvmAssert(!(ne.id > nameCount));						// unhandled verify error
 					AvmAssert(!(basetb && slot_id < basetb->slotCount));	// unhandled verify error
 					AvmAssert(!(bindings->get(name, ns) != BIND_NONE));		// unhandled verify error
-					bindings->add(name, ns, AvmCore::makeSlotBinding(slot_id, ne.kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST));
+					addVersionedBindings(bindings, name, nss, AvmCore::makeSlotBinding(slot_id, ne.kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST), core);
 					break;
 				}
 				case TRAIT_Method:
@@ -1059,7 +1075,7 @@ namespace avmplus
 					Binding baseBinding = this->getOverride(basetb, ns, name, ne.tag, toplevel);
 					if (baseBinding == BIND_NONE)
 					{
-						bindings->add(name, ns, AvmCore::makeMGSBinding(methodCount, BKIND_METHOD));
+						addVersionedBindings(bindings, name, nss, AvmCore::makeMGSBinding(methodCount, BKIND_METHOD), core);
 						// accessors require 2 vtable slots, methods only need 1.
 						methodCount += 1;
 					}
@@ -1067,7 +1083,7 @@ namespace avmplus
 					{
 						// something got overridden, need new name entry for this subclass
 						// but keep the existing disp_id
-						bindings->add(name, ns, baseBinding);
+						addVersionedBindings(bindings, name, nss, baseBinding, core);
 					}
 					else
 					{
@@ -1089,7 +1105,7 @@ namespace avmplus
 					const BindingKind them = (ne.kind == TRAIT_Getter) ? BKIND_SET : BKIND_GET;
 					if (baseBinding == BIND_NONE)
 					{
-						bindings->add(name, ns, AvmCore::makeMGSBinding(methodCount, us));
+						addVersionedBindings(bindings, name, nss, AvmCore::makeMGSBinding(methodCount, us), core);
 						// accessors require 2 vtable slots, methods only need 1.
 						methodCount += 2;
 					}
@@ -1097,12 +1113,12 @@ namespace avmplus
 					{
 						// something maybe got overridden, need new name entry for this subclass
 						// but keep the existing disp_id
-						// both get & set bindings use the get id.  set_id = get_id + 1.
+						// both get & set bindings use the get id.	set_id = get_id + 1.
 						if (AvmCore::bindingKind(baseBinding) == them)
 						{
 							baseBinding = AvmCore::makeGetSetBinding(baseBinding);
 						}
-						bindings->add(name, ns, baseBinding);
+						addVersionedBindings(bindings, name, nss, baseBinding, core);
 					}
 					else
 					{
@@ -1117,8 +1133,8 @@ namespace avmplus
 					// unsupported traits type -- can't happen, caught in AbcParser::parseTraits
 					AvmAssert(0);
 					break;
-            }
-        } // for i
+			}
+		} // for i
 		
 		slotCount = sic.slotCount();
 	}
@@ -1139,22 +1155,11 @@ namespace avmplus
 		for (uint32_t i = 0; i < nameCount; i++)
         {
 			ne.readNameEntry(pos);
-			if (testSkip(i))
-			{
-				//Multiname qn;
-				//this->pool->resolveQName_index(qni, qn, toplevel);
-				//Namespacep ns = qn.getNamespace();
-				//Stringp name = qn.getName();
-				//core->console << "FSM skipping definition " << i << " for " << this << " name=" << Multiname::format(core,ns,name) << "\n";
-				continue;
-			}
-			
-			// Didn't skip the trait, so do set up for the definition now.
-
-			Multiname qn;
-			this->pool->resolveQName(ne.qni, qn, toplevel);
-			Namespacep ns = qn.getNamespace();
-			Stringp name = qn.getName();
+			Multiname mn;
+			this->pool->resolveQName(ne.qni, mn, toplevel);
+			Namespacep ns = mn.getNamespace();
+			Stringp name = mn.getName();
+			// NOTE only one versioned namespace from the set needed here
 
 			switch (ne.kind)
             {
@@ -1334,8 +1339,7 @@ namespace avmplus
 			Traits* t = this->pool->resolveTypeName(pos, toplevel);
 
 			// this assumes we save name/ns in all builds, not just verbose
-			bindings->add(this->name(), this->ns(), AvmCore::makeSlotBinding(0, BKIND_VAR));
-
+			addVersionedBindings(bindings, this->name(), this->ns(), AvmCore::makeSlotBinding(0, BKIND_VAR), core);
 			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/0);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);
 			thisData->m_slotSize = is8ByteSlot(t) ? 8 : 4;
@@ -1451,11 +1455,6 @@ namespace avmplus
 		for (uint32_t i = 0; i < nameCount; i++)
         {
 			ne.readNameEntry(pos);
-			if (testSkip(i))
-			{
-				continue;
-			}
-
 			switch (ne.kind)
             {
 				case TRAIT_Class:
@@ -1965,7 +1964,7 @@ namespace avmplus
 failure:
 
 #ifdef AVMPLUS_VERBOSE
-		if (pool->verbose)
+   		if (pool->verbose)
 			core->console << "illegal override in "<< this << ": " << Multiname(ns,name) <<"\n";
 #endif
 		if (toplevel)

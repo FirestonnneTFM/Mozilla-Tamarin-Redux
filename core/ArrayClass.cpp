@@ -574,7 +574,9 @@ namespace avmplus
 					ScriptObject* obj = AvmCore::atomToScriptObject (a);
 
 					Stringp name = fields[0].name;
-					Multiname mname(core->publicNamespace, name);
+
+					// NOTE we want to sort the public members of the caller's version
+					Multiname mname(core->findPublicNamespace(), name);
 					
 					// An undefined prop just becomes undefined in our sort
 					Atom x = toplevel->getproperty(obj->atom(), &mname, obj->vtable);
@@ -1032,7 +1034,8 @@ namespace avmplus
 		for (uint32 i = 0; i < numFields; i++)
 		{
 			Stringp name = fields[i].name;
-			Multiname mname(core->publicNamespace, name);
+			// NOTE compare the names of the caller's version
+			Multiname mname(core->findPublicNamespace(), name);
 			
 			opt = fields[i].options; // override the group defaults with the current field
 
@@ -1576,6 +1579,7 @@ namespace avmplus
 	/*static*/ uint32_t ArrayClass::getLengthHelper(Toplevel* toplevel, ScriptObject* d)
 	{
 		AvmCore* core = toplevel->core();
+		// NOTE we can pick any public::length, so pick the default versioned one 
 		Multiname mname(core->publicNamespace, core->klength);
 		Atom lenAtm = toplevel->getproperty(d->atom(), &mname, d->vtable);
 		return AvmCore::toUInt32(lenAtm);
@@ -1584,6 +1588,7 @@ namespace avmplus
 	/*static*/ void ArrayClass::setLengthHelper(Toplevel* toplevel, ScriptObject* d, uint32 newLen)
 	{
 		AvmCore* core = toplevel->core();
+		// NOTE we can pick any public::length, so pick the default versioned one 
 		Multiname mname(core->publicNamespace, core->klength);
 		Atom lenAtm = core->uintToAtom(newLen);
 		toplevel->setproperty(d->atom(), &mname, lenAtm, d->vtable);

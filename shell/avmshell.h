@@ -50,6 +50,11 @@
   #define VMCFG_WORKERTHREADS
 #endif
 
+#if defined VMCFG_TESTING
+  // We simulate Flash's use of API versioning for testing only.
+  #define VMCFG_TEST_VERSIONING
+#endif
+
 #if !defined(UNDER_CE) && !defined(AVM_SHELL_NO_PROJECTOR)
 #  define AVMSHELL_PROJECTOR_SUPPORT
 #endif

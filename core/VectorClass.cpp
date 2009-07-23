@@ -117,7 +117,8 @@ namespace avmplus
 		}
 		else
 		{
-			Multiname mn(core()->publicNamespace,core()->string(name));
+			// NOTE use default public for message gen
+			Multiname mn(core()->publicNamespace, core()->string(name));
 			// Vector is sorta sealed, can only write to "indexed" properties
 			toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
 		}
@@ -137,7 +138,8 @@ namespace avmplus
 			if(isNumber)
 			{
 				// Not a valid indexed name - has a decimal part
-				Multiname mn(core->publicNamespace,core->string(name));
+				// NOTE use default public for message gen
+				Multiname mn(core->findPublicNamespace(), core->string(name));
 				toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
 			}
 			// Check the prototype chain - that will throw if there is no match

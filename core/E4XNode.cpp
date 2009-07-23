@@ -229,7 +229,7 @@ namespace avmplus
 		{
 			Stringp str = (String *)(nameOrAux);
 			mn->setName (str);
-			mn->setNamespace (core->publicNamespace);
+			mn->setNamespace (core->findPublicNamespace());
 		}
 
 		if (getClass() == kAttribute)
@@ -257,8 +257,8 @@ namespace avmplus
 			return;
 		}
 
-		if (!ns || ns == core->publicNamespace || 
-			(ns->getPrefix() == core->kEmptyString->atom() && ns->getURI() == core->kEmptyString))
+		if (!ns || ns->isPublic() || 
+			(ns->getPrefix() == core->kEmptyString->atom() && ApiUtils::isEmptyURI(ns->getURI())))
 		{
 			//m_nameOrAux = int (name);
 			WBRC(core->GetGC(), this, &m_nameOrAux, uintptr(name));
@@ -299,7 +299,8 @@ namespace avmplus
 		Multiname m;
 		getQName (core, &m);
 
-		if ((ns->getPrefix() == core->kEmptyString->atom()) && (!m.isAnyNamespace()) && (m.getNamespace()->getURI() == core->kEmptyString))
+		if ((ns->getPrefix() == core->kEmptyString->atom()) && 
+			(!m.isAnyNamespace()) && ApiUtils::isEmptyURI(m.getNamespace()->getURI()))
 			return;
 
 		// step 2b + 2c
@@ -333,7 +334,7 @@ namespace avmplus
 			// set this nodes prefix to undefined
 		if  (!m.isAnyNamespace() && (m.getNamespace()->getPrefix() == ns->getPrefix()))
 		{
-			setQName (core, m.getName(), core->newNamespace (m.getNamespace()->getURI()));
+			setQName (core, m.getName(), core->newNamespace(m.getNamespace()->getURI()));
 		}
 
 		// step 2g
@@ -347,7 +348,7 @@ namespace avmplus
 			curAttr->getQName (core, &ma);
 			if (!ma.isAnyNamespace() && ma.getNamespace()->getPrefix() == ns->getPrefix())
 			{
-				curAttr->setQName (core, ma.getName(), core->newNamespace (ma.getNamespace()->getURI()));
+				curAttr->setQName (core, ma.getName(), core->newNamespace(ma.getNamespace()->getURI()));
 			}
 		}
 
@@ -414,7 +415,8 @@ namespace avmplus
 
 		if (prefix == toplevel->xmlClass()->kXml)
 		{
-			return toplevel->xmlClass()->nsXML;
+			Namespacep nsXML = core->newNamespace(core->kEmptyString->atom(), core->internConstantStringLatin1("http://www.w3.org/XML/1998/namespace")->atom()); 
+			return nsXML;
 		}
 
 		// throw error because we didn't match this prefix
@@ -503,12 +505,13 @@ namespace avmplus
 						if (len == 6)
 							// xmlns:=uri -- throw exception because of badly formed XML???
 							toplevel->throwTypeError(kXMLBadQName, attributeName);
-						Stringp prefix = core->internString(attributeName->substring (6, len));
+						Stringp prefix = attributeName->substring (6, len);
 						ns = core->newNamespace(prefix->atom(), attributeValue->atom());
 					}
-					else if (len == 5)
+					else if (len == 5) {
 						// xmlns=uri
 						ns = core->newNamespace(core->kEmptyString->atom(), attributeValue->atom());
+					}
 
 					// !!@ Don't intern these namespaces since the intern table ignores
 					// the prefix value of the namespace.
@@ -547,7 +550,7 @@ namespace avmplus
 
 			Namespace *ns = this->FindNamespace(core, toplevel, attributeName, true);
 			if (!ns)
-				ns = core->publicNamespace;
+				ns = core->findPublicNamespace();
 
 			attrObj->setQName(core, attributeName, ns);
 
@@ -955,7 +958,7 @@ namespace avmplus
 		else
 		{
 			Stringp str = (String *)(nameOrAux);
-			E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, core->publicNamespace, f);
+			E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, core->findPublicNamespace(), f);
 			//m_nameOrAux = AUXBIT | int(aux);
 			WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
 		}

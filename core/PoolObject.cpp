@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-	PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startPos) :
+	PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startPos, uint32_t api) :
 		core(core),
 		cpool_int(0),
 		cpool_uint(0),
@@ -70,6 +70,7 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES
 		, _method_name_indices(0)
 #endif
+		, api(api)
 	{
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 	}
@@ -136,7 +137,7 @@ namespace avmplus
 
 	Traits* PoolObject::getTraits(Stringp name, bool recursive/*=true*/) const
 	{
-		return getTraits(name, core->publicNamespace, recursive);
+		return getTraits(name, core->getPublicNamespace((PoolObject*) this), recursive);
 	}
 
 	Traits* PoolObject::getTraits(const Multiname& mname, const Toplevel* toplevel, bool recursive/*=true*/) const
@@ -565,7 +566,8 @@ range_error:
 		}
 
 		parseMultiname(cpool_mn[index], m);
-		if (!m.isQName())
+
+		if (!isBuiltin && !m.isQName())
 		{
 			if (toplevel)
 				toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
@@ -591,7 +593,7 @@ range_error:
 
 		Multiname m;
 		parseMultiname(cpool_mn[index], m);
-
+		
 		Traits* t = getTraits(m, toplevel);
 		if(m.isParameterizedType())
 		{

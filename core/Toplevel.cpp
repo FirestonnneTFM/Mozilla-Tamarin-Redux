@@ -59,7 +59,8 @@ namespace avmplus
 			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
 			// of Object and Class have the right scope.
 		object_ivtable = core->newVTable(core->traits.object_itraits, NULL, NULL);
-		ScopeChain* object_iscope = ScopeChain::create(gc, object_ivtable, abcEnv, core->traits.object_istc, NULL, core->newNamespace(core->kEmptyString));
+		Namespacep publicNS = core->getPublicNamespace(core->getDefaultAPI());
+		ScopeChain* object_iscope = ScopeChain::create(gc, object_ivtable, abcEnv, core->traits.object_istc, NULL, publicNS);
 		object_ivtable->resolveSignatures(object_iscope);
 
 		// global objects are subclasses of Object
@@ -70,7 +71,7 @@ namespace avmplus
 			mainTraits->init_declaringScopes(ScopeTypeChain::createEmpty(core->GetGC(), mainTraits));
 		ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, mainVTable, abcEnv);
 		mainVTable->init = main;
-		toplevel_scope = ScopeChain::create(gc, mainVTable, abcEnv, mainTraits->init->declaringScope(), NULL, core->newNamespace(core->kEmptyString));
+		toplevel_scope = ScopeChain::create(gc, mainVTable, abcEnv, mainTraits->init->declaringScope(), NULL, publicNS);
 		mainVTable->resolveSignatures(toplevel_scope);
 
 		_global = new (gc, mainVTable->getExtraSize()) ScriptObject(mainVTable, NULL);
@@ -80,7 +81,7 @@ namespace avmplus
 		// to use when it creates Object$ and Class$.  once that happens, we replace
 		// with the real Class$ vtable.
 		class_ivtable = core->newVTable(core->traits.class_itraits, object_ivtable, this);
-		ScopeChain* class_iscope = ScopeChain::create(gc, class_ivtable, abcEnv, core->traits.class_istc, NULL, core->newNamespace(core->kEmptyString));
+		ScopeChain* class_iscope = ScopeChain::create(gc, class_ivtable, abcEnv, core->traits.class_istc, NULL, publicNS);
 		class_ivtable->resolveSignatures(class_iscope);
 
 		core->exportDefs(mainTraits, main);
@@ -324,7 +325,7 @@ namespace avmplus
 	}
 
 	// E4X 10.6.1, page 38
-	// This returns a Multiname create from a unqualified generic type.
+	// This returns a Multiname created from a unqualified generic type.
 	// The multiname returned will have one namespace and will be correctly
 	// marked as an attribute if input is an attribute
 	void Toplevel::ToXMLName(const Atom p, Multiname& m) 
@@ -352,7 +353,7 @@ namespace avmplus
 						QNameObject *q = AvmCore::atomToQName(p);
 
 						m.setAttr(q->isAttr() ? true : false);
-						m.setNamespace(core->newNamespace(q->get_uri()));
+						m.setNamespace(core->newNamespace(q->getURI()));
 						Stringp name = q->get_localName();
 						if (name == core->kAsterisk)
 						{
@@ -409,7 +410,8 @@ namespace avmplus
 			m.setAnyName(); // marks it as an anyName
 		}
 
-		m.setNamespace(core->publicNamespace);
+		// NOTE need a public, so use the caller's public
+		m.setNamespace(core->findPublicNamespace());
 	}
 
 	void Toplevel::CoerceE4XMultiname(const Multiname *m, Multiname &out)
@@ -715,7 +717,8 @@ namespace avmplus
 
 			// ISSUE should we try this on each object on the proto chain or just the first?
 			TraitsBindingsp td = t->getTraitsBindings();
-			if (td->findBinding(name, core->publicNamespace) != BIND_NONE)
+			// NOTE looking for a name that matches the caller's version, so use caller's public
+			if (td->findBinding(name, core->findPublicNamespace()) != BIND_NONE)
 				return trueAtom;
 
 			nameatom = name->atom();
@@ -963,7 +966,7 @@ add_numbers:
 
 		case BKIND_METHOD:
 			{
-				if (multiname->contains(core()->publicNamespace) && isXmlBase(obj)) 
+				if (multiname->contains(core()->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj)) 
 				{
 					ScriptObject* o = AvmCore::atomToScriptObject(obj);
 					// dynamic props should hide declared methods
@@ -996,7 +999,7 @@ add_numbers:
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getproperty method " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
-			if (multiname->contains(core->publicNamespace) && isXmlBase(obj))
+			if (multiname->contains(core->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj))
 			{
 				// dynamic props should hide declared methods
 				ScriptObject* so = AvmCore::atomToScriptObject(obj);
@@ -1087,7 +1090,7 @@ add_numbers:
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setproperty method " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
-			if (multiname->contains(core()->publicNamespace) && isXmlBase(obj))
+			if (multiname->contains(core()->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj))
 			{
 				// dynamic props should hide declared methods
 				ScriptObject* so = AvmCore::atomToScriptObject(obj);
@@ -1356,7 +1359,8 @@ add_numbers:
 			NativeInitializer* nativeInitializer = NULL;	// "native" not supported for eval code
 			Toplevel* toplevel = (Toplevel*)self;
 			String *newsrc = AvmCore::atomToString(input)->appendLatin1("\0", 1);
-			return core->handleActionSource(newsrc, filename, domainEnv, toplevel, nativeInitializer, codeContext);
+			uint32_t api = core->getAPI(NULL);
+			return core->handleActionSource(newsrc, filename, domainEnv, toplevel, nativeInitializer, codeContext, api);
 		}
 #endif // VMCFG_EVAL
 		return undefinedAtom;
@@ -1663,7 +1667,7 @@ add_numbers:
 		// delegated to this function because in-lining it in the caller prevents
 		// taill calling.  See comments in op_call, above.
 		
-		Multiname name(core()->publicNamespace, core()->internString(core()->newStringLatin1(namestr)));
+		Multiname name(core()->findPublicNamespace(), core()->internString(core()->newStringLatin1(namestr)));
 		throwTypeError(id, core()->toErrorString(&name));
 	}
 	

@@ -165,15 +165,24 @@ namespace avmplus
 		return a;
 	}
 
-	static void addBindings(MultinameHashtable* bindings, TraitsBindingsp tb, uint32_t flags)
+	static void addBindings(AvmCore* core, MultinameHashtable* bindings, TraitsBindingsp tb, uint32_t flags)
 	{
 		if (!tb) return;
 		if ((flags & TypeDescriber::HIDE_OBJECT) && !tb->base) return;
-		addBindings(bindings, tb->base, flags);
+		addBindings(core, bindings, tb->base, flags);
 		StTraitsBindingsIterator iter(tb);
+		uint32_t curv = core->getAPI(NULL);
 		while (iter.next())
 		{
 			if (!iter.key()) continue;
+			Namespacep ns = iter.ns();
+			if (ApiUtils::isVersionedNS(core, ns->getType(), ns->getURI())) {
+				// Skip names that don't match the current version
+				uint32_t v = ApiUtils::getNamespaceVersion(core, iter.ns(), false);
+				if (curv != v) {
+					continue;
+				}
+			}
 			bindings->add(iter.key(), iter.ns(), iter.value());
 		}
 	}
@@ -249,7 +258,7 @@ namespace avmplus
 			// make a flattened set of bindings so we don't have to check for overrides as we go.
 			// This is not terribly efficient, but doesn't need to be.
 			MultinameHashtable* mybind = new (gc) MultinameHashtable();
-			addBindings(mybind, tb, flags);
+			addBindings(m_toplevel->core(), mybind, tb, flags);
 
 			// Don't want interface methods, so post-process and wipe out any
 			// bindings that were added.
@@ -279,7 +288,7 @@ namespace avmplus
 					{
 						if (!iter.key()) continue;
 						Namespacep ns = iter.ns();
-						if (ns->getURI()->length() > 0 && nsremoval.indexOf(ns) < 0)
+						if (ns->getURI(true)->length() > 0 && nsremoval.indexOf(ns) < 0)
 						{
 							nsremoval.add(ns);
 						}
@@ -294,19 +303,20 @@ namespace avmplus
 				Stringp name = iter.key();
 				Namespacep ns = iter.ns();
 				Binding binding = iter.value();
-				Stringp nsuri = ns->getURI();
+				Stringp nsuri = ns->getURI(true);
 				TraitsMetadata::MetadataPtr md1 = NULL;
 				TraitsMetadata::MetadataPtr md2 = NULL;
 				PoolObject* md1pool = NULL;
 				PoolObject* md2pool = NULL;
 
 				// We only display public members -- exposing private namespaces could compromise security.
-				if (ns->getType() != Namespace::NS_Public) 
+				if (ns->getType() != Namespace::NS_Public) {
 					continue;
+				}
 				
-				if ((flags & HIDE_NSURI_METHODS) && nsremoval.indexOf(ns) >= 0)
+				if ((flags & HIDE_NSURI_METHODS) && nsremoval.indexOf(ns) >= 0) {
 					continue;
-			
+				}			
 				ScriptObject* v = new_object();
 
 				const BindingKind bk = AvmCore::bindingKind(binding);

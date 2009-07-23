@@ -50,8 +50,7 @@ namespace avmplus
 		AbcParser(AvmCore* core, ScriptBuffer code, 
 			Toplevel* toplevel,
 			Domain* domain,
-			const NativeInitializer* natives,
-			const List<Stringp>* keepVersions = NULL);
+			const NativeInitializer* natives);
 
 		~AbcParser();
 
@@ -64,7 +63,7 @@ namespace avmplus
 			Toplevel* toplevel,
 			Domain* domain,
 			const NativeInitializer* natives,
-			const List<Stringp>* keepVersions = NULL);
+			uint32_t api);
 
 		/** return 0 iff the code starts with a known magic number,
 		  * otherwise an appropriate error code.
@@ -74,7 +73,7 @@ namespace avmplus
 		static int canParse(ScriptBuffer code, int* version = NULL);
 
 	protected:
-		PoolObject* parse();
+		PoolObject* parse(uint32_t api);
 		MethodInfo* resolveMethodInfo(uint32 index) const;
 
 		#ifdef AVMPLUS_VERBOSE
@@ -92,7 +91,7 @@ namespace avmplus
 		void parseClassInfos();
 		bool parseScriptInfos();
 		void parseMethodBodies();
-		void parseCpool();
+		void parseCpool(uint32_t api);
 		Traits* parseTraits(uint32_t sizeofInstance,
 							Traits* base, 
 							Namespacep ns, 
@@ -105,7 +104,7 @@ namespace avmplus
 		/**
 		 * add script to VM-wide table
 		 */
-		void addNamedScript(Namespacep ns, Stringp name, MethodInfo* script);
+		void addNamedScript(NamespaceSetp nss, Stringp name, MethodInfo* script);
 
 		/**
 		 * Adds traits to the VM-wide traits table, for types
@@ -115,6 +114,7 @@ namespace avmplus
 		 * @param itraits The instance traits of the class
 		 */
 		void addNamedTraits(Namespacep ns, Stringp name, Traits* itraits);
+		void addNamedTraits(NamespaceSetp nss, Stringp name, Traits* itraits);
 
 		/**
 		 * reads in 8 bytes in little endian order and stores in
@@ -197,7 +197,6 @@ namespace avmplus
 		byte*						abcEnd; // one past the end, actually
 		Stringp*					metaNames;
 		Stringp						kNeedsDxns;
-		const List<Stringp>*		keepVersions;
 #ifdef AVMPLUS_VERBOSE
 		Stringp 					kVerboseVerify;
 #endif

@@ -81,6 +81,12 @@ namespace avmplus
 		return (AvmCore::isName(m_prefix) && AvmCore::atomToString(m_prefix)->length()>0);
 	}
 
+	bool Namespace::isPublic() const
+	{
+		Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
+		return getType() == Namespace::NS_Public && ApiUtils::isEmptyURI(uri);
+	}
+
 	bool Namespace::EqualTo(const Namespace* other) const
 	{
 		if (isPrivate() || other->isPrivate())
@@ -113,7 +119,7 @@ namespace avmplus
 	{
 		// first return uri then prefix
 		if (index == 1)
-			return this->getURI()->atom();
+			return this->getURI(true)->atom();
 		else if (index == 2)
 			return this->m_prefix;
 		else
@@ -130,14 +136,17 @@ namespace avmplus
 			return 0;
 	}
 
-	Stringp Namespace::format(AvmCore* /*core*/) const
+	Stringp Namespace::format(AvmCore* core) const
 	{
-		return getURI();
+		(void) core;
+		return getURI(true);
 	}
 
-	Stringp Namespace::get_uri() const
+	Stringp Namespace::getURI(bool stripVersion /*=false*/) const
 	{
 		Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
+		if (stripVersion)
+			return ApiUtils::getBaseURI(MMgc::GC::GetGC(this)->core(), uri);
 		return uri;
 	}
 }

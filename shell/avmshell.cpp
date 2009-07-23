@@ -614,6 +614,11 @@ namespace avmshell
 				}
 				
 				if (arg[1] == 'D') {
+					if (!VMPI_strcmp(arg+2, "api")) {
+						settings.api = VMPI_atoi(argv[i+1]); // -n form
+						i++;
+					}
+					else
 					if (!VMPI_strcmp(arg+2, "timeout")) {
 						settings.interrupts = true;
 					}

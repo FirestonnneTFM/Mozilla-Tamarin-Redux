@@ -126,6 +126,7 @@ namespace avmplus
 		Stringp u2 = qname->getNamespace()->getURI();
         uint8 type2 = (uint8)(qname->getNamespace()->getType());
 		//Stringp s2 = core->string(u2);
+		
 		for (int i = 0; i < this->namespaceCount(); i++)
 		{
 			// We'd like to just compare namespace objects but we need
@@ -144,7 +145,7 @@ namespace avmplus
 	/* static */ 
 	Stringp Multiname::format(AvmCore *core, Namespacep ns, Stringp name, bool attr, bool hideNonPublicNamespaces)
 	{
-		if (ns == core->publicNamespace ||
+		if (ns->isPublic() ||
 			(hideNonPublicNamespaces && // backwards compatibility
 			ns->getType() != Namespace::NS_Public))
 		{
@@ -152,14 +153,15 @@ namespace avmplus
 		}
 		else
 		{
+			Stringp uri = ApiUtils::getBaseURI(core, ns->getURI());
 			if (attr)
 			{
-				return core->concatStrings(core->newConstantStringLatin1("@"), core->concatStrings(ns->getURI(),
+				return core->concatStrings(core->newConstantStringLatin1("@"), core->concatStrings(uri,
 					core->concatStrings(core->newConstantStringLatin1("::"), name)));
 			}
 			else
 			{
-				return core->concatStrings(ns->getURI(),
+				return core->concatStrings(uri,
 					core->concatStrings(core->newConstantStringLatin1("::"), name));
 			}
 		}
@@ -202,10 +204,10 @@ namespace avmplus
 
 				for (int i=0,n=namespaceCount(); i < n; i++) 
 				{			
-					if (getNamespace(i)==core->publicNamespace)
+					if (getNamespace(i)->isPublic())
 						s = core->concatStrings(s, core->newConstantStringLatin1("public"));
 					else
-						s = core->concatStrings(s, getNamespace(i)->getURI());
+						s = core->concatStrings(s, ApiUtils::getBaseURI(core, getNamespace(i)->getURI()));
 					if (i+1 < n)
 						s = core->concatStrings(s, core->newConstantStringLatin1(","));
 				}

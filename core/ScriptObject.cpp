@@ -169,7 +169,8 @@ namespace avmplus
 			}
 			while ((o = o->delegate) != NULL);
 		}
-		Multiname multiname(core()->publicNamespace,AvmCore::atomToString(name));
+		// NOTE use default public since name is not used
+		Multiname multiname(core()->publicNamespace, AvmCore::atomToString(name));
 		toplevel()->throwReferenceError(kReadSealedError, &multiname, origObjTraits);
 		// unreached
 		return undefinedAtom;
@@ -234,6 +235,7 @@ namespace avmplus
 		}
 		else
 		{
+			// NOTE use default public since name is not used
 			Multiname multiname(core()->publicNamespace, AvmCore::atomToString(name));
 			// cannot create properties on a sealed object.
 			toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
@@ -290,7 +292,7 @@ namespace avmplus
 		}
 		else
 		{
-			// cannot create properties on a sealed object.
+			// cannot create properties on a sealed object. just use any public
 			Multiname multiname(core()->publicNamespace, AvmCore::atomToString(name));
 			toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
 		}
@@ -377,6 +379,7 @@ namespace avmplus
 			}
 			else
 			{
+				// use the default public
 				Multiname multiname(core->publicNamespace, core->internUint32(i));
 				// cannot create properties on a sealed object.
 				toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
@@ -509,7 +512,8 @@ namespace avmplus
 		Atom atomv_out[1];
 
 		// call this.valueOf()
-		Multiname tempname(core->publicNamespace, core->kvalueOf);
+		// NOTE use callers versioned public to get correct valueOf
+		Multiname tempname(core->findPublicNamespace(), core->kvalueOf);
 		atomv_out[0] = atom();
 		Atom result = toplevel->callproperty(atom(), &tempname, 0, atomv_out, vtable);
 
@@ -544,7 +548,8 @@ namespace avmplus
 		Atom atomv_out[1];
 
 		// call this.toString()
-		Multiname tempname(core->publicNamespace, core->ktoString);
+		// NOTE use callers versioned public to get correct toString
+		Multiname tempname(core->findPublicNamespace(), core->ktoString);
 		atomv_out[0] = atom();
 		Atom result = toplevel->callproperty(atom(), &tempname, 0, atomv_out, vtable);
 

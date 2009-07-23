@@ -333,7 +333,7 @@ namespace avmplus
 		}
 		
 		Namespacep ns = t->ns();
-		if (ns != NULL && ns != m_core->publicNamespace)
+		if (ns != NULL && !ns->isPublic())
 			*this << ns << ".";
 		
 		Stringp n = t->name();

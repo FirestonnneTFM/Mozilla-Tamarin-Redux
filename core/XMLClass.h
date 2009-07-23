@@ -83,7 +83,6 @@ namespace avmplus
 
 		// Support for built-in "xml" namespace
 		DRCWB(Stringp) kXml;
-		DRCWB(Namespace*) nsXML;
 
 		// notification types 
 		ATOM_WB kAttrAdded;

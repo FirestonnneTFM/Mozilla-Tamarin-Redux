@@ -342,10 +342,10 @@ const int kBufferPadding = 16;
 		int interrupted;
 		
 		/**
-		 * The default namespace, "public", that all identifiers
-		 * belong to
+		 * The unnamed public namespace, versioned and unversioned
 		 */
 		DRC(Namespacep) publicNamespace;
+		NamespaceSet* publicNamespaces;  // FIXME memory management: anything special need to be done here?
 		VTable* namespaceVTable;
 
 		#ifdef AVMPLUS_WITH_JNI
@@ -363,6 +363,7 @@ const int kBufferPadding = 16;
 		 * @param toplevel the Toplevel object to execute against,
 		 *                 or NULL if a Toplevel should be
 		 *                 created.
+		 * @param codeContext FIXME
 		 * @throws Exception If an error occurs, an Exception object will
 		 *         be thrown using the AVM+ exceptions mechanism.
 		 *         Calls to handleActionBlock should be bracketed
@@ -388,9 +389,10 @@ const int kBufferPadding = 16;
 		 * @param toplevel the Toplevel object to execute against,
 		 *                 or NULL if a Toplevel should be
 		 *                 created.
-		 * @param nativeMethods the NATIVE_METHOD table
-		 * @param nativeClasses the NATIVE_CLASS table
-		 * @param nativeScriptss the NATIVE_SCRIPT table
+		 * @param domain FIXME
+		 * @param ninit FIXME
+		 * @param api The api version of the code being parsed. It must
+		 *            coorespond to one of the versions in api-versions.h
 		 * @throws Exception If an error occurs, an Exception object will
 		 *         be thrown using the AVM+ exceptions mechanism.
 		 *         Calls to handleActionBlock should be bracketed
@@ -401,19 +403,21 @@ const int kBufferPadding = 16;
 									 Toplevel* toplevel,
 									 Domain* domain,
 									 const NativeInitializer* ninit,
-									 const List<Stringp>* include_versions = NULL);
+									 uint32_t api);
 		
 		/**
 		 * Execute the ABC block starting at offset start in code.
 		 * @param code buffer holding the ABC block to execute
 		 * @param start zero-indexed offset, in bytes, into the
 		 *              buffer where the code begins
+		 * @param domainEnv FIXME
 		 * @param toplevel the Toplevel object to execute against,
 		 *                 or NULL if a Toplevel should be
 		 *                 created.
-		 * @param nativeMethods the NATIVE_METHOD table
-		 * @param nativeClasses the NATIVE_CLASS table
-		 * @param nativeScripts the NATIVE_SCRIPT table
+		 * @param ninit FIXME
+		 * @param codeContext FIXME
+		 * @param api The api version of the code being parsed. It must
+		 *            coorespond to one of the versions in api-versions.h
 		 * @throws Exception If an error occurs, an Exception object will
 		 *         be thrown using the AVM+ exceptions mechanism.
 		 *         Calls to handleActionBlock should be bracketed
@@ -424,7 +428,8 @@ const int kBufferPadding = 16;
 									DomainEnv* domainEnv,
 									Toplevel* &toplevel,
 									const NativeInitializer* ninit,
-									CodeContext *codeContext);
+									CodeContext *codeContext,
+									uint32_t api);
 
 #ifdef VMCFG_EVAL
 		/**
@@ -441,12 +446,14 @@ const int kBufferPadding = 16;
 		 *                 If not NULL then ActionScript's 'include' directive will
 		 *                 be allowed in the program and files will be loaded
 		 *                 relative to 'filename'.
-		 * @param domainEnv  FIXME
+		 * @param domainEnv FIXME
 		 * @param toplevel the Toplevel object to execute against,
 		 *                 or NULL if a Toplevel should be
 		 *                 created.
-		 * @param ninit  FIXME
-		 * @param codeContext  FIXME
+		 * @param ninit FIXME
+		 * @param codeContext FIXME
+		 * @param api The api version of the code being parsed. It must
+		 *            coorespond to one of the versions in api-versions.h
 		 * @throws Exception If an error occurs, an Exception object will
 		 *         be thrown using the AVM+ exceptions mechanism.
 		 *         Calls to handleActionBlock should be bracketed
@@ -457,7 +464,8 @@ const int kBufferPadding = 16;
 								DomainEnv* domainEnv,
 								Toplevel* &toplevel,
 								const NativeInitializer* ninit,
-								CodeContext *codeContext);
+								CodeContext *codeContext,
+								uint32_t api);
 		
 		/**
 		 * Obtain input from a file to handle ActionScript's 'include' directive.
@@ -725,7 +733,60 @@ const int kBufferPadding = 16;
 
 		virtual Toplevel* createToplevel(AbcEnv* abcEnv);
 		
-	public:
+		/**
+		 * Support for API versioning
+		 */
+
+
+		/**
+		 * Set the AVM wide version information on startup.
+		 *
+		 * @param apis_start First first API version number
+		 * @param apis_sizes Array of sizes of arrays of compatible APIs
+		 * @param apis_count Count of API versions
+		 * @param apis       Array of arrays of compatible APIs
+		 * @param uris_count Count of URIs
+		 * @param uris       Array of versioned URIs
+		 */
+		void setAPIInfo(uint32_t apis_start, const uint32_t* apis_sizes,
+						uint32_t apis_count, const uint32_t** apis,  
+						uint32_t uris_count, const char** uris);
+
+		/**
+		 * Get the AVM wide default API version.
+		 */
+		virtual uint32_t getDefaultAPI();
+
+		/**
+		 * Get the current API version. Uses the given PoolObject, or otherwise
+		 * walks the scope chain for the first non-builtin method info and uses
+		 * it's PoolObject.
+		 *
+		 * @param pool The caller's pool object.
+		 */
+		uint32_t getAPI(PoolObject* pool);
+
+		/**
+		 * Find the current public by walking the call stack
+		 */
+		Namespacep findPublicNamespace();
+
+		/**
+		 * Get the public namespace associated with the given pool's version.
+		 *
+		 * @param pool The caller's pool object.
+		 */
+		Namespacep getPublicNamespace(PoolObject* pool);
+
+		/**
+		 * Get the public namespace associated with the given pool's version.
+		 *
+		 * @param version The version of public being requested.
+		 */
+		Namespacep getPublicNamespace(uint32_t version);
+
+		friend class ApiUtils;
+
 		/**
 		 * toUInt32 is the ToUInt32 algorithm from
 		 * ECMA-262 section 9.6, used in many of the
@@ -1477,7 +1538,7 @@ const int kBufferPadding = 16;
         Namespacep newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespacep newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public);
-		Namespacep newPublicNamespace(Stringp uri) { return newNamespace(uri); }
+		Namespacep newPublicNamespace(Stringp uri);
 		NamespaceSet* newNamespaceSet(int nsCount);
 
 		Stringp uintToString(uint32 i);
@@ -1520,6 +1581,15 @@ const int kBufferPadding = 16;
 		DRC(Stringp) * strings;
 		// hash set containing namespaces
 		DRC(Namespacep) * namespaces;
+
+		// API versioning state
+		uint32_t          apis_start;  // first api number
+		const uint32_t*   apis_sizes;  // array of sizes of array of compatible apis
+		uint32_t          apis_count;  // count of apis
+		const uint32_t**  apis;        // array of array of compatible apis
+		uint32_t          uris_count;  // count of uris
+		const char**      uris;        // array of uris
+		uint32_t          largest_api;
 
 #ifdef AVMPLUS_WORD_CODE
 	private:
@@ -1612,6 +1682,71 @@ const int kBufferPadding = 16;
 		MethodFrame*	next;
 	};
 
+	class ApiUtils {
+		friend class AvmCore;
+		friend class AbcParser;
+		friend class Namespace;
+		friend class NativeInitializer;
+		friend class Traits;
+
+	public:
+		/**
+		 * Returns true if the given uri is the empty string or consists of a single
+		 * character that is a api version marker.
+		 */
+		static bool isEmptyURI(Stringp uri);
+
+		/**
+		 * Returns the version of the given namespace. (See TypeDescriber.cpp)
+		 */
+		static uint32_t getNamespaceVersion(AvmCore* core, Namespace* ns, bool isBinding);
+
+		/**
+		 * Returns the unmarked URI
+		 *
+		 * Only called dynamically for formatting, and 
+		 * #ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS
+		 */
+		static Stringp getBaseURI(AvmCore* core, Stringp uri);
+
+		/**
+		 * Returns a namespace like the one given but of the current version
+		 */
+		static Namespacep getVersionedNamespace(AvmCore* core, Namespacep ns);
+
+		/**
+		 * Returns true if the given type and uri constitute a versioned namespace.
+		 */
+		static bool isVersionedNS(AvmCore* core, Namespace::NamespaceType type, Stringp uri);
+
+		/**
+		 * If it is a versioned URI of a versioned namespace, then return the versioned
+		 * URI, otherwise return the given URI (or the base URI 
+		 * #ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS)
+		 */
+		static Stringp getVersionedURI(AvmCore* core, PoolObject* pool, String* uri, Namespace::NamespaceType type, bool is_builtin=false);
+
+		/**
+		 * Get the set of namespaces that are compatible with the given set
+		 */
+		static NamespaceSetp getCompatibleNamespaces(AvmCore* core, NamespaceSetp nss);
+
+	private:
+		static uint32_t getLargestAPI(AvmCore* core);
+		inline static uint32_t getOriginalAPI(AvmCore* core) { return core->apis_start; }
+		static List<uint32_t>* getNamespaceVersions(AvmCore* core, NamespaceSetp nss);
+		static List<uint32_t>* getCompatibleVersions(AvmCore* core, uint32_t v);
+		static void getCompatibleAPIs(AvmCore* core, uint32_t v, const uint32_t*& apis, uint32_t &count);
+		static void getVersionedURIs(AvmCore* core, const char** &uris, uint32_t &count);
+		static Namespacep getBaseNamespace(AvmCore* core, Namespacep ns);
+		static bool isVersionedURI(AvmCore* core, Stringp uri);
+
+		enum { 
+			MIN_API_MARK = 0xE000,
+			MAX_API_MARK = 0xF8FF
+		};
+
+	};
 }
 
 #endif /* __avmplus_AvmCore__ */

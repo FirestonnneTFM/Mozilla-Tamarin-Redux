@@ -997,9 +997,9 @@ namespace avmplus
 
 	/*static*/ ScopeChain* ScriptEnv::createScriptScope(const ScopeTypeChain* stc, VTable* _vtable, AbcEnv* _abcEnv)
 	{
-		// ISSUE can we just make this the public namespace?
 		AvmCore* core = _vtable->core();
-		return ScopeChain::create(core->GetGC(), _vtable, _abcEnv, stc, NULL, core->newNamespace(core->kEmptyString));
+		// NOTE the namespace here is the default xml namespaces. we use the caller's public
+		return ScopeChain::create(core->GetGC(), _vtable, _abcEnv, stc, NULL, core->findPublicNamespace());
 	}
 
 	ScriptObject* ScriptEnv::initGlobal()
@@ -1343,7 +1343,6 @@ namespace avmplus
 		{
 			fscope->setScope(gc, i, *scopes++);
 		}
-		//core->console<<"New fscope: "<<fscope<<"\n";
 
 		FunctionEnv* fenv = new (gc) FunctionEnv(function, fscope);
 		FunctionObject* c = new (gc, fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
@@ -1551,7 +1550,7 @@ namespace avmplus
 			// are sealed and final.  Cannot add dynamic vars to them.
 
 			// throw a ReferenceError exception  Property not found and could not be created.
-			Multiname tempname(core()->publicNamespace, core()->internInt(index));
+			Multiname tempname(core()->getPublicNamespace(method->pool()), core()->internInt(index));
 			toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
 		}
 	}
@@ -1568,7 +1567,7 @@ namespace avmplus
 			// are sealed and final.  Cannot add dynamic vars to them.
 
 			// throw a ReferenceError exception  Property not found and could not be created.
-			Multiname tempname(core()->publicNamespace, core()->internUint32(index));
+			Multiname tempname(core()->getPublicNamespace(method->pool()), core()->internUint32(index));
 			toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
 		}
 	}
@@ -1645,7 +1644,7 @@ namespace avmplus
 			}
 			else if (AvmCore::isMethodBinding(b))
 			{
-				if (multiname->contains(core()->publicNamespace) && toplevel->isXmlBase(obj))
+				if (multiname->contains(core()->getPublicNamespace(method->pool())) && toplevel->isXmlBase(obj))
 				{
 					// dynamic props should hide declared methods on delete
 					ScriptObject* so = AvmCore::atomToScriptObject(obj);
