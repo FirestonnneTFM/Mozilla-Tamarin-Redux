@@ -43,12 +43,18 @@ extern void create_avmplus_basics(AvmCore* core);
 extern void create_avmplus_peephole(AvmCore* core);
 #endif
 extern void create_mmgc_basics(AvmCore* core);
+#if defined VMCFG_WORKERTHREADS
+extern void create_mmgc_threads(AvmCore* core);
+#endif
 void SelftestRunner::createGeneratedSelftestClasses() {
 create_avmplus_basics(core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 create_avmplus_peephole(core);
 #endif
 create_mmgc_basics(core);
+#if defined VMCFG_WORKERTHREADS
+create_mmgc_threads(core);
+#endif
 }
 #endif // AVMPLUS_SELFTEST
 }
