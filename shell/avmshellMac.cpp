@@ -63,7 +63,9 @@ namespace avmshell
 	{
 		struct rlimit r;
 		size_t stackheight = avmshell::kStackSizeFallbackValue;
-		if (getrlimit(RLIMIT_STACK, &r) == 0)
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=504976: setting the height to kStackSizeFallbackValue
+		// is not ideal if the stack is meant to be unlimited but is an OK workaround for the time being.
+		if (getrlimit(RLIMIT_STACK, &r) == 0 && r.rlim_cur != RLIM_INFINITY)
 			stackheight = size_t(r.rlim_cur);
 		return uintptr_t(stackbase) - stackheight + avmshell::kStackMargin;
 	}
