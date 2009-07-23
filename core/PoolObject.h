@@ -80,9 +80,11 @@ namespace avmplus
 	class PoolObject : public MMgc::GCFinalizedObject
 	{
 		friend class AbcParser;
-		
+
 	public:
 		AvmCore *core;
+
+		inline uint32_t getAPI() { return api; }
 
 		/** constants */
 		List<int32_t> cpool_int;
@@ -139,7 +141,7 @@ namespace avmplus
         DWB(PageMgr*) codePages;
         #endif
 
-		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos);
+		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos, uint32_t api);
 		~PoolObject();
 
 		MethodInfo* getNamedScript(const Multiname* multiname) const;
@@ -208,9 +210,6 @@ namespace avmplus
 			AvmAssert((a&7)==kObjectType);
 			return _abcStart + (uintptr_t(a) >> 3);
 		}
-
-		// Index of the metadata info that means skip the associated definition
-		List<uint32_t> stripMetadataIndexes;
 
 		int version;
 		
@@ -284,6 +283,8 @@ namespace avmplus
 		List<int32_t, LIST_NonGCObjects>			_method_name_indices;	
 #endif
 				void								setupConstantStrings(uint32_t count);
+		uint32_t api;		
+
 	public:
 		// @todo, privatize & make into bitfield (requires API churn)
 		bool						isBuiltin;	// true if this pool is baked into the player.  used to control whether callees will set their context.

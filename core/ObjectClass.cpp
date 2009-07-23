@@ -105,7 +105,7 @@ namespace avmplus
 		When the hasOwnProperty method is called with argument V, the following steps are taken:
 		1. Let O be this object.
 		2. Call ToString(V).
-		3. If O doesnt have a property with the name given by Result(2), return false.
+		3. If O doesn't have a property with the name given by Result(2), return false.
 		4. Return true.
 		NOTE Unlike [[HasProperty]] (section 8.6.2.4), this method does not consider objects in the prototype chain.
      */
@@ -136,7 +136,8 @@ namespace avmplus
 			default:
 				return false;
 		}
-		return t->getTraitsBindings()->findBinding(name, core->publicNamespace) != BIND_NONE;
+		// NOTE use caller's public namespace
+		return t->getTraitsBindings()->findBinding(name, core->findPublicNamespace()) != BIND_NONE;
 	}
 
 	bool ObjectClass::_propertyIsEnumerable(Atom thisAtom, Stringp name)
@@ -175,6 +176,7 @@ namespace avmplus
 		else
 		{
 			// cannot create properties on a sealed object.
+			// NOTE use default public
 			Multiname multiname(core->publicNamespace, name);
 			toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
 		}

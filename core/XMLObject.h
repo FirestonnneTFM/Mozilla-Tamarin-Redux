@@ -320,6 +320,7 @@ namespace avmplus
 		QNameObject(QNameClass *type, Atom name, bool bAttribute=false);
 		QNameObject(QNameClass *type, Namespace *nameSpace, Atom name, bool bAttribute=false);
 
+		Atom getURI(bool stripVersion=false) const;
 		Stringp get_localName() const;
 		Atom get_uri() const;
 

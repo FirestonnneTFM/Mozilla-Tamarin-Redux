@@ -62,14 +62,22 @@ package
 
 		AS3 function toString():String
 		{
-			return uri
+			if (uri === "" || uri === null)
+				return uri
+			var cc:uint = uri.charCodeAt(uri.length-1);	
+			// strip the version mark, if there is one
+			var baseuri:String = uri;
+			if (cc >= 0xE000 && cc <= 0xF8FF) {
+				baseuri = uri.substr(0, uri.length-1);
+			}
+			return baseuri
 		}
 		
 		prototype.toString = function ():String
 		{
 			if (this === prototype) return ""
 			var n:Namespace = this
-			return n.uri;
+			return n.AS3::toString();
 		}
 
         // Dummy constructor function - This is neccessary so the compiler can do arg # checking for the ctor in strict mode

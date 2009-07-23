@@ -1,0 +1,76 @@
+<!--
+
+This is a strawman for how we specify version compatibility for the player.
+
+Player API versions are associated with the set of attributes that defines 
+incompatible changes to that API. At a minimum this set incudes the release 
+of the player. In Argo we will likely add two more attributes: product 
+(Player and AIR) and profile (Desktop and SmartPhone). This set of attributes
+can change over time. Note however, even if attributes are dropped from
+the specification, they must remain in the compatibility matrix forever.
+
+The list of attributes within its parent defines the compatiblity relationship
+between those attributes. Release 10.1.52 is compatible with 10.1.62, but not 
+vice-versa. A particular profile and release of Player is compatible with the
+same profile and release of AIR, but not vice-versa. 
+
+The leaf elements are always version specifications. These must be unique
+but do not have to be in any particular order. 
+
+From this xml we generate AS code that defines a compatibility matrix.
+This code is embedded in the release of Flash runtime glue and used by
+ASC and AVM to control the visibility of names in the API.
+
+-->
+
+<api>
+<versions id="Flash Runtime">
+  <release id="0">
+    <product id="player">
+      <profile id="full">
+        <version id="660" alias="FP_9_0"/>
+      </profile>
+    </product>
+    <product id="air">
+      <profile id="full">
+        <version id="661" alias="AIR_1_0"/>
+      </profile>
+    </product>
+  </release>
+  <release id="1">
+    <product id="player">
+      <profile id="full">
+		<version id="662" alias="FP_10_0"/>
+      </profile>
+    </product>
+    <product id="air">
+      <profile id="full">
+		<version id="663" alias="AIR_1_5"/>
+      </profile>
+    </product>
+  </release>
+  <release id="2">
+    <product id="air">
+      <profile id="full">
+		<version id="664" alias="AIR_1_5_1"/>
+      </profile>
+    </product>
+  </release>
+  <release id="3">
+    <product id="player">
+      <profile id="full">
+		<version id="665" alias="FP_10_1"/>
+      </profile>
+    </product>
+    <product id="air">
+      <profile id="full">
+		<version id="666" alias="AIR_ATHENA"/>
+      </profile>
+    </product>
+  </release>
+</versions>
+<uris>
+  <uri id=""/>
+  <uri id="avmplus"/>
+</uris>
+</api>

@@ -103,7 +103,14 @@ namespace avmplus
 		}		
 		
 		bool isValidDynamicName(const Multiname* m) const {
-			return m->contains(core()->publicNamespace) && !m->isAnyName() && !m->isAttr();
+		    if (m->isAnyName() || m->isAttr())
+			    return false;
+		    for(int i = m->namespaceCount()-1; i >= 0; --i) {
+				if (m->getNamespace(i)->isPublic()) {
+				    return true;
+				}
+		    }
+			return false;
 		}
 		
 		Atom getSlotAtom(uint32_t slot);

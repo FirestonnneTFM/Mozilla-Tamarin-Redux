@@ -233,8 +233,11 @@ namespace avmplus
 
 						// pg 35, map [[name]].uri to "namespace name" of node
 
-						if (!ns) 
-							ns = core->publicNamespace;
+						if (!ns) {
+							// NOTE use caller's public
+							ns = core->findPublicNamespace();
+						}
+
 						pNewElement->setQName(core, tag.text, ns);
 					}
 				}
@@ -294,7 +297,8 @@ namespace avmplus
 						val  = tag.text->substring(space, tag.text->length());
 					}
 					pNewElement = new (gc) PIE4XNode(0, val); 
-					pNewElement->setQName (core, name, core->publicNamespace);
+					// NOTE use caller's public
+					pNewElement->setQName (core, name, core->findPublicNamespace());
 					if (!m_node)
 						setNode( pNewElement );
 				}
@@ -1331,7 +1335,7 @@ namespace avmplus
 		for (uint32 i = origLength; i < AncestorNamespaces->getLength(); i++)
 		{
 			Namespace *an = AvmCore::atomToNamespace(AncestorNamespaces->getAt(i));
-			if (an->getURI() != core->kEmptyString)
+			if (an->getURI(true) != core->kEmptyString)
 			{
 				s << " xmlns";
 				AvmAssert (an->getPrefix() != undefinedAtom);
@@ -1343,7 +1347,7 @@ namespace avmplus
 				// 17d
 				s << "=\"";
 				//step 17f - namespace case
-				s << an->getURI();
+				s << an->getURI(true);
 				//step 17g
 				s << "\"";
 			}
@@ -1774,7 +1778,8 @@ namespace avmplus
 		// !!@ Rhino behavior always seems to return at least one NS
 		if (!inScopeNS->getLength())
 		{
-			a->setUintProperty (i, core->newNamespace(core->kEmptyString)->atom()); 
+			// NOTE use caller's public
+			a->setUintProperty (i, core->findPublicNamespace()->atom());
 		}
 
 		return a;
@@ -1995,7 +2000,7 @@ namespace avmplus
 			if (!ns->hasPrefix ())
 			{
 				// Emulating Rhino behavior
-				if (ns->getURI() != core->kEmptyString)
+			    if (ns->getURI(true) != core->kEmptyString)
 				{
 					bool bMatch = false;
 					for (uint32 j = 0; j < ancestorNS->getLength(); j++)
@@ -2391,7 +2396,7 @@ namespace avmplus
 		if (AvmCore::isQName(name))
 		{
 			QNameObject *q  = AvmCore::atomToQName(name);
-			if (AvmCore::isNull(q->get_uri()))
+			if (AvmCore::isNull(q->getURI()))
 			{
 				name = q->get_localName()->atom();
 			}
@@ -2408,7 +2413,7 @@ namespace avmplus
 		{
 			if (m_node->getClass() == E4XNode::kProcessingInstruction)
 			{
-				m_node->setQName (core, n->get_localName(), core->publicNamespace);
+				m_node->setQName (core, n->get_localName(), core->findPublicNamespace());
 			}
 			else // only for attribute and element nodes
 			{
@@ -2417,7 +2422,7 @@ namespace avmplus
 				m_node->setQName (core, &m2);
 
 				// ISNS changes
-				if (n->get_uri() != core->kEmptyString->atom())
+				if (n->getURI(true) != core->kEmptyString->atom())
 				{
 					m_node->getQName(core, &m); // get our new multiname
 
@@ -2916,7 +2921,8 @@ namespace avmplus
 				this->m_mn.setName(name);
 			}
 
-			this->m_mn.setNamespace(toplevel->getDefaultNamespace());
+			Namespacep ns = ApiUtils::getVersionedNamespace(core, toplevel->getDefaultNamespace());
+			this->m_mn.setNamespace(ns);
 		}
 	}
 
@@ -2928,7 +2934,7 @@ namespace avmplus
 		return m_mn.getName();
 	}
 
-	Atom QNameObject::get_uri() const
+	Atom QNameObject::getURI(bool stripVersion) const
 	{
 		if (m_mn.isAnyNamespace())
 		{
@@ -2940,8 +2946,13 @@ namespace avmplus
 		}
 		else
 		{
-			return m_mn.getNamespace()->getURI()->atom();
+			return m_mn.getNamespace()->getURI(stripVersion)->atom();
 		}
+	}
+
+	Atom QNameObject::get_uri() const
+	{
+	    return getURI(true);
 	}
 
 	// E4X 13.3.5.4, pg 69
@@ -2992,7 +3003,7 @@ namespace avmplus
 		if (index == 1)
 			return this->get_localName()->atom();
 		else if (index == 2)
-			return this->get_uri();
+			return this->getURI();
 		else
 			return nullStringAtom;
 	}

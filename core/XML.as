@@ -692,7 +692,17 @@ public final class QName extends Object
 	AS3 function toString():String {
 		if (uri === "")
 			return localName
-		return (uri===null ? "*" : uri) + "::" + localName
+		if (uri === null)
+			return "*::" + localName
+		var cc:uint = uri.charCodeAt(uri.length-1);	
+		// strip the version mark, if there is one
+		var base_uri:String = uri;
+		if(cc >= 0xE000 && cc <= 0xF8FF) {
+			base_uri = uri.substr(0, uri.length-1);
+		}
+		if (base_uri === "")
+			return localName
+		return base_uri + "::" + localName
 	}
 
 	prototype.toString = function():String

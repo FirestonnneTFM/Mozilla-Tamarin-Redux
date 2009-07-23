@@ -105,7 +105,7 @@ ConstantString {
 ConstantNamespace {
    U8 kind
    union {
-      kind=8,5,22,23,24,25,26 { // CONSTANT_Namespace, CONSTANT_PrivateNamespace, CONSTANT_PackageNamespace, CONSTANT_PacakgeInternalNamespace, CONSTANT_ProtectedNamespace, CONSTANT_ExplicitNamespace, CONSTANT_MultinameL
+      kind=8,5,22,23,24,25,26 { // CONSTANT_Namespace, CONSTANT_PrivateNamespace, CONSTANT_PackageNamespace, CONSTANT_PacakgeInternalNamespace, CONSTANT_ProtectedNamespace, CONSTANT_ExplicitNamespace, CONSTANT_StaticProtectedNamespace
          U30 name_index                    // CONSTANT_Utf8 uri (maybe 0)
       }
    }

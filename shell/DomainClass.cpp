@@ -85,10 +85,13 @@ namespace avmshell
 		ScriptBuffer code = core->newScriptBuffer(len);
 		VMPI_memcpy(code.getBuffer(), &b->GetByteArray()[0], len); 
 		Toplevel *toplevel = domainToplevel;
+
+		uint32_t api = core->getAPI(NULL);
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
 								  toplevel,
-								  NULL, codeContext);
+								  NULL, codeContext, 
+								  api);
 	}
 
 	ScriptObject* DomainObject::finddef(const Multiname& multiname,
@@ -131,11 +134,11 @@ namespace avmshell
 		Namespace* ns;
 		Stringp className;
 		if (dot >= 0) {
-			Stringp uri = core->internString(name->substring(0, dot));
+			Stringp uri = ApiUtils::getVersionedURI(core, NULL, core->internString(name->substring(0, dot)), Namespace::NS_Public);
 			ns = core->internNamespace(core->newNamespace(uri));
 			className = core->internString(name->substring(dot+1, name->length()));
 		} else {
-			ns = core->publicNamespace;
+			ns = core->findPublicNamespace();
 			className = core->internString(name);
 		}
 

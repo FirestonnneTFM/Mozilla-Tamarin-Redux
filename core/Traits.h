@@ -416,10 +416,6 @@ namespace avmplus
 		Traits* newParameterizedCTraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this->base); }
 
 	public:
-		void enableSkips(uint32_t nameCount);
-		inline void setSkip(uint32_t i) { AvmAssert(m_skips.test(0)); m_skips.set(i+1); }
-		inline bool testSkip(uint32_t i) const { return m_skips.test(0) && m_skips.test(i+1); }
-
 		bool allowEarlyBinding() const;
 
 	private:

@@ -68,7 +68,6 @@ namespace avmplus
 
 		kColon = core->internConstantStringLatin1(":");
 		kXml = core->internConstantStringLatin1("xml");
-		nsXML = core->newNamespace(core->kEmptyString->atom(), core->internConstantStringLatin1("http://www.w3.org/XML/1998/namespace")->atom()); 
 
 		// for notifications
 		kAttrAdded = core->internConstantStringLatin1("attributeAdded")->atom();

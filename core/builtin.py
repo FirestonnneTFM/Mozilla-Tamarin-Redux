@@ -61,7 +61,7 @@ print("ASC="+classpath)
 print("Building builtins...")
 
 # compile builtins 
-os.system(asc+" -builtin -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as")
+os.system(asc+" -builtin -apiversioning -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as")
 
 print("Generating native thunks...")
 os.system("python ../utils/nativegen.py builtin.abc")

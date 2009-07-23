@@ -90,13 +90,13 @@ namespace avmplus
 	}
 #endif // AVMPLUS_STATIC_POINTERS
 	
-	PoolObject* NativeInitializer::parseBuiltinABC(Domain* domain, const List<Stringp, LIST_RCObjects>* includes)
+	PoolObject* NativeInitializer::parseBuiltinABC(Domain* domain)
 	{
 		AvmAssert(domain != NULL);
 		
 		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ConstDataScriptBufferImpl(abcData, abcDataLen));
 
-		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, (const List<Stringp>*)includes);
+		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, ApiUtils::getLargestAPI(core));
 	}
 	
 	NativeInitializer::~NativeInitializer()

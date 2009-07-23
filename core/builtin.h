@@ -418,9 +418,6 @@ extern double builtin_func_d2d_osi_optsAvmThunkConstant_AvmString_67_____NaN____
 extern AvmBox builtin_i2a_ss_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_localeCompare_thunk  builtin_i2a_ss_optakAvmThunkUndefined_thunk
 
-extern AvmBox builtin_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define avmplus_DescribeType_avmplus_describeTypeJSON_thunk  builtin_a2a_oau_thunk
-
 extern AvmBox builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__match_thunk  builtin_a2a_osa_thunk
 
@@ -537,8 +534,8 @@ extern AvmBox builtin_s2a_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox
 extern AvmBox builtin_s2a_osaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__replace_thunk  builtin_s2a_osaa_thunk
 
-extern AvmBox builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define Array_private__lastIndexOf_thunk  builtin_i2a_oaai_opti0_thunk
+extern AvmBox builtin_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define avmplus_DescribeType_avmplus_describeTypeJSON_thunk  builtin_a2a_oau_thunk
 
 extern AvmBox builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Object_private__hasOwnProperty_thunk  builtin_b2a_oas_thunk
@@ -675,13 +672,13 @@ extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define Date_private__toString_thunk  builtin_s2a_oi_thunk
 #define Error_getErrorMessage_thunk  builtin_s2a_oi_thunk
 
-extern AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define native_script_function_decodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
-#define native_script_function_escape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
-#define native_script_function_unescape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
-#define native_script_function_encodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
-#define native_script_function_encodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
-#define native_script_function_decodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
+extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
 
 extern AvmBox builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__indexOf_thunk  builtin_i2a_ssi_opti0_thunk
@@ -689,13 +686,8 @@ extern AvmBox builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBo
 extern AvmBox builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_AS3_fromCharCode_thunk  builtin_s2a_o_rest_thunk
 
-extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk
+extern AvmBox builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define Array_private__lastIndexOf_thunk  builtin_i2a_oaai_opti0_thunk
 
 extern double builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Date_private__setTime_thunk  builtin_d2d_od_thunk
@@ -805,6 +797,14 @@ extern AvmBox builtin_s2a_odii_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* ar
 
 extern double builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Math_min_thunk  builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk
+
+extern AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define native_script_function_decodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
+#define native_script_function_escape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
+#define native_script_function_unescape_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
+#define native_script_function_encodeURI_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
+#define native_script_function_encodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
+#define native_script_function_decodeURIComponent_thunk  builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____thunk
 
 extern AvmBox builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define __AS3___vec_Vector_uint_private__sort_thunk  builtin_a2a_oao_thunk

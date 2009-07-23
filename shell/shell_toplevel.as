@@ -104,7 +104,7 @@ package avmplus
 
 		// function exists solely to test ScriptObject::isGlobalObject
 		public native static function isGlobal(o:Object):Boolean;
-	}	
+	}
 	
 	[native(cls="FileClass", methods="auto")]
 	public class File
@@ -175,3 +175,77 @@ package {
 		return System.readLine()
 	}
 }
+
+// test library code
+
+/*
+[0,player,full]=660:FP_9_0
+[0,air,full]=661:AIR_1_0
+[1,player,full]=662:FP_10_0
+[1,air,full]=663:AIR_1_5
+[2,air,full]=664:AIR_1_5_1
+[3,player,full]=665:FP_10_1
+[3,air,mobile]=667:AIR_ZEPHYR
+[3,air,full]=666:AIR_ATHENA
+
+static const uint32_t _min_version_num = 660;
+static const uint32_t _max_version_num = 667;
+static const uint32_t _versions_count[] = {7, 4, 5, 3, 2, 2, 1, 2, };
+
+static const uint32_t _versions [][8] = {
+  {660, 661, 662, 663, 664, 665, 666, },
+  {661, 663, 664, 666, },
+  {662, 663, 664, 665, 666, },
+  {663, 664, 666, },
+  {664, 666, },
+  {665, 666, },
+  {666, },
+  {667, 666, },
+};
+*/
+/*
+ tests
+ - unversioned names: are in all versions, as though version 0
+ - versioned names: are not visible to smaller versions (bindings, not number)
+ - multiple versioned names: are visible to all compatible versions
+ - class, interface, method, accessor, slot, static names
+ - running multiple active versions
+*/
+/*
+package avmplus {
+[API(660)] public var x0 = true;
+[API(661)] public var x1 = true;
+[API(662)] public var x2 = true;
+[API(663)] public var x3 = true;
+[API(664)] public var x4 = true;
+[API(665)] public var x5 = true;
+[API(661,662)] public var x12 = true;
+[API(662,663)] public var x23 = true;
+
+
+public class A {
+    public function m () {
+        return 10;
+    }
+
+    [API(661)] public var x = 10;
+
+
+    [API(661,662)] public function n () {
+        return 20;
+	}
+
+	[API(661,662)] public function p () {
+	    return 30;
+    }
+}
+
+[API(665)] public class B extends A {
+    override public function m() { return 50 }
+}
+
+public class C {
+    public static function m() { return new B().m() }
+}
+}
+*/
