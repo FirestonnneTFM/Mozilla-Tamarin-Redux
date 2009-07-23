@@ -50,3 +50,7 @@ export platform=solaris
 export basedir=/export/home/build/buildbot/$branch/${platform}-sparc-deep/$branch
 export buildsdir=$basedir/../builds
 
+# Need to get all builds from mozilla since machine does not have access to adobe network
+export vmbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds
+export ftp_asteam=${vmbuilds}/..
+export ascbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds/asc/latest
