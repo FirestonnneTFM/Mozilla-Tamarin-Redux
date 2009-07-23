@@ -48,47 +48,6 @@
 #define SAMPLE_CHECK() 
 #endif
 
-#ifdef SOLARIS
-#include <ucontext.h>
-#include <sys/frame.h>
-#include <errno.h>
-#include <unistd.h>
-#include <sys/stack.h>
-extern "C" greg_t _getsp(void);
-#endif
-
-#ifdef MMGC_SPARC
-extern "C" {
-void sparc_clean_windows()
-{
-	asm(
-		"  cmp %i7, %o7 \n"
-		"  be 2f\n"
-		"  clr %o0\n"
-		"  cmp %o7, 0\n"
-		"  be 1f\n"
-		"  clr %o1\n"
-		"  call sparc_clean_windows\n"
-		"  nop\n"
-		"1:clr %o2\n"
-		"  clr %o3\n"
-		"  clr %o4\n"
-		"  clr %o5\n"
-		"  clr %o7\n"
-		"  clr %l0\n"
-		"  clr %l1\n"
-		"  clr %l2\n"
-		"  clr %l3\n"
-		"  clr %l4\n"
-		"  clr %l5\n"
-		"  clr %l6\n"
-		"  clr %l7\n"
-		"2:nop\n"
-		);
-}
-}
-#endif
-
 // Werner mode is a back pointer chain facility for Relase mode.
 //
 // *** NOTE ON THREAD SAFETY ***
