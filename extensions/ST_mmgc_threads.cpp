@@ -56,7 +56,6 @@ private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
     MMgc::FixedMalloc *fm;
-	MMgc::RCObject *obj;
 	bool waiting;
 	bool result;
 	bool isDead;
@@ -158,7 +157,7 @@ public:
 void ST_mmgc_threads::test0() {
 	   startSlave();
 	   MMGC_GCENTER(gc);
-   	   obj = new (gc) RCObjectNotifier(&isDead);
+   	   RCObject *obj = new (gc) RCObjectNotifier(&isDead);
 	   {
           MMGC_GC_ROOT_THREAD(gc);
 		  kick();
@@ -174,6 +173,7 @@ verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 
 	   pthread_join(pthread, NULL);
+
 }
 void create_mmgc_threads(AvmCore* core) { new ST_mmgc_threads(core); }
 }

@@ -58,7 +58,6 @@ private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
     MMgc::FixedMalloc *fm;
-	MMgc::RCObject *obj;
 	bool waiting;
 	bool result;
 	bool isDead;
@@ -138,7 +137,7 @@ private:
 %%test mmgc_gc_root_thread
 	   startSlave();
 	   MMGC_GCENTER(gc);
-   	   obj = new (gc) RCObjectNotifier(&isDead);
+   	   RCObject *obj = new (gc) RCObjectNotifier(&isDead);
 	   {
           MMGC_GC_ROOT_THREAD(gc);
 		  kick();
