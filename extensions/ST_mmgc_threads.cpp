@@ -135,6 +135,7 @@ void ST_mmgc_threads::prologue() {
 	pthread_mutex_init(&pmutex, NULL);
 	pthread_cond_init(&pcond, NULL);
 	result = true;
+    isDead = false;
 	waiting = false;
 
 }

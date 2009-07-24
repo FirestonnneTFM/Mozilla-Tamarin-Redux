@@ -127,6 +127,7 @@ private:
 	pthread_mutex_init(&pmutex, NULL);
 	pthread_cond_init(&pcond, NULL);
 	result = true;
+    isDead = false;
 	waiting = false;
 
 %%epilogue
