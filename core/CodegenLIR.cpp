@@ -183,7 +183,7 @@ namespace avmplus
         {
             RETURN_METHOD_PTR(MMgc::GC, f);
         }
-        
+
         intptr_t  envAddr( int (MethodEnv::*f)() )
         {
             RETURN_METHOD_PTR(MethodEnv, f);
@@ -198,7 +198,7 @@ namespace avmplus
         intptr_t  debuggerAddr( int (Debugger::*f)() )
         {
             RETURN_METHOD_PTR(Debugger, f);
-        }       
+        }
     #endif /* DEBUGGER */
 
         intptr_t scriptAddr(int (ScriptObject::*f)())
@@ -287,11 +287,11 @@ namespace avmplus
         SoftFloatFilter(LirWriter *out) : LirWriter(out)
         {}
 
-        LIns *hi(LIns *q) { 
-            return ins1(LIR_qhi, q); 
+        LIns *hi(LIns *q) {
+            return ins1(LIR_qhi, q);
         }
-        LIns *lo(LIns *q) { 
-            return ins1(LIR_qlo, q); 
+        LIns *lo(LIns *q) {
+            return ins1(LIR_qlo, q);
         }
 
         LIns *split(LIns *a) {
@@ -382,7 +382,7 @@ namespace avmplus
 
     /**
      * ---------------------------------
-     * Instruction convenience functions 
+     * Instruction convenience functions
      * ---------------------------------
      */
 
@@ -391,7 +391,7 @@ namespace avmplus
         return lirout->ins2(LIR_addp, base, InsConstPtr((void*)disp));
     }
 
-    // call 
+    // call
     LIns* CodegenLIR::callIns(const CallInfo *ci, uint32_t argc, ...)
     {
         AvmAssert(argc <= MAXARGS);
@@ -498,7 +498,7 @@ namespace avmplus
         }
 
         LIns* native = localCopy(i);
-        
+
         // short circuit immediates
         if (native->isconst())
         {
@@ -596,7 +596,7 @@ namespace avmplus
         }
     }
 
-    CodegenLIR::CodegenLIR(MethodInfo* i) : 
+    CodegenLIR::CodegenLIR(MethodInfo* i) :
 #ifdef VTUNE
         jitInfoList(i->core()->gc),
         jitPendingRecords(i->core()->gc),
@@ -621,7 +621,7 @@ namespace avmplus
         abcEnd   = NULL;
 
         overflow = false;
-    
+
         #ifdef VTUNE
         hasDebugInfo = false;
        #endif /* VTUNE */
@@ -658,12 +658,12 @@ namespace avmplus
     int CodegenLIR::setjmpAddress = 0;
 
     extern "C" int __setjmp();
-    
+
     asm int CodegenLIR::setjmpDummy(jmp_buf buf)
     {
-        b __setjmp; 
+        b __setjmp;
     }
-    
+
     void CodegenLIR::setjmpInit()
     {
         // CodeWarrior defies all reasonable efforts to get
@@ -681,7 +681,7 @@ namespace avmplus
     {
         return atomToNativeRep(bt(t), atom);
     }
-    
+
     LIns* CodegenLIR::atomToNativeRep(BuiltinType bt, LIns* atom)
     {
         switch (bt)
@@ -721,7 +721,7 @@ namespace avmplus
                 return InsConst(int32_t(atom->imm32()) >> 3);
             else
                 return p2i(binaryIns(LIR_pursh, atom, InsConst(3)));
-        
+
         default:
             // pointer type
             if (atom->isconst())
@@ -729,7 +729,7 @@ namespace avmplus
             else
                 return binaryIns(LIR_piand, atom, InsConstAtom(~7));
         }
-        
+
 #ifdef __GNUC__
         return 0;// satisfy GCC, although we should never get here
 #endif
@@ -850,10 +850,10 @@ namespace avmplus
         LIns *ins3(LOpcode op, LIns* a, LIns* b, LIns* c) {
             switch (op) {
                 case LIR_cmov:
-                    AvmAssert(isCondOrConst(a) && !b->isQuad() && !c->isQuad()); 
+                    AvmAssert(isCondOrConst(a) && !b->isQuad() && !c->isQuad());
                     break;
                 case LIR_qcmov:
-                    AvmAssert(isCondOrConst(a) && b->isQuad() && c->isQuad()); 
+                    AvmAssert(isCondOrConst(a) && b->isQuad() && c->isQuad());
                     break;
                 default:
                     AvmAssert(false);
@@ -922,7 +922,7 @@ namespace avmplus
 // if DEFER_STORES is defined, we defer local variable stores to the
 // ends of basic blocks, then only emit the ones that are live
 // #define DEFER_STORES(...) __VA_ARGS__
-#define DEFER_STORES(...) 
+#define DEFER_STORES(...)
 
     class CopyPropagation: public LirWriter
     {
@@ -934,7 +934,7 @@ namespace avmplus
         BitSet dirty;
         bool hasExceptions;
     public:
-        CopyPropagation(AvmCore* core, GC *gc, LirWriter *out, int nvar, bool ex) 
+        CopyPropagation(AvmCore* core, GC *gc, LirWriter *out, int nvar, bool ex)
             : LirWriter(out), core(core), gc(gc), nvar(nvar), dirty(nvar), hasExceptions(ex)
         {
             LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
@@ -953,7 +953,7 @@ namespace avmplus
             LIns *vars = this->vars;
             for (int i=0, n=nvar; i < n; i++) {
                 LIns *v = tracker[i];
-                if (!v) 
+                if (!v)
                     continue;
                 if (dirty.get(i)) {
                     if (v->isLoad() && v->oprnd1() == vars && v->disp() == int32_t(i*sizeof(double))) {
@@ -1115,10 +1115,10 @@ namespace avmplus
                     imm = 0; // can't convert
             } else {
                 imm = 0; // non-imm
-            }            
+            }
             return imm;
         }
-        
+
         LIns *insCall(const CallInfo *call, LInsp args[]) {
             if (call == FUNCTIONID(integer_d)) {
                 LIns *v = args[0];
@@ -1152,11 +1152,11 @@ namespace avmplus
 
 #if defined(DEBUGGER) && defined(_DEBUG)
     // The AS debugger requires type information for variables contained
-    // in the AS frame regions (i.e. 'vars').  In the interpreter this 
+    // in the AS frame regions (i.e. 'vars').  In the interpreter this
     // is not an issues, since the region contains box values (i.e. Atoms)
     // and so the type information is self-contained.  With the jit, this is
     // not the case, and thus 'varTraits' is used to track the type of each
-    // variable in 'vars'. 
+    // variable in 'vars'.
     // This filter watches stores to 'vars' and 'varTraits' and upon encountering
     // debugline (i.e. place where debugger can halt), it ensures that the
     // varTraits entry is consistent with the value stored in 'vars'
@@ -1168,7 +1168,7 @@ namespace avmplus
         LIns *vars,*traits;
         int nvar;
     public:
-        DebuggerCheck(AvmCore* core, GC *gc, LirWriter *out, int nvar) 
+        DebuggerCheck(AvmCore* core, GC *gc, LirWriter *out, int nvar)
             : LirWriter(out), core(core), gc(gc), nvar(nvar)
         {
             LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
@@ -1213,9 +1213,9 @@ namespace avmplus
             LIns* tra = traitsTracker[i];
             NanoAssert(val && tra);
 
-            Traits *t = (Traits*) tra->constvalp(); 
+            Traits *t = (Traits*) tra->constvalp();
             bool is = false;
-            if (t == NUMBER_TYPE) 
+            if (t == NUMBER_TYPE)
             {
                 is = val->isFloat() || val->isQuad();
                 AvmAssert(is);
@@ -1242,13 +1242,13 @@ namespace avmplus
             }
             return is;
         }
-        
+
         void checkState() {
             for(int i=0; i<this->nvar; i++) {
                 LIns* val = tracker[i];
                 LIns* tra = traitsTracker[i];
                 AvmAssert(val && tra);
-                
+
                 // isValid should have already been called on everything
                 AvmAssert(((intptr_t)tra&0x1) == 1);
             }
@@ -1270,7 +1270,7 @@ namespace avmplus
 
     };
 #endif
-    
+
     // f(env, argc, instance, argv)
     bool CodegenLIR::prologue(FrameState* state)
     {
@@ -1312,17 +1312,17 @@ namespace avmplus
         DebuggerCheck *checker = (core->debugger()) ? new (gc) DebuggerCheck(core, gc, lirout, state->verifier->local_count) : 0;
         lirout = checker ? checker : lirout;
         #endif
-        
+
         emitStart(gc, lirbuf, lirout);
 
         if (overflow)
             return false;
 
-        // last pc value that we generated a store for 
+        // last pc value that we generated a store for
         lastPcSave = 0;
 
         //
-        // generate lir to define incoming method arguments.  Stack 
+        // generate lir to define incoming method arguments.  Stack
         // frame allocations follow.
         //
 
@@ -1374,7 +1374,7 @@ namespace avmplus
 
         // whether this sequence is interruptable or not.
         interruptable = ! info->isNonInterruptible();
-        
+
         // then space for the exception frame, be safe if its an init stub
         if (info->hasExceptions())
         {
@@ -1392,7 +1392,7 @@ namespace avmplus
         verbose_only( if (lirbuf->names) {
             lirbuf->names->addName(methodFrame, "methodFrame");
         })
-        
+
         // replicate MethodFrame ctor inline
         LIns* currentMethodFrame = loadIns(LIR_ldp, offsetof(AvmCore,currentMethodFrame), coreAddr);
         storeIns(env_param, offsetof(MethodFrame,envOrCodeContext), methodFrame); // implicitly leave IS_EXPLICIT_CODECONTEXT clear
@@ -1428,7 +1428,7 @@ namespace avmplus
         const int param_count = ms->param_count();
         const int optional_count = ms->optional_count();
         const int required_count = param_count - optional_count;
-            
+
         LIns* apArg = ap_param;
         if (info->hasOptional())
         {
@@ -1449,7 +1449,7 @@ namespace avmplus
                 LIns* defaultVal = InsConstAtom(ms->getDefaultValue(i));
                 defaultVal = atomToNativeRep(loc, defaultVal);
                 localSet(loc, defaultVal, state->value(loc).traits);
-                
+
                 // then generate: if (argc > p) local[p+1] = arg[p+1]
                 LIns* cmp = binaryIns(LIR_le, argcarg, InsConst(param));
                 LIns* br = branchIns(LIR_jt, cmp); // will patch
@@ -1489,7 +1489,7 @@ namespace avmplus
         {
             //framep[info->param_count+1] = createRest(env, argv, argc);
             // use csop so if rest value never used, we don't bother creating array
-            LIns* rest = callIns(FUNCTIONID(createRestHelper), 3, 
+            LIns* rest = callIns(FUNCTIONID(createRestHelper), 3,
                 env_param, argc_param, apArg);
 
             localSet(firstLocal, rest, ARRAY_TYPE);
@@ -1499,7 +1499,7 @@ namespace avmplus
         {
             //framep[info->param_count+1] = createArguments(env, argv, argc);
             // use csop so if arguments never used, we don't create it
-            LIns* arguments = callIns(FUNCTIONID(createArgumentsHelper), 3, 
+            LIns* arguments = callIns(FUNCTIONID(createArgumentsHelper), 3,
                 env_param, argc_param, apArg);
 
             localSet(firstLocal, arguments, ARRAY_TYPE);
@@ -1528,9 +1528,9 @@ namespace avmplus
             }
 
             callIns(FUNCTIONID(debugEnter), 5,
-                env_param, 
+                env_param,
                 varTraits,
-                csn, 
+                csn,
                 vars,
                 info->hasExceptions() ? _save_eip : InsConstPtr(0)
                 );
@@ -1661,9 +1661,9 @@ namespace avmplus
     {
         this->state = state;
         // our eBB now terminates.  For all branch instructions we are
-        // able to detect this situation and have already generated the 
-        // correct spill code prior to the jump, only for the case where 
-        // the pc is a target of a jump do we not know enough during emit() 
+        // able to detect this situation and have already generated the
+        // correct spill code prior to the jump, only for the case where
+        // the pc is a target of a jump do we not know enough during emit()
         // to do this.  The Verifier tracks this information and merges
         // the states across the various blocks generating this op prior
         // to the merge.  After this emit, we should receive an emitBlockStart()
@@ -1673,7 +1673,7 @@ namespace avmplus
     void CodegenLIR::writePrologue(FrameState* state, const byte *pc)
     {
         (void)pc;
-        if( !prologue(state) ) 
+        if( !prologue(state) )
         {
             if (!overflow)
                 state->verifier->verifyFailed(kCorruptABCError);
@@ -1774,7 +1774,7 @@ namespace avmplus
         case OP_pushnan:
             emitDoubleConst(state, sp+1, (double*)(core->kNaN & ~7));
             break;
-        case OP_lookupswitch: 
+        case OP_lookupswitch:
             emit(state, opcode, state->pc+imm24, imm30b /*count*/);
             break;
         case OP_throw:
@@ -1916,7 +1916,7 @@ namespace avmplus
             break;
         }
 
-        case OP_istypelate: 
+        case OP_istypelate:
             emit(state, opcode, 0, 0, BOOLEAN_TYPE);
             break;
 
@@ -1930,7 +1930,7 @@ namespace avmplus
             emit(state, opcode, imm30/*argc*/, 0, NULL);
             break;
 
-        case OP_newobject: 
+        case OP_newobject:
             emit(state, opcode, imm30, 0, OBJECT_TYPE);
             break;
 
@@ -2109,7 +2109,7 @@ namespace avmplus
             break;
 
         case OP_convert_s:
-        case OP_esc_xelem: 
+        case OP_esc_xelem:
         case OP_esc_xattr:
         case OP_debug:
             // NOTE implemented by writeOp1
@@ -2221,14 +2221,14 @@ namespace avmplus
         case OP_pushwith:
             emitCopy(state, state->sp(), opd1);
             break;
-        case OP_convert_s: 
-        case OP_esc_xelem: 
+        case OP_convert_s:
+        case OP_esc_xelem:
         case OP_esc_xattr:
         {
             // opd1=i, type=in
             Value& value = state->value(opd1);
             Traits *in = type;
-            if (opcode == OP_convert_s && in && 
+            if (opcode == OP_convert_s && in &&
                 (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE))
             {
                 emitCoerce(state, opd1, STRING_TYPE);
@@ -2239,15 +2239,15 @@ namespace avmplus
             }
             break;
         }
-        case OP_findpropstrict: 
-        case OP_findproperty: 
+        case OP_findpropstrict:
+        case OP_findproperty:
         {
             Multiname name;
             pool->parseMultiname(name, opd1);
             emit(state, opcode, (uintptr)&name, 0, OBJECT_TYPE);
             break;
         }
-        case OP_findpropglobalstrict: 
+        case OP_findpropglobalstrict:
         {
             // NOTE opcode not supported, deoptimizing
             Multiname name;
@@ -2255,7 +2255,7 @@ namespace avmplus
             emit(state, OP_findpropstrict, (uintptr)&name, 0, OBJECT_TYPE);
             break;
         }
-        case OP_findpropglobal: 
+        case OP_findpropglobal:
         {
             // NOTE opcode not supported, deoptimizing
             Multiname name;
@@ -2272,7 +2272,7 @@ namespace avmplus
             break;
         }
 
-        case OP_finddef: 
+        case OP_finddef:
         {
             // opd1=name index
             // type=script->declaringTraits
@@ -2315,8 +2315,8 @@ namespace avmplus
     {
         (void)pc;
         switch (opcode) {
-        case OP_callproperty: 
-        case OP_callproplex: 
+        case OP_callproperty:
+        case OP_callproplex:
         case OP_callpropvoid:
             emitCall(state, OP_callinterface, opd1, opd2, type);
             break;
@@ -2505,7 +2505,7 @@ namespace avmplus
                     emitCall(state, OP_callmethod, disp_id, 0, type);
                 }
                 else {
-                    // FIXME f->iid() is a 64 bit value, being passed through a 32 bit 
+                    // FIXME f->iid() is a 64 bit value, being passed through a 32 bit
                     // location. need to understand why this works.
                     emitCall(state, OP_callinterface, f->iid(), 0, type);
                 }
@@ -2540,7 +2540,7 @@ namespace avmplus
                     emitCall(state, OP_callmethod, disp_id, 1, type);
                 }
                 else {
-                    // FIXME f->iid() is a 64 bit value, being passed through a 32 bit 
+                    // FIXME f->iid() is a 64 bit value, being passed through a 32 bit
                     // location. need to understand why this works.
                     emitCall(state, OP_callinterface, f->iid(), 1, type);
                 }
@@ -2577,8 +2577,8 @@ namespace avmplus
             emitCall(state, opcode, opd1, opd2, type);
             break;
 
-        case OP_callproperty: 
-        case OP_callproplex: 
+        case OP_callproperty:
+        case OP_callproplex:
         case OP_callpropvoid:
         {
             Multiname name;
@@ -2717,7 +2717,7 @@ namespace avmplus
             else if (in == INT_TYPE || in == UINT_TYPE)
             {
                 // int to bool: b = (i==0) == 0
-                localSet(loc, binaryIns(LIR_eq, 
+                localSet(loc, binaryIns(LIR_eq,
                     binaryIns(LIR_eq, localGet(loc), InsConst(0)),
                     InsConst(0)), result);
             }
@@ -2807,7 +2807,7 @@ namespace avmplus
         this->state = state;
         emitPrep();
 
-        // The result is either unchanged or an exception is thrown, so 
+        // The result is either unchanged or an exception is thrown, so
         // we don't save the result.  This is the null pointer check.
         Traits* t = state->value(index).traits;
         switch (bt(t)) {
@@ -2946,7 +2946,7 @@ namespace avmplus
             }
         }
     #endif
-        
+
         disp = pad;
         for (int i=0; i <= argc; i++)
         {
@@ -3017,7 +3017,7 @@ namespace avmplus
 
         if (opcode != OP_constructsuper && opcode != OP_construct)
         {
-            localSet(dest, out, result); 
+            localSet(dest, out, result);
         }
     }
 
@@ -3025,7 +3025,7 @@ namespace avmplus
     {
         this->state = state;
         emitPrep();
-        
+
         Traits *t = state->value(ptr_index).traits;
         LIns *ptr = localGetp(ptr_index);
         AvmAssert(state->value(ptr_index).notNull);
@@ -3034,7 +3034,7 @@ namespace avmplus
         AvmAssert(t->isResolved());
         const TraitsBindingsp tb = t->getTraitsBindings();
         int offset = tb->getSlotOffset(slot);
-        
+
         if (t->pool->isBuiltin && !t->final)
         {
             // t's slots aren't locked in, so we have to adjust for the actual runtime
@@ -3066,7 +3066,7 @@ namespace avmplus
 
         Traits* t;
         LIns* ptr;
-        
+
         if (opcode == OP_setslot)
         {
             t = state->value(ptr_index).traits;
@@ -3094,13 +3094,13 @@ namespace avmplus
                 LIns* scope = loadEnvScope();
                 LIns* scopeobj = loadIns(LIR_ldp, offsetof(ScopeChain,_scopes) + 0*sizeof(Atom), scope);
                 ptr = atomToNativeRep(t, scopeobj);
-            }               
+            }
         }
 
         AvmAssert(t->isResolved());
         const TraitsBindingsp tb = t->getTraitsBindings();
         int offset = tb->getSlotOffset(slot);
-        
+
         LIns *unoffsetPtr = ptr;
         if (t->pool->isBuiltin && !t->final)
         {
@@ -3115,7 +3115,7 @@ namespace avmplus
 
         // set
         // use localCopy() to sniff the type and use ldq if it's Number
-        LIns* value = localCopy(sp);                    
+        LIns* value = localCopy(sp);
 
         // if storing to a pointer-typed slot, inline a WB
         Traits* slotType = tb->getSlotTraits(slot);
@@ -3129,12 +3129,12 @@ namespace avmplus
                 // TODO: inline pointer check
                 wbAddr = FUNCTIONID(atomWriteBarrier);
             }
-            callIns(wbAddr, 4, 
-                    InsConstPtr(core->GetGC()), 
-                    unoffsetPtr, 
+            callIns(wbAddr, 4,
+                    InsConstPtr(core->GetGC()),
+                    unoffsetPtr,
                     leaIns(offset, ptr),
                     value);
-        }                   
+        }
         else {
             storeIns(value, offset, ptr);
         }
@@ -3166,7 +3166,7 @@ namespace avmplus
                 }
             }
         }
-        
+
         // generic path, could not early bind to a constructor method
         // stack in: ctor-object arg1..N
         // sp[-argc] = construct(env, sp[-argc], argc, null, arg1..N)
@@ -3203,7 +3203,7 @@ namespace avmplus
                 localSet(index, res, result);
                 break;
             }
-            
+
             // loads
             case OP_li8:
             case OP_li16:
@@ -3211,11 +3211,11 @@ namespace avmplus
             case OP_lf32:
             case OP_lf64:
             {
-                static const CallInfop kFuncID[5] = { 
-                    FUNCTIONID(li8),  
-                    FUNCTIONID(li16),  
-                    FUNCTIONID(li32),  
-                    FUNCTIONID(lf32),  
+                static const CallInfop kFuncID[5] = {
+                    FUNCTIONID(li8),
+                    FUNCTIONID(li16),
+                    FUNCTIONID(li32),
+                    FUNCTIONID(lf32),
                     FUNCTIONID(lf64)
                 };
 
@@ -3225,7 +3225,7 @@ namespace avmplus
                 localSet(index, i2, result);
                 break;
             }
-            
+
             // stores
             case OP_si8:
             case OP_si16:
@@ -3233,11 +3233,11 @@ namespace avmplus
             case OP_sf32:
             case OP_sf64:
             {
-                static const CallInfop kFuncID[5] = { 
-                    FUNCTIONID(si8),  
-                    FUNCTIONID(si16),  
-                    FUNCTIONID(si32),  
-                    FUNCTIONID(sf32),  
+                static const CallInfop kFuncID[5] = {
+                    FUNCTIONID(si8),
+                    FUNCTIONID(si16),
+                    FUNCTIONID(si32),
+                    FUNCTIONID(sf32),
                     FUNCTIONID(sf64)
                 };
 
@@ -3268,7 +3268,7 @@ namespace avmplus
             case OP_lookupswitch:
             {
                 //int index = integer(*(sp--));
-                //pc += readS24(index < readU16(pc+4) ? 
+                //pc += readS24(index < readU16(pc+4) ?
                 //  (pc+6+3*index) :    // matched case
                 //  (pc+1));            // default
                 int count = int(1 + op2);
@@ -3303,7 +3303,7 @@ namespace avmplus
                 {
                     callIns(FUNCTIONID(debugExit), 2,
                         env_param, csn);
-                    // now we toast the cse and restore contents in order to 
+                    // now we toast the cse and restore contents in order to
                     // ensure that any variable modifications made by the debugger
                     // will be pulled in.
                     //firstCse = ip;
@@ -3535,7 +3535,7 @@ namespace avmplus
                 break;
             }
 
-            case OP_hasnext: 
+            case OP_hasnext:
             {
                 // sp[-1] = hasnext(sp[-1], sp[0]);
                 LIns* obj = loadAtomRep(sp-1);
@@ -3548,7 +3548,7 @@ namespace avmplus
                 break;
             }
 
-            case OP_hasnext2: 
+            case OP_hasnext2:
             {
                 // fixme - if obj is already Atom, or index is already int,
                 // easier to directly reference space in vars.
@@ -3566,7 +3566,7 @@ namespace avmplus
                 localSet(sp+1, i1, result);
                 break;
             }
-            
+
             case OP_newfunction:
             {
                 uint32_t function_id = (uint32_t) op1;
@@ -3602,7 +3602,7 @@ namespace avmplus
 
                 LIns* toplevel = loadToplevel();
 
-                LIns* i3 = callIns(FUNCTIONID(op_call), 4, 
+                LIns* i3 = callIns(FUNCTIONID(op_call), 4,
                     toplevel, func, InsConst(argc), ap);
 
                 localSet(dest, atomToNativeRep(result, i3), result);
@@ -3748,7 +3748,7 @@ namespace avmplus
                 // result = core->newObject(env->activation, NULL);
                 int dest = sp+1;
 
-                LIns* activation = callIns(FUNCTIONID(newcatch), 2, 
+                LIns* activation = callIns(FUNCTIONID(newcatch), 2,
                                          env_param, InsConstPtr(result));
 
                 localSet(dest, ptrToNativeRep(result, activation), result);
@@ -3786,7 +3786,7 @@ namespace avmplus
                 // prepare scopechain args for call
                 LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-                LIns* i3 = callIns(FUNCTIONID(newclass), 5, 
+                LIns* i3 = callIns(FUNCTIONID(newclass), 5,
                     env_param, InsConstPtr(ctraits), base, outer, ap);
 
                 AvmAssert(!result->isMachineType());
@@ -3821,8 +3821,8 @@ namespace avmplus
                 break;
             }
 
-            case OP_findpropstrict: 
-            case OP_findproperty: 
+            case OP_findpropstrict:
+            case OP_findproperty:
             {
                 // stack in: [ns [name]]
                 // stack out: obj
@@ -3846,11 +3846,11 @@ namespace avmplus
                 {
                     withBase = leaIns(state->withBase*sizeof(Atom), ap);
                 }
-    
+
                 //      return env->findproperty(outer, argv, extraScopes, name, strict);
 
-                LIns* i3 = callIns(FUNCTIONID(findproperty), 7, 
-                    env_param, outer, ap, InsConst(extraScopes), multi, 
+                LIns* i3 = callIns(FUNCTIONID(findproperty), 7,
+                    env_param, outer, ap, InsConst(extraScopes), multi,
                     InsConst((int32_t)(opcode == OP_findpropstrict)),
                     withBase);
 
@@ -3858,9 +3858,9 @@ namespace avmplus
                 break;
             }
 
-            case OP_finddef: 
+            case OP_finddef:
             {
-                // stack in: 
+                // stack in:
                 // stack out: obj
                 // framep[op2] = env->finddef(name)
                 Multiname* multiname = (Multiname*) op1;
@@ -3899,24 +3899,24 @@ namespace avmplus
                 Traits* indexType = state->value(sp).traits;
                 int objDisp = sp;
 
-				bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->contains(core->getPublicNamespace(pool));
+                bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->contains(core->getPublicNamespace(pool));
                 if (maybeIntegerIndex && indexType == INT_TYPE)
                 {
                     bool valIsAtom = true;
                     LIns* index = localGet(objDisp--);
-                    
+
                     if (multiname->isRtns())
                     {
                         // Discard runtime namespace
                         objDisp--;
                     }
-                    
+
                     Traits* objType = state->value(objDisp).traits;
 
                     LIns *value;
                     if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)) )
                     {
-                        value = callIns((objType==ARRAY_TYPE ? 
+                        value = callIns((objType==ARRAY_TYPE ?
                                         FUNCTIONID(ArrayObject_getIntProperty) :
                                         FUNCTIONID(ObjectVectorObject_getIntProperty)), 2,
                             localGetp(sp-1), index);
@@ -3925,7 +3925,7 @@ namespace avmplus
                     {
                         if( result == INT_TYPE || result == UINT_TYPE)
                         {
-                            value = callIns((objType==VECTORINT_TYPE ? 
+                            value = callIns((objType==VECTORINT_TYPE ?
                                                     FUNCTIONID(IntVectorObject_getNativeIntProperty) :
                                                     FUNCTIONID(UIntVectorObject_getNativeIntProperty)), 2,
                             localGetp(sp-1), index);
@@ -3933,7 +3933,7 @@ namespace avmplus
                         }
                         else
                         {
-                            value = callIns((objType==VECTORINT_TYPE ? 
+                            value = callIns((objType==VECTORINT_TYPE ?
                                                     FUNCTIONID(IntVectorObject_getIntProperty) :
                                                     FUNCTIONID(UIntVectorObject_getIntProperty)), 2,
                             localGetp(sp-1), index);
@@ -3966,19 +3966,19 @@ namespace avmplus
                     bool valIsAtom = true;
 
                     LIns* index = localGet(objDisp--);
-                    
+
                     if (multiname->isRtns())
                     {
                         // Discard runtime namespace
                         objDisp--;
                     }
-                    
+
                     Traits* objType = state->value(objDisp).traits;
 
                     LIns *value;
                     if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
                     {
-                        value = callIns((objType==ARRAY_TYPE ? 
+                        value = callIns((objType==ARRAY_TYPE ?
                                                 FUNCTIONID(ArrayObject_getUintProperty) :
                                                 FUNCTIONID(ObjectVectorObject_getUintProperty)), 2,
                             localGetp(sp-1), index);
@@ -3996,7 +3996,7 @@ namespace avmplus
                         else
                         {
                             value = callIns((objType==VECTORINT_TYPE ?
-                                                    FUNCTIONID(IntVectorObject_getUintProperty) : 
+                                                    FUNCTIONID(IntVectorObject_getUintProperty) :
                                                     FUNCTIONID(UIntVectorObject_getUintProperty)), 2,
                             localGetp(sp-1), index);
                         }
@@ -4077,24 +4077,24 @@ namespace avmplus
                 Traits* valueType = state->value(sp).traits;
                 int objDisp = sp-1;
 
-				bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->contains(core->getPublicNamespace(pool));
+                bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->contains(core->getPublicNamespace(pool));
 
                 if (maybeIntegerIndex && indexType == INT_TYPE)
                 {
                     LIns* index = localGet(objDisp--);
-                    
+
                     if (multiname->isRtns())
                     {
                         // Discard runtime namespace
                         objDisp--;
                     }
-                    
+
                     Traits* objType = state->value(objDisp).traits;
 
                     if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
                     {
                         LIns* value = loadAtomRep(sp);
-                        callIns((objType==ARRAY_TYPE ? 
+                        callIns((objType==ARRAY_TYPE ?
                                         FUNCTIONID(ArrayObject_setIntProperty) :
                                         FUNCTIONID(ObjectVectorObject_setIntProperty)), 3,
                             localGetp(objDisp), index, value);
@@ -4104,7 +4104,7 @@ namespace avmplus
                         if( valueType == INT_TYPE )
                         {
                             LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ? 
+                            callIns((objType==VECTORINT_TYPE ?
                                             FUNCTIONID(IntVectorObject_setNativeIntProperty) :
                                             FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
                                             3,
@@ -4113,18 +4113,18 @@ namespace avmplus
                         else if( valueType == UINT_TYPE )
                         {
                             LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ? 
+                            callIns((objType==VECTORINT_TYPE ?
                                             FUNCTIONID(IntVectorObject_setNativeIntProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeIntProperty)), 
+                                            FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
                                             3,
                                             localGetp(objDisp), index, value);
                         }
                         else
                         {
                             LIns* value = loadAtomRep(sp);
-                            value = callIns((objType==VECTORINT_TYPE ? 
+                            value = callIns((objType==VECTORINT_TYPE ?
                                                     FUNCTIONID(IntVectorObject_setIntProperty) :
-                                                    FUNCTIONID(UIntVectorObject_setIntProperty)), 
+                                                    FUNCTIONID(UIntVectorObject_setIntProperty)),
                                                     3,
                                                     localGetp(objDisp), index, value);
                         }
@@ -4154,19 +4154,19 @@ namespace avmplus
                 else if (maybeIntegerIndex && indexType == UINT_TYPE)
                 {
                     LIns* index = localGet(objDisp--);
-                    
+
                     if (multiname->isRtns())
                     {
                         // Discard runtime namespace
                         objDisp--;
                     }
-                    
+
                     Traits* objType = state->value(objDisp).traits;
 
                     if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
                     {
                         LIns* value = loadAtomRep(sp);
-                        callIns((objType==ARRAY_TYPE ? 
+                        callIns((objType==ARRAY_TYPE ?
                                         FUNCTIONID(ArrayObject_setUintProperty) :
                                         FUNCTIONID(ObjectVectorObject_setUintProperty)), 3,
                             localGetp(objDisp), index, value);
@@ -4176,7 +4176,7 @@ namespace avmplus
                         if( valueType == INT_TYPE )
                         {
                             LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ? 
+                            callIns((objType==VECTORINT_TYPE ?
                                             FUNCTIONID(IntVectorObject_setNativeUintProperty) :
                                             FUNCTIONID(UIntVectorObject_setNativeUintProperty)),
                                             3,
@@ -4185,18 +4185,18 @@ namespace avmplus
                         else if( valueType == UINT_TYPE )
                         {
                             LIns* value = localGet(sp);
-                            callIns((objType==VECTORINT_TYPE ? 
+                            callIns((objType==VECTORINT_TYPE ?
                                             FUNCTIONID(IntVectorObject_setNativeUintProperty) :
-                                            FUNCTIONID(UIntVectorObject_setNativeUintProperty)), 
+                                            FUNCTIONID(UIntVectorObject_setNativeUintProperty)),
                                             3,
                                             localGetp(objDisp), index, value);
                         }
                         else
                         {
                             LIns* value = loadAtomRep(sp);
-                            value = callIns((objType==VECTORINT_TYPE ? 
+                            value = callIns((objType==VECTORINT_TYPE ?
                                                     FUNCTIONID(IntVectorObject_setUintProperty) :
-                                                    FUNCTIONID(UIntVectorObject_setUintProperty)), 
+                                                    FUNCTIONID(UIntVectorObject_setUintProperty)),
                                                     3,
                                                     localGetp(objDisp), index, value);
                         }
@@ -4284,7 +4284,7 @@ namespace avmplus
                     LIns* multi = initMultiname(multiname, objDisp, true);
 
                     LIns* obj = loadAtomRep(objDisp);
-                    
+
                     LIns* i3 = callIns(FUNCTIONID(delproperty), 3,
                         env_param, obj, multi);
 
@@ -4448,7 +4448,7 @@ namespace avmplus
                 break;
             }
 
-            case OP_greaterequals: 
+            case OP_greaterequals:
             {
                 AvmAssert(result == BOOLEAN_TYPE);
                 localSet(sp-1, cmpLe(sp, sp-1), result);
@@ -4480,7 +4480,7 @@ namespace avmplus
             }
 
             case OP_istype:
-            {           
+            {
                 // expects a CONSTANT_Multiname cpool index
                 // used when operator "is" RHS is a compile-time type constant
                 //sp[0] = istype(sp[0], itraits);
@@ -4517,9 +4517,9 @@ namespace avmplus
             case OP_dxns:
             {
                 LIns* uri = InsConstPtr((String*)op1); // uri
-                LIns* ns = callIns(FUNCTIONID(newPublicNamespace), 
-                    2, 
-                    coreAddr, 
+                LIns* ns = callIns(FUNCTIONID(newPublicNamespace),
+                    2,
+                    coreAddr,
                     uri);
                 storeIns(ns, offsetof(MethodFrame,dxns), methodFrame);
                 break;
@@ -4528,19 +4528,19 @@ namespace avmplus
             case OP_dxnslate:
             {
                 int32_t index = (int32_t) op1;
-                LIns* atom = loadAtomRep(index);                
+                LIns* atom = loadAtomRep(index);
                 LIns* uri = callIns(FUNCTIONID(intern), 2,
                     coreAddr, atom);
-                LIns* ns = callIns(FUNCTIONID(newPublicNamespace), 
-                    2, 
-                    coreAddr, 
+                LIns* ns = callIns(FUNCTIONID(newPublicNamespace),
+                    2,
+                    coreAddr,
                     uri);
                 storeIns(ns, offsetof(MethodFrame,dxns), methodFrame);
                 break;
             }
 
             /*
-             * debugger instructions 
+             * debugger instructions
              */
             case OP_debugfile:
             {
@@ -4601,7 +4601,7 @@ namespace avmplus
         }
 #endif
 
-        // 
+        //
         // compile instructions that cannot throw exceptions before we add exception handling logic
         //
 
@@ -4610,7 +4610,7 @@ namespace avmplus
 
         LIns* cond;
         LOpcode br;
-        
+
         switch (opcode)
         {
         case OP_iftrue:
@@ -4690,7 +4690,7 @@ namespace avmplus
 
         branchIns(br, cond, target_off);
     } // emitIf()
-    
+
     // Faster compares for ints, uint, doubles
     LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
     {
@@ -4754,7 +4754,7 @@ namespace avmplus
         }
 
         return NULL;
-    }   
+    }
 
     // set cc's for < operator
     LIns* CodegenLIR::cmpLt(int lhsi, int rhsi)
@@ -4772,10 +4772,10 @@ namespace avmplus
             coreAddr, lhs, rhs);
 
         // caller will use jt for (a<b) and jf for !(a<b)
-        // compare          ^8    <8 
-        // true       1101  0101   y 
-        // false      0101  1101   n 
-        // undefined  0100  1100   n 
+        // compare          ^8    <8
+        // true       1101  0101   y
+        // false      0101  1101   n
+        // undefined  0100  1100   n
 
         LIns* c = InsConst(8);
         return binaryIns(LIR_lt, binaryIns(LIR_xor, p2i(atom), c), c);
@@ -4812,11 +4812,11 @@ namespace avmplus
 
         Traits* lht = state->value(lhsi).traits;
         Traits* rht = state->value(rhsi).traits;
-        
+
         // If we have null and a type that is derived from an Object (but not Object or XML)
         // we can optimize our equal comparison down to a simple ptr comparison. This also
         // works when both types are derived Object types.
-        if (((lht == NULL_TYPE) && (rht && !rht->notDerivedObjectOrXML())) || 
+        if (((lht == NULL_TYPE) && (rht && !rht->notDerivedObjectOrXML())) ||
             ((rht == NULL_TYPE) && (lht && !lht->notDerivedObjectOrXML())) ||
             ((rht && !rht->notDerivedObjectOrXML()) && (lht && !lht->notDerivedObjectOrXML())))
         {
@@ -4861,7 +4861,7 @@ namespace avmplus
             LIns *exptr = loadIns(LIR_ldp, offsetof(AvmCore, exceptionAddr), coreAddr);
             LIns *exAtom = loadIns(LIR_ldp, offsetof(Exception, atom), exptr);
             localSet(state->verifier->stackBase, exAtom, NULL_TYPE);
-            // need to convert exception from atom to native rep, at top of 
+            // need to convert exception from atom to native rep, at top of
             // catch handler.  can't do it here because it could be any type.
 
             // _ef.beginCatch()
@@ -4925,10 +4925,10 @@ namespace avmplus
         storeIns(mFlag, offsetof(Multiname,flags), _tempname);
 
         LIns* nameAtom = NULL;
-        
+
         if (multiname->isRtname())
         {
-            nameAtom = loadAtomRep(csp--);          
+            nameAtom = loadAtomRep(csp--);
         }
         else
         {
@@ -4967,7 +4967,7 @@ namespace avmplus
             {
                 callIns(FUNCTIONID(initMultinameLate), 3,
                         coreAddr, _tempname, nameAtom);
-            }               
+            }
         }
 
         return _tempname;
@@ -5020,7 +5020,7 @@ namespace avmplus
         else if (t == NUMBER_TYPE)  offset = offsetof(Toplevel, numberClass);
         else if (t == INT_TYPE)     offset = offsetof(Toplevel, intClass);
         else if (t == UINT_TYPE)    offset = offsetof(Toplevel, uintClass);
-        else 
+        else
         {
             // *, Object or Void
             LIns* obj = loadAtomRep(i);
@@ -5090,7 +5090,7 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-    bool CodegenLIR::verbose() 
+    bool CodegenLIR::verbose()
     {
         return (state && state->verifier->verbose) || pool->verbose;
     }
@@ -5163,7 +5163,7 @@ namespace avmplus
             switch (i->opcode()) {
             case LIR_jt:
             case LIR_jf:
-            case LIR_j: 
+            case LIR_j:
                 AvmAssert(i->getTarget() != NULL && i->getTarget() == i->oprnd2() && i->oprnd2()->isop(LIR_label));
                 break;
             }
@@ -5253,7 +5253,7 @@ namespace avmplus
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
                         // reachable catch blocks.  If we haven't seen the catch label yet then
-                        // the call is to an exception handling helper (eg beginCatch()) 
+                        // the call is to an exception handling helper (eg beginCatch())
                         // that won't throw.
                         BitSet *lset = labels.get(catcher);
                         if (lset)
@@ -5267,7 +5267,7 @@ namespace avmplus
         while (again);
 
         // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
-        verbose_only( if (verbose()) 
+        verbose_only( if (verbose())
             AvmLog("killing dead stores after %d LA iterations.\n",iter);
         )
     }
@@ -5361,13 +5361,13 @@ namespace avmplus
      * this is iterative live variable analysis.  We walk backwards through
      * the code.  when we see a load, we mark the variable live, and when
      * we see a store, we mark it dead.  Dead stores are dropped, not returned
-     * by read().  
+     * by read().
      *
      * at labels, we save the liveIn set associated with that label.
      *
      * at branches, we merge the liveIn sets from the fall through case (which
      * is the current set) and the branch case (which was saved with the label).
-     * this filter can be run multiple times, which is required to pick up 
+     * this filter can be run multiple times, which is required to pick up
      * loop-carried live variables.
      *
      * once the live sets are stable, the DeadVars.kill flag is set to cause the filter
@@ -5394,7 +5394,7 @@ namespace avmplus
     int jitmax = 0x7fffffff;
 #endif
 
-    void CodegenLIR::emitMD() 
+    void CodegenLIR::emitMD()
     {
         PERFM_NTPROF("compile");
         debug_only(
@@ -5428,17 +5428,17 @@ namespace avmplus
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
         PERFM_TPROF_END();
-        
+
         verbose_only(
             assm->_outputCache = 0;
             for (int i=asmOutput.size()-1; i>=0; --i) {
-                assm->outputf("%s",asmOutput.get(i)); 
+                assm->outputf("%s",asmOutput.get(i));
             }
         );
 
         PERFM_NVPROF("IR-bytes", frag->lirbuf->byteCount());
-        PERFM_NVPROF("IR", frag->lirbuf->insCount());       
-        
+        PERFM_NVPROF("IR", frag->lirbuf->insCount());
+
         LirBuffer *lirbuf = frag->lirbuf;
         frag->releaseLirBuffer();
         for (LirWriter *w = lirout, *wnext; w != 0; w = wnext) {
@@ -5449,7 +5449,7 @@ namespace avmplus
         delete lirbuf;
         lirbuf = NULL;
 
-        bool keep = //!info->hasExceptions() && 
+        bool keep = //!info->hasExceptions() &&
             !assm->error();
     #ifdef AVMPLUS_JITMAX
         jitcount++;
@@ -5485,8 +5485,8 @@ namespace avmplus
         #ifdef VTUNE
         if (keep) x{
             AvmAssert(!jitPendingRecords.size());  // all should be resolved by now
-            int32_t count = jitInfoList.size(); 
-            uint32_t id = 0;        
+            int32_t count = jitInfoList.size();
+            uint32_t id = 0;
             for(int i=0; i<count; i++) {
                 JITCodeInfo* jitInfo = jitInfoList.get(i);
                 if (jitInfo->lineNumTable.size()) {
@@ -5530,7 +5530,7 @@ namespace avmplus
        return rec;
    }
 
-   void CodegenLIR::jitFilenameUpdate(uint32_t filename) 
+   void CodegenLIR::jitFilenameUpdate(uint32_t filename)
    {
        AvmAssert(filename);
        int32_t size = jitPendingRecords.size();
@@ -5543,7 +5543,7 @@ namespace avmplus
        }
    }
 
-   void CodegenLIR::jitLineNumUpdate(uint32_t num) 
+   void CodegenLIR::jitLineNumUpdate(uint32_t num)
    {
        AvmAssert(num);
        int32_t size = jitPendingRecords.size();
@@ -5556,7 +5556,7 @@ namespace avmplus
        }
    }
 
-   void CodegenLIR::jitCodePosUpdate(uint32_t pos) 
+   void CodegenLIR::jitCodePosUpdate(uint32_t pos)
    {
        JITCodeInfo* inf = jitCurrentInfo();
        if (!inf->endAddr) inf->endAddr = pos;
