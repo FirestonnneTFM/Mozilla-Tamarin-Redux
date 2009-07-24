@@ -1289,7 +1289,7 @@ namespace avmplus
         )
         verbose_only(
             vbWriter = 0;
-            if (verbose()) {
+            if (verbose() && !core->quiet_opt()) {
                 log.lcbits = 0xffff; // turn everything on
                 lirbuf->names = new (gc) LirNameMap(gc, *lir_alloc, pool->codePages->labels);
                 lirout = vbWriter = new (gc) VerboseWriter(gc, lirout, lirbuf->names, &log);
@@ -5411,10 +5411,7 @@ namespace avmplus
         )
 
         PageMgr *mgr = pool->codePages;
-        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core);
-    #ifdef AVMPLUS_VERBOSE
-        assm->_verbose = pool->verbose;
-    #endif
+        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core, &log);
         #ifdef VTUNE
         assm->cgen = this;
         #endif
