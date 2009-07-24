@@ -65,7 +65,7 @@ namespace avmplus
 
        String*  filename;
        uint32_t lineno;
-   }; 
+   };
 
    class JITCodeInfo : public MMgc::GCObject
    {
@@ -73,7 +73,7 @@ namespace avmplus
            JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
 
            MethodInfo* method;
-           SortedMap<int, LineNumberRecord*, LIST_GCObjects> lineNumTable;       // populated during code generation 
+           SortedMap<int, LineNumberRecord*, LIST_GCObjects> lineNumTable;       // populated during code generation
            uintptr startAddr;
            uintptr endAddr;
            iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
@@ -86,7 +86,7 @@ namespace avmplus
                return record;
            }
 
-           void clear() 
+           void clear()
            {
                lineNumTable.clear();
                method = 0;
@@ -237,7 +237,7 @@ namespace avmplus
             return lirout->ins1(LIR_u2f, v);
         }
         LIns *binaryIns(LOpcode op, LIns *a, LIns *b) {
-            return lirout->ins2(op,a,b); 
+            return lirout->ins2(op,a,b);
         }
         LIns *InsConst(int32_t c) {
             return lirout->insImm(c);
