@@ -270,7 +270,10 @@ class HorizontalOneBoxPerBuilder(HtmlResource):
 
       for builder_name in builders:
         builder = status.getBuilder(builder_name)
-        classname = ITopBox(builder).getBox(request).class_
+        if builder.getState()[0] == 'building':
+            classname = 'LastBuild running'
+        else: 
+            classname = ITopBox(builder).getBox(request).class_
         title = builder_name
 
         url = (self.path_to_root(request) + "waterfall?builder=" +
