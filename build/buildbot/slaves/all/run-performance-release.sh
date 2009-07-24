@@ -107,6 +107,13 @@ echo "`$AVM -Dversion`"
 echo ""
 
 
+##
+# Ensure that the system is clean and ready
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-clean.sh
+
+
 cd $basedir/test/performance
 find ./ -name "*.abc" -exec rm {} \;
 
@@ -246,6 +253,13 @@ echo "perfchange: ${perfchg}%"
 cd $basedir/build/buildbot/slaves/scripts/
 . ./run-performance-post.sh
 
+##
+# Ensure that the system is torn down and clean
+##
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-acceptance-teardown.sh
+
 test "$result" = "0" && resultmessage="performance tests passed"
 echo -e "message: $resultmessage"
+
 exit $result
