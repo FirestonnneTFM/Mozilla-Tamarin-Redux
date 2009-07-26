@@ -5578,9 +5578,7 @@ namespace nanojit
 
     void Fragment::onDestroy() {
         if (root == this) {
-            delete mergeCounts;
             delete lirbuf;
-            mergeCounts = 0;
             lirbuf = 0;
         }
     }
