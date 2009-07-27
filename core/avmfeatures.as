@@ -184,6 +184,15 @@ var FEATURES =
 	<requires> AVMSYSTEM_LITTLE_ENDIAN </requires>
 	<defines>  VMCFG_DOUBLE_MSW_FIRST </defines>
   </feature>
+
+  <feature>
+    <desc> Enables the just-in-time compiler to generate vector floating point 
+           instructions for ARM based architectures.  </desc>
+
+    <name> AVMSYSTEM_ARM_FPU  </name>
+	<requires>AVMSYSTEM_ARM</requires>
+    <defines> NJ_ARM_VFP </defines>
+  </feature>
   
   <!-- CPU architectures, one of these is required for the JIT -->
 
@@ -553,6 +562,7 @@ function main() {
     s += "#ifdef AVMSHELL_BUILD\n";
     s += "extern const char * const avmfeatures;\n";
     s += "#endif\n\n";
+	print('writing avmfeatures.h');
 	File.write("avmfeatures.h", s);
 
     // Generate avmfeatures.cpp
@@ -568,6 +578,7 @@ function main() {
         s += showFeature(feature);
     s += ";\n\n"
     s += "#endif // AVMSHELL_BUILD\n";
+	print('writing avmfeatures.cpp');
 	File.write("avmfeatures.cpp", s);
 
     // Generate ../build/avmfeatures.py
@@ -580,6 +591,7 @@ function main() {
 		s += configureFeature(feature);
 	s += "    return args\n";
 
+	print('writing ../build/avmfeatures.h');
 	File.write("../build/avmfeatures.py", s);
 }
 

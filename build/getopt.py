@@ -101,12 +101,13 @@ class Options:
                             + ', '.join(unknown_args))
 
 
-    def getBoolArg(self, name, default=None):
+    def getBoolArg(self, name, default=None, remove=True):
         if not name in self._args:
             return default
 
         val = self._args[name]
-        del self._args[name]
+        if remove:
+            del self._args[name]
 
         if type(val) == bool:
             return val
@@ -120,6 +121,12 @@ class Options:
         val = self._args[name]
         del self._args[name]
         return val
+
+    def peekBoolArg(self, name, default=None):
+        return Options.getBoolArg(self,name,default,False)
+
+    def peekStringArg(self, name, default=None):
+        return Options.getStringArg(self,name,default,False)
 
     def finish(self):
         if not self.ignore_unknown_flags:
