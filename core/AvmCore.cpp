@@ -3166,7 +3166,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		else
 		{
 		    // We get here via a AS Namespace constructor, so version the uri now
-			u = ApiUtils::getVersionedURI(this, NULL /*pool*/, internString(uri), type);
+			u = internString(ApiUtils::getVersionedURI(this, NULL /*pool*/, internString(uri), type));
 		}
 		if (ApiUtils::isEmptyURI(u))
 		{
@@ -3191,7 +3191,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			p = internString(string (prefix))->atom();
+			p = internString(string(prefix))->atom();
 		}
 		return new (GetGC()) Namespace(p, u, type);
 	}
@@ -3200,23 +3200,27 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		// prefix and uri must be interned!
 		// E4X - this is 13.2.2, step 3 - "prefix not specified"
-
+		Atom p;
+		Stringp u;
 		if (isNamespace (uri))
 		{
-			Namespacep ns = atomToNamespace (uri);
-			return new (GetGC()) Namespace (ns->getPrefix(), ns->getURI(), type);
+			Namespacep ns = atomToNamespace(uri);
+			p = ns->getPrefix();
+			u = ns->getURI();
 		}
 		else if (isObject(uri) && isQName(uri) && !isNull(atomToQName(uri)->getURI()))
 		{
-		    return new (GetGC()) Namespace(undefinedAtom, atomToString(atomToQName(uri)->getURI()), type);
+			p = undefinedAtom;
+			u = atomToString(atomToQName(uri)->getURI());
 		}
 		else
 		{
-			Stringp u = internString(string (uri));
-			Atom prefix = ApiUtils::isEmptyURI(u) ? kEmptyString->atom() : undefinedAtom;
+			u = string(uri);
+			p = ApiUtils::isEmptyURI(u) ? kEmptyString->atom() : undefinedAtom;
 			// We get here via a AS Namespace constructor, so version the uri now
-			return new (GetGC()) Namespace(prefix, ApiUtils::getVersionedURI(this, NULL/*pool*/, u, type), type);
+			u = internString(ApiUtils::getVersionedURI(this, NULL/*pool*/, u, type));
 		}
+		return new (GetGC()) Namespace(p, u, type);
 	}
 
     // caller does uri versioning if needed
@@ -4162,8 +4166,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		// otherwise, get the base uri and mark it
 		wchar vc = (wchar)(MIN_API_MARK + v);
-		Stringp mark = core->internStringUTF16((wchar*) &vc, 1);
-		return uri->append(mark);
+		return uri->append16(&vc, 1);
 	}
 
 	// global helpers
@@ -4306,8 +4309,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					wchar c = (wchar)(MIN_API_MARK + versions->get(i));
 					//core->console << "ns=" << baseURI << " v=" << c - 0xe000 << "\n";
-					Stringp mark = String::createUTF16(core, (wchar*) &c, 1);
-					Stringp uri = baseURI->append(mark);
+					Stringp uri = baseURI->append16(&c, 1);
 					Namespacep ns = core->internNamespace(core->newNamespace(uri, nss->namespaces[0]->getType()));
 					WBRC(core->GetGC(), compat_nss, &namespaces[i], ns);				
 				}
@@ -4355,8 +4357,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else {
 			wchar c = (wchar) (MIN_API_MARK + v);
-			Stringp mark = String::createUTF16(core, (wchar*) &c, 1);
-			uri = base->append(mark);
+			uri = base->append16(&c, 1);
 		}
 		return core->internNamespace(core->newNamespace(uri, ns->getType()));
 	}
