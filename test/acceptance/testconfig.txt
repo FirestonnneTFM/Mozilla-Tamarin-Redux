@@ -174,18 +174,20 @@ ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, htt
 # Windows Mobile Emulator
 ####################
 # emulator is not using DST by default
-ecma3/Date/e15_9_5_14, arm-winmobile-emulator.*, skip, emulator DST problem
-ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator.*, skip, emulator DST problem
-ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator.*, skip, emulator DST problem
-ecma3/Unicode/u9000_CJKUnifiedIdeographs, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Unicode/u6000_CJKUnifiedIdeographs, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Unicode/u5000_CJKUnifiedIdeographs, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Unicode/u7000_CJKUnifiedIdeographs, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Unicode/u8000_CJKUnifiedIdeographs, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Unicode/uE000_PrivateUseArea, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Unicode/uAC00_HangulSyllables, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
-ecma3/Date/e15_9_5_10, arm-winmobile-emulator.*, skip, tests run too slowly on winmo
+# do not use wildcard match (.*) at end, fully specify matches so -deep ending will not match
+ecma3/Date/e15_9_5_14, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Unicode/u9000_CJKUnifiedIdeographs, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u6000_CJKUnifiedIdeographs, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u5000_CJKUnifiedIdeographs, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u7000_CJKUnifiedIdeographs, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u8000_CJKUnifiedIdeographs, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/uE000_PrivateUseArea, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/uAC00_HangulSyllables, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Date/e15_9_5_10, arm-winmobile-emulator(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+
 as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
