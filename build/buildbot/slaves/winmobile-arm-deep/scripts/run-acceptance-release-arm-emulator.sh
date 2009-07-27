@@ -109,8 +109,8 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --nohtml --config=winmobile-emulator-tvm-release-deep --notimecheck"
-$py ./runtests.py --nohtml --config=winmobile-emulator-tvm-release-deep --notimecheck
+echo "message: $py ./runtests.py --nohtml --config=arm-winmobile-emulator-tvm-release-deep --notimecheck"
+$py ./runtests.py --nohtml --config=arm-winmobile-emulator-tvm-release-deep --notimecheck
 
 ##
 # Ensure that the system is torn down and clean
