@@ -85,12 +85,13 @@ class BuilderDependent(Dependent):
     
     fileIsImportant = None
     
-    def __init__(self, name, upstream, builderNames, builderDependencies, 
+    def __init__(self, name, upstream, callbackInterval, builderNames, builderDependencies, 
                     properties={}, fileIsImportant=None):
         Dependent.__init__(self, name, upstream, builderNames, properties)
         # - each builder must have a dependent that is in the upstream builder
         # - multiple builders can be dependent on the same upstream builder
         self.builderDependencies = builderDependencies
+        self.callbackInterval = callbackInterval
         
         if fileIsImportant:
             assert callable(fileIsImportant)
@@ -113,6 +114,9 @@ class BuilderDependent(Dependent):
             if dependent_builder not in self.upstream.listBuilderNames():
                 errmsg = "The dependent builder %s is not defined in the upstream scheduler %s" % (dependent_builder, self.upstream.name)
                 assert False, errmsg
+                
+        self.timer = None
+        self.source_stamp = None
        
     def upstreamBuilt(self, ss):
         # Only add builders to the buildset that are currently online and if the dependent builder 
@@ -130,6 +134,34 @@ class BuilderDependent(Dependent):
             if not startThisBuildSet:
                 # no important files found, do not continue with this buildset
                 return
+        
+        if self.source_stamp == None:
+            # This is the first time that the ss has been seen, this is NOT a callback
+            self.source_stamp = ss
+        else:
+            # This can either be a callback or a new ss passed in from upstream builder
+            try:
+                 revision_prev = int(self.source_stamp.revision)
+                 revision_curr = int(ss.revision)
+            except ValueError:
+                errmsg = "BuilderDependent.upstreamBuilt has an unknown ss.revison: %s" % (ss.revision)
+                assert False, errmsg
+
+            # ss.revision is an OLDER REV than self.source_stamp.revision
+            if revision_curr < revision_prev: 
+                # This means we are a callback, and during sleep period a new build request 
+                # has come in and is now in control, we can just stop running.
+                return
+            
+            # ss.revision is a NEWER REV than self.source_stamp.revision
+            elif revision_curr > revision_prev:
+                # This would indicate a new build and we need to merge ss and self.source_stamp
+                ss.mergeWith([self.source_stamp])
+                self.source_stamp = ss
+            
+            # Revisions are the same so this is the callback
+            # else revision_curr == revision_prev
+        
         
         buildset_builderNames = []
         for builder_name in self.builderNames:
@@ -153,9 +185,21 @@ class BuilderDependent(Dependent):
             if ss.revision == dep_ss.revision:
                 # Get a builder from the BotMaster:
                 builder = self.parent.botmaster.builders.get(builder_name)
+                if builder.builder_status.getState()[0] == 'building':
+                    # There is a builder in this scheduler that is active so we need
+                    # to NOT start the build yet, but instead callback in X seconds
+                    # to see if all of the builders are available.
+                    self.timer = reactor.callLater(self.callbackInterval, self.upstreamBuilt, ss)
+                    return
+                # Add the builder to the set if it is idle (not building and not offline)
                 if builder.builder_status.getState()[0] == 'idle':
                     buildset_builderNames.append(builder_name)
+                    
 
         bs = buildset.BuildSet(buildset_builderNames, ss,
                     properties=self.properties)
         self.submitBuildSet(bs)
+        
+        # Clear the tracked source stamp
+        self.source_stamp = None
+
