@@ -60,6 +60,7 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/GCStack.cpp \
   $(curdir)/GCTests.cpp \
   $(curdir)/GCThreads.cpp \
+  $(curdir)/ZCT.cpp \
   $(NULL)
 
 ifeq (arm,$(TARGET_CPU))

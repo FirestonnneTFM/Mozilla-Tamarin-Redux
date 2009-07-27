@@ -152,6 +152,7 @@ namespace MMgc
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
 #include "GCGlobalNew.h"
+#include "ZCT.h"
 #include "GC.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"
