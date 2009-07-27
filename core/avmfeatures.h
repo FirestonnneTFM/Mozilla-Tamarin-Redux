@@ -52,6 +52,7 @@
 #undef AVMPLUS_LITTLE_ENDIAN
 #undef AVM10_BIG_ENDIAN
 #undef VMCFG_DOUBLE_MSW_FIRST
+#undef NJ_ARM_VFP
 #undef VMCFG_IA32
 #undef MMGC_IA32
 #undef AVMPLUS_IA32
@@ -155,6 +156,16 @@
  */
 #if !defined AVMSYSTEM_DOUBLE_MSW_FIRST || AVMSYSTEM_DOUBLE_MSW_FIRST != 0 && AVMSYSTEM_DOUBLE_MSW_FIRST != 1
 #  error "AVMSYSTEM_DOUBLE_MSW_FIRST must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMSYSTEM_ARM_FPU
+ *
+ * Enables the just-in-time compiler to generate vector floating point 
+ * instructions for ARM based architectures.
+ */
+#if !defined AVMSYSTEM_ARM_FPU || AVMSYSTEM_ARM_FPU != 0 && AVMSYSTEM_ARM_FPU != 1
+#  error "AVMSYSTEM_ARM_FPU must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -494,6 +505,11 @@
 #    error "AVMSYSTEM_LITTLE_ENDIAN is required for AVMSYSTEM_DOUBLE_MSW_FIRST"
 #  endif
 #endif
+#if AVMSYSTEM_ARM_FPU
+#  if !AVMSYSTEM_ARM
+#    error "AVMSYSTEM_ARM is required for AVMSYSTEM_ARM_FPU"
+#  endif
+#endif
 #if AVMSYSTEM_IA32
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_IA32"
@@ -588,6 +604,9 @@
 #endif
 #if AVMSYSTEM_DOUBLE_MSW_FIRST
 #  define VMCFG_DOUBLE_MSW_FIRST
+#endif
+#if AVMSYSTEM_ARM_FPU
+#  define NJ_ARM_VFP
 #endif
 #if AVMSYSTEM_IA32
 #  define VMCFG_IA32

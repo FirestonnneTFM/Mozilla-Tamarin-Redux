@@ -86,6 +86,8 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 
+arm_fpu = o.peekBoolArg("arm-fpu",False)  # capture value since featureSettings() removes it
+
 # See build/avmfeatures.py for the code that processes switches for
 # standard feature names.
 APP_CPPFLAGS += build.avmfeatures.featureSettings(o)
@@ -128,6 +130,8 @@ if config.getCompiler() == 'GCC':
             APP_CXXFLAGS += "-Wstrict-aliasing=0 "
         else: # gcc 4.3 or later
             APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
+    if arm_fpu:
+        OPT_CXXFLAGS += "-mfloat-abi=softfp -mfpu=vfp -march=armv6"  # compile to use hardware fpu and armv6
     if config.getDebug():
         APP_CXXFLAGS += ""
     else:
