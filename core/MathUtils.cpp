@@ -814,8 +814,8 @@ namespace avmplus
 		}
 
 		MMgc::GC::AllocaAutoPtr _tmp;
-		char* tmp = (char*)VMPI_alloca(core, _tmp, kMinSizeForDouble_toString);
-		char *src = tmp + kMinSizeForDouble_toString - 1;
+		char* tmp = (char*)VMPI_alloca(core, _tmp, kMinSizeForDouble_base2_toString);
+		char *src = tmp + kMinSizeForDouble_base2_toString - 1;
 		char *srcEnd = src;
 
 		bool negative=false;
@@ -840,7 +840,7 @@ namespace avmplus
 
 				*src-- = (char)((j < 10) ? ((int32_t)j + '0') : ((int32_t)j + ('a' - 10)));
 
-				AvmAssert(src > tmp);
+				AvmAssert(src >= tmp || 0 == uVal);
 			}
 
 			if (negative)
@@ -888,7 +888,7 @@ namespace avmplus
 		int32_t i, len = 0;
 
 		MMgc::GC::AllocaAutoPtr _buffer;
-		char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForDouble_toString);
+		char* buffer = (char*)VMPI_alloca(core, _buffer, kMinSizeForDouble_base10_toString);
 		char *s = buffer;
 		bool negative = false;
 
