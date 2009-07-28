@@ -86,8 +86,6 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 
-arm_fpu = o.peekBoolArg("arm-fpu",False)  # capture value since featureSettings() removes it
-
 # See build/avmfeatures.py for the code that processes switches for
 # standard feature names.
 APP_CPPFLAGS += build.avmfeatures.featureSettings(o)
@@ -107,6 +105,10 @@ MMGC_DYNAMIC = o.getBoolArg('mmgc-shared', False)
 if MMGC_DYNAMIC:
     MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
+
+arm_fpu = o.getBoolArg("arm-fpu",False)  
+if arm_fpu:
+    APP_CPPFLAGS += "-DAVMSYSTEM_ARM_FPU=1 "
 
 the_os, cpu = config.getTarget()
 
