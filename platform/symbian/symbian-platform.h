@@ -38,42 +38,43 @@
 #ifndef __avmplus_symbian_platform__
 #define __avmplus_symbian_platform__
 
-#define VMPI_memcpy			memcpy
-#define VMPI_memset 		memset	
-#define VMPI_memcmp 		memcmp	
-#define VMPI_memmove 		memmove	
-#define VMPI_memchr			memchr	
-#define VMPI_strcmp 		strcmp
-#define VMPI_strcat 		strcat
-#define VMPI_strchr 		strchr
-#define VMPI_strrchr 		strrchr
-#define VMPI_strcpy 		strcpy
-#define VMPI_strlen 		strlen
-#define VMPI_strncat 		strncat
-#define VMPI_strncmp 		strncmp
-#define VMPI_strncpy 		strncpy
-#define VMPI_strtol			strtol
-#define VMPI_strstr			strstr
+#define VMPI_memcpy		::memcpy
+#define VMPI_memset 		::memset	
+#define VMPI_memcmp 		::memcmp	
+#define VMPI_memmove 		::memmove	
+#define VMPI_memchr			::memchr	
+#define VMPI_strcmp 		::strcmp
+#define VMPI_strcat 		::strcat
+#define VMPI_strchr 		::strchr
+#define VMPI_strrchr 		::strrchr
+#define VMPI_strcpy 		::strcpy
+#define VMPI_strlen 		::strlen
+#define VMPI_strncat 		::strncat
+#define VMPI_strncmp 		::strncmp
+#define VMPI_strncpy 		::strncpy
+#define VMPI_strtol			::strtol
+#define VMPI_strstr			::strstr
 
-#define VMPI_sprintf		sprintf
-#define VMPI_snprintf		snprintf
-#define VMPI_sscanf			sscanf
+#define VMPI_sprintf		::sprintf
+#define VMPI_snprintf		::snprintf
+#define VMPI_sscanf			::sscanf
 
-#define VMPI_atoi	atoi
-#define VMPI_tolower tolower	
-#define VMPI_islower islower	
-#define VMPI_toupper toupper	
-#define VMPI_isupper isupper	
-#define VMPI_isdigit isdigit	
-#define VMPI_isalnum isalnum	
-#define VMPI_isxdigit isxdigit	
-#define VMPI_isspace isspace	
-#define VMPI_isgraph isgraph	
-#define VMPI_isprint isprint	
-#define VMPI_ispunct ispunct	
-#define VMPI_iscntrl iscntrl	
-#define VMPI_isalpha isalpha
-#define VMPI_abort   abort
+#define VMPI_atoi	::atoi
+#define VMPI_tolower ::tolower	
+#define VMPI_islower ::islower	
+#define VMPI_toupper ::toupper	
+#define VMPI_isupper ::isupper	
+#define VMPI_isdigit ::isdigit	
+#define VMPI_isalnum ::isalnum	
+#define VMPI_isxdigit ::isxdigit	
+#define VMPI_isspace ::isspace	
+#define VMPI_isgraph ::isgraph	
+#define VMPI_isprint ::isprint	
+#define VMPI_ispunct ::ispunct	
+#define VMPI_iscntrl ::iscntrl	
+#define VMPI_isalpha ::isalpha
+#define VMPI_abort   ::abort
+#define VMPI_exit    ::exit
 
 #include <stddef.h>
 #include <string.h>
