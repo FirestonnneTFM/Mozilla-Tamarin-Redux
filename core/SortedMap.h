@@ -198,6 +198,17 @@ namespace avmplus
 			}
 			return -(lo + 1);  // key not found, low is the insertion point
 		}
+	private:
+		// private and unimplemented to prevent you from using it by mistake: 
+		// SortedMap must not be heap-allocated using gc-new.
+		// either use "standard" new, or use GCSortedMap instead.
+		void* operator new(size_t size, MMgc::GC* gc, int flags=0);
+	public:
+		// simple wrapper to allow "standard" new to be used.
+		inline void* operator new(size_t size)
+		{
+			return ::operator new(size);
+		}
 	};
 
 	template <class K, class T, ListElementType valType>
