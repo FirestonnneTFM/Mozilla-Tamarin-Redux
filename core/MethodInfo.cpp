@@ -281,13 +281,9 @@ namespace avmplus
 		else
 		{
 			#ifdef DEBUGGER
-			// just a fake CallStackNode here , so that if we throw a verify error, 
+			// just a fake CallStackNode here, so that if we throw a verify error, 
 			// we get a stack trace with the method being verified as its top entry.
-			// init with an empty setup when debugger() isn't present, so we can
-			// skip the call to getMethodName(), which is nonzero
-			CallStackNode callStackNode(CallStackNode::kNoOp);
-			if (core->debugger())
-				callStackNode.init(this->pool()->core, this->getMethodName());
+			CallStackNode callStackNode(this->pool()->core, this);
 			#endif /* DEBUGGER */
 
 			PERFM_NTPROF("verify-ticks");
