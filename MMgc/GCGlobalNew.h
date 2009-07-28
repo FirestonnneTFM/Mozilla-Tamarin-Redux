@@ -57,7 +57,7 @@ REALLY_INLINE void *operator new(size_t size) NEW_THROWS_CLAUSE
 	return space;
 #else
 	GCAssertMsg(MMgc::GCHeap::GetGCHeap()->StackEnteredCheck(), "MMGC_ENTER macro must exist on the stack");
-	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size);
 #endif
 }
        
@@ -69,7 +69,7 @@ REALLY_INLINE void *operator new[](size_t size) NEW_THROWS_CLAUSE
 	return space;
 #else
 	GCAssertMsg(MMgc::GCHeap::GetGCHeap()->StackEnteredCheck(), "MMGC_ENTER macro must exist on the stack");
-	return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size);
 #endif
 }
        
@@ -80,7 +80,7 @@ REALLY_INLINE void operator delete( void *p) DELETE_THROWS_CLAUSE
 	MMgc::GCHeap::TrackSystemFree(p);
 	VMPI_free(p);
 #else
-	MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);
+	MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineFree(p);
 #endif
 }
        
@@ -90,7 +90,7 @@ REALLY_INLINE void operator delete[]( void *p ) DELETE_THROWS_CLAUSE
 	MMgc::GCHeap::TrackSystemFree(p);
 	VMPI_free(p);
 #else
-	MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);
+	MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineFree(p);
 #endif
 }
 

@@ -59,7 +59,7 @@ namespace MMgc
 		--markstack_allowance;
 #endif
 		nbytes = (nbytes + 4095) & ~4095;
-		return FixedMalloc::GetInstance()->PleaseAlloc(nbytes);
+		return FixedMalloc::GetFixedMalloc()->PleaseAlloc(nbytes);
 	}
 
 	static inline void FreeStackSegment(void* p)
@@ -67,7 +67,7 @@ namespace MMgc
 #ifdef TESTING_MARKSTACK
 		++markstack_allowance;
 #endif
-		FixedMalloc::GetInstance()->Free(p);
+		FixedMalloc::GetFixedMalloc()->Free(p);
 	}
 	
 	template<typename T, int kMarkStackItems>

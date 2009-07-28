@@ -107,15 +107,12 @@ namespace MMgc
 	};
 
 #endif
+
 	/*static*/
-	FixedMalloc* FixedMalloc::GetInstance()
-	{
-		return GCHeap::GetGCHeap()->GetFixedMalloc(); 
-	}
+	FixedMalloc FixedMalloc::instance;
 
 	void FixedMalloc::_Init(GCHeap* heap)
 	{
-
 		m_heap = heap;
 		numLargeChunks = 0;
 	#ifdef MMGC_MEMORY_PROFILER
@@ -160,6 +157,26 @@ namespace MMgc
 			FixedAllocSafe *a = m_allocs[i];
 			delete a;
 		}		
+	}
+	
+	FASTCALL void* FixedMalloc::OutOfLineAlloc(size_t size)
+	{
+		// OPTIMIZEME?  Alloc() is inlined, as are some functions
+		// it calls, but we could inline massively here.  As it
+		// is, Alloc(size) expands to three calls: VMPI_lockAcquire,
+		// FixedAlloc::Alloc/LargeAlloc, and VMPI_lockRelease.
+
+		return Alloc(size);
+	}
+	
+	FASTCALL void FixedMalloc::OutOfLineFree(void* p)
+	{
+		// OPTIMIZEME?  Free() is inlined, as are some functions
+		// it calls, but we could inline massively here.  As it is,
+		// Free(p) expands into three calls: VMPI_lockAcquire,
+		// FixedAlloc::Free/LargeFree, and VMPI_lockRelease.
+
+		Free(p);
 	}
 	
 	void FixedMalloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
