@@ -60,10 +60,10 @@ namespace MMgc
 		static FixedMalloc *GetFixedMalloc() { return &instance; }
 
 		/* not inline - used by ::new etc */
-		FASTCALL void* OutOfLineAlloc(size_t size);
+		void* FASTCALL OutOfLineAlloc(size_t size);
 		
 		/* not inline - used by ::delete etc */
-		FASTCALL void OutOfLineFree(void* p);
+		void FASTCALL OutOfLineFree(void* p);
 
 		REALLY_INLINE void* Alloc(size_t size)
 		{

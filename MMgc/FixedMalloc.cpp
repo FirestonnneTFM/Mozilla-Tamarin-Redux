@@ -159,7 +159,7 @@ namespace MMgc
 		}		
 	}
 	
-	FASTCALL void* FixedMalloc::OutOfLineAlloc(size_t size)
+	void* FASTCALL FixedMalloc::OutOfLineAlloc(size_t size)
 	{
 		// OPTIMIZEME?  Alloc() is inlined, as are some functions
 		// it calls, but we could inline massively here.  As it
@@ -169,7 +169,7 @@ namespace MMgc
 		return Alloc(size);
 	}
 	
-	FASTCALL void FixedMalloc::OutOfLineFree(void* p)
+	void FASTCALL FixedMalloc::OutOfLineFree(void* p)
 	{
 		// OPTIMIZEME?  Free() is inlined, as are some functions
 		// it calls, but we could inline massively here.  As it is,
