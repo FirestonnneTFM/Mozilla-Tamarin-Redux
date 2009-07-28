@@ -283,7 +283,7 @@ namespace avmplus
 			#ifdef DEBUGGER
 			// just a fake CallStackNode here, so that if we throw a verify error, 
 			// we get a stack trace with the method being verified as its top entry.
-			CallStackNode callStackNode(this->pool()->core, this);
+			CallStackNode callStackNode(this);
 			#endif /* DEBUGGER */
 
 			PERFM_NTPROF("verify-ticks");

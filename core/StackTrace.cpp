@@ -62,9 +62,8 @@ namespace avmplus
 		m_linenum		= 0;
 	}
 
-	void CallStackNode::init(AvmCore* core, MethodInfo* methodInfo)
+	void CallStackNode::init(MethodInfo* methodInfo)
 	{
-		AvmAssert(core != NULL);
 		AvmAssert(methodInfo != NULL);
 		
 		m_env			= NULL;
