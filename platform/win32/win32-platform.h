@@ -90,19 +90,20 @@
 #define VMPI_sscanf			::sscanf
 
 #define VMPI_atoi			::atoi
-#define VMPI_tolower 		::tolower
-#define VMPI_islower 		::islower
-#define VMPI_toupper 		::toupper
-#define VMPI_isupper 		::isupper
-#define VMPI_isdigit 		::isdigit
-#define VMPI_isalnum 		::isalnum
-#define VMPI_isxdigit 		::isxdigit
-#define VMPI_isspace 		::isspace
-#define VMPI_isgraph 		::isgraph
-#define VMPI_isprint 		::isprint
-#define VMPI_ispunct 		::ispunct
-#define VMPI_iscntrl 		::iscntrl
-#define VMPI_isalpha 		::isalpha
+// these aren't prefixed b/c off winmo/pcre problems with ? : expressions
+#define VMPI_tolower 		tolower
+#define VMPI_islower		islower
+#define VMPI_toupper		toupper
+#define VMPI_isupper 		isupper
+#define VMPI_isdigit 		isdigit
+#define VMPI_isalnum 		isalnum
+#define VMPI_isxdigit 		isxdigit
+#define VMPI_isspace 		isspace
+#define VMPI_isgraph 		isgraph
+#define VMPI_isprint 		isprint
+#define VMPI_ispunct 		ispunct
+#define VMPI_iscntrl 		iscntrl
+#define VMPI_isalpha 		isalpha
 #ifdef UNDER_CE
 	#define VMPI_abort() ::TerminateProcess(GetCurrentProcess(), 0)
 #else
