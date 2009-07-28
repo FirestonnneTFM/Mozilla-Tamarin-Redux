@@ -1882,8 +1882,6 @@ namespace MMgc
 			}
 			if(cb)
 				cb->memoryStatusChange(oldStatus, to);
-			if(status == kMemAbort)
-				break;
 		} while(cb != NULL);
 		VMPI_lockAcquire(&m_spinlock);
 	}
