@@ -1574,14 +1574,6 @@ namespace MMgc
 		if(ef != NULL)
 		{
 			VMPI_lockRelease(&m_spinlock);
-			#ifdef _DEBUG
-			DumpStackTrace();
-			#endif
-			// we might be jumping over a FixedMalloc lock, unlock
-			for (int i=0; i<FixedMalloc::kNumSizeClasses; i++) {
-				VMPI_lockTestAndAcquire(&fixedMalloc.m_allocs[i]->m_spinlock);
-				VMPI_lockRelease(&fixedMalloc.m_allocs[i]->m_spinlock);
-			}
 			longjmp(ef->jmpbuf, 1);
 		}
 		GCAssertMsg(false, "MMGC_ENTER missing!");
