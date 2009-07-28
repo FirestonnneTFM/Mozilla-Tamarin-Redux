@@ -209,7 +209,7 @@ namespace MMgc
 		 */
 		inline static GCHeap *GetGCHeap() { GCAssert(instance != NULL); return instance; }
 
-		inline FixedMalloc* GetFixedMalloc() { return &fixedMalloc; }
+		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
 		/**
 		* flags to be passed as second argument to alloc
@@ -535,7 +535,6 @@ namespace MMgc
 		unsigned int numDecommitted;
 		HeapBlock freelists[kNumFreeLists];
 		unsigned int numAlloc;
-		FixedMalloc fixedMalloc;
 		vmpi_spin_lock_t m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
