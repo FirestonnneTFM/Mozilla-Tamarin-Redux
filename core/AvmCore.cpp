@@ -92,6 +92,9 @@ namespace avmplus
 		, console(NULL) 
 		, gc(g)
 		, currentMethodFrame(NULL)
+#ifdef _DEBUG
+		, codeContextThread(VMPI_currentThread())
+#endif
 #ifdef DEBUGGER
 		, _debugger(NULL)
 		, _profiler(NULL)

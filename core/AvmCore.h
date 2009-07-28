@@ -188,6 +188,12 @@ const int kBufferPadding = 16;
 		
 		private:
 			MethodFrame*		currentMethodFrame;
+	#ifdef _DEBUG
+			// Only the thread used to create the AvmCore is allowed to modify currentMethodFrame (and thus, use EnterCodeContext).
+			// We don't enforce this in Release builds, but check for it and assert in Debug builds.
+			vmpi_thread_t		codeContextThread;
+	#endif
+	
 
 		#ifdef DEBUGGER
 		private:
@@ -1409,7 +1415,7 @@ const int kBufferPadding = 16;
 
 		int numStrings;
 		int numNamespaces;
-				
+		
 	public:
 
 		static Namespacep atomToNamespace(Atom atom)
@@ -1650,6 +1656,9 @@ const int kBufferPadding = 16;
 		// if you make changes here, you may need to make changes there as well.
 		inline void enter(AvmCore* core, MethodEnv* e)
 		{
+#ifdef _DEBUG
+			AvmAssert(core->codeContextThread == VMPI_currentThread());
+#endif
 			this->envOrCodeContext = uintptr_t(e); // implicitly leave IS_EXPLICIT_CODECONTEXT clear
 			this->dxns = NULL;
 			this->next = core->currentMethodFrame;
@@ -1658,6 +1667,9 @@ const int kBufferPadding = 16;
 
 		inline void enter(AvmCore* core, CodeContext* cc)
 		{
+#ifdef _DEBUG
+			AvmAssert(core->codeContextThread == VMPI_currentThread());
+#endif
 			this->envOrCodeContext = uintptr_t(cc) | IS_EXPLICIT_CODECONTEXT;
 			this->dxns = NULL;
 			this->next = core->currentMethodFrame;
@@ -1666,6 +1678,9 @@ const int kBufferPadding = 16;
 
 		inline void exit(AvmCore* core)
 		{
+#ifdef _DEBUG
+			AvmAssert(core->codeContextThread == VMPI_currentThread());
+#endif
 			AvmAssert(core->currentMethodFrame == this);
 			core->currentMethodFrame = this->next;
 		}
