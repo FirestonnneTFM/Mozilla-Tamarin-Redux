@@ -1593,7 +1593,6 @@ namespace MMgc
 		{
 			MMGC_LOCK(m_spinlock);
 			enterCount--;
-			enterFrame = NULL;
 
 			// only safe to run bail out code on primary thread
 			if(VMPI_currentThread() == primordialThread && 
@@ -1601,6 +1600,9 @@ namespace MMgc
 				abortStatusNotificationSent = true;
 				StatusChangeNotify(kMemAbort);
 			}
+
+			// do this after StatusChangeNotify it affects ShouldNotEnter
+			enterFrame = NULL;
 
 			if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
 				// last one out of the pool pulls the plug
@@ -1884,5 +1886,15 @@ namespace MMgc
 				cb->memoryStatusChange(oldStatus, to);
 		} while(cb != NULL);
 		VMPI_lockAcquire(&m_spinlock);
+	}
+
+ 	/*static*/
+	bool GCHeap::ShouldNotEnter()
+	{
+		// don't enter if the heap is already gone or we're aborting but not on the aborting call stack in a nested enter call
+		if(GetGCHeap() == NULL || 
+		   (MMgc::GCHeap::GetGCHeap()->GetStatus() == MMgc::kMemAbort && MMgc::GCHeap::GetGCHeap()->GetEnterFrame() == NULL))
+			return true;
+		return false;
 	}
 }

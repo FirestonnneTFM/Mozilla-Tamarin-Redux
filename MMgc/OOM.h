@@ -41,7 +41,7 @@
 #define __OOM_H__
 
 #define MMGC_ENTER_VOID							\
-	if(MMgc::GCHeap::GetGCHeap() == NULL)		\
+	if(MMgc::GCHeap::ShouldNotEnter())			\
 		return;									\
 	MMgc::EnterFrame _ef;						\
 	_ef.status = setjmp(_ef.jmpbuf);            \
@@ -50,7 +50,7 @@
 
 
 #define MMGC_ENTER_RETURN(_val)					\
-	if(MMgc::GCHeap::GetGCHeap() == NULL)		\
+	if(MMgc::GCHeap::ShouldNotEnter())			\
 		return _val;							\
 	MMgc::EnterFrame _ef;						\
 	_ef.status = setjmp(_ef.jmpbuf);            \
