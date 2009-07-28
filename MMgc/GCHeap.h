@@ -367,6 +367,8 @@ namespace MMgc
 		};
 		Region *lastRegion;
 		
+		static bool ShouldNotEnter();
+
 	private:
 
 		GCHeap(const GCHeapConfig &config);
