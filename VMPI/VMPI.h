@@ -86,11 +86,15 @@ typedef void * vmpi_thread_t;
 #endif
 
 // Catchall, though in general the platform files are really responsible for giving
-// REALLY_INLINE a definition.
+// REALLY_INLINE and FASTCALL a definition.
 
 #ifndef REALLY_INLINE
     #define REALLY_INLINE inline
 #endif
+#ifndef FASTCALL
+    #define FASTCALL 
+#endif
+
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 

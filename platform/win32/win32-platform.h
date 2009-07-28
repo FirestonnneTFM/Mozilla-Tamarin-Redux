@@ -178,9 +178,14 @@ typedef unsigned __int64	uint64_t;
 	#pragma intrinsic(strcat)
 #endif
 
-#ifdef _MSC_VER
+#if _MSC_VER
     #define REALLY_INLINE __forceinline
-#endif // _MSC_VER
+	#define FASTCALL __fastcall
+#elif __GNUC__
+	#define FASTCALL __attribute__((fastcall))
+#else
+    #define FASTCALL 
+#endif 
 
 #ifdef _DEBUG
 typedef struct {
