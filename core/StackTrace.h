@@ -96,6 +96,8 @@ namespace avmplus
 					, intptr_t volatile*	eip
 				);
 
+		void init(AvmCore* core, MethodInfo* methodInfo);
+
 		void init(AvmCore* core, Stringp name);
 
 		/**
@@ -118,6 +120,12 @@ namespace avmplus
 		{
 			Sampler* sampler = core ? core->get_sampler() : NULL;
 			init(core, sampler ? sampler->getFakeFunctionName(name) : NULL);
+		}
+		
+		// ctor used only for MethodInfo::verify (no MethodEnv, but has MethodInfo)
+		inline explicit CallStackNode(AvmCore* core, MethodInfo* info)
+		{
+			init(core, info);
 		}
 
 		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which
@@ -145,7 +153,7 @@ namespace avmplus
 		// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
 		inline MethodEnv* env() const { return m_env; }
 		// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
-		inline MethodInfo* info() const { return m_env ? m_env->method : NULL; }
+		inline MethodInfo* info() const { return m_info; }
 		inline Stringp fakename() const { return m_fakename; }
 		inline int32_t depth() const { return m_depth; }
 
@@ -171,6 +179,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION BEGIN
 	private:	AvmCore*			m_core;
 	private:	MethodEnv*			m_env;			// will be NULL if the element is from a fake CallStackNode
+	private:	MethodInfo*			m_info;
 	private:	CallStackNode*		m_next;
 	private:	Stringp				m_fakename;		// NULL unless we are a fake CallStackNode
 	private:	int32_t				m_depth;
@@ -202,7 +211,7 @@ namespace avmplus
 		struct Element
 		{
 			MethodInfo*			m_info;			// will be null for fake CallStackNode
-			Stringp				m_name;			// same as m_info->name (except for fake CallStackNode)
+			Stringp				m_fakename;		// needed just for fake CallStackNodes, null otherwise
 			Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 		    int32_t				m_linenum;
 		#ifdef AVMPLUS_64BIT
@@ -212,9 +221,7 @@ namespace avmplus
 			inline void set(const CallStackNode& csn) 
 			{ 
 				m_info		= csn.info();		// will be NULL if the element is from a fake CallStackNode
-				m_name		= csn.fakename();
-				if (!m_name && csn.info())
-					m_name = csn.info()->getMethodName();
+				m_fakename	= csn.fakename();
 				m_filename	= csn.filename();
 				m_linenum	= csn.linenum();
 			#ifdef AVMPLUS_64BIT
@@ -223,7 +230,11 @@ namespace avmplus
 			}
 			// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
 			inline MethodInfo* info() const { return m_info; }
-			inline Stringp infoname() const { return m_name; }
+			#ifdef _DEBUG
+			// used in Sampler::presweep to check if the fake name is null or marked
+			inline Stringp fakename() const	{ return m_fakename; }
+			#endif
+			inline Stringp name() const	{ return (!m_fakename && m_info) ? m_info->getMethodName() : m_fakename; }
 			inline Stringp filename() const { return m_filename; }
 			inline int32_t linenum() const { return m_linenum; }
 		};

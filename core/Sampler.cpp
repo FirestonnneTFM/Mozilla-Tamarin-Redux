@@ -570,7 +570,7 @@ namespace avmplus
 				StackTrace::Element *e = (StackTrace::Element*)s.stack.trace;
 				for(uint32_t i=0; i < s.stack.depth; i++, e++)
 				{
-					NULL_OR_MARKED(e->infoname());
+					NULL_OR_MARKED(e->fakename());
 					NULL_OR_MARKED(e->filename());
 				}
 			}

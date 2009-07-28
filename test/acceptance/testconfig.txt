@@ -79,17 +79,6 @@ abcasm/mops, x64-(win|mac).*, skip , https://bugzilla.mozilla.org/show_bug.cgi?i
 abcasm/coverage/I, ppc64-mac.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=496643
 
 ####################
-# Sampling
-####################
-# Bug 476864 - Intermittent sampling test failures
-as3/sampling/Callback               , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-as3/sampling/ProcessSampling        , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-as3/sampling/SimpleSampling         , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-as3/sampling/StartSamplingErrors    , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
-# https://bugzilla.mozilla.org/show_bug.cgi?id=487027 sampler failure, started with changeset 1863:fa7476a03d9c
-as3/sampling/InvocationSampling, .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487027
-
-####################
 # Differential testing (avmdiff.py)
 ####################
 # sampling only works on debugger for avmdiff skip

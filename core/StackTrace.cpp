@@ -51,6 +51,7 @@ namespace avmplus
 		AvmAssert(env != NULL);
 		m_core			= env->core();
 		m_env			= env;
+		m_info			= env ? env->method : NULL;
 		m_next			= m_core->callStack; m_core->callStack = this;
 		m_fakename		= NULL;
 		m_depth			= m_next ? (m_next->m_depth + 1) : 1;
@@ -61,10 +62,29 @@ namespace avmplus
 		m_linenum		= 0;
 	}
 
+	void CallStackNode::init(AvmCore* core, MethodInfo* methodInfo)
+	{
+		AvmAssert(core != NULL);
+		AvmAssert(methodInfo != NULL);
+		
+		m_env			= NULL;
+		m_info			= methodInfo;
+		m_fakename		= NULL;
+		m_core			= NULL;
+		m_next			= NULL;
+		m_depth			= 0;
+		m_eip			= 0;    
+		m_filename		= 0;
+		m_framep		= 0;
+		m_traits		= 0;
+		m_linenum		= 0;
+	}
+	
 	void CallStackNode::init(AvmCore* core, Stringp name)
 	{
 		// careful, core and/or name can be null
 		m_env			= NULL;
+		m_info			= NULL;
 		m_fakename		= name;
 		if (name)
 		{

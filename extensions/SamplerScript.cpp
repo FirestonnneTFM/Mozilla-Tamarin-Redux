@@ -412,7 +412,7 @@ namespace avmplus
 				if (s->getSamples(num) == NULL)
 					return NULL;
 		
-				WBRC(gc, f, ((char*)f + cc->nameOffset), uintptr(e->infoname()));	// NOT e->info()->name() 
+				WBRC(gc, f, ((char*)f + cc->nameOffset), uintptr(e->name()));	// NOT e->info()->name() because e->name() can be a fake name
 				if(e->filename()) {
 					WBRC(gc, f, ((char*)f + cc->fileOffset), e->filename());
 					off_c = (char*)f + cc->lineOffset;
