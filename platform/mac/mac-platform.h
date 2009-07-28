@@ -128,6 +128,7 @@ typedef void *maddr_ptr;
 
 #ifdef __GCC__
 #define REALLY_INLINE inline __attribute__((always_inline))
+#define FASTCALL __attribute__((fastcall))
 #endif
 
 // "verify" is a Mac thing, it gets in the way of our code

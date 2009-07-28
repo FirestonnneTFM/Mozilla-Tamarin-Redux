@@ -117,24 +117,6 @@
 # define PERFM_TPROF_END() 
 #endif
 
-// This is here because it hasn't yet been refactored - it's platform code.
-// FIXME: refactor this.
-//
-// One wonders why GCC on x86 alone gets fastcall, and not GCC generally.
-//
-// FASTCALL 
-#ifdef AVMPLUS_IA32
-	#if _MSC_VER
-		#define FASTCALL __fastcall
-	#elif __GNUC__
-		#define FASTCALL __attribute__((fastcall))
-	#else
-		#define FASTCALL
-	#endif
-#else
-	#define FASTCALL
-#endif
-
 // This is here because it's a hack that will go away and does not need a permanent solution.
 //
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...

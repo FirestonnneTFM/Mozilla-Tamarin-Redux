@@ -125,6 +125,7 @@ typedef void *maddr_ptr;
 
 #ifdef __GCC__
 #define REALLY_INLINE inline __attribute__((always_inline))
+#define FASTCALL __attribute__((fastcall))
 #endif
 
 // inline __attribute__((always_inline)) is supposed to work for SunStudio.
@@ -133,6 +134,7 @@ typedef void *maddr_ptr;
 // when this bug got fixed.
 #if defined __SUNPRO_C || defined __SUNPRO_CC
 #define REALLY_INLINE inline __hidden
+#define FASTCALL 
 #endif
 
 // ifdef's are suspect copied from SpinLockUnix

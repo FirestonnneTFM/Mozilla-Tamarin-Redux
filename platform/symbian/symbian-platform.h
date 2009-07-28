@@ -94,6 +94,7 @@
 
 #ifdef __GCC__
 #define REALLY_INLINE inline __attribute__((always_inline))
+#define FASTCALL __attribute__((fastcall))
 #endif
 
 #ifdef __WINSCW__
