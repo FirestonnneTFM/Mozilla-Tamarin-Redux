@@ -159,6 +159,26 @@ namespace MMgc
 		}		
 	}
 	
+	FASTCALL void* FixedMalloc::OutOfLineAlloc(size_t size)
+	{
+		// OPTIMIZEME?  Alloc() is inlined, as are some functions
+		// it calls, but we could inline massively here.  As it
+		// is, Alloc(size) expands to three calls: VMPI_lockAcquire,
+		// FixedAlloc::Alloc/LargeAlloc, and VMPI_lockRelease.
+
+		return Alloc(size);
+	}
+	
+	FASTCALL void FixedMalloc::OutOfLineFree(void* p)
+	{
+		// OPTIMIZEME?  Free() is inlined, as are some functions
+		// it calls, but we could inline massively here.  As it is,
+		// Free(p) expands into three calls: VMPI_lockAcquire,
+		// FixedAlloc::Free/LargeFree, and VMPI_lockRelease.
+
+		Free(p);
+	}
+	
 	void FixedMalloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
 	{
 		totalAskSize = 0;
