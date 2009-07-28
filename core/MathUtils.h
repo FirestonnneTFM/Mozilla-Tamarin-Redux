@@ -151,7 +151,16 @@ namespace avmplus
 			 * needs 347.  But why be stingy?  There may be other cases that are 
 			 * even bigger, it's hard to say.
 			 */
-			 kMinSizeForDouble_toString			= 380
+			 kMinSizeForDouble_base10_toString	= 380,
+			 /**
+			  *  Buffer size for converting IEEE-754 double to string
+			  *  using worst-case radix(2).  This doesn't account for
+			  *  a leading '-' char because negative values are negated
+			  *  before formatting.  Denormalized (i.e., very small)
+			  *  numbers are simply truncated to "0" so they also do
+			  *  not require additional space.
+			  */
+			  kMinSizeForDouble_base2_toString	= 1024,
 		};
 		
 		enum UnsignedTreatment
