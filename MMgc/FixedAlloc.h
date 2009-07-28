@@ -140,7 +140,6 @@ namespace MMgc
 
 	class FixedAllocSafe : public FixedAlloc
 	{
-		friend class GCHeap;	
 	public:
 		FixedAllocSafe(int itemSize, GCHeap* heap) : 
 			FixedAlloc(itemSize, heap)
