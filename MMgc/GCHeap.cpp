@@ -167,7 +167,7 @@ namespace MMgc
 			ExpandHeap((int)config.initialSize);
 		}
 
-		fixedMalloc._Init(this);
+		GetFixedMalloc()->_Init(this);
 
 		instance = this;
 
@@ -202,7 +202,7 @@ namespace MMgc
 
 		gcManager.destroy();
 		callbacks.Destroy();
-		fixedMalloc._Destroy();
+		GetFixedMalloc()->_Destroy();
 
 		if(numAlloc != 0 && status != kMemAbort)
 		{

@@ -60,7 +60,7 @@ namespace avmplus
 		void *operator new(size_t size, size_t extra=0)
 		{
 			// 	GCRoot requires this allocation to come from FixedMalloc 
-			return MMgc::FixedMalloc::GetInstance()->Alloc(size+extra);
+			return MMgc::FixedMalloc::GetFixedMalloc()->Alloc(size+extra);
 		}
 
 		PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool);		
@@ -250,13 +250,13 @@ namespace avmplus
 		public:
 			ConstantStrings(MMgc::GC* gc) 
 				: GCRoot (gc, NULL, 0), data(NULL) {}
-			~ConstantStrings() { MMgc::FixedMalloc::GetInstance()->Free(data); }
+			~ConstantStrings() { MMgc::FixedMalloc::GetFixedMalloc()->Free(data); }
 			void setup(uint32_t size)
 			{
 				AvmAssert(data == NULL);
 				size *= sizeof(ConstantStringData);
 				// GCRoot requires this allocation to come from FixedMalloc 
-				data = (ConstantStringData*) MMgc::FixedMalloc::GetInstance()->Alloc(size);
+				data = (ConstantStringData*) MMgc::FixedMalloc::GetFixedMalloc()->Alloc(size);
 				Set(data, size);
 			}
 			ConstantStringData* data;

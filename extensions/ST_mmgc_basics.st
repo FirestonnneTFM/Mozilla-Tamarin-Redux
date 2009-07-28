@@ -116,7 +116,7 @@ delete gc;
     delete fa;								  
 
 %%test fixedMalloc
-    fm=MMgc::FixedMalloc::GetInstance();
+    fm=MMgc::FixedMalloc::GetFixedMalloc();
     int start=(int)fm->GetBytesInUse();
     int starttotal=(int)fm->GetTotalSize();
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());

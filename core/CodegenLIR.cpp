@@ -5584,11 +5584,11 @@ namespace nanojit
     }
 
     void* Allocator::allocChunk(size_t size) {
-        return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+        return FixedMalloc::GetFixedMalloc()->Alloc(size);
     }
 
     void Allocator::freeChunk(void* p) {
-        return MMgc::GCHeap::GetGCHeap()->GetFixedMalloc()->Free(p);
+        return FixedMalloc::GetFixedMalloc()->Free(p);
     }
 
     // static
