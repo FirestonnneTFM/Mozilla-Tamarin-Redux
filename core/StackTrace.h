@@ -96,7 +96,7 @@ namespace avmplus
 					, intptr_t volatile*	eip
 				);
 
-		void init(AvmCore* core, MethodInfo* methodInfo);
+		void init(MethodInfo* methodInfo);
 
 		void init(AvmCore* core, Stringp name);
 
@@ -123,9 +123,9 @@ namespace avmplus
 		}
 		
 		// ctor used only for MethodInfo::verify (no MethodEnv, but has MethodInfo)
-		inline explicit CallStackNode(AvmCore* core, MethodInfo* info)
+		inline explicit CallStackNode(MethodInfo* info)
 		{
-			init(core, info);
+			init(info);
 		}
 
 		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which
