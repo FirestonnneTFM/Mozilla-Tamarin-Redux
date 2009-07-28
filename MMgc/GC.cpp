@@ -1654,7 +1654,7 @@ bail:
 
 	GCRoot::GCRoot(GC * _gc)
 	{
-		init(_gc, this, _gc->GetGCHeap()->GetFixedMalloc()->Size(this));
+		init(_gc, this, FixedMalloc::GetFixedMalloc()->Size(this));
 	}
 
 	GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size)

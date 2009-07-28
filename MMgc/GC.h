@@ -158,15 +158,15 @@ namespace MMgc
 		// override new and delete so we can know the objects extents (via FixedMalloc::Size())
 		void *operator new(size_t size)
 		{
-			void *space = GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+			void *space = FixedMalloc::GetFixedMalloc()->Alloc(size);
 			// GCRoots are auto-scanned so clean them, don't rely on ctors to init the object properly
-			VMPI_memset(space, 0, GCHeap::GetGCHeap()->GetFixedMalloc()->Size(space));
+			VMPI_memset(space, 0, FixedMalloc::GetFixedMalloc()->Size(space));
 			return space;
 		}
         
 		void operator delete (void *object)
 		{
-			GCHeap::GetGCHeap()->GetFixedMalloc()->Free(object);
+			FixedMalloc::GetFixedMalloc()->Free(object);
 		}
 
 		const void *Get() const { return object; }

@@ -107,15 +107,12 @@ namespace MMgc
 	};
 
 #endif
+
 	/*static*/
-	FixedMalloc* FixedMalloc::GetInstance()
-	{
-		return GCHeap::GetGCHeap()->GetFixedMalloc(); 
-	}
+	FixedMalloc FixedMalloc::instance;
 
 	void FixedMalloc::_Init(GCHeap* heap)
 	{
-
 		m_heap = heap;
 		numLargeChunks = 0;
 	#ifdef MMGC_MEMORY_PROFILER

@@ -48,12 +48,18 @@ namespace MMgc
 	{
 		friend class GCHeap;
 	public:
-		// FixedMalloc is controlled by GCHeap now, these are just API compat stubs
+		// GCHeap initializes the FixedMalloc by calling _Init and destroys it by calling _Destroy.
+		
+		// Compatibility stubs, should go away.
 		static void Init() {}
 		static void Destroy() {}
+		
+		// Backward compatible name for GetFixedMalloc
+		static FixedMalloc *GetInstance() { return &instance; }
 
-		static FixedMalloc *GetInstance();
+		static FixedMalloc *GetFixedMalloc() { return &instance; }
 
+		
 		REALLY_INLINE void* Alloc(size_t size)
 		{
 			return Alloc(size, false);
@@ -117,7 +123,7 @@ namespace MMgc
 		}
 
 	private:
-		void _Init(GCHeap *heap);
+		void _Init(GCHeap *heap);	// Called from GCHeap 
 		void _Destroy();
 #ifdef MMGC_64BIT
 		const static int kLargestAlloc = 2016;	
@@ -127,6 +133,8 @@ namespace MMgc
 		const static int kNumSizeClasses = 41;
 		const static int16_t kSizeClasses[kNumSizeClasses];
 		const static uint8_t kSizeClassIndex[32];
+		
+		static FixedMalloc instance;
 
 		GCHeap *m_heap;
 		FixedAllocSafe *m_allocs[kNumSizeClasses];	

@@ -359,11 +359,11 @@ namespace MMgc
 
 	void *FastAllocator::operator new[](size_t size)
 	{
-		return GCHeap::GetGCHeap()->GetFixedMalloc()->Alloc(size);
+		return FixedMalloc::GetFixedMalloc()->Alloc(size);
 	}
 	
 	void FastAllocator::operator delete [](void *item)
 	{
-		GCHeap::GetGCHeap()->GetFixedMalloc()->Free(item);
+		FixedMalloc::GetFixedMalloc()->Free(item);
 	}
 }
