@@ -54,8 +54,8 @@ namespace avmplus
 	 * no duplicates are allowed.
      *
 	 * MEMORY MANAGEMENT:
-	 * this class can be instantiated on the stack or by a plain
-	 * new allocation, or embedded as a field in the class.
+	 * this class can be instantiated on the stack or embedded as a field in another class.
+	 * (it *cannot* be allocated dynamically; use GCSortedMap for that.)
 	 * it allocates memory with global new/delete if gc == NULL.
 	 *
 	 * therefore, when gc == NULL, to avoid memory leaks, one MUST
@@ -64,12 +64,10 @@ namespace avmplus
 	 *   with stack allocation, as long as nobody longjmp's over
 	 *   the destructor, C++ compiler ensures the destructor is called.
 	 *
-	 *   with heap allocation, ~SortedMap is eventually called, somehow
-	 *   by deleting the object.  explicit Free is not enough.
-	 *
-	 *   with gc allocation, by embedding as a field in a GCFinalizedObject.
-	 *   use GCSortedMap (below) to get a standalone gc-destructable
-	 *   sorted map.
+	 *   when embedded as a field in another class, normal C++
+	 *   dtor handling should take care of this (but be wary:
+	 *   if embedding in a GC-allocated object, the embedder
+	 *   must be a GCFinalizedObject or RCObject, *not* a plain GCObject)
 	 */
   template <class K, class T, ListElementType valType>
 	class SortedMap 
@@ -199,16 +197,8 @@ namespace avmplus
 			return -(lo + 1);  // key not found, low is the insertion point
 		}
 	private:
-		// private and unimplemented to prevent you from using it by mistake: 
-		// SortedMap must not be heap-allocated using gc-new.
-		// either use "standard" new, or use GCSortedMap instead.
-		void* operator new(size_t size, MMgc::GC* gc, int flags=0);
-	public:
-		// simple wrapper to allow "standard" new to be used.
-		inline void* operator new(size_t size)
-		{
-			return ::operator new(size);
-		}
+		// private and unimplemented, use GCSortedMap instead
+		void* operator new(size_t size);
 	};
 
 	template <class K, class T, ListElementType valType>
