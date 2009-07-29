@@ -173,7 +173,12 @@
     #define AVMSYSTEM_LITTLE_ENDIAN     1
     #define AVMSYSTEM_BIG_ENDIAN        0
   #elif defined __GNUC__
-    #include <endian.h>
+    #if AVMSYSTEM_MAC && AVMSYSTEM_ARM
+        #include <machine/endian.h>
+        #define __BYTE_ORDER BYTE_ORDER
+    #else 
+		#include <endian.h>
+    #endif
     #if __BYTE_ORDER == LITTLE_ENDIAN
       #define AVMSYSTEM_LITTLE_ENDIAN   1
       #define AVMSYSTEM_BIG_ENDIAN      0
