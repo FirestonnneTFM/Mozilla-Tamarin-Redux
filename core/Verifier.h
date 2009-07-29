@@ -65,7 +65,7 @@ namespace avmplus
 	public:
 	    CodeWriter* coder;
 		AvmCore *core;
-		SortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
+		GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
 		FrameState *state;
 
 		int max_scope;

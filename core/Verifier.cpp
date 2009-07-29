@@ -2240,7 +2240,7 @@ namespace avmplus
 	FrameState *Verifier::getFrameState(int target_off)
 	{
 		if (!blockStates)
-			blockStates = new SortedMap<const byte*, FrameState*, LIST_NonGCObjects>();
+			blockStates = new (core->GetGC()) GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects>(core->GetGC());
 		const byte *target = code_pos + target_off;
 		FrameState *targetState;
 		// get state for target address or create a new one if none exists
