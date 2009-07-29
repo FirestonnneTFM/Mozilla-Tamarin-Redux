@@ -52,7 +52,7 @@
 #endif
 
 // This is here because the configuration system does not deal with DEBUG
-#if defined DEBUG && !defined AVMPLUS_VERBOSE && !defined SYMBIAN
+#if defined DEBUG && !defined AVMPLUS_VERBOSE && !defined VMCFG_SYMBIAN
     #define AVMPLUS_VERBOSE
 #endif
 
@@ -116,12 +116,6 @@
 # define PERFM_NTPROF(n)
 # define PERFM_TPROF_END() 
 #endif
-
-// This is here because it's a hack that will go away and does not need a permanent solution.
-//
-// temporary impedance-matching define for code that needs to build with different versions of tamarin...
-// will be removed soon
-#define AVMPLUS_REDUX_API 1
 
 // This is here for VM performance profiling.
 //
