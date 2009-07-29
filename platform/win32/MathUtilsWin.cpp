@@ -47,9 +47,11 @@
 namespace avmplus
 {
 #ifdef AVMPLUS_ARM
+
     const static double PI = 3.141592653589793;
     const static double PI3_BY_4 = 3*PI/4;
     const static double PI_BY_4 = PI/4;
+	const static double PI2 = 2*PI;
     
     // 0=no, 1=+0, -1=-0  
     static int32_t isZero(double v)
@@ -57,6 +59,36 @@ namespace avmplus
         int32_t r = (MathUtils::isNegZero(v)) ? -1 : (v==0.0)? 1 : 0;
         return r;
     }
+
+
+	// sin, cos, tan all function incorrectly when called with really large values on windows mobile
+	// they all start failing at different values, but all start failing somewhere with values
+	// greater than 210 million.
+	#define AVMPLUS_TRIG_FUNC_MAX 210000000
+
+	const static bool broken_trig_funcs = MathUtils::isNaN(MathUtils::cos(250000000));
+
+	// Helper function to adjust a value for sin, cos, or tan into an equivalent value
+	// in the range that works correctly.  This works because these functions all have a period
+	// of 2*PI or PI, so there are many equivalent values.
+	static double adjustValueForTrigFuncs(double v)
+	{
+		bool negate = false;
+		if( v < 0 ) {
+			v = -v;
+			negate = true;
+		}
+
+		int temp = (int)((v - AVMPLUS_TRIG_FUNC_MAX)/PI2);
+		double offset = PI2*(temp+1);
+		v -= offset;
+
+		if( negate )
+			v = -v;
+
+		return v;
+	}
+
 #endif
 
 	double MathUtils::abs(double value)
@@ -151,7 +183,18 @@ namespace avmplus
 		_asm fld [value];
 		_asm fcos;
 #else
-		return ::cos(value);
+
+#if defined AVMPLUS_ARM
+
+		if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
+		{
+			return ::cos(adjustValueForTrigFuncs(value));
+		}
+		else
+#endif /* AVMPLUS_ARM */
+		{
+			return ::cos(value);
+		}
 #endif /* X86_MATH */
 	}
 	
@@ -369,7 +412,17 @@ extern "C" {
 		_asm fld [value];
 		_asm fsin;
 #else
-		return ::sin(value);
+
+#if defined AVMPLUS_ARM
+		if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
+		{
+			return ::sin(adjustValueForTrigFuncs(value));
+		}
+		else
+#endif /* AVMPLUS_ARM */
+		{
+			return ::sin(value);
+		}
 #endif /* X86_MATH */
 	}
 
@@ -391,7 +444,17 @@ extern "C" {
 		_asm _emit 0xDD; // fstp st(0);
 		_asm _emit 0xD8;
 #else
-		return ::tan(value);
+
+#if defined AVMPLUS_ARM
+		if( broken_trig_funcs && (value > AVMPLUS_TRIG_FUNC_MAX || value < -AVMPLUS_TRIG_FUNC_MAX) )
+		{
+			return ::tan(adjustValueForTrigFuncs(value));
+		}
+		else
+#endif /* AVMPLUS_ARM */
+		{
+			return ::tan(value);
+		}
 #endif /* X86_MATH */
 	}
 
