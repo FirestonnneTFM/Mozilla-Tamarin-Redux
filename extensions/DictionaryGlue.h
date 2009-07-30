@@ -62,7 +62,7 @@ namespace avmplus
 	private:
 		inline HeapHashtable* getHeapHashtable() const 
 		{
-			return (HeapHashtable*)*((uint8_t*)this + vtable->traits->getHashtableOffset());
+			return *(HeapHashtable**)((uint8_t*)this + vtable->traits->getHashtableOffset());
 		}
 		
 		Atom FASTCALL getKeyFromObject(Atom object) const;
