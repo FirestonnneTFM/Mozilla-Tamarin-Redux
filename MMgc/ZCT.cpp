@@ -48,96 +48,86 @@
 #define SAMPLE_CHECK() 
 #endif
 
-#define CAPACITY(T)  (unsigned(GCHeap::kBlockSize) / unsigned(sizeof(T)))
+//#define ZCT_TESTING					// Test the handling of a failure to extend the ZCT
 
 namespace MMgc
 {
-	////////////// ZCT /////////////////////////////////////////////////////////////////////////////
-	
-//#define ZCT_TESTING					// Test the handling of a failure to extend the ZCT
+	/* The ZCT is implemented as a two-level table.  Given a ZCT index, the
+	 * first-level table (indexed by the high bits of the index) yields a
+	 * second-level table (indexed by the low bits) that contains a pointer to the
+	 * entry.  The entry is an RCObject*.  The RCObject has a header field,
+	 * ZCT_INDEX, which is the index at which the pointer is found, and a flag
+	 * stating whether that index is valid (ie whether the object is in the ZCT).
+	 *
+	 * The ZCT_INDEX field is 20 bits wide; thus it may be possible that some
+	 * objects cannot be entered into the ZCT.  This is OK, as the garbage
+	 * collector will reclaim any unreachable objects eventually anyway.  (Some
+	 * test programs in the acceptance tests actually run into this problem.)
+	 *
+	 * RCObjects whose reference counts are zero are added to the ZCT by being
+	 * passed to ZCT::Add(); they are removed by being passed to ZCT::Remove() if
+	 * their reference counts transition from 0 to 1, and when the object
+	 * is destroyed.  This is all taken care of in RCObject's constructor,
+	 * destructor, and reference counting operations.  See GCObject.h.
+	 *
+	 * Every RCObject is added to the ZCT on creation; 10%-25% are subsequently
+	 * removed as their reference counts transition from 0 to 1.  Very few are
+	 * removed as objects are destroyed; the bulk are removed by the reaper because
+	 * the objects are not pinned.  (Based on profiling some Flash apps, July 2009.)
+	 *
+	 * ZCT::Add() has a fast path that can be in-lined: it checks a pointer against
+	 * a limit, stores the object in the table, bumps the pointer, stores the
+	 * index in the object and sets the object's ZCT flag.
+	 * 
+	 * ZCT::Remove() only has a fast path: it clears the table entry and clears the
+	 * ZCT flag in the object.  NULL entries in the table are recovered during
+	 * reaping.
+	 *
+	 *
+	 * Useful invariants:
+	 *
+	 * - gc->collecting and zct.reaping are never both true at the same time.  This
+	 *   is ensured by GC::FinishIncrementalMark returning immediately if zct.reaping
+	 *   is true, and by ZCT::Reap returning immediately if gc->collecting is true.
+	 *
+	 * - There are never any free blocks beyond the 'current' block (the one pointed
+	 *   into by top or slowTop) in the ZCT.  During reaping, once the ZCT is popped 
+	 *   below a block the block is removed from the ZCT and added to an empty blocks
+	 *   pool.
+	 *
+	 * - The ZCT will honor calls to Pin() from prereap() but not necessarily any
+	 *   calls to Pin() earlier than that. 	When an object is added to the ZCT its
+	 *   pinned flag is cleared.  (This is consistent with the old ZCT code.)
+	 */
 
 #ifdef ZCT_TESTING
-	static int zct_allowance = 0;		// The first block isn't accounted for, so add one to this number
-										// for the true number of blocks
+	// Max number less 1 of blocks the ZCT may use for the second level of the block table
+	// as well as the pinned table during reaping.
+	static uint32_t zct_allowance = 0;
 #endif
 
-	// We can grow if adding a block makes the largest index of the grown table representable
-	// in the field in RCObject used to hold the ZCT index for the object.
-	inline bool ZCT::CanGrow()
-	{
-		return uint32_t(Capacity() + CAPACITY(RCObject*) - 1) <= uint32_t(RCObject::ZCT_INDEX)>>8;
-	}
-	
-	inline int ZCT::Capacity()
-	{
-		return int((blocktop - blocktable) * CAPACITY(RCObject*));
-	}
-	
-	inline bool ZCT::HasFree()
-	{
-		return freelist != -1;
-	}
-	
-	inline int ZCT::BlockNumber(int index)
-	{
-		return int(unsigned(index)/CAPACITY(RCObject**));
-	}
-	
-	inline int ZCT::EntryNumber(int index)
-	{
-		return index & int(CAPACITY(RCObject*)-1);
-	}
-
-	inline RCObject** ZCT::PointerTo(int index)
-	{
-		GCAssert(index >= 0 && index < Capacity());
-		return blocktable[BlockNumber(index)] + EntryNumber(index);
-	}
-
-	inline int ZCT::GrabFree()
-	{
-		GCAssert( HasFree() );
-		int index = freelist;
-		freelist = (int)(uintptr_t)Get(index);
-		return index;
-	}
-	
-	inline void ZCT::MakeFree(int index)
-	{
-		GCAssert(index >= 0 && index < Capacity());
-		*PointerTo(index) = (RCObject*)(uintptr_t)freelist;
-		freelist = index;
-	}
-	
-	inline RCObject* ZCT::Get(int index)
-	{
-		return *PointerTo(index);
-	}
-	
-	inline void ZCT::Put(int index, RCObject* value)
-	{
-		*PointerTo(index) = value;
-	}
-
 	ZCT::ZCT()
-		: gc(NULL)					// will be set in SetGC
-		, blocktable(NULL)			// will be set in SetGC
-		, blocktop(NULL)			// will be set in SetGC
-		, freelist(-1)
+		: gc(NULL)
+		, blocktable(NULL)
+		, blocktop(NULL)
 		, reaping(false)
-		, count(0)
-		, zctNext(0)
-		, zctReapThreshold(0)		// will be set in SetGC
-		, zctIndex(0)
-		, nextPinnedIndex(0)
+		, budget(0)
+		, bottom(NULL)
+		, top(NULL)
+		, limit(NULL)
+		, topIndex(0)
+		, slowState(false)
+		, slowBottom(NULL)
+		, slowTop(NULL)
+		, slowLimit(NULL)
+		, slowTopIndex(0)
+		, pinTop(NULL)
+		, pinLimit(NULL)
+		, pinIndex(0)
+		, pinList(0)
+		, pinLast(0)
+		, freeList(0)
 	{
-	}
-	
-	void ZCT::Destroy()
-	{
-		for ( RCObject*** p = blocktable ; p < blocktop ; p++ )
-			gc->heapFree(*p);
-		gc->heapFree(blocktable);
 	}
 	
 	void ZCT::SetGC(GC *gc)
@@ -152,111 +142,422 @@ namespace MMgc
 		// table needs 1K entries, occupying a single block.  Instead of messing with
 		// growing the block table later, just allocate full tables here.  The
 		// pointed-to blocks are still allocated on demand.
+
+		// This invariant is stronger than we need; we only need for the ZCT capacity
+		// to divide evenly into blocks on both 32-bit and 64-bit systems.
+		GCAssert(RCObject::ZCT_CAPACITY == 0x100000U);
 		
-		GCAssert((uint32_t(RCObject::ZCT_INDEX)>>8) == 0xFFFFFU);
-#ifdef MMGC_64BIT
-		const int numblocks = 4;
-#else
-		const int numblocks = 1;
-#endif
-		blocktable = (RCObject***) gc->heapAlloc(numblocks);	// must succeed
-		for ( unsigned i=0 ; i < CAPACITY(RCObject**)*numblocks ; i++ )
+		const uint32_t numblocks = RCObject::ZCT_CAPACITY / CAPACITY(RCObject**) / CAPACITY(RCObject***);
+
+		blocktable = (RCObject***) gc->heapAlloc(numblocks);	// must succeed, so use default flags
+		for ( uint32_t i=0 ; i < CAPACITY(RCObject**)*numblocks ; i++ )
 			blocktable[i] = NULL;
-		blocktable[0] = (RCObject**) gc->heapAlloc(1);			// must succeed
+		blocktable[0] = (RCObject**) gc->heapAlloc(1);			// must succeed, so use default flags
 		blocktop = blocktable + 1;
-		zctReapThreshold = int(gc->policy.zctNewReapThreshold(blocktop - blocktable, 0));
+
+		budget = 0;
+		bottom = blocktable[0];
+		top = blocktable[0];
+		limit = blocktable[0] + CAPACITY(RCObject*);
+		topIndex = 0;
+	}
+
+	void ZCT::Destroy()
+	{
+		ClearBlockTable();
+		ClearFreeList();
+		gc->heapFree(blocktable);
 	}
 	
-	void ZCT::Add(RCObject *obj REFCOUNT_PROFILING_ARG(bool initial))
+	void ZCT::StartCollecting()
 	{
-		REFCOUNT_PROFILING_ONLY( gc->policy.signalZCTAdd(initial, count); )
+		GCAssert(!slowState);
+		
+		// Transfer state to slow-path variables
+		slowState = true;
+		slowBottom = bottom;
+		slowTop = top;
+		slowLimit = limit;
+		slowTopIndex = topIndex;
+		
+		// Create a state that triggers the slow path
+		top = limit;
+	}
+	
+	void ZCT::EndCollecting()
+	{
+		GCAssert(slowState);
+		
+		// Transfer the state from the slow-path variables
+		bottom = slowBottom;
+		top = slowTop;
+		limit = slowLimit;
+		topIndex = slowTopIndex;
+		slowState = false;
+	}
+	
+	void ZCT::AddSlow(RCObject *obj)
+	{
+		GCAssert(top == limit);
+		GCAssert(gc->collecting + reaping < 2);
+
 		if(gc->collecting)
 		{
-			// this is a vestige from FP8 to fix bug 165100, it has the affect of delaying 
-			// the deletion of some objects which causes the site to work
+			// This is a vestige from FP8 to fix bug 165100, it has the effect of delaying 
+			// the deletion of some objects; this causes the site to work.
 			if(gc->dontAddToZCTDuringCollection)
 				return;
 			
-			// unmarked objects are gonna get swept anyways
+			// Unmarked objects are gonna get swept anyways.
 			if(!GC::GetMark(obj))
 				return;
 		}
-		
-#if 0
-		// note if we add things while reaping we could delete the object
-		// here if we had a way to monitor our stack usage
-		if(reaping && PLENTY_OF_STACK()) {
-			for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
-				cb->prereap(obj);
-			if(gc->IsFinalized(obj))
-				((GCFinalizable*)obj)->~GCFinalizable();
-			gc->Free(obj);
+
+		if (slowState && slowTop < slowLimit) {
+			*slowTop++ = obj;
+			obj->setZCTIndexAndMaybeUnpin(slowTopIndex++, uint32_t(reaping));
 			return;
 		}
-#endif
+
+		// Overflow.
+		// Expand or reap?  Sometimes we must grow even if the budget has been exhausted.
 		
-		if(HasFree()) {
-			int index = GrabFree();
-			Put(index, obj);
-			obj->setZCTIndex(index);
-		}
-		else if(reaping && zctIndex > nextPinnedIndex) {
-			// we're going over the list, insert this guy at the front if possible
-			zctIndex--;
-			GCAssert(Get(zctIndex) == NULL);
-			Put(zctIndex, obj);
-			obj->setZCTIndex(zctIndex);
-		}
-		else if(zctNext < Capacity()) {
-			Put(zctNext, obj);
-			obj->setZCTIndex(zctNext);
-			zctNext++;
-		}
+		bool shouldGrow = false;
+		if (reaping) 
+			shouldGrow = true;
+		else if (budget > 0 && CanGrow())
+			shouldGrow = true;
 		else {
-			// zct is full, do nothing, mark/sweep will have to handle it
-			return;
+			// 'obj' will not be reaped as it's on the stack; we'll add it to the ZCT below.
+			Reap();
+			uint32_t avail = AvailableInCurrentSegment();
+			budget = gc->policy.queryZCTBudget(uint32_t(blocktop - blocktable));
+			if (avail == 0) 
+				shouldGrow = true;
 		}
-		
-		count++;
-		
-		bool should_grow = false;
-		
-		if(!reaping) {
-			// object that were pinned last reap should be unpinned
-			if(obj->IsPinned())
-				obj->Unpin();
-			if(!gc->collecting && zctNext >= zctReapThreshold) {
-				Reap();
-				should_grow = gc->policy.queryZctShouldGrowAfterReap(blocktop - blocktable, count);
+
+		if (shouldGrow) {
+			GCAssert(AvailableInCurrentSegment() == 0);
+			if (!CanGrow() || !Grow()) 
+				return;		// c'est la vie
+			if (budget > 0)
+				budget--;
+			// Grow() does not set up the state for Add(), so do that.
+			if (slowState) {
+				slowBottom = blocktop[-1];
+				slowTop = slowBottom;
+				slowLimit = slowBottom + CAPACITY(RCObject*);
+				GCAssert(slowTopIndex % CAPACITY(RCObject*) == 0);
+			}
+			else {
+				bottom = blocktop[-1];
+				limit = bottom + CAPACITY(RCObject*);
+				top = bottom;
+				GCAssert(topIndex % CAPACITY(RCObject*) == 0);
 			}
 		}
-		
-		GCAssert(zctNext <= Capacity());
-		
-		if((should_grow || zctNext == Capacity()) && CanGrow()) 
-			Grow();
-	}
-	
-	void ZCT::Remove(RCObject *obj REFCOUNT_PROFILING_ARG(bool final))
+
+		GCAssert(AvailableInCurrentSegment() > 0);
+
+		Add(obj);			// won't fail
+	}	
+
+	uint32_t ZCT::AvailableInCurrentSegment()
 	{
-		REFCOUNT_PROFILING_ONLY( gc->policy.signalZCTRemove(final); )
-		int index = obj->getZCTIndex();
-		GCAssert(Get(index) == obj);
-		
-		if(reaping) {
-			// freelist doesn't exist during reaping, simplifies things, holes will
-			// be compacted next go around if index < nextPinnedIndex.  the freelist
-			// allows incoming object to be added behind zctIndex which would mean
-			// the reap process wouldn't cascade like its supposed to. 
-			Put(index,NULL);
-		}
-		else {
-			MakeFree(index);
-		}
-		obj->ClearZCTFlag();
-		count--;
+		return slowState ? uint32_t(slowLimit - slowTop) : uint32_t(limit - top);
 	}
 	
+	bool ZCT::CanGrow()
+	{
+		return (slowState ? slowTopIndex : topIndex) + CAPACITY(RCObject*) <= RCObject::ZCT_CAPACITY;
+	}
+	
+	void ZCT::Reap(bool scanStack)
+	{
+		if(gc->collecting)
+			return;
+
+		GCAssert(!slowState);
+
+		// Do not reap if already reaping or if the ZCT is empty (waste of time).
+		if (reaping || topIndex == 0)
+			return;
+		
+		reaping = true;
+		gc->policy.signal(GCPolicyManager::START_ReapZCT);
+		SAMPLE_FRAME("[reap]", gc->core());
+		
+		uint64_t start = VMPI_getPerformanceCounter();
+#ifdef MMGC_POLICY_PROFILING
+		uint32_t objects_pinned = 0;
+#endif
+		uint32_t objects_reaped = 0;
+		size_t bytes_reaped = 0;
+		size_t blocks_before = gc->GetNumBlocks();
+		
+		// Note that we must pin from root segments even if scanStack is false, because the
+		// MMGC_GC_ROOT_THREAD creates one AutoRCRootSegment that is not managed by VMPI_alloca.
+		// The root segment list should be very short if scanStack==false so performance-wise
+		// this is not a big deal.
+
+		GCWorkItem stack;		// "stack" needed for SetupDefRefValidation if validateDefRef is true
+		if (scanStack || gc->validateDefRef)
+			stack = PinProgramStack(scanStack);
+		PinRootSegments();
+		
+		// Invoke prereap on all callbacks
+		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+			cb->prereap();
+		
+#ifdef _DEBUG
+		SetupDefRefValidation(stack);
+#endif
+		
+		// We perform depth-first reaping using the ZCT as a stack.
+		//
+		// Popping an element off the end of the ZCT, it is either NULL, pinned, or unpinned.
+		//  - If it's NULL it's ignored.
+		//  - If it's pinned, it's shifted into a list of new blocks that will replace
+		//    the blocks in the ZCT.  The index of the object is updated.
+		//  - If it's not pinned, it's reaped (which runs its finalizer, which may add
+		//    more elements ot the end of the ZCT).
+		//
+		// Depth-first processing is desirable because object graphs will tend to be wider
+		// than they are deep; going depth-first reduces ZCT growth during reaping.
+		//
+		// Memory use is optimal to within a constant: space occupied by a pointer to a
+		// reaped object is released immediately, and empty segments popped off the ZCT
+		// are used for the list of replacement blocks.
+
+		SetupPinningMemory();
+		for (;;) {
+			SAMPLE_CHECK();
+			
+			// Pop an element off the ZCT
+			GCAssert(bottom <= top);
+			GCAssert(top <= limit);
+			
+			if (top == bottom) {
+				if (topIndex == 0)
+					break;
+				PopFastSegment();
+			}
+			RCObject *rcobj = *--top;
+			--topIndex;
+
+			// Process the element
+			if (rcobj == NULL)
+				;
+			else if (rcobj->IsPinned()) {
+#ifdef MMGC_POLICY_PROFILING
+				objects_pinned++;
+#endif
+				PinObject(rcobj);
+			}
+			else {
+				objects_reaped++;
+				bytes_reaped += GC::Size(rcobj);
+				ReapObject(rcobj);
+			}
+		}
+		UsePinningMemory();
+
+		// Invoke postreap on all callbacks
+		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+			cb->postreap();
+		
+		if(gc->heap->Config().gcstats && objects_reaped > 0) {
+			size_t blocks_after = gc->GetNumBlocks();
+			gc->gclog("[mem] DRC reaped %u objects (%u kb) freeing %u pages (%u kb) in %.2f millis (%.4f s)\n", 
+					  objects_reaped,
+					  unsigned(bytes_reaped/1024), 
+					  unsigned(blocks_before - blocks_after), 
+					  unsigned(blocks_after * GCHeap::kBlockSize / 1024), 
+					  GC::duration(start), 
+					  GC::duration(gc->t0)/1000);
+		}
+
+		reaping = false;
+
+#ifdef _DEBUG
+		for ( uint32_t i=0 ; i < topIndex ; i++ ) {
+			// The first element of each block is usually NULL because it has
+			// been used as a link for pinList.
+			if (Get(i) != NULL) {
+				GCAssert(Get(i)->getZCTIndex() == i);
+				GCAssert(!Get(i)->IsPinned());
+			}
+		}
+		FinishDefRefValidation();
+#endif
+		
+#ifdef MMGC_POLICY_PROFILING
+		gc->policy.signalReapWork(objects_reaped, uint32_t(bytes_reaped), objects_pinned);
+#endif
+		gc->policy.signal(GCPolicyManager::END_ReapZCT);
+	}
+
+	void ZCT::PopFastSegment()
+	{
+		GCAssert(!slowState);
+		GCAssert(blocktop-1 > blocktable);	// Can't pop the first segment
+		blocktop--;
+		FreeBlock(*blocktop);
+		*blocktop = NULL;
+		RCObject** block = blocktop[-1];
+		bottom = block;
+		top = block + CAPACITY(RCObject**);
+		limit = top;
+	}
+
+	void ZCT::SetupPinningMemory()
+	{
+		GCAssert(pinList == NULL);
+		GCAssert(pinLast == NULL);
+		pinTop = NULL;
+		pinLimit = NULL;
+		pinIndex = 0;
+	}
+
+	bool ZCT::GrowPinningMemory()
+	{
+		GCAssert(pinTop == pinLimit);
+		GCAssert(pinIndex % CAPACITY(RCObject*) == 0);
+
+		RCObject** block = PleaseAllocBlock();
+		if (block == NULL)
+			return false;
+		// Use the first element of the block as a 'next' pointer, we don't
+		// want to use an auxiliary dynamic data structure that might fail
+		// here.
+		if (pinLast == NULL)
+			pinList = block;
+		else
+			pinLast[0] = (RCObject*)block;
+		pinLast = block;
+		block[0] = NULL;
+		pinTop = block + 1;
+		pinIndex++;
+		pinLimit = block + CAPACITY(RCObject*);
+		return true;
+	}
+	
+	// Transfer blocks from pinList into the ZCT, replacing the ZCT blocks.
+
+	void ZCT::UsePinningMemory()
+	{
+		// ZCT must be empty when we do this
+		GCAssert(!slowState);
+		GCAssert(top == bottom);
+		GCAssert(topIndex == 0);
+
+		if (pinTop != NULL) {
+			// Nuke the ZCT contents (there should only be one block in it)
+			ClearBlockTable();
+			GCAssert(blocktop == blocktable);
+			GCAssert(*blocktop == NULL);
+
+			// Copy block pointers into the ZCT (typically very few)
+			while (pinList != NULL) {
+				RCObject** block = pinList;
+				pinList = (RCObject**)block[0];
+				block[0] = NULL;
+				*blocktop++ = block;
+			}
+			
+			pinLast = NULL;
+			
+			bottom = blocktop[-1];
+			top = pinTop;
+			limit = pinLimit;
+			topIndex = pinIndex;
+		}
+	}
+
+	REALLY_INLINE void ZCT::PinObject(RCObject* obj)
+	{
+		if (pinTop == pinLimit) {
+			if (!GrowPinningMemory()) {
+				obj->ClearZCTFlag();
+				return;
+			}
+		}
+		*pinTop++ = obj;
+		obj->setZCTIndexAndUnpin(pinIndex++);
+	}
+
+	REALLY_INLINE void ZCT::ReapObject(RCObject* obj)
+	{
+		obj->ClearZCTFlag();
+#ifdef _DEBUG
+		DefRefValidate(obj);
+#endif
+		// Invoke prereap on all callbacks.
+		// FIXME: This is fairly wasteful and it would be good to be rid of it.
+		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
+			cb->prereap(obj);
+		
+		GCAssert(*(intptr_t*)obj != 0);			// That's the vtable normally
+		GCAssert(gc->IsFinalized(obj));
+		((GCFinalizable*)obj)->~GCFinalizable();
+		gc->Free(obj);
+		
+		GCAssert(gc->weakRefs.get(obj) == NULL);
+	}
+
+#ifdef _DEBUG
+	// FIXME: document the purpose & mechanisms of DefRef validation
+	void ZCT::SetupDefRefValidation(GCWorkItem& stack)
+	{
+		if(!gc->validateDefRef)
+			return;
+		
+		gc->Trace(stack.ptr, stack._size);
+	}
+	
+	void ZCT::FinishDefRefValidation()
+	{
+		if(!gc->validateDefRef) 
+			return;
+
+		gc->Sweep();
+	}
+
+	void ZCT::DefRefValidate(RCObject* obj)
+	{
+		if(!gc->validateDefRef || !gc->GetMark(obj))
+			return;
+		
+#ifdef MMGC_RC_HISTORY
+		obj->DumpHistory();
+#endif
+#ifdef MMGC_MEMORY_INFO
+		GCDebugMsg(false, "Back pointer chain:");
+		gc->DumpBackPointerChain(obj);
+#endif
+		GCAssertMsg(false, "Zero count object reachable, ref counts not correct!");
+	}
+#endif // _DEBUG
+
+	GCWorkItem ZCT::PinProgramStack(bool scanStack)
+	{
+		GCWorkItem stack;
+		MMGC_GET_STACK_EXTENTS(gc, stack.ptr, stack._size);
+		if (scanStack)
+			PinStackObjects(stack.ptr, stack._size);
+		return stack;
+	}
+	
+	void ZCT::PinRootSegments()
+	{
+		GC::RCRootSegment* segment = gc->rcRootSegments;
+		while(segment)
+		{
+			PinStackObjects(segment->mem, segment->size);
+			segment = segment->next;
+		}
+	}
+
 	void ZCT::PinStackObjects(const void *start, size_t len)
 	{
 		RCObject **p = (RCObject**)start;
@@ -271,7 +572,7 @@ namespace MMgc
 			if(val < _memStart || val >= _memEnd)
 				continue;
 			
-			int bits = gc->GetPageMapValue((uintptr_t)val); 
+			int32_t bits = gc->GetPageMapValue((uintptr_t)val); 
 			bool doit = false;
 			if (bits == GC::kGCAllocPage) {
 				doit = GCAlloc::IsRCObject(val) && GCAlloc::FindBeginning(val) == GetRealPointer(val);
@@ -281,192 +582,82 @@ namespace MMgc
 			}
 			
 			if(doit) {
+				// We must pin all objects that are reachable from the stack whether they're in
+				// the ZCT or not, because destroying an object not in the ZCT may push additional
+				// references onto the ZCT, and if those are reachable from the stack they must
+				// be pinned.  (Ergo adding objects during reaping must not clear the ZCT flag.)
+
 				RCObject *obj = (RCObject*)val;
 				obj->Pin();
 			}
 		}
 	}
 
-	void ZCT::Reap(bool scanStack)
-	{
-		if(gc->collecting || reaping || count == 0)
-			return;
-		
-		gc->policy.signal(GCPolicyManager::START_ReapZCT);
-		
-		volatile uint64_t start = 0;
-		if(gc->heap->Config().gcstats) {
-			start = VMPI_getPerformanceCounter();
-		}
-		uint32_t pagesStart = (uint32_t)gc->GetNumBlocks();
-		uint32_t numObjects=0;
-		size_t objSize=0;
-		
-		reaping = true;
-		
-		SAMPLE_FRAME("[reap]", gc->core());
-		
-		// start by pinning live stack objects
-		GCWorkItem item;
-		MMGC_GET_STACK_EXTENTS(gc, item.ptr, item._size);
-		if (scanStack)
-			PinStackObjects(item.ptr, item._size);
-		
-		GC::RCRootSegment* segment = gc->rcRootSegments;
-		while(segment)
-		{
-			PinStackObjects(segment->mem, segment->size);
-			segment = segment->next;
-		}
-		
-		// important to do this before calling prereap
-		// use index to iterate in case it grows, as we go through the list we
-		// unpin pinned objects and pack them at the front of the list, that
-		// way the ZCT is in a good state at the end
-		zctIndex = 0;
-		nextPinnedIndex = 0;
-		
-		// invoke prereap on all callbacks
-		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
-			cb->prereap();
-		
-#ifdef _DEBUG
-		if(gc->validateDefRef) {
-			// kill incremental mark since we're gonna wipe the marks
-			gc->marking = false;
-			gc->m_incrementalWork.Clear();
-			gc->m_barrierWork.Clear();
-			gc->Trace(item.ptr, item._size);
-		}
-#endif
-		
-		// first nuke the freelist, we won't have one when we're done reaping
-		// and we don't want secondary objects put on the freelist (otherwise
-		// reaping couldn't be a linear scan)
-		while (HasFree())
-			Put(GrabFree(), NULL);
-		
-#ifdef MMGC_POLICY_PROFILING
-		uint32_t objects_reaped = 0;
-		uint32_t objects_pinned = 0;
-#endif
-		
-		while(zctIndex < zctNext) {
-			SAMPLE_CHECK();
-			RCObject *rcobj = Get(zctIndex++);
-			if(rcobj && !rcobj->IsPinned()) {
-				rcobj->ClearZCTFlag();
-				Put(zctIndex-1, NULL);
-				count--;
-#ifdef _DEBUG
-				if(gc->validateDefRef) {
-					if(gc->GetMark(rcobj)) {
-#ifdef MMGC_RC_HISTORY
-						rcobj->DumpHistory();
-#endif
-#ifdef MMGC_MEMORY_INFO
-						GCDebugMsg(false, "Back pointer chain:");
-						gc->DumpBackPointerChain(rcobj);
-#endif
-						GCAssertMsg(false, "Zero count object reachable, ref counts not correct!");
-					}
-				}
-#endif
-				// invoke prereap on all callbacks
-				for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
-					cb->prereap(rcobj);
-				
-				GCAssert(*(intptr_t*)rcobj != 0);
-				GCAssert(gc->IsFinalized(rcobj));
-				((GCFinalizable*)rcobj)->~GCFinalizable();
-				numObjects++;
-				objSize += GC::Size(rcobj);
-#ifdef MMGC_POLICY_PROFILING
-				objects_reaped++;
-#endif
-				gc->Free(rcobj);
-				
-				GCAssert(gc->weakRefs.get(rcobj) == NULL);
-			}
-			else if(rcobj) {
-				// move it to front
-				rcobj->Unpin();
-#ifdef MMGC_POLICY_PROFILING
-				objects_pinned++;
-#endif
-				if(nextPinnedIndex != zctIndex-1) {
-					rcobj->setZCTIndex(nextPinnedIndex);
-					GCAssert(Get(nextPinnedIndex) == NULL);
-					Put(nextPinnedIndex, rcobj);
-					Put(zctIndex-1, NULL);
-				}
-				nextPinnedIndex++;				
-			}
-		}
-		
-		zctNext = nextPinnedIndex;
-		zctReapThreshold = int(gc->policy.zctNewReapThreshold(blocktop - blocktable, count));
-		GCAssert(nextPinnedIndex == count);
-		zctIndex = nextPinnedIndex = 0;
-		
-		// invoke postreap on all callbacks
-		for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
-			cb->postreap();
-		
-		if(gc->heap->Config().gcstats && numObjects) {
-			gc->gclog("[mem] DRC reaped %d objects (%d kb) freeing %d pages (%d kb) in %.2f millis (%.4f s)\n", 
-					  numObjects, objSize>>10, pagesStart - gc->GetNumBlocks(), gc->GetNumBlocks()*GCHeap::kBlockSize >> 10, 
-					  GC::duration(start), gc->duration(gc->t0)/1000);
-		}
-		reaping = false;
-		
-#ifdef _DEBUG
-		if(gc->validateDefRef) {
-			gc->Sweep();
-		}
-#endif
-		
-#ifdef MMGC_POLICY_PROFILING
-		gc->policy.signalReapWork(objects_reaped, uint32_t(objSize), objects_pinned);
-#endif
-		gc->policy.signal(GCPolicyManager::END_ReapZCT);
-	}
-	
-	void ZCT::Grow()
+	bool ZCT::Grow()
 	{
 		GCAssert(CanGrow());
 		GCAssert(*blocktop == NULL);
 
-#ifdef ZCT_TESTING
-		if (zct_allowance == 0)
-			return;
-		--zct_allowance;
-#endif
 		// Allocate one more block
-		// The flags are the default flags for heapAlloc() + kCanFail
-		*blocktop = (RCObject**)gc->heapAlloc(1, GCHeap::kExpand|GCHeap::kZero|GCHeap::kProfile|GCHeap::kCanFail);
+		*blocktop = PleaseAllocBlock();
 		if (*blocktop == NULL)
-			return;
+			return false;
 		blocktop++;
 		
-		// If the ZCT is nearly full after Reap then the new threshold will be
-		// pinned within the old size but the ZCT may still grow; recompute the
-		// threshold following growth to get something more realistic.
-		zctReapThreshold = int(gc->policy.zctNewReapThreshold(blocktop - blocktable, count));
+		return true;
 	}
 
 	void ZCT::Prune()
 	{
-		int lastblock = (zctNext - 1) / int(CAPACITY(RCObject*));
-		// Both Grow() and ~ZCT depend on there being no blocks at or above blocktop, so if 
-		// that changes here then be sure to fix those as well.
-		for ( int i=lastblock + 1, limit=int(blocktop - blocktable) ; i < limit ; i++ ) {
-			gc->heapFree(blocktable[i]);
-			blocktable[i] = NULL;
-#ifdef ZCT_TESTING
-			zct_allowance++;
-#endif
+		ClearFreeList();
+	}
+
+	void ZCT::ClearBlockTable()
+	{
+		while (blocktop > blocktable) {
+			blocktop--;
+			FreeBlock(*blocktop);
+			*blocktop = NULL;
 		}
-		blocktop = blocktable + lastblock + 1;
+	}
+
+	void ZCT::ClearFreeList()
+	{
+		while (freeList != NULL) {
+			void* item = (void*)freeList;
+			freeList = (void**)*freeList;
+			gc->heapFree(item);
+		}
+	}
+	
+	RCObject** ZCT::PleaseAllocBlock()
+	{
+#ifdef ZCT_TESTING
+		if (zct_allowance == 0)
+			return false;
+#endif
+		RCObject** block = NULL;
+		if (freeList != NULL) {
+			block = (RCObject**)freeList;
+			freeList = (void**)*freeList;
+		}
+		else {
+			// The flags are the default flags for heapAlloc + kCanFail
+			block = (RCObject**)gc->heapAlloc(1, GCHeap::kExpand|GCHeap::kZero|GCHeap::kProfile|GCHeap::kCanFail);
+		}
+#ifdef ZCT_TESTING
+		if (block != NULL)
+			--zct_allowance;
+#endif
+		return block;
+	}
+	
+	void ZCT::FreeBlock(RCObject** block)
+	{
+#ifdef ZCT_TESTING
+		zct_allowance++;
+#endif
+		*(void**)block = (void*)freeList;
+		freeList = (void**)block;
 	}
 }

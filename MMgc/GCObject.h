@@ -130,35 +130,65 @@ namespace MMgc
 		static void operator delete (void *gcObject);
 	};
 
+	/**
+	 * Base class for reference counted objects.
+	 *
+	 * This object always has a finalizer (the C++ destructor).  The C++ destructor /must/
+	 * leave the object with all-fields-zero.
+	 *
+	 * Reference counting is deferred: when an object's reference count drops to zero it
+	 * is inserted into the zero-count table (the ZCT), see ZCT.h etc.  If the reference 
+	 * count grows above zero the object is removed from the ZCT again.  Every new object
+	 * is added to the ZCT initially - reference counts start at zero.
+	 *
+	 * Occasionally the ZCT is reaped: objects in the ZCT that are not referenced from stack
+	 * memory or special ZCT roots, and that are not explicitly pinned by client code, are
+	 * deleted by calling their finalizers and reclaiming their memory.   A finalizer may
+	 * make the reference counts of more referenced objects drop to zero, whereupon they
+	 * too are entered into the ZCT (and may be deleted by the ongoing reap, or a later
+	 * reap).
+	 *
+	 * (Under complicated scenarios it is possible for an object allocated during reaping
+	 * to be erroneously deleted, see https://bugzilla.mozilla.org/show_bug.cgi?id=506644,
+	 * so client code may want to take note of that.)
+	 */
 	class RCObject : public GCFinalizedObject
 	{
 		friend class GC;
+		friend class ZCT;
 	public:
-		RCObject()
+		REALLY_INLINE RCObject()
 		{
 			// composite == 0 is special, it means a deleted object in Release builds
-			// b/c RCObjects have a vtable we know composite isn't the first 4 byte and thus
+			// b/c RCObjects have a vtable we "know" composite isn't the first word and thus
 			// won't be trampled by the freelist
 			composite = 1;
 			GC::GetGC(this)->AddToZCT(this REFCOUNT_PROFILING_ARG(true));
 		}
 
-		~RCObject()
+		REALLY_INLINE ~RCObject()
 		{
 			// for explicit deletion
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this REFCOUNT_PROFILING_ARG(true));
 			composite = 0;
-#if 0  // no justification for this
-			padto32bytes = 0;
-#endif
 		}
 
-		bool IsPinned()
+		/**
+		 * @return true if the object is currently pinned (explicitly or by
+		 *         the ZCT's stack pinner).
+		 */
+		REALLY_INLINE bool IsPinned()
 		{
 			return (composite & STACK_PIN) != 0;
 		}
 
+		/**
+		 * Explicitly pin the object, protecting it from ZCT reaping.  The pin
+		 * flag /will/ be cleared if the object is subsequently added to the
+		 * ZCT and reaping is not ongoing.  It is not advised to call Pin()
+		 * except from prereap() callback handlers.
+		 */
 		void Pin()
 		{
 #ifdef _DEBUG
@@ -179,23 +209,56 @@ namespace MMgc
 			composite |= STACK_PIN;
 		}
 
+		/**
+		 * Explicitly unpin the object, allowing it to be reaped by the ZCT.
+		 * It is not advised to unpin objects that weren't pinned explicitly
+		 * by a call to Pin(), and calls to Unpin() should come from postreap()
+		 * callback handlers.
+		 */
 		void Unpin()
 		{
 			composite &= ~STACK_PIN;
 		}
 
-		int InZCT() const { return composite & ZCTFLAG; }
-		int RefCount() const { return (composite & RCBITS) - 1; }
-		int Sticky() const { return composite & STICKYFLAG; }		
-		void Stick() { composite = STICKYFLAG; }
-		
-		// called by EnqueZCT
-		void ClearZCTFlag() 
-		{ 
-			composite &= ~(ZCTFLAG|ZCT_INDEX);
+		/**
+		 * @return the object's current reference count.  The value is not
+		 * valid unless Sticky() returns 0.
+		 */
+		REALLY_INLINE uint32_t RefCount() const
+		{
+			return (composite & RCBITS) - 1;
 		}
-
-		void IncrementRef() 
+		
+		/**
+		 * @return non-zero if the object is sticky (RC operations have no effect because
+		 *         the RC field is invalid, either as a consequence of an RC overflow or
+		 *         because the sticky bit was set explicitly).
+		 */
+		REALLY_INLINE uint32_t Sticky() const
+		{
+			return composite & STICKYFLAG;
+		}
+		
+		/**
+		 * Make RC operations on the object be no-ops.
+		 */
+		REALLY_INLINE void Stick()
+		{
+			composite = STICKYFLAG;
+		}
+		
+		/**
+		 * Increment the object's reference count.
+		 *
+		 * OPTIMIZEME: this is too expensive and too large.  It should be
+		 * possible to do better if we play around with the positive/negative
+		 * boundary (eg, operations that don't cross that boundary are
+		 * cheap, and those that do aren't), but the special-casing of
+		 * composite==0 and invariants throughtout the system relying on
+		 * composite==0 make it hard.  We need profiling data on the breakdown
+		 * of the frequency of various paths through this function.
+		 */
+		REALLY_INLINE void IncrementRef() 
 		{
 			REFCOUNT_PROFILING_ONLY( GC::GetGC(this)->policy.signalIncrementRef(); )
 			if(Sticky() || composite == 0)
@@ -223,6 +286,17 @@ namespace MMgc
 #endif
 		}
 
+		/**
+		 * Decrement the object's reference count.
+		 *
+		 * OPTIMIZEME: this is too expensive and too large.  It should be
+		 * possible to do better if we play around with the positive/negative
+		 * boundary (eg, operations that don't cross that boundary are
+		 * cheap, and those that do aren't), but the special-casing of
+		 * composite==0 and invariants throughtout the system relying on
+		 * composite==0 make it hard.  We need profiling data on the breakdown
+		 * of the frequency of various paths through this function.
+		 */
 		REALLY_INLINE void DecrementRef() 
 		{ 
 			REFCOUNT_PROFILING_ONLY( GC::GetGC(this)->policy.signalDecrementRef(); )
@@ -288,41 +362,60 @@ namespace MMgc
 		void DumpHistory();
 #endif
 
-		void setZCTIndex(uint32_t index) 
+		static void *operator new(size_t size, GC *gc, size_t extra = 0)
 		{
-			GCAssert(index <= (ZCT_INDEX>>8));
-			composite = (composite&~ZCT_INDEX) | ((index<<8)|ZCTFLAG);
+			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
+		}
+		
+	private:
+
+		// @return non-zero if the object is in the ZCT
+		uint32_t InZCT() const
+		{
+			return composite & ZCTFLAG;
+		}
+		
+		// Clear the ZCT flag and the ZCT index
+		void ClearZCTFlag() 
+		{ 
+			composite &= ~(ZCTFLAG|ZCT_INDEX);
 		}
 
+		// @return the ZCT index.  This is only valid if InZCT returns non-zero.
 		uint32_t getZCTIndex() const
 		{
 			return (composite & ZCT_INDEX) >> 8;
 		}
 		
-		static void *operator new(size_t size, GC *gc, size_t extra = 0)
+		// Set the ZCT index and the ZCT flag and clear the pinned flag.
+		void setZCTIndexAndUnpin(uint32_t index) 
 		{
-			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
+			GCAssert(index <= (ZCT_INDEX>>8));
+			composite = (composite&~(ZCT_INDEX|STACK_PIN)) | ((index<<8)|ZCTFLAG);
 		}
 
-	private:
-		friend class ZCT;
-		
-		// 1 bit for inZCT flag (0x80000000)
-		// 1 bit for sticky flag (0x40000000)
-		// 20 bits for ZCT index
-		// 8 bits for RC count (0x000000FF)
-		static const uint32_t ZCTFLAG	         = 0x80000000;
-		static const uint32_t STICKYFLAG         = 0x40000000;
-		static const uint32_t STACK_PIN          = 0x20000000;
-		static const uint32_t RCBITS	         = 0x000000FF;
-		static const uint32_t ZCT_INDEX          = 0x0FFFFF00;
+		// Set the ZCT index and the ZCT flag.  If reaping==0 then clear the pinned flag, 
+		// otherwise preserve the pinned flag.
+		void setZCTIndexAndMaybeUnpin(uint32_t index, uint32_t reaping)
+		{
+			GCAssert(reaping == 0 || reaping == 1);
+			GCAssert(index <= (ZCT_INDEX>>8));
+			composite = (composite&~(ZCT_INDEX|((~reaping&1)<<STACK_PIN_SHIFT))) | ((index<<8)|ZCTFLAG);
+		}
+
+		// Fields in 'composite'
+		static const uint32_t ZCTFLAG	         = 0x80000000;			// The object is in the ZCT
+		static const uint32_t STICKYFLAG         = 0x40000000;			// The object is sticky (RC overflow)
+		static const uint32_t STACK_PIN          = 0x20000000;			// The object has been pinned
+		static const uint32_t STACK_PIN_SHIFT    = 29;
+		static const uint32_t RCBITS	         = 0x000000FF;			// 8 bits for the reference count
+		static const uint32_t ZCT_INDEX          = 0x0FFFFF00;			// 20 bits for the ZCT index
+		static const uint32_t ZCT_CAPACITY       = (ZCT_INDEX>>8) + 1;
+
 		uint32_t composite;
 #ifdef MMGC_RC_HISTORY
 		// addref/decref stack traces
 		BasicList<StackTrace*> history;
-#if 0  // no justification exists for this
-		int32_t padto32bytes;
-#endif
 #endif // MMGC_MEMORY_INFO
 	};
 

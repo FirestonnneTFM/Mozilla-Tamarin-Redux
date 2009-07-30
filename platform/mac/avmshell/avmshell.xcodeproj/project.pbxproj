@@ -50,8 +50,8 @@
 		072EA1010F4C1CE9009F11E6 /* eval-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E30F4C1CE9009F11E6 /* eval-parse.cpp */; };
 		072EA1020F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E50F4C1CE9009F11E6 /* eval-unicode.cpp */; };
 		072EA1030F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
-		076898F01019B6AE00BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 076898EE1019B6AE00BC72AA /* ZCT.cpp */; };
-		076898F11019B6AE00BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 076898EE1019B6AE00BC72AA /* ZCT.cpp */; };
+		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
+		07689AA1101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		078F536B0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
 		078F536C0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
 		079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */; };
@@ -442,8 +442,9 @@
 		072EA1080F4C1D1B009F11E6 /* smoketest.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest.as; path = ../../../eval/smoketest.as; sourceTree = SOURCE_ROOT; };
 		072EA1090F4C1D1B009F11E6 /* smoketest2.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest2.as; path = ../../../eval/smoketest2.as; sourceTree = SOURCE_ROOT; };
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
-		076898EE1019B6AE00BC72AA /* ZCT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZCT.cpp; path = ../../../MMgc/ZCT.cpp; sourceTree = SOURCE_ROOT; };
-		076898EF1019B6AE00BC72AA /* ZCT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZCT.h; path = ../../../MMgc/ZCT.h; sourceTree = SOURCE_ROOT; };
+		076899071019D3AC00BC72AA /* ZCT-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ZCT-inlines.h"; path = "../../../MMgc/ZCT-inlines.h"; sourceTree = SOURCE_ROOT; };
+		07689A9E101DC28000BC72AA /* ZCT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZCT.cpp; path = ../../../MMgc/ZCT.cpp; sourceTree = SOURCE_ROOT; };
+		07689A9F101DC28000BC72AA /* ZCT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZCT.h; path = ../../../MMgc/ZCT.h; sourceTree = SOURCE_ROOT; };
 		0772CCF20F3C3084008DDBB6 /* ST_avmplus_basics.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_avmplus_basics.st; path = ../../../extensions/ST_avmplus_basics.st; sourceTree = SOURCE_ROOT; };
 		0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_avmplus_peephole.st; path = ../../../extensions/ST_avmplus_peephole.st; sourceTree = SOURCE_ROOT; };
 		0772CCF40F3C3084008DDBB6 /* ST_mmgc_basics.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_basics.st; path = ../../../extensions/ST_mmgc_basics.st; sourceTree = SOURCE_ROOT; };
@@ -1362,8 +1363,9 @@
 				079DFAAE0F3A96BE0031D1B4 /* StaticAssert.h */,
 				079DFAAF0F3A96BE0031D1B4 /* TypeTraits.h */,
 				079DFAB00F3A96BE0031D1B4 /* WriteBarrier.h */,
-				076898EE1019B6AE00BC72AA /* ZCT.cpp */,
-				076898EF1019B6AE00BC72AA /* ZCT.h */,
+				07689A9E101DC28000BC72AA /* ZCT.cpp */,
+				07689A9F101DC28000BC72AA /* ZCT.h */,
+				076899071019D3AC00BC72AA /* ZCT-inlines.h */,
 				07DA49E70F80C906007939FD /* manifest.mk */,
 			);
 			name = mmgc;
@@ -1695,7 +1697,7 @@
 				191659990FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */,
 				07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */,
 				19BDA444100CC20200172A70 /* Allocator.cpp in Sources */,
-				076898F11019B6AE00BC72AA /* ZCT.cpp in Sources */,
+				07689AA1101DC28000BC72AA /* ZCT.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1872,7 +1874,7 @@
 				191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */,
 				07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */,
 				19BDA443100CC20200172A70 /* Allocator.cpp in Sources */,
-				076898F01019B6AE00BC72AA /* ZCT.cpp in Sources */,
+				07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
