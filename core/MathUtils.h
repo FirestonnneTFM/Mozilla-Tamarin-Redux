@@ -154,13 +154,11 @@ namespace avmplus
 			 kMinSizeForDouble_base10_toString	= 380,
 			 /**
 			  *  Buffer size for converting IEEE-754 double to string
-			  *  using worst-case radix(2).  This doesn't account for
-			  *  a leading '-' char because negative values are negated
-			  *  before formatting.  Denormalized (i.e., very small)
-			  *  numbers are simply truncated to "0" so they also do
-			  *  not require additional space.
+			  *  using worst-case radix(2) plus a leading '-' char.
+			  *  Denormalized (i.e., very small) numbers are  truncated 
+			  *  to "0" so they don't require additional space.
 			  */
-			  kMinSizeForDouble_base2_toString	= 1024
+			  kMinSizeForDouble_base2_toString	= 1025,
 		};
 		
 		enum UnsignedTreatment
