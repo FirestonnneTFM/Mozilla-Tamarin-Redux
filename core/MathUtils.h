@@ -160,7 +160,7 @@ namespace avmplus
 			  *  numbers are simply truncated to "0" so they also do
 			  *  not require additional space.
 			  */
-			  kMinSizeForDouble_base2_toString	= 1024,
+			  kMinSizeForDouble_base2_toString	= 1024
 		};
 		
 		enum UnsignedTreatment
