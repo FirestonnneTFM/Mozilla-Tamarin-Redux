@@ -1063,12 +1063,8 @@ namespace MMgc
 		
 		REALLY_INLINE static int SetMark(const void *item)
 		{
-			GCAssert(item != NULL);
-#ifdef MMGC_MEMORY_INFO
-			GC *gc = GetGC(item);	
 			item = GetRealPointer(item);
-			GCAssert(gc->IsPointerToGCPage(item));
-#endif 			
+			GCAssert(GetGC(item)->IsPointerToGCObject(item));
 			if (GCLargeAlloc::IsLargeBlock(item)) {
 				return GCLargeAlloc::SetMark(item);
 			} else {
@@ -1079,10 +1075,8 @@ namespace MMgc
 		// Not a hot method
 		void ClearQueued(const void *item)
 		{
-#ifdef MMGC_MEMORY_INFO
 			item = GetRealPointer(item);
-			GCAssert(IsPointerToGCPage(item));
-#endif 			
+			GCAssert(IsPointerToGCObject(item));
 			if (GCLargeAlloc::IsLargeBlock(item)) {
 				GCLargeAlloc::ClearQueued(item);
 			} else {
@@ -1093,11 +1087,8 @@ namespace MMgc
 		// not a hot method
 		static void ClearFinalized(const void *item)
 		{
-#ifdef MMGC_MEMORY_INFO
-			GC *gc = GetGC(item);	
 			item = GetRealPointer(item);
-			GCAssert(gc->IsPointerToGCPage(item));
-#endif 			
+			GCAssert(GetGC(item)->IsPointerToGCObject(item));
 			if (GCLargeAlloc::IsLargeBlock(item)) {
 				GCLargeAlloc::ClearFinalized(item);
 			} else {
@@ -1108,11 +1099,8 @@ namespace MMgc
 		// not a hot method
 		static void SetFinalize(const void *item)
 		{
-#ifdef MMGC_MEMORY_INFO
-			GC *gc = GetGC(item);	
 			item = GetRealPointer(item);
-			GCAssert(gc->IsPointerToGCPage(item));
-#endif 			
+			GCAssert(GetGC(item)->IsPointerToGCObject(item));
 			if (GCLargeAlloc::IsLargeBlock(item)) {
 				GCLargeAlloc::SetFinalize(item);
 			} else {
@@ -1123,11 +1111,8 @@ namespace MMgc
 		// not a hot method
 		static int IsFinalized(const void *item)
 		{
-#ifdef MMGC_MEMORY_INFO
-			GC *gc = GetGC(item);	
 			item = GetRealPointer(item);
-			GCAssert(gc->IsPointerToGCPage(item));
-#endif 			
+			GCAssert(GetGC(item)->IsPointerToGCObject(item));
 			if (GCLargeAlloc::IsLargeBlock(item)) {
 				return GCLargeAlloc::IsFinalized(item);
 			} else {
@@ -1138,11 +1123,8 @@ namespace MMgc
 		// not a hot method
 		static int HasWeakRef(const void *item)
 		{
-#ifdef MMGC_MEMORY_INFO
-			GC *gc = GetGC(item);	
 			item = GetRealPointer(item);
-			GCAssert(gc->IsPointerToGCPage(item));
-#endif 			
+			GCAssert(GetGC(item)->IsPointerToGCObject(item));
 			if (GCLargeAlloc::IsLargeBlock(item)) {
 				return GCLargeAlloc::HasWeakRef(item);
 			} else {
@@ -1378,6 +1360,12 @@ namespace MMgc
 			return GetPageMapValueGuarded((uintptr_t)item) != 0;
 		}
 
+		bool IsPointerToGCObject(const void *realPtr)
+		{
+			GCAssert(realPtr != NULL);
+			return GetRealPointer(FindBeginningGuarded(realPtr)) == realPtr;
+		}
+		
 		static double duration(uint64_t start) 
 		{
 			return (double(VMPI_getPerformanceCounter() - start) * 1000) / VMPI_getPerformanceFrequency();

@@ -2531,7 +2531,7 @@ bail:
 		
 		for ( int i=int(stack.Count()/2) ; i > 0 ; i-- ) {
 			GCWorkItem item = stack.Pop();
-			if (item.ptr)
+			if (item.ptr && item.IsGCItem())
 				ClearQueued(item.ptr);
 		}
 		
