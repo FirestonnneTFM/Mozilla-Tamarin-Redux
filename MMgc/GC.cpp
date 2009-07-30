@@ -66,8 +66,6 @@
 	char statusBuffer[1024];
 #endif
 
-#define CAPACITY(T)  (unsigned(GCHeap::kBlockSize) / unsigned(sizeof(T)))
-
 namespace MMgc
 {
 #ifdef MMGC_64BIT
@@ -405,24 +403,10 @@ namespace MMgc
 		return objectsScannedTotal + objectsScannedLastCollection;
 	}
 
-	// how many objects trigger a reap, should be high
-	// enough that the stack scan time is noise but low enough
-	// so that objects go away in a timely manner
-	
-	static const int ZCT_REAP_THRESHOLD = 512;
-	
-	uint64_t GCPolicyManager::zctNewReapThreshold(uint64_t zctSize, uint64_t zctOccupancy)
+	uint32_t GCPolicyManager::queryZCTBudget(uint32_t zctSizeBlocks)
 	{
-		uint64_t zctReapThreshold = zctOccupancy + ZCT_REAP_THRESHOLD;
-		if(zctReapThreshold > zctSize * CAPACITY(RCObject*))
-			zctReapThreshold = zctSize * CAPACITY(RCObject*);
-		return zctReapThreshold;
-	}
-	
-	bool GCPolicyManager::queryZctShouldGrowAfterReap(uint64_t zctBlocks, uint64_t zctOccupancy)
-	{
-		// grow it if it can't accomodate the reap threshold
-		return (zctBlocks*CAPACITY(RCObject*) - zctOccupancy) < uint64_t(ZCT_REAP_THRESHOLD);
+		(void)zctSizeBlocks;
+		return 1;
 	}
 
 	void GCPolicyManager::signal(PolicyEvent ev) {
@@ -1063,6 +1047,11 @@ namespace MMgc
 	{
 		SAMPLE_FRAME("[mark]", core());
 
+		// Kill incremental mark since we're gonna wipe the marks.
+		marking = false;
+		m_incrementalWork.Clear();
+		m_barrierWork.Clear();
+		
 		// Clear all mark bits.
 		ClearMarks();
 
@@ -1355,7 +1344,8 @@ bail:
 		// start out marked, we can't rely on write barriers below since 
 		// presweep could write a new GC object to a root
 		collecting = true;
-
+		zct.StartCollecting();
+		
 		SAMPLE_FRAME("[sweep]", core());
 		sweeps++;
 
@@ -1438,9 +1428,10 @@ bail:
 #endif
 
 		// don't want postsweep to fire WB's
-		marking = false;
 		collecting = false;
-
+		marking = false;
+		zct.EndCollecting();
+		
 		// invoke postsweep callback
 		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
 			cb->postsweep();
@@ -3040,14 +3031,16 @@ bail:
 
 		policy.signal(GCPolicyManager::START_FinalizeAndSweep);
 		GCAssert(!collecting);
-		collecting = true;
+
+		// Sweep is responsible for setting and clearing GC::collecting.
+		// It also clears GC::marking.
+		
 		GCAssert(m_incrementalWork.Count() == 0);
 		GCAssert(m_barrierWork.Count() == 0);
 		Sweep();
 		GCAssert(m_incrementalWork.Count() == 0);
 		GCAssert(m_barrierWork.Count() == 0);
-		collecting = false;
-		marking = false;
+
 		policy.signal(GCPolicyManager::END_FinalizeAndSweep);	// garbage collection is finished
 #ifdef MMGC_MEMORY_PROFILER
 		if(heap->Config().autoGCStats)

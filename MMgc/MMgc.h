@@ -137,6 +137,8 @@ namespace MMgc
 	class GCHeap;
 }
 
+#define CAPACITY(T)  (uint32_t(GCHeap::kBlockSize) / uint32_t(sizeof(T)))
+
 #include "GCTypes.h"
 #include "OOM.h"
 #include "BasicList.h"
@@ -157,6 +159,8 @@ namespace MMgc
 #include "GCObject.h"
 #include "GCWeakRef.h"
 #include "WriteBarrier.h"
+
+#include "ZCT-inlines.h"
 
 // remove these when the player stops using it
 #define MMGC_DRC

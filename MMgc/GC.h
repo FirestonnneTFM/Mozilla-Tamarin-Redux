@@ -323,22 +323,11 @@ namespace MMgc
 		uint64_t bytesMarked();
 		
 		/**
-		 * Compute a new reap threshold for the ZCT based on its current size and occupancy.
+		 * Compute a ZCT growth budget (in blocks) based on its current size.
 		 *
-		 * @return the new reap threshold (ZCT occupancy upper limit).
-		 *
-		 * (Note, an alternative strategy for the ZCT would be to call a policy function
-		 * every time the ZCT has to be extended, and to shrink the ZCT following a reap.)
+		 * @return the growth budget
 		 */
-		uint64_t zctNewReapThreshold(uint64_t zctBlocks, uint64_t zctOccupancy);
-
-		/**
-		 * Situation: The ZCT has just been reaped and there are zctBlocks live blocks
-		 * and zctOccupancy live pointers.  Should we grow the zct by a block?
-		 *
-		 * @return true if we should grow the ZCT.
-		 */
-		bool queryZctShouldGrowAfterReap(uint64_t zctBlocks, uint64_t zctOccupancy);
+		uint32_t queryZCTBudget(uint32_t zctBlocksUsed);
 		
 		/**
 		 * Set the lower limit beyond which we try not to run the garbage collector.
