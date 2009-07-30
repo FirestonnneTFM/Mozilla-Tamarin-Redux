@@ -2034,8 +2034,8 @@ bail:
 			uint32_t markRate = (uint32_t) (bytesMarked() / (1024 * ticksToMillis(markTicks()))); // kb/ms == mb/s
 			GCLog("[mem] \tmark rate %u mb/s\n", markRate);
 		}
-		GCLog("[mem] \tmark increments %d\n", marks());
-		GCLog("[mem] \tsweeps %d mb/s\n", sweeps);
+		GCLog("[mem] \tmark increments %d\n", markIncrements());
+		GCLog("[mem] \tsweeps %d \n", sweeps);
 		
 		size_t total_overhead = 0;
 		size_t total_internal_waste = 0;
