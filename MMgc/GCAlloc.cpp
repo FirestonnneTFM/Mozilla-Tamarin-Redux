@@ -441,9 +441,9 @@ namespace MMgc
         
 					if (marks & kFinalize)
 					{     
-						GCFinalizable *obj = (GCFinalizedObject*)GetUserPointer(item);
+						GCFinalizedObject *obj = (GCFinalizedObject*)GetUserPointer(item);
 						GCAssert(*(intptr_t*)obj != 0);
-						obj->~GCFinalizable();
+						obj->~GCFinalizedObject();
 						bits[i] &= ~(kFinalize<<(j*4));
 
 #if defined(_DEBUG)
