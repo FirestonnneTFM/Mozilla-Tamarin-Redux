@@ -189,7 +189,7 @@ namespace MMgc
 			for ( GCCallback *cb = gc->m_callbacks; cb ; cb = cb->nextCB )
 				cb->prereap(obj);
 			if(gc->IsFinalized(obj))
-				((GCFinalizable*)obj)->~GCFinalizable();
+				((GCFinalizedObject*)obj)->~GCFinalizedObject();
 			gc->Free(obj);
 			return;
 		}
@@ -378,7 +378,7 @@ namespace MMgc
 				
 				GCAssert(*(intptr_t*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
-				((GCFinalizable*)rcobj)->~GCFinalizable();
+				((GCFinalizedObject*)rcobj)->~GCFinalizedObject();
 				numObjects++;
 				objSize += GC::Size(rcobj);
 #ifdef MMGC_POLICY_PROFILING

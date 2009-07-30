@@ -159,9 +159,9 @@ namespace MMgc
 
 				void *item = b+1;
 				if (NeedsFinalize(b)) {
-					GCFinalizable *obj = (GCFinalizable *) item;
-					obj = (GCFinalizable *) GetUserPointer(obj);
-					obj->~GCFinalizable();
+					GCFinalizedObject *obj = (GCFinalizedObject *) item;
+					obj = (GCFinalizedObject *) GetUserPointer(obj);
+					obj->~GCFinalizedObject();
 #if defined(_DEBUG)
 					if((b->flags & kRCObject) != 0) {
 						gc->RCObjectZeroCheck((RCObject*)obj);
