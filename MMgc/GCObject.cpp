@@ -61,16 +61,6 @@ namespace MMgc
 		GC::GetGC(gcObject)->Free(gcObject);
 	}		
 
-	void* GCFinalizedObjectOptIn::operator new(size_t size, GC *gc, size_t extra)
-	{
-		return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero);
-	}
-
-	void GCFinalizedObjectOptIn::operator delete (void *gcObject)
-	{
-		GC::GetGC(gcObject)->Free(gcObject);
-	}		
-
 #ifdef MMGC_RC_HISTORY
 	
 	void RCObject::DumpHistory()
