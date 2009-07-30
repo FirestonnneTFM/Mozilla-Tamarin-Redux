@@ -158,7 +158,7 @@ namespace avmplus
 			  *  Denormalized (i.e., very small) numbers are  truncated 
 			  *  to "0" so they don't require additional space.
 			  */
-			  kMinSizeForDouble_base2_toString	= 1025,
+			  kMinSizeForDouble_base2_toString	= 1025
 		};
 		
 		enum UnsignedTreatment
