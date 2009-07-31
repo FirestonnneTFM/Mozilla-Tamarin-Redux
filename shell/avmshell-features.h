@@ -150,4 +150,11 @@
   #define AVMFEATURE_INDIRECT_NATIVE_THUNKS 1
 #endif
 
+#if !defined(_DEBUG) && !defined(DEBUG)
+	// by default, nanojit enables NJ_VERBOSE mode when AVMPLUS_VERBOSE is on,
+	// which is enabled for Debug *and* Debugger builds. 
+	#define NJ_VERBOSE_DISABLED 1
+	#define NJ_PROFILE_DISABLED 1
+#endif
+
 #endif // __avmshell_features__
