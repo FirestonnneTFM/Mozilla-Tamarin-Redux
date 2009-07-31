@@ -79,6 +79,7 @@ namespace MMgc
 		, m_extraSegment(NULL)
 	{
 		PushSegment();
+		GCAssert(Invariants());
 	}
 
 	GCMarkStack::~GCMarkStack()
@@ -101,6 +102,7 @@ namespace MMgc
 			FreeStackSegment(m_extraSegment);
 			m_extraSegment = NULL;
 		}
+		GCAssert(Invariants());
 	}
 
 	bool GCMarkStack::PushSegment()
@@ -148,6 +150,7 @@ namespace MMgc
 
 		if (other.m_topSegment->m_prev == NULL) {
 			// Picking off the only segment
+			GCAssert(other.m_top == other.m_limit);
 			seg = other.m_topSegment;
 			other.m_topSegment = NULL;
 			other.m_top = NULL;
@@ -169,5 +172,27 @@ namespace MMgc
 		// Special case that occurs if a segment was inserted into an empty stack.
 		if (m_top == m_base)
 			PopSegment();
+		GCAssert(Invariants());
+		GCAssert(other.Invariants());
 	}
+	
+#ifdef _DEBUG
+	bool GCMarkStack::Invariants()
+	{
+		GCAssert(m_base+kMarkStackItems == m_limit);
+		GCAssert(m_top >= m_base);
+		GCAssert(m_top <= m_limit);
+		GCAssert(m_topSegment->m_prev == NULL || m_top > m_base);
+		uint32_t hc = 0;
+		uint32_t ns = 0;
+		for ( GCStackSegment* seg=m_topSegment->m_prev ; seg != NULL ; seg = seg->m_prev ) {
+			hc += kMarkStackItems;
+			ns++;
+		}
+		GCAssert(ns == EntirelyFullSegments() || m_top == m_limit && ns+1 == EntirelyFullSegments());
+		GCAssert(hc == m_hiddenCount);
+		GCAssert(Count() == hc + (m_top - m_base));
+		return true;
+	}
+#endif
 }
