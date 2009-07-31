@@ -41,15 +41,39 @@
 
 namespace MMgc
 {	
-	// Optimize the number of elements in a mark stack segments for GCStack<GCWorkItem>.  
+	/**
+	 * Conservative collector unit of work
+	 */
+	class GCWorkItem
+	{
+	public:
+		// FIXME? The initialization is redundant for most locals and for the mark stack we
+		// don't want to have to init all the elements in the array as it makes allocating a mark
+		// stack segment expensive.  I believe we could safely get rid of the two initializing
+		// clauses here.  --lars
+		GCWorkItem() : ptr(NULL), _size(0) { }
+		inline GCWorkItem(const void *p, uint32_t s, bool isGCItem);
+		
+		uint32_t GetSize() const { return _size & ~1; }
+		uint32_t IsGCItem() const { return _size & 1; }
+		
+		// If a WI is a GC item, `ptr` is the UserPointer; it must not
+		// be the RealPointer nor an interior pointer
+		const void *ptr;
+		
+		// The low bit of _size stores whether this is a GC item.
+		// Always access this through `GetSize` and `IsGCItem`
+		uint32_t _size;
+	};
+	
 	// Each GCWorkItem is two words.  There's a one-word overhead in the segment data
 	// structure, and on a 32-bit system there's one word of alignment.  Ergo we have
 	// space for (4k-8)/2w items in a block, where w(ordsize) is 4 or 8.  (FixedMalloc 
 	// does not add further overhead in Release builds.)
 #ifdef AVMPLUS_64BIT
-	enum { kDefaultMarkStackItems=255 };
+	enum { kMarkStackItems=255 };
 #else
-	enum { kDefaultMarkStackItems=511 };
+	enum { kMarkStackItems=511 };
 #endif
 
 	// Invariant: m_topSegment, m_base, m_top, and m_limit are never NULL following construction.
@@ -57,31 +81,29 @@ namespace MMgc
 	// Invariant: m_base == m_topSegment->m_items
 	// Invariant: m_limit == m_topSegment->m_items + kMarkStackItems
 	
-	template<typename T, int kMarkStackItems=kDefaultMarkStackItems>
-	class GCStack
+	class GCMarkStack
 	{
 	public:
-		GCStack();
-		~GCStack();
+		GCMarkStack();
+		~GCMarkStack();
 
 		/** 
 		 * Push 'item' onto the stack. 
+		 *
+		 * This should only ever be called from GC::PushWorkItem, because
+		 * that function does extra processing and may push various derived
+		 * items (for large objects).
+		 *
 		 * @return true if the item could be pushed, false if the system
 		 *		   is out of memory and the item was not pushed.
 		 */
-		bool Push(T item);
+		bool Push(GCWorkItem item);
 
 		/**
 		 * Pop one item off the stack.  Precondition: The stack must not be empty.
 		 * @return the popped element.
 		 */
-		T Pop();
-
-		/**
-		 * @return the top element.  
-		 * Precondition: The stack must not be empty.
-		 */
-		T Peek();
+		GCWorkItem Pop();
 
 		/** @return the number of elements on the stack. */
 		uint32_t Count();
@@ -96,24 +118,24 @@ namespace MMgc
 		uint32_t EntirelyFullSegments();
 
 		/** Move one entirely full segment from 'other' and insert it into our segment list */
-		void TransferOneFullSegmentFrom(GCStack<T, kMarkStackItems>& other);
+		void TransferOneFullSegmentFrom(GCMarkStack& other);
 
 	protected:
 		// no implementation of these
-		GCStack(const GCStack<T, kMarkStackItems>& other);
-		GCStack<T, kMarkStackItems>& operator=(const GCStack<T, kMarkStackItems>& other);
+		GCMarkStack(const GCMarkStack& other);
+		GCMarkStack& operator=(const GCMarkStack& other);
 
 	private:
 		
 		struct GCStackSegment
 		{
-			T				m_items[kMarkStackItems];
+			GCWorkItem		m_items[kMarkStackItems];
 			GCStackSegment* m_prev;
 		};
 		
-		T*					m_base;			// first entry in m_topSegment
-		T*					m_top;			// first free entry in m_topSegment
-		T*					m_limit;		// first entry following m_topSegment
+		GCWorkItem*			m_base;			// first entry in m_topSegment
+		GCWorkItem*			m_top;			// first free entry in m_topSegment
+		GCWorkItem*			m_limit;		// first entry following m_topSegment
 		GCStackSegment*	    m_topSegment;	// current stack segment, older segments linked through 'prev'
 		uint32_t			m_hiddenCount;	// number of elements in those older segments
 		GCStackSegment*		m_extraSegment;	// single-element cache used to avoid hysteresis
@@ -130,9 +152,9 @@ namespace MMgc
 		void PopSegment();
 	};
 	
-	template<typename T, int kMarkStackItems> 
-	inline bool GCStack<T, kMarkStackItems>::Push(T item)
+	REALLY_INLINE bool GCMarkStack::Push(GCWorkItem item)
 	{
+		GCAssert(item.ptr != NULL);
 		if (m_top == m_limit) 
 			if (!PushSegment())
 				return false;
@@ -141,13 +163,13 @@ namespace MMgc
 		return true;
 	}
 	
-	template<typename T, int kMarkStackItems> 
-	inline T GCStack<T, kMarkStackItems>::Pop()
+	REALLY_INLINE GCWorkItem GCMarkStack::Pop()
 	{
 		GCAssert(m_top > m_base);
-		T t = *--m_top;
+		GCWorkItem t = *--m_top;
+		GCAssert(t.ptr != NULL);
 #ifdef _DEBUG
-		VMPI_memset(m_top, 0, sizeof(T));
+		VMPI_memset(m_top, 0, sizeof(GCWorkItem));
 #endif
 		if (m_top == m_base)
 			if (m_topSegment->m_prev != NULL)
@@ -155,27 +177,17 @@ namespace MMgc
 		return t;
 	}
 	
-	template<typename T, int kMarkStackItems> 
-	inline T GCStack<T, kMarkStackItems>::Peek()
-	{
-		GCAssert(m_top > m_base);
-		return *(m_top-1);
-	}
-	
-	template<typename T, int kMarkStackItems> 
-	inline uint32_t GCStack<T, kMarkStackItems>::Count()
+	REALLY_INLINE uint32_t GCMarkStack::Count()
 	{
 		return uint32_t(m_top - m_base) + m_hiddenCount;
 	}
 
-	template<typename T, int kMarkStackItems> 
-	inline uint32_t GCStack<T, kMarkStackItems>::ElementsPerSegment()
+	REALLY_INLINE uint32_t GCMarkStack::ElementsPerSegment()
 	{
 		return kMarkStackItems;
 	}
 
-	template<typename T, int kMarkStackItems>
-	uint32_t GCStack<T, kMarkStackItems>::EntirelyFullSegments()
+	REALLY_INLINE uint32_t GCMarkStack::EntirelyFullSegments()
 	{
 		return Count() / kMarkStackItems;
 	}
