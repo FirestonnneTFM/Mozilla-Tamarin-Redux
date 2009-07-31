@@ -850,6 +850,7 @@ namespace MMgc
 		emptyWeakRefRoot(0),
 		marking(false),
 		m_markStackOverflow(false),
+		m_inMarkStackOverflow(false),
 		mark_item_recursion_control(20),	// About 3KB as measured with GCC 4.1 on MacOS X (144 bytes / frame), May 2009
 		memStart(MAX_UINTPTR),
 		memEnd(0),
@@ -1023,23 +1024,24 @@ namespace MMgc
 	}
 
 #ifdef RECURSIVE_MARK
-	REALLY_INLINE void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
+	REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
 	{
-		if (item.ptr)
-			MarkItem(item, stack);
+		GCAssert(item.ptr != NULL);
+		MarkItem(item);
 	}
 #else	
-	REALLY_INLINE void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
+	REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
 	{
-		if(item.ptr)
-			if (!stack.Push(item))
-				SignalMarkStackOverflow(stack, item);
+		GCAssert(item.ptr != NULL);
+		if (!m_incrementalWork.Push(item))
+			SignalMarkStackOverflow(item);
 	}
 #endif
-
+	
 	void GC::PushWorkItem_MayFail(GCWorkItem &item)
 	{
-		PushWorkItem(m_incrementalWork, item);
+		if (item.ptr)
+			PushWorkItem(item);
 	}
 
 #ifdef _DEBUG
@@ -1057,17 +1059,17 @@ namespace MMgc
 
 		SAMPLE_CHECK();
 
-		GCStack<GCWorkItem> work;
-		MarkAllRoots(work);
+		MarkAllRoots();
 
 		SAMPLE_CHECK();
 
 		if(stackStart == NULL) {
-			MarkQueueAndStack(work);
+ 			// grab the stack, push it, and 
+			MarkQueueAndStack();
 		} else {
 			GCWorkItem item(stackStart, stackSize, false);
-			PushWorkItem(work, item);
-			Mark(work);
+			PushWorkItem(item);
+			Mark();
 		}
 		
 		SAMPLE_CHECK();
@@ -1368,7 +1370,7 @@ bail:
 		if(!force) {
 			// we just executed mutator code which could have fired some WB's
 			FlushBarrierWork();
-			Mark(m_incrementalWork);
+			Mark();
 		}
 
 		Finalize();
@@ -1377,7 +1379,7 @@ bail:
 		if(!force) {
 			// we just executed mutator code which could have fired some WB's
 			FlushBarrierWork();
-			Mark(m_incrementalWork);
+			Mark();
 		}
 	
 		SAMPLE_CHECK();
@@ -1527,10 +1529,11 @@ bail:
 		return realItem;
 	}
 	
-	void GC::Mark(GCStack<GCWorkItem> &work)
+	void GC::Mark()
 	{
-		while(work.Count()) {
-			MarkItem(work);
+		while(m_incrementalWork.Count()) {
+ 			GCWorkItem item = m_incrementalWork.Pop();
+			MarkItem(item);
 		}
 	}
 
@@ -1619,19 +1622,20 @@ bail:
 	#if defined(MMGC_PPC) && defined(__GNUC__)
 	__attribute__((noinline)) 
 	#endif
-	void GC::MarkQueueAndStack(GCStack<GCWorkItem>& work, bool scanStack)
+	void GC::MarkQueueAndStack(bool scanStack)
 	{
 		if(scanStack) {
 			GCWorkItem item;
 			MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
+			GCAssert(item.ptr != NULL);
 
 			// this is where we will clear to when CleanStack is called
 			if(rememberedStackTop < item.ptr) {
 				rememberedStackTop = item.ptr;
 			}
-			PushWorkItem(work, item);
+			PushWorkItem(item);
 		}
-		Mark(work);
+		Mark();
 	}
 
 	void GCRoot::init(GC* _gc, const void *_object, size_t _size)
@@ -2382,7 +2386,7 @@ bail:
 		}
 #endif
 
-		MarkAllRoots(m_incrementalWork);
+		MarkAllRoots();
 		
 		policy.signal(GCPolicyManager::END_StartIncrementalMark);
 		
@@ -2395,7 +2399,7 @@ bail:
 	// The mark stack overflow logic depends on this calling MarkItem directly 
 	// for each of the roots.
 
-	void GC::MarkAllRoots(GCStack<GCWorkItem>& work)
+	void GC::MarkAllRoots()
 	{
 		// Need to do this while holding the root lock so we don't end 
 		// up trying to scan a deleted item later, another reason to keep
@@ -2406,7 +2410,7 @@ bail:
 		while(r) {
 			GCWorkItem item = r->GetWorkItem();
 			if(item.ptr)
-				MarkItem(item, work);
+				MarkItem(item);
 			r = r->next;
 		}
 	}
@@ -2457,7 +2461,7 @@ bail:
 		// for us: it pushes referenced objects that are not marked.  (MarkAllRoots calls
 		// MarkItem on each root.)
 
-		MarkAllRoots(m_incrementalWork);
+		MarkAllRoots();
 
 		// For all iterator types, GetNextMarkedObject returns true if 'item' has been
 		// updated to reference a marked, non-free object to mark, false if the allocator
@@ -2469,21 +2473,21 @@ bail:
 			GCAllocIterator iter1(containsPointersRCAllocs[i]);
 			while (iter1.GetNextMarkedObject(ptr, size)) {
 				GCWorkItem item(ptr, size, true);
-				MarkItem(item, m_incrementalWork);
+				MarkItem(item);
 				if (m_markStackOverflow)
 					goto overflow;
 			}
 			GCAllocIterator iter2(containsPointersAllocs[i]);
 			while (iter2.GetNextMarkedObject(ptr, size)) {
 				GCWorkItem item(ptr, size, true);
-				MarkItem(item, m_incrementalWork);
+				MarkItem(item);
 				if (m_markStackOverflow)
 					goto overflow;
 			}
 			GCLargeAllocIterator iter3(largeAlloc);
 			while (iter3.GetNextMarkedObject(ptr, size)) {
 				GCWorkItem item(ptr, size, true);
-				MarkItem(item, m_incrementalWork);
+				MarkItem(item);
 				if (m_markStackOverflow)
 					goto overflow;
 			}
@@ -2514,29 +2518,33 @@ bail:
 	// In practice, this means the overflow mechanism converges with little performance
 	// impact on eg the heap_stress benchmark.
 
-	void GC::SignalMarkStackOverflow(GCStack<GCWorkItem> &stack, GCWorkItem& item)
+	void GC::SignalMarkStackOverflow(GCWorkItem& item)
 	{
 		GCAssert(item.ptr != NULL);
-		
-		m_markStackOverflow = true;
-		
-		for ( int i=int(stack.Count()/2) ; i > 0 ; i-- ) {
-			GCWorkItem item = stack.Pop();
-			if (item.ptr && item.IsGCItem())
-				ClearQueued(item.ptr);
-		}
-		
-		// If we're unlucky the popping may have freed a segment that was picked up
-		// by some other thread, so the Push may fail.  If that happens, clear the
-		// queued state of 'item'.
-		if (!stack.Push(item))
+ 
+ 		if (m_inMarkStackOverflow) {
+ 			// If we're unlucky the popping below may free a segment that is picked up
+ 			// by some other thread, so the final PushWorkItem may fail and we may
+ 			// end up back here.  If that happens, just clear the queued state of 'item'.
+ 			
 			if (item.IsGCItem())
 				ClearQueued(item.ptr);
+ 			return;
+ 		}
+ 
+ 		m_inMarkStackOverflow = true;
+ 		m_markStackOverflow = true;
+ 		for ( int i=int(m_incrementalWork.Count()/2) ; i > 0 ; i-- ) {
+ 			GCWorkItem item = m_incrementalWork.Pop();
+ 			ClearQueued(item.ptr);
+ 		}
+ 		PushWorkItem(item);
+ 		m_inMarkStackOverflow = false;
 	}
 
 #if 0
 	// TODO: SSE2 version
-	void GC::MarkItem_MMX(const void *ptr, size_t size, GCStack<GCWorkItem> &work)
+	void GC::MarkItem_MMX(const void *ptr, size_t size)
 	{
 		 uintptr *p = (uintptr*) ptr;
 		// deleted things are removed from the queue by setting them to null
@@ -2671,7 +2679,7 @@ bail:
 	// This will mark the item whether the item was previously marked or not.
 	// The mark stack overflow logic depends on that.
 
-	void GC::MarkItem(GCWorkItem &wi, GCStack<GCWorkItem> &work)
+	void GC::MarkItem(GCWorkItem &wi)
 	{
 		size_t size = wi.GetSize();
 		uintptr_t *p = (uintptr_t*) wi.ptr;
@@ -2821,12 +2829,12 @@ bail:
 						if(((uintptr_t)realItem & ~0xfff) != thisPage || mark_item_recursion_control == 0)
 						{							
 							*pbits = bits2 | (GCAlloc::kQueued << shift);
-							PushWorkItem(work, newItem);
+							PushWorkItem(newItem);
 						}
 						else
 						{
 							mark_item_recursion_control--;
-							MarkItem(newItem, work);
+							MarkItem(newItem);
 							mark_item_recursion_control++;
 						}
 					}
@@ -2884,7 +2892,7 @@ bail:
 						realItem = GetUserPointer(item);
 						usize -= (uint32_t)DebugSize();
 						#endif
-						PushWorkItem(work, GCWorkItem(realItem, usize, true));
+						PushWorkItem(GCWorkItem(realItem, usize, true));
 					} 
 					else
 					{
@@ -2954,7 +2962,8 @@ bail:
 			}
 			for(unsigned int i=0; i<count; i++) 
 			{
- 				MarkItem(m_incrementalWork);
+				GCWorkItem item = m_incrementalWork.Pop();
+ 				MarkItem(item);
 			}
 			SAMPLE_CHECK();
 		} while(VMPI_getPerformanceCounter() < ticks);
@@ -2986,7 +2995,7 @@ bail:
 			m_markStackOverflow = false;
 			HandleMarkStackOverflow();		// may set
 			FlushBarrierWork();				//    m_markStackOverflow
-			Mark(m_incrementalWork);		//       to true again
+			Mark();							//       to true again
 		}
 
 		// finished in Sweep
@@ -3000,8 +3009,8 @@ bail:
 		GCAssert(!m_markStackOverflow);
 		
 		FlushBarrierWork();
-		MarkAllRoots(m_incrementalWork);
-		MarkQueueAndStack(m_incrementalWork, scanStack);
+		MarkAllRoots();
+		MarkQueueAndStack(scanStack);
 		
 		// Force repeated restarts and marking until we're done.  For discussion
 		// of completion, see the comments above HandleMarkStackOverflow.  Note
@@ -3015,7 +3024,7 @@ bail:
 			m_markStackOverflow = false;
 			HandleMarkStackOverflow();							// may set
 			FlushBarrierWork();									//    m_markStackOverflow
-			MarkQueueAndStack(m_incrementalWork, scanStack);	//       to true again
+			MarkQueueAndStack(scanStack);						//       to true again
 		}
 		m_incrementalWork.Clear();				// Frees any cached resources
 		m_barrierWork.Clear();
@@ -3095,7 +3104,7 @@ bail:
 			m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork);
 		while (m_barrierWork.Count() > 0) {
 			GCWorkItem item = m_barrierWork.Pop();
-			PushWorkItem(m_incrementalWork, item);
+			PushWorkItem(item);
 		}
 	}
 	
@@ -3150,8 +3159,9 @@ bail:
 	// FinishIncrementalMark will take care of what remains.
 	//
 	// Observe that if adding the item to the remembered set (a secondary mark stack)
-	// fails, then the item is just pushed onto the regular mark stack as part of the
-	// normal stack overflow handling.  That is what we want.
+	// fails, then the item is just pushed onto the regular mark stack; if that too
+	// fails then normal stack overflow handling takes over.  That is what we want,
+	// as it guarantees that the item will be traced again.
 	
 	void GC::WriteBarrierHit(const void* container)
 	{
@@ -3167,7 +3177,12 @@ bail:
 			return;
 		}
 		GCWorkItem item(container, (uint32_t)Size(container), true);
-		PushWorkItem(m_barrierWork, item);
+		// Note, pushing directly here works right now because PushWorkItem never
+		// performs any processing (breaking up a large object into shorter
+		// segments, for example).  If that changes, we must probably introduce
+		// PushBarrierItem to do the same thing for m_barrierWork.
+		if (!m_barrierWork.Push(item))
+			PushWorkItem(item);
 	}
 	
 	bool GC::ContainsPointers(const void *item)

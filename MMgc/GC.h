@@ -115,31 +115,6 @@ namespace MMgc
 	class GCAutoEnter;
 
 	/**
-	 * Conservative collector unit of work
-	 */
-	class GCWorkItem
-	{
-	public:
-		// FIXME? The initialization is redundant for most locals and for the mark stack we
-		// don't want to have to init all the elements in the array as it makes allocating a mark
-		// stack segment expensive.  I believe we could safely get rid of the two initializing
-		// clauses here.  --lars
-		GCWorkItem() : ptr(NULL), _size(0) { }
-		inline GCWorkItem(const void *p, uint32_t s, bool isGCItem);
-
-		uint32_t GetSize() const { return _size & ~1; }
-		uint32_t IsGCItem() const { return _size & 1; }
-
-		// If a WI is a GC item, `ptr` is the UserPointer; it must not
-		// be the RealPointer nor an interior pointer
-		const void *ptr;
-
-		// The low bit of _size stores whether this is a GC item.
-		// Always access this through `GetSize` and `IsGCItem`
-		uint32_t _size;
-	};
-
-	/**
 	 * GCRoot is root in the reachability graph, it contains a pointer a size 
 	 * and will be searched for things.  
 	 */
@@ -1528,15 +1503,16 @@ namespace MMgc
 		 * Note that this is not obviously exclusive with 'collecting'.
 		 */
 		bool marking;
-		GCStack<GCWorkItem> m_incrementalWork;
+		GCMarkStack m_incrementalWork;
 		void StartIncrementalMark();
 		void FinishIncrementalMark(bool scanStack);
 
 		bool m_markStackOverflow;
+		bool m_inMarkStackOverflow;
 		void HandleMarkStackOverflow();
-		void SignalMarkStackOverflow(GCStack<GCWorkItem> &stack, GCWorkItem& item);
+		void SignalMarkStackOverflow(GCWorkItem& item);
 		
-		GCStack<GCWorkItem> m_barrierWork;
+		GCMarkStack m_barrierWork;
 		void CheckBarrierWork();
 		void FlushBarrierWork();
 
@@ -1647,38 +1623,35 @@ namespace MMgc
 		GCLargeAlloc *largeAlloc;
 		GCHeap *heap;
 
+#ifdef _DEBUG
+	public:
+#else
 	private:
-
-#ifdef _DEBUG
-		public:
 #endif
-
 		void ClearMarks();
-#ifdef _DEBUG
-		private:
-#endif
-
 
 #ifdef _DEBUG
-		public:
-		// Sometimes useful for mutator to call this.  Returns true if it succeeded, false if there was
-		// a mark stack overflow.
+	public:
+		/**
+		 * Kill any incremental mark in progress, then trace from roots and stack.  If
+		 * stackStart/stackSize are NULL/0 then the thread stack is obtained and used.
+		 *
+		 * It's sometimes useful for mutator to call this; the ZCT reaper uses it for
+		 * validating the heap.
+		 *
+		 * @return   true if it succeeded, false if there was a mark stack overflow.
+		 */
 		bool Trace(const void *stackStart=NULL, uint32_t stackSize=0);
-		private:
 #endif
 
+	private:
 		void Finalize();
 		void Sweep(bool force=false);
 		void ForceSweep() { Sweep(true); }
-		void MarkAllRoots(GCStack<GCWorkItem>& work);
-		void Mark(GCStack<GCWorkItem> &work);
-		void MarkQueueAndStack(GCStack<GCWorkItem> &work, bool scanStack=true);
-		void MarkItem(GCStack<GCWorkItem> &work)
-		{
-			GCWorkItem workitem = work.Pop();
-			MarkItem(workitem, work);
-		}
-		void MarkItem(GCWorkItem &workitem, GCStack<GCWorkItem> &work);
+		void MarkAllRoots();
+		void Mark();
+		void MarkQueueAndStack(bool scanStack=true);
+		void MarkItem(GCWorkItem &wi);
 
 		/**
 		 * True during the sweep phase of collection.  Several things have to
@@ -1760,7 +1733,9 @@ public:
 		
 private:
 
-		void PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item);		// defined in GC.cpp, always inlined in callers there
+		// PushWorkItem is defined in GC.cpp, always inlined in callers there.
+		// item.ptr must not be NULL.
+		void PushWorkItem(GCWorkItem item);
 
 #ifdef _DEBUG		
 		void CheckFreelist(GCAlloc *gca);
