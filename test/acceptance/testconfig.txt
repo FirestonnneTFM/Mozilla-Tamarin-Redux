@@ -215,3 +215,10 @@ mops/mops,^((?!ppc-mac-tvm-debug-).).*deep, include, include slow tests in deep 
 ####################
 ecma3/Statements/eforin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
 as3/Statements/for-each-in/eforeachin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
+
+####################
+# Sampling assertion
+# Assertion failed: "(((start_event == (PolicyEvent)(ev - 1))))" (".\\GC.cpp":461)
+# Disabling test until this can be properly investigated
+####################
+as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
