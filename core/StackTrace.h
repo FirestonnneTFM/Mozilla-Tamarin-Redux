@@ -235,7 +235,7 @@ namespace avmplus
 				{
 					Stringp		m_fakename;		// needed just for fake CallStackNodes, null otherwise
 					Stringp		m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
-				};
+                               }u;
 				uint64_t        m_functionId;
 			};
 
@@ -245,15 +245,15 @@ namespace avmplus
 				{
 					m_info 		= (MethodInfo*) EXTERNAL_CALL_FRAME;
 				#ifdef VMCFG_64BIT
-					m_fakename	= NULL;		// let's keep the stack nice and clean
+                                       u.m_fakename    = NULL;         // let's keep the stack nice and clean
 				#endif
 					m_functionId = csn.functionId();
 				} 
 				else 
 				{
 					m_info		= csn.info();		// will be NULL if the element is from a fake CallStackNode
-					m_fakename	= csn.fakename();
-					m_filename	= csn.filename();
+                                       u.m_fakename    = csn.fakename();
+                                       u.m_filename    = csn.filename();
 				}
 				m_linenum	= csn.linenum();
 			#ifdef VMCFG_64BIT
@@ -265,10 +265,10 @@ namespace avmplus
 			inline MethodInfo* info() const { return isAS3Sample() ? m_info : NULL; }
 			#ifdef _DEBUG
 			// used in Sampler::presweep to check if the fake name is null or marked
-			inline Stringp fakename() const	{ return m_fakename; }
+                       inline Stringp fakename() const { return u.m_fakename; }
 			#endif
-			inline Stringp name() const	{ return isAS3Sample() ? ((!m_fakename && m_info) ? m_info->getMethodName() : m_fakename) : NULL; }
-			inline Stringp filename() const { return isAS3Sample() ? m_filename : NULL; }
+                       inline Stringp name() const     { return isAS3Sample() ? ((!u.m_fakename && m_info) ? m_info->getMethodName() : u.m_fakename) : NULL; }
+                       inline Stringp filename() const { return isAS3Sample() ? u.m_filename : NULL; }
 			inline int32_t linenum() const { return m_linenum; }
 			inline uint64_t functionId() const { return isAS3Sample() ? 0 : m_functionId; }
 		};
