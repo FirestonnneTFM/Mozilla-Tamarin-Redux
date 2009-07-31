@@ -221,15 +221,22 @@ namespace avmplus
 			write(p, depth);
 			while(csn)
 			{
-				write(p, csn->info());
-				write(p, csn->fakename());
-				// FIXME: can filename can be stored in the AbstractInfo?
-				write(p, csn->filename());
-				write(p, csn->linenum());
-#ifdef AVMPLUS_64BIT
-				AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
-				write(p, (int) 0); // structure padding
-#endif
+				VMPI_memset(p, 0, sizeof(StackTrace::Element));
+				StackTrace::Element *e = (StackTrace::Element*)p;
+				e->m_info = csn->isAS3Sample() ? csn->info() : (MethodInfo*) StackTrace::Element::EXTERNAL_CALL_FRAME;
+				e->m_linenum = csn->linenum();
+				if(csn->isAS3Sample())
+				{
+					e->m_fakename = csn->fakename());
+					// FIXME: can filename can be stored in the AbstractInfo?
+					e->m_filename = csn->filename();
+				} 
+				else 
+				{
+					e->m_functionId = csn->functionId();
+				}
+				// advance p over the current stack element
+				p += sizeof(StackTrace::Element);
 				csn = csn->next();
 				depth--;
 			}
@@ -281,13 +288,13 @@ namespace avmplus
 		}
 	}
 
-	uint64 Sampler::recordAllocationSample(const void* item, uint64 size, bool callback_ok)
+	uint64 Sampler::recordAllocationSample(const void* item, uint64 size, bool callback_ok, bool forceWrite)
 	{
 		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow)
 			return 0;
 
-		if(!samplingAllAllocs)
+		if(!(forceWrite || samplingAllAllocs))
 			return 0;
 
 		if(!sampleSpaceCheck(callback_ok))

@@ -114,6 +114,14 @@ namespace avmplus
 		{
 			init(env, framep, frameTraits, eip);
 		}
+		
+		// ctor used for external script profiling
+		inline explicit CallStackNode(AvmCore* core, uint64_t functionId, int32_t lineno)
+		{
+			init(core, functionId, lineno);
+		}
+        
+		void init(AvmCore* core, uint64_t functionId, int32_t lineno);
 
 		// ctor used only for Sampling (no MethodEnv)
 		inline explicit CallStackNode(AvmCore* core, const char* name)
@@ -165,6 +173,9 @@ namespace avmplus
 
 		inline void set_filename(Stringp s) { m_filename = s; }
 		inline void set_linenum(int32_t i) { m_linenum = i; }
+		
+		inline uint64_t functionId() const { return m_functionId; }
+		inline bool isAS3Sample() const { return m_functionId == 0; }
 
 		// Placement new and delete because the interpreter allocates CallStackNode
 		// instances inside other data structures (think alloca storage that has been
@@ -177,6 +188,7 @@ namespace avmplus
 		inline void operator delete(void*) {}
 
 	// ------------------------ DATA SECTION BEGIN
+	private:	uint64_t			m_functionId;	// int used to uniquely identify function calls in external scripting languages
 	private:	AvmCore*			m_core;
 	private:	MethodEnv*			m_env;			// will be NULL if the element is from a fake CallStackNode
 	private:	MethodInfo*			m_info;
@@ -210,33 +222,55 @@ namespace avmplus
 
 		struct Element
 		{
-			MethodInfo*			m_info;			// will be null for fake CallStackNode
-			Stringp				m_fakename;		// needed just for fake CallStackNodes, null otherwise
-			Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
-		    int32_t				m_linenum;
-		#ifdef AVMPLUS_64BIT
+			enum { EXTERNAL_CALL_FRAME = 1 }; // used for CallStackNodes for external scripting languages 
+
+  			MethodInfo*			m_info;			// will be null for fake CallStackNode
+			int32_t				m_linenum;
+		#ifdef VMCFG_64BIT
 			int32_t				m_pad;
 		#endif
+			union
+			{
+				struct
+				{
+					Stringp		m_fakename;		// needed just for fake CallStackNodes, null otherwise
+					Stringp		m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
+				};
+				uint64_t        m_functionId;
+			};
 
 			inline void set(const CallStackNode& csn) 
-			{ 
-				m_info		= csn.info();		// will be NULL if the element is from a fake CallStackNode
-				m_fakename	= csn.fakename();
-				m_filename	= csn.filename();
+			{
+				if (csn.functionId() != 0) 
+				{
+					m_info 		= (MethodInfo*) EXTERNAL_CALL_FRAME;
+				#ifdef VMCFG_64BIT
+					m_fakename	= NULL;		// let's keep the stack nice and clean
+				#endif
+					m_functionId = csn.functionId();
+				} 
+				else 
+				{
+					m_info		= csn.info();		// will be NULL if the element is from a fake CallStackNode
+					m_fakename	= csn.fakename();
+					m_filename	= csn.filename();
+				}
 				m_linenum	= csn.linenum();
-			#ifdef AVMPLUS_64BIT
+			#ifdef VMCFG_64BIT
 				m_pad		= 0;	// let's keep the stack nice and clean
 			#endif
 			}
+			inline bool isAS3Sample() const { return m_info != (MethodInfo*) EXTERNAL_CALL_FRAME; }
 			// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
-			inline MethodInfo* info() const { return m_info; }
+			inline MethodInfo* info() const { return isAS3Sample() ? m_info : NULL; }
 			#ifdef _DEBUG
 			// used in Sampler::presweep to check if the fake name is null or marked
 			inline Stringp fakename() const	{ return m_fakename; }
 			#endif
-			inline Stringp name() const	{ return (!m_fakename && m_info) ? m_info->getMethodName() : m_fakename; }
-			inline Stringp filename() const { return m_filename; }
+			inline Stringp name() const	{ return isAS3Sample() ? ((!m_fakename && m_info) ? m_info->getMethodName() : m_fakename) : NULL; }
+			inline Stringp filename() const { return isAS3Sample() ? m_filename : NULL; }
 			inline int32_t linenum() const { return m_linenum; }
+			inline uint64_t functionId() const { return isAS3Sample() ? 0 : m_functionId; }
 		};
 		bool equals(StackTrace::Element* e, int depth);
 		static uintptr_t hashCode(StackTrace::Element* e, int depth);
