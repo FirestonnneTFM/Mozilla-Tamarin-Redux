@@ -227,7 +227,7 @@ namespace avmplus
 				e->m_linenum = csn->linenum();
 				if(csn->isAS3Sample())
 				{
-					e->m_fakename = csn->fakename());
+					e->m_fakename = csn->fakename();
 					// FIXME: can filename can be stored in the AbstractInfo?
 					e->m_filename = csn->filename();
 				} 
