@@ -374,6 +374,7 @@ namespace avmplus
 			char* off_c;
 			double* off_d;
 			uint32_t* off_u;
+			uint64_t* off_u64;
 		};
 		off_c = (char*)sam + cc->timeOffset;
 		*off_d = (double)sample.micros;
@@ -415,9 +416,12 @@ namespace avmplus
 				WBRC(gc, f, ((char*)f + cc->nameOffset), uintptr(e->name()));	// NOT e->info()->name() because e->name() can be a fake name
 				if(e->filename()) {
 					WBRC(gc, f, ((char*)f + cc->fileOffset), e->filename());
-					off_c = (char*)f + cc->lineOffset;
-					*off_u = e->linenum();
 				}
+				off_c = (char*)f + cc->lineOffset;
+				*off_u = e->linenum();
+				off_c = (char*)f + cc->stackIdOffset;
+				*off_u64 = e->functionId();
+
 				stack->setUintProperty(i, f->atom());
 			}			
 			WBRC(gc, sam, (char*)sam + cc->stackOffset, stack);
@@ -802,6 +806,10 @@ namespace avmplus
 		b = t->findBinding(core()->internConstantStringLatin1("line"), core()->publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		lineOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
+		
+		b = t->findBinding(core()->internConstantStringLatin1("id"), core()->publicNamespace);
+		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+		stackIdOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}
 
 	ScriptObject *SampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
