@@ -189,7 +189,7 @@ namespace MMgc
 			hc += kMarkStackItems;
 			ns++;
 		}
-		GCAssert(ns == EntirelyFullSegments() || m_top == m_limit && ns+1 == EntirelyFullSegments());
+		GCAssert(ns == EntirelyFullSegments() || (m_top == m_limit && ns+1 == EntirelyFullSegments()));
 		GCAssert(hc == m_hiddenCount);
 		GCAssert(Count() == hc + (m_top - m_base));
 		return true;
