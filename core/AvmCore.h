@@ -208,6 +208,7 @@ const int kBufferPadding = 16;
 		protected:
 			virtual Debugger* createDebugger() { return NULL; }
 			virtual Profiler* createProfiler() { return NULL; }
+			virtual Sampler* createSampler();
 		public:
 			int					langID;
 			bool				passAllExceptionsToDebugger;

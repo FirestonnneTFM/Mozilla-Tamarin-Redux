@@ -73,7 +73,7 @@ namespace avmplus
 	{
 	public:
 		Sampler(AvmCore*);
-		~Sampler();
+		virtual ~Sampler();
 
 		enum SampleType 
 		{ 
@@ -91,13 +91,13 @@ namespace avmplus
 		void sampleCheck() { if(takeSample) sample(); }
 
 		uint64 recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable);
-		uint64 recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true);
+		uint64 recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true, bool forceWrite = false);
 		void recordDeallocationSample(const void* item, uint64_t size);
 
-		void startSampling();
-		void stopSampling();
-		void clearSamples();
-		void pauseSampling();
+		virtual void startSampling();
+		virtual void stopSampling();
+		virtual void clearSamples();
+		virtual void pauseSampling();
 
 		void sampleInternalAllocs(bool b);
 
@@ -134,8 +134,9 @@ namespace avmplus
 	public:
 		VTable*				sampleIteratorVTable;
 		VTable*				slotIteratorVTable;
-	private:
+	protected:
 		AvmCore*			core;
+	private:
 		List<Stringp>		fakeMethodNames; 
 		uint64_t			allocId;
 		uint8_t*			samples;

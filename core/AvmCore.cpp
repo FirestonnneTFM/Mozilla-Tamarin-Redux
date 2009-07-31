@@ -329,11 +329,19 @@ namespace avmplus
 		// sampling can begin now, requires builtinPool
 		if (_debugger)
 		{
-			_sampler = new Sampler(this);
+			_sampler = createSampler();
+			AvmAssert(_sampler != NULL);
 			_sampler->initSampling();
 		}
 #endif
 	}
+
+#ifdef DEBUGGER	
+	Sampler* AvmCore::createSampler()
+	{
+		return (new Sampler(this));
+	}
+#endif
 	
 	Toplevel* AvmCore::initTopLevel()
 	{
