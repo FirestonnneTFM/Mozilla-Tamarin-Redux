@@ -560,9 +560,10 @@ namespace avmplus
 				// keep all weak refs and type's live, in postsweep we'll erase our weak refs
 				// to objects that were finalized.  we can't nuke them here b/c pushing the
 				// types could cause currently unmarked things to become live
-				if (s.typeOrVTable > 7 && !GC::GetMark((void*)s.typeOrVTable))
+				void *ptr = atomPtr(s.typeOrVTable);
+				if (ptr != NULL && !GC::GetMark(ptr))
 				{
-					GCWorkItem item((void*)s.typeOrVTable, (uint32)GC::Size((void*)s.typeOrVTable), true);
+					GCWorkItem item(ptr, (uint32)GC::Size(ptr), true);
 					// NOTE that PushWorkItem_MayFail can fail due to mark stack overflow in tight memory situations.
 					// This failure is visible as GC::m_markStackOverflow being true.  The GC compensates
 					// for that but it seems hard to compensate for it here.  The most credible workaround
