@@ -567,7 +567,7 @@ namespace avmplus
 
     LIns* CodegenLIR::storeAtomArgs(LIns* receiver, int count, int index)
     {
-        #ifdef AVMPLUS_VERBOSE
+        #ifdef NJ_VERBOSE
         if (verbose())
             core->console << "          store args\n";
         #endif
@@ -587,7 +587,7 @@ namespace avmplus
             GC *gc = core->gc;
             PageMgr *mgr = pool->codePages = new (gc) PageMgr();
             mgr->codeAlloc = new (gc) CodeAlloc();
-#ifdef AVMPLUS_VERBOSE
+#ifdef NJ_VERBOSE
             if (pool->verbose) {
                 LabelMap *labels = mgr->labels = new (gc) LabelMap(core, mgr->allocator);
                 labels->add(core, sizeof(AvmCore), 0, "core");
@@ -5054,7 +5054,7 @@ namespace avmplus
 
     void CodegenLIR::formatOperand(PrintWriter& buffer, Value& v)
     {
-#ifdef AVMPLUS_VERBOSE
+#ifdef NJ_VERBOSE
         if (v.ins) formatOperand(buffer, v.ins);
 #else
         (void)buffer;
@@ -5062,7 +5062,7 @@ namespace avmplus
 #endif
     }
 
-#ifdef AVMPLUS_VERBOSE
+#ifdef NJ_VERBOSE
     void CodegenLIR::formatOperand(PrintWriter& buffer, LIns* opr)
     {
         if (opr) {
@@ -5072,7 +5072,7 @@ namespace avmplus
             buffer << "0";
         }
     }
-#endif /* AVMPLUS_VERBOSE */
+#endif /* NJ_VERBOSE */
 
     /* set position of label */
     void CodegenLIR::setLabelPos(CodegenLabel& l, LIns* bb) {
@@ -5089,7 +5089,7 @@ namespace avmplus
     }
 #endif
 
-#ifdef AVMPLUS_VERBOSE
+#ifdef NJ_VERBOSE
     bool CodegenLIR::verbose()
     {
         return (state && state->verifier->verbose) || pool->verbose;
@@ -5464,7 +5464,7 @@ namespace avmplus
             info->_implGPR = u.fp;
             // mark method as been JIT'd
             info->_flags |= MethodInfo::JIT_IMPL;
-            #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
+            #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())
                 AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
             #endif
@@ -5472,7 +5472,7 @@ namespace avmplus
             // assm puked, or we did something untested, so interpret.
             frag->releaseCode(mgr->codeAlloc);
             overflow = true;
-            #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
+            #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())
                 AvmLog("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
             #endif
