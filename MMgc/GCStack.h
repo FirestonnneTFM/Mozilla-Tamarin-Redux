@@ -150,6 +150,11 @@ namespace MMgc
 		// The current segment is discarded and the previous segment, if any, reinstated.
 		// Update all instance vars.
 		void PopSegment();
+
+#ifdef _DEBUG
+		// Check as many invariants as possible
+		bool Invariants();
+#endif
 	};
 	
 	REALLY_INLINE bool GCMarkStack::Push(GCWorkItem item)
@@ -160,6 +165,7 @@ namespace MMgc
 				return false;
 		GCAssert(m_top < m_limit);
 		*m_top++ = item;
+		GCAssert(Invariants());
 		return true;
 	}
 	
@@ -174,6 +180,7 @@ namespace MMgc
 		if (m_top == m_base)
 			if (m_topSegment->m_prev != NULL)
 				PopSegment();
+		GCAssert(Invariants());
 		return t;
 	}
 	
