@@ -91,7 +91,7 @@ namespace avmplus
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 		
 		int typeOffset, stackOffset, timeOffset, idOffset, sizeOffset;
-		int nameOffset, fileOffset, lineOffset;
+		int nameOffset, fileOffset, lineOffset, stackIdOffset;
 	};
 	typedef SampleClass DeleteObjectSampleClass;
 

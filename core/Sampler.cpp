@@ -221,15 +221,22 @@ namespace avmplus
 			write(p, depth);
 			while(csn)
 			{
-				write(p, csn->info());
-				write(p, csn->fakename());
-				// FIXME: can filename can be stored in the AbstractInfo?
-				write(p, csn->filename());
-				write(p, csn->linenum());
-#ifdef AVMPLUS_64BIT
-				AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
-				write(p, (int) 0); // structure padding
-#endif
+				VMPI_memset(p, 0, sizeof(StackTrace::Element));
+				StackTrace::Element *e = (StackTrace::Element*)p;
+				e->m_info = csn->isAS3Sample() ? csn->info() : (MethodInfo*) StackTrace::Element::EXTERNAL_CALL_FRAME;
+				e->m_linenum = csn->linenum();
+				if(csn->isAS3Sample())
+				{
+					e->u.m_fakename = csn->fakename();
+					// FIXME: can filename can be stored in the AbstractInfo?
+					e->u.m_filename = csn->filename();
+				} 
+				else 
+				{
+					e->m_functionId = csn->functionId();
+				}
+				// advance p over the current stack element
+				p += sizeof(StackTrace::Element);
 				csn = csn->next();
 				depth--;
 			}
@@ -281,13 +288,13 @@ namespace avmplus
 		}
 	}
 
-	uint64 Sampler::recordAllocationSample(const void* item, uint64 size, bool callback_ok)
+	uint64 Sampler::recordAllocationSample(const void* item, uint64 size, bool callback_ok, bool forceWrite)
 	{
 		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow)
 			return 0;
 
-		if(!samplingAllAllocs)
+		if(!(forceWrite || samplingAllAllocs))
 			return 0;
 
 		if(!sampleSpaceCheck(callback_ok))
@@ -553,9 +560,10 @@ namespace avmplus
 				// keep all weak refs and type's live, in postsweep we'll erase our weak refs
 				// to objects that were finalized.  we can't nuke them here b/c pushing the
 				// types could cause currently unmarked things to become live
-				if (s.typeOrVTable > 7 && !GC::GetMark((void*)s.typeOrVTable))
+				void *ptr = atomPtr(s.typeOrVTable);
+				if (ptr != NULL && !GC::GetMark(ptr))
 				{
-					GCWorkItem item((void*)s.typeOrVTable, (uint32)GC::Size((void*)s.typeOrVTable), true);
+					GCWorkItem item(ptr, (uint32)GC::Size(ptr), true);
 					// NOTE that PushWorkItem_MayFail can fail due to mark stack overflow in tight memory situations.
 					// This failure is visible as GC::m_markStackOverflow being true.  The GC compensates
 					// for that but it seems hard to compensate for it here.  The most credible workaround

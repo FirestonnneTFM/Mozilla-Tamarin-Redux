@@ -70,8 +70,7 @@ namespace MMgc
 		FixedMalloc::GetFixedMalloc()->Free(p);
 	}
 	
-	template<typename T, int kMarkStackItems>
-	GCStack<T, kMarkStackItems>::GCStack()
+	GCMarkStack::GCMarkStack()
 		: m_base(NULL)
 		, m_top(NULL)
 		, m_limit(NULL)
@@ -80,10 +79,10 @@ namespace MMgc
 		, m_extraSegment(NULL)
 	{
 		PushSegment();
+		GCAssert(Invariants());
 	}
 
-	template<typename T, int kMarkStackItems>
-	GCStack<T, kMarkStackItems>::~GCStack()
+	GCMarkStack::~GCMarkStack()
 	{
 		while (m_topSegment != NULL)
 			PopSegment();
@@ -91,8 +90,7 @@ namespace MMgc
 			FreeStackSegment(m_extraSegment);
 	}
 
-	template<typename T, int kMarkStackItems>
-	void GCStack<T, kMarkStackItems>::Clear()
+	void GCMarkStack::Clear()
 	{
 		// Clear out the elements
 		while (m_topSegment->m_prev != NULL)
@@ -104,10 +102,10 @@ namespace MMgc
 			FreeStackSegment(m_extraSegment);
 			m_extraSegment = NULL;
 		}
+		GCAssert(Invariants());
 	}
 
-	template<typename T, int kMarkStackItems> 
-	bool GCStack<T, kMarkStackItems>::PushSegment()
+	bool GCMarkStack::PushSegment()
 	{
 		GCAssert(sizeof(GCStackSegment) <= 4096);
 		GCAssert(m_top == m_limit);
@@ -129,8 +127,7 @@ namespace MMgc
 		return true;
 	}
 
-	template<typename T, int kMarkStackItems>
-	void GCStack<T, kMarkStackItems>::PopSegment()
+	void GCMarkStack::PopSegment()
 	{
 		m_hiddenCount -= kMarkStackItems;
 		GCStackSegment* seg = m_topSegment;
@@ -146,14 +143,14 @@ namespace MMgc
 			FreeStackSegment(seg);
 	}
 
-	template<typename T, int kMarkStackItems>
-	void GCStack<T, kMarkStackItems>::TransferOneFullSegmentFrom(GCStack<T, kMarkStackItems>& other)
+	void GCMarkStack::TransferOneFullSegmentFrom(GCMarkStack& other)
 	{
 		GCAssert(other.EntirelyFullSegments() > 0);
 		GCStackSegment* seg;
 
 		if (other.m_topSegment->m_prev == NULL) {
 			// Picking off the only segment
+			GCAssert(other.m_top == other.m_limit);
 			seg = other.m_topSegment;
 			other.m_topSegment = NULL;
 			other.m_top = NULL;
@@ -175,27 +172,27 @@ namespace MMgc
 		// Special case that occurs if a segment was inserted into an empty stack.
 		if (m_top == m_base)
 			PopSegment();
+		GCAssert(Invariants());
+		GCAssert(other.Invariants());
 	}
-
-	// Visual C++ 2008 requires the copy constructor and assignment operator to be present
-	// for the explicit template instantiation below to work; GCC doesn't.  But GCC requires
-	// the explicit template instantiation.
-	//
-	// (Neither function is ever called.)
-	template<typename T, int kMarkStackItems>
-	GCStack<T, kMarkStackItems>::GCStack(const GCStack<T, kMarkStackItems>& other)
+	
+#ifdef _DEBUG
+	bool GCMarkStack::Invariants()
 	{
-		(void)other;
-		GCAssert(!"Copy constructor");
+		GCAssert(m_base+kMarkStackItems == m_limit);
+		GCAssert(m_top >= m_base);
+		GCAssert(m_top <= m_limit);
+		GCAssert(m_topSegment->m_prev == NULL || m_top > m_base);
+		uint32_t hc = 0;
+		uint32_t ns = 0;
+		for ( GCStackSegment* seg=m_topSegment->m_prev ; seg != NULL ; seg = seg->m_prev ) {
+			hc += kMarkStackItems;
+			ns++;
+		}
+		GCAssert(ns == EntirelyFullSegments() || (m_top == m_limit && ns+1 == EntirelyFullSegments()));
+		GCAssert(hc == m_hiddenCount);
+		GCAssert(Count() == hc + (m_top - m_base));
+		return true;
 	}
-
-	template<typename T, int kMarkStackItems>
-	GCStack<T, kMarkStackItems>& GCStack<T, kMarkStackItems>::operator=(const GCStack<T, kMarkStackItems>& other)
-	{
-		(void)other;
-		GCAssert(!"Assignment operator");
-		return *(GCStack<T, kMarkStackItems>*)this;
-	}
-
-	template class GCStack<GCWorkItem>;
+#endif
 }
