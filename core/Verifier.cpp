@@ -2944,7 +2944,10 @@ namespace avmplus
     #endif /* AVMPLUS_VERBOSE */
 
 	FrameState::FrameState(Verifier* verifier)
-		: verifier(verifier), label(),
+		: verifier(verifier), 
+	#if defined FEATURE_NANOJIT
+		label(),
+	#endif
 		  pc(0), scopeDepth(0), stackDepth(0), withBase(-1),
 		  initialized(false), targetOfBackwardsBranch(false),
 		  insideTryBlock(false)

@@ -86,7 +86,9 @@ namespace MMgc
 			return GetFixedBlock(item)->alloc;
 		}
 
+#ifndef VMCFG_SYMBIAN // Symbian SDK sees an error in GC.cpp if FixedBlock is private.
 	private:
+#endif //VMCFG_SYMBIAN
 
 		struct FixedBlock
 		{
@@ -101,6 +103,10 @@ namespace MMgc
 			FixedAlloc *alloc;
 			char   items[1];
 		};
+
+#ifdef VMCFG_SYMBIAN		
+	private:
+#endif //VMCFG_SYMBIAN
 
 		GCHeap *m_heap;
 		unsigned int    m_itemsPerBlock;

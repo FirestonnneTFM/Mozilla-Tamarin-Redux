@@ -45,6 +45,7 @@
 * Experimental code to use RChunk to enable virtual allocation.
 * As JIT is currently off on Symbian it is not required and allocateAlignedMemory is used instead.
 */
+//#define SYMBIAN_JIT_TEST
 //#define USE_RCHUNK
 #ifdef USE_RCHUNK
 	class SymbianHeap
@@ -57,7 +58,11 @@
 			startAddr = 0;
 			endAddr = 0;
 			next = 0;
+#ifdef SYMBIAN_JIT_TEST // make all memory executable to quickly test JIT
+			if(chunk.CreateLocalCode(0,size,EOwnerProcess) == KErrNone)
+#else
 			if(chunk.CreateDisconnectedLocal(0,0,size,EOwnerProcess) == KErrNone)
+#endif // SYMBIAN_JIT
 			{
 				ok = true;
 				startAddr = (TInt)chunk.Base();
@@ -170,7 +175,6 @@ void* VMPI_reserveMemoryRegion(void* address, size_t size)
 bool VMPI_releaseMemoryRegion(void* address, size_t size)
 {
 #ifdef USE_RCHUNK
-	// This code has been never tested because Flash crashes before coming here.
 	SymbianHeap* heap = FindHeap((TInt)address);
 	if(heap)
 	{
