@@ -91,6 +91,7 @@
 #include <e32cmn.h>
 
 #include <setjmp.h> // for OOM.h
+#include <pthread.h>
 
 #ifdef __GCC__
 #define REALLY_INLINE inline __attribute__((always_inline))

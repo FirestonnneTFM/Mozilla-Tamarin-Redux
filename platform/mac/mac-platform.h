@@ -90,7 +90,9 @@
 #include <inttypes.h>
 #include <alloca.h>
 
-#include <CoreServices/CoreServices.h>   // for MakeDataExecutable
+#ifdef AVMPLUS_MAC_CARBON
+	#include <CoreServices/CoreServices.h>   // for MakeDataExecutable
+#endif
 #include <mach/mach.h>                   // for vm_protect()
 #include <AvailabilityMacros.h>
 

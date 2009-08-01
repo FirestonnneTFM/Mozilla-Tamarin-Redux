@@ -37,17 +37,12 @@
 
 #include "avmplus.h"
 
-#include <stdlib.h>
 #include <sys/time.h>
 #include <math.h> 
 
 #ifdef AVMPLUS_UNIX
 	#include <time.h>
 #endif // AVMPLUS_UNIX
-
-#ifdef AVMPLUS_MAC
-	#include <malloc/malloc.h>
-#endif //AVMPLUS_MAC
 
 #include <sys/mman.h>
 
@@ -59,6 +54,59 @@
 #define DIVCLOCK ( CLOCKS_PER_SEC / 1000 )
 
 #define kMicroPerSec 1000000.0
+
+/**
+* Logging code
+*/
+#include <e32std.h>
+#include <f32file.h>
+
+void DebugTrace(const TDesC8& aBuffer)
+{
+	RFile file;
+	RFs fs;
+
+	if (fs.Connect() != KErrNone)
+	{
+		return;
+	}
+
+	TInt err = file.Open(fs, _L("c:\\debug.txt"), EFileWrite);
+	if (err == KErrNotFound)
+	{
+		err = file.Create(fs, _L("c:\\debug.txt"), EFileWrite);
+	}
+	if (err == KErrNone)
+	{
+		TInt pos = 0;
+		file.Seek(ESeekEnd, pos);
+		file.Write(aBuffer);
+		file.Close();
+	}
+
+	fs.Close();
+}
+
+_LIT8(kNewline, "\n");
+_LIT8(kNullString, "NULL STRING");
+	
+void DebugTraceString(const char* aString)
+{
+	if (aString == NULL)
+	{
+		DebugTrace(kNullString);
+	}
+	else
+	{
+		TPtrC8 tstr((const TUint8*)aString);
+		DebugTrace(tstr);
+		DebugTrace(kNewline);
+	}
+}
+/**
+* Logging code ends
+*/
+
 
 double VMPI_getLocalTimeOffset()
 {
@@ -132,6 +180,7 @@ uint64_t VMPI_getTime()
 void* VMPI_alloc(size_t size)
 {
 	return malloc(size);
+
 }
 
 void VMPI_free(void* ptr)
@@ -141,15 +190,10 @@ void VMPI_free(void* ptr)
 
 size_t VMPI_size(void *ptr)
 {
-#ifdef AVMPLUS_MAC
-	return malloc_size(ptr);
-#else
-	(void)ptr;
 	return 0;
-#endif
 }
 
-typedef void (*LoggingFunction)(const char*);
+typedef int (*LoggingFunction)(const char*);
 
 LoggingFunction logFunc = NULL;
 
@@ -160,10 +204,7 @@ void RedirectLogOutput(LoggingFunction func)
 
 void VMPI_log(const char* message)
 {
-	if(logFunc)
-		logFunc(message);
-	else
-		printf("%s",message);
+	DebugTraceString(message);
 }
 
 bool VMPI_isMemoryProfilingEnabled()
@@ -187,11 +228,15 @@ void VMPI_setPageProtection(void *address,
 							bool executableFlag,
 							bool writeableFlag)
 {
-  int bitmask = sysconf(_SC_PAGESIZE) - 1;
+	(void)address;
+	(void)size;
+	(void)executableFlag;
+	(void)writeableFlag;
+/*
   // mprotect requires that the addresses be aligned on page boundaries
   void *endAddress = (void*) ((char*)address + size);
-  void *beginPage = (void*) ((size_t)address & ~bitmask);
-  void *endPage   = (void*) (((size_t)endAddress + bitmask) & ~bitmask);
+  void *beginPage = (void*) ((size_t)address & ~0xFFF);
+  void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
   size_t sizePaged = (size_t)endPage - (size_t)beginPage;
   
   int flags = PROT_READ;
@@ -204,8 +249,8 @@ void VMPI_setPageProtection(void *address,
   int retval = mprotect((maddr_ptr)beginPage, (unsigned int)sizePaged, flags);
   AvmAssert(retval == 0);
   (void)retval;
+*/
 }
-
 
 const char *VMPI_getenv(const char *name)
 {
