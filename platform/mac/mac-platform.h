@@ -90,7 +90,7 @@
 #include <inttypes.h>
 #include <alloca.h>
 
-#ifdef AVMPLUS_MAC_CARBON
+#if defined(AVMPLUS_MAC_CARBON) || defined(AVMPLUS_PPC)
 	#include <CoreServices/CoreServices.h>   // for MakeDataExecutable
 #endif
 #include <mach/mach.h>                   // for vm_protect()
