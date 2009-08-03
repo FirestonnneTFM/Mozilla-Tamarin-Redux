@@ -353,7 +353,6 @@ const int kBufferPadding = 16;
 		 */
 		DRC(Namespacep) publicNamespace;
 		NamespaceSet* publicNamespaces;  // FIXME memory management: anything special need to be done here?
-		VTable* namespaceVTable;
 
 		#ifdef AVMPLUS_WITH_JNI
 		Java* java;     /* java vm control */

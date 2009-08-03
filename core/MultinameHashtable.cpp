@@ -209,37 +209,65 @@ found1:
 		AvmAssert(!isFull());
 
 		GC* gc = GC::GetGC(m_quads);
-		int i = find(name, ns, m_quads, numQuads);
-		Quad& t = m_quads[i];
-		if (t.name == name)
-		{
-			// This <name,ns> pair is already in the table
-			AvmAssert(t.ns == ns);
-		}
-		else
-		{
-			bool multiNS = getName(name) != BIND_NONE;
 
-			// New table entry for this <name,ns> pair
-			size++;
-			//quads[i] = name;
-			WBRC(gc, m_quads, &t.name, name);
-			//quads[i+1] = ns;
-			WBRC(gc, m_quads, &t.ns, ns);
-
-			if(multiNS)
+		uint32_t multiNS = 0;
+		
+		// inlined version of find(), so that we can sniff for the multiNS
+		// case (and update as necessary) in a single pass (rather than the 
+		// two extra passes we used to do)... this relies on the fact that
+		// the quadratic probe will walk thru every existing entry with the same
+		// same name in order to find an empty slot, thus if there are any existing
+		// entries with a different ns than what we are adding, all of those name
+		// entries should be marked as multiNS.
+		Quad* cur;
+		Quad* const quadbase = m_quads;
+		{
+			int n = 7;
+			int const bitmask = (numQuads - 1);
+			unsigned i = ((0x7FFFFFF8 & (uintptr)name) >> 3) & bitmask;
+			cur = quadbase + i;
+			for (;;)
 			{
-				Quad* cur = m_quads;
-				for(int i = numQuads; i--; cur++)
-					if(cur->name == name)
-						cur->multiNS = (unsigned)-1;
+				Stringp probeName = cur->name;
+				if (!probeName)
+				{
+					// found the hole.
+					break;
+				}
+
+				if (probeName == name)
+				{
+					// there's at least one existing entry with this name in the MNHT.
+					if (cur->ns == ns)
+					{
+						// it's the one we're looking for, just update the value.
+						goto write_value;
+					}
+
+					// it's not the one we're looking for, thus we are now multiNS on this name.
+					cur->multiNS = multiNS = 1;
+				}
+
+				i = (i + (n++)) & bitmask;			// quadratic probe
+				cur = quadbase + i;
 			}
 		}
+		
+		AvmAssert(cur->name == NULL);
 
-		//quads[i+2] = value;
-		WB(gc, m_quads, &t.value, value);
+		// New table entry for this <name,ns> pair
+		size++;
+		//quads[i].name = name;
+		WBRC(gc, quadbase, &cur->name, name);
+		//quads[i].ns = ns;
+		WBRC(gc, quadbase, &cur->ns, ns);
+		cur->multiNS = multiNS;
+
+write_value:
+		//quads[i].value = value;
+		WB(gc, quadbase, &cur->value, value);
 #ifdef MH_CACHE1
-		m_cache1 = t;
+		m_cache1 = *cur;
 #endif
 	}
 
