@@ -4309,7 +4309,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			compat_nss = core->newNamespaceSet(count);
 			Stringp baseURI = getBaseURI(core, proto_ns->getURI());
 		#ifdef _DEBUG
-			for (uint32_t i = 1; i < nss->size; ++i)
+			for (int i = 1; i < nss->size; ++i)
 			{
 				// getBaseURI always returns an interned string
 				AvmAssert(baseURI == getBaseURI(core, nss->namespaces[i]->getURI()));
