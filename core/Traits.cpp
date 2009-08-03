@@ -646,26 +646,15 @@ namespace avmplus
 		
 	static void addVersionedBindings(MultinameHashtable* bindings,
 									 Stringp name,
-									 NamespaceSetp nss,
+									 NamespaceSetp compat_nss,
 									 Binding binding,
 									 AvmCore* core)
 	{
 		// Add a binding for each version that is larger
 		// (compatible with) the version of the current namespace.
-		const NamespaceSet* compat_nss = ApiUtils::getCompatibleNamespaces(core, nss);
 		for (int i=0; i<compat_nss->size; ++i) {
 			bindings->add(name, compat_nss->namespaces[i], binding);
 		}
-	}
-
-	static void addVersionedBindings(MultinameHashtable* bindings,
-									 Stringp name,
-									 Namespacep ns,
-									 Binding binding,
-									 AvmCore* core)
-	{
-		NamespaceSet* nss = new (core->GetGC()) NamespaceSet(ns);
-		addVersionedBindings(bindings, name, nss, binding, core);
 	}
 
 	// -------------------------------------------------------------------
@@ -1017,14 +1006,14 @@ namespace avmplus
 			this->pool->resolveQName(ne.qni, mn, toplevel);
 			Stringp name = mn.getName();
 			Namespacep ns;
-			NamespaceSet* nss;
+			NamespaceSetp compat_nss;
 			if (mn.namespaceCount() > 1) {
-				nss = (NamespaceSet*) mn.getNsset();
-				ns = nss->namespaces[0];
+				ns = mn.getNsset()->namespaces[0];
+				compat_nss = ApiUtils::getCompatibleNamespaces(core, mn.getNsset());
 			}
 			else {
 				ns = mn.getNamespace();
-				nss = new (core->GetGC()) NamespaceSet(ns);
+				compat_nss = ApiUtils::getCompatibleNamespaces(core, new (core->GetGC()) NamespaceSet(ns));
 			}
 
 			switch (ne.kind)
@@ -1067,7 +1056,7 @@ namespace avmplus
 					AvmAssert(!(ne.id > nameCount));						// unhandled verify error
 					AvmAssert(!(basetb && slot_id < basetb->slotCount));	// unhandled verify error
 					AvmAssert(!(bindings->get(name, ns) != BIND_NONE));		// unhandled verify error
-					addVersionedBindings(bindings, name, nss, AvmCore::makeSlotBinding(slot_id, ne.kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST), core);
+					addVersionedBindings(bindings, name, compat_nss, AvmCore::makeSlotBinding(slot_id, ne.kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST), core);
 					break;
 				}
 				case TRAIT_Method:
@@ -1075,7 +1064,7 @@ namespace avmplus
 					Binding baseBinding = this->getOverride(basetb, ns, name, ne.tag, toplevel);
 					if (baseBinding == BIND_NONE)
 					{
-						addVersionedBindings(bindings, name, nss, AvmCore::makeMGSBinding(methodCount, BKIND_METHOD), core);
+						addVersionedBindings(bindings, name, compat_nss, AvmCore::makeMGSBinding(methodCount, BKIND_METHOD), core);
 						// accessors require 2 vtable slots, methods only need 1.
 						methodCount += 1;
 					}
@@ -1083,7 +1072,7 @@ namespace avmplus
 					{
 						// something got overridden, need new name entry for this subclass
 						// but keep the existing disp_id
-						addVersionedBindings(bindings, name, nss, baseBinding, core);
+						addVersionedBindings(bindings, name, compat_nss, baseBinding, core);
 					}
 					else
 					{
@@ -1105,7 +1094,7 @@ namespace avmplus
 					const BindingKind them = (ne.kind == TRAIT_Getter) ? BKIND_SET : BKIND_GET;
 					if (baseBinding == BIND_NONE)
 					{
-						addVersionedBindings(bindings, name, nss, AvmCore::makeMGSBinding(methodCount, us), core);
+						addVersionedBindings(bindings, name, compat_nss, AvmCore::makeMGSBinding(methodCount, us), core);
 						// accessors require 2 vtable slots, methods only need 1.
 						methodCount += 2;
 					}
@@ -1118,7 +1107,7 @@ namespace avmplus
 						{
 							baseBinding = AvmCore::makeGetSetBinding(baseBinding);
 						}
-						addVersionedBindings(bindings, name, nss, baseBinding, core);
+						addVersionedBindings(bindings, name, compat_nss, baseBinding, core);
 					}
 					else
 					{
@@ -1339,7 +1328,9 @@ namespace avmplus
 			Traits* t = this->pool->resolveTypeName(pos, toplevel);
 
 			// this assumes we save name/ns in all builds, not just verbose
-			addVersionedBindings(bindings, this->name(), this->ns(), AvmCore::makeSlotBinding(0, BKIND_VAR), core);
+			NamespaceSetp nss = new (core->GetGC()) NamespaceSet(this->ns());
+			NamespaceSetp compat_nss = ApiUtils::getCompatibleNamespaces(core, nss);
+			addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR), core);
 			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/0);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);
 			thisData->m_slotSize = is8ByteSlot(t) ? 8 : 4;
