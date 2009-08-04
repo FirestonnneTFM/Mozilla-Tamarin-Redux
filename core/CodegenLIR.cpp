@@ -5406,17 +5406,18 @@ namespace avmplus
 
         deadvars();
 
-        verbose_only(if (verbose())
-            live(gc, frag, &log);
-        )
+        verbose_only(if (verbose()) {
+            Allocator live_alloc;
+            live(gc, live_alloc, frag, &log);
+        })
 
         PageMgr *mgr = pool->codePages;
-        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core, &log);
+        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, *lir_alloc, core, &log);
         #ifdef VTUNE
         assm->cgen = this;
         #endif
 
-        verbose_only( StringList asmOutput(gc); )
+        verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
         RegAllocMap regMap(gc);
         NInsList loopJumps(gc);
@@ -5428,8 +5429,8 @@ namespace avmplus
 
         verbose_only(
             assm->_outputCache = 0;
-            for (int i=asmOutput.size()-1; i>=0; --i) {
-                assm->outputf("%s",asmOutput.get(i));
+            for (Seq<char*>* p = asmOutput.get(); p != NULL; p = p->tail) {
+                assm->outputf("%s", p->head);
             }
         );
 
