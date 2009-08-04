@@ -105,15 +105,14 @@ namespace nanojit
         ,UnknownBranch
     };
 
-    typedef avmplus::List<NIns*, avmplus::LIST_NonGCObjects> NInsList;
-    typedef avmplus::SortedMap<LIns*,NIns*,avmplus::LIST_NonGCObjects> InsMap;
-    typedef avmplus::SortedMap<NIns*,LIns*,avmplus::LIST_NonGCObjects> NInsMap;
+    typedef SeqBuilder<NIns*> NInsList;
+    typedef HashMap<NIns*, LIns*> NInsMap;
 
 #ifdef VTUNE
     class avmplus::CodegenLIR;
 #endif
 
-    class LabelState MMGC_SUBCLASS_DECL
+    class LabelState
     {
     public:
         RegAlloc regs;
@@ -124,17 +123,22 @@ namespace nanojit
 
     class LabelStateMap
     {
-        GC *gc;
-        avmplus::SortedMap<LIns*, LabelState*, avmplus::LIST_GCObjects> labels;
+        Allocator& alloc;
+        HashMap<LIns*, LabelState*> labels;
     public:
-        LabelStateMap(GC *gc) : gc(gc), labels(gc)
+        LabelStateMap(Allocator& alloc) : alloc(alloc), labels(alloc)
         {}
-        ~LabelStateMap();
 
         void clear() { labels.clear(); }
         void add(LIns *label, NIns *addr, RegAlloc &regs);
         LabelState *get(LIns *);
     };
+
+    typedef SeqBuilder<char*> StringList;
+
+    /** map tracking the register allocation state at each bailout point
+     *  (represented by SideExit*) in a trace fragment. */
+    typedef HashMap<SideExit*, RegAlloc*> RegAllocMap;
 
     /**
      * Information about the activation record for the method is built up
@@ -172,7 +176,7 @@ namespace nanojit
             avmplus::CodegenLIR *cgen;
             #endif
 
-            Assembler(CodeAlloc* codeAlloc, AvmCore* core, LogControl* logc);
+            Assembler(CodeAlloc* codeAlloc, Allocator& alloc, AvmCore* core, LogControl* logc);
             ~Assembler() {}
 
             void        assemble(Fragment* frag, NInsList& loopJumps);
@@ -237,9 +241,8 @@ namespace nanojit
                 return r->used ? r : 0;
             }
 
-            AvmCore             *core;
+            Allocator           &alloc;
             DWB(CodeAlloc*)     _codeAlloc;
-            GC*                 _gc;
             DWB(Fragment*)      _thisfrag;
             RegAllocMap*        _branchStateMap;
 

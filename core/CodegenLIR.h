@@ -146,6 +146,7 @@ namespace avmplus
 
     private:
         GC *gc;
+        Allocator* alloc1;    // allocator used in first pass, while writing LIR
         Allocator* lir_alloc; // allocator with LIR buffer lifetime
         LogControl log;
         AvmCore *core;
@@ -209,7 +210,7 @@ namespace avmplus
         void patchLater(LIns *br, int pc_off);
         void setLabelPos(CodegenLabel &l, LIns *target);
         void deadvars();
-        void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
+        void deadvars_analyze(Allocator&, SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
         void deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
         void copyParam(int i, int &offset);
 

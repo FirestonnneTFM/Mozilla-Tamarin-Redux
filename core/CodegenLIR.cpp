@@ -602,6 +602,7 @@ namespace avmplus
         jitPendingRecords(i->core()->gc),
 #endif
         gc(i->pool()->core->gc),
+        alloc1(new Allocator()),
         lir_alloc(new Allocator()),
         core(i->pool()->core),
         info(i),
@@ -651,6 +652,7 @@ namespace avmplus
             delete lirbuf;
         }
 
+        delete alloc1;
         delete lir_alloc;
     }
 
@@ -1292,7 +1294,7 @@ namespace avmplus
             if (verbose() && !core->quiet_opt()) {
                 log.lcbits = 0xffff; // turn everything on
                 lirbuf->names = new (gc) LirNameMap(gc, *lir_alloc, pool->codePages->labels);
-                lirout = vbWriter = new (gc) VerboseWriter(gc, lirout, lirbuf->names, &log);
+                lirout = vbWriter = new (gc) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
             }
         )
         #ifdef NJ_SOFTFLOAT
@@ -5172,12 +5174,12 @@ namespace avmplus
     };
 #endif
 
-    void CodegenLIR::deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
+    void CodegenLIR::deadvars_analyze(Allocator& alloc, SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
     {
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LIns *vars = lirbuf->sp;
-        InsList looplabels(gc);
+        InsList looplabels(alloc);
         BitSet livein(framesize);
 
         verbose_only(int iter = 0;)
@@ -5218,8 +5220,8 @@ namespace avmplus
                         labels.put(i, lset);
                     }
                     if (lset->setFrom(livein) && !again) {
-                        for (int j=0, n=looplabels.size(); j < n; j++) {
-                            if (looplabels[j] == i) {
+                        for (Seq<LIns*>* p = looplabels.get(); p != NULL; p = p->tail) {
+                            if (p->head == i) {
                                 again = true;
                                 break;
                             }
@@ -5379,8 +5381,9 @@ namespace avmplus
     {
         DEBUGGER_ONLY(if (core->debugger()) return; ) // if debugging don't elim vars
 
+        Allocator dv_alloc;
         SortedMap<LIns*, BitSet*, LIST_GCObjects> labels(gc);
-        deadvars_analyze(labels);
+        deadvars_analyze(dv_alloc, labels);
         deadvars_kill(labels);
         for (int i=0, n = labels.size(); i < n; i++) {
             BitSet *b = labels.at(i);
@@ -5396,6 +5399,9 @@ namespace avmplus
 
     void CodegenLIR::emitMD()
     {
+        delete alloc1;
+        alloc1 = NULL;
+
         PERFM_NTPROF("compile");
         debug_only(
             LirReader reader(frag->lastIns);
@@ -5406,20 +5412,21 @@ namespace avmplus
 
         deadvars();
 
-        verbose_only(if (verbose())
-            live(gc, frag, &log);
-        )
+        verbose_only(if (verbose()) {
+            Allocator live_alloc;
+            live(live_alloc, frag, &log);
+        })
 
         PageMgr *mgr = pool->codePages;
-        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, core, &log);
+        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, *lir_alloc, core, &log);
         #ifdef VTUNE
         assm->cgen = this;
         #endif
 
-        verbose_only( StringList asmOutput(gc); )
+        verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
-        RegAllocMap regMap(gc);
-        NInsList loopJumps(gc);
+        RegAllocMap regMap(*lir_alloc);
+        NInsList loopJumps(*lir_alloc);
         assm->hasLoop = false;
         assm->beginAssembly(frag, &regMap);
         assm->assemble(frag, loopJumps);
@@ -5428,8 +5435,8 @@ namespace avmplus
 
         verbose_only(
             assm->_outputCache = 0;
-            for (int i=asmOutput.size()-1; i>=0; --i) {
-                assm->outputf("%s",asmOutput.get(i));
+            for (Seq<char*>* p = asmOutput.get(); p != NULL; p = p->tail) {
+                assm->outputf("%s", p->head);
             }
         );
 

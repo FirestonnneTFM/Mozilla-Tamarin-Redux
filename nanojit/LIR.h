@@ -320,6 +320,8 @@ namespace nanojit
         LRK_None    // this one is used for unused opcode numbers
     };
 
+    class LIns;
+
     // 0-operand form.  Used for LIR_start and LIR_label.
     class LInsOp0
     {
@@ -791,6 +793,7 @@ namespace nanojit
     };
 
     typedef LIns* LInsp;
+    typedef SeqBuilder<LIns*> InsList;
 
     LIns* FASTCALL callArgN(LInsp i, uint32_t n);
     extern const int8_t operandCount[];
@@ -950,9 +953,9 @@ namespace nanojit
         DWB(LirNameMap*) names;
         LogControl* logc;
     public:
-        VerboseWriter(GC *gc, LirWriter *out,
+        VerboseWriter(Allocator& alloc, LirWriter *out,
                       LirNameMap* names, LogControl* logc)
-            : LirWriter(out), code(gc), names(names), logc(logc)
+            : LirWriter(out), code(alloc), names(names), logc(logc)
         {}
 
         LInsp add(LInsp i) {
@@ -969,12 +972,14 @@ namespace nanojit
 
         void flush()
         {
-            int n = code.size();
-            if (n) {
-                for (int i=0; i < n; i++)
-                    logc->printf("    %s\n",names->formatIns(code[i]));
+            if (!code.isEmpty()) {
+                int32_t count = 0;
+                for (Seq<LIns*>* p = code.get(); p != NULL; p = p->tail) {
+                    logc->printf("    %s\n",names->formatIns(p->head));
+                    count++;
+                }
                 code.clear();
-                if (n > 1)
+                if (count > 1)
                     logc->printf("\n");
             }
         }
@@ -1213,18 +1218,17 @@ namespace nanojit
     class Assembler;
 
     void compile(Assembler *assm, Fragment *frag, Fragmento*);
-    verbose_only(void live(GC *gc, Fragment* frag, LogControl*);)
+    verbose_only(void live(Allocator& alloc, Fragment* frag, LogControl*);)
 
     class StackFilter: public LirFilter
     {
         LirBuffer *lirbuf;
         LInsp sp;
-        avmplus::BitSet stk;
+        BitSet stk;
         int top;
         int getTop(LInsp br);
     public:
-        StackFilter(LirFilter *in, LirBuffer *lirbuf, LInsp sp);
-        virtual ~StackFilter() {}
+        StackFilter(LirFilter *in, Allocator& alloc, LirBuffer *lirbuf, LInsp sp);
         LInsp read();
     };
 
