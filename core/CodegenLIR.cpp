@@ -5419,7 +5419,7 @@ namespace avmplus
 
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
-        RegAllocMap regMap(gc);
+        RegAllocMap regMap(*lir_alloc);
         NInsList loopJumps(gc);
         assm->hasLoop = false;
         assm->beginAssembly(frag, &regMap);
