@@ -107,11 +107,13 @@ namespace avmplus
 
     class PageMgr : public GCFinalizedObject {
     public:
-        Allocator allocator;
         DWB(CodeAlloc*) codeAlloc;
-        verbose_only( DWB(LabelMap*) labels; )
+        LogControl  log;
+    #ifdef NJ_VERBOSE
+        Allocator   allocator;    // lifetime of this PageMgr
+        LabelMap    labels;
+    #endif
         PageMgr();
-        ~PageMgr();
     };
 
     class Patch {
