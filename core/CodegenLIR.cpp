@@ -640,12 +640,6 @@ namespace avmplus
         }
         lirout = NULL;
 
-        // clean up partially generated LIR
-        if (frag) {
-            delete frag;
-            frag = NULL;
-        }
-
         delete alloc1;
         alloc1 = NULL;
         delete lir_alloc;
@@ -1277,7 +1271,7 @@ namespace avmplus
         abcEnd   = abcStart + state->verifier->code_length;
         framesize = state->verifier->frameSize;
 
-        frag = new (gc) Fragment(abcStart);
+        frag = new (*lir_alloc) Fragment(abcStart);
         frag->root = frag;
         LirBuffer *lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
