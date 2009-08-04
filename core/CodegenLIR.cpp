@@ -1290,7 +1290,7 @@ namespace avmplus
         verbose_only(
             vbWriter = 0;
             if (verbose() && !core->quiet_opt()) {
-                lirbuf->names = new (gc) LirNameMap(gc, *lir_alloc, &pool->codePages->labels);
+                lirbuf->names = new (*lir_alloc) LirNameMap(*lir_alloc, &pool->codePages->labels);
                 lirout = vbWriter = new (gc) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
             }
         )
