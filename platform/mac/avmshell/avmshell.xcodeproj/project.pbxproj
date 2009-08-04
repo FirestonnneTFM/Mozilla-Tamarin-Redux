@@ -332,6 +332,8 @@
 		07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
 		191659990FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
+		1992FDA3102869D10032FBBF /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1992FDA1102869D10032FBBF /* Containers.cpp */; };
+		1992FDA4102869D10032FBBF /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1992FDA1102869D10032FBBF /* Containers.cpp */; };
 		19BB29A00F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BB29A10F8119E100C5F1F7 /* swf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BB299F0F8119E100C5F1F7 /* swf.cpp */; };
 		19BDA443100CC20200172A70 /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19BDA441100CC20200172A70 /* Allocator.cpp */; };
@@ -788,6 +790,8 @@
 		07ED27EF0FBD78C4007E3950 /* GCStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCStack.cpp; path = ../../../MMgc/GCStack.cpp; sourceTree = SOURCE_ROOT; };
 		191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeAlloc.cpp; path = ../../../nanojit/CodeAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		191659970FB88A1400F3DCD3 /* CodeAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeAlloc.h; path = ../../../nanojit/CodeAlloc.h; sourceTree = SOURCE_ROOT; };
+		1992FDA1102869D10032FBBF /* Containers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Containers.cpp; path = ../../../nanojit/Containers.cpp; sourceTree = SOURCE_ROOT; };
+		1992FDA2102869D10032FBBF /* Containers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Containers.h; path = ../../../nanojit/Containers.h; sourceTree = SOURCE_ROOT; };
 		19BB299F0F8119E100C5F1F7 /* swf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swf.cpp; path = ../../../shell/swf.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA441100CC20200172A70 /* Allocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Allocator.cpp; path = ../../../nanojit/Allocator.cpp; sourceTree = SOURCE_ROOT; };
 		19BDA442100CC20200172A70 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = ../../../nanojit/Allocator.h; sourceTree = SOURCE_ROOT; };
@@ -1146,6 +1150,8 @@
 		079DF7B30F3A86F20031D1B4 /* nanojit */ = {
 			isa = PBXGroup;
 			children = (
+				1992FDA1102869D10032FBBF /* Containers.cpp */,
+				1992FDA2102869D10032FBBF /* Containers.h */,
 				19BDA441100CC20200172A70 /* Allocator.cpp */,
 				19BDA442100CC20200172A70 /* Allocator.h */,
 				D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */,
@@ -1698,6 +1704,7 @@
 				07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */,
 				19BDA444100CC20200172A70 /* Allocator.cpp in Sources */,
 				07689AA1101DC28000BC72AA /* ZCT.cpp in Sources */,
+				1992FDA4102869D10032FBBF /* Containers.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1875,6 +1882,7 @@
 				07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */,
 				19BDA443100CC20200172A70 /* Allocator.cpp in Sources */,
 				07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */,
+				1992FDA3102869D10032FBBF /* Containers.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
