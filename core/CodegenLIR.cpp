@@ -5408,7 +5408,7 @@ namespace avmplus
 
         verbose_only(if (verbose()) {
             Allocator live_alloc;
-            live(gc, live_alloc, frag, &log);
+            live(live_alloc, frag, &log);
         })
 
         PageMgr *mgr = pool->codePages;
