@@ -105,9 +105,9 @@ namespace avmplus
         {}
     };
 
-    class PageMgr : public GCFinalizedObject {
+    class PageMgr {
     public:
-        DWB(CodeAlloc*) codeAlloc;
+        CodeAlloc   codeAlloc;
         LogControl  log;
     #ifdef NJ_VERBOSE
         Allocator   allocator;    // lifetime of this PageMgr
