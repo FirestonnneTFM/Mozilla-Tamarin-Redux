@@ -583,14 +583,13 @@ namespace avmplus
 
     void initCodePages(PoolObject *pool) {
         if (!pool->codePages) {
-            AvmCore *core = pool->core;
-            GC *gc = core->gc;
+            GC *gc = pool->core->gc;
             PageMgr *mgr = pool->codePages = new (gc) PageMgr();
             mgr->codeAlloc = new (gc) CodeAlloc();
 #ifdef NJ_VERBOSE
             if (pool->verbose) {
-                LabelMap *labels = mgr->labels = new (gc) LabelMap(core, mgr->allocator);
-                labels->add(core, sizeof(AvmCore), 0, "core");
+                mgr->log.lcbits = 0xffff; // turn everything on
+                mgr->labels.add(pool->core, sizeof(AvmCore), 0, "core");
             }
 #endif
         }
@@ -611,7 +610,6 @@ namespace avmplus
         interruptable(true),
         patches(gc)
     {
-        log.lcbits = 0;
         state = NULL;
 
         #ifdef AVMPLUS_MAC_CARBON
@@ -1292,8 +1290,7 @@ namespace avmplus
         verbose_only(
             vbWriter = 0;
             if (verbose() && !core->quiet_opt()) {
-                log.lcbits = 0xffff; // turn everything on
-                lirbuf->names = new (gc) LirNameMap(gc, *lir_alloc, pool->codePages->labels);
+                lirbuf->names = new (gc) LirNameMap(gc, *lir_alloc, &pool->codePages->labels);
                 lirout = vbWriter = new (gc) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
             }
         )
@@ -5148,10 +5145,11 @@ namespace avmplus
     }
 
     PageMgr::PageMgr() : codeAlloc(0)
-        verbose_only(, labels(0))
-    {}
-
-    PageMgr::~PageMgr() {
+#ifdef NJ_VERBOSE
+        , labels(allocator, &log)
+#endif
+    {
+        verbose_only( log.lcbits = 0; )
     }
 
 #ifdef _DEBUG
@@ -5412,13 +5410,13 @@ namespace avmplus
 
         deadvars();
 
+        PageMgr *mgr = pool->codePages;
         verbose_only(if (verbose()) {
             Allocator live_alloc;
-            live(live_alloc, frag, &log);
+            live(live_alloc, frag, &mgr->log);
         })
 
-        PageMgr *mgr = pool->codePages;
-        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, *lir_alloc, core, &log);
+        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, *lir_alloc, core, &mgr->log);
         #ifdef VTUNE
         assm->cgen = this;
         #endif
