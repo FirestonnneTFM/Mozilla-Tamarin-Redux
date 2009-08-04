@@ -41,7 +41,7 @@
 
 namespace avmplus
 {
-#ifdef FEATURE_NANOJIT
+#ifdef VMCFG_NANOJIT
     class PageMgr;
 #endif
 
@@ -137,8 +137,8 @@ namespace avmplus
 		void initPrecomputedMultinames();
 #endif
 		
-        #ifdef FEATURE_NANOJIT
-        DWB(PageMgr*) codePages;
+        #ifdef VMCFG_NANOJIT
+        PageMgr* codePages;
         #endif
 
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos, uint32_t api);

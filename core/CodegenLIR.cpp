@@ -583,9 +583,8 @@ namespace avmplus
 
     void initCodePages(PoolObject *pool) {
         if (!pool->codePages) {
-            GC *gc = pool->core->gc;
-            PageMgr *mgr = pool->codePages = new (gc) PageMgr();
-            mgr->codeAlloc = new (gc) CodeAlloc();
+            PageMgr *mgr = new PageMgr();
+            pool->codePages = mgr;
 #ifdef NJ_VERBOSE
             if (pool->verbose) {
                 mgr->log.lcbits = 0xffff; // turn everything on
@@ -5145,7 +5144,7 @@ namespace avmplus
         return lirout->insAlloc(size >= 4 ? size : 4);
     }
 
-    PageMgr::PageMgr() : codeAlloc(0)
+    PageMgr::PageMgr() : codeAlloc()
 #ifdef NJ_VERBOSE
         , labels(allocator, &log)
 #endif
@@ -5476,7 +5475,7 @@ namespace avmplus
             #endif
         } else {
             // assm puked, or we did something untested, so interpret.
-            frag->releaseCode(mgr->codeAlloc);
+            frag->releaseCode(&mgr->codeAlloc);
             overflow = true;
             #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())

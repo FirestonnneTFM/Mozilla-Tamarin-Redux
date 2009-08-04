@@ -38,6 +38,10 @@
 
 #include "avmplus.h"
 
+#ifdef VMCFG_NANOJIT
+#  include "CodegenLIR.h"
+#endif
+
 namespace avmplus
 {
 	PoolObject::PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startPos, uint32_t api) :
@@ -85,6 +89,10 @@ namespace avmplus
 	{
 		#ifdef AVMPLUS_WORD_CODE
 		delete word_code.cpool_mn;
+		#endif
+
+		#ifdef VMCFG_NANOJIT
+		delete codePages;
 		#endif
 
 #if USE_STATIC_ABC_STRINGS
