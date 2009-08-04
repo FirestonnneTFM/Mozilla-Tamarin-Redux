@@ -5409,7 +5409,7 @@ namespace avmplus
             live(live_alloc, frag, &mgr->log);
         })
 
-        Assembler *assm = new (gc) Assembler(mgr->codeAlloc, *lir_alloc, core, &mgr->log);
+        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, *lir_alloc, core, &mgr->log);
         #ifdef VTUNE
         assm->cgen = this;
         #endif
@@ -5483,8 +5483,6 @@ namespace avmplus
             jitInfoList.clear();
         }
         #endif /* VTUNE */
-
-        delete assm;
     }
 
 #ifdef VTUNE
