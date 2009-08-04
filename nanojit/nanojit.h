@@ -132,15 +132,9 @@ namespace nanojit
      * -------------------------------------------
      */
     class Fragment;
-    class LIns;
-    struct SideExit;
-    class RegAlloc;
     typedef avmplus::AvmCore AvmCore;
     typedef avmplus::OSDep OSDep;
     typedef avmplus::SortedMap<const void*, Fragment*, avmplus::LIST_GCObjects> FragmentMap;
-    typedef avmplus::SortedMap<SideExit*, RegAlloc*, avmplus::LIST_GCObjects> RegAllocMap;
-    typedef avmplus::List<LIns*, avmplus::LIST_NonGCObjects>    InsList;
-    typedef avmplus::List<char*, avmplus::LIST_GCObjects> StringList;
 
     const uint32_t MAXARGS = 8;
 
@@ -311,6 +305,7 @@ namespace nanojit {
 
 
 #include "Allocator.h"
+#include "Containers.h"
 #include "Native.h"
 #include "CodeAlloc.h"
 #include "LIR.h"
