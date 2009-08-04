@@ -1,0 +1,224 @@
+# ***** BEGIN LICENSE BLOCK ***** 
+# Version: MPL 1.1/GPL 2.0/LGPL 2.1 
+#
+# The contents of this file are subject to the Mozilla Public License Version 1.1 (the 
+# "License"); you may not use this file except in compliance with the License. You may obtain 
+# a copy of the License at http://www.mozilla.org/MPL/ 
+#
+# Software distributed under the License is distributed on an "AS IS" basis, WITHOUT 
+# WARRANTY OF ANY KIND, either express or implied. See the License for the specific 
+# language governing rights and limitations under the License. 
+#
+# created by dschaffe@adobe.com for use with tamarin tests
+#
+# Alternatively, the contents of this file may be used under the terms of either the GNU 
+# General Public License Version 2 or later (the "GPL"), or the GNU Lesser General Public 
+# License Version 2.1 or later (the "LGPL"), in which case the provisions of the GPL or the 
+# LGPL are applicable instead of those above. If you wish to allow use of your version of this 
+# file only under the terms of either the GPL or the LGPL, and not to allow others to use your 
+# version of this file under the terms of the MPL, indicate your decision by deleting provisions 
+# above and replace them with the notice and other provisions required by the GPL or the 
+# LGPL. If you do not delete the provisions above, a recipient may use your version of this file 
+# under the terms of any one of the MPL, the GPL or the LGPL. 
+# 
+# ***** END LICENSE BLOCK ***** */
+
+# DOCUMENTATION:
+#    the acceptance/testconfig.txt controls when test files and test cases are marked as expected failure and skip for a specific configuration.
+#
+#    the general format for non-comment lines in this file is comma separated:
+#       test ,  configuration  ,  command (expectedfailure, skip,include)   ,  comments
+#
+# test is a regular expression consisting of path to file relative from test/acceptance  ':' (separator) testcase
+#
+# configuration is a regular expression with the format {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+#
+# command are currently one of : asc.args, expectedfailure, skip, include
+#    expectedfailure - expects the test to fail, comments should provide bug number and a comment
+#    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
+#    include - includes a specific testcase even if the parent has been skipped
+#
+# comments: please include bug reference, date, and reason for the entry
+
+# NOTES:
+# To specify that a configuration string DOES NOT contain certain strings use Zero-width negative lookahead: (?!regex)
+#   For example, to set an expected failure for all test runs EXCEPT when -Dinterp is used, use the following:
+#       ^((?!Dinterp).)*$
+
+#  PERMANENT ENTRIES:
+util/shell_ats, .*, skip, shell file for ats media creation
+
+
+# BUGS:
+# Grouped by feature or platform
+
+####################
+# force JIT -Ojit
+####################
+as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*jit.*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(jit.*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+
+####################
+# abcasm:
+####################
+# inconsistencies in different debug output, need to implement regex matching of diffs
+abcasm/adhoc , .* , skip, 
+# abcasm helper, not a test
+abcasm/abs_helper , .* , skip,
+# Test uses abcasm to check a boundary condition, failure is correct result
+abcasm/traitsSparseSlots , .* , expectedfail , Error 1107 is correct output
+# Test uses abcasm to check a boundary condition, failure is correct result
+abcasm/semanticErrorDuplicateSlotName , .* , expectedfail , Error 1107 is correct output
+# Test uses abcasm to check a boundary condition, failure is correct result
+abcasm/funcRedef , .* , expectedfail , Error 1107 is correct output
+# Test not ready for prime-time
+abcasm/stringEscapes , .* , skip,
+abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=491056
+# Bug 496643 - x64 smoke test failures
+abcasm/mops, x64-(win|mac).*, skip , https://bugzilla.mozilla.org/show_bug.cgi?id=496643
+abcasm/coverage/I, ppc64-mac.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=496643
+
+####################
+# Differential testing (avmdiff.py)
+####################
+# sampling only works on debugger for avmdiff skip
+as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
+# mmgc tests fail on avmdiff, does not support passing args to vm
+mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
+# trim down tests to save time
+ecma3/Unicode/.*, .*diff, skip , trim down tests
+ecma3/Date/.*, .*diff, skip, trim down tests
+abcasm/.*, .*diff, skip, trim down tests
+# these failures are caused by stack traces appearing only the debugger builds
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType , .*diff , expectedfail, known issue
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch , .*diff , expectedfail, known issue
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , .*diff , expectedfail, known issue
+ecma3/Exceptions/exception_010_rt , .*diff , expectedfail, known issue
+ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
+ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
+
+####################
+# mmgc
+####################
+# Probably killing the stack 
+mmgc/outofmemory,   x64-win-tvm-.*   , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=488124
+
+####################
+# String
+####################
+ecma3/String/split_504567:'abab',    .*   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
+ecma3/String/split_504567:'babab',   .*   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
+
+####################
+# Vector
+####################
+as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
+as3/Vector/initializerLargeVector, x64.*jit.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281 intermittent seg fault
+
+
+####################
+# -Djitordie
+####################
+# The following testcases are not able to be jitted
+# https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+as3/Definitions/Function/functionReturnTypes, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+as3/ShellClasses/Domain, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/Array/e15_4_4_4_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/Expressions/e11_2_1_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/Expressions/e11_4_6, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/Expressions/e11_4_7, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/GlobalObject/e15_1_2_3_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/GlobalObject/e15_1_2_3_2, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/LexicalConventions/e7_7_3, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/LexicalConventions/e7_7_4, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/RegExp/eperlstress_001, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/RegExp/eperlstress_002, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/String/e15_5_3_2_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/String/e15_5_3_2_2, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/TypeConversion/e9_3_1_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/Unicode/uc_006, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+as3/Expressions/asOperator/asOper, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+regress/vector_domain_bug, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+ecma3/String/e15_5_4_4_4_rt, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
+
+####################
+# Windows Mobile
+####################
+# limitations of ceremoteshell.exe for running tests on windows mobile devices
+mops/.*                                                          ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
+abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
+mmgc/outofmemory,   .*winmobile.* ,  skip,   winmo is not returning exit code
+mmgc/memlimit   ,   .*winmobile.* ,  skip,   winmo does not run under memlimit
+# recursive PCRE testcases kills the stack on PocketPC builds
+ecma3/RegExp/eregress_119909,   .*winmobile.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
+ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+# sampling failure on winmobile-arm
+as3/sampling/Callback:.*                                         ,   arm-winmobile.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
+# Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+
+
+####################
+# Windows Mobile Emulator
+####################
+# emulator is not using DST by default
+# do not use wildcard match (.*) at end, fully specify matches so -deep ending will not match
+ecma3/Date/e15_9_5_14, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Unicode/u9000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u6000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u5000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u7000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u8000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/uE000_PrivateUseArea, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/uAC00_HangulSyllables, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Date/e15_9_5_10, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+
+as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+
+####################
+# skip slow tests in test phase
+####################
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/uE000_PrivateUseArea, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+ecma3/Unicode/uAC00_HangulSyllables, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+mops/mops, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+
+####################
+# run slow tests in deep test phase
+####################
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/uE000_PrivateUseArea,.*deep, include, include slow tests in deep phase
+ecma3/Unicode/uAC00_HangulSyllables,.*deep, include, include slow tests in deep phase
+# bug 505982
+mops/mops,^((?!ppc-mac-tvm-debug-).).*deep, include, include slow tests in deep phase
+
+####################
+# verifier
+####################
+ecma3/Statements/eforin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
+as3/Statements/for-each-in/eforeachin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
+
+####################
+# Sampling assertion
+# Assertion failed: "(((start_event == (PolicyEvent)(ev - 1))))" (".\\GC.cpp":461)
+# Disabling test until this can be properly investigated
+####################
+as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
