@@ -642,15 +642,14 @@ namespace avmplus
 
         // clean up partially generated LIR
         if (frag) {
-            LirBuffer *lirbuf = frag->lirbuf;
-            frag->releaseLirBuffer();
             delete frag;
             frag = NULL;
-            delete lirbuf;
         }
 
         delete alloc1;
+        alloc1 = NULL;
         delete lir_alloc;
+        lir_alloc = NULL;
     }
 
     #ifdef AVMPLUS_MAC_CARBON
@@ -1280,7 +1279,7 @@ namespace avmplus
 
         frag = new (gc) Fragment(abcStart);
         frag->root = frag;
-        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(*lir_alloc);
+        LirBuffer *lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
         debug_only(
@@ -5441,16 +5440,6 @@ namespace avmplus
         PERFM_NVPROF("IR-bytes", frag->lirbuf->byteCount());
         PERFM_NVPROF("IR", frag->lirbuf->insCount());
 
-        LirBuffer *lirbuf = frag->lirbuf;
-        frag->releaseLirBuffer();
-        for (LirWriter *w = lirout, *wnext; w != 0; w = wnext) {
-            wnext = w->out;
-            delete w;
-        }
-        lirout = NULL;
-        delete lirbuf;
-        lirbuf = NULL;
-
         bool keep = //!info->hasExceptions() &&
             !assm->error();
     #ifdef AVMPLUS_JITMAX
@@ -5586,26 +5575,9 @@ namespace nanojit
 		/*
 			This method is called exclusively from ~Fragment.
 			
-			Since Fragment is a GCFinalizedObject, this means that
-			we are called here only if:
-				(a) the heap is being swept, or
-				(b) we have been explicitly deleted. 
-			
-			HOWEVER: LirBuffer is also a GCFinalizedObject.
-			
-			Thus, for case (a), lirbuf might have been finalized before
-			us, so we MUST NOT explicitly delete it here, because that
-			could cause a double-delete, which can lead to many amusing problems.
-			
-			Instead, we will do nothing here, and in the (rare) case (b), 
-			lirbuf will simply be collected in due course.
+            Since LirBuffer is Allocator-allocated, we have no more
+            work to do when a Fragment is destroyed.  
 		*/
-		
-        if (root == this) {
-			// left here as a counterexample for the moment. don't delete.
-            // delete lirbuf;
-            lirbuf = 0;
-        }
     }
 
     void* Allocator::allocChunk(size_t size) {
