@@ -4280,6 +4280,9 @@ return the result of the comparison ToPrimitive(x) == y.
 			isVersionedURI(core, uri);
 	}
 
+	// note: this assumes that all namespaces in the input NSS have the same base uri
+	// (ie, uri is same except for version marker)... the input comes from traits with multiple 
+	// versioned namespaces.
 	const NamespaceSet* ApiUtils::getCompatibleNamespaces(AvmCore* core, const NamespaceSet* nss) 
 	{
 		//core->console << ">> getCompatibleNamespace\n";
@@ -4305,25 +4308,26 @@ return the result of the comparison ToPrimitive(x) == y.
 			uint32_t count = versions->size();
 			compat_nss = core->newNamespaceSet(count);
 			Stringp baseURI = getBaseURI(core, proto_ns->getURI());
+		#ifdef _DEBUG
+			for (uint32_t i = 1; i < nss->size; ++i)
+			{
+				// getBaseURI always returns an interned string
+				AvmAssert(baseURI == getBaseURI(core, nss->namespaces[i]->getURI()));
+			}
+		#endif
 			// add the versioned namespaces
 			for (uint32_t i = 0; i < count; ++i)
 			{
+				Stringp uri = baseURI;
 				uint32_t v = versions->get(i);
-				Namespacep* namespaces = compat_nss->namespaces;
-				if (v == getLargestAPI(core)) 
+				if (v != getLargestAPI(core)) 
 				{
-					// add the unversioned namespace (meaning is same as the largest versioned namespace)
-					Namespacep ns = core->internNamespace(core->newNamespace(baseURI, proto_ns->getType()));
-					WBRC(core->GetGC(), compat_nss, &namespaces[i], ns);				
-				}
-				else 
-				{
-					wchar c = (wchar)(MIN_API_MARK + versions->get(i));
+					wchar c = (wchar)(MIN_API_MARK + v);
 					//core->console << "ns=" << baseURI << " v=" << c - 0xe000 << "\n";
-					Stringp uri = baseURI->append16(&c, 1);
-					Namespacep ns = core->internNamespace(core->newNamespace(uri, nss->namespaces[0]->getType()));
-					WBRC(core->GetGC(), compat_nss, &namespaces[i], ns);				
+					uri = baseURI->append16(&c, 1);
 				}
+				Namespacep ns = core->internNamespace(core->newNamespace(uri, kind));
+				WBRC(core->GetGC(), compat_nss, &compat_nss->namespaces[i], ns);				
 			}
 		}
 		else
@@ -4334,7 +4338,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return compat_nss;
 	}
 
-	void ApiUtils::getCompatibleAPIs (AvmCore* core, uint32_t v, const uint32_t* &versions, uint32_t &size) 
+	void ApiUtils::getCompatibleAPIs(AvmCore* core, uint32_t v, const uint32_t* &versions, uint32_t &size) 
 	{
 #ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS
 		if (v>=core->apis_start && v<=core->apis_start+core->apis_count) {
