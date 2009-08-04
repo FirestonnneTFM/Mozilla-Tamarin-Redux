@@ -3159,7 +3159,8 @@ namespace avmplus
             itraits = ctraits->itraits;
             if (itraits && !itraits->hasCustomConstruct) {
                 Toplevel* toplevel = state->verifier->getToplevel(this);
-                itraits->init->resolveSignature(toplevel);
+                itraits->resolveSignatures(toplevel);
+				AvmAssert(itraits->init->isResolved());
                 if (itraits->init->getMethodSignature()->argcOk(argc)) {
                     state->verifier->emitCheckNull(ctor_index);
                     state->verifier->emitCoerceArgs(itraits->init, argc, true);

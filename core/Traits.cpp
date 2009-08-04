@@ -1603,6 +1603,9 @@ namespace avmplus
 			}
 		}
 
+		if (this->init != NULL)
+			this->init->resolveSignature(toplevel);
+
 		bool legal = true;
 		TraitsBindingsp tbbase = tb->base;	// might be null
 
