@@ -5458,7 +5458,6 @@ namespace avmplus
             #endif
         } else {
             // assm puked, or we did something untested, so interpret.
-            frag->releaseCode(&mgr->codeAlloc);
             overflow = true;
             #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())
