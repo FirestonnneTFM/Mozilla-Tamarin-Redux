@@ -273,9 +273,6 @@ namespace avmplus
         }
     #endif
 
-
-        bool outOMem();
-
         /** emit a constructor call, and early bind if possible */
         void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
 
