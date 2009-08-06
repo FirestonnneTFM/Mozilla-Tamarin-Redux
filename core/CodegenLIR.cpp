@@ -1042,21 +1042,6 @@ namespace avmplus
         // * suppress stores until ends of blocks
     };
 
-    class CfgCseFilter: public CseFilter
-    {
-    public:
-        CfgCseFilter(LirWriter *out, GC *gc) : CseFilter(out, gc)
-        {
-        }
-
-        LIns *ins0(LOpcode op) {
-            if (op == LIR_label) {
-                exprs.clear();
-            }
-            return out->ins0(op);
-        }
-    };
-
     void emitStart(GC* gc, LirBuffer *lirbuf, LirWriter* &lirout) {
         (void)gc;
         (void)lirbuf;
@@ -1291,8 +1276,8 @@ namespace avmplus
         #endif
         LoadFilter *loadfilter = 0;
         if (core->config.cseopt) {
-            loadfilter = new (gc) LoadFilter(lirout, gc);
-            lirout = new (gc) CfgCseFilter(loadfilter, gc);
+            loadfilter = new (gc) LoadFilter(lirout, *alloc1);
+            lirout = new (gc) CseFilter(loadfilter, *alloc1);
         }
         lirout = new (gc) Specializer(lirout, core->config);
         CopyPropagation *copier = new (gc) CopyPropagation(core, gc, lirout,
