@@ -633,13 +633,6 @@ namespace avmplus
 
     void CodegenLIR::cleanup()
     {
-        // clean up the LirWriter pipeline
-        for (LirWriter *w = lirout, *wnext; w != 0; w = wnext) {
-            wnext = w->out;
-            delete w;
-        }
-        lirout = NULL;
-
         delete alloc1;
         alloc1 = NULL;
         delete lir_alloc;
@@ -926,7 +919,7 @@ namespace avmplus
         bool hasExceptions;
     public:
         CopyPropagation(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar, bool ex)
-            : LirWriter(out), core(core), nvar(nvar), dirty(alloc, nvar), hasExceptions(ex)
+            : LirWriter(out), core(core), vars(NULL), nvar(nvar), dirty(alloc, nvar), hasExceptions(ex)
         {
             tracker = new (alloc) LInsp[nvar];
             clearState(); 
@@ -1037,12 +1030,12 @@ namespace avmplus
         // * suppress stores until ends of blocks
     };
 
-    void emitStart(GC* gc, LirBuffer *lirbuf, LirWriter* &lirout) {
-        (void)gc;
+    void emitStart(Allocator& alloc, LirBuffer *lirbuf, LirWriter* &lirout) {
+        (void)alloc;
         (void)lirbuf;
         debug_only(
             // catch problems before they hit the buffer
-            lirout = new (gc) ValidateWriter(lirout);
+            lirout = new (alloc) ValidateWriter(lirout);
         )
         lirout->ins0(LIR_start);
 
@@ -1142,7 +1135,7 @@ namespace avmplus
         int nvar;
     public:
         DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar)
-            : LirWriter(out), core(core), nvar(nvar)
+            : LirWriter(out), core(core), vars(NULL), traits(NULL), nvar(nvar)
         {
             tracker = new (alloc) LInsp[nvar];
             traitsTracker = new (alloc) LInsp[nvar];
@@ -1249,39 +1242,39 @@ namespace avmplus
         frag->root = frag;
         LirBuffer *lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
-        lirout = new (gc) LirBufWriter(lirbuf);
+        lirout = new (*alloc1) LirBufWriter(lirbuf);
         debug_only(
-            lirout = new (gc) ValidateWriter(lirout);
+            lirout = new (*alloc1) ValidateWriter(lirout);
         )
         verbose_only(
             vbWriter = 0;
             if (verbose() && !core->quiet_opt()) {
                 lirbuf->names = new (*lir_alloc) LirNameMap(*lir_alloc, &pool->codePages->labels);
-                lirout = vbWriter = new (gc) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
+                lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
             }
         )
         #ifdef NJ_SOFTFLOAT
-        lirout = new (gc) SoftFloatFilter(lirout);
+        lirout = new (*alloc1) SoftFloatFilter(lirout);
         #endif
         LoadFilter *loadfilter = 0;
         if (core->config.cseopt) {
-            loadfilter = new (gc) LoadFilter(lirout, *alloc1);
-            lirout = new (gc) CseFilter(loadfilter, *alloc1);
+            loadfilter = new (*alloc1) LoadFilter(lirout, *alloc1);
+            lirout = new (*alloc1) CseFilter(loadfilter, *alloc1);
         }
-        lirout = new (gc) Specializer(lirout, core->config);
-        CopyPropagation *copier = new (gc) CopyPropagation(core, *alloc1, lirout,
+        lirout = new (*alloc1) Specializer(lirout, core->config);
+        CopyPropagation *copier = new (*alloc1) CopyPropagation(core, *alloc1, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
 
         #if defined(DEBUGGER) && defined(_DEBUG)
         DebuggerCheck *checker = NULL;
         if (core->debugger()) {
-            checker = new (gc) DebuggerCheck(core, *alloc1, lirout, state->verifier->local_count);
+            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, state->verifier->local_count);
             lirout = checker;
         }
         #endif
 
-        emitStart(gc, lirbuf, lirout);
+        emitStart(*alloc1, lirbuf, lirout);
 
         if (overflow)
             return false;
