@@ -919,22 +919,17 @@ namespace avmplus
     class CopyPropagation: public LirWriter
     {
         AvmCore* core;
-        GC *gc;
-        LInsp *tracker; // we use WB() macro, so no DWB() here.
+        LInsp *tracker;
         LIns *vars;
         int nvar;
-        BitSet dirty;
+        nanojit::BitSet dirty;
         bool hasExceptions;
     public:
-        CopyPropagation(AvmCore* core, GC *gc, LirWriter *out, int nvar, bool ex)
-            : LirWriter(out), core(core), gc(gc), nvar(nvar), dirty(nvar), hasExceptions(ex)
+        CopyPropagation(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar, bool ex)
+            : LirWriter(out), core(core), nvar(nvar), dirty(alloc, nvar), hasExceptions(ex)
         {
-            LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
-            WB(gc, this, &tracker, a);
-        }
-
-        ~CopyPropagation() {
-            gc->Free(tracker);
+            tracker = new (alloc) LInsp[nvar];
+            clearState(); 
         }
 
         void init(LIns *vars) {
@@ -1280,7 +1275,7 @@ namespace avmplus
             lirout = new (gc) CseFilter(loadfilter, *alloc1);
         }
         lirout = new (gc) Specializer(lirout, core->config);
-        CopyPropagation *copier = new (gc) CopyPropagation(core, gc, lirout,
+        CopyPropagation *copier = new (gc) CopyPropagation(core, *alloc1, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
 
