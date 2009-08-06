@@ -168,7 +168,7 @@ namespace avmplus
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
         intptr_t lastPcSave;
-        List<Patch, LIST_NonGCObjects> patches;
+        SeqBuilder<Patch> patches;
         LIns *exBranch;
         LIns *setjmpResult;
         CopyPropagation *copier;

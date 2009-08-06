@@ -599,7 +599,7 @@ namespace avmplus
         jitInfoList(i->core()->gc),
         jitPendingRecords(i->core()->gc),
 #endif
-        gc(i->pool()->core->gc),
+        gc(i->pool()->core->gc),        
         alloc1(new Allocator()),
         lir_alloc(new Allocator()),
         core(i->pool()->core),
@@ -607,7 +607,7 @@ namespace avmplus
         ms(i->getMethodSignature()),
         pool(i->pool()),
         interruptable(true),
-        patches(gc)
+        patches(*alloc1)
     {
         state = NULL;
 
@@ -4869,10 +4869,10 @@ namespace avmplus
         }
         #endif
 
-        for (int i=0, n=patches.size(); i < n; i++) {
-            Patch p = patches[i];
-            AvmAssert(p.label->bb != 0);
-            p.br->setTarget(p.label->bb);
+        for (Seq<Patch>* p = patches.get(); p != NULL; p = p->tail) {
+            Patch& patch = p->head;
+            AvmAssert(patch.label->bb != NULL);
+            patch.br->setTarget(patch.label->bb);
         }
 
         frag->lastIns = last;
