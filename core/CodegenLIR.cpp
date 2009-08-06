@@ -1135,24 +1135,18 @@ namespace avmplus
     class DebuggerCheck : public LirWriter
     {
         AvmCore* core;
-        GC *gc;
-        LInsp *tracker,*traitsTracker; // we use WB() macro, so no DWB() here.
-        LIns *vars,*traits;
+        LInsp *tracker;
+        LInsp *traitsTracker;
+        LIns *vars;
+        LIns *traits;
         int nvar;
     public:
-        DebuggerCheck(AvmCore* core, GC *gc, LirWriter *out, int nvar)
-            : LirWriter(out), core(core), gc(gc), nvar(nvar)
+        DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar)
+            : LirWriter(out), core(core), nvar(nvar)
         {
-            LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
-            WB(gc, this, &tracker, a);
-
-            a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
-            WB(gc, this, &traitsTracker, a);
-        }
-
-        ~DebuggerCheck() {
-            gc->Free(tracker);
-            gc->Free(traitsTracker);
+            tracker = new (alloc) LInsp[nvar];
+            traitsTracker = new (alloc) LInsp[nvar];
+            clearState();
         }
 
         void init(LIns *vars, LIns *traits) {
@@ -1280,8 +1274,11 @@ namespace avmplus
         lirout = this->copier = copier;
 
         #if defined(DEBUGGER) && defined(_DEBUG)
-        DebuggerCheck *checker = (core->debugger()) ? new (gc) DebuggerCheck(core, gc, lirout, state->verifier->local_count) : 0;
-        lirout = checker ? checker : lirout;
+        DebuggerCheck *checker = NULL;
+        if (core->debugger()) {
+            checker = new (gc) DebuggerCheck(core, *alloc1, lirout, state->verifier->local_count);
+            lirout = checker;
+        }
         #endif
 
         emitStart(gc, lirbuf, lirout);
