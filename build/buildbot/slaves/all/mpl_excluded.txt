@@ -43,6 +43,7 @@
 .*/doc/mmgc/audit-2009/.*
 .*/esc/.*
 .*/MMgc/Windows.*/.*
+.*/objdir/.*
 .*/other-licenses/.*
 .*/pcre/.*
 .*/performance/jsbench/.*
