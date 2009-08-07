@@ -1108,7 +1108,7 @@ class RuntestBase:
         else:
             try:
                 outputLines = []
-                for line in f:
+                for line in f+err:
                     outputLines.append(line)
                     outputCalls.append((self.verbose_print,(line.strip(),)))
                     if 'Assertion failed:' in line:
