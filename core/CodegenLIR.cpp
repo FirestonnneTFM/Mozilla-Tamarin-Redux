@@ -599,7 +599,6 @@ namespace avmplus
         jitInfoList(i->core()->gc),
         jitPendingRecords(i->core()->gc),
 #endif
-        gc(i->pool()->core->gc),        
         alloc1(new Allocator()),
         lir_alloc(new Allocator()),
         core(i->pool()->core),
@@ -4799,6 +4798,7 @@ namespace avmplus
     void CodegenLIR::epilogue(FrameState *state)
     {
         this->state = state;
+        this->labelCount = state->verifier->labelCount;
 
         if (npe_label.preds) {
             LIns *label = Ins(LIR_label);
@@ -5135,13 +5135,13 @@ namespace avmplus
     };
 #endif
 
-    void CodegenLIR::deadvars_analyze(Allocator& alloc, SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
+    void CodegenLIR::deadvars_analyze(Allocator& alloc, nanojit::BitSet& livein,
+        HashMap<LIns*, nanojit::BitSet*> &labels)
     {
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LIns *vars = lirbuf->sp;
         InsList looplabels(alloc);
-        BitSet livein(framesize);
 
         verbose_only(int iter = 0;)
         bool again;
@@ -5175,9 +5175,9 @@ namespace avmplus
                 case LIR_label: {
                     // we're at the top of a block, save livein for this block
                     // so it can be propagated to predecessors
-                    BitSet *lset = labels.get(i);
+                    nanojit::BitSet *lset = labels.get(i);
                     if (!lset) {
-                        lset = new BitSet(framesize);
+                        lset = new (alloc) nanojit::BitSet(alloc, framesize);
                         labels.put(i, lset);
                     }
                     if (lset->setFrom(livein) && !again) {
@@ -5199,7 +5199,7 @@ namespace avmplus
                     // merge the LiveIn sets from each successor:  the fall
                     // through case (livein) and the branch case (lset).
                     LIns *label = i->getTarget();
-                    BitSet *lset = labels.get(label);
+                    nanojit::BitSet *lset = labels.get(label);
                     if (lset) {
                         livein.setFrom(*lset);
                     } else {
@@ -5218,7 +5218,7 @@ namespace avmplus
                         // reachable catch blocks.  If we haven't seen the catch label yet then
                         // the call is to an exception handling helper (eg beginCatch())
                         // that won't throw.
-                        BitSet *lset = labels.get(catcher);
+                        nanojit::BitSet *lset = labels.get(catcher);
                         if (lset)
                             livein.setFrom(*lset);
                     }
@@ -5235,13 +5235,13 @@ namespace avmplus
         )
     }
 
-    void CodegenLIR::deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
+    void CodegenLIR::deadvars_kill(nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels)
     {
         verbose_only(LirNameMap *names = frag->lirbuf->names;)
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *vars = lirbuf->sp;
-        BitSet livein(framesize);
+        livein.reset();
         LirReader in(frag->lastIns);
         for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
             LOpcode op = i->opcode();
@@ -5278,7 +5278,7 @@ namespace avmplus
                 case LIR_label: {
                     // we're at the top of a block, save livein for this block
                     // so it can be propagated to predecessors
-                    BitSet *lset = labels.get(i);
+                    nanojit::BitSet *lset = labels.get(i);
                     AvmAssert(lset != 0); // all labels have been seen by deadvars_analyze()
                     lset->setFrom(livein);
                     break;
@@ -5291,7 +5291,7 @@ namespace avmplus
                 case LIR_jf: {
                     // merge the LiveIn sets from each successor:  the fall
                     // through case (live) and the branch case (lset).
-                    BitSet *lset = labels.get(i->getTarget());
+                    nanojit::BitSet *lset = labels.get(i->getTarget());
                     AvmAssert(lset != 0); // all labels have been seen by deadvars_analyze()
                     // the target LiveIn set (lset) is non-empty,
                     // union it with fall-through set (live).
@@ -5306,7 +5306,7 @@ namespace avmplus
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
                         // reachable catch blocks.
-                        BitSet *lset = labels.get(catcher);
+                        nanojit::BitSet *lset = labels.get(catcher);
                         AvmAssert(lset != 0); // this is a forward branch, we have seen the label.
                         // the target LiveIn set (lset) is non-empty,
                         // union it with fall-through set (live).
@@ -5340,16 +5340,28 @@ namespace avmplus
 
     void CodegenLIR::deadvars()
     {
-        DEBUGGER_ONLY(if (core->debugger()) return; ) // if debugging don't elim vars
+        // if debugging, don't eliminate vars.  this way the debugger sees the true
+        // variable state at each safe point.
+        DEBUGGER_ONLY(if (core->debugger()) return; )
 
+        // allocator used only for duration of this phase.  no exceptions are
+        // thrown while this phase runs, hence no try/catch is necessary.
         Allocator dv_alloc;
-        SortedMap<LIns*, BitSet*, LIST_GCObjects> labels(gc);
-        deadvars_analyze(dv_alloc, labels);
-        deadvars_kill(labels);
-        for (int i=0, n = labels.size(); i < n; i++) {
-            BitSet *b = labels.at(i);
-            delete b;
-        }
+
+        // map of label -> bitset, tracking what is livein at each label.
+        // populated by deadvars_analyze, then used by deadvars_kill
+        // estimate number of required buckets based on the verifier's labelCount,
+        // which is slightly below the actual # of labels in LIR.  being slightly low
+        // is okay for a bucket hashtable.  note: labelCount is 0 for simple 1-block
+        // methods, so use labelCount+1 as the estimate to ensure we have >0 buckets.
+        HashMap<LIns*, nanojit::BitSet*> labels(dv_alloc, labelCount + 1);
+
+        // scratch bitset used by both dv_analyze and dv_kill.  Each resets
+        // the bitset before using it.  creating it here saves one allocation.
+        nanojit::BitSet livein(dv_alloc, framesize);
+
+        deadvars_analyze(dv_alloc, livein, labels);
+        deadvars_kill(livein, labels);
     }
 
 #ifdef AVMPLUS_JITMAX
