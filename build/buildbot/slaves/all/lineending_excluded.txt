@@ -39,6 +39,7 @@
 .*/.hg/.*
 .*/axscript/.*
 .*/esc/.*
+.*/objdir/.*
 .*/pcre/.*
 .*/platform/win32/obj/.*
 .*/platform/win32/Windows.*/.*
