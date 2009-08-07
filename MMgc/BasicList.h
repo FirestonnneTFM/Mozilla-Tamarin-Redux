@@ -65,7 +65,8 @@ namespace MMgc
 				delete [] items;
 				items = NULL;
 			}
-			count = capacity = 0;
+			count = capacity = iteratorCount = 0;
+			holes = false;
 		}
 		
 		void Add(T item)
@@ -76,6 +77,7 @@ namespace MMgc
 			{
 				capacity += growthIncrement;
 				T* newItems = new T[ capacity ];
+				VMPI_memset(newItems, 0, count * sizeof(T));
 				if (items)
 					VMPI_memcpy(newItems, items, count * sizeof(T));
 				delete [] items;
@@ -98,8 +100,9 @@ namespace MMgc
 				return;
 			}
 			items[i] = NULL;
-			holes = true;
 			count--;
+			if (i != count)
+				holes = true;
 		}
 		
 		T Get(uint32_t i) const
