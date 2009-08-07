@@ -45,7 +45,11 @@ namespace MMgc
 	class BasicList
 	{
 	public:
-		BasicList() : count(0), capacity(0), items(NULL) 
+		BasicList() : count(0), 
+					  capacity(0), 
+					  items(NULL), 
+					  iteratorCount(0),
+					  holes(false)
 		{
 		}
 		
@@ -66,11 +70,13 @@ namespace MMgc
 		
 		void Add(T item)
 		{
-			if(count == capacity)
+			if (holes && iteratorCount == 0)
+				Compact();
+			if (count == capacity)
 			{
 				capacity += growthIncrement;
 				T* newItems = new T[ capacity ];
-				if(items)
+				if (items)
 					VMPI_memcpy(newItems, items, count * sizeof(T));
 				delete [] items;
 				items = newItems;
@@ -81,52 +87,109 @@ namespace MMgc
 		
 		void Remove(T item)
 		{
+			if (holes && iteratorCount == 0)
+				Compact();
 			uint32_t i=0;
 			while (i < count && items[i] != item)
 				i++;
-			if (i == count) {
+			if (i == Limit()) 
+			{
 				GCAssertMsg(false, "Bug: should not try to remove something that's not in the list");
 				return;
 			}
-			while (i < count-1) {
-				items[i] = items[i+1];
-				i++;
-			}
+			items[i] = NULL;
+			holes = true;
 			count--;
 		}
 		
 		T Get(uint32_t i) const
 		{ 
-			GCAssertMsg(i < count, "Index out of bounds");
+			GCAssertMsg(i < Limit(), "Index out of bounds");
 			return items[i]; 
 		}
 		
 		uint32_t Count() const { return count; }
+
+		// iterator needs this to give complete iteration in the face of in-flight mutation
+		uint32_t Limit() const { return holes ? capacity : count; }
 		
+		void IteratorAttach() { iteratorCount++; }
+		void IteratorDettach() 
+		{ 
+			iteratorCount--; 
+			if (holes && iteratorCount == 0)
+				Compact();
+		}
+
 	protected:
 		// no impl
 		BasicList(const BasicList& other);
 		BasicList& operator=(const BasicList& other);
 
 	private:
+
+		void Compact()
+		{
+			// i iterates through destintation slots and j iterates through source slots
+			// j skips over holes i doesn't
+			// at the end i = count
+			uint32_t i=0,j=1;
+			while (j < capacity) 
+			{
+				if (items[i] == NULL) 
+				{
+					if (items[j] != NULL) 
+					{
+						items[i++] = items[j++];
+						items[j-1] = NULL; // NULL it so next item goes in this hole
+					} 
+					else
+					{
+						j++;
+					}
+				} 
+				else 
+				{
+					i++,j++;
+				}
+			}
+			GCAssert(i == count);
+			holes = false;
+		}
+
 		uint32_t count, capacity;
 		T *items;
+		uint32_t iteratorCount;
+		bool holes;
+
 	};
 
 	template<typename T>
 	class BasicListIterator
 	{
 	public:
-		BasicListIterator(const BasicList<T>& bl) : index(0), bl(bl) {}
-		T next() { return index < bl.Count() ? bl.Get(index++) : NULL; }
-		T next(vmpi_spin_lock_t& lock) 
+		BasicListIterator(BasicList<T>& bl) : index(0), bl(bl) 
 		{
-			MMGC_LOCK(lock);
-			return next();
+			bl.IteratorAttach();
 		}
+		~BasicListIterator()
+		{
+			bl.IteratorDettach();
+		}
+		T next() 
+		{ 
+			T t = NULL;
+			// iterate over holes until end
+			while (index < bl.Limit() && t == NULL) 
+			{
+				t = bl.Get(index++);
+			}
+			return t;
+		}
+
 	private:
 		uint32_t index;
-		const BasicList<T> &bl;
+		BasicList<T> &bl;
 	};
 }
 

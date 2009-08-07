@@ -98,7 +98,7 @@ namespace MMgc
 		 */
 		void signalEndCollection(GC* gc);
 		
-		const BasicList<GC*>& gcs() { return collectors; }
+		BasicList<GC*>& gcs() { return collectors; }
 
 	private:
 		BasicList<GC*> collectors;			// array of collectors
