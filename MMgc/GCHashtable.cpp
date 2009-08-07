@@ -123,9 +123,9 @@ namespace MMgc
 			table[i+1] = NULL;
 			numDeleted++;
 			// this helps a bit on pathologic memory profiler use case, needs more investigation
-			// 5% deleted == rehash
-			//if(numDeleted * 40 >= tableSize)
-			//	grow();
+			// 20% deleted == rehash
+			if(numDeleted * 10 >= tableSize)
+				grow();
 		}		
 		return ret;
 	}
