@@ -48,10 +48,10 @@ var thisError = "Exited with uncaught exception";
 
 try {
 	throw null;
-} catch(e:Error) {
-	thisError = e.toString();
-	trace("FAILED!: Should have exited with uncaught exception.");
+} catch(e) {
+	thisError = e;
 } finally {
-	AddTestCase("Thrown null should be uncaught.", "Exited with uncaught exception", thisError);
-	test();
+        AddTestCase("Catch thrown null", "null", String(thisError));
 }
+
+test();

@@ -100,6 +100,7 @@ class AcceptanceRuntest(RuntestBase):
                 self.threads=int(v)
             elif o in ('--ats'):
                 self.genAtsSwfs = True
+                self.rebuildtests = True
             elif o in ('--atsdir'):
                 self.atsDir = v
     

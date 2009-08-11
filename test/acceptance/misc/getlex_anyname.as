@@ -37,21 +37,26 @@
 
 package 
 {
-	function run_test()
-	{
-		try
-		{
-			var x = 10;
-			// bug being tested caused an assert to fire if OP_getlex was given an anyname.
-			// thus only debug builds would have "failed".
-			// (the looking is expected to throw)
-			var s = String(public::*);
-			print("test FAILED!");
-		}
-		catch(e)
-		{
-			print("test PASSED!");
-		}
-	}
-	run_test();
+    result = "";
+    function run_test()
+    {
+        try
+        {
+            var x = 10;
+            // bug being tested caused an assert to fire if OP_getlex was given an anyname.
+            // thus only debug builds would have "failed".
+            // (the looking is expected to throw)
+            var s = String(public::*);
+            result = "FAILED";
+        }
+        catch(e)
+        {
+            result = "PASSED";
+        }
+    }
+    run_test();
+    startTest();
+    AddTestCase("String(public::*) should throw an exception", "PASSED", result);
+    test();
+    
 }

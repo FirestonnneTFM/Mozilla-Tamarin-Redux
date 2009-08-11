@@ -124,6 +124,15 @@ class RuntestBase:
     
     genAtsSwfs = False
     atsDir = 'ATS_SWFS'
+    # ats template code 
+    atstemplate = [
+        'import flash.display.*;\n',
+        'import flash.util.*;\n',
+        'var fileName:String ="_";\n', # this line will get replaced with the actual filename
+        'this[fileName] = new Array();\n',
+        'this[fileName+"Str"] = new Array();\n',
+        'this[fileName+"Ans"] = new Array();\n'
+        ]
     
     
     def __init__(self):
@@ -167,8 +176,6 @@ class RuntestBase:
         self.preProcessTests()
         if self.rebuildtests:
             self.rebuildTests()
-        elif self.genAtsSwfs:
-            self.generateAtsSwfs()
         else:
             self.runTests(self.tests)
         self.cleanup()
@@ -273,6 +280,8 @@ class RuntestBase:
                 self.shellabc = v
             elif o in ('-x', '--exclude'):
                 self.exclude += v.split(',')
+                # remove any trailing /,\ and whitespace from exclude list
+                self.exclude = map(lambda s: s.rstrip('\\/ '), self.exclude)
             elif o in ('-t', '--notime'):
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
@@ -432,6 +441,8 @@ class RuntestBase:
         tests = [a for a in startDir if isfile(a) and self.istest(a)]
         for a in [d for d in startDir if isdir(d) and not (basename(d) in self.exclude)]:
             for d, dirs, files in walk(a, followlinks=True):
+                if d.startswith('./'):
+                    d=d[2:]
                 tests += [(d+'/'+f) for f in files if self.istest(f)]
                 utils = [d for d in dirs if d+self.sourceExt in files]
                 for x in [x for x in self.exclude+utils if x in dirs]:
@@ -624,42 +635,6 @@ class RuntestBase:
                         pass
         return arglist
     
-    def generateAtsSwfs(self):
-        if not exists(self.atsDir):
-            os.mkdir(self.atsDir)
-        
-        # ats template code 
-        atstemplate = [
-            'import flash.display.*;\n',
-            'import flash.util.*;\n',
-            'var fileName:String ="_";\n', # this line will get replaced with the actual filename
-            'this[fileName] = new Array();\n',
-            'this[fileName+"Str"] = new Array();\n',
-            'this[fileName+"Ans"] = new Array();\n'
-            ]
-        print 'Compiling ATS Swfs:'
-        for test in self.tests:
-            (dir, file) = split(test)
-            (name, ext) = splitext(file)
-            # insert filename into template
-            atstemplate[2] = 'var fileName:String = "%s_";\n' % name
-            # write out the template file
-            ats_inc = open('./ats_temp.as','w')
-            ats_inc.writelines(atstemplate)
-            ats_inc.close()
-            
-            self.ascargs += ' -AS3 -swf 200,200 -d -in ./ats_temp.as '
-            print '  %s/%s.swf' % (dir,name)
-            self.compile_test(test)
-            
-            # move the swf to the swfs dir
-            try:
-                atsOut = self.atsDir+'/'+dir 
-                os.makedirs(atsOut)
-            except:
-                pass
-            shutil.move('%s/%s.swf' % (dir,name),'%s/%s_.swf' % (atsOut,name))
-        os.remove('./ats_temp.as')
         
     def compile_test(self, as_file, extraArgs=[]):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
@@ -692,11 +667,20 @@ class RuntestBase:
                 cmd = '"%s" -jar %s' % (self.java,asc)
             else:
                 cmd = asc
-                
+            
             arglist = self.parseArgStringToList(ascargs)
         
             # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
             arglist = self.loadAscArgs(arglist, dir, as_file)
+            
+            if self.genAtsSwfs:
+                # get settings as ats excluded files are defined there
+                settings = self.getLocalSettings(testdir)
+                if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
+                    print 'ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip'])
+                    return
+                arglist.extend(self.genAtsArgs(dir,file))
+            
             for arg in extraArgs:
                 cmd += ' %s' % arg
         
@@ -731,8 +715,15 @@ class RuntestBase:
             return f+err
         except:
             raise
+            
+        if self.genAtsSwfs:
+            self.moveAtsSwf(dir,file)
     
     def rebuildTests(self):
+        if self.genAtsSwfs:
+            if not exists(self.atsDir):
+                os.mkdir(self.atsDir)
+    
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
             self.compileWithAsh(self.tests)
         else: # run using threads
@@ -759,6 +750,42 @@ class RuntestBase:
                 print 'EXCEPTION: %s' % e
                 self.killmyself()
         
+        if self.genAtsSwfs:
+            try:
+                pass#os.remove('./ats_temp.as')
+            except:
+                pass
+        
+    
+    def genAtsArgs(self, dir, file):
+        args = []
+        atstemplate = self.atstemplate
+        (name, ext) = splitext(file)
+        # insert filename into template
+        atstemplate[2] = 'var fileName:String = "%s_";\n' % name
+        # write out the template file
+        ats_inc = open('./ats_temp.as','w')
+        ats_inc.writelines(atstemplate)
+        ats_inc.close()
+        if not 'ecma' in dir:
+            args.append('-AS3')
+        args.extend(['-swf 200,200','-in ./ats_temp.as'])
+        return args
+        
+    def moveAtsSwf(self, dir, file):
+        (name, ext) = splitext(file)
+        # move the swf to the swfs dir
+        try:
+            atsOut = self.atsDir+'/'+dir 
+            if not exists(atsOut):
+                os.makedirs(atsOut)
+        except:
+            pass
+            
+        try:
+            shutil.move('%s/%s.swf' % (dir,name),'%s/%s_.swf' % (atsOut,name))
+        except:
+            print 'Error attempting to move %s/%s_.swf' % (dir,name)
     
     def compileWithAsh(self, tests):
         start_time = datetime.today()
@@ -786,19 +813,31 @@ class RuntestBase:
                     arglist = self.parseArgStringToList(self.ascargs)
                 
                     (dir, file) = split(test)
+                    (testdir, ext) = splitext(test)
+                    
                     # look for .asc_args files to specify dir / file level compile args
                     arglist = self.loadAscArgs(arglist, dir, test)
+                    
+                    if self.genAtsSwfs:
+                        # get settings as ats excluded files are defined there
+                        settings = self.getLocalSettings(testdir)
+                        if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
+                            print 'ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip'])
+                            continue
+                        arglist.extend(self.genAtsArgs(dir,file))
                     
                     cmd = "asc -import %s " % (self.builtinabc)
                     for arg in arglist:
                         cmd += ' %s' % arg
                     
                     for p in self.parents(dir):
+                        if p=='':
+                            p='.'
                         shell = join(p,"shell.as")
                         if isfile(shell):
                             cmd += " -in " + shell
                             break
-                    (testdir, ext) = splitext(test)
+                    
                     deps = glob(join(testdir,"*.as"))
                     deps.sort()
                     for util in deps + glob(join(dir,"*Util.as")):
@@ -818,6 +857,10 @@ class RuntestBase:
                         print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                         self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                     total -= 1;
+                    
+                    if self.genAtsSwfs:
+                        self.moveAtsSwf(dir,file)
+                    
                     #print("%d remaining, %s" % (total,cmd))
         end_time = datetime.today()
         #print("finished compile of %d tests at %s elapsed time is %s" % (len(tests),start_time,end_time-start_time))
@@ -919,7 +962,7 @@ class RuntestBase:
             for line in lines:
                 if line.startswith('#') or len(line)==0:
                     continue
-                fields = line.split(',')
+                fields = line.split(',',3)
                 for f in range(len(fields)):
                     fields[f]=fields[f].strip()
                 while len(fields)<4:
@@ -973,6 +1016,27 @@ class RuntestBase:
                 return flines
         return
                                                 
+    def getLocalSettings(self, root):
+        settings = {}
+        dir = os.path.split(root)[0]
+        # get settings for this test
+        for k in self.settings.keys():
+            if re.search('^'+k+'$', root):
+                for k2 in self.settings[k].keys():
+                    if k2 in settings:
+                        settings[k2].update(self.settings[k][k2])
+                    else:
+                        settings[k2] = self.settings[k][k2].copy()
+        
+        if isfile(join(dir,self.testconfig)):
+            localSettings, localIncludes = self.parseTestConfig(dir)
+            # have a local testconfig, so we create a copy of the global settings to not overwrite
+            includes = list(self.includes) #copy list - don't use reference
+            includes.extend(localIncludes)
+            if localSettings.has_key(root):
+                settings.update(localSettings[root])
+        return settings
+    
     def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
         testnum = testAndNum[1]
@@ -985,10 +1049,8 @@ class RuntestBase:
         lassert = 0
         extraVmArgs = ''
         abcargs = ''
-        if ast.startswith('./'):
-            ast=ast[2:]
         
-        dir = ast[0:ast.rfind('/')]
+        dir = os.path.split(ast)[0]
         root,ext = splitext(ast)
         if self.runSource or self.eval:
             testName = ast
@@ -996,33 +1058,16 @@ class RuntestBase:
             testName = root + '.abc'
             
         includes = self.includes #list
-        settings = {}
         
-        # get settings for this test
-        for k in self.settings.keys():
-            if re.search('^'+k+'$', root):
-                for k2 in self.settings[k].keys():
-                    if k2 in settings:
-                        settings[k2].update(self.settings[k][k2])
-                    else:
-                        settings[k2] = self.settings[k][k2].copy()
-        
-        if isfile(join(dir,self.testconfig)):
-            localIncludes, localSettings = self.parseTestConfig(dir)
-            # have a local testconfig, so we create a copy of the global settings to not overwrite
-            includes = list(self.includes) #copy list - don't use reference
-            includes.extend(localIncludes)
-            if localSettings.has_key(root):
-                settings.update(localSettings[root])
+        settings = self.getLocalSettings(root)
         
         #TODO: possibly handle includes by building test list?  This works for now...
         if includes and not list_match(includes,root):
             return
         
         # skip entire test if specified
-        # TODO: add skip reason to output
         if settings.has_key('.*') and settings['.*'].has_key('skip'):
-            outputCalls.append((self.js_print,('  skipping',)))
+            outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['skip'],)))
             self.allskips += 1
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
@@ -1117,8 +1162,9 @@ class RuntestBase:
                     testcase=''
                     if len(line)>9:
                         testcase=line.strip()
-                    if dict_match(settings,testcase,'skip'):
-                        outputCalls.append((self.js_print,('  skipping %s' % line.strip(),)))
+                    skipTestDesc = dict_match(settings,testcase,'skip')
+                    if skipTestDesc:
+                        outputCalls.append((self.js_print,('  skipping "%s" ... reason: %s' % (line.strip(),skipTestDesc),)))
                         self.allskips+=1
                         continue
                     if 'PASSED!' in line:

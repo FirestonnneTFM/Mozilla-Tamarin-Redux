@@ -161,8 +161,10 @@ var ns = new Namespace("foo");
 default xml namespace = ns;
 var x1 = <x><a/><b/><c/></x>;
 
-AddTestCase("Namespaces in global scope: ", 3, x1.ns::*.length())
+AddTestCase("Namespaces in global scope: ", 3, x1.ns::*.length());
 f();
+
+XML.prettyPrinting = true;
 
 /*
 var x1  = new XML("<a xmlns:XMLNameSpace='http://www.macromedia.com' />");

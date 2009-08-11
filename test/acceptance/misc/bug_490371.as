@@ -35,7 +35,7 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-var results = []
+startTest();
 
 /**
  * Scenario:
@@ -75,14 +75,7 @@ var exp2:String = "컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
                 + "컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴"
                 + "컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴";
 
-results.push({expected: exp1, actual: substr + s16b});
-results.push({expected: exp2, actual: s16a});
+AddTestCase("substr + s16b", exp1, substr + s16b);
+AddTestCase("s16a", exp2, s16a);
 
-for (var i in results)
-{
-	var o = results[i]
-	if (o.actual == o.expected)
-		print("test "+i+" PASSED!");
-	else
-		print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-}
+test();

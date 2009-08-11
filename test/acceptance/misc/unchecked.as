@@ -40,7 +40,7 @@ class Foo
 	public function Foo():void;
 };
 
-function test()
+function runtest()
 {
 	var e = "failure";
 	try
@@ -56,17 +56,11 @@ function test()
 		e = "failure";
 	}
 
-	var results = []
 
-	results.push({expected: "success", actual: e});
+	AddTestCase("unchecked", "success", e);
 
-	for (var i in results)
-	{
-		var o = results[i]
-		if (o.actual == o.expected)
-			print("test "+i+" PASSED!");
-		else
-			print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-	}
 }
+
+startTest();
+runtest();
 test();

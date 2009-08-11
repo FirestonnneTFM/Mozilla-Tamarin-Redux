@@ -48,7 +48,7 @@ import avmplus.*;
 		/**** end Node *******/
 
 
-print("before out-of-memory PASSED!");
+trace("before out-of-memory PASSED!");
 var data:Array=new Array();
 var last:Node=new Node();
 var counter:int = 0;
@@ -60,7 +60,7 @@ while (true) {
     counter++;
     if ((counter % 20000) == 0){
         if (System.totalMemory < memWatcher){
-            print("memory stopped growing, something wrong?");
+            trace("memory stopped growing, something wrong?");
             break;
         }
         memWatcher = System.totalMemory
@@ -69,4 +69,4 @@ while (true) {
 
 // if reaches this point did not run out of memory
 // in order to run out of memory -memlimit 100 must be a runtime arg to the vm
-print("out-of-memory FAILED!");
+trace("out-of-memory FAILED!");

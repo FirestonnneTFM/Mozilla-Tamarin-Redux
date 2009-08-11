@@ -39,20 +39,11 @@ namespace foons = "foo";
 
 function ns_to_string(ns:Namespace) { return String(ns); }
 
-function test()
-{
-	var results = []
-	results.push({expected: "foo", actual: ns_to_string(foons)});
-	results.push({expected: "null", actual: ns_to_string(null)});
-	results.push({expected: "null", actual: ns_to_string(void 0)}); // unbox undefined -> Namespace should yield null
+startTest();
 
-	for (var i in results)
-	{
-		var o = results[i]
-		if (o.actual == o.expected)
-			print("test "+i+" PASSED!");
-		else
-			print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-	}
-}
+AddTestCase("ns_to_string(foons)", "foo", ns_to_string(foons));
+AddTestCase("ns_to_string(null)", "null", ns_to_string(null));
+AddTestCase("ns_to_string(void 0)", "null", ns_to_string(void 0)); // unbox undefined -> Namespace should yield null
+
+
 test();
