@@ -236,9 +236,11 @@ namespace avmplus
 		inline bool test(uint32_t bit) const
 		{
 			AvmAssert(bit < m_cap);
-			const uintptr_t* v = (m_bits & 1) ? &m_bits : (const uintptr_t*)m_bits;
 			const uint32_t nbit = bit + 1;
-			return (v[nbit / BITS_PER_UINTPTR] & (uintptr_t(1) << (nbit & (BITS_PER_UINTPTR-1)))) != 0;
+			uintptr_t w = m_bits;
+			if (!(w & 1))
+				w = ((const uintptr_t*)m_bits)[nbit / BITS_PER_UINTPTR];
+			return (w & (uintptr_t(1) << (nbit & (BITS_PER_UINTPTR-1)))) != 0;
 		}
 
 		inline size_t allocatedSize()
