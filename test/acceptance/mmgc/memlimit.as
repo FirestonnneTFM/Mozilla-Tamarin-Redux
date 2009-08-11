@@ -46,7 +46,7 @@
 		}
 		/**** end Node *******/
 
-print("starting memlimit test");
+trace("starting memlimit test");
 var data:Array=new Array();
 var last:Node=new Node();
 for (var i=0;i<100000;i++) {
@@ -55,4 +55,4 @@ for (var i=0;i<100000;i++) {
     last=node;
 }
 
-print("memlimit not exceeded PASSED!");
+trace("memlimit not exceeded PASSED!");

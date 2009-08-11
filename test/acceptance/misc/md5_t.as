@@ -402,95 +402,42 @@ package com.adobe.SwitchBoard
 
 		// unitTest() returns true if the md5 uint tests succeeded.
 
-		public static function unitTest() : Boolean
+		public static function unitTest() : void
 		{
 			var ok : Boolean = true;
 			var got : String;
 			var expected : String;
 
-			expected = "d41d8cd98f00b204e9800998ecf8427e"
-			if( (got = md5_t.md5String("")) != expected)
-			{
-				ok = false;
-				trace( "FAILED!: md5_t.md5String('') = " + got + " expected " + expected );
-			}
-			else
-			{
-				trace( "PASSED!: md5_t.md5String('') = " + got)
-			}
+			expected = "d41d8cd98f00b204e9800998ecf8427e";
+			AddTestCase("md5_t.md5String('')", expected, md5_t.md5String(""));
 
-			expected = "0cc175b9c0f1b6a831c399e269772661"
-			if( (got = md5_t.md5String ("a")) != expected)
-			{
-				ok = false;
-				trace( "FAILED!: md5_t.md5String('a') = " + got + " expected " + expected );
-			}				
-			else
-			{
-				trace( "PASSED!: md5_t.md5String('a') = " + got);
-			}
+			expected = "0cc175b9c0f1b6a831c399e269772661";
+			AddTestCase("md5_t.md5String('a')", expected, md5_t.md5String ("a"));
 
-			expected = "900150983cd24fb0d6963f7d28e17f72"
-			if( (got = md5_t.md5String ("abc")) != expected)
-			{
-				ok = false;
-				trace( "FAILED!: md5_t.md5String('abc') = " + got + " expected " + expected );
-			}				
-			else
-			{
-				trace( "PASSED!: md5_t.md5String('abc') = " + got);
-			}
 
-			expected = "f96b697d7cb7938d525a2f31aaf161d0"
-			if( (got = md5_t.md5String ("message digest")) != expected)
-			{
-				ok = false;
-				trace( "FAILED!: md5_t.md5String('message digest') = " + got + " expected " + expected );
-			}				
-			else
-			{
-				trace( "PASSED!: md5_t.md5String('message digest') = " + got);
-			}
+			expected = "900150983cd24fb0d6963f7d28e17f72";
+			AddTestCase("md5_t.md5String('abc')", expected, md5_t.md5String ("abc"));
 
-			expected = "c3fcd3d76192e4007dfb496cca67e13b"
-			if( (got = md5_t.md5String ("abcdefghijklmnopqrstuvwxyz")) != expected)
-			{
-				ok = false;
-				trace( "FAILED!: md5_t.md5String('abcdefghijklmnopqrstuvwxyz') = " + got + " expected " + expected );
-			}				
-			else
-			{
-				trace( "PASSED!: md5_t.md5String('abcdefghijklmnopqrstuvwxyz') = " + got);
-			}
+			expected = "f96b697d7cb7938d525a2f31aaf161d0";
+			AddTestCase("md5_t.md5String('message digest')", expected, md5_t.md5String ("message digest"));
 
-			expected = "d174ab98d277d9f5a5611c2c9f419d9f"
-			if( (got = md5_t.md5String ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")) != expected)
-			{
-				ok = false;
-				trace( "FAILED!: md5_t.md5String('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') = " + got + " expected " + expected);
-			}				
-			else
-			{
-				trace( "PASSED!: md5_t.md5String('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') = " + got);
-			}
 
-			expected = "57edf4a22be3c955ac49da2e2107b67a"
-			if( (got = md5_t.md5String ("12345678901234567890123456789012345678901234567890123456789012345678901234567890")) != expected)
-			{
-				ok = false;
-				trace( "FAILED!: md5_t.md5String('12345678901234567890123456789012345678901234567890123456789012345678901234567890') = " + got + " expected " + expected);
-			}				
-			else
-			{
-				trace( "PASSED!: md5_t.md5String('12345678901234567890123456789012345678901234567890123456789012345678901234567890') = " + got);
-			}
-			return ok;	
+			expected = "c3fcd3d76192e4007dfb496cca67e13b";
+			AddTestCase("md5_t.md5String('abcdefghijklmnopqrstuvwxyz')", expected, md5_t.md5String ("abcdefghijklmnopqrstuvwxyz"));
+
+			expected = "d174ab98d277d9f5a5611c2c9f419d9f";
+			AddTestCase("md5_t.md5String('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')", expected, md5_t.md5String ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"));
+
+			expected = "57edf4a22be3c955ac49da2e2107b67a";
+			AddTestCase("md5_t.md5String('12345678901234567890123456789012345678901234567890123456789012345678901234567890')", expected, md5_t.md5String ("12345678901234567890123456789012345678901234567890123456789012345678901234567890"));
 		}
 
 		/*************************************************************************************************/
 
 	}
-
-	print(md5_t.unitTest())
+    
+    startTest();
+	md5_t.unitTest();
+	test();
 }
 

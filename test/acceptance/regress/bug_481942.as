@@ -40,11 +40,13 @@
 package {
     import flash.utils.*;
     function foo() {
-	var o1:Object = new Object();
-	var o2:Object = new Dictionary();
-	trace(o1 in o2);
+        var o1:Object = new Object();
+        var o2:Object = new Dictionary();
+        return (o1 in o2);
     }
-    foo();
-    print("PASSED!");
+    
+    startTest();
+    AddTestCase("This testcase would assert in debug if bug is present. o1 in o2:", false, foo());
+    test();
 }
 

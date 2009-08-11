@@ -37,6 +37,7 @@
 #    expectedfailure - expects the test to fail, comments should provide bug number and a comment
 #    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase even if the parent has been skipped
+#    ats_skip - don't generate an ATS swf as these files are not ATS compatible
 #
 # comments: please include bug reference, date, and reason for the entry
 
@@ -62,7 +63,7 @@ as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(jit.*|diff)  , expect
 # abcasm:
 ####################
 # inconsistencies in different debug output, need to implement regex matching of diffs
-abcasm/adhoc , .* , skip, 
+abcasm/adhoc , .* , skip, inconsistencies in different debug output, need to implement regex matching of diffs
 # abcasm helper, not a test
 abcasm/abs_helper , .* , skip,
 # Test uses abcasm to check a boundary condition, failure is correct result
@@ -222,3 +223,28 @@ as3/Statements/for-each-in/eforeachin_001_500476, .*, skip, https://bugzilla.moz
 # Disabling test until this can be properly investigated
 ####################
 as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
+
+####################
+# ATS Skipped tests - These tests will not be exported when generating ATS swfs
+####################
+misc/isGlobalObject.as, .*, ats_skip, uses avmplus.System.isGlobal
+as3/ShellClasses/.*, .*, ats_skip, Tests avmplus ShellClasses
+as3/sampling/.*, .*, ats_skip, sampling tests
+mmgc/.*, .*, ats_skip, mmgc testsf
+abcasm/.*, .*, ats_skip, abcasm tests
+mops/.*, .*, ats_skip, mops test - we don't have source to generate swf
+regress/vector_domain_bug, .*, ats_skip, uses avmplus.Domain
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType , .* , ats_skip, known issue
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch , .* , ats_skip, known issue
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , .* , ats_skip, known issue
+as3/RuntimeErrors/Error1034TypeCoercionFailed, .*, ats_skip, -AS3 switch breaks test
+ecma3/Exceptions/exception_011_rt, .*, ats_skip, test throws an undefined which is not catchable
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,.*, skip, bug 499685 skip slow tests
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
+ecma3/Unicode/uE000_PrivateUseArea, .*, skip, bug 499685 skip slow tests
+ecma3/Unicode/uAC00_HangulSyllables, .*, skip, bug 499685 skip slow tests
+

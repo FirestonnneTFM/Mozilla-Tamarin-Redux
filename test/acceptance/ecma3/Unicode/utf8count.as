@@ -68,17 +68,11 @@ var str_utf8_b:String = "𠮷野屋abc南巽駅";
 
 var str_utf8_ab:String = str_utf8_a + str_utf8_b;
 
-var results = [];
-results.push({expected: true, actual: str_utf8 == str_utf16});
-results.push({expected: true, actual: str_utf8.length == str_utf16.length});
-results.push({expected: true, actual: str_utf8_ab == str_utf8});
+startTest();
 
-for (var i in results)
-{
-	var o = results[i]
-	if (o.actual == o.expected)
-		print("test "+i+" PASSED!");
-	else
-		print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-}
+AddTestCase("str_utf8 == str_utf16", true, str_utf8 == str_utf16);
+AddTestCase("str_utf8.length == str_utf16.length", true, str_utf8.length == str_utf16.length);
+AddTestCase("str_utf8_ab == str_utf8", true, str_utf8_ab == str_utf8);
+
+test();
 

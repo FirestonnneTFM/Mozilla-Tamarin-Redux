@@ -54,9 +54,14 @@ function getTestCases() {
 //  verify that prototype object is an Array object.
     array[item++] = new TestCase( SECTION,	"typeof Array.prototype",    "object",   typeof Array.prototype );
 
+    var tempToString = Array.prototype.toString;
  	array[item++] = new TestCase( SECTION,
                                     "Array.prototype.toString = Object.prototype.toString; Array.prototype.toString()",
                                     "[object Array]",
                                     (Array.prototype.toString = Object.prototype.toString, Array.prototype.toString()) );
+    
+    // revert Array.prototype.toString back to original for ATS tests
+    Array.prototype.toString = tempToString;
+    
     return ( array );
 }

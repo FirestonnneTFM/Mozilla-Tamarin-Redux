@@ -60,21 +60,11 @@ class B extends A
 	}
 }
 
-function test()
-{
-	var t = new Thing;
-	var b:B = new B(t);
+var t = new Thing;
+var b:B = new B(t);
 
-	var results = []
-	results.push({expected: "[object Thing]", actual: String(b.container)});
+startTest();
 
-	for (var i in results)
-	{
-		var o = results[i]
-		if (o.actual == o.expected)
-			print("test "+i+" PASSED!");
-		else
-			print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-	}
-}
+AddTestCase("String(b.container)", "[object Thing]", String(b.container));
+
 test();

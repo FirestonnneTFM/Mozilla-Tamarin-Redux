@@ -42,10 +42,11 @@ startTest();
 
 try {
 	var result = "no error";
-	this.setTime = Date.prototype.setTime;
+	this.setTime = new Date().getDate;
 	this.setTime(-1);
 } catch (err) {
 	result = err.toString();
+	trace(err);
 } finally {
 	AddTestCase("Runtime Error", TYPEERROR + CODE, typeError(result));
 }

@@ -34,6 +34,11 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+class Test {
+
+    public static const NAME:String = "name";
+
+}
 
 var SECTION = "Definitions\const";       			// provide a document reference (ie, ECMA section)
 var VERSION = "ActionScript 3.0";  			// Version of JavaScript or ECMA
@@ -41,12 +46,6 @@ var TITLE   = "static const";       // Provide ECMA section title or a descripti
 var BUGNUMBER = "";
 
 startTest();
-
-class Test {
-
-    static const NAME:String = "name";
-
-}
 
 AddTestCase("static const in class", "name", Test.NAME);
 

@@ -39,6 +39,7 @@ test/acceptance/test.*
 test/util/emulator_files/**
 test/util/flashrunner/working/**
 test/acceptance/*.html
+test/acceptance/ATS_SWFS/**
 pcre/doc/*.1
 MMgc/obj*/**
 MMgc/x64/**

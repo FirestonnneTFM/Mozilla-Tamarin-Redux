@@ -111,25 +111,6 @@ package {
 	var oc = describeType(Foo2, FLASH10_FLAGS);
 	var ov = describeType(new Vector.<String>(), FLASH10_FLAGS);
 	
-	var results = []
-	results.push(sortXML(oc));	// describeType doesn't return the children in a canonical order; sort for stability
-	results.push(sortXML(oi));	// describeType doesn't return the children in a canonical order; sort for stability
-	results.push(sortXML(ov));	// describeType doesn't return the children in a canonical order; sort for stability
-	results.push(getQualifiedClassName(Object));
-	results.push(getQualifiedClassName(Foo));
-	results.push(getQualifiedClassName(Foo2));
-	results.push(getQualifiedClassName(new Object));
-	results.push(getQualifiedClassName(new Foo(1)));
-	results.push(getQualifiedClassName(new Foo2(1)));
-	results.push(getQualifiedSuperclassName(Object));
-	results.push(getQualifiedSuperclassName(Foo));
-	results.push(getQualifiedSuperclassName(Foo2));
-	results.push(getQualifiedSuperclassName(new Object));
-	results.push(getQualifiedSuperclassName(new Foo(1)));
-	results.push(getQualifiedSuperclassName(new Foo2(1)));
-	results.push(describeType(null, FLASH10_FLAGS).toXMLString());
-	results.push(describeType(void 0, FLASH10_FLAGS).toXMLString());
-
 	var expected = []
 	var xc = 
 <type name="Foo2" base="Class" isDynamic="true" isFinal="true" isStatic="true">
@@ -255,23 +236,7 @@ package {
     <accessor name="length" access="readwrite" type="uint" declaredBy="__AS3__.vec::Vector.&lt;*&gt;"/>
 </type>
 
-	expected.push(sortXML(xc));	// describeType doesn't return the children in a canonical order; sort for stability
-	expected.push(sortXML(xi));	// describeType doesn't return the children in a canonical order; sort for stability
-	expected.push(sortXML(xv));	// describeType doesn't return the children in a canonical order; sort for stability
-	expected.push("Object");
-	expected.push("Foo");
-	expected.push("Foo2");
-	expected.push("Object");
-	expected.push("Foo");
-	expected.push("Foo2");
-	expected.push(null);
-	expected.push("FooBase");
-	expected.push("Foo");
-	expected.push(null);	// getQualifiedSuperclassName returns null (not "null") for Object
-	expected.push("FooBase");
-	expected.push("Foo");
-	expected.push('<type name="null" isDynamic="false" isFinal="true" isStatic="false"/>');
-	expected.push('<type name="void" isDynamic="false" isFinal="true" isStatic="false"/>');
+
 	
 	function sortXMLAttrs(x:XML):XML
 	{
@@ -311,15 +276,48 @@ package {
 		{
 			x.appendChild(sortXML(new XML(s)));
 		}
+		
+		
+		
 		return x;
 	}
+	
+    // save values to restore afterwards (for ATS)
+    var ignoreComments = XML.ignoreComments ;
+    var ignoreProcessingInstructions = XML.ignoreProcessingInstructions ;
+    var ignoreWhitespace = XML.ignoreWhitespace ;
+    var prettyIndent = XML.prettyIndent;
+    var prettyPrinting = XML.prettyPrinting ;
+    
+    startTest();
 
-	for (var i in results)
-	{
-		if (results[i] == expected[i])
-			print("test "+i+" PASSED!");
-		else
-			print("test "+i+" FAILED! expected "+String(expected[i])+" got "+String(results[i]));
-	}
+	AddTestCase("sortXML(oc)", String(sortXML(xc)), String(sortXML(oc)));	// describeType doesn't return the children in a canonical order; sort for stability
+	AddTestCase("sortXML(oi)", String(sortXML(xi)), String(sortXML(oi)));	// describeType doesn't return the children in a canonical order; sort for stability
+	AddTestCase("sortXML(ov)", String(sortXML(xv)), String(sortXML(ov)));	// describeType doesn't return the children in a canonical order; sort for stability
+	AddTestCase("getQualifiedClassName(Object)", "Object", getQualifiedClassName(Object));
+	AddTestCase("getQualifiedClassName(Foo)", "Foo", getQualifiedClassName(Foo));
+	AddTestCase("getQualifiedClassName(Foo2)", "Foo2", getQualifiedClassName(Foo2));
+	AddTestCase("getQualifiedClassName(new Object)", "Object", getQualifiedClassName(new Object));
+	AddTestCase("getQualifiedClassName(new Foo(1))", "Foo", getQualifiedClassName(new Foo(1)));
+	AddTestCase("getQualifiedClassName(new Foo2(1))", "Foo2", getQualifiedClassName(new Foo2(1)));
+	AddTestCase("getQualifiedSuperclassName(Object)", null, getQualifiedSuperclassName(Object));
+	AddTestCase("getQualifiedSuperclassName(Foo)", "FooBase", getQualifiedSuperclassName(Foo));
+	AddTestCase("getQualifiedSuperclassName(Foo2)", "Foo", getQualifiedSuperclassName(Foo2));
+	AddTestCase("getQualifiedSuperclassName(new Object)", null, getQualifiedSuperclassName(new Object));
+	AddTestCase("getQualifiedSuperclassName(new Foo(1))", "FooBase", getQualifiedSuperclassName(new Foo(1)));
+	AddTestCase("getQualifiedSuperclassName(new Foo2(1))", "Foo", getQualifiedSuperclassName(new Foo2(1)));
+	AddTestCase("describeType(null, FLASH10_FLAGS).toXMLString()", '<type name="null" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(null, FLASH10_FLAGS).toXMLString());
+	AddTestCase("describeType(void 0, FLASH10_FLAGS).toXMLString()", '<type name="void" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(void 0, FLASH10_FLAGS).toXMLString());
+
+
+    test();
+    
+    
+    // restore XML values (for ATS)
+    XML.ignoreComments = ignoreComments;
+    XML.ignoreProcessingInstructions = ignoreProcessingInstructions;
+    XML.ignoreWhitespace = ignoreWhitespace;
+    XML.prettyIndent = prettyIndent;
+    XML.prettyPrinting = prettyPrinting;
 }
 

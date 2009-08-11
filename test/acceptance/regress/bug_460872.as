@@ -46,15 +46,7 @@ class Foo {
 }
 Foo.failsVerification({});
 
-var results = []
-results.push({expected: true, actual: true});
-
-for (var i in results)
-{
-	var o = results[i]
-	if (o.actual == o.expected)
-		print("test "+i+" PASSED!");
-	else
-		print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-}
+startTest();
+AddTestCase("This test will fail verification above if bug is present", true, true);
+test();
 
