@@ -93,7 +93,7 @@
 #include <setjmp.h> // for OOM.h
 #include <pthread.h>
 
-#ifdef __GCC__
+#ifdef __GNUC__
 #define REALLY_INLINE inline __attribute__((always_inline))
 #define FASTCALL __attribute__((fastcall))
 #endif

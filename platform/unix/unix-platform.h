@@ -123,7 +123,7 @@ typedef void *maddr_ptr;
 #endif
 #endif // SOLARIS
 
-#ifdef __GCC__
+#ifdef __GNUC__
 #define REALLY_INLINE inline __attribute__((always_inline))
 #define FASTCALL __attribute__((fastcall))
 #endif
