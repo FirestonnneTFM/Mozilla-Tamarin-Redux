@@ -126,7 +126,7 @@ namespace avmplus
 		lastAllocSample(NULL),
 		callback(NULL),
 		timerHandle(0),
-		uids(1024, GCHashtable::OPTION_MALLOC),
+		uids(1024),
 		ptrSamples(NULL),
 		takeSample(0),
 		numSamples(0), 
@@ -433,8 +433,8 @@ namespace avmplus
 	{
 		//samples->free();
 		currentSample = samples;
-		GCHashtable* t = ptrSamples;
-		ptrSamples = new MMgc::GCHashtable(4096, GCHashtable::OPTION_MALLOC);
+		GCHashtable_VMPI* t = ptrSamples;
+		ptrSamples = new MMgc::GCHashtable_VMPI(4096);
 		delete t;
 		numSamples = 0;
 	}
@@ -462,7 +462,7 @@ namespace avmplus
 		
 		if( !ptrSamples ) 
 		{
-			ptrSamples = new MMgc::GCHashtable(1024, GCHashtable::OPTION_MALLOC);
+			ptrSamples = new MMgc::GCHashtable_VMPI(1024);
 		}
 
 		samplingNow = true;

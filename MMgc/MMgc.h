@@ -131,7 +131,6 @@ namespace MMgc
 	class RCObject;
 	class GCWeakRef;
 	class GCObject;
-	class GCHashtable;
 	class Cleaner;
 	class GCAlloc;
 	class GCHeap;
