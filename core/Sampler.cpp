@@ -280,6 +280,21 @@ namespace avmplus
 				read(p, s.ptr);
 				read(p, s.typeOrVTable);
 				read(p, s.alloc_size);
+				
+				if (s.ptr != NULL && s.typeOrVTable != NULL && !GC::IsFinalized(s.ptr))
+				{
+					// s.ptr HAS to be a ScriptObject (that inherits from RCObject),
+					// but it seems that its destructor has already been called, because
+					// it was cleared by calling "delete" during Marking or Collection.
+					// In that cases the collector will just set its finalized flag 
+					// to false and let it be a zombie (simple GCObject) until
+					// it isn't referenced anymore. The zombie might be deleted 
+					// in another sweep session, meaning that the Sampler can 
+					// run and crash when trying to make the Sample object for the zombie object.
+					// The Sampler will eventually be notified that the zombie is deleted.
+					s.ptr = NULL;
+				}
+				
 			}
 			else 
 			{
