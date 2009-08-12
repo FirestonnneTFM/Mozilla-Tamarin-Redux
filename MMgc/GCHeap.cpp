@@ -88,6 +88,7 @@ namespace MMgc
 	GCHeapConfig::GCHeapConfig() : 
 		initialSize(512), 
 		heapLimit(kDefaultHeapLimit), 
+		OOMExitCode(0),
 		useVirtualMemory(VMPI_useVirtualMemory()),
 		trimVirtualMemory(true),
 		verbose(false),
@@ -1571,6 +1572,12 @@ namespace MMgc
 		status = kMemAbort;
 		EnterFrame *ef = enterFrame;
 		GCLog("error: out of memory\n");
+
+		if(config.OOMExitCode != 0) 
+		{
+			VMPI_exit(config.OOMExitCode);
+		}
+			
 		if(ef != NULL)
 		{
 			VMPI_lockRelease(&m_spinlock);

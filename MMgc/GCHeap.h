@@ -48,6 +48,12 @@ namespace MMgc
 		
 		size_t initialSize;
 		size_t heapLimit;
+		/**
+		 * If the application wants the allocator to exit when memory
+		 * runs out and reclamation efforts fail set this to a
+		 * non-zero value.   Defaults to zero.
+		 */
+		int OOMExitCode;
 		const bool useVirtualMemory;
 		bool trimVirtualMemory;
 		bool verbose;
