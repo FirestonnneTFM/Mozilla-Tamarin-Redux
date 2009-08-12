@@ -41,89 +41,313 @@
 
 namespace MMgc
 {
-	class GCHashtableIterator;
 	/**
-	* simplified version of avmplus hashtable, doesn't shrink or handle deletions for instance
+	* simplified version of avmplus hashtable
 	*/
-	class GCHashtable
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	class GCHashtableBase
 	{
-		friend class GCHashtableIterator;
 	public:
-		const static uint32_t kDefaultSize=16;
-		const static void * DELETED;
-		enum 
-		{ 
-			OPTION_MALLOC=1, 
-			OPTION_MT=2, 
-			OPTION_STRINGS=4 
-		};
-		GCHashtable(unsigned int capacity=kDefaultSize, int options=0);
-		virtual ~GCHashtable();
-		const void *get(const void *key);
-		const void *get(intptr_t key) { return get((const void*)key); }
-		const void *remove(const void *key);
+		static uint32_t const kDefaultSize = 16;
+
+		GCHashtableBase(uint32_t capacity = kDefaultSize);
+		~GCHashtableBase();
+
+		inline const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
+		inline const void* get(intptr_t key) { return get((const void*)key); }
+		const void* remove(const void* key);
 		// updates value if present, adds and grows if necessary if not
-		void put(const void *key, const void *value);
-		void add(const void *key, const void *value) { put(key, value); }
-		void add(intptr_t key, const void *value) { put((const void*)key, value); }
-		int count() { return numValues; }
+		void put(const void* key, const void* value);
+		inline void add(const void* key, const void* value) { put(key, value); }
+		inline void add(intptr_t key, const void* value) { put((const void*)key, value); }
+		inline int32_t count() const { return numValues; }
 
-		int nextIndex(int index);
-		const void *keyAt(int index) { return table[index<<1]; }
-		const void *valueAt(int index) { return table[((index)<<1)+1]; }
+		int32_t nextIndex(int32_t index);
+		const void* keyAt(int32_t index) const { return table[index<<1]; }
+		const void* valueAt(int32_t index) const { return table[((index)<<1)+1]; }
+
+		class Iterator
+		{
+		public:
+			Iterator(GCHashtableBase* _ht) : ht(_ht), index(-2) {}
+
+			const void* nextKey() 
+			{ 
+				do {
+					index += 2;
+				} while(index < (int32_t)ht->tableSize && ht->table[index] <= GCHashtableBase::DELETED);
+
+				return (index < (int32_t)ht->tableSize) ? ht->table[index] : NULL;
+			}
+
+			const void* value() 
+			{ 
+				GCAssert(ht->table[index] != NULL); 
+				return ht->table[index+1]; 
+			}
+
+			void remove()
+			{
+				GCAssert(ht->table[index] != NULL);			
+				ht->table[index] = GCHashtableBase::DELETED;
+				ht->table[index+1] = NULL;
+			}
+		private:
+			GCHashtableBase* ht;
+			int32_t index;
+		};
 
 	private:
-		// capacity
-		unsigned int tableSize;
+		int32_t find(const void* key, const void** table, uint32_t tableSize);
 
-		// size of table array
-		unsigned int numValues;
-
-		// number of delete items
-		unsigned int numDeleted;
-
-		// table elements
-		const void **table;
-
-		int options;
-		int find(const void *key, const void **table, unsigned int tableSize);
 		void grow();
+
+		static const void* const DELETED;// = (const void*)1;
+		static const void* EMPTY[2];// = { NULL, NULL };
+
 	protected:
-		virtual unsigned equals(const void *k1, const void *k2);
-		virtual unsigned hash(const void *k);
+		const void** table;		// table elements
+		uint32_t tableSize;		// capacity
+		uint32_t numValues;		// size of table array
+		uint32_t numDeleted;	// number of delete items
 	};
 
-	class GCHashtableIterator
+	// --------------------------------
+	
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	/*static*/ const void* const GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::DELETED = (const void*)1;
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	/*static*/ const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::EMPTY[2] = { NULL, NULL };
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::GCHashtableBase(uint32_t capacity) :
+		table(NULL),
+		tableSize(capacity*2),
+		numValues(0), 
+		numDeleted(0)
+	{
+		if (tableSize > 0)
+		{
+			grow();
+		}
+		else 
+		{
+			tableSize = 4;
+			numValues = 4;
+			table = EMPTY;
+		}
+	}
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::~GCHashtableBase()
+	{
+		if (table && table != EMPTY)
+			ALLOCHANDLER::free(table);
+		table = NULL;
+		tableSize = 0;
+		numValues = 0;
+		numDeleted = 0;
+	}
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	int32_t GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::find(const void* key, const void** table, uint32_t tableSize)
+	{	
+		GCAssert(key != DELETED);
+
+		// this is a quadratic probe but we only hit even numbered slots since those hold keys.
+		int32_t n = 7 << 1;
+		int32_t const bitmask = (tableSize - 1) & ~0x1;
+		uint32_t i = KEYHANDLER::hash(key) & bitmask;  
+		const void* k;
+		while ((k = table[i]) != NULL && !KEYHANDLER::equal(k, key))
+		{
+			i = (i + (n += 2)) & bitmask;		// quadratic probe
+		}
+		GCAssert(i <= ((tableSize-1)&~0x1));
+		return i;
+	}
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::put(const void* key, const void* value)
+	{
+		GCAssert(table != NULL);
+		int32_t i = find(key, table, tableSize);
+		if (!table[i]) 
+		{
+			// .75 load factor, note we don't take numDeleted into account
+			// numValues includes numDeleted
+			if (numValues * 8 >= tableSize * 3)
+			{
+				grow();
+				// grow rehashes
+				i = find(key, table, tableSize);
+				GCAssert(!table[i]);
+			}
+
+			table[i] = key;
+			numValues++;
+		}
+		table[i+1] = value;
+	}
+	
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key)
+	{
+		const void* ret = NULL;
+		int32_t i = find(key, table, tableSize);
+		if (table[i] == key) 
+		{
+			table[i] = DELETED;
+			ret = table[i+1];
+			table[i+1] = NULL;
+			numDeleted++;
+			// this helps a bit on pathologic memory profiler use case, needs more investigation
+			// 20% deleted == rehash
+			if (numDeleted * 10 >= tableSize)
+				grow();
+		}		
+		return ret;
+	}
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::grow()
+	{
+		int32_t newTableSize = tableSize;
+
+		uint32_t occupiedSlots = numValues - numDeleted;
+		GCAssert(numValues >= numDeleted);
+
+		// grow or shrink as appropriate:
+		// if we're greater than 50% full grow
+		// if we're less than 10% shrink
+		// else stay the same
+		if (4*occupiedSlots > tableSize)
+			newTableSize <<= 1;
+		else if (20*occupiedSlots < tableSize && tableSize > kDefaultSize && table)
+			newTableSize >>= 1;
+
+		const void** newTable;
+		newTable = (const void**)ALLOCHANDLER::alloc(newTableSize*sizeof(const void*));
+		
+		VMPI_memset(newTable, 0, newTableSize*sizeof(void*));
+
+		numValues = 0;
+		numDeleted = 0;
+
+		if (table)
+		{
+			for (int32_t i=0, n=tableSize; i < n; i += 2)	
+			{
+				const void* oldKey;
+				if ((oldKey=table[i]) != NULL)
+				{
+					// inlined & simplified version of put()
+					if (oldKey != DELETED) {
+						int32_t j = find(oldKey, newTable, newTableSize);
+						newTable[j] = oldKey;
+						newTable[j+1] = table[i+1];
+						numValues++;
+					}
+				}
+			}
+		}
+	
+		if (table && table != EMPTY) 
+		{
+			ALLOCHANDLER::free(table);
+		}
+		table = newTable;
+		tableSize = newTableSize;
+		GCAssert(table != NULL);
+	}
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	int32_t GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::nextIndex(int32_t index)
+	{
+		uint32_t i = index<<1;
+		while(i < tableSize)
+		{
+			if (table[i] > DELETED)
+				return (i>>1)+1;
+			i += 2;
+		}
+		return 0;
+	}
+
+	// --------------------------------
+	
+	/*
+		Why do we need two allocator options?
+
+		On some platforms FixedMalloc is known to be faster than the system (VMPI) allocator,
+		but really its about OOM: when we run out of memory we can shutdown in a
+		leak proof manner by zapping the GCHeap; if we use system memory we can't do
+		that (short of using a malloc zone). Also, it's about getting the right
+		profiler data: we want the WeakRef hashtable to show up in the memory profile
+		results.
+	*/
+	class GCHashtableAllocHandler_VMPI
 	{
 	public:
-		GCHashtableIterator(GCHashtable * _ht) : ht(_ht), index(-2) {}
-
-		const void *nextKey() 
-		{ 
-			do {
-				index+=2;
-			} while(index < (int)ht->tableSize && ht->table[index] <= GCHashtable::DELETED);
-			if(index < (int)ht->tableSize)
-				return ht->table[index];
-			return NULL;
-		}
-
-		const void *value() 
-		{ 
-			GCAssert(ht->table[index] != NULL); 
-			return ht->table[index+1]; 
-		}
-
-		void remove()
-		{
-			GCAssert(ht->table[index] != NULL);			
-			ht->table[index] = (const void*)GCHashtable::DELETED;
-			ht->table[index+1] = NULL;
-		}
-	private:
-		GCHashtable *ht;
-		int index;
+		static void* alloc(size_t size);
+		static void free(void* ptr);
 	};
+
+	class GCHashtableAllocHandler_new
+	{
+	public:
+		static void* alloc(size_t size);
+		static void free(void* ptr);
+	};
+	
+	// --------------------------------
+
+	class GCHashtableKeyHandler
+	{
+	public:
+		inline static uint32_t hash(const void* k)
+		{
+			return (0x7FFFFFFF & (uintptr_t)k);
+		}
+
+		inline static bool equal(const void* k1, const void* k2)
+		{
+			return k1 == k2;
+		}
+	};
+	
+	typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_new> GCHashtable;
+	typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCHashtable_VMPI;
+
+	// --------------------------------
+
+	class GCStringHashtableKeyHandler
+	{
+	public:
+		inline static uint32_t hash(const void* k)
+		{
+			uint32_t hash = 0;
+			const char* s = (const char*)k;
+			while (*s++) 
+			{
+				hash = (hash >> 28) ^ (hash << 4) ^ ((uintptr_t)*s << ((uintptr_t)s & 0x3));
+			}
+			return hash;
+		}
+
+		inline static bool equal(const void* k1, const void* k2)
+		{
+			if (k1 == k2) 
+				return true;
+			if (k1 && k2)
+				return VMPI_strcmp((const char*)k1, (const char*)k2) == 0;
+			return false;
+		}
+	};
+
+	typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_new> GCStringHashtable;
+	typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCStringHashtable_VMPI;
 }
 
 #endif

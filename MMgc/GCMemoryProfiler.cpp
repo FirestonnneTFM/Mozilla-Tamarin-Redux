@@ -43,7 +43,6 @@ namespace MMgc
 
 #ifdef MMGC_MEMORY_PROFILER
 	// increase this to get more info
-	const int kMaxStackTrace = 16; // RtlCaptureStackBackTrace stops working when this is 32
 	const int kNumTypes = 10;
 	const int kNumTracesPerType = 5;
 
@@ -91,10 +90,10 @@ namespace MMgc
 	GCThreadLocal<const void*> memtype;
 
 	MemoryProfiler::MemoryProfiler() : 
-		stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
-		stringsTable(4, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS),
-		nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
-		allocInfoTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT)
+		stackTraceMap(128),
+		stringsTable(4),
+		nameTable(128),
+		allocInfoTable(128)
 	{
 		VMPI_setupPCResolution();
 		simpleDump = !VMPI_hasSymbols();
@@ -102,20 +101,20 @@ namespace MMgc
 
 	MemoryProfiler::~MemoryProfiler()
 	{
-		GCHashtableIterator traceIter(&stackTraceMap);
+		GCStackTraceHashtable_VMPI::Iterator traceIter(&stackTraceMap);
 		const void *obj;
 		while((obj = traceIter.nextKey()) != NULL)
 		{
 			StackTrace *trace = (StackTrace*)traceIter.value();
 			delete trace;
 		}
-		GCHashtableIterator nameIter(&nameTable);
+		GCHashtable_VMPI::Iterator nameIter(&nameTable);
 		while((obj = nameIter.nextKey()) != NULL)
 		{
 			VMPI_free((void*)nameIter.value());			
 		}
 
-		GCHashtableIterator allocIter(&allocInfoTable);
+		GCHashtable_VMPI::Iterator allocIter(&allocInfoTable);
 		while((obj = allocIter.nextKey()) != NULL)
 		{
 			delete (AllocInfo*)allocIter.value();
@@ -281,11 +280,12 @@ namespace MMgc
 	class PackageGroup : public GCAllocObject
 	{
 	public:
-		PackageGroup(const char *name) : name(name), size(0), count(0), categories(16, GCHashtable::OPTION_MALLOC) {}
+		PackageGroup(const char *name) : name(name), size(0), count(0), categories(16) {}
 		const char *name;
 		size_t size;
 		uint32_t count;
-		GCHashtable categories; // key == category name, value == CategoryGroup*
+		// Note: it's important to use the VMPI variant of GCHashtable for this.
+		GCHashtable_VMPI categories; // key == category name, value == CategoryGroup*
 	};
 
 	// data structure to gather allocations by type with the top 5 traces
@@ -348,14 +348,15 @@ namespace MMgc
 			return;
 		}
 
-		GCHashtable packageTable(128, GCHashtable::OPTION_MALLOC);
+		// Note: it's important to use the VMPI variant of GCHashtable for this.
+		GCHashtable_VMPI packageTable(128);
 
 		size_t residentSize=0;
 		uint32_t residentCount=0;
 		size_t packageCount=0;
 
 		// rip through all allocation sites and sort into package and categories
-		GCHashtableIterator iter(&stackTraceMap);
+		GCStackTraceHashtable_VMPI::Iterator iter(&stackTraceMap);
 		const void *obj;
 		while((obj = iter.nextKey()) != NULL)
 		{
@@ -415,7 +416,7 @@ namespace MMgc
 		PackageGroup **packages = (PackageGroup**)alloca(packageCount*sizeof(PackageGroup*));
 		VMPI_memset(packages, 0, packageCount*sizeof(PackageGroup*));
 
-		GCHashtableIterator pack_iter(&packageTable);
+		GCHashtable_VMPI::Iterator pack_iter(&packageTable);
 		const char *package;
 		while((package = (const char*)pack_iter.nextKey()) != NULL)
 		{
@@ -444,7 +445,7 @@ namespace MMgc
 			// sort CategoryGroup's into this array
 			CategoryGroup **residentFatties = (CategoryGroup**) alloca(numTypes * sizeof(CategoryGroup *));
 			VMPI_memset(residentFatties, 0, numTypes * sizeof(CategoryGroup *));
-			GCHashtableIterator iter(&pg->categories);
+			GCHashtable_VMPI::Iterator iter(&pg->categories);
 			const char *name;
 			while((name = (const char*)iter.nextKey()) != NULL)
 			{
@@ -496,11 +497,11 @@ namespace MMgc
 			}
 		}
 
-		GCHashtableIterator pi(&packageTable);
+		GCHashtable_VMPI::Iterator pi(&packageTable);
 		while(pi.nextKey() != NULL)
 		{
 			PackageGroup* pg = (PackageGroup*)pi.value();
-			GCHashtableIterator iter(&pg->categories);
+			GCHashtable_VMPI::Iterator iter(&pg->categories);
 			while(iter.nextKey() != NULL)
 				delete (CategoryGroup*)iter.value();
 			delete pg;
@@ -512,7 +513,7 @@ namespace MMgc
 		// rip through all allocation sites and dump them all without any sorting
 		// useful on WinMo or other platforms where we don't have symbol names
 		// at runtime, and just need to dump the raw addresses (which makes sorting impossible)
-		GCHashtableIterator iter(&stackTraceMap);
+		GCStackTraceHashtable_VMPI::Iterator iter(&stackTraceMap);
 		const void *obj;
 		size_t num_traces = 0; 
 		// Get a stack trace with VMPI_captureStackTrace as the top address - this will be used to calculate the
@@ -647,22 +648,6 @@ namespace MMgc
 		if(GCHeap::GetGCHeap()->GetProfiler())
 			return GCHeap::GetGCHeap()->GetProfiler()->GetAllocationName(obj);
 		return NULL;
-	}
-
-	unsigned GCStackTraceHashtable::equals(const void *k, const void *k2)
-	{
-		if(k == NULL || k2 == NULL)
-			return false;
-		return VMPI_memcmp(k, k2, kMaxStackTrace * sizeof(void*)) == 0;
-	}
-
-	unsigned GCStackTraceHashtable::hash(const void *k)
-	{
-		const int *array = (const int*)k;
-		int hash = 0;
-		for(int i=0;i<kMaxStackTrace; i++)
-			hash += array[i];
-		return hash;
 	}
 
 #else
