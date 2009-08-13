@@ -990,8 +990,10 @@ namespace MMgc
 			
 		GCAssertMsg(GetNumBlocks() == 0, "GC accounting off");
 
-		if(stackEnter != NULL)
+		if(stackEnter != NULL) {
+			VMPI_lockRelease(&m_gcLock);	
 			stackEnter->Destroy();
+		}
 
 		VMPI_lockDestroy(&m_gcLock);
 		VMPI_lockDestroy(&m_rootListLock);
@@ -3597,7 +3599,10 @@ bail:
  				Collect();
  			} else {
  				if(VMPI_lockTestAndAcquire(&m_gcLock)) {
- 					Collect();
+					// got it
+					m_gcThread = VMPI_currentThread();
+ 					Collect(false);
+					m_gcThread = NULL;;
  					VMPI_lockRelease(&m_gcLock);
  				}		
  				// else nothing can be done
