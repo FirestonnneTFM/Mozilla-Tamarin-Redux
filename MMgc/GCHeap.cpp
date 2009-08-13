@@ -132,6 +132,7 @@ namespace MMgc
 		  numAlloc(0),
 		  config(c),
  		  status(kMemNormal),
+		  enterCount(0),
 		  primordialThread(VMPI_currentThread()),
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
