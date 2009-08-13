@@ -159,7 +159,7 @@ namespace MMgc
 			VMPI_lockDestroy(&m_spinlock);
 		}
 
-		void* Alloc(size_t size, FixedMallocOpts flags=0)
+		void* Alloc(size_t size, FixedMallocOpts flags=kNone)
 		{
 			MMGC_LOCK(m_spinlock);
 			return FixedAlloc::Alloc(size, flags); 
