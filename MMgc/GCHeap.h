@@ -213,7 +213,7 @@ namespace MMgc
 		/**
 		 * Get the GCHeap singleton
 		 */
-		inline static GCHeap *GetGCHeap() { GCAssert(instance != NULL); return instance; }
+		inline static GCHeap *GetGCHeap() { return instance; }
 
 		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
