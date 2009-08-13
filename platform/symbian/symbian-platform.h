@@ -95,7 +95,10 @@
 
 #ifdef __GNUC__
 #define REALLY_INLINE inline __attribute__((always_inline))
-#define FASTCALL __attribute__((fastcall))
+// only define FASTCALL for x86-32; other gcc versions will spew warnings
+#ifdef AVMPLUS_IA32
+	#define FASTCALL __attribute__((fastcall))
+#endif
 #endif
 
 #ifdef __WINSCW__
