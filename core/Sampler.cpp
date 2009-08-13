@@ -281,7 +281,7 @@ namespace avmplus
 				read(p, s.typeOrVTable);
 				read(p, s.alloc_size);
 				
-				if (s.ptr != NULL && s.typeOrVTable != NULL && !GC::IsFinalized(s.ptr))
+				if (s.ptr != NULL && s.typeOrVTable != 0 && !GC::IsFinalized(s.ptr))
 				{
 					// s.ptr HAS to be a ScriptObject (that inherits from RCObject),
 					// but it seems that its destructor has already been called, because
