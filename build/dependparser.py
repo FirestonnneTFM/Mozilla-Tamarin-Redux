@@ -42,11 +42,10 @@ a file."""
 
 import re
 import sys
-from sets import Set
 
 _lineExp = re.compile("#(?:line)? ?\d+ \"([^\"<>]+[^/])\"");
 
-deps = Set()
+deps = set()
 
 for line in sys.stdin:
     sys.stdout.write(line)
