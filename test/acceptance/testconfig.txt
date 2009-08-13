@@ -95,7 +95,7 @@ as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCa
 as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch , .*diff , expectedfail, known issue
 as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , .*diff , expectedfail, known issue
 as3/RuntimeErrors/Error1034TypeCoercionFailed , .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=510225
-eecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
+ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 
 ####################
