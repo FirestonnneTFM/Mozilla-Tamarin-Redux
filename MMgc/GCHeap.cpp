@@ -1604,7 +1604,6 @@ namespace MMgc
 		bool lastOneOut = false;
 		{
 			MMGC_LOCK(m_spinlock);
-			enterCount--;
 
 			// only safe to run bail out code on primary thread
 			if(VMPI_currentThread() == primordialThread && 
@@ -1615,6 +1614,8 @@ namespace MMgc
 
 			// do this after StatusChangeNotify it affects ShouldNotEnter
 			enterFrame = NULL;
+
+			enterCount--;
 
 			if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
 				// last one out of the pool pulls the plug
