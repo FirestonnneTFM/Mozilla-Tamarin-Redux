@@ -49,6 +49,13 @@
 		return;
 
 
+#define MMGC_ENTER_VOID_NO_GUARD				\
+	MMgc::EnterFrame _ef;						\
+	_ef.status = setjmp(_ef.jmpbuf);            \
+	if(_ef.status != 0)							\
+		return;
+
+
 #define MMGC_ENTER_RETURN(_val)					\
 	if(MMgc::GCHeap::ShouldNotEnter())			\
 		return _val;							\
