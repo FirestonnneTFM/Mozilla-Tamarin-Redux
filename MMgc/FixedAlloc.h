@@ -59,7 +59,7 @@ namespace MMgc
 		FixedAlloc(int itemSize, GCHeap* heap);
 		~FixedAlloc();
 
-		void* Alloc(size_t size, bool canFail=false);
+		void* Alloc(size_t size, FixedMallocOpts flags=kNone);
 		static void Free(void *item);
 
 		//This method returns the number bytes allocated by FixedAlloc
@@ -159,10 +159,10 @@ namespace MMgc
 			VMPI_lockDestroy(&m_spinlock);
 		}
 
-		void* Alloc(size_t size, bool canFail=false)
+		void* Alloc(size_t size, FixedMallocOpts flags=0)
 		{
 			MMGC_LOCK(m_spinlock);
-			return FixedAlloc::Alloc(size, canFail); 
+			return FixedAlloc::Alloc(size, flags); 
 		}
 
 		void Free(void *ptr)
@@ -184,7 +184,7 @@ namespace MMgc
 	/**
 	 * classes that need fast lock free allocation should subclass this and pass
 	 * a FixedAlloc * to the new parameter.  One new/delete are lock free, scalar
-	 * allocations use the normal locked general size allocator.
+	 * allocations use the normal locked general size allocator. 
 	 */
 	class FastAllocator 
 	{		

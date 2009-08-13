@@ -133,10 +133,7 @@ namespace MMgc
 		// override new and delete so we can know the objects extents (via FixedMalloc::Size())
 		void *operator new(size_t size)
 		{
-			void *space = FixedMalloc::GetFixedMalloc()->Alloc(size);
-			// GCRoots are auto-scanned so clean them, don't rely on ctors to init the object properly
-			VMPI_memset(space, 0, FixedMalloc::GetFixedMalloc()->Size(space));
-			return space;
+			return FixedMalloc::GetFixedMalloc()->Alloc(size, MMgc::kZero);
 		}
         
 		void operator delete (void *object)

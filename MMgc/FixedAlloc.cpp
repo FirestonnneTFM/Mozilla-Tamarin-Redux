@@ -107,16 +107,16 @@ namespace MMgc
 		}
 	}
 
-	void* FixedAlloc::Alloc(size_t size, bool canFail)
+	void* FixedAlloc::Alloc(size_t size, FixedMallocOpts flags)
 	{ 
 		(void)size;
 		GCAssertMsg(m_heap->StackEnteredCheck(), "MMGC_ENTER must be on the stack");
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
 		if(!m_firstFree) {
-			CreateChunk(canFail);
+			CreateChunk((flags & kCanFail) != 0);
 			if(!m_firstFree) {
-				GCAssertMsg(canFail, "Memory allocation failed to abort properly");
+				GCAssertMsg((flags & kCanFail) != 0, "Memory allocation failed to abort properly");
 				return NULL;
 			}
 		}
@@ -175,10 +175,14 @@ namespace MMgc
 		}
 #endif
 
-#ifdef MMGC_MEMORY_INFO
+#ifdef _DEBUG
 		// fresh memory poisoning
-		memset(item, 0xfa, b->size - DebugSize());
+		if((flags & kZero) == 0)
+			memset(item, 0xfa, b->size - DebugSize());
 #endif
+
+		if((flags & kZero) != 0)
+			memset(item, 0, b->size - DebugSize());
 
 		return item;
 	}

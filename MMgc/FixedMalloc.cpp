@@ -159,14 +159,14 @@ namespace MMgc
 		}		
 	}
 	
-	void* FASTCALL FixedMalloc::OutOfLineAlloc(size_t size)
+	void* FASTCALL FixedMalloc::OutOfLineAlloc(size_t size, FixedMallocOpts flags)
 	{
 		// OPTIMIZEME?  Alloc() is inlined, as are some functions
 		// it calls, but we could inline massively here.  As it
 		// is, Alloc(size) expands to three calls: VMPI_lockAcquire,
 		// FixedAlloc::Alloc/LargeAlloc, and VMPI_lockRelease.
 
-		return Alloc(size);
+		return Alloc(size, flags);
 	}
 	
 	void FASTCALL FixedMalloc::OutOfLineFree(void* p)
@@ -237,11 +237,18 @@ namespace MMgc
 	  return m_allocs[index];
 	}
 
-	void *FixedMalloc::LargeAlloc(size_t size, bool canFail)
+	void *FixedMalloc::LargeAlloc(size_t size, FixedMallocOpts flags)
 	{
 		size += DebugSize();
 		int blocksNeeded = (int)GCHeap::SizeToBlocks(size);
-		void *item = m_heap->Alloc(blocksNeeded, GCHeap::kExpand | (canFail ? GCHeap::kCanFail : 0));
+		uint32_t gcheap_flags = GCHeap::kExpand;
+
+		if((flags & kCanFail) != 0)
+			gcheap_flags |= GCHeap::kCanFail;
+		if((flags & kZero) != 0)
+			gcheap_flags |= GCHeap::kZero;
+
+		void *item = m_heap->Alloc(blocksNeeded, gcheap_flags);
 		if(item)
 		{
 			numLargeChunks += blocksNeeded;
@@ -255,6 +262,12 @@ namespace MMgc
 #endif
 				m_heap->AllocHook(item, size - DebugSize(), Size(item));
 			}
+#endif // MMGC_HOOKS
+		
+#ifdef _DEBUG
+		// fresh memory poisoning
+			if((flags & kZero) == 0)
+				memset(item, 0xfa, size - DebugSize());
 #endif
 		}
 		return item;
