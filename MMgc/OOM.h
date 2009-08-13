@@ -74,6 +74,7 @@ namespace MMgc
 		~EnterFrame();
 		jmp_buf jmpbuf;
 		int status;
+		void Destroy() { m_heap = NULL; }
 	private:
 		GCHeap *m_heap;
 	};

@@ -236,6 +236,9 @@ namespace MMgc
 		VMPI_lockDestroy(&gclog_spinlock);
 		VMPI_lockDestroy(&m_spinlock);
 		VMPI_lockDestroy(&callbacks_lock);
+		
+		if(enterFrame)
+			enterFrame->Destroy();
 	}
 
 	void* GCHeap::Alloc(int size, int flags)
