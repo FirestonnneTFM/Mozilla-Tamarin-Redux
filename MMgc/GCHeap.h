@@ -213,7 +213,13 @@ namespace MMgc
 		/**
 		 * Get the GCHeap singleton
 		 */
-		inline static GCHeap *GetGCHeap() { return instance; }
+		inline static GCHeap *GetGCHeap() 
+		{
+			// when OOM occurs the last EnterFrame macro destroys the
+			// heap so this can be NULL, clients should detect NULL
+			// and re-create the heap if desired
+			return instance; 
+		}
 
 		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
