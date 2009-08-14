@@ -1172,12 +1172,23 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			uint16_t* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		uint16_t result = *p;
+#else
+		union {
+			uint8_t a[2];
+			uint16_t b;
+		};
+		uint8_t* p_8 = dom->globalMemoryBase;
+		a[0] = p_8[addr];
+		a[1] = p_8[addr+1];
+		uint16_t result = b;
+#endif
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1191,12 +1202,25 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			int32_t* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		int32_t result = *p;
+#else
+		union {
+			uint8_t a[4];
+			uint32_t b;
+		};
+		uint8_t* p_8 = dom->globalMemoryBase;
+		a[0] = p_8[addr];
+		a[1] = p_8[addr+1];
+		a[2] = p_8[addr+2];
+		a[3] = p_8[addr+3];
+		int32_t result = b;
+#endif
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1210,12 +1234,25 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			float* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		float result = *p;
+#else
+		union {
+			uint8_t a[4];
+			float b;
+		};
+		uint8_t* p_8 = dom->globalMemoryBase;
+		a[0] = p_8[addr];
+		a[1] = p_8[addr+1];
+		a[2] = p_8[addr+2];
+		a[3] = p_8[addr+3];
+		float result = b;
+#endif
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1229,12 +1266,29 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 8) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			double* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		double result = *p;
+#else
+		union {
+			uint8_t a[8];
+			double b;
+		};
+		uint8_t* p_8 = dom->globalMemoryBase;
+		a[0] = p_8[addr];
+		a[1] = p_8[addr+1];
+		a[2] = p_8[addr+2];
+		a[3] = p_8[addr+3];
+		a[4] = p_8[addr+4];
+		a[5] = p_8[addr+5];
+		a[6] = p_8[addr+6];
+		a[7] = p_8[addr+7];
+		double result = b;
+#endif
 
 		MOPS_SWAP_BYTES(&result);
 
@@ -1262,12 +1316,23 @@ namespace avmplus
 
 		MOPS_SWAP_BYTES(&svalue);
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			uint16_t* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		*p = svalue;
+#else
+		union {
+			uint8_t a[2];
+			uint16_t b;
+		};
+		b = svalue;
+		uint8_t* p_8 = dom->globalMemoryBase;
+		p_8[addr] = a[0];
+		p_8[addr+1] = a[1];
+#endif
 	}
 
 	void MethodEnv::si32(int value, int addr) const
@@ -1279,12 +1344,25 @@ namespace avmplus
 
 		MOPS_SWAP_BYTES(&value);
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			int32_t* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		*p = value;
+#else
+		union {
+			uint8_t a[4];
+			int32_t b;
+		};
+		uint8_t* p_8 = dom->globalMemoryBase;
+		b = value;
+		p_8[addr] = a[0];
+		p_8[addr+1] = a[1];
+		p_8[addr+2] = a[2];
+		p_8[addr+3] = a[3];
+#endif
 	}
 
 	void MethodEnv::sf32(double value, int addr) const
@@ -1298,12 +1376,25 @@ namespace avmplus
 
 		MOPS_SWAP_BYTES(&fvalue);
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			float* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		*p = fvalue;
+#else
+		union {
+			uint8_t a[4];
+			float b;
+		};
+		uint8_t* p_8 = dom->globalMemoryBase;
+		b = fvalue;
+		p_8[addr] = a[0];
+		p_8[addr+1] = a[1];
+		p_8[addr+2] = a[2];
+		p_8[addr+3] = a[3];
+#endif
 	}
 
 	void MethodEnv::sf64(double value, int addr) const
@@ -1315,12 +1406,29 @@ namespace avmplus
 
 		MOPS_SWAP_BYTES(&value);
 
+#ifdef AVMPLUS_UNALIGNED_ACCESS
 		union {
 			uint8_t* p_8;
 			double* p;
 		};
 		p_8 = dom->globalMemoryBase + addr;
 		*p = value;
+#else
+		union {
+			uint8_t a[8];
+			double b;
+		};
+		uint8_t* p_8 = dom->globalMemoryBase;
+		b = value;
+		p_8[addr] = a[0];
+		p_8[addr+1] = a[1];
+		p_8[addr+2] = a[2];
+		p_8[addr+3] = a[3];
+		p_8[addr+4] = a[4];
+		p_8[addr+5] = a[5];
+		p_8[addr+6] = a[6];
+		p_8[addr+7] = a[7];
+#endif
 	}
 
 	// see 13.2 creating function objects
