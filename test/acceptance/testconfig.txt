@@ -239,12 +239,12 @@ as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatc
 as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , .* , ats_skip, known issue
 as3/RuntimeErrors/Error1034TypeCoercionFailed, .*, ats_skip, -AS3 switch breaks test
 ecma3/Exceptions/exception_011_rt, .*, ats_skip, test throws an undefined which is not catchable
-ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,.*, skip, bug 499685 skip slow tests
-ecma3/Unicode/u5000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
-ecma3/Unicode/u6000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
-ecma3/Unicode/u7000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
-ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
-ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, skip, bug 499685 skip slow tests
-ecma3/Unicode/uE000_PrivateUseArea, .*, skip, bug 499685 skip slow tests
-ecma3/Unicode/uAC00_HangulSyllables, .*, skip, bug 499685 skip slow tests
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,.*, ats_skip, bug 499685 skip slow tests
+ecma3/Unicode/u5000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow tests
+ecma3/Unicode/u6000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow tests
+ecma3/Unicode/u7000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow tests
+ecma3/Unicode/u9000_CJKUnifiedIdeographs,.*, ats_skip, bug 499685 skip slow tests
+ecma3/Unicode/uE000_PrivateUseArea, .*, ats_skip, bug 499685 skip slow tests
+ecma3/Unicode/uAC00_HangulSyllables, .*, ats_skip, bug 499685 skip slow tests
 
