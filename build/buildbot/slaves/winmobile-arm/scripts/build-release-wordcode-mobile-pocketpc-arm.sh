@@ -55,7 +55,7 @@
 # Just need to pass in the additional args for zlib
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/build-release-wordcode.sh $change "--target=arm-windows --enable-wordcode-interp --enable-zlib-include-dir=../../../modules/zlib/src --enable-zlib-lib=../../../modules/zlib/zlib-arm.lib"
+../all/build-release-wordcode.sh $change "--target=arm-windows"
 
 cp $buildsdir/${change}-${changeid}/$platform/$shell_release_wordcode $buildsdir/${change}-${changeid}/$platform/$shell_release_wordcode_arm
 chmod 777 $buildsdir/${change}-${changeid}/$platform/$shell_release_wordcode_arm

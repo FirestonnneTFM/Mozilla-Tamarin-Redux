@@ -80,7 +80,7 @@ $bullseyedir/cov01 --on
 # Just need to pass in the additional args for zlib
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/build-selftest.sh $change "--enable-zlib-include-dir=../../../modules/zlib/src --enable-zlib-lib=../../../modules/zlib/zlib.lib" ${shell_selftest_cov}
+../all/build-selftest.sh $change ${shell_selftest_cov}
 
 
 
