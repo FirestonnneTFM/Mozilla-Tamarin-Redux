@@ -72,10 +72,12 @@ if (buildShell):
 
 APP_CPPFLAGS = "-DAVMSHELL_BUILD "
 APP_CXXFLAGS = ""
+APP_CFLAGS = ""
 OPT_CXXFLAGS = "-O3 "
 OPT_CPPFLAGS = ""
 DEBUG_CPPFLAGS = "-DDEBUG -D_DEBUG "
 DEBUG_CXXFLAGS = ""
+DEBUG_CFLAGS = ""
 DEBUG_LDFLAGS = ""
 OS_LIBS = []
 OS_LDFLAGS = ""
@@ -145,19 +147,24 @@ elif config.getCompiler() == 'VS':
         OS_LDFLAGS += "-MAP "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
+            DEBUG_CFLAGS = "-Od "
             APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- -Zc:forScope "
         else:
             OPT_CXXFLAGS = "-O2 -GR- "
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
+        APP_CFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
         OS_LDFLAGS += "-SAFESEH:NO -MAP "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
+            DEBUG_CFLAGS = "-Od "
         else:
             OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
+            OPT_CFLAGS = "-O2 -Ob1 -GR- "
         if memoryProfiler:
             OPT_CXXFLAGS += "-Oy- -Zi "
     DEBUG_CXXFLAGS += "-Zi "
+    DEBUG_CFLAGS += "-Zi "
     DEBUG_LDFLAGS += "-DEBUG "
 elif config.getCompiler() == 'SunStudio':
     APP_CXXFLAGS = "-template=no%extdef "
@@ -174,7 +181,7 @@ zlib_lib = o.getStringArg('zlib-lib')
 if zlib_lib is not None:
     AVMSHELL_LDFLAGS = zlib_lib
 else:
-    AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,z)'
+    AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,zlib)'
 
 
 if the_os == "darwin":
@@ -193,9 +200,11 @@ if the_os == "darwin":
         config.subst("MACOSX_DEPLOYMENT_TARGET",10.5)
         if cpu == 'x86_64':
             APP_CXXFLAGS += "-arch x86_64 "
+            APP_CFLAGS += "-arch x86_64 "
             OS_LDFLAGS += "-arch x86_64 "
         else:
             APP_CXXFLAGS += "-arch ppc64 "
+            APP_CFLAGS += "-arch ppc64 "
             OS_LDFLAGS += "-arch ppc64 "
     else:
         APP_CXXFLAGS += "-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "

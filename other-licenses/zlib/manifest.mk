@@ -15,7 +15,7 @@
 #
 # The Initial Developer of the Original Code is
 # Adobe System Incorporated.
-# Portions created by the Initial Developer are Copyright (C) 2005-2006
+# Portions created by the Initial Developer are Copyright (C) 2009
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
@@ -34,65 +34,34 @@
 #
 # ***** END LICENSE BLOCK *****
 
-# shell must be included here because that's where avmshell-features.h lives,
-# and in shell builds it is included from platform/VMPI.h.  That's how it
-# is supposed to be.
-INCLUDES += \
-  -I$(topsrcdir) \
-  -I$(topsrcdir)/MMgc \
-  -I$(topsrcdir)/core \
-  -I$(topsrcdir)/pcre \
-  -I$(topsrcdir)/eval \
-  -I$(topsrcdir)/platform \
-  -I$(topsrcdir)/other-licenses/zlib \
-  -I$(topsrcdir)/shell \
-  -I$(topsrcdir)/VMPI \
+
+STATIC_LIBRARIES += zlib
+
+zlib_BUILD_ALL = 1
+
+# When compiling the debug versions on windows, need to set -DHAVE_VSNPRINTF 
+# otherwise the following error will be produced when compiling:
+#  error C3163: '_vsnprintf': attributes inconsistent with previous declaration
+ifdef ENABLE_DEBUG
+ifeq ($(COMPILER),VS)
+    zlib_EXTRA_CFLAGS += -DHAVE_VSNPRINTF
+endif
+endif
+
+
+zlib_CSRCS := $(zlib_CSRCS) \
+  $(curdir)/adler32.c \
+  $(curdir)/compress.c \
+  $(curdir)/crc32.c \
+  $(curdir)/deflate.c \
+  $(curdir)/gzio.c \
+  $(curdir)/infback.c \
+  $(curdir)/inffast.c \
+  $(curdir)/inflate.c \
+  $(curdir)/inftrees.c \
+  $(curdir)/trees.c \
+  $(curdir)/uncompr.c \
+  $(curdir)/zutil.c \
   $(NULL)
 
-$(call RECURSE_DIRS,other-licenses/zlib)
-$(call RECURSE_DIRS,VMPI)
-$(call RECURSE_DIRS,MMgc)
 
-ifdef ENABLE_TAMARIN
-$(call RECURSE_DIRS,core pcre vprof)
-ifeq (sparc,$(TARGET_CPU))
-$(call RECURSE_DIRS,nanojit)
-endif
-ifeq (i686,$(TARGET_CPU))
-$(call RECURSE_DIRS,nanojit)
-endif
-ifeq (x86_64,$(TARGET_CPU))
-$(call RECURSE_DIRS,nanojit)
-endif
-ifeq (arm,$(TARGET_CPU))
-$(call RECURSE_DIRS,nanojit)
-endif
-ifeq (powerpc,$(TARGET_CPU))
-$(call RECURSE_DIRS,nanojit)
-endif
-ifeq (ppc64,$(TARGET_CPU))
-$(call RECURSE_DIRS,nanojit)
-endif
-ifeq (darwin,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/mac)
-endif
-ifeq (windows,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/win32)
-endif
-ifeq (linux,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/unix)
-endif
-ifeq (sunos,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/unix)
-endif
-endif
-
-$(call RECURSE_DIRS,eval)
-$(call RECURSE_DIRS,shell)
-
-echo:
-	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
-	@echo avmplus_CXXSRCS = $(avmplus_CXXSRCS)
-	@echo avmplus_CXXOBJS = $(avmplus_CXXOBJS)
-	@echo avmplus_OBJS = $(avmplus_OBJS)
-	@echo avmplus_NAME = $(avmplus_NAME)

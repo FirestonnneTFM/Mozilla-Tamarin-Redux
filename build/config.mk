@@ -43,14 +43,17 @@ srcdir := $(topsrcdir)
 
 COMPILE_CPPFLAGS = $(CPPFLAGS) $(APP_CPPFLAGS)
 COMPILE_CXXFLAGS = $(CXXFLAGS) $(APP_CXXFLAGS)
+COMPILE_CFLAGS = $(CFLAGS) $(APP_CFLAGS)
 
 ifdef ENABLE_DEBUG
 COMPILE_CPPFLAGS += $(DEBUG_CPPFLAGS)
 COMPILE_CXXFLAGS += $(DEBUG_CXXFLAGS)
+COMPILE_CFLAGS += $(DEBUG_CFLAGS)
 LDFLAGS += $(DEBUG_LDFLAGS)
 else
 COMPILE_CPPFLAGS += $(OPT_CPPFLAGS)
 COMPILE_CXXFLAGS += $(OPT_CXXFLAGS)
+COMPILE_CFLAGS += $(OPT_CFLAGS)
 endif
 
 ifdef MACOSX_DEPLOYMENT_TARGET
@@ -88,20 +91,27 @@ endef
 define THING_SRCS
 $(1)_CPPFLAGS ?= $(COMPILE_CPPFLAGS)
 $(1)_CXXFLAGS ?= $(COMPILE_CXXFLAGS)
+$(1)_CFLAGS ?= $(COMPILE_CFLAGS)
 $(1)_CPPFLAGS += $($(1)_EXTRA_CPPFLAGS)
 $(1)_CXXFLAGS += $($(1)_EXTRA_CXXFLAGS)
+$(1)_CFLAGS += $($(1)_EXTRA_CFLAGS)
 $(1)_INCLUDES += $(INCLUDES)
 $(1)_DEFINES += $(DEFINES)
 
 $(1)_CXXOBJS = $$($(1)_CXXSRCS:%.cpp=%.$(OBJ_SUFFIX))
 
+$(1)_COBJS = $$($(1)_CSRCS:%.c=%.$(OBJ_SUFFIX))
+
 $(1)_ASMOBJS = $$($(1)_ASMSRCS:%.armasm=%.$(OBJ_SUFFIX))
 
 GARBAGE += \
   $$($(1)_CXXOBJS) \
+  $$($(1)_COBJS) \
   $$($(1)_ASMOBJS) \
   $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) \
   $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.deps) \
+  $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) \
+  $$($(1)_COBJS:.$(OBJ_SUFFIX)=.deps) \
   $(NULL)
 
 $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_DEPS)
@@ -113,11 +123,20 @@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_D
 $$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.$(II_SUFFIX) $$(GLOBAL_DEPS)
 	@$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
+$$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX)): %.$(I_SUFFIX): %.c $$(GLOBAL_DEPS)
+	@test -d $$(dir $$@) || mkdir -p $$(dir $$@)
+	@echo "Compiling $$*"
+	@$(CC) -E $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) $$< > $$@
+	@$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@ > /dev/null
+
+$$($(1)_COBJS): %.$(OBJ_SUFFIX): %.$(I_SUFFIX) $$(GLOBAL_DEPS)
+	@$(CC) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
+
 $$($(1)_ASMOBJS): %.$(OBJ_SUFFIX): %.armasm $$(GLOBAL_DEPS)
 	$(ASM) -o $$@ $$($(1)_ASMFLAGS) $$<
 	
 $(1).thing.pp: FORCE
-	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX))
+	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) $$($(1)_COBJS:.$(OBJ_SUFFIX)=.$(I_SUFFIX))
 
 include $(1).thing.pp
 
@@ -128,9 +147,9 @@ define STATIC_LIBRARY_RULES
   $(1)_BASENAME ?= $(1)
   $(1)_NAME = $(LIB_PREFIX)$$($(1)_BASENAME).$(LIB_SUFFIX)
 
-$$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_ASMOBJS)
+$$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_ASMOBJS)
 	@echo "Library $$*"
-	@$(call MKSTATICLIB,$$@) $$($(1)_CXXOBJS) $$($(1)_ASMOBJS)
+	$(call MKSTATICLIB,$$@) $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_ASMOBJS)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)
 
@@ -156,8 +175,8 @@ define DLL_RULES
     $$(OS_LDFLAGS) \
     $(NULL)
 
-$$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
-	$(call MKDLL,$$@) $$($(1)_CXXOBJS) \
+$$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_COBJS) $$($(1)_DEPS)
+	$(call MKDLL,$$@) $$($(1)_CXXOBJS) $$($(1)_COBJS) \
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
 	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
 	  $$($(1)_LDFLAGS)
@@ -188,7 +207,7 @@ define PROGRAM_RULES
 
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
 	@echo "Link $$@"
-	@$(call MKPROGRAM,$$@) \
+	$(call MKPROGRAM,$$@) \
 	  $$($(1)_CXXOBJS) \
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
 	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
