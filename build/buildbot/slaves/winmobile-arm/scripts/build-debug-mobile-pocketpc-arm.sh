@@ -55,7 +55,7 @@
 # Just need to pass in the additional args for zlib
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/build-debug.sh $change "--target=arm-windows --enable-zlib-include-dir=../../../modules/zlib/src --enable-zlib-lib=../../../modules/zlib/zlib-arm.lib"
+../all/build-debug.sh $change "--target=arm-windows"
 
 cp $buildsdir/${change}-${changeid}/$platform/$shell_debug $buildsdir/${change}-${changeid}/$platform/$shell_debug_arm
 chmod 777 $buildsdir/${change}-${changeid}/$platform/$shell_debug_arm

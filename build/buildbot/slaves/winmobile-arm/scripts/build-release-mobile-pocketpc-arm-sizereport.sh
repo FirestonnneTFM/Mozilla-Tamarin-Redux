@@ -64,7 +64,7 @@ mkdir objdir-release
 
 cd objdir-release
 
-python ../configure.py --enable-shell --target=arm-windows --enable-zlib-include-dir=../../../modules/zlib/src --enable-zlib-lib=../../../modules/zlib/zlib-arm.lib
+python ../configure.py --enable-shell --target=arm-windows
 
 topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
 CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
