@@ -1057,23 +1057,29 @@ namespace MMgc
 #endif
 		
 		// Try to coalesce this block with its predecessor
-		HeapBlock *prevBlock = block - block->sizePrevious;
-		if (!prevBlock->inUse() && prevBlock->committed) {
-			// Remove predecessor block from free list
-			RemoveFromList(prevBlock);
-
-			// Increase size of predecessor block
-			prevBlock->size += block->size;
-
-			block->size = 0;
-			block->sizePrevious = 0;
-			block->baseAddr = 0;				
-
-			block = prevBlock;
+		if(block->sizePrevious)
+		{
+			HeapBlock *prevBlock = block - block->sizePrevious;
+			if (!prevBlock->inUse() && prevBlock->committed) 
+			{
+				// Remove predecessor block from free list
+				RemoveFromList(prevBlock);
+				
+				// Increase size of predecessor block
+				prevBlock->size += block->size;
+				
+				block->size = 0;
+				block->sizePrevious = 0;
+				block->baseAddr = 0;				
+				
+				block = prevBlock;
+			}
 		}
 
 		// Try to coalesce this block with its successor
 		HeapBlock *nextBlock = block + block->size;
+
+		GCAssert(block->size != 0);
 
 		if (!nextBlock->inUse() && nextBlock->committed) {
 			// Remove successor block from free list
