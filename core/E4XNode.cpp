@@ -381,8 +381,8 @@ namespace avmplus
 		Stringp prefix = core->kEmptyString;
 		if (pos > 0)
 		{
-			prefix = core->internString(tagName->substring(0, pos));
-			tagName = core->internString(tagName->substring(pos + 1, tagName->length()));
+			prefix = tagName->intern_substring(0, pos);
+			tagName = tagName->intern_substring(pos + 1, tagName->length());
 		}
 
 		// An attribute without a prefix is unqualified and does not inherit a namespace
@@ -492,7 +492,7 @@ namespace avmplus
 			if (len >= 5)
 			{
 				// caseless match
-				if (attributeName->matchesLatin1("xmlns", 5, 0, true))
+				if (attributeName->matchesLatin1_caseless("xmlns", 5, 0))
 				{
 					// a namespace xnlns:prefix="URI" or xmlns="URI"
 					if ((len > 5) && attributeName->charAt(5) == ':')
@@ -532,7 +532,7 @@ namespace avmplus
 			if (len >= 5)
 			{
 				// caseless match
-				if (attributeName->matchesLatin1("xmlns", 5, 0, true))
+				if (attributeName->matchesLatin1_caseless("xmlns", 5, 0))
 				{
 					// a namespace xnlns:prefix="URI" or xmlns="URI"
 					if ((len == 5) || ((len > 5) && attributeName->charAt(5) == ':'))

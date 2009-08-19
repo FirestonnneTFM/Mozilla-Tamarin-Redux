@@ -148,6 +148,7 @@ namespace avmplus
 
 		while ((m_status = parser.getNext(tag)) == XMLParser::kNoError)
 		{
+
 			E4XNode* pNewElement = NULL;
 
 			switch (tag.nodeType)
@@ -166,20 +167,20 @@ namespace avmplus
 					// A closing tag
 					if (tag.text->charAt(0) == '/')
 					{
-						Stringp thisNodeNameNoSlash = tag.text->substring(1);
-						
+						const int32_t nodeNameStart = 1; // skip the slash
+
 						Multiname m;
 						p->getQName(core, &m);
-						Namespace *ns = m.getNamespace();
+						Namespace* ns = m.getNamespace();
 
-						// Get our parents qualified name string here
+						// Get our parent's qualified name string here
 						Stringp parentName = m.getName();
 
-						Namespace *ns2 = toplevel->getDefaultNamespace();
-						if ((!NodeNameEquals(thisNodeNameNoSlash, parentName, ns)) &&
+						if (!NodeNameEquals(tag.text, nodeNameStart, parentName, ns) &&
 							// We're trying to support paired nodes where the first node gets a namespace
 							// from the default namespace.
-							(*m.getName() != *thisNodeNameNoSlash) && (ns->getURI() == ns2->getURI()))
+							parentName->Compare(*tag.text, nodeNameStart, tag.text->length()-nodeNameStart) != 0 && 
+							ns->getURI() == toplevel->getDefaultNamespace()->getURI())
 						{
 							// If p == m_node, we are at the top of our tree and we're parsing the fake "parent"
 							// wrapper tags around our actual XML text.  Instead of warning about a missing "</parent>"
@@ -291,7 +292,7 @@ namespace avmplus
 					else
 					{
 						name = tag.text->substring(0, space);
-						while (String::isSpace((wchar) tag.text->charAt (++space))) {}
+						while (String::isSpace((wchar) tag.text->charAt(++space))) {}
 						val  = tag.text->substring(space, tag.text->length());
 					}
 					pNewElement = new (gc) PIE4XNode(0, val); 
@@ -369,10 +370,12 @@ namespace avmplus
 
 			toplevel->throwTypeError(kXMLUnterminatedElementTag, parentName, parentName);
 		}
+
 	}
 
-	bool XMLObject::NodeNameEquals(Stringp nodeName, Stringp parentName, Namespace * parentNs)
+	bool XMLObject::NodeNameEquals(Stringp nodeName, int32_t nodeNameStart, Stringp parentName, Namespace * parentNs)
 	{
+		int32_t const nodeNameLength = nodeName->length() - nodeNameStart;
 		if (parentNs && parentNs->hasPrefix())
 		{
 			AvmCore *core = this->core();
@@ -381,22 +384,22 @@ namespace avmplus
 
 			// Does nodeName == parentNS:parentName
 			int totalLen = prefixLen + 1 + parentName->length(); // + 1 for ':' separator
-			if (totalLen != nodeName->length())
+			if (totalLen != nodeNameLength)
 				return false;
 
-			if (parentNSName->Compare(*nodeName, 0, prefixLen) != 0)
+			if (parentNSName->Compare(*nodeName, nodeNameStart, prefixLen) != 0)
 				return false;
 
-			if (nodeName->charAt(prefixLen) != ':')
+			if (nodeName->charAt(nodeNameStart + prefixLen) != ':')
 				return false;
 
 			// -1 for ':'
 			prefixLen++;
-			return (parentName->Compare(*nodeName, prefixLen, nodeName->length() - prefixLen) == 0); 
+			return (parentName->Compare(*nodeName, nodeNameStart + prefixLen, nodeNameLength - prefixLen) == 0); 
 		}
 		else
 		{
-			return *parentName == *nodeName;
+			return parentName->Compare(*nodeName, nodeNameStart, nodeNameLength) == 0; 
 		}
 	}
 

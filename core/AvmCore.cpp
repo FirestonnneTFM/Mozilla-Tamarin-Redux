@@ -2791,7 +2791,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		Stringp k;
 		if (!deletedCount)
 		{
-			while ((k=strings[i]) != NULL && k->Compare(*s) != 0) {
+			while ((k=strings[i]) != NULL && !k->equals(s)) {
 				i = (i + (n++)) & bitMask; // quadratic probe
 			}
 		}
@@ -2802,26 +2802,76 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				if (k == AVMPLUS_STRING_DELETED)
 				{
-					if (iFirstDeletedSlot == -1)
+					if (iFirstDeletedSlot < 0)
 					{
 						iFirstDeletedSlot = i;
 					}
 				}
-				else if (k->Compare(*s) == 0)
+				else if (k->equals(s))
 				{
-					return i;
+					break;
 				}
 				i = (i + (n++)) & bitMask; // quadratic probe
 			}
 
-			if ((k == NULL) && (iFirstDeletedSlot != -1))
-				return iFirstDeletedSlot;
-
+			if ((k == NULL) && (iFirstDeletedSlot >= 0))
+				i = iFirstDeletedSlot;
 		}
         return i;
     }
 
-    int AvmCore::findString(const wchar *s, int len)
+    int AvmCore::findStringLatin1(const char* s, int len)
+    {
+        int m = numStrings;
+		// 80% load factor
+		if (5*(stringCount+deletedCount+1) > 4*m) {
+			if (2*stringCount > m) // 50%
+			    rehashStrings(m = m << 1);
+			else
+				rehashStrings(m);
+		}
+
+        // compute the hash function
+		int hashCode = String::hashCodeLatin1(s, len);
+
+		int bitMask = m - 1;
+
+        // find the slot to use
+        int i = (hashCode&0x7FFFFFFF) & bitMask;
+        int n = 7;
+		Stringp k;
+		if (!deletedCount)
+		{
+			while ((k=strings[i]) != NULL && !k->equalsLatin1(s,len)) {
+				i = (i + (n++)) & bitMask; // quadratic probe
+			}
+		}
+		else
+		{
+			int iFirstDeletedSlot = -1;
+			while ((k=strings[i]) != NULL)
+			{
+				if (k == AVMPLUS_STRING_DELETED)
+				{
+					if (iFirstDeletedSlot < 0)
+					{
+						iFirstDeletedSlot = i;
+					}
+				}
+				else if (k->equalsLatin1(s, len))
+				{
+					break;
+				}
+				i = (i + (n++)) & bitMask; // quadratic probe
+			}
+
+			if ((k == NULL) && (iFirstDeletedSlot >= 0))
+				i = iFirstDeletedSlot;
+		}
+        return i;
+    }
+
+    int AvmCore::findStringUTF16(const wchar* s, int len)
     {
         int m = numStrings;
 		// 80% load factor
@@ -2854,20 +2904,20 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				if (k == AVMPLUS_STRING_DELETED)
 				{
-					if (iFirstDeletedSlot == -1)
+					if (iFirstDeletedSlot < 0)
 					{
 						iFirstDeletedSlot = i;
 					}
 				}
 				else if (k->equalsUTF16(s, len))
 				{
-					return i;
+					break;
 				}
 				i = (i + (n++)) & bitMask; // quadratic probe
 			}
 
-			if ((k == NULL) && (iFirstDeletedSlot != -1))
-				return iFirstDeletedSlot;
+			if ((k == NULL) && (iFirstDeletedSlot >= 0))
+				i = iFirstDeletedSlot;
 
 		}
         return i;
@@ -2904,7 +2954,33 @@ return the result of the comparison ToPrimitive(x) == y.
 	// note, this assumes Latin-1, not UTF8.
 	Stringp AvmCore::internStringLatin1(const char* s, int len)
 	{
-		return internString(newStringLatin1(s, len));
+		if (len < 0) len = String::Length(s);
+        int i = findStringLatin1(s, len);
+		Stringp other;
+        if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
+        {
+			if (other == AVMPLUS_STRING_DELETED)
+			{
+				deletedCount--;
+				AvmAssert(deletedCount >= 0);
+			}
+            
+#ifdef DEBUGGER			
+			DRC(Stringp) *oldStrings = strings;
+#endif
+
+			other = newStringLatin1(s, len);
+			
+#ifdef DEBUGGER
+			// re-find if String ctor caused rehash
+			if(strings != oldStrings)
+				i = findStringLatin1(s, len);
+#endif
+			strings[i] = other;
+			stringCount++;
+			other->setInterned();
+		}
+		return other;
 	}
 
 	// note, this assumes Latin-1, not UTF8.
@@ -2988,7 +3064,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		
 		UnicodeUtils::Utf8ToUtf16((const uint8*)cs, len8, buffer, len16, true);
 		buffer[len16] = 0;
-		int i = findString(buffer, len16);
+		int i = findStringUTF16(buffer, len16);
 		Stringp other;
 		if ((other=strings[i]) > AVMPLUS_STRING_DELETED)
 		{		
@@ -3026,7 +3102,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	Stringp AvmCore::internStringUTF16(const wchar* s, int len)
 	{
 		if (len < 0) len = String::Length(s);
-        int i = findString(s, len);
+        int i = findStringUTF16(s, len);
 		Stringp other;
         if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
         {
@@ -3045,7 +3121,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifdef DEBUGGER
 			// re-find if String ctor caused rehash
 			if(strings != oldStrings)
-				i = findString(s, len);
+				i = findStringUTF16(s, len);
 #endif
 			strings[i] = other;
 			stringCount++;

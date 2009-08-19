@@ -1464,7 +1464,8 @@ const int kBufferPadding = 16;
 
 	private:
 		/** search the string intern table */
-		int findString(const wchar *s, int len);
+		int findStringLatin1(const char* s, int len);
+		int findStringUTF16(const wchar* s, int len);
 		int findString(Stringp s);
 
 		/** search the namespace intern table */

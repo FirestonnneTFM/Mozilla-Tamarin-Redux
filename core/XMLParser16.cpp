@@ -63,7 +63,7 @@ namespace avmplus
 	// This is to simulate the E4X XML parser
 	static Stringp _condenseWhitespace(Stringp text)
 	{
-		StringIndexer str (text);
+		StringIndexer str(text);
 		// leading space
 		int32_t start = 0;
 		while (start < text->length() && String::isSpace(str[start]))
@@ -103,7 +103,7 @@ namespace avmplus
 		if (ch != '<') 
 		{
 			// Treat it as text.  Scan up to the next < or until EOF.
-			m_pos = m_str->indexOfLatin1("<", 1, m_pos + 1);
+			m_pos = m_str->indexOfCharCode('<', m_pos + 1);
 			if (m_pos < 0)
 				m_pos = m_str->length();
 
@@ -317,22 +317,30 @@ namespace avmplus
 		return XMLParser::kNoError;
 	}
 
-	Stringp XMLParser::unescape(int32_t start, int32_t last, bool bIntern)
+	Stringp XMLParser::unescape(int32_t start, int32_t last, bool intern)
 	{
-		if (start == last)
-			return core->kEmptyString;
-
-		int32_t bgn = m_str->indexOfLatin1("&", 1, start, last);
-		int32_t end = start;
 		Stringp dest = core->kEmptyString;
+
+		if (start == last)
+			return dest;
+
+		int32_t bgn = m_str->indexOfCharCode('&', start, last);
+		if (bgn < 0)
+		{
+			return intern ?
+					m_str->intern_substring(start, last) :
+					m_str->substring(start, last);
+		}
+		
+		int32_t end = start;
 		while (bgn >= start && bgn < last)
 		{
-			int32_t ampEnd = m_str->indexOfLatin1(";", 1, ++bgn, last);
+			int32_t ampEnd = m_str->indexOfCharCode(';', ++bgn, last);
 			if (ampEnd < 0)
 				// &xxx without semicolon - we are done
 				break;
 			// add the text between the last sequence and this sequence
-			dest = String::concatStrings(dest, m_str->substring(end, bgn-1));
+			dest = dest->append(m_str->substring(end, bgn-1));
 			end = ampEnd;
 			int32_t len = end - bgn;
 			// an &xx; sequence is at least two characters
@@ -376,7 +384,7 @@ namespace avmplus
 				} 
 				else if (len <= 4) // Our xmlEntities are only 4 characters or less
 				{
-					Atom entityAtom = core->internString(m_str->substring(bgn, end))->atom();
+					Atom entityAtom = m_str->intern_substring(bgn, end)->atom();
 					Atom result = core->xmlEntities->get(entityAtom);
 					if (result != undefinedAtom) 
 					{
@@ -395,13 +403,16 @@ namespace avmplus
 			}
 			if (!ok)
 				bgn = end + 1;
-			bgn = m_str->indexOfLatin1("&", 1, bgn, last);
+			bgn = m_str->indexOfCharCode('&', bgn, last);
 		}
 		// add any remaining text
 		if (end < last)
-			dest = String::concatStrings(dest, m_str->substring(end, last));
+			dest = dest->append(m_str->substring(end, last));
+		
+		if (intern)
+			dest = core->internString(dest);
 
-		return (bIntern) ? core->internString(dest) : dest;
+		return dest;
 	}
 
 	XMLParser::XMLParser(AvmCore *core, Stringp str) : m_str (str), m_pos (0)
