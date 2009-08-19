@@ -50,7 +50,9 @@
 #define WBRC(gc, container, addr, value) gc->privateWriteBarrierRC(container, addr, (const void *) (value))
 
 // fast-path versions for writing NULL (useful in dtors)
-#define WB_NULL(gc, container, addr) do { *(uintptr_t*)(addr) = 0; } while (0)
+
+inline void write_null(void* p) { *(uintptr_t*)(p) = 0; }
+#define WB_NULL(gc, container, addr) write_null((void*)addr)
 
 #define WBRC_NULL(gc, container, addr) gc->privateWriteBarrierRC_NULL(addr)
 
