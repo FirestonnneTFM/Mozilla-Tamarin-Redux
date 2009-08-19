@@ -179,21 +179,25 @@ namespace avmplus
 		/**
 		Produce a has code of this string.
 		*/
-				uint32_t FASTCALL	hashCode() const;
+				int32_t				hashCode() const;
+		/**
+		Use the same algorithm to produce a hash code for Latin1 data.
+		*/
+		static	int32_t FASTCALL	hashCodeLatin1(const char* buf, int32_t len);
 		/**
 		Use the same algorithm to produce a hash code for UTF-8 data.
 		*/
-		static	uint32_t FASTCALL	hashCodeUTF8(const utf8_t* buf, int32_t len);
+		static	int32_t FASTCALL	hashCodeUTF8(const utf8_t* buf, int32_t len);
 		/**
 		Use the same algorithm to produce a hash code for UTF-16 data.
 		*/
-		static	uint32_t FASTCALL	hashCodeUTF16(const wchar* buf, int32_t len);
+		static	int32_t FASTCALL	hashCodeUTF16(const wchar* buf, int32_t len);
 		/// Return the length in characters.
 		inline	int32_t				length() const { return m_length; }
 		// overload used by AS3 glue code.
 				int					get_length() const { return m_length; }
 		/// Is this string empty?
-		inline	bool isEmpty()		const { return m_length == 0; }
+		inline	bool				isEmpty() const { return m_length == 0; }
 		/// Return the width constant.
 		inline	Width				getWidth() const { return Width(m_bitsAndFlags & TSTR_WIDTH_MASK); }
 		/// Return the string typex.
@@ -213,17 +217,22 @@ namespace avmplus
 		Compare the String with toCompare. If the length is > 0, compare
 		the other string up to the given length.
 		@param	other				the string to compare with
-		@param	start				the starting position
-		@param	length				the length to compare(if > 0)
+		@param	start				the starting position (in other)
+		@param	length				the length to compare (if > 0) (in other)
 		@return = 0 if the strings are identical,
 		        < 0 if this string is less than toCompare,
 		        > 0 if this string is greater than toCompare
 		 */
-				int32_t FASTCALL	Compare(String& other, int32_t start = 0, int32_t length = 0) const;
+				int32_t FASTCALL	Compare(String& other, int32_t other_start = 0, int32_t other_length = 0) const;
+
+		/**
+		Compare this string with another string.
+		*/
+				bool FASTCALL		equals(Stringp that) const;
 		/**
 		Compare this string with a Latin1 string.
 		*/
-				bool	FASTCALL	equalsLatin1(const char* p) const;
+				bool	FASTCALL	equalsLatin1(const char* p, int32_t len = -1) const;
 		/**
 		Compare this string with a UTF-16 string.
 		*/
@@ -274,6 +283,15 @@ namespace avmplus
 		@return						the index of the found position, or -1 if no match
 		*/
 				int32_t FASTCALL	indexOfLatin1(const char* p, int32_t len = -1, int32_t start = 0, int32_t end = 0x7FFFFFFF) const;
+
+		/**
+		Convenience method: indexOf() for a string of length 1.
+		@param	c					the character code to compare
+		@param	start				the starting position
+		@param	end					the ending position
+		@return						the index of the found position, or -1 if no match
+		*/
+				int32_t FASTCALL	indexOfCharCode(wchar c, int32_t start = 0, int32_t end = 0x7FFFFFFF) const;
 		/**
 		Convenience method for old code (boolean result)
 		*/
@@ -284,10 +302,18 @@ namespace avmplus
 		@param	p					the character string to compare; NULL returns false
 		@param	len					the number of characters to compare; if < 0, call Length()
 		@param	pos					the position to match
-		@param	caseless			true for a caseless match
 		@return						true if the string matches
 		*/
-				bool	 FASTCALL	matchesLatin1(const char* p, int32_t len, int32_t pos, bool caseless = false);
+				bool	 FASTCALL	matchesLatin1(const char* p, int32_t len, int32_t pos);
+
+		/**
+		Convenience method: Does a Latin-1 string match at the current position, ignoring case?
+		@param	p					the character string to compare; NULL returns false
+		@param	len					the number of characters to compare; if < 0, call Length()
+		@param	pos					the position to match
+		@return						true if the string matches
+		*/
+				bool	 FASTCALL	matchesLatin1_caseless(const char* p, int32_t len, int32_t pos);
 		/**
 		Implements String.lastIndexOf().
 		*/
@@ -308,19 +334,21 @@ namespace avmplus
 		@return						the concatenated string
 		*/
 				Stringp	FASTCALL	append(Stringp str);
+
+//				Stringp	FASTCALL	append_substring(Stringp str, int32_t start, int32_t end = 0x7fffffff);
 		/*
 		Append a 8-bit-wide string. For Unicode, strings should be Latin1, not UTF8.
 		*/
-		inline	Stringp				appendLatin1(const char* p) { return append(NULL, p, Length(p), k8); }
-		inline	Stringp				appendLatin1(const char* p, int32_t len) { return append(NULL, p, len, k8); }
+		inline	Stringp				appendLatin1(const char* p) { return _append(NULL, p, Length(p), k8); }
+		inline	Stringp				appendLatin1(const char* p, int32_t len) { return _append(NULL, p, len, k8); }
 		/*
 		Append a 16-bit-wide string. For Unicode, strings should be UTF16, but this is not enforced
 		by this method: indeed, several callers expect to be able to create "illegal" UTF16 sequences
 		via this call, for backwards compatibility. Thus, this is a dangerous call and should be used with
 		caution (and is also the reason it is not named "appendUTF16").
 		*/
-		inline	Stringp				append16(const wchar* p) { return append(NULL, p, Length(p), k16); }
-		inline	Stringp				append16(const wchar* p, int32_t len) { return append(NULL, p, len, k16); }
+		inline	Stringp				append16(const wchar* p) { return _append(NULL, p, Length(p), k16); }
+		inline	Stringp				append16(const wchar* p, int32_t len) { return _append(NULL, p, len, k16); }
 		/**
 		Implement String.substr(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
@@ -331,6 +359,8 @@ namespace avmplus
 		and holds a reference to the original string.
 		*/
 				Stringp	FASTCALL	substring(int32_t start, int32_t end = 0x7fffffff);
+				Stringp	FASTCALL	intern_substring(int32_t start, int32_t end = 0x7fffffff);
+
 		/**
 		Implement String.slice(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
@@ -477,20 +507,19 @@ private:
 		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
 
 		// Create a string with no buffer.
-		static	Stringp	FASTCALL	createDependent(MMgc::GC* gc, Stringp master, int32_t start, int32_t len);
+		static	Stringp				createDependent(MMgc::GC* gc, Stringp master, int32_t start, int32_t len);
 		// Create a string with a dynamic buffer.
-		static	Stringp	FASTCALL	createDynamic(MMgc::GC* gc, const void* data, int32_t len, Width w, int32_t extra=0);
+		static	Stringp				createDynamic(MMgc::GC* gc, const void* data, int32_t len, Width w, int32_t extra=0);
 		// Create a string with a static buffer.
-		static	Stringp	FASTCALL	createStatic(MMgc::GC* gc, const void* data, int32_t len, Width w);
-		// Calculate the hash code.
-				uint32_t FASTCALL	_hashCode();
+		static	Stringp				createStatic(MMgc::GC* gc, const void* data, int32_t len, Width w);
+
 		// Do a raw buffer compare.
 		static	int32_t	FASTCALL	compare(const Pointers& r1, Width w1, const Pointers& r2, Width w2, int32_t len);
 
 		/**
 		Low-level append worker. Either inStr is non-NULL, or buffer/length is.
 		*/
-				Stringp				append(Stringp inStr, const void* buffer, int32_t numChars, Width width);
+				Stringp				_append(Stringp inStr, const void* buffer, int32_t numChars, Width width);
 		/**
 		Make operator new private - people should use the create functions
 		*/
@@ -505,11 +534,11 @@ private:
 	// Compare helpers
 	inline bool operator==(String& s1, String& s2)
 	{ 
-		return s1.Compare(s2) == 0;
+		return s1.equals(&s2);
 	}
 	inline bool operator!=(String& s1, String& s2)
 	{
-		return s1.Compare(s2) != 0;
+		return !s1.equals(&s2);
 	}
 	inline bool operator<(String& s1, String& s2)
 	{ 
@@ -528,6 +557,19 @@ private:
 		return s2.Compare(s1) >= 0; 
 	}
 
+	REALLY_INLINE /*static*/ bool String::isSpace(wchar ch)
+	{
+		const uint32_t IS_SPACE_MASK = 
+			(1U << (32-1)) |	// space
+			(1U << (9-1)) |		// tab
+			(1U << (10-1)) |	// LF
+			(1U << (13-1));		// CR
+		
+		ch -= 1;
+		return (ch < 32) &		// bitwise and, *not* logical and -- avoids a branch
+				((IS_SPACE_MASK & (1U<<ch)) != 0);
+	}
+
 	/**
 	The StringIndexer class provides quick access to single characters by index.
 	Use an instance of this class on the stack if multiple index access is required.
@@ -543,18 +585,22 @@ private:
 		/// Return the embedded string.
 		inline	String*				operator->() const { return m_str; }
 		/// Quick index operator.
-		inline	String::CharAtType	operator[](int index) const { return (*m_getter)(m_str, index); }
+		inline	String::CharAtType	operator[](int index) const 
+		{ 
+			AvmAssert(index >= 0 && index < m_str->length());
+			return m_latin1 ?
+					(String::CharAtType) m_buffer.p8[index] :
+					(String::CharAtType) m_buffer.p16[index];
+		}
 
 	private:
-		typedef String::CharAtType (*Getter) (Stringp s, int index);
-				Stringp		m_str;
-				Getter		m_getter;
+				Stringp const			m_str;
+				String::Pointers const	m_buffer;
+				int const				m_latin1; // actually a bool, int-sized for speed
 
 		// do not create on the heap
 				void*		operator new(size_t) throw(); // unimplemented
 				void		operator delete(void*); // unimplemented
-		static	String::CharAtType get8(Stringp s, int index);
-		static	String::CharAtType get16(Stringp s, int index);
 	};
 
 	/**

@@ -357,23 +357,23 @@ namespace avmplus
 		return res;
 	}
 
-	int32_t String::Compare(String& other, int32_t start, int32_t other_length) const
+	int32_t String::Compare(String& other, int32_t other_start, int32_t other_length) const
 	{
 		if (this == &other)
 			return 0;
 
-		if (start >= other.m_length)
+		if (other_start >= other.m_length)
 			return -1;
 
 		if (other_length < 1 || other_length > other.m_length)
 			other_length = other.m_length;
-		if (start < 0)
-			start = 0;
+		if (other_start < 0)
+			other_start = 0;
 
 		int32_t result;
 
 		Pointers other_ptrs = other.m_buffer;
-		other_ptrs.p8 += start * other.getWidth();
+		other_ptrs.p8 += other_start * other.getWidth();
 		int32_t count = (m_length < other_length) ? m_length : other_length;  // choose smaller of two
 		result = compare(m_buffer, getWidth(), other_ptrs, other.getWidth(), count);
 		if (result == 0)
@@ -388,22 +388,25 @@ namespace avmplus
 		return result;
 	}
 
-	bool String::equalsLatin1(const char* p) const
+	bool String::equalsLatin1(const char* p, int32_t len) const
 	{
-		int32_t len = Length(p);
+		if (len < 0)
+			len = Length(p);
+
 		if (len != length())
 			return false;
 
-		bool ok = true;
-		Pointers ptrs = m_buffer;
 		if (getWidth() == k8)
-			ok = !VMPI_memcmp(ptrs.p8, p, len);
+		{
+			return !VMPI_memcmp(this->m_buffer.p8, p, len);
+		}
 		else
 		{
-			while (ok && len-- != 0)
-				ok = (*((uint8_t*) p++) == *ptrs.p16++);
+			for (int32_t i = 0; i < len; ++i)
+				if (uint8_t(p[i]) != this->m_buffer.p16[i])
+					return false;
+			return true;
 		}
-		return ok;
 	}
 
 	bool String::equalsUTF16(const wchar* p, int32_t len) const
@@ -423,6 +426,47 @@ namespace avmplus
 			ok = !VMPI_memcmp(ptrs.p16, p, len * sizeof(wchar));
 		}
 		return ok;
+	}
+
+	bool String::equals(Stringp that) const
+	{
+		if (this == that)
+			return true;
+
+		int32_t const len1 = this->length();
+		int32_t const len2 = that->length();
+		if (len1 != len2)
+			return false;
+
+		Width const w1 = this->getWidth();
+		Width const w2 = that->getWidth();
+
+		Pointers thisbuf = this->m_buffer;
+		Pointers thatbuf = that->m_buffer;
+
+		switch ((w1 << 3) + w2)
+		{
+			case (k8 << 3) + k8:
+			case (k16 << 3) + k16:
+				// same width, a memcmp will do the tricl.
+				return !VMPI_memcmp(thisbuf.pv, thatbuf.pv, len1 * w1);
+				break;
+			case (k8 << 3) + k16:
+				for (int32_t j = 0; j < len1; j++)
+				{
+					if (thisbuf.p8[j] != thatbuf.p16[j])
+						return false;
+				}
+				break;
+			case (k16 << 3) + k8:
+				for (int32_t j = 0; j < len1; j++)
+				{
+					if (thisbuf.p16[j] != thatbuf.p8[j])
+						return false;
+				}
+				break;
+		}
+		return true;
 	}
 
 	int32_t String::localeCompare(Stringp other, const Atom* /*argv*/, int32_t /*argc*/)
@@ -473,9 +517,11 @@ namespace avmplus
 
 	// The hashing algorithm uses the full character width
 
-	uint32_t String::hashCodeUTF8(const utf8_t* buf, int32_t len)
+	int32_t String::hashCodeUTF8(const utf8_t* buf, int32_t len)
 	{
-		uint32_t hashCode = 0; // must be uint32!
+		// must be same signed-ness as other hashcode functions.
+		// experimentation shows better results from signed (vs unsigned).
+		int32_t hashCode = 0; 
 		while (len) 
 		{
 			uint32_t ch;
@@ -483,7 +529,7 @@ namespace avmplus
 				// ASCII
 				ch = *buf++, len--;
 			else
-				len -= UnicodeUtils::Utf8ToUcs4 (buf, len, &ch);
+				len -= UnicodeUtils::Utf8ToUcs4(buf, len, &ch);
 			if (ch >= 0x10000)
 			{
 				// first byte of hi word of surrogate pair
@@ -496,17 +542,31 @@ namespace avmplus
 		return hashCode;
 	}
 
-	uint32_t String::hashCodeUTF16(const wchar* buf, int32_t len)
+	int32_t String::hashCodeLatin1(const char* buf, int32_t len)
 	{
-		uint32_t hashCode = 0;	// must be uint32!
+		// must be same signed-ness as other hashcode functions.
+		// experimentation shows better results from signed (vs unsigned).
+		int32_t hashCode = 0; 
+		while (len--)
+			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ uint8_t(*buf++);
+		return hashCode;
+	}
+
+	int32_t String::hashCodeUTF16(const wchar* buf, int32_t len)
+	{
+		// must be same signed-ness as other hashcode functions.
+		// experimentation shows better results from signed (vs unsigned).
+		int32_t hashCode = 0; 
 		while (len--)
 			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *buf++;
 		return hashCode;
 	}
 
-	uint32_t String::hashCode() const
+	int32_t String::hashCode() const
 	{
-		uint32_t hashCode = 0;	// must be uint32!
+		// must be same signed-ness as other hashcode functions.
+		// experimentation shows better results from signed (vs unsigned).
+		int32_t hashCode = 0; 
 		if (m_length != 0)
 		{
 			Pointers ptrs = m_buffer;
@@ -789,7 +849,73 @@ namespace avmplus
 		return -1;
 	}
 
-	bool String::matchesLatin1(const char* p, int32_t len, int32_t pos, bool caseless)
+	int32_t String::indexOfCharCode(wchar c, int32_t start, int32_t end) const
+	{
+		if (start < 0)
+			start = 0;
+		if (end < 0)
+			end = 0;
+		if (end > m_length)
+			end = m_length;
+
+		if (end <= start)
+			return -1;
+
+		int32_t right = end - 1; 
+		if (right < 0)
+			return -1;
+
+		if (getWidth() == String::k8)
+		{
+			const uint8_t* p8 = m_buffer.p8 + start - 1;
+			const uint8_t* const end = m_buffer.p8 + right;
+			while (++p8 <= end)
+				if (*p8 == c)
+					return p8 - m_buffer.p8;
+		}
+		else
+		{
+			const uint16_t* p16 = m_buffer.p16 + start - 1;
+			const uint16_t* const end = m_buffer.p16 + right;
+			while (++p16 <= end)
+				if (*p16 == c)
+					return p16 - m_buffer.p16;
+		}
+		return -1;
+	}
+
+	bool String::matchesLatin1(const char* p, int32_t len, int32_t pos)
+	{
+		if (p == NULL || pos >= m_length)
+			return false;
+
+		if (pos < 0)
+			pos = 0;
+		if (len < 0)
+			len = Length(p);
+
+		if (getWidth() == k8)
+		{
+			const uint8_t* p8 = m_buffer.p8 + pos;
+			while (len--)
+			{
+				if (*p8++ != uint8_t(*p++))
+					return false;
+			}
+		}
+		else
+		{
+			const uint16_t* p16 = m_buffer.p16 + pos;
+			while (len--)
+			{
+				if (*p16++ != uint8_t(*p++))
+					return false;
+			}
+		}
+		return true;
+	}
+
+	bool String::matchesLatin1_caseless(const char* p, int32_t len, int32_t pos)
 	{
 		if (p == NULL || pos >= m_length)
 			return false;
@@ -802,11 +928,9 @@ namespace avmplus
 		StringIndexer self(this);
 		while (len--)
 		{
-			wchar ch1 = self[pos++];
-			wchar ch2 = wchar(*((uint8_t*) p++));
-			if (caseless && wCharToUpper(ch1) != wCharToUpper(ch2))
-				return false;
-			else if (ch1 != ch2)
+			wchar const ch1 = wCharToUpper(self[pos++]);
+			wchar const ch2 = wCharToUpper(uint8_t(*p++));
+			if (ch1 != ch2)
 				return false;
 		}
 		return true;
@@ -818,18 +942,13 @@ namespace avmplus
 	{
 		if (leftStr == NULL || leftStr->m_length == 0)
 			return rightStr;
-		if (rightStr == NULL || rightStr->m_length == 0)
-			return leftStr;
 
-		Stringp s = leftStr->append(rightStr, NULL, 0, kAuto);
-		return s;
+		return leftStr->_append(rightStr, NULL, 0, kAuto);
 	}
 
 	Stringp String::append(Stringp rightStr)
 	{
-		if (rightStr == NULL || rightStr->length() == 0)
-			return this;
-		return append(rightStr, NULL, 0, kAuto);
+		return _append(rightStr, NULL, 0, kAuto);
 	}
 
 	// Come here either with inStr non-NULL and other values == 0, or vice versa
@@ -838,7 +957,7 @@ namespace avmplus
 	// there are massive problems with RCObject pointers getting lost, and internal
 	// pointers to that object not being recognized.
 
-	Stringp String::append(Stringp inStr, const void* buffer, int32_t numChars, Width charWidth)
+	Stringp String::_append(Stringp inStr, const void* buffer, int32_t numChars, Width charWidth)
 	{
 		if (inStr != NULL)
 		{
@@ -848,7 +967,10 @@ namespace avmplus
 			numChars = inStr->length();
 			charWidth = inStr->getWidth();
 		}
-		else if (buffer == NULL || numChars <= 0)
+		else if (buffer == NULL)
+			return this;
+		
+		if (numChars <= 0)
 			return this;
 
 		AvmAssert(charWidth != kAuto);
@@ -994,7 +1116,7 @@ namespace avmplus
 		{
 			// get the string offset
 			master = m_master;
-			int32_t offset = int32_t(m_buffer.p8 - master->m_buffer.p8) / master->getWidth();
+			int32_t offset = int32_t(m_buffer.p8 - master->m_buffer.p8) >> (master->getWidth()-1);
 			// TODO: possible 32-bit overflow for a very huge dependent string
 			start += offset;
 			end += offset;
@@ -1006,6 +1128,26 @@ namespace avmplus
 			return createStatic(gc, master->m_buffer.p8  + start * master->getWidth(), end - start, master->getWidth());
 		else
 			return createDependent(gc, master, start, end - start);
+	}
+
+	Stringp String::intern_substring(int32_t start, int32_t end)
+	{
+		// this is (currently) only called by XMLParser, which only passes us
+		// valid values -- skip the checks in the name of performance.
+		AvmAssert(start < end);
+		AvmAssert(start >= 0 && start <= this->length());
+		AvmAssert(end >= 0 && end <= this->length());
+		
+		AvmCore* core = _core(this);
+		if (start == 0 && end == this->length())
+			return core->internString(this);
+
+		int32_t const len = end - start;
+		String::Width const w = this->getWidth();
+		if (w == String::k8)
+			return core->internStringLatin1((const char*)m_buffer.p8 + start, len);
+		else
+			return core->internStringUTF16(m_buffer.p16 + start, len);
 	}
 
 	Stringp String::substr(int32_t start, int32_t len)
@@ -1978,11 +2120,6 @@ namespace avmplus
 		return d;
 	}
 
-	/*static*/ bool String::isSpace(wchar ch)
-	{
-		return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r');
-	}
-
 	bool String::isWhitespace() const
 	{
 		StringIndexer self((Stringp) this);
@@ -2243,22 +2380,12 @@ namespace avmplus
 
 /////////////////////////////////// StringIndexer //////////////////////////////////////
 
-	StringIndexer::StringIndexer(Stringp s) : m_str(s) 
+	StringIndexer::StringIndexer(Stringp s) : 
+		m_str(s),
+		m_buffer(s->m_buffer),
+		m_latin1(s->getWidth() == String::k8)
 	{ 
 		AvmAssert(s != NULL);
-		m_getter = (s->getWidth() == String::k8) ? &get8 : &get16;
-	}
-
-	String::CharAtType StringIndexer::get8(Stringp s, int index)
-	{
-		AvmAssert(index >= 0 && index < s->length());
-		return (String::CharAtType) s->m_buffer.p8[index];
-	}
-
-	String::CharAtType StringIndexer::get16(Stringp s, int index)
-	{
-		AvmAssert(index >= 0 && index < s->length());
-		return (String::CharAtType) s->m_buffer.p16[index];
 	}
 
 ////////////////////////////// Helpers: Width Analysis /////////////////////////////////

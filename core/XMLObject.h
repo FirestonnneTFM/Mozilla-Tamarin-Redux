@@ -291,7 +291,7 @@ namespace avmplus
 		 * (strips @ from strings and marks multiname as attribute)
 		 */
 		void CoerceE4XMultiname(const Multiname *m, Multiname &out) const;
-		bool NodeNameEquals(Stringp odeName, Stringp parentName, Namespace *ns);
+		bool NodeNameEquals(Stringp nodeName, int32_t nodeNameStart, Stringp parentName, Namespace *ns);
 	};
 
 	/**
