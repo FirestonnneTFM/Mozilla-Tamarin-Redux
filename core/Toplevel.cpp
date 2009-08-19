@@ -554,8 +554,11 @@ namespace avmplus
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
-			Atom method = AvmCore::atomToScriptObject(base)->getSlotAtom(AvmCore::bindingToSlotId(b));
-			return op_call(method, argc, atomv);
+			// inlined equivalent of op_call
+			ScriptObject* method = AvmCore::atomToScriptObject(base)->getSlotObject(AvmCore::bindingToSlotId(b));
+			if (!method)
+				throwTypeErrorWithName(kCallOfNonFunctionError, "value");
+			return method->call(argc, atomv);
 		}
 		case BKIND_GET:
 		case BKIND_GETSET:
@@ -615,10 +618,12 @@ namespace avmplus
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "constructprop slot " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
-			Atom ctor = AvmCore::atomToScriptObject(obj)->getSlotAtom(AvmCore::bindingToSlotId(b));
-			if (!AvmCore::istype(ctor, CLASS_TYPE) && !AvmCore::istype(ctor, FUNCTION_TYPE))
+			ScriptObject* ctor = AvmCore::atomToScriptObject(obj)->getSlotObject(AvmCore::bindingToSlotId(b));
+			if (!ctor ||
+				(!ctor->traits()->containsInterface(CLASS_TYPE) && !ctor->traits()->containsInterface(FUNCTION_TYPE)))
 				throwTypeError(kNotConstructorError, core->toErrorString(multiname));
-			return op_construct(ctor, argc, atomv);
+			// inlined equivalent of op_construct
+			return ctor->construct(argc, atomv);
 		}
 		case BKIND_GET:
 		case BKIND_GETSET:

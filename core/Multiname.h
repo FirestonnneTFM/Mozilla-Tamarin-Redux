@@ -159,16 +159,38 @@ namespace avmplus
 			this->next_index = 0;
 		}
 
+		inline Multiname(NamespaceSetp nsset)
+		{
+			this->name = NULL;
+			this->nsset = nsset;
+			this->flags = NSSET;
+			this->next_index = 0;
+		}
 
-		Multiname(NamespaceSetp nsset);
-
-		Multiname(const Multiname &other)
+		inline Multiname(const Multiname &other)
 		{
 			*this = other;
 		}
 
+		inline Multiname(Namespacep ns, Stringp name)
+		{
+			AvmAssert(name && name->isInterned());
+			this->name = name;
+			this->ns = ns;
+			this->flags = 0;
+			this->next_index = 0;
+		}
 
-		Multiname(Namespacep ns, Stringp name, bool qualified=false);
+		inline Multiname(Namespacep ns, Stringp name, bool qualified)
+		{
+			AvmAssert(name && name->isInterned());
+			this->name = name;
+			this->ns = ns;
+			this->flags = 0;
+			this->next_index = 0;
+			if (qualified)
+				setQName();
+		}
 
 		inline ~Multiname()
 		{

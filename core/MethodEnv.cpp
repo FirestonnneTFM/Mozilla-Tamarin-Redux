@@ -45,9 +45,7 @@ namespace avmplus
 
 	// note that some of these have (partial) guts of Toplevel::coerce replicated here, for efficiency.
 	// if you find bugs here, you might need to update Toplevel::coerce as well (and vice versa).
-	// (Note: toplevel is passed as the final parameter as it's only used in exception cases,
-	// thus preserving our precious FASTCALL args (only 2 on x86-32) for more-frequently used args.)
-	static Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args, Toplevel* toplevel)
+	Atom* FASTCALL MethodEnv::unbox1(Atom atom, Traits* t, Atom* args)
 	{
 		// using computed-gotos here doesn't move the needle appreciably in my testing
 		switch (Traits::getBuiltinType(t))
@@ -111,7 +109,7 @@ namespace avmplus
 				break;
 
 			case BUILTIN_string:
-				atom = AvmCore::isNullOrUndefined(atom) ? NULL : (Atom)toplevel->core()->string(atom);
+				atom = AvmCore::isNullOrUndefined(atom) ? NULL : (Atom)this->core()->string(atom);
 				break;
 
 			case BUILTIN_null:
@@ -178,10 +176,11 @@ namespace avmplus
 		return args+1;
 
 	failure:
+		AvmCore* core = this->core();
 		#ifdef AVMPLUS_VERBOSE
-		//toplevel->core()->console << "checktype failed " << t << " <- " << toplevel->core()->format(atom) << "\n";
+		//core->console << "checktype failed " << t << " <- " << core->format(atom) << "\n";
 		#endif
-		toplevel->throwTypeError(kCheckTypeFailedError, toplevel->core()->atomToErrorString(atom), toplevel->core()->toErrorString(t));
+		this->toplevel()->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(atom), core->toErrorString(t));
 		return NULL;	// unreachable
 	}
 
@@ -210,11 +209,12 @@ namespace avmplus
 	// helper
 	inline int MethodEnv::startCoerce(int argc, MethodSignaturep ms)
 	{
-		Toplevel* toplevel = this->toplevel();
+		// getting toplevel() is slightly more expensive than it used to be (more indirection)...
+		// so only extract in the (rare) event of an exception
 
 		if (!ms->argcOk(argc))
 		{
-			toplevel->argumentErrorClass()->throwError(kWrongArgumentCountError, 
+			toplevel()->argumentErrorClass()->throwError(kWrongArgumentCountError, 
 													   core()->toErrorString(method), 
 													   core()->toErrorString(ms->requiredParamCount()), 
 													   core()->toErrorString(argc));
@@ -226,7 +226,7 @@ namespace avmplus
 		{
 			//core()->console<<method<<" "<<int(method->declaringTraits()->posType())<<"\n";
 			//core()->console<<"expected "<<this->scope()->scopeTraits()<<" but got "<<method->declaringScope()<<"\n";
-			toplevel->throwVerifyError(kCorruptABCError);
+			toplevel()->throwVerifyError(kCorruptABCError);
 		}
 
 		// now unbox everything, including instance and rest args
@@ -318,7 +318,7 @@ namespace avmplus
 		}
 		else
 		{
-			unbox1(thisArg, ms->paramTraits(0), &thisArg, toplevel());
+			unbox1(thisArg, ms->paramTraits(0), &thisArg);
 			return endCoerce(0, (uint32*)&thisArg, ms);
 		}
 	}
@@ -454,43 +454,38 @@ namespace avmplus
 	 */
 	void MethodEnv::unboxCoerceArgs(int argc, Atom* in, uint32 *argv, MethodSignaturep ms)
 	{
-		Toplevel* toplevel = this->toplevel();
-		
 		Atom* args = (Atom*)argv;
 
 		const int param_count = ms->param_count();
 		int end = argc >= param_count ? param_count : argc;
 		for (int i=0; i <= end; i++)
-			args = unbox1(in[i], ms->paramTraits(i), args, toplevel);
+			args = unbox1(in[i], ms->paramTraits(i), args);
 		while (end < argc)
 			*args++ = in[++end];
 	}
 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv, MethodSignaturep ms)
 	{
-		Toplevel* toplevel = this->toplevel();
 		int argc = a->getLength();
 
-		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv, toplevel);
+		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
 		const int param_count = ms->param_count();
 		int end = argc >= param_count ? param_count : argc;
 		for (int i=0; i < end; i++)
-			args = unbox1(a->getUintProperty(i), ms->paramTraits(i+1), args, toplevel);
+			args = unbox1(a->getUintProperty(i), ms->paramTraits(i+1), args);
 		while (end < argc)
 			*args++ = a->getUintProperty(end++);
 	}
 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms)
 	{
-		Toplevel* toplevel = this->toplevel();
-
-		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv, toplevel);
+		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
 		const int param_count = ms->param_count();
 		int end = argc >= param_count ? param_count : argc;
 		for (int i=0; i < end; i++)
-			args = unbox1(in[i], ms->paramTraits(i+1), args, toplevel);
+			args = unbox1(in[i], ms->paramTraits(i+1), args);
 		while (end < argc)
 			*args++ = in[end++];
 	}
@@ -616,13 +611,14 @@ namespace avmplus
 		AvmAssert(AvmCore::isNullOrUndefined(atom));
 
 		// TypeError in ECMA
-		ErrorClass *error = toplevel()->typeErrorClass();
+		Toplevel* toplevel = this->toplevel();
+		ErrorClass *error = toplevel->typeErrorClass();
 		if( error ){
 			error->throwError(
 					(atom == undefinedAtom) ? kConvertUndefinedToObjectError :
 										kConvertNullToObjectError);
 		} else {
-			toplevel()->throwVerifyError(kCorruptABCError);
+			toplevel->throwVerifyError(kCorruptABCError);
 		}
     }
 
@@ -952,14 +948,15 @@ namespace avmplus
 
 	ScriptObject* MethodEnv::finddef(const Multiname* multiname) const
 	{
-		Toplevel* toplevel = this->toplevel();
+		// getting toplevel() is slightly more expensive than it used to be (more indirection)...
+		// so only extract in the (rare) event of an exception
 
 		ScriptEnv* script = getScriptEnv(multiname);
 		if (script == (ScriptEnv*)BIND_AMBIGUOUS)
-            toplevel->throwReferenceError(kAmbiguousBindingError, multiname);
+            this->toplevel()->throwReferenceError(kAmbiguousBindingError, multiname);
 
 		if (script == (ScriptEnv*)BIND_NONE)
-            toplevel->throwReferenceError(kUndefinedVarError, multiname);
+            this->toplevel()->throwReferenceError(kUndefinedVarError, multiname);
 
 		ScriptObject* global = script->global;
 		if (!global)
@@ -1705,8 +1702,11 @@ namespace avmplus
 			core()->console << "callsuper slot " << base->traits << " " << multiname->name << "\n";
 			#endif
 			uint32 slot = AvmCore::bindingToSlotId(b);
-			Atom method = AvmCore::atomToScriptObject(atomv[0])->getSlotAtom(slot);
-			return toplevel->op_call(method, argc, atomv);
+			ScriptObject* method = AvmCore::atomToScriptObject(atomv[0])->getSlotObject(slot);
+			// inlined equivalent of op_call
+			if (!method)
+				toplevel->throwTypeErrorWithName(kCallOfNonFunctionError, "value");
+			return method->call(argc, atomv);
 		}
 		case BKIND_SET:
 		{
@@ -2120,9 +2120,10 @@ namespace avmplus
 
 	void MethodEnv::checkfilter(Atom obj)
 	{
-		if ( !toplevel()->isXmlBase(obj) )
+		if ( !AvmCore::isXMLorXMLList(obj) )
 		{
-			toplevel()->throwTypeError(kFilterError, core()->toErrorString(toplevel()->toTraits(obj)));
+			Toplevel* toplevel = this->toplevel();
+			toplevel->throwTypeError(kFilterError, core()->toErrorString(toplevel->toTraits(obj)));
 		}
 	}
 
@@ -2162,17 +2163,19 @@ namespace avmplus
 	{
 		const ScopeTypeChain* activationScopeTraits = method->activationScope();
 
+		Toplevel* toplevel = this->toplevel();
+
 		// This can happen when the ABC has MethodInfo data but not MethodBody data
 		if (!activationScopeTraits)
 		{
-			toplevel()->throwVerifyError(kCorruptABCError);
+			toplevel->throwVerifyError(kCorruptABCError);
 		}
 		
 		Traits* activationTraits = activationScopeTraits->traits();
 		AvmAssert(activationTraits != NULL);
 		
 		AvmCore* core = this->core();
-		VTable* activation = core->newVTable(activationTraits, NULL, toplevel());
+		VTable* activation = core->newVTable(activationTraits, NULL, toplevel);
 		ScopeChain* activationScope = this->scope()->cloneWithNewVTable(core->GetGC(), activation, this->abcEnv(), activationScopeTraits);
 		activation->resolveSignatures(activationScope);
 		return activation;

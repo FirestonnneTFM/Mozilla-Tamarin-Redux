@@ -91,13 +91,13 @@ namespace avmplus
 		virtual ~MethodEnv();
 #endif
 
-		inline AbcEnv* abcEnv() const { return _scope->abcEnv(); }
-		inline AvmCore* core() const { return method->pool()->core; }
-		inline CodeContext* codeContext() const { return abcEnv()->codeContext(); }
-		inline DomainEnv* domainEnv() const { return abcEnv()->domainEnv(); }
-		inline ScopeChain* scope() const { return _scope; }
-		inline MethodEnv* super_init() const { AvmAssert(vtable()->base != NULL); return vtable()->base->init; }
-		inline Toplevel* toplevel() const { return vtable()->toplevel(); }
+		REALLY_INLINE AbcEnv* abcEnv() const { return _scope->abcEnv(); }
+		REALLY_INLINE AvmCore* core() const { return method->pool()->core; }
+		REALLY_INLINE CodeContext* codeContext() const { return abcEnv()->codeContext(); }
+		REALLY_INLINE DomainEnv* domainEnv() const { return abcEnv()->domainEnv(); }
+		REALLY_INLINE ScopeChain* scope() const { return _scope; }
+		REALLY_INLINE MethodEnv* super_init() const { AvmAssert(vtable()->base != NULL); return vtable()->base->init; }
+		REALLY_INLINE Toplevel* toplevel() const { return vtable()->toplevel(); }
 		inline Stringp traitsName() const { return vtable()->traits->name(); }
 		inline Namespacep traitsNs() const { return vtable()->traits->ns(); }
 
@@ -138,6 +138,7 @@ namespace avmplus
 		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap, MethodSignaturep ms);
 		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms);
 		void FASTCALL nullcheckfail(Atom atom);
+		Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args);
 
 		VTable* getActivationVTable();
 		VTable* buildActivationVTable();
