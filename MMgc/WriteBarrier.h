@@ -256,14 +256,20 @@ namespace MMgc
 			verify();
 		#endif
 			if (_t)
-				_t->IncrementRefSlow();
+			{
+				// explicitly cast to RCObject to allow forward-declared classes to work.
+				// unfortunate, but required for existing embedder code.
+				((RCObject*)_t)->IncrementRefSlow();
+			}
 		}
 
 		REALLY_INLINE ~WriteBarrierRC() 
 		{
 			if (t != 0) 
 			{
-				t->DecrementRefSlow();
+				// explicitly cast to RCObject to allow forward-declared classes to work.
+				// unfortunate, but required for existing embedder code.
+				((RCObject*)t)->DecrementRefSlow();
 				t = 0;
 			}
 		}
