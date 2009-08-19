@@ -40,22 +40,6 @@
 
 namespace avmplus
 {
-	Multiname::Multiname(NamespaceSetp nsset)
-	{
-		this->flags = 0;
-		setNsset(nsset);
-		this->name = NULL;
-	}
-
-	Multiname::Multiname(Namespacep ns, Stringp name, bool qualified)
-	{
-		this->flags = 0;
-		setNamespace(ns);
-		setName(name);
-		if (qualified)
-			setQName();
-	}
-
 	Namespacep Multiname::getNamespace(int i) const
 	{
 		AvmAssert(!isRtns() && !isAnyNamespace());

@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
+//#define DOPROF
+//#include "../vprof/vprof.h"
 
 namespace avmplus
 {
@@ -652,6 +654,33 @@ namespace avmplus
 			AvmAssert(sst == SST_scriptobject);
 			return (*((const ScriptObject**)p))->atom(); // may be null|kObjectType, copacetic
 		}
+	}
+
+	ScriptObject* ScriptObject::getSlotObject(uint32_t slot)
+	{
+		Traits* traits = this->traits();
+		const TraitsBindingsp td = traits->getTraitsBindings();
+		void* p;
+		const SlotStorageType sst = td->calcSlotAddrAndSST(slot, (void*)this, p);
+
+		// based on profiling of Flex apps, it's *much* more common for the slot in this case
+		// to have a type (vs "atom"), so check for that first...
+		if (sst == SST_scriptobject)
+		{
+			return *((ScriptObject**)p);
+		}
+		else if (sst == SST_atom)
+		{
+			Atom const a = *((const Atom*)p);
+
+			// don't call AvmCore::isObject(); it checks for null, which we don't care about here
+			if (atomKind(a) == kObjectType)
+				return (ScriptObject*)atomPtr(a);
+			
+			// else fall thru and return null
+		} 
+
+		return NULL;
 	}
 
 	// note: coerceAndSetSlotAtom now includes a simplified and streamlined version

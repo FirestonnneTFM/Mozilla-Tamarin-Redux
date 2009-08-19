@@ -114,6 +114,13 @@ namespace avmplus
 		}
 		
 		Atom getSlotAtom(uint32_t slot);
+		
+		// like getSlotAtom, but assume the resulting Atom is a ScriptObject...
+		// if it is not, return NULL. useful for callers that expect only
+		// a ScriptObject and reject other types (eg callproperty). If the
+		// slot in question is usually a ScriptObject, it's substantially faster
+		// to call this (vs getSlotAtom).
+		ScriptObject* getSlotObject(uint32_t slot);
 
 		// NOTE, this now does the equivalent of Toplevel::coerce() internally;
 		// it is not necessary to call coerce() prior to calling this!
