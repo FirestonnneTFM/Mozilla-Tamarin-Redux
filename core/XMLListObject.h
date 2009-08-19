@@ -98,15 +98,13 @@ namespace avmplus
 
 	private:
 		HeapMultiname m_targetProperty;
-		Atom m_targetObject;
+		ATOM_WB m_targetObject;
 
 		// An array of XMLObjects (NOT E4XNodes)
 		AtomArray m_children;
 		friend class XMLObject;
 
-		void setTargetObject(Atom a) { 
-			WBATOM(MMgc::GC::GetGC(this), this, &m_targetObject, a); 
-		}
+		void setTargetObject(Atom a) { m_targetObject.set(MMgc::GC::GetGC(this), this, a); }
 
 	public:
 		// Functions that override object version
@@ -248,7 +246,6 @@ namespace avmplus
 	public:
 
 		XMLListObject(XMLListClass *type, Atom targetObject = nullObjectAtom, const Multiname* targetProperty = 0);
-		~XMLListObject();
 	};
 }
 

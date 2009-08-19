@@ -41,20 +41,14 @@
 namespace avmplus
 {
 	XMLListObject::XMLListObject(XMLListClass *type, Atom tObject, const Multiname* tProperty)
-		: ScriptObject(type->ivtable(), type->prototype),
-		  m_children(0)
+		: ScriptObject(type->ivtable(), type->prototype), m_targetObject(tObject), m_children(0)
 	{
 		if (tProperty)
-			m_targetProperty.setMultiname (*tProperty);
-		else // should be equivalent to a null m_targetProperty
-			m_targetProperty.setAnyName();
-		setTargetObject(tObject);
+			m_targetProperty = *tProperty;
+		// unnecessary: the default ctor for HeapMultiname (and Multiname) init to an anyName
+		//else // should be equivalent to a null m_targetProperty
+		//	m_targetProperty.setAnyName();
 	}
-
-	XMLListObject::~XMLListObject()
-	{
-		setTargetObject(0);
-	}	
 
 	//////////////////////////////////////////////////////////////////////
 	// E4X Section 9.2.1 below (internal methods)
@@ -639,7 +633,7 @@ namespace avmplus
 		{
 			Multiname m;
 			if (v->getQName (core, &m))
-				this->m_targetProperty.setMultiname(m);
+				this->m_targetProperty = m;
 		}
 
 		m_children.push (x->atom());
@@ -680,7 +674,7 @@ namespace avmplus
 	{
 		AvmCore *core = this->core();
 
-		XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), m_targetObject, &m_targetProperty.getMultiname());
+		XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), m_targetObject, m_targetProperty);
 
 		l->m_children.checkCapacity(numChildren());
 		for (uint32 i = 0; i < numChildren(); i++)

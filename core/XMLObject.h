@@ -121,14 +121,14 @@ namespace avmplus
 		}
 
 	protected:
-		E4XNode *m_node;
+		DWB(E4XNode*) m_node;
 
 		friend class XMLClass;
 
 	public:
 
-		E4XNode *getNode() const { return m_node; }
-		void setNode(E4XNode* node) { WB(MMgc::GC::GetGC(this), this, &m_node, node); }
+		E4XNode* getNode() const { return m_node; }
+		void setNode(E4XNode* node) { m_node = node; }
 
 		// Functions that override object version
 		// Delete (deleteProperty)
@@ -281,8 +281,6 @@ namespace avmplus
 		XMLObject(XMLClass *type, Stringp s=NULL, Namespace *defaultNamespace=NULL);
 		XMLObject(XMLClass *type, E4XNode *node);
 
-		~XMLObject();
-
 #ifdef AVMPLUS_VERBOSE
 	public:
 		Stringp format(AvmCore* core) const;
@@ -333,7 +331,7 @@ namespace avmplus
 
 		void getMultiname(Multiname& name) const
 		{
-			name = m_mn.getMultiname();
+			name = m_mn;
 		}
 	};
 }

@@ -1238,6 +1238,11 @@ namespace MMgc
 		void privateWriteBarrierRC(const void *container, const void *address, const void *value);
 		
 		/**
+		 * Version of privateWriteBarrierRC() optimized for value = NULL.
+		 */
+		void FASTCALL privateWriteBarrierRC_NULL(const void *address);
+		
+		/**
 		 * A write barrier that finds the container's address and the container's GC
 		 * and then performs a standard RC write barrier operation (see privateWriteBarrierRC).
 		 */

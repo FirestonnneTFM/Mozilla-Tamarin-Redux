@@ -49,6 +49,11 @@
 // fast manual RC write barrier
 #define WBRC(gc, container, addr, value) gc->privateWriteBarrierRC(container, addr, (const void *) (value))
 
+// fast-path versions for writing NULL (useful in dtors)
+#define WB_NULL(gc, container, addr) do { *(uintptr_t*)(addr) = 0; } while (0)
+
+#define WBRC_NULL(gc, container, addr) gc->privateWriteBarrierRC_NULL(addr)
+
 // declare write barrier
 // put spaces around the template arg to avoid possible digraph warnings
 #define DWB(type) MMgc::WriteBarrier< type >
@@ -222,22 +227,42 @@ namespace MMgc
 			GC::WriteBarrierRC(&t, (const void*)tNew);	// updates 't'
 			return tNew;
 		}
+
+		#ifdef _DEBUG
+		/*not inlined*/ void verify()
+		{
+			GC* gc = GC::GetGC(&t);
+			void* container = gc->FindBeginningFast(&t);
+			GCAssert(gc->IsPointerToGCPage(container));
+			GCAssert(!GC::GetMark(container));
+		}
+		#endif
 		
 	public:
 		explicit REALLY_INLINE WriteBarrierRC() : t(0) 
 		{
 		}
-		
-		explicit REALLY_INLINE WriteBarrierRC(T _t) : t(0)
+
+		explicit REALLY_INLINE WriteBarrierRC(const T _t) : t(_t)
 		{ 
-			set(_t);
+			// we don't need (or want!) a full call to set(): 
+			// it has to check for marking (which can't happen here)
+			// and decrement the previous value (also not here).
+			// instead, rely on the fact that we've 
+
+		#ifdef _DEBUG
+			verify();
+		#endif
+			if (_t)
+				_t->IncrementRefSlow();
 		}
 
 		REALLY_INLINE ~WriteBarrierRC() 
 		{
-			if(t != 0) {
-				((RCObject*)t)->DecrementRef();
-				t=0;
+			if (t != 0) 
+			{
+				t->DecrementRefSlow();
+				t = 0;
 			}
 		}
 
@@ -250,6 +275,8 @@ namespace MMgc
 		{
 			return set(tNew);
 		}
+
+		REALLY_INLINE T value() const { return t; }
 
 		REALLY_INLINE operator T() const { return t; }
 

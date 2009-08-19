@@ -72,13 +72,13 @@ namespace avmplus
 	}
 
 	RegExpObject::RegExpObject(RegExpObject *toCopy)
-		: ScriptObject(toCopy->vtable, toCopy->getDelegate())
+		: ScriptObject(toCopy->vtable, toCopy->getDelegate()), m_source(toCopy->m_source.value())
 	{
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
 
 		GC::SetFinalize(this);
 
-		m_source = toCopy->m_source;
+		// m_source = toCopy->m_source; -- no, now done in the initializer list above
 		m_global = toCopy->m_global;
 		m_lastIndex = 0;
 		m_optionFlags = toCopy->m_optionFlags;
@@ -93,10 +93,10 @@ namespace avmplus
 	RegExpObject::RegExpObject(RegExpClass *type,
 							   Stringp pattern,
 							   Stringp options)
-	   : ScriptObject(type->ivtable(), type->prototype)
+	   : ScriptObject(type->ivtable(), type->prototype), m_source(pattern)
 	{
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
-		m_source = pattern;
+		// m_source = pattern;  -- no, now done in the initializer list above
 
 		GC::SetFinalize(this);
 		

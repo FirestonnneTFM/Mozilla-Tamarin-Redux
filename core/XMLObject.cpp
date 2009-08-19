@@ -80,10 +80,9 @@
 namespace avmplus
 {
 	XMLObject::XMLObject(XMLClass *type, E4XNode *node)
-		: ScriptObject(type->ivtable(), type->prototype)
+		: ScriptObject(type->ivtable(), type->prototype), m_node(node)
 	{
 		SAMPLE_FRAME("XML", this->core());
-		setNode( node );
 	}
 
 	// This is considered the "toXML function"
@@ -108,7 +107,6 @@ namespace avmplus
 			AvmDebugMsg(false, "sizeof(E4XNodeAux): %d\r\n", sizeof(E4XNodeAux));
 		}
 		#endif
-		m_node = 0;
 		if (!str)
 			return;
 
@@ -371,11 +369,6 @@ namespace avmplus
 
 			toplevel->throwTypeError(kXMLUnterminatedElementTag, parentName, parentName);
 		}
-	}
-
-	XMLObject::~XMLObject()
-	{
-		setNode(NULL);
 	}
 
 	bool XMLObject::NodeNameEquals(Stringp nodeName, Stringp parentName, Namespace * parentNs)
@@ -2835,13 +2828,8 @@ namespace avmplus
 	 * inside the QName to differentiate betweent the two types.
 	 */
 	QNameObject::QNameObject(QNameClass *factory, Namespace *ns, Atom nameatom, bool bA)
-		: ScriptObject(factory->ivtable(), factory->prototype),
-		  m_mn()
+		: ScriptObject(factory->ivtable(), factory->prototype)
 	{
-		// Set attribute bit in multiname
-		if (bA)
-			m_mn.setAttr();
-
 		AvmCore *core = this->core();
 
 		Stringp name;
@@ -2859,71 +2847,80 @@ namespace avmplus
 			name = core->intern(nameatom);
 		}
 
+		Multiname mn;
+
+		// Set attribute bit in multiname
+		if (bA)
+			mn.setAttr();
+
 		if (name == core->kAsterisk)
 		{
-			this->m_mn.setAnyName();
-			AvmAssert(this->m_mn.isAnyName());
+			mn.setAnyName();
+			AvmAssert(mn.isAnyName());
 		}
 		else
 		{
-			this->m_mn.setName(name);
+			mn.setName(name);
 		}
 
 		if (ns == NULL)
 		{
-			this->m_mn.setAnyNamespace();
+			mn.setAnyNamespace();
 		}
 		else
 		{
-			this->m_mn.setNamespace(core->internNamespace(ns));
-			this->m_mn.setQName();
+			mn.setNamespace(core->internNamespace(ns));
+			mn.setQName();
 		}
+		this->m_mn = mn;
 	}
 
 	/**
 	 * called when no namespace specified.
 	 */
 	QNameObject::QNameObject(QNameClass *factory, Atom nameatom, bool bA)
-	: ScriptObject(factory->ivtable(), factory->prototype),
-		m_mn()
+	: ScriptObject(factory->ivtable(), factory->prototype)
 	{
-		// Set attribute bit in multiname
-		if (bA)
-			m_mn.setAttr();
-
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
+
+		Multiname mn;
 
 		if (AvmCore::isQName(nameatom))
 		{
 			QNameObject *q = AvmCore::atomToQName(nameatom);
-			m_mn = q->m_mn;
-			if (bA)
-				m_mn.setAttr();
-			return;
-		}
-
-		Stringp name = core->intern(nameatom);
-		if (name == core->kAsterisk)
-		{
-			this->m_mn.setAnyNamespace();
-			this->m_mn.setAnyName();
-			AvmAssert(this->m_mn.isAnyName());
+			mn = q->m_mn;
 		}
 		else
 		{
-			if (nameatom == undefinedAtom)
+			Stringp name = core->intern(nameatom);
+			if (name == core->kAsterisk)
 			{
-				this->m_mn.setName (core->kEmptyString);
-			}			
+				mn.setAnyNamespace();
+				mn.setAnyName();
+				AvmAssert(mn.isAnyName());
+			}
 			else
 			{
-				this->m_mn.setName(name);
-			}
+				if (nameatom == undefinedAtom)
+				{
+					mn.setName(core->kEmptyString);
+				}			
+				else
+				{
+					mn.setName(name);
+				}
 
-			Namespacep ns = ApiUtils::getVersionedNamespace(core, toplevel->getDefaultNamespace());
-			this->m_mn.setNamespace(ns);
+				Namespacep ns = ApiUtils::getVersionedNamespace(core, toplevel->getDefaultNamespace());
+				mn.setNamespace(ns);
+			}
 		}
+
+		// Set attribute bit in multiname
+		if (bA)
+			mn.setAttr();
+
+		this->m_mn = mn;
 	}
 
 	Stringp QNameObject::get_localName() const

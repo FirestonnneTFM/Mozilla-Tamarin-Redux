@@ -45,7 +45,7 @@ namespace avmplus
 		  , globalMemoryBase(m_gmInfo.globalMemoryScratch)
 		  , globalMemorySize(sizeof(m_gmInfo.globalMemoryScratch))
 	{
-		m_gmInfo.globalMemory = NULL;
+		//m_gmInfo.globalMemory = NULL; -- not necessary, null is default
 		// should be able to contain largest read or write (currently double)
 		AvmAssert(sizeof(m_gmInfo.globalMemoryScratch) >= sizeof(double));
 		namedTraits  = new (_core->GetGC()) MultinameHashtable();
