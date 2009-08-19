@@ -871,7 +871,7 @@ namespace avmplus
 			const uint8_t* const end = m_buffer.p8 + right;
 			while (++p8 <= end)
 				if (*p8 == c)
-					return p8 - m_buffer.p8;
+					return int32_t(p8 - m_buffer.p8);
 		}
 		else
 		{
@@ -879,7 +879,7 @@ namespace avmplus
 			const uint16_t* const end = m_buffer.p16 + right;
 			while (++p16 <= end)
 				if (*p16 == c)
-					return p16 - m_buffer.p16;
+					return int32_t(p16 - m_buffer.p16);
 		}
 		return -1;
 	}
