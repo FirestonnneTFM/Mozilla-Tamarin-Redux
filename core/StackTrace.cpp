@@ -113,6 +113,7 @@ namespace avmplus
 		AvmAssert(functionId != 0);
 		
 		m_functionId	= functionId;
+		m_info			= NULL;
 		m_env			= NULL;
 		m_fakename		= NULL;
 		m_core          = core;

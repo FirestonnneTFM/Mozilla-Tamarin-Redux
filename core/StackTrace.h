@@ -157,6 +157,7 @@ namespace avmplus
 
 		void** FASTCALL scopeBase(); // with JIT, array members are (ScriptObject*); with interpreter, they are (Atom).
 
+		inline void setNext(CallStackNode* next) { m_next = next; }
 		inline CallStackNode* next() const { return m_next; }
 		// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
 		inline MethodEnv* env() const { return m_env; }
