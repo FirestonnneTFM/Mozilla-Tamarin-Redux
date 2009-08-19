@@ -297,11 +297,11 @@ namespace avmplus
 
 	void AtomArray::clear()
 	{
-		AvmCore::decrementAtomRegion(m_atoms, m_length);
-		m_length = 0;
 		if(m_atoms) {
+			AvmCore::decrementAtomRegion(m_atoms, m_length);
 			GC::GetGC(m_atoms)->Free(m_atoms);
 			m_atoms = 0;
 		}
+		m_length = 0;
 	}
 }

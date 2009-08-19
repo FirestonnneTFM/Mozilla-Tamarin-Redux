@@ -301,79 +301,28 @@ namespace avmplus
 	{
 	public:
 
-		HeapMultiname() {}
+		explicit HeapMultiname() { /* our embedded Multiname inits itself to all zero */ }
 
-		HeapMultiname(NamespaceSetp nsset) { name.setNsset(nsset); }
+		explicit HeapMultiname(const Multiname& other) { setMultiname(other); }
 
-		HeapMultiname(const Multiname &other)
+		~HeapMultiname();
+
+		operator const Multiname* () const { return &name; }
+		operator const Multiname& () const { return name; }
+
+		const HeapMultiname& operator=(const HeapMultiname& that)
 		{
-			setMultiname(other);
-		}
-
-		HeapMultiname(Namespacep ns, Stringp name, bool qualified=false);
-
-
-		operator Multiname* () { return &name; }
-
-		const Multiname& getMultiname() const { return name; }
-
-		void setMultiname(const Multiname &other)
-		{
-			WBRC(gc(), this, &name.name, other.name);
-			if(name.isNsset())
-				name.ns = NULL;
-			else
-				WBRC(gc(), this, &name.ns, NULL);
-
-			if(other.isNsset()) {
-				WB(gc(), this, &name.ns, other.ns);
-			} else {
-				WBRC(gc(), this, &name.ns, other.ns);
+			if (this != &that)
+			{
+				setMultiname(that.name);
 			}
-			name.flags = other.flags;
+			return *this;
 		}
 
-		void setName(Stringp n) {
-			WBRC(gc(), this, &name.name, n);
-			name.setName(n);
-		}
-
-		void setName(const Multiname* other) {
-			WBRC(gc(), this, &name.name, other->name);
-			name.setName(other);
-		}
-		
-		void setNamespace(Namespacep ns) {
-			WBRC(gc(), this, &name.ns, ns);
-			name.setNamespace(ns);
-		}
-
-		void setNamespace(const Multiname* other)	{
-			WBRC(gc(), this, &name.ns, other->ns);
-			name.setNamespace(other);
-		}
-
-		void setNsset(NamespaceSetp nsset) {
-			WB(gc(), this, &name.nsset, nsset);
-			name.setNsset(nsset);
-		}
-		
-		void setRtns() { 
-			WBRC(gc(), this, &name.name, NULL);
-			name.setRtns(); 
-		}
-		void setRtname() 
-		{ 
-			WBRC(gc(), this, &name.name, NULL);
-			name.setRtname(); 
-		}
-		void setAnyName() { 
-			WBRC(gc(), this, &name.name, NULL);
-			name.setAnyName(); 
-		}
-		void setAnyNamespace() { 
-			WBRC(gc(), this, &name.ns, NULL);
-			name.setAnyNamespace();
+		const HeapMultiname& operator=(const Multiname& that)
+		{
+			setMultiname(that);
+			return *this;
 		}
 
 		Stringp getName() const { return name.getName(); }
@@ -393,9 +342,6 @@ namespace avmplus
 		bool isAnyNamespace() const { return name.isAnyNamespace(); }
 		int isNsset() const { return name.isNsset(); }
 
-		void setAttr(bool b=true) { name.setAttr(b); }
-		void setQName() { name.setQName(); }
-
 		bool matches(const Multiname *mn) const { return name.matches(mn); }
 
 //#ifdef AVMPLUS_VERBOSE
@@ -405,7 +351,14 @@ namespace avmplus
 //#endif
 	private:
         Multiname name;
+
 		MMgc::GC* gc() const { return MMgc::GC::GetGC(this); }
+
+	private:
+		void setMultiname(const Multiname& other);
+
+	private:
+		explicit HeapMultiname(const HeapMultiname& toCopy); // unimplemented
 	};
 }
 

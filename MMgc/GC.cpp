@@ -3125,6 +3125,18 @@ bail:
 		privateInlineWriteBarrierRC(container, address, value);
 	}
 
+	void GC::privateWriteBarrierRC_NULL(const void *address)
+	{
+		RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
+		if(rc != NULL) {
+			GCAssert(IsRCObject(rc));
+			GCAssert(rc == FindBeginningGuarded(rc));
+			rc->DecrementRef();
+		}
+		GCAssert(IsPointerIntoGCObject(address));
+		*(uintptr_t*)address = 0;
+	}
+
 	/* static */ void GC::WriteBarrierRC(const void *address, const void *value)
 	{
 		GC* gc = GC::GetGC(address);

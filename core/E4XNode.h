@@ -141,7 +141,7 @@ namespace avmplus
 	protected:
 	
 		/** Either null or an E4XNode, valid for all node types */
-		E4XNode * m_parent; 
+		DWB(E4XNode*) m_parent; 
 
 		// If this is a simple name with no namespace or notification function, 
 		// we just have a string pointer.  Otherwise, we're a E4XNodeAux value
@@ -152,19 +152,19 @@ namespace avmplus
 		#define AUXBIT 0x1
 
 	public:
-		E4XNode (E4XNode *parent) : m_parent(parent), m_nameOrAux(0) { }
+		E4XNode(E4XNode* parent) : m_parent(parent), m_nameOrAux(0) { }
 		// we have virtual functions, so we probably need a virtual dtor
 		virtual ~E4XNode() {}
 
 		bool getQName (AvmCore *core, Multiname *mn) const;
 		void setQName (AvmCore *core, Stringp name, Namespace *ns = 0);
-		void setQName (AvmCore *core, Multiname *mn);
+		void setQName (AvmCore *core, const Multiname *mn);
 
 		virtual Stringp getValue() const = 0;
 		virtual void setValue (String *s) = 0;
 
-		E4XNode *getParent() const { return m_parent; };
-		void setParent (E4XNode *n) { WB(MMgc::GC::GetGC(this), this, &m_parent, n); }
+		E4XNode* getParent() const { return m_parent; };
+		void setParent(E4XNode* n) { m_parent = n; }
 
 		// Not used as bit fields (only one bit at a time can be set) but
 		// used for fast multi-type compares.

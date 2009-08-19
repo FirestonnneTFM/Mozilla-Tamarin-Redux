@@ -41,36 +41,31 @@ namespace avmplus
 {
 	extern wchar *stripPrefix (const wchar *str, const char *pre);
 
-	E4XNodeAux::E4XNodeAux(Stringp s, Namespace *ns, FunctionObject* notify)
+	E4XNodeAux::E4XNodeAux(Stringp s, Namespace *ns, FunctionObject* notify) :
+		m_name(s), 
+		m_ns(ns),
+		m_notification(notify)
 	{
-		m_name = s;
-		m_ns = ns;
-		m_notification = notify;
 	}
 
-	AttributeE4XNode::AttributeE4XNode (E4XNode *parent, String *value) : E4XNode(parent)
+	AttributeE4XNode::AttributeE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
 	{
-		m_value = value;
 	}
 
-	CDATAE4XNode::CDATAE4XNode (E4XNode *parent, String *value) : E4XNode(parent)
+	CDATAE4XNode::CDATAE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
 	{
-		m_value = value;
 	}
 
-	CommentE4XNode::CommentE4XNode (E4XNode *parent, String *value) : E4XNode(parent)
+	CommentE4XNode::CommentE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
 	{
-		m_value = value;
 	}
 
-	PIE4XNode::PIE4XNode (E4XNode *parent, String *value) : E4XNode(parent)
+	PIE4XNode::PIE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
 	{
-		m_value = value;
 	}
 
-	TextE4XNode::TextE4XNode (E4XNode *parent, String *value) : E4XNode(parent)
+	TextE4XNode::TextE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
 	{
-		m_value = value;
 	}
 
 	ElementE4XNode::ElementE4XNode (E4XNode *parent) : E4XNode(parent)
@@ -270,7 +265,7 @@ namespace avmplus
 		WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
 	}
 
-	void E4XNode::setQName (AvmCore *core, Multiname *mn)
+	void E4XNode::setQName (AvmCore *core, const Multiname *mn)
 	{
 		if (!mn)
 		{

@@ -222,4 +222,46 @@ namespace avmplus
 		}
 	}
 //#endif
+
+	void HeapMultiname::setMultiname(const Multiname& that)
+	{
+		MMgc::GC* gc = this->gc();
+		WBRC(gc, this, &name.name, that.name);
+		
+		bool const this_nsset = name.isNsset();
+		bool const that_nsset = that.isNsset();
+
+		if (this_nsset != that_nsset)
+		{
+			// gc->rc or vice versa... we have to explicitly null out
+			// any existing value (before setting a new one) because WB/WBRC
+			// assume any existing value is a GCObject/RCObject respectively.
+			if (this_nsset)
+				WB_NULL(gc, this, &name.ns);
+			else
+				WBRC_NULL(gc, this, &name.ns);
+		}
+
+		if (that_nsset) 
+		{
+			WB(gc, this, &name.nsset, that.nsset);
+		} 
+		else 
+		{
+			WBRC(gc, this, &name.ns, that.ns);
+		}
+
+		name.flags = that.flags;
+		name.next_index = that.next_index;
+	}
+
+	HeapMultiname::~HeapMultiname()
+	{
+		// Our embedded Multiname will zero itself, but we should call WBRC to 
+		// adjust the refcounts correctly...
+		WBRC_NULL(gc(), this, &name.name);
+		if (!name.isNsset())
+			WBRC_NULL(gc(), this, &name.ns);
+	}
+	
 }

@@ -283,14 +283,14 @@ namespace avmplus
 				gc->Free(m_buffer.pv);
 				break;
 			case kDependent:
-				WBRC(gc, this, &m_master, NULL);
+				WBRC_NULL(gc, this, &m_master);
 				break;
 			default: ; // kStatic
 		}
+		m_master = NULL;	// might have already been cleared above, but that's ok
 		m_buffer.p8 = NULL;
-		m_bitsAndFlags = 0;
 		m_length = 0;
-		m_index = 0;
+		m_bitsAndFlags = 0;
 	}
 
 /////////////////////////////// Conversions ////////////////////////////////
@@ -309,7 +309,7 @@ namespace avmplus
 			VMPI_memcpy(buf, m_buffer.pv, bytes);
 			WB(gc, this, &this->m_buffer.pv, buf);
 			if (type == kDependent)
-				WBRC(gc, this, &m_master, NULL);
+				WBRC_NULL(gc, this, &m_master);
 		}
 	}
 

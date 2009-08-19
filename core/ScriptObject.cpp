@@ -39,26 +39,39 @@
 
 namespace avmplus
 {
-	ScriptObject::ScriptObject(VTable *vtable,
-							   ScriptObject *delegate,
-	                           int capacity /*= 0*/)
-		: 
+	ScriptObject::ScriptObject(VTable* _vtable, ScriptObject* _delegate) :
 #ifdef DEBUGGER 
-			AvmPlusScriptableObject((Atom)vtable), 
+		AvmPlusScriptableObject((Atom)_vtable), 
 #endif // DEBUGGER
-				vtable(vtable)
+		vtable(_vtable),
+		// note that it's substantially more efficient to initialize this in the ctor
+		// list vs. a later explicit call to setDelegate, as we don't have to check for marking
+		// nor decrement an existing value...
+		delegate(_delegate)
 	{
-		// initialize slots in this object to initial values from traits.
-		Traits* traits = vtable->traits;
-		AvmAssert(traits->isResolved());
+		AvmAssert(vtable->traits->isResolved());
 
 		// Ensure that our object is large enough to hold its extra traits data.
-		AvmAssert(MMgc::GC::Size(this) >= traits->getTotalSize());
+		AvmAssert(MMgc::GC::Size(this) >= vtable->traits->getTotalSize());
+	}
 
- 		setDelegate(delegate);
+	ScriptObject::ScriptObject(VTable* _vtable, ScriptObject* _delegate, int capacity) :
+#ifdef DEBUGGER 
+		AvmPlusScriptableObject((Atom)_vtable), 
+#endif // DEBUGGER
+		vtable(_vtable),
+		// note that it's substantially more efficient to initialize this in the ctor
+		// list vs. a later explicit call to setDelegate, as we don't have to check for marking
+		// nor decrement an existing value...
+		delegate(_delegate)
+	{
+		AvmAssert(vtable->traits->isResolved());
+
+		// Ensure that our object is large enough to hold its extra traits data.
+		AvmAssert(MMgc::GC::Size(this) >= vtable->traits->getTotalSize());
 
 		//if capacity not specified then initialize the hashtable lazily
-		if( traits->needsHashtable() && capacity )
+		if (vtable->traits->needsHashtable() && capacity)
 		{
 			initHashtable(capacity);
 		}
@@ -66,7 +79,7 @@ namespace avmplus
 
 	ScriptObject::~ScriptObject()
 	{
-		setDelegate(NULL);
+		//setDelegate(NULL); -- no longer necessary
 		vtable->traits->destroyInstance(this);
 	}
 	

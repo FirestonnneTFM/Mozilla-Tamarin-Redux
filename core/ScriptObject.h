@@ -49,12 +49,12 @@ namespace avmplus
 	{
 	public:
 	
-		ScriptObject(VTable* vtable, ScriptObject* delegate,
-					 int capacity = 0);
+		ScriptObject(VTable* vtable, ScriptObject* delegate);
+		ScriptObject(VTable* vtable, ScriptObject* delegate, int capacity);
 		~ScriptObject();
 
 		ScriptObject* getDelegate() const { return delegate; }
-		void setDelegate(ScriptObject *d) { WBRC(MMgc::GC::GetGC(this), this, &delegate, d); }
+		void setDelegate(ScriptObject *d) { delegate = d; }
 
 		Atom atom() const {
 			return kObjectType|(uintptr)this; 
@@ -235,8 +235,8 @@ namespace avmplus
 		void initHashtable(int capacity = InlineHashtable::kDefaultCapacity);
 		
 	// ------------------------ DATA SECTION BEGIN
-	public:		VTable* const		vtable;
-	private:	ScriptObject*		delegate;     // __proto__ in AS2, archetype in semantics
+	public:		VTable* const			vtable;
+	private:	DRCWB(ScriptObject*)	delegate;     // __proto__ in AS2, archetype in semantics
 	// ------------------------ DATA SECTION END
 	};
 }
