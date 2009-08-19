@@ -228,8 +228,8 @@ namespace avmplus
 		MMgc::GC* gc = this->gc();
 		WBRC(gc, this, &name.name, that.name);
 		
-		bool const this_nsset = name.isNsset();
-		bool const that_nsset = that.isNsset();
+		bool const this_nsset = name.isNsset() != 0;
+		bool const that_nsset = that.isNsset() != 0;
 
 		if (this_nsset != that_nsset)
 		{
