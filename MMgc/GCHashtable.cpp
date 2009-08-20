@@ -58,13 +58,12 @@ namespace MMgc
 
 	void* GCHashtableAllocHandler_new::alloc(size_t size)
 	{
-		return new char[size];
+		return mmfx_alloc(size);
 	}
 
 	void GCHashtableAllocHandler_new::free(void* ptr)
 	{
-		char* p = (char*)ptr;
-		delete p;
+		mmfx_free(ptr);
 	}
 }
 

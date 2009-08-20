@@ -92,7 +92,7 @@ namespace avmplus
 		#endif
 
 		#ifdef VMCFG_NANOJIT
-		delete codePages;
+		mmfx_delete( codePages );
 		#endif
 
 #if USE_STATIC_ABC_STRINGS

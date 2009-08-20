@@ -56,13 +56,13 @@ differently, and global variables are not used (see pcre.in). */
 
 void *avmplus_pcre_malloc(size_t size)
 {
-	return new char[size];
+	return mmfx_new_array(char, size);
 }
 
 void avmplus_pcre_free(void *ptr)
 {
 	char *cp = (char *) ptr;
-	delete [] cp;
+	mmfx_delete_array(cp);
 }
 
 const pcre_callout_t pcre_callout = NULL;

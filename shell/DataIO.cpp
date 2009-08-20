@@ -102,7 +102,7 @@ namespace avmshell
 	{
 		CheckEOF(length);
 		
-		char *buffer = new char[length+1];
+		char *buffer = mmfx_new_array_opt( char, length+1, MMgc::kCanFail );
 		if (!buffer) {
 			ThrowMemoryError();
 		}
@@ -119,7 +119,7 @@ namespace avmshell
 		}
 
 		String *out = m_toplevel->core()->newStringUTF8(utf8chars);
-		delete [] buffer;
+		mmfx_delete_array( buffer );
 		
 		return out;
 	}

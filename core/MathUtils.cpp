@@ -901,7 +901,7 @@ namespace avmplus
 		}
 
 		// initialize d2a engine
-		D2A *d2a = new D2A(value, mode, precision);
+		D2A *d2a = mmfx_new(D2A(value, mode, precision));
 		int32_t exp10 = d2a->expBase10()-1;
 		
 		// Sentinel is used for rounding
@@ -1174,7 +1174,7 @@ namespace avmplus
 		_asm fldcw [oldcw];
 		#endif
 
-		delete d2a;
+		mmfx_delete(d2a);
 
 		return core->newStringLatin1(s, len);
 	}

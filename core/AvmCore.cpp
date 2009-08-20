@@ -191,11 +191,11 @@ namespace avmplus
 		nsCount			= 0;
 
 		numStrings = 1024; // power of 2
-		strings = new DRC(Stringp)[numStrings];
+		strings = mmfx_new_array(DRC(Stringp), numStrings);
 		VMPI_memset(strings, 0, numStrings*sizeof(Stringp));
 
 		numNamespaces = 1024;  // power of 2
-		namespaces = new DRC(Namespacep)[numNamespaces];
+		namespaces = mmfx_new_array(DRC(Namespacep), numNamespaces);
 		VMPI_memset(namespaces, 0, numNamespaces*sizeof(Namespacep));
 
 		console.setCore(this);
@@ -284,7 +284,7 @@ namespace avmplus
 		m_msCache = NULL;
 		
 		// Free the numbers and strings tables
-		delete [] strings;
+		mmfx_delete_array(strings);
 		if (gc) 
 		{
 			gc->SetGCContextVariable(GC::GCV_AVMCORE, NULL);
@@ -292,7 +292,7 @@ namespace avmplus
 
 		strings = NULL;
 
-		delete [] namespaces;
+		mmfx_delete_array(namespaces);
 		namespaces = NULL;
 
 #ifdef SUPERWORD_PROFILING
@@ -3137,7 +3137,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		DRC(Stringp) *oldStrings = strings;
 		int oldStringCount = numStrings;
 
-		strings = new DRC(Stringp)[newlen];
+		strings = mmfx_new_array(DRC(Stringp), newlen);
 		VMPI_memset(strings, 0, newlen*sizeof(Stringp));
 		numStrings = newlen;
 
@@ -3190,7 +3190,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 
 		// Clear oldStrings so it can be collected.
-		delete [] oldStrings;
+		mmfx_delete_array(oldStrings);
     }
 
 	void AvmCore::rehashNamespaces(int newlen)
@@ -3200,7 +3200,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		DRC(Namespacep) *old = namespaces;
 		int oldCount = numNamespaces;
 
-		namespaces = new DRC(Namespacep)[newlen];
+		namespaces = mmfx_new_array(DRC(Namespacep), newlen);
 		VMPI_memset(namespaces, 0, newlen*sizeof(Namespacep));
 		numNamespaces = newlen;
 		
@@ -3212,7 +3212,7 @@ return the result of the comparison ToPrimitive(x) == y.
         }
 
 		// Clear old namespaces table so it can be collected.
-		delete [] old;
+		mmfx_delete_array(old);
     }
 		
 	ScriptBufferImpl* AvmCore::newScriptBuffer(size_t size)

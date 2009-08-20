@@ -434,8 +434,8 @@ namespace avmplus
 		//samples->free();
 		currentSample = samples;
 		GCHashtable_VMPI* t = ptrSamples;
-		ptrSamples = new MMgc::GCHashtable_VMPI(4096);
-		delete t;
+		ptrSamples = mmfx_new( MMgc::GCHashtable_VMPI(4096) );
+		mmfx_delete( t );
 		numSamples = 0;
 	}
 
@@ -449,7 +449,7 @@ namespace avmplus
 			int megs=16;
 			while(!currentSample && megs > 0) {
 				samples_size = megs*1024*1024;
-				currentSample = samples = new byte[samples_size];
+				currentSample = samples = mmfx_new_array(byte, samples_size);
 				megs >>= 1;
 			}
 			if(!currentSample) {
@@ -462,7 +462,7 @@ namespace avmplus
 		
 		if( !ptrSamples ) 
 		{
-			ptrSamples = new MMgc::GCHashtable_VMPI(1024);
+		    ptrSamples = mmfx_new( MMgc::GCHashtable_VMPI(1024) );
 		}
 
 		samplingNow = true;
@@ -493,7 +493,7 @@ namespace avmplus
 			return;
 
 		if( samples )
-			delete [] samples;
+			mmfx_delete_array(samples);
 		samples = 0;
 		samples_size = 0;
 
@@ -503,7 +503,7 @@ namespace avmplus
 		}
 
 		if( ptrSamples ) {
-			delete ptrSamples;
+			mmfx_delete(ptrSamples);
 			ptrSamples = 0;
 		}
 

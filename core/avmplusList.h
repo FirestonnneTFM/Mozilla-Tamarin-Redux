@@ -211,7 +211,7 @@ namespace avmplus
 				}	
 				gc->Free(data);
 			} else
-				delete [] data;
+				mmfx_delete_array(data);
 			// List can be a stack object, or it can be inside an RCObject, so clearing it
 			// can help the gc or indeed be required.
 			data = NULL;
@@ -353,12 +353,12 @@ namespace avmplus
 				if(kElementType == LIST_RCObjects)
 					gcflags |= (MMgc::GC::kContainsPointers|MMgc::GC::kZero);
 
-				T* newData = (gc) ? (T*) gc->Calloc(cap, sizeof(T), gcflags) : new T[cap];
+				T* newData = (gc) ? (T*) gc->Calloc(cap, sizeof(T), gcflags) : mmfx_new_array(T, cap);
 				for (unsigned int i=0; i<len; i++) {
 					newData[i] = data[i];
 				}
 				if (!gc) {
-					delete [] data;
+					mmfx_delete_array(data);
 				}
 				if(gc && gc->IsPointerToGCPage(this)) {
 					// data = newData;

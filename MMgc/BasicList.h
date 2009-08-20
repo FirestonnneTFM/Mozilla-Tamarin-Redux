@@ -62,7 +62,7 @@ namespace MMgc
 		{
 			if ( items )
 			{
-				delete [] items;
+				mmfx_delete_array(items);
 				items = NULL;
 			}
 			count = capacity = iteratorCount = 0;
@@ -76,11 +76,11 @@ namespace MMgc
 			if (count == capacity)
 			{
 				capacity += growthIncrement;
-				T* newItems = new T[ capacity ];
+				T* newItems = mmfx_new_array(T,  capacity );
 				VMPI_memset(newItems, 0, count * sizeof(T));
 				if (items)
 					VMPI_memcpy(newItems, items, count * sizeof(T));
-				delete [] items;
+				mmfx_delete_array(items);
 				items = newItems;
 			}
 			items[count] = item;

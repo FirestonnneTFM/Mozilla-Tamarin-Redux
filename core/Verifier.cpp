@@ -142,10 +142,10 @@ namespace avmplus
 
     Verifier::~Verifier()
     {
-		delete this->state;
+		mmfx_delete( this->state );
 		if (blockStates) {
 			for(int i = 0, n=blockStates->size(); i < n; i++)
-				delete blockStates->at(i);
+				mmfx_delete( blockStates->at(i) );
 			delete blockStates;
 		}
     }
@@ -207,7 +207,7 @@ namespace avmplus
 
 		this->coder = coder;
 
-        state = new FrameState(this);
+	state = mmfx_new( FrameState(this) );
 
         if (info->needRest())
         {
@@ -332,7 +332,7 @@ namespace avmplus
                     #else
                         // lir and translator are okay with this
 						blockStates->remove(pc);
-						delete blockState;
+						mmfx_delete( blockState );
                     #endif
 				}
 			}
@@ -2246,7 +2246,7 @@ namespace avmplus
 		// get state for target address or create a new one if none exists
 		if ( (targetState = blockStates->get(target)) == 0 ) 
 		{
-			targetState = new FrameState(this);
+			targetState = mmfx_new( FrameState(this) );
 			targetState->pc = int(target - code_pos);
 			blockStates->put(target, targetState);
 			labelCount++;
@@ -2952,12 +2952,11 @@ namespace avmplus
 		  initialized(false), targetOfBackwardsBranch(false),
 		  insideTryBlock(false)
 	{
-		locals = new Value[verifier->frameSize];
-		memset(locals, 0, verifier->frameSize * sizeof(Value));
+		locals = (Value*)mmfx_alloc_opt(sizeof(Value) * verifier->frameSize, MMgc::kZero);
 	}
 
 	FrameState::~FrameState() {
-		delete [] locals;
+		mmfx_free( locals );
 	}
 
 #if defined FEATURE_CFGWRITER

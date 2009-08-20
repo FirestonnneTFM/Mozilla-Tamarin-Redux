@@ -59,13 +59,13 @@ namespace avmplus
 		{
 			for(int i=0; i<header.f_nscns; i++)
 			{
-				delete sections[i];
+				mmfx_delete(sections[i]);
 				sections[i] = 0;
 			}
 
 			for(unsigned int i=0; i<header.f_nsyms; i++)
 			{
-				delete symbols[i];
+				mmfx_delete(symbols[i]);
 				symbols[i] = 0;
 			}
 		}
@@ -85,7 +85,7 @@ namespace avmplus
 		{
 			int alignedSize = (numBytes+3) & ~3;
 
-			SectionHeader_t* section = (SectionHeader_t*) new char[sizeof(SectionHeader_t)+alignedSize]; 
+			SectionHeader_t* section = (SectionHeader_t*) mmfx_new_array(char, sizeof(SectionHeader_t)+alignedSize); 
 	//		assert(count < NUM_SECTIONS);
 			sections[header.f_nscns++] = section;
 
@@ -113,7 +113,7 @@ namespace avmplus
 			int size = VMPI_strlen(s);					 // the string size
 			int allocSize = sizeof(int) + size + 1;  // string length + its content + null terminator
 
-			SymbolEntry_t* symbol = (SymbolEntry_t*) new char[sizeof(SymbolEntry_t)+allocSize]; 
+			SymbolEntry_t* symbol = (SymbolEntry_t*) mmfx_new_array(char, sizeof(SymbolEntry_t)+allocSize); 
 			symbols[header.f_nsyms++] = symbol;
 
 			symbol->name.table.zero = 0;

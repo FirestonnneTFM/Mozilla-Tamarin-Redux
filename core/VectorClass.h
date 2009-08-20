@@ -106,7 +106,7 @@ namespace avmplus
 
 		~TypedVectorObject()
 		{
-			delete [] m_array;
+			mmfx_delete_array((T*)m_array);
 			m_array = NULL;
 		}
 
@@ -410,7 +410,7 @@ namespace avmplus
 				if( !exact )
 					newCapacity = newCapacity + (newCapacity >>2);
 				//newCapacity = ((newCapacity+kGrowthIncr)/kGrowthIncr)*kGrowthIncr;
-				T *newArray = new T[newCapacity];
+				T *newArray = mmfx_new_array(T, newCapacity);
 				if (!newArray)
 				{
 					toplevel()->throwError(kOutOfMemoryError);
@@ -418,7 +418,7 @@ namespace avmplus
 				if (m_array)
 				{
 					VMPI_memcpy(newArray, m_array, m_length * sizeof(T));
-					delete [] m_array;
+					mmfx_delete_array((T*)m_array);
 				}
 				VMPI_memset(newArray+m_length, 0, (newCapacity-m_capacity) * sizeof(T));
 				m_array = newArray;
