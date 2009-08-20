@@ -114,6 +114,8 @@ typedef caddr_t maddr_ptr;
 typedef void *maddr_ptr;
 #endif
 
+#include <new>
+
 #ifdef SOLARIS
 // "NP" = non-portable.  Origin of code unclear, may be old.  Consider removing it,
 // it's not used by current Solaris builds.

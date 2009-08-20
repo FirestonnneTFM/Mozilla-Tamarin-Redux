@@ -1465,6 +1465,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GCGlobalNew.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GCHashtable.h"
 				>
 			</File>

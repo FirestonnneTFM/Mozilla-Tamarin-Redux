@@ -45,13 +45,6 @@
 //#define DOPROF
 //#include "../vprof/vprof.h"
 
-#ifndef MMGC_ENABLE_CPP_EXCEPTIONS
-// if MMGC_ENABLE_CPP_EXCEPTIONS is defined, we already include <new> and get placement-new from there
-// if MMGC_ENABLE_CPP_EXCEPTIONS is not defined, we don't want to to include <new> so we need our own placement-new
-// (@todo, this should probably be moved to GCGlobalNew.h)
-inline void* operator new(size_t, void* p) { return p; }
-#endif
-
 namespace avmplus
 {
 	using namespace MMgc;

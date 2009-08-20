@@ -101,8 +101,6 @@
 #  define DEBUG_ONLY(x)
 #endif
 
-inline void* operator new(size_t, void* p) { return p; }
-
 namespace avmplus
 {
 	namespace RTC

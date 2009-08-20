@@ -130,6 +130,16 @@
 #include <windows.h>
 #include <malloc.h>
 
+#if defined(UNDER_CE) 
+// winmo complains if we try to include <new> and it complains if someone else includes new before us so...
+#ifndef __PLACEMENT_NEW_INLINE
+#define __PLACEMENT_NEW_INLINE
+inline void* operator new(size_t, void* p) { return p; }
+#endif
+#else
+// others want the system new
+#include <new>
+#endif
 
 #ifdef _ARM_
 	// Windows Mobile doesn't provide intptr_t or uintptr_t

@@ -102,6 +102,7 @@
 
 #include <unistd.h>
 #include <pthread.h>
+#include <new>
 
 typedef void *maddr_ptr;
 

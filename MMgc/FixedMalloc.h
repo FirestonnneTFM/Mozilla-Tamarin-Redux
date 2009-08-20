@@ -117,7 +117,7 @@ namespace MMgc
 			return size;
 		}
 
-		void *Calloc(size_t num, size_t elsize)
+		void *Calloc(size_t num, size_t elsize, FixedMallocOpts opts=kNone)
 		{
 			uint64_t size = (uint64_t)num * (uint64_t)elsize;
 			if(size > 0xfffffff0) 
@@ -125,7 +125,7 @@ namespace MMgc
 				GCAssertMsg(false, "Attempted allocation overflows size_t\n");
 				return NULL;
 			}
-			return Alloc(num * elsize);
+			return Alloc(num * elsize, opts);
 		}
 
 		size_t GetTotalSize();
