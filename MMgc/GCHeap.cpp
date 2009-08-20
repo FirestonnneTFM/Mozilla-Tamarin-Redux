@@ -1920,4 +1920,9 @@ namespace MMgc
 			return true;
 		return false;
 	}
+
+	bool GCHeap::IsAddressInHeap(void *addr)
+	{
+		return AddrToBlock(addr) != NULL;
+	}
 }
