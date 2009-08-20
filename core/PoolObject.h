@@ -250,13 +250,12 @@ namespace avmplus
 		public:
 			ConstantStrings(MMgc::GC* gc) 
 				: GCRoot (gc, NULL, 0), data(NULL) {}
-			~ConstantStrings() { MMgc::FixedMalloc::GetFixedMalloc()->Free(data); }
+			~ConstantStrings() { mmfx_free(data); }
 			void setup(uint32_t size)
 			{
 				AvmAssert(data == NULL);
 				size *= sizeof(ConstantStringData);
-				// GCRoot requires this allocation to come from FixedMalloc 
-				data = (ConstantStringData*) MMgc::FixedMalloc::GetFixedMalloc()->Alloc(size);
+				data = (ConstantStringData*) mmfx_alloc(size);
 				Set(data, size);
 			}
 			ConstantStringData* data;

@@ -583,7 +583,7 @@ namespace avmplus
 
     void initCodePages(PoolObject *pool) {
         if (!pool->codePages) {
-            PageMgr *mgr = new PageMgr();
+            PageMgr *mgr = mmfx_new( PageMgr() );
             pool->codePages = mgr;
 #ifdef NJ_VERBOSE
             if (pool->verbose) {
@@ -599,8 +599,8 @@ namespace avmplus
         jitInfoList(i->core()->gc),
         jitPendingRecords(i->core()->gc),
 #endif
-        alloc1(new Allocator()),
-        lir_alloc(new Allocator()),
+        alloc1(mmfx_new( Allocator() )),
+        lir_alloc(mmfx_new( Allocator() )),
         core(i->pool()->core),
         info(i),
         ms(i->getMethodSignature()),
@@ -632,9 +632,9 @@ namespace avmplus
 
     void CodegenLIR::cleanup()
     {
-        delete alloc1;
+        mmfx_delete( alloc1 );
         alloc1 = NULL;
-        delete lir_alloc;
+        mmfx_delete( lir_alloc );
         lir_alloc = NULL;
     }
 
@@ -5372,7 +5372,7 @@ namespace avmplus
 
     void CodegenLIR::emitMD()
     {
-        delete alloc1;
+        mmfx_delete( alloc1 );
         alloc1 = NULL;
 
         PERFM_NTPROF("compile");
@@ -5554,11 +5554,11 @@ namespace nanojit
     }
 
     void* Allocator::allocChunk(size_t size) {
-        return FixedMalloc::GetFixedMalloc()->Alloc(size);
+        return mmfx_alloc(size);
     }
 
     void Allocator::freeChunk(void* p) {
-        return FixedMalloc::GetFixedMalloc()->Free(p);
+        return mmfx_free(p);
     }
 
     // static

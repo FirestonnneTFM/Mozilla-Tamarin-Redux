@@ -148,9 +148,10 @@ namespace MMgc
 #include "GCThreadLocal.h"
 #include "FixedAlloc.h"
 #include "FixedMalloc.h"
+#include "GCGlobalNew.h"
 #include "BasicList.h"
 #include "GCHeap.h"
-#include "GCGlobalNew.h"
+
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
 #include "ZCT.h"

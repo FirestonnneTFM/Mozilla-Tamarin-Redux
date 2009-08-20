@@ -538,7 +538,7 @@ namespace avmplus
 		if ((len > 0) && (len < (0x10000000)))
 		{
 
-			index = new uint32[len];
+			index = mmfx_new_array(uint32, len);
 			atoms = new (core->GetGC()) AtomArray(len);
 			atoms->setLength(len);
 		}
@@ -729,7 +729,7 @@ namespace avmplus
 
 	ArraySort::~ArraySort()
 	{
-		delete [] index;
+		mmfx_delete_array(index);
 		if(atoms) {
 			atoms->clear();
 			core->GetGC()->Free(atoms);

@@ -47,12 +47,12 @@ namespace avmshell
 
 	File* PosixPartialPlatform::createFile()
 	{
-		return new PosixFile();
+		return mmfx_new( PosixFile() );
 	}
 
 	void PosixPartialPlatform::destroyFile(File* file)
 	{
-		delete file;
+		mmfx_delete( file );
 	}
 
 	void PosixPartialPlatform::initializeLogging(const char* filename)

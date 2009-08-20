@@ -68,7 +68,7 @@ namespace avmplus
 	uintptr OSDep::startIntWriteTimer(uint32 millis, int *addr)
 	{
 		pthread_t p;
-		IntWriteTimerData *data = new IntWriteTimerData();
+		IntWriteTimerData *data = mmfx_new( IntWriteTimerData() );
 		data->interval = millis*1000;
 		data->addr = addr;
 		pthread_create(&p, NULL, timerThread, data);
@@ -81,7 +81,7 @@ namespace avmplus
 		IntWriteTimerData *data = (IntWriteTimerData*) handle;
 		data->addr = NULL;
 		pthread_join(data->thread, NULL);
-		delete data;
+		mmfx_delete( data );
 	}
 #endif // DEBUGGER
 }

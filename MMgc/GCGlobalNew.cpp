@@ -53,6 +53,21 @@ namespace MMgc
 	{
 		DeleteCallInline(p);
 	}
+
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *SystemNew(size_t size)
+	{	
+		void *space = VMPI_alloc(size);
+		GCHeap::TrackSystemAlloc(space, size);
+		return space;
+	}
+
+	void SystemDelete(void *p)
+	{
+		GCHeap::TrackSystemFree(p);
+		VMPI_free(p);
+	}
+#endif
 };
 
 #ifndef MMGC_OVERRIDE_GLOBAL_NEW

@@ -130,14 +130,14 @@ namespace avmshell
 	/* static */
 	void Shell::singleWorker(ShellSettings& settings)
 	{
-		MMgc::GC *gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+		MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap()) );
 		{
 			MMGC_GCENTER(gc);			
 			ShellCore* shell = new ShellCoreImpl(gc, true);
 			Shell::singleWorkerHelper(shell, settings);			
 			delete shell;
 		}
-		delete gc;
+		mmfx_delete( gc );
 	}
 
 	/* static */

@@ -57,7 +57,7 @@ namespace avmshell
 	ByteArray::ByteArray(const ByteArray &lhs)
 	{
 		m_subscriberRoot = NULL;
-		m_array    = new U8[lhs.m_length];
+		m_array    = mmfx_new_array(uint8_t, lhs.m_length);
 		if (!m_array)
 		{
 			ThrowMemoryError();
@@ -75,7 +75,7 @@ namespace avmshell
 		m_subscriberRoot = NULL;
 		if (m_array)
 		{
-			delete [] m_array;
+			mmfx_delete_array(m_array);
 			m_array = NULL;
 		}
 		m_capacity = 0;
@@ -101,7 +101,7 @@ namespace avmshell
 			{
 				newCapacity = kGrowthIncr;
 			}
-			U8 *newArray = new U8[newCapacity];
+			U8 *newArray = mmfx_new_array(uint8_t, newCapacity);
 			if (!newArray)
 			{
 				return false;
@@ -109,7 +109,7 @@ namespace avmshell
 			if (m_array)
 			{
 				VMPI_memcpy(newArray, m_array, m_length);
-				delete [] m_array;
+				mmfx_delete_array(m_array);
 			}
 			VMPI_memset(newArray+m_length, 0, newCapacity-m_capacity);
 			m_array = newArray;
@@ -489,10 +489,10 @@ namespace avmshell
 		if (!len) // empty buffer should give us a empty result
 			return; 
 		unsigned long gzlen = len * 3/2 + 32; // enough for growth plus zlib headers
-		U8 *gzdata = new U8[gzlen];
+		U8 *gzdata = mmfx_new_array( uint8_t, gzlen );
 
 		// Use zlib to compress the data
-		compress2((U8*)gzdata, (unsigned long*)&gzlen,
+		compress2((uint8_t*)gzdata, (unsigned long*)&gzlen,
 				m_byteArray.GetBuffer(), len, 9);
 
 		// Replace the byte array with the compressed data
@@ -500,7 +500,7 @@ namespace avmshell
 		//m_byteArray.WriteU32((U32)len);
 		m_byteArray.Write(gzdata, gzlen);
 
-		delete [] gzdata;
+		mmfx_delete_array( gzdata );
 	}
 
     void ByteArrayObject::zlib_uncompress()
@@ -510,7 +510,7 @@ namespace avmshell
 		if (!gzlen) // empty buffer should give us a empty result
 			return; 
 
-		U8 *gzdata = new U8[gzlen];
+		uint8_t *gzdata = mmfx_new_array( uint8_t, gzlen );
         VMPI_memcpy(gzdata, m_byteArray.GetBuffer(), gzlen);
 
         // Clear the buffer
@@ -527,7 +527,7 @@ namespace avmshell
             zstream.SetAvailIn(gzlen);
 
             const int kBufferSize = 8192;
-            U8 *buffer = new U8 [kBufferSize];
+            uint8_t *buffer = mmfx_new_array( uint8_t, kBufferSize );
 
             do {
                 zstream.SetNextOut(buffer);
@@ -536,8 +536,8 @@ namespace avmshell
                 m_byteArray.Write(buffer, kBufferSize-zstream.AvailOut());
             } while (error == Z_OK);
 
-            delete [] buffer;
-            delete [] gzdata;
+            mmfx_delete_array( buffer );
+	    mmfx_delete_array( gzdata );
         }
 
 		// position byte array at the beginning
@@ -664,7 +664,7 @@ namespace avmshell
 
 		uint32_t readCount = (uint32_t)len;
 
-		unsigned char *c = new unsigned char[readCount+1];
+		unsigned char *c = mmfx_new_array( unsigned char, readCount+1);
 
 		Atom args[1] = {nullObjectAtom};
 		ByteArrayObject *b = (ByteArrayObject*)AvmCore::atomToScriptObject(construct(0,args));
@@ -685,7 +685,7 @@ namespace avmshell
 		}
 		b->seek(0);
 
-		delete [] c;
+		mmfx_delete_array( c );
 
 		fp->close();
 		Platform::GetInstance()->destroyFile(fp);

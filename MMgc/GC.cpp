@@ -1099,9 +1099,7 @@ namespace MMgc
 			char* block;
 			uintptr_t* block_u;
 		};
-		block = new char[size + hdr_size];
-		// FIXME: should allocate with zeroing, probably.
-		VMPI_memset(block, 0, size + hdr_size);
+		block = mmfx_new_array_opt(char, size + hdr_size, MMgc::kZero);
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
 		*block_u = (uintptr_t)segment;
@@ -1120,7 +1118,7 @@ namespace MMgc
 		RCRootSegment* segment = *segmentp;
 		RemoveRCRootSegment(segment);
 		delete segment;
-		delete block;
+		mmfx_delete_array(block);
 	}
 
 	void GC::CollectionWork()
@@ -3507,7 +3505,7 @@ bail:
  		stackdepth += nbytes;
  #endif
  		void* memory = AllocRCRoot(nbytes);
- 		AllocaStackSegment* seg = new AllocaStackSegment;
+ 		AllocaStackSegment* seg = mmfx_new(AllocaStackSegment);
  		seg->start = memory;
  		seg->limit = (void*)((char*)memory + nbytes);
  		seg->top = NULL;
@@ -3528,7 +3526,7 @@ bail:
  		top_segment = top_segment->prev;
  		if (top_segment != NULL)
  			stacktop = top_segment->top;
- 		delete seg;
+ 		mmfx_delete(seg);
  	} 
 
 	GCAutoEnter::GCAutoEnter(GC *gc) : gc(NULL) 

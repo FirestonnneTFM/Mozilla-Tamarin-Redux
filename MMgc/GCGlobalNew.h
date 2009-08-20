@@ -52,11 +52,15 @@ namespace MMgc
 	void *AllocCall(size_t, FixedMallocOpts opts=kNone);
 	void DeleteCall(void *);
 
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *SystemNew(size_t);
+	void SystemDelete(void*);
+#endif
+
 	REALLY_INLINE void *AllocCallInline(size_t size, FixedMallocOpts opts=kNone)
 	{
 #ifdef MMGC_USE_SYSTEM_MALLOC
-		void *space = VMPI_alloc(size);
-		GCHeap::TrackSystemAlloc(space, size);
+		void *space = SystemNew(size);
 		if ((opts & kZero) != 0)
 		{
 			VMPI_memset(space, 0, size);
@@ -71,8 +75,7 @@ namespace MMgc
 	REALLY_INLINE void DeleteCallInline(void *p)
 	{
 #ifdef MMGC_USE_SYSTEM_MALLOC
-		GCHeap::TrackSystemFree(p);
-		VMPI_free(p);
+		SystemDelete(p);
 #else
 		FixedMalloc::GetFixedMalloc()->OutOfLineFree(p);
 #endif
