@@ -381,6 +381,8 @@ namespace MMgc
 		
 		static bool ShouldNotEnter();
 
+		bool IsAddressInHeap(void *);
+
 	private:
 
 		GCHeap(const GCHeapConfig &config);

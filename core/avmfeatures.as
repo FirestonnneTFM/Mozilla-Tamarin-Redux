@@ -516,6 +516,17 @@ var FEATURES =
 	<name> AVMFEATURE_INDIRECT_NATIVE_THUNKS </name>
 	<defines> AVMPLUS_INDIRECT_NATIVE_THUNKS </defines>
   </feature>
+
+  <feature>
+    <desc> Enabling this will cause the mmfx_* memory macros to use global new/delete.
+		By default we use specialized new/delete operators and avoid global new/delete.  However
+		this requires some tricks to get multiple inheritance and private destructors to work
+		so some codebases may want to use the simpler path of overriding global new/delete.
+		Note that this feature works independently of AVMFEATURE_USE_SYSTEM_MALLOC.
+      </desc>
+	<name> AVMFEATURE_OVERRIDE_GLOBAL_NEW </name>
+	<defines> MMGC_OVERRIDE_GLOBAL_NEW </defines>
+  </feature>
   
 </features>;
 

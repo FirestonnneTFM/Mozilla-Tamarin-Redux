@@ -157,4 +157,8 @@
 	#define NJ_PROFILE_DISABLED 1
 #endif
 
+#ifndef AVMFEATURE_OVERRIDE_GLOBAL_NEW
+  #define AVMFEATURE_OVERRIDE_GLOBAL_NEW 0
+#endif
+
 #endif // __avmshell_features__

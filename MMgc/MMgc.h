@@ -43,9 +43,8 @@
 // VMPI.h includes avmfeatures.h, which detects platforms and sets up most MMGC_ names.
 #include "VMPI.h"
 
-// Memory profiling settings
-
 #ifdef DEBUG
+    #define MMGC_DELETE_DEBUGGING
     #define MMGC_MEMORY_INFO
 #endif
 
@@ -139,8 +138,8 @@ namespace MMgc
 #define CAPACITY(T)  (uint32_t(GCHeap::kBlockSize) / uint32_t(sizeof(T)))
 
 #include "GCTypes.h"
+#include "AllocationMacros.h"
 #include "OOM.h"
-#include "BasicList.h"
 #include "GCStack.h"
 #include "GCThreads.h"
 #include "GCAllocObject.h"
@@ -149,10 +148,11 @@ namespace MMgc
 #include "GCThreadLocal.h"
 #include "FixedAlloc.h"
 #include "FixedMalloc.h"
+#include "BasicList.h"
 #include "GCHeap.h"
+#include "GCGlobalNew.h"
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
-#include "GCGlobalNew.h"
 #include "ZCT.h"
 #include "GC.h"
 #include "GCObject.h"

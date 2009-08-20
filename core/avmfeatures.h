@@ -106,6 +106,7 @@
 #undef AVMPLUS_HEAP_ALLOCA
 #undef AVMPLUS_STATIC_POINTERS
 #undef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#undef MMGC_OVERRIDE_GLOBAL_NEW
 
 
 
@@ -480,6 +481,19 @@
 #  error "AVMFEATURE_INDIRECT_NATIVE_THUNKS must be defined and 0 or 1 (only)."
 #endif
 
+
+/* AVMFEATURE_OVERRIDE_GLOBAL_NEW
+ *
+ * Enabling this will cause the mmfx_* memory macros to use global new/delete.
+ * By default we use specialized new/delete operators and avoid global new/delete.  However
+ * this requires some tricks to get multiple inheritance and private destructors to work
+ * so some codebases may want to use the simpler path of overriding global new/delete.
+ * Note that this feature works independently of AVMFEATURE_USE_SYSTEM_MALLOC.
+ */
+#if !defined AVMFEATURE_OVERRIDE_GLOBAL_NEW || AVMFEATURE_OVERRIDE_GLOBAL_NEW != 0 && AVMFEATURE_OVERRIDE_GLOBAL_NEW != 1
+#  error "AVMFEATURE_OVERRIDE_GLOBAL_NEW must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -551,6 +565,7 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
 
 
 
@@ -766,6 +781,9 @@
 #endif
 #if AVMFEATURE_INDIRECT_NATIVE_THUNKS
 #  define AVMPLUS_INDIRECT_NATIVE_THUNKS
+#endif
+#if AVMFEATURE_OVERRIDE_GLOBAL_NEW
+#  define MMGC_OVERRIDE_GLOBAL_NEW
 #endif
 
 #ifdef AVMSHELL_BUILD

@@ -81,4 +81,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_STATIC_FUNCTION_PTRS=1 "
     if o.getBoolArg("indirect-native_thunks"):
         args += "-DAVMFEATURE_INDIRECT_NATIVE_THUNKS=1 "
+    if o.getBoolArg("override-global_new"):
+        args += "-DAVMFEATURE_OVERRIDE_GLOBAL_NEW=1 "
     return args
