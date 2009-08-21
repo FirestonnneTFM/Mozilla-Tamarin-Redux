@@ -3318,7 +3318,7 @@ bail:
 
 	void GC::ClearWeakRef(const void *item)
 	{
-		GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item);
+		GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item, /*rehash=*/!collecting);
 		GCAssert(weakRefs.get(item) == NULL);
 		GCAssert(ref != NULL);
 		GCAssert(ref->get() == item || ref->get() == NULL);

@@ -55,7 +55,7 @@ namespace MMgc
 
 		inline const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
 		inline const void* get(intptr_t key) { return get((const void*)key); }
-		const void* remove(const void* key);
+		const void* remove(const void* key, bool rehashIfNeeded=true);
 		// updates value if present, adds and grows if necessary if not
 		void put(const void* key, const void* value);
 		inline void add(const void* key, const void* value) { put(key, value); }
@@ -100,7 +100,7 @@ namespace MMgc
 	private:
 		int32_t find(const void* key, const void** table, uint32_t tableSize);
 
-		void grow();
+		void grow(bool canFail);
 
 		static const void* const DELETED;// = (const void*)1;
 		static const void* EMPTY[2];// = { NULL, NULL };
@@ -129,7 +129,7 @@ namespace MMgc
 	{
 		if (tableSize > 0)
 		{
-			grow();
+			grow(false);
 		}
 		else 
 		{
@@ -179,7 +179,7 @@ namespace MMgc
 			// numValues includes numDeleted
 			if (numValues * 8 >= tableSize * 3)
 			{
-				grow();
+				grow(false);
 				// grow rehashes
 				i = find(key, table, tableSize);
 				GCAssert(!table[i]);
@@ -192,7 +192,7 @@ namespace MMgc
 	}
 	
 	template <class KEYHANDLER, class ALLOCHANDLER>
-	const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key)
+	const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key, bool rehashIfNeeded/*=true*/)
 	{
 		const void* ret = NULL;
 		int32_t i = find(key, table, tableSize);
@@ -204,14 +204,14 @@ namespace MMgc
 			numDeleted++;
 			// this helps a bit on pathologic memory profiler use case, needs more investigation
 			// 20% deleted == rehash
-			if (numDeleted * 10 >= tableSize)
-				grow();
+			if (rehashIfNeeded && numDeleted * 10 >= tableSize)
+				grow(true);
 		}		
 		return ret;
 	}
 
 	template <class KEYHANDLER, class ALLOCHANDLER>
-	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::grow()
+	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::grow(bool canFail)
 	{
 		int32_t newTableSize = tableSize;
 
@@ -228,7 +228,7 @@ namespace MMgc
 			newTableSize >>= 1;
 
 		const void** newTable;
-		newTable = (const void**)ALLOCHANDLER::alloc(newTableSize*sizeof(const void*));
+		newTable = (const void**)ALLOCHANDLER::alloc(newTableSize*sizeof(const void*), canFail);
 		
 		VMPI_memset(newTable, 0, newTableSize*sizeof(void*));
 
@@ -290,14 +290,14 @@ namespace MMgc
 	class GCHashtableAllocHandler_VMPI
 	{
 	public:
-		static void* alloc(size_t size);
+		static void* alloc(size_t size, bool canFail);
 		static void free(void* ptr);
 	};
 
 	class GCHashtableAllocHandler_new
 	{
 	public:
-		static void* alloc(size_t size);
+		static void* alloc(size_t size, bool canFail);
 		static void free(void* ptr);
 	};
 	
