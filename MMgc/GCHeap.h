@@ -560,6 +560,7 @@ namespace MMgc
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
 		MemoryStatus status;
+		bool statusNotificationBeingSent;
  		uint32_t enterCount;
  		vmpi_thread_t const primordialThread;
 

@@ -132,6 +132,7 @@ namespace MMgc
 		  numAlloc(0),
 		  config(c),
  		  status(kMemNormal),
+		  statusNotificationBeingSent(false),
 		  enterCount(0),
 		  primordialThread(VMPI_currentThread()),
 	#ifdef MMGC_MEMORY_PROFILER
@@ -1112,8 +1113,16 @@ namespace MMgc
 			// random policy choice: don't invoke OOM callbacks for
 			// canFail allocs
 			if(status == kMemNormal && !canFail) {
+
+				if(statusNotificationBeingSent)
+					Abort();
+				
+				statusNotificationBeingSent = true;
+
 				// invoke callbacks
 				StatusChangeNotify(kMemReserve);
+
+				statusNotificationBeingSent = false;
 				
 				// try again
 				result = ExpandHeapInternal(askSize);
@@ -1896,6 +1905,11 @@ namespace MMgc
 		status = to;
 		
 		// unlock the heap so that memory operations are allowed
+
+		// this isn't right, really what we want is to allow this
+		// thread to call Free but keep other threads out, so what we
+		// really want is a lock operation that allows repeated same
+		// thread locks
 		VMPI_lockRelease(&m_spinlock);
 		
 		BasicListIterator<OOMCallback*> iter(callbacks);
