@@ -40,10 +40,10 @@
 
 namespace MMgc
 {
-	void* GCHashtableAllocHandler_VMPI::alloc(size_t size)
+	void* GCHashtableAllocHandler_VMPI::alloc(size_t size, bool canFail)
 	{
 		void* p = VMPI_alloc(size);
-		if (!p)
+		if (!p && !canFail)
 		{
 			// ran out of memory...
 			GCHeap::GetGCHeap()->Abort();
@@ -56,9 +56,9 @@ namespace MMgc
 		VMPI_free(ptr);
 	}
 
-	void* GCHashtableAllocHandler_new::alloc(size_t size)
+	void* GCHashtableAllocHandler_new::alloc(size_t size, bool canFail)
 	{
-		return mmfx_alloc(size);
+		return mmfx_alloc_opt(size, canFail ? kCanFail : kNone);
 	}
 
 	void GCHashtableAllocHandler_new::free(void* ptr)
