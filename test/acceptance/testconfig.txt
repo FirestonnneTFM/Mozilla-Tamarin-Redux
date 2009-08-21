@@ -97,8 +97,8 @@ as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatc
 as3/RuntimeErrors/Error1034TypeCoercionFailed , .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=510225
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
-ecma3/GlobalObject/e15_1_2_2_2  , linux-diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
-ecma3/TypeConversion/e9_3_1_3   , linux-diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+ecma3/GlobalObject/e15_1_2_2_2  , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+ecma3/TypeConversion/e9_3_1_3_rt   , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 
 ####################
 # Number
