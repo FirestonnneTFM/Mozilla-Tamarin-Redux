@@ -141,7 +141,7 @@ void *operator new(size_t size, MMgc::NewDummyOperand /*ignored*/, MMgc::FixedMa
 
 // Empty deletes to get rid of warnings
 // has impl for solaris (maybe solaris is generating C++ exception based delete calls?)
-REALLY_INLINE void operator delete(void *p, MMgc::NewDummyOperand /* ignored */) MMGC_DELETE_THROWS_CLAUSE { GCAssert(false); }
+REALLY_INLINE void operator delete(void *, MMgc::NewDummyOperand /* ignored */) MMGC_DELETE_THROWS_CLAUSE { GCAssert(false); }
 
 // b/c we need to use the fancy template routines for new[] these arent used
 //void* operator new[](size_t size, size_t arraySize, MMgc::NewDummyOperand /*ignored*/) MMGC_NEW_THROWS_CLAUSE;
