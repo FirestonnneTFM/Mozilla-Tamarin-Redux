@@ -103,8 +103,13 @@ ecma3/TypeConversion/e9_3_1_3   , linux-diff , expectedfail, https://bugzilla.mo
 ####################
 # Number
 ####################
-ecma3/GlobalObject/e15_1_2_2_2  , x86-lnx-tvm-release.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
-ecma3/TypeConversion/e9_3_1_3   , x86-lnx-tvm-release.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+####################
+# Number
+####################
+ecma3/TypeConversion/e9_3_1_3_rt:parseInt.*123456789012345678.*   , x86-lnx-tvm-release.* , expected\
+fail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+ecma3/GlobalObject/e15_1_2_2_2:parseInt.*123456789012345678.*   , x86-lnx-tvm-release.* , expectedfa\
+il, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 
 ####################
 # mmgc
