@@ -2962,16 +2962,16 @@ namespace avmplus
 #if defined FEATURE_CFGWRITER
     CFGWriter::CFGWriter (MethodInfo* info, CodeWriter* coder) 
 	    : NullWriter(coder), info(info), label(0), edge(0) {
-		blocks.put(0, new Block(label++, 0));
+	        blocks.put(0, mmfx_new( Block(label++, 0)));
 		current = blocks.at(0);
 		current->pred_count = -1;
     }
 
 	CFGWriter::~CFGWriter() {
 		for (int i=0, n=blocks.size(); i < n; i++)
-			delete blocks.at(i);
+			mmfx_delete( blocks.at(i) );
 		for (int i=0, n=edges.size(); i < n; i++)
-			delete edges.at(i);
+			mmfx_delete( edges.at(i) );
 	}
 
 	void CFGWriter::writeEpilogue(FrameState* state)
@@ -3020,7 +3020,7 @@ namespace avmplus
 		Block *b = blocks.get(state->pc);
 		// if there isn't a block for the current pc, then create one
 		if (!b) {
-		  b = new Block(label++, state->pc);
+		  b = mmfx_new(Block(label++, state->pc));
 		  //b->pred_count++;
 		  blocks.put(state->pc, b);
 		  current = b;
@@ -3069,21 +3069,21 @@ namespace avmplus
 
 		  // if there isn't a block for the next pc, then create one
 		  if (!b) {
-			b = new Block(label++, state->pc+4);
+			b = mmfx_new( Block(label++, state->pc+4) );
 			blocks.put(state->pc+4, b);
 		  }
 		  if (opcode != OP_jump) {
 			  b->pred_count++;
 			  b->preds.add(current->label);
 			  current->succs.add(b->label);
-			  edges.put(edge++, new Edge(current->label, b->label));
+			  edges.put(edge++, mmfx_new(Edge(current->label, b->label)));
 		  }
 			  
 
 		  // if there isn't a block for target then create one
 		  b = blocks.get(state->pc+4+opd1);
 		  if (!b) {
-			b = new Block(label++, state->pc+4+opd1);
+			b = mmfx_new( Block(label++, state->pc+4+opd1));
 			blocks.put(state->pc+4+opd1, b);
 		  }
 
@@ -3098,7 +3098,7 @@ namespace avmplus
 		  b->preds.add(current->label);
 		  current->succs.add(b->label);
 		  current->end = state->pc+4;
-		  edges.put(edge++, new Edge(current->label, b->label));
+		  edges.put(edge++, mmfx_new(Edge(current->label, b->label)));
 
 		  //core->console << "label " << (uint32_t)state->pc+opd1+4 << "\n";
 		  //core->console << "    edge " << (uint32_t)state->pc << " -> " << (uint32_t)state->pc+opd1+4 << "\n";

@@ -83,7 +83,7 @@ namespace avmplus
 
 			virtual ~BitSet() {
 				if (capacity > kDefaultCapacity) {
-					delete[] bits.ptr;
+					mmfx_delete_array(bits.ptr);
 					bits.ptr = 0;
 					capacity = kDefaultCapacity;
 				}
@@ -147,7 +147,7 @@ namespace avmplus
 			// Grow the array until at least newCapacity big
 			void grow(int newCapacity)
 			{
-				uintptr_t* newBits = new uintptr_t[newCapacity];
+				uintptr_t* newBits = mmfx_new_array( uintptr_t, newCapacity);
 				// copy the old one 
                 uintptr_t *bits = getbits();
                 for (int i=0, n=capacity; i < n; i++)
@@ -157,7 +157,7 @@ namespace avmplus
 
 				// in with the new out with the old
 				if (capacity > kDefaultCapacity)
-					delete[] bits;
+					mmfx_delete_array( bits );
 
 				this->bits.ptr = newBits;
 				capacity = newCapacity;
