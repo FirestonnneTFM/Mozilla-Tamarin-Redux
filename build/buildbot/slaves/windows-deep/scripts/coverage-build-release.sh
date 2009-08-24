@@ -77,10 +77,11 @@ $bullseyedir/cov01 --on
 
 ##
 # Execute the common build script.
-# Just need to pass in the additional args for zlib
+# Just need to pass in a dummy additional args string ($2) and then the 
+# name of the executable that we want ($3)
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/build-release.sh $change ${shell_release_cov}
+../all/build-release.sh $change " " ${shell_release_cov}
 
 
 
