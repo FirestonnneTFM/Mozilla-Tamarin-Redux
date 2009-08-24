@@ -77,10 +77,11 @@ $bullseyedir/cov01 --on
 
 ##
 # Execute the common build script.
-# Just need to pass in the additional args for zlib
+# Just need to pass in a dummy additional args string ($2) and then the 
+# name of the executable that we want ($3)
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/build-selftest.sh $change ${shell_selftest_cov}
+../all/build-selftest.sh $change " " ${shell_selftest_cov}
 
 
 
