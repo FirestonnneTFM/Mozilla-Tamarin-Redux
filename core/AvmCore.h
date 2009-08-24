@@ -1172,8 +1172,6 @@ const int kBufferPadding = 16;
 		 *  minstack)
 		 */
 		virtual void stackOverflow(MethodEnv *env) = 0;
-
-		void _stackOverflow(MethodEnv *env) { stackOverflow(env); }
 		
 		/**
 		 * Throws an exception.  Constructs an Exception object
