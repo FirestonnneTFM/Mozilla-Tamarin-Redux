@@ -2025,7 +2025,7 @@ failure:
 #ifdef DEBUG
 		// sanity check to make sure we don't have any duplicate supertypes.
 		List<Traitsp, LIST_GCObjects> supertypes(gc);
-		for (uint32_t i = 0; i < MAX_PRIMARY_SUPERTYPE; i++) {
+		for (int i = 0; i < MAX_PRIMARY_SUPERTYPE; i++) {
 			Traits* t = m_primary_supertypes[i];
 			if (t != NULL) {
 				if (supertypes.indexOf(t) != -1) {
