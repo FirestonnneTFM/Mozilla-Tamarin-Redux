@@ -676,8 +676,9 @@ namespace avmplus
  			env->lookup_cache = (MethodEnv::LookupCache*)core->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code_cache_size(), GC::kContainsPointers|GC::kZero);
   		}
 #endif
- 		
- 		if (core->minstack)
+
+		// always do a stack check.  If minstack == 0, this
+		// code still works since p < 0 is always false for all unsigned p
  		{
  			// Take the address of a local variable to get
  			// stack pointer
