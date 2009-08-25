@@ -48,14 +48,6 @@
     #define MMGC_MEMORY_INFO
 #endif
 
-#if defined AVMPLUS_MAC && !(defined MMGC_PPC && defined MMGC_64BIT)
-	#define MMGC_MEMORY_PROFILER
-#endif
-
-#if defined AVMPLUS_WIN32 && !defined AVMPLUS_ARM // note, does not require DEBUG
-    #define MMGC_MEMORY_PROFILER
-#endif
-
 #if defined MMGC_MEMORY_INFO && defined MMGC_MEMORY_PROFILER
     #define MMGC_RC_HISTORY
 #endif

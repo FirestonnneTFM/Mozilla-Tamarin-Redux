@@ -83,4 +83,6 @@ def featureSettings(o):
         args += "-DAVMFEATURE_INDIRECT_NATIVE_THUNKS=1 "
     if o.getBoolArg("override-global_new"):
         args += "-DAVMFEATURE_OVERRIDE_GLOBAL_NEW=1 "
+    if o.getBoolArg("memory-profiler"):
+        args += "-DAVMFEATURE_MEMORY_PROFILER=1 "
     return args
