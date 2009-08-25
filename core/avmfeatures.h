@@ -107,6 +107,7 @@
 #undef AVMPLUS_STATIC_POINTERS
 #undef AVMPLUS_INDIRECT_NATIVE_THUNKS
 #undef MMGC_OVERRIDE_GLOBAL_NEW
+#undef MMGC_MEMORY_PROFILER
 
 
 
@@ -494,6 +495,16 @@
 #  error "AVMFEATURE_OVERRIDE_GLOBAL_NEW must be defined and 0 or 1 (only)."
 #endif
 
+
+/* AVMFEATURE_MEMORY_PROFILER
+ *
+ * Enabling this will compile in code to enable memory profiling. (Must still be
+ * enabled at runtime.)
+ */
+#if !defined AVMFEATURE_MEMORY_PROFILER || AVMFEATURE_MEMORY_PROFILER != 0 && AVMFEATURE_MEMORY_PROFILER != 1
+#  error "AVMFEATURE_MEMORY_PROFILER must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -565,6 +576,7 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
 
 
 
@@ -784,6 +796,9 @@
 #endif
 #if AVMFEATURE_OVERRIDE_GLOBAL_NEW
 #  define MMGC_OVERRIDE_GLOBAL_NEW
+#endif
+#if AVMFEATURE_MEMORY_PROFILER
+#  define MMGC_MEMORY_PROFILER
 #endif
 
 #ifdef AVMSHELL_BUILD

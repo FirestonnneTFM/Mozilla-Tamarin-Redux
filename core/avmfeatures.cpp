@@ -152,6 +152,9 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_OVERRIDE_GLOBAL_NEW
     "AVMFEATURE_OVERRIDE_GLOBAL_NEW;"
   #endif
+  #if AVMFEATURE_MEMORY_PROFILER
+    "AVMFEATURE_MEMORY_PROFILER;"
+  #endif
 ;
 
 #endif // AVMSHELL_BUILD

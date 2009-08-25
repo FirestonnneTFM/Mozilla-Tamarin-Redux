@@ -527,6 +527,14 @@ var FEATURES =
 	<name> AVMFEATURE_OVERRIDE_GLOBAL_NEW </name>
 	<defines> MMGC_OVERRIDE_GLOBAL_NEW </defines>
   </feature>
+
+  <feature>
+    <desc> Enabling this will compile in code to enable memory profiling. (Must still be
+		enabled at runtime.)
+      </desc>
+	<name> AVMFEATURE_MEMORY_PROFILER </name>
+	<defines> MMGC_MEMORY_PROFILER </defines>
+  </feature>
   
 </features>;
 
