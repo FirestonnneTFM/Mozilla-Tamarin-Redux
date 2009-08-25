@@ -353,8 +353,8 @@ namespace MMgc
 		void DumpMemoryInfoLocked();
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
-		static void TrackSystemAlloc(void *addr, size_t askSize);
-		static void TrackSystemFree(void *addr);
+		void TrackSystemAlloc(void *addr, size_t askSize);
+		void TrackSystemFree(void *addr);
 #endif //MMGC_USE_SYSTEM_MALLOC
 
 		void *GetStackEntryAddress() { return (void*)GetEnterFrame(); }

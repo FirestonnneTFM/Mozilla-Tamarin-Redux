@@ -1834,11 +1834,11 @@ namespace MMgc
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
 
-	/* static */
 	void GCHeap::TrackSystemAlloc(void *addr, size_t askSize)
 	{
 		(void)addr;
 		(void)askSize;
+		MMGC_LOCK(m_spinlock);
 	#ifdef MMGC_MEMORY_PROFILER
 		if(!IsProfilerInitialized())
 		{
@@ -1850,15 +1850,14 @@ namespace MMgc
 
 	}
 
-	/* static */
 	void GCHeap::TrackSystemFree(void *addr)
 	{
-		(void)addr;
+		(void)addr;		
+		MMGC_LOCK(m_spinlock);
 	#ifdef MMGC_MEMORY_PROFILER
 		if(addr && profiler)
 			profiler->RecordDeallocation(addr, VMPI_size(addr));
-	#endif //MMGC_MEMORY_PROFILER
-		
+	#endif //MMGC_MEMORY_PROFILER		
 	}
 
 #endif //MMGC_USE_SYSTEM_MALLOC
