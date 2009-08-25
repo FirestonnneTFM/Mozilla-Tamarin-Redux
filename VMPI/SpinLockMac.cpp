@@ -88,6 +88,7 @@ bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock)
 		GCAssert(lock->owner == NULL);
 		lock->owner = VMPI_currentThread();
 		#endif
+		return true;
 	}
 	return false;
 }
