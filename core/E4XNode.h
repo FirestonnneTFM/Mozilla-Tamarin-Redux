@@ -197,14 +197,16 @@ namespace avmplus
 		virtual void removeChild (uint32 /*i*/) {};
 		virtual void convertToAtomArray() {};
 
+ 		bool hasSimpleContent() const;
+ 		bool hasComplexContent() const;
+ 		int32 childIndex() const;
+ 		String* nodeKind(Toplevel* toplevel) const;
+ 
 		virtual void addAttribute (E4XNode *x);
 
 		// Should this silently fail or assert?
 		virtual void setNotification(AvmCore* /*core*/, FunctionObject* /*f*/) { return; }
 		virtual FunctionObject* getNotification() const { return NULL; }
-
-		// used to determine child number in notifications
-		virtual uint32 childIndex()  const { return 0; };
 
 		// The following routines are E4X support routines
 		
@@ -342,9 +344,6 @@ namespace avmplus
 
 		void setNotification(AvmCore* core, FunctionObject* f);
 		FunctionObject* getNotification() const;
-
-		// used to determine child number in notifications
-		uint32 childIndex()  const;
 
 		// E4X support routines below
 		uint32 _length() const { return numChildren(); };

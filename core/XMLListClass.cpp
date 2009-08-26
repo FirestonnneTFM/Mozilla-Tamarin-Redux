@@ -108,7 +108,7 @@ namespace avmplus
 				Namespace *ns = toplevel->getDefaultNamespace();
 				c->_addInScopeNamespace (core, ns);
 
-				xl->_append (c);
+				xl->_appendNode (c);
 			}
 			return xl->atom();
 		}

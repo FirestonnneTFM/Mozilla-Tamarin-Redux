@@ -97,14 +97,17 @@ namespace avmplus
 		}
 
 	private:
-		HeapMultiname m_targetProperty;
-		ATOM_WB m_targetObject;
-
-		// An array of XMLObjects (NOT E4XNodes)
-		AtomArray m_children;
+		mutable HeapMultiname m_targetProperty;
+		mutable ATOM_WB m_targetObject;
+ 		mutable bool m_appended;
+ 		// Above member are mutable because this const method may modify them
+ 		void fixTargetObject() const;
+  
+ 		// An array of XMLObjects,or E4XNodes; mutable because E4XNodes may be converted to XMLObjects
+		mutable AtomArray m_children;
 		friend class XMLObject;
 
-		void setTargetObject(Atom a) { m_targetObject.set(MMgc::GC::GetGC(this), this, a); }
+		void setTargetObject(Atom a) const { m_targetObject.set(MMgc::GC::GetGC(this), this, a); }
 
 	public:
 		// Functions that override object version
@@ -135,18 +138,22 @@ namespace avmplus
 		bool delUintProperty(uint32 i);
 
 		// private helper functions
-		void _append (E4XNode *node);				// [[Append]]
-		void _append (Atom child);					// [[Append]]
-		XMLListObject* _deepCopy () const;			// [[DeepCopy]]
+		void _appendNode(E4XNode *node);			// [[Append]]
+		void _append(Atom child);					// [[Append]]
+		XMLListObject* _deepCopy() const;			// [[DeepCopy]]
 		Atom _equals(Atom V) const;					// [[Equals]]
-		Atom _resolveValue ();						// [[ResolveValue]
+		Atom _resolveValue();						// [[ResolveValue]
 
 		uint32 numChildren()   const { return m_children.getLength(); };
 		
 		// inline version for frequent internal use
 		inline uint32 _length() const { return (numChildren()); }; //[[Length]]
 
-		XMLObject* _getAt (uint32 i) const;
+		// may convert an E4XNode to an XMLObject despite of being const
+		XMLObject* _getAt(uint32 i) const;
+		E4XNode*   _getNodeAt(uint32 i) const;
+
+		inline void checkCapacity(int c) { m_children.checkCapacity(c); }
 
 		void __toXMLString(StringBuffer &output, Atom AncestorNamespace, int indentLevel = 0);
 
