@@ -175,9 +175,9 @@ namespace MMgc
 	template <class T>
 	T *MMgcNewArrayCall(T* /*dummy template arg*/, size_t count, MMgc::FixedMallocOpts opts)
 	{
-		size_t *p = (size_t*) MMgc::NewArrayCalloc(sizeof(T), count, opts, false /* !isPrimitive */);
-		*p = count;
-		p++;
+		void *p = MMgc::NewArrayCalloc(sizeof(T), count, opts, false /* !isPrimitive */);
+		*(size_t*)p = count;
+		p = ((size_t*)p + 1);
 		T *tp = (T*)p;
 		for(size_t i=count; i>0; i--, tp++) {
 			new ((void*)tp) T;
