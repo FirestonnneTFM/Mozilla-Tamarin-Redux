@@ -161,10 +161,10 @@
   #define AVMFEATURE_OVERRIDE_GLOBAL_NEW 0
 #endif
 
-#if defined AVMPLUS_MAC && !(defined MMGC_PPC && defined MMGC_64BIT)
+#if AVMSYSTEM_MAC && !(AVMSYSTEM_PPC && AVMSYSTEM_64BIT)
 	#define AVMFEATURE_MEMORY_PROFILER 1
-#elif defined AVMPLUS_WIN32 && !defined AVMPLUS_ARM // note, does not require DEBUG
-    #define AVMFEATURE_MEMORY_PROFILER 1
+#elif AVMSYSTEM_WIN32 && !AVMSYSTEM_ARM // note, does not require DEBUG
+	#define AVMFEATURE_MEMORY_PROFILER 1
 #else
 	#define AVMFEATURE_MEMORY_PROFILER 0
 #endif

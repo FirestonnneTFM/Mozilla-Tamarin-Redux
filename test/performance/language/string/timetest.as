@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function timetest(func:Function, iterationsDesktop:Number=1, iterationsMobile:Number=1) {
-    if (iterationsMobile == null)
+function timetest(func:Function, iterationsDesktop:Number=1, iterationsMobile:Number=0) {
+    if (iterationsMobile == 0)
         iterationsMobile = iterationsDesktop;
 
     var start:Number;
