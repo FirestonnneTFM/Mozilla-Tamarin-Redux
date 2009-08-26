@@ -480,6 +480,8 @@ namespace avmplus
 
 		if (name.isAttr())
 		{
+			// does not hurt, but makes things faster
+			xl->checkCapacity(m_node->numAttributes());
 			// for each a in x.[[attributes]]
 			for (uint32 i = 0; i < m_node->numAttributes(); i++)
 			{
@@ -497,7 +499,7 @@ namespace avmplus
 				xml->getQName (core, &m);
 				if (name.matches(&m))
 				{
-					xl->_append (xml);
+					xl->_appendNode (xml);
 				}
 			}
 
@@ -509,6 +511,9 @@ namespace avmplus
 //		if (n.localName = "*" and this[k].class == "element" and (this[k].name.localName == n.localName)
 //			and (!n.uri) or (this[k].class == "element) and (n.uri == this[k].name.uri)))
 //			xl->_append (x[k]);
+
+		if (name.isAnyName())
+			xl->checkCapacity(m_node->numChildren());
 
 		for (uint32 i = 0; i < m_node->numChildren(); i++)
 		{
@@ -526,7 +531,7 @@ namespace avmplus
 			//		xl->_append (x[k]);
 			if (name.matches(m2))
 			{
-				xl->_append (child);
+				xl->_appendNode (child);
 			}
 		}
 
@@ -914,7 +919,7 @@ namespace avmplus
 				if (m.matches(&m2))
 				{
 					// for each atribute, if it's name equals m,
-					l->_append (ax);
+					l->_appendNode (ax);
 				}
 			}
 		}
@@ -934,7 +939,7 @@ namespace avmplus
 				}
 				if (m.matches(m2))
 				{
-					l->_append (child);
+					l->_appendNode (child);
 				}
 			}
 
@@ -1583,7 +1588,7 @@ namespace avmplus
 			XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass());
 			if (index < m_node->numChildren())
 			{
-				xl->_append (m_node->_getAt(index));
+				xl->_appendNode (m_node->_getAt(index));
 			}
 			return xl;
 		}
@@ -1593,27 +1598,7 @@ namespace avmplus
 
 	int XMLObject::AS3_childIndex()
 	{
-		if ((m_node->getParent() == NULL) || (getClass() == E4XNode::kAttribute))
-			return -1;
-
-		// find this child in parent's children list - return ordinal
-
-		E4XNode *parent = m_node->getParent();
-		AvmAssert(parent != 0);
-		AvmAssert(parent->_length()); // this child's parent does not contain itself???
-
-		for (uint32 i = 0; i < parent->_length(); i++)
-		{
-			E4XNode *x = parent->_getAt(i);
-			if (x == m_node)
-			{
-				return i;
-			}
-		}
-
-		// this child's parent does not contain itself???
-		AvmAssert(0);
-		return -1;
+		return m_node->childIndex();
 	}
 
 	XMLListObject *XMLObject::AS3_children ()
@@ -1634,7 +1619,7 @@ namespace avmplus
 
 			if (child->getClass() == E4XNode::kComment)
 			{
-				l->_append (child);
+				l->_appendNode (child);
 			}
 		}
 
@@ -1694,7 +1679,7 @@ namespace avmplus
 				{
 					// if name.localName = "*" or name.localName =child->name.localName)
 					// and (name.uri == null) or (name.uri == child.name.uri))
-					l->_append (child);
+					l->_appendNode (child);
 				}
 			}
 		}
@@ -1717,40 +1702,13 @@ namespace avmplus
 	// E4X 13.4.4.15, page 77
 	bool XMLObject::AS3_hasComplexContent ()
 	{
-		if (m_node->getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
-			return false;
-
-		for (uint32 i = 0; i < m_node->_length(); i++)
-		{
-			E4XNode *child = m_node->_getAt(i);
-
-			if (child->getClass() == E4XNode::kElement)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return m_node->hasComplexContent();
 	}
 
 	// E4X 13.4.4.16, page 77
 	bool XMLObject::AS3_hasSimpleContent ()
 	{
-		if (m_node->getClass() & (E4XNode::kComment | E4XNode::kProcessingInstruction))
-			return false;
-
-		// for each prop in x, if x.class == element, return false
-		for (uint32 i = 0; i < m_node->_length(); i++)
-		{
-			E4XNode *child = m_node->_getAt(i);
-
-			if (child->getClass() == E4XNode::kElement)
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return m_node->hasSimpleContent();
 	}
 
 	// E4X 13.4.4.17, page 78
@@ -2040,24 +1998,7 @@ namespace avmplus
 
 	String *XMLObject::AS3_nodeKind () const
 	{
-		switch (m_node->getClass())
-		{
-			case E4XNode::kAttribute:
-				return toplevel()->xmlClass()->kAttribute;
-			case E4XNode::kText:
-			case E4XNode::kCDATA: 
-				return toplevel()->xmlClass()->kText;
-			case E4XNode::kComment:
-				return toplevel()->xmlClass()->kComment;
-			case E4XNode::kProcessingInstruction:
-				return toplevel()->xmlClass()->kProcessingInstruction;
-			case E4XNode::kElement:
-				return toplevel()->xmlClass()->kElement;
-			case E4XNode::kUnknown:
-			default:
-				AvmAssert(0);
-				return 0; 
-		}
+		return m_node->nodeKind(toplevel());
 	}
 
 	XMLObject *XMLObject::AS3_normalize ()
@@ -2159,7 +2100,7 @@ namespace avmplus
 				// and (name.uri == null) or (name.uri == child.name.uri))
 				if (m.matches(bFound ? &m2 : 0))
 				{
-					xl->_append (child);
+					xl->_appendNode (child);
 				}
 			}
 		}
@@ -2476,7 +2417,7 @@ namespace avmplus
 			E4XNode *child = m_node->_getAt(i);
 			if (child->getClass() & (E4XNode::kText | E4XNode::kCDATA))
 			{
-				l->_append (child);
+				l->_appendNode (child);
 			}
 		}
 

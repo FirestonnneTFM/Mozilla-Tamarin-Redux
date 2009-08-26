@@ -41,7 +41,8 @@
 namespace avmplus
 {
 	XMLListObject::XMLListObject(XMLListClass *type, Atom tObject, const Multiname* tProperty)
-		: ScriptObject(type->ivtable(), type->prototype), m_targetObject(tObject), m_children(0)
+		: ScriptObject(type->ivtable(), type->prototype), m_targetObject(tObject), 
+		  m_appended(false), m_children(0)
 	{
 		if (tProperty)
 			m_targetProperty = *tProperty;
@@ -104,10 +105,11 @@ namespace avmplus
 		// step 3
 		for (uint32 i = 0; i < _length(); i++)
 		{
-			XMLObject *xml = _getAt(i);
-			if (xml && xml->getClass() == E4XNode::kElement)
+			E4XNode* node = _getNodeAt(i);
+			if (node->getClass() == E4XNode::kElement)
 			{
 				// step 3ai
+				XMLObject* xml = _getAt(i);
 				Atom gq = xml->getMultinameProperty(m);
 				if (AvmCore::atomToXML(gq))
 				{
@@ -191,9 +193,9 @@ namespace avmplus
 
 		for (uint32 i = 0; i < numChildren(); i++)
 		{
-			XMLObject *xm = _getAt(i);
-			if (xm->getClass() == E4XNode::kElement)
+			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 			{
+				XMLObject *xm = _getAt(i);
 				xm->deleteMultinameProperty(m);
 			}
 		}
@@ -208,9 +210,9 @@ namespace avmplus
 		XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass());
 		for (uint32 i = 0; i < numChildren(); i++)
 		{
-			XMLObject *xm = _getAt(i);
-			if (xm->getClass() == E4XNode::kElement)
+			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 			{
+				XMLObject *xm = _getAt(i);
 				Atom dq = xm->getDescendants (m);
 				XMLListObject *dqx = AvmCore::atomToXMLList(dq);
 				if (dqx && dqx->_length())
@@ -257,6 +259,7 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 
 		Atom r = nullStringAtom;
+		fixTargetObject();
 		// step 2a
 		if (!AvmCore::isNull(this->m_targetObject))
 		{
@@ -338,7 +341,7 @@ namespace avmplus
 						// step 2 c vii 1 ii 
 						// spec says "y.[[parent]][j] is not the same object as x[i-1]" and I'm
 						// assuming that means pointer equality and not "equals" comparison
-						while ((j < (parent->_length() - 1)) && parent->_getAt (j) != _getAt(i - 1)->getNode())
+						while ((j < (parent->_length() - 1)) && parent->_getAt (j) != _getNodeAt(i - 1))
 						{
 							j++;
 						}
@@ -370,14 +373,14 @@ namespace avmplus
 				}
 			}
 
-			this->_append (y);
+			this->_appendNode (y);
 		}
 
 		// step 2d
 		if (AvmCore::atomToXMLList(V))
 		{
 			XMLListObject *src = AvmCore::atomToXMLList(V);
-			if ((src->_length() == 1) && src->_getAt(0)->getClass() & (E4XNode::kText | E4XNode::kAttribute))
+			if ((src->_length() == 1) && src->_getNodeAt(0)->getClass() & (E4XNode::kText | E4XNode::kAttribute))
 			{
 				V = core->string(V)->atom();
 			}	
@@ -397,17 +400,18 @@ namespace avmplus
 		}
 
 		// step 2e
-		XMLObject *xi = _getAt(i);
+		E4XNode *xi = _getNodeAt(i);
 		if (xi->getClass() == E4XNode::kAttribute)
 		{
-			XMLObject *parent = xi->getParent();
+			XMLObject* xio = _getAt(i);
+			XMLObject *parent = xio->getParent();
 			Multiname mxi;
-			xi->getQName (&mxi);
+			xio->getQName (&mxi);
 			parent->setMultinameProperty(&mxi, V);
 			Atom attr = parent->getMultinameProperty(&mxi);
 			XMLListObject *attrx = AvmCore::atomToXMLList(attr);
 			// x[i] = attr[0]; 
-			m_children.setAt (i, attrx->_getAt(0) ->atom());
+			m_children.setAt (i, attrx->m_children.getAt(0));
 		}
 		// step 2f
 		else if (AvmCore::isXMLList(V))
@@ -421,20 +425,19 @@ namespace avmplus
 			for (uint32 i2 = 0; i2 < src->numChildren(); i2++)
 				c->m_children.push (src->m_children.getAt(i2));
 
-			E4XNode *parent = _getAt(i)->getNode()->getParent();
+			E4XNode *parent = _getNodeAt(i)->getParent();
 			// step 2 f iii
 			if (parent)
 			{
 				uint32 q = 0;
 				while (q < parent->numChildren())
 				{
-					if (parent->_getAt(q) == _getAt(i)->getNode())
+					if (parent->_getAt(q) == _getNodeAt(i))
 					{
 						parent->_replace (core, toplevel, q, c->atom());
 						for (uint32 j = 0; j < c->_length(); j++)
 						{
-							XMLObject *xo = new (core->GetGC()) XMLObject(toplevel->xmlClass(), parent->_getAt(q + j));
-							c->m_children.setAt (j, xo->atom());
+							c->m_children.setAt (j, AvmCore::genericObjectToAtom(parent->_getAt(q + j)));
 						}
 
 						break;
@@ -455,13 +458,14 @@ namespace avmplus
 			{
 				m_children.insert (i + i2, c->m_children.getAt(i2));
 
-				XMLObject* obj = c->_getAt(i2);
-                if (notify && (parent == obj->getNode()->getParent()))
+				E4XNode* node = c->_getNodeAt(i2);
+                if (notify && (parent == node->getParent()))
                 {
+					XMLObject* obj = c->_getAt(i2);
                     if (i2 == 0)
                     {
                         // @todo; is this condition ever true?
-                        if (obj->getNode() != prior->getNode())
+                        if (node != prior->getNode())
                             target->childChanges( xmlClass()->kNodeChanged, obj->atom(), prior->getNode());
                     }
                     else
@@ -483,14 +487,14 @@ namespace avmplus
 		// print(o);
 		else if (AvmCore::isXML(V) || xi->getClass() & (E4XNode::kText | E4XNode::kCDATA | E4XNode::kComment | E4XNode::kProcessingInstruction))
 		{
-			E4XNode *parent = _getAt(i)->getNode()->getParent();
+			E4XNode *parent = _getNodeAt(i)->getParent();
 			if (parent)
 			{
 				// search our parent for a match between a child and x[i]
 				uint32 q = 0;
 				while (q < parent->numChildren())
 				{
-					if (parent->_getAt(q) == _getAt(i)->getNode())
+					if (parent->_getAt(q) == _getNodeAt(i))
 					{
 						parent->_replace (core, toplevel, q, V);
 						XMLObject *xo = new (core->GetGC()) XMLObject (toplevel->xmlClass(), parent->_getAt(q));
@@ -598,9 +602,9 @@ namespace avmplus
 
 		for (uint32 i = 0; i < numChildren(); i++)
 		{
-			XMLObject *xm = _getAt(i);
-			if (xm->getClass() == E4XNode::kElement)
-			{
+ 			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
+  			{
+ 				XMLObject *xm = _getAt(i);
 				if (xm->hasMultinameProperty(m))
 					return true;
 			}
@@ -617,63 +621,90 @@ namespace avmplus
 		return hasMultinameProperty(&m);
 	}
 
-	void XMLListObject::_append(E4XNode *v)
-	{
-		AvmCore *core = this->core();
-		XMLObject *x = new (core->GetGC()) XMLObject (toplevel()->xmlClass(), v);
-
-		if (v->getParent())
-		{
-			XMLObject *p = new (core->GetGC()) XMLObject (toplevel()->xmlClass(), v->getParent());
-			setTargetObject(p->atom());
-		}
-		else
-			setTargetObject(nullObjectAtom);
-		if (v->getClass() != E4XNode::kProcessingInstruction)
-		{
-			Multiname m;
-			if (v->getQName (core, &m))
-				this->m_targetProperty = m;
-		}
-
-		m_children.push (x->atom());
-	}
-
-	// E4X 9.2.1.6, pg 24
-	void XMLListObject::_append(Atom V)
-	{
-		// !!@ what the docs say
-		// Atom children = this->get ("*");
-		// children->put (children->length(), child)
-		// return x;
-
-		if (AvmCore::isXMLList(V))
-		{
-			XMLListObject *v = AvmCore::atomToXMLList(V);
-			setTargetObject(v->m_targetObject);
-			this->m_targetProperty = v->m_targetProperty;
-
-			if (v->_length())
-			{
-				m_children.checkCapacity(v->_length());
-				for (uint32 j = 0; j < v->_length(); j++)
-				{
-					m_children.push (v->_getAt(j)->atom());
-				}
-			}
-		}
-		else if (AvmCore::isXML(V))
-		{
-			E4XNode *v = AvmCore::atomToXML(V);
-			_append (v);
-		}
-	}
-
+ 	/*
+ 	This code is extracted from the former _append(E4XNode*) method.
+ 	It is unclear why this code is required, but I left it in to not
+ 	break any existing code. It does not make sense to execute the
+ 	code for every call to _appendNode(). That method now sets m_appended,
+ 	and code that accesses m_targetObject and/or m_targetProperty needs
+ 	to call fixTargetObject() before.
+ 	*/
+ 	void XMLListObject::fixTargetObject() const
+ 	{
+ 		if (m_appended && numChildren() > 0)
+ 		{
+ 			AvmCore *core = this->core();
+ 			E4XNode* v = _getNodeAt(numChildren()-1);
+ 
+ 			if (v->getParent())
+ 			{
+ 				XMLObject* target = AvmCore::atomToXMLObject(m_targetObject);
+ 				if (target && target->getNode() != v->getParent())
+ 				{
+ 					// create only a new target object if the old one does not match
+ 					XMLObject *p = new (core->GetGC()) XMLObject (toplevel()->xmlClass(), v->getParent());
+ 					setTargetObject(p->atom());
+ 				}
+ 			}
+ 			else
+ 				setTargetObject(nullObjectAtom);
+ 			if (v->getClass() != E4XNode::kProcessingInstruction)
+ 			{
+ 				Multiname m;
+ 				if (v->getQName (core, &m))
+ 					this->m_targetProperty = m;
+ 			}
+ 			m_appended = false;
+ 		}
+ 	}
+ 
+ 	void XMLListObject::_appendNode(E4XNode *v)
+ 	{
+ 		m_children.push(AvmCore::genericObjectToAtom(v));
+ 		m_appended = true;
+  	}
+  
+  	// E4X 9.2.1.6, pg 24
+  	void XMLListObject::_append(Atom V)
+  	{
+  		// !!@ what the docs say
+  		// Atom children = this->get ("*");
+  		// children->put (children->length(), child)
+  		// return x;
+  
+ 		XMLListObject *v = AvmCore::atomToXMLList(V);
+ 		if (v)
+  		{
+  			setTargetObject(v->m_targetObject);
+  			this->m_targetProperty = v->m_targetProperty;
+ 			m_appended = false;
+  
+  			if (v->_length())
+  			{
+ 				m_children.checkCapacity(m_children.getLength() + v->_length());
+  				for (uint32 j = 0; j < v->_length(); j++)
+  				{
+ 					m_children.push(v->m_children.getAt(j));
+  				}
+  			}
+  		}
+ 		else
+  		{
+ 			XMLObject* v = AvmCore::atomToXMLObject(V);
+ 			if (v)
+ 			{
+ 				m_appended = true;
+ 				m_children.push(V);
+ 			}
+  		}
+  	}
+  
 	// E4X 9.2.1.7, pg 25
 	XMLListObject *XMLListObject::_deepCopy () const
 	{
 		AvmCore *core = this->core();
 
+ 		fixTargetObject();
 		XMLListObject *l = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), m_targetObject, m_targetProperty);
 
 		l->m_children.checkCapacity(numChildren());
@@ -710,7 +741,9 @@ namespace avmplus
 
 			for (uint32 i = 0; i < _length(); i++)
 			{
-				if (core->equals (m_children.getAt(i), v->m_children.getAt(i)) == falseAtom)
+				Atom a1 = m_children.getAt(i);
+				Atom a2 = v->m_children.getAt(i);
+				if ((a1 != a2) && core->equals (_getAt(i)->atom(), v->_getAt(i)->atom()) == falseAtom)
 					return falseAtom;
 			}			
 
@@ -718,7 +751,7 @@ namespace avmplus
 		}
 		else if (_length() == 1)
 		{
-			return core->equals(m_children.getAt(0), V);
+			return core->equals(_getAt(0)->atom(), V);
 		}
 
 		return falseAtom;
@@ -732,6 +765,7 @@ namespace avmplus
 
 		AvmCore *core = this->core();
 
+		fixTargetObject();
 		if (AvmCore::isNull(m_targetObject) || 
 			(m_targetProperty.isAttr()) || 
 			(m_targetProperty.isAnyName()))
@@ -802,7 +836,26 @@ namespace avmplus
 		if (i >= _length())
 			return 0;
 
-		return AvmCore::atomToXMLObject(m_children.getAt(i));
+		Atom a = m_children.getAt(i);
+		XMLObject* obj = AvmCore::atomToXMLObject(a);
+		if (!obj)
+		{
+			obj = new (core()->GetGC()) XMLObject (toplevel()->xmlClass(), (E4XNode*) AvmCore::atomToGenericObject(a));
+			m_children.setAt(i, obj->atom());
+		}
+		return obj;
+	}
+
+	E4XNode *XMLListObject::_getNodeAt (uint32 i) const
+	{
+		if (i >= _length())
+			return 0;
+
+		Atom a = m_children.getAt(i);
+		XMLObject* obj = AvmCore::atomToXMLObject(a);
+		if (obj)
+			return obj->getNode();
+		return (E4XNode*) AvmCore::atomToGenericObject(a);
 	}
 
 	// E4X 12.2, page 59
@@ -925,9 +978,9 @@ namespace avmplus
 
 		for (uint32 i = 0; i < _length(); i++)
 		{
-			XMLObject *x = _getAt(i);
-			if (x->getClass() == E4XNode::kElement)
+			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 			{
+				XMLObject *x = _getAt(i);
 				XMLListObject *rxl = x->comments();
 				if (rxl && rxl->_length())
 				{
@@ -945,7 +998,7 @@ namespace avmplus
 		for (uint32 i = 0; i < _length(); i++)
 		{
 			// Spec says "comparison l[i] == value)" which is different than _equals
-			if (core->equals(m_children.getAt(i), value) == trueAtom)
+			if (core->equals(_getAt(i)->atom(), value) == trueAtom)
 				return true;
 		}
 
@@ -970,9 +1023,9 @@ namespace avmplus
 
 		for (uint32 i = 0; i < _length(); i++)
 		{
-			XMLObject *x = _getAt(i);
-			if (x->getClass() == E4XNode::kElement)
+			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 			{
+				XMLObject *x = _getAt(i);
 				XMLListObject *rxl = x->elements(name);
 				if (rxl && rxl->_length())
 				{
@@ -1004,14 +1057,12 @@ namespace avmplus
 
 		if (_length() == 1)
 		{
-			XMLObject *x = _getAt(0);
-			return x->hasComplexContent();
+			return _getNodeAt(0)->hasComplexContent();
 		}
 
 		for (uint32 i = 0; i < _length(); i++)
 		{
-			XMLObject *x = _getAt(i);
-			if (x->getClass() == E4XNode::kElement)
+			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 			{
 				return true;
 			}
@@ -1029,22 +1080,13 @@ namespace avmplus
 		}
 		else if (_length() == 1)
 		{
-			XMLObject *xm = _getAt(0);
-			if (xm)
-				return xm->hasSimpleContent();
-			else
-			{
-				AvmAssert(0);
-				return false;
-			}
+			return _getNodeAt(0)->hasSimpleContent();
 		}
 		else
 		{
 			for (uint32 i = 0; i < _length(); i++)
 			{
-				XMLObject *xm = _getAt(i);
-				AvmAssert(xm != 0);
-				if (xm && xm->getClass() == E4XNode::kElement)
+				if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 				{
 					return false;
 				}
@@ -1066,20 +1108,21 @@ namespace avmplus
 		uint32 i = 0;
 		while (i < _length())
 		{
-			XMLObject *x = _getAt(i);
-			if (x->getClass() == E4XNode::kElement)
+			E4XNode* xn = _getNodeAt(i);
+			if (xn->getClass() == E4XNode::kElement)
 			{
+				XMLObject *x = _getAt(i);
 				x->normalize();
 				i++;
 			}
-			else if ((x->getClass() & (E4XNode::kText | E4XNode::kCDATA)))
+			else if ((xn->getClass() & (E4XNode::kText | E4XNode::kCDATA)))
 			{
-				while (((i + 1) < _length()) && ((_getAt(i + 1)->getNode()->getClass() & (E4XNode::kText | E4XNode::kCDATA))))
+				while (((i + 1) < _length()) && ((_getNodeAt(i + 1)->getClass() & (E4XNode::kText | E4XNode::kCDATA))))
 				{
-					x->setValue (core->concatStrings(x->getNode()->getValue(), _getAt(i + 1)->getNode()->getValue()));
+					xn->setValue (core->concatStrings(xn->getValue(), _getNodeAt(i + 1)->getValue()));
 					deleteAtomProperty(core->intToAtom(i + 1));
 				}
-				if (x->getValue()->length() == 0)
+				if (xn->getValue()->length() == 0)
 				{
 					deleteAtomProperty(core->intToAtom(i));
 				}
@@ -1102,10 +1145,10 @@ namespace avmplus
 		if (!_length())
 			return undefinedAtom;
 
-		E4XNode *parent = _getAt(0)->getNode()->getParent();
+		E4XNode *parent = _getNodeAt(0)->getParent();
 		for (uint32 i = 1; i < _length(); i++)
 		{
-			E4XNode *p = _getAt(i)->getNode()->getParent();
+			E4XNode *p = _getNodeAt(i)->getParent();
 			if (parent != p)
 				return undefinedAtom;
 		}
@@ -1123,9 +1166,9 @@ namespace avmplus
 
 		for (uint32 i = 0; i < _length(); i++)
 		{
-			XMLObject *x = _getAt(i);
-			if (x->getClass() == E4XNode::kElement)
+			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 			{
+				XMLObject *x = _getAt(i);
 				XMLListObject *rxl = x->processingInstructions(name);
 				if (rxl && rxl->_length())
 				{
@@ -1154,9 +1197,9 @@ namespace avmplus
 
 		for (uint32 i = 0; i < _length(); i++)
 		{
-			XMLObject *x = _getAt(i);
-			if (x->getClass() == E4XNode::kElement)
+			if (_getNodeAt(i)->getClass() == E4XNode::kElement)
 			{
+				XMLObject *x = _getAt(i);
 				XMLListObject *rxl = x->text();
 				if (rxl && rxl->_length())
 				{
@@ -1182,9 +1225,10 @@ namespace avmplus
 			// s = s + toString(prop)
 			for (uint32 i = 0; i < _length(); i++)
 			{
-				XMLObject *xm = _getAt(i);
-				if (xm && (xm->getClass() != E4XNode::kComment) && (xm->getClass() != E4XNode::kProcessingInstruction))
+				E4XNode* xn = _getNodeAt(i);
+				if ((xn->getClass() != E4XNode::kComment) && (xn->getClass() != E4XNode::kProcessingInstruction))
 				{
+					XMLObject *xm = _getAt(i);
 					output = core->concatStrings(output, core->string (xm->toString()));
 				}
 			}
@@ -1249,7 +1293,7 @@ namespace avmplus
 	{
 		if (_length() == 1)
 		{
-			return _getAt(0)->childIndex ();
+			return _getNodeAt(0)->childIndex ();
 		}
 		else
 		{
@@ -1365,7 +1409,7 @@ namespace avmplus
 		// if our list has one element, return the nodeKind of the first element
 		if (_length() == 1)
 		{
-			return _getAt(0)->nodeKind();
+			return _getNodeAt(0)->nodeKind(toplevel());
 		}
 		else
 		{

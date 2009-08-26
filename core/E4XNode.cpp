@@ -177,28 +177,6 @@ namespace avmplus
 		}
 	}
 
-	uint32 ElementE4XNode::childIndex() const
-	{
-		// pull the parent
-		int index = -1;
-		E4XNode* p = this->getParent();
-		if (p) 
-		{
-			// yea old linear search...
-			int size = p->numChildren();
-			for(int i=0; i<size; i++)
-			{
-				if (p->_getAt(i) == const_cast<ElementE4XNode*>(this))
-				{
-					index = i;
-					break;
-				}
-			}
-			AvmAssert(index < size); // My parent should know about me!
-		}
-		return index;
-	}
-
 	bool E4XNode::getQName(AvmCore *core, Multiname *mn) const
 	{
 		if (!m_nameOrAux)
@@ -969,6 +947,88 @@ namespace avmplus
 		}
 
 		return 0; 
+	}
+
+	bool E4XNode::hasSimpleContent() const
+	{
+		if (getClass() & (E4XNode::kComment | E4XNode::kProcessingInstruction))
+			return false;
+
+		// for each prop in x, if x.class == element, return false
+		for (uint32 i = 0; i < _length(); i++)
+		{
+			E4XNode *child = _getAt(i);
+
+			if (child->getClass() == E4XNode::kElement)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool E4XNode::hasComplexContent() const
+	{
+		if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
+			return false;
+
+		for (uint32 i = 0; i < _length(); i++)
+		{
+			E4XNode *child = _getAt(i);
+
+			if (child->getClass() == E4XNode::kElement)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	int E4XNode::childIndex() const
+	{
+		if ((m_parent == NULL) || (getClass() == E4XNode::kAttribute))
+			return -1;
+
+		// find this child in parent's children list - return ordinal
+
+		AvmAssert(m_parent->_length()); // this child's parent does not contain itself???
+
+		for (uint32 i = 0; i < m_parent->_length(); i++)
+		{
+			E4XNode *x = m_parent->_getAt(i);
+			if (x == this)
+			{
+				return i;
+			}
+		}
+
+		// this child's parent does not contain itself???
+		AvmAssert(0);
+		return -1;
+	}
+
+	String *E4XNode::nodeKind(Toplevel* toplevel) const
+	{
+		switch (getClass())
+		{
+			case E4XNode::kAttribute:
+				return toplevel->xmlClass()->kAttribute;
+			case E4XNode::kText:
+			case E4XNode::kCDATA: 
+				return toplevel->xmlClass()->kText;
+			case E4XNode::kComment:
+				return toplevel->xmlClass()->kComment;
+			case E4XNode::kProcessingInstruction:
+				return toplevel->xmlClass()->kProcessingInstruction;
+			case E4XNode::kElement:
+				return toplevel->xmlClass()->kElement;
+			case E4XNode::kUnknown:
+			default:
+				AvmAssert(0);
+				return 0; 
+		}
 	}
 
 }
