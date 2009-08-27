@@ -1354,10 +1354,16 @@ namespace avmplus
 
         // replicate MethodFrame ctor inline
         LIns* currentMethodFrame = loadIns(LIR_ldp, offsetof(AvmCore,currentMethodFrame), coreAddr);
-        storeIns(env_param, offsetof(MethodFrame,envOrCodeContext), methodFrame); // implicitly leave IS_EXPLICIT_CODECONTEXT clear
-        storeIns(InsConstPtr(0), offsetof(MethodFrame,dxns), methodFrame);
+        // save env in MethodFrame.envOrCodeContext
+        //     explicitly leave IS_EXPLICIT_CODECONTEXT clear
+        //     explicitly leave DXNS_NOT_NULL clear, dxns is effectively null without doing the store here.
+        storeIns(env_param, offsetof(MethodFrame,envOrCodeContext), methodFrame);
         storeIns(currentMethodFrame, offsetof(MethodFrame,next), methodFrame);
-        storeIns(methodFrame, 0, InsConstPtr(&core->currentMethodFrame));
+        storeIns(methodFrame, offsetof(AvmCore,currentMethodFrame), coreAddr);
+        #ifdef _DEBUG
+        // poison MethodFrame.dxns since it's uninitialized by default
+        storeIns(InsConstPtr((void*)(uintptr_t)0xdeadbeef), offsetof(MethodFrame,dxns), methodFrame);
+        #endif
 
         #ifdef DEBUGGER
         if (core->debugger())
@@ -3278,7 +3284,7 @@ namespace avmplus
 
                 // replicate MethodFrame dtor inline -- must come after endTry call (if any)
                 LIns* nextMethodFrame = loadIns(LIR_ldp, offsetof(MethodFrame,next), methodFrame);
-                storeIns(nextMethodFrame, 0, InsConstPtr(&core->currentMethodFrame));
+                storeIns(nextMethodFrame, offsetof(AvmCore,currentMethodFrame), coreAddr);
 
                 Traits* t = ms->returnTraits();
                 LIns* retvalue;
@@ -4476,12 +4482,8 @@ namespace avmplus
 
             case OP_dxns:
             {
-                LIns* uri = InsConstPtr((String*)op1); // uri
-                LIns* ns = callIns(FUNCTIONID(newPublicNamespace),
-                    2,
-                    coreAddr,
-                    uri);
-                storeIns(ns, offsetof(MethodFrame,dxns), methodFrame);
+                LIns* uri = InsConstPtr((String*)op1); // namespace uri from string pool
+                callIns(FUNCTIONID(setDxns), 3, coreAddr, methodFrame, uri);
                 break;
             }
 
@@ -4489,13 +4491,7 @@ namespace avmplus
             {
                 int32_t index = (int32_t) op1;
                 LIns* atom = loadAtomRep(index);
-                LIns* uri = callIns(FUNCTIONID(intern), 2,
-                    coreAddr, atom);
-                LIns* ns = callIns(FUNCTIONID(newPublicNamespace),
-                    2,
-                    coreAddr,
-                    uri);
-                storeIns(ns, offsetof(MethodFrame,dxns), methodFrame);
+                callIns(FUNCTIONID(setDxnsLate), 3, coreAddr, methodFrame, atom);
                 break;
             }
 

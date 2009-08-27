@@ -65,7 +65,6 @@ namespace avmplus
 		{
 			m_frame.exit(m_core);
 		}
-		inline void set_dxns(Namespace* ns) { m_frame.dxns = ns; }
 	private:
 		AvmCore* m_core;
 		MethodFrame& m_frame;
@@ -2765,14 +2764,14 @@ namespace avmplus
 			INSTR(dxns) {
 				AvmAssert(info->setsDxns());
 				SAVE_EXPC;
-				methodFrame.set_dxns(core->newPublicNamespace(pool->getString((uint32_t)U30ARG)));
+				core->setDxns(&aux_memory->methodFrame, pool->getString((uint32_t)U30ARG));
 				NEXT;
 			}
 
 			INSTR(dxnslate) {
 				AvmAssert(info->setsDxns());
 				SAVE_EXPC;
-				methodFrame.set_dxns(core->newPublicNamespace(core->intern(*sp)));
+				core->setDxnsLate(&aux_memory->methodFrame, *sp);
 				sp--;
 				NEXT;
 			}

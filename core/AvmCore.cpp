@@ -91,7 +91,6 @@ namespace avmplus
 		: GCRoot(g) 
 		, console(NULL) 
 		, gc(g)
-		, currentMethodFrame(NULL)
 #ifdef _DEBUG
 		, codeContextThread(VMPI_currentThread())
 #endif
@@ -108,6 +107,7 @@ namespace avmplus
 		, m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
  		, m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
  		, m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))	
+		, currentMethodFrame(NULL)
 #ifdef AVMPLUS_WORD_CODE
 		, lookup_cache_timestamp(1)
 #endif
@@ -3984,23 +3984,38 @@ return the result of the comparison ToPrimitive(x) == y.
 		return this->getDefaultAPI();
 	}
 
+	void AvmCore::setDxns(MethodFrame* f, String* internedUri)
+	{
+		Namespace* ns = newPublicNamespace(internedUri);
+		f->setDxns(ns);
+	}
+
+	void AvmCore::setDxnsLate(MethodFrame* f, Atom uri)
+	{
+		String* internedUri = intern(uri);
+		Namespace* ns = newPublicNamespace(internedUri);
+		f->setDxns(ns);
+	}
+
 	Namespace* AvmCore::dxns() const
 	{
-		for (MethodFrame* f = currentMethodFrame; f != NULL; f = f->next)
-		{
+		// NULL is ok to return here -- Toplevel::getDefaultNamespace() will throw
+		return MethodFrame::findDxns(currentMethodFrame);
+	}
+
+	// static
+	Namespace* MethodFrame::findDxns(const MethodFrame* start)
+	{
+		for (const MethodFrame* f = start; f != NULL; f = f->next) {
 			// explicit dxns set here? if so, it's the winner
-			Namespace* ns = f->dxns;
-			if (ns != NULL) {
-			    return ns;
-			}
+			if (f->envOrCodeContext & DXNS_NOT_NULL)
+				return f->dxns;
+
 			// if not -- is this a frame with an env? if so, return its default ns, even if null.
 			MethodEnv* env = f->env();
 			if (env)
 				return env->scope()->getDefaultNamespace();
-
-			// if not, keep going...
 		}
-		// NULL is ok to return here -- Toplevel::getDefaultNamespace() will throw
 		return NULL;
 	}
 
