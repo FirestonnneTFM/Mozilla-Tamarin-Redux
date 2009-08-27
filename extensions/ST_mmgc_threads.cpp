@@ -158,7 +158,7 @@ public:
 void ST_mmgc_threads::test0() {
 	   startSlave();
 	   MMGC_GCENTER(gc);
-   	   RCObject *obj = new (gc) RCObjectNotifier(&isDead);
+   	   /*RCObject *obj =*/ new (gc) RCObjectNotifier(&isDead);
 	   {
           MMGC_GC_ROOT_THREAD(gc);
 		  kick();

@@ -49,3 +49,31 @@
 
 // Does right shift of signed quantities work?
 %%verify (-1 >> 1) == -1
+
+// verify that the "latin1" literal string calls work properly for hi-bit latin1 chars
+%%test equalsLatin1
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool equals = s->equalsLatin1("ev\xADident");
+%%verify equals == true
+
+%%test containsLatin1
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool found = s->containsLatin1("\xAD");
+%%verify found == true
+
+%%test indexOfLatin1
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	int index = s->indexOfLatin1("\xAD");
+%%verify index == 2
+
+%%test matchesLatin1
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool matches1 = s->matchesLatin1("\xADi", 2, 2);
+%%verify matches1 == true
+
+%%test matchesLatin1_caseless
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool matches2 = s->matchesLatin1_caseless("\xADIDENT", 2, 2);
+%%verify matches2 == true
+
+

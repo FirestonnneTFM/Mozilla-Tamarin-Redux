@@ -160,7 +160,7 @@ verifyPass((int)fa->GetNumChunks()==1, "(int)fa->GetNumChunks()==1", __FILE__, _
 
 }
 void ST_mmgc_basics::test6() {
-    fm=MMgc::FixedMalloc::GetInstance();
+    fm=MMgc::FixedMalloc::GetFixedMalloc();
     int start=(int)fm->GetBytesInUse();
     int starttotal=(int)fm->GetTotalSize();
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
