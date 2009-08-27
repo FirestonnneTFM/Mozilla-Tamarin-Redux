@@ -821,7 +821,7 @@ namespace avmplus
 				int32_t j;
 				for (j = 0; j < sublen; j++)
 				{
-					if (selfBuf.p8[j] != p[j])
+					if (selfBuf.p8[j] != (utf8_t) p[j])
 						break;
 				}
 

@@ -49,15 +49,25 @@ private:
 static const char* ST_names[];
 void test0();
 void test1();
+void test2();
+void test3();
+void test4();
+void test5();
+void test6();
 };
 ST_avmplus_basics::ST_avmplus_basics(AvmCore* core)
     : Selftest(core, "avmplus", "basics", ST_avmplus_basics::ST_names)
 {}
-const char* ST_avmplus_basics::ST_names[] = {"unsigned_int","signed_int", NULL };
+const char* ST_avmplus_basics::ST_names[] = {"unsigned_int","signed_int","equalsLatin1","containsLatin1","indexOfLatin1","matchesLatin1","matchesLatin1_caseless", NULL };
 void ST_avmplus_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
 case 1: test1(); return;
+case 2: test2(); return;
+case 3: test3(); return;
+case 4: test4(); return;
+case 5: test5(); return;
+case 6: test6(); return;
 }
 }
 void ST_avmplus_basics::test0() {
@@ -70,6 +80,39 @@ void ST_avmplus_basics::test1() {
 
 // Does right shift of signed quantities work?
 verifyPass((-1 >> 1) == -1, "(-1 >> 1) == -1", __FILE__, __LINE__);
+
+// verify that the "latin1" literal string calls work properly for hi-bit latin1 chars
+}
+void ST_avmplus_basics::test2() {
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool equals = s->equalsLatin1("ev\xADident");
+verifyPass(equals == true, "equals == true", __FILE__, __LINE__);
+
+}
+void ST_avmplus_basics::test3() {
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool found = s->containsLatin1("\xAD");
+verifyPass(found == true, "found == true", __FILE__, __LINE__);
+
+}
+void ST_avmplus_basics::test4() {
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	int index = s->indexOfLatin1("\xAD");
+verifyPass(index == 2, "index == 2", __FILE__, __LINE__);
+
+}
+void ST_avmplus_basics::test5() {
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool matches1 = s->matchesLatin1("\xADi", 2, 2);
+verifyPass(matches1 == true, "matches1 == true", __FILE__, __LINE__);
+
+}
+void ST_avmplus_basics::test6() {
+    Stringp s = core->newConstantStringLatin1("ev\xADident");
+	bool matches2 = s->matchesLatin1_caseless("\xADIDENT", 2, 2);
+verifyPass(matches2 == true, "matches2 == true", __FILE__, __LINE__);
+
+
 
 }
 void create_avmplus_basics(AvmCore* core) { new ST_avmplus_basics(core); }

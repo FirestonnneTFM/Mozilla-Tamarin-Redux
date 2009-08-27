@@ -370,6 +370,8 @@
 		D94236BD0F8ACBD400F97706 /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */; };
 		D9AA8809103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
+		D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
+		D9FDA5B91045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -832,6 +834,8 @@
 		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
 		D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
+		D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_threads.cpp; path = ../../../extensions/ST_mmgc_threads.cpp; sourceTree = SOURCE_ROOT; };
+		D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_threads.st; path = ../../../extensions/ST_mmgc_threads.st; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -931,6 +935,7 @@
 				0772CCF20F3C3084008DDBB6 /* ST_avmplus_basics.st */,
 				0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */,
 				0772CCF40F3C3084008DDBB6 /* ST_mmgc_basics.st */,
+				D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */,
 			);
 			name = sources;
 			sourceTree = "<group>";
@@ -1293,6 +1298,7 @@
 				079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */,
 				079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */,
 				079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */,
+				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
 			);
 			name = selftest;
 			sourceTree = "<group>";
@@ -1710,6 +1716,7 @@
 				07689AA1101DC28000BC72AA /* ZCT.cpp in Sources */,
 				1992FDA4102869D10032FBBF /* Containers.cpp in Sources */,
 				D9AA8809103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */,
+				D9FDA5B91045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1889,6 +1896,7 @@
 				07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */,
 				1992FDA3102869D10032FBBF /* Containers.cpp in Sources */,
 				D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */,
+				D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
