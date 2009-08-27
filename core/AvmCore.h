@@ -187,7 +187,6 @@ const int kBufferPadding = 16;
 		MMgc::GC * const gc;
 		
 		private:
-			MethodFrame*		currentMethodFrame;
 	#ifdef _DEBUG
 			// Only the thread used to create the AvmCore is allowed to modify currentMethodFrame (and thus, use EnterCodeContext).
 			// We don't enforce this in Release builds, but check for it and assert in Debug builds.
@@ -314,6 +313,10 @@ const int kBufferPadding = 16;
 		 */
 		uintptr minstack;
 
+		private:
+		MethodFrame*		currentMethodFrame;
+
+		public:
 		/**
 		 * This method will be invoked when the first exception
 		 * frame is set up.  This will be a good point to set
@@ -1260,6 +1263,21 @@ const int kBufferPadding = 16;
 		CodeContext* codeContext() const;
 		Namespace* dxns() const;
 
+		/**
+		 * implements OP_dxns.  internedUri is expected to be from a constant
+		 * pool and therefore already interned.  Creates a namespace and
+		 * saves it as the given method frame's default xml namespace.
+		 */
+		void setDxns(MethodFrame*, String* internedUri);
+
+		/**
+		 * implements OP_dxnslate.  uri is any value, which we must convert
+		 * to an interned-string, then create an namespace from it,
+		 * then save the value in the current method frame as the current
+		 * default xml namespace.
+		 */
+		void setDxnsLate(MethodFrame*, Atom uri);
+
 		/** env of the highest catch handler on the call stack, or NULL */
 		ExceptionFrame *exceptionFrame;
 		
@@ -1644,56 +1662,76 @@ const int kBufferPadding = 16;
 	*/
 	class MethodFrame
 	{
-		friend class AvmCore;
-		friend class CodegenLIR;
-		friend class EnterCodeContext;
-		friend class EnterMethodEnv;
-
+	public:
 		// deliberately no ctor or dtor here.
 		
 		// NOTE, the code in enter/exit is replicated in CodegenLIR.cpp;
 		// if you make changes here, you may need to make changes there as well.
 		inline void enter(AvmCore* core, MethodEnv* e)
 		{
-#ifdef _DEBUG
 			AvmAssert(core->codeContextThread == VMPI_currentThread());
-#endif
-			this->envOrCodeContext = uintptr_t(e); // implicitly leave IS_EXPLICIT_CODECONTEXT clear
-			this->dxns = NULL;
+			AvmAssert(!(uintptr_t(e) & FLAGS_MASK));
+			// implicitly leave IS_EXPLICIT_CODECONTEXT and DXNS_NOT_NULL clear
+			this->envOrCodeContext = uintptr_t(e);
 			this->next = core->currentMethodFrame;
 			core->currentMethodFrame = this;
+			#ifdef _DEBUG
+			this->dxns = (Namespace*)(uintptr_t)0xdeadbeef;
+			#endif
 		}
 
 		inline void enter(AvmCore* core, CodeContext* cc)
 		{
-#ifdef _DEBUG
 			AvmAssert(core->codeContextThread == VMPI_currentThread());
-#endif
+			AvmAssert(!(uintptr_t(cc) & FLAGS_MASK));
+			// set IS_EXPLICIT_CODECONTEXT and leave DXNS_NOT_NULL clear
 			this->envOrCodeContext = uintptr_t(cc) | IS_EXPLICIT_CODECONTEXT;
-			this->dxns = NULL;
 			this->next = core->currentMethodFrame;
 			core->currentMethodFrame = this;
+			#ifdef _DEBUG
+			this->dxns = (Namespace*)(uintptr_t)0xdeadbeef;
+			#endif
 		}
 
 		inline void exit(AvmCore* core)
 		{
-#ifdef _DEBUG
 			AvmAssert(core->codeContextThread == VMPI_currentThread());
-#endif
 			AvmAssert(core->currentMethodFrame == this);
 			core->currentMethodFrame = this->next;
 		}
 
-		inline CodeContext* cc() const { return (envOrCodeContext & IS_EXPLICIT_CODECONTEXT) ? (CodeContext*)(envOrCodeContext & ~IS_EXPLICIT_CODECONTEXT) : NULL; }
-		inline MethodEnv* env() const { return (envOrCodeContext & IS_EXPLICIT_CODECONTEXT) ? NULL : (MethodEnv*)(envOrCodeContext); }
+		inline CodeContext* cc() const {
+			return (envOrCodeContext & IS_EXPLICIT_CODECONTEXT)
+				? (CodeContext*)(envOrCodeContext & ~FLAGS_MASK)
+				: NULL;
+		}
+		inline MethodEnv* env() const {
+			return (envOrCodeContext & IS_EXPLICIT_CODECONTEXT)
+				? NULL
+				: (MethodEnv*)(envOrCodeContext & ~FLAGS_MASK);
+		}
+
+		// Search for a frame that has a default namespace, starting on the given frame.
+		static Namespace* findDxns(const MethodFrame* start);
+
+		void setDxns(Namespace* ns) {
+			AvmAssert(ns != NULL);
+			envOrCodeContext |= DXNS_NOT_NULL;
+			dxns = ns;
+		}
+
+	public:
+		MethodFrame*	next;
 
 	private:
-
-	private:
-		enum { IS_EXPLICIT_CODECONTEXT = 0x1 };
+		friend class CodegenLIR;
+		enum {
+			IS_EXPLICIT_CODECONTEXT = 0x1,
+			DXNS_NOT_NULL = 0x2,
+			FLAGS_MASK = 0x3
+		};
 		uintptr_t		envOrCodeContext;
 		Namespace*		dxns; // NOTE: this struct is always stack-allocated (or via VMPI_alloca, which is just as good), so no DRC needed
-		MethodFrame*	next;
 	};
 
 	class ApiUtils {
