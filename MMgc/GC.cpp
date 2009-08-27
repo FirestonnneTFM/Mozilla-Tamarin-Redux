@@ -1905,20 +1905,21 @@ bail:
 		VMPI_log(buf);
 
 		// log gross stats any time anything interesting happens
-		static bool ingclog=false;
-		bool doit;
+		static bool g_in_gclog = false;
+		
+		bool was_in_gclog;
 		{
 			MMGC_LOCK(heap->gclog_spinlock);
-			doit = !ingclog;
-			if (doit)
-				ingclog = true;
+			was_in_gclog = g_in_gclog;
+			g_in_gclog = true;
 		}
-		if(!doit) {
+
+		if(!was_in_gclog && !destroying)
 			heap->DumpMemoryInfo();
-			{
-				MMGC_LOCK(heap->gclog_spinlock);
-				ingclog = false;
-			}
+
+		{
+			MMGC_LOCK(heap->gclog_spinlock);
+			g_in_gclog = was_in_gclog;
 		}
 	}
 
