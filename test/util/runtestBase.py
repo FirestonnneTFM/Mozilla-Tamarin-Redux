@@ -369,7 +369,7 @@ class RuntestBase:
             # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
             cputype = ''
             (f,err,exitcode) = self.run_pipe('file "%s"' % (self.avm))
-            f = ' '.join(f)
+            f = ' '.join(f).replace(self.avm, '');
             self.verbose_print('determineConfig: %s' % f)
             
             if re.search('\(console\) 32-bit', f):

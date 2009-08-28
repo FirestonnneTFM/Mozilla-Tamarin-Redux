@@ -53,6 +53,13 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
+
+# We have seen this test fail the GetSizeSamples test
+cd acceptance;${py} ./runtests.py --nohtml --notimecheck --avm=${avmr} as3/sampling/ProcessSampling.as
+cd acceptance;${py} ./runtests.py --nohtml --notimecheck --avm=${avmrd} as3/sampling/ProcessSampling.as
+cd acceptance;${py} ./runtests.py --nohtml --notimecheck --avm=${avmd} as3/sampling/ProcessSampling.as
+cd acceptance;${py} ./runtests.py --nohtml --notimecheck --avm=${avmdd} as3/sampling/ProcessSampling.as
+
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 cd acceptance;${py} ./runtests.py --nohtml --notimecheck --avm=${avmr} ecma3/GlobalObject/e15_1_2_2_2.as ecma3/TypeConversion/e9_3_1_3.as
 
