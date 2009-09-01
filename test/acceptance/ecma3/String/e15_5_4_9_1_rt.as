@@ -140,7 +140,7 @@ function getTestCases() {
     array[item++] = new TestCase(   SECTION,
                                     "var obj = function() {}; obj.substring = String.prototype.substring; obj.toString = Object.prototype.toString; obj.substring(8)",
                                     true,
-                                    (obj = function() {}, obj.substring = String.prototype.substring, obj.toString = Object.prototype.toString, obj.substring(8))=="Function-2]" ||
+                                    (obj = function() {}, obj.substring = String.prototype.substring, obj.toString = Object.prototype.toString, obj.substring(8)).indexOf("Function-") == 0  ||
                                     (obj = function() {}, obj.substring = String.prototype.substring, obj.toString = Object.prototype.toString, obj.substring(8))=="null]"
                                      );
     // this is a number object
