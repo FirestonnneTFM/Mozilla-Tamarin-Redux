@@ -594,7 +594,7 @@ private:
 		}
 
 	private:
-				Stringp const			m_str;
+				Stringp const volatile	m_str;
 				String::Pointers const	m_buffer;
 				int const				m_latin1; // actually a bool, int-sized for speed
 

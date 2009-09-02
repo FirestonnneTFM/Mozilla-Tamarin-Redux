@@ -274,7 +274,7 @@ namespace avmplus
 	class StTraitsBindingsIterator : public StMNHTIterator
 	{
 	private:
-		TraitsBindingsp const _tb;	// kept just to ensure it doesn't get collected
+		TraitsBindingsp const volatile _tb;	// kept just to ensure it doesn't get collected -- must be volatile!
 	public:
 		inline StTraitsBindingsIterator(TraitsBindingsp tb) : StMNHTIterator(tb->m_bindings), _tb(tb)
 		{
