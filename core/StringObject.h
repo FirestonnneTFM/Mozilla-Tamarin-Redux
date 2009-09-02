@@ -81,8 +81,6 @@ namespace avmplus
 	{
 	public:
 
-		typedef wchar CharAtType;
-
 		/// String type constants. Note that isDependent() and isStatic() rely on using these values as bitflags.
 		enum Type
 		{
@@ -153,15 +151,6 @@ namespace avmplus
 		@return						the String instance, or NULL on kAuto, or string too wide
 		*/
 				Stringp	FASTCALL	getFixedWidthString(Width w) const;
-
-		/**
-		Check this string for being a dependent string; if so, create and return
-		a copy. The AvmCore uses this method to ensure that interned strings are
-		never dependent; if dependent strings could be interned, this would keep
-		the master string from being released, which, with a large master string,
-		may be a huge waste of memory.
-		*/
-				Stringp	FASTCALL	getIndependentString() const;
 		/**
 		Returns the Atom equivalent of this String.  This is
 		done by or'ing the proper type bits into the pointer.
@@ -173,9 +162,21 @@ namespace avmplus
 		virtual Atom				toAtom() const { return atom(); }
 		/**
 		If this string is a static or dependent string, make it dynamic so the static 
-		data can be released.
+		data can be released. If dataStart and dataSize is given, the string is only
+		made dynamic if the static string pointer falls within the given data buffer.
+		This prevents unnecessary dynamization of static strings if the string data
+		belongs to a different data buffer.
 		*/
-				void				makeDynamic();
+				void				makeDynamic(const char* dataStart = NULL, uint32_t dataSize = 0);
+		/**
+		Check the master of this string if this is a dependent string. If there is
+		any indication that using this string would hold a lock on a big master
+		string, create a dynamic string and release the master string. The AvmCore 
+		uses this method to ensure that interned strings do not keep a lock on a huge
+		master string if the master string is dynamic, trying to limit the waste of
+		memory.
+		*/
+				void				fixDependentString();
 		/**
 		Produce a has code of this string.
 		*/
@@ -215,7 +216,7 @@ namespace avmplus
 		@param	index				the index
 		@return						the character at the index
 		*/
-				CharAtType FASTCALL	charAt(int32_t index) const;
+				wchar FASTCALL		charAt(int32_t index) const;
 
 		/**
 		Compare the String with toCompare. If the length is > 0, compare
@@ -331,16 +332,16 @@ namespace avmplus
 		/*
 		Append a 8-bit-wide string. For Unicode, strings should be Latin1, not UTF8.
 		*/
-		inline	Stringp				appendLatin1(const char* p) { return _append(NULL, p, Length(p), k8); }
-		inline	Stringp				appendLatin1(const char* p, int32_t len) { return _append(NULL, p, len, k8); }
+		inline	Stringp				appendLatin1(const char* p) { return _append(NULL, Pointers((const uint8_t*)p), Length(p), k8); }
+		inline	Stringp				appendLatin1(const char* p, int32_t len) { return _append(NULL, Pointers((const uint8_t*)p), len, k8); }
 		/*
 		Append a 16-bit-wide string. For Unicode, strings should be UTF16, but this is not enforced
 		by this method: indeed, several callers expect to be able to create "illegal" UTF16 sequences
 		via this call, for backwards compatibility. Thus, this is a dangerous call and should be used with
 		caution (and is also the reason it is not named "appendUTF16").
 		*/
-		inline	Stringp				append16(const wchar* p) { return _append(NULL, p, Length(p), k16); }
-		inline	Stringp				append16(const wchar* p, int32_t len) { return _append(NULL, p, len, k16); }
+		inline	Stringp				append16(const wchar* p) { return _append(NULL, Pointers(p), Length(p), k16); }
+		inline	Stringp				append16(const wchar* p, int32_t len) { return _append(NULL, Pointers(p), len, k16); }
 		/**
 		Implement String.substr(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
@@ -459,27 +460,48 @@ namespace avmplus
 		friend class StUTF8String;
 		friend class StUTF16String;
 
-private:
+	private:
 		/**
-		This is a union of three different pointers.
+			This is a union of three different pointers, or an offset value -- you
+			must know what type of String this is (static, dynamic, dependent) to know
+			how to interpret the field. 
+			
+			Note that the offset value is always in bytes, regardless of string width!
+			
+			*** WARNING ***
+			This struct is only used inside of String itself, and should not ever be allocated on the stack.
+			If you want to obtain a pointer to the start of the string's character buffer, the simplest
+			and safest way to do this is to use the Pointers struct (see below).
 		*/
-		struct Pointers
+		struct Buffer
 		{
 			union
 			{
 				void*			pv;
 				uint8_t*		p8;
 				wchar*			p16;
+				uintptr_t		offset_bytes;
 			};
+			inline explicit Buffer(const void* _pv) { pv = const_cast<void*>(_pv); }
+			inline explicit Buffer(uintptr_t _offset_bytes) { offset_bytes = _offset_bytes; }
+		};
+
+		/**
+			Extra storage, for the Master pointer (for dependent strings) 
+			or index value (lazily calculated for other strings)
+		*/
+		struct Extra
+		{
+			union
+			{
+				Stringp			master;	// used for dependent strings
+		mutable uint32_t		index;	// if not dependent, this is the index value for getIntAtom/parseIndex
+			};
+			inline explicit Extra(Stringp _master) { master = _master; }
 		};
 		
-		union
-		{
-			Stringp				m_master;	// used for dependent strings
-			mutable uint32_t	m_index;	// if not dependent, this is the index value for getIntAtom/parseIndex
-		};
-				Pointers		m_buffer;	// buffer pointer (dynamic, static, or into master)
-
+				Buffer			m_buffer;	// buffer pointer (dynamic, static, or offset into master)
+				Extra			m_extra;
 				int32_t			m_length;					// length in characters
 		mutable	uint32_t		m_bitsAndFlags;				// various bits and flags, see below (must be unsigned)
 				enum {
@@ -500,6 +522,25 @@ private:
 					TSTR_CHARSLEFT_MASK		= 0xFFFFFE00,	// characters left in buffer field (for inplace concat)
 					TSTR_CHARSLEFT_SHIFT	= 9
 				};
+
+		/**
+			This is a TEMPORARY struct, always stack-allocated, that is used to extract the current starting
+			pointer for a string. It may look superficially similar to the "Buffer" struct, but is different,
+			in that the pointer is always correct (unlike Buffer, which might actually be an offset into a master).
+		*/
+		struct Pointers
+		{
+			union
+			{
+				void*			pv;
+				uint8_t*		p8;
+				wchar*			p16;
+			};
+			explicit Pointers(const String* const self);
+			inline explicit Pointers(const uint8_t* _p8) { p8 = const_cast<uint8_t*>(_p8); }
+			inline explicit Pointers(const uint16_t* _p16) { p16 = const_cast<uint16_t*>(_p16); }
+		};
+		
 		inline	void			setType(char index)			{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_TYPE_MASK) |(index << TSTR_TYPE_SHIFT); }
 		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
 		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
@@ -511,10 +552,14 @@ private:
 		// Create a string with a static buffer.
 		static	Stringp				createStatic(MMgc::GC* gc, const void* data, int32_t len, Width w);
 
+		// Convert the string data to a dynamic buffer.
+				void				convertToDynamic();
+
 		/**
-		Low-level append worker. Either inStr is non-NULL, or buffer/length is.
+		Low-level append worker. 
 		*/
-				Stringp				_append(Stringp inStr, const void* buffer, int32_t numChars, Width width);
+				Stringp				_append(Stringp volatile * rightStrPtr, const Pointers& rightStr, int32_t numChars, Width width);
+
 		/**
 		Make operator new private - people should use the create functions
 		*/
@@ -586,17 +631,17 @@ private:
 		/// Return the embedded string.
 		inline	String*				operator->() const { return m_str; }
 		/// Quick index operator.
-		inline	String::CharAtType	operator[](int index) const 
-		{ 
-			AvmAssert(index >= 0 && index < m_str->length());
-			return m_latin1 ?
-					(String::CharAtType) m_buffer.p8[index] :
-					(String::CharAtType) m_buffer.p16[index];
-		}
+ 		inline	wchar	operator[](int index) const 
+  		{ 
+  			AvmAssert(index >= 0 && index < m_str->length());
+  			return m_latin1 ?
+ 					m_ptrs.p8[index] :
+ 					m_ptrs.p16[index];
+  		}
 
 	private:
 				Stringp const volatile	m_str;
-				String::Pointers const	m_buffer;
+ 				String::Pointers const	m_ptrs;
 				int const				m_latin1; // actually a bool, int-sized for speed
 
 		// do not create on the heap

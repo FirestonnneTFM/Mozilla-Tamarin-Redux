@@ -104,6 +104,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERIFYALL
 		, verifyQueue(g, 0)
 #endif
+		, livingPools(g, 0)
 		, m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
  		, m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
  		, m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))	
@@ -2720,6 +2721,13 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	void AvmCore::presweep()
 	{
+		for (uint32_t i=0, n=livingPools.size(); i < n; i++)
+		{
+			PoolObject* pool = livingPools[i];
+			if (pool && !GetGC()->GetMark(pool))
+				pool->dynamicizeStrings();
+		}
+	
         // clear out the string table
 		{
 			for (int i=0, n=numStrings; i < n; i++)
@@ -3009,9 +3017,8 @@ return the result of the comparison ToPrimitive(x) == y.
 				AvmAssert(deletedCount >= 0);
 			}
 			stringCount++;
-			// do not intern kDependent string - may block large master string
-			// from being freed
-			o = o->getIndependentString();
+			// Keep dependent strings from holding a lock on a huge master
+			o->fixDependentString();
 			o->setInterned();
 			strings[i] = o;
 			return o;
