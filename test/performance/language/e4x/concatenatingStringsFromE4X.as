@@ -49,7 +49,7 @@ if (CONFIG::desktop) {
 }
 
 if (referenceResult != result.toXMLString()) {
-    trace("ERROR! XML does not match reference");
+    print("ERROR! XML does not match reference");
 } else {
     print('metric time '+totaltime);
 }
