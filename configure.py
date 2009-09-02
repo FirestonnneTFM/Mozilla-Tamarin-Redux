@@ -270,6 +270,11 @@ else:
 if o.getBoolArg('perfm'):
     APP_CPPFLAGS += "-DPERFM "
 
+if o.help:
+    sys.stdout.write(o.getHelp())
+    sys.exit(1)
+
+
 # We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
                         for (var, val) in MMGC_DEFINES.iteritems())
