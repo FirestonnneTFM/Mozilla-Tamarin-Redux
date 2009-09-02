@@ -77,13 +77,8 @@ namespace avmplus
 		, api(api)
 	{
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
+		core->livingPools.add(this);
 	}
-
-// currently buggy: MMgc doesn't reliably support allocations from a finalizer 
-// (which is required for this to work). Disabled for now; we either need to make
-// MMgc support this reliably or redesign this feature to dynamic-ize the strings
-// elsewhere. (srj)
-#define USE_STATIC_ABC_STRINGS 0
 
 	PoolObject::~PoolObject()
 	{
@@ -95,7 +90,22 @@ namespace avmplus
 		mmfx_delete( codePages );
 		#endif
 
-#if USE_STATIC_ABC_STRINGS
+		if (!MMgc::GC::GetGC(this)->Destroying())
+		{
+			for (uint32_t i=0, n=core->livingPools.size(); i < n; i++)
+			{
+				PoolObject* pool = core->livingPools[i];
+				if (pool && pool == this)
+				{
+					core->livingPools.removeAt(i);
+					break;
+				}
+			}
+		}
+	}
+	
+	void PoolObject::dynamicizeStrings()
+	{
 		if (!MMgc::GC::GetGC(this)->Destroying())
 		{
 			// make all strings created so far dynamic,
@@ -105,27 +115,30 @@ namespace avmplus
 			for (uint32_t i = 1; i < constantStringCount; i++)
 			{
 				++dataP;
-				if (dataP->abcPtr < _abcStringStart || dataP->abcPtr >= _abcStringEnd)
+				
+				if (dataP->abcPtr >= _abcStringStart && dataP->abcPtr < _abcStringEnd)
 				{
-					// in theory, only index 0 should be the empty string... but in practice,
-					// any index could be empty, and makeDynamic doesn't work on zero-length strings.
-					// since that call doesn't have easy access to an AvmCore, do the check here.
-					if (!dataP->str->isEmpty())
-					{
-						dataP->str->makeDynamic();
-					}
-					else
-					{
-						// all zero-length strings should be kEmptyString.
-						AvmAssert(dataP->str == core->kEmptyString);
-					}
-						
+					// it's still a raw ABC ptr, not a String
+					continue;
 				}
+
+				Stringp s = dataP->str;
+
+				// in theory, only index 0 should be the empty string... but in practice,
+				// any index could be empty, and makeDynamic doesn't work on zero-length strings.
+				// since that call doesn't have easy access to an AvmCore, do the check here.
+				if (s->isEmpty())
+				{
+					// all zero-length strings should be kEmptyString.
+					AvmAssert(s == core->kEmptyString);
+					continue;
+				}
+				
+				s->makeDynamic((const char*)_abcStringStart, uint32_t(_abcStringEnd - _abcStringStart));
 			}
 		}
-#endif
 	}
-	
+
 	Traits* PoolObject::getBuiltinTraits(Stringp name) const
 	{
 		AvmAssert(BIND_NONE == 0);
@@ -208,11 +221,7 @@ namespace avmplus
 		{
 			// String not created yet; grab the pointer to the (verified) ABC data
 			uint32_t len = AvmCore::readU30(dataP->abcPtr);
-#if USE_STATIC_ABC_STRINGS
 			Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, true);
-#else
-			Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, false);
-#endif
 			// must be made sticky for now...
 			s->Stick();
 			dataP->str = s;

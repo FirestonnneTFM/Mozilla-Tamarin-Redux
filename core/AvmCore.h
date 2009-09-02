@@ -212,13 +212,22 @@ const int kBufferPadding = 16;
 			int					langID;
 			bool				passAllExceptionsToDebugger;
 		#endif
+		
 #ifdef AVMPLUS_VERIFYALL
+	public:
         List<MethodInfo*, LIST_GCObjects> verifyQueue;
 		void enqFunction(MethodInfo* f);
 		void enqTraits(Traits* t);
 		void verifyEarly(Toplevel* toplevel);
 #endif
 	
+	public:
+		// NOTE: this is deliberately using LIST_NonGCObjects, not LIST_GCObjects,
+		// because we DO NOT want to have this list cause the pools to stay in memory...
+		// the Pool ctor/dtor add/remove from this list. (Equivalently, we could use
+		// a list of GCWeakRefs, but this is simpler and just as effective.)
+        List<PoolObject*, LIST_NonGCObjects> livingPools;
+
 	public:
 		void branchCheck(MethodEnv *env, bool interruptable, int go)
 		{

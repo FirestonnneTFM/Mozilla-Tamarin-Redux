@@ -239,6 +239,8 @@ namespace avmplus
 		Stringp getMethodInfoName(uint32_t i);
 #endif
 		
+		void dynamicizeStrings();
+		
 	private:
 		union ConstantStringData
 		{
