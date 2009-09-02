@@ -517,17 +517,19 @@ namespace avmplus
 
 		if (MathUtils::isNaN(value)) 
 			return 0;
-
+	
+	{
 		int32_t const inf = MathUtils::isInfinite(value);
 		if (inf > 0)
 			return clampMagnitude;
 		else if (inf < 0)
 			return -clampMagnitude;
+	}
 		
 		if (value < 0) 
-			intValue = -MathUtils::floor(-value);
+			intValue = -int32_t(MathUtils::floor(-value));
 		else 
-			intValue = MathUtils::floor(value);
+			intValue = int32_t(MathUtils::floor(value));
 
 	clamp_check:
 		if (intValue > clampMagnitude)
