@@ -229,11 +229,13 @@ ecma3/Statements/eforin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_
 as3/Statements/for-each-in/eforeachin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
 
 ####################
-# Sampling assertion
+# Sampling 
+####################
 # Assertion failed: "(((start_event == (PolicyEvent)(ev - 1))))" (".\\GC.cpp":461)
 # Disabling test until this can be properly investigated
-####################
 as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
+# ProcessSampling:GetSizeSamples intermittently fails
+as3/sampling/ProcessSampling ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
 
 ####################
 # ATS Skipped tests - These tests will not be exported when generating ATS swfs
