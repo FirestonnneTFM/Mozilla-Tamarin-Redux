@@ -610,7 +610,7 @@ function main() {
 		s += configureFeature(feature);
 	s += "    return args\n";
 
-	print('writing ../build/avmfeatures.h');
+	print('writing ../build/avmfeatures.py');
 	File.write("../build/avmfeatures.py", s);
 }
 
@@ -786,11 +786,22 @@ function configureFeature(feature) {
     }
 
     if (feature.name.indexOf("AVMFEATURE_") == 0) {
-	    var f = "-D" + feature.name + "=1 ";
-		f += complement(feature.name, FEATURES["at-most-one"]);
-		f += complement(feature.name, FEATURES["exactly-one"]);
-        return ("    if o.getBoolArg(\"" + feature.name.substring(11).toLowerCase().replace("_","-") + "\"):\n" +
-		        "        args += \"" + f + "\"\n");
+	    var enable = "-D" + feature.name + "=1 ";
+	    var disable = "-D" + feature.name + "=0 ";
+		var dependent = complement(feature.name, FEATURES["at-most-one"]) +
+				        complement(feature.name, FEATURES["exactly-one"]);
+		var feature = feature.name.substring(11).toLowerCase().replace(/_/g,"-");
+
+		// features without dependencies can be explicitly enabled or disabled
+		if (dependent == "") {
+			return ("    arg = o.getBoolArg(\"" + feature + "\")\n" +
+					"    if (arg == True):\n" +
+					"        args += \"" + enable + "\"\n" +
+					"    if (arg == False):\n" +
+					"        args += \"" + disable + "\"\n");
+		}
+		return ("    if o.getBoolArg(\"" + feature + "\"):\n" +
+				"        args += \"" + enable + dependent + "\"\n");
     }
     return "";
 }
