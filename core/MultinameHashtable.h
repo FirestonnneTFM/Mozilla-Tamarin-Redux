@@ -208,11 +208,13 @@ namespace avmplus
 	class StMNHTIterator
 	{
 	private:
+		MultinameHashtable* const volatile m_mnht; // kept just to ensure it doesn't get collected -- must be volatile!
 		const MultinameHashtable::Quad* m_cur;
 		const MultinameHashtable::Quad* const m_end; // one past the end
 	
 	public:
 		inline StMNHTIterator(MultinameHashtable* mnht) : 
+			m_mnht(mnht),
 			m_cur(mnht->m_quads - 1), 
 			m_end(mnht->m_quads + mnht->numQuads)
 		{
