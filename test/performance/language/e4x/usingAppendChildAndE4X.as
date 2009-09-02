@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var nodeCount:int = 1000;
+var referenceResult:String = simpleStringConcatenation(nodeCount).toXMLString();
 
 if (CONFIG::desktop) {
     var startTime:Number = new Date();
@@ -46,7 +47,11 @@ if (CONFIG::desktop) {
     var result:XML = usingAppendChildAndE4X(nodeCount);
     var totaltime:Number = getTimer() - startTime;
 }
-print('metric time '+totaltime);
+if (referenceResult != result.toXMLString()) {
+    print("ERROR! XML does not match reference");
+} else {
+    print('metric time '+totaltime);
+}
 
 
 function usingAppendChildAndE4X(nodeCount:int):XML
@@ -58,4 +63,17 @@ function usingAppendChildAndE4X(nodeCount:int):XML
     }
 
     return xml;
+}
+
+function simpleStringConcatenation(nodeCount:int):XML
+{
+    var str:String = "<root>";
+
+    for (var i:int = 0; i < nodeCount; i++) {
+        str += "<node id=\"" + i + "\" />";
+    }
+
+    str += "</root>";
+
+    return XML(str);
 }
