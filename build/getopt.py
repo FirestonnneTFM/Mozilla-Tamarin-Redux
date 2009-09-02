@@ -44,6 +44,8 @@ _ignore = re.compile(r"^--(srcdir|cache-file)=")
 _arg = re.compile(r"^--(enable|disable|with|without)-([\w-]+)(?:=(.*)|$)$")
 _yes = re.compile("^(t|true|yes|y|1)$", re.I)
 _no = re.compile("^(f|false|no|n|0)$", re.I)
+_help = re.compile("^(-h|--help)$")
+
 
 class Options:
     def __init__(self, argv = sys.argv):
@@ -51,6 +53,9 @@ class Options:
         self.target = None
         self.host = None
         self.ignore_unknown_flags = False
+        self.help = False
+        self._allargs = {}
+
 
         unknown_args = []
         for arg in argv[1:]:
@@ -69,6 +74,10 @@ class Options:
 
             if arg == '--ignore-unknown-flags':
                 self.ignore_unknown_flags = True
+                continue
+
+            if _help.search(arg) is not None:
+                self.help = True
                 continue
 
             m = _arg.search(arg)
@@ -102,6 +111,7 @@ class Options:
 
 
     def getBoolArg(self, name, default=None, remove=True):
+        self._allargs[name] = default
         if not name in self._args:
             return default
 
@@ -115,6 +125,7 @@ class Options:
         raise Exception("Unrecognized value for option '" + name + "'.")
 
     def getStringArg(self, name, default=None):
+        self._allargs[name] = default
         if not name in self._args:
             return default
 
@@ -127,6 +138,17 @@ class Options:
 
     def peekStringArg(self, name, default=None):
         return Options.getStringArg(self,name,default,False)
+
+    def getHelp(self):
+        ret = ''
+        for opt,default in self._allargs.iteritems():
+            if default == True:
+                ret += "%-35s [=enabled]\n" % ("--enable-%s" % opt)
+            else:
+                ret += "%-35s [=not enabled]\n" % ("--enable-%s" % opt)
+        return ret
+
+
 
     def finish(self):
         if not self.ignore_unknown_flags:
