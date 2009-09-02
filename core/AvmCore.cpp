@@ -4006,6 +4006,13 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Namespace* AvmCore::dxns() const
 	{
+		// if currentMethodFrame is null, then no AS3 code is executing -- we are being
+		// called directly from builtin code. We really want to return a non-NULL namespace
+		// in this case, so that native code that calls (say) XML::construct directly 
+		// can succeed (otherwise, getDefaultNamespace() would throw exceptions). 
+		if (!currentMethodFrame)
+			return publicNamespace;
+
 		// NULL is ok to return here -- Toplevel::getDefaultNamespace() will throw
 		return MethodFrame::findDxns(currentMethodFrame);
 	}
