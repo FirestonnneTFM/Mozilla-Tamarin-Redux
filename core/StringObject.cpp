@@ -864,7 +864,6 @@ namespace avmplus
 		{
  			return indexOfImpl(selfBuf.p16, start, right, (const uint8_t*)p, sublen);
 		}
-		return -1;
 	}
 
 	int32_t String::indexOfCharCode(wchar c, int32_t start, int32_t end) const
