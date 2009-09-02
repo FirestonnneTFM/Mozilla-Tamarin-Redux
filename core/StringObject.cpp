@@ -96,13 +96,13 @@ namespace avmplus
 	static void* _copyBuffers(const void* src, void* dst, int32_t srcLen, String::Width srcWidth, String::Width dstWidth)
 	{
 		if (srcWidth == dstWidth)
-			VMPI_memcpy(dst, src, srcLen * srcWidth);
+			VMPI_memcpy(dst, src, srcLen << srcWidth);
 		else if (srcWidth == String::k8)
 			_widen8_16((const uint8_t*) src, (wchar*) dst, srcLen);
 		else
 			_narrow16_8((const wchar*) src, (uint8_t*) dst, srcLen);
 		// return the new buffer pointer
-		return (char*) dst + (srcLen * dstWidth);
+		return (char*) dst + (srcLen << dstWidth);
 	}
 
 /////////////////////////// Helper: get AvmCore /////////////////////////////
@@ -118,7 +118,164 @@ namespace avmplus
 		return gc->core();
 	}
 
+/////////////////////////// Helpers: templated functions /////////////////////////////
+
+	// use typetraits to generate a compile-time error if you attempt to use a
+	// non-unsigned char type as an argument to these.
+	#define PREVENT_SIGNED_CHAR_PTR(TYPE) \
+	{ \
+		typedef MMgc::is_same<char, uint8_t> is_char_unsigned; \
+		typedef MMgc::is_same<char, TYPE> is_char; \
+		MMGC_STATIC_ASSERT(!(is_char::value && !is_char_unsigned::value)); \
+	}
+
+	template <typename STR1, typename STR2>
+	static inline bool equalsImpl(const STR1* str1, const STR2* str2, int32_t len)
+	{
+		PREVENT_SIGNED_CHAR_PTR(STR1)
+		PREVENT_SIGNED_CHAR_PTR(STR2)
+
+		for (int32_t j = 0; j < len; j++)
+		{
+			if (str1[j] != str2[j])
+				return false;
+		}
+		return true;
+	}
+
+	template <typename STR1, typename STR2>
+	static inline int32_t compareImpl(const STR1* str1, const STR2* str2, int32_t len)
+	{
+		PREVENT_SIGNED_CHAR_PTR(STR1)
+		PREVENT_SIGNED_CHAR_PTR(STR2)
+
+		int32_t res = 0;
+		while (len-- > 0 && !res)
+		{
+			res = int32_t(*str2++ - *str1++);
+		}
+		return res;
+	}
+
+	template <typename STR, typename PATTERN>
+	static inline int32_t indexOfImpl(const STR* str, int32_t start, int32_t right, const PATTERN* pat, int32_t patlen)
+	{
+		PREVENT_SIGNED_CHAR_PTR(STR)
+		PREVENT_SIGNED_CHAR_PTR(PATTERN)
+
+		str += start;
+		for ( ; start <= right; start++)
+		{
+			int32_t j;
+			for (j = 0; j < patlen; j++)
+			{
+				if (str[j] != pat[j])
+					break;
+			}
+
+			if (j == patlen)
+				return start;
+			str++;
+		}
+		return -1;
+	}
+
+	template <typename STR>
+	static inline int32_t indexOfCharCodeImpl(const STR* str, int32_t start, int32_t right, wchar c)
+	{
+		PREVENT_SIGNED_CHAR_PTR(STR)
+
+		const STR* p = str + start - 1;
+		const STR* const end = str + right;
+		while (++p <= end)
+			if (*p == c)
+				return int32_t(p - str);
+		
+		return -1;
+	}
+
+	template <typename STR, typename PATTERN>
+	static inline int32_t lastIndexOfImpl(const STR* str, int32_t start, const PATTERN* pat, int32_t patlen)
+	{
+		PREVENT_SIGNED_CHAR_PTR(STR)
+		PREVENT_SIGNED_CHAR_PTR(PATTERN)
+
+		str += start;
+		for ( ; start >= 0; start--)
+		{
+			int32_t j;
+			for (j = 0; j < patlen; j++)
+			{
+				if (str[j] != pat[j])
+					break;
+				if (j == (patlen - 1))
+					return start;
+			}
+
+			if (j == patlen)
+				return start;
+			str--;
+		}
+		return -1;
+	}
+
+	template <typename STR>
+	static inline int32_t hashCodeImpl(const STR* str, int32_t len)
+	{
+		PREVENT_SIGNED_CHAR_PTR(STR)
+
+		// must be same signed-ness as other hashcode functions.
+		// experimentation shows better results from signed (vs unsigned).
+		int32_t hashCode = 0;
+		while (len--)
+			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *str++;
+		return hashCode;
+	}
+
 ////////////////////////////// Constructors ////////////////////////////////
+
+	// ctor for a static string.
+
+	inline String::String(const void* buffer, Width w, int32_t length) :
+#ifdef DEBUGGER
+		AvmPlusScriptableObject(kStringType), 
+#endif
+		m_length(length), 
+		// note that TSTR_7BIT is not pre-emptively set (it's done lazily by StUTF8String)
+		m_bitsAndFlags(w | (kStatic << TSTR_TYPE_SHIFT))
+	{
+		// static data - no WB() needed
+		this->m_buffer.pv = const_cast<void*>(buffer);
+	}
+
+	// ctor for a dynamic string.
+
+	inline String::String(MMgc::GC* gc, void* buffer, Width w, int32_t length, int32_t charsLeft) :
+#ifdef DEBUGGER
+		AvmPlusScriptableObject(kStringType), 
+#endif
+		m_length(length), 
+		// note that TSTR_7BIT is not pre-emptively set (it's done lazily by StUTF8String)
+		m_bitsAndFlags(w | (kDynamic << TSTR_TYPE_SHIFT) | (charsLeft << TSTR_CHARSLEFT_SHIFT))
+	{
+		WB(gc, this, &this->m_buffer.pv, buffer);
+	}
+
+	// ctor for a dependent string.
+
+	inline String::String(MMgc::GC* gc, Stringp master, int32_t start, int32_t length) :
+#ifdef DEBUGGER
+		AvmPlusScriptableObject(kStringType), 
+#endif
+		m_length(length), 
+		// note that we propagate TSTR_7BIT: if the entire master is TSTR_7BIT, then so is the dependent string.
+		// @todo: a dependent string could qualify for TSTR_7BIT even if it's master is not. worth checking for?
+		m_bitsAndFlags((master->m_bitsAndFlags & (TSTR_WIDTH_MASK | TSTR_7BIT)) | (kDependent << TSTR_TYPE_SHIFT))
+	{
+		WBRC(gc, this, &this->m_master, master);
+		// interior pointer - no need to WB()
+		this->m_buffer.p8 = master->m_buffer.p8 + (start << master->getWidth());
+	}
 
 	// Private static method to create a dependent string
 
@@ -126,21 +283,16 @@ namespace avmplus
 	{
 		AvmAssert(len >= 0);
 		// master cannot be a dependent string
-		AvmAssert(kDependent != master->getType());
+		AvmAssert(!master->isDependent());
 		MMGC_MEM_TAG( "Strings" );
-		Stringp s = new(gc)
-					String(len, (master->m_bitsAndFlags & TSTR_WIDTH_MASK) | (kDependent << TSTR_TYPE_SHIFT));
-		WBRC( gc, s, &s->m_master, master );
-		// interior pointer - no need to WB()
-		s->m_buffer.p8 = master->m_buffer.p8 + start * master->getWidth();
-		return s;
+		return new(gc) String(gc, master, start, len);
 	}
 
 	// Private static method to create a dynamic string, given a buffer and its size in characters
 
 	Stringp String::createDynamic(GC* gc, const void* data, int32_t len, Width w, int32_t extra)
 	{
-		AvmAssert(kAuto != w);
+		AvmAssert(w != kAuto);
 		AvmAssert(len >= 0);
 
 		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
@@ -148,32 +300,27 @@ namespace avmplus
 		if (alloc < 1) alloc = 1;
 
 		MMGC_MEM_TAG( "Strings" );
-		Stringp s = new(gc)
-					String(len, w | (kDynamic  << TSTR_TYPE_SHIFT));
 
 		// First, use PleaseAlloc(), and if the call fails, reduce the amount of extra data
 		// to TSTR_MAX_EXTRA_BYTES_IN_LOW_MEMORY and do an Alloc(), which may fail.
-		MMGC_MEM_TYPE( s );
-		void* buffer = gc->PleaseAlloc(alloc * w, 0);
+		void* buffer = gc->PleaseAlloc(alloc << w, 0);
 		if (buffer == NULL)
 		{
-			if (extra > (TSTR_MAX_LOMEM_EXTRABYTES / w))
-				extra = TSTR_MAX_LOMEM_EXTRABYTES / w;
+			if (extra > (TSTR_MAX_LOMEM_EXTRABYTES >> w))
+				extra = TSTR_MAX_LOMEM_EXTRABYTES >> w;
 			alloc = len + extra;
-			MMGC_MEM_TYPE( s );
-			buffer = gc->Alloc(alloc * w, 0);
+			buffer = gc->Alloc(alloc << w, 0);
 		}
 
-		int32_t bufLen = (int32_t) (GC::Size (buffer) / w);
+		int32_t bufLen = (int32_t) (GC::Size(buffer) >> w);
 		int32_t charsLeft = bufLen - len;
 		// the extra character must not exceed the available field size
 		AvmAssert(charsLeft <= int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT));
 
-		WB(gc, s, &s->m_buffer.pv, buffer);
-		s->setCharsLeft(charsLeft);
+		Stringp s = new(gc) String(gc, buffer, w, len, charsLeft);
 
 		if (data != NULL && len != 0)
-			VMPI_memcpy(buffer, data, size_t(len * w));
+			VMPI_memcpy(buffer, data, size_t(len << w));
 #ifdef _DEBUG
 		// Terminate string with 0 for better debugging display
 		if (charsLeft)
@@ -191,23 +338,10 @@ namespace avmplus
 
 	Stringp String::createStatic(GC* gc, const void* data, int32_t len, Width w)
 	{
-		AvmAssert(kAuto != w);
+		AvmAssert(w != kAuto);
 		AvmAssert(len >= 0);
 		MMGC_MEM_TAG( "Strings" );
-		Stringp s = new(gc)
-					String(len, w | (kStatic << TSTR_TYPE_SHIFT));
-		// static data - no WB() needed
-		s->m_buffer.p8 = (uint8_t*) data;
-		return s;
-	}
-
-	String::String(int32_t len, uint32_t bits)
-#ifdef DEBUGGER
-		: AvmPlusScriptableObject(kStringType), m_length(len), m_bitsAndFlags(bits)
-#else
-		: m_length(len), m_bitsAndFlags (bits)
-#endif // DEBUGGER
-	{
+		return new(gc) String(data, w, len);
 	}
 
 	// Create a string out of an 8bit buffer. Characters are just widened and copied, not interpreted as UTF8.
@@ -266,7 +400,7 @@ namespace avmplus
 
 	Stringp String::getIndependentString() const
 	{
-		if (getType() != kDependent)
+		if (!isDependent())
 			return (Stringp) this;
 		return createDynamic(_gc(this), m_buffer.pv, m_length, getWidth());
 	}
@@ -302,13 +436,13 @@ namespace avmplus
 		setType(kDynamic);
 		if (type != kDynamic)
 		{
-			int32_t bytes = length() * getWidth();
+			int32_t bytes = length() << getWidth();
 			GC* gc = GC::GetGC(this);
 			MMGC_MEM_TYPE( this );
 			void* buf = gc->Alloc(bytes, 0);
 			VMPI_memcpy(buf, m_buffer.pv, bytes);
 			WB(gc, this, &this->m_buffer.pv, buf);
-			if (type == kDependent)
+			if (isDependent())
 				WBRC_NULL(gc, this, &m_master);
 		}
 	}
@@ -319,43 +453,6 @@ namespace avmplus
 	// ecma3/String/localeCompare_rt.as depends on the difference 
 	// in character values, and memcmp() does not guarantee to
 	// return this value
-
-	int32_t String::compare(const Pointers& p1, Width w1, const Pointers& p2, Width w2, int32_t len)
-	{
-		Pointers r1 = p1;
-		Pointers r2 = p2;
-		int32_t res = 0;
-		if (len > 0)
-		{
-			if (w1 == k8)
-			{
-				if (w2 == k8)
-				{
-					while (len-- > 0 && 0 == res)
-						res = int32_t(*r2.p8++ - *r1.p8++);
-				} 
-				else 
-				{
-					while (len-- > 0 && 0 == res)
-						res = int32_t(*r2.p16++ - *r1.p8++);
-				}
-			}
-			else 
-			{
-				if (w2 == k8)
-				{
-					while (len-- > 0 && 0 == res)
-						res = int32_t(*r2.p8++ - *r1.p16++);
-				}
-				else
-				{
-					while (len-- > 0 && 0 == res)
-						res = int32_t(*r2.p16++ - *r1.p16++);
-				}
-			}
-		}
-		return res;
-	}
 
 	int32_t String::Compare(String& other, int32_t other_start, int32_t other_length) const
 	{
@@ -370,12 +467,33 @@ namespace avmplus
 		if (other_start < 0)
 			other_start = 0;
 
-		int32_t result;
+		int32_t result = 0;
 
-		Pointers other_ptrs = other.m_buffer;
-		other_ptrs.p8 += other_start * other.getWidth();
-		int32_t count = (m_length < other_length) ? m_length : other_length;  // choose smaller of two
-		result = compare(m_buffer, getWidth(), other_ptrs, other.getWidth(), count);
+		int32_t len = (m_length < other_length) ? m_length : other_length;  // choose smaller of two
+		if (len > 0)
+		{
+			Width const w1 = this->getWidth();
+			Width const w2 = other.getWidth();
+			switch ((w1 << 1) + w2)
+			{
+				case (k8 << 1) + k8:
+					result = compareImpl(m_buffer.p8, other.m_buffer.p8 + other_start, len);
+					break;
+					
+				case (k8 << 1) + k16:
+					result = compareImpl(m_buffer.p8, other.m_buffer.p16 + other_start, len);
+					break;
+
+				case (k16 << 1) + k8:
+					result = compareImpl(m_buffer.p16, other.m_buffer.p8 + other_start, len);
+					break;
+
+				case (k16 << 1) + k16:
+					result = compareImpl(m_buffer.p16, other.m_buffer.p16 + other_start, len);
+					break;
+			}
+		}
+
 		if (result == 0)
 		{
 			// catch substring compares
@@ -398,14 +516,11 @@ namespace avmplus
 
 		if (getWidth() == k8)
 		{
-			return !VMPI_memcmp(this->m_buffer.p8, p, len);
+			return equalsImpl(m_buffer.p8, (const uint8_t*)p, len);
 		}
 		else
 		{
-			for (int32_t i = 0; i < len; ++i)
-				if (uint8_t(p[i]) != this->m_buffer.p16[i])
-					return false;
-			return true;
+			return equalsImpl(m_buffer.p16, (const uint8_t*)p, len);
 		}
 	}
 
@@ -415,17 +530,14 @@ namespace avmplus
 			return false;
 
 		Pointers ptrs = m_buffer;
-		bool ok = true;
 		if (getWidth() == k8)
 		{
-			while (ok && len-- != 0)
-				ok = (*p++ == *ptrs.p8++);
+			return equalsImpl(m_buffer.p8, p, len);
 		}
 		else
 		{
-			ok = !VMPI_memcmp(ptrs.p16, p, len * sizeof(wchar));
+			return equalsImpl(m_buffer.p16, p, len);
 		}
-		return ok;
 	}
 
 	bool String::equals(Stringp that) const
@@ -444,28 +556,21 @@ namespace avmplus
 		Pointers thisbuf = this->m_buffer;
 		Pointers thatbuf = that->m_buffer;
 
-		switch ((w1 << 3) + w2)
+		switch ((w1 << 1) + w2)
 		{
-			case (k8 << 3) + k8:
-			case (k16 << 3) + k16:
-				// same width, a memcmp will do the tricl.
-				return !VMPI_memcmp(thisbuf.pv, thatbuf.pv, len1 * w1);
-				break;
-			case (k8 << 3) + k16:
-				for (int32_t j = 0; j < len1; j++)
-				{
-					if (thisbuf.p8[j] != thatbuf.p16[j])
-						return false;
-				}
-				break;
-			case (k16 << 3) + k8:
-				for (int32_t j = 0; j < len1; j++)
-				{
-					if (thisbuf.p16[j] != thatbuf.p8[j])
-						return false;
-				}
-				break;
+			case (k8 << 1) + k8:
+				return equalsImpl(thisbuf.p8, thatbuf.p8, len1);
+				
+			case (k8 << 1) + k16:
+				return equalsImpl(thisbuf.p8, thatbuf.p16, len1);
+
+			case (k16 << 1) + k8:
+				return equalsImpl(thisbuf.p16, thatbuf.p8, len1);
+
+			case (k16 << 1) + k16:
+				return equalsImpl(thisbuf.p16, thatbuf.p16, len1);
 		}
+		AvmAssert(0);
 		return true;
 	}
 
@@ -481,6 +586,8 @@ namespace avmplus
 
 	bool String::equalsUTF8(const utf8_t* buf, int32_t bytes) const
 	{
+		// @todo -- use TSTR_7BIT here. (this function isn't currently used.) 
+
 		if (buf == NULL || bytes <= 0)
 			return false;
 
@@ -500,7 +607,7 @@ namespace avmplus
 			}
 			else
 			{
-				int bytesRead = UnicodeUtils::Utf8ToUcs4 (buf, bytes, &ch2);
+				int bytesRead = UnicodeUtils::Utf8ToUcs4(buf, bytes, &ch2);
 				bytes -= bytesRead;
 				buf += bytesRead;
 			}
@@ -519,6 +626,8 @@ namespace avmplus
 
 	int32_t String::hashCodeUTF8(const utf8_t* buf, int32_t len)
 	{
+		// @todo -- use TSTR_7BIT here. (this function isn't currently used.) 
+		
 		// must be same signed-ness as other hashcode functions.
 		// experimentation shows better results from signed (vs unsigned).
 		int32_t hashCode = 0; 
@@ -544,46 +653,28 @@ namespace avmplus
 
 	int32_t String::hashCodeLatin1(const char* buf, int32_t len)
 	{
-		// must be same signed-ness as other hashcode functions.
-		// experimentation shows better results from signed (vs unsigned).
-		int32_t hashCode = 0; 
-		while (len--)
-			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ uint8_t(*buf++);
-		return hashCode;
+		return hashCodeImpl((const utf8_t*)buf, len); 
 	}
 
 	int32_t String::hashCodeUTF16(const wchar* buf, int32_t len)
 	{
-		// must be same signed-ness as other hashcode functions.
-		// experimentation shows better results from signed (vs unsigned).
-		int32_t hashCode = 0; 
-		while (len--)
-			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *buf++;
-		return hashCode;
+		return hashCodeImpl(buf, len); 
 	}
 
 	int32_t String::hashCode() const
 	{
-		// must be same signed-ness as other hashcode functions.
-		// experimentation shows better results from signed (vs unsigned).
-		int32_t hashCode = 0; 
 		if (m_length != 0)
 		{
-			Pointers ptrs = m_buffer;
-			int32_t len = m_length;
-
 			if (getWidth() == k8)
 			{
-				while (len--)
-					hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p8++;
+				return hashCodeImpl(m_buffer.p8, m_length); 
 			}
 			else
 			{
-				while (len--)
-					hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p16++;
+				return hashCodeImpl(m_buffer.p16, m_length); 
 			}
 		}
-		return hashCode;
+		return 0;
 	}
 
 //////////////////////////////// Accessors /////////////////////////////////
@@ -624,78 +715,28 @@ namespace avmplus
 		if (start < 0) 
 			start = 0;
 
-		Width w1 = getWidth();
-		Width w2 = substr->getWidth();
+		Width const w1 = getWidth();
+		Width const w2 = substr->getWidth();
 
 		Pointers selfBuf = m_buffer;
-		selfBuf.p8 += start * w1;
 		Pointers subBuf = substr->m_buffer;
 
 		// For maximum performance, use different cases for k8/k16 combinations
-		switch ((w1 << 3) + w2)
+		switch ((w1 << 1) + w2)
 		{
-			case (k8 << 3) + k8:
-				for ( ; start <= right; start++)
-				{
-					int32_t j;
-					for (j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p8[j] != subBuf.p8[j])
-							break;
-					}
+			case (k8 << 1) + k8:
+				return indexOfImpl(selfBuf.p8, start, right, subBuf.p8, sublen);
 
-					if (j == sublen)
-						return start;
-					selfBuf.p8++;
-				}
-				break;
-			case (k8 << 3) + k16:
-				for ( ; start <= right; start++)
-				{
-					int32_t j;
-					for (j = 0; j < sublen; j++)
-					{
-						if ((utf8_t) selfBuf.p8[j] != subBuf.p16[j])
-							break;
-					}
+			case (k8 << 1) + k16:
+				return indexOfImpl(selfBuf.p8, start, right, subBuf.p16, sublen);
 
-					if (j == sublen)
-						return start;
-					selfBuf.p8++;
-				}
-				break;
-			case (k16 << 3) + k8:
-				for ( ; start <= right; start++)
-				{
-					int32_t j;
-					for (j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p16[j] != (utf8_t) subBuf.p8[j])
-							break;
-					}
+			case (k16 << 1) + k8:
+				return indexOfImpl(selfBuf.p16, start, right, subBuf.p8, sublen);
 
-					if (j == sublen)
-						return start;
-					selfBuf.p16++;
-				}
-				break;
-			case (k16 << 3) + k16:
-				for ( ; start <= right; start++)
-				{
-					int32_t j;
-					for (j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p16[j] != subBuf.p16[j])
-							break;
-					}
-
-					if (j == sublen)
-						return start;
-					selfBuf.p16++;
-				}
-				break;
-			default: ;
+			case (k16 << 1) + k16:
+				return indexOfImpl(selfBuf.p16, start, right, subBuf.p16, sublen);
 		}
+		AvmAssert(0);
 		return -1;
 	}
 
@@ -728,66 +769,24 @@ namespace avmplus
 		Width w2 = substr->getWidth();
 
 		Pointers selfBuf = m_buffer;
-		selfBuf.p8 += start * w1;
 		Pointers subBuf = substr->m_buffer;
 
 		// For maximum performance, use different cases for k8/k16 combinations
-		switch ((w1 << 3) + w2)
+		switch ((w1 << 1) + w2)
 		{
-			case (k8 << 3) + k8:
-				for ( ; start >= 0; start--)
-				{
-					for (int j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p8[j] != subBuf.p8[j])
-							break;
-						if (j == (sublen - 1))
-							return start;
-					}
-					selfBuf.p8--;
-				}
-				break;
-			case (k8 << 3) + k16:
-				for ( ; start >= 0; start--)
-				{
-					for (int j = 0; j < sublen; j++)
-					{
-						if ((utf8_t) selfBuf.p8[j] != subBuf.p16[j])
-							break;
-						if (j == (sublen - 1))
-							return start;
-					}
-					selfBuf.p8--;
-				}
-				break;
-			case (k16 << 3) + k8:
-				for ( ; start >= 0; start--)
-				{
-					for (int j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p16[j] != (utf8_t) subBuf.p8[j])
-							break;
-						if (j == (sublen - 1))
-							return start;
-					}
-					selfBuf.p16--;
-				}
-				break;
-			case (k16 << 3) + k16:
-				for ( ; start >= 0; start--)
-				{
-					for (int j = 0; j < sublen; j++)
-					{
-						if (selfBuf.p16[j] != subBuf.p16[j])
-							break;
-						if (j == (sublen - 1))
-							return start;
-					}
-					selfBuf.p16--;
-				}
-				break;
-			default: ;
+			case (k8 << 1) + k8:
+				return lastIndexOfImpl(selfBuf.p8, start, subBuf.p8, sublen);
+
+			case (k8 << 1) + k16:
+				return lastIndexOfImpl(selfBuf.p8, start, subBuf.p16, sublen);
+
+			case (k16 << 1) + k8:
+				return lastIndexOfImpl(selfBuf.p16, start, subBuf.p8, sublen);
+
+			case (k16 << 1) + k16:
+				return lastIndexOfImpl(selfBuf.p16, start, subBuf.p16, sublen);
 		}
+		AvmAssert(0);
 		return -1;
 	}
 
@@ -812,39 +811,14 @@ namespace avmplus
 		Width w = getWidth();
 
 		Pointers selfBuf = m_buffer;
-		selfBuf.p8 += start * w;
 
 		if (w == k8)
 		{
-			for ( ; start <= right; start++)
-			{
-				int32_t j;
-				for (j = 0; j < sublen; j++)
-				{
-					if (selfBuf.p8[j] != (utf8_t) p[j])
-						break;
-				}
-
-				if (j == sublen)
-					return start;
-				selfBuf.p8++;
-			}
+ 			return indexOfImpl(selfBuf.p8, start, right, (const uint8_t*)p, sublen);
 		}
 		else
 		{
-			for ( ; start <= right; start++)
-			{
-				int32_t j;
-				for (j = 0; j < sublen; j++)
-				{
-					if (selfBuf.p16[j] != (utf8_t) p[j])
-						break;
-				}
-
-				if (j == sublen)
-					return start;
-				selfBuf.p16++;
-			}
+ 			return indexOfImpl(selfBuf.p16, start, right, (const uint8_t*)p, sublen);
 		}
 		return -1;
 	}
@@ -867,21 +841,12 @@ namespace avmplus
 
 		if (getWidth() == String::k8)
 		{
-			const uint8_t* p8 = m_buffer.p8 + start - 1;
-			const uint8_t* const end = m_buffer.p8 + right;
-			while (++p8 <= end)
-				if (*p8 == c)
-					return int32_t(p8 - m_buffer.p8);
+			return indexOfCharCodeImpl(m_buffer.p8, start, right, c);
 		}
 		else
 		{
-			const uint16_t* p16 = m_buffer.p16 + start - 1;
-			const uint16_t* const end = m_buffer.p16 + right;
-			while (++p16 <= end)
-				if (*p16 == c)
-					return int32_t(p16 - m_buffer.p16);
+			return indexOfCharCodeImpl(m_buffer.p16, start, right, c);
 		}
-		return -1;
 	}
 
 	bool String::matchesLatin1(const char* p, int32_t len, int32_t pos)
@@ -896,23 +861,12 @@ namespace avmplus
 
 		if (getWidth() == k8)
 		{
-			const uint8_t* p8 = m_buffer.p8 + pos;
-			while (len--)
-			{
-				if (*p8++ != uint8_t(*p++))
-					return false;
-			}
+			return equalsImpl(m_buffer.p8 + pos, (const uint8_t*)p, len);
 		}
 		else
 		{
-			const uint16_t* p16 = m_buffer.p16 + pos;
-			while (len--)
-			{
-				if (*p16++ != uint8_t(*p++))
-					return false;
-			}
+			return equalsImpl(m_buffer.p16 + pos, (const uint8_t*)p, len);
 		}
-		return true;
 	}
 
 	bool String::matchesLatin1_caseless(const char* p, int32_t len, int32_t pos)
@@ -977,7 +931,16 @@ namespace avmplus
 
 		MMgc::GC* gc = _gc(this);
 
-		Stringp newStr;
+		// fromCharCode() optimization: If this string is empty, and the buffer is a single
+		// ASCII character, return the cached character
+		if (m_length == 0 && numChars == 1)
+		{
+			Pointers tmp;
+			tmp.pv = const_cast<void*>(buffer ? buffer : inStr->m_buffer.pv);
+			wchar const ch = (charWidth == k8) ? tmp.p8[0] : tmp.p16[0];
+			if (ch < 128)
+				return gc->core()->cachedChars[ch];
+		}
 
 		Width thisWidth = getWidth();
 		Width newWidth = (thisWidth < charWidth) ? charWidth : thisWidth;
@@ -986,7 +949,7 @@ namespace avmplus
 
 		// TODO: make thread safe
 
-		Stringp master = (getType() == kDependent) ? m_master : this;
+		Stringp master = (isDependent()) ? m_master : this;
 		// check for characters left in leftStr's buffer, or if leftStr has spent its padding already
 		// string types other than kDynamic have charsLeft == 0
 		int32_t charsLeft = 0;
@@ -995,9 +958,9 @@ namespace avmplus
 		{
 			// in-place append only if rightStr's width fits into leftStr
 			charsLeft = master->getCharsLeft();
-			if (master->getType() != kStatic)
+			if (!master->isStatic())
 				// charsUsed is the number of chars already spent behind m_length
-				charsUsed = int32_t((GC::Size(master->m_buffer.pv) / thisWidth) - master->m_length - charsLeft);
+				charsUsed = int32_t((GC::Size(master->m_buffer.pv) >> thisWidth) - master->m_length - charsLeft);
 		}
 		int32_t start = 0;	// string start for dependent strings
 
@@ -1012,7 +975,7 @@ namespace avmplus
 					charsLeft = 0;
 				break;
 			case kDependent:
-				start = int32_t(m_buffer.p8 - master->m_buffer.p8) / thisWidth;
+				start = int32_t(m_buffer.p8 - master->m_buffer.p8) >> thisWidth;
 				if ((start + m_length) != master->m_length + charsUsed)
 					charsLeft = 0;
 				break;
@@ -1024,7 +987,7 @@ namespace avmplus
 		{
 			// the right-hand string fits into the buffer end
 			_copyBuffers(buffer ? buffer : inStr->m_buffer.pv, 
-						 m_buffer.p8 + m_length * thisWidth, 
+						 m_buffer.p8 + (m_length << thisWidth), 
 						 numChars, charWidth, newWidth);
 
 			charsUsed += numChars;
@@ -1053,7 +1016,7 @@ namespace avmplus
 		if (extra > (int32_t) TSTR_MAX_CHARSLEFT)
 			extra = (int32_t) TSTR_MAX_CHARSLEFT;
 
-		newStr = createDynamic(gc, NULL, newLen, newWidth, extra);
+		Stringp newStr = createDynamic(gc, NULL, newLen, newWidth, extra);
 		// copy leftStr
 		void* ptr = _copyBuffers(m_buffer.pv, 
 					  newStr->m_buffer.p8, 
@@ -1112,20 +1075,20 @@ namespace avmplus
 
 		// otherwise, create a dependent string
 		Stringp master = this;
-		if (getType() == kDependent)
+		if (isDependent())
 		{
 			// get the string offset
 			master = m_master;
-			int32_t offset = int32_t(m_buffer.p8 - master->m_buffer.p8) >> (master->getWidth()-1);
+			int32_t offset = int32_t(m_buffer.p8 - master->m_buffer.p8) >> master->getWidth();
 			// TODO: possible 32-bit overflow for a very huge dependent string
 			start += offset;
 			end += offset;
 		}
-		AvmAssert(kDependent != master->getType());
-		if (master->getType() == kStatic)
+		AvmAssert(!master->isDependent());
+		if (master->isStatic())
 			// for static strings, create a new static string pointing to the substring
 			// no need to create a dependent string and block the master
-			return createStatic(gc, master->m_buffer.p8  + start * master->getWidth(), end - start, master->getWidth());
+			return createStatic(gc, master->m_buffer.p8 + (start << master->getWidth()), end - start, master->getWidth());
 		else
 			return createDependent(gc, master, start, end - start);
 	}
@@ -1234,7 +1197,7 @@ namespace avmplus
 			goto bad;
 		if (n & ScriptObject::MAX_INTEGER_MASK)
 			m_bitsAndFlags |= TSTR_NOINT_FLAG;
-		if (getType() != kDependent)
+		if (!isDependent())
 		{
 			m_bitsAndFlags |= TSTR_UINT32_FLAG;
 			m_index = uint32_t(n);
@@ -1277,7 +1240,7 @@ namespace avmplus
 			if (n & ScriptObject::MAX_INTEGER_MASK)
 				goto bad;
 		}
-		if (getType() != kDependent)
+		if (!isDependent())
 		{
 			m_bitsAndFlags |= TSTR_UINT28_FLAG;
 			m_index = n;
@@ -2158,67 +2121,6 @@ namespace avmplus
 		return len;
 	}
 
-	// compare(dst,len) to (src,len), including nulls
-	int32_t String::Compare(const wchar *dst, int32_t dstLen, const wchar *src, int32_t srcLen)
-	{
-		int32_t ret = 0;
-		int32_t count = (dstLen < srcLen) ? dstLen : srcLen;  // choose smaller of two
-		const wchar *dstend = dst + count;
-
-		while(dst < dstend && (ret = (int32_t)(*src - *dst)) == 0)
-		{
-			++src, ++dst;
-		}
-
-		// catch substring cases (e.g. '1' vs. '104')
-		if (ret == 0)
-		{
-			if (srcLen < dstLen)
-				ret = -1;
-			else if (srcLen > dstLen)
-				ret = 1;
-			// else really equal
-		}
-		return ret;
-	}
-
-	// compare(dst,len) to (src), src is null-terminated 8bit string
-	int32_t String::Compare(const wchar *dst, const char *src, int32_t len)
-	{
-		int32_t ret = 0;
-		const wchar *dstend = dst + len;
-
-		while (dst < dstend && *src && (ret = (int32_t)(((wchar)*src) - *dst)) == 0)
-		{
-			++src, ++dst;
-		}
-
-		if (ret == 0)
-		{
-			// catch substring cases (e.g. '1' vs. '104')
-			if (dst < dstend)
-			{
-				// more chars in dst than src
-				AvmAssert(*src == 0);
-				ret = -1;
-			}
-			else if (*src)
-			{
-				// more chars in src than dst
-				AvmAssert(dst == dstend);
-				ret = 1;
-			}
-			else
-			{
-				// really equal
-				AvmAssert(dst == dstend);
-				AvmAssert(*src == 0);
-			}
-		}
-
-		return ret;
-	}
-
 	int String::_indexOf(Stringp substr, int startPos)
 	{
 		return (int) indexOf(substr, (int32_t) startPos);
@@ -2226,9 +2128,7 @@ namespace avmplus
 
 	int32_t String::AS3_indexOf(Stringp substr, double dStartPos)
 	{
-		dStartPos = MathUtils::toInt(dStartPos);
-		int32_t iStartPos = (dStartPos > (double)this->length() ? this->length() : (int32_t) dStartPos);
-		return indexOf(substr, iStartPos);
+		return indexOf(substr, MathUtils::toIntClamp(dStartPos, this->length()));
 	}
 
 	int String::_lastIndexOf(Stringp substr, int iStartPos)
@@ -2238,11 +2138,10 @@ namespace avmplus
 
 	int32_t String::AS3_lastIndexOf(Stringp substr, double dStartPos)
 	{
-		if (!MathUtils::isNaN(dStartPos))
-			dStartPos = MathUtils::toInt(dStartPos);
-		else
-			dStartPos = this->length();
-		int32_t iStartPos = (dStartPos > this->length() ? this->length() : (int32_t)dStartPos);
+		// unlike most other calls, this one has nan->length rather than nan->0
+		int32_t iStartPos = !MathUtils::isNaN(dStartPos) ?
+							MathUtils::toIntClamp(dStartPos, this->length()) :
+							this->length();
 		return lastIndexOf(substr, iStartPos);
 	}
 
@@ -2328,15 +2227,17 @@ namespace avmplus
 		if (iPos < 0 || iPos >= m_length)
 			return core->kEmptyString;
 
-		wchar ch = (wchar) charAt(iPos);
+		wchar const ch = (wchar) charAt(iPos);
+		// newStringUTF16 does the cachedChar optimization internally, but short-circuiting the test
+		// here is worthwhile because it's a pretty common case
+		if (ch < 128)
+			return core->cachedChars[ch];
 		return core->newStringUTF16(&ch, 1);
 	}
 
 	Stringp String::AS3_charAt(double dPos)
 	{
-		dPos = MathUtils::toInt(dPos);
-		int32_t iPos = (dPos > (double) this->length()) ? this->length() : (int32_t) dPos;
-		return _charAt(iPos);
+		return _charAt(MathUtils::toIntClamp(dPos, this->length()));
 	}
 
 	Stringp String::AS3_toUpperCase()
@@ -2359,11 +2260,9 @@ namespace avmplus
 		return d;
 	}
 
-	double String::AS3_charCodeAt (double dPos)
+	double String::AS3_charCodeAt(double dPos)
     {
-		dPos = MathUtils::toInt(dPos);
-		int32_t iPos = (dPos > (double)this->length()) ? this->length() : (int32_t)dPos;
-		return _charCodeAt(iPos);
+		return _charCodeAt(MathUtils::toIntClamp(dPos, this->length()));
     }
 
 	int32_t String::AS3_localeCompare(Stringp other)
@@ -2695,7 +2594,7 @@ namespace avmplus
 		}
 		else
 		{
-			VMPI_memcpy(s->m_buffer.pv, buffer, len * desiredWidth);
+			VMPI_memcpy(s->m_buffer.pv, buffer, len << desiredWidth);
 		}
 		return s;
 	}
@@ -2718,48 +2617,66 @@ namespace avmplus
 	{
 		if (!str || !str->length())
 		{
-			m_length = 0;
 			m_buffer = zero8;
+			m_length = 0;
 			return;
 		}
 
-		int32_t i;
-		m_length = 0;
+		int32_t len = 0;
 
 		MMgc::GC* gc = _gc(str);
 		if (str->getWidth() == String::k8)
 		{
-			const uint8_t* buf = (const uint8_t*) str->m_buffer.p8;
-			for (i = 0; i < str->m_length; i++, buf++)
-				m_length += (*buf > 127) ? 2 : 1;
+			len = str->m_length;
 			
-			char* dstBuf = (char*) gc->Alloc(m_length+1, 0);
-			m_buffer = dstBuf;
-			dstBuf[m_length] = 0;
-
-			buf = (const uint8_t*) str->m_buffer.p8;
-
-			for (i = 0; i < str->m_length; i++, buf++)
+			// if we know it's 7-bit, we don't need to walk it.
+			if (!(str->m_bitsAndFlags & String::TSTR_7BIT))
 			{
-				wchar ch = wchar (*buf);
-				if (ch >= 128)
+				const uint8_t* srcBuf = (const uint8_t*) str->m_buffer.p8;
+				for (int32_t i = str->m_length; i--;)
+					len += (*srcBuf++ > 127);
+				
+				// no hi bits? set the bit!
+				if (len == str->m_length)
+					str->m_bitsAndFlags |= String::TSTR_7BIT;
+			}
+			
+			const uint8_t* srcBuf = (const uint8_t*) str->m_buffer.p8;
+			char* dstBuf = (char*)gc->Alloc(len+1, 0);
+			m_buffer = dstBuf;
+			m_length = len;
+
+			if (len == str->m_length)
+			{
+				VMPI_memcpy(dstBuf, srcBuf, len);
+				dstBuf[len] = 0;
+			}
+			else
+			{
+				for (int32_t i = str->m_length; i--;)
 				{
-					*dstBuf++ = char(0xC0 + ((ch >> 6) & 0x3));
-					*dstBuf++ = char(0x80 + (ch & 0x3F));
-					ch <<= 32-12;
-				}
-				else
+					wchar ch = wchar(*srcBuf++);
+					if (ch >= 128)
+					{
+						*dstBuf++ = char(0xC0 + ((ch >> 6) & 0x3));
+						ch = 0x80 + (ch & 0x3F);
+						// fall thru
+					}
 					*dstBuf++ = char(ch);
+				}
+				AvmAssert(dstBuf - m_buffer == len);
+				*dstBuf = 0;
 			}
 		}
 		else
 		{
 			const wchar* data = str->m_buffer.p16;
-			m_length = UnicodeUtils::Utf16ToUtf8(data, str->length(), NULL, 0);
-			char* dstBuf = (char*) gc->Alloc(m_length + 1, 0);
+			len = UnicodeUtils::Utf16ToUtf8(data, str->length(), NULL, 0);
+			char* dstBuf = (char*) gc->Alloc(len + 1, 0);
 			m_buffer = dstBuf;
-			dstBuf[m_length] = 0;
-			UnicodeUtils::Utf16ToUtf8(data, str->length(), (uint8_t*) dstBuf, m_length);
+			m_length = len;
+			dstBuf[len] = 0;
+			UnicodeUtils::Utf16ToUtf8(data, str->length(), (uint8_t*) dstBuf, len);
 		}
 	}
 
@@ -2782,7 +2699,7 @@ namespace avmplus
 		MMgc::GC* gc = _gc(str);
 
 		m_length = str->m_length;
-		wchar* dst = (wchar*) gc->Alloc((m_length + 1) * String::k16, 0);
+		wchar* dst = (wchar*) gc->Alloc((m_length + 1) << String::k16, 0);
 		m_buffer = dst;
 		dst[m_length] = 0;
 		_copyBuffers(str->m_buffer.pv, dst, m_length, str->getWidth(), String::k16);
@@ -2812,9 +2729,17 @@ namespace avmplus
 		4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,6
 	};
 
+	StIndexableUTF8String::StIndexableUTF8String(Stringp s) :
+		StUTF8String(s), 
+		m_lastPos(0), 
+		m_lastUtf8Pos(0)
+	{
+		m_indexable = (s->length() == this->length());	// can't init in init-list, generates warning :-(
+	}
+
 	int32_t StIndexableUTF8String::toUtf8Index(int32_t pos)
 	{
-		if (pos <= 0 || pos >= length())
+		if (pos <= 0 || pos >= length() || m_indexable)
 			return pos;
 
 		// optimization: these two members kick in if this method
@@ -2824,7 +2749,7 @@ namespace avmplus
 
 		int32_t utf8Pos = m_lastPos;
 
-		const utf8_t* p = (const utf8_t*) &m_buffer[m_lastUtf8Pos];
+		const utf8_t* p = (const utf8_t*) this->c_str() + m_lastUtf8Pos;
 		for (int32_t i = m_lastPos; i < pos; i++)
 		{
 			utf8_t ch = *p;
@@ -2844,7 +2769,7 @@ namespace avmplus
 
 	int32_t StIndexableUTF8String::toIndex(int32_t utf8Pos)
 	{
-		if (utf8Pos <= 0)
+		if (utf8Pos <= 0 || m_indexable)
 			return utf8Pos;
 
 		// optimization: these two members kick in if this method
@@ -2855,7 +2780,7 @@ namespace avmplus
 		int32_t i = m_lastUtf8Pos;
 		int32_t pos = m_lastPos;
 
-		const utf8_t* p = (const utf8_t*) m_buffer + m_lastUtf8Pos;
+		const utf8_t* p = (const utf8_t*) this->c_str() + m_lastUtf8Pos;
 		while (i < utf8Pos)
 		{
 			if (i >= length())

@@ -496,6 +496,48 @@ namespace avmplus
 		}
 	}
 
+	int32_t MathUtils::toIntClamp(double value, int32_t clampMagnitude)
+	{
+		AvmAssert(clampMagnitude >= 0);
+
+#if defined(WIN32) && defined(AVMPLUS_AMD64)
+		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
+#elif defined(WIN32) && defined(AVMPLUS_IA32)
+		int32_t intValue;
+		_asm fld [value];
+		_asm fistp [intValue];
+#elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
+		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
+#else
+		int32_t intValue = real2int(value);
+#endif
+
+		if (value == (double)(intValue))
+			goto clamp_check;
+
+		if (MathUtils::isNaN(value)) 
+			return 0;
+
+		int32_t const inf = MathUtils::isInfinite(value);
+		if (inf > 0)
+			return clampMagnitude;
+		else if (inf < 0)
+			return -clampMagnitude;
+		
+		if (value < 0) 
+			intValue = -MathUtils::floor(-value);
+		else 
+			intValue = MathUtils::floor(value);
+
+	clamp_check:
+		if (intValue > clampMagnitude)
+			intValue = clampMagnitude;
+		else if (intValue < -clampMagnitude)
+			intValue = -clampMagnitude;
+	
+		return intValue;
+	}
+
 	//
 	// powerOfTen(exponent, value) returns the value
 	//    value * 10 ^ exponent

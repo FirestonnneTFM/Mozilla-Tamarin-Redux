@@ -83,7 +83,7 @@ namespace avmplus
 
 		typedef wchar CharAtType;
 
-		/// String type constants.
+		/// String type constants. Note that isDependent() and isStatic() rely on using these values as bitflags.
 		enum Type
 		{
 			kDynamic			= 0,	// buffer is on the heap
@@ -93,9 +93,9 @@ namespace avmplus
 		/// String width constants.
 		enum Width
 		{
-			kAuto	= 0,	// only used in APIs
-			k8		= 1,
-			k16		= 2
+			kAuto	= -1,	// only used in APIs
+			k8		= 0,	// chosen such that i<<k8 == i*sizeof(uint8_t)
+			k16		= 1		// chosen such that i<<k16 == i*sizeof(uint16_t)
 		};
 		/**
 		Use this constant to define the default width for this system. If you use anything
@@ -200,8 +200,12 @@ namespace avmplus
 		inline	bool				isEmpty() const { return m_length == 0; }
 		/// Return the width constant.
 		inline	Width				getWidth() const { return Width(m_bitsAndFlags & TSTR_WIDTH_MASK); }
-		/// Return the string typex.
+		/// Return the string type.
 		inline	int32_t				getType() const { return ((m_bitsAndFlags & TSTR_TYPE_MASK) >> TSTR_TYPE_SHIFT); }
+		/// Return true iff getType() == kDependent.
+		inline	bool				isDependent() const { return (m_bitsAndFlags & (kDependent << TSTR_TYPE_SHIFT)) != 0; }
+		/// Return true iff getType() == kStatic.
+		inline	bool				isStatic() const { return (m_bitsAndFlags & (kStatic << TSTR_TYPE_SHIFT)) != 0; }
 		/// Is this an interned string?
 		inline	bool				isInterned() const { return (m_bitsAndFlags & TSTR_INTERNED_FLAG) != 0; }
 		/// Mark this string as interned.
@@ -241,17 +245,6 @@ namespace avmplus
 		Localized compare - maps to compare().
 		*/
 				int32_t FASTCALL	localeCompare(Stringp other, const Atom* argv, int32_t argc);
-		/*@{*/
-		/**
-		 * Compares s1 and s2.
-		 * @return = 0 if the strings are identical.
-		 *         < 0 if s1 is less than s2
-		 *         > 0 if s1 is greater than s2
-		 */		
-		static	int32_t	FASTCALL	Compare(const wchar *s1, int32_t len1, const wchar *s2, int32_t len2);
-		///
-		static	int32_t	FASTCALL	Compare(const wchar *s1, const char *s2, int32_t len);
-		/*@}*/
 
 		/*@{*/
 		/**
@@ -262,7 +255,7 @@ namespace avmplus
 		/*@}*/
 		/**
 		Compare the String with an UTF-8 buffer. On a bad UTF-8 character sequence,
-		return false. This method is used for hash table lookups.
+		return false. 
 		*/
 				bool FASTCALL		equalsUTF8(const utf8_t* buf, int32_t bytes) const;
 		/**
@@ -335,7 +328,6 @@ namespace avmplus
 		*/
 				Stringp	FASTCALL	append(Stringp str);
 
-//				Stringp	FASTCALL	append_substring(Stringp str, int32_t start, int32_t end = 0x7fffffff);
 		/*
 		Append a 8-bit-wide string. For Unicode, strings should be Latin1, not UTF8.
 		*/
@@ -491,9 +483,15 @@ private:
 				int32_t			m_length;					// length in characters
 		mutable	uint32_t		m_bitsAndFlags;				// various bits and flags, see below (must be unsigned)
 				enum {
-					TSTR_WIDTH_MASK			= 0x00000003,	// string width (right-aligned for fast access)
-					TSTR_TYPE_MASK			= 0x0000000C,	// type index, 2 bits
-					TSTR_TYPE_SHIFT			= 2,
+					TSTR_WIDTH_MASK			= 0x00000001,	// string width (right-aligned for fast access)
+					TSTR_TYPE_MASK			= 0x00000006,	// type index, 2 bits
+					TSTR_TYPE_SHIFT			= 1,
+					// If TSTR_7BIT is set, the string has width of k8, with no characters having the high bit set.
+					// Thus the string is both 7-bit ascii and "utf8-compatible" as-is; knowing this can produce
+					// huge speedups in code that uses utf8 conversion heavily (in conjunction with "ascii" strings, of course).
+					// Note that this bit is set lazily (and currently, only by StUTF8String), thus, if this bit is clear,
+					// the string might still be 7-bit-ascii... we just haven't checked yet.
+					TSTR_7BIT				= 0x00000008,	
 					TSTR_INTERNED_FLAG		= 0x00000010,	// this string is interned
 					TSTR_NOINT_FLAG			= 0x00000020,	// set in getIntAtom() if the string is not an 28-bit integer
 					TSTR_NOUINT_FLAG		= 0x00000040,	// set in parseIndex() if the string is not an unsigned integer
@@ -513,9 +511,6 @@ private:
 		// Create a string with a static buffer.
 		static	Stringp				createStatic(MMgc::GC* gc, const void* data, int32_t len, Width w);
 
-		// Do a raw buffer compare.
-		static	int32_t	FASTCALL	compare(const Pointers& r1, Width w1, const Pointers& r2, Width w2, int32_t len);
-
 		/**
 		Low-level append worker. Either inStr is non-NULL, or buffer/length is.
 		*/
@@ -528,8 +523,14 @@ private:
 			return AvmPlusScriptableObject::operator new(size, gc);
 		}
 		inline	void				operator delete(void*) {}	// Strings cannot be deleted
-									String(int32_t length, uint32_t bits);
-};
+
+		// ctor for a static string.
+		inline						String(const void* buffer, Width w, int32_t length);
+		// ctor for a dynamic string.
+		inline						String(MMgc::GC* gc, void* buffer, Width w, int32_t length, int32_t charsLeft);
+		// ctor for a dependent string.
+		inline						String(MMgc::GC* gc, Stringp master, int32_t start, int32_t length);
+	};
 
 	// Compare helpers
 	inline bool operator==(String& s1, String& s2)
@@ -618,15 +619,13 @@ private:
 									~StUTF8String();
 		inline	const char*			c_str() const { return m_buffer; }
 		inline	int32_t				length() const { return m_length; }
-	protected:
-				const char*			m_buffer;
 	private:
-				int32_t				m_length;
-		static	void				create8 (Stringp s);
-		static	void				create16(Stringp s);
 		// do not create on the heap
 		inline	void*				operator new(size_t) throw() { return NULL; }
 		inline	void				operator delete(void*) {}		
+	private:
+				const char*			m_buffer;
+				int32_t				m_length;
 	};
 
 	/**
@@ -658,10 +657,11 @@ private:
 	private:
 		int32_t		m_lastPos;
 		int32_t		m_lastUtf8Pos;
+		bool		m_indexable;
 
 	public:
 		
-		inline explicit StIndexableUTF8String(Stringp s) : StUTF8String(s), m_lastPos(0), m_lastUtf8Pos(0) {}
+		explicit StIndexableUTF8String(Stringp s);
 
 		/**
 		Convert a string index to an UTF-8 index. 
