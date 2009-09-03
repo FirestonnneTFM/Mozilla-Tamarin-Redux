@@ -205,7 +205,7 @@ namespace avmplus
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
         debug_only( bool isPointer(int i); )
         void label(CodegenLabel &label, LIns *bb);
-        void emitPrep();
+        void emitPrep(FrameState*);
         void emitSampleCheck();
         bool verbose();
         void patchLater(LIns *br, CodegenLabel &);
@@ -276,10 +276,6 @@ namespace avmplus
         /** emit a constructor call, and early bind if possible */
         void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
 
-    public:
-        CodegenLIR(MethodInfo* info);
-        ~CodegenLIR();
-        void emitMD();
         void formatOperand(PrintWriter& buffer, LIns* oprnd);
         void epilogue(FrameState* state);
         bool prologue(FrameState* state);
@@ -296,11 +292,15 @@ namespace avmplus
         void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
         void emitDoubleConst(FrameState* state, int index, double* pd);
         void emitCoerce(FrameState* state, int index, Traits* type);
-        void emitCheckNull(FrameState* state, int index);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
         void emitGetGlobalScope();
         void localSet(int i, LIns* o, Traits* type);
+
+    public:
+        CodegenLIR(MethodInfo* info);
+        ~CodegenLIR();
+        void emitMD();
 
         // CodeWriter methods
         void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
