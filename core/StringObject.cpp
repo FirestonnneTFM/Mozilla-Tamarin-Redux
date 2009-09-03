@@ -1911,7 +1911,7 @@ namespace avmplus
 		while (*s) {
 			s++;
 		}
-		return s - str;
+		return int32_t(s - str);
 	}
 
 	int String::_indexOf(Stringp substr, int startPos)
