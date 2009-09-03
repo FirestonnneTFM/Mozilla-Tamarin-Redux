@@ -110,7 +110,7 @@ namespace MMgc
 	/*REALLY_INLINE*/
 	void* NewCall(size_t size, FixedMallocOpts opts)
 	{
-		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck(), "MMGC_ENTER macro must exist on the stack");
+		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
 		return GuardedFixedAlloc(size, opts, MMGC_SCALAR_GUARD);
 	}
 
@@ -131,7 +131,7 @@ namespace MMgc
 
 	void* NewArrayCalloc(size_t el_size, size_t count, FixedMallocOpts opts, bool isPrimitive) 
 	{
-		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck(), "MMGC_ENTER macro must exist on the stack");
+		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
 
 		bool overflow = false;
 		size_t size = CallocSizeCalc(el_size, count, overflow, isPrimitive ? false : true);

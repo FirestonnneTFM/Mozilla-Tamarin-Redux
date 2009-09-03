@@ -143,7 +143,6 @@ namespace MMgc
 #include "GCGlobalNew.h"
 #include "BasicList.h"
 #include "GCHeap.h"
-
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
 #include "ZCT.h"
