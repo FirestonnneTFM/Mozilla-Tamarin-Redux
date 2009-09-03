@@ -1597,6 +1597,8 @@ const int kBufferPadding = 16;
 
 		// static version for smart pointers
 		static void atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew);
+		static void atomWriteBarrier_ctor(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew);
+		static void atomWriteBarrier_dtor(Atom *address);
 
 		static void decrementAtomRegion(Atom *ar, int length);
 

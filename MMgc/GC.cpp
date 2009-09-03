@@ -3124,22 +3124,24 @@ bail:
 		privateInlineWriteBarrierRC(container, address, value);
 	}
 
-	void GC::privateWriteBarrierRC_NULL(const void *address)
-	{
-		RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
-		if(rc != NULL) {
-			GCAssert(IsRCObject(rc));
-			GCAssert(rc == FindBeginningGuarded(rc));
-			rc->DecrementRef();
-		}
-		GCAssert(IsPointerIntoGCObject(address));
-		*(uintptr_t*)address = 0;
-	}
-
 	/* static */ void GC::WriteBarrierRC(const void *address, const void *value)
 	{
 		GC* gc = GC::GetGC(address);
 		gc->privateInlineWriteBarrierRC(gc->FindBeginningFast(address), address, value);
+	}
+	
+	/* static */ void GC::WriteBarrierRC_ctor(const void *address, const void *value)
+	{
+		GC* gc = GC::GetGC(address);
+		void* const container = gc->FindBeginningFast(address);
+		gc->InlineWriteBarrierTrap(container);
+		gc->WriteBarrierWriteRC_ctor(address, value);
+	}
+	
+	/* static */ void GC::WriteBarrierRC_dtor(const void *address)
+	{
+		GC* gc = GC::GetGC(address);
+		gc->WriteBarrierWriteRC_dtor(address);
 	}
 	
 	/* static */ void GC::WriteBarrier(const void *address, const void *value)

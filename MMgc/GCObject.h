@@ -264,10 +264,6 @@ namespace MMgc
 #endif
 		}
 
-		// non-inlined version of IncrementRef/DecrementRef (for WriteBarrierRC)
-		void FASTCALL IncrementRefSlow();
-		void FASTCALL DecrementRefSlow();
-
 		/**
 		 * Decrement the object's reference count.
 		 *
