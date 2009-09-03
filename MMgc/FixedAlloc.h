@@ -56,7 +56,7 @@ namespace MMgc
 		friend class FastAllocator;
 		friend class GC;
 	public:
-		FixedAlloc(int itemSize, GCHeap* heap);
+		FixedAlloc(int itemSize, GCHeap* heap, bool isFixedAllocSafe=false);
 		~FixedAlloc();
 
 		void* Alloc(size_t size, FixedMallocOpts flags=kNone);
@@ -104,6 +104,7 @@ namespace MMgc
 			char   items[1];
 		};
 
+
 #ifdef VMCFG_SYMBIAN		
 	private:
 #endif //VMCFG_SYMBIAN
@@ -122,7 +123,8 @@ namespace MMgc
 		int    m_maxAlloc;
 	#ifdef MMGC_MEMORY_PROFILER
 		size_t m_totalAskSize;
-	#endif
+	#endif 
+		bool m_isFixedAllocSafe;
 
 		bool IsFull(FixedBlock *b) const { return b->numAlloc == m_itemsPerBlock; }
 		void CreateChunk(bool canFail);
@@ -146,10 +148,10 @@ namespace MMgc
 
 	class FixedAllocSafe : public FixedAlloc
 	{
-		friend class GCHeap;	
+		friend class FixedAlloc;
 	public:
-		FixedAllocSafe(int itemSize, GCHeap* heap) : 
-			FixedAlloc(itemSize, heap)
+		FixedAllocSafe(int itemSize, GCHeap* heap) 
+			: FixedAlloc(itemSize, heap, true)
 		{
 			VMPI_lockInit(&m_spinlock);
 		}
