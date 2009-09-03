@@ -145,8 +145,9 @@ namespace avmplus
 		MMGC_STATIC_ASSERT(!(is_char::value && !is_char_unsigned::value)); \
 	}
 
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR1, typename STR2>
-	static REALLY_INLINE bool equalsImpl(const STR1* str1, const STR2* str2, int32_t len)
+	/*static*/ REALLY_INLINE bool equalsImpl(const STR1* str1, const STR2* str2, int32_t len)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR1)
 		PREVENT_SIGNED_CHAR_PTR(STR2)
@@ -164,8 +165,9 @@ namespace avmplus
 	// in character values, and memcmp() does not guarantee to
 	// return this value
 
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR1, typename STR2>
-	static REALLY_INLINE int32_t compareImpl(const STR1* str1, const STR2* str2, int32_t len)
+	/*static*/ REALLY_INLINE int32_t compareImpl(const STR1* str1, const STR2* str2, int32_t len)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR1)
 		PREVENT_SIGNED_CHAR_PTR(STR2)
@@ -178,8 +180,9 @@ namespace avmplus
 		return res;
 	}
 
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR, typename PATTERN>
-	static REALLY_INLINE int32_t indexOfImpl(const STR* str, int32_t start, int32_t right, const PATTERN* pat, int32_t patlen)
+	/*static*/ REALLY_INLINE int32_t indexOfImpl(const STR* str, int32_t start, int32_t right, const PATTERN* pat, int32_t patlen)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
@@ -201,8 +204,9 @@ namespace avmplus
 		return -1;
 	}
 
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR>
-	static REALLY_INLINE int32_t indexOfCharCodeImpl(const STR* str, int32_t start, int32_t right, wchar c)
+	/*static*/ REALLY_INLINE int32_t indexOfCharCodeImpl(const STR* str, int32_t start, int32_t right, wchar c)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 
@@ -215,8 +219,9 @@ namespace avmplus
 		return -1;
 	}
 
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR, typename PATTERN>
-	static REALLY_INLINE int32_t lastIndexOfImpl(const STR* str, int32_t start, const PATTERN* pat, int32_t patlen)
+	/*static*/ REALLY_INLINE int32_t lastIndexOfImpl(const STR* str, int32_t start, const PATTERN* pat, int32_t patlen)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
@@ -240,8 +245,9 @@ namespace avmplus
 		return -1;
 	}
 
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR>
-	static REALLY_INLINE int32_t hashCodeImpl(const STR* str, int32_t len)
+	/*static*/ REALLY_INLINE int32_t hashCodeImpl(const STR* str, int32_t len)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 
