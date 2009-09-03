@@ -85,11 +85,13 @@
 #undef VTUNE
 #undef AVMPLUS_VERBOSE
 #undef VMCFG_NANOJIT
+#undef VMCFG_PRECOMP_NAMES
 #undef FEATURE_NANOJIT
 #undef VMCFG_INTERPRETER
 #undef VMCFG_INTERPRETER
 #undef VMCFG_WORDCODE
 #undef VMCFG_WORDCODE_PEEPHOLE
+#undef VMCFG_PRECOMP_NAMES
 #undef AVMPLUS_WORD_CODE
 #undef AVMPLUS_PEEPHOLE_OPTIMIZER
 #undef VMCFG_WORDCODE_THREADED
@@ -281,7 +283,7 @@
  * FIXME: more information needed.
  * 
  * Note that this is enabled always by AVMFEATURE_DEBUGGER.
- * 
+ *  * 
  * It is known that the Flash Player wants to enable this if SCRIPT_DEBUGGER
  * is enabled in the Player code.
  */
@@ -408,11 +410,11 @@
  * this means decorating the global new and delete operator with appropriate 'throw'
  * clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
  * do not generally support C++ exceptions.  
- * 
+ *  * 
  * Note that even if this is enabled, the global new and delete operators may
  * not throw exceptions when memory can't be allocated, because the out-of-memory
  * handling in MMgc may take precedence.
- * 
+ *  * 
  * FixedMalloc never throws an exception for a failed allocation.
  */
 #if !defined AVMFEATURE_CPP_EXCEPTIONS || AVMFEATURE_CPP_EXCEPTIONS != 0 && AVMFEATURE_CPP_EXCEPTIONS != 1
@@ -732,6 +734,9 @@
 #  define VMCFG_NANOJIT
 #endif
 #if AVMFEATURE_JIT
+#  define VMCFG_PRECOMP_NAMES
+#endif
+#if AVMFEATURE_JIT
 #  define FEATURE_NANOJIT
 #endif
 #if AVMFEATURE_ABC_INTERP
@@ -745,6 +750,9 @@
 #endif
 #if AVMFEATURE_WORDCODE_INTERP
 #  define VMCFG_WORDCODE_PEEPHOLE
+#endif
+#if AVMFEATURE_WORDCODE_INTERP
+#  define VMCFG_PRECOMP_NAMES
 #endif
 #if AVMFEATURE_WORDCODE_INTERP
 #  define AVMPLUS_WORD_CODE

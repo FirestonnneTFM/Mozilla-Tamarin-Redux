@@ -45,7 +45,7 @@ namespace avmplus
     class PageMgr;
 #endif
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_PRECOMP_NAMES
 	
 	// This needs to be a root because there are GCObjects referenced from the multinames
 	// that are not protected by write barriers (namely, the NamespaceSet objects).
@@ -70,7 +70,7 @@ namespace avmplus
 		Multiname multinames[1];				// Allocated size is MAX(1,nName)
 	};
 	
-#endif  // AVMPLUS_WORD_CODE
+#endif  // VMCFG_PRECOMP_NAMES
 	
 	/**
 	 * The PoolObject class is a container for the pool of resources
@@ -129,12 +129,14 @@ namespace avmplus
 			kbug444630 = 0x00000001
 		};
 
-#ifdef AVMPLUS_WORD_CODE
-		struct 
-		{
-			PrecomputedMultinames* cpool_mn;	// a GCRoot
-		} word_code;
+#ifdef VMCFG_PRECOMP_NAMES
+	private:
+		PrecomputedMultinames* precompNames;	// a GCRoot
+	public:
 		void initPrecomputedMultinames();
+		REALLY_INLINE const Multiname* precomputedMultiname(int index) {
+			return &precompNames->multinames[index];
+		}
 #endif
 		
         #ifdef VMCFG_NANOJIT

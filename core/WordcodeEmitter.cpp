@@ -106,8 +106,6 @@ namespace avmplus
 #endif // AVMPLUS_SELFTEST
 	
 	void WordcodeEmitter::boot() {
-		if (pool != NULL)
-			pool->initPrecomputedMultinames();
 		computeExceptionFixups();
 		refill();
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
