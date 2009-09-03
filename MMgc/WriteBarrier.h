@@ -54,7 +54,7 @@
 inline void write_null(void* p) { *(uintptr_t*)(p) = 0; }
 #define WB_NULL(gc, container, addr) write_null((void*)addr)
 
-#define WBRC_NULL(gc, container, addr) gc->privateWriteBarrierRC_NULL(addr)
+#define WBRC_NULL(gc, container, addr) MMgc::GC::WriteBarrierRC_dtor(addr)
 
 // declare write barrier
 // put spaces around the template arg to avoid possible digraph warnings
@@ -88,6 +88,34 @@ namespace MMgc
 			GCAssert(IsRCObject(rc));
 			GCAssert(rc == FindBeginningGuarded(value));
 			rc->IncrementRef();
+		}
+	}
+
+	/*private*/
+	REALLY_INLINE void GC::WriteBarrierWriteRC_ctor(const void *address, const void *value)
+	{
+		// assume existing contents of address are potentially uninitialized,
+		// so don't bother even making an assertion.
+		GCAssert(IsPointerIntoGCObject(address));
+		*(uintptr_t*)address = (uintptr_t) value;
+		RCObject *rc = (RCObject*)Pointer(value);
+		if(rc != NULL) {
+			GCAssert(IsRCObject(rc));
+			GCAssert(rc == FindBeginningGuarded(value));
+			rc->IncrementRef();
+		}
+	}
+
+	/*private*/
+	REALLY_INLINE void GC::WriteBarrierWriteRC_dtor(const void *address)
+	{
+		GCAssert(IsPointerIntoGCObject(address));
+		RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
+		if(rc != NULL) {
+			GCAssert(IsRCObject(rc));
+			GCAssert(rc == FindBeginningGuarded(rc));
+			rc->DecrementRef();
+			*(uintptr_t*)address = 0;
 		}
 	}
 
@@ -223,55 +251,25 @@ namespace MMgc
 	{
 	private:
 		// Always pay for a single real function call; then inline & optimize massively in WriteBarrierRC()
-		REALLY_INLINE 		
-		T set(const T tNew)
+		REALLY_INLINE T set(const T tNew)
 		{
 			GC::WriteBarrierRC(&t, (const void*)tNew);	// updates 't'
 			return tNew;
 		}
 
-		#ifdef _DEBUG
-		/*not inlined*/ void verify()
-		{
-			GC* gc = GC::GetGC(&t);
-			void* container = gc->FindBeginningFast(&t);
-			GCAssert(gc->IsPointerToGCPage(container));
-			GCAssert(!GC::GetMark(container));
-		}
-		#endif
-		
 	public:
 		explicit REALLY_INLINE WriteBarrierRC() : t(0) 
 		{
 		}
 
-		explicit REALLY_INLINE WriteBarrierRC(const T _t) : t(_t)
+		explicit REALLY_INLINE WriteBarrierRC(const T _t) // : t(0) -- not necessary, WriteBarrierRC_ctor handles it
 		{ 
-			// we don't need (or want!) a full call to set(): 
-			// it has to check for marking (which can't happen here)
-			// and decrement the previous value (also not here).
-			// instead, rely on the fact that we've 
-
-		#ifdef _DEBUG
-			verify();
-		#endif
-			if (_t)
-			{
-				// explicitly cast to RCObject to allow forward-declared classes to work.
-				// unfortunate, but required for existing embedder code.
-				((RCObject*)_t)->IncrementRefSlow();
-			}
+			GC::WriteBarrierRC_ctor(&t, (const void*)_t);
 		}
 
 		REALLY_INLINE ~WriteBarrierRC() 
 		{
-			if (t != 0) 
-			{
-				// explicitly cast to RCObject to allow forward-declared classes to work.
-				// unfortunate, but required for existing embedder code.
-				((RCObject*)t)->DecrementRefSlow();
-				t = 0;
-			}
+			GC::WriteBarrierRC_dtor(&t);
 		}
 
 		REALLY_INLINE T operator=(const WriteBarrierRC<T>& wb)

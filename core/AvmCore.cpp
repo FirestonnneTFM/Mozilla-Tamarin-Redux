@@ -4047,58 +4047,69 @@ return the result of the comparison ToPrimitive(x) == y.
 		return NULL;
 	}
 
-	/*static*/ 
-	void AvmCore::decrementAtomRegion(Atom *arr, int length)
+	REALLY_INLINE static void decr_atom(Atom const a)
 	{
-		for(int i=0; i < length; i++)
+		// contrary to what you might think from the name, "kUnusedAtomTag" is in fact occasionally used
+		// in player code, so be sure *not* to include it.
+		int const RC_TYPE_MASK = (1 << kObjectType) | (1 << kStringType) | (1 << kNamespaceType);
+		int const aKind = (1 << atomKind(a));
+		if (aKind & RC_TYPE_MASK)
 		{
-			Atom a = arr[i];
-			RCObject *obj = (RCObject*)(a&~7);
-			if(obj)	{
-				switch(a&7) {
-				case kStringType:
-				case kObjectType:
-				case kNamespaceType:
-					obj->DecrementRef();
-					break;
-				}
+			MMgc::RCObject* rcptr = (MMgc::RCObject*)atomPtr(a);
+			if (rcptr)
+				rcptr->DecrementRef();
+		}
+	}
+
+	REALLY_INLINE static void incr_atom(MMgc::GC *gc, const void* container, Atom const a)
+	{
+		int const RC_TYPE_MASK = (1 << kObjectType) | (1 << kStringType) | (1 << kNamespaceType);
+		int const GC_TYPE_MASK = RC_TYPE_MASK | (1 << kDoubleType);
+
+		// assume existing contents of address are potentially uninitialized,
+		// so don't bother even making an assertion.
+		int const aKind = (1 << atomKind(a));
+		if (aKind & GC_TYPE_MASK)
+		{
+			if (aKind & RC_TYPE_MASK)
+			{
+				MMgc::RCObject* rcptr = (MMgc::RCObject*)atomPtr(a);
+				if (rcptr)
+					rcptr->IncrementRef();
+				// fall through to InlineWriteBarrierTrap()
 			}
-			arr[i] = 0;
+			gc->InlineWriteBarrierTrap(container);
 		}
 	}
 
 	/*static*/ 
-	void AvmCore::atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
-	{ 
-		Atom atom = *address;
-		if(!isNull(atom)) {
-			switch(atom&7)
-			{	
-				case kStringType:
-				case kObjectType:
-				case kNamespaceType:
-					MMgc::RCObject *obj = (MMgc::RCObject*)(atom&~7);
-					obj->DecrementRef();
-					break;
-			}
-		}
-
-		switch(atomNew&7)
+	void AvmCore::decrementAtomRegion(Atom* arr, int length)
+	{
+		Atom* end = arr + length;
+		while (arr < end)
 		{
-		case kStringType:
-		case kObjectType:
-		case kNamespaceType:
-			if(!isNull(atomNew))
-				((MMgc::RCObject*)(atomNew&~7))->IncrementRef();
-			// fall through
-		case kDoubleType:
-			{
-				gc->InlineWriteBarrierTrap(container);
-			}
-			break;	
-
+			decr_atom(*arr);
+			*arr++ = 0;
 		}
+	}
+
+	/*static*/ void AvmCore::atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
+	{ 
+		decr_atom(*address);
+		incr_atom(gc, container, atomNew);
 		*address = atomNew;
+	}
+
+	/*static*/ void AvmCore::atomWriteBarrier_ctor(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
+	{ 
+		incr_atom(gc, container, atomNew);
+		*address = atomNew;
+	}
+
+	/*static*/ void AvmCore::atomWriteBarrier_dtor(Atom *address)
+	{ 
+		decr_atom(*address);
+		*address = 0;
 	}
 
 #ifdef _DEBUG

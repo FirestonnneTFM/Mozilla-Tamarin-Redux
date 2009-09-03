@@ -1153,6 +1153,12 @@ namespace MMgc
 		 */
 		/*REALLY_INLINE*/ void WriteBarrierWriteRC(const void *address, const void *value);
 		
+		/*
+		 * Streamlined versions to be used from the ctor/dtor of containers.
+		 */
+		/*REALLY_INLINE*/ void WriteBarrierWriteRC_ctor(const void *address, const void *value);
+		/*REALLY_INLINE*/ void WriteBarrierWriteRC_dtor(const void *address);
+		
 		/**
 		 * Perform the actual store of value into *address.  (This is just a store, but there
 		 * is additional error checking in debug builds.)
@@ -1238,15 +1244,17 @@ namespace MMgc
 		void privateWriteBarrierRC(const void *container, const void *address, const void *value);
 		
 		/**
-		 * Version of privateWriteBarrierRC() optimized for value = NULL.
-		 */
-		void FASTCALL privateWriteBarrierRC_NULL(const void *address);
-		
-		/**
 		 * A write barrier that finds the container's address and the container's GC
 		 * and then performs a standard RC write barrier operation (see privateWriteBarrierRC).
 		 */
-		static void WriteBarrierRC(const void *address, const void *value);
+		static void FASTCALL WriteBarrierRC(const void *address, const void *value);
+
+		/**
+		 * Like WriteBarrierRC, but used when calling from a container's ctor/dtor.
+		 * We can avoid some unnecessary work in each case.
+		 */
+		static void FASTCALL WriteBarrierRC_ctor(const void *address, const void *value);
+		static void FASTCALL WriteBarrierRC_dtor(const void *address);
 
 		/**
 		 * Host API: if 'address' points to a GC page (it can point into an object, not just

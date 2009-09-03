@@ -50,31 +50,23 @@ namespace avmplus
 				// nothing
 			}
 
-			explicit AtomWB(Atom t) : m_atom(t)
+			explicit AtomWB(Atom t)  // : m_atom(t) -- not necessary, atomWriteBarrier_ctor handles it
 			{ 
-				if (atomKind(t) <= kNamespaceType)
-				{
-					MMgc::RCObject* r = (MMgc::RCObject*)atomPtr(t);
-					if (r)
-						r->IncrementRef();
-				}
+				MMgc::GC* const gc = MMgc::GC::GetGC(this);
+				void* const container = gc->FindBeginningFast(this);
+				AvmCore::atomWriteBarrier_ctor(gc, container, &m_atom, t);
 			}
 
 			~AtomWB() 
 			{ 
-				if (atomKind(m_atom) <= kNamespaceType)
-				{
-					MMgc::RCObject* r = (MMgc::RCObject*)atomPtr(m_atom);
-					if (r)
-						r->DecrementRef();
-				}
-				m_atom = 0;
+				AvmCore::atomWriteBarrier_dtor(&m_atom);
 			}
 
 			Atom operator=(Atom tNew)
 			{
-				MMgc::GC* gc = MMgc::GC::GetGC(this);
-				set(gc, gc->FindBeginningFast(this), tNew);
+				MMgc::GC* const gc = MMgc::GC::GetGC(this);
+				void* const container = gc->FindBeginningFast(this);
+				set(gc, container, tNew);
 				return tNew;
 			}
 			

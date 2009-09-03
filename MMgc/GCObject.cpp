@@ -61,16 +61,6 @@ namespace MMgc
 		GC::GetGC(gcObject)->Free(gcObject);
 	}		
 
-	void FASTCALL RCObject::IncrementRefSlow()
-	{
-		this->IncrementRef();
-	}
-
-	void FASTCALL RCObject::DecrementRefSlow()
-	{
-		this->DecrementRef();
-	}
-
 #ifdef MMGC_RC_HISTORY
 	
 	void RCObject::DumpHistory()
