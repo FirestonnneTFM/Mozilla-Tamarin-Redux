@@ -124,7 +124,7 @@ namespace MMgc
 	#ifdef MMGC_MEMORY_PROFILER
 		size_t m_totalAskSize;
 	#endif 
-		bool m_isFixedAllocSafe;
+		bool const m_isFixedAllocSafe;
 
 		bool IsFull(FixedBlock *b) const { return b->numAlloc == m_itemsPerBlock; }
 		void CreateChunk(bool canFail);

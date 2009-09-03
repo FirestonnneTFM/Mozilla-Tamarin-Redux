@@ -3321,9 +3321,9 @@ bail:
 	{
 		GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item, /*rehash=*/!collecting);
 		GCAssert(weakRefs.get(item) == NULL);
-		GCAssert(ref != NULL);
-		GCAssert(ref->get() == item || ref->get() == NULL);
+		GCAssert(ref != NULL || heap->GetStatus() == kMemAbort);
 		if(ref) {
+			GCAssert(ref->get() == item || ref->get() == NULL);
 			ref->m_obj = NULL;
 			item = GetRealPointer(item);
 			if (GCLargeAlloc::IsLargeBlock(item)) {
@@ -3570,11 +3570,11 @@ bail:
  		} else if(stackEnter == NULL) {
  			stackEnter = enter;
 			edge = true;
-			m_gcThread = VMPI_currentThread();
 			VMPI_lockAcquire(&m_gcLock);
+			m_gcThread = VMPI_currentThread();
  		}
 
-		if(edge && doCollectionWork) {
+		if(edge && doCollectionWork && !destroying) {
 			if(policy.queryFullCollectionQueued())
 				Collect(false);
 			else
@@ -3605,7 +3605,7 @@ bail:
  		// we do nothing, which means we rely on reserve or other
  		// listeners to free memory or head straight to abort
  
- 		if(to == kMemReserve) {
+ 		if(to == kMemReserve || to == kMemSoftLimit) {
  			if(onThread()) {
  				Collect();
  			} else {

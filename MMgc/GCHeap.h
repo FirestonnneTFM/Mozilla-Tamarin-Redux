@@ -47,7 +47,16 @@ namespace MMgc
 		GCHeapConfig();
 		
 		size_t initialSize;
+		/**
+		 * if the heap gets this big we stop expanding
+		 */
 		size_t heapLimit;
+
+		/**
+		 * if the heap gets this big we fire memory status 
+		 * notifications and engage collection activities
+		 */
+		size_t heapSoftLimit;
 		/**
 		 * If the application wants the allocator to exit when memory
 		 * runs out and reclamation efforts fail set this to a
@@ -535,6 +544,7 @@ namespace MMgc
 		}
 
 		void StatusChangeNotify(MemoryStatus to);
+		void CheckForStatusReturnToNormal();
 
 		void ValidateHeapBlocks();
 
@@ -542,6 +552,11 @@ namespace MMgc
 
  		void Enter(EnterFrame *frame);
  		void Leave();
+
+		bool statusNotNormalOrAbort()
+		{
+			return status != kMemNormal && status != kMemAbort;
+		}
 
 		// data section
 		static GCHeap *instance;
