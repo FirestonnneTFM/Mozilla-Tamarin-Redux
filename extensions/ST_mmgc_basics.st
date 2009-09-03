@@ -42,7 +42,15 @@
 
 %%methods
 using namespace MMgc;
-
+class DeleteInFinalizer : public GCFinalizedObject {
+ public:
+  DeleteInFinalizer(GCFinalizedObject *big, GCFinalizedObject *small) : big(big), small(small) {};
+  ~DeleteInFinalizer() { delete big; delete small; }
+ private:
+  GCFinalizedObject *big;
+  GCFinalizedObject *small;
+  
+};
 %%decls
 private:
     MMgc::GC *gc;
@@ -186,4 +194,16 @@ delete gc;
     MMgc::GCLargeAlloc::SetMark(obj);
     %%verify MMgc::GCLargeAlloc::GetMark(obj)==true
 
+%%test finalizerDelete
+    MMGC_GCENTER(gc);
+	new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
+	//delete m;	delete m; // this verifies we crash, it does	
+	gc->Collect(false);
+	%%verify true
+    GCFinalizedObject *gcfo = new (gc) GCFinalizedObject();
+    gcfo->~GCFinalizedObject();
+    gcfo->~GCFinalizedObject(); // this used to be a deleteing dtor and would crash, not anymore
+			 
 
+									
+									   

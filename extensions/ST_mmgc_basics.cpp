@@ -59,6 +59,7 @@ void test6();
 void test7();
 void test8();
 void test9();
+void test10();
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
@@ -68,7 +69,7 @@ private:
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
     : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names)
 {}
-const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc", NULL };
+const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerDelete", NULL };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -81,6 +82,7 @@ case 6: test6(); return;
 case 7: test7(); return;
 case 8: test8(); return;
 case 9: test9(); return;
+case 10: test10(); return;
 }
 }
 void ST_mmgc_basics::prologue() {
@@ -97,7 +99,15 @@ delete gc;
 
 }
 using namespace MMgc;
-
+class DeleteInFinalizer : public GCFinalizedObject {
+ public:
+  DeleteInFinalizer(GCFinalizedObject *big, GCFinalizedObject *small) : big(big), small(small) {};
+  ~DeleteInFinalizer() { delete big; delete small; }
+ private:
+  GCFinalizedObject *big;
+  GCFinalizedObject *small;
+  
+};
 void ST_mmgc_basics::test0() {
 verifyPass(gc != NULL, "gc != NULL", __FILE__, __LINE__);
 
@@ -233,7 +243,20 @@ verifyPass(MMgc::GCLargeAlloc::GetMark(obj)==false, "MMgc::GCLargeAlloc::GetMark
     MMgc::GCLargeAlloc::SetMark(obj);
 verifyPass(MMgc::GCLargeAlloc::GetMark(obj)==true, "MMgc::GCLargeAlloc::GetMark(obj)==true", __FILE__, __LINE__);
 
+}
+void ST_mmgc_basics::test10() {
+    MMGC_GCENTER(gc);
+	new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
+	//delete m;	delete m; // this verifies we crash, it does	
+	gc->Collect(false);
+verifyPass(true, "true", __FILE__, __LINE__);
+    GCFinalizedObject *gcfo = new (gc) GCFinalizedObject();
+    gcfo->~GCFinalizedObject();
+    gcfo->~GCFinalizedObject(); // this used to be a deleteing dtor and would crash, not anymore
+			 
 
+									
+									   
 
 }
 void create_mmgc_basics(AvmCore* core) { new ST_mmgc_basics(core); }
