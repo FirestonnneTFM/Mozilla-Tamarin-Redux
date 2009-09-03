@@ -154,7 +154,7 @@ namespace avmplus
 		StringIndexer str_idx(s);
 		for (int i = 0; i < count; i++)
 		{
-			utf32_t ch = str_idx[offset + i];
+			uint32_t ch = str_idx[offset + i];
 			// must be alphabetic
 			if (ch < 'A' || ch > 'z' || (ch > 'Z' && ch < 'a'))
 				return false;

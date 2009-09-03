@@ -77,7 +77,7 @@ namespace avmplus
 	{
 		while (index < s->length())
 		{
-			utf32_t ch = s[index];
+			uint32_t ch = s[index];
 			if (!(ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' || ch == '\f' || ch == '\v' || 
 				 (ch >= 0x2000 && ch <=0x200b) || ch == 0x2028 || ch == 0x2029 || ch == 0x205f || ch == 0x3000 ))
 				break;
@@ -94,7 +94,7 @@ namespace avmplus
 		negative = false;
 		if (index >= s->length())
 			return index;
-		utf32_t ch = s[index];
+		uint32_t ch = s[index];
 		if (ch == '+') {
 			index++;
 		} else if (ch == '-') {
@@ -264,7 +264,7 @@ namespace avmplus
 	{
 		if (s->length() - index < 2 || s[index] != '0')
 			return false;
-		utf32_t ch = s[index+1];
+		uint32_t ch = s[index+1];
 		return (ch == 'x' || ch == 'X');
 	}
 
@@ -1235,7 +1235,7 @@ namespace avmplus
 		int32_t numDigits = 0;
 		int32_t exp10 = 0;
 		double result = 0;
-		utf32_t ch = 0;
+		uint32_t ch = 0;
 
 		StringIndexer s(inStr);
 		int32_t index = skipSpaces(s, 0);

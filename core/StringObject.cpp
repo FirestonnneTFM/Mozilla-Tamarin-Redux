@@ -55,6 +55,13 @@
 // operations.
 #define TSTR_MAX_LOMEM_EXTRABYTES 16384
 
+// Never allocate dynamic strings smaller than this (in bytes)
+#define TSTR_MIN_DYNAMIC_ALLOCATION 32
+
+// in fixDependentString, don't bother going dependent->dynamic if the memory
+// we would save is < this (in bytes)
+#define TSTR_DEPENDENT_STRING_NUISANCE_SAVINGS int32_t(sizeof(String))
+
 using namespace MMgc;
 
 namespace avmplus
@@ -70,18 +77,18 @@ namespace avmplus
 	};
 	static const Zero k_zero = { 0 };
 
-	inline String::Pointers::Pointers(const String* const self)
+	REALLY_INLINE String::Pointers::Pointers(const String* const self)
 	{
 		AvmAssert(self != NULL);
 		if (!self->isDependent())
 			p8 = self->m_buffer.p8;
 		else
-			p8 = self->m_buffer.p8 + self->m_extra.master->m_buffer.offset_bytes;
+			p8 = self->m_extra.master->m_buffer.p8 + self->m_buffer.offset_bytes;
 	}
 
 /////////////////////////// Helpers: Widening //////////////////////////////
 
-	inline void _widen8_16(const uint8_t* src, wchar* dst, int32_t len)
+	REALLY_INLINE void _widen8_16(const uint8_t* src, wchar* dst, int32_t len)
 	{
 		while (len-- > 0)
 			*dst++ = wchar(*src++);
@@ -89,7 +96,7 @@ namespace avmplus
 
 /////////////////////////// Helpers: Narrowing //////////////////////////////
 
-	inline void _narrow16_8(const wchar* src, uint8_t* dst, int32_t len)
+	REALLY_INLINE void _narrow16_8(const wchar* src, uint8_t* dst, int32_t len)
 	{
 		while (len-- > 0)
 		{
@@ -116,12 +123,12 @@ namespace avmplus
 
 /////////////////////////// Helper: get AvmCore /////////////////////////////
 
-	inline MMgc::GC* _gc(const String* s)
+	REALLY_INLINE MMgc::GC* _gc(const String* s)
 	{
 		return MMgc::GC::GetGC(s);
 	}
 
-	inline AvmCore* _core(const String* s)
+	REALLY_INLINE AvmCore* _core(const String* s)
 	{
 		MMgc::GC *gc = MMgc::GC::GetGC(s);
 		return gc->core();
@@ -139,7 +146,7 @@ namespace avmplus
 	}
 
 	template <typename STR1, typename STR2>
-	static inline bool equalsImpl(const STR1* str1, const STR2* str2, int32_t len)
+	static REALLY_INLINE bool equalsImpl(const STR1* str1, const STR2* str2, int32_t len)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR1)
 		PREVENT_SIGNED_CHAR_PTR(STR2)
@@ -152,8 +159,13 @@ namespace avmplus
 		return true;
 	}
 
+	// NOTE: this routine cannot use memcmp(), as the test 
+	// ecma3/String/localeCompare_rt.as depends on the difference 
+	// in character values, and memcmp() does not guarantee to
+	// return this value
+
 	template <typename STR1, typename STR2>
-	static inline int32_t compareImpl(const STR1* str1, const STR2* str2, int32_t len)
+	static REALLY_INLINE int32_t compareImpl(const STR1* str1, const STR2* str2, int32_t len)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR1)
 		PREVENT_SIGNED_CHAR_PTR(STR2)
@@ -167,7 +179,7 @@ namespace avmplus
 	}
 
 	template <typename STR, typename PATTERN>
-	static inline int32_t indexOfImpl(const STR* str, int32_t start, int32_t right, const PATTERN* pat, int32_t patlen)
+	static REALLY_INLINE int32_t indexOfImpl(const STR* str, int32_t start, int32_t right, const PATTERN* pat, int32_t patlen)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
@@ -190,7 +202,7 @@ namespace avmplus
 	}
 
 	template <typename STR>
-	static inline int32_t indexOfCharCodeImpl(const STR* str, int32_t start, int32_t right, wchar c)
+	static REALLY_INLINE int32_t indexOfCharCodeImpl(const STR* str, int32_t start, int32_t right, wchar c)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 
@@ -204,7 +216,7 @@ namespace avmplus
 	}
 
 	template <typename STR, typename PATTERN>
-	static inline int32_t lastIndexOfImpl(const STR* str, int32_t start, const PATTERN* pat, int32_t patlen)
+	static REALLY_INLINE int32_t lastIndexOfImpl(const STR* str, int32_t start, const PATTERN* pat, int32_t patlen)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
@@ -229,7 +241,7 @@ namespace avmplus
 	}
 
 	template <typename STR>
-	static inline int32_t hashCodeImpl(const STR* str, int32_t len)
+	static REALLY_INLINE int32_t hashCodeImpl(const STR* str, int32_t len)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 
@@ -245,45 +257,43 @@ namespace avmplus
 
 	// ctor for a static string.
 
-	inline String::String(const void* buffer, Width w, int32_t length) :
+	REALLY_INLINE String::String(const void* buffer, Width w, int32_t length, bool is7bit) :
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(kStringType), 
 #endif
 		m_buffer(buffer),	// static data - no WB() needed
 		m_extra(NULL),
 		m_length(length), 
-		// note that TSTR_7BIT is not pre-emptively set (it's done lazily by StUTF8String)
-		m_bitsAndFlags(w | (kStatic << TSTR_TYPE_SHIFT))
+		m_bitsAndFlags(w | (kStatic << TSTR_TYPE_SHIFT) | (uint32_t(is7bit) << TSTR_7BIT_SHIFT))
 	{
 	}
 
 	// ctor for a dynamic string.
 
-	inline String::String(MMgc::GC* gc, void* buffer, Width w, int32_t length, int32_t charsLeft) :
+	REALLY_INLINE String::String(MMgc::GC* gc, void* buffer, Width w, int32_t length, int32_t charsLeft, bool is7bit) :
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(kStringType), 
 #endif
 		m_buffer((void*)NULL),
 		m_extra(NULL),
 		m_length(length), 
-		// note that TSTR_7BIT is not pre-emptively set (it's done lazily by StUTF8String)
-		m_bitsAndFlags(w | (kDynamic << TSTR_TYPE_SHIFT) | (charsLeft << TSTR_CHARSLEFT_SHIFT))
+		m_bitsAndFlags(w | (kDynamic << TSTR_TYPE_SHIFT) | (charsLeft << TSTR_CHARSLEFT_SHIFT) | (uint32_t(is7bit) << TSTR_7BIT_SHIFT))
 	{
 		WB(gc, this, &this->m_buffer.pv, buffer);
 	}
 
 	// ctor for a dependent string.
 
-	inline String::String(MMgc::GC* gc, Stringp master, int32_t start, int32_t length) :
+	REALLY_INLINE String::String(MMgc::GC* gc, Stringp master, int32_t start, int32_t length) :
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(kStringType), 
 #endif
 		m_buffer(uintptr_t(start << master->getWidth())),
 		m_extra(NULL),
 		m_length(length), 
-		// note that we propagate TSTR_7BIT: if the entire master is TSTR_7BIT, then so is the dependent string.
-		// @todo: a dependent string could qualify for TSTR_7BIT even if it's master is not. worth checking for?
-		m_bitsAndFlags((master->m_bitsAndFlags & (TSTR_WIDTH_MASK | TSTR_7BIT)) | (kDependent << TSTR_TYPE_SHIFT))
+		// note that we propagate TSTR_7BIT_FLAG: if the entire master is TSTR_7BIT_FLAG, then so is the dependent string.
+		// @todo: a dependent string could qualify for TSTR_7BIT_FLAG even if it's master is not. worth checking for?
+		m_bitsAndFlags((master->m_bitsAndFlags & (TSTR_WIDTH_MASK | TSTR_7BIT_FLAG)) | (kDependent << TSTR_TYPE_SHIFT))
 	{
 		WBRC(gc, this, &this->m_extra.master, master);
 	}
@@ -301,10 +311,14 @@ namespace avmplus
 
 	// Private static method to create a dynamic string, given a buffer and its size in characters
 
-	Stringp String::createDynamic(GC* gc, const void* data, int32_t len, Width w, int32_t extra)
+	Stringp String::createDynamic(GC* gc, const void* data, int32_t len, Width w, bool is7bit, int32_t extra)
 	{
 		AvmAssert(w != kAuto);
 		AvmAssert(len >= 0);
+		
+		// only 8-bit strings should set the 7-bit flag
+		if (w != k8)
+			is7bit = false;
 
 		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
 		int32_t alloc = len + extra;
@@ -328,7 +342,7 @@ namespace avmplus
 		// the extra character must not exceed the available field size
 		AvmAssert(charsLeft <= int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT));
 
-		Stringp s = new(gc) String(gc, buffer, w, len, charsLeft);
+		Stringp s = new(gc) String(gc, buffer, w, len, charsLeft, is7bit);
 
 		if (data != NULL && len != 0)
 			VMPI_memcpy(buffer, data, size_t(len << w));
@@ -347,12 +361,15 @@ namespace avmplus
 
 	// Private static method to create a string, given a static buffer and its size in characters
 
-	Stringp String::createStatic(GC* gc, const void* data, int32_t len, Width w)
+	Stringp String::createStatic(GC* gc, const void* data, int32_t len, Width w, bool is7bit)
 	{
 		AvmAssert(w != kAuto);
 		AvmAssert(len >= 0);
 		MMGC_MEM_TAG( "Strings" );
-		return new(gc) String(data, w, len);
+		// only 8-bit strings should set the 7-bit flag
+		if (w != k8)
+			is7bit = false;
+		return new(gc) String(data, w, len, is7bit);
 	}
 
 	// Create a string out of an 8bit buffer. Characters are just widened and copied, not interpreted as UTF8.
@@ -370,7 +387,7 @@ namespace avmplus
 		if (desiredWidth == kAuto)
 			desiredWidth = k8;
 
-		if (core->publicNamespace && desiredWidth == k8)
+		if (desiredWidth == k8 && core->kEmptyString != NULL)
 		{
 			// core has been initialized, check for cached characters
 			if (len == 0)
@@ -380,15 +397,17 @@ namespace avmplus
 				return core->cachedChars[*((uint8_t*) buffer)];
 		}
 
+		const bool is7bit = false; // actually, might be, we just haven't checked yet.
+
 		Stringp s = NULL;
 		GC* gc = core->GetGC();
 		if (staticBuf && desiredWidth == k8)
 		{
-			s = createStatic(gc, buffer, len, k8);
+			s = createStatic(gc, buffer, len, k8, is7bit);
 		}
 		else
 		{
-			s = createDynamic(gc, NULL, len, desiredWidth);
+			s = createDynamic(gc, NULL, len, desiredWidth, is7bit);
 			_copyBuffers(buffer, s->m_buffer.p8, len, k8, desiredWidth);
 		}
 		return s;
@@ -401,8 +420,9 @@ namespace avmplus
 
 		if (w == kAuto)
 			return NULL;
-
-		Stringp newStr = createDynamic(_gc(this), NULL, length(), w);
+		
+		const bool is7bit = false;
+		Stringp newStr = createDynamic(_gc(this), NULL, length(), w, is7bit);
 		
 		Pointers ptrs(this);
 		Pointers new_ptrs(this);
@@ -436,14 +456,15 @@ namespace avmplus
 
 /////////////////////////////// Conversions ////////////////////////////////
 
-	void String::makeDynamic(const char* dataStart, uint32_t dataSize)
+	void String::makeDynamic(const uint8_t* dataStart, uint32_t dataSize)
 	{
+		AvmAssert(dataStart != NULL);
+		AvmAssert(dataSize > 0);
 		switch(getType())
 		{
 			case kStatic:
-				// do not convert is range is given and data falls within
-				if (dataStart && dataSize 
-					&& ((uint32_t) ((const char*) m_buffer.p8 - dataStart) >= dataSize))
+				// do not convert if range is given and data falls within
+				if ((uint32_t) (m_buffer.p8 - dataStart) >= dataSize)
 					break;
 				// else fall thru
 			case kDependent:
@@ -461,9 +482,8 @@ namespace avmplus
 		// If the length of this instance is > the master length, this
 		// string is the result of an auto-concat; we keep the master in
 		// in that case - there is little to no memory gain to be expected.
-		// Also, forget about conversion if the memry to be gained is less
-		// than the size of the String instance that could be released.
-		if (m_length >= (m_extra.master->m_length - (int32_t) sizeof(String)))
+		// Also, forget about conversion if the memory to be gained is minimal.
+		if (m_length >= (m_extra.master->m_length - (TSTR_DEPENDENT_STRING_NUISANCE_SAVINGS >> getWidth())))
 			return;
 
 		// Do not convert to a static string here, because a static string
@@ -474,6 +494,7 @@ namespace avmplus
 
 	void String::convertToDynamic()
 	{
+		AvmAssert(getType() != kDynamic);
 		// Convert this string to be a dynamic string
 		int32_t bytes = m_length << getWidth();
 		GC* gc = _gc(this);
@@ -488,11 +509,6 @@ namespace avmplus
 	}
 
 /////////////////////////////// Comparison /////////////////////////////////
-
-	// NOTE: this routine cannot use memcmp(), as the test 
-	// ecma3/String/localeCompare_rt.as depends on the difference 
-	// in character values, and memcmp() does not guarantee to
-	// return this value
 
 	int32_t String::Compare(String& other, int32_t other_start, int32_t other_length) const
 	{
@@ -627,72 +643,9 @@ namespace avmplus
 		return other->Compare(*this);
 	}
 
-	bool String::equalsUTF8(const utf8_t* buf, int32_t bytes) const
-	{
-		// @todo -- use TSTR_7BIT here. (this function isn't currently used.) 
-
-		if (buf == NULL || bytes <= 0)
-			return false;
-
-		Width w = getWidth();
-
-		Pointers ptrs(this);
-
-		for (int32_t i = length(); i > 0; i--)
-		{
-			wchar ch1 = (w == k8) ? wchar(*ptrs.p8++) : *ptrs.p16++;
-			uint32_t ch2;
-			if ((*buf & 0x7FF) < 0x80)
-			{
-				// ASCII
-				ch2 = uint32_t(*buf++);
-				bytes--;
-			}
-			else
-			{
-				int bytesRead = UnicodeUtils::Utf8ToUcs4(buf, bytes, &ch2);
-				bytes -= bytesRead;
-				buf += bytesRead;
-			}
-			if (bytes < 0 || ch1 != ch2)
-				return false;
-			if (bytes == 0)
-				// UTF-8 string exhausted
-				return (i == 1);
-		}
-		return false;
-	}
-
 /////////////////////////////// Hash Codes /////////////////////////////////
 
 	// The hashing algorithm uses the full character width
-
-	int32_t String::hashCodeUTF8(const utf8_t* buf, int32_t len)
-	{
-		// @todo -- use TSTR_7BIT here. (this function isn't currently used.) 
-		
-		// must be same signed-ness as other hashcode functions.
-		// experimentation shows better results from signed (vs unsigned).
-		int32_t hashCode = 0; 
-		while (len) 
-		{
-			uint32_t ch;
-			if (*buf < 0x80)
-				// ASCII
-				ch = *buf++, len--;
-			else
-				len -= UnicodeUtils::Utf8ToUcs4(buf, len, &ch);
-			if (ch >= 0x10000)
-			{
-				// first byte of hi word of surrogate pair
-				wchar ch1 = (wchar) (((ch-0x10000)>>10) & 0x3FF) + 0xD800;
-				ch = (wchar) ((ch-0x10000) & 0x3FF) + 0xDC00;
-				hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ ch1;
-			}
-			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ ch;
-		}
-		return hashCode;
-	}
 
 	int32_t String::hashCodeLatin1(const char* buf, int32_t len)
 	{
@@ -983,8 +936,6 @@ namespace avmplus
 
 		int32_t newLen = m_length + numChars;
 
-		// TODO: make thread safe
-
 		Stringp master = (isDependent()) ? m_extra.master : this;
 		// check for characters left in leftStr's buffer, or if leftStr has spent its padding already
 		// string types other than kDynamic have charsLeft == 0
@@ -1049,12 +1000,13 @@ namespace avmplus
 		// create a new kDynamic string containing the concatenated string
 		// See the definition of TSTR_MAX_CHARSLEFT above for an explanation
 		// of this algorithm
-		int32_t newSize = (newLen < 32) ? 32 : (newLen << 1);
+		int32_t newSize = (newLen < TSTR_MIN_DYNAMIC_ALLOCATION) ? TSTR_MIN_DYNAMIC_ALLOCATION : (newLen << 1);
 		int32_t extra   = newSize - newLen;
 		if (extra > (int32_t) TSTR_MAX_CHARSLEFT)
 			extra = (int32_t) TSTR_MAX_CHARSLEFT;
 
-		Stringp newStr = createDynamic(gc, NULL, newLen, newWidth, extra);
+		const bool is7bit = false; // actually, might be, we just haven't checked yet.
+		Stringp newStr = createDynamic(gc, NULL, newLen, newWidth, is7bit, extra);
 		// copy leftStr
 		void* ptr = _copyBuffers(my_ptrs.pv, 
 					  newStr->m_buffer.pv, 
@@ -1290,118 +1242,6 @@ namespace avmplus
 
 /////////////////////////////// Case conversion /////////////////////////////////
 
-#ifdef USE_RANGE_TABLE
-	bool l2u_cyrillic(uint32_t* pch)
-	{
-		uint32_t ch = *pch;
-		if ( ((ch>=0x0461 && ch<=0x04BF) && (ch&1) && !(ch==0x0483 || ch==0x0485 || ch==0x487 || ch==0x0489)) ||
-			 ((ch>=0x04D1 && ch<=0x04F9) && (ch&1)) )
-		{
-				if (ch!=0x0483 && ch!=0x0485 && ch!=0x487 && ch!=0x0489)
-				{
-					*pch -= 1;
-					return true;
-				}
-		}
-		return false;
-	}
-
-	bool u2l_cyrillic(uint32_t* pch)
-	{
-		uint32_t ch = *pch;
-		if ( ((ch>=0x0460 && ch<=0x04BE) && !(ch&1) && !(ch==0x0482 || ch==0x0484 || ch==0x486 || ch==0x0488)) ||
-			 ((ch>=0x04D0 && ch<=0x04F8) && !(ch&1)) )
-		{
-				if (ch!=0x0482 && ch!=0x0484 && ch!=0x486 && ch!=0x0488)
-				{
-					*pch += 1;
-					return true;
-				}
-		}
-		return false;
-	}
-
-	bool l2u_latin_ext(uint32_t* pch)
-	{
-		uint32_t ch = *pch;
-		if ( ((ch<=0x012F) && (ch&0x1)) ||								// odd only
-			 ((ch>=0x013A && ch<=0x0148) && !(ch&0x1)) ||				// even only
-			 ((ch>=0x014B && ch<=0x0177) && (ch&1)) ||					// odd only
-			 ((ch>=0x0201 && ch<=0x0233) && (ch&1) && ch!=0x0221) )		// odd only 
-		{
-			*pch -= 1;
-			return true;
-		}
-
-		return false;
-	}
-
-	bool u2l_latin_ext(uint32_t* pch)
-	{
-		uint32_t ch = *pch;
-		// only even numbers
-		if ( ((ch<=0x012E) && !(ch&0x1)) ||
-			 ((ch>=0x0139 && ch<=0x0147) && (ch&0x1)) ||
-			 ((ch>=0x014A && ch<=0x0176) && !(ch&1)) ||
-			 ((ch>=0x0200 && ch<=0x0232) && !(ch&1) && (ch!=0x0220)) )
-		{
-			*pch += 1;
-			return true;
-		}
-
-		return false;
-	}
-
-	typedef bool (*rangehandler)(uint32_t* ch);
-
-	typedef struct case_range {
-		uint32_t			low;
-		uint32_t			high;
-		int32_t			offset;
-		rangehandler	handler;
-		uint8_t			flags;
-	} CaseRange;
-
-	// we subtract the offset
-	const CaseRange lowerCaseRange[] = {
-		//{ 0x0061, 0x007A, 0x20 , NULL },			// LATIN
-		{ 0x0101, 0x0233, 0x01, l2u_latin_ext },	// LATIN_EXT(A and B)
-		{ 0x03B1, 0x03CB, 0x20 , NULL },			// GREEK
-		{ 0x0430, 0x044F, 0x20 , NULL },			// CYRILLIC
-		{ 0x0450, 0x045F, 0x50, NULL },				// CYRILLIC
-		{ 0x0461, 0x04BF, 0x01, l2u_cyrillic },		// CYRILLIC
-		{ 0x0561, 0x057F, 0x30 , NULL },			// ARMENIAN
-		{ 0x10C0, 0x10E5, 0x20 , NULL },			// GEORGIAN
-		{ 0x1F00, 0X1F07, -0x08 , NULL },			// GREEK_EXT
-		{ 0x1F10, 0x1F15, -0x08 , NULL },			// GREEK_EXT
-		{ 0x1F20, 0x1F27, -0x08 , NULL },			// GREEK_EXT
-		{ 0x1F30, 0x1F37, -0x08 , NULL },			// GREEK_EXT
-		{ 0x2170, 0x217F, 0x10 , NULL },			// NUMBERS
-		{ 0x24D0, 0x24E9, 0x1A , NULL },			// ENCLOSED_ALPHA
-		{ 0xFF41, 0xFF5A, 0x20 , NULL }				// FULLWIDTH
-	};
-
-	// we add the offset
-	const CaseRange upperCaseRange[] = {
-		//{ 0x0041, 0x005A, 0x20 , NULL },			// LATIN
-		//{ 0x00C0, 0x00DE, 0x20, NULL },				// LATIN
-		{ 0x0100, 0x0232, 0x01, u2l_latin_ext },	// LATIN_EXT(A and B)
-		{ 0x0391, 0x03AB, 0x20 , NULL },			// GREEK
-		{ 0x0410, 0x042F, 0x20 , NULL },			// CYRILLIC
-		{ 0x0400, 0x040F, 0x50, NULL },				// CYRILLIC
-		{ 0x0460, 0x04BE, 0x01, u2l_cyrillic },		// CYRILLIC
-		{ 0x0531, 0x054F, 0x30 , NULL },			// ARMENIAN
-		{ 0x10A0, 0x10C5, 0x20 , NULL },			// GEORGIAN
-		{ 0x1F08, 0X1F0F, -0x08 , NULL },			// GREEK_EXT
-		{ 0x1F18, 0x1F1D, -0x08 , NULL },			// GREEK_EXT
-		{ 0x1F28, 0x1F2F, -0x08 , NULL },			// GREEK_EXT
-		{ 0x1F38, 0x1F3F, -0x08 , NULL },			// GREEK_EXT
-		{ 0x2160, 0x216F, 0x10 , NULL },			// NUMBERS
-		{ 0x24B6, 0x24CF, 0x1A , NULL },			// ENCLOSED_ALPHA
-		{ 0xFF21, 0xFF3A, 0x20 , NULL }				// FULLWIDTH
-	};
-#endif
-
 
 	static const wchar lowerCaseBase[] = 
 	{
@@ -1606,40 +1446,6 @@ namespace avmplus
 		if (ch < 0xFF)
 			return toupper_map[ch] ^ ch;
 
-#ifdef USE_RANGE_TABLE
-		// Do a binary search in lowerCaseRange for range that char is in
-		int32_t lor = 0;
-		int32_t hir = (sizeof(lowerCaseRange) / sizeof(lowerCaseRange[0])) - 1;
-
-		while (lor <= hir) 
-		{
-			int32_t pivot = (lor+hir)>>1;
-			CaseRange conv = lowerCaseRange[pivot];
-
-			if (ch>=conv.low && ch<=conv.high)
-			{
-				// if there is a special handler, call it
-				if (conv.handler)
-				{
-					uint32_t tmp = ch;
-					if (conv.handler(&tmp))
-						return tmp;
-					else
-						break; // if the handler didn't handle it, keep going
-				}
-				else
-					return (ch - conv.offset);
-			}
-			else if (ch < conv.low) 
-			{
-				hir = pivot-1;
-			} 
-			else 
-			{
-				lor = pivot+1;
-			}
-		}
-#else
 		// offset 0x1C60
 		/*
 		if ( (ch>=0x2D00 && ch<=0x2D25) )	// Georgian
@@ -1700,7 +1506,6 @@ namespace avmplus
 				return (ch - 1);
 			}
 		}
-#endif
 
 		if ( ch&1 ) // only looking for odd chars here
 		{
@@ -1913,40 +1718,6 @@ namespace avmplus
 		if (ch < 0xFF)
 			return tolower_map[ch] ^ ch;
 
-#ifdef USE_RANGE_TABLE
-		// Do a binary search in lowerCaseRange for range that char is in
-		int32_t lor = 0;
-		int32_t hir = (sizeof(upperCaseRange) / sizeof(upperCaseRange[0])) - 1;
-
-		while (lor <= hir) 
-		{
-			int32_t pivot = (lor+hir)>>1;
-			CaseRange conv = upperCaseRange[pivot];
-
-			if (ch>=conv.low && ch<=conv.high)
-			{
-				// if there is a special handler, call it
-				if (conv.handler)
-				{
-					uint32_t tmp = ch;
-					if (conv.handler(&tmp))
-						return tmp;
-					else
-						break; // if the handler didn't handle it, keep going
-				}
-				else
-					return (ch - conv.offset);
-			}
-			else if (ch < conv.low) 
-			{
-				hir = pivot-1;
-			} 
-			else 
-			{
-				lor = pivot+1;
-			}
-		}
-#else
 		// offset x1C60	
 		if( ch>=0x10A0 && ch<=0x10C5 )	// Georgian
 		{
@@ -2007,7 +1778,7 @@ namespace avmplus
 				return (ch + 1);
 			}
 		}
-#endif
+
 		if ( !(ch&1) ) // only looking for even chars
 		{
 			if ( (ch>=0x03D8 && ch<=0x03EE) )
@@ -2081,7 +1852,8 @@ namespace avmplus
 			w = k16;
 
 		GC* gc = _gc(this);
-		Stringp newStr = createDynamic(gc, NULL, m_length, w);
+		const bool is7bit = false;
+		Stringp newStr = createDynamic(gc, NULL, m_length, w, is7bit);
 		Pointers dst(newStr);
 
 		int32_t i;
@@ -2116,8 +1888,7 @@ namespace avmplus
 
 	double String::toNumber()
 	{
-		double d = MathUtils::convertStringToNumber(this);
-		return d;
+		return MathUtils::convertStringToNumber(this);
 	}
 
 	bool String::isWhitespace() const
@@ -2132,30 +1903,15 @@ namespace avmplus
 		return true;
 	}
 
-	int32_t String::Length(const wchar *str)
+	/*static*/ int32_t FASTCALL String::Length(const wchar* const str)
 	{
-		if (!str) 
-			return 0;
-
-		int32_t len = 0;
-		while (*str) {
-			len++;
-			str++;
+		AvmAssert(str != NULL);
+		
+		const wchar* s = str;
+		while (*s) {
+			s++;
 		}
-		return len;
-	}
-
-	int32_t String::Length(const char *str)
-	{
-		if (!str) 
-			return 0;
-
-		int32_t len = 0;
-		while (*str) {
-			len++;
-			str++;
-		}
-		return len;
+		return s - str;
 	}
 
 	int String::_indexOf(Stringp substr, int startPos)
@@ -2287,7 +2043,7 @@ namespace avmplus
 		return toLowerCase();
 	}
 
-	double String::_charCodeAt (int32_t iPos)
+	double String::_charCodeAt(int32_t iPos)
 	{
 		double d;
 		if (iPos >= 0 && iPos < m_length)
@@ -2507,7 +2263,7 @@ namespace avmplus
 				desiredWidth = String::k8;
 		}
 
-		if (core->publicNamespace && desiredWidth == String::k8)
+		if (desiredWidth == String::k8 && core->kEmptyString != NULL)
 		{
 			// core has been initialized, check for cached characters
 			if (len == 0)
@@ -2517,6 +2273,8 @@ namespace avmplus
 				return core->cachedChars[*buffer];
 		}
 
+		const bool is7bit = (widths.ascii == widths.w8); 
+
 		Stringp s = NULL;
 		GC* gc = core->GetGC();
 		if (desiredWidth == k8)
@@ -2525,12 +2283,14 @@ namespace avmplus
 				// cannot do 8-bit string with this data
 				// TODO: string-too-wide error
 				s = NULL;
-			else if (staticBuf && widths.ascii == widths.w8)
+			else if (staticBuf && is7bit)
+			{
 				// works, because we only have 7-bit ASCII
-				return createStatic(gc, buffer, widths.w8, String::k8);
+				return createStatic(gc, buffer, widths.w8, String::k8, is7bit);
+			}
 			else
 			{
-				s = createDynamic(gc, buffer, widths.w8, String::k8);
+				s = createDynamic(gc, buffer, widths.w8, String::k8, is7bit);
 				uint32_t uch;
 				int32_t bytesRead;
 				Pointers dst(s);
@@ -2564,7 +2324,7 @@ namespace avmplus
 		else
 		{
 			// surrogate pairs need 2 characters
-			s = createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16);
+			s = createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16, is7bit);
 			if (UnicodeUtils::Utf8ToUtf16(buffer, len, s->m_buffer.p16, s->m_length, strict) < 0)
 				return NULL;
 		}
@@ -2582,7 +2342,8 @@ namespace avmplus
 		}
 		if (len < 0)
 			len = Length(buffer);
-
+		
+		bool is7bit = false;
 		int32_t stringLength = len;
 		if (desiredWidth != k16)
 		{
@@ -2605,9 +2366,10 @@ namespace avmplus
 				// cannot do 8-bit string with this data
 				// TODO: string-too-wide error
 				return NULL;
+			is7bit = (widths.ascii == widths.w8);
 		}
 
-		if (core->publicNamespace && desiredWidth == k8)
+		if (desiredWidth == k8 && core->kEmptyString != NULL)
 		{
 			// core has been initialized, check for cached characters
 			if (len == 0)
@@ -2618,10 +2380,12 @@ namespace avmplus
 		}
 
 		if (desiredWidth == k16 && staticBuf)
-			return String::createStatic(core->GetGC(), buffer, len, k16);
+		{
+			return createStatic(core->GetGC(), buffer, len, k16, is7bit);
+		}
 
 		// found the width to use, now create that string
-		Stringp s = createDynamic(core->GetGC(), NULL, stringLength, desiredWidth);
+		Stringp s = createDynamic(core->GetGC(), NULL, stringLength, desiredWidth, is7bit);
 
 		String::Pointers ptrs(s);
 		if (desiredWidth == k8)
@@ -2648,13 +2412,11 @@ namespace avmplus
 	//   0020 0000-03FF FFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 	//   0400 0000-7FFF FFFF   1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 
-	static const char* const zero8 = "";
-
 	StUTF8String::StUTF8String(Stringp str)
 	{
 		if (!str || !str->length())
 		{
-			m_buffer = zero8;
+			m_buffer = &k_zero.c8;
 			m_length = 0;
 			return;
 		}
@@ -2668,7 +2430,7 @@ namespace avmplus
 			len = str->m_length;
 			
 			// if we know it's 7-bit, we don't need to walk it.
-			if (!(str->m_bitsAndFlags & String::TSTR_7BIT))
+			if (!(str->m_bitsAndFlags & String::TSTR_7BIT_FLAG))
 			{
 				const uint8_t* srcBuf = (const uint8_t*) ptrs.p8;
 				for (int32_t i = str->m_length; i--;)
@@ -2676,9 +2438,11 @@ namespace avmplus
 				
 				// no hi bits? set the bit!
 				if (len == str->m_length)
-					str->m_bitsAndFlags |= String::TSTR_7BIT;
+					str->m_bitsAndFlags |= String::TSTR_7BIT_FLAG;
 			}
 			
+			// Deliberately using gc'ed memory here (not mmfx, unmanaged memory)
+			// so that longjmp's past our dtor won't cause a long-term leak
 			const uint8_t* srcBuf = (const uint8_t*) ptrs.p8;
 			char* dstBuf = (char*)gc->Alloc(len+1, 0);
 			m_buffer = dstBuf;
@@ -2720,23 +2484,23 @@ namespace avmplus
 
 	StUTF8String::~StUTF8String()
 	{
-		if (m_buffer != zero8)
+		if (m_buffer != &k_zero.c8)
 			GC::GetGC(m_buffer)->Free(m_buffer);
 	}
-
-	static const wchar zero16[1] = { 0 };
 
 	StUTF16String::StUTF16String(Stringp str)
 	{
 		if (!str || !str->length())
 		{
 			m_length = 0;
-			m_buffer = zero16;
+			m_buffer = &k_zero.u16;
 			return;
 		}
 		MMgc::GC* gc = _gc(str);
 
 		m_length = str->m_length;
+		// Deliberately using gc'ed memory here (not mmfx, unmanaged memory)
+		// so that longjmp's past our dtor won't cause a long-term leak
 		wchar* dst = (wchar*) gc->Alloc((m_length + 1) << String::k16, 0);
 		m_buffer = dst;
 		dst[m_length] = 0;
@@ -2746,7 +2510,7 @@ namespace avmplus
 
 	StUTF16String::~StUTF16String()
 	{
-		if (m_buffer != zero16)
+		if (m_buffer != &k_zero.u16)
 			GC::GetGC(m_buffer)->Free(m_buffer);
 	}
 
