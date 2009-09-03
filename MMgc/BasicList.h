@@ -76,8 +76,7 @@ namespace MMgc
 			if (count == capacity)
 			{
 				capacity += growthIncrement;
-				T* newItems = mmfx_new_array(T,  capacity );
-				VMPI_memset(newItems, 0, count * sizeof(T));
+				T* newItems = mmfx_new_array_opt(T,  capacity, kZero);
 				if (items)
 					VMPI_memcpy(newItems, items, count * sizeof(T));
 				mmfx_delete_array(items);
@@ -92,7 +91,7 @@ namespace MMgc
 			if (holes && iteratorCount == 0)
 				Compact();
 			uint32_t i=0;
-			while (i < count && items[i] != item)
+			while (i < Limit() && items[i] != item)
 				i++;
 			if (i == Limit()) 
 			{
