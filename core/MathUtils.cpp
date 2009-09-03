@@ -464,7 +464,7 @@ namespace avmplus
 		return MathUtils::floor(value + 0.5);
 	}
 	
-	static REALLY_INLINE int32_t d2i(double value)
+	REALLY_INLINE static int32_t d2i(double value)
 	{
 #if defined(WIN32) && defined(AVMPLUS_AMD64)
 		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
