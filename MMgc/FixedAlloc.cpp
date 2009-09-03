@@ -108,16 +108,17 @@ namespace MMgc
 		}
 	}
 
-	void* FixedAlloc::Alloc(size_t size, FixedMallocOpts flags)
+	void* FixedAlloc::Alloc(size_t size, FixedMallocOpts opts)
 	{ 
 		(void)size;
-		GCAssertMsg(m_heap->StackEnteredCheck(), "MMGC_ENTER must be on the stack");
+		GCAssertMsg(m_heap->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER must be on the stack");
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
 		if(!m_firstFree) {
-			CreateChunk((flags & kCanFail) != 0);
+			bool canFail = (opts & kCanFail) != 0;
+			CreateChunk(canFail);
 			if(!m_firstFree) {
-				GCAssertMsg((flags & kCanFail) != 0, "Memory allocation failed to abort properly");
+				GCAssertMsg(canFail, "Memory allocation failed to abort properly");
 				return NULL;
 			}
 		}
@@ -178,11 +179,11 @@ namespace MMgc
 
 #ifdef _DEBUG
 		// fresh memory poisoning
-		if((flags & kZero) == 0)
+		if((opts & kZero) == 0)
 			memset(item, 0xfa, b->size - DebugSize());
 #endif
 
-		if((flags & kZero) != 0)
+		if((opts & kZero) != 0)
 			memset(item, 0, b->size - DebugSize());
 
 		return item;
@@ -192,6 +193,8 @@ namespace MMgc
 	void FixedAlloc::Free(void *item)
 	{
 		FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
+
+		GCAssertMsg(b->alloc->m_heap->IsAddressInHeap(item), "Bogus pointer passed to free");
 
 #ifdef MMGC_HOOKS
 		GCHeap *heap = b->alloc->m_heap;
