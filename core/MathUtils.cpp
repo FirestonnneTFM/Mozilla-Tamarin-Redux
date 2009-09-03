@@ -464,7 +464,9 @@ namespace avmplus
 		return MathUtils::floor(value + 0.5);
 	}
 	
-	REALLY_INLINE static int32_t d2i(double value)
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
+	/*static*/
+	REALLY_INLINE int32_t real_to_int(double value)
 	{
 #if defined(WIN32) && defined(AVMPLUS_AMD64)
 		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
@@ -484,7 +486,7 @@ namespace avmplus
 	// ECMA-262 section 9.4
 	double MathUtils::toInt(double value)
 	{
-		int32_t intValue = d2i(value);
+		int32_t intValue = real_to_int(value);
 
 		if ((value == (double)(intValue)) && ((uint32_t)intValue != 0x80000000))
 			return value;
@@ -524,7 +526,7 @@ namespace avmplus
 		else if (value < -clampMag)
 			value = -clampMag;
 
-		int32_t intValue = d2i(value);
+		int32_t intValue = real_to_int(value);
 
 		if (value != (double)(intValue))
 		{
@@ -534,7 +536,7 @@ namespace avmplus
 			else 
 				value = MathUtils::floor(value);
 
-			intValue = d2i(value);
+			intValue = real_to_int(value);
 		}
 	
 		return intValue;
