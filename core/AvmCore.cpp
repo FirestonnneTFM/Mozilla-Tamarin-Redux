@@ -4047,7 +4047,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		return NULL;
 	}
 
-	REALLY_INLINE static void decr_atom(Atom const a)
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
+	/*static*/
+	REALLY_INLINE void decr_atom(Atom const a)
 	{
 		// contrary to what you might think from the name, "kUnusedAtomTag" is in fact occasionally used
 		// in player code, so be sure *not* to include it.
@@ -4061,7 +4063,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	REALLY_INLINE static void incr_atom(MMgc::GC *gc, const void* container, Atom const a)
+	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
+	/*static*/
+	REALLY_INLINE void incr_atom(MMgc::GC *gc, const void* container, Atom const a)
 	{
 		int const RC_TYPE_MASK = (1 << kObjectType) | (1 << kStringType) | (1 << kNamespaceType);
 		int const GC_TYPE_MASK = RC_TYPE_MASK | (1 << kDoubleType);
