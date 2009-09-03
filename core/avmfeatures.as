@@ -359,6 +359,7 @@ var FEATURES =
 	 </exactly-one>
 	</requires>
     <defines> VMCFG_NANOJIT  </defines>
+    <defines> VMCFG_PRECOMP_NAMES </defines>
     <defines> FEATURE_NANOJIT </defines>  <!-- FIXME: legacy name -->
   </feature>
 
@@ -380,6 +381,7 @@ var FEATURES =
     <defines>    VMCFG_INTERPRETER  </defines>
     <defines>    VMCFG_WORDCODE  </defines>
     <defines>    VMCFG_WORDCODE_PEEPHOLE  </defines>
+    <defines>    VMCFG_PRECOMP_NAMES </defines>
 	<defines>    AVMPLUS_WORD_CODE </defines>  <!-- FIXME: legacy name -->
 	<defines>    AVMPLUS_PEEPHOLE_OPTIMIZER </defines>  <!-- FIXME: legacy name -->
   </feature>

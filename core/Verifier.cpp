@@ -138,6 +138,10 @@ namespace avmplus
 
         state       = NULL;
         labelCount = 0;
+
+		#ifdef VMCFG_PRECOMP_NAMES
+		pool->initPrecomputedMultinames();
+		#endif
     }
 
     Verifier::~Verifier()

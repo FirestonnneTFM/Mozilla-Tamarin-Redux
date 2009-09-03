@@ -1936,11 +1936,9 @@ namespace avmplus
 // a test and a switch to get to that.  Should we in-line?
 // How will RTTI caching affect that?
 
-#ifdef AVMPLUS_WORD_CODE
-#  define GET_MULTINAME(name, arg)  do { name = pool->word_code.cpool_mn->multinames[arg]; } while(0)
-#  define GET_MULTINAME_PTR(decl, arg)  decl = &pool->word_code.cpool_mn->multinames[arg]
+#ifdef VMCFG_PRECOMP_NAMES
+#  define GET_MULTINAME_PTR(decl, arg)  decl = pool->precomputedMultiname(arg)
 #else
-#  define GET_MULTINAME(name, arg)  do { pool->parseMultiname(name, arg); } while(0)
 #  define GET_MULTINAME_PTR(decl, arg)  Multiname _multiname; pool->parseMultiname(_multiname, arg); decl = &_multiname
 #endif
 

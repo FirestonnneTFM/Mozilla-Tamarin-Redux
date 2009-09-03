@@ -82,8 +82,8 @@ namespace avmplus
 
 	PoolObject::~PoolObject()
 	{
-		#ifdef AVMPLUS_WORD_CODE
-		delete word_code.cpool_mn;
+		#ifdef VMCFG_PRECOMP_NAMES
+		delete precompNames;
 		#endif
 
 		#ifdef VMCFG_NANOJIT
@@ -689,11 +689,11 @@ range_error:
 		return f;
 	}
 	
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_PRECOMP_NAMES
 	void PoolObject::initPrecomputedMultinames()
 	{
-		if (this->word_code.cpool_mn == NULL)
-			this->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (this->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), this);
+		if (this->precompNames == NULL)
+			this->precompNames = new (sizeof(PrecomputedMultinames) + (this->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), this);
 	}
 
 	PrecomputedMultinames::PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool)
@@ -728,11 +728,11 @@ range_error:
 			}
 			else
 			{
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_PRECOMP_NAMES
 				// PrecomputedMultinames may not be inited yet, but we'll need them eventually,
 				// so go ahead and init them now
 				this->initPrecomputedMultinames();
-				const Multiname& mn = this->word_code.cpool_mn->multinames[-index];
+				const Multiname& mn = this->precompNames->multinames[-index];
 #else
 				Multiname mn;
 				this->parseMultiname(this->cpool_mn[-index], mn);
