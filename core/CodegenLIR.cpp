@@ -2271,11 +2271,6 @@ namespace avmplus
         emitCopy(state, state->sp(), state->sp()-1);
     }
 
-    void CodegenLIR::writeCheckNull(FrameState* state, uint32_t index)
-    {
-        emitCheckNull(state, index);
-    }
-
     void CodegenLIR::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits *type)
     {
         (void)pc;
@@ -2589,8 +2584,7 @@ namespace avmplus
 
     void CodegenLIR::emitCoerce(FrameState* state, int loc, Traits* result)
     {
-        this->state = state;
-        emitPrep();
+        emitPrep(state);
 
         Value& value = state->value(loc);
         Traits* in = value.traits;
@@ -2767,10 +2761,9 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::emitCheckNull(FrameState* state, int index)
+    void CodegenLIR::writeCheckNull(FrameState* state, uint32_t index)
     {
-        this->state = state;
-        emitPrep();
+        emitPrep(state);
 
         // The result is either unchanged or an exception is thrown, so
         // we don't save the result.  This is the null pointer check.
@@ -2801,8 +2794,10 @@ namespace avmplus
         // else: number, int, uint, and boolean, are never null
     }
 
-    void CodegenLIR::emitPrep()
+    void CodegenLIR::emitPrep(FrameState* state)
     {
+        this->state = state;
+
         // update bytecode ip if necessary
         if (state->insideTryBlock && lastPcSave != state->pc)
         {
@@ -2813,8 +2808,7 @@ namespace avmplus
 
     void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
     {
-        this->state = state;
-        emitPrep();
+        emitPrep(state);
 
         int sp = state->sp();
 
@@ -2988,8 +2982,7 @@ namespace avmplus
 
     void CodegenLIR::emitGetslot(FrameState *state, int slot, int ptr_index, Traits *result)
     {
-        this->state = state;
-        emitPrep();
+        emitPrep(state);
 
         Traits *t = state->value(ptr_index).traits;
         LIns *ptr = localGetp(ptr_index);
@@ -3025,8 +3018,7 @@ namespace avmplus
 
     void CodegenLIR::emitSetslot(FrameState *state, AbcOpcode opcode, int slot, int ptr_index)
     {
-        this->state = state;
-        emitPrep();
+        emitPrep(state);
         int sp = state->sp();
 
         Traits* t;
@@ -3113,8 +3105,7 @@ namespace avmplus
     */
     void CodegenLIR::emitConstruct(FrameState* state, int argc, int ctor_index, Traits* ctraits)
     {
-        this->state = state;
-        emitPrep();
+        emitPrep(state);
 
         // attempt to early bind to constructor method.
         Traits* itraits = NULL;
@@ -3147,8 +3138,7 @@ namespace avmplus
 
     void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
     {
-        this->state = state;
-        emitPrep();
+        emitPrep(state);
 
         int sp = state->sp();
 
