@@ -246,7 +246,7 @@ namespace avmplus
 		 * Returns the length of str, in # of characters.
 		 */
 		static int32_t	FASTCALL Length(const wchar* str);
-		REALLY_INLINE static int32_t Length(const char* str) { AvmAssert(str != NULL); return VMPI_strlen(str); }
+		REALLY_INLINE static int32_t Length(const char* str) { AvmAssert(str != NULL); return int32_t(VMPI_strlen(str)); }
 		/*@}*/
 
 		/**
