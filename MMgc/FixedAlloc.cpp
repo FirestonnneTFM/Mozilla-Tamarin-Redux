@@ -42,7 +42,8 @@
 
 namespace MMgc
 {
-	FixedAlloc::FixedAlloc(int itemSize, GCHeap* heap)
+	FixedAlloc::FixedAlloc(int itemSize, GCHeap* heap, bool isFixedAllocSafe)
+		: m_isFixedAllocSafe(isFixedAllocSafe)
 	{
 		m_heap = heap;
 
@@ -254,7 +255,16 @@ namespace MMgc
 		// Allocate a new block
 		m_maxAlloc += m_itemsPerBlock;
 
+		vmpi_spin_lock_t *lock;
+		if(m_isFixedAllocSafe) {
+			lock = &((FixedAllocSafe*)this)->m_spinlock;
+			VMPI_lockRelease(lock);
+		}
+
 		FixedBlock* b = (FixedBlock*) m_heap->Alloc(1, GCHeap::kExpand | (canFail ? GCHeap::kCanFail : 0));
+
+		if(m_isFixedAllocSafe)
+			VMPI_lockAcquire(lock);
 		
 		GCAssert(m_itemSize <= 0xffff);
 
@@ -283,7 +293,8 @@ namespace MMgc
 		}
 		m_lastBlock = b;
 
-		// Add our new ChunkBlock to the firstFree list (which should be empty)
+		// Add our new ChunkBlock to the firstFree list (which should
+		// be empty but might not because we let go of the lock above)
 		if (m_firstFree)
 		{
 			GCAssert(m_firstFree->prevFree == 0);
