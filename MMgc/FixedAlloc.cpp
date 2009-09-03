@@ -255,7 +255,7 @@ namespace MMgc
 		// Allocate a new block
 		m_maxAlloc += m_itemsPerBlock;
 
-		vmpi_spin_lock_t *lock;
+		vmpi_spin_lock_t *lock = NULL;
 		if(m_isFixedAllocSafe) {
 			lock = &((FixedAllocSafe*)this)->m_spinlock;
 			VMPI_lockRelease(lock);
@@ -263,7 +263,7 @@ namespace MMgc
 
 		FixedBlock* b = (FixedBlock*) m_heap->Alloc(1, GCHeap::kExpand | (canFail ? GCHeap::kCanFail : 0));
 
-		if(m_isFixedAllocSafe)
+		if(lock != NULL)
 			VMPI_lockAcquire(lock);
 		
 		GCAssert(m_itemSize <= 0xffff);
