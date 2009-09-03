@@ -57,6 +57,7 @@ void VMPI_lockInit(vmpi_spin_lock_t* lock)
 
 void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
+	(void)lock;
 	GCAssert(lock->lock == 0);
 	GCAssert(lock->owner == NULL);
 }

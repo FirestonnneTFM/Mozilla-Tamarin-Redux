@@ -501,6 +501,10 @@ bool VMPI_getFunctionNameFromPC(uintptr_t pc, char *buffer, size_t bufferSize)
 			}
 		}
 	}
+#else
+    (void)pc;
+	(void)buffer;
+	(void)bufferSize;
 #endif //if 0
 	
 	return false;
