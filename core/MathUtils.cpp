@@ -464,9 +464,7 @@ namespace avmplus
 		return MathUtils::floor(value + 0.5);
 	}
 	
-	// MathUtils::toInt is the ToInteger algorithm from
-	// ECMA-262 section 9.4
-	double MathUtils::toInt(double value)
+	static REALLY_INLINE int32_t d2i(double value)
 	{
 #if defined(WIN32) && defined(AVMPLUS_AMD64)
 		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
@@ -477,8 +475,16 @@ namespace avmplus
 #elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
 #else
-		int32_t intValue = real2int(value);
+		int32_t intValue = MathUtils::real2int(value);
 #endif
+		return intValue;
+	}
+
+	// MathUtils::toInt is the ToInteger algorithm from
+	// ECMA-262 section 9.4
+	double MathUtils::toInt(double value)
+	{
+		int32_t intValue = d2i(value);
 
 		if ((value == (double)(intValue)) && ((uint32_t)intValue != 0x80000000))
 			return value;
@@ -499,43 +505,37 @@ namespace avmplus
 	int32_t MathUtils::toIntClamp(double value, int32_t clampMagnitude)
 	{
 		AvmAssert(clampMagnitude >= 0);
-
-#if defined(WIN32) && defined(AVMPLUS_AMD64)
-		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
-#elif defined(WIN32) && defined(AVMPLUS_IA32)
-		int32_t intValue;
-		_asm fld [value];
-		_asm fistp [intValue];
-#elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-		int32_t intValue = _mm_cvttsd_si32(_mm_set_sd(value));
-#else
-		int32_t intValue = real2int(value);
-#endif
-
-		if (value == (double)(intValue))
-			goto clamp_check;
-
+		
 		if (MathUtils::isNaN(value)) 
 			return 0;
 	
-	{
 		int32_t const inf = MathUtils::isInfinite(value);
 		if (inf > 0)
 			return clampMagnitude;
 		else if (inf < 0)
 			return -clampMagnitude;
-	}
-		
-		if (value < 0) 
-			intValue = -int32_t(MathUtils::floor(-value));
-		else 
-			intValue = int32_t(MathUtils::floor(value));
 
-	clamp_check:
-		if (intValue > clampMagnitude)
-			intValue = clampMagnitude;
-		else if (intValue < -clampMagnitude)
-			intValue = -clampMagnitude;
+		//
+		// clamp first, so we know the double is in an integer range.
+		// 
+		double const clampMag = (double)clampMagnitude;
+		if (value > clampMag)
+			value = clampMag;
+		else if (value < -clampMag)
+			value = -clampMag;
+
+		int32_t intValue = d2i(value);
+
+		if (value != (double)(intValue))
+		{
+			// alas, have to round, then reconvert.
+			if (value < 0) 
+				value = -MathUtils::floor(-value);
+			else 
+				value = MathUtils::floor(value);
+
+			intValue = d2i(value);
+		}
 	
 		return intValue;
 	}
