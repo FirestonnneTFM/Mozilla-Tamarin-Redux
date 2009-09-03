@@ -134,7 +134,7 @@ namespace avmplus
 					continue;
 				}
 				
-				s->makeDynamic((const char*)_abcStringStart, uint32_t(_abcStringEnd - _abcStringStart));
+				s->makeDynamic(_abcStringStart, uint32_t(_abcStringEnd - _abcStringStart));
 			}
 		}
 	}

@@ -86,6 +86,17 @@ namespace avmplus
 
 	static const uint32_t apis [][1] = {{0}};
 	static const uint32_t apis_sizes [] = {1};
+	
+	// a single string with characters 0x00...0x7f (inclusive)
+	static const char* const k_cachedChars = 
+		"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+		"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
+		"\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2A\x2B\x2C\x2D\x2E\x2F"
+		"\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3A\x3B\x3C\x3D\x3E\x3F"
+		"\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4A\x4B\x4C\x4D\x4E\x4F"
+		"\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5A\x5B\x5C\x5D\x5E\x5F"
+		"\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6A\x6B\x6C\x6D\x6E\x6F"
+		"\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7A\x7B\x7C\x7D\x7E\x7F";
 
 	AvmCore::AvmCore(GC* g) 
 		: GCRoot(g) 
@@ -201,7 +212,6 @@ namespace avmplus
 
 		console.setCore(this);
 		
-        kEmptyString = internConstantStringLatin1("");
 		kconstructor = internConstantStringLatin1("constructor");
         kundefined = internConstantStringLatin1("undefined");
         knull = internConstantStringLatin1("null");
@@ -234,15 +244,19 @@ namespace avmplus
 
 		for (int i = 0; i < 128; i++)
 		{
-			char singleChar = (char)i;
+			AvmAssert(k_cachedChars[i] == i);
 			// call String::createLatin1() with an explicit length of 1; required
 			// when singleChar==0, because in that case we need a string
 			// which is a single character with value 0
-			cachedChars[i] = internString(String::createLatin1(this, &singleChar, 1));
+			cachedChars[i] = internString(String::createLatin1(this, &k_cachedChars[i], 1));
 		}
 
 		booleanStrings[0] = kfalse;
         booleanStrings[1] = ktrue;
+
+		// init kEmptyString last, so that StringObject can use it as a sentinel for 
+		// determining if all the cached strings are valid.
+        kEmptyString = internConstantStringLatin1("");
 
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
@@ -3017,7 +3031,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				AvmAssert(deletedCount >= 0);
 			}
 			stringCount++;
-			// Keep dependent strings from holding a lock on a huge master
+			// Prevent dependent strings from keeping a huge master in memory
 			o->fixDependentString();
 			o->setInterned();
 			strings[i] = o;

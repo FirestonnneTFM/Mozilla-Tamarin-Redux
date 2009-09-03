@@ -1397,7 +1397,7 @@ add_numbers:
 		StringIndexer str(in);
 		while (pos < in->length())
 		{
-			utf32_t ch = str[pos++];
+			uint32_t ch = str[pos++];
 			if (ch == '%') 
 			{
 				int32_t curPos = pos;
@@ -1419,7 +1419,7 @@ add_numbers:
 							ch = '%';
 							break;
 						}
-						ch = (utf32_t)((ch<<4) | v);
+						ch = (uint32_t)((ch<<4) | v);
 					}
 				}
 			}
