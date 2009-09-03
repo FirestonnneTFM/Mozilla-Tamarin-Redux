@@ -1909,7 +1909,7 @@ namespace avmplus
 		return true;
 	}
 
-	/*static*/ int32_t FASTCALL String::Length(const wchar* const str)
+	/*static*/ int32_t FASTCALL String::Length(const wchar* str)
 	{
 		AvmAssert(str != NULL);
 		
