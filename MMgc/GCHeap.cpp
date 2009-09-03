@@ -88,6 +88,7 @@ namespace MMgc
 	GCHeapConfig::GCHeapConfig() : 
 		initialSize(512), 
 		heapLimit(kDefaultHeapLimit), 
+		heapSoftLimit(0),
 		OOMExitCode(0),
 		useVirtualMemory(VMPI_useVirtualMemory()),
 		trimVirtualMemory(true),
@@ -110,6 +111,9 @@ namespace MMgc
 		const char *envValue = VMPI_getenv("MMGC_HEAP_LIMIT");
 		if(envValue)
 			heapLimit = VMPI_strtol(envValue, 0, 10);
+		envValue = VMPI_getenv("MMGC_HEAP_SOFT_LIMIT");
+		if(envValue)
+			heapSoftLimit = VMPI_strtol(envValue, 0, 10);
 	}
 
 	void GCHeap::Init(const GCHeapConfig& config)
@@ -318,15 +322,6 @@ namespace MMgc
 		}
 #endif
 
-		if(status == kMemReserve)
-		{
-			// we aren't sending a status notification here, wait for
-			// need to arise.  We could be in the middle of sending
-			// the kMemReserve notifications and there's other
-			// complications
-			status = kMemNormal;
-		}
-
 		FreeBlock(block);
 	}
 
@@ -495,6 +490,27 @@ namespace MMgc
 
 		if(config.verbose)
 			DumpHeapRep();
+		CheckForStatusReturnToNormal();
+	}
+
+	void GCHeap::CheckForStatusReturnToNormal()
+	{
+		if(!statusNotificationBeingSent && statusNotNormalOrAbort())
+		{
+			size_t total = GetTotalHeapSize();
+			// return to normal if we drop below heapSoftLimit
+			if(config.heapSoftLimit != 0 )
+			{
+				if (total < config.heapSoftLimit)
+				{
+					GCDebugMsg(false, "### Alloc dropped below softlimit: usedheapsize =%d, totalHeap =%d\n",  GetUsedHeapSize(), total );
+					StatusChangeNotify(kMemNormal);
+				}
+			}
+			// or if we shrink to below %10 of the max
+			else if(maxTotalHeapSize / kBlockSize * 9 > total * 10)
+				StatusChangeNotify(kMemNormal);
+		}
 	}
 
 	void GCHeap::RemoveBlock(HeapBlock *block)
@@ -1112,17 +1128,15 @@ namespace MMgc
 		{ 
 			// random policy choice: don't invoke OOM callbacks for
 			// canFail allocs
-			if(status == kMemNormal && !canFail) {
+			if(status != kMemReserve && !canFail) {
 
 				if(statusNotificationBeingSent)
 					Abort();
 				
-				statusNotificationBeingSent = true;
 
 				// invoke callbacks
 				StatusChangeNotify(kMemReserve);
 
-				statusNotificationBeingSent = false;
 				
 				// try again
 				result = ExpandHeapInternal(askSize);
@@ -1134,6 +1148,11 @@ namespace MMgc
 				else 
 					Abort();
 			}
+		}
+
+		if(config.heapSoftLimit && GetTotalHeapSize() > config.heapSoftLimit && status == kMemNormal)
+		{
+			StatusChangeNotify(kMemSoftLimit);
 		}
 
 		// The guard on instance being non-NULL is a hack, to be fixed later (now=2009-07-20).
@@ -1895,6 +1914,7 @@ namespace MMgc
 	*/
 	void GCHeap::StatusChangeNotify(MemoryStatus to)
 	{
+		statusNotificationBeingSent = true;
 		MemoryStatus oldStatus = status;
 		status = to;
 		
@@ -1916,7 +1936,12 @@ namespace MMgc
 			if(cb)
 				cb->memoryStatusChange(oldStatus, to);
 		} while(cb != NULL);
+
+		statusNotificationBeingSent = false;
+
 		VMPI_lockAcquire(&m_spinlock);
+
+		CheckForStatusReturnToNormal();
 	}
 
  	/*static*/
