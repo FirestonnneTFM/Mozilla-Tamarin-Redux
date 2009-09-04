@@ -370,6 +370,13 @@ const int kBufferPadding = 16;
 		uintptr_t minstack;
 
 		/**
+		 * the host-provided stack limit.  we never change this, but
+		 * it's used to save/restore minstack when minstack is moved
+		 * to trigger interrupt handling.
+		 */
+		uintptr_t stack_limit;
+
+		/**
 		 * If this field is not NotInterrupted, the host has requested that the currently
 		 * executing AS3 code stop and invoke handleInterrupt.  The field
 		 * is checked directly by executing code.

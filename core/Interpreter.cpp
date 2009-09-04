@@ -676,7 +676,10 @@ namespace avmplus
   		}
 #endif
  		
-		// always do a stack check.
+		// always do a stack check; this not only checks true stack overflows
+		// but also the stack limit is used to gain control for host interrupts.
+		// so this stack check doubles as an interrupt check.
+		// see also: AvmCore::handleStackOverflow().
 		core->stackCheck(env);
 
  		register List<double*, LIST_GCObjects> const & cpool_double = pool->cpool_double;
@@ -805,8 +808,6 @@ namespace avmplus
 		}
 #endif
 #endif
- 
- 		core->branchCheck(env, interruptable, -1);
 
 // NEXT dispatches the next instruction.
 //
