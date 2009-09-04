@@ -1311,7 +1311,7 @@ namespace avmplus
         LIns *d = loadIns(LIR_ldp, offsetof(AvmCore, minstack), coreAddr);
         LIns *c = binaryIns(LIR_pult, vars, d);
         LIns *b = branchIns(LIR_jf, c);
-        callIns(FUNCTIONID(stkover), 1, env_param);
+        callIns(FUNCTIONID(handleStackOverflow), 1, env_param);
         LIns *label = Ins(LIR_label);
         verbose_only( if (lirbuf->names) { lirbuf->names->addName(label, "begin");  })
         b->setTarget(label);

@@ -62,15 +62,19 @@
 
 #if _MSC_VER
     #define ABI_FUNCTION ABI_CDECL
+    #define ABI_FAST     ABI_FASTCALL
     #define ABI_METHOD   ABI_THISCALL
 #else
     // gcc, probably
     #define ABI_FUNCTION ABI_CDECL
+    #define ABI_FAST     ABI_FASTCALL
     #define ABI_METHOD   ABI_CDECL
 #endif
 
 #define FUNCTION(f, sig, name) \
     DEFINE_CALLINFO(f,sig,0,0,ABI_FUNCTION,name)
+#define FASTFUNCTION(f, sig, name) \
+    DEFINE_CALLINFO(f,sig,0,0,ABI_FAST,name)
 #define CSEFUNCTION(f, sig, name) \
     DEFINE_CALLINFO(f,sig,1,0,ABI_FUNCTION,name)
 
@@ -94,6 +98,7 @@
     CSEMETHOD(TOPLEVELADDR(Toplevel::coerce), SIG3(A,P,A,P), coerce)
     METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
     FUNCTION(FUNCADDR(AvmCore::handleInterrupt), SIG1(V,P), handleInterrupt)
+    FASTFUNCTION(FUNCADDR(AvmCore::handleStackOverflow), SIG1(V,P), handleStackOverflow)
     METHOD(ENVADDR(MethodEnv::nextname), SIG3(A,P,A,I), nextname)
     METHOD(ENVADDR(MethodEnv::nextvalue), SIG3(A,P,A,I), nextvalue)
     METHOD(ENVADDR(MethodEnv::hasnext), SIG3(I,P,A,I), hasnext)
@@ -202,7 +207,6 @@
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), SIG3(V,P,P,A), initMultinameLateForDelete)
     CSEFUNCTION(FUNCADDR(MathUtils::doubleToBool), SIG1(I,F), doubleToBool)
     METHOD(CLASSCLOSUREADDR(ClassClosure::newInstance), SIG1(P,P), newInstance)
-    METHOD(ENVADDR(MethodEnv::stkover), SIG1(V,P), stkover)
 
     METHOD(EFADDR(ExceptionFrame::endTry), SIG1(V,P), endTry)
     METHOD(EFADDR(ExceptionFrame::beginTry), SIG2(V,P,P), beginTry)

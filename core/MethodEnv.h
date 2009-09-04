@@ -154,7 +154,6 @@ namespace avmplus
 		}
 		
 	    void npe();
-        void stkover();
 
 		ArrayObject* createRest(Atom* argv, int argc);
 		Atom getpropertylate_i(Atom obj, int index) const;

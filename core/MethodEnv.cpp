@@ -627,11 +627,6 @@ namespace avmplus
 		toplevel()->throwTypeError(kConvertNullToObjectError);
 	}
 
-    void MethodEnv::stkover()
-    {
-        this->core()->stackOverflow(this);
-    }
-
 	ArrayObject* MethodEnv::createRest(Atom* argv, int argc)
 	{
 		// create arguments Array using argv[param_count..argc]
