@@ -504,7 +504,7 @@ namespace avmplus
 					// Note that this bit is set lazily (and currently, only by StUTF8String), thus, if this bit is clear,
 					// the string might still be 7-bit-ascii... we just haven't checked yet.
 					TSTR_7BIT_FLAG			= 0x00000008,	
-					TSTR_7BIT_SHIFT			= 4,	
+					TSTR_7BIT_SHIFT			= 3,	
 					TSTR_INTERNED_FLAG		= 0x00000010,	// this string is interned
 					TSTR_NOINT_FLAG			= 0x00000020,	// set in getIntAtom() if the string is not an 28-bit integer
 					TSTR_NOUINT_FLAG		= 0x00000040,	// set in parseIndex() if the string is not an unsigned integer
@@ -550,6 +550,15 @@ namespace avmplus
 		Low-level append worker. 
 		*/
 				Stringp				_append(Stringp volatile * rightStrPtr, const Pointers& rightStr, int32_t numChars, Width width);
+
+		#ifdef _DEBUG
+			void verify7bit() const;
+			//#define VERIFY_7BIT(s) do { if (s) (s)->verify7bit(); } while (0)
+			// extremely slow, so disabled by default, even in debug mode.
+			#define VERIFY_7BIT(s) do {  } while (0)
+		#else
+			#define VERIFY_7BIT(s) do { } while (0)
+		#endif
 
 		/**
 		Make operator new private - people should use the create functions
