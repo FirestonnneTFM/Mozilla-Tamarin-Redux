@@ -144,7 +144,11 @@ class AggregateMailNotifier(MailNotifier):
                                 state = self.status.getBuilder(builder).getState()[0]
                                 if state == "building":     # if any are building we can return
                                     return
-                        # Nothing is building, send out grouped Message
+                        # Nothing is building - send out the aggregated message
+                        if len(builderGroup.cachedMessages) == builderGroup.sent:
+                            # We've already sent out all the messages in the cache
+                            # so there is no need to send out the aggregated messages
+                            return
                         d = self.sendAggregateMail(builderGroup.cachedMessages)
                         builderGroup.reset()
                         return d
