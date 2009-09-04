@@ -229,6 +229,8 @@ namespace MMgc
 
 		const void** newTable;
 		newTable = (const void**)ALLOCHANDLER::alloc(newTableSize*sizeof(const void*), canFail);
+		if (!newTable)
+			return;
 		
 		VMPI_memset(newTable, 0, newTableSize*sizeof(void*));
 
