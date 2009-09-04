@@ -121,6 +121,30 @@ namespace avmplus
 		return (char*) dst + (srcLen << dstWidth);
 	}
 
+#ifdef _DEBUG
+	void String::verify7bit() const
+	{
+		if (!(m_bitsAndFlags & TSTR_7BIT_FLAG))
+			return;
+		
+		if (getWidth() == k8)
+		{
+			Pointers ptrs(this);
+			for (int32_t i = 0; i < m_length; ++i)
+			{
+				if (ptrs.p8[i] > 127)
+				{
+					AvmAssert(!"hi bit found on string with TSTR_7BIT_FLAG set");
+				}
+			}
+		}
+		else
+		{
+			AvmAssert(!"only k8 strings should set TSTR_7BIT_FLAG");
+		}
+	}
+#endif
+
 /////////////////////////// Helper: get AvmCore /////////////////////////////
 
 	REALLY_INLINE MMgc::GC* _gc(const String* s)
@@ -312,7 +336,9 @@ namespace avmplus
 		// master cannot be a dependent string
 		AvmAssert(!master->isDependent());
 		MMGC_MEM_TAG( "Strings" );
-		return new(gc) String(gc, master, start, len);
+		Stringp s = new(gc) String(gc, master, start, len);
+		VERIFY_7BIT(s);
+		return s;
 	}
 
 	// Private static method to create a dynamic string, given a buffer and its size in characters
@@ -361,6 +387,11 @@ namespace avmplus
 			else
 				s->m_buffer.p16[len] = 0;
 		}
+		if (data != NULL)
+		{
+			// don't try to verify if data==null, buffer will be random! (caller will verify)
+			VERIFY_7BIT(s);
+		}
 #endif
 		return s;
 	}
@@ -375,7 +406,9 @@ namespace avmplus
 		// only 8-bit strings should set the 7-bit flag
 		if (w != k8)
 			is7bit = false;
-		return new(gc) String(data, w, len, is7bit);
+		Stringp s = new(gc) String(data, w, len, is7bit);
+		VERIFY_7BIT(s);
+		return s;
 	}
 
 	// Create a string out of an 8bit buffer. Characters are just widened and copied, not interpreted as UTF8.
@@ -415,6 +448,7 @@ namespace avmplus
 		{
 			s = createDynamic(gc, NULL, len, desiredWidth, is7bit);
 			_copyBuffers(buffer, s->m_buffer.p8, len, k8, desiredWidth);
+			VERIFY_7BIT(s);
 		}
 		return s;
 	}
@@ -435,6 +469,7 @@ namespace avmplus
 		if (!_copyBuffers(ptrs.pv, new_ptrs.pv, length(), getWidth(), w))
 			return NULL;
 
+		VERIFY_7BIT(newStr);
 		return newStr;
 	}
 
@@ -999,7 +1034,12 @@ namespace avmplus
 					master->m_buffer.p16[end] = 0;
 			}
 #endif
-			return createDependent(gc, master, start, newLen);
+			Stringp s = createDependent(gc, master, start, newLen);
+			// createDependent propagates the 7-bit flag, which is a good idea for substrings.
+			// however, if we are adding data, it may no longer qualify. rather than checking
+			// the appended data, just clear the flag (it will be lazily recalculated as needed)
+			s->m_bitsAndFlags &= ~TSTR_7BIT_FLAG;
+			return s;
 		}
 
 		// fall thru - string does not fit
@@ -1034,6 +1074,7 @@ namespace avmplus
 				newStr->m_buffer.p16[newStr->m_length] = 0;
 		}
 #endif
+		VERIFY_7BIT(newStr);
 		return newStr;
 	}
 
@@ -1889,6 +1930,8 @@ namespace avmplus
 					changed = true;
 			}
 		}
+		VERIFY_7BIT(this);
+		VERIFY_7BIT(newStr);
 		return changed ? newStr : this;
 	}
 
@@ -2279,7 +2322,7 @@ namespace avmplus
 				return core->cachedChars[*buffer];
 		}
 
-		const bool is7bit = (widths.ascii == widths.w8); 
+		const bool is7bit = (widths.ascii == widths.w8) && !widths.w16 && !widths.w32;
 
 		Stringp s = NULL;
 		GC* gc = core->GetGC();
@@ -2292,7 +2335,7 @@ namespace avmplus
 			else if (staticBuf && is7bit)
 			{
 				// works, because we only have 7-bit ASCII
-				return createStatic(gc, buffer, widths.w8, String::k8, is7bit);
+				s = createStatic(gc, buffer, widths.w8, String::k8, is7bit);
 			}
 			else
 			{
@@ -2310,7 +2353,7 @@ namespace avmplus
 					}
 					else
 					{
-						bytesRead = UnicodeUtils::Utf8ToUcs4 (buffer, len, &uch);
+						bytesRead = UnicodeUtils::Utf8ToUcs4(buffer, len, &uch);
 						if (bytesRead == 0)
 						{
 							// invalid sequence (only if strict was false)
@@ -2334,6 +2377,7 @@ namespace avmplus
 			if (UnicodeUtils::Utf8ToUtf16(buffer, len, s->m_buffer.p16, s->m_length, strict) < 0)
 				return NULL;
 		}
+		VERIFY_7BIT(s);
 		return s;
 	}
 
@@ -2372,7 +2416,8 @@ namespace avmplus
 				// cannot do 8-bit string with this data
 				// TODO: string-too-wide error
 				return NULL;
-			is7bit = (widths.ascii == widths.w8);
+
+			is7bit = (widths.ascii == widths.w8) && !widths.w16 && !widths.w32;
 		}
 
 		if (desiredWidth == k8 && core->kEmptyString != NULL)
@@ -2403,6 +2448,7 @@ namespace avmplus
 		{
 			VMPI_memcpy(ptrs.pv, buffer, len << desiredWidth);
 		}
+		VERIFY_7BIT(s);
 		return s;
 	}
 
@@ -2426,6 +2472,8 @@ namespace avmplus
 			m_length = 0;
 			return;
 		}
+
+		VERIFY_7BIT(str);
 
 		int32_t len = 0;
 
@@ -2502,6 +2550,9 @@ namespace avmplus
 			m_buffer = &k_zero.u16;
 			return;
 		}
+
+		VERIFY_7BIT(str);
+
 		MMgc::GC* gc = _gc(str);
 
 		m_length = str->m_length;

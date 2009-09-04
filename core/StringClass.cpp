@@ -140,10 +140,22 @@ namespace avmplus
 		for (int i=0; i<argc; i++) 
 		{
 			wchar c = wchar(AvmCore::integer(argv[i]));
-			// note: this code is allowed to construct a string
-			// containing illegal UTF16 sequences!
-			// (eg, String.fromCharCode(0xD800).charCodeAt(0) -> 0xD800).
-			out = out->append16(&c, 1);
+			if (c <= 0xff)
+			{
+				// append16 will always append as k16, forcing the string
+				// to be widened, as String::_append doesn't understand kAuto.
+				// That can/should probably be smarted, but for now, 
+				// improve the smarts here:
+				uint8_t c8 = uint8_t(c);
+				out = out->appendLatin1((char*)&c8, 1);
+			}
+			else
+			{
+				// note: this code is allowed to construct a string
+				// containing illegal UTF16 sequences!
+				// (eg, String.fromCharCode(0xD800).charCodeAt(0) -> 0xD800).
+				out = out->append16(&c, 1);
+			}
 		}
 		return out;
 	}
