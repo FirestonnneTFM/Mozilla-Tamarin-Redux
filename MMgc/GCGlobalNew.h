@@ -92,36 +92,77 @@ namespace MMgc
 // result most likely in a crash. By using the GCAllocObject you can try to go around some of these
 // issues, but atleast to system headers may pose a problem.
 
+
 // User-defined operator new.
 REALLY_INLINE void *operator new(size_t size) MMGC_NEW_THROWS_CLAUSE 
 { 
-	return MMgc::AllocCallInline(size, MMgc::kNone); 
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *space = MMgc::SystemNew(size);
+	// should we abort if space is NULL and they didn't specify kCanFail?
+	return space;
+#else
+	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, MMgc::kNone);
+#endif
 }
 
 REALLY_INLINE void *operator new(size_t size, MMgc::FixedMallocOpts opts) MMGC_NEW_THROWS_CLAUSE
 {
-	return MMgc::AllocCallInline(size, opts); 
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *space = MMgc::SystemNew(size);
+	if ((opts & MMgc::kZero) != 0)
+	{
+		VMPI_memset(space, 0, size);
+	}
+	// should we abort if space is NULL and they didn't specify kCanFail?
+	return space;
+#else
+	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, opts);
+#endif	
 }
 
 REALLY_INLINE void *operator new[](size_t size) MMGC_NEW_THROWS_CLAUSE
 {
-	return MMgc::AllocCallInline(size, MMgc::kNone); 
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *space = MMgc::SystemNew(size);
+	// should we abort if space is NULL and they didn't specify kCanFail?
+	return space;
+#else
+	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, MMgc::kNone);
+#endif
 }
 
 REALLY_INLINE void *operator new[](size_t size, MMgc::FixedMallocOpts opts) MMGC_NEW_THROWS_CLAUSE
 {
-	return MMgc::AllocCallInline(size, opts); 
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void *space = MMgc::SystemNew(size);
+	if ((opts & MMgc::kZero) != 0)
+	{
+		VMPI_memset(space, 0, size);
+	}
+	// should we abort if space is NULL and they didn't specify kCanFail?
+	return space;
+#else
+	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, opts);
+#endif		
 }
 
 // User-defined operator delete.
 REALLY_INLINE void operator delete( void *p) MMGC_DELETE_THROWS_CLAUSE
 {
-	MMgc::DeleteCallInline(p);
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	MMgc::SystemDelete(p);
+#else
+	MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineFree(p);
+#endif	
 }
 
 REALLY_INLINE void operator delete[]( void *p ) MMGC_DELETE_THROWS_CLAUSE
 {
-	MMgc::DeleteCallInline(p);
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	MMgc::SystemDelete(p);
+#else
+	MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineFree(p);
+#endif	
 }
 
 // map these to nothingness
@@ -175,9 +216,11 @@ namespace MMgc
 	template <class T>
 	T *MMgcNewArrayCall(T* /*dummy template arg*/, size_t count, MMgc::FixedMallocOpts opts)
 	{
-		void *p = MMgc::NewArrayCalloc(sizeof(T), count, opts, false /* !isPrimitive */);
-		*(size_t*)p = count;
-		p = ((size_t*)p + 1);
+		size_t *p = (size_t*) MMgc::NewArrayCalloc(sizeof(T), count, opts, false /* !isPrimitive */);
+		if(!p && (opts&kCanFail) != 0)
+			return NULL;
+		*p = count;
+		p++;
 		T *tp = (T*)p;
 		for(size_t i=count; i>0; i--, tp++) {
 			new ((void*)tp) T;
