@@ -217,7 +217,7 @@ namespace MMgc
 	T *MMgcNewArrayCall(T* /*dummy template arg*/, size_t count, MMgc::FixedMallocOpts opts)
 	{
 		size_t *p = (size_t*) MMgc::NewArrayCalloc(sizeof(T), count, opts, false /* !isPrimitive */);
-		if(!p && (opts&kCanFail) != 0)
+		if(!p && (opts & MMgc::kCanFail) != 0)
 			return NULL;
 		*p = count;
 		p++;
