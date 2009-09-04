@@ -675,20 +675,10 @@ namespace avmplus
  			env->lookup_cache = (MethodEnv::LookupCache*)core->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code_cache_size(), GC::kContainsPointers|GC::kZero);
   		}
 #endif
-
-		// always do a stack check.  If minstack == 0, this
-		// code still works since p < 0 is always false for all unsigned p
- 		{
- 			// Take the address of a local variable to get
- 			// stack pointer
- 			void* dummy;
- 			//fprintf(stderr, "%p\n", &dummy);
- 			if ((uintptr_t)&dummy < core->minstack)
- 			{
- 				core->stackOverflow(env);
- 			}
- 		}
  		
+		// always do a stack check.
+		core->stackCheck(env);
+
  		register List<double*, LIST_GCObjects> const & cpool_double = pool->cpool_double;
  		register const bool interruptable = !info->isNonInterruptible();
  		register const Domain* envDomain = env->domainEnv()->domain();

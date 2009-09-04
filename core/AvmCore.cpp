@@ -4216,6 +4216,18 @@ return the result of the comparison ToPrimitive(x) == y.
 		return NULL;
 	}
 
+	void AvmCore::setStackLimit(uintptr_t p)
+	{
+		minstack = p;
+	}
+
+	/* static */
+	void AvmCore::handleStackOverflow(MethodEnv* env)
+	{
+		// invoke host's stack overflow handler
+		env->core()->stackOverflow(env);
+	}
+
 	void AvmCore::raiseInterrupt(InterruptReason reason)
 	{
 		AvmAssert(reason != NotInterrupted);

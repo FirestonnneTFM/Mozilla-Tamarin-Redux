@@ -67,6 +67,7 @@ namespace avmshell
 	/* virtual */
 	void ShellCoreImpl::setStackLimit()
   	{
+		uintptr_t minstack;
 #ifdef VMCFG_WORKERTHREADS
 		if (mainthread)
 			minstack = Platform::GetInstance()->getMainThreadStackLimit();
@@ -84,6 +85,9 @@ namespace avmshell
 #else
 		minstack = Platform::GetInstance()->getMainThreadStackLimit();
 #endif
+
+		// call the non-virtual setter on AvmCore
+		AvmCore::setStackLimit(minstack);
   	}
   	
 	/* static */
