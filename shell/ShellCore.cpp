@@ -146,13 +146,11 @@ namespace avmshell
 	/* static */
 	void ShellCore::interruptTimerCallback(void* data)
 	{
-		((AvmCore*)data)->interrupted = true;
+		((AvmCore*)data)->raiseInterrupt(ScriptTimeout);
 	}
 	
-	void ShellCore::interrupt(MethodEnv *env)
+	void ShellCore::interrupt(MethodEnv *env, InterruptReason)
 	{
-		interrupted = false;
-
 		Toplevel* toplevel = env->toplevel();
 
 		if (gracePeriod) {

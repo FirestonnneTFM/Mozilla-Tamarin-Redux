@@ -154,7 +154,6 @@ namespace avmplus
 		}
 		
 	    void npe();
-		void interrupt();
         void stkover();
 
 		ArrayObject* createRest(Atom* argv, int argc);

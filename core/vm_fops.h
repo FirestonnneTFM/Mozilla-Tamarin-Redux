@@ -93,7 +93,7 @@
     METHOD(TOPLEVELADDR(Toplevel::callproperty), SIG6(A,P,A,P,I,P,P), callproperty)
     CSEMETHOD(TOPLEVELADDR(Toplevel::coerce), SIG3(A,P,A,P), coerce)
     METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
-    METHOD(ENVADDR(MethodEnv::interrupt), SIG1(V,P), interrupt)
+    FUNCTION(FUNCADDR(AvmCore::handleInterrupt), SIG1(V,P), handleInterrupt)
     METHOD(ENVADDR(MethodEnv::nextname), SIG3(A,P,A,I), nextname)
     METHOD(ENVADDR(MethodEnv::nextvalue), SIG3(A,P,A,I), nextvalue)
     METHOD(ENVADDR(MethodEnv::hasnext), SIG3(I,P,A,I), hasnext)
