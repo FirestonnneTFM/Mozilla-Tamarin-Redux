@@ -1518,18 +1518,6 @@ namespace avmplus
         else {
             exBranch = 0;
         }
-
-        // If interrupts are enabled, generate an interrupt check.
-        // This ensures at least one interrupt check per method.
-        if (interruptable && core->config.interrupts)
-        {
-            if (state->insideTryBlock)
-                storeIns(InsConstPtr((void*)state->pc), 0, _save_eip);
-
-            LIns* interrupted = loadIns(LIR_ld, offsetof(AvmCore, interrupted), coreAddr);
-            LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(AvmCore::NotInterrupted)));
-            patchLater(br, interrupt_label);
-        }
         verbose_only( if (vbWriter) { vbWriter->flush();} )
         return true;
     }

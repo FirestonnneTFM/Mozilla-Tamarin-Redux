@@ -4218,14 +4218,24 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	void AvmCore::setStackLimit(uintptr_t p)
 	{
-		minstack = p;
+		stack_limit = p;
+		if (interrupted == NotInterrupted)
+			minstack = p;
 	}
 
 	/* static */
 	void AvmCore::handleStackOverflow(MethodEnv* env)
 	{
+		// this could be a real stack overflow, or an interrupt that
+		// used the stack overflow handler as a way to take control of AS3.
+		AvmCore *core = env->core();
+		if (core->interrupted) {
+			handleInterrupt(env);
+			// never returns
+		}
+
 		// invoke host's stack overflow handler
-		env->core()->stackOverflow(env);
+		core->stackOverflow(env);
 	}
 
 	void AvmCore::raiseInterrupt(InterruptReason reason)
