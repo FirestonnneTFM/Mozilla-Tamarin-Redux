@@ -220,24 +220,39 @@ const int kBufferPadding = 16;
 		void enqTraits(Traits* t);
 		void verifyEarly(Toplevel* toplevel);
 #endif
-	
+
 	public:
 		// NOTE: this is deliberately using LIST_NonGCObjects, not LIST_GCObjects,
 		// because we DO NOT want to have this list cause the pools to stay in memory...
 		// the Pool ctor/dtor add/remove from this list. (Equivalently, we could use
 		// a list of GCWeakRefs, but this is simpler and just as effective.)
         List<PoolObject*, LIST_NonGCObjects> livingPools;
-
+	
 	public:
+		/**
+		 * inlineable interrupt check; used by interpreter in situations
+		 * where we must do more work before calling handleInterrupt, like
+		 * in the body of OP_absjump.
+		 */
+		REALLY_INLINE bool interruptCheck(bool interruptable)
+		{
+			return interruptable && (interrupted != NotInterrupted);
+		}
+
+		/**
+		 * on a backwards branch, check if the interrupt flag is enabled.
+		 * used by interpreter only.  A copy of this is inline-generated
+		 * by CodegenLIR at loop headers.
+		 */
 		void branchCheck(MethodEnv *env, bool interruptable, int go)
 		{
-			if(go < 0)
+			if (go < 0)
 			{
 #ifdef DEBUGGER
 				sampleCheck();
 #endif
-				if (interruptable && interrupted)
-					interrupt(env);
+				if (interruptCheck(interruptable))
+					handleInterrupt(env);
 			}
 		}
 
@@ -315,6 +330,17 @@ const int kBufferPadding = 16;
 		inline bool JITMustSucceed() const { return false; }
 #endif
 
+		enum InterruptReason {
+			// normal state.  must be 0 to allow efficient code for interrupt checks
+			NotInterrupted = 0,
+
+			// script is running too long
+			ScriptTimeout = 1,
+
+			// host-defined external interrupt, other than a script timeout.
+			ExternalInterrupt = 2
+		};
+
 		/**
 		 * If this is set to a nonzero value, executing code
 		 * will check the stack pointer to make sure it
@@ -322,7 +348,22 @@ const int kBufferPadding = 16;
 		 */
 		uintptr minstack;
 
-		private:
+	private:
+		/**
+		 * If this field is not NotInterrupted, the host has requested that the currently
+		 * executing AS3 code stop and invoke handleInterrupt.  The field
+		 * is checked directly by executing code.
+		 * 
+		 * Set to ScriptTimeout for a timeout interrupt,
+		 * ExternalInterrupt for an external (i.e., signal handler) interrupt.
+		 */
+		InterruptReason interrupted;
+
+		/**
+		 * points to the topmost AS3 frame that's executing and provides
+		 * the full AS3 callstack.  Every AS3 method prolog/epilog updates
+		 * this pointer.  Exception catch handlers update this as well.
+		 */
 		MethodFrame*		currentMethodFrame;
 
 		public:
@@ -344,21 +385,6 @@ const int kBufferPadding = 16;
 
 		/** Domain for built-in classes */
 		Domain* builtinDomain;
-		
-		enum InterruptReason {
-			ScriptTimeout = 1,
-			ExternalInterrupt = 2
-		};
-
-		/**
-		 * If this flag is set, an interrupt is in progress.
-		 * This must be type int, not bool, since it will
-		 * be checked by generated code.
-		 * 
-		 * Set to 1 for a timeout interrupt, 2 for
-		 * an external (i.e., signal handler) interrupt.
-		 */
-		int interrupted;
 		
 		/**
 		 * The unnamed public namespace, versioned and unversioned
@@ -1174,9 +1200,23 @@ const int kBufferPadding = 16;
 
 		/**
 		 * The interrupt method is called from executing code
-		 * when the interrupted flag is set.
+		 * when the interrupted flag is set.  interrupt()
+		 * MUST NOT RETURN; the caller expects a thrown exception.
 		 */
-		virtual void interrupt(MethodEnv *env) = 0;
+		virtual void interrupt(MethodEnv *env, InterruptReason) = 0;
+
+		/**
+		 * called by the host to raise the AS3 interrupt exception.
+		 * if AS3 code is executing, then soon after this call, 
+		 * interrupt() will be invoked by the currently executing function.
+		 */
+		void raiseInterrupt(InterruptReason reason);
+
+		/**
+		 * called by AS3 code when the interrupt is detected.  Must
+		 * not return!
+		 */
+		static void handleInterrupt(MethodEnv*);
 
 		/**
 		 * This is called when the stack overflows

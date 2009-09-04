@@ -627,11 +627,6 @@ namespace avmplus
 		toplevel()->throwTypeError(kConvertNullToObjectError);
 	}
 
-	void MethodEnv::interrupt()
-	{
-		this->core()->interrupt(this);
-	}
-
     void MethodEnv::stkover()
     {
         this->core()->stackOverflow(this);

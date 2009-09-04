@@ -192,7 +192,7 @@ namespace avmplus
 		callStack          = NULL;
 #endif
 
-		interrupted        = false;
+		interrupted     = NotInterrupted;
 
 		strings			= NULL;
 		numStrings		= 0;
@@ -4214,6 +4214,23 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
 		return NULL;
+	}
+
+	void AvmCore::raiseInterrupt(InterruptReason reason)
+	{
+		AvmAssert(reason != NotInterrupted);
+		interrupted = reason;
+	}
+
+	/* static */
+	void AvmCore::handleInterrupt(MethodEnv *env)
+	{
+		AvmCore *core = env->core();
+		InterruptReason reason = core->interrupted;
+		core->interrupted = NotInterrupted;
+		core->interrupt(env, reason);
+		// interrupt() must not return!
+		AvmAssert(false);
 	}
 
 	// BEGIN api versioning

@@ -1526,8 +1526,8 @@ namespace avmplus
             if (state->insideTryBlock)
                 storeIns(InsConstPtr((void*)state->pc), 0, _save_eip);
 
-            LIns* interrupted = loadIns(LIR_ld, 0, InsConstPtr(&core->interrupted));
-            LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
+            LIns* interrupted = loadIns(LIR_ld, offsetof(AvmCore, interrupted), coreAddr);
+            LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(AvmCore::NotInterrupted)));
             patchLater(br, interrupt_label);
         }
         verbose_only( if (vbWriter) { vbWriter->flush();} )
@@ -1604,8 +1604,8 @@ namespace avmplus
             if (state->insideTryBlock)
                 storeIns(InsConstPtr((void*)state->pc), 0, _save_eip);
 
-            LIns* interrupted = loadIns(LIR_ld, 0, InsConstPtr(&core->interrupted));
-            LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
+            LIns* interrupted = loadIns(LIR_ld, offsetof(AvmCore,interrupted), coreAddr);
+            LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(AvmCore::NotInterrupted)));
             patchLater(br, interrupt_label);
         }
 
@@ -4796,7 +4796,7 @@ namespace avmplus
             LIns *label = Ins(LIR_label);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "interrupt"); })
             setLabelPos(interrupt_label, label);
-            callIns(FUNCTIONID(interrupt), 1, env_param);
+            callIns(FUNCTIONID(handleInterrupt), 1, env_param);
         }
 
         if (info->hasExceptions()) {

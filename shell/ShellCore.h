@@ -171,7 +171,7 @@ namespace avmshell
 		static void interruptTimerCallback(void* data);
 		
 		Toplevel* initShellBuiltins();
-		void interrupt(MethodEnv *env);
+		void interrupt(MethodEnv*, InterruptReason);
 		void stackOverflow(MethodEnv *env);
 		void setEnv(Toplevel *toplevel, int argc, char *argv[]);
 		void initShellPool();

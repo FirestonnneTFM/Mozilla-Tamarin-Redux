@@ -2779,9 +2779,9 @@ namespace avmplus
 #ifndef AVMPLUS_WORD_CODE
 					
 			INSTR(abs_jump)	{
-				if (interruptable && core->interrupted) {
+				if (core->interruptCheck(interruptable)) {
 					SAVE_EXPC;
-					env->interrupt();
+					AvmCore::handleInterrupt(env);
 				}
 #  ifdef AVMPLUS_64BIT
 				uint32_t target_lo = U30ARG;
