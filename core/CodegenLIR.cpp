@@ -1778,9 +1778,8 @@ namespace avmplus
 
         case OP_getdescendants:
         {
-            Multiname name;
-            pool->parseMultiname(name, imm30);
-            emit(state, opcode, (uintptr)&name, 0, NULL);
+            const Multiname *name = pool->precomputedMultiname(imm30);
+            emit(state, opcode, (uintptr)name, 0, NULL);
             break;
         }
 
@@ -1790,17 +1789,15 @@ namespace avmplus
 
         case OP_deleteproperty:
         {
-            Multiname multiname;
-            pool->parseMultiname(multiname, imm30);
-            emit(state, opcode, (uintptr)&multiname, 0, BOOLEAN_TYPE);
+            const Multiname *name = pool->precomputedMultiname(imm30);
+            emit(state, opcode, (uintptr)name, 0, BOOLEAN_TYPE);
             break;
         }
 
         case OP_astype:
         {
-            Multiname name;
-            pool->parseMultiname(name, imm30);
-            Traits *t = pool->getTraits(name, state->verifier->getToplevel(this));
+            const Multiname *name = pool->precomputedMultiname(imm30);
+            Traits *t = pool->getTraits(*name, state->verifier->getToplevel(this));
             emit(state, OP_astype, (uintptr)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
             break;
         }
@@ -1862,9 +1859,8 @@ namespace avmplus
 
         case OP_istype:
         {
-            Multiname name;
-            pool->parseMultiname(name, imm30);
-            Traits* itraits = pool->getTraits(name, state->verifier->getToplevel(this));
+            const Multiname *name = pool->precomputedMultiname(imm30);
+            Traits* itraits = pool->getTraits(*name, state->verifier->getToplevel(this));
             emit(state, opcode, (uintptr)itraits, sp, BOOLEAN_TYPE);
             break;
         }
@@ -2195,25 +2191,22 @@ namespace avmplus
         case OP_findpropstrict:
         case OP_findproperty:
         {
-            Multiname name;
-            pool->parseMultiname(name, opd1);
-            emit(state, opcode, (uintptr)&name, 0, OBJECT_TYPE);
+            const Multiname *name = pool->precomputedMultiname(opd1);
+            emit(state, opcode, (uintptr)name, 0, OBJECT_TYPE);
             break;
         }
         case OP_findpropglobalstrict:
         {
             // NOTE opcode not supported, deoptimizing
-            Multiname name;
-            pool->parseMultiname(name, opd1);
-            emit(state, OP_findpropstrict, (uintptr)&name, 0, OBJECT_TYPE);
+            const Multiname *name = pool->precomputedMultiname(opd1);
+            emit(state, OP_findpropstrict, (uintptr)name, 0, OBJECT_TYPE);
             break;
         }
         case OP_findpropglobal:
         {
             // NOTE opcode not supported, deoptimizing
-            Multiname name;
-            pool->parseMultiname(name, opd1);
-            emit(state, OP_findproperty, (uintptr)&name, 0, OBJECT_TYPE);
+            const Multiname *name = pool->precomputedMultiname(opd1);
+            emit(state, OP_findproperty, (uintptr)name, 0, OBJECT_TYPE);
             break;
         }
 
@@ -2229,19 +2222,18 @@ namespace avmplus
         {
             // opd1=name index
             // type=script->declaringTraits
-            Multiname multiname;
-            pool->parseMultiname(multiname, opd1);
-            MethodInfo* script = (MethodInfo*)pool->getNamedScript(&multiname);
+            const Multiname *name = pool->precomputedMultiname(opd1);
+            MethodInfo* script = (MethodInfo*)pool->getNamedScript(name);
             if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
             {
                 // found a single matching traits
-                emit(state, opcode, (uintptr)&multiname, state->sp()+1, script->declaringTraits());
+                emit(state, opcode, (uintptr)name, state->sp()+1, script->declaringTraits());
             }
             else
             {
                 // no traits, or ambiguous reference.  use Object, anticipating
                 // a runtime exception
-                emit(state, opcode, (uintptr)&multiname, state->sp()+1, OBJECT_TYPE);
+                emit(state, opcode, (uintptr)name, state->sp()+1, OBJECT_TYPE);
             }
             break;
         }
@@ -2291,11 +2283,10 @@ namespace avmplus
             Traits* base = type;
             int32_t ptrIndex = state->sp()-(n-1);
 
-            Multiname name;
-            pool->parseMultiname(name, index);
+            const Multiname* name = pool->precomputedMultiname(index);
 
             Toplevel* toplevel = state->verifier->getToplevel(this);
-            Binding b = toplevel->getBinding(base, &name);
+            Binding b = toplevel->getBinding(base, name);
             Traits* propType = state->verifier->readBinding(base, b);
             const TraitsBindingsp basetd = base->getTraitsBindings();
 
@@ -2325,7 +2316,7 @@ namespace avmplus
                 // else, ignore write to readonly accessor
             }
             else {
-                emit(state, opcode, (uintptr)&name);
+                emit(state, opcode, (uintptr)name);
                 #ifdef DEBUG_EARLY_BINDING
                 core->console << "verify setsuper " << base << " " << name.getName() << " from within " << info << "\n";
                 #endif
@@ -2338,11 +2329,10 @@ namespace avmplus
             const uint32_t n = opd2;
             Traits* base = type;
 
-            Multiname name;
-            pool->parseMultiname(name, index);
+            const Multiname* name = pool->precomputedMultiname(index);
 
             Toplevel* toplevel = state->verifier->getToplevel(this);
-            Binding b = toplevel->getBinding(base, &name);
+            Binding b = toplevel->getBinding(base, name);
             Traits* propType = state->verifier->readBinding(base, b);
 
             if (AvmCore::isSlotBinding(b))
@@ -2364,7 +2354,7 @@ namespace avmplus
                 emitCall(state, OP_callsuperid, disp_id, 0, resultType);
             }
             else {
-                emit(state, opcode, (uintptr)&name, 0, propType);
+                emit(state, opcode, (uintptr)name, 0, propType);
                 #ifdef DEBUG_EARLY_BINDING
                 core->console << "verify getsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
                 #endif
@@ -2379,11 +2369,10 @@ namespace avmplus
             Traits* base = type;
             const TraitsBindingsp basetd = base->getTraitsBindings();
 
-            Multiname name;
-            pool->parseMultiname(name, index);
+            const Multiname *name = pool->precomputedMultiname(index);
 
             Toplevel* toplevel = state->verifier->getToplevel(this);
-            Binding b = toplevel->getBinding(base, &name);
+            Binding b = toplevel->getBinding(base, name);
 
             if (AvmCore::isMethodBinding(b))
             {
@@ -2398,7 +2387,7 @@ namespace avmplus
             else {
 
                 // TODO optimize other cases
-                emit(state, opcode, (uintptr)&name, argc, NULL);
+                emit(state, opcode, (uintptr)name, argc, NULL);
             }
 
             break;
@@ -2408,12 +2397,11 @@ namespace avmplus
         {
             const uint32_t argc = opd2;
             const uint32_t n = argc+1;
-            Multiname name;
-            pool->parseMultiname(name, opd1);
+            const Multiname* name = pool->precomputedMultiname(opd1);
 
             Value& obj = state->peek(n); // object
             Toplevel* toplevel = state->verifier->getToplevel(this);
-            Binding b = toplevel->getBinding(obj.traits, &name);
+            Binding b = toplevel->getBinding(obj.traits, name);
 
             if (AvmCore::isSlotBinding(b))
             {
@@ -2426,7 +2414,7 @@ namespace avmplus
             }
             else
             {
-                emit(state, opcode, (uintptr)&name, argc, NULL);
+                emit(state, opcode, (uintptr)name, argc, NULL);
             }
             break;
         }
@@ -2434,11 +2422,10 @@ namespace avmplus
         case OP_getproperty:
         {
             // NOTE opd2 is the stack offset to the reciever
-            Multiname name;
-            pool->parseMultiname(name, opd1);
+            const Multiname* name = pool->precomputedMultiname(opd1);
             Value& obj = state->peek(opd2); // object
             Toplevel* toplevel = state->verifier->getToplevel(this);
-            Binding b = toplevel->getBinding(obj.traits, &name);
+            Binding b = toplevel->getBinding(obj.traits, name);
 
             // early bind accessor
             if (AvmCore::hasGetterBinding(b))
@@ -2460,7 +2447,7 @@ namespace avmplus
                 AvmAssert(type == f->getMethodSignature()->returnTraits());
             }
             else {
-                emit(state, OP_getproperty, (uintptr)&name, 0, type);
+                emit(state, OP_getproperty, (uintptr)name, 0, type);
             }
             break;
         }
@@ -2469,11 +2456,10 @@ namespace avmplus
         case OP_initproperty:
         {
             // opd2=n the stack offset to the reciever
-            Multiname name;
-            pool->parseMultiname(name, opd1);
+            const Multiname *name = pool->precomputedMultiname(opd1);
             Value& obj = state->peek(opd2); // object
             Toplevel* toplevel = state->verifier->getToplevel(this);
-            Binding b = toplevel->getBinding(obj.traits, &name);
+            Binding b = toplevel->getBinding(obj.traits, name);
 
             // early bind accessor
             if (AvmCore::hasSetterBinding(b))
@@ -2494,7 +2480,7 @@ namespace avmplus
                 }
             }
             else {
-                emit(state, opcode, (uintptr)&name);
+                emit(state, opcode, (uintptr)name);
             }
             break;
         }
@@ -2529,9 +2515,8 @@ namespace avmplus
         case OP_callproplex:
         case OP_callpropvoid:
         {
-            Multiname name;
-            pool->parseMultiname(name, opd1);
-            emit(state, opcode, (uintptr)&name, opd2, NULL);
+            const Multiname* name = pool->precomputedMultiname(opd1);
+            emit(state, opcode, (uintptr)name, opd2, NULL);
             break;
         }
 
@@ -3969,12 +3954,7 @@ namespace avmplus
                 }
                 else if (maybeIntegerIndex && indexType != STRING_TYPE)
                 {
-                    LIns* _tempname = InsAlloc(sizeof(Multiname));
-
-                    // copy the flags
-                    LIns* mFlag = InsConst(multiname->ctFlags());
-                    storeIns(mFlag, offsetof(Multiname,flags), _tempname);
-
+                    LIns* _tempname = copyMultiname(multiname);
                     LIns* index = loadAtomRep(objDisp--);
                     AvmAssert(state->value(objDisp).notNull);
 
@@ -4169,13 +4149,8 @@ namespace avmplus
                 }
                 else if (maybeIntegerIndex)
                 {
+                    LIns* _tempname = copyMultiname(multiname);
                     LIns* value = loadAtomRep(sp);
-                    LIns* _tempname = InsAlloc(sizeof(Multiname));
-
-                    // copy the flags
-                    LIns* mFlag = InsConst(multiname->ctFlags());
-                    storeIns(mFlag, offsetof(Multiname,flags), _tempname);
-
                     LIns* index = loadAtomRep(objDisp--);
                     AvmAssert(state->value(objDisp).notNull);
 
@@ -4234,12 +4209,7 @@ namespace avmplus
 
                     localSet(objDisp, atomToNativeRep(result, i3), result);
                 } else {
-                    LIns* _tempname = InsAlloc(sizeof(Multiname));
-
-                    // copy the flags
-                    LIns* mFlag = InsConst(multiname->ctFlags());
-                    storeIns(mFlag, offsetof(Multiname,flags), _tempname);
-
+                    LIns* _tempname = copyMultiname(multiname);
                     LIns* index = loadAtomRep(objDisp--);
 
                     if( !multiname->isRtns() )
@@ -4851,16 +4821,28 @@ namespace avmplus
         frag->lastIns = last;
     }
 
-    LIns* CodegenLIR::initMultiname(Multiname* multiname, int& csp, bool isDelete /*=false*/)
+    // emit code to create a stack-allocated copy of the given multiname.
+    // this helper only initializes Multiname.flags and Multiname.next_index
+    LIns* CodegenLIR::copyMultiname(const Multiname* multiname)
     {
-        LIns* _tempname = InsAlloc(sizeof(Multiname));
+        LIns* name = InsAlloc(sizeof(Multiname));
+        storeIns(InsConst(multiname->ctFlags()), offsetof(Multiname, flags), name);
+        storeIns(InsConst(multiname->next_index), offsetof(Multiname, next_index), name);
+        return name;
+    }
 
-        // copy the flags
-        LIns* mFlag = InsConst(multiname->ctFlags());
-        storeIns(mFlag, offsetof(Multiname,flags), _tempname);
+    LIns* CodegenLIR::initMultiname(const Multiname* multiname, int& csp, bool isDelete /*=false*/)
+    {
+        if (!multiname->isRuntime()) {
+            // use the precomputed multiname
+            return InsConstPtr(multiname);
+        }
 
+        // create an initialize a copy of the given multiname
+        LIns* _tempname = copyMultiname(multiname);
+
+        // then initialize its name and ns|nsset fields.
         LIns* nameAtom = NULL;
-
         if (multiname->isRtname())
         {
             nameAtom = loadAtomRep(csp--);

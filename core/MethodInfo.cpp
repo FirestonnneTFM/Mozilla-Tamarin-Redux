@@ -397,7 +397,7 @@ namespace avmplus
 
 				// NOTE copied from above
 				#if defined AVMPLUS_WORD_CODE
-				WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this);
+				WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
 				coder = translator;
 				#else
 				CodeWriter* stubWriter = new(stubWriter_buf) CodeWriter();
