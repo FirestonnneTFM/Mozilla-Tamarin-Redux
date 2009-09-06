@@ -194,7 +194,8 @@ namespace avmplus
         LIns *loadEnvScope();
         LIns *loadEnvVTable();
         LIns *loadEnvAbcEnv();
-        LIns *initMultiname(Multiname* multiname, int& csp, bool isDelete =false);
+        LIns *copyMultiname(const Multiname* multiname);
+        LIns *initMultiname(const Multiname* multiname, int& csp, bool isDelete =false);
         LIns *storeAtomArgs(int count, int index);
         LIns *storeAtomArgs(LIns *obj, int count, int index);
         LIns *promoteNumberIns(Traits *t, int i);
