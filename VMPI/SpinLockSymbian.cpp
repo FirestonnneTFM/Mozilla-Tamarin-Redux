@@ -56,7 +56,11 @@ void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
 
 bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 {
-	return pthread_mutex_lock( (pthread_mutex_t*)lock ) == 0;
+// Use try lock for now to detect dead locks
+// return pthread_mutex_lock( (pthread_mutex_t*)lock ) == 0;
+	int ret = pthread_mutex_trylock( (pthread_mutex_t*)lock );
+	GCAssert( (ret == 0) );
+	return (ret == 0);
 }
 
 bool VMPI_lockRelease(vmpi_spin_lock_t *lock)

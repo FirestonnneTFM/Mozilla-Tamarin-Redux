@@ -46,7 +46,7 @@
 * As JIT is currently off on Symbian it is not required and allocateAlignedMemory is used instead.
 */
 //#define SYMBIAN_JIT_TEST
-//#define USE_RCHUNK
+#define USE_RCHUNK
 #ifdef USE_RCHUNK
 	class SymbianHeap
 	{
