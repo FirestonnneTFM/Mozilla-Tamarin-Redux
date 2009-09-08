@@ -3534,16 +3534,20 @@ bail:
 
 	GCAutoEnter::GCAutoEnter(GC *gc) : gc(NULL) 
 	{ 
-		if(gc->GetStackEnter() == 0) {
+		if(gc && gc->GetStackEnter() == 0) {
 			this->gc = gc;
 			gc->SetStackEnter(this); 
+			gc->heap->SetActiveGC(gc);
 		}
 	}
 	
 	GCAutoEnter::~GCAutoEnter() 
 	{ 
-		if(gc)
+		if(gc) {
 			gc->SetStackEnter(NULL); 
+			gc->heap->SetActiveGC(NULL);
+			gc = NULL;
+		}
 	}
 
 	GCAutoEnterPause::GCAutoEnterPause(GC *gc) : gc(gc), enterSave(gc->GetAutoEnter())

@@ -1619,6 +1619,10 @@ namespace MMgc
 		if(ef != NULL)
 		{
 			VMPI_lockRelease(&m_spinlock);
+			if(ef->m_gc) {
+				// we're about to jump across the GC lock, unlock it
+				ef->m_gc->SetStackEnter(NULL);
+			}
 			longjmp(ef->jmpbuf, 1);
 		}
 		GCAssertMsg(false, "MMGC_ENTER missing!");
