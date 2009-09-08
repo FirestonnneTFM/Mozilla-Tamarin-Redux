@@ -160,6 +160,17 @@ namespace avmplus
 
 /////////////////////////// Helpers: templated functions /////////////////////////////
 
+#ifdef ANDROID
+	//
+	// current Android compilers fail here with
+	//
+	// "error: logical '&&' with non-zero constant will always evaluate as true"
+	//
+	// ... which is, in fact, precisely the point. Since this is core code, just
+	// skip the checks there.
+	//
+	#define PREVENT_SIGNED_CHAR_PTR(TYPE) 
+#else
 	// use typetraits to generate a compile-time error if you attempt to use a
 	// non-unsigned char type as an argument to these.
 	#define PREVENT_SIGNED_CHAR_PTR(TYPE) \
@@ -168,6 +179,7 @@ namespace avmplus
 		typedef MMgc::is_same<char, TYPE> is_char; \
 		MMGC_STATIC_ASSERT(!(is_char::value && !is_char_unsigned::value)); \
 	}
+#endif
 
 	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR1, typename STR2>
