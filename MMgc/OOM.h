@@ -68,6 +68,7 @@ namespace MMgc
 {
 	class EnterFrame
 	{
+		friend class GCHeap;
 		friend class FixedMalloc;
 	public:
 		EnterFrame();
@@ -75,8 +76,10 @@ namespace MMgc
 		jmp_buf jmpbuf;
 		int status;
 		void Destroy() { m_heap = NULL; }
+		void SetActiveGC(GC *gc) { m_gc = gc; }
 	private:
 		GCHeap *m_heap;
+		GC *m_gc;
 	};
 	
 	typedef enum _MemoryStatus {

@@ -784,6 +784,7 @@ namespace MMgc
 	class GC : public OOMCallback
 	{
 		friend class GCRoot;
+		friend class GCHeap;
 		friend class GCCallback;
 		friend class GCAlloc;
 		friend class GCLargeAlloc;
