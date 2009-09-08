@@ -1676,7 +1676,7 @@ namespace MMgc
 		if(heapToDestroy != NULL) {
 			// any thread can call this, just need to make sure all other
 			// threads are done, hence the ref counting
-			delete heapToDestroy;
+			heapToDestroy->DestroyInstance();
 		}
 	}
 	void GCHeap::log_percentage(const char *name, size_t bytes, size_t bytes_compare)
