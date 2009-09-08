@@ -130,7 +130,8 @@ namespace MMgc
 	}
 
 	GCHeap::GCHeap(const GCHeapConfig& c)
-		: blocks(NULL),
+		: lastRegion(NULL),
+		  blocks(NULL),
 		  blocksLen(0),
 		  numDecommitted(0),
 		  numAlloc(0),
@@ -151,12 +152,6 @@ namespace MMgc
 		  abortStatusNotificationSent(false),
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
-		lastRegion  = 0;
-		blocksLen   = 0;
-		numAlloc    = 0;
-		numDecommitted = 0;
-		blocks      = NULL;
-
 		VMPI_lockInit(&m_spinlock);
 		VMPI_lockInit(&callbacks_lock);
 		VMPI_lockInit(&gclog_spinlock);
