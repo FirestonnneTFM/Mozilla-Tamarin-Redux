@@ -58,14 +58,17 @@ namespace MMgc
 	void *SystemNew(size_t size)
 	{	
 		void *space = VMPI_alloc(size);
-		GCHeap::GetGCHeap()->TrackSystemAlloc(space, size);
+		if(space)
+			GCHeap::GetGCHeap()->TrackSystemAlloc(space, size);
 		return space;
 	}
 
 	void SystemDelete(void *p)
 	{
-		GCHeap::GetGCHeap()->TrackSystemFree(p);
-		VMPI_free(p);
+		if(p) {
+			GCHeap::GetGCHeap()->TrackSystemFree(p);
+			VMPI_free(p);
+		}
 	}
 #endif
 };
