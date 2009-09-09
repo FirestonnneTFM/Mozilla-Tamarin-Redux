@@ -153,7 +153,7 @@ namespace MMgc
 		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
 	{		
 		VMPI_lockInit(&m_spinlock);
-		VMPI_lockInit(&callbacks_lock);
+		VMPI_lockInit(&list_lock);
 		VMPI_lockInit(&gclog_spinlock);
 
 		// Initialize free lists
@@ -236,7 +236,7 @@ namespace MMgc
 
 		VMPI_lockDestroy(&gclog_spinlock);
 		VMPI_lockDestroy(&m_spinlock);
-		VMPI_lockDestroy(&callbacks_lock);
+		VMPI_lockDestroy(&list_lock);
 		
 		if(enterFrame)
 			enterFrame->Destroy();
@@ -1929,7 +1929,7 @@ namespace MMgc
 		OOMCallback *cb = NULL;
 		do {
 			{
-				MMGC_LOCK(callbacks_lock);
+				MMGC_LOCK(list_lock);
 				cb = iter.next();
 			}
 			if(cb)
@@ -1956,5 +1956,31 @@ namespace MMgc
 	bool GCHeap::IsAddressInHeap(void *addr)
 	{
 		return AddrToBlock(addr) != NULL;
+	}
+
+	// Every new GC must register itself with the GCHeap.
+	void GCHeap::AddGC(GC *gc)
+	{ 
+		MMGC_LOCK(list_lock);
+		gcManager.addGC(gc); 
+	}		
+		
+	// When the GC is destroyed it must remove itself from the GCHeap.
+	void GCHeap::RemoveGC(GC *gc) 
+	{ 
+		MMGC_LOCK(list_lock);
+		gcManager.removeGC(gc); 
+	}
+	
+	void GCHeap::AddOOMCallback(OOMCallback *p) 
+	{
+		MMGC_LOCK(list_lock);
+		callbacks.Add(p); 
+	}
+	
+	void GCHeap::RemoveOOMCallback(OOMCallback *p) 
+	{ 
+		MMGC_LOCK(list_lock);
+		callbacks.Remove(p); 
 	}
 }
