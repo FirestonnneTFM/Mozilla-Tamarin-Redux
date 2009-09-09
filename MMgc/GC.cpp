@@ -913,6 +913,7 @@ namespace MMgc
 		}
 
 		gcheap->AddGC(this);
+		gcheap->AddOOMCallback(this);
  		allocaInit();
 
 		emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef));
@@ -929,6 +930,7 @@ namespace MMgc
 		policy.shutdown();
  		allocaShutdown();
 		heap->RemoveGC(this);
+		heap->RemoveOOMCallback(this);
 
 		// Force all objects to be destroyed
 		destroying = true;
