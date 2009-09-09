@@ -1239,6 +1239,13 @@ const int kBufferPadding = 16;
 		 */
 		void raiseInterrupt(InterruptReason reason);
 
+		// return true if there is a pending interrupt of the specific InterruptReason.
+		REALLY_INLINE bool interruptCheckReason(InterruptReason r) const
+		{
+			AvmAssert(r != NotInterrupted);
+			return interrupted == r;
+		}
+
 		/**
 		 * called by AS3 code when the interrupt is detected.  Must
 		 * not return!
