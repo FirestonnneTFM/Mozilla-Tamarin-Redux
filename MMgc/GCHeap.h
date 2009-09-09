@@ -362,7 +362,6 @@ namespace MMgc
 		EnterFrame *GetEnterFrame() { return enterFrame; }
 
 		void SetActiveGC(GC *gc) { if(enterFrame) enterFrame->SetActiveGC(gc); }
-
 		inline bool StackEnteredCheck() { return !entryChecksEnabled || GetEnterFrame() != NULL; }
 		
 		// remove this and make them always enabled once its possible
