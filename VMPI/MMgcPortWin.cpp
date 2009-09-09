@@ -556,6 +556,9 @@ extern "C" unsigned long* get_frame_pointer();
 
 	bool VMPI_captureStackTrace(uintptr_t *buffer, size_t bufferSize, uint32_t framesToSkip)
 	{
+		if(RtlCaptureStackBackTrace_fn == NULL)
+			return false;
+
 #ifdef UNDER_CE
 
 		CallSnapshot lpFrames[32];

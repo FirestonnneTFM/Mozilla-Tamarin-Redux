@@ -1594,10 +1594,15 @@ namespace MMgc
 		}
 	}
 	
+	// this is the first thing we run after the Abort longjmp
 	EnterFrame::~EnterFrame()
 	{
-		if(m_heap)
-			m_heap->Leave();
+		if(m_heap) {
+			GCHeap *heap = m_heap;
+			// this prevents us from doing multiple jumps in case leave results in more allocations
+			m_heap = NULL;
+			heap->Leave();
+		}
 	}
 	
 	void GCHeap::Abort()
@@ -1611,7 +1616,7 @@ namespace MMgc
 			VMPI_exit(config.OOMExitCode);
 		}
 			
-		if(ef != NULL)
+		if(ef != NULL && ef->m_heap != NULL)
 		{
 			VMPI_lockRelease(&m_spinlock);
 			if(ef->m_gc) {
