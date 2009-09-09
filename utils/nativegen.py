@@ -328,7 +328,18 @@ class TypeName:
 		self.name = name
 		self.types = types
 	def __str__(self):
-		return str(self.name)
+		# @todo horrible special-casing, improve someday
+		s = str(self.name)
+		t = str(self.types[0])
+		if t == "int":
+			s += "$int"
+		elif t == "uint":
+			s += "$uint"
+		elif t == "Number":
+			s += "$double"
+		else:
+			s += "$object"
+		return s
 
 class MetaData:
 	name = ""
@@ -1258,7 +1269,10 @@ class AbcThunkGen:
 			self.out_c.println("%s* const obj = %s;" % (recname, args[0][0]))
 			if ret != "void":
 				if rettraits.ctype == CTYPE_OBJECT:
-					self.out_c.prnt("%s* const ret = " % (rettraits.niname))
+					if rettraits.niname == None:
+						self.out_c.prnt("%s const ret = " % ("AvmObject"))
+					else:
+						self.out_c.prnt("%s* const ret = " % (rettraits.niname))
 				else:
 					self.out_c.prnt("%s const ret = " % (ret))
 			if m.receiver == None:
