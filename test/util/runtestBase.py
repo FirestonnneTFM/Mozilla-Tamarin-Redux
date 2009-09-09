@@ -388,10 +388,6 @@ class RuntestBase:
                         cputype = 'ppc'
                     elif machine == 'i386':
                         cputype = 'x86'
-            # Need to do the SPARC check before the x86 check as the x86 check 
-            # will find the "32-bit" string and think that it is x86.
-            elif re.search('(SPARC)', f):
-                cputype='sparc'
             elif re.search('(ppc64)', f):
                 cputype='ppc64'
             elif re.search('(ppc)', f):
