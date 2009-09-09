@@ -640,7 +640,7 @@ class B extends A {
 	]]></description>
  </error>
   <error id="1503" label="kScriptTerminatedError">Сценарий не завершился через 30 секунд и был остановлен.
- <description><![CDATA[
+    <description><![CDATA[
 	  The script was still executing after 30 seconds. Flash Player first throws run-time error number 1502 (A script has executed for longer than the default timeout period of 15 seconds.) if the script executed more than 15 
 	  seconds, which is the default timeout period. This error occurs 15 seconds after Error 1502 occurs.  
 	]]></description></error>
