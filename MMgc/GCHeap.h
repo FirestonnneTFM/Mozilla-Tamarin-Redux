@@ -328,22 +328,14 @@ namespace MMgc
 #endif
 
 		// Every new GC must register itself with the GCHeap.
-		void AddGC(GC *gc)
-		{ 
-			gcManager.addGC(gc); 
-			callbacks.Add((OOMCallback*)gc);
-		}		
+		void AddGC(GC *gc);
 		
 		// When the GC is destroyed it must remove itself from the GCHeap.
-		void RemoveGC(GC *gc) 
-		{ 
-			gcManager.removeGC(gc); 
-			callbacks.Remove((OOMCallback*)gc);
-		}
+		void RemoveGC(GC *gc);
 
-		void AddOOMCallback(OOMCallback *p) { callbacks.Add(p); }
+		void AddOOMCallback(OOMCallback *p);
 
-		void RemoveOOMCallback(OOMCallback *p) { callbacks.Remove(p); }
+		void RemoveOOMCallback(OOMCallback *p);
 		
 		void Abort();
 		MemoryStatus GetStatus() { return status; }
@@ -572,7 +564,7 @@ namespace MMgc
 		GCHeapConfig config;
 		GCManager gcManager;		
  		BasicList<OOMCallback*> callbacks;
- 		vmpi_spin_lock_t callbacks_lock;
+ 		vmpi_spin_lock_t list_lock;
 
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
