@@ -78,8 +78,8 @@
 		<LangFile_ru    file='../localization/ru/ErrorConstants.xml' />
 		<LangFile_sv    file='../localization/sv/ErrorConstants.xml' />
 		<LangFile_tr    file='../localization/tr/ErrorConstants.xml' />
-		<LangFile_zh_CN file='../localization/zh_CN/ErrorConstants.xml' />
-		<LangFile_zh_TW file='../localization/zh_TW/ErrorConstants.xml' />
+		<LangFile_zh_CN file='../localization/zh_Hans/ErrorConstants.xml' />
+		<LangFile_zh_TW file='../localization/zh_Hant/ErrorConstants.xml' />
 
 		<dotAs>
 <![CDATA[
