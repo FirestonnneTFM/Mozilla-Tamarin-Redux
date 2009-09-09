@@ -1145,8 +1145,11 @@ namespace MMgc
 			}
 		}
 
-		if(config.heapSoftLimit && GetTotalHeapSize() > config.heapSoftLimit && status == kMemNormal)
+
+		size_t total = GetTotalHeapSize() ;
+		if(config.heapSoftLimit && total > config.heapSoftLimit && status == kMemNormal)
 		{
+			GCDebugMsg(false, "*** Alloc exceed softlimit: ask for %d, usedheapsize =%d, totalHeap =%d\n", askSize, GetUsedHeapSize(), total );
 			StatusChangeNotify(kMemSoftLimit);
 		}
 
@@ -1625,7 +1628,7 @@ namespace MMgc
 			}
 			longjmp(ef->jmpbuf, 1);
 		}
-		GCAssertMsg(false, "MMGC_ENTER missing!");
+		GCAssertMsg(false, "MMGC_ENTER missing or we allocated more memory trying to shutdown");
 		VMPI_abort();
 	}
 	

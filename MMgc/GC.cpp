@@ -1770,6 +1770,10 @@ bail:
 			{
 				PrintAllocStackTrace(item);
 				GCAssertMsg(false, "RCObject didn't clean up itself.");
+				// If you hit this assert, use the debugger to cast 'item' to the type indicated by the call stack 
+				// in the output (you'll have to qualify the scope - (coreplayer::View*) rather than (View*)
+				// and check to see that all fields are 0 (even boolean members). This Is a 
+				// performance optimization that lets the GC avoid zero'ing the whole thing itself.
 			}
 		}	
 	}
