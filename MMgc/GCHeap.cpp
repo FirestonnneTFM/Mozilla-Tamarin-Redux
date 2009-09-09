@@ -1585,7 +1585,7 @@ namespace MMgc
 	}
 #endif // MMGC_HOOKS
 
-	EnterFrame::EnterFrame() : m_heap(NULL)
+	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL)
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
 		if(heap->GetStackEntryAddress() == NULL) {
