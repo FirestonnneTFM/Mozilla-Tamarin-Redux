@@ -76,6 +76,7 @@ static void endGCLogToFile()
 namespace MMgc
 {
 	GCHeap *GCHeap::instance = NULL;
+	size_t GCHeap::leakedBytes;
 
 #ifdef MMGC_MEMORY_PROFILER
 	MemoryProfiler* GCHeap::profiler = (MemoryProfiler*)-1;
@@ -122,11 +123,12 @@ namespace MMgc
 		instance = new GCHeap(config);
 	}
 
-	void GCHeap::Destroy()
+	size_t GCHeap::Destroy()
 	{
 		GCAssert(instance != NULL);
 		delete instance;
 		instance = NULL;
+		return leakedBytes;
 	}
 
 	GCHeap::GCHeap(const GCHeapConfig& c)
@@ -204,6 +206,8 @@ namespace MMgc
 
 		gcManager.destroy();
 		callbacks.Destroy();
+
+		leakedBytes = GetFixedMalloc()->GetBytesInUse();
 		GetFixedMalloc()->_Destroy();
 
 		if(numAlloc != 0 && status != kMemAbort)
