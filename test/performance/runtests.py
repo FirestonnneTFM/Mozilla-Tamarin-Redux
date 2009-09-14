@@ -562,8 +562,11 @@ class PerformanceRuntest(RuntestBase):
                                 perfmSocketlog('vprof-count','count')
                         self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
                         runResults = ''
-                        for i in range(self.iterations):
-                            runResults += '%8s' % resultList[i]
+                        if self.csv:
+                            for i in range(self.iterations):
+                                runResults += '%8s' % resultList[i]
+                        else:
+                            runResults = str(resultList)
                         self.js_print(("%-50s %7s %10.1f%% %7s  "+runResults+" %s") % (ast,result1,confidence,metric, largerIsFaster)) 
                     else: #one iteration
                         self.js_print("%-50s %7s %7s %s" % (testName,result1,metric,largerIsFaster)) 
