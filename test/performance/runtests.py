@@ -508,16 +508,10 @@ class PerformanceRuntest(RuntestBase):
                         rl2_avg=sum(resultList2)/float(len(resultList2))
                         min1 = float(min(resultList))
                         min2 = float(min(resultList2))
-                        max1 = float(max(resultList))
-                        max2 = float(max(resultList2))
-                        if largerIsFaster:
-                            spdup = 100.0*(max2-max1)/max1
-                        else:
-                            spdup = 100.0*(min1-min2)/min1
                         self.js_print('%-50s [%6s :%6s] %6.1f %6.1f   [%6s :%6s] %6.1f %6.1f %6.1f%% %7s %s' %
-                                      (testName, min1, max1, rl1_avg, standard_deviation(resultList),
-                                       min2, max2, rl2_avg, standard_deviation(resultList2),
-                                       spdup, metric, largerIsFaster))
+                                      (testName, min1, max(resultList), rl1_avg, standard_deviation(resultList),
+                                       min2, max(resultList2), rl2_avg, standard_deviation(resultList2),
+                                       ((min1-min2)/min2*100.0) if not largerIsFaster else ((min2-min1)/min1*100.0), metric, largerIsFaster))
                     except:
                         self.js_print('%-50s [%6s :%6s] %6.1f %6s   [%6s :%6s] %6.1f %6s %7.1f %7s %s' % (testName, '', '', result1,'', '', '', result2,'', spdup, metric, largerIsFaster))
                 #TODO: clean up / reformat
@@ -568,11 +562,8 @@ class PerformanceRuntest(RuntestBase):
                                 perfmSocketlog('vprof-count','count')
                         self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
                         runResults = ''
-                        if self.csv:
-                            for i in range(self.iterations):
-                                runResults += '%8s' % resultList[i]
-                        else:
-                            runResults = str(resultList)
+                        for i in range(self.iterations):
+                            runResults += '%8s' % resultList[i]
                         self.js_print(("%-50s %7s %10.1f%% %7s  "+runResults+" %s") % (ast,result1,confidence,metric, largerIsFaster)) 
                     else: #one iteration
                         self.js_print("%-50s %7s %7s %s" % (testName,result1,metric,largerIsFaster)) 
