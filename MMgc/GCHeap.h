@@ -215,9 +215,9 @@ namespace MMgc
 		}
 
 		/**
-		 * Destroy the GCHeap singleton
+		 * Destroy the GCHeap singleton, returns the number of bytes still allocated in FixedMalloc (ie leaked)
 		 */
-		static void Destroy();
+		static size_t Destroy();
 
 		/**
 		 * Get the GCHeap singleton
@@ -553,7 +553,8 @@ namespace MMgc
 
 		// data section
 		static GCHeap *instance;
-	
+		static size_t leakedBytes;
+
 		HeapBlock *blocks;
 		unsigned int blocksLen;
 		unsigned int numDecommitted;
