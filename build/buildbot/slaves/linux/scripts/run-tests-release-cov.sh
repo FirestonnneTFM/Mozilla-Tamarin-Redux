@@ -97,14 +97,14 @@ $bullseyedir/covclear
 cd $basedir/test/acceptance
 
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py --nohtml --notimecheck"
-python ./runtests.py --config=x86-lnx-tvm-cov-releasedebugger --nohtml --notimecheck
+echo "message: python ./runtests.py  --notimecheck"
+python ./runtests.py --config=x86-lnx-tvm-cov-releasedebugger  --notimecheck
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Dinterp --nohtml  --notimecheck"
-python ./runtests.py --vmargs=-Dinterp --config=x86-lnx-tvm-cov-releasedebugger-Dinterp --nohtml --notimecheck
+echo "message: python ./runtests.py --vmargs=-Dinterp   --notimecheck"
+python ./runtests.py --vmargs=-Dinterp --config=x86-lnx-tvm-cov-releasedebugger-Dinterp  --notimecheck
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Ojit --nohtml  --notimecheck"
-python ./runtests.py --vmargs=-Ojit --config=x86-lnx-tvm-cov-releasedebugger-Ojit --nohtml --notimecheck
+echo "message: python ./runtests.py --vmargs=-Ojit   --notimecheck"
+python ./runtests.py --vmargs=-Ojit --config=x86-lnx-tvm-cov-releasedebugger-Ojit  --notimecheck
 $bullseyedir/covdir -q
 
 fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`

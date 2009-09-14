@@ -119,8 +119,8 @@ then
 else
     py=$PYTHONWIN
 fi
-echo "message: $py ./runtests.py  --vmargs=-Dnodebugger --nohtml --notimecheck"
-$py ./runtests.py  --vmargs=-Dnodebugger --nohtml --notimecheck
+echo "message: $py ./runtests.py  --vmargs=-Dnodebugger  --notimecheck"
+$py ./runtests.py  --vmargs=-Dnodebugger  --notimecheck
 
 ##
 # Ensure that the system is torn down and clean

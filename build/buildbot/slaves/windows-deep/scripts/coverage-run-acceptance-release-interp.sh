@@ -107,8 +107,8 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp  --nohtml --notimecheck"
-$py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp --vmargs=${interp}  --nohtml --notimecheck
+echo "message: $py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp   --notimecheck"
+$py ./runtests.py --config=x86-win-tvm-cov-release-Dinterp --vmargs=${interp}   --notimecheck
 $bullseyedir/covdir -q
 
 ##

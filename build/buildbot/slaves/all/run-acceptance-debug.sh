@@ -127,8 +127,8 @@ then
 else
     py=$PYTHONWIN
 fi
-echo "message: $py ./runtests.py --config=$config  --nohtml --notimecheck"
-$py ./runtests.py --config=$config  --nohtml --notimecheck
+echo "message: $py ./runtests.py --config=$config   --notimecheck"
+$py ./runtests.py --config=$config   --notimecheck
 
 ##
 # Ensure that the system is torn down and clean
