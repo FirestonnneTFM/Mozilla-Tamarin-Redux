@@ -125,8 +125,8 @@ then
 else
     py=$PYTHONWIN
 fi
-echo "message: $py ./runtests.py --config=${config}-nodebugger --vmargs=-Dnodebugger --nohtml --notimecheck"
-$py ./runtests.py --config=${config}-nodebugger --vmargs=-Dnodebugger --nohtml --notimecheck
+echo "message: $py ./runtests.py --config=${config}-nodebugger --vmargs=-Dnodebugger  --notimecheck"
+$py ./runtests.py --config=${config}-nodebugger --vmargs=-Dnodebugger  --notimecheck
 
 ##
 # Ensure that the system is torn down and clean

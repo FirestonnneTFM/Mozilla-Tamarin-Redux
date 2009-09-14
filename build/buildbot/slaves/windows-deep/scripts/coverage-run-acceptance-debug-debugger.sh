@@ -107,8 +107,8 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --config=x86-win-tvm-cov-debugdebugger  --nohtml --notimecheck"
-$py ./runtests.py --config=x86-win-tvm-cov-debugdebugger  --nohtml --notimecheck
+echo "message: $py ./runtests.py --config=x86-win-tvm-cov-debugdebugger   --notimecheck"
+$py ./runtests.py --config=x86-win-tvm-cov-debugdebugger   --notimecheck
 $bullseyedir/covdir -q
 
 ##

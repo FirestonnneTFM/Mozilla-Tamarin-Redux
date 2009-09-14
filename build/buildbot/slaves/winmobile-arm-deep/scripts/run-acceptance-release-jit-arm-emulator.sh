@@ -109,8 +109,8 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --nohtml --vmargs=-Ojit --config=arm-winmobile-emulator-tvm-release-Ojit-deep --notimecheck"
-$py ./runtests.py --nohtml --vmargs=-Ojit --config=arm-winmobile-emulator-tvm-release-Ojit-deep --notimecheck
+echo "message: $py ./runtests.py  --vmargs=-Ojit --config=arm-winmobile-emulator-tvm-release-Ojit-deep --notimecheck"
+$py ./runtests.py  --vmargs=-Ojit --config=arm-winmobile-emulator-tvm-release-Ojit-deep --notimecheck
 
 
 ##

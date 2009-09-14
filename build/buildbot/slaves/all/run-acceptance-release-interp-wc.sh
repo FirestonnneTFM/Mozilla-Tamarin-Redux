@@ -119,8 +119,8 @@ then
 else
     py=$PYTHONWIN
 fi
-echo "message: $py ./runtests.py --vmargs=$interp  --nohtml --notimecheck"
-$py ./runtests.py --vmargs=$interp  --nohtml --notimecheck
+echo "message: $py ./runtests.py --vmargs=$interp   --notimecheck"
+$py ./runtests.py --vmargs=$interp   --notimecheck
 
 ##
 # Ensure that the system is torn down and clean

@@ -108,8 +108,8 @@ else
 fi
 
 
-echo "message: $py ./runtests.py --config=x86-win-tvm-cov-debug  --nohtml --notimecheck"
-$py ./runtests.py --config=x86-win-tvm-cov-debug  --nohtml --notimecheck
+echo "message: $py ./runtests.py --config=x86-win-tvm-cov-debug   --notimecheck"
+$py ./runtests.py --config=x86-win-tvm-cov-debug   --notimecheck
 $bullseyedir/covdir -q
 
 ##

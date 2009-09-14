@@ -109,8 +109,8 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py --nohtml --vmargs=-Dinterp --config=arm-winmobile-emulator-tvm-release-Dinterp-deep --notimecheck"
-$py ./runtests.py --nohtml --vmargs=-Dinterp --config=arm-winmobile-emulator-tvm-release-Dinterp-deep --notimecheck
+echo "message: $py ./runtests.py  --vmargs=-Dinterp --config=arm-winmobile-emulator-tvm-release-Dinterp-deep --notimecheck"
+$py ./runtests.py  --vmargs=-Dinterp --config=arm-winmobile-emulator-tvm-release-Dinterp-deep --notimecheck
 
 ##
 # Ensure that the system is torn down and clean
