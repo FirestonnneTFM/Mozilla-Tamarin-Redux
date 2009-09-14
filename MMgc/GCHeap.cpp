@@ -1641,7 +1641,7 @@ namespace MMgc
 
 	void GCHeap::Leave()
 	{
-		bool lastOneOut = false;
+		GCHeap *heapToDestroy=NULL;
 		{
 			MMGC_LOCK(m_spinlock);
 
@@ -1659,13 +1659,14 @@ namespace MMgc
 
 			if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
 				// last one out of the pool pulls the plug
-				lastOneOut = true;
+				heapToDestroy = instance;
+				instance = NULL;
 			}
 		}
-		if(lastOneOut) {
+		if(heapToDestroy != NULL) {
 			// any thread can call this, just need to make sure all other
 			// threads are done, hence the ref counting
-			Destroy();
+			delete heapToDestroy;
 		}
 	}
 	void GCHeap::log_percentage(const char *name, size_t bytes, size_t bytes_compare)
