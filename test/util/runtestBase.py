@@ -110,7 +110,7 @@ class RuntestBase:
     
     verbose = False
     quiet = False
-    htmlOutput = True
+    htmlOutput = False
     timestampcheck = True
     timestamps = True
     forcerebuild = False
@@ -121,6 +121,7 @@ class RuntestBase:
     debug = False
     threads = 1
     winceProcesses = []
+    csv = False
     
     genAtsSwfs = False
     atsDir = 'ATS_SWFS'
@@ -241,7 +242,7 @@ class RuntestBase:
         print '    --ascargs       args to pass to asc on rebuild of test files'
         print '    --vmargs        args to pass to vm'
         print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
-        print '    --nohtml        do not create a html output file'
+        print '    --html          also create an html output file'
         print '    --notimecheck   do not recompile .abc if timestamp is older than .as'
         print '    --java          location of java executable (default=java)'
         
@@ -252,7 +253,8 @@ class RuntestBase:
         self.options = 'vE:a:g:b:s:x:htfc:dqe'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                   'timeout=', 'rebuildtests','quiet','nohtml','notimecheck','eval','showtimes','java=']
+                   'timeout=', 'rebuildtests','quiet','notimecheck','eval','showtimes','java=',
+                   'html']
 
     def parseOptions(self):
         try:
@@ -304,8 +306,8 @@ class RuntestBase:
                 self.rebuildtests = True
             elif o in ('-q', '--quiet'):
                 self.quiet = True
-            elif o in ('--nohtml',):
-                self.htmlOutput = False
+            elif o in ('--html',):
+                self.htmlOutput = True
             elif o in ('--notimecheck',):
                 self.timestampcheck = False
             elif o in ('--showtimes'):
@@ -336,7 +338,7 @@ class RuntestBase:
         if self.timestamps:
             # get the start time
             self.start_time = datetime.today()
-            self.js_print('Tamarin tests started: %s' % self.start_time, overrideQuiet=True)
+            self.js_print('Tamarin tests started: %s' % self.start_time, overrideQuiet=True, csv=False)
         
     def determineOS(self):
         _os = platform.system()
@@ -462,9 +464,36 @@ class RuntestBase:
         print 'Writing results to %s' % self.js_output
         self.js_output_f = open(self.js_output, 'w')
     
-    def js_print(self, m, start_tag='<p><tt>', end_tag='</tt></p>', overrideQuiet=False):
+    def convertToCsv(self, line):
+        # convert all whitespace and [ : ] chars to ,
+        line = line.replace('\n', '')
+        line = line.replace('[',' ')
+        line = line.replace(']',' ')
+        line = line.replace(':',' ')
+        lineList = []
+        
+        for l in line.split():
+            l = l.strip()
+            if l.find(',') != -1:   #wrap with "" if there is a , in val
+                l = '"%s"' % l
+            lineList.append(l)
+        
+        return ','.join(lineList)
+    
+    def js_print(self, m, start_tag='<p><tt>', end_tag='</tt></p>', overrideQuiet=False, csv=True, csvOut=True):
+        # Print output
+        # csv - if True and if outputting csv, convert line into csv (spaces and []: chars)
+        # csvOut - if False and if outputing csv, do not print out this line
         if self.quiet and not overrideQuiet:
             sys.stdout.write('.')
+        elif self.csv:
+            if csvOut:
+                if csv:
+                    print self.convertToCsv(m)
+                else:
+                    if m.find(',') != -1:
+                        m = '"%s"' % m
+                    print m
         else:
             print m
             sys.stdout.flush()
