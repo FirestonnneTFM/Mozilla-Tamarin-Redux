@@ -175,8 +175,6 @@ namespace avmplus
 		 * used for defining and resolving imported definitions.
 		 */
 		ScriptObject* finddef(const Multiname* name) const;
-		ScriptObject* finddefNsset(NamespaceSet* nsset, Stringp name) const;
-		ScriptObject* finddefNs(Namespace* ns, Stringp name) const;
 
 		/**
 		 * implementation of object initializers
