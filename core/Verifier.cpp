@@ -807,19 +807,18 @@ namespace avmplus
 					// error, def name must be CT constant, regular name
 					verifyFailed(kIllegalOpMultinameError, core->toErrorString(opcode), core->toErrorString(&multiname));
 				}
-				coder->writeOp1(state, pc, opcode, imm30);
 				MethodInfo* script = pool->getNamedScript(&multiname);
-				if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
-				{
+				Traits* resultType;
+				if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS) {
 					// found a single matching traits
-					state->push(script->declaringTraits(), true);
-				}
-				else
-				{
+					resultType = script->declaringTraits();
+				} else {
 					// no traits, or ambiguous reference.  use Object, anticipating
 					// a runtime exception
-					state->push(OBJECT_TYPE, true);
+					resultType = OBJECT_TYPE;
 				}
+				coder->writeOp1(state, pc, opcode, imm30, resultType);
+				state->push(resultType, true);
 				break;
 			}
 

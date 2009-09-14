@@ -2222,25 +2222,18 @@ namespace avmplus
         {
             // opd1=name index
             // type=script->declaringTraits
-            const Multiname *name = pool->precomputedMultiname(opd1);
-            MethodInfo* script = (MethodInfo*)pool->getNamedScript(name);
-            if (script != (MethodInfo*)BIND_NONE && script != (MethodInfo*)BIND_AMBIGUOUS)
-            {
-                // found a single matching traits
-                emit(state, opcode, (uintptr)name, state->sp()+1, script->declaringTraits());
-            }
-            else
-            {
-                // no traits, or ambiguous reference.  use Object, anticipating
-                // a runtime exception
-                emit(state, opcode, (uintptr)name, state->sp()+1, OBJECT_TYPE);
-            }
+            const Multiname *multiname = pool->precomputedMultiname(opd1);
+            AvmAssert(multiname->isBinding());
+            int32_t dest_index = state->sp() + 1;
+            emitPrep(state);
+            LIns* out = callIns(FUNCTIONID(finddef), 2, env_param, InsConstPtr(multiname));
+            localSet(dest_index, ptrToNativeRep(type, out), type);
             break;
         }
 
         default:
+            // verifier has called writeOp1 improperly
             AvmAssert(false);
-            // FIXME need error handler here
             break;
         }
     }
@@ -3784,35 +3777,6 @@ namespace avmplus
                     withBase);
 
                 localSet(dest, atomToNativeRep(result, i3), result);
-                break;
-            }
-
-            case OP_finddef:
-            {
-                // stack in:
-                // stack out: obj
-                // framep[op2] = env->finddef(name)
-                Multiname* multiname = (Multiname*) op1;
-                int32_t dest_index = (int32_t) op2;
-                LIns* name = InsConstPtr(multiname->getName());
-                LIns* out;
-
-                AvmAssert(multiname->isBinding());
-                if (multiname->isNsset())
-                {
-                    out = callIns(FUNCTIONID(finddefNsset), 3,
-                        env_param,
-                        InsConstPtr(multiname->getNsset()),
-                        name);
-                }
-                else
-                {
-                    out = callIns(FUNCTIONID(finddefNs), 3,
-                        env_param,
-                        InsConstPtr(multiname->getNamespace()),
-                        name);
-                }
-                localSet(dest_index, ptrToNativeRep(result, out), result);
                 break;
             }
 

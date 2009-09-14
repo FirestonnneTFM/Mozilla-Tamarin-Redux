@@ -969,19 +969,6 @@ namespace avmplus
 		return se;
 	}
 
-	ScriptObject* MethodEnv::finddefNsset(NamespaceSet* nsset, Stringp name) const
-	{
-		Multiname m(nsset);
-		m.setName(name);
-		return finddef(&m);
-	}
-
-	ScriptObject* MethodEnv::finddefNs(Namespace* ns, Stringp name) const
-	{
-		Multiname m(ns, name);
-		return finddef(&m);
-	}
-
 	/*static*/ ScopeChain* ScriptEnv::createScriptScope(const ScopeTypeChain* stc, VTable* _vtable, AbcEnv* _abcEnv)
 	{
 		AvmCore* core = _vtable->core();
