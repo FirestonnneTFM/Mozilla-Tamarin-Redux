@@ -319,6 +319,8 @@ namespace avmplus
 	};
 
 	// version of multiname sporting write barriers
+	// NOTE NOTE NOTE
+	// This is embedded into other GCObjects, it's not a GCObject by itself
 	class HeapMultiname 
 	{
 	public:

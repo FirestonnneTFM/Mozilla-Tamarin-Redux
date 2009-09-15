@@ -207,10 +207,16 @@ namespace avmplus
 	}
 //#endif
 
+	// NOTE NOTE NOTE
+	// Write barrier note: the container for a HeapMultiname is *not* 'this'; 
+	// HeapMultiname figures as a field in eg QNameObject and XMLListObject.
+	// You *must* call FindBeginningFast(this) to get the right container.
+	
 	void HeapMultiname::setMultiname(const Multiname& that)
 	{
 		MMgc::GC* gc = this->gc();
-		WBRC(gc, this, &name.name, that.name);
+		const void *container = gc->FindBeginningFast(this);
+		WBRC(gc, container, &name.name, that.name);
 		
 		bool const this_nsset = name.isNsset() != 0;
 		bool const that_nsset = that.isNsset() != 0;
@@ -221,18 +227,18 @@ namespace avmplus
 			// any existing value (before setting a new one) because WB/WBRC
 			// assume any existing value is a GCObject/RCObject respectively.
 			if (this_nsset)
-				WB_NULL(gc, this, &name.ns);
+				WB_NULL(&name.ns);
 			else
-				WBRC_NULL(gc, this, &name.ns);
+				WBRC_NULL(&name.ns);
 		}
 
 		if (that_nsset) 
 		{
-			WB(gc, this, &name.nsset, that.nsset);
+			WB(gc, container, &name.nsset, that.nsset);
 		} 
 		else 
 		{
-			WBRC(gc, this, &name.ns, that.ns);
+			WBRC(gc, container, &name.ns, that.ns);
 		}
 
 		name.flags = that.flags;
@@ -243,9 +249,9 @@ namespace avmplus
 	{
 		// Our embedded Multiname will zero itself, but we should call WBRC to 
 		// adjust the refcounts correctly...
-		WBRC_NULL(gc(), this, &name.name);
+		WBRC_NULL(&name.name);
 		if (!name.isNsset())
-			WBRC_NULL(gc(), this, &name.ns);
+			WBRC_NULL(&name.ns);
 	}
 	
 }

@@ -502,7 +502,7 @@ namespace avmplus
 				gc->Free(m_buffer.pv);
 				break;
 			case kDependent:
-				WBRC_NULL(gc, this, &m_extra.master);
+				WBRC_NULL(&m_extra.master);
 				break;
 			default: ; // kStatic
 		}
@@ -562,7 +562,7 @@ namespace avmplus
 		VMPI_memcpy(buf, ptrs.pv, bytes);
 		WB(gc, this, &this->m_buffer.pv, buf);
 		if (isDependent())
-			WBRC_NULL(gc, this, &m_extra.master);
+			WBRC_NULL(&m_extra.master);
 		setType(kDynamic);
 	}
 
