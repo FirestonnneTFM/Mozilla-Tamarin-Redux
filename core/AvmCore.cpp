@@ -120,7 +120,7 @@ namespace avmplus
  		, m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
  		, m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))	
 		, currentMethodFrame(NULL)
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_LOOKUP_CACHE
 		, lookup_cache_timestamp(1)
 #endif
 		, gcInterface(g)
@@ -508,7 +508,7 @@ namespace avmplus
 				}
 			}
 		}
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_LOOKUP_CACHE
 		// Adding scripts to a domain always invalidates the lookup cache.
 		invalidateLookupCache();
 #endif

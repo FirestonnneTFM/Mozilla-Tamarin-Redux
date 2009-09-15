@@ -360,6 +360,7 @@ var FEATURES =
 	</requires>
     <defines> VMCFG_NANOJIT  </defines>
     <defines> VMCFG_PRECOMP_NAMES </defines>
+    <defines> VMCFG_LOOKUP_CACHE </defines>
     <defines> FEATURE_NANOJIT </defines>  <!-- FIXME: legacy name -->
   </feature>
 
@@ -382,6 +383,7 @@ var FEATURES =
     <defines>    VMCFG_WORDCODE  </defines>
     <defines>    VMCFG_WORDCODE_PEEPHOLE  </defines>
     <defines>    VMCFG_PRECOMP_NAMES </defines>
+    <defines>    VMCFG_LOOKUP_CACHE </defines>
 	<defines>    AVMPLUS_WORD_CODE </defines>  <!-- FIXME: legacy name -->
 	<defines>    AVMPLUS_PEEPHOLE_OPTIMIZER </defines>  <!-- FIXME: legacy name -->
   </feature>
@@ -404,6 +406,14 @@ var FEATURES =
 		 
     <name>  AVMFEATURE_WORDCODE_INTERP  </name>
     <name>  AVMFEATURE_ABC_INTERP  </name>
+  </exactly-one>
+
+  <exactly-one>
+    <!-- The wordcode interpreter and JIT both use a LookupCache, and there can only
+         be one instance of said cache.  We can fix this through some refactoring but
+         the expedient solution is to only ever allow one or the other -->
+    <name> AVMFEATURE_WORDCODE_INTERP </name>
+    <name> AVMFEATURE_JIT </name>
   </exactly-one>
 
   <feature>

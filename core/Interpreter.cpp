@@ -669,10 +669,14 @@ namespace avmplus
   		// Should not have to do this on every entry, but the logic that tries to do
   		// it elsewhere is not currently working - at least the verifier installs a trampoline
   		// bypasses delegateInvoke, so the structure is not created on all paths.
+		// 
+		// this block is not #ifdef VMCFG_LOOKUP_CACHE because we only want
+		// to do this when the lookup cache is being used by wordcode.  we do not
+		// want to run this in the abc interpreter when combined with the JIT.
   		
-  		if (info->word_code_cache_size() > 0 && env->lookup_cache == NULL) {
+  		if (info->lookup_cache_size() > 0 && env->lookup_cache == NULL) {
   			using namespace MMgc;
- 			env->lookup_cache = (MethodEnv::LookupCache*)core->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code_cache_size(), GC::kContainsPointers|GC::kZero);
+ 			env->lookup_cache = (MethodEnv::LookupCache*)core->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->lookup_cache_size(), GC::kContainsPointers|GC::kZero);
   		}
 #endif
  		

@@ -1699,12 +1699,12 @@ const int kBufferPadding = 16;
 		const char**      uris;        // array of uris
 		uint32_t          largest_api;
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_LOOKUP_CACHE
 	private:
 		// Saturating counter.  
-		uint32 lookup_cache_timestamp;
+		uint32_t lookup_cache_timestamp;
 	public:
-		uint32 lookupCacheTimestamp() { return lookup_cache_timestamp == ~0U ? 0 : lookup_cache_timestamp; }
+		uint32_t lookupCacheTimestamp() { return lookup_cache_timestamp == ~0U ? 0 : lookup_cache_timestamp; }
 		bool   lookupCacheIsValid(uint32 t) { return t == lookup_cache_timestamp; }
 		void   invalidateLookupCache() { if (lookup_cache_timestamp != ~0U) ++lookup_cache_timestamp; }
 #endif
