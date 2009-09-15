@@ -52,9 +52,9 @@
 // fast-path versions for writing NULL (useful in dtors)
 
 inline void write_null(void* p) { *(uintptr_t*)(p) = 0; }
-#define WB_NULL(gc, container, addr) write_null((void*)addr)
+#define WB_NULL(addr) write_null((void*)addr)
 
-#define WBRC_NULL(gc, container, addr) MMgc::GC::WriteBarrierRC_dtor(addr)
+#define WBRC_NULL(addr) MMgc::GC::WriteBarrierRC_dtor(addr)
 
 // declare write barrier
 // put spaces around the template arg to avoid possible digraph warnings
