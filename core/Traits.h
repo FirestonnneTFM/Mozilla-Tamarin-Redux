@@ -509,7 +509,6 @@ namespace avmplus
 	private:	CreateClassClosureProc	m_createClassClosure;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType
 	private:	const byte*				metadata_pos;
-	private:	FixedBitSet				m_skips;	
 	private:	FixedBitSet				m_slotDestroyInfo;	
 	private:	DWB(MMgc::GCWeakRef*)	m_tbref;				// our TraitsBindings 
 	private:	DWB(MMgc::GCWeakRef*)	m_tmref;				// our TraitsMetadata
