@@ -151,7 +151,9 @@ namespace MMgc
 		  hasSpy(false),
 	#endif
 		  maxTotalHeapSize(0),
+	#ifdef MMGC_POLICY_PROFILING
  		  maxPrivateMemory(0),
+	#endif
     #ifdef MMGC_HOOKS
 		  hooksEnabled(false),
     #endif
@@ -1174,7 +1176,9 @@ namespace MMgc
 			size_t heapSizeNow = GetTotalHeapSize() * kBlockSize;
 			if (heapSizeNow > maxTotalHeapSize) {
 				maxTotalHeapSize = heapSizeNow;
+#ifdef MMGC_POLICY_PROFILING
 				maxPrivateMemory = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
+#endif
 			}
 		}
 	}
