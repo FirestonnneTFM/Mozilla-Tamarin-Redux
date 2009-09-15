@@ -91,7 +91,7 @@ namespace MMgc
 	 * heap size / minimim heap size ratio.
 	 * 
 	 */
-	class GCAlloc : public GCAllocObject
+	class GCAlloc 
 	{
 		friend class GC;
 		friend class GCAllocIterator;

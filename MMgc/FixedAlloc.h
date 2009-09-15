@@ -50,13 +50,13 @@ namespace MMgc
 	 * FixedAllocLarge allocator which will allocate multiple
 	 * pages at a time to minimize waste.
 	 */
-	class FixedAlloc : public GCAllocObject
+	class FixedAlloc 
 	{
 		friend class FixedMalloc;
 		friend class FastAllocator;
 		friend class GC;
 	public:
-		FixedAlloc(int itemSize, GCHeap* heap, bool isFixedAllocSafe=false);
+		FixedAlloc(uint32_t itemSize, GCHeap* heap, bool isFixedAllocSafe=false);
 		~FixedAlloc();
 
 		void* Alloc(size_t size, FixedMallocOpts flags=kNone);
@@ -86,6 +86,13 @@ namespace MMgc
 			return GetFixedBlock(item)->alloc;
 		}
 
+
+	protected:
+
+		// no-arg ctor used only by FixedAllocSafe
+		FixedAlloc() : m_isFixedAllocSafe(true) {}
+
+
 #ifndef VMCFG_SYMBIAN // Symbian SDK sees an error in GC.cpp if FixedBlock is private.
 	private:
 #endif //VMCFG_SYMBIAN
@@ -109,9 +116,12 @@ namespace MMgc
 	private:
 #endif //VMCFG_SYMBIAN
 
+		void Init(uint32_t itemSize, GCHeap *heap);
+		void Destroy();
+
 		GCHeap *m_heap;
-		unsigned int    m_itemsPerBlock;
-		size_t    m_itemSize;
+		uint32_t m_itemsPerBlock;
+		uint32_t m_itemSize;
 
 		// The list of chunk blocks
 		FixedBlock* m_firstBlock; 
@@ -120,7 +130,7 @@ namespace MMgc
 		// The lowest priority block that has free items		
 		FixedBlock* m_firstFree;
 
-		int    m_maxAlloc;
+		size_t    m_maxAlloc;
 	#ifdef MMGC_MEMORY_PROFILER
 		size_t m_totalAskSize;
 	#endif 
@@ -149,6 +159,7 @@ namespace MMgc
 	class FixedAllocSafe : public FixedAlloc
 	{
 		friend class FixedAlloc;
+		friend class FixedMalloc;
 	public:
 		FixedAllocSafe(int itemSize, GCHeap* heap) 
 			: FixedAlloc(itemSize, heap, true)
@@ -179,6 +190,9 @@ namespace MMgc
 		}
 
 	private:
+
+		// default ctor used only by FixedMalloc
+		FixedAllocSafe() {}
 
 		vmpi_spin_lock_t m_spinlock;
 	};

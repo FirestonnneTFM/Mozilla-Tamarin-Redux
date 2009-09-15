@@ -76,6 +76,9 @@ static void endGCLogToFile()
 namespace MMgc
 {
 	GCHeap *GCHeap::instance = NULL;
+	// GCHeap instance has the C++ runtime call dtor which causes problems
+	uint8_t heapSpace[sizeof(GCHeap)];
+
 	size_t GCHeap::leakedBytes;
 
 #ifdef MMGC_MEMORY_PROFILER
@@ -93,6 +96,7 @@ namespace MMgc
 		OOMExitCode(0),
 		useVirtualMemory(VMPI_useVirtualMemory()),
 		trimVirtualMemory(true),
+		mergeContiguousRegions(VMPI_canMergeContiguousRegions()),
 		verbose(false),
 		returnMemory(true),
 		gcstats(false), // tracking
@@ -120,13 +124,14 @@ namespace MMgc
 	void GCHeap::Init(const GCHeapConfig& config)
 	{
 		GCAssert(instance == NULL);
-		instance = new GCHeap(config);
+		void *p = (void*)heapSpace;
+		instance = new (p) GCHeap(config);
 	}
 
 	size_t GCHeap::Destroy()
 	{
 		GCAssert(instance != NULL);
-		delete instance;
+		instance->DestroyInstance();
 		instance = NULL;
 		return leakedBytes;
 	}
@@ -151,8 +156,7 @@ namespace MMgc
 		  hooksEnabled(false),
     #endif
 		  entryChecksEnabled(true),
-		  abortStatusNotificationSent(false),
-		  mergeContiguousRegions(VMPI_canMergeContiguousRegions())
+		  abortStatusNotificationSent(false)
 	{		
 		VMPI_lockInit(&m_spinlock);
 		VMPI_lockInit(&list_lock);
@@ -171,7 +175,7 @@ namespace MMgc
 			ExpandHeap((int)config.initialSize);
 		}
 
-		GetFixedMalloc()->_Init(this);
+		fixedMalloc.InitInstance(this);
 
 		instance = this;
 
@@ -198,7 +202,7 @@ namespace MMgc
 #endif
 	}
 
-	GCHeap::~GCHeap()
+	void GCHeap::DestroyInstance()
 	{
 #if defined MMGC_POLICY_PROFILING && !defined AVMSHELL_BUILD
 		endGCLogToFile();
@@ -208,7 +212,9 @@ namespace MMgc
 		callbacks.Destroy();
 
 		leakedBytes = GetFixedMalloc()->GetBytesInUse();
-		GetFixedMalloc()->_Destroy();
+		fixedMalloc.DestroyInstance();
+
+		instance = NULL;
 
 		if(numAlloc != 0 && status != kMemAbort)
 		{
@@ -1465,7 +1471,7 @@ namespace MMgc
 
 		// If we created a new region, save the base address so we can free later.		
 		if (newRegionAddr) {
-			if(contiguous && mergeContiguousRegions) {
+			if(contiguous && config.mergeContiguousRegions) {
 				lastRegion->reserveTop += newRegionSize*kBlockSize;
 				lastRegion->commitTop += (size-commitAvail)*kBlockSize;
 			} else {

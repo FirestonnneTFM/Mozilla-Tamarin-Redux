@@ -42,11 +42,15 @@
 
 namespace MMgc
 {
-	FixedAlloc::FixedAlloc(int itemSize, GCHeap* heap, bool isFixedAllocSafe)
+	FixedAlloc::FixedAlloc(uint32_t itemSize, GCHeap* heap, bool isFixedAllocSafe)
 		: m_isFixedAllocSafe(isFixedAllocSafe)
 	{
-		m_heap = heap;
+		Init(itemSize, heap);
+	}
 
+	void FixedAlloc::Init(uint32_t itemSize, GCHeap* heap)
+	{
+		m_heap = heap;
 		m_firstBlock    = NULL;
 		m_lastBlock     = NULL;
 		m_firstFree     = NULL;
@@ -70,6 +74,11 @@ namespace MMgc
 
 	FixedAlloc::~FixedAlloc()
 	{   
+		Destroy();
+	}
+
+	void FixedAlloc::Destroy()
+	{
 		// Free all of the blocks
  		while (m_firstBlock) {
 #ifdef MMGC_MEMORY_INFO
@@ -106,6 +115,7 @@ namespace MMgc
 #endif
 			FreeChunk(m_firstBlock);
 		}
+		m_firstBlock = NULL;
 	}
 
 	void* FixedAlloc::Alloc(size_t size, FixedMallocOpts opts)
@@ -312,7 +322,7 @@ namespace MMgc
 	
 	void FixedAlloc::FreeChunk(FixedBlock* b)
 	{
-	  m_maxAlloc -= m_itemsPerBlock;
+		m_maxAlloc -= m_itemsPerBlock;
 
 		// Unlink the block from the list
 		if (b == m_firstBlock) {

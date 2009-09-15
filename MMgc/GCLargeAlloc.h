@@ -44,7 +44,7 @@ namespace MMgc
 	/**
 	 * This is a garbage collecting allocator for large memory blocks.
 	 */
-	class GCLargeAlloc : public GCAllocObject
+	class GCLargeAlloc
 	{
 		friend class GC;
 		friend class GCLargeAllocIterator;
