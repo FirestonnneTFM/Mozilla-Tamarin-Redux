@@ -721,10 +721,6 @@ namespace avmplus
 		AvmAssert(BUILTIN_COUNT <= 32);
 		AvmAssert(_sizeofInstance <= 0xffff);
 		AvmAssert(m_slotDestroyInfo.allocatedSize() == 0);
-		AvmAssert(m_skips.allocatedSize() == 0);
-		// assume no skips (bit zero = clear)
-		m_skips.resize(core->GetGC(), 1);
-		AvmAssert(!m_skips.test(0));
 #ifdef _DEBUG
 		switch (posType)
 		{
