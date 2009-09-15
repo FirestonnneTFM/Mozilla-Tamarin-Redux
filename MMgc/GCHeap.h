@@ -63,8 +63,9 @@ namespace MMgc
 		 * non-zero value.   Defaults to zero.
 		 */
 		int OOMExitCode;
-		const bool useVirtualMemory;
+		bool useVirtualMemory;
 		bool trimVirtualMemory;
+		bool mergeContiguousRegions;
 		bool verbose;
 		bool returnMemory;
 		bool gcstats;
@@ -157,7 +158,7 @@ namespace MMgc
 	 * the address space returned by VirtualAlloc.  Heap regions are
 	 * allocated contiguously if possible to reduce fragmentation.
 	 */
-	class GCHeap : public GCAllocObject
+	class GCHeap 
 	{
 		friend class GC;
 		friend class FixedAlloc;		
@@ -388,7 +389,7 @@ namespace MMgc
 	private:
 
 		GCHeap(const GCHeapConfig &config);
-		~GCHeap();
+		void DestroyInstance();
 
 #ifdef MMGC_MEMORY_PROFILER
 		static void InitProfiler();
@@ -555,6 +556,7 @@ namespace MMgc
 		static GCHeap *instance;
 		static size_t leakedBytes;
 
+		FixedMalloc fixedMalloc;
 		HeapBlock *blocks;
 		unsigned int blocksLen;
 		unsigned int numDecommitted;
@@ -589,10 +591,6 @@ namespace MMgc
 
 		bool entryChecksEnabled;
  		bool abortStatusNotificationSent;
-
-		// some OS's are loose with how with virtual memory is dealt with and we don't have to track
-		// each region individually (ie multiple contiguous mmap's can be munmap'd all at once)
-		const bool mergeContiguousRegions;
 	};
 }
 

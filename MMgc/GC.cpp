@@ -898,12 +898,12 @@ namespace MMgc
 		// so that we don't have to check the pointers for
 		// NULL on every allocation.
 		for (int i=0; i<kNumSizeClasses; i++) {			
-			containsPointersAllocs[i] = new GCAlloc(this, kSizeClasses[i], true, false, i);
-			containsPointersRCAllocs[i] = new GCAlloc(this, kSizeClasses[i], true, true, i);
-			noPointersAllocs[i] = new GCAlloc(this, kSizeClasses[i], false, false, i);
+			containsPointersAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, false, i));
+			containsPointersRCAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], true, true, i));
+			noPointersAllocs[i] = mmfx_new(GCAlloc(this, kSizeClasses[i], false, false, i));
 		}
 		
-		largeAlloc = new GCLargeAlloc(this);
+		largeAlloc = mmfx_new(GCLargeAlloc(this));
 
 		pageMap = (unsigned char*) heapAlloc(1);
 
@@ -949,13 +949,13 @@ namespace MMgc
 		}
 
 		for (int i=0; i < kNumSizeClasses; i++) {
-			delete containsPointersAllocs[i];
-			delete containsPointersRCAllocs[i];
-			delete noPointersAllocs[i];
+ 			mmfx_delete( containsPointersAllocs[i]);
+			mmfx_delete(containsPointersRCAllocs[i]);
+			mmfx_delete(noPointersAllocs[i]);
 		}
 
 		if (largeAlloc) {
-			delete largeAlloc;
+			mmfx_delete(largeAlloc);
 		}
 
 		// Go through m_bitsFreelist and collect list of all pointers

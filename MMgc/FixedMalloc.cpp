@@ -109,9 +109,9 @@ namespace MMgc
 #endif
 
 	/*static*/
-	FixedMalloc FixedMalloc::instance;
+	FixedMalloc *FixedMalloc::instance;
 
-	void FixedMalloc::_Init(GCHeap* heap)
+	void FixedMalloc::InitInstance(GCHeap* heap)
 	{
 		m_heap = heap;
 		numLargeChunks = 0;
@@ -127,7 +127,7 @@ namespace MMgc
 			// more common size classes maybe we should use 8/16/32.
 			// FIXME: we could use FixedAllocLarge for the bigger size 
 			// classes but how to call the right Free would need to be work out
-			m_allocs[i] = new FixedAllocSafe(kSizeClasses[i], heap);
+			m_allocs[i].Init((uint32_t)kSizeClasses[i], heap);
 		}
 
 #ifdef _DEBUG 
@@ -140,23 +140,24 @@ namespace MMgc
 
 			// Given our foo index, this is the maximum sized alloc that may occur
 			// and need to fit into the m_alloc[index] value.
-			unsigned maxsize = (kPageUsableSpace / foo) & ~0x7;
+			uint32_t maxsize = (kPageUsableSpace / foo) & ~0x7;
 
 			// assert that I fit
-			GCAssert(maxsize <= (m_allocs[index]->GetItemSize()));
+			GCAssert(maxsize <= (m_allocs[index].GetItemSize()));
 
 			// assert that I don't fit (makes sure we don't waste space)
-			GCAssert(maxsize > (m_allocs[index-1]->GetItemSize()));
+			GCAssert(maxsize > (m_allocs[index-1].GetItemSize()));
 		}
 #endif
+		FixedMalloc::instance = this;
 	}
 
-	void FixedMalloc::_Destroy()
+	void FixedMalloc::DestroyInstance()
 	{
 		for (int i=0; i<kNumSizeClasses; i++) {
-			FixedAllocSafe *a = m_allocs[i];
-			delete a;
+			m_allocs[i].Destroy();
 		}		
+		FixedMalloc::instance = NULL;
 	}
 	
 	void* FASTCALL FixedMalloc::OutOfLineAlloc(size_t size, FixedMallocOpts flags)
@@ -186,7 +187,7 @@ namespace MMgc
 		for (int i=0; i<kNumSizeClasses; i++) {
 			size_t allocated = 0;
 			size_t ask = 0;
-			m_allocs[i]->GetUsageInfo(ask, allocated);
+			m_allocs[i].GetUsageInfo(ask, allocated);
 			totalAskSize += ask;
 			totalAllocated += allocated;
 		}
@@ -199,7 +200,7 @@ namespace MMgc
 		totalAllocated += numLargeChunks * GCHeap::kBlockSize;
 	}
 
-	FixedAllocSafe *FixedMalloc::FindSizeClass(size_t size) const
+	FixedAllocSafe *FixedMalloc::FindSizeClass(size_t size)
 	{
 		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
 
@@ -212,12 +213,12 @@ namespace MMgc
 #else
 			unsigned index = size > 4 ? size8 >> 3 : 0;
 #endif
-			FixedAllocSafe *a = m_allocs[index];
+			FixedAllocSafe *a = &m_allocs[index];
 			// make sure I fit
 			GCAssert(size <= a->GetItemSize());
 
 			// make sure I don't fit
-			GCAssert(index == 0 || size > m_allocs[index-1]->GetItemSize());
+			GCAssert(index == 0 || size > m_allocs[index-1].GetItemSize());
 				
 			return a;
 		}
@@ -229,12 +230,12 @@ namespace MMgc
 		unsigned index = kSizeClassIndex[kPageUsableSpace/size8];
 
 		// assert that I fit
-		GCAssert(size <= m_allocs[index]->GetItemSize());
+		GCAssert(size <= m_allocs[index].GetItemSize());
 
 		// assert that I don't fit (makes sure we don't waste space
-		GCAssert(size > m_allocs[index-1]->GetItemSize());
+		GCAssert(size > m_allocs[index-1].GetItemSize());
 
-	  return m_allocs[index];
+		return &m_allocs[index];
 	}
 
 	void *FixedMalloc::LargeAlloc(size_t size, FixedMallocOpts flags)
@@ -299,8 +300,7 @@ namespace MMgc
 	{
 		size_t total = numLargeChunks;
 		for (int i=0; i<kNumSizeClasses; i++) {
-			FixedAllocSafe *a = m_allocs[i];
-			total += a->GetNumChunks();
+			total += m_allocs[i].GetNumChunks();
 		}	
 		return total;
 	}

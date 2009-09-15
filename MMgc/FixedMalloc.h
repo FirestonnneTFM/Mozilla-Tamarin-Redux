@@ -44,20 +44,20 @@ namespace MMgc
 	/**
 	 * A general purpose memory allocator using size classes 
 	 */
-	class FixedMalloc : public GCAllocObject
+	class FixedMalloc 
 	{
 		friend class GCHeap;
 	public:
-		// GCHeap initializes the FixedMalloc by calling _Init and destroys it by calling _Destroy.
-		
+		// GCHeap initializes the FixedMalloc by calling InitInstance and destroys it by calling DestroyInstance
+
 		// Compatibility stubs, should go away.
 		static void Init() {}
 		static void Destroy() {}
-		
-		// Backward compatible name for GetFixedMalloc
-		static FixedMalloc *GetInstance() { return &instance; }
 
-		static FixedMalloc *GetFixedMalloc() { return &instance; }
+		// Backward compatible name for GetFixedMalloc
+		static FixedMalloc *GetInstance() { return instance; }
+
+		static FixedMalloc *GetFixedMalloc() { return instance; }
 
 		/* not inline - used by ::new etc */
 		void* FASTCALL OutOfLineAlloc(size_t size, FixedMallocOpts flags=kNone);
@@ -139,8 +139,8 @@ namespace MMgc
 		}
 
 	private:
-		void _Init(GCHeap *heap);	// Called from GCHeap 
-		void _Destroy();
+		void InitInstance(GCHeap *heap);	// Called from GCHeap 
+		void DestroyInstance();
 #ifdef MMGC_64BIT
 		const static int kLargestAlloc = 2016;	
 #else
@@ -150,17 +150,17 @@ namespace MMgc
 		const static int16_t kSizeClasses[kNumSizeClasses];
 		const static uint8_t kSizeClassIndex[32];
 		
-		static FixedMalloc instance;
+		static FixedMalloc *instance;
 
 		GCHeap *m_heap;
-		FixedAllocSafe *m_allocs[kNumSizeClasses];	
+		FixedAllocSafe m_allocs[kNumSizeClasses];	
 		size_t numLargeChunks;
 
 #ifdef MMGC_MEMORY_PROFILER
 		size_t totalAskSizeLargeAllocs;
 #endif
 
-		FixedAllocSafe *FindSizeClass(size_t size) const;
+		FixedAllocSafe *FindSizeClass(size_t size);
 
 		static bool IsLargeAlloc(const void *item)
 		{
