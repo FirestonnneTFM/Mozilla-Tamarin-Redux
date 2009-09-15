@@ -77,7 +77,7 @@ namespace MMgc
 		void GetUsageInfo(size_t& totalAsk, size_t& totalAllocated);
 		
 		size_t GetItemSize() const;
-		int GetMaxAlloc() const { return m_maxAlloc; }
+		size_t GetMaxAlloc() const { return m_maxAlloc; }
 
 		size_t GetNumChunks() { return m_maxAlloc / m_itemsPerBlock; }	
 
