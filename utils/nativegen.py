@@ -373,6 +373,7 @@ class MethodInfo(MemberInfo):
 	final = False
 	override = False
 	receiver = None
+	unbox_this = -1 # -1 == undetermined, 0 = no, 1 = yes
 
 	def isNative(self):
 		return (self.flags & NATIVE) != 0
@@ -831,7 +832,7 @@ class Abc:
 		for i in range(0, namecount):
 			name_index = self.data.readU30()
 			name = self.names[name_index]
-                        name = qname(name)
+			name = qname(name)
 			tag = self.data.readU8()
 			kind = tag & 0xf
 			member = None
@@ -1199,6 +1200,8 @@ class AbcThunkGen:
 		if m.kind == TRAIT_Setter:
 			ret = "void"
 		decl = self.thunkDecl(name, ret)
+		
+		unbox_receiver = self.calc_unbox_this(m)
 
 		self.out_c.println(decl);
 		self.out_c.println("{");
@@ -1232,7 +1235,10 @@ class AbcThunkGen:
 		
 		cts = ctype_from_traits(argtraits[0], True)
 		assert(cts in ["AvmObject","AvmString","AvmNamespace"])
-		val = "AvmThunkUnbox_AvmReceiver("+cts+", argv[argoff0])";
+		if unbox_receiver:
+			val = "AvmThunkUnbox_AvmAtomReceiver("+cts+", argv[argoff0])";
+		else:
+			val = "AvmThunkUnbox_AvmReceiver("+cts+", argv[argoff0])";
 		if directcall and argtraits[0].niname != None:
 			val = "(%s*)%s" % (argtraits[0].niname, val)
 		args.append((val, cts))
@@ -1344,6 +1350,31 @@ class AbcThunkGen:
 		self.out_c.indent -= 1
 		self.out_c.println("}")
 
+	# inefficient, but doesn't really matter
+	def find_override_base(self, mi):
+		if mi.override and mi.receiver.base != None:
+			bt = self.lookupTraits(mi.receiver.base)
+			for j in range(0, len(bt.tmethods)):
+				bmi = bt.tmethods[j]
+				if bmi.name.name == mi.name.name and bmi.name.ns == mi.name.ns and bmi != mi:
+					#print "OVER", str(mi.name), str(mi.receiver)
+					#print "BASE", str(bmi.name), str(bmi.receiver)
+					return bt,bmi
+		return None,None
+
+	def calc_unbox_this(self, mi):
+		if mi.unbox_this < 0:
+			bt,bmi = self.find_override_base(mi)
+			if bmi == None:
+				mi.unbox_this = 0 # no need to unbox
+			elif bmi.unbox_this > 0:
+				mi.unbox_this = 1 # unbox_this is sticky, down the inheritance tree
+			else:
+				param0 = self.lookupTraits(bmi.paramTypes[0])
+				if mi.receiver.ctype in [CTYPE_OBJECT,CTYPE_STRING,CTYPE_NAMESPACE] and param0.ctype == CTYPE_ATOM:
+					mi.unbox_this = 1 # unbox_this is sticky, down the inheritance tree
+		return mi.unbox_this > 0
+
 	def lookupTraits(self, name):
 		name = str(name)
 		if self.lookup_traits == None:
@@ -1391,6 +1422,8 @@ class AbcThunkGen:
 				sig += "_opt" + sigchar_from_enum(dct, True) + to_cname(defval)
 		if m.needRest():
 			sig += "_rest"
+		if self.calc_unbox_this(m):
+			sig += "_u"
 		# native script functions can't share thunk with native class methods, add a prefix to force uniqueness
 		if m.receiver == None:
 			sig = "func_" + sig

@@ -2223,4 +2223,11 @@ namespace avmplus
 		}
 		return (WeakKeyHashtable*)(activationOrMCTable&~7);
 	}
+
+#ifdef _DEBUG
+	void FASTCALL check_unbox(MethodEnv* env, bool u)
+	{
+		AvmAssert((env->method->unboxThis() != 0) == u); 
+	}
+#endif
 }

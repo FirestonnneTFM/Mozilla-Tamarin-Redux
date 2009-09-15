@@ -79,7 +79,28 @@ namespace avmplus
 #endif
 
 	const uintptr_t kUnboxMask = ~uintptr_t(7);
-	#define AvmThunkUnbox_AvmReceiver(t,r)	((t)(uintptr_t(r) & kUnboxMask))
+#ifdef _DEBUG
+	extern void FASTCALL check_unbox(MethodEnv* env, bool u);
+
+	inline uintptr_t _AvmThunkUnbox_AvmReceiver(AvmMethodEnv env, uintptr_t r) 
+	{ 
+		check_unbox(env, false); 
+		AvmAssert((r & ~kUnboxMask) == 0); 
+		return r; 
+	}
+	#define AvmThunkUnbox_AvmReceiver(t,r)		((t)(_AvmThunkUnbox_AvmReceiver(env, uintptr_t(r))))
+
+	inline uintptr_t _AvmThunkUnbox_AvmAtomReceiver(AvmMethodEnv env, uintptr_t r) 
+	{ 
+		check_unbox(env, true); 
+		return r & kUnboxMask; 
+	}
+	#define AvmThunkUnbox_AvmAtomReceiver(t,r)		((t)(_AvmThunkUnbox_AvmAtomReceiver(env, uintptr_t(r))))
+#else
+	#define AvmThunkUnbox_AvmReceiver(t,r)		((t)(uintptr_t(r)))
+	#define AvmThunkUnbox_AvmAtomReceiver(t,r)	((t)(uintptr_t(r) & kUnboxMask))
+#endif
+
 	#define AvmThunkUnbox_AvmObject(r)		((ScriptObject*)(r))
 	#define AvmThunkUnbox_AvmBool32(r)		((r) != 0)
 	#define AvmThunkUnbox_int32_t(r)		int32_t(r)
