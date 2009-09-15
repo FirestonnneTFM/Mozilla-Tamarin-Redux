@@ -340,15 +340,22 @@ namespace MMgc
 #endif
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
   	}
- 
+
  	// Called when an incremental mark ends
  	void GCPolicyManager::adjustPolicyForNextMinorCycle()
  	{
- 		remainingMinorAllocationBudget += int32_t(A());
+		if (remainingMinorAllocationBudget < 0) {
+			// We overshot the allocation budget.  Sometimes this overshoot can be
+			// much greater than A, if a single large object is allocated, so the
+			// clean solution is to adjust the major budget by the overshoot first.
+			remainingMajorAllocationBudget -= -remainingMinorAllocationBudget;
+			remainingMinorAllocationBudget = 0;
+		}
+ 		remainingMinorAllocationBudget = int32_t(A());
 		minorAllocationBudget = remainingMinorAllocationBudget;
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
  	}
- 
+
  	// Called when an incremental mark is about to start.  The premise is that if the
  	// application stays within the budget then the value returned here will correspond
  	// to the desired time slice.  But if the application allocates some huge block that
