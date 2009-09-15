@@ -283,6 +283,7 @@ namespace MMgc
 		 */
 		size_t GetFreeHeapSize() const { return GetTotalHeapSize()-numAlloc; }
 
+#ifdef MMGC_POLICY_PROFILING
 		/**
 		 * Returns the peak value for the total amount of space managed by the heap
 		 * and the amount of private memory at the point where the maximum heap
@@ -293,6 +294,7 @@ namespace MMgc
 			heapBlocks = maxTotalHeapSize / kBlockSize;
 			privateBlocks = maxPrivateMemory / kBlockSize;
 		}
+#endif
 
 		/**
 		 * Returns the total heap size, that is, the total amount
@@ -583,7 +585,9 @@ namespace MMgc
 #endif
 
 		size_t maxTotalHeapSize;	// in bytes
+#ifdef MMGC_POLICY_PROFILING
 		size_t maxPrivateMemory;	// in bytes
+#endif
 
 #ifdef MMGC_HOOKS
 		bool hooksEnabled;
