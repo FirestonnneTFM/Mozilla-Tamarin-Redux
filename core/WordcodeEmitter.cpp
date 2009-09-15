@@ -111,9 +111,6 @@ namespace avmplus
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepInit();
 #endif
-		this->next_cache = 0;
-		this->caches = new uint32_t[5];
-		this->num_caches = 5;
 	}
 	
 	WordcodeEmitter::~WordcodeEmitter()
@@ -134,10 +131,7 @@ namespace avmplus
 	
 	void WordcodeEmitter::cleanup() 
 	{
-		if (caches) {
-			delete [] caches;
-			caches = NULL;
-		}
+		cache_builder.cleanup();
 		DELETE_LIST(backpatch_info, backpatches);
 		DELETE_LIST(label_info, labels);
 		DELETE_LIST(catch_info, exception_fixes);
@@ -446,7 +440,7 @@ namespace avmplus
 			break;
 		case OP_findpropglobal: 
 		case OP_findpropglobalstrict:
-			emitOp2(wordCode(opcode), opd1, allocateCacheSlot(opd1));
+			emitOp2(wordCode(opcode), opd1, cache_builder.allocateCacheSlot(opd1));
 		    break;
         case OP_pushscope:
         case OP_pushwith:
@@ -1046,7 +1040,7 @@ namespace avmplus
 		AvmAssert(exception_fixes == NULL);
 		
 		if (info != NULL)
-			info->set_word_code_cache_size(next_cache);
+			info->set_lookup_cache_size(cache_builder.next_cache);
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepFlush();
@@ -1520,26 +1514,6 @@ namespace avmplus
 		state = 0;			// ignore any partial match
 	}
 #endif  // AVMPLUS_PEEPHOLE_OPTIMIZER
-
-	// The cache structure is expected to be small in the normal case, so use a
-	// linear list.  For some programs, notably classical JS programs, it may however
-	// be larger, and we may need a more sophisticated structure.
-	uint32_t WordcodeEmitter::allocateCacheSlot(uint32_t imm30)
-	{
-		for ( int i=0 ; i < next_cache ; i++ )
-			if (caches[i] == imm30)
-				return i;
-		if (next_cache == num_caches) {
-			uint32_t* new_cache = new uint32_t[num_caches*2];
-			VMPI_memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
-			delete [] caches;
-			caches = new_cache;
-			num_caches *= 2;
-		}
-		caches[next_cache] = imm30;
-		return next_cache++;
-	}
-
 
 }
 #endif // AVMPLUS_WORD_CODE

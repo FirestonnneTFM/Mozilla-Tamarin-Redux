@@ -233,11 +233,7 @@ namespace avmplus
 		}
 #endif	// AVMPLUS_PEEPHOLE_OPTIMIZER
 
-		uint32_t allocateCacheSlot(uint32_t imm30);
-		int num_caches;			// number of entries in 'caches'
-		int next_cache;			// next free entry in 'caches'
-		uint32_t* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
-
+		LookupCacheBuilder cache_builder;
 	};
 #endif // AVMPUS_WORD_CODE
 }

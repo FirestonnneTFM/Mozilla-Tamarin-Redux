@@ -233,7 +233,7 @@ namespace avmplus
 
 	PoolObject* AbcParser::parse(uint32_t api)
 	{
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_LOOKUP_CACHE
 		// Loading a new ABC file always invalidates the lookup cache
 		core->invalidateLookupCache();
 #endif

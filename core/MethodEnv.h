@@ -360,11 +360,11 @@ namespace avmplus
 	private:
 		uintptr_t					activationOrMCTable;
 	public:
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_LOOKUP_CACHE
 		class LookupCache : public MMgc::GCObject
 		{
 		public:
-			uint32 timestamp;
+			uint32_t timestamp;
 			DRCWB(ScriptObject*) object;
 		};
 		DWB(LookupCache*) lookup_cache;
@@ -530,7 +530,6 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 #endif // FEATURE_NANOJIT
-
 }
 
 #endif // __avmplus_MethodEnv__
