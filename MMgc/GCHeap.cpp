@@ -1539,18 +1539,6 @@ namespace MMgc
 		delete [] blocks;
 	}
 	
-	size_t GCHeap::GetTotalHeapSize() const
-	{
-		size_t size = 0;
-		// Release all of the heap regions
-		Region *region = lastRegion;
-		while (region != NULL) {
-			size += region->commitTop - region->baseAddr;
-			region = region->prev;
-		}
-		return SizeToBlocks(size);
-	}
-
 #ifdef MMGC_HOOKS
 	void GCHeap::AllocHook(const void *item, size_t askSize, size_t gotSize)
 	{
