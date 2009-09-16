@@ -179,7 +179,6 @@
     METHOD(VECTORUINTADDR(UIntVectorObject::_getNativeIntProperty), SIG2(U,P,I), UIntVectorObject_getNativeIntProperty)
     METHOD(ARRAYADDR(ArrayObject::_getIntProperty), SIG2(A,P,I), ArrayObject_getIntProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_getIntProperty), SIG2(A,P,I), ObjectVectorObject_getIntProperty)
-    CSEMETHOD(ENVADDR(MethodEnv::finddef), SIG2(P,P,P), finddef)
     METHOD(ENVADDR(MethodEnv::findproperty), SIG7(A,P,P,P,I,P,B,P), findproperty)
     METHOD(ENVADDR(MethodEnv::checkfilter), SIG2(V,P,A), checkfilter)
     METHOD(ENVADDR(MethodEnv::getdescendants), SIG3(A,P,A,P), getdescendants)
@@ -236,3 +235,40 @@ SSE2_ONLY(
     METHOD(ENVADDR(MethodEnv::si32), SIG3(V,P,I,I), si32)
     METHOD(ENVADDR(MethodEnv::sf32), SIG3(V,P,F,I), sf32)
     METHOD(ENVADDR(MethodEnv::sf64), SIG3(V,P,F,I), sf64)
+
+    /**
+     * inline-cache enabled finddef.  if the cache for this slot is valid, return
+     * the result from calling finddef on this (env,multiname) pair previously.
+     */
+    ScriptObject* finddef(MethodEnv* env, const Multiname* name, uint32_t slot)
+    {
+        AvmAssert(env->method->lookup_cache_size() > 0);
+        AvmAssert(slot < (uint32_t)env->method->lookup_cache_size());
+        MethodEnv::LookupCache *cache = env->lookup_cache;
+        if (!cache) {
+            // todo - do this earlier.  This extra test in the fast path
+            // is repugnant but hasn't shown itself to be a problem in practice.
+            using namespace MMgc;
+            size_t nbytes = sizeof(*cache) * env->method->lookup_cache_size();
+            _nvprof("lookup_cache_bytes", nbytes);
+            AvmCore* core = env->core();
+            cache = (MethodEnv::LookupCache*) core->gc->Alloc(nbytes, GC::kContainsPointers | GC::kZero);
+            env->lookup_cache = cache;
+        }
+
+        // check for valid cache
+        AvmCore* core = env->core();
+        if (core->lookupCacheIsValid(cache[slot].timestamp)) {
+            _nvprof("finddef P-fast", 1);
+            return cache[slot].object;
+        }
+
+        // miss
+        _nvprof("finddef P-fast", 0);
+        ScriptObject* obj = env->finddef(name);
+        AvmAssert(obj != NULL); // or else finddef would have thrown an exception.
+        cache[slot].timestamp = core->lookupCacheTimestamp();
+        WBRC(core->gc, cache, &cache[slot].object, obj);
+        return obj;
+    }
+    CSEFUNCTION(FUNCADDR(finddef), SIG3(P,P,P,U), finddef)

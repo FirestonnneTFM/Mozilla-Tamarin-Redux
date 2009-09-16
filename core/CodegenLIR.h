@@ -173,6 +173,7 @@ namespace avmplus
         CopyPropagation *copier;
         int framesize;
         int labelCount;
+        LookupCacheBuilder cache_builder;
         verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);
