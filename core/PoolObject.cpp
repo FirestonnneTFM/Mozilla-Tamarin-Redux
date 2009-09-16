@@ -77,7 +77,7 @@ namespace avmplus
 		, api(api)
 	{
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
-		core->livingPools.add(this);
+		core->addLivePool(this);
 	}
 
 	PoolObject::~PoolObject()
@@ -89,19 +89,6 @@ namespace avmplus
 		#ifdef VMCFG_NANOJIT
 		mmfx_delete( codePages );
 		#endif
-
-		if (!MMgc::GC::GetGC(this)->Destroying())
-		{
-			for (uint32_t i=0, n=core->livingPools.size(); i < n; i++)
-			{
-				PoolObject* pool = core->livingPools[i];
-				if (pool && pool == this)
-				{
-					core->livingPools.removeAt(i);
-					break;
-				}
-			}
-		}
 	}
 	
 	void PoolObject::dynamicizeStrings()
