@@ -131,8 +131,9 @@ return *((intptr_t*)&_method);
 
 #ifdef PERFM
 #define DOPROF
-#include "../vprof/vprof.h"
 #endif /* PERFM */
+
+#include "../vprof/vprof.h"
 
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer         AvmCore::integer64
@@ -632,6 +633,7 @@ namespace avmplus
 
     void CodegenLIR::cleanup()
     {
+        cache_builder.cleanup();
         mmfx_delete( alloc1 );
         alloc1 = NULL;
         mmfx_delete( lir_alloc );
@@ -2226,7 +2228,11 @@ namespace avmplus
             AvmAssert(multiname->isBinding());
             int32_t dest_index = state->sp() + 1;
             emitPrep(state);
-            LIns* out = callIns(FUNCTIONID(finddef), 2, env_param, InsConstPtr(multiname));
+            // This allocates a cache slot even if the finddef ultimately becomes dead.
+            // As long as caches tend to be small compared to size of pool data and code,
+            // filtering out dead cache lines isn't worth the complexity.
+            LIns* slot = InsConst(cache_builder.allocateCacheSlot(opd1));
+            LIns* out = callIns(FUNCTIONID(finddef), 3, env_param, InsConstPtr(multiname), slot);
             localSet(dest_index, ptrToNativeRep(type, out), type);
             break;
         }
@@ -4783,6 +4789,8 @@ namespace avmplus
         }
 
         frag->lastIns = last;
+
+        info->set_lookup_cache_size(cache_builder.next_cache);
     }
 
     // emit code to create a stack-allocated copy of the given multiname.
