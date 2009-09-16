@@ -302,7 +302,7 @@ namespace MMgc
 		 * free space.
 		 * @return the total heap size in pages (kBlockSize bytes apiece)
 		 */
-		size_t GetTotalHeapSize() const;
+		size_t GetTotalHeapSize() const { return blocksLen - numDecommitted; }
 		
 		/**
 		 * gives memory back to the OS when there hasn't been any memory activity in a while
