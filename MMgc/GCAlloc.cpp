@@ -504,7 +504,7 @@ namespace MMgc
 			for(uint32_t j=0; j<subCount;j++,marks>>=4)
 			{
 				int mq = marks & kFreelist;
-				if(mq == kMark)
+				if(mq == kMark || mq == kQueued)	// Sweeping is lazy; don't sweep objects on the mark stack
 				{
 					// live item, clear bits
 					bits[i] &= ~(kFreelist<<(j*4));
@@ -576,24 +576,13 @@ namespace MMgc
 
 	void GCAlloc::ClearMarks()
 	{
-		GCBlock *block = m_firstBlock;
-start:
-		while (block) {
-			GCBlock *next = Next(block);
-
-			if(block->needsSweeping) {
-				if(Sweep(block)) {
-					UnlinkChunk(block);
-					FreeChunk(block);
-					block = next;
-					goto start;
-				}
-			}
+		for ( GCBlock *block=m_firstBlock, *next ; block ; block=next ) {
+			next = Next(block);
+			
+			if (block->needsSweeping && Sweep(block)) 
+				continue;
 
 			ClearMarks(block);
-
-			// Advance to next block
-			block = next;
 		}
 	}	
 
