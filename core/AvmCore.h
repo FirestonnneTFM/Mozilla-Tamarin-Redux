@@ -221,12 +221,20 @@ const int kBufferPadding = 16;
 		void verifyEarly(Toplevel* toplevel);
 #endif
 
+	private:
+		class LivePoolNode : public MMgc::GCRoot
+		{
+		public:
+			LivePoolNode* next;
+			MMgc::GCWeakRef* pool;
+			LivePoolNode(MMgc::GC* gc) : GCRoot(gc) {}
+		};
+		
+		// note, allocated using mmfx_new, *not* gc memory 
+        LivePoolNode* livePools;
+	
 	public:
-		// NOTE: this is deliberately using LIST_NonGCObjects, not LIST_GCObjects,
-		// because we DO NOT want to have this list cause the pools to stay in memory...
-		// the Pool ctor/dtor add/remove from this list. (Equivalently, we could use
-		// a list of GCWeakRefs, but this is simpler and just as effective.)
-        List<PoolObject*, LIST_NonGCObjects> livingPools;
+		void addLivePool(PoolObject* pool);
 	
 	public:
 		/**

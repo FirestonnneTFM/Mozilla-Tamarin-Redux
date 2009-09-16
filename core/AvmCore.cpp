@@ -115,7 +115,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERIFYALL
 		, verifyQueue(g, 0)
 #endif
-		, livingPools(g, 0)
+		, livePools(NULL)
 		, m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
  		, m_tmCache(new (g) QCache(CacheSizes::DEFAULT_METADATA, g))
  		, m_msCache(new (g) QCache(CacheSizes::DEFAULT_METHODS, g))	
@@ -317,6 +317,14 @@ namespace avmplus
 		delete _profiler;
 		_profiler = NULL;
 #endif
+		LivePoolNode* node = livePools;
+		while (node)
+		{
+			LivePoolNode* next = node->next;
+			delete node;
+			node = next;
+		} 
+		livePools = NULL;
 	}
 
 	void AvmCore::initBuiltinPool()
@@ -2733,14 +2741,42 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC()) Toplevel(abcEnv);
 	}
 
+	void AvmCore::addLivePool(PoolObject* pool)
+	{
+		LivePoolNode* node = new LivePoolNode(GetGC());
+		node->next = livePools;
+		node->pool = pool->GetWeakRef();
+		livePools = node;
+	}
+	
 	void AvmCore::presweep()
 	{
-		for (uint32_t i=0, n=livingPools.size(); i < n; i++)
+		LivePoolNode** prev = &livePools;
+		LivePoolNode* node = livePools;
+		while (node)
 		{
-			PoolObject* pool = livingPools[i];
-			if (pool && !GetGC()->GetMark(pool))
-				pool->dynamicizeStrings();
-		}
+			PoolObject* pool = (PoolObject*)(node->pool->get());
+			if (pool)
+			{
+				// pool is still alive -- if about to get collected, dynamicize the strings
+				// and remove it from the active list
+				if (!GetGC()->GetMark(pool))
+				{
+					pool->dynamicizeStrings();
+					*prev = node->next;
+					delete node;
+					node = *prev;
+					continue;
+				}
+			}
+			else
+			{
+				// pool is dead -- should have already removed it?
+				AvmAssert(0);
+			} 
+			prev = &node->next;
+			node = node->next;
+		} 
 	
         // clear out the string table
 		{
