@@ -300,6 +300,7 @@ namespace avmplus
         void localSet(int i, LIns* o, Traits* type);
         LIns* convertToString(int i);
         LIns* coerceToString(int i);
+        LIns* coerceToNumber(int i);
 
     public:
         CodegenLIR(MethodInfo* info);

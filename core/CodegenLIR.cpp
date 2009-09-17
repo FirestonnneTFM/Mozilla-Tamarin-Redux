@@ -2053,23 +2053,27 @@ namespace avmplus
             emitGetGlobalScope();
             break;
 
-        case OP_add_d:
-            emit(state, opcode, 0, 0, type);
-            break;
-
         case OP_add:
         {
             emitPrep(state);
             Value& val1 = state->value(sp-1);
             Value& val2 = state->value(sp);
             if ((val1.traits == STRING_TYPE && val1.notNull) || (val2.traits == STRING_TYPE && val2.notNull)) {
-                // concat
+                // string add
+                AvmAssert(type == STRING_TYPE);
                 LIns* lhs = convertToString(sp-1);
                 LIns* rhs = convertToString(sp);
                 LIns* out = callIns(FUNCTIONID(concatStrings), 3, coreAddr, lhs, rhs);
                 localSet(sp-1,  out, type);
+            } else if (val1.traits && val2.traits && val1.traits->isNumeric() && val2.traits->isNumeric()) {
+                // numeric add
+                AvmAssert(type == NUMBER_TYPE);
+                LIns* num1 = coerceToNumber(sp-1);
+                LIns* num2 = coerceToNumber(sp);
+                localSet(sp-1, binaryIns(LIR_fadd, num1, num2), type);
             } else {
                 // any other add
+                AvmAssert(type == OBJECT_TYPE);
                 emit(state, opcode, 0, 0, type);
             }
             break;
@@ -2277,6 +2281,21 @@ namespace avmplus
                 return callIns(FUNCTIONID(string), 2, coreAddr, loadAtomRep(index));
             }
             return callIns(FUNCTIONID(coerce_s), 2, coreAddr, loadAtomRep(index));
+        }
+    }
+
+    /** emit code for * -> Number conversion */
+    LIns* CodegenLIR::coerceToNumber(int index)
+    {
+        // assume emitPrep() already called
+        Value& value = state->value(index);
+        Traits* in = value.traits;
+
+        if (in && (in->isNumeric() || in == BOOLEAN_TYPE)) {
+            return promoteNumberIns(in, index);
+        } else {
+            // * -> Number
+            return callIns(FUNCTIONID(number), 1, loadAtomRep(index));
         }
     }
 
@@ -2648,16 +2667,7 @@ namespace avmplus
         }
         else if (result == NUMBER_TYPE)
         {
-            if (in && (in->isNumeric() || in == BOOLEAN_TYPE))
-            {
-                localSet(loc, promoteNumberIns(in, loc), result);
-            }
-            else
-            {
-                // * -> Number
-                localSet(loc, callIns(FUNCTIONID(number), 1,
-                    loadAtomRep(loc)), result);
-            }
+            localSet(loc, coerceToNumber(loc), result);
         }
         else if (result == INT_TYPE)
         {
@@ -3386,15 +3396,13 @@ namespace avmplus
 
             case OP_divide:
             case OP_multiply:
-            case OP_subtract:
-            case OP_add_d: {
+            case OP_subtract: {
                 LOpcode op;
                 switch (opcode) {
                     default:
                     case OP_divide:     op = LIR_fdiv; break;
                     case OP_multiply:   op = LIR_fmul; break;
                     case OP_subtract:   op = LIR_fsub; break;
-                    case OP_add_d:      op = LIR_fadd; break;
                 }
                 localSet(sp-1, binaryIns(op, localGetq(sp-1), localGetq(sp)), result);
                 break;
