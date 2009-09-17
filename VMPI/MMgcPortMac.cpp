@@ -190,7 +190,7 @@ size_t VMPI_getPrivateResidentPageCount()
 		
 		addr += size;
 		
-#ifdef MMGC_64BIT
+#if defined(VMCFG_64BIT) || defined(VMCFG_ARM)
 		ret = vm_region_64(task, &addr, &size, VM_REGION_TOP_INFO, (vm_region_info_t)&info, &count, &object_name);
 #else
 		ret = vm_region(task, &addr, &size, VM_REGION_TOP_INFO, (vm_region_info_t)&info, &count, &object_name);
