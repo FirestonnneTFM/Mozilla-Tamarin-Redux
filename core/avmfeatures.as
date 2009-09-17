@@ -408,13 +408,13 @@ var FEATURES =
     <name>  AVMFEATURE_ABC_INTERP  </name>
   </exactly-one>
 
-  <exactly-one>
+  <at-most-one>
     <!-- The wordcode interpreter and JIT both use a LookupCache, and there can only
          be one instance of said cache.  We can fix this through some refactoring but
          the expedient solution is to only ever allow one or the other -->
     <name> AVMFEATURE_WORDCODE_INTERP </name>
     <name> AVMFEATURE_JIT </name>
-  </exactly-one>
+  </at-most-one>
 
   <feature>
    <desc> AVMFEATURE_SELFTEST enables the built-in selftests.  These can be run by -Dselftest
