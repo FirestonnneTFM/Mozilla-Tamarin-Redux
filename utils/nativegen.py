@@ -1369,7 +1369,7 @@ class AbcThunkGen:
 				mi.unbox_this = 0 # no need to unbox
 			elif bmi.unbox_this > 0:
 				mi.unbox_this = 1 # unbox_this is sticky, down the inheritance tree
-			else:
+			elif len(bmi.paramTypes) > 0:
 				param0 = self.lookupTraits(bmi.paramTypes[0])
 				if mi.receiver.ctype in [CTYPE_OBJECT,CTYPE_STRING,CTYPE_NAMESPACE] and param0.ctype == CTYPE_ATOM:
 					mi.unbox_this = 1 # unbox_this is sticky, down the inheritance tree
