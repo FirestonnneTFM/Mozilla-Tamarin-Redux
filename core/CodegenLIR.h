@@ -298,6 +298,8 @@ namespace avmplus
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
         void emitGetGlobalScope();
         void localSet(int i, LIns* o, Traits* type);
+        LIns* convertToString(int i);
+        LIns* coerceToString(int i);
 
     public:
         CodegenLIR(MethodInfo* info);

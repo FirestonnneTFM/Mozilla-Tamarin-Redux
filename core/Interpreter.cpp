@@ -433,7 +433,7 @@ namespace avmplus
 			 III(0x97, L_bitnot)
 			 XXX(0x98)
 			 XXX(0x99)
-			 XXX(0x9A) /* OP_concat */
+			 XXX(0x9A)
 			 XXX(0x9B) /* OP_add_d */
 			 XXX(0x9C)
 			 XXX(0x9D)

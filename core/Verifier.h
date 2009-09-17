@@ -132,7 +132,6 @@ namespace avmplus
 		void parseExceptionHandlers();
 		void checkStack(uint32_t pop, uint32_t push);
 		void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
-		void emitToString(AbcOpcode opcode, int index, const byte *pc);
 		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);
 		void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc);
 		void checkGetGlobalScope();

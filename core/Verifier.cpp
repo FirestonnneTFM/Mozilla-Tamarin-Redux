@@ -1089,8 +1089,8 @@ namespace avmplus
 				checkStack(1,1);
 				// this is the ECMA ToString and ToXMLString operators, so the result must not be null
 				// (ToXMLString is split into two variants - escaping elements and attributes)
-				emitToString(opcode, sp, pc);     // lir only
-				coder->write(state, pc, opcode);  // wc only
+				coder->write(state, pc, opcode);
+				state->pop_push(1, STRING_TYPE, true);
 				break;
 
 			case OP_callstatic: 
@@ -1621,9 +1621,7 @@ namespace avmplus
 				Traits* rhst = rhs.traits;
 				if ((lhst == STRING_TYPE && lhs.notNull) || (rhst == STRING_TYPE && rhs.notNull))
 				{
-				    emitToString(OP_convert_s, sp-1, pc);
-					emitToString(OP_convert_s, sp, pc);
-					coder->write(state, pc, OP_concat, STRING_TYPE);
+					coder->write(state, pc, OP_add, STRING_TYPE);
 					state->pop_push(2, STRING_TYPE, true);
 				}
 				else if (lhst && lhst->isNumeric() && rhst && rhst->isNumeric())
@@ -2018,8 +2016,7 @@ namespace avmplus
 		else
 		if (slotType == core->traits.string_ctraits)
 		{
-   		    emitToString(OP_convert_s, sp, pc);     // lir only
-			coder->write(state, pc, OP_convert_s);  // wc only
+			coder->write(state, pc, OP_convert_s);
 			state->setType(sp, STRING_TYPE, true); 
 		}
 		else
@@ -2255,24 +2252,6 @@ namespace avmplus
 			labelCount++;
 		}
 		return targetState;
-	}
-	
-    // NOTE CodegenLIR implements string conv using writeOp1() while
-    // WordcodeEmitter implements it using write(). so this method
-    // only emits lir. this is necessary because the semantics of 
-    // string conversion are different in the interpreter than they
-    // are in lir.
-	void Verifier::emitToString(AbcOpcode opcode, int i, const byte *pc)
-	{
-		Traits *st = STRING_TYPE;
-		Value& value = state->value(i);
-		Traits *in = value.traits;
-		if (in != st || !value.notNull || opcode != OP_convert_s)
-		{
-		    coder->writeOp1(state, pc, opcode, i, in);  // lir only
-			value.traits = st;
-			value.notNull = true;
-		}
 	}
 
     #if defined FEATURE_NANOJIT

@@ -643,9 +643,6 @@ namespace avmplus
 		case OP_esc_xattr:
   		    emitOp0(pc, wordCode(opcode));
 			break;
-		case OP_concat:
-  		    emitOp0(pc, wordCode(OP_add));
-			break;
 		case OP_add_d:
   		    emitOp0(pc, wordCode(OP_add));
 			break;

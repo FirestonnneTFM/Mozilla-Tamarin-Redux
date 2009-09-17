@@ -232,7 +232,6 @@ namespace avmplus
 			OP_typeof = 0x95,
 			OP_not = 0x96,
 			OP_bitnot = 0x97,
-			OP_concat = 0x9A,
 			OP_add_d = 0x9B,
 			OP_add = 0xA0,
 			OP_subtract = 0xA1,
