@@ -2053,17 +2053,40 @@ namespace avmplus
             emitGetGlobalScope();
             break;
 
-        case OP_concat:
         case OP_add_d:
-        case OP_add:
             emit(state, opcode, 0, 0, type);
             break;
 
+        case OP_add:
+        {
+            emitPrep(state);
+            Value& val1 = state->value(sp-1);
+            Value& val2 = state->value(sp);
+            if ((val1.traits == STRING_TYPE && val1.notNull) || (val2.traits == STRING_TYPE && val2.notNull)) {
+                // concat
+                LIns* lhs = convertToString(sp-1);
+                LIns* rhs = convertToString(sp);
+                LIns* out = callIns(FUNCTIONID(concatStrings), 3, coreAddr, lhs, rhs);
+                localSet(sp-1,  out, type);
+            } else {
+                // any other add
+                emit(state, opcode, 0, 0, type);
+            }
+            break;
+        }
+
         case OP_convert_s:
+            emitPrep(state);
+            localSet(sp, convertToString(sp), STRING_TYPE);
+            break;
+
         case OP_esc_xelem:
         case OP_esc_xattr:
+            emit(state, opcode, sp, 0, STRING_TYPE);
+            break;
+
         case OP_debug:
-            // NOTE implemented by writeOp1
+            // ignored
             break;
 
         default:
@@ -2172,24 +2195,6 @@ namespace avmplus
         case OP_pushwith:
             emitCopy(state, state->sp(), opd1);
             break;
-        case OP_convert_s:
-        case OP_esc_xelem:
-        case OP_esc_xattr:
-        {
-            // opd1=i, type=in
-            Value& value = state->value(opd1);
-            Traits *in = type;
-            if (opcode == OP_convert_s && in &&
-                (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE))
-            {
-                emitCoerce(state, opd1, STRING_TYPE);
-            }
-            else
-            {
-                emit(state, opcode, opd1, 0, STRING_TYPE);
-            }
-            break;
-        }
         case OP_findpropstrict:
         case OP_findproperty:
         {
@@ -2241,6 +2246,58 @@ namespace avmplus
             // verifier has called writeOp1 improperly
             AvmAssert(false);
             break;
+        }
+    }
+
+    LIns* CodegenLIR::coerceToString(int index)
+    {
+        Value& value = state->value(index);
+        Traits* in = value.traits;
+
+        switch (bt(in)) {
+        case BUILTIN_null:
+        case BUILTIN_string:
+            // fine to just load the pointer
+            return localGetp(index);
+        case BUILTIN_int:
+            return callIns(FUNCTIONID(intToString), 2, coreAddr, localGet(index));
+        case BUILTIN_uint:
+            return callIns(FUNCTIONID(uintToString), 2, coreAddr, localGet(index));
+        case BUILTIN_number:
+            return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetq(index));
+        case BUILTIN_boolean: {
+            // load "true" or "false" string constant from AvmCore.booleanStrings[]
+            LIns *offset = binaryIns(LIR_pilsh, i2p(localGet(index)), InsConst(PTR_SCALE));
+            LIns *arr = InsConstPtr(&core->booleanStrings);
+            return loadIns(LIR_ldcp, 0, binaryIns(LIR_addp, arr, offset));
+        }
+        default:
+            if (value.notNull) {
+                // not eligible for CSE, and we know it's not null/undefined
+                return callIns(FUNCTIONID(string), 2, coreAddr, loadAtomRep(index));
+            }
+            return callIns(FUNCTIONID(coerce_s), 2, coreAddr, loadAtomRep(index));
+        }
+    }
+
+    LIns* CodegenLIR::convertToString(int index)
+    {
+        // assume emitPrep() already called
+        Value& value = state->value(index);
+        Traits* in = value.traits;
+        Traits* stringType = STRING_TYPE;
+    
+        if (in != stringType || !value.notNull) {
+            if (in && (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE)) {
+                // convert is the same as coerce
+                return coerceToString(index);
+            } else {
+                // explicitly convert to string
+                return callIns(FUNCTIONID(string), 2, coreAddr, loadAtomRep(index));
+            }
+        } else {
+            // already String*
+            return localGetp(index);
         }
     }
 
@@ -2668,39 +2725,7 @@ namespace avmplus
         }
         else if (result == STRING_TYPE)
         {
-            if (in == INT_TYPE)
-            {
-                localSet(loc, callIns(FUNCTIONID(intToString), 2,
-                    coreAddr, localGet(loc)), result);
-            }
-            else if (in == UINT_TYPE)
-            {
-                localSet(loc, callIns(FUNCTIONID(uintToString), 2,
-                    coreAddr, localGet(loc)), result);
-            }
-            else if (in == NUMBER_TYPE)
-            {
-                localSet(loc, callIns(FUNCTIONID(doubleToString), 2,
-                    coreAddr, localGetq(loc)), result);
-            }
-            else if (in == BOOLEAN_TYPE)
-            {
-                // load "true" or "false"
-                LIns *index = binaryIns(LIR_pilsh, i2p(localGet(loc)), InsConst(PTR_SCALE));
-                LIns *arr = InsConstPtr(&core->booleanStrings);
-                localSet(loc, loadIns(LIR_ldcp, 0, binaryIns(LIR_addp, arr, index)), result);
-            }
-            else if (value.notNull)
-            {
-                // not eligible for CSE, and we know it's not null/undefined
-                localSet(loc, callIns(FUNCTIONID(string), 2,
-                    coreAddr, loadAtomRep(loc)), result);
-            }
-            else
-            {
-                localSet(loc, callIns(FUNCTIONID(coerce_s), 2,
-                    coreAddr, loadAtomRep(loc)), result);
-            }
+            localSet(loc, coerceToString(loc), result);
         }
         else if (in && !in->isMachineType() && !result->isMachineType()
                && in != STRING_TYPE && in != NAMESPACE_TYPE)
@@ -4211,6 +4236,7 @@ namespace avmplus
 
             case OP_convert_s:
             {
+                AvmAssert(false);
                 int32_t index = (int32_t) op1;
                 localSet(index, callIns(FUNCTIONID(string), 2,
                     coreAddr, loadAtomRep(index)), result);
@@ -4284,16 +4310,6 @@ namespace avmplus
                 LIns* out = callIns(FUNCTIONID(add2), 3,
                     toplevel, lhs, rhs);
                 localSet(sp-1, atomToNativeRep(result, out), result);
-                break;
-            }
-
-            case OP_concat:
-            {
-                LIns* lhs = localGetp(sp-1);
-                LIns* rhs = localGetp(sp);
-                LIns* out = callIns(FUNCTIONID(concatStrings), 3,
-                    coreAddr, lhs, rhs);
-                localSet(sp-1,  out, result);
                 break;
             }
 

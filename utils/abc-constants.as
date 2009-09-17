@@ -224,7 +224,6 @@ const OP_declocal:int = 0x94
 const OP_typeof:int = 0x95
 const OP_not:int = 0x96
 const OP_bitnot:int = 0x97
-const OP_concat:int = 0x9A
 const OP_add_d:int = 0x9B
 const OP_add:int = 0xA0
 const OP_subtract:int = 0xA1
@@ -423,7 +422,7 @@ const opNames = [
 "bitnot        ",
 "OP_0x98       ",
 "OP_0x99       ",
-"concat        ",
+"OP_0x9A       ",
 "add_d         ",
 "OP_0x9C       ",
 "OP_0x9D       ",

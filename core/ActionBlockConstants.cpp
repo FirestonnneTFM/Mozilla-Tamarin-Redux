@@ -294,7 +294,7 @@ namespace avmplus
 		{    0,  1,   0    W(WOP_bitnot)          N("bitnot") },
 		{   -1,  0,   0    W(0)                   N("OP_0x98") },
 		{   -1,  0,   0    W(0)                   N("OP_0x99") },
-		{   -1,  1,  -1    W(0)                   N("concat") },
+		{   -1,  0,   0    W(0)                   N("OP_0x9A") },
 		{   -1,  1,  -1    W(0)                   N("add_d") },
 		{   -1,  0,   0    W(0)                   N("OP_0x9C") },
 		{   -1,  0,   0    W(0)                   N("OP_0x9D") },

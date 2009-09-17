@@ -158,7 +158,6 @@ namespace avmplus
 		WOP_typeof = 0x95,
 		WOP_not = 0x96,
 		WOP_bitnot = 0x97,
-		WOP_concat = 0x9A,
 		WOP_add = 0xA0,
 		WOP_subtract = 0xA1,
 		WOP_multiply = 0xA2,
