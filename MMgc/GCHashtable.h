@@ -53,14 +53,14 @@ namespace MMgc
 		GCHashtableBase(uint32_t capacity = kDefaultSize);
 		~GCHashtableBase();
 
-		inline const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
-		inline const void* get(intptr_t key) { return get((const void*)key); }
+		REALLY_INLINE const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
+		REALLY_INLINE const void* get(intptr_t key) { return get((const void*)key); }
 		const void* remove(const void* key, bool rehashIfNeeded=true);
 		// updates value if present, adds and grows if necessary if not
 		void put(const void* key, const void* value);
-		inline void add(const void* key, const void* value) { put(key, value); }
-		inline void add(intptr_t key, const void* value) { put((const void*)key, value); }
-		inline int32_t count() const { return numValues; }
+		REALLY_INLINE void add(const void* key, const void* value) { put(key, value); }
+		REALLY_INLINE void add(intptr_t key, const void* value) { put((const void*)key, value); }
+		REALLY_INLINE uint32_t count() const { return numValues; }
 
 		int32_t nextIndex(int32_t index);
 		const void* keyAt(int32_t index) const { return table[index<<1]; }
@@ -86,19 +86,13 @@ namespace MMgc
 				return ht->table[index+1]; 
 			}
 
-			void remove()
-			{
-				GCAssert(ht->table[index] != NULL);			
-				ht->table[index] = GCHashtableBase::DELETED;
-				ht->table[index+1] = NULL;
-			}
 		private:
-			GCHashtableBase* ht;
+			GCHashtableBase* volatile ht;
 			int32_t index;
 		};
 
 	private:
-		int32_t find(const void* key, const void** table, uint32_t tableSize);
+		uint32_t find(const void* key, const void** table, uint32_t tableSize);
 
 		void grow(bool canFail);
 
@@ -151,18 +145,19 @@ namespace MMgc
 	}
 
 	template <class KEYHANDLER, class ALLOCHANDLER>
-	int32_t GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::find(const void* key, const void** table, uint32_t tableSize)
+	uint32_t GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::find(const void* key, const void** table, uint32_t tableSize)
 	{	
 		GCAssert(key != DELETED);
 
 		// this is a quadratic probe but we only hit even numbered slots since those hold keys.
-		int32_t n = 7 << 1;
-		int32_t const bitmask = (tableSize - 1) & ~0x1;
-		uint32_t i = KEYHANDLER::hash(key) & bitmask;  
+		uint32_t n = 7 << 1;
+		// bitmask is defined in Symbian OS headers. changing to bitMask
+		uint32_t const bitMask = (tableSize - 1) & ~0x1;
+		uint32_t i = KEYHANDLER::hash(key) & bitMask;  
 		const void* k;
 		while ((k = table[i]) != NULL && !KEYHANDLER::equal(k, key))
 		{
-			i = (i + (n += 2)) & bitmask;		// quadratic probe
+			i = (i + (n += 2)) & bitMask;		// quadratic probe
 		}
 		GCAssert(i <= ((tableSize-1)&~0x1));
 		return i;
@@ -172,21 +167,53 @@ namespace MMgc
 	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::put(const void* key, const void* value)
 	{
 		GCAssert(table != NULL);
-		int32_t i = find(key, table, tableSize);
-		if (!table[i]) 
+		
+		// this is basically an inlined version of find() with one minor difference:
+		// it notices if there are DELETED slots along the probe, and if there is one,
+		// we recycle it rather than adding to the end of the probe chain. this allows us 
+		// to recycle deleted slots MUCH more quickly (without having to wait for a full rehash)
+		// and can dramatically reduce the average probe depth if there are a lot of
+		// insertions and removals.
+		const uint32_t NO_DELINDEX = 0xffffffff;
+		uint32_t delindex = NO_DELINDEX;
+		uint32_t n = 7 << 1;
+		uint32_t const bitMask = (tableSize - 1) & ~0x1;
+		uint32_t i = KEYHANDLER::hash(key) & bitMask;  
+		const void* k;
+		while ((k = table[i]) != NULL && !KEYHANDLER::equal(k, key))
 		{
-			// .75 load factor, note we don't take numDeleted into account
-			// numValues includes numDeleted
-			if (numValues * 8 >= tableSize * 3)
+			// note that we can't just stop at the first DELETED value we find --
+			// we might have a matching value later in the chain. We choose
+			// the first such entry so that subsequent searches are as short as possible
+			// (choosing any other entry would be fine, just suboptimal)
+			if (k == DELETED && delindex == NO_DELINDEX) delindex = i;
+			i = (i + (n += 2)) & bitMask;		// quadratic probe
+		}
+		GCAssert(k == NULL || KEYHANDLER::equal(k, key));
+		if (k == NULL) 
+		{
+			if (delindex != NO_DELINDEX)
 			{
-				grow(false);
-				// grow rehashes
-				i = find(key, table, tableSize);
-				GCAssert(!table[i]);
+				// there's a deleted entry we can replace
+				i = delindex;
+				numDeleted--;
+				// note that we don't increment numValues here!
 			}
-
+			else
+			{
+				// .75 load factor, note we don't take numDeleted into account
+				// numValues includes numDeleted
+				if (numValues * 8 >= tableSize * 3)
+				{
+					grow(false);
+					// grow rehashes, so no DELETED items, thus normal find() is OK
+					GCAssert(numDeleted == 0);
+					i = find(key, table, tableSize);
+					GCAssert(!table[i]);
+				}
+				numValues++;
+			}
 			table[i] = key;
-			numValues++;
 		}
 		table[i+1] = value;
 	}
@@ -195,7 +222,7 @@ namespace MMgc
 	const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key, bool rehashIfNeeded/*=true*/)
 	{
 		const void* ret = NULL;
-		int32_t i = find(key, table, tableSize);
+		uint32_t i = find(key, table, tableSize);
 		if (table[i] == key) 
 		{
 			table[i] = DELETED;
@@ -205,7 +232,9 @@ namespace MMgc
 			// this helps a bit on pathologic memory profiler use case, needs more investigation
 			// 20% deleted == rehash
 			if (rehashIfNeeded && numDeleted * 10 >= tableSize)
+			{
 				grow(true);
+			}
 		}		
 		return ret;
 	}
@@ -213,7 +242,7 @@ namespace MMgc
 	template <class KEYHANDLER, class ALLOCHANDLER>
 	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::grow(bool canFail)
 	{
-		int32_t newTableSize = tableSize;
+		uint32_t newTableSize = tableSize;
 
 		uint32_t occupiedSlots = numValues - numDeleted;
 		GCAssert(numValues >= numDeleted);
@@ -239,14 +268,14 @@ namespace MMgc
 
 		if (table)
 		{
-			for (int32_t i=0, n=tableSize; i < n; i += 2)	
+			for (uint32_t i=0, n=tableSize; i < n; i += 2)	
 			{
 				const void* oldKey;
 				if ((oldKey=table[i]) != NULL)
 				{
 					// inlined & simplified version of put()
 					if (oldKey != DELETED) {
-						int32_t j = find(oldKey, newTable, newTableSize);
+						uint32_t j = find(oldKey, newTable, newTableSize);
 						newTable[j] = oldKey;
 						newTable[j+1] = table[i+1];
 						numValues++;
@@ -308,12 +337,12 @@ namespace MMgc
 	class GCHashtableKeyHandler
 	{
 	public:
-		inline static uint32_t hash(const void* k)
+		REALLY_INLINE static uint32_t hash(const void* k)
 		{
-			return (0x7FFFFFFF & (uintptr_t)k);
+            return uint32_t((uintptr_t(k)>>3) ^ (uintptr_t(k)<<29)); // move the low 3 bits higher up since they're often 0
 		}
 
-		inline static bool equal(const void* k1, const void* k2)
+		REALLY_INLINE static bool equal(const void* k1, const void* k2)
 		{
 			return k1 == k2;
 		}
@@ -327,7 +356,7 @@ namespace MMgc
 	class GCStringHashtableKeyHandler
 	{
 	public:
-		inline static uint32_t hash(const void* k)
+		REALLY_INLINE static uint32_t hash(const void* k)
 		{
 			uint32_t hash = 0;
 			const char* s = (const char*)k;
@@ -338,7 +367,7 @@ namespace MMgc
 			return hash;
 		}
 
-		inline static bool equal(const void* k1, const void* k2)
+		REALLY_INLINE static bool equal(const void* k1, const void* k2)
 		{
 			if (k1 == k2) 
 				return true;
