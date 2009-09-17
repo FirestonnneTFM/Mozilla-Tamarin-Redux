@@ -1626,9 +1626,7 @@ namespace avmplus
 				}
 				else if (lhst && lhst->isNumeric() && rhst && rhst->isNumeric())
 				{
-				    emitCoerce(NUMBER_TYPE, sp-1);
-					emitCoerce(NUMBER_TYPE, sp);
-					coder->write(state, pc, OP_add_d, NUMBER_TYPE);
+					coder->write(state, pc, OP_add, NUMBER_TYPE);
 					state->pop_push(2, NUMBER_TYPE);
 				}
 				else

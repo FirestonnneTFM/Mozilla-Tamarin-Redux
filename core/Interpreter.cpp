@@ -434,7 +434,7 @@ namespace avmplus
 			 XXX(0x98)
 			 XXX(0x99)
 			 XXX(0x9A)
-			 XXX(0x9B) /* OP_add_d */
+			 XXX(0x9B)
 			 XXX(0x9C)
 			 XXX(0x9D)
 			 XXX(0x9E)
