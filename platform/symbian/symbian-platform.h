@@ -93,6 +93,8 @@
 #include <setjmp.h> // for OOM.h
 #include <pthread.h>
 
+#include <new> // for std::bad_alloc definition in GCGlobalNew.h
+
 #ifdef __GNUC__
 #define REALLY_INLINE inline __attribute__((always_inline))
 // only define FASTCALL for x86-32; other gcc versions will spew warnings

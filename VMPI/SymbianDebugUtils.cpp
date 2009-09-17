@@ -38,16 +38,17 @@
 /******************************* Debugging *******************************/
 /*************************************************************************/
 
-// TODO: implement on S60
+// old SDK can not see these? comment out for now
+//#include "e32def.h"
+//#include "e32std.h"
 
-void VMPI_debugLog(const char* message)
+void VMPI_debugLog(const char* /*message*/)
 {
 //	VMPI_log( message ); //also log to standard output
 }
 
-
 void VMPI_debugBreak()
 {
-//	::DebugBreak();
+//	ASSERT( false );
 }
 
