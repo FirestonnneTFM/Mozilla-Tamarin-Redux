@@ -832,9 +832,12 @@ namespace avmplus
 
 				uint32_t n=2;
 				checkPropertyMultiname(n, multiname);
-
+				
+				Traitsp declarer = NULL;
 				Value& obj = state->peek(n);
-				Binding b = toplevel->getBinding(obj.traits, &multiname);
+				Binding b = (opcode == OP_initproperty) ? 
+							toplevel->getBindingAndDeclarer(obj.traits, multiname, declarer) : 
+							toplevel->getBinding(obj.traits, &multiname);
 				Traits* propTraits = readBinding(obj.traits, b);
 
 				emitCheckNull(sp-(n-1));
@@ -842,7 +845,7 @@ namespace avmplus
 				if (AvmCore::isSlotBinding(b) && 
 					// it's a var, or a const being set from the init function
 					(!AvmCore::isConstBinding(b) || 
-						(obj.traits->init == info && opcode == OP_initproperty)))
+						(opcode == OP_initproperty && declarer->init == info)))
 				{
 				    emitCoerce(propTraits, state->sp());
 					coder->writeOp2(state, pc, OP_setslot, (uint32_t)AvmCore::bindingToSlotId(b), sp-(n-1), propTraits);

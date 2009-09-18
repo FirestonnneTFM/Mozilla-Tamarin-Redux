@@ -207,6 +207,7 @@ namespace avmplus
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
 		Binding findBinding(Stringp name, NamespaceSetp nsset) const;
+		Binding findBindingAndDeclarer(const Multiname& mn, Traitsp& declarer) const;
 
 		// note: if you are just doing a single iteration thru a single TraitsBindings,
 		// it's more efficient (and easier) to use StTraitsBindingsIterator instead.

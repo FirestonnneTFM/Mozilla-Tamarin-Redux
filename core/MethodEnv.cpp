@@ -1601,11 +1601,15 @@ namespace avmplus
     void MethodEnv::initproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const
     {
 		Toplevel* toplevel = this->toplevel();
-		Binding b = toplevel->getBinding(vtable->traits, multiname);
+
+		Traitsp declarer = NULL;
+		Binding b = toplevel->getBindingAndDeclarer(vtable->traits, *multiname, declarer);
+
 		if (AvmCore::bindingKind(b) == BKIND_CONST)
 		{
-			if (vtable->init != this)
+			if (this->method != declarer->init)
 				toplevel->throwReferenceError(kConstWriteError, multiname, vtable->traits);
+
 			b = AvmCore::makeSlotBinding(AvmCore::bindingToSlotId(b), BKIND_VAR);
 		}
 		toplevel->setproperty_b(obj, multiname, value, vtable, b);

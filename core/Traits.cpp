@@ -343,6 +343,46 @@ namespace avmplus
 		return BIND_NONE;
 	}
 
+	Binding TraitsBindings::findBindingAndDeclarer(const Multiname& mn, Traitsp& declarer) const
+	{
+		if (mn.isBinding())
+		{
+			for (TraitsBindingsp self = this; self; self = self->base)
+			{
+				Namespacep foundns = NULL;
+				Binding const b = self->m_bindings->getMulti(mn, foundns);
+				if (b != BIND_NONE)
+				{
+					declarer = self->owner;
+
+					// if the member is 'protected' then we have to do extra work,
+					// as we may have found it in a descendant's protected namespace -- 
+					// we have to bounce up the inheritance chain and check our parent's 
+					// protected namespace.
+					while (foundns == declarer->protectedNamespace)
+					{
+						Traitsp declParent = declarer->base;
+						if (!declParent || declParent->protectedNamespace == NULL)
+							break;
+
+						Binding const bp = declParent->getTraitsBindings()->findBinding(mn.getName(), declParent->protectedNamespace);
+						if (bp != b)
+							break;
+
+						// self->owner->core->console<<"bounce "<<declarer<<" to "<<declParent<<"\n";
+						declarer = declParent;
+						foundns = declParent->protectedNamespace;
+					}
+
+					// self->owner->core->console<<"final declarer is "<<declarer<<"\n";
+					return b;
+				}
+			}
+		}
+		declarer = NULL;
+		return BIND_NONE;
+	}
+
 	bool TraitsBindings::addOneInterface(Traitsp intf)
 	{
 		AvmAssert(intf != NULL);

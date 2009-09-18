@@ -1215,6 +1215,24 @@ add_numbers:
 		return b;
 	}
 
+	Binding Toplevel::getBindingAndDeclarer(Traits* traits, const Multiname& ref, Traitsp& declarer) const
+	{
+		Binding b = BIND_NONE;
+		if (traits && ref.isBinding())
+		{
+			if (!traits->isResolved())
+				traits->resolveSignatures(this);
+				
+			b = traits->getTraitsBindings()->findBindingAndDeclarer(ref, declarer);
+			if (b == BIND_AMBIGUOUS)
+			{
+				// ERROR.  more than one binding is available.  throw exception.
+				throwTypeError(kAmbiguousBindingError, core()->toErrorString(ref));
+			}
+		}
+		return b;
+	}
+
 	Stringp Toplevel::decodeURI(ScriptObject* self, Stringp uri)
 	{
 		AvmCore* core = self->core();

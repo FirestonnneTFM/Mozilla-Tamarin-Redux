@@ -295,6 +295,9 @@ namespace avmplus
 		 * @param multiname The multiname of the property
 		 */
 		Binding getBinding(Traits* traits, const Multiname* multiname) const;
+		
+		// like getBinding, but do extra work to find the initial declarer of the member
+		Binding getBindingAndDeclarer(Traits* traits, const Multiname& multiname, Traitsp& declarer) const;
 
 		/**
 		 * @name ECMA-262 Appendix B.2 extensions
