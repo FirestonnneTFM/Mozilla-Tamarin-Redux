@@ -1294,6 +1294,29 @@ namespace avmplus
         argc_param = lirout->ins1(LIR_qlo, argc_param);
     #endif
         ap_param = lirout->insParam(2, 0);
+
+        // allocate room for a MethodFrame structure
+        methodFrame = InsAlloc(sizeof(MethodFrame));
+        verbose_only( if (lirbuf->names) {
+            lirbuf->names->addName(methodFrame, "methodFrame");
+        })
+
+        coreAddr = InsConstPtr(core);
+
+        // replicate MethodFrame ctor inline
+        LIns* currentMethodFrame = loadIns(LIR_ldp, offsetof(AvmCore,currentMethodFrame), coreAddr);
+        // save env in MethodFrame.envOrCodeContext
+        //     explicitly leave IS_EXPLICIT_CODECONTEXT clear
+        //     explicitly leave DXNS_NOT_NULL clear, dxns is effectively null without doing the store here.
+        storeIns(env_param, offsetof(MethodFrame,envOrCodeContext), methodFrame);
+        storeIns(currentMethodFrame, offsetof(MethodFrame,next), methodFrame);
+        storeIns(methodFrame, offsetof(AvmCore,currentMethodFrame), coreAddr);
+        #ifdef _DEBUG
+        // poison MethodFrame.dxns since it's uninitialized by default
+        storeIns(InsConstPtr((void*)(uintptr_t)0xdeadbeef), offsetof(MethodFrame,dxns), methodFrame);
+        #endif
+
+        // allocate room for our local variables
         vars = InsAlloc(framesize * 8);
         lirbuf->sp = vars;
         if (loadfilter)
@@ -1307,11 +1330,9 @@ namespace avmplus
             lirbuf->names->addName(vars, "vars");
         })
 
-        coreAddr = InsConstPtr(core);
-
-        // stack overflow check - use vars address as comparison
+        // stack overflow check - use methodFrame address as comparison
         LIns *d = loadIns(LIR_ldp, offsetof(AvmCore, minstack), coreAddr);
-        LIns *c = binaryIns(LIR_pult, vars, d);
+        LIns *c = binaryIns(LIR_pult, methodFrame, d);
         LIns *b = branchIns(LIR_jf, c);
         callIns(FUNCTIONID(handleStackOverflow), 1, env_param);
         LIns *label = Ins(LIR_label);
@@ -1348,24 +1369,6 @@ namespace avmplus
                 lirbuf->names->addName(_ef, "_ef");
             })
         }
-
-        methodFrame = InsAlloc(sizeof(MethodFrame));
-        verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(methodFrame, "methodFrame");
-        })
-
-        // replicate MethodFrame ctor inline
-        LIns* currentMethodFrame = loadIns(LIR_ldp, offsetof(AvmCore,currentMethodFrame), coreAddr);
-        // save env in MethodFrame.envOrCodeContext
-        //     explicitly leave IS_EXPLICIT_CODECONTEXT clear
-        //     explicitly leave DXNS_NOT_NULL clear, dxns is effectively null without doing the store here.
-        storeIns(env_param, offsetof(MethodFrame,envOrCodeContext), methodFrame);
-        storeIns(currentMethodFrame, offsetof(MethodFrame,next), methodFrame);
-        storeIns(methodFrame, offsetof(AvmCore,currentMethodFrame), coreAddr);
-        #ifdef _DEBUG
-        // poison MethodFrame.dxns since it's uninitialized by default
-        storeIns(InsConstPtr((void*)(uintptr_t)0xdeadbeef), offsetof(MethodFrame,dxns), methodFrame);
-        #endif
 
         #ifdef DEBUGGER
         if (core->debugger())
@@ -4786,8 +4789,8 @@ namespace avmplus
 
         // extend live range of critical stuff
         // fixme -- this should be automatic based on live analysis
+        Ins(LIR_live, methodFrame);
         Ins(LIR_live, env_param);
-        Ins(LIR_live, vars);
         Ins(LIR_live, coreAddr);
         Ins(LIR_live, undefConst);
 
@@ -4796,7 +4799,7 @@ namespace avmplus
             Ins(LIR_live, _save_eip);
         }
 
-        LIns* last = Ins(LIR_live, methodFrame);
+        LIns* last = Ins(LIR_live, vars);
 
         #ifdef DEBUGGER
         if (core->debugger())
