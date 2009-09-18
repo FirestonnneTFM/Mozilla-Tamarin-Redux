@@ -38,15 +38,6 @@
 #ifndef __avmplus_MultinameHashtable__
 #define __avmplus_MultinameHashtable__
 
-// the TC performance suites of sunspider, misc, and scimark show
-// no meaningful performance difference with MH_CACHE1 enabled, thus 
-// disabled for now until profiling evidence justifies it.
-//#define MH_CACHE1
-
-#ifdef MH_CACHE1
-	#include "NamespaceSet.h"
-#endif
-
 namespace avmplus
 {
 	/**
@@ -126,40 +117,14 @@ namespace avmplus
 		/*@{*/
 		void    put(Stringp name, Namespacep ns, Binding value);
 
-#ifdef MH_CACHE1
-		inline Binding getName(Stringp name) const
-		{
-			if (m_cache1.name == name)
-				return m_cache1.value;
-			return _getName(name);
-		}
-		inline Binding get(Stringp name, Namespacep ns) const
-		{
-			if (m_cache1.name == name && m_cache1.ns == ns)
-				return m_cache1.value;
-			return _get(name, ns);
-		}
-		inline Binding get(Stringp name, NamespaceSetp nsset) const
-		{
-			if (name == m_cache1.name && !m_cache1.multiNS)
-			{
-				for (int j = 0, n = nsset->size; j < n; j++)
-					if (m_cache1.ns == nsset->namespaces[j])
-						return m_cache1.value;
-				return BIND_NONE;
-			}
-			return _get(name, nsset);
-		}
-		Binding _getName(Stringp name) const;
-		Binding _get(Stringp name, Namespacep ns) const;
-		Binding _get(Stringp name, NamespaceSetp nsset) const;
-#else
 		Binding get(Stringp name, Namespacep ns) const;
-		Binding get(Stringp name, NamespaceSetp nsset) const;
+		inline Binding get(Stringp name, NamespaceSetp nsset) const { return getNSSet(name, nsset)->value; }
 		Binding getName(Stringp name) const;
-#endif
 		Binding getMulti(const Multiname* name) const;
 		inline Binding getMulti(const Multiname& name) const { return getMulti(&name); }
+		
+		// return the NS that unambigously matches in "match" (or null for none/ambiguous)
+		Binding getMulti(const Multiname& name, Namespacep& match) const;
 		/*@}*/
 
 		/**
@@ -177,6 +142,9 @@ namespace avmplus
 		
 		size_t allocatedSize() const { return numQuads * sizeof(Quad); }
 
+	private:
+		const Quad* getNSSet(Stringp name, NamespaceSetp nsset) const;
+
 	protected:
 		void Init(int capacity);
 
@@ -184,9 +152,6 @@ namespace avmplus
 	private:	Quad* m_quads;			// property hashtable (written with explicit WB)
 	public:		int size;				// no. of properties
 	public:		int numQuads;			// size of hashtable 
-#ifdef MH_CACHE1
-	private:	mutable Quad m_cache1;	// single-level cache
-#endif
 	// ------------------------ DATA SECTION END
 	};
 	

@@ -65,6 +65,26 @@ namespace avmplus
 			return get(mname->getName(), mname->getNsset());
 	}
 
+	// return the NS that unambigously matches in "match" (or null for none/ambiguous)
+	Binding MultinameHashtable::getMulti(const Multiname& mname, Namespacep& match) const
+	{
+		// multiname must not be an attr name, have wildcards, or have runtime parts.
+		AvmAssert(mname.isBinding() && !mname.isAnyName());
+
+		if (!mname.isNsset())
+		{
+			Binding b = get(mname.getName(), mname.getNamespace());
+			match = (b != BIND_NONE) ? mname.getNamespace() : NULL;
+			return b;
+		}
+		else
+		{
+			const Quad* q = getNSSet(mname.getName(), mname.getNsset()); 
+			match = q->ns; 
+			return q->value; 
+		}
+	}
+
 	void MultinameHashtable::add(Stringp name, Namespacep ns, Binding value)
 	{
 		if (isFull())
@@ -80,12 +100,6 @@ namespace avmplus
 		numQuads(0)
 	{
 		Init(capacity);
-#ifdef MH_CACHE1
-		m_cache1.name = 0;
-		m_cache1.ns = 0;
-		m_cache1.value = 0;
-		m_cache1.multiNS = 0;
-#endif
 	}
 
 	void MultinameHashtable::Init(int capacity)
@@ -136,16 +150,21 @@ namespace avmplus
 		return i;
 	}
 
-#ifdef MH_CACHE1
-	Binding MultinameHashtable::_get(Stringp mnameName, NamespaceSetp nsset) const
-#else
-	Binding MultinameHashtable::get(Stringp mnameName, NamespaceSetp nsset) const
-#endif
+	const MultinameHashtable::Quad* MultinameHashtable::getNSSet(Stringp mnameName, NamespaceSetp nsset) const
 	{
+	#ifdef AVMPLUS_64BIT
+		static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0, 0 };
+		static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0, 0 };
+	#else
+		static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0 };
+		static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0 };
+	#endif
+	
 		int nsCount = nsset->size;
 		int j;
 
-		Binding match = BIND_NONE;
+		const Quad* match = &kBindNone;
+		Binding matchValue = match->value;
 
 		// this is a quadratic probe but we only hit every third slot since those hold keys.
 		int n = 7;
@@ -167,7 +186,8 @@ namespace avmplus
 				{
 					if (ns == nsset->namespaces[j])
 					{
-						match = t[i].value;
+						match = &t[i];
+						matchValue = match->value;
 						goto found1;
 					}
 				}
@@ -176,10 +196,10 @@ namespace avmplus
 			i = (i + (n++)) & bitMask;			// quadratic probe
 		}
 
-		return BIND_NONE;
+		return &kBindNone;
 
 found1:
-		if(t[i].multiNS)
+		if (t[i].multiNS)
 		{
 			int k = (i + (n++)) & bitMask;			// quadratic probe
 			while ((atomName = t[k].name) != EMPTY)
@@ -189,18 +209,15 @@ found1:
 					Namespacep ns = t[k].ns;
 					for (j=0; j < nsCount; j++)
 					{
-						if (ns == nsset->namespaces[j] && match != t[k].value)
+						if (ns == nsset->namespaces[j] && matchValue != t[k].value)
 						{
-							return BIND_AMBIGUOUS;
+							return &kBindAmbiguous;
 						}
 					}
 				}
 				k = (k + (n++)) & bitMask;			// quadratic probe
 			}
 		}
-#ifdef MH_CACHE1
-		m_cache1 = t[i];
-#endif
 		return match;
 	}
 
@@ -266,16 +283,9 @@ found1:
 write_value:
 		//quads[i].value = value;
 		WB(gc, quadbase, &cur->value, value);
-#ifdef MH_CACHE1
-		m_cache1 = *cur;
-#endif
 	}
 
-#ifdef MH_CACHE1
-	Binding MultinameHashtable::_get(Stringp name, Namespacep ns) const
-#else
 	Binding MultinameHashtable::get(Stringp name, Namespacep ns) const
-#endif
 	{
 		const Quad* t = m_quads;
 		int i = find(name, ns, t, numQuads);
@@ -283,19 +293,12 @@ write_value:
 		{
 			const Quad& tf = t[i];
 			AvmAssert(tf.ns == ns);
-#ifdef MH_CACHE1
-			m_cache1 = tf;
-#endif
 			return tf.value;
 		}
 		return BIND_NONE;
 	}
 
-#ifdef MH_CACHE1
-	Binding MultinameHashtable::_getName(Stringp name) const
-#else
 	Binding MultinameHashtable::getName(Stringp name) const
-#endif
 	{
 		const Quad* t = m_quads;
 		for (int i=0, n=numQuads; i < n; i++)
@@ -304,9 +307,6 @@ write_value:
 			{
 				const Quad& tf = t[i];
 
-#ifdef MH_CACHE1
-				m_cache1 = tf;
-#endif
 				return tf.value;
 			}
 		}
