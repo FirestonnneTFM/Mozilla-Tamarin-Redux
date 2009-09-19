@@ -5352,9 +5352,7 @@ namespace avmplus
 
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
-        RegAllocMap regMap(*lir_alloc);
-        NInsList loopJumps(*lir_alloc);
-        assm->beginAssembly(frag, &regMap);
+        assm->beginAssembly(frag);
         assm->assemble(frag);
         assm->endAssembly(frag);
         PERFM_TPROF_END();
