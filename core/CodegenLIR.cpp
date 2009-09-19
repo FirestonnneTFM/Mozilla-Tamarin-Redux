@@ -5354,10 +5354,9 @@ namespace avmplus
         verbose_only( assm->_outputCache = &asmOutput; )
         RegAllocMap regMap(*lir_alloc);
         NInsList loopJumps(*lir_alloc);
-        assm->hasLoop = false;
         assm->beginAssembly(frag, &regMap);
-        assm->assemble(frag, loopJumps);
-        assm->endAssembly(frag, loopJumps);
+        assm->assemble(frag);
+        assm->endAssembly(frag);
         PERFM_TPROF_END();
 
         verbose_only(
@@ -5496,16 +5495,6 @@ namespace nanojit
         AvmAssert(false);
     }
     #endif
-
-    void Fragment::onDestroy() 
-	{
-		/*
-			This method is called exclusively from ~Fragment.
-			
-            Since LirBuffer is Allocator-allocated, we have no more
-            work to do when a Fragment is destroyed.  
-		*/
-    }
 
     void* Allocator::allocChunk(size_t size) {
         return mmfx_alloc(size);
