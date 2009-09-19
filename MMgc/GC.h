@@ -1652,6 +1652,11 @@ namespace MMgc
 		void MarkQueueAndStack(bool scanStack=true);
 		void MarkItem(GCWorkItem &wi);
 
+	public:
+		// Sweep all small-block pages that need sweeping
+		void SweepNeedsSweeping();
+		
+	private:
 		/**
 		 * True during the sweep phase of collection.  Several things have to
 		 * behave a little differently during this phase.  For example,

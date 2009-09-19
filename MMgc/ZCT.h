@@ -167,7 +167,7 @@ namespace MMgc
 		// only if scanStack is true
 		GCWorkItem PinProgramStack(bool scanStack);
 		
-		// Scan the AllocaStackSegments and pin all objects reachable from them.
+		// Scan the AllocaStackSegments and pin all objects directly reachable from them.
 		void PinRootSegments();
 		
 		// Conservatively scan memory starting at 'start' for 'len' bytes, examining each
