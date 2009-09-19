@@ -2980,7 +2980,7 @@ bail:
 			numObjects = policy.objectsMarked() - numObjects;
 			objSize = policy.bytesMarked() - objSize;
 			double millis = duration(start);
-			size_t kb = int(objSize)>>10;
+			size_t kb = size_t(objSize)>>10;
 			gclog("[mem] mark(%d) %d objects (%d kb %d mb/s) in %.2f millis (%.4f s)\n", 
 				  markIncrements() - lastStartMarkIncrementCount, int(numObjects), kb, 
 				  uint32_t(double(kb)/millis), millis, duration(t0)/1000);
