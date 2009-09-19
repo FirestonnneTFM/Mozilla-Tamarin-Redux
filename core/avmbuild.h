@@ -196,7 +196,8 @@
 	// The portapi_avmbuild.h file is used to override
 	// definitions in this file. E.g. turning off
 	// features, etc.
-	#include "portapi_avmbuild.h"
+	//#include "portapi_avmbuild.h"
+    #error "Obsolete define"
 #endif
 
 #endif /* __avmbuild__ */
