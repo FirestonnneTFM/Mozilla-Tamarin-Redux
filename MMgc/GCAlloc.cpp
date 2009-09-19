@@ -472,6 +472,8 @@ namespace MMgc
 				putOnFreeList = false;
 			} else if(numMarkedItems == b->numItems) {
 				// nothing changed on this page, clear marks
+				// note there will be at least one free item on the page (otherwise it
+				// would not have been scanned) so the page just stays on the freelist
 				ClearMarks(b);
 			} else if(!b->needsSweeping) {
 				// free'ing some items but not all
@@ -684,6 +686,7 @@ namespace MMgc
 #endif
 		numItems--;
 
+		GCAssert(!GetBit(this, index, kQueued));
 		SetBit(this, index, kFreelist);
 
 #ifndef _DEBUG

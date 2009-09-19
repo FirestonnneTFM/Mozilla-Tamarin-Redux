@@ -146,6 +146,7 @@ namespace MMgc
 		while (*prev) {			
 			LargeBlock *b = *prev;
 			if ((b->flags & kMarkFlag) == 0) {
+				GCAssert((b->flags & kQueuedFlag) == 0);
 				GC* gc = b->gc;
 				
 				// Large blocks may be allocated by finalizers for large blocks, creating contention

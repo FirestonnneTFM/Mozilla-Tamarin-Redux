@@ -299,6 +299,12 @@ namespace MMgc
 		// MMGC_GC_ROOT_THREAD creates one AutoRCRootSegment that is not managed by VMPI_alloca.
 		// The root segment list should be very short if scanStack==false so performance-wise
 		// this is not a big deal.
+		//
+		// It is not necessary to pin from the mark and barrier stacks because there is a
+		// test in GC::Free that prevents queued objects from being deleted; we have to pay
+		// for that check in any case and can depend on it here.
+		//
+		// For some generally difficult problems around pinning see bugzilla #506644.
 
 		GCWorkItem stack;		// "stack" needed for SetupDefRefValidation if validateDefRef is true
 		if (scanStack || gc->validateDefRef)

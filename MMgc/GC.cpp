@@ -1043,6 +1043,7 @@ namespace MMgc
 	REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
 	{
 		GCAssert(item.ptr != NULL);
+		GCAssert(!item.IsGCItem() || IsPointerToGCObject(GetRealPointer(item.ptr)));
 		if (!m_incrementalWork.Push(item))
 			SignalMarkStackOverflow(item);
 	}
@@ -1348,6 +1349,16 @@ bail:
 		}
 	}
 
+	void GC::SweepNeedsSweeping()
+	{
+		// clean up any pages that need sweeping
+		for(int i=0; i < kNumSizeClasses; i++) {
+			containsPointersRCAllocs[i]->SweepNeedsSweeping();
+			containsPointersAllocs[i]->SweepNeedsSweeping();
+			noPointersAllocs[i]->SweepNeedsSweeping();
+		}
+	}
+
 	void GC::Sweep(bool force)
 	{	
 		// collecting must be true because it indicates allocations should
@@ -1531,10 +1542,7 @@ bail:
 				GCAssertMsg(false, "FindBeginningGuarded must not be called on non-managed addresses");
 				return NULL;
 		}		
-#ifdef MMGC_MEMORY_INFO
-		realItem = GetUserPointer(realItem);
-#endif
-		return realItem;
+		return GetUserPointer(realItem);
 	}
 	
 	void GC::Mark()
@@ -2383,12 +2391,7 @@ bail:
 		GCAssert(m_incrementalWork.Count() == 0);
 		GCAssert(m_barrierWork.Count() == 0);
 	
-		// clean up any pages that need sweeping
-		for(int i=0; i < kNumSizeClasses; i++) {
-			containsPointersRCAllocs[i]->SweepNeedsSweeping();
-			containsPointersAllocs[i]->SweepNeedsSweeping();
-			noPointersAllocs[i]->SweepNeedsSweeping();
-		}
+		SweepNeedsSweeping();
 
 		// at this point every object should have no marks or be marked kFreelist
 #ifdef _DEBUG		
@@ -3184,6 +3187,7 @@ bail:
 	
 	void GC::WriteBarrierHit(const void* container)
 	{
+		GCAssert(IsPointerToGCObject(GetRealPointer(container)));
 		if (collecting)
 		{
 			// It's the job of the allocators to make sure the rhs is marked if
