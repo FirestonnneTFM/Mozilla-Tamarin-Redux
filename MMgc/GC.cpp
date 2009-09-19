@@ -845,7 +845,6 @@ namespace MMgc
 		t0(VMPI_getPerformanceCounter()),
 		lastStartMarkIncrementCount(0),
 		sweeps(0),
-		numObjects(0),
 		sweepStart(0),
 		emptyWeakRef(0),
 
@@ -2763,9 +2762,6 @@ bail:
 		uintptr_t _memStart = memStart;
 		uintptr_t _memEnd = memEnd;
 		
-		numObjects++;
-		objSize += size;
-
 		while(p < end) 
 		{
 #ifdef WERNER_MODE
@@ -2831,14 +2827,10 @@ bail:
 				//if(GCAlloc::IsWhite(block, itemNum)) 
 				if((bits2 & ((GCAlloc::kMark|GCAlloc::kQueued)<<shift)) == 0)
 				{
+					uint32_t itemSize = block->size - (uint32_t)DebugSize();
 					if(block->alloc->ContainsPointers())
 					{
-						const void *realItem = item;
-						uint32_t itemSize = block->size;
-						#ifdef MMGC_MEMORY_INFO
-						realItem = GetUserPointer(realItem);
-						itemSize -= (uint32_t)DebugSize();
-						#endif
+						const void *realItem = GetUserPointer(item);
 						GCWorkItem newItem(realItem, itemSize, true);
 						if(((uintptr_t)realItem & ~0xfff) != thisPage || mark_item_recursion_control == 0)
 						{							
@@ -2856,6 +2848,7 @@ bail:
 					{
 						//GCAlloc::SetBit(block, itemNum, GCAlloc::kMark);
 						*pbits = bits2 | (GCAlloc::kMark << shift);
+						policy.signalMarkWork(itemSize);
 					}
 					#if defined(MMGC_MEMORY_INFO)
 					GC::WriteBackPointer(item, (end==(void*)0x130000) ? p-1 : wi.ptr, block->size);
@@ -2897,24 +2890,20 @@ bail:
 				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetLargeBlock(item);
 				if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
 				{
-					uint32_t usize = b->size;
+					uint32_t itemSize = b->size - (uint32_t)DebugSize();
 					if((b->flags & GCLargeAlloc::kContainsPointers) != 0) 
 					{
 						b->flags |= GCLargeAlloc::kQueuedFlag;
-						const void *realItem = item;
-						#ifdef MMGC_MEMORY_INFO
-						realItem = GetUserPointer(item);
-						usize -= (uint32_t)DebugSize();
-						#endif
-						PushWorkItem(GCWorkItem(realItem, usize, true));
+						PushWorkItem(GCWorkItem(GetUserPointer(item), itemSize, true));
 					} 
 					else
 					{
 						// doesn't need marking go right to black
 						b->flags |= GCLargeAlloc::kMarkFlag;
+						policy.signalMarkWork(itemSize);
 					}
 					#if defined(MMGC_MEMORY_INFO)
-					GC::WriteBackPointer(item, end==(void*)0x130000 ? p-1 : wi.ptr, usize);
+					GC::WriteBackPointer(item, end==(void*)0x130000 ? p-1 : wi.ptr, itemSize);
 					#endif
 				}
 			}
@@ -2959,8 +2948,8 @@ bail:
 		const unsigned int checkTimeIncrements = 100;
 		uint64_t start = VMPI_getPerformanceCounter();
 
-		numObjects=0;
-		objSize=0;
+		uint64_t numObjects=policy.objectsMarked();
+		uint64_t objSize=policy.bytesMarked();
 
 		uint64_t ticks = start + time * VMPI_getPerformanceFrequency() / 1000;
 		do {
@@ -2985,10 +2974,12 @@ bail:
 		policy.signal(GCPolicyManager::END_IncrementalMark);
 
 		if(heap->Config().gcstats) {
+			numObjects = policy.objectsMarked() - numObjects;
+			objSize = policy.bytesMarked() - objSize;
 			double millis = duration(start);
-			size_t kb = objSize>>10;
+			size_t kb = int(objSize)>>10;
 			gclog("[mem] mark(%d) %d objects (%d kb %d mb/s) in %.2f millis (%.4f s)\n", 
-				  markIncrements() - lastStartMarkIncrementCount, numObjects, kb, 
+				  markIncrements() - lastStartMarkIncrementCount, int(numObjects), kb, 
 				  uint32_t(double(kb)/millis), millis, duration(t0)/1000);
 		}
 	}

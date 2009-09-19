@@ -1383,18 +1383,6 @@ namespace MMgc
         uint32_t sweeps;
 
 		/**
-		 * Number of calls to MarkItem() during the current (or most recent)
-		 * IncrementalMark().
-		 */
-		uint32_t numObjects;
-
-		/**
-		 * Number of bytes scanned in MarkItem() during the current (or most
-		 * recent) IncrementalMark().
-		 */
-		size_t objSize;
-
-		/**
 		 * Time of the latest FinishIncrementalMark() call, in ticks.
 		 */
 		uint64_t sweepStart;
