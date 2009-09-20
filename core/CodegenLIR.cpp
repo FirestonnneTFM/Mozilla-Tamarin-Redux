@@ -5477,9 +5477,8 @@ namespace avmplus
 
 namespace nanojit
 {
-    int StackFilter::getTop(LIns*) {
+    void StackFilter::getTops(LInsp /*br*/, int& /*spTop*/, int& /*rpTop*/) {
         AvmAssert(false);
-        return 0;
     }
 
     #ifdef NJ_VERBOSE
