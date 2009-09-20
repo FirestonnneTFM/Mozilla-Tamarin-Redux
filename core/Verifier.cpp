@@ -45,8 +45,6 @@
 
 namespace avmplus
 {
-#undef DEBUG_EARLY_BINDING
-
 #ifdef AVMPLUS_VERIFYALL
 	class VerifyallWriter : public NullWriter {
 		MethodInfo *info;
@@ -872,10 +870,6 @@ namespace avmplus
 				    break;
 				}
 
-				#ifdef DEBUG_EARLY_BINDING
-				core->console << "verify setproperty " << obj.traits << " " << &multiname->getName() << " from within " << info << "\n";
-				#endif
-
 				if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
 					obj.traits == VECTORDOUBLE_TYPE )
 				{
@@ -1257,11 +1251,6 @@ namespace avmplus
 					if( !m ) verifyFailed(kCorruptABCError);
 					MethodSignaturep mms = m->getMethodSignature();
 					resultType = mms->returnTraits();
-				}
-				else {
-                    #ifdef DEBUG_EARLY_BINDING
-				    core->console << "verify callsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
-                    #endif
 				}
 
 				emitCheckNull(sp-(n-1));
@@ -1914,10 +1903,10 @@ namespace avmplus
 		emitCheckNull(sp-(n-1));
 		
 		if (emitCallpropertyMethod(opcode, t, b, multiname, multiname_index, argc, pc))
-			goto callproperty_done;
+			return;
 		
 		if (emitCallpropertySlot(opcode, sp, t, b, argc, pc))
-			goto callproperty_done;
+			return;
 
 		coder->writeOp2(state, pc, opcode, multiname_index, argc);
 
@@ -1925,12 +1914,6 @@ namespace avmplus
 		state->pop_push(n, NULL);
 		if (opcode == OP_callpropvoid)
 			state->pop();
-		
-	callproperty_done:
-		;
-        #ifdef DEBUG_EARLY_BINDING
-		core->console << "verify callproperty " << t << " " << multiname.getName() << " from within " << info << "\n";
-        #endif
 	}
 
 	bool Verifier::emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc) 
@@ -2178,11 +2161,6 @@ namespace avmplus
 			state->pop_push(n, propType);
 			return;
 		}
-
-		#ifdef DEBUG_EARLY_BINDING
-		core->console << "verify getproperty " << obj.traits << " " << multiname->getName() << " from within " << info << "\n";
-		#endif
-
 		if( !propType )
 		{
 			if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||

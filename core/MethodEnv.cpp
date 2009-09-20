@@ -41,8 +41,6 @@
 
 namespace avmplus
 {
-#undef DEBUG_EARLY_BINDING
-
 	// note that some of these have (partial) guts of Toplevel::coerce replicated here, for efficiency.
 	// if you find bugs here, you might need to update Toplevel::coerce as well (and vice versa).
 	Atom* FASTCALL MethodEnv::unbox1(Atom atom, Traits* t, Atom* args)
@@ -1670,18 +1668,12 @@ namespace avmplus
 
 		case BKIND_METHOD:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callsuper method " << base->traits << " " << multiname->name << "\n";
-			#endif
 			MethodEnv* superenv = base->methods[AvmCore::bindingToMethodId(b)];
 			return superenv->coerceEnter(argc, atomv);
 		}
 		case BKIND_VAR:
 		case BKIND_CONST:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callsuper slot " << base->traits << " " << multiname->name << "\n";
-			#endif
 			uint32 slot = AvmCore::bindingToSlotId(b);
 			ScriptObject* method = AvmCore::atomToScriptObject(atomv[0])->getSlotObject(slot);
 			// inlined equivalent of op_call
@@ -1691,18 +1683,12 @@ namespace avmplus
 		}
 		case BKIND_SET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callsuper setter " << base->traits << " " << multiname->name << "\n";
-			#endif
 			// read on write-only property
 			toplevel->throwReferenceError(kWriteOnlyError, multiname, base->traits);
 		}
 		case BKIND_GET:
 		case BKIND_GETSET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callsuper getter " << base->traits << " " << multiname->name << "\n";
-			#endif
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = base->methods[m];
@@ -1762,9 +1748,6 @@ namespace avmplus
 
 		case BKIND_METHOD: 
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getsuper method " << vtable->traits << " " << multiname->name << "\n";
-			#endif
 			// extracting a virtual method
 			MethodEnv *m = vtable->methods[AvmCore::bindingToMethodId(b)];
 			return toplevel->methodClosureClass->create(m, obj)->atom();
@@ -1772,25 +1755,16 @@ namespace avmplus
 
         case BKIND_VAR:
         case BKIND_CONST:
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getsuper slot " << vtable->traits << " " << multiname->name << "\n";
-			#endif
 			return AvmCore::atomToScriptObject(obj)->getSlotAtom(AvmCore::bindingToSlotId(b));
 
 		case BKIND_SET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getsuper setter " << vtable->traits << " " << multiname->name << "\n";
-			#endif
 			// read on write-only property
 			toplevel->throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
 		}
 		case BKIND_GET:
 		case BKIND_GETSET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getsuper getter " << vtable->traits << " " << multiname->name << "\n";
-			#endif
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
@@ -1818,15 +1792,9 @@ namespace avmplus
 			toplevel->throwReferenceError(kCannotAssignToMethodError, multiname, vtable->traits);
 
 		case BKIND_GET: 
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setsuper getter " << vtable->traits << " " << multiname->name << "\n";
-			#endif
 			toplevel->throwReferenceError(kConstWriteError, multiname, vtable->traits);
 
 		case BKIND_VAR:
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setsuper slot " << vtable->traits << " " << multiname->name << "\n";
-			#endif
 			// @todo, this does a redundant coercion -- no harm done, just slightly more work than necessary
 			AvmCore::atomToScriptObject(obj)->coerceAndSetSlotAtom(AvmCore::bindingToSlotId(b), value);
             return;
@@ -1834,9 +1802,6 @@ namespace avmplus
 		case BKIND_SET: 
 		case BKIND_GETSET: 
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setsuper setter " << vtable->traits << " " << multiname->name << "\n";
-			#endif
 			// Invoke the setter
 			uint32 m = AvmCore::bindingToSetterId(b);
 			AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);

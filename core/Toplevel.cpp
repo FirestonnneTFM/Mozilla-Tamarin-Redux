@@ -41,8 +41,6 @@
 
 namespace avmplus
 {
-#undef DEBUG_EARLY_BINDING
-
 	Toplevel::Toplevel(AbcEnv* abcEnv) : 
 		_abcEnv(abcEnv),
 		_builtinClasses(NULL),
@@ -539,9 +537,6 @@ namespace avmplus
 		{
 		case BKIND_METHOD:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callproperty method " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// force receiver == base.  if caller used OP_callproplex then receiver was null.
 			atomv[0] = base;
 			MethodEnv* method = vtable->methods[AvmCore::bindingToMethodId(b)];
@@ -551,9 +546,6 @@ namespace avmplus
 		case BKIND_VAR:
 		case BKIND_CONST:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// inlined equivalent of op_call
 			ScriptObject* method = AvmCore::atomToScriptObject(base)->getSlotObject(AvmCore::bindingToSlotId(b));
 			if (!method)
@@ -563,9 +555,6 @@ namespace avmplus
 		case BKIND_GET:
 		case BKIND_GETSET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callproperty getter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// Invoke the getter on base
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
@@ -574,16 +563,10 @@ namespace avmplus
 		}
 		case BKIND_SET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callproperty setter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// read on write-only property
 			throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
 		}
 		default:
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "callproperty dynamic " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			if (AvmCore::isObject(base))
 			{
 				return AvmCore::atomToScriptObject(base)->callProperty(multiname, argc, atomv);
@@ -615,9 +598,6 @@ namespace avmplus
 		case BKIND_VAR:
 		case BKIND_CONST:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "constructprop slot " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			ScriptObject* ctor = AvmCore::atomToScriptObject(obj)->getSlotObject(AvmCore::bindingToSlotId(b));
 			if (!ctor ||
 				(!ctor->traits()->containsInterface(CLASS_TYPE) && !ctor->traits()->containsInterface(FUNCTION_TYPE)))
@@ -628,9 +608,6 @@ namespace avmplus
 		case BKIND_GET:
 		case BKIND_GETSET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "constructprop getter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
@@ -639,16 +616,10 @@ namespace avmplus
 		}
 		case BKIND_SET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "constructprop setter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// read on write-only property
 			throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
 		}
 		default:
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "constructprop dynamic " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			if ((obj&7)==kObjectType)
 			{
 				return AvmCore::atomToScriptObject(obj)->constructProperty(multiname, argc, atomv);
@@ -996,14 +967,11 @@ add_numbers:
 	Atom Toplevel::getproperty(Atom obj, const Multiname* multiname, VTable* vtable)
     {
 		Binding b = getBinding(vtable->traits, multiname);
-		AvmCore* core = this->core();
         switch (AvmCore::bindingKind(b))
         {
 		case BKIND_METHOD: 
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getproperty method " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
+			AvmCore* core = this->core();
 			if (multiname->contains(core->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj))
 			{
 				// dynamic props should hide declared methods
@@ -1018,17 +986,11 @@ add_numbers:
         case BKIND_VAR:
         case BKIND_CONST:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			int slot = AvmCore::bindingToSlotId(b);
 			return AvmCore::atomToScriptObject(obj)->getSlotAtom(slot);
 		}
 
 		case BKIND_NONE:
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getproperty dynamic " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			if ((obj&7) == kObjectType)
 			{
 				// try dynamic lookup on instance.  even if the traits are sealed,
@@ -1056,9 +1018,6 @@ add_numbers:
 		case BKIND_GET:
 		case BKIND_GETSET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getproperty getter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
@@ -1066,9 +1025,6 @@ add_numbers:
 		}
 		case BKIND_SET:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core->console << "getproperty setter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// read on write-only property
 			throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
 		}
@@ -1092,9 +1048,6 @@ add_numbers:
         {
 		case BKIND_METHOD: 
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setproperty method " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			if (multiname->contains(core()->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj))
 			{
 				// dynamic props should hide declared methods
@@ -1114,9 +1067,6 @@ add_numbers:
 		}
 		case BKIND_VAR:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			AvmCore::atomToScriptObject(obj)->coerceAndSetSlotAtom(AvmCore::bindingToSlotId(b), value);
             return;
 		}
@@ -1124,9 +1074,6 @@ add_numbers:
 		case BKIND_SET: 
 		case BKIND_GETSET: 
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setproperty setter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			// Invoke the setter
 			uint32 m = AvmCore::bindingToSetterId(b);
 			AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);
@@ -1137,18 +1084,12 @@ add_numbers:
 		}
 		case BKIND_GET: 
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setproperty getter " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			throwReferenceError(kConstWriteError, multiname, vtable->traits);
 			return;
 		}
 
 		case BKIND_NONE:
 		{
-			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "setproperty dynamic " << vtable->traits << " " << multiname->getName() << "\n";
-			#endif
 			if (AvmCore::isObject(obj))
 			{
 				AvmCore::atomToScriptObject(obj)->setMultinameProperty(multiname, value);

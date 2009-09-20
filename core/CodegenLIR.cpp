@@ -2395,9 +2395,6 @@ namespace avmplus
             }
             else {
                 emit(state, opcode, (uintptr)name);
-                #ifdef DEBUG_EARLY_BINDING
-                core->console << "verify setsuper " << base << " " << name.getName() << " from within " << info << "\n";
-                #endif
             }
             break;
         }
@@ -2433,9 +2430,6 @@ namespace avmplus
             }
             else {
                 emit(state, opcode, (uintptr)name, 0, propType);
-                #ifdef DEBUG_EARLY_BINDING
-                core->console << "verify getsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
-                #endif
             }
             break;
         }
