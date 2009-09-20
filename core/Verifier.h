@@ -233,7 +233,9 @@ namespace nanojit {
         int sid;
         Fragment *target;
         GuardRecord *guards;
+        struct SwitchInfo* switchInfo;
     };
+    
     #define SideExitSize(x) sizeof(SideExit)
 }
 
