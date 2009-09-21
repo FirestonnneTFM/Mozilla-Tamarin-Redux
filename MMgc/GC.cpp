@@ -2557,7 +2557,8 @@ bail:
  		m_markStackOverflow = true;
  		for ( int i=int(m_incrementalWork.Count()/2) ; i > 0 ; i-- ) {
  			GCWorkItem item = m_incrementalWork.Pop();
- 			ClearQueued(item.ptr);
+			if (item.IsGCItem())
+				ClearQueued(item.ptr);
  		}
  		PushWorkItem(item);
  		m_inMarkStackOverflow = false;
