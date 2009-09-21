@@ -128,7 +128,6 @@
     FUNCTION(FUNCADDR(AvmCore::istypeAtom), SIG2(A,A,P), istypeAtom)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toClassITraits), SIG2(P,P,A), toClassITraits)
     METHOD(TOPLEVELADDR(Toplevel::in_operator), SIG3(A,P,A,A), in)
-    METHOD(TOPLEVELADDR(Toplevel::instanceof), SIG3(A,P,A,A), instanceof)
     CSEMETHOD(COREADDR(AvmCore::stricteq), SIG3(A,P,A,A), stricteq)
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     CSEMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
@@ -268,6 +267,14 @@ SSE2_ONLY(
     } 
     CSEFUNCTION(FUNCADDR(astype_late), SIG3(A,P,A,A), astype_late)
     CSEFUNCTION(FUNCADDR(AvmCore::astype), SIG2(A,A,P), astype)
+
+    /**
+     * implementation of OP_instanceof
+     */
+    Atom instanceof(MethodEnv* caller_env, Atom val, Atom ctor) {
+        return caller_env->toplevel()->instanceof(val, ctor);
+    }
+    FUNCTION(FUNCADDR(instanceof), SIG3(A,P,A,A), instanceof)
 
     /**
      * inline-cache enabled finddef.  if the cache for this slot is valid, return
