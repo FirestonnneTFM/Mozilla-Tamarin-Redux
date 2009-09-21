@@ -185,7 +185,6 @@
     METHOD(ENVADDR(MethodEnv::newclass), SIG5(P,P,P,P,P,P), newclass)
     METHOD(SCRIPTADDR(ArrayClass::newarray), SIG3(P,P,P,I), newarray)
     METHOD(ENVADDR(MethodEnv::op_newobject), SIG3(P,P,P,I), op_newobject)
-    METHOD(TOPLEVELADDR(Toplevel::op_applytype), SIG4(A,P,A,I,P), op_applytype)
     METHOD(TOPLEVELADDR(Toplevel::op_construct), SIG4(A,P,A,I,P), op_construct)
     METHOD(ENVADDR(MethodEnv::callsuper), SIG4(A,P,P,I,P), callsuper)
     METHOD(TOPLEVELADDR(Toplevel::constructprop), SIG5(A,P,P,I,P,P), constructprop)
@@ -235,6 +234,21 @@ SSE2_ONLY(
     METHOD(ENVADDR(MethodEnv::si32), SIG3(V,P,I,I), si32)
     METHOD(ENVADDR(MethodEnv::sf32), SIG3(V,P,F,I), sf32)
     METHOD(ENVADDR(MethodEnv::sf64), SIG3(V,P,F,I), sf64)
+
+    /**
+     * used to create concrete class objects for parameterizations of Vector.
+     * this code is inlined from Toplevel::op_applytype so we can delay loading
+     * Toplevel* until we need it
+     */
+    Atom op_applytype(MethodEnv* caller_env, Atom factory, int argc, Atom *ap) {
+        if (AvmCore::isObject(factory))
+            return AvmCore::atomToScriptObject(factory)->applyTypeArgs(argc, ap);
+
+        caller_env->toplevel()->throwTypeError(kTypeAppOfNonParamType);
+        // unreachable
+        return undefinedAtom;
+    }
+    FUNCTION(FUNCADDR(op_applytype), SIG4(A,P,A,I,P), op_applytype)
 
     /**
      * inline-cache enabled finddef.  if the cache for this slot is valid, return

@@ -3667,10 +3667,8 @@ namespace avmplus
                 // convert args to Atom[] for the call
                 LIns* ap = storeAtomArgs(argc, arg0);
 
-                LIns* toplevel = loadToplevel();
-
                 LIns* i3 = callIns(FUNCTIONID(op_applytype), 4,
-                    toplevel, func, InsConst(argc), ap);
+                    env_param, func, InsConst(argc), ap);
 
                 localSet(dest, atomToNativeRep(result, i3), result);
                 break;
