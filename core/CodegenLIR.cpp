@@ -251,7 +251,7 @@ namespace avmplus
     #  define SETJMP ((uintptr)::setjmp)
     #endif // _MSC_VER
 
-    #include "../core/vm_fops.h"
+    #include "../core/jit-calls.h"
 
 #ifdef NJ_SOFTFLOAT
 
