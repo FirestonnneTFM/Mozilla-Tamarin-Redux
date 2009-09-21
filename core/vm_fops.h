@@ -127,7 +127,6 @@
     METHOD(COREADDR(AvmCore::setDxnsLate), SIG3(V,P,P,A), setDxnsLate)
     FUNCTION(FUNCADDR(AvmCore::istypeAtom), SIG2(A,A,P), istypeAtom)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toClassITraits), SIG2(P,P,A), toClassITraits)
-    METHOD(TOPLEVELADDR(Toplevel::in_operator), SIG3(A,P,A,A), in)
     CSEMETHOD(COREADDR(AvmCore::stricteq), SIG3(A,P,A,A), stricteq)
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     CSEMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
@@ -275,6 +274,14 @@ SSE2_ONLY(
         return caller_env->toplevel()->instanceof(val, ctor);
     }
     FUNCTION(FUNCADDR(instanceof), SIG3(A,P,A,A), instanceof)
+
+    /**
+     * implementation of OP_in
+     */
+    Atom op_in(MethodEnv* caller_env, Atom name, Atom obj) {
+        return caller_env->toplevel()->in_operator(name, obj);
+    }
+    FUNCTION(FUNCADDR(op_in), SIG3(A,P,A,A), op_in)
 
     /**
      * inline-cache enabled finddef.  if the cache for this slot is valid, return
