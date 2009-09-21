@@ -4358,9 +4358,7 @@ namespace avmplus
             {
                 LIns* lhs = loadAtomRep(sp-1);
                 LIns* rhs = loadAtomRep(sp);
-                LIns* toplevel = loadToplevel();
-                LIns* out = callIns(FUNCTIONID(in), 3,
-                    toplevel, lhs, rhs);
+                LIns* out = callIns(FUNCTIONID(op_in), 3, env_param, lhs, rhs);
                 out = atomToNativeRep(result, out);
                 localSet(sp-1, out, result);
                 break;
