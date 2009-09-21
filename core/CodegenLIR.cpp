@@ -3713,16 +3713,13 @@ namespace avmplus
 
             case OP_newarray:
             {
-                // sp[-argc+1] = core->arrayClass->newarray(sp-argc+1, argc)
+                // sp[-argc+1] = env->toplevel()->arrayClass->newarray(sp-argc+1, argc)
                 int argc = int(op1);
                 int arg0 = sp - 1*argc+1;
 
                 // convert array elements to Atom[]
                 LIns* ap = storeAtomArgs(argc, arg0);
-                LIns* toplevel = loadToplevel();
-                LIns* arrayClass = loadIns(LIR_ldcp, offsetof(Toplevel,arrayClass), toplevel);
-                LIns* i3 = callIns(FUNCTIONID(newarray), 3,
-                    arrayClass, ap, InsConst(argc));
+                LIns* i3 = callIns(FUNCTIONID(newarray), 3, env_param, InsConst(argc), ap);
 
                 AvmAssert(!result->isMachineType());
                 localSet(arg0, i3, result);
