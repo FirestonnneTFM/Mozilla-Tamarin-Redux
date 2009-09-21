@@ -183,7 +183,6 @@
     METHOD(ENVADDR(MethodEnv::checkfilter), SIG2(V,P,A), checkfilter)
     METHOD(ENVADDR(MethodEnv::getdescendants), SIG3(A,P,A,P), getdescendants)
     METHOD(ENVADDR(MethodEnv::newclass), SIG5(P,P,P,P,P,P), newclass)
-    METHOD(SCRIPTADDR(ArrayClass::newarray), SIG3(P,P,P,I), newarray)
     METHOD(ENVADDR(MethodEnv::op_newobject), SIG3(P,P,P,I), op_newobject)
     METHOD(TOPLEVELADDR(Toplevel::op_construct), SIG4(A,P,A,I,P), op_construct)
     METHOD(ENVADDR(MethodEnv::callsuper), SIG4(A,P,P,I,P), callsuper)
@@ -249,6 +248,16 @@ SSE2_ONLY(
         return undefinedAtom;
     }
     FUNCTION(FUNCADDR(op_applytype), SIG4(A,P,A,I,P), op_applytype)
+
+    /**
+     * implementaion of OP_newarray for creating array literals
+     */
+    ArrayObject* newarray(MethodEnv* caller_env, int argc, Atom* ap) {
+        Toplevel* toplevel = caller_env->toplevel();
+        ArrayClass* arrayClass = toplevel->arrayClass;
+        return arrayClass->newarray(ap, argc);
+    }
+    FUNCTION(FUNCADDR(newarray), SIG3(P,P,I,P), newarray)
 
     /**
      * inline-cache enabled finddef.  if the cache for this slot is valid, return
