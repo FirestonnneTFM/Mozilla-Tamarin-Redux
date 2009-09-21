@@ -2732,7 +2732,7 @@ bail:
 		const size_t markstackCutoff = 400;
 		if (size > markstackCutoff)
 		{
-			PushWorkItem(GCWorkItem(p + markstackCutoff / sizeof(uintptr_t), size - markstackCutoff, false));
+			PushWorkItem(GCWorkItem(p + markstackCutoff / sizeof(uintptr_t), uint32_t(size - markstackCutoff), false));
 			size = markstackCutoff;
 		}
 			
