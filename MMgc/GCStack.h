@@ -120,6 +120,11 @@ namespace MMgc
 		/** Move one entirely full segment from 'other' and insert it into our segment list */
 		void TransferOneFullSegmentFrom(GCMarkStack& other);
 
+#ifdef MMGC_MARKSTACK_DEPTH
+		/** @return the number of elements on the stack when its depth was the greatest */
+		uint32_t MaxCount();
+#endif
+	
 	protected:
 		// no implementation of these
 		GCMarkStack(const GCMarkStack& other);
@@ -139,6 +144,9 @@ namespace MMgc
 		GCStackSegment*	    m_topSegment;	// current stack segment, older segments linked through 'prev'
 		uint32_t			m_hiddenCount;	// number of elements in those older segments
 		GCStackSegment*		m_extraSegment;	// single-element cache used to avoid hysteresis
+#ifdef MMGC_MARKSTACK_DEPTH
+		uint32_t			m_maxDepth;		// max depth of mark stack
+#endif
 
 		/**
 		 * The current segment must be NULL or full (top == limit).  Push a new segment onto the 
@@ -165,6 +173,11 @@ namespace MMgc
 				return false;
 		GCAssert(m_top < m_limit);
 		*m_top++ = item;
+#ifdef MMGC_MARKSTACK_DEPTH
+		uint32_t depth = Count();
+		if (depth > m_maxDepth)
+			m_maxDepth = depth;
+#endif
 		GCAssert(Invariants());
 		return true;
 	}
@@ -198,6 +211,13 @@ namespace MMgc
 	{
 		return Count() / kMarkStackItems;
 	}
+
+#ifdef MMGC_MARKSTACK_DEPTH
+	REALLY_INLINE uint32_t GCMarkStack::MaxCount()
+	{
+		return m_maxDepth;
+	}
+#endif
 }
 
 #endif /* __GCStack__ */

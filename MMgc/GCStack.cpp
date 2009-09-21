@@ -73,6 +73,9 @@ namespace MMgc
 		, m_topSegment(NULL)
 		, m_hiddenCount(0)
 		, m_extraSegment(NULL)
+#ifdef MMGC_MARKSTACK_DEPTH
+		, m_maxDepth(0)
+#endif
 	{
 		PushSegment();
 		GCAssert(Invariants());

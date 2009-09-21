@@ -86,6 +86,9 @@
 	// to the overhead already added by MMGC_POLICY_PROFILING, on the gcbench benchmark,
 	// measured on MacOS X desktop.
 	//#define MMGC_REFCOUNT_PROFILING
+
+	// Profile mark stack depth
+	//#define MMGC_MARKSTACK_DEPTH
 #endif
 
 #ifdef MMGC_REFCOUNT_PROFILING
