@@ -614,6 +614,11 @@ namespace MMgc
 			  unsigned(couldBePointer),
 			  unsigned(actuallyIsPointer));
 #endif
+#ifdef MMGC_MARKSTACK_DEPTH
+		GCLog("[gcbehavior] mark-stack: stack-max-depth=%u barrier-max-depth=%u\n", 
+			  gc->m_incrementalWork.MaxCount(),
+			  gc->m_barrierWork.MaxCount());
+#endif
 		if (afterCollection || gc->IncrementalMarking())
 		{
 			GCLog("[gcbehavior] markitem-last-gc: objects=%u bytes=%u\n",

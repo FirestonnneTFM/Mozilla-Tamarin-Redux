@@ -792,6 +792,7 @@ namespace MMgc
 		friend class GCInterval;
 		friend class ZCT;
 		friend class AutoRCRootSegment;
+		friend class GCPolicyManager;
 	public:
 
 		/**
