@@ -374,7 +374,6 @@ namespace avmplus
 			char* off_c;
 			double* off_d;
 			uint32_t* off_u;
-			uint64_t* off_u64;
 		};
 		off_c = (char*)sam + cc->timeOffset;
 		*off_d = (double)sample.micros;
@@ -420,7 +419,7 @@ namespace avmplus
 				off_c = (char*)f + cc->lineOffset;
 				*off_u = e->linenum();
 				off_c = (char*)f + cc->stackIdOffset;
-				*off_u64 = e->functionId();
+				*off_d = (double)e->functionId();
 
 				stack->setUintProperty(i, f->atom());
 			}			
