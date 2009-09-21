@@ -2488,33 +2488,33 @@ bail:
 		// updated to reference a marked, non-free object to mark, false if the allocator
 		// instance has been exhausted.
 
+		void* ptr;
+		uint32_t size;
+		
 		for(int i=0; i < kNumSizeClasses; i++) {
-			void* ptr=0;
-			uint32_t size=0;
 			GCAllocIterator iter1(containsPointersRCAllocs[i]);
 			while (iter1.GetNextMarkedObject(ptr, size)) {
 				GCWorkItem item(ptr, size, true);
 				MarkItem(item);
 				if (m_markStackOverflow)
-					goto overflow;
+					return;
 			}
 			GCAllocIterator iter2(containsPointersAllocs[i]);
 			while (iter2.GetNextMarkedObject(ptr, size)) {
 				GCWorkItem item(ptr, size, true);
 				MarkItem(item);
 				if (m_markStackOverflow)
-					goto overflow;
-			}
-			GCLargeAllocIterator iter3(largeAlloc);
-			while (iter3.GetNextMarkedObject(ptr, size)) {
-				GCWorkItem item(ptr, size, true);
-				MarkItem(item);
-				if (m_markStackOverflow)
-					goto overflow;
+					return;
 			}
 		}
-	overflow:
-		return;
+
+		GCLargeAllocIterator iter3(largeAlloc);
+		while (iter3.GetNextMarkedObject(ptr, size)) {
+			GCWorkItem item(ptr, size, true);
+			MarkItem(item);
+			if (m_markStackOverflow)
+				return;
+		}
 	}
 
 	// Signal that attempting to push 'item' onto 'stack' overflowed 'stack'.
