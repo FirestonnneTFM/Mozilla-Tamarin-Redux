@@ -4273,10 +4273,7 @@ namespace avmplus
                 Traits *type = (Traits*) op1;
                 int32_t index = (int32_t) op2;
                 LIns* obj = loadAtomRep(index);
-                LIns* i1 = callIns(FUNCTIONID(astype), 2,
-                    obj,
-                    InsConstPtr(type));
-
+                LIns* i1 = callIns(FUNCTIONID(astype), 2, obj, InsConstPtr(type));
                 i1 = atomToNativeRep(result, i1);
                 localSet(index, i1, result);
                 break;
@@ -4284,18 +4281,10 @@ namespace avmplus
 
             case OP_astypelate:
             {
-                //sp[-1] = astype(sp[-1], toClassITraits(sp[0]));
-                //sp--;
+                //sp[-1] = astype_late(env, sp[-1], sp[0]);
                 LIns* type = loadAtomRep(sp);
-
-                LIns* itraits = callIns(FUNCTIONID(toClassITraits), 2,
-                    loadToplevel(), type);
-
                 LIns* obj = loadAtomRep(sp-1);
-
-                LIns* i3 = callIns(FUNCTIONID(astype), 2,
-                    obj, itraits);
-
+                LIns* i3 = callIns(FUNCTIONID(astype_late), 3, env_param, obj, type);
                 i3 = atomToNativeRep(result, i3);
                 localSet(sp-1, i3, result);
                 break;
