@@ -133,7 +133,6 @@
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     CSEMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
     METHOD(TOPLEVELADDR(Toplevel::add2), SIG3(A,P,A,A), add2)
-    CSEFUNCTION(FUNCADDR(AvmCore::astype), SIG2(A,A,P), astype)
     CSEMETHOD(COREADDR(AvmCore::EscapeAttributeValue), SIG2(P,P,A), EscapeAttributeValue)
     CSEMETHOD(COREADDR(AvmCore::ToXMLString), SIG2(P,P,A), ToXMLString)
     METHOD(ENVADDR(MethodEnv::delpropertyHelper), SIG4(A,P,A,P,A), delpropertyHelper)
@@ -258,6 +257,17 @@ SSE2_ONLY(
         return arrayClass->newarray(ap, argc);
     }
     FUNCTION(FUNCADDR(newarray), SIG3(P,P,I,P), newarray)
+
+    /**
+     * implementation of OP_newarray when RHS type is not 
+     * known at JIT time
+     */
+    Atom astype_late(MethodEnv* caller_env, Atom value, Atom type) {
+        Traits* itraits = caller_env->toplevel()->toClassITraits(type);
+        return AvmCore::astype(value, itraits);
+    } 
+    CSEFUNCTION(FUNCADDR(astype_late), SIG3(A,P,A,A), astype_late)
+    CSEFUNCTION(FUNCADDR(AvmCore::astype), SIG2(A,A,P), astype)
 
     /**
      * inline-cache enabled finddef.  if the cache for this slot is valid, return
