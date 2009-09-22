@@ -234,9 +234,6 @@ namespace avmplus
 }
 
 #include "MMgc.h"
-
-#define MMGC_SUBCLASS_DECL : public GCObject
-
 #include "QCache.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"
