@@ -1,0 +1,13 @@
+<api>
+<versions id="avm">
+  <release id="0">
+    <product id="shell">
+      <profile id="system">
+	<version id="0" alias="AVM"/>
+      </profile>
+    </product>
+  </release>
+</versions>
+<uris>
+</uris>
+</api>
