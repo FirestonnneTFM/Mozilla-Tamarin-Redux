@@ -66,7 +66,6 @@ namespace avmplus
 	#endif
 	
 	typedef struct Binding_* Binding;
-	typedef struct CodeContextAtom_* CodeContextAtom;
 }
 
 #endif /* __avmplus_types__ */
