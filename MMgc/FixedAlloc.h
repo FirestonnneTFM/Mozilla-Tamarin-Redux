@@ -192,7 +192,10 @@ namespace MMgc
 	private:
 
 		// default ctor used only by FixedMalloc
-		FixedAllocSafe() {}
+		FixedAllocSafe()
+		{
+			VMPI_lockInit(&m_spinlock);
+		}
 
 		vmpi_spin_lock_t m_spinlock;
 	};
