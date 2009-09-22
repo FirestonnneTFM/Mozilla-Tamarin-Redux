@@ -84,9 +84,6 @@ namespace avmplus
 	const bool AvmCore::interrupts_default = false;
 	const bool AvmCore::jitordie_default = false;
 
-	static const uint32_t apis [][1] = {{0}};
-	static const uint32_t apis_sizes [] = {1};
-	
 	// a single string with characters 0x00...0x7f (inclusive)
 	static const char* const k_cachedChars = 
 		"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
@@ -261,20 +258,13 @@ namespace avmplus
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
 
-		// turn off versioning by default
-		setAPIInfo(0, 
-				   (const uint32_t*)avmplus::apis_sizes, 
-				   sizeof(avmplus::apis)/sizeof(avmplus::apis[0]),
-				   (const uint32_t**)avmplus::apis,
- 				   0,
-				   (const char**) NULL);
-
-		#ifdef AVMPLUS_WITH_JNI
+#ifdef AVMPLUS_WITH_JNI
 		java = NULL;
 		#endif
 #ifdef SUPERWORD_PROFILING
 		WordcodeTranslator::swprofStart();
 #endif
+
 	}
 
 	AvmCore::~AvmCore()
@@ -1161,7 +1151,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		
 		Namespacep ns = t->ns();
-		if (ns != NULL && ns != publicNamespace)
+		if (ns != NULL && !ns->getURI()->isEmpty())
 			s = concatStrings(s, concatStrings(toErrorString(ns), newConstantStringLatin1("."))); 
 		
 		Stringp n = t->name();
@@ -1415,7 +1405,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int i = findNamespace(ns);
 		if (namespaces[i] == NULL)
 		{
-			// first time we've seen this namespace.  intern int
+			// first time we've seen this namespace.  intern it
 			nsCount++;
 			namespaces[i] = ns;
 			return ns;
@@ -2066,7 +2056,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			switch (atom&7)
 			{
 			case kNamespaceType:
-				return atomToNamespace(atom)->getURI(true);
+				return atomToNamespace(atom)->getURI();
 			case kObjectType:
 				return string(atomToScriptObject(atom)->toString());
 			case kStringType:
@@ -2995,7 +2985,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
         // compute the hash function
-		int hashCode = (int)(((uintptr)ns->getURI())>>3);
+		int hashCode = (int)(((uintptr)ns->getURI())>>3);  // FIXME possibly hash api mask too
 
 		int bitMask = m - 1;
 
@@ -3003,10 +2993,31 @@ return the result of the comparison ToPrimitive(x) == y.
         int i = (hashCode&0x7FFFFFFF) & bitMask;
         int n = 7;
 		Namespacep k;
-        while ((k=namespaces[i]) != NULL && k->m_uri != ns->m_uri ) {
-            i = (i + (n++)) & bitMask; // quadratic probe
+		while ((k=namespaces[i]) != NULL && (k->m_uri != ns->m_uri || k->m_api != ns->m_api)) {
+			i = (i + (n++)) & bitMask; // quadratic probe
 		}
         return i;
+	}
+	
+	Namespacep AvmCore::gotNamespace(Stringp uri, int32_t api)
+	{
+		int m = numNamespaces;
+
+		// compute the hash function
+		int hashCode = (int)(((uintptr)uri)>>3);  // FIXME possibly hash api mask too
+
+		int bitMask = m - 1;
+
+		// find the slot to use
+		int i = (hashCode&0x7FFFFFFF) & bitMask;
+		int n = 7;
+		Namespacep k;
+		while ((k=namespaces[i]) != NULL && 
+			   (k->getURI() != uri || 
+				k->m_api != api)) {
+			i = (i + (n++)) & bitMask; // quadratic probe
+		}
+		return namespaces[i];
 	}
 	
 	// note, this assumes Latin-1, not UTF8.
@@ -3298,7 +3309,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
 	}
 
-    Namespacep AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)
+	Namespacep AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)
 	{
 		// E4X - this is 13.2.3, step 3 - prefix IS specified
 		Atom p;
@@ -3309,10 +3320,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-		    // We get here via a AS Namespace constructor, so version the uri now
-			u = internString(ApiUtils::getVersionedURI(this, NULL /*pool*/, internString(uri), type));
+			u = internString(string(uri));
 		}
-		if (ApiUtils::isEmptyURI(u))
+		if (u->isEmpty())
 		{
 			if (prefix == undefinedAtom)
 				p = kEmptyString->atom();
@@ -3337,7 +3347,12 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			p = internString(string(prefix))->atom();
 		}
-		return new (GetGC()) Namespace(p, u, type);
+
+		Namespacep ns = new (GetGC()) Namespace(p, u, type);
+		// called from AS so need to get the api version off the call stack
+		if (ApiUtils::isVersionedNS(this, type, u)) 
+			ns->setAPI(this->getAPI(NULL));
+		return ns;
 	}
 
 	Namespacep AvmCore::newNamespace(Atom uri, Namespace::NamespaceType type)
@@ -3360,24 +3375,28 @@ return the result of the comparison ToPrimitive(x) == y.
 		else
 		{
 			u = string(uri);
-			p = ApiUtils::isEmptyURI(u) ? kEmptyString->atom() : undefinedAtom;
-			// We get here via a AS Namespace constructor, so version the uri now
-			u = internString(ApiUtils::getVersionedURI(this, NULL/*pool*/, u, type));
+			p = u->isEmpty() ? kEmptyString->atom() : undefinedAtom;
+			u = internString(u);
 		}
-		return new (GetGC()) Namespace(p, u, type);
+		Namespacep ns = new (GetGC()) Namespace(p, u, type);
+		// called from AS so need to get the api version off the call stack
+		if (ApiUtils::isVersionedNS(this, type, u)) 
+			ns->setAPI(this->getAPI(NULL));
+		return ns;
 	}
 
-    // caller does uri versioning if needed
-	Namespacep AvmCore::newNamespace(Stringp uri, Namespace::NamespaceType type)
+	Namespacep AvmCore::newNamespace(Stringp uri, Namespace::NamespaceType type, int32_t api)
 	{
-		uri = internString(uri);
-		Atom prefix = ApiUtils::isEmptyURI(uri) ? kEmptyString->atom() : undefinedAtom;
-		return new (GetGC()) Namespace(prefix, uri, type);
+		Atom prefix = uri->isEmpty() ? kEmptyString->atom() : undefinedAtom;
+		Namespacep ns = new (GetGC()) Namespace(prefix, uri, type);
+		if (ApiUtils::isVersionedNS(this, type, uri))
+			ns->setAPI(api);
+		return ns;
 	}
 
-	Namespacep AvmCore::newPublicNamespace (Stringp uri) 
+	Namespacep AvmCore::newPublicNamespace(Stringp uri) 
 	{ 
-		return newNamespace(ApiUtils::getVersionedURI(this, NULL/*pool*/, uri, Namespace::NS_Public)); 
+		return newNamespace(uri, Namespace::NS_Public, this->getAPI(NULL)); 
 	}
 
 	NamespaceSet* AvmCore::newNamespaceSet(int nsCount)
@@ -4025,7 +4044,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s->parseIndex((uint32_t&) *result);
 	}
 
-	uint32_t AvmCore::getAPI(PoolObject* pool)
+	int32_t AvmCore::getAPI(PoolObject* pool)
 	{
 		if (pool != NULL) {
 			return pool->getAPI();
@@ -4293,185 +4312,89 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	// BEGIN api versioning
 
-	void AvmCore::setAPIInfo(uint32_t apis_start, const uint32_t* apis_sizes,
-							 uint32_t apis_count, const uint32_t** apis,
-							 uint32_t uris_count, const char** uris) 
+	void AvmCore::setActiveAPI(API api)
+	{
+		active_api_flags |= api;
+	}
+
+	/*
+	  assumptions:
+	  - largest api is represented by the largest bit that is set
+	  - original api is represented by the first bit
+	  - the nth bit represents number n more than the original version
+	*/
+
+	void AvmCore::setAPIInfo(uint32_t apis_start,
+							 uint32_t apis_count, 
+							 uint32_t uris_count, const char** uris,
+							 const API* api_compat)
 	{
 		this->apis_start  = apis_start;
-		this->apis_sizes  = apis_sizes;
 		this->apis_count  = apis_count;
-		this->apis        = apis;
 		this->uris_count  = uris_count;
-		this->uris        = uris;
-		this->largest_api = ((uint32_t*)apis)[apis_sizes[0]-1];	 
-                                   // last api of any row is largest
-
+		this->uris		  = uris;
+		this->api_compat  = api_compat;
+		this->largest_api = 0x1 << (apis_count-1);
+		this->active_api_flags = 0;
+		// cache public namespaces
 		this->publicNamespaces = newNamespaceSet(apis_count);
 		Namespacep* namespaces = this->publicNamespaces->namespaces;
-		for (uint32_t v = apis_start; v < apis_start+apis_count; ++v) {
-			if (v == ApiUtils::getLargestAPI(this)) {
-				// if the largest api, then use the unmarked form
-				WBRC(GetGC(), this->publicNamespaces, &namespaces[v-apis_start], this->publicNamespace);				
-			}
-			else {
-				// otherwise, mark it
-				wchar c = (wchar)(ApiUtils::MIN_API_MARK + v);
-				Stringp uri = this->internStringUTF16((wchar*) &c, 1);
-				Namespacep ns = this->internNamespace(this->newNamespace(uri, Namespace::NS_Public));
-				WBRC(GetGC(), this->publicNamespaces, &namespaces[v-apis_start], ns);				
-			}
+		for (uint32_t i = 0; i < apis_count; ++i) {
+			Namespacep ns = this->internNamespace(this->newNamespace(kEmptyString, Namespace::NS_Public, 0x1<<i));
+			WBRC(GetGC(), this->publicNamespaces, &namespaces[i], ns);
 		}
 	}
 
 	Namespacep AvmCore::findPublicNamespace()
-	{
-		return publicNamespaces->namespaces[this->getAPI(NULL)-apis_start];
+	{	
+		return publicNamespaces->namespaces[ApiUtils::toVersion(this, this->getAPI(NULL))-apis_start];
 	}
 
 	Namespacep AvmCore::getPublicNamespace(PoolObject* pool)
 	{
 		AvmAssert(pool != NULL);
-		return publicNamespaces->namespaces[pool->getAPI()-apis_start];
+		return publicNamespaces->namespaces[ApiUtils::toVersion(this, pool->getAPI())-apis_start];
 	}
 
-	Namespacep AvmCore::getPublicNamespace(uint32_t v)
+	Namespacep AvmCore::getPublicNamespace(int32_t api) 
 	{
-		AvmAssert(v >= apis_start && v < apis_start+apis_count);
-		return publicNamespaces->namespaces[v-apis_start];
+		return publicNamespaces->namespaces[ApiUtils::toVersion(this, api)-apis_start];
 	}
 
-	uint32_t AvmCore::getDefaultAPI()
+	Namespacep AvmCore::getAnyPublicNamespace() 
 	{
-		return ApiUtils::getLargestAPI(this); 
-	}
-
-	// pool specific helpers
-
-	Stringp ApiUtils::getVersionedURI(AvmCore* core, PoolObject* pool, String* uri, Namespace::NamespaceType type, bool is_builtin) 
-	{
-#ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS
-		(void) is_builtin;
-		if (!isVersionedNS(core, type, uri)) {
-			// strip marker just in case its asc and avm disagree on which uris are versioned
-			return getBaseURI(core, uri);
-		}
-#else
-		// if it's a builtin or not a versioned namespace then just return it as is
-		if (is_builtin || !isVersionedNS(core, type, uri)) {
-			return uri;
-		}
-#endif
-
-		// if it's not a builtin and it is the largest version then it should already
-		// be unmarked.
-		uint32_t v = uri->length()==0 ? 0xFFFFFFFF : (uri->charAt(uri->length()-1)-MIN_API_MARK);
-		if (v == getLargestAPI(core)) {
-#ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS
-			return getBaseURI(core, uri);
-#else
-			AvmAssert(false);  // largest version should already be unmarked
-			return uri; 
-#endif
-		}
-
-		if (v >= core->apis_start && v <= core->apis_start+core->apis_count) {
-			return uri; // already versioned
-		}
-
-		v = core->getAPI(pool);
-		//core->console << "getVersionedURI v=" << v << "\n";
-		if (v == getLargestAPI(core)) {
-			return uri;	 // largest version is always unmarked, so reuse current uri
-		}
-
-		// otherwise, get the base uri and mark it
-		wchar vc = (wchar)(MIN_API_MARK + v);
-		return uri->append16(&vc, 1);
+		// any version will do
+		return publicNamespaces->namespaces[0];
 	}
 
 	// global helpers
 
-	Stringp ApiUtils::getBaseURI(AvmCore* core, Stringp uri) 
+	bool ApiUtils::hasVersionMark(Stringp uri) 
 	{
-		uint32_t v = uri->length()==0 ? 0 : uri->charAt(uri->length()-1);
-		Stringp baseURI;
-		if (v >= MIN_API_MARK && v <= MAX_API_MARK) {
-			baseURI = core->internString(uri->substr(0, uri->length()-1));
-			//printf("found versioned binding: %x\n", v);
-		}
-		else {
-			baseURI = uri;
-		}
-		return baseURI;
-	}
-
-	// WARNING if you call getNamespaceVersion on an unversioned namespace you'll get
-	// the the first or the largest api version back, which might not be what you
-	// want. So check if a namespaces is of the versioned type and uri before getting
-	// the api version.
-
-	uint32_t ApiUtils::getNamespaceVersion(AvmCore* core, Namespace* ns, bool defaultOriginal) 
-	{
-		Stringp uri = ns->getURI();
-		uint32_t v = uri->length()==0 ? 0 : uri->charAt(uri->length()-1);
-		if (v < MIN_API_MARK || v > MAX_API_MARK) {
-			if (defaultOriginal) {
-				v = getOriginalAPI(core);	// default library version is the original version
-			}
-			else {
-				v = getLargestAPI(core);  // default client version is the largest version
-			} 
-		}
-		else {
-			v = v - MIN_API_MARK;
-		}
-		return v;
-	}
-
-	bool ApiUtils::isEmptyURI(Stringp uri)
-	{
-		if (uri->isEmpty())
+		uint32_t mark = uri->length()==0 ? 0: uri->charAt(uri->length()-1);
+		if (mark >= ApiUtils::MIN_API_MARK && mark <= ApiUtils::MAX_API_MARK) {
 			return true;
-		uint32_t v = uri->charAt(0);
-		if (v >= MIN_API_MARK && v <= MAX_API_MARK)
-			return true;
+		}
 		return false;
 	}
 
-	/*
-	  Return the versions associated with a set of namespaces.
-	*/
-
-	List<uint32_t>* ApiUtils::getNamespaceVersions(AvmCore* core, const NamespaceSet* nss) 
+	API ApiUtils::getURIAPI(AvmCore* core, Stringp uri) 
 	{
-		List<uint32_t> *versions = new (core->GetGC()) List<uint32_t> (core->GetGC(), nss->size);
-		for(int i = 0; i < nss->size; ++i) {
-			uint32_t v = getNamespaceVersion(core, nss->namespaces[i], true);
-			//core->console << v << " ";
-			versions->add(v);
+		uint32_t mark = uri->length()==0 ? 0: uri->charAt(uri->length()-1);
+		// if mark is not recognized as a valid version marker, then ignore it
+		if (mark >= ApiUtils::MIN_API_MARK+core->apis_start && mark <= ApiUtils::MIN_API_MARK+core->apis_start+core->apis_count) {
+			return toAPI(core, mark-ApiUtils::MIN_API_MARK);
 		}
-		return versions;
+		return 0;
 	}
 
-	/*
-	  Return the versions that are compatible with a particular version.
-	*/
-
-	List<uint32_t>* ApiUtils::getCompatibleVersions(AvmCore* core, uint32_t v) 
+	Stringp ApiUtils::getBaseURI(AvmCore* core, Stringp uri) 
 	{
-		uint32_t count;
-		const uint32_t* versions;
-		getCompatibleAPIs(core, v, versions, count);
-		List<uint32_t> *compat_versions = new (core->GetGC()) List<uint32_t> (core->GetGC());
-		for (uint32_t i = 0; i < count; ++i) {
-			compat_versions->add(versions[i]);
+		uint32_t mark = uri->length()==0 ? 0: uri->charAt(uri->length()-1);
+		if (mark >= ApiUtils::MIN_API_MARK && mark <= ApiUtils::MAX_API_MARK) {
+			uri = core->internString(uri->substr(0, uri->length()-1));
 		}
-		return compat_versions;
-	}
-
-	uint32_t ApiUtils::getLargestAPI(AvmCore* core) 
-	{
-		return core->largest_api;
+		return uri;
 	}
 
 	/*
@@ -4481,143 +4404,145 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	bool ApiUtils::isVersionedNS(AvmCore* core, Namespace::NamespaceType type, Stringp uri) 
 	{
-		// FIXME re-writing using bit fields if turns out to be hot
-		return type != Namespace::NS_Private &&
-			type != Namespace::NS_Protected &&
-			type != Namespace::NS_StaticProtected &&
-			type != Namespace::NS_PackageInternal &&
-			isVersionedURI(core, uri);
+		return type == Namespace::NS_Public && core->isVersionedURI(uri);
 	}
 
-	// note: this assumes that all namespaces in the input NSS have the same base uri
-	// (ie, uri is same except for version marker)... the input comes from traits with multiple 
-	// versioned namespaces.
-	const NamespaceSet* ApiUtils::getCompatibleNamespaces(AvmCore* core, const NamespaceSet* nss) 
-	{
-		//core->console << ">> getCompatibleNamespace\n";
-		// kind is same for all namespaces
-		Namespace* proto_ns = nss->namespaces[0];
-		Namespace::NamespaceType kind = proto_ns->getType();
-		NamespaceSet* compat_nss;
-		List<uint32_t> *versions = new (core->GetGC()) List<uint32_t> (core->GetGC());
-		if (isVersionedNS(core, kind, proto_ns->getURI()))
-		{
-			// for each namespace, get the associated version
-			List<uint32_t>* ns_versions = getNamespaceVersions(core, nss);
-			for(uint32_t j = 0; j < ns_versions->size(); ++j) {
-				//core->console << "library code\n";
-				// for each version, get the compatible versions
-				List<uint32_t> *compat_versions = getCompatibleVersions(core, ns_versions->get(j));
-				// erase duplicates
-				for(uint32_t k = 0; k < compat_versions->size(); ++k) {
-					uint32_t v = compat_versions->get(k);
-					versions->add(v);
-				}
-			}
-			uint32_t count = versions->size();
-			compat_nss = core->newNamespaceSet(count);
-			Stringp baseURI = getBaseURI(core, proto_ns->getURI());
-		#ifdef _DEBUG
-			for (int i = 1; i < nss->size; ++i)
-			{
-				// getBaseURI always returns an interned string
-				AvmAssert(baseURI == getBaseURI(core, nss->namespaces[i]->getURI()));
-			}
-		#endif
-			// add the versioned namespaces
-			for (uint32_t i = 0; i < count; ++i)
-			{
-				Stringp uri = baseURI;
-				uint32_t v = versions->get(i);
-				if (v != getLargestAPI(core)) 
-				{
-					wchar c = (wchar)(MIN_API_MARK + v);
-					//core->console << "ns=" << baseURI << " v=" << c - 0xe000 << "\n";
-					uri = baseURI->append16(&c, 1);
-				}
-				Namespacep ns = core->internNamespace(core->newNamespace(uri, kind));
-				WBRC(core->GetGC(), compat_nss, &compat_nss->namespaces[i], ns);				
-			}
+	// this is a poor man's bit checker, but it's probably rich enough.
+	// nanojit and possibly mmgc have similar operations that use the
+	// hardware instructions to do it faster, but it's not clear that
+	// we need the speed. if we do we should provide an public implementation
+	// one an existing implementation
+	// NOTE: this is called from two place so inline, if it gets inlined, is
+	// not a problem
+	inline static uint32_t apiBit(API api) {
+		uint32_t x;
+		switch (api) {
+		case 0x00000001: x =  0; break;
+		case 0x00000002: x =  1; break;
+		case 0x00000004: x =  2; break;
+		case 0x00000008: x =  3; break;
+		case 0x00000010: x =  4; break;
+		case 0x00000020: x =  5; break;
+		case 0x00000040: x =  6; break;
+		case 0x00000080: x =  7; break;
+		case 0x00000100: x =  8; break;
+		case 0x00000200: x =  9; break;
+		case 0x00000400: x = 10; break;
+		case 0x00000800: x = 11; break;
+		case 0x00001000: x = 12; break;
+		case 0x00002000: x = 13; break;
+		case 0x00004000: x = 14; break;
+		case 0x00008000: x = 15; break;
+		case 0x00010000: x = 16; break;
+		case 0x00020000: x = 17; break;
+		case 0x00040000: x = 18; break;
+		case 0x00080000: x = 19; break;
+		case 0x00100000: x = 20; break;
+		case 0x00200000: x = 21; break;
+		case 0x00400000: x = 22; break;
+		case 0x00800000: x = 23; break;
+		case 0x01000000: x = 24; break;
+		case 0x02000000: x = 25; break;
+		case 0x04000000: x = 26; break;
+		case 0x08000000: x = 27; break;
+		case 0x10000000: x = 28; break;
+		case 0x20000000: x = 29; break;
+		case 0x40000000: x = 30; break;
+		case 0x80000000: x = 31; break;
+		default:
+			AvmAssert(false);  // one and only one bit should be set 
+			x = 0;
 		}
-		else
-		{
-			compat_nss = new (core->GetGC()) NamespaceSet(proto_ns);
-		}
-		//core->console << "<< getCompatibleNamespace\n";
-		return compat_nss;
+		return x;
 	}
 
-	void ApiUtils::getCompatibleAPIs(AvmCore* core, uint32_t v, const uint32_t* &versions, uint32_t &size) 
+	API ApiUtils::getCompatibleAPIs(AvmCore* core, API api)
 	{
-#ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS
-		if (v>=core->apis_start && v<=core->apis_start+core->apis_count) {
-			uint32_t offset = v-core->apis_start;
-			versions = (uint32_t*) (core->apis+core->apis_count*offset); // WARNING address arithmetic here
-			size = core->apis_sizes[offset];
-		}
-		else {
-			// don't know this version so ignore it
-			versions = NULL;
-			size = 0;
-		}
-#else
-		AvmAssert(v>=core->apis_start && v<=core->apis_start+core->apis_count);
-		uint32_t offset = v-core->apis_start;
-		versions = (uint32_t*) (core->apis+core->apis_count*(offset)); // WARNING address arithmetic here
-		size = core->apis_sizes[offset];
-#endif
+		if (api==0)
+			return 0;
+		uint32_t x = apiBit(api);
+		AvmAssert(x<core->apis_count);
+		return core->api_compat[x];
 	}
 
-	Namespacep ApiUtils::getVersionedNamespace(AvmCore* core, Namespacep ns) 
+	Namespacep ApiUtils::getVersionedNamespace(AvmCore* core, Namespacep ns, API api) 
 	{
-		//core->console << "ns=" << baseURI << " v=" << c - 0xe000 << "\n";
+		AvmAssert(!(ApiUtils::isVersionedNS(core, ns->getType(), ns->getURI()) && api==0));
 		if (!isVersionedNS(core, ns->getType(), ns->getURI()))
 			return ns;
-		Stringp base = ns->getURI(true);
-		Stringp uri;
-		uint32_t v = core->getAPI(NULL);
-		if (v == getLargestAPI(core)) {
-			uri = base;
+
+		Namespacep ns2 = core->gotNamespace(ns->getURI(), api);
+		if (ns2 != NULL) {
+			return ns2;
 		}
 		else {
-			wchar c = (wchar) (MIN_API_MARK + v);
-			uri = base->append16(&c, 1);
+			return core->internNamespace(core->newNamespace(ns->getURI(), ns->getType(), api));
 		}
-		return core->internNamespace(core->newNamespace(uri, ns->getType()));
 	}
 
-	Namespacep ApiUtils::getBaseNamespace(AvmCore* core, Namespacep ns) 
+	bool AvmCore::isVersionedURI(Stringp uri) 
 	{
-		Stringp uri = ns->getURI(true);
-		return core->internNamespace(core->newNamespace(uri, ns->getType()));
-	}
-
-	void ApiUtils::getVersionedURIs (AvmCore* core, const char** &uris, uint32_t &count) 
-	{
-		uris = core->uris;
-		count = core->uris_count;
-	}
-
-	bool ApiUtils::isVersionedURI(AvmCore* core, Stringp uri) 
-	{
-		if (core->uris_count == 0) 
+		// versioning is turned off
+		if (uris_count == 0)
 			return false;
 
-		uint32_t v = uri->length()==0 ? 0 : uri->charAt(uri->length()-1);
-		// If already versioned, then assume its a versioned URI
-		if (v >= MIN_API_MARK && v <= MAX_API_MARK)
+		if (uri->isEmpty())
 			return true;
 
-		// FIXME use a hash table for a faster decision
-		const char** uris;
-		uint32_t uri_count;
-		ApiUtils::getVersionedURIs(core, uris, uri_count);
-		Stringp baseURI = getBaseURI(core, uri);
-		for(uint32_t i = 0; i < uri_count; ++i) {
-			if (baseURI->equalsLatin1(uris[i])) {
-				return true;
+		// binary search (requires uris to be sorted). avoids the need
+		// to call getBaseURI, and to search the whole list in negative
+		// cases.
+		uint32_t i = this->uris_count / 2;
+		uint32_t l1 = (uint32_t)uri->length();
+		for (uint32_t j = i; j;) {
+			const char* probe = this->uris[i];
+			int32_t r = 0;
+			uint32_t l2 = (uint32_t)strlen(probe);
+			uint32_t len = l1 < l2 ? l1 : l2;
+			for (uint32_t k = 0; k < len; k++) {
+				wchar c1 = uri->charAt(k);
+				wchar c2 = probe[k];
+				if (c1 == c2)
+					continue;
+				r = c1 - c2;
+				break;
 			}
+			// we have a match if the prefixes match and the strings are the same
+			// length modulo the version mark, if there is one. (this code assumes
+			// the uri being checked does not have a unicode characters above 0xF8FF
+			// in its last position)
+			if (r==0) {
+				if (l1==l2 || (l1==l2+1 && uri->charAt(l2) > ApiUtils::MIN_API_MARK)) {
+					return true;
+				}
+				else {
+					// keep looking, in the right direction based on length
+					r = l1-l2;
+				}
+			}
+
+			j /= 2;
+			if (r < 0)
+				i = i - j;
+			else
+				i = i + j;
 		}
 		return false;
+	}
+
+	API ApiUtils::toAPI(AvmCore* core, uint32_t v) 
+	{
+		AvmAssert(v >= core->apis_start && v <= core->apis_start+core->apis_count);
+		return 0x1 << (v-core->apis_start);
+	}
+
+	uint32_t ApiUtils::toVersion(AvmCore* core, API api) 
+	{
+		// handle the special case when versioning is turned off (apis and versions are always zero)
+		if (api==0)
+			return 0;
+		uint32_t x = apiBit(api);
+		AvmAssert(x<core->apis_count);
+		return core->apis_start+x;
 	}
 }

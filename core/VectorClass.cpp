@@ -118,7 +118,8 @@ namespace avmplus
 		else
 		{
 			// NOTE use default public for message gen
-			Multiname mn(core()->publicNamespace, core()->string(name));
+			Multiname mn(core()->getAnyPublicNamespace(), core()->string(name));
+
 			// Vector is sorta sealed, can only write to "indexed" properties
 			toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
 		}

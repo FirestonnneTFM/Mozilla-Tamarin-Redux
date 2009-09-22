@@ -292,6 +292,7 @@ namespace avmplus
 		 */
 		void CoerceE4XMultiname(const Multiname *m, Multiname &out) const;
 		bool NodeNameEquals(Stringp nodeName, int32_t nodeNameStart, Stringp parentName, Namespace *ns);
+		Namespacep publicNS;
 	};
 
 	/**
@@ -318,7 +319,7 @@ namespace avmplus
 		QNameObject(QNameClass *type, Atom name, bool bAttribute=false);
 		QNameObject(QNameClass *type, Namespace *nameSpace, Atom name, bool bAttribute=false);
 
-		Atom getURI(bool stripVersion=false) const;
+		Atom getURI() const;
 		Stringp get_localName() const;
 		Atom get_uri() const;
 

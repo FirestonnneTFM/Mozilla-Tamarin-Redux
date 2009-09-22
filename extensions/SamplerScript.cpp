@@ -768,17 +768,18 @@ namespace avmplus
 	SampleClass::SampleClass(VTable *vtable)
 		: ClassClosure(vtable)
 	{
+		Namespacep publicNamespace = core()->getPublicNamespace(vtable->traits->pool);
 		createVanillaPrototype();
 		TraitsBindingsp t = vtable->ivtable->traits->getTraitsBindings();
-		Binding b =  t->findBinding(core()->internConstantStringLatin1("time"), core()->publicNamespace);
+		Binding b =  t->findBinding(core()->internConstantStringLatin1("time"), publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		timeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
-		b = t->findBinding(core()->internConstantStringLatin1("stack"), core()->publicNamespace);
+		b = t->findBinding(core()->internConstantStringLatin1("stack"), publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		stackOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
-		b = t->findBinding(core()->internConstantStringLatin1("id"), core()->publicNamespace);
+		b = t->findBinding(core()->internConstantStringLatin1("id"), publicNamespace);
 		if(b != BIND_NONE)
 		{
 			AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
@@ -786,7 +787,7 @@ namespace avmplus
 		}
 
 		sizeOffset = 0;
-		b = t->findBinding(core()->internConstantStringLatin1("size"), core()->publicNamespace);
+		b = t->findBinding(core()->internConstantStringLatin1("size"), publicNamespace);
 		if(AvmCore::bindingKind(b) == BKIND_CONST)
 		{
 			sizeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
@@ -794,19 +795,19 @@ namespace avmplus
 
 		t = toplevel()->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame)->vtable->ivtable->traits->getTraitsBindings();
 
-		b =  t->findBinding(core()->internConstantStringLatin1("name"), core()->publicNamespace);
+		b =  t->findBinding(core()->internConstantStringLatin1("name"), publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		nameOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
-		b = t->findBinding(core()->internConstantStringLatin1("file"), core()->publicNamespace);
+		b = t->findBinding(core()->internConstantStringLatin1("file"), publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		fileOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
-		b = t->findBinding(core()->internConstantStringLatin1("line"), core()->publicNamespace);
+		b = t->findBinding(core()->internConstantStringLatin1("line"), publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		lineOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 		
-		b = t->findBinding(core()->internConstantStringLatin1("id"), core()->publicNamespace);
+		b = t->findBinding(core()->internConstantStringLatin1("id"), publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		stackIdOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}
@@ -820,8 +821,7 @@ namespace avmplus
 		: SampleClass(vtable)
 	{		
 		TraitsBindingsp t = vtable->ivtable->traits->getTraitsBindings();
-
-		Binding b =  t->findBinding(core()->internConstantStringLatin1("type"), core()->publicNamespace);
+		Binding b =  t->findBinding(core()->internConstantStringLatin1("type"), core()->getPublicNamespace(vtable->traits->pool));
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		typeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}

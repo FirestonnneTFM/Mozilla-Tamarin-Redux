@@ -48,9 +48,12 @@ namespace avmplus
 	{
 	private:
 		friend class AvmCore;
+		friend class MultinameHashtable;
 		// Should these be Stringp's?
 		Atom m_prefix;
+		API m_api; 
 		uintptr m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
+
 	public:
         enum NamespaceType
         {
@@ -65,11 +68,14 @@ namespace avmplus
 		~Namespace();
 
 		inline Atom getPrefix() const { return get_prefix(); }
-		Stringp getURI(bool stripVersion=false) const;
+		Stringp getURI() const;
+		inline API getAPI() { return m_api; }
+		inline void setAPI(API api) { m_api = api; }
+
 		Atom get_prefix() const { return m_prefix; }
 		Stringp get_uri() const
 		{
-			return getURI(true);
+			return getURI();
 		}
 
 		Atom  atom() const { return AtomConstants::kNamespaceType | (Atom)this; }

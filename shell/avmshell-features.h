@@ -169,4 +169,7 @@
 	#define AVMFEATURE_MEMORY_PROFILER 0
 #endif
 
+
+//#define VMCFG_TEST_API_VERSIONING
+
 #endif // __avmshell_features__

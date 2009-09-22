@@ -96,7 +96,7 @@ namespace avmplus
 		
 		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ConstDataScriptBufferImpl(abcData, abcDataLen));
 
-		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, ApiUtils::getLargestAPI(core));
+		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, ApiUtils::getLargestAPI(core)/*active api*/);
 	}
 	
 	NativeInitializer::~NativeInitializer()

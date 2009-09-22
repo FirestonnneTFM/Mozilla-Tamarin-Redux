@@ -176,8 +176,9 @@ namespace avmplus
 		else
 		{
 			// cannot create properties on a sealed object.
+			// NOTE just use the unmarked version
+			Multiname multiname(core->getAnyPublicNamespace(), name);
 			// NOTE use default public
-			Multiname multiname(core->publicNamespace, name);
 			toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
 		}
 	}		

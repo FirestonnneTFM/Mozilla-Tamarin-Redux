@@ -684,16 +684,17 @@ namespace avmplus
 		} 
 	}
 		
-	static void addVersionedBindings(MultinameHashtable* bindings,
-									 Stringp name,
-									 NamespaceSetp compat_nss,
-									 Binding binding)
+	void Traits::addVersionedBindings(MultinameHashtable* bindings,
+									  Stringp name,
+									  NamespaceSetp nss,
+									  Binding binding) const
 	{
-		// Add a binding for each version that is larger
-		// (compatible with) the version of the current namespace.
-		for (int i=0; i<compat_nss->size; ++i) {
-			bindings->add(name, compat_nss->namespaces[i], binding);
+		int32_t apis = 0;
+		for (int i=0; i<nss->size; ++i) {
+			 apis |= ApiUtils::getCompatibleAPIs(core, nss->namespaces[i]->getAPI());
 		}
+		Namespacep ns = ApiUtils::getVersionedNamespace(core, nss->namespaces[0], apis);
+		bindings->add(name, ns, binding);
 	}
 
 	// -------------------------------------------------------------------
@@ -1044,11 +1045,11 @@ namespace avmplus
 			NamespaceSetp compat_nss;
 			if (mn.namespaceCount() > 1) {
 				ns = mn.getNsset()->namespaces[0];
-				compat_nss = ApiUtils::getCompatibleNamespaces(core, mn.getNsset());
+				compat_nss = mn.getNsset();
 			}
 			else {
 				ns = mn.getNamespace();
-				compat_nss = ApiUtils::getCompatibleNamespaces(core, new (core->GetGC()) NamespaceSet(ns));
+				compat_nss = new (core->GetGC()) NamespaceSet(ns);
 			}
 
 			switch (ne.kind)
@@ -1364,7 +1365,7 @@ namespace avmplus
 
 			// this assumes we save name/ns in all builds, not just verbose
 			NamespaceSetp nss = new (core->GetGC()) NamespaceSet(this->ns());
-			NamespaceSetp compat_nss = ApiUtils::getCompatibleNamespaces(core, nss);
+			NamespaceSetp compat_nss = nss;
 			addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR));
 			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/0);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);

@@ -422,10 +422,14 @@ const int kBufferPadding = 16;
 		Domain* builtinDomain;
 		
 		/**
-		 * The unnamed public namespace, versioned and unversioned
+		 * The default namespace, "public"
 		 */
 		DRC(Namespacep) publicNamespace;
-		NamespaceSet* publicNamespaces;  // FIXME memory management: anything special need to be done here?
+
+		/**
+		 * The unnamed public namespaces
+		 */
+		NamespaceSet* publicNamespaces;
 
 		#ifdef AVMPLUS_WITH_JNI
 		Java* java;     /* java vm control */
@@ -787,6 +791,7 @@ const int kBufferPadding = 16;
 #if VMCFG_METHOD_NAMES
 		DRC(Stringp) kanonymousFunc;
 #endif
+
 		Atom kNaN;
 
 		DRC(Stringp) cachedChars[128];
@@ -816,7 +821,6 @@ const int kBufferPadding = 16;
 		 * Support for API versioning
 		 */
 
-
 		/**
 		 * Set the AVM wide version information on startup.
 		 *
@@ -827,14 +831,18 @@ const int kBufferPadding = 16;
 		 * @param uris_count Count of URIs
 		 * @param uris       Array of versioned URIs
 		 */
-		void setAPIInfo(uint32_t apis_start, const uint32_t* apis_sizes,
-						uint32_t apis_count, const uint32_t** apis,  
-						uint32_t uris_count, const char** uris);
+		void setAPIInfo(uint32_t apis_start,
+						uint32_t apis_count,  
+						uint32_t uris_count, const char** uris,
+						const int32_t* api_compat);
+
+
+		bool isVersionedURI(Stringp uri);
 
 		/**
 		 * Get the AVM wide default API version.
 		 */
-		virtual uint32_t getDefaultAPI();
+		virtual int32_t getDefaultAPI() = 0;
 
 		/**
 		 * Get the current API version. Uses the given PoolObject, or otherwise
@@ -843,7 +851,7 @@ const int kBufferPadding = 16;
 		 *
 		 * @param pool The caller's pool object.
 		 */
-		uint32_t getAPI(PoolObject* pool);
+		int32_t getAPI(PoolObject* pool);
 
 		/**
 		 * Find the current public by walking the call stack
@@ -858,11 +866,29 @@ const int kBufferPadding = 16;
 		Namespacep getPublicNamespace(PoolObject* pool);
 
 		/**
+		 * Get any public namespace
+		 */
+		Namespacep getAnyPublicNamespace();
+
+		/**
 		 * Get the public namespace associated with the given pool's version.
 		 *
 		 * @param version The version of public being requested.
 		 */
-		Namespacep getPublicNamespace(uint32_t version);
+		Namespacep getPublicNamespace(int32_t api);
+
+		/**
+		 * Set the active api bit for the given api
+		 */
+		void setActiveAPI(int32_t api);
+
+		/**
+		 * Get the bits for the currently active apis
+		 */
+		inline int32_t getActiveAPIs() {
+			return this->active_api_flags;
+		}
+
 
 		friend class ApiUtils;
 
@@ -1577,6 +1603,7 @@ const int kBufferPadding = 16;
 
 		/** search the namespace intern table */
 		int findNamespace(Namespacep ns);
+		Namespacep gotNamespace(Stringp uri, int32_t api);
 
 	public:
 
@@ -1649,9 +1676,9 @@ const int kBufferPadding = 16;
 		ScriptObject* newObject(VTable* ivtable, ScriptObject *delegate);
 
 		FrameState* newFrameState(int frameSize, int scopeBase, int stackBase);
-        Namespacep newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
+		Namespacep newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespacep newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
-		Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public);
+		Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public, int32_t api = 0);
 		Namespacep newPublicNamespace(Stringp uri);
 		NamespaceSet* newNamespaceSet(int nsCount);
 
@@ -1699,13 +1726,13 @@ const int kBufferPadding = 16;
 		DRC(Namespacep) * namespaces;
 
 		// API versioning state
-		uint32_t          apis_start;  // first api number
-		const uint32_t*   apis_sizes;  // array of sizes of array of compatible apis
-		uint32_t          apis_count;  // count of apis
-		const uint32_t**  apis;        // array of array of compatible apis
-		uint32_t          uris_count;  // count of uris
-		const char**      uris;        // array of uris
-		uint32_t          largest_api;
+		uint32_t		  apis_start;  // first api number
+		uint32_t		  apis_count;  // count of apis
+		uint32_t		  uris_count;  // count of uris
+		const char**	  uris;		   // array of uris
+		const int32_t*	  api_compat;  // array of compatible api bit masks
+		int32_t			  largest_api;
+		int32_t			  active_api_flags;
 
 #ifdef VMCFG_LOOKUP_CACHE
 	private:
@@ -1827,70 +1854,80 @@ const int kBufferPadding = 16;
 		Namespace*		dxns; // NOTE: this struct is always stack-allocated (or via VMPI_alloca, which is just as good), so no DRC needed
 	};
 
+
+	/**
+	 * ApiUtils provides some helper methods to friends of
+	 * api versioning
+	 */
+	  
 	class ApiUtils {
 		friend class AvmCore;
 		friend class AbcParser;
 		friend class Namespace;
 		friend class NativeInitializer;
 		friend class Traits;
-
-	public:
-		/**
-		 * Returns true if the given uri is the empty string or consists of a single
-		 * character that is a api version marker.
-		 */
-		static bool isEmptyURI(Stringp uri);
+		friend class QNameObject;
+		friend class TypeDescriber;
+		friend class BuiltinTraits;
 
 		/**
-		 * Returns the version of the given namespace. (See TypeDescriber.cpp)
-		 */
-		static uint32_t getNamespaceVersion(AvmCore* core, Namespace* ns, bool isBinding);
-
-		/**
-		 * Returns the unmarked URI
-		 *
-		 * Only called dynamically for formatting, and 
-		 * #ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS
-		 */
-		static Stringp getBaseURI(AvmCore* core, Stringp uri);
-
-		/**
-		 * Returns a namespace like the one given but of the current version
-		 */
-		static Namespacep getVersionedNamespace(AvmCore* core, Namespacep ns);
-
-		/**
-		 * Returns true if the given type and uri constitute a versioned namespace.
+		 * Return true if type is Namespace::NS_Pubilc and uri is one of the versioned
+		 * namespaces in the list provided by the host
 		 */
 		static bool isVersionedNS(AvmCore* core, Namespace::NamespaceType type, Stringp uri);
 
 		/**
-		 * If it is a versioned URI of a versioned namespace, then return the versioned
-		 * URI, otherwise return the given URI (or the base URI 
-		 * #ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS)
+		 * Return an interned namespace that corresponds to the given a namespace 
+		 * and api bitmask
 		 */
-		static Stringp getVersionedURI(AvmCore* core, PoolObject* pool, String* uri, Namespace::NamespaceType type, bool is_builtin=false);
+		static Namespacep getVersionedNamespace(AvmCore* core, Namespacep ns, API api);
 
 		/**
-		 * Get the set of namespaces that are compatible with the given set
+		 * Map an api bitmask to its cooresponding version number
 		 */
-		static NamespaceSetp getCompatibleNamespaces(AvmCore* core, NamespaceSetp nss);
+		static uint32_t toVersion(AvmCore* core, API api);
 
-	private:
-		static uint32_t getLargestAPI(AvmCore* core);
-		inline static uint32_t getOriginalAPI(AvmCore* core) { return core->apis_start; }
-		static List<uint32_t>* getNamespaceVersions(AvmCore* core, NamespaceSetp nss);
-		static List<uint32_t>* getCompatibleVersions(AvmCore* core, uint32_t v);
-		static void getCompatibleAPIs(AvmCore* core, uint32_t v, const uint32_t*& apis, uint32_t &count);
-		static void getVersionedURIs(AvmCore* core, const char** &uris, uint32_t &count);
-		static Namespacep getBaseNamespace(AvmCore* core, Namespacep ns);
-		static bool isVersionedURI(AvmCore* core, Stringp uri);
+		/**
+		 * Strip the given uri of its version marker, if it has one
+		 */
+		static Stringp getBaseURI(AvmCore* core, Stringp uri);
+
+		/**
+		 * Return the API bitmask for the given uri, or zero if there is none
+		 */
+		static API getURIAPI(AvmCore* core, Stringp uri);
+
+		/**
+		 * Return true if the given uri has a version marker
+		 */
+		static bool hasVersionMark(Stringp uri);
+
+		/**
+		 * Return the API bitmask of all APIs compatible with the given API
+		 */
+		static API getCompatibleAPIs(AvmCore* core, API api);
+
+		/**
+		 * Return the API bitmask for the smallest api
+		 */
+		inline static API getSmallestAPI() { return 0x1; }
+
+		/**
+		 * Return the API bitmask for the largest api
+		 */
+		inline static API getLargestAPI(AvmCore* core) { return core->largest_api; }
 
 		enum { 
 			MIN_API_MARK = 0xE000,
 			MAX_API_MARK = 0xF8FF
 		};
 
+	public:
+
+		/**
+		 * Convert a version number to an api bitmask
+		 */
+		static API toAPI(AvmCore* core, uint32_t v);
 	};
 }
 

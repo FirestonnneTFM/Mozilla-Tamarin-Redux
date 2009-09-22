@@ -385,6 +385,11 @@ namespace avmplus
 		bool addInterfaces(TraitsBindings* tb, const Toplevel* toplevel);
 		Binding getOverride(TraitsBindingsp basetb, Namespacep ns, Stringp name, int tag, const Toplevel *toplevel) const;
 
+		void addVersionedBindings(MultinameHashtable* bindings,
+								  Stringp name,
+								  NamespaceSetp compat_nss,
+								  Binding binding) const;
+
 	private:
 
 		/**

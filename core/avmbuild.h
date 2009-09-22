@@ -165,17 +165,6 @@
 #  define VMCFG_METHODENV_IMPL32 1
 #endif
 
-// This allows builtins to defined more versions than are required
-// for a particular embedding. e.g. AIR versions that are ignored
-// in FP releases. The glue can be shared without hacking it with
-// conditionally compiled blocks. You might want to not define it 
-// because it introduces a small amount of overhead into the api
-// versioning implementation
-#define VMCFG_IGNORE_UNKNOWN_API_VERSIONS
-
-// testing flash api versioning. requires an asc.jar that supports versioning
-//#define VMCFG_TEST_VERSIONING 
-
 // This is here for VM development.
 //
 // Enable support for printing the control flow graph in the JIT.

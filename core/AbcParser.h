@@ -63,7 +63,7 @@ namespace avmplus
 			Toplevel* toplevel,
 			Domain* domain,
 			const NativeInitializer* natives,
-			uint32_t api);
+			API api);
 
 		/** return 0 iff the code starts with a known magic number,
 		  * otherwise an appropriate error code.
@@ -73,7 +73,7 @@ namespace avmplus
 		static int canParse(ScriptBuffer code, int* version = NULL);
 
 	protected:
-		PoolObject* parse(uint32_t api);
+		PoolObject* parse(API api);
 		MethodInfo* resolveMethodInfo(uint32 index) const;
 
 		#ifdef AVMPLUS_VERBOSE
@@ -91,7 +91,7 @@ namespace avmplus
 		void parseClassInfos();
 		bool parseScriptInfos();
 		void parseMethodBodies();
-		void parseCpool(uint32_t api);
+		void parseCpool(API api);
 		Traits* parseTraits(uint32_t sizeofInstance,
 							Traits* base, 
 							Namespacep ns, 

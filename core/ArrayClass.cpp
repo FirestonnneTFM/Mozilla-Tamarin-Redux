@@ -1580,7 +1580,7 @@ namespace avmplus
 	{
 		AvmCore* core = toplevel->core();
 		// NOTE we can pick any public::length, so pick the default versioned one 
-		Multiname mname(core->publicNamespace, core->klength);
+		Multiname mname(core->getAnyPublicNamespace(), core->klength);
 		Atom lenAtm = toplevel->getproperty(d->atom(), &mname, d->vtable);
 		return AvmCore::toUInt32(lenAtm);
 	}
@@ -1589,7 +1589,7 @@ namespace avmplus
 	{
 		AvmCore* core = toplevel->core();
 		// NOTE we can pick any public::length, so pick the default versioned one 
-		Multiname mname(core->publicNamespace, core->klength);
+		Multiname mname(core->getAnyPublicNamespace(), core->klength);
 		Atom lenAtm = core->uintToAtom(newLen);
 		toplevel->setproperty(d->atom(), &mname, lenAtm, d->vtable);
 	}

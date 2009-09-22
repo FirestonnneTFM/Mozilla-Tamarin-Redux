@@ -52,6 +52,7 @@ START("13.5.4.17 - XMLList processingInstructions()");
               (MYXML = new XMLList(xmlDoc), MYXML.processingInstructions().toXMLString()));
  
  XML.ignoreProcessingInstructions = false;
+
  AddTestCase( "ignorePI = false, MYXML = new XMLList(xmlDoc), MYXML.processingInstructions().toString()", 
  			 "<?xml-stylesheet href='mystyle.xsl'?>\n<?foo bar?>", 
               (MYXML = new XMLList(xmlDoc), MYXML.processingInstructions().toXMLString()));
@@ -63,7 +64,7 @@ START("13.5.4.17 - XMLList processingInstructions()");
  AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.processingInstructions('xml-stylesheet')", 
  	"<?xml-stylesheet href='mystyle.xsl'?>", 
  	(MYXML = new XMLList(xmlDoc), MYXML.processingInstructions("xml-stylesheet").toString()));
- 
+
  AddTestCase( "MYXML = new XMLList(xmlDoc), MYXML.processingInstructions(new QName('xml-stylesheet'))", 
  	"<?xml-stylesheet href='mystyle.xsl'?>", 
  	(MYXML = new XMLList(xmlDoc), MYXML.processingInstructions(new QName("xml-stylesheet")).toString()));

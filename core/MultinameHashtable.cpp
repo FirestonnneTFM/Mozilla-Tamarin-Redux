@@ -40,7 +40,7 @@
 using namespace MMgc;
 
 namespace avmplus
-{	
+{
 	void MultinameHashtable::grow()
 	{
 		// double our table
@@ -131,7 +131,9 @@ namespace avmplus
 
 	int MultinameHashtable::find(Stringp name, Namespacep ns, const Quad* t, unsigned m)
 	{
+		AvmAssert(ns->getURI()->isInterned());
 		AvmAssert(name != NULL && ns != NULL);
+		AvmAssert(name->isInterned());
 
 		// this is a quadratic probe but we only hit every third slot since those hold keys.
 		int n = 7;
@@ -142,8 +144,9 @@ namespace avmplus
 		// 3 bits because it doesn't contribute to hash.  Quad it
 		// because names, namespaces, and values are stored adjacently.
 		unsigned i = ((0x7FFFFFF8 & (uintptr)name) >> 3) & bitmask;
+
 		Stringp k;
-		while (((k=t[i].name) != name || t[i].ns != ns) && k != NULL)
+		while (((k=t[i].name) != name || !(t[i].ns == ns || matchNS(t[i].ns->m_uri, t[i].apis, ns))) && k != NULL)
 		{
 			i = (i + (n++)) & bitmask;			// quadratic probe
 		}
@@ -156,8 +159,8 @@ namespace avmplus
 		static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0, 0 };
 		static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0, 0 };
 	#else
-		static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0 };
-		static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0 };
+		static const Quad kBindNone = { NULL, NULL, BIND_NONE, 0, 0 };
+		static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0, 0 };
 	#endif
 	
 		int nsCount = nsset->size;
@@ -181,10 +184,15 @@ namespace avmplus
 		{
 			if (atomName == mnameName)
 			{
-				Namespacep ns = t[i].ns;
+				Namespacep probeNS = t[i].ns;
+				AvmAssert(probeNS->getURI()->isInterned());
+				API probeAPIs = t[i].apis;
+				uintptr probeURI = probeNS ? probeNS->m_uri : 0;
 				for (j=0; j < nsCount; j++)
 				{
-					if (ns == nsset->namespaces[j])
+					Namespacep ns = nsset->namespaces[j];
+					AvmAssert(ns->getURI()->isInterned());
+					if (probeNS==ns || (probeURI == ns->m_uri && (probeAPIs & ns->m_api)))
 					{
 						match = &t[i];
 						matchValue = match->value;
@@ -206,12 +214,17 @@ found1:
 			{
 				if (atomName == mnameName)
 				{
-					Namespacep ns = t[k].ns;
+					Namespacep probeNS = t[k].ns;
+					AvmAssert(probeNS->getURI()->isInterned());
+					API probeAPIs = t[k].apis;
+					uintptr probeURI = t[k].ns->m_uri;
 					for (j=0; j < nsCount; j++)
 					{
-						if (ns == nsset->namespaces[j] && matchValue != t[k].value)
+						Namespacep ns = nsset->namespaces[j];
+						if ((probeNS==ns || matchNS(probeURI, probeAPIs, ns)) && matchValue != t[k].value)
 						{
 							return &kBindAmbiguous;
+
 						}
 					}
 				}
@@ -221,9 +234,12 @@ found1:
 		return match;
 	}
 
+
 	void MultinameHashtable::put(Stringp name, Namespacep ns, Binding value)
 	{
 		AvmAssert(!isFull());
+		AvmAssert(name->isInterned());
+		AvmAssert(ns->getURI()->isInterned());
 
 		GC* gc = GC::GetGC(m_quads);
 
@@ -255,14 +271,16 @@ found1:
 				if (probeName == name)
 				{
 					// there's at least one existing entry with this name in the MNHT.
-					if (cur->ns == ns)
+					if (cur->ns == ns || matchNS(cur->ns->m_uri, cur->apis, ns))
 					{
 						// it's the one we're looking for, just update the value.
 						goto write_value;
 					}
 
 					// it's not the one we're looking for, thus we are now multiNS on this name.
-					cur->multiNS = multiNS = 1;
+					if (cur->ns->m_uri != ns->m_uri) {
+						cur->multiNS = multiNS = 1;
+					}
 				}
 
 				i = (i + (n++)) & bitmask;			// quadratic probe
@@ -283,16 +301,18 @@ found1:
 write_value:
 		//quads[i].value = value;
 		WB(gc, quadbase, &cur->value, value);
+		cur->apis |= ns->getAPI();
 	}
 
 	Binding MultinameHashtable::get(Stringp name, Namespacep ns) const
 	{
+		AvmAssert(ns->getURI()->isInterned());
 		const Quad* t = m_quads;
 		int i = find(name, ns, t, numQuads);
 		if (t[i].name == name)
 		{
 			const Quad& tf = t[i];
-			AvmAssert(tf.ns == ns);
+			AvmAssert(tf.ns==ns || matchNS(tf.ns->m_uri, tf.apis, ns));
 			return tf.value;
 		}
 		return BIND_NONE;
@@ -322,10 +342,12 @@ write_value:
 			{
 				// inlined & simplified version of put()
 				int j = find(oldName, oldAtoms[i].ns, newAtoms, newTriplet);
+				// don't need WBRC/WB here because we are just moving pointers
 				newAtoms[j].name = oldName;
 				newAtoms[j].ns = oldAtoms[i].ns;
 				newAtoms[j].value = oldAtoms[i].value;
 				newAtoms[j].multiNS = oldAtoms[i].multiNS;
+				newAtoms[j].apis = oldAtoms[i].apis;
 			}
 		}
 	}

@@ -942,7 +942,7 @@ add_numbers:
 
 		case BKIND_METHOD:
 			{
-				if (multiname->contains(core()->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj)) 
+				if (isXmlBase(obj) && multiname->contains(core()->findPublicNamespace())) 
 				{
 					ScriptObject* o = AvmCore::atomToScriptObject(obj);
 					// dynamic props should hide declared methods
@@ -971,8 +971,7 @@ add_numbers:
         {
 		case BKIND_METHOD: 
 		{
-			AvmCore* core = this->core();
-			if (multiname->contains(core->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj))
+			if (isXmlBase(obj) && multiname->contains(core()->findPublicNamespace()))
 			{
 				// dynamic props should hide declared methods
 				ScriptObject* so = AvmCore::atomToScriptObject(obj);
@@ -1048,7 +1047,7 @@ add_numbers:
         {
 		case BKIND_METHOD: 
 		{
-			if (multiname->contains(core()->getPublicNamespace(vtable->traits->pool)) && isXmlBase(obj))
+			if (isXmlBase(obj) && multiname->contains(core()->findPublicNamespace()))
 			{
 				// dynamic props should hide declared methods
 				ScriptObject* so = AvmCore::atomToScriptObject(obj);

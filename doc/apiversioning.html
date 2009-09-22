@@ -5,6 +5,7 @@
 <hr>
 <pre>
 Revision History:
+14-Sep-2009  jodyer@adobe.com  updated to reflect new bitmask mechanics
 22-Jul-2009  jodyer@adobe.com  initial draft
 </pre>
 <hr>
@@ -55,10 +56,11 @@ FP_10_1   <   AR_2_0
 
 <P><span class="pcounter"></span>From these relations we can see, for example, that a binding introduced in 
 FP_9_0 will be in every other version; a binding introduced in AR_1_0 is not in 
-FP_9_0 but is in AR_1_5; and a binding introduced in AR_2_0 is only in AR_2_0.
+FP_9_0 (or any other FP version, for that matter) but is in AR_1_5; and a binding 
+introduced in AR_2_0 is only in AR_2_0.
 
 <P><span class="pcounter"></span>
-In source code, each built-in (library code) definition may beannotated with a 
+In source code, each built-in (library code) definition may be annotated with a 
 metadata attribute that indicates the version or versions in which it was 
 introduced. If no metadata occurs on a definition, it is assumed to have been 
 introduced in the smallest version (FP_9_0). Library code reference names are 
@@ -77,7 +79,7 @@ startup.
 <P><span class="pcounter"></span>
 Only public names in AVM library code (that which is built into the AVM binary)
 may be versioned. Furthermore, it is prohibited to version names in a private, 
-protected, internal, interface, or user defined namespace is prohibited. Private 
+protected, internal, interface, or user defined namespace. Private 
 names are not visible outside of the builtin code and so versioning has no 
 effect on them; other names might be visible outside of the builtin code but 
 are not required by currently targeted use cases to be versioned and therefore 
@@ -114,7 +116,7 @@ FP_10_1     665
 AR_2_0      666
 </pre>
 
-ASC configuration variables are defined to alias these integers. Thus to
+[TODO] ASC configuration variables are defined to alias these integers. Thus to
 indicate that a particular method was introduced in both AR_1_0 and in FP_10_0
 we would use the following annotation:
 
@@ -159,12 +161,16 @@ party tools that read ABC will continue to work as before.
 <h3>Invoking AVM</h3>
 
 <P><span class="pcounter"></span>
+By default AVM is built with API versioning turned off. However, for the purpose
+of testing versioning, the macro <code>VMCFG_TEST_API_VERSIONING</code> can be defined to
+enable Flash Player like versioning in AVM.
+
+<P><span class="pcounter"></span>
 Since client version information is not stored in ABC files, the AVM has no way 
 to know what version client code is compiled against. For this reason there is 
-a flag <code>-Dapi</code> which allows an api version to be specified for all 
-ABCs (except the built-ins) being executed. [NOTE: this flag is only interesting
-for testing since there are currently no versioned APIs in the AVM built-ins or 
-shell code.]
+a command-line flag <code>-api</code> which allows an api version to be specified for all 
+user ABCs. [NOTE: this flag is only available with versioning is enabled as describe 
+in the previous paragraph.]
 
 <h2>MECHANICS</h2>
 
@@ -172,21 +178,26 @@ shell code.]
 
 <P><span class="pcounter"></span>
 Namespaces control the visibility of names in AS3 and AVM. We exploit this fact 
-by modifying the URI of versioned namespaces with a version mark. A version mark 
-is a single Unicode character from the Private Use Area (0xE000 to 0xF8FF). Such 
-a mark is appended to the normal (base) URI. The effect is to make each 
-versioned name visible only to references that also have their versioned 
-namespaces similarly marked. The unicode character used to represent a version
-has the code point equal to the sum of 0xE000 and the version number (in our
-example, FP_9_0 namespaces would be marked with the character whose code point
-is 0xE000+660). For simplicity and consistency with existing unversioned code
-and tools, URIs of the largest version are unmarked by the VM.
+by adding a bit mask to namespaces to indicate the version of the associated name,
+and a bit mask to the binding (multiname hash) table entry to indicate all versions 
+in which a name is visible. A bitwise comparision between these two bitmasks is 
+done during name lookup to determine whether or not a name is a match.
 
 <P><span class="pcounter"></span>
-To cause versioned bindings to be visible to code of larger (and therefore 
-different) versions, we add binding aliases for each of the larger (compatible) 
-versions. This is true for client, as well as library code to allow SWFs of
-larger versions to "see" bindings of SWFs of smaller versions. 
+To cause versioned bindings to be visible to code of larger (and therefore different) 
+versions, we set the version bit of each larger (compatible) version in the binding
+table. This is true for client, as well as library, code to allow  SWFs of larger 
+versions to "see" bindings of SWFs of smaller versions.
+
+<P><span class="pcounter"></span>
+In order to avoid changing the ABC file format we encode the version of a namespace
+in the URI of the namespace in the ABC file and strip it out during ABC parsing,
+replacing it with the version bitmask in the instantiated namespace object. A version 
+mark is a single Unicode character from the Private Use Area (0xE000 to 0xF8FF). Such 
+a mark is appended to the normal (base) URI. The unicode character used to represent 
+a version has the code point equal to the sum of 0xE000 and the version number (in 
+our example, FP_9_0 namespaces would be marked with the character whose code point
+is 0xE000+660).
 
 <P><span class="pcounter"></span>
 The important differences between builtin and client code are that: 
@@ -195,23 +206,27 @@ The important differences between builtin and client code are that:
 bindings within an ABC are always of the same version
 <li>built-in versions are explicitly encoded in each trait name, whereas client 
 code versions are indicated by the host
+<li>version numbers appear nowhere in client code. this is important because
+because version numbers might change, intentionally or accidently, from release
+to release causing content containing that information to be brittle
 </ul>
 
 <P><span class="pcounter"></span>
 On AVM startup, the version compatibility information is passed to AvmCore via
-the instance method <code>AvmCore::setAPIInfo()</code>. (See 
-<code>./shell/ShellCore.cpp</code> for an example).
+the instance method <code>AvmCore::setAPIInfo()</code>. (See <code>./shell/ShellCore.cpp</code> 
+for an example).
 
 <P><span class="pcounter"></span>
 During ABC parsing, the version of the ABC being parsed is given to the parser 
 by the host embedding code. Again, builtin code is by default treated as if of 
 the largest version. The version number is cached in the PoolObject associated 
-with the ABC and versioned namespaces are marked with the appropriate version 
-marker. When traits (and scripts for toplevel bindings) are added to the various 
-multiname hash tables an alias is added for each version that is compatible 
-with the initial version(s). [NOTE: builtin traits can be introduced in multiple 
-versions and so the set of compatible versions must be computed as the union of 
-the compatibility sets of each of the initial versions.]
+with the ABC and versioned namespaces have their appropriate version bit set.
+When traits (and scripts for toplevel bindings) are added to the various 
+multiname hash tables the version bit on the hash table entry is set for each 
+version that is compatible with the initial version(s). [NOTE: builtin traits 
+can be introduced in multiple versions and so the set of compatible versions 
+must be computed as the union of the compatibility sets of each of the initial 
+versions.]
 
 <P><span class="pcounter"></span>
 At runtime, dynamically computed names (e.g E4X names) that have a versioned URI 
@@ -222,9 +237,9 @@ necessary (or at least expedient) to also version E4X names.
 
 <P><span class="pcounter"></span>
 TESTING NOTE: Create an E4X value with elements with names in a namespace with a 
-versioned URI (e.g. the empty string) and passing that value to code of another 
+versioned URI (e.g. the empty string) and passing that value to code of a smaller
 version. Are the elements of that value visible to the receiver code? They 
-should be, but is that a problem in practice. At least its something to document. 
+should not be, but is that a problem in practice. At least its something to document. 
 [NOTE: this is not a problem for ordinary object properties, since such 
 properties have no namespace.]
 
@@ -268,57 +283,10 @@ builtin code is always of the largest version and so the '-api' flag is
 meaningless. [NOTE: the '-api' flag has no effect on the import of '.as' files.]
 
 <P><span class="pcounter"></span>
-It is an error to use an invalid version number with API metadata. The ASC in
-Flex SDK supports versions ranging from 660 to 666.
+It is an error to use an invalid version number with API metadata. The definition
+of valid versions can be found found in the file ./shell/api-versions.xml (see
+below).
 
-
-<h2>PITFALLS</h2>
-
-<h3>Semantic Pitfalls</h3>
-
-<P><span class="pcounter"></span>These are not your father's namespaces and so there are a few things to think 
-about when handling namespaces in native code:
-
-<ul>
-<li>Creating - versioned namespaces must be versioned with the version of the 
-owning code
-<li>Comparing - versioned namespaces must be interned to compare correctly to 
-other namespaces; and, the nameless public is no longer necessarily the empty 
-string
-<li>Formatting - namespaces might print funny
-</ul>
-
-Therefore:
-
-<ul>
-<li>Use <code>ApiUtils::getVersionedURI</code> to create namespace URIs of the current version
-<li>Use <code>ApiUtils::isEmptyURI</code> to test if a URI is a the empty URI (empty string 
-if unversioned)
-<li>Use <code>Namespace::isPublic()</code> to determine of a namespace is nameless public
-<li>Use <code>Namespace::getURI(true)</code> to get the uri with version marker stripped off
-<li>Use the built-in format methods to pretty print names and namespaces
-</ul>
-
-<h3>Performance Pitfalls</h3>
-
-Computational overhead is introduced into AVM in two ways:
-
-<ul>
-<li>Storing hash table entries for versioned aliases
-<li>Computing versioned namespaces dynamically (e.g. 
-<code>AvmCore::findPublicNamespace()</code>)
-</ul>
-
-To minimize this overhead we should:
-
-<ul>
-<li>(done) Cache the public namespace per PoolObject instance
-<li>Cache the versioned namespaces by version and uri in AvmCore instance
-<li>Add versioned alias only those versions which are available on each platform 
-(e.g. no AR bindings on FP releases)
-<li>(done) Ensure that the pool object of the caller whenever it is available to 
-avoid stack walking
-</ul>
 
 <h2>UTILITIES</h2>
 
@@ -333,20 +301,28 @@ versioning, and it strips off the version marker when generating thunk names.
 <P><span class="pcounter"></span>
 Version numbers and compatibility information are specified in an domain
 specific xml file that is processed by the utility named <code>apivergen.abc</code>.
-(e.g. <code>api-versions.xml</code>). The XML file is used as input to 
+(e.g. <code>./shell/api-versions.xml</code>). The XML file is used as input to 
 <code>./utils/apivergen.abc</code> to generated equivalent C++ and Java code. Copy and/or 
 rename these files as appropriate.
 
 <P><span class="pcounter"></span>
-Manually execute
+To build apivergen.abc, execute
+
+<pre>
+   java -jar asc.jar apivergen.as
+</pre>
+
+<P><span class="pcounter"></span>
+To compile api-versions.xml, execute
 
 <pre>
    avmshell apivergen.abc -- api-versions.xml
 </pre>
 
 <P><span class="pcounter"></span>
-to generate the files <code>api-versions.xml.h</code> and <code>api-versions.xml.java</code>. 
-These files must then be copied to the appropriately named files 
-(api-versions.cpp and APIVersions.java) in their respective locations in the 
+
+This will result in the files <code>api-versions.xml.h</code> and <code>api-versions.xml.java</code>
+being generated. These files must then be copied to the appropriately named files 
+(e.g. api-versions.h and APIVersions.java) in their respective locations in the 
 avm/player and ASC workspaces. [NOTE: This process should not be automated as it 
 is performed once per release.]

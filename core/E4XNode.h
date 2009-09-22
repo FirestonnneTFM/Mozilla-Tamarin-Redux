@@ -139,7 +139,6 @@ namespace avmplus
 	class E4XNode : public MMgc::GCObject
 	{
 	protected:
-	
 		/** Either null or an E4XNode, valid for all node types */
 		DWB(E4XNode*) m_parent; 
 
@@ -153,10 +152,11 @@ namespace avmplus
 
 	public:
 		E4XNode(E4XNode* parent) : m_parent(parent), m_nameOrAux(0) { }
+
 		// we have virtual functions, so we probably need a virtual dtor
 		virtual ~E4XNode() {}
 
-		bool getQName (AvmCore *core, Multiname *mn) const;
+		bool getQName (Multiname *mn, Namespacep publicNS) const;
 		void setQName (AvmCore *core, Stringp name, Namespace *ns = 0);
 		void setQName (AvmCore *core, const Multiname *mn);
 
@@ -205,7 +205,7 @@ namespace avmplus
 		virtual void addAttribute (E4XNode *x);
 
 		// Should this silently fail or assert?
-		virtual void setNotification(AvmCore* /*core*/, FunctionObject* /*f*/) { return; }
+		virtual void setNotification(AvmCore* /*core*/, FunctionObject* /*f*/, Namespacep /*publicNS*/) { return; }
 		virtual FunctionObject* getNotification() const { return NULL; }
 
 		// The following routines are E4X support routines
@@ -226,10 +226,10 @@ namespace avmplus
 		Atom _equals (AvmCore *core, E4XNode *value) const;
 
 		void _deleteByIndex (uint32 entry);
-		E4XNode *_deepCopy (AvmCore *core, Toplevel *toplevel) const;
+		E4XNode *_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const;
 		virtual void _insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value);
 		virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
-		virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns);
+		virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS);
 		virtual void _append (E4XNode* /*childNode*/) { AvmAssert(0); };
 		// Extract a namespace from a tag name, and return the new tag name in tagName
 		Namespace *FindNamespace(AvmCore *core, Toplevel *toplevel, Stringp& tagName, bool bAttribute);
@@ -342,7 +342,7 @@ namespace avmplus
 		Stringp getValue() const { return 0; };
 		void setValue (String *s) { (void)s; AvmAssert(s == 0); }
 
-		void setNotification(AvmCore* core, FunctionObject* f);
+		void setNotification(AvmCore* core, FunctionObject* f, Namespacep publicNS);
 		FunctionObject* getNotification() const;
 
 		// E4X support routines below
@@ -351,11 +351,11 @@ namespace avmplus
 
 		void _append (E4XNode *childNode);
 
-		void _addInScopeNamespace (AvmCore *core, Namespace *ns);
+		void _addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS);
 		void _insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value);
 		E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
 
-		void CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag);
+		void CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, Namespacep publicNS);
 	};
 }
 #endif /* __avmplus_E4XNode__ */
