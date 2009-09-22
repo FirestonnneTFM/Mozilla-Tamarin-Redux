@@ -50,7 +50,7 @@ namespace avmplus
 #endif
 	{
 		friend class StMNHTIterator;
-		
+
 	private:
 		class Quad // 33% better!
 		{
@@ -61,9 +61,7 @@ namespace avmplus
 			// non-0 if the given name exists elsewhere w/ a different NS
 			// (also the alignment gives a speed boost)
 			uint32_t multiNS;
-			#ifdef AVMPLUS_64BIT
-			uint32_t padding;
-			#endif
+			API apis;   // bit flags for versions
 		};
 
 	private:
@@ -73,8 +71,15 @@ namespace avmplus
 		 * in the hash table starting at t, containing tLen
 		 * quads.
 		 */
+		// match if they are the same or if they have the same base ns and ns api is in apis
+		static inline bool matchNS(uintptr uri, API apis, Namespacep ns)
+		{
+			AvmAssert(ns->getURI()->isInterned());
+			return (apis & ns->m_api) && uri == ns->m_uri;
+		}
+
 		static int find(Stringp name, Namespacep ns, const Quad *t, unsigned tLen);
-	    void rehash(const Quad *oldAtoms, int oldlen, Quad *newAtoms, int newlen);
+		void rehash(const Quad *oldAtoms, int oldlen, Quad *newAtoms, int newlen);
 
 		/**
 		 * Called to grow the Hashtable, particularly by add.
@@ -139,6 +144,7 @@ namespace avmplus
 		inline Stringp keyAt(int index) const { AvmAssert(m_quads[index-1].name != NULL); return m_quads[index-1].name; }
 		inline Namespacep nsAt(int index) const { return m_quads[index-1].ns; }
 		inline Binding valueAt(int index) const { return m_quads[index-1].value; }
+		inline API apisAt(int index) const { return m_quads[index-1].apis; }
 		
 		size_t allocatedSize() const { return numQuads * sizeof(Quad); }
 
@@ -204,6 +210,11 @@ namespace avmplus
 		inline Binding value() const
 		{
 			return m_cur->value;
+		}
+
+		inline API apis() const
+		{
+			return m_cur->apis;
 		}
 	};
 }

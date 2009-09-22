@@ -42,25 +42,66 @@
 [1,player,full]=662:FP_10_0
 [1,air,full]=663:AIR_1_5
 [2,air,full]=664:AIR_1_5_1
-[3,player,full]=665:FP_10_1
-[3,air,full]=666:AIR_ATHENA
+[3,player,full]=665:FP_10_0_32
+[3,air,full]=666:AIR_1_5_2
+[4,player,full]=667:FP_10_1
+[4,player,system]=669:FP_SYS
+[4,air,full]=668:AIR_2_0
+[4,air,system]=670:AIR_SYS
 */
 
 static const uint32_t _min_version_num = 660;
-static const uint32_t _max_version_num = 666;
-static const uint32_t _versions_count[] = {7, 4, 5, 3, 2, 2, 1, };
+static const uint32_t _max_version_num = 670;
+static const uint32_t _versions_count[] = {11, 6, 9, 5, 4, 6, 3, 4, 2, 2, 1, };
 
-static const uint32_t _versions [][7] = {
-  {660, 661, 662, 663, 664, 665, 666, },
-  {661, 663, 664, 666, },
-  {662, 663, 664, 665, 666, },
-  {663, 664, 666, },
-  {664, 666, },
-  {665, 666, },
-  {666, },
+static const uint32_t _versions [][11] = {
+  {660, 661, 662, 663, 664, 665, 666, 667, 669, 668, 670, },
+  {661, 663, 664, 666, 668, 670, },
+  {662, 663, 664, 665, 666, 667, 669, 668, 670, },
+  {663, 664, 666, 668, 670, },
+  {664, 666, 668, 670, },
+  {665, 666, 667, 669, 668, 670, },
+  {666, 668, 670, },
+  {667, 669, 668, 670, },
+  {668, 670, },
+  {669, 670, },
+  {670, },
 };
-static const uint32_t _uris_count = 2;
+static const uint32_t _uris_count = 34;
 static const char* _uris [] = {
   "",
+  "__AS3__.vec",
+  "adobe.utils",
   "avmplus",
+  "flash.accessibility",
+  "flash.automation",
+  "flash.data",
+  "flash.debugger",
+  "flash.desktop",
+  "flash.display",
+  "flash.errors",
+  "flash.events",
+  "flash.external",
+  "flash.filesystem",
+  "flash.filters",
+  "flash.geom",
+  "flash.globalization",
+  "flash.html",
+  "flash.html.script",
+  "flash.media",
+  "flash.net",
+  "flash.net.dns",
+  "flash.net.drm",
+  "flash.printing",
+  "flash.profiler",
+  "flash.sampler",
+  "flash.security",
+  "flash.system",
+  "flash.text",
+  "flash.text.engine",
+  "flash.text.ime",
+  "flash.ui",
+  "flash.utils",
+  "flash.xml",
 };
+static const int32_t _api_compat [] = {0x7ff, 0x55a, 0x7fc, 0x558, 0x550, 0x7e0, 0x540, 0x780, 0x500, 0x600, 0x400, };

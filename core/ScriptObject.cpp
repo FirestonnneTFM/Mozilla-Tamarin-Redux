@@ -185,7 +185,7 @@ namespace avmplus
 			while ((o = o->delegate) != NULL);
 		}
 		// NOTE use default public since name is not used
-		Multiname multiname(core()->publicNamespace, AvmCore::atomToString(name));
+		Multiname multiname(core()->getAnyPublicNamespace(), AvmCore::atomToString(name));
 		toplevel()->throwReferenceError(kReadSealedError, &multiname, origObjTraits);
 		// unreached
 		return undefinedAtom;
@@ -251,7 +251,8 @@ namespace avmplus
 		else
 		{
 			// NOTE use default public since name is not used
-			Multiname multiname(core()->publicNamespace, AvmCore::atomToString(name));
+			Multiname multiname(core()->getAnyPublicNamespace(), AvmCore::atomToString(name));
+
 			// cannot create properties on a sealed object.
 			toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
 		}
@@ -308,7 +309,7 @@ namespace avmplus
 		else
 		{
 			// cannot create properties on a sealed object. just use any public
-			Multiname multiname(core()->publicNamespace, AvmCore::atomToString(name));
+			Multiname multiname(core()->getAnyPublicNamespace(), AvmCore::atomToString(name));
 			toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
 		}
 	}
@@ -394,8 +395,9 @@ namespace avmplus
 			}
 			else
 			{
-				// use the default public
-				Multiname multiname(core->publicNamespace, core->internUint32(i));
+				// NOTE use default public since name is not used
+				Multiname multiname(core->getAnyPublicNamespace(), AvmCore::atomToString(name));
+
 				// cannot create properties on a sealed object.
 				toplevel()->throwReferenceError(kWriteSealedError, &multiname, traits());
 			}
@@ -592,7 +594,8 @@ namespace avmplus
 	Atom ScriptObject::call(int /*argc*/, Atom* /*argv*/)
 	{
 		// TypeError in ECMA to execute a non-function
-		Multiname name(core()->publicNamespace, core()->internConstantStringLatin1("value"));
+		// NOTE use default public since name is not used
+		Multiname name(core()->getAnyPublicNamespace(), core()->internConstantStringLatin1("value"));
 		toplevel()->throwTypeError(kCallOfNonFunctionError, core()->toErrorString(&name));
 		return undefinedAtom;
 	}

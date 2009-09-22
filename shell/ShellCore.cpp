@@ -48,8 +48,10 @@ namespace avmplus {
 	}
 }
 
-#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
+#ifdef VMCFG_TEST_API_VERSIONING
   #include "api-versions.h"
+#else
+  #include "noapi-versions.h"
 #endif
 
 namespace avmshell
@@ -77,7 +79,7 @@ namespace avmshell
 		, st_component(NULL)
 		, st_category(NULL)
 		, st_name(NULL)
-		, api(0)
+		, api(0xffffffff)
 	{
 	}
 
@@ -102,16 +104,11 @@ namespace avmshell
 		
 		setConsoleStream(consoleOutputStream);
 
-#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
 		setAPIInfo(_min_version_num,
-				   (const uint32_t*) _versions_count,
 				   _max_version_num-_min_version_num+1,
-				   (const uint32_t**) _versions,
 				   _uris_count,
-				   (const char**) _uris);
-		defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];	 
-#endif
-				   
+				   (const char**) _uris,
+				   (int32_t*) _api_compat);
 	}
 	
 	void ShellCore::stackOverflow(MethodEnv *env)
@@ -360,7 +357,24 @@ namespace avmshell
 			config.sse2 = false;
 	#endif
 #endif
-		
+
+		// set the default api version
+		if (settings.api <= _max_version_num) {
+			this->defaultAPIVersion = settings.api;
+		}
+		else {
+			// if there is at least on versioned uri, then there must be a version matrix
+			if (_uris_count > 0) {
+				// last api of any row is largestApiUtils::getLargestVersion(this);
+				this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
+			}
+			else {
+				this->defaultAPIVersion = 0;
+			}
+		}
+		//console << "defaultAPIVersion=" << defaultAPIVersion;
+		this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
+
 		config.interrupts = settings.interrupts;
 #ifdef AVMPLUS_VERIFYALL
 		config.verifyall = settings.verifyall;
@@ -478,16 +492,6 @@ namespace avmshell
 #else
 		// placate MSVC - settings is unreferenced if this is not here
 		(void)settings.enter_debugger_on_launch;
-#endif
-
-#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
-		// set the default api version
-		if (defaultAPIVersion == _versions[0][_versions_count[0]-1]) {
-		    if (settings.api >= _min_version_num && 
-			    settings.api <= _max_version_num) {
-			    this->defaultAPIVersion = settings.api;
-		    }
-		}
 #endif
 
 		return handleArbitraryExecutableContent(code, filename);

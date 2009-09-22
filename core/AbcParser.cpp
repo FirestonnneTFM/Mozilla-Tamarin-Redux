@@ -48,7 +48,7 @@ namespace avmplus
 		Toplevel* toplevel,
 		Domain* domain,
 		const NativeInitializer* natives,
-		uint32_t api)
+		API api)
     {
 		int version;
 		int result = canParse(code, &version);
@@ -231,7 +231,7 @@ namespace avmplus
 		return resolveUtf8(index);
 	}
 
-	PoolObject* AbcParser::parse(uint32_t api)
+	PoolObject* AbcParser::parse(API api)
 	{
 #ifdef VMCFG_LOOKUP_CACHE
 		// Loading a new ABC file always invalidates the lookup cache
@@ -261,7 +261,7 @@ namespace avmplus
 			core->traits.initInstanceTypes(pool);
 
 			// register "void"
-			addNamedTraits(core->getPublicNamespace(pool), VOID_TYPE->name(), VOID_TYPE);
+			addNamedTraits(core->getPublicNamespace(ApiUtils::getSmallestAPI()), VOID_TYPE->name(), VOID_TYPE);
 		}
 
 		// type information about class objects
@@ -393,7 +393,6 @@ namespace avmplus
 				}
 			}
 
-			// Didn't skip the trait, so do set up for the definition now.
 			switch (kind)
             {
             case TRAIT_Slot:
@@ -742,13 +741,13 @@ namespace avmplus
 					if(pool->verbose) {
 						core->console << ")";
 					}
-					#endif
-				}
-				#ifdef AVMPLUS_VERBOSE
-				if(pool->verbose) {
-					core->console << "\n";
-				}
 				#endif
+				}
+			#ifdef AVMPLUS_VERBOSE
+			if(pool->verbose) {
+					core->console << "\n";
+			}
+			#endif
 			}
 		}
     }
@@ -953,7 +952,7 @@ namespace avmplus
 		}
     }
 
-    void AbcParser::parseCpool(uint32_t api)
+    void AbcParser::parseCpool(API api)
     {
 		pool = new (core->GetGC()) PoolObject(core, code, pos, api);
 		pool->domain = domain;
@@ -1148,15 +1147,26 @@ namespace avmplus
                     if (index)
 					{
 						Stringp uri = resolveUtf8(index);
-						// if not builtin and versioned ns kind and versioned uri, then mark namespace
-#ifdef VMCFG_IGNORE_UNKNOWN_API_VERSIONS
-#else
-						if (!pool->isBuiltin)
-#endif
-						{
-						    uri = ApiUtils::getVersionedURI(core, pool, uri, type, pool->isBuiltin);
+						API api = ApiUtils::getURIAPI(core, uri);
+						if (api) {
+							uri = ApiUtils::getBaseURI(core, uri);
 						}
-						cpool_ns.set(i, core->internNamespace(core->newNamespace(uri, type)));
+						else {
+							if (pool->isBuiltin) {
+								// builtins are by default in the largest version
+								api = ApiUtils::getLargestAPI(core);
+							}
+							else {
+								api = pool->getAPI();
+							}
+
+							// finally, if it has as version mark then strip it. this only happens
+							// when asc and avm are out of sync, which is a contingency we support
+							if (ApiUtils::hasVersionMark(uri))
+								uri = ApiUtils::getBaseURI(core, uri);
+						}
+						Namespacep ns = core->internNamespace(core->newNamespace(uri, type, api));
+						cpool_ns.set(i, ns);
 					}
 					else
 					{
@@ -1211,8 +1221,8 @@ namespace avmplus
 			
 			if (ns_count > (uint32)(abcEnd - pos))
 				toplevel->throwVerifyError(kCorruptABCError);
-			NamespaceSet* namespace_set = core->newNamespaceSet(ns_count);
 
+			NamespaceSet* namespace_set = core->newNamespaceSet(ns_count);
 			Namespacep* nss = namespace_set->namespaces;
 			for(uint32 j=0; j < ns_count; ++j)
 			{
@@ -1352,13 +1362,19 @@ namespace avmplus
         // check to see if the base namespace has been added, if so then
         // all versions have been added
         Namespace* ns = nss->namespaces[0];
-        if (!ns->isPrivate() && !domain->getNamedTrait(name, ns)) {
-            const NamespaceSet* compat_nss = ApiUtils::getCompatibleNamespaces(core, nss);
-            for (int i=0; i<compat_nss->size; ++i) {
-                Namespacep ns = compat_nss->namespaces[i];
-                domain->addNamedTrait(name, ns, itraits);
-            }
-        }
+        if (!ns->isPrivate()) {
+			// compute the compatible apis for all namespaces and construct a namespace
+			// with that composite api
+			API apis = 0;
+			for (int i=0; i<nss->size; ++i) {
+				AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nss->namespaces[i]->getType(), nss->namespaces[i]->getURI()) ? nss->namespaces[i]->getAPI() != 0 : true);
+				apis |= ApiUtils::getCompatibleAPIs(core, nss->namespaces[i]->getAPI());
+			}
+			ns = ApiUtils::getVersionedNamespace(core, ns, apis);
+			if (!domain->getNamedTrait(name, ns)) {
+				domain->addNamedTrait(name, ns, itraits);
+			}
+		}
         else {
             // duplicate class
             //Multiname qname(ns,name);
@@ -1374,30 +1390,31 @@ namespace avmplus
 
 	void AbcParser::addNamedScript(NamespaceSetp nss, Stringp name, MethodInfo* script)
 	{
-		// use the first namespace to see if its been added
 		Namespacep ns = nss->namespaces[0]; // just need one
-		MethodInfo* s = domain->getNamedScript(name, nss->namespaces[0]);
-		if (!s)
+		if (ns->isPrivate()) 
 		{
-			if (ns->isPrivate()) 
-			{
-				pool->addPrivateNamedScript(name, ns, script);
-			}
-			else 
-			{
-				NamespaceSetp compat_nss = ApiUtils::getCompatibleNamespaces(core, nss);
-				for (int i=0; i<compat_nss->size; ++i) 
-				{
-					Namespacep ns = compat_nss->namespaces[i];
-					domain->addNamedScript(name, ns, script);
-				}
-			}
+			pool->addPrivateNamedScript(name, ns, script);
 		}
-		else
+		else 
 		{
-			// duplicate definition
-			//Multiname qname(ns, name);
-			//toplevel->definitionErrorClass()->throwError(kRedefinedError, core->toErrorString(&qname));
+			// use the first namespace to see if its been added
+			MethodInfo* s = domain->getNamedScript(name, nss->namespaces[0]);
+			if (!s)
+			{
+				API apis = 0;
+				for (int i=0; i<nss->size; ++i) {
+					AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nss->namespaces[i]->getType(), nss->namespaces[i]->getURI()) ? nss->namespaces[i]->getAPI() != 0 : true);
+					apis |= ApiUtils::getCompatibleAPIs(core, nss->namespaces[i]->getAPI());
+				}
+				ns = ApiUtils::getVersionedNamespace(core, ns, apis);
+				domain->addNamedScript(name, ns, script);
+			}
+			else
+			{
+				// duplicate definition
+				//Multiname qname(ns, name);
+				//toplevel->definitionErrorClass()->throwError(kRedefinedError, core->toErrorString(&qname));
+			}
 		}
 	}
 

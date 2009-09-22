@@ -361,7 +361,7 @@ namespace avmplus
 				if (AvmCore::isXML(V))
 				{
 					Multiname mV;
-					if (AvmCore::atomToXML(V)->getQName(core, &mV))
+					if (AvmCore::atomToXML(V)->getQName(&mV, core->findPublicNamespace()))
 						y->setQName (core, &mV);
 
 				}
@@ -651,7 +651,7 @@ namespace avmplus
  			if (v->getClass() != E4XNode::kProcessingInstruction)
  			{
  				Multiname m;
- 				if (v->getQName (core, &m))
+ 				if (v->getQName (&m, core->findPublicNamespace()))
  					this->m_targetProperty = m;
  			}
  			m_appended = false;

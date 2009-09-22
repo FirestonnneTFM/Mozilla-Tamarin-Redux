@@ -66,6 +66,12 @@ namespace avmplus
 	#endif
 	
 	typedef struct Binding_* Binding;
+	typedef struct CodeContextAtom_* CodeContextAtom;
+
+	/**
+	 * API is the type of an api bitmask
+	 */
+	typedef int32_t API;
 }
 
 #endif /* __avmplus_types__ */

@@ -78,6 +78,7 @@ namespace avmplus
 	{
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 		core->addLivePool(this);
+		core->setActiveAPI(api);
 	}
 
 	PoolObject::~PoolObject()
@@ -523,7 +524,6 @@ range_error:
 			index = AvmCore::readU30(pos);
 			AvmAssert(index != 0);
 			m.setNsset(getNamespaceSet(index));
-
 			m.setAttr(kind==CONSTANT_MultinameA);
 			break;
 		}

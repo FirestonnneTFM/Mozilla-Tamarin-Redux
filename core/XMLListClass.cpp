@@ -106,8 +106,7 @@ namespace avmplus
 				// !!@ trying to emulate rhino behavior here
 				// Add the default namespace to our top element.
 				Namespace *ns = toplevel->getDefaultNamespace();
-				c->_addInScopeNamespace (core, ns);
-
+				c->_addInScopeNamespace (core, ns, core->findPublicNamespace());
 				xl->_appendNode (c);
 			}
 			return xl->atom();

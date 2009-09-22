@@ -62,15 +62,7 @@ package
 
 		AS3 function toString():String
 		{
-			if (uri === "" || uri === null)
-				return uri
-			var cc:uint = uri.charCodeAt(uri.length-1);	
-			// strip the version mark, if there is one
-			var baseuri:String = uri;
-			if (cc >= 0xE000 && cc <= 0xF8FF) {
-				baseuri = uri.substr(0, uri.length-1);
-			}
-			return baseuri
+			return uri
 		}
 		
 		prototype.toString = function ():String

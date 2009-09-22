@@ -137,7 +137,7 @@ namespace avmplus
 		}
 		else
 		{
-			Stringp uri = ApiUtils::getBaseURI(core, ns->getURI());
+			Stringp uri = ns->getURI();
 			if (attr)
 			{
 				return core->concatStrings(core->newConstantStringLatin1("@"), core->concatStrings(uri,
@@ -191,7 +191,7 @@ namespace avmplus
 					if (getNamespace(i)->isPublic())
 						s = core->concatStrings(s, core->newConstantStringLatin1("public"));
 					else
-						s = core->concatStrings(s, ApiUtils::getBaseURI(core, getNamespace(i)->getURI()));
+						s = core->concatStrings(s, getNamespace(i)->getURI());
 					if (i+1 < n)
 						s = core->concatStrings(s, core->newConstantStringLatin1(","));
 				}

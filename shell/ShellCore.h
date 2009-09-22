@@ -151,8 +151,10 @@ namespace avmshell
 		static bool isValidProjectorFile(const char* filename);
 #endif
 
-#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
-		uint32_t getDefaultAPI() { return defaultAPIVersion; }
+#ifdef VMCFG_TEST_API_VERSIONING
+		inline int32_t getDefaultAPI() { return ApiUtils::toAPI(this, defaultAPIVersion); }
+#else
+		inline int32_t getDefaultAPI() { return 0; }
 #endif
 
 	protected:
@@ -192,11 +194,7 @@ namespace avmshell
 		Toplevel* shell_toplevel;
 		Domain* shell_domain;
 		DomainEnv* shell_domainEnv;
-
-#ifdef VMCFG_TEST_VERSIONING // testing flash api versioning
 		uint32_t defaultAPIVersion;
-#endif
-
 	};
 
 	class ShellToplevel : public Toplevel

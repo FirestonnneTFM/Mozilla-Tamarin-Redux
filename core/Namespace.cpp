@@ -60,6 +60,7 @@ namespace avmplus
 	{
 		WBATOM(MMgc::GC::GetGC(this), this, &m_prefix, 0);
 		setUri(NULL, NS_Public);
+		setAPI(0);
 	}
 
 	void Namespace::setUri(Stringp uri, NamespaceType flags)
@@ -84,7 +85,7 @@ namespace avmplus
 	bool Namespace::isPublic() const
 	{
 		Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
-		return getType() == Namespace::NS_Public && ApiUtils::isEmptyURI(uri);
+		return getType() == Namespace::NS_Public && uri->isEmpty();
 	}
 
 	bool Namespace::EqualTo(const Namespace* other) const
@@ -98,7 +99,7 @@ namespace avmplus
 		{
 			// both are public, so compare using uri's.  they are intern'ed so we
 			// can do a fast pointer compare.
-            return m_uri == other->m_uri;
+			return m_uri == other->m_uri && m_api==other->m_api;
 		}
 	}
 
@@ -119,7 +120,7 @@ namespace avmplus
 	{
 		// first return uri then prefix
 		if (index == 1)
-			return this->getURI(true)->atom();
+			return this->getURI()->atom();
 		else if (index == 2)
 			return this->m_prefix;
 		else
@@ -139,15 +140,12 @@ namespace avmplus
 	Stringp Namespace::format(AvmCore* core) const
 	{
 		(void) core;
-		return getURI(true);
+		return getURI();
 	}
 
-	Stringp Namespace::getURI(bool stripVersion /*=false*/) const
+	Stringp Namespace::getURI() const
 	{
-		Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
-		if (stripVersion)
-			return ApiUtils::getBaseURI(MMgc::GC::GetGC(this)->core(), uri);
-		return uri;
+		return (Stringp)atomPtr(m_uri);
 	}
 }
 

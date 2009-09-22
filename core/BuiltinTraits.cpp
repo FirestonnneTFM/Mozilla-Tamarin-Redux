@@ -51,14 +51,16 @@ namespace avmplus
 	{
 		AvmCore* core = pool->core;
 
+		Namespacep publicNS = core->getPublicNamespace(ApiUtils::getSmallestAPI());
+
 		null_itraits = Traits::newTraits(pool, NULL, 0, 0, TRAITSTYPE_NVA);
-		null_itraits->set_names(core->getPublicNamespace(pool), core->internConstantStringLatin1("null"));
+		null_itraits->set_names(publicNS, core->internConstantStringLatin1("null"));
 		null_itraits->final = true;
 		null_itraits->builtinType = BUILTIN_null;
 		null_itraits->resolveSignatures(NULL);
 
 		void_itraits = Traits::newTraits(pool, NULL, 0, 0, TRAITSTYPE_NVA);
-		void_itraits->set_names(core->getPublicNamespace(pool), core->internConstantStringLatin1("void"));
+		void_itraits->set_names(publicNS, core->internConstantStringLatin1("void"));
 		void_itraits->final = true;
 		void_itraits->builtinType = BUILTIN_void;
 		void_itraits->resolveSignatures(NULL);

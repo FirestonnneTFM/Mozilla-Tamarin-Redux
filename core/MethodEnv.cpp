@@ -944,7 +944,7 @@ namespace avmplus
             this->toplevel()->throwReferenceError(kAmbiguousBindingError, multiname);
 
 		if (script == (ScriptEnv*)BIND_NONE)
-            this->toplevel()->throwReferenceError(kUndefinedVarError, multiname);
+			this->toplevel()->throwReferenceError(kUndefinedVarError, multiname);
 
 		ScriptObject* global = script->global;
 		if (!global)

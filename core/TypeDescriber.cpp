@@ -165,21 +165,21 @@ namespace avmplus
 		return a;
 	}
 
-	static void addBindings(AvmCore* core, MultinameHashtable* bindings, TraitsBindingsp tb, uint32_t flags)
+	void TypeDescriber::addBindings(AvmCore* core, MultinameHashtable* bindings, TraitsBindingsp tb, uint32_t flags)
 	{
 		if (!tb) return;
 		if ((flags & TypeDescriber::HIDE_OBJECT) && !tb->base) return;
 		addBindings(core, bindings, tb->base, flags);
 		StTraitsBindingsIterator iter(tb);
-		uint32_t curv = core->getAPI(NULL);
+		uint32_t curapi = core->getAPI(NULL);
 		while (iter.next())
 		{
 			if (!iter.key()) continue;
 			Namespacep ns = iter.ns();
 			if (ApiUtils::isVersionedNS(core, ns->getType(), ns->getURI())) {
 				// Skip names that don't match the current version
-				uint32_t v = ApiUtils::getNamespaceVersion(core, iter.ns(), false);
-				if (curv != v) {
+				API api = iter.apis();
+				if (!(curapi & api)) {
 					continue;
 				}
 			}
@@ -288,7 +288,7 @@ namespace avmplus
 					{
 						if (!iter.key()) continue;
 						Namespacep ns = iter.ns();
-						if (ns->getURI(true)->length() > 0 && nsremoval.indexOf(ns) < 0)
+						if (ns->getURI()->length() > 0 && nsremoval.indexOf(ns) < 0)
 						{
 							nsremoval.add(ns);
 						}
@@ -303,7 +303,7 @@ namespace avmplus
 				Stringp name = iter.key();
 				Namespacep ns = iter.ns();
 				Binding binding = iter.value();
-				Stringp nsuri = ns->getURI(true);
+				Stringp nsuri = ns->getURI();
 				TraitsMetadata::MetadataPtr md1 = NULL;
 				TraitsMetadata::MetadataPtr md2 = NULL;
 				PoolObject* md1pool = NULL;

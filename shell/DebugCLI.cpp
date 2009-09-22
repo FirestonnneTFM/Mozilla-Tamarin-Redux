@@ -573,7 +573,7 @@ namespace avmshell
 
 		// todo deal with exceptions
 		Multiname mname(
-			core->publicNamespace,
+			core->getAnyPublicNamespace(),
 			core->internStringLatin1(name)
 		);
 

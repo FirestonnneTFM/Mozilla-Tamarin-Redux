@@ -68,7 +68,7 @@ namespace avmshell
 			domainToplevel = core->initShellBuiltins();
 		}
 		
-		domainEnv = new (core->GetGC()) DomainEnv(core, domain, parentDomain->domainEnv);
+		domainEnv = new (core->GetGC()) DomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
 	}
 
 	Atom DomainObject::loadBytes(ByteArrayObject *b)
@@ -134,8 +134,8 @@ namespace avmshell
 		Namespace* ns;
 		Stringp className;
 		if (dot >= 0) {
-			Stringp uri = ApiUtils::getVersionedURI(core, NULL, core->internString(name->substring(0, dot)), Namespace::NS_Public);
-			ns = core->internNamespace(core->newNamespace(uri));
+			Stringp uri = core->internString(name->substring(0, dot));
+			ns = core->internNamespace(core->newNamespace(uri, Namespace::NS_Public, core->getAPI(NULL)));
 			className = core->internString(name->substring(dot+1, name->length()));
 		} else {
 			ns = core->findPublicNamespace();

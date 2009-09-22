@@ -177,7 +177,7 @@ namespace avmplus
 		}
 	}
 
-	bool E4XNode::getQName(AvmCore *core, Multiname *mn) const
+	bool E4XNode::getQName(Multiname *mn, Namespacep publicNS) const
 	{
 		if (!m_nameOrAux)
 			return false;
@@ -202,7 +202,7 @@ namespace avmplus
 		{
 			Stringp str = (String *)(nameOrAux);
 			mn->setName (str);
-			mn->setNamespace (core->findPublicNamespace());
+			mn->setNamespace(publicNS);
 		}
 
 		if (getClass() == kAttribute)
@@ -231,7 +231,7 @@ namespace avmplus
 		}
 
 		if (!ns || ns->isPublic() || 
-			(ns->getPrefix() == core->kEmptyString->atom() && ApiUtils::isEmptyURI(ns->getURI())))
+			(ns->getPrefix() == core->kEmptyString->atom() && ns->getURI()->isEmpty()))
 		{
 			//m_nameOrAux = int (name);
 			WBRC(core->GetGC(), this, &m_nameOrAux, uintptr(name));
@@ -256,12 +256,12 @@ namespace avmplus
 	}
 
 	// E4X 9.1.1.3, pg 20
-	void E4XNode::_addInScopeNamespace (AvmCore* /*core*/, Namespace* /*ns*/)
+	void E4XNode::_addInScopeNamespace (AvmCore* /*core*/, Namespace* /*ns*/, Namespacep /*publicNS*/)
 	{
 		// do nothing for non-element nodes
 	}
 
-	void ElementE4XNode::_addInScopeNamespace (AvmCore *core, Namespace *ns)
+	void ElementE4XNode::_addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS)
 	{
 //		if (getClass() & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
 //			return; 
@@ -270,10 +270,10 @@ namespace avmplus
 			return;
 
 		Multiname m;
-		getQName (core, &m);
+		getQName(&m, publicNS);
 
 		if ((ns->getPrefix() == core->kEmptyString->atom()) && 
-			(!m.isAnyNamespace()) && ApiUtils::isEmptyURI(m.getNamespace()->getURI()))
+			(!m.isAnyNamespace()) && m.getNamespace()->getURI()->isEmpty())
 			return;
 
 		// step 2b + 2c
@@ -318,7 +318,7 @@ namespace avmplus
 		{
 			E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
 			Multiname ma;
-			curAttr->getQName (core, &ma);
+			curAttr->getQName(&ma, publicNS);
 			if (!ma.isAnyNamespace() && ma.getNamespace()->getPrefix() == ns->getPrefix())
 			{
 				curAttr->setQName (core, ma.getName(), core->newNamespace(ma.getNamespace()->getURI()));
@@ -451,7 +451,7 @@ namespace avmplus
 		m_attributes->push (AvmCore::genericObjectToAtom(x));
 	}
 
-	void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag)
+	void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, Namespacep publicNS)
 	{
 		m_attributes = 0;
 		m_namespaces = 0;
@@ -489,7 +489,7 @@ namespace avmplus
 					// !!@ Don't intern these namespaces since the intern table ignores
 					// the prefix value of the namespace.
 					if (ns) // ns can be null if prefix is defined and attributeValue = ""
-						this->_addInScopeNamespace(core, ns);
+						this->_addInScopeNamespace(core, ns, publicNS);
 				}
 			}
 			if (!ns)
@@ -523,19 +523,19 @@ namespace avmplus
 
 			Namespace *ns = this->FindNamespace(core, toplevel, attributeName, true);
 			if (!ns)
-				ns = core->findPublicNamespace();
+				ns = publicNS;
 
 			attrObj->setQName(core, attributeName, ns);
 
 			// check for a duplicate attribute here and throw a kXMLDuplicateAttribute if found
 
 			Multiname m2;
-			attrObj->getQName(core, &m2);
+			attrObj->getQName(&m2, publicNS);
 			for (unsigned int i = 0; i < numAttributes(); i++)
 			{
 				E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
 				Multiname m;
-				curAttr->getQName(core, &m);
+				curAttr->getQName(&m, publicNS);
 				if (m.matches(&m2))
 				{
 					toplevel->typeErrorClass()->throwError(kXMLDuplicateAttribute, attributeName, tag.text, core->toErrorString(tag.text->length()));
@@ -567,7 +567,7 @@ namespace avmplus
 	}
 
 	// E4X 9.1.1.7, page 16
-	E4XNode *E4XNode::_deepCopy (AvmCore *core, Toplevel *toplevel) const
+	E4XNode *E4XNode::_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const
 	{
 		E4XNode *x = 0;
 		switch (this->getClass())
@@ -593,7 +593,7 @@ namespace avmplus
 		}
 
 		Multiname m;
-		if (this->getQName (core, &m))
+		if (this->getQName(&m, publicNS))
 		{
 			x->setQName (core, &m); 
 		}
@@ -621,7 +621,7 @@ namespace avmplus
 				for (i = 0; i < numAttributes(); i++)
 				{
 					E4XNode *ax = getAttribute (i);
-					E4XNode *bx = ax->_deepCopy(core, toplevel);
+					E4XNode *bx = ax->_deepCopy(core, toplevel, publicNS);
 					bx->setParent(y);
 					y->addAttribute(bx);
 				}
@@ -641,7 +641,7 @@ namespace avmplus
 						continue;
 					}
 
-					E4XNode *cx = child->_deepCopy (core, toplevel);
+					E4XNode *cx = child->_deepCopy (core, toplevel, publicNS);
 					cx->setParent (y);
 					//y->m_children->push (c);
 					y->_append (cx);
@@ -673,16 +673,17 @@ namespace avmplus
 
 		Multiname m;
 		Multiname m2;
-		if (this->getQName(core, &m))
+		Namespacep publicNS = core->findPublicNamespace();
+		if (this->getQName(&m, publicNS))
 		{
-			if (v->getQName(core, &m2) == 0)
+			if (v->getQName(&m2, publicNS) == 0)
 				return falseAtom;
 
 			// QName/AttributeName comparision here
 			if (!m.matches(&m2))
 				return falseAtom;
 		}
-		else if (v->getQName(core, &m2) != 0)
+		else if (v->getQName(&m2, publicNS) != 0)
 		{
 			return falseAtom;
 		}
@@ -918,7 +919,7 @@ namespace avmplus
 		return prior;
 	}
 
-	void ElementE4XNode::setNotification(AvmCore *core, FunctionObject* f) 
+	void ElementE4XNode::setNotification(AvmCore *core, FunctionObject* f, Namespacep publicNS)
 	{ 
 		uintptr nameOrAux = m_nameOrAux;
 		// We already have an aux structure
@@ -931,7 +932,7 @@ namespace avmplus
 		else
 		{
 			Stringp str = (String *)(nameOrAux);
-			E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, core->findPublicNamespace(), f);
+			E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, publicNS, f);
 			//m_nameOrAux = AUXBIT | int(aux);
 			WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
 		}

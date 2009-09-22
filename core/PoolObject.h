@@ -84,7 +84,7 @@ namespace avmplus
 	public:
 		AvmCore *core;
 
-		inline uint32_t getAPI() { return api; }
+		inline int32_t getAPI() { return api; }
 
 		/** constants */
 		List<int32_t> cpool_int;
