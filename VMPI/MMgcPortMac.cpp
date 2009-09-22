@@ -282,16 +282,38 @@ bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t skip)
 	
 	if (skip)
 		--skip;
+
+	// our embedder (eg Safari) can have stack frames that aren't formed
+	// in the way we expect, which can make us crash. so sniff to ensure we're still
+	// inside the stack range, and if not, bail before trying to dereference.
+	// Note that pthread_get_stackaddr_np() and pthread_get_stacksize_np() seems
+	// to be poorly documented and thus it's not completely clear if they are meant to
+	// apply to the current thread vs. the main thread; the fact they take a thread as
+	// an argument, and anecdotal evidence online, suggests the former (which is what we want).
+	// In any event, doing this check makes for less-crashy code than what we had before,
+	// which is good, but if you find misbehavior here, be aware.
+	pthread_t const self = pthread_self();
+	uintptr_t const stacktop = uintptr_t(pthread_get_stackaddr_np(self));
+	uintptr_t const stacksize = pthread_get_stacksize_np(self);
+	uintptr_t const stackbot = stacktop - stacksize;
 	
-	while(skip-- && *ebp)
+	while(skip--)
 	{
+		if ((uintptr_t(ebp) - stackbot) >= stacksize)
+			break;
+		if (!*ebp)
+			break;
 		ebp = (void**)(*ebp);
 	}
 	
 	bufferSize--;
 	size_t i=0;
-	while(i<bufferSize && *ebp)
+	while(i<bufferSize)
 	{
+		if ((uintptr_t(ebp) - stackbot) >= stacksize)
+			break;
+		if (!*ebp)
+			break;
 		buffer[i++] = *((uintptr_t*)ebp+1);
 		ebp = (void**)(*ebp);			
 	}
