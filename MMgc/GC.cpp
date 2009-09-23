@@ -2493,6 +2493,9 @@ bail:
 	// where scanning left off, and then iterate), but we should cross that bridge if and when
 	// restarting turns out to be a problem in practice.  (If it does, caching more mark stack
 	// segments may be a better first fix, too.)
+	//
+	// (Overflow handling assumes that there are no non-gcobjects on the mark stack
+	// that won't be recovered by marking from the roots and program stack.)
 
 	void GC::HandleMarkStackOverflow()
 	{
@@ -2724,6 +2727,34 @@ bail:
 		size_t size = wi.GetSize();
 		uintptr_t *p = (uintptr_t*) wi.ptr;
 
+		// Control mark stack growth:
+		// Here we consider whether to split the object into multiple pieces.
+		// A cutoff of 400 is somewhat arbitrary; it can't be too small
+		// because then we'll split too many objects, and it can't be too large
+		// because then the mark stack growth won't be throttled properly.
+		//
+		// See bugzilla #495049 for a discussion of this problem.
+		//
+		// If the cutoff is exceeded split the work item into two chunks:
+		// a small head (which we mark now) and a large tail (which we push
+		// onto the stack).  The tail is a non-gcobject regardless of whether
+		// the head is a gcobject.  The head must be marked first because this
+		// ensures that the mark on the object is set immediately; that is
+		// necessary for write barrier correctness.
+		//
+		// If a mark stack overflow occurs the large tail may be popped
+		// and discarded.  This is not a problem: the object as a whole
+		// is marked, but points to unmarked storage, and the latter
+		// objects will be picked up as per normal.  Discarding the
+		// tail is entirely equivalent to discarding the work items that
+		// would result from scanning the tail.
+		const size_t markstackCutoff = 400;
+		if (size > markstackCutoff)
+		{
+			PushWorkItem(GCWorkItem(p + markstackCutoff / sizeof(uintptr_t), uint32_t(size - markstackCutoff), false));
+			size = markstackCutoff;
+		}
+			
 #ifdef WERNER_MODE
 		MarkList me(wi);
 		
@@ -2780,10 +2811,6 @@ bail:
 				//GCAssert(!b);
 			}
 #endif			
-		}
-		else
-		{
-			GCAssert(!IsPointerToGCPage(wi.ptr));
 		}
 
 		uintptr_t _memStart = memStart;
