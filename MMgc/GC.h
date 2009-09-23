@@ -1646,8 +1646,8 @@ namespace MMgc
 
 	private:
 		void Finalize();
-		void Sweep(bool force=false);
-		void ForceSweep() { Sweep(true); }
+		void Sweep();
+		void ForceSweepAtShutdown();
 		void MarkAllRoots();
 		void Mark();
 		void MarkQueueAndStack(bool scanStack=true);
