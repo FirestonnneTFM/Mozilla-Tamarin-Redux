@@ -44,10 +44,10 @@
 namespace MMgc
 {
 #ifdef TESTING_MARKSTACK
-	static int markstack_allowance = MARKSTACK_ALLOWANCE;
+	static int markstack_allowance = 2*MARKSTACK_ALLOWANCE;		// Two stacks!
 #endif
 
-	static inline void* AllocStackSegment(size_t nbytes)
+	static inline void* AllocStackSegment(size_t nbytes, bool mustSucceed)
 	{
 #ifdef TESTING_MARKSTACK
 		if (markstack_allowance == 0)
@@ -55,7 +55,7 @@ namespace MMgc
 		--markstack_allowance;
 #endif
 		nbytes = (nbytes + 4095) & ~4095;
-		return FixedMalloc::GetFixedMalloc()->PleaseAlloc(nbytes);
+		return FixedMalloc::GetFixedMalloc()->Alloc(nbytes, mustSucceed ? kNone : kCanFail);
 	}
 
 	static inline void FreeStackSegment(void* p)
@@ -77,7 +77,7 @@ namespace MMgc
 		, m_maxDepth(0)
 #endif
 	{
-		PushSegment();
+		PushSegment(true);
 		GCAssert(Invariants());
 	}
 
@@ -104,12 +104,12 @@ namespace MMgc
 		GCAssert(Invariants());
 	}
 
-	bool GCMarkStack::PushSegment()
+	bool GCMarkStack::PushSegment(bool mustSucceed)
 	{
 		GCAssert(sizeof(GCStackSegment) <= 4096);
 		GCAssert(m_top == m_limit);
 		if (m_extraSegment == NULL) {
-			void *memory = AllocStackSegment(sizeof(GCStackSegment));
+			void *memory = AllocStackSegment(sizeof(GCStackSegment), mustSucceed);
 			if (memory == NULL)
 				return false;
 			m_extraSegment = new (memory) GCStackSegment();
@@ -142,7 +142,7 @@ namespace MMgc
 			FreeStackSegment(seg);
 	}
 
-	void GCMarkStack::TransferOneFullSegmentFrom(GCMarkStack& other)
+	bool GCMarkStack::TransferOneFullSegmentFrom(GCMarkStack& other)
 	{
 		GCAssert(other.EntirelyFullSegments() > 0);
 		GCStackSegment* seg;
@@ -152,9 +152,18 @@ namespace MMgc
 			GCAssert(other.m_top == other.m_limit);
 			seg = other.m_topSegment;
 			other.m_topSegment = NULL;
+			other.m_base = NULL;
 			other.m_top = NULL;
 			other.m_limit = NULL;
-			other.PushSegment();
+			if (!other.PushSegment()) {
+				// Oops: couldn't push it, so undo.  We're out of memory but we
+				// don't want to signal OOM here, we want to recover, signal failure,
+				// and let the caller handle it.
+				other.m_topSegment = seg;
+				other.m_base = seg->m_items;
+				other.m_top = other.m_limit = other.m_base + kMarkStackItems;
+				return false;
+			}
 		}
 		else {
 			// Picking off the one below the top always
@@ -173,6 +182,7 @@ namespace MMgc
 			PopSegment();
 		GCAssert(Invariants());
 		GCAssert(other.Invariants());
+		return true;
 	}
 	
 #ifdef _DEBUG

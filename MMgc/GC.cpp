@@ -945,11 +945,10 @@ namespace MMgc
 
 		// Force all objects to be destroyed
 		destroying = true;
-		ClearMarks();
 
 		{
 			MMGC_GCENTER(this);
-			ForceSweep();
+			ForceSweepAtShutdown();
 		}
 
 		for (int i=0; i < kNumSizeClasses; i++) {
@@ -1364,11 +1363,35 @@ bail:
 		}
 	}
 
-	void GC::Sweep(bool force)
+	void GC::ForceSweepAtShutdown()
+	{
+		// There are two preconditions for Sweep: the mark stacks must be empty, and
+		// the queued bits must all be clear (except as part of kFreelist).  
+		//
+		// We are doing this at shutdown, so don't bother with pushing the marking through
+		// to the end; just clear the stacks, clear the mark bits, and sweep.  The objects
+		// will be finalized and deallocated and the blocks will be returned to the block
+		// manager.
+
+		m_incrementalWork.Clear();
+		m_barrierWork.Clear();
+		
+		ClearMarks();
+
+		Sweep();
+	}
+
+	void GC::Sweep()
 	{	
-		// collecting must be true because it indicates allocations should
-		// start out marked, we can't rely on write barriers below since 
-		// presweep could write a new GC object to a root
+		// 'collecting' must be true because it indicates allocations should
+		// start out marked and the write barrier should short-circuit (not
+		// record any hits).  We can't rely on write barriers to mark objects
+		// during finalization below since presweep or finalization could write
+		// a new GC object to a root.
+
+		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
+		
 		collecting = true;
 		zct.StartCollecting();
 		
@@ -1384,29 +1407,24 @@ bail:
 		}
 #endif
 
+		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
+		
 		// invoke presweep on all callbacks
 		for ( GCCallback *cb = m_callbacks; cb ; cb = cb->nextCB )
 			cb->presweep();
 
 		SAMPLE_CHECK();
 
-		// if force is true we're being called from ~GC and this isn't necessary
-		if(!force) {
-			// we just executed mutator code which could have fired some WB's
-			FlushBarrierWork();
-			Mark();
-		}
+		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 
 		Finalize();
 
-		// if force is true we're being called from ~GC and this isn't necessary
-		if(!force) {
-			// we just executed mutator code which could have fired some WB's
-			FlushBarrierWork();
-			Mark();
-		}
-	
 		SAMPLE_CHECK();
+
+		GCAssert(m_incrementalWork.Count() == 0);
+		GCAssert(m_barrierWork.Count() == 0);
 
 		int sweepResults = 0;
 
@@ -3111,11 +3129,15 @@ bail:
 	// mark stack, unconditionally.  This may mean copying mark work from one stack to
 	// the other (for work that's in a non-full segment), but full segments can just be
 	// moved by changing some pointers and counters.
+	//
+	// Note it's possible for this to cause a mark stack overflow, and the caller must
+	// deal with that.
 
 	void GC::FlushBarrierWork()
 	{
 		for ( uint32_t numfull = m_barrierWork.EntirelyFullSegments() ; numfull > 0 ; --numfull )
-			m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork);
+			if (!m_incrementalWork.TransferOneFullSegmentFrom(m_barrierWork))
+				break;
 		while (m_barrierWork.Count() > 0) {
 			GCWorkItem item = m_barrierWork.Pop();
 			PushWorkItem(item);

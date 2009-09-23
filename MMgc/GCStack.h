@@ -117,8 +117,13 @@ namespace MMgc
 		/** @return the number of entirely full segments */
 		uint32_t EntirelyFullSegments();
 
-		/** Move one entirely full segment from 'other' and insert it into our segment list */
-		void TransferOneFullSegmentFrom(GCMarkStack& other);
+		/** 
+		 * Move one entirely full segment from 'other' and insert it into our segment list.
+		 * @return true if the transfer was successful, false if an out-of-memory condition
+		 *         prevented reestablishing invariants in 'other' following the transfer.
+		 *         (In the latter case the stacks remain unchanged.)
+		 */
+		bool TransferOneFullSegmentFrom(GCMarkStack& other);
 
 #ifdef MMGC_MARKSTACK_DEPTH
 		/** @return the number of elements on the stack when its depth was the greatest */
@@ -151,9 +156,11 @@ namespace MMgc
 		/**
 		 * The current segment must be NULL or full (top == limit).  Push a new segment onto the 
 		 * stack, and update all instance vars.
+		 * @param mustSucceed  If true, the allocation must not fail.  This is true during initialization.
+		 *                     Failure in this case is signaled through the normal OOM mechanism.
 		 * @return true if the segment could be pushed or false if not (if it could not be allocated).
 		 */
-		bool PushSegment();
+		bool PushSegment(bool mustSucceed=false);
 		
 		// The current segment is discarded and the previous segment, if any, reinstated.
 		// Update all instance vars.
