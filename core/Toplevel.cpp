@@ -147,39 +147,8 @@ namespace avmplus
 			return NULL;
 		}
 	}
-
-	// equivalent to ToObject, obj->traits.  exception if null or undefined.
-	VTable* Toplevel::toVTable(Atom atom)
-	{
-		if (!AvmCore::isNullOrUndefined(atom))
-		{
-			switch (atom&7)
-			{
-			case kObjectType:
-				return AvmCore::atomToScriptObject(atom)->vtable;
-			case kNamespaceType:
-				return namespaceClass->ivtable();
-			case kStringType:
-				return stringClass->ivtable();
-			case kBooleanType:
-				return booleanClass->ivtable();
-			case kIntegerType:
-			case kDoubleType:
-				// ISSUE what about int?
-				return numberClass->ivtable();
-			}
-		}
-		else
-		{
-            // TypeError in ECMA
-			throwTypeError(
-					(atom == undefinedAtom) ? kConvertUndefinedToObjectError :
-										kConvertNullToObjectError);
-		}
-		return NULL;
-	}
 	
-	// equivalent to ToObject, obj->traits.  exception if null or undefined.
+	// equivalent to ToObject, obj->vtable->traits.  exception if null or undefined.
 	Traits* Toplevel::toTraits(Atom atom)
 	{
 		if (!AvmCore::isNullOrUndefined(atom))
@@ -212,61 +181,6 @@ namespace avmplus
 				throwVerifyError(kCorruptABCError);
 		}
 		return NULL;
-	}
-	
-    /**
-     * OP_call.
-     *
-     * arg0 = argv[0]
-     * arg1 = argv[1]
-     * argN = argv[argc]
-     */
-    Atom Toplevel::op_call(Atom method, int argc, Atom* atomv)
-    {
-		// The construction of the multiname and the resulting error string is
-		// delegated because in-lining it here prevents the call to call() from
-		// being a tail call - the address of a local multiname is taken, this
-		// makes GCC (arguably incorrectly, given the scope of the variable)
-		// turn off tail calling.
-		
-		if (!AvmCore::isObject(method))
-			throwTypeErrorWithName(kCallOfNonFunctionError, "value");
-		
-		return AvmCore::atomToScriptObject(method)->call(argc, atomv);
-    }
-
-    /**
-     * OP_construct.  Note that arguments are in the opposite order from AVM.
-     *
-	 * this = argv[0] // ignored
-     * arg1 = argv[1]
-     * argN = argv[argc]
-     */
-    Atom Toplevel::op_construct(Atom ctor, int argc, Atom* atomv)
-    {
-		if (!AvmCore::isObject(ctor))
-		{
-			throwTypeError(kConstructOfNonFunctionError);
-		}
-
-		ScriptObject *ct = AvmCore::atomToScriptObject(ctor);
-		Atom val = ct->construct(argc, atomv);
-		return val;
-	}
-
-	/**
-	* OP_applytype.
-	*
-	* arg1 = argv[0]
-	* argN = argv[argc-1]
-	*/
-	Atom Toplevel::op_applytype(Atom factory, int argc, Atom* atomv)
-	{
-		if (!AvmCore::isObject(factory))
-		{
-			throwTypeError(kTypeAppOfNonParamType);
-		}
-		return AvmCore::atomToScriptObject(factory)->applyTypeArgs(argc, atomv);
 	}
 	
 	// E4X 10.5.1, pg 37
@@ -529,111 +443,6 @@ namespace avmplus
 			}
 		}
 	}
-
-	Atom Toplevel::callproperty(Atom base, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
-	{
-		Binding b = getBinding(vtable->traits, multiname);
-		switch (AvmCore::bindingKind(b))
-		{
-		case BKIND_METHOD:
-		{
-			// force receiver == base.  if caller used OP_callproplex then receiver was null.
-			atomv[0] = base;
-			MethodEnv* method = vtable->methods[AvmCore::bindingToMethodId(b)];
-			AvmAssert(method != NULL);
-			return method->coerceEnter(argc, atomv);
-		}
-		case BKIND_VAR:
-		case BKIND_CONST:
-		{
-			// inlined equivalent of op_call
-			ScriptObject* method = AvmCore::atomToScriptObject(base)->getSlotObject(AvmCore::bindingToSlotId(b));
-			if (!method)
-				throwTypeErrorWithName(kCallOfNonFunctionError, "value");
-			return method->call(argc, atomv);
-		}
-		case BKIND_GET:
-		case BKIND_GETSET:
-		{
-			// Invoke the getter on base
-			int m = AvmCore::bindingToGetterId(b);
-			MethodEnv *f = vtable->methods[m];
-			Atom method = f->coerceEnter(base);
-			return op_call(method, argc, atomv);
-		}
-		case BKIND_SET:
-		{
-			// read on write-only property
-			throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
-		}
-		default:
-			if (AvmCore::isObject(base))
-			{
-				return AvmCore::atomToScriptObject(base)->callProperty(multiname, argc, atomv);
-			}
-			else
-			{
-				// primitive types are not dynamic, so we can go directly
-				// to their __proto__ object
-				ScriptObject* proto = toPrototype(base);
-				Atom method = proto->getMultinameProperty(multiname);
-				return op_call(method, argc, atomv);
-			}
-		}
-	}
-
-	Atom Toplevel::constructprop(const Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
-	{
-		Binding b = getBinding(vtable->traits, multiname);
-		Atom obj = atomv[0];
-		AvmCore* core = this->core();
-		switch (AvmCore::bindingKind(b))
-		{
-		case BKIND_METHOD:
-		{
-			// can't invoke method as constructor
-			MethodEnv* env = vtable->methods[AvmCore::bindingToMethodId(b)];
-			throwTypeError(kCannotCallMethodAsConstructor, core->toErrorString(env->method));
-		}
-		case BKIND_VAR:
-		case BKIND_CONST:
-		{
-			ScriptObject* ctor = AvmCore::atomToScriptObject(obj)->getSlotObject(AvmCore::bindingToSlotId(b));
-			if (!ctor ||
-				(!ctor->traits()->containsInterface(CLASS_TYPE) && !ctor->traits()->containsInterface(FUNCTION_TYPE)))
-				throwTypeError(kNotConstructorError, core->toErrorString(multiname));
-			// inlined equivalent of op_construct
-			return ctor->construct(argc, atomv);
-		}
-		case BKIND_GET:
-		case BKIND_GETSET:
-		{
-			// Invoke the getter
-			int m = AvmCore::bindingToGetterId(b);
-			MethodEnv *f = vtable->methods[m];
-			Atom ctor = f->coerceEnter(obj);
-			return op_construct(ctor, argc, atomv);
-		}
-		case BKIND_SET:
-		{
-			// read on write-only property
-			throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
-		}
-		default:
-			if ((obj&7)==kObjectType)
-			{
-				return AvmCore::atomToScriptObject(obj)->constructProperty(multiname, argc, atomv);
-			}
-			else
-			{
-				// primitive types are not dynamic, so we can go directly
-				// to their __proto__ object
-				ScriptObject* proto = toPrototype(obj);
-				Atom ctor = proto->getMultinameProperty(multiname);
-				return op_construct(ctor, argc, atomv);
-			}
-		}
-	}	
 
 	Atom Toplevel::instanceof(Atom atom, Atom ctor)
 	{
@@ -1122,37 +931,6 @@ add_numbers:
 		if (!dxns)
 			throwTypeError(kNoDefaultNamespaceError);
 		return dxns;
-	}
-
-	/**
-	 * find the binding for a property given a full multiname reference.  The lookup
-	 * must produce a single binding, or it's an error.  Note that the name could be
-	 * bound to the same binding in multiple namespaces.
-	 */
-	Binding Toplevel::getBinding(Traits* traits, const Multiname* ref) const
-	{
-		Binding b = BIND_NONE;
-		if (traits && ref->isBinding())
-		{
-			if (!traits->isResolved())
-				traits->resolveSignatures(this);
-				
-			TraitsBindingsp tb = traits->getTraitsBindings();
-			if (!ref->isNsset())
-			{
-				b = tb->findBinding(ref->getName(), ref->getNamespace());
-			}
-			else
-			{
-				b = tb->findBinding(ref->getName(), ref->getNsset());
-				if (b == BIND_AMBIGUOUS)
-				{
-					// ERROR.  more than one binding is available.  throw exception.
-					throwTypeError(kAmbiguousBindingError, core()->toErrorString(ref));
-				}
-			}
-		}
-		return b;
 	}
 
 	Binding Toplevel::getBindingAndDeclarer(Traits* traits, const Multiname& ref, Traitsp& declarer) const

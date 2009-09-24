@@ -1908,6 +1908,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\instr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\instr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\instr-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\IntClass.cpp"
 				>
 			</File>

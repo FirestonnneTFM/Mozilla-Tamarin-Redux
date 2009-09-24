@@ -2244,7 +2244,7 @@ namespace avmplus
             // As long as caches tend to be small compared to size of pool data and code,
             // filtering out dead cache lines isn't worth the complexity.
             LIns* slot = InsConst(cache_builder.allocateCacheSlot(opd1));
-            LIns* out = callIns(FUNCTIONID(finddef), 3, env_param, InsConstPtr(multiname), slot);
+            LIns* out = callIns(FUNCTIONID(finddef_cache), 3, env_param, InsConstPtr(multiname), slot);
             localSet(dest_index, ptrToNativeRep(type, out), type);
             break;
         }
