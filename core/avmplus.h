@@ -315,5 +315,10 @@ namespace avmplus
 #include "avmplusDebugger.h"
 #include "E4XNode.h"
 #include "AbcGen.h"
+#include "instr.h"
+
+// inlines
+#include "instr-inlines.h"
+#include "Toplevel-inlines.h"
 
 #endif /* __avmplus__ */ 

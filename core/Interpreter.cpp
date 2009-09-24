@@ -1911,7 +1911,7 @@ namespace avmplus
             INSTR(newarray) {
 				SAVE_EXPC;
                 i1 = (intptr_t)U30ARG;
-                a1 = toplevel->arrayClass->newarray(sp-i1+1, (int)i1)->atom();
+                a1 = avmplus::newarray(toplevel, (int)i1, sp-i1+1)->atom();
                 *(sp -= i1-1) = a1;
                 NEXT;
 			}
@@ -2444,7 +2444,7 @@ namespace avmplus
 				i1 = (intptr_t)U30ARG;  // argc
 				// stack in: factory, arg1, ... argN
 				// stack out: result
-				a1 = toplevel->op_applytype(sp[-i1]/*function*/, (int32_t)i1, sp-i1+1);
+				a1 = op_applytype(env, sp[-i1]/*function*/, (int32_t)i1, sp-i1+1);
 				*(sp = sp-i1) = a1;
 				NEXT;
 			}

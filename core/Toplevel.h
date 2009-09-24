@@ -121,6 +121,9 @@ namespace avmplus
 		inline void throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const { throwReferenceError(id, &multiname, traits); }
 		inline void throwReferenceError(int id, const Multiname& multiname) const { throwReferenceError(id, &multiname); }
 
+		inline Toplevel* toplevel() { return this; }
+		inline const Toplevel* toplevel() const { return this; }
+
 		// 
 		// methods that used to be on AvmCore but depend on the caller's environment
 		//

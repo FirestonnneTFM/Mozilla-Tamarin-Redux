@@ -136,6 +136,9 @@ namespace avmplus
 		const Atom undefinedAtom  = kSpecialType|0; // 0x03
 		const Atom trueAtom       = kBooleanType|0x08; // 0x0D
 		const Atom falseAtom      = kBooleanType|0x00; // 0x05
+
+		// used in unreachable "return" clauses as a self-documenting invalid value.
+		const Atom unreachableAtom = kUnusedAtomTag;
 		/*@}*/
 
 		enum BindingKind
@@ -155,6 +158,12 @@ namespace avmplus
 		const Binding BIND_NONE      = (Binding)BKIND_NONE;      // no such binding
 
 	}
+
+#ifdef DOPROF
+#define tagprof(n,v) _nhprof(n, uintptr_t(v)&7, 8, 0, 1, 2, 3, 4, 5, 6, 7)
+#else
+#define tagprof(n,v)
+#endif
 }
 
 #endif /* __avmplus_AtomConstants__ */

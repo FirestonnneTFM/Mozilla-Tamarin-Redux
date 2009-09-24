@@ -117,6 +117,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Date.cpp \
   $(curdir)/AbcData.cpp \
   $(curdir)/AvmPlusScriptableObject.cpp \
+  $(curdir)/instr.cpp \
   $(NULL)
 
 ifdef ENABLE_DEBUG

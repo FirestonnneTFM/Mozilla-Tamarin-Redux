@@ -231,91 +231,20 @@ SSE2_ONLY(
     METHOD(ENVADDR(MethodEnv::sf32), SIG3(V,P,F,I), sf32)
     METHOD(ENVADDR(MethodEnv::sf64), SIG3(V,P,F,I), sf64)
 
-    /**
-     * used to create concrete class objects for parameterizations of Vector.
-     * this code is inlined from Toplevel::op_applytype so we can delay loading
-     * Toplevel* until we need it
-     */
-    Atom op_applytype(MethodEnv* caller_env, Atom factory, int argc, Atom *ap) {
-        if (AvmCore::isObject(factory))
-            return AvmCore::atomToScriptObject(factory)->applyTypeArgs(argc, ap);
+    typedef Atom (*op_applytype_MethodEnv)(MethodEnv*, Atom, int, Atom*);
+    FUNCTION(FUNCADDR((op_applytype_MethodEnv)&avmplus::op_applytype<MethodEnv*>), SIG4(A,P,A,I,P), op_applytype)
 
-        caller_env->toplevel()->throwTypeError(kTypeAppOfNonParamType);
-        // unreachable
-        return undefinedAtom;
-    }
-    FUNCTION(FUNCADDR(op_applytype), SIG4(A,P,A,I,P), op_applytype)
+    typedef ArrayObject* (*newarray_MethodEnv)(MethodEnv*, int, Atom*);
+    FUNCTION(FUNCADDR((newarray_MethodEnv)&newarray<MethodEnv*>), SIG3(P,P,I,P), newarray)
 
-    /**
-     * implementaion of OP_newarray for creating array literals
-     */
-    ArrayObject* newarray(MethodEnv* caller_env, int argc, Atom* ap) {
-        Toplevel* toplevel = caller_env->toplevel();
-        ArrayClass* arrayClass = toplevel->arrayClass;
-        return arrayClass->newarray(ap, argc);
-    }
-    FUNCTION(FUNCADDR(newarray), SIG3(P,P,I,P), newarray)
-
-    /**
-     * implementation of OP_newarray when RHS type is not 
-     * known at JIT time
-     */
-    Atom astype_late(MethodEnv* caller_env, Atom value, Atom type) {
-        Traits* itraits = caller_env->toplevel()->toClassITraits(type);
-        return AvmCore::astype(value, itraits);
-    } 
-    CSEFUNCTION(FUNCADDR(astype_late), SIG3(A,P,A,A), astype_late)
+    typedef Atom (*astype_late_MethodEnv)(MethodEnv*, Atom, Atom);
+    CSEFUNCTION(FUNCADDR((astype_late_MethodEnv)&astype_late<MethodEnv*>), SIG3(A,P,A,A), astype_late)
     CSEFUNCTION(FUNCADDR(AvmCore::astype), SIG2(A,A,P), astype)
 
-    /**
-     * implementation of OP_instanceof
-     */
-    Atom instanceof(MethodEnv* caller_env, Atom val, Atom ctor) {
-        return caller_env->toplevel()->instanceof(val, ctor);
-    }
-    FUNCTION(FUNCADDR(instanceof), SIG3(A,P,A,A), instanceof)
+    typedef Atom (*instanceof_MethodEnv)(MethodEnv*, Atom, Atom);
+    FUNCTION(FUNCADDR((instanceof_MethodEnv)&instanceof<MethodEnv*>), SIG3(A,P,A,A), instanceof)
 
-    /**
-     * implementation of OP_in
-     */
-    Atom op_in(MethodEnv* caller_env, Atom name, Atom obj) {
-        return caller_env->toplevel()->in_operator(name, obj);
-    }
-    FUNCTION(FUNCADDR(op_in), SIG3(A,P,A,A), op_in)
+    typedef Atom (*op_in_MethodEnv)(MethodEnv*, Atom, Atom);
+    FUNCTION(FUNCADDR((op_in_MethodEnv)&op_in<MethodEnv*>), SIG3(A,P,A,A), op_in)
 
-    /**
-     * inline-cache enabled finddef.  if the cache for this slot is valid, return
-     * the result from calling finddef on this (env,multiname) pair previously.
-     */
-    ScriptObject* finddef(MethodEnv* env, const Multiname* name, uint32_t slot)
-    {
-        AvmAssert(env->method->lookup_cache_size() > 0);
-        AvmAssert(slot < (uint32_t)env->method->lookup_cache_size());
-        MethodEnv::LookupCache *cache = env->lookup_cache;
-        if (!cache) {
-            // todo - do this earlier.  This extra test in the fast path
-            // is repugnant but hasn't shown itself to be a problem in practice.
-            using namespace MMgc;
-            size_t nbytes = sizeof(*cache) * env->method->lookup_cache_size();
-            _nvprof("lookup_cache_bytes", nbytes);
-            AvmCore* core = env->core();
-            cache = (MethodEnv::LookupCache*) core->gc->Alloc(nbytes, GC::kContainsPointers | GC::kZero);
-            env->lookup_cache = cache;
-        }
-
-        // check for valid cache
-        AvmCore* core = env->core();
-        if (core->lookupCacheIsValid(cache[slot].timestamp)) {
-            _nvprof("finddef P-fast", 1);
-            return cache[slot].object;
-        }
-
-        // miss
-        _nvprof("finddef P-fast", 0);
-        ScriptObject* obj = env->finddef(name);
-        AvmAssert(obj != NULL); // or else finddef would have thrown an exception.
-        cache[slot].timestamp = core->lookupCacheTimestamp();
-        WBRC(core->gc, cache, &cache[slot].object, obj);
-        return obj;
-    }
-    CSEFUNCTION(FUNCADDR(finddef), SIG3(P,P,P,U), finddef)
+    CSEFUNCTION(FUNCADDR(finddef_cache), SIG3(P,P,P,U), finddef_cache)
