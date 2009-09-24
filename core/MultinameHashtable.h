@@ -43,11 +43,7 @@ namespace avmplus
 	/**
 	 * Hashtable for mapping <name, ns> pairs to a Binding
 	 */
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class MultinameHashtable : public MMgc::GCFinalizedObject
-#else
 	class MultinameHashtable : public MMgc::GCObject
-#endif
 	{
 		friend class StMNHTIterator;
 

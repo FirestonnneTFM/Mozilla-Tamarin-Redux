@@ -41,11 +41,7 @@
 
 namespace avmplus
 {
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class MethodEnvProcHolder : public MMgc::GCFinalizedObject
-#else
 	class MethodEnvProcHolder : public MMgc::GCObject
-#endif
 	{
 		friend class CodegenLIR;
 
@@ -86,10 +82,6 @@ namespace avmplus
 		WeakKeyHashtable *getMethodClosureTable();
 
 		MethodEnv(MethodInfo* method, ScopeChain* scope);
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		virtual ~MethodEnv();
-#endif
 
 		REALLY_INLINE AbcEnv* abcEnv() const { return _scope->abcEnv(); }
 		REALLY_INLINE AvmCore* core() const { return method->pool()->core; }

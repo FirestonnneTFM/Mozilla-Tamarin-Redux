@@ -519,17 +519,8 @@ namespace avmplus
 		}
 		
 		// activation info used to be created here, but is now created lazily
-		
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
 	
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-	MethodEnv::~MethodEnv()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_methodenv, this); )
-	}
-#endif
-
 #ifdef DEBUGGER
 	void MethodEnv::debugEnter(	Traits** frameTraits, 
 								CallStackNode* callstack,

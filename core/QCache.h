@@ -68,11 +68,7 @@
 
 namespace avmplus
 {
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class QCachedItem : public MMgc::GCFinalizedObject
-#else
 	class QCachedItem : public MMgc::GCObject
-#endif
 	{
 		friend class QCache;
 	public:

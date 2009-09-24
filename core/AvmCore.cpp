@@ -64,10 +64,6 @@ namespace avmplus
  		m_msCache->resize(cs.methods);
 	}
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	extern AvmCore* g_tmcore;
-#endif
-
 	const bool AvmCore::verbose_default = false;
 	const bool AvmCore::verbose_addrs_default = false;
 	const bool AvmCore::methodNames_default = true;
@@ -122,10 +118,6 @@ namespace avmplus
 #endif
 		, gcInterface(g)
     {
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-		AvmAssert(g_tmcore == NULL);
-		g_tmcore = this;
-#endif
 		// sanity check for all our types
 		MMGC_STATIC_ASSERT(sizeof(int8) == 1);
 		MMGC_STATIC_ASSERT(sizeof(uint8) == 1);		
@@ -277,12 +269,6 @@ namespace avmplus
 		m_tbCache->flush(); 
 		m_tmCache->flush(); 
 		m_msCache->flush(); 
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-		tmt_report();
-		AvmAssert(g_tmcore == this);
-		g_tmcore = NULL;
-#endif
 
 		m_tbCache = NULL;
 		m_tmCache = NULL;
@@ -2811,9 +2797,6 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifdef DEBUGGER
 		if (_sampler)
 			_sampler->postsweep();
-#endif
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-		tmt_report();
 #endif
 	}
 
