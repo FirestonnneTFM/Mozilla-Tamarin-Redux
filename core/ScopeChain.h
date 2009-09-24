@@ -44,20 +44,12 @@ namespace avmplus
 	 *
 	 * Note: ScopeTypeChain is now immutable; once created it cannot be modified
 	 */
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class ScopeTypeChain : public MMgc::GCFinalizedObject
-#else
 	class ScopeTypeChain : public MMgc::GCObject
-#endif
 	{
 	private:
 		inline ScopeTypeChain(int _size, int _fullsize, Traits* traits) : size(_size), fullsize(_fullsize), _traits(traits) { }
 
 	public:
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		virtual ~ScopeTypeChain();
-#endif
 
 		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra);
 		inline static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits) { return create(gc, traits, NULL, NULL, NULL, NULL); }
@@ -92,11 +84,7 @@ namespace avmplus
 	/**
 	* a captured scope chain
 	*/
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class ScopeChain : public MMgc::GCFinalizedObject
-#else
 	class ScopeChain : public MMgc::GCObject
-#endif
 	{
 		inline ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns) : 
 			_vtable(vtable), _abcEnv(abcEnv), _scopeTraits(scopeTraits), _defaultXmlNamespace(dxns)
@@ -109,9 +97,6 @@ namespace avmplus
 
 	public:
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		virtual ~ScopeChain();
-#endif
 		/*
 			dxns is modelled as a variable on an activation object.  The activation
 			object will be in several scope chains, so we can't store dxns in the SC.

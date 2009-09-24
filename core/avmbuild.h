@@ -143,20 +143,6 @@
 #  endif
 #endif
 
-// This is here for VM memory profiling.
-//
-// this can be useful in tracking down memory usage for Traits and Traits-related caches,
-// but is very invasive and should only be used in special engineering builds. It should be
-// be left in place (but disabled) for now, as it's still in use...
-// it will go away at some point in the not-too-distant future, however.
-//
-// *** NOTE ON THREAD SAFETY ***
-// AVMPLUS_TRAITS_MEMTRACK is not supported in configurations where more than one
-// AvmCore is instantiated in the same process, as the monitoring code is not
-// thread safe and the results will be unpredictable.
-
-//#define AVMPLUS_TRAITS_MEMTRACK
-
 // This is here for VM development.
 //
 // define this to 1 to keep a shadow copy of implGPR in MethodEnv (vs MethodInfo only).

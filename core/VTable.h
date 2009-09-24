@@ -75,11 +75,7 @@ namespace avmplus
 
 #endif
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class VTable : public MMgc::GCFinalizedObject
-#else
 	class VTable : public MMgc::GCObject
-#endif
 	{
 #if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
@@ -113,9 +109,6 @@ namespace avmplus
 
 	public:
 		VTable(Traits* traits, VTable* base, Toplevel* toplevel);
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		virtual ~VTable();
-#endif
 		void resolveSignatures(ScopeChain* scope);
 
 		VTable* newParameterizedVTable(Traits* param_traits, Stringp fullname);

@@ -78,11 +78,7 @@ namespace avmplus
 
 	class MethodSignature;
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	class MethodInfoProcHolder : public MMgc::GCFinalizedObject
-#else
 	class MethodInfoProcHolder : public MMgc::GCObject
-#endif
 	{
 		friend class CodegenLIR;
 		friend class ImtThunkEnv;
@@ -314,11 +310,6 @@ namespace avmplus
 #endif
 
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	protected:
-		virtual ~MethodInfo();
-#endif
-
 	public:
 
 #if VMCFG_METHOD_NAMES
@@ -452,10 +443,6 @@ namespace avmplus
 	{
 		friend class MethodInfo;
 	public:
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		MethodSignature();
-		virtual ~MethodSignature();
-#endif
 	private:
 		union AtomOrType
 		{

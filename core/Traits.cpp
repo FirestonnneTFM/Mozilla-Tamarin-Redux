@@ -42,221 +42,6 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	AvmCore* g_tmcore = NULL;
-	
-	class TMT_list
-	{
-	private:
-		enum { MAXLIST = 150000 };
-		uint32_t m_count;
-		const void* m_p[MAXLIST];
-	public:
-		inline TMT_list() : m_count(0) {}
-		inline uint32_t count() const { return m_count; }
-		inline const void* operator[](uint32_t i) const { return m_p[i]; }
-		int32_t find(const void* val) const;
-		void add(const void* val);
-		bool remove(const void* val);
-		void reset() { m_count = 0; }
-	};
-
-	struct TMT
-	{
-		TMT_list live;
-		uint32_t mem, active, cached;
-		uint32_t count_hw, mem_hw;
-		
-		inline TMT() : mem(0), active(0), cached(0), count_hw(0), mem_hw(0) {}
-	};
-	static TMT g_tinfo[TMT_COUNT];
-	static const char* const g_tinfonm[TMT_COUNT] = 
-	{ 
-		"Traits", 
-		"TBI", 
-		"TMI", 
-		"VTable", 
-		"MethodEnv", 
-		"MethodInfo", 
-		"MethodSig",
-		"ScopeChain", 
-		"STC" 
-	};
-
-	int32_t TMT_list::find(const void* val) const
-	{
-		for(uint32_t i=0; i<m_count; i++)
-			if (m_p[i] == val)
-				return (int32_t)i;
-		
-		return -1;
-	}
-
-	void TMT_list::add(const void* val)
-	{
-		if (m_count >= MAXLIST)
-		{
-			AvmAssert(0);
-			AvmLog("***** WARNING, overflow\n");
-			AvmLog("***** WARNING, overflow\n");
-			AvmLog("***** WARNING, overflow\n");
-			return;
-		}
-		
-		if (find(val) >= 0)
-			return;
-		
-		m_p[m_count++] = val;
-	}
-
-	bool TMT_list::remove(const void* val)
-	{
-		int32_t i = find(val);
-		AvmAssert(i >= 0 && i < (int32_t)m_count);
-		if (i >= 0)
-		{
-			if (i < (int32_t)m_count-1)
-				VMPI_memmove(&m_p[i], &m_p[i+1], sizeof(const void*)*(m_count-1-i));
-			m_count -= 1;
-			AvmAssert(find(val) < 0);
-			return true;
-		}
-		return false;
-	}
-	
-	void tmt_report()
-	{
-		static int g_in_delta = 0;
-		if (g_in_delta == 0)	// just in case
-		{
-			++g_in_delta;
-			
-			static TMT_list g_tmp;	// static only to avoid crushing the stack
-
-			g_tmp.reset();
-			for (QCachedItem* td = g_tmcore->tmCache()->first(); td; td = g_tmcore->tmCache()->next(td))
-			{
-				for (TraitsMetadatap t = (TraitsMetadatap)td; t; t = t->base)
-					g_tmp.add(t);
-			}
-			g_tinfo[TMT_tmi].cached = g_tmcore->tmCache()->count();
-			g_tinfo[TMT_tmi].active = g_tmp.count();
-
-			g_tmp.reset();
-			for (QCachedItem* td = g_tmcore->msCache()->first(); td; td = g_tmcore->msCache()->next(td))
-			{
-				g_tmp.add(td);
-			}
-			g_tinfo[TMT_methodsig].cached = g_tmcore->msCache()->count();
-			g_tinfo[TMT_methodsig].active = g_tmp.count();
-			
-			// NOTE, always process TBI last, as code below relies on that for rogue processing
-			g_tmp.reset();
-			for (QCachedItem* td = g_tmcore->tbCache()->first(); td; td = g_tmcore->tbCache()->next(td))
-			{
-				for (TraitsBindingsp t = (TraitsBindingsp)td; t; t = t->base)
-					g_tmp.add(t);
-			}
-			g_tinfo[TMT_tbi].cached = g_tmcore->tbCache()->count();
-			g_tinfo[TMT_tbi].active = g_tmp.count();
-
-			AvmLog("\nTraitsMemTrack %s:\n",g_tmcore->IsJITEnabled()?"JIT":"INTERP");
-			uint32_t totmem = 0;
-			uint32_t totmem_hw = 0;
-			for (int i = 0; i < TMT_COUNT; ++i)
-			{
-				AvmLog("    %-16s live: %d=%dk (%db), hw: %d=%dk (%db) ",
-					g_tinfonm[i],
-					g_tinfo[i].live.count(),
-					g_tinfo[i].mem>>10,
-					g_tinfo[i].live.count()?(g_tinfo[i].mem/g_tinfo[i].live.count()):0,
-					g_tinfo[i].count_hw,
-					g_tinfo[i].mem_hw>>10,
-					g_tinfo[i].count_hw?(g_tinfo[i].mem_hw/g_tinfo[i].count_hw):0);
-
-				if (i == TMT_tmi || i == TMT_tbi || i == TMT_methodsig)
-					AvmLog(" cached=%d(=%d incl bases)",
-						g_tinfo[i].cached,
-						g_tinfo[i].active);
-
-				AvmLog("\n");
-				totmem += g_tinfo[i].mem;
-				totmem_hw += g_tinfo[i].mem_hw;
-			}
-			// hw total may be inaccurate because different buckets might HW at different times
-			AvmLog("  totmem: %dk (hw estimate: %dk)\n",totmem>>10,totmem_hw>>10);
-
-			// g_tmp still contains the list of all active cached TBI
-			uint32_t rogues = 0;
-			for (uint32_t i = 0; i < g_tinfo[TMT_tbi].live.count(); ++i)
-			{
-				const void* tbi = g_tinfo[TMT_tbi].live[i];
-				if (g_tmp.find(tbi) < 0)
-				{
-					AvmLog("   rogue TBI found: %p size %d\n", (void*)tbi, (uint32_t)GC::Size(tbi));
-					//Traitsp o = ((TraitsBindingsp)(g_live_tbi[i]))->owner;
-					//AvmLog("   rogue TBI found: %p size=%d owned by %s %p\n", (void*)g_live_tbi[i], (uint32_t)GC::Size(live_tbi[i]), (char*)o->rawname, (void*)o);
-					#ifdef _DEBUG
-					//g_tmcore->GetGC()->DumpBackPointerChain((void*)tbi);
-					#endif
-					++rogues;
-				}
-			}
-			if (rogues>10)
-			AvmLog(" **** found %d rogues\n",rogues);
-
-			--g_in_delta;
-		}
-	}
-
-	void tmt_add_mem(TMTTYPE t, size_t d)
-	{
-		g_tinfo[t].mem += d;
-		
-		if (g_tinfo[t].mem_hw < g_tinfo[t].mem)
-		{
-			g_tinfo[t].mem_hw = g_tinfo[t].mem;
-			g_tinfo[t].count_hw = g_tinfo[t].live.count();
-		}
-	}
-
-	void tmt_sub_mem(TMTTYPE t, size_t d)
-	{
-		g_tinfo[t].mem -= d;
-	}
-
-	static size_t get_size(TMTTYPE t, const void* inst)
-	{
-		size_t sz = GC::Size(inst);
-		if (t != TMT_traits && t != TMT_tbi && t != TMT_tmi)
-		{
-			// remove vtable ptr that only exists in memtrack mode
-			sz -= sizeof(void*);
-			// note, mmgc allocates in 8-byte increments, so saving 4 might allow us to save 8,
-			// we don't try to account for that here
-		}
-		return sz;
-	}
-
-	void tmt_add_inst(TMTTYPE t, const void* inst)
-	{
-		AvmAssert(g_tinfo[t].live.find(inst) < 0);
-		g_tinfo[t].live.add(inst);
-		AvmAssert(g_tinfo[t].live.find(inst) >= 0);
-		
-		tmt_add_mem(t, get_size(t, inst));
-	}
-
-	void tmt_sub_inst(TMTTYPE t, const void* inst)
-	{
-		AvmAssert(g_tinfo[t].live.find(inst) >= 0);
-		g_tinfo[t].live.remove(inst);
-		AvmAssert(g_tinfo[t].live.find(inst) < 0);
-
-		tmt_sub_mem(t, get_size(t, inst));
-	}
-#endif
-
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
@@ -299,16 +84,8 @@ namespace avmplus
 			if (_base->methodCount)
 				VMPI_memcpy(&tb->getMethods()[0], &_base->getMethods()[0], _base->methodCount * sizeof(MethodInfo));
 		}
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_tbi, tb); )
 		return tb;
 	}
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	TraitsBindings::~TraitsBindings()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst( TMT_tbi, this); )
-	}
-#endif
 
 	Binding TraitsBindings::findBinding(Stringp name) const
 	{
@@ -432,9 +209,7 @@ namespace avmplus
 		const uint32_t bitsNeeded = m_slotSize / sizeof(uint32_t);	// not sizeof(Atom)!
 		AvmAssert(bitsNeeded * sizeof(uint32_t) == m_slotSize);		// should be even multiple!
 		// allocate one extra bit and use it for "all-zero"
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_mem(TMT_traits, slotDestroyInfo.allocatedSize() ); )
 		slotDestroyInfo.resize(gc, bitsNeeded+1);
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_traits, slotDestroyInfo.allocatedSize() ); )
 		
 		const uint32_t sizeofInstance = this->owner->m_sizeofInstance;
 		const TraitsBindings::SlotInfo* tbs		= getSlots();
@@ -458,9 +233,7 @@ namespace avmplus
 		// if nothing set, blow away what we built and realloc as single clear bit -- smaller and faster
 		if (!slotDestroyInfo.test(0))
 		{
-			AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_mem(TMT_traits, slotDestroyInfo.allocatedSize() ); )
 			slotDestroyInfo.resize(gc, 1);
-			AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_traits, slotDestroyInfo.allocatedSize() ); )
 			AvmAssert(!slotDestroyInfo.test(0));
 		}
 	}
@@ -700,13 +473,6 @@ namespace avmplus
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-	TraitsMetadata::~TraitsMetadata()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst( TMT_tmi, this); )
-	}
-#endif
-
 	TraitsMetadata::MetadataPtr TraitsMetadata::getSlotMetadataPos(uint32_t i, PoolObject*& residingPool) const
 	{
 		AvmAssert(i < slotCount);
@@ -774,15 +540,7 @@ namespace avmplus
 				break;
 		}
 #endif
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_traits, this); )
     }
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	Traits::~Traits()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_traits, this); )
-	}
-#endif
 
 	/*static*/ Traits* Traits::newTraits(PoolObject* pool,
 							Traits *base,
@@ -1471,7 +1229,6 @@ namespace avmplus
 		const uint32_t extra = td->slotCount * sizeof(TraitsMetadata::MetadataPtr) + td->methodCount * sizeof(TraitsMetadata::MetadataPtr);
 
 		TraitsMetadata* tm = new (gc, extra) TraitsMetadata(basetm, this->pool, this->metadata_pos, td->slotCount, td->methodCount);
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_tmi, tm); )
 		tm->slotMetadataPos = (TraitsMetadata::MetadataPtr*)(tm + 1);
 		tm->methodMetadataPos = (TraitsMetadata::MetadataPtr*)(tm->slotMetadataPos + tm->slotCount);
 
@@ -1676,12 +1433,6 @@ namespace avmplus
 		tb->buildSlotDestroyInfo(gc, m_slotDestroyInfo);
 
 		linked = true;
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-		StUTF8String name8(name());
-		rawname = (char*)gc->Alloc(name8.length()+1);
-		VMPI_strcpy(rawname, name8.c_str());
-#endif
 	}
 
 	// static

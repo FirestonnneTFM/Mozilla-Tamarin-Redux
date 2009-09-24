@@ -41,41 +41,6 @@
 
 namespace avmplus
 {
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	// doesn't really belong here, but needs to go somewhere... good enough for now.
-	enum TMTTYPE 
-	{ 
-		TMT_traits, 
-		TMT_tbi, 
-		TMT_tmi, 
-		TMT_vtable, 
-		TMT_methodenv, 
-		TMT_methodinfo, 
-		TMT_methodsig, 
-		TMT_scopechain, 
-		TMT_scopetypechain, 
-		TMT_COUNT 
-	};
-
-	extern void tmt_add_mem(TMTTYPE t, size_t d);
-	extern void tmt_sub_mem(TMTTYPE t, size_t d);
-
-	extern void tmt_add_inst(TMTTYPE t, const void* inst);
-	extern void tmt_sub_inst(TMTTYPE t, const void* inst);
-	
-	extern void tmt_report();
-
-	#define AVMPLUS_TRAITS_MEMTRACK_ONLY(x) x
-#else
-	#define AVMPLUS_TRAITS_MEMTRACK_ONLY(x) 
-#endif
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	typedef MMgc::GCFinalizedObject TRAITSBASE;
-#else
-	typedef MMgc::GCObject TRAITSBASE;
-#endif
-
 	// Note: we rely on being able to store this in 3 bits. 
 	enum TraitsPosType
 	{
@@ -176,10 +141,6 @@ namespace avmplus
 			m_slotSize(0)
 		{
 		}
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		virtual ~TraitsBindings();
-#endif
 
 	public:
 		static const uint32_t MAX_SLOT_OFFSET = (1U << 31) - 1;
@@ -303,10 +264,6 @@ namespace avmplus
 
 	public:
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-		virtual ~TraitsMetadata();
-#endif
-
 		MetadataPtr getMetadataPos(PoolObject*& residingPool) const { residingPool = this->residingPool; return metadataPos; }
 		MetadataPtr getSlotMetadataPos(uint32_t i, PoolObject*& residingPool) const;
 		MetadataPtr getMethodMetadataPos(uint32_t i, PoolObject*& residingPool) const;
@@ -336,7 +293,7 @@ namespace avmplus
 	 * binding to an accessor, binding to a virtual function,
 	 * binding to a final function.
 	 */
-	class Traits : public TRAITSBASE 
+	class Traits : public MMgc::GCObject 
 	{
 		friend class TraitsBindings;	// for m_sizeofInstance
 		#if defined FEATURE_NANOJIT
@@ -413,10 +370,6 @@ namespace avmplus
 				TraitsPosPtr traitsPos,
 				TraitsPosType posType);
 		
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-		virtual ~Traits();
-#endif
-
 		static Traits* newCatchTraits(const Toplevel* toplevel, PoolObject* pool, TraitsPosPtr traitsPos, Stringp name, Namespacep ns);
 		Traits* newParameterizedITraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this); }
 		Traits* newParameterizedCTraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this->base); }
@@ -507,9 +460,6 @@ namespace avmplus
 	public:		Traits*					itraits;	// if this type is a factory, itraits is non-null and points to the type created by this factory.
 	private:	DRCWB(Namespacep)		_ns;			// The namespace of the class described by this traits object
 	private:	DRCWB(Stringp)			_name;		// The name of the class described by this traits object
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	public:		DWB(char*)				rawname;
-#endif
 	public:		DRCWB(Namespacep)		protectedNamespace;	// protected namespace, if any
 	public:		DWB(MethodInfo*)		init;				// not a call/init union b/c smart pointers and union's don't mix
 	private:	CreateClassClosureProc	m_createClassClosure;

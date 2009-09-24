@@ -64,7 +64,6 @@ namespace avmplus
 		_flags(RESOLVED),
 		_method_id(-1)
 	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_methodinfo, this); )
 	}
 
 	/**
@@ -85,7 +84,7 @@ namespace avmplus
 		_method_id(method_id)
 	{
 
-#if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
+#if !defined(MEMORY_INFO)
 		MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
 #endif
 
@@ -97,16 +96,8 @@ namespace avmplus
 #endif
 			this->_flags |= NEEDS_CODECONTEXT | NEEDS_DXNS | ABSTRACT_METHOD;
 		}
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_methodinfo, this); )
 	}
 
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	MethodInfo::~MethodInfo()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_methodinfo, this); )
-	}
-#endif
- 
     // WARNING the logic 'declaringTraits()->init' appears to imply 
     // a class initializer, but the condition could be generated for
     // some other combination of traits and methods - short of it is 
@@ -1174,17 +1165,5 @@ namespace avmplus
 		return name;
 	}
 #endif		
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK
-	MethodSignature::MethodSignature()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodsig, this); )
-	}
-
-	MethodSignature::~MethodSignature()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst( TMT_methodsig, this); )
-	}
-#endif
 
 }

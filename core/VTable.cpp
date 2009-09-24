@@ -295,15 +295,7 @@ namespace avmplus
 		linked(false)
 	{
 		AvmAssert(traits != NULL);
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_vtable, this); )
 	}
-
-#ifdef AVMPLUS_TRAITS_MEMTRACK 
-	VTable::~VTable()
-	{
-		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_vtable, this); )
-	}
-#endif
 
 	void VTable::resolveSignatures(ScopeChain* scope)
 	{
