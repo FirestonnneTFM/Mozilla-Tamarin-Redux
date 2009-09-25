@@ -133,6 +133,7 @@ return *((intptr_t*)&_method);
 #define DOPROF
 #endif /* PERFM */
 
+//#define DOPROF
 #include "../vprof/vprof.h"
 
 #ifdef AVMPLUS_64BIT
@@ -483,79 +484,50 @@ namespace avmplus
 
     LIns* CodegenLIR::loadAtomRep(int i)
     {
-        Value& v = state->value(i);
-        Traits* t = v.traits;
+        return loadAtomRep(localCopy(i), state->value(i).traits);
+    }
 
-        // handle Number first in case we need to do a quad load
-        if (t == NUMBER_TYPE)
-        {
-            return callIns(FUNCTIONID(doubleToAtom), 2, coreAddr, localGetq(i));
-        }
+    LIns* CodegenLIR::loadAtomRep(LIns* native, Traits* t)
+    {
+        switch (bt(t)) {
+        case BUILTIN_number:
+            return callIns(FUNCTIONID(doubleToAtom), 2, coreAddr, native);
 
-        if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
-        {
-            // already Atom
-            return localGetp(i);
-        }
+        case BUILTIN_any:
+        case BUILTIN_object:
+        case BUILTIN_void:
+            return native;  // value already represented as Atom
 
-        LIns* native = localCopy(i);
-
-        // short circuit immediates
-        if (native->isconst())
-        {
-            if (t == INT_TYPE)
-            {
-                Atom a = core->intToAtom(int(native->imm32()));
-                if(AvmCore::isInteger(a))
+        case BUILTIN_int:
+            if (native->isconst()) {
+                Atom a = core->intToAtom(native->imm32());
+                if (AvmCore::isInteger(a))
                     return InsConstAtom(a);
             }
+            return callIns(FUNCTIONID(intToAtom), 2, coreAddr, native);
 
-            if (t == UINT_TYPE)
-            {
+        case BUILTIN_uint:
+            if (native->isconst()) {
                 Atom a = core->uintToAtom(native->imm32());
-                if(AvmCore::isInteger(a))
+                if (AvmCore::isInteger(a))
                     return InsConstAtom(a);
             }
+            return callIns(FUNCTIONID(uintToAtom), 2, coreAddr, native);
 
-            if (t == BOOLEAN_TYPE)
-            {
-                return InsConstAtom(native->imm32() ? trueAtom : falseAtom);
-            }
-        }
+        case BUILTIN_boolean:
+            return u2p(binaryIns(LIR_or, // could be add
+                                 binaryIns(LIR_lsh, native, InsConst(3)),
+                                 InsConst(kBooleanType)));
 
-        if (native->isconstp()) {
-            if (!t->isMachineType() && native->constvalp() == 0) {
-                return InsConstAtom(nullObjectAtom);
-            }
-        }
-
-        if (t == INT_TYPE)
-        {
-            return callIns(FUNCTIONID(intToAtom), 2,
-                coreAddr, native);
-        }
-        if (t == UINT_TYPE)
-        {
-            return callIns(FUNCTIONID(uintToAtom), 2,
-                coreAddr, native);
-        }
-        if (t == BOOLEAN_TYPE)
-        {
-            LIns* i1 = binaryIns(LIR_lsh, native, InsConst(3));
-            return u2p(binaryIns(LIR_or, i1, InsConst(kBooleanType)));
-        }
-
-        // possibly null pointers
-        if (t == STRING_TYPE)
-        {
+        case BUILTIN_string:
             return binaryIns(LIR_pior, native, InsConstAtom(kStringType));
-        }
-        if (t == NAMESPACE_TYPE)
-        {
-            return binaryIns(LIR_pior, native, InsConstAtom(kNamespaceType));
-        }
 
-        return binaryIns(LIR_pior, native, InsConstAtom(kObjectType));
+        case BUILTIN_namespace:
+            return binaryIns(LIR_pior, native, InsConstAtom(kNamespaceType));
+
+        default:
+            return binaryIns(LIR_pior, native, InsConstAtom(kObjectType));
+        }
     }
 
     LIns* CodegenLIR::storeAtomArgs(int count, int index)
@@ -2984,9 +2956,9 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::emitGetslot(FrameState *state, int slot, int ptr_index, Traits *result)
+    LIns* CodegenLIR::loadFromSlot(int ptr_index, int slot, Traits* slotType)
     {
-        emitPrep(state);
+        // assumes emitPrep already called and state already saved
 
         Traits *t = state->value(ptr_index).traits;
         LIns *ptr = localGetp(ptr_index);
@@ -3010,14 +2982,20 @@ namespace avmplus
 
         // get
         LOpcode op;
-        switch (bt(result)) {
+        switch (bt(slotType)) {
         case BUILTIN_number:    op = LIR_ldq;   break;
         case BUILTIN_int:
         case BUILTIN_uint:
         case BUILTIN_boolean:   op = LIR_ld;    break;
         default:                op = LIR_ldp;   break;
         }
-        localSet(ptr_index, loadIns(op, offset, ptr), result);
+        return loadIns(op, offset, ptr);
+    }
+
+    void CodegenLIR::emitGetslot(FrameState *state, int slot, int ptr_index, Traits *slotType)
+    {
+        emitPrep(state);
+        localSet(ptr_index, loadFromSlot(ptr_index, slot, slotType), slotType);
     }
 
     void CodegenLIR::emitSetslot(FrameState *state, AbcOpcode opcode, int slot, int ptr_index)
@@ -3549,7 +3527,7 @@ namespace avmplus
             case OP_call:
             {
                 // stack in: method obj arg1..N
-                // sp[-argc-1] = call(env, sp[-argc], argc, ...)
+                // sp[-argc-1] = op_call(env, sp[-argc], argc, ...)
                 int argc = int(op1);
                 int funcDisp = sp - argc - 1;
                 int dest = funcDisp;
@@ -3557,12 +3535,7 @@ namespace avmplus
                 // convert args to Atom[] for the call
                 LIns* func = loadAtomRep(funcDisp);
                 LIns* ap = storeAtomArgs(loadAtomRep(funcDisp+1), argc, funcDisp+2);
-
-                LIns* toplevel = loadToplevel();
-
-                LIns* i3 = callIns(FUNCTIONID(op_call), 4,
-                    toplevel, func, InsConst(argc), ap);
-
+                LIns* i3 = callIns(FUNCTIONID(op_call), 4, env_param, func, InsConst(argc), ap);
                 localSet(dest, atomToNativeRep(result, i3), result);
                 break;
             }
@@ -3574,28 +3547,36 @@ namespace avmplus
                 // stack in: obj [ns [name]] arg1..N
                 // stack out: result
 
-                int argc = int(op2);
                 // obj = sp[-argc]
                 //tempAtom = callproperty(env, name, toVTable(obj), argc, ...);
                 //  *(sp -= argc) = tempAtom;
+                int argc = int(op2);
                 int argv = sp-argc+1;
-
                 int baseDisp = sp-argc;
-                LIns* multi = initMultiname((Multiname*)op1, baseDisp);
-
                 AvmAssert(state->value(baseDisp).notNull);
 
-                // convert args to Atom[] for the call
                 LIns* base = loadAtomRep(baseDisp);
                 LIns* receiver = opcode == OP_callproplex ? InsConstAtom(nullObjectAtom) : base;
                 LIns* ap = storeAtomArgs(receiver, argc, argv);
 
-                LIns* vtable = loadVTable(baseDisp);
-                LIns* toplevel = loadToplevel();
-
-                LIns* out = callIns(FUNCTIONID(callproperty), 6,
-                    toplevel, base, multi, InsConst(argc), ap, vtable);
-
+                const Multiname* name = (const Multiname*) op1;
+                Traits* baseTraits = state->value(baseDisp).traits;
+                Binding b = state->verifier->getToplevel(this)->getBinding(baseTraits, name);
+                LIns* out;
+                if (AvmCore::isSlotBinding(b)) {
+                    // can early bind call to closure in slot
+                    Traits* slotType = state->verifier->readBinding(baseTraits, b);
+                    // todo if funcValue is already a ScriptObject then don't box it, use a different helper.
+                    LIns* funcValue = loadFromSlot(baseDisp, AvmCore::bindingToSlotId(b), slotType);
+                    LIns* funcAtom = loadAtomRep(funcValue, slotType);
+                    out = callIns(FUNCTIONID(op_call), 4, env_param, funcAtom, InsConst(argc), ap);
+                } else {
+                    // generic late bound call to anything
+                    LIns* multi = initMultiname(name, baseDisp);
+                    LIns* vtable = loadVTable(baseDisp);
+                    LIns* toplevel = loadToplevel();
+                    out = callIns(FUNCTIONID(callproperty), 6, toplevel, base, multi, InsConst(argc), ap, vtable);
+                }
                 localSet(baseDisp, atomToNativeRep(result, out), result);
                 break;
             }
