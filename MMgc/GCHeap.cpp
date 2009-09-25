@@ -1223,7 +1223,7 @@ namespace MMgc
 				// Can this request be satisfied purely by committing more memory that
 				// is already reserved?
 				if (size <= commitAvail) {
-				if (VMPI_commitMemory(region->commitTop, size * kBlockSize))
+					if (VMPI_commitMemory(region->commitTop, size * kBlockSize))
 					{
 						// Succeeded!
 						baseAddr = region->commitTop;
@@ -1316,15 +1316,15 @@ namespace MMgc
 			// - Go for the default reservation size unless the requested
 			//   size is bigger.
 			if (size < defaultReserve) {
-			newRegionAddr = (char*) VMPI_reserveMemoryRegion(NULL,
-											  defaultReserve*kBlockSize);
+				newRegionAddr = (char*) VMPI_reserveMemoryRegion(NULL,
+												  defaultReserve*kBlockSize);
 				newRegionSize = defaultReserve;
 			}
 			
 			// - If that failed or the requested size is bigger than default,
 			//   go for the requested size exactly.
 			if (newRegionAddr == NULL) {
-			newRegionAddr = (char*) VMPI_reserveMemoryRegion(NULL,
+				newRegionAddr = (char*) VMPI_reserveMemoryRegion(NULL,
 											  size*kBlockSize);
 				newRegionSize = size;
 			}
@@ -1335,7 +1335,7 @@ namespace MMgc
 			}
 			
 			// - Try to commit the memory.
-		if (VMPI_commitMemory(newRegionAddr,
+			if (VMPI_commitMemory(newRegionAddr,
 							 size*kBlockSize) == 0)
 			{
 				// Failed.  Un-reserve the memory and fail.
@@ -1379,7 +1379,8 @@ namespace MMgc
 		HeapBlock *newBlocks = new HeapBlock[newBlocksLen];
 		if (!newBlocks) {
 			// Could not get the memory.
-			ReleaseMemory(newRegionAddr, newRegionSize);
+			if( newRegionAddr )
+				ReleaseMemory(newRegionAddr, newRegionSize);
 			return false;
 		}
 		
