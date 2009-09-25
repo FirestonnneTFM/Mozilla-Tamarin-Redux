@@ -182,6 +182,7 @@ namespace avmplus
         LIns *atomToNativeRep(BuiltinType, LIns *i);
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
+        LIns *loadAtomRep(LIns* value, Traits* valType);
         LIns *callIns(const CallInfo *, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *localGet(int i);
@@ -294,13 +295,14 @@ namespace avmplus
         void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
         void emitDoubleConst(FrameState* state, int index, double* pd);
         void emitCoerce(FrameState* state, int index, Traits* type);
-        void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
+        void emitGetslot(FrameState*, int slot, int ptr_index, Traits *slotType);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
         void emitGetGlobalScope();
         void localSet(int i, LIns* o, Traits* type);
         LIns* convertToString(int i);
         LIns* coerceToString(int i);
         LIns* coerceToNumber(int i);
+        LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
 
     public:
         CodegenLIR(MethodInfo* info);
