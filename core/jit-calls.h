@@ -93,8 +93,6 @@
     METHOD(ENVADDR(MethodEnv::newActivation), SIG1(P,P), newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), SIG2(P,P,P), newcatch)
     METHOD(ENVADDR(MethodEnv::newfunction), SIG4(P,P,P,P,P), newfunction)
-    METHOD(TOPLEVELADDR(Toplevel::op_call), SIG4(A,P,A,I,P), op_call)
-    METHOD(TOPLEVELADDR(Toplevel::callproperty), SIG6(A,P,A,P,I,P,P), callproperty)
     CSEMETHOD(TOPLEVELADDR(Toplevel::coerce), SIG3(A,P,A,P), coerce)
     METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
     FUNCTION(FUNCADDR(AvmCore::handleInterrupt), SIG1(V,P), handleInterrupt)
@@ -230,6 +228,11 @@ SSE2_ONLY(
     METHOD(ENVADDR(MethodEnv::si32), SIG3(V,P,I,I), si32)
     METHOD(ENVADDR(MethodEnv::sf32), SIG3(V,P,F,I), sf32)
     METHOD(ENVADDR(MethodEnv::sf64), SIG3(V,P,F,I), sf64)
+
+    typedef Atom (*op_call_MethodEnv)(MethodEnv*, Atom, int, Atom*);
+    FUNCTION(FUNCADDR((op_call_MethodEnv)&avmplus::op_call<MethodEnv*>), SIG4(A,P,A,I,P), op_call)
+
+    METHOD(TOPLEVELADDR(Toplevel::callproperty), SIG6(A,P,A,P,I,P,P), callproperty)
 
     typedef Atom (*op_applytype_MethodEnv)(MethodEnv*, Atom, int, Atom*);
     FUNCTION(FUNCADDR((op_applytype_MethodEnv)&avmplus::op_applytype<MethodEnv*>), SIG4(A,P,A,I,P), op_applytype)
