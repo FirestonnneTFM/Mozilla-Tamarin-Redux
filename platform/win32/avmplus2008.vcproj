@@ -1500,11 +1500,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AtomConstants.cpp"
+				RelativePath="..\..\core\atom.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AtomConstants.h"
+				RelativePath="..\..\core\atom-inlines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\atom.h"
 				>
 			</File>
 			<File
@@ -1737,10 +1741,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\AvmPlusScriptableObject.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\avmplusTypes.h"
 				>
 			</File>
 			<File
@@ -2173,6 +2173,10 @@
 			</File>
 			<File
 				RelativePath="..\..\core\Toplevel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\Toplevel-inlines.h"
 				>
 			</File>
 			<File

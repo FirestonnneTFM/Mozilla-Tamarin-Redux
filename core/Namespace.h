@@ -42,6 +42,11 @@
 namespace avmplus
 {
 	/**
+	 * API is the type of an api bitmask
+	 */
+	typedef int32_t API;
+
+	/**
 	 * a namespace is a primitive value in the system, similar to String
 	 */
 	class Namespace : public AvmPlusScriptableObject

@@ -40,7 +40,6 @@
 #define __avmplus_MathUtils__
 
 #include "BigInteger.h"
-#include "avmplusTypes.h"
 
 namespace avmplus
 {
