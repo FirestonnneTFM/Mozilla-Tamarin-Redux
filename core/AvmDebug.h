@@ -39,8 +39,6 @@
 #ifndef __AvmDebug__
 #define __AvmDebug__
 
-#include "avmplusTypes.h"
-
 // AVMPLUS_CUSTOM_ASSERTION_HANDLER not yet (now == Apr-2009) exposed as a feature; 
 // awaiting cleanup of the debug code (merging MMgc and Avm debug macros, etc)
 

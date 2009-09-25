@@ -82,11 +82,11 @@
 #include "VMPI.h"			// also includes avmfeatures.h
 #include "avmbuild.h"			// old-style configuration, may disappear, handles a few things not yet handled by the feature system
 
-#include "avmplusTypes.h"
+#include "GCTypes.h"
 #include "avmplusVersion.h"
 #include "AvmDebug.h"
 #include "AvmLog.h"
-#include "AtomConstants.h"
+#include "atom.h"
 #include "ActionBlockConstants.h"
 #include "wopcodes.h"
 #include "ErrorConstants.h"
@@ -317,7 +317,8 @@ namespace avmplus
 #include "AbcGen.h"
 #include "instr.h"
 
-// inlines
+// inline implementations
+#include "atom-inlines.h"
 #include "instr-inlines.h"
 #include "Toplevel-inlines.h"
 

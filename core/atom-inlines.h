@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,43 +37,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_types__
-#define __avmplus_types__
-
-#include "GCTypes.h"
+// inline functions that manipulate Atom go here.
 
 namespace avmplus
 {
+    // macros for these are defined in atom.h
 
-    #ifndef NULL
-    #define NULL 0
-    #endif
-
-	// Atom should really be an intptr_t, but doing so can cause problematic compiles
-	// because some platforms define intptr_t as an int64, and some as a long, which
-	// create different overload possibilities in a few cases. Ideally, Atom should
-	// be a unique pointer type (as it is in TT) but for now, avoid the code churn
-	// by defining it the "old" way
-	//
-	// math friendly pointer (64 bits in LP 64 systems)
-	#if defined (_MSC_VER) && (_MSC_VER >= 1300)
-	    #define AVMPLUS_TYPE_IS_POINTER_SIZED __w64
-	#else
-	    #define AVMPLUS_TYPE_IS_POINTER_SIZED
-	#endif	
-	#ifdef AVMPLUS_64BIT
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int64_t Atom;
-	#else
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32_t Atom;
-	#endif
-	
-	typedef struct Binding_* Binding;
-	typedef struct CodeContextAtom_* CodeContextAtom;
-
-	/**
-	 * API is the type of an api bitmask
-	 */
-	typedef int32_t API;
+    //inline AtomConstants::AtomKind atomKind(Atom a) { return AtomConstants::AtomKind(uintptr_t(a) & 7); }
+    //inline void* atomPtr(Atom a) { return (void*)(uintptr_t(a) & ~7); }
+    // note that this needs to be signed (NOT unsigned) to maintain existing semantics
+    //inline intptr_t atomInt(Atom a) { return intptr_t(a) >> 3; }
 }
-
-#endif /* __avmplus_types__ */

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -37,31 +39,8 @@
 
 #include "avmplus.h"
 
+// non-inline Atom implementation code goes here.
+
 namespace avmplus
 {
-	/*
-	This definition is solely for the purpose to enable the VC++ visualizer
-	to display atoms. An Atom is not a structure, and the structure below
-	defines a wrapper that visualizers can use to cast atoms to, like e.h.
-	(avmplus::AtomP*) &myAtom
-	The autoexp.dat visualizer is
-
-	avmplus::AtomP {
-		preview(
-			#switch ($e.value & 7)
-				#case 0		( #( "untagged ", [$e.value,x] ) )
-				#case 1		( #( "Object ", (avmplus::ScriptObject*) ($e.value & ~7) ) )
-				#case 2		( #( "String ", (avmplus::String*) ($e.value & ~7) ) )
-				#case 3		( #( "Namespace ", (avmplus::Namespace*) ($e.value & ~7) ) )
-				#case 4		( #( "undefined" ) )
-				#case 5		( #( "bool ", ($e.value & 8) != 0 ) )
-				#case 6		( #( "int ", [$e.value >> 3,d] ) )
-				#case 7		( #( "double ", *((double*) ($e.value & ~7)) ) )
-		)
-	}
-	*/
-	typedef struct
-	{
-		Atom value;
-	} AtomP;
 }
