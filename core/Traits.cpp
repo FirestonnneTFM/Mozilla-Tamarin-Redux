@@ -190,7 +190,8 @@ namespace avmplus
                 i = (i + (n++)) & bitMask;                // quadratic probe
             }
         }
-		AvmAssert(0); // never reached
+		// ironically, some compilers will complain that this is unreachable. Er, yeah...
+		// AvmAssert(0); // never reached
 	}
 
 	bool FASTCALL TraitsBindings::containsInterface(Traitsp intf) const
@@ -219,7 +220,8 @@ namespace avmplus
                 i = (i + (n++)) & bitMask;                // quadratic probe
             }
         }
-		AvmAssert(0); // never reached
+		// ironically, some compilers will complain that this is unreachable. Er, yeah...
+		// AvmAssert(0); // never reached
 	}
 
 	void TraitsBindings::buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const
