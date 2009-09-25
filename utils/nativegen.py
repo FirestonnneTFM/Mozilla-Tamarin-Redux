@@ -1096,7 +1096,9 @@ class AbcThunkGen:
 					# (sad but true, happens in some environments)
 					out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
 				out_h.println("")
-				self.emitThunkBody(thunkname, receiver, m, False);
+				# if there's only one client of the thunk, emit a direct call even if direct thunks aren't requested
+				do_direct = (len(users) == 1)
+				self.emitThunkBody(thunkname, receiver, m, do_direct);
 
 		out_c.println("");
 		for i in range(0, len(abc.classes)):
