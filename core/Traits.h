@@ -164,7 +164,7 @@ namespace avmplus
 		}
 		inline Traitsp getInterface(uint32 i) const { AvmAssert(i < interfaceCapacity); return getInterfaces()[i].t; }
 		inline MethodInfo* getMethod(uint32_t i) const { AvmAssert(i < methodCount); return getMethods()[i].f; }
-		inline bool containsInterface(Traitsp t) const { return findInterfaceAddr(t)->t != NULL; }
+		bool FASTCALL containsInterface(Traitsp t) const;
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
 		Binding findBinding(Stringp name, NamespaceSetp nsset) const;
@@ -206,8 +206,6 @@ namespace avmplus
 		}
 
 		bool addOneInterface(Traitsp intf);
-		InterfaceInfo* FASTCALL findInterfaceAddr(Traitsp intf);
-		inline const InterfaceInfo* findInterfaceAddr(Traitsp intf) const { return const_cast<TraitsBindings*>(this)->findInterfaceAddr(intf); }
 		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
 		void fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel);
@@ -432,9 +430,6 @@ namespace avmplus
 		Stringp formatClassName();
 
 		void destroyInstance(ScriptObject *obj) const;
-
-	private:
-		Traitsp* findInterface(Traits* t) const;
 
 	public:
 #if VMCFG_METHOD_NAMES

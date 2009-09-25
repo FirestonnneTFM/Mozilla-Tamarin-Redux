@@ -164,38 +164,62 @@ namespace avmplus
 	{
 		AvmAssert(intf != NULL);
 
-		// since this is in the cache, no need for WB: ifc isn't going to go
-		// away before we do
-		InterfaceInfo* addr = findInterfaceAddr(intf);
-		AvmAssert(addr->t == NULL || addr->t == intf);
-		const bool added = (addr->t == NULL);
-		addr->t = intf;
-		return added;
-	}
-
-	// note that findInterfaceAddr() always returns a nonnull InterfaceInfo* --
-	// this is expected and required by all callers! This is ensured by the fact
-	// that we allocate enough space (via countInterfaces) to hold exactly
-	// the right number of interfaces. overflow is not checked for in normal builds
-	// (only via assertions in debug builds).
-	TraitsBindings::InterfaceInfo* FASTCALL TraitsBindings::findInterfaceAddr(Traitsp intf)
-	{
 		InterfaceInfo* set = getInterfaces();
-        // this is a quadratic probe
         int32_t n = 7;
 		const uint32_t bitMask = this->interfaceCapacity - 1;
-		
 		// skip lower 3 bits since they are always zero and don't contribute to hash
 		uint32_t i = (uintptr_t(intf) >> 3) & bitMask;
-		AvmAssert(i < this->interfaceCapacity);
-        Traitsp k;
-        while ((k = set[i].t) != intf && k != NULL)
-		{
-			i = (i + (n++)) & bitMask;				// quadratic probe
-		}
-		AvmAssert(i < this->interfaceCapacity);
-		AvmAssert(set[i].t == NULL || set[i].t == intf);
-        return &set[i];
+        for (;;)
+        {
+            Traitsp k;
+			// when adding, intf probably isn't present, check for null first
+            if ((k = set[i].t) == NULL)
+            {
+				// since this is in the cache, no need for WB: 
+				// intf isn't going to go away before we do
+				set[i].t = intf;
+				return true; // true == added
+            }
+            else if (k == intf)
+            {
+				// already added, we're done
+                return false; // false == not added
+            }
+            else
+            {
+                i = (i + (n++)) & bitMask;                // quadratic probe
+            }
+        }
+		AvmAssert(0); // never reached
+	}
+
+	bool FASTCALL TraitsBindings::containsInterface(Traitsp intf) const
+	{
+		AvmAssert(intf != NULL);
+
+		const InterfaceInfo* set = getInterfaces();
+        int32_t n = 7;
+		const uint32_t bitMask = this->interfaceCapacity - 1;
+		// skip lower 3 bits since they are always zero and don't contribute to hash
+		uint32_t i = (uintptr_t(intf) >> 3) & bitMask;
+        for (;;)
+        {
+            Traitsp k;
+			// containsInterface succeeds much more often than it fails (~10x) so check for that first
+            if ((k = set[i].t) == intf)
+            {
+				return true; 
+            }
+            else if (k == NULL)
+            {
+                return false; 
+            }
+            else
+            {
+                i = (i + (n++)) & bitMask;                // quadratic probe
+            }
+        }
+		AvmAssert(0); // never reached
 	}
 
 	void TraitsBindings::buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const
