@@ -3553,13 +3553,14 @@ namespace avmplus
                 int argc = int(op2);
                 int argv = sp-argc+1;
                 int baseDisp = sp-argc;
+                const Multiname* name = (const Multiname*) op1;
+                LIns* multi = initMultiname(name, baseDisp);
                 AvmAssert(state->value(baseDisp).notNull);
 
                 LIns* base = loadAtomRep(baseDisp);
                 LIns* receiver = opcode == OP_callproplex ? InsConstAtom(nullObjectAtom) : base;
                 LIns* ap = storeAtomArgs(receiver, argc, argv);
 
-                const Multiname* name = (const Multiname*) op1;
                 Traits* baseTraits = state->value(baseDisp).traits;
                 Binding b = state->verifier->getToplevel(this)->getBinding(baseTraits, name);
                 LIns* out;
@@ -3572,7 +3573,6 @@ namespace avmplus
                     out = callIns(FUNCTIONID(op_call), 4, env_param, funcAtom, InsConst(argc), ap);
                 } else {
                     // generic late bound call to anything
-                    LIns* multi = initMultiname(name, baseDisp);
                     LIns* vtable = loadVTable(baseDisp);
                     LIns* toplevel = loadToplevel();
                     out = callIns(FUNCTIONID(callproperty), 6, toplevel, base, multi, InsConst(argc), ap, vtable);
