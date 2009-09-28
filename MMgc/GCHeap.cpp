@@ -106,6 +106,7 @@ namespace MMgc
 #else
 		gcbehavior(true),	// unconditional, if MMGC_POLICY_PROFILING is on
 #endif
+		eagerSweeping(false),
 		gcLoad(2.0),
 		gcLoadCeiling(3.0),
 		gcEfficiency(0.25)

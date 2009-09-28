@@ -773,6 +773,9 @@ namespace avmshell
 					MMgc::GCHeap::GetGCHeap()->Config().gcbehavior = true;
 				}
 #endif
+				else if (!VMPI_strcmp(arg, "-eagersweep")) {
+					MMgc::GCHeap::GetGCHeap()->Config().eagerSweeping = true;
+				}
 				else if (!VMPI_strcmp(arg, "-load")) {
 					double load;
 					double limit;
@@ -954,6 +957,8 @@ namespace avmshell
 #endif
 		AvmLog("          [-memstats]   generate statistics on memory usage\n");
 		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
+		AvmLog("          [-eagersweep] sweep the heap synchronously at the end of GC;\n"
+			   "                        improves usage statistics.\n");
 #ifdef MMGC_POLICY_PROFILING
 		AvmLog("          [-gcbehavior] summarize GC behavior and policy computation\n"); 
 #endif
