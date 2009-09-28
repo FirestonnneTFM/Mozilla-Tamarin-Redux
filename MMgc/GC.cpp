@@ -1459,6 +1459,9 @@ bail:
 		}
 		largeEmptyPageList = NULL;
 		
+		if (heap->Config().eagerSweeping)
+			SweepNeedsSweeping();
+
 		// we potentially freed a lot of memory, tell heap to regulate
 		heap->Decommit();
 
