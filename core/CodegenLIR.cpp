@@ -1203,7 +1203,18 @@ namespace avmplus
     };
 #endif
 
-    // f(env, argc, instance, argv)
+    // generate the prolog for a function with this signature:
+    //
+    //    <return-type> f(MethodEnv* env, int argc, void* args)
+    //
+    // argc is the number of arguments, not counting the receiver
+    // (aka "this"). args points to the arguments in memory:
+    //
+    //    [receiver] [arg1, arg2, ... ]
+    //
+    // the arguments in memory are typed according to the AS3 method
+    // signature.  types * and Object are represented as Atom, and all
+    // other types are native pointers or values.
     bool CodegenLIR::prologue(FrameState* state)
     {
         this->state = state;
