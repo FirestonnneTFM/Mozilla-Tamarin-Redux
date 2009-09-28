@@ -348,11 +348,11 @@ namespace MMgc
 	void GCHeap::Decommit()
 	{
 		// keep at least initialSize free 
-		if(!config.returnMemory || GetFreeHeapSize() <= config.initialSize)
+		if(!config.returnMemory)
 			return;
 		
 		size_t heapSize = GetTotalHeapSize();
-		size_t freeSize = GetFreeHeapSize() - config.initialSize;
+		size_t freeSize = GetFreeHeapSize();
 		
 		size_t decommitSize;
 		// commit if > kDecommitThresholdPercentage is free
@@ -360,7 +360,13 @@ namespace MMgc
 			decommitSize = int((freeSize * 100 - heapSize * kDecommitThresholdPercentage) / 100);
 		else
 			return;
-		
+				
+		//  Don't decommit more than our initial config size.
+		if (heapSize - decommitSize < config.initialSize)
+		{
+			decommitSize = heapSize - config.initialSize;
+		}
+
 		// don't trifle
 		if(decommitSize < (size_t)kMinHeapIncrement)
 			return;
@@ -399,8 +405,9 @@ namespace MMgc
 					   freeSize * 100 > heapSize * kReleaseThresholdPercentage &&
 					   // if block is as big or bigger than a region, free the whole region
 					   block->baseAddr <= region->baseAddr && 
-					   region->reserveTop <= block->endAddr())
-					{
+					   region->reserveTop <= block->endAddr() )
+	   				{
+
 						if(block->baseAddr < region->baseAddr)
 						{
 							HeapBlock *newBlock = Split(block, int((region->baseAddr - block->baseAddr) / kBlockSize));
@@ -417,7 +424,7 @@ namespace MMgc
 						RemoveBlock(block);
 						goto restart;
 					}
-				else if(VMPI_decommitMemory(block->baseAddr, block->size * kBlockSize))
+					else if(VMPI_decommitMemory(block->baseAddr, block->size * kBlockSize))
 					{
 						block->committed = false;
 						block->dirty = false;
