@@ -1749,7 +1749,9 @@ namespace MMgc
 		// printed.  There are other, more complicated, fixes we should adopt.
 
 		GCLog("[mem] ------- gross stats -----\n");
+#ifdef MMGC_MEMORY_PROFILER
 		if (GCHeap::GetGCHeap()->GetProfiler() == NULL)
+#endif
 		{
 			log_percentage("[mem] private", priv, priv);
 			log_percentage("[mem]\t mmgc", mmgc, priv);
