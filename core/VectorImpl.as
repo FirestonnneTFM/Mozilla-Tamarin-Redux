@@ -103,9 +103,6 @@ AS3 function every(checker:Function, thisObj: Object=null): Boolean {
 AS3 function forEach(eacher:Function, thisObj: Object=null): void { 
     _forEach(this, eacher, (thisObj is Object ? thisObj : null));
 }
-AS3 function map(mapper:Function, thisObj:Object=null) { 
-    this.private::_map(mapper, thisObj is Object ? thisObj : null);
-}
 
 AS3 native function push(...items:Array): uint;
 
@@ -171,11 +168,11 @@ prototype.every = function(checker, thisObj=void 0) : Boolean {
     return _every(castToThisType(this), checker, thisObj is Object ? thisObj : null);
 }
 
-private native function _filter(callback:Function, thisObject):Array;
+private native function _filter(callback:Function, thisObject):*;
 prototype.filter = function(checker, thisObj=void 0) {
-    return castToThisType(this).private::_filter(checker, thisObj is Object ? thisObj : null);
+	return castToThisType(this).private::_filter(checker, thisObj is Object ? thisObj : null);
 }
-
+		
 private static native function _forEach(o, callback:Function, thisObject):void;
 prototype.forEach = function(eacher, thisObj=void 0) {
     _forEach(castToThisType(this), eacher, (thisObj is Object ? thisObj : null));
@@ -189,9 +186,9 @@ prototype.lastIndexOf = function (value, from=void 0) {
     return castToThisType(this).AS3::lastIndexOf(value, from == undefined ? Infinity : Number(from));
 }
 
-private native function _map(callback:Function, thisObject):Array;
+private native function _map(callback:Function, thisObject):*;
 prototype.map = function(mapper, thisObj=void 0) {
-    return castToThisType(this).private::_map(mapper, thisObj is Object ? thisObj : null);
+	return castToThisType(this).private::_map(mapper, thisObj is Object ? thisObj : null);
 }
 
 prototype.pop = function() {
