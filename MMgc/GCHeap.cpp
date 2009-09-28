@@ -1733,25 +1733,35 @@ namespace MMgc
 			
 			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
+
+		// Gross stats are not meaningful if the profiler is running, see bugzilla 490014.
+		// Disabling their printing is just an expedient fix to avoid misleading data being
+		// printed.  There are other, more complicated, fixes we should adopt.
+
 		GCLog("[mem] ------- gross stats -----\n");
-		log_percentage("[mem] private", priv, priv);
-		log_percentage("[mem]\t mmgc", mmgc, priv);
-		log_percentage("[mem]\t\t unmanaged", unmanaged, priv);
-		log_percentage("[mem]\t\t managed", gc_total, priv);
-		log_percentage("[mem]\t\t free",  (size_t)GetFreeHeapSize() * GCHeap::kBlockSize, priv);
-		log_percentage("[mem]\t other",  priv - mmgc, priv);
-		log_percentage("[mem] \tunmanaged overhead ", unmanaged-fixed_alloced, unmanaged);
-		log_percentage("[mem] \tmanaged overhead ", gc_total - gc_allocated_total, gc_total);
-#ifdef MMGC_MEMORY_PROFILER
-		if(HooksEnabled())
+		if (GCHeap::GetGCHeap()->GetProfiler() == NULL)
 		{
-			log_percentage("[mem] \tunmanaged internal wastage", fixed_alloced - fixed_asksize, fixed_alloced);
-			log_percentage("[mem] \tmanaged internal wastage", gc_allocated_total - gc_ask_total, gc_allocated_total);
-		}
+			log_percentage("[mem] private", priv, priv);
+			log_percentage("[mem]\t mmgc", mmgc, priv);
+			log_percentage("[mem]\t\t unmanaged", unmanaged, priv);
+			log_percentage("[mem]\t\t managed", gc_total, priv);
+			log_percentage("[mem]\t\t free",  (size_t)GetFreeHeapSize() * GCHeap::kBlockSize, priv);
+			log_percentage("[mem]\t other",  priv - mmgc, priv);
+			log_percentage("[mem] \tunmanaged overhead ", unmanaged-fixed_alloced, unmanaged);
+			log_percentage("[mem] \tmanaged overhead ", gc_total - gc_allocated_total, gc_total);
+#ifdef MMGC_MEMORY_PROFILER
+			if(HooksEnabled())
+			{
+				log_percentage("[mem] \tunmanaged internal wastage", fixed_alloced - fixed_asksize, fixed_alloced);
+				log_percentage("[mem] \tmanaged internal wastage", gc_allocated_total - gc_ask_total, gc_allocated_total);
+			}
 #endif
-		GCLog("[mem] number of collectors %u\n", unsigned(gc_count));
+			GCLog("[mem] number of collectors %u\n", unsigned(gc_count));
+		}
+		else
+			GCLog("[mem] No gross stats available when profiler is enabled.\n");
 		GCLog("[mem] -------- gross stats end -----\n");
-		
+
 		DumpHeapRep();
 		
 #ifdef MMGC_MEMORY_PROFILER
