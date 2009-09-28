@@ -340,6 +340,16 @@ namespace MMgc
 
 		void RemoveOOMCallback(OOMCallback *p);
 		
+#ifdef MMGC_USE_SYSTEM_MALLOC
+		// Signal a failure to allocate 'size' bytes from the system heap (VMPI_alloc).
+		// The value 'attempt' denotes the number of previous attempts made to satisfy
+		// this particular memory request; the implementation is at liberty to have
+		// a cutoff for the number of attempts and must signal an abort if the number
+		// of attempts exceeds the cutoff.  (Normally the cutoff would be one previous
+		// attempt.)
+		void SystemOOMEvent(size_t size, int attempt);
+#endif
+
 		void Abort();
 		MemoryStatus GetStatus() { return status; }
 
@@ -356,10 +366,12 @@ namespace MMgc
 		void DumpMemoryInfo();
 		void DumpMemoryInfoLocked();
 
+#ifdef MMGC_MEMORY_PROFILER
 #ifdef MMGC_USE_SYSTEM_MALLOC
 		void TrackSystemAlloc(void *addr, size_t askSize);
 		void TrackSystemFree(void *addr);
 #endif //MMGC_USE_SYSTEM_MALLOC
+#endif
 
 		void *GetStackEntryAddress() { return (void*)GetEnterFrame(); }
 		EnterFrame *GetEnterFrame() { return enterFrame; }

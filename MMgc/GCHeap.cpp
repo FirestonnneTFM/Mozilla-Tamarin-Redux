@@ -1623,6 +1623,16 @@ namespace MMgc
 		}
 	}
 	
+#ifdef MMGC_USE_SYSTEM_MALLOC
+	void GCHeap::SystemOOMEvent(size_t size, int attempt)
+	{
+		if (attempt == 0 && !statusNotificationBeingSent)
+			StatusChangeNotify(kMemReserve);
+		else
+			Abort();
+	}
+#endif
+
 	void GCHeap::Abort()
 	{
 		status = kMemAbort;
@@ -1882,35 +1892,27 @@ namespace MMgc
 
 #endif //MMGC_MEMORY_PROFILER
 
+#ifdef MMGC_MEMORY_PROFILER
 #ifdef MMGC_USE_SYSTEM_MALLOC
 
 	void GCHeap::TrackSystemAlloc(void *addr, size_t askSize)
 	{
-		(void)addr;
-		(void)askSize;
 		MMGC_LOCK(m_spinlock);
-	#ifdef MMGC_MEMORY_PROFILER
 		if(!IsProfilerInitialized())
-		{
 			InitProfiler();
-		}
 		if(profiler)
 			profiler->RecordAllocation(addr, askSize, VMPI_size(addr));
-	#endif //MMGC_MEMORY_PROFILER
-
 	}
 
 	void GCHeap::TrackSystemFree(void *addr)
 	{
-		(void)addr;		
 		MMGC_LOCK(m_spinlock);
-	#ifdef MMGC_MEMORY_PROFILER
 		if(addr && profiler)
 			profiler->RecordDeallocation(addr, VMPI_size(addr));
-	#endif //MMGC_MEMORY_PROFILER		
 	}
 
 #endif //MMGC_USE_SYSTEM_MALLOC
+#endif // MMGC_MEMORY_PROFILER
 	
 	void GCHeap::ReleaseMemory(char *address, size_t size)
 	{
