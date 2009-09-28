@@ -53,20 +53,29 @@ namespace MMgc
 	void DeleteCall(void *);
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
-	void *SystemNew(size_t);
-	void SystemDelete(void*);
+	/**
+	 * Allocate memory from the system heap using VMPI_alloc, with options.
+	 * @param size  the size in bytes of the request
+	 * @param opts  an options bit vector
+	 * @return      a pointer to a suitable memory area.  NULL only if kCanFail is part of
+	 *              opts.  The memory is zeroed only of kZero is part of opts.
+	 * @note If memory cannot be allocated and kCanFail is not part of opts then the regular
+	 *       OOM handling is run, in the hope that this will free some memory on the system
+	 *       heap as well.  If memory is not available on a second allocation attempt then
+	 *       the system will enter the abort state.
+	 */
+	void *SystemNew(size_t size, FixedMallocOpts opts);
+	
+	/**
+	 * Free memory allocated with SystemNew.  p may be NULL.
+	 */
+	void SystemDelete(void* p);
 #endif
 
 	REALLY_INLINE void *AllocCallInline(size_t size, FixedMallocOpts opts=kNone)
 	{
 #ifdef MMGC_USE_SYSTEM_MALLOC
-		void *space = SystemNew(size);
-		if ((opts & kZero) != 0)
-		{
-			VMPI_memset(space, 0, size);
-		}
-		// should we abort if space is NULL and they didn't specify kCanFail?
-		return space;
+		return SystemNew(size, opts);
 #else
 		return FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, opts);
 #endif
@@ -97,9 +106,7 @@ namespace MMgc
 REALLY_INLINE void *operator new(size_t size) MMGC_NEW_THROWS_CLAUSE 
 { 
 #ifdef MMGC_USE_SYSTEM_MALLOC
-	void *space = MMgc::SystemNew(size);
-	// should we abort if space is NULL and they didn't specify kCanFail?
-	return space;
+	return MMgc::SystemNew(size, MMgc::kNone);
 #else
 	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, MMgc::kNone);
 #endif
@@ -108,13 +115,7 @@ REALLY_INLINE void *operator new(size_t size) MMGC_NEW_THROWS_CLAUSE
 REALLY_INLINE void *operator new(size_t size, MMgc::FixedMallocOpts opts) MMGC_NEW_THROWS_CLAUSE
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
-	void *space = MMgc::SystemNew(size);
-	if ((opts & MMgc::kZero) != 0)
-	{
-		VMPI_memset(space, 0, size);
-	}
-	// should we abort if space is NULL and they didn't specify kCanFail?
-	return space;
+	return MMgc::SystemNew(size, opts);
 #else
 	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, opts);
 #endif	
@@ -123,9 +124,7 @@ REALLY_INLINE void *operator new(size_t size, MMgc::FixedMallocOpts opts) MMGC_N
 REALLY_INLINE void *operator new[](size_t size) MMGC_NEW_THROWS_CLAUSE
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
-	void *space = MMgc::SystemNew(size);
-	// should we abort if space is NULL and they didn't specify kCanFail?
-	return space;
+	return MMgc::SystemNew(size, MMgc::kNone);
 #else
 	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, MMgc::kNone);
 #endif
@@ -134,13 +133,7 @@ REALLY_INLINE void *operator new[](size_t size) MMGC_NEW_THROWS_CLAUSE
 REALLY_INLINE void *operator new[](size_t size, MMgc::FixedMallocOpts opts) MMGC_NEW_THROWS_CLAUSE
 {
 #ifdef MMGC_USE_SYSTEM_MALLOC
-	void *space = MMgc::SystemNew(size);
-	if ((opts & MMgc::kZero) != 0)
-	{
-		VMPI_memset(space, 0, size);
-	}
-	// should we abort if space is NULL and they didn't specify kCanFail?
-	return space;
+	return MMgc::SystemNew(size, opts);
 #else
 	return MMgc::FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, opts);
 #endif		

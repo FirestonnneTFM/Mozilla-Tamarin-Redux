@@ -55,22 +55,43 @@ namespace MMgc
 	}
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
-	void *SystemNew(size_t size)
-	{	
+	void *SystemNew(size_t size, FixedMallocOpts opts)
+	{
 		void *space = VMPI_alloc(size);
-		if(space)
-			GCHeap::GetGCHeap()->TrackSystemAlloc(space, size);
+		if (space == NULL)
+		{
+			if (opts & MMgc::kCanFail)
+				return NULL;
+
+			int attempt = 0;
+			do {
+				GCHeap::GetGCHeap()->SystemOOMEvent(size, attempt++);
+				space = VMPI_alloc(size);
+			} while (space == NULL);
+		}
+#ifdef MMGC_MEMORY_PROFILER
+		GCHeap* heap = GCHeap::GetGCHeap();
+		if (heap)
+			heap->TrackSystemAlloc(space, size);
+#endif
+		if (opts & MMgc::kZero)
+			VMPI_memset(space, 0, size);
 		return space;
 	}
 
 	void SystemDelete(void *p)
 	{
-		if(p) {
-			GCHeap::GetGCHeap()->TrackSystemFree(p);
-			VMPI_free(p);
+#ifdef MMGC_MEMORY_PROFILER
+		if (p) {
+			// heap can be NULL during OOM shutdown
+			GCHeap* heap = GCHeap::GetGCHeap();
+			if (heap)
+				heap->TrackSystemFree(p);
 		}
-	}
 #endif
+		VMPI_free(p);
+	}
+#endif // MMGC_USE_SYSTEM_MALLOC
 };
 
 #ifndef MMGC_OVERRIDE_GLOBAL_NEW
