@@ -1712,6 +1712,7 @@ namespace MMgc
 		size_t gc_total=0;
 		size_t gc_allocated_total =0;
 		size_t gc_ask_total = 0;
+		size_t gc_count = 0;
 		BasicListIterator<GC*> iter(gcManager.gcs());
 		GC* gc;
 		while((gc = iter.next()) != NULL)
@@ -1728,6 +1729,7 @@ namespace MMgc
 			gc->GetUsageInfo(ask, allocated);
 			gc_ask_total += ask;
 			gc_allocated_total += allocated;
+			gc_count += 1;
 			
 			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
@@ -1747,6 +1749,7 @@ namespace MMgc
 			log_percentage("[mem] \tmanaged internal wastage", gc_allocated_total - gc_ask_total, gc_allocated_total);
 		}
 #endif
+		GCLog("[mem] number of collectors %u\n", unsigned(gc_count));
 		GCLog("[mem] -------- gross stats end -----\n");
 		
 		DumpHeapRep();
