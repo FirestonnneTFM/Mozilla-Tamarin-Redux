@@ -80,6 +80,10 @@ package __AS3__.vec
             return _filter(checker, thisObj);
         }
         
+        AS3 function map(mapper : Function, thisObj: Object=null): Vector$object {
+            return _map(mapper, thisObj);
+        }
+        
         AS3 native function pop();
 
         AS3 function reverse() : Vector$object {
@@ -154,9 +158,13 @@ package __AS3__.vec
         AS3 function concat(...items) : Vector$int {
             return _concat(items);
         }
-
+		
         AS3 function filter(checker:Function, thisObj: Object=null): Vector$int {
             return _filter(checker, thisObj);
+        }
+        
+        AS3 function map(mapper : Function, thisObj: Object=null): Vector$int {
+            return _map(mapper, thisObj);
         }
         
         AS3 native function pop(): int ;
@@ -237,6 +245,10 @@ package __AS3__.vec
             return _filter(checker, thisObj);
         }
         
+        AS3 function map(mapper : Function, thisObj: Object=null): Vector$uint {
+            return _map(mapper, thisObj);
+        }
+        
         AS3 native function pop(): uint ;
 
         AS3 function reverse() : Vector$uint {
@@ -313,6 +325,10 @@ package __AS3__.vec
 
         AS3 function filter(checker:Function, thisObj: Object=null): Vector$double {
             return _filter(checker, thisObj);
+        }
+        
+        AS3 function map(mapper : Function, thisObj: Object=null): Vector$double {
+            return _map(mapper, thisObj);
         }
         
         AS3 native function pop(): Number ;

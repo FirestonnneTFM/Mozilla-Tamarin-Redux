@@ -110,8 +110,8 @@ namespace avmplus
 			m_array = NULL;
 		}
 
-		ArrayObject* _filter(ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_filter(toplevel(), this->atom(), callback, thisObject); }
-		ArrayObject* _map(ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_map(toplevel(), this->atom(), callback, thisObject); }
+		Atom _filter(ScriptObject* callback, Atom thisObject) { return filter(callback, thisObject); }
+		Atom _map(ScriptObject* callback, Atom thisObject) { return map(callback, thisObject); }
 
 		virtual Atom getUintProperty(uint32 index) const
 		{
