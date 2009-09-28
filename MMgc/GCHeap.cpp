@@ -1771,8 +1771,10 @@ namespace MMgc
 #endif
 			GCLog("[mem] number of collectors %u\n", unsigned(gc_count));
 		}
+#ifdef MMGC_MEMORY_PROFILER
 		else
 			GCLog("[mem] No gross stats available when profiler is enabled.\n");
+#endif
 		GCLog("[mem] -------- gross stats end -----\n");
 
 		DumpHeapRep();
