@@ -225,7 +225,12 @@ namespace MMgc
 				HeapBlock *block = &blocks[i];
 				if(block->inUse() && block->baseAddr)
 				{
-					GCLog("Block 0x%x not freed\n", block->baseAddr);
+#ifndef DEBUG
+					if (config.verbose)
+#endif
+					{
+						GCLog("Block 0x%x not freed\n", block->baseAddr);
+					}
 #if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
 					if(block->allocTrace)
 						PrintStackTrace(block->allocTrace);
