@@ -97,6 +97,12 @@ namespace avmplus
    };
    #endif /* VTUNE */
 
+    /**
+     * CodegenLabel: information about a LIR label that hasn't been generated yet.
+     * Once code at the label is generated, we fill in bb.  Later, we'll patch
+     * branch instructions to point to this bb.  We have one of
+     * these for each verifier FrameState.
+     */
     class CodegenLabel {
     public:
         LIns *bb;
@@ -105,21 +111,31 @@ namespace avmplus
         {}
     };
 
+    /**
+     * CodeMgr manages memory for compiled code, including the code itself
+     * (in a nanojit::CodeAlloc), and any data with code lifetime
+     * (in a nanojit::Allocator), such as debuging info, or inline caches.
+     */
     class PageMgr {
     public:
-        CodeAlloc   codeAlloc;
-        LogControl  log;
+        CodeAlloc   codeAlloc;  // allocator for code memory
+        LogControl  log;        // controller for verbose output
     #ifdef NJ_VERBOSE
-        Allocator   allocator;    // lifetime of this PageMgr
-        LabelMap    labels;
+        Allocator   allocator;  // data with same lifetime of this PageMgr
+        LabelMap    labels;     // pretty names for addresses in verbose code listing
     #endif
         PageMgr();
     };
 
+    /**
+     * Each Patch record tracks a label for which we have not yet
+     * generated LIR code.  At the end of code generation we'll iterate
+     * through a list of these and patch all the unsatisfied forward branches.
+     */
     class Patch {
     public:
-        LIns *br;
-        CodegenLabel *label;
+        LIns *br;               // the branch instruction that needs patching
+        CodegenLabel *label;    // information about the target of the branch
         Patch() : br(0), label(0) {}
         Patch(int) : br(0), label(0) {}
         Patch(LIns *br, CodegenLabel &l) : br(br), label(&l) {}
@@ -127,6 +143,11 @@ namespace avmplus
 
     class CopyPropagation;
 
+    /**
+     * CodegenLIR is a kitchen sink class containing all state for all passes
+     * of the JIT.  It is intended to be instantiated on the stack once for each
+     * jit-compiled method, and is a terminator of a CodeWriter pipeline.
+     */
     class CodegenLIR : public CodeWriter {
     public:
         bool overflow;
