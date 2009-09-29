@@ -653,7 +653,7 @@ namespace avmshell
 						settings.incremental = false;
 					}
 					else if (!VMPI_strcmp(arg+2, "astrace")) {
-						avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) VMPI_strtol(argv[++i], 0, 10);
+						settings.astrace_console = VMPI_strtol(argv[++i], 0, 10);
 					}
 					else if (!VMPI_strcmp(arg+2, "language")) {
 						settings.langID=-1;

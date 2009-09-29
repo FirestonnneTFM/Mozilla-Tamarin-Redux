@@ -303,10 +303,14 @@ namespace avmplus
 		livePools = NULL;
 	}
 
-	void AvmCore::initBuiltinPool()
+	void AvmCore::initBuiltinPool(
+#ifdef DEBUGGER
+								  int tracelevel
+#endif
+	)
 	{
 		#ifdef DEBUGGER
-		_debugger = createDebugger();
+		_debugger = createDebugger(tracelevel);
 		_profiler = createProfiler();
 		#endif
 	

@@ -65,9 +65,9 @@ namespace avmplus
 		if (core->debugger())
 		{
 			if (target > 1)
-				lvl = Debugger::astrace_callback;
+				lvl = core->debugger()->astrace_callback;
 			else
-				lvl = Debugger::astrace_console;				
+				lvl = core->debugger()->astrace_console;				
 		}
 	#endif /* DEBUGGER */
 		(void)target;
@@ -81,9 +81,9 @@ namespace avmplus
 		if (core->debugger())
 		{
 			if (target > 1)
-				Debugger::astrace_callback = (Debugger::TraceLevel) lvl;
+				core->debugger()->astrace_callback = (Debugger::TraceLevel) lvl;
 			else
-				Debugger::astrace_console = (Debugger::TraceLevel) lvl;				
+				core->debugger()->astrace_console = (Debugger::TraceLevel) lvl;				
 		}
 	#endif /* DEBUGGER */
 		(void)lvl;
