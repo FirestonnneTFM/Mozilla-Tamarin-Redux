@@ -90,18 +90,18 @@ class AcceptanceRuntest(RuntestBase):
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
         for o, v in opts:
-            if o in ('--ext'):
+            if o in ('--ext',):
                 self.sourceExt = v
-            elif o in ('--esc'):
+            elif o in ('--esc',):
                 self.runESC = True
-            elif o in ('--escbin'):
+            elif o in ('--escbin',):
                 self.escbin = v
-            elif o in ('--threads'):
+            elif o in ('--threads',):
                 self.threads=int(v)
-            elif o in ('--ats'):
+            elif o in ('--ats',):
                 self.genAtsSwfs = True
                 self.rebuildtests = True
-            elif o in ('--atsdir'):
+            elif o in ('--atsdir',):
                 self.atsDir = v
     
     def detectCPUs(self):
