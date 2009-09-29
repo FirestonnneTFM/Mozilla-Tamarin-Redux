@@ -69,6 +69,7 @@ namespace avmshell
 		char** arguments;				// non-terminated array of argument values, never NULL
 		int numargs;					// number of entries in 'arguments'
 		bool nodebugger;
+		int  astrace_console;
 		bool do_verbose;				// copy to config
 		bool enter_debugger_on_launch;
 		bool interrupts;				// copy to config
@@ -162,7 +163,11 @@ namespace avmshell
 		
 		virtual Toplevel* createToplevel(AbcEnv* abcEnv);
 #ifdef DEBUGGER
-		virtual avmplus::Debugger* createDebugger() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) DebugCLI(this) : NULL; }
+		virtual avmplus::Debugger* createDebugger(int tracelevel) 
+		{
+			AvmAssert(allowDebugger >= 0);
+			return allowDebugger ? new (GetGC()) DebugCLI(this, (avmplus::Debugger::TraceLevel)tracelevel) : NULL;
+		}
 		virtual avmplus::Profiler* createProfiler() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) Profiler(this) : NULL; }
 #endif
 #ifdef VMCFG_EVAL

@@ -191,10 +191,38 @@ namespace avmplus
 	{
 	public:
 		/**
+		 * --------------------------------------------------
+		 *    Trace facility for dumping out method entry 
+		 * line number and file name information while executing
+		 * --------------------------------------------------
+		 */
+		
+		typedef enum _TraceLevel 
+		{
+			TRACE_OFF = 0,
+			TRACE_METHODS = 1,						// method entry only 
+			TRACE_METHODS_WITH_ARGS = 2,			// method entry and arguments
+			TRACE_METHODS_AND_LINES = 3,			// method entry and line numbers
+			TRACE_METHODS_AND_LINES_WITH_ARGS = 4	// method entry, arguments and line numbers
+		} TraceLevel;
+		
+		//typedef void (*TraceCallback_i)( Stringp fileName, int linenum, Stringp methodName, Stringp methodArgs );
+		TraceLevel					astrace_console; 
+		TraceLevel					astrace_callback;
+		DRCWB(FunctionObject*)		trace_callback;
+		bool						in_trace;
+		uint64						astraceStartTime;
+		
+		void disableAllTracing();  // shuts down all tracing operations
+		
+		void traceMethod(MethodInfo* fnc, bool ignoreArgs=false);
+		void traceLine(int linenum);
+		
+		/**
 		 * Constructor; must be invoked from subclass to
 		 * initialize the Debugger's internal state.
 		 */
-		Debugger(AvmCore *core);
+		Debugger(AvmCore *core, TraceLevel tracelevel);
 		virtual ~Debugger();
 
 		/**
@@ -402,34 +430,6 @@ namespace avmplus
 		 * have been loaded. 
 		 */
 		AbcInfo* abcAt(int index) const;
-
-		/**
-		 * --------------------------------------------------
-		 *    Trace facility for dumping out method entry 
-		 * line number and file name information while executing
-		 * --------------------------------------------------
-		 */
-
-		typedef enum _TraceLevel 
-		{
-			TRACE_OFF = 0,
-			TRACE_METHODS = 1,						// method entry only 
-			TRACE_METHODS_WITH_ARGS = 2,			// method entry and arguments
-			TRACE_METHODS_AND_LINES = 3,			// method entry and line numbers
-			TRACE_METHODS_AND_LINES_WITH_ARGS = 4	// method entry, arguments and line numbers
-		} TraceLevel;
-
-		//typedef void (*TraceCallback_i)( Stringp fileName, int linenum, Stringp methodName, Stringp methodArgs );
-		static TraceLevel			astrace_console; 
-		static TraceLevel			astrace_callback;
-		DRCWB(FunctionObject*)		trace_callback;
-		static bool					in_trace;
-		static uint64				astraceStartTime;
-
-		void disableAllTracing();  // shuts down all tracing operations
-
-		void traceMethod(MethodInfo* fnc, bool ignoreArgs=false);
-		void traceLine(int linenum);
 
 	protected:
 		friend class DebugStackFrame;

@@ -205,7 +205,7 @@ const int kBufferPadding = 16;
 			inline Sampler* get_sampler() const { return _sampler; }
 			inline void sampleCheck() { if (_sampler) _sampler->sampleCheck(); }
 		protected:
-			virtual Debugger* createDebugger() { return NULL; }
+			virtual Debugger* createDebugger(int tracelevel) { return NULL; }
 			virtual Profiler* createProfiler() { return NULL; }
 			virtual Sampler* createSampler();
 		public:
@@ -807,8 +807,12 @@ const int kBufferPadding = 16;
 		 * Parses builtin.abc into a PoolObject, to be executed
 		 * later for each new Toplevel
 		 */
+#ifdef DEBUGGER
+		void initBuiltinPool(int tracelevel);
+#else
 		void initBuiltinPool();
-		
+#endif
+
 		/**
 		 * Initializes the specified Toplevel object by running
 		 * builtin.abc

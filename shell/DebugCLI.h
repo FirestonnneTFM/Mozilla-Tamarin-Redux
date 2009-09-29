@@ -161,7 +161,7 @@ namespace avmshell
 			int id;
 		};
 		
-		DebugCLI(AvmCore *core);
+		DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel);
 		~DebugCLI();
 		
 		void enterDebugger();

@@ -99,8 +99,8 @@ namespace avmshell
 		{ NULL, 0 }		
 	};
 
-	DebugCLI::DebugCLI(AvmCore *core)
-		: Debugger(core)
+	DebugCLI::DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel)
+		: Debugger(core, tracelevel)
 	{
 		currentSourceLen = 0;
         warnMissingSource = true;

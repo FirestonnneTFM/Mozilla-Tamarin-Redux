@@ -63,6 +63,7 @@ namespace avmshell
 		: arguments(NULL)
 		, numargs(-1)
 		, nodebugger(false)
+		, astrace_console(0)
 		, do_verbose(false)
 		, enter_debugger_on_launch(false)
 		, interrupts(AvmCore::interrupts_default)
@@ -427,7 +428,11 @@ namespace avmshell
 			SystemClass::user_argc = settings.numargs;
 			SystemClass::user_argv = settings.arguments;
 
+#ifdef DEBUGGER
+			initBuiltinPool((avmplus::Debugger::TraceLevel)settings.astrace_console);
+#else
 			initBuiltinPool();
+#endif
 			initShellPool();
 			
 			// init toplevel internally
