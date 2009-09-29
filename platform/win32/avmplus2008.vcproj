@@ -1792,6 +1792,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\CodegenLIR-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\CodegenLIR.h"
 				>
 			</File>

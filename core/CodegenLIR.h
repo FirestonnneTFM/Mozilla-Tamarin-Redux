@@ -79,21 +79,8 @@ namespace avmplus
            iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
            uint32_t sid;  // code info id
 
-           LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
-           {
-               LineNumberRecord* record = new (gc) LineNumberRecord(file,line);
-               lineNumTable.put(loc,record);
-               return record;
-           }
-
-           void clear()
-           {
-               lineNumTable.clear();
-               method = 0;
-               vtune = 0;
-               startAddr = 0;
-               endAddr = 0;
-           }
+           LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line);
+           void clear();
    };
    #endif /* VTUNE */
 
@@ -346,62 +333,20 @@ namespace avmplus
         // on successful jit, allocate memory for BindingCache instances, if necessary
         void initBindingCache();
 
-        static BuiltinType bt(Traits *t) {
-            return Traits::getBuiltinType(t);
-        }
-
-        LIns *loadIns(LOpcode op, size_t disp, LIns *base) {
-            AvmAssert(isS32(disp));
-            return lirout->insLoad(op, base, (int32_t)disp);
-        }
-        LIns *Ins(LOpcode op) {
-            return lirout->ins0(op);
-        }
-        LIns *Ins(LOpcode op, LIns *a) {
-            return lirout->ins1(op, a);
-        }
-        void storeIns(LIns *val, int32_t disp, LIns *base) {
-            lirout->insStorei(val, base, disp);
-        }
-        LIns *i2dIns(LIns* v) {
-            return lirout->ins1(LIR_i2f, v);
-        }
-        LIns *u2dIns(LIns* v) {
-            return lirout->ins1(LIR_u2f, v);
-        }
-        LIns *binaryIns(LOpcode op, LIns *a, LIns *b) {
-            return lirout->ins2(op,a,b);
-        }
-        LIns *InsConst(int32_t c) {
-            return lirout->insImm(c);
-        }
-        LIns *InsConstPtr(const void *p) {
-            return lirout->insImmPtr(p);
-        }
-        LIns *InsConstAtom(Atom c) {
-            return lirout->insImmPtr((void*)c);
-        }
-    #ifdef NANOJIT_64BIT
-        LIns *i2p(LIns *i) {
-            return lirout->ins1(LIR_i2q, i);
-        }
-        LIns *u2p(LIns *i) {
-            return lirout->ins1(LIR_u2q, i);
-        }
-        LIns *p2i(LIns *i) {
-            return lirout->ins1(LIR_qlo, i);
-        }
-    #else
-        LIns *i2p(LIns *i) {
-            return i;
-        }
-        LIns *u2p(LIns *i) {
-            return i;
-        }
-        LIns *p2i(LIns *i) {
-            return i;
-        }
-    #endif
+        static BuiltinType bt(Traits *t);
+        LIns *loadIns(LOpcode op, size_t disp, LIns *base);
+        LIns *Ins(LOpcode op);
+        LIns *Ins(LOpcode op, LIns *a);
+        void storeIns(LIns *val, int32_t disp, LIns *base);
+        LIns *i2dIns(LIns* v);
+        LIns *u2dIns(LIns* v);
+        LIns *binaryIns(LOpcode op, LIns *a, LIns *b);
+        LIns *InsConst(int32_t c);
+        LIns *InsConstPtr(const void *p);
+        LIns *InsConstAtom(Atom c);
+        LIns *i2p(LIns *i);
+        LIns *u2p(LIns *i);
+        LIns *p2i(LIns *i);
 
         /** emit a constructor call, and early bind if possible */
         void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
@@ -438,8 +383,8 @@ namespace avmplus
 
         // CodeWriter methods
         void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
-        void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
-        void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
+        void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
+        void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
         void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
         void writeNip(FrameState* state, const byte *pc);
         void writeCheckNull(FrameState* state, uint32_t index);
@@ -453,5 +398,7 @@ namespace avmplus
         void cleanup();
     };
 }
+
+#include "CodegenLIR-inlines.h"
 
 #endif /* __avmplus_CodegenLIR__ */
