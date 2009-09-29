@@ -40,12 +40,14 @@ crt kernel32:KERNEL32.dll
 crt advapi32:ADVAPI32.dll
 crt winmm:WINMM.dll
 crt LIBCMT: *
+crt libcpmt: *
 crt Dll:: *
 crt _E32Dll *
 crt __cpp *
 crt mmtimer: *
 crt coredll: *
 crt corelibc: *
+
 
 mmgc mmgc: *
 mmgc avmplus:GC *
@@ -242,6 +244,7 @@ vm avmplus:VectorClass.obj
 vm avmplus:DescribeTypeClass.obj
 vm avmplus:ScopeChain.obj
 vm avmplus:avmfeatures.obj
+vm avmplus:instr.obj
 
 eval eval-abc.obj
 eval eval-avmplus.obj
@@ -339,6 +342,7 @@ shell swf.obj
 shell WinPortUtils.obj
 shell avmshellWin.obj
 shell WinFile.obj
+shell WinDebugUtils.obj
 
 darkMatter <Anon *
 
