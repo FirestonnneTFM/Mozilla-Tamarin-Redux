@@ -205,7 +205,7 @@ const int kBufferPadding = 16;
 			inline Sampler* get_sampler() const { return _sampler; }
 			inline void sampleCheck() { if (_sampler) _sampler->sampleCheck(); }
 		protected:
-			virtual Debugger* createDebugger(int tracelevel) { return NULL; }
+			virtual Debugger* createDebugger(int tracelevel) { (void)tracelevel; return NULL; }
 			virtual Profiler* createProfiler() { return NULL; }
 			virtual Sampler* createSampler();
 		public:
