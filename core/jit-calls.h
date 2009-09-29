@@ -93,6 +93,166 @@
     METHOD(ENVADDR(MethodEnv::newActivation), SIG1(P,P), newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), SIG2(P,P,P), newcatch)
     METHOD(ENVADDR(MethodEnv::newfunction), SIG4(P,P,P,P,P), newfunction)
+
+    Atom callprop_miss(BindingCache&, Atom obj, int argc, Atom* args, MethodEnv*);
+
+    #ifdef DOPROF
+    # define PROF_IF(label, expr) bool hit = (expr); _nvprof(label, hit); if (hit)
+    #else
+    # define PROF_IF(label, expr) if (expr)
+    #endif
+
+    // if the cached obj was a ScriptObject, we have a hit when
+    // the new object's tag is kObjectType and the cached vtable matches exactly
+    #define OBJ_HIT(obj, c)  (atomKind(obj) == kObjectType && atomObj(obj)->vtable == (c).vtable)
+
+    // if the cached obj was a primitive, we only need a matching atom tag for a hit
+    #define PRIM_HIT(val, c) (atomKind(val) == c.tag)
+
+    REALLY_INLINE Atom invoke_cached_method(BindingCache& c, Atom obj, int argc, Atom* args) {
+        // force arg0 = obj; if caller used OP_callproplex then receiver was null.
+        args[0] = obj;
+        return c.method->coerceEnter(argc, args);
+    }
+
+    template <class T>
+    REALLY_INLINE T load_cached_slot(BindingCache& c, Atom obj) {
+        return *((T*) (uintptr_t(atomObj(obj)) + c.slot_offset));
+    }
+
+    // calling a declared method on a ScriptObject
+    Atom callprop_obj_method(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    {
+        PROF_IF ("callprop_obj_method hit", OBJ_HIT(obj,c))
+            return invoke_cached_method(c, obj, argc, args);
+        return callprop_miss(c, obj, argc, args, env);
+    }
+
+    // calling a function in a declared slot, specialized for slot type
+    template <class T>
+    Atom callprop_obj_slot(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    {
+        PROF_IF ("callprop_obj_slot hit", OBJ_HIT(obj,c))
+            return op_call(env, load_cached_slot<T>(c, obj), argc, args);
+        return callprop_miss(c, obj, argc, args, env);
+    }
+
+    // calling an unknown binding on an object, i.e. a dynamic property
+    Atom callprop_obj_none(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    {
+        PROF_IF ("callprop_obj_none hit", OBJ_HIT(obj,c)) {
+            // cache hit: access dynamic properties and proto-chain directly
+            return call_obj_dynamic(obj, c.name, argc, args);
+        }
+        return callprop_miss(c, obj, argc, args, env);
+    }
+
+    // calling a declared method on a primitive value
+    Atom callprop_prim_method(BindingCache& c, Atom prim, int argc, Atom* args, MethodEnv* env)
+    {
+        PROF_IF ("callprop_prim_method hit", PRIM_HIT(prim, c))
+            return invoke_cached_method(c, prim, argc, args);
+        return callprop_miss(c, prim, argc, args, env);
+    }
+
+    // calling a dynamic property on a primitive's prototype
+    Atom callprop_prim_none(BindingCache& c, Atom prim, int argc, Atom* args, MethodEnv* env)
+    {
+        PROF_IF ("callprop_prim_none hit", PRIM_HIT(prim, c)) {
+            // cache hit since all prims are final
+            // possible speedup: cached the prototype object itself, or at least
+            // get the prototype object using a table lookup with tag as the index
+            return call_prim_dynamic(env, prim, c.name, argc, args);
+        } 
+        return callprop_miss(c, prim, argc, args, env);
+    }
+
+    // generic call handler for uncommon cases
+    Atom callprop_generic(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    {
+        // go back to callprop_miss() after this call in case atom type changes
+        // to something allowing a smarter handler
+        c.call_handler = callprop_miss;
+        Toplevel* toplevel = env->toplevel();
+        VTable* vtable = toplevel->toVTable(obj);
+        return toplevel->callproperty(obj, c.name, argc, args, vtable);
+    }
+
+    static const CallCacheHandler callprop_obj_handlers[8] = {
+        &callprop_obj_none,     // BKIND_NONE
+        &callprop_obj_method,   // BKIND_METHOD
+        0,                      // BKIND_VAR (custom handler picked below)
+        0,                      // BKIND_CONST
+        0,                      // BKIND_unused (impossible)
+        &callprop_generic,      // BKIND_GET
+        &callprop_generic,      // BKIND_SET (error)
+        &callprop_generic       // BKIND_GETSET
+    };
+
+    // handlers for ScriptObject slots, indexed by SlotStorageType.  We only 
+    // care about slot types that hold something we can call; other cases
+    // will be errors, so we use the generic handler for them.
+    static const CallCacheHandler callprop_slot_handlers[8] = {
+        &callprop_obj_slot<Atom>,           // SST_atom
+        &callprop_generic,                  // SST_string
+        &callprop_generic,                  // SST_namespace
+        &callprop_obj_slot<ScriptObject*>,  // SST_scriptobject
+        &callprop_generic,                  // SST_int32
+        &callprop_generic,                  // SST_uint32
+        &callprop_generic,                  // SST_bool32
+        &callprop_generic                   // SST_double
+    };
+
+    static const CallCacheHandler callprop_prim_handlers[8] = {
+        &callprop_prim_none,    // BKIND_NONE
+        &callprop_prim_method,  // BKIND_METHOD
+        0,                      // BKIND_VAR (impossible on primitive)
+        0,                      // BKIND_CONST (impossible on primitive)
+        0,                      // BKIND_unused (impossible)
+        &callprop_generic,      // BKIND_GET
+        0,                      // BKIND_SET (impossible on primitive)
+        0                       // BKIND_GETSET (impossible on primitive)
+    };
+
+    // cache handler when cache miss occurs:
+    //  - Look up the binding using the Multiname saved in the cache
+    //  - save the object vtable (for ScriptObject*) or atom tag (all others)
+    //  - pick a handler and save the MethodEnv* or slot_offset
+    //  - invoke the new handler, which WILL NOT miss on this first call
+    Atom callprop_miss(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    {
+        AssertNotNull(obj);
+        Toplevel* toplevel = env->toplevel();
+        VTable* vtable = toplevel->toVTable(obj);
+        Traits* obj_type = vtable->traits;
+        Binding b = toplevel->getBinding(obj_type, c.name);
+        if (AvmCore::isMethodBinding(b)) {
+            // cache the method we will call
+            c.method = vtable->methods[AvmCore::bindingToMethodId(b)];
+        }
+        if (isObjectPtr(obj)) {
+            c.vtable = vtable;
+            if (AvmCore::isSlotBinding(b)) {
+                // precompute the slot offset, then install a cache handler that's
+                // specialized for the slot type
+                void *slot_ptr, *obj_ptr = atomObj(obj);
+                SlotStorageType sst = obj_type->getTraitsBindings()->
+                    calcSlotAddrAndSST(AvmCore::bindingToSlotId(b), obj_ptr, slot_ptr);
+                c.call_handler = callprop_slot_handlers[sst];
+                c.slot_offset = uintptr_t(slot_ptr) - uintptr_t(obj_ptr);
+            } else {
+                // all other bindings 
+                c.call_handler = callprop_obj_handlers[AvmCore::bindingKind(b)];
+            }
+        } else {
+            // must be a primitive: int, bool, string, namespace, or number
+            c.call_handler = callprop_prim_handlers[AvmCore::bindingKind(b)];
+            c.tag = atomKind(obj);
+        }
+        return c.call_handler(c, obj, argc, args, env);
+    }
+    FUNCTION(CALL_INDIRECT, SIG6(A,P,P,A,I,P,P), call_cache_handler)
+
     CSEMETHOD(TOPLEVELADDR(Toplevel::coerce), SIG3(A,P,A,P), coerce)
     METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
     FUNCTION(FUNCADDR(AvmCore::handleInterrupt), SIG1(V,P), handleInterrupt)

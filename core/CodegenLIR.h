@@ -120,8 +120,8 @@ namespace avmplus
     public:
         CodeAlloc   codeAlloc;  // allocator for code memory
         LogControl  log;        // controller for verbose output
-    #ifdef NJ_VERBOSE
         Allocator   allocator;  // data with same lifetime of this CodeMgr
+    #ifdef NJ_VERBOSE
         LabelMap    labels;     // pretty names for addresses in verbose code listing
     #endif
         CodeMgr();
@@ -139,6 +139,108 @@ namespace avmplus
         Patch() : br(0), label(0) {}
         Patch(int) : br(0), label(0) {}
         Patch(LIns *br, CodegenLabel &l) : br(br), label(&l) {}
+    };
+
+    // Binding Cache Design
+    // 
+    // When we don't know the type of the base object at a point we access a property,
+    // we must look up the property at runtime./ We cache the results of this lookup
+    // in a BindingCache instance, and install a handler specialized for the object
+    // type and binding kind. Each BindingCache consists of:
+    //
+    //    call_handler      initially, points to callprop_miss(), later points
+    //                      to the specialized handler
+    //
+    //    vtable or tag     VTable* or Atom tag for the base object.  specialized
+    //                      handlers quickly check this and "miss" when they dont match
+    //                      the object seen at runtime.
+    // 
+    //    slot_offset or    precomputed offset for a slot, for fast loads, or a preloaded
+    //    method            MethodEnv* for a method, for fast calls
+    //
+    //    name              Multiname* for this dynamic access.  Used on a cache miss,
+    //                      and also for handlers that access dynamic properties.
+    //
+    // If jit'd code for a method needs 1+ cache entries, they are allocated and
+    // saved on MethodInfo::_abc.call_cache. The table is only allocated when jit
+    // compilation was successful, so jit'd code must load this pointer at runtime
+    // since we don't have the address at compile time.
+    //
+    // cache instances are in unmanaged memory, so VTable and MethodEnv pointers
+    // are effectively weak references: gc-visible pointers must exist elsewhere,
+    // and the cache doesn't cause them to be pinned.
+    //
+    // we allocate one entry for each unique Multiname in each method (only at
+    // late-bound call sites, of course).  
+    //
+    // Limitations:
+    //
+    //   * we only use a binding cache if the name has no runtime parts.
+    //   * only implemented for OP_callproperty and OP_callproplex.
+    //   * only common cases observed in testing are handled, others use a generic
+    //     handler that's slightly slower than not using a cache at all.
+    //     see callprop_miss() in jit-calls.h for detail on handled cases.
+    //
+    // Alternatives that led to current design: 
+    //
+    //   * specializing slot accessors on slot type, and storing slot_offset,
+    //     avoids calling ScriptObject::getSlotAtom()  (15% faster for gets & calls)
+    //   * decl_type:  when an object type doesn't match the cached type, sometimes the
+    //     binding doesn't change.  for example calling a method declared on
+    //     a base class, on many different subclasses that don't override the
+    //     method.  the subsequent misses can be handled faster if we saved the method_id,
+    //     and checked that the actual type & cached type are related by inheritance.
+    //     This doesn't help for interface methods and the fast case didn't occur often
+    //     enough for the extra cache size and code complexity.
+    //   * vtable: When a single type (Traits*) is used in different environments we'll
+    //     have distinct VTable*'s that point to the same Traits*.  the cache might hit
+    //     more often if we stored Traits*.  however, specializing the cache on VTable*
+    //     lest us pre-load the MethodEnv* for calls, saving one load.  also, comparing
+    //     vtable pointers instead of traits pointers saves one more load. (5% median speedup)
+    //   * we pass the base object to CallCacheHandler instead of accessing it indirectly
+    //     via args[], to save a load on the fast path.  Worth 2-3%, and enables the same
+    //     code to handle OP_callproperty and OP_callproplex.
+    //   * we put Multiname* in the cache instead of passing it as a constant parameter,
+    //     because the increase in cache size is smaller than the savings in code size,
+    //     less parameters is faster, and the multiname is only used on relatively slow paths.
+    //   
+    //   (footnote: Times are from the tests in tamarin/test/performance as well as a
+    //   selection of Flash/Flex benchmark apps)
+    //
+    // Alternatives not yet investigated:
+    //
+    //   * we could put the whole Multiname in the cache, and maybe eliminate
+    //     PoolObject::precomputedMultinames[].  Not all multinames are used in late bound
+    //     call sites, so this could save some memory.  precomputed multinames have been
+    //     measured at over 10% of code size.  Need to study cache size increase vs pool
+    //     memory decrease.  Later when we have a code cache, this could be more compelling.
+    //   * we could specialize BKIND_METHOD handlers on method return type, enabling us
+    //     to inline the native-value boxing logic from MethodEnv::endCoerce()
+    //   * we could specialize getter & setter handlers on return/parameter type, 
+    //     allowing us to inline boxing & unboxing code from coerceEnter AND endCoerce
+    //   * the MethodEnv* passed to each handler is only used on slow paths.  Could we
+    //     put it somewhere else?  maybe core->currentMethodFrame->env?
+    //   * on x86, FASTCALL might be faster, if it doesn't inhibit tail calls in handlers
+    //   * we could allocate cache instances while generating code, saving a load @ runtime
+    //   * other cache instance groupings:
+    //       * one per call site instead of per-unique-multiname?
+    //       * share them between methods?
+    //   * handlers that access primitive dynamic properites have to call toplevel->toPrototype(val).
+    //     we could save the result and check its validity with (env->toplevel() == saved_proto->toplevel())
+    //   * we could specialize on primitive type too, inlining just the toPrototype() path we need
+
+    typedef Atom (*CallCacheHandler)(BindingCache&, Atom base, int argc, Atom* args, MethodEnv*);
+    struct BindingCache {
+        CallCacheHandler call_handler;
+        union {
+            VTable* vtable;     // for kObjectType receivers
+            Atom tag;           // for primitive receivers
+        };
+        union {
+            ptrdiff_t slot_offset;  // if the cached binding is a slot
+            MethodEnv* method;      // if the cached binding is a method/getter/setter
+        };
+        const Multiname* name;  // multiname for this entry, saved when cache created.
     };
 
     class CopyPropagation;
@@ -194,7 +296,8 @@ namespace avmplus
         CopyPropagation *copier;
         int framesize;
         int labelCount;
-        LookupCacheBuilder cache_builder;
+        LookupCacheBuilder finddef_cache_builder;
+        LookupCacheBuilder call_cache_builder;
         verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);
@@ -239,6 +342,9 @@ namespace avmplus
         void deadvars_analyze(Allocator& alloc, nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels);
         void deadvars_kill(nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels);
         void copyParam(int i, int &offset);
+
+        // on successful jit, allocate memory for BindingCache instances, if necessary
+        void initBindingCache();
 
         static BuiltinType bt(Traits *t) {
             return Traits::getBuiltinType(t);

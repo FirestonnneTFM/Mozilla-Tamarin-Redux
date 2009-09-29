@@ -111,6 +111,7 @@ namespace avmplus
 	class AtomArray;
 	class AvmCore;
 	class MethodFrame;
+	struct BindingCache;
 	class BooleanClass;
 	class BuiltinTraits;
 	class CallStackNode;
