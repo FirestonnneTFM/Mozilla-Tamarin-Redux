@@ -310,9 +310,9 @@ class RuntestBase:
                 self.htmlOutput = True
             elif o in ('--notimecheck',):
                 self.timestampcheck = False
-            elif o in ('--showtimes'):
+            elif o in ('--showtimes',):
                 self.show_time = True
-            elif o in ('--java'):
+            elif o in ('--java',):
                 self.java = v
         return opts
                 
