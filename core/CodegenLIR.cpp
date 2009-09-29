@@ -554,10 +554,11 @@ namespace avmplus
         return ap;
     }
 
-    void initCodePages(PoolObject *pool) {
-        if (!pool->codePages) {
-            PageMgr *mgr = mmfx_new( PageMgr() );
-            pool->codePages = mgr;
+    // initialize the code manager the first time we jit any method for this PoolObject.
+    void initCodeMgr(PoolObject *pool) {
+        if (!pool->codeMgr) {
+            CodeMgr *mgr = mmfx_new( CodeMgr() );
+            pool->codeMgr = mgr;
 #ifdef NJ_VERBOSE
             if (pool->verbose) {
                 mgr->log.lcbits = 0xffff; // turn everything on
@@ -596,7 +597,7 @@ namespace avmplus
         hasDebugInfo = false;
        #endif /* VTUNE */
 
-        initCodePages(pool);
+        initCodeMgr(pool);
     }
 
     CodegenLIR::~CodegenLIR() {
@@ -1203,7 +1204,7 @@ namespace avmplus
     };
 #endif
 
-    // generate the prolog for a function with this signature:
+    // Generate the prolog for a function with this C++ signature:
     //
     //    <return-type> f(MethodEnv* env, int argc, void* args)
     //
@@ -1214,7 +1215,77 @@ namespace avmplus
     //
     // the arguments in memory are typed according to the AS3 method
     // signature.  types * and Object are represented as Atom, and all
-    // other types are native pointers or values.
+    // other types are native pointers or values.  return-type is whatever
+    // the native type is for the AS3 return type; one of double, int32_t,
+    // uint32_t, ScriptObject*, String*, Namespace*, Atom, or void.
+    //
+    // The stack frame layout of a jit-compiled function is determined by
+    // the jit backend.  Stack-allocated structs are declared in LIR with
+    // a LIR_alloc instruction.  Incoming parameters are declared with LIR_param
+    // instructions, and any other local variables with function-body scope
+    // and lifetime are declared with the expressions that compute them.
+    // The backend will also allocate additional stack space for spilled values
+    // and callee-saved registers.  The VM and LIR do not currently depend on how
+    // the backend organizes the stack frame.
+    //
+    // Incoming parameters:
+    //
+    // env_param (LIR_param, MethodEnv*) is the incoming MethodEnv* parameter
+    // that provides access to the environment for this function and all vm services.
+    //
+    // argc_param (LIR_param, int32_t) the # of arguments that follow.  Ignored
+    // when the # of args is fixed, but otherwise used for optional arg processing
+    // and/or creating the rest[] or arguments[] arrays for undeclared varargs.
+    //
+    // ap_param (LIR_param, uint32_t*) pointer to (argc+1) incoming arguments.
+    // arguments are packed.  doubles are sizeof(double), everything else is sizeof(Atom).
+    //
+    // Distinguished locals:
+    //
+    // methodFrame (LIR_alloc, MethodFrame*) is the current MethodFrame.  in the prolog
+    // we push this onto the call stack pointed to by AvmCore::currentMethodFrame, and
+    // in the epilog we pop it back off.
+    //
+    // coreAddr (LIR_int|LIR_quad) constant address of AvmCore*.  used in lots of places.
+    // undefConst (LIR_int|LIR_quad) constant value = undefinedAtom. used all over.
+    //
+    // vars (LIR_alloc) storage for ABC stack frame variables.  8 bytes per variable,
+    // always, laid out according to ABC param/local var numbering.  The total number
+    // is local_count + scope_depth + stack_depth, i.e. enough for the whole ABC frame.
+    // values at any given point in the jit code are are represented according to the
+    // statically known type of the variable at that point in the code.  (the type and
+    // representation may change at different points.  verifier->frameState maintains
+    // the known static types of variables.
+    //
+    // The contents of vars are up-to-date at all labels and all debugging safe points.
+    // Inbetween those points, the contents are stale; the JIT optimizes away
+    // stores and loads in straightline code.  Additional dead stores at ends-of-blocks
+    // are elided by deadvars_analyze() and deadvars_kill().
+    // 
+    // Locals for Debugger use, only present when Debugger is in use:
+    //
+    // varTraits (LIR_alloc, Traits**).  Array of Traits*, with the same ordering as
+    // vars.  Used by the debugger to enable decoding local variables in vars[].
+    //
+    // csn (LIR_alloc, CallStackNode).  extra information about this call frame
+    // used by the debugger and also used for constructing human-readable stack traces.
+    //
+    // Locals for Exception-handling, only present when method has try/catch blocks:
+    //
+    // _save_eip (LIR_alloc, int32_t) storage for the current ABC-based "pc", used by exception
+    // handling to determine which catch blocks are in scope.  The value is an ABC
+    // instruction offset, which is how catch handler records are indexed.
+    //
+    // _ef (LIR_alloc, ExceptionFrame) an instance of struct ExceptionFrame, including
+    // a jmp_buf holding our setjmp() state, a pointer to the next outer ExceptionFrame,
+    // and other junk.  
+    //
+    // setjmpResult (LIR_call, int) result from calling setjmp; feeds a conditional branch
+    // that surrounds the whole function body; logic to pick a catch handler and jump to it
+    // is compiled after the function body.  if setjmp returns a nonzero result then we
+    // jump forward, pick a catch block, then jump backwards to the catch block.
+    // 
+
     bool CodegenLIR::prologue(FrameState* state)
     {
         this->state = state;
@@ -1233,7 +1304,7 @@ namespace avmplus
         verbose_only(
             vbWriter = 0;
             if (verbose() && !core->quiet_opt()) {
-                lirbuf->names = new (*lir_alloc) LirNameMap(*lir_alloc, &pool->codePages->labels);
+                lirbuf->names = new (*lir_alloc) LirNameMap(*lir_alloc, &pool->codeMgr->labels);
                 lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
             }
         )
@@ -1322,6 +1393,8 @@ namespace avmplus
         verbose_only( if (lirbuf->names) { lirbuf->names->addName(label, "begin");  })
         b->setTarget(label);
 
+        // we emit the undefined constant here since we use it so often and
+        // to ensure it dominates all uses.
         undefConst = InsConstAtom(undefinedAtom);
 
         #ifdef DEBUGGER
@@ -5027,7 +5100,7 @@ namespace avmplus
         return lirout->insAlloc(size >= 4 ? size : 4);
     }
 
-    PageMgr::PageMgr() : codeAlloc()
+    CodeMgr::CodeMgr() : codeAlloc()
 #ifdef NJ_VERBOSE
         , labels(allocator, &log)
 #endif
@@ -5305,7 +5378,7 @@ namespace avmplus
 
         deadvars();
 
-        PageMgr *mgr = pool->codePages;
+        CodeMgr *mgr = pool->codeMgr;
         verbose_only(if (verbose()) {
             Allocator live_alloc;
             live(live_alloc, frag, &mgr->log);

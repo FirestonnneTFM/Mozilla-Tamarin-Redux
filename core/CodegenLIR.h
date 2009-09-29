@@ -116,15 +116,15 @@ namespace avmplus
      * (in a nanojit::CodeAlloc), and any data with code lifetime
      * (in a nanojit::Allocator), such as debuging info, or inline caches.
      */
-    class PageMgr {
+    class CodeMgr {
     public:
         CodeAlloc   codeAlloc;  // allocator for code memory
         LogControl  log;        // controller for verbose output
     #ifdef NJ_VERBOSE
-        Allocator   allocator;  // data with same lifetime of this PageMgr
+        Allocator   allocator;  // data with same lifetime of this CodeMgr
         LabelMap    labels;     // pretty names for addresses in verbose code listing
     #endif
-        PageMgr();
+        CodeMgr();
     };
 
     /**
