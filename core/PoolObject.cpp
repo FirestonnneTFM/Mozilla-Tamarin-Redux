@@ -88,7 +88,7 @@ namespace avmplus
 		#endif
 
 		#ifdef VMCFG_NANOJIT
-		mmfx_delete( codePages );
+		mmfx_delete( codeMgr );
 		#endif
 	}
 	

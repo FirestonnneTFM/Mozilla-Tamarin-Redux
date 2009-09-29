@@ -42,7 +42,7 @@
 namespace avmplus
 {
 #ifdef VMCFG_NANOJIT
-    class PageMgr;
+    class CodeMgr;
 #endif
 
 #ifdef VMCFG_PRECOMP_NAMES
@@ -140,7 +140,7 @@ namespace avmplus
 #endif
 		
         #ifdef VMCFG_NANOJIT
-        PageMgr* codePages;
+        CodeMgr* codeMgr;
         #endif
 
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos, uint32_t api);
