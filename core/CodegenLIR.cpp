@@ -606,7 +606,8 @@ namespace avmplus
 
     void CodegenLIR::cleanup()
     {
-        cache_builder.cleanup();
+        finddef_cache_builder.cleanup();
+        call_cache_builder.cleanup();
         mmfx_delete( alloc1 );
         alloc1 = NULL;
         mmfx_delete( lir_alloc );
@@ -2299,7 +2300,7 @@ namespace avmplus
             // This allocates a cache slot even if the finddef ultimately becomes dead.
             // As long as caches tend to be small compared to size of pool data and code,
             // filtering out dead cache lines isn't worth the complexity.
-            LIns* slot = InsConst(cache_builder.allocateCacheSlot(opd1));
+            LIns* slot = InsConst(finddef_cache_builder.allocateCacheSlot(opd1));
             LIns* out = callIns(FUNCTIONID(finddef_cache), 3, env_param, InsConstPtr(multiname), slot);
             localSet(dest_index, ptrToNativeRep(type, out), type);
             break;
@@ -2643,8 +2644,7 @@ namespace avmplus
         case OP_callproplex:
         case OP_callpropvoid:
         {
-            const Multiname* name = pool->precomputedMultiname(opd1);
-            emit(state, opcode, (uintptr)name, opd2, NULL);
+            emit(state, opcode, opd1, opd2, NULL);
             break;
         }
 
@@ -3637,16 +3637,18 @@ namespace avmplus
                 int argc = int(op2);
                 int argv = sp-argc+1;
                 int baseDisp = sp-argc;
-                const Multiname* name = (const Multiname*) op1;
+                const Multiname* name = pool->precomputedMultiname(op1);
                 LIns* multi = initMultiname(name, baseDisp);
                 AvmAssert(state->value(baseDisp).notNull);
 
+                // convert args to Atom[] for the call
                 LIns* base = loadAtomRep(baseDisp);
                 LIns* receiver = opcode == OP_callproplex ? InsConstAtom(nullObjectAtom) : base;
                 LIns* ap = storeAtomArgs(receiver, argc, argv);
 
                 Traits* baseTraits = state->value(baseDisp).traits;
                 Binding b = state->verifier->getToplevel(this)->getBinding(baseTraits, name);
+
                 LIns* out;
                 if (AvmCore::isSlotBinding(b)) {
                     // can early bind call to closure in slot
@@ -3655,7 +3657,18 @@ namespace avmplus
                     LIns* funcValue = loadFromSlot(baseDisp, AvmCore::bindingToSlotId(b), slotType);
                     LIns* funcAtom = loadAtomRep(funcValue, slotType);
                     out = callIns(FUNCTIONID(op_call), 4, env_param, funcAtom, InsConst(argc), ap);
-                } else {
+                }
+                else if (!name->isRuntime()) {
+                    // use inline cache for late bound call
+                    // cache (type, ptr), call ptr with (slot, multiname, argc, args)
+                    int cache_slot = call_cache_builder.allocateCacheSlot(op1);
+                    LIns* cacheTable = loadIns(LIR_ldcp, offsetof(MethodInfo, _abc.call_cache), InsConstPtr(info));
+                    LIns* cacheEntry = binaryIns(LIR_piadd, cacheTable, InsConstAtom(cache_slot * sizeof(BindingCache)));
+                    LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, call_handler), cacheEntry);
+                    out = callIns(FUNCTIONID(call_cache_handler), 6,
+                        handler, cacheEntry, base, InsConst(argc), ap, env_param);
+                }
+                else {
                     // generic late bound call to anything
                     LIns* vtable = loadVTable(baseDisp);
                     LIns* toplevel = loadToplevel();
@@ -4856,7 +4869,7 @@ namespace avmplus
 
         frag->lastIns = last;
 
-        info->set_lookup_cache_size(cache_builder.next_cache);
+        info->set_lookup_cache_size(finddef_cache_builder.next_cache);
     }
 
     // emit code to create a stack-allocated copy of the given multiname.
@@ -5424,6 +5437,7 @@ namespace avmplus
             info->_implGPR = u.fp;
             // mark method as been JIT'd
             info->_flags |= MethodInfo::JIT_IMPL;
+            initBindingCache();
             #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())
                 AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
@@ -5454,6 +5468,22 @@ namespace avmplus
             jitInfoList.clear();
         }
         #endif /* VTUNE */
+    }
+
+    // on successful jit, allocate memory for BindingCache instances, if necessary
+    void CodegenLIR::initBindingCache()
+    {
+        CodeMgr *mgr = pool->codeMgr;
+        int nslots = call_cache_builder.next_cache;
+        if (nslots > 0) {
+            _nvprof("call_cache bytes", nslots * sizeof(BindingCache));
+            BindingCache* cache = new (mgr->allocator) BindingCache[nslots];
+            for (int i=0; i < nslots; i++) {
+                cache[i].call_handler = callprop_miss;
+                cache[i].name = pool->precomputedMultiname(call_cache_builder.get_entry(i));
+            }
+            info->_abc.call_cache = cache;
+        }
     }
 
 #ifdef VTUNE

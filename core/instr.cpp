@@ -76,11 +76,7 @@ Atom callprop_b(E env, Atom base, const Multiname* multiname, int argc, Atom* at
         if (isObjectPtr(base)) {
             return call_obj_dynamic(base, multiname, argc, atomv);
         } else {
-            // primitive types are not dynamic, so we can go directly
-            // to their __proto__ object
-            ScriptObject* proto = env->toplevel()->toPrototype(base);
-            Atom method = proto->getMultinameProperty(multiname);
-            return op_call(env, method, argc, atomv);
+            return call_prim_dynamic(env, base, multiname, argc, atomv);
         }
     }
 }

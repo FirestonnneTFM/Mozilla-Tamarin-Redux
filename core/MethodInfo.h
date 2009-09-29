@@ -355,8 +355,8 @@ namespace avmplus
 	#endif
 
 	#ifdef VMCFG_LOOKUP_CACHE
-		inline int lookup_cache_size() const { AvmAssert(!isNative()); return _abc.cache_size; }
-		inline void set_lookup_cache_size(int s) { AvmAssert(!isNative()); _abc.cache_size = s; }
+		inline int lookup_cache_size() const { AvmAssert(!isNative()); return _abc.lookup_cache_size; }
+		inline void set_lookup_cache_size(int s) { AvmAssert(!isNative()); _abc.lookup_cache_size = s; }
 	#endif
 
 		inline int method_id() const { return _method_id; }
@@ -406,7 +406,10 @@ namespace avmplus
 			const uint8_t*			body_pos;
 			ExceptionHandlerTable*	exceptions;		// we write this once, in Verifier, with an explicit WB.  so no DWB.
 	#ifdef VMCFG_LOOKUP_CACHE
-			int						cache_size;     // Number of items in lookup cache
+			int						lookup_cache_size;     // Number of items in lookup cache
+	#endif
+	#ifdef FEATURE_NANOJIT
+			BindingCache*			call_cache;			// call cache, created and owned by jit
 	#endif
 	#ifdef AVMPLUS_WORD_CODE
 			struct 

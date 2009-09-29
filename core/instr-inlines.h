@@ -75,7 +75,7 @@ template <class E> REALLY_INLINE
 Atom call_slot_binding(E env, Atom base, Binding b, int argc, Atom* atomv)
 {
     ScriptObject* method = AvmCore::atomToScriptObject(base)->getSlotObject(AvmCore::bindingToSlotId(b));
-    return op_call_obj(env, method, argc, atomv);
+    return op_call(env, method, argc, atomv);
 }
 
 REALLY_INLINE
@@ -90,6 +90,16 @@ REALLY_INLINE
 Atom call_obj_dynamic(Atom base, const Multiname* name, int argc, Atom* atomv)
 {
     return AvmCore::atomToScriptObject(base)->callProperty(name, argc, atomv);
+}
+
+template <class E> REALLY_INLINE
+Atom call_prim_dynamic(E env, Atom val, const Multiname* name, int argc, Atom* args)
+{
+    // primitive types are not dynamic, so we can go directly
+    // to their __proto__ object
+    ScriptObject* proto = env->toplevel()->toPrototype(val);
+    Atom func = proto->getMultinameProperty(name);
+    return op_call(env, func, argc, args);
 }
 
 /**
@@ -117,7 +127,7 @@ Atom op_call(E env, Atom func, int argc, Atom* atomv)
 
 /** specialized op_call when you have a ScriptObject* already for the function */
 template <class E> REALLY_INLINE
-Atom op_call_obj(E env, ScriptObject* func, int argc, Atom* atomv)
+Atom op_call(E env, ScriptObject* func, int argc, Atom* atomv)
 {
     if (func)
         return func->call(argc, atomv);

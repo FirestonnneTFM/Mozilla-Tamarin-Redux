@@ -221,6 +221,9 @@ namespace avmplus
 	public:
 		// next free entry in 'caches'
 		int next_cache;
+		uint32_t get_entry(int i) {
+			return caches[i];
+		}
 
 	public:
 		LookupCacheBuilder();

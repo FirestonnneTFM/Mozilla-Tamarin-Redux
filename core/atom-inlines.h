@@ -47,4 +47,14 @@ namespace avmplus
     //inline void* atomPtr(Atom a) { return (void*)(uintptr_t(a) & ~7); }
     // note that this needs to be signed (NOT unsigned) to maintain existing semantics
     //inline intptr_t atomInt(Atom a) { return intptr_t(a) >> 3; }
+
+// unwrap an atom and return a ScriptObject*.  Doesn't use atomPtr(), because
+// using subtract allows the expression to be folded with other pointer math,
+// unlike the & ~7 in atomPtr().
+REALLY_INLINE ScriptObject* atomObj(Atom a)
+{
+    AvmAssert(AvmCore::isObject(a)); // proper type and not null or undefined
+    return (ScriptObject*) (uintptr_t(a) - kObjectType);
 }
+
+} // namespace

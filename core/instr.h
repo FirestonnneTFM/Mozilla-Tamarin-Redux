@@ -76,7 +76,7 @@ Atom op_call(E env, Atom func, int argc, Atom* atomv);
  * already.  Includes null pointer handling
  */
 template <class E>
-Atom op_call_obj(E env, ScriptObject* func, int argc, Atom* atomv);
+Atom op_call(E env, ScriptObject* func, int argc, Atom* atomv);
 
 /**
  * implements OP_construct, including error handling for non-constructor
