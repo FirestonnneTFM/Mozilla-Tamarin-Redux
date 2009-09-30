@@ -75,4 +75,94 @@ REALLY_INLINE Atom Toplevel::op_applytype(Atom obj, int argc, Atom* atomv)
 	return avmplus::op_applytype(this, obj, argc, atomv);
 }
 
+REALLY_INLINE QNameObject* Toplevel::ToAttributeName(const Stringp arg)
+{
+	return ToAttributeName(arg->atom());
+}
+
+REALLY_INLINE Atom Toplevel::coerce(Atom atom, Traits* expected) const
+{
+	// do a couple of quick checks to see if we can bail early, since it's often the case
+	// that the type is already what we expect (and we can determine that quickly
+	// by checks against the Traits BuiltinType)
+	if (!expected)
+		return atom;
+
+	if (AvmCore::atomDoesNotNeedCoerce(atom, BuiltinType(expected->builtinType)))
+		return atom;
+
+	return coerceImpl(atom, expected);
+}
+
+//static
+REALLY_INLINE bool Toplevel::isXmlBase(Atom obj)
+{
+	return AvmCore::isXMLorXMLList(obj);
+}
+
+REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
+{
+	return _builtinClasses[class_id]
+		? _builtinClasses[class_id]
+		: const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
+}
+
+// static
+REALLY_INLINE bool Toplevel::contains(const uint32 *uriSet, uint32 ch)
+{
+	return (ch<0x80) && (uriSet[ch>>5]&(1<<(ch&0x1f))) != 0;
+}
+
+REALLY_INLINE void Toplevel::throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const
+{
+	throwReferenceError(id, &multiname, traits);
+}
+
+REALLY_INLINE void Toplevel::throwReferenceError(int id, const Multiname& multiname) const
+{
+	throwReferenceError(id, &multiname);
+}
+
+#ifndef DEBUGGER
+REALLY_INLINE void Toplevel::throwVerifyError(int id, Stringp) const
+{
+	throwVerifyError(id);
+}
+
+REALLY_INLINE void Toplevel::throwVerifyError(int id, Stringp, Stringp) const
+{
+	throwVerifyError(id);
+}
+#endif // !DEBUGGER
+
+REALLY_INLINE AbcEnv* Toplevel::abcEnv() const
+{
+	return _abcEnv;
+}
+
+REALLY_INLINE DomainEnv* Toplevel::domainEnv() const
+{
+	return _abcEnv->domainEnv();
+}
+
+REALLY_INLINE AvmCore* Toplevel::core() const
+{
+	return _abcEnv->pool()->core;
+}
+
+REALLY_INLINE MMgc::GC* Toplevel::gc() const
+{
+	return core()->GetGC();
+}
+
+REALLY_INLINE ScriptObject* Toplevel::global() const
+{
+	return _global;
+}
+
+REALLY_INLINE Atom Toplevel::atom() const
+{
+	return _global->atom();
+}
+
 } // namespace avmplus
