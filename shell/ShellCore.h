@@ -88,6 +88,14 @@ namespace avmshell
 		const char* st_category;
 		const char* st_name;
 		uint32_t api;
+		
+		MMgc::GC::GCMode gcMode()
+		{
+			if (nogc)				return MMgc::GC::kDisableGC;
+			else if (greedy)		return MMgc::GC::kGreedyGC;
+			else if (incremental)	return MMgc::GC::kIncrementalGC;
+			else					return MMgc::GC::kNonincrementalGC;
+		}		
 	};
 
 	/**

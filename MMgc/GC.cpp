@@ -831,10 +831,11 @@ namespace MMgc
 #  pragma warning(disable:4355) // 'this': used in base member initializer list
 #endif 
 
-	GC::GC(GCHeap *gcheap)
+	GC::GC(GCHeap *gcheap, GCMode mode)
 		:
-		greedy(false),
-		nogc(false),
+		greedy(mode == kGreedyGC),
+		nogc(mode == kDisableGC),
+		incremental(mode == kIncrementalGC),
 		findUnmarkedPointers(false),
 		validateDefRef(false),
 		keepDRCHistory(false),
@@ -844,7 +845,6 @@ namespace MMgc
 		// check for missing write barriers at every Alloc
 		incrementalValidationPedantic(false),
 #endif
-		incremental(true),
 		rcRootSegments(NULL),
 		policy(this, gcheap),
 		t0(VMPI_getPerformanceCounter()),
@@ -893,6 +893,7 @@ namespace MMgc
 		MMGC_STATIC_ASSERT(sizeof(uintptr_t) == 4);	
 		#endif		
 
+		GCAssert(!(greedy && incremental));
 		zct.SetGC(this);
 
 		VMPI_lockInit(&m_gcLock);

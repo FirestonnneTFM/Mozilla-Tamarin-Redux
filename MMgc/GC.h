@@ -813,28 +813,36 @@ namespace MMgc
 		 * greedy is a debugging flag.  When set, every allocation
 		 * will cause a garbage collection.  This makes code run
 		 * abysmally slow, but can be useful for detecting mark
-		 * bugs.
+		 * bugs or computing true peak live size.
 		 *
-		 * The GC reads this flag only when holding the GC lock.  It is best
-		 * to set it as soon as the GC is created.
+		 * Set by GC::GC based on the 'mode' argument.
 		 */
-		bool greedy;
+		const bool greedy;
 
 		/**
 		 * nogc is a debugging flag.  When set, garbage collection
 		 * never happens.
+		 *
+		 * Set by GC::GC based on the 'mode' argument.
 		 */
-		bool nogc;
+		const bool nogc;
 
 		/**
-	      * findUnmarkedPointers is a debugging flag, only 
-		  */
+		 * Configuration flag enabling incremental collection.
+		 *
+		 * Set by GC::GC based on the 'mode' argument.
+		 */
+		const bool incremental;
+		
+		/**
+	     * findUnmarkedPointers is a debugging flag, only 
+		 */
 		bool findUnmarkedPointers;
 
 		/**
-		* turns on code that does a trace before reaping zero count object and asserting on
-		* any objects that get marked, debug builds only
-		*/
+		 * turns on code that does a trace before reaping zero count object and asserting on
+		 * any objects that get marked, debug builds only
+		 */
 		bool validateDefRef;		
 		
 		/**
@@ -851,13 +859,16 @@ namespace MMgc
 		bool incrementalValidationPedantic;
 #endif
 
-		/**
-		 * Configuration flag enabling incremental collection.
-		 */
-		bool incremental;
-
 		// -- Interface
-		GC(GCHeap *heap);
+		enum GCMode 
+		{
+			kDisableGC=1,		// never collect
+			kGreedyGC,			// stop-the-world collection at every allocation
+			kIncrementalGC,		// incremental collection
+			kNonincrementalGC	// nonincremental collection
+		};
+
+		GC(GCHeap *heap, GCMode mode);
 		virtual ~GC();
 		
 		/**
