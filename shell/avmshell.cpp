@@ -134,7 +134,7 @@ namespace avmshell
 	/* static */
 	void Shell::singleWorker(ShellSettings& settings)
 	{
-		MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap()) );
+		MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode()) );
 		{
 			MMGC_GCENTER(gc);			
 			ShellCore* shell = new ShellCoreImpl(gc, true);
@@ -369,7 +369,7 @@ namespace avmshell
 		// Create collectors and cores.
 		// Extra credit: perform setup in parallel on the threads.
 		for ( int i=0 ; i < numcores ; i++ ) {
-			MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+			MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode());
 			MMGC_GCENTER(gc);
 			cores[i] = new CoreNode(new ShellCoreImpl(gc, false), i);
 			if (!cores[i]->core->setup(settings))

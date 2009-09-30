@@ -413,10 +413,6 @@ namespace avmshell
 		langID = settings.langID;
 #endif
 
-		GetGC()->greedy = settings.greedy;
-		GetGC()->nogc = settings.nogc;
-		GetGC()->incremental = settings.incremental;
-		
 		TRY(this, kCatchAction_ReportAsError)
 		{
 			setStackLimit();
