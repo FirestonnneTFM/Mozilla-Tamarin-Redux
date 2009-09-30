@@ -640,18 +640,16 @@ namespace avmshell
 						settings.verifyall = true;
 					}
 #endif /* AVMPLUS_VERIFYALL */
-#ifdef _DEBUG
 					else if (!VMPI_strcmp(arg+2, "greedy")) {
 						settings.greedy = true;
 					}
-#endif /* _DEBUG */
-#ifdef DEBUGGER
 					else if (!VMPI_strcmp(arg+2, "nogc")) {
 						settings.nogc = true;
 					}
 					else if (!VMPI_strcmp(arg+2, "noincgc")) {
 						settings.incremental = false;
 					}
+#ifdef DEBUGGER
 					else if (!VMPI_strcmp(arg+2, "astrace")) {
 						settings.astrace_console = VMPI_strtol(argv[++i], 0, 10);
 					}
@@ -967,12 +965,10 @@ namespace avmshell
 		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
 		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
 		AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
-#ifdef _DEBUG
 		AvmLog("          [-Dgreedy]    collect before every allocation\n");
-#endif
-#ifdef DEBUGGER
 		AvmLog("          [-Dnogc]      don't collect\n");
 		AvmLog("          [-Dnoincgc]   don't use incremental collection\n");
+#ifdef DEBUGGER
 		AvmLog("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
 		AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
 		AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
