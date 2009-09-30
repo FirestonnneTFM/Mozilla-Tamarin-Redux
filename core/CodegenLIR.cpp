@@ -854,9 +854,9 @@ namespace avmplus
             return out->insBranch(op, cond, to);
         }
 
-        LIns *insGuard(LOpcode v, LIns *cond, LIns *x) {
+        LIns *insGuard(LOpcode v, LIns *cond, GuardRecord *gr) {
             AvmAssert(false);
-            return out->insGuard(v, cond, x);
+            return out->insGuard(v, cond, gr);
         }
 
         LIns *insAlloc(int32_t size) {
