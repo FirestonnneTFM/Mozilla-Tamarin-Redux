@@ -3143,13 +3143,12 @@ namespace avmplus
         // if storing to a pointer-typed slot, inline a WB
         Traits* slotType = tb->getSlotTraits(slot);
 
-        if (core->GetGC()->incremental &&
-            (!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE))
+        if (!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE)
         {
+            // slot type is Atom (for *, Object) or RCObject* (String, Namespace, or other user types)
             const CallInfo *wbAddr = FUNCTIONID(privateWriteBarrierRC);
             if(slotType == NULL || slotType == OBJECT_TYPE) {
                 // use fast atom wb
-                // TODO: inline pointer check
                 wbAddr = FUNCTIONID(atomWriteBarrier);
             }
             callIns(wbAddr, 4,
