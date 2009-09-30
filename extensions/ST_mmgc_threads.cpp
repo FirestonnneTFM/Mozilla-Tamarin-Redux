@@ -126,10 +126,10 @@ case 0: test0(); return;
 }
 }
 void ST_mmgc_threads::prologue() {
-	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
 	if (gc==NULL) {
 	    MMgc::GCHeap::Init();
-	    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+	    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
 	}
 	pthread_mutex_init(&pmutex, NULL);
 	pthread_cond_init(&pcond, NULL);
