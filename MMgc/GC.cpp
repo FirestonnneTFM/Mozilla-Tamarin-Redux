@@ -94,6 +94,7 @@ namespace MMgc
 
 #define R_LOWER_LIMIT (10*1024*1024)
 #define R_INITIAL_VALUE (10*R_LOWER_LIMIT)
+#define GREEDY_TRIGGER (-(INT_MAX/2))				// must be <= 0 but should never go positive as a result of a single alloc action or multiple free actions
 
 	GCPolicyManager::GCPolicyManager(GC* gc, GCHeap* heap)
 		// public
@@ -339,6 +340,9 @@ namespace MMgc
 				  (H+remainingMajorAllocationBudget) / 1024.0);
 #endif
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
+		
+		if (gc->greedy)
+			remainingMinorAllocationBudget = GREEDY_TRIGGER;
   	}
 
  	// Called when an incremental mark ends
@@ -354,6 +358,9 @@ namespace MMgc
  		remainingMinorAllocationBudget = int32_t(A());
 		minorAllocationBudget = remainingMinorAllocationBudget;
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
+		
+		if (gc->greedy)
+			remainingMinorAllocationBudget = GREEDY_TRIGGER;
  	}
 
  	// Called when an incremental mark is about to start.  The premise is that if the
@@ -1179,9 +1186,6 @@ namespace MMgc
 			return NULL;
 		}
 		GCAssert(size + 7 > size);
-		if (GC::greedy) {
-			Collect(true);
-		}
 		// always be marking in pedantic mode
 		if(incrementalValidationPedantic) {
 			if(!marking)
