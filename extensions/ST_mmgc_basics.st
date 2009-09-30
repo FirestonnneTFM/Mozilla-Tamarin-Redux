@@ -58,10 +58,10 @@ private:
     MMgc::FixedMalloc *fm;
 
 %%prologue
-	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
 	if (gc==NULL) {
 	    MMgc::GCHeap::Init();
-	    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap());
+	    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
 	}
 
 %%epilogue
