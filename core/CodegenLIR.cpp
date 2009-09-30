@@ -3896,7 +3896,7 @@ namespace avmplus
                 // obj=sp[0]
                 //sp[0] = env->getproperty(obj, multiname);
 
-                const Multiname* multiname = pool->precomputedMultiname(op1);
+                const Multiname* multiname = pool->precomputedMultiname((int)op1);
                 bool attr = multiname->isAttr();
                 Traits* indexType = state->value(sp).traits;
                 int objDisp = sp;
@@ -4058,7 +4058,7 @@ namespace avmplus
                                             toplevel, obj, multi, vtable);
                     } else {
                         // static name, use property cache
-                        int cache_slot = get_cache_builder.allocateCacheSlot(op1);
+                        int cache_slot = get_cache_builder.allocateCacheSlot((uint32_t)op1);
                         LIns* cacheTable = loadIns(LIR_ldcp, offsetof(MethodInfo, _abc.get_cache), InsConstPtr(info));
                         LIns* cacheEntry = binaryIns(LIR_piadd, cacheTable, InsConstAtom(cache_slot * sizeof(BindingCache)));
                         LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, get_handler), cacheEntry);
