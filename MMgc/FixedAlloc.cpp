@@ -48,6 +48,11 @@ namespace MMgc
 		Init(itemSize, heap);
 	}
 
+	FixedAlloc::FixedAlloc() 
+		: m_isFixedAllocSafe(true)
+	{
+	}
+	
 	void FixedAlloc::Init(uint32_t itemSize, GCHeap* heap)
 	{
 		m_heap = heap;
@@ -385,6 +390,26 @@ namespace MMgc
 	}
 #endif //MMGC_MEMORY_INFO
 
+	// FixedAllocSafe
+
+	FixedAllocSafe::FixedAllocSafe(int itemSize, GCHeap* heap) 
+		: FixedAlloc(itemSize, heap, true)
+	{
+		VMPI_lockInit(&m_spinlock);
+	}
+	
+	FixedAllocSafe::FixedAllocSafe()
+	{
+		VMPI_lockInit(&m_spinlock);
+	}
+	
+	FixedAllocSafe::~FixedAllocSafe()
+	{
+		VMPI_lockDestroy(&m_spinlock);
+	}
+
+	// FastAllocator
+	
 	void *FastAllocator::operator new[](size_t size)
 	{
 		return FixedMalloc::GetFixedMalloc()->Alloc(size);
