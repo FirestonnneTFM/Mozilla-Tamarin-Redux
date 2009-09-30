@@ -295,7 +295,13 @@ namespace MMgc
 			return t;
 		}
 
+		// Clear() clears the smart pointer without decrementing the reference count of any object stored in
+		// the smart pointer.  It is essentially useful in situations where the caller has already deleted
+		// the object and needs to ensure that the destruction of the smart pointer does not access the
+		// deleted storage.
+
 		REALLY_INLINE void Clear() { t = 0; }
+
 	private:
 		// Private constructor to prevent its use and someone adding it, GCC creates
 		// WriteBarrierRCs on the stack with it
