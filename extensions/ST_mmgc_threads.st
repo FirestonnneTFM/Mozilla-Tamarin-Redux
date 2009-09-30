@@ -121,7 +121,6 @@ private:
 	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap());
 	if (gc==NULL) {
 	    MMgc::GCHeap::Init();
-	    MMgc::FixedMalloc::Init();
 	    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap());
 	}
 	pthread_mutex_init(&pmutex, NULL);
