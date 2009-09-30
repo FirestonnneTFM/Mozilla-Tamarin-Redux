@@ -56,12 +56,12 @@ namespace avmplus
 		Toplevel(AbcEnv*);
 		virtual ~Toplevel() {} // silence compiler warnings
 		
-		inline AbcEnv* abcEnv() const { return _abcEnv; }
-		inline DomainEnv* domainEnv() const { return _abcEnv->domainEnv(); }
-		inline AvmCore* core() const { return _abcEnv->pool()->core; }
-		inline MMgc::GC* gc() const { return core()->GetGC(); }
-		inline ScriptObject* global() const { return _global; }
-		inline Atom atom() const { return _global->atom(); }
+		AbcEnv* abcEnv() const;
+		DomainEnv* domainEnv() const;
+		AvmCore* core() const;
+		MMgc::GC* gc() const;
+		ScriptObject* global() const;
+		Atom atom() const;
 		ScriptEnv* mainEntryPoint() const;
 
 		DateClass* dateClass();
@@ -87,14 +87,8 @@ namespace avmplus
 		/*@}*/
 
 		void throwVerifyError(int id) const;
-
-#ifdef DEBUGGER
 		void throwVerifyError(int id, Stringp arg1) const;
 		void throwVerifyError(int id, Stringp arg1, Stringp arg2) const;
-#else
-		void throwVerifyError(int id, Stringp arg1) const { throwVerifyError(id); (void)arg1; }
-		void throwVerifyError(int id, Stringp arg1, Stringp arg2) const { throwVerifyError(id); (void)arg1;(void)arg2; }
-#endif
 
 		void throwTypeError(int id) const;
 		void throwTypeError(int id, Stringp arg1) const;
@@ -118,8 +112,8 @@ namespace avmplus
 		void throwReferenceError(int id, const Multiname* multiname, const Traits* traits) const;
 		void throwReferenceError(int id, const Multiname* multiname) const;
 
-		inline void throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const { throwReferenceError(id, &multiname, traits); }
-		inline void throwReferenceError(int id, const Multiname& multiname) const { throwReferenceError(id, &multiname); }
+		void throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const;
+		void throwReferenceError(int id, const Multiname& multiname) const;
 
 		inline Toplevel* toplevel() { return this; }
 		inline const Toplevel* toplevel() const { return this; }
@@ -176,10 +170,7 @@ namespace avmplus
 		 * Implements the ToAttributeName API as specified in E4X 10.5.1, pg 37
 		 */
 		QNameObject* ToAttributeName (Atom arg);
-		QNameObject* ToAttributeName (const Stringp arg)
-		{
-			return ToAttributeName(arg->atom());
-		}
+		QNameObject* ToAttributeName (const Stringp arg);
 
 		/**
 		 * Implements the ToXMLName API as specified in E4X 10.6.1, page 38
@@ -224,20 +215,7 @@ namespace avmplus
 		Atom coerceImpl(Atom atom, Traits* expected) const;
 
 	public:
-		inline Atom coerce(Atom atom, Traits* expected) const
-		{
-			// do a couple of quick checks to see if we can bail early, since it's often the case
-			// that the type is already what we expect (and we can determine that quickly
-			// by checks against the Traits BuiltinType)
-			if (!expected)
-				return atom;
-
-			if (AvmCore::atomDoesNotNeedCoerce(atom, BuiltinType(expected->builtinType)))
-				return atom;
-
-			return coerceImpl(atom, expected);
-		}
-
+		Atom coerce(Atom atom, Traits* expected) const;
 		void coerceobj(ScriptObject* obj, Traits* expected) const;
 
 		/**
@@ -274,7 +252,7 @@ namespace avmplus
 	    void setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
 	    void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
 
-		static bool isXmlBase(Atom obj) { return AvmCore::isXMLorXMLList(obj); }
+		static bool isXmlBase(Atom obj);
 
 		/**
 		 * operator +
@@ -340,21 +318,18 @@ namespace avmplus
 		// For E4X
 		static bool isXMLName(ScriptObject*, Atom v);
 
-        ClassClosure* getBuiltinClass(int class_id) const
-        {
-            return _builtinClasses[class_id] ? _builtinClasses[class_id] : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
-        }
+        ClassClosure* getBuiltinClass(int class_id) const;
 		ErrorClass* getErrorClass(int class_id) const { return (ErrorClass*)getBuiltinClass(class_id); }
 
 		unsigned int readU30(const byte *&p) const;
 
 		// implementations supporting any of our extensions should override this
-		virtual ClassClosure *getBuiltinExtensionClass(int /*clsid*/) { return NULL; }
+		virtual ClassClosure *getBuiltinExtensionClass(int clsid);
 
 		// subclasses can override this to check for security violations
 		// and prohibit certain operations. default implementation always
 		// allows but FlashPlayer takes advantage of this.
-		virtual bool sampler_trusted(ScriptObject* /*sampler*/) { return true; }
+		virtual bool sampler_trusted(ScriptObject* /*sampler*/);
 
 	protected:
 		ClassClosure* findClassInPool(int class_id, PoolObject* pool);
@@ -369,10 +344,7 @@ namespace avmplus
 		static const uint32 uriUnescaped[];
 		static const uint32 uriReservedPlusPound[];
 		
-		inline static bool contains(const uint32 *uriSet, uint32 ch)
-		{
-			return (ch<0x80) && (uriSet[ch>>5]&(1<<(ch&0x1f))) != 0;
-		}
+		static bool contains(const uint32 *uriSet, uint32 ch);
 
 		ClassClosure* resolveBuiltinClass(int class_id);
 
