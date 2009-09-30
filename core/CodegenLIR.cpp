@@ -5569,6 +5569,9 @@ namespace nanojit
         return mmfx_free(p);
     }
 
+    void Allocator::postReset() {
+    }
+
     // static
     void* CodeAlloc::allocCodeChunk(size_t nbytes) {
         size_t npages = (nbytes + GCHeap::kBlockSize - 1) / GCHeap::kBlockSize;
