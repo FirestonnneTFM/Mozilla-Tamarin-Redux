@@ -160,6 +160,8 @@ namespace MMgc
 #include "GCWeakRef.h"
 #include "WriteBarrier.h"
 
+#include "FixedAlloc-inlines.h"
+#include "FixedMalloc-inlines.h"
 #include "ZCT-inlines.h"
 
 // remove these when the player stops using it

@@ -41,61 +41,101 @@
 namespace MMgc
 {
 	/**
-	 * This is a fast, fixed-size memory allocator for manually freed
-	 * objects.
+	 * FixedAlloc is a fast, non-thread-safe, fixed-size memory allocator for manually
+	 * freed objects.
 	 *
-	 * Memory is allocated from the system in 4096 byte chunks
-	 * via the GCHeap class.  Not that this won't work well for
-	 * large objects (>400 bytes).  For that, we have the
-	 * FixedAllocLarge allocator which will allocate multiple
-	 * pages at a time to minimize waste.
+	 * Memory is allocated from the system in 4096 byte chunks via the GCHeap
+	 * class and then carved into smaller objects.  For larger objects we have
+	 * the FixedAllocLarge allocator.  See FixedMalloc.cpp for details on
+	 * the cutoffs etc.
 	 */
 	class FixedAlloc 
 	{
 		friend class FixedMalloc;
 		friend class FastAllocator;
 		friend class GC;
+
 	public:
+		/**
+		 * Initialize the allocator.
+		 *
+		 * @param itemSize          The size of items managed by this allocator.
+		 * @param heap              The block manager from which we obtain memory.
+		 * @param isFixedAllocSafe  If true, this allocator's concrete instance
+		 *                          is FixedAllocSafe, and certain unlocking operations
+		 *                          will be performed in out-of-memory situations.
+		 */
 		FixedAlloc(uint32_t itemSize, GCHeap* heap, bool isFixedAllocSafe=false);
+		
+		/**
+		 * Destroy the allocator, returning all blocks to the block manager.
+		 * Check for and report storage leaks in MMGC_MEMORY_INFO mode.
+		 */
 		~FixedAlloc();
 
+		/**
+		 * Allocate one object from this allocator.
+		 *
+		 * @param size   The size of the object; this is used for debugging only, as the
+		 *               size allocated is fixed by the allocator.
+		 * @param flags  A bit vector of allocation options.
+		 *
+		 * @return  A pointer to the object.  The pointer may be NULL only if kCanFail is
+		 *          part of flags.  The memory is zeroed only if kZero is part of flags.
+		 */
 		void* Alloc(size_t size, FixedMallocOpts flags=kNone);
+		
+		/**
+		 * Free an object allocated with a FixedAlloc instance.  The object is returned
+		 * to the FixedAlloc that provided it.
+		 *
+		 * @param item  The object to free.
+		 */
 		static void Free(void *item);
 
-		//This method returns the number bytes allocated by FixedAlloc
-		size_t GetBytesInUse()
-		{
-			size_t totalAskSize, totalAllocated;  
-			GetUsageInfo(totalAskSize, totalAllocated);
-			return totalAllocated;			
-		}
+		/**
+		 * @return the number bytes currently allocated by this FixedAlloc
+		 */
+		size_t GetBytesInUse();
 		
-		//This method is for more fine grained allocation details
-		//It reports the total number of bytes requested (i.e. ask size) and
-		//the number of bytes actually allocated.  The latter is the same
-		//number as reported by GetBytesInUse()
+		/**
+		 * Obtain current (not running total) allocation information for this FixedAlloc.
+		 *
+		 * @param totalAsk        (out) The total number of bytes requested
+		 * @param totalAllocated  (out) The number of bytes actually allocated
+		 */
 		void GetUsageInfo(size_t& totalAsk, size_t& totalAllocated);
 		
+		/**
+		 * @return the size of objects managed by this allocator
+		 */
 		size_t GetItemSize() const;
-		size_t GetMaxAlloc() const { return m_maxAlloc; }
+		
+		/**
+		 * @return the number of objects (free and allocated) held by this allocator.
+		 */
+		size_t GetMaxAlloc() const;
 
-		size_t GetNumChunks() { return m_maxAlloc / m_itemsPerBlock; }	
+		/**
+		 * @return the number of blocks held by this allocator.
+		 */
+		size_t GetNumChunks();	
 
-		static FixedAlloc *GetFixedAlloc(void *item)
-		{
-			return GetFixedBlock(item)->alloc;
-		}
-
+		/**
+		 * Obtain the allocator used to allocate a particular FixedAlloc item.
+		 *
+		 * @param item  An object allocated with FixedAlloc.
+		 *
+		 * @return   The allocator used to allocate the item
+		 */
+		static FixedAlloc *GetFixedAlloc(void *item);
 
 	protected:
 
-		// no-arg ctor used only by FixedAllocSafe
-		FixedAlloc() : m_isFixedAllocSafe(true) {}
+		// A no-argument constructor used only by FixedAllocSafe
+		FixedAlloc();
 
-
-#ifndef VMCFG_SYMBIAN // Symbian SDK sees an error in GC.cpp if FixedBlock is private.
-	private:
-#endif //VMCFG_SYMBIAN
+	public:		// Really private, but Symbian compiler requires this structure to be public
 
 		struct FixedBlock
 		{
@@ -111,10 +151,7 @@ namespace MMgc
 			char   items[1];
 		};
 
-
-#ifdef VMCFG_SYMBIAN		
 	private:
-#endif //VMCFG_SYMBIAN
 
 		void Init(uint32_t itemSize, GCHeap *heap);
 		void Destroy();
@@ -136,19 +173,17 @@ namespace MMgc
 	#endif 
 		bool const m_isFixedAllocSafe;
 
-		bool IsFull(FixedBlock *b) const { return b->numAlloc == m_itemsPerBlock; }
+		// @return true iff there are no free items in the block.
+		bool IsFull(FixedBlock *b) const;
+		
 		void CreateChunk(bool canFail);
 		void FreeChunk(FixedBlock* b);
 
-		static inline FixedBlock *GetFixedBlock(const void *item)
-		{
-			return (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-		}
+		// @return the FixedBlock for any item allocated by FixedAlloc
+		static FixedBlock *GetFixedBlock(const void *item);
 
-		static inline size_t Size(const void *item)
-		{
-			return GetFixedBlock(item)->size;
-		}
+		// @return the size of any item allocated by FixedAlloc.
+		static size_t Size(const void *item);
 
 #ifdef MMGC_MEMORY_INFO
 		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
@@ -156,69 +191,41 @@ namespace MMgc
 
 	};
 
+	/**
+	 * FixedAlloc is a fast, thread-safe, fixed-size memory allocator for manually
+	 * freed objects.
+	 */
 	class FixedAllocSafe : public FixedAlloc
 	{
 		friend class FixedAlloc;
 		friend class FixedMalloc;
 	public:
-		FixedAllocSafe(int itemSize, GCHeap* heap) 
-			: FixedAlloc(itemSize, heap, true)
-		{
-			VMPI_lockInit(&m_spinlock);
-		}
+		FixedAllocSafe(int itemSize, GCHeap* heap);
 		
-		~FixedAllocSafe()
-		{
-			VMPI_lockDestroy(&m_spinlock);
-		}
+		~FixedAllocSafe();
 
-		void* Alloc(size_t size, FixedMallocOpts flags=kNone)
-		{
-			MMGC_LOCK(m_spinlock);
-			return FixedAlloc::Alloc(size, flags); 
-		}
+		void* Alloc(size_t size, FixedMallocOpts flags=kNone);
 
-		void Free(void *ptr)
-		{
-			MMGC_LOCK(m_spinlock);
-			FixedAlloc::Free(ptr);
-		}
+		void Free(void *ptr);
 
-		static FixedAllocSafe *GetFixedAllocSafe(void *item)
-		{
-			return (FixedAllocSafe*) FixedAlloc::GetFixedAlloc(item);
-		}
+		static FixedAllocSafe *GetFixedAllocSafe(void *item);
 
 	private:
-
 		// default ctor used only by FixedMalloc
-		FixedAllocSafe()
-		{
-			VMPI_lockInit(&m_spinlock);
-		}
+		FixedAllocSafe();
 
 		vmpi_spin_lock_t m_spinlock;
 	};
 
 	/**
-	 * classes that need fast lock free allocation should subclass this and pass
-	 * a FixedAlloc * to the new parameter.  One new/delete are lock free, scalar
-	 * allocations use the normal locked general size allocator. 
+	 * FastAllocator is a fast, non-thread-safe, fixed-size memory allocator for
+	 * manually freed objects using 'new' and 'delete' operators for object management.
 	 */
 	class FastAllocator 
 	{		
 	public:
-		static void *operator new(size_t size, FixedAlloc *alloc)
-		{
-			return alloc->Alloc(size);
-		}
-		
-		static void operator delete (void *item)
-		{
-			FixedAlloc::Free(item);
-		}
-
-		// allow array allocation  as well		
+		static void *operator new(size_t size, FixedAlloc *alloc);
+		static void operator delete (void *item);
 		static void *operator new[](size_t size);		
 		static void operator delete [](void *item);
 	};

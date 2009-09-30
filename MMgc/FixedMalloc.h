@@ -42,105 +42,102 @@
 namespace MMgc
 {
 	/**
-	 * A general purpose memory allocator using size classes 
+	 * A general purpose memory allocator.
+	 *
+	 * FixedMalloc is a singleton, obtainable by calling FixedMalloc::GetFixedMalloc.
+	 * The "owner" of the FixedMalloc is GCHeap, the block manager.
+	 *
+	 * FixedMalloc uses size classes; each size class is handled by a FixedAllocSafe
+	 * instance.  Large objects are handled specially.  All objects are headerless.
 	 */
 	class FixedMalloc 
 	{
 		friend class GCHeap;
+
 	public:
-		// GCHeap initializes the FixedMalloc by calling InitInstance and destroys it by calling DestroyInstance
+		/**
+		 * @return the FixedMalloc singleton.
+		 */
+		static FixedMalloc *GetFixedMalloc();
 
-		// Compatibility stubs, should go away.
-		static void Init() {}
-		static void Destroy() {}
-
-		// Backward compatible name for GetFixedMalloc
-		static FixedMalloc *GetInstance() { return instance; }
-
-		static FixedMalloc *GetFixedMalloc() { return instance; }
-
-		/* not inline - used by ::new etc */
-		void* FASTCALL OutOfLineAlloc(size_t size, FixedMallocOpts flags=kNone);
-		
-		/* not inline - used by ::delete etc */
-		void FASTCALL OutOfLineFree(void* p);
-
-		REALLY_INLINE void* Alloc(size_t size, FixedMallocOpts flags=kNone)
-		{
-			void *item;
-			GCAssert(size + 3 > size);
-			// overflow detection
-			if(size+3 < size)
-				return NULL;
-
-			if (size <= (size_t)kLargestAlloc) {
-				item = FindSizeClass(size)->Alloc(size, flags);
-			} else {
-				item = LargeAlloc(size, flags);
-			}
-			return item;
-		}
+		// Backward compatible name for GetFixedMalloc, not used by Tamarin
+		static FixedMalloc *GetInstance();
 
 		/**
-		 * Unlike Alloc this can return NULL
+		 * Allocate one object from this allocator.
+		 *
+		 * @param size   The size of the object.
+		 * @param flags  A bit vector of allocation options.
+		 *
+		 * @return  A pointer to the object.  The pointer may be NULL only if kCanFail is
+		 *          part of flags.  The memory is zeroed only if kZero is part of flags.
 		 */
-		REALLY_INLINE void *PleaseAlloc(size_t size)
-		{	
-			return Alloc(size, kCanFail);
-		}
+		void* Alloc(size_t size, FixedMallocOpts flags=kNone);
 
-		inline void Free(void *item)
-		{
-			if(item == 0)
-				return;
+		// Exactly like Alloc with flags=kCanFail
+		void *PleaseAlloc(size_t size);
 
-			// small things are never allocated on the 4K boundary b/c the block
-			// header structure is stored there, large things always are		
-			if(IsLargeAlloc(item)) {
-				LargeFree(item);
-			} else {		
-				FixedAllocSafe::GetFixedAllocSafe(item)->Free(item);
-			}
-		}
+		// Exactly like Alloc, but guaranteed not to be inlined - used by ::new etc
+		void* FASTCALL OutOfLineAlloc(size_t size, FixedMallocOpts flags=kNone);
 
-		size_t Size(const void *item)
-		{
-			size_t size;
-			if(IsLargeAlloc(item)) {
-				size = LargeSize(item);
-			} else {		
-				size = FixedAlloc::Size(item);
-			}
-#ifdef MMGC_MEMORY_INFO
-			size -= DebugSize();
-#endif
-			return size;
-		}
+		/**
+		 * Allocate space for an array of objects from this allocator.
+		 *
+		 * @param count  The number of objects
+		 * @param size   The size of each part object
+		 * @param flags  A bit vector of allocation options
+		 *
+		 * @return  A pointer to the aggregate object.  The pointer may be NULL only if
+		 *          kCanFail is part of flags.  The memory is zeroed only if kZero is part
+		 *          of flags.
+		 *
+		 * @note  Unlike 'calloc' in the C library, this does /not/ zero the memory
+		 *        unless kZero is passed in flags.  The name 'Calloc' comes from the
+		 *        shape of the API.
+		 */
+		void *Calloc(size_t count, size_t size, FixedMallocOpts flags=kNone);
+		
+		/**
+		 * Free an object allocated with FixedMalloc.
+		 *
+		 * @param item  The object to free.
+		 */
+		void Free(void *item);
 
-		void *Calloc(size_t num, size_t elsize, FixedMallocOpts opts=kNone)
-		{
-			uint64_t size = (uint64_t)num * (uint64_t)elsize;
-			if(size > 0xfffffff0) 
-			{
-				GCAssertMsg(false, "Attempted allocation overflows size_t\n");
-				return NULL;
-			}
-			return Alloc(num * elsize, opts);
-		}
+		// Exactly like Free, but guaranteed not to be inlined - used by ::delete etc
+		void FASTCALL OutOfLineFree(void* p);
+		
+		/**
+		 * @param  item  An object allocated with FixedMalloc.
+		 * @return the allocated size of 'item'
+		 */
+		size_t Size(const void *item);
 
+		/**
+		 * @return the total number of /blocks/ managed by FixedMalloc.
+		 */
 		size_t GetTotalSize();
+		
+		/**
+		 * Obtain current (not running total) allocation information for FixedMalloc.
+		 *
+		 * @param totalAskSize    (out) The total number of bytes requested
+		 * @param totalAllocated  (out) The number of bytes actually allocated
+		 */
 		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 		
-		size_t GetBytesInUse()
-		{
-			size_t totalAskSize, totalAllocated;  
-			GetUsageInfo(totalAskSize, totalAllocated);
-			return totalAllocated;			
-		}
+		/**
+		 * @return the number bytes currently allocated by FixedMalloc
+		 */
+		size_t GetBytesInUse();
 
 	private:
-		void InitInstance(GCHeap *heap);	// Called from GCHeap 
+		// Initialize FixedMalloc.  Must be called from GCHeap during GCHeap setup.
+		void InitInstance(GCHeap *heap);
+		
+		// Destroy FixedMalloc and free all resources.
 		void DestroyInstance();
+		
 #ifdef MMGC_64BIT
 		const static int kLargestAlloc = 2016;	
 #else
@@ -160,17 +157,22 @@ namespace MMgc
 		size_t totalAskSizeLargeAllocs;
 #endif
 
+		// @return a thread-safe allocator for objects of the given size.
 		FixedAllocSafe *FindSizeClass(size_t size);
 
-		static bool IsLargeAlloc(const void *item)
-		{
-			// space made in ctor
-			item = GetRealPointer(item);
-			return ((uintptr_t) item & 0xFFF) == 0;
-		}
+		// @return true if item is a large-object allocation.  item must have been
+		//         returned from one of the allocation functions.
+		static bool IsLargeAlloc(const void *item);
 
+		// @return an object of at least the requested size, allocated with the given
+		//         flags.  The object's real size will be an integral number of blocks.
 		void *LargeAlloc(size_t size, FixedMallocOpts flags=kNone);	
+		
+		// Free the item returned from LargeAlloc.
 		void LargeFree(void *item);
+		
+		// @return the allocated size (in bytes) of 'item', which must have been returned
+		//         from LargeAlloc.
 		size_t LargeSize(const void *item);
 	};
 }
