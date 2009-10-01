@@ -55,17 +55,17 @@ namespace MMgc
 #define mmfx_new(new_data)					new (MMgc::kUseFixedMalloc) new_data
 #define mmfx_new0(new_data)					new (MMgc::kUseFixedMalloc, MMgc::kZero) new_data
 
-#define mmfx_new_array(type, n)				::MMgcNewArrayCall((type*)NULL, n, MMgc::kNone)
+#define mmfx_new_array(type, n)				::MMgcConstructTaggedArray((type*)NULL, n, MMgc::kNone)
 
 #define mmfx_new_opt(new_data, opts)		new (MMgc::kUseFixedMalloc, opts) new_data
-#define mmfx_new_array_opt(type, n, opts)	::MMgcNewArrayCall((type*)NULL, n, opts)
+#define mmfx_new_array_opt(type, n, opts)	::MMgcConstructTaggedArray((type*)NULL, n, opts)
 
-#define mmfx_delete(p)						::MMgcDestructorCall(p)
-#define mmfx_delete_array(p)				::MMgcDestructorArrayCall(p)
+#define mmfx_delete(p)						::MMgcDestructTaggedScalarChecked(p)
+#define mmfx_delete_array(p)				::MMgcDestructTaggedArrayChecked(p)
 
-#define mmfx_alloc(_siz) MMgc::AllocCall(_siz)
+#define mmfx_alloc(_siz)					MMgc::AllocCall(_siz)
 #define mmfx_alloc_opt(_siz, opts)          MMgc::AllocCall(_siz, opts)
-#define mmfx_free(_ptr) MMgc::DeleteCall(_ptr)
+#define mmfx_free(_ptr)						MMgc::DeleteCall(_ptr)
 
 #else
 

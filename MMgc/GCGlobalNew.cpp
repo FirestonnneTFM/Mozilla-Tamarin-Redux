@@ -38,23 +38,14 @@
 
 #include "MMgc.h"
 
-#define MMGC_SCALAR_GUARD 0xafafafaf
-#define MMGC_NORM_VECTOR_GUARD 0xbfbf0001
-#define MMGC_PRIM_VECTOR_GUARD 0xbfbf0002
+#define MMGC_SCALAR_GUARD		0xafafafafU
+#define MMGC_NORM_ARRAY_GUARD	0xbfbf0001U
+#define MMGC_PRIM_ARRAY_GUARD	(MMGC_NORM_ARRAY_GUARD + 1)	// Code depends on this fact
 
 namespace MMgc
 {
-	void *AllocCall(size_t s, FixedMallocOpts opts) 
-	{ 
-		return AllocCallInline(s, opts);
-	}
-
-	void DeleteCall( void* p )
-	{
-		DeleteCallInline(p);
-	}
-
 #ifdef MMGC_USE_SYSTEM_MALLOC
+	
 	void *SystemNew(size_t size, FixedMallocOpts opts)
 	{
 		void *space = VMPI_alloc(size);
@@ -91,115 +82,128 @@ namespace MMgc
 #endif
 		VMPI_free(p);
 	}
+	
 #endif // MMGC_USE_SYSTEM_MALLOC
+
+	void *AllocCall(size_t s, FixedMallocOpts opts) 
+	{ 
+		return AllocCallInline(s, opts);
+	}
+	
+	void DeleteCall( void* p )
+	{
+		DeleteCallInline(p);
+	}
 };
 
-#ifndef MMGC_OVERRIDE_GLOBAL_NEW
+#ifdef MMGC_OVERRIDE_GLOBAL_NEW
+
+// Nothing; it's all inline in GCGlobalNew.h
+
+#else
 
 void* operator new(size_t size, MMgc::NewDummyOperand /*ignored*/) MMGC_NEW_THROWS_CLAUSE
 {
-	return MMgc::NewCall(size);
+	return MMgc::NewTaggedScalar(size);
 }
 
 void* operator new(size_t size, MMgc::NewDummyOperand /*ignored*/, MMgc::FixedMallocOpts opts) MMGC_NEW_THROWS_CLAUSE
 {
-	return MMgc::NewCall(size, opts);
+	return MMgc::NewTaggedScalar(size, opts);
 }
 
 namespace MMgc
 {
-	REALLY_INLINE void *GuardedFixedAlloc(size_t size, FixedMallocOpts opts, uint32_t guard)
+	// Return NULL iff ((opts & kCanFail) != 0)
+	REALLY_INLINE void *TaggedAlloc(size_t size, FixedMallocOpts opts, uint32_t guard)
 	{
+		(void)guard;
+
 #ifdef MMGC_DELETE_DEBUGGING
-		// lets store a guard cookie so that we can see if it is released with a proper delete (scalar/vector)
-		size += sizeof(size_t);
-#else
-		(void)guard; // get rid of warning
+		// Store a guard cookie preceding the object so that we can see if it is
+		// released with a proper delete (scalar/array)
+		size += MMGC_GUARDCOOKIE_SIZE;
 #endif //MMGC_DELETE_DEBUGGING
 
-		size_t* mem = (size_t*)AllocCallInline(size, opts);
+		char* mem = (char*)AllocCallInline(size, opts);
 
 #ifdef MMGC_DELETE_DEBUGGING
-		if ( mem )
+		if (mem != NULL)
 		{
-			// add the guard cookie
-			*(mem) = guard; 
-			mem += 1;
+			*(uint32_t*)mem = guard;
+			mem += MMGC_GUARDCOOKIE_SIZE;
 		}
 #endif // MMGC_DELETE_DEBUGGING
 
 		return mem;
 	}
 
-	/*REALLY_INLINE*/
-	void* NewCall(size_t size, FixedMallocOpts opts)
+	REALLY_INLINE void* NewTaggedScalar(size_t size, FixedMallocOpts opts)
 	{
 		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
-		return GuardedFixedAlloc(size, opts, MMGC_SCALAR_GUARD);
+		
+		return TaggedAlloc(size, opts, MMGC_SCALAR_GUARD);
 	}
 
-	REALLY_INLINE size_t CallocSizeCalc(size_t el_size, size_t count, bool& overflow, bool addCookie)
-	{
-		uint64_t size = (uint64_t)count * (uint64_t)el_size;
-
-		if(addCookie)
-			size += sizeof(size_t);
-
-		if(size > 0xfffffff0) 
-		{
-			overflow = true;
-			return 0;
-		}
-		return (size_t)size;
-	}
-
-	void* NewArrayCalloc(size_t el_size, size_t count, FixedMallocOpts opts, bool isPrimitive) 
+	void* NewTaggedArray(size_t el_size, size_t count, FixedMallocOpts opts, bool isPrimitive) 
 	{
 		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
 
-		bool overflow = false;
-		size_t size = CallocSizeCalc(el_size, count, overflow, isPrimitive ? false : true);
-		if(overflow) 
+		uint64_t size64 = (uint64_t)count * (uint64_t)el_size;
+		
+		if(!isPrimitive)
+			size64 += MMGC_ARRAYHEADER_SIZE;
+		
+		if(size64 > 0xfffffff0)
 		{
-			GCAssertMsg(false, "Attempted allocation overflows size_t\n");
-			return NULL;
+			if (opts & kCanFail)
+				return NULL;
+			GCHeap::SignalObjectTooLarge();
 		}
+	
+		void *p = TaggedAlloc((size_t)size64, opts, MMGC_NORM_ARRAY_GUARD + uint32_t(isPrimitive));
 
-		return GuardedFixedAlloc(size, opts, isPrimitive ? MMGC_PRIM_VECTOR_GUARD : MMGC_NORM_VECTOR_GUARD);
+		if (!isPrimitive && p != NULL)
+		{
+			*(size_t*)p = count;
+			p = (char*)p + MMGC_ARRAYHEADER_SIZE;
+		}
+		
+		return p;
 	}
 
 #ifdef MMGC_DELETE_DEBUGGING
-	// Helper functions to check the 
-	bool CheckForAllocationGuard(size_t* mem, size_t guard)
+	// Helper functions to check the guard.
+	// The guard is an uin32_t stored in locations preceding the object.
+	
+	REALLY_INLINE static bool CheckForAllocationGuard(void* mem, uint32_t guard)
 	{
-		mem--;
-		return (*mem == guard);
+		return (*(uint32_t*)((char*)mem - MMGC_GUARDCOOKIE_SIZE) == guard);
 	}
 
-	bool IsScalarAllocation(void* p)
+	REALLY_INLINE static bool IsScalarAllocation(void* p)
 	{
-		return CheckForAllocationGuard((size_t*)p, MMGC_SCALAR_GUARD);
+		return CheckForAllocationGuard(p, MMGC_SCALAR_GUARD);
 	}
 
-	bool IsVectorAllocation(void* p, bool primitive)
+	REALLY_INLINE static bool IsArrayAllocation(void* p, bool primitive)
 	{
-		// Check if we have vector guard right before the pointer.
-		size_t* w = (size_t*)p;
-		size_t guard = primitive ? MMGC_PRIM_VECTOR_GUARD : MMGC_NORM_VECTOR_GUARD;
-		return CheckForAllocationGuard(w, guard) || // simple vector
-			CheckForAllocationGuard(w-1, guard); // vector with count
+		// Check if we have array guard right before the pointer.
+		uint32_t guard = MMGC_NORM_ARRAY_GUARD + uint32_t(primitive);
+		return CheckForAllocationGuard(p, guard)									// simple array
+			|| CheckForAllocationGuard((char*)p - MMGC_ARRAYHEADER_SIZE, guard);	// array with header
 	}
 
-	bool IsGCHeapAllocation(void* p)
+	REALLY_INLINE static bool IsGCHeapAllocation(void* p)
 	{
 		return (GCHeap::GetGCHeap() && GCHeap::GetGCHeap()->IsAddressInHeap(p));
 	}
 
-	void VerifyScalarDelete(void* p)
+	void VerifyTaggedScalar(void* p)
 	{
 		if (!IsScalarAllocation(p))
 		{
-			if (IsVectorAllocation(p, true) || IsVectorAllocation(p, false))
+			if (IsArrayAllocation(p, true) || IsArrayAllocation(p, false))
 			{
 				GCAssertMsg(0, "Trying to release array pointer with scalar destructor! Check the allocation and free calls for this object!");
 			}
@@ -214,11 +218,11 @@ namespace MMgc
 		}
 	}
 
-	void VerifyVectorDelete(void* p, bool primitive)
+	void VerifyTaggedArray(void* p, bool primitive)
 	{
-		if (!IsVectorAllocation(p, primitive))
+		if (!IsArrayAllocation(p, primitive))
 		{
-			if (IsVectorAllocation(p, !primitive))
+			if (IsArrayAllocation(p, !primitive))
 			{
 				GCAssertMsg(0, "Trying to release array pointer with different type destructor! Check the allocation and free calls for this object!");
 			}
@@ -240,57 +244,53 @@ namespace MMgc
 #endif //MMGC_DELETE_DEBUGGING
 
 	// Functions to actually release the memory through FixedMalloc.
-	void DeleteFunc( void* p )
+	void DeleteTaggedScalar( void* p )
 	{
 #ifdef MMGC_DELETE_DEBUGGING
 		// we need to adjust the pointer to release also the guard.
-		size_t* temp = (size_t*)p;
-		temp--;
-		p = temp;
+		p = (char*)p - MMGC_GUARDCOOKIE_SIZE;
 #endif //MMGC_DELETE_DEBUGGING
 
 		DeleteCallInline(p);
 	}
 
-
-	void DeleteArrayFunc( void* p )
+	void DeleteTaggedArrayWithHeader( void* p )
 	{
 		if( p )
 		{
 #ifdef MMGC_DELETE_DEBUGGING
-			p = ((size_t*)p - 2);
+			p = ((char*)p - (MMGC_ARRAYHEADER_SIZE + MMGC_GUARDCOOKIE_SIZE));
 #else
-			p = ((size_t*)p - 1);
+			p = ((char*)p - MMGC_ARRAYHEADER_SIZE);
 #endif //MMGC_DELETE_DEBUGGING
 			DeleteCallInline(p);
 		}
 	}
 
-	void SimpleDestructorCall(void* p)
+	void DeleteTaggedScalarChecked(void* p)
 	{
 		if( p ) 
 		{
 #ifdef MMGC_DELETE_DEBUGGING
-			VerifyScalarDelete( p );
+			VerifyTaggedScalar( p );
 #endif
-			DeleteFunc( p ); 
+			DeleteTaggedScalar( p ); 
 		}	
 	}
 
-	void SimpleDestructorArrayCall(void* p, bool primitive)
+	void DeleteTaggedArrayWithHeaderChecked(void* p, bool primitive)
 	{
+		(void)primitive;
 		if(p) 
 		{
 #ifdef MMGC_DELETE_DEBUGGING
-			VerifyVectorDelete( p, primitive );
-#else
-			(void)primitive; // get rid of warning
+			VerifyTaggedArray( p, primitive );
 #endif
-			// not using DeleteArrayFunc, that's for non-Simple case with count cookie
-			DeleteFunc( p );
+			// not using DeleteTaggedArrayWithHeader, that's for non-Simple case with count cookie
+			DeleteTaggedScalar( p );
 		}
 	}
 
 } // namespace MMgc
 
-#endif //MMGC_OVERRIDE_GLOBAL_NEW
+#endif // MMGC_OVERRIDE_GLOBAL_NEW
