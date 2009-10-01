@@ -220,7 +220,7 @@ REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 {
 	int tries = 0;
-	while (::InterlockedCompareExchange(&lock->lock, 1, 0) != 0)
+	while (::InterlockedCompareExchange((LPLONG)&lock->lock, 1, 0) != 0)
 	{
 		++tries;
 		// We used to reset to zero if we got to 100. This resets to 0 at 64 instead, with no branch.
@@ -233,13 +233,13 @@ REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 
 REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
 {
-	::InterlockedExchange(&lock->lock, 0);
+	::InterlockedExchange((LPLONG)&lock->lock, 0);
 	return true;
 }
 
 REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
-	return ::InterlockedCompareExchange(&lock->lock, 1, 0) == 0;
+	return ::InterlockedCompareExchange((LPLONG)&lock->lock, 1, 0) == 0;
 }
 
 #endif // __avmplus_win32_platform__
