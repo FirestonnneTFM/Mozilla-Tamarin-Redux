@@ -266,7 +266,7 @@ namespace avmplus
 			inline MethodInfo* info() const { return isAS3Sample() ? m_info : NULL; }
 			#ifdef _DEBUG
 			// used in Sampler::presweep to check if the fake name is null or marked
-                       inline Stringp fakename() const { return u.m_fakename; }
+                       inline Stringp fakename() const { return isAS3Sample() ? u.m_fakename : NULL; }
 			#endif
                        inline Stringp name() const     { return isAS3Sample() ? ((!u.m_fakename && m_info) ? m_info->getMethodName() : u.m_fakename) : NULL; }
                        inline Stringp filename() const { return isAS3Sample() ? u.m_filename : NULL; }

@@ -72,11 +72,11 @@ package flash.sampler
 	public const line:uint;
 	
 	/**
-     * The identifier for the script function in the application being debugged.
+     * The identifier for the script function in the application being profiled.
      * @langversion 3.0
-     * @keyword StackFrame.id, id      
+     * @keyword StackFrame.scriptID, scriptID      
      */
-	public const id:Number;
+	public const scriptID:Number;
     
     /**
      * Converts the StackFrame to a string of its properties.

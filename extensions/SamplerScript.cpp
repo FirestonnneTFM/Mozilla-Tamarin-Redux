@@ -807,7 +807,7 @@ namespace avmplus
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		lineOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 		
-		b = t->findBinding(core()->internConstantStringLatin1("id"), publicNamespace);
+		b = t->findBinding(core()->internConstantStringLatin1("scriptID"), publicNamespace);
 		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
 		stackIdOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}
