@@ -37,6 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
@@ -48,15 +49,83 @@
 ##
 . ../all/util-calculate-change.sh $1
 
-
+showhelp ()
+{
+    echo ""
+    echo "usage: compile-generic.sh <change> <config> <filename>"
+    echo "       <change>   changeset that is going to be built"
+    echo "       <config>   config options passed to configure.py"
+    echo "       <filename> name of the shell, do not include file extenstion"
+    exit 1
+}
+config=$2
+test "$config" = "" && {
+    showhelp
+}
 filename=$3
 test "$filename" = "" && {
-    filename=$shell_release_nojit
+    showhelp
 }
 
-##
-# Execute the common build script.
-##
-../all/build-generic.sh $change "--enable-shell --disable-jit $2" $filename
 
+
+##
+# Update the version string
+##
+. ../all/util-update-version.sh
+
+
+##
+# Make sure that there are no left over directories from previous compile
+##
+cd $basedir
+test -d objdir && {
+    echo Remove directory $basedir/objdir
+    rm -rf $basedir/objdir
+}
+
+mkdir objdir
+
+cd objdir
+
+python ../configure.py $config
+
+topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
+CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
+echo ""
+echo compiler version: 
+eval ${CXX} --version
+echo ""
+echo ""
+
+make $make_opt clean
+make $make_opt 
+res=$?
+
+test "$res" = "0" || {
+    echo "build failed return value $res"
+}
+test -f shell/$shell || {
+    echo "avmshell is missing, build failed"
+    cd $basedir/core
+    hg revert avmplusVersion.h
+    exit 1
+}
+
+mkdir -p $buildsdir/${change}-${changeid}/$platform
+chmod 777 $buildsdir/${change}-${changeid}/$platform
+cp shell/$shell $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
+chmod 777 $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
+
+cd $basedir/core
+hg revert avmplusVersion.h
+
+
+# Post the build shell to ASTEAM
+cd $basedir/build/buildbot/slaves/scripts/
+. ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension $ftp_asteam/$branch/${change}-${changeid}/$platform/$filename$shell_extension
+
+echo "build succeeded"
+rm -rf $basedir/objdir
+exit 0
 

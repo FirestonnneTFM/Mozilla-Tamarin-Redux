@@ -64,7 +64,6 @@ export shell=avmshell$shell_extension
 export shell_selftest=avmshell_test$shell_extension
 export shell_release=avmshell$shell_extension
 export shell_release_wordcode=avmshell_wordcode$shell_extension
-export shell_release_nojit=avmshell_nojit$shell_extension
 export shell_debug=avmshell_d$shell_extension
 export shell_release_debugger=avmshell_s$shell_extension
 export shell_debug_debugger=avmshell_sd$shell_extension
