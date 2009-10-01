@@ -687,6 +687,13 @@ class RuntestBase:
         (dir, file) = split(as_file)
         self.verbose_print('   compiling %s' % file)
         
+        if self.genAtsSwfs:
+            # get settings as ats excluded files are defined there
+            settings = self.getLocalSettings(as_file)
+            if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
+                self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*']['ats_skip']))
+                return
+    
         # additional .as file compiler args
         if as_file.endswith(self.sourceExt):
             if not isfile(builtinabc):
@@ -702,12 +709,9 @@ class RuntestBase:
             # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
             arglist = self.loadAscArgs(arglist, dir, as_file)
             
+            (testdir, ext) = splitext(as_file)
+            
             if self.genAtsSwfs:
-                # get settings as ats excluded files are defined there
-                settings = self.getLocalSettings(testdir)
-                if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
-                    print 'ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip'])
-                    return
                 arglist.extend(self.genAtsArgs(dir,file))
             
             for arg in extraArgs:
@@ -725,7 +729,7 @@ class RuntestBase:
                 if isfile(shell):
                     cmd += ' -in ' + shell
                     break
-            (testdir, ext) = splitext(as_file)
+            
             deps = glob(join(testdir,'*'+self.sourceExt))
             deps.sort()
             for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
@@ -741,12 +745,13 @@ class RuntestBase:
                 self.verbose_print(line.strip())
             for line in err:
                 self.verbose_print(line.strip())
+            
+            if self.genAtsSwfs:
+                self.moveAtsSwf(dir,file)
+            
             return f+err
         except:
             raise
-            
-        if self.genAtsSwfs:
-            self.moveAtsSwf(dir,file)
     
     def rebuildTests(self):
         if self.genAtsSwfs:
@@ -781,7 +786,7 @@ class RuntestBase:
         
         if self.genAtsSwfs:
             try:
-                pass#os.remove('./ats_temp.as')
+                os.remove('./ats_temp.as')
             except:
                 pass
         
@@ -821,14 +826,17 @@ class RuntestBase:
         #print("starting compile of %d tests at %s" % (len(tests),start_time))
         total=len(tests)
         if not pexpect:
-              for test in tests:
-                  self.js_print('%d\tcompiling %s' % (total,test))
-                  self.compile_test(test)
-                  (testdir, ext) = splitext(test)
-                  if exists(testdir+".abc")==False:
-                      print("ERROR abc files %s.abc not created" % (testdir))
-                      self.ashErrors.append("abc files %s.abc not created" % (testdir))
-                  total -= 1;
+            if self.genAtsSwfs:
+                print 'The pexpect module must be installed to generate ats swfs.'
+                exit(1)
+            for test in tests:
+                self.js_print('%d\tcompiling %s' % (total,test))
+                self.compile_test(test)
+                (testdir, ext) = splitext(test)
+                if exists(testdir+".abc")==False:
+                    print("ERROR abc files %s.abc not created" % (testdir))
+                    self.ashErrors.append("abc files %s.abc not created" % (testdir))
+                total -= 1;
         else:  #pexpect available
             child = pexpect.spawn('"%s" -classpath %s macromedia.asc.embedding.Shell' % (self.java,self.asc))
             child.logfile = None
@@ -851,7 +859,7 @@ class RuntestBase:
                         # get settings as ats excluded files are defined there
                         settings = self.getLocalSettings(testdir)
                         if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
-                            print 'ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip'])
+                            self.js_print('ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip']))
                             continue
                         arglist.extend(self.genAtsArgs(dir,file))
                     
@@ -874,9 +882,9 @@ class RuntestBase:
                     cmd += " %s" % test
                     
                     if self.debug:
-                        print cmd
+                        self.js_print(cmd)
                     else:
-                        print "Compiling ", test
+                        self.js_print("Compiling %s" % test)
                     
                     if exists(testdir+".abc"):
                         os.unlink(testdir+".abc")

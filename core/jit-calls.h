@@ -175,6 +175,8 @@
         c.call_handler = callprop_miss;
         Toplevel* toplevel = env->toplevel();
         VTable* vtable = toplevel->toVTable(obj);
+        tagprof("callprop_generic obj", obj);
+        tagprof("callprop_generic bind", toplevel->getBinding(vtable->traits, c.name));
         return toplevel->callproperty(obj, c.name, argc, args, vtable);
     }
 
@@ -253,6 +255,160 @@
     }
     FUNCTION(CALL_INDIRECT, SIG6(A,P,P,A,I,P,P), call_cache_handler)
 
+    // forward decl
+    Atom getprop_miss(BindingCache&, MethodEnv*, Atom obj);
+
+    // getting any property (catch-all)
+    Atom getprop_generic(BindingCache& c, MethodEnv* env, Atom obj)
+    {
+        // reinstall miss handler so we don't end up dead-ended here in this handler.
+        c.get_handler = getprop_miss;
+        Toplevel* toplevel = env->toplevel();
+        VTable* vtable = toplevel->toVTable(obj);
+        tagprof("getprop_generic obj", obj);
+        tagprof("getprop_generic bind", toplevel->getBinding(vtable->traits, c.name));
+        return toplevel->getproperty(obj, c.name, vtable);
+    }
+
+    // overloaded helpers that convert a raw value to Atom.  helper will be
+    // chosen based on the <T> parameter to getprop_obj_slot, below.
+    typedef struct _Atom* OpaqueAtom;
+    REALLY_INLINE Atom boxslot(AvmCore*, OpaqueAtom a) { return (Atom)a; }
+    REALLY_INLINE Atom boxslot(AvmCore*, String* a) { return a->atom(); }
+    REALLY_INLINE Atom boxslot(AvmCore*, Namespace* a) { return a->atom(); }
+    REALLY_INLINE Atom boxslot(AvmCore*, ScriptObject* a) { return a->atom(); }
+    REALLY_INLINE Atom boxslot(AvmCore* core, int32_t i) { return core->intToAtom(i); }
+    REALLY_INLINE Atom boxslot(AvmCore* core, uint32_t u) { return core->uintToAtom(u); }
+    REALLY_INLINE Atom boxslot(AvmCore*, bool b) { return (int(b)<<3)|kBooleanType; }
+    REALLY_INLINE Atom boxslot(AvmCore* core, double d) { return core->doubleToAtom(d); }
+
+    // getting a slot on an object, specialized on slot type to streamline boxing
+    template <class T>
+    Atom getprop_obj_slot(BindingCache& c, MethodEnv* env, Atom obj)
+    {
+        PROF_IF ("getprop_obj_slot hit", OBJ_HIT(obj, c)) {
+            return boxslot(atomObj(obj)->core(), load_cached_slot<T>(c, obj));
+        }
+        return getprop_miss(c, env, obj);
+    }
+
+    // calling a getter method on an object
+    Atom getprop_obj_get(BindingCache& c, MethodEnv* env, Atom obj)
+    {
+        PROF_IF ("getprop_obj_get hit", OBJ_HIT(obj, c)) {
+            return c.method->coerceEnter(obj);
+        }
+        return getprop_miss(c, env, obj);
+    }
+
+    // getting a dynamic property on an object
+    Atom getprop_obj_none(BindingCache& c, MethodEnv* env, Atom obj)
+    {
+        PROF_IF ("getprop_obj_none hit", OBJ_HIT(obj, c)) {
+            return atomObj(obj)->getMultinameProperty(c.name);
+        }
+        return getprop_miss(c, env, obj);
+    }
+
+    // getting an object method (method closure creation)
+    Atom getprop_obj_method(BindingCache& c, MethodEnv* env, Atom obj)
+    {
+        PROF_IF ("getprop_obj_method hit", OBJ_HIT(obj, c)) {
+            return env->toplevel()->methodClosureClass->create(c.method, obj)->atom();
+        }
+        return getprop_miss(c, env, obj);
+    }
+
+    // getting the result of a getter property on a primitive, e.g. String.length
+    Atom getprop_prim_get(BindingCache& c, MethodEnv* env, Atom obj)
+    {
+        PROF_IF ("getprop_prim_get hit", PRIM_HIT(obj, c)) {
+            return c.method->coerceEnter(obj);
+        }
+        return getprop_miss(c, env, obj);
+    }
+
+    // handlers for gets on ScriptObject* objects, indexed by bindingKind(Binding)
+    static const GetCacheHandler getprop_obj_handlers[8] = {
+        &getprop_obj_none,      // BKIND_NONE
+        &getprop_obj_method,    // BKIND_METHOD (method extraction)
+        0,                      // BKIND_VAR (will use slot handler table below)
+        0,                      // BKIND_CONST (will use slot handler table)
+        0,                      // BKIND_unused (impossible)
+        &getprop_obj_get,       // BKIND_GET
+        &getprop_generic,       // BKIND_SET (error)
+        &getprop_obj_get        // BKIND_GETSET
+    };
+
+    // handlers for slots on ScriptObject, indexed by SlotStorageType
+    static const GetCacheHandler getprop_slot_handlers[8] = {
+        &getprop_obj_slot<OpaqueAtom>,      // SST_atom
+        &getprop_obj_slot<String*>,         // SST_string
+        &getprop_obj_slot<Namespace*>,      // SST_namespace
+        &getprop_obj_slot<ScriptObject*>,   // SST_scriptobject
+        &getprop_obj_slot<int32_t>,         // SST_int32
+        &getprop_obj_slot<uint32_t>,        // SST_uint32
+        &getprop_obj_slot<bool>,            // SST_bool32
+        &getprop_obj_slot<double>           // SST_double
+    };
+
+    // handlers when object is primitive, indexed by bindingKind(Binding)
+    static const GetCacheHandler getprop_prim_handlers[8] = {
+        &getprop_generic,     // BKIND_NONE
+        &getprop_generic,     // BKIND_METHOD
+        0,                    // BKIND_VAR (impossible on primitive)
+        0,                    // BKIND_CONST (impossible on primitive)
+        0,                    // BKIND_unused (impossible)
+        getprop_prim_get,     // BKIND_GET
+        0,                    // BKIND_SET (impossible on primitive)
+        0,                    // BKIND_GETSET (impossible on primitive)
+    };
+
+    Atom getprop_miss(BindingCache& c, MethodEnv* env, Atom obj)
+    {
+        // cache handler when cache miss occurs
+        AvmAssert(!AvmCore::isNullOrUndefined(obj));
+        Toplevel* toplevel = env->toplevel();
+        VTable* vtable = toplevel->toVTable(obj);
+        Traits* actual_type = vtable->traits;
+        Binding b = toplevel->getBinding(actual_type, c.name);
+        if (AvmCore::isMethodBinding(b)) {
+            c.method = vtable->methods[AvmCore::bindingToMethodId(b)];
+        } else if (AvmCore::hasGetterBinding(b)) {
+            c.method = vtable->methods[AvmCore::bindingToGetterId(b)];
+        }
+        if (isObjectPtr(obj)) {
+            c.vtable = vtable;
+            if (AvmCore::isSlotBinding(b)) {
+                // precompute the slot offset, then install a cache handler that's
+                // hardwired to read the slot and convert value to Atom.
+                void *slot_ptr, *obj_ptr = atomObj(obj);
+                const SlotStorageType sst = actual_type->getTraitsBindings()->
+                    calcSlotAddrAndSST(AvmCore::bindingToSlotId(b), (void*)obj_ptr, slot_ptr);
+                c.get_handler = getprop_slot_handlers[sst];
+                c.slot_offset = uintptr_t(slot_ptr) - uintptr_t(obj_ptr);
+            }
+            else {
+                c.get_handler = getprop_obj_handlers[AvmCore::bindingKind(b)];
+                if (AvmCore::isMethodBinding(b) &&
+                    AvmCore::isXMLorXMLList(obj) &&
+                    c.name->contains(actual_type->core->findPublicNamespace())) {
+                    // special case for XML objects: dynamic props hide declared methods
+                    // dynamic property lookup
+                    c.get_handler = getprop_obj_none;
+                }
+            }
+        } else {
+            // must be a primitive: int, bool, string, namespace, or number
+            c.get_handler = getprop_prim_handlers[AvmCore::bindingKind(b)];
+            c.tag = atomKind(obj);
+        }
+        return c.get_handler(c, env, obj);
+    }
+    FUNCTION(CALL_INDIRECT, SIG4(A,P,P,P,A), get_cache_handler)
+
+    METHOD(TOPLEVELADDR(Toplevel::getproperty), SIG4(A,P,A,P,P), getproperty)
+
     CSEMETHOD(TOPLEVELADDR(Toplevel::coerce), SIG3(A,P,A,P), coerce)
     METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
     FUNCTION(FUNCADDR(AvmCore::handleInterrupt), SIG1(V,P), handleInterrupt)
@@ -314,7 +470,6 @@
     METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty), SIG3(V,P,I,U), UIntVectorObject_setNativeIntProperty)
     METHOD(ARRAYADDR(ArrayObject::_setIntProperty), SIG3(V,P,I,A), ArrayObject_setIntProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_setIntProperty), SIG3(V,P,I,A), ObjectVectorObject_setIntProperty)
-    METHOD(TOPLEVELADDR(Toplevel::getproperty), SIG4(A,P,A,P,P), getproperty)
     METHOD(ENVADDR(MethodEnv::getpropertyHelper), SIG5(A,P,A,P,P,A), getpropertyHelper)
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getUintProperty), SIG2(A,P,U), DoubleVectorObject_getUintProperty)

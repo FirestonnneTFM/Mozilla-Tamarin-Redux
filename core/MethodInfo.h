@@ -410,6 +410,7 @@ namespace avmplus
 	#endif
 	#ifdef FEATURE_NANOJIT
 			BindingCache*			call_cache;			// call cache, created and owned by jit
+			BindingCache*			get_cache;			// get cache, created and owned by jit
 	#endif
 	#ifdef AVMPLUS_WORD_CODE
 			struct 

@@ -165,6 +165,7 @@ namespace nanojit
             POPr(FP); // dummy
         }
         POPr(FP); // Restore caller's FP.
+
         return  _nIns;
     }
 
@@ -210,6 +211,7 @@ namespace nanojit
             }
         }
 
+        NanoAssert(ins->isop(LIR_pcall) || ins->isop(LIR_fcall));
         if (!indirect) {
             CALL(call);
         }
@@ -250,7 +252,7 @@ namespace nanojit
             SUBi(SP, extra);
     }
 
-    Register Assembler::nRegisterAllocFromSet(int set)
+    Register Assembler::nRegisterAllocFromSet(RegisterMask set)
     {
         Register r;
         RegAlloc &regs = _allocator;
@@ -288,16 +290,16 @@ namespace nanojit
         debug_only( a.managed = a.free; )
     }
 
-    void Assembler::nPatchBranch(NIns* branch, NIns* location)
+    void Assembler::nPatchBranch(NIns* branch, NIns* targ)
     {
-        intptr_t offset = intptr_t(location) - intptr_t(branch);
+        intptr_t offset = intptr_t(targ) - intptr_t(branch);
         if (branch[0] == JMP32) {
             *(uint32_t*)&branch[1] = offset - 5;
             VALGRIND_DISCARD_TRANSLATIONS(&branch[1], sizeof(int32_t));
         } else {
             *(uint32_t*)&branch[2] = offset - 6;
             VALGRIND_DISCARD_TRANSLATIONS(&branch[2], sizeof(int32_t));
-         }
+        }
     }
 
     RegisterMask Assembler::hint(LIns* i, RegisterMask allow)
@@ -1001,7 +1003,7 @@ namespace nanojit
     {
         LOpcode op = ins->opcode();
         LIns* base = ins->oprnd1();
-        int d = ins->disp();
+        int32_t d = ins->disp();
         Register rr = prepResultReg(ins, GpRegs);
 
         if (base->isconst()) {
@@ -1093,7 +1095,7 @@ namespace nanojit
                 case LIR_ule:   MRA(rr, iffalsereg);    break;
                 case LIR_ugt:   MRBE(rr, iffalsereg);   break;
                 case LIR_uge:   MRB(rr, iffalsereg);    break;
-                debug_only( default: NanoAssert(0); break; )
+                default: NanoAssert(0); break;
             }
         } else if (op == LIR_qcmov) {
             NanoAssert(0);
@@ -1229,22 +1231,22 @@ namespace nanojit
 
 	// negateMask is used by asm_fneg.
 #if defined __SUNPRO_CC
-	// From Sun Studio C++ Readme: #pragma align inside namespace requires mangled names.
-	// Initialize here to avoid multithreading contention issues during initialization.
-	static uint32_t negateMask_temp[] = {0, 0, 0, 0, 0, 0, 0};
-	
-	static uint32_t* negateMaskInit()
-	{
-		uint32_t* negateMask = (uint32_t*)alignUp(negateMask_temp, 16);
-		negateMask[1] = 0x80000000;
-		return negateMask;
-	}
-	
-	static uint32_t *negateMask = negateMaskInit();
+    // From Sun Studio C++ Readme: #pragma align inside namespace requires mangled names.
+    // Initialize here to avoid multithreading contention issues during initialization.
+    static uint32_t negateMask_temp[] = {0, 0, 0, 0, 0, 0, 0};
+
+    static uint32_t* negateMaskInit()
+    {
+        uint32_t* negateMask = (uint32_t*)alignUp(negateMask_temp, 16);
+        negateMask[1] = 0x80000000;
+        return negateMask;
+    }
+
+    static uint32_t *negateMask = negateMaskInit();
 #else
-	static const AVMPLUS_ALIGN16(uint32_t) negateMask[] = {0,0x80000000,0,0};
+    static const AVMPLUS_ALIGN16(uint32_t) negateMask[] = {0,0x80000000,0,0};
 #endif
-	
+
     void Assembler::asm_fneg(LInsp ins)
     {
         if (config.sse2)
@@ -1418,15 +1420,15 @@ namespace nanojit
             Register ra;
 
             // if this is last use of lhs in reg, we can re-use result reg
-            if (lhs->isUnusedOrHasUnknownReg()) {   
+            if (lhs->isUnusedOrHasUnknownReg()) {
                 ra = findSpecificRegFor(lhs, rr);
             } else if ((rmask(lhs->getReg()) & XmmRegs) == 0) {
                 // We need this case on AMD64, because it's possible that
                 // an earlier instruction has done a quadword load and reserved a
                 // GPR.  If so, ask for a new register.
                 ra = findRegFor(lhs, XmmRegs);
-            } else {                                                                                                         
-                // lhs already has a register assigned but maybe not from the allow set                                      
+            } else {
+                // lhs already has a register assigned but maybe not from the allow set
                 ra = findRegFor(lhs, allow);
             }
 
