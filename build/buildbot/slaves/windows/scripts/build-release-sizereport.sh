@@ -63,7 +63,7 @@ mkdir objdir-release
 
 cd objdir-release
 
-python ../configure.py --enable-shell --enable-zlib-include-dir=../../../modules/zlib/src --enable-zlib-lib=../../../modules/zlib/zlib.lib
+python ../configure.py --enable-shell --disable-eval
 
 topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
 CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
@@ -81,13 +81,17 @@ test "$res" = "0" || {
     echo "build failed return value $res"
     exit $res
 }
+test -f "$basedir/objdir-release/shell/avmshell.map" || {
+    echo "avmshell.map file was not created"
+    exit 1
+}
 
-cd ../utils
+cd $basedir/utils
 python ./sizereport.py --vmversion=$change --product=tamarin-redux --socketlog --prefix=message: --map=../objdir-release/shell/avmshell.map
 
 echo url: "http://tamarin-builds.mozilla.org/report/index.cfm?mode=size&rollupname=sizereport&hostip=10.60.147.246&configbaseline=tamarin-redux&config1=tamarin-redux&config2=tamarin-redux&baselineBuild=1094&topBuild=${change}" size report
 
-cd ..
+cd $basedir
 test -d objdir-release && {
     echo Remove directory $basedir/objdir-release
     rm -rf $basedir/objdir-release

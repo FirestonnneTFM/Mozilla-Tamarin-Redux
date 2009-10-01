@@ -608,6 +608,7 @@ namespace avmplus
     {
         finddef_cache_builder.cleanup();
         call_cache_builder.cleanup();
+        get_cache_builder.cleanup();
         mmfx_delete( alloc1 );
         alloc1 = NULL;
         mmfx_delete( lir_alloc );
@@ -854,9 +855,9 @@ namespace avmplus
             return out->insBranch(op, cond, to);
         }
 
-        LIns *insGuard(LOpcode v, LIns *cond, LIns *x) {
+        LIns *insGuard(LOpcode v, LIns *cond, GuardRecord *gr) {
             AvmAssert(false);
-            return out->insGuard(v, cond, x);
+            return out->insGuard(v, cond, gr);
         }
 
         LIns *insAlloc(int32_t size) {
@@ -2576,7 +2577,7 @@ namespace avmplus
                 AvmAssert(type == f->getMethodSignature()->returnTraits());
             }
             else {
-                emit(state, OP_getproperty, (uintptr)name, 0, type);
+                emit(state, OP_getproperty, opd1, 0, type);
             }
             break;
         }
@@ -3895,7 +3896,7 @@ namespace avmplus
                 // obj=sp[0]
                 //sp[0] = env->getproperty(obj, multiname);
 
-                Multiname* multiname = (Multiname*)op1;
+                const Multiname* multiname = pool->precomputedMultiname((int)op1);
                 bool attr = multiname->isAttr();
                 Traits* indexType = state->value(sp).traits;
                 int objDisp = sp;
@@ -4043,16 +4044,26 @@ namespace avmplus
                 }
                 else
                 {
-                    LIns* multi = initMultiname((Multiname*)op1, objDisp);
+                    LIns* multi = initMultiname(multiname, objDisp);
                     AvmAssert(state->value(objDisp).notNull);
 
-                    LIns* vtable = loadVTable(objDisp);
+                    LIns* value;
                     LIns* obj = loadAtomRep(objDisp);
-                    LIns* toplevel = loadToplevel();
+                    if (multiname->isRuntime()) {
+                        LIns* vtable = loadVTable(objDisp);
+                        LIns* toplevel = loadToplevel();
 
-                    //return toplevel->getproperty(obj, name, toplevel->toVTable(obj));
-                    LIns* value = callIns(FUNCTIONID(getproperty), 4,
-                                        toplevel, obj, multi, vtable);
+                        //return toplevel->getproperty(obj, name, toplevel->toVTable(obj));
+                        value = callIns(FUNCTIONID(getproperty), 4,
+                                            toplevel, obj, multi, vtable);
+                    } else {
+                        // static name, use property cache
+                        int cache_slot = get_cache_builder.allocateCacheSlot((uint32_t)op1);
+                        LIns* cacheTable = loadIns(LIR_ldcp, offsetof(MethodInfo, _abc.get_cache), InsConstPtr(info));
+                        LIns* cacheEntry = binaryIns(LIR_piadd, cacheTable, InsConstAtom(cache_slot * sizeof(BindingCache)));
+                        LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, get_handler), cacheEntry);
+                        value = callIns(FUNCTIONID(get_cache_handler), 4, handler, cacheEntry, env_param, obj);
+                    }
 
                     localSet(objDisp, atomToNativeRep(result, value), result);
                 }
@@ -5483,6 +5494,16 @@ namespace avmplus
             }
             info->_abc.call_cache = cache;
         }
+        nslots = get_cache_builder.next_cache;
+        if (nslots > 0) {
+            _nvprof("get_cache bytes", nslots * sizeof(BindingCache));
+            BindingCache* cache = new (mgr->allocator) BindingCache[nslots];
+            for (int i=0; i < nslots; i++) {
+                cache[i].get_handler = getprop_miss;
+                cache[i].name = pool->precomputedMultiname(get_cache_builder.get_entry(i));
+            }
+            info->_abc.get_cache = cache;
+        }
     }
 
 #ifdef VTUNE
@@ -5567,6 +5588,9 @@ namespace nanojit
 
     void Allocator::freeChunk(void* p) {
         return mmfx_free(p);
+    }
+
+    void Allocator::postReset() {
     }
 
     // static

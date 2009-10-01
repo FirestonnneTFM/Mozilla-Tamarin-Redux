@@ -148,7 +148,7 @@ namespace avmplus
     //    name              Multiname* for this dynamic access.  Used on a cache miss,
     //                      and also for handlers that access dynamic properties.
     //
-    // If jit'd code for a method needs 1+ cache entries, they are allocated and
+    // If jit'd code for a method needs cache entries, they are allocated and
     // saved on MethodInfo::_abc.call_cache. The table is only allocated when jit
     // compilation was successful, so jit'd code must load this pointer at runtime
     // since we don't have the address at compile time.
@@ -158,12 +158,12 @@ namespace avmplus
     // and the cache doesn't cause them to be pinned.
     //
     // we allocate one entry for each unique Multiname in each method (only at
-    // late-bound call sites, of course).  
+    // late-bound reference sites, of course).  
     //
     // Limitations:
     //
     //   * we only use a binding cache if the name has no runtime parts.
-    //   * only implemented for OP_callproperty and OP_callproplex.
+    //   * only implemented for OP_callproperty OP_callproplex, and OP_getproperty
     //   * only common cases observed in testing are handled, others use a generic
     //     handler that's slightly slower than not using a cache at all.
     //     see callprop_miss() in jit-calls.h for detail on handled cases.
@@ -212,22 +212,27 @@ namespace avmplus
     //   * other cache instance groupings:
     //       * one per call site instead of per-unique-multiname?
     //       * share them between methods?
-    //   * handlers that access primitive dynamic properites have to call toplevel->toPrototype(val).
-    //     we could save the result and check its validity with (env->toplevel() == saved_proto->toplevel())
-    //   * we could specialize on primitive type too, inlining just the toPrototype() path we need
+    //   * handlers that access primitive dynamic properites have to call toplevel->toPrototype(val),
+    //     maybe we could save the result and check its validity with (env->toplevel() == saved_proto->toplevel())
+    //   * we could specialize on primitive type too, inlining just the toPrototype() path we need,
+    //     instead of using a single set of handlers for all primitives types
 
     typedef Atom (*CallCacheHandler)(BindingCache&, Atom base, int argc, Atom* args, MethodEnv*);
+    typedef Atom (*GetCacheHandler)(BindingCache&, MethodEnv*, Atom);
     struct BindingCache {
-        CallCacheHandler call_handler;
         union {
-            VTable* vtable;     // for kObjectType receivers
-            Atom tag;           // for primitive receivers
+            CallCacheHandler call_handler;  // for late bound calls
+            GetCacheHandler get_handler;    // for late bound gets
         };
         union {
-            ptrdiff_t slot_offset;  // if the cached binding is a slot
-            MethodEnv* method;      // if the cached binding is a method/getter/setter
+            VTable* vtable;         // for kObjectType receivers
+            Atom tag;               // for primitive receivers
         };
-        const Multiname* name;  // multiname for this entry, saved when cache created.
+        union {
+            ptrdiff_t slot_offset;  // for gets of a slot
+            MethodEnv* method;      // calls to a method
+        };
+        const Multiname* name;      // multiname for this entry, saved when cache created.
     };
 
     class CopyPropagation;
@@ -285,6 +290,7 @@ namespace avmplus
         int labelCount;
         LookupCacheBuilder finddef_cache_builder;
         LookupCacheBuilder call_cache_builder;
+        LookupCacheBuilder get_cache_builder;
         verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);
