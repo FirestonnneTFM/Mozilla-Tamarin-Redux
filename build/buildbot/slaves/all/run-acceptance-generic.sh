@@ -48,20 +48,42 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+showhelp ()
+{
+    echo ""
+    echo "usage: run-acceptance-generic.sh <change> <filename> <vmargs> <config>"
+    echo "       <change>   build number of shell to test"
+    echo "       <filename> name of the shell, do not include file extenstion"
+    echo "       <vmargs>   vmargs to be passed or empty quoted string"
+    echo "       <config>   custom config string to be passed to runtests.py"
+    echo "                  or an empty string"
+    exit 1
+}
+
+test "$#" = "4" || {
+    echo "not enough args passed"
+    showhelp
+}
+
+filename=$2
+vmargs=$3
+config=$4
+export shell=$filename$shell_extension
+
 
 ##
 # Download the AVMSHELL if it does not exist
 ##
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell" ]; then
     echo "Download AVMSHELL"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release $buildsdir/$change-${changeid}/$platform/$shell_release
+    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell $buildsdir/$change-${changeid}/$platform/$shell
     ret=$?
     test "$ret" = "0" || {
-        echo "Downloading of $shell_release failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release
+        echo "Downloading of $shell failed"
+        rm -f $buildsdir/$change-${changeid}/$platform/$shell
         exit 1
     }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell
 fi
 
 
@@ -79,6 +101,7 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     }
 fi
 
+
 echo ""
 echo "Missing media will be compiled using the following ASC version:"
 echo "`java -jar $basedir/utils/asc.jar`"
@@ -89,7 +112,7 @@ echo ""
 export ASC=$basedir/utils/asc.jar
 export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
-export AVM=$buildsdir/$change-${changeid}/$platform/$shell_release
+export AVM=$buildsdir/$change-${changeid}/$platform/$shell
 
 echo AVM=$AVM
 echo "`$AVM`"
@@ -99,7 +122,6 @@ test -f $AVM || {
 }
 echo; echo "AVM built with the following options:"
 echo "`$AVM -Dversion`"
-
 
 
 ##
@@ -119,8 +141,15 @@ then
 else
     py=$PYTHONWIN
 fi
-echo "message: $py ./runtests.py --vmargs=-Djitordie   --notimecheck"
-$py ./runtests.py --vmargs=-Djitordie   --notimecheck
+
+if [ "$config" != "" ]
+then
+    echo "message: $py ./runtests.py --vmargs=${vmargs} --config=${config} --notimecheck"
+    $py ./runtests.py  --vmargs=${vmargs} --config=${config} --notimecheck
+else
+    echo "message: $py ./runtests.py --vmargs=${vmargs} --notimecheck"
+    $py ./runtests.py  --vmargs=${vmargs} --notimecheck
+fi
 
 ##
 # Ensure that the system is torn down and clean
