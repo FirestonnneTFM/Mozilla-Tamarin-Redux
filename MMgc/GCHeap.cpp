@@ -1628,6 +1628,7 @@ namespace MMgc
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
 	{
+		(void)size;
 		if (attempt == 0 && !statusNotificationBeingSent)
 			StatusChangeNotify(kMemReserve);
 		else

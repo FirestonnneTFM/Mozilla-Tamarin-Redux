@@ -176,17 +176,20 @@ namespace MMgc
 	// Helper functions to check the guard.
 	// The guard is an uin32_t stored in locations preceding the object.
 	
-	REALLY_INLINE static bool CheckForAllocationGuard(void* mem, uint32_t guard)
+	// The solaris compiler does not allow these to be both static and REALLY_INLINE,
+	// so choose the latter over the former.
+	
+	REALLY_INLINE bool CheckForAllocationGuard(void* mem, uint32_t guard)
 	{
 		return (*(uint32_t*)((char*)mem - MMGC_GUARDCOOKIE_SIZE) == guard);
 	}
 
-	REALLY_INLINE static bool IsScalarAllocation(void* p)
+	REALLY_INLINE bool IsScalarAllocation(void* p)
 	{
 		return CheckForAllocationGuard(p, MMGC_SCALAR_GUARD);
 	}
 
-	REALLY_INLINE static bool IsArrayAllocation(void* p, bool primitive)
+	REALLY_INLINE bool IsArrayAllocation(void* p, bool primitive)
 	{
 		// Check if we have array guard right before the pointer.
 		uint32_t guard = MMGC_NORM_ARRAY_GUARD + uint32_t(primitive);
@@ -194,7 +197,7 @@ namespace MMgc
 			|| CheckForAllocationGuard((char*)p - MMGC_ARRAYHEADER_SIZE, guard);	// array with header
 	}
 
-	REALLY_INLINE static bool IsGCHeapAllocation(void* p)
+	REALLY_INLINE bool IsGCHeapAllocation(void* p)
 	{
 		return (GCHeap::GetGCHeap() && GCHeap::GetGCHeap()->IsAddressInHeap(p));
 	}
