@@ -146,6 +146,39 @@ typedef void *maddr_ptr;
 * Type defintion for an opaque data type representing platform-defined spin lock 
 * @see VMPI_lockInit(), VMPI_lockAcquire()
 */
+#ifdef USE_PTHREAD_MUTEX
+struct vmpi_spin_lock_t
+{
+	// Some small systems (eg android) don't provide spinlock.
+	// using pthread_mutex for now (unfortunate since it's usually more expensive)
+	volatile pthread_mutex_t lock;
+};
+
+REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
+{
+	pthread_mutex_init((pthread_mutex_t*)&lock->lock, 0);
+}
+
+REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
+{
+	pthread_mutex_destroy((pthread_mutex_t*)&lock->lock);
+}
+
+REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_lock((pthread_mutex_t*)&lock->lock) == 0;
+}
+ 
+REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_unlock((pthread_mutex_t*)&lock->lock) == 0;
+}
+
+REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_trylock((pthread_mutex_t*)&lock->lock) == 0;
+}
+#else
 struct vmpi_spin_lock_t
 {
 	volatile pthread_spinlock_t lock;
@@ -175,5 +208,6 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
 	return pthread_spin_trylock((pthread_spinlock_t*)&lock->lock) == 0;
 }
+#endif
 
 #endif // __avmplus_unix_platform__
