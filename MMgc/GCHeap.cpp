@@ -943,9 +943,10 @@ namespace MMgc
 		}
 	}
 
+#ifdef _DEBUG
+	// Non-debug version in GCHeap.h
 	void GCHeap::CheckFreelist()
 	{
-#ifdef _DEBUG
 		HeapBlock *freelist = freelists;
 		for (int i = 0; i < kNumFreeLists; i++)
 		{
@@ -962,7 +963,6 @@ namespace MMgc
 			}
 			freelist++;
 		}
-#endif
 #if 0
 // Debugging code to find problems with block/region layout
 // This code is slow, but can be useful for tracking down issues
@@ -1035,6 +1035,7 @@ namespace MMgc
 		}
 #endif	
 	}
+#endif // DEBUG
 
 	bool GCHeap::BlocksAreContiguous(void *item1, void *item2)
 	{

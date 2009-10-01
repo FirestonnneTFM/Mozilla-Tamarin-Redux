@@ -131,17 +131,12 @@ namespace MMgc
 		virtual ~GCRoot();
 
 		// override new and delete so we can know the objects extents (via FixedMalloc::Size())
-		void *operator new(size_t size)
-		{
-			return FixedMalloc::GetFixedMalloc()->Alloc(size, MMgc::kZero);
-		}
+		void *operator new(size_t size);
         
-		void operator delete (void *object)
-		{
-			FixedMalloc::GetFixedMalloc()->Free(object);
-		}
+		void operator delete (void *object);
 
 		const void *Get() const { return object; }
+
 		void Set(const void *object, size_t size);
 
 		GC *GetGC() const { return gc; }
@@ -156,7 +151,7 @@ namespace MMgc
 		const void *object;
 		size_t size;
 
-		GCWorkItem GetWorkItem() const { return GCWorkItem(object, (uint32_t)size, false); }
+		GCWorkItem GetWorkItem() const;
 	};
 
 	/**
@@ -180,23 +175,23 @@ namespace MMgc
 		 * sweeping, useful for bookkeeping based on whether things
 		 * got marked
 		 */
-		virtual void presweep() {}
+		virtual void presweep();
 
 		/**
 		 * This method is invoked after all sweeping
 		 */
-		virtual void postsweep() {}
+		virtual void postsweep();
 
 		// called before a ZCT reap begins
-		virtual void prereap() {}
+		virtual void prereap();
 
 		// called after a ZCT reap completes
-		virtual void postreap() {}
+		virtual void postreap();
 
 		/**
 		 * This method is called before an RC object is reaped
 		 */
-		virtual void prereap(void* /*rcobj*/) {}
+		virtual void prereap(void* /*rcobj*/);
 
 	private:
 		GC *gc;
@@ -694,59 +689,6 @@ namespace MMgc
 		uint64_t adjustR_startTime;
 		uint64_t adjustR_totalTime;
 	};
-
-	// The following inline functions must be here (and not in GC.cpp with the rest of them)
-	// because they are accessed from various inline functions in this file or in
-	// WriteBarrier.h, typically.
-	
-#ifdef MMGC_POLICY_PROFILING
-	REALLY_INLINE void GCPolicyManager::signalWriteBarrierWork(int stage)
-	{
-		GCAssert(ARRAY_SIZE(barrierStageLastCollection) > size_t(stage));
-		barrierStageLastCollection[stage]++;
-	}
-#endif
-#ifdef MMGC_REFCOUNT_PROFILING
-	REALLY_INLINE void GCPolicyManager::signalIncrementRef()
-	{
-		incrementRefLastCollection++;
-	}
-	
-	REALLY_INLINE void GCPolicyManager::signalDecrementRef()
-	{
-		decrementRefLastCollection++;
-	}
-	
-	REALLY_INLINE void GCPolicyManager::signalZCTAdd(bool initial, uint32_t population)
-	{
-		addZCTLastCollection++;
-		if (initial)
-			addZCTInitialTotal++;
-		if (population > zctPeakSize)
-			zctPeakSize = population;
-	}
-	
-	REALLY_INLINE void GCPolicyManager::signalZCTRemove(bool final)
-	{
-		removeZCTLastCollection++;
-		if (final)
-			removeZCTFinalTotal++;
-	}
-#endif
-	
- 	REALLY_INLINE bool GCPolicyManager::queryCollectionWork()
- 	{
- 		return remainingMinorAllocationBudget <= 0;
- 	}
-	
-	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
-	{
-#ifdef MMGC_POLICY_PROFILING
-		objectsAllocated++;
-		bytesAllocated += nbytes;
-#endif
-		remainingMinorAllocationBudget -= int32_t(nbytes);
-	}
 	
 	/**
 	 * This is a general-purpose garbage collector used by the Flash Player.
@@ -797,6 +739,7 @@ namespace MMgc
 
 		/**
 		 * If you need context vars use this!
+		 * FIXME: document context variables.
 		 */
 		enum
 		{
@@ -804,51 +747,60 @@ namespace MMgc
 			GCV_AVMCORE,
 			GCV_COUNT
 		};
-		void *GetGCContextVariable(int var) const { return m_contextVars[var]; }
-		void SetGCContextVariable(int var, void *val) { m_contextVars[var] = val; }
 		
-		avmplus::AvmCore *core() const { return (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE); }
+		void *GetGCContextVariable(int var) const;
+
+		void SetGCContextVariable(int var, void *val);
+		
+		/**
+		 * @return the AvmCore instance associated with this GC.
+		 */
+		avmplus::AvmCore *core() const;
 
 		/**
-		 * greedy is a debugging flag.  When set, every allocation
-		 * will cause a garbage collection.  This makes code run
-		 * abysmally slow, but can be useful for detecting mark
-		 * bugs or computing true peak live size.
-		 *
-		 * Set by GC::GC based on the 'mode' argument.
+		 * greedy is a debugging flag.  When set, every allocation will cause
+		 * a garbage collection.  This makes code run abysmally slow, but can
+		 * be useful for detecting mark bugs or computing true peak live size.
+		 * (The flag is effective in both debug and release builds.)
 		 */
 		const bool greedy;
 
 		/**
-		 * nogc is a debugging flag.  When set, garbage collection
-		 * never happens.
-		 *
-		 * Set by GC::GC based on the 'mode' argument.
+		 * nogc is a debugging flag.  When set, garbage collection never happens.
+		 * (The flag is effective in both debug and release builds.)
 		 */
 		const bool nogc;
 
 		/**
-		 * Configuration flag enabling incremental collection.
-		 *
-		 * Set by GC::GC based on the 'mode' argument.
+		 * incremental controls the behavior of the garbage collection.  If true,
+		 * collection is incremental (and pause times are more or less controlled);
+		 * if false, collection is stop-the-world.
 		 */
 		const bool incremental;
 		
 		/**
-	     * findUnmarkedPointers is a debugging flag, only 
+	     * findUnmarkedPointers is a debugging flag.  If true, the GC will scan the
+		 * heap at the end of garbage collection, asserting that every word that
+		 * looks like it conservatively points to an object points to an object that
+		 * was marked by the collector.  The flag is available in release builds but
+		 * effective in debug builds only.)
 		 */
 		bool findUnmarkedPointers;
 
 		/**
-		 * turns on code that does a trace before reaping zero count object and asserting on
-		 * any objects that get marked, debug builds only
+		 * validateDefRef is a debugging flag.  It turns on code that does a
+		 * trace before reaping zero count object and asserting on any objects
+		 * that get marked.  Significant space cost.  (The flag is available
+		 * in release builds but effective in debug builds only.)
 		 */
 		bool validateDefRef;		
 		
 		/**
-		 * turn on code that keeps the call stacks of all IncrementRef and DecrementRef operations
-		 * on each RC object, and prints this history when the reference count is already zero
-		 * on entry to DecrementRef, debug builds only.
+		 * keepDRCHistory is a debugging flag.  It turns on code that keeps the call
+		 * stacks of all IncrementRef and DecrementRef operations on each RC object,
+		 * and prints this history when the reference count is already zero
+		 * on entry to DecrementRef.  Significant space cost.  (The flag is available
+		 * in release builds but effective in debug builds only.)
 		 */
 		bool keepDRCHistory;
 
@@ -859,7 +811,11 @@ namespace MMgc
 		bool incrementalValidationPedantic;
 #endif
 
-		// -- Interface
+		/**
+		 * Garbage collection mode.  The GC is configured at creation in one of
+		 * these (it would be pointlessly hairy to allow the mode to be changed
+		 * at run-time).
+		 */
 		enum GCMode 
 		{
 			kDisableGC=1,		// never collect
@@ -869,6 +825,7 @@ namespace MMgc
 		};
 
 		GC(GCHeap *heap, GCMode mode);
+		
 		virtual ~GC();
 		
 		/**
@@ -880,11 +837,11 @@ namespace MMgc
 		/**
 		 * Do a full collection at the next MMGC_GCENTER macro site
 		 */
-		void QueueCollection() { policy.queueFullCollection(); }
+		void QueueCollection();
 
 		/**
-		* flags to be passed as second argument to alloc
-		*/
+		 * flags to be passed as second argument to alloc
+		 */
 		enum AllocFlags
 		{
 			kZero=1,
@@ -894,6 +851,7 @@ namespace MMgc
 			kCanFail=16			
 		};
 
+		// FIXME: why is this public?
 		enum PageType
 		{
 			kNonGC = 0,
@@ -911,12 +869,8 @@ namespace MMgc
 		/**
 		 * Just like Alloc but can return NULL
 		 */
-		void *PleaseAlloc(size_t size, int flags=0)
-		{
-			return Alloc(size, flags | kCanFail);			
-		}
+		void *PleaseAlloc(size_t size, int flags=0);
 
-#if !defined _DEBUG && !defined MMGC_MEMORY_INFO && !defined AVMPLUS_SAMPLER && !defined MMGC_HOOKS
 		/**
 		 * Like Alloc but optimized for the case of allocating one
 		 * 8-byte non-pointer-containing non-finalizable non-rc
@@ -926,19 +880,7 @@ namespace MMgc
 		 * in AllocDouble() should be the same as in Alloc(), which is defined
 		 * in GC.cpp.
 		 */
-		REALLY_INLINE void* AllocDouble()
-		{
-			if (policy.queryCollectionWork())
-				CollectionWork();
-			policy.signalAllocWork(8);
-			return GetUserPointer(noPointersAllocs[0]->Alloc(8,0));
-		}
-#else
-		REALLY_INLINE void* AllocDouble()
-		{
-			return Alloc(8,0);
-		}
-#endif
+		void* AllocDouble();
 			
 	private:
 		class RCRootSegment : public GCRoot
@@ -953,23 +895,9 @@ namespace MMgc
 		
 		RCRootSegment* rcRootSegments;
 		
-		void AddRCRootSegment(RCRootSegment *segment)
-		{
-			segment->next = rcRootSegments;
-			if (rcRootSegments)
-				rcRootSegments->prev = segment;
-			rcRootSegments = segment;
-		}
+		void AddRCRootSegment(RCRootSegment *segment);
 
-		void RemoveRCRootSegment(RCRootSegment *segment)
-		{
-			if (segment->next != NULL)
-				segment->next->prev = segment->prev;
-			if (segment->prev != NULL)
-				segment->prev->next = segment->next;
-			else
-				rcRootSegments = segment->next;
-		}
+		void RemoveRCRootSegment(RCRootSegment *segment);
 
 	public:
 
@@ -1008,103 +936,35 @@ namespace MMgc
 		 * @return the size of a managed object given a user or real pointer to its
 		 * beginning.  The returned value may be bigger than what was asked for.
 		 */
-		REALLY_INLINE static size_t Size(const void *ptr)
-		{
-			return GetBlockHeader(ptr)->size - DebugSize();
-		}
+		static size_t Size(const void *ptr);
 
 		/**
 		 * @return the GC object associated with a managed object.
 		 */
-		REALLY_INLINE static GC* GetGC(const void *item)
-		{
-			return GetBlockHeader(item)->gc;
-		}
+		static GC* GetGC(const void *item);
 		
 		/**
 		 * Tracers should employ GetMark and SetMark to
 		 * set the mark bits during the mark pass.
 		 */
-		REALLY_INLINE static int GetMark(const void *item)
-		{
-			item = GetRealPointer(item);
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				return GCLargeAlloc::GetMark(item);
-			} else {
-				return GCAlloc::GetMark(item);
-			}
-		}
+		static int GetMark(const void *item);
 		
-		REALLY_INLINE static int SetMark(const void *item)
-		{
-			item = GetRealPointer(item);
-			GCAssert(GetGC(item)->IsPointerToGCObject(item));
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				return GCLargeAlloc::SetMark(item);
-			} else {
-				return GCAlloc::SetMark(item);
-			}
-		}
+		static int SetMark(const void *item);
 
 		// Not a hot method
-		void ClearQueued(const void *item)
-		{
-			item = GetRealPointer(item);
-			GCAssert(IsPointerToGCObject(item));
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				GCLargeAlloc::ClearQueued(item);
-			} else {
-				GCAlloc::ClearQueued(item);
-			}
-		}
+		void ClearQueued(const void *item);
 		
 		// not a hot method
-		static void ClearFinalized(const void *item)
-		{
-			item = GetRealPointer(item);
-			GCAssert(GetGC(item)->IsPointerToGCObject(item));
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				GCLargeAlloc::ClearFinalized(item);
-			} else {
-				GCAlloc::ClearFinalized(item);
-			}
-		}
+		static void ClearFinalized(const void *item);
 
 		// not a hot method
-		static void SetFinalize(const void *item)
-		{
-			item = GetRealPointer(item);
-			GCAssert(GetGC(item)->IsPointerToGCObject(item));
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				GCLargeAlloc::SetFinalize(item);
-			} else {
-				GCAlloc::SetFinalize(item);
-			}
-		}
+		static void SetFinalize(const void *item);
 
 		// not a hot method
-		static int IsFinalized(const void *item)
-		{
-			item = GetRealPointer(item);
-			GCAssert(GetGC(item)->IsPointerToGCObject(item));
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				return GCLargeAlloc::IsFinalized(item);
-			} else {
-				return GCAlloc::IsFinalized(item);
-			}
-		}
+		static int IsFinalized(const void *item);
 
 		// not a hot method
-		static int HasWeakRef(const void *item)
-		{
-			item = GetRealPointer(item);
-			GCAssert(GetGC(item)->IsPointerToGCObject(item));
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				return GCLargeAlloc::HasWeakRef(item);
-			} else {
-				return GCAlloc::HasWeakRef(item);
-			}
-		}
+		static int HasWeakRef(const void *item);
 
 		/**
 		 * Used by sub-allocators to obtain memory.
@@ -1114,20 +974,11 @@ namespace MMgc
 		void FreeBlock(void *ptr, uint32_t size);
 
 		// Host API: this should go away but Player code is currently using it.  VM code should not use it.
-		REALLY_INLINE GCHeap *GetGCHeap() const
-		{ 
-			return heap;
-		}
+		GCHeap *GetGCHeap() const;
 
-		REALLY_INLINE void ReapZCT(bool scanStack=true)
-		{
-			zct.Reap(scanStack);
-		}
+		void ReapZCT(bool scanStack=true);
 		
-		REALLY_INLINE bool Reaping()
-		{
-			return zct.IsReaping();
-		}
+		bool Reaping();
 
 #ifdef _DEBUG
 		// Test whether the RCObject cleaned itself properly by zeroing everything.
@@ -1150,15 +1001,11 @@ namespace MMgc
 		/**
 		 * Are we currently marking?
 		 */
-		REALLY_INLINE bool IncrementalMarking()
-		{
-			return marking;
-		}
+		bool IncrementalMarking();
 
 		//////////////////////////////////////////////////////////////////////////
 		//
-		// Write barrier.  Those that are REALLY_INLINE are defined in WriteBarrier.h,
-		// to handle circularity problems: RCObject is not yet defined in GC.h.
+		// Write barrier.  Those that are REALLY_INLINE are defined in WriteBarrier.h.
 
 	private:
 		/**
@@ -1304,26 +1151,12 @@ namespace MMgc
 		void *FindBeginningGuarded(const void *gcItem);
 
 		// Legacy public API.  DO NOT USE from within AVM code.
-		REALLY_INLINE void *FindBeginning(const void *gcItem)
-		{
-			return FindBeginningGuarded(gcItem);
-		}
+		void *FindBeginning(const void *gcItem);
 
 		// Used on the critical path of the write barrier path.  gcItem must point into
 		// managed memory, and NULL is never returned.  Don't use this for GCAssert and
 		// similar purposes, but use it when speed is key.
-		REALLY_INLINE void *FindBeginningFast(const void *gcItem)
-		{
-			int bits = GetPageMapValue((uintptr_t)gcItem);
-			if (bits == kGCAllocPage)
-				return GetUserPointer(GCAlloc::FindBeginning(gcItem));
-			while (bits == kGCLargeAllocPageRest)
-			{
-				gcItem = (void*) ((uintptr_t)gcItem - GCHeap::kBlockSize);
-				bits = GetPageMapValue((uintptr_t)gcItem);
-			}
-			return GetUserPointer(GCLargeAlloc::FindBeginning(gcItem));
-		}
+		void *FindBeginningFast(const void *gcItem);
 		
 		// not a hot method; PinStackObjects goes directly to GCAlloc::IsRCObject/GCLargeAlloc::IsRCObject.
 		bool IsRCObject(const void *);
@@ -1333,61 +1166,47 @@ namespace MMgc
 		 * determine if it's being called (directly or indirectly) from a
 		 * finalizer.
 		 */
-		REALLY_INLINE bool Collecting()
-		{
-			return collecting;
-		}
+		bool Collecting();
 
 		/**
 		 * @return true if the item points to a page containing managed objects.
 		 * Any pointer can be passed in here.
 		 */
-		REALLY_INLINE bool IsPointerToGCPage(const void *item)
-		{
-			return GetPageMapValueGuarded((uintptr_t)item) != 0;
-		}
+		bool IsPointerToGCPage(const void *item);
 
-		bool IsPointerToGCObject(const void *realPtr)
-		{
-			GCAssert(realPtr != NULL);
-			return GetRealPointer(FindBeginningGuarded(realPtr)) == realPtr;
-		}
+		bool IsPointerToGCObject(const void *realPtr);
 		
-		static double duration(uint64_t start) 
-		{
-			return (double(VMPI_getPerformanceCounter() - start) * 1000) / VMPI_getPerformanceFrequency();
-		}
-
-		/** GC initialization time, in ticks.  Used for logging. */
+		/**
+		 * GC initialization time, in ticks.  Used for logging.
+		 * FIXME: why is this public?
+		 */
 		const uint64_t t0;
 
+		// FIXME: these three static methods could be lifted out of the GC class to the global level,
+		// they're simple utilities.
+		static double duration(uint64_t start);
+		
 		// a tick is the unit of VMPI_getPerformanceFrequency()
-		static uint64_t ticksToMicros(uint64_t ticks) 
-		{ 
-			return (ticks*1000000)/VMPI_getPerformanceFrequency();
-		}
+		static uint64_t ticksToMicros(uint64_t ticks);
 
-		static uint64_t ticksToMillis(uint64_t ticks) 
-		{ 
-			return (ticks*1000)/VMPI_getPerformanceFrequency();
-		}
+		static uint64_t ticksToMillis(uint64_t ticks);
 
 		/**
 		 * Total number of bytes of pointer-containing memory scanned by this
 		 * GC.  Used to measure marking rate, which is
 		 * <code>bytesMarked()/ticksToMillis(markTicks())</code>.
 		 */
-		uint64_t bytesMarked() { return policy.bytesMarked(); }
+		uint64_t bytesMarked();
 
 		/**
 		 * Total time spent doing incremental marking, in ticks.  See
 		 * bytesMarked.
 		 */
-		uint64_t markTicks() { return policy.timeStartIncrementalMark + policy.timeIncrementalMark; }
+		uint64_t markTicks();
 
 		// calls to mark item
 		uint32_t lastStartMarkIncrementCount;
-		uint32_t markIncrements() { return (uint32_t)policy.countIncrementalMark; }
+		uint32_t markIncrements();
 
 		/**
 		 * Number of calls to Sweep().
@@ -1406,10 +1225,7 @@ namespace MMgc
 		// a lot without impacting performance
 		void CleanStack(bool force=false);
 
-		REALLY_INLINE bool Destroying()
-		{
-			return destroying;
-		}
+		bool Destroying();
 
 		static GCWeakRef *GetWeakRef(const void *obj);
 		
@@ -1421,18 +1237,9 @@ namespace MMgc
 		// legacy API that gets physical start of OS thread
 		uintptr_t GetOSStackTop() const;
 
-		uintptr_t GetStackTop() const
-		{
-			// temporary crutch until we're moved over to the MMGC_GCENTER system
-			if(stackEnter == NULL)
-				return GetOSStackTop();
-			return GetStackEnter();
-		}
+		uintptr_t GetStackTop() const;
 
-		uintptr_t GetStackEnter() const 
-		{ 
-			return (uintptr_t)stackEnter; 
-		}
+		uintptr_t GetStackEnter() const;
 
 		// for deciding a tree of things should be scanned from presweep
 		void PushWorkItem_MayFail(GCWorkItem &item);
@@ -1450,17 +1257,11 @@ namespace MMgc
 		friend class GCAutoEnterPause;
 		void SetStackEnter(GCAutoEnter *enter, bool doCollectionWork=true);
 
-		REALLY_INLINE GCAutoEnter *GetAutoEnter()
-		{
-			return stackEnter;
-		}
+		GCAutoEnter *GetAutoEnter();
 
  		vmpi_spin_lock_t m_gcLock;
 
- 		bool onThread()
-		{
-			return VMPI_currentThread() == m_gcThread;
-		}
+ 		bool onThread();
 
 		// store a handle to the thread that create the GC to ensure thread safety
 		vmpi_thread_t m_gcThread;
@@ -1475,15 +1276,7 @@ namespace MMgc
 
 		uint32_t *GetBits(int numBytes, int sizeClass);
 
-		void FreeBits(uint32_t *bits, int sizeClass)
-		{
-#ifdef _DEBUG
-			for(int i=0, n=noPointersAllocs[sizeClass]->m_numBitmapBytes; i<n;i++) 
-				GCAssert(((uint8_t*)bits)[i] == 0);
-#endif
-			*(uint32_t**)bits = m_bitsFreelists[sizeClass];
-			m_bitsFreelists[sizeClass] = bits;
-		}
+		void FreeBits(uint32_t *bits, int sizeClass);
 
 		uint32_t *m_bitsFreelists[kNumSizeClasses];
 		uint32_t *m_bitsNext;
@@ -1536,24 +1329,10 @@ namespace MMgc
 #endif
 
 		// Used heavily by the write barrier.
-		REALLY_INLINE bool IsMarkedThenMakeQueued(const void* userptr)
-		{
-			const void* realptr = GetRealPointer(userptr);
-			if (GCLargeAlloc::IsLargeBlock(realptr))
-				return GCLargeAlloc::IsMarkedThenMakeQueued(realptr);
-			else
-				return GCAlloc::IsMarkedThenMakeQueued(realptr);
-		}
+		bool IsMarkedThenMakeQueued(const void* userptr);
 
 		// Used heavily by GC::Free.
-		REALLY_INLINE bool IsQueued(const void* userptr)
-		{
-			const void* realptr = GetRealPointer(userptr);
-			if (GCLargeAlloc::IsLargeBlock(realptr))
-				return GCLargeAlloc::IsQueued(realptr);
-			else
-				return GCAlloc::IsQueued(realptr);
-		}
+		bool IsQueued(const void* userptr);
 
 		const static int16_t kSizeClasses[kNumSizeClasses];		
 		const static uint8_t kSizeClassIndex[246];
@@ -1583,30 +1362,10 @@ namespace MMgc
 		unsigned char *pageMap;
 
 		// This is very hot
-		REALLY_INLINE int GetPageMapValue(uintptr_t addr) const
-		{
-			GCAssert(addr >= memStart && addr < memEnd);
-			uintptr_t index = (addr-memStart) >> 12;
-#ifdef MMGC_64BIT
-			GCAssert((index >> 2) < uintptr_t(64*65536) * uintptr_t(GCHeap::kBlockSize));
-#else
-			GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
-#endif
-			// shift amount to determine position in the byte (times 2 b/c 2 bits per page)
-			uint32_t shiftAmount = (index&0x3) * 2;
-			// 3 ... is mask for 2 bits, shifted to the left by shiftAmount
-			// finally shift back by shift amount to get the value 0, 1 or 3
-			//return (pageMap[addr >> 2] & (3<<shiftAmount)) >> shiftAmount;
-			return (pageMap[index >> 2] >> shiftAmount) & 3;
-		}
+		int GetPageMapValue(uintptr_t addr) const;
 
 		// This is warm - used in IsPointerToGCPage and in FindBeginningGuarded
-		REALLY_INLINE int GetPageMapValueGuarded(uintptr_t addr)
-		{
-			if(addr >= memStart && addr < memEnd)
-				return GetPageMapValue(addr);
-			return 0;
-		}
+		int GetPageMapValueGuarded(uintptr_t addr);
 
 		/**
 		 * Set the pageMap bits for the given address.  Those bits must be
@@ -1682,22 +1441,14 @@ namespace MMgc
  
 		bool finalizedValue;
 
-		REALLY_INLINE void AddToSmallEmptyBlockList(GCAlloc::GCBlock *b)
-		{
-			b->next = smallEmptyPageList;
-			smallEmptyPageList = b;
-		}
+		void AddToSmallEmptyBlockList(GCAlloc::GCBlock *b);
 
 		/**
 		 * List of pages to be swept, built up in Finalize.
 		 */
 		GCAlloc::GCBlock *smallEmptyPageList;
 		
-		REALLY_INLINE void AddToLargeEmptyBlockList(GCLargeAlloc::LargeBlock *lb)
-		{
-			lb->next = largeEmptyPageList;
-			largeEmptyPageList = lb;
-		}
+		void AddToLargeEmptyBlockList(GCLargeAlloc::LargeBlock *lb);
 
 		/**
 		 * List of pages to be swept, built up in Finalize.
@@ -1720,9 +1471,9 @@ namespace MMgc
 		// Deferred ref counting implementation
 		ZCT zct;
 #ifdef MMGC_REFCOUNT_PROFILING
-		void AddToZCT(RCObject *obj, bool initial=false) { zct.Add(obj, initial); }
+		void AddToZCT(RCObject *obj, bool initial=false);
 #else
-		void AddToZCT(RCObject *obj) { zct.Add(obj); }
+		void AddToZCT(RCObject *obj);
 #endif
 
 		// Public for one hack from splay.cpp - no one else should call
@@ -1730,16 +1481,13 @@ namespace MMgc
 		// abstracted into a better API function here, probably.)
 public:
 #ifdef MMGC_REFCOUNT_PROFILING
-		REALLY_INLINE void RemoveFromZCT(RCObject *obj, bool final=false) { zct.Remove(obj, final); }
+		REALLY_INLINE void RemoveFromZCT(RCObject *obj, bool final=false);
 #else
-		REALLY_INLINE void RemoveFromZCT(RCObject *obj) { zct.Remove(obj); }
+		REALLY_INLINE void RemoveFromZCT(RCObject *obj);
 #endif
 
 private:
-		REALLY_INLINE static const void *Pointer(const void *p) 
-		{
-			return (const void*)(((uintptr_t)p)&~7);
-		}
+		static const void *Pointer(const void *p);
 
 public:
 		void DumpMemoryInfo();
@@ -1753,22 +1501,25 @@ private:
 		// item.ptr must not be NULL.
 		void PushWorkItem(GCWorkItem item);
 
-#ifdef _DEBUG		
-		void CheckFreelist(GCAlloc *gca);
+#ifdef _DEBUG
+		/**
+		 * Check the consistency of the free lists for all the allocators.
+		 */
 		void CheckFreelists();
 
-		int m_gcLastStackTrace;
-
 		/**
-		 * Used by FindUnmarkedPointers.
-		 */
-		void UnmarkedScan(const void *mem, size_t size);
-
-		/**
-		 * Find unmarked pointers in the entire heap.
+		 * Conservatively find pointers in the entire heap referencing unmarked objects, 
+		 * triggering assertions when one is found.  This is a sanity check on the GC
+		 * marking algorithm.
 		 */
 		void FindUnmarkedPointers();
 
+		/**
+		 * Conservatively find pointers in an address range referencing unmarked objects, 
+		 * triggering assertions when one is found.
+		 */
+		void UnmarkedScan(const void *mem, size_t size);
+		
 		// methods for incremental verification
 
 		/**
@@ -1788,6 +1539,7 @@ private:
 public:
 #ifdef MMGC_MEMORY_INFO
 		typedef void (*pDumpBackCallbackProc)(void* pContext, void *obj, const char *type );
+		
 		void DumpBackPointerChain(void *o, pDumpBackCallbackProc p = NULL, void *context = NULL);
 
 		// debugging routine that records who marked who, can be used to
@@ -1817,10 +1569,7 @@ public:
 		//number as reported by GetBytesInUse()
 		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
 
-		size_t GetNumBlocks()
-		{
-			return (size_t)policy.blocksOwnedByGC();
-		}
+		size_t GetNumBlocks();
 
 		virtual void memoryStatusChange(MemoryStatus oldStatus, MemoryStatus newStatus);
 
@@ -1878,68 +1627,33 @@ public:
 		{
 			friend class GC;
 		public:
-			AllocaAutoPtr() : gc(NULL), unwindPtr(NULL) {}  // initialization of 'gc' to pacify gcc
-			~AllocaAutoPtr() { if (unwindPtr) gc->allocaPopTo(unwindPtr); }
+			AllocaAutoPtr();
+			~AllocaAutoPtr();
 		private:
 			GC* gc;
 			void* unwindPtr;
 		};
 				
-		inline void* allocaTop() 
-		{
-			return stacktop;
-		}
+		void* allocaTop();
 		
-		inline void allocaPopTo(void* top)
-		{ 
-			if (top >= top_segment->start && top <= top_segment->limit)
-				stacktop = top;
-			else
-				allocaPopToSlow(top);
-		}
+		void allocaPopTo(void* top);
 	
-		inline void* allocaPush(size_t nbytes, AllocaAutoPtr& x) 
-		{
-			GCAssert(x.unwindPtr == NULL);
-			x.gc = this;
-			x.unwindPtr = stacktop;
-			nbytes = (nbytes + 7) & ~7;
-			if ((char*)stacktop + nbytes <= top_segment->limit) {
-				stacktop = (char*)stacktop + nbytes;
-				return x.unwindPtr;
-			}
-			return allocaPushSlow(nbytes);
-		}
+		void* allocaPush(size_t nbytes, AllocaAutoPtr& x);
 	};
 
 	// helper class to wipe out vtable pointer of members for DRC
 	class Cleaner
 	{
 	public:
-		Cleaner() {}
+		Cleaner();
+		~Cleaner();
 		// don't let myself move between objects
-		Cleaner& operator=(const Cleaner& /*rhs*/) { return *this; }
-		void set(const void * _v, size_t _size) { this->v = (int*)_v; this->size = _size; }
-		~Cleaner() { 
-			if(v) 
-				VMPI_memset(v, 0, size);
-			v = 0; 
-			size = 0;
-		}
+		Cleaner& operator=(const Cleaner& /*rhs*/);
+		void set(const void * _v, size_t _size);
+
 		int *v;
 		size_t size;
 	};
-
-	inline GCWorkItem::GCWorkItem(const void *p, uint32_t s, bool isGCItem)
-		: ptr(p)
-		, _size(s | uint32_t(isGCItem))
-	{
-#ifdef _DEBUG
-		if (IsGCItem()) {
-			GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
-		}
-#endif
-	}
 
 	/**
 	 * Stack object that takes care of many things including defining stack

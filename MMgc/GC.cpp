@@ -83,6 +83,21 @@ namespace MMgc
 	inline uint64_t max(uint64_t a, uint64_t b) { return a > b ? a : b; }
 #endif
 
+	/*virtual*/
+	void GCCallback::presweep() {}
+	
+	/*virtual*/
+	void GCCallback::postsweep() {}
+	
+	/*virtual*/
+	void GCCallback::prereap() {}
+	
+	/*virtual*/
+	void GCCallback::postreap() {}
+	
+	/*virtual*/
+	void GCCallback::prereap(void* /*rcobj*/) {}
+	
 	// Scanning rates (bytes/sec).
 	//
 	// Less than R_LOWER_LIMIT is not credible and is probably a measurement error / measurement
@@ -2137,29 +2152,13 @@ bail:
 
 #ifdef _DEBUG
 
-	void GC::CheckFreelist(GCAlloc *gca)
-	{	
-		GCAlloc::GCBlock *b = gca->m_firstFree;
-		while(b)
-		{
-			void *freelist = b->firstFree;
-			while(freelist)
-			{			
-				// b->firstFree should be either 0 end of free list or a pointer into b, otherwise, someone
-				// wrote to freed memory and hosed our freelist
-				GCAssert(freelist == 0 || ((uintptr_t) freelist >= (uintptr_t) b->items && (uintptr_t) freelist < (uintptr_t) b + GCHeap::kBlockSize));
-				freelist = *((void**)freelist);
-			}
-			b = b->nextFree;
-		}
-	}
-
 	void GC::CheckFreelists()
 	{
 		for(int i=0; i < kNumSizeClasses; i++)
 		{
-			CheckFreelist(containsPointersAllocs[i]);
-			CheckFreelist(noPointersAllocs[i]);
+			containsPointersAllocs[i]->CheckFreelist();
+			containsPointersRCAllocs[i]->CheckFreelist();
+			noPointersAllocs[i]->CheckFreelist();
 		}
 	}
 
@@ -2198,6 +2197,14 @@ bail:
 		}
 	}
 
+	// For every page in the address range known to this GC, scan the page conservatively
+	// for pointers and assert that anything that looks like a pointer to an object
+	// points to an object that's marked.
+	//
+	// FIXME: This looks like it could be prone to signaling false positives and crashes:
+	// it scans memory that's marked kNonGC, and some of that memory could even be
+	// unmapped at the VM level?
+	
 	void GC::FindUnmarkedPointers()
 	{
 		if(findUnmarkedPointers)

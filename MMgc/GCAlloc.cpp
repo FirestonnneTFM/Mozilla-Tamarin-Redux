@@ -648,6 +648,24 @@ namespace MMgc
 
 		return GetMark(item);
 	}
+	
+	void GCAlloc::CheckFreelist()
+	{	
+		GCBlock *b = m_firstFree;
+		while(b)
+		{
+			void *freelist = b->firstFree;
+			while(freelist)
+			{			
+				// b->firstFree should be either 0 end of free list or a pointer into b, otherwise, someone
+				// wrote to freed memory and hosed our freelist
+				GCAssert(freelist == 0 || ((uintptr_t) freelist >= (uintptr_t) b->items && (uintptr_t) freelist < (uintptr_t) b + GCHeap::kBlockSize));
+				freelist = *((void**)freelist);
+			}
+			b = b->nextFree;
+		}
+	}
+	
 #endif // _DEBUG
 	
 	// allows us to avoid division in GetItemIndex, kudos to Tinic

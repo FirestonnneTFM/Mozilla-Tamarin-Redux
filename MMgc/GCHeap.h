@@ -521,7 +521,15 @@ namespace MMgc
 		void RemoveRegion(Region *r);
 
 		// debug only freelist consistency checks
+#ifdef _DEBUG
 		void CheckFreelist();
+#else
+		REALLY_INLINE void CheckFreelist()
+		{
+			// nothing
+		}
+#endif
+
 		bool BlocksAreContiguous(void *item1, void *item2);
 		
 		// textual heap representation, very nice!

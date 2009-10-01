@@ -452,6 +452,9 @@
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
 		075CBD4B107326E4009E599C /* FixedAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FixedAlloc-inlines.h"; path = "../../../MMgc/FixedAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBD5710732FD9009E599C /* FixedMalloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FixedMalloc-inlines.h"; path = "../../../MMgc/FixedMalloc-inlines.h"; sourceTree = SOURCE_ROOT; };
+		075CBE9610739FF5009E599C /* GC-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GC-inlines.h"; path = "../../../MMgc/GC-inlines.h"; sourceTree = SOURCE_ROOT; };
+		075CBECC1074ACB7009E599C /* GCAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCAlloc-inlines.h"; path = "../../../MMgc/GCAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
+		075CBF191074B252009E599C /* GCLargeAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCLargeAlloc-inlines.h"; path = "../../../MMgc/GCLargeAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		076899071019D3AC00BC72AA /* ZCT-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ZCT-inlines.h"; path = "../../../MMgc/ZCT-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07689A9E101DC28000BC72AA /* ZCT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZCT.cpp; path = ../../../MMgc/ZCT.cpp; sourceTree = SOURCE_ROOT; };
 		07689A9F101DC28000BC72AA /* ZCT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZCT.h; path = ../../../MMgc/ZCT.h; sourceTree = SOURCE_ROOT; };
@@ -1360,10 +1363,12 @@
 				079DFA8B0F3A96BD0031D1B4 /* FixedMalloc.cpp */,
 				079DFA8C0F3A96BD0031D1B4 /* FixedMalloc.h */,
 				075CBD5710732FD9009E599C /* FixedMalloc-inlines.h */,
-				07A8D2F10F5EEAB00005E66C /* GC.h */,
 				079DFA8D0F3A96BD0031D1B4 /* GC.cpp */,
+				07A8D2F10F5EEAB00005E66C /* GC.h */,
+				075CBE9610739FF5009E599C /* GC-inlines.h */,
 				079DFA8E0F3A96BD0031D1B4 /* GCAlloc.cpp */,
 				079DFA8F0F3A96BD0031D1B4 /* GCAlloc.h */,
+				075CBECC1074ACB7009E599C /* GCAlloc-inlines.h */,
 				3FFDEC6B0F69A54F00E510AB /* GCAllocObject.cpp */,
 				079DFA900F3A96BD0031D1B4 /* GCAllocObject.h */,
 				079DFA920F3A96BD0031D1B4 /* GCDebug.h */,
@@ -1376,6 +1381,7 @@
 				079DFA990F3A96BD0031D1B4 /* GCHeap.h */,
 				079DFA9B0F3A96BD0031D1B4 /* GCLargeAlloc.cpp */,
 				079DFA9C0F3A96BD0031D1B4 /* GCLargeAlloc.h */,
+				075CBF191074B252009E599C /* GCLargeAlloc-inlines.h */,
 				3FDDC5490F60A0B600E29821 /* GCLog.cpp */,
 				3FDDC54A0F60A0B600E29821 /* GCLog.h */,
 				079DFA9D0F3A96BD0031D1B4 /* GCMemoryProfiler.cpp */,

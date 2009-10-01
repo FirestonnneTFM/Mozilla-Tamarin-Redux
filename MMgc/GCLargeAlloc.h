@@ -68,109 +68,41 @@ namespace MMgc
 		void ClearMarks();
 
 		// not a hot method
-		static void SetHasWeakRef(const void *item, bool to)
-		{
-			if(to) {
-				GetLargeBlock(item)->flags |= kHasWeakRef;
-			} else {
-				GetLargeBlock(item)->flags &= ~kHasWeakRef;
-			}
-		}
+		static void SetHasWeakRef(const void *item, bool to);
 
 		// not a hot method
-		static bool HasWeakRef(const void *item)
-		{
-			return (GetLargeBlock(item)->flags & kHasWeakRef) != 0;
-		}
+		static bool HasWeakRef(const void *item);
 
-		REALLY_INLINE static bool IsLargeBlock(const void *item)
-		{
-			// The pointer should be 4K aligned plus 16 bytes
-			// Mac inserts 16 bytes for new[] so make it more general
-			return (((uintptr_t)item & 0xFFF) == sizeof(LargeBlock));
-		}
+		static bool IsLargeBlock(const void *item);
 
-		REALLY_INLINE static bool SetMark(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			bool oldMark = (block->flags & kMarkFlag) != 0;
-			block->flags |= kMarkFlag;
-			block->flags &= ~kQueuedFlag;
-			return oldMark;
-		}
+		static bool SetMark(const void *item);
 
 		// Not a hot method but always inlining probably shrinks the code
-		REALLY_INLINE static void SetFinalize(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			block->flags |= kFinalizeFlag;
-		}
+		static void SetFinalize(const void *item);
 		
-		REALLY_INLINE static bool GetMark(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			return (block->flags & kMarkFlag) != 0;
-		}
+		static bool GetMark(const void *item);
 
 #ifdef _DEBUG
-		static bool IsWhite(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			if(!IsLargeBlock(item))
-				return false;
-			return (block->flags & (kMarkFlag|kQueuedFlag)) == 0;
-		}
+		static bool IsWhite(const void *item);
 #endif
 	
-		REALLY_INLINE static bool IsMarkedThenMakeQueued(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			if ((block->flags & kMarkFlag) != 0) {
-				block->flags ^= kMarkFlag|kQueuedFlag;
-				return true;
-			}
-			return false;
-		}
+		static bool IsMarkedThenMakeQueued(const void *item);
 
-		REALLY_INLINE static bool IsQueued(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			return (block->flags & kQueuedFlag) != 0;
-		}
+		static bool IsQueued(const void *item);
 
-		REALLY_INLINE static void* FindBeginning(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			return (void*) (block+1);
-		}
+		static void* FindBeginning(const void *item);
 
 		// not a hot method
-		static void ClearFinalized(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			block->flags &= ~kFinalizeFlag;
-		}
+		static void ClearFinalized(const void *item);
 
 		// Not hot, because GC::MarkItem open-codes it
-		static bool ContainsPointers(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			return (block->flags & kContainsPointers) != 0;
-		}
+		static bool ContainsPointers(const void *item);
 		
 		// not a hot method
-		static bool IsFinalized(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			return (block->flags & kFinalizeFlag) != 0;
-		}
+		static bool IsFinalized(const void *item);
 
 		// Can be hot - used by PinStackObjects
-		REALLY_INLINE static bool IsRCObject(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			return (block->flags & kRCObject) != 0;
-		}
+		static bool IsRCObject(const void *item);
 
 		//This method returns the number bytes allocated by FixedMalloc
 		size_t GetBytesInUse();
@@ -186,29 +118,16 @@ namespace MMgc
 		{
 			uint32_t flags;
 
-			int GetNumBlocks() const
-			{
-				return (size + sizeof(LargeBlock)) / GCHeap::kBlockSize;
-			}
+			int GetNumBlocks() const;
 		};
 
-		REALLY_INLINE static LargeBlock* GetLargeBlock(const void *addr)
-		{
-			return (LargeBlock*)GetBlockHeader(addr);
-		}
+		static LargeBlock* GetLargeBlock(const void *addr);
 		
 		// not a hot method
-		static bool NeedsFinalize(LargeBlock *block)
-		{
-			return (block->flags & kFinalizeFlag) != 0;
-		}			
+		static bool NeedsFinalize(LargeBlock *block);
 		
 		// not a hot method
-		static void ClearQueued(const void *item)
-		{
-			LargeBlock *block = GetLargeBlock(item);
-			block->flags &= ~kQueuedFlag;
-		}
+		static void ClearQueued(const void *item);
 		
 		// The list of chunk blocks
 		LargeBlock* m_blocks;
@@ -226,10 +145,7 @@ namespace MMgc
 		GC *m_gc;
 
 	public:
-		REALLY_INLINE static LargeBlock* Next(LargeBlock* b)
-		{
-			return (LargeBlock*)b->next;
-		}
+		static LargeBlock* Next(LargeBlock* b);
 	};
 
 	/**
@@ -243,25 +159,9 @@ namespace MMgc
 	class GCLargeAllocIterator
 	{
 	public:
-		GCLargeAllocIterator(MMgc::GCLargeAlloc* alloc) 
-			: alloc(alloc)
-			, block(alloc->m_blocks)
-		{
-		}
+		GCLargeAllocIterator(MMgc::GCLargeAlloc* alloc);
 		
-		bool GetNextMarkedObject(void*& out_ptr, uint32_t& out_size)
-		{
-			while (block != NULL) {
-				GCLargeAlloc::LargeBlock* b = block;
-				block = GCLargeAlloc::Next(block);
-				if ((b->flags & (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) == (GCLargeAlloc::kContainsPointers|GCLargeAlloc::kMarkFlag)) {
-					out_ptr = GetUserPointer(b+1);
-					out_size = b->size - (uint32_t)DebugSize();
-					return true;
-				}
-			}
-			return false;
-		}
+		bool GetNextMarkedObject(void*& out_ptr, uint32_t& out_size);
 		
 	private:
 		GCLargeAlloc* const alloc;
