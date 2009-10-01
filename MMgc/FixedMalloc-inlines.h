@@ -123,6 +123,36 @@ namespace MMgc
 		item = GetRealPointer(item);
 		return ((uintptr_t) item & 0xFFF) == 0;
 	}
+
+	REALLY_INLINE FixedAllocSafe* FixedMalloc::FindSizeClass(size_t size)
+	{
+		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
+
+#ifdef _DEBUG
+		uint32_t const size8 = (uint32_t)((size+7)&~7); // round up to multiple of 8
+		GCAssert((size8 >> 3) < kMaxSizeClassIndex);
+		GCAssert(size8 <= (uint32_t)kLargestAlloc);
+#endif
+
+		// index is (conceptually) "(size8>>3)" but this allows
+		// us to skip the &~7 that is redundant for nondebug builds...
+#ifdef MMGC_64BIT
+		unsigned const index = kSizeClassIndex[((size+7)>>3)];
+#else
+		// first bucket is 4 on 32-bit, so just special case that rather than
+		// double the size-class-index table
+		unsigned const index = (size <= 4) ? 0 : kSizeClassIndex[((size+7)>>3)];
+#endif
+
+		// assert that I fit
+		GCAssert(size <= m_allocs[index].GetItemSize());
+
+		// assert that I don't fit (makes sure we don't waste space
+		GCAssert(index == 0 || size > m_allocs[index-1].GetItemSize());
+
+		return &m_allocs[index];
+	}
+
 }
 
 #endif /* __FixedMalloc_inlines__ */
