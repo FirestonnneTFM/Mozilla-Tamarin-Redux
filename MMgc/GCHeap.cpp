@@ -1635,6 +1635,13 @@ namespace MMgc
 	}
 #endif
 
+	// Not ideal, but no worse than returning a NULL pointer from the allocator.
+	void GCHeap::SignalObjectTooLarge()
+	{
+		GCLog("Implementation limit exceeded: attempting to allocate too-large object");
+		VMPI_exit(1);
+	}
+
 	void GCHeap::Abort()
 	{
 		status = kMemAbort;

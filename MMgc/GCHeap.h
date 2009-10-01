@@ -232,6 +232,15 @@ namespace MMgc
 			return instance; 
 		}
 
+		/**
+		 * Signal a too-large allocation request.  This /will/ cause an immediate shutdown of
+		 * the entire system.  (The alternative is to return a NULL pointer, which has the
+		 * same effect but with considerably less grace.)  Clients that allocate arbitrarily
+		 * large objects based on application or end-user data may wish to be concerned about
+		 * checking whether the object might be too large.
+		 */
+		static void SignalObjectTooLarge();
+
 		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
 		/**
