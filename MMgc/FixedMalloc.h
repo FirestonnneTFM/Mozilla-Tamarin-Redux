@@ -145,7 +145,9 @@ namespace MMgc
 #endif
 		const static int kNumSizeClasses = 41;
 		const static int16_t kSizeClasses[kNumSizeClasses];
-		const static uint8_t kSizeClassIndex[32];
+
+		const static unsigned kMaxSizeClassIndex = (kLargestAlloc>>3)+1;
+		const static uint8_t kSizeClassIndex[kMaxSizeClassIndex];
 		
 		static FixedMalloc *instance;
 
@@ -158,7 +160,7 @@ namespace MMgc
 #endif
 
 		// @return a thread-safe allocator for objects of the given size.
-		FixedAllocSafe *FindSizeClass(size_t size);
+		FixedAllocSafe* FindSizeClass(size_t size);
 
 		// @return true if item is a large-object allocation.  item must have been
 		//         returned from one of the allocation functions.

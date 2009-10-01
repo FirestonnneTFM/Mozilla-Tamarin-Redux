@@ -41,20 +41,35 @@
 
 namespace MMgc
 {
-	// Size classes for our Malloc.  We start with a 4 byte allocator and then from
-	// 8 to 128, size classes are spaced evenly 8 bytes apart, then from 128 to 1968 they
-#ifdef MMGC_64BIT
-	// The upper entries of the table (>128) are sized to 
-	// match the kSizeClassIndex which uses the number-of-entries
-	// per block to pick an allocator.  For example, if you want to 
-	// allocate a 798 byte object, it gets rounded up to 800 and then
-	// 4032/800 = 5.04 so you look up kSizeClassIndex[5] and get 37 which
-	// returns the allocator size to allocate 800 bytes per alloc.  The 800
-	// was picked to be just larger than the maximum 5-per-block size
-	// that would fit (4032/5=804 down to 800) rounded down to the next 
-	// lowest 8 bytes.  If someone was allocating 801 bytes, it would get rounded
-	// up to 808 and then go into the 4-per-block allocator (4032/808=4.99).
+	// kSizeClassIndex[] is an array that lets us quickly determine the allocator
+	// to use for a given size, without division. A given allocation is rounded
+	// up to the nearest multiple of 8, then downshifted 3 bits, and the index
+	// tells us which allocator to use. (a special case is made for <= 4 bytes on
+	// 32-bit systems in FindSizeClass to keep the table small.)
 
+	// code to generate the table:
+	//
+	//		const int kMaxSizeClassIndex = (kLargestAlloc>>3)+1;
+	//		uint8_t kSizeClassIndex[kMaxSizeClassIndex];
+	//		printf("static const unsigned kMaxSizeClassIndex = %d;\n",kMaxSizeClassIndex);
+	//		printf("static const uint8_t kSizeClassIndex[kMaxSizeClassIndex] = {\n");
+	//		for (int size = 0; size <= kLargestAlloc; size += 8)
+	//		{
+	//			int i = 0;
+	//			while (kSizeClasses[i] < size)
+	//			{
+	//				++i;
+	//				AvmAssert(i < kNumSizeClasses);
+	//			}
+	//			AvmAssert((size>>3) < kMaxSizeClassIndex);
+	//			kSizeClassIndex[(size>>3)] = i;
+	//			if (size > 0) printf(",");
+	//			if (size % (16*8) == 0) printf("\n");
+	//			printf(" %d",i);
+	//		}
+	//		printf("};\n");
+
+#ifdef MMGC_64BIT
 	const int16_t FixedMalloc::kSizeClasses[kNumSizeClasses] = {
 		8, 16, 24, 32, 40, 48, 56, 64, 72, 80, //0-9
 		88, 96, 104, 112, 120, 128,	136, 144, 152, 160, //10-19
@@ -63,30 +78,24 @@ namespace MMgc
 		2016, //40
 	};
 
-	// This is an index which indicates that allocator i should be used
-	// if kSizeClassIndex[i] items fit into a 4096 byte page.
-	const uint8_t FixedMalloc::kSizeClassIndex[32] = {
-		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-9
-		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
-		23, 22, 21, 20, 20, 19, 18, 17, 17, 16, //20-29
-		15, 15  //30-31
+	/*static*/ const uint8_t FixedMalloc::kSizeClassIndex[kMaxSizeClassIndex] = {
+		 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+		 15, 16, 17, 18, 19, 20, 21, 22, 22, 23, 23, 24, 24, 25, 26, 26,
+		 27, 27, 28, 28, 28, 29, 29, 30, 30, 30, 30, 31, 31, 31, 32, 32,
+		 32, 32, 32, 33, 33, 33, 33, 33, 33, 34, 34, 34, 34, 34, 34, 34,
+		 35, 35, 35, 35, 35, 35, 35, 35, 35, 36, 36, 36, 36, 36, 36, 36,
+		 36, 36, 36, 36, 36, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37,
+		 37, 37, 37, 37, 37, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38,
+		 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 39,
+		 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+		 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+		 39, 39, 39, 39, 39, 39, 39, 39, 39, 40, 40, 40, 40, 40, 40, 40,
+		 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+		 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+		 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+		 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+		 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
 	};
-	/*
-	const int16_t FixedMalloc::kSizeClasses[kNumSizeClasses] = {
-		4, 8, 16, 24, 32, 40, 48, 56, 64, 72, //0-9
-		80, 88, 96, 104, 112, 120, 128,	144, 160, 168, //10-19
-        183, 192, 201, 211, 224, 235, 251, 267, 288, 310, //20-29
-		336, 366, 403, 448, 504, 576, 672, 806, 1008, 1344, //30-39
-		2032, //40
-	};
-
-	const uint8_t FixedMalloc::kSizeClassIndex[32] = {
-		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-10
-		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
-		22, 21, 20, 19, 19, 18, 18, 18, 17, 17, //20-29
-		17, 16  //30-31
-	};
-	*/
 
 #else
 	const int16_t FixedMalloc::kSizeClasses[kNumSizeClasses] = {
@@ -97,13 +106,23 @@ namespace MMgc
 		2032, //40
 	};
 
-	// This is an index which indicates that allocator i should be used
-	// if kSizeClassIndex[i] items fit into a 4096 byte page.
-	const uint8_t FixedMalloc::kSizeClassIndex[32] = {
-		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-10
-		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
-		22, 21, 20, 19, 19, 18, 18, 18, 17, 17, //20-29
-		17, 16  //30-31
+	/*static*/ const uint8_t FixedMalloc::kSizeClassIndex[kMaxSizeClassIndex] = {
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
+		16, 17, 17, 18, 18, 19, 19, 20, 21, 22, 23, 24, 24, 25, 26, 26, 
+		27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 31, 32, 
+		32, 32, 32, 33, 33, 33, 33, 33, 33, 34, 34, 34, 34, 34, 34, 34, 
+		35, 35, 35, 35, 35, 35, 35, 35, 35, 36, 36, 36, 36, 36, 36, 36, 
+		36, 36, 36, 36, 36, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 
+		37, 37, 37, 37, 37, 37, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 
+		38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 
+		39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 
+		39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 
+		39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 40, 40, 40, 40, 40, 40, 
+		40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 
+		40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 
+		40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 
+		40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 
+		40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
 	};
 
 #endif
@@ -130,25 +149,6 @@ namespace MMgc
 			m_allocs[i].Init((uint32_t)kSizeClasses[i], heap);
 		}
 
-#ifdef _DEBUG 
-		const int kPageUsableSpace = GCHeap::kBlockSize - offsetof(MMgc::FixedAlloc::FixedBlock, items);
-		// sanity check our tables
-		for (int size8 = 136; size8 < 2016; size8 += 8)
-		{
-			int foo = kPageUsableSpace/(size8);
-			unsigned index = kSizeClassIndex[foo];
-
-			// Given our foo index, this is the maximum sized alloc that may occur
-			// and need to fit into the m_alloc[index] value.
-			uint32_t maxsize = (kPageUsableSpace / foo) & ~0x7;
-
-			// assert that I fit
-			GCAssert(maxsize <= (m_allocs[index].GetItemSize()));
-
-			// assert that I don't fit (makes sure we don't waste space)
-			GCAssert(maxsize > (m_allocs[index-1].GetItemSize()));
-		}
-#endif
 		FixedMalloc::instance = this;
 	}
 
@@ -198,44 +198,6 @@ namespace MMgc
 
 		// not entirely accurate
 		totalAllocated += numLargeChunks * GCHeap::kBlockSize;
-	}
-
-	FixedAllocSafe *FixedMalloc::FindSizeClass(size_t size)
-	{
-		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
-
-		uint32_t size8 = (uint32_t)((size+7)&~7); // round up to multiple of 8
-
-		// Buckets up to 128 are spaced evenly at 8 bytes.
-		if (size <= 128) {
-#ifdef MMGC_64BIT
-			unsigned index = size8 ? ((size8 >> 3) - 1) : 0;
-#else
-			unsigned index = size > 4 ? size8 >> 3 : 0;
-#endif
-			FixedAllocSafe *a = &m_allocs[index];
-			// make sure I fit
-			GCAssert(size <= a->GetItemSize());
-
-			// make sure I don't fit
-			GCAssert(index == 0 || size > m_allocs[index-1].GetItemSize());
-				
-			return a;
-		}
-
-		// This is the fast lookup table implementation to
-		// find the right allocator.
-		// FIXME: do this w/o division!
-		const int kPageUsableSpace = GCHeap::kBlockSize - offsetof(MMgc::FixedAlloc::FixedBlock, items);
-		unsigned index = kSizeClassIndex[kPageUsableSpace/size8];
-
-		// assert that I fit
-		GCAssert(size <= m_allocs[index].GetItemSize());
-
-		// assert that I don't fit (makes sure we don't waste space
-		GCAssert(size > m_allocs[index-1].GetItemSize());
-
-		return &m_allocs[index];
 	}
 
 	void *FixedMalloc::LargeAlloc(size_t size, FixedMallocOpts flags)
