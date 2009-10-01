@@ -60,7 +60,6 @@ mmgc MMgcPortWin.obj
 mmgc SpyUtilsWin.obj
 mmgc AdvAPI32:ADVAPI32.dll
 mmgc ThreadsWin.obj
-mmgc SpinLockWin.obj
 
 nanojit avmplus:CodegenMIR.obj
 nanojit avmplus:Ia32Assembler.obj

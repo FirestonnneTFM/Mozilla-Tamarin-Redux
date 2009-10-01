@@ -1673,10 +1673,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\VMPI\SpinLockWin.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\VMPI\SpyUtilsWin.cpp"
 				>
 				<FileConfiguration

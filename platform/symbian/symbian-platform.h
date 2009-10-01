@@ -108,13 +108,40 @@
 #undef __MWERKS__
 #endif
 
-#ifdef _DEBUG
-typedef struct {
-	pthread_mutex_t lock;
-	vmpi_thread_t owner;	
-} vmpi_spin_lock_t;
-#else
-typedef pthread_mutex_t vmpi_spin_lock_t;
-#endif
+/**
+* Type defintion for an opaque data type representing platform-defined spin lock 
+* @see VMPI_lockInit(), VMPI_lockAcquire()
+*/
+struct vmpi_spin_lock_t
+{
+	// Looks like Symbian SDK does not support pthread spinlock.
+	// using pthread_mutex for now (unfortunate since it's usually more expensive)
+	volatile pthread_mutex_t lock;
+};
+
+REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
+{
+	pthread_mutex_init((pthread_mutex_t*)&lock->lock, 0);
+}
+
+REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
+{
+	pthread_mutex_destroy((pthread_mutex_t*)&lock->lock);
+}
+
+REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_lock((pthread_mutex_t*)&lock->lock) == 0;
+}
+
+REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_unlock((pthread_mutex_t*)&lock->lock) == 0;
+}
+
+REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	return pthread_mutex_trylock((pthread_mutex_t*)&lock->lock) == 0;
+}
 
 #endif // __avmplus_symbian_platform__
