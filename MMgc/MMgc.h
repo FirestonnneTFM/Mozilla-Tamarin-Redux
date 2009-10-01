@@ -162,7 +162,10 @@ namespace MMgc
 
 #include "FixedAlloc-inlines.h"
 #include "FixedMalloc-inlines.h"
+#include "GCAlloc-inlines.h"
+#include "GCLargeAlloc-inlines.h"
 #include "ZCT-inlines.h"
+#include "GC-inlines.h"
 
 // remove these when the player stops using it
 #define MMGC_DRC
