@@ -366,8 +366,6 @@
 		D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */; };
 		D942369A0F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */; };
 		D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */; };
-		D94236BC0F8ACBD300F97706 /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */; };
-		D94236BD0F8ACBD400F97706 /* SpinLockMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */; };
 		D9AA8809103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */; };
 		D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */; };
@@ -834,9 +832,6 @@
 		D942369C0F8ACB0600F97706 /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../VMPI/manifest.mk; sourceTree = SOURCE_ROOT; };
 		D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortUnix.cpp; path = ../../../VMPI/MMgcPortUnix.cpp; sourceTree = SOURCE_ROOT; };
 		D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortWin.cpp; path = ../../../VMPI/MMgcPortWin.cpp; sourceTree = SOURCE_ROOT; };
-		D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockMac.cpp; path = ../../../VMPI/SpinLockMac.cpp; sourceTree = SOURCE_ROOT; };
-		D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockUnix.cpp; path = ../../../VMPI/SpinLockUnix.cpp; sourceTree = SOURCE_ROOT; };
-		D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpinLockWin.cpp; path = ../../../VMPI/SpinLockWin.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UnixDebugUtils.cpp; path = ../../../VMPI/UnixDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinDebugUtils.cpp; path = ../../../VMPI/WinDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinPortUtils.cpp; path = ../../../VMPI/WinPortUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -891,8 +886,6 @@
 				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
 				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
 				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
-				D94236A00F8ACB0600F97706 /* SpinLockUnix.cpp */,
-				D94236A10F8ACB0600F97706 /* SpinLockWin.cpp */,
 				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
 				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
 				D942369C0F8ACB0600F97706 /* manifest.mk */,
@@ -1499,7 +1492,6 @@
 				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
 				D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */,
 				D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */,
-				D942369F0F8ACB0600F97706 /* SpinLockMac.cpp */,
 				D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */,
 				D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */,
 				D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */,
@@ -1728,7 +1720,6 @@
 				D94236960F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */,
 				D94236970F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */,
 				D94236980F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */,
-				D94236BD0F8ACBD400F97706 /* SpinLockMac.cpp in Sources */,
 				D5AD1DAE0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */,
 				D5AD1E2C0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */,
 				079C96F10F9EF0E900B2E653 /* avmfeatures.cpp in Sources */,
@@ -1909,7 +1900,6 @@
 				D94236990F8ACAE400F97706 /* MacDebugUtils.cpp in Sources */,
 				D942369A0F8ACAE400F97706 /* MMgcPortMac.cpp in Sources */,
 				D942369B0F8ACAE400F97706 /* PosixPortUtils.cpp in Sources */,
-				D94236BC0F8ACBD300F97706 /* SpinLockMac.cpp in Sources */,
 				D5AD1DAD0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */,
 				D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */,
 				079C96F00F9EF0E900B2E653 /* avmfeatures.cpp in Sources */,

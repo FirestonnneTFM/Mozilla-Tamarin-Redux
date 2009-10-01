@@ -103,6 +103,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <new>
+#include <libkern/OSAtomic.h>
 
 typedef void *maddr_ptr;
 
@@ -144,15 +145,38 @@ typedef void *maddr_ptr;
 
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock 
-* @see VMPI_lockCreate(), VMPI_lockAcquire()
+* @see VMPI_lockInit(), VMPI_lockAcquire()
 */
-#ifdef _DEBUG
-typedef struct {
-	uint32_t lock;
-	vmpi_thread_t owner;	
-} vmpi_spin_lock_t;
-#else
-typedef uint32_t vmpi_spin_lock_t;
-#endif
+struct vmpi_spin_lock_t
+{
+	volatile OSSpinLock lock;
+};
+
+REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
+{
+	lock->lock = OS_SPINLOCK_INIT;
+}
+
+REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
+{
+	lock->lock = OS_SPINLOCK_INIT;
+}
+
+REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t* lock)
+{
+	::OSSpinLockLock((OSSpinLock*)&lock->lock);
+	return true;
+}
+
+REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t* lock)
+{
+	::OSSpinLockUnlock((OSSpinLock*)&lock->lock);
+	return true;
+}
+
+REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock)
+{
+	return ::OSSpinLockTry((OSSpinLock*)&lock->lock);
+}
 
 #endif // __avmplus_mac_platform__

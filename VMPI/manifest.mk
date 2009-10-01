@@ -40,7 +40,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/WinDebugUtils.cpp \
   $(curdir)/WinPortUtils.cpp \
   $(curdir)/MMgcPortWin.cpp \
-  $(curdir)/SpinLockWin.cpp \
   $(curdir)/SpyUtilsWin.cpp \
   $(curdir)/ThreadsWin.cpp \
   $(NULL)
@@ -51,7 +50,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/MacDebugUtils.cpp \
   $(curdir)/PosixPortUtils.cpp \
   $(curdir)/MMgcPortMac.cpp \
-  $(curdir)/SpinLockMac.cpp \
   $(curdir)/SpyUtilsPosix.cpp \
   $(curdir)/ThreadsPosix.cpp \
   $(NULL)
@@ -62,7 +60,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/PosixPortUtils.cpp \
   $(curdir)/UnixDebugUtils.cpp \
   $(curdir)/MMgcPortUnix.cpp \
-  $(curdir)/SpinLockUnix.cpp \
   $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
@@ -72,7 +69,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/PosixPortUtils.cpp \
   $(curdir)/UnixDebugUtils.cpp \
   $(curdir)/MMgcPortUnix.cpp \
-  $(curdir)/SpinLockUnix.cpp \
   $(curdir)/ThreadsPosix.cpp \
   $(NULL)
 endif
