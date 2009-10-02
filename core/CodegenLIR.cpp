@@ -555,7 +555,7 @@ namespace avmplus
     }
 
     // initialize the code manager the first time we jit any method for this PoolObject.
-    void initCodeMgr(PoolObject *pool) {
+    CodeMgr* initCodeMgr(PoolObject *pool) {
         if (!pool->codeMgr) {
             CodeMgr *mgr = mmfx_new( CodeMgr() );
             pool->codeMgr = mgr;
@@ -566,6 +566,7 @@ namespace avmplus
             }
 #endif
         }
+        return pool->codeMgr;
     }
 
     CodegenLIR::CodegenLIR(MethodInfo* i) :
@@ -580,7 +581,9 @@ namespace avmplus
         ms(i->getMethodSignature()),
         pool(i->pool()),
         interruptable(true),
-        patches(*alloc1)
+        patches(*alloc1),
+        call_cache_builder(*alloc1, initCodeMgr(pool)->allocator, callprop_miss),
+        get_cache_builder(*alloc1, pool->codeMgr->allocator, getprop_miss)
     {
         state = NULL;
 
@@ -596,8 +599,6 @@ namespace avmplus
         #ifdef VTUNE
         hasDebugInfo = false;
        #endif /* VTUNE */
-
-        initCodeMgr(pool);
     }
 
     CodegenLIR::~CodegenLIR() {
@@ -607,8 +608,6 @@ namespace avmplus
     void CodegenLIR::cleanup()
     {
         finddef_cache_builder.cleanup();
-        call_cache_builder.cleanup();
-        get_cache_builder.cleanup();
         mmfx_delete( alloc1 );
         alloc1 = NULL;
         mmfx_delete( lir_alloc );
@@ -898,7 +897,7 @@ namespace avmplus
             : LirWriter(out), core(core), vars(NULL), nvar(nvar), dirty(alloc, nvar), hasExceptions(ex)
         {
             tracker = new (alloc) LInsp[nvar];
-            clearState(); 
+            clearState();
         }
 
         void init(LIns *vars) {
@@ -1263,7 +1262,7 @@ namespace avmplus
     // Inbetween those points, the contents are stale; the JIT optimizes away
     // stores and loads in straightline code.  Additional dead stores at ends-of-blocks
     // are elided by deadvars_analyze() and deadvars_kill().
-    // 
+    //
     // Locals for Debugger use, only present when Debugger is in use:
     //
     // varTraits (LIR_alloc, Traits**).  Array of Traits*, with the same ordering as
@@ -1280,13 +1279,13 @@ namespace avmplus
     //
     // _ef (LIR_alloc, ExceptionFrame) an instance of struct ExceptionFrame, including
     // a jmp_buf holding our setjmp() state, a pointer to the next outer ExceptionFrame,
-    // and other junk.  
+    // and other junk.
     //
     // setjmpResult (LIR_call, int) result from calling setjmp; feeds a conditional branch
     // that surrounds the whole function body; logic to pick a catch handler and jump to it
     // is compiled after the function body.  if setjmp returns a nonzero result then we
     // jump forward, pick a catch block, then jump backwards to the catch block.
-    // 
+    //
 
     bool CodegenLIR::prologue(FrameState* state)
     {
@@ -2366,7 +2365,7 @@ namespace avmplus
         Value& value = state->value(index);
         Traits* in = value.traits;
         Traits* stringType = STRING_TYPE;
-    
+
         if (in != stringType || !value.notNull) {
             if (in && (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE)) {
                 // convert is the same as coerce
@@ -3180,7 +3179,7 @@ namespace avmplus
             if (itraits && !itraits->hasCustomConstruct) {
                 Toplevel* toplevel = state->verifier->getToplevel(this);
                 itraits->resolveSignatures(toplevel);
-				AvmAssert(itraits->init->isResolved());
+                AvmAssert(itraits->init->isResolved());
                 if (itraits->init->getMethodSignature()->argcOk(argc)) {
                     state->verifier->emitCheckNull(ctor_index);
                     state->verifier->emitCoerceArgs(itraits->init, argc, true);
@@ -3660,13 +3659,13 @@ namespace avmplus
                 }
                 else if (!name->isRuntime()) {
                     // use inline cache for late bound call
-                    // cache (type, ptr), call ptr with (slot, multiname, argc, args)
-                    int cache_slot = call_cache_builder.allocateCacheSlot((uint32_t)op1);
-                    LIns* cacheTable = loadIns(LIR_ldcp, offsetof(MethodInfo, _abc.call_cache), InsConstPtr(info));
-                    LIns* cacheEntry = binaryIns(LIR_piadd, cacheTable, InsConstAtom(cache_slot * sizeof(BindingCache)));
-                    LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, call_handler), cacheEntry);
+                    // cache contains: [handler, vtable, [data], Multiname*]
+                    // and we call (*cache->handler)(cache, obj, argc, args*, MethodEnv*)
+                    BindingCache* cache = call_cache_builder.allocateCacheSlot(name);
+                    LIns* cacheAddr = InsConstPtr(cache);
+                    LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, call_handler), cacheAddr);
                     out = callIns(FUNCTIONID(call_cache_handler), 6,
-                        handler, cacheEntry, base, InsConst(argc), ap, env_param);
+                        handler, cacheAddr, base, InsConst(argc), ap, env_param);
                 }
                 else {
                     // generic late bound call to anything
@@ -4058,11 +4057,10 @@ namespace avmplus
                                             toplevel, obj, multi, vtable);
                     } else {
                         // static name, use property cache
-                        int cache_slot = get_cache_builder.allocateCacheSlot((uint32_t)op1);
-                        LIns* cacheTable = loadIns(LIR_ldcp, offsetof(MethodInfo, _abc.get_cache), InsConstPtr(info));
-                        LIns* cacheEntry = binaryIns(LIR_piadd, cacheTable, InsConstAtom(cache_slot * sizeof(BindingCache)));
-                        LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, get_handler), cacheEntry);
-                        value = callIns(FUNCTIONID(get_cache_handler), 4, handler, cacheEntry, env_param, obj);
+                        BindingCache* cache = get_cache_builder.allocateCacheSlot(multiname);
+                        LIns* cacheAddr = InsConstPtr(cache);
+                        LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, get_handler), cacheAddr);
+                        value = callIns(FUNCTIONID(get_cache_handler), 4, handler, cacheAddr, env_param, obj);
                     }
 
                     localSet(objDisp, atomToNativeRep(result, value), result);
@@ -5447,7 +5445,6 @@ namespace avmplus
             info->_implGPR = u.fp;
             // mark method as been JIT'd
             info->_flags |= MethodInfo::JIT_IMPL;
-            initBindingCache();
             #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())
                 AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
@@ -5478,32 +5475,6 @@ namespace avmplus
             jitInfoList.clear();
         }
         #endif /* VTUNE */
-    }
-
-    // on successful jit, allocate memory for BindingCache instances, if necessary
-    void CodegenLIR::initBindingCache()
-    {
-        CodeMgr *mgr = pool->codeMgr;
-        int nslots = call_cache_builder.next_cache;
-        if (nslots > 0) {
-            _nvprof("call_cache bytes", nslots * sizeof(BindingCache));
-            BindingCache* cache = new (mgr->allocator) BindingCache[nslots];
-            for (int i=0; i < nslots; i++) {
-                cache[i].call_handler = callprop_miss;
-                cache[i].name = pool->precomputedMultiname(call_cache_builder.get_entry(i));
-            }
-            info->_abc.call_cache = cache;
-        }
-        nslots = get_cache_builder.next_cache;
-        if (nslots > 0) {
-            _nvprof("get_cache bytes", nslots * sizeof(BindingCache));
-            BindingCache* cache = new (mgr->allocator) BindingCache[nslots];
-            for (int i=0; i < nslots; i++) {
-                cache[i].get_handler = getprop_miss;
-                cache[i].name = pool->precomputedMultiname(get_cache_builder.get_entry(i));
-            }
-            info->_abc.get_cache = cache;
-        }
     }
 
 #ifdef VTUNE
@@ -5567,6 +5538,32 @@ namespace avmplus
        inf->startAddr = pos;
    }
 #endif
+
+    BindingCache::BindingCache(CallCacheHandler h, const Multiname* name)
+        : call_handler(h), name(name)
+    {}
+
+    BindingCacheBuilder::BindingCacheBuilder(Allocator& temp_alloc, Allocator& alloc, CallCacheHandler handler)
+        : caches(temp_alloc), call_handler(handler), alloc(alloc)
+    {}
+
+    BindingCacheBuilder::BindingCacheBuilder(Allocator& temp_alloc, Allocator& alloc, GetCacheHandler handler)
+        : caches(temp_alloc), get_handler(handler), alloc(alloc)
+    {}
+
+    // The cache structure is expected to be small in the normal case, so use a
+    // linear list.  For some programs, notably classical JS programs, it may however
+    // be larger, and we may need a more sophisticated structure.
+    BindingCache* BindingCacheBuilder::allocateCacheSlot(const Multiname* name)
+    {
+        for (Seq<BindingCache*> *p = caches.get(); p != NULL; p = p->tail)
+            if (p->head->name == name)
+                return p->head;
+        _nvprof("binding cache bytes", sizeof(BindingCache));
+        BindingCache* c = new (alloc) BindingCache(call_handler, name);
+        caches.add(c);
+        return c;
+    }
 
 }
 

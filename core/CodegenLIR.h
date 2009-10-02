@@ -129,7 +129,7 @@ namespace avmplus
     };
 
     // Binding Cache Design
-    // 
+    //
     // When we don't know the type of the base object at a point we access a property,
     // we must look up the property at runtime./ We cache the results of this lookup
     // in a BindingCache instance, and install a handler specialized for the object
@@ -141,7 +141,7 @@ namespace avmplus
     //    vtable or tag     VTable* or Atom tag for the base object.  specialized
     //                      handlers quickly check this and "miss" when they dont match
     //                      the object seen at runtime.
-    // 
+    //
     //    slot_offset or    precomputed offset for a slot, for fast loads, or a preloaded
     //    method            MethodEnv* for a method, for fast calls
     //
@@ -158,7 +158,7 @@ namespace avmplus
     // and the cache doesn't cause them to be pinned.
     //
     // we allocate one entry for each unique Multiname in each method (only at
-    // late-bound reference sites, of course).  
+    // late-bound reference sites, of course).
     //
     // Limitations:
     //
@@ -168,7 +168,7 @@ namespace avmplus
     //     handler that's slightly slower than not using a cache at all.
     //     see callprop_miss() in jit-calls.h for detail on handled cases.
     //
-    // Alternatives that led to current design: 
+    // Alternatives that led to current design:
     //
     //   * specializing slot accessors on slot type, and storing slot_offset,
     //     avoids calling ScriptObject::getSlotAtom()  (15% faster for gets & calls)
@@ -190,7 +190,14 @@ namespace avmplus
     //   * we put Multiname* in the cache instead of passing it as a constant parameter,
     //     because the increase in cache size is smaller than the savings in code size,
     //     less parameters is faster, and the multiname is only used on relatively slow paths.
-    //   
+    //   * we allocate cache instances while generating code, which lets us embed
+    //     the cache address in code instead of loading from methodinfo.  some stats on ESC:
+    //        cache entries: 489
+    //        bytes of cache entries: 7,824
+    //        instructions saved by early allocation (static): 1,445 (loads, movs, adds)
+    //        MethodInfo instances: 2436
+    //        bytes saved by eliminating 2 cache pointers on MethodInfo: 19,448
+    //
     //   (footnote: Times are from the tests in tamarin/test/performance as well as a
     //   selection of Flash/Flex benchmark apps)
     //
@@ -203,12 +210,11 @@ namespace avmplus
     //     memory decrease.  Later when we have a code cache, this could be more compelling.
     //   * we could specialize BKIND_METHOD handlers on method return type, enabling us
     //     to inline the native-value boxing logic from MethodEnv::endCoerce()
-    //   * we could specialize getter & setter handlers on return/parameter type, 
+    //   * we could specialize getter & setter handlers on return/parameter type,
     //     allowing us to inline boxing & unboxing code from coerceEnter AND endCoerce
     //   * the MethodEnv* passed to each handler is only used on slow paths.  Could we
     //     put it somewhere else?  maybe core->currentMethodFrame->env?
     //   * on x86, FASTCALL might be faster, if it doesn't inhibit tail calls in handlers
-    //   * we could allocate cache instances while generating code, saving a load @ runtime
     //   * other cache instance groupings:
     //       * one per call site instead of per-unique-multiname?
     //       * share them between methods?
@@ -217,9 +223,13 @@ namespace avmplus
     //   * we could specialize on primitive type too, inlining just the toPrototype() path we need,
     //     instead of using a single set of handlers for all primitives types
 
+    class BindingCache;
     typedef Atom (*CallCacheHandler)(BindingCache&, Atom base, int argc, Atom* args, MethodEnv*);
     typedef Atom (*GetCacheHandler)(BindingCache&, MethodEnv*, Atom);
-    struct BindingCache {
+    class BindingCache {
+        friend class BindingCacheBuilder;
+        BindingCache(CallCacheHandler, const Multiname*);
+    public:
         union {
             CallCacheHandler call_handler;  // for late bound calls
             GetCacheHandler get_handler;    // for late bound gets
@@ -233,6 +243,26 @@ namespace avmplus
             MethodEnv* method;      // calls to a method
         };
         const Multiname* name;      // multiname for this entry, saved when cache created.
+    };
+
+    /** helper class for allocating binding caches during jit compilation */
+    class BindingCacheBuilder
+    {
+        SeqBuilder<BindingCache*> caches;   // each entry points to an initialized cache
+        union {
+            CallCacheHandler call_handler;   // for initializing new call caches
+            GetCacheHandler get_handler;     // for initializing new get caches
+        };
+        Allocator& alloc;                   // this allocator is used for new caches
+    public:
+        /** each new entry will be initialized with the given handler.
+         *  temp_alloc is the allocator for this cache builder, with short lifetime.
+         *  cache_alloc is used to allocate memory for the method's caches, with method lifetime */
+        BindingCacheBuilder(Allocator& temp_alloc, Allocator& cache_alloc, CallCacheHandler);
+        BindingCacheBuilder(Allocator& temp_alloc, Allocator& cache_alloc, GetCacheHandler);
+
+        /** allocate a new cache slot or reuse an existing one with the same imm30 */
+        BindingCache* allocateCacheSlot(const Multiname* name);
     };
 
     class CopyPropagation;
@@ -289,8 +319,8 @@ namespace avmplus
         int framesize;
         int labelCount;
         LookupCacheBuilder finddef_cache_builder;
-        LookupCacheBuilder call_cache_builder;
-        LookupCacheBuilder get_cache_builder;
+        BindingCacheBuilder call_cache_builder;
+        BindingCacheBuilder get_cache_builder;
         verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);
