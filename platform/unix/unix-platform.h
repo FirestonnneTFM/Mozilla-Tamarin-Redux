@@ -142,6 +142,16 @@ typedef void *maddr_ptr;
 #define FASTCALL 
 #endif
 
+#if defined(__GNUC__)
+	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+#else
+	#error "Unrecognized compiler"
+#endif
+
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock 
 * @see VMPI_lockInit(), VMPI_lockAcquire()

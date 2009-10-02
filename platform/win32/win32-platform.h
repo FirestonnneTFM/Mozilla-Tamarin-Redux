@@ -197,6 +197,17 @@ typedef unsigned __int64	uint64_t;
     #define FASTCALL 
 #endif 
 
+#if defined(_MSC_VER)
+	#define AVMPLUS_ALIGN8(type) __declspec(align(8)) type
+	#define AVMPLUS_ALIGN16(type) __declspec(align(16)) type
+#elif defined(__GNUC__)
+	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+#else
+	#error "Unrecognized compiler"
+#endif
+
+
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock 
 * @see VMPI_lockInit(), VMPI_lockAcquire()
