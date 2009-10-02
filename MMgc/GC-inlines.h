@@ -143,6 +143,11 @@ namespace MMgc
 		return Alloc(size, flags | kCanFail);			
 	}
 
+	REALLY_INLINE void *GC::AllocExtra(size_t size, size_t extra, int flags)
+	{
+		return Alloc(GCHeap::CheckForAllocSizeOverflow(size, extra), flags);
+	}
+	
 #if !defined _DEBUG && !defined MMGC_MEMORY_INFO && !defined AVMPLUS_SAMPLER && !defined MMGC_HOOKS
 	REALLY_INLINE void* GC::AllocDouble()
 	{
@@ -493,19 +498,6 @@ namespace MMgc
 			stacktop = top;
 		else
 			allocaPopToSlow(top);
-	}
-
-	REALLY_INLINE void* GC::allocaPush(size_t nbytes, AllocaAutoPtr& x) 
-	{
-		GCAssert(x.unwindPtr == NULL);
-		x.gc = this;
-		x.unwindPtr = stacktop;
-		nbytes = (nbytes + 7) & ~7;
-		if ((char*)stacktop + nbytes <= top_segment->limit) {
-			stacktop = (char*)stacktop + nbytes;
-			return x.unwindPtr;
-		}
-		return allocaPushSlow(nbytes);
 	}
 
 	REALLY_INLINE GC::AllocaAutoPtr::AllocaAutoPtr()

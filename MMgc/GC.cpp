@@ -1131,6 +1131,9 @@ namespace MMgc
 	void* GC::AllocRCRoot(size_t size)
 	{
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
+
+		GCHeap::CheckForAllocSizeOverflow(size, hdr_size);
+		
 		union {
 			char* block;
 			uintptr_t* block_u;
@@ -1195,12 +1198,14 @@ namespace MMgc
 #endif
 		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
 
+		GCHeap::CheckForAllocSizeOverflow(size, 7+DebugSize());
+
 #ifdef _DEBUG
 		if(!nogc && stackEnter == NULL) {
 			GCAssertMsg(false, "A MMGC_GC_ENTER macro must exist on the stack");
 			return NULL;
 		}
-		GCAssert(size + 7 > size);
+
 		// always be marking in pedantic mode
 		if(incrementalValidationPedantic) {
 			if(!marking)
@@ -1208,18 +1213,12 @@ namespace MMgc
 		}
 #endif
 
-		// overflow detection
-		if(size+7 < size)
-			return NULL;
-
 		size_t askSize = size;
 
 		size = (size+7)&~7; // round up to multiple of 8
 
 		size += DebugSize();
 
-		GCAssertMsg(size > 0, "debug overflow, adding space for Debug stuff overflowed size_t\n");
-	
 		GCAlloc **allocs = noPointersAllocs;
 
 		if(flags & kRCObject) {
@@ -1275,15 +1274,9 @@ namespace MMgc
 		return item;
 	}
 
-	void *GC::Calloc(size_t num, size_t elsize, int flags)
+	void *GC::Calloc(size_t count, size_t elsize, int flags)
 	{
-		uint64_t size = (uint64_t)num * (uint64_t)elsize;
-		if(size > 0xfffffff0) 
-		{
-			GCAssertMsg(false, "Attempted allocation overflows size_t\n");
-			return NULL;
-		}
-		return Alloc(num * elsize, flags);
+		return Alloc(GCHeap::CheckForCallocSizeOverflow(count, elsize), flags);
 	}
 
 	void GC::Free(const void *item)
@@ -3558,7 +3551,20 @@ bail:
  		top_segment = NULL;
  		stacktop = NULL;
  	}
- 	
+
+	void* GC::allocaPush(size_t nbytes, AllocaAutoPtr& x) 
+	{
+		GCAssert(x.unwindPtr == NULL);
+		x.gc = this;
+		x.unwindPtr = stacktop;
+		nbytes = GCHeap::CheckForAllocSizeOverflow(nbytes, 7) & ~7;
+		if ((char*)stacktop + nbytes <= top_segment->limit) {
+			stacktop = (char*)stacktop + nbytes;
+			return x.unwindPtr;
+		}
+		return allocaPushSlow(nbytes);
+	}
+	
  	void GC::allocaPopToSlow(void* top)
  	{
  		GCAssert(top_segment != NULL);

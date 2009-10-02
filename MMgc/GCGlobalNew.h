@@ -223,8 +223,8 @@ namespace MMgc
 	/**
 	 * Allocate space for an array, with error checking (in debug builds).
 	 *
-	 * @param size         The size in bytes of each array element
 	 * @param count        The number of array elements
+	 * @param elsize       The size in bytes of each array element
 	 * @param opts         A bit vector of the usual MMgc options (kCanFail, kZero).
 	 * @param isPrimitive  A flag indicating whether the array needs a header storing
 	 *                     the value of count: if false, the header is created and
@@ -234,7 +234,7 @@ namespace MMgc
 	 *          and the object can't be allocated due to an out-of-memory condition or
 	 *          if the object would exceed the maximum object size.
 	 */
-	void* NewTaggedArray(size_t size, size_t count, FixedMallocOpts opts, bool isPrimitive);
+	void* NewTaggedArray(size_t count, size_t elsize, FixedMallocOpts opts, bool isPrimitive);
 
 	/* Deallocate an object allocated by NewTaggedScalar.  Does /not/ check the tag.
 	 *
@@ -267,7 +267,7 @@ namespace MMgc
 	template <class T>
 	T *MMgcConstructTaggedArray(T* /*dummy template arg*/, size_t count, MMgc::FixedMallocOpts opts)
 	{
-		T *mem = (T*) MMgc::NewTaggedArray(sizeof(T), count, opts, false /* !isPrimitive */);
+		T *mem = (T*) MMgc::NewTaggedArray(count, sizeof(T), opts, false /* !isPrimitive */);
 		T *tp = mem;
 		for(size_t i=count; i>0; i--, tp++)
 			new ((void*)tp) T;
@@ -277,7 +277,7 @@ namespace MMgc
 #define DECLARE_PRIM_ARRAY_NEW(_x)	\
 	template <> REALLY_INLINE _x *MMgcConstructTaggedArray(_x*, size_t count, MMgc::FixedMallocOpts opts)	\
 	{																								\
-		return (_x*)MMgc::NewTaggedArray(sizeof(_x), count, opts, true /* isPrimitive */);			\
+		return (_x*)MMgc::NewTaggedArray(count, sizeof(_x), opts, true /* isPrimitive */);			\
 	}
 
 	// Scalar delete mechanism. First calls the destructor and then deletefunc to release the memory.
@@ -350,7 +350,7 @@ namespace MMgc
 
 	template <> REALLY_INLINE void *MMgcConstructTaggedArray(void*, size_t count, MMgc::FixedMallocOpts opts)
 	{
-		return (void*)MMgc::NewTaggedArray(sizeof(void*), count, opts, true /* isPrimitive */);
+		return (void*)MMgc::NewTaggedArray(count, sizeof(void*), opts, true /* isPrimitive */);
 	}
 
 	DECLARE_PRIM_ARRAY_DELETE(void)

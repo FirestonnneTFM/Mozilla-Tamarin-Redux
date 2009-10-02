@@ -98,17 +98,6 @@ namespace MMgc
 		return size;
 	}
 
-	REALLY_INLINE void *FixedMalloc::Calloc(size_t num, size_t elsize, FixedMallocOpts flags)
-	{
-		uint64_t size = (uint64_t)num * (uint64_t)elsize;
-		if(size > 0xfffffff0) 
-		{
-			GCAssertMsg(false, "Attempted allocation overflows size_t\n");
-			return NULL;
-		}
-		return Alloc(num * elsize, flags);
-	}
-
 	REALLY_INLINE size_t FixedMalloc::GetBytesInUse()
 	{
 		size_t totalAskSize, totalAllocated;  

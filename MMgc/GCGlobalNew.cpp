@@ -122,7 +122,7 @@ namespace MMgc
 #ifdef MMGC_DELETE_DEBUGGING
 		// Store a guard cookie preceding the object so that we can see if it is
 		// released with a proper delete (scalar/array)
-		size += MMGC_GUARDCOOKIE_SIZE;
+		size = GCHeap::CheckForAllocSizeOverflow(size, MMGC_GUARDCOOKIE_SIZE);
 #endif //MMGC_DELETE_DEBUGGING
 
 		char* mem = (char*)AllocCallInline(size, opts);
@@ -145,23 +145,15 @@ namespace MMgc
 		return TaggedAlloc(size, opts, MMGC_SCALAR_GUARD);
 	}
 
-	void* NewTaggedArray(size_t el_size, size_t count, FixedMallocOpts opts, bool isPrimitive) 
+	void* NewTaggedArray(size_t count, size_t elsize, FixedMallocOpts opts, bool isPrimitive) 
 	{
 		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
 
-		uint64_t size64 = (uint64_t)count * (uint64_t)el_size;
-		
+		size_t size = GCHeap::CheckForCallocSizeOverflow(count, elsize);
 		if(!isPrimitive)
-			size64 += MMGC_ARRAYHEADER_SIZE;
-		
-		if(size64 > 0xfffffff0)
-		{
-			if (opts & kCanFail)
-				return NULL;
-			GCHeap::SignalObjectTooLarge();
-		}
+			size = GCHeap::CheckForAllocSizeOverflow(size, MMGC_ARRAYHEADER_SIZE);
 	
-		void *p = TaggedAlloc((size_t)size64, opts, MMGC_NORM_ARRAY_GUARD + uint32_t(isPrimitive));
+		void *p = TaggedAlloc(size, opts, MMGC_NORM_ARRAY_GUARD + uint32_t(isPrimitive));
 
 		if (!isPrimitive && p != NULL)
 		{

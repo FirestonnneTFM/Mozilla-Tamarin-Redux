@@ -53,6 +53,8 @@ namespace MMgc
 	{
 		(void)originalSize;
 
+		GCHeap::CheckForAllocSizeOverflow(requestSize, sizeof(LargeBlock)+GCHeap::kBlockSize);
+
 		int blocks = (int)((requestSize+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize);
 		
 		LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, GC::kGCLargeAllocPageFirst, 
@@ -172,7 +174,7 @@ namespace MMgc
 				if(b->flags & kHasWeakRef) {
 					gc->ClearWeakRef(GetUserPointer(item));
 				}
-
+				
 #ifdef MMGC_HOOKS
 				if(m_gc->heap->HooksEnabled())
 				{
@@ -184,7 +186,7 @@ namespace MMgc
 					m_gc->heap->FinalizeHook(GetUserPointer(item), b->size - DebugSize());
 				}
 #endif
-
+				
 				// The block is not empty until now, so now add it.
 				gc->AddToLargeEmptyBlockList(b);
 				continue;
@@ -212,7 +214,7 @@ namespace MMgc
 		return bogusPointerReturnValue;
 	}
 #endif
-
+	
 	void GCLargeAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)
 	{
 		totalAskSize = 0;
