@@ -133,7 +133,11 @@ namespace MMgc
 			bool canFail = (opts & kCanFail) != 0;
 			CreateChunk(canFail);
 			if(!m_firstFree) {
-				GCAssertMsg(canFail, "Memory allocation failed to abort properly");
+				if (!canFail) {
+					GCAssertMsg(0, "Memory allocation failed to abort properly");
+					GCHeap::SignalInconsistentHeapState("Failed to abort");
+					/*NOTREACHED*/
+				}
 				return NULL;
 			}
 		}

@@ -1202,7 +1202,9 @@ namespace MMgc
 
 #ifdef _DEBUG
 		if(!nogc && stackEnter == NULL) {
-			GCAssertMsg(false, "A MMGC_GC_ENTER macro must exist on the stack");
+			GCAssertMsg(false, "A MMGC_GCENTER macro must exist on the stack");
+			GCHeap::SignalInconsistentHeapState("MMGC_GCENTER missing");
+			/*NOTREACHED*/
 			return NULL;
 		}
 
@@ -1579,6 +1581,8 @@ bail:
 				break;
 			default:
 				GCAssertMsg(false, "FindBeginningGuarded must not be called on non-managed addresses");
+				// The NULL return is a documented effect of this function, and is desired, despite 
+				// the assert above.
 				return NULL;
 		}		
 		return GetUserPointer(realItem);

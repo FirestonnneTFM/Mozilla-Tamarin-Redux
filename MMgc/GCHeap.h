@@ -250,6 +250,13 @@ namespace MMgc
 		 */
 		static void SignalObjectTooLarge();
 
+		/**
+		 * Signal an inconsistent heap state (an unrecoverable program error).  This /will/
+		 * cause an immediate shutdown of the entire system.  (The alternative is to return
+		 * a NULL pointer, which has the same effect but with considerably less grace.)
+		 */
+		static void SignalInconsistentHeapState(const char* reason);
+
 		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
 		/**
