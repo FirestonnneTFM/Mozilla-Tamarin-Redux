@@ -77,7 +77,7 @@ namespace MMgc
 {
 	GCHeap *GCHeap::instance = NULL;
 	// GCHeap instance has the C++ runtime call dtor which causes problems
-	uint8_t heapSpace[sizeof(GCHeap)];
+	AVMPLUS_ALIGN8(uint8_t) heapSpace[sizeof(GCHeap)];
 
 	size_t GCHeap::leakedBytes;
 

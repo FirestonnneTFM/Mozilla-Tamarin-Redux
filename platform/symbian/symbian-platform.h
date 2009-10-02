@@ -103,6 +103,13 @@
 #endif
 #endif
 
+#if defined(__GNUC__)
+	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+#else
+	#error "Unrecognized compiler"
+#endif
+
 #ifdef __WINSCW__
 #undef _WIN32
 #undef __MWERKS__

@@ -138,6 +138,13 @@ typedef void *maddr_ptr;
 #endif
 #endif
 
+#if defined(__GNUC__)
+	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+#else
+	#error "Unrecognized compiler"
+#endif
+
 // "verify" is a Mac thing, it gets in the way of our code
 // FIXME: should clean up our code, as this #undef will leak into the AVM embedder's code
 
