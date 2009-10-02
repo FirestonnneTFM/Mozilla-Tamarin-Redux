@@ -50,12 +50,19 @@
 #endif
 #endif
 
-size_t VMPI_getVMPageSize()
+static size_t computePagesize()
 {
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
-
+	
 	return sysinfo.dwPageSize;
+}
+
+static size_t pagesize = computePagesize();
+
+size_t VMPI_getVMPageSize()
+{
+	return pagesize;
 }
 
 bool VMPI_canMergeContiguousRegions()
@@ -183,12 +190,11 @@ size_t VMPI_getPrivateResidentPageCount()
 	void  *addr = (void*)(0x00010000);
 	void  *endAddr = (void*)(0x02000000);
 
-	size_t ret;
 	size_t bytes=0;
 	MEMORY_BASIC_INFORMATION mib;
 	while(true)
 	{
-		ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+		size_t ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
 		if(ret == 0)
 			break;
 
@@ -226,7 +232,7 @@ size_t VMPI_getPrivateResidentPageCount()
 
 		while(true)
 		{
-			ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+			size_t ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
 			if(ret == 0)
 				break;
 
@@ -253,14 +259,12 @@ size_t VMPI_getPrivateResidentPageCount()
 
 size_t VMPI_getPrivateResidentPageCount()
 {
-	size_t pageSize = VMPI_getVMPageSize();
 	void *addr = 0;
-	size_t ret;
 	size_t bytes=0;
 	MEMORY_BASIC_INFORMATION mib;
 	while(true)
 	{
-		ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+		size_t ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
 		if(ret == 0)
 			break;
 
@@ -270,7 +274,7 @@ size_t VMPI_getPrivateResidentPageCount()
 			addr = (void*) ((intptr_t)mib.BaseAddress + mib.RegionSize);
 	}
 
-	return bytes / pageSize;
+	return bytes / VMPI_getVMPageSize();
 }
 #endif //UNDER_CE
 
