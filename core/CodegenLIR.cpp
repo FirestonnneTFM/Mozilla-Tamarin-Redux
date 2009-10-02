@@ -3194,8 +3194,7 @@ namespace avmplus
         // sp[-argc] = construct(env, sp[-argc], argc, null, arg1..N)
         LIns* func = loadAtomRep(ctor_index);
         LIns* args = storeAtomArgs(InsConstAtom(nullObjectAtom), argc, ctor_index+1);
-        LIns* toplevel = loadToplevel();
-        LIns* newobj = callIns(FUNCTIONID(op_construct), 4, toplevel, func, InsConst(argc), args);
+        LIns* newobj = callIns(FUNCTIONID(op_construct), 4, env_param, func, InsConst(argc), args);
         localSet(ctor_index, atomToNativeRep(itraits, newobj), itraits);
     }
 
@@ -3691,13 +3690,9 @@ namespace avmplus
                 AvmAssert(state->value(objDisp).notNull);
 
                 // convert args to Atom[] for the call
-                LIns* obj = loadAtomRep(objDisp);
-                LIns* vtable = loadVTable(objDisp);
-                LIns* ap = storeAtomArgs(obj, argc, argv);
-
-                LIns* toplevel = loadToplevel();
-                LIns* i3 = callIns(FUNCTIONID(constructprop), 5,
-                    toplevel, multi, InsConst(argc), ap, vtable);
+                LIns* ap = storeAtomArgs(loadAtomRep(objDisp), argc, argv);
+                LIns* i3 = callIns(FUNCTIONID(construct_late), 4,
+                    env_param, multi, InsConst(argc), ap);
 
                 localSet(objDisp, atomToNativeRep(result, i3), result);
                 break;
