@@ -121,9 +121,17 @@ private function _slice(start: Number=0, end: Number=0x7fffffff) {
     return result;
 }
 
-private function _splice(start, deleteCount, items : Array) {
+private function _splice(start, deleteCount:uint, items:Array) {
     var first:uint  = clamp( start, length );
-    var delcnt:uint = clamp( deleteCount, length-first );
+    var delcnt:uint;
+
+    //  Constrain the deleteCount to a value within 
+    //  this Vector's bounds.  clamp() can't be used
+    //  because clamp() yields an index, not a count.
+    if ( deleteCount > length )
+        delcnt = length - first;
+    else
+        delcnt = deleteCount;
 
     var result = newThisType();
     result.private::_spliceHelper(0, delcnt, 0, this, first);
@@ -224,8 +232,8 @@ prototype.sort = function(comparefn){
     return _sort(castToThisType(this), a);
 }
 
-prototype.splice = function(start, deleteCount, ...items){
-    return castToThisType(this)._splice(Number(start), Number(deleteCount), items);
+prototype.splice = function(start, deleteCount:uint=uint.MAX_VALUE, ...items){
+    return castToThisType(this)._splice(Number(start), deleteCount, items);
 }
 
 prototype.unshift = function(...items){
