@@ -279,7 +279,12 @@ namespace MMgc
 				ExpandHeap(size, (flags & kCanFail) != 0);
 				block = AllocBlock(size, zero);
 				if(!block) {
-					GCAssertMsg(flags & kCanFail, "Internal error: ExpandHeap should have aborted if it can't satisfy the request");
+					if (!(flags & kCanFail))
+					{
+						GCAssertMsg(0, "Internal error: ExpandHeap should have aborted if it can't satisfy the request");
+						SignalInconsistentHeapState("Failed to abort");
+						/*NOTREACHED*/
+					}
 					return NULL;
 				}
 			}
@@ -1636,13 +1641,20 @@ namespace MMgc
 	}
 #endif
 
-	// Not ideal, but no worse than returning a NULL pointer from the allocator.
 	void GCHeap::SignalObjectTooLarge()
 	{
+		GCAssert(!"Too-large object request; aborting");
 		GCLog("Implementation limit exceeded: attempting to allocate too-large object");
-		VMPI_exit(1);
+		GetGCHeap()->Abort();
 	}
 
+	void GCHeap::SignalInconsistentHeapState(const char* reason)
+	{
+		GCAssert(!"Inconsistent heap state; aborting");
+		GCLog("Inconsistent heap state: %s");
+		GetGCHeap()->Abort();
+	}
+	
 	void GCHeap::Abort()
 	{
 		status = kMemAbort;
