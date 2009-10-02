@@ -1651,7 +1651,7 @@ namespace MMgc
 	void GCHeap::SignalInconsistentHeapState(const char* reason)
 	{
 		GCAssert(!"Inconsistent heap state; aborting");
-		GCLog("Inconsistent heap state: %s");
+		GCLog("Inconsistent heap state: %s", reason);
 		GetGCHeap()->Abort();
 	}
 	
