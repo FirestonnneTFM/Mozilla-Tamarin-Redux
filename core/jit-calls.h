@@ -272,14 +272,15 @@
 
     // overloaded helpers that convert a raw value to Atom.  helper will be
     // chosen based on the <T> parameter to getprop_obj_slot, below.
-    typedef struct _Atom* OpaqueAtom;
+    typedef struct _Atom* OpaqueAtom;  // so we dont collide with int32_t
+    enum Bool32 {};                    // can't use bool when sizeof(bool) != sizeof(int32_t)
     REALLY_INLINE Atom boxslot(AvmCore*, OpaqueAtom a) { return (Atom)a; }
     REALLY_INLINE Atom boxslot(AvmCore*, String* a) { return a->atom(); }
     REALLY_INLINE Atom boxslot(AvmCore*, Namespace* a) { return a->atom(); }
     REALLY_INLINE Atom boxslot(AvmCore*, ScriptObject* a) { return a->atom(); }
     REALLY_INLINE Atom boxslot(AvmCore* core, int32_t i) { return core->intToAtom(i); }
     REALLY_INLINE Atom boxslot(AvmCore* core, uint32_t u) { return core->uintToAtom(u); }
-    REALLY_INLINE Atom boxslot(AvmCore*, bool b) { return (int(b)<<3)|kBooleanType; }
+    REALLY_INLINE Atom boxslot(AvmCore*, Bool32 b) { return ((b != 0)<<3)|kBooleanType; }
     REALLY_INLINE Atom boxslot(AvmCore* core, double d) { return core->doubleToAtom(d); }
 
     // getting a slot on an object, specialized on slot type to streamline boxing
@@ -348,7 +349,7 @@
         &getprop_obj_slot<ScriptObject*>,   // SST_scriptobject
         &getprop_obj_slot<int32_t>,         // SST_int32
         &getprop_obj_slot<uint32_t>,        // SST_uint32
-        &getprop_obj_slot<bool>,            // SST_bool32
+        &getprop_obj_slot<Bool32>,          // SST_bool32
         &getprop_obj_slot<double>           // SST_double
     };
 
