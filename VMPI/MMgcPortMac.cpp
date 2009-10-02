@@ -62,11 +62,20 @@
 
 static const int kOSX105 = 9;
 
+static size_t computePagesize()
+{
+	long pagesize = sysconf(_SC_PAGESIZE);
+	// MacOS X 10.1 needs the extra check
+	if (pagesize == -1)
+		pagesize = 4096;
+	return size_t(pagesize);
+}
+
+static size_t pagesize = computePagesize();
+
 size_t VMPI_getVMPageSize()
 {
-	long v = sysconf(_SC_PAGESIZE);
-	if (v == -1) v = 4096; // Mac 10.1 needs this
-	return v;
+	return pagesize;
 }
 
 bool VMPI_canMergeContiguousRegions()
@@ -173,12 +182,8 @@ void VMPI_releaseAlignedMemory(void* address)
 
 size_t VMPI_getPrivateResidentPageCount()
 {
-	size_t private_bytes = 0;
-	kern_return_t ret;
+	size_t private_pages = 0;
 	task_t task = mach_task_self();
-	
-	vm_size_t pagesize = 0;
-	ret = host_page_size(mach_host_self(), &pagesize);
 	
 	vm_address_t addr = VM_MIN_ADDRESS;
 	vm_size_t size = 0;
@@ -187,6 +192,7 @@ size_t VMPI_getPrivateResidentPageCount()
 		mach_msg_type_number_t count = VM_REGION_TOP_INFO_COUNT;
 		vm_region_top_info_data_t info;
 		mach_port_t object_name;
+		kern_return_t ret;
 		
 		addr += size;
 		
@@ -198,9 +204,9 @@ size_t VMPI_getPrivateResidentPageCount()
 		
 		if (ret != KERN_SUCCESS)
 			break;
-		private_bytes += info.private_pages_resident;
+		private_pages += info.private_pages_resident;
 	}
-	return private_bytes;
+	return private_pages;
 }
 
 // Call VMPI_getPerformanceFrequency() once to initialize its cache; avoids thread safety issues.

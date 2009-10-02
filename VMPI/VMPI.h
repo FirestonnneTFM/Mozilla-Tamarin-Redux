@@ -209,8 +209,7 @@ extern size_t			VMPI_size(void* ptr);
 extern size_t		VMPI_getVMPageSize();
 
 /**
-* Method to retrieve number of pages in virtual address space of a process
-* @param pageSize size, in bytes, of a page.  This value is the same as the one returned by VMPI_getVMPageSize
+* Method to retrieve number of VM pages in virtual address space of a process
 * @return number of pages
 * @see VMPI_getVMPageSize()
 */

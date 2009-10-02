@@ -214,7 +214,7 @@ namespace avmshell
 	
 	double SystemClass::get_privateMemory()
 	{
-		return double(VMPI_getPrivateResidentPageCount() * MMgc::GCHeap::kBlockSize);
+		return double(VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize());
 	}
 
 	void SystemClass::forceFullCollection()

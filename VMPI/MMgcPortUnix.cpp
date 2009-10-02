@@ -72,14 +72,15 @@
 
 #include <fcntl.h>
 
+#ifdef MMGC_SPARC
+static size_t pagesize = 4096;
+#else
+static size_t pagesize = size_t(sysconf(_SC_PAGESIZE));
+#endif
+
 size_t VMPI_getVMPageSize()
 {
-#ifdef MMGC_SPARC
-	return 4096;
-#else
-	long v = sysconf(_SC_PAGESIZE);
-	return v;
-#endif
+	return pagesize;
 }
 
 bool VMPI_canMergeContiguousRegions()
@@ -172,102 +173,105 @@ void VMPI_releaseAlignedMemory(void* address)
 #define state_Private 6
 #define state_size 7
 
+#ifdef LINUX
+
 size_t VMPI_getPrivateResidentPageCount()
 {
+	char buff[32];
+	VMPI_snprintf(buff, sizeof(buff), "/proc/%d/smaps", getpid());
+	int smap_hndl = open(buff, O_RDONLY);
+	if (smap_hndl == -1)
+		return 0;
+	
+	size_t priv_pages = 0;
 	size_t pageSize = VMPI_getVMPageSize();
-#ifdef LINUX
-		uint32_t pid = getpid();
-		char buff[32];
-		VMPI_sprintf(buff, "/proc/%d/smaps", pid);
-		int smap_hndl = open(buff, O_RDONLY);
-		size_t priv_bytes = 0;
-		if( smap_hndl != -1 )
+	uint32_t state = state_newline;
+	char size_buff[16];
+	uint32_t size_idx = 0;
+	int read_size = 0;
+	while( (read_size = read(smap_hndl, buff, 32)) )
+	{
+		int i = 0;
+		while(i < read_size )
 		{
-			uint32_t state = state_newline;
-			char size_buff[16];
-			uint32_t size_idx = 0;
-			int read_size = 0;
-			while( (read_size = read(smap_hndl, buff, 32)) )
+			char c = buff[i++];
+			switch( state )
 			{
-				int i = 0;
-				while(i < read_size )
+			case state_newline:
+				if( c == 'P' )
+					state = state_P;
+				else
+					state = state_skipline;
+				break;
+
+			case state_skipline:
+				if( c == '\n' )
+					state = state_newline;
+				break;
+
+			case state_P:
+				if( c == 'r' )
+					state = state_Pr;
+				else
+					state = state_skipline;
+				break;
+
+			case state_Pr:
+				if( c == 'i' )  // Good enough, nothing else in smaps starts with Pr
+					state = state_Private;
+				else
+					state = state_skipline;
+				break;
+
+			case state_Private:
+				if ( c >= '0' && c <= '9' )
 				{
-					char c = buff[i++];
-					switch( state )
-					{
-					case state_newline:
-						if( c == 'P' )
-							state = state_P;
-						else
-							state = state_skipline;
-						break;
-
-					case state_skipline:
-						if( c == '\n' )
-							state = state_newline;
-						break;
-
-					case state_P:
-						if( c == 'r' )
-							state = state_Pr;
-						else
-							state = state_skipline;
-						break;
-
-					case state_Pr:
-						if( c == 'i' )  // Good enough, nothing else in smaps starts with Pr
-							state = state_Private;
-						else
-							state = state_skipline;
-						break;
-
-					case state_Private:
-						if ( c >= '0' && c <= '9' )
-						{
-							state = state_size;
-							size_buff[size_idx++] = c;
-						}
-						else if ( c == '\n')
-							state = state_newline;
-						break;
-
-					case state_size:
-						if( c >= '0' && c <= '9' )
-							size_buff[size_idx++] = c;
-						else
-						{
-							size_buff[size_idx] = 0;
-							size_idx = 0;
-							uint32_t size = VMPI_atoi(size_buff)*1024;
-							uint32_t blocks = size/pageSize;
-							if( size % pageSize != 0 )
-								++blocks;
-							priv_bytes += blocks;
-							
-							if ( c == '\n' )
-								state = state_newline;
-							else
-								state = state_skipline;
-						}
-						break;
-					}
+					state = state_size;
+					size_buff[size_idx++] = c;
 				}
-			} 
-			close(smap_hndl);
+				else if ( c == '\n')
+					state = state_newline;
+				break;
+
+			case state_size:
+				if( c >= '0' && c <= '9' )
+					size_buff[size_idx++] = c;
+				else
+				{
+					size_buff[size_idx] = 0;
+					size_idx = 0;
+					uint32_t size = VMPI_atoi(size_buff)*1024;
+					uint32_t blocks = size/pageSize;
+					if( size % pageSize != 0 )
+						++blocks;
+					priv_pages += blocks;
+					
+					if ( c == '\n' )
+						state = state_newline;
+					else
+						state = state_skipline;
+				}
+				break;
+			}
 		}
-	//	return 0;
-	return priv_bytes; 
+	} 
+	close(smap_hndl);
+
+	return priv_pages; 
+}
+
 #elif defined SOLARIS
-	uint32_t pid = getpid();
+
+size_t VMPI_getPrivateResidentPageCount()
+{
 	char mapname[32];
 	int mapfd, nmap, i;
 	prxmap_t *prmapp, *pmp;
 	struct stat st;
 	ssize_t n;
-	size_t priv_bytes = 0;
+	size_t priv_pages = 0;
 
-	(void) VMPI_snprintf(mapname, sizeof (mapname),
-	    "/proc/%d/xmap", pid);
+	VMPI_snprintf(mapname, sizeof (mapname), "/proc/%d/xmap", getpid());
 
 	if ((mapfd = open(mapname, O_RDONLY)) < 0 || fstat(mapfd, &st) != 0) {
 		if (mapfd >= 0)
@@ -296,15 +300,20 @@ again:
 	nmap = n / sizeof (prxmap_t);
 
 	for (i = 0, pmp = prmapp; i < nmap; i++, pmp++) {
-		priv_bytes += pmp->pr_anon;
+		priv_pages += pmp->pr_anon;
 	}
 	free(prmapp);
-	priv_bytes = priv_bytes * sysconf(_SC_PAGESIZE) / pageSize;
-	return priv_bytes;
-#else
-	return 0;
-#endif
+	return priv_pages;
 }
+
+#else
+
+size_t VMPI_getPrivateResidentPageCount()
+{
+	return 0;
+}
+
+#endif
 
 uint64_t VMPI_getPerformanceFrequency()
 {

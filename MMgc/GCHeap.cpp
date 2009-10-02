@@ -1734,7 +1734,7 @@ namespace MMgc
 
 	void GCHeap::DumpMemoryInfoLocked()
 	{
-		size_t priv = VMPI_getPrivateResidentPageCount() * GCHeap::kBlockSize;
+		size_t priv = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
 		size_t mmgc = GetTotalHeapSize() * GCHeap::kBlockSize;
 		size_t unmanaged = GetFixedMalloc()->GetTotalSize() * GCHeap::kBlockSize;
 		size_t fixed_alloced;
