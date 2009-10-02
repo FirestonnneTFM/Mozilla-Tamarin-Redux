@@ -104,7 +104,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$object {
+        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$object {
             return this._splice(start, deleteCount, items);
         }
 
@@ -186,7 +186,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$int {
+        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$int {
             return this._splice(start, deleteCount, items);
         }
 
@@ -269,7 +269,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$uint {
+        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$uint {
             return this._splice(start, deleteCount, items);
         }
 
@@ -351,7 +351,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$double {
+        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$double {
             return this._splice(start, deleteCount, items);
         }
 

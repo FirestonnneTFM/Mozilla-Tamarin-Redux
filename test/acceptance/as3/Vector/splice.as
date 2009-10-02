@@ -91,13 +91,33 @@ AddTestCase(
 		"splice small vector start is negative",
 		"one,two,three,four,five,six",
 		v1.toString());
-/*
+
 var v1=new Vector.<String>();
 v1.push("one");v1.push("delete1");v1.push("delete2");v1.push("four");v1.push("five");v1.push("six");
 var splice=v1.splice(1,-2,"two","three")
 AddTestCase(
 		"splice small vector deletecount is negative",
-		"one,two,three,delete1,delete2,four,five,six",
+		"one,two,three",
 		v1.toString());
-*/
+var v1=new <String>["one","two","three"];
+var splice = v1.splice(0,"non numeric", "first");
+AddTestCase(
+		"splice small vector deletecount is non-numeric",
+		"first,one,two,three",
+		v1.toString());
+
+var v1=new <String>["one","two","three"];
+var splice = v1.splice(0,undefined, "first-ud");
+AddTestCase(
+		"splice small vector deletecount is undefined",
+		"first-ud,one,two,three",
+		v1.toString());
+
+var v1=new <String>["one","two","three","four","five"];
+var splice = v1.splice(2)
+AddTestCase(
+		"splice small vector omitted deletecount",
+		"one,two",
+		v1.toString());
+
 test();

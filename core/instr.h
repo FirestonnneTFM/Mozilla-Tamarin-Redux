@@ -150,6 +150,8 @@ ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot
 /**
  * Implementation of OP_constructprop 
  */
+template <class E>
+Atom constructprop(E env, const Multiname* multiname, int argc, Atom* atomv);
 Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable);
 
 } // namespace avmplus
