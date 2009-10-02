@@ -227,9 +227,8 @@ namespace avmplus
     typedef Atom (*CallCacheHandler)(BindingCache&, Atom base, int argc, Atom* args, MethodEnv*);
     typedef Atom (*GetCacheHandler)(BindingCache&, MethodEnv*, Atom);
     class BindingCache {
-        friend class BindingCacheBuilder;
-        BindingCache(CallCacheHandler, const Multiname*);
     public:
+        BindingCache(CallCacheHandler, const Multiname*);
         union {
             CallCacheHandler call_handler;  // for late bound calls
             GetCacheHandler get_handler;    // for late bound gets

@@ -255,6 +255,15 @@
     }
     FUNCTION(CALL_INDIRECT, SIG6(A,P,P,A,I,P,P), call_cache_handler)
 
+    // called by jit'd code when an OP_callproperty or callproplex could not be
+    // early bound to a property and we must do the property lookup at runtime,
+    // AND the multiname has runtime parts, so we couldn't use a BindingCache.
+    Atom callprop_late(MethodEnv* caller_env, Atom base, const Multiname* name, int argc, Atom* args) {
+        BindingCache c(NULL, name);  // temporary cache, just so we can call the generic handler.
+        return callprop_generic(c, base, argc, args, caller_env);
+    }
+    FUNCTION(FUNCADDR(callprop_late), SIG5(A,P,A,P,I,P), callprop_late)
+
     // forward decl
     Atom getprop_miss(BindingCache&, MethodEnv*, Atom obj);
 
@@ -547,8 +556,6 @@ SSE2_ONLY(
 
     typedef Atom (*op_call_MethodEnv)(MethodEnv*, Atom, int, Atom*);
     FUNCTION(FUNCADDR((op_call_MethodEnv)&avmplus::op_call<MethodEnv*>), SIG4(A,P,A,I,P), op_call)
-
-    METHOD(TOPLEVELADDR(Toplevel::callproperty), SIG6(A,P,A,P,I,P,P), callproperty)
 
     typedef Atom (*op_applytype_MethodEnv)(MethodEnv*, Atom, int, Atom*);
     FUNCTION(FUNCADDR((op_applytype_MethodEnv)&avmplus::op_applytype<MethodEnv*>), SIG4(A,P,A,I,P), op_applytype)
