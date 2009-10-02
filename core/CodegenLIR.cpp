@@ -3669,9 +3669,7 @@ namespace avmplus
                 }
                 else {
                     // generic late bound call to anything
-                    LIns* vtable = loadVTable(baseDisp);
-                    LIns* toplevel = loadToplevel();
-                    out = callIns(FUNCTIONID(callproperty), 6, toplevel, base, multi, InsConst(argc), ap, vtable);
+                    out = callIns(FUNCTIONID(callprop_late), 5, env_param, base, multi, InsConst(argc), ap);
                 }
                 localSet(baseDisp, atomToNativeRep(result, out), result);
                 break;
