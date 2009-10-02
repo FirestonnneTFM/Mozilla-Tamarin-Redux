@@ -217,7 +217,7 @@ namespace avmplus
 			m_lastPage(NULL), 
 			m_lastPageProt(0), 
 			m_lastPageSize(0), 
-			m_pageSize(MMgc::GCHeap::GetGCHeap()->kNativePageSize)
+			m_pageSize(VMPI_getVMPageSize())
 #if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX) || defined(AVMPLUS_SYMBIAN))
 			, m_codeMin(NULL)
 			, m_codeMax(NULL)
