@@ -76,13 +76,7 @@ namespace MMgc
 			throw()
 #endif
 		{
-			// TODO throw exception and shutdown player?
-			if (size + extra < size)
-			{
-				GCAssert(0);
-				return 0;
-			}
-			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero);
+			return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero);
 		}
 
 		static void operator delete (void *gcObject)
@@ -130,6 +124,7 @@ namespace MMgc
 	 * to be erroneously deleted, see https://bugzilla.mozilla.org/show_bug.cgi?id=506644,
 	 * so client code may want to take note of that.)
 	 */
+
 	class RCObject : public GCFinalizedObject
 	{
 		friend class GC;
@@ -221,10 +216,10 @@ namespace MMgc
 		 * Make RC operations on the object be no-ops.
 		 */
 		REALLY_INLINE void Stick()
-		{
+		{ 
 			composite = STICKYFLAG;
 		}
-		
+
 		/**
 		 * Increment the object's reference count.
 		 *
@@ -342,7 +337,7 @@ namespace MMgc
 
 		static void *operator new(size_t size, GC *gc, size_t extra = 0)
 		{
-			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
+			return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
 		}
 		
 	private:
@@ -355,7 +350,7 @@ namespace MMgc
 		
 		// Clear the ZCT flag and the ZCT index
 		void ClearZCTFlag() 
-		{ 
+		{
 			composite &= ~(ZCTFLAG|ZCT_INDEX);
 		}
 
@@ -389,7 +384,7 @@ namespace MMgc
 		static const uint32_t RCBITS	         = 0x000000FF;			// 8 bits for the reference count
 		static const uint32_t ZCT_INDEX          = 0x0FFFFF00;			// 20 bits for the ZCT index
 		static const uint32_t ZCT_CAPACITY       = (ZCT_INDEX>>8) + 1;
-
+		
 		uint32_t composite;
 #ifdef MMGC_RC_HISTORY
 		// addref/decref stack traces

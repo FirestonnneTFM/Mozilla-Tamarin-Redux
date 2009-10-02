@@ -202,7 +202,10 @@ namespace MMgc
 
 	void *FixedMalloc::LargeAlloc(size_t size, FixedMallocOpts flags)
 	{
+		GCHeap::CheckForAllocSizeOverflow(size, GCHeap::kBlockSize+DebugSize());
+		
 		size += DebugSize();
+
 		int blocksNeeded = (int)GCHeap::SizeToBlocks(size);
 		uint32_t gcheap_flags = GCHeap::kExpand;
 
@@ -258,6 +261,11 @@ namespace MMgc
 		return m_heap->Size(item) * GCHeap::kBlockSize;
 	}
 
+	void *FixedMalloc::Calloc(size_t count, size_t elsize, FixedMallocOpts opts)
+	{
+		return Alloc(GCHeap::CheckForCallocSizeOverflow(count, elsize), opts);
+	}
+	
 	size_t FixedMalloc::GetTotalSize()
 	{
 		size_t total = numLargeChunks;

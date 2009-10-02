@@ -104,7 +104,7 @@ namespace MMgc
 		 * Unregister the GC with the manager.  The GC must be registered.
 		 */
 		void removeGC(GC* gc) { collectors.Remove(gc); }
-				
+		
 		/**
 		 * Tell every other GC that 'gc' is starting a collection (ie there may be memory pressure there).
 		 */
@@ -171,6 +171,15 @@ namespace MMgc
 		/** Size of a block */
 		const static int kBlockSize = 4096;
 
+		/** 
+		 * Max allowable size for any allocation = 2^32 - 1  bytes
+		 * This value is based on the max value on 32-bit systems
+		 * and acts as a cap on the size of an allocation request
+		 * Overflow detection routines CheckForAllocSizeOverflow()
+		 * use this value to check for overflows
+		 */
+		const static size_t kMaxObjectSize = 0xFFFFFFFF; 
+		
 		/** Default size of address space reserved per region in blocks */
 #ifdef MMGC_64BIT
 		const static int kDefaultReserve = 4096;
@@ -360,8 +369,91 @@ namespace MMgc
 		void SystemOOMEvent(size_t size, int attempt);
 #endif
 
+#if defined (__GNUC__)
+		void Abort() __attribute__((noreturn));
+#else
 		void Abort();
+#endif
+
 		MemoryStatus GetStatus() { return status; }
+
+		/**
+		 * CheckForAllocSizeOverflow checks whether an allocation request
+		 * would request an object larger than what MMgc can accomodate.
+		 *
+		 * Overflow detection logic: 
+		 * Currently, in MMgc all object allocations are capped to 2^32-1 (=kMaxObjectSize)
+		 * which is the largest object size on 32-bit systems.  To detect overflow
+		 * the standard way is to add the values and look for wraparound by checking if
+		 * the result is less than either of the operands.  However, on 64-bit systems
+		 * sizeof(size_t) == 8 bytes and the wraparound check would not work.  So this
+		 * method also checks if the result exceeds 2^32-1 to conform our allocation size cap.
+		 * Requirement:
+		 * All allocation routines and methods that add extra payload (such as headers) to 
+		 * allocation requests should call this method for overflow detection.
+		 * @param size requested size pertaining to object being allocated
+		 * @param extra amount of extra bytes accompanying an allocation
+		 * @return:  The sum of size and extra.
+		 * @note This method may not return.  It is designed to terminate
+		 * the program if an overflow is detected.
+		 */
+		REALLY_INLINE static size_t CheckForAllocSizeOverflow(size_t size, size_t extra)
+		{
+			//calculate the total requested size
+			uint64_t total = (uint64_t)size + (uint64_t)extra;
+			
+			//check if request size exceeds kMaxObjectSize
+			// or for sizeof(size_t) = 8 bytes check for wraparound on the total value
+#ifdef MMGC_64BIT
+			if ((total > (uint64_t)kMaxObjectSize) || (total < size) || (total < extra))
+				SignalObjectTooLarge();
+#else
+			// This is the 32-bit implementation, it avoids unnecessary checks for overflow.
+			if (total > (uint64_t)kMaxObjectSize)
+				SignalObjectTooLarge();
+#endif
+			return size_t(total);
+		}
+		
+		/**
+		 * CheckForCallocSizeOverflow
+		 * This method is designed to check whether an allocation request
+		 * of N objects for a given size might result in numeric overflow.  
+		 * Overflow detection logic:
+		 * In this method we detect overflow occurring from result of (N * M) where
+		 * N = number of objects and M = size of one object.
+		 * Currently, in MMgc all object allocations are capped to 2^32-1 (=kMaxObjectSize)
+		 * which is the largest object size on 32-bit systems.  
+		 * To detect overflow, we first check if either of N or M exceeds kMaxObjectSize.  
+		 * This check is a guard against overflow on 64-bit systems where sizeof(size_t) is
+		 * greater than 4 bytes.  If this check succeeds then we perform a 64-bit based
+		 * product i.e. (N * M) and check if the result exceeds kMaxObjectSize.
+		 * Requirement:
+		 * All allocation routines and methods that are servicing allocation requests
+		 * based on a product of object size and a number of objects should call this method prior to allocation
+		 * @param count number of objects being allocated
+		 * @param elsize requested size pertaining to a single object being allocated
+		 * @return: None.  This method is designed to call Abort() which in turn terminates
+		 * the program if an overflow is detected.
+		 */		
+		REALLY_INLINE static size_t CheckForCallocSizeOverflow(size_t count, size_t elsize)
+		{
+			//If either of the size of requested bytes
+			//or the number of requested size 
+			//or if their product exceeds kMaxObjectSize 
+			//we treat that as overflow and abort
+			uint64_t total = (uint64_t)elsize * (uint64_t)count;
+#ifdef MMGC_64BIT
+			if(   elsize > kMaxObjectSize 
+			   || count >= kMaxObjectSize
+			   || total > (uint64_t)kMaxObjectSize)
+				SignalObjectTooLarge();
+#else
+			if(total > (uint64_t)kMaxObjectSize)
+				SignalObjectTooLarge();
+#endif
+			return size_t(total);
+		}
 
 		/** The native VM page size (in bytes) for the current architecture */
 		static const size_t kNativePageSize;
@@ -608,7 +700,7 @@ namespace MMgc
  		vmpi_thread_t const primordialThread;
 
 		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
-	
+
 #ifdef MMGC_MEMORY_PROFILER
 		static MemoryProfiler *profiler;
 		bool hasSpy; //flag indicating whether profiler spy is active or not.  If active, AllocHook will call VMPI_spyCallback

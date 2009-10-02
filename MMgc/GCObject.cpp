@@ -53,7 +53,7 @@ namespace MMgc
   
 	void* GCFinalizedObject::operator new(size_t size, GC *gc, size_t extra)
 	{
-		return gc->Alloc(size + extra, GC::kFinalize|GC::kContainsPointers|GC::kZero);
+		return gc->AllocExtra(size, extra, GC::kFinalize|GC::kContainsPointers|GC::kZero);
 	}
 
 	void GCFinalizedObject::operator delete (void *gcObject)

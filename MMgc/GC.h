@@ -881,7 +881,13 @@ namespace MMgc
 		 * in GC.cpp.
 		 */
 		void* AllocDouble();
-			
+
+		/**
+		 * Like Alloc but allocating a little extra memory; factored out as a
+		 * separate function in order to allow for a fast object overflow check.
+		 */
+		void *AllocExtra(size_t size, size_t extra, int flags=0);
+		
 	private:
 		class RCRootSegment : public GCRoot
 		{
