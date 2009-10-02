@@ -156,7 +156,62 @@ typedef void *maddr_ptr;
 * Type defintion for an opaque data type representing platform-defined spin lock 
 * @see VMPI_lockInit(), VMPI_lockAcquire()
 */
-#ifdef USE_PTHREAD_MUTEX
+#if defined(__GNUC__) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
+
+struct vmpi_spin_lock_t 
+{
+	volatile uint32_t lock;
+};
+
+
+REALLY_INLINE uint32_t X86_TestAndSet(volatile uint32_t* ptr, uint32_t val) {
+	__asm__ volatile("xchgl %0, (%2)" :"=r"(val) : "0"(val), "r"(ptr));
+	return val;
+}
+
+REALLY_INLINE void X86_Pause()
+{
+	__asm__ volatile("pause");
+}
+
+REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
+{
+	lock->lock = 0;
+	__asm__ volatile("" : : : "memory");
+}
+
+REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
+{
+	lock->lock = 0;
+	__asm__ volatile("" : : : "memory");
+}
+
+REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
+{
+	while ( X86_TestAndSet(&lock->lock, 1) != 0 ) {
+		X86_Pause();
+	}
+	__asm__ volatile("" : : : "memory");
+	return true;
+}
+
+REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
+{
+	__asm__ volatile("" : : : "memory");
+	lock->lock = 0;
+	return true;
+}
+
+REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
+{
+	__asm__ volatile("" : : : "memory");
+	if(X86_TestAndSet(&lock->lock, 1) != 0)
+		return false;
+	return true;
+}
+
+#elif defined(USE_PTHREAD_MUTEX)
+
 struct vmpi_spin_lock_t
 {
 	// Some small systems (eg android) don't provide spinlock.
@@ -188,7 +243,9 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
 	return pthread_mutex_trylock((pthread_mutex_t*)&lock->lock) == 0;
 }
+
 #else
+
 struct vmpi_spin_lock_t
 {
 	volatile pthread_spinlock_t lock;
@@ -218,6 +275,7 @@ REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t *lock)
 {
 	return pthread_spin_trylock((pthread_spinlock_t*)&lock->lock) == 0;
 }
+
 #endif
 
 #endif // __avmplus_unix_platform__
