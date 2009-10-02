@@ -504,9 +504,14 @@
     METHOD(ENVADDR(MethodEnv::getdescendants), SIG3(A,P,A,P), getdescendants)
     METHOD(ENVADDR(MethodEnv::newclass), SIG5(P,P,P,P,P,P), newclass)
     METHOD(ENVADDR(MethodEnv::op_newobject), SIG3(P,P,P,I), op_newobject)
-    METHOD(TOPLEVELADDR(Toplevel::op_construct), SIG4(A,P,A,I,P), op_construct)
+
+    typedef Atom (*constructprop_MethodEnv)(MethodEnv*, const Multiname*, int, Atom*);
+    FUNCTION(FUNCADDR((constructprop_MethodEnv)&constructprop<MethodEnv*>), SIG4(A,P,P,I,P), construct_late)
+
+    typedef Atom (*op_construct_MethodEnv)(MethodEnv*, Atom, int, Atom*);
+    FUNCTION(FUNCADDR((op_construct_MethodEnv)&op_construct<MethodEnv*>), SIG4(A,P,A,I,P), op_construct)
+
     METHOD(ENVADDR(MethodEnv::callsuper), SIG4(A,P,P,I,P), callsuper)
-    METHOD(TOPLEVELADDR(Toplevel::constructprop), SIG5(A,P,P,I,P,P), constructprop)
     METHOD(ENVADDR(MethodEnv::setsuper), SIG4(V,P,A,P,A), setsuper)
     METHOD(ENVADDR(MethodEnv::getsuper), SIG3(A,P,A,P), getsuper)
     METHOD(COREADDR(AvmCore::throwAtom), SIG2(V,P,A), throwAtom)

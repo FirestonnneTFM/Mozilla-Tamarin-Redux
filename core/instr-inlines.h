@@ -165,4 +165,11 @@ ArrayObject* newarray(E caller_env, int argc, Atom* ap) {
     return arrayClass->newarray(ap, argc);
 }
 
+template <class E> REALLY_INLINE
+Atom constructprop(E env, const Multiname* multiname, int argc, Atom* atomv)
+{
+    Toplevel* toplevel = env->toplevel();
+    return constructprop(toplevel, multiname, argc, atomv, toVTable(toplevel, atomv[0]));
 }
+
+} // namespace avmplus
