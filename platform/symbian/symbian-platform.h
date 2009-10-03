@@ -46,7 +46,7 @@
 #define VMPI_strcmp 		::strcmp
 #define VMPI_strcat 		::strcat
 #define VMPI_strchr 		::strchr
-#define VMPI_strrchr 		::strrchr
+//#define VMPI_strrchr 		::strrchr	not called by avm
 #define VMPI_strcpy 		::strcpy
 #define VMPI_strlen 		::strlen
 #define VMPI_strncat 		::strncat
@@ -54,12 +54,10 @@
 #define VMPI_strncpy 		::strncpy
 #define VMPI_strtol			::strtol
 #define VMPI_strstr			::strstr
-
 #define VMPI_sprintf		::sprintf
 #define VMPI_snprintf		::snprintf
-#define VMPI_sscanf			::sscanf
-
-#define VMPI_atoi	::atoi
+//#define VMPI_sscanf		::sscanf	not called by avm
+//#define VMPI_atoi	::atoi				not called by avm
 #define VMPI_tolower ::tolower	
 #define VMPI_islower ::islower	
 #define VMPI_toupper ::toupper	
@@ -92,23 +90,9 @@
 
 #include <setjmp.h> // for OOM.h
 #include <pthread.h>
-
 #include <new> // for std::bad_alloc definition in GCGlobalNew.h
 
-#ifdef __GNUC__
-#define REALLY_INLINE inline __attribute__((always_inline))
-// only define FASTCALL for x86-32; other gcc versions will spew warnings
-#ifdef AVMPLUS_IA32
-	#define FASTCALL __attribute__((fastcall))
-#endif
-#endif
-
-#if defined(__GNUC__)
-	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
-	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
-#else
-	#error "Unrecognized compiler"
-#endif
+#define REALLY_INLINE inline
 
 #ifdef __WINSCW__
 #undef _WIN32
@@ -122,7 +106,7 @@
 struct vmpi_spin_lock_t
 {
 	// Looks like Symbian SDK does not support pthread spinlock.
-	// using pthread_mutex for now (unfortunate since it's usually more expensive)
+	// Using pthread_mutex for now (unfortunate since it's usually more expensive).
 	volatile pthread_mutex_t lock;
 };
 
@@ -138,7 +122,9 @@ REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t *lock)
 
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t *lock)
 {
-	return pthread_mutex_lock((pthread_mutex_t*)&lock->lock) == 0;
+	// detect deadlock situations - happens sometimes
+	int ret = pthread_mutex_trylock( (pthread_mutex_t*)&lock->lock );
+	return (ret == 0);
 }
 
 REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t *lock)
