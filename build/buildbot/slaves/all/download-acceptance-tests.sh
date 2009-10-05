@@ -98,6 +98,10 @@ fi
 
 fi # manually rebuild tests
 
+
+# clean up
+rm $basedir/test/acceptance/acceptance-tests-abcs.zip
+rm $basedir/test/acceptance/download.log
 echo "finished"
 
 exit 0
