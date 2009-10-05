@@ -53,6 +53,11 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
+
+
+# Solairs SPARC failures, fixed by: http://hg.mozilla.org/tamarin-redux/rev/2669
+cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} --vmargs="-Ojit" as3/Definitions/Classes/ClassDef/DynamicClassSameMethPropName.as
+
 # https://bugzilla.mozilla.org/show_bug.cgi?id=517858
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmdd} mmgc/outofmemory.as
 
