@@ -4313,15 +4313,6 @@ namespace avmplus
                 break;
             }
 
-            case OP_convert_s:
-            {
-                AvmAssert(false);
-                int32_t index = (int32_t) op1;
-                localSet(index, callIns(FUNCTIONID(string), 2,
-                    coreAddr, loadAtomRep(index)), result);
-                break;
-            }
-
             case OP_esc_xelem: // ToXMLString will call EscapeElementValue
             {
                 //sp[0] = core->ToXMLString(sp[0]);
@@ -5013,12 +5004,8 @@ namespace avmplus
         {
             return i2dIns(localGet(i));
         }
-        if (t == UINT_TYPE)
-        {
-            return u2dIns(localGet(i));
-        }
-        AvmAssert(false);
-        return NULL;
+        AvmAssert(t == UINT_TYPE);
+        return u2dIns(localGet(i));
     }
 
     void CodegenLIR::formatOperand(PrintWriter& buffer, Value& v)
