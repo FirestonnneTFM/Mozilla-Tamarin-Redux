@@ -60,7 +60,7 @@ if [ "$res" = "0" -a -f "$basedir/test/acceptance/acceptance-tests-abcs.zip" ]
 then
 
 echo "unzipping acceptance tests"
-unzip -q acceptance-tests-abcs.zip
+unzip -o -q acceptance-tests-abcs.zip
 
 else
 
