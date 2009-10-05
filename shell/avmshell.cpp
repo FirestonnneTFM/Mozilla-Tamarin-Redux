@@ -720,6 +720,7 @@ namespace avmshell
 						settings.runmode = RM_interp_all;
 					}
 					else {
+						AvmLog("Unrecognized option %s\n", arg);
 						usage();
 					}
 				} 
@@ -788,8 +789,10 @@ namespace avmshell
 					else if (VMPI_sscanf(val, "%lf%n", &load, &nchar) == 1 && size_t(nchar) == len && load > 1.0) {
 						MMgc::GCHeap::GetGCHeap()->Config().gcLoad = load;
 					}
-					else
+					else {
+						AvmLog("Bad value to -load: %s\n", val);
 						usage();
+					}
 				}
 				else if (!VMPI_strcmp(arg, "-gcwork")) {
 					double work;
@@ -798,8 +801,10 @@ namespace avmshell
 					if (VMPI_sscanf(val, "%lf%n", &work, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && work > 0.0 && work <= 1.0) {
 						MMgc::GCHeap::GetGCHeap()->Config().gcEfficiency = work;
 					}
-					else
+					else {
+						AvmLog("Bad value to -gcwork: %s\n", val);
 						usage();
+					}
 				}
 				else if (!VMPI_strcmp(arg, "-log")) {
 					settings.do_log = true;
@@ -816,13 +821,17 @@ namespace avmshell
 					if (val == NULL)
 						val = "";
 					if (VMPI_sscanf(val, "%d,%d,%d%n", &settings.numworkers, &settings.numthreads, &settings.repeats, &nchar) != 3)
-						if (VMPI_sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2)
+						if (VMPI_sscanf(val, "%d,%d%n", &settings.numworkers, &settings.numthreads, &nchar) != 2) {
+							AvmLog("Bad value to -workers: %s\n", val);
 							usage();
+						}
 					if (settings.numthreads < 1 || 
 						settings.numworkers < settings.numthreads || 
 						settings.repeats < 1 ||
-						size_t(nchar) != VMPI_strlen(val))
+						size_t(nchar) != VMPI_strlen(val)) {
+						AvmLog("Bad value to -workers: %s\n", val);
 						usage();
+					}
 				}
 #endif // VMCFG_WORKERTHREADS
 #ifdef AVMPLUS_WIN32
