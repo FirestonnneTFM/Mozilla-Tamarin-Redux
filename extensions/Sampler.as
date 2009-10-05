@@ -47,49 +47,49 @@ package flash.sampler
     public final class StackFrame
     {
     
-    /**
-     * The function name in the stack frame. For Flash Player debugger version only.
-     * @playerversion Flash 9.0.115.0
-     * @langversion 3.0     
-     * @keyword StackFrame.name, name      
-     */    
-   	public const name:String;
+		/**
+		 * The function name in the stack frame. For Flash Player debugger version only.
+		 * @playerversion Flash 9.0.115.0
+		 * @langversion 3.0     
+		 * @keyword StackFrame.name, name      
+		 */    
+		public const name:String;
     
-    /**
-     * The file name of the SWF file being debugged. For Flash Player debugger version only.
-     * @playerversion Flash 9.0.115.0
-     * @langversion 3.0     
-     * @keyword StackFrame.file, file      
-     */       
-	public const file:String;
+		/**
+		 * The file name of the SWF file being debugged. For Flash Player debugger version only.
+		 * @playerversion Flash 9.0.115.0
+		 * @langversion 3.0     
+		 * @keyword StackFrame.file, file      
+		 */       
+		public const file:String;
     
-    /**
-     * The line number for the function in the SWF file being debugged. For Flash Player debugger version only.
-     * @playerversion Flash 9.0.115.0
-     * @langversion 3.0     
-     * @keyword StackFrame.line, line      
-     */      
-	public const line:uint;
+		/**
+		 * The line number for the function in the SWF file being debugged. For Flash Player debugger version only.
+		 * @playerversion Flash 9.0.115.0
+		 * @langversion 3.0     
+		 * @keyword StackFrame.line, line      
+		 */      
+		public const line:uint;
 	
-	/**
-     * The identifier for the script function in the application being profiled.
-     * @langversion 3.0
-     * @keyword StackFrame.scriptID, scriptID      
-     */
-	public const scriptID:Number;
+		/**
+		 * The identifier for the script function in the application being profiled.
+		 * @langversion 3.0
+		 * @keyword StackFrame.scriptID, scriptID      
+		 */
+		public const scriptID:Number;
     
-    /**
-     * Converts the StackFrame to a string of its properties.
-     * @return A string containing the <code>name</code> property, and optionally the <code>file</code> 
-     * and <code>line</code> properties (if a SWF file is being debugged) of the StackFrame object. For Flash Player debugger version only.
-     * @playerversion Flash 9.0.115.0
-     * @langversion 3.0     
-     * @keyword StackFrame.toString, toString      
-     */      
-	public function toString():String
-	{
-		return name + "()" + (file ? "[" + file + ":" + line + "]" : "");
-	}
+		/**
+		 * Converts the StackFrame to a string of its properties.
+		 * @return A string containing the <code>name</code> property, and optionally the <code>file</code> 
+		 * and <code>line</code> properties (if a SWF file is being debugged) of the StackFrame object. For Flash Player debugger version only.
+		 * @playerversion Flash 9.0.115.0
+		 * @langversion 3.0     
+		 * @keyword StackFrame.toString, toString      
+		 */      
+		public function toString():String
+		{
+			return name + "()" + (file ? "[" + file + ":" + line + "]" : "");
+		}
     };
 	
 
@@ -108,8 +108,8 @@ package flash.sampler
     {
 		/**
 	     * The microseconds that define the duration of the Sample instance. For Flash Player debugger version only.
-             * 
-             * @playerversion Flash 9.0.115.0
+		 * 
+		 * @playerversion Flash 9.0.115.0
 	     * @langversion 3.0     
 	     * @keyword Sample, Sample.time, time         
 		 */
