@@ -463,10 +463,7 @@ namespace MMgc
 		}
 
 		/** The native VM page size (in bytes) for the current architecture */
-		static const size_t kNativePageSize;
-
-		// OS abstraction to determine native page size
-		static uint32_t vmPageSize();
+		const size_t kNativePageSize;
 
 		GCHeapConfig &Config() { return config; }
 

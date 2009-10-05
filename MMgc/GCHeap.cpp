@@ -85,10 +85,6 @@ namespace MMgc
 	MemoryProfiler* GCHeap::profiler = (MemoryProfiler*)-1;
 #endif
 
-	/** The native VM page size (in bytes) for the current architecture */
-	const size_t GCHeap::kNativePageSize = VMPI_getVMPageSize();
-
-
 	GCHeapConfig::GCHeapConfig() : 
 		initialSize(512), 
 		heapLimit(kDefaultHeapLimit), 
@@ -138,7 +134,8 @@ namespace MMgc
 	}
 
 	GCHeap::GCHeap(const GCHeapConfig& c)
-		: lastRegion(NULL),
+		: kNativePageSize(VMPI_getVMPageSize()),
+		  lastRegion(NULL),
 		  blocks(NULL),
 		  blocksLen(0),
 		  numDecommitted(0),
