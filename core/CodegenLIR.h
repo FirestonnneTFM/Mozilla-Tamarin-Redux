@@ -163,7 +163,8 @@ namespace avmplus
     // Limitations:
     //
     //   * we only use a binding cache if the name has no runtime parts.
-    //   * only implemented for OP_callproperty OP_callproplex, and OP_getproperty
+    //   * only implemented for OP_callproperty OP_callproplex, OP_getproperty,
+    //     and OP_setproperty
     //   * only common cases observed in testing are handled, others use a generic
     //     handler that's slightly slower than not using a cache at all.
     //     see callprop_miss() in jit-calls.h for detail on handled cases.
@@ -184,7 +185,7 @@ namespace avmplus
     //     more often if we stored Traits*.  however, specializing the cache on VTable*
     //     lest us pre-load the MethodEnv* for calls, saving one load.  also, comparing
     //     vtable pointers instead of traits pointers saves one more load. (5% median speedup)
-    //   * we pass the base object to CallCacheHandler instead of accessing it indirectly
+    //   * we pass the base object to CallCache::Handler instead of accessing it indirectly
     //     via args[], to save a load on the fast path.  Worth 2-3%, and enables the same
     //     code to handle OP_callproperty and OP_callproplex.
     //   * we put Multiname* in the cache instead of passing it as a constant parameter,
@@ -192,8 +193,8 @@ namespace avmplus
     //     less parameters is faster, and the multiname is only used on relatively slow paths.
     //   * we allocate cache instances while generating code, which lets us embed
     //     the cache address in code instead of loading from methodinfo.  some stats on ESC:
-    //        cache entries: 489
-    //        bytes of cache entries: 7,824
+    //        call cache entries: 489
+    //        bytes of call cache entries: 7,824
     //        instructions saved by early allocation (static): 1,445 (loads, movs, adds)
     //        MethodInfo instances: 2436
     //        bytes saved by eliminating 2 cache pointers on MethodInfo: 19,448
@@ -222,17 +223,13 @@ namespace avmplus
     //     maybe we could save the result and check its validity with (env->toplevel() == saved_proto->toplevel())
     //   * we could specialize on primitive type too, inlining just the toPrototype() path we need,
     //     instead of using a single set of handlers for all primitives types
+    //   * OP_initproperty is rarely late bound in jit code; if this evidence changes
+    //     then we should consider an inline cache for it.
 
-    class BindingCache;
-    typedef Atom (*CallCacheHandler)(BindingCache&, Atom base, int argc, Atom* args, MethodEnv*);
-    typedef Atom (*GetCacheHandler)(BindingCache&, MethodEnv*, Atom);
+    // binding cache common code
     class BindingCache {
     public:
-        BindingCache(CallCacheHandler, const Multiname*);
-        union {
-            CallCacheHandler call_handler;  // for late bound calls
-            GetCacheHandler get_handler;    // for late bound gets
-        };
+        BindingCache(const Multiname*);
         union {
             VTable* vtable;         // for kObjectType receivers
             Atom tag;               // for primitive receivers
@@ -244,24 +241,52 @@ namespace avmplus
         const Multiname* name;      // multiname for this entry, saved when cache created.
     };
 
-    /** helper class for allocating binding caches during jit compilation */
-    class BindingCacheBuilder
-    {
-        SeqBuilder<BindingCache*> caches;   // each entry points to an initialized cache
+    // cache for late bound calls
+    class CallCache: public BindingCache {
+    public:
+        typedef Atom (*Handler)(CallCache&, Atom base, int argc, Atom* args, MethodEnv*);
+        CallCache(const Multiname*);
+        Handler call_handler;
+    };
+
+    // cache for late bound gets
+    class GetCache: public BindingCache {
+    public:
+        typedef Atom (*Handler)(GetCache&, MethodEnv*, Atom);
+        GetCache(const Multiname*);
+        Handler get_handler;
+    };
+
+    // bind cache for sets.  This is necessarily larger than for gets because
+    // an assignment implies a coercion, and the target type is an additional 
+    // cached parameter to the coercion
+    class SetCache: public BindingCache {
+    public:
+        typedef void (*Handler)(SetCache&, Atom obj, Atom val, MethodEnv*);
+        SetCache(const Multiname*);
+        Handler set_handler;
         union {
-            CallCacheHandler call_handler;   // for initializing new call caches
-            GetCacheHandler get_handler;     // for initializing new get caches
+            Traits* slot_type;  // slot or setter type, for implicit coercion
+            GC* gc;             // saved GC* for set-handlers that call WBATOM
         };
+    };
+
+    /** helper class for allocating binding caches during jit compilation */
+    template <class C>
+    class CacheBuilder
+    {
+        SeqBuilder<C*> caches;   // each entry points to an initialized cache
         Allocator& alloc;                   // this allocator is used for new caches
+        C* findCacheSlot(const Multiname*);
     public:
         /** each new entry will be initialized with the given handler.
          *  temp_alloc is the allocator for this cache builder, with short lifetime.
          *  cache_alloc is used to allocate memory for the method's caches, with method lifetime */
-        BindingCacheBuilder(Allocator& temp_alloc, Allocator& cache_alloc, CallCacheHandler);
-        BindingCacheBuilder(Allocator& temp_alloc, Allocator& cache_alloc, GetCacheHandler);
+        CacheBuilder(Allocator& builder_alloc, Allocator& cache_alloc)
+            : caches(builder_alloc), alloc(cache_alloc) {}
 
-        /** allocate a new cache slot or reuse an existing one with the same imm30 */
-        BindingCache* allocateCacheSlot(const Multiname* name);
+        /** allocate a new cache slot or reuse an existing one with the same multiname */
+        C* allocateCacheSlot(const Multiname* name);
     };
 
     class CopyPropagation;
@@ -318,8 +343,9 @@ namespace avmplus
         int framesize;
         int labelCount;
         LookupCacheBuilder finddef_cache_builder;
-        BindingCacheBuilder call_cache_builder;
-        BindingCacheBuilder get_cache_builder;
+        CacheBuilder<CallCache> call_cache_builder;
+        CacheBuilder<GetCache> get_cache_builder;
+        CacheBuilder<SetCache> set_cache_builder;
         verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);

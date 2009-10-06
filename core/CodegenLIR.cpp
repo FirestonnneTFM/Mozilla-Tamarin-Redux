@@ -582,8 +582,9 @@ namespace avmplus
         pool(i->pool()),
         interruptable(true),
         patches(*alloc1),
-        call_cache_builder(*alloc1, initCodeMgr(pool)->allocator, callprop_miss),
-        get_cache_builder(*alloc1, pool->codeMgr->allocator, getprop_miss)
+        call_cache_builder(*alloc1, initCodeMgr(pool)->allocator),
+        get_cache_builder(*alloc1, pool->codeMgr->allocator),
+        set_cache_builder(*alloc1, pool->codeMgr->allocator)
     {
         state = NULL;
 
@@ -3660,9 +3661,9 @@ namespace avmplus
                     // use inline cache for late bound call
                     // cache contains: [handler, vtable, [data], Multiname*]
                     // and we call (*cache->handler)(cache, obj, argc, args*, MethodEnv*)
-                    BindingCache* cache = call_cache_builder.allocateCacheSlot(name);
+                    CallCache* cache = call_cache_builder.allocateCacheSlot(name);
                     LIns* cacheAddr = InsConstPtr(cache);
-                    LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, call_handler), cacheAddr);
+                    LIns* handler = loadIns(LIR_ldp, offsetof(CallCache, call_handler), cacheAddr);
                     out = callIns(FUNCTIONID(call_cache_handler), 6,
                         handler, cacheAddr, base, InsConst(argc), ap, env_param);
                 }
@@ -4050,9 +4051,9 @@ namespace avmplus
                                             toplevel, obj, multi, vtable);
                     } else {
                         // static name, use property cache
-                        BindingCache* cache = get_cache_builder.allocateCacheSlot(multiname);
+                        GetCache* cache = get_cache_builder.allocateCacheSlot(multiname);
                         LIns* cacheAddr = InsConstPtr(cache);
-                        LIns* handler = loadIns(LIR_ldp, offsetof(BindingCache, get_handler), cacheAddr);
+                        LIns* handler = loadIns(LIR_ldp, offsetof(GetCache, get_handler), cacheAddr);
                         value = callIns(FUNCTIONID(get_cache_handler), 4, handler, cacheAddr, env_param, obj);
                     }
 
@@ -4245,22 +4246,29 @@ namespace avmplus
                 else
                 {
                     LIns* value = loadAtomRep(sp);
-                    LIns* multi = initMultiname((Multiname*)op1, objDisp);
+                    const Multiname* name = (Multiname*)op1;
+                    LIns* multi = initMultiname(name, objDisp);
                     AvmAssert(state->value(objDisp).notNull);
-
-                    LIns* vtable = loadVTable(objDisp);
                     LIns* obj = loadAtomRep(objDisp);
 
-                    if (OP_setproperty)
+                    if (opcode == OP_setproperty)
                     {
-                        LIns* toplevel = loadToplevel();
-                        callIns(FUNCTIONID(setproperty), 5,
-                                        toplevel, obj, multi, value, vtable);
+                        if (!name->isRuntime()) {
+                            // use inline cache for dynamic setproperty access
+                            SetCache* cache = set_cache_builder.allocateCacheSlot(multiname);
+                            LIns* cacheAddr = InsConstPtr(cache);
+                            LIns* handler = loadIns(LIR_ldp, offsetof(SetCache, set_handler), cacheAddr);
+                            callIns(FUNCTIONID(set_cache_handler), 5, handler, cacheAddr, obj, value, env_param);
+                        } else {
+                            // last resort slow path for OP_setproperty
+                            callIns(FUNCTIONID(setprop_late), 4, env_param, obj, multi, value);
+                        }
                     }
                     else
                     {
-                        callIns(FUNCTIONID(initproperty), 5,
-                            env_param, obj, multi, value, vtable);
+                        // initproplate is rare in jit code because we typically interpret static
+                        // initializers, and constructor initializers tend to early-bind successfully.
+                        callIns(FUNCTIONID(initprop_late), 4, env_param, obj, multi, value);
                     }
                 }
                 break;
@@ -5519,32 +5527,45 @@ namespace avmplus
    }
 #endif
 
-    BindingCache::BindingCache(CallCacheHandler h, const Multiname* name)
-        : call_handler(h), name(name)
+    BindingCache::BindingCache(const Multiname* name)
+        : name(name)
     {}
 
-    BindingCacheBuilder::BindingCacheBuilder(Allocator& temp_alloc, Allocator& alloc, CallCacheHandler handler)
-        : caches(temp_alloc), call_handler(handler), alloc(alloc)
+    CallCache::CallCache(const Multiname* name)
+        : BindingCache(name), call_handler(callprop_miss)
     {}
 
-    BindingCacheBuilder::BindingCacheBuilder(Allocator& temp_alloc, Allocator& alloc, GetCacheHandler handler)
-        : caches(temp_alloc), get_handler(handler), alloc(alloc)
+    GetCache::GetCache(const Multiname* name)
+        : BindingCache(name), get_handler(getprop_miss)
     {}
+
+    SetCache::SetCache(const Multiname* name)
+        : BindingCache(name), set_handler(setprop_miss)
+    {}
+
+    template <class C>
+    C* CacheBuilder<C>::findCacheSlot(const Multiname* name)
+    {
+        for (Seq<C*> *p = caches.get(); p != NULL; p = p->tail)
+            if (p->head->name == name)
+                return p->head;
+        return NULL;
+    }
 
     // The cache structure is expected to be small in the normal case, so use a
     // linear list.  For some programs, notably classical JS programs, it may however
     // be larger, and we may need a more sophisticated structure.
-    BindingCache* BindingCacheBuilder::allocateCacheSlot(const Multiname* name)
+    template <class C>
+    C* CacheBuilder<C>::allocateCacheSlot(const Multiname* name)
     {
-        for (Seq<BindingCache*> *p = caches.get(); p != NULL; p = p->tail)
-            if (p->head->name == name)
-                return p->head;
-        _nvprof("binding cache bytes", sizeof(BindingCache));
-        BindingCache* c = new (alloc) BindingCache(call_handler, name);
-        caches.add(c);
+        C* c = findCacheSlot(name);
+        if (!c) {
+            _nvprof("binding cache bytes", sizeof(C));
+            c = new (alloc) C(name);
+            caches.add(c);
+        }
         return c;
     }
-
 }
 
 namespace nanojit
