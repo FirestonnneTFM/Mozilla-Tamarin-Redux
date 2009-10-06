@@ -94,7 +94,7 @@
     METHOD(ENVADDR(MethodEnv::newcatch), SIG2(P,P,P), newcatch)
     METHOD(ENVADDR(MethodEnv::newfunction), SIG4(P,P,P,P,P), newfunction)
 
-    Atom callprop_miss(BindingCache&, Atom obj, int argc, Atom* args, MethodEnv*);
+    Atom callprop_miss(CallCache&, Atom obj, int argc, Atom* args, MethodEnv*);
 
     #ifdef DOPROF
     # define PROF_IF(label, expr) bool hit = (expr); _nvprof(label, hit); if (hit)
@@ -109,7 +109,7 @@
     // if the cached obj was a primitive, we only need a matching atom tag for a hit
     #define PRIM_HIT(val, c) (atomKind(val) == c.tag)
 
-    REALLY_INLINE Atom invoke_cached_method(BindingCache& c, Atom obj, int argc, Atom* args) {
+    REALLY_INLINE Atom invoke_cached_method(CallCache& c, Atom obj, int argc, Atom* args) {
         // force arg0 = obj; if caller used OP_callproplex then receiver was null.
         args[0] = obj;
         return c.method->coerceEnter(argc, args);
@@ -121,7 +121,7 @@
     }
 
     // calling a declared method on a ScriptObject
-    Atom callprop_obj_method(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    Atom callprop_obj_method(CallCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
     {
         PROF_IF ("callprop_obj_method hit", OBJ_HIT(obj,c))
             return invoke_cached_method(c, obj, argc, args);
@@ -130,7 +130,7 @@
 
     // calling a function in a declared slot, specialized for slot type
     template <class T>
-    Atom callprop_obj_slot(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    Atom callprop_obj_slot(CallCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
     {
         PROF_IF ("callprop_obj_slot hit", OBJ_HIT(obj,c))
             return op_call(env, load_cached_slot<T>(c, obj), argc, args);
@@ -138,7 +138,7 @@
     }
 
     // calling an unknown binding on an object, i.e. a dynamic property
-    Atom callprop_obj_none(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    Atom callprop_obj_none(CallCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
     {
         PROF_IF ("callprop_obj_none hit", OBJ_HIT(obj,c)) {
             // cache hit: access dynamic properties and proto-chain directly
@@ -148,7 +148,7 @@
     }
 
     // calling a declared method on a primitive value
-    Atom callprop_prim_method(BindingCache& c, Atom prim, int argc, Atom* args, MethodEnv* env)
+    Atom callprop_prim_method(CallCache& c, Atom prim, int argc, Atom* args, MethodEnv* env)
     {
         PROF_IF ("callprop_prim_method hit", PRIM_HIT(prim, c))
             return invoke_cached_method(c, prim, argc, args);
@@ -156,7 +156,7 @@
     }
 
     // calling a dynamic property on a primitive's prototype
-    Atom callprop_prim_none(BindingCache& c, Atom prim, int argc, Atom* args, MethodEnv* env)
+    Atom callprop_prim_none(CallCache& c, Atom prim, int argc, Atom* args, MethodEnv* env)
     {
         PROF_IF ("callprop_prim_none hit", PRIM_HIT(prim, c)) {
             // cache hit since all prims are final
@@ -168,7 +168,7 @@
     }
 
     // generic call handler for uncommon cases
-    Atom callprop_generic(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    Atom callprop_generic(CallCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
     {
         // go back to callprop_miss() after this call in case atom type changes
         // to something allowing a smarter handler
@@ -180,7 +180,7 @@
         return toplevel->callproperty(obj, c.name, argc, args, vtable);
     }
 
-    static const CallCacheHandler callprop_obj_handlers[8] = {
+    static const CallCache::Handler callprop_obj_handlers[8] = {
         &callprop_obj_none,     // BKIND_NONE
         &callprop_obj_method,   // BKIND_METHOD
         0,                      // BKIND_VAR (custom handler picked below)
@@ -194,7 +194,7 @@
     // handlers for ScriptObject slots, indexed by SlotStorageType.  We only 
     // care about slot types that hold something we can call; other cases
     // will be errors, so we use the generic handler for them.
-    static const CallCacheHandler callprop_slot_handlers[8] = {
+    static const CallCache::Handler callprop_slot_handlers[8] = {
         &callprop_obj_slot<Atom>,           // SST_atom
         &callprop_generic,                  // SST_string
         &callprop_generic,                  // SST_namespace
@@ -205,7 +205,7 @@
         &callprop_generic                   // SST_double
     };
 
-    static const CallCacheHandler callprop_prim_handlers[8] = {
+    static const CallCache::Handler callprop_prim_handlers[8] = {
         &callprop_prim_none,    // BKIND_NONE
         &callprop_prim_method,  // BKIND_METHOD
         0,                      // BKIND_VAR (impossible on primitive)
@@ -221,7 +221,7 @@
     //  - save the object vtable (for ScriptObject*) or atom tag (all others)
     //  - pick a handler and save the MethodEnv* or slot_offset
     //  - invoke the new handler, which WILL NOT miss on this first call
-    Atom callprop_miss(BindingCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
+    Atom callprop_miss(CallCache& c, Atom obj, int argc, Atom* args, MethodEnv* env)
     {
         AssertNotNull(obj);
         Toplevel* toplevel = env->toplevel();
@@ -257,18 +257,18 @@
 
     // called by jit'd code when an OP_callproperty or callproplex could not be
     // early bound to a property and we must do the property lookup at runtime,
-    // AND the multiname has runtime parts, so we couldn't use a BindingCache.
+    // AND the multiname has runtime parts, so we couldn't use a CallCache.
     Atom callprop_late(MethodEnv* caller_env, Atom base, const Multiname* name, int argc, Atom* args) {
-        BindingCache c(NULL, name);  // temporary cache, just so we can call the generic handler.
+        CallCache c(name);  // temporary cache, just so we can call the generic handler.
         return callprop_generic(c, base, argc, args, caller_env);
     }
     FUNCTION(FUNCADDR(callprop_late), SIG5(A,P,A,P,I,P), callprop_late)
 
     // forward decl
-    Atom getprop_miss(BindingCache&, MethodEnv*, Atom obj);
+    Atom getprop_miss(GetCache&, MethodEnv*, Atom obj);
 
     // getting any property (catch-all)
-    Atom getprop_generic(BindingCache& c, MethodEnv* env, Atom obj)
+    Atom getprop_generic(GetCache& c, MethodEnv* env, Atom obj)
     {
         // reinstall miss handler so we don't end up dead-ended here in this handler.
         c.get_handler = getprop_miss;
@@ -294,7 +294,7 @@
 
     // getting a slot on an object, specialized on slot type to streamline boxing
     template <class T>
-    Atom getprop_obj_slot(BindingCache& c, MethodEnv* env, Atom obj)
+    Atom getprop_obj_slot(GetCache& c, MethodEnv* env, Atom obj)
     {
         PROF_IF ("getprop_obj_slot hit", OBJ_HIT(obj, c)) {
             return boxslot(atomObj(obj)->core(), load_cached_slot<T>(c, obj));
@@ -303,7 +303,7 @@
     }
 
     // calling a getter method on an object
-    Atom getprop_obj_get(BindingCache& c, MethodEnv* env, Atom obj)
+    Atom getprop_obj_get(GetCache& c, MethodEnv* env, Atom obj)
     {
         PROF_IF ("getprop_obj_get hit", OBJ_HIT(obj, c)) {
             return c.method->coerceEnter(obj);
@@ -312,7 +312,7 @@
     }
 
     // getting a dynamic property on an object
-    Atom getprop_obj_none(BindingCache& c, MethodEnv* env, Atom obj)
+    Atom getprop_obj_none(GetCache& c, MethodEnv* env, Atom obj)
     {
         PROF_IF ("getprop_obj_none hit", OBJ_HIT(obj, c)) {
             return atomObj(obj)->getMultinameProperty(c.name);
@@ -321,7 +321,7 @@
     }
 
     // getting an object method (method closure creation)
-    Atom getprop_obj_method(BindingCache& c, MethodEnv* env, Atom obj)
+    Atom getprop_obj_method(GetCache& c, MethodEnv* env, Atom obj)
     {
         PROF_IF ("getprop_obj_method hit", OBJ_HIT(obj, c)) {
             return env->toplevel()->methodClosureClass->create(c.method, obj)->atom();
@@ -330,7 +330,7 @@
     }
 
     // getting the result of a getter property on a primitive, e.g. String.length
-    Atom getprop_prim_get(BindingCache& c, MethodEnv* env, Atom obj)
+    Atom getprop_prim_get(GetCache& c, MethodEnv* env, Atom obj)
     {
         PROF_IF ("getprop_prim_get hit", PRIM_HIT(obj, c)) {
             return c.method->coerceEnter(obj);
@@ -339,7 +339,7 @@
     }
 
     // handlers for gets on ScriptObject* objects, indexed by bindingKind(Binding)
-    static const GetCacheHandler getprop_obj_handlers[8] = {
+    static const GetCache::Handler getprop_obj_handlers[8] = {
         &getprop_obj_none,      // BKIND_NONE
         &getprop_obj_method,    // BKIND_METHOD (method extraction)
         0,                      // BKIND_VAR (will use slot handler table below)
@@ -351,7 +351,7 @@
     };
 
     // handlers for slots on ScriptObject, indexed by SlotStorageType
-    static const GetCacheHandler getprop_slot_handlers[8] = {
+    static const GetCache::Handler getprop_slot_handlers[8] = {
         &getprop_obj_slot<OpaqueAtom>,      // SST_atom
         &getprop_obj_slot<String*>,         // SST_string
         &getprop_obj_slot<Namespace*>,      // SST_namespace
@@ -363,7 +363,7 @@
     };
 
     // handlers when object is primitive, indexed by bindingKind(Binding)
-    static const GetCacheHandler getprop_prim_handlers[8] = {
+    static const GetCache::Handler getprop_prim_handlers[8] = {
         &getprop_generic,     // BKIND_NONE
         &getprop_generic,     // BKIND_METHOD
         0,                    // BKIND_VAR (impossible on primitive)
@@ -374,7 +374,7 @@
         0,                    // BKIND_GETSET (impossible on primitive)
     };
 
-    Atom getprop_miss(BindingCache& c, MethodEnv* env, Atom obj)
+    Atom getprop_miss(GetCache& c, MethodEnv* env, Atom obj)
     {
         // cache handler when cache miss occurs
         AvmAssert(!AvmCore::isNullOrUndefined(obj));
@@ -445,8 +445,202 @@
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
     METHOD(ENVADDR(MethodEnv::nullcheck), SIG2(V,P,A), nullcheck)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toVTable), SIG2(P,P,A), toVTable)
-    METHOD(TOPLEVELADDR(Toplevel::setproperty), SIG5(V,P,A,P,A,P), setproperty)
-    METHOD(ENVADDR(MethodEnv::initproperty), SIG5(V,P,A,P,A,P), initproperty)
+
+    void setprop_miss(SetCache& c, Atom obj, Atom val, MethodEnv* env);
+
+    void setprop_generic(SetCache& c, Atom obj, Atom val, MethodEnv* env)
+    {
+        // reinstall miss handler so we don't end up dead-ended here in this handler.
+        c.set_handler = setprop_miss;
+        Toplevel* toplevel = env->toplevel();
+        VTable* vtable = toplevel->toVTable(obj);
+        tagprof("setprop_generic obj", obj);
+        tagprof("setprop_generic val", val);
+        tagprof("setprop_generic bind", toplevel->getBinding(vtable->traits, c.name));
+        toplevel->setproperty(obj, c.name, val, vtable);
+    }
+
+    // sst_atom (*), for slot types not requiring any coercion
+    void setprop_slot_any(SetCache& c, Atom obj, Atom val, MethodEnv* env)
+    {
+        PROF_IF ("setprop_slot_any hit", OBJ_HIT(obj, c)) {
+            ScriptObject* obj_ptr = atomObj(obj);
+            Atom* slot_ptr = (Atom*)(uintptr_t(obj_ptr) + c.slot_offset);
+            WBATOM(c.gc, obj_ptr, slot_ptr, val);
+        } else {
+            setprop_miss(c, obj, val, env);
+        }
+    }
+
+    // coerce and store Object slot; converts undefined->null, no other typecheck
+    REALLY_INLINE void store_cached_slot(SetCache& c, ScriptObject* obj, OpaqueAtom* slot_ptr, Atom val)
+    {
+        AvmAssert(c.gc == obj->gc());
+        WBATOM(c.gc, obj, (Atom*)slot_ptr, (val != undefinedAtom ? val : nullObjectAtom));
+    }
+
+    // helper to throw a type error, intentionally not inline
+    void throw_checktype_error(SetCache& c, ScriptObject* obj_ptr, Atom val)
+    {
+        AvmCore* core = obj_ptr->core();
+        obj_ptr->toplevel()->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(val),
+                core->toErrorString(c.slot_type));
+    }
+
+    // coerce & store into ScriptObject subclass-typed slot
+    REALLY_INLINE void store_cached_slot(SetCache& c, ScriptObject* obj, ScriptObject** slot_ptr, Atom val)
+    {
+        if ((atomKind(val) == kObjectType && atomObj(val)->traits()->containsInterface(c.slot_type)) ||
+            AvmCore::isNullOrUndefined(val)) {
+            WBRC(c.slot_type->core->gc, obj, slot_ptr, atomPtr(val));
+        } else {
+            throw_checktype_error(c, obj, val);
+        }
+    }
+
+    // coerce & store into int slot
+    REALLY_INLINE void store_cached_slot(SetCache&, ScriptObject*, int32_t* slot_ptr, Atom val)
+    {
+        *slot_ptr = AvmCore::integer(val);
+    }
+
+    // coerce & store into uint slot
+    REALLY_INLINE void store_cached_slot(SetCache&, ScriptObject*, uint32_t* slot_ptr, Atom val)
+    {
+        *slot_ptr = AvmCore::toUInt32(val);
+    }
+
+    // coerce & store into Boolean slot
+    REALLY_INLINE void store_cached_slot(SetCache&, ScriptObject*, Bool32* slot_ptr, Atom val)
+    {
+        *slot_ptr = (Bool32)AvmCore::boolean(val);
+    }
+
+    // coerce & store into Number slot
+    REALLY_INLINE void store_cached_slot(SetCache&, ScriptObject*, double* slot_ptr, Atom val)
+    {
+        *slot_ptr = AvmCore::number(val);
+    }
+
+    // set slot on an object, sst_scriptobject, sst_int32, sst_uint32
+    template <class T>
+    void setprop_slot(SetCache& c, Atom obj, Atom val, MethodEnv* env)
+    {
+        PROF_IF ("setprop_slot hit", OBJ_HIT(obj, c)) {
+            ScriptObject* obj_ptr = atomObj(obj);
+            T* slot_ptr = (T*) (uintptr_t(obj_ptr) + c.slot_offset);
+            store_cached_slot(c, obj_ptr, slot_ptr, val);
+        } else {
+            setprop_miss(c, obj, val, env);
+        }
+    }
+
+    // storing dynamic property on object
+    void setprop_none(SetCache& c, Atom obj, Atom val, MethodEnv* env)
+    {
+        PROF_IF ("setprop_none hit", OBJ_HIT(obj, c)) {
+            atomObj(obj)->setMultinameProperty(c.name, val);
+        } else {
+            setprop_miss(c, obj, val, env);
+        }
+    }
+
+    // calling a setter on an object
+    void setprop_setter(SetCache& c, Atom obj, Atom val, MethodEnv* env)
+    {
+        PROF_IF ("setprop_setter hit", OBJ_HIT(obj, c)) {
+            // todo; obj is always a good type here
+            // we could specialize coerceUnboxEnter on the setter type, like for slots
+			Atom args[2] = { obj, val };
+			c.method->coerceEnter(1, args);
+        } else {
+            setprop_miss(c, obj, val, env);
+        }
+    }
+
+    // handlers for sets on ScriptObject* objects, indexed by bindingKind(Binding)
+    static const SetCache::Handler setprop_obj_handlers[8] = {
+        &setprop_none,          // BKIND_NONE
+        &setprop_generic,       // BKIND_METHOD (dynamic set for xml, otherwise error)
+        0,                      // BKIND_VAR (will use slot handler table below)
+        &setprop_generic,       // BKIND_CONST (error)
+        0,                      // BKIND_unused (impossible)
+        &setprop_generic,       // BKIND_GET (error)
+        &setprop_setter,        // BKIND_SET
+        &setprop_setter         // BKIND_GETSET
+    };
+
+    // handlers for sets of a declared var on a ScriptObject, indexed by bindingKind
+    static const SetCache::Handler setprop_slot_handlers[8] = {
+        &setprop_slot<OpaqueAtom>,          // SST_atom (for slot type Object.  type * is an exception)
+        &setprop_generic,                   // SST_string
+        &setprop_generic,                   // SST_namespace
+        &setprop_slot<ScriptObject*>,       // SST_scriptobject
+        &setprop_slot<int32_t>,             // SST_int32
+        &setprop_slot<uint32_t>,            // SST_uint32
+        &setprop_slot<Bool32>,              // SST_bool32
+        &setprop_slot<double>,              // SST_double
+    };
+
+    void setprop_miss(SetCache& c, Atom obj, Atom val, MethodEnv* env)
+    {
+        // cache handler when cache miss occurs
+        AvmAssert(!AvmCore::isNullOrUndefined(obj));
+        Toplevel* toplevel = env->toplevel();
+        VTable* vtable = toplevel->toVTable(obj);
+        Traits* actual_type = vtable->traits;
+        Binding b = toplevel->getBinding(actual_type, c.name);
+        if (AvmCore::hasSetterBinding(b)) {
+            c.method = vtable->methods[AvmCore::bindingToSetterId(b)];
+        }
+        if (isObjectPtr(obj)) {
+            c.vtable = vtable;
+            if (AvmCore::isVarBinding(b)) {
+                // precompute the slot offset, then install a cache handler that's
+                // hardwired to coerce Atom to slot type then store
+                void *slot_ptr, *obj_ptr = atomObj(obj);
+                uint32_t slot = AvmCore::bindingToSlotId(b);
+                const TraitsBindings* tb = actual_type->getTraitsBindings();
+                const SlotStorageType sst = tb->calcSlotAddrAndSST(slot, obj_ptr, slot_ptr);
+                // use handler based on sst
+                c.set_handler = setprop_slot_handlers[sst];
+                c.slot_type = tb->getSlotTraits(slot);
+                c.slot_offset = uintptr_t(slot_ptr) - uintptr_t(obj_ptr);
+                if (sst == SST_atom) {
+                    // slot type is * or Object, handlers want gc ptr instead of traits ptr
+                    c.gc = actual_type->core->gc;
+                    if (c.slot_type == NULL) {
+                        // slot type is *
+                        c.set_handler = setprop_slot_any;
+                    }
+                }
+            } else {
+                // non-var handler, including const slots (setting them is an error)
+                c.set_handler = setprop_obj_handlers[AvmCore::bindingKind(b)];
+            }
+        } else {
+            // must be a primitive: int, bool, string, namespace, or number.
+            // all paths lead to an error, so just use the generic handler.
+            c.set_handler = &setprop_generic;
+        }
+        c.set_handler(c, obj, val, env);
+    }
+    FUNCTION(CALL_INDIRECT, SIG5(V,P,P,A,A,P), set_cache_handler)
+
+    void setprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom val)
+    {
+        SetCache c(name);  // temporary cache, just so we can call the generic handler.
+        setprop_generic(c, obj, val, env);
+    }
+    FUNCTION(FUNCADDR(setprop_late), SIG4(V,P,A,P,A), setprop_late)
+
+    void initprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom value) 
+    {
+        tagprof("initprop_late", ojb);
+        env->initproperty(obj, name, value, toVTable(env->toplevel(), obj));
+    }
+    FUNCTION(FUNCADDR(initprop_late), SIG4(V,P,A,P,A), initprop_late)
+
     METHOD(COREADDR(AvmCore::setDxns), SIG3(V,P,P,P), setDxns)
     METHOD(COREADDR(AvmCore::setDxnsLate), SIG3(V,P,P,A), setDxnsLate)
     FUNCTION(FUNCADDR(AvmCore::istypeAtom), SIG2(A,A,P), istypeAtom)
