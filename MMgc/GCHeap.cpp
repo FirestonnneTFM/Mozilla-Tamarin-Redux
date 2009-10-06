@@ -216,12 +216,13 @@ namespace MMgc
 
 		instance = NULL;
 
-		if(numAlloc != 0 && status != kMemAbort)
+		// numAlloc should just be the size of the HeapBlock's space
+		if(numAlloc != (uint32_t)AddrToBlock(blocks)->size && status != kMemAbort)
 		{
 			for (unsigned int i=0; i<blocksLen; i++) 
 			{
 				HeapBlock *block = &blocks[i];
-				if(block->inUse() && block->baseAddr)
+				if(block->inUse() && block->baseAddr && block->baseAddr != (char*)blocks)
 				{
 #ifndef DEBUG
 					if (config.verbose)
@@ -237,7 +238,7 @@ namespace MMgc
 			}	
 			GCAssert(false);
 		}
-		
+
 #ifdef MMGC_MEMORY_PROFILER
 		hooksEnabled = false;
 		if(profiler)
@@ -542,7 +543,6 @@ namespace MMgc
 		GCAssert(region->baseAddr == block->baseAddr);
 		GCAssert(region->reserveTop == block->endAddr());
 		
-
 		int newBlocksLen = blocksLen - block->size;
 
 		HeapBlock *nextBlock = block + block->size;
@@ -570,13 +570,9 @@ namespace MMgc
 		else if(remove_sentinel)
 			--newBlocksLen;
 
-		// we're removing a region so re-allocate the blocks w/o the blocks for this region
-		HeapBlock *newBlocks = new HeapBlock[newBlocksLen];
-		
-		// copy blocks before this block
-		GCAssert(block - blocks <= newBlocksLen);
-		memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
-		
+		// just re-use blocks; small wastage possible
+		HeapBlock *newBlocks = blocks;
+
 		int offset = int(block-blocks);
 		int sen_offset = 0;
 		HeapBlock *src = block + block->size;
@@ -600,10 +596,13 @@ namespace MMgc
 			sen_offset = -1;
 		}
 		
+		// the memmove will overwrite this so save it
+		int blockSize = block->size;
+
 		// copy blocks after
 		int lastChunkSize = int((blocks + blocksLen) - src);
 		GCAssert(lastChunkSize + offset == newBlocksLen);
-		memcpy(newBlocks + offset, src, lastChunkSize * sizeof(HeapBlock));
+		memmove(newBlocks + offset, src, lastChunkSize * sizeof(HeapBlock));
 
 		// Fix up the prev/next pointers of each freelist.  This is a little more complicated
 		// than the similiar code in ExpandHeap because blocks after the one we are free'ing
@@ -614,16 +613,12 @@ namespace MMgc
 			do {
 				if (temp->prev != fl) {
 					if(temp->prev > block) {
-						temp->prev = newBlocks + (temp->prev-blocks-block->size) + sen_offset;
-					} else {
-						temp->prev = newBlocks + (temp->prev-blocks);
+						temp->prev = newBlocks + (temp->prev-blocks-blockSize) + sen_offset;
 					}
 				}
 				if (temp->next != fl) {
 					if(temp->next > block) {
-						temp->next = newBlocks + (temp->next-blocks-block->size) + sen_offset;
-					} else {
-						temp->next = newBlocks + (temp->next-blocks);
+						temp->next = newBlocks + (temp->next-blocks-blockSize) + sen_offset;
 					}
 				}
 			} while ((temp = temp->next) != fl);
@@ -634,13 +629,11 @@ namespace MMgc
 		Region *r = lastRegion;
 		while(r) {
 			if(r->blockId > region->blockId) {
-				r->blockId -= (block->size-sen_offset);
+				r->blockId -= (blockSize-sen_offset);
 			}
 			r = r->prev;
 		}
 
-		delete [] blocks;
-		blocks = newBlocks;
 		blocksLen = newBlocksLen;
 		RemoveRegion(region);
 
@@ -1197,7 +1190,9 @@ namespace MMgc
 #endif
 			}
 		}
-	}
+	} 
+
+#define roundUp(_s, _inc) (((_s + _inc - 1) / _inc) * _inc)
 	 
 	bool GCHeap::ExpandHeapInternal(int askSize)
 	{
@@ -1220,14 +1215,34 @@ namespace MMgc
 		int newRegionSize = 0;
 		bool contiguous = false;
 		int commitAvail = 0;
-		
-		// Allocate at least kMinHeapIncrement blocks
-		if (size < kMinHeapIncrement) {
-			size = kMinHeapIncrement;
-		}
 
-		// Round to the nearest kMinHeapIncrement
-		size = ((size + kMinHeapIncrement - 1) / kMinHeapIncrement) * kMinHeapIncrement;
+		// Round up to the nearest kMinHeapIncrement
+		size = roundUp(size, kMinHeapIncrement);
+
+		// when we allocate a new region the space needed for the HeapBlocks, if it won't fit 
+		// in existing space it must fit in new space so we may need to increase the new space
+
+		HeapBlock *newBlocks = blocks;
+		
+		if(blocksLen != 0 || config.initialSize == 0) // if initial heap size is zero we can't assume HeapBlocks will fit in askSize
+		{
+			uint32_t curHeapBlocksSize = blocks ? AddrToBlock(blocks)->size : 0;
+			uint32_t newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + 1); // +1 for potential new sentinel
+
+			// size is based on newSize and vice versa, loop to settle (typically one loop, sometimes two)
+			while(newHeapBlocksSize > curHeapBlocksSize) 
+			{
+				// use askSize so HeapBlock's can fit in rounding slop
+				size = roundUp(askSize + newHeapBlocksSize, kMinHeapIncrement);
+
+				// tells us use new memory for blocks below
+				newBlocks = NULL;
+
+				// since newSize is based on size we have to repeat in case it changes
+				curHeapBlocksSize = newHeapBlocksSize;
+				newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + 1);
+			}
+		}
 
 		if(config.useVirtualMemory)
 		{
@@ -1322,9 +1337,11 @@ namespace MMgc
 			// is the first-ever expansion.  Allocate a non-contiguous region.
 			
 			// don't waste this uncommitted space, go ahead and commit it
-			if(commitAvail) {
-				ExpandHeapInternal(commitAvail);
-			}
+			// FIXME: the new HeapBlock approach doesn't work with this, need to
+			// instead do a region scan above instead of just using lastRegion
+//			if(commitAvail != 0) {
+//				ExpandHeapInternal(commitAvail);
+//			}
 			
 			// Don't use any of the available space in the current region.
 			commitAvail = 0;
@@ -1392,16 +1409,12 @@ namespace MMgc
 		// Add space for the "top" sentinel
 		newBlocksLen++;
 
-		HeapBlock *newBlocks = new HeapBlock[newBlocksLen];
 		if (!newBlocks) {
-			// Could not get the memory.
-			if( newRegionAddr )
-				ReleaseMemory(newRegionAddr, newRegionSize);
-			return false;
+ 			newBlocks = (HeapBlock*)baseAddr;
 		}
 		
 		// Copy all the existing blocks.
-		if (blocksLen) {
+		if (blocks && blocks != newBlocks) {
 			VMPI_memcpy(newBlocks, blocks, blocksLen * sizeof(HeapBlock));
 
 			// Fix up the prev/next pointers of each freelist.
@@ -1425,9 +1438,9 @@ namespace MMgc
 		// and add it to the free list.
 		HeapBlock *block = newBlocks+blocksLen;
 		block->baseAddr = baseAddr;
-
 		block->size = size;
 		block->sizePrevious = 0;
+
 		// link up contiguous blocks
 		if(blocksLen && contiguous)
 		{
@@ -1451,10 +1464,22 @@ namespace MMgc
 		block->freeTrace = 0;
 #endif
 
+		// if baseAddr was used for HeapBlocks split
+		if((char*)newBlocks == baseAddr)
+		{
+			size_t numBlocksNeededForHeapBlocks = numHeapBlocksToNumBlocks(newBlocksLen);
+			HeapBlock *next = Split(block, numBlocksNeededForHeapBlocks);
+			// this space counts as used space
+			numAlloc += numBlocksNeededForHeapBlocks;
+			block = next;
+		}
+
 		AddToFreeList(block);
 
 		// Initialize the rest of the new blocks to empty.
-		for (int i=1; i<size; i++) {
+		uint32_t freeBlockSize = block->size;
+
+		for (uint32_t i=1; i < freeBlockSize; i++) {
 			block++;
 			block->baseAddr = NULL;
 			block->size = 0;
@@ -1473,7 +1498,7 @@ namespace MMgc
 		block++;
 		block->baseAddr     = NULL;
 		block->size         = 0;
-		block->sizePrevious = size;
+		block->sizePrevious = freeBlockSize;
 		block->prev         = NULL;
 		block->next         = NULL;
 		block->committed    = false;
@@ -1483,12 +1508,18 @@ namespace MMgc
 		block->freeTrace = 0;
 #endif
 
-		// Replace the blocks list
-		if (blocks) {
-			delete [] blocks;
-		}
+		// save for free'ing
+		void *oldBlocks = blocks;
+
 		blocks = newBlocks;
 		blocksLen = newBlocksLen;
+
+		// free old blocks space using new blocks (FreeBlock poisons blocks so can't use old blocks)
+		if (oldBlocks && oldBlocks != newBlocks) {
+			HeapBlock *oldBlocksHB = AddrToBlock(oldBlocks);
+			numAlloc -= oldBlocksHB->size;
+			FreeBlock(oldBlocksHB);
+		}
 
 		// If we created a new region, save the base address so we can free later.		
 		if (newRegionAddr) {
@@ -1553,7 +1584,6 @@ namespace MMgc
 						  region->reserveTop-region->baseAddr);
 			delete region;
 		}
-		delete [] blocks;
 	}
 	
 #ifdef MMGC_HOOKS

@@ -579,7 +579,7 @@ namespace MMgc
 		bool ExpandHeapInternal(int size);
 		
 		// Block struct used for free lists and memory traversal
-		class HeapBlock : public GCAllocObject
+		class HeapBlock 
 		{
 		public:
 			char *baseAddr;   // base address of block's memory
@@ -680,16 +680,24 @@ namespace MMgc
 			return status != kMemNormal && status != kMemAbort;
 		}
 
+ 		uint32_t numHeapBlocksToNumBlocks(uint32_t numBlocks)
+ 		{
+ 			uint32_t bytes = numBlocks * sizeof(HeapBlock);
+ 			// round up to nearest block
+ 			bytes = (bytes + kBlockSize - 1) & ~(kBlockSize-1);
+ 			return bytes / kBlockSize;
+ 		}
+
 		// data section
 		static GCHeap *instance;
 		static size_t leakedBytes;
 
 		FixedMalloc fixedMalloc;
 		HeapBlock *blocks;
-		unsigned int blocksLen;
-		unsigned int numDecommitted;
+		uint32_t blocksLen;
+		uint32_t numDecommitted;
 		HeapBlock freelists[kNumFreeLists];
-		unsigned int numAlloc;
+		uint32_t numAlloc;
 		vmpi_spin_lock_t m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
