@@ -301,7 +301,7 @@ namespace MMgc
 			mmgc_debug_only(MMgc::VerifyTaggedArray(mem, false);)
 
 			char *p = (char*)mem - MMGC_ARRAYHEADER_SIZE;
-			size_t count = *(size_t*)p;
+			size_t count = *(size_t*)(void*)p;
 
 			T* tail = mem + count;
 			while ( tail > mem )

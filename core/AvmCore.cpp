@@ -2735,7 +2735,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		LivePoolNode* node = livePools;
 		while (node)
 		{
-			PoolObject* pool = (PoolObject*)(node->pool->get());
+		  PoolObject* pool = (PoolObject*)(void*)(node->pool->get());
 			if (pool)
 			{
 				// pool is still alive -- if about to get collected, dynamicize the strings
