@@ -130,7 +130,7 @@ namespace MMgc
 #ifdef MMGC_DELETE_DEBUGGING
 		if (mem != NULL)
 		{
-			*(uint32_t*)mem = guard;
+			*(uint32_t*)(void*)mem = guard;
 			mem += MMGC_GUARDCOOKIE_SIZE;
 		}
 #endif // MMGC_DELETE_DEBUGGING
