@@ -1645,6 +1645,21 @@ public:
 		void allocaPopTo(void* top);
 	
 		void* allocaPush(size_t nbytes, AllocaAutoPtr& x);
+
+#ifdef DEBUGGER
+ 	public:
+		// Attach an opaque sampler to this GC, overriding any previous sampler
+ 		void* GetAttachedSampler();
+		
+		// Retrieve the opaque sampler from this GC, NULL if none has been attached
+ 		void SetAttachedSampler(void *sampler);
+ 		
+ 	private:
+		// An attached sampler, or NULL.  We need to attach the sampler to the GC
+		// because it moves with the GC/AvmCore pair, it is not attached to a
+		// particular thread.
+ 		void* m_sampler;
+#endif
 	};
 
 	// helper class to wipe out vtable pointer of members for DRC
