@@ -187,41 +187,176 @@ package {
  - running multiple active versions
 */
 
+// API Versioning - Globals
 package avmplus {
-[API(660)] public var x0 = true;
-[API(661)] public var x1 = true;
-[API(662)] public var x2 = true;
-[API(663)] public var x3 = true;
-[API(664)] public var x4 = true;
-[API(665)] public var x5 = true;
-[API(661,662)] public var x12 = true;
-[API(662,663)] public var x23 = true;
+    public var public_var:Boolean = true;
+    [API(660)] public var public_var_660:Boolean = true;
+    [API(661)] public var public_var_661:Boolean = true;
+    [API(662)] public var public_var_662:Boolean = true;
+    [API(663)] public var public_var_663:Boolean = true;
+    [API(664)] public var public_var_664:Boolean = true;
+    [API(665)] public var public_var_665:Boolean = true;
+    //[API(666)] public var public_var_666:Boolean = true;
+    //[API(667)] public var public_var_667:Boolean = true;
+    [API(661,662)] public var public_var_661_662:Boolean = true;
+    [API(666,660)] public var public_var_666_660:Boolean = true;
+    [API(664,662,666)] public var public_var_664_662_666:Boolean = true;
+    [API(665,660,661,662)] public var public_var_665_660_661_662:Boolean = true;
+    
+    public const public_const:Boolean = true;
+    [API(660)] public const public_const_660:Boolean = true;
+    [API(661)] public const public_const_661:Boolean = true;
+    [API(662)] public const public_const_662:Boolean = true;
+    [API(663)] public const public_const_663:Boolean = true;
+    [API(664)] public const public_const_664:Boolean = true;
+    [API(665)] public const public_const_665:Boolean = true;
+    //[API(666)] public const public_const_666:Boolean = true;
+    //[API(667)] public const public_const_667:Boolean = true;
+    [API(661,662)] public const public_const_661_662:Boolean = true;
+    [API(666,660)] public const public_const_666_660:Boolean = true;
+    [API(664,662,666)] public const public_const_664_662_666:Boolean = true;
+    [API(665,660,661,662)] public const public_const_665_660_661_662:Boolean = true;
+    
+    public function public_function():Boolean { return true; } 
+    [API(660)] public function public_function_660():Boolean { return true; } 
+    [API(661)] public function public_function_661():Boolean { return true; } 
+    [API(662)] public function public_function_662():Boolean { return true; } 
+    [API(663)] public function public_function_663():Boolean { return true; } 
+    [API(664)] public function public_function_664():Boolean { return true; } 
+    [API(665)] public function public_function_665():Boolean { return true; } 
+    //[API(666)] public function public_function_666():Boolean { return true; } 
+    //[API(667)] public function public_function_667():Boolean { return true; } 
+    [API(661,662)] public function public_function_661_662():Boolean { return true; } 
+    [API(666,660)] public function public_function_666_660():Boolean { return true; } 
+    [API(664,662,666)] public function public_function_664_662_666():Boolean { return true; } 
+    [API(665,660,661,662)] public function public_function_665_660_661_662():Boolean { return true; }
+    
+    public function get public_getset():Boolean { return true; } 
+    [API(660)] public function get public_getset_660():Boolean { return true; } 
+    [API(661)] public function get public_getset_661():Boolean { return true; } 
+    [API(662)] public function get public_getset_662():Boolean { return true; } 
+    [API(663)] public function get public_getset_663():Boolean { return true; } 
+    [API(664)] public function get public_getset_664():Boolean { return true; } 
+    [API(665)] public function get public_getset_665():Boolean { return true; } 
+    //[API(666)] public function get public_getset_666():Boolean { return true; } 
+    //[API(667)] public function get public_getset_667():Boolean { return true; } 
+    [API(661,662)] public function get public_getset_661_662():Boolean { return true; } 
+    [API(666,660)] public function get public_getset_666_660():Boolean { return true; } 
+    [API(664,662,666)] public function get public_getset_664_662_666():Boolean { return true; } 
+    [API(665,660,661,662)] public function get public_getset_665_660_661_662():Boolean { return true; }
+    
+    public function set public_getset(x:*):void {  } 
+    [API(660)] public function set public_getset_660(x:*):void {  } 
+    [API(661)] public function set public_getset_661(x:*):void {  } 
+    [API(662)] public function set public_getset_662(x:*):void {  } 
+    [API(663)] public function set public_getset_663(x:*):void {  } 
+    [API(664)] public function set public_getset_664(x:*):void {  } 
+    [API(665)] public function set public_getset_665(x:*):void {  } 
+    //[API(666)] public function set public_getset_666(x:*):void {  } 
+    //[API(667)] public function set public_getset_667(x:*):void {  } 
+    [API(661,662)] public function set public_getset_661_662(x:*):void {  } 
+    [API(666,660)] public function set public_getset_666_660(x:*):void {  } 
+    [API(664,662,666)] public function set public_getset_664_662_666(x:*):void {  } 
+    [API(665,660,661,662)] public function set public_getset_665_660_661_662(x:*):void {  }
+    
+}
 
-
-public class A {
-    public function m () {
-        return 10;
+// API Versioning - Classes
+package avmplus {
+    public class public_class {
+        
+        public var public_var:Boolean = true;
+        [API(660)] public var public_var_660:Boolean = true;
+        [API(661)] public var public_var_661:Boolean = true;
+        [API(662)] public var public_var_662:Boolean = true;
+        [API(663)] public var public_var_663:Boolean = true;
+        [API(664)] public var public_var_664:Boolean = true;
+        [API(665)] public var public_var_665:Boolean = true;
+        //[API(666)] public var public_var_666:Boolean = true;
+        //[API(667)] public var public_var_667:Boolean = true;
+        [API(661,662)] public var public_var_661_662:Boolean = true;
+        [API(666,660)] public var public_var_666_660:Boolean = true;
+        [API(664,662,666)] public var public_var_664_662_666:Boolean = true;
+        [API(665,660,661,662)] public var public_var_665_660_661_662:Boolean = true;
+        
+        public const public_const:Boolean = true;
+        [API(660)] public const public_const_660:Boolean = true;
+        [API(661)] public const public_const_661:Boolean = true;
+        [API(662)] public const public_const_662:Boolean = true;
+        [API(663)] public const public_const_663:Boolean = true;
+        [API(664)] public const public_const_664:Boolean = true;
+        [API(665)] public const public_const_665:Boolean = true;
+        //[API(666)] public const public_const_666:Boolean = true;
+        //[API(667)] public const public_const_667:Boolean = true;
+        [API(661,662)] public const public_const_661_662:Boolean = true;
+        [API(666,660)] public const public_const_666_660:Boolean = true;
+        [API(664,662,666)] public const public_const_664_662_666:Boolean = true;
+        [API(665,660,661,662)] public const public_const_665_660_661_662:Boolean = true;
+        
+        public function public_function():Boolean { return true; } 
+        [API(660)] public function public_function_660():Boolean { return true; } 
+        [API(661)] public function public_function_661():Boolean { return true; } 
+        [API(662)] public function public_function_662():Boolean { return true; } 
+        [API(663)] public function public_function_663():Boolean { return true; } 
+        [API(664)] public function public_function_664():Boolean { return true; } 
+        [API(665)] public function public_function_665():Boolean { return true; } 
+        //[API(666)] public function public_function_666():Boolean { return true; } 
+        //[API(667)] public function public_function_667():Boolean { return true; } 
+        [API(661,662)] public function public_function_661_662():Boolean { return true; } 
+        [API(666,660)] public function public_function_666_660():Boolean { return true; } 
+        [API(664,662,666)] public function public_function_664_662_666():Boolean { return true; } 
+        [API(665,660,661,662)] public function public_function_665_660_661_662():Boolean { return true; }
+    
+        public function get public_getset():Boolean { return true; } 
+        [API(660)] public function get public_getset_660():Boolean { return true; } 
+        [API(661)] public function get public_getset_661():Boolean { return true; } 
+        [API(662)] public function get public_getset_662():Boolean { return true; } 
+        [API(663)] public function get public_getset_663():Boolean { return true; } 
+        [API(664)] public function get public_getset_664():Boolean { return true; } 
+        [API(665)] public function get public_getset_665():Boolean { return true; } 
+        //[API(666)] public function get public_getset_666():Boolean { return true; } 
+        //[API(667)] public function get public_getset_667():Boolean { return true; } 
+        [API(661,662)] public function get public_getset_661_662():Boolean { return true; } 
+        [API(666,660)] public function get public_getset_666_660():Boolean { return true; } 
+        [API(664,662,666)] public function get public_getset_664_662_666():Boolean { return true; } 
+        [API(665,660,661,662)] public function get public_getset_665_660_661_662():Boolean { return true; }
+        
+        public function set public_getset(x:*):void {  } 
+        [API(660)] public function set public_getset_660(x:*):void {  } 
+        [API(661)] public function set public_getset_661(x:*):void {  } 
+        [API(662)] public function set public_getset_662(x:*):void {  } 
+        [API(663)] public function set public_getset_663(x:*):void {  } 
+        [API(664)] public function set public_getset_664(x:*):void {  } 
+        [API(665)] public function set public_getset_665(x:*):void {  } 
+        //[API(666)] public function set public_getset_666(x:*):void {  } 
+        //[API(667)] public function set public_getset_667(x:*):void {  } 
+        [API(661,662)] public function set public_getset_661_662(x:*):void {  } 
+        [API(666,660)] public function set public_getset_666_660(x:*):void {  } 
+        [API(664,662,666)] public function set public_getset_664_662_666(x:*):void {  } 
+        [API(665,660,661,662)] public function set public_getset_665_660_661_662(x:*):void {  }
     }
-
-    [API(661)] public var x = 10;
-
-
-    [API(661,662)] public function n () {
-        return 20;
-	}
-
-	[API(661,662)] public function p () {
-	    return 30;
-    }
-}
-
-public class B extends A {
-    override public function m() { return 50 }
-}
-
-public class C {
-    public static function m() { return new B().m() }
-}
-
-[Version("10.0.32")] public var foo
+    
+    [API(660)] public class  public_class_660 {  } 
+    [API(661)] public class  public_class_661 {  } 
+    [API(662)] public class  public_class_662 {  } 
+    [API(663)] public class  public_class_663 {  } 
+    [API(664)] public class  public_class_664 {  } 
+    [API(665)] public class  public_class_665 {  } 
+    [API(661,662)] public class  public_class_661_662 {  } 
+    [API(666,660)] public class  public_class_666_660 {  } 
+    [API(664,662,666)] public class  public_class_664_662_666 {  } 
+    [API(665,660,661,662)] public class  public_class_665_660_661_662 {  }
+    
+    public interface  public_interface {}
+    [API(660)] public interface  public_interface_660 {  } 
+    [API(661)] public interface  public_interface_661 {  } 
+    [API(662)] public interface  public_interface_662 {  } 
+    [API(663)] public interface  public_interface_663 {  } 
+    [API(664)] public interface  public_interface_664 {  } 
+    [API(665)] public interface  public_interface_665 {  } 
+    [API(661,662)] public interface  public_interface_661_662 {  } 
+    [API(666,660)] public interface  public_interface_666_660 {  } 
+    [API(664,662,666)] public interface  public_interface_664_662_666 {  } 
+    [API(665,660,661,662)] public interface  public_interface_665_660_661_662 {  }
+    
 }
