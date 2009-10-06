@@ -1467,7 +1467,7 @@ namespace MMgc
 		// if baseAddr was used for HeapBlocks split
 		if((char*)newBlocks == baseAddr)
 		{
-			size_t numBlocksNeededForHeapBlocks = numHeapBlocksToNumBlocks(newBlocksLen);
+			int numBlocksNeededForHeapBlocks = numHeapBlocksToNumBlocks(newBlocksLen);
 			HeapBlock *next = Split(block, numBlocksNeededForHeapBlocks);
 			// this space counts as used space
 			numAlloc += numBlocksNeededForHeapBlocks;
