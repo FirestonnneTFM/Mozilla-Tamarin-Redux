@@ -91,4 +91,14 @@ AddTestCase(
 		"unshift single element vector with single item",
 		"RangeError: Error #1126",
 		parseError(errormsg,"RangeError: Error #1126".length));
+
+// bug: https://bugzilla.mozilla.org/show_bug.cgi?id=469377
+var strVector = new Vector.<String>;
+strVector.push("Carol", "Justine");
+strVector.unshift("Betty");
+AddTestCase(
+    "Vector.<String>.unshift()",
+    "Betty,Carol,Justine",
+    strVector.toString());
+
 test();
