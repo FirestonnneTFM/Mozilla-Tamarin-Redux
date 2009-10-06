@@ -236,7 +236,7 @@ namespace avmplus
 	}
 
 	// helper
-	inline Atom MethodEnv::endCoerce(int argc, uint32 *ap, MethodSignaturep ms)
+	inline Atom MethodEnv::endCoerce(int argc, uint32_t *ap, MethodSignaturep ms)
 	{
 		// we know we have verified the method, so we can go right into it.
 		AvmCore* core = this->core();
@@ -252,9 +252,9 @@ namespace avmplus
 		switch (bt)
 		{
 		case BUILTIN_int:
-			return core->intToAtom((int)i);
+			return core->intToAtom((int32_t)i);
 		case BUILTIN_uint:
-			return core->uintToAtom((uint32)i);
+			return core->uintToAtom((uint32_t)i);
 		case BUILTIN_boolean:
 			return i ? trueAtom : falseAtom;
 		case BUILTIN_any:
@@ -317,7 +317,7 @@ namespace avmplus
 		else
 		{
 			unbox1(thisArg, ms->paramTraits(0), &thisArg);
-			return endCoerce(0, (uint32*)&thisArg, ms);
+			return endCoerce(0, (uint32_t*)&thisArg, ms);
 		}
 	}
 	
@@ -350,7 +350,7 @@ namespace avmplus
 			const int rest_offset = ms->rest_offset();
 			const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 			MMgc::GC::AllocaAutoPtr _ap;
-			uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+			uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
 
 			unboxCoerceArgs(thisArg, a, ap, ms);
 			return endCoerce(argc, ap, ms);
@@ -390,7 +390,7 @@ namespace avmplus
 			const int rest_offset = ms->rest_offset();
 			const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 			MMgc::GC::AllocaAutoPtr _ap;
-			uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+			uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
 				
 			unboxCoerceArgs(thisArg, argc, argv, ap, ms);
 			return endCoerce(argc, ap, ms);
@@ -439,7 +439,7 @@ namespace avmplus
 		const int rest_offset = ms->rest_offset();
 		const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 		MMgc::GC::AllocaAutoPtr _ap;
-		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+		uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
 			
 		unboxCoerceArgs(argc, atomv, ap, ms);
 		return endCoerce(argc, ap, ms);
@@ -450,7 +450,7 @@ namespace avmplus
 	 * args, not counting the instance which is arg[0].  the
 	 * layout is [instance][arg1..argN]
 	 */
-	void MethodEnv::unboxCoerceArgs(int argc, Atom* in, uint32 *argv, MethodSignaturep ms)
+	void MethodEnv::unboxCoerceArgs(int argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 	{
 		Atom* args = (Atom*)argv;
 
@@ -462,7 +462,7 @@ namespace avmplus
 			*args++ = in[++end];
 	}
 
-	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv, MethodSignaturep ms)
+	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms)
 	{
 		int argc = a->getLength();
 
@@ -476,7 +476,7 @@ namespace avmplus
 			*args++ = a->getUintProperty(end++);
 	}
 
-	void MethodEnv::unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms)
+	void MethodEnv::unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 	{
 		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
@@ -489,7 +489,7 @@ namespace avmplus
 	}
 
 #if VMCFG_METHODENV_IMPL32
-	uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
+	uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32_t *ap)
 	{
 		env->_implGPR = env->method->implGPR();
 		AvmAssert(env->_implGPR != (GprMethodProc)MethodEnv::delegateInvoke);
@@ -632,12 +632,12 @@ namespace avmplus
 	{
 		if ((index&7) == kIntegerType)
 		{
-			return getpropertylate_i(obj, (int)(index>>3));
+			return getpropertylate_i(obj, (int32_t)(index>>3));
 		}
 
 		if ((index&7) == kDoubleType)
 		{
-			int i = AvmCore::integer_i(index);
+			int32_t i = AvmCore::integer_i(index);
 			if ((double)i == AvmCore::atomToDouble(index))
 			{
 				return getpropertylate_i(obj, i);
@@ -673,14 +673,14 @@ namespace avmplus
 	{
 		if ((index&7) == kIntegerType)
 		{
-			setpropertylate_i(obj, (int)(index>>3), value);
+			setpropertylate_i(obj, (int32_t)(index>>3), value);
 			return;
 		}
 
 		if ((index&7) == kDoubleType)
 		{
-			int i = AvmCore::integer(index);
-			uint32 u = (uint32)(i);
+			int32_t i = AvmCore::integer(index);
+			uint32_t u = uint32_t(i);
 			if ((double)u == AvmCore::atomToDouble(index))
 			{
 				setpropertylate_u(obj, u, value);
@@ -718,14 +718,14 @@ namespace avmplus
 	{
 		if ((index&7) == kIntegerType)
 		{
-			setpropertylate_i(obj, (int)(index>>3), value);
+			setpropertylate_i(obj, (int32_t)(index>>3), value);
 			return;
 		}
 
 		if ((index&7) == kDoubleType)
 		{
-			int i = AvmCore::integer(index);
-			uint32 u = (uint32)(i);
+			int32_t i = AvmCore::integer(index);
+			uint32_t u = uint32_t(i);
 			if ((double)u == AvmCore::atomToDouble(index))
 			{
 				setpropertylate_u(obj, u, value);
@@ -847,7 +847,7 @@ namespace avmplus
 	}
 
 #if defined FEATURE_NANOJIT
-	ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32 *ap)
+	ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32_t *ap)
 	{
 		// create arguments using argv[1..argc].
 		// Even tho E3 says create an Object, E4 says create an Array so thats what we will do.
@@ -858,7 +858,7 @@ namespace avmplus
 		return createArguments(atomv, argc);
 	}
 
-	ArrayObject* MethodEnv::createRestHelper(int argc, uint32 *ap)
+	ArrayObject* MethodEnv::createRestHelper(int argc, uint32_t *ap)
 	{
 		// create rest Array using argv[param_count..argc]
 		MethodSignaturep ms = get_ms();
@@ -875,7 +875,7 @@ namespace avmplus
 
 #endif // FEATURE_NANOJIT
 
-	Atom MethodEnv::getpropertylate_i(Atom obj, int index) const
+	Atom MethodEnv::getpropertylate_i(Atom obj, int32_t index) const
 	{
 		// here we put the case for bind-none, since we know there are no bindings
 		// with numeric names.
@@ -904,7 +904,7 @@ namespace avmplus
 		}
 	}
 
-	Atom MethodEnv::getpropertylate_u(Atom obj, uint32 index) const
+	Atom MethodEnv::getpropertylate_u(Atom obj, uint32_t index) const
 	{
 		// here we put the case for bind-none, since we know there are no bindings
 		// with numeric names.
@@ -1122,7 +1122,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 1) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 1) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 		uint8 result = *(uint8 *)(dom->globalMemoryBase + addr);
 		return result;
@@ -1132,7 +1132,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 2) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 #ifdef AVMPLUS_UNALIGNED_ACCESS
@@ -1162,7 +1162,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 #ifdef AVMPLUS_UNALIGNED_ACCESS
@@ -1194,7 +1194,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 #ifdef AVMPLUS_UNALIGNED_ACCESS
@@ -1226,7 +1226,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 8) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 8) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 #ifdef AVMPLUS_UNALIGNED_ACCESS
@@ -1262,7 +1262,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 1) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 1) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 		*(uint8 *)(dom->globalMemoryBase + addr) = (uint8)value;
@@ -1272,7 +1272,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 2) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 		uint16_t svalue = (uint16_t)value;
@@ -1302,7 +1302,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 		MOPS_SWAP_BYTES(&value);
@@ -1332,7 +1332,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 		float fvalue = (float)value;
@@ -1364,7 +1364,7 @@ namespace avmplus
 	{
 		const Domain *dom = domainEnv()->domain();
 
-		if(addr < 0 || (uint32)(addr + 8) > dom->globalMemorySize)
+		if(addr < 0 || (uint32_t)(addr + 8) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
 		MOPS_SWAP_BYTES(&value);
@@ -1604,7 +1604,7 @@ namespace avmplus
 		toplevel->setproperty_b(obj, multiname, value, vtable, b);
     }
 
-	void MethodEnv::setpropertylate_i(Atom obj, int index, Atom value) const
+	void MethodEnv::setpropertylate_i(Atom obj, int32_t index, Atom value) const
 	{
 		if (AvmCore::isObject(obj))
 		{
@@ -1630,7 +1630,7 @@ namespace avmplus
 		}
 	}
 
-	void MethodEnv::setpropertylate_u(Atom obj, uint32 index, Atom value) const
+	void MethodEnv::setpropertylate_u(Atom obj, uint32_t index, Atom value) const
 	{
 		if (AvmCore::isObject(obj))
 		{
@@ -1665,7 +1665,7 @@ namespace avmplus
 		case BKIND_VAR:
 		case BKIND_CONST:
 		{
-			uint32 slot = AvmCore::bindingToSlotId(b);
+			uint32_t slot = AvmCore::bindingToSlotId(b);
 			ScriptObject* method = AvmCore::atomToScriptObject(atomv[0])->getSlotObject(slot);
 			// inlined equivalent of op_call
 			if (!method)
@@ -1794,7 +1794,7 @@ namespace avmplus
 		case BKIND_GETSET: 
 		{
 			// Invoke the setter
-			uint32 m = AvmCore::bindingToSetterId(b);
+			uint32_t m = AvmCore::bindingToSetterId(b);
 			AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);
 			MethodEnv* method = vtable->methods[m];
 			Atom atomv_out[2] = { obj, value };

@@ -72,7 +72,7 @@ namespace avmplus
 		friend class CodegenLIR;
 	#if VMCFG_METHODENV_IMPL32
 		friend class MethodInfo;
-		static uintptr_t delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
+		static uintptr_t delegateInvoke(MethodEnv* env, int argc, uint32_t *ap);
 	#endif
 	public:
 		/** vtable for the activation scope inside this method */
@@ -123,12 +123,12 @@ namespace avmplus
 	private:
 		MethodSignaturep get_ms();
 		inline bool isInterpreted();
-		Atom endCoerce(int argc, uint32 *ap, MethodSignaturep ms);
+		Atom endCoerce(int argc, uint32_t *ap, MethodSignaturep ms);
 		int  startCoerce(int argc, MethodSignaturep ms);
 		Atom coerceUnboxEnter(int argc, Atom* atomv);
-		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv, MethodSignaturep ms);
-		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap, MethodSignaturep ms);
-		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv, MethodSignaturep ms);
+		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms);
+		void unboxCoerceArgs(int argc, Atom* in, uint32_t *ap, MethodSignaturep ms);
+		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32_t *argv, MethodSignaturep ms);
 		void FASTCALL nullcheckfail(Atom atom);
 		Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args);
 
@@ -148,8 +148,8 @@ namespace avmplus
 	    void npe();
 
 		ArrayObject* createRest(Atom* argv, int argc);
-		Atom getpropertylate_i(Atom obj, int index) const;
-		Atom getpropertylate_u(Atom obj, uint32 index) const;
+		Atom getpropertylate_i(Atom obj, int32_t index) const;
+		Atom getpropertylate_u(Atom obj, uint32_t index) const;
 
 #if defined FEATURE_NANOJIT
 		void setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
@@ -158,8 +158,8 @@ namespace avmplus
 		Atom delpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom index);
 
 		void initMultinameLateForDelete(Multiname& name, Atom index);
-		ArrayObject* createArgumentsHelper(int argc, uint32 *ap);
-		ArrayObject* createRestHelper(int argc, uint32 *ap);
+		ArrayObject* createArgumentsHelper(int argc, uint32_t *ap);
+		ArrayObject* createRestHelper(int argc, uint32_t *ap);
 #endif
 
 		ScriptObject* newcatch(Traits *traits);
@@ -226,8 +226,8 @@ namespace avmplus
 					  Atom* scopes) const;
 
 		void initproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
-		void setpropertylate_i(Atom obj, int index, Atom value) const;
-		void setpropertylate_u(Atom obj, uint32 index, Atom value) const;
+		void setpropertylate_i(Atom obj, int32_t index, Atom value) const;
+		void setpropertylate_u(Atom obj, uint32_t index, Atom value) const;
 
 		/** same as callproperty but only considers the bindings in given vtable */
 		Atom callsuper(const Multiname* name, int argc, Atom* atomv) const;
