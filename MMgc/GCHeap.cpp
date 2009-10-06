@@ -573,6 +573,9 @@ namespace MMgc
 		// just re-use blocks; small wastage possible
 		HeapBlock *newBlocks = blocks;
 
+		// the memmove will overwrite this so save it
+		int blockSize = block->size;
+
 		int offset = int(block-blocks);
 		int sen_offset = 0;
 		HeapBlock *src = block + block->size;
@@ -596,9 +599,6 @@ namespace MMgc
 			sen_offset = -1;
 		}
 		
-		// the memmove will overwrite this so save it
-		int blockSize = block->size;
-
 		// copy blocks after
 		int lastChunkSize = int((blocks + blocksLen) - src);
 		GCAssert(lastChunkSize + offset == newBlocksLen);
