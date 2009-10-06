@@ -55,6 +55,8 @@ namespace avmplus
 												uint32_t methodCount,
 												uint32_t interfaceCapacity)
 	{
+		AvmAssert(interfaceCapacity > 0);
+
 		const uint32_t extra = slotCount * sizeof(SlotInfo) + 
 						methodCount * sizeof(MethodInfo) +
 						interfaceCapacity * sizeof(InterfaceInfo);
@@ -163,6 +165,7 @@ namespace avmplus
 	bool TraitsBindings::addOneInterface(Traitsp intf)
 	{
 		AvmAssert(intf != NULL);
+		AvmAssert(this->interfaceCapacity > 0);
 
 		InterfaceInfo* set = getInterfaces();
         int32_t n = 7;
@@ -197,6 +200,7 @@ namespace avmplus
 	bool FASTCALL TraitsBindings::containsInterface(Traitsp intf) const
 	{
 		AvmAssert(intf != NULL);
+		AvmAssert(this->interfaceCapacity > 0);
 
 		const InterfaceInfo* set = getInterfaces();
         int32_t n = 7;
@@ -1151,9 +1155,12 @@ namespace avmplus
 			NamespaceSetp nss = new (core->GetGC()) NamespaceSet(this->ns());
 			NamespaceSetp compat_nss = nss;
 			addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR));
-			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/0);
+			// the Sampler can call containsInterface() on a catch object, so we must ensure the list is valid.
+			// we add ourself to it, and since the algorithm requires at least one unused entry in the table, we use a size of 2, not 1.
+			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/2);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);
 			thisData->m_slotSize = is8ByteSlot(t) ? 8 : 4;
+			thisData->addOneInterface(this);
 		}
 		else
 		{
