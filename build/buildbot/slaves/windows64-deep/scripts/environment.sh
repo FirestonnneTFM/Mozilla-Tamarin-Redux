@@ -51,6 +51,8 @@ export platform=windows
 export basedir=c:/buildbot/$branch/windows64-deep/$branch
 export buildsdir=c:/buildbot/$branch/windows64-deep/builds
 
+export shell_release_32=${shell_release}
+export shell_release_64=${shell_release_64}
 
 export shell_release=${shell_release_64}
 export shell_release_wordcode=${shell_release_wordcode_64}
