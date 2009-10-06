@@ -500,6 +500,18 @@ namespace MMgc
 			allocaPopToSlow(top);
 	}
 
+#ifdef DEBUGGER
+	REALLY_INLINE void* GC::GetAttachedSampler()
+	{
+		return m_sampler;
+	}
+	
+	REALLY_INLINE void GC::SetAttachedSampler(void *sampler)
+	{
+		m_sampler = sampler;
+	}
+#endif
+	
 	REALLY_INLINE GC::AllocaAutoPtr::AllocaAutoPtr()
 		: gc(NULL)
 		, unwindPtr(NULL)

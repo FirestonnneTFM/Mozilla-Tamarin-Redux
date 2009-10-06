@@ -94,14 +94,47 @@ namespace avmplus
 			p += sizeof(int32_t);
 		}
 	}
+
+	// A sampler is tied to a particular GC/core pair.  As each GC/core pair
+	// can be moved from one thread to another in a timesliced fashion in some
+	// applications we do not use a thread-local variable to hold the sampler,
+	// but attach it directly to the GC, which we pick up from the EnterFrame.
+
+	void AttachSampler(avmplus::Sampler* sampler)
+	{
+		GCHeap* heap = GCHeap::GetGCHeap();		// May be NULL during OOM shutdown
+		if (heap)
+		{
+			EnterFrame* ef = heap->GetEnterFrame();
+			if (ef)
+			{
+				GC* gc = ef->GetActiveGC();
+				if (gc)
+					gc->SetAttachedSampler(sampler);
+			}
+		}
+	}
 	
-	// store this in a thread local to capture FixedAlloc alloc traffic
-	GCThreadLocal<avmplus::Sampler*> tls_sampler;
+	avmplus::Sampler* GetSampler()
+	{
+		GCHeap* heap = GCHeap::GetGCHeap();		// May be NULL during OOM shutdown
+		if (heap)
+		{
+			EnterFrame* ef = heap->GetEnterFrame();
+			if (ef)
+			{
+				GC* gc = ef->GetActiveGC();
+				if (gc)
+					return (avmplus::Sampler*)gc->GetAttachedSampler();
+			}
+		}
+		return NULL;
+	}
 
 	/* static */
 	void recordAllocationSample(const void* item, size_t size)
 	{
-		avmplus::Sampler* sampler = tls_sampler;
+		avmplus::Sampler* sampler = GetSampler();
 		if (sampler && sampler->sampling())
 			sampler->recordAllocationSample(item, size);
 	}
@@ -109,7 +142,7 @@ namespace avmplus
 	/* static */
 	void recordDeallocationSample(const void* item, size_t size)
 	{
-		avmplus::Sampler* sampler = tls_sampler;
+		avmplus::Sampler* sampler = GetSampler();
 		if( sampler /*&& sampler->sampling*/ )
 			sampler->recordDeallocationSample(item, size);
 	}
@@ -138,15 +171,13 @@ namespace avmplus
 		_sampling(true)
 	{
 		GCHeap::GetGCHeap()->EnableHooks();
- 		tls_sampler = this;
+ 		AttachSampler(this);
 	}
 
 	Sampler::~Sampler()
 	{
 		stopSampling();
- 		Sampler* tls = tls_sampler;
- 		if (tls == this)
- 			tls_sampler = NULL;
+		AttachSampler(NULL);
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)

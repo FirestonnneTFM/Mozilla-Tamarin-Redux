@@ -76,6 +76,7 @@ namespace MMgc
 		jmp_buf jmpbuf;
 		int status;
 		void Destroy() { m_heap = NULL; }
+		GC* GetActiveGC() { return m_gc; }
 		void SetActiveGC(GC *gc) { m_gc = gc; }
 	private:
 		GCHeap *m_heap;
