@@ -156,6 +156,7 @@ namespace avmshell
 		int numthreads;
 		int numworkers;
 		int repeats;
+		uint32_t stackSize;
 		char st_mem[200];				// Selftest scratch memory.  200 chars ought to be enough for anyone
 	};
 	
@@ -190,7 +191,7 @@ namespace avmshell
 		 *                    thread.  It must be one or the other; a core created on a spawned thread
 		 *                    cannot be used on the main thread or vice versa.
 		 */
-		ShellCoreImpl(MMgc::GC* gc, bool mainthread);
+		ShellCoreImpl(MMgc::GC* gc, ShellSettings& settings, bool mainthread);
 		
 		/**
 		 * Set AvmCore::minstack appropriately for the current thread.
@@ -198,6 +199,7 @@ namespace avmshell
 		virtual void setStackLimit();
 		
 	private:
+		ShellSettings& settings;
 		bool mainthread;
 	};
 }

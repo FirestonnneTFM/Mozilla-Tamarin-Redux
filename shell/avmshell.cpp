@@ -55,11 +55,13 @@ namespace avmshell
 		, numthreads(1)
 		, numworkers(1)
 		, repeats(1)
+		, stackSize(0)
 	{
   	}
   
-	ShellCoreImpl::ShellCoreImpl(MMgc::GC* gc, bool mainthread)
+	ShellCoreImpl::ShellCoreImpl(MMgc::GC* gc, ShellSettings& settings, bool mainthread)
 		: ShellCore(gc)
+		, settings(settings)
 		, mainthread(mainthread)
   	{
   	}
@@ -68,23 +70,33 @@ namespace avmshell
 	void ShellCoreImpl::setStackLimit()
   	{
 		uintptr_t minstack;
-#ifdef VMCFG_WORKERTHREADS
-		if (mainthread)
-			minstack = Platform::GetInstance()->getMainThreadStackLimit();
-		else {
+		if (settings.stackSize != 0)
+		{
 			// Here we really depend on being called fairly high up on
 			// the thread's stack, because we don't know where the highest
 			// stack address is.
-			size_t stackheight;
-			pthread_attr_t attr;
-			pthread_attr_init(&attr);
-			pthread_attr_getstacksize(&attr, &stackheight);
-			pthread_attr_destroy(&attr);
-			minstack = uintptr_t(&stackheight) - stackheight + avmshell::kStackMargin;
-  		}
+			minstack = uintptr_t(&minstack) - settings.stackSize + avmshell::kStackMargin;
+		}
+		else 
+		{
+#ifdef VMCFG_WORKERTHREADS
+			if (mainthread)
+				minstack = Platform::GetInstance()->getMainThreadStackLimit();
+			else {
+				// Here we really depend on being called fairly high up on
+				// the thread's stack, because we don't know where the highest
+				// stack address is.
+				size_t stackheight;
+				pthread_attr_t attr;
+				pthread_attr_init(&attr);
+				pthread_attr_getstacksize(&attr, &stackheight);
+				pthread_attr_destroy(&attr);
+				minstack = uintptr_t(&stackheight) - stackheight + avmshell::kStackMargin;
+			}
 #else
-		minstack = Platform::GetInstance()->getMainThreadStackLimit();
+			minstack = Platform::GetInstance()->getMainThreadStackLimit();
 #endif
+		}
 
 		// call the non-virtual setter on AvmCore
 		AvmCore::setStackLimit(minstack);
@@ -137,7 +149,7 @@ namespace avmshell
 		MMgc::GC *gc = mmfx_new( MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode()) );
 		{
 			MMGC_GCENTER(gc);			
-			ShellCore* shell = new ShellCoreImpl(gc, true);
+			ShellCore* shell = new ShellCoreImpl(gc, settings, true);
 			Shell::singleWorkerHelper(shell, settings);			
 			delete shell;
 		}
@@ -371,7 +383,7 @@ namespace avmshell
 		for ( int i=0 ; i < numcores ; i++ ) {
 			MMgc::GC* gc = new MMgc::GC(MMgc::GCHeap::GetGCHeap(), settings.gcMode());
 			MMGC_GCENTER(gc);
-			cores[i] = new CoreNode(new ShellCoreImpl(gc, false), i);
+			cores[i] = new CoreNode(new ShellCoreImpl(gc, settings, false), i);
 			if (!cores[i]->core->setup(settings))
 				Platform::GetInstance()->exit(1);
 		}
@@ -806,6 +818,19 @@ namespace avmshell
 						usage();
 					}
 				}
+ 				else if (!VMPI_strcmp(arg, "-stack")) {
+ 					unsigned stack;
+ 					int nchar;
+ 					const char* val = argv[++i];
+ 					if (VMPI_sscanf(val, "%u%n", &stack, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && stack > avmshell::kStackMargin) {
+ 						settings.stackSize = uint32_t(stack);
+ 					}
+ 					else
+ 					{
+ 						AvmLog("Bad argument to -stack\n");
+ 						usage();
+ 					}
+				}
 				else if (!VMPI_strcmp(arg, "-log")) {
 					settings.do_log = true;
 				} 
@@ -971,6 +996,8 @@ namespace avmshell
 #endif
 		AvmLog("          [-load L[,X]] GC load factor (default 2.0) and max multiplier (default 3.0)\n");
 		AvmLog("          [-gcwork G]   Max fraction of time (default 0.25) we're willing to spend in GC\n");
+		AvmLog("          [-stack N]    Stack size in bytes (will be honored approximately).\n"
+			   "                        Be aware of the stack margin: %u\n", avmshell::kStackMargin);
 		AvmLog("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
 		AvmLog("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
 		AvmLog("          [-cache_methods  N]   size of method cache (0 = unlimited)\n");
