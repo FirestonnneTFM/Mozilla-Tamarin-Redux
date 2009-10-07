@@ -120,4 +120,54 @@ AddTestCase(
 		"one,two",
 		v1.toString());
 
+class TestClass {
+    private var myVal:Object;
+    public function TestClass(v:Object):void {
+        myVal = v;
+    }
+    public function toString():String {
+        return myVal.toString();
+    }
+}
+
+var v2:Vector.<TestClass> = new Vector.<TestClass>();
+for (var i=0; i<10; i++) {
+    v2.push(new TestClass(i));
+}
+
+var errormsg = "";
+try {
+    v2.splice(2, 0, new <String>["hello","there"]);
+} catch (e) {
+    errormsg=e.toString();
+}
+
+AddTestCase("Attempt to insert incorrect typed vector using splice",
+            "TypeError: Error #1034",
+            parseError(errormsg,"TypeError: Error #1034".length)
+            );
+
+AddTestCase("Pass non-uint deletecount",
+            "4,5,6",
+            v2.splice(5, new TestClass(3)).toString()
+            );
+
+v2 = new Vector.<TestClass>();
+for (var i=0; i<10; i++) {
+    v2.push(new TestClass(i));
+}
+
+// uint(-4294967290) == 6
+AddTestCase("Verify uint rollover behaviour for deletecount",
+            "2,3,4,5,6,7",
+            v2.splice(2,-4294967290).toString()
+            );
+
+trace(v2);
+v2.splice(2, 1, new TestClass(10), new TestClass(11), new TestClass(12));
+
+AddTestCase("Add custom vector class items",
+            "0,1,10,11,12,9",
+            v2.toString());
+
 test();
