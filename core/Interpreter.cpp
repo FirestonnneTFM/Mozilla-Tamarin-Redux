@@ -2172,7 +2172,7 @@ namespace avmplus
 				MOPS_LOAD(i1, uint16_t, uh2l);	// uh2l = result
 				MOPS_SWAP_BYTES(&uh2l);
 #else
-				uh2l = env->li16(i1);
+				uh2l = uint16_t(env->li16(i1));
 #endif
 				sp[0] = MAKE_INTEGER(uh2l);		// always fits in atom
 				NEXT;
@@ -2196,7 +2196,7 @@ namespace avmplus
 				MOPS_LOAD(i1, float, f2l);		// f2l = result
 				MOPS_SWAP_BYTES(&f2l);
 #else
-				f2l = env->lf32(i1);
+				f2l = float(env->lf32(i1));
 #endif
 				sp[0] = core->doubleToAtom(f2l);
 				NEXT;
