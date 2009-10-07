@@ -163,7 +163,7 @@
             // possible speedup: cached the prototype object itself, or at least
             // get the prototype object using a table lookup with tag as the index
             return call_prim_dynamic(env, prim, c.name, argc, args);
-        } 
+        }
         return callprop_miss(c, prim, argc, args, env);
     }
 
@@ -191,7 +191,7 @@
         &callprop_generic       // BKIND_GETSET
     };
 
-    // handlers for ScriptObject slots, indexed by SlotStorageType.  We only 
+    // handlers for ScriptObject slots, indexed by SlotStorageType.  We only
     // care about slot types that hold something we can call; other cases
     // will be errors, so we use the generic handler for them.
     static const CallCache::Handler callprop_slot_handlers[8] = {
@@ -243,7 +243,7 @@
                 c.call_handler = callprop_slot_handlers[sst];
                 c.slot_offset = uintptr_t(slot_ptr) - uintptr_t(obj_ptr);
             } else {
-                // all other bindings 
+                // all other bindings
                 c.call_handler = callprop_obj_handlers[AvmCore::bindingKind(b)];
             }
         } else {
@@ -556,8 +556,8 @@
         PROF_IF ("setprop_setter hit", OBJ_HIT(obj, c)) {
             // todo; obj is always a good type here
             // we could specialize coerceUnboxEnter on the setter type, like for slots
-			Atom args[2] = { obj, val };
-			c.method->coerceEnter(1, args);
+            Atom args[2] = { obj, val };
+            c.method->coerceEnter(1, args);
         } else {
             setprop_miss(c, obj, val, env);
         }
@@ -641,7 +641,7 @@
     FUNCTION(FUNCADDR(setprop_late), SIG4(V,P,A,P,A), setprop_late)
 
     // fully dynamic generic handler for OP_intproperty
-    void initprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom value) 
+    void initprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom value)
     {
         tagprof("initprop_late", ojb);
         env->initproperty(obj, name, value, toVTable(env->toplevel(), obj));

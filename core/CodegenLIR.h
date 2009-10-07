@@ -258,7 +258,7 @@ namespace avmplus
     };
 
     // bind cache for sets.  This is necessarily larger than for gets because
-    // an assignment implies a coercion, and the target type is an additional 
+    // an assignment implies a coercion, and the target type is an additional
     // cached parameter to the coercion
     class SetCache: public BindingCache {
     public:

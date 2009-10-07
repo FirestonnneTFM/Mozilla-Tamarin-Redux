@@ -147,8 +147,8 @@ namespace avmplus
         const Atom trueAtom       = kBooleanType|0x08; // 0x0D
         const Atom falseAtom      = kBooleanType|0x00; // 0x05
 
-		// used in unreachable "return" clauses as a self-documenting invalid value.
-		const Atom unreachableAtom = kUnusedAtomTag;
+        // used in unreachable "return" clauses as a self-documenting invalid value.
+        const Atom unreachableAtom = kUnusedAtomTag;
         /*@}*/
 
         enum BindingKind
