@@ -129,4 +129,64 @@ AddTestCase(   "map vector of int",
                "1,4,9,16",
                v1.map(mapper4).toString());
 
+// From https://bugzilla.mozilla.org/show_bug.cgi?id=507501
+function convertToUpper(item:String, index:int, v:Vector.<String>):String {
+    return item.toUpperCase();
+    }
+    
+var vec:Vector.<String> = Vector.<String>(['one','two']);
+
+
+var vec2:Vector.<String> = vec.map(convertToUpper);
+AddTestCase("Vector map to uppercase",
+            "ONE,TWO",
+            vec2.toString()
+            );
+
+AddTestCase("Type check", true, vec is Vector.<String>);
+AddTestCase("Type check returned map value", true, vec.map(convertToUpper) is Vector.<String>);
+
+// Custom vector type
+class TestClass {
+    private var myVal:Object;
+    public function TestClass(v:Object):void {
+        myVal = v;
+    }
+    public function toString():String {
+        return myVal.toString();
+    }
+    
+    public function doubleMyVar():void {
+        myVal *= 2;
+    }
+    
+    public static function double(item:Object, index:int, vector:Vector.<TestClass>):Object {
+        item.doubleMyVar();
+        return item;
+    }
+    
+    public static function TestClass33():TestClass {
+        return new TestClass(33);
+    }
+}
+
+var v4:Vector.<TestClass> = new Vector.<TestClass>();
+v4.push(new TestClass(33));
+v4.push(new TestClass(44));
+v4.push(new TestClass(50));
+
+AddTestCase("Call map on custom vector class",
+            "66,88,100",
+            v4.map(TestClass.double).toString()
+            );
+
+function thisObjectTest(item:Object, index:int, vector:Vector.<TestClass>):Object {
+    return this.TestClass33();
+}
+
+AddTestCase("test thisObject",
+            "33,33,33",
+            v4.map(thisObjectTest, TestClass).toString()
+            );
+
 test();

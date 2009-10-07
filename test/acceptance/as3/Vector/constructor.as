@@ -135,4 +135,14 @@ var v18=new Vector.<uint>();
 v18.push(true);
 AddTestCase("constructor type uint castes other types", 1, v18[0]);
 
+function bug449468() {
+    var v : Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(4);
+    return v;
+}
+
+AddTestCase("Bug 449468: Crash with vector constructor in interp mode",
+            "null,null,null,null",
+            bug449468().toString()
+            );
+
 test();
