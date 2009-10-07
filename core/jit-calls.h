@@ -627,6 +627,7 @@
     }
     FUNCTION(CALL_INDIRECT, SIG5(V,P,P,A,A,P), set_cache_handler)
 
+    // fully dynamic generic handler for OP_setproperty
     void setprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom val)
     {
         SetCache c(name);  // temporary cache, just so we can call the generic handler.
@@ -634,12 +635,46 @@
     }
     FUNCTION(FUNCADDR(setprop_late), SIG4(V,P,A,P,A), setprop_late)
 
+    // fully dynamic generic handler for OP_intproperty
     void initprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom value) 
     {
         tagprof("initprop_late", ojb);
         env->initproperty(obj, name, value, toVTable(env->toplevel(), obj));
     }
     FUNCTION(FUNCADDR(initprop_late), SIG4(V,P,A,P,A), initprop_late)
+
+    // called when we don't know the base object type and we have a runtime
+    // index expression that is public and therefore able to access dynamic properties.
+    // (typically this is late-bound array access)
+    void setprop_index(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, Atom index) {
+        if (isObjectPtr(obj)) {
+            if (AvmCore::isInteger(index)) {
+                int i = (int) atomInt(index);
+                if (i >= 0) {
+                    // todo: obj is probably a dense array or vector
+                    AvmCore::atomToScriptObject(obj)->setUintProperty(i, value);
+                    _nvprof("setprop_index P-fast", 1);
+                }
+                return;
+            }
+        }
+
+        _nvprof("setprop_index P-fast", 0);
+        Multiname tempname = *name;
+        caller_env->setpropertyHelper(obj, &tempname, value, toVTable(caller_env->toplevel(), obj), index);
+    }
+    FUNCTION(FUNCADDR(setprop_index),  SIG5(V,P,A,P,A,A), setprop_index)
+
+    // helper for OP_initproperty, called when the namespace has a dynamic name
+    // but known namespace that includes public, typical for late bound a[i] = ...
+    // expressions occurring within constructors.
+    void initprop_index(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, Atom index) {
+        _nvprof("initprop_index", 1);
+        Multiname tempname = *name;
+        VTable* vtable = toVTable(caller_env->toplevel(), obj);
+        caller_env->initpropertyHelper(obj, &tempname, value, vtable, index);
+    }
+    FUNCTION(FUNCADDR(initprop_index),  SIG5(V,P,A,P,A,A), initprop_index)
 
     METHOD(COREADDR(AvmCore::setDxns), SIG3(V,P,P,P), setDxns)
     METHOD(COREADDR(AvmCore::setDxnsLate), SIG3(V,P,P,A), setDxnsLate)
@@ -654,8 +689,6 @@
     METHOD(ENVADDR(MethodEnv::delpropertyHelper), SIG4(A,P,A,P,A), delpropertyHelper)
     METHOD(ENVADDR(MethodEnv::internRtns), SIG2(P,P,A), internRtns)
     METHOD(ENVADDR(MethodEnv::delproperty), SIG3(A,P,A,P), delproperty)
-    METHOD(ENVADDR(MethodEnv::setpropertyHelper),  SIG6(V,P,A,P,A,P,A), setpropertyHelper)
-    METHOD(ENVADDR(MethodEnv::initpropertyHelper), SIG6(V,P,A,P,A,P,A), initpropertyHelper)
     METHOD(ENVADDR(MethodEnv::setpropertylate_u), SIG4(V,P,A,U,A), setpropertylate_u)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setUintProperty), SIG3(V,P,U,A), DoubleVectorObject_setUintProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_setNativeUintProperty), SIG3(V,P,U,F), DoubleVectorObject_setNativeUintProperty)

@@ -4070,7 +4070,7 @@ namespace avmplus
                 //env->setproperty(obj, multiname, sp[0], toVTable(obj));
                 //LIns* value = loadAtomRep(sp);
 
-                Multiname* multiname = (Multiname*)op1;
+                const Multiname* multiname = (const Multiname*)op1;
                 bool attr = multiname->isAttr();
                 Traits* indexType = state->value(sp-1).traits;
                 Traits* valueType = state->value(sp).traits;
@@ -4224,36 +4224,24 @@ namespace avmplus
                 }
                 else if (maybeIntegerIndex)
                 {
-                    LIns* _tempname = copyMultiname(multiname);
+                    LIns* name = InsConstPtr(multiname); // precomputed multiname
                     LIns* value = loadAtomRep(sp);
                     LIns* index = loadAtomRep(objDisp--);
                     AvmAssert(state->value(objDisp).notNull);
-
-                    LIns* vtable = loadVTable(objDisp);
                     LIns* obj = loadAtomRep(objDisp);
-                    LIns* envarg = env_param;
-
-                    // copy the compile-time namespace to the temp multiname
-                    LIns* mSpace = InsConstPtr(multiname->ns);
-                    storeIns(mSpace, offsetof(Multiname, ns), _tempname);
-
-                    const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setpropertyHelper) :
-                                                        FUNCTIONID(initpropertyHelper);
-                    callIns(func, 6, envarg, obj, _tempname, value, vtable, index);
-
-                    localSet(objDisp, atomToNativeRep(result, value), result);
+                    const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setprop_index) :
+                                                        FUNCTIONID(initprop_index);
+                    callIns(func, 5, env_param, obj, name, value, index);
                 }
                 else
                 {
                     LIns* value = loadAtomRep(sp);
-                    const Multiname* name = (Multiname*)op1;
-                    LIns* multi = initMultiname(name, objDisp);
+                    LIns* multi = initMultiname(multiname, objDisp);
                     AvmAssert(state->value(objDisp).notNull);
-                    LIns* obj = loadAtomRep(objDisp);
 
-                    if (opcode == OP_setproperty)
-                    {
-                        if (!name->isRuntime()) {
+                    LIns* obj = loadAtomRep(objDisp);
+                    if (opcode == OP_setproperty) {
+                        if (!multiname->isRuntime()) {
                             // use inline cache for dynamic setproperty access
                             SetCache* cache = set_cache_builder.allocateCacheSlot(multiname);
                             LIns* cacheAddr = InsConstPtr(cache);
