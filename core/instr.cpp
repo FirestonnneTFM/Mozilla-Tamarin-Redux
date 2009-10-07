@@ -266,4 +266,93 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
     }
 }
 
+/**
+ * implements ECMA implicit coersion.  returns the coerced value,
+ * or throws a TypeError if coersion is not possible.
+ */
+// NOTE: parts of this function have been explicitly inlined into MethodEnv::unbox1 for
+// efficiency. If you change/fix this method, you may need to change/fix MethodEnv::unbox1 as well.
+Atom coerceImpl(const Toplevel* toplevel, Atom atom, Traits* expected)
+{
+    AvmAssert(expected != NULL);
+    AvmAssert(!AvmCore::atomDoesNotNeedCoerce(atom, BuiltinType(expected->builtinType)));
+
+    Traits* actual;
+    AvmCore* core = toplevel->core();
+
+    // these types always succeed
+    switch (expected->builtinType)
+    {
+        case BUILTIN_boolean:
+            return AvmCore::booleanAtom(atom);
+        case BUILTIN_number:
+            return core->numberAtom(atom);
+        case BUILTIN_string:
+            return AvmCore::isNullOrUndefined(atom) ? nullStringAtom : core->string(atom)->atom();
+        case BUILTIN_int:
+            return core->intAtom(atom);
+        case BUILTIN_uint:
+            return core->uintAtom(atom);
+        case BUILTIN_object:
+            return atom == undefinedAtom ? nullObjectAtom : atom;
+    }
+    // else fall thru
+
+    if (AvmCore::isNullOrUndefined(atom))
+        return (expected->builtinType == BUILTIN_void) ? undefinedAtom : nullObjectAtom;
+
+    switch (atomKind(atom))
+    {
+    case kStringType:
+        actual = core->traits.string_itraits;
+        break;
+
+    case kBooleanType:
+        actual = core->traits.boolean_itraits;
+        break;
+
+    case kDoubleType:
+        actual = core->traits.number_itraits;
+        break;
+
+    case kIntegerType:
+        actual = core->traits.int_itraits;
+        break;
+
+    case kNamespaceType:
+        actual = core->traits.namespace_itraits;
+        break;
+
+    case kObjectType:
+        actual = AvmCore::atomToScriptObject(atom)->traits();
+        break;
+
+    default:
+        // unexpected atom type
+        AvmAssert(false);
+        return unreachableAtom;
+    }
+
+    if (!actual->containsInterface(expected))
+    {
+        // failed
+#ifdef AVMPLUS_VERBOSE
+        //core->console << "checktype failed " << expected << " <- " << atom << "\n";
+#endif
+        toplevel->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(atom), core->toErrorString(expected));
+    }
+
+    return atom;
+}
+
+template void coerceobj(MethodEnv*, ScriptObject*, Traits*);
+template <class E>
+void coerceobj(E caller_env, ScriptObject* obj, Traits* type) {
+    _nvprof("coerceobj",1);
+    if (obj && !obj->traits()->containsInterface(type)) {
+        AvmCore* core = caller_env->core();
+        caller_env->toplevel()->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(obj->atom()), core->toErrorString(type));
+    }
+}
+
 } // namespace avmplus

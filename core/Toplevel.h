@@ -194,29 +194,10 @@ namespace avmplus
 		 * operator in from ES3
 		 */
 		Atom in_operator(Atom name, Atom obj);
-		
-		/**
-		 * This is the implicit coercion operator.  It is kind of like a
-		 * Java downcast, but because of how E4 works, there are some cases
-		 * when it returns a different value than what you pass in.
-		 *
-		 * It will happily return null if you pass in null for
-		 * any reference type.  And, it will throw an exception if the
-		 * value is not in the type's value set.  It does not do type
-		 * conversion.
-		 *
-		 * @param  atom      The atom containing the value to coerce.
-		 * @param  itraits   The itraits of the type to coerce to.
-		 * @return The coerced atom.
-		 * @throws Exception if the value is not in the type's value
-		 *                   set.
-		 */
-	private:
-		Atom coerceImpl(Atom atom, Traits* expected) const;
 
 	public:
+		/** legacy wrapper around coerce() from instr.h */
 		Atom coerce(Atom atom, Traits* expected) const;
-		void coerceobj(ScriptObject* obj, Traits* expected) const;
 
 		/**
 		 * Reads a property from an object, with the property

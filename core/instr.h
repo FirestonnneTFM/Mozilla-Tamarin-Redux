@@ -154,4 +154,31 @@ template <class E>
 Atom constructprop(E env, const Multiname* multiname, int argc, Atom* atomv);
 Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable);
 
+/**
+ * This is the implicit coercion operator.  It is kind of like a
+ * Java downcast, but because of how E4 works, there are some cases
+ * when it returns a different value than what you pass in.
+ *
+ * It will happily return null if you pass in null for
+ * any reference type.  And, it will throw an exception if the
+ * value is not in the type's value set.  It does not do type
+ * conversion.
+ *
+ * @param  atom      The atom containing the value to coerce.
+ * @param  itraits   The itraits of the type to coerce to.
+ * @return The coerced atom.
+ * @throws Exception if the value is not in the type's value
+ *                   set.
+ */
+Atom coerceImpl(const Toplevel*, Atom atom, Traits* expected);
+template <class E>
+Atom coerce(E env, Atom atom, Traits* expected);
+
+/**
+ * coerce specialized for objects; coerceobj() either throws an error
+ * or returns with no side effects
+ */
+template <class E>
+void coerceobj(E env, ScriptObject* obj, Traits*);
+
 } // namespace avmplus
