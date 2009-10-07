@@ -2794,10 +2794,9 @@ namespace avmplus
         else if (in && !in->isMachineType() && !result->isMachineType()
                && in != STRING_TYPE && in != NAMESPACE_TYPE)
         {
-            LIns* toplevel = loadToplevel();
             // coerceobj is void, but we mustn't optimize it out; verifier only calls it when required
             callIns(FUNCTIONID(coerceobj), 3,
-                toplevel, localGetp(loc), InsConstPtr(result));
+                env_param, localGetp(loc), InsConstPtr(result));
             // the input pointer has now been checked but it's still the same value.
             // verifier remembers this fact by updating the verify time type.
         }
@@ -2810,12 +2809,9 @@ namespace avmplus
         else
         {
             LIns* value = loadAtomRep(loc);
-            LIns* toplevel = loadToplevel();
-            // sp[0] = toplevel->coerce(sp[0], traits)
+            // sp[0] = coerce(caller_env, sp[0], traits)
             LIns* out = callIns(FUNCTIONID(coerce), 3,
-                toplevel,
-                value,
-                InsConstPtr(result));
+                env_param, value, InsConstPtr(result));
 
             // store the result
             localSet(loc, atomToNativeRep(result, out), result);
@@ -3356,9 +3352,8 @@ namespace avmplus
                     if (t && t != VOID_TYPE)
                     {
                         // implicitly coerce undefined to the return type
-                        LIns* toplevel = loadToplevel();
                         retvalue = callIns(FUNCTIONID(coerce), 3,
-                            toplevel, retvalue, InsConstPtr(t));
+                            env_param, retvalue, InsConstPtr(t));
                         retvalue = atomToNativeRep(t, retvalue);
                     }
                 }

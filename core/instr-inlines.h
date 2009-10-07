@@ -172,4 +172,19 @@ Atom constructprop(E env, const Multiname* multiname, int argc, Atom* atomv)
     return constructprop(toplevel, multiname, argc, atomv, toVTable(toplevel, atomv[0]));
 }
 
+template <class E> REALLY_INLINE
+Atom coerce(E env, Atom atom, Traits* expected)
+{
+    // do a couple of quick checks to see if we can bail early, since it's often the case
+    // that the type is already what we expect (and we can determine that quickly
+    // by checks against the Traits BuiltinType)
+    if (!expected)
+        return atom;
+
+    if (AvmCore::atomDoesNotNeedCoerce(atom, BuiltinType(expected->builtinType)))
+        return atom;
+
+    return coerceImpl(env->toplevel(), atom, expected);
+}
+
 } // namespace avmplus

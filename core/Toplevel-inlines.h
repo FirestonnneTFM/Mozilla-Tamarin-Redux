@@ -82,16 +82,7 @@ REALLY_INLINE QNameObject* Toplevel::ToAttributeName(const Stringp arg)
 
 REALLY_INLINE Atom Toplevel::coerce(Atom atom, Traits* expected) const
 {
-	// do a couple of quick checks to see if we can bail early, since it's often the case
-	// that the type is already what we expect (and we can determine that quickly
-	// by checks against the Traits BuiltinType)
-	if (!expected)
-		return atom;
-
-	if (AvmCore::atomDoesNotNeedCoerce(atom, BuiltinType(expected->builtinType)))
-		return atom;
-
-	return coerceImpl(atom, expected);
+	return avmplus::coerce(this, atom, expected);
 }
 
 //static
