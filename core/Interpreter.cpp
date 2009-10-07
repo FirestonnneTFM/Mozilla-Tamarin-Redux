@@ -2669,7 +2669,10 @@ namespace avmplus
 
             INSTR(popscope) {
 				if (!--scopeDepth)
-					globalScope = NULL;
+				{
+					if (scope->getSize() == 0)
+						globalScope = NULL;
+				}
 				if (withBase >= scopeBase + scopeDepth)
 					withBase = NULL;
 				NEXT;
