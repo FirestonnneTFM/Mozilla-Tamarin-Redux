@@ -164,7 +164,7 @@ namespace MMgc
 
 		// Initialize free lists
 		HeapBlock *block = freelists;
-		for (int i=0; i<kNumFreeLists; i++) {
+		for (uint32_t i=0; i<kNumFreeLists; i++) {
 			block->FreelistInit();
 			block++;
 		}
@@ -258,7 +258,7 @@ namespace MMgc
 			enterFrame->Destroy();
 	}
 
-	void* GCHeap::Alloc(int size, int flags)
+	void* GCHeap::Alloc(size_t size, uint32_t flags)
 	{
 		GCAssert(size > 0);
 
@@ -608,7 +608,7 @@ namespace MMgc
 		// than the similiar code in ExpandHeap because blocks after the one we are free'ing
 		// are sliding down by block->size
 		HeapBlock *fl = freelists;
-		for (int i=0; i<kNumFreeLists; i++) {
+		for (uint32_t i=0; i<kNumFreeLists; i++) {
 			HeapBlock *temp = fl;
 			do {
 				if (temp->prev != fl) {
@@ -718,15 +718,15 @@ namespace MMgc
 		return NULL;
 	}
 	
-	GCHeap::HeapBlock* GCHeap::AllocBlock(int size, bool& zero)
+	GCHeap::HeapBlock* GCHeap::AllocBlock(size_t size, bool& zero)
 	{
-		int startList = GetFreeListIndex(size);
+		uint32_t startList = GetFreeListIndex(size);
 		HeapBlock *freelist = &freelists[startList];
 
 		HeapBlock *decommittedSuitableBlock = NULL;
 		HeapBlock *blockToUse = NULL;
 
-		for (int i = startList; i < kNumFreeLists; i++)
+		for (uint32_t i = startList; i < kNumFreeLists; i++)
 		{
 			// Search for a big enough block in free list
 			HeapBlock *block = freelist;
@@ -744,7 +744,7 @@ namespace MMgc
 					// it and combining it with its neighbors
 					if(!block->committed && !decommittedSuitableBlock)
 					{
-						int totalSize = block->size;
+						size_t totalSize = block->size;
 						
 						// first try predecessors
 						HeapBlock *firstFree = block;
@@ -818,7 +818,7 @@ namespace MMgc
 			// first handle case where its too big
 			if(decommittedSuitableBlock->size > size)
 			{				
-				int toCommit = size > kMinHeapIncrement ? size : kMinHeapIncrement;
+				size_t toCommit = size > kMinHeapIncrement ? size : kMinHeapIncrement;
 
 				if(toCommit > decommittedSuitableBlock->size)
 					toCommit = decommittedSuitableBlock->size;
@@ -901,7 +901,7 @@ namespace MMgc
 		return 0;
 	}
 
-	GCHeap::HeapBlock *GCHeap::Split(HeapBlock *block, int size)
+	GCHeap::HeapBlock *GCHeap::Split(HeapBlock *block, size_t size)
 	{
 		GCAssert(block->size > size);
 		HeapBlock *newBlock = block + size;
@@ -943,7 +943,7 @@ namespace MMgc
 	void GCHeap::CheckFreelist()
 	{
 		HeapBlock *freelist = freelists;
-		for (int i = 0; i < kNumFreeLists; i++)
+		for (uint32_t i = 0; i < kNumFreeLists; i++)
 		{
 			HeapBlock *block = freelist;
 			while((block = block->next) != freelist)
@@ -1137,7 +1137,7 @@ namespace MMgc
 		CheckFreelist();
 	}
 
-	void GCHeap::ExpandHeap(int askSize, bool canFail)
+	void GCHeap::ExpandHeap(size_t askSize, bool canFail)
 	{
 		bool result = ExpandHeapInternal(askSize);
 		if(!result)
@@ -1194,17 +1194,17 @@ namespace MMgc
 
 #define roundUp(_s, _inc) (((_s + _inc - 1) / _inc) * _inc)
 	 
-	bool GCHeap::ExpandHeapInternal(int askSize)
+	bool GCHeap::ExpandHeapInternal(size_t askSize)
 	{
-		int size = askSize;
+		size_t size = askSize;
 
 #ifdef _DEBUG
 		// Turn this switch on to test bridging of contiguous
 		// regions.
 		bool test_bridging = false;
-		int defaultReserve = test_bridging ? (size+kMinHeapIncrement) : kDefaultReserve;
+		size_t defaultReserve = test_bridging ? (size+kMinHeapIncrement) : kDefaultReserve;
 #else
-		const int defaultReserve = kDefaultReserve;
+		const size_t defaultReserve = kDefaultReserve;
 #endif
 		
 		if(GetTotalHeapSize() > config.heapLimit)
@@ -1212,9 +1212,9 @@ namespace MMgc
 		
 		char *baseAddr = NULL;
 		char *newRegionAddr = NULL;
-		int newRegionSize = 0;
+		size_t newRegionSize = 0;
 		bool contiguous = false;
-		int commitAvail = 0;
+		size_t commitAvail = 0;
 
 		// Round up to the nearest kMinHeapIncrement
 		size = roundUp(size, kMinHeapIncrement);
@@ -1419,7 +1419,7 @@ namespace MMgc
 
 			// Fix up the prev/next pointers of each freelist.
 			HeapBlock *freelist = freelists;
-			for (int i=0; i<kNumFreeLists; i++) {
+			for (uint32_t i=0; i<kNumFreeLists; i++) {
 				HeapBlock *temp = freelist;
 				do {
 					if (temp->prev != freelist) {
