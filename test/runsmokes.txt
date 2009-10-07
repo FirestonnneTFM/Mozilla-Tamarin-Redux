@@ -77,7 +77,7 @@ cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} as3/Definitions/C
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmrd} regress/vector_domain_bug.as
 
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=491489
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} --vmargs="-Dinterp" abcasm/coverage
+cd acceptance;${py} ./runtests.py -v --notimecheck --avm=${avmr} --vmargs="-Dinterp" abcasm/coverage
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=494016
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} --vmargs="-Dinterp" as3/ShellClasses/toplevel.as
 
@@ -90,9 +90,9 @@ cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmdd} as3/sampling/Inv
 cd cmdline;${py} ./testMemstats.py
 
 # Bug https://bugzilla.mozilla.org/show_bug.cgi?id=491489
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} abcasm
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmrd} abcasm
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmdd} abcasm
+cd acceptance;${py} ./runtests.py -v --notimecheck --avm=${avmr} abcasm
+cd acceptance;${py} ./runtests.py -v --notimecheck --avm=${avmrd} abcasm
+cd acceptance;${py} ./runtests.py -v --notimecheck --avm=${avmdd} abcasm
 
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} as3/Vector
 
