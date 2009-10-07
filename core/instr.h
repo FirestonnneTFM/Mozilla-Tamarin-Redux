@@ -95,7 +95,7 @@ Atom callprop_b(E env, Atom base, const Multiname* name, int argc, Atom* atomv, 
 
 /**
  * get the __proto__ object for this value.  When the value is an object,
- * we look it up directly.  For primitives (String, Namespace, int, 
+ * we look it up directly.  For primitives (String, Namespace, int,
  * Boolean, uint, and Number, we get the prototype from the primitive's
  * class object.  Includes null/undefined error handling.
  */
@@ -123,7 +123,7 @@ template <class E>
 ArrayObject* newarray(E caller_env, int argc, Atom* ap);
 
 /**
- * implementation of OP_astype when RHS type is not 
+ * implementation of OP_astype when RHS type is not
  * known at JIT time
  */
 template <class E>
@@ -148,7 +148,7 @@ Atom op_in(E caller_env, Atom name, Atom obj);
 ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot);
 
 /**
- * Implementation of OP_constructprop 
+ * Implementation of OP_constructprop
  */
 template <class E>
 Atom constructprop(E env, const Multiname* multiname, int argc, Atom* atomv);

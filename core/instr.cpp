@@ -71,7 +71,7 @@ Atom callprop_b(E env, Atom base, const Multiname* multiname, int argc, Atom* at
         // read on write-only property
         env->toplevel()->throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
         return unreachableAtom;
-    
+
     default:
         if (isObjectPtr(base)) {
             return call_obj_dynamic(base, multiname, argc, atomv);
@@ -96,7 +96,7 @@ Binding getBinding(E env, Traits* traits, const Multiname* ref)
     {
         if (!traits->isResolved())
             traits->resolveSignatures(env->toplevel());
-            
+
         TraitsBindingsp tb = traits->getTraitsBindings();
         if (!ref->isNsset())
         {
@@ -165,7 +165,7 @@ template <class E>
 Atom astype_late(E caller_env, Atom value, Atom type) {
     Traits* itraits = caller_env->toplevel()->toClassITraits(type);
     return AvmCore::astype(value, itraits);
-} 
+}
 
 template Atom instanceof(MethodEnv*, Atom, Atom);
 template <class E>
@@ -211,7 +211,7 @@ ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot
     WBRC(core->gc, cache, &cache[slot].object, obj);
     return obj;
 }
-#endif // FEATURE_NANOJIT 
+#endif // FEATURE_NANOJIT
 
 Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
 {
@@ -264,6 +264,6 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
             return op_construct(toplevel, ctor, argc, atomv);
         }
     }
-}	
+}
 
 } // namespace avmplus

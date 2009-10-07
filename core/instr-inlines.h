@@ -120,7 +120,7 @@ Atom op_call(E env, Atom func, int argc, Atom* atomv)
     // being a tail call - the address of a local multiname is taken, this
     // makes GCC (arguably incorrectly, given the scope of the variable)
     // turn off tail calling.
-    
+
     env->toplevel()->throwTypeErrorWithName(kCallOfNonFunctionError, "value");
     return unreachableAtom;
 }
