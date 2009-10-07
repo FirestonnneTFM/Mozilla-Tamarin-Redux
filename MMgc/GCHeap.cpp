@@ -543,7 +543,7 @@ namespace MMgc
 		GCAssert(region->baseAddr == block->baseAddr);
 		GCAssert(region->reserveTop == block->endAddr());
 		
-		int newBlocksLen = blocksLen - block->size;
+		size_t newBlocksLen = blocksLen - block->size;
 
 		HeapBlock *nextBlock = block + block->size;
 
@@ -574,10 +574,10 @@ namespace MMgc
 		HeapBlock *newBlocks = blocks;
 
 		// the memmove will overwrite this so save it
-		int blockSize = block->size;
+		size_t blockSize = block->size;
 
-		int offset = int(block-blocks);
-		int sen_offset = 0;
+		size_t offset = int(block-blocks);
+		int32_t sen_offset = 0;
 		HeapBlock *src = block + block->size;
 
 		if( need_sentinel ) {
@@ -651,7 +651,7 @@ namespace MMgc
 		while(block - blocks < (intptr_t)blocksLen) {
 			Region *r = AddrToRegion(block->baseAddr);
 			if(r && r->baseAddr == block->baseAddr)
-				GCAssert(r->blockId == block-blocks);
+				GCAssert(r->blockId == (size_t)(block-blocks));
 
 			HeapBlock *next = NULL;
 			if(block->size) {
@@ -846,7 +846,7 @@ namespace MMgc
 				HeapBlock *block = decommittedSuitableBlock;
 				RemoveFromList(block);
 
-				int amountRecommitted = block->committed ? 0 : block->size;
+				size_t amountRecommitted = block->committed ? 0 : block->size;
 					
 				while(block->size < size)
 				{
@@ -1226,8 +1226,8 @@ namespace MMgc
 		
 		if(blocksLen != 0 || config.initialSize == 0) // if initial heap size is zero we can't assume HeapBlocks will fit in askSize
 		{
-			uint32_t curHeapBlocksSize = blocks ? AddrToBlock(blocks)->size : 0;
-			uint32_t newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + 1); // +1 for potential new sentinel
+			size_t curHeapBlocksSize = blocks ? AddrToBlock(blocks)->size : 0;
+			size_t newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + 1); // +1 for potential new sentinel
 
 			// size is based on newSize and vice versa, loop to settle (typically one loop, sometimes two)
 			while(newHeapBlocksSize > curHeapBlocksSize) 
@@ -1404,7 +1404,7 @@ namespace MMgc
 		}
 
 		// Expand the block list.
-		int newBlocksLen = blocksLen + size;
+		size_t newBlocksLen = blocksLen + size;
 
 		// Add space for the "top" sentinel
 		newBlocksLen++;
@@ -1467,7 +1467,7 @@ namespace MMgc
 		// if baseAddr was used for HeapBlocks split
 		if((char*)newBlocks == baseAddr)
 		{
-			int numBlocksNeededForHeapBlocks = numHeapBlocksToNumBlocks(newBlocksLen);
+			size_t numBlocksNeededForHeapBlocks = numHeapBlocksToNumBlocks(newBlocksLen);
 			HeapBlock *next = Split(block, numBlocksNeededForHeapBlocks);
 			// this space counts as used space
 			numAlloc += numBlocksNeededForHeapBlocks;
@@ -1477,7 +1477,7 @@ namespace MMgc
 		AddToFreeList(block);
 
 		// Initialize the rest of the new blocks to empty.
-		uint32_t freeBlockSize = block->size;
+		size_t freeBlockSize = block->size;
 
 		for (uint32_t i=1; i < freeBlockSize; i++) {
 			block++;
@@ -1896,7 +1896,7 @@ namespace MMgc
 			}
 			HeapBlock *hb;
 			while(addr != r->commitTop && (hb = AddrToBlock(addr)) != NULL) {
-				GCAssert(hb->size);
+				GCAssert(hb->size != 0);
 
 				if(hb->inUse())
 					c = '1';
@@ -1904,7 +1904,7 @@ namespace MMgc
 					c = '0';
 				else 
 					c = '-';
-				int i, n;
+				size_t i, n;
 				for(i=0, n=hb->size; i < n; i++, addr += GCHeap::kBlockSize) {
 					if(addr == r->reserveTop) {
 						// end of region!

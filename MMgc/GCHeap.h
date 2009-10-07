@@ -498,7 +498,7 @@ namespace MMgc
 			char *baseAddr;
 			char *reserveTop;
 			char *commitTop;
-			int blockId;
+			size_t blockId;
 		};
 		Region *lastRegion;
 		
@@ -680,9 +680,9 @@ namespace MMgc
 			return status != kMemNormal && status != kMemAbort;
 		}
 
- 		uint32_t numHeapBlocksToNumBlocks(uint32_t numBlocks)
+ 		size_t numHeapBlocksToNumBlocks(size_t numBlocks)
  		{
- 			uint32_t bytes = numBlocks * sizeof(HeapBlock);
+ 			size_t bytes = numBlocks * sizeof(HeapBlock);
  			// round up to nearest block
  			bytes = (bytes + kBlockSize - 1) & ~(kBlockSize-1);
  			return bytes / kBlockSize;
@@ -694,10 +694,10 @@ namespace MMgc
 
 		FixedMalloc fixedMalloc;
 		HeapBlock *blocks;
-		uint32_t blocksLen;
-		uint32_t numDecommitted;
+		size_t blocksLen;
+		size_t numDecommitted;
 		HeapBlock freelists[kNumFreeLists];
-		uint32_t numAlloc;
+		size_t numAlloc;
 		vmpi_spin_lock_t m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
