@@ -4020,18 +4020,12 @@ namespace avmplus
                 }
                 else if (maybeIntegerIndex && indexType != STRING_TYPE)
                 {
-                    LIns* _tempname = copyMultiname(multiname);
+                    LIns* multi = InsConstPtr(multiname); // inline ptr to precomputed name
                     LIns* index = loadAtomRep(objDisp--);
                     AvmAssert(state->value(objDisp).notNull);
-
                     LIns* obj = loadAtomRep(objDisp);
-
-                    // copy the compile-time namespace to the temp multiname
-                    LIns* mSpace = InsConstPtr(multiname->ns);
-                    storeIns(mSpace, offsetof(Multiname, ns), _tempname);
-
-                    LIns* value = callIns(FUNCTIONID(getpropertyHelper), 5,
-                                        env_param, obj, _tempname, loadVTable(objDisp), index);
+                    LIns* value = callIns(FUNCTIONID(getprop_index), 4,
+                                        env_param, obj, multi, index);
 
                     localSet(objDisp, atomToNativeRep(result, value), result);
                 }
@@ -4043,12 +4037,8 @@ namespace avmplus
                     LIns* value;
                     LIns* obj = loadAtomRep(objDisp);
                     if (multiname->isRuntime()) {
-                        LIns* vtable = loadVTable(objDisp);
-                        LIns* toplevel = loadToplevel();
-
-                        //return toplevel->getproperty(obj, name, toplevel->toVTable(obj));
-                        value = callIns(FUNCTIONID(getproperty), 4,
-                                            toplevel, obj, multi, vtable);
+                        //return getprop_late(obj, name);
+                        value = callIns(FUNCTIONID(getprop_late), 3, env_param, obj, multi);
                     } else {
                         // static name, use property cache
                         GetCache* cache = get_cache_builder.allocateCacheSlot(multiname);
