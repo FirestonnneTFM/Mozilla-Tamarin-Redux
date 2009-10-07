@@ -222,8 +222,8 @@ mops/mops,^((?!ppc-mac-tvm-debug-).).*deep, include, include slow tests in deep 
 ####################
 # verifier
 ####################
-ecma3/Statements/eforin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
-as3/Statements/for-each-in/eforeachin_001_500476, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
+ecma3/Statements/eforin_001_500476, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
+as3/Statements/for-each-in/eforeachin_001_500476, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=500476
 
 ####################
 # Sampling 
