@@ -677,20 +677,24 @@ namespace avmplus
 				break;
 			}
 			case OP_getlocal:
+			{
 				checkStack(0,1);
+				Value& v = checkLocal(imm30);
 				coder->write(state, pc, opcode);
-				state->push(checkLocal(imm30));
+				state->push(v);
 				break;
-
+			}
 			case OP_getlocal0:
 			case OP_getlocal1:
 			case OP_getlocal2:
 			case OP_getlocal3:
+			{
 				checkStack(0,1);
+				Value& v = checkLocal(opcode-OP_getlocal0);
 				coder->write(state, pc, opcode);
-				state->push(checkLocal(opcode-OP_getlocal0));
+				state->push(v);
 				break;
-			
+			}
 			case OP_kill:
 			{
 				//checkStack(0,0)
