@@ -716,7 +716,9 @@ namespace avmplus
 
 	void MethodEnv::setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index)
 	{
-		if ((index&7) == kIntegerType)
+		// the positive-integer case is inlined into setprop_index in jit-calls.h,
+		// this handles the negative case
+		if (AvmCore::isInteger(obj))
 		{
 			setpropertylate_i(obj, (int32_t)(index>>3), value);
 			return;
