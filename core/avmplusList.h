@@ -247,6 +247,7 @@ namespace avmplus
 		}
 		T last() const
 		{
+			AvmAssert(len > 0);
 			return data[len-1];
 		}
 		void set(uint32 index, T value)
