@@ -62,7 +62,7 @@ namespace MMgc
 		 * runs out and reclamation efforts fail set this to a
 		 * non-zero value.   Defaults to zero.
 		 */
-		int OOMExitCode;
+		uint32_t OOMExitCode;
 		bool useVirtualMemory;
 		bool trimVirtualMemory;
 		bool mergeContiguousRegions;
@@ -169,7 +169,7 @@ namespace MMgc
 		// -- Constants
 		
 		/** Size of a block */
-		const static int kBlockSize = 4096;
+		const static uint32_t kBlockSize = 4096;
 
 		/** 
 		 * Max allowable size for any allocation = 2^32 - 1  bytes
@@ -182,33 +182,33 @@ namespace MMgc
 		
 		/** Default size of address space reserved per region in blocks */
 #ifdef MMGC_64BIT
-		const static int kDefaultReserve = 4096;
+		const static uint32_t kDefaultReserve = 4096;
 #else
-		const static int kDefaultReserve = 512;
+		const static uint32_t kDefaultReserve = 512;
 #endif
 		
 		/** Sizes up to this many blocks each have their own free list. */
-		const static int kUniqueThreshold = 16;
+		const static uint32_t kUniqueThreshold = 16;
 
 		/**
 		 * Sizes of at least this many heap blocks are mapped to a
 		 * single free list.
 		 */
-		const static int kHugeThreshold = 128;
+		const static uint32_t kHugeThreshold = 128;
 
 		/** In between sizes map this many distinct sizes to a single bin. */
-		const static int kFreeListCompression = 8;
+		const static uint32_t kFreeListCompression = 8;
 
 		/** Calculated number of free lists */
-		const static int kNumFreeLists = (kHugeThreshold-kUniqueThreshold)/kFreeListCompression+kUniqueThreshold;
+		const static uint32_t kNumFreeLists = (kHugeThreshold-kUniqueThreshold)/kFreeListCompression+kUniqueThreshold;
 
 		/** Minimum heap increment, in blocks */
-		const static int kMinHeapIncrement = 32;
+		const static uint32_t kMinHeapIncrement = 32;
 
 		/** if this much of the heap is free decommit some memory */
-		const static int kDecommitThresholdPercentage = 25;
+		const static uint32_t kDecommitThresholdPercentage = 25;
 		/** if this much of the heap is free un-reserve it */
-		const static int kReleaseThresholdPercentage = 50;
+		const static uint32_t kReleaseThresholdPercentage = 50;
 
 		/**
 		 * Init must be called to set up the GCHeap singleton
@@ -276,7 +276,7 @@ namespace MMgc
 		 *             to allocate.
 		 * @return pointer to beginning of block, or NULL if failed.
 		 */
-		void *Alloc(int size, int flags=kExpand | kZero | kProfile);
+		void *Alloc(size_t size, uint32_t flags=kExpand | kZero | kProfile);
 
 		/**
 		 * Frees a block.
@@ -575,16 +575,16 @@ namespace MMgc
 		 *
 		 * @param size the number of pages to expand the heap by
 		 */	 
-		void ExpandHeap(int size, bool canFail=false);
-		bool ExpandHeapInternal(int size);
+		void ExpandHeap(size_t size, bool canFail=false);
+		bool ExpandHeapInternal(size_t size);
 		
 		// Block struct used for free lists and memory traversal
 		class HeapBlock 
 		{
 		public:
 			char *baseAddr;   // base address of block's memory
-			int size;         // size of this block
-			int sizePrevious; // size of previous block
+			size_t size;         // size of this block
+			size_t sizePrevious; // size of previous block
 			HeapBlock *prev;      // prev entry on free list
 			HeapBlock *next;      // next entry on free list
 			bool committed;   // is block fully committed?
@@ -610,13 +610,13 @@ namespace MMgc
 		// Core methods
 		void AddToFreeList(HeapBlock *block);
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
-		HeapBlock *AllocBlock(int size, bool& zero);
+		HeapBlock *AllocBlock(size_t size, bool& zero);
 		void FreeBlock(HeapBlock *block);
 		void FreeAll();
 
 		void FreeInternal(const void *item, bool profile);
 	
-		HeapBlock *Split(HeapBlock *block, int size);
+		HeapBlock *Split(HeapBlock *block, size_t size);
 		void RemoveBlock(HeapBlock *block);
 
 		void Commit(HeapBlock *block);
@@ -654,14 +654,14 @@ namespace MMgc
 
 		// Map a number of blocks to the appropriate large block free list index
 		// (inlined for speed)
-		inline int GetFreeListIndex(int size)
+		inline uint32_t GetFreeListIndex(size_t size)
 		{
 			if (size <= kUniqueThreshold) {
-				return size-1;
+				return (uint32_t)size-1;
 			} else if (size >= kHugeThreshold) {
 				return kNumFreeLists-1;
 			} else {
-				return (size-kUniqueThreshold)/kFreeListCompression+kUniqueThreshold-1;
+				return (uint32_t) ((size-kUniqueThreshold)/kFreeListCompression+kUniqueThreshold-1);
 			}
 		}
 
