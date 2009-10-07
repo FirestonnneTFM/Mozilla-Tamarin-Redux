@@ -417,7 +417,12 @@
     }
     FUNCTION(CALL_INDIRECT, SIG4(A,P,P,P,A), get_cache_handler)
 
-    METHOD(TOPLEVELADDR(Toplevel::getproperty), SIG4(A,P,A,P,P), getproperty)
+    Atom getprop_late(MethodEnv* env, Atom obj, const Multiname* name)
+    {
+        GetCache c(name);
+        return getprop_generic(c, env, obj);
+    }
+    FUNCTION(FUNCADDR(getprop_late), SIG3(A,P,A,P), getprop_late)
 
     CSEMETHOD(TOPLEVELADDR(Toplevel::coerce), SIG3(A,P,A,P), coerce)
     METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
@@ -643,6 +648,25 @@
     }
     FUNCTION(FUNCADDR(initprop_late), SIG4(V,P,A,P,A), initprop_late)
 
+    // implements OP_getproperty with unknown base object or index type, but a multiname
+    // that includes public and therefore exposes dynamic properties
+    Atom getprop_index(MethodEnv* caller_env, Atom obj, const Multiname *name, Atom index) {
+        if (AvmCore::isInteger(index)) {
+            if (isObjectPtr(obj)) {
+                int i = (int)atomInt(index);
+                if (i >= 0) {
+                    _nvprof("getprop_index P-fast", 1);
+                    return AvmCore::atomToScriptObject(obj)->getUintProperty(i);
+                }
+            }
+        }
+        _nvprof("getprop_index P-fast", 0);
+        Multiname tempname = *name;
+        VTable* vtable = toVTable(caller_env->toplevel(), obj);
+        return caller_env->getpropertyHelper(obj, &tempname, vtable, index);
+    }
+    FUNCTION(FUNCADDR(getprop_index), SIG4(A,P,A,P,A), getprop_index)
+
     // called when we don't know the base object type and we have a runtime
     // index expression that is public and therefore able to access dynamic properties.
     // (typically this is late-bound array access)
@@ -707,7 +731,6 @@
     METHOD(VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty), SIG3(V,P,I,U), UIntVectorObject_setNativeIntProperty)
     METHOD(ARRAYADDR(ArrayObject::_setIntProperty), SIG3(V,P,I,A), ArrayObject_setIntProperty)
     METHOD(VECTOROBJADDR(ObjectVectorObject::_setIntProperty), SIG3(V,P,I,A), ObjectVectorObject_setIntProperty)
-    METHOD(ENVADDR(MethodEnv::getpropertyHelper), SIG5(A,P,A,P,P,A), getpropertyHelper)
     METHOD(ENVADDR(MethodEnv::getpropertylate_u), SIG3(A,P,A,U), getpropertylate_u)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getUintProperty), SIG2(A,P,U), DoubleVectorObject_getUintProperty)
     METHOD(VECTORDOUBLEADDR(DoubleVectorObject::_getNativeUintProperty), SIG2(F,P,U), DoubleVectorObject_getNativeUintProperty)
