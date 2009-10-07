@@ -123,8 +123,6 @@ ecma3/String/split_504567:'babab',   .*   , expectedfail, bug https://bugzilla.m
 ####################
 # Vector
 ####################
-as3/Vector/initializerLargeVector, (x86-lnx.*|.*winmobile.*), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281
-as3/Vector/initializerLargeVector, x64.*jit.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=487281 intermittent seg fault
 as3/Vector/concat:concat multiple int vectors, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=504525
 
 ####################
