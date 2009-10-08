@@ -144,7 +144,7 @@ fi
 
 
 echo "message: $py ./runtests.py --config=${platform}-diff   --notimecheck"
-$py ./runtests.py --config=${platform}-diff   --notimecheck
+$py ./runtests.py --config=${platform}-3264-diff --notimecheck
 
 ##
 # Ensure that the system is torn down and clean

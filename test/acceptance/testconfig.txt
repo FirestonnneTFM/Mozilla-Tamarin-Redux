@@ -99,6 +99,16 @@ ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/
 ecma3/GlobalObject/e15_1_2_2_2  , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/TypeConversion/e9_3_1_3_rt   , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 
+# specific skips when running differential testing between 32bit and 64bit shells
+as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/RuntimeErrors/Error1034TypeCoercionFailed , .*3264-diff , skip , both produce the same results and therefore produce and unexpected pass
+ecma3/Expressions/e11_5_3 , .*3264-diff , skip , both produce the same results and therefore produce and unexpected pass
+ecma3/Math/e15_8_2_16 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
+ecma3/Math/e15_8_2_18 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
+ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
+
+
 ####################
 # Number
 ####################
