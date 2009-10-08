@@ -1461,8 +1461,14 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
-				if (index < pool->cpool_double.size())
+				if (index > 0 && index < pool->cpool_double.size())
+				{
 					buffer << " " << *pool->cpool_double[index];
+				}
+				else
+				{
+					buffer << " invalid_index=" << index;
+				}
 				break;
 			}
 			case OP_pushnamespace:
