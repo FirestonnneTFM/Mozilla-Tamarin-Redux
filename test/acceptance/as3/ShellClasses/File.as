@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
     import avmplus.File
+    import flash.utils.ByteArray
 
     var SECTION = "File";
     var VERSION = "as3";
@@ -67,5 +68,9 @@
     AddTestCase("File read on unknown file should throw exception",
       "Error: Error #1500",
       err.substring(0,18));
+
+    File.write("test2.ba","sample test data");
+    var ba:ByteArray=File.fileToByteArray("test2.ba",false);
+    AddTestCase("File.fileToByteArray length",true,ba.length=="sample test data".length);
 
     test();

@@ -406,5 +406,45 @@
       "\u00FB\u00BF\u00BF\u00BF\u00BF\u4e00",
       bytearray_bad.toString());
 
+// compress/uncompress
+    var bytearray_compress = new ByteArray();
+    bytearray_compress[0]=0xef;
+    bytearray_compress[1]=0xbb;
+    bytearray_compress[2]=0xbf;
+    bytearray_compress[3]=100;
+    bytearray_compress[4]=97;
+    bytearray_compress[5]=110;
+    bytearray_compress[6]=33;
+    // original length = 7
+    var origlength=bytearray_compress.length;
+    bytearray_compress.compress();
+    // test the compressed bytearray values are all different from the original
+    var compressstate=(bytearray_compress[0]==0xef || 
+                       bytearray_compress[1]==0xbb ||
+                       bytearray_compress[2]==0xbf ||
+                       bytearray_compress[3]==100 ||
+                       bytearray_compress[4]==97);
+    // check the compressed length = 15 (small strings compress larger in zlib)
+    var compresslength=bytearray_compress.length;
+    bytearray_compress.uncompress();
+    // check the uncompress/compress length should equal original length 7
+    var restoredlength=bytearray_compress.length;
+    var restorestate=(bytearray_compress[0]==0xef && 
+                       bytearray_compress[1]==0xbb &&
+                       bytearray_compress[2]==0xbf &&
+                       bytearray_compress[3]==100 &&
+                       bytearray_compress[4]==97 &&
+                       bytearray_compress[5]==110 &&
+                       bytearray_compress[6]==33
+                     );
+    AddTestCase("ByteArray.compress bytearray length is different",
+                origlength==compresslength,false);
+    AddTestCase("ByteArray.compress bytearray contents differ",
+                compressstate,false);
+    AddTestCase("ByteArray.uncompress bytearray length matches before compress",
+                origlength,restoredlength);
+    AddTestCase("ByteArray.uncompress uncompressing compressed string matches original",
+                restorestate,true);
+ 
     test();
 

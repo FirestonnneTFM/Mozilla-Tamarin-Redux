@@ -55,8 +55,12 @@
 
 
 
-# Solairs SPARC failures, fixed by: http://hg.mozilla.org/tamarin-redux/rev/2669
+# Solaris SPARC failures, fixed by: http://hg.mozilla.org/tamarin-redux/rev/2669
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} --vmargs="-Ojit" as3/Definitions/Classes/ClassDef/DynamicClassSameMethPropName.as
+
+# ByteArray compress/uncompress: https://bugzilla.mozilla.org/show_bug.cgi?id=436372
+cd acceptance;${py} ./runtests.py --notimecheck --avm=${avmr} as3/ShellClasses/ByteArray.as
+cd acceptance;${py} ./runtests.py --notimecheck --avm=${avmr} as3/ShellClasses/File.as
 
 # https://bugzilla.mozilla.org/show_bug.cgi?id=517858
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmdd} mmgc/outofmemory.as
