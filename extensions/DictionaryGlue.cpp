@@ -94,6 +94,9 @@ namespace avmplus
 		AvmAssert(MMgc::GC::Size(obj) >= sizeof(ScriptObject));
 		(void)obj;
 
+		// This commented-out code probably pertains to Bugzilla 507699:
+		// "Dictionary key of Xml type are not matching."
+		//
 		// FIXME: this doesn't work, need to convert back to an XMLObject
 		// on the way out or intern XMLObject's somehow
 		//if(AvmCore::isXML(key))
