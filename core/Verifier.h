@@ -218,25 +218,4 @@ namespace avmplus
 #endif // FEATURE_CFGWRITER
 }
 
-namespace nanojit {
-    class Fragment;
-    struct GuardRecord {
-        int calldepth;
-        Fragment *from, *target;
-        void *jmp, *origTarget;
-        GuardRecord *next, *outgoing;
-        struct SideExit *exit;
-    };
-    #define GuardRecordSize(r) sizeof(GuardRecord)
-
-    struct SideExit {
-        int sid;
-        Fragment *target;
-        GuardRecord *guards;
-        struct SwitchInfo* switchInfo;
-    };
-    
-    #define SideExitSize(x) sizeof(SideExit)
-}
-
 #endif /* __avmplus_Verifier__ */
