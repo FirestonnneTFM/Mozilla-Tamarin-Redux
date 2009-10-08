@@ -3889,7 +3889,7 @@ namespace avmplus
                 Traits* indexType = state->value(sp).traits;
                 int objDisp = sp;
 
-                bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->contains(core->getPublicNamespace(pool));
+                bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->containsAnyPublicNamespace();
                 if (maybeIntegerIndex && indexType == INT_TYPE)
                 {
                     bool valIsAtom = true;
@@ -4061,7 +4061,7 @@ namespace avmplus
                 Traits* valueType = state->value(sp).traits;
                 int objDisp = sp-1;
 
-                bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->contains(core->getPublicNamespace(pool));
+                bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->containsAnyPublicNamespace();
 
                 if (maybeIntegerIndex && indexType == INT_TYPE)
                 {

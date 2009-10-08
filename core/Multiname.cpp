@@ -71,6 +71,22 @@ namespace avmplus
 		}
 	}
 
+    bool Multiname::containsAnyPublicNamespace() const
+    {
+        if (flags & NSSET)
+        {
+            if( !nsset ) return false;
+            for (int i=0; i < nsset->size; i++)
+                if (nsset->namespaces[i]->isPublic())
+                    return true;
+            return false;
+        }
+        else
+        {
+            return this->ns->isPublic();
+        }
+    }
+
 	bool Multiname::matches(const Multiname* qname) const
 	{
 		// For attributes (XML::getprop page 12)

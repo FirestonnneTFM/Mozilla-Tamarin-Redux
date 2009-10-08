@@ -881,7 +881,7 @@ namespace avmplus
 					Traits* indexType = state->value(state->sp()-1).traits;
 
 					// NOTE a dynamic name should have the same version as the current pool
-					bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.contains(core->getPublicNamespace(pool));
+					bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
 					if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
 					{
 						if(obj.traits == VECTORINT_TYPE)
@@ -2173,7 +2173,7 @@ namespace avmplus
 				bool attr = multiname.isAttr();
 				Traits* indexType = state->value(state->sp()).traits;
 				// NOTE a dynamic name should have the same version as the current pool
-				bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.contains(core->getPublicNamespace(pool));
+				bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.containsAnyPublicNamespace();
 				if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
 				{
 					if(obj.traits == VECTORINT_TYPE)
