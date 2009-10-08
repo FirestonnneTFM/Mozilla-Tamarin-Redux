@@ -57,8 +57,8 @@ util/shell_ats, .*, skip, shell file for ats media creation
 ####################
 # force JIT -Ojit
 ####################
-as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*-Ojit.*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-as3/Vector/nonindexproperty:index -6.*          , [^ppc].*(-Ojit.*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*(-Ojit|-Djitordie).*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*          , [^ppc].*((-Ojit|-Djitordie).*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 ####################
 # abcasm:
@@ -156,7 +156,6 @@ ecma3/String/e15_5_3_2_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla
 ecma3/String/e15_5_3_2_2, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 ecma3/TypeConversion/e9_3_1_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 ecma3/Unicode/uc_006, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-as3/Expressions/asOperator/asOper, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 regress/vector_domain_bug, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 ecma3/String/e15_5_4_4_4_rt, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 
