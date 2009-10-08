@@ -285,6 +285,13 @@ namespace MMgc
 					}
 					return NULL;
 				}
+
+				size_t total = GetTotalHeapSize() ;
+				if(config.heapSoftLimit && total > config.heapSoftLimit && status == kMemNormal)
+				{
+					GCDebugMsg(false, "*** Alloc exceeded softlimit: ask for %d, usedheapsize =%d, totalHeap =%d\n", size, GetUsedHeapSize(), total );
+					StatusChangeNotify(kMemSoftLimit);
+				}
 			}
 
 			GCAssert(block->size == size);
@@ -1164,14 +1171,6 @@ namespace MMgc
 				else 
 					Abort();
 			}
-		}
-
-
-		size_t total = GetTotalHeapSize() ;
-		if(config.heapSoftLimit && total > config.heapSoftLimit && status == kMemNormal)
-		{
-			GCDebugMsg(false, "*** Alloc exceed softlimit: ask for %d, usedheapsize =%d, totalHeap =%d\n", askSize, GetUsedHeapSize(), total );
-			StatusChangeNotify(kMemSoftLimit);
 		}
 
 		// The guard on instance being non-NULL is a hack, to be fixed later (now=2009-07-20).
