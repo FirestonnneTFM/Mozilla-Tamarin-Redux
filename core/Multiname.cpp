@@ -73,9 +73,11 @@ namespace avmplus
 
     bool Multiname::containsAnyPublicNamespace() const
     {
+        if (!nsset) 
+			return false; // note, also handles this->ns == null
+
         if (flags & NSSET)
         {
-            if( !nsset ) return false;
             for (int i=0; i < nsset->size; i++)
                 if (nsset->namespaces[i]->isPublic())
                     return true;
