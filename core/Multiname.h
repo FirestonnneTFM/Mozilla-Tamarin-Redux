@@ -201,6 +201,7 @@ namespace avmplus
 		}
 
 		bool contains(Namespacep ns) const;
+	    bool containsAnyPublicNamespace() const;
 
 		/**
 		 * return the flags we want to keep when copying a compile-time

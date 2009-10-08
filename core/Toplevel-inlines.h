@@ -85,12 +85,6 @@ REALLY_INLINE Atom Toplevel::coerce(Atom atom, Traits* expected) const
 	return avmplus::coerce(this, atom, expected);
 }
 
-//static
-REALLY_INLINE bool Toplevel::isXmlBase(Atom obj)
-{
-	return AvmCore::isXMLorXMLList(obj);
-}
-
 REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
 {
 	return _builtinClasses[class_id]

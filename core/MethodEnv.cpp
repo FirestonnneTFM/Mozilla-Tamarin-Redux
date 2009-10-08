@@ -1712,7 +1712,7 @@ namespace avmplus
 			}
 			else if (AvmCore::isMethodBinding(b))
 			{
-				if (multiname->contains(core()->getPublicNamespace(method->pool())) && toplevel->isXmlBase(obj))
+				if (AvmCore::isXMLorXMLList(obj) && multiname->containsAnyPublicNamespace())
 				{
 					// dynamic props should hide declared methods on delete
 					ScriptObject* so = AvmCore::atomToScriptObject(obj);

@@ -402,7 +402,7 @@
                 c.get_handler = getprop_obj_handlers[AvmCore::bindingKind(b)];
                 if (AvmCore::isMethodBinding(b) &&
                     AvmCore::isXMLorXMLList(obj) &&
-                    c.name->contains(actual_type->core->findPublicNamespace())) {
+                    c.name->containsAnyPublicNamespace()) {
                     // special case for XML objects: dynamic props hide declared methods
                     // dynamic property lookup
                     c.get_handler = getprop_obj_none;

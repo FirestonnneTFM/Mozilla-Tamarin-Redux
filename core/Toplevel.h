@@ -233,8 +233,6 @@ namespace avmplus
 	    void setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
 	    void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
 
-		static bool isXmlBase(Atom obj);
-
 		/**
 		 * operator +
 		 */
