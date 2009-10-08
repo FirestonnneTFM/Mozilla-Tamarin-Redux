@@ -1295,7 +1295,7 @@ namespace avmplus
         abcEnd   = abcStart + state->verifier->code_length;
         framesize = state->verifier->frameSize;
 
-        frag = new (*lir_alloc) Fragment(abcStart);
+        frag = new (*lir_alloc) Fragment(abcStart verbose_only(, 0));
         frag->root = frag;
         LirBuffer *lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
