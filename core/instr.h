@@ -181,4 +181,9 @@ Atom coerce(E env, Atom atom, Traits* expected);
 template <class E>
 void coerceobj(E env, ScriptObject* obj, Traits*);
 
+/**
+ * generic implementation of OP_add
+ */
+Atom op_add(AvmCore*, Atom lhs, Atom rhs);
+
 } // namespace avmplus

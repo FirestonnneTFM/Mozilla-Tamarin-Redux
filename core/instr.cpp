@@ -355,4 +355,84 @@ void coerceobj(E caller_env, ScriptObject* obj, Traits* type) {
     }
 }
 
+Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
+{
+    tagprof("op_add val1", lhs);
+    tagprof("op_add val2", rhs);
+
+    // detect integers... less control flow but more registers -- which is better?
+    #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0)
+    // integer optimization based on the one from Interpreter.cpp, modified
+    // to reduce the # of alu instructions
+    if (IS_BOTH_INTEGER(lhs,rhs)) {
+        intptr_t sum = lhs + rhs - kIntegerType;
+        if ((lhs ^ rhs) < 0 || (lhs ^ sum) >= 0) {
+            // no overflow
+            return sum;
+        }
+        // both integers, but overflow happens.  Intentionally add these
+        // without casting to int32_t.  If the sum of the shifted values overflow,
+        // we know the unshifted values will not overflow with a word-sized add.
+        return core->allocDouble(atomInt(lhs) + atomInt(rhs));
+    }
+
+    if (AvmCore::isNumber(lhs) && AvmCore::isNumber(rhs))
+    {
+        // C++ porting note. if either side is undefined NaN then result must be NaN,
+        // which is assumed to be taken care of by IEEE 748 double add.
+        goto add_numbers;
+    }
+    
+    if (AvmCore::isString(lhs) || AvmCore::isString(rhs) || AvmCore::isDate(lhs) || AvmCore::isDate(rhs))
+    {
+        goto concat_strings;
+    }
+
+    // then look for the more unlikely cases
+
+    // E4X, section 11.4.1, pg 53
+
+    if (AvmCore::isXMLorXMLList(lhs) && AvmCore::isXMLorXMLList(rhs))
+    {
+        XMLListObject *l = new (core->GetGC()) XMLListObject(atomObj(lhs)->toplevel()->xmlListClass());
+        l->_append(lhs);
+        l->_append(rhs);
+        return l->atom();
+    }
+
+    // to catch oddball cases like:
+    //   function foo() { };
+    //   foo.prototype.valueOf = function() { return new Object(); }
+    //   foo.prototype.toString = function() { return 2; }
+    //   print( new foo() + 33 ); // should be 35
+    //
+    // we need to follow the E3 spec:
+    // 1. call ToPrimitive() on lhs and rhs, then
+    // if L is String || R is String, concat, else add toNumber(lhs) to toNumber(rhs)
+
+    // ToPrimitive() will call [[DefaultValue]], which calls valueOf().  If the result is
+    //  a primitive, return that value else call toString() instead.
+
+    // from E3:
+    // NOTE No hint is provided in the calls to ToPrimitive in steps 5 and 6. All native ECMAScript objects except Date objects handle
+    // the absence of a hint as if the hint Number were given; Date objects handle the absence of a hint as if the hint String were given.
+    // Host objects may handle the absence of a hint in some other manner.
+
+    lhs = AvmCore::primitive(lhs); // Date is handled above with the String argument case,  we don't have to check for it here.
+    rhs = AvmCore::primitive(rhs);
+
+    if (!(AvmCore::isString(lhs) || AvmCore::isString(rhs)))
+    {
+        goto add_numbers;
+    }
+    // else fall thru to concat_strings
+
+concat_strings:
+    return core->concatStrings(core->string(lhs), core->string(rhs))->atom();
+
+add_numbers:
+    return core->doubleToAtom(AvmCore::number(lhs) + AvmCore::number(rhs));
+#undef IS_BOTH_INTEGER
+}
+
 } // namespace avmplus
