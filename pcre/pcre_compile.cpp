@@ -1158,7 +1158,151 @@ for (;;)
 }
 
 
+/*****************************************************************************
+ *        Generic stack used by find_fixedlength, is_anchored, is_startline  *
+ *        to avoid unbounded recursion                                       *
+ *****************************************************************************/
 
+#define TYPED_SEGMENT_SIZE 20
+
+template <class T>
+class TypedStack {
+public:
+	TypedStack();
+	~TypedStack();
+	
+	bool isEmpty();						// true iff the stack is empty
+	void push(T& value);				// push value onto the stack (by copy)
+	void pop(T& value);					// pop value off the stack (by copy)
+	T& stackTop();						// reference to top element
+
+private:
+	struct TypedSegment {
+		T memory[TYPED_SEGMENT_SIZE];	// stack memory
+		T *top;							// for non-top segments, the saved 'top' pointer
+		TypedSegment *next;				// next segment on the stack
+	};
+	
+	void pushSegment();
+	void popSegment();
+	void invariants();
+	
+	TypedSegment* topSegment;			// segment at the top of stack
+	T *top;								// next free address in that segment
+	T *limit;							// limit address in that segment
+#ifdef DEBUG
+	uint32_t depth;						// current stack depth
+	uint32_t maxdepth;					// peak stack depth
+#endif
+};
+
+template <class T>
+void TypedStack<T>::invariants()
+{
+	AvmAssert(topSegment == NULL || top > topSegment->memory);
+	AvmAssert(topSegment == NULL || limit == topSegment->memory + TYPED_SEGMENT_SIZE);
+	AvmAssert(top <= limit);
+}
+
+template <class T>
+TypedStack<T>::TypedStack()
+	: topSegment(NULL)
+	, top(NULL)
+	, limit(NULL)
+#ifdef DEBUG
+	, depth(0)
+	, maxdepth(0)
+#endif
+{
+	invariants();
+}
+
+template <class T>
+TypedStack<T>::~TypedStack()
+{
+#if 0 && defined DEBUG
+	// For the morbidly curious only.  See bugzilla 502589 for some data.
+	FILE *fp = fopen("typedstack.txt", "a");
+	fprintf(fp, "PCRE TypedStack depth = %u\n", unsigned(maxdepth));
+	fclose(fp);
+#endif
+	invariants();
+	while (topSegment != NULL)
+		popSegment();
+}
+
+template <class T>
+bool TypedStack<T>::isEmpty()
+{
+	return topSegment == NULL;
+}
+
+template <class T>
+T& TypedStack<T>::stackTop()
+{
+	invariants();
+	AvmAssert(!isEmpty());
+	return top[-1];
+}
+
+template <class T>
+void TypedStack<T>::push(T& value)
+{
+	invariants();
+	if (top == limit)
+		pushSegment();
+	*top++ = value;
+#ifdef DEBUG
+	depth++;
+	if (depth > maxdepth)
+		maxdepth = depth;
+#endif
+	invariants();
+}
+
+template <class T>
+void TypedStack<T>::pop(T& value)
+{
+	invariants();
+#ifdef DEBUG
+	depth--;
+#endif
+	top--;
+	value = *top;
+	if (top == topSegment->memory)
+		popSegment();
+	invariants();
+}
+
+template <class T>
+void TypedStack<T>::pushSegment()
+{
+	TypedSegment *s = (TypedSegment*)pcre_malloc(sizeof(TypedSegment));
+	if (topSegment != NULL)
+		topSegment->top = top;
+	s->next = topSegment;
+	topSegment = s;
+	top = s->memory;
+	limit = s->memory + TYPED_SEGMENT_SIZE;
+}
+
+template <class T>
+void TypedStack<T>::popSegment()
+{
+	TypedSegment *s = topSegment;
+	topSegment = topSegment->next;
+	pcre_free(s);
+	if (topSegment != NULL)
+	{
+		top = topSegment->top;
+		limit = topSegment->memory + TYPED_SEGMENT_SIZE;
+	}
+	else
+	{
+		top = NULL;
+		limit = NULL;
+	}
+}
 
 /*************************************************
 *        Find the fixed length of a pattern      *
@@ -1176,177 +1320,247 @@ Returns:   the fixed length, or -1 if there is no fixed length,
              or -2 if \C was encountered
 */
 
+// processing information for find_fixedlength
+typedef struct pi_ffl {
+  uschar* code;
+  int length;
+  int branchlength;
+  /* the work item from which this work item was derived */
+  pi_ffl* parent;
+} pi_ffl;
+
+#define FFL_NEWITEM(ITEM) \
+  ITEM.code = 0; \
+  ITEM.length = -1; \
+  ITEM.branchlength = 0; \
+  ITEM.parent = 0
+
 static int
-find_fixedlength(uschar *code, int options)
+find_fixedlength(uschar * const code, const int options)
 {
-int length = -1;
+(void)options;
 
-register int branchlength = 0;
-register uschar *cc = code + 1 + LINK_SIZE;
+TypedStack<pi_ffl> work_stack;
+pi_ffl work_item;
 
-/* Scan along the opcodes for this branch. If we get to the end of the
-branch, check the length against that of the other branches. */
+/* set up the first work item */
+FFL_NEWITEM(work_item);
+work_item.code = code;
+work_stack.push(work_item);
 
-for (;;)
-  {
-  int d;
-  register int op = *cc;
-  switch (op)
+/* start the processing loop */
+while (!work_stack.isEmpty()) {
+  work_stack.pop(work_item);
+  int length = work_item.length;
+  register int branchlength = work_item.branchlength;
+  register uschar *cc = work_item.code + 1 + LINK_SIZE;
+  BOOL skip_to_next_item = FALSE;
+
+  for (;!skip_to_next_item;)
     {
-    case OP_CBRA:
-    case OP_BRA:
-    case OP_ONCE:
-    case OP_COND:
-    d = find_fixedlength(cc + ((op == OP_CBRA)? 2:0), options);
-    if (d < 0) return d;
-    branchlength += d;
-    do cc += GET(cc, 1); while (*cc == OP_ALT);
-    cc += 1 + LINK_SIZE;
-    break;
+    register int op = *cc;
+    switch (op)
+      {
+      case OP_CBRA:
+      case OP_BRA:
+      case OP_ONCE:
+      case OP_COND:
+	  {
+      /*
+       - create a new workitem for the remainder of this item (or alter the
+         current one)
+       - create a new workitem with the bracketed code and put it on the stack
+       - this results in the following stack state: new_item -> work_item -> ...
+         this way we keep the processing order as if recursion would have been
+         used
+       - move the code pointer of work_item after the bracketed code
+       - start the next iteration (with new_item)
+      * */
+      work_item.length = length;
+      work_item.branchlength = branchlength;
+	  work_stack.push(work_item);
 
-    /* Reached end of a branch; if it's a ket it is the end of a nested
-    call. If it's ALT it is an alternation in a nested call. If it is
-    END it's the end of the outer call. All can be handled by the same code. */
+      pi_ffl new_item;
+      FFL_NEWITEM(new_item);
+      new_item.code = cc + ((op == OP_CBRA)? 2:0);
+	  pi_ffl* parent_item = &work_stack.stackTop();
+	  new_item.parent = parent_item;
+	  work_stack.push(new_item);
 
-    case OP_ALT:
-    case OP_KET:
-    case OP_KETRMAX:
-    case OP_KETRMIN:
-    case OP_END:
-    if (length < 0) length = branchlength;
-      else if (length != branchlength) return -1;
-    if (*cc != OP_ALT) return length;
-    cc += 1 + LINK_SIZE;
-    branchlength = 0;
-    break;
+      do cc += GET(cc, 1); while (*cc == OP_ALT);
+      // original code added 1 + LINK_SIZE to the pointer
+      // we don't need this as the processing of an item start with that
+      parent_item->code = cc;
+
+      skip_to_next_item = TRUE;
+      continue;
+	  }
+
+      /* Reached end of a branch; if it's a ket it is the end of a nested
+      call. If it's ALT it is an alternation in a nested call. If it is
+      END it's the end of the outer call. All can be handled by the same code.*/
+
+      case OP_ALT:
+      case OP_KET:
+      case OP_KETRMAX:
+      case OP_KETRMIN:
+      case OP_END:
+      if (length < 0) length = branchlength;
+      /* clean up the stack and current item and return -1 */
+      else if (length != branchlength)
+        { return -1; }
+      if (*cc != OP_ALT)
+        {
+        /* end of the pattern, clean up and return */
+        if (*cc == OP_END)
+          { return length; }
+        else
+        /* KET is the end of in internal group, propagate the brenchlength back
+           to the parent group's branchlength */
+          {
+            work_item.parent->branchlength += branchlength;
+            skip_to_next_item = TRUE;
+            continue;
+          }
+        }
+      cc += 1 + LINK_SIZE;
+      branchlength = 0;
+      break;
 
     /* Skip over assertive subpatterns */
 
-    case OP_ASSERT:
-    case OP_ASSERT_NOT:
-    case OP_ASSERTBACK:
-    case OP_ASSERTBACK_NOT:
-    do cc += GET(cc, 1); while (*cc == OP_ALT);
-    /* Fall through */
+      case OP_ASSERT:
+      case OP_ASSERT_NOT:
+      case OP_ASSERTBACK:
+      case OP_ASSERTBACK_NOT:
+      do cc += GET(cc, 1); while (*cc == OP_ALT);
+      /* Fall through */
 
-    /* Skip over things that don't match chars */
+      /* Skip over things that don't match chars */
 
-    case OP_REVERSE:
-    case OP_CREF:
-    case OP_RREF:
-    case OP_DEF:
-    case OP_OPT:
-    case OP_CALLOUT:
-    case OP_SOD:
-    case OP_SOM:
-    case OP_EOD:
-    case OP_EODN:
-    case OP_CIRC:
-    case OP_DOLL:
-    case OP_NOT_WORD_BOUNDARY:
-    case OP_WORD_BOUNDARY:
-    cc += _pcre_OP_lengths[*cc];
-    break;
-
-    /* Handle literal characters */
-
-    case OP_CHAR:
-    case OP_CHARNC:
-    case OP_NOT:
-    branchlength++;
-    cc += 2;
-#ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0)
-      {
-      while ((*cc & 0xc0) == 0x80) cc++;
-      }
-#endif
-    break;
-
-    /* Handle exact repetitions. The count is already in characters, but we
-    need to skip over a multibyte character in UTF8 mode.  */
-
-    case OP_EXACT:
-    branchlength += GET2(cc,1);
-    cc += 4;
-#ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0)
-      {
-      while((*cc & 0x80) == 0x80) cc++;
-      }
-#endif
-    break;
-
-    case OP_TYPEEXACT:
-    branchlength += GET2(cc,1);
-    if (cc[3] == OP_PROP || cc[3] == OP_NOTPROP) cc += 2;
-    cc += 4;
-    break;
-
-    /* Handle single-char matchers */
-
-    case OP_PROP:
-    case OP_NOTPROP:
-    cc += 2;
-    /* Fall through */
-
-    case OP_NOT_DIGIT:
-    case OP_DIGIT:
-    case OP_NOT_WHITESPACE:
-    case OP_WHITESPACE:
-    case OP_NOT_WORDCHAR:
-    case OP_WORDCHAR:
-    case OP_ANY:
-    branchlength++;
-    cc++;
-    break;
-
-    /* The single-byte matcher isn't allowed */
-
-    case OP_ANYBYTE:
-    return -2;
-
-    /* Check a class for variable quantification */
-
-#ifdef SUPPORT_UTF8
-    case OP_XCLASS:
-    cc += GET(cc, 1) - 33;
-    /* Fall through */
-#endif
-
-    case OP_CLASS:
-    case OP_NCLASS:
-    cc += 33;
-
-    switch (*cc)
-      {
-      case OP_CRSTAR:
-      case OP_CRMINSTAR:
-      case OP_CRQUERY:
-      case OP_CRMINQUERY:
-      return -1;
-
-      case OP_CRRANGE:
-      case OP_CRMINRANGE:
-      if (GET2(cc,1) != GET2(cc,3)) return -1;
-      branchlength += GET2(cc,1);
-      cc += 5;
+      case OP_REVERSE:
+      case OP_CREF:
+      case OP_RREF:
+      case OP_DEF:
+      case OP_OPT:
+      case OP_CALLOUT:
+      case OP_SOD:
+      case OP_SOM:
+      case OP_EOD:
+      case OP_EODN:
+      case OP_CIRC:
+      case OP_DOLL:
+      case OP_NOT_WORD_BOUNDARY:
+      case OP_WORD_BOUNDARY:
+      cc += _pcre_OP_lengths[*cc];
       break;
 
-      default:
+      /* Handle literal characters */
+
+      case OP_CHAR:
+      case OP_CHARNC:
+      case OP_NOT:
       branchlength++;
+      cc += 2;
+#ifdef SUPPORT_UTF8
+      if ((options & PCRE_UTF8) != 0)
+        {
+        while ((*cc & 0xc0) == 0x80) cc++;
+        }
+#endif
+      break;
+
+      /* Handle exact repetitions. The count is already in characters, but we
+      need to skip over a multibyte character in UTF8 mode.  */
+
+      case OP_EXACT:
+      branchlength += GET2(cc,1);
+      cc += 4;
+#ifdef SUPPORT_UTF8
+      if ((options & PCRE_UTF8) != 0)
+        {
+        while((*cc & 0x80) == 0x80) cc++;
+        }
+#endif
+      break;
+
+      case OP_TYPEEXACT:
+      branchlength += GET2(cc,1);
+      if (cc[3] == OP_PROP || cc[3] == OP_NOTPROP) cc += 2;
+      cc += 4;
+      break;
+
+      /* Handle single-char matchers */
+
+      case OP_PROP:
+      case OP_NOTPROP:
+      cc += 2;
+      /* Fall through */
+
+      case OP_NOT_DIGIT:
+      case OP_DIGIT:
+      case OP_NOT_WHITESPACE:
+      case OP_WHITESPACE:
+      case OP_NOT_WORDCHAR:
+      case OP_WORDCHAR:
+      case OP_ANY:
+      branchlength++;
+      cc++;
+      break;
+
+      /* The single-byte matcher isn't allowed */
+
+      case OP_ANYBYTE:
+      /* free the proc stack and the current item*/
+      return -2;
+
+      /* Check a class for variable quantification */
+
+#ifdef SUPPORT_UTF8
+      case OP_XCLASS:
+      cc += GET(cc, 1) - 33;
+      /* Fall through */
+#endif
+
+      case OP_CLASS:
+      case OP_NCLASS:
+      cc += 33;
+
+      switch (*cc)
+        {
+        case OP_CRSTAR:
+        case OP_CRMINSTAR:
+        case OP_CRQUERY:
+        case OP_CRMINQUERY:
+        /* free the proc stack and the current item*/
+        return -1;
+
+        case OP_CRRANGE:
+        case OP_CRMINRANGE:
+        if (GET2(cc,1) != GET2(cc,3)) return -1;
+        branchlength += GET2(cc,1);
+        cc += 5;
+        break;
+
+        default:
+        branchlength++;
+        }
+      break;
+
+      /* Anything else is variable length */
+
+      default:
+      /* free the proc stack and the current item*/
+      return -1;
       }
-    break;
-
-    /* Anything else is variable length */
-
-    default:
-    return -1;
     }
-  }
+}
 /* Control never gets here */
+AvmAssert(0);
+return -1;
 }
 
+#undef FFL_NEWITEM
 
 
 
@@ -5523,6 +5737,15 @@ for (;;)
 
 
 
+/************************************************************************
+ * Stack implementation used in is_anchored and is_startline functions. *
+ ************************************************************************/
+
+typedef struct pi_ia_is {
+	const uschar *code;
+	unsigned int bracket_map;
+} pi_ia_is;
+
 
 /*************************************************
 *          Check for anchored expression         *
@@ -5563,57 +5786,90 @@ Returns:     TRUE or FALSE
 */
 
 static BOOL
-is_anchored(register const uschar *code, int *options, unsigned int bracket_map,
-  unsigned int backref_map)
+is_anchored(register const uschar * const code, int * const options, const unsigned int bracket_map,
+  const unsigned int backref_map)
 {
-do {
-   const uschar *scode = first_significant_code(code + _pcre_OP_lengths[*code],
-     options, PCRE_MULTILINE, FALSE);
-   register int op = *scode;
+TypedStack<pi_ia_is> work_stack;
+pi_ia_is work_item;
 
-   /* Non-capturing brackets */
+/* set up the first work item */
+work_item.code = code;
+work_item.bracket_map = bracket_map;
+work_stack.push(work_item);
 
-   if (op == OP_BRA)
-     {
-     if (!is_anchored(scode, options, bracket_map, backref_map)) return FALSE;
-     }
+/* start the processing loop */
+while (!work_stack.isEmpty())
+  {
+  work_stack.pop(work_item);
+  const uschar *wi_code = work_item.code;
+  unsigned int wi_bracket_map = work_item.bracket_map;
+  do {
+     const uschar *scode = first_significant_code(
+       wi_code + _pcre_OP_lengths[*wi_code], options, PCRE_MULTILINE, FALSE);
+     register int op = *scode;
 
-   /* Capturing brackets */
+     /* Non-capturing brackets */
 
-   else if (op == OP_CBRA)
-     {
-     int n = GET2(scode, 1+LINK_SIZE);
-     int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
-     if (!is_anchored(scode, options, new_map, backref_map)) return FALSE;
-     }
+     if (op == OP_BRA)
+       {
+       pi_ia_is new_item;
+       new_item.code = scode;
+       new_item.bracket_map = wi_bracket_map;
+	   work_stack.push(new_item);
+       break;
+       }
 
-   /* Other brackets */
+     /* Capturing brackets */
 
-   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
-     {
-     if (!is_anchored(scode, options, bracket_map, backref_map)) return FALSE;
-     }
+     else if (op == OP_CBRA)
+       {
+       pi_ia_is new_item;
+       new_item.code = scode;
+       int n = GET2(scode, 1+LINK_SIZE);
+       int new_map = wi_bracket_map | ((n < 32)? (1 << n) : 1);
+       new_item.bracket_map = new_map;
+       work_stack.push(new_item);
+       break;
+       }
 
-   /* .* is not anchored unless DOTALL is set and it isn't in brackets that
-   are or may be referenced. */
+     /* Other brackets */
 
-   else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
-             op == OP_TYPEPOSSTAR) &&
-            (*options & PCRE_DOTALL) != 0)
-     {
-     if (scode[1] != OP_ANY || (bracket_map & backref_map) != 0) return FALSE;
-     }
+     else if (op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
+       {
+       pi_ia_is new_item;
+       new_item.code = scode;
+       new_item.bracket_map = wi_bracket_map;
+       work_stack.push(new_item);
+       break;
+       }
 
-   /* Check for explicit anchoring */
+     /* .* is not anchored unless DOTALL is set and it isn't in brackets that
+     are or may be referenced. */
 
-   else if (op != OP_SOD && op != OP_SOM &&
-           ((*options & PCRE_MULTILINE) != 0 || op != OP_CIRC))
-     return FALSE;
-   code += GET(code, 1);
-   }
-while (*code == OP_ALT);   /* Loop for each alternative */
+     else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
+               op == OP_TYPEPOSSTAR) && (*options & PCRE_DOTALL) != 0)
+       {
+       if (scode[1] != OP_ANY || (wi_bracket_map & backref_map) != 0)
+         {
+         return FALSE;
+         }
+       }
+
+     /* Check for explicit anchoring */
+
+     else if (op != OP_SOD && op != OP_SOM &&
+             ((*options & PCRE_MULTILINE) != 0 || op != OP_CIRC))
+       {
+       return FALSE;
+       }
+
+     wi_code += GET(wi_code, 1);
+  } while (*wi_code == OP_ALT);   /* Loop for each alternative */
+} //while
+AvmAssert(work_stack.isEmpty());
 return TRUE;
 }
+
 
 
 
@@ -5639,53 +5895,88 @@ Returns:         TRUE or FALSE
 */
 
 static BOOL
-is_startline(const uschar *code, unsigned int bracket_map,
-  unsigned int backref_map)
+is_startline(const uschar * const code, const unsigned int bracket_map,
+  const unsigned int backref_map)
 {
-do {
-   const uschar *scode = first_significant_code(code + _pcre_OP_lengths[*code],
-     NULL, 0, FALSE);
-   register int op = *scode;
+TypedStack<pi_ia_is> work_stack;
+pi_ia_is work_item;
 
-   /* Non-capturing brackets */
+/* set up the first work item */
+work_item.code = code;
+work_item.bracket_map = bracket_map;
+work_stack.push(work_item);
 
-   if (op == OP_BRA)
+/*  start the processing loop */
+while (!work_stack.isEmpty())
+  {
+  work_stack.pop(work_item);
+  const uschar *wi_code = work_item.code;
+  unsigned int wi_bracket_map = work_item.bracket_map;
+  do {
+     const uschar *scode = first_significant_code(
+       wi_code + _pcre_OP_lengths[*wi_code], NULL, 0, FALSE);
+     register int op = *scode;
+
+     /* Non-capturing brackets */
+
+     if (op == OP_BRA)
+       {
+       pi_ia_is new_item;
+       new_item.code = scode;
+       new_item.bracket_map = wi_bracket_map;
+       work_stack.push(new_item);
+       break;
+       }
+
+     /* Capturing brackets */
+
+     else if (op == OP_CBRA)
+       {
+       pi_ia_is new_item;
+       new_item.code = scode;
+       int n = GET2(scode, 1+LINK_SIZE);
+       int new_map = wi_bracket_map | ((n < 32)? (1 << n) : 1);
+       new_item.bracket_map = new_map;
+       work_stack.push(new_item);
+       break;
+       }
+
+     /* Other brackets */
+
+     else if (op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
+       {
+       pi_ia_is new_item;
+       new_item.code = scode;
+       new_item.bracket_map = wi_bracket_map;
+       work_stack.push(new_item);
+       break;
+       }
+
+     /* .* means "start at start or after \n" if it isn't in brackets that
+     may be referenced. */
+
+     else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
      {
-     if (!is_startline(scode, bracket_map, backref_map)) return FALSE;
+     if (scode[1] != OP_ANY || (wi_bracket_map & backref_map) != 0)
+       {
+       return FALSE;
+       }
      }
 
-   /* Capturing brackets */
+     /* Check for explicit circumflex */
 
-   else if (op == OP_CBRA)
-     {
-     int n = GET2(scode, 1+LINK_SIZE);
-     int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
-     if (!is_startline(scode, new_map, backref_map)) return FALSE;
-     }
+     else if (op != OP_CIRC)
+       {
+       return FALSE;
+       }
 
-   /* Other brackets */
+     /* Move on to the next alternative */
 
-   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
-     { if (!is_startline(scode, bracket_map, backref_map)) return FALSE; }
-
-   /* .* means "start at start or after \n" if it isn't in brackets that
-   may be referenced. */
-
-   else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
-     {
-     if (scode[1] != OP_ANY || (bracket_map & backref_map) != 0) return FALSE;
-     }
-
-   /* Check for explicit circumflex */
-
-   else if (op != OP_CIRC) return FALSE;
-
-   /* Move on to the next alternative */
-
-   code += GET(code, 1);
-   }
-while (*code == OP_ALT);  /* Loop for each alternative */
-return TRUE;
+     wi_code += GET(wi_code, 1);
+     } while (*wi_code == OP_ALT);  /* Loop for each alternative */
+  } //while
+  AvmAssert(work_stack.isEmpty());
+  return TRUE;
 }
 
 
@@ -5710,55 +6001,83 @@ Arguments:
 Returns:     -1 or the fixed first char
 */
 
+typedef struct pi_ffac {
+  const uschar* code;
+} pi_ffac;
+
 static int
-find_firstassertedchar(const uschar *code, int *options, BOOL inassert)
+find_firstassertedchar(const uschar * const code, int * const options)
 {
 register int c = -1;
-do {
-   int d;
-   const uschar *scode =
-     first_significant_code(code + 1+LINK_SIZE, options, PCRE_CASELESS, TRUE);
-   register int op = *scode;
+BOOL inassert = FALSE;
+BOOL caseless = (*options & PCRE_CASELESS) != 0;
+TypedStack<pi_ffac> work_stack;
+pi_ffac work_item;
 
-   switch(op)
-     {
-     default:
-     return -1;
+/* set up the first work item */
+work_item.code = code;
+work_stack.push(work_item);
 
-     case OP_BRA:
-     case OP_CBRA:
-     case OP_ASSERT:
-     case OP_ONCE:
-     case OP_COND:
-     if ((d = find_firstassertedchar(scode, options, op == OP_ASSERT)) < 0)
-       return -1;
-     if (c < 0) c = d; else if (c != d) return -1;
-     break;
+/*  start the processing loop */
+while (!work_stack.isEmpty())
+  {
+  BOOL exit = FALSE;
+  work_stack.pop(work_item);
+  const uschar *wi_code = work_item.code;
+  do {
+     const uschar *scode =
+       first_significant_code(wi_code + 1+LINK_SIZE, options, PCRE_CASELESS, TRUE);
+     register int op = *scode;
 
-     case OP_EXACT:       /* Fall through */
-     scode += 2;
-
-     case OP_CHAR:
-     case OP_CHARNC:
-     case OP_PLUS:
-     case OP_MINPLUS:
-     case OP_POSPLUS:
-     if (!inassert) return -1;
-     if (c < 0)
+     switch(op)
        {
-       c = scode[1];
-       if ((*options & PCRE_CASELESS) != 0) c |= REQ_CASELESS;
-       }
-     else if (c != scode[1]) return -1;
-     break;
-     }
+       default:
+       return -1;
 
-   code += GET(code, 1);
-   }
-while (*code == OP_ALT);
+       case OP_BRA:
+       case OP_CBRA:
+       case OP_ASSERT:
+       case OP_ONCE:
+       case OP_COND:
+       inassert = (op == OP_ASSERT);
+       pi_ffac new_item;
+       new_item.code = scode;
+       work_stack.push(new_item);
+       exit = TRUE;
+       break;
+
+       case OP_EXACT:       /* Fall through */
+       scode += 2;
+
+       case OP_CHAR:
+       case OP_CHARNC:
+       case OP_PLUS:
+       case OP_MINPLUS:
+       case OP_POSPLUS:
+       if (!inassert)
+         {
+         return -1;
+         }
+       if (c < 0)
+         {
+         c = scode[1];
+         if (caseless) c |= REQ_CASELESS;
+         }
+       else if ((!caseless && c != scode[1]) ||
+               (caseless && c != (scode[1] | REQ_CASELESS)))
+         {
+         return -1;
+         }
+         break;
+       }
+       if(exit) break;
+       wi_code += GET(wi_code, 1);
+       if(*wi_code == OP_KET) wi_code += GET(work_item.code, 1);
+     }
+  while (*wi_code == OP_ALT);
+  } //while
 return c;
 }
-
 
 
 /*************************************************
@@ -6120,7 +6439,7 @@ if ((re->options & PCRE_ANCHORED) == 0)
   else
     {
     if (firstbyte < 0)
-      firstbyte = find_firstassertedchar(codestart, &temp_options, FALSE);
+      firstbyte = find_firstassertedchar(codestart, &temp_options);
     if (firstbyte >= 0)   /* Remove caseless flag for non-caseable chars */
       {
       int ch = firstbyte & 255;
