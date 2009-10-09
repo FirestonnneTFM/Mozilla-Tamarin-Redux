@@ -1824,12 +1824,13 @@ namespace MMgc
 #endif
 		GCLog("[mem] -------- gross stats end -----\n");
 
-		DumpHeapRep();
-		
 #ifdef MMGC_MEMORY_PROFILER
 		if(hasSpy)
 			DumpFatties();
 #endif
+
+		if (config.verbose)
+			DumpHeapRep();
 	}
 
 #ifdef VMCFG_SYMBIAN

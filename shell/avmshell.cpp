@@ -776,6 +776,11 @@ namespace avmshell
 					MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
 					MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
 				}
+				else if (!VMPI_strcmp(arg, "-memstats-verbose")) {
+					MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
+					MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
+					MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
+				}
 				else if (!VMPI_strcmp(arg, "-memlimit")) {
 					MMgc::GCHeap::GetGCHeap()->Config().heapLimit = VMPI_strtol(argv[++i], 0, 10);
 				}
@@ -988,6 +993,8 @@ namespace avmshell
 		AvmLog("          [-d]          enter debugger on start\n");
 #endif
 		AvmLog("          [-memstats]   generate statistics on memory usage\n");
+		AvmLog("          [-memstats-verbose]\n"
+			   "                        generate more statistics on memory usage\n");
 		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
 		AvmLog("          [-eagersweep] sweep the heap synchronously at the end of GC;\n"
 			   "                        improves usage statistics.\n");
