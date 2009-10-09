@@ -313,6 +313,8 @@ namespace avmplus
 		m_length(length), 
 		m_bitsAndFlags(w | (kStatic << TSTR_TYPE_SHIFT) | (uint32_t(is7bit) << TSTR_7BIT_SHIFT))
 	{
+		AvmAssert(m_length >= 0);
+		AvmAssert((uint64_t(m_length) << getWidth()) <= 0x7FFFFFFFU);
 	}
 
 	// ctor for a dynamic string.
@@ -326,6 +328,8 @@ namespace avmplus
 		m_length(length), 
 		m_bitsAndFlags(w | (kDynamic << TSTR_TYPE_SHIFT) | (charsLeft << TSTR_CHARSLEFT_SHIFT) | (uint32_t(is7bit) << TSTR_7BIT_SHIFT))
 	{
+		AvmAssert(m_length >= 0);
+		AvmAssert((uint64_t(m_length) << getWidth()) <= 0x7FFFFFFFU);
 		WB(gc, this, &this->m_buffer.pv, buffer);
 	}
 
@@ -342,9 +346,53 @@ namespace avmplus
 		// @todo: a dependent string could qualify for TSTR_7BIT_FLAG even if it's master is not. worth checking for?
 		m_bitsAndFlags((master->m_bitsAndFlags & (TSTR_WIDTH_MASK | TSTR_7BIT_FLAG)) | (kDependent << TSTR_TYPE_SHIFT))
 	{
+		AvmAssert(m_length >= 0);
+		AvmAssert((uint64_t(m_length) << getWidth()) <= 0x7FFFFFFFU);
 		WBRC(gc, this, &this->m_extra.master, master);
 	}
 
+	// add a and b and check for overflow
+	
+	static int32_t int32AddChecked(int32_t a, int32_t b)
+	{
+		if ((a | b) >= 0)		// both nonnegative?
+		{
+			uint64_t x = uint64_t(a) + uint64_t(b);
+			if (x <= 0x7FFFFFFFU)
+				return int32_t(x);
+		}
+		GCHeap::SignalObjectTooLarge();
+		/*NOTREACHED*/
+		return 0;
+	}
+
+	// shift a left by b and check for overflow
+	
+	static int32_t int32ShlChecked(int32_t a, int32_t b)
+	{
+		AvmAssert(b < 32);		// ok for this to be DEBUG-only, the shift amounts are known constants for practical purposes
+		if ((a | b) >= 0)		// both nonnegative?
+		{
+			uint64_t x = uint64_t(a) << uint64_t(b);
+			if (x <= 0x7FFFFFFFU)
+				return int32_t(x);
+		}
+		GCHeap::SignalObjectTooLarge();
+		/*NOTREACHED*/
+		return 0;
+	}
+
+	static uint32_t uint32ShlChecked(uint32_t a, uint32_t b)
+	{
+		AvmAssert(b < 32);		// ok for this to be DEBUG-only, the shift amounts are known constants for practical purposes
+		uint64_t x = uint64_t(a) << uint64_t(b);
+		if (x <= 0xFFFFFFFFU)
+			return uint32_t(x);
+		GCHeap::SignalObjectTooLarge();
+		/*NOTREACHED*/
+		return 0;
+	}
+	
 	// Private static method to create a dependent string
 
 	Stringp String::createDependent(GC* gc, Stringp master, int32_t start, int32_t len)
@@ -370,31 +418,33 @@ namespace avmplus
 			is7bit = false;
 
 		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
-		int32_t alloc = len + extra;
-		if (alloc < 1) alloc = 1;
+		int32_t alloc = int32AddChecked(len, extra);
 
 		MMGC_MEM_TAG( "Strings" );
 
 		// First, use PleaseAlloc(), and if the call fails, reduce the amount of extra data
 		// to TSTR_MAX_EXTRA_BYTES_IN_LOW_MEMORY and do an Alloc(), which may fail.
-		void* buffer = gc->PleaseAlloc(alloc << w, 0);
+		void* buffer = gc->PleaseAlloc(int32ShlChecked(alloc, w), 0);
 		if (buffer == NULL)
 		{
 			if (extra > (TSTR_MAX_LOMEM_EXTRABYTES >> w))
 				extra = TSTR_MAX_LOMEM_EXTRABYTES >> w;
-			alloc = len + extra;
-			buffer = gc->Alloc(alloc << w, 0);
+			alloc = len + extra;					// This is safe because the new value of 'extra' is smaller than the old, and the old was checked
+			buffer = gc->Alloc(alloc << w, 0);		// Ditto
 		}
 
-		int32_t bufLen = (int32_t) (GC::Size(buffer) >> w);
+		int32_t bufLen = (int32_t) (GC::Size(buffer) >> w);		// Note bufLen may be larger than (alloc << w)
 		int32_t charsLeft = bufLen - len;
-		// the extra character must not exceed the available field size
+		// the extra character must not exceed the available field size.
+		//
+		// ok for this to be an assertion because we will not have problems with mmgc rounding up
+		// to a 4KB boundary; the max chars left is about 4KB.
 		AvmAssert(charsLeft <= int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT));
 
 		Stringp s = new(gc) String(gc, buffer, w, len, charsLeft, is7bit);
 
 		if (data != NULL && len != 0)
-			VMPI_memcpy(buffer, data, size_t(len << w));
+			VMPI_memcpy(buffer, data, size_t(len << w));	// This is safe because alloc >= len and buffer size is alloc << w and that has been checked.
 #ifdef _DEBUG
 		// Terminate string with 0 for better debugging display
 		if (charsLeft)
@@ -429,6 +479,7 @@ namespace avmplus
 	}
 
 	// Create a string out of an 8bit buffer. Characters are just widened and copied, not interpreted as UTF8.
+
 	Stringp String::createLatin1(AvmCore* core, const char* buffer, int32_t len, Width desiredWidth, bool staticBuf)
 	{
 		if (buffer == NULL)
@@ -438,7 +489,7 @@ namespace avmplus
 			staticBuf = true;
 		}
 		if (len < 0)
-			len = Length((const char*)buffer);
+			len = Length(buffer);
 
 		if (desiredWidth == kAuto)
 			desiredWidth = k8;
@@ -479,12 +530,11 @@ namespace avmplus
 			return NULL;
 		
 		const bool is7bit = false;
-		Stringp newStr = createDynamic(_gc(this), NULL, length(), w, is7bit);
+		Stringp newStr = createDynamic(_gc(this), NULL, m_length, w, is7bit);
 		
 		Pointers ptrs(this);
 		Pointers new_ptrs(this);
-		if (!_copyBuffers(ptrs.pv, new_ptrs.pv, length(), getWidth(), w))
-			return NULL;
+		_copyBuffers(ptrs.pv, new_ptrs.pv, m_length, getWidth(), w);
 
 		VERIFY_7BIT(newStr);
 		return newStr;
@@ -554,7 +604,7 @@ namespace avmplus
 	{
 		AvmAssert(getType() != kDynamic);
 		// Convert this string to be a dynamic string
-		int32_t bytes = m_length << getWidth();
+		int32_t bytes = m_length << getWidth();			// No overflow by definition
 		GC* gc = _gc(this);
 		MMGC_MEM_TYPE( this );
 		void* buf = gc->Alloc(bytes, 0);
@@ -992,7 +1042,7 @@ namespace avmplus
 		Width thisWidth = getWidth();
 		Width newWidth = (thisWidth < charWidth) ? charWidth : thisWidth;
 
-		int32_t newLen = m_length + numChars;
+		int32_t newLen = int32AddChecked(m_length, numChars);
 
 		Stringp master = (isDependent()) ? m_extra.master : this;
 		// check for characters left in leftStr's buffer, or if leftStr has spent its padding already
@@ -1034,7 +1084,7 @@ namespace avmplus
 		{
 			// the right-hand string fits into the buffer end
 			_copyBuffers(rightStr.pv, 
-						 my_ptrs.p8 + (m_length << thisWidth), 
+						 my_ptrs.p8 + (m_length << thisWidth),	// m_length << thiswidth is safe by definition
 						 numChars, charWidth, newWidth);
 
 			charsUsed += numChars;
@@ -1063,7 +1113,7 @@ namespace avmplus
 		// create a new kDynamic string containing the concatenated string
 		// See the definition of TSTR_MAX_CHARSLEFT above for an explanation
 		// of this algorithm
-		int32_t newSize = (newLen < TSTR_MIN_DYNAMIC_ALLOCATION) ? TSTR_MIN_DYNAMIC_ALLOCATION : (newLen << 1);
+		int32_t newSize = (newLen < TSTR_MIN_DYNAMIC_ALLOCATION) ? TSTR_MIN_DYNAMIC_ALLOCATION : int32ShlChecked(newLen, 1);
 		int32_t extra	= newSize - newLen;
 		if (extra > (int32_t) TSTR_MAX_CHARSLEFT)
 			extra = (int32_t) TSTR_MAX_CHARSLEFT;
@@ -1974,12 +2024,28 @@ namespace avmplus
 		AvmAssert(str != NULL);
 		
 		const wchar* s = str;
-		while (*s) {
+		while (*s) 
 			s++;
-		}
-		return int32_t(s - str);
+		ptrdiff_t len = s - str;
+		if (len <= 0x7FFFFFFF)
+			return int32_t(len);
+		GCHeap::SignalObjectTooLarge();
+		/*NOTREACHED*/
+		return 0;
 	}
 
+	/*static*/ int32_t FASTCALL String::Length(const char* str)
+	{
+		AvmAssert(str != NULL);
+	
+		size_t len = VMPI_strlen(str);
+		if (len <= 0x7FFFFFFF)
+			return int32_t(len);
+		GCHeap::SignalObjectTooLarge();
+		/*NOTREACHED*/
+		return 0;
+	}
+	
 	int String::_indexOf(Stringp substr, int startPos)
 	{
 		return (int) indexOf(substr, (int32_t) startPos);
@@ -2390,7 +2456,7 @@ namespace avmplus
 		else
 		{
 			// surrogate pairs need 2 characters
-			s = createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16, is7bit);
+			s = createDynamic(gc, NULL, int32AddChecked(int32AddChecked(widths.w8, widths.w16), int32AddChecked(widths.w32, widths.w32)), String::k16, is7bit);
 			if (UnicodeUtils::Utf8ToUtf16(buffer, len, s->m_buffer.p16, s->m_length, strict) < 0)
 				return NULL;
 		}
@@ -2504,8 +2570,11 @@ namespace avmplus
 			if (!(str->m_bitsAndFlags & String::TSTR_7BIT_FLAG))
 			{
 				const uint8_t* srcBuf = (const uint8_t*) ptrs.p8;
+				int32_t auxchars = 0;
 				for (int32_t i = str->m_length; i--;)
-					len += (*srcBuf++ > 127);
+					auxchars += (*srcBuf++ > 127);
+
+				len = int32AddChecked(len, auxchars);
 				
 				// no hi bits? set the bit!
 				if (len == str->m_length)
@@ -2515,7 +2584,7 @@ namespace avmplus
 			// Deliberately using gc'ed memory here (not mmfx, unmanaged memory)
 			// so that longjmp's past our dtor won't cause a long-term leak
 			const uint8_t* srcBuf = (const uint8_t*) ptrs.p8;
-			char* dstBuf = (char*)gc->Alloc(len+1, 0);
+			char* dstBuf = (char*)gc->Alloc(uint32_t(len)+1, 0);
 			m_buffer = dstBuf;
 			m_length = len;
 
@@ -2545,7 +2614,7 @@ namespace avmplus
 		{
 			const wchar* data = ptrs.p16;
 			len = UnicodeUtils::Utf16ToUtf8(data, str->length(), NULL, 0);
-			char* dstBuf = (char*) gc->Alloc(len + 1, 0);
+			char* dstBuf = (char*) gc->Alloc(uint32_t(len)+1, 0);
 			m_buffer = dstBuf;
 			m_length = len;
 			dstBuf[len] = 0;
@@ -2575,7 +2644,7 @@ namespace avmplus
 		m_length = str->m_length;
 		// Deliberately using gc'ed memory here (not mmfx, unmanaged memory)
 		// so that longjmp's past our dtor won't cause a long-term leak
-		wchar* dst = (wchar*) gc->Alloc((m_length + 1) << String::k16, 0);
+		wchar* dst = (wchar*) gc->Alloc(uint32ShlChecked(uint32_t(m_length)+1, String::k16), 0);
 		m_buffer = dst;
 		dst[m_length] = 0;
 		String::Pointers ptrs(str);

@@ -1685,14 +1685,14 @@ namespace MMgc
 	void GCHeap::SignalObjectTooLarge()
 	{
 		GCAssert(!"Too-large object request; aborting");
-		GCLog("Implementation limit exceeded: attempting to allocate too-large object");
+		GCLog("Implementation limit exceeded: attempting to allocate too-large object\n");
 		GetGCHeap()->Abort();
 	}
 
 	void GCHeap::SignalInconsistentHeapState(const char* reason)
 	{
 		GCAssert(!"Inconsistent heap state; aborting");
-		GCLog("Inconsistent heap state: %s", reason);
+		GCLog("Inconsistent heap state: %s\n", reason);
 		GetGCHeap()->Abort();
 	}
 	
