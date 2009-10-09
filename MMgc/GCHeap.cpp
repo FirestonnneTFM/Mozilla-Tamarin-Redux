@@ -136,9 +136,12 @@ namespace MMgc
 	GCHeap::GCHeap(const GCHeapConfig& c)
 		: kNativePageSize(VMPI_getVMPageSize()),
 		  lastRegion(NULL),
+		  freeRegion(NULL),
+		  nextRegion(NULL),
 		  blocks(NULL),
 		  blocksLen(0),
 		  numDecommitted(0),
+		  numRegionBlocks(0),
 		  numAlloc(0),
 		  config(c),
  		  status(kMemNormal),
@@ -216,8 +219,10 @@ namespace MMgc
 
 		instance = NULL;
 
+		size_t internalNum = AddrToBlock(blocks)->size + numRegionBlocks;		
+		
 		// numAlloc should just be the size of the HeapBlock's space
-		if(numAlloc != (uint32_t)AddrToBlock(blocks)->size && status != kMemAbort)
+		if(numAlloc != internalNum && status != kMemAbort)
 		{
 			for (unsigned int i=0; i<blocksLen; i++) 
 			{
@@ -1223,25 +1228,30 @@ namespace MMgc
 
 		HeapBlock *newBlocks = blocks;
 		
-		if(blocksLen != 0 || config.initialSize == 0) // if initial heap size is zero we can't assume HeapBlocks will fit in askSize
+		if(blocksLen != 0 || // first time through just take what we need out of initialSize instead of adjusting
+		   config.initialSize == 0) // unless initializeSize is zero of course
 		{
+			int extraBlocks = 1; // for potential new sentinel
+			if(nextRegion == NULL) {
+				extraBlocks++; // may need a new page for regions
+			}
 			size_t curHeapBlocksSize = blocks ? AddrToBlock(blocks)->size : 0;
-			size_t newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + 1); // +1 for potential new sentinel
+			size_t newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + extraBlocks);
 
 			// size is based on newSize and vice versa, loop to settle (typically one loop, sometimes two)
 			while(newHeapBlocksSize > curHeapBlocksSize) 
 			{
 				// use askSize so HeapBlock's can fit in rounding slop
-				size = roundUp(askSize + newHeapBlocksSize, kMinHeapIncrement);
+				size = roundUp(askSize + newHeapBlocksSize + extraBlocks, kMinHeapIncrement);
 
 				// tells us use new memory for blocks below
 				newBlocks = NULL;
 
 				// since newSize is based on size we have to repeat in case it changes
 				curHeapBlocksSize = newHeapBlocksSize;
-				newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + 1);
+				newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + extraBlocks);
 			}
-		}
+		}		
 
 		if(config.useVirtualMemory)
 		{
@@ -1473,6 +1483,16 @@ namespace MMgc
 			block = next;
 		}
 
+		// get space for region allocations
+		if(nextRegion == NULL) {
+			nextRegion = (Region*)block->baseAddr;
+			HeapBlock *next = Split(block, 1);
+			// this space counts as used space
+			numAlloc++;
+			numRegionBlocks++;
+			block = next;
+		}
+
 		AddToFreeList(block);
 
 		// Initialize the rest of the new blocks to empty.
@@ -1526,11 +1546,7 @@ namespace MMgc
 				lastRegion->reserveTop += newRegionSize*kBlockSize;
 				lastRegion->commitTop += (size-commitAvail)*kBlockSize;
 			} else {
-				Region *newRegion = new Region;
-				if (newRegion == NULL) {
-					// Ugh, FUBAR.
-					return false;
-				}
+				Region *newRegion = NewRegion();
 				newRegion->baseAddr   = newRegionAddr;
 				newRegion->reserveTop = newRegionAddr+newRegionSize*kBlockSize;
 				newRegion->commitTop  = newRegionAddr+(size-commitAvail)*kBlockSize;
@@ -1570,7 +1586,7 @@ namespace MMgc
 			GCLog("unreserved region 0x%p - 0x%p (commitTop: %p)\n", region->baseAddr, region->reserveTop, region->commitTop);
 			DumpHeapRep();
 		}
-		delete region;
+		FreeRegion(region);
 	}
 
 	void GCHeap::FreeAll()
@@ -1581,7 +1597,6 @@ namespace MMgc
 			lastRegion = lastRegion->prev;
 			ReleaseMemory(region->baseAddr,
 						  region->reserveTop-region->baseAddr);
-			delete region;
 		}
 	}
 	
@@ -2074,5 +2089,26 @@ namespace MMgc
 	{ 
 		MMGC_LOCK(list_lock);
 		callbacks.Remove(p); 
+	}
+
+#define toPage(r) ((uintptr_t)r & ~(kBlockSize-1))
+
+	GCHeap::Region *GCHeap::NewRegion()
+	{
+		Region *r = freeRegion;
+		if(r) {
+			freeRegion = *(Region**)freeRegion;
+		} else {
+			r = nextRegion++;
+			if(toPage(r) != toPage(nextRegion))
+				nextRegion = NULL; // fresh page allocated in ExpandHeap
+		}			
+		return r;
+	}
+
+	void GCHeap::FreeRegion(Region *r)
+	{
+		*(Region**)r = freeRegion;
+		freeRegion = r;		
 	}
 }

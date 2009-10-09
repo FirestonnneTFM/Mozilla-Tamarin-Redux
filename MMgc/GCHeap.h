@@ -491,7 +491,7 @@ namespace MMgc
 		// Heap regions
 		// (ought to be private but some VMPI implementations 
 		// currently need to peek at it)
-		class Region : public GCAllocObject
+		class Region
 		{
 		public:
 			Region *prev;
@@ -688,14 +688,26 @@ namespace MMgc
  			return bytes / kBlockSize;
  		}
 
+		/**
+		 * Regions are allocated from the blocks GCHeap manages
+		 * similar to the HeapBlocks.  Regions can come and go so we
+		 * maintain a freelist although in practice they come and go
+		 * rarely we want don't want any longevity bugs
+		 */
+		Region *NewRegion();
+		void FreeRegion(Region *r);
+
 		// data section
 		static GCHeap *instance;
 		static size_t leakedBytes;
 
 		FixedMalloc fixedMalloc;
+		Region *freeRegion;
+		Region *nextRegion;
 		HeapBlock *blocks;
 		size_t blocksLen;
 		size_t numDecommitted;
+		size_t numRegionBlocks;
 		HeapBlock freelists[kNumFreeLists];
 		size_t numAlloc;
 		vmpi_spin_lock_t m_spinlock;
