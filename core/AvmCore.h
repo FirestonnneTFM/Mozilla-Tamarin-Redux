@@ -421,11 +421,13 @@ const int kBufferPadding = 16;
 		/** Domain for built-in classes */
 		Domain* builtinDomain;
 		
+	private:
 		/**
 		 * The default namespace, "public"
 		 */
 		DRC(Namespacep) publicNamespace;
 
+	public:
 		/**
 		 * The unnamed public namespaces
 		 */

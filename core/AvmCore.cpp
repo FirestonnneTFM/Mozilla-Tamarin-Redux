@@ -4352,8 +4352,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Namespacep AvmCore::getAnyPublicNamespace() 
 	{
-		// any version will do
-		return publicNamespaces->namespaces[0];
+		return publicNamespaces->namespaces[ApiUtils::toVersion(this, largest_api)-apis_start];
 	}
 
 	// global helpers
