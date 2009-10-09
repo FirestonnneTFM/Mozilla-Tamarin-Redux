@@ -150,4 +150,9 @@ REALLY_INLINE Atom Toplevel::atom() const
 	return _global->atom();
 }
 
+REALLY_INLINE Atom Toplevel::add2(Atom val1, Atom val2)
+{
+	return avmplus::op_add(this->core(), val1, val2);
+}
+
 } // namespace avmplus

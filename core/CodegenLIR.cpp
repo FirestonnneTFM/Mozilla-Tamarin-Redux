@@ -2135,7 +2135,11 @@ namespace avmplus
             } else {
                 // any other add
                 AvmAssert(type == OBJECT_TYPE);
-                emit(state, opcode, 0, 0, type);
+                LIns* lhs = loadAtomRep(sp-1);
+                LIns* rhs = loadAtomRep(sp);
+                LIns* out = callIns(FUNCTIONID(op_add), 3, coreAddr, lhs, rhs);
+                localSet(sp-1, atomToNativeRep(type, out), type);
+                break;
             }
             break;
         }
@@ -4338,18 +4342,6 @@ namespace avmplus
                 LIns* i3 = callIns(FUNCTIONID(astype_late), 3, env_param, obj, type);
                 i3 = atomToNativeRep(result, i3);
                 localSet(sp-1, i3, result);
-                break;
-            }
-
-
-            case OP_add:
-            {
-                LIns* lhs = loadAtomRep(sp-1);
-                LIns* rhs = loadAtomRep(sp);
-                LIns* toplevel = loadToplevel();
-                LIns* out = callIns(FUNCTIONID(add2), 3,
-                    toplevel, lhs, rhs);
-                localSet(sp-1, atomToNativeRep(result, out), result);
                 break;
             }
 
