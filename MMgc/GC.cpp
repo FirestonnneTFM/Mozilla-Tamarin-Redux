@@ -3702,7 +3702,7 @@ bail:
  		// we do nothing, which means we rely on reserve or other
  		// listeners to free memory or head straight to abort
  
- 		if(to == kMemReserve || to == kMemSoftLimit) {
+ 		if(to == kMemHardLimit || to == kMemSoftLimit) {
  			if(onThread()) {
  				Collect();
  			} else {

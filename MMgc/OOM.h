@@ -86,7 +86,7 @@ namespace MMgc
 	typedef enum _MemoryStatus {
 		kMemNormal,
 		kMemSoftLimit,
-		kMemReserve,
+		kMemHardLimit,
 		kMemAbort
 	} MemoryStatus;
 
