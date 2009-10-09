@@ -534,7 +534,7 @@ namespace MMgc
 		{
 			size_t total = GetTotalHeapSize();
 			// return to normal if we drop below heapSoftLimit
-			if(config.heapSoftLimit != 0 )
+			if(config.heapSoftLimit != 0 && status == kMemSoftLimit)
 			{
 				if (total < config.heapSoftLimit)
 				{
