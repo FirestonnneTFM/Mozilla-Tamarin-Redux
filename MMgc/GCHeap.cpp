@@ -1156,14 +1156,14 @@ namespace MMgc
 		{ 
 			// random policy choice: don't invoke OOM callbacks for
 			// canFail allocs
-			if(status != kMemReserve && !canFail) {
+			if(status != kMemHardLimit && !canFail) {
 
 				if(statusNotificationBeingSent)
 					Abort();
 				
 
 				// invoke callbacks
-				StatusChangeNotify(kMemReserve);
+				StatusChangeNotify(kMemHardLimit);
 
 				
 				// try again
@@ -1676,7 +1676,7 @@ namespace MMgc
 	{
 		(void)size;
 		if (attempt == 0 && !statusNotificationBeingSent)
-			StatusChangeNotify(kMemReserve);
+			StatusChangeNotify(kMemHardLimit);
 		else
 			Abort();
 	}
