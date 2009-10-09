@@ -373,7 +373,7 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
         // both integers, but overflow happens.  Intentionally add these
         // without casting to int32_t.  If the sum of the shifted values overflow,
         // we know the unshifted values will not overflow with a word-sized add.
-        return core->allocDouble(atomInt(lhs) + atomInt(rhs));
+        return core->allocDouble(double(atomInt(lhs) + atomInt(rhs)));
     }
 
     if (AvmCore::isNumber(lhs) && AvmCore::isNumber(rhs))
