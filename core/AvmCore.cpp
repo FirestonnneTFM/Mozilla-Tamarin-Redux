@@ -2049,7 +2049,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
 		if (!isNull(atom))
 		{
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			case kNamespaceType:
 				return atomToNamespace(atom)->getURI();
@@ -2063,13 +2063,9 @@ return the result of the comparison ToPrimitive(x) == y.
 				return booleanStrings[atom>>3];
 			case kIntegerType: {
 #ifdef AVMPLUS_64BIT
-				intptr_t val = (intptr_t)(atom>>3);
-				if (val > 0x7fffffff)
-					return uintToString((uint32_t)val);
-				else
-					return intToString((int32_t)val);
+				return MathUtils::convertIntegerToStringRadix(this, atomInt(atom), 10, MathUtils::kTreatAsSigned);
 #else
-				return intToString (int(sint32(atom)>>3));
+				return intToString(int32_t(atomInt(atom)));
 #endif
 			}
 			case kDoubleType:
