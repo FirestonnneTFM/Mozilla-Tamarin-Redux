@@ -178,6 +178,7 @@ as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatc
 as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
 ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
 ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+recursion/.* , .*winmobile.* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=502589
 
 
 ####################
