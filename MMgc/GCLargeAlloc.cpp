@@ -187,7 +187,7 @@ namespace MMgc
                 VALGRIND_MEMPOOL_FREE(b, b);
                 VALGRIND_MEMPOOL_FREE(b, item);
                 VALGRIND_DESTROY_MEMPOOL(b);
-                m_gc->FreeBlock(b, numBlocks);
+                m_gc->FreeBlock(b, (uint32_t)numBlocks);
                 return;
             }
             prev = (LargeBlock**)(&(*prev)->next);

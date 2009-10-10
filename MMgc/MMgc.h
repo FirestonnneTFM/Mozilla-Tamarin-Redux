@@ -55,14 +55,14 @@
     #include <valgrind/memcheck.h>
 #else
     #define RUNNING_ON_VALGRIND false
-    #define VALGRIND_MAKE_MEM_DEFINED
-    #define VALGRIND_MAKE_MEM_UNDEFINED
-    #define VALGRIND_MEMPOOL_ALLOC
-    #define VALGRIND_MEMPOOL_FREE
-    #define VALGRIND_CREATE_MEMPOOL
-    #define VALGRIND_DESTROY_MEMPOOL
-    #define VALGRIND_MALLOCLIKE_BLOCK
-    #define VALGRIND_FREELIKE_BLOCK
+    #define VALGRIND_MAKE_MEM_DEFINED(_a,_s)  {}
+    #define VALGRIND_MAKE_MEM_UNDEFINED(_a,_s) {}
+    #define VALGRIND_MEMPOOL_ALLOC(_p,_a,_s) {}
+    #define VALGRIND_MEMPOOL_FREE(_p,_a) {}
+    #define VALGRIND_CREATE_MEMPOOL(_a,_rdz,_zer) {}
+    #define VALGRIND_DESTROY_MEMPOOL(_p) {}
+    #define VALGRIND_MALLOCLIKE_BLOCK(_a,_s,_rdz,_zer) {}
+    #define VALGRIND_FREELIKE_BLOCK(_a,rdz) {}
 #endif
 
 #if defined MMGC_MEMORY_INFO && defined MMGC_64BIT
