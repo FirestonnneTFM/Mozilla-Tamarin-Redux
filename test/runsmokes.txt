@@ -53,7 +53,8 @@
 #        do use ${py} ./runtests.py ...
 # - specify python with the ${py} environment variable
 
-
+# mops.abc_ is crashing at end with exitcode 138: https://bugzilla.mozilla.org/show_bug.cgi?id=521550
+cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmrd} --vmargs="-Dnogc" mops/mops.as
 
 # Solaris SPARC failures, fixed by: http://hg.mozilla.org/tamarin-redux/rev/2669
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} --vmargs="-Ojit" as3/Definitions/Classes/ClassDef/DynamicClassSameMethPropName.as
