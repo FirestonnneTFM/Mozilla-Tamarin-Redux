@@ -77,8 +77,59 @@ AddTestCase(
    "TypeError: Error #1034",
    parseError(errormsg,"TypeError: Error #1034".length));
 
+class TestClass {
+    private var myVal:Object;
+    public function TestClass(v:Object):void {
+        myVal = v;
+    }
+    public function toString():String {
+        return myVal.toString();
+    }
+    
+    public function get val():Object {
+        return myVal;
+    }
+}
 
+function testClassReverseSort(x:TestClass, y:TestClass) {
+    if (x.val < y.val)
+        return 1
+    if (x.val == y.val)
+        return 0
+    return -1
+}
 
+var testClassVector = new Vector.<TestClass>();
+for (var i=0; i<20; i++) {
+    testClassVector.push(new TestClass(i));
+}
+// push one duplicate value
+testClassVector.push(new TestClass(12));
+
+AddTestCase("Sort a custom vector",
+            "19,18,17,16,15,14,13,12,12,11,10,9,8,7,6,5,4,3,2,1,0",
+            testClassVector.sort(testClassReverseSort).toString()
+            );
+
+// Since we are not sorting on val, does an alpha sort
+AddTestCase("Custom vector sort - object (alpha) sort",
+            "0,1,10,11,12,12,13,14,15,16,17,18,19,2,3,4,5,6,7,8,9",
+            testClassVector.sort(function(x,y) {if (x>y) return 1; if (x==y) return 0; return -1}).toString()
+            );
+
+// regular sort returning non-standard values
+var mySortFunction:Function = function (x,y):Number {
+    if (x.val < y.val)
+        return -Infinity;
+    if (x.val > y.val)
+        return uint.MAX_VALUE;
+    return undefined;
+}
+
+AddTestCase("Custom vector sort using sort function with non-standard values",
+            "0,1,2,3,4,5,6,7,8,9,10,11,12,12,13,14,15,16,17,18,19",
+            testClassVector.sort(mySortFunction).toString()
+            );
 
 test();
 

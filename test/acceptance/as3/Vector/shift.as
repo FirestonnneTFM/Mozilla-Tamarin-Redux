@@ -92,6 +92,7 @@ AddTestCase(
 
 var v1=new Vector.<int>(10,true);
 for (var i=0;i<10;i++) v1[i]=10+i;
+
 var errormsg="";
 try {
   v1.shift();
@@ -102,8 +103,30 @@ AddTestCase(
 		"shift on fixed vector throws exception",
 		"RangeError: Error #1126",
 		parseError(errormsg,"RangeError: Error #1126".length));
-test();AddTestCase(
-		"shift on fixed vector does shift",
+
+AddTestCase(
+		"shift on fixed vector does not shift",
 		"10,11,12,13,14,15,16,17,18,19",
 		v1.toString());
+
+AddTestCase("Shift string vector",
+            "h",
+            Vector.<String>(['h','e','l','l','o']).shift()
+            );
+
+class TestClass {
+    private var myVal:Object;
+    public function TestClass(v:Object):void {
+        myVal = v;
+    }
+    public function toString():String {
+        return myVal.toString();
+    }
+}
+
+AddTestCase("Shift custom vector class",
+            "-Infinity",
+            Vector.<TestClass>([new TestClass(-Infinity), new TestClass(55), new TestClass(789)]).shift().toString()
+            );
+
 test();
