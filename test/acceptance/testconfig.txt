@@ -117,6 +117,10 @@ ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bu
 ####################
 ecma3/TypeConversion/e9_3_1_3_rt:parseInt.*123456789012345678.*   , x86-lnx-tvm-release.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/GlobalObject/e15_1_2_2_2:parseInt.*123456789012345678.*   , x86-lnx-tvm-release.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+ecma3/Number/e15_7_4_6_1:Section R-(1|2|3|4|5|6|7|8|10|11|12|13|14|16|17) .* , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=513039
+ecma3/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
+ecma3/Number/e15_7_4_6_1:Section C , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
+ecma3/Number/e15_7_4_7_1:Section R-1 , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=442974
 
 ####################
 # mmgc

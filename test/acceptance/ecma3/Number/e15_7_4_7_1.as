@@ -165,6 +165,15 @@ function getTestCases() {
     //captureThis();
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
+    // Regression tests
+
+    // Bugzilla 442974
+
+    status = 'Section R-1 of test: no error intended!';
+    actual = Number.MIN_VALUE.toPrecision(21);
+    expect = '4.94065645841246544177e-324';
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
 
 ///////////////////////////    OOPS....    ///////////////////////////////
 
