@@ -88,7 +88,7 @@ function getTestCases() {
 
     status = 'Section C of test: no error intended!';
     actual = testNum.toExponential();
-    expect = '7e+1';
+    expect = '7.71234e+1';
     //captureThis();
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
@@ -146,6 +146,108 @@ function getTestCases() {
     actual = testNum5.toExponential(2);
     expect = '3.15e+5';
     //captureThis();
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+
+    // Regression tests
+
+    // Bugzilla 513039
+
+    status = 'Section R-1 of test: no error intended!';
+    actual = (-0.1).toFixed(0);
+    expect = '-0'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-2 of test: no error intended!';
+    actual = (-0.05).toFixed(0);
+    expect = '-0'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-3 of test: no error intended!';
+    actual = (0).toFixed(0);
+    expect = '0'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-4 of test: no error intended!';
+    actual = (0.05).toFixed(0);
+    expect = '0'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-5 of test: no error intended!';
+    actual = (0.1).toFixed(0);
+    expect = '0'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-6 of test: no error intended!';
+    actual = (0.00005).toFixed(2);
+    expect = '0.00'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-7 of test: no error intended!';
+    actual = (0.00007).toFixed(2);
+    expect = '0.00'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-8 of test: no error intended!';
+    actual = (0.00009).toFixed(2);
+    expect = '0.00'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-9 of test: no error intended!';
+    actual = (5e-7).toFixed(2);
+    expect = '0.00'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-10 of test: no error intended!';
+    actual = (7e-7).toFixed(2);
+    expect = '0.00'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+    
+    status = 'Section R-11 of test: no error intended!';
+    actual = (9e-7).toFixed(2);
+    expect = '0.00'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-12 of test: no error intended!';
+    actual = (0.00005).toFixed(3);
+    expect = '0.000'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-13 of test: no error intended!';
+    actual = (0.00007).toFixed(3);
+    expect = '0.000'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-14 of test: no error intended!';
+    actual = (0.00009).toFixed(3);
+    expect = '0.000'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-15 of test: no error intended!';
+    actual = (5e-7).toFixed(3);
+    expect = '0.000'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-16 of test: no error intended!';
+    actual = (7e-7).toFixed(3);
+    expect = '0.000'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+    
+    status = 'Section R-17 of test: no error intended!';
+    actual = (9e-7).toFixed(3);
+    expect = '0.000'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    // Bugzilla 478796
+
+    status = 'Section R-18 of test: no error intended!';
+    actual = (1000000000000000128).toFixed(0);
+    expect = '1000000000000000128'
+    array[item++] = new TestCase(SECTION, status, expect, actual);
+
+    status = 'Section R-19 of test: no error intended!';
+    actual = (1000000000000000128).toFixed(1);
+    expect = '1000000000000000128.0'
     array[item++] = new TestCase(SECTION, status, expect, actual);
 
 
