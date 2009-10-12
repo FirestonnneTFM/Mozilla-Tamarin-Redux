@@ -300,3 +300,11 @@ ecma3/String/toLocaleUpperCase.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla
 ecma3/RegExp/multibyte_regress,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
 
 
+
+
+######################
+# mops.abc_ is crashing at end with exitcode 138: 
+# https://bugzilla.mozilla.org/show_bug.cgi?id=521550
+######################
+mops/mops.as, .*(mac|sol).*-Dnogc , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=521550
+
