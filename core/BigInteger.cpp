@@ -588,10 +588,14 @@ BigInteger *BigInteger::addOrSubtract(const BigInteger* smallerNum, bool isAdd, 
 	
 	result->setNumWords(biggerNum->numWords+1, true);
 
-	if (!isAdd && !comparedTo) // i.e. this - smallerNum == 0
+	// Handle a result of zero specially
+	if (!comparedTo)
 	{
-		result->setValue(0);
-		return result;
+		if (!isAdd || numWords == 1 && wordBuffer[0] == 0)
+		{
+			result->setValue(0);
+			return result;
+		}
 	}
 
 	// do the math: loop over common words of both numbers, performing - or + and carrying the  
@@ -630,6 +634,7 @@ BigInteger *BigInteger::addOrSubtract(const BigInteger* smallerNum, bool isAdd, 
 	while( !(result->wordBuffer[--index]) ) 
 	{	
 	}
+	AvmAssert(index >= 0);	// If this fires then there's something wrong with the zero check above
 	result->numWords = index+1;
 
 	return result;
