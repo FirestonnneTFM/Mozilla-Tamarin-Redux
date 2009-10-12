@@ -111,7 +111,7 @@ namespace avmplus
         }
 
         #ifdef AVMPLUS_VERBOSE
-        this->verbose = pool->verbose;
+        this->verbose = pool->isVerbose(VB_verify);
         #endif
 
         max_stack = ms->max_stack();

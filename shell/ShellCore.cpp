@@ -64,7 +64,7 @@ namespace avmshell
 		, numargs(-1)
 		, nodebugger(false)
 		, astrace_console(0)
-		, do_verbose(false)
+		, do_verbose(0)
 		, enter_debugger_on_launch(false)
 		, interrupts(AvmCore::interrupts_default)
 		, verifyall(AvmCore::verifyall_default)
@@ -73,7 +73,6 @@ namespace avmshell
 		, nogc(false)
 		, incremental(true)
 		, langID(-1)
-		, bbgraph(AvmCore::bbgraph_default)
 		, cseopt(AvmCore::cseopt_default)
 		, jitordie(AvmCore::jitordie_default)
 		, runmode(AvmCore::runmode_default)
@@ -387,28 +386,24 @@ namespace avmshell
 		config.sse2 = settings.sse2;
 	#endif
 #endif
+
 #ifdef AVMPLUS_VERBOSE
-		config.bbgraph = settings.bbgraph;
-		config.verbose = settings.do_verbose;
+        if (settings.do_verbose & VB_builtins) 
+            config.verbose_vb = settings.do_verbose;  // ~builtins then skip verbose settings during setup()
 #endif
 		config.runmode = settings.runmode;
 		
-#ifdef DEBUGGER
-	#if VMCFG_METHOD_NAMES
+#ifdef VMCFG_METHOD_NAMES
+		// verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
+		if (settings.do_verbose)
+			config.methodNames = true;
+    #ifdef DEBUGGER
 		// debugger in avmshell always enables methodnames. 
 		if (allowDebugger)
 			config.methodNames = true;
 	#endif
-#endif
+#endif // VMCFG_METHOD_NAMES
 			
-#ifdef AVMPLUS_VERBOSE
-	#if VMCFG_METHOD_NAMES
-		// verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
-		if (settings.do_verbose)
-			config.methodNames = true;
-	#endif
-#endif
-
 #ifdef DEBUGGER
 		langID = settings.langID;
 #endif
@@ -439,7 +434,10 @@ namespace avmshell
 			
 			// Return a new DomainEnv for the user code
 			shell_domainEnv = new (GetGC()) DomainEnv(this, shell_domain, shell_toplevel->domainEnv());
-			
+        
+#ifdef AVMPLUS_VERBOSE
+            config.verbose_vb = settings.do_verbose;  // builtins is done, so propagate verbose 
+#endif
 			return true;
 		}
 		CATCH(Exception *exception)
@@ -467,7 +465,7 @@ namespace avmshell
 			Platform::GetInstance()->setTimer(kScriptTimeout, interruptTimerCallback, this);
 		
 #ifdef AVMPLUS_VERBOSE
-		if (config.verbose)
+		if (config.verbose_vb)
 			console << "run " << filename << "\n";
 #endif
 		

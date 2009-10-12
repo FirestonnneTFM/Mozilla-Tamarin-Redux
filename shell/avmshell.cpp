@@ -106,7 +106,7 @@ namespace avmshell
 	int Shell::run(int argc, char *argv[]) 
 	{
 		MMgc::GCHeapConfig conf;
-		//conf.verbose = true;
+		//conf.verbose = DEFAULT_VERBOSE_ON;
 		MMgc::GCHeap::Init(conf);
 
 		// Note that output from the command line parser (usage messages, error messages,
@@ -707,18 +707,57 @@ namespace avmshell
 					}
 #endif /* AVMPLUS_SELFTEST */
 #ifdef AVMPLUS_VERBOSE
-					else if (!VMPI_strcmp(arg+2, "verbose")) {
-						settings.do_verbose = true;
-					}
-					else if (!VMPI_strcmp(arg+2, "verbose_init")) {
-						settings.do_verbose = true;
+// @see nanojit.h
+#define LC_FragProfile  (1<<7)
+#define LC_Activation   (1<<6)
+#define LC_Liveness     (1<<5)
+#define LC_ReadLIR      (1<<4)
+#define LC_AfterSF      (1<<3)
+#define LC_RegAlloc     (1<<2)
+#define LC_Assembly     (1<<1)
+#define LC_NoCodeAddrs  (1<<0)
+#define DEFAULT_VERBOSE_ON ((uint32_t)~0 & ~(LC_FragProfile<<16) ) 
+
+					else if (!VMPI_strncmp(arg+2, "verbose", 7)) {
+						settings.do_verbose = DEFAULT_VERBOSE_ON; // all 'on' by default
+						if (arg[9] == '=') {
+                            // specific options so turn-off 'all'
+                            settings.do_verbose = 0;
+                            const char* p = &arg[10];
+                            const char* e = p;
+                            while(*e) {
+                                e = p;
+                                while(*e && *e!=',') e++;
+                                if (!p) break;
+                                if (!VMPI_strncmp(p, "parse", 5))
+                                    settings.do_verbose |= VB_parse;
+                                else if (!VMPI_strncmp(p, "verify", 6))
+                                    settings.do_verbose |= VB_verify;
+                                else if (!VMPI_strncmp(p, "interp", 6))
+                                    settings.do_verbose |= VB_interp;
+                                else if (!VMPI_strncmp(p, "traits", 6))
+                                    settings.do_verbose |= VB_traits;
+                                else if (!VMPI_strncmp(p, "builtins", 8))
+                                    settings.do_verbose |= VB_builtins;
+                                else if (!VMPI_strncmp(p, "memstats",8)) 
+                                    MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
+                                else if (!VMPI_strncmp(p, "sweep",5)) 
+                                    MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
+                                else if (!VMPI_strncmp(p, "occupancy",9)) 
+                                    MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
+#if defined FEATURE_NANOJIT
+                                else if (!VMPI_strncmp(p, "minaddr", 8))
+                                    settings.do_verbose |= (LC_NoCodeAddrs)<<16; 
+                                else if (!VMPI_strncmp(p, "jit", 3))
+                                    settings.do_verbose |= VB_jit | ((LC_Activation | LC_Liveness | LC_ReadLIR 
+                                                                    | LC_AfterSF    | LC_RegAlloc | LC_Assembly
+                                                                    ) << 16); // stuff LC_Bits into the upper 16bits
+#endif /* FEATURE_NANOJIT */
+                                p = e+1;
+                            }
+                        }
 					}
 #endif /* AVMPLUS_VERBOSE */
-#if defined FEATURE_NANOJIT && defined AVMPLUS_VERBOSE
-					else if (!VMPI_strcmp(arg+2, "bbgraph")) {
-						settings.bbgraph = true;  // generate basic block graph (only valid with JIT)
-                    }
-#endif /* FEATURE_NANOJIT && AVMPLUS_VERBOSE */
 #ifdef FEATURE_NANOJIT
 					else if (!VMPI_strcmp(arg+2, "nocse")) {
 						settings.cseopt = false;
@@ -992,9 +1031,6 @@ namespace avmshell
 #ifdef DEBUGGER
 		AvmLog("          [-d]          enter debugger on start\n");
 #endif
-		AvmLog("          [-memstats]   generate statistics on memory usage\n");
-		AvmLog("          [-memstats-verbose]\n"
-			   "                        generate more statistics on memory usage\n");
 		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
 		AvmLog("          [-eagersweep] sweep the heap synchronously at the end of GC;\n"
 			   "                        improves usage statistics.\n");
@@ -1016,14 +1052,20 @@ namespace avmshell
 		AvmLog("          [-Dlanguage l] localize runtime errors, languages are:\n");
 		AvmLog("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 #endif
-		AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
 #ifdef AVMPLUS_VERBOSE
-		AvmLog("          [-Dverbose]   trace every instruction (verbose!)\n");
-		AvmLog("          [-Dverbose_init]");
-		AvmLog("                        trace the builtins too\n");
-		AvmLog("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
+		AvmLog("          [-Dverbose[=[parse,verify,interp,traits,builtins,jit,minaddr,memstats,sweep,occupancy]] \n");
+		AvmLog("                        With no options, enables extreme! output mode.  Otherwise the\n");
+		AvmLog("                        options are mostly self-descriptive except for the following: \n");
+		AvmLog("                           builtins - includes output from builtin methods\n");
+		AvmLog("                           minaddr - [jit] minimize intstruction address output\n");
+		AvmLog("                           memstats - generate statistics on memory usage \n");
+		AvmLog("                           sweep - [memstats] include detailed sweep information \n");
+		AvmLog("                           occupancy - [memstats] include occupancy bit graph \n");
+		AvmLog("                        Note that ordering matters for options with dependencies.  Dependencies \n");
+		AvmLog("                        are contained in [ ] For example, 'minaddr' requires 'jit' \n");
 #endif
 #ifdef FEATURE_NANOJIT
+		AvmLog("          [-Dinterp]    do not generate machine code, interpret instead\n");
 		AvmLog("          [-Ojit]       use jit always, never interp (except when the jit fails)\n");
 		AvmLog("          [-Djitordie]  use jit always, and abort when the jit fails\n");
 		AvmLog("          [-Dnocse]     disable CSE optimization \n");

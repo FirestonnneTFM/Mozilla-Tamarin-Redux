@@ -1021,7 +1021,7 @@ namespace avmplus
 				continue;
 
 			#ifdef AVMPLUS_VERBOSE
-			if (pool->verbose)
+			if (pool->isVerbose(VB_traits))
 			{
 				core->console << "WARNING: slot " << i+1 << " on " << this << " not defined by compiler.  Using *\n";
 			}
@@ -1129,7 +1129,7 @@ namespace avmplus
 		// no, this can be called before the resolved bit is set
 		//AvmAssert(this->linked);
 #ifdef AVMPLUS_VERBOSE
-		if (pool->verbose)
+		if (pool->isVerbose(VB_traits))
 		{
 			core->console << "Generate TraitsBindings for "<<this<<"\n";
 		}
@@ -1225,7 +1225,7 @@ namespace avmplus
 		AvmAssert(m_bindingCapLog2 > 0);
 
 #ifdef AVMPLUS_VERBOSE
-		if (pool->verbose)
+		if (pool->isVerbose(VB_traits))
 		{
 			core->console << this << " bindings\n";
 			StTraitsBindingsIterator iter(thisData);
@@ -1248,7 +1248,7 @@ namespace avmplus
 		AvmAssert(this->linked);
 
 #ifdef AVMPLUS_VERBOSE
-		if (pool->verbose)
+		if (pool->isVerbose(VB_traits))
 		{
 			core->console << "Generate TraitsMetadata for "<<this<<"\n";
 		}
@@ -1778,7 +1778,7 @@ namespace avmplus
 failure:
 
 #ifdef AVMPLUS_VERBOSE
-   		if (pool->verbose)
+   		if (pool->isVerbose(VB_traits))
 			core->console << "illegal override in "<< this << ": " << Multiname(ns,name) <<"\n";
 #endif
 		if (toplevel)

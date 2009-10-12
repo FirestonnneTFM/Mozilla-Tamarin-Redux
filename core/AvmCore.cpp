@@ -51,7 +51,7 @@ namespace avmplus
 	void AvmCore::setCacheSizes(const CacheSizes& cs)
 	{
 		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
+		if (isVerbose(VB_traits))
 		{
 			console << "setCacheSize: bindings " << cs.bindings << " metadata " << cs.metadata << '\n';
 		}
@@ -64,18 +64,14 @@ namespace avmplus
  		m_msCache->resize(cs.methods);
 	}
 
-	const bool AvmCore::verbose_default = false;
-	const bool AvmCore::verbose_addrs_default = false;
+	const uint32_t AvmCore::verbose_default = 0; // all off
 	const bool AvmCore::methodNames_default = true;
 	const bool AvmCore::oldVectorMethodNames_default = true;
 	const bool AvmCore::verifyall_default = false;
 	const bool AvmCore::show_stats_default = false;
 	const bool AvmCore::tree_opt_default = false;
-	const bool AvmCore::verbose_live_default = false;;
-	const bool AvmCore::verbose_exits_default = false;
 	const Runmode AvmCore::runmode_default = RM_mixed;
 	const bool AvmCore::cseopt_default = true;
-	const bool AvmCore::bbgraph_default = false;
 	const bool AvmCore::sse2_default = true;
 	const bool AvmCore::interrupts_default = false;
 	const bool AvmCore::jitordie_default = false;
@@ -138,8 +134,7 @@ namespace avmplus
 #endif	
 			
 		// set default mode flags
-		config.verbose = verbose_default;
-		config.verbose_addrs = verbose_addrs_default;
+		config.verbose_vb = verbose_default;
 
 		// default to recording method names, if possible. 
 		// (subclass might change this in its ctor if it wants to conserve memory.)
@@ -149,13 +144,10 @@ namespace avmplus
 	   	config.verifyall = verifyall_default;
 		config.show_stats = show_stats_default;
 		config.tree_opt = tree_opt_default;
-		config.verbose_live = verbose_live_default;
-		config.verbose_exits = verbose_exits_default;
 
 		// jit flag forces use of jit-compiler instead of interpreter
 		config.runmode = runmode_default;
 		config.cseopt = cseopt_default;
-		config.bbgraph = bbgraph_default;
 		config.jitordie = jitordie_default;
 
 		config.sse2 = sse2_default;
@@ -482,7 +474,7 @@ namespace avmplus
 					// add ns/name to global table
 					// ISSUE should we filter out Object traits and/or private members?
 					#ifdef AVMPLUS_VERBOSE
-					if (scriptTraits->pool->verbose)
+					if (scriptTraits->pool->isVerbose(VB_parse))
 						console << "exporting " << ns << "::" << name << "\n";
 					#endif
 					domainEnv->addNamedScript(name, ns, scriptEnv);
@@ -1921,7 +1913,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				if (istype(atom, handler->traits)) 
 				{
 					#ifdef AVMPLUS_VERBOSE
-					if (config.verbose)
+					if (isVerbose((uint32_t)~0)) // any verbose flag enabled we emit this...
 					{
 						console << "enter " << info << " catch " << handler->traits << '\n';
 					}

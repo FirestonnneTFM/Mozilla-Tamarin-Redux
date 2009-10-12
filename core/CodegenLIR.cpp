@@ -560,8 +560,8 @@ namespace avmplus
             CodeMgr *mgr = mmfx_new( CodeMgr() );
             pool->codeMgr = mgr;
 #ifdef NJ_VERBOSE
-            if (pool->verbose) {
-                mgr->log.lcbits = 0xffff; // turn everything on
+            if (pool->isVerbose(VB_jit)) {
+                mgr->log.lcbits = pool->verbose_vb>>16; // upper 16bits hold our jit flags
                 mgr->labels.add(pool->core, sizeof(AvmCore), 0, "core");
             }
 #endif
@@ -5021,7 +5021,7 @@ namespace avmplus
 #ifdef NJ_VERBOSE
     bool CodegenLIR::verbose()
     {
-        return (state && state->verifier->verbose) || pool->verbose;
+        return (state && state->verifier->verbose) || pool->isVerbose(VB_jit);
     }
 #endif
 
@@ -5197,7 +5197,7 @@ namespace avmplus
         while (again);
 
         // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
-        verbose_only( if (verbose())
+        verbose_only( if (pool->isVerbose(VB_jit))
             AvmLog("killing dead stores after %d LA iterations.\n",iter);
         )
     }
@@ -5205,6 +5205,7 @@ namespace avmplus
     void CodegenLIR::deadvars_kill(nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels)
     {
         verbose_only(LirNameMap *names = frag->lirbuf->names;)
+        verbose_only(bool verbose = names && pool->isVerbose(VB_jit); )
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *vars = lirbuf->sp;
@@ -5222,7 +5223,7 @@ namespace avmplus
                     if (i->oprnd2() == vars) {
                         int d = i->disp() >> 3;
                         if (!livein.get(d)) {
-                            verbose_only(if (names)
+                            verbose_only(if (verbose)
                                 AvmLog("- %s\n", names->formatIns(i));)
                             // erase the store by rewriting it as a skip
                             LIns* prevIns = (LIns*) (uintptr_t(i) - insSizes[op]);
@@ -5281,7 +5282,7 @@ namespace avmplus
                     }
                     break;
             }
-            verbose_only(if (names) {
+            verbose_only(if (verbose) {
                 AvmLog("  %s\n", names->formatIns(i));
             })
         }
@@ -5353,7 +5354,7 @@ namespace avmplus
         deadvars();
 
         CodeMgr *mgr = pool->codeMgr;
-        verbose_only(if (verbose()) {
+        verbose_only(if (pool->isVerbose(VB_jit)) {
             Allocator live_alloc;
             live(live_alloc, frag, &mgr->log);
         })

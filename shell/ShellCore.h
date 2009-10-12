@@ -70,7 +70,7 @@ namespace avmshell
 		int numargs;					// number of entries in 'arguments'
 		bool nodebugger;
 		int  astrace_console;
-		bool do_verbose;				// copy to config
+		uint32_t do_verbose;            // copy to config
 		bool enter_debugger_on_launch;
 		bool interrupts;				// copy to config
 		bool verifyall;					// copy to config
@@ -79,7 +79,6 @@ namespace avmshell
 		bool nogc;						// copy to each GC
 		bool incremental;				// copy to each GC
 		int langID;						// copy to ShellCore?
-		bool bbgraph;					// copy to config
 		bool cseopt;					// copy to config
 		bool jitordie;					// copy to config
 		Runmode runmode;				// copy to config

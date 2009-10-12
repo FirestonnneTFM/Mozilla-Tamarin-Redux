@@ -659,7 +659,7 @@ namespace avmplus
 #endif
  		
 #ifdef AVMPLUS_VERBOSE
- 		if (pool->verbose)
+ 		if (pool->isVerbose(VB_interp))
  			core->console << "interp " << info << '\n';
 #endif
  		
@@ -828,7 +828,7 @@ namespace avmplus
 // Used in the case of exceptions.
 
 #ifdef AVMPLUS_VERBOSE
-#  define VERBOSE  if (pool->verbose) showState(info, codeStart, pc-1, framep, sp, scopeDepth, scopeBase, ms->max_scope())
+#  define VERBOSE  if (pool->isVerbose(VB_interp)) showState(info, codeStart, pc-1, framep, sp, scopeDepth, scopeBase, ms->max_scope())
 #else
 #  define VERBOSE
 #endif
@@ -967,7 +967,7 @@ namespace avmplus
 				SAVE_EXPC;
 				a1 = toplevel->coerce(a1, ms->returnTraits());
 #ifdef AVMPLUS_VERBOSE
-				if (pool->verbose)
+				if (pool->isVerbose(VB_interp))
 					core->console << "exit " << info << '\n';
 #endif
 				return a1;
