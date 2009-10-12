@@ -256,13 +256,11 @@ regress/vector_domain_bug.as, .*, ats_skip, uses avmplus::Domain
 as3/ShellClasses/.*, .*, ats_skip, Tests avmplus ShellClasses
 as3/sampling/.*, .*, ats_skip, sampling tests
 as3/DescribeType/.*, .*, ats_skip, https://bugzilla.mozilla.org/show_bug.cgi?id=520082
+ecma3/Exceptions/exception_011_rt.as, .*, ats_skip, test purposefully throws an uncaught error
 mmgc/.*, .*, ats_skip, mmgc testsf
 abcasm/.*, .*, ats_skip, abcasm tests
 mops/.*, .*, ats_skip, mops test - we don't have source to generate swf
 regress/vector_domain_bug, .*, ats_skip, uses avmplus.Domain
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType , .* , ats_skip, known issue
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch , .* , ats_skip, known issue
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , .* , ats_skip, known issue
 as3/RuntimeErrors/Error1034TypeCoercionFailed, .*, ats_skip, -AS3 switch breaks test
 ecma3/Exceptions/exception_011_rt, .*, ats_skip, test throws an undefined which is not catchable
 ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,.*, ats_skip, bug 499685 skip slow tests
