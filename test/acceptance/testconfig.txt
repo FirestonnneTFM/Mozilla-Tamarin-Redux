@@ -307,4 +307,6 @@ ecma3/RegExp/multibyte_regress,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.m
 # https://bugzilla.mozilla.org/show_bug.cgi?id=521550
 ######################
 mops/mops.as, .*(mac|sol).*-Dnogc , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=521550
+mops/mops.as, .*(mac|sol).*diff , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=521550
+
 
