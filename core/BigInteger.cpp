@@ -591,7 +591,7 @@ BigInteger *BigInteger::addOrSubtract(const BigInteger* smallerNum, bool isAdd, 
 	// Handle a result of zero specially
 	if (!comparedTo)
 	{
-		if (!isAdd || numWords == 1 && wordBuffer[0] == 0)
+		if (!isAdd || (numWords == 1 && wordBuffer[0] == 0))
 		{
 			result->setValue(0);
 			return result;
