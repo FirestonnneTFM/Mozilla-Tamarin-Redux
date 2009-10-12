@@ -132,4 +132,52 @@ var root=new tree("root",one,four);
 AddTestCase("test vector of custom classes",
            tree.printlist(tree.collect(root)).toString(),
            "root,one,two,three,four,five,six,seven");
+
+class TestClass {
+    private var myVal:Object;
+    public function TestClass(v:Object):void {
+        myVal = v;
+    }
+    public function toString():String {
+        return myVal.toString();
+    }
+}
+
+// nested vector stress test
+var nestedVectorType = Vector.<TestClass>;
+var tempNestedVector = nestedVectorType([new TestClass(2), new TestClass(new Object()), new TestClass("hello")])
+var expectedStr = "";
+
+for (var i=0; i<500; i++) {
+    nestedVectorType = Vector.<nestedVectorType>;
+    tempNestedVector = nestedVectorType([tempNestedVector]);
+    expectedStr += ">";
+}
+
+AddTestCase("Nested vector typecheck",
+            true,
+            tempNestedVector is nestedVectorType
+            );
+
+AddTestCase("Nested vector length",
+            1,
+            tempNestedVector.length
+            );
+
+// last char from nestedVectorType will be ]
+expectedStr += "]";
+
+// Compare the end of the nestedVectorType.toString
+AddTestCase("500 Nested vectors",
+            true,
+            expectedStr == nestedVectorType.toString().substr(-501)
+           );
+
+var deeplyNestedVector = new nestedVectorType();
+
+AddTestCase("Instantiate deeply nested vector",
+            0,
+            deeplyNestedVector.length
+            );
+
 test();

@@ -124,4 +124,33 @@ AddTestCase("Bug 513095: Type-check filter function",
             filtered.toString()
             );
 
+class TestClass {
+    private var myVal:Object;
+    
+    static public function over100(item:TestClass, index:int, vector:Vector.<TestClass>):Boolean {
+        if (item.myVal > 100) 
+            return true;
+        return false;
+    }
+    
+    public function TestClass(v:Object):void {
+        myVal = v;
+    }
+    
+    public function toString():String {
+        return myVal.toString();
+    }
+    
+    
+}
+
+var v2 = new <TestClass> [new TestClass(150), new TestClass(40), new TestClass(-200), new TestClass(400)];
+var v2filtered = v2.filter(TestClass.over100);
+
+AddTestCase("Filtered custom class",
+            "150,400",
+            v2filtered.toString()
+            );
+
+
 test();
