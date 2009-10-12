@@ -62,16 +62,25 @@ const int kBufferPadding = 16;
 
 	enum Runmode { RM_mixed, RM_jit_all, RM_interp_all };
 
+    enum VB_Bits {
+        // Output control bits for verbose mode
+        VB_builtins     = 1<<0, // display output for builtins (default is to ignore any builtins)
+        VB_parse        = 1<<1, // abc parsing information
+        VB_verify       = 1<<2, // verification information
+        VB_interp       = 1<<3, // interpreter information
+        VB_jit          = 1<<4, // jit information
+        VB_traits       = 1<<5, // traits creation information
+    };
+
 	struct Config
 	{
 		/**
 		 * The verbose flag may be set to display each bytecode
 		 * instruction as it is executed, along with a snapshot of
 		 * the state of the stack and scope chain.
-		 * Caution!  This shoots out a ton of output!
+		 * @see VB_Bits for individual settings of these flags
 		 */
-		bool verbose;
-		bool verbose_addrs;
+		uint32_t verbose_vb;
 
 		// if true, record original names of methods at runtime.
 		// if false, don't (Function.toString will return things like "Function-21")
@@ -95,12 +104,6 @@ const int kBufferPadding = 16;
 		bool sse2;
 		bool use_cmov;
 
-		/**
-		 * Genearate a graph for the basic blocks.  Can be used by
-		 * 'dot' utility to generate a jpg.
-		 */
-		bool bbgraph;
-
         /**
 		 * If this switch is set, executing code will check the
 		 * "interrupted" flag to see whether an interrupt needs
@@ -112,8 +115,6 @@ const int kBufferPadding = 16;
 
         bool show_stats;
         bool tree_opt;
-        bool verbose_live;
-        bool verbose_exits;
 		
 		bool jitordie;		// Always JIT, and if the JIT fails then abort
 	};
@@ -141,18 +142,14 @@ const int kBufferPadding = 16;
 		 * These are not conditionally included because the resulting code is a mess
 		 * at no benefit.
 		 */
-		static const bool verbose_default;
-		static const bool verbose_addrs_default;
+		static const uint32_t verbose_default;
 		static const bool methodNames_default;
 		static const bool oldVectorMethodNames_default;
 		static const bool verifyall_default;
 		static const bool show_stats_default;
 		static const bool tree_opt_default;
-		static const bool verbose_live_default;
-		static const bool verbose_exits_default;
 		static const Runmode runmode_default;
 		static const bool cseopt_default;
-		static const bool bbgraph_default;
 		static const bool sse2_default;
 		static const bool interrupts_default;
 		static const bool jitordie_default;
@@ -313,13 +310,10 @@ const int kBufferPadding = 16;
             #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
             inline bool use_sse2() const { return config.sse2; }
 			#endif
-			#ifdef AVMPLUS_VERBOSE
-                inline bool verbose_exits() const { return config.verbose_exits; }
-                inline bool verbose_live() const { return config.verbose_live; }
-            #endif
         #endif
 		#ifdef AVMPLUS_VERBOSE
-		inline bool verbose() const { return config.verbose; }
+		inline bool isVerbose(uint32_t b) const { return isBitSet(config.verbose_vb,b); }
+        static bool isBitSet(uint32_t v, uint32_t bit) { return (v&bit)?true:false; } 
 		#endif
 
 #if defined FEATURE_NANOJIT

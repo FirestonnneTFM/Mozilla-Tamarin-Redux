@@ -349,7 +349,7 @@ namespace avmplus
 				continue;
 			}
 			#ifdef AVMPLUS_VERBOSE
-			if (traits->pool->verbose)
+			if (traits->pool->isVerbose(VB_traits))
 			{
 				// why would the compiler assign sparse disp_id's?
 				traits->core->console << "WARNING: empty disp_id " << i << " on " << traits << "\n";
@@ -391,7 +391,7 @@ namespace avmplus
 				abcEnv->setMethod(method_id, methodEnv);
 			}
 			#ifdef AVMPLUS_VERBOSE
-			else if (func->pool()->verbose)
+			else if (func->pool()->isVerbose(VB_traits))
 			{
 				core->console << "WARNING: tried to re-register global MethodEnv for " << func << "\n";
 			}

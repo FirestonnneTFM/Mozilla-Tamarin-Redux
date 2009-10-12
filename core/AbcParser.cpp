@@ -54,7 +54,7 @@ namespace avmplus
 		int result = canParse(code, &version);
 		
 #ifdef AVMPLUS_VERBOSE
-		if (core->config.verbose)
+		if (core->isVerbose(VB_parse))
 			core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
 #endif
 		
@@ -305,7 +305,7 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		#ifdef AVMPLUS_VERBOSE
-		if (pool->verbose)
+		if (pool->isVerbose(VB_parse))
 			core->console << "        trait_count=" << nameCount << "\n";
 		#endif
 
@@ -413,7 +413,7 @@ namespace avmplus
 						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_index));
 
 					#ifdef AVMPLUS_VERBOSE
-					if (pool->verbose)
+					if (pool->isVerbose(VB_parse))
 					{
 						core->console << "            " << traitNames[kind]
 							<< " name=" << Multiname::format(core, ns, name)
@@ -444,7 +444,7 @@ namespace avmplus
 				else
 				{
 					#ifdef AVMPLUS_VERBOSE
-					if (pool->verbose)
+					if (pool->isVerbose(VB_parse))
 					{
 						core->console << "            " << traitNames[kind]
 							<< " name=" << Multiname::format(core,ns,name)
@@ -462,7 +462,7 @@ namespace avmplus
             case TRAIT_Method:
 			{
 				#ifdef AVMPLUS_VERBOSE
-				if (pool->verbose)
+				if (pool->isVerbose(VB_parse))
 				{
 					core->console << "            " << traitNames[kind]
 						<< " name=" << Multiname::format(core, ns, name)
@@ -518,7 +518,7 @@ namespace avmplus
 				for (uint32_t metadata = 0; metadata < metadataCount; ++metadata)
 				{
 					uint32_t index = readU30(meta_pos);
-					if (pool->verbose)
+					if (pool->isVerbose(VB_parse))
 						core->console << "            [" << metaNames[index] << "]\n";
 				}
             }
@@ -533,7 +533,7 @@ namespace avmplus
         int methodCount = readU30(pos);
 
 		#ifdef AVMPLUS_VERBOSE
-		if(pool->verbose) {
+		if(pool->isVerbose(VB_parse)) {
 			core->console << "method_count=" << methodCount << "\n";
 		}
 		#endif
@@ -581,7 +581,7 @@ namespace avmplus
 			#ifdef AVMPLUS_VERBOSE
 			Multiname returnTypeName;
 			parseTypeName(pos, returnTypeName);
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":method["<<i<<"]\n"
 					<< "        returnType=" << returnTypeName << "\n"
 					<< "        param_count=" << param_count 
@@ -596,7 +596,7 @@ namespace avmplus
 				#ifdef AVMPLUS_VERBOSE
 				Multiname multiname;
 				parseTypeName(pos, multiname);
-				if(pool->verbose) {
+				if(pool->isVerbose(VB_parse)) {
 					core->console << "            paramType["<<j<<"]="<< multiname << "\n";
 				}
 				#else
@@ -610,7 +610,7 @@ namespace avmplus
 			const uint8_t abcFlags = *pos++;
 
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "        name_index=" << name_index;
 				if (name_index > 0 && name_index < pool->constantStringCount)
 					core->console << " \"" << pool->getString(name_index) << "\"";
@@ -680,7 +680,7 @@ namespace avmplus
         uint32_t metadataCount = readU30(pos);
 
 		#ifdef AVMPLUS_VERBOSE
-		if(pool->verbose) {
+		if(pool->isVerbose(VB_parse)) {
 			core->console << "metadata_count=" << metadataCount << "\n";
 		}
 		#endif
@@ -709,7 +709,7 @@ namespace avmplus
 				metaNames[i] = name;
 
 				#ifdef AVMPLUS_VERBOSE
-				if(pool->verbose) {
+				if(pool->isVerbose(VB_parse)) {
 					core->console << "    " << name;
 				}
 				#endif
@@ -718,7 +718,7 @@ namespace avmplus
 				if (values_count > 0)
 				{
 					#ifdef AVMPLUS_VERBOSE
-					if(pool->verbose) {
+					if(pool->isVerbose(VB_parse)) {
 						core->console << "(";
 					}
 					#endif
@@ -727,7 +727,7 @@ namespace avmplus
 						uint32_t a = readU30(pos);
 						uint32_t b = readU30(pos);
 						#ifdef AVMPLUS_VERBOSE
-						if(pool->verbose) {
+						if(pool->isVerbose(VB_parse)) {
 							core->console << a << "," << b;
 							if (q+1 < values_count)
 								core->console << " ";
@@ -738,13 +738,13 @@ namespace avmplus
 						#endif
 					}
 					#ifdef AVMPLUS_VERBOSE
-					if(pool->verbose) {
+					if(pool->isVerbose(VB_parse)) {
 						core->console << ")";
 					}
 				#endif
 				}
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 					core->console << "\n";
 			}
 			#endif
@@ -757,7 +757,7 @@ namespace avmplus
         int bodyCount = readU30(pos);
 
 		#ifdef AVMPLUS_VERBOSE
-		if(pool->verbose) {
+		if(pool->isVerbose(VB_parse)) {
 			core->console << "bodies_count=" << bodyCount << "\n";
 		}
 		#endif
@@ -814,7 +814,7 @@ namespace avmplus
             int exception_count = readU30(pos);
 
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":method["<<method_index<<"] max_stack=" << max_stack
 					<< " local_count=" << local_count 
 					<< " init_scope_depth=" << init_scope_depth 
@@ -849,7 +849,7 @@ namespace avmplus
 						pool->parseMultiname(qn, name_index);
 					}
 
-					if (pool->verbose)
+					if (pool->isVerbose(VB_parse))
 					{
 						core->console << "            exception["<<i<<"] from="<< from
 							<< " to=" << to
@@ -968,7 +968,7 @@ namespace avmplus
 		pool->constantIntCount = int_count;
 
 #ifdef AVMPLUS_VERBOSE
-		pool->verbose = core->config.verbose;
+		pool->verbose_vb = core->config.verbose_vb; // pool picks up global settings
 #endif
 
 #ifdef AVMPLUS_VERBOSE
@@ -983,7 +983,7 @@ namespace avmplus
 			// S32 value
 			cpool_int.set(i, readS32(pos));
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":" << "cpool_int["<<(uint32_t)i<<"]="
 					<<constantNames[CONSTANT_Int] << " ";
 				core->console << cpool_int[i] << "\n";
@@ -1012,7 +1012,7 @@ namespace avmplus
 			cpool_uint.set(i, (unsigned)readS32(pos));
 
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":" << "cpool_uint["<<i<<"]="
 					<<constantNames[CONSTANT_UInt] << " ";
 				core->console << (double)cpool_uint[i];
@@ -1041,7 +1041,7 @@ namespace avmplus
 			double value = readDouble(pos);
 			cpool_double.set(i, (double*)(core->allocDouble(value)&~7));
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":" << "cpool_double["<<i<<"]="
 					<<constantNames[CONSTANT_Double] << " ";
 				core->console << *cpool_double[i];
@@ -1085,7 +1085,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kCorruptABCError);
 
 #ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":" << "cpool_string["<<i<<"]="
 					<< constantNames[CONSTANT_Utf8] << " ";
 				core->console.write(pos, len);
@@ -1191,7 +1191,7 @@ namespace avmplus
 				}
 			}
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":" << "cpool_ns["<<i<<"]="
 					<<constantNames[kind] << " ";
 				core->console << core->format(cpool_ns[i]->atom());
@@ -1235,7 +1235,7 @@ namespace avmplus
 			cpool_ns_set.set(i, namespace_set);
 
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":" << "cpool_ns_set["<<i<<"]="
 					<<constantNames[CONSTANT_NamespaceSet] << " ";
 				core->console << cpool_ns_set[i]->format(core);
@@ -1345,7 +1345,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(i));
 			}
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << offset << ":" << "cpool_mn["<<i<<"]="
 					<<constantNames[kind] << " ";
 				Multiname name;
@@ -1432,7 +1432,7 @@ namespace avmplus
 		uint32_t count = readU30(pos);
 
 		#ifdef AVMPLUS_VERBOSE
-		if(pool->verbose) {
+		if(pool->isVerbose(VB_parse)) {
 			core->console << "script_count=" << count << "\n";
 		}
 		#endif
@@ -1460,7 +1460,7 @@ namespace avmplus
 			int init_index = readU30(pos);
 
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console << "    " << (int)(script_pos-startpos) << ":script[" << i << "]"
 					<< " init_index=" << init_index
 					<< "\n";
@@ -1513,7 +1513,7 @@ namespace avmplus
 	{
 		classCount = readU30(pos);
 #ifdef AVMPLUS_VERBOSE
-		if(pool->verbose) {
+		if(pool->isVerbose(VB_parse)) {
 			core->console << "class_count=" << classCount <<"\n";
 		}
 #endif
@@ -1568,7 +1568,7 @@ namespace avmplus
 			{
 				// error - attempt to extend final class
                 #ifdef AVMPLUS_VERBOSE
-				if(pool->verbose) {
+				if(pool->isVerbose(VB_parse)) {
 					core->console << mn << " can't extend final class " << baseTraits << "\n";
 				}
                 #endif
@@ -1619,7 +1619,7 @@ namespace avmplus
 			MethodInfo* iinit = resolveMethodInfo(iinit_index);
 
 #ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				// TODO:  fixup this math here, since the 2's are all wrong
 				core->console
 					<< "	" << (int)(instancepos-startpos) << ":instance[" << i << "]"
@@ -1686,7 +1686,7 @@ namespace avmplus
 				Traits *interfaceTraits = pool->resolveTypeName(interfacePos, toplevel);
 				(void)interfaceTraits;
 #ifdef AVMPLUS_VERBOSE
-				if(pool->verbose) {
+				if(pool->isVerbose(VB_parse)) {
 					core->console << "		  interface["<<j<<"]=" << interfaceTraits <<"\n";
 				}
 #endif
@@ -1732,7 +1732,7 @@ namespace avmplus
             MethodInfo* cinit = resolveMethodInfo(cinit_index);
 
 			#ifdef AVMPLUS_VERBOSE
-			if(pool->verbose) {
+			if(pool->isVerbose(VB_parse)) {
 				core->console
 					<< "    " << (int)(class_pos-startpos) << ":class[" << i << "]"
 					<< " " << ns << "::" << name;

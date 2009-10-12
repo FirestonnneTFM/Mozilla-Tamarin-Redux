@@ -727,7 +727,7 @@ namespace avmplus
 		else
 		{
 			#ifdef AVMPLUS_VERBOSE
-			if (pool()->verbose)
+			if (pool()->isVerbose(VB_parse))
 				pool()->core->console << "WARNING: method " << this << " was already bound to " << declaringTraits() << "\n";
 			#endif
 

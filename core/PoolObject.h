@@ -289,11 +289,12 @@ namespace avmplus
 		uint32_t api;		
 
 	public:
+	#ifdef AVMPLUS_VERBOSE
+        bool isVerbose(uint32_t flag) { return AvmCore::isBitSet(verbose_vb,flag); }
+		uint32_t                    verbose_vb;
+	#endif
 		// @todo, privatize & make into bitfield (requires API churn)
 		bool						isBuiltin;	// true if this pool is baked into the player.  used to control whether callees will set their context.
-	#ifdef AVMPLUS_VERBOSE
-		bool						verbose;
-	#endif
 	};
 }
 
