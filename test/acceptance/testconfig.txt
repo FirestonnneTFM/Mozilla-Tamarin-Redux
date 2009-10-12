@@ -61,6 +61,7 @@ as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*(-Ojit|-Djitordie).*  
 as3/Vector/nonindexproperty:index -6.*          , [^ppc].*((-Ojit|-Djitordie).*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
 as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
 
 ####################
 # abcasm:
@@ -91,10 +92,6 @@ mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 4
 ecma3/Unicode/.*, .*diff, skip , trim down tests
 ecma3/Date/.*, .*diff, skip, trim down tests
 abcasm/.*, .*diff, skip, trim down tests
-# these failures are caused by stack traces appearing only the debugger builds
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType , .*diff , expectedfail, known issue
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch , .*diff , expectedfail, known issue
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , .*diff , expectedfail, known issue
 as3/RuntimeErrors/Error1034TypeCoercionFailed , .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=510225
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
