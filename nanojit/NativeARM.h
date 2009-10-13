@@ -183,21 +183,16 @@ typedef struct _FragInfo {
     NIns*           epilogue;
 } FragInfo;
 
-#ifdef NJ_ARM_VFP
 // D0-D6 are not saved; D7-D15 are, but we don't use those,
 // so we don't have to worry about saving/restoring them
-static const RegisterMask SavedFpRegs = 0; // we only use D0-D7 (S14), none of which need to be saved
-static const RegisterMask SavedRegs = 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10 | SavedFpRegs;
-static const int NumSavedRegs = 7;
-#else
 static const RegisterMask SavedFpRegs = 0;
 static const RegisterMask SavedRegs = 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
 static const int NumSavedRegs = 7;
-#endif
+
 static const RegisterMask FpRegs = 1<<D0 | 1<<D1 | 1<<D2 | 1<<D3 | 1<<D4 | 1<<D5 | 1<<D6; // no D7; S14-S15 are used for i2f/u2f.
 static const RegisterMask GpRegs = 0xFFFF;
 static const RegisterMask AllowableFlagRegs = 1<<R0 | 1<<R1 | 1<<R2 | 1<<R3 | 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
-static const bool CalleeRegsNeedExplicitSaving = false;  // genPrologue() does it for us
+static const bool CalleeRegsNeedExplicitSaving = true;  // genPrologue() does it for us
 
 #define IsFpReg(_r)     ((rmask((Register)_r) & (FpRegs)) != 0)
 #define IsGpReg(_r)     ((rmask((Register)_r) & (GpRegs)) != 0)
@@ -235,8 +230,10 @@ verbose_only( extern const char* shiftNames[]; )
     DECLARE_PLATFORM_ASSEMBLER_DEBUG()                                          \
                                                                                 \
     const static Register argRegs[4], retRegs[2];                       \
-    void BL(NIns*);                                                     \
-    bool BL_noload(NIns*, Register);                                    \
+                                                                                \
+    void        BranchWithLink(NIns* addr);                                     \
+    inline void BLX(Register addr, bool chk = true);                            \
+    void        JMP_far(NIns*);                                                 \
     void B_cond_chk(ConditionCode, NIns*, bool);                        \
     void underrunProtect(int bytes);                                    \
     void nativePageReset();                                             \
@@ -307,13 +304,6 @@ typedef enum {
         asm_output("bx %s", gpn(_r)); } while(0)
 #endif
 
-#if NJ_ARM_ARCH >= NJ_ARM_V5
-#define BLX(_r)  do {                                                    \
-        underrunProtect(4);                                             \
-        NanoAssert(IsGpReg(_r));                                        \
-        *(--_nIns) = (NIns)( COND_AL | (0x12<<20) | (0xFFF<<8) | (3<<4) | (_r)); \
-        asm_output("blx %s", gpn(_r)); } while(0)
-#endif
 /*
  * ALU operations
  */
@@ -695,6 +685,7 @@ enum {
 #define BKPTi_nochk(id) do {                                \
         NanoAssert((id & 0xffff) == id);                    \
         *(--_nIns) = BKPTi_insn(id);                        \
+        } while (0)
 
 // NOP
 #if NJ_ARM_ARCH >= NJ_ARM_V7
