@@ -241,6 +241,7 @@ namespace avmplus
 			// hence the continue
 			continue;
 		}
+
 		return -1;
 	}
 
@@ -268,23 +269,23 @@ namespace avmplus
 
 		// even with REALLY_INLINE, some compilers will be reluctant to inline equalsImpl here,
 		// so we explicitly repeat the code here.
-		for (const STR* probe = str + start; probe >= str; --probe)
+		const STR* probe = str + start;
+		for ( ; start >= 0 ; start-- )
 		{
 			for (int32_t j = 0; j < patlen; j++)
 			{
-				if (probe[j] != pat[j])
-					goto no_match;
+				if (pat[j] != probe[j])
+				{
+					break;
+				}
+				if (j == (patlen - 1))
+					return start;
 			}
-			return int32_t(uintptr_t(probe - str));
-  
-		no_match: 
-			// some compilers will complain about a label with no statement following,
-			// hence the continue
-			continue;
+
+			probe--;
 		}
- 
 		return -1;
-	}
+ 	}
 
 	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR>
@@ -828,19 +829,39 @@ namespace avmplus
 		Pointers subBuf(substr);
 
 		// For maximum performance, use different cases for k8/k16 combinations
-		switch ((w1 << 1) + w2)
+		if (sublen == 1)
 		{
-			case (k8 << 1) + k8:
-				return indexOfImpl(selfBuf.p8, start, right, subBuf.p8, sublen);
+			switch ((w1 << 1) + w2)
+			{
+				case (k8 << 1) + k8:
+					return indexOfCharCodeImpl(selfBuf.p8, start, right, subBuf.p8[0]);
 
-			case (k8 << 1) + k16:
-				return indexOfImpl(selfBuf.p8, start, right, subBuf.p16, sublen);
+				case (k8 << 1) + k16:
+					return indexOfCharCodeImpl(selfBuf.p8, start, right, subBuf.p16[0]);
 
-			case (k16 << 1) + k8:
-				return indexOfImpl(selfBuf.p16, start, right, subBuf.p8, sublen);
+				case (k16 << 1) + k8:
+					return indexOfCharCodeImpl(selfBuf.p16, start, right, subBuf.p8[0]);
 
-			case (k16 << 1) + k16:
-				return indexOfImpl(selfBuf.p16, start, right, subBuf.p16, sublen);
+				case (k16 << 1) + k16:
+					return indexOfCharCodeImpl(selfBuf.p16, start, right, subBuf.p16[0]);
+			}
+		}
+		else
+		{
+			switch ((w1 << 1) + w2)
+			{
+				case (k8 << 1) + k8:
+					return indexOfImpl(selfBuf.p8, start, right, subBuf.p8, sublen);
+
+				case (k8 << 1) + k16:
+					return indexOfImpl(selfBuf.p8, start, right, subBuf.p16, sublen);
+
+				case (k16 << 1) + k8:
+					return indexOfImpl(selfBuf.p16, start, right, subBuf.p8, sublen);
+
+				case (k16 << 1) + k16:
+					return indexOfImpl(selfBuf.p16, start, right, subBuf.p16, sublen);
+			}
 		}
 		AvmAssert(0);
 		return -1;
