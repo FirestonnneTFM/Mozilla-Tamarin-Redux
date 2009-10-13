@@ -39,6 +39,10 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
+#if defined FEATURE_NANOJIT
+#include "nanojit.h"
+#endif
+
 //GCC only allows intrinsics if sse2 is enabled
 #if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
@@ -75,6 +79,14 @@ namespace avmplus
 	const bool AvmCore::sse2_default = true;
 	const bool AvmCore::interrupts_default = false;
 	const bool AvmCore::jitordie_default = false;
+
+#ifdef AVMPLUS_VERBOSE
+	#if defined FEATURE_NANOJIT
+		const uint32_t AvmCore::DEFAULT_VERBOSE_ON = ((uint32_t)~0 & ~(nanojit::LC_FragProfile<<16));
+	#else
+		const uint32_t AvmCore::DEFAULT_VERBOSE_ON = ((uint32_t)~0);
+	#endif
+#endif
 
 	// a single string with characters 0x00...0x7f (inclusive)
 	static const char* const k_cachedChars = 
