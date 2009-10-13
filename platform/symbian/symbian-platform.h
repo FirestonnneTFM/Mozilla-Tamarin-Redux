@@ -99,6 +99,15 @@
 #undef __MWERKS__
 #endif
 
+#if defined(__GNUC__)
+	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+#else
+	// @todo implement me
+	#define AVMPLUS_ALIGN8(type) type 
+	#define AVMPLUS_ALIGN16(type) type 
+#endif
+
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock 
 * @see VMPI_lockInit(), VMPI_lockAcquire()
