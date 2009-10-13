@@ -40,7 +40,7 @@
 #include "BuiltinNatives.h"
 
 #if defined FEATURE_NANOJIT
-#include "nanojit.h"
+#include "../nanojit/nanojit.h"
 #endif
 
 //GCC only allows intrinsics if sse2 is enabled
