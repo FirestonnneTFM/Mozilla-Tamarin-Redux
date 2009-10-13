@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#!/usr/bin/env python
+
 #* ***** BEGIN LICENSE BLOCK *****
 #* Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #*
@@ -37,43 +40,37 @@
 #* ***** END LICENSE BLOCK ***** */
 #
 
+
 from cmdutils import *
-from os import listdir
-import testAvmShell,testDebugger,testShellSystem
-class RunTests (RunTestLib):
-    def compileAll(self):
-        print "compile all"
-        # for testShellSystem.py
-        r.compile("testdata/exec.as")
-        r.compile("testdata/exit.as")
-        r.compile("testdata/readline.as")
-        r.compile("testdata/trace1.as")
-        r.compile("testdata/write.as")
-        r.compile("testdata/argv.as")
-        # for testAvmShell.py
-        r.compile("testdata/sleep.as")
-        # for testDebuggerShell.py
-        r.compile("testdata/debug.as",None,"-d")
-        # for testMemstats.py
-        r.compile("testdata/memstats.as",None)
-        # for testLanguage.py
-        r.compile("testdata/rt_error.as",None)
+import os
 
-    def runAll(self):
-        list=os.listdir(".")
-        for f in list:
-            if re.match("test.*\.py$",f):
-                if self.testconfig.has_key(f):
-                    (type,notes)=self.testconfig[f]
-                    if type=='skip':
-                        print "%-30s SKIPPED, %s" % (f,notes)
-                        continue
-                cl=f[0:f.rindex('.')]
-                exec "import " + cl
-                print "%s.run()" % cl
-                exec cl + ".run()"
+def run():
+    r=RunTestLib()
+    if r.avmrd==None:
+        print "environment variable 'AVMRD' is not set"
+        print "debugger FAILED"
+        return
 
-if __name__ == "__main__":
-    r=RunTests()
-    r.compileAll()
-    r.runAll()
+    r.run_test(
+      'french',
+      '%s -Dlanguage fr testdata/rt_error.abc'%r.avmrd,
+      expectedout=['RangeError: Error #1002: L\'argument precision doit']
+    )
+    
+    r.run_test(
+      'italian',
+      '%s -Dlanguage it testdata/rt_error.abc'%r.avmrd,
+      expectedout=['RangeError: Error #1002: L\'argomento precision deve essere compreso tra']
+    )
+    
+    r.run_test(
+      'english',
+      '%s -Dlanguage en testdata/rt_error.abc'%r.avmrd,
+      expectedout=['RangeError: Error #1002: Number.toPrecision has a range of 1 to 21.']
+    )
+
+    
+if __name__ == '__main__':
+    r=RunTestLib()
+    r.compile("testdata/rt_Error.as",None,"")
+    run()
