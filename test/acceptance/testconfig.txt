@@ -54,14 +54,16 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # BUGS:
 # Grouped by feature or platform
 
+regress/bug_420755:.*, .*debug.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=522069
+
 ####################
 # force JIT -Ojit
 ####################
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*(-Ojit|-Djitordie).*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*          , [^ppc].*((-Ojit|-Djitordie).*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:.*, [^ppc].*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:.*, [^ppc].*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:.*, [^ppc].*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
 
 ####################
 # abcasm:
@@ -97,6 +99,7 @@ ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
 ecma3/Expressions/e11_5_3 , .*diff , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=481874
 ecma3/GlobalObject/e15_1_2_2_2  , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/TypeConversion/e9_3_1_3_rt   , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+regress/bug_420755:.*, .*diff, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=522069
 
 # specific skips when running differential testing between 32bit and 64bit shells
 as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
@@ -106,11 +109,11 @@ ecma3/Expressions/e11_5_3 , .*3264-diff , skip , both produce the same results a
 ecma3/Math/e15_8_2_16 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_18 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:.*, .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:.*, .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:.*, .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521879
 
 
-####################
-# Number
-####################
 ####################
 # Number
 ####################
