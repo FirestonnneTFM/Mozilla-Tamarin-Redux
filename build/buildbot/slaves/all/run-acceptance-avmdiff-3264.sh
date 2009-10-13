@@ -143,7 +143,7 @@ else
 fi
 
 
-echo "message: $py ./runtests.py --config=${platform}-diff   --notimecheck"
+echo "message: $py ./runtests.py --config=${platform}-3264-diff   --notimecheck"
 $py ./runtests.py --config=${platform}-3264-diff --notimecheck
 
 ##
