@@ -37,7 +37,7 @@
 
 #include "avmshell.h"
 #if defined FEATURE_NANOJIT
-#include "nanojit.h"
+#include "../nanojit/nanojit.h"
 #endif
 
 namespace avmshell
