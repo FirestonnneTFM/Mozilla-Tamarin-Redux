@@ -154,6 +154,11 @@ const int kBufferPadding = 16;
 		static const bool interrupts_default;
 		static const bool jitordie_default;
 		
+#ifdef AVMPLUS_VERBOSE
+		// default set of flags to enable for "verbose" with no specific qualifiers
+		static const uint32_t DEFAULT_VERBOSE_ON;
+#endif
+		
 	public:
 		/**
 		 * The console object.  Text to be displayed to the developer

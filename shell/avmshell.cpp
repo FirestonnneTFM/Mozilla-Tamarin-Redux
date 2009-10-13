@@ -36,6 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmshell.h"
+#if defined FEATURE_NANOJIT
+#include "nanojit.h"
+#endif
 
 namespace avmshell
 {
@@ -106,7 +109,7 @@ namespace avmshell
 	int Shell::run(int argc, char *argv[]) 
 	{
 		MMgc::GCHeapConfig conf;
-		//conf.verbose = DEFAULT_VERBOSE_ON;
+		//conf.verbose = AvmCore::DEFAULT_VERBOSE_ON;
 		MMgc::GCHeap::Init(conf);
 
 		// Note that output from the command line parser (usage messages, error messages,
@@ -707,19 +710,8 @@ namespace avmshell
 					}
 #endif /* AVMPLUS_SELFTEST */
 #ifdef AVMPLUS_VERBOSE
-// @see nanojit.h
-#define LC_FragProfile  (1<<7)
-#define LC_Activation   (1<<6)
-#define LC_Liveness     (1<<5)
-#define LC_ReadLIR      (1<<4)
-#define LC_AfterSF      (1<<3)
-#define LC_RegAlloc     (1<<2)
-#define LC_Assembly     (1<<1)
-#define LC_NoCodeAddrs  (1<<0)
-#define DEFAULT_VERBOSE_ON ((uint32_t)~0 & ~(LC_FragProfile<<16) ) 
-
 					else if (!VMPI_strncmp(arg+2, "verbose", 7)) {
-						settings.do_verbose = DEFAULT_VERBOSE_ON; // all 'on' by default
+						settings.do_verbose = AvmCore::DEFAULT_VERBOSE_ON; // all 'on' by default
 						if (arg[9] == '=') {
                             // specific options so turn-off 'all'
                             settings.do_verbose = 0;
@@ -747,10 +739,10 @@ namespace avmshell
                                     MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
 #if defined FEATURE_NANOJIT
                                 else if (!VMPI_strncmp(p, "minaddr", 8))
-                                    settings.do_verbose |= (LC_NoCodeAddrs)<<16; 
+                                    settings.do_verbose |= (nanojit::LC_NoCodeAddrs)<<16; 
                                 else if (!VMPI_strncmp(p, "jit", 3))
-                                    settings.do_verbose |= VB_jit | ((LC_Activation | LC_Liveness | LC_ReadLIR 
-                                                                    | LC_AfterSF    | LC_RegAlloc | LC_Assembly
+                                    settings.do_verbose |= VB_jit | ((nanojit::LC_Activation | nanojit::LC_Liveness | nanojit::LC_ReadLIR 
+                                                                    | nanojit::LC_AfterSF    | nanojit::LC_RegAlloc | nanojit::LC_Assembly
                                                                     ) << 16); // stuff LC_Bits into the upper 16bits
 #endif /* FEATURE_NANOJIT */
                                 p = e+1;
