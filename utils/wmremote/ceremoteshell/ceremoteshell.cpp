@@ -258,8 +258,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		cbIn = 256;
 		pIn = (BYTE*)LocalAlloc(LPTR, 256);
-		strcpy((char*)pIn, argv[1]);
+		strcpy((char*)pIn," ");
+		for (int i=1;i<argc-1;i++) {
+		    strcat((char*)pIn, argv[i]);
+			if (i<argc)
+				strcat((char*)pIn," ");
+		}
 	}
+//	printf("pIn: %s\n",pIn);
 //	printf("calling start avmshell...\n");
 	hr = CeRapiInvoke( L"\\Windows\\avmremote.dll", L"StartAVMShell",
 						cbIn, ( BYTE * ) pIn,  
@@ -273,6 +279,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	wait_info info;
 	DWORD dwTimeout = 0;
 	DWORD dwInterval = 1000;
+    DWORD dwCode = 0;
 	info.dwTimeout = dwInterval;
 	info.proc_id = hProcess;
 	//printf("calling wait for avmshell...\n");
@@ -281,7 +288,7 @@ int _tmain(int argc, _TCHAR* argv[])
 						&cbOut, ( BYTE ** ) &pOut, NULL, 0)==S_OK)
 	{
 		// pOut should be the return code
-		DWORD dwCode = *(DWORD*)pOut;
+		dwCode = *(DWORD*)pOut;
 		LocalFree((HLOCAL)*pOut);
 
 		if (dwCode==WAIT_TIMEOUT)
@@ -371,6 +378,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	// Uninitialize RAPI
 	CeRapiUninit();
 
-	return 0;
+	return dwCode;
 }
 
