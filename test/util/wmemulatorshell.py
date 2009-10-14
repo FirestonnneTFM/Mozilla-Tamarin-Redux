@@ -55,47 +55,67 @@ def runTest():
 #        print "SHELL: looking for free emulator : %d" % (time.time()-starttime)
         for eachdir in dirs:
             try:
+                sdate=str(datetime.datetime.today())+"\n"
                 if os.path.isdir(dirbase+'/'+eachdir) and os.path.exists(dirbase+'/'+eachdir+'/lock')==False:
-                    file=open(dirbase+'/'+eachdir+'/lock','w')
-                    file.write(str(datetime.datetime.today())+"\n")
-                    file.close()
+                    open(dirbase+'/'+eachdir+'/lock','w').write(sdate)
                     dir=dirbase+'/'+eachdir
+                    time.sleep(.1)
+                    if open(dir+'/lock','r').read()!=sdate:
+                        print("ERROR: writing lock file")
+                        if os.path.exists(dir+'/lock')==False:
+                            os.unlink(dir+'/lock')
+                        return -1
+                    time.sleep(.1)
+                    if os.path.exists(dir+'/lock')==False: 
+                        print("ERROR: lock file does not exist")
+                        return -1
                     break
             except:
                 print "ERROR: writing lock file"
+                if os.path.exists(dir+"/lock"):
+                    os.unlink(dir+"/lock")
+                return -1
         time.sleep(.1)     
 #    print "SHELL: running emulator %s : %d" % (dir,time.time()-starttime)
     ddir="\\Storage Card\\media"
     cmdfile=dir+"/nextvm.txt"
     dlog='%s/media/%s.log' % (dir,base)
     dabc='%s/media/%s.abc' % (dir,base)
+    exitcodefile='%s/exitcode.txt' % dir
     ctr=0
 
     # clean up old log and abc files
     try:
-        if os.path.exists(dlog):
-            os.unlink(dlog)
-        if os.path.exists(dabc):
-            os.unlink(dabc)
         ctr=0
         while os.path.exists(cmdfile) and ctr<20:
             time.sleep(.1)
             ctr+=1
-
+        if os.path.exists(dlog):
+            os.unlink(dlog)
+        if os.path.exists(dabc):
+            os.unlink(dabc)
+        if os.path.exists(exitcodefile):
+            os.unlink(exitcodefile)
     except:
         print "ERROR: exception deleting file"
+        os.unlink(dir+'/lock')
+        return -1
 
     # copy .abc test to the emulator directory
     try:
         shutil.copy(cwd+"/"+abc,dabc)
     except:
         print("ERROR: copying abc file")
+        os.unlink(dir+'/lock')
+        return -1
     try:
         file=open(cmdfile,"w")
         file.write("%s -log \"%s\%s.abc\" " % (args,ddir,base))
         file.close()
     except:
         print "ERROR: write command file failed"
+        os.unlink(dir+'/lock')
+        return -1
         
 #   wait until emulator deletes nextvm.txt command file
 #    print "SHELL: wrote file %s : %d" % (cmdfile,time.time()-starttime)
@@ -105,10 +125,24 @@ def runTest():
 #    print "SHELL: detected test finished %d" % (time.time()-starttime)
     if os.path.exists(dlog)==False:
         print "ERROR: cannot find log %s" % dlog
+        if os.path.exists(dir+'/lock'):
+            os.unlink(dir+'/lock')
+        return -1
     ctr=0
     while os.path.exists(dlog)==False and ctr<50:
         time.sleep(.1)
         ctr+=1
+
+# read the exitcode file
+    exitcode=0
+    if os.path.exists(exitcodefile):
+        try:
+            exitcodestr=open(exitcodefile,'r').read()
+            exitcode=int(exitcodestr.strip())
+        except:
+            print 'exception reading exit code file'
+            os.unlink(dir+'/lock')
+            return -1
 
 #  remove lock, another thread can use the emulator while the shell reads the output log
 #    print "SHELL: finished %s : %d" % (abc,time.time()-starttime)
@@ -116,16 +150,17 @@ def runTest():
         os.unlink(dir+'/lock')
     except:
         print "exception deleting %s/lock" % dir
+        return -1
 
 # read and print the log file
     try:
        file=open(dlog,"r")
-       print file.read()
+       print(file.read())
        file.close()
     except:
        print "ERROR: did not find log  %s" % dlog
-       return False
-    return True
+       return -1
+    return exitcode
 
 
 # main
@@ -143,7 +178,7 @@ for arg in sys.argv[1:-1]:
 
 # abc to test
 abc=sys.argv[-1]
-    
+print("args: %s" % abc)    
 # flatten the directory path
 abc=abc.replace('/','\\')
 base=abc[0:abc.rfind('.')].replace('\\','_')
@@ -161,9 +196,9 @@ attempts=0
 while attempts<5:
     print "attempt # %d" % attempts
     res=runTest()
-    if res==True:
-        break
+    if res!=-1:
+        sys.exit(res)
     attempts+=1
     print "retrying test"
-
+sys.exit(-1)
 

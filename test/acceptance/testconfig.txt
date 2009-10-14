@@ -171,19 +171,11 @@ ecma3/String/e15_5_4_4_4_rt, .*-Djitordie , expectedfail, https://bugzilla.mozil
 # limitations of ceremoteshell.exe for running tests on windows mobile devices
 mops/.*                                                          ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
 abcasm/.*                                                        ,   .*winmobile.*              ,  skip           ,   remote proxy does not have access to additional abc files
-mmgc/outofmemory,   .*winmobile.* ,  skip,   winmo is not returning exit code
-mmgc/memlimit   ,   .*winmobile.* ,  skip,   winmo does not run under memlimit
 # recursive PCRE testcases kills the stack on PocketPC builds
 ecma3/RegExp/eregress_119909,   .*winmobile.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
 # sampling failure on winmobile-arm
 as3/sampling/Callback:.*                                         ,   arm-winmobile.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
-# Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:exitcode   , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_010_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
-ecma3/Exceptions/exception_011_rt:exitcode , arm-winmobile.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
 recursion/.* , .*winmobile.* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=502589
 
 

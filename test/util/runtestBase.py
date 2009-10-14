@@ -1370,7 +1370,7 @@ class RuntestBase:
     def setupCEEmulators(self):
         
         emulator="c:/Program Files/Microsoft Device Emulator/1.0/DeviceEmulator.exe"
-        emulator_image="c:/Program Files/Windows Mobile 6 SDK/PocketPC/DeviceemulationV614/0409/PPC_USA_GSM_VR.BIN"
+        emulator_image="c:/Program Files/Windows Mobile 6 SDK/PocketPC/DeviceemulationV650/0409/PPC_USA_GSM_VR.BIN"
         cwd=os.getcwd()
         # fixes for changing cygwin style paths into DOS
         if len(cwd)>9 and cwd[0:9]=='/cygdrive':
