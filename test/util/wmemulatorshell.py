@@ -45,7 +45,7 @@ import os,sys,shutil,time,datetime,random
 
 def runTest():
     global startime
-
+    
     dir=None
 
     # search for an unlocked emulator directory
@@ -57,24 +57,29 @@ def runTest():
             try:
                 sdate=str(datetime.datetime.today())+"\n"
                 if os.path.isdir(dirbase+'/'+eachdir) and os.path.exists(dirbase+'/'+eachdir+'/lock')==False:
-                    open(dirbase+'/'+eachdir+'/lock','w').write(sdate)
+                    file=open(dirbase+'/'+eachdir+'/lock','w')
+                    file.write(sdate)
+                    file.close()
                     dir=dirbase+'/'+eachdir
                     time.sleep(.1)
-                    if open(dir+'/lock','r').read()!=sdate:
+                    file=open(dir+'/lock','r')
+                    sdateread=file.read()
+                    file.close()
+                    if sdateread!=sdate:
                         print("ERROR: writing lock file")
                         if os.path.exists(dir+'/lock')==False:
                             os.unlink(dir+'/lock')
-                        return -1
+                        return (-1,'ERROR: writing lock file')
                     time.sleep(.1)
                     if os.path.exists(dir+'/lock')==False: 
                         print("ERROR: lock file does not exist")
-                        return -1
+                        return (-1,'ERROR: lock file does not exist')
                     break
             except:
-                print "ERROR: writing lock file"
+                print "ERROR: exception lock file"
                 if os.path.exists(dir+"/lock"):
                     os.unlink(dir+"/lock")
-                return -1
+                return (-1,"ERROR: exception writing lock file")
         time.sleep(.1)     
 #    print "SHELL: running emulator %s : %d" % (dir,time.time()-starttime)
     ddir="\\Storage Card\\media"
@@ -99,7 +104,7 @@ def runTest():
     except:
         print "ERROR: exception deleting file"
         os.unlink(dir+'/lock')
-        return -1
+        return (-1,"ERROR: exception deleting file")
 
     # copy .abc test to the emulator directory
     try:
@@ -107,7 +112,7 @@ def runTest():
     except:
         print("ERROR: copying abc file")
         os.unlink(dir+'/lock')
-        return -1
+        return (-1,"ERROR: copying abc file")
     try:
         file=open(cmdfile,"w")
         file.write("%s -log \"%s\%s.abc\" " % (args,ddir,base))
@@ -115,7 +120,7 @@ def runTest():
     except:
         print "ERROR: write command file failed"
         os.unlink(dir+'/lock')
-        return -1
+        return (-1,"ERROR: write command file failed")
         
 #   wait until emulator deletes nextvm.txt command file
 #    print "SHELL: wrote file %s : %d" % (cmdfile,time.time()-starttime)
@@ -127,7 +132,7 @@ def runTest():
         print "ERROR: cannot find log %s" % dlog
         if os.path.exists(dir+'/lock'):
             os.unlink(dir+'/lock')
-        return -1
+        return (-1,"ERROR: cannotfind log %s" % dlog)
     ctr=0
     while os.path.exists(dlog)==False and ctr<50:
         time.sleep(.1)
@@ -137,12 +142,13 @@ def runTest():
     exitcode=0
     if os.path.exists(exitcodefile):
         try:
-            exitcodestr=open(exitcodefile,'r').read()
+            file=open(exitcodefile,'r')
+            exitcodestr=file.read()
             exitcode=int(exitcodestr.strip())
         except:
             print 'exception reading exit code file'
             os.unlink(dir+'/lock')
-            return -1
+            return (-1,"exception reading exit code file")
 
 #  remove lock, another thread can use the emulator while the shell reads the output log
 #    print "SHELL: finished %s : %d" % (abc,time.time()-starttime)
@@ -150,17 +156,17 @@ def runTest():
         os.unlink(dir+'/lock')
     except:
         print "exception deleting %s/lock" % dir
-        return -1
+        return (-1,"exception deleting %s/lock" %dir)
 
 # read and print the log file
     try:
-       file=open(dlog,"r")
-       print(file.read())
-       file.close()
+       file=open(dlog,'r')
+       sysout=file.read()
+       print(sysout)
     except:
-       print "ERROR: did not find log  %s" % dlog
-       return -1
-    return exitcode
+       print "ERROR: failed to read log  %s" % dlog
+       return (-1,"ERROR: failed to read log %s" % dlog)
+    return (exitcode,sysout)
 
 
 # main
@@ -195,10 +201,13 @@ if os.path.isdir(dirbase)==False:
 attempts=0
 while attempts<5:
     print "attempt # %d" % attempts
-    res=runTest()
-    if res!=-1:
+    (res,sysout)=runTest()
+    if res!=-1 and res!=1:
         sys.exit(res)
     attempts+=1
     print "retrying test"
-sys.exit(-1)
+    file=open(dirbase+'/../failures.log','a')
+    file.write("%s attempt %d %s %s\n" %(str(datetime.datetime.today()),attempts,sys.argv[1:],sysout))
+    file.close()
+sys.exit(res)
 
