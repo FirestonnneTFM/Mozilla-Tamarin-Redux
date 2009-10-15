@@ -1023,6 +1023,9 @@ namespace avmshell
 #ifdef DEBUGGER
 		AvmLog("          [-d]          enter debugger on start\n");
 #endif
+		AvmLog("          [-memstats]   generate statistics on memory usage\n");
+		AvmLog("          [-memstats-verbose]\n"
+			   "                        generate more statistics on memory usage\n");
 		AvmLog("          [-memlimit d] limit the heap size to d pages\n");
 		AvmLog("          [-eagersweep] sweep the heap synchronously at the end of GC;\n"
 			   "                        improves usage statistics.\n");
