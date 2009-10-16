@@ -73,4 +73,24 @@
     var ba:ByteArray=File.fileToByteArray("test2.ba",false);
     AddTestCase("File.fileToByteArray length",true,ba.length=="sample test data".length);
 
+    // Regression for https://bugzilla.mozilla.org/show_bug.cgi?id=473863
+    //      File.read fail for binary files
+    
+    // ByteArray with partial bad utf-8 sequence
+    var bytearray_bad : ByteArray = new ByteArray();
+    bytearray_bad[0]=0xE4; // 19968
+    bytearray_bad[1]=0xB8;
+    bytearray_bad[2]=0x80;
+    bytearray_bad[3]=0xE4; // bad sequence
+    bytearray_bad[4]=0xE4; // 19968
+    bytearray_bad[5]=0xB8;
+    bytearray_bad[6]=0x80;
+    
+    File.write("test.bin", bytearray_bad);
+    AddTestCase("File read binary test file",
+                "\u4e00\u00E4\u4e00",
+                File.read("test.bin")
+               );
+
+
     test();
