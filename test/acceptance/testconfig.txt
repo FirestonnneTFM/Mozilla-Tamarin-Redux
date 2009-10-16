@@ -187,6 +187,7 @@ recursion/.* , .*winmobile.* , expectedfail , https://bugzilla.mozilla.org/show_
 ecma3/Date/e15_9_5_14, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, emulator DST problem
 ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, emulator DST problem
 ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Exceptions/exception_011_rt, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, bug 480315 not detecting exit code
 ecma3/Unicode/u9000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
 ecma3/Unicode/u6000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
 ecma3/Unicode/u5000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run too slowly on winmo

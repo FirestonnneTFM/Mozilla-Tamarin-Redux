@@ -199,15 +199,20 @@ if os.path.isdir(dirbase)==False:
 
 # if .log file is not written try multiple attempts
 attempts=0
-while attempts<5:
-    print "attempt # %d" % attempts
+retrys=0
+while retrys<5:
+    print "attempt %d, retry %d" % (attempts,retrys)
     (res,sysout)=runTest()
     if res!=-1 and res!=1:
         sys.exit(res)
     attempts+=1
-    print "retrying test"
-    file=open(dirbase+'/../failures.log','a')
-    file.write("%s attempt %d %s %s\n" %(str(datetime.datetime.today()),attempts,sys.argv[1:],sysout))
-    file.close()
+    if res==1:
+        retrys+=1
+    try:
+        file=open(dirbase+'/../failures.log','a')
+        file.write("%s attempt %d %s %s\n" %(str(datetime.datetime.today()),attempts,sys.argv[1:],sysout))
+        file.close()
+    except:
+        print("ERROR: writing failures.log")
 sys.exit(res)
 
