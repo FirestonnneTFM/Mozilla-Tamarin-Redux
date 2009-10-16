@@ -493,8 +493,8 @@
     // coerce & store into ScriptObject subclass-typed slot
     REALLY_INLINE void store_cached_slot(SetCache& c, ScriptObject* obj, ScriptObject** slot_ptr, Atom val)
     {
-        if (atomKind(val) == kObjectType && 
-			(AvmCore::isNullOrUndefined(val) || atomObj(val)->traits()->containsInterface(c.slot_type))) {
+        if (AvmCore::isNullOrUndefined(val) ||
+            (atomKind(val) == kObjectType && atomObj(val)->traits()->containsInterface(c.slot_type))) {
             WBRC(c.slot_type->core->gc, obj, slot_ptr, atomPtr(val));
         } else {
             throw_checktype_error(c, obj, val);
