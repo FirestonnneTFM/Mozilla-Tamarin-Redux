@@ -93,7 +93,10 @@ class RunSmokes():
     def run(self):
         print "starting smoke tests"
         print "    test file is %s" % self.testfile
-        print "    will run tests until timeout of %ds is exceeded" % self.timeout
+        if self.timeout > 0:
+            print "    will run tests until timeout of %ds is exceeded" % self.timeout
+        else:
+            print "    will run tests until all tests are complete, no timeout"
         print
         try:
             infile=open(self.testfile,'r')
@@ -104,13 +107,17 @@ class RunSmokes():
             test=test.strip()
             if len(test)==0 or test[0]=='#':
                 continue
-            if time.time()-self.startTime>self.timeout:
-                break
+            if self.timeout > 0:
+                if time.time()-self.startTime>self.timeout:
+                    break
             self.runtest(test)
-        if time.time()-self.startTime<self.timeout:
-            print '\ntests finished after %d seconds, did not exceed timeout of %d seconds' % (time.time()-self.startTime,self.timeout)
+        if self.timeout > 0:
+            if time.time()-self.startTime<self.timeout:
+                print '\ntests finished after %d seconds, did not exceed timeout of %d seconds' % (time.time()-self.startTime,self.timeout)
+            else:
+                print '\nexceeded timeout of %d seconds, actual time %d seconds' % (self.timeout,time.time()-self.startTime)
         else:
-            print '\nexceeded timeout of %d seconds, actual time %d seconds' % (self.timeout,time.time()-self.startTime)
+            print '\ntests finished after %d seconds' % (time.time()-self.startTime)
         infile.close()
 
     def showstats(self):
