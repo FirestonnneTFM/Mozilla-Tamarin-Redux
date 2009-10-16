@@ -213,6 +213,7 @@ ecma3/Unicode/u9000_CJKUnifiedIdeographs,(sparc-sol|x64-win|ppc-mac|ppc64-mac)-t
 ecma3/Unicode/uE000_PrivateUseArea, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 ecma3/Unicode/uAC00_HangulSyllables, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
 mops/mops, (sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger), skip, bug 499685 skip slow tests
+regress/bug_483783, .*, skip, skip slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
 
 ####################
 # run slow tests in deep test phase
@@ -227,6 +228,7 @@ ecma3/Unicode/uE000_PrivateUseArea,.*deep, include, include slow tests in deep p
 ecma3/Unicode/uAC00_HangulSyllables,.*deep, include, include slow tests in deep phase
 # bug 505982
 mops/mops,^((?!ppc-mac-tvm-debug-).).*deep, include, include slow tests in deep phase
+regress/bug_483783, .*deep, include, include slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
 
 ####################
 # verifier
