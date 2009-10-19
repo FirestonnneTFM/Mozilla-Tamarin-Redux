@@ -341,6 +341,8 @@ namespace avmplus
 			cause an allocation if sampling is enabled. ("Icky and brittle", but that's how it is.)
 		*/
 		WB(gc, this, &this->m_buffer.pv, buffer);
+#else
+		(void)gc;
 #endif
 	}
 
@@ -374,6 +376,7 @@ namespace avmplus
 		*/
 		AvmAssert(master != NULL);
 		master->IncrementRef();
+		(void)gc;
 #endif
 	}
 
