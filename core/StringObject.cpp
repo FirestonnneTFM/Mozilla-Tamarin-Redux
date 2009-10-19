@@ -323,15 +323,25 @@ namespace avmplus
 	REALLY_INLINE String::String(MMgc::GC* gc, void* buffer, Width w, int32_t length, int32_t charsLeft, bool is7bit) :
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(kStringType), 
-#endif
 		m_buffer((void*)NULL),
+#else
+		m_buffer(buffer),
+#endif
 		m_extra(NULL),
 		m_length(length), 
 		m_bitsAndFlags(w | (kDynamic << TSTR_TYPE_SHIFT) | (charsLeft << TSTR_CHARSLEFT_SHIFT) | (uint32_t(is7bit) << TSTR_7BIT_SHIFT))
 	{
 		AvmAssert(m_length >= 0);
 		AvmAssert((uint64_t(m_length) << getWidth()) <= 0x7FFFFFFFU);
+#ifdef DEBUGGER
+		/*
+			an explicit WB is only necessary if there's the possibility of an allocation between the time
+			the container (String) is allocated and time we set the field. In nondebugger builds, there is no
+			such possibility, but in DEBUGGER builds, the superclass ctor (AvmPlusScriptableObject) can
+			cause an allocation if sampling is enabled. ("Icky and brittle", but that's how it is.)
+		*/
 		WB(gc, this, &this->m_buffer.pv, buffer);
+#endif
 	}
 
 	// ctor for a dependent string.
@@ -341,7 +351,11 @@ namespace avmplus
 		AvmPlusScriptableObject(kStringType), 
 #endif
 		m_buffer(uintptr_t(start << master->getWidth())),
+#ifdef DEBUGGER
 		m_extra(NULL),
+#else
+		m_extra(master),
+#endif
 		m_length(length), 
 		// note that we propagate TSTR_7BIT_FLAG: if the entire master is TSTR_7BIT_FLAG, then so is the dependent string.
 		// @todo: a dependent string could qualify for TSTR_7BIT_FLAG even if it's master is not. worth checking for?
@@ -349,7 +363,18 @@ namespace avmplus
 	{
 		AvmAssert(m_length >= 0);
 		AvmAssert((uint64_t(m_length) << getWidth()) <= 0x7FFFFFFFU);
+#ifdef DEBUGGER
 		WBRC(gc, this, &this->m_extra.master, master);
+#else
+		/*
+			an explicit WBRC is only necessary if there's the possibility of an allocation between the time
+			the container (String) is allocated and time we set the field. In nondebugger builds, there is no
+			such possibility, but in DEBUGGER builds, the superclass ctor (AvmPlusScriptableObject) can
+			cause an allocation if sampling is enabled. ("Icky and brittle", but that's how it is.)
+		*/
+		AvmAssert(master != NULL);
+		master->IncrementRef();
+#endif
 	}
 
 	// add a and b and check for overflow
@@ -396,7 +421,8 @@ namespace avmplus
 	
 	// Private static method to create a dependent string
 
-	Stringp String::createDependent(GC* gc, Stringp master, int32_t start, int32_t len)
+	// in nondebug builds this is a trivial wrapper around the ctor (which is itself trivial), so REALLY_INLINE it
+	REALLY_INLINE /*static*/ Stringp String::createDependent(GC* gc, Stringp master, int32_t start, int32_t len)
 	{
 		AvmAssert(len >= 0);
 		// master cannot be a dependent string
@@ -409,7 +435,7 @@ namespace avmplus
 
 	// Private static method to create a dynamic string, given a buffer and its size in characters
 
-	Stringp String::createDynamic(GC* gc, const void* data, int32_t len, Width w, bool is7bit, int32_t extra)
+	/*static*/ Stringp String::createDynamic(GC* gc, const void* data, int32_t len, Width w, bool is7bit, int32_t extra)
 	{
 		AvmAssert(w != kAuto);
 		AvmAssert(len >= 0);
@@ -466,7 +492,7 @@ namespace avmplus
 
 	// Private static method to create a string, given a static buffer and its size in characters
 
-	Stringp String::createStatic(GC* gc, const void* data, int32_t len, Width w, bool is7bit)
+	/*static*/ Stringp String::createStatic(GC* gc, const void* data, int32_t len, Width w, bool is7bit)
 	{
 		AvmAssert(w != kAuto);
 		AvmAssert(len >= 0);
