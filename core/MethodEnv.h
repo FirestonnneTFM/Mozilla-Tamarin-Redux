@@ -266,7 +266,7 @@ namespace avmplus
 		 *  property could not be found; caller should signal strict error or return the
 		 *  target_global as appropriate.
 		 */
-		ScriptObject* findglobalproperty(ScriptObject* target_global, const Multiname* multiname);
+		Atom findglobalproperty(Atom target_global, const Multiname* multiname);
 
 		Namespace* internRtns(Atom ns);
 

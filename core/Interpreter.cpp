@@ -911,7 +911,6 @@ namespace avmplus
 		register bool b1;
 		register uint8_t ub2;
 		register ScriptObject *o1;
-		WORD_CODE_ONLY(register ScriptObject* o2;)
 		register const Multiname* multiname;
 		register MethodEnv* f;
 		register Traits* t1;
@@ -3183,8 +3182,8 @@ namespace avmplus
 				GET_MULTINAME_PTR(multiname, u1);
 				AvmAssert(multiname->isBinding());
 				AvmAssert(globalScope != NULL);
-				o2 = env->findglobalproperty(globalScope, multiname);  // container
-				if (o2 == NULL) 
+				a1 = env->findglobalproperty(globalScope->atom(), multiname);  // container
+				if (AvmCore::isNullOrUndefined(a1)) 
 				{
 					if (b1)
 						toplevel->throwReferenceError(kUndefinedVarError, multiname);
@@ -3193,7 +3192,7 @@ namespace avmplus
 				}
 				else
 				{
-					*(++sp) = o2->atom();
+					*(++sp) = a1;
 					env->lookup_cache[u2].timestamp = core->lookupCacheTimestamp();
 					WBRC(core->GetGC(), env->lookup_cache, &env->lookup_cache[u2].object, AvmCore::atomToScriptObject(sp[0]));
 				}
