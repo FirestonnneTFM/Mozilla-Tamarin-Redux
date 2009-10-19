@@ -1958,24 +1958,25 @@ namespace avmplus
 
 		// now we have searched all the scopes, except global
 		{
-			ScriptObject* global = AvmCore::atomToScriptObject(outer->getSize() > 0 ? outer->getScope(0) : *scopes);
-			ScriptObject* obj = findglobalproperty(global, multiname);
-			if (obj == NULL) {
+			Atom global = outer->getSize() > 0 ? outer->getScope(0) : *scopes;
+			Atom obj = findglobalproperty(global, multiname);
+			if (AvmCore::isNullOrUndefined(obj)) {
 				if (strict)
 					toplevel->throwReferenceError(kUndefinedVarError, multiname);
 				obj = global;
 			}
-			return obj->atom();
+			return obj;
 		}
+
 	}
 	
-	ScriptObject* MethodEnv::findglobalproperty(ScriptObject* target_global, const Multiname* multiname)
+	Atom MethodEnv::findglobalproperty(Atom target_global, const Multiname* multiname)
 	{
 		// in theory, anyname shouldn't get passed to us, but in practice, sometimes it does.
 		// it will always fail later on, but will generate an assert further downstream,
 		// so let's just check and bail now.
 		if (multiname->isAnyName())
-			return NULL;
+			return nullObjectAtom;
 
 		Toplevel* toplevel = this->toplevel();
 		
@@ -1994,27 +1995,27 @@ namespace avmplus
 				Atom argv[1] = { script->global->atom() };
 				script->coerceEnter(0, argv);
 			}
-			return global;
+			return global->atom();
 		}
 
 		// no imported definition found.  look for dynamic props
 		// on the global object
 
-		ScriptObject* global = target_global;
-
 		// search the delegate chain for a value.  The delegate
 		// chain for the global object will only contain vanilla
 		// objects (Object.prototype) so we can skip traits
 
-		ScriptObject* o = global;
+		ScriptObject* o = AvmCore::isObject(target_global) ? 
+            AvmCore::atomToScriptObject(target_global) : 
+            toplevel->toPrototype(target_global);
 		do
 		{
 			if (o->hasMultinameProperty(multiname))
-				return global;
+				return target_global;
 		}
 		while ((o = o->getDelegate()) != NULL);
 
-		return NULL;
+		return nullObjectAtom;
     }
 
 	Namespace* MethodEnv::internRtns(Atom nsAtom)
