@@ -266,7 +266,7 @@ namespace avmplus
 			if (hasDense())
 			{
 				uint32 index;
-				if (AvmCore::getIndexFromAtom(name, &index))
+				if (AvmCore::getIndexFromAtom(name, &index) && index < getDenseLength())
 				{
 					return delUintProperty(index);
 				}
