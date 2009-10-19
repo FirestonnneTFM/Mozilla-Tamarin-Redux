@@ -1684,7 +1684,6 @@ namespace MMgc
 
 	void GCHeap::SignalObjectTooLarge()
 	{
-		GCAssert(!"Too-large object request; aborting");
 		GCLog("Implementation limit exceeded: attempting to allocate too-large object\n");
 		GetGCHeap()->Abort();
 	}
