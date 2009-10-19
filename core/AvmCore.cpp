@@ -1413,7 +1413,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	/* static */
 	void AvmCore::formatMultiname(PrintWriter& out, uint32 index, PoolObject* pool)
 	{
-		if (index > 0 && index <= pool->constantMnCount)
+		if (index > 0 && index <= pool->cpool_mn_offsets.size())
 		{
 			Multiname name;
 			pool->parseMultiname(name, index);

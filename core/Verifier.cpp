@@ -2661,7 +2661,7 @@ namespace avmplus
 		return common;
 	}
 
-    Atom Verifier::checkCpoolOperand(uint32_t index, int requiredAtomType)
+    void Verifier::checkCpoolOperand(uint32_t index, int requiredAtomType)
     {
 		switch( requiredAtomType )
 		{
@@ -2669,21 +2669,19 @@ namespace avmplus
 			if( !index || index >= pool->constantStringCount )
 			{
 				verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantStringCount));
-				return undefinedAtom;
 			}
-			return pool->getString(index)->atom();
+			break;
 
 		case kObjectType:
-			if( !index || index >= pool->constantMnCount )
+			if( !index || index >= pool->cpool_mn_offsets.size() )
 			{
-				verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantMnCount));
-				return undefinedAtom;
+				verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->cpool_mn_offsets.size()));
 			}
-			return pool->cpool_mn[index];
+			break;
 
 		default:
 			verifyFailed(kCpoolEntryWrongTypeError, core->toErrorString(index));
-			return undefinedAtom;
+			break;
 		}
     }
 

@@ -100,8 +100,7 @@ namespace avmplus
 		List<Atom, LIST_GCObjects> cpool_uint_atoms;	
 #endif
 
-		// explicitly specify LIST_NonGCObjects b/c these aren't really atoms, they are offsets
-		List<Atom,LIST_NonGCObjects> cpool_mn;
+		List<uint32_t> cpool_mn_offsets;
 
 		/** metadata -- ptrs into ABC, not gc-allocated */
 		List<const byte*> metadata_infos;
@@ -120,7 +119,6 @@ namespace avmplus
 		uint32_t constantStringCount;
 		uint32_t constantNsCount;
 		uint32_t constantNsSetCount;
-		uint32_t constantMnCount;
 
 		/** flags to control certain bugfix behavior */
 		uint32_t bugFlags;
@@ -179,16 +177,9 @@ namespace avmplus
 		Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
 
 
-		void parseMultiname(Multiname& m, int index) const
+		void parseMultiname(Multiname& m, uint32_t index) const
 		{
-			AvmAssert (index >= 0 && index < int(constantMnCount));
-			Atom a = cpool_mn[index];
-			parseMultiname(atomToPos(a), m);
-		}
-
-		void parseMultiname(Atom a, Multiname& m) const
-		{
-			parseMultiname(atomToPos(a), m);
+			parseMultiname(_abcStart + cpool_mn_offsets[index], m);
 		}
 
 		Namespacep getNamespace(int index) const;
@@ -201,17 +192,6 @@ namespace avmplus
 
 		Atom getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t);
 		static bool isLegalDefaultValue(BuiltinType bt, Atom value);
-
-		Atom posToAtom(const byte* pos) const
-		{
-			return (pos - _abcStart)<<3 | kObjectType;
-		}
-
-		const byte* atomToPos(Atom a) const
-		{
-			AvmAssert((a&7)==kObjectType);
-			return _abcStart + (uintptr_t(a) >> 3);
-		}
 
 		int version;
 		

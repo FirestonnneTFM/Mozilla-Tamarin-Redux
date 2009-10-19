@@ -118,7 +118,7 @@ namespace avmplus
 		MethodInfo*  checkMethodInfo(uint32_t method_id);
 		Traits*            checkClassInfo(uint32_t class_id);
 		void checkTarget(const byte* target);
-		Atom checkCpoolOperand(uint32_t index, int requiredAtomType);
+		void checkCpoolOperand(uint32_t index, int requiredAtomType);
 		void checkConstantMultiname(uint32_t index, Multiname &m);
 		bool canAssign(Traits* lhs, Traits* rhs) const;
 		Traits* checkSlot(Traits* traits, int slot_id);
