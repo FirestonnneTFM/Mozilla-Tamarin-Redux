@@ -55,7 +55,7 @@ namespace avmplus
 		cpool_int_atoms(core->GetGC(), 0),
 		cpool_uint_atoms(core->GetGC(), 0),
 #endif
-		cpool_mn(0),
+		cpool_mn_offsets(0),
 		metadata_infos(0),
 		bugFlags(0),
 		_namedTraits(new(core->GetGC()) MultinameHashtable()),
@@ -544,8 +544,7 @@ range_error:
 		case CONSTANT_TypeName:
 		{
 			index = AvmCore::readU30(pos);
-			Atom a = cpool_mn[index];
-			parseMultiname(atomToPos(a), m);
+			parseMultiname(_abcStart + cpool_mn_offsets[index], m);
 			index = AvmCore::readU30(pos);
 			AvmAssert(index==1);
 			m.setTypeParameter(AvmCore::readU30(pos));
@@ -562,14 +561,14 @@ range_error:
 
 	void PoolObject::resolveQName(uint32_t index, Multiname &m, const Toplevel* toplevel) const
 	{
-		if (index == 0 || index >= constantMnCount)
+		if (index == 0 || index >= cpool_mn_offsets.size())
 		{
 			if (toplevel)
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantMnCount));
+				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.size()));
 			AvmAssert(!"unhandled verify error");
 		}
 
-		parseMultiname(cpool_mn[index], m);
+		parseMultiname(m, index);
 
 		if (!isBuiltin && !m.isQName())
 		{
@@ -588,15 +587,15 @@ range_error:
 		}
 
 		// check contents is a multiname.  in the cpool, and type system, kObjectType means multiname.
-		if (index >= constantMnCount)
+		if (index >= cpool_mn_offsets.size())
 		{
 			if (toplevel)
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantMnCount));
+				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.size()));
 			AvmAssert(!"unhandled verify error");
 		}
 
 		Multiname m;
-		parseMultiname(cpool_mn[index], m);
+		parseMultiname(m, index);
 		
 		Traits* t = getTraits(m, toplevel);
 		if(m.isParameterizedType())
@@ -680,14 +679,14 @@ range_error:
 	void PoolObject::initPrecomputedMultinames()
 	{
 		if (this->precompNames == NULL)
-			this->precompNames = new (sizeof(PrecomputedMultinames) + (this->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), this);
+			this->precompNames = new (sizeof(PrecomputedMultinames) + (this->cpool_mn_offsets.size() - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), this);
 	}
 
 	PrecomputedMultinames::PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool)
 		: MMgc::GCRoot(gc)
 		, nNames (0)
 	{
-		nNames = pool->constantMnCount;
+		nNames = pool->cpool_mn_offsets.size();
 		for ( uint32 i=1 ; i < nNames ; i++ ) {
 			Multiname mn;
 			pool->parseMultiname(mn, i);

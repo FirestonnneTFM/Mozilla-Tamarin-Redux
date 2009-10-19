@@ -178,8 +178,8 @@ namespace avmplus
 			return;
 		}
 
-		if (index >= pool->constantMnCount)
-			toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantMnCount));
+		if (index >= pool->cpool_mn_offsets.size())
+			toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->cpool_mn_offsets.size()));
 
 		pool->parseMultiname(m, index);
 	}
@@ -188,12 +188,10 @@ namespace avmplus
 	uint32_t AbcParser::resolveQName(const byte* &p, Multiname &m) const
 	{
 		uint32 index = readU30(p);
-		if (index == 0 || index >= pool->constantMnCount)
+		if (index == 0 || index >= pool->cpool_mn_offsets.size())
 			toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantCount));
 
-		Atom a = pool->cpool_mn[index];
-
-		pool->parseMultiname(a, m);
+		pool->parseMultiname(m, index);
 
 		if (!pool->isBuiltin && !m.isQName())
 			toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
@@ -844,7 +842,7 @@ namespace avmplus
 					uint32 name_index = (version != (46<<16|15)) ? readU30(pos) : 0;
 					if (name_index != 0)
 					{
-						if (name_index >= pool->constantMnCount)
+						if (name_index >= pool->cpool_mn_offsets.size())
 							toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(name_index), core->toErrorString(pool->constantCount));
 						pool->parseMultiname(qn, name_index);
 					}
@@ -874,7 +872,7 @@ namespace avmplus
 					if (version != (46<<16|15))
 					{
 						const uint32 name_index = readU30(pos); // variable name
-						if (name_index >= pool->constantMnCount)
+						if (name_index >= pool->cpool_mn_offsets.size())
 							toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(name_index), core->toErrorString(pool->constantCount));
 					}
 					#endif
@@ -1248,23 +1246,17 @@ namespace avmplus
 		if (mn_count > (uint32)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		// TODO: why Atom?  its actually a list of positions
-		List<Atom, LIST_NonGCObjects> &cpool_mn = pool->cpool_mn;
+		List<uint32_t>& cpool_mn_offsets = pool->cpool_mn_offsets;
 
 		MMGC_MEM_TYPE(pool);
-		cpool_mn.ensureCapacity(mn_count);
-		pool->constantMnCount = mn_count;
+		cpool_mn_offsets.ensureCapacity(mn_count);
 
-#ifdef AVMPLUS_VERBOSE
-		startpos = pos;
-#endif
 		for(uint32_t i = 1; i < mn_count; ++i )
 		{
-#ifdef AVMPLUS_VERBOSE
-			int offset = (int)(pos-startpos);
-#endif
 			CHECK_POS(pos);
-			CPoolKind kind = (CPoolKind) *(pos++);
+			uint32_t const offset = uint32_t(pos - pool->_abcStart);
+			cpool_mn_offsets.set(i, offset);
+			CPoolKind kind = (CPoolKind)*pos++;
 			switch(kind)
 			{
 			case CONSTANT_Qname: 
@@ -1273,7 +1265,6 @@ namespace avmplus
 				// U16 namespace_index
 				// U16 name_index
 				// parse a multiname with one namespace (aka qname)
-				cpool_mn.set(i, pool->posToAtom(pos-1));
 				parseNsRef(pos);
 				parseName(pos);
 				break;
@@ -1284,22 +1275,18 @@ namespace avmplus
 			{
 				// U16 name_index
 				// parse a multiname with just a name; ns fetched at runtime
-				cpool_mn.set(i, pool->posToAtom(pos-1));
 				parseName(pos);
 				break;
 			}
 			case CONSTANT_RTQnameL:
 			case CONSTANT_RTQnameLA:
 			{
-				cpool_mn.set(i, pool->posToAtom(pos-1));
 				break;
 			}
 
 			case CONSTANT_Multiname:
 			case CONSTANT_MultinameA:
 			{
-				cpool_mn.set(i, pool->posToAtom(pos-1));
-   				
 				parseName(pos);
 				
 				uint32 index = readU30(pos);
@@ -1314,8 +1301,6 @@ namespace avmplus
 			case CONSTANT_MultinameL:
 			case CONSTANT_MultinameLA:
 			{
-				cpool_mn.set(i, pool->posToAtom(pos-1));
-   				
 				uint32 index = readU30(pos);
 
 				if (!index || index >= pool->constantNsSetCount)
@@ -1328,12 +1313,10 @@ namespace avmplus
 			
 			case CONSTANT_TypeName:
 			{
-				cpool_mn.set(i, pool->posToAtom(pos-1));
-
 				uint32 index = readU30(pos);
 
-				if(!index || index >= pool->constantMnCount)
-					toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantMnCount));
+				if(!index || index >= cpool_mn_offsets.size())
+					toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.size()));
 
 				index = readU30(pos);
 				if(index != 1)
