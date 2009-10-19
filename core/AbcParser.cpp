@@ -1600,6 +1600,9 @@ namespace avmplus
 
 			if(interfaceCount)
 			{
+				if (interfaceCount >= 0x10000000)
+					toplevel->throwVerifyError(kCorruptABCError);
+
 				for( int x = 0; x < interfaceCount; ++ x )
 				{
 					Traits *t = pool->resolveTypeName(pos, toplevel);
