@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,119 +42,119 @@ namespace avmplus
 
 REALLY_INLINE Atom Toplevel::callproperty(Atom base, const Multiname* name, int argc, Atom* atomv, VTable* vtable)
 {
-	AssertNotNull(base);
-	Binding b = avmplus::getBinding(this, vtable, name);
-	return avmplus::callprop_b(this, base, name, argc, atomv, vtable, b);
+    AssertNotNull(base);
+    Binding b = avmplus::getBinding(this, vtable, name);
+    return avmplus::callprop_b(this, base, name, argc, atomv, vtable, b);
 }
 
 REALLY_INLINE VTable* Toplevel::toVTable(Atom atom)
 {
-	return avmplus::toVTable(this, atom);
+    return avmplus::toVTable(this, atom);
 }
 
 REALLY_INLINE Atom Toplevel::op_call(Atom method, int argc, Atom* atomv)
 {
-	return avmplus::op_call(this, method, argc, atomv);
+    return avmplus::op_call(this, method, argc, atomv);
 }
 
 REALLY_INLINE Atom Toplevel::op_construct(Atom ctor, int argc, Atom* atomv)
 {
-	return avmplus::op_construct(this, ctor, argc, atomv);
+    return avmplus::op_construct(this, ctor, argc, atomv);
 }
 
 REALLY_INLINE Binding Toplevel::getBinding(Traits* traits, const Multiname* ref) const
 {
-	return avmplus::getBinding(this, traits, ref);
+    return avmplus::getBinding(this, traits, ref);
 }
 
 REALLY_INLINE Atom Toplevel::constructprop(const Multiname *name, int argc, Atom* atomv, VTable* vtable)
 {
-	return avmplus::constructprop(this, name, argc, atomv, vtable);
+    return avmplus::constructprop(this, name, argc, atomv, vtable);
 }
 
 REALLY_INLINE Atom Toplevel::op_applytype(Atom obj, int argc, Atom* atomv)
 {
-	return avmplus::op_applytype(this, obj, argc, atomv);
+    return avmplus::op_applytype(this, obj, argc, atomv);
 }
 
 REALLY_INLINE QNameObject* Toplevel::ToAttributeName(const Stringp arg)
 {
-	return ToAttributeName(arg->atom());
+    return ToAttributeName(arg->atom());
 }
 
 REALLY_INLINE Atom Toplevel::coerce(Atom atom, Traits* expected) const
 {
-	return avmplus::coerce(this, atom, expected);
+    return avmplus::coerce(this, atom, expected);
 }
 
 REALLY_INLINE ClassClosure* Toplevel::getBuiltinClass(int class_id) const
 {
-	return _builtinClasses[class_id]
-		? _builtinClasses[class_id]
-		: const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
+    return _builtinClasses[class_id]
+        ? _builtinClasses[class_id]
+        : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
 }
 
 // static
 REALLY_INLINE bool Toplevel::contains(const uint32 *uriSet, uint32 ch)
 {
-	return (ch<0x80) && (uriSet[ch>>5]&(1<<(ch&0x1f))) != 0;
+    return (ch<0x80) && (uriSet[ch>>5]&(1<<(ch&0x1f))) != 0;
 }
 
 REALLY_INLINE void Toplevel::throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const
 {
-	throwReferenceError(id, &multiname, traits);
+    throwReferenceError(id, &multiname, traits);
 }
 
 REALLY_INLINE void Toplevel::throwReferenceError(int id, const Multiname& multiname) const
 {
-	throwReferenceError(id, &multiname);
+    throwReferenceError(id, &multiname);
 }
 
 #ifndef DEBUGGER
 REALLY_INLINE void Toplevel::throwVerifyError(int id, Stringp) const
 {
-	throwVerifyError(id);
+    throwVerifyError(id);
 }
 
 REALLY_INLINE void Toplevel::throwVerifyError(int id, Stringp, Stringp) const
 {
-	throwVerifyError(id);
+    throwVerifyError(id);
 }
 #endif // !DEBUGGER
 
 REALLY_INLINE AbcEnv* Toplevel::abcEnv() const
 {
-	return _abcEnv;
+    return _abcEnv;
 }
 
 REALLY_INLINE DomainEnv* Toplevel::domainEnv() const
 {
-	return _abcEnv->domainEnv();
+    return _abcEnv->domainEnv();
 }
 
 REALLY_INLINE AvmCore* Toplevel::core() const
 {
-	return _abcEnv->pool()->core;
+    return _abcEnv->pool()->core;
 }
 
 REALLY_INLINE MMgc::GC* Toplevel::gc() const
 {
-	return core()->GetGC();
+    return core()->GetGC();
 }
 
 REALLY_INLINE ScriptObject* Toplevel::global() const
 {
-	return _global;
+    return _global;
 }
 
 REALLY_INLINE Atom Toplevel::atom() const
 {
-	return _global->atom();
+    return _global->atom();
 }
 
 REALLY_INLINE Atom Toplevel::add2(Atom val1, Atom val2)
 {
-	return avmplus::op_add(this->core(), val1, val2);
+    return avmplus::op_add(this->core(), val1, val2);
 }
 
 } // namespace avmplus
