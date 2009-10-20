@@ -2090,8 +2090,6 @@ namespace MMgc
 		callbacks.Remove(p); 
 	}
 
-#define toPage(r) ((uintptr_t)r & ~(kBlockSize-1))
-
 	GCHeap::Region *GCHeap::NewRegion()
 	{
 		Region *r = freeRegion;
@@ -2099,7 +2097,7 @@ namespace MMgc
 			freeRegion = *(Region**)freeRegion;
 		} else {
 			r = nextRegion++;
-			if(toPage(r) != toPage(nextRegion))
+			if(roundUp((uintptr_t)nextRegion, kBlockSize) - (uintptr_t)nextRegion < sizeof(Region))
 				nextRegion = NULL; // fresh page allocated in ExpandHeap
 		}			
 		return r;
