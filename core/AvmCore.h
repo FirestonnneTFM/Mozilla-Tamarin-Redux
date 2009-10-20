@@ -996,7 +996,7 @@ const int kBufferPadding = 16;
 			AvmAssert(isNumber(a));
 
 			if (atomKind(a) == kIntegerType)
-				return (int32_t)atomInt(a);
+				return (double)atomInt(a);
 			else
 				return atomToDouble(a);
 		}

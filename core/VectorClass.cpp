@@ -223,16 +223,17 @@ namespace avmplus
 		ScriptObject *d = this;
 		uint32 len = m_length;
 
-		// If thisObject is null, the call function will substitute the global object 
-		Atom args[4] = { thisObject, nullObjectAtom, nullObjectAtom, this->atom() };
-
 		for (uint32 i = 0; i < len; i++)
 		{
-			args[1] = d->getUintProperty (i); // element
-			args[2] = core->uintToAtom (i); // index
-
+			// If thisObject is null, the call function will substitute the global object 
+			// args are modified in place by callee
+			Atom args[4] = {
+				thisObject,
+				d->getUintProperty(i), // element
+				core->uintToAtom(i), // index
+				this->atom()
+			};
 			Atom result = callback->call(3, args);
-
 			r->setUintProperty (i, result);
 		}
 
@@ -250,20 +251,20 @@ namespace avmplus
 		ScriptObject *d = this;
 		uint32 len = m_length;
 
-		// If thisObject is null, the call function will substitute the global object 
-		Atom args[4] = { thisObject, nullObjectAtom, nullObjectAtom, this->atom() };
-
 		for (uint32 i = 0, k = 0; i < len; i++)
 		{
-			args[1] = d->getUintProperty (i); // element
-			args[2] = core->uintToAtom (i); // index
-
+			// If thisObject is null, the call function will substitute the global object 
+			// args are modified in place by callee
+			Atom element = d->getUintProperty(i);
+			Atom args[4] = {
+				thisObject,
+				element,
+				core->uintToAtom(i), // index
+				this->atom()
+			};
 			Atom result = callback->call(3, args);
-
 			if (result == trueAtom)
-			{
-				r->setUintProperty (k++, args[1]);
-			}
+				r->setUintProperty(k++, element);
 		}
 
 		return r->atom();
