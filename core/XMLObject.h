@@ -276,6 +276,7 @@ namespace avmplus
 		XMLListObject* filter (Atom propertyName, Atom value);
 		void _filter (XMLListObject* , const Multiname &m, Atom value);
 #endif
+		void dispose();
 
 	public:
 		XMLObject(XMLClass *type, Stringp s=NULL, Namespace *defaultNamespace=NULL);

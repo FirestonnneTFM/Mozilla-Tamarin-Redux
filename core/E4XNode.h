@@ -236,6 +236,7 @@ namespace avmplus
 		int FindMatchingNamespace(AvmCore *core, Namespace *ns);
 
 		void BuildInScopeNamespaceList(AvmCore *core, AtomArray *list) const;
+		void dispose();
 
 		MMgc::GC *gc() const { return MMgc::GC::GetGC(this); }
 	};
