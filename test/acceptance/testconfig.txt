@@ -55,7 +55,7 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # Grouped by feature or platform
 
 regress/bug_420755:.*, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=522069
-regress/bug_515935:unexpected.*, x64-win.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=515935 - expectedfail does not work for exitcode failures
+regress/bug_515935:, x64-win.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=515935 - expectedfail does not work for exitcode failures
 
 ####################
 # force JIT -Ojit
