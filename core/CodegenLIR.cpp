@@ -1015,13 +1015,11 @@ namespace avmplus
         )
         lirout->ins0(LIR_start);
 
-        if (CalleeRegsNeedExplicitSaving) {
-            // create params for saved regs -- processor specific
-            for (int i=0; i < NumSavedRegs; i++) {
-                LIns *p = lirout->insParam(i, 1); (void) p;
-                verbose_only(if (lirbuf->names)
-                    lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
-            }
+        // create params for saved regs -- processor specific
+        for (int i=0; i < NumSavedRegs; i++) {
+            LIns *p = lirout->insParam(i, 1); (void) p;
+            verbose_only(if (lirbuf->names)
+                lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
         }
     }
 
