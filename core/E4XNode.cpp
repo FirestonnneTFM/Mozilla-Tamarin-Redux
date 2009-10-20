@@ -1031,6 +1031,16 @@ namespace avmplus
 				return 0; 
 		}
 	}
-
+	
+	void E4XNode::dispose()
+	{
+		for(uint32_t i=0,n=numChildren();i < n; i++)
+		{
+			E4XNode *node = _getAt(i);
+			node->dispose();
+			node->setParent(NULL);
+			node->clearChildren();
+		}
+	}
 }
 

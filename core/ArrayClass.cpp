@@ -1442,15 +1442,16 @@ namespace avmplus
 		ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
 		uint32 len = getLengthHelper(toplevel, d);
 
-		// If thisObject is null, the call function will substitute the global object 
-		Atom args[4] = { thisObject, nullObjectAtom, nullObjectAtom, thisAtom };
-
 		AvmCore* core = toplevel->core();
 		for (uint32 i = 0; i < len; i++)
 		{
-			args[1] = d->getUintProperty (i); // element
-			args[2] = core->uintToAtom (i); // index
-
+			// If thisObject is null, the call function will substitute the global object.
+			// args are modified in place by callee
+			Atom args[4] = { thisObject,
+				d->getUintProperty(i),	// element
+				core->uintToAtom(i),	// index
+				thisAtom
+			};
 			Atom result = callback->call(3, args);
 			if (result != trueAtom)
 				return false;
@@ -1474,20 +1475,20 @@ namespace avmplus
 		ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
 		uint32 len = getLengthHelper(toplevel, d);
 
-		// If thisObject is null, the call function will substitute the global object 
-		Atom args[4] = { thisObject, nullObjectAtom, nullObjectAtom, thisAtom };
-
 		AvmCore* core = toplevel->core();
 		for (uint32 i = 0; i < len; i++)
 		{
-			args[1] = d->getUintProperty (i); // element
-			args[2] = core->uintToAtom (i); // index
-
+			// If thisObject is null, the call function will substitute the global object 
+			// args are modified in place by callee
+			Atom args[4] = {
+				thisObject,
+				d->getUintProperty(i), // element
+				core->uintToAtom(i), // index
+				thisAtom
+			};
 			Atom result = callback->call(3, args);
 			if (result == trueAtom)
-			{
-				r->push (args + 1, 1);
-			}
+				r->push(args + 1, 1);
 		}
 
 		return r;
@@ -1506,15 +1507,16 @@ namespace avmplus
 		ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
 		uint32 len = getLengthHelper(toplevel, d);
 
-		// If thisObject is null, the call function will substitute the global object 
-		Atom args[4] = { thisObject, nullObjectAtom, nullObjectAtom, thisAtom };
-
 		AvmCore* core = toplevel->core();
 		for (uint32 i = 0; i < len; i++)
 		{
-			args[1] = d->getUintProperty (i); // element
-			args[2] = core->uintToAtom (i); // index
-
+			// If thisObject is null, the call function will substitute the global object 
+			// args are modified in place by callee
+			Atom args[4] = { thisObject,
+				d->getUintProperty(i),	// element
+				core->uintToAtom(i),	// index
+				thisAtom
+			};
 			callback->call(3, args);
 		}
 	}
@@ -1532,15 +1534,17 @@ namespace avmplus
 		ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
 		uint32 len = getLengthHelper(toplevel, d);
 
-		// If thisObject is null, the call function will substitute the global object 
-		Atom args[4] = { thisObject, nullObjectAtom, nullObjectAtom, thisAtom };
-
 		AvmCore* core = toplevel->core();
 		for (uint32 i = 0; i < len; i++)
 		{
-			args[1] = d->getUintProperty (i); // element
-			args[2] = core->uintToAtom (i); // index
-
+			// If thisObject is null, the call function will substitute the global object 
+			// args are modified in place by callee
+			Atom args[4] = {
+				thisObject,
+				d->getUintProperty(i),	// element
+				core->uintToAtom(i),	// index
+				thisAtom
+			};
 			Atom result = callback->call(3, args);
 			if (result == trueAtom)
 				return true;
@@ -1559,18 +1563,19 @@ namespace avmplus
 		ScriptObject *d = AvmCore::atomToScriptObject(thisAtom);
 		uint32 len = getLengthHelper(toplevel, d);
 
-		// If thisObject is null, the call function will substitute the global object 
-		Atom args[4] = { thisObject, nullObjectAtom, nullObjectAtom, thisAtom };
-
 		AvmCore* core = toplevel->core();
 		for (uint32 i = 0; i < len; i++)
 		{
-			args[1] = d->getUintProperty (i); // element
-			args[2] = core->uintToAtom (i); // index
-
+			// If thisObject is null, the call function will substitute the global object 
+			// args are modified in place by callee
+			Atom args[4] = {
+				thisObject,
+				d->getUintProperty(i),	// element
+				core->uintToAtom(i),	// index
+				thisAtom
+			};
 			Atom result = callback->call(3, args);
-
-			r->push (&result, 1);
+			r->push(&result, 1);
 		}
 
 		return r;
