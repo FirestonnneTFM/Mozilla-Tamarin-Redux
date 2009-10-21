@@ -77,8 +77,10 @@ def runTest():
                     break
             except:
                 print "ERROR: exception lock file"
-                if os.path.exists(dir+"/lock"):
+                try:
                     os.unlink(dir+"/lock")
+                except:
+                    pass
                 return (-1,"ERROR: exception writing lock file")
         time.sleep(.1)     
 #    print "SHELL: running emulator %s : %d" % (dir,time.time()-starttime)
@@ -103,7 +105,10 @@ def runTest():
             os.unlink(exitcodefile)
     except:
         print "ERROR: exception deleting file"
-        os.unlink(dir+'/lock')
+        try:
+            os.unlink(dir+'/lock')
+        except:
+            pass
         return (-1,"ERROR: exception deleting file")
 
     # copy .abc test to the emulator directory
@@ -111,7 +116,10 @@ def runTest():
         shutil.copy(cwd+"/"+abc,dabc)
     except:
         print("ERROR: copying abc file")
-        os.unlink(dir+'/lock')
+        try:
+            os.unlink(dir+'/lock')
+        except:
+            pass
         return (-1,"ERROR: copying abc file")
     try:
         file=open(cmdfile,"w")
@@ -119,7 +127,10 @@ def runTest():
         file.close()
     except:
         print "ERROR: write command file failed"
-        os.unlink(dir+'/lock')
+        try:
+            os.unlink(dir+'/lock')
+        except:
+            pass
         return (-1,"ERROR: write command file failed")
         
 #   wait until emulator deletes nextvm.txt command file
@@ -147,7 +158,10 @@ def runTest():
             exitcode=int(exitcodestr.strip())
         except:
             print 'exception reading exit code file'
-            os.unlink(dir+'/lock')
+            try:
+                os.unlink(dir+'/lock')
+            except:
+                pass
             return (-1,"exception reading exit code file")
 
 #  remove lock, another thread can use the emulator while the shell reads the output log
@@ -214,5 +228,6 @@ while retrys<5:
         file.close()
     except:
         print("ERROR: writing failures.log")
+    time.sleep(1)
 sys.exit(res)
 
