@@ -49,7 +49,6 @@
 namespace avmplus
 {
 
-template Atom callprop_b(Toplevel*, Atom, const Multiname*, int, Atom*, VTable*, Binding);
 template <class E>
 Atom callprop_b(E env, Atom base, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable, Binding b)
 {
@@ -80,14 +79,13 @@ Atom callprop_b(E env, Atom base, const Multiname* multiname, int argc, Atom* at
         }
     }
 }
+template Atom callprop_b(Toplevel*, Atom, const Multiname*, int, Atom*, VTable*, Binding);
 
 /**
  * find the binding for a property given a full multiname reference.  The lookup
  * must produce a single binding, or it's an error.  Note that the name could be
  * bound to the same binding in multiple namespaces.
  */
-template Binding getBinding(const Toplevel*, Traits*, const Multiname*);
-template Binding getBinding(Toplevel*, Traits*, const Multiname*);
 template <class E>
 Binding getBinding(E env, Traits* traits, const Multiname* ref)
 {
@@ -114,8 +112,9 @@ Binding getBinding(E env, Traits* traits, const Multiname* ref)
     }
     return b;
 }
+template Binding getBinding(const Toplevel*, Traits*, const Multiname*);
+template Binding getBinding(Toplevel*, Traits*, const Multiname*);
 
-template VTable* toVTable(Toplevel*, Atom);
 template <class E>
 VTable* toVTable(E env, Atom atom)
 {
@@ -147,9 +146,8 @@ VTable* toVTable(E env, Atom atom)
     // unreachable
     return NULL;
 }
+template VTable* toVTable(Toplevel*, Atom);
 
-template Atom op_applytype(Toplevel*, Atom, int, Atom*);
-template Atom op_applytype(MethodEnv*, Atom, int, Atom*);
 template <class E>
 Atom op_applytype(E env, Atom factory, int argc, Atom* args)
 {
@@ -159,25 +157,27 @@ Atom op_applytype(E env, Atom factory, int argc, Atom* args)
     env->toplevel()->throwTypeError(kTypeAppOfNonParamType);
     return unreachableAtom;
 }
+template Atom op_applytype(Toplevel*, Atom, int, Atom*);
+template Atom op_applytype(MethodEnv*, Atom, int, Atom*);
 
-template Atom astype_late(MethodEnv*, Atom, Atom);
 template <class E>
 Atom astype_late(E caller_env, Atom value, Atom type) {
     Traits* itraits = caller_env->toplevel()->toClassITraits(type);
     return AvmCore::astype(value, itraits);
 }
+template Atom astype_late(MethodEnv*, Atom, Atom);
 
-template Atom instanceof(MethodEnv*, Atom, Atom);
 template <class E>
 Atom instanceof(E caller_env, Atom val, Atom ctor) {
     return caller_env->toplevel()->instanceof(val, ctor);
 }
+template Atom instanceof(MethodEnv*, Atom, Atom);
 
-template Atom op_in(MethodEnv*, Atom, Atom);
 template <class E>
 Atom op_in(E caller_env, Atom name, Atom obj) {
     return caller_env->toplevel()->in_operator(name, obj);
 }
+template Atom op_in(MethodEnv*, Atom, Atom);
 
 #ifdef FEATURE_NANOJIT
 ScriptObject* finddef_cache(MethodEnv* env, const Multiname* name, uint32_t slot)
@@ -345,15 +345,17 @@ Atom coerceImpl(const Toplevel* toplevel, Atom atom, Traits* expected)
     return atom;
 }
 
-template void coerceobj(MethodEnv*, ScriptObject*, Traits*);
 template <class E>
 void coerceobj(E caller_env, ScriptObject* obj, Traits* type) {
+	#ifdef DOPROF // Adding this ifdef because this does not compile with Symbian emulator WINSCW compiler (it expects >=3 parameters for _nvprof).
     _nvprof("coerceobj",1);
+	#endif // DOPROF
     if (obj && !obj->traits()->containsInterface(type)) {
         AvmCore* core = caller_env->core();
         caller_env->toplevel()->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(obj->atom()), core->toErrorString(type));
     }
 }
+template void coerceobj(MethodEnv*, ScriptObject*, Traits*);
 
 Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
 {

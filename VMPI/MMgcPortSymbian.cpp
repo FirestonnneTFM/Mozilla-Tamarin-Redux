@@ -215,6 +215,12 @@ bool VMPI_commitMemory(void* address, size_t size)
 	if(heap)
 	{
 		result = heap->Commit((TInt)address, (TInt)size);
+// TEMPORARY FIX: MMgc should zero initialize the memory, but it does not seem to do it in all cases.
+		if(result)
+		{
+			memset(address, 0, size);
+		}
+// TEMPORARY FIX: MMgc should zero initialize the memory, but it does not seem to do it in all cases.
 	}
 #if 1
 	if(result)
