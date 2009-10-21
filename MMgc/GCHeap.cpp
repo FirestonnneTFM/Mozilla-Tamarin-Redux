@@ -1711,7 +1711,7 @@ namespace MMgc
 			VMPI_lockRelease(&m_spinlock);
 			if(ef->m_gc) {
 				// we're about to jump across the GC lock, unlock it
-				ef->m_gc->SetStackEnter(NULL);
+				ef->m_gc->SetStackEnter(NULL, false);
 			}
 			longjmp(ef->jmpbuf, 1);
 		}
