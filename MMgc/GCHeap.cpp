@@ -290,13 +290,6 @@ namespace MMgc
 					}
 					return NULL;
 				}
-
-				size_t total = GetTotalHeapSize() ;
-				if(config.heapSoftLimit && total > config.heapSoftLimit && status == kMemNormal)
-				{
-					GCDebugMsg(false, "*** Alloc exceeded softlimit: ask for %d, usedheapsize =%d, totalHeap =%d\n", size, GetUsedHeapSize(), total );
-					StatusChangeNotify(kMemSoftLimit);
-				}
 			}
 
 			GCAssert(block->size == size);
@@ -317,6 +310,13 @@ namespace MMgc
 				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
 #endif
+
+			size_t total = GetTotalHeapSize() ;
+			if(config.heapSoftLimit && total > config.heapSoftLimit && status == kMemNormal)
+			{
+				GCDebugMsg(false, "*** Alloc exceeded softlimit: ask for %d, usedheapsize =%d, totalHeap =%d\n", size, GetUsedHeapSize(), total );
+				StatusChangeNotify(kMemSoftLimit);
+			}
 		}
 
 		// Zero out the memory, if requested to do so
