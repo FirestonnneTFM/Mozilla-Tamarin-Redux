@@ -1598,7 +1598,7 @@ namespace avmplus
 
 		if (AvmCore::bindingKind(b) == BKIND_CONST)
 		{
-			if (this->method != declarer->init)
+			if (this->method != declarer->init.value())
 				toplevel->throwReferenceError(kConstWriteError, multiname, vtable->traits);
 
 			b = AvmCore::makeSlotBinding(AvmCore::bindingToSlotId(b), BKIND_VAR);
