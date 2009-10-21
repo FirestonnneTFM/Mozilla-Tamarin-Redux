@@ -2076,6 +2076,9 @@ namespace MMgc
 	{ 
 		MMGC_LOCK(list_lock);
 		gcManager.removeGC(gc); 
+		EnterFrame* ef = GetEnterFrame();
+		if (ef && ef->GetActiveGC() == gc)
+			ef->SetActiveGC(NULL);
 	}
 	
 	void GCHeap::AddOOMCallback(OOMCallback *p) 
