@@ -837,6 +837,7 @@
 		D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WinPortUtils.cpp; path = ../../../VMPI/WinPortUtils.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A70FE03CC5002DBDCF /* NativeSparc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeSparc.cpp; path = ../../../nanojit/NativeSparc.cpp; sourceTree = SOURCE_ROOT; };
 		D96013A80FE03CC5002DBDCF /* NativeSparc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeSparc.h; path = ../../../nanojit/NativeSparc.h; sourceTree = SOURCE_ROOT; };
+		D9854B961090D05700F30404 /* AvmCore-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AvmCore-inlines.h"; path = "../../../core/AvmCore-inlines.h"; sourceTree = SOURCE_ROOT; };
 		D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCGlobalNew.cpp; path = ../../../MMgc/GCGlobalNew.cpp; sourceTree = SOURCE_ROOT; };
 		D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_threads.cpp; path = ../../../extensions/ST_mmgc_threads.cpp; sourceTree = SOURCE_ROOT; };
 		D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_threads.st; path = ../../../extensions/ST_mmgc_threads.st; sourceTree = SOURCE_ROOT; };
@@ -986,6 +987,7 @@
 				D935BDEB0FA0EBA7001E3E70 /* avm.cpp */,
 				D935BDEE0FA0EC17001E3E70 /* avm.h */,
 				079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */,
+				D9854B961090D05700F30404 /* AvmCore-inlines.h */,
 				079DF7C70F3A882D0031D1B4 /* AvmCore.h */,
 				3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */,
 				3FDDC53F0F60A07400E29821 /* AvmDebug.h */,

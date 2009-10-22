@@ -1536,6 +1536,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\AvmCore-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\AvmDebug.cpp"
 				>
 			</File>
