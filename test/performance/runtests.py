@@ -508,10 +508,16 @@ class PerformanceRuntest(RuntestBase):
                         rl2_avg=sum(resultList2)/float(len(resultList2))
                         min1 = float(min(resultList))
                         min2 = float(min(resultList2))
+                        max1 = float(max(resultList))
+                        max2 = float(max(resultList2))
+                        if largerIsFaster:
+                            spdup = 100.0*(max2-max1)/max1
+                        else:
+                            spdup = 100.0*(min1-min2)/min1
                         self.js_print('%-50s [%6s :%6s] %6.1f %6.1f   [%6s :%6s] %6.1f %6.1f %6.1f%% %7s %s' %
-                                      (testName, min1, max(resultList), rl1_avg, standard_deviation(resultList),
-                                       min2, max(resultList2), rl2_avg, standard_deviation(resultList2),
-                                       ((min1-min2)/min2*100.0) if not largerIsFaster else ((min2-min1)/min1*100.0), metric, largerIsFaster))
+                                      (testName, min1, max1, rl1_avg, standard_deviation(resultList),
+                                       min2, max2, rl2_avg, standard_deviation(resultList2),
+                                       spdup, metric, largerIsFaster))
                     except:
                         self.js_print('%-50s [%6s :%6s] %6.1f %6s   [%6s :%6s] %6.1f %6s %7.1f %7s %s' % (testName, '', '', result1,'', '', '', result2,'', spdup, metric, largerIsFaster))
                 #TODO: clean up / reformat
