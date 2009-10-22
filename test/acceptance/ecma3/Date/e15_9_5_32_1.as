@@ -75,29 +75,29 @@ function getTestCases() {
         var UTCDate = UTCDateFromTime(SetDate(t, d));
         var LocalDate=LocalDateFromTime(SetDate(t,d));
     
-        array[item++] = new TestCase( SECTION, "DateString+.getTime()",             UTCDate.value,       DateCase.getTime() );
-        array[item++] = new TestCase( SECTION, "DateString+.valueOf()",             UTCDate.value,       DateCase.valueOf() );
+        array[item++] = new TestCase( SECTION, DateString + ".getTime()",             UTCDate.value,       DateCase.getTime() );
+        array[item++] = new TestCase( SECTION, DateString + ".valueOf()",             UTCDate.value,       DateCase.valueOf() );
     
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCFullYear()",      UTCDate.year,    DateCase.getUTCFullYear() );
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCMonth()",         UTCDate.month,  DateCase.getUTCMonth() );
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCDate()",          UTCDate.date,   DateCase.getUTCDate() );
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCDay()",           UTCDate.day,    DateCase.getUTCDay() );
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCHours()",         UTCDate.hours,  DateCase.getUTCHours() );
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCMinutes()",       UTCDate.minutes,DateCase.getUTCMinutes() );
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCSeconds()",       UTCDate.seconds,DateCase.getUTCSeconds() );
-        array[item++] = new TestCase( SECTION, "DateString+.getUTCMilliseconds()",  UTCDate.ms,     DateCase.getUTCMilliseconds() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCFullYear()",      UTCDate.year,   DateCase.getUTCFullYear() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCMonth()",         UTCDate.month,  DateCase.getUTCMonth() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCDate()",          UTCDate.date,   DateCase.getUTCDate() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCDay()",           UTCDate.day,    DateCase.getUTCDay() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCHours()",         UTCDate.hours,  DateCase.getUTCHours() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCMinutes()",       UTCDate.minutes,DateCase.getUTCMinutes() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCSeconds()",       UTCDate.seconds,DateCase.getUTCSeconds() );
+        array[item++] = new TestCase( SECTION, DateString + ".getUTCMilliseconds()",  UTCDate.ms,     DateCase.getUTCMilliseconds() );
     
-        array[item++] = new TestCase( SECTION, "DateString+.getFullYear()",         LocalDate.year,       DateCase.getFullYear() );
-        array[item++] = new TestCase( SECTION, "DateString+.getMonth()",            LocalDate.month,      DateCase.getMonth() );
-        array[item++] = new TestCase( SECTION, "DateString+.getDate()",             LocalDate.date,       DateCase.getDate() );
-        array[item++] = new TestCase( SECTION, "DateString+.getDay()",              LocalDate.day,        DateCase.getDay() );
-        array[item++] = new TestCase( SECTION, "DateString+.getHours()",            LocalDate.hours,      DateCase.getHours() );
-        array[item++] = new TestCase( SECTION, "DateString+.getMinutes()",          LocalDate.minutes,    DateCase.getMinutes() );
-        array[item++] = new TestCase( SECTION, "DateString+.getSeconds()",          LocalDate.seconds,    DateCase.getSeconds() );
-        array[item++] = new TestCase( SECTION, "DateString+.getMilliseconds()",     LocalDate.ms,         DateCase.getMilliseconds() );
+        array[item++] = new TestCase( SECTION, DateString + ".getFullYear()",         LocalDate.year,       DateCase.getFullYear() );
+        array[item++] = new TestCase( SECTION, DateString + ".getMonth()",            LocalDate.month,      DateCase.getMonth() );
+        array[item++] = new TestCase( SECTION, DateString + ".getDate()",             LocalDate.date,       DateCase.getDate() );
+        array[item++] = new TestCase( SECTION, DateString + ".getDay()",              LocalDate.day,        DateCase.getDay() );
+        array[item++] = new TestCase( SECTION, DateString + ".getHours()",            LocalDate.hours,      DateCase.getHours() );
+        array[item++] = new TestCase( SECTION, DateString + ".getMinutes()",          LocalDate.minutes,    DateCase.getMinutes() );
+        array[item++] = new TestCase( SECTION, DateString + ".getSeconds()",          LocalDate.seconds,    DateCase.getSeconds() );
+        array[item++] = new TestCase( SECTION, DateString + ".getMilliseconds()",     LocalDate.ms,         DateCase.getMilliseconds() );
     
         DateCase.toString = Object.prototype.toString;
-    	array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString; DateCase.toString()","[object Date]", DateCase.toString() );
+        array[item++]  =new TestCase(SECTION,"DateCase.toString = Object.prototype.toString; DateCase.toString()","[object Date]", DateCase.toString() );
     
         array[item++] = new TestCase( SECTION,
                                           "DateString.toString=Object.prototype.toString;DateString.toString()",
