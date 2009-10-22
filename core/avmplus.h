@@ -319,6 +319,7 @@ namespace avmplus
 
 // inline implementations
 #include "atom-inlines.h"
+#include "AvmCore-inlines.h"
 #include "instr-inlines.h"
 #include "Toplevel-inlines.h"
 

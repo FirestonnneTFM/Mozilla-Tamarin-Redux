@@ -344,12 +344,66 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER	
+	Debugger* AvmCore::createDebugger(int /*tracelevel*/)
+	{
+		return NULL;
+	}
+
+	Profiler* AvmCore::createProfiler()
+	{
+		return NULL;
+	}
+
 	Sampler* AvmCore::createSampler()
 	{
 		return (new Sampler(this));
 	}
 #endif
+
+	/*virtual*/ void AvmCore::setStackBase() 
+	{
+		// nothing
+	}
 	
+	/*static*/ void AvmCore::readOperands(const byte* &pc, unsigned int& imm32, int& imm24, unsigned int& imm32b, int& imm8 )
+	{
+		AbcOpcode opcode = (AbcOpcode)*pc++;
+		int op_count = opcodeInfo[opcode].operandCount;
+
+		imm8 = pc[0];
+		if( opcode == OP_pushbyte || opcode == OP_debug )
+		{
+			// these two operands have a byte as their first operand, which is not encoded
+			// with the variable length encoding scheme for bigger numbers, because it will
+			// never be larger than a byte.
+			--op_count;
+			pc++;
+		}
+
+		if( op_count > 0 )
+		{
+			if( opcode >= OP_ifnlt && opcode <= OP_lookupswitch )
+			{
+				imm24 = AvmCore::readS24(pc);
+				pc += 3;
+			}
+			else
+			{
+				imm32 = AvmCore::readU30(pc);
+			}
+
+			if( opcode == OP_debug )
+			{
+				--op_count; //OP_debug has a third operand of a byte
+				pc++;
+			}
+			if( op_count > 1 )
+			{
+				imm32b = AvmCore::readU30(pc);
+			}
+		}
+	}
+
 	Toplevel* AvmCore::initTopLevel()
 	{
 		Toplevel* toplevel = NULL;
