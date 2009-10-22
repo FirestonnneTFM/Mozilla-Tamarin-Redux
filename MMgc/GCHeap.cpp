@@ -1701,6 +1701,10 @@ namespace MMgc
 		EnterFrame *ef = enterFrame;
 		GCLog("error: out of memory\n");
 
+		// release lock so we don't deadlock if exit or longjmp end up coming
+		// back to GCHeap (all callers must have this lock)
+		VMPI_lockRelease(&m_spinlock);
+
 		if(config.OOMExitCode != 0) 
 		{
 			VMPI_exit(config.OOMExitCode);
@@ -1708,7 +1712,6 @@ namespace MMgc
 			
 		if(ef != NULL && ef->m_heap != NULL)
 		{
-			VMPI_lockRelease(&m_spinlock);
 			if(ef->m_gc) {
 				// we're about to jump across the GC lock, unlock it
 				ef->m_gc->SetStackEnter(NULL, false);
