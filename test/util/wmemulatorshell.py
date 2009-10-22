@@ -41,7 +41,7 @@
 # script to run an abc test on a windows mobile emulator
 # - requires the wmrunner.exe program to be running in the emulator
 
-import os,sys,shutil,time,datetime,random
+import os,sys,shutil,time,datetime,random,re
 
 def runTest():
     global startime
@@ -111,6 +111,25 @@ def runTest():
             pass
         return (-1,"ERROR: exception deleting file")
 
+    args=""
+    newdlog=None
+    for arg in sys.argv[1:-1]:
+        if re.search('.abc',arg)!=None:
+            shutil.copy(cwd+'/'+arg,dir+'/media')
+            if arg.find('/')>-1:
+                arg=arg[arg.rfind('/')+1:]
+            args+=' \"%s\%s\" ' % (ddir,arg)
+            if newdlog==None:
+                dlog='%s/media/%s.log' % (dir,arg[0:arg.find('.')])
+                newdlog=dlog
+                try:
+                    if os.path.exists(dlog):
+                       os.unlink(dlog)
+                except:
+                    return (-1,"ERROR: deleting log file %s" % dlog)
+        else:
+            args+=' '+arg           
+
     # copy .abc test to the emulator directory
     try:
         shutil.copy(cwd+"/"+abc,dabc)
@@ -123,7 +142,7 @@ def runTest():
         return (-1,"ERROR: copying abc file")
     try:
         file=open(cmdfile,"w")
-        file.write("%s -log \"%s\%s.abc\" " % (args,ddir,base))
+        file.write("-log %s \"%s\%s.abc\" " % (args,ddir,base))
         file.close()
     except:
         print "ERROR: write command file failed"
@@ -143,7 +162,7 @@ def runTest():
         print "ERROR: cannot find log %s" % dlog
         if os.path.exists(dir+'/lock'):
             os.unlink(dir+'/lock')
-        return (-1,"ERROR: cannotfind log %s" % dlog)
+        return (-1,"ERROR: cannot find log %s" % dlog)
     ctr=0
     while os.path.exists(dlog)==False and ctr<50:
         time.sleep(.1)
@@ -191,14 +210,8 @@ if len(sys.argv)==1:
 starttime=time.time()
 cwd=os.getcwd()
 
-# args contains all vm arguments, all argv except the last (test abc)
-args=" "
-for arg in sys.argv[1:-1]:
-   args=args+arg+" "
-
 # abc to test
 abc=sys.argv[-1]
-print("args: %s" % abc)    
 # flatten the directory path
 abc=abc.replace('/','\\')
 base=abc[0:abc.rfind('.')].replace('\\','_')
@@ -217,11 +230,13 @@ retrys=0
 while retrys<5:
     print "attempt %d, retry %d" % (attempts,retrys)
     (res,sysout)=runTest()
+    print("exit code=%d" % res)
     if res!=-1 and res!=1:
         sys.exit(res)
     attempts+=1
     if res==1:
         retrys+=1
+    time.sleep(1)
     try:
         file=open(dirbase+'/../failures.log','a')
         file.write("%s attempt %d %s %s\n" %(str(datetime.datetime.today()),attempts,sys.argv[1:],sysout))
