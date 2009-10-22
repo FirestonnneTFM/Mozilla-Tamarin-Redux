@@ -90,8 +90,16 @@ class PerformanceRuntest(RuntestBase):
         self.parseOptions()
         self.altsearchpath='../../other-licenses/test/performance/'
         self.setTimestamp()
-        self.determineOS()
-        self.getVersion()
+        if re.search('(_arm.exe|_arm_d.exe|Windows Mobile)',self.avm)!=None:
+            self.config='arm-winmobile-emulator-tvm'
+        if not self.config:
+            self.determineOS()
+            self.getVersion()
+        if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
+            if re.search('^arm-winmobile-emulator',self.config)==None:
+                print 'ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe'
+                sys.exit(1)
+            self.setupCEEmulators()
         self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
