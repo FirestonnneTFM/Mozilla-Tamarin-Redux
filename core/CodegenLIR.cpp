@@ -5362,10 +5362,13 @@ namespace avmplus
         assm->cgen = this;
         #endif
 
+        LirReader bufreader(frag->lastIns);
+        
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
+        
         assm->beginAssembly(frag);
-        assm->assemble(frag);
+        assm->assemble(frag, &bufreader);
         assm->endAssembly(frag);
         PERFM_TPROF_END();
 
