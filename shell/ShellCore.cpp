@@ -69,6 +69,7 @@ namespace avmshell
 		, interrupts(AvmCore::interrupts_default)
 		, verifyall(AvmCore::verifyall_default)
 		, sse2(AvmCore::sse2_default)
+        , fixed_esp(AvmCore::fixed_esp_default)
 		, greedy(false)
 		, nogc(false)
 		, incremental(true)
@@ -384,6 +385,7 @@ namespace avmshell
 		config.jitordie = settings.jitordie;
 	#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		config.sse2 = settings.sse2;
+        config.fixed_esp = settings.fixed_esp;
 	#endif
 #endif
 

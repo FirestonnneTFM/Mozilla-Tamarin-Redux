@@ -75,6 +75,7 @@ namespace avmshell
 		bool interrupts;				// copy to config
 		bool verifyall;					// copy to config
 		bool sse2;						// copy to config
+        bool fixed_esp;                 // copy to config
 		bool greedy;					// copy to each GC
 		bool nogc;						// copy to each GC
 		bool incremental;				// copy to each GC

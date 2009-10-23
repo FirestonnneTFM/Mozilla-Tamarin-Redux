@@ -643,12 +643,13 @@ namespace avmshell
 						// allow this option even in non-DEBUGGER builds to make test scripts simpler
 						settings.nodebugger = true;
 					}
-#ifdef AVMPLUS_IA32
+#if defined(AVMPLUS_IA32) && defined(FEATURE_NANOJIT)
 					else if (!VMPI_strcmp(arg+2, "nosse")) {
-#if defined FEATURE_NANOJIT
 						settings.sse2 = false;
-#endif
 					}
+                    else if (!VMPI_strcmp(arg+2, "fixedesp")) {
+                        settings.fixed_esp = true;
+                    }
 #endif /* AVMPLUS_IA32 */
 #ifdef AVMPLUS_VERIFYALL
 					else if (!VMPI_strcmp(arg+2, "verifyall")) {
@@ -1066,6 +1067,7 @@ namespace avmshell
 		AvmLog("          [-Dnocse]     disable CSE optimization \n");
 	#ifdef AVMPLUS_IA32
         AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
+        AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");
 	#endif
 #endif
 #ifdef AVMPLUS_JITMAX
