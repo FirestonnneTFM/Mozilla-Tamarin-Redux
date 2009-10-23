@@ -77,6 +77,7 @@ namespace avmplus
 	const Runmode AvmCore::runmode_default = RM_mixed;
 	const bool AvmCore::cseopt_default = true;
 	const bool AvmCore::sse2_default = true;
+    const bool AvmCore::fixed_esp_default = false;
 	const bool AvmCore::interrupts_default = false;
 	const bool AvmCore::jitordie_default = false;
 
@@ -163,6 +164,7 @@ namespace avmplus
 		config.jitordie = jitordie_default;
 
 		config.sse2 = sse2_default;
+        config.fixed_esp = fixed_esp_default;
 
 #ifdef VTUNE
 		VTuneStatus = CheckVTuneStatus();

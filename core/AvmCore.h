@@ -102,6 +102,7 @@ const int kBufferPadding = 16;
 		bool cseopt;
 
 		bool sse2;
+        bool fixed_esp;
 		bool use_cmov;
 
         /**
@@ -151,6 +152,7 @@ const int kBufferPadding = 16;
 		static const Runmode runmode_default;
 		static const bool cseopt_default;
 		static const bool sse2_default;
+        static const bool fixed_esp_default;
 		static const bool interrupts_default;
 		static const bool jitordie_default;
 		
