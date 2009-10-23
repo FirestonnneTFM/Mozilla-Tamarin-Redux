@@ -82,21 +82,30 @@ namespace MMgc
 		Destroy();
 	}
 
+	bool FixedAlloc::IsOnFreelist(FixedBlock *b, void *item)
+	{
+		void *fl = b->firstFree;
+		while(fl) {
+			if(item == fl)
+				return true;
+			fl = *(void**)fl;
+		}
+		return false;
+	}
+	
+	bool FixedAlloc::IsInUse(FixedBlock *b, void *item)
+	{
+		if(b->nextItem && item >= b->nextItem)
+			return false;
+		return !IsOnFreelist(b, item);
+	}
+
 	void FixedAlloc::Destroy()
 	{
 		// Free all of the blocks
  		while (m_firstBlock) {
-#ifdef MMGC_MEMORY_INFO
+#ifdef MMGC_MEMORY_PROFILER
 			if(m_firstBlock->numAlloc > 0 && m_heap->GetStatus() != kMemAbort) {
-				// go through every memory location, if the third 4 bytes cast as
-				// an integer isn't 0xedededed then its allocated space and the integer is
-				// an index into the stack trace table, the first 4 bytes will contain
-				// the freelist pointer for free'd items (which is why the trace index is
-				// stored in the second 4)
-				// the size of the item
-				// 1st 4 bytes - size
-				// 2nd 4 bytes - unused
-				// 3rd 4 bytes - 0xedededed if freed correctly
 				union {
 					char* mem_c;
 					uint32_t* mem;
@@ -104,18 +113,19 @@ namespace MMgc
 				mem_c = m_firstBlock->items;
 				unsigned int itemNum = 0;
 				while(itemNum++ < m_itemsPerBlock) {
-					uint32_t thirdInt32 = *(mem+2);
-					if(thirdInt32 != 0xedededed) {
-						GCDebugMsg(false, "Leaked %d byte item.  Addr: 0x%p\n", GetItemSize(), mem+2);
+					if(IsInUse(m_firstBlock, mem)) {
+						GCLog("Leaked %d byte item.  Addr: 0x%p\n", GetItemSize(), GetUserPointer(mem));
 						PrintAllocStackTrace(GetUserPointer(mem));
 					}
-					mem += (m_itemSize / sizeof(uint32_t));
+					mem_c += m_itemSize;
 				}
 				GCAssert(false);
 			}
 
+#ifdef MMGC_MEMORY_INFO
 			//check for writes on deleted memory
 			VerifyFreeBlockIntegrity(m_firstBlock->firstFree, m_firstBlock->size);
+#endif
 
 #endif
 			FreeChunk(m_firstBlock);
