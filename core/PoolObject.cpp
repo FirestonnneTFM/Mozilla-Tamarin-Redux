@@ -721,7 +721,7 @@ range_error:
 				const Multiname& mn = this->precompNames->multinames[-index];
 #else
 				Multiname mn;
-				this->parseMultiname(this->cpool_mn[-index], mn);
+				this->parseMultiname(mn, this->cpool_mn_offsets[-index]);
 #endif
 				name = Multiname::format(core, mn.getNamespace(), mn.getName());
 			}
