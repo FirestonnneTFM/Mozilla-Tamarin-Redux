@@ -1249,6 +1249,7 @@ namespace MMgc
 
 		// for deciding a tree of things should be scanned from presweep
 		void PushWorkItem_MayFail(GCWorkItem &item);
+		bool GetMarkStackOverflow() const { return m_markStackOverflow; }
 		
 	private:
 
