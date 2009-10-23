@@ -189,6 +189,9 @@ namespace MMgc
 		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
 #endif
 
+		bool IsOnFreelist(FixedBlock *b, void *item);
+		bool IsInUse(FixedBlock *b, void *item);
+
 	};
 
 	/**
