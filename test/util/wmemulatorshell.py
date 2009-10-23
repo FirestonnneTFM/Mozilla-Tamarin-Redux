@@ -66,9 +66,10 @@ def runTest():
                     sdateread=file.read()
                     file.close()
                     if sdateread!=sdate:
-                        print("ERROR: writing lock file")
-                        if os.path.exists(dir+'/lock')==False:
+                        try:
                             os.unlink(dir+'/lock')
+                        except:
+                            pass
                         return (-1,'ERROR: writing lock file')
                     time.sleep(.1)
                     if os.path.exists(dir+'/lock')==False: 
@@ -159,9 +160,10 @@ def runTest():
         
 #    print "SHELL: detected test finished %d" % (time.time()-starttime)
     if os.path.exists(dlog)==False:
-        print "ERROR: cannot find log %s" % dlog
-        if os.path.exists(dir+'/lock'):
+        try:
             os.unlink(dir+'/lock')
+        except:
+            pass
         return (-1,"ERROR: cannot find log %s" % dlog)
     ctr=0
     while os.path.exists(dlog)==False and ctr<50:
