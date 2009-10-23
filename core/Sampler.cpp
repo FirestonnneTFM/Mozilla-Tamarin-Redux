@@ -598,6 +598,9 @@ namespace avmplus
 	{
 		uint32 num;
 		byte *p = getSamples(num);
+
+		MMgc::GC * const gc = core->gc;
+
 		for(uint32 i=0; i < num ; i++)
 		{
 			Sample s;
@@ -611,10 +614,10 @@ namespace avmplus
 				{
 					GCWorkItem item(ptr, (uint32)GC::Size(ptr), true);
 					// NOTE that PushWorkItem_MayFail can fail due to mark stack overflow in tight memory situations.
-					// This failure is visible as GC::m_markStackOverflow being true.  The GC compensates
+					// This failure is visible as GC::GetMarkStackOverflow() being true.  The GC compensates
 					// for that but it seems hard to compensate for it here.  The most credible workaround
 					// is likely to test that flag at the end of presweep and disable the sampler if it is set.
-					core->gc->PushWorkItem_MayFail(item);
+					gc->PushWorkItem_MayFail(item);
 				}
 			}
 #ifdef _DEBUG
@@ -629,6 +632,12 @@ namespace avmplus
 				}
 			}
 #endif
+		}
+
+		if (gc->GetMarkStackOverflow())
+		{
+			// see the comment above
+			stopSampling();
 		}
 	}
 

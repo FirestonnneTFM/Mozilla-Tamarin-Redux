@@ -1434,6 +1434,19 @@ bail:
 
 		SAMPLE_CHECK();
 
+		// The presweep callbacks can't drive marking or trigger write barriers as the barrier is disabled, 
+		// but they can cause elements to be pushed onto the mark stack explicitly and it's necessary to call mark.
+		// One example of callback that pushes work items is the Sampler::presweep().
+		do {
+			if (m_markStackOverflow) {
+				m_markStackOverflow = false;
+				HandleMarkStackOverflow();
+			}
+			Mark();
+		} while (m_markStackOverflow);
+
+		SAMPLE_CHECK();
+
 		GCAssert(m_incrementalWork.Count() == 0);
 		GCAssert(m_barrierWork.Count() == 0);
 
