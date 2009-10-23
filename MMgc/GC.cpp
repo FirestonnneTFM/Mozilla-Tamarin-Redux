@@ -3627,8 +3627,8 @@ bail:
 	{ 
 		if(gc && gc->GetStackEnter() == 0) {
 			this->gc = gc;
-			gc->SetStackEnter(this); 
 			gc->heap->SetActiveGC(gc);
+			gc->SetStackEnter(this);
 		}
 	}
 	
