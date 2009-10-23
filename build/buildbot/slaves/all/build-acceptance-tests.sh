@@ -48,15 +48,18 @@
 . ../all/util-calculate-change.sh $1
 
 ##
-# Download the latest asc.jar
+# Download the latest asc.jar if it does not exist
 ##
-echo "Download asc.jar"
-../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
-ret=$?
-test "$ret" = "0" || {
-    echo "Downloading of asc.jar failed"
-    exit 1
-}
+if [ ! -e "$basedir/utils/asc.jar" ]; then
+    echo "Download asc.jar"
+    ../all/util-download.sh $ascbuilds/asc.jar $basedir/utils/asc.jar
+    ret=$?
+    test "$ret" = "0" || {
+        echo "Downloading of asc.jar failed"
+        rm -f $basedir/utils/asc.jar
+        exit 1
+    }
+fi
 
 echo ""
 echo "Building ABC files using the following ASC version:"
