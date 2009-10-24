@@ -777,7 +777,7 @@ package abcdump
                     t.protectedNs = namespaces[readU32()]
                 var interface_count = readU32()
                 for (var j:int=0; j < interface_count; j++)
-                    t.interfaces[i] = names[readU32()]
+                    t.interfaces[j] = names[readU32()]
                 var m = t.init = methods[readU32()]
                 m.name = t.name
                 m.kind = TRAIT_Method
