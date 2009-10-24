@@ -1,0 +1,13 @@
+function main() {
+    getlocal0
+    pushscope
+
+    findproperty COMPARE_STRICTEQ
+    pushstring "null istype Object"
+    pushfalse // expected
+    pushnull
+    istype Object
+    callpropvoid COMPARE_STRICTEQ 3
+
+    returnvoid
+}
