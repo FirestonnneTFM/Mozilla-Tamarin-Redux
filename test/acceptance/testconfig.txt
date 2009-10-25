@@ -84,6 +84,7 @@ abcasm/stringEscapes , .* , skip,
 abcasm/nullCheck/I:null istype Object, ^((?!Dinterp).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=491056
 # Test is supposed to throw a verifyerror
 abcasm/bug_481171, .*verifyall.*, skip, Intended behaviour is to throw a verifyerror.
+abcasm/bug_481171, arm-winmobile.*Ojit, expectedfail, Intended behaviour is to throw a verifyerror.
 
 ####################
 # Differential testing (avmdiff.py)
