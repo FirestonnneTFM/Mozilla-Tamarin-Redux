@@ -2196,6 +2196,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\Traits-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Traits.h"
 				>
 			</File>

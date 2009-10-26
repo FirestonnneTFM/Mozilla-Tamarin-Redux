@@ -322,5 +322,6 @@ namespace avmplus
 #include "AvmCore-inlines.h"
 #include "instr-inlines.h"
 #include "Toplevel-inlines.h"
+#include "Traits-inlines.h"
 
 #endif /* __avmplus__ */ 
