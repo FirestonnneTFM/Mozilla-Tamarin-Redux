@@ -479,10 +479,10 @@ namespace avmplus
 	public:		uint32_t				isInterface:1;				// true for types that are interfaces */
 	public:		uint32_t				commonBase:1;				// used for Verify::findCommonBase */
 	public:		uint32_t				isDictionary:1;				// how we implement dictionary or strict style lookups
+							// If hasCustomConstruct is false, the JIT will early bind to the AS defined constructor. 
 	public:		uint32_t				hasCustomConstruct:1;		// does this type use the default ClassClosure::construct method or not?
+							// If the traits are for a type that implements its own construct method, m_immplementsNewInterfaces must be set to true.  
 	private:	uint32_t				m_implementsNewInterfaces:1; // does this type implement interfaces not implemented by its base?
-										// If the traits are for a type that implements its own construct method, this must be set to true.  
-										// If it is false, the JIT will early bind to the AS defined constructor. 
 	// ------------------------ DATA SECTION END
 	};
 }
