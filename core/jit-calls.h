@@ -109,14 +109,16 @@
     // if the cached obj was a primitive, we only need a matching atom tag for a hit
     #define PRIM_HIT(val, c) (atomKind(val) == c.tag)
 
-    REALLY_INLINE Atom invoke_cached_method(CallCache& c, Atom obj, int argc, Atom* args) {
+    REALLY_INLINE Atom invoke_cached_method(CallCache& c, Atom obj, int argc, Atom* args)
+    {
         // force arg0 = obj; if caller used OP_callproplex then receiver was null.
         args[0] = obj;
         return c.method->coerceEnter(argc, args);
     }
 
     template <class T>
-    REALLY_INLINE T load_cached_slot(BindingCache& c, Atom obj) {
+    REALLY_INLINE T load_cached_slot(BindingCache& c, Atom obj)
+    {
         return *((T*) (uintptr_t(atomObj(obj)) + c.slot_offset));
     }
 
@@ -258,7 +260,8 @@
     // called by jit'd code when an OP_callproperty or callproplex could not be
     // early bound to a property and we must do the property lookup at runtime,
     // AND the multiname has runtime parts, so we couldn't use a CallCache.
-    Atom callprop_late(MethodEnv* caller_env, Atom base, const Multiname* name, int argc, Atom* args) {
+    Atom callprop_late(MethodEnv* caller_env, Atom base, const Multiname* name, int argc, Atom* args)
+    {
         CallCache c(name);  // temporary cache, just so we can call the generic handler.
         return callprop_generic(c, base, argc, args, caller_env);
     }
@@ -648,7 +651,8 @@
 
     // implements OP_getproperty with unknown base object or index type, but a multiname
     // that includes public and therefore exposes dynamic properties
-    Atom getprop_index(MethodEnv* caller_env, Atom obj, const Multiname *name, Atom index) {
+    Atom getprop_index(MethodEnv* caller_env, Atom obj, const Multiname *name, Atom index)
+    {
         if (AvmCore::isInteger(index)) {
             if (isObjectPtr(obj)) {
                 int i = (int)atomInt(index);
@@ -668,7 +672,8 @@
     // called when we don't know the base object type and we have a runtime
     // index expression that is public and therefore able to access dynamic properties.
     // (typically this is late-bound array access)
-    void setprop_index(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, Atom index) {
+    void setprop_index(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, Atom index)
+    {
         if (isObjectPtr(obj)) {
             if (AvmCore::isInteger(index)) {
                 int i = (int) atomInt(index);
@@ -690,7 +695,8 @@
     // helper for OP_initproperty, called when the namespace has a dynamic name
     // but known namespace that includes public, typical for late bound a[i] = ...
     // expressions occurring within constructors.
-    void initprop_index(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, Atom index) {
+    void initprop_index(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, Atom index)
+    {
         _nvprof("initprop_index", 1);
         Multiname tempname = *name;
         VTable* vtable = toVTable(caller_env->toplevel(), obj);
