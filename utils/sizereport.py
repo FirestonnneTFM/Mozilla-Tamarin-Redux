@@ -154,11 +154,19 @@ def logResult(out):
     msg+='exit;'
     if globs['verbose']:
         print('sending result to socket server: %s' % msg)
-    s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
-    s.connect((globs['serverHost'], globs['serverPort'])) # connect to server on the port
-    s.send("%s;exit\r\n" % msg)         # send the data
-    data = s.recv(1024)
-    s.close()
+    try:
+        s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
+        s.settimeout(10)
+        s.connect((globs['serverHost'], globs['serverPort'])) # connect to server on the port
+        s.send("%s;exit\r\n" % msg)         # send the data
+        data = s.recv(1024)
+        s.close()
+    except :
+        print("Socket error occured:")
+        print('sending result to socket server: %s' % msg)
+        print(sys.exc_info())
+        print('buildbot_status: WARNINGS')
+
     print('finished sending results to socket server')
 
 try:
