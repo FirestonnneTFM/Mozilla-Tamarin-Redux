@@ -96,7 +96,7 @@ namespace avmplus
 		SST_bool32,
 		SST_double
 	};
-	inline bool isAtomOrRCObjectSlot(SlotStorageType sst) { return sst <= SST_scriptobject; }
+	bool isAtomOrRCObjectSlot(SlotStorageType sst);
 	
 	class TraitsBindings : public QCachedItem
 	{
@@ -111,8 +111,8 @@ namespace avmplus
 			#ifdef AVMPLUS_64BIT
 			uint32_t padding;	// alignment to power-of-two boundary is a Good Thing here
 			#endif
-			inline SlotStorageType sst() const { return SlotStorageType(offsetAndSST & 7); }
-			inline uint32_t offset() const { return (offsetAndSST >> 3) << 2; }
+			SlotStorageType sst() const;	// get just the storage type of this slot
+			uint32_t offset() const;		// get just the offset of this slot
 		};
 
 		struct BindingMethodInfo
@@ -126,21 +126,12 @@ namespace avmplus
 		};
 		
 	private:
-		inline TraitsBindings(Traits* _owner, 
+		TraitsBindings(Traits* _owner, 
 							TraitsBindingsp _base, 
 							MultinameHashtable* _bindings,
 							uint32_t _slotCount, 
 							uint32_t _methodCount, 
-							uint32_t _interfaceCapacity) : 
-			owner(_owner),
-			base(_base),
-			m_bindings(_bindings),
-			slotCount(_slotCount), 
-			methodCount(_methodCount), 
-			interfaceCapacity(_interfaceCapacity),
-			m_slotSize(0)
-		{
-		}
+							uint32_t _interfaceCapacity);
 
 	public:
 		static const uint32_t MAX_SLOT_OFFSET = (1U << 31) - 1;
@@ -151,19 +142,12 @@ namespace avmplus
 
 		void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const;
 
-		Traitsp getSlotTraits(uint32_t i) const { AvmAssert(i < slotCount); return getSlots()[i].type; }
-		uint32_t getSlotOffset(uint32_t i) const { AvmAssert(i < slotCount); return getSlots()[i].offset(); }
-// if you need SST you probably want offset too; call calcSlotAddrAndSST
-//		SlotStorageType getSlotSST(uint32_t i) const { AvmAssert(i < slotCount); return getSlots()[i].sst(); }
-		SlotStorageType calcSlotAddrAndSST(uint32_t i, void* pin, void*& pout) const 
-		{ 
-			AvmAssert(i < slotCount); 
-			uint32_t offsetAndSST = getSlots()[i].offsetAndSST; 
-			pout = (void*)(((uint32_t*)pin) + (offsetAndSST >> 3));
-			return SlotStorageType(offsetAndSST & 7);
-		}
-		inline Traitsp getInterface(uint32 i) const { AvmAssert(i < interfaceCapacity); return getInterfaces()[i].t; }
-		inline MethodInfo* getMethod(uint32_t i) const { AvmAssert(i < methodCount); return getMethods()[i].f; }
+		Traitsp getSlotTraits(uint32_t i) const;
+		uint32_t getSlotOffset(uint32_t i) const;
+		// if you need SST you probably want offset too
+		SlotStorageType calcSlotAddrAndSST(uint32_t i, void* pin, void*& pout) const;
+		Traitsp getInterface(uint32 i) const;
+		MethodInfo* getMethod(uint32_t i) const;
 		bool FASTCALL containsInterface(Traitsp t) const;
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
@@ -172,38 +156,24 @@ namespace avmplus
 
 		// note: if you are just doing a single iteration thru a single TraitsBindings,
 		// it's more efficient (and easier) to use StTraitsBindingsIterator instead.
-		inline int32_t next(int32_t index) const { return m_bindings->next(index); }
-		inline Stringp keyAt(int32_t index) const { return m_bindings->keyAt(index); }
-		inline Namespacep nsAt(int32_t index) const { return m_bindings->nsAt(index); }
-		inline Binding valueAt(int32_t index) const { return m_bindings->valueAt(index); }
+		int32_t next(int32_t index) const;
+		Stringp keyAt(int32_t index) const;
+		Namespacep nsAt(int32_t index) const;
+		Binding valueAt(int32_t index) const;
 
 	private:
-		SlotInfo* getSlots() { return (SlotInfo*)(this + 1); }
-		const SlotInfo* getSlots() const { return (const SlotInfo*)(this + 1); }
+		SlotInfo* getSlots();
+		const SlotInfo* getSlots() const;
 
-		InterfaceInfo* getInterfaces() { return (InterfaceInfo*)(getSlots() + slotCount); }
-		const InterfaceInfo* getInterfaces() const { return (const InterfaceInfo*)(getSlots() + slotCount); }
+		InterfaceInfo* getInterfaces();
+		const InterfaceInfo* getInterfaces() const;
 
-		BindingMethodInfo* getMethods() { return (BindingMethodInfo*)(getInterfaces() + interfaceCapacity); }
-		const BindingMethodInfo* getMethods() const { return (const BindingMethodInfo*)(getInterfaces() + interfaceCapacity); }
+		BindingMethodInfo* getMethods();
+		const BindingMethodInfo* getMethods() const;
 
-		inline void setSlotInfo(uint32_t i, Traits* t, SlotStorageType sst, uint32_t offset) 
-		{ 
-			AvmAssert(i < slotCount); 
-			// don't need WB here
-			getSlots()[i].type = t;
-			// offset is always a multiple of 4 so skip those, gives us a max of 1<<31-1
-			AvmAssert((offset & 3) == 0);
-			AvmAssert(offset <= MAX_SLOT_OFFSET);
-			getSlots()[i].offsetAndSST = (offset<<1) | uint32_t(sst);
-		}
+		void setSlotInfo(uint32_t i, Traits* t, SlotStorageType sst, uint32_t offset);
 
-		inline void setMethodInfo(uint32_t i, MethodInfo* f) 
-		{ 
-			AvmAssert(i < methodCount); 
-			// don't need WB here
-			getMethods()[i].f = f;
-		}
+		void setMethodInfo(uint32_t i, MethodInfo* f);
 
 		bool addOneInterface(Traitsp intf);
 		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
@@ -236,9 +206,7 @@ namespace avmplus
 	private:
 		TraitsBindingsp const volatile _tb;	// kept just to ensure it doesn't get collected -- must be volatile!
 	public:
-		inline StTraitsBindingsIterator(TraitsBindingsp tb) : StMNHTIterator(tb->m_bindings), _tb(tb)
-		{
-		}
+		StTraitsBindingsIterator(TraitsBindingsp tb);
 	};
 
 	class TraitsMetadata : public QCachedItem
@@ -249,20 +217,10 @@ namespace avmplus
 		typedef const uint8_t* MetadataPtr;
 
 	private:
-		inline TraitsMetadata(TraitsMetadatap _base, PoolObject* _residingPool, MetadataPtr _metadata_pos, uint32_t _slotCount, uint32_t _methodCount) : 
-			base(_base),
-			residingPool(_residingPool),
-			slotCount(_slotCount), 
-			methodCount(_methodCount),
-			metadataPos(_metadata_pos),
-			slotMetadataPos(NULL),
-			methodMetadataPos(NULL)
-		{
-		}
+		TraitsMetadata(TraitsMetadatap _base, PoolObject* _residingPool, MetadataPtr _metadata_pos, uint32_t _slotCount, uint32_t _methodCount);
 
 	public:
-
-		MetadataPtr getMetadataPos(PoolObject*& residingPool) const { residingPool = this->residingPool; return metadataPos; }
+		MetadataPtr getMetadataPos(PoolObject*& residingPool) const;
 		MetadataPtr getSlotMetadataPos(uint32_t i, PoolObject*& residingPool) const;
 		MetadataPtr getMethodMetadataPos(uint32_t i, PoolObject*& residingPool) const;
 
@@ -300,25 +258,20 @@ namespace avmplus
 
 	public:
 
-		inline uint32_t getSizeOfInstance() const { return m_sizeofInstance; }
-		inline uint32_t getHashtableOffset() const { AvmAssert(linked); return m_hashTableOffset; }
-		inline uint32_t getTotalSize() const { AvmAssert(linked); return m_totalSize; }
+		uint32_t getSizeOfInstance() const;
+		uint32_t getHashtableOffset() const;
+		uint32_t getTotalSize() const;
 
 		// in bytes. includes size for all base classes too.
-		inline uint32_t getSlotAreaSize() const { AvmAssert(linked); return m_totalSize - m_sizeofInstance - (m_hashTableOffset ? sizeof(InlineHashtable) : 0); }
-
-		inline uint32_t getSlotAreaStart() const { return m_sizeofInstance + (base ? base->getSlotAreaSize() : 0); }
+		uint32_t getSlotAreaSize() const;
+		uint32_t getSlotAreaStart() const;
 
 		// in bytes. includes size for all base classes too.
-		inline uint32_t getExtraSize() const { AvmAssert(linked); AvmAssert(m_totalSize >= m_sizeofInstance); return m_totalSize - m_sizeofInstance; }
+		uint32_t getExtraSize() const;
 
 		// sadly, it's still more efficient to stash this in Traits itself, as it's nontrivial to recover when
 		// we rebuild the TraitMethodInfo. 
-		void setMetadataPos(const byte* pos) 
-		{
-			AvmAssert(metadata_pos == NULL);
-			metadata_pos = pos;
-		}
+		void setMetadataPos(const byte* pos);
 
 	private:
 		void buildBindings(TraitsBindingsp basetb, 
@@ -369,8 +322,8 @@ namespace avmplus
 				TraitsPosType posType);
 		
 		static Traits* newCatchTraits(const Toplevel* toplevel, PoolObject* pool, TraitsPosPtr traitsPos, Stringp name, Namespacep ns);
-		Traits* newParameterizedITraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this); }
-		Traits* newParameterizedCTraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this->base); }
+		Traits* newParameterizedITraits(Stringp name, Namespacep ns);
+		Traits* newParameterizedCTraits(Stringp name, Namespacep ns);
 
 	public:
 		bool allowEarlyBinding() const;
@@ -378,54 +331,37 @@ namespace avmplus
 	private:
 		TraitsBindings* FASTCALL _getTraitsBindings();
 		TraitsMetadata* FASTCALL _getTraitsMetadata();
+
 	public:
-		inline TraitsBindingsp getTraitsBindings()
-		{
-			AvmAssert(this->linked);
-			AvmAssert(m_tbref != NULL);
-			TraitsBindings* tb;
-			if ((tb = (TraitsBindings*)m_tbref->get()) == NULL)
-				tb = _getTraitsBindings();
-			return tb;
-		}
-		inline TraitsMetadatap getTraitsMetadata()
-		{
-			AvmAssert(this->linked);
-			AvmAssert(m_tmref != NULL);
-			TraitsMetadata* tm;
-			if ((tm = (TraitsMetadata*)m_tmref->get()) == NULL)
-				tm = _getTraitsMetadata();
-			return tm;
-		}
-		inline bool containsInterface(Traitsp t) { return this == t || this->getTraitsBindings()->containsInterface(t); }
+		TraitsBindingsp getTraitsBindings();
+		TraitsMetadatap getTraitsMetadata();
+		bool containsInterface(Traitsp t);
 		
 	public:
-
 		void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;
 		void genInitBody(const Toplevel* toplevel, AbcGen& gen);
 		
 		void resolveSignatures(const Toplevel* toplevel);
 
 		// convenient wrapper to check for null (returns "BUILTIN_any")
-		inline static BuiltinType getBuiltinType(const Traitsp t) { return t ? BuiltinType(t->builtinType) : BUILTIN_any; }
+		static BuiltinType getBuiltinType(const Traitsp t);
 
-		inline bool notDerivedObjectOrXML() const { return ((1<<builtinType) & NOT_DERIVED_OR_XML_MASK) != 0; }
-		inline bool isMachineType() const { return ((1<<builtinType) & MACHINE_TYPE_MASK) != 0; }
-		inline bool isNumeric() const { return ((1<<builtinType) & NUMERIC_TYPE_MASK) != 0; }
-		inline bool isXMLType() const { return ((1<<builtinType) & XML_TYPE_MASK) != 0; }
+		bool notDerivedObjectOrXML() const;
+		bool isMachineType() const;
+		bool isNumeric() const;
+		bool isXMLType() const;
 
-		inline TraitsPosType posType() const { return (TraitsPosType)(uint32_t)m_posType; }
-		inline bool isResolved() const { return linked; }
-		inline bool isActivationTraits() const { return posType() == TRAITSTYPE_ACTIVATION; }
+		TraitsPosType posType() const;
+		bool isResolved() const;
+		bool isActivationTraits() const;
 
-		inline bool needsHashtable() const { AvmAssert(linked); return m_needsHashtable; }
-		inline void set_needsHashtable(bool v) { AvmAssert(!linked); m_needsHashtable = v; }
+		bool needsHashtable() const;
+		void set_needsHashtable(bool v);
 
 		static bool isMachineCompatible(const Traits* a, const Traits* b);
 
-		void setCreateClassClosureProc(CreateClassClosureProc p) { this->m_createClassClosure = p; }
-		CreateClassClosureProc getCreateClassClosureProc() const { return m_createClassClosure; }
-
+		void setCreateClassClosureProc(CreateClassClosureProc p);
+		CreateClassClosureProc getCreateClassClosureProc() const;
 
 		Stringp formatClassName();
 
@@ -440,13 +376,13 @@ namespace avmplus
 		// called exactly once per Traits, *after* the Traits has been resolved.
 		void init_declaringScopes(const ScopeTypeChain* stc);
 		
-		inline Namespacep ns() const { return _ns; }
-		inline Stringp name() const { return _name; }
-		void set_names(Namespacep p_ns, Stringp p_name) { _ns = p_ns; _name = p_name; }
+		Namespacep ns() const;
+		Stringp name() const;
+		void set_names(Namespacep p_ns, Stringp p_name);
 		
 		// this returns true iff we implement an interface that is not implemented by our parent.
 		// essential for efficient building of IMT thunks.
-		inline bool implementsNewInterfaces() const { AvmAssert(linked); return m_implementsNewInterfaces; }
+		bool implementsNewInterfaces() const;
 
 	// ------------------------ DATA SECTION BEGIN
 	public:		AvmCore* const			core;		// @todo remove, can get from pool->core
