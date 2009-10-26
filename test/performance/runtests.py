@@ -222,15 +222,19 @@ class PerformanceRuntest(RuntestBase):
                     file = "socketlog-%s-%s.txt" % (self.vmversion,ctr)
                 self.socketlogFile=file
             open(self.socketlogFile,'a').write(msg)
-            s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
-            s.connect((self.serverHost, self.serverPort)) # connect to server on the port
-            s.send("%s;exit\r\n" % msg)         # send the data
-            data = s.recv(1024)
-            #print('Sent: %s' % msg)
-            #print('Received: %s \n\n' % data)
-            #s.shutdown(SHUT_RDWR)
-            s.close()
-            
+            try:
+                s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
+                s.connect((self.serverHost, self.serverPort)) # connect to server on the port
+                s.send("%s;exit\r\n" % msg)         # send the data
+                data = s.recv(1024)
+                #print('Sent: %s' % msg)
+                #print('Received: %s \n\n' % data)
+                #s.shutdown(SHUT_RDWR)
+                s.close()
+            except :
+                print("Socket error occured:")
+                print(sys.exc_info())
+                print('buildbot_status: WARNINGS')
 
     def parsePerfm(self, line,dic):
         try:
