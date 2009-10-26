@@ -51,23 +51,31 @@
 showhelp ()
 {
     echo ""
-    echo "usage: run-acceptance-generic.sh <change> <filename> <vmargs> <config>"
+    echo "usage: run-acceptance-generic.sh <change> <filename> <vmargs> <config> <testdir(s)>"
     echo "       <change>   build number of shell to test"
     echo "       <filename> name of the shell, do not include file extenstion"
     echo "       <vmargs>   vmargs to be passed or empty quoted string"
     echo "       <config>   custom config string to be passed to runtests.py"
     echo "                  or an empty string"
+    echo "       <testDir>  (optional) test directories to run - may be multiple dirs space seperated"
     exit 1
 }
 
-test "$#" = "4" || {
+if [ "$#" -lt 4 ]
+then
     echo "not enough args passed"
     showhelp
-}
+fi
 
 filename=$2
 vmargs=$3
 config=$4
+
+# assign the remaining positional params to testdirs
+shift 4
+testdirs=$*
+
+
 export shell=$filename$shell_extension
 
 
@@ -75,7 +83,7 @@ export shell=$filename$shell_extension
 # Download the AVMSHELL if it does not exist
 ##
 if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell" ]; then
-    echo "Download AVMSHELL"
+    echo "Download AVMSHELL: ${shell}"
     ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell $buildsdir/$change-${changeid}/$platform/$shell
     ret=$?
     test "$ret" = "0" || {
@@ -144,11 +152,11 @@ fi
 
 if [ "$config" != "" ]
 then
-    echo "message: $py ./runtests.py --vmargs=${vmargs} --config=${config} --notimecheck"
-    $py ./runtests.py  --vmargs=${vmargs} --config=${config} --notimecheck
+    echo "message: $py ./runtests.py --vmargs=${vmargs} --config=${config} --notimecheck ${testdirs}"
+    $py ./runtests.py  --vmargs=${vmargs} --config=${config} --notimecheck ${testdirs}
 else
-    echo "message: $py ./runtests.py --vmargs=${vmargs} --notimecheck"
-    $py ./runtests.py  --vmargs=${vmargs} --notimecheck
+    echo "message: $py ./runtests.py --vmargs=${vmargs} --notimecheck ${testdirs}" 
+    $py ./runtests.py  --vmargs=${vmargs} --notimecheck ${testdirs}
 fi
 
 ##
