@@ -77,7 +77,7 @@ namespace avmplus
 
 #ifdef DEBUGGER
 	private:		
-		static ClassClosure* getType(ScriptObject* self, SamplerObjectType sot, const void *obj);
+		static ClassClosure* getType(SamplerObjectType sot, const void *obj);
 		
 		friend class SampleIterator;
 		static ScriptObject* makeSample(ScriptObject* self, const Sample& sample);
