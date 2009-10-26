@@ -41,6 +41,13 @@
 
 namespace avmplus
 {
+
+#ifdef DEBUGGER
+    // This really ought to be defined in Sampler.h, but is here to simplify header-file inclusion
+    // order issues.
+    typedef struct SamplerObjectType_* SamplerObjectType;
+#endif
+
 	class AvmPlusScriptableObject : public MMgc::RCObject
 	{
 	public:
@@ -48,7 +55,7 @@ namespace avmplus
 		virtual Atom toAtom() const = 0;
 
 #ifdef DEBUGGER
-		AvmPlusScriptableObject(Atom atom);
+		AvmPlusScriptableObject(SamplerObjectType sot);
 
 		virtual uint64 size() const = 0;
 

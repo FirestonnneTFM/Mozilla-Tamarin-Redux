@@ -45,13 +45,13 @@ using namespace MMgc;
 namespace avmplus
 {
 #ifdef DEBUGGER
-	AvmPlusScriptableObject::AvmPlusScriptableObject(Atom typeOrVTable)
+	AvmPlusScriptableObject::AvmPlusScriptableObject(SamplerObjectType sot)
 	{
 		AvmCore* core = this->core();
 		Sampler* s = core->get_sampler();
 		if (s && s->sampling())
 		{
-			s->recordAllocationInfo(this, (uintptr)typeOrVTable);
+			s->recordAllocationInfo(this, sot);
 		}		
 	}
 #endif

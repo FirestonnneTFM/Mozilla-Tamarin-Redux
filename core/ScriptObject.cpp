@@ -43,7 +43,7 @@ namespace avmplus
 {
 	ScriptObject::ScriptObject(VTable* _vtable, ScriptObject* _delegate) :
 #ifdef DEBUGGER 
-		AvmPlusScriptableObject((Atom)_vtable), 
+		AvmPlusScriptableObject(sotObject(_vtable)), 
 #endif // DEBUGGER
 		vtable(_vtable),
 		// note that it's substantially more efficient to initialize this in the ctor
@@ -59,7 +59,7 @@ namespace avmplus
 
 	ScriptObject::ScriptObject(VTable* _vtable, ScriptObject* _delegate, int capacity) :
 #ifdef DEBUGGER 
-		AvmPlusScriptableObject((Atom)_vtable), 
+		AvmPlusScriptableObject(sotObject(_vtable)), 
 #endif // DEBUGGER
 		vtable(_vtable),
 		// note that it's substantially more efficient to initialize this in the ctor

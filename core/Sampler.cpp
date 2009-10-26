@@ -309,10 +309,10 @@ namespace avmplus
 			if(s.sampleType == Sampler::NEW_OBJECT_SAMPLE || s.sampleType == Sampler::NEW_AUX_SAMPLE)
 			{
 				read(p, s.ptr);
-				read(p, s.typeOrVTable);
+				read(p, s.sot);
 				read(p, s.alloc_size);
 				
-				if (s.ptr != NULL && s.typeOrVTable != 0 && !GC::IsFinalized(s.ptr))
+				if (s.ptr != NULL && sotGetKind(s.sot) != kSOT_Empty && !GC::IsFinalized(s.ptr))
 				{
 					// s.ptr HAS to be a ScriptObject (that inherits from RCObject),
 					// but it seems that its destructor has already been called, because
@@ -354,7 +354,7 @@ namespace avmplus
 		uids.add(item, (void*)uid);
 		write(currentSample, uid);
 		write(currentSample, item);
-		write(currentSample, (uintptr)0);
+		write(currentSample, sotEmpty());
 		write(currentSample, size);
 
 		AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.\n");
@@ -363,7 +363,7 @@ namespace avmplus
 		return uid; 
 	}
 
-	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable)
+	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, SamplerObjectType sot)
 	{
 		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow)
@@ -386,11 +386,10 @@ namespace avmplus
 		Sample s;
 		readSample(old_sample, s);
 		old_sample = lastAllocSample;
-
-		if(typeOrVTable < 7 && core->codeContext() && core->codeContext()->domainEnv()) {
-			// and in toplevel
-			typeOrVTable |= (uintptr)core->codeContext()->domainEnv()->toplevel();
-		}
+        
+        DomainEnv* domainEnv = core->codeContext() ? core->codeContext()->domainEnv() : NULL;
+        Toplevel* toplevel = domainEnv ? domainEnv->toplevel() : NULL;
+        sot = sotSetToplevel(sot, toplevel);
 
 		AvmAssertMsg(s.sampleType == NEW_AUX_SAMPLE, "Sample stream corrupt - can only add info to an AUX sample.\n");
 		AvmAssertMsg(s.ptr == (void*)obj, "Sample stream corrupt - last sample is not for same object.\n");
@@ -407,7 +406,7 @@ namespace avmplus
 
 		write(currentSample, s.ptr);
 
-		write(currentSample, typeOrVTable);
+		write(currentSample, sot);
 		write(currentSample, s.alloc_size);
 
 		AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.\n");
@@ -609,7 +608,7 @@ namespace avmplus
 				// keep all weak refs and type's live, in postsweep we'll erase our weak refs
 				// to objects that were finalized.  we can't nuke them here b/c pushing the
 				// types could cause currently unmarked things to become live
-				void *ptr = atomPtr(s.typeOrVTable);
+				void *ptr = sotGetGCPointer(s.sot);
 				if (ptr != NULL && !GC::GetMark(ptr))
 				{
 					GCWorkItem item(ptr, (uint32)GC::Size(ptr), true);

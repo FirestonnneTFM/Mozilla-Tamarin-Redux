@@ -45,7 +45,7 @@ namespace avmplus
 	// See E4X 13.2.2, pg 64
     Namespace::Namespace(Atom prefix, Stringp uri, NamespaceType flags)
 #ifdef DEBUGGER
-		: AvmPlusScriptableObject(kNamespaceType)
+		: AvmPlusScriptableObject(sotNamespace())
 #endif // DEBUGGER
 	{
 		// verify our parameters are interned strings
