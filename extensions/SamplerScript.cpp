@@ -268,43 +268,35 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	ClassClosure *SamplerScript::getType(ScriptObject* self, Atom typeOrVTable, const void *ptr)
+	ClassClosure *SamplerScript::getType(ScriptObject* self, SamplerObjectType sot, const void *ptr)
 	{
-		Toplevel *tl = self->toplevel();
-		AvmCore *core = self->core();
-
-		if((typeOrVTable&7) != 0) {
-			// String of Namespace
-			if((typeOrVTable&~7) != 0) {
-				tl = (Toplevel*)(typeOrVTable&~7);
-			}
-
-			if(((Atom) typeOrVTable&7) == kStringType)
-				return tl->stringClass;
-
-			if(((Atom) typeOrVTable&7) == kNamespaceType)
-				return tl->namespaceClass;
+        switch (sotGetKind(sot))
+        {
+            case kSOT_String:
+				return sotGetToplevel(sot)->stringClass;
+            case kSOT_Namespace:
+				return sotGetToplevel(sot)->namespaceClass;
+            default:
+                AvmAssert(0);
+            case kSOT_Object:
+                break;
 		}
 		
-		VTable *vtable = (VTable*)typeOrVTable;
-		if (vtable && vtable->toplevel())
-			tl = vtable->toplevel();
-
-		ScriptObject *obj=NULL;
-		if (ptr != NULL ) {
-			obj = (ScriptObject*)ptr;	
-		}
-		
+        VTable* vt = sotGetVTable(sot);
+        Toplevel* tl = vt->toplevel();
+        AvmCore* core = tl->core();
+        
 		ClassClosure *type;
-		if(obj && AvmCore::istype(obj->atom(), CLASS_TYPE))
+		ScriptObject* obj = (ScriptObject*)ptr;
+		if (obj && AvmCore::istype(obj->atom(), core->traits.class_itraits))
 		{
 			type = tl->classClass;
 		} 
-		else if(obj && AvmCore::istype(obj->atom(), FUNCTION_TYPE))
+		else if (obj && AvmCore::istype(obj->atom(), core->traits.function_itraits))
 		{
 			type = tl->functionClass;
 		}
-		else if(obj && obj->traits()->isActivationTraits())
+		else if (obj && obj->traits()->isActivationTraits())
 		{
 			type = tl->objectClass;
 		}
@@ -320,18 +312,21 @@ namespace avmplus
 			// objects well in the first place (eg activation or catch objects),
 			// so it doesn't seem we're a lot worse off than before.
 			ScopeChain* sc = NULL;
-			if (vtable->init)
-				sc = vtable->init->scope();
+			if (vt->init)
+				sc = vt->init->scope();
 			
-			if(sc && sc->getSize() <= 1) {
+			if (sc && sc->getSize() <= 1) 
+            {
 				if(sc->getSize() == 1)
 					type = tl->classClass;
-			} else if(sc) {
+			} 
+            else if (sc) 
+            {
 				Atom ccAtom = sc->getScope(sc->getSize()-1);
 				if(AvmCore::isObject(ccAtom))
 				{
 					type = (ClassClosure*) AvmCore::atomToScriptObject(ccAtom);
-					if(!AvmCore::istype(type->atom(), CLASS_TYPE))
+					if(!AvmCore::istype(type->atom(), core->traits.class_itraits))
 					{
 						// obj is a ClassClosure
 						type = tl->classClass;
@@ -339,15 +334,7 @@ namespace avmplus
 				}
 			}
 		}
-		// If this fires off, Tommy Reilly says: "It basically means we exhausting all efforts to
-		// associate an object with some "type" and failed.  You can ignore it.
-		AvmAssert(!obj || 
-			typeOrVTable < 7 || 
-			  (obj->traits()->name() && obj->traits()->name()->equalsLatin1("global")) ||
-			(AvmCore::istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
-			(obj->traits()->isActivationTraits() && type == tl->objectClass) ||
-			AvmCore::istype(obj->atom(), type->traits()->itraits));
-		AvmAssert(AvmCore::istype(type->atom(), CLASS_TYPE));	
+		AvmAssert(AvmCore::istype(type->atom(), core->traits.class_itraits));	
 		return type;	
 	}
 #endif // DEBUGGER
@@ -434,7 +421,7 @@ namespace avmplus
 			if (sample.ptr != NULL ) {
 				((NewObjectSampleObject*)sam)->setRef((AvmPlusScriptableObject*)sample.ptr);
 			}
-			ClassClosure *type = getType(self, sample.typeOrVTable, sample.ptr);
+			ClassClosure *type = getType(self, sample.sot, sample.ptr);
 			WBRC(gc, sam, ((char*)sam + cc->typeOffset), type);
 
 			((NewObjectSampleObject*)sam)->setSize(sample.alloc_size);

@@ -307,7 +307,7 @@ namespace avmplus
 
 	REALLY_INLINE String::String(const void* buffer, Width w, int32_t length, bool is7bit) :
 #ifdef DEBUGGER
-		AvmPlusScriptableObject(kStringType), 
+		AvmPlusScriptableObject(sotString()), 
 #endif
 		m_buffer(buffer),	// static data - no WB() needed
 		m_extra(NULL),
@@ -322,7 +322,7 @@ namespace avmplus
 
 	REALLY_INLINE String::String(MMgc::GC* gc, void* buffer, Width w, int32_t length, int32_t charsLeft, bool is7bit) :
 #ifdef DEBUGGER
-		AvmPlusScriptableObject(kStringType), 
+		AvmPlusScriptableObject(sotString()), 
 		m_buffer((void*)NULL),
 #else
 		m_buffer(buffer),
@@ -350,7 +350,7 @@ namespace avmplus
 
 	REALLY_INLINE String::String(MMgc::GC* gc, Stringp master, int32_t start, int32_t length) :
 #ifdef DEBUGGER
-		AvmPlusScriptableObject(kStringType), 
+		AvmPlusScriptableObject(sotString()), 
 #endif
 		m_buffer(uintptr_t(start << master->getWidth())),
 #ifdef DEBUGGER
