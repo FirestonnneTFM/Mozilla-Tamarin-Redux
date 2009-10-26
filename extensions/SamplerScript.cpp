@@ -268,7 +268,7 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	ClassClosure *SamplerScript::getType(ScriptObject* self, SamplerObjectType sot, const void *ptr)
+	ClassClosure *SamplerScript::getType(SamplerObjectType sot, const void *ptr)
 	{
         switch (sotGetKind(sot))
         {
@@ -421,7 +421,7 @@ namespace avmplus
 			if (sample.ptr != NULL ) {
 				((NewObjectSampleObject*)sam)->setRef((AvmPlusScriptableObject*)sample.ptr);
 			}
-			ClassClosure *type = getType(self, sample.sot, sample.ptr);
+			ClassClosure *type = getType(sample.sot, sample.ptr);
 			WBRC(gc, sam, ((char*)sam + cc->typeOffset), type);
 
 			((NewObjectSampleObject*)sam)->setSize(sample.alloc_size);
