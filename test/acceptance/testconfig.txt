@@ -178,7 +178,6 @@ ecma3/RegExp/eregress_119909,   .*winmobile.* ,  expectedfail,   https://bugzill
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
 # sampling failure on winmobile-arm
 as3/sampling/Callback:.*                                         ,   arm-winmobile.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
-recursion/.* , .*winmobile.* , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=502589
 
 
 ####################
