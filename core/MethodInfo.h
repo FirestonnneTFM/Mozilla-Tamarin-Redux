@@ -284,7 +284,6 @@ namespace avmplus
 		inline int setsDxns() const { return _flags & SETS_DXNS; }
 		inline int suggestInterp() const { return _flags & SUGGEST_INTERP; }
 		inline int unboxThis() const { return _flags & UNBOX_THIS; }
-		inline int isJitImpl() const { return _flags & JIT_IMPL; } // @ todo, Flash needs this for now, remove soon
 
 		inline void setUnboxThis() { _flags |= UNBOX_THIS; }
 		inline void setSuggestInterp() { _flags |= SUGGEST_INTERP; }
