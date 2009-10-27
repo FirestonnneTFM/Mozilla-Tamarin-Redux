@@ -1662,7 +1662,7 @@ namespace MMgc
 	}
 #endif // MMGC_HOOKS
 
-	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL)
+	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL), m_collectingGC(NULL)
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
 		if(heap->GetStackEntryAddress() == NULL) {
@@ -1719,6 +1719,17 @@ namespace MMgc
 		if(config.OOMExitCode != 0) 
 		{
 			VMPI_exit(config.OOMExitCode);
+		}
+			
+		// If the current thread is holding a lock for a GC that's not currently active on the thread
+		// then break the lock: the current thread is collecting in that GC, but the Abort has cancelled
+		// the collection.
+
+		if (ef->m_collectingGC)
+		{
+			VMPI_lockRelease(&(ef->m_collectingGC->m_gcLock));
+			ef->m_collectingGC->m_gcThread = NULL;
+			ef->m_collectingGC = NULL;
 		}
 			
 		if(ef != NULL && ef->m_heap != NULL)
