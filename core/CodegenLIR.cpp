@@ -1920,15 +1920,37 @@ namespace avmplus
 
         case OP_istype:
         {
+            // expects a CONSTANT_Multiname cpool index
+            // used when operator "is" RHS is a compile-time type constant
+            //sp[0] = istype(sp[0], itraits);
             const Multiname *name = pool->precomputedMultiname(imm30);
             Traits* itraits = pool->getTraits(*name, state->verifier->getToplevel(this));
-            emit(state, opcode, (uintptr)itraits, sp, BOOLEAN_TYPE);
+            emitPrep(state);
+            LIns* obj = loadAtomRep(sp);
+            LIns* out = callIns(FUNCTIONID(istype), 2, obj, InsConstPtr(itraits));
+            localSet(sp, out, BOOLEAN_TYPE);
             break;
         }
 
-        case OP_istypelate:
-            emit(state, opcode, 0, 0, BOOLEAN_TYPE);
+        case OP_istypelate: 
+        {
+            emitPrep(state);
+            // null check for the type value T in (x is T).  This also preserves
+            // any side effects from loading T, even if we end up inlining T.itraits() as a const.
+            state->verifier->emitCheckNull(sp);
+            LIns* obj = loadAtomRep(sp-1);
+            Traits* class_type = state->value(sp).traits;
+            LIns* istype_result;
+            if (class_type && class_type->base == CLASS_TYPE) {
+                // (x is T) where T is a class object: get T.itraits as constant.
+                istype_result = callIns(FUNCTIONID(istype), 2, obj, InsConstPtr(class_type->itraits));
+            } else {
+                // RHS is unknown, call general istype
+                istype_result = callIns(FUNCTIONID(istypelate), 3, env_param, obj, loadAtomRep(sp));
+            }
+            localSet(sp-1, istype_result, BOOLEAN_TYPE);
             break;
+        }
 
         case OP_convert_o:
             // NOTE check null has already been done
@@ -4402,41 +4424,6 @@ namespace avmplus
                 LIns* out = callIns(FUNCTIONID(op_in), 3, env_param, lhs, rhs);
                 out = atomToNativeRep(result, out);
                 localSet(sp-1, out, result);
-                break;
-            }
-
-            case OP_istype:
-            {
-                // expects a CONSTANT_Multiname cpool index
-                // used when operator "is" RHS is a compile-time type constant
-                //sp[0] = istype(sp[0], itraits);
-                Traits *type = (Traits*) op1;
-                int32_t index = (int32_t) op2;
-                LIns* obj = loadAtomRep(index);
-                LIns* itraits = InsConstPtr(type);
-                LIns* out = callIns(FUNCTIONID(istypeAtom), 2,
-                    obj, itraits);
-                out = atomToNativeRep(result, out);
-                localSet(index, out, result);
-                break;
-            }
-
-            case OP_istypelate:
-            {
-                //sp[-1] = istype(sp[-1], toClassITraits(sp[0]));
-                //sp--;
-                LIns* type = loadAtomRep(sp);
-
-                LIns* traits = callIns(FUNCTIONID(toClassITraits), 2,
-                    loadToplevel(), type);
-
-                LIns* obj = loadAtomRep(sp-1);
-
-                LIns* i3 = callIns(FUNCTIONID(istypeAtom), 2,
-                    obj, traits);
-
-                i3 = atomToNativeRep(result, i3);
-                localSet(sp-1, i3, result);
                 break;
             }
 
