@@ -197,7 +197,7 @@ namespace avmplus
 		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif
 
-		f->verify(env->toplevel());
+		f->verify(env->toplevel(), env->abcEnv());
 
 #if VMCFG_METHODENV_IMPL32
 		// we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
@@ -220,7 +220,7 @@ namespace avmplus
 		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif
 
-		f->verify(env->toplevel());
+		f->verify(env->toplevel(), env->abcEnv());
 
 #if VMCFG_METHODENV_IMPL32
 		// we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
@@ -234,7 +234,7 @@ namespace avmplus
 		return f->implFPR()(env, argc, ap);
 	}
 
-	void MethodInfo::verify(Toplevel *toplevel)
+	void MethodInfo::verify(Toplevel *toplevel, AbcEnv* abc_env)
 	{
 		AvmAssert(declaringTraits()->isResolved());
 		resolveSignature(toplevel);
@@ -273,7 +273,7 @@ namespace avmplus
 			PERFM_NTPROF("verify-ticks");
 
 			CodeWriter* coder = NULL;
-			Verifier verifier(this, toplevel);
+			Verifier verifier(this, toplevel, abc_env);
 
 			/*
 				These "buf" declarations are an unfortunate but expedient hack:
@@ -1036,7 +1036,7 @@ namespace avmplus
 					toplevel->throwVerifyError(kCorruptABCError);
 			}
 
-			if (ms->paramTraits(0)->isInterface)
+			if (ms->paramTraits(0) != NULL && ms->paramTraits(0)->isInterface)
 				_flags |= ABSTRACT_METHOD;
 
 			_flags |= RESOLVED;

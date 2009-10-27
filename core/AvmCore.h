@@ -218,7 +218,7 @@ const int kBufferPadding = 16;
         List<MethodInfo*, LIST_GCObjects> verifyQueue;
 		void enqFunction(MethodInfo* f);
 		void enqTraits(Traits* t);
-		void verifyEarly(Toplevel* toplevel);
+		void verifyEarly(Toplevel* toplevel, AbcEnv* abc_env);
 #endif
 
 	private:

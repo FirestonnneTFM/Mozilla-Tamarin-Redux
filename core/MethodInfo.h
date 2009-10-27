@@ -260,7 +260,7 @@ namespace avmplus
 
 	public:
 
-		void verify(Toplevel* toplevel);
+		void verify(Toplevel* toplevel, AbcEnv* abc_env);
         void setInterpImpl();
 
 	public:
