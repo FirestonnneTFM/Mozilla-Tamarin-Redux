@@ -478,7 +478,7 @@ namespace avmplus
 		if (config.verifyall) {
 			for (int i=0, n=pool->scriptCount(); i < n; i++)
 				enqTraits(pool->getScriptTraits(i));
-			verifyEarly(toplevel);
+			verifyEarly(toplevel, abcEnv);
 		}
 #endif
 
@@ -4273,7 +4273,7 @@ return the result of the comparison ToPrimitive(x) == y.
         }
 	}
 
-    void AvmCore::verifyEarly(Toplevel* toplevel) {
+    void AvmCore::verifyEarly(Toplevel* toplevel, AbcEnv* abc_env) {
         List<MethodInfo*, LIST_GCObjects> verifyQueue2(GetGC());
 		int verified = 0;
 		do {
@@ -4287,7 +4287,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					}
 					verified++;
 					//console << "pre verify " << f << "\n";
-					f->verify(toplevel);
+					f->verify(toplevel, abc_env);
 					f->setVerified();
 				}
 			}
