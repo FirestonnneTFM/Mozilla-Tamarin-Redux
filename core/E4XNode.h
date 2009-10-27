@@ -223,7 +223,7 @@ namespace avmplus
 		// Corresponds to [[Length]] in the docs
 		virtual uint32 _length() const { return 0; };
 
-		Atom _equals (AvmCore *core, E4XNode *value) const;
+		Atom _equals (Toplevel* toplevel, AvmCore *core, E4XNode *value) const;
 
 		void _deleteByIndex (uint32 entry);
 		E4XNode *_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const;

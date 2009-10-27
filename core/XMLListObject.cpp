@@ -728,7 +728,7 @@ namespace avmplus
 	Atom XMLListObject::_equals(Atom V) const
 	{
 		AvmCore *core = this->core();
-
+		
 		// null or "" return false
 		if ((V == undefinedAtom) && (_length() == 0))
 			return trueAtom;
@@ -765,6 +765,8 @@ namespace avmplus
 
 		AvmCore *core = this->core();
 
+		core->stackCheck(toplevel());
+		
 		fixTargetObject();
 		if (AvmCore::isNull(m_targetObject) || 
 			(m_targetProperty.isAttr()) || 

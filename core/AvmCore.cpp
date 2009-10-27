@@ -716,7 +716,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					}	
 					else
 					{
-						return x->getNode()->_equals(this, y->getNode());
+						return x->getNode()->_equals(x->toplevel(), this, y->getNode());
 					}
 				}
 				else if (isQName(lhs) && isQName(rhs))
