@@ -37,7 +37,7 @@
 
 #include "avmshell.h"
 
-#if (defined WIN32 && !defined UNDER_CE) || defined AVMPLUS_UNIX
+#if defined FEATURE_NANOJIT && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 bool P4Available();
 #endif
 
