@@ -41,25 +41,37 @@
 #define __OOM_H__
 
 #define MMGC_ENTER_VOID							\
+	MMGC::GCHeap::EnterLock();					\
 	if(MMgc::GCHeap::ShouldNotEnter())			\
+	{											\
+		MMgc::GCHeap::EnterRelease();			\
 		return;									\
+	}											\
 	MMgc::EnterFrame _ef;						\
+	MMgc::GCHeap::EnterRelease();				\
 	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return;
 
 
 #define MMGC_ENTER_VOID_NO_GUARD				\
+	MMgc::GCHEap::EnterLock();					\
 	MMgc::EnterFrame _ef;						\
+	MMgc::GCHeap::EnterRelease();				\
 	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return;
 
 
 #define MMGC_ENTER_RETURN(_val)					\
+	MMgc::GCHeap::EnterLock();					\
 	if(MMgc::GCHeap::ShouldNotEnter())			\
+	{											\
+		MMgc::GCHeap::EnterRelease();			\
 		return _val;							\
+	}											\
 	MMgc::EnterFrame _ef;						\
+	MMgc::GCHeap::EnterRelease();				\
 	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return _val;

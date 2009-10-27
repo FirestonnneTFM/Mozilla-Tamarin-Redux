@@ -108,6 +108,7 @@ namespace avmshell
 	/* static */
 	int Shell::run(int argc, char *argv[]) 
 	{
+		MMgc::GCHeap::EnterLockInit();
 		MMgc::GCHeapConfig conf;
 		//conf.verbose = AvmCore::DEFAULT_VERBOSE_ON;
 		MMgc::GCHeap::Init(conf);
@@ -140,6 +141,7 @@ namespace avmshell
 #endif /* AVMPLUS_WITH_JNI */
 		
 		MMgc::GCHeap::Destroy();
+		MMgc::GCHeap::EnterLockDestroy();
 	 	return 0;
 	}
 
