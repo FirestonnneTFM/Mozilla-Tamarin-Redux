@@ -155,8 +155,6 @@ namespace avmplus
 		
 		inline void sampleCheck() { if (m_core) m_core->sampleCheck(); }
 
-		void** FASTCALL scopeBase(); // with JIT, array members are (ScriptObject*); with interpreter, they are (Atom).
-
 		inline void setNext(CallStackNode* next) { m_next = next; }
 		inline CallStackNode* next() const { return m_next; }
 		// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
@@ -188,6 +186,15 @@ namespace avmplus
 		inline void* operator new(size_t, void* storage) { return storage; }
 		inline void operator delete(void*) {}
 
+        // enumerateScopeChainAtoms will list the active scopechain by repeatedly calling the addScope of the interface.
+        class IScopeChainEnumerator
+        {
+        public:
+            virtual ~IScopeChainEnumerator() { }
+            virtual void addScope(Atom scope) = 0;
+        };
+        void enumerateScopeChainAtoms(IScopeChainEnumerator& scb);
+
 	// ------------------------ DATA SECTION BEGIN
 	private:	uint64_t			m_functionId;	// int used to uniquely identify function calls in external scripting languages
 	private:	AvmCore*			m_core;
@@ -195,12 +202,12 @@ namespace avmplus
 	private:	MethodInfo*			m_info;
 	private:	CallStackNode*		m_next;
 	private:	Stringp				m_fakename;		// NULL unless we are a fake CallStackNode
-	private:	int32_t				m_depth;
 	private:	intptr_t volatile*	m_eip;			// ptr to where the current pc is stored
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 	private:	FramePtr			m_framep;		// pointer to top of AS registers
 	private:	Traits**			m_traits;		// array of traits for AS registers
 	private:	int32_t				m_linenum;
+	private:	int32_t				m_depth;
 	// ------------------------ DATA SECTION END
 	};
 
