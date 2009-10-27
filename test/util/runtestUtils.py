@@ -42,6 +42,10 @@ import os
 from os.path import join, isdir, islink
 from math import sqrt
 
+class TimeOutException(Exception):
+    def __init__(self):
+        pass
+
 # functions that all can be used independently
 #
 
