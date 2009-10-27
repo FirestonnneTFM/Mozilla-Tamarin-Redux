@@ -1618,8 +1618,8 @@ namespace MMgc
 		(void)askSize;
 		(void)gotSize;
 		{
-			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
+			MMGC_LOCK(m_spinlock);
 			if(hasSpy) {
 				VMPI_spyCallback();
 			}
@@ -1627,10 +1627,10 @@ namespace MMgc
 				profiler->RecordAllocation(item, askSize, gotSize);
 #endif
 
-#ifdef MMGC_MEMORY_INFO
-			DebugDecorate(item, gotSize);
-#endif
 		}
+#ifdef MMGC_MEMORY_INFO
+		DebugDecorate(item, gotSize);
+#endif
 #ifdef AVMPLUS_SAMPLER
 		// this can't be called with the heap lock locked.
 		avmplus::recordAllocationSample(item, gotSize);
@@ -1641,8 +1641,8 @@ namespace MMgc
 	{
 		(void)item,(void)size;
 		{
-			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
+			MMGC_LOCK(m_spinlock);
 			if(profiler)
 				profiler->RecordDeallocation(item, size);
 #endif
