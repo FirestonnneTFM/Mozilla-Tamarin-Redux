@@ -76,6 +76,9 @@ static void endGCLogToFile()
 namespace MMgc
 {
 	GCHeap *GCHeap::instance = NULL;
+	bool GCHeap::instanceEnterLockInitialized = false;
+	vmpi_spin_lock_t GCHeap::instanceEnterLock;
+
 	// GCHeap instance has the C++ runtime call dtor which causes problems
 	AVMPLUS_ALIGN8(uint8_t) heapSpace[sizeof(GCHeap)];
 
@@ -127,9 +130,11 @@ namespace MMgc
 
 	size_t GCHeap::Destroy()
 	{
+		EnterLock();	
 		GCAssert(instance != NULL);
 		instance->DestroyInstance();
 		instance = NULL;
+		EnterRelease();		
 		return leakedBytes;
 	}
 
@@ -254,9 +259,15 @@ namespace MMgc
 #endif
 
 		FreeAll();
-
-		VMPI_lockDestroy(&gclog_spinlock);
+		
+		//  Acquire all the locks before destroying them to make absolutely sure we're the last consumers.
+		VMPI_lockAcquire(&m_spinlock);
 		VMPI_lockDestroy(&m_spinlock);
+
+		VMPI_lockAcquire(&gclog_spinlock);
+		VMPI_lockDestroy(&gclog_spinlock);
+		
+		VMPI_lockAcquire(&list_lock);
 		VMPI_lockDestroy(&list_lock);
 		
 		if(enterFrame)
@@ -1607,8 +1618,8 @@ namespace MMgc
 		(void)askSize;
 		(void)gotSize;
 		{
-			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
+			MMGC_LOCK(m_spinlock);
 			if(hasSpy) {
 				VMPI_spyCallback();
 			}
@@ -1616,10 +1627,10 @@ namespace MMgc
 				profiler->RecordAllocation(item, askSize, gotSize);
 #endif
 
-#ifdef MMGC_MEMORY_INFO
-			DebugDecorate(item, gotSize);
-#endif
 		}
+#ifdef MMGC_MEMORY_INFO
+		DebugDecorate(item, gotSize);
+#endif
 #ifdef AVMPLUS_SAMPLER
 		// this can't be called with the heap lock locked.
 		avmplus::recordAllocationSample(item, gotSize);
@@ -1630,8 +1641,8 @@ namespace MMgc
 	{
 		(void)item,(void)size;
 		{
-			MMGC_LOCK(m_spinlock);
 #ifdef MMGC_MEMORY_PROFILER
+			MMGC_LOCK(m_spinlock);
 			if(profiler)
 				profiler->RecordDeallocation(item, size);
 #endif
@@ -1651,7 +1662,7 @@ namespace MMgc
 	}
 #endif // MMGC_HOOKS
 
-	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL)
+	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL), m_collectingGC(NULL)
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
 		if(heap->GetStackEntryAddress() == NULL) {
@@ -1710,13 +1721,24 @@ namespace MMgc
 			VMPI_exit(config.OOMExitCode);
 		}
 			
+		// If the current thread is holding a lock for a GC that's not currently active on the thread
+		// then break the lock: the current thread is collecting in that GC, but the Abort has cancelled
+		// the collection.
+
+		if (ef->m_collectingGC)
+		{
+			VMPI_lockRelease(&(ef->m_collectingGC->m_gcLock));
+			ef->m_collectingGC->m_gcThread = NULL;
+			ef->m_collectingGC = NULL;
+		}
+			
 		if(ef != NULL && ef->m_heap != NULL)
 		{
 			if(ef->m_gc) {
 				// we're about to jump across the GC lock, unlock it
 				ef->m_gc->SetStackEnter(NULL, false);
 			}
-			longjmp(ef->jmpbuf, 1);
+			VMPI_longjmpNoUnwind(ef->jmpbuf, 1);
 		}
 		GCAssertMsg(false, "MMGC_ENTER missing or we allocated more memory trying to shutdown");
 		VMPI_abort();
@@ -1724,7 +1746,6 @@ namespace MMgc
 	
 	void GCHeap::Enter(EnterFrame *frame)
 	{
-		MMGC_LOCK(m_spinlock);
 		enterCount++;
 		enterFrame = frame;
 	}
@@ -1741,23 +1762,25 @@ namespace MMgc
 				abortStatusNotificationSent = true;
 				StatusChangeNotify(kMemAbort);
 			}
+		}
+	
+		EnterLock();				
+		// do this after StatusChangeNotify it affects ShouldNotEnter
+		enterFrame = NULL;
 
-			// do this after StatusChangeNotify it affects ShouldNotEnter
-			enterFrame = NULL;
+		enterCount--;
 
-			enterCount--;
-
-			if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
-				// last one out of the pool pulls the plug
-				heapToDestroy = instance;
-				instance = NULL;
-			}
+		if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
+			// last one out of the pool pulls the plug
+			heapToDestroy = instance;
+			instance = NULL;
 		}
 		if(heapToDestroy != NULL) {
 			// any thread can call this, just need to make sure all other
 			// threads are done, hence the ref counting
 			heapToDestroy->DestroyInstance();
 		}
+		EnterRelease();				
 	}
 	void GCHeap::log_percentage(const char *name, size_t bytes, size_t bytes_compare)
 	{
@@ -2113,5 +2136,22 @@ namespace MMgc
 	{
 		*(Region**)r = freeRegion;
 		freeRegion = r;		
+	}
+	
+	/*static*/ 
+	void GCHeap::EnterLockInit()
+	{ 
+		if (!instanceEnterLockInitialized)
+		{
+			instanceEnterLockInitialized = true; 
+			VMPI_lockInit(&instanceEnterLock); 
+		}
+	}
+
+	/*static*/ 
+	void GCHeap::EnterLockDestroy()
+	{  
+		GCAssert(instanceEnterLockInitialized);
+		VMPI_lockDestroy(&instanceEnterLock);
 	}
 }

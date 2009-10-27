@@ -77,6 +77,14 @@
 #define VMPI_abort   ::abort
 #define VMPI_exit    ::exit
 
+// Set up a jmp_buf suitable for VMPI_longjmpNoUnwind.
+#define VMPI_setjmpNoUnwind ::setjmp
+
+// Jump to an active jmp_buf that was set up by VMPI_setjmpNoUnwind.
+// Under no circumstances may C++ destructors be unwound during the
+// jump (MSVC likes to do this by default).
+#define VMPI_longjmpNoUnwind ::longjmp
+
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>

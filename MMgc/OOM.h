@@ -41,26 +41,38 @@
 #define __OOM_H__
 
 #define MMGC_ENTER_VOID							\
+	MMgc::GCHeap::EnterLock();					\
 	if(MMgc::GCHeap::ShouldNotEnter())			\
+	{											\
+		MMgc::GCHeap::EnterRelease();			\
 		return;									\
+	}											\
 	MMgc::EnterFrame _ef;						\
-	_ef.status = setjmp(_ef.jmpbuf);            \
+	MMgc::GCHeap::EnterRelease();				\
+	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return;
 
 
 #define MMGC_ENTER_VOID_NO_GUARD				\
+	MMgc::GCHEap::EnterLock();					\
 	MMgc::EnterFrame _ef;						\
-	_ef.status = setjmp(_ef.jmpbuf);            \
+	MMgc::GCHeap::EnterRelease();				\
+	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return;
 
 
 #define MMGC_ENTER_RETURN(_val)					\
+	MMgc::GCHeap::EnterLock();					\
 	if(MMgc::GCHeap::ShouldNotEnter())			\
+	{											\
+		MMgc::GCHeap::EnterRelease();			\
 		return _val;							\
+	}											\
 	MMgc::EnterFrame _ef;						\
-	_ef.status = setjmp(_ef.jmpbuf);            \
+	MMgc::GCHeap::EnterRelease();				\
+	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return _val;
 
@@ -78,9 +90,13 @@ namespace MMgc
 		void Destroy() { m_heap = NULL; }
 		GC* GetActiveGC() { return m_gc; }
 		void SetActiveGC(GC *gc) { m_gc = gc; }
+		void SetCollectingGC(GC *gc){ m_collectingGC = gc; }
+		GC* GetCollectingGC(){return m_collectingGC;}
 	private:
 		GCHeap *m_heap;
 		GC *m_gc;
+		GC *m_collectingGC;
+
 	};
 	
 	typedef enum _MemoryStatus {

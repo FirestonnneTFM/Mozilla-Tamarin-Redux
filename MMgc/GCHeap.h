@@ -241,6 +241,21 @@ namespace MMgc
 			return instance; 
 		}
 
+		static void EnterLockInit();
+		static void EnterLockDestroy();
+
+		inline static bool EnterLock()
+		{
+			GCAssert(instanceEnterLockInitialized); 
+			return VMPI_lockAcquire(&instanceEnterLock);
+		}
+
+		inline static bool EnterRelease()
+		{
+			GCAssert(instanceEnterLockInitialized); 
+			return VMPI_lockRelease(&instanceEnterLock);
+		}
+
 		/**
 		 * Signal a too-large allocation request.  This /will/ cause an immediate shutdown of
 		 * the entire system.  (The alternative is to return a NULL pointer, which has the
@@ -701,6 +716,9 @@ namespace MMgc
 		static GCHeap *instance;
 		static size_t leakedBytes;
 
+		static vmpi_spin_lock_t instanceEnterLock;
+		static bool instanceEnterLockInitialized;
+	
 		FixedMalloc fixedMalloc;
 		Region *freeRegion;
 		Region *nextRegion;
