@@ -85,7 +85,7 @@ namespace avmplus
     }
 #endif
     
-    Verifier::Verifier(MethodInfo* info, Toplevel* toplevel
+    Verifier::Verifier(MethodInfo* info, Toplevel* toplevel, AbcEnv* abc_env
 #ifdef AVMPLUS_VERBOSE
         , bool secondTry
 #endif
@@ -99,6 +99,7 @@ namespace avmplus
 		this->core   = info->pool()->core;
         this->pool   = info->pool();
         this->toplevel = toplevel;
+        this->abc_env  = abc_env;
 
 		// do these checks early before we allocate any resources.
 		if (!info->abc_body_pos()) {
@@ -1096,6 +1097,14 @@ namespace avmplus
 
 			case OP_callstatic: 
 			{
+                //  Ensure that the method is eligible for callstatic.
+                //  Note: This fails when called by verifyEarly(), since the
+                //  data structures being checked have not been initialized.
+                //  Need to either rearrange the initialization sequence or 
+                //  mark this verify pass as "needs late retry."
+                if ( ! abc_env->getMethod(imm30) )
+                    verifyFailed(kCorruptABCError);
+
 				MethodInfo* m = checkMethodInfo(imm30);
 				const uint32_t argc = imm30b;
 				checkStack(argc+1, 1);
@@ -2475,7 +2484,7 @@ namespace avmplus
 		if (!secondTry && !verbose)
 		{
 			// capture the verify trace even if verbose is false.
-			Verifier v2(info, toplevel, true);
+			Verifier v2(info, toplevel, abc_env, true);
 			v2.verbose = true;
 			CodeWriter stubWriter;
 			v2.verify(&stubWriter);

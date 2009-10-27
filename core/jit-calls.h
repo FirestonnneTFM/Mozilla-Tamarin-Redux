@@ -706,8 +706,23 @@
 
     METHOD(COREADDR(AvmCore::setDxns), SIG3(V,P,P,P), setDxns)
     METHOD(COREADDR(AvmCore::setDxnsLate), SIG3(V,P,P,A), setDxnsLate)
-    FUNCTION(FUNCADDR(AvmCore::istypeAtom), SIG2(A,A,P), istypeAtom)
-    CSEMETHOD(TOPLEVELADDR(Toplevel::toClassITraits), SIG2(P,P,A), toClassITraits)
+
+    // implementation of OP_istypelate with unknown type
+    int istypelate(MethodEnv* env, Atom val, Atom type)
+    {
+        AvmAssert(!AvmCore::isNullOrUndefined(type)); // jit inlined the null check.
+        Traits* t = env->toplevel()->toClassITraits(type);
+        return AvmCore::istype(val, t); // implicitly cast bool -> int
+    }
+    FUNCTION(FUNCADDR(istypelate), SIG3(I,P,A,A), istypelate)
+
+    // implementation of OP_istype (known type, no side effects)
+    int istype(Atom val, Traits* t)
+    {
+        return AvmCore::istype(val, t); // implicitly cast bool -> int
+    }
+    CSEFUNCTION(FUNCADDR(istype), SIG2(I,A,P), istype)
+
     CSEMETHOD(COREADDR(AvmCore::stricteq), SIG3(A,P,A,A), stricteq)
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
     CSEMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
