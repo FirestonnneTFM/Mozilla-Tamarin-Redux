@@ -800,6 +800,13 @@ namespace avmplus
  				// Even tho E3 says create an Object, E4 says create an Array so thats what we will do.
  				framep[param_count+1] = env->createArguments(_atomv, arguments_argc)->atom();
  			}
+
+#ifdef DEBUGGER
+            // in debugger builds, ensure that non-active scope entries are nulled out
+            // (really only need to do so if there's a debugger active, but not really worth checking for)
+            for (int i = 0; i < ms->max_scope(); ++i)
+                scopeBase[i] = nullObjectAtom;
+#endif
  		}
 
 #ifdef DEBUGGER
@@ -2704,6 +2711,10 @@ namespace avmplus
 					if (scope->getSize() == 0)
 						globalScope = NULL;
 				}
+            #ifdef DEBUGGER
+                // in debugger builds, ensure that non-active scope entries are nulled out
+                scopeBase[scopeDepth] = nullObjectAtom;
+            #endif
 				if (withBase >= scopeBase + scopeDepth)
 					withBase = NULL;
 				NEXT;
@@ -3241,6 +3252,11 @@ namespace avmplus
 			pc = codeStart + handler->target;
 #endif
 			scopeDepth = 0;
+#ifdef DEBUGGER
+            // in debugger builds, ensure that non-active scope entries are nulled out
+            for (int i = 0, n = ms->max_scope(); i < n; ++i)
+                scopeBase[i] = nullObjectAtom;
+#endif
 			globalScope = (scope->getSize() > 0) ? AvmCore::atomToScriptObject(scope->getScope(0)) : NULL;
 			sp = scopeBase + ms->max_scope() - 1;
 			*(++sp) = exception->atom;

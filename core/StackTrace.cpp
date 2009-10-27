@@ -145,15 +145,52 @@ namespace avmplus
 		}
 	}
 
-	void** FASTCALL CallStackNode::scopeBase()
+	void CallStackNode::enumerateScopeChainAtoms(IScopeChainEnumerator& scb)
 	{
-		// If we were given a real frame, calculate the scope base; otherwise return NULL
-		if (m_framep && m_env)
+		// First, get the "dynamic" portion of the scope chain, that is, the
+		// part that is modified on-the-fly within the function.  This includes
+		// activation objects for try/catch blocks and "with" clauses.
+
+		if (m_info)
 		{
-            // @todo disabling this for now see https://bugzilla.mozilla.org/show_bug.cgi?id=484039
-			//return (void**) (m_framep + m_env->method->getMethodSignature()->local_count());
+            MethodSignaturep const ms = m_info->getMethodSignature();
+            const Atom* const scopeBase = (const Atom*)m_framep + ms->local_count();
+            for (int i = ms->max_scope() - 1; i >= 0; --i)
+            {
+                Atom scope = scopeBase[i];
+                // the JIT can use Atoms or untagged ScriptObjects here... let's check and normalize
+                // to a real Atom so the caller doesn't have to play guessing games
+                if (atomKind(scope) == kUnusedAtomTag)
+                {
+                    // we know the tag bits are zero
+                    // scope |= kObjectType;
+                    // using + is potentially more efficient when we know the tag is zero
+                    scope += kObjectType;
+                }
+                
+                // go ahead and call addScope, even if null or undefined.
+                scb.addScope(scope);
+            }
 		}
-		return NULL;
+
+		// Next, get the "static" portion of the scope chain, that is, the
+		// part that is defined as part of the definition of the function.  This
+		// includes the locals of any functions that enclose this one, and the "this"
+		// object, if any.
+
+		ScopeChain* scopeChain = m_env ? m_env->scope() : NULL;
+		if (scopeChain) 
+		{
+			int scopeChainLength = scopeChain->getSize();
+			for (int i = scopeChainLength - 1; i >= 0; --i)
+			{
+				Atom scope = scopeChain->getScope(i);
+				if (AvmCore::isObject(scope))
+				{
+                    scb.addScope(scope);
+				}
+			}
+		}
 	}
 
 	// Dump a filename.  The incoming filename is of the form
