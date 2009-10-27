@@ -48,7 +48,7 @@
 #
 
 import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, shutil
-import subprocess
+import subprocess, random
 from os.path import *
 from os import getcwd,environ
 from datetime import datetime
@@ -100,6 +100,9 @@ class RuntestBase:
     longOptions = []
     osName = ''
     vmtype = ''
+    timeout = 0 # in seconds
+    startTime = 0
+    
 
     js_output = ''
     js_output_f = None
@@ -123,6 +126,7 @@ class RuntestBase:
     winceProcesses = []
     csv = False
     apiVersioning = False
+    random = False
     
     genAtsSwfs = False
     atsDir = 'ATS_SWFS'
@@ -242,10 +246,13 @@ class RuntestBase:
         print '    --showtimes     shows the time for each test'
         print '    --ascargs       args to pass to asc on rebuild of test files'
         print '    --vmargs        args to pass to vm'
-        print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
+        print '    --timeout       max time to run all tests'
+        print '    --testtimeout   max time to let a test run, in sec (default -1 = never timeout)'
         print '    --html          also create an html output file'
         print '    --notimecheck   do not recompile .abc if timestamp is older than .as'
         print '    --java          location of java executable (default=java)'
+        print '    --random        run tests in random order'
+        
         
 
     def setOptions(self):
@@ -254,8 +261,8 @@ class RuntestBase:
         self.options = 'vE:a:g:b:s:x:htfc:dqe'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                   'timeout=', 'rebuildtests','quiet','notimecheck','eval','showtimes','java=',
-                   'html']
+                   'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck','eval',
+                   'showtimes','java=','html','random']
 
     def parseOptions(self):
         try:
@@ -300,7 +307,9 @@ class RuntestBase:
             elif o in ('--ext',):
                 self.sourceExt = v
             elif o in ('--timeout',):
-                self.self.testTimeOut=int(v)
+                self.timeout = int(v)
+            elif o in ('--testtimeout',):
+                self.testTimeOut=int(v)
             elif o in ('-d',):
                 self.debug = True
             elif o in ('--rebuildtests',):
@@ -315,6 +324,9 @@ class RuntestBase:
                 self.show_time = True
             elif o in ('--java',):
                 self.java = v
+            elif o in ('--random',):
+                self.random = True
+            
         return opts
                 
     def checkPath(self):
@@ -952,14 +964,28 @@ class RuntestBase:
             for call in outputCalls:
                 apply(call[0],call[1])
     
+    # this will be called when an exception occurs within a thread
+    def handle_exception(self, request, exc_info):
+        raise exc_info[0]
+    
     def runTests(self, testList):
         testnum = len(testList)
+        if self.random:
+            random.shuffle(testList)
+        
+        if self.timeout:
+            self.js_print("will run tests until timeout of %ds is exceeded" % self.timeout)
+            self.startTime = time()
+        
         # threads on cygwin randomly lock up
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
-            for t in testList:
-                testnum -= 1
-                o = self.runTestPrep((t, testnum))
-                self.printOutput(None, o)
+            try:
+                for t in testList:
+                    testnum -= 1
+                    o = self.runTestPrep((t, testnum))
+                    self.printOutput(None, o)
+            except TimeOutException:
+                pass
         else: # run using threads
             #Assign test numbers
             testsTuples = []
@@ -967,7 +993,7 @@ class RuntestBase:
             for i,t in enumerate(testList):
               testsTuples.append([t,testsLen-i])
             # generate threadpool
-            requests = threadpool.makeRequests(self.runTestPrep, testsTuples, self.printOutput)
+            requests = threadpool.makeRequests(self.runTestPrep, testsTuples, self.printOutput, self.handle_exception)
             main = threadpool.ThreadPool(self.threads)
             # que requests
             [main.putRequest(req) for req in requests]
@@ -981,10 +1007,17 @@ class RuntestBase:
                 print '\n\nKeyboardInterrupt detected ... killing worker threads'
                 main.dismissWorkers(self.threads)
                 self.killmyself()
+            except TimeOutException:
+                main.dismissWorkers(self.threads)
+                self.cleanup()
+                self.killmyself()
             except Exception, e:
                 main.dismissWorkers(self.threads)
                 print 'EXCEPTION: %s' % e
                 self.killmyself()
+            
+                
+                
         
     def parseTestConfig(self, dir):
         settings={}
@@ -1079,6 +1112,10 @@ class RuntestBase:
         return settings
     
     def runTestPrep(self, testAndNum):
+        if self.timeout:
+            if time()-self.startTime > self.timeout:
+                raise TimeOutException
+        
         ast = testAndNum[0]
         testnum = testAndNum[1]
         outputCalls = [] #queue all output calls so that output is written in a block
