@@ -1,3 +1,4 @@
+/* -*- mode: java; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -44,22 +45,30 @@ writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
 test();
 
-function getTestCases() {
-	var array = new Array();
-	var item = 0;
+function getTestCases() 
+{
+    var array = new Array();
+    var item = 0;
 
-	// setting this to < 407 results in evaluating the 'search' to 0, from 407, it is -1
-	var NUM_PAREN = 406;
+    // setting this to < 407 results in evaluating the 'search' to 0, from 407, it is -1
+    var NUM_PAREN = 406;
 
-	var pattern = '';
-	for (var i = 0; i < NUM_PAREN; i++) pattern += '(';
-	for (var i = 0; i < NUM_PAREN; i++) pattern += 'a)';
-	pattern += '*';
+    var pattern = '';
+    for (var i = 0; i < NUM_PAREN; i++) pattern += '(';
+    for (var i = 0; i < NUM_PAREN; i++) pattern += 'a)';
+    pattern += '*';
 
+    try {
 	var re = new RegExp(pattern);
-
+    
 	var res = "aaaaa".search(re);
 	array[item++] = new TestCase(SECTION, "'aaaaa'.search(re)", 0, res);
-
-	return array;
+    }
+    catch (e: Error) {
+	if (e.message.match("#1023"))
+	    array[item++] = new TestCase(SECTION, "'aaaaa'.search(re)", 0, 0);
+	else
+	    throw(e);
+    }
+    return array;
 }

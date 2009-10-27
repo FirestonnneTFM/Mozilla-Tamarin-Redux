@@ -1,3 +1,4 @@
+/* -*- mode: java; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -44,43 +45,54 @@ writeHeaderToLog(SECTION + " " + TITLE);
 var testcases = getTestCases();
 test();
 
-function getTestCases() {
-	var array = new Array();
-	var item = 0;
+// The tests succeed either if they finish normally or if they exit by stack
+// overflow (on limited stack systems).
+function getTestCases() 
+{
+    var array = new Array();
+    var item = 0;
 
-	var NO_BACKREFS = false;
-	var DO_BACKREFS = true;
+    var NO_BACKREFS = false;
+    var DO_BACKREFS = true;
 
-	//--------------------------------------------------
+    //--------------------------------------------------
 
-	testThis(500, NO_BACKREFS, 'a');
-	testThis(500, DO_BACKREFS, 'a');
+    testThis(500, NO_BACKREFS, 'a');
+    testThis(500, DO_BACKREFS, 'a');
 
-	//--------------------------------------------------
+    //--------------------------------------------------
 
-	/*
-	 * Creates a regexp pattern like ((...((a))...))
-	 * and tests str.search(), str.match(), str.replace()
-	 * */
-	function testThis(numParens, doBackRefs, str)
-	{
-		var openParen = doBackRefs? '(' : '(?:';
-		var closeParen = ')';
-		var pattern = '';
+    /*
+     * Creates a regexp pattern like ((...((a))...))
+     * and tests str.search(), str.match(), str.replace()
+     * */
+    function testThis(numParens, doBackRefs, str)
+    {
+	var openParen = doBackRefs? '(' : '(?:';
+	var closeParen = ')';
+	var pattern = '';
+	    
+	for (var i=0; i<numParens; i++) {pattern += openParen;}
+	pattern += str;
+	for (i=0; i<numParens; i++) {pattern += closeParen;}
 
-		for (var i=0; i<numParens; i++) {pattern += openParen;}
-		pattern += str;
-		for (i=0; i<numParens; i++) {pattern += closeParen;}
-		var re = new RegExp(pattern);
-
-		if (doBackRefs) {
-			var res = str.search(re);
-			array[item++] = new TestCase(SECTION, "str.search(re)", -1, res);
-		} else {
-			var res = str.search(re);
-			array[item++] = new TestCase(SECTION, "str.search(re)", 0, res);
-		}
+	try {
+	    var re = new RegExp(pattern);
+	    
+	    if (doBackRefs) {
+		var res = str.search(re);
+		array[item++] = new TestCase(SECTION, "str.search(re)", -1, res);
+	    } else {
+		var res = str.search(re);
+		array[item++] = new TestCase(SECTION, "str.search(re)", 0, res);
+	    }
 	}
-
-	return array;
+	catch (e: Error) {
+	    if (e.message.match("#1023"))
+		array[item++] = new TestCase(SECTION, "str.search(re)", 0, 0);
+	    else
+		throw(e);
+	}
+    }
+    return array;
 }

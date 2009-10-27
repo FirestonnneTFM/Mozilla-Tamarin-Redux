@@ -112,7 +112,7 @@ namespace avmshell
 				   (int32_t*) _api_compat);
 	}
 	
-	void ShellCore::stackOverflow(MethodEnv *env)
+	void ShellCore::stackOverflow(Toplevel* toplevel)
 	{
 		if (inStackOverflow)
 		{
@@ -126,8 +126,6 @@ namespace avmshell
 		// There should be plenty of margin before the
 		// actual stack bottom to do this.
 		inStackOverflow = true;
-
-		Toplevel* toplevel = env->toplevel();
 
 		Stringp errorMessage = getErrorMessage(kStackOverflowError);
 		Atom args[2] = { nullObjectAtom, errorMessage->atom() };
@@ -147,10 +145,8 @@ namespace avmshell
 		((AvmCore*)data)->raiseInterrupt(ScriptTimeout);
 	}
 	
-	void ShellCore::interrupt(MethodEnv *env, InterruptReason)
+	void ShellCore::interrupt(Toplevel *toplevel, InterruptReason)
 	{
-		Toplevel* toplevel = env->toplevel();
-
 		if (gracePeriod) {
 			// This script has already had its chance; it violated
 			// the grace period.
@@ -162,13 +158,13 @@ namespace avmshell
 			exception->flags |= Exception::EXIT_EXCEPTION;
 			throwException(exception);
 		}
-
+		
 		// Give the script an additional grace period to
 		// clean up, and throw an exception.
 		gracePeriod = true;
-
+		
 		Platform::GetInstance()->setTimer(kScriptGracePeriod, interruptTimerCallback, this);
-
+		
 		toplevel->throwError(kScriptTimeoutError);
 	}
 	

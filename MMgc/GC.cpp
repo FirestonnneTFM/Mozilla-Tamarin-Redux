@@ -3719,11 +3719,25 @@ bail:
  			if(onThread()) {
  				Collect();
  			} else {
- 				if(VMPI_lockTestAndAcquire(&m_gcLock)) {
+				//  If we're not already in the middle of collecting from another thread's GC, then try to...
+ 				if(m_gcThread == NULL && heap->GetEnterFrame()->GetCollectingGC() == NULL && VMPI_lockTestAndAcquire(&m_gcLock)) {
+					
 					// got it
 					m_gcThread = VMPI_currentThread();
- 					Collect(false);
+ 					
+					//  Tell the heap that we are temporarily invoking a "collect" on this GC, and have locked the gcLock.  
+					//  This will allow "GCHeap::Abort" to release the lock if Abort is thrown while collecting
+					heap->GetEnterFrame()->SetCollectingGC(this);
+
+					//  If collect fails due to allocation here, then we'll end up leaving this thread, need to store off this gclock so that if abort is called
+					//  we know whassup
+					Collect(false);
+
+					//  Set collecting GC back to NULL now that we are finished
+					heap->GetEnterFrame()->SetCollectingGC(NULL);
+					
 					m_gcThread = NULL;;
+
  					VMPI_lockRelease(&m_gcLock);
  				}		
  				// else nothing can be done

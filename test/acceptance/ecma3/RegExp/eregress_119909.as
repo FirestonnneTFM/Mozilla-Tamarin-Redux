@@ -80,9 +80,11 @@ function getTestCases() {
 	  for (var i=0; i<numParens; i++) {pattern += openParen;}
 	  pattern += strOriginal;
 	  for (i=0; i<numParens; i++) {pattern += closeParen;}
-	  var re = new RegExp(pattern);
+
+	  try {
+	      var re = new RegExp(pattern);
 	
-	  if (doBackRefs) {
+	      if (doBackRefs) {
 		  var res = strOriginal.search(re);
 		  array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
 
@@ -91,7 +93,7 @@ function getTestCases() {
 
 		  res = strOriginal.replace(re, strReplace);
 		  array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "hello", res);
-	  } else {
+	      } else {
 	  	  var res = strOriginal.search(re);
 		  array[item++] = new TestCase(SECTION, "strOriginal.search(re)", 0, res);
 
@@ -103,6 +105,13 @@ function getTestCases() {
 		  res = strOriginal.replace(re, strReplace);
 		  array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "goodbye", res);
 	
+	      }
+	  }
+	  catch (e: Error) {
+	      if (e.message.match("#1023"))
+		  array[item++] = new TestCase(SECTION, "str.search(re)", 0, 0);
+	      else
+		  throw(e);
 	  }
 	}
 

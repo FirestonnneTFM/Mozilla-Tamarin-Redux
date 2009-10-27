@@ -87,7 +87,7 @@ namespace avmplus
 		PoolObject *pool;
 		int labelCount;
 
-		Verifier(MethodInfo *info, Toplevel* toplevel
+		Verifier(MethodInfo *info, Toplevel* toplevel, AbcEnv* abc_env
 #ifdef AVMPLUS_VERBOSE
 			, bool secondTry=false
 #endif
@@ -113,6 +113,7 @@ namespace avmplus
 
 	private:
 		Toplevel* toplevel;
+        AbcEnv*   abc_env;
 		Value& checkLocal(int local);
 		MethodInfo*  checkDispId(Traits* traits, uint32_t disp_id);
 		MethodInfo*  checkMethodInfo(uint32_t method_id);

@@ -361,6 +361,7 @@ extern void			VMPI_lockInit(vmpi_spin_lock_t* lock);
 * This method is called when MMgc no longer intends to use the vmpi_spin_lock_t
 * instance created and return via VMPI_lockCreate.
 * The implementation can safely destroy the lock instance.
+* It is allowed for the caller to have acquired the lock when this function is called.
 * @param lock instance of vmpi_spin_lock_t to be destroyed
 * @return none
 * @see VMPI_lockCreate

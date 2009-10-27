@@ -478,7 +478,7 @@ namespace avmplus
 		if (config.verifyall) {
 			for (int i=0, n=pool->scriptCount(); i < n; i++)
 				enqTraits(pool->getScriptTraits(i));
-			verifyEarly(toplevel);
+			verifyEarly(toplevel, abcEnv);
 		}
 #endif
 
@@ -716,7 +716,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					}	
 					else
 					{
-						return x->getNode()->_equals(this, y->getNode());
+						return x->getNode()->_equals(x->toplevel(), this, y->getNode());
 					}
 				}
 				else if (isQName(lhs) && isQName(rhs))
@@ -4273,7 +4273,7 @@ return the result of the comparison ToPrimitive(x) == y.
         }
 	}
 
-    void AvmCore::verifyEarly(Toplevel* toplevel) {
+    void AvmCore::verifyEarly(Toplevel* toplevel, AbcEnv* abc_env) {
         List<MethodInfo*, LIST_GCObjects> verifyQueue2(GetGC());
 		int verified = 0;
 		do {
@@ -4287,7 +4287,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					}
 					verified++;
 					//console << "pre verify " << f << "\n";
-					f->verify(toplevel);
+					f->verify(toplevel, abc_env);
 					f->setVerified();
 				}
 			}
@@ -4328,18 +4328,39 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 	/* static */
-	void AvmCore::handleStackOverflow(MethodEnv* env)
+	void AvmCore::handleStackOverflowMethodEnv(MethodEnv* env)
+	{
+		handleStackOverflowToplevel(env->toplevel());
+	}
+
+	/* static */
+	void AvmCore::handleStackOverflowToplevel(Toplevel* toplevel)
 	{
 		// this could be a real stack overflow, or an interrupt that
 		// used the stack overflow handler as a way to take control of AS3.
-		AvmCore *core = env->core();
+		AvmCore *core = toplevel->core();
 		if (core->interrupted) {
-			handleInterrupt(env);
+			handleInterruptToplevel(toplevel);
 			// never returns
 		}
-
+		
 		// invoke host's stack overflow handler
-		core->stackOverflow(env);
+		core->stackOverflow(toplevel);
+	}
+	
+	static GCThreadLocal<Toplevel*> PCREContext;
+
+	/* static */
+	void AvmCore::checkPCREStackOverflow()
+	{
+		AvmAssert(PCREContext != NULL);
+		(PCREContext->core())->stackCheck(PCREContext);
+	}
+
+	/* static */
+	void AvmCore::setPCREContext(Toplevel* env)
+	{
+		PCREContext = env;
 	}
 
 	void AvmCore::raiseInterrupt(InterruptReason reason)
@@ -4349,16 +4370,22 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 	/* static */
-	void AvmCore::handleInterrupt(MethodEnv *env)
+	void AvmCore::handleInterruptMethodEnv(MethodEnv *env)
 	{
-		AvmCore *core = env->core();
+		handleInterruptToplevel(env->toplevel());
+	}
+
+	/* static */
+	void AvmCore::handleInterruptToplevel(Toplevel *toplevel)
+	{
+		AvmCore *core = toplevel->core();
 		InterruptReason reason = core->interrupted;
 		core->interrupted = NotInterrupted;
-		core->interrupt(env, reason);
+		core->interrupt(toplevel, reason);
 		// interrupt() must not return!
 		AvmAssert(false);
 	}
-
+	
 	// BEGIN api versioning
 
 	void AvmCore::setActiveAPI(API api)
