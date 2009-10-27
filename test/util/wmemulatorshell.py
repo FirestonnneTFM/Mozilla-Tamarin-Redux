@@ -89,7 +89,7 @@ def runTest():
     cmdfile=dir+"/nextvm.txt"
     dlog='%s/media/%s.log' % (dir,base)
     dabc='%s/media/%s.abc' % (dir,base)
-    exitcodefile='%s/exitcode.txt' % dir
+    exitcodefile='%s.exitcode' % dabc
     ctr=0
 
     # clean up old log and abc files
@@ -172,11 +172,16 @@ def runTest():
 
 # read the exitcode file
     exitcode=0
+    ctr=0
+    while os.path.exists(exitcodefile)==False and ctr<50:
+        time.sleep(.4)
+        ctr+=1
     if os.path.exists(exitcodefile):
         try:
             file=open(exitcodefile,'r')
             exitcodestr=file.read()
             exitcode=int(exitcodestr.strip())
+            file.close()
         except:
             print 'exception reading exit code file'
             try:
@@ -184,6 +189,11 @@ def runTest():
             except:
                 pass
             return (-1,"exception reading exit code file")
+    else:
+        print "ERROR: cannot find exit code file %s" % exitcodefile
+        if os.path.exists(dir+'/lock'):
+            os.unlink(dir+'/lock')
+        return (-1,"ERROR: cannot find exit code file %s" % exitcodefile)
 
 #  remove lock, another thread can use the emulator while the shell reads the output log
 #    print "SHELL: finished %s : %d" % (abc,time.time()-starttime)
@@ -201,7 +211,7 @@ def runTest():
     except:
        print "ERROR: failed to read log  %s" % dlog
        return (-1,"ERROR: failed to read log %s" % dlog)
-    return (exitcode,sysout)
+    return (exitcode,"succeeded")
 
 
 # main
@@ -232,7 +242,7 @@ retrys=0
 while retrys<5:
     print "attempt %d, retry %d" % (attempts,retrys)
     (res,sysout)=runTest()
-    print("exit code=%d" % res)
+    print("exit code=%d reason=%s"  % (res,sysout))
     if res!=-1 and res!=1:
         sys.exit(res)
     attempts+=1

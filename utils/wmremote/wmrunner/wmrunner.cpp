@@ -52,6 +52,7 @@ INT                 i_timer;
 TCHAR               szMessage[550];
 TCHAR               szError[550];
 TCHAR               szExitCode[550];
+TCHAR               szExitCodeFile[550];
 TCHAR               nextvm[500];
 TCHAR               shell[100];
 TCHAR               last[200];
@@ -420,6 +421,23 @@ BOOL checkForCommand(HWND hWnd) {
 			BOOL convert;
             convert=MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,msg,-1,last,500);
 			convert=MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,data,-1,params,500);
+            char *pch;
+			char filename[500];
+			pch=strtok(data," ");
+			while (pch!=NULL) {
+				if (pch[0]!='\"') {
+					strcat(filename," ");
+					strcat(filename,pch);
+				} else {
+					strcpy(filename,pch+1);
+				}
+				if (filename[strlen(filename)-1]=='\"') {
+					filename[strlen(filename)-1]=0;
+				}
+				pch=strtok(NULL," ");
+			}
+			strcat(filename,".exitcode");
+			MultiByteToWideChar(CP_ACP,0,filename,-1,szExitCodeFile,500);
 			if (convert==0) {
 				_tcscpy(szMessage,L"error converting string");
 				_tcscpy(szError,L"error converting string");
@@ -452,7 +470,7 @@ BOOL checkForCommand(HWND hWnd) {
 						char szExit[100];
 						sprintf(szExit,"%d\n",i_exitcode);
 						DWORD dwBytes;
-						HANDLE ceExitFile = CreateFile(L"\\Storage Card\\exitcode.txt", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
+						HANDLE ceExitFile = CreateFile(szExitCodeFile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
                         WriteFile(ceExitFile, (void*)szExit, strlen(szExit), &dwBytes, NULL);
                         CloseHandle(ceExitFile);
 						i_buildcount++;
