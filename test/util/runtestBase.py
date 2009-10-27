@@ -427,8 +427,8 @@ class RuntestBase:
                 self.apiVersioning = True
             if re.search('\[-d\]',f):
                 self.vmtype = 'releasedebugger'
-          
-        self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+self.vmargs
+        
+        self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+self.vmargs.replace(" ", "")
     
     ### File and Directory functions ###
     def istest(self,f):
