@@ -906,6 +906,8 @@ namespace avmplus
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
 
+		core->stackCheck(toplevel);
+
 		Multiname m;
 		toplevel->CoerceE4XMultiname(name_in, m);
 
@@ -1157,6 +1159,8 @@ namespace avmplus
 	void XMLObject::__toXMLString(StringBuffer &s, AtomArray *AncestorNamespaces, int indentLevel, bool includeChildren) const
 	{
 		AvmCore *core = this->core();
+
+		core->stackCheck(toplevel());
 
 		if (toplevel()->xmlClass()->okToPrettyPrint()) 
 		{
@@ -1649,7 +1653,7 @@ namespace avmplus
 
 		E4XNode *v = AvmCore::atomToXML(value);
 
-		return getNode()->_equals (core, v) == trueAtom; // rhino
+		return getNode()->_equals (toplevel(), core, v) == trueAtom; // rhino
 		//SPEC - return (core()->equals (this->atom(), value) == trueAtom);
 	}
 

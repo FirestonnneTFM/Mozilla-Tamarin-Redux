@@ -569,6 +569,8 @@ namespace avmplus
 	// E4X 9.1.1.7, page 16
 	E4XNode *E4XNode::_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const
 	{
+		core->stackCheck(toplevel);
+
 		E4XNode *x = 0;
 		switch (this->getClass())
 		{
@@ -663,14 +665,16 @@ namespace avmplus
 #endif
 
 	// E4X 9.1.1.9, page 17
-	Atom E4XNode::_equals(AvmCore *core, E4XNode *v) const
+	Atom E4XNode::_equals(Toplevel* toplevel, AvmCore *core, E4XNode *v) const
 	{
+		core->stackCheck(toplevel);
+		
 		if (this == v)
 			return trueAtom;
 
 		if (this->getClass() != v->getClass())
 			return falseAtom;
-
+		
 		Multiname m;
 		Multiname m2;
 		Namespacep publicNS = core->findPublicNamespace();
@@ -733,7 +737,7 @@ namespace avmplus
 			bool bFoundMatch = false;
 			for (uint32 k2 = 0; k2 < v->numAttributes(); k2++)
 			{
-				if (x1->_equals (core, v->getAttribute(k2)) == trueAtom)
+				if (x1->_equals (toplevel, core, v->getAttribute(k2)) == trueAtom)
 				{
 					bFoundMatch = true;
 					break;
@@ -749,7 +753,7 @@ namespace avmplus
 		{
 			E4XNode *x1 = _getAt(i);
 			E4XNode *x2 = v->_getAt(i);
-			if (x1->_equals (core, x2) == falseAtom)
+			if (x1->_equals (toplevel, core, x2) == falseAtom)
 				return falseAtom;
 		}
 
