@@ -149,10 +149,26 @@ inline void* operator new(size_t, void* p) { return p; }
 
 typedef void *maddr_ptr;
 
+// Set up a jmp_buf suitable for VMPI_longjmpNoUnwind.
+//#define VMPI_setjmpNoUnwind ::setjmp
+
+// Jump to an active jmp_buf that was set up by VMPI_setjmpNoUnwind.
+// Under no circumstances may C++ destructors be unwound during the
+// jump (MSVC likes to do this by default).
+//#define VMPI_longjmpNoUnwind ::longjmp
+
 #ifdef VMCFG_64BIT
 	#include <setjmpex.h>
+	extern "C"
+	{
+		_int64 __cdecl longjmp64(jmp_buf jmpbuf, _int64 arg);
+	}
+	#define VMPI_setjmpNoUnwind(buf)    ::setjmp(buf)
+	#define VMPI_longjmpNoUnwind(buf,n) ::longjmp64(buf,n)
 #else
 	#include <setjmp.h>
+	#define VMPI_setjmpNoUnwind(buf)    ::setjmp(buf)
+	#define VMPI_longjmpNoUnwind(buf,n) ::longjmp(buf,n)
 #endif
 
 #ifndef UNDER_CE
