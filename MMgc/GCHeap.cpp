@@ -259,9 +259,15 @@ namespace MMgc
 #endif
 
 		FreeAll();
-
-		VMPI_lockDestroy(&gclog_spinlock);
+		
+		//  Acquire all the locks before destroying them to make absolutely sure we're the last consumers.
+		VMPI_lockAcquire(&m_spinlock);
 		VMPI_lockDestroy(&m_spinlock);
+
+		VMPI_lockAcquire(&gclog_spinlock);
+		VMPI_lockDestroy(&gclog_spinlock);
+		
+		VMPI_lockAcquire(&list_lock);
 		VMPI_lockDestroy(&list_lock);
 		
 		if(enterFrame)
