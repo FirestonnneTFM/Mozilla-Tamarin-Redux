@@ -1782,6 +1782,7 @@ static BOOL
 could_be_empty_branch(const uschar *code, const uschar *endcode, BOOL utf8)
 {
 register int c;
+avmplus::AvmCore::checkPCREStackOverflow();
 for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE);
      code < endcode;
      code = first_significant_code(code + _pcre_OP_lengths[c], NULL, 0, TRUE))
@@ -5516,6 +5517,8 @@ int orig_bracount;
 int max_bracount;
 branch_chain bc;
 
+avmplus::AvmCore::checkPCREStackOverflow();
+	
 bc.outer = bcptr;
 bc.current = code;
 

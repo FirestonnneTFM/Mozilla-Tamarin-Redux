@@ -328,12 +328,31 @@ const int kBufferPadding = 16;
 		 */
 		void stackCheck(MethodEnv* env);
 		
+		/**
+		 * Like the previous method but for a Toplevel* argument.
+		 */
+		void stackCheck(Toplevel* env);
+		
 		/** set the stack limit that will be checked by executing AS3 code. */
 		void setStackLimit(uintptr_t p);
 
 		/** called by executing code when stack overflow is detected (sp < minstack) */
-		static void FASTCALL handleStackOverflow(MethodEnv* env);
+		static void FASTCALL handleStackOverflowMethodEnv(MethodEnv* env);
 
+		/** called by executing code when stack overflow is detected (sp < minstack) */
+		static void FASTCALL handleStackOverflowToplevel(Toplevel* env);
+		
+		/**
+		 * Called by certain functions in PCRE to check for overflow.  The state is
+		 * kept in thread-local storage and is set up by call-ins to PCRE.
+		 */
+		static void FASTCALL checkPCREStackOverflow();
+ 
+		/**
+		 * Set the state for call-ins to PCRE.
+		 */
+		static void setPCREContext(Toplevel* env);
+		
 	private:
 		/**
 		 * Stack limit set by host and checked by executing AS3 code.
@@ -1010,8 +1029,8 @@ const int kBufferPadding = 16;
 		 * when the interrupted flag is set.  interrupt()
 		 * MUST NOT RETURN; the caller expects a thrown exception.
 		 */
-		virtual void interrupt(MethodEnv *env, InterruptReason) = 0;
-
+		virtual void interrupt(Toplevel *env, InterruptReason) = 0;
+		
 		/**
 		 * called by the host to raise the AS3 interrupt exception.
 		 * if AS3 code is executing, then soon after this call, 
@@ -1026,14 +1045,20 @@ const int kBufferPadding = 16;
 		 * called by AS3 code when the interrupt is detected.  Must
 		 * not return!
 		 */
-		static void handleInterrupt(MethodEnv*);
+		static void handleInterruptMethodEnv(MethodEnv*);
 
+		/**
+		 * called by AS3 code when the interrupt is detected.  Must
+		 * not return!
+		 */
+		static void handleInterruptToplevel(Toplevel*);
+		
 		/**
 		 * This is called when the stack overflows
 		 * (when the machine stack pointer is about to go below
 		 *  minstack)
 		 */
-		virtual void stackOverflow(MethodEnv *env) = 0;
+		virtual void stackOverflow(Toplevel *env) = 0;
 		
 		/**
 		 * Throws an exception.  Constructs an Exception object

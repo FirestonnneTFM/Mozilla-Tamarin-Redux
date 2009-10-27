@@ -428,8 +428,8 @@
     FUNCTION(FUNCADDR(getprop_late), SIG3(A,P,A,P), getprop_late)
 
     METHOD(ENVADDR(MethodEnv::npe), SIG1(V,P), npe)
-    FUNCTION(FUNCADDR(AvmCore::handleInterrupt), SIG1(V,P), handleInterrupt)
-    FASTFUNCTION(FUNCADDR(AvmCore::handleStackOverflow), SIG1(V,P), handleStackOverflow)
+    FUNCTION(FUNCADDR(AvmCore::handleInterruptMethodEnv), SIG1(V,P), handleInterruptMethodEnv)
+    FASTFUNCTION(FUNCADDR(AvmCore::handleStackOverflowMethodEnv), SIG1(V,P), handleStackOverflowMethodEnv)
     METHOD(ENVADDR(MethodEnv::nextname), SIG3(A,P,A,I), nextname)
     METHOD(ENVADDR(MethodEnv::nextvalue), SIG3(A,P,A,I), nextvalue)
     METHOD(ENVADDR(MethodEnv::hasnext), SIG3(I,P,A,I), hasnext)

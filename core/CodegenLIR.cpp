@@ -1388,7 +1388,7 @@ namespace avmplus
         LIns *d = loadIns(LIR_ldp, offsetof(AvmCore, minstack), coreAddr);
         LIns *c = binaryIns(LIR_pult, methodFrame, d);
         LIns *b = branchIns(LIR_jf, c);
-        callIns(FUNCTIONID(handleStackOverflow), 1, env_param);
+        callIns(FUNCTIONID(handleStackOverflowMethodEnv), 1, env_param);
         LIns *label = Ins(LIR_label);
         verbose_only( if (lirbuf->names) { lirbuf->names->addName(label, "begin");  })
         b->setTarget(label);
@@ -4766,7 +4766,7 @@ namespace avmplus
             LIns *label = Ins(LIR_label);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "interrupt"); })
             setLabelPos(interrupt_label, label);
-            callIns(FUNCTIONID(handleInterrupt), 1, env_param);
+            callIns(FUNCTIONID(handleInterruptMethodEnv), 1, env_param);
         }
 
         if (info->hasExceptions()) {

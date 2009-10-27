@@ -48,6 +48,13 @@ namespace avmplus
 	using namespace MMgc;
 
 
+	class PcreState {
+	public:
+		PcreState(Toplevel* t) { AvmCore::setPCREContext(t); }
+		~PcreState() { AvmCore::setPCREContext(NULL); }
+	};
+	
+#define PCRE_STATE(x) PcreState p(x)
 
 #define OVECTOR_SIZE 99 // 32 matches = (32+1)*3
 
@@ -68,6 +75,7 @@ namespace avmplus
 		m_source = core->newConstantStringLatin1("(?:)");
 
 		StUTF8String utf8Pattern(m_source);
+		PCRE_STATE(toplevel());
 		m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
 	}
 
@@ -87,6 +95,7 @@ namespace avmplus
 		StUTF8String utf8Pattern(m_source);
 		int errptr;
 		const char *error;
+		PCRE_STATE(toplevel());
 		m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
 	}
 		
@@ -160,6 +169,7 @@ namespace avmplus
 			}
 		}
 
+		PCRE_STATE(toplevel());
 		
 		m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
 		// FIXME: make errors available to actionscript
@@ -167,6 +177,7 @@ namespace avmplus
 
 	RegExpObject::~RegExpObject()
 	{
+		PCRE_STATE(toplevel());
 		(pcre_free)((void*)(pcre*)m_pcreInst);
 		m_global = false;
 		m_lastIndex = 0;
@@ -337,6 +348,7 @@ namespace avmplus
 		int results;
 		int subjectLength = utf8Subject.length();
 
+		PCRE_STATE(toplevel());
 		if( startIndex < 0 ||
 			startIndex > subjectLength ||
 			(results = pcre_exec((pcre*)m_pcreInst,
@@ -472,6 +484,8 @@ namespace avmplus
 
 		const char *src = utf8Subject.c_str();
 		
+		PCRE_STATE(toplevel());
+
 		// get start/end index of all matches
 		int matchCount;
 		while (lastIndex <= subjectLength &&
@@ -587,6 +601,8 @@ namespace avmplus
 
 		const char *src = utf8Subject.c_str();
 		
+		PCRE_STATE(toplevel());
+
 		// get start/end index of all matches
 		int matchCount;
 		while (lastIndex < subjectLength &&
