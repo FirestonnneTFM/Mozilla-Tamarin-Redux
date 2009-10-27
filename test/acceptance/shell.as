@@ -1047,3 +1047,16 @@ function parseError(error,len) {
   }
   return error;
 }
+
+// helper function for api versioning tests
+function versionTest(testFunc, desc, expected) {
+   var result;
+   try {
+       result = testFunc();
+   } catch (e) {
+       // Get the error type and code, but not desc if its a debug build
+       result = e.toString().substring(0,e.toString().indexOf(':')+13);
+   }
+   AddTestCase(desc, expected, result);
+}
+
