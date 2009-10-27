@@ -76,6 +76,9 @@ static void endGCLogToFile()
 namespace MMgc
 {
 	GCHeap *GCHeap::instance = NULL;
+	bool GCHeap::instanceEnterLockInitialized = false;
+	vmpi_spin_lock_t GCHeap::instanceEnterLock;
+
 	// GCHeap instance has the C++ runtime call dtor which causes problems
 	AVMPLUS_ALIGN8(uint8_t) heapSpace[sizeof(GCHeap)];
 
@@ -127,9 +130,11 @@ namespace MMgc
 
 	size_t GCHeap::Destroy()
 	{
+		EnterLock();	
 		GCAssert(instance != NULL);
 		instance->DestroyInstance();
 		instance = NULL;
+		EnterRelease();		
 		return leakedBytes;
 	}
 
@@ -1724,7 +1729,6 @@ namespace MMgc
 	
 	void GCHeap::Enter(EnterFrame *frame)
 	{
-		MMGC_LOCK(m_spinlock);
 		enterCount++;
 		enterFrame = frame;
 	}
@@ -1741,23 +1745,25 @@ namespace MMgc
 				abortStatusNotificationSent = true;
 				StatusChangeNotify(kMemAbort);
 			}
+		}
+	
+		EnterLock();				
+		// do this after StatusChangeNotify it affects ShouldNotEnter
+		enterFrame = NULL;
 
-			// do this after StatusChangeNotify it affects ShouldNotEnter
-			enterFrame = NULL;
+		enterCount--;
 
-			enterCount--;
-
-			if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
-				// last one out of the pool pulls the plug
-				heapToDestroy = instance;
-				instance = NULL;
-			}
+		if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
+			// last one out of the pool pulls the plug
+			heapToDestroy = instance;
+			instance = NULL;
 		}
 		if(heapToDestroy != NULL) {
 			// any thread can call this, just need to make sure all other
 			// threads are done, hence the ref counting
 			heapToDestroy->DestroyInstance();
 		}
+		EnterRelease();				
 	}
 	void GCHeap::log_percentage(const char *name, size_t bytes, size_t bytes_compare)
 	{
@@ -2113,5 +2119,22 @@ namespace MMgc
 	{
 		*(Region**)r = freeRegion;
 		freeRegion = r;		
+	}
+	
+	/*static*/ 
+	void GCHeap::EnterLockInit()
+	{ 
+		if (!instanceEnterLockInitialized)
+		{
+			instanceEnterLockInitialized = true; 
+			VMPI_lockInit(&instanceEnterLock); 
+		}
+	}
+
+	/*static*/ 
+	void GCHeap::EnterLockDestroy()
+	{  
+		GCAssert(instanceEnterLockInitialized);
+		VMPI_lockDestroy(&instanceEnterLock);
 	}
 }
