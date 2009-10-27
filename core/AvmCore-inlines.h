@@ -85,7 +85,7 @@ REALLY_INLINE void AvmCore::branchCheck(MethodEnv *env, bool interruptable, int 
 		sampleCheck();
 #endif
 		if (interruptCheck(interruptable))
-			handleInterrupt(env);
+			handleInterruptMethodEnv(env);
 	}
 }
 
@@ -165,7 +165,16 @@ REALLY_INLINE void AvmCore::stackCheck(MethodEnv* env)
 	void* dummy;
 	//fprintf(stderr, "%p\n", &dummy);
 	if ((uintptr_t)&dummy < minstack)
-		handleStackOverflow(env);
+		handleStackOverflowMethodEnv(env);
+}
+
+REALLY_INLINE void AvmCore::stackCheck(Toplevel* toplevel)
+{
+	// Take the address of a local variable to get stack pointer
+	void* dummy;
+	//fprintf(stderr, "%p\n", &dummy);
+	if ((uintptr_t)&dummy < minstack)
+		handleStackOverflowToplevel(toplevel);
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isObject(Atom atom)

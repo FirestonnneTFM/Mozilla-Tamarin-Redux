@@ -2821,7 +2821,7 @@ namespace avmplus
 			INSTR(abs_jump)	{
 				if (core->interruptCheck(interruptable)) {
 					SAVE_EXPC;
-					AvmCore::handleInterrupt(env);
+					AvmCore::handleInterruptMethodEnv(env);
 				}
 #  ifdef AVMPLUS_64BIT
 				uint32_t target_lo = U30ARG;
