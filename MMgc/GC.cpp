@@ -2194,9 +2194,8 @@ bail:
 			int bits = GetPageMapValue(val);
 			switch(bits)
 			{
-			case 0:
+			case kNonGC:
 				continue;
-				break;
 			case kGCAllocPage:
 				GCAssert(GCAlloc::ConservativeGetMark((const void*) (val&~7), true));
 				break;
@@ -3153,12 +3152,9 @@ bail:
 
 		int bits = GetPageMapValueGuarded((uintptr_t)item);	
 		switch(bits) {
-		case 1:
+		case kGCAllocPage:
 			return GCAlloc::IsWhite(item);
-		case 3:
-			// FIXME: we only want pointers to the first page for large items, fix
-			// this by marking the first page and subsequent pages of large items differently
-			// in the page map (ie use 2).
+		case kGCLargeAllocPageFirst:
 			return GCLargeAlloc::IsWhite(item);
 		}
 		return false;
@@ -3465,10 +3461,10 @@ bail:
 			int bits = GetPageMapValue(m);
 			switch(bits)
 			{
-			case 0:
+			case kNonGC:
 				m += GCHeap::kBlockSize;
 				break;
-			case 3:
+			case kGCLargeAllocPageFirst:
 				{
 					GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
 					const void *item = GetUserPointer((const void*)(lb+1));
@@ -3478,7 +3474,7 @@ bail:
 					m += lb->GetNumBlocks() * GCHeap::kBlockSize;
 				}
 				break;
-			case 1:
+			case kGCAllocPage:
 				{
 					// go through all marked objects in this page
 					GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
