@@ -51,13 +51,14 @@
 showhelp ()
 {
     echo ""
-    echo "usage: run-acceptance-generic.sh <change> <filename> <vmargs> <config> <testdir(s)>"
-    echo "       <change>   build number of shell to test"
-    echo "       <filename> name of the shell, do not include file extenstion"
-    echo "       <vmargs>   vmargs to be passed or empty quoted string"
-    echo "       <config>   custom config string to be passed to runtests.py"
-    echo "                  or an empty string"
-    echo "       <testDir>  (optional) test directories to run - may be multiple dirs space seperated"
+    echo "usage: run-acceptance-generic.sh <change> <filename> <vmargs> <config> <scriptargs>"
+    echo "  <change>     build number of shell to test"
+    echo "  <filename>   name of the shell, do not include file extenstion"
+    echo "  <vmargs>     vmargs to be passed or empty quoted string"
+    echo "  <config>     custom config string to be passed to runtests.py"
+    echo "               or an empty string"
+    echo "  <scriptargs> (optional) additional runtests.py args to be passed, can be"
+    echo "               args and test/directories to run, value is appended to call"
     exit 1
 }
 
@@ -71,9 +72,9 @@ filename=$2
 vmargs=$3
 config=$4
 
-# assign the remaining positional params to testdirs
+# assign the remaining positional params to scriptargs
 shift 4
-testdirs=$*
+scriptargs=$*
 
 
 export shell=$filename$shell_extension
@@ -152,11 +153,11 @@ fi
 
 if [ "$config" != "" ]
 then
-    echo "message: $py ./runtests.py --vmargs=${vmargs} --config=${config} --notimecheck ${testdirs}"
-    $py ./runtests.py  --vmargs=${vmargs} --config=${config} --notimecheck ${testdirs}
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs}"
+    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs}
 else
-    echo "message: $py ./runtests.py --vmargs=${vmargs} --notimecheck ${testdirs}" 
-    $py ./runtests.py  --vmargs=${vmargs} --notimecheck ${testdirs}
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs}" 
+    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs}
 fi
 
 ##
