@@ -41,7 +41,7 @@
 #define __OOM_H__
 
 #define MMGC_ENTER_VOID							\
-	MMGC::GCHeap::EnterLock();					\
+	MMgc::GCHeap::EnterLock();					\
 	if(MMgc::GCHeap::ShouldNotEnter())			\
 	{											\
 		MMgc::GCHeap::EnterRelease();			\
