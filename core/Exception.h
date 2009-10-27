@@ -225,7 +225,7 @@ namespace avmplus
 		ExceptionFrame _ef; \
 		_ef.beginTry(core); \
 		_ef.catchAction = (CATCH_ACTION); \
-		int _setjmpVal = ::setjmp(_ef.jmpbuf); \
+		int _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf); \
 		Exception* _ee = core->exceptionAddr; \
 		if (!_setjmpVal)
 
@@ -233,14 +233,14 @@ namespace avmplus
 		ExceptionFrame _ef; \
 		Exception* _ee; \
 		int _setjmpVal = 0; \
-		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
 
 	#define TRY_UNLESS_HEAPMEM(mem, core, expr, CATCH_ACTION) { \
 		ExceptionFrame& _ef = *(new (mem) ExceptionFrame); \
 		ExceptionFrameAutoPtr _ef_ap(_ef); \
 		Exception* _ee; \
 		int _setjmpVal = 0; \
-		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
 
     #define CATCH(x) else { _ef.beginCatch(); x = _ee;
     #define END_CATCH }

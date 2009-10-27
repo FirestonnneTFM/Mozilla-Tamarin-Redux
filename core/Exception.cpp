@@ -135,11 +135,7 @@ namespace avmplus
 	void ExceptionFrame::throwException(Exception *exception)
 	{
 		core->exceptionAddr = exception;
-#if defined(_WIN64)
-		longjmp64(jmpbuf, (uintptr)exception); 
-#else
-		longjmp(jmpbuf, 1); 
-#endif
+		VMPI_longjmpNoUnwind(jmpbuf, 1); 
 	}
 
 	void ExceptionFrame::beginCatch()

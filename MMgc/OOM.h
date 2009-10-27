@@ -44,14 +44,14 @@
 	if(MMgc::GCHeap::ShouldNotEnter())			\
 		return;									\
 	MMgc::EnterFrame _ef;						\
-	_ef.status = setjmp(_ef.jmpbuf);            \
+	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return;
 
 
 #define MMGC_ENTER_VOID_NO_GUARD				\
 	MMgc::EnterFrame _ef;						\
-	_ef.status = setjmp(_ef.jmpbuf);            \
+	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return;
 
@@ -60,7 +60,7 @@
 	if(MMgc::GCHeap::ShouldNotEnter())			\
 		return _val;							\
 	MMgc::EnterFrame _ef;						\
-	_ef.status = setjmp(_ef.jmpbuf);            \
+	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
 	if(_ef.status != 0)							\
 		return _val;
 

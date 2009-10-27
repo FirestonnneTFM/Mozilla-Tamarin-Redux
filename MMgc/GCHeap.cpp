@@ -1716,7 +1716,7 @@ namespace MMgc
 				// we're about to jump across the GC lock, unlock it
 				ef->m_gc->SetStackEnter(NULL, false);
 			}
-			longjmp(ef->jmpbuf, 1);
+			VMPI_longjmpNoUnwind(ef->jmpbuf, 1);
 		}
 		GCAssertMsg(false, "MMGC_ENTER missing or we allocated more memory trying to shutdown");
 		VMPI_abort();
