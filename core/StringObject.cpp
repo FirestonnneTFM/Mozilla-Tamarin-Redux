@@ -574,14 +574,14 @@ namespace avmplus
 
 	String::~String()
 	{
-		GC* gc = _gc(this);
 		switch (getType())
 		{
 			case kDynamic:
-				// no need to WB() NULL here according to treilly
-				gc->Free(m_buffer.pv);
+				// never necessary to WB() when we store NULL
+				_gc(this)->Free(m_buffer.pv);
 				break;
 			case kDependent:
+				// WBRC() is however desirable when we store NULL
 				WBRC_NULL(&m_extra.master);
 				break;
 			default: ; // kStatic
