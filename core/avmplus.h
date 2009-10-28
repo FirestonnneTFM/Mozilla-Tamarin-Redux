@@ -136,6 +136,7 @@ namespace avmplus
 	class ExceptionFrame;
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
+	class FixedBitSet;
 	class FrameState;
 	class HeapHashtable;
 	class HeapMultiname;

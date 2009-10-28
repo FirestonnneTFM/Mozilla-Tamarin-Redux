@@ -130,6 +130,7 @@ namespace MMgc
 	class GC;
 	class RCObject;
 	class GCWeakRef;
+	class GCFinalizedObject;
 	class GCObject;
 	class Cleaner;
 	class GCAlloc;
