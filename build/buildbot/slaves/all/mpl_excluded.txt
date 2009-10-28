@@ -42,7 +42,6 @@
 .*/build/buildbot/master/custom/.*
 .*/doc/mmgc/audit-2009/.*
 .*/esc/.*
-.*/MMgc/Windows.*/.*
 .*/objdir/.*
 .*/other-licenses/.*
 .*/pcre/.*
@@ -63,6 +62,7 @@
 .*\.asc_args
 .*\.asm
 .*\.avm_args
+.*\.dll
 .*\.dmp
 .*\.exe
 .*\.exitcode
@@ -78,6 +78,7 @@
 .*\.out
 .*\.rej
 .*\.sln
+.*\.txt
 .*\.vcproj
 .*\.pdf
 
@@ -89,24 +90,18 @@
 .*/\.hgignore
 .*/\.hgtags
 .*/build/cygwin-wrapper\.sh
-.*/eval/backlog\.txt
-.*/eval/documentation\.txt
-.*/test/acceptance/util/.*\.py
-.*/test/acceptance/util/shell_ats\.as
 .*/platform/mac/shell/exports\.exp
 .*/platform/win32/armasm\.rules
 .*/\.buildbot-sourcedata
-.*/utils/lastsizereport\.txt
 .*/test/acceptance/test\.ba
-.*/test/acceptance/test\.txt
 .*/test/acceptance/misc/md5_t\.as
 .*/test/performance/canaries/simpleflexapputil/avmglue_abc
 .*/test/performance/canaries/simpleflexapputil/hello_frame1_abc
 .*/test/performance/canaries/simpleflexapputil/hello_frame2_abc
+.*/test/performance/mmgc/gcbench\.as
 .*/test/util/__init__\.py
 .*/test/util/killableprocess\.py
 .*/test/util/subProcess\.py
 .*/test/util/threadpool\.py
 .*/test/util/winprocess\.py
-
 

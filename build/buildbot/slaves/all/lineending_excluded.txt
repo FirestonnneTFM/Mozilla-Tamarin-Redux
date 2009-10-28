@@ -51,6 +51,8 @@
 .*\.abc
 .*_abc
 .*\.html
+.*\.dat
+.*\.dll
 .*\.exe
 .*\.jar
 .*\.pch
