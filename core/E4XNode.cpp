@@ -213,7 +213,10 @@ namespace avmplus
 
 	void E4XNode::setQName (AvmCore *core, Stringp name, Namespace *ns)
 	{
-		name = core->internString(name);
+        // name can be null!
+        if (name && !name->isInterned())
+            name = core->internString(name);
+            
 		// If we already have an aux, use it.  (It may have notification atom set)
 		uintptr nameOrAux = m_nameOrAux;
 		if (AUXBIT & nameOrAux)

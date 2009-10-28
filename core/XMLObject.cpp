@@ -570,9 +570,9 @@ namespace avmplus
 		{
 			XMLListObject *src = AvmCore::atomToXMLList(V);
 			if ((src->_length() == 1) && src->_getAt(0)->getClass() & (E4XNode::kText | E4XNode::kAttribute))
-		{
-			c = core->string(V)->atom();
-		}
+            {
+                c = core->string(V)->atom();
+            }
 			else
 			{
 				c = src->_deepCopy()->atom();									
@@ -661,13 +661,14 @@ namespace avmplus
 				Namespace *ns = 0;
 				if (m.namespaceCount() == 1)
 					ns = m.getNamespace();
-				e->setQName (core, m.getName(), ns);
+                Stringp name = !m.isAnyName() ? m.getName() : NULL;
+				e->setQName(core, name, ns);
 
 				this->m_node->addAttribute (e);
 				
-				e->_addInScopeNamespace (core, ns, publicNS);
+				e->_addInScopeNamespace(core, ns, publicNS);
 
-				nonChildChanges(xmlClass()->kAttrAdded, m.getName()->atom(), sc->atom());
+				nonChildChanges(xmlClass()->kAttrAdded, name ? name->atom() : nullStringAtom, sc->atom());
 			}
 			else // step 7g
 			{
@@ -694,8 +695,7 @@ namespace avmplus
 
 		// step 10
 		int32 i = -1; // -1 is undefined in spec
-		bool primitiveAssign = ((!AvmCore::isXML(c) && !AvmCore::isXMLList(c)) && 
-			(!m.isAnyName()));
+		bool primitiveAssign = ((!AvmCore::isXML(c) && !AvmCore::isXMLList(c)) && (!m.isAnyName()));
 
 		// step 12
 		bool notify = notifyNeeded(getNode());
