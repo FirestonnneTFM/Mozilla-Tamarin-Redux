@@ -323,5 +323,6 @@ namespace avmplus
 #include "instr-inlines.h"
 #include "Toplevel-inlines.h"
 #include "Traits-inlines.h"
+#include "VTable-inlines.h"
 
 #endif /* __avmplus__ */ 

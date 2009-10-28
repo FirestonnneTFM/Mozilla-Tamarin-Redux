@@ -113,19 +113,18 @@ namespace avmplus
 
 		VTable* newParameterizedVTable(Traits* param_traits, Stringp fullname);
 
-		inline size_t getExtraSize() const { return traits->getExtraSize(); }
-		inline MMgc::GC* gc() const { return traits->core->GetGC(); }
-		inline AvmCore* core() const { return traits->core; }
+		size_t getExtraSize() const;
+		MMgc::GC* gc() const;
+		AvmCore* core() const;
+		Toplevel* toplevel() const;
 
 #ifdef AVMPLUS_VERBOSE
-		Stringp format(AvmCore* core) const { return traits->format(core); }
+		Stringp format(AvmCore* core) const;
 #endif
 
 #ifdef DEBUGGER
 		uint32 size() const;
 #endif
-
-		inline Toplevel* toplevel() const { return _toplevel; }
 	
 	// ------------------------ DATA SECTION BEGIN
 	private:
