@@ -2727,9 +2727,8 @@ bail:
 #endif
 
 #ifdef WERNER_MODE
-
-	class MarkList
-	{
+	
+	class MarkList {
 	public:
 		static MarkList *current;
 		static int offset;
@@ -2744,8 +2743,60 @@ bail:
 	};
 	MarkList *MarkList::current = NULL;
 	int MarkList::offset = -1;
+	
+	class Werner {
+	public:
+		Werner(GCWorkItem& w);
+		void location(uintptr_t* p);
+		GCWorkItem& wi;
+		MarkList me;
+		uintptr_t *objptr;
+	};
+	
+	Werner::Werner(GCWorkItem& w)
+		: wi(wi)
+		, me(wi)
+		, objptr((uintptr_t*) wi.ptr)
+	{
+		if(objptr == shouldGo) {
+			MarkList *wl = MarkList::current;
+			while(wl) {
+				const char *name = "";
+				// To enable RTTI, you must change all your projects to use RTTI first.  
+#if 0
+				static bool tryit = true;
+				if (tryit)
+				{
+					try {
+						const std::type_info *ti = &typeid(*(MMgc::GCFinalizedObject*)wl->wi.ptr);
+						if (ti->name() && (int(ti->name()) > 0x10000))
+							name = ti->name();
+					} catch(...) {
+						name = "unknown";
+					}
+				}
 #endif
-
+				
+				if(wl->prev)
+					VMPI_sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
+				else
+					VMPI_sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
+				wl = wl->prev;
+				GCLog("%s", statusBuffer);
+			}
+			VMPI_sprintf(statusBuffer, "\n");
+			GCLog("%s", statusBuffer);
+			//shouldGo = NULL;
+		}
+	}
+	
+	void Werner::location(uintptr_t *p)
+	{
+		MarkList::offset = (int)p - (int)objptr;
+	}
+	
+#endif	// WERNER_MODE
+	
 	// This will mark the item whether the item was previously marked or not.
 	// The mark stack overflow logic depends on that.
 
@@ -2783,38 +2834,7 @@ bail:
 		}
 			
 #ifdef WERNER_MODE
-		MarkList me(wi);
-		
-		if(p == shouldGo) {
-			MarkList *wl = MarkList::current;
-			while(wl) {
-				const char *name = "";
-// To enable RTTI, you must change all your projects to use RTTI first.  
-#if 0
-				static bool tryit = true;
-				if (tryit)
-				{
-					try {
-						const std::type_info *ti = &typeid(*(MMgc::GCFinalizedObject*)wl->wi.ptr);
-						if (ti->name() && (int(ti->name()) > 0x10000))
-							name = ti->name();
-					} catch(...) {
-						name = "unknown";
-					}
-				}
-#endif
-
-				if(wl->prev)
-					VMPI_sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
-				else
-					VMPI_sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
-				wl = wl->prev;
-				OutputDebugString(statusBuffer);
-			}
-			VMPI_sprintf(statusBuffer, "\n");
-			OutputDebugString(statusBuffer);
-			//shouldGo = NULL;
-		}
+		Werner werner(wi);
 #endif
 		policy.signalMarkWork(size);
 
@@ -2846,7 +2866,7 @@ bail:
 		while(p < end) 
 		{
 #ifdef WERNER_MODE
-			MarkList::offset = (int)p - (int)wi.ptr;
+			werner.location(p);
 #endif
 
 			uintptr_t val = *p++;  
