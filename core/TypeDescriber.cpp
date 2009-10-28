@@ -521,6 +521,22 @@ namespace avmplus
 		return index < pool->constantStringCount ? pool->getString(index) : str(kstrid_emptyString);
 	}
 	
+    // bug comaptibility note: FP10 and earlier sniffed the Atom type and return 'int' for
+    // all integer atoms. This is wrong, but we should preserve the behavior. Note that we
+    // compare the numeric range: doesn't matter for 32-bit builds, but 64-builds have larger
+    // possible int atoms, so this preserves the existing behavior of "29-bit int -> int" even
+    // on 64-bit systems. 
+    static bool isIntAtom29Bit(Atom value)
+    {
+        if (atomKind(value) == kIntegerType)
+        {
+            intptr_t const i = atomInt(value);
+            int32_t const i32 = (int32_t(i)<<3)>>3;
+            return i == intptr_t(i32);
+        }
+        return false;
+    }
+
 	ScriptObject* TypeDescriber::describeType(Atom value, uint32_t flags)
 	{
 		Traitsp traits;
@@ -528,6 +544,8 @@ namespace avmplus
 			traits = m_toplevel->core()->traits.void_itraits;
 		else if (ISNULL(value))
 			traits = m_toplevel->core()->traits.null_itraits;
+		else if (isIntAtom29Bit(value))
+			traits = m_toplevel->core()->traits.int_itraits;
 		else
 			traits = m_toplevel->toTraits(value);
 
