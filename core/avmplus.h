@@ -319,11 +319,13 @@ namespace avmplus
 #include "instr.h"
 
 // inline implementations
+#include "AbcEnv-inlines.h"
 #include "atom-inlines.h"
 #include "AvmCore-inlines.h"
 #include "instr-inlines.h"
 #include "Toplevel-inlines.h"
 #include "Traits-inlines.h"
+#include "Verifier-inlines.h"
 #include "VTable-inlines.h"
 
 #endif /* __avmplus__ */ 

@@ -105,10 +105,7 @@ namespace avmplus
 
 		// provide access to known jitters
 		#if defined FEATURE_NANOJIT
-		Toplevel* getToplevel (CodegenLIR* jit) {
-		    (void)jit;
-		    return toplevel;
-		}
+		Toplevel* getToplevel(CodegenLIR* jit);
         #endif
 
 	private:
@@ -180,18 +177,15 @@ namespace avmplus
 	  List<uint32_t, LIST_NonGCObjects> succs;
 	  List<uint32_t, LIST_NonGCObjects> preds;
 	  int32_t pred_count;
-	  Block (uint32_t label, int32_t begin) 
-		: label(label), begin(begin), end(0), succ(0)
-		, pred_count(0) { }
-	  ~Block() {}
+	  Block(uint32_t label, int32_t begin);
+	  ~Block();
 	};
 
 	class Edge {
 	public:
 	  uint32_t src;
 	  uint32_t snk;
-	  Edge(uint32_t src, uint32_t snk)
-		: src(src), snk(snk) {}
+	  Edge(uint32_t src, uint32_t snk);
 	};
 
 	class CFGWriter : public NullWriter {
@@ -210,11 +204,7 @@ namespace avmplus
 		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
 		void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
 		void writeEpilogue(FrameState*);
-		void cleanup() {
-			// this is only called on abnormal paths where the dtor wouldn't otherwise run at all.
-			coder->cleanup();
-			this->~CFGWriter();
-		}
+		void cleanup();
 	};
 #endif // FEATURE_CFGWRITER
 }

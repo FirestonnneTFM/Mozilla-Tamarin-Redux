@@ -1,4 +1,6 @@
-﻿/* ***** BEGIN LICENSE BLOCK *****
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -35,22 +37,68 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-include '../timetest.as'
+namespace avmplus
+{
 
-if (CONFIG::desktop) {
-    var size:int = 50000;
-} else {
-    var size:int = 40000;
+REALLY_INLINE PoolObject* AbcEnv::pool() const
+{
+    return m_pool;
 }
 
-var aString:String = "a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890";
-
-for (var k:int = 0; k < size; k++)
-    aString += "a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu "
-
-
-function split(loops:int):void {
-    aString.split(" ");
+REALLY_INLINE DomainEnv* AbcEnv::domainEnv() const
+{
+    return m_domainEnv;
 }
 
-timetest(split);
+REALLY_INLINE CodeContext* AbcEnv::codeContext() const
+{
+    return m_codeContext;
+}
+
+REALLY_INLINE MethodEnv* AbcEnv::getMethod(uint32_t i) const
+{
+    return m_methods[i];
+}
+
+REALLY_INLINE void AbcEnv::setMethod(uint32_t i, MethodEnv* env)
+{
+    WB(m_pool->core->GetGC(), this, &m_methods[i], env);
+}
+
+#ifdef DEBUGGER
+REALLY_INLINE uint64_t& AbcEnv::invocationCount(uint32_t i)
+{
+    AvmAssert(m_invocationCounts != NULL);
+    AvmAssert(i < m_pool->methodCount());
+    return m_invocationCounts[i];
+}
+#endif
+
+REALLY_INLINE size_t AbcEnv::calcExtra(PoolObject* pool)
+{
+    const uint32_t c = pool->methodCount();
+    return (c <= 1) ? 0 : (sizeof(MethodEnv*)*(c-1));
+}
+
+REALLY_INLINE ScriptEnv* AbcEnv::getPrivateScriptEnv(Stringp name) const
+{
+    return (ScriptEnv*)m_privateScriptEnvs->getName(name);
+}
+
+REALLY_INLINE ScriptEnv* AbcEnv::getPrivateScriptEnv(Stringp name, Namespacep ns) const
+{
+    return (ScriptEnv*)m_privateScriptEnvs->get(name, ns);
+}
+
+REALLY_INLINE ScriptEnv* AbcEnv::getPrivateScriptEnv(const Multiname& m) const
+{
+    return (ScriptEnv*)m_privateScriptEnvs->getMulti(m);
+}
+
+REALLY_INLINE void AbcEnv::addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv)
+{
+    AvmAssert(!getPrivateScriptEnv(name, ns));
+    return m_privateScriptEnvs->add(name, ns, (Binding) scriptEnv);
+}
+
+} // namespace avmplus

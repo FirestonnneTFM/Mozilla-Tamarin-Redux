@@ -1,4 +1,6 @@
-﻿/* ***** BEGIN LICENSE BLOCK *****
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -35,22 +37,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-include '../timetest.as'
+namespace avmplus
+{
 
-if (CONFIG::desktop) {
-    var size:int = 50000;
-} else {
-    var size:int = 40000;
+#if defined FEATURE_NANOJIT
+// provide access to known jitters
+REALLY_INLINE Toplevel* Verifier::getToplevel(CodegenLIR*)
+{
+    return toplevel;
 }
+#endif
 
-var aString:String = "a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890";
-
-for (var k:int = 0; k < size; k++)
-    aString += "a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu vwxyz12 34567890 a bc def ghij klmno pqrstu "
-
-
-function split(loops:int):void {
-    aString.split(" ");
-}
-
-timetest(split);
+} // namespace avmplus
