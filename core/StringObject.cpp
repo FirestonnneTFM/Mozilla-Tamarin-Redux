@@ -1370,7 +1370,7 @@ namespace avmplus
 			return 0;
 
 		if (m_bitsAndFlags & TSTR_UINT28_FLAG)
-			return Atom((m_extra.index << 3) | AtomConstants::kIntegerType);
+			return Atom((m_extra.index << 3) | AtomConstants::kIntptrType);
 
 		int32_t n = 0;
 		wchar wch;
@@ -1398,7 +1398,7 @@ namespace avmplus
 			m_bitsAndFlags |= TSTR_UINT28_FLAG;
 			m_extra.index = n;
 		}
-		return Atom((n << 3) | AtomConstants::kIntegerType);
+		return Atom((n << 3) | AtomConstants::kIntptrType);
 	bad:
 		m_bitsAndFlags |= TSTR_NOINT_FLAG;
 		return 0;

@@ -39,22 +39,89 @@
 
 // inline functions that manipulate Atom go here.
 
+#ifndef __avmplus_atom_inlines__
+#define __avmplus_atom_inlines__
+
 namespace avmplus
 {
     // macros for these are defined in atom.h
 
     //inline AtomConstants::AtomKind atomKind(Atom a) { return AtomConstants::AtomKind(uintptr_t(a) & 7); }
     //inline void* atomPtr(Atom a) { return (void*)(uintptr_t(a) & ~7); }
-    // note that this needs to be signed (NOT unsigned) to maintain existing semantics
-    //inline intptr_t atomInt(Atom a) { return intptr_t(a) >> 3; }
 
-// unwrap an atom and return a ScriptObject*.  Doesn't use atomPtr(), because
-// using subtract allows the expression to be folded with other pointer math,
-// unlike the & ~7 in atomPtr().
-REALLY_INLINE ScriptObject* atomObj(Atom a)
-{
-    AvmAssert(AvmCore::isObject(a)); // proper type and not null or undefined
-    return (ScriptObject*) (uintptr_t(a) - kObjectType);
-}
+    REALLY_INLINE bool atomIsIntptr(Atom atom)
+    {
+        return atomKind(atom) == kIntptrType;
+    }
+
+    REALLY_INLINE bool atomIsBothIntptr(Atom a, Atom b)
+    {
+        return ((((uintptr_t(a) ^ kIntptrType) | (uintptr_t(b) ^ kIntptrType)) & 7) == 0);
+    }
+
+
+    REALLY_INLINE bool atomCanBeInt32(Atom atom)
+    {
+        AvmAssert(atomIsIntptr(atom));
+#ifdef AVMPLUS_64BIT
+        intptr_t const i = atomGetIntptr(atom);
+        int32_t const i32 = int32_t(i);
+        return i == i32;
+#else
+        // int atoms always fit in int32 on 32-bit
+        return true;
+#endif      
+    }
+
+    REALLY_INLINE bool atomCanBeUint32(Atom atom)
+    {
+        AvmAssert(atomIsIntptr(atom));
+#ifdef AVMPLUS_64BIT
+        intptr_t const i = atomGetIntptr(atom);
+        uint32_t const u32 = uint32_t(i);
+        return i == intptr_t(u32);
+#else
+        // int atoms always fit in uint32 on 32-bit, if they are >= 0
+        return atom >= 0;
+#endif      
+    }
+
+    REALLY_INLINE intptr_t atomGetIntptr(Atom a) 
+    { 
+        AvmAssert(atomIsIntptr(a));
+        AvmAssert(atomIsValidIntptrValue(intptr_t(a) >> 3));
+        return intptr_t(a) >> 3; 
+    }
+    
+    REALLY_INLINE bool atomIsValidIntptrValue(const intptr_t i)
+    {
+#ifdef AVMPLUS_64BIT
+        // we want 53 bits of precision, plus 3 bits for the tag bits,
+        // so that's 64-53-3 = 8
+        return (((i << 8) >> 8) == i);
+#else
+        return (((i << 3) >> 3) == i);
+#endif
+    }
+
+    REALLY_INLINE bool atomIsValidIntptrValue_u(const uintptr_t u)
+    {
+#ifdef AVMPLUS_64BIT
+        return (u & 0xFF80000000000000ULL) == 0;
+#else
+        return (u & 0xF0000000UL) == 0;
+#endif
+    }
+
+    // unwrap an atom and return a ScriptObject*.  Doesn't use atomPtr(), because
+    // using subtract allows the expression to be folded with other pointer math,
+    // unlike the & ~7 in atomPtr().
+    REALLY_INLINE ScriptObject* atomObj(Atom a)
+    {
+        AvmAssert(AvmCore::isObject(a)); // proper type and not null or undefined
+        return (ScriptObject*) (uintptr_t(a) - kObjectType);
+    }
 
 } // namespace
+
+#endif // __avmplus_atom_inlines__

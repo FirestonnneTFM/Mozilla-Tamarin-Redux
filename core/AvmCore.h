@@ -624,8 +624,10 @@ const int kBufferPadding = 16;
 		/** Helper method; returns true if atom's type is double */
 		static bool isDouble(Atom atom);
 
-		/** Helper method; returns true if atom's type is int */
-		static bool isInteger(Atom atom);
+		// removed, because it was being (erroneously) used to ask
+        // "will you fit in int32?", which was never right for 64-bit.
+        // instead, use atomIsIntptr(), which asks "will you fit in intptr?"
+		// static bool isInteger(Atom atom);
 
 		/** Helper method; returns true if atom's type is Number */
 		static bool isNumber(Atom atom);
@@ -816,7 +818,7 @@ const int kBufferPadding = 16;
 		static	int64_t integer64_d_sse2(double d);
 	#endif
 #endif
-		static int integer(Atom atom);
+		static int32_t integer(Atom atom);
 
 		// convert atom to integer when we know it is already a legal signed-32 bit int value
 		static int32_t integer_i(Atom a);
@@ -1403,8 +1405,8 @@ const int kBufferPadding = 16;
 		Stringp doubleToString(double d);
 		Stringp concatStrings(Stringp s1, Stringp s2);
 		
-		Atom uintToAtom(uint32 n);
-		Atom intToAtom(int n);
+		Atom uintToAtom(uint32_t n);
+		Atom intToAtom(int32_t n);
 
 		Atom allocDouble(double n);
 		

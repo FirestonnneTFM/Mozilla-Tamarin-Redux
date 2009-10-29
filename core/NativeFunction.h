@@ -149,7 +149,7 @@ namespace avmplus
 	// trick, since values are compile-time known we usually don't need to call intToAtom, can statically transform them
 	// good for ints and ints currently
 	#define AvmThunkCanBeSmallIntAtom(v)	(!((v) & 0xF0000000))
-	#define AvmThunkSmallIntAtom(v)			((((Atom)(v))<<3) | kIntegerType)
+	#define AvmThunkSmallIntAtom(v)			((((Atom)(v))<<3) | kIntptrType)
 		
 	// note, this isn't complete -- only the ones currently needed are defined.
 	// expand as necessary. macros to take advantage of the fact that most

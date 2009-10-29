@@ -70,23 +70,44 @@ namespace avmplus
 		MethodFrame& m_frame;
 	};
 
+#ifdef _DEBUG
+    REALLY_INLINE Atom CHECK_INT_ATOM(Atom a)
+    {
+        AvmAssert(atomKind(a) == kIntptrType && atomIsValidIntptrValue(atomGetIntptr(a)));
+        return a;
+    }
+#else
+    #define CHECK_INT_ATOM(a) (a)
+#endif
 
-#define IS_INTEGER(v)        (((v) & 7) == kIntegerType)
+
+#define IS_INTEGER(v)        (((v) & 7) == kIntptrType)
 #define IS_DOUBLE(v)         (((v) & 7) == kDoubleType)
 #define IS_BOOLEAN(v)        (((v) & 7) == kBooleanType)
 #define IS_STRING(v)		 (((v) & 7) == kStringType)
+
+// note that the argument to SIGN_EXTEND is expected to be upshifted 3 bits (not a "raw" intptr),
+// but it doesn't expect or require the tag bits to be set properly.
 #ifdef AVMPLUS_64BIT
-#  define FITS_IN_INTEGER(v)   (true)
-#  define SIGN_EXTEND(v)       ((intptr_t(v) << 29) >> 29)	
+// since 64-bit int atoms expect exactly 53 bits of precision, we want to shift bit 53+3 up into the sign bit and back down
+#  define SIGN_EXTEND(v)       ((intptr_t(v) << 8) >> 8)	
 #else
-#  define FITS_IN_INTEGER(v)   (((intptr_t(v) << 3) >> 3) == intptr_t(v))
 #  define SIGN_EXTEND(v)       (intptr_t(v))
 #endif
-#define MAKE_INTEGER(v)      ((intptr_t(v) << 3) | kIntegerType)
-#define INT32_VALUE(v)       int32_t(intptr_t(v) >> 3)
-#define UINT32_VALUE(v)      uint32_t(intptr_t(v) >> 3)
+
+// CLAMP_32 is equivalent to running an int atom thru AvmCore::integer (ie, truncate to int32 using the right rules),
+// but, like SIGN_EXTEND, it expects the argument to be upshifted 3 bit.
+#ifdef AVMPLUS_64BIT
+#  define CLAMP_32(v)       ((intptr_t(v) << 29) >> 29)	
+#else
+#  define CLAMP_32(v)       (intptr_t(v))
+#endif
+
+#define MAKE_INTEGER(v)      (CHECK_INT_ATOM((intptr_t(v) << 3) | kIntptrType))
+#define INT32_VALUE(v)       int32_t(atomGetIntptr(v))
+#define UINT32_VALUE(v)      uint32_t(atomGetIntptr(v))
 #define DOUBLE_VALUE(v)		 (*(double*)((v) ^ kDoubleType))
-#define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0) // less control flow but more registers -- which is better?
+#define IS_BOTH_INTEGER(a,b) ((((a ^ kIntptrType) | (b ^ kIntptrType)) & 7) == 0) // less control flow but more registers -- which is better?
 #define IS_BOTH_DOUBLE(a,b)  ((((a ^ kDoubleType) | (b ^ kDoubleType)) & 7) == 0)
 
 #ifdef AVMPLUS_WORD_CODE
@@ -1198,7 +1219,7 @@ namespace avmplus
 				if (IS_BOOLEAN(a1))
 					;
 				else if (IS_INTEGER(a1))
-					sp[0] = a1 == kIntegerType ? falseAtom : trueAtom;
+					sp[0] = a1 == zeroIntAtom ? falseAtom : trueAtom;
 				else
 					sp[0] = AvmCore::booleanAtom(a1);
 				NEXT;
@@ -1220,19 +1241,12 @@ namespace avmplus
 
             INSTR(negate) {
 				a1 = sp[0];
-				if (IS_INTEGER(a1) && a1 != MAKE_INTEGER(0)) {
-					i1 = INT32_VALUE(a1);
-				#ifdef AVMPLUS_64BIT
-					// -2147483648 will fit in an integer, but 2147483648 won't. 
-					if (i1 > (int32_t)0x80000000)
-				#endif
-					{
-						i1 = -i1;
-						if (FITS_IN_INTEGER(i1)) {
-							sp[0] = MAKE_INTEGER(i1);
-							NEXT;
-						}
-					}
+				if (IS_INTEGER(a1) && a1 != zeroIntAtom) {
+					i1 = -atomGetIntptr(a1); // *not* INT32_VALUE
+                    if (atomIsValidIntptrValue(i1)) {
+                        sp[0] = MAKE_INTEGER(i1);
+                        NEXT;
+                    }
 				}
 				SAVE_EXPC;
 				sp[0] = core->doubleToAtom(-AvmCore::number(a1));
@@ -1264,7 +1278,7 @@ namespace avmplus
 				if (IS_BOOLEAN(a1))
 					;
 				else if (IS_INTEGER(a1))
-					a1 = a1 == kIntegerType ? falseAtom : trueAtom;
+					a1 = a1 == zeroIntAtom ? falseAtom : trueAtom;
 				else
 					a1 = AvmCore::booleanAtom(a1);
                 sp[0] = a1 ^ (trueAtom ^ falseAtom);
@@ -1274,7 +1288,7 @@ namespace avmplus
 			INSTR(bitnot) {
 				a1 = sp[0];
 				if (IS_INTEGER(a1)) {
-					sp[0] = SIGN_EXTEND(~a1 ^ 7);
+					sp[0] = MAKE_INTEGER(~int32_t(atomGetIntptr(a1)));
 					NEXT;
 				}
 				SAVE_EXPC;
@@ -1315,10 +1329,10 @@ namespace avmplus
 					
 #define FAST_INC_MAYBE(a1,dest) \
 	if (IS_INTEGER(a1)) { \
-		u1t = a1 ^ kIntegerType; \
-		u3t = u1t + (1 << 3); \
+		u1t = a1 ^ kIntptrType; \
+		u3t = SIGN_EXTEND(u1t + (1 << 3)); \
 		if ((intptr_t)u1t < 0 || (intptr_t)(u3t ^ u1t) >= 0) { \
-			dest = u3t | kIntegerType; \
+			dest = CHECK_INT_ATOM(u3t | kIntptrType); \
 			NEXT; \
 		} \
 	} \
@@ -1329,11 +1343,11 @@ namespace avmplus
 
 #define ADD_TWO_VALUES_AND_NEXT(a1, a2, dest) \
 	if (IS_BOTH_INTEGER(a1, a2)) { \
-		u1t = a1 ^ kIntegerType; \
-		u2t = a2 ^ kIntegerType; \
-		u3t = u1t + u2t; \
+		u1t = a1 ^ kIntptrType; \
+		u2t = a2 ^ kIntptrType; \
+		u3t = SIGN_EXTEND(u1t + u2t); \
 		if ((intptr_t)(u1t ^ u2t) < 0 || (intptr_t)(u1t ^ u3t) >= 0) { \
-			dest = u3t | kIntegerType; \
+			dest = CHECK_INT_ATOM(u3t | kIntptrType); \
 			NEXT; \
 		} \
 	} \
@@ -1349,10 +1363,10 @@ namespace avmplus
 // On success, store the result in dest, and NEXT. 
 #define FAST_DEC_MAYBE(a1,dest) \
 	if (IS_INTEGER(a1)) { \
-		u1t = a1 ^ kIntegerType; \
-		u3t = u1t - (1 << 3); \
+		u1t = a1 ^ kIntptrType; \
+		u3t = SIGN_EXTEND(u1t - (1 << 3)); \
 		if ((intptr_t)u1t >= 0 || (intptr_t)(u1t ^ u3t) >= 0) { \
-			dest = u3t | kIntegerType; \
+			dest = CHECK_INT_ATOM(u3t | kIntptrType); \
 			NEXT; \
 		} \
 	} \
@@ -1443,10 +1457,10 @@ namespace avmplus
 				a2 = sp[0];
 				sp--;
 				if (IS_BOTH_INTEGER(a1, a2)) {
-					u1t = a1 ^ kIntegerType;
-					u2t = a2 ^ kIntegerType;
-					u3t = u1t + u2t;
-					sp[0] = SIGN_EXTEND(u3t | kIntegerType);
+					u1t = a1 ^ kIntptrType;
+					u2t = a2 ^ kIntptrType;
+					u3t = CLAMP_32(u1t + u2t);
+					sp[0] = CHECK_INT_ATOM(u3t | kIntptrType);
 					NEXT;
 				}
 				if (IS_BOTH_DOUBLE(a1, a2)) { 
@@ -1470,11 +1484,11 @@ namespace avmplus
 			sub_two_values_and_next:
 #endif
 				if (IS_BOTH_INTEGER(a1, a2)) { 
-					u1t = a1 ^ kIntegerType; 
-					u2t = a2 ^ kIntegerType;
-					u3t = u1t - u2t; 
+					u1t = a1 ^ kIntptrType; 
+					u2t = a2 ^ kIntptrType;
+					u3t = SIGN_EXTEND(u1t - u2t); 
 					if ((intptr_t)(u1t ^ u2t) >= 0 || (intptr_t)(u1t ^ u3t) >= 0) { 
-						sp[0] = u3t | kIntegerType; 
+						sp[0] = CHECK_INT_ATOM(u3t | kIntptrType); 
 						NEXT; 
 					} 
 				} 
@@ -1494,10 +1508,10 @@ namespace avmplus
 				a2 = sp[0];
 				sp--;
 				if (IS_BOTH_INTEGER(a1, a2)) {
-					u1t = a1 ^ kIntegerType;
-					u2t = a2 ^ kIntegerType;
-					u3t = u1t - u2t;
-					sp[0] = SIGN_EXTEND(u3t | kIntegerType);
+					u1t = a1 ^ kIntptrType;
+					u2t = a2 ^ kIntptrType;
+					u3t = CLAMP_32(u1t - u2t);
+					sp[0] = CHECK_INT_ATOM(u3t | kIntptrType);
 					NEXT;
 				}
 				if (IS_BOTH_DOUBLE(a1, a2)) { 
@@ -1572,9 +1586,9 @@ namespace avmplus
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 			mod_two_values_and_next:
 #endif
-				if (IS_BOTH_INTEGER(a1, a2) && a2 != kIntegerType) {
+				if (IS_BOTH_INTEGER(a1, a2) && a2 != zeroIntAtom) {
 					i1 = INT32_VALUE(a1) % INT32_VALUE(a2);
-					if (FITS_IN_INTEGER(i1)) {
+					if (atomIsValidIntptrValue(i1)) {
 						sp[0] = MAKE_INTEGER(i1);
 						NEXT;
 					}
@@ -1597,7 +1611,7 @@ namespace avmplus
 			//lshift_two_values_and_next:
 				if (IS_BOTH_INTEGER(a1,a2)) {
 					i1 = INT32_VALUE(a1) << (INT32_VALUE(a2) & 0x1F);
-					if (FITS_IN_INTEGER(i1)) {
+					if (atomIsValidIntptrValue(i1)) {
 						sp[0] = SIGN_EXTEND(MAKE_INTEGER(i1));
 						NEXT;
 					}
@@ -1631,9 +1645,18 @@ namespace avmplus
 				sp--;
 			//urshift_two_values_and_next:
 				if (IS_BOTH_INTEGER(a1,a2)) {
-					u1 = (UINT32_VALUE(a1) >> (INT32_VALUE(a2) & 0x1F));
-					if ((u1 & 0xF0000000U) == 0) {
-						sp[0] = MAKE_INTEGER(u1);
+                    // if a2 != 0 and a1 was already a legal signed intptr_t (29 bits or 53 bits) 
+                    // then we'll definitely insert at least one zero in the high bit, 
+                    // and the result has to be a valid unsigned kIntptrType atom (28 or 52 bit
+                    // uint).  if a2 == 0, then INSTR(urshift) is equivalent to ToUint32(a1); on
+                    // 32-bit cpus we still must check if it fits in kIntptrType, but on 64-bit cpus
+                    // it always will.  ergo, we just need to check for a2 == 0 on 32 bit only.
+                    i1 = (INT32_VALUE(a2) & 0x1F);
+#ifndef AVMPLUS_64BIT
+                    if (i1 > 0)
+#endif
+                    {
+						sp[0] = MAKE_INTEGER(UINT32_VALUE(a1) >> i1);
 						NEXT;
 					}
 				}
@@ -1644,12 +1667,12 @@ namespace avmplus
 				NEXT;
 			}
 
-// The OR with tag is only necessary for xor, which passes kIntegerType.  The
+// The OR with tag is only necessary for xor, which passes kIntptrType.  The
 // others pass 0, and we assume the compiler optimizes the OR away.
 
 #define BITOP_TWO_VALUES_AND_NEXT(op, a1, a2, dest, tag) \
 	if (IS_BOTH_INTEGER(a1,a2)) { \
-		dest = SIGN_EXTEND((intptr_t(a1) op intptr_t(a2)) | tag); \
+		dest = (CLAMP_32((a1) op (a2)) | tag); \
 		NEXT; \
 	} \
 	SAVE_EXPC; \
@@ -1685,7 +1708,7 @@ namespace avmplus
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 			bitxor_two_values_and_next:
 #endif
-				BITOP_TWO_VALUES_AND_NEXT(^, a1, a2, sp[0], kIntegerType);
+				BITOP_TWO_VALUES_AND_NEXT(^, a1, a2, sp[0], kIntptrType);
 			}
 
             INSTR(equals) {
@@ -1706,7 +1729,7 @@ namespace avmplus
 			INSTR(lookupswitch) {
 #ifdef AVMPLUS_WORD_CODE
 				const uintptr_t* base = pc-1;
-				uint32_t index = AvmCore::integer_u(*(sp--));
+				uint32_t index = AvmCore::integer_i(*(sp--));
 				intptr_t default_offset = S24ARG;
 				uintptr_t case_count = U30ARG;
 				if (index <= case_count)
@@ -1716,7 +1739,7 @@ namespace avmplus
 #else
 				const uint8_t* base = pc-1;
 				// safe to assume int since verifier checks for int
-				uint32_t index = AvmCore::integer_u(*(sp--));
+				uint32_t index = AvmCore::integer_i(*(sp--));
 				const uint8_t* switch_pc = pc+3;
 				uint32_t case_count = uint32_t(readU30(switch_pc)) + 1;
                 pc = base+readS24( index < case_count ? (switch_pc + 3*index) : pc );
@@ -1731,7 +1754,7 @@ namespace avmplus
 				if (IS_BOOLEAN(a1))
 					;
 				else if (IS_INTEGER(a1))
-					a1 = a1 == kIntegerType ? falseAtom : trueAtom;
+					a1 = a1 == zeroIntAtom ? falseAtom : trueAtom;
 				else
 					a1 = AvmCore::booleanAtom(a1);  // does not throw or change the XML namespace
 				i1 = S24ARG;
@@ -2133,19 +2156,19 @@ namespace avmplus
 			// rather than using MAKE_INTEGER macro.
 			INSTR(sxi1) {
 				i1 = AvmCore::integer(sp[0]);
-				sp[0] = Atom(((i1 << (8*sizeof(Atom)-1)) >> ((8*sizeof(Atom)-1)-3)) | kIntegerType);
+				sp[0] = CHECK_INT_ATOM(Atom(((i1 << (8*sizeof(Atom)-1)) >> ((8*sizeof(Atom)-1)-3)) | kIntptrType));
 				NEXT;
 			}
 			
 			INSTR(sxi8) {
 				i1 = AvmCore::integer(sp[0]);
-				sp[0] = Atom(((i1 << (8*(sizeof(Atom)-1))) >> ((8*(sizeof(Atom)-1))-3)) | kIntegerType);
+				sp[0] = CHECK_INT_ATOM(Atom(((i1 << (8*(sizeof(Atom)-1))) >> ((8*(sizeof(Atom)-1))-3)) | kIntptrType));
 				NEXT;
 			}
 			
 			INSTR(sxi16) {
 				i1 = AvmCore::integer(sp[0]);
-				sp[0] = Atom(((i1 << (8*(sizeof(Atom)-2))) >> ((8*(sizeof(Atom)-2))-3)) | kIntegerType);
+				sp[0] = CHECK_INT_ATOM(Atom(((i1 << (8*(sizeof(Atom)-2))) >> ((8*(sizeof(Atom)-2))-3)) | kIntptrType));
 				NEXT;
 			}
 					
@@ -2560,7 +2583,7 @@ namespace avmplus
 #ifndef AVMPLUS_WORD_CODE
             INSTR(pushshort) {
                 // this just pushes an integer since we dont have short atoms
-                *(++sp) = ((signed short)U30ARG)<<3|kIntegerType;
+                *(++sp) = MAKE_INTEGER(((int16_t)U30ARG));
 				NEXT;
 			}
 #endif
@@ -2727,28 +2750,9 @@ namespace avmplus
  					SAVE_EXPC;
  					sp[0] = core->intAtom(a1);
  				}
-			#ifdef AVMPLUS_64BIT
-				/*
-					what's up with the  "a1 > 0" check?
-
-					consider that in 64-bit builds, an int atom can have the
-					range of -2147483648 (0xffffffff80000000) to 4294967295 (0x00000000ffffffff).
-					[actually, shifted up 3 bits, but you get the idea]
-
-					If the value is <= 2147483647 then the atom is treated as a signed int;
-					otherwise it's considered unsigned. 
-
-					if the source for convert_i is an unsigned int, it retains the same 32-bit
-					pattern but is treated as signed instead of unsigned. so what we have to do is
-					ensure that the int atoms in the range 0x0000000080000000..0x00000000ffffffff
-					get their sign bit propagated so that they are treated as signed. 
-					
-					checking for ">0" is overkill (handles atoms that don't need it) but is likely 
-					to be cheaper than a more precise check.
-				*/
-				else if (a1 > 0)
-					sp[0] = SIGN_EXTEND(a1);
-			#endif
+				else {
+					sp[0] = CLAMP_32(a1);
+                }
 				NEXT;
 			}
 

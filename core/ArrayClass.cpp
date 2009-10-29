@@ -396,7 +396,6 @@ namespace avmplus
 	}
 	
 	static inline bool defined(Atom atom) { return (atom != undefinedAtom); }
-	static inline bool isInteger(Atom atom) { return ((atom&7) == kIntegerType); }
 
     /**
      * ArraySort implements actionscript Array.sort().
@@ -966,9 +965,10 @@ namespace avmplus
 		Atom atmk = get(k);
 		// Integer checks makes an int array sort about 3x faster.
 		// A double array sort is 5% slower because of this overhead
-		if (((atmj & 7) == kIntegerType) && ((atmk & 7) == kIntegerType))
+		if (atomIsBothIntptr(atmj, atmk))
 		{
-			return ((int)atmj - (int)atmk);
+            // yes, this code is wrong, but fixing requires a version-check to preserve buggy behavior
+            return ((int)atmj - (int)atmk);
 		}
 
 		double x = AvmCore::number(atmj);

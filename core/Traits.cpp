@@ -1525,7 +1525,7 @@ namespace avmplus
 			case BUILTIN_uint:
 			case BUILTIN_int:
 			{
-				if (value == (0|kIntegerType))
+				if (value == (zeroIntAtom))
 					return;
 
 				break;

@@ -132,7 +132,7 @@ VTable* toVTable(E env, Atom atom)
             return toplevel->stringClass->ivtable();
         case kBooleanType:
             return toplevel->booleanClass->ivtable();
-        case kIntegerType:
+        case kIntptrType:
         case kDoubleType:
             // ISSUE what about int?
             return toplevel->numberClass->ivtable();
@@ -315,7 +315,7 @@ Atom coerceImpl(const Toplevel* toplevel, Atom atom, Traits* expected)
         actual = core->traits.number_itraits;
         break;
 
-    case kIntegerType:
+    case kIntptrType:
         actual = core->traits.int_itraits;
         break;
 
@@ -362,12 +362,18 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
     tagprof("op_add val1", lhs);
     tagprof("op_add val2", rhs);
 
-    // detect integers... less control flow but more registers -- which is better?
-    #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0)
+#ifdef AVMPLUS_64BIT
+// since 64-bit int atoms expect exactly 53 bits of precision, we want to shift bit 53+3 up into the sign bit and back down
+#  define SIGN_EXTEND(v)       ((intptr_t(v) << 8) >> 8)	
+#else
+#  define SIGN_EXTEND(v)       (intptr_t(v))
+#endif
+
     // integer optimization based on the one from Interpreter.cpp, modified
     // to reduce the # of alu instructions
-    if (IS_BOTH_INTEGER(lhs,rhs)) {
-        intptr_t sum = lhs + rhs - kIntegerType;
+    if (atomIsBothIntptr(lhs,rhs)) 
+    {
+        intptr_t const sum = SIGN_EXTEND(lhs + rhs - kIntptrType);
         if ((lhs ^ rhs) < 0 || (lhs ^ sum) >= 0) {
             // no overflow
             return sum;
@@ -375,7 +381,7 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
         // both integers, but overflow happens.  Intentionally add these
         // without casting to int32_t.  If the sum of the shifted values overflow,
         // we know the unshifted values will not overflow with a word-sized add.
-        return core->allocDouble(double(atomInt(lhs) + atomInt(rhs)));
+        return core->allocDouble(double(atomGetIntptr(lhs) + atomGetIntptr(rhs)));
     }
 
     if (AvmCore::isNumber(lhs) && AvmCore::isNumber(rhs))

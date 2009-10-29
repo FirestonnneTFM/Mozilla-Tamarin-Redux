@@ -130,7 +130,7 @@ namespace avmplus
 			case kStringType:
 			case kBooleanType:
 			case kDoubleType:
-			case kIntegerType:
+			case kIntptrType:
 				t = toplevel()->toTraits(thisAtom);
 				break;
 			default:

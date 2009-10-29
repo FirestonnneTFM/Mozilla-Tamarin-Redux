@@ -501,7 +501,7 @@ namespace avmplus
         case BUILTIN_int:
             if (native->isconst()) {
                 Atom a = core->intToAtom(native->imm32());
-                if (AvmCore::isInteger(a))
+                if (atomIsIntptr(a))
                     return InsConstAtom(a);
             }
             return callIns(FUNCTIONID(intToAtom), 2, coreAddr, native);
@@ -509,7 +509,7 @@ namespace avmplus
         case BUILTIN_uint:
             if (native->isconst()) {
                 Atom a = core->uintToAtom(native->imm32());
-                if (AvmCore::isInteger(a))
+                if (atomIsIntptr(a))
                     return InsConstAtom(a);
             }
             return callIns(FUNCTIONID(uintToAtom), 2, coreAddr, native);
@@ -658,12 +658,13 @@ namespace avmplus
                 if (AvmCore::isDouble(a)) {
                     return loadIns(LIR_ldqc, 0, InsConstAtom(a&~7));
                 } else {
-                    AvmAssert(AvmCore::isInteger(a));
-                    return i2dIns(InsConst(int32_t(a>>3)));
+                    AvmAssert(atomIsIntptr(a));
+                    if (atomCanBeInt32(a))
+                        return i2dIns(InsConst(int32_t(atomGetIntptr(a))));
+                    // else fall thru and call number_d
                 }
-            } else {
-                return callIns(FUNCTIONID(number_d), 1, atom);
             }
+            return callIns(FUNCTIONID(number_d), 1, atom);
 
         case BUILTIN_int:
             if (atom->isconst())

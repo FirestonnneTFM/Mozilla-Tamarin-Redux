@@ -286,15 +286,11 @@ REALLY_INLINE /*static*/ bool AvmCore::isDouble(Atom atom)
 	return (atom&7) == kDoubleType;
 }
 
-REALLY_INLINE /*static*/ bool AvmCore::isInteger(Atom atom)
-{
-	return (atom&7) == kIntegerType;
-}
-
 REALLY_INLINE /*static*/ bool AvmCore::isNumber(Atom atom)
 {
-	// accept kIntegerType(6) or kDoubleType(7)
-	return (atom&6) == kIntegerType;
+	// accept kIntptrType(6) or kDoubleType(7)
+    MMGC_STATIC_ASSERT(kIntptrType == 6 && kDoubleType == 7);
+	return (atom&6) == kIntptrType;
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isBoolean(Atom atom)
@@ -329,9 +325,9 @@ REALLY_INLINE /*static*/ uint32_t AvmCore::toUInt32(Atom atom)
 
 REALLY_INLINE /*static*/ double AvmCore::toInteger(Atom atom)
 {
-	if (atomKind(atom) == kIntegerType) 
+	if (atomIsIntptr(atom)) 
 	{
-		return (double) atomInt(atom);
+		return (double) atomGetIntptr(atom);
 	} 
 	else 
 	{
@@ -371,9 +367,11 @@ REALLY_INLINE /*static*/ int64_t AvmCore::integer64_d_sse2(double d)
 
 REALLY_INLINE /*static*/ int32_t AvmCore::integer_i(Atom a)
 {
-	if (atomKind(a) == kIntegerType)
-	{
-		return (int32_t)atomInt(a);
+	if (atomIsIntptr(a))
+	{  
+		intptr_t const i = atomGetIntptr(a);
+		AvmAssert(i == int32_t(i));
+		return int32_t(i);
 	}
 	else
 	{
@@ -384,9 +382,11 @@ REALLY_INLINE /*static*/ int32_t AvmCore::integer_i(Atom a)
 
 REALLY_INLINE /*static*/ uint32_t AvmCore::integer_u(Atom a)
 {
-	if (atomKind(a) == kIntegerType)
+	if (atomIsIntptr(a))
 	{
-		return (uint32_t)atomInt(a);
+		intptr_t const i = atomGetIntptr(a);
+		AvmAssert(i == intptr_t(uint32_t(i)));
+		return uint32_t(i);
 	}
 	else
 	{
@@ -412,8 +412,8 @@ REALLY_INLINE /*static*/ double AvmCore::number_d(Atom a)
 {
 	AvmAssert(isNumber(a));
 
-	if (atomKind(a) == kIntegerType)
-		return (double)atomInt(a);
+	if (atomIsIntptr(a))
+		return (double)atomGetIntptr(a);
 	else
 		return atomToDouble(a);
 }
@@ -588,9 +588,9 @@ REALLY_INLINE /*static*/ bool AvmCore::isGenericObject(Atom a)
 
 REALLY_INLINE /*static*/ bool AvmCore::getIndexFromAtom(Atom a, uint32 *result)
 {
-	if (AvmCore::isInteger(a))
+	if (atomIsIntptr(a) && atomCanBeUint32(a))
 	{
-		*result = uint32(a >> 3);
+		*result = uint32_t(atomGetIntptr(a));
 		return true;
 	}
 	else

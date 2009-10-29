@@ -55,7 +55,7 @@ namespace avmplus
 		// Number called as constructor creates new Number instance
 		// Note: SpiderMonkey returns 0 for new Number() with no args
 		if (argc == 0)
-			return 0|kIntegerType;   // yep this is zero atom
+			return zeroIntAtom;   // yep this is zero atom
 		else
 			return core()->numberAtom(argv[1]);
 		// TODO ArgumentError if argc > 1

@@ -695,7 +695,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				if (lhs == rhs) return trueAtom;
 				return (*atomToString(lhs) == *atomToString(rhs)) ? trueAtom : falseAtom;
             case kBooleanType:
-			case kIntegerType:
+			case kIntptrType:
 				return lhs == rhs ? trueAtom : falseAtom;
 			case kNamespaceType:
 				// E4X 11.5.1, pg 53
@@ -739,10 +739,10 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			if (isNullOrUndefined(lhs) && isNullOrUndefined(rhs))
 				return trueAtom;
-            if (ltype == kIntegerType && rtype == kDoubleType)
-				return ((double)(lhs>>3)) == atomToDouble(rhs) ? trueAtom : falseAtom;
-            if (ltype == kDoubleType && rtype == kIntegerType)
-                return atomToDouble(lhs) == ((double)(rhs>>3)) ? trueAtom : falseAtom;
+            if (ltype == kIntptrType && rtype == kDoubleType)
+				return ((double)atomGetIntptr(lhs)) == atomToDouble(rhs) ? trueAtom : falseAtom;
+            if (ltype == kDoubleType && rtype == kIntptrType)
+                return atomToDouble(lhs) == ((double)atomGetIntptr(rhs)) ? trueAtom : falseAtom;
 
 			// 16. If Type(x) is Number and Type(y) is String,
 			// return the result of the comparison x == ToNumber(y).
@@ -765,11 +765,11 @@ return the result of the comparison ToPrimitive(x) == y.
 
 			// 18. If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
             if (ltype == kBooleanType)
-                return equals((lhs&~7)|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
+                return equals((lhs&~7)|kIntptrType, rhs);  // equal(toInteger(lhs), rhs)
 			
 			// 19. If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
             if (rtype == kBooleanType)
-                return equals(lhs, (rhs&~7)|kIntegerType);  // equal(lhs, toInteger(rhs))
+                return equals(lhs, (rhs&~7)|kIntptrType);  // equal(lhs, toInteger(rhs))
 
 			// 20. If Type(x) is either String or Number and Type(y) is Object,
 			// return the result of the comparison x == ToPrimitive(y).
@@ -794,7 +794,7 @@ return the result of the comparison ToPrimitive(x) == y.
     Atom AvmCore::compare(Atom lhs, Atom rhs)
     {
         // fixme - toprimitive must take number hint, so "7" becomes 7
-		if ((lhs&7)==kIntegerType && (rhs&7)==kIntegerType)
+		if (atomIsBothIntptr(lhs, rhs))
 		{
 			// fast path for integers
 			return lhs < rhs ? trueAtom : falseAtom;
@@ -835,7 +835,7 @@ return the result of the comparison ToPrimitive(x) == y.
             case kStringType:
                 return (lhs==rhs || *string(lhs) == *string(rhs)) ? trueAtom : falseAtom;
             case kBooleanType:
-            case kIntegerType:
+            case kIntptrType:
             case kNamespaceType:
 				return lhs == rhs ? trueAtom : falseAtom;
             case kObjectType:
@@ -856,8 +856,8 @@ return the result of the comparison ToPrimitive(x) == y.
             }
         }
 		// Sometimes ints can hide in double atoms (neg zero for one)
-		else if (((ltype == kIntegerType) && (rtype == kDoubleType)) || 
-			((rtype == kIntegerType) && (ltype == kDoubleType)))
+		else if (((ltype == kIntptrType) && (rtype == kDoubleType)) || 
+			((rtype == kIntptrType) && (ltype == kDoubleType)))
 		{
 			return number(lhs) == number(rhs) ? trueAtom : falseAtom;
 		}
@@ -1273,10 +1273,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			switch (atom&7)
 			{
-			case kIntegerType:
+			case kIntptrType:
 				{
-					Atom i = atom>>3;
-					return ((uint32_t(i|-i) >> 28)&~7) | kBooleanType;
+					return atomGetIntptr(atom) ? trueAtom : falseAtom;
 				}
 			case kBooleanType:
 				return atom;
@@ -1305,7 +1304,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			switch (atom&7)
 			{
-			case kIntegerType:
+			case kIntptrType:
+                return atomGetIntptr(atom) != 0;
 			case kBooleanType:
 				return (atom & ~7) != 0;
 			case kObjectType:
@@ -1355,9 +1355,9 @@ return the result of the comparison ToPrimitive(x) == y.
 			default:
 				AvmAssert(false);
 			case kBooleanType:
-				return (atom&~7) | kIntegerType;
+				return (atom&~7) | kIntptrType;
 			case kDoubleType:
-			case kIntegerType:
+			case kIntptrType:
 				return atom;
 			case kNamespaceType:
 				// return ToNumber(namespace->uri)
@@ -1371,7 +1371,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			return 0 | kIntegerType;
+			return zeroIntAtom;
 		}
     }
 	
@@ -1381,9 +1381,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			const int kind = atomKind(atom);
 
-			// kIntegerType is by far the most common
-			if (kind == kIntegerType)
-				return (double) atomInt(atom);
+			// kIntptrType is by far the most common
+			if (kind == kIntptrType)
+				return (double) atomGetIntptr(atom);
 
 			// kDoubleType is next most common
 			if (kind == kDoubleType)
@@ -1430,8 +1430,8 @@ return the result of the comparison ToPrimitive(x) == y.
 				return kundefined;
 			case kObjectType:
 				return intern(atomToScriptObject(atom)->toString());
-			case kIntegerType:
-				return internInt((int)(atom>>3));
+			case kIntptrType:
+				return internInt(atomGetIntptr(atom));
 			case kDoubleType:
 			default: // number
 				return internDouble(atomToDouble(atom));
@@ -1672,8 +1672,8 @@ return the result of the comparison ToPrimitive(x) == y.
 			buffer << "undefined";
 		else if (isBoolean(a))
 			buffer << (boolean(a) ? "true" : "false");
-		else if (isInteger(a))
-			buffer << integer(a);
+		else if (atomIsIntptr(a))
+			buffer << (double)atomGetIntptr(a);
 		else
 			buffer << "[unknown: " << bits << "]";
 	}
@@ -2000,8 +2000,8 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::increment_d(Atom *ap, int delta)
 	{
 		AvmAssert(isNumber(*ap));
-		if (isInteger(*ap))
-			*ap = intToAtom(delta+((sint32)((sintptr)*ap>>3)));
+		if (atomIsIntptr(*ap))
+			*ap = intToAtom(delta + int32_t(atomGetIntptr(*ap)));
 		else
 			*ap = doubleToAtom(atomToDouble(*ap)+delta);
 	}
@@ -2011,8 +2011,10 @@ return the result of the comparison ToPrimitive(x) == y.
 		switch (*ap & 7)
 		{
 		case kBooleanType:
-		case kIntegerType:
 			*ap = intToAtom(delta+(sint32((sintptr)*ap>>3)));
+            return;
+		case kIntptrType:
+			*ap = intToAtom(delta + int32_t(atomGetIntptr(*ap)));
 			return;
 		case kDoubleType:
 			*ap = intToAtom((int)((sint32)atomToDouble(*ap)+delta));
@@ -2032,7 +2034,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		(1<<BUILTIN_namespace) | (1<<BUILTIN_object),										// kNamespaceType
 		(1<<BUILTIN_void),																	// kSpecialType
 		(1<<BUILTIN_boolean) | (1<<BUILTIN_object),											// kBooleanType
-		(1<<BUILTIN_number) | (1<<BUILTIN_object),											// kIntegerType
+		(1<<BUILTIN_number) | (1<<BUILTIN_object),											// kIntptrType
 		(1<<BUILTIN_number) | (1<<BUILTIN_object)											// kDoubleType
 	};
 		
@@ -2059,21 +2061,16 @@ return the result of the comparison ToPrimitive(x) == y.
 			return atomToScriptObject(atom)->traits()->containsInterface(itraits);
 		}
 		
-		if (kind == kIntegerType)
+		if (kind == kIntptrType)
 		{
 			// ISSUE need special support for number value ranges
 			if (bt == BUILTIN_uint)
 			{
-				return atomInt(atom) >= 0;
+                return atomCanBeUint32(atom);
 			}
 			if (bt == BUILTIN_int)
 			{
-			#ifdef AVMPLUS_64BIT
-				// this might be a uint
-				return ((int64_t)atomInt(atom) == (int32_t)atomInt(atom));
-			#else
-				return true;
-			#endif
+                return atomCanBeInt32(atom);
 			}
 		}
 
@@ -2121,12 +2118,8 @@ return the result of the comparison ToPrimitive(x) == y.
 				return kundefined;
 			case kBooleanType:
 				return booleanStrings[atom>>3];
-			case kIntegerType: {
-#ifdef AVMPLUS_64BIT
-				return MathUtils::convertIntegerToStringRadix(this, atomInt(atom), 10, MathUtils::kTreatAsSigned);
-#else
-				return intToString(int32_t(atomInt(atom)));
-#endif
+			case kIntptrType: {
+				return MathUtils::convertIntegerToStringRadix(this, atomGetIntptr(atom), 10, MathUtils::kTreatAsSigned);
 			}
 			case kDoubleType:
 			default: // number
@@ -2607,7 +2600,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				break;
 			case kSpecialType:
 				return kundefined;
-			case kIntegerType:
+			case kIntptrType:
 			case kBooleanType:
 			case kDoubleType:
 			default:
@@ -2759,7 +2752,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kBooleanType:
 				return kboolean;
 
-			case kIntegerType:
+			case kIntptrType:
 			case kDoubleType:
 				return knumber;
 
@@ -3454,32 +3447,32 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC(), extra) NamespaceSet(nsCount);
 	}
 
-	Atom AvmCore::uintToAtom(uint32 n)
+	Atom AvmCore::uintToAtom(uint32_t n)
 	{
 #ifdef AVMPLUS_64BIT
 		// We can always fit the value in an Atom
-		return (((Atom)n)<<3) | kIntegerType;
+		return (((Atom)n)<<3) | kIntptrType;
 #else
-		// As kIntegerType is signed, we can only represent a 28-bit uint in it
+		// As kIntptrType is signed, we can only represent a 28-bit uint in it
 		if (!(n&0xF0000000)) {
-			return uint32((n<<3) | kIntegerType);
+			return Atom((n<<3) | kIntptrType);
 		} else {
 			return allocDouble(n);
 		}
 #endif
 	}
 			
-	Atom AvmCore::intToAtom(int n)
+	Atom AvmCore::intToAtom(int32_t n)
 	{
 #ifdef AVMPLUS_64BIT
 		// We can always fit the value in an Atom
-		return (((Atom)n)<<3) | kIntegerType;
+		return (((Atom)n)<<3) | kIntptrType;
 #else
 		// handle integer values w/out allocation
-		int i29 = n << 3;
+		int32_t i29 = n << 3;
 		if ((i29>>3) == n)
 		{
-			return uint32(i29 | kIntegerType);
+			return Atom(i29 | kIntptrType);
 		}
 		else 
 		{
@@ -3489,12 +3482,12 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 #ifdef AVMPLUS_64BIT
-	#define CAN_BE_INT_ATOM(intval,n) (intval == n && !(intval == 0 && MathUtils::isNegZero(n)))
+	#define CAN_BE_INT_ATOM(intval,n) (((intval<<8)>>8) == n && !(intval == 0 && MathUtils::isNegZero(n)))
 #else
 	#define CAN_BE_INT_ATOM(intval,n) (((intval<<3)>>3) == n && !(intval == 0 && MathUtils::isNegZero(n)))
 #endif
 
-#define MAKE_INT_ATOM(intval) ((intptr_t(intval)<<3) | kIntegerType)
+#define MAKE_INT_ATOM(intval) ((intptr_t(intval)<<3) | kIntptrType)
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 
@@ -3652,17 +3645,8 @@ return the result of the comparison ToPrimitive(x) == y.
 				return kundefined;
 			case kBooleanType:
 				return booleanStrings[atom>>3];
-			case kIntegerType: {
-#ifdef AVMPLUS_64BIT
-				intptr_t val = (intptr_t)(atom>>3);
-				if (val > 0x7fffffff)
-					return uintToString((uint32_t)val);
-				else
-					return intToString((int32_t)val);
-#else
-				return intToString((int)(sint32(atom)>>3));
-#endif
-			}
+			case kIntptrType: 
+				return MathUtils::convertIntegerToStringRadix(this, atomGetIntptr(atom), 10, MathUtils::kTreatAsSigned);
 			case kDoubleType:
 				AvmAssert(atom != kDoubleType); // this would be a null pointer to double
 				return doubleToString(atomToDouble(atom));
@@ -3791,13 +3775,18 @@ return the result of the comparison ToPrimitive(x) == y.
 	#endif
 	#endif /* DEBUGGER */
 
-	/*static*/ int AvmCore::integer(Atom atom)
+	/*static*/ int32_t AvmCore::integer(Atom atom)
 	{
 		const int kind = atomKind(atom);
-		if ((1<<kind) & ((1<<kIntegerType)|(1<<kBooleanType)))
-		{
-			return (int32_t)atomInt(atom);
-		} 
+        if (kind == kIntptrType)
+        {
+            AvmAssert(int32_t(atomGetIntptr(atom)) == (int32_t)integer_d(number(atom)));
+            return int32_t(atomGetIntptr(atom));
+        }
+        else if (kind == kBooleanType)
+        {
+            return int32_t(atom>>3);
+        }
 		else 
 		{
 			// TODO optimize the code below.

@@ -887,7 +887,7 @@ namespace avmplus
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(WOP_pushbits);
-		*dest++ = (intptr_t)(((int8_t)*pc++) << 3) | kIntegerType;
+		*dest++ = (intptr_t)(((int8_t)*pc++) << 3) | kIntptrType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(WOP_pushbits, dest-2);
 #endif
@@ -898,7 +898,7 @@ namespace avmplus
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(WOP_pushbits);
-		*dest++ = (intptr_t)((int16_t)AvmCore::readU30(pc) << 3) | kIntegerType;
+		*dest++ = (intptr_t)((int16_t)AvmCore::readU30(pc) << 3) | kIntptrType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(WOP_pushbits, dest-2);
 #endif
@@ -920,10 +920,10 @@ namespace avmplus
 		// FIXME: wrong for 64-bit, we want 32 bits of payload
 		pc++;
 		int32_t value = pool->cpool_int[AvmCore::readU30(pc)];
-		if ((value & 0xF0000000U) == 0xF0000000U || (value & 0xF0000000U) == 0) {
+		if (atomIsValidIntptrValue(value)) {
 			CHECK(2);
 			*dest++ = NEW_OPCODE(WOP_pushbits);
-			*dest++ = (value << 3) | kIntegerType;
+			*dest++ = (intptr_t(value) << 3) | kIntptrType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 			peep(WOP_pushbits, dest-2);
 #endif
@@ -949,10 +949,10 @@ namespace avmplus
 		// FIXME: wrong for 64-bit, we want 32 bits of payload
 		pc++;
 		uint32_t value = pool->cpool_uint[AvmCore::readU30(pc)];
-		if ((value & 0xF0000000U) == 0) {
+		if (atomIsValidIntptrValue_u(value)) {
 			CHECK(2);
 			*dest++ = NEW_OPCODE(WOP_pushbits);
-			*dest++ = (value << 3) | kIntegerType;
+			*dest++ = (intptr_t(value) << 3) | kIntptrType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 			peep(WOP_pushbits, dest-2);
 #endif

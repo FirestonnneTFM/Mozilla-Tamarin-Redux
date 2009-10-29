@@ -388,8 +388,8 @@ namespace avmplus
 					Atom result = core->xmlEntities->get(entityAtom);
 					if (result != undefinedAtom) 
 					{
-						AvmAssert(atomKind(result) == kIntegerType);
-						wchar c = (wchar) (result>>3);
+						AvmAssert(atomIsIntptr(result));
+						wchar c = (wchar) atomGetIntptr(result);
 						// note: this code is allowed to construct a string
 						// containing illegal UTF16 sequences!
 						dest = dest->append16(&c, 1);

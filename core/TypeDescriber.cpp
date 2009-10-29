@@ -528,9 +528,9 @@ namespace avmplus
     // on 64-bit systems. 
     static bool isIntAtom29Bit(Atom value)
     {
-        if (atomKind(value) == kIntegerType)
+        if (atomIsIntptr(value))
         {
-            intptr_t const i = atomInt(value);
+            intptr_t const i = atomGetIntptr(value);
             int32_t const i32 = (int32_t(i)<<3)>>3;
             return i == intptr_t(i32);
         }
