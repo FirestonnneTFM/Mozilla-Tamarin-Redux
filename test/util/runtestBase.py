@@ -102,7 +102,7 @@ class RuntestBase:
     vmtype = ''
     timeout = 0 # in seconds
     startTime = 0
-    
+    currentPids = []
 
     js_output = ''
     js_output_f = None
@@ -127,6 +127,7 @@ class RuntestBase:
     csv = False
     apiVersioning = False
     random = False
+    lock = threadpool.threading.Lock()
     
     genAtsSwfs = False
     atsDir = 'ATS_SWFS'
@@ -553,28 +554,37 @@ class RuntestBase:
             print('cmd: %s' % cmd)
         self.verbose_print('executing: %s' % cmd)
         try:
-            p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.lock.acquire()
+            try:
+                p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.currentPids.append(p)
+            finally:
+                self.lock.release()
+
             output = p.stdout.readlines()
             err = p.stderr.readlines()
             starttime=time()
             exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return 'timedOut'
+
+            self.lock.acquire()
+            try:
+                self.currentPids.remove(p)
+            finally:
+                self.lock.release()
+
             return (output,err,exitCode)
         except KeyboardInterrupt:
-            print '\n\nKeyboardInterrupt detected ... killing process'
-            p.kill()
-            self.killmyself()
+            self.killCurrentPids()
             
-    def killmyself(self):
-        # destroy this python process and children
-        if self.osName == 'win':
-            import ctypes
-            ctypes.windll.kernel32.TerminateProcess(
-                ctypes.windll.kernel32.OpenProcess(1, False, os.getpid()),
-                -1)
-        else:
-            os.killpg(os.getpgrp(),9)
+    def killCurrentPids(self):
+        self.lock.acquire()
+        try:
+            for p in self.currentPids:
+                p.kill()
+        finally:
+            self.lock.release()
                     
     def parseArgStringToList(self, argStr):
         args = argStr.strip().split(' ')
@@ -791,14 +801,12 @@ class RuntestBase:
             
             try:
               main.wait()
-            except KeyboardInterrupt, SystemExit:
-                print '\n\nKeyboardInterrupt detected ... killing worker threads'
+            except (TimeOutException, KeyboardInterrupt, SystemExit):
                 main.dismissWorkers(self.threads)
-                self.killmyself()
-            except Exception, e:
-                main.dismissWorkers(self.threads)
-                print 'EXCEPTION: %s' % e
-                self.killmyself()
+                self.killCurrentPids()
+                self.lock.acquire()
+                self.cleanup()
+                exit(0)
         
         if self.genAtsSwfs:
             try:
@@ -998,23 +1006,25 @@ class RuntestBase:
             # que requests
             [main.putRequest(req) for req in requests]
             
-            # ...and wait for the results to arrive in the result queue
-            # wait() will return when results for all work requests have arrived
-            
             try:
-              main.wait()
-            except KeyboardInterrupt, SystemExit:
-                print '\n\nKeyboardInterrupt detected ... killing worker threads'
+                while True:
+                    try:
+                        sleep(1)
+                        main.poll()
+                        if self.timeout:
+                            if time()-self.startTime > self.timeout:
+                                raise TimeOutException
+                        #print "(active worker threads: %i)" % (threadpool.threading.activeCount()-1, )
+                    except threadpool.NoResultsPending:
+                        break
+                if main.dismissedWorkers:
+                    main.joinAllDismissedWorkers()
+            except (TimeOutException, KeyboardInterrupt, SystemExit):
                 main.dismissWorkers(self.threads)
-                self.killmyself()
-            except TimeOutException:
-                main.dismissWorkers(self.threads)
+                self.killCurrentPids()
+                self.lock.acquire()
                 self.cleanup()
-                self.killmyself()
-            except Exception, e:
-                main.dismissWorkers(self.threads)
-                print 'EXCEPTION: %s' % e
-                self.killmyself()
+                exit(0)
             
                 
                 
@@ -1112,10 +1122,6 @@ class RuntestBase:
         return settings
     
     def runTestPrep(self, testAndNum):
-        if self.timeout:
-            if time()-self.startTime > self.timeout:
-                raise TimeOutException
-        
         ast = testAndNum[0]
         testnum = testAndNum[1]
         outputCalls = [] #queue all output calls so that output is written in a block
