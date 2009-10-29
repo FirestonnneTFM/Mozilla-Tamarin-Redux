@@ -51,42 +51,29 @@ namespace avmplus
 	public:
 		AbcEnv(PoolObject* _pool, DomainEnv* _domainEnv, CodeContext * _codeContext);
 
-		inline PoolObject* pool() const { return m_pool; }
-		inline DomainEnv* domainEnv() const { return m_domainEnv; }
-		inline CodeContext* codeContext() const { return m_codeContext; }
+		PoolObject* pool() const;
+		DomainEnv* domainEnv() const;
+		CodeContext* codeContext() const;
 
-		inline MethodEnv* getMethod(uint32_t i) const { return m_methods[i]; }
-		inline void setMethod(uint32_t i, MethodEnv* env) { WB(m_pool->core->GetGC(), this, &m_methods[i], env); }
+		MethodEnv* getMethod(uint32_t i) const;
+		void setMethod(uint32_t i, MethodEnv* env);
 
 #ifdef DEBUGGER
-		inline uint64_t& invocationCount(uint32_t i) 
-		{ 
-			AvmAssert(m_invocationCounts != NULL); 
-			AvmAssert(i < m_pool->methodCount()); 
-			return m_invocationCounts[i]; 
-		}
+		uint64_t& invocationCount(uint32_t i);
 #endif
 
-		static size_t calcExtra(PoolObject* pool)
-		{
-			const uint32_t c = pool->methodCount();
-			return (c <= 1) ? 0 : (sizeof(MethodEnv*)*(c-1));
-		}
-		
+		static size_t calcExtra(PoolObject* pool);
+
 		// these peek into the DomainEnv as appropriate
 		ScriptEnv* getScriptEnv(Stringp name, Namespacep ns);
 		ScriptEnv* getScriptEnv(const Multiname& m);
 
 		// these peek only into m_privateScriptEnvs
-		inline ScriptEnv* getPrivateScriptEnv(Stringp name) const { return (ScriptEnv*)m_privateScriptEnvs->getName(name); }
-		inline ScriptEnv* getPrivateScriptEnv(Stringp name, Namespacep ns) const { return (ScriptEnv*)m_privateScriptEnvs->get(name, ns); }
-		inline ScriptEnv* getPrivateScriptEnv(const Multiname& m) const { return (ScriptEnv*)m_privateScriptEnvs->getMulti(m); }
+		ScriptEnv* getPrivateScriptEnv(Stringp name) const;
+		ScriptEnv* getPrivateScriptEnv(Stringp name, Namespacep ns) const;
+		ScriptEnv* getPrivateScriptEnv(const Multiname& m) const;
 
-		inline void addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv) 
-		{ 
-			AvmAssert(!getPrivateScriptEnv(name, ns));
-			return m_privateScriptEnvs->add(name, ns, (Binding) scriptEnv); 
-		}
+		void addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv);
 
 	// ------------------------ DATA SECTION BEGIN
 	private:
