@@ -106,11 +106,8 @@ namespace avmplus
 
     REALLY_INLINE bool atomIsValidIntptrValue_u(const uintptr_t u)
     {
-#ifdef AVMPLUS_64BIT
-        return (u & 0xFF80000000000000ULL) == 0;
-#else
-        return (u & 0xF0000000UL) == 0;
-#endif
+        const uintptr_t MASK = uintptr_t(atomMaxIntValue)>>1;
+        return (u & MASK) == 0;
     }
 
     // unwrap an atom and return a ScriptObject*.  Doesn't use atomPtr(), because
