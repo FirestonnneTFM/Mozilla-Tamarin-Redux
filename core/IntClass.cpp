@@ -50,7 +50,7 @@ namespace avmplus
 	Atom IntClass::construct(int argc, Atom* argv)
 	{
 		if (argc == 0)
-			return 0|kIntegerType;   // yep this is zero atom
+			return zeroIntAtom;   // yep this is zero atom
 		else
 			return core()->intAtom(argv[1]);
 		// TODO ArgumentError if argc > 1
@@ -66,7 +66,7 @@ namespace avmplus
 	Atom UIntClass::construct(int argc, Atom* argv)
 	{
 		if (argc == 0)
-			return 0|kIntegerType;   // yep this is zero atom
+			return zeroIntAtom;   // yep this is zero atom
 		else
 			return core()->uintAtom(argv[1]);
 		// TODO ArgumentError if argc > 1

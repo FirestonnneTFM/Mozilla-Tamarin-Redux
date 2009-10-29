@@ -130,7 +130,7 @@ namespace avmplus
 				return AvmCore::atomToScriptObject(atom)->getDelegate();
 
 			case kDoubleType:
-			case kIntegerType:
+			case kIntptrType:
 				// ISSUE what about int?
 				return numberClass->prototype;
 
@@ -163,7 +163,7 @@ namespace avmplus
 				return core()->traits.string_itraits;
 			case kBooleanType:
 				return core()->traits.boolean_itraits;
-			case kIntegerType:
+			case kIntptrType:
 			case kDoubleType:
 				// ISSUE what about int?
 				return core()->traits.number_itraits;
@@ -221,7 +221,7 @@ namespace avmplus
 					break;
 				}
 			case kBooleanType:
-			case kIntegerType:
+			case kIntptrType:
 			case kDoubleType:
 			default: // number
 				throwTypeError(kConvertUndefinedToObjectError);
@@ -283,7 +283,7 @@ namespace avmplus
 						break;
 					}
 				}
-			case kIntegerType:
+			case kIntptrType:
 			case kDoubleType:
 			case kStringType:
 			case kBooleanType:

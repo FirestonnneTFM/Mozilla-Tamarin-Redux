@@ -394,7 +394,7 @@ namespace avmplus
 		/**
 		Returns a kIntegerAtom Atom if the string holds an integer that fits into
 		such an atom. For use in our ScriptObject HashTable implementation.  If we 
-		have a valid integer equivalent, it will never be zero since kIntegerType tag != 0.
+		have a valid integer equivalent, it will never be zero since kIntptrType tag != 0.
 		*/
 				Atom	FASTCALL	getIntAtom() const;
 		/**

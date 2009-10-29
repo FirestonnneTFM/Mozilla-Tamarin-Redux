@@ -653,13 +653,10 @@
     // that includes public and therefore exposes dynamic properties
     Atom getprop_index(MethodEnv* caller_env, Atom obj, const Multiname *name, Atom index)
     {
-        if (AvmCore::isInteger(index)) {
+        if (atomIsIntptr(index) && atomCanBeUint32(index)) {
             if (isObjectPtr(obj)) {
-                int i = (int)atomInt(index);
-                if (i >= 0) {
-                    _nvprof("getprop_index P-fast", 1);
-                    return AvmCore::atomToScriptObject(obj)->getUintProperty(i);
-                }
+                _nvprof("getprop_index P-fast", 1);
+                return AvmCore::atomToScriptObject(obj)->getUintProperty(uint32_t(atomGetIntptr(index)));
             }
         }
         _nvprof("getprop_index P-fast", 0);
@@ -675,13 +672,10 @@
     void setprop_index(MethodEnv* caller_env, Atom obj, const Multiname* name, Atom value, Atom index)
     {
         if (isObjectPtr(obj)) {
-            if (AvmCore::isInteger(index)) {
-                int i = (int) atomInt(index);
-                if (i >= 0) {
-                    // todo: obj is probably a dense array or vector
-                    AvmCore::atomToScriptObject(obj)->setUintProperty(i, value);
-                    _nvprof("setprop_index P-fast", 1);
-                }
+            if (atomIsIntptr(index) && atomCanBeUint32(index)) {
+                // todo: obj is probably a dense array or vector
+                AvmCore::atomToScriptObject(obj)->setUintProperty(uint32_t(atomGetIntptr(index)), value);
+                _nvprof("setprop_index P-fast", 1);
                 return;
             }
         }

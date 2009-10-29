@@ -241,7 +241,7 @@ namespace avmplus
 						return true;
 				}
 
-				return AvmCore::isInteger(value);
+				return atomIsIntptr(value) && atomCanBeUint32(value);
 
 			case BUILTIN_int:
 				if (AvmCore::isDouble(value))
@@ -251,7 +251,7 @@ namespace avmplus
 						return true;
 				}
 
-				return AvmCore::isInteger(value);
+				return atomIsIntptr(value) && atomCanBeInt32(value);
 
 			case BUILTIN_string:
 				return AvmCore::isNull(value) || AvmCore::isString(value);
@@ -287,7 +287,7 @@ namespace avmplus
 				const int32_t i = cpool_int[index];
 #ifdef AVMPLUS_64BIT
 				value = core->intToAtom(i);
-				AvmAssert(AvmCore::isInteger(value));
+				AvmAssert(atomIsIntptr(value) && atomCanBeInt32(value));
 #else
 				// LIR relies on the return values from this being "sticky" so it can insert them inline.
 				// that's true for everything but int/uints that overflow, so special-case them.
@@ -323,7 +323,7 @@ namespace avmplus
 				const int32_t u = cpool_int[index];
 #ifdef AVMPLUS_64BIT
 				value = core->uintToAtom(u);
-				AvmAssert(AvmCore::isInteger(value));
+				AvmAssert(atomIsIntptr(value) && atomCanBeUint32(value));
 #else
 				// LIR relies on the return values from this being "sticky" so it can insert them inline.
 				// that's true for everything but int/uints that overflow, so special-case them.
@@ -408,7 +408,7 @@ namespace avmplus
 					break;
 				case BUILTIN_int:
 				case BUILTIN_uint:
-					value = (0|kIntegerType);
+					value = (zeroIntAtom);
 					break;
 				case BUILTIN_string:
 					value = nullStringAtom;

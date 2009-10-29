@@ -190,9 +190,9 @@ namespace avmplus
 		case BUILTIN_number:
 			return (atomKind(atom) == kDoubleType) ? atom : core->numberAtom(atom);
 		case BUILTIN_int:
-			return (atomKind(atom) == kIntegerType) ? atom : core->intAtom(atom);
+			return (atomKind(atom) == kIntptrType) ? atom : core->intAtom(atom);
 		case BUILTIN_uint:
-			return (atomKind(atom) == kIntegerType && atom >= 0) ? atom : core->uintAtom(atom);
+			return (atomKind(atom) == kIntptrType && atom >= 0) ? atom : core->uintAtom(atom);
 		case BUILTIN_boolean:
 			return (atomKind(atom) == kBooleanType) ? atom : AvmCore::booleanAtom(atom);
 		case BUILTIN_object:
@@ -630,9 +630,9 @@ namespace avmplus
 
 	Atom MethodEnv::getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index)
 	{
-		if ((index&7) == kIntegerType)
+		if (atomIsIntptr(index) && atomCanBeInt32(index))
 		{
-			return getpropertylate_i(obj, (int32_t)(index>>3));
+			return getpropertylate_i(obj, (int32_t)atomGetIntptr(index));
 		}
 
 		if ((index&7) == kDoubleType)
@@ -671,9 +671,9 @@ namespace avmplus
 
 	void MethodEnv::initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index)
 	{
-		if ((index&7) == kIntegerType)
+		if (atomIsIntptr(index) && atomCanBeInt32(index))
 		{
-			setpropertylate_i(obj, (int32_t)(index>>3), value);
+			setpropertylate_i(obj, (int32_t)atomGetIntptr(index), value);
 			return;
 		}
 
@@ -718,9 +718,9 @@ namespace avmplus
 	{
 		// the positive-integer case is inlined into setprop_index in jit-calls.h,
 		// this handles the negative case
-		if (AvmCore::isInteger(obj))
+		if (atomIsIntptr(index) && atomCanBeInt32(index))
 		{
-			setpropertylate_i(obj, (int32_t)(index>>3), value);
+			setpropertylate_i(obj, (int32_t)atomGetIntptr(index), value);
 			return;
 		}
 

@@ -114,7 +114,7 @@ namespace avmplus
         const Atom kNamespaceType = 3;  // null=3
         const Atom kSpecialType   = 4;  // undefined=4
         const Atom kBooleanType   = 5;  // false=5 true=13
-        const Atom kIntegerType   = 6;
+        const Atom kIntptrType    = 6;
         const Atom kDoubleType    = 7;
         /*@}*/
 
@@ -146,35 +146,88 @@ namespace avmplus
         const Atom undefinedAtom  = kSpecialType|0; // 0x03
         const Atom trueAtom       = kBooleanType|0x08; // 0x0D
         const Atom falseAtom      = kBooleanType|0x00; // 0x05
+        const Atom zeroIntAtom    = Atom(kIntptrType|0);
 
         // used in unreachable "return" clauses as a self-documenting invalid value.
         const Atom unreachableAtom = kUnusedAtomTag;
         /*@}*/
 
-        enum BindingKind
-        {
-            BKIND_NONE              = 0,        // no such binding (id == 0)            000
-            BKIND_METHOD            = 1,        // MethodEnv*                           001
-            BKIND_VAR               = 2,        // int local slot number (r/w var)      010
-            BKIND_CONST             = 3,        // int local slot number (r/o const)    011
-            BKIND_unused            = 4,        // not in use                           100
-            BKIND_GET               = 5,        // get-only property                    101
-            BKIND_SET               = 6,        // set-only property                    110
-            BKIND_GETSET            = 7         // readwrite property                   111
-        };
-
-        // A couple of common Binding results that are worth having constants for
-        const Binding BIND_AMBIGUOUS = (Binding)-1;
-        const Binding BIND_NONE      = (Binding)BKIND_NONE;      // no such binding
-
     }
 
+#ifdef AVMPLUS_64BIT
+    // in 64-bit builds, integer atoms can hold a 53-bit signed value.
+    // (this is so that integer values can be interchanged with doubles with no loss of precision)
+    const intptr_t atomMinIntValue = -(1LL<<53);
+    const intptr_t atomMaxIntValue = (1LL<<53)-1;
+#else
+    // in 32-bit builds, integer atoms can hold a 29-bit signed value.
+    const intptr_t atomMinIntValue = -(1L<<29);
+    const intptr_t atomMaxIntValue = (1L<<29)-1;
+#endif
+
     // sadly, these generate better code than the inlines in atom-inlines.h
-    #define atomKind(a) ((Atom)((uintptr_t(a) & 7)))
-    #define atomPtr(a)  ((void*)(uintptr_t(a) & ~7))
-    #define atomInt(a)  (intptr_t(a) >> 3)
+    #define atomKind(a)     ((Atom)((uintptr_t(a) & 7)))
+    #define atomPtr(a)      ((void*)(uintptr_t(a) & ~7))
 
     #define ISNULL(a) (((uintptr)a) < (uintptr)kSpecialType)
+
+    // returns true if atom type is int. 
+    // Note that this DOES NOT imply that the Atom's value will
+    // fit into an int32 (or a uint32); an integer atom's value
+    // will always fit into an intptr_t, which may be more than
+    // an int32 (or uint32) will hold on 64-bit architectures.
+    bool            atomIsIntptr(Atom atom);
+
+    // return true iff both atoms are of the given type. sometimes this is slightly
+    // faster than calling atomIs(b1)&&atomIs(b2). (And yes, "atomIsBoth" is poor 
+    // grammar in English, but follows the "atomIsXXX -> bool" pattern)
+    bool            atomIsBothIntptr(Atom atom1, Atom atom2);
+
+    // if the atom is kIntptrType and will fit into an int32_t, return true
+    // if the atom is kIntptrType and will NOT fit into an int32_t, return false
+    // if the atom is not kIntptrType, assert
+    bool            atomCanBeInt32(Atom atom);
+    // if the atom is kIntptrType and will fit into an uint32_t, return true
+    // if the atom is kIntptrType and will NOT fit into an uint32_t, return false
+    // if the atom is not kIntptrType, assert
+    bool            atomCanBeUint32(Atom atom);
+
+    // getters to obtain the value.
+    // these getters require that the type of the Atom be *exactly* what is requested;
+    // no coercion is done (e.g., calling getDouble() on a Atom containing TypeInt will assert).
+    intptr_t        atomGetIntptr(Atom atom);
+
+    // if the given intptr can fit into an kIntptrType atom, return true.
+    // if not (the magnitude is too large/small), return false.
+    // WARNING: do not pass an (unsigned) uintptr_t value; you may get incorrect results.
+    bool            atomIsValidIntptrValue(const intptr_t i);
+
+    // if the given uintptr can fit into an kIntptrType atom, return true.
+    // if not (the magnitude is too large/small), return false.
+    // WARNING: do not pass a (signed) intptr_t value; you may get incorrect results.
+    bool            atomIsValidIntptrValue_u(const uintptr_t u);
+
+    // ---------------------------------------------------------------------------------
+
+    typedef struct Binding_* Binding;
+
+    enum BindingKind
+    {
+        BKIND_NONE              = 0,        // no such binding (id == 0)            000
+        BKIND_METHOD            = 1,        // MethodEnv*                           001
+        BKIND_VAR               = 2,        // int local slot number (r/w var)      010
+        BKIND_CONST             = 3,        // int local slot number (r/o const)    011
+        BKIND_unused            = 4,        // not in use                           100
+        BKIND_GET               = 5,        // get-only property                    101
+        BKIND_SET               = 6,        // set-only property                    110
+        BKIND_GETSET            = 7         // readwrite property                   111
+    };
+
+    // A couple of common Binding results that are worth having constants for
+    const Binding BIND_AMBIGUOUS = (Binding)-1;
+    const Binding BIND_NONE      = (Binding)BKIND_NONE;      // no such binding
+
+    // ---------------------------------------------------------------------------------
 
     // macro for profiling the frequencies of different Atom or Binding tags.
     // Must include vprof.h.  usage:   tagprof("histogram for my_atom", my_atom);
@@ -183,6 +236,7 @@ namespace avmplus
     #else
     #  define tagprof(n,v)
     #endif
+
 }
 
 #endif // __avmplus_atom__
