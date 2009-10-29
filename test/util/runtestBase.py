@@ -958,15 +958,15 @@ class RuntestBase:
         return files
 
     def checkExecutable(self,exe, msg):
-        if not re.search('winmobile',self.config): 
-            if not isfile(exe):
-                exit('ERROR: cannot find %s, %s' % (exe, msg))
-            if not os.access(exe, os.X_OK):
-                try:
-                    import stat
-                    os.chmod(exe, stat.S_IXUSR)
-                except:
-                    exit('ERROR: cannot execute %s, check the executable flag' % exe)
+        exe = exe.split()[0]    # only check first arg if there are more than one
+        if not isfile(exe):
+            exit('ERROR: cannot find %s, %s' % (exe, msg))
+        if not os.access(exe, os.X_OK):
+            try:
+                import stat
+                os.chmod(exe, stat.S_IXUSR)
+            except:
+                exit('ERROR: cannot execute %s, check the executable flag' % exe)
 
     # TODO: Rename/move to better place
     def preProcessTests(self):  # don't need AVM if rebuilding tests
