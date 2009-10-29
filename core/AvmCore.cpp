@@ -4353,8 +4353,11 @@ return the result of the comparison ToPrimitive(x) == y.
 	/* static */
 	void AvmCore::checkPCREStackOverflow()
 	{
-		AvmAssert(PCREContext != NULL);
-		(PCREContext->core())->stackCheck(PCREContext);
+		// Stopgap measure 2009-10-29:  The PCREContext can be NULL when host code (*cough* Flash Player *cough*)
+		// calls directly into the PCRE engine.  We need to fix that, but for the moment we allow it to happen:
+		// it's no worse than before.
+		if (PCREContext != NULL)
+			(PCREContext->core())->stackCheck(PCREContext);
 	}
 
 	/* static */
