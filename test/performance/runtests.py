@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -79,6 +81,7 @@ class PerformanceRuntest(RuntestBase):
     serverHost = '10.60.48.47'
     serverPort = 1188
     finalexitcode=0
+    prettyprint = False
     
     def __init__(self):
         RuntestBase.__init__(self)
@@ -90,6 +93,7 @@ class PerformanceRuntest(RuntestBase):
         self.parseOptions()
         self.altsearchpath='../../other-licenses/test/performance/'
         self.setTimestamp()
+        self.checkPath(['avm2'])
         if re.search('(_arm.exe|_arm_d.exe|Windows Mobile)',self.avm)!=None:
             self.config='arm-winmobile-emulator-tvm'
         if not self.config:
@@ -130,14 +134,15 @@ class PerformanceRuntest(RuntestBase):
         print "    --nooptimize    do not optimize files when compiling"
         print "    --perfm         parse the perfm results from avm"
         print "    --csv           output in csv format"
+        print " -p --prettyprint   enhanced terminal coloring"
         exit(c)
     
     def setOptions(self):
         RuntestBase.setOptions(self)
-        self.options += 'S:i:lkr:m'
+        self.options += 'S:i:lkr:mp'
         self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log','socketlog',
                                  'runtime=','memory','larger','vmversion=','vmargs2=','nooptimize',
-                                 'perfm','csv'])
+                                 'perfm','csv','prettyprint'])
     
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -169,7 +174,8 @@ class PerformanceRuntest(RuntestBase):
                 self.perfm = True
             elif o in ('--csv',):
                 self.csv = True
-                
+            elif o in ('-p', '--prettyprint'):
+                self.prettyprint = True
     
     
     def getVersion(self):
@@ -198,7 +204,7 @@ class PerformanceRuntest(RuntestBase):
         args = []
         args.append('-import %s' % self.shellabc)
         if self.optimize:
-            args.append('-optimize')
+            args.append('-optimize -AS3')
         RuntestBase.compile_test(self, as_file, args)
     
     def formatExceptionInfo(maxTBlevel=5):
@@ -255,9 +261,10 @@ class PerformanceRuntest(RuntestBase):
 
 
     def preProcessTests(self):
-        if not self.avm:
-            exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % self.avm)
-        
+        self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
+        if self.avm2:
+            self.checkExecutable(self.avm2, '--avm2 must be set to avmplus')
+            
         # Print run info and headers
         self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True, csv=False)
         self.js_print("%s: %s %s" % (self.avmname, self.avm, self.vmargs))
@@ -276,8 +283,8 @@ class PerformanceRuntest(RuntestBase):
                 else:
                     self.js_print('Note that %diff is calculated using the fastest value (not avg) of all runs', csv=False)
                 self.js_print("\n%-50s %20s   %20s" % ('',self.avmname,self.avm2name))
-                self.js_print('%-50s  %6s :%6s  %6s %6s    %6s :%6s  %6s %6s %7s %7s' % ('test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','metric'))
-                self.js_print('                                                   ------------------------------   ------------------------------   -----  ------', csvOut=False)
+                self.js_print('%-50s  %6s :%6s  %6s %6s    %6s :%6s  %6s %6s %7s %7s %8s' % ('test', 'min','max','avg','stdev','min','max','avg','stdev','%diff','sig  ','metric'))
+                self.js_print('                                                   ------------------------------   ------------------------------   -----  -------  ------', csvOut=False)
         else:
             if (self.iterations>2):
                 runFormatStr = ''
@@ -489,11 +496,21 @@ class PerformanceRuntest(RuntestBase):
                 else:
                     mem1_avg = formatMemory(sum(resultList)/float(len(resultList)))
                     mem2_avg = formatMemory(sum(resultList2)/float(len(resultList2)))
-                    self.js_print('%-50s [%6s :%6s] %6s %6s   [%6s :%6s] %6s %6s %6.1f%% %7s %s' %
-                                  (testName,formatMemory(min(resultList)),formatMemory(memoryhigh),mem1_avg,
-                                    formatMemory(standard_deviation(resultList)), formatMemory(min(resultList2)),
-                                    formatMemory(memoryhigh2),mem2_avg,formatMemory(standard_deviation(resultList2)),
-                                    spdup, metric, largerIsFaster) )
+                    relStdDev1 = rel_std_dev(resultList)
+                    relStdDev2 = rel_std_dev(resultList2)
+                    try:
+                        sig = spdup / (relStdDev1+relStdDev2)
+                    except ZeroDivisionError:
+                        sig = cmp(spdup,0) * (3.0 if abs(spdup) > 5.0 else 2.0 if abs(spdup) > 1.0 else 0.0)
+                    sig_str = '--' if (sig < -2.0 and spdup < -5.0) else '- ' if sig < -1.0 \
+                              else '++' if (sig > 2.0 and spdup > 5.0) else '+ ' if sig > 1.0 else '  '
+                    bold = '\033[1m' if (abs(sig)>1.0 and self.prettyprint) else ''
+                    endbold = '\033[0;0m' if bold else ''
+                    self.js_print('%s%-50s [%6s :%6s] %6s ±%4.1f%%   [%6s :%6s] %6s ±%4.1f%% %6.1f%% %5.1f %2s %7s %s%s' %
+                                  (bold,testName,formatMemory(min(resultList)),formatMemory(memoryhigh),mem1_avg,
+                                    rel_std_dev(resultList), formatMemory(min(resultList2)),
+                                    formatMemory(memoryhigh2),mem2_avg,rel_std_dev(resultList2),
+                                    spdup, sig, sig_str, metric, largerIsFaster,endbold) )
             else:
                 confidence=0
                 meanRes=memoryhigh
@@ -522,15 +539,31 @@ class PerformanceRuntest(RuntestBase):
                         min2 = float(min(resultList2))
                         max1 = float(max(resultList))
                         max2 = float(max(resultList2))
-                        if largerIsFaster:
-                            spdup = 100.0*(max2-max1)/max1
-                        else:
-                            spdup = 100.0*(min1-min2)/min1
-                        self.js_print('%-50s [%6s :%6s] %6.1f %6.1f   [%6s :%6s] %6.1f %6.1f %6.1f%% %7s %s' %
-                                      (testName, min1, max1, rl1_avg, standard_deviation(resultList),
-                                       min2, max2, rl2_avg, standard_deviation(resultList2),
-                                       spdup, metric, largerIsFaster))
+                        relStdDev1 = rel_std_dev(resultList)
+                        relStdDev2 = rel_std_dev(resultList2)
+                        try:
+                            if largerIsFaster:
+                                spdup = 100.0*(max2-max1)/max1
+                            else:
+                                spdup = 100.0*(min1-min2)/min1
+                        except ZeroDivisionError:
+                            spdup = 9999
+                        try:
+                            sig = spdup / (relStdDev1+relStdDev2)
+                        except ZeroDivisionError:
+                            # determine sig by %diff (spdup) only
+                            sig = cmp(spdup,0) * (3.0 if abs(spdup) > 5.0 else 2.0 if abs(spdup) > 1.0 else 0.0)
+                        sig_str = '--' if (sig < -2.0 and spdup < -5.0) else '- ' if sig < -1.0 \
+                                  else '++' if (sig > 2.0 and spdup > 5.0) else '+ ' if sig > 1.0 else '  '
+                        # only bold if abs > 1 and averages are > 3 ms apart
+                        bold = '\033[1m' if (abs(sig)>1.0 and abs(rl1_avg-rl2_avg) > 3 and self.prettyprint) else ''
+                        endbold = '\033[0;0m' if bold else ''
+                        self.js_print('%s%-50s [%6s :%6s] %6.1f ±%4.1f%%   [%6s :%6s] %6.1f ±%4.1f%% %6.1f%% %5.1f %2s %7s %s%s' %
+                                      (bold,testName, min1, max1, rl1_avg, relStdDev1,
+                                       min2, max2, rl2_avg, relStdDev2,
+                                       spdup, sig,sig_str, metric, largerIsFaster,endbold))
                     except:
+                        print sys.exc_info
                         self.js_print('%-50s [%6s :%6s] %6.1f %6s   [%6s :%6s] %6.1f %6s %7.1f %7s %s' % (testName, '', '', result1,'', '', '', result2,'', spdup, metric, largerIsFaster))
                 #TODO: clean up / reformat
                 if self.perfm:
