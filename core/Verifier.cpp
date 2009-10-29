@@ -2934,6 +2934,18 @@ namespace avmplus
 	}
 
 #if defined FEATURE_CFGWRITER
+	Block::Block(uint32_t label, int32_t begin) 
+		: label(label), begin(begin), end(0), succ(0)
+		, pred_count(0)
+	{}
+
+	Block::~Block()
+	{}
+
+	Edge::Edge(uint32_t src, uint32_t snk)
+		: src(src), snk(snk)
+	{}
+
     CFGWriter::CFGWriter (MethodInfo* info, CodeWriter* coder) 
 	    : NullWriter(coder), info(info), label(0), edge(0) {
 	        blocks.put(0, mmfx_new( Block(label++, 0)));
@@ -2946,6 +2958,13 @@ namespace avmplus
 			mmfx_delete( blocks.at(i) );
 		for (int i=0, n=edges.size(); i < n; i++)
 			mmfx_delete( edges.at(i) );
+	}
+
+	void CfgWriter::cleanup()
+	{
+		// this is only called on abnormal paths where the dtor wouldn't otherwise run at all.
+		coder->cleanup();
+		this->~CFGWriter();
 	}
 
 	void CFGWriter::writeEpilogue(FrameState* state)

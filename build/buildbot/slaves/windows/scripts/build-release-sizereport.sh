@@ -91,6 +91,11 @@ python ./sizereport.py --vmversion=$change --product=tamarin-redux --socketlog -
 
 echo url: "http://tamarin-builds.mozilla.org/report/index.cfm?mode=size&rollupname=sizereport&hostip=10.60.147.246&configbaseline=tamarin-redux&config1=tamarin-redux&config2=tamarin-redux&baselineBuild=1094&topBuild=${change}" size report
 
+# We have had some problems in the past with deleting the objdir-release directory after running the 
+# sizereport, give the script a couple of seconds to make sure that the python process completely
+# shutsdown prior to trying to remove the directory
+sleep 10
+
 cd $basedir
 test -d objdir-release && {
     echo Remove directory $basedir/objdir-release

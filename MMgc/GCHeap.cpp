@@ -148,6 +148,7 @@ namespace MMgc
 		  numDecommitted(0),
 		  numRegionBlocks(0),
 		  numAlloc(0),
+		  codeMemory(0),
 		  config(c),
  		  status(kMemNormal),
 		  statusNotificationBeingSent(false),
