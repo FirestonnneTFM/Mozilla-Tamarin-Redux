@@ -1431,7 +1431,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kObjectType:
 				return intern(atomToScriptObject(atom)->toString());
 			case kIntptrType:
-				return internInt(atomGetIntptr(atom));
+				return internInt((int32_t)atomGetIntptr(atom));
 			case kDoubleType:
 			default: // number
 				return internDouble(atomToDouble(atom));
@@ -3525,7 +3525,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		if (id3 != 0 || !MathUtils::isNegZero(n))
 		{
-			return id3 | kIntegerType;
+			return id3 | kIntptrType;
 		}
 		else
 		{
@@ -3572,7 +3572,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		if (id3 != 0 || !MathUtils::isNegZero(n))
 		{
-			return id3 | kIntegerType;
+			return id3 | kIntptrType;
 		}
 
 		asm("d2a_alloc:");

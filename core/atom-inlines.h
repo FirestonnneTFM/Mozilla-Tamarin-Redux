@@ -69,6 +69,7 @@ namespace avmplus
         return i == i32;
 #else
         // int atoms always fit in int32 on 32-bit
+        (void)atom;
         return true;
 #endif      
     }
