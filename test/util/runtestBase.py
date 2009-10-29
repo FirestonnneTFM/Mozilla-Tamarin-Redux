@@ -102,7 +102,7 @@ class RuntestBase:
     vmtype = ''
     timeout = 0 # in seconds
     startTime = 0
-    currentPids = []
+    
 
     js_output = ''
     js_output_f = None
@@ -127,7 +127,6 @@ class RuntestBase:
     csv = False
     apiVersioning = False
     random = False
-    lock = threadpool.threading.Lock()
     
     genAtsSwfs = False
     atsDir = 'ATS_SWFS'
@@ -330,30 +329,15 @@ class RuntestBase:
             
         return opts
                 
-    def checkPath(self,additionalVars=[]):
-        '''Check to see if running using windows python and if so, convert any cygwin paths to win paths
-            Takes additional variables to check as a list of strings
-        '''
+    def checkPath(self):
+        '''Check to see if running using windows python and if so, convert any cygwin paths to win paths'''
         if platform.system() == 'Windows':
             def convertFromCygwin(cygpath):
-                if cygpath.find('\\') == -1:
-                    try:
-                        f = self.run_pipe('cygpath -m %s' % cygpath)
-                        cygpath = f[0][0].strip()
-                    except:
-                        pass
+                if cygpath[:9] == '/cygdrive':
+                    cygpath = '%s:/%s' % (cygpath[10],cygpath[11:])
                 return cygpath
-            # check for .exe in avm, avm2
-            try:
-                if self.avm and not isfile(self.avm) and self.avm[-4:] != '.exe':
-                    self.avm += '.exe'
-                if self.avm2 and not isfile(self.avm2) and self.avm2[-4:] != '.exe':
-                    self.avm2 += '.exe'
-            except:
-                pass
             
             selfVarsToCheck = ['avm','asc','builtinabc','shellabc','java']
-            selfVarsToCheck.extend(additionalVars)
             for var in selfVarsToCheck:
                 setattr(self, var, convertFromCygwin(getattr(self,var)))
                 
@@ -569,37 +553,28 @@ class RuntestBase:
             print('cmd: %s' % cmd)
         self.verbose_print('executing: %s' % cmd)
         try:
-            self.lock.acquire()
-            try:
-                p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                self.currentPids.append(p)
-            finally:
-                self.lock.release()
-
+            p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.stdout.readlines()
             err = p.stderr.readlines()
             starttime=time()
             exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return 'timedOut'
-
-            self.lock.acquire()
-            try:
-                self.currentPids.remove(p)
-            finally:
-                self.lock.release()
-
             return (output,err,exitCode)
         except KeyboardInterrupt:
-            self.killCurrentPids()
+            print '\n\nKeyboardInterrupt detected ... killing process'
+            p.kill()
+            self.killmyself()
             
-    def killCurrentPids(self):
-        self.lock.acquire()
-        try:
-            for p in self.currentPids:
-                p.kill()
-        finally:
-            self.lock.release()
+    def killmyself(self):
+        # destroy this python process and children
+        if self.osName == 'win':
+            import ctypes
+            ctypes.windll.kernel32.TerminateProcess(
+                ctypes.windll.kernel32.OpenProcess(1, False, os.getpid()),
+                -1)
+        else:
+            os.killpg(os.getpgrp(),9)
                     
     def parseArgStringToList(self, argStr):
         args = argStr.strip().split(' ')
@@ -816,12 +791,14 @@ class RuntestBase:
             
             try:
               main.wait()
-            except (TimeOutException, KeyboardInterrupt, SystemExit):
+            except KeyboardInterrupt, SystemExit:
+                print '\n\nKeyboardInterrupt detected ... killing worker threads'
                 main.dismissWorkers(self.threads)
-                self.killCurrentPids()
-                self.lock.acquire()
-                self.cleanup()
-                exit(0)
+                self.killmyself()
+            except Exception, e:
+                main.dismissWorkers(self.threads)
+                print 'EXCEPTION: %s' % e
+                self.killmyself()
         
         if self.genAtsSwfs:
             try:
@@ -957,23 +934,14 @@ class RuntestBase:
                 files.append(string.replace(util, "$", "\$"))
         return files
 
-    def checkExecutable(self,exe, msg):
-        if not isfile(exe):
-            exit('ERROR: cannot find %s, %s' % (exe, msg))
-        if not os.access(exe, os.X_OK):
-            try:
-                import stat
-                os.chmod(exe, stat.S_IXUSR)
-            except:
-                exit('ERROR: cannot execute %s, check the executable flag' % exe)
-
     # TODO: Rename/move to better place
-    def preProcessTests(self):  # don't need AVM if rebuilding tests
-        if not self.rebuildtests:
-            self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
+    def preProcessTests(self):
+        if (not self.rebuildtests) and (not self.avm): #don't need AVM if rebuilding tests
+            exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % self.avm)
             
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
+        
         
         # Are we running esc - depends on a valid avm
         if self.runESC:
@@ -1030,25 +998,23 @@ class RuntestBase:
             # que requests
             [main.putRequest(req) for req in requests]
             
+            # ...and wait for the results to arrive in the result queue
+            # wait() will return when results for all work requests have arrived
+            
             try:
-                while True:
-                    try:
-                        sleep(1)
-                        main.poll()
-                        if self.timeout:
-                            if time()-self.startTime > self.timeout:
-                                raise TimeOutException
-                        #print "(active worker threads: %i)" % (threadpool.threading.activeCount()-1, )
-                    except threadpool.NoResultsPending:
-                        break
-                if main.dismissedWorkers:
-                    main.joinAllDismissedWorkers()
-            except (TimeOutException, KeyboardInterrupt, SystemExit):
+              main.wait()
+            except KeyboardInterrupt, SystemExit:
+                print '\n\nKeyboardInterrupt detected ... killing worker threads'
                 main.dismissWorkers(self.threads)
-                self.killCurrentPids()
-                self.lock.acquire()
+                self.killmyself()
+            except TimeOutException:
+                main.dismissWorkers(self.threads)
                 self.cleanup()
-                exit(0)
+                self.killmyself()
+            except Exception, e:
+                main.dismissWorkers(self.threads)
+                print 'EXCEPTION: %s' % e
+                self.killmyself()
             
                 
                 
@@ -1146,6 +1112,10 @@ class RuntestBase:
         return settings
     
     def runTestPrep(self, testAndNum):
+        if self.timeout:
+            if time()-self.startTime > self.timeout:
+                raise TimeOutException
+        
         ast = testAndNum[0]
         testnum = testAndNum[1]
         outputCalls = [] #queue all output calls so that output is written in a block

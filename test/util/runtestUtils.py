@@ -81,15 +81,7 @@ def variance(population):
     # if you want to calculate std deviation
     # of a sample change this to "s / (n-1)"
     return s / (n)
-
-
-# Relative Standard Deviation = % standard deviation
-def rel_std_dev(population):
-    try:
-        return (100*standard_deviation(population))/mean(population)
-    except ZeroDivisionError:
-        return 0.0
-
+    
 def standard_deviation(population):
     return sqrt(variance(population))
 
