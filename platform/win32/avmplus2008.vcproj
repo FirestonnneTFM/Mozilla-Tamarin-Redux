@@ -2236,6 +2236,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\Verifier-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Verifier.h"
 				>
 			</File>
