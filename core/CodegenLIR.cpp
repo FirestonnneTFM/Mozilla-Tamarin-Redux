@@ -5548,12 +5548,12 @@ namespace nanojit
     // static
     void* CodeAlloc::allocCodeChunk(size_t nbytes) {
         size_t npages = (nbytes + GCHeap::kBlockSize - 1) / GCHeap::kBlockSize;
-        return GCHeap::GetGCHeap()->Alloc((int)npages);
+        return GCHeap::GetGCHeap()->AllocCodeMemory(npages);
     }
 
     // static
     void CodeAlloc::freeCodeChunk(void* addr, size_t) {
-        return GCHeap::GetGCHeap()->Free(addr);
+        return GCHeap::GetGCHeap()->FreeCodeMemory(addr);
     }
 }
 
