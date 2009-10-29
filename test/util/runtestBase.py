@@ -816,11 +816,17 @@ class RuntestBase:
             
             try:
               main.wait()
-            except (TimeOutException, KeyboardInterrupt, SystemExit):
+            except (TimeOutException, KeyboardInterrupt):
                 main.dismissWorkers(self.threads)
                 self.killCurrentPids()
                 self.lock.acquire()
                 self.cleanup()
+                exit(0)
+            except SystemExit, e:
+                main.dismissWorkers(self.threads)
+                self.killCurrentPids()
+                self.lock.acquire()
+                print e
                 exit(0)
         
         if self.genAtsSwfs:
@@ -958,7 +964,8 @@ class RuntestBase:
         return files
 
     def checkExecutable(self,exe, msg):
-        exe = exe.split()[0]    # only check first arg if there are more than one
+        if exe:
+            exe = exe.split()[0]    # only check first arg if there are more than one
         if not isfile(exe):
             exit('ERROR: cannot find %s, %s' % (exe, msg))
         if not os.access(exe, os.X_OK):
@@ -999,7 +1006,7 @@ class RuntestBase:
     
     # this will be called when an exception occurs within a thread
     def handle_exception(self, request, exc_info):
-        raise exc_info[0]
+        raise exc_info[1]
     
     def runTests(self, testList):
         testnum = len(testList)
@@ -1044,11 +1051,17 @@ class RuntestBase:
                         break
                 if main.dismissedWorkers:
                     main.joinAllDismissedWorkers()
-            except (TimeOutException, KeyboardInterrupt, SystemExit):
+            except (TimeOutException, KeyboardInterrupt):
                 main.dismissWorkers(self.threads)
                 self.killCurrentPids()
                 self.lock.acquire()
                 self.cleanup()
+                exit(0)
+            except SystemExit, e:
+                main.dismissWorkers(self.threads)
+                self.killCurrentPids()
+                self.lock.acquire()
+                print e
                 exit(0)
             
                 
