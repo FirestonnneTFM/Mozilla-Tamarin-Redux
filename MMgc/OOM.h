@@ -55,7 +55,7 @@
 
 
 #define MMGC_ENTER_VOID_NO_GUARD				\
-	MMgc::GCHEap::EnterLock();					\
+	MMgc::GCHeap::EnterLock();					\
 	MMgc::EnterFrame _ef;						\
 	MMgc::GCHeap::EnterRelease();				\
 	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
