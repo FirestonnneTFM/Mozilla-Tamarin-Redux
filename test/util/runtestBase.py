@@ -330,15 +330,30 @@ class RuntestBase:
             
         return opts
                 
-    def checkPath(self):
-        '''Check to see if running using windows python and if so, convert any cygwin paths to win paths'''
+    def checkPath(self,additionalVars=[]):
+        '''Check to see if running using windows python and if so, convert any cygwin paths to win paths
+            Takes additional variables to check as a list of strings
+        '''
         if platform.system() == 'Windows':
             def convertFromCygwin(cygpath):
-                if cygpath[:9] == '/cygdrive':
-                    cygpath = '%s:/%s' % (cygpath[10],cygpath[11:])
+                if cygpath.find('\\') == -1:
+                    try:
+                        f = self.run_pipe('cygpath -m %s' % cygpath)
+                        cygpath = f[0][0].strip()
+                    except:
+                        pass
                 return cygpath
+            # check for .exe in avm, avm2
+            try:
+                if self.avm and not isfile(self.avm) and self.avm[-4:] != '.exe':
+                    self.avm += '.exe'
+                if self.avm2 and not isfile(self.avm2) and self.avm2[-4:] != '.exe':
+                    self.avm2 += '.exe'
+            except:
+                pass
             
             selfVarsToCheck = ['avm','asc','builtinabc','shellabc','java']
+            selfVarsToCheck.extend(additionalVars)
             for var in selfVarsToCheck:
                 setattr(self, var, convertFromCygwin(getattr(self,var)))
                 
@@ -942,14 +957,23 @@ class RuntestBase:
                 files.append(string.replace(util, "$", "\$"))
         return files
 
+    def checkExecutable(self,exe, msg):
+        if not isfile(exe):
+            exit('ERROR: cannot find %s, %s' % (exe, msg))
+        if not os.access(exe, os.X_OK):
+            try:
+                import stat
+                os.chmod(exe, stat.S_IXUSR)
+            except:
+                exit('ERROR: cannot execute %s, check the executable flag' % exe)
+
     # TODO: Rename/move to better place
-    def preProcessTests(self):
-        if (not self.rebuildtests) and (not self.avm): #don't need AVM if rebuilding tests
-            exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % self.avm)
+    def preProcessTests(self):  # don't need AVM if rebuilding tests
+        if not self.rebuildtests:
+            self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
             
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
-        
         
         # Are we running esc - depends on a valid avm
         if self.runESC:
