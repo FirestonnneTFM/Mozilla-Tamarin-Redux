@@ -294,6 +294,16 @@ namespace MMgc
 		void *Alloc(size_t size, uint32_t flags=kExpand | kZero | kProfile);
 
 		/**
+		 * Allocate memory that the JIT will use for object code.
+		 * @param size the number of blocks
+		 */
+		void *AllocCodeMemory(size_t size)
+		{
+			codeMemory += size;
+			return Alloc(size);
+		}
+		
+		/**
 		 * Frees a block.
 		 * @param item the block to free.  This must be the same
 		 *             pointer that was previously returned by
@@ -302,6 +312,16 @@ namespace MMgc
 		void Free(void *item) { FreeInternal(item, true); }
 		void FreeNoProfile(void *item) { FreeInternal(item, false); }
 
+		/**
+		 * Free memory allocated from AllocCodeMemory.
+		 */
+		void FreeCodeMemory(void* item)
+		{
+			HeapBlock *block = AddrToBlock(item);
+			codeMemory -= block->size;
+			Free(item);
+		}
+		
 		/**
 		 * Added for NJ's portability needs cause it doesn't always MMgc 
 		 */
@@ -728,6 +748,7 @@ namespace MMgc
 		size_t numRegionBlocks;
 		HeapBlock freelists[kNumFreeLists];
 		size_t numAlloc;
+		size_t codeMemory;
 		vmpi_spin_lock_t m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
