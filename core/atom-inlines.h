@@ -107,7 +107,7 @@ namespace avmplus
 
     REALLY_INLINE bool atomIsValidIntptrValue_u(const uintptr_t u)
     {
-        const uintptr_t MASK = uintptr_t(atomMaxIntValue)>>1;
+        const uintptr_t MASK = ~(uintptr_t(atomMaxIntValue)>>1);
         return (u & MASK) == 0;
     }
 
