@@ -54,7 +54,7 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # BUGS:
 # Grouped by feature or platform
 
-regress/bug_420755:.*, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=522069
+
 
 ####################
 # force JIT -Ojit
