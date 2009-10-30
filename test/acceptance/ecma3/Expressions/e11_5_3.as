@@ -145,7 +145,13 @@ function getTestCases() {
     array[item++] = new TestCase( SECTION,    "66.6 % -25.4",                       15.799999999999997,               66.6 % -25.4);
     array[item++] = new TestCase( SECTION,    "-66.6 % 25.4",                       -15.799999999999997,              -66.6 % 25.4 );
     array[item++] = new TestCase( SECTION,    "-66.6 % -25.4",                       -15.799999999999997,             -66.6 % -25.4 );
-
-
+    
+    // Regression for https://bugzilla.mozilla.org/show_bug.cgi?id=491084
+    array[item++] = new TestCase( SECTION,    "null % null",        NaN, null %  null);
+    array[item++] = new TestCase( SECTION,    "'a string' % null",  NaN, 'a string' %  null);
+    array[item++] = new TestCase( SECTION,    "null % 'a string'",  NaN, null % 'a string');
+    array[item++] = new TestCase( SECTION,    "Math.PI % null",     NaN, Math.PI % null);
+    array[item++] = new TestCase( SECTION,    "null % Math.PI",     0, null % Math.PI);
+    
     return ( array );
 }
