@@ -120,6 +120,12 @@ namespace avmplus
         return (ScriptObject*) (uintptr_t(a) - kObjectType);
     }
 
+    REALLY_INLINE bool atomGetBoolean(Atom a)
+    {
+        AvmAssert(a == trueAtom || a == falseAtom);
+        return bool(a >> 3);
+    }
+
 } // namespace
 
 #endif // __avmplus_atom_inlines__
