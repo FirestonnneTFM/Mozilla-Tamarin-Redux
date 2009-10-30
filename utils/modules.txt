@@ -97,6 +97,7 @@ vm avmplus::Verifier
 vm avmplus::AbcParser
 vm avmplus::SortedIntMap
 vm avmplus::FrameState
+vm avmplus:FrameState.obj
 vm avmplus:Coder.obj
 
 builtin avmplus:MathUtils.obj
