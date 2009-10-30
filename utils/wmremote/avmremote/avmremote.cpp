@@ -59,22 +59,34 @@ STDAPI StartAVMShell(
    BYTE  **ppOutput,
    IRAPIStream *pIRAPIStream )
 {
-
-	WCHAR cmdLine[256];
-	if (cbInput>0)
-	{
-		WCHAR wOpt[64];
-		int cnt = MultiByteToWideChar(CP_ACP, 0, (LPCSTR)pInput, cbInput, wOpt, 64);
-		wcscpy(cmdLine, wOpt);
-		wcscat(cmdLine, L" -log \\Temp\\avmfile.abc");
+    WCHAR wShell[1024];
+	char shell[1024];
+	WCHAR wCmdline[1024];
+	DWORD dwLen;
+	char cmdline[1024];
+	strcpy(shell,(char *)pInput);
+	if (cbInput>0) {
+		shell[cbInput]=0;
+		char *match;
+		match=strchr(shell,'\t');
+		if (match!=NULL) {
+			strcpy(cmdline,match+1);
+			shell[cbInput-strlen(match)]=0;
+			cmdline[cbInput-strlen(shell)-1]=0;
+			dwLen=MultiByteToWideChar(CP_ACP,0, (LPCSTR)shell, -1, wShell, 256);
+		} else {
+			wcscpy(wShell,L"\\Program Files\\shell\\avmshell.exe");
+			strcpy(cmdline,shell);
+		}
+   		dwLen=MultiByteToWideChar(CP_ACP,0, (LPCSTR)cmdline, -1, wCmdline, 1024);
+	} else {
+		wcscpy(wShell,L"\\Program Files\\shell\\avmshell.exe");
+		wcscpy(wCmdline, L"-log \\Temp\\remoteshell.abc \\Temp\\avmfile.abc");
 	}
-	else
-		wcscpy(cmdLine, L"-log \\Temp\\avmfile.abc");
-
 	PROCESS_INFORMATION processInfo;
 	// program live in \\Program Files\\shell\\avmshell.exe
-	BOOL bResult = CreateProcess(L"\\Program Files\\shell\\avmshell.exe",
-								cmdLine,
+	BOOL bResult = CreateProcess(wShell,
+								wCmdline,
 								NULL, NULL, FALSE,
 								CREATE_NEW_CONSOLE,
 								NULL, NULL, NULL,
