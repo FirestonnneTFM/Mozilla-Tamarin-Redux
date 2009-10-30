@@ -36,12 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
-
-#if defined FEATURE_NANOJIT
-    #include "CodegenLIR.h"
-#endif
-
-#include "FrameState.h"
+#include "FrameState.h" // FIXME required because FrameState has dependencies on the jitters
 
 namespace avmplus
 {

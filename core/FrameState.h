@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -38,136 +40,72 @@
 #ifndef __avmplus_FrameState__
 #define __avmplus_FrameState__
 
+#if defined FEATURE_NANOJIT
+#  include "CodegenLIR.h"
+#endif
+
 namespace avmplus
 {
-	/**
-	 * represents a value in the verifier
-	 */
-	class Value
-	{
-	public:
-		Traits* traits;
-	#if defined FEATURE_NANOJIT
-		LIns* ins;
-	#endif
-		bool notNull;
-		bool isWith;
-		bool killed;
-	};
+    /**
+     * represents a value in the verifier
+     */
+    class Value
+    {
+    public:
+        Traits* traits;
+    #if defined FEATURE_NANOJIT
+        LIns* ins;
+    #endif
+        bool notNull;
+        bool isWith;
+        bool killed;
+    };
 
-	/**
-		* this object holds the stack frame state at any given block entry.
-		* the frame state consists of the types of each local, each entry on the
-		* scope chain, and each operand stack slot.
-		*/
-	class FrameState
-	{
-		// info about each local var in this frame.
-		// length is verifier->frameSize, one entry per local, scope, and stack operand
-		Value *locals;
-	public:
-		Verifier *verifier;
-	#if defined FEATURE_NANOJIT
-		CodegenLabel label;
-	#endif
-		int pc; // offset from code_start 
-		int scopeDepth;
-		int stackDepth;
-		int withBase;
-		bool initialized;
-		bool targetOfBackwardsBranch;
-		bool insideTryBlock;
-		
-	public:
-		FrameState(Verifier*);
-		~FrameState();
+    /**
+     * this object holds the stack frame state at any given block entry.
+     * the frame state consists of the types of each local, each entry on the
+     * scope chain, and each operand stack slot.
+     */
+    class FrameState
+    {
+        // info about each local var in this frame.
+        // length is verifier->frameSize, one entry per local, scope, and stack operand
+        Value *locals;
+    public:
+        Verifier *verifier;
+    #if defined FEATURE_NANOJIT
+        CodegenLabel label;
+    #endif
+        int32_t pc; // offset from code_start
+        int32_t scopeDepth;
+        int32_t stackDepth;
+        int32_t withBase;
+        bool initialized;
+        bool targetOfBackwardsBranch;
+        bool insideTryBlock;
 
-		void init(FrameState* other)
-		{
-			AvmAssert(other->verifier == this->verifier);
-			scopeDepth = other->scopeDepth;
-			stackDepth = other->stackDepth;
-			withBase = other->withBase;
-			VMPI_memcpy(locals, other->locals, verifier->frameSize*sizeof(Value));
-		}
+    public:
+        FrameState(Verifier*);
+        ~FrameState();
 
-		Value& value(int i)
-		{
-			AvmAssert(i >= 0 && i < verifier->frameSize);
-			return locals[i];
-		}
-
-		const Value& value(int i) const
-		{
-			AvmAssert(i >= 0 && i < verifier->frameSize);
-			return locals[i];
-		}
-
-		Value& scopeValue(int i)
-		{
-			AvmAssert(i >= 0 && i < scopeDepth);
-			return value(verifier->scopeBase+i);
-		}
-
-		const Value& scopeValue(int i) const
-		{
-			AvmAssert(i >= 0 && i < scopeDepth);
-			return value(verifier->scopeBase+i);
-		}
-
-		Value& stackValue(int i)
-		{
-			AvmAssert(i >= 0 && i < stackDepth);
-			return value(verifier->stackBase+i);
-		}
-
-		Value& stackTop() {
-			return value(verifier->stackBase+stackDepth-1);
-		}
-
-		int sp() const {
-			return verifier->stackBase+stackDepth-1;
-		}
-
-		void setType(int i, Traits* t, bool notNull=false, bool isWith=false)
-		{
-			Value& v = value(i);
-			v.traits = t;
-			v.notNull = notNull;
-			v.isWith = isWith;
-		}
-
-		void pop(int n=1)
-		{
-			stackDepth -= n;
-			AvmAssert(stackDepth >= 0);
-		}
-
-		Value& peek(int n=1)
-		{
-			return value(verifier->stackBase+stackDepth-n);
-		}
-
-		void pop_push(int n, Traits* type, bool notNull=false)
-		{
-			int _sp = stackDepth - n;
-			setType(verifier->stackBase+_sp, type, notNull);
-			stackDepth = _sp+1;
-		}
-
-		void push(Value& _value)
-		{
-			AvmAssert(verifier->stackBase+stackDepth+1 <= verifier->frameSize);
-			setType(verifier->stackBase+stackDepth++, _value.traits, _value.notNull);
-		}
-
-		void push(Traits* traits, bool notNull=false)
-		{
-			AvmAssert(verifier->stackBase+stackDepth+1 <= verifier->frameSize);
-			setType(verifier->stackBase+stackDepth++, traits, notNull);
-		}
-
-	};
+        void init(FrameState* other);
+        Value& value(int32_t i);
+        const Value& value(int32_t i) const;
+        Value& scopeValue(int32_t i);
+        const Value& scopeValue(int32_t i) const;
+        Value& stackValue(int32_t i);
+        Value& stackTop();
+        int32_t sp() const;
+        void setType(int32_t i, Traits* t, bool notNull=false, bool isWith=false);
+        void pop(int32_t n=1);
+        Value& peek(int32_t n=1);
+        void pop_push(int32_t n, Traits* type, bool notNull=false);
+        void push(Value& _value);
+        void push(Traits* traits, bool notNull=false);
+    };
 }
+
+// inline method definitions
+#include "FrameState-inlines.h"
 
 #endif /* __avmplus_FrameState__ */

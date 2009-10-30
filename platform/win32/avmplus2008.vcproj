@@ -1908,6 +1908,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\FrameState-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\FrameState.h"
 				>
 			</File>
