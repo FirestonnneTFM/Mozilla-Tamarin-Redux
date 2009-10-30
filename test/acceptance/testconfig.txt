@@ -39,6 +39,7 @@
 #    include - includes a specific testcase even if the parent has been skipped
 #    ats_skip - don't generate an ATS swf as these files are not ATS compatible
 #    apiversioning - define test to require apiversioning in the vm
+#    verify_skip - skip test when doing a verify run
 #
 # comments: please include bug reference, date, and reason for the entry
 
@@ -290,6 +291,12 @@ ecma3/String/e15_5_4_11_.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozil
 ecma3/String/toLocaleLowerCase.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
 ecma3/String/toLocaleUpperCase.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
 ecma3/RegExp/multibyte_regress,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
+
+####################
+#  --verify skips
+####################
+abcasm/.*, .*, verify_skip, abcasm tests not compatible with --verify
+
 
 
 

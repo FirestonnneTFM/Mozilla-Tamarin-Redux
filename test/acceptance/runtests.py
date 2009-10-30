@@ -81,11 +81,12 @@ class AcceptanceRuntest(RuntestBase):
         print '    --ats           generate ats swfs instead of running tests'
         print '    --atsdir        base output directory for ats swfs - defaults to ATS_SWFS'
         print '    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially'
+        print '    --verify        run a verify pass instead of running abcs'
         exit(c)
     
     def setOptions(self):
         RuntestBase.setOptions(self)
-        self.longOptions.extend(['ext=','esc','escbin=','threads=','ats','atsdir='])
+        self.longOptions.extend(['ext=','esc','escbin=','threads=','ats','atsdir=','verify'])
     
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
@@ -103,6 +104,9 @@ class AcceptanceRuntest(RuntestBase):
                 self.rebuildtests = True
             elif o in ('--atsdir',):
                 self.atsDir = v
+            elif o in ('--verify',):
+                self.verify = True
+                self.vmargs = '-Dverifyall -Dverbose=verify'
     
     def detectCPUs(self):
         """
