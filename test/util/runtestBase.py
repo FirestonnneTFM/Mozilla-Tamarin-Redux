@@ -579,15 +579,15 @@ class RuntestBase:
                 self.currentPids.append(p)
             finally:
                 self.lock.release()
-                
+            
             starttime=time()
-            if self.threads == 1:
-                exitCode = p.wait(self.testTimeOut) # abort if timeout exceeded
-            else:
-                exitCode = p.wait() # Kill signal only works for main thread
             output = p.stdout.readlines()
             err = p.stderr.readlines()
-                
+            if self.threads == 1:
+                exitCode = p.wait(self.testTimeOut) # abort if timeout exceeded    
+            else:
+                exitCode = p.wait(-1) # Kill signal only works for main thread
+            
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return ('', err, exitCode)
 
