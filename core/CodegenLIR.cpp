@@ -254,7 +254,7 @@ namespace avmplus
 
     #include "../core/jit-calls.h"
 
-#ifdef NJ_SOFTFLOAT
+#if NJ_SOFTFLOAT
 
     static double i2f(int32_t i) { return i; }
     static double u2f(uint32_t u) { return u; }
@@ -1309,7 +1309,7 @@ namespace avmplus
                 lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
             }
         )
-        #ifdef NJ_SOFTFLOAT
+        #if NJ_SOFTFLOAT
         lirout = new (*alloc1) SoftFloatFilter(lirout);
         #endif
         LoadFilter *loadfilter = 0;
