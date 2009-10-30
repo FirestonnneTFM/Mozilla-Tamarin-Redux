@@ -76,8 +76,14 @@ namespace avmplus
         AvmAssert(atomKind(a) == kIntptrType && atomIsValidIntptrValue(atomGetIntptr(a)));
         return a;
     }
+    REALLY_INLINE Atom MAKE_INTEGER(intptr_t i)
+    {
+        AvmAssert(atomIsValidIntptrValue(i));
+        return (intptr_t(i) << 3) | kIntptrType;
+    }
 #else
     #define CHECK_INT_ATOM(a) (a)
+    #define MAKE_INTEGER(v)   ((intptr_t(v) << 3) | kIntptrType)
 #endif
 
 
@@ -103,7 +109,6 @@ namespace avmplus
 #  define CLAMP_32(v)       (intptr_t(v))
 #endif
 
-#define MAKE_INTEGER(v)      (CHECK_INT_ATOM((intptr_t(v) << 3) | kIntptrType))
 #define INT32_VALUE(v)       int32_t(atomGetIntptr(v))
 #define UINT32_VALUE(v)      uint32_t(atomGetIntptr(v))
 #define DOUBLE_VALUE(v)		 (*(double*)((v) ^ kDoubleType))
@@ -1645,18 +1650,9 @@ namespace avmplus
 				sp--;
 			//urshift_two_values_and_next:
 				if (IS_BOTH_INTEGER(a1,a2)) {
-                    // if a2 != 0 and a1 was already a legal signed intptr_t (29 bits or 53 bits) 
-                    // then we'll definitely insert at least one zero in the high bit, 
-                    // and the result has to be a valid unsigned kIntptrType atom (28 or 52 bit
-                    // uint).  if a2 == 0, then INSTR(urshift) is equivalent to ToUint32(a1); on
-                    // 32-bit cpus we still must check if it fits in kIntptrType, but on 64-bit cpus
-                    // it always will.  ergo, we just need to check for a2 == 0 on 32 bit only.
-                    i1 = (INT32_VALUE(a2) & 0x1F);
-#ifndef AVMPLUS_64BIT
-                    if (i1 > 0)
-#endif
-                    {
-						sp[0] = MAKE_INTEGER(UINT32_VALUE(a1) >> i1);
+                    u1 = (UINT32_VALUE(a1) >> (INT32_VALUE(a2) & 0x1F));
+					if (atomIsValidIntptrValue_u(u1)) {
+						sp[0] = MAKE_INTEGER(u1);
 						NEXT;
 					}
 				}
