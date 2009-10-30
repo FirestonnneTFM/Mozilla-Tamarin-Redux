@@ -652,41 +652,33 @@ namespace avmplus
             return atom;
 
         case BUILTIN_number:
-            if (atom->isconst()) {
-                Atom a = atom->imm32();
-                if (AvmCore::isDouble(a)) {
-                    return loadIns(LIR_ldqc, 0, InsConstAtom(a&~7));
-                } else {
-                    AvmAssert(atomIsIntptr(a));
-                    if (atomCanBeInt32(a))
-                        return i2dIns(InsConst(int32_t(atomGetIntptr(a))));
-                    // else fall thru and call number_d
-                }
-            }
-            return callIns(FUNCTIONID(number_d), 1, atom);
+            if (atom->isconstp())
+                return lirout->insImmf(AvmCore::number_d((Atom)atom->constvalp()));
+            else
+                return callIns(FUNCTIONID(number_d), 1, atom);
 
         case BUILTIN_int:
-            if (atom->isconst())
-                return InsConst(AvmCore::integer_i(atom->imm32()));
+            if (atom->isconstp())
+                return InsConst(AvmCore::integer_i((Atom)atom->constvalp()));
             else
                 return callIns(FUNCTIONID(integer_i), 1, atom);
 
         case BUILTIN_uint:
-            if (atom->isconst())
-                return InsConst(AvmCore::integer_u(atom->imm32()));
+            if (atom->isconstp())
+                return InsConst(AvmCore::integer_u((Atom)atom->constvalp()));
             else
                 return callIns(FUNCTIONID(integer_u), 1, atom);
 
         case BUILTIN_boolean:
             if (atom->isconst())
-                return InsConst(int32_t(atom->imm32()) >> 3);
+                return InsConst((int32_t)atomGetBoolean((Atom)atom->constvalp()));
             else
                 return p2i(binaryIns(LIR_pursh, atom, InsConst(3)));
 
         default:
             // pointer type
-            if (atom->isconst())
-                return InsConstAtom(atom->imm32() & ~7);
+            if (atom->isconstp())
+                return InsConstPtr(atomPtr((Atom)atom->constvalp()));
             else
                 return binaryIns(LIR_piand, atom, InsConstAtom(~7));
         }
