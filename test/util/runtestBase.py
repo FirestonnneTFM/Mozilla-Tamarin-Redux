@@ -312,6 +312,7 @@ class RuntestBase:
                 self.sourceExt = v
             elif o in ('--timeout',):
                 self.timeout = int(v)
+                self.testTimeOut=int(v)
             elif o in ('--testtimeout',):
                 self.testTimeOut=int(v)
             elif o in ('-d',):
@@ -578,13 +579,17 @@ class RuntestBase:
                 self.currentPids.append(p)
             finally:
                 self.lock.release()
-
+                
+            starttime=time()
+            if self.threads == 1:
+                exitCode = p.wait(self.testTimeOut) # abort if timeout exceeded
+            else:
+                exitCode = p.wait() # Kill signal only works for main thread
             output = p.stdout.readlines()
             err = p.stderr.readlines()
-            starttime=time()
-            exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
+                
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
-                return 'timedOut'
+                return ('', err, exitCode)
 
             self.lock.acquire()
             try:
@@ -1032,13 +1037,12 @@ class RuntestBase:
         
         # threads on cygwin randomly lock up
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
-            try:
-                for t in testList:
-                    testnum -= 1
-                    o = self.runTestPrep((t, testnum))
-                    self.printOutput(None, o)
-            except TimeOutException:
-                pass
+            for t in testList:
+                testnum -= 1
+                o = self.runTestPrep((t, testnum))
+                self.printOutput(None, o)
+                if self.timeout and time()-self.startTime > self.timeout:
+                    break
         else: # run using threads
             #Assign test numbers
             testsTuples = []
@@ -1056,9 +1060,8 @@ class RuntestBase:
                     try:
                         sleep(1)
                         main.poll()
-                        if self.timeout:
-                            if time()-self.startTime > self.timeout:
-                                raise TimeOutException
+                        if self.timeout and time()-self.startTime > self.timeout:
+                            raise TimeOutException
                         #print "(active worker threads: %i)" % (threadpool.threading.activeCount()-1, )
                     except threadpool.NoResultsPending:
                         break
@@ -1313,11 +1316,7 @@ class RuntestBase:
             else:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName))
             
-        
-        if f == "timedOut":
-            outputCalls.append((self.fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % self.testTimeOut, self.timeoutmsgs)))
-            ltimeout += 1
-        elif not self.verify:
+        if f and not self.verify:
             try:
                 outputLines = []
                 for line in f+err:
@@ -1403,10 +1402,6 @@ class RuntestBase:
         # Turn off quiet to display summary
         if self.quiet:
             self.quiet = False
-        if self.timeoutmsgs:
-            self.js_print('\nTIMEOUTS:', '', '<br/>')
-            for m in self.timeoutmsgs:
-                self.js_print('  %s' % m, '', '<br/>')
         
         if self.failmsgs:
             self.js_print('\nFAILURES:', '', '<br/>')
