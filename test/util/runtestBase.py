@@ -81,6 +81,7 @@ class RuntestBase:
     testconfig = 'testconfig.txt'
     logFileType = 'html'
     java = 'java'
+    abcdump = '../../utils/abcdump'
     
     avm = ''
     avmce = ''
@@ -128,6 +129,8 @@ class RuntestBase:
     apiVersioning = False
     random = False
     lock = threadpool.threading.Lock()
+    
+    verify = False
     
     genAtsSwfs = False
     atsDir = 'ATS_SWFS'
@@ -597,7 +600,10 @@ class RuntestBase:
         self.lock.acquire()
         try:
             for p in self.currentPids:
-                p.kill()
+                try:
+                    p.kill()
+                except:
+                    pass
         finally:
             self.lock.release()
                     
@@ -1012,6 +1018,13 @@ class RuntestBase:
         testnum = len(testList)
         if self.random:
             random.shuffle(testList)
+            
+        if self.verify:
+            if not re.search('debug', self.config):
+                print 'Avm Debugger build must be used when running --verify'
+                sys.exit(1)
+            if not isfile(self.abcdump+'.abc'): # check that abcdump.abc is built
+                self.run_pipe('"%s" -jar %s -import %s -import %s %s' % (self.java, self.asc, self.builtinabc, self.shellabc, self.abcdump+'.as'))
         
         if self.timeout:
             self.js_print("will run tests until timeout of %ds is exceeded" % self.timeout)
@@ -1187,6 +1200,13 @@ class RuntestBase:
         if includes and not list_match(includes,root):
             return
         
+        # skip tests that can't be verified
+        if self.verify and settings.has_key('.*') and settings['.*'].has_key('verify_skip'):
+            outputCalls.append((self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+            outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['verify_skip'],)))
+            self.allskips += 1
+            return outputCalls
+        
         # skip entire test if specified
         if settings.has_key('.*') and settings['.*'].has_key('skip'):
             outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['skip'],)))
@@ -1200,7 +1220,7 @@ class RuntestBase:
             self.allskips += 1
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
             return outputCalls
-            
+        
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName):
             os.unlink(testName)
@@ -1270,16 +1290,34 @@ class RuntestBase:
             if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
                 self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
             (f,err,exitcode) = self.run_pipe('%s %s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, self.abcasmShell+'.abc', testName))
+        elif self.verify:
+            # get the abcdump for the file
+            (f,err,exitcode) = self.run_pipe('%s %s -- %s' % (self.avm, self.abcdump+'.abc', testName))
+            abcdumpFunctions = [line.strip() for line in f if line.startswith('var function')]
+            
+            # get -Dverifyall -Dverbose=verify output
+            (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
+            verifyFunctions = [line.strip() for line in f if line.startswith('verify Function/')]
+            
+            # we can't compare actual function names since abcdump treats function names and var names the same
+            # we instead just compare that the # of functions verified == the # of functions listed out by abcdump
+            if len(abcdumpFunctions) != len(verifyFunctions):
+                lfail += 1
+                outputCalls.append((self.fail,(testName, 'FAILED! :\nExpected (from abcdump): %s functions verified\nGOT (-Dverifyall -Dverbose=verify): %s functions verified' %
+                                               (len(abcdumpFunctions),len(verifyFunctions)), self.failmsgs)))
+            else:
+                lpass += 1
         else:
             if abcargs:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs))
             else:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName))
             
+        
         if f == "timedOut":
             outputCalls.append((self.fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % self.testTimeOut, self.timeoutmsgs)))
             ltimeout += 1
-        else:
+        elif not self.verify:
             try:
                 outputLines = []
                 for line in f+err:
