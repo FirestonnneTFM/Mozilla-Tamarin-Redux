@@ -37,13 +37,7 @@
 
 
 #include "avmplus.h"
-
-// FIXME the following is required because FrameState has dependencies on the jitters
-#if defined FEATURE_NANOJIT
-    #include "CodegenLIR.h"
-#endif
-
-#include "FrameState.h"
+#include "FrameState.h" // FIXME required because FrameState has dependencies on the jitters
 
 namespace avmplus
 {

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -37,8 +39,16 @@
 
 
 #include "avmplus.h"
+#include "FrameState.h"
 
 namespace avmplus
 {
+    void FrameState::init(FrameState* other)
+    {
+        AvmAssert(other->verifier == this->verifier);
+        scopeDepth = other->scopeDepth;
+        stackDepth = other->stackDepth;
+        withBase = other->withBase;
+        VMPI_memcpy(locals, other->locals, verifier->frameSize*sizeof(Value));
+    }
 }
-

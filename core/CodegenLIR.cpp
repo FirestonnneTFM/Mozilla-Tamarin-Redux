@@ -43,8 +43,7 @@
 
 #ifdef FEATURE_NANOJIT
 
-#include "CodegenLIR.h"
-#include "../core/FrameState.h"
+#include "FrameState.h"
 
 #if defined(WIN32) && defined(AVMPLUS_ARM)
 #include <cmnintrin.h>
