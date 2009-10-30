@@ -123,7 +123,7 @@ namespace avmplus
     REALLY_INLINE bool atomGetBoolean(Atom a)
     {
         AvmAssert(a == trueAtom || a == falseAtom);
-        return bool(a >> 3);
+        return (a >> 3) != 0;
     }
 
 } // namespace
