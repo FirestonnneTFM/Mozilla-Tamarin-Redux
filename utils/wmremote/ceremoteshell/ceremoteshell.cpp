@@ -168,76 +168,46 @@ void DoMemProfiler()
 		CloseNamedPipe(pipe);
 	}
 }
-
-#define PROCESS_TIMEOUT 300000
-
-static uint32_t mmgc_spy_signal = 0;
-
-int _tmain(int argc, _TCHAR* argv[])
-{
-
-  if (argc<2)
-    return -1;
-
-//	printf("starting...\n");
-	// Initialize RAPI
-	HRESULT hr = CeRapiInit();
-
-	DWORD dwErr = 0;
-	// Start avmshell with -redir
-	DWORD dwAttr = CeGetFileAttributes(L"\\Program Files\\shell\\avmshell.exe");
-
-
-//    printf("copying avmshell.exe...\n");
-	// Filename will be passed last param
-	HANDLE hFile = ::CreateFile(argv[argc-1], 
-								GENERIC_READ, FILE_SHARE_READ,
-								NULL, OPEN_EXISTING,
-								FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile==INVALID_HANDLE_VALUE)
+DWORD copyFileToDevice(char *source,char *dest) {
+    DWORD dwErr,dwLen;
+    WCHAR wDest[1024];
+	// if source==null create an empty file
+	if (source==NULL) {
+		DWORD dwLen=MultiByteToWideChar(CP_ACP,MB_COMPOSITE,dest,-1,wDest, 256);
+        HANDLE hEmpty=CeCreateFile(wDest, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
+        CeCloseHandle(hEmpty);
+		return 0;
+	}
+	HANDLE hSource = CreateFile(source,GENERIC_READ, FILE_SHARE_READ,NULL, OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hSource==INVALID_HANDLE_VALUE)
 	{
-        printf("unable to open avmshell.exe\n");
+		printf("error: file '%s' does not exist\n",source);
 		dwErr = GetLastError();
 
 		CeRapiUninit();
 		return -1;
 	}
-
-	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
-
-	// remove the log file from previous run if it exists.
-	// It is left in place in the event that you need to debug
-	hr = CeDeleteFile(L"\\Temp\\avmfile.log");
-//    printf("copying avmfile.abc...\n");
-
-	// Create the file on the device in the temp directory
-	WCHAR ceFilename[MAX_PATH];
-	DWORD dwmblen = ::MultiByteToWideChar(CP_ACP, MB_COMPOSITE, argv[1], _tcslen(argv[1]), ceFilename, MAX_PATH); 
-	ceFilename[dwmblen] = 0;
-
-
-	WCHAR cePath[MAX_PATH];
-	HANDLE ceFile = CeCreateFile(L"\\Temp\\avmfile.abc", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
-
-	if (ceFile==INVALID_HANDLE_VALUE)
+    dwLen=MultiByteToWideChar(CP_ACP,MB_COMPOSITE,dest,-1,wDest, 256);
+	HANDLE hDest = CeCreateFile(wDest, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
+	if (hDest==INVALID_HANDLE_VALUE)
 	{
-        printf("unable to open avmfile.abc\n");
+		printf("error: unable to create file %s\n",dest);
 		dwErr = GetLastError();
-        CloseHandle(hFile);
+        CeCloseHandle(hDest);
 		CeRapiUninit();
 		return -1;
 	}
 
 	char localBuf[4096];
-	DWORD dwBufsize=4096, dwFilesize = ::GetFileSize(hFile, NULL);
+	DWORD dwBufsize=4096, dwFilesize = ::GetFileSize(hSource, NULL);
 	if (dwFilesize<4096)
 		dwBufsize = dwFilesize;
 
 
 	DWORD dwCeBytes=0, dwRead;
-	while (ReadFile(hFile, localBuf, dwBufsize, &dwRead, NULL))
+	while (ReadFile(hSource, localBuf, dwBufsize, &dwRead, NULL))
 	{
-		BOOL bWrite = CeWriteFile(ceFile, (void*)localBuf, dwRead, &dwCeBytes, NULL);
+		BOOL bWrite = CeWriteFile(hDest, (void*)localBuf, dwRead, &dwCeBytes, NULL);
 		if (!bWrite)
 		{
 			dwErr = CeGetLastError();
@@ -250,25 +220,124 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	}
 	dwErr = GetLastError();
-	CeCloseHandle(ceFile);
+	CeCloseHandle(hDest);
+	CloseHandle(hSource);
+	return dwErr;
+}
+#define PROCESS_TIMEOUT 300000
 
-	DWORD cbIn=0, cbOut;
-	BYTE *pIn=NULL, *pOut;
-	if (argc>2)
-	{
-		cbIn = 256;
-		pIn = (BYTE*)LocalAlloc(LPTR, 256);
-		strcpy((char*)pIn," ");
-		for (int i=1;i<argc-1;i++) {
-		    strcat((char*)pIn, argv[i]);
-			if (i<argc)
-				strcat((char*)pIn," ");
+static uint32_t mmgc_spy_signal = 0;
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+
+	if (argc<2) {
+		printf("usage:\n --shell=avmshell_arm.exe [params] test.abc\n runs the abc file in the shell and prints the output to stdout\n");
+        return -1;
+	}
+	//printf("initialize rapi...\n");
+	// Initialize RAPI
+	HRESULT hr = CeRapiInit();
+    char shell[128];
+    char str1[128];
+	char cmdline[1024];
+	char filelist[4096];
+	HANDLE hFile;
+	filelist[0]=0;
+	cmdline[0]=0;
+	strcpy(shell,"\\Program Files\\shell\\avmshell.exe");
+	BOOL inArgs=0;
+    BOOL hasLog=0;
+	for (int i=1;i<argc;i++) {
+		//printf("%d : %s\n",i,argv[i]);
+		if (!strcmp("-log",argv[i])) {
+			hasLog=1;
+		}
+		if (strlen(argv[i])>7) {
+			strncpy(str1,argv[i],8);
+			str1[8]='\0';
+			if (!strcmp(str1,"--shell=")) {
+				strcpy(shell,argv[i]+8);
+				continue;
+			}
+		}
+		// check if file exists locally to copy to device
+		if (argv[i][0]!='-') {
+            hFile = CreateFile(argv[i],GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hFile!=INVALID_HANDLE_VALUE) {
+				if (!hasLog) {
+					strcat(cmdline,"-log ");
+					hasLog=1;
+				}
+				if (inArgs==0) {
+					strcat(filelist,"\\Temp\\remoteshell.abc");
+					copyFileToDevice(NULL,"\\Temp\\remoteshell.abc");
+				    strcat(cmdline,"\\Temp\\remoteshell.abc ");
+                    inArgs=1;
+				}	 
+  				char dest[128];
+				strcpy(dest,"\\Temp\\");
+				if (strrchr(argv[i],'/')!=NULL) {
+					strcat(dest,strrchr(argv[i],'/')+1);
+				} else if (strrchr(argv[i],'\\')!=NULL) {
+					strcat(dest,strrchr(argv[i],'\\')+1);
+				} else {
+					strcat(dest,argv[i]);
+				}
+				if (strlen(filelist)>0) {
+					strcat(filelist,"\t");
+				}
+				strcat(filelist,dest);
+				copyFileToDevice(argv[i],dest);
+				strcat(cmdline,dest);
+				if (i<argc-1)
+					strcat(cmdline," ");
+				continue;
+			}
+		}
+		strcat(cmdline,argv[i]);
+		if (i<argc-1) {
+			strcat(cmdline," ");
 		}
 	}
-//	printf("pIn: %s\n",pIn);
+	printf("shell: '%s' cmdline: '%s'\n",shell,cmdline);
+
+	WCHAR wShell[1024];
+    DWORD dwLen=MultiByteToWideChar(CP_ACP,0,shell,-1,wShell, 128);
+	DWORD dwErr = 0;
+	// Start avmshell with -redir
+	DWORD dwAttr = CeGetFileAttributes(wShell);
+    // check for avmshell
+	hFile = ::CeCreateFile(wShell, 
+								GENERIC_READ, FILE_SHARE_READ,
+								NULL, OPEN_EXISTING,
+								FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile==INVALID_HANDLE_VALUE)
+	{
+		printf("error: shell '%s' does not exist on device\n",shell);
+		dwErr = GetLastError();
+
+		CeRapiUninit();
+		return -1;
+	}
+
+	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
+
+	// remove the log file from previous run if it exists.
+	// It is left in place in the event that you need to debug
+	hr = CeDeleteFile(L"\\Temp\\remoteshell.log");
+//    printf("copying avmfile.abc...\n");
+
+	DWORD cbOut;
+	BYTE *pOut;
 //	printf("calling start avmshell...\n");
+    char pIn[1024];
+	pIn[0]=0;
+	strcat(pIn,shell);
+	strcat(pIn,"\t");
+	strcat(pIn,cmdline);
 	hr = CeRapiInvoke( L"\\Windows\\avmremote.dll", L"StartAVMShell",
-						cbIn, ( BYTE * ) pIn,  
+						strlen(pIn), ( BYTE * )pIn,  
 						&cbOut, ( BYTE ** ) &pOut, NULL, 0);
 
 	HANDLE hProcess = *(HANDLE*)pOut;
@@ -317,10 +386,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	// above may have failed!
 
 	DWORD dwTickStart = ::GetTickCount();
-	dwAttr = CeGetFileAttributes(L"\\Temp\\avmfile.log");
+	dwAttr = CeGetFileAttributes(L"\\Temp\\remoteshell.log");
 	if (dwAttr==-1)
 	{
-		printf("no output file\n");
+		printf("error: no output\n");
 		// no output file, test must have crashed
 		//hr = CeDeleteFile(L"\\Temp\\avmfile.abc");
 	
@@ -330,17 +399,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		return -1;
 	}
 
-
+    HANDLE ceFile;
 	while (1)
 	{
 		if (::GetTickCount()>(dwTickStart+600000))
 			break; // assume we failed after 10(?) minutes
 
 		Sleep(100);
-		dwAttr = CeGetFileAttributes(L"\\Temp\\avmfile.log");
+		dwAttr = CeGetFileAttributes(L"\\Temp\\remoteshell.log");
 		if (dwAttr==-1)
 			continue;
-		ceFile = CeCreateFile(L"\\Temp\\avmfile.log", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		ceFile = CeCreateFile(L"\\Temp\\remoteshell.log", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (ceFile==INVALID_HANDLE_VALUE)
 			continue;
 		if (CeGetFileSize(ceFile, NULL)==0)
@@ -349,15 +418,24 @@ int _tmain(int argc, _TCHAR* argv[])
 		break;
 	}
 
-	// now delete 
-	//hr = CeDeleteFile(L"\\Temp\\avmfile.abc");
-	
-	// dump the temp file to stdout - YUCK
+	// cleanup
+	char *file;
+    WCHAR wFile[1024];
+	file=strtok(filelist,"\t");
+	while (file!=NULL) {
+		dwLen=MultiByteToWideChar(CP_ACP,0,file,-1,wFile, 1024);
+		CeDeleteFile(wFile);
+		file=strtok(NULL,"\t");
+	}
+    DWORD dwBufsize;	
+    DWORD dwFilesize;
 	dwBufsize = 4096;
 	dwFilesize = CeGetFileSize(ceFile, NULL);
 	if (dwFilesize<4096)
 		dwBufsize = dwFilesize;
 
+    char localBuf[4096];
+    DWORD dwRead;
 	while (CeReadFile(ceFile, localBuf, dwBufsize, &dwRead, NULL))
 	{
 	

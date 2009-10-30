@@ -56,32 +56,40 @@ int _tmain(int argc, _TCHAR* argv[])
 	// Initialize RAPI
 	HRESULT hr = CeRapiInit();
 
-	hr = CeDeleteFile(L"\\Program Files\\shell\\avmshell.exe");
+	WCHAR destFile[MAX_PATH];
+    WCHAR sourceFile[MAX_PATH];
 
-
-	if (argc>1) {
-
-	// Filename will be passed in argv[0]
-	HANDLE hFile = ::CreateFile(argv[1], 
+	if (argc>2) {
+		wcscpy(destFile,argv[2]);
+	    wcscpy(sourceFile,argv[1]);
+	} else if (argc>1) {
+   	    wcscpy(destFile,L"\\Program Files\\shell\\avmshell.exe");
+		wcscpy(sourceFile,argv[1]);
+	} else {
+		printf("Usage: ceremotedeployer.exe [source] [dest]\n");
+		CeRapiUninit();
+		return -1;
+	}
+	HANDLE hFile = ::CreateFile(sourceFile, 
 								GENERIC_READ, FILE_SHARE_READ,
 								NULL, OPEN_EXISTING,
 								FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile==INVALID_HANDLE_VALUE)
 	{
-		printf("Error copying file %s to device",argv[1]);
+		printf("Error copying file %s to device",sourceFile);
 		CeRapiUninit();
 		return -1;
 	}
 
+	hr = CeDeleteFile(destFile);
 
 	// Create the file on the device in the temp directory
 	WCHAR ceFilename[MAX_PATH];
-	DWORD dwmblen = ::MultiByteToWideChar(CP_ACP, MB_COMPOSITE, (const char *)argv[1], strlen((const char *)argv[1]), ceFilename, MAX_PATH); 
+	DWORD dwmblen = ::MultiByteToWideChar(CP_ACP, MB_COMPOSITE, (const char *)sourceFile, strlen((const char *)sourceFile), ceFilename, MAX_PATH); 
 	ceFilename[dwmblen] = 0;
 
 
-	WCHAR cePath[MAX_PATH];
-	HANDLE ceFile = CeCreateFile(L"\\Program Files\\shell\\avmshell.exe", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
+	HANDLE ceFile = CeCreateFile(destFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
 
 	char localBuf[4096];
 	DWORD dwBufsize=4096, dwFilesize = ::GetFileSize(hFile, NULL);
@@ -99,7 +107,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		if (dwBufsize<=0)
 			break;
 	}
-	}
+
 	// Uninitialize RAPI
 	CeRapiUninit();
 	return 0;

@@ -281,7 +281,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory=""
+				RemoteDirectory="\Windows"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
