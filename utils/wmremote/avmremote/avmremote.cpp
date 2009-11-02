@@ -130,18 +130,13 @@ STDAPI WaitForAVMShell(
 	DWORD dwWait = WaitForSingleObject(info->proc_id, info->dwTimeout);
 	if (dwWait==WAIT_FAILED)
 		return E_FAIL;
-
-    DWORD exitCode=STILL_ACTIVE;
-	int ctr=0;
-	while (true) {
-	    GetExitCodeProcess(info->proc_id,&exitCode);
-		if (exitCode!=STILL_ACTIVE) {
-			break;
-		}
-		if (++ctr>300) {
-			break;
-		}
-        Sleep(200);
+    
+    DWORD exitCode;
+    if (dwWait==WAIT_TIMEOUT)
+        exitCode=STILL_ACTIVE;
+    else
+    {
+        GetExitCodeProcess(info->proc_id,&exitCode);
 	}
 	*ppOutput = (BYTE*)LocalAlloc(LPTR, sizeof(DWORD));
 	*((DWORD*)*ppOutput) = exitCode;

@@ -491,14 +491,6 @@ namespace avmplus
 		return (Atom)instantiated_types->get(type);
 	}
 
-
-	ScriptObject* VectorClass::createInstance(VTable * /*ivtable*/,
-		ScriptObject * /*prototype*/)
-	{
-		toplevel()->throwTypeError(kConstructOfNonFunctionError);
-		return 0;
-	}
-
 	Atom ObjectVectorClass::call(int argc, Atom* argv) 
 	{
 		if (argc != 1)
@@ -679,7 +671,10 @@ namespace avmplus
 
 	VectorBaseObject* ObjectVectorObject::newVector(uint32 length)
 	{
-		return toplevel()->vectorClass->newVector(t, length);
+        Atom args[1] = {t->atom()};
+        
+		ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(toplevel()->vectorClass->applyTypeArgs(1, args));
+		return vecclass->newVector(length);
 	}
 
 	void ObjectVectorObject::_spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)
