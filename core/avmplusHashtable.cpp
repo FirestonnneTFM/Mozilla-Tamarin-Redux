@@ -156,6 +156,10 @@ namespace avmplus
         if (removeDontEnumMask(atoms[i]) == name)
         {
 			val = atoms[i+1];
+            // decrement refcount as necessary.
+            AvmCore::atomWriteBarrier_dtor(&atoms[i]);
+            AvmCore::atomWriteBarrier_dtor(&atoms[i+1]);
+            // calls above set the slot to 0, we want DELETED
             atoms[i] = DELETED;
 			atoms[i+1] = DELETED;
 			setHasDeletedItems();
@@ -356,6 +360,9 @@ namespace avmplus
 			if(AvmCore::isGenericObject(atoms[i])) {
 				GCWeakRef *ref = (GCWeakRef*)AvmCore::atomToGenericObject(atoms[i]);
 				if(ref && ref->get() == NULL) {
+                    // decrement refcount as necessary.
+                    AvmCore::atomWriteBarrier_dtor(&atoms[i]);
+                    AvmCore::atomWriteBarrier_dtor(&atoms[i+1]);
 					// inlined delete
 					atoms[i] = InlineHashtable::DELETED;
 					atoms[i+1] = InlineHashtable::DELETED;
