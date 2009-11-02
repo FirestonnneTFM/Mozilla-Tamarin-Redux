@@ -583,8 +583,11 @@ namespace avmplus
 	public:
 		VectorClass(VTable * vtable);
 
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-
+        /**
+         *  Apply type arguments and call the specialized class' newVector().
+         *  @pre The type must be an Object type.
+         *  
+         */
 		ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
 
 		virtual Atom applyTypeArgs(int argc, Atom* argv);
