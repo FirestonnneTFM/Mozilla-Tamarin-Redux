@@ -582,6 +582,13 @@ namespace avmplus
 	{
 	public:
 		VectorClass(VTable * vtable);
+        
+        /**
+         *  This unspecialized class cannot be instantiated.
+         *  Ensure any attempt fails.
+         *  @throw TypeError
+         */
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
         /**
          *  Apply type arguments and call the specialized class' newVector().
