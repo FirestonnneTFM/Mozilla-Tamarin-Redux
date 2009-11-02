@@ -507,6 +507,12 @@ namespace avmplus
 
 		return v->atom();
 	}
+    
+    ScriptObject* VectorClass::createInstance(VTable * /*ivtable*/, ScriptObject * /*prototype*/)
+    {
+        toplevel()->throwTypeError(kConstructOfNonFunctionError);
+        return 0;
+    }    
 
 	ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32 length)
 	{
