@@ -1566,7 +1566,7 @@ namespace avmplus
                 jmpbuf, InsConst(0));
 
             // if (setjmp() != 0) goto catch dispatcher, which we generate in the epilog.
-            exBranch = branchIns(LIR_jf, binaryIns(LIR_eq, setjmpResult, InsConst(0)));
+            exBranch = branchIns(LIR_jf, eq0(setjmpResult));
         }
         else {
             exBranch = 0;
@@ -2775,16 +2775,12 @@ namespace avmplus
             else if (in == INT_TYPE || in == UINT_TYPE)
             {
                 // int to bool: b = (i==0) == 0
-                localSet(loc, binaryIns(LIR_eq,
-                    binaryIns(LIR_eq, localGet(loc), InsConst(0)),
-                    InsConst(0)), result);
+                localSet(loc, eq0(eq0(localGet(loc))), result);
             }
             else if (in && !in->notDerivedObjectOrXML())
             {
                 // ptr to bool: b = (p==0) == 0
-                localSet(loc, binaryIns(LIR_eq,
-                                        binaryIns(LIR_peq, localGetp(loc), InsConstPtr(0)),
-                                        InsConst(0)), result);
+                localSet(loc, eq0(peq0(localGetp(loc))), result);
             }
             else
             {
@@ -4501,12 +4497,12 @@ namespace avmplus
         case OP_iftrue:
             NanoAssert(state->value(a).traits == BOOLEAN_TYPE);
             br = LIR_jf;
-            cond = binaryIns(LIR_eq, localGet(a), InsConst(0));
+            cond = eq0(localGet(a));
             break;
         case OP_iffalse:
             NanoAssert(state->value(a).traits == BOOLEAN_TYPE);
             br = LIR_jt;
-            cond = binaryIns(LIR_eq, localGet(a), InsConst(0));
+            cond = eq0(localGet(a));
             break;
         case OP_iflt:
             br = LIR_jt;
@@ -4997,7 +4993,7 @@ namespace avmplus
             if (!cond->isCmp()) {
                 // branching on a non-condition expression, so test (v==0)
                 // and invert the sense of the branch.
-                cond = lirout->ins_eq0(cond);
+                cond = eq0(cond);
                 op = LOpcode(op ^ 1);
             }
             if (cond->isconst()) {
