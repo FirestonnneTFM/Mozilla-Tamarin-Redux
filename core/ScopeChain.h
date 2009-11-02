@@ -47,26 +47,24 @@ namespace avmplus
 	class ScopeTypeChain : public MMgc::GCObject
 	{
 	private:
-		inline ScopeTypeChain(int _size, int _fullsize, Traits* traits) : size(_size), fullsize(_fullsize), _traits(traits) { }
+		ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits);
 
 	public:
 
 		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra);
-		inline static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits) { return create(gc, traits, NULL, NULL, NULL, NULL); }
+		static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits);
 
 		const ScopeTypeChain* cloneWithNewTraits(MMgc::GC* gc, Traits* traits) const;
-
-		inline Traits* traits() const { return _traits; }
-
-		inline Traits* getScopeTraitsAt(uint32_t i) const { return (Traits*)(_scopes[i] & ~ISWITH); }
-		inline bool getScopeIsWithAt(uint32_t i) const { return (_scopes[i] & ISWITH) != 0; }
+		Traits* traits() const;
+		Traits* getScopeTraitsAt(uint32_t i) const;
+		bool getScopeIsWithAt(uint32_t i) const;
 
 		#if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core) const;
 		#endif
 
 	private:
-		inline void setScopeAt(uint32_t i, Traits* t, bool w) { _scopes[i] = uintptr_t(t) | (w ? ISWITH : 0); }
+		void setScopeAt(uint32_t i, Traits* t, bool w);
 
 		// Traits are MMgc-allocated, thus always 8-byte-aligned, so the low 3 bits are available for us to use
 		static const uintptr_t ISWITH = 0x01;
@@ -86,11 +84,8 @@ namespace avmplus
 	*/
 	class ScopeChain : public MMgc::GCObject
 	{
-		inline ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns) : 
-			_vtable(vtable), _abcEnv(abcEnv), _scopeTraits(scopeTraits), _defaultXmlNamespace(dxns)
-		{
-		}
-		
+		ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns);
+
 		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif
@@ -107,16 +102,13 @@ namespace avmplus
 
 		ScopeChain* cloneWithNewVTable(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits = NULL);
 
-		inline VTable* vtable() const { return _vtable; }
-		inline AbcEnv* abcEnv() const { return _abcEnv; }
-		
-		inline const ScopeTypeChain* scopeTraits() const { return _scopeTraits; }
-		inline int getSize() const { return _scopeTraits->size; }
-		inline Atom getScope(int i) const { AvmAssert(i >= 0 && i < _scopeTraits->size); return _scopes[i]; }
-
-		void setScope(MMgc::GC* gc, int i, Atom value);
-
-		inline Namespacep getDefaultNamespace() const { return _defaultXmlNamespace; }
+		VTable* vtable() const;
+		AbcEnv* abcEnv() const;
+		const ScopeTypeChain* scopeTraits() const;
+		int32_t getSize() const;
+		Atom getScope(int32_t i) const;
+		void setScope(MMgc::GC* gc, int32_t i, Atom value);
+		Namespacep getDefaultNamespace() const;
 
 		#if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core) const;
