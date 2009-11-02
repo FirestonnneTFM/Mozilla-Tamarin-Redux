@@ -293,12 +293,25 @@ namespace avmplus
 
     class CopyPropagation;
 
+    /** helper code to make LIR generation nice and tidy */
+    class LirHelper {
+    protected: // methods
+        LIns* eq0(LIns* i);             // eq(i, imm(0))
+        LIns* peq0(LIns* ptr);          // peq(ptr, immq(0))
+        LIns* qlo(LIns* q);             // LIR_qlo(q)
+        LIns* i2p(LIns* i);             // 32bit: nop, 64bit: i2q(i)
+        LIns* u2p(LIns* u);             // 32bit: nop, 64bit: u2q(i)
+        LIns* p2i(LIns* ptr);           // 32bit: nop, 64bit: qlo(ptr)
+    protected: // data
+        LirWriter *lirout;
+    };
+
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
      * of the JIT.  It is intended to be instantiated on the stack once for each
      * jit-compiled method, and is a terminator of a CodeWriter pipeline.
      */
-    class CodegenLIR : public CodeWriter {
+    class CodegenLIR : public LirHelper, public CodeWriter {
     public:
         bool overflow;
         const byte *abcStart;
@@ -326,7 +339,6 @@ namespace avmplus
         const MethodSignaturep ms;
         PoolObject *pool;
         Fragment *frag;
-        LirWriter *lirout;
         FrameState *state;
         LIns *vars, *varTraits;
         LIns *env_param, *argc_param, *ap_param;
@@ -407,9 +419,6 @@ namespace avmplus
         LIns *InsConst(int32_t c);
         LIns *InsConstPtr(const void *p);
         LIns *InsConstAtom(Atom c);
-        LIns *i2p(LIns *i);
-        LIns *u2p(LIns *i);
-        LIns *p2i(LIns *i);
 
         /** emit a constructor call, and early bind if possible */
         void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);

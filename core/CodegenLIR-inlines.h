@@ -116,31 +116,38 @@ inline LIns* CodegenLIR::InsConstAtom(Atom c)
     return lirout->insImmPtr((void*)c);
 }
 
-inline LIns* CodegenLIR::i2p(LIns *i)
+inline LIns* LirHelper::i2p(LIns *i)
 {
-#ifdef NANOJIT_64BIT
-    return lirout->ins1(LIR_i2q, i);
-#else
-    return i;
-#endif
+    return lirout->ins_i2p(i);
 }
 
-inline LIns* CodegenLIR::u2p(LIns *i)
+inline LIns* LirHelper::u2p(LIns *i)
 {
-#ifdef NANOJIT_64BIT
-    return lirout->ins1(LIR_u2q, i);
-#else
-    return i;
-#endif
+    return lirout->ins_u2p(i);
 }
 
-inline LIns* CodegenLIR::p2i(LIns *i)
+inline LIns* LirHelper::p2i(LIns *i)
 {
 #ifdef NANOJIT_64BIT
     return lirout->ins1(LIR_qlo, i);
 #else
     return i;
 #endif
+}
+
+inline LIns* LirHelper::qlo(LIns* q)
+{
+    return lirout->ins1(LIR_qlo, q);
+}
+
+inline LIns* LirHelper::peq0(LIns* ptr)
+{
+    return lirout->ins_peq0(ptr);
+}
+
+inline LIns* LirHelper::eq0(LIns* ptr)
+{
+    return lirout->ins_eq0(ptr);
 }
 
 } // namespace
