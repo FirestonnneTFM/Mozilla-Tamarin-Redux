@@ -360,7 +360,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		dwCode = *(DWORD*)pOut;
 		LocalFree((HLOCAL)*pOut);
 
-		if (dwCode==WAIT_TIMEOUT)
+		if (dwCode==STILL_ACTIVE)
 		{
 			dwTimeout += dwInterval;
 			if( mmgc_spy_signal )
