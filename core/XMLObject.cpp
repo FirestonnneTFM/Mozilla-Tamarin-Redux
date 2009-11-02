@@ -1274,17 +1274,18 @@ namespace avmplus
 			AvmAssert(an != 0);
 			AvmAssert(an->getClass() == E4XNode::kAttribute);
 			Multiname nam;
-			AvmAssert(an->getQName(&nam, publicNS));
-			an->getQName(&nam, publicNS);
-			Namespace *ns = GetNamespace (nam, AncestorNamespaces);
-			AvmAssert(ns != 0);
-			if (ns->getPrefix() == undefinedAtom)
-			{
-				// find a prefix and add this namespace to our list
-				ns = GenerateUniquePrefix (ns, AncestorNamespaces);
+			if (an->getQName(&nam, publicNS))
+            {
+                Namespace* ns = GetNamespace(nam, AncestorNamespaces);
+                AvmAssert(ns != 0);
+                if (ns->getPrefix() == undefinedAtom)
+                {
+                    // find a prefix and add this namespace to our list
+                    ns = GenerateUniquePrefix (ns, AncestorNamespaces);
 
-				AncestorNamespaces->push (ns->atom());
-			}
+                    AncestorNamespaces->push (ns->atom());
+                }
+            }
 		}
 		// step 12
 		s << "<";
@@ -1310,33 +1311,33 @@ namespace avmplus
 			AvmAssert(an != 0);
 			AvmAssert(an->getClass() == E4XNode::kAttribute);
 			Multiname nam;
-			AvmAssert(an->getQName(&nam, publicNS));
-			an->getQName(&nam, publicNS);
+			if (an->getQName(&nam, publicNS))
+            {
+                // step16b-i - ans = an->getName->getNamespace(AncestorNamespace);
+                AvmAssert(nam.isAttr());
+                Namespace *attr_ns = GetNamespace (nam, AncestorNamespaces);
 
-			// step16b-i - ans = an->getName->getNamespace(AncestorNamespace);
-			AvmAssert(nam.isAttr());
-			Namespace *attr_ns = GetNamespace (nam, AncestorNamespaces);
+                //!!@step16b-ii - should never get hit now with revised 10.2.1 step 11.
+                AvmAssert(attr_ns->getPrefix() != undefinedAtom);
 
-			//!!@step16b-ii - should never get hit now with revised 10.2.1 step 11.
-			AvmAssert(attr_ns->getPrefix() != undefinedAtom);
+                // step16b-iii
+                if (attr_ns && attr_ns->hasPrefix ())
+                {
+                    s << core->string(attr_ns->getPrefix()) << ":";
+                }
+                //step16b-iv
+                s << nam.getName();
 
-			// step16b-iii
-			if (attr_ns && attr_ns->hasPrefix ())
-			{
-				s << core->string(attr_ns->getPrefix()) << ":";
-			}
-			//step16b-iv
-			s << nam.getName();
+                //step16c - namespace case - see below
 
-			//step16c - namespace case - see below
-
-			//step 16d
-			s << "=\"";
-			//step 16e
-			s << core->EscapeAttributeValue(an->getValue()->atom());
-			//step 16f - namespace case
-			//step 16g
-			s << "\"";
+                //step 16d
+                s << "=\"";
+                //step 16e
+                s << core->EscapeAttributeValue(an->getValue()->atom());
+                //step 16f - namespace case
+                //step 16g
+                s << "\"";
+            }
 		}
 
 		// This adds any NS that were added to our ancestor namespace list (from origLength on up)
