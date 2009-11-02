@@ -415,7 +415,6 @@ namespace avmplus
         void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
 
         void formatOperand(PrintWriter& buffer, LIns* oprnd);
-        void epilogue(FrameState* state);
         bool prologue(FrameState* state);
         void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
         void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
@@ -424,7 +423,6 @@ namespace avmplus
         void emitCopy(FrameState* state, int src, int dest);
         void emitGetscope(FrameState* state, int scope, int dest);
         void emitKill(FrameState* state, int i);
-        void emitBlockStart(FrameState* state);
         void emitBlockEnd(FrameState* state);
         void emitIntConst(FrameState* state, int index, int32_t c);
         void emitPtrConst(FrameState* state, int index, void* c, Traits* type);

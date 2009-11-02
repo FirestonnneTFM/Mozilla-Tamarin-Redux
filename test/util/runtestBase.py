@@ -1297,11 +1297,14 @@ class RuntestBase:
             # get the abcdump for the file
             (f,err,exitcode) = self.run_pipe('%s %s -- %s' % (self.avm, self.abcdump+'.abc', testName))
             abcdumpFunctions = [line.strip() for line in f if line.startswith('var function')]
-            
+            if self.verbose:
+                outputCalls.append((self.js_print,(abcdumpFunctions,)))
             # get -Dverifyall -Dverbose=verify output
             (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
             verifyFunctions = [line.strip() for line in f if line.startswith('verify Function/')]
-            
+            if self.verbose:
+                outputCalls.append((self.js_print,(verifyFunctions,)))
+                
             # we can't compare actual function names since abcdump treats function names and var names the same
             # we instead just compare that the # of functions verified == the # of functions listed out by abcdump
             if len(abcdumpFunctions) != len(verifyFunctions):
