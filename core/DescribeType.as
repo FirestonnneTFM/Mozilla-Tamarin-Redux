@@ -39,13 +39,9 @@ package avmplus
 {
 	// -------------- internal --------------
 	
-	[native(cls="DescribeTypeClass", methods="auto")]
-	// no instance
-	internal class DescribeType
-	{
-		internal native static function describeTypeJSON(o:*, flags:uint):Object;
-	}
-	
+	[native("DescribeTypeClass::describeTypeJSON")]
+	internal native function describeTypeJSON(o:*, flags:uint):Object;
+
 	internal function describeParams(x:XML, parameters:Object):void
 	{
 		for (var i in parameters)
@@ -150,7 +146,7 @@ package avmplus
 
 	public function describeType(value:*, flags:uint):XML
 	{
-		var o:Object = DescribeType.describeTypeJSON(value, flags);
+		var o:Object = describeTypeJSON(value, flags);
 		var x:XML = <type name={o.name}/>
 		if (o.traits.bases.length)
 			x.@base = o.traits.bases[0];
@@ -159,7 +155,7 @@ package avmplus
 		x.@isStatic = o.isStatic;
 		describeTraits(x, o.traits);
 		
-		var oi:Object = DescribeType.describeTypeJSON(value, flags | USE_ITRAITS);
+		var oi:Object = describeTypeJSON(value, flags | USE_ITRAITS);
 		if (oi !== null)
 		{
 			var e:XML = <factory type={oi.name}/>
@@ -170,22 +166,9 @@ package avmplus
 		return x;
 	}
 	
-	public function getQualifiedClassName(value:*):String
-	{
-		return DescribeType.describeTypeJSON(value, 0).name;
-	}
+	[native("DescribeTypeClass::getQualifiedClassName")]
+	public native function getQualifiedClassName(value:*):String;
 	
-	public function getQualifiedSuperclassName(value:*):String
-	{
-		// getQualifiedSuperclassName explicitly allows us to pass Class or Instance,
-		// and either should resolve to super of Instance
-		var o = DescribeType.describeTypeJSON(value, USE_ITRAITS | INCLUDE_TRAITS | INCLUDE_BASES);
-		if (!o)
-			o = DescribeType.describeTypeJSON(value, INCLUDE_TRAITS | INCLUDE_BASES);
-		var bases = o.traits.bases;
-		var base = bases.length ? bases[0] : null;
-		if (base == "Class")
-			base = null;
-		return base;
-	}
+	[native("DescribeTypeClass::getQualifiedSuperclassName")]
+	public native function getQualifiedSuperclassName(value:*):String;
 }

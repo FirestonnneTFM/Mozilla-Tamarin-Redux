@@ -41,12 +41,12 @@
 
 namespace avmplus
 {
-	class DescribeTypeClass : public ClassClosure
+	class DescribeTypeClass 
 	{
     public:
-		DescribeTypeClass(VTable* cvtable);
-
-		Atom describeTypeJSON(Atom o, uint32_t flags);
+		static Atom describeTypeJSON(ScriptObject* self, Atom o, uint32_t flags);
+        static Stringp getQualifiedClassName(ScriptObject* self, Atom v);
+        static Stringp getQualifiedSuperclassName(ScriptObject* self, Atom v);
     };
 }
 
