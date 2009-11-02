@@ -537,7 +537,7 @@ namespace avmplus
         return false;
     }
 
-	ScriptObject* TypeDescriber::describeType(Atom value, uint32_t flags)
+	Traits* TypeDescriber::chooseTraits(Atom value, uint32_t flags)
 	{
 		Traitsp traits;
 		if (value == undefinedAtom)
@@ -551,6 +551,13 @@ namespace avmplus
 
 		if (flags & USE_ITRAITS)
 			traits = traits->itraits;
+        
+        return traits;
+    }
+    
+	ScriptObject* TypeDescriber::describeType(Atom value, uint32_t flags)
+	{
+		Traitsp traits = chooseTraits(value, flags);
 
 		if (!traits)
 			return NULL;
@@ -567,5 +574,27 @@ namespace avmplus
 		setpropmulti(o, props, elem_count(props));
 
 		return o;
+	}
+
+	Stringp TypeDescriber::getQualifiedClassName(Atom value)
+	{
+		Traitsp traits = chooseTraits(value, 0);
+        return traits ? describeClassName(traits) : NULL;
+	}
+
+	Stringp TypeDescriber::getQualifiedSuperclassName(Atom value)
+	{
+		// getQualifiedSuperclassName explicitly allows us to pass Class or Instance,
+		// and either should resolve to super of Instance
+		Traitsp traits = chooseTraits(value, 0);
+        if (!traits)
+            return NULL;
+            
+		if (traits->itraits)
+			traits = traits->itraits;
+        
+        return traits->base && traits->base != m_toplevel->core()->traits.class_itraits ? 
+                describeClassName(traits->base) : 
+                NULL;
 	}
 }
