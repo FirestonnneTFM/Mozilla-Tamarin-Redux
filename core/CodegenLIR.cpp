@@ -1624,7 +1624,7 @@ namespace avmplus
         localSet(i, undefConst, VOID_TYPE);
     }
 
-    void CodegenLIR::emitBlockStart(FrameState* state)
+    void CodegenLIR::writeBlockStart(FrameState* state)
     {
         // our new extended BB now starts here, this means that any branch targets
         // should hit the next instruction our bb start instruction
@@ -1672,7 +1672,7 @@ namespace avmplus
         // the pc is a target of a jump do we not know enough during emit()
         // to do this.  The Verifier tracks this information and merges
         // the states across the various blocks generating this op prior
-        // to the merge.  After this emit, we should receive an emitBlockStart()
+        // to the merge.  After this emit, we should receive a writeBlockStart()
         // from the Verifier.
     }
 
@@ -1684,16 +1684,6 @@ namespace avmplus
             if (!overflow)
                 state->verifier->verifyFailed(kCorruptABCError);
         }
-    }
-
-    void CodegenLIR::writeEpilogue(FrameState* state)
-    {
-        epilogue(state);
-    }
-
-    void CodegenLIR::writeBlockStart(FrameState* state)
-    {
-        emitBlockStart(state);
     }
 
     void CodegenLIR::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode)
@@ -4729,7 +4719,7 @@ namespace avmplus
         return result;
     }
 
-    void CodegenLIR::epilogue(FrameState *state)
+    void CodegenLIR::writeEpilogue(FrameState *state)
     {
         this->state = state;
         this->labelCount = state->verifier->labelCount;
