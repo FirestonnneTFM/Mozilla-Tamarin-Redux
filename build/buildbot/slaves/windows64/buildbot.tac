@@ -40,7 +40,7 @@ from buildbot.slave.bot import BuildSlave
 
 basedir = r'/c/buildbot/tamarin-redux/windows64'
 buildmaster_host = '10.171.22.12'
-port = 1000
+port = 9750
 slavename = 'asteamwin3'
 passwd = 'asteam'
 keepalive = 600
