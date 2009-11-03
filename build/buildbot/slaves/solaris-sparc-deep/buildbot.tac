@@ -40,7 +40,7 @@ from buildbot.slave.bot import BuildSlave
 
 basedir = r'/export/home/build/buildbot/tamarin-redux/solaris-sparc-deep'
 host = '10.171.22.12'
-port = 1000
+port = 9750
 slavename = 'asteamsol1'
 passwd = 'asteam'
 keepalive = 600
