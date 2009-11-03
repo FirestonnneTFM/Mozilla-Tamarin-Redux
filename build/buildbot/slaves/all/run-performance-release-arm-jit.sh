@@ -88,7 +88,7 @@ fi
 # Install the AVMSHELL on the device
 ##
 echo "Setting up the device with build #$change"
-../all/avmshell-arm-setup.sh $change
+../all/avmshell-arm-setup.sh $change:$changeid
 
 
 echo ""
