@@ -65,6 +65,12 @@
   #define AVMSYSTEM_SYMBIAN 0
 #endif
 
+#ifdef WEBOS
+  #define AVMSYSTEM_WEBOS 1
+#else
+  #define AVMSYSTEM_WEBOS 0
+#endif
+
 // cpu, word size
 
 #undef SIXTYFOURBIT
