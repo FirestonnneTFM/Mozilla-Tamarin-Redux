@@ -100,7 +100,7 @@ cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean.sh
 
 echo "Setting up the device with build #$change"
-../all/avmshell-arm-setup.sh $change:$changeid
+../all/avmshell-arm-setup.sh $change
 
 
 cd $basedir/test/acceptance
