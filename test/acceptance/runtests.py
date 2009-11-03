@@ -46,7 +46,6 @@ from glob import glob
 from sys import argv, exit
 from getopt import getopt
 from itertools import count
-from subprocess import Popen, PIPE,STDOUT
 from time import time
 
 # add parent dir to python module search path
@@ -54,6 +53,8 @@ sys.path.append('..')
 
 try:
     from util.runtestBase import RuntestBase
+    # runtestUtils must be imported after "from os.path import *" as walk is overridden
+    from util.runtestUtils import detectCPUs
 except ImportError:
     print "Import error.  Please make sure that the test/acceptance/util directory has been deleted."
     print "   (directory has been moved to test/util)."
@@ -65,7 +66,7 @@ class AcceptanceRuntest(RuntestBase):
 
     def __init__(self):
         # Set threads to # of available cpus/cores
-        self.threads = self.detectCPUs()
+        self.threads = detectCPUs()
         RuntestBase.__init__(self)
 
     def setEnvironVars(self):
@@ -107,26 +108,31 @@ class AcceptanceRuntest(RuntestBase):
             elif o in ('--verify',):
                 self.verify = True
                 self.vmargs = '-Dverifyall -Dverbose=verify'
-    
-    def detectCPUs(self):
-        """
-        Detects the number of CPUs on a system.
-        """
-        # Linux, Unix and MacOS:
-        if hasattr(os, "sysconf"):
-            if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
-                # Linux & Unix:
-                ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
-                if isinstance(ncpus, int) and ncpus > 0:
-                    return ncpus
-            else: # OSX:
-                p = Popen("sysctl -n hw.ncpu", shell=True, close_fds=True, stdin=PIPE, stdout=PIPE)
-                return int(p.stdout.read())
-        # Windows:
-        if os.environ.has_key("NUMBER_OF_PROCESSORS"):
-            ncpus = int(os.environ["NUMBER_OF_PROCESSORS"]);
-            if ncpus > 0:
-                return ncpus
-        return 1 # Default                
+                
+    def run(self):
+        self.setEnvironVars()
+        self.loadPropertiesFile()
+        self.setOptions()
+        self.parseOptions()
+        self.setTimestamp()
+        if not self.config:
+            self.determineConfig()
+        self.checkPath()
+        if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
+            if re.search('^arm-winmobile-emulator',self.config)==None:
+                print 'ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe'
+                sys.exit(1)
+            self.setupCEEmulators()
+        if self.htmlOutput and not self.rebuildtests:
+            self.createOutputFile()
+        self.tests = self.getTestsList(self.args)
+        # Load the root testconfig file
+        self.settings, self.includes = self.parseTestConfig('.')
+        self.preProcessTests()
+        if self.rebuildtests:
+            self.rebuildTests()
+        else:
+            self.runTests(self.tests)
+        self.cleanup()
 
 runtest = AcceptanceRuntest()

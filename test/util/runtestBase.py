@@ -74,66 +74,35 @@ except ImportError:
     
 
 class RuntestBase:
-    sourceExt = '.as'
     abcasmExt = '.abs'
     abcasmRunner = 'bash ../../utils/abcasm/abcasm.sh'
     abcasmShell = 'abcasm/abs_helper'
-    testconfig = 'testconfig.txt'
-    logFileType = 'html'
-    java = 'java'
     abcdump = '../../utils/abcdump'
-    
+    asc = ''
+    ascargs = ''
+    atsDir = 'ATS_SWFS'
     avm = ''
     avmce = ''
-    asc = ''
     builtinabc = ''
-    shellabc = ''
-    exclude = []
     config = ''
-    ascargs = ''
-    vmargs = ''
     escbin = ''
-    rebuildtests = False
     includes = None
-    settings = None
-    ashErrors = []
-    options = ''
-    longOptions = []
-    osName = ''
-    vmtype = ''
-    timeout = 0 # in seconds
-    startTime = 0
-    currentPids = []
-
+    java = 'java'
     js_output = ''
     js_output_f = None
+    logFileType = 'html'
+    options = ''
+    osName = ''
+    playerglobalabc = ''
+    settings = None
+    shellabc = ''
+    sourceExt = '.as'
+    testconfig = 'testconfig.txt'
+    vmargs = ''
+    vmtype = ''
+    
     args = []
-    tests = []
-    start_time = None
-    show_time = False
-    
-    verbose = False
-    quiet = False
-    htmlOutput = False
-    timestampcheck = True
-    timestamps = True
-    forcerebuild = False
-    eval = False      # Run the source file (.as, .js) but, do not magically prepend included files
-    
-    runSource = False # Run the source file (.as, .js) instead of .abc, magically prepend included files
-    testTimeOut = -1 #by default tests will NOT timeout
-    debug = False
-    threads = 1
-    winceProcesses = []
-    csv = False
-    apiVersioning = False
-    random = False
-    lock = threadpool.threading.Lock()
-    
-    verify = False
-    
-    genAtsSwfs = False
-    atsDir = 'ATS_SWFS'
+    ashErrors = []
     # ats template code 
     atstemplate = [
         'import flash.display.*;\n',
@@ -143,7 +112,36 @@ class RuntestBase:
         'this[fileName+"Str"] = new Array();\n',
         'this[fileName+"Ans"] = new Array();\n'
         ]
+    currentPids = []
+    exclude = []
+    longOptions = []
+    tests = []
+    winceProcesses = []
     
+    apiVersioning = False
+    csv = False
+    debug = False
+    eval = False      # Run the source file (.as, .js) but, do not magically prepend included files
+    forcerebuild = False
+    genAtsSwfs = False
+    htmlOutput = False
+    quiet = False
+    random = False
+    rebuildtests = False
+    runSource = False # Run the source file (.as, .js) instead of .abc, magically prepend included files
+    show_time = False
+    timestampcheck = True
+    timestamps = True
+    verbose = False
+    verify = False
+    
+    start_time = None
+    testTimeOut = -1 #by default tests will NOT timeout
+    threads = 1
+    timeout = 0 # in seconds
+    timeoutStartTime = 0
+    
+    lock = threadpool.threading.Lock()  # global lock used when threading
     
     def __init__(self):
         # Result Vars
@@ -162,74 +160,7 @@ class RuntestBase:
         self.assertmsgs=[]
         self.altsearchpath=None
         
-        self.run()
-        
-    def run(self):
-        self.setEnvironVars()
-        self.loadPropertiesFile()
-        self.setOptions()
-        self.parseOptions()
-        self.setTimestamp()
-        if not self.config:
-            self.determineConfig()
-        self.checkPath()
-        if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
-            if re.search('^arm-winmobile-emulator',self.config)==None:
-                print 'ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe'
-                sys.exit(1)
-            self.setupCEEmulators()
-        if self.htmlOutput and not self.rebuildtests:
-            self.createOutputFile()
-        self.tests = self.getTestsList(self.args)
-        # Load the root testconfig file
-        self.settings, self.includes = self.parseTestConfig('.')
-        self.preProcessTests()
-        if self.rebuildtests:
-            self.rebuildTests()
-        else:
-            self.runTests(self.tests)
-        self.cleanup()
-        
-    def setEnvironVars(self):
-        if 'AVM' in environ:
-            self.avm = environ['AVM'].strip()
-        if 'ASC' in environ:
-            self.asc = environ['ASC'].strip()
-        if 'GLOBALABC' in environ:
-            self.builtinabc = environ['GLOBALABC'].strip()
-        if 'BUILTINABC' in environ:
-            self.builtinabc = environ['BUILTINABC'].strip()
-        if 'SHELLABC' in environ:
-            self.shellabc = environ['SHELLABC'].strip()
-        if 'CVS' in environ:
-            self.exclude = ['CVS'].strip()
-        if 'CONFIG' in environ:
-            self.config = environ['CONFIG'].strip()
-        if 'ASCARGS' in environ:
-            self.ascargs = environ['ASCARGS'].strip()
-        if 'VMARGS' in environ:
-            self.vmargs = environ['VMARGS'].strip()
-        
-
-    def loadPropertiesFile(self):
-        # yet another way to specify asc,avm,builtinabc ...from a file
-        pf = 'runtests.properties'
-        if exists(pf):
-            self.verbose_print( 'reading properties from %s' % (pf) )
-            fd = open(pf,'r')
-            for l in fd:
-                setting = l.strip().split('=')
-                if l.startswith('#') or len(setting) < 2 or len(setting[1]) <= 0:
-                    continue
-                val = setting[1].strip()
-                option = setting[0].split('.')  # see if we have x.y = z
-                nm = option[0].strip()
-                # check if nm is valid
-                if nm in self.__class__.__dict__ and not callable(self.__class__.__dict__[nm]):
-                    if len(option) > 1:
-                        val = self.__class__.__dict__[nm] + ' ' + val  # concat
-                    self.__class__.__dict__[nm] = val
-            fd.close()
+        self.run()        
 
     def usage(self, c):
         print 'usage: %s [options] [tests]' % basename(argv[0])
@@ -333,64 +264,10 @@ class RuntestBase:
                 self.random = True
             
         return opts
-                
-    def checkPath(self,additionalVars=[]):
-        '''Check to see if running using windows python and if so, convert any cygwin paths to win paths
-            Takes additional variables to check as a list of strings
-        '''
-        if self.osName == 'win':
-            def convertFromCygwin(cygpath):
-                if cygpath.find('\\') == -1:
-                    try:
-                        f = self.run_pipe('cygpath -m %s' % cygpath)
-                        cygpath = f[0][0].strip()
-                    except:
-                        pass
-                return cygpath
-            # check for .exe in avm, avm2
-            try:
-                if self.avm and not isfile(self.avm) and self.avm[-4:] != '.exe':
-                    self.avm += '.exe'
-                if self.avm2 and not isfile(self.avm2) and self.avm2[-4:] != '.exe':
-                    self.avm2 += '.exe'
-            except:
-                pass
-            
-            selfVarsToCheck = ['avm','asc','builtinabc','shellabc','java']
-            selfVarsToCheck.extend(additionalVars)
-            for var in selfVarsToCheck:
-                setattr(self, var, convertFromCygwin(getattr(self,var)))
-                
-            newargs = []
-            for t in self.args:
-                newargs.append(convertFromCygwin(t))
-            self.args = newargs
-            
     
-    def setTimestamp(self):
-        if self.timestamps:
-            # get the start time
-            self.start_time = datetime.today()
-            self.js_print('Tamarin tests started: %s' % self.start_time, overrideQuiet=True, csv=False)
-        
-    def determineOS(self):
-        _os = platform.system()
-        ostype = ''
-        if re.search('(CYGWIN_NT|Windows)', _os):
-            ostype='win'
-        if re.search('(Darwin)', _os):
-            ostype='mac'
-        if re.search('(Linux)', _os):
-            ostype='lnx'
-        if re.search('(SunOS)', _os):
-            ostype='sol'
-        
-        if ostype == '':
-            print("ERROR: os %s is unknown, expected values are (win,mac,lnx,sol), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.system()))
-            exit(1)
-        
-        self.osName = ostype
     
+    ### Config and Settings ###
+
     def determineConfig(self):
         # ================================================
         # Determine the configruation if it has not been 
@@ -399,6 +276,7 @@ class RuntestBase:
         # ================================================
         
         self.determineOS()
+        
         
         try:
             # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
@@ -462,11 +340,137 @@ class RuntestBase:
         
         self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+self.vmargs.replace(" ", "")
     
+    def determineOS(self):
+        _os = platform.system()
+        ostype = ''
+        if re.search('(CYGWIN_NT|Windows)', _os):
+            ostype='win'
+        if re.search('(Darwin)', _os):
+            ostype='mac'
+        if re.search('(Linux)', _os):
+            ostype='lnx'
+        if re.search('(SunOS)', _os):
+            ostype='sol'
+            
+        if ostype == '':
+            print("ERROR: os %s is unknown, expected values are (win,mac,lnx,sol), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.system()))
+            exit(1)
+            
+        self.osName = ostype
+
+    def loadPropertiesFile(self):
+        # yet another way to specify asc,avm,builtinabc ...from a file
+        pf = 'runtests.properties'
+        if exists(pf):
+            self.verbose_print( 'reading properties from %s' % (pf) )
+            fd = open(pf,'r')
+            for l in fd:
+                setting = l.strip().split('=')
+                if l.startswith('#') or len(setting) < 2 or len(setting[1]) <= 0:
+                    continue
+                val = setting[1].strip()
+                option = setting[0].split('.')  # see if we have x.y = z
+                nm = option[0].strip()
+                # check if nm is valid
+                if nm in self.__class__.__dict__ and not callable(self.__class__.__dict__[nm]):
+                    if len(option) > 1:
+                        val = self.__class__.__dict__[nm] + ' ' + val  # concat
+                    self.__class__.__dict__[nm] = val
+            fd.close()
+            
+    def setEnvironVars(self):
+        if 'ASC' in environ:
+            self.asc = environ['ASC'].strip()
+        if 'ASCARGS' in environ:
+            self.ascargs = environ['ASCARGS'].strip()
+        if 'AVM' in environ:
+            self.avm = environ['AVM'].strip()
+        if 'BUILTINABC' in environ:
+            self.builtinabc = environ['BUILTINABC'].strip()
+        if 'CONFIG' in environ:
+            self.config = environ['CONFIG'].strip()
+        if 'CVS' in environ:
+            self.exclude = ['CVS'].strip()
+        if 'GLOBALABC' in environ:
+            self.builtinabc = environ['GLOBALABC'].strip()
+        if 'PLAYERGLOBALABC' in environ:
+            self.playerglobalabc = environ['PLAYERGLOBALABC'].strip()
+        if 'SHELLABC' in environ:
+            self.shellabc = environ['SHELLABC'].strip()
+        if 'VMARGS' in environ:
+            self.vmargs = environ['VMARGS'].strip()
+        
     ### File and Directory functions ###
-    def istest(self,f):
-        return f.endswith((self.sourceExt,self.abcasmExt)) and basename(f) != ('shell'+self.sourceExt) \
-               and not f.endswith('Util'+self.sourceExt)
-               
+
+    def build_incfiles(self, as_file):
+        files=[]
+        (dir, file) = split(as_file)
+        for p in self.parents(dir):
+            shell = join(p,'shell'+self.sourceExt)
+            if isfile(shell):
+                files.append(shell)
+        (testdir, ext) = splitext(as_file)
+        if not self.eval:
+            for util in glob(join(testdir,'*'+self.sourceExt)) + glob(join(dir,'*Util'+self.sourceExt)):
+                files.append(string.replace(util, "$", "\$"))
+        return files
+
+    def checkExecutable(self,exe, msg):
+        if exe:
+            exe = exe.split()[0]    # only check first arg if there are more than one
+        if not isfile(exe):
+            exit('ERROR: cannot find %s, %s' % (exe, msg))
+        if not os.access(exe, os.X_OK):
+            try:
+                import stat
+                os.chmod(exe, stat.S_IXUSR)
+            except:
+                exit('ERROR: cannot execute %s, check the executable flag' % exe)
+
+    def checkPath(self,additionalVars=[]):
+        '''Check to see if running using windows python and if so, convert any cygwin paths to win paths
+            Takes additional variables to check as a list of strings
+        '''
+        if self.osName == 'win':
+            def convertFromCygwin(cygpath):
+                if cygpath.find('\\') == -1:
+                    try:
+                        f = self.run_pipe('cygpath -m %s' % cygpath)
+                        cygpath = f[0][0].strip()
+                    except:
+                        pass
+                return cygpath
+            # check for .exe in avm, avm2
+            try:
+                if self.avm and not isfile(self.avm) and self.avm[-4:] != '.exe':
+                    self.avm += '.exe'
+                if self.avm2 and not isfile(self.avm2) and self.avm2[-4:] != '.exe':
+                    self.avm2 += '.exe'
+            except:
+                pass
+            
+            selfVarsToCheck = ['avm','asc','builtinabc','shellabc','java']
+            selfVarsToCheck.extend(additionalVars)
+            for var in selfVarsToCheck:
+                setattr(self, var, convertFromCygwin(getattr(self,var)))
+                
+            newargs = []
+            for t in self.args:
+                newargs.append(convertFromCygwin(t))
+            self.args = newargs
+
+    def createOutputFile(self):
+        # set the output file name.  let's base its name on the date and platform,
+        # and give it a sequence number.
+        now = datetime.today()
+        for i in count(1):
+            self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
+            if not isfile(self.js_output):
+                break
+        
+        print 'Writing results to %s' % self.js_output
+        self.js_output_f = open(self.js_output, 'w')
+        
     def getTestsList(self, startDir):
         if self.altsearchpath!=None:
             newstartDir=[]
@@ -487,35 +491,88 @@ class RuntestBase:
                     dirs.remove(x)
         return tests
 
+    def getLocalSettings(self, root):
+        settings = {}
+        dir = os.path.split(root)[0]
+        # get settings for this test
+        for k in self.settings.keys():
+            if re.search('^'+k+'$', root):
+                for k2 in self.settings[k].keys():
+                    if k2 in settings:
+                        settings[k2].update(self.settings[k][k2])
+                    else:
+                        settings[k2] = self.settings[k][k2].copy()
+        
+        if isfile(join(dir,self.testconfig)):
+            localSettings, localIncludes = self.parseTestConfig(dir)
+            # have a local testconfig, so we create a copy of the global settings to not overwrite
+            includes = list(self.includes) #copy list - don't use reference
+            includes.extend(localIncludes)
+            if localSettings.has_key(root):
+                settings.update(localSettings[root])
+        return settings
+    
+    def istest(self,f):
+        return f.endswith((self.sourceExt,self.abcasmExt)) and basename(f) != ('shell'+self.sourceExt) \
+               and not f.endswith('Util'+self.sourceExt)
+        
+    def parents(self, d):
+        while d != abspath(self.args[0]) and d != '':
+            yield d
+            d = dirname(d)
+        yield d
 
-    # set the output file name.  let's base its name on the date and platform,
-    # and give it a sequence number.
-    def createOutputFile(self):
-        now = datetime.today()
-        for i in count(1):
-            self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
-            if not isfile(self.js_output):
-                break
+    def parseTestConfig(self, dir):
+        settings={}
+        includes=[]
+        names=None
+        lines=[]
         
-        print 'Writing results to %s' % self.js_output
-        self.js_output_f = open(self.js_output, 'w')
+        if isfile(join(dir,self.testconfig)):
+            if join(dir, '') == './':
+                for line in open(join(dir,self.testconfig)).read().splitlines():
+                    lines.append(line)
+            else:
+                # if this is not the root testconfig, append the path before the testname
+                for line in open(join(dir,self.testconfig)).read().splitlines():
+                    lines.append('%s/%s' %(dir,line))
+            for line in lines:
+                if line.startswith('#') or len(line)==0:
+                    continue
+                fields = line.split(',',3)
+                for f in range(len(fields)):
+                    fields[f]=fields[f].strip()
+                while len(fields)<4:
+                    fields.append('');
+                names=fields[0].split(':')
+                if len(names)==1:
+                    names.append('.*')
+                # remove any trailing extension if specified
+                # TODO: add abs to here
+                if names[0][-3:] == self.sourceExt:
+                    names[0]=names[0][:-3]
+                rs='^%s$' % names[0]
+                # only add settings for current config
+                if re.search('^%s$' % fields[1],self.config):
+                    if re.search(fields[1],self.config) and fields[2]=='include':
+                        includes.append(fields[0])
+                    if not settings.has_key(names[0]):
+                        settings[names[0]] = {}
+                    if not settings[names[0]].has_key(names[1]):
+                        settings[names[0]][names[1]] = {}
+                    settings[names[0]][names[1]][fields[2]]=fields[3]
+        return settings, includes
     
-    def convertToCsv(self, line):
-        # convert all whitespace and [ : ] chars to ,
-        line = line.replace('\n', '')
-        line = line.replace('[',' ')
-        line = line.replace(']',' ')
-        line = line.replace(':',' ')
-        lineList = []
-        
-        for l in line.split():
-            l = l.strip()
-            if l.find(',') != -1:   #wrap with "" if there is a , in val
-                l = '"%s"' % l
-            lineList.append(l)
-        
-        return ','.join(lineList)
+    ### Output / Printing functions ###
     
+    def err_print(self, m):
+        self.js_print(m, '<font color=#990000>', '</font><br/>')
+
+    def fail(self, abc, msg, failmsgs):
+        msg = msg.strip()
+        self.err_print('   %s' % msg)
+        failmsgs += ['%s : %s' % (abc, msg)]
+        
     def js_print(self, m, start_tag='<p><tt>', end_tag='</tt></p>', overrideQuiet=False, csv=True, csvOut=True):
         # Print output
         # csv - if True and if outputting csv, convert line into csv (spaces and []: chars)
@@ -525,7 +582,7 @@ class RuntestBase:
         elif self.csv:
             if csvOut:
                 if csv:
-                    print self.convertToCsv(m)
+                    print convertToCsv(m)
                 else:
                     if m.find(',') != -1:
                         m = '"%s"' % m
@@ -539,13 +596,12 @@ class RuntestBase:
             else:
                 self.js_output_f.write('%s\n' % m)
             self.js_output_f.flush()
-            
-    def verbose_print(self, m, start='', end=''):
-      if self.verbose:
-        self.js_print(m, start, end)
-    
-    def err_print(self, m):
-        self.js_print(m, '<font color=#990000>', '</font><br/>')
+
+    def printOutput(self,request, outputCalls=None):
+        #execute the outputCalls
+        if outputCalls:
+            for call in outputCalls:
+                apply(call[0],call[1])
     
     def quiet_print(self, m, start=None, end=None):
         if self.quiet:
@@ -555,106 +611,182 @@ class RuntestBase:
                 self.js_print(m)
             else:
                 self.js_print(m, start, end)
+                
+    def verbose_print(self, m, start='', end=''):
+      if self.verbose:
+        self.js_print(m, start, end)
     
-    def fail(self, abc, msg, failmsgs):
-        msg = msg.strip()
-        self.err_print('   %s' % msg)
-        failmsgs += ['%s : %s' % (abc, msg)]
 
-    def parents(self, d):
-        while d != abspath(self.args[0]) and d != '':
-            yield d
-            d = dirname(d)
-        yield d
+    ### ASC / Compiling Functions ###
     
-    # run a command and return its output 
-    def run_pipe(self, cmd):
-        if self.debug:
-            print('cmd: %s' % cmd)
-        self.verbose_print('executing: %s' % cmd)
-        try:
-            self.lock.acquire()
-            try:
-                p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                self.currentPids.append(p)
-            finally:
-                self.lock.release()
-            
-            starttime=time()
-            output = p.stdout.readlines()
-            err = p.stderr.readlines()
-            if self.threads == 1:
-                exitCode = p.wait(self.testTimeOut) # abort if timeout exceeded    
-            else:
-                exitCode = p.wait(-1) # Kill signal only works for main thread
-            
-            if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
-                return ('', err, exitCode)
-
-            self.lock.acquire()
-            try:
-                self.currentPids.remove(p)
-            finally:
-                self.lock.release()
-
-            return (output,err,exitCode)
-        except KeyboardInterrupt:
-            self.killCurrentPids()
-            
-    def killCurrentPids(self):
-        self.lock.acquire()
-        try:
-            for p in self.currentPids:
-                try:
-                    p.kill()
-                except:
-                    pass
-        finally:
-            self.lock.release()
-                    
-    def parseArgStringToList(self, argStr):
-        args = argStr.strip().split(' ')
-        # recombine any args that have spaces in them
-        argList = []
-        for a in args:
-            if a == '':
-                pass
-            elif a[0] == '-':
-                argList.append(a)
-            else:   # append the space and text to the last arg
-                argList[len(argList)-1] += ' ' + a
-        return argList
-    
-    def parseAscArgs(self, ascArgFile, currentdir):
-        # reads an .asc_args file and returns a tuple of the arg mode (override or merge) and a list of args
-        f = open(ascArgFile,'r')
-        while True: # skip comment lines
-            ascargs = f.readline()
-            if (ascargs[0] != '#'):
-                break
-        ascargs = ascargs.split('|')
-        ascargs[0] = ascargs[0].strip()
-        if (len(ascargs) == 1): #treat no keyword as a merge
-            ascargs.insert(0,'merge')
-        elif (ascargs[0] != 'override') or (ascargs[0] != 'merge'): # default to merge if mode not recognized
-            ascargs[0] = 'merge'
-        # replace the $DIR keyword with actual directory
-        ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
-        if ascargs[1].find('$SHELLABC') != -1:  
-            if not isfile(self.shellabc):   # TODO: not the best place to check for this
-                exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % self.shellabc)
-            ascargs[1] = string.replace(ascargs[1], '$SHELLABC', self.shellabc)
-        ascargs[1] = self.parseArgStringToList(ascargs[1])
-        removeArgList = []
-        argList = []
-        for a in ascargs[1]:
-            if a[0:3] == '-no':
-                removeArgList.append(a[3:])
-            else:
-                argList.append(a)
-    
-        return ascargs[0], argList, removeArgList
+    def compile_test(self, as_file, extraArgs=[]):
+        asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
         
+        # if there is a .build file available (which is an executable script) run that file instead
+        # of compiling with asc
+        as_base = as_file[0:as_file.rfind('.')]
+        if isfile(as_base+'.build'):
+            (dir,file)=split(as_base)
+            self.verbose_print('    compiling %s running %s%s' % (file, as_base, '.build'))
+            (f,err,exitcode) = self.run_pipe('%s%s' % (as_base, '.build'))
+            for line in f:
+                self.verbose_print(line.strip())
+            for line in err:
+                self.verbose_print(line.strip())
+            return
+
+        if not isfile(asc):
+            exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
+           
+        (dir, file) = split(as_file)
+        self.verbose_print('   compiling %s' % file)
+        
+        if self.genAtsSwfs:
+            # get settings as ats excluded files are defined there
+            settings = self.getLocalSettings(as_file)
+            if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
+                self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*']['ats_skip']))
+                return
+    
+        # additional .as file compiler args
+        if as_file.endswith(self.sourceExt):
+            if not isfile(builtinabc):
+                exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
+        
+            if asc.endswith('.jar'):
+                cmd = '"%s" -jar %s' % (self.java,asc)
+            else:
+                cmd = asc
+            
+            arglist = parseArgStringToList(ascargs)
+        
+            # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
+            arglist = self.loadAscArgs(arglist, dir, as_file)
+            
+            (testdir, ext) = splitext(as_file)
+            
+            if self.genAtsSwfs:
+                arglist.extend(genAtsArgs(dir,file,self.atstemplate))
+            
+            for arg in extraArgs:
+                cmd += ' %s' % arg
+        
+                                  
+            cmd += ' -import %s' % builtinabc
+            for arg in arglist:
+                cmd += ' %s' % arg
+            
+            for p in self.parents(dir):
+                if p=='':
+                    p='.'
+                shell = join(p,'shell'+self.sourceExt)
+                if isfile(shell):
+                    cmd += ' -in ' + shell
+                    break
+            
+            deps = glob(join(testdir,'*'+self.sourceExt))
+            deps.sort()
+            for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
+                cmd += ' -in %s' % string.replace(util, '$', '\$')
+                
+        elif as_file.endswith(self.abcasmExt):
+            cmd = '%s -j "%s" ' % (self.abcasmRunner,self.java)
+            
+        try:
+            self.verbose_print('%s %s' % (cmd,as_file))
+            (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file))
+            for line in f:
+                self.verbose_print(line.strip())
+            for line in err:
+                self.verbose_print(line.strip())
+            
+            if self.genAtsSwfs:
+                moveAtsSwf(dir,file, self.atsDir)
+            
+            return f+err
+        except:
+            raise
+    
+    def compileWithAsh(self, tests):
+        start_time = datetime.today()
+        #print("starting compile of %d tests at %s" % (len(tests),start_time))
+        total=len(tests)
+        if not pexpect:
+            if self.genAtsSwfs:
+                print 'The pexpect module must be installed to generate ats swfs.'
+                exit(1)
+            for test in tests:
+                self.js_print('%d\tcompiling %s' % (total,test))
+                self.compile_test(test)
+                (testdir, ext) = splitext(test)
+                if exists(testdir+".abc")==False:
+                    print("ERROR abc files %s.abc not created" % (testdir))
+                    self.ashErrors.append("abc files %s.abc not created" % (testdir))
+                total -= 1;
+        else:  #pexpect available
+            child = pexpect.spawn('"%s" -classpath %s macromedia.asc.embedding.Shell' % (self.java,self.asc))
+            child.logfile = None
+            child.expect("\(ash\)")
+            child.expect("\(ash\)")
+    
+            for test in tests:
+                if test.endswith(self.abcasmExt):
+                    self.compile_test(test)
+                else:
+                    arglist = parseArgStringToList(self.ascargs)
+                
+                    (dir, file) = split(test)
+                    (testdir, ext) = splitext(test)
+                    
+                    # look for .asc_args files to specify dir / file level compile args
+                    arglist = self.loadAscArgs(arglist, dir, test)
+                    
+                    if self.genAtsSwfs:
+                        # get settings as ats excluded files are defined there
+                        settings = self.getLocalSettings(testdir)
+                        if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
+                            self.js_print('ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip']))
+                            continue
+                        arglist.extend(genAtsArgs(dir,file,self.atstemplate))
+                    
+                    cmd = "asc -import %s " % (self.builtinabc)
+                    for arg in arglist:
+                        cmd += ' %s' % arg
+                    
+                    for p in self.parents(dir):
+                        if p=='':
+                            p='.'
+                        shell = join(p,"shell.as")
+                        if isfile(shell):
+                            cmd += " -in " + shell
+                            break
+                    
+                    deps = glob(join(testdir,"*.as"))
+                    deps.sort()
+                    for util in deps + glob(join(dir,"*Util.as")):
+                        cmd += " -in %s" % util #no need to prepend \ to $ when using ash
+                    cmd += " %s" % test
+                    
+                    if self.debug:
+                        self.js_print(cmd)
+                    else:
+                        self.js_print("Compiling %s" % test)
+                    
+                    if exists(testdir+".abc"):
+                        os.unlink(testdir+".abc")
+                    child.sendline(cmd)
+                    child.expect("\(ash\)")
+                    if not exists(testdir+".abc"):
+                        print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
+                        self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
+                    total -= 1;
+                    
+                    if self.genAtsSwfs:
+                        moveAtsSwf(dir,file, self.atsDir)
+                    
+                    #print("%d remaining, %s" % (total,cmd))
+        end_time = datetime.today() 
+    
     def loadAscArgs(self, arglist,dir,file):
         # It is possible that file is actually a partial path rooted to acceptance,
         # so make sure that we are only dealing with the actual filename
@@ -716,94 +848,37 @@ class RuntestBase:
                         pass
         return arglist
     
-        
-    def compile_test(self, as_file, extraArgs=[]):
-        asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
-        
-        # if there is a .build file available (which is an executable script) run that file instead
-        # of compiling with asc
-        as_base = as_file[0:as_file.rfind('.')]
-        if isfile(as_base+'.build'):
-            (dir,file)=split(as_base)
-            self.verbose_print('    compiling %s running %s%s' % (file, as_base, '.build'))
-            (f,err,exitcode) = self.run_pipe('%s%s' % (as_base, '.build'))
-            for line in f:
-                self.verbose_print(line.strip())
-            for line in err:
-                self.verbose_print(line.strip())
-            return
-
-        if not isfile(asc):
-            exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
-           
-        (dir, file) = split(as_file)
-        self.verbose_print('   compiling %s' % file)
-        
-        if self.genAtsSwfs:
-            # get settings as ats excluded files are defined there
-            settings = self.getLocalSettings(as_file)
-            if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
-                self.js_print('ATS Skipping %s ... reason: %s' % (file,settings['.*']['ats_skip']))
-                return
     
-        # additional .as file compiler args
-        if as_file.endswith(self.sourceExt):
-            if not isfile(builtinabc):
-                exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
-        
-            if asc.endswith('.jar'):
-                cmd = '"%s" -jar %s' % (self.java,asc)
+    def parseAscArgs(self, ascArgFile, currentdir):
+        # reads an .asc_args file and returns a tuple of the arg mode (override or merge) and a list of args
+        f = open(ascArgFile,'r')
+        while True: # skip comment lines
+            ascargs = f.readline()
+            if (ascargs[0] != '#'):
+                break
+        ascargs = ascargs.split('|')
+        ascargs[0] = ascargs[0].strip()
+        if (len(ascargs) == 1): #treat no keyword as a merge
+            ascargs.insert(0,'merge')
+        elif (ascargs[0] != 'override') or (ascargs[0] != 'merge'): # default to merge if mode not recognized
+            ascargs[0] = 'merge'
+        # replace the $DIR keyword with actual directory
+        ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
+        if ascargs[1].find('$SHELLABC') != -1:  
+            if not isfile(self.shellabc):   # TODO: not the best place to check for this
+                exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % self.shellabc)
+            ascargs[1] = string.replace(ascargs[1], '$SHELLABC', self.shellabc)
+        ascargs[1] = parseArgStringToList(ascargs[1])
+        removeArgList = []
+        argList = []
+        for a in ascargs[1]:
+            if a[0:3] == '-no':
+                removeArgList.append(a[3:])
             else:
-                cmd = asc
-            
-            arglist = self.parseArgStringToList(ascargs)
-        
-            # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
-            arglist = self.loadAscArgs(arglist, dir, as_file)
-            
-            (testdir, ext) = splitext(as_file)
-            
-            if self.genAtsSwfs:
-                arglist.extend(self.genAtsArgs(dir,file))
-            
-            for arg in extraArgs:
-                cmd += ' %s' % arg
-        
-                                  
-            cmd += ' -import %s' % builtinabc
-            for arg in arglist:
-                cmd += ' %s' % arg
-            
-            for p in self.parents(dir):
-                if p=='':
-                    p='.'
-                shell = join(p,'shell'+self.sourceExt)
-                if isfile(shell):
-                    cmd += ' -in ' + shell
-                    break
-            
-            deps = glob(join(testdir,'*'+self.sourceExt))
-            deps.sort()
-            for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
-                cmd += ' -in %s' % string.replace(util, '$', '\$')
-                
-        elif as_file.endswith(self.abcasmExt):
-            cmd = '%s -j "%s" ' % (self.abcasmRunner,self.java)
-            
-        try:
-            self.verbose_print('%s %s' % (cmd,as_file))
-            (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file))
-            for line in f:
-                self.verbose_print(line.strip())
-            for line in err:
-                self.verbose_print(line.strip())
-            
-            if self.genAtsSwfs:
-                self.moveAtsSwf(dir,file)
-            
-            return f+err
-        except:
-            raise
+                argList.append(a)
+    
+        return ascargs[0], argList, removeArgList 
+    
     
     def rebuildTests(self):
         if self.genAtsSwfs:
@@ -844,149 +919,60 @@ class RuntestBase:
             try:
                 os.remove('./ats_temp.as')
             except:
-                pass
-        
+                pass  
     
-    def genAtsArgs(self, dir, file):
-        args = []
-        atstemplate = self.atstemplate
-        (name, ext) = splitext(file)
-        # insert filename into template
-        atstemplate[2] = 'var fileName:String = "%s_";\n' % name
-        # write out the template file
-        ats_inc = open('./ats_temp.as','w')
-        ats_inc.writelines(atstemplate)
-        ats_inc.close()
-        if not 'ecma' in dir:
-            args.append('-AS3')
-        args.extend(['-swf 200,200','-in ./ats_temp.as'])
-        return args
-        
-    def moveAtsSwf(self, dir, file):
-        (name, ext) = splitext(file)
-        # move the swf to the swfs dir
+    
+    
+    ### Process Management ###  
+    
+    def killCurrentPids(self):
+        # Kill all pids in the self.currentPids list
+        self.lock.acquire()
         try:
-            atsOut = self.atsDir+'/'+dir 
-            if not exists(atsOut):
-                os.makedirs(atsOut)
-        except:
-            pass
-            
+            for p in self.currentPids:
+                try:
+                    p.kill()
+                except:
+                    pass
+        finally:
+            self.lock.release()
+    
+    def run_pipe(self, cmd):
+        # run a command and return a tuple of (output, stdErr, exitCode) 
+        if self.debug:
+            print('cmd: %s' % cmd)
+        self.verbose_print('executing: %s' % cmd)
         try:
-            shutil.move('%s/%s.swf' % (dir,name),'%s/%s_.swf' % (atsOut,name))
-        except:
-            print 'Error attempting to move %s/%s_.swf' % (dir,name)
-    
-    def compileWithAsh(self, tests):
-        start_time = datetime.today()
-        #print("starting compile of %d tests at %s" % (len(tests),start_time))
-        total=len(tests)
-        if not pexpect:
-            if self.genAtsSwfs:
-                print 'The pexpect module must be installed to generate ats swfs.'
-                exit(1)
-            for test in tests:
-                self.js_print('%d\tcompiling %s' % (total,test))
-                self.compile_test(test)
-                (testdir, ext) = splitext(test)
-                if exists(testdir+".abc")==False:
-                    print("ERROR abc files %s.abc not created" % (testdir))
-                    self.ashErrors.append("abc files %s.abc not created" % (testdir))
-                total -= 1;
-        else:  #pexpect available
-            child = pexpect.spawn('"%s" -classpath %s macromedia.asc.embedding.Shell' % (self.java,self.asc))
-            child.logfile = None
-            child.expect("\(ash\)")
-            child.expect("\(ash\)")
-    
-            for test in tests:
-                if test.endswith(self.abcasmExt):
-                    self.compile_test(test)
-                else:
-                    arglist = self.parseArgStringToList(self.ascargs)
-                
-                    (dir, file) = split(test)
-                    (testdir, ext) = splitext(test)
-                    
-                    # look for .asc_args files to specify dir / file level compile args
-                    arglist = self.loadAscArgs(arglist, dir, test)
-                    
-                    if self.genAtsSwfs:
-                        # get settings as ats excluded files are defined there
-                        settings = self.getLocalSettings(testdir)
-                        if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
-                            self.js_print('ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip']))
-                            continue
-                        arglist.extend(self.genAtsArgs(dir,file))
-                    
-                    cmd = "asc -import %s " % (self.builtinabc)
-                    for arg in arglist:
-                        cmd += ' %s' % arg
-                    
-                    for p in self.parents(dir):
-                        if p=='':
-                            p='.'
-                        shell = join(p,"shell.as")
-                        if isfile(shell):
-                            cmd += " -in " + shell
-                            break
-                    
-                    deps = glob(join(testdir,"*.as"))
-                    deps.sort()
-                    for util in deps + glob(join(dir,"*Util.as")):
-                        cmd += " -in %s" % util #no need to prepend \ to $ when using ash
-                    cmd += " %s" % test
-                    
-                    if self.debug:
-                        self.js_print(cmd)
-                    else:
-                        self.js_print("Compiling %s" % test)
-                    
-                    if exists(testdir+".abc"):
-                        os.unlink(testdir+".abc")
-                    child.sendline(cmd)
-                    child.expect("\(ash\)")
-                    if not exists(testdir+".abc"):
-                        print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
-                        self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
-                    total -= 1;
-                    
-                    if self.genAtsSwfs:
-                        self.moveAtsSwf(dir,file)
-                    
-                    #print("%d remaining, %s" % (total,cmd))
-        end_time = datetime.today()
-        #print("finished compile of %d tests at %s elapsed time is %s" % (len(tests),start_time,end_time-start_time))
-
-
-        
-    
-    def build_incfiles(self, as_file):
-        files=[]
-        (dir, file) = split(as_file)
-        for p in self.parents(dir):
-            shell = join(p,'shell'+self.sourceExt)
-            if isfile(shell):
-                files.append(shell)
-        (testdir, ext) = splitext(as_file)
-        if not self.eval:
-            for util in glob(join(testdir,'*'+self.sourceExt)) + glob(join(dir,'*Util'+self.sourceExt)):
-                files.append(string.replace(util, "$", "\$"))
-        return files
-
-    def checkExecutable(self,exe, msg):
-        if exe:
-            exe = exe.split()[0]    # only check first arg if there are more than one
-        if not isfile(exe):
-            exit('ERROR: cannot find %s, %s' % (exe, msg))
-        if not os.access(exe, os.X_OK):
+            self.lock.acquire()
             try:
-                import stat
-                os.chmod(exe, stat.S_IXUSR)
-            except:
-                exit('ERROR: cannot execute %s, check the executable flag' % exe)
+                p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self.currentPids.append(p)
+            finally:
+                self.lock.release()
+            
+            starttime=time()
+            output = p.stdout.readlines()
+            err = p.stderr.readlines()
+            if self.threads == 1:
+                exitCode = p.wait(self.testTimeOut) # abort if timeout exceeded    
+            else:
+                exitCode = p.wait(-1) # Kill signal only works for main thread
+            
+            if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
+                return ('', err, exitCode)
 
-    # TODO: Rename/move to better place
+            self.lock.acquire()
+            try:
+                self.currentPids.remove(p)
+            finally:
+                self.lock.release()
+
+            return (output,err,exitCode)
+        except KeyboardInterrupt:
+            self.killCurrentPids()
+            
+    ### Run Tests ###
+    
     def preProcessTests(self):  # don't need AVM if rebuilding tests
         if not self.rebuildtests:
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
@@ -1009,16 +995,7 @@ class RuntestBase:
             self.avm += ' -- '
             self.avm += ' %s../test/spidermonkey-prefix.es' % self.escbin  #needed to run shell harness
 
-    def printOutput(self,request, outputCalls=None):
-        #execute the outputCalls
-        if outputCalls:
-            for call in outputCalls:
-                apply(call[0],call[1])
-    
-    # this will be called when an exception occurs within a thread
-    def handle_exception(self, request, exc_info):
-        raise exc_info[1]
-    
+
     def runTests(self, testList):
         testnum = len(testList)
         if self.random:
@@ -1033,7 +1010,7 @@ class RuntestBase:
         
         if self.timeout:
             self.js_print("will run tests until timeout of %ds is exceeded" % self.timeout)
-            self.startTime = time()
+            self.timeoutStartTime = time()
         
         # threads on cygwin randomly lock up
         if self.threads == 1 or platform.system()[:6].upper() == 'CYGWIN':
@@ -1041,7 +1018,7 @@ class RuntestBase:
                 testnum -= 1
                 o = self.runTestPrep((t, testnum))
                 self.printOutput(None, o)
-                if self.timeout and time()-self.startTime > self.timeout:
+                if self.timeout and time()-self.timeoutStartTime > self.timeout:
                     break
         else: # run using threads
             #Assign test numbers
@@ -1060,7 +1037,7 @@ class RuntestBase:
                     try:
                         sleep(1)
                         main.poll()
-                        if self.timeout and time()-self.startTime > self.timeout:
+                        if self.timeout and time()-self.timeoutStartTime > self.timeout:
                             raise TimeOutException
                         #print "(active worker threads: %i)" % (threadpool.threading.activeCount()-1, )
                     except threadpool.NoResultsPending:
@@ -1079,101 +1056,6 @@ class RuntestBase:
                 self.lock.acquire()
                 print e
                 exit(0)
-            
-                
-                
-        
-    def parseTestConfig(self, dir):
-        settings={}
-        includes=[]
-        names=None
-        lines=[]
-        
-        if isfile(join(dir,self.testconfig)):
-            if join(dir, '') == './':
-                for line in open(join(dir,self.testconfig)).read().splitlines():
-                    lines.append(line)
-            else:
-                # if this is not the root testconfig, append the path before the testname
-                for line in open(join(dir,self.testconfig)).read().splitlines():
-                    lines.append('%s/%s' %(dir,line))
-            for line in lines:
-                if line.startswith('#') or len(line)==0:
-                    continue
-                fields = line.split(',',3)
-                for f in range(len(fields)):
-                    fields[f]=fields[f].strip()
-                while len(fields)<4:
-                    fields.append('');
-                names=fields[0].split(':')
-                if len(names)==1:
-                    names.append('.*')
-                # remove any trailing extension if specified
-                # TODO: add abs to here
-                if names[0][-3:] == self.sourceExt:
-                    names[0]=names[0][:-3]
-                rs='^%s$' % names[0]
-                # only add settings for current config
-                if re.search('^%s$' % fields[1],self.config):
-                    if re.search(fields[1],self.config) and fields[2]=='include':
-                        includes.append(fields[0])
-                    if not settings.has_key(names[0]):
-                        settings[names[0]] = {}
-                    if not settings[names[0]].has_key(names[1]):
-                        settings[names[0]][names[1]] = {}
-                    settings[names[0]][names[1]][fields[2]]=fields[3]
-        return settings, includes
-    
-    def compareAbcAsmOutput(self, file, output):
-        # return diff
-        try:
-            f = open(file[:-4]+'.out', 'r')
-            if self.config.find('debugger') != -1:
-                if isfile(file[:-4]+'.out.debug'):
-                    f.close()
-                    f = open(file[:-4]+'.out.debug', 'r')
-            if self.config.find('interp') != -1:
-                if isfile(file[:-4]+'.out.interp'):
-                    f.close()
-                    f = open(file[:-4]+'.out.interp', 'r')
-            flines = []
-            for line in f.readlines():
-                line = ''.join(line.split('\r'))
-                if line != '\n':
-                    flines.append(line)
-            f.close()
-        except IOError:
-            flines = ['IOError Opening .out file']
-        if len(output) != len(flines):
-            return flines
-        # compare lines
-        for i in range(0,len(output)):
-            line=output[i].strip()
-            line=line.replace('\\','/')
-            if line != flines[i].strip():
-                return flines
-        return
-                                                
-    def getLocalSettings(self, root):
-        settings = {}
-        dir = os.path.split(root)[0]
-        # get settings for this test
-        for k in self.settings.keys():
-            if re.search('^'+k+'$', root):
-                for k2 in self.settings[k].keys():
-                    if k2 in settings:
-                        settings[k2].update(self.settings[k][k2])
-                    else:
-                        settings[k2] = self.settings[k][k2].copy()
-        
-        if isfile(join(dir,self.testconfig)):
-            localSettings, localIncludes = self.parseTestConfig(dir)
-            # have a local testconfig, so we create a copy of the global settings to not overwrite
-            includes = list(self.includes) #copy list - don't use reference
-            includes.extend(localIncludes)
-            if localSettings.has_key(root):
-                settings.update(localSettings[root])
-        return settings
     
     def runTestPrep(self, testAndNum):
         ast = testAndNum[0]
@@ -1471,20 +1353,63 @@ class RuntestBase:
         if self.ashErrors:
             exit(1)
 
-    # runs the windows mobile emulators
-    # * for each threads (--numthreads=) start an emulator with emulator $EMULATOR and image $EMULATORIMAGE environment variables or use defaults below
-    # * in emulator map shared directory to local machine, the shared directory gets mapped to /Storage Card on the device
-    # * in shared directory /2755/autorun.exe will autorun when emulator is started
-    # * copy the wmrunner.exe program as autorun.exe
-    # * the wm tamarin shell is copied to /Storage Card/shell/avmshell_arm.exe
-    # * the /Storage Card/nextvm.txt contains the parameters and abc file to compile
-    # * /Storage Card/media is where .abc files are stored
-    # * the wmrunner.exe runs in windows mobile looking for nextvm.txt, runs the avmplus_arm.exe with the arguments in the file
-    # * when -log is a vm parameter the result of running the abc will be in a .log file
-    # * the avm variable is replaced with the ../util/wmemulatorshell.py file, when called it copies the test abc to the wm /Storage Card/media
-    #   directory and creates nextvm.txt, then waits for the wmrunner.exe to delete the nextvm.txt to signal the test is finished
-    #
+    ### Misc Functions ###
+
+    def compareAbcAsmOutput(self, file, output):
+        # return diff
+        try:
+            f = open(file[:-4]+'.out', 'r')
+            if self.config.find('debugger') != -1:
+                if isfile(file[:-4]+'.out.debug'):
+                    f.close()
+                    f = open(file[:-4]+'.out.debug', 'r')
+            if self.config.find('interp') != -1:
+                if isfile(file[:-4]+'.out.interp'):
+                    f.close()
+                    f = open(file[:-4]+'.out.interp', 'r')
+            flines = []
+            for line in f.readlines():
+                line = ''.join(line.split('\r'))
+                if line != '\n':
+                    flines.append(line)
+            f.close()
+        except IOError:
+            flines = ['IOError Opening .out file']
+        if len(output) != len(flines):
+            return flines
+        # compare lines
+        for i in range(0,len(output)):
+            line=output[i].strip()
+            line=line.replace('\\','/')
+            if line != flines[i].strip():
+                return flines
+        return
+
+    # this will be called when an exception occurs within a thread
+    def handle_exception(self, request, exc_info):
+        raise exc_info[1]
+
+    def setTimestamp(self):
+        if self.timestamps:
+            # get the start time
+            self.start_time = datetime.today()
+            self.js_print('Tamarin tests started: %s' % self.start_time, overrideQuiet=True, csv=False)
+
+
     def setupCEEmulators(self):
+        # runs the windows mobile emulators
+        # * for each threads (--numthreads=) start an emulator with emulator $EMULATOR and image $EMULATORIMAGE environment variables or use defaults below
+        # * in emulator map shared directory to local machine, the shared directory gets mapped to /Storage Card on the device
+        # * in shared directory /2755/autorun.exe will autorun when emulator is started
+        # * copy the wmrunner.exe program as autorun.exe
+        # * the wm tamarin shell is copied to /Storage Card/shell/avmshell_arm.exe
+        # * the /Storage Card/nextvm.txt contains the parameters and abc file to compile
+        # * /Storage Card/media is where .abc files are stored
+        # * the wmrunner.exe runs in windows mobile looking for nextvm.txt, runs the avmplus_arm.exe with the arguments in the file
+        # * when -log is a vm parameter the result of running the abc will be in a .log file
+        # * the avm variable is replaced with the ../util/wmemulatorshell.py file, when called it copies the test abc to the wm /Storage Card/media
+        #   directory and creates nextvm.txt, then waits for the wmrunner.exe to delete the nextvm.txt to signal the test is finished
+        #
         
         emulator="c:/Program Files/Microsoft Device Emulator/1.0/DeviceEmulator.exe"
         emulator_image="c:/Program Files/Windows Mobile 6 SDK/PocketPC/DeviceemulationV650/0409/PPC_USA_GSM_VR.BIN"
@@ -1613,5 +1538,3 @@ class RuntestBase:
         except:
             print 'exception deleting %s/version.as or %s/version.abc' % (cwd,cwd)
             
-#if __name__ == '__main__':
-#    test = RuntestBase()
