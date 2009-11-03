@@ -41,15 +41,28 @@ cwd=`pwd`
 cd $basedir
 if [ -d .hg ];
 then
-    change=$1
-    test "$change" = "" && {
-      change=`hg identify -n | awk -F+ '{print $1}'`
-      echo "change number not passed using tip: $change"
-    }
-    change=`echo $change | awk -F: '{print $1}'`
-
-    changeid=`hg log -r $change | head -n 1 | awk -F: '{print $3}'`
+    withhash=`echo $1 | grep :`
+    # nothing passed in
+    if [ "$1" == "" ]; then
+        change=`hg identify -n | awk -F+ '{print $1}'`
+        echo "change number not passed using tip: $change"
+        changeid=`hg log -r $change | head -n 1 | awk -F: '{print $3}'`
+        
+    # only revision passed in
+    elif [ "$withhash" == ""  ]; then
+        change=$1
+        echo "change number passed: $change"
+        changeid=`hg log -r $change | head -n 1 | awk -F: '{print $3}'`
+    
+    # revision and changeid passed in
+    else
+        change=${1%:*}
+        changeid=${1#*:}
+        echo "change and changeid number passed: $change $changeid"
+    fi
+    
     echo "running $platform build for change: $change changeid: $changeid"
+
 
 else
     change=$1
