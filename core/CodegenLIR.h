@@ -436,7 +436,6 @@ namespace avmplus
         void emitIntConst(FrameState* state, int index, int32_t c);
         void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
         void emitDoubleConst(FrameState* state, int index, double* pd);
-        void emitCoerce(FrameState* state, int index, Traits* type);
         void emitGetslot(FrameState*, int slot, int ptr_index, Traits *slotType);
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
         void emitGetGlobalScope();

@@ -2666,11 +2666,6 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::writeCoerce(FrameState* state, uint32_t index, Traits *type)
-    {
-        emitCoerce(state, index, type);
-    }
-
     void CodegenLIR::emitIntConst(FrameState* state, int index, int32_t c)
     {
         this->state = state;
@@ -2690,7 +2685,7 @@ namespace avmplus
         localSet(index, lirout->insImmq(*pquad), NUMBER_TYPE);
     }
 
-    void CodegenLIR::emitCoerce(FrameState* state, int loc, Traits* result)
+    void CodegenLIR::writeCoerce(FrameState* state, uint32_t loc, Traits* result)
     {
         emitPrep(state);
 
