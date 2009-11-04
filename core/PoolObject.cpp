@@ -157,7 +157,7 @@ namespace avmplus
 		if (mname.isBinding())
 		{
 			// multiname must not be an attr name, have wildcards, or have runtime parts.
-			for (int i=0, n=mname.namespaceCount(); i < n; i++)
+			for (int32_t i=0, n=mname.namespaceCount(); i < n; i++)
 			{
 				Traits* t = getTraits(mname.getName(), mname.getNamespace(i), recursive);
 				if (t != NULL)
@@ -184,12 +184,12 @@ namespace avmplus
 		_namedTraits->add(name, ns, (Binding)traits);
 	}
 
-	Namespace* PoolObject::getNamespace(int index) const
+	Namespace* PoolObject::getNamespace(int32_t index) const
 	{
 		return cpool_ns[index];  
 	}
 
-	NamespaceSetp PoolObject::getNamespaceSet(int index) const
+	NamespaceSetp PoolObject::getNamespaceSet(int32_t index) const
 	{
 		return cpool_ns_set[index];  
 	}
@@ -202,7 +202,7 @@ namespace avmplus
 		constantStringCount = count;
 	}
 
-	Stringp PoolObject::getString(int index) const
+	Stringp PoolObject::getString(int32_t index) const
 	{
 		ConstantStringData* dataP = _abcStrings.data + index;
 		if (dataP->abcPtr >= _abcStringStart && dataP->abcPtr < _abcStringEnd)
@@ -266,7 +266,7 @@ namespace avmplus
 		//return false; // unreachable
 	}
 
-	Atom PoolObject::getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) 
+	Atom PoolObject::getLegalDefaultValue(const Toplevel* toplevel, uint32_t index, CPoolKind kind, Traits* t) 
 	{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds
@@ -456,7 +456,7 @@ range_error:
 		// any checking here, we just fill in the Multiname object
 		// with the information we have parsed.
 
-		int index;
+		int32_t index;
 		CPoolKind kind = (CPoolKind) *(pos++);
         switch (kind)
         {
@@ -578,7 +578,7 @@ range_error:
 		}
 	}
 
-	Traits* PoolObject::resolveTypeName(uint32 index, const Toplevel* toplevel, bool allowVoid/*=false*/) const
+	Traits* PoolObject::resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid/*=false*/) const
 	{
 		// only save the type name for now.  verifier will resolve to traits
 		if (index == 0)
@@ -687,7 +687,7 @@ range_error:
 		, nNames (0)
 	{
 		nNames = pool->cpool_mn_offsets.size();
-		for ( uint32 i=1 ; i < nNames ; i++ ) {
+		for (uint32_t i=1; i < nNames; i++) {
 			Multiname mn;
 			pool->parseMultiname(mn, i);
 			mn.IncrementRef();
@@ -696,7 +696,7 @@ range_error:
 	}
 	
 	PrecomputedMultinames::~PrecomputedMultinames() {
-		for ( uint32 i=1 ; i < nNames ; i++ ) 
+		for (uint32_t i=1; i < nNames; i++) 
 			multinames[i].DecrementRef();
 	}
 #endif

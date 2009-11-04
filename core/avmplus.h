@@ -323,6 +323,7 @@ namespace avmplus
 #include "atom-inlines.h"
 #include "AvmCore-inlines.h"
 #include "instr-inlines.h"
+#include "PoolObject-inlines.h"
 #include "ScopeChain-inlines.h"
 #include "Toplevel-inlines.h"
 #include "Traits-inlines.h"
