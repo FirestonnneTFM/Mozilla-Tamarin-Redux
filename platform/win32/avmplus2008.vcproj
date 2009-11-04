@@ -2088,6 +2088,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\PoolObject-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\PoolObject.h"
 				>
 			</File>
