@@ -326,6 +326,13 @@
 		079DFC980F3AB9640031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB70F3ABC5E0031D1B4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFC970F3AB9640031D1B4 /* CoreServices.framework */; };
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
+		07C2E84010A193FC00C773C6 /* SpyUtilsSymbian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07C2E83A10A193FC00C773C6 /* SpyUtilsSymbian.cpp */; };
+		07C2E84110A193FC00C773C6 /* SymbianDebugUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07C2E83B10A193FC00C773C6 /* SymbianDebugUtils.cpp */; };
+		07C2E84210A193FC00C773C6 /* SymbianPortUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07C2E83C10A193FC00C773C6 /* SymbianPortUtils.cpp */; };
+		07C2E88610A197DE00C773C6 /* MMgcPortSymbian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07C2E87E10A197DE00C773C6 /* MMgcPortSymbian.cpp */; };
+		07C2E88710A197DE00C773C6 /* SpyUtilsWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07C2E87F10A197DE00C773C6 /* SpyUtilsWin.cpp */; };
+		07C2E88810A197DE00C773C6 /* SpyUtilsWinMo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07C2E88010A197DE00C773C6 /* SpyUtilsWinMo.cpp */; };
+		07C2E88910A197DE00C773C6 /* ThreadsWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07C2E88110A197DE00C773C6 /* ThreadsWin.cpp */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
@@ -792,6 +799,13 @@
 		07A8D2DD0F5EEA2B0005E66C /* OOM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OOM.h; path = ../../../MMgc/OOM.h; sourceTree = SOURCE_ROOT; };
 		07A8D2F10F5EEAB00005E66C /* GC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GC.h; path = ../../../MMgc/GC.h; sourceTree = SOURCE_ROOT; };
 		07C0F7BE0FDE897100B0E09A /* BasicList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BasicList.h; path = ../../../MMgc/BasicList.h; sourceTree = SOURCE_ROOT; };
+		07C2E83A10A193FC00C773C6 /* SpyUtilsSymbian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsSymbian.cpp; path = ../../../VMPI/SpyUtilsSymbian.cpp; sourceTree = SOURCE_ROOT; };
+		07C2E83B10A193FC00C773C6 /* SymbianDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbianDebugUtils.cpp; path = ../../../VMPI/SymbianDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
+		07C2E83C10A193FC00C773C6 /* SymbianPortUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbianPortUtils.cpp; path = ../../../VMPI/SymbianPortUtils.cpp; sourceTree = SOURCE_ROOT; };
+		07C2E87E10A197DE00C773C6 /* MMgcPortSymbian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MMgcPortSymbian.cpp; path = ../../../VMPI/MMgcPortSymbian.cpp; sourceTree = SOURCE_ROOT; };
+		07C2E87F10A197DE00C773C6 /* SpyUtilsWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsWin.cpp; path = ../../../VMPI/SpyUtilsWin.cpp; sourceTree = SOURCE_ROOT; };
+		07C2E88010A197DE00C773C6 /* SpyUtilsWinMo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsWinMo.cpp; path = ../../../VMPI/SpyUtilsWinMo.cpp; sourceTree = SOURCE_ROOT; };
+		07C2E88110A197DE00C773C6 /* ThreadsWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsWin.cpp; path = ../../../VMPI/ThreadsWin.cpp; sourceTree = SOURCE_ROOT; };
 		07D28FEA106CF00D0050C864 /* AllocationMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AllocationMacros.h; path = ../../../MMgc/AllocationMacros.h; sourceTree = SOURCE_ROOT; };
 		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
@@ -887,12 +901,9 @@
 		0709B6580F9734DF001A6E61 /* Non-Mac */ = {
 			isa = PBXGroup;
 			children = (
-				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
-				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
-				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
-				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
-				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
-				D942369C0F8ACB0600F97706 /* manifest.mk */,
+				07C2E88A10A197F900C773C6 /* Symbian */,
+				07C2E88C10A1983300C773C6 /* Unix */,
+				07C2E88B10A1981400C773C6 /* Windows */,
 			);
 			name = "Non-Mac";
 			sourceTree = "<group>";
@@ -1448,6 +1459,40 @@
 			name = Libraries;
 			sourceTree = "<group>";
 		};
+		07C2E88A10A197F900C773C6 /* Symbian */ = {
+			isa = PBXGroup;
+			children = (
+				07C2E87E10A197DE00C773C6 /* MMgcPortSymbian.cpp */,
+				07C2E83A10A193FC00C773C6 /* SpyUtilsSymbian.cpp */,
+				07C2E83B10A193FC00C773C6 /* SymbianDebugUtils.cpp */,
+				07C2E83C10A193FC00C773C6 /* SymbianPortUtils.cpp */,
+			);
+			name = Symbian;
+			sourceTree = "<group>";
+		};
+		07C2E88B10A1981400C773C6 /* Windows */ = {
+			isa = PBXGroup;
+			children = (
+				07C2E88110A197DE00C773C6 /* ThreadsWin.cpp */,
+				07C2E87F10A197DE00C773C6 /* SpyUtilsWin.cpp */,
+				07C2E88010A197DE00C773C6 /* SpyUtilsWinMo.cpp */,
+				D942369E0F8ACB0600F97706 /* MMgcPortWin.cpp */,
+				D94236A40F8ACB0600F97706 /* WinPortUtils.cpp */,
+				D94236A30F8ACB0600F97706 /* WinDebugUtils.cpp */,
+			);
+			name = Windows;
+			sourceTree = "<group>";
+		};
+		07C2E88C10A1983300C773C6 /* Unix */ = {
+			isa = PBXGroup;
+			children = (
+				D942369D0F8ACB0600F97706 /* MMgcPortUnix.cpp */,
+				D94236A20F8ACB0600F97706 /* UnixDebugUtils.cpp */,
+				D942369C0F8ACB0600F97706 /* manifest.mk */,
+			);
+			name = Unix;
+			sourceTree = "<group>";
+		};
 		08FB7794FE84155DC02AAC07 /* avmshell */ = {
 			isa = PBXGroup;
 			children = (
@@ -1741,6 +1786,13 @@
 				D9AA8809103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */,
 				D9FDA5B91045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 				E8B532071069A1DE00ED299A /* instr.cpp in Sources */,
+				07C2E84010A193FC00C773C6 /* SpyUtilsSymbian.cpp in Sources */,
+				07C2E84110A193FC00C773C6 /* SymbianDebugUtils.cpp in Sources */,
+				07C2E84210A193FC00C773C6 /* SymbianPortUtils.cpp in Sources */,
+				07C2E88610A197DE00C773C6 /* MMgcPortSymbian.cpp in Sources */,
+				07C2E88710A197DE00C773C6 /* SpyUtilsWin.cpp in Sources */,
+				07C2E88810A197DE00C773C6 /* SpyUtilsWinMo.cpp in Sources */,
+				07C2E88910A197DE00C773C6 /* ThreadsWin.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
