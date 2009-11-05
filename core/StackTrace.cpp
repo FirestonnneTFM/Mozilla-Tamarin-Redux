@@ -154,20 +154,10 @@ namespace avmplus
 		if (m_info)
 		{
             MethodSignaturep const ms = m_info->getMethodSignature();
-            const Atom* const scopeBase = (const Atom*)m_framep + ms->local_count();
-            for (int i = ms->max_scope() - 1; i >= 0; --i)
+            for (int i = (ms->max_scope() + ms->local_count() - 1), n = ms->local_count(); i >= n; --i)
             {
-                Atom scope = scopeBase[i];
-                // the JIT can use Atoms or untagged ScriptObjects here... let's check and normalize
-                // to a real Atom so the caller doesn't have to play guessing games
-                if (atomKind(scope) == kUnusedAtomTag)
-                {
-                    // we know the tag bits are zero
-                    // scope |= kObjectType;
-                    // using + is potentially more efficient when we know the tag is zero
-                    scope += kObjectType;
-                }
-                
+                Atom const scope = m_info->boxOneLocal(m_framep, i, m_traits[i]);
+                AvmAssert(atomKind(scope) != kUnusedAtomTag);
                 // go ahead and call addScope, even if null or undefined.
                 scb.addScope(scope);
             }

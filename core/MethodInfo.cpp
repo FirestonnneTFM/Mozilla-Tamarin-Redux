@@ -555,6 +555,61 @@ namespace avmplus
 		WBRC(core->GetGC(), dmi, &dmi->localNames[slot], core->internString(name));
 	}
 
+    // note that the "local" can be a true local (0..local_count-1) 
+    // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
+	Atom MethodInfo::boxOneLocal(FramePtr src, int srcPos, Traits* traits)
+	{
+		// if we are running jit then the types are native and we need to box em.
+		if (_flags & JIT_IMPL)
+		{
+			src = FramePtr(uintptr_t(src) + srcPos*8);
+			AvmCore* core = this->pool()->core;
+            switch (Traits::getBuiltinType(traits))
+            {
+				case BUILTIN_number:
+				{
+					return core->doubleToAtom(*(const double*)src);
+				}
+				case BUILTIN_int:
+				{
+					return core->intToAtom(*(const int32_t*)src);
+				}
+				case BUILTIN_uint:
+				{
+					return core->uintToAtom(*(const uint32_t*)src);
+				}
+				case BUILTIN_boolean:
+				{
+					return *(const int32_t*)src ? trueAtom : falseAtom;
+				}
+				case BUILTIN_any:
+				case BUILTIN_object:
+				case BUILTIN_void:
+				{
+					return *(const Atom*)src;
+				}
+                case BUILTIN_string:
+                {
+                    return (*(const Stringp*)src)->atom();
+                }
+                case BUILTIN_namespace:
+                {
+                    return (*(const Namespacep*)src)->atom();
+                }
+                default:
+                {
+                    return (*(ScriptObject**)src)->atom();
+                }
+			}
+		}
+		else
+		{
+			src = FramePtr(uintptr_t(src) + srcPos*sizeof(Atom));
+			return *(const Atom*)src;
+		}
+	}
+
+
 	/**
 	 * convert ap[start]...ap[start+count-1] entries from their native types into
 	 * Atoms.  The result is placed into out[to]...out[to+count-1].
@@ -566,68 +621,62 @@ namespace avmplus
 	 */
 	void MethodInfo::boxLocals(FramePtr src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length)
 	{
-		int size = srcPos+length;
-		int at = destPos;
-
-		// if we are running jit then the types are native and we
-		// need to box em.
+        for(int i = srcPos, n = srcPos+length; i < n; i++)
+        {
+            AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
+            dest[destPos++] = boxOneLocal(src, i, traitArr[i]);
+        }
+	}
+    
+    
+    // note that the "local" can be a true local (0..local_count-1) 
+    // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
+	void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int dstPos, Traits* traits)
+	{
 		if (_flags & JIT_IMPL)
 		{
-			// each entry is a pointer into the function's stack frame
-			int64_t* in = (int64_t*)src;			// WARNING this must match with JIT generator (endianness issue???)
-
-			// now probe each type and do the atom conversion.
-			AvmCore* core = this->pool()->core;
-			for (int i=srcPos; i<size; i++)
-			{
-				Traits* t = traitArr[i];
-				const void* p = &in[i];   // jit uses 8B per entry
-				if (t == NUMBER_TYPE) 
+			dst = FramePtr(uintptr_t(dst) + dstPos*8);
+            switch (Traits::getBuiltinType(traits))
+            {
+				case BUILTIN_number:
 				{
-					dest[at] = core->doubleToAtom( *((double*)p) );
+					*(double*)dst = AvmCore::number_d(src);
+                    break;
 				}
-				else if (t == INT_TYPE)
+				case BUILTIN_int:
 				{
-					dest[at] = core->intToAtom( *((int*)p) );
+					*(int32_t*)dst = AvmCore::integer_i(src);
+                    break;
 				}
-				else if (t == UINT_TYPE)
+				case BUILTIN_uint:
 				{
-					dest[at] = core->uintToAtom( *((uint32*)p) );
+					*(uint32_t*)dst = AvmCore::integer_u(src);
+                    break;
 				}
-				else if (t == BOOLEAN_TYPE)
+				case BUILTIN_boolean:
 				{
-					dest[at] = *((int*)p) ? trueAtom : falseAtom;
+					*(int32_t*)dst = (int32_t)atomGetBoolean(src);
+                    break;
 				}
-				else if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
+				case BUILTIN_any:
+				case BUILTIN_object:
+				case BUILTIN_void:
 				{
-					dest[at] = *((Atom*)p);
+					*(Atom*)dst = src;
+                    break;
 				}
-				else
-				{
-					// it's a pointer type, either null or some specific atom tag.
-					void* ptr = *((void**)p); // unknown pointer
-					if (t == STRING_TYPE)
-					{
-						dest[at] = ((Stringp)ptr)->atom();
-					}
-					else if (t == NAMESPACE_TYPE)
-					{
-						dest[at] = ((Namespace*)ptr)->atom();
-					}
-					else 
-					{
-						dest[at] = ((ScriptObject*)ptr)->atom();
-					}
-				}
-				at++;
+                default:
+                {
+					// ScriptObject, String, Namespace, or Null
+					*(void**)dst = atomPtr(src);
+                    break;
+                }
 			}
 		}
 		else
 		{
-			// no JIT then we know they are Atoms and we just copy them
-			Atom* in = (Atom*)src;
-			for(int i=srcPos; i<size; i++)
-				dest[at++] = in[i];
+			dst = FramePtr(uintptr_t(dst) + dstPos*sizeof(Atom));
+			*(Atom*)dst = src;
 		}
 	}
 
@@ -642,59 +691,11 @@ namespace avmplus
 	 */
 	void MethodInfo::unboxLocals(const Atom* src, int srcPos, Traits** traitArr, FramePtr dest, int destPos, int length)
 	{
-		#ifdef AVMPLUS_64BIT
-		AvmAssertMsg(false, "are these ops right for 64-bit?  alignment of int/uint/bool?\n");
-		#endif
-		int size = destPos+length;
-		int at = srcPos;
-
-		// If the method has been jit'd then we need to box em, otherwise just
-		// copy them 
-		if (_flags & JIT_IMPL)
-		{
-			// we allocated double sized entry for each local src CodegenJIT
-			int64_t* out = (int64_t*)dest;		// WARNING this must match with JIT generator
-
-			// now probe each type and conversion.
-			AvmCore* core = this->pool()->core;
-			for (int i=destPos; i<size; i++)
-			{
-				Traits* t = traitArr[i];
-				void *p = &out[i];      // JIT uses 8B per entry
-				if (t == NUMBER_TYPE) 
-				{
-					*((double*)p) = AvmCore::number_d(src[at++]);
-				}
-				else if (t == INT_TYPE)
-				{
-					*((int*)p) = AvmCore::integer_i(src[at++]);
-				}
-				else if (t == UINT_TYPE)
-				{
-					*((uint32*)p) = AvmCore::integer_u(src[at++]);
-				}
-				else if (t == BOOLEAN_TYPE)
-				{
-					*((int*)p) = (int)(src[at++]>>3);
-				}
-				else if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
-				{
-					*((Atom*)p) = src[at++];
-				}
-				else
-				{
-					// ScriptObject, String, Namespace, or Null
-					*((sintptr*)p) = (src[at++] & ~7);
-				}
-			}
-		}
-		else
-		{
-			// no JIT then we know they are Atoms and we just copy them
-			Atom* out = (Atom*)dest;
-			for(int i=destPos; i<size; i++)
-				out[i] = src[at++];
-		}
+        for (int i = destPos, n = destPos+length; i < n; i++)
+        {
+            AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
+            unboxOneLocal(src[srcPos++], dest, i, traitArr[i]);
+        }
 	}
 
 #endif //DEBUGGER
