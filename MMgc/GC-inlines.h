@@ -193,7 +193,7 @@ namespace MMgc
 		GC *gc = GetBlockHeader(item)->gc;
 		// we don't want to rely on the gcheap thread local but it makes a good
 		// sanity check against misuse of this function
-		GCAssert(gc == GCHeap::GetGCHeap()->GetActiveGC());
+//		GCAssert(gc == GCHeap::GetGCHeap()->GetActiveGC());
 		return gc;
 	}
 	
