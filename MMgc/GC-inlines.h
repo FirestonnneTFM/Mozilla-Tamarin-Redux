@@ -190,7 +190,11 @@ namespace MMgc
 	/*static*/
 	REALLY_INLINE GC* GC::GetGC(const void *item)
 	{
-		return GetBlockHeader(item)->gc;
+		GC *gc = GetBlockHeader(item)->gc;
+		// we don't want to rely on the gcheap thread local but it makes a good
+		// sanity check against misuse of this function
+		GCAssert(gc == GCHeap::GetGCHeap()->GetActiveGC());
+		return gc;
 	}
 	
 	/*static*/
