@@ -205,7 +205,7 @@ namespace avmplus
 	private:	intptr_t volatile*	m_eip;			// ptr to where the current pc is stored
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 	private:	FramePtr			m_framep;		// pointer to top of AS registers
-	private:	Traits**			m_traits;		// array of traits for AS registers
+	private:	Traits**			m_traits;		// array of traits for AS registers and scopechain
 	private:	int32_t				m_linenum;
 	private:	int32_t				m_depth;
 	// ------------------------ DATA SECTION END

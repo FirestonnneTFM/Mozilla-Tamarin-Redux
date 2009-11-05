@@ -234,6 +234,9 @@ namespace avmplus
 		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
+        Atom boxOneLocal(FramePtr src, int srcPos, Traits* traits);
+        void unboxOneLocal(Atom src, FramePtr dst, int dstPos, Traits* traits);
+
 		void boxLocals(FramePtr src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length);
 		void unboxLocals(const Atom* src, int srcPos, Traits** traitArr, FramePtr dest, int destPos, int length);
 
@@ -307,7 +310,6 @@ namespace avmplus
 		inline void setVerified() { _flags = (_flags | VERIFIED) & ~VERIFY_PENDING; }
 		inline void setVerifyPending() { _flags |= VERIFY_PENDING; }
 #endif
-
 
 	public:
 

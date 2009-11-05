@@ -454,8 +454,9 @@ namespace avmplus
         v.ins = o;
         lirout->insStorei(o, vars, i*8);
         (void)type;
+        // note that this now updates traits for values on the scopechain as well as locals
         DEBUGGER_ONLY(
-            if (core->debugger() && int(i) < state->verifier->local_count) {
+            if (core->debugger() && i < (state->verifier->local_count + state->verifier->max_scope)) {
                 lirout->insStorei(InsConstPtr(type), varTraits, i*sizeof(Traits*));
             }
         )
@@ -1316,7 +1317,7 @@ namespace avmplus
         #if defined(DEBUGGER) && defined(_DEBUG)
         DebuggerCheck *checker = NULL;
         if (core->debugger()) {
-            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, state->verifier->local_count);
+            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, state->verifier->local_count + state->verifier->max_scope);
             lirout = checker;
         }
         #endif
@@ -1394,7 +1395,8 @@ namespace avmplus
         {
             // pointers to traits so that the debugger can decode the locals
             // IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
-            varTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
+            // note that this now updates traits for values on the scopechain as well as locals
+            varTraits = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(Traits*));
             verbose_only( if (lirbuf->names) {
                 lirbuf->names->addName(varTraits, "varTraits");
             })
