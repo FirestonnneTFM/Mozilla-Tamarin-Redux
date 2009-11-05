@@ -482,12 +482,19 @@ namespace MMgc
 				}
 				/*FALLTHROUGH*/
 			common_actions:
+#ifdef DEBUG
+				if (start_event != NO_EVENT)
+					GCDebugMsg(true, "Should not have a start_event but had start_event=%d, ev=%d\n", (int)start_event, (int)ev);
+#endif
 				start_time = now();
 				start_event = ev;
 				return;	// to circumvent resetting of start_event below
 		}
 		
-		GCAssert(start_event == (PolicyEvent)(ev - 1));
+#ifdef DEBUG
+		if (start_event != (PolicyEvent)(ev - 1))
+			GCDebugMsg(true, "Should have had a matching start_event but instead had start_event=%d, ev=%d\n", (int)start_event, (int)ev);
+#endif
 		start_event = NO_EVENT;
 		
 		uint64_t t = now();
