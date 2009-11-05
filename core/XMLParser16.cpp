@@ -415,7 +415,35 @@ namespace avmplus
 		return dest;
 	}
 
-	XMLParser::XMLParser(AvmCore *core, Stringp str) : m_str (str), m_pos (0)
+    /*
+        This provides backwards-compatibility for a rather obscure case:
+        The old XMLParser considered any null terminator to end the parse,
+        regardless of actual string length. Some buggy SWFs take a random
+        ByteArray and try to convert it to XML. The old parser would stop parsing
+        at the first null, but the new one won't, and thus is much likely to 
+        throw an exception (since random binary rarely parses as XML), while the
+        old one would return quietly if there happened to be a null character
+        before the first '<' character. Rather than add null-char checking
+        back into the parser, let's just do a quick pre-check for a null char,
+        and if one is found, truncate the string there. 
+        
+        (Watson #2471228)
+    */
+	static Stringp truncateAtFirstNullChar(AvmCore* core, Stringp in)
+	{
+		int32_t const pos = in->indexOfCharCode(0);
+		if (pos > 0)
+        {
+			in = in->substr(0, pos);
+        }
+        else if (pos == 0)
+        {
+            in = core->kEmptyString;
+        }
+		return in;
+	}
+
+	XMLParser::XMLParser(AvmCore* core, Stringp str) : m_str(truncateAtFirstNullChar(core, str)), m_pos (0)
 	{
 		this->core = core;
 
