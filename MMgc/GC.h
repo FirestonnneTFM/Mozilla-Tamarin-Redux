@@ -946,6 +946,8 @@ namespace MMgc
 
 		/**
 		 * @return the GC object associated with a managed object.
+		 * this item must be a small item (<1968) or the first page of a large allocation,
+		 * it won't work on secondary pages of a large allocation,
 		 */
 		static GC* GetGC(const void *item);
 		
