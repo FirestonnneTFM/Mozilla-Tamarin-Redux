@@ -23,6 +23,7 @@
 # 
 # ***** END LICENSE BLOCK ***** */
 
+########################################################################################################################
 # DOCUMENTATION:
 #    the acceptance/testconfig.txt controls when test files and test cases are marked as expected failure and skip for a specific configuration.
 #
@@ -33,7 +34,7 @@
 #
 # configuration is a regular expression with the format {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
 #
-# command are currently one of : asc.args, expectedfailure, skip, include
+# commands are currently one of : asc.args, expectedfailure, skip, include
 #    expectedfailure - expects the test to fail, comments should provide bug number and a comment
 #    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase even if the parent has been skipped
@@ -44,9 +45,17 @@
 # comments: please include bug reference, date, and reason for the entry
 
 # NOTES:
+# Filename matching:
+#    When more than one test/filename regexp matches, we choose to match to the longest regexp
+#    e.g:
+#       given someDir/.* and someDir/myTestname
+#       someDir/myTestname will take precedence since it has longer total length
+#
 # To specify that a configuration string DOES NOT contain certain strings use Zero-width negative lookahead: (?!regex)
-#   For example, to set an expected failure for all test runs EXCEPT when -Dinterp is used, use the following:
-#       ^((?!Dinterp).)*$
+#    For example, to set an expected failure for all test runs EXCEPT when -Dinterp is used, use the following:
+#    ^((?!Dinterp).)*$
+#
+########################################################################################################################
 
 #  PERMANENT ENTRIES:
 util/shell_ats, .*, skip, shell file for ats media creation
@@ -54,8 +63,6 @@ util/shell_ats, .*, skip, shell file for ats media creation
 
 # BUGS:
 # Grouped by feature or platform
-
-
 
 ####################
 # force JIT -Ojit
