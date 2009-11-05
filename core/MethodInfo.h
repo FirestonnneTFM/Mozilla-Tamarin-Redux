@@ -234,8 +234,8 @@ namespace avmplus
 		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
-        Atom boxOneLocal(FramePtr src, int srcPos, Traits* traits);
-        void unboxOneLocal(Atom src, FramePtr dst, int dstPos, Traits* traits);
+        Atom boxOneLocal(FramePtr src, int srcPos, Traits** traitArr);
+        void unboxOneLocal(Atom src, FramePtr dst, int dstPos, Traits** traitArr);
 
 		void boxLocals(FramePtr src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length);
 		void unboxLocals(const Atom* src, int srcPos, Traits** traitArr, FramePtr dest, int destPos, int length);

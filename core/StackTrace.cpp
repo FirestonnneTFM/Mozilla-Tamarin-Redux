@@ -156,7 +156,7 @@ namespace avmplus
             MethodSignaturep const ms = m_info->getMethodSignature();
             for (int i = (ms->max_scope() + ms->local_count() - 1), n = ms->local_count(); i >= n; --i)
             {
-                Atom const scope = m_info->boxOneLocal(m_framep, i, m_traits[i]);
+                Atom const scope = m_info->boxOneLocal(m_framep, i, m_traits);
                 AvmAssert(atomKind(scope) != kUnusedAtomTag);
                 // go ahead and call addScope, even if null or undefined.
                 scb.addScope(scope);

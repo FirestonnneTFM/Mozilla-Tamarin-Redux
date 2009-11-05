@@ -557,14 +557,15 @@ namespace avmplus
 
     // note that the "local" can be a true local (0..local_count-1) 
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-	Atom MethodInfo::boxOneLocal(FramePtr src, int srcPos, Traits* traits)
+	Atom MethodInfo::boxOneLocal(FramePtr src, int srcPos, Traits** traitArr)
 	{
 		// if we are running jit then the types are native and we need to box em.
 		if (_flags & JIT_IMPL)
 		{
 			src = FramePtr(uintptr_t(src) + srcPos*8);
 			AvmCore* core = this->pool()->core;
-            switch (Traits::getBuiltinType(traits))
+            AvmAssert(traitArr != NULL);
+            switch (Traits::getBuiltinType(traitArr[srcPos]))
             {
 				case BUILTIN_number:
 				{
@@ -604,6 +605,7 @@ namespace avmplus
 		}
 		else
 		{
+            // note, traitArr is generally null for interpreted frames
 			src = FramePtr(uintptr_t(src) + srcPos*sizeof(Atom));
 			return *(const Atom*)src;
 		}
@@ -624,19 +626,20 @@ namespace avmplus
         for(int i = srcPos, n = srcPos+length; i < n; i++)
         {
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
-            dest[destPos++] = boxOneLocal(src, i, traitArr[i]);
+            dest[destPos++] = boxOneLocal(src, i, traitArr);
         }
 	}
     
     
     // note that the "local" can be a true local (0..local_count-1) 
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-	void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int dstPos, Traits* traits)
+	void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int dstPos, Traits** traitArr)
 	{
 		if (_flags & JIT_IMPL)
 		{
+            AvmAssert(traitArr != NULL);
 			dst = FramePtr(uintptr_t(dst) + dstPos*8);
-            switch (Traits::getBuiltinType(traits))
+            switch (Traits::getBuiltinType(traitArr[dstPos]))
             {
 				case BUILTIN_number:
 				{
@@ -675,6 +678,7 @@ namespace avmplus
 		}
 		else
 		{
+            // note, traitArr is generally null for interpreted frames
 			dst = FramePtr(uintptr_t(dst) + dstPos*sizeof(Atom));
 			*(Atom*)dst = src;
 		}
@@ -694,7 +698,7 @@ namespace avmplus
         for (int i = destPos, n = destPos+length; i < n; i++)
         {
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
-            unboxOneLocal(src[srcPos++], dest, i, traitArr[i]);
+            unboxOneLocal(src[srcPos++], dest, i, traitArr);
         }
 	}
 
