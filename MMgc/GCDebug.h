@@ -45,6 +45,7 @@
 namespace MMgc
 {
 	void GCDebugMsg(bool debuggerBreak, const char* format, ...);
+	void GCDebugIndent(size_t count);
 
 	#ifdef _DEBUG
 		inline void ___GCAssertMsg(int32_t assertion, const char* msg)

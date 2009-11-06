@@ -2264,21 +2264,6 @@ bail:
 		}
 	}
 
-#ifdef VMCFG_SYMBIAN
-
-#define ALLOCA_AND_FILL_WITH_SPACES(b, i) {} \
-
-#else
-
-/* macro to stack allocate a string containing 3*i (indent) spaces */
-#define ALLOCA_AND_FILL_WITH_SPACES(b, i) \
-	{ b = (char*)alloca((3*(i))+1); \
-	int n = 0; \
-	for(; n<3*(i); n++) b[n] = ' '; \
-	b[n] = '\0'; }
-
-#endif // VMCFG_SYMBIAN
-
 	void GC::ProbeForMatch(const void *mem, size_t size, uintptr_t value, int recurseDepth, int currentDepth)
 	{
 		uintptr_t lowerBound = memStart;
@@ -2347,12 +2332,9 @@ bail:
 				int  taggedSize = *ptr;
 				int* real = (ptr+2);
 
-				char* buffer = 0;
-				ALLOCA_AND_FILL_WITH_SPACES(buffer, currentDepth);
-
-				if (buffer) GCDebugMsg(false, buffer);
+				GCDebugIndent(currentDepth*3);
 				GCDebugMsg(false, "Location: 0x%08x  Object: 0x%08x (size %d)\n", where, real, taggedSize);
-				if (buffer) GCDebugMsg(false, buffer);
+				GCDebugIndent(currentDepth*3);
 				PrintAllocStackTrace(real);
 
 				if (recurseDepth > 0)
@@ -2374,10 +2356,7 @@ bail:
 		uintptr_t val = (uintptr_t)me;
 		uintptr_t m = memStart;
 
-		char* buffer = 0;
-		ALLOCA_AND_FILL_WITH_SPACES(buffer, currentDepth);
-
-		if (buffer) GCDebugMsg(false, buffer);
+		GCDebugIndent(currentDepth*3);
 		GCDebugMsg(false, "[%d] Probing for pointers to : 0x%08x\n", currentDepth, me);
 		while(m < memEnd)
 		{
