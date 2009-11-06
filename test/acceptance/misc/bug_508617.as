@@ -104,8 +104,7 @@ function test_one(c)
 	return e;
 }
 
-function test()
-{
+
 	var results = []
 
 	results.push({expected: "no-exception", actual: test_one(B)});
@@ -114,14 +113,11 @@ function test()
 	results.push({expected: "ReferenceError: Error #1074", actual: test_one(C3)});
 	results.push({expected: "ReferenceError: Error #1074", actual: test_one(C4)});
 
-	for (var i in results)
-	{
-		var o = results[i]
-		if (o.actual == o.expected)
-			print("test "+i+" PASSED!");
-		else
-			print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-	}
+startTest();
+for (var i in results)
+{
+    var o = results[i]
+    AddTestCase("test_"+i, o.expected, o.actual);
 }
 test();
 
