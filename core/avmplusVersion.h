@@ -45,6 +45,20 @@
 // with the correct value before compilation.  Do not change this.
 #define AVMPLUS_BUILD_CODE			"cyclone"
 
+#ifdef DEBUGGER
+#define AVMPLUS_BIN_DEBUGGER_TAG "-debugger"
+#else
+#define AVMPLUS_BIN_DEBUGGER_TAG ""
+#endif
+
+#ifdef DEBUG
+#define AVMPLUS_BIN_TYPE_TAG  "debug"
+#else
+#define AVMPLUS_BIN_TYPE_TAG  "release"
+#endif
+
+#define AVMPLUS_BIN_TYPE  AVMPLUS_BIN_TYPE_TAG AVMPLUS_BIN_DEBUGGER_TAG
+
 // A possibly-obsolete build number, not used by the VM itself but
 // possibly by embedders.  It is supposed to count 1-n for development
 // builds, and restart at 1-n for release builds.

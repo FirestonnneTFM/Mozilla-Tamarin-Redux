@@ -329,14 +329,31 @@ class RuntestBase:
         if self.osName=='winmobile-emulator':
             self.vmtype = 'release'
         elif not self.runSource:
-            self.vmtype = 'release'
             (f,err,exitcode) = self.run_pipe('%s' % self.avm)
+            # determine avmshell type
+            if re.search('debug-debugger',f[1]):
+                self.vmtype = 'debugdebugger'
+            elif re.search('release-debugger',f[1]):
+                self.vmtype = 'releasedebugger'
+            elif re.search('debug',f[1]):
+                self.vmtype = 'debug'
+            elif re.search('release',f[1]):
+                self.vmtype = 'release'
+            else:   # try to determine vmtype by filename
+                vm = splitext(split(self.avm)[1])[0]
+                if '_sd' in vm:
+                    self.vmtype = 'debugdebugger'
+                elif '_s' in vm:
+                    self.vmtype = 'releasedebugger'
+                elif '_d' in vm:
+                    self.vmtype = 'debug'
+                else:
+                    self.vmtype = 'release'
+                
             f = ' '.join(f)
             # determine if api versioning switch is available
             if re.search('(api)', f):
                 self.apiVersioning = True
-            if re.search('\[-d\]',f):
-                self.vmtype = 'releasedebugger'
         
         self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+self.vmargs.replace(" ", "")
     
@@ -1091,12 +1108,12 @@ class RuntestBase:
             if self.js_output:
                 print 'Results were written to %s' % self.js_output
 
-            if self.writeResultProperties:
-                logfile = open('result.properties', 'w')
-                if self.allfails>0:
-                  logfile.write("failures=%d" % self.allfails)
-                else:
-                  logfile.write("no failures")  
+        if self.writeResultProperties:
+            logfile = open('result.properties', 'w')
+            if self.allfails>0:
+              logfile.write("failures=%d" % self.allfails)
+            else:
+              logfile.write("no failures")  
 
         if self.ashErrors:
             exit(1)
