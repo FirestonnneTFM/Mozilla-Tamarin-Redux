@@ -964,7 +964,7 @@ namespace avmshell
 	
 		if (print_version)
 		{
-			AvmLog("shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n");
+			AvmLog("shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE " build " AVMPLUS_BUILD_CODE "\n");
 			AvmLog("features %s\n", avmfeatures);
 			Platform::GetInstance()->exit(1);
 		}
@@ -1021,7 +1021,7 @@ namespace avmshell
 	/*static*/
 	void Shell::usage()
 	{
-		AvmLog("avmplus shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n\n");
+		AvmLog("avmplus shell " AVMPLUS_VERSION_USER " " AVMPLUS_BIN_TYPE " build " AVMPLUS_BUILD_CODE "\n\n");
 		AvmLog("usage: avmplus\n");
 #ifdef DEBUGGER
 		AvmLog("          [-d]          enter debugger on start\n");
