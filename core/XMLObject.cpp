@@ -655,20 +655,22 @@ namespace avmplus
 					}
 				}
 			}
+
+            Stringp name = !m.isAnyName() ? m.getName() : NULL;
+            Atom nameAtom = name ? name->atom() : nullStringAtom;
 			if (a == -1) // step 7f
 			{
 				E4XNode *e = new (core->GetGC()) AttributeE4XNode(this->m_node, sc);
 				Namespace *ns = 0;
 				if (m.namespaceCount() == 1)
 					ns = m.getNamespace();
-                Stringp name = !m.isAnyName() ? m.getName() : NULL;
 				e->setQName(core, name, ns);
 
 				this->m_node->addAttribute (e);
 				
 				e->_addInScopeNamespace(core, ns, publicNS);
 
-				nonChildChanges(xmlClass()->kAttrAdded, name ? name->atom() : nullStringAtom, sc->atom());
+				nonChildChanges(xmlClass()->kAttrAdded, nameAtom, sc->atom());
 			}
 			else // step 7g
 			{
@@ -676,7 +678,7 @@ namespace avmplus
 				Stringp prior = x->getValue();
 				x->setValue (sc);
 
-				nonChildChanges(xmlClass()->kAttrChanged, m.getName()->atom(), (prior) ? prior->atom() : undefinedAtom);
+				nonChildChanges(xmlClass()->kAttrChanged, nameAtom, (prior) ? prior->atom() : undefinedAtom);
 			}
 
 			// step 7h
@@ -1306,13 +1308,14 @@ namespace avmplus
 		for (uint32 i = 0; i < m_node->numAttributes(); i++)
 		{
 			// step 17a
-			s << " ";
 			E4XNode *an = m_node->getAttribute(i);
 			AvmAssert(an != 0);
 			AvmAssert(an->getClass() == E4XNode::kAttribute);
 			Multiname nam;
 			if (an->getQName(&nam, publicNS))
             {
+                s << " ";
+
                 // step16b-i - ans = an->getName->getNamespace(AncestorNamespace);
                 AvmAssert(nam.isAttr());
                 Namespace *attr_ns = GetNamespace (nam, AncestorNamespaces);
