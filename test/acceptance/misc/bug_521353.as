@@ -81,8 +81,7 @@ function test_neg()
     return i;
 }
 
-function test()
-{
+
 	var results = []
 
     var e = (-1 >>> 0)
@@ -97,14 +96,10 @@ function test()
 	results.push({expected: 0, actual: ~u});
 	results.push({expected: -4294967295, actual: -u});
     
-	for (var i in results)
-	{
-		var o = results[i]
-		if (o.actual == o.expected)
-			print("test "+i+" PASSED!");
-		else
-			print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-	}
+startTest();
+for (var i in results)
+{
+    var o = results[i]
+    AddTestCase("test_"+i, o.expected, o.actual);
 }
-
-test()
+test();

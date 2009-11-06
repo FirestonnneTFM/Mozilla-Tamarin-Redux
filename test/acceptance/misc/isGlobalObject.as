@@ -65,12 +65,11 @@ results.push({expected: false, actual: System.isGlobal("some_string")});
 results.push({expected: false, actual: System.isGlobal({object_literal: 0})});
 results.push({expected: false, actual: System.isGlobal([1,2,3])});
 
+startTest();
 for (var i in results)
 {
-	var o = results[i]
-	if (o.actual == o.expected)
-		print("test "+i+" PASSED!");
-	else
-		print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
+    var o = results[i]
+    AddTestCase("test_"+i, o.expected, o.actual);
 }
+test();
 
