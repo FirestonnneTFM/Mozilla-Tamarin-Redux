@@ -243,7 +243,9 @@ namespace avmplus
 				// 11110xxx  10xxxxxx  10xxxxxx  10xxxxxx
 				// 111110xx ... is always invalid
 				// 1111110x ... is always invalid
-				if ((c & 0x08) || (inLen < 4)) {
+                // note: when 'strict' is false, we need to mimic the behavior of FP9/FP10,
+                // which did not do the c&8 test. so skip it for bug-compatibility.
+				if ((strict && (c & 0x08)) || (inLen < 4)) {
 					// Invalid
 					goto invalid;
 				}
