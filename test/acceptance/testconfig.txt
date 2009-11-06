@@ -249,7 +249,8 @@ regress/bug_498979, .*-Dverifyall.*, skip, https://bugzilla.mozilla.org/show_bug
 ####################
 # Assertion failed: "(((start_event == (PolicyEvent)(ev - 1))))" (".\\GC.cpp":461)
 # Disabling test until this can be properly investigated
-as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
+# Re-enabling to get a better diagnosis; I've made it print a better error.  --lars
+# as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=507685
 # ProcessSampling:GetSizeSamples intermittently fails
 as3/sampling/ProcessSampling ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
 
