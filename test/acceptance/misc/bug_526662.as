@@ -15,7 +15,7 @@
 *
 * The Initial Developer of the Original Code is
 * Adobe System Incorporated.
-* Portions created by the Initial Developer are Copyright (C) 2008
+* Portions created by the Initial Developer are Copyright (C) 2009
 * the Initial Developer. All Rights Reserved.
 *
 * Contributor(s):
@@ -49,8 +49,7 @@ function parse(s:String):String
     }
 }
 
-function test()
-{
+
     XML.prettyPrinting = false;
     XML.prettyIndent = 0;
     
@@ -88,14 +87,12 @@ function test()
     // the XML parser stops at the first zero char, regardless of length
 	results.push({expected: "Error #1085", actual: r});
 
-	for (var i in results)
-	{
-		var o = results[i]
-		if (o.actual == o.expected)
-			print("test "+i+" PASSED!");
-		else
-			print("test "+i+" FAILED! expected "+o.expected+" got "+o.actual);
-	}
+
+startTest();
+for (var i in results)
+{
+    var o = results[i]
+    AddTestCase("test_"+i, o.expected.toString(), o.actual.toString());
 }
 
-test()
+test();
