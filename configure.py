@@ -151,6 +151,9 @@ elif config.getCompiler() == 'VS':
             APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- -Zc:forScope "
         else:
             OPT_CXXFLAGS = "-O2 -GR- "
+            
+        if arm_fpu:
+            OPT_CXXFLAGS += "-QRfpe- -QRarch6"  # compile to use hardware fpu and armv6
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
         APP_CFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
@@ -214,7 +217,11 @@ elif the_os == "windows" or the_os == "cygwin":
                          '_CRT_SECURE_NO_DEPRECATE': None})
     OS_LDFLAGS += "-MAP "
     if cpu == "arm":
-        APP_CPPFLAGS += "-DARM -D_ARM_ -DARMV5 -DUNICODE -DUNDER_CE=1 -DMMGC_ARM -QRarch5t "
+        APP_CPPFLAGS += "-DARM -D_ARM_ -DUNICODE -DUNDER_CE=1 -DMMGC_ARM "
+        if arm_fpu:
+            APP_CPPFLAGS += "-DARMV6 -QRarch6 "
+        else:
+            APP_CPPFLAGS += "-DARMV5 -QRarch5t "
         OS_LIBS.append('mmtimer corelibc coredll')
     else:
         APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
