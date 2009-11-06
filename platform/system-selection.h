@@ -111,6 +111,12 @@
     #define AVMSYSTEM_SPARC  0
   #endif
 
+  #if defined(__mips__) || defined(__MIPS__)
+    #define AVMSYSTEM_MIPS   1
+  #else
+    #define AVMSYSTEM_MIPS   0
+  #endif
+
 #endif  // mac || unix
 
 #if AVMSYSTEM_WIN32
@@ -136,6 +142,7 @@
 
   #define AVMSYSTEM_PPC    0
   #define AVMSYSTEM_SPARC  0
+  #define AVMSYSTEM_MIPS   0
 
 #endif  // win32
 
@@ -202,6 +209,17 @@
 #elif AVMSYSTEM_PPC || AVMSYSTEM_SPARC
   #define AVMSYSTEM_LITTLE_ENDIAN       0
   #define AVMSYSTEM_BIG_ENDIAN          1
+#elif AVMSYSTEM_MIPS
+  #if defined __GNUC__
+    #include <endian.h>
+    #if __BYTE_ORDER == LITTLE_ENDIAN
+      #define AVMSYSTEM_LITTLE_ENDIAN   1
+      #define AVMSYSTEM_BIG_ENDIAN      0
+    #else
+      #define AVMSYSTEM_LITTLE_ENDIAN   0
+      #define AVMSYSTEM_BIG_ENDIAN      1
+    #endif
+  #endif
 #else
   #error "Error in test to determine endianness"
 #endif

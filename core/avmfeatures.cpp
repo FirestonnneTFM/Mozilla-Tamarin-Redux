@@ -83,6 +83,9 @@ const char * const avmfeatures = ""
   #if AVMSYSTEM_SPARC
     "AVMSYSTEM_SPARC;"
   #endif
+  #if AVMSYSTEM_MIPS
+    "AVMSYSTEM_MIPS;"
+  #endif
   #if AVMSYSTEM_UNIX
     "AVMSYSTEM_UNIX;"
   #endif
