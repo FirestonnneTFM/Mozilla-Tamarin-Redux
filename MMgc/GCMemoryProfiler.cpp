@@ -305,17 +305,39 @@ namespace MMgc
 
 	const char *MemoryProfiler::Intern(const char *name, size_t len)
 	{
-		// input doesn't have to be zero terminated
-		char *buff = (char*)alloca(len+1);
+		char tmp[100];
+		// input doesn't have to be zero terminated, so zero terminate in buff
+		char *buff = len < 100 ? tmp : (char*)VMPI_alloc(len+1);
+		if (buff == NULL)
+		{
+			// Well, we try
+			len = 99;
+			buff = tmp;
+		}
 		VMPI_strncpy(buff, name, len);
 		buff[len]='\0';
 		char *iname = (char*)stringsTable.get(buff);
 		if(iname)
+		{
+			if (buff != tmp)
+				VMPI_free(buff);
 			return iname;
-		iname = (char*)VMPI_alloc(len+1);
-		VMPI_strncpy(iname, name, len);
-		iname[len]='\0';
+		}
+		if (buff == tmp)
+		{
+			iname = (char*)VMPI_alloc(len+1);
+			if (iname == NULL)
+				GCHeap::GetGCHeap()->Abort();
+			VMPI_strcpy(iname, buff);
+		}
+		else
+		{
+			iname = buff;
+			buff = tmp;
+		}
 		stringsTable.put(iname, iname);
+		if (buff != tmp)
+			VMPI_free(buff);
 		return iname;
 	}
 
@@ -413,7 +435,9 @@ namespace MMgc
 		}
 
 		// reporting time....
-		PackageGroup **packages = (PackageGroup**)alloca(packageCount*sizeof(PackageGroup*));
+		PackageGroup **packages = (PackageGroup**)VMPI_alloc(packageCount*sizeof(PackageGroup*));
+		if (packages == NULL)
+			return;
 		VMPI_memset(packages, 0, packageCount*sizeof(PackageGroup*));
 
 		GCHashtable_VMPI::Iterator pack_iter(&packageTable);
@@ -443,7 +467,9 @@ namespace MMgc
 				continue;
 
 			// sort CategoryGroup's into this array
-			CategoryGroup **residentFatties = (CategoryGroup**) alloca(numTypes * sizeof(CategoryGroup *));
+			CategoryGroup **residentFatties = (CategoryGroup**) VMPI_alloc(numTypes * sizeof(CategoryGroup *));
+			if (residentFatties == NULL)
+				return;
 			VMPI_memset(residentFatties, 0, numTypes * sizeof(CategoryGroup *));
 			GCHashtable_VMPI::Iterator iter(&pg->categories);
 			const char *name;
@@ -495,6 +521,8 @@ namespace MMgc
 					}
 				}
 			}
+			
+			VMPI_free(residentFatties);
 		}
 
 		GCHashtable_VMPI::Iterator pi(&packageTable);
@@ -506,6 +534,8 @@ namespace MMgc
 				delete (CategoryGroup*)iter.value();
 			delete pg;
 		}
+		
+		VMPI_free(packages);
 	}
 	
 	void MemoryProfiler::DumpSimple()

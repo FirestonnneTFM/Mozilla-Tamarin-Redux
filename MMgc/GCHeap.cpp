@@ -1874,31 +1874,23 @@ namespace MMgc
 			DumpHeapRep();
 	}
 
-#ifdef VMCFG_SYMBIAN
-	
 	void GCHeap::LogChar(char c, size_t count)
 	{
-		// TODO: implement without alloca.
-	}
-	void GCHeap::DumpHeapRep()
-	{
-		// TODO: implement without alloca.
-	}
-	
-#else
-	
-	void GCHeap::LogChar(char c, size_t count)
-	{
-		char* buf = (char*)alloca(count+1);
+		char tmp[100];
+		char* buf = count < 100 ? tmp : (char*)VMPI_alloc(count+1);
+		if (buf == NULL)
+			return;
 		VMPI_memset(buf, c, count);
 		buf[count] = '\0';
 
 		GCLog(buf);
+		if (buf != tmp)
+			VMPI_free(buf);
 	}
 
 	void GCHeap::DumpHeapRep()
 	{
-		Region **regions;
+		Region **regions = NULL;
 		Region *r = lastRegion;
 		int numRegions = 0;
 
@@ -1907,7 +1899,9 @@ namespace MMgc
 			numRegions++;
 			r = r->prev;
 		}
-		regions = (Region**) alloca(sizeof(Region*)*numRegions);
+		regions = (Region**) VMPI_alloc(sizeof(Region*)*numRegions);
+		if (regions == NULL)
+			return;
 		r = lastRegion;
 		for(int i=numRegions-1; i >= 0; i--) {
 			regions[i] = r;
@@ -1961,9 +1955,8 @@ namespace MMgc
 
 			GCLog("\n");
 		}
+		VMPI_free(regions);
 	}
-
-#endif // VMCFG_SYMBIAN
 	
 #ifdef MMGC_MEMORY_PROFILER
 

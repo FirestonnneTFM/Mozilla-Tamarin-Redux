@@ -63,4 +63,20 @@ namespace MMgc
 		(void)format;
 	#endif
 	}
+	
+	void GCDebugIndent(size_t count)
+	{
+#ifdef _DEBUG
+		while (count > 10) {
+			VMPI_debugLog("          ");
+			count -= 10;
+		}
+		while (count > 0) {
+			VMPI_debugLog(" ");
+			count--;
+		}
+#else
+		(void)count;
+#endif
+	}
 }
