@@ -248,6 +248,13 @@ var FEATURES =
 	<defines>   AVMPLUS_SPARC </defines>  <!-- FIXME: legacy name -->
   </feature>
 
+  <feature>
+    <desc> Selects the MIPS architecture (version left unspecified for now). </desc>
+	
+	<name>      AVMSYSTEM_MIPS </name>
+	<defines>   VMCFG_MIPS </defines>
+  </feature>
+  
   <at-most-one>
     <!-- architectures are all mutually exclusive, but there can be "none", I believe (need to verify) -->
 	<name> AVMSYSTEM_IA32 </name>
@@ -255,6 +262,7 @@ var FEATURES =
 	<name> AVMSYSTEM_ARM </name>
 	<name> AVMSYSTEM_PPC </name>
 	<name> AVMSYSTEM_SPARC </name>
+	<name> AVMSYSTEM_MIPS </name>
   </at-most-one>
 
 
@@ -356,6 +364,7 @@ var FEATURES =
 	  <name> AVMSYSTEM_ARM </name>
 	  <name> AVMSYSTEM_PPC </name>
 	  <name> AVMSYSTEM_SPARC </name>
+	  <name> AVMSYSTEM_MIPS </name>
 	 </exactly-one>
 	</requires>
     <defines> VMCFG_NANOJIT  </defines>

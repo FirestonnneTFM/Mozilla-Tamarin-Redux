@@ -92,6 +92,8 @@ def _configSub(ostest, cputest):
         cpu = 'sparc'
     elif re.search('arm', cputest):
         cpu = 'arm'
+    elif re.search('mips', cputest):
+        cpu = 'mips'
     else:
         raise Exception('Unrecognized CPU: ' + cputest)
 
@@ -276,12 +278,18 @@ class Configuration:
                 'CC'           : os.environ.get('CC', 'gcc'),
                 'CFLAGS'       : os.environ.get('CFLAGS', ''),
                 'DLL_CFLAGS'   : '-fPIC',
-                'LD'           : 'ar',
-                'LDFLAGS'      : '',
+                'LD'           : os.environ.get('LD', 'ar'),
+                'LDFLAGS'      : os.environ.get('LDFLAGS', ''),
+                'AR'           : os.environ.get('AR', 'ar'),
                 'MKSTATICLIB'  : '$(AR) cr $(1)',
                 'MKDLL'        : '$(CXX) -shared -o $(1)',
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
+            if self._target[1] == "mips":
+                self._acvars.update({'CXXFLAGS' : '-EL -mips32r2 '})
+                self._acvars.update({'LDFLAGS' : '-EL'})
+                self._acvars.update({'zlib_EXTRA_CFLAGS' : '-EL'})
+                
         elif self._target[0] == 'sunos':
 	    if options.getBoolArg("gcc", False):
                 self._acvars.update({

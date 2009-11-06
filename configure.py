@@ -130,7 +130,7 @@ if config.getCompiler() == 'GCC':
     APP_CXXFLAGS = "-Wall -Wcast-align -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wno-invalid-offsetof -Wno-switch -Wparentheses -Wpointer-arith -Wreorder -Wsign-compare -Wunused-parameter -Wwrite-strings -Wno-ctor-dtor-privacy -Woverloaded-virtual -Wsign-promo -Wno-char-subscripts -fmessage-length=0 -fno-exceptions -fno-rtti -fno-check-new -fstrict-aliasing -fsigned-char  "
     if GCC_MAJOR_VERSION >= 4:
         APP_CXXFLAGS += "-Wstrict-null-sentinel "
-        if GCC_MAJOR_VERSION == 4 and GCC_MINOR_VERSION <= 2: # 4.0 - 4.2
+        if (GCC_MAJOR_VERSION == 4 and GCC_MINOR_VERSION <= 2) or cpu == 'mips': # 4.0 - 4.2
             APP_CXXFLAGS += "-Wstrict-aliasing=0 "
         else: # gcc 4.3 or later
             APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
@@ -262,6 +262,9 @@ elif cpu == "x86_64":
     # we detect this in core/avmbuild.h and MMgc/*build.h
     None
 elif cpu == "arm":
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
+elif cpu == "mips":
     # we detect this in core/avmbuild.h and MMgc/*build.h
     None
 else:
