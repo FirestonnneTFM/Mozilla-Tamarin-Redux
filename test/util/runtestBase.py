@@ -326,9 +326,10 @@ class RuntestBase:
                 print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
                 exit(1)
                 
+        self.vmtype = 'release'
         if self.osName=='winmobile-emulator':
             self.vmtype = 'release'
-        elif not self.runSource:
+        elif not self.runSource and not self.rebuildtests:
             (f,err,exitcode) = self.run_pipe('%s' % self.avm)
             # determine avmshell type
             if re.search('debug-debugger',f[1]):
