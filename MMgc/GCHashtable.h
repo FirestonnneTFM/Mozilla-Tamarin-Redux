@@ -53,6 +53,8 @@ namespace MMgc
 		GCHashtableBase(uint32_t capacity = kDefaultSize);
 		~GCHashtableBase();
 
+		void clear();
+
 		REALLY_INLINE const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
 		REALLY_INLINE const void* get(intptr_t key) { return get((const void*)key); }
 		const void* remove(const void* key, bool rehashIfNeeded=true);
@@ -60,7 +62,7 @@ namespace MMgc
 		void put(const void* key, const void* value);
 		REALLY_INLINE void add(const void* key, const void* value) { put(key, value); }
 		REALLY_INLINE void add(intptr_t key, const void* value) { put((const void*)key, value); }
-		REALLY_INLINE uint32_t count() const { return numValues; }
+		REALLY_INLINE uint32_t count() const { return numValues - numDeleted; }
 
 		int32_t nextIndex(int32_t index);
 		const void* keyAt(int32_t index) const { return table[index<<1]; }
@@ -97,7 +99,7 @@ namespace MMgc
 		void grow(bool canFail);
 
 		static const void* const DELETED;// = (const void*)1;
-		static const void* EMPTY[2];// = { NULL, NULL };
+		static const void* EMPTY[4];// = { NULL, NULL, NULL, NULL };
 
 	protected:
 		const void** table;		// table elements
@@ -112,7 +114,7 @@ namespace MMgc
 	/*static*/ const void* const GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::DELETED = (const void*)1;
 
 	template <class KEYHANDLER, class ALLOCHANDLER>
-	/*static*/ const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::EMPTY[2] = { NULL, NULL };
+	/*static*/ const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::EMPTY[4] = { NULL, NULL, NULL, NULL };
 
 	template <class KEYHANDLER, class ALLOCHANDLER>
 	GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::GCHashtableBase(uint32_t capacity) :
@@ -127,6 +129,7 @@ namespace MMgc
 		}
 		else 
 		{
+			// appear as full table so grow, numValues will go to zero on rehash
 			tableSize = 4;
 			numValues = 4;
 			table = EMPTY;
@@ -142,6 +145,17 @@ namespace MMgc
 		tableSize = 0;
 		numValues = 0;
 		numDeleted = 0;
+	}
+
+	template <class KEYHANDLER, class ALLOCHANDLER>
+	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::clear()
+	{
+		if (table && table != EMPTY)
+			ALLOCHANDLER::free(table);
+		table = NULL;
+		tableSize = 4;
+		numValues = 4;
+		table = EMPTY;
 	}
 
 	template <class KEYHANDLER, class ALLOCHANDLER>
