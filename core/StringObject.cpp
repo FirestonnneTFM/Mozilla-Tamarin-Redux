@@ -2348,7 +2348,9 @@ namespace avmplus
 					// 11110xxx	 10xxxxxx  10xxxxxx	 10xxxxxx
 					// 111110xx ... is always invalid
 					// 1111110x ... is always invalid
-					if ((c & 0x08) || (inLen < 4)) {
+                    // note: when 'strict' is false, we need to mimic the behavior of FP9/FP10,
+                    // which did not do the c&8 test. so skip it for bug-compatibility.
+					if ((strict && (c & 0x08)) || (inLen < 4)) {
 						// Invalid
 						goto invalid;
 					}
@@ -2507,7 +2509,10 @@ namespace avmplus
 		{
 			// surrogate pairs need 2 characters
 			s = createDynamic(gc, NULL, int32AddChecked(int32AddChecked(widths.w8, widths.w16), int32AddChecked(widths.w32, widths.w32)), String::k16, is7bit);
-			if (UnicodeUtils::Utf8ToUtf16(buffer, len, s->m_buffer.p16, s->m_length, strict) < 0)
+			int32_t const convertedlen = UnicodeUtils::Utf8ToUtf16(buffer, len, s->m_buffer.p16, s->m_length, strict);
+			// if this assert fires, _analyzeUtf8 didn't agree with UnicodeUtils::Utf8ToUtf16, which is bad.
+			AvmAssert(convertedlen == s->m_length);
+			if (convertedlen < 0)
 				return NULL;
 		}
 		VERIFY_7BIT(s);

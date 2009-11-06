@@ -403,7 +403,7 @@
     bytearray_bad[7]=0x80;
     AddTestCase(
       "ByteArray with out-of-range utf-8 sequence",
-      "\u00FB\u00BF\u00BF\u00BF\u00BF\u4e00",
+      "\udbbf\udfff\u00BF\u4e00",
       bytearray_bad.toString());
 
 // compress/uncompress
