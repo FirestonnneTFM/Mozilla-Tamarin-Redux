@@ -1076,11 +1076,18 @@ namespace avmplus
 			int len = readU30(pos);
 
 			// check to see if we are trying to read past the file end or the beginning.
-			if (pos < abcStart || pos+len >= abcEnd )
+            // Also check for valid UTF8.
+			if (pos < abcStart || pos+len >= abcEnd || 
+                UnicodeUtils::Utf8ToUtf16((const uint8*) pos, len, NULL, 0, true) < 0)
+            {
+                // if we throw a verify error here, _abcStringEnd will never be set, and _abcStrings
+                // will be left in an inconsistent state. having _abcStringStart set but not _abcStringEnd
+                // can cause dynamicizeStrings to make poor decisions. So clean up before throwing.
+                pool->_abcStringStart = NULL;
+                pool->_abcStringEnd = NULL;
+                VMPI_memset(pool->_abcStrings.data, 0, string_count*sizeof(PoolObject::ConstantStringData*));
 				toplevel->throwVerifyError(kCorruptABCError);
-			// verify the UTF-8 sequence
-			if (UnicodeUtils::Utf8ToUtf16((const uint8*) pos, len, NULL, 0, true) < 0)
-				toplevel->throwVerifyError(kCorruptABCError);
+            }
 
 #ifdef AVMPLUS_VERBOSE
 			if(pool->isVerbose(VB_parse)) {

@@ -115,10 +115,11 @@ namespace avmplus
 				// in theory, only index 0 should be the empty string... but in practice,
 				// any index could be empty, and makeDynamic doesn't work on zero-length strings.
 				// since that call doesn't have easy access to an AvmCore, do the check here.
-				if (s->isEmpty())
+                // (s can be null in the obscure case of a fuzzed ABC)
+				if (!s || s->isEmpty())
 				{
 					// all zero-length strings should be kEmptyString.
-					AvmAssert(s == core->kEmptyString);
+					AvmAssert(!s || s == core->kEmptyString);
 					continue;
 				}
 				
