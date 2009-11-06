@@ -115,18 +115,21 @@ namespace MMgc
 		// cause some incremental marking.
 		uint32_t* bits = NULL;
 
-		if(!m_bitsInPage)
+		if(!m_bitsInPage) {
+			// Note, bits will leak if AllocBlock aborts due to OOM, but that isn't much of a problem
 			bits = m_gc->GetBits(m_numBitmapBytes, m_sizeClassIndex);
+		}
 
 		// Allocate a new block
-		m_maxAlloc += m_itemsPerBlock;
-		m_numBlocks++;
 
 		int numBlocks = kBlockSize/GCHeap::kBlockSize;
 		GCBlock* b = (GCBlock*) m_gc->AllocBlock(numBlocks, GC::kGCAllocPage, /*zero*/true,  (flags&GC::kCanFail) != 0);
 
 		if (b) 
 		{
+			m_maxAlloc += m_itemsPerBlock;
+			m_numBlocks++;
+
 			b->firstFree = 0;
 			b->gc = m_gc;
 			b->alloc = this;
@@ -170,6 +173,10 @@ namespace MMgc
 			b->items = (char*)b+GCHeap::kBlockSize - m_itemsPerBlock * m_itemSize;
 			b->nextItem = b->items;
 			b->numItems = 0;
+		}
+		else {
+			if (bits)
+				m_gc->FreeBits(bits, m_sizeClassIndex);
 		}
 
 		return b;
@@ -443,8 +450,8 @@ namespace MMgc
 					{     
 						GCFinalizedObject *obj = (GCFinalizedObject*)GetUserPointer(item);
 						GCAssert(*(intptr_t*)obj != 0);
+						bits[i] &= ~(kFinalize<<(j*4));		// Clear bits first so we won't get second finalization if finalizer longjmps out
 						obj->~GCFinalizedObject();
-						bits[i] &= ~(kFinalize<<(j*4));
 
 #if defined(_DEBUG)
 						if(b->alloc->ContainsRCObjects()) {
