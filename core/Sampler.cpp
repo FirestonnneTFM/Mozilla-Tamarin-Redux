@@ -476,7 +476,7 @@ namespace avmplus
 
 		if (!currentSample)
 		{
-			int megs=16;
+			int megs = (callback != NULL) ? 16 : 256;
 			while(!currentSample && megs > 0) {
 				samples_size = megs*1024*1024;
 				currentSample = samples = mmfx_new_array(byte, samples_size);
