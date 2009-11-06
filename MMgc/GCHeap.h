@@ -348,7 +348,7 @@ namespace MMgc
 		 * @return the amount of code memory currently allocated.  GCHeap does not
 		 * have a notion of "free" and "used" code memory.
 		 */
-		size_t GetTotalCodeMemory() const { return codeMemory; }
+		size_t GetTotalCodeSize() const { return codeMemory; }
 
 #ifdef MMGC_POLICY_PROFILING
 		/**
