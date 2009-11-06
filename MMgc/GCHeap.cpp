@@ -1431,7 +1431,7 @@ namespace MMgc
 		newBlocksLen++;
 
 		if (!newBlocks) {
- 			newBlocks = (HeapBlock*)baseAddr;
+ 			newBlocks = (HeapBlock*)(void *)baseAddr;
 		}
 		
 		// Copy all the existing blocks.
@@ -1497,7 +1497,7 @@ namespace MMgc
 
 		// get space for region allocations
 		if(nextRegion == NULL) {
-			nextRegion = (Region*)block->baseAddr;
+			nextRegion = (Region*)(void *)block->baseAddr;
 			HeapBlock *next = Split(block, 1);
 			// this space counts as used space
 			numAlloc++;

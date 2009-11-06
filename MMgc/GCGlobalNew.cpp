@@ -173,7 +173,7 @@ namespace MMgc
 	
 	REALLY_INLINE bool CheckForAllocationGuard(void* mem, uint32_t guard)
 	{
-		return (*(uint32_t*)((char*)mem - MMGC_GUARDCOOKIE_SIZE) == guard);
+		return (*(uint32_t*)(void *)((char*)mem - MMGC_GUARDCOOKIE_SIZE) == guard);
 	}
 
 	REALLY_INLINE bool IsScalarAllocation(void* p)
