@@ -118,9 +118,9 @@ class AcceptanceRuntest(RuntestBase):
         self.setOptions()
         self.parseOptions()
         self.setTimestamp()
+        self.checkPath()
         if not self.config:
             self.determineConfig()
-        self.checkPath()
         if self.rebuildtests==False and (re.search('arm-winmobile-emulator',self.config)!=None or self.osName=='winmobile'):
             if re.search('^arm-winmobile-emulator',self.config)==None:
                 print 'ERROR: to use windows mobile build set --config arm-winmobile-emulator-tvm-release or install cygwin utility /usr/bin/file.exe'

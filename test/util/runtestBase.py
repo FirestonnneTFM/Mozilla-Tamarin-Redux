@@ -477,6 +477,9 @@ class RuntestBase:
             for t in self.args:
                 newargs.append(convertFromCygwin(t))
             self.args = newargs
+        
+        if not self.rebuildtests:
+            self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
 
     def createOutputFile(self):
         # set the output file name.  let's base its name on the date and platform,
@@ -970,9 +973,6 @@ class RuntestBase:
     ### Run Tests ###
     
     def preProcessTests(self):  # don't need AVM if rebuilding tests
-        if not self.rebuildtests:
-            self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
-            
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
 
