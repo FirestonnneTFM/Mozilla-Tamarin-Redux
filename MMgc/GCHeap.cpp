@@ -107,7 +107,7 @@ namespace MMgc
 #endif
 		eagerSweeping(false),
 		gcLoad(2.0),
-		gcLoadCeiling(3.0),
+		gcLoadCeiling(1.0),	// 1.0 is probably OK for desktop, maybe less so for mobile - more experiments needed
 		gcEfficiency(0.25)
 	{
 #ifdef MMGC_64BIT
