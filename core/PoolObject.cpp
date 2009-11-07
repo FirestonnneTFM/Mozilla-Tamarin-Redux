@@ -680,8 +680,11 @@ range_error:
 	void PoolObject::initPrecomputedMultinames()
 	{
 		if (this->precompNames == NULL)
-			this->precompNames = new (sizeof(PrecomputedMultinames) + (this->cpool_mn_offsets.size() - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), this);
-	}
+        {
+            size_t const s = sizeof(PrecomputedMultinames) - sizeof(Multiname) + this->cpool_mn_offsets.size() * sizeof(Multiname);
+			this->precompNames = new (s) PrecomputedMultinames(core->GetGC(), this);
+        }
+    }
 
 	PrecomputedMultinames::PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool)
 		: MMgc::GCRoot(gc)
