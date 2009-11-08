@@ -206,6 +206,12 @@ mops/mops, arm-winmobile-emulator-tvm-release(|-Dinterp|-Ojit), skip, tests run 
 as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
+
+####################
+# -Dgreedy bugs
+####################
+as3/DescribeType/describetype       ,   x64-win.*-Dgreedy , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=527346
+
 ####################
 # skip slow tests in test phase, -Dgreedy passes
 ####################
@@ -234,6 +240,8 @@ ecma3/Unicode/uAC00_HangulSyllables,.*deep, include, include slow tests in deep 
 # bug 505982
 mops/mops,^((?!ppc-mac-tvm-debug-).).*deep, include, include slow tests in deep phase
 regress/bug_483783, .*deep, include, include slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+
+
 
 ####################
 # verifier
