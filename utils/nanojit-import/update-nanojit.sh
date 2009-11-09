@@ -1,15 +1,49 @@
 #!/bin/bash
+#
+# This script automates the import of changes from
+# nanojit-central to tamarin. 
+#
+# It works by noting revisions from nanojit-central, starting with the
+# rev number in the file nanojit-import-rev, and then pulling those
+# changes into the current repo.
+#
+# The last step updates the rev number file and checks it in.
+#
+# Note that the scripts will clobber the contents of the nanojit/
+# directory so it is important that changes move in a single
+# direction; i.e. from nanojit-central --> tamarin.
+#
+# You also need to ensure that nothing nasty happened during this
+# import, and that you're the only person using the script when you
+# push your changes.
+#
+# I would also recommend only running the script once per 'checkin',
+# and not try to revert or otherwise manipulate the repo after the
+# script has run.
+#
+# If nanojit-import-rev (which identifies a node in nanojit-central)
+# gets corrupted (it really should never happen) you need to manually
+# set it to the correct rev, not doing so will cause subsequent
+# executions of this script to do very nasty things.
+#
+# I found the following command quite handy in displaying
+# rev information: hg log --template "{rev} {node|short} {node}
+# {author}\n", since the long form of the node is used in the file. 
+# 
+# If you see the error "mercurial.error.RepoError: unknown revision xxx", then
+# the NJ repo you're attempting to pull from does not have the rev identified
+# in the file nanojit-import-rev
+# 
+set -x
+set -e
 
-if [ $# != 1 ]
+if [ $# -lt 1 ]
 then
     echo "usage: $0 -f"
     echo "Pulls and commits the latest nanojit-central changes to this repo"
     exit 1
 fi
 if [ $1 != '-f' ]; then exit 1; fi
-
-set -x
-set -e
 
 # random part of names
 RAND="$RANDOM$RANDOM"
@@ -21,6 +55,12 @@ TMPDIR=/tmp/nj-$RAND
 NANOJIT_CENTRAL_REV=$(cat $SCRIPTDIR/nanojit-import-rev)
 NANOJIT_CENTRAL_REPO=http://hg.mozilla.org/projects/nanojit-central
 NANOJIT_CENTRAL_LOCAL=$TMPDIR/nanojit-central
+
+if [ $# -eq 2 ]
+then
+	# undocumented option ... be mighty careful when using could result in big problems
+	NANOJIT_CENTRAL_REPO=$2
+fi
 
 mkdir $TMPDIR
 rm -Rf $NANOJIT_CENTRAL_LOCAL $TMPDIR/import-splicemap $TMPDIR/import-revmap
