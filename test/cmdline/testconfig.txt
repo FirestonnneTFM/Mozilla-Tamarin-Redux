@@ -51,5 +51,5 @@
 # name, type [skip], notes
 
 
-testDebugger.py , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=527119
+
 
