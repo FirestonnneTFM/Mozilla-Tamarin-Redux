@@ -207,7 +207,7 @@ namespace avmplus
 		ArrayObject* variables = NULL;
 		ScriptObject* constructor = NULL;
 
-		if (flags & INCLUDE_BASES)
+		if (flags & INCLUDE_METADATA)
 		{
 			metadata = new_array();
 			PoolObject* class_mdpool;
