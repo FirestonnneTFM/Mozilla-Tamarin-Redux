@@ -141,6 +141,7 @@ namespace MMgc
 	{
 		if (table && table != EMPTY)
 			ALLOCHANDLER::free(table);
+		table = NULL;
 		tableSize = 0;
 		numValues = 0;
 		numDeleted = 0;
@@ -151,7 +152,6 @@ namespace MMgc
 	{
 		if (table && table != EMPTY)
 			ALLOCHANDLER::free(table);
-		table = NULL;
 		tableSize = 4;
 		numValues = 4;
 		table = EMPTY;
