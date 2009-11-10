@@ -119,7 +119,6 @@ namespace MMgc
 					}
 					mem_c += m_itemSize;
 				}
-				GCAssert(false);
 			}
 
 #ifdef MMGC_MEMORY_INFO
