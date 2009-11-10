@@ -158,6 +158,9 @@ const char * const avmfeatures = ""
   #if AVMFEATURE_MEMORY_PROFILER
     "AVMFEATURE_MEMORY_PROFILER;"
   #endif
+  #if AVMFEATURE_CACHE_GQCN
+    "AVMFEATURE_CACHE_GQCN;"
+  #endif
   #if AVMFEATURE_API_VERSIONING
     "AVMFEATURE_API_VERSIONING;"
   #endif

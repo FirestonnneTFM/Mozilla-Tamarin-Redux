@@ -173,6 +173,8 @@
     #define AVMFEATURE_API_VERSIONING 0
 #endif
 
-//#define VMCFG_TEST_API_VERSIONING
+#ifndef AVMFEATURE_CACHE_GQCN
+  #define AVMFEATURE_CACHE_GQCN 1
+#endif
 
 #endif // __avmshell_features__
