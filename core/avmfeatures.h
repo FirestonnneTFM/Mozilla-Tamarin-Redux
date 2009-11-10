@@ -113,6 +113,7 @@
 #undef AVMPLUS_INDIRECT_NATIVE_THUNKS
 #undef MMGC_OVERRIDE_GLOBAL_NEW
 #undef MMGC_MEMORY_PROFILER
+#undef VMCFG_TEST_API_VERSIONING
 
 
 
@@ -519,6 +520,15 @@
 #  error "AVMFEATURE_MEMORY_PROFILER must be defined and 0 or 1 (only)."
 #endif
 
+
+/* AVMFEATURE_API_VERSIONING
+ *
+ * Enabling this will enable api-versioning in the avmshell
+ */
+#if !defined AVMFEATURE_API_VERSIONING || AVMFEATURE_API_VERSIONING != 0 && AVMFEATURE_API_VERSIONING != 1
+#  error "AVMFEATURE_API_VERSIONING must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -591,6 +601,7 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
 
 
 
@@ -832,6 +843,9 @@
 #endif
 #if AVMFEATURE_MEMORY_PROFILER
 #  define MMGC_MEMORY_PROFILER
+#endif
+#if AVMFEATURE_API_VERSIONING
+#  define VMCFG_TEST_API_VERSIONING
 #endif
 
 #ifdef AVMSHELL_BUILD
