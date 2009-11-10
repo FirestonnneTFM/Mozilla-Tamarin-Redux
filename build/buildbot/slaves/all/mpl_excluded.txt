@@ -103,5 +103,8 @@
 .*/test/util/killableprocess\.py
 .*/test/util/subProcess\.py
 .*/test/util/threadpool\.py
+.*/test/util/which\.py
 .*/test/util/winprocess\.py
+.*/utils/nanojit-import/nanojit-import-filemap
+.*/utils/nanojit-import/nanojit-import-rev
 
