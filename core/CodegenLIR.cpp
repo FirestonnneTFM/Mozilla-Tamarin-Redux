@@ -1975,8 +1975,7 @@ namespace avmplus
         {
             Value& obj = state->peek();
             int index = imm30-1;
-            TraitsBindingsp td = obj.traits ? obj.traits->getTraitsBindings() : NULL;
-            Traits* slotTraits = td->getSlotTraits(index);
+            Traits* slotTraits = obj.traits ? obj.traits->getTraitsBindings()->getSlotTraits(index) : NULL;
             emitGetslot(state, index, sp, slotTraits);
             break;
         }
