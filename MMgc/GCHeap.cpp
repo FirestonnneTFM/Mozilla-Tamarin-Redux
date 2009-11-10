@@ -225,6 +225,7 @@ namespace MMgc
 
 		leakedBytes = GetFixedMalloc()->GetBytesInUse();
 		fixedMalloc.DestroyInstance();
+		GCAssertMsg(leakedBytes == 0, "Leaks!");
 
 		instance = NULL;
 
