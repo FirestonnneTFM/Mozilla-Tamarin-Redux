@@ -125,6 +125,10 @@
 #define MMGC_LOCK(_x) 
 #endif
 
+// This keeps a graph of the edges the marker finds which are printed out in Sweep
+// for all objects added with GC::AddToBlacklist
+//#define MMGC_HEAP_GRAPH
+
 namespace MMgc
 {
 	class GC;
@@ -156,6 +160,7 @@ namespace MMgc
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
 #include "ZCT.h"
+#include "HeapGraph.h"
 #include "GC.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"

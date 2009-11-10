@@ -136,13 +136,13 @@ namespace MMgc
 		void operator delete (void *object);
 
 		const void *Get() const { return object; }
-
+		const void *End() const { return (char*)object + size; }
 		void Set(const void *object, size_t size);
 
 		GC *GetGC() const { return gc; }
 		/** if your object goes away after the GC is deleted this can be useful */
 		void Destroy();
-	
+
 	private:
 		GC * gc;
 
@@ -1156,7 +1156,7 @@ namespace MMgc
 
 		// not a hot method.  Will reliably return NULL if gcItem does not point into managed
 		// memory (and _DEBUG code will also assert if that happens - it should not).
-		void *FindBeginningGuarded(const void *gcItem);
+		void *FindBeginningGuarded(const void *gcItem, bool allowGarbage=false);
 
 		// Legacy public API.  DO NOT USE from within AVM code.
 		void *FindBeginning(const void *gcItem);
@@ -1495,7 +1495,6 @@ public:
 		REALLY_INLINE void RemoveFromZCT(RCObject *obj);
 #endif
 
-private:
 		static const void *Pointer(const void *p);
 
 public:
@@ -1546,17 +1545,7 @@ private:
 #endif
 
 public:
-#ifdef MMGC_MEMORY_INFO
-		typedef void (*pDumpBackCallbackProc)(void* pContext, void *obj, const char *type );
-		
-		void DumpBackPointerChain(void *o, pDumpBackCallbackProc p = NULL, void *context = NULL);
 
-		// debugging routine that records who marked who, can be used to
-		// answer the question, how did I get marked?  also could be used to
-		// find false positives by verifying the back pointer chain gets back
-		// to a GC root
-		static void WriteBackPointer(const void *item, const void *container, size_t itemSize);
-#endif
 #ifdef _DEBUG
 		// Dump a list of objects that have pointers to the given location.
 		void WhosPointingAtMe(void* me, int recurseDepth=0, int currentDepth=0);
@@ -1662,6 +1651,27 @@ public:
 		// because it moves with the GC/AvmCore pair, it is not attached to a
 		// particular thread.
  		void* m_sampler;
+#endif
+
+#ifdef MMGC_HEAP_GRAPH			
+
+	public:
+
+		void addToBlacklist(const void *gcptr);
+		void removeFromBlacklist(const void *gcptr);
+
+	private:
+
+		GCHashtable blacklist;
+
+		void printBlacklist();
+		void pruneBlacklist();
+		
+		const void *findGCGraphBeginning(const void *addr, bool &wasDeletedGCRoot);
+		void dumpBackPointerChain(const void *obj, HeapGraph &g);
+		void dumpBackPointerChainHelper(const void *p, HeapGraph& g);
+		HeapGraph mutatorGraph;		
+		HeapGraph markerGraph;
 #endif
 	};
 

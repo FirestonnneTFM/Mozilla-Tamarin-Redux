@@ -537,10 +537,6 @@ namespace MMgc
 #ifdef MMGC_RC_HISTORY
 		obj->DumpHistory();
 #endif
-#ifdef MMGC_MEMORY_INFO
-		GCDebugMsg(false, "Back pointer chain:");
-		gc->DumpBackPointerChain(obj);
-#endif
 		GCAssertMsg(false, "Zero count object reachable, ref counts not correct!");
 	}
 #endif // _DEBUG
