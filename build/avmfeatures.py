@@ -138,5 +138,7 @@ def featureSettings(o):
         args += "-DAVMFEATURE_MEMORY_PROFILER=0 "
     arg = o.getBoolArg("api-versioning")
     if (arg == True):
-         args += "-DVMCFG_TEST_API_VERSIONING "
+        args += "-DAVMFEATURE_API_VERSIONING=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_API_VERSIONING=0 "
     return args

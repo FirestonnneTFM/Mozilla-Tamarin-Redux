@@ -557,6 +557,13 @@ var FEATURES =
 	<defines> MMGC_MEMORY_PROFILER </defines>
   </feature>
   
+  <feature>
+    <desc> Enabling this will enable api-versioning in the avmshell
+      </desc>
+	<name> AVMFEATURE_API_VERSIONING </name>
+	<defines> VMCFG_TEST_API_VERSIONING </defines>
+  </feature>
+  
 </features>;
 
 /****************************************************************************
