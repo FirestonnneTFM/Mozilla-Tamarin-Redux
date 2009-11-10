@@ -1128,7 +1128,10 @@ namespace avmplus
 					for (int i = 0; i < 4; ++i)
 					{
 						if (tname->equalsLatin1(kNameMap[i].n))
+						{
 							tname = core->newConstantStringLatin1(kNameMap[i].o);
+							break;
+						}
 					}
 				};
 				
