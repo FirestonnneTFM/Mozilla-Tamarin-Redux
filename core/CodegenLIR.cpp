@@ -1287,7 +1287,6 @@ namespace avmplus
         framesize = state->verifier->frameSize;
 
         frag = new (*lir_alloc) Fragment(abcStart verbose_only(, 0));
-        frag->root = frag;
         LirBuffer *lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
         lirout = new (*alloc1) LirBufWriter(lirbuf);
@@ -1301,14 +1300,14 @@ namespace avmplus
                 lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
             }
         )
-        #if NJ_SOFTFLOAT
-        lirout = new (*alloc1) SoftFloatFilter(lirout);
-        #endif
         LoadFilter *loadfilter = 0;
         if (core->config.cseopt) {
             loadfilter = new (*alloc1) LoadFilter(lirout, *alloc1);
             lirout = new (*alloc1) CseFilter(loadfilter, *alloc1);
         }
+        #if NJ_SOFTFLOAT
+        lirout = new (*alloc1) SoftFloatFilter(lirout);
+        #endif
         lirout = new (*alloc1) Specializer(lirout, core->config);
         CopyPropagation *copier = new (*alloc1) CopyPropagation(core, *alloc1, lirout,
             framesize, info->hasExceptions() != 0);
