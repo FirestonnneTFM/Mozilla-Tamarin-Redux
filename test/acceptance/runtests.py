@@ -224,6 +224,8 @@ class AcceptanceRuntest(RuntestBase):
                         lpass += 1
                         outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
                     outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+                    self.allfails += lfail
+                    self.allpasses += lpass
                     return outputCalls
                 else:
                     lfail += 1

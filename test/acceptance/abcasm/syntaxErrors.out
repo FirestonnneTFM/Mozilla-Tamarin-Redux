@@ -1,4 +1,5 @@
 abcasm/syntaxErrors.abs
+
 Unable to assemble abcasm/syntaxErrors.abs due to syntax errors:
 line 43:1 Unimplemented opcode "zuul"
 line 50:1 no viable alternative at input 'pushnull'
