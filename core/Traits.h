@@ -399,6 +399,9 @@ namespace avmplus
 	private:	FixedBitSet				m_slotDestroyInfo;	
 	private:	DWB(MMgc::GCWeakRef*)	m_tbref;				// our TraitsBindings 
 	private:	DWB(MMgc::GCWeakRef*)	m_tmref;				// our TraitsMetadata
+#ifdef VMCFG_CACHE_GQCN
+	private:	DRCWB(Stringp)			_fullname;		// value returned by formatClassName
+#endif
 // @todo -- we should be able to store m_sizeofInstance in 16 bits but JIT doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
 // @todo -- what prevents an instance being >64K?
 	private:	uint32_t				m_sizeofInstance;	// sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.

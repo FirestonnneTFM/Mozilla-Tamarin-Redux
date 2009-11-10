@@ -1697,16 +1697,25 @@ namespace avmplus
 
 	Stringp Traits::formatClassName()
 	{
-		Multiname qname(ns(), name());
-		qname.setQName();
-		StringBuffer buffer(core);
-		buffer << qname;
-		int length = buffer.length();
-		if (length && buffer.c_str()[length-1] == '$') 
-		{
-			length--;
-		} 
-		return core->newStringUTF8(buffer.c_str(), length);
+#ifdef VMCFG_CACHE_GQCN
+        if (_fullname != NULL)
+            return _fullname;
+#endif
+
+        Multiname qname(ns(), name());
+        qname.setQName();
+        StringBuffer buffer(core);
+        buffer << qname;
+        int length = buffer.length();
+        if (length && buffer.c_str()[length-1] == '$') 
+        {
+            length--;
+        } 
+#ifndef VMCFG_CACHE_GQCN
+        Stringp _fullname;
+#endif
+        _fullname = core->newStringUTF8(buffer.c_str(), length);
+        return _fullname;
 	}
 
 

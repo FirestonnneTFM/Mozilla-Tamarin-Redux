@@ -556,6 +556,14 @@ var FEATURES =
 	<name> AVMFEATURE_MEMORY_PROFILER </name>
 	<defines> MMGC_MEMORY_PROFILER </defines>
   </feature>
+
+  <feature>
+    <desc> Enabling this will cache the result of getQualifiedClassName, making it run
+        much more quickly, at the expense of more memory usage.
+      </desc>
+	<name> AVMFEATURE_CACHE_GQCN </name>
+	<defines> VMCFG_CACHE_GQCN </defines>
+  </feature>
   
   <feature>
     <desc> Enabling this will enable api-versioning in the avmshell
