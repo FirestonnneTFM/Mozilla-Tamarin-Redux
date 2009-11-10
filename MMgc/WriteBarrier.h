@@ -82,6 +82,7 @@ namespace MMgc
 			rc->DecrementRef();
 		}
 		GCAssert(IsPointerIntoGCObject(address));
+		MMGC_WB_EDGE(address, value);
 		*(uintptr_t*)address = (uintptr_t) value;
 		rc = (RCObject*)Pointer(value);
 		if(rc != NULL) {
@@ -97,6 +98,7 @@ namespace MMgc
 		// assume existing contents of address are potentially uninitialized,
 		// so don't bother even making an assertion.
 		GCAssert(IsPointerIntoGCObject(address));
+		MMGC_WB_EDGE(address, value);
 		*(uintptr_t*)address = (uintptr_t) value;
 		RCObject *rc = (RCObject*)Pointer(value);
 		if(rc != NULL) {
@@ -111,6 +113,7 @@ namespace MMgc
 	{
 		GCAssert(IsPointerIntoGCObject(address));
 		RCObject *rc = (RCObject*)Pointer(*(RCObject**)address);
+		MMGC_WB_EDGE(address, NULL);
 		if(rc != NULL) {
 			GCAssert(IsRCObject(rc));
 			GCAssert(rc == FindBeginningGuarded(rc));
@@ -124,6 +127,7 @@ namespace MMgc
 	{
 		GCAssert(!IsRCObject(value));
 		GCAssert(IsPointerIntoGCObject(address));
+		MMGC_WB_EDGE(address, value);
 		*(uintptr_t*)address = (uintptr_t) value;
 	}
 
@@ -202,7 +206,9 @@ namespace MMgc
 
 		explicit REALLY_INLINE WriteBarrier(T _t) : t(_t)
 		{ 
-			//set(_t); not necessary
+#ifdef MMGC_HEAP_GRAPH
+			set(_t); // not necessary normally
+#endif
 		}
 
 		REALLY_INLINE ~WriteBarrier() 

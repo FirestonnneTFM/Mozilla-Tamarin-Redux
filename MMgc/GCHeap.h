@@ -72,6 +72,9 @@ namespace MMgc
 		bool autoGCStats;
 		bool gcbehavior;		// Print gross history and policy decisions (MMGC_POLICY_PROFILING)
 		bool eagerSweeping;     // Enable full-heap sweeping at the end of Sweep()
+#ifdef MMGC_HEAP_GRAPH
+		bool dumpFalsePositives;
+#endif
 		double gcLoad;			// GC load factor: policy aims for a heap size that is gcLoad*H where H is the live size following GC
 		double gcLoadCeiling;	// Max multiple of gcLoad policy should use after adjusting L for various factors (0=unlimited)
 		double gcEfficiency;    // Max fraction of time to spend in the collector while the incremental collector is active

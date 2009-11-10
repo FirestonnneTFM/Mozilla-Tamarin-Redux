@@ -130,6 +130,12 @@ namespace MMgc
 		 */
 		static FixedAlloc *GetFixedAlloc(void *item);
 
+#ifdef MMGC_HEAP_GRAPH
+		// used by back pointer facility to find beginning of
+		// GC root derived pointers
+		static const void *FindBeginning(const void *addr);
+#endif
+
 	protected:
 
 		// A no-argument constructor used only by FixedAllocSafe

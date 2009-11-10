@@ -48,24 +48,6 @@
 #define SAMPLE_CHECK() 
 #endif
 
-// Werner mode is a back pointer chain facility for Relase mode.
-//
-// *** NOTE ON THREAD SAFETY ***
-// Werner mode has unprotected global (or function-static) state and is not
-// thread safe.  Do not use in situations where multiple AvmCores may be
-// running on multiple threads at the same time; the results will not be
-// reliable.
-//
-//#define WERNER_MODE
-
-#ifdef WERNER_MODE
-#define RECURSIVE_MARK
-	#include <typeinfo>
-	#include <stdio.h>
-	void *shouldGo;
-	char statusBuffer[1024];
-#endif
-
 namespace MMgc
 {
 #ifdef MMGC_64BIT
@@ -1457,6 +1439,10 @@ bail:
 		GCAssert(m_incrementalWork.Count() == 0);
 		GCAssert(m_barrierWork.Count() == 0);
 
+#ifdef MMGC_HEAP_GRAPH
+		pruneBlacklist();
+#endif
+
 		Finalize();
 
 		SAMPLE_CHECK();
@@ -1531,6 +1517,11 @@ bail:
 				sweeps, sweepResults, sweepResults*GCHeap::kBlockSize>>10, millis,
 				duration(t0)/1000);
 		}
+		
+#ifdef MMGC_HEAP_GRAPH
+		printBlacklist();
+#endif
+
 	}
 
 	void* GC::AllocBlock(int size, int pageType, bool zero, bool canFail)
@@ -1582,8 +1573,9 @@ bail:
 		pageMap[index >> 2] &= ~(3<<((index&0x3)*2));
 	}	
 
-	void *GC::FindBeginningGuarded(const void *gcItem)
+	void *GC::FindBeginningGuarded(const void *gcItem, bool allowGarbage)
 	{
+		(void)allowGarbage;
 		void *realItem = NULL;
 		int bits = GetPageMapValueGuarded((uintptr_t)gcItem);
 		switch(bits)
@@ -1603,7 +1595,7 @@ bail:
 				realItem = GCLargeAlloc::FindBeginning(gcItem);
 				break;
 			default:
-				GCAssertMsg(false, "FindBeginningGuarded must not be called on non-managed addresses");
+				GCAssertMsg(allowGarbage, "FindBeginningGuarded must not be called on non-managed addresses");
 				// The NULL return is a documented effect of this function, and is desired, despite 
 				// the assert above.
 				return NULL;
@@ -2009,54 +2001,6 @@ bail:
 		}
 	}
 
-#ifdef MMGC_MEMORY_INFO
-	void GC::DumpBackPointerChain(void *o, pDumpBackCallbackProc proc, void *context)
-	{
-		int *p = (int*)GetRealPointer ( o ) ;
-		int size = *p++;
-		p++; // skip old trace index slot
-		//if(*(p+1) == 0xcacacaca || *(p+1) == 0xbabababa) {
-			// bail, object was deleted
-		//	return;
-		//}
-		const char *typeName = GetAllocationName(o);
-
-		// strip "class "
-		if (!VMPI_strncmp(typeName, "class ", 6))
-			typeName += 6;
-		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, o);
-		if (proc)
-			proc(context, o, typeName);
-		PrintAllocStackTrace(o);
-		GCDebugMsg(false, "---\n");
-		// skip data + endMarker
-		p += 1 + (size>>2);
-		void *container = (void*)(*(void**)p);
-		if(container && IsPointerToGCPage(container))
-			DumpBackPointerChain(container, proc, context);
-		else 
-		{
-			GCDebugMsg(false, "GCRoot object: 0x%x\n", container);
-			if((uintptr_t)container >= memStart && (uintptr_t)container < memEnd)
-				PrintAllocStackTrace(container);
-		}
-	}
-
-	void GC::WriteBackPointer(const void *item, const void *container, size_t itemSize)
-	{
-		GCAssert(container != NULL);
-		uint32_t *p = (uint32_t*) item;
-		uint32_t size = *p++;
-		if(size && size <= itemSize) {
-			// skip traceIndex + data + endMarker
-			p += (2 + (size>>2));
-			GCAssert(sizeof(uintptr_t) == sizeof(void*));
-			*(uintptr_t*)p = (uintptr_t) container;
-		}
-	}
-
-#endif
-
 	bool GC::IsRCObject(const void *item)
 	{
 		if ((uintptr_t)item < memStart || (uintptr_t)item >= memEnd || ((uintptr_t)item&0xfff) == 0)
@@ -2438,6 +2382,10 @@ bail:
 		}
 #endif
 
+#ifdef MMGC_HEAP_GRAPH
+		markerGraph.clear();
+#endif
+
 		MarkAllRoots();
 		
 		policy.signal(GCPolicyManager::END_StartIncrementalMark);
@@ -2711,77 +2659,6 @@ bail:
 		return bits == GC::kGCLargeAllocPageFirst;
 	}
 #endif
-
-#ifdef WERNER_MODE
-	
-	class MarkList {
-	public:
-		static MarkList *current;
-		static int offset;
-		MarkList(GCWorkItem &item) : prev(current), wi(item), off(offset)
-		{
-			current = this;
-		}
-		~MarkList() { current = prev; }
-		MarkList *prev;
-		GCWorkItem &wi;
-		int off;
-	};
-	MarkList *MarkList::current = NULL;
-	int MarkList::offset = -1;
-	
-	class Werner {
-	public:
-		Werner(GCWorkItem& w);
-		void location(uintptr_t* p);
-		GCWorkItem& wi;
-		MarkList me;
-		uintptr_t *objptr;
-	};
-	
-	Werner::Werner(GCWorkItem& w)
-		: wi(wi)
-		, me(wi)
-		, objptr((uintptr_t*) wi.ptr)
-	{
-		if(objptr == shouldGo) {
-			MarkList *wl = MarkList::current;
-			while(wl) {
-				const char *name = "";
-				// To enable RTTI, you must change all your projects to use RTTI first.  
-#if 0
-				static bool tryit = true;
-				if (tryit)
-				{
-					try {
-						const std::type_info *ti = &typeid(*(MMgc::GCFinalizedObject*)wl->wi.ptr);
-						if (ti->name() && (int(ti->name()) > 0x10000))
-							name = ti->name();
-					} catch(...) {
-						name = "unknown";
-					}
-				}
-#endif
-				
-				if(wl->prev)
-					VMPI_sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
-				else
-					VMPI_sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
-				wl = wl->prev;
-				GCLog("%s", statusBuffer);
-			}
-			VMPI_sprintf(statusBuffer, "\n");
-			GCLog("%s", statusBuffer);
-			//shouldGo = NULL;
-		}
-	}
-	
-	void Werner::location(uintptr_t *p)
-	{
-		MarkList::offset = (int)p - (int)objptr;
-	}
-	
-#endif	// WERNER_MODE
 	
 	// This will mark the item whether the item was previously marked or not.
 	// The mark stack overflow logic depends on that.
@@ -2818,10 +2695,7 @@ bail:
 			PushWorkItem(GCWorkItem(p + markstackCutoff / sizeof(uintptr_t), uint32_t(size - markstackCutoff), false));
 			size = markstackCutoff;
 		}
-			
-#ifdef WERNER_MODE
-		Werner werner(wi);
-#endif
+
 		policy.signalMarkWork(size);
 
 		uintptr_t *end = p + (size / sizeof(void*));
@@ -2851,10 +2725,6 @@ bail:
 		
 		while(p < end) 
 		{
-#ifdef WERNER_MODE
-			werner.location(p);
-#endif
-
 			uintptr_t val = *p++;  
 			
 			if(val < _memStart || val >= _memEnd)
@@ -2906,6 +2776,8 @@ bail:
 #ifdef MMGC_POINTINESS_PROFILING
 				actually_is_pointer++;
 #endif
+
+
 				// inline IsWhite/SetBit
 				// FIXME: see if using 32 bit values is faster
 				uint32_t *pbits = &block->GetBits()[itemNum>>3];
@@ -2937,9 +2809,9 @@ bail:
 						*pbits = bits2 | (GCAlloc::kMark << shift);
 						policy.signalMarkWork(itemSize);
 					}
-					#if defined(MMGC_MEMORY_INFO)
-					GC::WriteBackPointer(item, (end==(void*)0x130000) ? p-1 : wi.ptr, block->size);
-					#endif
+#ifdef MMGC_HEAP_GRAPH
+					markerGraph.edge(p-1, GetUserPointer(item));
+#endif				
 				}
 			}
 			else if (IsLargeAllocPage(bits))
@@ -2974,6 +2846,7 @@ bail:
 #ifdef MMGC_POINTINESS_PROFILING
 				actually_is_pointer++;
 #endif
+
 				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetLargeBlock(item);
 				if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
 				{
@@ -2989,9 +2862,9 @@ bail:
 						b->flags |= GCLargeAlloc::kMarkFlag;
 						policy.signalMarkWork(itemSize);
 					}
-					#if defined(MMGC_MEMORY_INFO)
-					GC::WriteBackPointer(item, end==(void*)0x130000 ? p-1 : wi.ptr, itemSize);
-					#endif
+#ifdef MMGC_HEAP_GRAPH
+					markerGraph.edge(p-1, GetUserPointer(item));
+#endif				
 				}
 			}
 		}
@@ -3757,5 +3630,142 @@ bail:
 	{
 		GetGC()->RemoveRCRootSegment(this);
 	}
+
+#ifdef MMGC_HEAP_GRAPH
+
+	void GC::addToBlacklist(const void *gcptr)
+	{
+		blacklist.add(gcptr, gcptr);
+	}
+
+	void GC::removeFromBlacklist(const void *gcptr)
+	{
+		blacklist.remove(gcptr);
+	}
+
+	const void *GC::findGCGraphBeginning(const void *addr, bool &wasDeletedGCRoot)
+	{
+		/* These are all the possibilities
+		   1) GC small object
+		   2) GC large object
+		   3) GCRoot
+		   4) OS stack
+		*/
+		if(!IsPointerToGCPage(addr)) {
+			GCRoot *r = m_roots;
+			while(r)  {
+				if(addr >= r->Get() && addr < r->End())
+					return r->Get();
+				r = r->next;
+			}
+
+			// could be a deleted GCRoot
+			GCHeap::HeapBlock *b = heap->AddrToBlock(addr);
+			if(b) {
+				wasDeletedGCRoot = true;
+				if(b->size == 1) {
+					return FixedAlloc::FindBeginning(addr);
+				} else {
+					return GetUserPointer(b->baseAddr);
+				}
+			}
+		}
+		return FindBeginningGuarded(addr, true); // will return NULL for OS stack
+	}
+	
+	void GC::dumpBackPointerChain(const void *p, HeapGraph& g)
+	{
+		GCLog("Dumping back pointer chain for 0x%p\n", p);
+		PrintAllocStackTrace(p);
+		dumpBackPointerChainHelper(p, g);
+		GCLog("End back pointer chain for 0x%p\n", p);
+	}
+
+	void GC::dumpBackPointerChainHelper(const void *p, HeapGraph& g)
+	{
+		GCHashtable *pointers = g.getPointers(p);
+		if(pointers) {
+			GCHashtable::Iterator iter(pointers);
+			const void *addr = iter.nextKey();
+			if(addr) {
+				bool wasDeletedGCRoot=false;
+				const void *container = findGCGraphBeginning(addr, wasDeletedGCRoot);
+				const void *displayContainer =  container ? container : addr;
+				uint32_t offset = container ? (char*)addr - (char*)container : 0;
+				const char *containerDescription = IsPointerToGCPage(container) ? "gc" : (container ? "gcroot" : "stack");
+				if(wasDeletedGCRoot)
+					containerDescription = "gcroot-deleted";
+				GCLog("0x%p(%x)(%s) -> 0x%p\n", displayContainer, offset, containerDescription, p);
+				if(container) {
+					PrintAllocStackTrace(container);
+					dumpBackPointerChainHelper(container, g);
+				}
+			}
+		}
+	}
+
+	void HeapGraph::edge(const void *addr, const void *newValue)
+	{
+		const void *oldValue = GC::Pointer(*(void**)addr);
+		newValue = GC::Pointer(newValue);
+		GCHashtable *addresses;
+		if(oldValue) {
+			addresses = (GCHashtable*)backEdges.get(oldValue);
+			if(addresses) {
+				addresses->remove(addr);
+			}
+		}
+		if(newValue) {
+			addresses = (GCHashtable*)backEdges.get(newValue);
+			if(!addresses) {
+				addresses = mmfx_new(GCHashtable());
+				backEdges.put(newValue, addresses);
+			}
+			addresses->add(addr, addr);
+		}
+	}
+	
+	void HeapGraph::clear()
+	{
+		GCHashtable_VMPI::Iterator iter(&backEdges);
+		const void *key;
+		while((key = iter.nextKey()) != NULL) {
+			GCHashtable *addresses = (GCHashtable*)iter.value();
+			mmfx_delete(addresses);
+		}
+		backEdges.clear();
+	}
+
+	GCHashtable *HeapGraph::getPointers(const void *obj)
+	{
+		return (GCHashtable*)backEdges.get(obj);
+	}
+
+	void GC::pruneBlacklist()
+	{
+		if(blacklist.count() > 0) {
+			GCHashtable::Iterator iter(&blacklist);
+			const void *p;
+			while((p = iter.nextKey()) != NULL) {
+				if(!GetMark(p)) {
+					removeFromBlacklist(p);
+				}		
+			}			
+		}
+	}
+
+	void GC::printBlacklist()
+	{
+		if(blacklist.count() > 0) {
+			GCHashtable::Iterator iter(&blacklist);
+			const void *p;
+			while((p = iter.nextKey()) != NULL) {
+				GCLog("Blacklist item 0x%p %s found in marker graph\n", p, markerGraph.getPointers(p) ? "was" : "wasn't");
+				GCLog("Blacklist item 0x%p %s found in mutator graph\n", p, mutatorGraph.getPointers(p) ? "was" : "wasn't");
+				dumpBackPointerChain(p, markerGraph);
+			}
+		}
+	}
+#endif
 }
 		

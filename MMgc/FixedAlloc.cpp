@@ -433,4 +433,21 @@ namespace MMgc
 	{
 		FixedMalloc::GetFixedMalloc()->Free(item);
 	}
+
+#ifdef MMGC_HEAP_GRAPH
+	/*static*/
+	const void *FixedAlloc::FindBeginning(const void *addr)
+	{
+		FixedBlock *b = GetFixedBlock(addr);
+		uint32_t itemNum = 0;
+		char *mem = b->items;
+		while(itemNum++ < b->alloc->m_itemsPerBlock) {
+			char *next = mem + b->alloc->m_itemSize;
+			if(addr >= mem && addr < next)
+				return mem;
+			mem = next;
+		}
+		return NULL;
+	}
+#endif
 }
