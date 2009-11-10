@@ -361,7 +361,7 @@ class RuntestBase:
             if re.search('(api)', f):
                 self.apiVersioning = True
             
-            wordcode = '-wordcode' if re.search('wordcode', self.avm) else ''
+        wordcode = '-wordcode' if re.search('wordcode', self.avm) else ''
         
         self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
     
