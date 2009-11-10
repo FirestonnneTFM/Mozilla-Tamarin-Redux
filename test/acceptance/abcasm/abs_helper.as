@@ -69,6 +69,33 @@ package
 
     public function COMPARE_STRICTEQ(name, expected, actual)
     {
+        
+        //    because    ( NaN == NaN ) always returns false, need to do
+        //    a special compare to see if    we got the right result.
+        if ( actual != actual )    {
+            if ( typeof actual == "object" ) {
+                actual = "NaN object";
+            } else {
+                actual = "NaN number";
+            }
+        }
+        if ( expected != expected )    {
+            if ( typeof    expected == "object" ) {
+                expected = "NaN object";
+            } else {
+                expected = "NaN number";
+            }
+        }
+        if (expected !== actual)
+            FAIL(name, expected, actual);
+        else
+            PASS(name);
+    }
+
+    public function COMPARE_TYPEERROR(name, expected, actual)
+    {
+        // Trim the typeerror to just the number so that we can compare in both release and debugger
+        actual = String(actual).substr(0,22);
         if (expected !== actual)
             FAIL(name, expected, actual);
         else
