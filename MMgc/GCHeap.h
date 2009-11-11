@@ -275,6 +275,18 @@ namespace MMgc
 		 */
 		static void SignalInconsistentHeapState(const char* reason);
 
+		/**
+		 * Signal that the caller is about to longjmp to or past an MMGC_ENTER, and that
+		 * actions should be taken to leave the heap in a consistent state.
+		 *
+		 * MMgc code does not use this, it's intended for use by external agents.  It can
+		 * be called without ill effect even if there is no active GC or GCHeap.
+		 *
+		 * longjmp'ing to or past an MMGC_ENTER is not supported in all contexts: host code
+		 * should never do it on call-backs on allocation, deallocation, and finalization hooks.
+		 */
+		static void SignalImminentAbort();
+		
 		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
 		/**

@@ -457,6 +457,11 @@ namespace MMgc
 		 */
 		bool queryFullCollectionQueued() { return fullCollectionQueued; }
 
+		/**
+		 * Called by the owner when the owner is notified of an imminent abort
+		 */
+		void SignalImminentAbort();
+		
 		// ----- Public data --------------------------------------
 		
 		// Elapsed time (in ticks) for various collection phases, and the maximum phase time
@@ -1253,6 +1258,11 @@ namespace MMgc
 		void PushWorkItem_MayFail(GCWorkItem &item);
 		bool GetMarkStackOverflow() const { return m_markStackOverflow; }
 		
+#ifdef DEBUG
+		// Check that invariants for an inactive GC hold
+		void ShouldBeInactive();
+#endif
+
 	private:
 
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
@@ -1275,6 +1285,12 @@ namespace MMgc
 		// store a handle to the thread that create the GC to ensure thread safety
 		vmpi_thread_t m_gcThread;
 
+		// Will be called from GCHeap::AbortCleanup before a longjmp that jumps past the
+		// GC (effectively aborting an operation, be it allocation or GC).  This function
+		// must be aware of the internal state of the GC and must take
+		// care to make that state consistent.
+		void SignalImminentAbort();
+		
 		void gclog(const char *format, ...);
 		void log_mem(const char *name, size_t s, size_t comp );
 
@@ -1607,6 +1623,7 @@ public:
 		
 		void allocaInit();
 		void allocaShutdown();
+		void allocaUnwind();			// restore to initial state
 		void allocaPopToSlow(void* top);
 		void* allocaPushSlow(size_t nbytes);
 		void pushAllocaSegment(size_t nbytes);
