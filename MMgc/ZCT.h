@@ -89,6 +89,11 @@ namespace MMgc
 		void EndCollecting();
 
 		/**
+		 * Will be called by the collector when the collector is notified of an imminent abort
+		 */
+		void SignalImminentAbort();
+
+		/**
 		 * Add obj to the ZCT; it must not already be in the ZCT.  This method can fail silently,
 		 * leaving the GC to reap the object in case its reference count stays zero.
 		 *
@@ -195,6 +200,9 @@ namespace MMgc
 		// ZCT pointers to point into the new blocks.
 		void UsePinningMemory();
 
+		// Discard the pinning memory
+		void ClearPinningMemory();
+		
 		// Discard a block that is no longer used because ZCT popping during reaping
 		// has gone below the block's beginning.
 		void PopFastSegment();

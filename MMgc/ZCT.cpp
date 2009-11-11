@@ -196,6 +196,28 @@ namespace MMgc
 		slowState = false;
 	}
 	
+	// The problem here is when a prereap(), prereap(obj), or postreap()
+	// call gets into a situation where a longjmp is made across the GC,
+	// or if the GC aborts while slowState is true (because this leaves us
+	// with broken invariants when the heap is later swept).
+
+	void ZCT::SignalImminentAbort()
+	{
+		// It's not necessary to unpin objects; pinned garbage will be
+		// reclaimed by the garbage collector eventually.
+		
+		// No particular reason to clear the ZCT, the objects in it are
+		// valid.
+
+		if (slowState) {
+			EndCollecting();
+			ClearPinningMemory();
+		}
+
+		if (reaping)
+			reaping = false;
+	}
+
 	void ZCT::AddSlow(RCObject *obj)
 	{
 		GCAssert(top == limit);
@@ -480,6 +502,17 @@ namespace MMgc
 		}
 	}
 
+	void ZCT::ClearPinningMemory()
+	{
+		while (pinList != NULL)
+		{
+			RCObject** block = pinList;
+			pinList = (RCObject**)block[0];
+			FreeBlock(block);
+		}
+		pinLast = NULL;
+	}
+	
 	REALLY_INLINE void ZCT::PinObject(RCObject* obj)
 	{
 		if (pinTop == pinLimit) {

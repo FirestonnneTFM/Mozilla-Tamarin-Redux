@@ -420,6 +420,11 @@ namespace MMgc
 		return 1;
 	}
 
+	void GCPolicyManager::SignalImminentAbort()
+	{
+		start_event = NO_EVENT;
+	}
+
 	void GCPolicyManager::signal(PolicyEvent ev) {
 		switch (ev) {
 			case START_StartIncrementalMark:
@@ -3447,6 +3452,12 @@ bail:
  		stacktop = NULL;
  	}
 
+	void GC::allocaUnwind()
+	{
+		allocaShutdown();
+		allocaInit();
+	}
+
 	void* GC::allocaPush(size_t nbytes, AllocaAutoPtr& x) 
 	{
 		GCAssert(x.unwindPtr == NULL);
@@ -3620,6 +3631,38 @@ bail:
 		}
 	}
 
+#ifdef DEBUG
+	void GC::ShouldBeInactive()
+	{
+		GCAssert(m_gcThread == NULL);
+		GCAssert(stackEnter == NULL);
+		GCAssert(top_segment != NULL && top_segment->prev == NULL && top_segment->start == stacktop);
+		GCAssert(VMPI_lockTestAndAcquire(&m_gcLock) && VMPI_lockRelease(&m_gcLock));
+	}
+#endif
+
+	void GC::SignalImminentAbort()
+	{
+		policy.SignalImminentAbort();
+		zct.SignalImminentAbort();
+		
+		if (collecting || marking)
+		{
+			m_incrementalWork.Clear();
+			m_barrierWork.Clear();
+			ClearMarks();
+			m_markStackOverflow = false;
+			m_inMarkStackOverflow = false;
+			collecting = false;
+			marking = false;
+		}
+
+		// Make it squeaky clean
+		SetStackEnter(NULL,false);
+		VMPI_lockRelease(&m_gcLock);
+		m_gcThread = NULL;		
+	}
+	
 	GC::AutoRCRootSegment::AutoRCRootSegment(GC* gc, void* mem, size_t size)
 		: RCRootSegment(gc, mem, size)
 	{

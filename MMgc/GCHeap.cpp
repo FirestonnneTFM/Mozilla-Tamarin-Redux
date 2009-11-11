@@ -1711,39 +1711,84 @@ namespace MMgc
 		GetGCHeap()->Abort();
 	}
 	
-	void GCHeap::Abort()
+	// This can *always* be called.  It will clean up the state on the current thread
+	// if appropriate, otherwise do nothing.  It *must* be called by host code if the
+	// host code jumps past an MMGC_ENTER instance.  (The Flash player does that, in
+	// some circumstances.)
+	
+	/*static*/
+	void GCHeap::SignalImminentAbort()
 	{
-		status = kMemAbort;
-		EnterFrame *ef = enterFrame;
-		GCLog("error: out of memory\n");
+		if (instance == NULL)
+			return;
+		EnterFrame* ef = GetGCHeap()->GetEnterFrame();
+		if (ef == NULL)
+			return;
 
-		// release lock so we don't deadlock if exit or longjmp end up coming
-		// back to GCHeap (all callers must have this lock)
-		VMPI_lockRelease(&m_spinlock);
+		// We don't know if we're holding the lock but we can release it anyhow,
+		// on the assumption that this operation will not cause problems if the
+		// lock is not held or is held by another thread.
+		//
+		// Release lock so we don't deadlock if exit or longjmp end up coming
+		// back to GCHeap (all callers must have this lock).
 
-		if(config.OOMExitCode != 0) 
-		{
-			VMPI_exit(config.OOMExitCode);
-		}
-			
+		VMPI_lockRelease(&instance->m_spinlock);
+		
 		// If the current thread is holding a lock for a GC that's not currently active on the thread
 		// then break the lock: the current thread is collecting in that GC, but the Abort has cancelled
 		// the collection.
 
 		if (ef->m_collectingGC)
 		{
-			VMPI_lockRelease(&(ef->m_collectingGC->m_gcLock));
-			ef->m_collectingGC->m_gcThread = NULL;
+			ef->m_collectingGC->SignalImminentAbort();
 			ef->m_collectingGC = NULL;
 		}
-			
-		if(ef != NULL && ef->m_heap != NULL)
+
+		if(ef->m_gc)
+			ef->m_gc->SignalImminentAbort();
+		
+		// Clear the enterFrame because we're jumping past MMGC_ENTER.
+		GetGCHeap()->enterFrame = NULL;
+	}
+	
+	void GCHeap::Abort()
+	{
+		status = kMemAbort;
+		EnterFrame *ef = enterFrame;
+		GCLog("error: out of memory\n");
+		
+		// release lock so we don't deadlock if exit or longjmp end up coming
+		// back to GCHeap (all callers must have this lock)
+		VMPI_lockRelease(&m_spinlock);
+		
+		// Lock must not be held when we call VMPI_exit, deadlocks ensue on Linux
+		if(config.OOMExitCode != 0) 
 		{
-			if(ef->m_gc) {
-				// we're about to jump across the GC lock, unlock it
-				ef->m_gc->SetStackEnter(NULL, false);
+			VMPI_exit(config.OOMExitCode);
+		}
+
+		if (ef != NULL)
+		{
+			// If the current thread is holding a lock for a GC that's not currently active on the thread
+			// then break the lock: the current thread is collecting in that GC, but the Abort has cancelled
+			// the collection.
+			if (ef->m_collectingGC)
+			{
+				ef->m_collectingGC->SignalImminentAbort();
+				ef->m_collectingGC = NULL;
 			}
-			VMPI_longjmpNoUnwind(ef->jmpbuf, 1);
+			if(ef->m_gc)
+			{
+				ef->m_gc->SignalImminentAbort();
+			}
+			// Guard against repeated jumps: ef->m_heap doubles as a flag.  We go Abort->longjmp->~EnterFrame->Leave
+			// and Leave calls StatusChangeNotify and the host code might do another allocation during shutdown
+			// in which case we want to go to VMPI_abort instead.  At that point m_heap will be NULL and the right
+			// thing happens.
+			if (ef->m_heap != NULL)
+			{
+				VMPI_longjmpNoUnwind(ef->jmpbuf, 1);
+			}
 		}
 		GCAssertMsg(false, "MMGC_ENTER missing or we allocated more memory trying to shutdown");
 		VMPI_abort();
