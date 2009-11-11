@@ -313,7 +313,7 @@ namespace avmplus
 			 III(0x05, L_setsuper)
 			 III(0x06, L_dxns)
 			 III(0x07, L_dxnslate)
-			 XXX(0x08) /* OP_kill */
+			 III(0x08, L_kill)
 			 XXX(0x09) /* OP_label */
 			 XXX(0x0A)
 			 XXX(0x0B)
@@ -1265,13 +1265,11 @@ namespace avmplus
                 NEXT;
 			}
 
-#ifndef AVMPLUS_WORD_CODE
 			INSTR(kill) {
 				u1 = U30ARG;
 				framep[u1] = undefinedAtom;
 				NEXT;
 			}
-#endif
 
             INSTR(typeof) {
 				*sp = core->_typeof(*sp)->atom();

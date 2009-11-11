@@ -81,7 +81,7 @@ namespace avmplus
 		// use_l=1 means the instruction reads a local slot
 		// def_l=1 means the instruction writes a local slot
 
-		// You may assume that the instructions that may invoke user code is a subset of
+		// You may assume that the instructions that may invoke user code comprise a subset of
 	    // the ones that are marked as thro=1.  A few of the latter will not call user code, 
 		// but at this point we have no formal definition of whether e.g. embedders may
 		// or may not subclass MethodEnv in such a way that MethodEnv::findproperty()
@@ -99,7 +99,7 @@ namespace avmplus
 		{    2,    0,    0,   1,    0,   0,   2,   1,    0,    0         N("setsuper") },
 		{    2,    0,    0,   1,    0,   0,   0,   0,    0,    0         N("dxns") },
 		{    1,    0,    0,   1,    0,   0,   1,   0,    0,    0         N("dxnslate") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x08") },            // kill
+		{    2,    0,    0,   0,    0,   0,   0,   0,    1,    1         N("kill") },
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x09") },            // label
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x0A") },
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x0B") },
