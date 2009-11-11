@@ -65,7 +65,6 @@ import subProcess
 
 # For Python 2.6 and above, use native subprocess.Popen
 if sys.version_info[0] >= 3 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6):
-    print '>= 2.6'
     from subprocess import Popen
 else:
     from killableprocess import Popen
@@ -140,6 +139,7 @@ class RuntestBase:
     show_time = False
     timestampcheck = True
     timestamps = True
+    useShell = True
     verbose = False
     verify = False
     writeResultProperties = False   # used by the asc runtests.py to write to a result.properties file used by the asc ant scripts
@@ -368,8 +368,11 @@ class RuntestBase:
     def determineOS(self):
         _os = platform.system()
         ostype = ''
-        if re.search('(CYGWIN_NT|Windows)', _os):
+        if re.search('(CYGWIN_NT)', _os):
             ostype='win'
+        if re.search('(Windows)', _os):
+            ostype='win'
+            self.useShell = False
         if re.search('(Darwin)', _os):
             ostype='mac'
         if re.search('(Linux)', _os):
@@ -954,7 +957,7 @@ class RuntestBase:
         try:
             self.lock.acquire()
             try:
-                p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p = Popen((cmd), shell=self.useShell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 self.currentPids.append(p)
             finally:
                 self.lock.release()
