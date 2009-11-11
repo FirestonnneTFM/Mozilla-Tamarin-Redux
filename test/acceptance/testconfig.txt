@@ -97,20 +97,20 @@ abcasm/nullCheck/K , .*wordcode.* , skip, https://bugzilla.mozilla.org/show_bug.
 # Differential testing (avmdiff.py)
 ####################
 # sampling only works on debugger for avmdiff skip
-#as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
+as3/sampling/.*  , .*diff , skip , skip since output differs debugger vs nondebugger
 # mmgc tests fail on avmdiff, does not support passing args to vm
-#mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
+mmgc/.* , .*diff , skip , skip since avmdiff does not support passing args bug 487841
 # trim down tests to save time
-#ecma3/Unicode/.*, .*diff, skip , trim down tests
-#ecma3/Date/.*, .*diff, skip, trim down tests
-#abcasm/.*, .*diff, skip, trim down tests
-#as3/RuntimeErrors/Error1034TypeCoercionFailed , .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=510225
-#ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
-#ecma3/GlobalObject/e15_1_2_2_2  , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
-#ecma3/TypeConversion/e9_3_1_3_rt   , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
-#regress/bug_420755:.*, .*diff, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=522069
-#regress/bug_515935, .*diff, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=515935
-.* , .*diff, skip, skip all differential tests due to https://bugzilla.mozilla.org/show_bug.cgi?id=527808
+ecma3/Unicode/.*, .*diff, skip , trim down tests
+ecma3/Date/.*, .*diff, skip, trim down tests
+abcasm/.*, .*diff, skip, trim down tests
+as3/RuntimeErrors/Error1034TypeCoercionFailed , .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=510225
+ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue
+ecma3/GlobalObject/e15_1_2_2_2  , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+ecma3/TypeConversion/e9_3_1_3_rt   , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+regress/bug_420755:.*, .*diff, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=522069
+regress/bug_515935, .*diff, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=515935
+#.* , .*diff, skip, skip all differential tests due to https://bugzilla.mozilla.org/show_bug.cgi?id=527808
 
 # specific skips when running differential testing between 32bit and 64bit shells
 as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
