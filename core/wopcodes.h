@@ -51,6 +51,7 @@ namespace avmplus
 		WOP_setsuper = 0x05,
 		WOP_dxns = 0x06,
 		WOP_dxnslate = 0x07,
+		WOP_kill = 0x08,
 		WOP_ifnlt = 0x0C,
 		WOP_ifnle = 0x0D,
 		WOP_ifngt = 0x0E,

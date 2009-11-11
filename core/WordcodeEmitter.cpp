@@ -747,8 +747,8 @@ namespace avmplus
 		    emitOp0(pc, WOP_dxnslate);
 			break;
 		case OP_kill:
-			// No sense in emitting this for the interpreter, as all
-			// stacked values are atoms and fully type checked
+			// We used to remove this but it has side effects, so we can't
+			emitOp1(pc, WOP_kill);
 			break;
 		default:
 			// FIXME need error handler here
