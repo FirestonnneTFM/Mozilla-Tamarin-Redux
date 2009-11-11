@@ -44,7 +44,7 @@ namespace avmplus
 		va_list args;
 		va_start(args, format);
 
-		char buf[1024];
+		char buf[2048];
 		vsnprintf(buf, sizeof(buf), format, args);
 		va_end(args);
 

@@ -703,6 +703,7 @@ namespace avmplus
                 case LIR_skip: AvmAssert(false); break;
                 case LIR_label: break;
                 case LIR_start: break;
+                case LIR_regfence: break;
                 default:AvmAssert(false);
             }
             return out->ins0(op);
@@ -842,10 +843,14 @@ namespace avmplus
                 case LIR_jt: AvmAssert(cond->isCond() && (!to || to->isop(LIR_label))); break;
                 case LIR_jf: AvmAssert(cond->isCond() && (!to || to->isop(LIR_label))); break;
                 case LIR_j:  AvmAssert(!cond && (!to || to->isop(LIR_label))); break;
-                case LIR_ji: AvmAssert(!cond && to && !to->isop(LIR_label)); break;
                 default: AvmAssert(false);
             }
             return out->insBranch(op, cond, to);
+        }
+
+        LIns* insJtbl(LIns* index, uint32_t size) {
+            AvmAssert(!index->isQuad());
+            return out->insJtbl(index, size);
         }
 
         LIns *insGuard(LOpcode v, LIns *cond, GuardRecord *gr) {
@@ -968,6 +973,11 @@ namespace avmplus
         LIns *insBranch(LOpcode v, LInsp cond, LInsp to) {
             DEFER_STORES(saveState();)
             return out->insBranch(v, cond, to);
+        }
+
+        LIns *insJtbl(LIns* index, uint32_t size) {
+            DEFER_STORES(saveState();)
+            return out->insJtbl(index, size);
         }
 
         LIns *insCall(const CallInfo *call, LInsp args[]) {
@@ -1629,7 +1639,7 @@ namespace avmplus
     {
         // our new extended BB now starts here, this means that any branch targets
         // should hit the next instruction our bb start instruction
-        LIns* bb = Ins(LIR_label); // mark start of block
+        LIns* bb = Ins(LIR_label);  // mark start of block
         verbose_only( if (frag->lirbuf->names) {
             char str[64];
             VMPI_sprintf(str,"B%d",(int)state->pc);
@@ -1637,7 +1647,14 @@ namespace avmplus
         });
 
         // get a label for our block start and tie it to this location
-        setLabelPos(state->verifier->getFrameState(state->pc)->label, bb);
+        CodegenLabel& label = state->verifier->getFrameState(state->pc)->label;
+        setLabelPos(label, bb);
+        if (label.jtbl_forward_target) {
+            // A jtbl (switch) jumps forward to here, creating a situation our
+            // register allocator cannot handle; force regs to be loaded at the
+            // start of this block.
+            Ins(LIR_regfence);
+        }
 
         // If this is a backwards branch, generate an interrupt check.
         // current verifier state, includes tack pointer.
@@ -3289,20 +3306,35 @@ namespace avmplus
                 int targetpc_off = (int)op1;
 
                 AvmAssert(state->value(sp).traits == INT_TYPE);
+                AvmAssert(count >= 0);
 
-                LIns* input = localGet(sp);
-                LIns* cmp = binaryIns(LIR_ult, input, InsConst(count));
-                branchIns(LIR_jf, cmp, targetpc_off); // will be patched
-
-                // fixme - this is just a bunch of if's
-
+                // Compute address of jump table
                 const byte* pc = 4 + abcStart + state->pc;
-                AvmCore::readU30(pc);
+                AvmCore::readU30(pc);  // skip count
 
-                for (int i=0; i < count; i++)
-                {
-                    int target = state->pc + AvmCore::readS24(pc+3*i);
-                    branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)), target);
+                // Delete any trailing table entries that == default case (effective for asc output)
+                while (count > 0 && targetpc_off == (state->pc + AvmCore::readS24(pc+3*(count-1))))
+                    count--;
+
+                if (count > 0) {
+                    LIns* index = localGet(sp);
+                    LIns* cmp = binaryIns(LIR_ult, index, InsConst(count));
+                    branchIns(LIR_jf, cmp, targetpc_off); // will be patched
+
+                    if (NJ_JTBL_SUPPORTED) {
+                        // Backend supports LIR_jtbl for jump tables
+                        LIns* jtbl = lirout->insJtbl(index, count);
+                        for (int i=0; i < count; i++) {
+                            int target = state->pc + AvmCore::readS24(pc+3*i);
+                            patchLater(jtbl, target, i);
+                        }
+                    } else {
+                        // Backend doesn't support jump tables, use cascading if's
+                        for (int i=0; i < count; i++) {
+                            int target = state->pc + AvmCore::readS24(pc+3*i);
+                            branchIns(LIR_jt, binaryIns(LIR_eq, index, InsConst(i)), target);
+                        }
+                    }
                 }
                 break;
             }
@@ -4715,14 +4747,14 @@ namespace avmplus
         this->state = state;
         this->labelCount = state->verifier->labelCount;
 
-        if (npe_label.preds) {
+        if (npe_label.has_preds) {
             LIns *label = Ins(LIR_label);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "npe"); })
             setLabelPos(npe_label, label);
             callIns(FUNCTIONID(npe), 1, env_param);
         }
 
-        if (interrupt_label.preds) {
+        if (interrupt_label.has_preds) {
             LIns *label = Ins(LIR_label);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "interrupt"); })
             setLabelPos(interrupt_label, label);
@@ -4747,9 +4779,9 @@ namespace avmplus
                 coreAddr, _ef, InsConstPtr(info), pc, exptr);
 
             int handler_count = info->abc_exceptions()->exception_count;
-            // jump to catch handler
+            // Jump to catch handler
             LIns *handler_target = loadIns(LIR_ld, offsetof(ExceptionHandler, target), handler);
-            // we dont have LIR_ji yet, so do a compare & branch to each possible target.
+            // Do a compare & branch to each possible target.
             for (int i=0; i < handler_count; i++)
             {
                 ExceptionHandler* h = &info->abc_exceptions()->exceptions[i];
@@ -4787,7 +4819,12 @@ namespace avmplus
         for (Seq<Patch>* p = patches.get(); p != NULL; p = p->tail) {
             Patch& patch = p->head;
             AvmAssert(patch.label->bb != NULL);
-            patch.br->setTarget(patch.label->bb);
+            if (patch.br->isBranch()) {
+                AvmAssert(patch.index == 0);
+                patch.br->setTarget(patch.label->bb);
+            } else {
+                patch.br->setTarget(patch.index, patch.label->bb);
+            }
         }
 
         frag->lastIns = last;
@@ -5017,13 +5054,27 @@ namespace avmplus
         patchLater(br, state->verifier->getFrameState(pc_off)->label);
     }
 
+    void CodegenLIR::patchLater(LIns* jtbl, int pc_off, uint32_t index) {
+        patchLater(jtbl, state->verifier->getFrameState(pc_off)->label, index);
+    }
+
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
         if (!br) return; // occurs if branch was unconditional and thus never emitted.
-        l.preds++;
+        l.has_preds = 1;
         if (l.bb != 0) {
             br->setTarget(l.bb);
         } else {
             patches.add(Patch(br, l));
+        }
+    }
+
+    void CodegenLIR::patchLater(LIns *jtbl, CodegenLabel &l, uint32_t index) {
+        l.has_preds = 1;
+        if (l.bb != 0) {
+            jtbl->setTarget(index, l.bb);           // backward edge
+        } else {
+            l.jtbl_forward_target = 1;              // target of jtbl forward edge
+            patches.add(Patch(jtbl, l, index));
         }
     }
 
@@ -5054,11 +5105,28 @@ namespace avmplus
             case LIR_j:
                 AvmAssert(i->getTarget() != NULL && i->getTarget() == i->oprnd2() && i->oprnd2()->isop(LIR_label));
                 break;
+            case LIR_jtbl:
+                AvmAssert(i->getTableSize() > 0);
+                for (uint32_t j=0, n=i->getTableSize(); j < n; j++)
+                    AvmAssert(i->getTarget(j) != NULL && i->getTarget(j)->isop(LIR_label));
+                break;
             }
             return i;
         }
     };
 #endif
+
+    void analyze_edge(LIns* label, nanojit::BitSet &livein, 
+                      HashMap<LIns*, nanojit::BitSet*> &labels,
+                      InsList* looplabels)
+    {
+        nanojit::BitSet *lset = labels.get(label);
+        if (lset) {
+            livein.setFrom(*lset);
+        } else {
+            looplabels->add(label);
+        }
+    }
 
     void CodegenLIR::deadvars_analyze(Allocator& alloc, nanojit::BitSet& livein,
         HashMap<LIns*, nanojit::BitSet*> &labels)
@@ -5120,19 +5188,16 @@ namespace avmplus
                     livein.reset();
                     // fall through to other branch cases
                 case LIR_jt:
-                case LIR_jf: {
+                case LIR_jf:
                     // merge the LiveIn sets from each successor:  the fall
                     // through case (livein) and the branch case (lset).
-                    LIns *label = i->getTarget();
-                    nanojit::BitSet *lset = labels.get(label);
-                    if (lset) {
-                        livein.setFrom(*lset);
-                    } else {
-                        AvmAssert(iter == 0);
-                        looplabels.add(label);
-                    }
+                    analyze_edge(i->getTarget(), livein, labels, &looplabels);
                     break;
-                }
+                case LIR_jtbl:
+                    livein.reset(); // fallthrough path is unreachable, clear it.
+                    for (uint32_t j=0, n=i->getTableSize(); j < n; j++)
+                        analyze_edge(i->getTarget(j), livein, labels, &looplabels);
+                    break;
                 case LIR_qcall:
                 case LIR_icall:
                 case LIR_fcall:
@@ -5214,16 +5279,16 @@ namespace avmplus
                     livein.reset();
                     // fall through to other branch cases
                 case LIR_jt:
-                case LIR_jf: {
+                case LIR_jf:
                     // merge the LiveIn sets from each successor:  the fall
                     // through case (live) and the branch case (lset).
-                    nanojit::BitSet *lset = labels.get(i->getTarget());
-                    AvmAssert(lset != 0); // all labels have been seen by deadvars_analyze()
-                    // the target LiveIn set (lset) is non-empty,
-                    // union it with fall-through set (live).
-                    livein.setFrom(*lset);
+                    analyze_edge(i->getTarget(), livein, labels, 0);
                     break;
-                }
+                case LIR_jtbl:
+                    livein.reset();
+                    for (uint32_t j = 0, n = i->getTableSize(); j < n; j++)
+                        analyze_edge(i->getTarget(j), livein, labels, 0);
+                    break;
                 case LIR_qcall:
                 case LIR_icall:
                 case LIR_fcall:
@@ -5317,7 +5382,7 @@ namespace avmplus
             live(live_alloc, frag, &mgr->log);
         })
 
-        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, *lir_alloc, core, &mgr->log);
+        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log);
         #ifdef VTUNE
         assm->cgen = this;
         #endif
