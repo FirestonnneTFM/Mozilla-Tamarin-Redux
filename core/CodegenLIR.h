@@ -95,8 +95,9 @@ namespace avmplus
     class CodegenLabel {
     public:
         LIns *bb;
-        int preds;
-        CodegenLabel() : bb(0), preds(0)
+        int has_preds:1;
+        int jtbl_forward_target:1;
+        CodegenLabel() : bb(0), has_preds(0), jtbl_forward_target(0)
         {}
     };
 
@@ -125,9 +126,11 @@ namespace avmplus
     public:
         LIns *br;               // the branch instruction that needs patching
         CodegenLabel *label;    // information about the target of the branch
-        Patch() : br(0), label(0) {}
-        Patch(int) : br(0), label(0) {}
-        Patch(LIns *br, CodegenLabel &l) : br(br), label(&l) {}
+        uint32_t index;         // if br is a jtbl, which index in table to patch
+        Patch() : br(0), label(0), index(0) {}
+        Patch(int) : br(0), label(0), index(0) {}
+        Patch(LIns *br, CodegenLabel &l) : br(br), label(&l), index(0) {}
+        Patch(LIns *jtbl, CodegenLabel &l, uint32_t index) : br(jtbl), label(&l), index(index) {}
     };
 
     // Binding Cache Design
@@ -399,6 +402,8 @@ namespace avmplus
         bool verbose();
         void patchLater(LIns *br, CodegenLabel &);
         void patchLater(LIns *br, int pc_off);
+        void patchLater(LIns *jtbl, CodegenLabel &, uint32_t index);
+        void patchLater(LIns *jtbl, int pc_off, uint32_t index);
         void setLabelPos(CodegenLabel &l, LIns *target);
         void deadvars();
         void deadvars_analyze(Allocator& alloc, nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels);
