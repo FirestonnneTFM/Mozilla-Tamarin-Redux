@@ -255,9 +255,9 @@ namespace avmplus
 
     struct MopsInfo
     {
-        const uint32_t size;
-        const CallInfo* const loadCall;
-        const CallInfo* const storeCall;
+        uint32_t size;
+        const CallInfo* loadCall;
+        const CallInfo* storeCall;
     };
 
     static const MopsInfo kMopsInfo[5] = {
