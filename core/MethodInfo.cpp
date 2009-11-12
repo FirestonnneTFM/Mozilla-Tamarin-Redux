@@ -555,6 +555,64 @@ namespace avmplus
 		WBRC(core->GetGC(), dmi, &dmi->localNames[slot], core->internString(name));
 	}
 
+	REALLY_INLINE double unpack_double(const void* src)
+	{
+	#if defined(AVMPLUS_64BIT) || defined(AVMPLUS_UNALIGNED_ACCESS)
+        return *(const double*)src;
+	#else
+		union {
+			uint32_t b[2];
+			double d;
+		} u;
+		u.b[0] = ((const uint32_t*)src)[0];
+		u.b[1] = ((const uint32_t*)src)[1];
+		return u.d;
+	#endif
+	}
+
+    // note that the "local" can be a true local (0..local_count-1) 
+    // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
+	static Atom nativeLocalToAtom(AvmCore* core, void* src, BuiltinType bt)
+	{
+        switch (bt)
+        {
+            case BUILTIN_number:
+            {
+                return core->doubleToAtom(unpack_double(src));
+            }
+            case BUILTIN_int:
+            {
+                return core->intToAtom(*(const int32_t*)src);
+            }
+            case BUILTIN_uint:
+            {
+                return core->uintToAtom(*(const uint32_t*)src);
+            }
+            case BUILTIN_boolean:
+            {
+                return *(const int32_t*)src ? trueAtom : falseAtom;
+            }
+            case BUILTIN_any:
+            case BUILTIN_object:
+            case BUILTIN_void:
+            {
+                return *(const Atom*)src;
+            }
+            case BUILTIN_string:
+            {
+                return (*(const Stringp*)src)->atom();
+            }
+            case BUILTIN_namespace:
+            {
+                return (*(const Namespacep*)src)->atom();
+            }
+            default:
+            {
+                return (*(ScriptObject**)src)->atom();
+            }
+        }
+    }
+    
     // note that the "local" can be a true local (0..local_count-1) 
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
 	Atom MethodInfo::boxOneLocal(FramePtr src, int srcPos, Traits** traitArr)
@@ -563,45 +621,8 @@ namespace avmplus
 		if (_flags & JIT_IMPL)
 		{
 			src = FramePtr(uintptr_t(src) + srcPos*8);
-			AvmCore* core = this->pool()->core;
             AvmAssert(traitArr != NULL);
-            switch (Traits::getBuiltinType(traitArr[srcPos]))
-            {
-				case BUILTIN_number:
-				{
-					return core->doubleToAtom(*(const double*)src);
-				}
-				case BUILTIN_int:
-				{
-					return core->intToAtom(*(const int32_t*)src);
-				}
-				case BUILTIN_uint:
-				{
-					return core->uintToAtom(*(const uint32_t*)src);
-				}
-				case BUILTIN_boolean:
-				{
-					return *(const int32_t*)src ? trueAtom : falseAtom;
-				}
-				case BUILTIN_any:
-				case BUILTIN_object:
-				case BUILTIN_void:
-				{
-					return *(const Atom*)src;
-				}
-                case BUILTIN_string:
-                {
-                    return (*(const Stringp*)src)->atom();
-                }
-                case BUILTIN_namespace:
-                {
-                    return (*(const Namespacep*)src)->atom();
-                }
-                default:
-                {
-                    return (*(ScriptObject**)src)->atom();
-                }
-			}
+            return nativeLocalToAtom(this->pool()->core, src, Traits::getBuiltinType(traitArr[srcPos]));
 		}
 		else
 		{
@@ -771,36 +792,6 @@ namespace avmplus
 		return ftraits;
 	}
 	
-	inline double unpack_double(const uint32_t* ap)
-	{
-	#if defined(AVMPLUS_64BIT)
-		AvmAssert(sizeof(Atom) == sizeof(double));
-		union {
-			const uint32_t* b;
-			const double* d;
-		};
-		b = ap;
-		return *d;
-	#elif defined(AVMPLUS_UNALIGNED_ACCESS)
-		AvmAssert(sizeof(Atom)*2 == sizeof(double));
-		union {
-			const uint32_t* b;
-			const double* d;
-		};
-		b = ap;
-		return *d;
-	#else
-		AvmAssert(sizeof(Atom)*2 == sizeof(double));
-		union {
-			AvmBox b[2];
-			double d;
-		} u;
-		u.b[0] = ap[0];
-		u.b[1] = ap[1];
-		return u.d;
-	#endif
-	}
-
 	/**
 	 * convert native args to atoms.  argc is the number of
 	 * args, not counting the instance which is arg[0].  the
@@ -814,50 +805,9 @@ namespace avmplus
 		const int param_count = this->param_count();
 		for (int i=0; i <= argc; i++)
 		{
-			Atom atom;
 			const BuiltinType bt = (i <= param_count) ? this->paramTraitsBT(i) : BUILTIN_any;
-			switch (bt)
-			{
-				case BUILTIN_number:
-					atom =  core->doubleToAtom(unpack_double(ap));
-				#ifdef AVMPLUS_64BIT
-					// nothing
-				#else
-					ap += 1;
-				#endif
-					break;
-
-				case BUILTIN_int:
-					atom = core->intToAtom((int32_t)*ConstAtomPtr(ap));
-					break;
-
-				case BUILTIN_uint:
-					atom = core->uintToAtom((uint32_t)*ConstAtomPtr(ap));
-					break;
-
-				case BUILTIN_boolean:
-					atom = (*ConstAtomPtr(ap)) ? trueAtom : falseAtom;
-					break;
-
-				case BUILTIN_object:
-				case BUILTIN_any:
-					atom = *ConstAtomPtr(ap);
-					break;
-
-				case BUILTIN_string:
-					atom = ((Stringp)*ConstAtomPtr(ap))->atom();
-					break;
-
-				case BUILTIN_namespace:
-					atom = ((Namespacep)*ConstAtomPtr(ap))->atom();
-					break;
-
-				default:
-					atom = ((ScriptObject*)*ConstAtomPtr(ap))->atom();
-					break;
-			}
-			out[i] = atom;
-			ap += sizeof(Atom) / sizeof(uint32_t);
+            out[i] = nativeLocalToAtom(core, (void*)ap, bt);
+            ap += (bt == BUILTIN_number ? sizeof(double) : sizeof(Atom)) / sizeof(int32_t);
 		}
 	}
 
