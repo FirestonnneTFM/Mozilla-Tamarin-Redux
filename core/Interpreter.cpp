@@ -2186,7 +2186,7 @@ namespace avmplus
 #else
     #define MOPS_LOAD(addr, type, call, result) \
             MOPS_RANGE_CHECK(addr, type) \
-            result = avmplus::mop_##call(envDomain->globalMemoryBase() + (addr));
+            result = (type)avmplus::mop_##call(envDomain->globalMemoryBase() + (addr));
 
     #define MOPS_STORE(addr, type, call, value) \
             MOPS_RANGE_CHECK(addr, type) \
