@@ -1048,7 +1048,7 @@ namespace avmplus
 	
 	// Flex apps often have many interfaces redundantly listed, so first time thru,
 	// eliminate redundant ones.
-	void Traits::countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_NonGCObjects>& seen)
+	void Traits::countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_GCObjects>& seen)
 	{
 		for (Traitsp self = this; self != NULL; self = self->base)
 		{
@@ -1166,7 +1166,7 @@ namespace avmplus
 		{
 			if (m_interfaceCapLog2 == 0)
 			{
-				List<Traitsp, LIST_NonGCObjects> seen(gc);
+				List<Traitsp, LIST_GCObjects> seen(gc);
 				countInterfaces(toplevel, seen);
 				// a little redundant, but clarity is king
 				m_interfaceCapLog2 = calcLog2(MathUtils::nextPowerOfTwo((5*seen.size() >> 2) + 1));
