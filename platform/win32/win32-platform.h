@@ -227,11 +227,6 @@ typedef unsigned __int64	uint64_t;
     #define NJ_NO_VARIADIC_MACROS
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1400 && defined(FEATURE_NANOJIT)
-    #define NJ_NO_VARIADIC_MACROS
-#endif
-
-
 /**
 * Type defintion for an opaque data type representing platform-defined spin lock 
 * @see VMPI_lockInit(), VMPI_lockAcquire()
