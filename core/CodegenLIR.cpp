@@ -4819,11 +4819,11 @@ namespace avmplus
         for (Seq<Patch>* p = patches.get(); p != NULL; p = p->tail) {
             Patch& patch = p->head;
             AvmAssert(patch.label->bb != NULL);
-            if (patch.br->isBranch()) {
-                AvmAssert(patch.index == 0);
-                patch.br->setTarget(patch.label->bb);
-            } else {
+            if (patch.br->isop(LIR_jtbl)) {
                 patch.br->setTarget(patch.index, patch.label->bb);
+            } else {
+                AvmAssert(patch.br->isBranch() && patch.index == 0);
+                patch.br->setTarget(patch.label->bb);
             }
         }
 
