@@ -425,6 +425,64 @@ namespace avmplus
 		}
 	}
 
+	REALLY_INLINE double unpack_double(const void* src)
+	{
+	#if defined(AVMPLUS_64BIT) || defined(AVMPLUS_UNALIGNED_ACCESS)
+        return *(const double*)src;
+	#else
+		union {
+			uint32_t b[2];
+			double d;
+		} u;
+		u.b[0] = ((const uint32_t*)src)[0];
+		u.b[1] = ((const uint32_t*)src)[1];
+		return u.d;
+	#endif
+	}
+
+    // note that the "local" can be a true local (0..local_count-1) 
+    // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
+	static Atom nativeLocalToAtom(AvmCore* core, void* src, BuiltinType bt)
+	{
+        switch (bt)
+        {
+            case BUILTIN_number:
+            {
+                return core->doubleToAtom(unpack_double(src));
+            }
+            case BUILTIN_int:
+            {
+                return core->intToAtom(*(const int32_t*)src);
+            }
+            case BUILTIN_uint:
+            {
+                return core->uintToAtom(*(const uint32_t*)src);
+            }
+            case BUILTIN_boolean:
+            {
+                return *(const int32_t*)src ? trueAtom : falseAtom;
+            }
+            case BUILTIN_any:
+            case BUILTIN_object:
+            case BUILTIN_void:
+            {
+                return *(const Atom*)src;
+            }
+            case BUILTIN_string:
+            {
+                return (*(const Stringp*)src)->atom();
+            }
+            case BUILTIN_namespace:
+            {
+                return (*(const Namespacep*)src)->atom();
+            }
+            default:
+            {
+                return (*(ScriptObject**)src)->atom();
+            }
+        }
+    }
+    
 #ifdef DEBUGGER
 
 	/*static*/ DebuggerMethodInfo* DebuggerMethodInfo::create(AvmCore* core, int32_t local_count, uint32_t codeSize, int32_t max_scopes)
@@ -555,64 +613,6 @@ namespace avmplus
 		WBRC(core->GetGC(), dmi, &dmi->localNames[slot], core->internString(name));
 	}
 
-	REALLY_INLINE double unpack_double(const void* src)
-	{
-	#if defined(AVMPLUS_64BIT) || defined(AVMPLUS_UNALIGNED_ACCESS)
-        return *(const double*)src;
-	#else
-		union {
-			uint32_t b[2];
-			double d;
-		} u;
-		u.b[0] = ((const uint32_t*)src)[0];
-		u.b[1] = ((const uint32_t*)src)[1];
-		return u.d;
-	#endif
-	}
-
-    // note that the "local" can be a true local (0..local_count-1) 
-    // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-	static Atom nativeLocalToAtom(AvmCore* core, void* src, BuiltinType bt)
-	{
-        switch (bt)
-        {
-            case BUILTIN_number:
-            {
-                return core->doubleToAtom(unpack_double(src));
-            }
-            case BUILTIN_int:
-            {
-                return core->intToAtom(*(const int32_t*)src);
-            }
-            case BUILTIN_uint:
-            {
-                return core->uintToAtom(*(const uint32_t*)src);
-            }
-            case BUILTIN_boolean:
-            {
-                return *(const int32_t*)src ? trueAtom : falseAtom;
-            }
-            case BUILTIN_any:
-            case BUILTIN_object:
-            case BUILTIN_void:
-            {
-                return *(const Atom*)src;
-            }
-            case BUILTIN_string:
-            {
-                return (*(const Stringp*)src)->atom();
-            }
-            case BUILTIN_namespace:
-            {
-                return (*(const Namespacep*)src)->atom();
-            }
-            default:
-            {
-                return (*(ScriptObject**)src)->atom();
-            }
-        }
-    }
-    
     // note that the "local" can be a true local (0..local_count-1) 
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
 	Atom MethodInfo::boxOneLocal(FramePtr src, int srcPos, Traits** traitArr)
