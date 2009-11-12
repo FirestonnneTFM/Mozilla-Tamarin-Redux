@@ -289,7 +289,7 @@ namespace avmplus
 
 		TraitsPosPtr traitsPosStart() const;
 		TraitsPosPtr skipToInstanceInitPos(TraitsPosPtr pos) const;
-		void countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_NonGCObjects>& seen);
+		void countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_GCObjects>& seen);
 		bool addInterfaces(TraitsBindings* tb, const Toplevel* toplevel);
 		Binding getOverride(TraitsBindingsp basetb, Namespacep ns, Stringp name, int tag, const Toplevel *toplevel) const;
 
