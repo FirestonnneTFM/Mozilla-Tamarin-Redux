@@ -81,10 +81,9 @@ namespace avmplus
 				8
 //#endif
 		};
-		// backing store for global memory
-		mutable unsigned char *globalMemoryBase;
-		// current size of global memory
-		mutable uint32 globalMemorySize;
+
+		REALLY_INLINE uint8_t* globalMemoryBase() const { return _globalMemoryBase; }
+		REALLY_INLINE uint32_t globalMemorySize() const { return _globalMemorySize; }
 
 		// global memory object accessor (will always be a ByteArray but
 		// ByteArray isn't part of AVMPlus proper so plumbing is a little
@@ -94,22 +93,27 @@ namespace avmplus
 
 		// mark a pointer to pointer as being a reference to the global memory
 		// so that it gets updated if the global memory moves
-		void addGlobalMemoryBaseRef(unsigned char **baseRef) const;
-		// mark a pointer to uint32 (TODO: 64 bit?) as being a reference to
+		void addGlobalMemoryBaseRef(uint8_t** baseRef) const;
+		// mark a pointer to uint32_t as being a reference to
 		// the current size of the global memory so it can get updated
-		void addGlobalMemorySizeRef(uint32 *sizeRef) const;
+		void addGlobalMemorySizeRef(uint32_t* sizeRef) const;
 
 		// verifies that the Traits correspond to a memory object
 		bool isMemoryObject(Traits *t) const;
 
 	private:
+
+		// backing store / current size for global memory
+		mutable uint8_t* _globalMemoryBase;
+		mutable uint32_t _globalMemorySize;
+
 		// global memory tracking stuff
 		mutable struct GMInfo
 		{
 			// the actual memory object (can be NULL)
 			DRCWB(ScriptObject*) globalMemory;
 			// scratch memory to use if the memory object is NULL
-			unsigned char globalMemoryScratch[GLOBAL_MEMORY_MIN_SIZE];
+			uint8_t globalMemoryScratch[GLOBAL_MEMORY_MIN_SIZE];
 
 			// number of memory base or size references per "chunk"
 			// these references are stored in linked list with each link
@@ -119,34 +123,34 @@ namespace avmplus
 			// chunk link for references to global memory base
 			struct BaseRefChunk : public MMgc::GCObject
 			{
-				unsigned char **refs[REFS_PER_CHUNK];
+				uint8_t** refs[REFS_PER_CHUNK];
 				DWB(BaseRefChunk *) next;
 			};
 			// we keep count of the total so we know how many
 			// slots are unoccupied in the head link
-			uint32 globalMemoryBaseRefNum;
+			uint32_t globalMemoryBaseRefNum;
 			// head link
 			DWB(BaseRefChunk *) globalMemoryBaseRefs;
 
 			// same as above but for reference to global memory size
 			struct SizeRefChunk : public MMgc::GCObject
 			{
-				uint32 *refs[REFS_PER_CHUNK];
+				uint32_t* refs[REFS_PER_CHUNK];
 				DWB(SizeRefChunk *) next;
 			};
-			uint32 globalMemorySizeRefNum;
+			uint32_t globalMemorySizeRefNum;
 			DWB(SizeRefChunk *) globalMemorySizeRefs;
 		} m_gmInfo;
 
 		// called when the global memory backing store moves
 		// updates all of the references held in globalMemoryBaseRefs and 
 		// globalMemorySizeRefs
-		void notifyGlobalMemoryChanged(unsigned char *newBase, uint32 newSize) const;
+		void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize) const;
 		// subscribes to the memory object "mem" such that "mem" will call our
 		// notifyGlobalMemoryChanged when it moves
-		bool globalMemorySubscribe(ScriptObject *mem) const;
+		bool globalMemorySubscribe(ScriptObject* mem) const;
 		// stops "mem" from notifying us if it moves
-		bool globalMemoryUnsubscribe(ScriptObject *mem) const;
+		bool globalMemoryUnsubscribe(ScriptObject* mem) const;
 	};
 }
 

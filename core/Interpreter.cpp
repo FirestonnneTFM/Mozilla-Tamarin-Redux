@@ -2167,18 +2167,18 @@ namespace avmplus
 			}
 					
 #define MOPS_RANGE_CHECK(addr, type) \
-		if (addr < 0 || (uint32_t)((addr) + sizeof(type)) > envDomain->globalMemorySize) { env->mopRangeCheckFailed(); }
+		if (addr < 0 || (uint32_t)((addr) + sizeof(type)) > envDomain->globalMemorySize()) { env->mopRangeCheckFailed(); }
 
 #define MOPS_LOAD(addr, type, result) \
 		MOPS_RANGE_CHECK(addr, type) \
 		union { const uint8_t* p8; const type* p; }; \
-		p8 = envDomain->globalMemoryBase + (addr); \
+		p8 = envDomain->globalMemoryBase() + (addr); \
 		result = *p;
 
 #define MOPS_STORE(addr, type, value) \
 		MOPS_RANGE_CHECK(addr, type) \
 		union { uint8_t* p8; type* p; }; \
-		p8 = envDomain->globalMemoryBase + (addr); \
+		p8 = envDomain->globalMemoryBase() + (addr); \
 		*p = (type)(value);
 			
 			// loads
