@@ -185,29 +185,6 @@ namespace avmplus
 		/** Implementation of OP_hasnext2 */		
 		int hasnextproto(Atom& objAtom, int& index) const;
 		
-		/** Implementation of memory op helpers */
-		void mopRangeCheckFailed() const;
-
-		/** Implementations of OP_lXXX */
-		int li8(int addr) const;
-		int li16(int addr) const;
-		int li32(int addr) const;
-		double lf32(int addr) const;
-		double lf64(int addr) const;
-
-		/** Implementations of OP_sXXX */
-		void si8(int value, int addr) const;
-		void si16(int value, int addr) const;
-		void si32(int value, int addr) const;
-		void sf32(double value, int addr) const;
-		void sf64(double value, int addr) const;
-
-		/** Implementations of OP_sxXXX */
-		// (not actually used anywhere, left here for reference) */
-		//inline static int sxi1(int value) { return (value << 31) >> 31; }
-		//inline static int sxi8(int value) { return (value << 24) >> 24; }
-		//inline static int sxi16(int value) { return (value << 16) >> 16; }
-
 		/**
 		 * OP_newfunction
 		 * see 13.2 creating function objects
@@ -396,78 +373,6 @@ namespace avmplus
 		DRCWB(ClassClosure*) closure;
 	// ------------------------ DATA SECTION END
 	};
-
-	// probably should go elsewhere, but this is adequate for now.
-	#if defined(AVMPLUS_BIG_ENDIAN)
-		inline void _swap8(uint8_t& a, uint8_t& b)
-		{
-			const uint8_t t = a;
-			a = b;
-			b = t;
-		}
-
-		inline void MOPS_SWAP_BYTES(uint16_t* p)
-		{
-			union {
-				uint16_t* pv;
-				uint8_t* c;
-			};
-			pv = p;
-			_swap8(c[0], c[1]);
-		}
-		
-		inline void MOPS_SWAP_BYTES(int32_t* p)
-		{
-			union {
-				int32_t* pv;
-				uint8_t* c;
-			};
-			pv = p;
-			_swap8(c[0], c[3]);
-			_swap8(c[1], c[2]);
-		}
-
-		inline void MOPS_SWAP_BYTES(float* p)
-		{
-			union {
-				float* pv;
-				uint8_t* c;
-			};
-			pv = p;
-			_swap8(c[0], c[3]);
-			_swap8(c[1], c[2]);
-		}
-		
-		inline void MOPS_SWAP_BYTES(double* p)
-		{
-			union {
-				double* pv;
-				uint8_t* c;
-			};
-			pv = p;
-			_swap8(c[0], c[7]);
-			_swap8(c[1], c[6]);
-			_swap8(c[2], c[5]);
-			_swap8(c[3], c[4]);
-		}
-	#elif defined VMCFG_DOUBLE_MSW_FIRST
-		inline void MOPS_SWAP_BYTES(uint16_t*) {}
-		inline void MOPS_SWAP_BYTES(int32_t*) {}
-		inline void MOPS_SWAP_BYTES(float*) {}
-		inline void MOPS_SWAP_BYTES(double *p)
-		{
-			union {
-				double* pv;
-				uint32_t* w;
-			};
-			pv = p;
-			uint32_t t = w[0];
-			w[0] = w[1];
-			w[1] = t;
-		}
-	#else
-		#define MOPS_SWAP_BYTES(p) do {} while (0)
-	#endif
 
 #if defined FEATURE_NANOJIT
 	struct ImtThunkEntry

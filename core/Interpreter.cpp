@@ -2166,73 +2166,67 @@ namespace avmplus
 				NEXT;
 			}
 					
+        // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
+        // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
 #define MOPS_RANGE_CHECK(addr, type) \
-		if (addr < 0 || (uint32_t)((addr) + sizeof(type)) > envDomain->globalMemorySize()) { env->mopRangeCheckFailed(); }
+		if (uint32_t(addr) > (envDomain->globalMemorySize() - sizeof(type))) { avmplus::mop_rangeCheckFailed(env); }
 
-#define MOPS_LOAD(addr, type, result) \
-		MOPS_RANGE_CHECK(addr, type) \
-		union { const uint8_t* p8; const type* p; }; \
-		p8 = envDomain->globalMemoryBase() + (addr); \
-		result = *p;
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    #define MOPS_LOAD(addr, type, call, result) \
+            MOPS_RANGE_CHECK(addr, type) \
+            union { const uint8_t* p8; const type* p; }; \
+            p8 = envDomain->globalMemoryBase() + (addr); \
+            result = *p;
 
-#define MOPS_STORE(addr, type, value) \
-		MOPS_RANGE_CHECK(addr, type) \
-		union { uint8_t* p8; type* p; }; \
-		p8 = envDomain->globalMemoryBase() + (addr); \
-		*p = (type)(value);
+    #define MOPS_STORE(addr, type, call, value) \
+            MOPS_RANGE_CHECK(addr, type) \
+            union { uint8_t* p8; type* p; }; \
+            p8 = envDomain->globalMemoryBase() + (addr); \
+            *p = (type)(value);
+#else
+    #define MOPS_LOAD(addr, type, call, result) \
+            MOPS_RANGE_CHECK(addr, type) \
+            result = avmplus::mop_##call(envDomain->globalMemoryBase() + (addr));
+
+    #define MOPS_STORE(addr, type, call, value) \
+            MOPS_RANGE_CHECK(addr, type) \
+            avmplus::mop_##call(envDomain->globalMemoryBase() + (addr), value);
+#endif
+
+
 			
 			// loads
 			INSTR(li8) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
-				MOPS_LOAD(i1, uint8_t, ub2);	// ub2 = result
+				MOPS_LOAD(i1, uint8_t, li8, ub2);	// ub2 = result
 				sp[0] = MAKE_INTEGER(ub2);		// always fits in atom
 				NEXT;
 			}
 
 			INSTR(li16) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_LOAD(i1, uint16_t, uh2l);	// uh2l = result
-				MOPS_SWAP_BYTES(&uh2l);
-#else
-				uh2l = uint16_t(env->li16(i1));
-#endif
+				MOPS_LOAD(i1, uint16_t, li16, uh2l);	// uh2l = result
 				sp[0] = MAKE_INTEGER(uh2l);		// always fits in atom
 				NEXT;
 			}
 
 			INSTR(li32) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_LOAD(i1, int32_t, i32l);	// i32l = result
-				MOPS_SWAP_BYTES(&i32l);
-#else
-				i32l = env->li32(i1);
-#endif
+				MOPS_LOAD(i1, int32_t, li32, i32l);	// i32l = result
 				sp[0] = core->intToAtom(i32l);
 				NEXT;
 			}
 
 			INSTR(lf32) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_LOAD(i1, float, f2l);		// f2l = result
-				MOPS_SWAP_BYTES(&f2l);
-#else
-				f2l = float(env->lf32(i1));
-#endif
+				MOPS_LOAD(i1, float, lf32, f2l);		// f2l = result
 				sp[0] = core->doubleToAtom(f2l);
 				NEXT;
 			}
 
 			INSTR(lf64) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_LOAD(i1, double, d2l);		// d2l = addr
-				MOPS_SWAP_BYTES(&d2l);
-#else
-				d2l = env->lf64(i1);
-#endif
+				MOPS_LOAD(i1, double, lf64, d2l);		// d2l = addr
 				sp[0] = core->doubleToAtom(d2l);
 				NEXT;
 			}
@@ -2241,7 +2235,7 @@ namespace avmplus
 			INSTR(si8) {
 				i1 = AvmCore::integer(sp[0]);		        // i1 = addr
 				ub2 = (uint8_t)AvmCore::integer(sp[-1]);	// u2 = value
-				MOPS_STORE(i1, uint8_t, ub2);
+				MOPS_STORE(i1, uint8_t, si8, ub2);
 				sp -= 2;
 				NEXT;
 			}
@@ -2249,12 +2243,7 @@ namespace avmplus
 			INSTR(si16) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				uh2l = (uint16_t)AvmCore::integer(sp[-1]);	// uh2l = value
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_SWAP_BYTES(&uh2l);
-				MOPS_STORE(i1, uint16_t, uh2l);
-#else
-				env->si16(uh2l, i1);
-#endif
+				MOPS_STORE(i1, uint16_t, si16, uh2l);
 				sp -= 2;
 				NEXT;
 			}
@@ -2262,12 +2251,7 @@ namespace avmplus
 			INSTR(si32) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				i32l = AvmCore::integer(sp[-1]);	// i32l = value
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_SWAP_BYTES(&i32l);
-				MOPS_STORE(i1, uint32_t, i32l);
-#else
-				env->si32(i32l, i1);
-#endif
+				MOPS_STORE(i1, uint32_t, si32, i32l);
 				sp -= 2;
 				NEXT;
 			}
@@ -2275,12 +2259,7 @@ namespace avmplus
 			INSTR(sf32) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				f2l = (float)AvmCore::number(sp[-1]);		// d2l = value
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_SWAP_BYTES(&f2l);
-				MOPS_STORE(i1, float, f2l);
-#else
-				env->sf32(f2l, i1);
-#endif
+				MOPS_STORE(i1, float, sf32, f2l);
 				sp -= 2;
 				NEXT;
 			}
@@ -2288,12 +2267,7 @@ namespace avmplus
 			INSTR(sf64) {
 				i1 = AvmCore::integer(sp[0]);
 				d2l = AvmCore::number(sp[-1]);
-#ifdef AVMPLUS_UNALIGNED_ACCESS
-				MOPS_SWAP_BYTES(&d2l);
-				MOPS_STORE(i1, double, d2l);
-#else
-				env->sf64(d2l, i1);
-#endif
+				MOPS_STORE(i1, double, sf64, d2l);
 				sp -= 2;
 				NEXT;
 			}

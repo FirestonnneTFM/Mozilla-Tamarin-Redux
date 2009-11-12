@@ -253,6 +253,21 @@ namespace avmplus
 
     #include "../core/jit-calls.h"
 
+    struct MopsInfo
+    {
+        const uint32_t size;
+        const CallInfo* const loadCall;
+        const CallInfo* const storeCall;
+    };
+
+    static const MopsInfo kMopsInfo[5] = {
+        { 1, FUNCTIONID(mop_li8), FUNCTIONID(mop_si8) },    
+        { 2, FUNCTIONID(mop_li16), FUNCTIONID(mop_si16) },
+        { 4, FUNCTIONID(mop_li32), FUNCTIONID(mop_si32) },
+        { 4, FUNCTIONID(mop_lf32), FUNCTIONID(mop_sf32) }, 
+        { 8, FUNCTIONID(mop_lf64), FUNCTIONID(mop_sf64) }
+    };
+
 #if NJ_SOFTFLOAT
 
     static double i2f(int32_t i) { return i; }
@@ -581,6 +596,7 @@ namespace avmplus
         ms(i->getMethodSignature()),
         pool(i->pool()),
         interruptable(true),
+        globalMemoryInfo(NULL),
         patches(*alloc1),
         call_cache_builder(*alloc1, initCodeMgr(pool)->allocator),
         get_cache_builder(*alloc1, pool->codeMgr->allocator),
@@ -3242,17 +3258,11 @@ namespace avmplus
             case OP_lf32:
             case OP_lf64:
             {
-                static const CallInfop kFuncID[5] = {
-                    FUNCTIONID(li8),
-                    FUNCTIONID(li16),
-                    FUNCTIONID(li32),
-                    FUNCTIONID(lf32),
-                    FUNCTIONID(lf64)
-                };
-
                 int32_t index = (int32_t) op1;
-                LIns* addr = localGet(index);
-                LIns* i2 = callIns(kFuncID[opcode-OP_li8], 2, env_param, addr);
+                LIns* mopAddr = localGet(index);
+                const MopsInfo& mi = kMopsInfo[opcode-OP_li8];
+                LIns* realAddr = mopAddrToRangeCheckedRealAddr(mopAddr, mi.size);
+                LIns* i2 = callIns(mi.loadCall, 1, realAddr);
                 localSet(index, i2, result);
                 break;
             }
@@ -3264,17 +3274,11 @@ namespace avmplus
             case OP_sf32:
             case OP_sf64:
             {
-                static const CallInfop kFuncID[5] = {
-                    FUNCTIONID(si8),
-                    FUNCTIONID(si16),
-                    FUNCTIONID(si32),
-                    FUNCTIONID(sf32),
-                    FUNCTIONID(sf64)
-                };
-
                 LIns* svalue = (opcode == OP_sf32 || opcode == OP_sf64) ? localGetq(sp-1) : localGet(sp-1);
-                LIns* addr = localGet(sp);
-                callIns(kFuncID[opcode-OP_si8], 3, env_param, svalue, addr);
+                LIns* mopAddr = localGet(sp);
+                const MopsInfo& mi = kMopsInfo[opcode-OP_si8];
+                LIns* realAddr = mopAddrToRangeCheckedRealAddr(mopAddr, mi.size);
+                callIns(mi.storeCall, 2, realAddr, svalue);
                 break;
             }
 
@@ -4747,6 +4751,13 @@ namespace avmplus
         this->state = state;
         this->labelCount = state->verifier->labelCount;
 
+        if (mop_rangeCheckFailed_label.has_preds) {
+            LIns* label = Ins(LIR_label);
+            verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "mop_rangeCheckFailed"); })
+            setLabelPos(mop_rangeCheckFailed_label, label);
+            callIns(FUNCTIONID(mop_rangeCheckFailed), 1, env_param);
+        }
+
         if (npe_label.has_preds) {
             LIns *label = Ins(LIR_label);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "npe"); })
@@ -4905,6 +4916,37 @@ namespace avmplus
     {
         LIns* vtable = loadEnvVTable();
         return loadIns(LIR_ldcp, offsetof(VTable,_toplevel), vtable);
+    }
+
+    LIns* CodegenLIR::mopAddrToRangeCheckedRealAddr(LIns* mopAddr, int32_t const size)
+    {
+        AvmAssert(size > 0);    // it's signed to help make the int promotion correct
+        
+        if (!globalMemoryInfo)
+        {
+            globalMemoryInfo = (GlobalMemoryInfo*)pool->codeMgr->allocator.alloc(sizeof(GlobalMemoryInfo));
+            globalMemoryInfo->base = pool->domain->globalMemoryBase();
+            globalMemoryInfo->size = pool->domain->globalMemorySize();
+            pool->domain->addGlobalMemoryBaseRef(&globalMemoryInfo->base);
+            pool->domain->addGlobalMemorySizeRef(&globalMemoryInfo->size);
+        }
+        LInsp mopsMemorySize = loadIns(LIR_ldc, 0, InsConstPtr(&globalMemoryInfo->size));
+        verbose_only( if (frag->lirbuf->names) {
+            frag->lirbuf->names->addName(mopsMemorySize, "mopsMemorySize");
+        })
+        
+        // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
+        // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
+        LInsp lhs = mopAddr;
+        LInsp rhs = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
+        LInsp br = branchIns(LIR_jt, binaryIns(LIR_ugt, lhs, rhs));
+        patchLater(br, mop_rangeCheckFailed_label);
+
+        LInsp mopsMemoryBase = loadIns(LIR_ldcp, 0, InsConstPtr(&globalMemoryInfo->base));
+        verbose_only( if (frag->lirbuf->names) {
+            frag->lirbuf->names->addName(mopsMemoryBase, "mopsMemoryBase");
+        })
+        return binaryIns(LIR_addp, mopsMemoryBase, u2p(mopAddr));
     }
 
     LIns* CodegenLIR::loadEnvScope()

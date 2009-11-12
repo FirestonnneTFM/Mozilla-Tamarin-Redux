@@ -309,6 +309,12 @@ namespace avmplus
         LirWriter *lirout;
     };
 
+    struct GlobalMemoryInfo
+    {
+        uint8_t* base;
+        uint32_t size; 
+    };
+
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
      * of the JIT.  It is intended to be instantiated on the stack once for each
@@ -352,6 +358,8 @@ namespace avmplus
         LIns *coreAddr;
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
+        CodegenLabel mop_rangeCheckFailed_label;
+        GlobalMemoryInfo* globalMemoryInfo; // allocated with CodeMgr, so lifetime is same as the code's
         intptr_t lastPcSave;
         SeqBuilder<Patch> patches;
         LIns *exBranch;
@@ -382,6 +390,7 @@ namespace avmplus
         LIns *branchIns(LOpcode op, LIns *cond, int target_off);
         LIns *retIns(LIns *val);
         LIns *loadToplevel();
+        LIns* mopAddrToRangeCheckedRealAddr(LIns* mopAddr, int32_t const size);
         LIns *loadEnvScope();
         LIns *loadEnvVTable();
         LIns *loadEnvAbcEnv();
