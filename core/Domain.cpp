@@ -42,8 +42,8 @@ namespace avmplus
 {
 	Domain::Domain(AvmCore *_core, Domain* base) : base(base)
 		  , core(_core)
-		  , globalMemoryBase(m_gmInfo.globalMemoryScratch)
-		  , globalMemorySize(sizeof(m_gmInfo.globalMemoryScratch))
+		  , _globalMemoryBase(m_gmInfo.globalMemoryScratch)
+		  , _globalMemorySize(sizeof(m_gmInfo.globalMemoryScratch))
 	{
 		//m_gmInfo.globalMemory = NULL; -- not necessary, null is default
 		// should be able to contain largest read or write (currently double)
@@ -129,9 +129,9 @@ namespace avmplus
 		return true;
 	}
 
-	// record that this unsigned char ** refers to a pointer to the
+	// record that this uint8_t** refers to a pointer to the
 	// global memory backing store
-	void Domain::addGlobalMemoryBaseRef(unsigned char **baseRef) const
+	void Domain::addGlobalMemoryBaseRef(uint8_t** baseRef) const
 	{
 		AvmAssert(baseRef != NULL);
 
@@ -157,7 +157,7 @@ namespace avmplus
 
 	// same as addGlobalMemoryBaseRef but for references to the
 	// size of the global memory object
-	void Domain::addGlobalMemorySizeRef(uint32 *sizeRef) const
+	void Domain::addGlobalMemorySizeRef(uint32_t* sizeRef) const
 	{
 		AvmAssert(sizeRef != NULL);
 
@@ -177,158 +177,23 @@ namespace avmplus
 		m_gmInfo.globalMemorySizeRefNum++;
 	}
 
-	// junk to toggle protection on code while
-	// updating global memory stuff
-	// TODO get rid of ifdefs (some/most of this
-	// functionality lives in GCHeap at various
-	// levels)
-	class ProtectionHelper
-	{
-	private:
-
-	#if defined(AVMPLUS_WIN32)
-		typedef DWORD PROT_TYPE;
-		typedef size_t PROT_SIZE;
-	#elif (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX) || defined(AVMPLUS_SYMBIAN))
-		typedef int PROT_TYPE;
-		typedef size_t PROT_SIZE;
-	#else
-		#error "PROT_TYPE and PROT_SIZE must be defined for this platform"
-	#endif
-
-		void*			m_lastPage;			// pointer to first page we have currently toggled
-		PROT_TYPE		m_lastPageProt;		// old protection of pages currently toggled
-		PROT_SIZE		m_lastPageSize;		// size of memory current toggled (divisible by page size)
-		const PROT_SIZE	m_pageSize;
-	#if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX) || defined(AVMPLUS_SYMBIAN))
-		void*			m_codeMin;
-		void*			m_codeMax;
-	#endif
-	
-	private:
-		void* GetPage(void *p, sintptr off)
-		{
-			return (void *)(~(m_pageSize-1) & (off + (sintptr)p));
-		}
-
-	public:
-
-		ProtectionHelper() : 
-			m_lastPage(NULL), 
-			m_lastPageProt(0), 
-			m_lastPageSize(0), 
-			m_pageSize(VMPI_getVMPageSize())
-#if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX) || defined(AVMPLUS_SYMBIAN))
-			, m_codeMin(NULL)
-			, m_codeMax(NULL)
-#endif
-		{
-		}
-
-		// flush the instruction cache
-		void FlushCache()
-		{
-		#if defined(AVMPLUS_WIN32)
-			FlushInstructionCache(GetCurrentProcess(), NULL, 0);
-		#elif (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX))
-			if (m_codeMin)
-			{
-				AvmAssert(m_codeMax != NULL);
-				msync((maddr_ptr)m_codeMin, (char*)m_codeMax - (char*)m_codeMin + m_pageSize, MS_INVALIDATE);
-			}
-		#elif defined(AVMPLUS_SYMBIAN)
-			// nothing
-		#else
-			#pragma warning flush instruction cache?
-		#endif
-		}
-
-		// if p != NULL, ensure that [p, p+r) is writeable
-		// (and maybe restore previous state for previous protect change)
-		// if p == NULL, restore previous state
-		// ([m_lastPage, m_lastPage + m_lastPageSize) to m_lastPageProt protection)
-		void MakeWriteable(void* p, uint32 r)
-		{
-			AvmAssert(r < m_pageSize);
-			void* page = GetPage(p, 0);
-			void* page1 = GetPage(p, r - 1); // might span a page
-			size_t size = (page == page1) ? m_pageSize : 2 * m_pageSize;
-
-			#if (defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX))
-			if (!page)
-			{
-				m_codeMin = m_codeMax = NULL;
-			}
-			else
-			{
-				if (!m_codeMin)
-					m_codeMin = page;
-				if (page > m_codeMax)
-					m_codeMax = (char*)page - m_pageSize + size;
-			}
-			#endif
-
-			if (page != m_lastPage || size != m_lastPageSize)
-			{
-				if (m_lastPage)
-				{
-				#ifdef AVMPLUS_WIN32
-				#ifndef UNDER_CE
-					DWORD dwIgnore;
-					VirtualProtectEx(GetCurrentProcess(), m_lastPage, m_lastPageSize, m_lastPageProt, &dwIgnore);
-				#else
-					AvmAssert(0);
-				#endif
-				#elif !defined(AVMPLUS_SYMBIAN)
-					int result = mprotect((maddr_ptr)m_lastPage, m_lastPageSize, m_lastPageProt);
-					AvmAssert(result == 0);
-					(void)result;
-				#else
-					AvmAssert(0);
-				#endif
-					m_lastPage =  NULL;
-					m_lastPageSize = 0;
-				}
-				if (page)
-				{
-				#ifdef AVMPLUS_WIN32
-				#ifndef UNDER_CE
-					VirtualProtectEx(GetCurrentProcess(), page, size, PAGE_READWRITE, &m_lastPageProt);
-				#else
-					AvmAssert(0);
-				#endif
-				#elif !defined(AVMPLUS_SYMBIAN)
-					int result = mprotect((maddr_ptr)page, size, PROT_READ | PROT_WRITE);
-					AvmAssert(result == 0);
-					(void)result;
-					m_lastPageProt = PROT_READ | PROT_EXEC;
-				#endif
-					m_lastPage = page;
-					m_lastPageSize = size;
-				}
-			}
-		}
-	};
-
 	// memory changed so go through and update all reference to both the base
 	// and the size of the global memory
-	void Domain::notifyGlobalMemoryChanged(unsigned char *newBase, uint32 newSize) const
+	void Domain::notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize) const
 	{
 		AvmAssert(newBase != NULL); // real base address
 		AvmAssert(newSize >= GLOBAL_MEMORY_MIN_SIZE); // big enough
 
 		// ensure a real change happened...
-		if(newBase != globalMemoryBase || newSize != globalMemorySize)
+		if(newBase != _globalMemoryBase || newSize != _globalMemorySize)
 		{
-			ProtectionHelper protHelper;
-
 			// if a real change happened to backing store base address...
-			if(newBase != globalMemoryBase)
+			if(newBase != _globalMemoryBase)
 			{
 				GMInfo::BaseRefChunk *baseRefs = m_gmInfo.globalMemoryBaseRefs;
 
 				// go through each reference
-				for(uint32 n = 0; n < m_gmInfo.globalMemoryBaseRefNum; n++)
+				for(uint32_t n = 0; n < m_gmInfo.globalMemoryBaseRefNum; n++)
 				{
 					// get the slot
 					int mod = n % GMInfo::REFS_PER_CHUNK;
@@ -342,21 +207,20 @@ namespace avmplus
 						if(!baseRefs)
 							baseRefs = m_gmInfo.globalMemoryBaseRefs;
 					}
-					unsigned char** p = (baseRefs->refs[mod]);
-					// make it writeable
-					protHelper.MakeWriteable(p, sizeof(unsigned char *));
+					uint8_t** p = (baseRefs->refs[mod]);
 					// and do a difference instead of a simple write
 					// as it may be offset from the base
-					*p = *p - globalMemoryBase + newBase;
+                    // printf("update base %p: %p -> %p\n",p,*p,*p - _globalMemoryBase + newBase);
+					*p = *p - _globalMemoryBase + newBase;
 				}
 			}
 
 			// same as above but for size
-			if(newSize != globalMemorySize)
+			if(newSize != _globalMemorySize)
 			{
 				GMInfo::SizeRefChunk* sizeRefs = m_gmInfo.globalMemorySizeRefs;
 
-				for(uint32 n = 0; n < m_gmInfo.globalMemorySizeRefNum; n++)
+				for(uint32_t n = 0; n < m_gmInfo.globalMemorySizeRefNum; n++)
 				{
 					int mod = n % GMInfo::REFS_PER_CHUNK;
 
@@ -367,20 +231,15 @@ namespace avmplus
 						if(!sizeRefs)
 							sizeRefs = m_gmInfo.globalMemorySizeRefs;
 					}
-					uint32* p = (sizeRefs->refs[mod]);
-					protHelper.MakeWriteable(p, sizeof(uint32));
-					*p = *p - globalMemorySize + newSize;
+					uint32_t* p = (sizeRefs->refs[mod]);
+                    // printf("update size %p: %d -> %d\n",p,*p,*p - _globalMemorySize + newSize);
+					*p = *p - _globalMemorySize + newSize;
 				}
 			}
 
-			// remove and writeability changes
-			protHelper.MakeWriteable(NULL, 1);
 			// record the new base and size
-			globalMemoryBase = newBase;
-			globalMemorySize = newSize;
-
-			// and flush the instruction cache
-			protHelper.FlushCache();
+			_globalMemoryBase = newBase;
+			_globalMemorySize = newSize;
 		}
 	}
 }
