@@ -2458,9 +2458,9 @@ Assembler::asm_jtbl(LIns* ins, NIns** table)
 {
     Register indexreg = findRegFor(ins->oprnd1(), GpRegs);
     Register tmp = registerAlloc(GpRegs & ~rmask(indexreg));
+    _allocator.addFree(tmp);
     LDR_scaled(PC, tmp, indexreg, 2);      // LDR PC, [tmp + index*4]
     asm_ld_imm(tmp, (int32_t)table);       // tmp = #table
-    _allocator.addFree(tmp);
 }
 
 }
