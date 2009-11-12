@@ -186,4 +186,16 @@ void coerceobj(E env, ScriptObject* obj, Traits*);
  */
 Atom op_add(AvmCore*, Atom lhs, Atom rhs);
 
+void FASTCALL mop_rangeCheckFailed(MethodEnv* env);
+int32_t FASTCALL mop_li8(const void* addr);
+int32_t FASTCALL mop_li16(const void* addr);
+int32_t FASTCALL mop_li32(const void* addr);
+double FASTCALL mop_lf32(const void* addr);
+double FASTCALL mop_lf64(const void* addr);
+void FASTCALL mop_si8(void* addr, int32_t value);
+void FASTCALL mop_si16(void* addr, int32_t value);
+void FASTCALL mop_si32(void* addr, int32_t value);
+void mop_sf32(void* addr, double value);
+void mop_sf64(void* addr, double value);
+
 } // namespace avmplus

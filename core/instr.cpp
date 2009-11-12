@@ -443,4 +443,158 @@ add_numbers:
 #undef IS_BOTH_INTEGER
 }
 
+void FASTCALL mop_rangeCheckFailed(MethodEnv* env)
+{
+    env->toplevel()->throwRangeError(kInvalidRangeError);
+}
+
+// note: all of the mop_xxx load/store functions assume
+// that the caller has done range checking, and the address
+// is safe for its intended use...
+int32_t FASTCALL mop_li8(const void* addr)
+{
+    // loads an unsigned byte, zero-extends
+    return *(const uint8_t*)(addr);
+}
+
+int32_t FASTCALL mop_li16(const void* addr)
+{
+    // loads an unsigned short, zero-extends
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    return *(const uint16_t*)(addr);
+#else
+    const uint8_t* u = (const uint8_t*)addr;
+    return (uint16_t(u[1]) << 8) | 
+            uint16_t(u[0]);
+#endif
+}
+
+int32_t FASTCALL mop_li32(const void* addr)
+{
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    return *(const int32_t*)(addr);
+#else
+    const uint8_t* u = (const uint8_t*)addr;
+    return (uint32_t(u[3]) << 24) |
+           (uint32_t(u[2]) << 16) |
+           (uint32_t(u[1]) << 8) |
+           uint32_t(u[0]);
+#endif
+}
+
+double FASTCALL mop_lf32(const void* addr)
+{
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    return *(const float*)(addr);
+#else
+    union {
+        uint32_t a;
+        float b;
+    };
+    const uint8_t* u = (const uint8_t*)addr;
+    a = (uint32_t(u[3]) << 24) |
+        (uint32_t(u[2]) << 16) |
+        (uint32_t(u[1]) << 8) |
+        uint32_t(u[0]);
+    return b;
+#endif
+}
+
+double FASTCALL mop_lf64(const void* addr)
+{
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    return *(const double*)(addr);
+#else
+    union {
+        uint64_t a;
+        double b;
+    };
+    const uint8_t* u = (const uint8_t*)addr;
+#ifdef VMCFG_DOUBLE_MSW_FIRST
+    #error "VMCFG_DOUBLE_MSW_FIRST not handled here yet"
+#endif
+    a = (uint64_t(u[7]) << 56) |
+        (uint64_t(u[6]) << 48) |
+        (uint64_t(u[5]) << 40) |
+        (uint64_t(u[4]) << 32) |
+        (uint64_t(u[3]) << 24) |
+        (uint64_t(u[2]) << 16) |
+        (uint64_t(u[1]) << 8) |
+        uint64_t(u[0]);
+    return b;
+#endif
+}
+
+void FASTCALL mop_si8(void* addr, int32_t value)
+{
+    *(uint8_t*)(addr) = uint8_t(value);
+}
+
+void FASTCALL mop_si16(void* addr, int32_t value)
+{
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    *(uint16_t*)(addr) = uint16_t(value);
+#else
+    uint8_t* u = (uint8_t*)addr;
+    u[0] = uint8_t(value);
+    u[1] = uint8_t(value >> 8);
+#endif
+}
+
+void FASTCALL mop_si32(void* addr, int32_t value)
+{
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    *(int32_t*)(addr) = int32_t(value);
+#else
+    uint8_t* u = (uint8_t*)addr;
+    u[0] = uint8_t(value);
+    u[1] = uint8_t(value >> 8);
+    u[2] = uint8_t(value >> 16);
+    u[3] = uint8_t(value >> 24);
+#endif
+}
+
+void mop_sf32(void* addr, double value)
+{
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    *(float*)(addr) = float(value);
+#else
+    union {
+        float a;
+        uint32_t b;
+    };
+    a = float(value);
+    uint8_t* u = (uint8_t*)addr;
+    u[0] = uint8_t(b);
+    u[1] = uint8_t(b >> 8);
+    u[2] = uint8_t(b >> 16);
+    u[3] = uint8_t(b >> 24);
+#endif
+}
+
+void mop_sf64(void* addr, double value)
+{
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    *(double*)(addr) = double(value);
+#else
+    union {
+        double a;
+        uint64_t b;
+    };
+    a = double(value);
+    uint8_t* u = (uint8_t*)addr;
+#ifdef VMCFG_DOUBLE_MSW_FIRST
+    #error "VMCFG_DOUBLE_MSW_FIRST not handled here yet"
+#endif
+    u[0] = uint8_t(b);
+    u[1] = uint8_t(b >> 8);
+    u[2] = uint8_t(b >> 16);
+    u[3] = uint8_t(b >> 24);
+    u[4] = uint8_t(b >> 32);
+    u[5] = uint8_t(b >> 40);
+    u[6] = uint8_t(b >> 48);
+    u[7] = uint8_t(b >> 56);
+#endif
+}
+
 } // namespace avmplus

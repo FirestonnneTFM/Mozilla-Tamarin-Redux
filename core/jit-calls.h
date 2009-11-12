@@ -813,16 +813,17 @@ SSE2_ONLY(
 #endif
 
     // MOPS helper functions
-    METHOD(ENVADDR(MethodEnv::li8),  SIG2(I,P,I), li8)
-    METHOD(ENVADDR(MethodEnv::li16), SIG2(I,P,I), li16)
-    METHOD(ENVADDR(MethodEnv::li32), SIG2(I,P,I), li32)
-    METHOD(ENVADDR(MethodEnv::lf32), SIG2(F,P,I), lf32)
-    METHOD(ENVADDR(MethodEnv::lf64), SIG2(F,P,I), lf64)
-    METHOD(ENVADDR(MethodEnv::si8),  SIG3(V,P,I,I), si8)
-    METHOD(ENVADDR(MethodEnv::si16), SIG3(V,P,I,I), si16)
-    METHOD(ENVADDR(MethodEnv::si32), SIG3(V,P,I,I), si32)
-    METHOD(ENVADDR(MethodEnv::sf32), SIG3(V,P,F,I), sf32)
-    METHOD(ENVADDR(MethodEnv::sf64), SIG3(V,P,F,I), sf64)
+    FASTFUNCTION(FUNCADDR(mop_rangeCheckFailed), SIG1(V,P), mop_rangeCheckFailed)
+    FASTFUNCTION(FUNCADDR(mop_li8), SIG1(I,P), mop_li8)
+    FASTFUNCTION(FUNCADDR(mop_li16), SIG1(I,P), mop_li16)
+    FASTFUNCTION(FUNCADDR(mop_li32), SIG1(I,P), mop_li32)
+    FASTFUNCTION(FUNCADDR(mop_lf32), SIG1(F,P), mop_lf32)
+    FASTFUNCTION(FUNCADDR(mop_lf64), SIG1(F,P), mop_lf64)
+    FASTFUNCTION(FUNCADDR(mop_si8), SIG2(V,P,I), mop_si8)
+    FASTFUNCTION(FUNCADDR(mop_si16), SIG2(V,P,I), mop_si16)
+    FASTFUNCTION(FUNCADDR(mop_si32), SIG2(V,P,I), mop_si32)
+    FUNCTION(FUNCADDR(mop_sf32), SIG2(V,P,F), mop_sf32)
+    FUNCTION(FUNCADDR(mop_sf64), SIG2(V,P,F), mop_sf64)
 
     typedef Atom (*op_call_MethodEnv)(MethodEnv*, Atom, int, Atom*);
     FUNCTION(FUNCADDR((op_call_MethodEnv)&avmplus::op_call<MethodEnv*>), SIG4(A,P,A,I,P), op_call)
