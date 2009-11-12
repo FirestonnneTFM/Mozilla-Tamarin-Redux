@@ -91,7 +91,7 @@ abcasm/stringEscapes , .* , skip,
 # Test is supposed to throw a verifyerror
 abcasm/bug_481171, .*verifyall.*, skip, Intended behaviour is to throw a verifyerror.
 abcasm/nullCheck/CallStatic , .*verifyall.* , expectedfail, Expected failure in -Dverifyall, see https://bugzilla.mozilla.org/show_bug.cgi?id=491356
-abcasm/nullCheck/K , .*wordcode.* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=527726
+
 
 ####################
 # Differential testing (avmdiff.py)
