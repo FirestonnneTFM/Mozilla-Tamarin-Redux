@@ -648,7 +648,8 @@ namespace avmplus
 		return ((1 << Traits::getBuiltinType(slotTE)) & BIG_TYPE_MASK) != 0;
 	}
 
-	static REALLY_INLINE int32_t pad8(int32_t nextSlotOffset)
+    // Sun compilers don't allow static and REALLY_INLINE
+	/*static*/ REALLY_INLINE int32_t pad8(int32_t nextSlotOffset)
 	{
 		// 8-aligned, 8-byte field
 		if (nextSlotOffset & 7)
@@ -678,7 +679,8 @@ namespace avmplus
 		}
 	}
 
-	static REALLY_INLINE bool isPointerSlot(Traits* slotTE)
+    // Sun compilers don't allow static and REALLY_INLINE
+	/*static*/ REALLY_INLINE bool isPointerSlot(Traits* slotTE)
 	{
 		BuiltinType bt = Traits::getBuiltinType(slotTE);
 		AvmAssert(bt != BUILTIN_void);
@@ -968,7 +970,8 @@ namespace avmplus
 		static const bool is64Bit = sizeof(void*) == 8;
 	}
 	
-	static REALLY_INLINE int32_t computeSlotOffset(Traits* slotType, int32_t& next32BitSlotOffset, int32_t& nextPointerSlotOffset, int32_t& next64BitSlotOffset)
+    // Sun compilers don't allow static and REALLY_INLINE
+	/*static*/ REALLY_INLINE int32_t computeSlotOffset(Traits* slotType, int32_t& next32BitSlotOffset, int32_t& nextPointerSlotOffset, int32_t& next64BitSlotOffset)
 	{
 		if (isPointerSlot(slotType))
 		{
