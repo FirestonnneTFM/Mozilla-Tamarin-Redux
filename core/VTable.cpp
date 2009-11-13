@@ -116,7 +116,7 @@ namespace avmplus
 		
 		MMgc::GC* gc = vtable->traits->core->GetGC(); 
 		Traitsp traits = vtable->traits;
-		AvmAssert(!traits->isInterface);
+		AvmAssert(!traits->isInterface());
 		AvmAssert(traits->core->IsJITEnabled());
 		
 		// first check to see if we added any interfaces. if not, we can just inherit.
@@ -129,7 +129,7 @@ namespace avmplus
 		for (uint32_t k = 0; k < tb->interfaceCapacity ; ++k) 
 		{
 			Traitsp ifc = tb->getInterface(k);
-			if (!ifc || !ifc->isInterface)
+			if (!ifc || !ifc->isInterface())
 				continue;
 			
 			TraitsBindingsp ifcd = ifc->getTraitsBindings();
@@ -222,7 +222,7 @@ namespace avmplus
 	{
 		AvmAssert(this->linked);
 		AvmAssert(this->base != NULL); // only Object has null base, and it has no Interfaces
-		AvmAssert(!traits->isInterface);
+		AvmAssert(!traits->isInterface());
 		AvmAssert(traits->core->IsJITEnabled());
 		
 		AvmCore* core = traits->core;

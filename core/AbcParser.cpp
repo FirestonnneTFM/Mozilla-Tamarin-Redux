@@ -892,7 +892,7 @@ namespace avmplus
 			{
 				// Interface methods should not have bodies
 				Traits* declaringTraits = info->declaringTraits();
-				if (declaringTraits && declaringTraits->isInterface)
+				if (declaringTraits && declaringTraits->isInterface())
 				{
 					toplevel->throwVerifyError(kIllegalInterfaceMethodBodyError, core->toErrorString(info));
 				}
@@ -1576,7 +1576,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kCannotExtendFinalClass, core->toErrorString(&mn));
 			}
 
-			if (baseTraits && baseTraits->isInterface)
+			if (baseTraits && baseTraits->isInterface())
 			{
 				// error, can't extend interface
 				toplevel->throwVerifyError(kCannotExtendError, core->toErrorString(&mn), core->toErrorString(baseTraits));
@@ -1607,7 +1607,7 @@ namespace avmplus
 				for( int x = 0; x < interfaceCount; ++ x )
 				{
 					Traits *t = pool->resolveTypeName(pos, toplevel);
-					if (!t || !t->isInterface)
+					if (!t || !t->isInterface())
 					{
 						// error, can't extend interface
 						toplevel->throwVerifyError(kCannotImplementError, core->toErrorString(&mn), core->toErrorString(t));
@@ -1664,7 +1664,7 @@ namespace avmplus
 
 			if (flags & 4)
 			{
-				itraits->isInterface = true;
+				itraits->m_isInterface = true;
 
 				// check for slotCount != 0 now done at resolve time
 

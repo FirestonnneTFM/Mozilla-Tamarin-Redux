@@ -1950,7 +1950,7 @@ namespace avmplus
 		Traits* resultType = mms->returnTraits();
 
 		emitCoerceArgs(m, argc);
-		if (!t->isInterface)
+		if (!t->isInterface())
 		{
 		    coder->writeOp2(state, pc, OP_callmethod, disp_id, argc, resultType);
 			if (opcode == OP_callpropvoid)
