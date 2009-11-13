@@ -96,6 +96,8 @@ namespace avmplus
 
 	private:
 		Java*	jvm();
+		
+		DECLARE_SLOTS_JObjectClass;
 	};
 
 	class JObject : public ScriptObject
@@ -126,6 +128,8 @@ namespace avmplus
 	private:
 		jobject		 obj;		/* underlying java object */
 		DWB(JClass*) jclass;	/* class of this object */
+		
+		DECLARE_SLOTS_JObject;
 	};
 
 	// non-AS exposed wrapper around a jvm Class object
@@ -302,6 +306,8 @@ namespace avmplus
 		JObject* create(String* , Atom* , int ) { return 0; }
 		JObject* createArray(JObject* , int , ArrayObject* ) { return 0; }
 		String*	 constructorSignature(String* , Atom* , int ) { return 0; }
+		
+		DECLARE_SLOTS_JObjectClass;
 	};
 
 	class JObject : public ScriptObject
@@ -309,6 +315,8 @@ namespace avmplus
 	public:
 		JObject(VTable *vtable, ScriptObject *proto) : ScriptObject(vtable, proto) { }
 		String* javaObjectToString() const { return 0; }
+		
+		DECLARE_SLOTS_JObject;
 	};
 }
 #endif /* AVMPLUS_WITH_JNI */

@@ -190,7 +190,7 @@ REALLY_INLINE TraitsMetadata::MetadataPtr TraitsMetadata::getMetadataPos(PoolObj
     return metadataPos;
 }
 
-REALLY_INLINE uint32_t Traits::getSizeOfInstance() const
+REALLY_INLINE uint16_t Traits::getSizeOfInstance() const
 {
     return m_sizeofInstance;
 }
@@ -210,20 +210,15 @@ REALLY_INLINE uint32_t Traits::getTotalSize() const
 REALLY_INLINE uint32_t Traits::getSlotAreaSize() const
 {
     AvmAssert(linked);
-    return m_totalSize - m_sizeofInstance - (m_hashTableOffset ? sizeof(InlineHashtable) : 0);
-}
-
-REALLY_INLINE uint32_t Traits::getSlotAreaStart() const
-{
-    return m_sizeofInstance + (base ? base->getSlotAreaSize() : 0);
+    return getTotalSize() - m_sizeofInstance - (m_hashTableOffset ? sizeof(InlineHashtable) : 0);
 }
 
 // in bytes. includes size for all base classes too.
 REALLY_INLINE uint32_t Traits::getExtraSize() const
 {
     AvmAssert(linked);
-    AvmAssert(m_totalSize >= m_sizeofInstance);
-    return m_totalSize - m_sizeofInstance;
+    AvmAssert(getTotalSize() >= m_sizeofInstance);
+    return getTotalSize() - m_sizeofInstance;
 }
 
 // sadly, it's still more efficient to stash this in Traits itself, as it's nontrivial to recover when

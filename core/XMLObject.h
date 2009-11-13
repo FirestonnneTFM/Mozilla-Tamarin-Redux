@@ -294,6 +294,7 @@ namespace avmplus
 		void CoerceE4XMultiname(const Multiname *m, Multiname &out) const;
 		bool NodeNameEquals(Stringp nodeName, int32_t nodeNameStart, Stringp parentName, Namespace *ns);
 		Namespacep publicNS;
+		DECLARE_SLOTS_XMLObject;
 	};
 
 	/**
@@ -335,6 +336,8 @@ namespace avmplus
 		{
 			name = m_mn;
 		}
+		
+		DECLARE_SLOTS_QNameObject;
 	};
 }
 #endif /* __avmplus_XMLObject__ */

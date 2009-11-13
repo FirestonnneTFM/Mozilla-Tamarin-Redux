@@ -57,11 +57,13 @@ namespace avmplus
 		// this = argv[0]
 		// arg1 = argv[1]
 		// argN = argv[argc]
-        Atom call(int argc, Atom *argv) 
+		Atom call(int argc, Atom *argv) 
 		{
 			return construct(argc, argv);
 		}
-    };
+        
+		DECLARE_SLOTS_IntClass;
+	};
 
 	/**
 	 * class uint
@@ -83,7 +85,9 @@ namespace avmplus
 		{
 			return construct(argc,argv);
 		}
-    };
+        
+		DECLARE_SLOTS_UIntClass;
+	};
 }
 
 #endif /* __avmplus_IntClass__ */

@@ -44,6 +44,7 @@ package flash.sampler
      * @langversion 3.0     
      * @keyword StackFrame      
      */
+    [native(cls="StackFrameClass", instance="StackFrameObject", methods="auto", constsetters="true")] // @todo: native only for slot getter/setter
     public final class StackFrame
     {
     
@@ -103,7 +104,7 @@ package flash.sampler
      * @keyword Sample      
      * @see package.html#getSamples() flash.sampler.getSamples()
      */
-	[native(cls="SampleClass", instance="SampleObject", methods="auto")]
+    [native(cls="SampleClass", instance="SampleObject", methods="auto", constsetters="true")]
     public class Sample
     {
 		/**
@@ -135,7 +136,7 @@ package flash.sampler
     * @see package.html#getSamples() flash.sampler.getSamples()
     * @includeExample examples\SampleTypesExample.as -noswf    
     */
-	[native(cls="NewObjectSampleClass", instance="NewObjectSampleObject", methods="auto")]
+    [native(cls="NewObjectSampleClass", instance="NewObjectSampleObject", methods="auto", constsetters="true")]
     public final class NewObjectSample extends Sample
     {
     	/** 
@@ -179,7 +180,7 @@ package flash.sampler
     * @see package.html#getSamples() flash.sampler.getSamples()
     * @includeExample examples\SampleTypesExample.as -noswf    
     */    
-	[native(cls="DeleteObjectSampleClass", instance="DeleteObjectSampleObject", methods="auto")]
+    [native(cls="DeleteObjectSampleClass", instance="DeleteObjectSampleObject", methods="auto", constsetters="true")] // @todo: native only for slot getter/setter
     public final class DeleteObjectSample extends Sample
     {
     	/** 

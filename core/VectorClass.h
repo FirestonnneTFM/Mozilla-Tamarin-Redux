@@ -439,7 +439,7 @@ namespace avmplus
 		}
 	protected:
 		virtual VectorBaseObject* newVector(uint32 length = 0);
-
+		DECLARE_SLOTS_IntVectorObject;
 	};
 
 	class UIntVectorObject : public TypedVectorObject<uint32> {
@@ -455,6 +455,7 @@ namespace avmplus
 
 	protected:
 		virtual VectorBaseObject* newVector(uint32 length = 0);
+		DECLARE_SLOTS_UIntVectorObject;
 	};
 
 	class DoubleVectorObject : public TypedVectorObject<double> {
@@ -470,6 +471,7 @@ namespace avmplus
 
 	protected:
 		virtual VectorBaseObject* newVector(uint32 length = 0);
+		DECLARE_SLOTS_DoubleVectorObject;
 	};
 
 	class ObjectVectorObject : public TypedVectorObject<Atom>
@@ -524,7 +526,7 @@ namespace avmplus
 		}
 
 		DRCWB(ClassClosure*) t;
-
+		DECLARE_SLOTS_ObjectVectorObject;
 	};
 
 	class IntVectorClass : public ClassClosure
@@ -542,6 +544,8 @@ namespace avmplus
 		bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
 		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
 		Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
+		
+		DECLARE_SLOTS_IntVectorClass;
     };
 
 	class UIntVectorClass : public ClassClosure
@@ -559,6 +563,8 @@ namespace avmplus
 		bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
 		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
 		Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
+		
+		DECLARE_SLOTS_UIntVectorClass;
     };
 
 	class DoubleVectorClass : public ClassClosure
@@ -576,6 +582,8 @@ namespace avmplus
 		bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
 		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
 		Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
+		
+		DECLARE_SLOTS_DoubleVectorClass;
     };
 
 	class VectorClass : public ClassClosure
@@ -603,6 +611,8 @@ namespace avmplus
 	
 	private:
 		DWB(HeapHashtable*) instantiated_types;
+		
+		DECLARE_SLOTS_VectorClass;
 	};
 
 	class ObjectVectorClass : public ClassClosure
@@ -624,6 +634,7 @@ namespace avmplus
 
 	private:
 		DRCWB(ClassClosure*) index_type;
+		DECLARE_SLOTS_ObjectVectorClass;
 	};
 
 }	

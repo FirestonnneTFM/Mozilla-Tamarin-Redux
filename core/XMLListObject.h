@@ -253,6 +253,8 @@ namespace avmplus
 	public:
 
 		XMLListObject(XMLListClass *type, Atom targetObject = nullObjectAtom, const Multiname* targetProperty = 0);
+		
+		DECLARE_SLOTS_XMLListObject;
 	};
 }
 

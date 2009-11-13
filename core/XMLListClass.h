@@ -60,6 +60,8 @@ namespace avmplus
 		Atom construct(int argc, Atom* argv);
 
 		Atom ToXMLList(Atom arg);
+        
+		DECLARE_SLOTS_XMLListClass;
 	};
 }
 

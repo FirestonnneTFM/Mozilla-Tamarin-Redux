@@ -192,6 +192,8 @@ namespace avmshell
 
 		MMgc::Cleaner c;
 		ByteArrayFile m_byteArray;
+		
+		DECLARE_SLOTS_ByteArrayObject;
 	};
 
 	//
@@ -206,6 +208,8 @@ namespace avmshell
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
 		ByteArrayObject *readFile(Stringp filename);
+		
+		DECLARE_SLOTS_ByteArrayClass;
     };
 }
 

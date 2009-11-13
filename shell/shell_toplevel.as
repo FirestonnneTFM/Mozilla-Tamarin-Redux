@@ -55,13 +55,13 @@ package avmplus
 	}
 
 	// this class exists solely to test native classes that use MI.
-	[native(cls="MIClass", instance="MIObject", methods="MIObjectImpl")]
+	[native(cls="::avmshell::MIClass", instance="::avmshell::MIObject", methods="::avmshell::MIObjectImpl")]
 	internal class MI
 	{
 		public native function plus(i:Number):Number;
 	}
 
-	[native(cls="SystemClass", methods="auto")]
+	[native(cls="::avmshell::SystemClass", methods="auto")]
 	public class System
 	{
 		// this metadata exists solely so that nativegen.py will encounter it during shell building,
@@ -106,7 +106,7 @@ package avmplus
 		public native static function isGlobal(o:Object):Boolean;
 	}
 	
-	[native(cls="FileClass", methods="auto")]
+	[native(cls="::avmshell::FileClass", methods="auto")]
 	public class File
 	{
 		public native static function exists(filename:String):Boolean;

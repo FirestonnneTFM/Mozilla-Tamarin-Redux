@@ -84,7 +84,7 @@ namespace avmplus
 		Stringp resolveUtf8(uint32 index) const;
 		Stringp parseName(const byte* &pc) const;
 		uint32_t resolveQName(const byte*& pc, Multiname& m) const;
-		uint32_t computeInstanceSize(int class_id, Traits* base) const;
+		void computeInstanceSizeAndSlotsOffset(int class_id, Traits* base, uint16_t& sizeofInstance, uint16_t& offsetofSlots) const;
 		void parseMethodInfos();
 		void parseMetadataInfos();
 		bool parseInstanceInfos();
@@ -92,7 +92,8 @@ namespace avmplus
 		bool parseScriptInfos();
 		void parseMethodBodies();
 		void parseCpool(API api);
-		Traits* parseTraits(uint32_t sizeofInstance,
+		Traits* parseTraits(uint16_t sizeofInstance,
+							uint16_t offsetofSlots,
 							Traits* base, 
 							Namespacep ns, 
 							Stringp name, 

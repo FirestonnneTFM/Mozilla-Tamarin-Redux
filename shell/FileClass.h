@@ -72,6 +72,8 @@ namespace avmshell
 		 * Writes the text "data" to the file "filename"
 		 */
 		void write(Stringp filename, Stringp data);
+		
+		DECLARE_SLOTS_FileClass;
     };
 }
 

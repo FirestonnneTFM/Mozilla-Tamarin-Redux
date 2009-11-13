@@ -39,6 +39,72 @@
 
 #define AVMTHUNK_VERSION 5
 
+namespace avmplus {
+    class ArgumentErrorClass; //ArgumentError$
+    class ArgumentErrorObject; //ArgumentError
+    class ArrayClass; //Array$
+    class ArrayObject; //Array
+    class BooleanClass; //Boolean$
+    class ClassClass; //Class$
+    class ClassClosure; //Class
+    class DateClass; //Date$
+    class DateObject; //Date
+    class DefinitionErrorClass; //DefinitionError$
+    class DefinitionErrorObject; //DefinitionError
+    class DoubleVectorClass; //__AS3__.vec::Vector$double$
+    class DoubleVectorObject; //__AS3__.vec::Vector$double
+    class ErrorClass; //Error$
+    class ErrorObject; //Error
+    class EvalErrorClass; //EvalError$
+    class EvalErrorObject; //EvalError
+    class FunctionClass; //Function$
+    class FunctionObject; //Function
+    class IntClass; //int$
+    class IntVectorClass; //__AS3__.vec::Vector$int$
+    class IntVectorObject; //__AS3__.vec::Vector$int
+    class MathClass; //Math$
+    class MethodClosure; //private::MethodClosure
+    class MethodClosureClass; //private::MethodClosure$
+    class Namespace; //Namespace
+    class NamespaceClass; //Namespace$
+    class NumberClass; //Number$
+    class ObjectClass; //Object$
+    class ObjectVectorClass; //__AS3__.vec::Vector$object$
+    class ObjectVectorObject; //__AS3__.vec::Vector$object
+    class QNameClass; //QName$
+    class QNameObject; //QName
+    class RangeErrorClass; //RangeError$
+    class RangeErrorObject; //RangeError
+    class ReferenceErrorClass; //ReferenceError$
+    class ReferenceErrorObject; //ReferenceError
+    class RegExpClass; //RegExp$
+    class RegExpObject; //RegExp
+    class SecurityErrorClass; //SecurityError$
+    class SecurityErrorObject; //SecurityError
+    class String; //String
+    class StringClass; //String$
+    class SyntaxErrorClass; //SyntaxError$
+    class SyntaxErrorObject; //SyntaxError
+    class TypeErrorClass; //TypeError$
+    class TypeErrorObject; //TypeError
+    class UIntClass; //uint$
+    class UIntVectorClass; //__AS3__.vec::Vector$uint$
+    class UIntVectorObject; //__AS3__.vec::Vector$uint
+    class URIErrorClass; //URIError$
+    class URIErrorObject; //URIError
+    class UninitializedErrorClass; //UninitializedError$
+    class UninitializedErrorObject; //UninitializedError
+    class VectorClass; //__AS3__.vec::Vector$
+    class VerifyErrorClass; //VerifyError$
+    class VerifyErrorObject; //VerifyError
+    class XMLClass; //XML$
+    class XMLListClass; //XMLList$
+    class XMLListObject; //XMLList
+    class XMLObject; //XML
+}
+
+namespace avmplus { namespace NativeID {
+
 extern const uint32_t builtin_abc_class_count;
 extern const uint32_t builtin_abc_script_count;
 extern const uint32_t builtin_abc_method_count;
@@ -524,6 +590,14 @@ extern double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmM
 extern AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_length_get_thunk  builtin_i2a_s_thunk
 
+extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk
+#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk
+#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk
+#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk
+#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk
+#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk
+
 extern AvmBox builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Object_private__isPrototypeOf_thunk  builtin_b2a_oaa_thunk
 
@@ -694,14 +768,6 @@ extern AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
 #define Date_private__toString_thunk  builtin_s2a_oi_thunk
 #define Error_getErrorMessage_thunk  builtin_s2a_oi_thunk
 
-extern AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-#define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
-#define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
-#define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
-#define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
-#define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
-#define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk
-
 extern AvmBox builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define String_private__indexOf_thunk  builtin_i2a_ssi_opti0_thunk
 
@@ -820,3 +886,1072 @@ extern AvmBox builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* arg
 #define Array_private__splice_thunk  builtin_a2a_oao_thunk
 #define Array_private__sort_thunk  builtin_a2a_oao_thunk
 
+class SlotOffsetsAndAsserts;
+// Object$
+//-----------------------------------------------------------
+class ObjectClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_ObjectClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_ObjectClass.get_length(); } \
+    private: \
+        avmplus::NativeID::ObjectClassSlots m_slots_ObjectClass
+//-----------------------------------------------------------
+
+// Class$
+//-----------------------------------------------------------
+class ClassClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_ClassClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_ClassClass.get_length(); } \
+    private: \
+        avmplus::NativeID::ClassClassSlots m_slots_ClassClass
+//-----------------------------------------------------------
+
+// Class
+//-----------------------------------------------------------
+class ClassClosureSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ClassClosure \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::ClassClosureSlots EmptySlotsStruct_ClassClosure
+//-----------------------------------------------------------
+
+// Function$
+//-----------------------------------------------------------
+class FunctionClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_FunctionClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_FunctionClass.get_length(); } \
+    private: \
+        avmplus::NativeID::FunctionClassSlots m_slots_FunctionClass
+//-----------------------------------------------------------
+
+// Function
+//-----------------------------------------------------------
+class FunctionObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_FunctionObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::FunctionObjectSlots EmptySlotsStruct_FunctionObject
+//-----------------------------------------------------------
+
+// Namespace$
+//-----------------------------------------------------------
+class NamespaceClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE AvmBox get_length() const { return m_length; }
+private:
+    ATOM_WB m_length;
+};
+#define DECLARE_SLOTS_NamespaceClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE AvmBox get_length() const { return m_slots_NamespaceClass.get_length(); } \
+    private: \
+        avmplus::NativeID::NamespaceClassSlots m_slots_NamespaceClass
+//-----------------------------------------------------------
+
+// Boolean$
+//-----------------------------------------------------------
+class BooleanClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_BooleanClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_BooleanClass.get_length(); } \
+    private: \
+        avmplus::NativeID::BooleanClassSlots m_slots_BooleanClass
+//-----------------------------------------------------------
+
+// Number$
+//-----------------------------------------------------------
+class NumberClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+    REALLY_INLINE int32_t get_private_DTOSTR_FIXED() const { return m_private_DTOSTR_FIXED; }
+    REALLY_INLINE int32_t get_private_DTOSTR_PRECISION() const { return m_private_DTOSTR_PRECISION; }
+    REALLY_INLINE int32_t get_private_DTOSTR_EXPONENTIAL() const { return m_private_DTOSTR_EXPONENTIAL; }
+    REALLY_INLINE double get_NaN() const { return m_NaN; }
+    REALLY_INLINE double get_NEGATIVE_INFINITY() const { return m_NEGATIVE_INFINITY; }
+    REALLY_INLINE double get_POSITIVE_INFINITY() const { return m_POSITIVE_INFINITY; }
+    REALLY_INLINE double get_MIN_VALUE() const { return m_MIN_VALUE; }
+    REALLY_INLINE double get_MAX_VALUE() const { return m_MAX_VALUE; }
+private:
+    int32_t m_length;
+    int32_t m_private_DTOSTR_FIXED;
+    int32_t m_private_DTOSTR_PRECISION;
+    int32_t m_private_DTOSTR_EXPONENTIAL;
+    double m_NaN;
+    double m_NEGATIVE_INFINITY;
+    double m_POSITIVE_INFINITY;
+    double m_MIN_VALUE;
+    double m_MAX_VALUE;
+};
+#define DECLARE_SLOTS_NumberClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_NumberClass.get_length(); } \
+        REALLY_INLINE int32_t get_private_DTOSTR_FIXED() const { return m_slots_NumberClass.get_private_DTOSTR_FIXED(); } \
+        REALLY_INLINE int32_t get_private_DTOSTR_PRECISION() const { return m_slots_NumberClass.get_private_DTOSTR_PRECISION(); } \
+        REALLY_INLINE int32_t get_private_DTOSTR_EXPONENTIAL() const { return m_slots_NumberClass.get_private_DTOSTR_EXPONENTIAL(); } \
+        REALLY_INLINE double get_NaN() const { return m_slots_NumberClass.get_NaN(); } \
+        REALLY_INLINE double get_NEGATIVE_INFINITY() const { return m_slots_NumberClass.get_NEGATIVE_INFINITY(); } \
+        REALLY_INLINE double get_POSITIVE_INFINITY() const { return m_slots_NumberClass.get_POSITIVE_INFINITY(); } \
+        REALLY_INLINE double get_MIN_VALUE() const { return m_slots_NumberClass.get_MIN_VALUE(); } \
+        REALLY_INLINE double get_MAX_VALUE() const { return m_slots_NumberClass.get_MAX_VALUE(); } \
+    private: \
+        avmplus::NativeID::NumberClassSlots m_slots_NumberClass
+//-----------------------------------------------------------
+
+// int$
+//-----------------------------------------------------------
+class IntClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_MIN_VALUE() const { return m_MIN_VALUE; }
+    REALLY_INLINE int32_t get_MAX_VALUE() const { return m_MAX_VALUE; }
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_MIN_VALUE;
+    int32_t m_MAX_VALUE;
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_IntClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_MIN_VALUE() const { return m_slots_IntClass.get_MIN_VALUE(); } \
+        REALLY_INLINE int32_t get_MAX_VALUE() const { return m_slots_IntClass.get_MAX_VALUE(); } \
+        REALLY_INLINE int32_t get_length() const { return m_slots_IntClass.get_length(); } \
+    private: \
+        avmplus::NativeID::IntClassSlots m_slots_IntClass
+//-----------------------------------------------------------
+
+// uint$
+//-----------------------------------------------------------
+class UIntClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE uint32_t get_MIN_VALUE() const { return m_MIN_VALUE; }
+    REALLY_INLINE uint32_t get_MAX_VALUE() const { return m_MAX_VALUE; }
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    uint32_t m_MIN_VALUE;
+    uint32_t m_MAX_VALUE;
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_UIntClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE uint32_t get_MIN_VALUE() const { return m_slots_UIntClass.get_MIN_VALUE(); } \
+        REALLY_INLINE uint32_t get_MAX_VALUE() const { return m_slots_UIntClass.get_MAX_VALUE(); } \
+        REALLY_INLINE int32_t get_length() const { return m_slots_UIntClass.get_length(); } \
+    private: \
+        avmplus::NativeID::UIntClassSlots m_slots_UIntClass
+//-----------------------------------------------------------
+
+// String$
+//-----------------------------------------------------------
+class StringClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_StringClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_StringClass.get_length(); } \
+    private: \
+        avmplus::NativeID::StringClassSlots m_slots_StringClass
+//-----------------------------------------------------------
+
+// Array$
+//-----------------------------------------------------------
+class ArrayClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE uint32_t get_CASEINSENSITIVE() const { return m_CASEINSENSITIVE; }
+    REALLY_INLINE uint32_t get_DESCENDING() const { return m_DESCENDING; }
+    REALLY_INLINE uint32_t get_UNIQUESORT() const { return m_UNIQUESORT; }
+    REALLY_INLINE uint32_t get_RETURNINDEXEDARRAY() const { return m_RETURNINDEXEDARRAY; }
+    REALLY_INLINE uint32_t get_NUMERIC() const { return m_NUMERIC; }
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    uint32_t m_CASEINSENSITIVE;
+    uint32_t m_DESCENDING;
+    uint32_t m_UNIQUESORT;
+    uint32_t m_RETURNINDEXEDARRAY;
+    uint32_t m_NUMERIC;
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_ArrayClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE uint32_t get_CASEINSENSITIVE() const { return m_slots_ArrayClass.get_CASEINSENSITIVE(); } \
+        REALLY_INLINE uint32_t get_DESCENDING() const { return m_slots_ArrayClass.get_DESCENDING(); } \
+        REALLY_INLINE uint32_t get_UNIQUESORT() const { return m_slots_ArrayClass.get_UNIQUESORT(); } \
+        REALLY_INLINE uint32_t get_RETURNINDEXEDARRAY() const { return m_slots_ArrayClass.get_RETURNINDEXEDARRAY(); } \
+        REALLY_INLINE uint32_t get_NUMERIC() const { return m_slots_ArrayClass.get_NUMERIC(); } \
+        REALLY_INLINE int32_t get_length() const { return m_slots_ArrayClass.get_length(); } \
+    private: \
+        avmplus::NativeID::ArrayClassSlots m_slots_ArrayClass
+//-----------------------------------------------------------
+
+// Array
+//-----------------------------------------------------------
+class ArrayObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ArrayObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::ArrayObjectSlots EmptySlotsStruct_ArrayObject
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$
+//-----------------------------------------------------------
+class VectorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_VectorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::VectorClassSlots EmptySlotsStruct_VectorClass
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector
+//-----------------------------------------------------------
+class ObjectVectorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ObjectVectorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::ObjectVectorObjectSlots EmptySlotsStruct_ObjectVectorObject
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$object$
+//-----------------------------------------------------------
+class ObjectVectorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ObjectVectorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::ObjectVectorClassSlots EmptySlotsStruct_ObjectVectorClass
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$int$
+//-----------------------------------------------------------
+class IntVectorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_IntVectorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::IntVectorClassSlots EmptySlotsStruct_IntVectorClass
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$int
+//-----------------------------------------------------------
+class IntVectorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_IntVectorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::IntVectorObjectSlots EmptySlotsStruct_IntVectorObject
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$uint$
+//-----------------------------------------------------------
+class UIntVectorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_UIntVectorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::UIntVectorClassSlots EmptySlotsStruct_UIntVectorClass
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$uint
+//-----------------------------------------------------------
+class UIntVectorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_UIntVectorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::UIntVectorObjectSlots EmptySlotsStruct_UIntVectorObject
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$double$
+//-----------------------------------------------------------
+class DoubleVectorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DoubleVectorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::DoubleVectorClassSlots EmptySlotsStruct_DoubleVectorClass
+//-----------------------------------------------------------
+
+// __AS3__.vec::Vector$double
+//-----------------------------------------------------------
+class DoubleVectorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DoubleVectorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::DoubleVectorObjectSlots EmptySlotsStruct_DoubleVectorObject
+//-----------------------------------------------------------
+
+// private::MethodClosure$
+//-----------------------------------------------------------
+class MethodClosureClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_MethodClosureClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::MethodClosureClassSlots EmptySlotsStruct_MethodClosureClass
+//-----------------------------------------------------------
+
+// private::MethodClosure
+//-----------------------------------------------------------
+class MethodClosureSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_MethodClosure \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::MethodClosureSlots EmptySlotsStruct_MethodClosure
+//-----------------------------------------------------------
+
+// Math$
+//-----------------------------------------------------------
+class MathClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE double get_E() const { return m_E; }
+    REALLY_INLINE double get_LN10() const { return m_LN10; }
+    REALLY_INLINE double get_LN2() const { return m_LN2; }
+    REALLY_INLINE double get_LOG10E() const { return m_LOG10E; }
+    REALLY_INLINE double get_LOG2E() const { return m_LOG2E; }
+    REALLY_INLINE double get_PI() const { return m_PI; }
+    REALLY_INLINE double get_SQRT1_2() const { return m_SQRT1_2; }
+    REALLY_INLINE double get_SQRT2() const { return m_SQRT2; }
+    REALLY_INLINE double get_private_NegInfinity() const { return m_private_NegInfinity; }
+private:
+    double m_E;
+    double m_LN10;
+    double m_LN2;
+    double m_LOG10E;
+    double m_LOG2E;
+    double m_PI;
+    double m_SQRT1_2;
+    double m_SQRT2;
+    double m_private_NegInfinity;
+};
+#define DECLARE_SLOTS_MathClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE double get_E() const { return m_slots_MathClass.get_E(); } \
+        REALLY_INLINE double get_LN10() const { return m_slots_MathClass.get_LN10(); } \
+        REALLY_INLINE double get_LN2() const { return m_slots_MathClass.get_LN2(); } \
+        REALLY_INLINE double get_LOG10E() const { return m_slots_MathClass.get_LOG10E(); } \
+        REALLY_INLINE double get_LOG2E() const { return m_slots_MathClass.get_LOG2E(); } \
+        REALLY_INLINE double get_PI() const { return m_slots_MathClass.get_PI(); } \
+        REALLY_INLINE double get_SQRT1_2() const { return m_slots_MathClass.get_SQRT1_2(); } \
+        REALLY_INLINE double get_SQRT2() const { return m_slots_MathClass.get_SQRT2(); } \
+        REALLY_INLINE double get_private_NegInfinity() const { return m_slots_MathClass.get_private_NegInfinity(); } \
+    private: \
+        avmplus::NativeID::MathClassSlots m_slots_MathClass
+//-----------------------------------------------------------
+
+// Error$
+//-----------------------------------------------------------
+class ErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_ErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_ErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::ErrorClassSlots m_slots_ErrorClass
+//-----------------------------------------------------------
+
+// Error
+//-----------------------------------------------------------
+class ErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_private__errorID() const { return m_private__errorID; }
+    void set_private__errorID(int32_t newVal);
+    REALLY_INLINE AvmBox get_message() const { return m_message; }
+    void set_message(ErrorObject* obj, AvmBox newVal);
+    REALLY_INLINE AvmBox get_name() const { return m_name; }
+    void set_name(ErrorObject* obj, AvmBox newVal);
+private:
+    int32_t m_private__errorID;
+    ATOM_WB m_message;
+    ATOM_WB m_name;
+};
+REALLY_INLINE void ErrorObjectSlots::set_private__errorID(int32_t newVal) { m_private__errorID = newVal; }
+REALLY_INLINE void ErrorObjectSlots::set_message(ErrorObject* obj, AvmBox newVal)
+{
+    m_message.set(((ScriptObject*)obj)->gc(), obj, newVal);
+}
+REALLY_INLINE void ErrorObjectSlots::set_name(ErrorObject* obj, AvmBox newVal)
+{
+    m_name.set(((ScriptObject*)obj)->gc(), obj, newVal);
+}
+#define DECLARE_SLOTS_ErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_private__errorID() const { return m_slots_ErrorObject.get_private__errorID(); } \
+        REALLY_INLINE void set_private__errorID(int32_t newVal) { m_slots_ErrorObject.set_private__errorID(newVal); } \
+        REALLY_INLINE AvmBox get_message() const { return m_slots_ErrorObject.get_message(); } \
+        REALLY_INLINE void set_message(AvmBox newVal) { m_slots_ErrorObject.set_message(this, newVal); } \
+        REALLY_INLINE AvmBox get_name() const { return m_slots_ErrorObject.get_name(); } \
+        REALLY_INLINE void set_name(AvmBox newVal) { m_slots_ErrorObject.set_name(this, newVal); } \
+    private: \
+        avmplus::NativeID::ErrorObjectSlots m_slots_ErrorObject
+//-----------------------------------------------------------
+
+// DefinitionError$
+//-----------------------------------------------------------
+class DefinitionErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_DefinitionErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_DefinitionErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::DefinitionErrorClassSlots m_slots_DefinitionErrorClass
+//-----------------------------------------------------------
+
+// DefinitionError
+//-----------------------------------------------------------
+class DefinitionErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DefinitionErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::DefinitionErrorObjectSlots EmptySlotsStruct_DefinitionErrorObject
+//-----------------------------------------------------------
+
+// EvalError$
+//-----------------------------------------------------------
+class EvalErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_EvalErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_EvalErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::EvalErrorClassSlots m_slots_EvalErrorClass
+//-----------------------------------------------------------
+
+// EvalError
+//-----------------------------------------------------------
+class EvalErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_EvalErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::EvalErrorObjectSlots EmptySlotsStruct_EvalErrorObject
+//-----------------------------------------------------------
+
+// RangeError$
+//-----------------------------------------------------------
+class RangeErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_RangeErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_RangeErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::RangeErrorClassSlots m_slots_RangeErrorClass
+//-----------------------------------------------------------
+
+// RangeError
+//-----------------------------------------------------------
+class RangeErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_RangeErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::RangeErrorObjectSlots EmptySlotsStruct_RangeErrorObject
+//-----------------------------------------------------------
+
+// ReferenceError$
+//-----------------------------------------------------------
+class ReferenceErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_ReferenceErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_ReferenceErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::ReferenceErrorClassSlots m_slots_ReferenceErrorClass
+//-----------------------------------------------------------
+
+// ReferenceError
+//-----------------------------------------------------------
+class ReferenceErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ReferenceErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::ReferenceErrorObjectSlots EmptySlotsStruct_ReferenceErrorObject
+//-----------------------------------------------------------
+
+// SecurityError$
+//-----------------------------------------------------------
+class SecurityErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_SecurityErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_SecurityErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::SecurityErrorClassSlots m_slots_SecurityErrorClass
+//-----------------------------------------------------------
+
+// SecurityError
+//-----------------------------------------------------------
+class SecurityErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_SecurityErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::SecurityErrorObjectSlots EmptySlotsStruct_SecurityErrorObject
+//-----------------------------------------------------------
+
+// SyntaxError$
+//-----------------------------------------------------------
+class SyntaxErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_SyntaxErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_SyntaxErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::SyntaxErrorClassSlots m_slots_SyntaxErrorClass
+//-----------------------------------------------------------
+
+// SyntaxError
+//-----------------------------------------------------------
+class SyntaxErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_SyntaxErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::SyntaxErrorObjectSlots EmptySlotsStruct_SyntaxErrorObject
+//-----------------------------------------------------------
+
+// TypeError$
+//-----------------------------------------------------------
+class TypeErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_TypeErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_TypeErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::TypeErrorClassSlots m_slots_TypeErrorClass
+//-----------------------------------------------------------
+
+// TypeError
+//-----------------------------------------------------------
+class TypeErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_TypeErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::TypeErrorObjectSlots EmptySlotsStruct_TypeErrorObject
+//-----------------------------------------------------------
+
+// URIError$
+//-----------------------------------------------------------
+class URIErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_URIErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_URIErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::URIErrorClassSlots m_slots_URIErrorClass
+//-----------------------------------------------------------
+
+// URIError
+//-----------------------------------------------------------
+class URIErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_URIErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::URIErrorObjectSlots EmptySlotsStruct_URIErrorObject
+//-----------------------------------------------------------
+
+// VerifyError$
+//-----------------------------------------------------------
+class VerifyErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_VerifyErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_VerifyErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::VerifyErrorClassSlots m_slots_VerifyErrorClass
+//-----------------------------------------------------------
+
+// VerifyError
+//-----------------------------------------------------------
+class VerifyErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_VerifyErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::VerifyErrorObjectSlots EmptySlotsStruct_VerifyErrorObject
+//-----------------------------------------------------------
+
+// UninitializedError$
+//-----------------------------------------------------------
+class UninitializedErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_UninitializedErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_UninitializedErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::UninitializedErrorClassSlots m_slots_UninitializedErrorClass
+//-----------------------------------------------------------
+
+// UninitializedError
+//-----------------------------------------------------------
+class UninitializedErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_UninitializedErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::UninitializedErrorObjectSlots EmptySlotsStruct_UninitializedErrorObject
+//-----------------------------------------------------------
+
+// ArgumentError$
+//-----------------------------------------------------------
+class ArgumentErrorClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_ArgumentErrorClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_ArgumentErrorClass.get_length(); } \
+    private: \
+        avmplus::NativeID::ArgumentErrorClassSlots m_slots_ArgumentErrorClass
+//-----------------------------------------------------------
+
+// ArgumentError
+//-----------------------------------------------------------
+class ArgumentErrorObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ArgumentErrorObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::ArgumentErrorObjectSlots EmptySlotsStruct_ArgumentErrorObject
+//-----------------------------------------------------------
+
+// Date$
+//-----------------------------------------------------------
+class DateClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_DateClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_DateClass.get_length(); } \
+    private: \
+        avmplus::NativeID::DateClassSlots m_slots_DateClass
+//-----------------------------------------------------------
+
+// Date
+//-----------------------------------------------------------
+class DateObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DateObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::DateObjectSlots EmptySlotsStruct_DateObject
+//-----------------------------------------------------------
+
+// RegExp$
+//-----------------------------------------------------------
+class RegExpClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_length() const { return m_length; }
+private:
+    int32_t m_length;
+};
+#define DECLARE_SLOTS_RegExpClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_length() const { return m_slots_RegExpClass.get_length(); } \
+    private: \
+        avmplus::NativeID::RegExpClassSlots m_slots_RegExpClass
+//-----------------------------------------------------------
+
+// RegExp
+//-----------------------------------------------------------
+class RegExpObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_RegExpObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::RegExpObjectSlots EmptySlotsStruct_RegExpObject
+//-----------------------------------------------------------
+
+// XML$
+//-----------------------------------------------------------
+class XMLClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE AvmBox get_length() const { return m_length; }
+private:
+    ATOM_WB m_length;
+};
+#define DECLARE_SLOTS_XMLClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE AvmBox get_length() const { return m_slots_XMLClass.get_length(); } \
+    private: \
+        avmplus::NativeID::XMLClassSlots m_slots_XMLClass
+//-----------------------------------------------------------
+
+// XML
+//-----------------------------------------------------------
+class XMLObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_XMLObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::XMLObjectSlots EmptySlotsStruct_XMLObject
+//-----------------------------------------------------------
+
+// XMLList$
+//-----------------------------------------------------------
+class XMLListClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE AvmBox get_length() const { return m_length; }
+private:
+    ATOM_WB m_length;
+};
+#define DECLARE_SLOTS_XMLListClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE AvmBox get_length() const { return m_slots_XMLListClass.get_length(); } \
+    private: \
+        avmplus::NativeID::XMLListClassSlots m_slots_XMLListClass
+//-----------------------------------------------------------
+
+// XMLList
+//-----------------------------------------------------------
+class XMLListObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_XMLListObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::XMLListObjectSlots EmptySlotsStruct_XMLListObject
+//-----------------------------------------------------------
+
+// QName$
+//-----------------------------------------------------------
+class QNameClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE AvmBox get_length() const { return m_length; }
+private:
+    ATOM_WB m_length;
+};
+#define DECLARE_SLOTS_QNameClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE AvmBox get_length() const { return m_slots_QNameClass.get_length(); } \
+    private: \
+        avmplus::NativeID::QNameClassSlots m_slots_QNameClass
+//-----------------------------------------------------------
+
+// QName
+//-----------------------------------------------------------
+class QNameObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_QNameObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::QNameObjectSlots EmptySlotsStruct_QNameObject
+//-----------------------------------------------------------
+
+} }

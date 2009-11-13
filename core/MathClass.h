@@ -45,7 +45,7 @@ namespace avmplus
 	 * class Math
 	 */
 	class MathClass : public ClassClosure
-    {
+	{
 	public:
 		MathClass(VTable* cvtable);
 		~MathClass() 
@@ -93,8 +93,10 @@ namespace avmplus
 		double min(double x, double y, const Atom* argv, uint32_t argc);
 
 	private:
-		TRandomFast seed;			
-    };
+		TRandomFast seed;
+        
+		DECLARE_SLOTS_MathClass;
+	};
 }
 
 #endif /* __avmplus_MathClass__ */
