@@ -402,7 +402,7 @@ namespace MMgc
 	}
 #endif
 
-	uint64_t GCPolicyManager::blocksOwnedByGC() {
+	size_t GCPolicyManager::blocksOwnedByGC() {
 		return blocksOwned;
 	}
 	
