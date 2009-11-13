@@ -362,7 +362,7 @@ namespace avmplus
 		for ( ; tbi < tbi_end; ++tbi) 
 		{
 			Traitsp ifc = tbi->t;
-			if (!ifc || !ifc->isInterface)
+			if (!ifc || !ifc->isInterface())
 				continue;
 
 			// don't need to bother checking interfaces in our parent.
@@ -445,7 +445,7 @@ namespace avmplus
 	
 	void TraitsBindings::fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel)
 	{
-		if (owner->isInterface)
+		if (owner->isInterface())
 			return;
 		
 		if (!ifc->linked) 
@@ -859,7 +859,7 @@ namespace avmplus
 						//	toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(qn), toplevel->core()->toErrorString(this));
 						
 						// Interfaces cannot have slots.
-						if (this->isInterface)
+						if (this->isInterface())
 							toplevel->throwVerifyError(kIllegalSlotError, core->toErrorString(this));
 
 					}
@@ -1207,7 +1207,7 @@ namespace avmplus
 				for (uint32_t j = 0; j < interfaceCount; j++)
 				{
 					Traitsp intf = self->pool->resolveTypeName(pos, toplevel);
-					AvmAssert(intf && intf->isInterface);
+					AvmAssert(intf && intf->isInterface());
 					// an interface can "extend" multiple other interfaces, so we must recurse here.
 					intf->countInterfaces(toplevel, seen);
 				}
@@ -1242,7 +1242,7 @@ namespace avmplus
 			{
 				// never need to pass toplevel here: we've already validated the typenames in AbcParser::parseInstanceInfos
 				Traitsp ifc = this->pool->resolveTypeName(pos, /*toplevel*/NULL);
-				AvmAssert(ifc && ifc->isInterface);
+				AvmAssert(ifc && ifc->isInterface());
 				if (tb->addOneInterface(ifc))
 				{
 					addedNewInterface = true;
@@ -1523,7 +1523,7 @@ namespace avmplus
 
 		// all interfaces should have been resolved inside _buildTraitsBindings, UNLESS we are an interface ourself...
 		// in which case let's do it now
-		if (this->isInterface)
+		if (this->isInterface())
 		{
 			TraitsBindings::InterfaceInfo* tbi = tb->getInterfaces();
 			TraitsBindings::InterfaceInfo* tbi_end = tbi + tb->interfaceCapacity;
@@ -1599,7 +1599,7 @@ namespace avmplus
 			}
 		}
 
-		if (legal && !this->isInterface)
+		if (legal && !this->isInterface())
 		{
 			legal &= tb->checkLegalInterfaces(core);
 		}

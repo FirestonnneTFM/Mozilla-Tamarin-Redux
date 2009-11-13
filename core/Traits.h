@@ -252,6 +252,7 @@ namespace avmplus
 	class Traits : public MMgc::GCObject 
 	{
 		friend class TraitsBindings;	// for m_sizeofInstance
+		friend class AbcParser; // only for access to m_isInterface
 		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif
@@ -360,6 +361,7 @@ namespace avmplus
 		bool isMachineType() const;
 		bool isNumeric() const;
 		bool isXMLType() const;
+		bool isInterface() const;
 
 		TraitsPosType posType() const;
 		bool isResolved() const;
@@ -424,7 +426,7 @@ namespace avmplus
 	private:	uint32_t				m_needsHashtable:1;			// If true, the class needs a hash table. Typically true for dynamic classes, but will be false for XML
 	private:	uint32_t				linked:1;					// set once signature types have been resolved */
 	public:		uint32_t				final:1;					// set when the class cannot be extended */
-	public:		uint32_t				isInterface:1;				// true for types that are interfaces */
+	private:	uint32_t				m_isInterface:1;			// true for types that are interfaces */
 	public:		uint32_t				commonBase:1;				// used for Verify::findCommonBase */
 	public:		uint32_t				isDictionary:1;				// how we implement dictionary or strict style lookups
 							// If hasCustomConstruct is false, the JIT will early bind to the AS defined constructor. 

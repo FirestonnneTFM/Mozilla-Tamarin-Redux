@@ -991,7 +991,7 @@ namespace avmplus
 					toplevel->throwVerifyError(kCorruptABCError);
 			}
 
-			if (ms->paramTraits(0) != NULL && ms->paramTraits(0)->isInterface)
+			if (ms->paramTraits(0) != NULL && ms->paramTraits(0)->isInterface())
 				_flags |= ABSTRACT_METHOD;
 
 			_flags |= RESOLVED;
