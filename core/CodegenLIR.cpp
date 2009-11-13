@@ -2605,7 +2605,7 @@ namespace avmplus
                 MethodInfo *f = objtd->getMethod(disp_id);
                 AvmAssert(f != NULL);
 
-                if (!obj.traits->isInterface) {
+                if (!obj.traits->isInterface()) {
                     emitCall(state, OP_callmethod, disp_id, 0, type);
                 }
                 else {
@@ -2639,7 +2639,7 @@ namespace avmplus
                 MethodInfo *f = objtd->getMethod(disp_id);
                 AvmAssert(f != NULL);
 
-                if (!obj.traits->isInterface) {
+                if (!obj.traits->isInterface()) {
                     emitCall(state, OP_callmethod, disp_id, 1, type);
                 }
                 else {
