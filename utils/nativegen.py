@@ -1664,7 +1664,7 @@ class AbcThunkGen:
 				out_c.println(u'{')
 				out_c.indent += 1
 				out_c.println(u'(void)cTraits; (void)iTraits;')
-				noSlotsStaticAssertStr = u'MMGC_STATIC_ASSERT(sizeof(%(nativeClass)s::EmptySlotsStruct_%(nativeClassBaseName)s) >= 0);'
+				noSlotsStaticAssertStr = u'// MMGC_STATIC_ASSERT(sizeof(%(nativeClass)s::EmptySlotsStruct_%(nativeClassBaseName)s) >= 0);'
 				assert (c.ni.class_name is not None)
 				if (len(c.slots) > 0):
 					self.printStructAssertsForTraits(namesDict, out_c, c, True, u'cTraits')
