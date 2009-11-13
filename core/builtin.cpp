@@ -1632,7 +1632,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doClassClassAsserts(Traits* cTraits, T
     MMGC_STATIC_ASSERT(offsetof(ClassClass, m_slots_ClassClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(ClassClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ClassClass, m_slots_ClassClass) + offsetof(ClassClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(ClassClosure::EmptySlotsStruct_ClassClosure) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ClassClosure::EmptySlotsStruct_ClassClosure) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doFunctionClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1641,7 +1641,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doFunctionClassAsserts(Traits* cTraits
     MMGC_STATIC_ASSERT(offsetof(FunctionClass, m_slots_FunctionClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(FunctionClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(FunctionClass, m_slots_FunctionClass) + offsetof(FunctionClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(FunctionObject::EmptySlotsStruct_FunctionObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(FunctionObject::EmptySlotsStruct_FunctionObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doNamespaceClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1715,43 +1715,43 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doArrayClassAsserts(Traits* cTraits, T
     AvmAssert(getSlotOffset(cTraits, 309) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_RETURNINDEXEDARRAY)));
     AvmAssert(getSlotOffset(cTraits, 310) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_NUMERIC)));
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(ArrayObject::EmptySlotsStruct_ArrayObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ArrayObject::EmptySlotsStruct_ArrayObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doVectorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
     (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(sizeof(VectorClass::EmptySlotsStruct_VectorClass) >= 0);
-    MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(VectorClass::EmptySlotsStruct_VectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doObjectVectorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
     (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(sizeof(ObjectVectorClass::EmptySlotsStruct_ObjectVectorClass) >= 0);
-    MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorClass::EmptySlotsStruct_ObjectVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doIntVectorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
     (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(sizeof(IntVectorClass::EmptySlotsStruct_IntVectorClass) >= 0);
-    MMGC_STATIC_ASSERT(sizeof(IntVectorObject::EmptySlotsStruct_IntVectorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(IntVectorClass::EmptySlotsStruct_IntVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(IntVectorObject::EmptySlotsStruct_IntVectorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doUIntVectorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
     (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(sizeof(UIntVectorClass::EmptySlotsStruct_UIntVectorClass) >= 0);
-    MMGC_STATIC_ASSERT(sizeof(UIntVectorObject::EmptySlotsStruct_UIntVectorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(UIntVectorClass::EmptySlotsStruct_UIntVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(UIntVectorObject::EmptySlotsStruct_UIntVectorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doDoubleVectorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
     (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(sizeof(DoubleVectorClass::EmptySlotsStruct_DoubleVectorClass) >= 0);
-    MMGC_STATIC_ASSERT(sizeof(DoubleVectorObject::EmptySlotsStruct_DoubleVectorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(DoubleVectorClass::EmptySlotsStruct_DoubleVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(DoubleVectorObject::EmptySlotsStruct_DoubleVectorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doMethodClosureClassAsserts(Traits* cTraits, Traits* iTraits)
 {
     (void)cTraits; (void)iTraits;
-    MMGC_STATIC_ASSERT(sizeof(MethodClosureClass::EmptySlotsStruct_MethodClosureClass) >= 0);
-    MMGC_STATIC_ASSERT(sizeof(MethodClosure::EmptySlotsStruct_MethodClosure) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(MethodClosureClass::EmptySlotsStruct_MethodClosureClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(MethodClosure::EmptySlotsStruct_MethodClosure) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doMathClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1790,7 +1790,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts(Traits* 
     MMGC_STATIC_ASSERT(offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(DefinitionErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) + offsetof(DefinitionErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(DefinitionErrorObject::EmptySlotsStruct_DefinitionErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(DefinitionErrorObject::EmptySlotsStruct_DefinitionErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doEvalErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1799,7 +1799,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doEvalErrorClassAsserts(Traits* cTrait
     MMGC_STATIC_ASSERT(offsetof(EvalErrorClass, m_slots_EvalErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(EvalErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(EvalErrorClass, m_slots_EvalErrorClass) + offsetof(EvalErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(EvalErrorObject::EmptySlotsStruct_EvalErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(EvalErrorObject::EmptySlotsStruct_EvalErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doRangeErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1808,7 +1808,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doRangeErrorClassAsserts(Traits* cTrai
     MMGC_STATIC_ASSERT(offsetof(RangeErrorClass, m_slots_RangeErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(RangeErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(RangeErrorClass, m_slots_RangeErrorClass) + offsetof(RangeErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(RangeErrorObject::EmptySlotsStruct_RangeErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(RangeErrorObject::EmptySlotsStruct_RangeErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1817,7 +1817,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(Traits* c
     MMGC_STATIC_ASSERT(offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(ReferenceErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) + offsetof(ReferenceErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(ReferenceErrorObject::EmptySlotsStruct_ReferenceErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ReferenceErrorObject::EmptySlotsStruct_ReferenceErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1826,7 +1826,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(Traits* cT
     MMGC_STATIC_ASSERT(offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(SecurityErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) + offsetof(SecurityErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(SecurityErrorObject::EmptySlotsStruct_SecurityErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(SecurityErrorObject::EmptySlotsStruct_SecurityErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1835,7 +1835,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(Traits* cTra
     MMGC_STATIC_ASSERT(offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(SyntaxErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) + offsetof(SyntaxErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(SyntaxErrorObject::EmptySlotsStruct_SyntaxErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(SyntaxErrorObject::EmptySlotsStruct_SyntaxErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doTypeErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1844,7 +1844,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doTypeErrorClassAsserts(Traits* cTrait
     MMGC_STATIC_ASSERT(offsetof(TypeErrorClass, m_slots_TypeErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(TypeErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(TypeErrorClass, m_slots_TypeErrorClass) + offsetof(TypeErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(TypeErrorObject::EmptySlotsStruct_TypeErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(TypeErrorObject::EmptySlotsStruct_TypeErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doURIErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1853,7 +1853,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doURIErrorClassAsserts(Traits* cTraits
     MMGC_STATIC_ASSERT(offsetof(URIErrorClass, m_slots_URIErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(URIErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(URIErrorClass, m_slots_URIErrorClass) + offsetof(URIErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(URIErrorObject::EmptySlotsStruct_URIErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(URIErrorObject::EmptySlotsStruct_URIErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1862,7 +1862,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(Traits* cTra
     MMGC_STATIC_ASSERT(offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(VerifyErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) + offsetof(VerifyErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(VerifyErrorObject::EmptySlotsStruct_VerifyErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(VerifyErrorObject::EmptySlotsStruct_VerifyErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1871,7 +1871,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(Trait
     MMGC_STATIC_ASSERT(offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(UninitializedErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) + offsetof(UninitializedErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(UninitializedErrorObject::EmptySlotsStruct_UninitializedErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(UninitializedErrorObject::EmptySlotsStruct_UninitializedErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1880,7 +1880,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(Traits* cT
     MMGC_STATIC_ASSERT(offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(ArgumentErrorClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) + offsetof(ArgumentErrorClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(ArgumentErrorObject::EmptySlotsStruct_ArgumentErrorObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ArgumentErrorObject::EmptySlotsStruct_ArgumentErrorObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doDateClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1889,7 +1889,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doDateClassAsserts(Traits* cTraits, Tr
     MMGC_STATIC_ASSERT(offsetof(DateClass, m_slots_DateClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(DateClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(DateClass, m_slots_DateClass) + offsetof(DateClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(DateObject::EmptySlotsStruct_DateObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(DateObject::EmptySlotsStruct_DateObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doRegExpClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1898,7 +1898,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doRegExpClassAsserts(Traits* cTraits, 
     MMGC_STATIC_ASSERT(offsetof(RegExpClass, m_slots_RegExpClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(RegExpClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(RegExpClass, m_slots_RegExpClass) + offsetof(RegExpClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(RegExpObject::EmptySlotsStruct_RegExpObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(RegExpObject::EmptySlotsStruct_RegExpObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doXMLClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1907,7 +1907,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doXMLClassAsserts(Traits* cTraits, Tra
     MMGC_STATIC_ASSERT(offsetof(XMLClass, m_slots_XMLClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(XMLClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(XMLClass, m_slots_XMLClass) + offsetof(XMLClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(XMLObject::EmptySlotsStruct_XMLObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(XMLObject::EmptySlotsStruct_XMLObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doXMLListClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1916,7 +1916,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doXMLListClassAsserts(Traits* cTraits,
     MMGC_STATIC_ASSERT(offsetof(XMLListClass, m_slots_XMLListClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(XMLListClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(XMLListClass, m_slots_XMLListClass) + offsetof(XMLListClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(XMLListObject::EmptySlotsStruct_XMLListObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(XMLListObject::EmptySlotsStruct_XMLListObject) >= 0);
 }
 REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* cTraits, Traits* iTraits)
 {
@@ -1925,7 +1925,7 @@ REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* cTraits, T
     MMGC_STATIC_ASSERT(offsetof(QNameClass, m_slots_QNameClass) <= 0xFFFF);
     MMGC_STATIC_ASSERT(sizeof(QNameClass) <= 0xFFFF);
     AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(QNameClass, m_slots_QNameClass) + offsetof(QNameClassSlots, m_length)));
-    MMGC_STATIC_ASSERT(sizeof(QNameObject::EmptySlotsStruct_QNameObject) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(QNameObject::EmptySlotsStruct_QNameObject) >= 0);
 }
 
 AVMTHUNK_NATIVE_CLASS_GLUE(ObjectClass, ObjectClass, SlotOffsetsAndAsserts::doObjectClassAsserts)
