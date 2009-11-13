@@ -399,7 +399,7 @@ namespace MMgc
 		   to some hot paths.  */
 		/* controls whether AllocHook and FreeHook are called */
 		void EnableHooks() { hooksEnabled = true; }
-		inline bool HooksEnabled() const { return hooksEnabled; }
+		REALLY_INLINE bool HooksEnabled() const { return hooksEnabled; }
 		void AllocHook(const void *item, size_t askSize, size_t gotSize);
 		// called when object is determined to be garbage but we can't write to it yet
 		void FinalizeHook(const void *item, size_t size);
