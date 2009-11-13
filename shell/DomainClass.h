@@ -59,6 +59,8 @@ namespace avmshell
 
 	  private:
 	    ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
+		
+		DECLARE_SLOTS_DomainObject;
 	};
 
 	class DomainClass : public ClassClosure
@@ -70,6 +72,8 @@ namespace avmshell
 
 		DomainObject* get_currentDomain();
  		int get_MIN_DOMAIN_MEMORY_LENGTH();
+		
+		DECLARE_SLOTS_DomainClass;
 	};
 }
 

@@ -123,6 +123,8 @@ namespace avmplus
 		int get_prettyIndent();
 
 		bool okToPrettyPrint() { return (get_prettyPrinting() && (m_prettyIndent >= 0)); }
+        
+		DECLARE_SLOTS_XMLClass;
 	};
 
 	/**
@@ -145,6 +147,8 @@ namespace avmplus
 
 		ATOM_WB kUri;
 		ATOM_WB kLocalName;
+        
+		DECLARE_SLOTS_QNameClass;
 	};
 }
 

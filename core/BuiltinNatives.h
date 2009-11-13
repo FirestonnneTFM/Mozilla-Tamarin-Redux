@@ -38,12 +38,6 @@
 #ifndef __avmplus_BuiltinNatives__
 #define __avmplus_BuiltinNatives__
 
-namespace avmplus
-{
-	namespace NativeID
-	{
-        #include "builtin.h"
-	}
-}
+#include "builtin.h"
 
 #endif

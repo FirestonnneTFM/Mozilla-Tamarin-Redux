@@ -72,6 +72,8 @@ namespace avmplus
 						   Atom *argv,
 						   int argc);
 #endif /* DEBUGGER */
+
+		DECLARE_SLOTS_ErrorClass;
 	};
 
 	/**
@@ -99,6 +101,8 @@ namespace avmplus
 	private:
 		StackTrace* stackTrace;
 #endif /* DEBUGGER */
+
+		DECLARE_SLOTS_ErrorObject;
 	};
 
 	/**
@@ -119,17 +123,37 @@ namespace avmplus
 		}
 	};
 
-	typedef NativeErrorClass DefinitionErrorClass;
-	typedef NativeErrorClass EvalErrorClass;
-	typedef NativeErrorClass RangeErrorClass;
-	typedef NativeErrorClass ReferenceErrorClass;
-	typedef NativeErrorClass SecurityErrorClass;
-	typedef NativeErrorClass SyntaxErrorClass;
-	typedef NativeErrorClass TypeErrorClass;
-	typedef NativeErrorClass URIErrorClass;
-	typedef NativeErrorClass VerifyErrorClass;
-	typedef NativeErrorClass UninitializedErrorClass;
-	typedef NativeErrorClass ArgumentErrorClass;
+	#define DECLARE_NATIVE_ERROR_CLASS(cls, obj)												\
+		class obj : public ErrorObject															\
+		{																						\
+		public:																					\
+			REALLY_INLINE obj(VTable *vtable, ScriptObject *delegate)							\
+				: ErrorObject(vtable, delegate) {}												\
+			DECLARE_SLOTS_##obj;																\
+		};																						\
+		class cls : public NativeErrorClass														\
+		{																						\
+		public:																					\
+			REALLY_INLINE cls(VTable* cvtable)													\
+				: NativeErrorClass(cvtable) {}													\
+			ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate)				\
+			{																					\
+				return new (ivtable->gc(), ivtable->getExtraSize()) obj(ivtable, delegate);		\
+			}																					\
+			DECLARE_SLOTS_##cls;																\
+		};
+	DECLARE_NATIVE_ERROR_CLASS(DefinitionErrorClass, DefinitionErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(EvalErrorClass, EvalErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(RangeErrorClass, RangeErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(ReferenceErrorClass, ReferenceErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(SecurityErrorClass, SecurityErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(SyntaxErrorClass, SyntaxErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(TypeErrorClass, TypeErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(URIErrorClass, URIErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(VerifyErrorClass, VerifyErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(UninitializedErrorClass, UninitializedErrorObject)
+	DECLARE_NATIVE_ERROR_CLASS(ArgumentErrorClass, ArgumentErrorObject)
+
 }
 
 #endif /* __avmplus_ErrorClass__ */

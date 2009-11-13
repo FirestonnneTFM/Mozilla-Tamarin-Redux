@@ -65,6 +65,8 @@ namespace avmplus
 
 		Stringp _convert(double n, int precision, int mode);
 		Stringp _numberToString(double n, int radix);
+        
+		DECLARE_SLOTS_NumberClass;
     };
 }
 

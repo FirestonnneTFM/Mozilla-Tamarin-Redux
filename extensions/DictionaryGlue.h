@@ -67,6 +67,8 @@ namespace avmplus
 		}
 		
 		Atom FASTCALL getKeyFromObject(Atom object) const;
+		
+		DECLARE_SLOTS_DictionaryObject;
 	};
 
 	class DictionaryClass : public ClassClosure
@@ -74,6 +76,8 @@ namespace avmplus
 	public:
 		DictionaryClass(VTable *vtable);
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+		
+		DECLARE_SLOTS_DictionaryClass;
 	};
 }
 

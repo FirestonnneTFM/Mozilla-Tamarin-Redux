@@ -39,6 +39,39 @@
 
 #define AVMTHUNK_VERSION 5
 
+namespace avmshell {
+    class ByteArrayClass; //flash.utils::ByteArray$
+    class ByteArrayObject; //flash.utils::ByteArray
+    class DomainClass; //avmplus::Domain$
+    class DomainObject; //avmplus::Domain
+    class FileClass; //avmplus::File$
+    class MIClass; //avmplus::MI$
+    class MIObject; //avmplus::MI
+    class SystemClass; //avmplus::System$
+}
+
+namespace avmplus {
+    class ArrayObject; //Array
+    class ClassClosure; //Class
+    class DeleteObjectSampleClass; //flash.sampler::DeleteObjectSample$
+    class DeleteObjectSampleObject; //flash.sampler::DeleteObjectSample
+    class DictionaryClass; //flash.utils::Dictionary$
+    class DictionaryObject; //flash.utils::Dictionary
+    class JObject; //avmplus::JObject
+    class JObjectClass; //avmplus::JObject$
+    class NewObjectSampleClass; //flash.sampler::NewObjectSample$
+    class NewObjectSampleObject; //flash.sampler::NewObjectSample
+    class SampleClass; //flash.sampler::Sample$
+    class SampleObject; //flash.sampler::Sample
+    class ScriptObject; //avmplus::File
+    class StackFrameClass; //flash.sampler::StackFrame$
+    class StackFrameObject; //flash.sampler::StackFrame
+    class String; //String
+    class TraceClass; //flash.trace::Trace$
+}
+
+namespace avmplus { namespace NativeID {
+
 extern const uint32_t shell_toplevel_abc_class_count;
 extern const uint32_t shell_toplevel_abc_script_count;
 extern const uint32_t shell_toplevel_abc_method_count;
@@ -340,3 +373,407 @@ extern AvmBox shell_toplevel_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBo
 #define avmplus_Domain_loadBytes_thunk  shell_toplevel_a2a_oo_thunk
 #define flash_trace_Trace_setListener_thunk  shell_toplevel_a2a_oo_thunk
 
+class SlotOffsetsAndAsserts;
+// avmplus::MI$
+//-----------------------------------------------------------
+class _avmshell_MIClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_MIClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_MIClassSlots EmptySlotsStruct_MIClass
+//-----------------------------------------------------------
+
+// avmplus::MI
+//-----------------------------------------------------------
+class _avmshell_MIObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_MIObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_MIObjectSlots EmptySlotsStruct_MIObject
+//-----------------------------------------------------------
+
+// avmplus::System$
+//-----------------------------------------------------------
+class _avmshell_SystemClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE ArrayObject* get_argv() const { return m_argv; }
+private:
+    DRCWB(ArrayObject*) m_argv;
+};
+#define DECLARE_SLOTS_SystemClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE ArrayObject* get_argv() const { return m_slots_SystemClass.get_argv(); } \
+    private: \
+        avmplus::NativeID::_avmshell_SystemClassSlots m_slots_SystemClass
+//-----------------------------------------------------------
+
+// avmplus::File$
+//-----------------------------------------------------------
+class _avmshell_FileClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_FileClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_FileClassSlots EmptySlotsStruct_FileClass
+//-----------------------------------------------------------
+
+// avmplus::Domain$
+//-----------------------------------------------------------
+class _avmshell_DomainClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DomainClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_DomainClassSlots EmptySlotsStruct_DomainClass
+//-----------------------------------------------------------
+
+// avmplus::Domain
+//-----------------------------------------------------------
+class _avmshell_DomainObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DomainObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_DomainObjectSlots EmptySlotsStruct_DomainObject
+//-----------------------------------------------------------
+
+// flash.utils::ByteArray$
+//-----------------------------------------------------------
+class _avmshell_ByteArrayClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ByteArrayClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_ByteArrayClassSlots EmptySlotsStruct_ByteArrayClass
+//-----------------------------------------------------------
+
+// flash.utils::ByteArray
+//-----------------------------------------------------------
+class _avmshell_ByteArrayObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_ByteArrayObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::_avmshell_ByteArrayObjectSlots EmptySlotsStruct_ByteArrayObject
+//-----------------------------------------------------------
+
+// flash.sampler::StackFrame$
+//-----------------------------------------------------------
+class StackFrameClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_StackFrameClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::StackFrameClassSlots EmptySlotsStruct_StackFrameClass
+//-----------------------------------------------------------
+
+// flash.sampler::StackFrame
+//-----------------------------------------------------------
+class StackFrameObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE uint32_t get_line() const { return m_line; }
+    void set_line(uint32_t newVal);
+    REALLY_INLINE AvmString get_name() const { return m_name; }
+    void set_name(StackFrameObject* obj, AvmString newVal);
+    REALLY_INLINE AvmString get_file() const { return m_file; }
+    void set_file(StackFrameObject* obj, AvmString newVal);
+    REALLY_INLINE double get_scriptID() const { return m_scriptID; }
+    void set_scriptID(double newVal);
+private:
+    uint32_t m_line;
+    DRCWB(AvmString) m_name;
+    DRCWB(AvmString) m_file;
+    double m_scriptID;
+};
+REALLY_INLINE void StackFrameObjectSlots::set_line(uint32_t newVal) { m_line = newVal; }
+REALLY_INLINE void StackFrameObjectSlots::set_name(StackFrameObject* obj, AvmString newVal)
+{
+    m_name.set(((ScriptObject*)obj)->gc(), obj, newVal);
+}
+REALLY_INLINE void StackFrameObjectSlots::set_file(StackFrameObject* obj, AvmString newVal)
+{
+    m_file.set(((ScriptObject*)obj)->gc(), obj, newVal);
+}
+REALLY_INLINE void StackFrameObjectSlots::set_scriptID(double newVal) { m_scriptID = newVal; }
+#define DECLARE_SLOTS_StackFrameObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE uint32_t get_line() const { return m_slots_StackFrameObject.get_line(); } \
+        REALLY_INLINE void set_line(uint32_t newVal) { m_slots_StackFrameObject.set_line(newVal); } \
+        REALLY_INLINE AvmString get_name() const { return m_slots_StackFrameObject.get_name(); } \
+        REALLY_INLINE void set_name(AvmString newVal) { m_slots_StackFrameObject.set_name(this, newVal); } \
+        REALLY_INLINE AvmString get_file() const { return m_slots_StackFrameObject.get_file(); } \
+        REALLY_INLINE void set_file(AvmString newVal) { m_slots_StackFrameObject.set_file(this, newVal); } \
+        REALLY_INLINE double get_scriptID() const { return m_slots_StackFrameObject.get_scriptID(); } \
+        REALLY_INLINE void set_scriptID(double newVal) { m_slots_StackFrameObject.set_scriptID(newVal); } \
+    private: \
+        avmplus::NativeID::StackFrameObjectSlots m_slots_StackFrameObject
+//-----------------------------------------------------------
+
+// flash.sampler::Sample$
+//-----------------------------------------------------------
+class SampleClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_SampleClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::SampleClassSlots EmptySlotsStruct_SampleClass
+//-----------------------------------------------------------
+
+// flash.sampler::Sample
+//-----------------------------------------------------------
+class SampleObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE ArrayObject* get_stack() const { return m_stack; }
+    void set_stack(SampleObject* obj, ArrayObject* newVal);
+    REALLY_INLINE double get_time() const { return m_time; }
+    void set_time(double newVal);
+private:
+    DRCWB(ArrayObject*) m_stack;
+    double m_time;
+};
+REALLY_INLINE void SampleObjectSlots::set_stack(SampleObject* obj, ArrayObject* newVal)
+{
+    m_stack.set(((ScriptObject*)obj)->gc(), obj, newVal);
+}
+REALLY_INLINE void SampleObjectSlots::set_time(double newVal) { m_time = newVal; }
+#define DECLARE_SLOTS_SampleObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE ArrayObject* get_stack() const { return m_slots_SampleObject.get_stack(); } \
+        REALLY_INLINE void set_stack(ArrayObject* newVal) { m_slots_SampleObject.set_stack(this, newVal); } \
+        REALLY_INLINE double get_time() const { return m_slots_SampleObject.get_time(); } \
+        REALLY_INLINE void set_time(double newVal) { m_slots_SampleObject.set_time(newVal); } \
+    private: \
+        avmplus::NativeID::SampleObjectSlots m_slots_SampleObject
+//-----------------------------------------------------------
+
+// flash.sampler::NewObjectSample$
+//-----------------------------------------------------------
+class NewObjectSampleClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_NewObjectSampleClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::NewObjectSampleClassSlots EmptySlotsStruct_NewObjectSampleClass
+//-----------------------------------------------------------
+
+// flash.sampler::NewObjectSample
+//-----------------------------------------------------------
+class NewObjectSampleObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE ClassClosure* get_type() const { return m_type; }
+    void set_type(NewObjectSampleObject* obj, ClassClosure* newVal);
+    REALLY_INLINE double get_id() const { return m_id; }
+    void set_id(double newVal);
+private:
+    DRCWB(ClassClosure*) m_type;
+    double m_id;
+};
+REALLY_INLINE void NewObjectSampleObjectSlots::set_type(NewObjectSampleObject* obj, ClassClosure* newVal)
+{
+    m_type.set(((ScriptObject*)obj)->gc(), obj, newVal);
+}
+REALLY_INLINE void NewObjectSampleObjectSlots::set_id(double newVal) { m_id = newVal; }
+#define DECLARE_SLOTS_NewObjectSampleObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE ClassClosure* get_type() const { return m_slots_NewObjectSampleObject.get_type(); } \
+        REALLY_INLINE void set_type(ClassClosure* newVal) { m_slots_NewObjectSampleObject.set_type(this, newVal); } \
+        REALLY_INLINE double get_id() const { return m_slots_NewObjectSampleObject.get_id(); } \
+        REALLY_INLINE void set_id(double newVal) { m_slots_NewObjectSampleObject.set_id(newVal); } \
+    private: \
+        avmplus::NativeID::NewObjectSampleObjectSlots m_slots_NewObjectSampleObject
+//-----------------------------------------------------------
+
+// flash.sampler::DeleteObjectSample$
+//-----------------------------------------------------------
+class DeleteObjectSampleClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DeleteObjectSampleClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::DeleteObjectSampleClassSlots EmptySlotsStruct_DeleteObjectSampleClass
+//-----------------------------------------------------------
+
+// flash.sampler::DeleteObjectSample
+//-----------------------------------------------------------
+class DeleteObjectSampleObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE double get_id() const { return m_id; }
+    void set_id(double newVal);
+    REALLY_INLINE double get_size() const { return m_size; }
+    void set_size(double newVal);
+private:
+    double m_id;
+    double m_size;
+};
+REALLY_INLINE void DeleteObjectSampleObjectSlots::set_id(double newVal) { m_id = newVal; }
+REALLY_INLINE void DeleteObjectSampleObjectSlots::set_size(double newVal) { m_size = newVal; }
+#define DECLARE_SLOTS_DeleteObjectSampleObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE double get_id() const { return m_slots_DeleteObjectSampleObject.get_id(); } \
+        REALLY_INLINE void set_id(double newVal) { m_slots_DeleteObjectSampleObject.set_id(newVal); } \
+        REALLY_INLINE double get_size() const { return m_slots_DeleteObjectSampleObject.get_size(); } \
+        REALLY_INLINE void set_size(double newVal) { m_slots_DeleteObjectSampleObject.set_size(newVal); } \
+    private: \
+        avmplus::NativeID::DeleteObjectSampleObjectSlots m_slots_DeleteObjectSampleObject
+//-----------------------------------------------------------
+
+// flash.trace::Trace$
+//-----------------------------------------------------------
+class TraceClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+    REALLY_INLINE int32_t get_OFF() const { return m_OFF; }
+    REALLY_INLINE int32_t get_METHODS() const { return m_METHODS; }
+    REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_METHODS_WITH_ARGS; }
+    REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_METHODS_AND_LINES; }
+    REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_METHODS_AND_LINES_WITH_ARGS; }
+    REALLY_INLINE AvmBox get_FILE() const { return m_FILE; }
+    REALLY_INLINE AvmBox get_LISTENER() const { return m_LISTENER; }
+private:
+    int32_t m_OFF;
+    int32_t m_METHODS;
+    int32_t m_METHODS_WITH_ARGS;
+    int32_t m_METHODS_AND_LINES;
+    int32_t m_METHODS_AND_LINES_WITH_ARGS;
+    ATOM_WB m_FILE;
+    ATOM_WB m_LISTENER;
+};
+#define DECLARE_SLOTS_TraceClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+    protected: \
+        REALLY_INLINE int32_t get_OFF() const { return m_slots_TraceClass.get_OFF(); } \
+        REALLY_INLINE int32_t get_METHODS() const { return m_slots_TraceClass.get_METHODS(); } \
+        REALLY_INLINE int32_t get_METHODS_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_WITH_ARGS(); } \
+        REALLY_INLINE int32_t get_METHODS_AND_LINES() const { return m_slots_TraceClass.get_METHODS_AND_LINES(); } \
+        REALLY_INLINE int32_t get_METHODS_AND_LINES_WITH_ARGS() const { return m_slots_TraceClass.get_METHODS_AND_LINES_WITH_ARGS(); } \
+        REALLY_INLINE AvmBox get_FILE() const { return m_slots_TraceClass.get_FILE(); } \
+        REALLY_INLINE AvmBox get_LISTENER() const { return m_slots_TraceClass.get_LISTENER(); } \
+    private: \
+        avmplus::NativeID::TraceClassSlots m_slots_TraceClass
+//-----------------------------------------------------------
+
+// flash.utils::Dictionary$
+//-----------------------------------------------------------
+class DictionaryClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DictionaryClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::DictionaryClassSlots EmptySlotsStruct_DictionaryClass
+//-----------------------------------------------------------
+
+// flash.utils::Dictionary
+//-----------------------------------------------------------
+class DictionaryObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_DictionaryObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::DictionaryObjectSlots EmptySlotsStruct_DictionaryObject
+//-----------------------------------------------------------
+
+// avmplus::JObject$
+//-----------------------------------------------------------
+class JObjectClassSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_JObjectClass \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::JObjectClassSlots EmptySlotsStruct_JObjectClass
+//-----------------------------------------------------------
+
+// avmplus::JObject
+//-----------------------------------------------------------
+class JObjectSlots
+{
+    friend class SlotOffsetsAndAsserts;
+public:
+private:
+};
+#define DECLARE_SLOTS_JObject \
+    private: \
+        friend class avmplus::NativeID::SlotOffsetsAndAsserts; \
+        typedef avmplus::NativeID::JObjectSlots EmptySlotsStruct_JObject
+//-----------------------------------------------------------
+
+} }

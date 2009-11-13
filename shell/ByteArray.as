@@ -81,7 +81,7 @@ package flash.utils
  * @refpath 
  * @keyword ByteArray
  */
-[native(cls="ByteArrayClass", instance="ByteArrayObject", methods="auto")]
+[native(cls="::avmshell::ByteArrayClass", instance="::avmshell::ByteArrayObject", methods="auto")]
 public class ByteArray
 {
 	public native static function readFile(filename:String):ByteArray;

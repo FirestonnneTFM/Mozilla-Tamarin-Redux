@@ -261,6 +261,7 @@ namespace avmplus
 #include "VTable.h"
 #include "ScriptObject.h"
 #include "NativeFunction.h"
+#include "BuiltinNatives.h"
 #include "Coder.h"
 #include "WordcodeTranslator.h"
 #include "WordcodeEmitter.h"

@@ -140,7 +140,7 @@ namespace avmplus
 		
 		static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameHashtable* _bindings, uint32_t slotCount, uint32_t methodCount, uint32_t interfaceCount);
 
-		void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const;
+		void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo, uint32_t slotAreaCount, uint32_t sizeOfSlotArea) const;
 
 		Traitsp getSlotTraits(uint32_t i) const;
 		uint32_t getSlotOffset(uint32_t i) const;
@@ -179,7 +179,7 @@ namespace avmplus
 		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
 		void fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel);
-		
+
 	// ------------------------ DATA SECTION BEGIN
 		public:		const Traitsp					owner;
 		public:		const TraitsBindingsp			base; 
@@ -192,7 +192,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 
 	};
-	
+
 	// NOTE: caller must check for null key, eg,
 	//
 	//		StTraitsBindingsIterator iter(mnht);
@@ -257,14 +257,10 @@ namespace avmplus
 		#endif
 
 	public:
-
-		uint32_t getSizeOfInstance() const;
+        
+		uint16_t getSizeOfInstance() const;
+		uint32_t getTotalSize() const;		
 		uint32_t getHashtableOffset() const;
-		uint32_t getTotalSize() const;
-
-		// in bytes. includes size for all base classes too.
-		uint32_t getSlotAreaSize() const;
-		uint32_t getSlotAreaStart() const;
 
 		// in bytes. includes size for all base classes too.
 		uint32_t getExtraSize() const;
@@ -274,15 +270,27 @@ namespace avmplus
 		void setMetadataPos(const byte* pos);
 
 	private:
+        
+		// in bytes. size of the slots not included in the size of instance.  Includes size of slots for bases classes that are not native.
+		uint32_t getSlotAreaSize() const;
+
+		void computeSlotAreaCountAndSize(TraitsBindings* tb, uint32_t& slotCount, uint32_t& size) const; 
+        
+		uint32_t computeSlotAreaStart(uint32_t nPointerSlots, uint32_t n32BitNonPointerSlots, uint32_t n64BitNonPointerSlots) const;
+		
 		void buildBindings(TraitsBindingsp basetb, 
 							MultinameHashtable* bindings, 
 							uint32_t& slotCount, 
 							uint32_t& methodCount,
+							uint32_t& n32BitNonPointerSlots,
+							uint32_t& n64BitNonPointerSlots,
 							const Toplevel* toplevel) const;
 		uint32_t finishSlotsAndMethods(TraitsBindingsp basetb, 
 									TraitsBindings* tb, 
 									const Toplevel* toplevel,
-									AbcGen* abcGen) const;
+									AbcGen* abcGen,
+									uint32_t n32BitNonPointerSlots,
+									uint32_t n64BitNonPointerSlots) const;
 		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen);
 
 		TraitsMetadata* _buildTraitsMetadata();
@@ -305,7 +313,8 @@ namespace avmplus
 		 */
 		Traits(PoolObject* pool,
 			   Traits* base,
-			   uint32_t sizeofInstance,
+			   uint16_t sizeofInstance,
+			   uint16_t offsetofSlots,
 			   TraitsPosPtr traitsPos,
 			   TraitsPosType posType);
 
@@ -317,7 +326,8 @@ namespace avmplus
 		 */
 		static Traits* newTraits(PoolObject* pool,
 			   Traits *base,
-				uint32_t sizeofInstance,
+				uint16_t sizeofInstance,
+				uint16_t offsetofSlots,
 				TraitsPosPtr traitsPos,
 				TraitsPosType posType);
 		
@@ -371,7 +381,7 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core, bool includeAllNamespaces = false) const;
 #endif
-		
+
 		// call init_declaringScope for each method that we own. this should be
 		// called exactly once per Traits, *after* the Traits has been resolved.
 		void init_declaringScopes(const ScopeTypeChain* stc);
@@ -402,9 +412,8 @@ namespace avmplus
 #ifdef VMCFG_CACHE_GQCN
 	private:	DRCWB(Stringp)			_fullname;		// value returned by formatClassName
 #endif
-// @todo -- we should be able to store m_sizeofInstance in 16 bits but JIT doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
-// @todo -- what prevents an instance being >64K?
-	private:	uint32_t				m_sizeofInstance;	// sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
+ 	private:	uint16_t				m_sizeofInstance;	// sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
+ 	private:	uint16_t				m_offsetofSlots;	// offset of first slot.
 	private:	uint32_t				m_hashTableOffset;	// offset to our hashtable (or 0 if none)
 	private:	uint32_t				m_totalSize;		// total size, including sizeofInstance + slots + hashtable
 	public:		uint8_t					builtinType;				// BuiltinType enumeration -- only need 5 bits but stored in byte for faster access

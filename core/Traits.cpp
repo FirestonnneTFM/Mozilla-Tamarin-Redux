@@ -69,19 +69,7 @@ namespace avmplus
 				const SlotInfo* src = &_base->getSlots()[0];
 				SlotInfo* dst = &tb->getSlots()[0];
 				VMPI_memcpy(dst, src, _base->slotCount * sizeof(SlotInfo));
-				if (!_owner->isMachineType())
-				{
-					AvmAssert(tb->owner->m_sizeofInstance >= _base->owner->m_sizeofInstance);
-					// upshift by 3 bits to affect only the offset part, leaving sst alone...
-					// downshift by 2 bits because it's stored as offset of uint32 (not uint8)
-					// thus net upshift of 1
-					const uint32_t delta = (tb->owner->m_sizeofInstance - _base->owner->m_sizeofInstance)<<1;
-					if (delta > 0)
-					{
-						for (uint32_t i = 0, n = _base->slotCount; i < n; ++i)
-							dst[i].offsetAndSST = src[i].offsetAndSST + delta;
-					}
-				}
+				AvmAssert(((_owner->isMachineType()) || (tb->owner->m_sizeofInstance >= _base->owner->m_sizeofInstance)));
 			}
 			if (_base->methodCount)
 				VMPI_memcpy(&tb->getMethods()[0], &_base->getMethods()[0], _base->methodCount * sizeof(MethodInfo));
@@ -193,8 +181,6 @@ namespace avmplus
                 i = (i + (n++)) & bitMask;                // quadratic probe
             }
         }
-		// ironically, some compilers will complain that this is unreachable. Er, yeah...
-		// AvmAssert(0); // never reached
 	}
 
 	bool FASTCALL TraitsBindings::containsInterface(Traitsp intf) const
@@ -224,40 +210,45 @@ namespace avmplus
                 i = (i + (n++)) & bitMask;                // quadratic probe
             }
         }
-		// ironically, some compilers will complain that this is unreachable. Er, yeah...
-		// AvmAssert(0); // never reached
 	}
 
-	void TraitsBindings::buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo) const
+	void TraitsBindings::buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo, uint32_t slotAreaCount, uint32_t slotAreaSize) const
 	{
-		// this is really a compile-time assertion
-		AvmAssert(kUnusedAtomTag == 0 && kObjectType == 1 && kStringType == 2 && kNamespaceType == 3);
+		MMGC_STATIC_ASSERT(kUnusedAtomTag == 0 && kObjectType == 1 && kStringType == 2 && kNamespaceType == 3);
+		AvmAssert(slotAreaCount <= slotCount);
 		
 		// not the same as slotCount since a slot of type double
 		// takes two bits (in 32-bit builds). note that the bits are
 		// always 4-byte chunks even in 64-bit builds!
-		const uint32_t bitsNeeded = m_slotSize / sizeof(uint32_t);	// not sizeof(Atom)!
-		AvmAssert(bitsNeeded * sizeof(uint32_t) == m_slotSize);		// should be even multiple!
+		const uint32_t bitsNeeded = slotAreaSize / sizeof(uint32_t);	// not sizeof(Atom)!
+		AvmAssert(bitsNeeded * sizeof(uint32_t) == slotAreaSize);		// should be even multiple!
 		// allocate one extra bit and use it for "all-zero"
 		slotDestroyInfo.resize(gc, bitsNeeded+1);
-		
-		const uint32_t sizeofInstance = this->owner->m_sizeofInstance;
-		const TraitsBindings::SlotInfo* tbs		= getSlots();
-		const TraitsBindings::SlotInfo* tbs_end	= tbs + slotCount;
-		for ( ; tbs < tbs_end; ++tbs) 
+		if (slotAreaSize > 0)
 		{
-			// offset is pointed off the end of our object
-			if (isAtomOrRCObjectSlot(tbs->sst())) 
+			const uint32_t sizeofInstance = this->owner->getSizeOfInstance();
+			const TraitsBindings::SlotInfo* tbs		= getSlots() + (slotCount - slotAreaCount);
+			const TraitsBindings::SlotInfo* tbs_end = tbs + slotAreaCount;
+			for ( ; tbs < tbs_end; ++tbs) 
 			{
-				//owner->core->console<<"SDI "<<owner<<" "<<sizeofInstance<<" "<<tbs->type<<" "<<tbs->offset()<<"\n";
-				AvmAssert(tbs->offset() >= sizeofInstance);
-				const uint32_t off = tbs->offset() - sizeofInstance;
-				AvmAssert((off % 4) == 0);
-				// if slot is "big" then this is the bit of the first 4 bytes. that's fine.
-				slotDestroyInfo.set((off>>2)+1);	// +1 to leave room for bit 0
-				slotDestroyInfo.set(0);				// bit 0 is "anyset" flag
-			} 
-			// otherwise leave the bit zero
+				// offset is pointed off the end of our object
+				if (isAtomOrRCObjectSlot(tbs->sst())) 
+				{
+					//owner->core->console<<"SDI "<<owner<<" "<<sizeofInstance<<" "<<tbs->type<<" "<<tbs->offset()<<"\n";
+					AvmAssert(tbs->offset() >= sizeofInstance);
+					const uint32_t off = tbs->offset() - sizeofInstance;
+					AvmAssert((off % 4) == 0);
+					// if slot is "big" then this is the bit of the first 4 bytes. that's fine.
+					slotDestroyInfo.set((off>>2)+1);	// +1 to leave room for bit 0
+					slotDestroyInfo.set(0);				// bit 0 is "anyset" flag
+				} 
+				// otherwise leave the bit zero
+			}
+		}
+		else
+		{
+			AvmAssert(slotAreaCount == 0);
+			AvmAssert(bitsNeeded == 0);
 		}
 
 		// if nothing set, blow away what we built and realloc as single clear bit -- smaller and faster
@@ -268,39 +259,39 @@ namespace avmplus
 		}
 	}
 
-    bool TraitsBindings::checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const
-    {
+	bool TraitsBindings::checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const
+	{
 		if (over == virt)
 			return true;
 			
 		MethodSignaturep overms = over->getMethodSignature();
 		MethodSignaturep virtms = virt->getMethodSignature();
 
-        Traits* overTraits = overms->returnTraits();
-        Traits* virtTraits = virtms->returnTraits();
+		Traits* overTraits = overms->returnTraits();
+		Traits* virtTraits = virtms->returnTraits();
 
-        if (overTraits != virtTraits)
-        {
+		if (overTraits != virtTraits)
+		{
 #ifdef AVMPLUS_VERBOSE
-            core->console << "\n";
-            core->console << "return types dont match\n";
-            core->console << "   virt " << virtTraits << " " << virt << "\n";
-            core->console << "   over " << overTraits << " " << over << "\n";
+			core->console << "\n";
+			core->console << "return types dont match\n";
+			core->console << "   virt " << virtTraits << " " << virt << "\n";
+			core->console << "   over " << overTraits << " " << over << "\n";
 #endif
-            return false;
-        }
+			return false;
+		}
 		
-        if (overms->param_count() != virtms->param_count() ||
-            overms->optional_count() != virtms->optional_count())
-        {
+		if (overms->param_count() != virtms->param_count() ||
+			overms->optional_count() != virtms->optional_count())
+		{
 #ifdef AVMPLUS_VERBOSE
-            core->console << "\n";
-            core->console << "param count mismatch\n";
-            core->console << "   virt params=" << virtms->param_count() << " optional=" << virtms->optional_count() << " " << virt << "\n";
-            core->console << "   over params=" << overms->param_count() << " optional=" << overms->optional_count() << " " << virt << "\n";
+			core->console << "\n";
+			core->console << "param count mismatch\n";
+			core->console << "   virt params=" << virtms->param_count() << " optional=" << virtms->optional_count() << " " << virt << "\n";
+			core->console << "   over params=" << overms->param_count() << " optional=" << overms->optional_count() << " " << virt << "\n";
 #endif
-            return false;
-        }
+			return false;
+		}
 
 		// allow subclass param 0 to implement or extend base param 0
 		virtTraits = virtms->paramTraits(0);
@@ -322,12 +313,12 @@ namespace avmplus
 			}
 		}
 
-        for (int k=1, p=overms->param_count(); k <= p; k++)
-        {
-            overTraits = overms->paramTraits(k);
-            virtTraits = virtms->paramTraits(k);
-            if (overTraits != virtTraits)
-            {
+		for (int k=1, p=overms->param_count(); k <= p; k++)
+		{
+			overTraits = overms->paramTraits(k);
+			virtTraits = virtms->paramTraits(k);
+			if (overTraits != virtTraits)
+			{
 				#ifdef AVMPLUS_VERBOSE
 				core->console << "\n";
 				core->console << "param " << k << " incompatible\n";
@@ -335,8 +326,8 @@ namespace avmplus
 				core->console << "   over " << overTraits << " " << over << "\n";
 				#endif
 				return false;
-            }
-        }
+			}
+		}
 
 		if (virt->unboxThis())
 		{
@@ -344,8 +335,8 @@ namespace avmplus
 			over->setUnboxThis();
 		}
 
-        return true;
-    }
+		return true;
+	}
 
 	static bool isCompatibleOverrideKind(BindingKind baseKind, BindingKind overKind)
 	{
@@ -456,7 +447,7 @@ namespace avmplus
 	{
 		if (owner->isInterface)
 			return;
-
+		
 		if (!ifc->linked) 
 		{
 			// toplevel will be non-null only for the first call (will be null afterwards) --
@@ -484,7 +475,7 @@ namespace avmplus
 					this->m_bindings->add(name, ns, pBinding);
 				}
 			}
-		} 
+		}
 	}
 		
 	void Traits::addVersionedBindings(MultinameHashtable* bindings,
@@ -499,7 +490,7 @@ namespace avmplus
 		Namespacep ns = ApiUtils::getVersionedNamespace(core, nss->namespaces[0], apis);
 		bindings->add(name, ns, binding);
 	}
-
+		
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
 
@@ -538,9 +529,10 @@ namespace avmplus
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
 
-    Traits::Traits(PoolObject* _pool, 
+	Traits::Traits(PoolObject* _pool, 
 				   Traits* _base,
-				   uint32_t _sizeofInstance,
+				   uint16_t _sizeofInstance,
+				   uint16_t _offsetofSlots,
 				   TraitsPosPtr traitsPos,
 				   TraitsPosType posType) : 
 		core(_pool->core),
@@ -549,14 +541,14 @@ namespace avmplus
 		m_traitsPos(traitsPos),
 		m_tbref(_pool->core->GetGC()->emptyWeakRef),
 		m_tmref(_pool->core->GetGC()->emptyWeakRef),
-		m_sizeofInstance(uint16_t(_sizeofInstance)),
+		m_sizeofInstance(_sizeofInstance),
+		m_offsetofSlots(_offsetofSlots),
 		builtinType(BUILTIN_none),
 		m_posType(uint8_t(posType))
-    {
+	{
 		AvmAssert(m_tbref->get() == NULL);
 		AvmAssert(m_tmref->get() == NULL);
 		AvmAssert(BUILTIN_COUNT <= 32);
-		AvmAssert(_sizeofInstance <= 0xffff);
 		AvmAssert(m_slotDestroyInfo.allocatedSize() == 0);
 #ifdef _DEBUG
 		switch (posType)
@@ -574,20 +566,21 @@ namespace avmplus
 
 	/*static*/ Traits* Traits::newTraits(PoolObject* pool,
 							Traits *base,
-							uint32_t objectSize,
+							uint16_t objectSize,
+							uint16_t offsetOfSlots,
 							TraitsPosPtr traitsPos,
 							TraitsPosType posType)
-    {
+	{
 		AvmAssert(posType != TRAITSTYPE_CATCH);
 		AvmAssert(pool != NULL);
-		Traits* traits = new (pool->core->GetGC()) Traits(pool, base, objectSize, traitsPos, posType);
+		Traits* traits = new (pool->core->GetGC()) Traits(pool, base, objectSize, offsetOfSlots, traitsPos, posType);
 		return traits;
 	}
 
 	/*static*/ Traits* Traits::newCatchTraits(const Toplevel* toplevel, PoolObject* pool, TraitsPosPtr traitsPos, Stringp name, Namespacep ns)
 	{
 		AvmAssert(pool != NULL);
-		Traits* traits = new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH);
+		Traits* traits = new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH);
 		traits->final = true;
 		traits->set_names(ns, name);
 		traits->resolveSignatures(toplevel);
@@ -596,7 +589,7 @@ namespace avmplus
 
 	Traits* Traits::_newParameterizedTraits(Stringp name, Namespacep ns, Traits* _base)
 	{
-		Traits* newtraits = Traits::newTraits(this->pool, _base, this->getSizeOfInstance(), NULL, TRAITSTYPE_RT);
+		Traits* newtraits = Traits::newTraits(this->pool, _base, this->getSizeOfInstance(), this->m_offsetofSlots, NULL, TRAITSTYPE_RT);
 		newtraits->m_needsHashtable = this->m_needsHashtable;
 		newtraits->set_names(ns, name);
 		return newtraits;
@@ -655,32 +648,12 @@ namespace avmplus
 		return ((1 << Traits::getBuiltinType(slotTE)) & BIG_TYPE_MASK) != 0;
 	}
 
-	static int32_t pad4(int32_t& hole, int32_t& nextSlotOffset)
-	{
-		// 4-aligned, 4-byte field
-		int32_t slotOffset;
-		if (hole != -1)
-		{
-			// this is a trick: if we have 4-8-4, this allows us
-			// to quietly rearrange into 4-4-8
-			slotOffset = hole;
-			hole = -1;
-		}
-		else
-		{
-			slotOffset = nextSlotOffset;
-			nextSlotOffset += 4;
-		}
-		return slotOffset;
-	}
-	
-	static int32_t pad8(int32_t& hole, int32_t& nextSlotOffset)
+	static REALLY_INLINE int32_t pad8(int32_t nextSlotOffset)
 	{
 		// 8-aligned, 8-byte field
 		if (nextSlotOffset & 7)
 		{
 			AvmAssert((nextSlotOffset % 4) == 0);	// should always be a multiple of 4
-			hole = nextSlotOffset;
 			nextSlotOffset += 4;
 		}
 		int32_t slotOffset = nextSlotOffset;
@@ -700,9 +673,20 @@ namespace avmplus
 			case BUILTIN_any:		return SST_atom;
 			case BUILTIN_object:	return SST_atom;
 			case BUILTIN_string:	return SST_string;
-			case BUILTIN_namespace:	return SST_namespace;
+			case BUILTIN_namespace: return SST_namespace;
 			default:				return SST_scriptobject;
 		}
+	}
+
+	static REALLY_INLINE bool isPointerSlot(Traits* slotTE)
+	{
+		BuiltinType bt = Traits::getBuiltinType(slotTE);
+		AvmAssert(bt != BUILTIN_void);
+		
+		MMGC_STATIC_ASSERT(BUILTIN_COUNT < (sizeof(unsigned) * 8));
+		static const unsigned IS_POINTER = ~((1<<BUILTIN_int)|(1<<BUILTIN_uint)|(1<<BUILTIN_number)|(1<<BUILTIN_boolean));
+		
+		return ((1 << bt) & IS_POINTER) != 0;
 	}
 
 	// the logic for assigning slot id's is used in several places, so it's now collapsed here
@@ -787,12 +771,12 @@ namespace avmplus
 		}
 	}
 	
- 	bool Traits::allowEarlyBinding() const
- 	{
- 		// the compiler can early bind to a type's slots when it's defined
- 		// or when the base class came from another abc file and has zero slots
- 		// this ensures you cant use the early opcodes to access an external type's
- 		// private members.
+	bool Traits::allowEarlyBinding() const
+	{
+		// the compiler can early bind to a type's slots when it's defined
+		// or when the base class came from another abc file and has zero slots
+		// this ensures you cant use the early opcodes to access an external type's
+		// private members.
 		TraitsBindingsp tb = this->base ? this->base->getTraitsBindings() : NULL;
 		while (tb != NULL && tb->slotCount > 0)
 		{
@@ -809,6 +793,8 @@ namespace avmplus
 								MultinameHashtable* bindings, 
 								uint32_t& slotCount, 
 								uint32_t& methodCount,
+								uint32_t& n32BitNonPointerSlots,
+								uint32_t& n64BitNonPointerSlots,
 								const Toplevel* toplevel) const
 	{
 		const uint8_t* pos = traitsPosStart();
@@ -839,7 +825,7 @@ namespace avmplus
 				ns = mn.getNamespace();
 				compat_nss = new (core->GetGC()) NamespaceSet(ns);
 			}
-
+			
 			switch (ne.kind)
 			{
 				case TRAIT_Slot:
@@ -881,6 +867,16 @@ namespace avmplus
 					AvmAssert(!(basetb && slot_id < basetb->slotCount));	// unhandled verify error
 					AvmAssert(!(bindings->get(name, ns) != BIND_NONE));		// unhandled verify error
 					addVersionedBindings(bindings, name, compat_nss, AvmCore::makeSlotBinding(slot_id, ne.kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST));
+					Traitsp slotType = (ne.kind == TRAIT_Class) ? 
+										pool->getClassTraits(ne.info) :
+										pool->resolveTypeName(ne.info, toplevel);
+					if (!isPointerSlot(slotType))
+					{
+						if (is8ByteSlot(slotType))
+							++n64BitNonPointerSlots;
+						else
+							++n32BitNonPointerSlots;
+					}
 					break;
 				}
 				case TRAIT_Method:
@@ -948,25 +944,169 @@ namespace avmplus
 					break;
 			}
 		} // for i
-		
 		slotCount = sic.slotCount();
+	}
+		
+	namespace
+	{
+		// Don't mess with the order of the members of the
+		// following struct.
+		//
+		// This struct is never actually instantiated, it is
+		// only used to determine the default padding that C++
+		// compiler will insert between 32 bit member variables and
+		// 64 bit member variables.
+		struct GlueClassTest_Slots
+		{
+			int32_t m_intSlot;
+			double m_numberSlot;
+			int32_t m_otherIntSlot;
+			void* m_ptrSlot;
+		};
+		static const bool align8ByteSlots = (offsetof(GlueClassTest_Slots, m_numberSlot) == 8);
+		static const bool alignPointersTo8Bytes = (offsetof(GlueClassTest_Slots, m_ptrSlot) == 24);
+		static const bool is64Bit = sizeof(void*) == 8;
+	}
+	
+	static REALLY_INLINE int32_t computeSlotOffset(Traits* slotType, int32_t& next32BitSlotOffset, int32_t& nextPointerSlotOffset, int32_t& next64BitSlotOffset)
+	{
+		if (isPointerSlot(slotType))
+		{
+			int32_t const result = nextPointerSlotOffset;
+			nextPointerSlotOffset += sizeof(void*);
+			return result;
+		}
+		else if (is8ByteSlot(slotType))
+		{
+			int32_t const result = next64BitSlotOffset;
+			next64BitSlotOffset += 8;
+			return result;
+		}
+		else
+		{
+			int32_t const result = next32BitSlotOffset;
+			next32BitSlotOffset += 4;
+			return result;
+		}
+	}
+
+    void Traits::computeSlotAreaCountAndSize(TraitsBindings* tb, uint32_t& slotCount, uint32_t& size) const
+	{
+		const TraitsBindings* prevBindings = tb;
+		const TraitsBindings* currBindings = tb->base;
+		uint32_t thisSize = getSizeOfInstance();
+		while ((currBindings != NULL) && (currBindings->owner->getSizeOfInstance() == thisSize))
+		{
+			const TraitsBindings* baseBindings = currBindings->base;
+			AvmAssert((baseBindings == 0) || (baseBindings->owner->getSizeOfInstance() <= thisSize)); (void)baseBindings;
+			prevBindings = currBindings;
+			currBindings = currBindings->base;
+		}
+		
+		// currBindings is first ancestor class that is native with at least one slot or native member variable
+		// or null if there is no native ancenstor class
+		
+		if (currBindings == NULL)
+		{
+			// We could not find a ancestor class that is native.
+			slotCount = tb->slotCount;
+			size = tb->m_slotSize;
+		}
+		else if (currBindings == tb->base)
+		{
+			AvmAssert(tb->base != NULL);
+			AvmAssert((tb->base->slotCount == 0) || (tb->base->owner->getSizeOfInstance() <= thisSize));
+			// "this" is a native class.
+			slotCount = 0;
+			size = 0;
+		}
+		else
+		{
+			AvmAssert(tb->base != NULL);
+			AvmAssert(currBindings != NULL);
+			AvmAssert(currBindings->owner->getSizeOfInstance() <= thisSize);
+			AvmAssert(tb->slotCount >= prevBindings->slotCount);
+			AvmAssert(tb->m_slotSize >= prevBindings->m_slotSize);
+			slotCount = tb->slotCount - prevBindings->slotCount;
+			size = tb->m_slotSize - prevBindings->m_slotSize;
+		}
+	}
+	
+	inline uint32_t Traits::computeSlotAreaStart(uint32_t nPointerSlots, uint32_t n32BitNonPointerSlots, uint32_t n64BitNonPointerSlots) const
+	{
+		// Actual size of slots can be larger because of padding inserted at beginning of slot area and between 4 byte slots and 8 byte slots.
+		uint32_t minSizeOfSlots = (nPointerSlots * sizeof(void*)) + (n32BitNonPointerSlots * 4) + (n64BitNonPointerSlots * 8);
+        uint32_t result = 0;
+		if (base && minSizeOfSlots)
+		{
+			if (getSizeOfInstance() == base->getSizeOfInstance())
+			{
+				// we are not a native subclass or if we are, we don't have any slots.
+				// Our slots start right after our base class slots.
+				// The end of our base class slots is the same offset at which
+				// our base class put its hash table.
+				
+				if (base->m_hashTableOffset)
+					result = base->m_hashTableOffset;
+				else
+					result = base->getTotalSize();
+			}
+			else
+			{
+				// We are a native subclass
+				// We should be bigger than our base class
+				// Our slots are at the end of our instance class.
+				AvmAssert(base->getSizeOfInstance() < getSizeOfInstance());
+				AvmAssert((getSizeOfInstance() - base->getSizeOfInstance()) >= static_cast<intptr_t>(minSizeOfSlots));
+				result = m_offsetofSlots;
+				
+				// result is an offset to a C++ class instance embedded in a glue class instance
+				// If the C++ class instance containing the slot values contains 8 byte types that
+				// are supposed to be 8 byte aligned, then result should also be 8 byte aligned.
+				//
+				// If either of these asserts fail, the slot offset calculation code in finishSlotsAndMethods
+				// will most likely produce incorrect slot offsets for 8 byte slots.
+                AvmAssert(((result % 8) == 0) || (!align8ByteSlots) || (n64BitNonPointerSlots == 0));
+                AvmAssert(((result % 8) == 0) || (!alignPointersTo8Bytes) || (nPointerSlots == 0));
+			}
+		}
+		else
+		{
+			AvmAssert((getSizeOfInstance() == sizeof(ScriptObject)) || (minSizeOfSlots == 0));
+			result = getSizeOfInstance();
+		}
+        return result;
 	}
 
 	uint32_t Traits::finishSlotsAndMethods(TraitsBindingsp basetb, 
 									TraitsBindings* tb, 
 									const Toplevel* toplevel,
-									AbcGen* abcGen) const
+									AbcGen* abcGen,
+									uint32_t n32BitNonPointerSlots,
+									uint32_t n64BitNonPointerSlots) const
 	{
 		const uint8_t* pos = traitsPosStart();
-
+		
 		SlotIdCalcer sic(basetb ? basetb->slotCount : 0, this->allowEarlyBinding());
-		int32_t nextSlotOffset = this->getSlotAreaStart();
-		int32_t hole = -1;
+		uint32_t nBaseSlots = tb->base ? tb->base->slotCount : 0;
+		uint32_t nPointerSlots = tb->slotCount - (n32BitNonPointerSlots + n64BitNonPointerSlots + nBaseSlots);
+		
+		int32_t slotAreaStart = computeSlotAreaStart(nPointerSlots, n32BitNonPointerSlots, n64BitNonPointerSlots);
+		
+		int32_t next32BitSlotOffset = slotAreaStart;
+		int32_t endOf32BitSlots = next32BitSlotOffset + (n32BitNonPointerSlots * 4);
+		int32_t nextPointerSlotOffset = alignPointersTo8Bytes && (nPointerSlots != 0) ? pad8(endOf32BitSlots) : endOf32BitSlots;
+		int32_t endOfPointerSlots = nextPointerSlotOffset + (nPointerSlots * sizeof(void*));
+		int32_t next64BitSlotOffset = align8ByteSlots && (n64BitNonPointerSlots != 0) ? pad8(endOfPointerSlots) : endOfPointerSlots;
+		int32_t endOf64BitSlots = next64BitSlotOffset + (n64BitNonPointerSlots * 8);
 
 		NameEntry ne;
 		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
 		for (uint32_t i = 0; i < nameCount; i++)
-        {
+		{
+            AvmAssert(next32BitSlotOffset <= endOf32BitSlots);
+            AvmAssert(nextPointerSlotOffset <= endOfPointerSlots);
+			AvmAssert(next64BitSlotOffset <= endOf64BitSlots); (void)endOf64BitSlots;
 			ne.readNameEntry(pos);
 			Multiname mn;
 			this->pool->resolveQName(ne.qni, mn, toplevel);
@@ -975,19 +1115,19 @@ namespace avmplus
 			// NOTE only one versioned namespace from the set needed here
 
 			switch (ne.kind)
-            {
+			{
 				case TRAIT_Slot:
 				case TRAIT_Const:
 				case TRAIT_Class:
 				{
+					AvmAssert(endOf64BitSlots > slotAreaStart);
 					uint32_t slotid = sic.calc_id(ne.id);
 					// note, for TRAIT_Class, AbcParser::parseTraits has already verified that pool->cinits[ne.info] is not null
 					Traitsp slotType = (ne.kind == TRAIT_Class) ? 
 										pool->getClassTraits(ne.info) :
 										pool->resolveTypeName(ne.info, toplevel);
-					uint32_t slotOffset = is8ByteSlot(slotType) ? 
-											pad8(hole, nextSlotOffset) : 
-											pad4(hole, nextSlotOffset);	// all slots get at least 4 bytes, even bool
+					uint32_t slotOffset = computeSlotOffset(slotType, next32BitSlotOffset, nextPointerSlotOffset, next64BitSlotOffset);
+					AvmAssert(slotOffset >= sizeof(ScriptObject));
 					tb->setSlotInfo(slotid, slotType, bt2sst(getBuiltinType(slotType)), slotOffset);
 					
 					if (abcGen)
@@ -1011,8 +1151,8 @@ namespace avmplus
 					// unsupported traits type -- can't happen, caught in AbcParser::parseTraits
 					AvmAssert(0);
 					break;
-            }
-        } // for i
+			}
+		} // for i
 		
 		// check for sparse slot table -- anything not specified will default to * (but we must allocate space for it)
 		for (uint32_t i = 0; i < tb->slotCount; i++)
@@ -1028,12 +1168,17 @@ namespace avmplus
 			#endif
 
 			const Traitsp slotType = NULL;
-			const uint32_t slotOffset = is8ByteSlot(slotType) ? 
-									pad8(hole, nextSlotOffset) : 
-									pad4(hole, nextSlotOffset);
+			const uint32_t slotOffset = nextPointerSlotOffset;
+			nextPointerSlotOffset += sizeof(void*);
+			AvmAssert(slotOffset >= sizeof(ScriptObject));
 			tb->setSlotInfo(i, slotType, SST_atom, slotOffset);
 		}
-		return nextSlotOffset;
+		
+		AvmAssert(next32BitSlotOffset == endOf32BitSlots);
+		AvmAssert(nextPointerSlotOffset == endOfPointerSlots);
+		AvmAssert(next64BitSlotOffset == endOf64BitSlots);
+		AvmAssert(endOf64BitSlots >= slotAreaStart);
+		return endOf64BitSlots - slotAreaStart;
 	}
 
 	static const uint8_t* skipToInterfaceCount(const uint8_t* pos)
@@ -1045,7 +1190,7 @@ namespace avmplus
 			AvmCore::skipU30(pos);	// skip protected namespace
 		return pos;
 	}
-	
+
 	// Flex apps often have many interfaces redundantly listed, so first time thru,
 	// eliminate redundant ones.
 	void Traits::countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_GCObjects>& seen)
@@ -1069,7 +1214,7 @@ namespace avmplus
 			}
 		}
 	}
-	
+
 	// Note that the interface list for a given TraitsBindings is flat and inclusive.
 	// in the original version of Tamarin, the interface list was flat, and included
 	// all Interfaces implemented by the Traits, as well as all parent Traits... but
@@ -1088,7 +1233,7 @@ namespace avmplus
 	bool Traits::addInterfaces(TraitsBindings* tb, const Toplevel* toplevel)
 	{
 		bool addedNewInterface = false;
-		
+
 		if (this->posType() == TRAITSTYPE_INSTANCE_FROM_ABC)
 		{
 			const uint8_t* pos = skipToInterfaceCount(this->m_traitsPos);
@@ -1191,16 +1336,19 @@ namespace avmplus
 			
 			uint32_t slotCount = 0;
 			uint32_t methodCount = 0;
-			buildBindings(basetb, bindings, slotCount, methodCount, toplevel);
+			uint32_t n32BitNonPointerSlots = 0;
+			uint32_t n64BitNonPointerSlots = 0;
+			buildBindings(basetb, bindings, slotCount, methodCount, n32BitNonPointerSlots, n64BitNonPointerSlots, toplevel);
 			
 			thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount, (1U << m_interfaceCapLog2));
 			
-			thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen) - m_sizeofInstance;
+			thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen, n32BitNonPointerSlots, n64BitNonPointerSlots);
 
-			// we implement everything our parent does, so re-add from there 
-			// rather than walking the whole hierarchy:
 			if (basetb)
 			{
+				thisData->m_slotSize += basetb->m_slotSize;
+				// we implement everything our parent does, so re-add from there 
+				// rather than walking the whole hierarchy:
 				const TraitsBindings::InterfaceInfo* tbi = basetb->getInterfaces();
 				const TraitsBindings::InterfaceInfo* tbi_end = tbi + basetb->interfaceCapacity;
 				for ( ; tbi < tbi_end; ++tbi) 
@@ -1270,10 +1418,10 @@ namespace avmplus
 		SlotIdCalcer sic(td->base ? td->base->slotCount : 0, this->allowEarlyBinding());
 		NameEntry ne;
 		for (uint32_t i = 0; i < nameCount; i++)
-        {
+		{
 			ne.readNameEntry(pos);
 			switch (ne.kind)
-            {
+			{
 				case TRAIT_Class:
 					AvmAssert(0);
 					// classes shouldn't have metadata, but just fall thru just in case
@@ -1308,7 +1456,7 @@ namespace avmplus
 					AvmAssert(0);
 					break;
 			}
-        } // for i
+		} // for i
 			
 		AvmAssert(m_tmref->get() == NULL);
 		m_tmref = tm->GetWeakRef();
@@ -1347,8 +1495,8 @@ namespace avmplus
 	 * instances are created.  It is not done eagerly in AbcParser
 	 * because doing so would prevent circular type references between
 	 * slots of cooperating classes.
-     *
-     * Resolve the type and position/width of each slot.
+	 *
+	 * Resolve the type and position/width of each slot.
 	 */
 	void Traits::resolveSignatures(const Toplevel* toplevel)
 	{
@@ -1367,7 +1515,7 @@ namespace avmplus
 				t->resolveSignatures(toplevel);
 		}
 
-		AbcGen gen(gc);	
+		AbcGen gen(gc); 
 		TraitsBindings* tb = _buildTraitsBindings(toplevel, &gen);
 		this->genInitBody(toplevel, gen);
 
@@ -1387,6 +1535,9 @@ namespace avmplus
 			}
 		}
 
+		uint32_t slotAreaSize = 0;
+		uint32_t slotAreaCount = 0;
+
 		switch (posType())
 		{
 			case TRAITSTYPE_INSTANCE_FROM_ABC:
@@ -1394,19 +1545,18 @@ namespace avmplus
 			case TRAITSTYPE_SCRIPT_FROM_ABC:
 			case TRAITSTYPE_ACTIVATION:
 			case TRAITSTYPE_CATCH:
-				m_totalSize = m_sizeofInstance + tb->m_slotSize;
+				computeSlotAreaCountAndSize(tb, slotAreaCount, slotAreaSize);
+				m_totalSize = getSizeOfInstance() + slotAreaSize;
 				break;
 			case TRAITSTYPE_NVA:
 			case TRAITSTYPE_RT:
-				m_totalSize = m_sizeofInstance;
+				m_totalSize = getSizeOfInstance();
 				break;
 		}
-		
 		AvmAssert(m_totalSize >= m_sizeofInstance);
 		if (m_needsHashtable || (base && base->base && base->m_hashTableOffset && !isXMLType()))
 		{
-			// slotSize is already rounded up to pointer-sized boundary, but totalsize might not be
-			// (eg for bool/int/uint, which have weird sizes)
+			// round up total size to multiple of pointer size.
 			m_totalSize = ((m_totalSize+(sizeof(uintptr_t)-1))&~(sizeof(uintptr_t)-1));
 			m_hashTableOffset = m_totalSize;
 			m_totalSize += sizeof(InlineHashtable);
@@ -1414,7 +1564,7 @@ namespace avmplus
 			AvmAssert((m_hashTableOffset & (sizeof(uintptr_t)-1)) == 0);
 			AvmAssert((m_totalSize & (sizeof(uintptr_t)-1)) == 0);
 		}
-		
+
 		// make sure all the methods have resolved types
 		{
 			const TraitsBindings::BindingMethodInfo* tbm		= tb->getMethods();
@@ -1463,7 +1613,7 @@ namespace avmplus
 			AvmAssert(!"unhandled verify error");
 		}
 
-		tb->buildSlotDestroyInfo(gc, m_slotDestroyInfo);
+		tb->buildSlotDestroyInfo(gc, m_slotDestroyInfo, slotAreaCount, slotAreaSize);
 
 		linked = true;
 	}
@@ -1486,7 +1636,7 @@ namespace avmplus
 			return Multiname::format(core, ns(), name(), false, !includeAllNamespaces);
 
 		return core->concatStrings(core->newConstantStringLatin1("Traits@"),
-									   core->formatAtomPtr((uintptr)this));
+									core->formatAtomPtr((uintptr)this));
 	}
 #endif
 
@@ -1590,7 +1740,7 @@ namespace avmplus
 				pos++;
 				code_length--;
 			}
-			gen.abs_jump(pos, code_length);	
+			gen.abs_jump(pos, code_length); 
 			
 			// this handles an obscure case: we have already resolved the signature for this
 			// and have a MethodSignature cached, but we just (potentially) increased the value of
@@ -1635,31 +1785,36 @@ namespace avmplus
 			uint32_t* p;
 		};
 		p_8 = (char*)obj + sizeof(AvmPlusScriptableObject);
-		AvmAssert((uintptr_t(p) & 0x3) == 0);
-		const uint32_t mysize = m_sizeofInstance - uint32_t(sizeof(AvmPlusScriptableObject));
-		AvmAssert((mysize & 0x3) == 0); // we assume all sizes are multiples of 4
-
-		const uint32_t slotAreaSize = getSlotAreaSize();
+		AvmAssert((uintptr_t(p) % sizeof(uint32_t)) == 0);
+		
 		if (!m_slotDestroyInfo.test(0))
 		{
 			AvmAssert(m_slotDestroyInfo.cap() == 1);
+			AvmAssert(m_totalSize >= (sizeof(AvmPlusScriptableObject) + (ht ? sizeof(InlineHashtable) : 0)));
+			uint32_t sizeToZero = m_totalSize - (sizeof(AvmPlusScriptableObject) + (ht ? sizeof(InlineHashtable) : 0));
+			AvmAssert((sizeToZero % sizeof(uint32_t)) == 0); // we assume all sizes are multiples of sizeof(uint32_t)
+			
 			// no RCObjects, so just zero it all... my, that was easy
-			VMPI_memset(p, 0, mysize + slotAreaSize);
+			VMPI_memset(p, 0, sizeToZero);
 		}
 		else
 		{
-			VMPI_memset(p, 0, mysize);
-			p += (mysize>>2);
+			uint32_t sizeToZero = m_sizeofInstance - uint32_t(sizeof(AvmPlusScriptableObject));
+			AvmAssert((sizeToZero % sizeof(uint32_t)) == 0); // we assume all sizes are multiples of sizeof(uint32_t)
+			VMPI_memset(p, 0, sizeToZero);
+			p += (sizeToZero / sizeof(uint32_t));
 
 			AvmAssert(m_slotDestroyInfo.cap() >= 1);
-			AvmAssert((uintptr_t(p) & 3) == 0);
+			AvmAssert((uintptr_t(p) % sizeof(uint32_t)) == 0);
+			
+			const uint32_t slotAreaSize = getSlotAreaSize();
 			const uint32_t bitsUsed = slotAreaSize / sizeof(uint32_t);	// not sizeof(Atom)!
 			for (uint32_t bit = 1; bit <= bitsUsed; bit++) 
 			{
 				if (m_slotDestroyInfo.test(bit))
 				{
 					#ifdef AVMPLUS_64BIT
-					AvmAssert((uintptr_t(p) & 7) == 0);	// we had better be on an 8-byte boundary...
+					AvmAssert((uintptr_t(p) & 7) == 0);     // we had better be on an 8-byte boundary...
 					#endif
 					Atom a = *(const Atom*)p;
 					RCObject* rc = NULL;
@@ -1811,7 +1966,7 @@ failure:
 	{ 
 		AvmAssert(this->linked);
 		TraitsMetadata* tm = _buildTraitsMetadata();
- 		return tm;
+		return tm;
 	}
 
 }

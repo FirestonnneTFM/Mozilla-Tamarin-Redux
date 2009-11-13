@@ -124,7 +124,7 @@ package
         }
 	}
 
-	[native(cls="DefinitionErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="DefinitionErrorClass", instance="DefinitionErrorObject", methods="auto")]
 	public dynamic class DefinitionError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -138,7 +138,7 @@ package
 		}	
 	}
 
-	[native(cls="EvalErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="EvalErrorClass", instance="EvalErrorObject", methods="auto")]
 	public dynamic class EvalError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -152,7 +152,7 @@ package
 		}
 	}
 
-	[native(cls="RangeErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="RangeErrorClass", instance="RangeErrorObject", methods="auto")]
 	public dynamic class RangeError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -166,7 +166,7 @@ package
 		}	
 	}
 
-	[native(cls="ReferenceErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="ReferenceErrorClass", instance="ReferenceErrorObject", methods="auto")]
 	public dynamic class ReferenceError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -180,7 +180,7 @@ package
 		}
 	}
 
-	[native(cls="SecurityErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="SecurityErrorClass", instance="SecurityErrorObject", methods="auto")]
 	public dynamic class SecurityError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -194,7 +194,7 @@ package
 		}	
 	}
 
-	[native(cls="SyntaxErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="SyntaxErrorClass", instance="SyntaxErrorObject", methods="auto")]
 	public dynamic class SyntaxError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -208,7 +208,7 @@ package
 		}	
 	}
 
-	[native(cls="TypeErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="TypeErrorClass", instance="TypeErrorObject", methods="auto")]
 	public dynamic class TypeError extends Error
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -222,7 +222,7 @@ package
 		}	
 	}
 
-	[native(cls="URIErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="URIErrorClass", instance="URIErrorObject", methods="auto")]
 	public dynamic class URIError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -236,7 +236,7 @@ package
 		}	
 	}
 
-	[native(cls="VerifyErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="VerifyErrorClass", instance="VerifyErrorObject", methods="auto")]
 	public dynamic class VerifyError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -250,7 +250,7 @@ package
 		}	
 	}
 
-	[native(cls="UninitializedErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="UninitializedErrorClass", instance="UninitializedErrorObject", methods="auto")]
 	public dynamic class UninitializedError	extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -264,7 +264,7 @@ package
 		}	
 	}
 
-	[native(cls="ArgumentErrorClass", instance="ErrorObject", methods="auto")]
+	[native(cls="ArgumentErrorClass", instance="ArgumentErrorObject", methods="auto")]
 	public dynamic class ArgumentError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }

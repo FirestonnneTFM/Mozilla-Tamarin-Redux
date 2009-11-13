@@ -137,6 +137,7 @@ namespace avmplus
 		Stringp format(AvmCore* core) const;
 #endif
 
+		DECLARE_SLOTS_ArrayObject;
 	};
 }
 

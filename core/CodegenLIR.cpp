@@ -3080,17 +3080,6 @@ namespace avmplus
         const TraitsBindingsp tb = t->getTraitsBindings();
         int offset = tb->getSlotOffset(slot);
 
-        if (t->pool->isBuiltin && !t->final)
-        {
-            // t's slots aren't locked in, so we have to adjust for the actual runtime
-            // traits->sizeofInstance.
-            LIns* vtable = loadIns(LIR_ldcp, offsetof(ScriptObject,vtable), ptr);
-            LIns* traits = loadIns(LIR_ldcp, offsetof(VTable,traits), vtable);
-            offset -= (int)(t->m_sizeofInstance);
-            LIns* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, m_sizeofInstance), traits);
-            ptr = binaryIns(LIR_addp, u2p(sizeofInstance), ptr);
-        }
-
         // get
         LOpcode op;
         switch (bt(slotType)) {
@@ -3152,16 +3141,6 @@ namespace avmplus
         int offset = tb->getSlotOffset(slot);
 
         LIns *unoffsetPtr = ptr;
-        if (t->pool->isBuiltin && !t->final)
-        {
-            // t's slots aren't locked in, so we have to adjust for the actual runtime
-            // traits->sizeofInstance.
-            LIns* vtable = loadIns(LIR_ldcp, offsetof(ScriptObject,vtable), ptr);
-            LIns* traits = loadIns(LIR_ldcp, offsetof(VTable,traits), vtable);
-            offset -= (int)(t->m_sizeofInstance);
-            LIns* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, m_sizeofInstance), traits);
-            ptr = binaryIns(LIR_addp, u2p(sizeofInstance), ptr);
-        }
 
         // set
         // use localCopy() to sniff the type and use ldq if it's Number
