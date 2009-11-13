@@ -4254,7 +4254,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 	void AvmCore::enqTraits(Traits* t) {
-        if (config.verifyall && !t->isInterface) {
+        if (config.verifyall && !t->isInterface()) {
 			TraitsBindingsp td = t->getTraitsBindings();
             enqFunction(t->init);
 		    for (int i=0, n=td->methodCount; i < n; i++)
