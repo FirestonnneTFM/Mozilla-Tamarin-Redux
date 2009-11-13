@@ -148,6 +148,11 @@ namespace MMgc
 		return Alloc(GCHeap::CheckForAllocSizeOverflow(size, extra), flags);
 	}
 	
+	REALLY_INLINE void *GC::Calloc(size_t count, size_t elsize, int flags)
+	{
+		return Alloc(GCHeap::CheckForCallocSizeOverflow(count, elsize), flags);
+	}
+	
 #if !defined _DEBUG && !defined MMGC_MEMORY_INFO && !defined AVMPLUS_SAMPLER && !defined MMGC_HOOKS
 	REALLY_INLINE void* GC::AllocDouble()
 	{
