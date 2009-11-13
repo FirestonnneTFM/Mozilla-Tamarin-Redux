@@ -230,6 +230,7 @@ vm avmplus::Toplevel
 vm avmplus::PoolObject
 vm avmplus::Traits
 vm avmplus::List
+vm avmplus:AvmLog.obj
 vm avmplus::Multiname *
 vm avmplus::PrintWriter
 vm avmplus::BuiltinTraits
