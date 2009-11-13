@@ -277,7 +277,7 @@ namespace MMgc
 		 * @return the number of blocks owned by this GC, as accounted for by calls to
 		 * signalBlockAllocation and signalBlockDeallocation.
 		 */
-		uint64_t blocksOwnedByGC();
+		size_t blocksOwnedByGC();
 
 		/**
 		 * @return the number of objects reported marked by signalMarkWork, since startup.
@@ -574,8 +574,8 @@ namespace MMgc
 		uint64_t timeEndOfLastCollection;
 
 		// The total number of blocks owned by GC, and the maximum such number
-		uint64_t blocksOwned;
-		uint64_t maxBlocksOwned;
+		size_t blocksOwned;
+		size_t maxBlocksOwned;
 		
 		// The number of objects scanned since startup (which is equivalent to the number
 		// of calls to GC::MarkItem), less the number scanned during the last

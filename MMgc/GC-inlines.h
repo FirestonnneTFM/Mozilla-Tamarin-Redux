@@ -488,7 +488,7 @@ namespace MMgc
 
 	REALLY_INLINE size_t GC::GetNumBlocks()
 	{
-		return (size_t)policy.blocksOwnedByGC();
+		return policy.blocksOwnedByGC();
 	}
 
 	REALLY_INLINE void* GC::allocaTop() 
