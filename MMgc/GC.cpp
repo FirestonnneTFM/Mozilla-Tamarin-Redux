@@ -1556,7 +1556,7 @@ bail:
 		UnmarkGCPages(ptr, size);
 	}
 
-	void GC::SetPageMapValue(uintptr_t addr, int val)
+	REALLY_INLINE void GC::SetPageMapValue(uintptr_t addr, int val)
 	{
 		uintptr_t index = (addr-memStart) >> 12;
 #ifdef MMGC_64BIT
@@ -1567,7 +1567,7 @@ bail:
 		pageMap[index >> 2] |= (val<<((index&0x3)*2));
 	}	
 
-	void GC::ClearPageMapValue(uintptr_t addr)
+	REALLY_INLINE void GC::ClearPageMapValue(uintptr_t addr)
 	{
 		uintptr_t index = (addr-memStart) >> 12;
 #ifdef MMGC_64BIT
