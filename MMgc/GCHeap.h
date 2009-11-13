@@ -266,14 +266,22 @@ namespace MMgc
 		 * large objects based on application or end-user data may wish to be concerned about
 		 * checking whether the object might be too large.
 		 */
+#if defined (__GNUC__)
+		static void SignalObjectTooLarge() __attribute__((noreturn));
+#else
 		static void SignalObjectTooLarge();
+#endif
 
 		/**
 		 * Signal an inconsistent heap state (an unrecoverable program error).  This /will/
 		 * cause an immediate shutdown of the entire system.  (The alternative is to return
 		 * a NULL pointer, which has the same effect but with considerably less grace.)
 		 */
+#if defined (__GNUC__)
+		static void SignalInconsistentHeapState(const char* reason) __attribute__((noreturn));
+#else
 		static void SignalInconsistentHeapState(const char* reason);
+#endif
 
 		/**
 		 * Signal that the caller is about to longjmp to or past an MMGC_ENTER, and that
