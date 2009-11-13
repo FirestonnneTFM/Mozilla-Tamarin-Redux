@@ -473,6 +473,47 @@ REALLY_INLINE void operator delete[]( void *p ) MMGC_DELETE_THROWS_CLAUSE
 }
 #endif // MMGC_OVERRIDE_NEWDELETE_DEBUGGING
 
+#ifndef MMGC_DELETE_DEBUGGING
+
+namespace MMgc
+{
+	// Debug versions of these functions are out-of-line.
+	
+	REALLY_INLINE void DeleteTaggedScalar( void* p )
+	{
+		DeleteCallInline(p);
+	}
+
+	REALLY_INLINE void DeleteTaggedArrayWithHeader( void* p )
+	{
+		if( p )
+		{
+			p = ((char*)p - MMGC_ARRAYHEADER_SIZE);
+			DeleteCallInline(p);
+		}
+	}
+
+	REALLY_INLINE void DeleteTaggedScalarChecked(void* p)
+	{
+		if( p ) 
+		{
+			DeleteTaggedScalar( p ); 
+		}	
+	}
+
+	REALLY_INLINE void DeleteTaggedArrayWithHeaderChecked(void* p, bool primitive)
+	{
+		(void)primitive;
+		if(p) 
+		{
+			// not using DeleteTaggedArrayWithHeader, that's for non-Simple case with count cookie
+			DeleteTaggedScalar( p );
+		}
+	}
+}
+
+#endif // MMGC_DELETE_DEBUGGING
+
 #endif /* MMGC_OVERRIDE_GLOBAL_NEW */
 
 #endif // __GCGLOBALNEW__

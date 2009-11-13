@@ -236,9 +236,9 @@ namespace MMgc
 		}
 	}
 
-#endif //MMGC_DELETE_DEBUGGING
-
 	// Functions to actually release the memory through FixedMalloc.
+	// Non-debug versions of these functions are always inlined.
+	
 	void DeleteTaggedScalar( void* p )
 	{
 #ifdef MMGC_DELETE_DEBUGGING
@@ -285,6 +285,9 @@ namespace MMgc
 			DeleteTaggedScalar( p );
 		}
 	}
+
+#endif //MMGC_DELETE_DEBUGGING
+	
 
 } // namespace MMgc
 
