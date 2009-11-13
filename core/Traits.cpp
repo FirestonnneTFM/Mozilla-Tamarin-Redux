@@ -683,8 +683,8 @@ namespace avmplus
 		BuiltinType bt = Traits::getBuiltinType(slotTE);
 		AvmAssert(bt != BUILTIN_void);
 		
-		MMGC_STATIC_ASSERT(BUILTIN_COUNT < (sizeof(unsigned) * 8));
-		static const unsigned IS_POINTER = ~((1<<BUILTIN_int)|(1<<BUILTIN_uint)|(1<<BUILTIN_number)|(1<<BUILTIN_boolean));
+		MMGC_STATIC_ASSERT(BUILTIN_COUNT < (sizeof(int) * 8));
+		int const IS_POINTER = ~((1<<BUILTIN_int)|(1<<BUILTIN_uint)|(1<<BUILTIN_number)|(1<<BUILTIN_boolean));
 		
 		return ((1 << bt) & IS_POINTER) != 0;
 	}
