@@ -369,14 +369,6 @@ namespace MMgc
 		FreeBlock(block);
 	}
 
-	
-	size_t GCHeap::Size(const void *item)
-	{
-		MMGC_LOCK(m_spinlock);
-		HeapBlock *block = AddrToBlock(item);
-		return block->size;
-	}
-
 	void GCHeap::Decommit()
 	{
 		// keep at least initialSize free 

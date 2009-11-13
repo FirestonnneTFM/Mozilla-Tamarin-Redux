@@ -1273,11 +1273,6 @@ namespace MMgc
 		return item;
 	}
 
-	void *GC::Calloc(size_t count, size_t elsize, int flags)
-	{
-		return Alloc(GCHeap::CheckForCallocSizeOverflow(count, elsize), flags);
-	}
-
 	void GC::Free(const void *item)
 	{
 		GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");

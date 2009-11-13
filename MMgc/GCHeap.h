@@ -810,6 +810,15 @@ namespace MMgc
 		bool entryChecksEnabled;
  		bool abortStatusNotificationSent;
 	};
+	
+	// Move the following to GCHeap-inlines.h when we have it.
+
+	REALLY_INLINE size_t GCHeap::Size(const void *item)
+	{
+		MMGC_LOCK(m_spinlock);
+		HeapBlock *block = AddrToBlock(item);
+		return block->size;
+	}
 }
 
 #endif /* __GCHeap__ */
