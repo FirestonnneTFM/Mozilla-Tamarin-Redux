@@ -261,6 +261,7 @@ namespace avmplus
 #include "VTable.h"
 #include "ScriptObject.h"
 #include "NativeFunction.h"
+#include "BuiltinNatives.h"
 #include "Coder.h"
 #include "WordcodeTranslator.h"
 #include "WordcodeEmitter.h"
@@ -320,6 +321,7 @@ namespace avmplus
 
 // inline implementations
 #include "AbcEnv-inlines.h"
+#include "AbcParser-inlines.h"
 #include "atom-inlines.h"
 #include "AvmCore-inlines.h"
 #include "instr-inlines.h"

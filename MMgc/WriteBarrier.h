@@ -277,6 +277,11 @@ namespace MMgc
 		{
 			GC::WriteBarrierRC_dtor(&t);
 		}
+		
+		REALLY_INLINE void set(MMgc::GC* gc, void* container, T newValue)
+		{
+			WBRC(gc, container, &t, newValue);
+		}
 
 		REALLY_INLINE T operator=(const WriteBarrierRC<T>& wb)
 		{

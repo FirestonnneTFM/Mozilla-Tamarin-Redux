@@ -41,12 +41,7 @@
 bool P4Available();
 #endif
 
-namespace avmplus {
-	namespace NativeID {
-		using namespace avmshell;
 #include "shell_toplevel.cpp"
-	}
-}
 
 #ifdef VMCFG_TEST_API_VERSIONING
   #include "api-versions.h"

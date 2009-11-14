@@ -229,7 +229,7 @@ namespace avmplus
 			for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
 			{
 				Traitsp ti = tb->getInterface(i);
-				if (ti && ti->isInterface)
+				if (ti && ti->isInterface())
 				{
 					pushstr(interfaces, describeClassName(ti));
 				}
@@ -265,7 +265,7 @@ namespace avmplus
 			for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
 			{
 				Traitsp ti = tb->getInterface(i);
-				if (ti && ti->isInterface)
+				if (ti && ti->isInterface())
 				{
 					TraitsBindingsp tbi = ti->getTraitsBindings();
 					StTraitsBindingsIterator iter(tbi);

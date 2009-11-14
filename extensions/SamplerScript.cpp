@@ -227,9 +227,9 @@ namespace avmplus
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
-	static VTable* _newVT(Toplevel* toplevel, PoolObject* pool, uint32_t sz)
+	static VTable* _newVT(Toplevel* toplevel, PoolObject* pool, uint16_t sz)
 	{
-		Traits* t = Traits::newTraits(pool, NULL, sz, 0, TRAITSTYPE_RT);
+		Traits* t = Traits::newTraits(pool, NULL, sz, 0, 0, TRAITSTYPE_RT);
 		return toplevel->core()->newVTable(t, NULL, toplevel);
 	}
 #endif
@@ -340,97 +340,99 @@ namespace avmplus
 #endif // DEBUGGER
 
 #ifdef DEBUGGER
-	ScriptObject* SamplerScript::makeSample(ScriptObject* self, const Sample& sample)
+	bool SamplerScript::set_stack(ScriptObject* self, const Sample& sample, SampleObject* sam)
 	{
-		AvmCore *core = self->core();
-		MMgc::GC* gc = core->GetGC();
-		Sampler* s = core->get_sampler();
-		if (!s)
-			return NULL;
-			
-		int clsId = NativeID::abcclass_flash_sampler_Sample;
-		
-		if(sample.sampleType == Sampler::NEW_OBJECT_SAMPLE || sample.sampleType == Sampler::NEW_AUX_SAMPLE)
-			clsId = NativeID::abcclass_flash_sampler_NewObjectSample;
-		else if(sample.sampleType == Sampler::DELETED_OBJECT_SAMPLE)
-			clsId = NativeID::abcclass_flash_sampler_DeleteObjectSample;
-		
-		SampleClass *cc = (SampleClass*) self->toplevel()->getBuiltinExtensionClass(clsId);
-		SampleObject *sam = (SampleObject*)cc->createInstance(cc->ivtable(), NULL);
-		union {
-			char* off_c;
-			double* off_d;
-			uint32_t* off_u;
-		};
-		off_c = (char*)sam + cc->timeOffset;
-		*off_d = (double)sample.micros;
-
-		if(sample.sampleType != Sampler::RAW_SAMPLE)
+		if (sample.stack.depth > 0)
 		{
-			AvmAssertMsg(sample.id != 0, "Didn't get id!");
-			off_c = (char*)sam + cc->idOffset;
-			*off_d = (double)sample.id;
-		}
+			Toplevel* toplevel = self->toplevel();
+			AvmCore* core = toplevel->core();
+			Sampler* s = core->get_sampler();
 
-		if(sample.sampleType == Sampler::DELETED_OBJECT_SAMPLE)
-		{
-			if (cc->sizeOffset > 0)
-			{
-				off_c = (char*)sam + cc->sizeOffset;
-				*off_d = (double)sample.size;
-			}
-			return sam;
-		}
-		
-		uint32 num;
-
-		if(sample.stack.depth > 0)
-		{
-			VTable *stackFrameVT = self->toplevel()->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame)->vtable->ivtable;		
-			ArrayObject *stack = self->toplevel()->arrayClass->newArray(sample.stack.depth);
-			StackTrace::Element *e = (StackTrace::Element*)sample.stack.trace;
+			StackFrameClass* sfcc = (StackFrameClass*)toplevel->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame);
+			ArrayObject* stack = toplevel->arrayClass->newArray(sample.stack.depth);
+			StackTrace::Element* e = (StackTrace::Element*)sample.stack.trace;
 			for(uint32 i=0; i < sample.stack.depth; i++, e++)
 			{
-				ScriptObject *f = core->newObject(stackFrameVT, NULL);
+				StackFrameObject* sf = (StackFrameObject*)sfcc->createInstance(sfcc->ivtable(), NULL);
 				
 				// at every allocation the sample buffer could overflow and the samples could be deleted
 				// the StackTrace::Element pointer is a raw pointer into that buffer so we need to check
 				// that its still around before dereferencing e
+				uint32_t num;
 				if (s->getSamples(num) == NULL)
-					return NULL;
-		
-				WBRC(gc, f, ((char*)f + cc->nameOffset), uintptr(e->name()));	// NOT e->info()->name() because e->name() can be a fake name
-				if(e->filename()) {
-					WBRC(gc, f, ((char*)f + cc->fileOffset), e->filename());
-				}
-				off_c = (char*)f + cc->lineOffset;
-				*off_u = e->linenum();
-				off_c = (char*)f + cc->stackIdOffset;
-				*off_d = (double)e->functionId();
+					return false;
+				
+				sf->set_name(e->name()); // NOT e->info()->name() because e->name() can be a fake name
+				if(e->filename())
+					sf->set_file(e->filename());
+				sf->set_line(e->linenum());
+				sf->set_scriptID(static_cast<double>(e->functionId()));
 
-				stack->setUintProperty(i, f->atom());
+				stack->setUintProperty(i, sf->atom());
 			}			
-			WBRC(gc, sam, (char*)sam + cc->stackOffset, stack);
+			sam->set_stack(stack);
 		}
-		
-		if(sample.sampleType == Sampler::RAW_SAMPLE)
-			return sam;
+		return true;
+	}
 
-		if( sample.sampleType == Sampler::NEW_OBJECT_SAMPLE ) {
-
-			if (sample.ptr != NULL ) {
-				((NewObjectSampleObject*)sam)->setRef((AvmPlusScriptableObject*)sample.ptr);
-			}
-			ClassClosure *type = getType(sample.sot, sample.ptr);
-			WBRC(gc, sam, ((char*)sam + cc->typeOffset), type);
-
-			((NewObjectSampleObject*)sam)->setSize(sample.alloc_size);
-		}
-		else if( sample.sampleType == Sampler::NEW_AUX_SAMPLE ) {
-			// Set up size... we know these samples won't have weakref or type info 
-			((NewObjectSampleObject*)sam)->setSize(sample.alloc_size);
-		}
+	SampleObject* SamplerScript::new_sam(ScriptObject* self, const Sample& sample, int clsid)
+	{
+		Toplevel* toplevel = self->toplevel();
+		ClassClosure* cc = toplevel->getBuiltinExtensionClass(clsid);
+		SampleObject* sam = (SampleObject*)cc->createInstance(cc->ivtable(), NULL);
+		sam->set_time(static_cast<double>(sample.micros));
 		return sam;
+	}
+
+	ScriptObject* SamplerScript::makeSample(ScriptObject* self, const Sample& sample)
+	{
+		Toplevel* toplevel = self->toplevel();
+		AvmCore* core = toplevel->core();
+		Sampler* s = core->get_sampler();
+		if (!s)
+			return NULL;
+		
+		switch (sample.sampleType)
+		{
+			case Sampler::RAW_SAMPLE:
+			{
+				SampleObject* sam = new_sam(self, sample, NativeID::abcclass_flash_sampler_Sample);
+				if (!set_stack(self, sample, sam))
+					return NULL;
+				return sam;
+			}
+			case Sampler::DELETED_OBJECT_SAMPLE:
+			{
+				DeleteObjectSampleObject* dsam = (DeleteObjectSampleObject*)new_sam(self, sample, NativeID::abcclass_flash_sampler_DeleteObjectSample);
+				dsam->set_id(static_cast<double>(sample.id));
+				dsam->set_size(static_cast<double>(sample.size));
+				return dsam;
+			}
+			case Sampler::NEW_OBJECT_SAMPLE:
+			{
+				NewObjectSampleObject* nsam = (NewObjectSampleObject*)new_sam(self, sample, NativeID::abcclass_flash_sampler_NewObjectSample);
+				nsam->set_id(static_cast<double>(sample.id));
+				if (!set_stack(self, sample, nsam))
+					return NULL;
+				if (sample.ptr != NULL )
+					nsam->setRef((AvmPlusScriptableObject*)sample.ptr);
+				nsam->set_type(getType(sample.sot, sample.ptr));
+				nsam->setSize(sample.alloc_size);
+				return nsam;
+			}
+			case Sampler::NEW_AUX_SAMPLE:
+			{
+				NewObjectSampleObject* nsam = (NewObjectSampleObject*)new_sam(self, sample, NativeID::abcclass_flash_sampler_NewObjectSample);
+				nsam->set_id(static_cast<double>(sample.id));
+				if (!set_stack(self, sample, nsam))
+					return NULL;
+				nsam->setSize(sample.alloc_size);
+				return nsam;
+			}
+		}
+
+		AvmAssert(0);
+		return NULL;
 	}
 #endif // DEBUGGER
 
@@ -732,6 +734,10 @@ namespace avmplus
 		: SampleObject(vtable, delegate), size(0)
 	{}
 
+	DeleteObjectSampleObject::DeleteObjectSampleObject(VTable *vtable, ScriptObject *delegate)
+		: SampleObject(vtable, delegate)
+	{}
+
 	Atom NewObjectSampleObject::get_object()
 	{
 		if(obj) {
@@ -755,48 +761,7 @@ namespace avmplus
 	SampleClass::SampleClass(VTable *vtable)
 		: ClassClosure(vtable)
 	{
-		Namespacep publicNamespace = core()->getPublicNamespace(vtable->traits->pool);
 		createVanillaPrototype();
-		TraitsBindingsp t = vtable->ivtable->traits->getTraitsBindings();
-		Binding b =  t->findBinding(core()->internConstantStringLatin1("time"), publicNamespace);
-		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-		timeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
-
-		b = t->findBinding(core()->internConstantStringLatin1("stack"), publicNamespace);
-		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-		stackOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
-
-		b = t->findBinding(core()->internConstantStringLatin1("id"), publicNamespace);
-		if(b != BIND_NONE)
-		{
-			AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-			idOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
-		}
-
-		sizeOffset = 0;
-		b = t->findBinding(core()->internConstantStringLatin1("size"), publicNamespace);
-		if(AvmCore::bindingKind(b) == BKIND_CONST)
-		{
-			sizeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
-		}
-
-		t = toplevel()->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame)->vtable->ivtable->traits->getTraitsBindings();
-
-		b =  t->findBinding(core()->internConstantStringLatin1("name"), publicNamespace);
-		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-		nameOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
-
-		b = t->findBinding(core()->internConstantStringLatin1("file"), publicNamespace);
-		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-		fileOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
-
-		b = t->findBinding(core()->internConstantStringLatin1("line"), publicNamespace);
-		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-		lineOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
-		
-		b = t->findBinding(core()->internConstantStringLatin1("scriptID"), publicNamespace);
-		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-		stackIdOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}
 
 	ScriptObject *SampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
@@ -807,15 +772,25 @@ namespace avmplus
 	NewObjectSampleClass::NewObjectSampleClass(VTable *vtable)
 		: SampleClass(vtable)
 	{		
-		TraitsBindingsp t = vtable->ivtable->traits->getTraitsBindings();
-		Binding b =  t->findBinding(core()->internConstantStringLatin1("type"), core()->getPublicNamespace(vtable->traits->pool));
-		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
-		typeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}
 	
 	ScriptObject *NewObjectSampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
 	{
 		return new (core()->gc, ivtable->getExtraSize()) NewObjectSampleObject(ivtable, prototype);
+	}
+
+	DeleteObjectSampleClass::DeleteObjectSampleClass(VTable* vtable) : SampleClass(vtable)
+	{		
+	}
+	
+	ScriptObject* DeleteObjectSampleClass::createInstance(VTable* ivtable, ScriptObject* /*delegate*/)
+	{
+		return new (core()->gc, ivtable->getExtraSize()) DeleteObjectSampleObject(ivtable, prototype);
+	}
+
+	ScriptObject* StackFrameClass::createInstance(VTable* ivtable, ScriptObject* /*delegate*/)
+	{
+		return new (core()->gc, ivtable->getExtraSize()) StackFrameObject(ivtable, prototype);
 	}
 }
 

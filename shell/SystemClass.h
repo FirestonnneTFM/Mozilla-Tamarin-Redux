@@ -47,6 +47,8 @@ namespace avmshell
 	public:
 		MIClass(VTable* cvtable) : ClassClosure(cvtable) {}
 		~MIClass() {}
+		
+		DECLARE_SLOTS_MIClass;
 	};
 
 	// this class exists solely to test native classes that use MI.
@@ -74,6 +76,8 @@ namespace avmshell
 	public:
 		MIObject(VTable* vtable, ScriptObject* prototype) : MIObjectImpl(vtable, prototype, 1), MixinClassThatDoesNotDescendFromScriptObject(2) {}
 		~MIObject() {}
+		
+		DECLARE_SLOTS_MIObject;
 	};
 
 	/**
@@ -155,6 +159,8 @@ namespace avmshell
 
 		// function exists solely to test ScriptObject::isGlobalObject
 		bool isGlobal(Atom o);
+        
+		DECLARE_SLOTS_SystemClass;
     };
 }
 

@@ -210,8 +210,10 @@ namespace avmplus
 #ifdef AVMPLUS_STATIC_POINTERS
 		int32_t class_id;
 #endif
-		uint32_t sizeofClass;
-		uint32_t sizeofInstance;
+		uint16_t sizeofClass;
+		uint16_t offsetofSlotsClass;
+		uint16_t sizeofInstance;
+		uint16_t offsetofSlotsInstance;
 	};
 
 
@@ -268,9 +270,19 @@ namespace avmplus
 		reinterpret_cast<AvmThunkNativeMethodHandler>((void(CLS::*)())(PTR))
 #endif
 
-	#define AVMTHUNK_NATIVE_CLASS_GLUE(CLS) \
+#ifdef _DEBUG
+	#define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, ASSERT_FUNC) \
 		static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
-		{ return new (cvtable->gc(), cvtable->getExtraSize()) CLS(cvtable); } 
+		{ \
+			FQCLS* cc = new (cvtable->gc(), cvtable->getExtraSize()) FQCLS(cvtable); \
+			ASSERT_FUNC(cc->traits(), cc->traits()->itraits); \
+			return cc; \
+		}
+#else
+	#define AVMTHUNK_NATIVE_CLASS_GLUE(CLS, FQCLS, ASSERT_FUNC) \
+		static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
+		{ return new (cvtable->gc(), cvtable->getExtraSize()) FQCLS(cvtable); }
+#endif
 
 	#define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME) \
 		extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain);
@@ -333,11 +345,11 @@ namespace avmplus
 	#define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
 		const NativeClassInfo NAME##_classEntries[] = {
 
-	#define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, INST) \
-		{ (CreateClassClosureProc)CLS##_createClassClosure, avmplus::NativeID::CLSID, sizeof(CLS), sizeof(INST) },
+	#define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST) \
+		{ (CreateClassClosureProc)CLS##_createClassClosure, avmplus::NativeID::CLSID, sizeof(FQCLS), OFFSETOFSLOTSCLS, sizeof(INST), OFFSETOFSLOTSINST },
 
 	#define AVMTHUNK_END_NATIVE_CLASSES() \
-		{ NULL, -1, 0, 0 } };
+		{ NULL, -1, 0, 0, 0, 0 } };
 
 	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
 		PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain) { \
@@ -395,10 +407,12 @@ namespace avmplus
 
 	#define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) 
 
-	#define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, INST) \
+	#define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, FQCLS, OFFSETOFSLOTSCLS, INST, OFFSETOFSLOTSINST) \
 		c[CLSID].createClassClosure = (CreateClassClosureProc)CLS##_createClassClosure; \
-		c[CLSID].sizeofClass = sizeof(CLS); \
-		c[CLSID].sizeofInstance = sizeof(INST); 
+		c[CLSID].sizeofClass = sizeof(FQCLS); \
+		c[CLSID].offsetofSlotsClass = OFFSETOFSLOTSCLS; \
+		c[CLSID].sizeofInstance = sizeof(INST); \
+		c[CLSID].offsetofSlots = OFFSETOFSLOTSINST;
 
 	#define AVMTHUNK_END_NATIVE_CLASSES() 
 

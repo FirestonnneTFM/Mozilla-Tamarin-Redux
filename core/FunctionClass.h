@@ -61,6 +61,8 @@ namespace avmplus
 		{
 			return construct(argc,argv);
 		}
+        
+		DECLARE_SLOTS_FunctionClass;
 	};
 
 	class FunctionObject : public ClassClosure
@@ -81,6 +83,8 @@ namespace avmplus
 		virtual Atom get_coerced_receiver(Atom a);
 	protected:
 		DWB(MethodEnv*) _call;
+		
+		DECLARE_SLOTS_FunctionObject;
 	};
 }
 

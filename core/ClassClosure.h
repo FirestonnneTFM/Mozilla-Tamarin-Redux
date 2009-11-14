@@ -85,6 +85,7 @@ namespace avmplus
 #endif
 	// ------------------------ DATA SECTION BEGIN
 	public: DRCWB(ScriptObject*) prototype;
+	DECLARE_SLOTS_ClassClosure;
 	// ------------------------ DATA SECTION END
 	};
 }

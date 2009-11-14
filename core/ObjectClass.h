@@ -70,6 +70,8 @@ namespace avmplus
 		bool _propertyIsEnumerable(Atom thisAtom, Stringp name);
 		void _setPropertyIsEnumerable(Atom thisAtom, Stringp name, bool enumerable);		
 		Stringp _toString(Atom thisAtom);
+        
+        DECLARE_SLOTS_ObjectClass;
     };
 }
 

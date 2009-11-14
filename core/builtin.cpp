@@ -37,10 +37,12 @@
 
 /* machine generated file -- do not edit */
 
+namespace avmplus { namespace NativeID {
+
 const uint32_t builtin_abc_class_count = 34;
 const uint32_t builtin_abc_script_count = 6;
 const uint32_t builtin_abc_method_count = 853;
-const uint32_t builtin_abc_length = 44246;
+const uint32_t builtin_abc_length = 44454;
 
 /* thunks (75 unique signatures, 293 total) */
 
@@ -534,6 +536,25 @@ AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     String* const obj = (String*)AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0]);
     int32_t const ret = obj->get_length();
     return (AvmBox) ret;
+}
+
+// XMLList_AS3_elements
+// XML_AS3_descendants
+// XML_AS3_processingInstructions
+// XML_AS3_elements
+// XMLList_AS3_descendants
+// XMLList_AS3_processingInstructions
+AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_494___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox);
+    const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
+        (argc < 1 ? AvmThunkCoerce_AvmString_AvmBox(AvmThunkConstant_AvmString(494)/* "*" */) : AvmThunkUnbox_AvmBox(argv[argoff1]))
+    );
 }
 
 // Object_private__isPrototypeOf
@@ -1090,25 +1111,6 @@ AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-// XMLList_AS3_elements
-// XML_AS3_descendants
-// XML_AS3_processingInstructions
-// XML_AS3_elements
-// XMLList_AS3_descendants
-// XMLList_AS3_processingInstructions
-AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_483___________thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
-{
-    enum {
-        argoff0 = 0
-        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
-    };
-    typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox);
-    const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
-        (argc < 1 ? AvmThunkCoerce_AvmString_AvmBox(AvmThunkConstant_AvmString(483)/* "*" */) : AvmThunkUnbox_AvmBox(argv[argoff1]))
-    );
-}
-
 // String_private__indexOf
 AvmBox builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
 {
@@ -1509,40 +1511,457 @@ AvmBox builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     );
 }
 
-AVMTHUNK_NATIVE_CLASS_GLUE(ObjectClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(ClassClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(FunctionClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(NamespaceClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(BooleanClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(NumberClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(IntClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(UIntClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(StringClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(ArrayClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(VectorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(ObjectVectorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(IntVectorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(UIntVectorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(DoubleVectorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(MethodClosureClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(MathClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(ErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(DefinitionErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(EvalErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(RangeErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(ReferenceErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(SecurityErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(SyntaxErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(TypeErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(URIErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(VerifyErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(UninitializedErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(ArgumentErrorClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(DateClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(RegExpClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(XMLClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(XMLListClass)
-AVMTHUNK_NATIVE_CLASS_GLUE(QNameClass)
+class SlotOffsetsAndAsserts
+{
+private:
+    static uint32_t getSlotOffset(Traits* t, int nameId);
+public:
+    static const uint16_t s_slotsOffsetObjectClass = offsetof(ObjectClass, m_slots_ObjectClass);
+    static const uint16_t s_slotsOffsetScriptObject = 0;
+    static void doObjectClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetClassClass = offsetof(ClassClass, m_slots_ClassClass);
+    static const uint16_t s_slotsOffsetClassClosure = 0;
+    static void doClassClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetFunctionClass = offsetof(FunctionClass, m_slots_FunctionClass);
+    static const uint16_t s_slotsOffsetFunctionObject = 0;
+    static void doFunctionClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetNamespaceClass = offsetof(NamespaceClass, m_slots_NamespaceClass);
+    static const uint16_t s_slotsOffsetNamespace = 0;
+    static void doNamespaceClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetBooleanClass = offsetof(BooleanClass, m_slots_BooleanClass);
+    static const uint16_t s_slotsOffsetbool = 0;
+    static void doBooleanClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetNumberClass = offsetof(NumberClass, m_slots_NumberClass);
+    static const uint16_t s_slotsOffsetdouble = 0;
+    static void doNumberClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetIntClass = offsetof(IntClass, m_slots_IntClass);
+    static const uint16_t s_slotsOffsetint32_t = 0;
+    static void doIntClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetUIntClass = offsetof(UIntClass, m_slots_UIntClass);
+    static const uint16_t s_slotsOffsetuint32_t = 0;
+    static void doUIntClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetStringClass = offsetof(StringClass, m_slots_StringClass);
+    static const uint16_t s_slotsOffsetString = 0;
+    static void doStringClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetArrayClass = offsetof(ArrayClass, m_slots_ArrayClass);
+    static const uint16_t s_slotsOffsetArrayObject = 0;
+    static void doArrayClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetVectorClass = 0;
+    static const uint16_t s_slotsOffsetObjectVectorObject = 0;
+    static void doVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetObjectVectorClass = 0;
+    static void doObjectVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetIntVectorClass = 0;
+    static const uint16_t s_slotsOffsetIntVectorObject = 0;
+    static void doIntVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetUIntVectorClass = 0;
+    static const uint16_t s_slotsOffsetUIntVectorObject = 0;
+    static void doUIntVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetDoubleVectorClass = 0;
+    static const uint16_t s_slotsOffsetDoubleVectorObject = 0;
+    static void doDoubleVectorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetMethodClosureClass = 0;
+    static const uint16_t s_slotsOffsetMethodClosure = 0;
+    static void doMethodClosureClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetMathClass = offsetof(MathClass, m_slots_MathClass);
+    static void doMathClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetErrorClass = offsetof(ErrorClass, m_slots_ErrorClass);
+    static const uint16_t s_slotsOffsetErrorObject = offsetof(ErrorObject, m_slots_ErrorObject);
+    static void doErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetDefinitionErrorClass = offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass);
+    static const uint16_t s_slotsOffsetDefinitionErrorObject = 0;
+    static void doDefinitionErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetEvalErrorClass = offsetof(EvalErrorClass, m_slots_EvalErrorClass);
+    static const uint16_t s_slotsOffsetEvalErrorObject = 0;
+    static void doEvalErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetRangeErrorClass = offsetof(RangeErrorClass, m_slots_RangeErrorClass);
+    static const uint16_t s_slotsOffsetRangeErrorObject = 0;
+    static void doRangeErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetReferenceErrorClass = offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass);
+    static const uint16_t s_slotsOffsetReferenceErrorObject = 0;
+    static void doReferenceErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetSecurityErrorClass = offsetof(SecurityErrorClass, m_slots_SecurityErrorClass);
+    static const uint16_t s_slotsOffsetSecurityErrorObject = 0;
+    static void doSecurityErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetSyntaxErrorClass = offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass);
+    static const uint16_t s_slotsOffsetSyntaxErrorObject = 0;
+    static void doSyntaxErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetTypeErrorClass = offsetof(TypeErrorClass, m_slots_TypeErrorClass);
+    static const uint16_t s_slotsOffsetTypeErrorObject = 0;
+    static void doTypeErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetURIErrorClass = offsetof(URIErrorClass, m_slots_URIErrorClass);
+    static const uint16_t s_slotsOffsetURIErrorObject = 0;
+    static void doURIErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetVerifyErrorClass = offsetof(VerifyErrorClass, m_slots_VerifyErrorClass);
+    static const uint16_t s_slotsOffsetVerifyErrorObject = 0;
+    static void doVerifyErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetUninitializedErrorClass = offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass);
+    static const uint16_t s_slotsOffsetUninitializedErrorObject = 0;
+    static void doUninitializedErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetArgumentErrorClass = offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass);
+    static const uint16_t s_slotsOffsetArgumentErrorObject = 0;
+    static void doArgumentErrorClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetDateClass = offsetof(DateClass, m_slots_DateClass);
+    static const uint16_t s_slotsOffsetDateObject = 0;
+    static void doDateClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetRegExpClass = offsetof(RegExpClass, m_slots_RegExpClass);
+    static const uint16_t s_slotsOffsetRegExpObject = 0;
+    static void doRegExpClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetXMLClass = offsetof(XMLClass, m_slots_XMLClass);
+    static const uint16_t s_slotsOffsetXMLObject = 0;
+    static void doXMLClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetXMLListClass = offsetof(XMLListClass, m_slots_XMLListClass);
+    static const uint16_t s_slotsOffsetXMLListObject = 0;
+    static void doXMLListClassAsserts(Traits* cTraits, Traits* iTraits);
+    static const uint16_t s_slotsOffsetQNameClass = offsetof(QNameClass, m_slots_QNameClass);
+    static const uint16_t s_slotsOffsetQNameObject = 0;
+    static void doQNameClassAsserts(Traits* cTraits, Traits* iTraits);
+};
+REALLY_INLINE void SlotOffsetsAndAsserts::doObjectClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(ObjectClass, m_slots_ObjectClass) == s_slotsOffsetObjectClass);
+    MMGC_STATIC_ASSERT(offsetof(ObjectClass, m_slots_ObjectClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(ObjectClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ObjectClass, m_slots_ObjectClass) + offsetof(ObjectClassSlots, m_length)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doClassClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(ClassClass, m_slots_ClassClass) == s_slotsOffsetClassClass);
+    MMGC_STATIC_ASSERT(offsetof(ClassClass, m_slots_ClassClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(ClassClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ClassClass, m_slots_ClassClass) + offsetof(ClassClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(ClassClosure::EmptySlotsStruct_ClassClosure) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doFunctionClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(FunctionClass, m_slots_FunctionClass) == s_slotsOffsetFunctionClass);
+    MMGC_STATIC_ASSERT(offsetof(FunctionClass, m_slots_FunctionClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(FunctionClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(FunctionClass, m_slots_FunctionClass) + offsetof(FunctionClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(FunctionObject::EmptySlotsStruct_FunctionObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doNamespaceClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(NamespaceClass, m_slots_NamespaceClass) == s_slotsOffsetNamespaceClass);
+    MMGC_STATIC_ASSERT(offsetof(NamespaceClass, m_slots_NamespaceClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(NamespaceClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(NamespaceClass, m_slots_NamespaceClass) + offsetof(NamespaceClassSlots, m_length)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doBooleanClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(BooleanClass, m_slots_BooleanClass) == s_slotsOffsetBooleanClass);
+    MMGC_STATIC_ASSERT(offsetof(BooleanClass, m_slots_BooleanClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(BooleanClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(BooleanClass, m_slots_BooleanClass) + offsetof(BooleanClassSlots, m_length)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doNumberClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(NumberClass, m_slots_NumberClass) == s_slotsOffsetNumberClass);
+    MMGC_STATIC_ASSERT(offsetof(NumberClass, m_slots_NumberClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(NumberClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_length)));
+    AvmAssert(getSlotOffset(cTraits, 135) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_NaN)));
+    AvmAssert(getSlotOffset(cTraits, 136) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_NEGATIVE_INFINITY)));
+    AvmAssert(getSlotOffset(cTraits, 137) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_POSITIVE_INFINITY)));
+    AvmAssert(getSlotOffset(cTraits, 138) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_MIN_VALUE)));
+    AvmAssert(getSlotOffset(cTraits, 139) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_MAX_VALUE)));
+    AvmAssert(getSlotOffset(cTraits, 140) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_private_DTOSTR_FIXED)));
+    AvmAssert(getSlotOffset(cTraits, 141) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_private_DTOSTR_PRECISION)));
+    AvmAssert(getSlotOffset(cTraits, 142) == (offsetof(NumberClass, m_slots_NumberClass) + offsetof(NumberClassSlots, m_private_DTOSTR_EXPONENTIAL)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doIntClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(IntClass, m_slots_IntClass) == s_slotsOffsetIntClass);
+    MMGC_STATIC_ASSERT(offsetof(IntClass, m_slots_IntClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(IntClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 138) == (offsetof(IntClass, m_slots_IntClass) + offsetof(IntClassSlots, m_MIN_VALUE)));
+    AvmAssert(getSlotOffset(cTraits, 139) == (offsetof(IntClass, m_slots_IntClass) + offsetof(IntClassSlots, m_MAX_VALUE)));
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(IntClass, m_slots_IntClass) + offsetof(IntClassSlots, m_length)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doUIntClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(UIntClass, m_slots_UIntClass) == s_slotsOffsetUIntClass);
+    MMGC_STATIC_ASSERT(offsetof(UIntClass, m_slots_UIntClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(UIntClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 138) == (offsetof(UIntClass, m_slots_UIntClass) + offsetof(UIntClassSlots, m_MIN_VALUE)));
+    AvmAssert(getSlotOffset(cTraits, 139) == (offsetof(UIntClass, m_slots_UIntClass) + offsetof(UIntClassSlots, m_MAX_VALUE)));
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(UIntClass, m_slots_UIntClass) + offsetof(UIntClassSlots, m_length)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doStringClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(StringClass, m_slots_StringClass) == s_slotsOffsetStringClass);
+    MMGC_STATIC_ASSERT(offsetof(StringClass, m_slots_StringClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(StringClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(StringClass, m_slots_StringClass) + offsetof(StringClassSlots, m_length)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doArrayClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(ArrayClass, m_slots_ArrayClass) == s_slotsOffsetArrayClass);
+    MMGC_STATIC_ASSERT(offsetof(ArrayClass, m_slots_ArrayClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(ArrayClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 306) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_CASEINSENSITIVE)));
+    AvmAssert(getSlotOffset(cTraits, 307) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_DESCENDING)));
+    AvmAssert(getSlotOffset(cTraits, 308) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_UNIQUESORT)));
+    AvmAssert(getSlotOffset(cTraits, 309) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_RETURNINDEXEDARRAY)));
+    AvmAssert(getSlotOffset(cTraits, 310) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_NUMERIC)));
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ArrayClass, m_slots_ArrayClass) + offsetof(ArrayClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(ArrayObject::EmptySlotsStruct_ArrayObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    // MMGC_STATIC_ASSERT(sizeof(VectorClass::EmptySlotsStruct_VectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doObjectVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorClass::EmptySlotsStruct_ObjectVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(ObjectVectorObject::EmptySlotsStruct_ObjectVectorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doIntVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    // MMGC_STATIC_ASSERT(sizeof(IntVectorClass::EmptySlotsStruct_IntVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(IntVectorObject::EmptySlotsStruct_IntVectorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doUIntVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    // MMGC_STATIC_ASSERT(sizeof(UIntVectorClass::EmptySlotsStruct_UIntVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(UIntVectorObject::EmptySlotsStruct_UIntVectorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doDoubleVectorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    // MMGC_STATIC_ASSERT(sizeof(DoubleVectorClass::EmptySlotsStruct_DoubleVectorClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(DoubleVectorObject::EmptySlotsStruct_DoubleVectorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doMethodClosureClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    // MMGC_STATIC_ASSERT(sizeof(MethodClosureClass::EmptySlotsStruct_MethodClosureClass) >= 0);
+    // MMGC_STATIC_ASSERT(sizeof(MethodClosure::EmptySlotsStruct_MethodClosure) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doMathClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(MathClass, m_slots_MathClass) == s_slotsOffsetMathClass);
+    MMGC_STATIC_ASSERT(offsetof(MathClass, m_slots_MathClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(MathClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 741) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_E)));
+    AvmAssert(getSlotOffset(cTraits, 742) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LN10)));
+    AvmAssert(getSlotOffset(cTraits, 743) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LN2)));
+    AvmAssert(getSlotOffset(cTraits, 744) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LOG10E)));
+    AvmAssert(getSlotOffset(cTraits, 745) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_LOG2E)));
+    AvmAssert(getSlotOffset(cTraits, 746) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_PI)));
+    AvmAssert(getSlotOffset(cTraits, 747) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_SQRT1_2)));
+    AvmAssert(getSlotOffset(cTraits, 748) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_SQRT2)));
+    AvmAssert(getSlotOffset(cTraits, 766) == (offsetof(MathClass, m_slots_MathClass) + offsetof(MathClassSlots, m_private_NegInfinity)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(ErrorClass, m_slots_ErrorClass) == s_slotsOffsetErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(ErrorClass, m_slots_ErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(ErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ErrorClass, m_slots_ErrorClass) + offsetof(ErrorClassSlots, m_length)));
+    MMGC_STATIC_ASSERT(offsetof(ErrorObject, m_slots_ErrorObject) == s_slotsOffsetErrorObject);
+    MMGC_STATIC_ASSERT(offsetof(ErrorObject, m_slots_ErrorObject) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(ErrorObject) <= 0xFFFF);
+    AvmAssert(getSlotOffset(iTraits, 795) == (offsetof(ErrorObject, m_slots_ErrorObject) + offsetof(ErrorObjectSlots, m_message)));
+    AvmAssert(getSlotOffset(iTraits, 796) == (offsetof(ErrorObject, m_slots_ErrorObject) + offsetof(ErrorObjectSlots, m_name)));
+    AvmAssert(getSlotOffset(iTraits, 798) == (offsetof(ErrorObject, m_slots_ErrorObject) + offsetof(ErrorObjectSlots, m_private__errorID)));
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) == s_slotsOffsetDefinitionErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(DefinitionErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(DefinitionErrorClass, m_slots_DefinitionErrorClass) + offsetof(DefinitionErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(DefinitionErrorObject::EmptySlotsStruct_DefinitionErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doEvalErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(EvalErrorClass, m_slots_EvalErrorClass) == s_slotsOffsetEvalErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(EvalErrorClass, m_slots_EvalErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(EvalErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(EvalErrorClass, m_slots_EvalErrorClass) + offsetof(EvalErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(EvalErrorObject::EmptySlotsStruct_EvalErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doRangeErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(RangeErrorClass, m_slots_RangeErrorClass) == s_slotsOffsetRangeErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(RangeErrorClass, m_slots_RangeErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(RangeErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(RangeErrorClass, m_slots_RangeErrorClass) + offsetof(RangeErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(RangeErrorObject::EmptySlotsStruct_RangeErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doReferenceErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) == s_slotsOffsetReferenceErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(ReferenceErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ReferenceErrorClass, m_slots_ReferenceErrorClass) + offsetof(ReferenceErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(ReferenceErrorObject::EmptySlotsStruct_ReferenceErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doSecurityErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) == s_slotsOffsetSecurityErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(SecurityErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(SecurityErrorClass, m_slots_SecurityErrorClass) + offsetof(SecurityErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(SecurityErrorObject::EmptySlotsStruct_SecurityErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) == s_slotsOffsetSyntaxErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(SyntaxErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(SyntaxErrorClass, m_slots_SyntaxErrorClass) + offsetof(SyntaxErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(SyntaxErrorObject::EmptySlotsStruct_SyntaxErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doTypeErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(TypeErrorClass, m_slots_TypeErrorClass) == s_slotsOffsetTypeErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(TypeErrorClass, m_slots_TypeErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(TypeErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(TypeErrorClass, m_slots_TypeErrorClass) + offsetof(TypeErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(TypeErrorObject::EmptySlotsStruct_TypeErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doURIErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(URIErrorClass, m_slots_URIErrorClass) == s_slotsOffsetURIErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(URIErrorClass, m_slots_URIErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(URIErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(URIErrorClass, m_slots_URIErrorClass) + offsetof(URIErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(URIErrorObject::EmptySlotsStruct_URIErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doVerifyErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) == s_slotsOffsetVerifyErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(VerifyErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(VerifyErrorClass, m_slots_VerifyErrorClass) + offsetof(VerifyErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(VerifyErrorObject::EmptySlotsStruct_VerifyErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) == s_slotsOffsetUninitializedErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(UninitializedErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(UninitializedErrorClass, m_slots_UninitializedErrorClass) + offsetof(UninitializedErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(UninitializedErrorObject::EmptySlotsStruct_UninitializedErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doArgumentErrorClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) == s_slotsOffsetArgumentErrorClass);
+    MMGC_STATIC_ASSERT(offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(ArgumentErrorClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(ArgumentErrorClass, m_slots_ArgumentErrorClass) + offsetof(ArgumentErrorClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(ArgumentErrorObject::EmptySlotsStruct_ArgumentErrorObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doDateClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(DateClass, m_slots_DateClass) == s_slotsOffsetDateClass);
+    MMGC_STATIC_ASSERT(offsetof(DateClass, m_slots_DateClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(DateClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(DateClass, m_slots_DateClass) + offsetof(DateClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(DateObject::EmptySlotsStruct_DateObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doRegExpClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(RegExpClass, m_slots_RegExpClass) == s_slotsOffsetRegExpClass);
+    MMGC_STATIC_ASSERT(offsetof(RegExpClass, m_slots_RegExpClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(RegExpClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(RegExpClass, m_slots_RegExpClass) + offsetof(RegExpClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(RegExpObject::EmptySlotsStruct_RegExpObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doXMLClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(XMLClass, m_slots_XMLClass) == s_slotsOffsetXMLClass);
+    MMGC_STATIC_ASSERT(offsetof(XMLClass, m_slots_XMLClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(XMLClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(XMLClass, m_slots_XMLClass) + offsetof(XMLClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(XMLObject::EmptySlotsStruct_XMLObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doXMLListClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(XMLListClass, m_slots_XMLListClass) == s_slotsOffsetXMLListClass);
+    MMGC_STATIC_ASSERT(offsetof(XMLListClass, m_slots_XMLListClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(XMLListClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(XMLListClass, m_slots_XMLListClass) + offsetof(XMLListClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(XMLListObject::EmptySlotsStruct_XMLListObject) >= 0);
+}
+REALLY_INLINE void SlotOffsetsAndAsserts::doQNameClassAsserts(Traits* cTraits, Traits* iTraits)
+{
+    (void)cTraits; (void)iTraits;
+    MMGC_STATIC_ASSERT(offsetof(QNameClass, m_slots_QNameClass) == s_slotsOffsetQNameClass);
+    MMGC_STATIC_ASSERT(offsetof(QNameClass, m_slots_QNameClass) <= 0xFFFF);
+    MMGC_STATIC_ASSERT(sizeof(QNameClass) <= 0xFFFF);
+    AvmAssert(getSlotOffset(cTraits, 65) == (offsetof(QNameClass, m_slots_QNameClass) + offsetof(QNameClassSlots, m_length)));
+    // MMGC_STATIC_ASSERT(sizeof(QNameObject::EmptySlotsStruct_QNameObject) >= 0);
+}
+
+AVMTHUNK_NATIVE_CLASS_GLUE(ObjectClass, ObjectClass, SlotOffsetsAndAsserts::doObjectClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(ClassClass, ClassClass, SlotOffsetsAndAsserts::doClassClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(FunctionClass, FunctionClass, SlotOffsetsAndAsserts::doFunctionClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(NamespaceClass, NamespaceClass, SlotOffsetsAndAsserts::doNamespaceClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(BooleanClass, BooleanClass, SlotOffsetsAndAsserts::doBooleanClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(NumberClass, NumberClass, SlotOffsetsAndAsserts::doNumberClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(IntClass, IntClass, SlotOffsetsAndAsserts::doIntClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(UIntClass, UIntClass, SlotOffsetsAndAsserts::doUIntClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(StringClass, StringClass, SlotOffsetsAndAsserts::doStringClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(ArrayClass, ArrayClass, SlotOffsetsAndAsserts::doArrayClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(VectorClass, VectorClass, SlotOffsetsAndAsserts::doVectorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(ObjectVectorClass, ObjectVectorClass, SlotOffsetsAndAsserts::doObjectVectorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(IntVectorClass, IntVectorClass, SlotOffsetsAndAsserts::doIntVectorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(UIntVectorClass, UIntVectorClass, SlotOffsetsAndAsserts::doUIntVectorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(DoubleVectorClass, DoubleVectorClass, SlotOffsetsAndAsserts::doDoubleVectorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(MethodClosureClass, MethodClosureClass, SlotOffsetsAndAsserts::doMethodClosureClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(MathClass, MathClass, SlotOffsetsAndAsserts::doMathClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(ErrorClass, ErrorClass, SlotOffsetsAndAsserts::doErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(DefinitionErrorClass, DefinitionErrorClass, SlotOffsetsAndAsserts::doDefinitionErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(EvalErrorClass, EvalErrorClass, SlotOffsetsAndAsserts::doEvalErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(RangeErrorClass, RangeErrorClass, SlotOffsetsAndAsserts::doRangeErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(ReferenceErrorClass, ReferenceErrorClass, SlotOffsetsAndAsserts::doReferenceErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(SecurityErrorClass, SecurityErrorClass, SlotOffsetsAndAsserts::doSecurityErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(SyntaxErrorClass, SyntaxErrorClass, SlotOffsetsAndAsserts::doSyntaxErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(TypeErrorClass, TypeErrorClass, SlotOffsetsAndAsserts::doTypeErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(URIErrorClass, URIErrorClass, SlotOffsetsAndAsserts::doURIErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(VerifyErrorClass, VerifyErrorClass, SlotOffsetsAndAsserts::doVerifyErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(UninitializedErrorClass, UninitializedErrorClass, SlotOffsetsAndAsserts::doUninitializedErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(ArgumentErrorClass, ArgumentErrorClass, SlotOffsetsAndAsserts::doArgumentErrorClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(DateClass, DateClass, SlotOffsetsAndAsserts::doDateClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(RegExpClass, RegExpClass, SlotOffsetsAndAsserts::doRegExpClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(XMLClass, XMLClass, SlotOffsetsAndAsserts::doXMLClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(XMLListClass, XMLListClass, SlotOffsetsAndAsserts::doXMLListClassAsserts)
+AVMTHUNK_NATIVE_CLASS_GLUE(QNameClass, QNameClass, SlotOffsetsAndAsserts::doQNameClassAsserts)
 
 AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
     
@@ -1843,40 +2262,40 @@ AVMTHUNK_BEGIN_NATIVE_TABLES(builtin)
     AVMTHUNK_END_NATIVE_METHODS()
     
     AVMTHUNK_BEGIN_NATIVE_CLASSES(builtin)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Object, ObjectClass, ScriptObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Class, ClassClass, ClassClosure)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Function, FunctionClass, FunctionObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Namespace, NamespaceClass, Namespace)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Boolean, BooleanClass, bool)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Number, NumberClass, double)
-        AVMTHUNK_NATIVE_CLASS(abcclass_int, IntClass, int32_t)
-        AVMTHUNK_NATIVE_CLASS(abcclass_uint, UIntClass, uint32_t)
-        AVMTHUNK_NATIVE_CLASS(abcclass_String, StringClass, String)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Array, ArrayClass, ArrayObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector, VectorClass, ObjectVectorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_object, ObjectVectorClass, ObjectVectorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_int, IntVectorClass, IntVectorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_uint, UIntVectorClass, UIntVectorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_double, DoubleVectorClass, DoubleVectorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_private_MethodClosure, MethodClosureClass, MethodClosure)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Math, MathClass, double)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Error, ErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_DefinitionError, DefinitionErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_EvalError, EvalErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_RangeError, RangeErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_ReferenceError, ReferenceErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_SecurityError, SecurityErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_SyntaxError, SyntaxErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_TypeError, TypeErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_URIError, URIErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_VerifyError, VerifyErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_UninitializedError, UninitializedErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_ArgumentError, ArgumentErrorClass, ErrorObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_Date, DateClass, DateObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_RegExp, RegExpClass, RegExpObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_XML, XMLClass, XMLObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, XMLListObject)
-        AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, QNameObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Object, ObjectClass, ObjectClass, SlotOffsetsAndAsserts::s_slotsOffsetObjectClass, ScriptObject, SlotOffsetsAndAsserts::s_slotsOffsetScriptObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Class, ClassClass, ClassClass, SlotOffsetsAndAsserts::s_slotsOffsetClassClass, ClassClosure, SlotOffsetsAndAsserts::s_slotsOffsetClassClosure)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Function, FunctionClass, FunctionClass, SlotOffsetsAndAsserts::s_slotsOffsetFunctionClass, FunctionObject, SlotOffsetsAndAsserts::s_slotsOffsetFunctionObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Namespace, NamespaceClass, NamespaceClass, SlotOffsetsAndAsserts::s_slotsOffsetNamespaceClass, Namespace, SlotOffsetsAndAsserts::s_slotsOffsetNamespace)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Boolean, BooleanClass, BooleanClass, SlotOffsetsAndAsserts::s_slotsOffsetBooleanClass, bool, SlotOffsetsAndAsserts::s_slotsOffsetbool)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Number, NumberClass, NumberClass, SlotOffsetsAndAsserts::s_slotsOffsetNumberClass, double, SlotOffsetsAndAsserts::s_slotsOffsetdouble)
+        AVMTHUNK_NATIVE_CLASS(abcclass_int, IntClass, IntClass, SlotOffsetsAndAsserts::s_slotsOffsetIntClass, int32_t, SlotOffsetsAndAsserts::s_slotsOffsetint32_t)
+        AVMTHUNK_NATIVE_CLASS(abcclass_uint, UIntClass, UIntClass, SlotOffsetsAndAsserts::s_slotsOffsetUIntClass, uint32_t, SlotOffsetsAndAsserts::s_slotsOffsetuint32_t)
+        AVMTHUNK_NATIVE_CLASS(abcclass_String, StringClass, StringClass, SlotOffsetsAndAsserts::s_slotsOffsetStringClass, String, SlotOffsetsAndAsserts::s_slotsOffsetString)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Array, ArrayClass, ArrayClass, SlotOffsetsAndAsserts::s_slotsOffsetArrayClass, ArrayObject, SlotOffsetsAndAsserts::s_slotsOffsetArrayObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector, VectorClass, VectorClass, SlotOffsetsAndAsserts::s_slotsOffsetVectorClass, ObjectVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetObjectVectorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_object, ObjectVectorClass, ObjectVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetObjectVectorClass, ObjectVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetObjectVectorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_int, IntVectorClass, IntVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetIntVectorClass, IntVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetIntVectorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_uint, UIntVectorClass, UIntVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetUIntVectorClass, UIntVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetUIntVectorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass___AS3___vec_Vector_double, DoubleVectorClass, DoubleVectorClass, SlotOffsetsAndAsserts::s_slotsOffsetDoubleVectorClass, DoubleVectorObject, SlotOffsetsAndAsserts::s_slotsOffsetDoubleVectorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_private_MethodClosure, MethodClosureClass, MethodClosureClass, SlotOffsetsAndAsserts::s_slotsOffsetMethodClosureClass, MethodClosure, SlotOffsetsAndAsserts::s_slotsOffsetMethodClosure)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Math, MathClass, MathClass, SlotOffsetsAndAsserts::s_slotsOffsetMathClass, double, SlotOffsetsAndAsserts::s_slotsOffsetdouble)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Error, ErrorClass, ErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetErrorClass, ErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_DefinitionError, DefinitionErrorClass, DefinitionErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetDefinitionErrorClass, DefinitionErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetDefinitionErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_EvalError, EvalErrorClass, EvalErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetEvalErrorClass, EvalErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetEvalErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_RangeError, RangeErrorClass, RangeErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetRangeErrorClass, RangeErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetRangeErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_ReferenceError, ReferenceErrorClass, ReferenceErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetReferenceErrorClass, ReferenceErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetReferenceErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_SecurityError, SecurityErrorClass, SecurityErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetSecurityErrorClass, SecurityErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetSecurityErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_SyntaxError, SyntaxErrorClass, SyntaxErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetSyntaxErrorClass, SyntaxErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetSyntaxErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_TypeError, TypeErrorClass, TypeErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetTypeErrorClass, TypeErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetTypeErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_URIError, URIErrorClass, URIErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetURIErrorClass, URIErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetURIErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_VerifyError, VerifyErrorClass, VerifyErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetVerifyErrorClass, VerifyErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetVerifyErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_UninitializedError, UninitializedErrorClass, UninitializedErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetUninitializedErrorClass, UninitializedErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetUninitializedErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_ArgumentError, ArgumentErrorClass, ArgumentErrorClass, SlotOffsetsAndAsserts::s_slotsOffsetArgumentErrorClass, ArgumentErrorObject, SlotOffsetsAndAsserts::s_slotsOffsetArgumentErrorObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_Date, DateClass, DateClass, SlotOffsetsAndAsserts::s_slotsOffsetDateClass, DateObject, SlotOffsetsAndAsserts::s_slotsOffsetDateObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_RegExp, RegExpClass, RegExpClass, SlotOffsetsAndAsserts::s_slotsOffsetRegExpClass, RegExpObject, SlotOffsetsAndAsserts::s_slotsOffsetRegExpObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_XML, XMLClass, XMLClass, SlotOffsetsAndAsserts::s_slotsOffsetXMLClass, XMLObject, SlotOffsetsAndAsserts::s_slotsOffsetXMLObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_XMLList, XMLListClass, XMLListClass, SlotOffsetsAndAsserts::s_slotsOffsetXMLListClass, XMLListObject, SlotOffsetsAndAsserts::s_slotsOffsetXMLListObject)
+        AVMTHUNK_NATIVE_CLASS(abcclass_QName, QNameClass, QNameClass, SlotOffsetsAndAsserts::s_slotsOffsetQNameClass, QNameObject, SlotOffsetsAndAsserts::s_slotsOffsetQNameObject)
     AVMTHUNK_END_NATIVE_CLASSES()
     
 AVMTHUNK_END_NATIVE_TABLES()
@@ -1884,7 +2303,7 @@ AVMTHUNK_END_NATIVE_TABLES()
 AVMTHUNK_DEFINE_NATIVE_INITIALIZER(builtin)
 
 /* abc */
-const uint8_t builtin_abc_data[44246] = {
+const uint8_t builtin_abc_data[44454] = {
  16,   0,  46,   0,  20,   0,   1,   2,  10,   3, 128, 128, 128, 128,   8, 255, 
 255, 255, 255,   7,   4,   8,  16,  32,  64, 128,   1, 128,   2, 128,   4, 128, 
   8,   7, 128, 192,   3, 255, 241,   3,   0,  16,   1,   0,   0,   0,   0,   0, 
@@ -1895,7 +2314,7 @@ const uint8_t builtin_abc_data[44246] = {
   2,  64, 239,  57, 250, 254,  66,  46, 230,  63,  14, 229,  38,  21, 123, 203, 
 219,  63, 254, 130,  43, 101,  71,  21, 247,  63,  24,  45,  68,  84, 251,  33, 
   9,  64, 205,  59, 127, 102, 158, 160, 230,  63, 205,  59, 127, 102, 158, 160, 
-246,  63, 241,   3,   0,   6,  83, 116, 114, 105, 110, 103,   3,  88,  77,  76, 
+246,  63, 252,   3,   0,   6,  83, 116, 114, 105, 110, 103,   3,  88,  77,  76, 
  16, 100, 101, 115,  99, 114, 105,  98, 101,  84, 121, 112, 101,  74,  83,  79, 
  78,  12,  98, 117, 105, 108, 116, 105, 110,  46,  97, 115,  36,  48,   7,  97, 
 118, 109, 112, 108, 117, 115,   6,  79,  98, 106, 101,  99, 116,  12,  60, 116, 
@@ -2136,18 +2555,31 @@ const uint8_t builtin_abc_data[44246] = {
 117, 109, 101, 110, 116,  69, 114, 114, 111, 114,  10,  69, 114, 114, 111, 114, 
  67, 108,  97, 115, 115,  11,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 
 116,  20,  68, 101, 102, 105, 110, 105, 116, 105, 111, 110,  69, 114, 114, 111, 
-114,  67, 108,  97, 115, 115,  14,  69, 118,  97, 108,  69, 114, 114, 111, 114, 
- 67, 108,  97, 115, 115,  15,  82,  97, 110, 103, 101,  69, 114, 114, 111, 114, 
- 67, 108,  97, 115, 115,  19,  82, 101, 102, 101, 114, 101, 110,  99, 101,  69, 
-114, 114, 111, 114,  67, 108,  97, 115, 115,  18,  83, 101,  99, 117, 114, 105, 
-116, 121,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  16,  83, 121, 110, 
-116,  97, 120,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  14,  84, 121, 
-112, 101,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  13,  85,  82,  73, 
- 69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  16,  86, 101, 114, 105, 102, 
-121,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  23,  85, 110, 105, 110, 
-105, 116, 105,  97, 108, 105, 122, 101, 100,  69, 114, 114, 111, 114,  67, 108, 
- 97, 115, 115,  18,  65, 114, 103, 117, 109, 101, 110, 116,  69, 114, 114, 111, 
-114,  67, 108,  97, 115, 115,   4,  68,  97, 116, 101,   9,  68,  97, 116, 101, 
+114,  67, 108,  97, 115, 115,  21,  68, 101, 102, 105, 110, 105, 116, 105, 111, 
+110,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  14,  69, 118,  97, 
+108,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  15,  69, 118,  97, 108, 
+ 69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  15,  82,  97, 110, 103, 
+101,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  16,  82,  97, 110, 103, 
+101,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  19,  82, 101, 102, 
+101, 114, 101, 110,  99, 101,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115, 
+ 20,  82, 101, 102, 101, 114, 101, 110,  99, 101,  69, 114, 114, 111, 114,  79, 
+ 98, 106, 101,  99, 116,  18,  83, 101,  99, 117, 114, 105, 116, 121,  69, 114, 
+114, 111, 114,  67, 108,  97, 115, 115,  19,  83, 101,  99, 117, 114, 105, 116, 
+121,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  16,  83, 121, 110, 
+116,  97, 120,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  17,  83, 121, 
+110, 116,  97, 120,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  14, 
+ 84, 121, 112, 101,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  15,  84, 
+121, 112, 101,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  13,  85, 
+ 82,  73,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  14,  85,  82,  73, 
+ 69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  16,  86, 101, 114, 105, 
+102, 121,  69, 114, 114, 111, 114,  67, 108,  97, 115, 115,  17,  86, 101, 114, 
+105, 102, 121,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  23,  85, 
+110, 105, 110, 105, 116, 105,  97, 108, 105, 122, 101, 100,  69, 114, 114, 111, 
+114,  67, 108,  97, 115, 115,  24,  85, 110, 105, 110, 105, 116, 105,  97, 108, 
+105, 122, 101, 100,  69, 114, 114, 111, 114,  79,  98, 106, 101,  99, 116,  18, 
+ 65, 114, 103, 117, 109, 101, 110, 116,  69, 114, 114, 111, 114,  67, 108,  97, 
+115, 115,  19,  65, 114, 103, 117, 109, 101, 110, 116,  69, 114, 114, 111, 114, 
+ 79,  98, 106, 101,  99, 116,   4,  68,  97, 116, 101,   9,  68,  97, 116, 101, 
  46,  97, 115,  36,  51,   7, 115, 101, 116,  84, 105, 109, 101,  12, 116, 111, 
  68,  97, 116, 101,  83, 116, 114, 105, 110, 103,  12, 116, 111,  84, 105, 109, 
 101,  83, 116, 114, 105, 110, 103,  18, 116, 111,  76, 111,  99,  97, 108, 101, 
@@ -2267,10 +2699,10 @@ const uint8_t builtin_abc_data[44246] = {
   2,  24, 202,   2,  26, 202,   2,   5,  92,  24,  92,  26,  92,   5, 203,   2, 
  24, 203,   2,  26, 203,   2,   5, 204,   2,  24, 204,   2,  26, 204,   2,   5, 
 205,   2,  24, 205,   2,  26, 205,   2,   5, 206,   2,  24, 206,   2,  26, 206, 
-  2,   5, 220,   2,   5, 221,   2,  24, 220,   2,  26, 220,   2,   5, 189,   2, 
-  5, 170,   3,  24, 189,   2,  26, 189,   2,   5,   3,   5, 187,   3,  24,   3, 
- 26,   3,   5, 226,   3,  24, 226,   3,  26, 226,   3,   5, 231,   3,  24, 231, 
-  3,  26, 231,   3,  67,   4,   1,   2,   3,   4,   6,   1,   2,   5,   6,   7, 
+  2,   5, 231,   2,   5, 232,   2,  24, 231,   2,  26, 231,   2,   5, 189,   2, 
+  5, 181,   3,  24, 189,   2,  26, 189,   2,   5,   3,   5, 198,   3,  24,   3, 
+ 26,   3,   5, 237,   3,  24, 237,   3,  26, 237,   3,   5, 242,   3,  24, 242, 
+  3,  26, 242,   3,  67,   4,   1,   2,   3,   4,   6,   1,   2,   5,   6,   7, 
   8,   1,  10,   1,   5,   1,   8,   1,   6,   1,   9,   7,   1,   2,   6,   8, 
  13,  14,  15,   1,  13,   7,   1,   2,   6,   8,  16,  17,  18,   7,   1,   2, 
   6,   8,  19,  20,  21,   7,   1,   2,   6,   8,  22,  23,  24,   1,  22,   7, 
@@ -2482,104 +2914,104 @@ const uint8_t builtin_abc_data[44246] = {
  29,   9,  91,   3,   9, 199,   2,   3,   9, 200,   2,   3,   9, 181,   1,   3, 
   9, 200,   1,   3,   9, 201,   2,   3,   9, 202,   2,   3,   9,  92,   3,   9, 
 203,   2,   3,   9, 204,   2,   3,   9, 205,   2,   3,   9, 206,   2,   3,   9, 
- 71,  56,   9, 222,   2,  56,   9,  75,  56,   9,  74,  56,   9, 223,   2,  56, 
-  9, 224,   2,  56,   9,  73,  56,   9, 225,   2,  56,   9, 226,   2,  56,   9, 
-227,   2,  56,   9, 228,   2,  56,   9, 229,   2,  56,   9, 230,   2,  56,   9, 
-231,   2,  56,   9, 232,   2,  56,   9, 233,   2,  56,   9, 234,   2,  56,   9, 
-235,   2,  56,   9, 236,   2,  56,   9, 237,   2,  56,   9, 238,   2,  56,   9, 
-239,   2,  56,   9, 240,   2,  56,   9, 241,   2,  56,   9, 242,   2,  56,   9, 
-243,   2,  56,   9, 244,   2,  56,   9, 245,   2,  56,   9, 246,   2,  56,   9, 
-247,   2,  56,   9, 248,   2,  56,   9, 249,   2,  56,   9, 250,   2,  56,   9, 
-251,   2,  56,   9, 252,   2,  56,   9, 253,   2,  56,   9, 254,   2,  56,   9, 
-255,   2,  56,   9, 128,   3,  56,   9, 129,   3,  56,   9, 130,   3,  56,   9, 
-131,   3,  56,   9,  76,  56,   7,   1, 220,   2,   9, 132,   3,  56,   7,   9, 
- 75,   9,  70,  56,   7,   9, 223,   2,   7,   9, 224,   2,   7,   9, 225,   2, 
-  7,   9, 226,   2,   7,   9, 227,   2,   7,   9, 228,   2,   7,   9, 229,   2, 
-  7,   9, 230,   2,   7,   9, 231,   2,   7,   9, 232,   2,   7,   9, 233,   2, 
-  7,   9, 234,   2,   7,   9, 235,   2,   7,   9, 236,   2,   7,   9, 237,   2, 
-  7,   9, 238,   2,   7,   9, 239,   2,   7,   9, 240,   2,   7,   9, 241,   2, 
-  7,   9, 242,   2,   7,   9, 243,   2,   7,   9, 244,   2,   7,   9, 245,   2, 
-  7,   9, 246,   2,   7,   9, 247,   2,   7,   9, 248,   2,   7,   9, 249,   2, 
-  7,   9, 250,   2,   7,   9, 251,   2,   7,   9, 252,   2,   7,   9, 253,   2, 
-  7,   9, 254,   2,   7,   9, 255,   2,   7,   9, 128,   3,   7,   9, 129,   3, 
-  7,   9, 130,   3,   7,   9, 131,   3,   9, 133,   3,  56,   9, 134,   3,  56, 
-  9, 135,   3,  56,   9, 136,   3,  56,   9, 137,   3,  56,   9, 138,   3,  56, 
-  9, 139,   3,  56,   9, 140,   3,  56,   9, 141,   3,  56,   9, 142,   3,  56, 
-  9, 143,   3,  56,   9, 144,   3,  56,   9, 145,   3,  56,   9, 146,   3,  56, 
-  7,   9, 222,   2,   9, 147,   3,   3,   9, 148,   3,   3,   9,  70,  57,   9, 
-132,   3,  57,   9, 149,   3,  57,   9, 222,   2,   7,   9, 223,   2,   7,   9, 
-224,   2,   7,   9, 225,   2,   7,   9, 226,   2,   7,   9, 227,   2,   7,   9, 
-228,   2,   7,   9, 229,   2,   7,   9, 230,   2,   7,   9, 231,   2,   7,   9, 
-232,   2,   7,   9, 233,   2,   7,   9, 234,   2,   7,   9, 235,   2,   7,   9, 
-236,   2,   7,   9, 237,   2,   7,   9, 238,   2,   7,   9, 239,   2,   7,   9, 
-240,   2,   7,   9, 241,   2,   7,   9, 242,   2,   7,   9, 243,   2,   7,   9, 
-244,   2,   7,   9, 245,   2,   7,   9, 133,   3,  57,   9, 134,   3,  57,   9, 
-135,   3,  57,   9, 136,   3,  57,   9, 137,   3,  57,   9, 138,   3,  57,   9, 
-139,   3,  57,   9, 140,   3,  57,   9, 141,   3,  57,   9, 142,   3,  57,   9, 
-143,   3,  57,   9, 144,   3,  57,   9, 145,   3,  57,   9, 146,   3,  57,   9, 
-246,   2,   7,   9, 247,   2,   7,   9, 248,   2,   7,   9, 249,   2,   7,   9, 
-250,   2,   7,   9, 251,   2,   7,   9, 252,   2,   7,   9, 253,   2,   7,   9, 
-254,   2,   7,   9, 255,   2,   7,   9, 128,   3,   7,   9, 129,   3,   7,   9, 
-130,   3,   7,   9, 131,   3,   7,   9, 150,   3,   3,   9, 151,   3,   3,   9, 
-152,   3,   3,   9, 153,   3,   3,   9, 154,   3,   3,   9, 155,   3,   3,   9, 
-156,   3,   3,   9, 157,   3,   3,   9, 158,   3,   3,   9, 159,   3,   3,   9, 
-160,   3,   3,   9, 161,   3,   3,   9, 162,   3,   3,   9, 163,   3,   3,   9, 
-164,   3,   3,   9, 165,   3,   3,   9, 166,   3,   3,   9, 167,   3,   3,   9, 
-  7,  58,   9, 220,   2,   3,   9,  71,  59,   9,  74,  59,   9, 171,   3,  59, 
-  9, 172,   3,  59,   9,  76,  59,   9, 174,   3,  59,   9, 175,   3,  59,   9, 
-176,   3,  59,   9, 177,   3,  59,   9, 179,   3,  59,   9, 181,   3,  59,   9, 
-  2,  59,   7,   9, 171,   3,   7,   9, 172,   3,   9, 174,   3,   3,   9, 175, 
-  3,   3,   9, 176,   3,   3,   9, 177,   3,   3,   9, 183,   3,   3,   9, 179, 
-  3,   3,   9, 181,   3,   3,   9, 171,   3,   7,   9, 172,   3,   7,   9,   7, 
- 60,   9, 189,   2,   3,   9, 186,   3,  61,   9, 188,   3,  61,   9, 189,   3, 
+ 71,  56,   9, 233,   2,  56,   9,  75,  56,   9,  74,  56,   9, 234,   2,  56, 
+  9, 235,   2,  56,   9,  73,  56,   9, 236,   2,  56,   9, 237,   2,  56,   9, 
+238,   2,  56,   9, 239,   2,  56,   9, 240,   2,  56,   9, 241,   2,  56,   9, 
+242,   2,  56,   9, 243,   2,  56,   9, 244,   2,  56,   9, 245,   2,  56,   9, 
+246,   2,  56,   9, 247,   2,  56,   9, 248,   2,  56,   9, 249,   2,  56,   9, 
+250,   2,  56,   9, 251,   2,  56,   9, 252,   2,  56,   9, 253,   2,  56,   9, 
+254,   2,  56,   9, 255,   2,  56,   9, 128,   3,  56,   9, 129,   3,  56,   9, 
+130,   3,  56,   9, 131,   3,  56,   9, 132,   3,  56,   9, 133,   3,  56,   9, 
+134,   3,  56,   9, 135,   3,  56,   9, 136,   3,  56,   9, 137,   3,  56,   9, 
+138,   3,  56,   9, 139,   3,  56,   9, 140,   3,  56,   9, 141,   3,  56,   9, 
+142,   3,  56,   9,  76,  56,   7,   1, 231,   2,   9, 143,   3,  56,   7,   9, 
+ 75,   9,  70,  56,   7,   9, 234,   2,   7,   9, 235,   2,   7,   9, 236,   2, 
+  7,   9, 237,   2,   7,   9, 238,   2,   7,   9, 239,   2,   7,   9, 240,   2, 
+  7,   9, 241,   2,   7,   9, 242,   2,   7,   9, 243,   2,   7,   9, 244,   2, 
+  7,   9, 245,   2,   7,   9, 246,   2,   7,   9, 247,   2,   7,   9, 248,   2, 
+  7,   9, 249,   2,   7,   9, 250,   2,   7,   9, 251,   2,   7,   9, 252,   2, 
+  7,   9, 253,   2,   7,   9, 254,   2,   7,   9, 255,   2,   7,   9, 128,   3, 
+  7,   9, 129,   3,   7,   9, 130,   3,   7,   9, 131,   3,   7,   9, 132,   3, 
+  7,   9, 133,   3,   7,   9, 134,   3,   7,   9, 135,   3,   7,   9, 136,   3, 
+  7,   9, 137,   3,   7,   9, 138,   3,   7,   9, 139,   3,   7,   9, 140,   3, 
+  7,   9, 141,   3,   7,   9, 142,   3,   9, 144,   3,  56,   9, 145,   3,  56, 
+  9, 146,   3,  56,   9, 147,   3,  56,   9, 148,   3,  56,   9, 149,   3,  56, 
+  9, 150,   3,  56,   9, 151,   3,  56,   9, 152,   3,  56,   9, 153,   3,  56, 
+  9, 154,   3,  56,   9, 155,   3,  56,   9, 156,   3,  56,   9, 157,   3,  56, 
+  7,   9, 233,   2,   9, 158,   3,   3,   9, 159,   3,   3,   9,  70,  57,   9, 
+143,   3,  57,   9, 160,   3,  57,   9, 233,   2,   7,   9, 234,   2,   7,   9, 
+235,   2,   7,   9, 236,   2,   7,   9, 237,   2,   7,   9, 238,   2,   7,   9, 
+239,   2,   7,   9, 240,   2,   7,   9, 241,   2,   7,   9, 242,   2,   7,   9, 
+243,   2,   7,   9, 244,   2,   7,   9, 245,   2,   7,   9, 246,   2,   7,   9, 
+247,   2,   7,   9, 248,   2,   7,   9, 249,   2,   7,   9, 250,   2,   7,   9, 
+251,   2,   7,   9, 252,   2,   7,   9, 253,   2,   7,   9, 254,   2,   7,   9, 
+255,   2,   7,   9, 128,   3,   7,   9, 144,   3,  57,   9, 145,   3,  57,   9, 
+146,   3,  57,   9, 147,   3,  57,   9, 148,   3,  57,   9, 149,   3,  57,   9, 
+150,   3,  57,   9, 151,   3,  57,   9, 152,   3,  57,   9, 153,   3,  57,   9, 
+154,   3,  57,   9, 155,   3,  57,   9, 156,   3,  57,   9, 157,   3,  57,   9, 
+129,   3,   7,   9, 130,   3,   7,   9, 131,   3,   7,   9, 132,   3,   7,   9, 
+133,   3,   7,   9, 134,   3,   7,   9, 135,   3,   7,   9, 136,   3,   7,   9, 
+137,   3,   7,   9, 138,   3,   7,   9, 139,   3,   7,   9, 140,   3,   7,   9, 
+141,   3,   7,   9, 142,   3,   7,   9, 161,   3,   3,   9, 162,   3,   3,   9, 
+163,   3,   3,   9, 164,   3,   3,   9, 165,   3,   3,   9, 166,   3,   3,   9, 
+167,   3,   3,   9, 168,   3,   3,   9, 169,   3,   3,   9, 170,   3,   3,   9, 
+171,   3,   3,   9, 172,   3,   3,   9, 173,   3,   3,   9, 174,   3,   3,   9, 
+175,   3,   3,   9, 176,   3,   3,   9, 177,   3,   3,   9, 178,   3,   3,   9, 
+  7,  58,   9, 231,   2,   3,   9,  71,  59,   9,  74,  59,   9, 182,   3,  59, 
+  9, 183,   3,  59,   9,  76,  59,   9, 185,   3,  59,   9, 186,   3,  59,   9, 
+187,   3,  59,   9, 188,   3,  59,   9, 190,   3,  59,   9, 192,   3,  59,   9, 
+  2,  59,   7,   9, 182,   3,   7,   9, 183,   3,   9, 185,   3,   3,   9, 186, 
+  3,   3,   9, 187,   3,   3,   9, 188,   3,   3,   9, 194,   3,   3,   9, 190, 
+  3,   3,   9, 192,   3,   3,   9, 182,   3,   7,   9, 183,   3,   7,   9,   7, 
+ 60,   9, 189,   2,   3,   9, 197,   3,  61,   9, 199,   3,  61,   9, 200,   3, 
  61,   9,  71,  61,   9,   7,  61,   9,  75,  61,   9,  66,  61,   9,  68,  61, 
-  9,  74,  61,   9, 190,   3,  61,   9,  21,  61,   9, 191,   3,  61,   9, 192, 
-  3,  61,   9, 193,   3,  61,   9, 194,   3,  61,   9, 195,   3,  61,   9, 196, 
-  3,  61,   9, 197,   3,  61,   9, 198,   3,  61,   9, 199,   3,  61,   9, 200, 
-  3,  61,   9, 201,   3,  61,   9, 202,   3,  61,   9, 203,   3,  61,   9, 204, 
-  3,  61,   9, 205,   3,  61,   9,  13,  61,   9, 206,   3,  61,   9,   9,  61, 
-  9, 207,   3,  61,   9, 208,   3,  61,   9, 209,   3,  61,   9, 210,   3,  61, 
-  9, 211,   3,  61,   9, 212,   3,  61,   9, 213,   3,  61,   9, 214,   3,  61, 
-  9, 124,  61,   9, 215,   3,  61,   9, 216,   3,  61,   9, 217,   3,  61,   9, 
-218,   3,  61,   9, 219,   3,  61,   9, 220,   3,  61,   9,  76,  61,   9,   3, 
- 61,   9, 221,   3,  61,   9, 222,   3,  61,   9, 223,   3,  61,   9, 224,   3, 
- 61,   9, 225,   3,  61,   9,  60,  61,   9,  62,  61,   7,   9, 186,   3,   7, 
-  9, 188,   3,   7,   9, 189,   3,   7,   9, 190,   3,   7,   9,  21,   7,   9, 
-191,   3,   7,   1, 226,   3,   7,   9, 192,   3,   7,   9, 193,   3,   7,   9, 
-194,   3,   7,   9, 195,   3,   7,   9, 196,   3,   7,   9, 197,   3,   7,   9, 
-198,   3,   7,   9, 199,   3,   7,   9, 200,   3,   7,   9, 201,   3,   7,   9, 
-202,   3,   7,   9, 203,   3,   7,   9, 204,   3,   7,   9, 205,   3,   7,   9, 
- 13,   7,   9, 206,   3,   7,   9,   9,   7,   9, 207,   3,   7,   9, 208,   3, 
-  7,   9, 209,   3,   7,   9, 210,   3,   7,   9, 211,   3,   7,   9, 212,   3, 
-  7,   9, 213,   3,   7,   9, 214,   3,   7,   9, 124,   7,   9, 215,   3,   7, 
-  9, 216,   3,   7,   9, 217,   3,   7,   9, 218,   3,   7,   9, 219,   3,   7, 
-  9, 220,   3,   9, 228,   3,  61,   9, 221,   3,   3,   9, 222,   3,   3,   9, 
-223,   3,   3,   9, 224,   3,   3,   9, 225,   3,   3,   9, 186,   3,   7,   9, 
-188,   3,   7,   9, 189,   3,   7,   9, 190,   3,   7,   9,  21,   7,   9, 191, 
-  3,   7,   9, 192,   3,   7,   9, 193,   3,   7,   9, 194,   3,   7,   9, 195, 
-  3,   7,   9, 196,   3,   7,   9, 197,   3,   7,   9, 198,   3,   7,   9, 199, 
-  3,   7,   9, 200,   3,   7,   9, 201,   3,   7,   9, 202,   3,   7,   9, 203, 
-  3,   7,   9, 204,   3,   7,   9, 205,   3,   7,   9,  13,   7,   9, 206,   3, 
-  7,   9,   9,   7,   9, 228,   3,  62,   9, 207,   3,   7,   9, 208,   3,   7, 
-  9, 209,   3,   7,   9, 210,   3,   7,   9, 211,   3,   7,   9, 212,   3,   7, 
-  9, 213,   3,   7,   9, 214,   3,   7,   9, 215,   3,   7,   9, 216,   3,   7, 
-  9, 217,   3,   7,   9, 218,   3,   7,   9, 219,   3,   7,   9, 220,   3,   7, 
-  9, 229,   3,   7,   9, 230,   3,   7,   9,  71,  63,   9,   7,  63,   9,  75, 
- 63,   9,  66,  63,   9,  68,  63,   9,  74,  63,   9, 190,   3,  63,   9,  21, 
- 63,   9, 191,   3,  63,   9, 192,   3,  63,   9, 193,   3,  63,   9, 194,   3, 
- 63,   9, 195,   3,  63,   9, 196,   3,  63,   9, 197,   3,  63,   9, 198,   3, 
- 63,   9, 199,   3,  63,   9, 200,   3,  63,   9, 201,   3,  63,   9, 202,   3, 
- 63,   9, 203,   3,  63,   9, 204,   3,  63,   9, 205,   3,  63,   9,  13,  63, 
-  9, 206,   3,  63,   9,   9,  63,   9, 207,   3,  63,   9, 208,   3,  63,   9, 
-209,   3,  63,   9, 210,   3,  63,   9, 211,   3,  63,   9, 212,   3,  63,   9, 
-213,   3,  63,   9, 214,   3,  63,   9, 124,  63,   9, 215,   3,  63,   9, 216, 
-  3,  63,   9, 217,   3,  63,   9, 218,   3,  63,   9, 219,   3,  63,   9, 220, 
-  3,  63,   9,  76,  63,   9, 228,   3,  63,   9, 228,   3,  64,   9,  71,  65, 
-  9,  74,  65,   9,  76,  65,   9, 231,   3,  65,   9,  91,  65,   9,  92,  65, 
-  9,  94,  65,   7,   1, 231,   3,   9,  50,  65,   9, 206,   3,  65,   9,  13, 
- 65,   9, 120,  65,   9, 129,   1,  65,   9, 206,   3,   3,   9,   3,  29,   9, 
-  7,  66,   9, 226,   3,  29,   9, 231,   3,  29,   9,   3,   3,   9, 226,   3, 
-  3,   9, 231,   3,   3, 213,   6,   1,   1,   0,   1,  32,   1,   1,   0,   1, 
+  9,  74,  61,   9, 201,   3,  61,   9,  21,  61,   9, 202,   3,  61,   9, 203, 
+  3,  61,   9, 204,   3,  61,   9, 205,   3,  61,   9, 206,   3,  61,   9, 207, 
+  3,  61,   9, 208,   3,  61,   9, 209,   3,  61,   9, 210,   3,  61,   9, 211, 
+  3,  61,   9, 212,   3,  61,   9, 213,   3,  61,   9, 214,   3,  61,   9, 215, 
+  3,  61,   9, 216,   3,  61,   9,  13,  61,   9, 217,   3,  61,   9,   9,  61, 
+  9, 218,   3,  61,   9, 219,   3,  61,   9, 220,   3,  61,   9, 221,   3,  61, 
+  9, 222,   3,  61,   9, 223,   3,  61,   9, 224,   3,  61,   9, 225,   3,  61, 
+  9, 124,  61,   9, 226,   3,  61,   9, 227,   3,  61,   9, 228,   3,  61,   9, 
+229,   3,  61,   9, 230,   3,  61,   9, 231,   3,  61,   9,  76,  61,   9,   3, 
+ 61,   9, 232,   3,  61,   9, 233,   3,  61,   9, 234,   3,  61,   9, 235,   3, 
+ 61,   9, 236,   3,  61,   9,  60,  61,   9,  62,  61,   7,   9, 197,   3,   7, 
+  9, 199,   3,   7,   9, 200,   3,   7,   9, 201,   3,   7,   9,  21,   7,   9, 
+202,   3,   7,   1, 237,   3,   7,   9, 203,   3,   7,   9, 204,   3,   7,   9, 
+205,   3,   7,   9, 206,   3,   7,   9, 207,   3,   7,   9, 208,   3,   7,   9, 
+209,   3,   7,   9, 210,   3,   7,   9, 211,   3,   7,   9, 212,   3,   7,   9, 
+213,   3,   7,   9, 214,   3,   7,   9, 215,   3,   7,   9, 216,   3,   7,   9, 
+ 13,   7,   9, 217,   3,   7,   9,   9,   7,   9, 218,   3,   7,   9, 219,   3, 
+  7,   9, 220,   3,   7,   9, 221,   3,   7,   9, 222,   3,   7,   9, 223,   3, 
+  7,   9, 224,   3,   7,   9, 225,   3,   7,   9, 124,   7,   9, 226,   3,   7, 
+  9, 227,   3,   7,   9, 228,   3,   7,   9, 229,   3,   7,   9, 230,   3,   7, 
+  9, 231,   3,   9, 239,   3,  61,   9, 232,   3,   3,   9, 233,   3,   3,   9, 
+234,   3,   3,   9, 235,   3,   3,   9, 236,   3,   3,   9, 197,   3,   7,   9, 
+199,   3,   7,   9, 200,   3,   7,   9, 201,   3,   7,   9,  21,   7,   9, 202, 
+  3,   7,   9, 203,   3,   7,   9, 204,   3,   7,   9, 205,   3,   7,   9, 206, 
+  3,   7,   9, 207,   3,   7,   9, 208,   3,   7,   9, 209,   3,   7,   9, 210, 
+  3,   7,   9, 211,   3,   7,   9, 212,   3,   7,   9, 213,   3,   7,   9, 214, 
+  3,   7,   9, 215,   3,   7,   9, 216,   3,   7,   9,  13,   7,   9, 217,   3, 
+  7,   9,   9,   7,   9, 239,   3,  62,   9, 218,   3,   7,   9, 219,   3,   7, 
+  9, 220,   3,   7,   9, 221,   3,   7,   9, 222,   3,   7,   9, 223,   3,   7, 
+  9, 224,   3,   7,   9, 225,   3,   7,   9, 226,   3,   7,   9, 227,   3,   7, 
+  9, 228,   3,   7,   9, 229,   3,   7,   9, 230,   3,   7,   9, 231,   3,   7, 
+  9, 240,   3,   7,   9, 241,   3,   7,   9,  71,  63,   9,   7,  63,   9,  75, 
+ 63,   9,  66,  63,   9,  68,  63,   9,  74,  63,   9, 201,   3,  63,   9,  21, 
+ 63,   9, 202,   3,  63,   9, 203,   3,  63,   9, 204,   3,  63,   9, 205,   3, 
+ 63,   9, 206,   3,  63,   9, 207,   3,  63,   9, 208,   3,  63,   9, 209,   3, 
+ 63,   9, 210,   3,  63,   9, 211,   3,  63,   9, 212,   3,  63,   9, 213,   3, 
+ 63,   9, 214,   3,  63,   9, 215,   3,  63,   9, 216,   3,  63,   9,  13,  63, 
+  9, 217,   3,  63,   9,   9,  63,   9, 218,   3,  63,   9, 219,   3,  63,   9, 
+220,   3,  63,   9, 221,   3,  63,   9, 222,   3,  63,   9, 223,   3,  63,   9, 
+224,   3,  63,   9, 225,   3,  63,   9, 124,  63,   9, 226,   3,  63,   9, 227, 
+  3,  63,   9, 228,   3,  63,   9, 229,   3,  63,   9, 230,   3,  63,   9, 231, 
+  3,  63,   9,  76,  63,   9, 239,   3,  63,   9, 239,   3,  64,   9,  71,  65, 
+  9,  74,  65,   9,  76,  65,   9, 242,   3,  65,   9,  91,  65,   9,  92,  65, 
+  9,  94,  65,   7,   1, 242,   3,   9,  50,  65,   9, 217,   3,  65,   9,  13, 
+ 65,   9, 120,  65,   9, 129,   1,  65,   9, 217,   3,   3,   9,   3,  29,   9, 
+  7,  66,   9, 237,   3,  29,   9, 242,   3,  29,   9,   3,   3,   9, 237,   3, 
+  3,   9, 242,   3,   3, 213,   6,   1,   1,   0,   1,  32,   1,   1,   0,   1, 
  32,   2,   2,   0,  20,   1,   0,   2,  37,   2,   4,   1,   0,   3,  37,   2, 
   2,   4,   1,   0,   2,  37,   2,  42,   1,   0,   2,  37,   2,   4,   1,   0, 
   2,   4,   0,  20,   1,  32,   1,  44,   0,   1,  40,   1,   0,   0,   1,   1, 
@@ -2856,12 +3288,12 @@ const uint8_t builtin_abc_data[44246] = {
   0,   1,   2,   0,   1,   0,   1, 223,   8,   0,   1,   0,   0, 223,   8,   1, 
   0,   1, 223,   8,   0,   1,   0,   0,  46,   1,   0,   0, 223,   8,   1,   0, 
   0, 223,   8,   1,   0,   1,  44,   0,   1,   0,   0,   2,   1,   0,   1, 223, 
-  8,   0,   1,   8,   1, 227,   3,   1,   1, 223,   8,   0,   1,   8,   1, 227, 
+  8,   0,   1,   8,   1, 238,   3,   1,   1, 223,   8,   0,   1,   8,   1, 238, 
   3,   1,   0,  44,   1,   0,   0,  44,   1,   0,   0,  42,   1,   0,   2,   0, 
   0,   0,   1,   0,   2,   0,   0,   0,   1,   0,   0,  46,   1,   0,   0,   4, 
   1,   0,   0,   4,   1,   0,   1,   0,   0,   1,   9,   1,  12,  12,   0,  42, 
   1,   0,   0,   1,   1,   0,   0,   2,   1,   0,   0,   0,   1,   0,   1, 223, 
-  8,   0,   1,   8,   1, 227,   3,   1,   1,   2,   0,   1,   0,   1,   2,   0, 
+  8,   0,   1,   8,   1, 238,   3,   1,   1,   2,   0,   1,   0,   1,   2,   0, 
   1,   0,   2,   2,   0,   0,   1,   0,   1,   2,   0,   1,   0,   1,  37,   0, 
   1,   0,   1,  37,   0,   1,   0,   1,  37,   0,   1,   0,   0, 223,   8,   1, 
   0,   0,   1,   1,   0,   0,  44,   1,  32,   1,   0,  44,   1,  32,   0,  44, 
@@ -2872,13 +3304,13 @@ const uint8_t builtin_abc_data[44246] = {
   0,   1,  40,   1,   0,   0,   1,   2,   0,   1,  32,   1,   2,   0,   1,  32, 
   1, 223,   8,   0,   1,  32,   0, 223,   8,   1,  32,   1, 223,   8,   0,   1, 
  32,   0,  46,   1,  32,   0, 223,   8,   1,  32,   0, 223,   8,   1,  32,   1, 
- 44,   0,   1,  32,   0,   2,   1,  32,   1, 223,   8,   0,   1,  40,   1, 227, 
-  3,   1,   1, 223,   8,   0,   1,  40,   1, 227,   3,   1,   0,  44,   1,  32, 
+ 44,   0,   1,  32,   0,   2,   1,  32,   1, 223,   8,   0,   1,  40,   1, 238, 
+  3,   1,   1, 223,   8,   0,   1,  40,   1, 238,   3,   1,   0,  44,   1,  32, 
   0,  44,   1,  32,   0,  42,   1,  32,   2,   0,   0,   0,   1,  32,   2,   0, 
   0,   0,   1,  32,   0,  46,   1,   0,   0,   4,   1,  32,   0,   4,   1,  32, 
   2,   0,   0,  46,   1,  32,   1,   0,   0,   1,   9,   1,  12,  12,   0,  42, 
   1,  32,   0,   1,   1,  32,   0,   2,   1,  32,   0,   0,   1,  32,   1, 223, 
-  8,   0,   1,  40,   1, 227,   3,   1,   1,   2,   0,   1,  32,   1,   2,   0, 
+  8,   0,   1,  40,   1, 238,   3,   1,   1,   2,   0,   1,  32,   1,   2,   0, 
   1,  32,   2,   2,   0,   0,   1,  32,   1,   2,   0,   1,  32,   1,  37,   0, 
   1,  32,   1,  37,   0,   1,  32,   1,  37,   0,   1,  32,   0, 223,   8,   1, 
  32,   0,   1,   1,  32,   0,  84,   1,  32,   1,   0,  84,   1,  32,   1,   0, 
@@ -2887,12 +3319,12 @@ const uint8_t builtin_abc_data[44246] = {
   1,   0,   1,   2,   0,   1,   0,   1,   2,   0,   1,   0,   1, 223,   8,   0, 
   1,   0,   0, 223,   8,   1,   0,   1, 223,   8,   0,   1,   0,   0,  46,   1, 
   0,   0, 223,   8,   1,   0,   0, 223,   8,   1,   0,   1,  44,   0,   1,   0, 
-  0, 223,   8,   1,   0,   1, 223,   8,   0,   1,   8,   1, 227,   3,   1,   1, 
-223,   8,   0,   1,   8,   1, 227,   3,   1,   0,  44,   1,   0,   0,  44,   1, 
+  0, 223,   8,   1,   0,   1, 223,   8,   0,   1,   8,   1, 238,   3,   1,   1, 
+223,   8,   0,   1,   8,   1, 238,   3,   1,   0,  44,   1,   0,   0,  44,   1, 
   0,   0,  42,   1,   0,   2,   0,   0,   0,   1,   0,   2,   0,   0,   0,   1, 
   0,   0,  46,   1,   0,   0,   4,   1,   0,   0,   4,   1,   0,   1,   0,   0, 
   1,   9,   1,  12,  12,   0,  42,   1,   0,   0,   1,   1,   0,   0, 223,   8, 
-  1,   0,   0,   0,   1,   0,   1, 223,   8,   0,   1,   8,   1, 227,   3,   1, 
+  1,   0,   0,   0,   1,   0,   1, 223,   8,   0,   1,   8,   1, 238,   3,   1, 
   1,   2,   0,   1,   0,   1,   2,   0,   1,   0,   2,   2,   0,   0,   1,   0, 
   1,   2,   0,   1,   0,   1,  37,   0,   1,   0,   1,  37,   0,   1,   0,   1, 
  37,   0,   1,   0,   0, 223,   8,   1,   0,   0,   1,   1,   0,   0,   1,   1, 
@@ -2900,9 +3332,9 @@ const uint8_t builtin_abc_data[44246] = {
   0,   1,  40,   1,   0,   0,   1, 223,   8,   0,   1,  32,   0, 223,   8,   1, 
  32,   1, 223,   8,   0,   1,  32,   0, 223,   8,   1,  32,   0, 223,   8,   1, 
  32,   1,  44,   0,   1,  32,   0, 223,   8,   1,  32,   1, 223,   8,   0,   1, 
- 40,   1, 227,   3,   1,   1, 223,   8,   0,   1,  40,   1, 227,   3,   1,   0, 
+ 40,   1, 238,   3,   1,   1, 223,   8,   0,   1,  40,   1, 238,   3,   1,   0, 
  44,   1,  32,   0,  44,   1,  32,   0,  46,   1,  32,   0,   4,   1,  32,   0, 
-223,   8,   1,  32,   0,   0,   1,  32,   1, 223,   8,   0,   1,  40,   1, 227, 
+223,   8,   1,  32,   0,   0,   1,  32,   1, 223,   8,   0,   1,  40,   1, 238, 
   3,   1,   0, 223,   8,   1,  32,   0,   1,   1,  32,   1,   2,   0,   1,  32, 
   1,   2,   0,   1,  32,   0,  46,   1,  32,   0,  42,   1,  32,   2,   0,   0, 
   0,   1,  32,   2,   0,   0,   0,   1,  32,   0,   1,   1,  32,   2,   0,   0, 
@@ -2933,20 +3365,20 @@ const uint8_t builtin_abc_data[44246] = {
 139,   2, 217,   1, 214,   1,   1,   0, 140,   2, 214,   1,   1,   0, 144,   2, 
 214,   1,   1,   0, 146,   2, 214,   1,   3, 215,   1, 219,   1,  42, 178,   2, 
 228,   1, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 207,   2, 208,   2, 
-217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 209,   2, 208,   2, 217,   1, 
-214,   1,   3, 215,   1, 219,   1,  42, 210,   2, 208,   2, 217,   1, 214,   1, 
-  3, 215,   1, 219,   1,  42, 211,   2, 208,   2, 217,   1, 214,   1,   3, 215, 
-  1, 219,   1,  42, 212,   2, 208,   2, 217,   1, 214,   1,   3, 215,   1, 219, 
-  1,  42, 213,   2, 208,   2, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 
-214,   2, 208,   2, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 215,   2, 
-208,   2, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 216,   2, 208,   2, 
-217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 217,   2, 208,   2, 217,   1, 
-214,   1,   3, 215,   1, 219,   1,  42, 218,   2, 208,   2, 217,   1, 214,   1, 
-  3, 215,   1, 219,   1,  42, 219,   2, 208,   2, 217,   1, 214,   1,   3, 215, 
-  1, 219,   1,  42, 168,   3, 169,   3, 217,   1, 214,   1,   3, 215,   1, 219, 
-  1,  42, 184,   3, 185,   3, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 
-235,   3, 236,   3, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 237,   3, 
-238,   3, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 239,   3, 240,   3, 
+217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 209,   2, 210,   2, 217,   1, 
+214,   1,   3, 215,   1, 219,   1,  42, 211,   2, 212,   2, 217,   1, 214,   1, 
+  3, 215,   1, 219,   1,  42, 213,   2, 214,   2, 217,   1, 214,   1,   3, 215, 
+  1, 219,   1,  42, 215,   2, 216,   2, 217,   1, 214,   1,   3, 215,   1, 219, 
+  1,  42, 217,   2, 218,   2, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 
+219,   2, 220,   2, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 221,   2, 
+222,   2, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 223,   2, 224,   2, 
+217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 225,   2, 226,   2, 217,   1, 
+214,   1,   3, 215,   1, 219,   1,  42, 227,   2, 228,   2, 217,   1, 214,   1, 
+  3, 215,   1, 219,   1,  42, 229,   2, 230,   2, 217,   1, 214,   1,   3, 215, 
+  1, 219,   1,  42, 179,   3, 180,   3, 217,   1, 214,   1,   3, 215,   1, 219, 
+  1,  42, 195,   3, 196,   3, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 
+246,   3, 247,   3, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 248,   3, 
+249,   3, 217,   1, 214,   1,   3, 215,   1, 219,   1,  42, 250,   3, 251,   3, 
 217,   1,  34,   4,   0,   8,   7,   0,  36,   3,  73,   1,   1,  33,  74,   1, 
   2,  34,  75,   1,   3,  35,  77,   4,   8,  12,   0,  39,   1,  76,  18,   5, 
  38,  84,   4,   8,  14,   0,  51,   5,  76,   2,   5,  46,  76,   3,   6,  47, 
@@ -4410,13 +4842,13 @@ const uint8_t builtin_abc_data[44246] = {
   8,  64, 140,   5,  97, 140,   8,  93, 139,   8, 102, 139,   8,  64, 141,   5, 
  97, 141,   8,  93, 139,   8, 102, 139,   8,  64, 142,   5,  97, 142,   8,  93, 
 143,   8,  93, 139,   8, 102, 139,   8,  70, 143,   8,   1,  41,  71,   0,   0, 
-140,   5,   2,   3,   3,   3,  96, 208, 128, 144,   6, 213,  44, 173,   3, 209, 
-102, 144,   8, 160,  44, 173,   3, 160, 133, 214, 209, 102, 145,   8,  18,   7, 
+140,   5,   2,   3,   3,   3,  96, 208, 128, 144,   6, 213,  44, 184,   3, 209, 
+102, 144,   8, 160,  44, 184,   3, 160, 133, 214, 209, 102, 145,   8,  18,   7, 
   0,   0, 210,  44, 191,   2, 160, 133, 214, 209, 102, 146,   8,  18,   7,   0, 
   0, 210,  44, 193,   2, 160, 133, 214, 209, 102, 147,   8,  18,   7,   0,   0, 
-210,  44, 178,   3, 160, 133, 214, 209, 102, 148,   8,  18,   7,   0,   0, 210, 
- 44, 180,   3, 160, 133, 214, 209, 102, 149,   8,  18,   7,   0,   0, 210,  44, 
-182,   3, 160, 133, 214, 210,  72,   0,   0, 141,   5,   3,   3,   3,   3,  19, 
+210,  44, 189,   3, 160, 133, 214, 209, 102, 148,   8,  18,   7,   0,   0, 210, 
+ 44, 191,   3, 160, 133, 214, 209, 102, 149,   8,  18,   7,   0,   0, 210,  44, 
+193,   3, 160, 133, 214, 210,  72,   0,   0, 141,   5,   3,   3,   3,   3,  19, 
 208, 128, 144,   6, 214, 210,  93, 150,   8, 209,  70, 150,   8,   1,  70, 151, 
   8,   1,  72,   0,   0, 142,   5,   3,   3,   3,   3,  19, 208, 128, 144,   6, 
 214, 210,  93, 150,   8, 209,  70, 150,   8,   1,  70, 152,   8,   1,  72,   0, 
@@ -4458,30 +4890,30 @@ const uint8_t builtin_abc_data[44246] = {
   8, 102, 167,   8,  64, 195,   5,  97, 206,   8,  93, 167,   8, 102, 167,   8, 
  64, 196,   5,  97, 207,   8,  93, 208,   8,  93, 167,   8, 102, 167,   8,  70, 
 208,   8,   1,  41,  71,   0,   0, 207,   5,  10,   1,   3,   4,  65, 208,  48, 
- 44, 221,   3,  93, 209,   8, 102, 209,   8, 102, 210,   8,  44, 222,   3,  93, 
-209,   8, 102, 209,   8, 102, 211,   8,  44, 223,   3,  93, 209,   8, 102, 209, 
-  8, 102, 212,   8,  44, 224,   3,  93, 209,   8, 102, 209,   8, 102, 213,   8, 
- 44, 225,   3,  93, 209,   8, 102, 209,   8, 102, 214,   8,  85,   5,  72,   0, 
+ 44, 232,   3,  93, 209,   8, 102, 209,   8, 102, 210,   8,  44, 233,   3,  93, 
+209,   8, 102, 209,   8, 102, 211,   8,  44, 234,   3,  93, 209,   8, 102, 209, 
+  8, 102, 212,   8,  44, 235,   3,  93, 209,   8, 102, 209,   8, 102, 213,   8, 
+ 44, 236,   3,  93, 209,   8, 102, 209,   8, 102, 214,   8,  85,   5,  72,   0, 
   0, 208,   5,   2,   2,   3,   4, 143,   2, 208,  48, 209,  32,  20,  52,   0, 
   0,  93, 209,   8, 102, 209,   8,  38,  97, 210,   8,  93, 209,   8, 102, 209, 
   8,  38,  97, 211,   8,  93, 209,   8, 102, 209,   8,  38,  97, 212,   8,  93, 
 209,   8, 102, 209,   8,  38,  97, 213,   8,  93, 209,   8, 102, 209,   8,  36, 
-  2,  97, 214,   8,  71,  44, 221,   3, 209, 180, 118,  42, 118,  18,  13,   0, 
+  2,  97, 214,   8,  71,  44, 232,   3, 209, 180, 118,  42, 118,  18,  13,   0, 
   0,  41, 209, 102, 210,   8,  93, 215,   8, 102, 215,   8, 179, 118,  18,  13, 
   0,   0,  93, 209,   8, 102, 209,   8, 209, 102, 210,   8,  97, 210,   8,  44, 
-222,   3, 209, 180, 118,  42, 118,  18,  13,   0,   0,  41, 209, 102, 211,   8, 
+233,   3, 209, 180, 118,  42, 118,  18,  13,   0,   0,  41, 209, 102, 211,   8, 
  93, 215,   8, 102, 215,   8, 179, 118,  18,  13,   0,   0,  93, 209,   8, 102, 
-209,   8, 209, 102, 211,   8,  97, 211,   8,  44, 223,   3, 209, 180, 118,  42, 
+209,   8, 209, 102, 211,   8,  97, 211,   8,  44, 234,   3, 209, 180, 118,  42, 
 118,  18,  13,   0,   0,  41, 209, 102, 212,   8,  93, 215,   8, 102, 215,   8, 
 179, 118,  18,  13,   0,   0,  93, 209,   8, 102, 209,   8, 209, 102, 212,   8, 
- 97, 212,   8,  44, 224,   3, 209, 180, 118,  42, 118,  18,  13,   0,   0,  41, 
+ 97, 212,   8,  44, 235,   3, 209, 180, 118,  42, 118,  18,  13,   0,   0,  41, 
 209, 102, 213,   8,  93, 215,   8, 102, 215,   8, 179, 118,  18,  13,   0,   0, 
- 93, 209,   8, 102, 209,   8, 209, 102, 213,   8,  97, 213,   8,  44, 225,   3, 
+ 93, 209,   8, 102, 209,   8, 209, 102, 213,   8,  97, 213,   8,  44, 236,   3, 
 209, 180, 118,  42, 118,  18,  13,   0,   0,  41, 209, 102, 214,   8,  93, 216, 
   8, 102, 216,   8, 179, 118,  18,  13,   0,   0,  93, 209,   8, 102, 209,   8, 
 209, 102, 214,   8,  97, 214,   8,  71,   0,   0, 209,   5,  10,   1,   3,   4, 
- 26, 208,  48,  44, 221,   3,  38,  44, 222,   3,  38,  44, 223,   3,  38,  44, 
-224,   3,  38,  44, 225,   3,  36,   2,  85,   5,  72,   0,   0, 156,   5,   1, 
+ 26, 208,  48,  44, 232,   3,  38,  44, 233,   3,  38,  44, 234,   3,  38,  44, 
+235,   3,  38,  44, 236,   3,  36,   2,  85,   5,  72,   0,   0, 156,   5,   1, 
   1,   3,   3,   8,  93, 217,   8,  70, 217,   8,   0,  72,   0,   0, 157,   5, 
   2,   2,   3,   3,  10,  93, 218,   8, 209,  70, 218,   8,   1,  41,  71,   0, 
   0, 158,   5,   1,   1,   3,   3,   8,  93, 219,   8,  70, 219,   8,   0,  72, 
@@ -4634,20 +5066,22 @@ const uint8_t builtin_abc_data[44246] = {
   9,   1,  41,  71,   0,   0, 206,   6,   4,   2,   3,   3,  60, 208,  93, 218, 
   9, 102, 218,   9,  26,   3,   0,   0,  44,   1,  72, 208,  93, 221,   9, 102, 
 221,   9, 179, 150,  18,  23,   0,   0,  93, 222,   9, 102, 222,   9,  93, 223, 
-  9, 102, 223,   9,  37, 236,   7,  44, 232,   3,  70, 224,   9,   3,  41, 208, 
+  9, 102, 223,   9,  37, 236,   7,  44, 243,   3,  70, 224,   9,   3,  41, 208, 
 128, 225,   9, 213, 209,  70,  95,   0,  72,   0,   0, 209,   6,   1,   1,   4, 
   5,   4, 208,  48, 208,  72,   0,   0, 210,   6,   4,   3,   4,   5, 127, 208, 
  48, 208, 102, 226,   9,  44,   1,  26,   5,   0,   0, 208, 102, 227,   9,  72, 
-208, 102, 226,   9,  32,  26,   9,   0,   0,  44, 233,   3, 208, 102, 227,   9, 
+208, 102, 226,   9,  32,  26,   9,   0,   0,  44, 244,   3, 208, 102, 227,   9, 
 160,  72, 208, 102, 226,   9, 208, 102, 226,   9, 102, 228,   9,  36,   1, 161, 
  70, 229,   9,   1, 116, 213, 208, 102, 226,   9, 133, 214, 209,  45,  18, 176, 
 118,  42, 118,  18,   6,   0,   0,  41, 209,  45,  19, 174, 118,  18,  22,   0, 
   0, 208, 102, 226,   9,  36,   0, 208, 102, 226,   9, 102, 228,   9,  36,   1, 
 161,  70, 230,   9,   2, 133, 214, 210,  44,   1,  26,   5,   0,   0, 208, 102, 
-227,   9,  72, 210,  44, 234,   3, 160, 208, 102, 227,   9, 160,  72,   0,   0, 
+227,   9,  72, 210,  44, 245,   3, 160, 208, 102, 227,   9, 160,  72,   0,   0, 
 211,   6,   1,   3,   4,   5,   6, 208,  48, 208,  73,   0,  71,   0,   0, 212, 
   6,   2,   1,   1,   3,  62, 208,  48,  93, 232,   9,  93,   4, 102,   4,  48, 
  93, 233,   9, 102, 233,   9,  88,  31,  29, 104,   2,  93, 234,   9,  93,   4, 
 102,   4,  48,  93, 233,   9, 102, 233,   9,  88,  32,  29, 104, 223,   8,  93, 
 235,   9,  93,   4, 102,   4,  48,  93, 233,   9, 102, 233,   9,  88,  33,  29, 
 104, 225,   9,  71,   0,   0};
+
+} }
