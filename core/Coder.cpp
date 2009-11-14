@@ -224,7 +224,7 @@ namespace avmplus
 	void LookupCacheBuilder::cleanup()
 	{
 		if (caches) {
-			delete [] caches;
+			mmfx_delete_array(caches);
 			caches = NULL;
 		}
 	}
@@ -239,10 +239,10 @@ namespace avmplus
 				return i;
 		if (next_cache == num_caches) {
 			uint32_t newcap = num_caches + num_caches/2 + 5; // 0 5 12 23 39 66 ...
-			uint32_t* new_cache = new uint32_t[newcap];
+			uint32_t* new_cache = mmfx_new_array(uint32_t, newcap);
 			if (num_caches > 0) {
 				VMPI_memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
-				delete [] caches;
+				mmfx_delete_array(caches);
 			}
 			caches = new_cache;
 			num_caches = newcap;

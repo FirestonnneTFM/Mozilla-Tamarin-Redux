@@ -1464,6 +1464,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\AbcParser-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\AbcParser.h"
 				>
 			</File>

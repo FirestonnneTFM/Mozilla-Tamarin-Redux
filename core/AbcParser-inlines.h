@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,34 +37,49 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_XMLListClass__
-#define __avmplus_XMLListClass__
-
-
 namespace avmplus
 {
-	/**
-	 * class XMLListClass
-	 */
-    class XMLListClass : public ClassClosure
-    {
-	public:
-		XMLListClass(VTable* cvtable);
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom call(int argc, Atom* argv);
-
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
-
-		Atom ToXMLList(Atom arg);
-        
-		DECLARE_SLOTS_XMLListClass;
-	};
+REALLY_INLINE int AbcParser::readU16(const byte* p) const
+{
+    if (p < abcStart || p+1 >= abcEnd)
+        toplevel->throwVerifyError(kCorruptABCError);
+    return p[0] | p[1]<<8;
 }
 
-#endif /* __avmplus_XMLListClass__ */
+REALLY_INLINE int AbcParser::readS32(const byte *&p) const
+{
+    // We have added kBufferPadding bytes to the end of the main swf buffer.
+    // Why?  Here we can read from 1 to 5 bytes.  If we were to
+    // put the required safety checks at each byte read, we would slow
+    // parsing of the file down.  With this buffer, only one check at the
+    // top of this function is necessary. (we will read on into our own memory)
+    if ( p < abcStart || p >= abcEnd )
+        toplevel->throwVerifyError(kCorruptABCError);
+
+    int result = p[0];
+    if (!(result & 0x00000080)) {
+        p++;
+        return result;
+    }
+    result = (result & 0x0000007f) | p[1]<<7;
+    if (!(result & 0x00004000)) {
+        p += 2;
+        return result;
+    }
+    result = (result & 0x00003fff) | p[2]<<14;
+    if (!(result & 0x00200000)) {
+        p += 3;
+        return result;
+    }
+    result = (result & 0x001fffff) | p[3]<<21;
+    if (!(result & 0x10000000)) {
+        p += 4;
+        return result;
+    }
+    result = (result & 0x0fffffff) | p[4]<<28;
+    p += 5;
+    return result;
+}
+
+} // namespace avmplus

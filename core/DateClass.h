@@ -75,6 +75,8 @@ namespace avmplus
 
 	private:
 		double		stringToDateDouble(Stringp s);
+        
+		DECLARE_SLOTS_DateClass;
 	};
 }
 

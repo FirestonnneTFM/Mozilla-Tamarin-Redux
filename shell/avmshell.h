@@ -66,6 +66,21 @@
 #pragma warning(disable:4996)		// 'scanf' was declared deprecated
 #endif
 
+// forward declarations for shell_toplevel.h
+namespace avmshell
+{
+	class SystemClass;
+}
+namespace avmplus
+{
+	class SampleObject;
+	class StackFrameObject;
+	class NewObjectSampleObject;
+	class TraceClass;
+}
+
+#include "shell_toplevel.h"
+
 using namespace avmplus;
 
 namespace avmplus
@@ -75,7 +90,6 @@ namespace avmplus
 
 namespace avmshell
 {
-	class ByteArrayObject;
 	class ByteArray;
 	class Shell;
 	class ShellCodeContext;
@@ -102,14 +116,6 @@ namespace avmshell
 #include "SamplerScript.h"
 #include "JavaGlue.h"
 #include "ShellCore.h"
-
-namespace avmplus
-{
-	namespace NativeID
-	{
-        #include "shell_toplevel.h"
-    }
-}
 
 namespace avmshell
 { 

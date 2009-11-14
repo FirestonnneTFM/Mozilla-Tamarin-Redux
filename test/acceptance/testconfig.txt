@@ -319,6 +319,8 @@ ecma3/RegExp/multibyte_regress,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.m
 abcasm/.*, .*, verify_skip, abcasm tests not compatible with --verify
 
 
-
-
+####################
+#  Bugs 
+####################
+mops/mops:Range read test byte min , ppc64.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=528533
 

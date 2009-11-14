@@ -62,6 +62,7 @@ namespace avmplus
 		}
 
 		MethodClosure* create(MethodEnv* env, Atom savedThis);
+		DECLARE_SLOTS_MethodClosureClass;
 	};
 
 	/**
@@ -101,6 +102,7 @@ namespace avmplus
 
 	protected:
 		ATOM_WB _savedThis;
+		DECLARE_SLOTS_MethodClosure;
 	};
 }
 

@@ -38,10 +38,27 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
+#include "builtin.cpp"
+
 namespace avmplus
 {
 	namespace NativeID 
 	{
-		#include "builtin.cpp"
+        
+		uint32_t SlotOffsetsAndAsserts::getSlotOffset(Traits* t, int nameId)
+		{
+			Multiname name;
+			t->pool->parseMultiname(name, nameId);
+			if (name.isNsset())
+				name.setNamespace(name.getNsset()->namespaces[0]);
+			
+			AvmAssert(!name.isNsset());
+			
+			const TraitsBindings* tb = t->getTraitsBindings();
+			Binding b = tb->findBinding(name.getName(), name.getNamespace());
+			AvmAssert(AvmCore::isSlotBinding(b));
+			int slotId = AvmCore::bindingToSlotId(b);
+			return tb->getSlotOffset(slotId);
+		}
 	}
 }

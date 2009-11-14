@@ -127,14 +127,18 @@ namespace avmplus
 			core->GetGC()->Free(metaNames);
 	}
 
-	uint32_t AbcParser::computeInstanceSize(int class_id, 
-									   Traits* base) const
+	REALLY_INLINE void AbcParser::computeInstanceSizeAndSlotsOffset(int class_id, 
+																	Traits* base,
+																	uint16_t& sizeofInstance,
+																	uint16_t& offsetofSlots) const
 	{
-		// If this is a native class, return the stated instance size
+		// If this is a native class, use the stated instance size and offset to slot area.
 		const NativeClassInfo* nativeEntry;
 		if (natives && (nativeEntry = natives->get_class(class_id)) != NULL && nativeEntry->sizeofInstance)
 		{
-			return nativeEntry->sizeofInstance;
+			sizeofInstance = nativeEntry->sizeofInstance;
+			offsetofSlots = nativeEntry->offsetofSlotsInstance;
+			return;
 		}
 
 		// Search the inheritance chain for any native classes.
@@ -143,13 +147,17 @@ namespace avmplus
 			if (base->getSizeOfInstance() > sizeof(ScriptObject))
 			{
 				// non-Object base class uses a subclass of ScriptObject, so use that size.
-				return base->getSizeOfInstance();
+				sizeofInstance = base->getSizeOfInstance();
+				// non-native class so slots start after end of C++ data.
+				offsetofSlots = sizeofInstance;
+				return;
 			}
 			base = base->base;
 		}
 
 		// no derived native classes found
-		return uint32_t(sizeof(ScriptObject));
+		sizeofInstance = uint16_t(sizeof(ScriptObject));
+		offsetofSlots = uint16_t(sizeof(ScriptObject));
 	}
 
 	Namespacep AbcParser::parseNsRef(const byte* &pc) const
@@ -287,7 +295,8 @@ namespace avmplus
 	 * one for sizing the traits object and the other for allocating it and filling
 	 * it in.
 	 */
-	Traits* AbcParser::parseTraits(uint32_t sizeofInstance, 
+	Traits* AbcParser::parseTraits(uint16_t sizeofInstance,
+									uint16_t offsetofSlots,
 									Traits* base, 
 									Namespacep ns, 
 									Stringp name, 
@@ -307,7 +316,7 @@ namespace avmplus
 			core->console << "        trait_count=" << nameCount << "\n";
 		#endif
 
-		Traits* traits = Traits::newTraits(pool, base, sizeofInstance, traitsPos, posType);
+		Traits* traits = Traits::newTraits(pool, base, sizeofInstance,offsetofSlots , traitsPos, posType);
 		traits->set_names(ns, name);
 		traits->protectedNamespace = protectedNamespace;
 		
@@ -883,7 +892,7 @@ namespace avmplus
 			{
 				// Interface methods should not have bodies
 				Traits* declaringTraits = info->declaringTraits();
-				if (declaringTraits && declaringTraits->isInterface)
+				if (declaringTraits && declaringTraits->isInterface())
 				{
 					toplevel->throwVerifyError(kIllegalInterfaceMethodBodyError, core->toErrorString(info));
 				}
@@ -925,7 +934,8 @@ namespace avmplus
 					#endif
 					// activation traits are raw types, not subclasses of object.  this is
 					// okay because they aren't accessable to the programming model.
-					Traits* act = parseTraits(sizeof(ScriptObject), 
+					Traits* act = parseTraits(sizeof(ScriptObject),
+																sizeof(ScriptObject), 
 																NULL, 
 																ns, 
 																name, 
@@ -1466,9 +1476,10 @@ namespace avmplus
 				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString(declaringTraits));
 			}
 
-			Traits* traits = parseTraits(sizeof(ScriptObject), 
+			Traits* traits = parseTraits(sizeof(ScriptObject),
+											sizeof(ScriptObject),
 											core->traits.object_itraits, 
-										    core->getPublicNamespace(pool), 
+											core->getPublicNamespace(pool), 
 											core->kglobal, 
 											script, 
 											script_pos,
@@ -1565,7 +1576,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kCannotExtendFinalClass, core->toErrorString(&mn));
 			}
 
-			if (baseTraits && baseTraits->isInterface)
+			if (baseTraits && baseTraits->isInterface())
 			{
 				// error, can't extend interface
 				toplevel->throwVerifyError(kCannotExtendError, core->toErrorString(&mn), core->toErrorString(baseTraits));
@@ -1596,7 +1607,7 @@ namespace avmplus
 				for( int x = 0; x < interfaceCount; ++ x )
 				{
 					Traits *t = pool->resolveTypeName(pos, toplevel);
-					if (!t || !t->isInterface)
+					if (!t || !t->isInterface())
 					{
 						// error, can't extend interface
 						toplevel->throwVerifyError(kCannotImplementError, core->toErrorString(&mn), core->toErrorString(t));
@@ -1627,8 +1638,11 @@ namespace avmplus
 					<< "\n";
 			}
 #endif
-
-			Traits* itraits = parseTraits(computeInstanceSize(i, baseTraits), 
+			uint16_t sizeofInstance = 0;
+			uint16_t offsetofSlots = 0;
+			computeInstanceSizeAndSlotsOffset(i, baseTraits, sizeofInstance, offsetofSlots);
+			Traits* itraits = parseTraits(sizeofInstance, 
+										  offsetofSlots,  
 										  baseTraits, 
 										  ns, 
 										  name, 
@@ -1650,7 +1664,7 @@ namespace avmplus
 
 			if (flags & 4)
 			{
-				itraits->isInterface = true;
+				itraits->m_isInterface = true;
 
 				// check for slotCount != 0 now done at resolve time
 
@@ -1737,7 +1751,9 @@ namespace avmplus
 			#endif
 
 			const NativeClassInfo* nativeEntry = natives ? natives->get_class(i) : NULL;
-			Traits* ctraits = parseTraits(nativeEntry && nativeEntry->sizeofClass ? nativeEntry->sizeofClass : sizeof(ClassClosure),
+			bool haveClassNativeInfo = nativeEntry && nativeEntry->sizeofClass;
+			Traits* ctraits = parseTraits(haveClassNativeInfo ? nativeEntry->sizeofClass : sizeof(ClassClosure),
+											haveClassNativeInfo ? nativeEntry->offsetofSlotsClass : sizeof(ClassClosure), 
 											CLASS_TYPE, 
 											ns, 
 											core->internString(core->concatStrings(name, core->newConstantStringLatin1("$"))), 
