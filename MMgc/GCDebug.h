@@ -57,7 +57,7 @@ namespace MMgc
         #define GCAssert(x)					GCAssertMsg((x), "")
 		#define GCAssertMsg(x,y)			_GCAssertMsg((x), y, __LINE__,__FILE__)
         #define _GCAssertMsg(x, msg, line_, file_)	__GCAssertMsg((x), msg, line_, file_)
-        #define __GCAssertMsg(x, msg, line_, file_)	do { MMgc::___GCAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")"); } while (0) /* no semi */
+        #define __GCAssertMsg(x, msg_, line_, file_)	do { if ((x) == 0) MMgc::GCDebugMsg(true, "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ") %s", msg_); } while (0) /* no semi */
 		
 	#else
 		#define GCAssertMsg(x,y)	do { } while (0) /* no semi */
