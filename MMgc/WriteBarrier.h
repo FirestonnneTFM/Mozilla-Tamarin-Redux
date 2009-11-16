@@ -204,11 +204,9 @@ namespace MMgc
 		{
 		}
 
-		explicit REALLY_INLINE WriteBarrier(T _t) : t(_t)
+		explicit REALLY_INLINE WriteBarrier(T _t) 
 		{ 
-#ifdef MMGC_HEAP_GRAPH
-			set(_t); // not necessary normally
-#endif
+			set(_t);
 		}
 
 		REALLY_INLINE ~WriteBarrier() 
