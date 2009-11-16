@@ -143,6 +143,8 @@ namespace MMgc
 		return Alloc(size, flags | kCanFail);			
 	}
 
+	// Normally extra will not be zero (overloaded 'new' operators take care of that)
+	// so the overflow check is not actually redundant.
 	REALLY_INLINE void *GC::AllocExtra(size_t size, size_t extra, int flags)
 	{
 		return Alloc(GCHeap::CheckForAllocSizeOverflow(size, extra), flags);

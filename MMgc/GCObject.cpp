@@ -46,21 +46,6 @@ namespace MMgc
 		return GC::GetWeakRef(this);
 	}
 
-	GCWeakRef* GCFinalizedObject::GetWeakRef() const
-	{
-		return GC::GetWeakRef(this);
-	}
-  
-	void* GCFinalizedObject::operator new(size_t size, GC *gc, size_t extra)
-	{
-		return gc->AllocExtra(size, extra, GC::kFinalize|GC::kContainsPointers|GC::kZero);
-	}
-
-	void GCFinalizedObject::operator delete (void *gcObject)
-	{
-		GC::GetGC(gcObject)->Free(gcObject);
-	}		
-
 #ifdef MMGC_RC_HISTORY
 	
 	void RCObject::DumpHistory()
