@@ -1697,6 +1697,8 @@ namespace avmplus
 					core->console << "		  interface["<<j<<"]=" << interfaceTraits <<"\n";
 				}
 			}
+#else
+			(void)interfacePos;
 #endif
 						
 			instances.set(i, itraits);
