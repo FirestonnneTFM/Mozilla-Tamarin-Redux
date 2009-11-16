@@ -3916,7 +3916,7 @@ namespace avmplus
                     Traits* objType = state->value(objDisp).traits;
 
                     LIns *value;
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)) )
+                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)) )
                     {
                         value = callIns((objType==ARRAY_TYPE ?
                                         FUNCTIONID(ArrayObject_getIntProperty) :
@@ -3978,7 +3978,7 @@ namespace avmplus
                     Traits* objType = state->value(objDisp).traits;
 
                     LIns *value;
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
+                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
                     {
                         value = callIns((objType==ARRAY_TYPE ?
                                                 FUNCTIONID(ArrayObject_getUintProperty) :
@@ -4087,7 +4087,7 @@ namespace avmplus
 
                     Traits* objType = state->value(objDisp).traits;
 
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
+                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
                     {
                         LIns* value = loadAtomRep(sp);
                         callIns((objType==ARRAY_TYPE ?
@@ -4159,7 +4159,7 @@ namespace avmplus
 
                     Traits* objType = state->value(objDisp).traits;
 
-                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
+                    if (objType == ARRAY_TYPE || (objType!= NULL && objType->subtypeof(VECTOROBJ_TYPE)))
                     {
                         LIns* value = loadAtomRep(sp);
                         callIns((objType==ARRAY_TYPE ?

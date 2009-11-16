@@ -497,7 +497,7 @@
     REALLY_INLINE void store_cached_slot(SetCache& c, ScriptObject* obj, ScriptObject** slot_ptr, Atom val)
     {
         if (AvmCore::isNullOrUndefined(val) ||
-            (atomKind(val) == kObjectType && atomObj(val)->traits()->containsInterface(c.slot_type))) {
+            (atomKind(val) == kObjectType && atomObj(val)->traits()->subtypeof(c.slot_type))) {
             WBRC(c.slot_type->core->gc, obj, slot_ptr, atomPtr(val));
         } else {
             throw_checktype_error(c, obj, val);

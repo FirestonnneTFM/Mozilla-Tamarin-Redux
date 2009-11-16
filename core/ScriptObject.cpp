@@ -742,7 +742,7 @@ namespace avmplus
 			else // if (sst == SST_scriptobject)
 			{
 				AvmAssert(sst == SST_scriptobject);
-				if (atomKind(value) != kObjectType || !AvmCore::atomToScriptObject(value)->traits()->containsInterface(td->getSlotTraits(slot)))
+				if (atomKind(value) != kObjectType || !AvmCore::atomToScriptObject(value)->traits()->subtypeof(td->getSlotTraits(slot)))
 					goto failure;
 			}
 			WBRC(traits->core->GetGC(), this, p, atomPtr(value));

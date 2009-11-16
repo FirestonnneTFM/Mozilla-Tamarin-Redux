@@ -183,7 +183,7 @@ namespace avmplus
         }
 	}
 
-	bool FASTCALL TraitsBindings::containsInterface(Traitsp intf) const
+	bool FASTCALL TraitsBindings::subtypeof(Traitsp intf) const
 	{
 		AvmAssert(intf != NULL);
 		AvmAssert(this->interfaceCapacity > 0);
@@ -196,7 +196,7 @@ namespace avmplus
         for (;;)
         {
             Traitsp k;
-			// containsInterface succeeds much more often than it fails (~10x) so check for that first
+			// subtypeof succeeds much more often than it fails (~10x) so check for that first
             if ((k = set[i].t) == intf)
             {
 				return true; 
@@ -295,7 +295,7 @@ namespace avmplus
 
 		// allow subclass param 0 to implement or extend base param 0
 		virtTraits = virtms->paramTraits(0);
-		if (!containsInterface(virtTraits) || !Traits::isMachineCompatible(this->owner, virtTraits))
+		if (!subtypeof(virtTraits) || !Traits::isMachineCompatible(this->owner, virtTraits))
 		{
 			if (!this->owner->isMachineType() && virtTraits == core->traits.object_itraits)
 			{
@@ -366,7 +366,7 @@ namespace avmplus
 				continue;
 
 			// don't need to bother checking interfaces in our parent.
-			if (this->base && this->base->containsInterface(ifc))
+			if (this->base && this->base->subtypeof(ifc))
 				continue;
 
 			TraitsBindingsp ifcd = ifc->getTraitsBindings();
@@ -1226,11 +1226,11 @@ namespace avmplus
 	// when TraitsBindings were added, we changed the interface list to be hierarchical,
 	// so that only the interfaces not implemented by parents were in the list... thus
 	// you had to walk up the tree to check for interface implementation. this proved
-	// to be too slow (eg for containsInterface which is used heavily by coerceEnter),
+	// to be too slow (eg for subtypeof which is used heavily by coerceEnter),
 	// thus the current implementation has gone back to a flat implementation, but
 	// with 'this' included in the list this time.
 	//
-	// aside from containsInterface, this affected a few other areas of the code that
+	// aside from subtypeof, this affected a few other areas of the code that
 	// thought they had to walk the TraitsBindings inheritance tree to get all
 	// interfaces (notable IMT thunk generation and TypeDescriber).
 	bool Traits::addInterfaces(TraitsBindings* tb, const Toplevel* toplevel)
@@ -1303,7 +1303,7 @@ namespace avmplus
 			NamespaceSetp nss = new (core->GetGC()) NamespaceSet(this->ns());
 			NamespaceSetp compat_nss = nss;
 			addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR));
-			// the Sampler can call containsInterface() on a catch object, so we must ensure the list is valid.
+			// the Sampler can call subtypeof() on a catch object, so we must ensure the list is valid.
 			// we add ourself to it, and since the algorithm requires at least one unused entry in the table, we use a size of 2, not 1.
 			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/2);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);

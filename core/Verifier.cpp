@@ -1379,7 +1379,7 @@ namespace avmplus
 				{
 					// extra constraints on type of pushscope allowed
 					Traits* requiredType = scope->getScopeTraitsAt(scope->size+state->scopeDepth);
-					if (!scopeTraits || !scopeTraits->containsInterface(requiredType))
+					if (!scopeTraits || !scopeTraits->subtypeof(requiredType))
 					{
 						verifyFailed(kIllegalOperandTypeError, core->toErrorString(scopeTraits), core->toErrorString(requiredType));
 					}

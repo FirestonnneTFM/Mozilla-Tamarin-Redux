@@ -2058,7 +2058,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		// repeated if-else is better than switch here
 		if (kind == kObjectType)
 		{
-			return atomToScriptObject(atom)->traits()->containsInterface(itraits);
+			return atomToScriptObject(atom)->traits()->subtypeof(itraits);
 		}
 		
 		if (kind == kIntptrType)
