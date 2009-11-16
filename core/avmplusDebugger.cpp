@@ -233,7 +233,11 @@ namespace avmplus
 		traceMethod(env->method);
 
 		// can't debug native methods
-		if (!env->method->isNative())
+		if (!env->method->isNative()
+#ifdef VMCFG_AOT
+			|| env->method->isCompiledMethod()
+#endif
+            )
 			debugMethod(env);
 	}
 
@@ -375,6 +379,11 @@ namespace avmplus
 	 */
 	void Debugger::processAbc(PoolObject* pool, ScriptBuffer code)
 	{
+#ifdef VMCFG_AOT
+		if(pool2abcIndex.get(pool) != NULL)
+			return;
+#endif
+
 		// first off we build an AbcInfo object 
 		AbcFile* abc = new (core->GetGC()) AbcFile(core, (int)code.getSize());
 		

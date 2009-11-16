@@ -165,7 +165,17 @@ namespace avmshell
 	
 	void ShellCore::initShellPool()
 	{
+#ifdef VMCFG_AOT
+        NativeInitializer shellNInit(this,
+			&shell_toplevel_aotInfo,
+            avmplus::NativeID::shell_toplevel_abc_method_count,
+            avmplus::NativeID::shell_toplevel_abc_class_count);
+        shellNInit.fillInClasses(avmplus::NativeID::shell_toplevel_classEntries);
+        shellNInit.fillInMethods(avmplus::NativeID::shell_toplevel_methodEntries);
+        shellPool = shellNInit.parseBuiltinABC(builtinDomain);
+#else
 		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this);
+#endif
 	}
 
 	Toplevel* ShellCore::initShellBuiltins()
@@ -454,6 +464,11 @@ namespace avmshell
 	
 	int ShellCore::evaluateFile(ShellCoreSettings& settings, const char* filename)
 	{
+#ifdef VMCFG_AOT
+        ScriptBuffer dummyScriptBuffer;
+        return handleArbitraryExecutableContent(dummyScriptBuffer, NULL);
+#endif
+
 		if (config.interrupts)
 			Platform::GetInstance()->setTimer(kScriptTimeout, interruptTimerCallback, this);
 		
@@ -498,6 +513,11 @@ namespace avmshell
 			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
 			codeContext->m_domainEnv = shell_domainEnv;
 
+#ifdef VMCFG_AOT
+            if (filename == NULL) {
+				handleAOT(this, shell_domain, shell_domainEnv, shell_toplevel, codeContext);
+			} else
+#endif
 			if (AbcParser::canParse(code) == 0) {
 				uint32_t api = this->getAPI(NULL);
 				handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext, api);

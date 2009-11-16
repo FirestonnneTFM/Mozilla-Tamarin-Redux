@@ -142,7 +142,9 @@ typedef void *maddr_ptr;
 #define REALLY_INLINE inline __attribute__((always_inline))
 // only define FASTCALL for x86-32; other gcc versions will spew warnings
 #ifdef AVMPLUS_IA32
+#ifndef VMCFG_AOT // Doesn't work with llvm compiler (need a better symbol for this, but don't know one) 
 	#define FASTCALL __attribute__((fastcall))
+#endif
 #endif
 #endif
 

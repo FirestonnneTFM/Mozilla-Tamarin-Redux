@@ -88,6 +88,10 @@ namespace avmplus
 	class Dictionary;
 }
 
+#ifdef VMCFG_AOT
+#include "../aot/AOTCompiler.h"
+#endif
+
 namespace avmshell
 {
 	class ByteArray;
@@ -146,6 +150,11 @@ namespace avmshell
 	// swf support, impl code in swf.cpp
 	bool isSwf(ScriptBuffer);
 	void handleSwf(const char *, ScriptBuffer, DomainEnv*, Toplevel*&, CodeContext*);
+
+#ifdef VMCFG_AOT
+	// AOT support, impl code in aot.cpp
+    void handleAOT(AvmCore*, Domain*, DomainEnv*, Toplevel*&, CodeContext*);
+#endif
 
 	class ShellSettings : public ShellCoreSettings
 	{

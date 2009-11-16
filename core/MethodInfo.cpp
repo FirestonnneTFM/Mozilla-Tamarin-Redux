@@ -66,6 +66,24 @@ namespace avmplus
 	{
 	}
 
+#ifdef VMCFG_AOT
+    MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info) :
+        MethodInfoProcHolder(verifyEnterGPR),
+        _msref(declTraits->pool->core->GetGC()->emptyWeakRef),
+		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
+		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
+        _pool(declTraits->pool),
+        _abc_info_pos(NULL),
+        _flags(RESOLVED),
+        _method_id(-1)
+    {
+        AvmAssert(native_info != NULL);
+        this->_native.thunker = native_info->thunker;
+        this->_native.handler = native_info->handler;
+        this->_flags |= compiledMethodFlags() | AOT_COMPILED;
+    }
+#endif
+
 	/**
 	 * ordinary MethodInfo for abc or native method.
 	 */
@@ -932,7 +950,7 @@ namespace avmplus
 			ms->_max_stack = max_stack;
 			ms->_local_count = local_count;
 			ms->_max_scope = max_scope_depth - init_scope_depth;
-		#ifdef AVMPLUS_WORD_CODE
+		#if defined(AVMPLUS_WORD_CODE) || defined(VMCFG_AOT)
 		#else
 			ms->_abc_code_start = this->abc_body_pos();
 			AvmCore::skipU30(ms->_abc_code_start, 5);

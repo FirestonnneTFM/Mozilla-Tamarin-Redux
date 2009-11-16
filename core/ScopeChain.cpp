@@ -41,10 +41,9 @@
 
 namespace avmplus
 {
-	/*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra)
+	/* static */ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra)
 	{
-		const int32_t stateScopeDepth = (state ? state->scopeDepth : 0);
-		const int32_t capture = stateScopeDepth + (append ? 1 : 0);
+		const int32_t capture = nValues + (append ? 1 : 0);
 		const int32_t extraEntries = extra ? 1 : 0;
 		const int32_t outerSize = (outer ? outer->size : 0);
 		const int32_t pad = capture + extraEntries;
@@ -55,9 +54,9 @@ namespace avmplus
 		{
 			nscope->_scopes[j++] = outer->_scopes[i];
 		}
-		for (int32_t i = 0; i < stateScopeDepth; i++)
+		for (int32_t i = 0; i < nValues; i++)
 		{
-			const Value& v = state->scopeValue(i);
+			const Value& v = values[i];
 			nscope->setScopeAt(j++, v.traits, v.isWith);
 		}
 		if (append)
@@ -71,6 +70,30 @@ namespace avmplus
 		AvmAssert(j == nscope->fullsize);
 		return nscope;
 	}
+	
+	/*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra)
+	{
+		if (state && state->scopeDepth > 0)
+			return ScopeTypeChain::create(gc, traits, outer, &state->scopeValue(0), state->scopeDepth, append, extra);
+		else
+			return ScopeTypeChain::create(gc, traits, outer, 0, 0, append, extra);
+			
+	}
+
+#ifdef VMCFG_AOT
+    /*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra)
+    {
+        MMgc::GC::AllocaAutoPtr valuesPtr;
+		Value *values = (Value *)VMPI_alloca_gc(gc, valuesPtr, sizeof(Value)*nStateTraits);
+		int32_t firstWith = nStateTraits - nStateWithTraits;
+		for (int32_t i = 0; i < nStateTraits; i++)
+		{
+			values[i].traits = stateTraits[i];
+			values[i].isWith = i >= firstWith;
+		}
+		return ScopeTypeChain::create(gc, traits, outer, values, nStateTraits, append, extra);
+    }
+#endif
 
 	const ScopeTypeChain* ScopeTypeChain::cloneWithNewTraits(MMgc::GC* gc, Traits* p_traits) const
 	{
