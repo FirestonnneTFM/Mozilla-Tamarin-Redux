@@ -95,17 +95,17 @@ namespace MMgc
 		static void operator delete (void *gcObject);
 	};
 
-	REALLY_INLINE static void *GCObject::operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw())
+	REALLY_INLINE void *GCObject::operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw())
 	{
 		return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero);
 	}
 	
-	REALLY_INLINE static void *GCObject::operator new(size_t size, GC *gc) GNUC_ONLY(throw())
+	REALLY_INLINE void *GCObject::operator new(size_t size, GC *gc) GNUC_ONLY(throw())
 	{
 		return gc->Alloc(size, GC::kContainsPointers|GC::kZero);
 	}
 	
-	REALLY_INLINE static void GCObject::operator delete(void *gcObject)
+	REALLY_INLINE void GCObject::operator delete(void *gcObject)
 	{
 		GC::GetGC(gcObject)->Free(gcObject);
 	}
