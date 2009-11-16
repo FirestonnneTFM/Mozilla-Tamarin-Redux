@@ -126,7 +126,7 @@ namespace avmplus
 			case BUILTIN_vectoruint:
 			case BUILTIN_xml:
 			case BUILTIN_xmlList:
-				// a few intrinsic final classes can skip containsInterface calls
+				// a few intrinsic final classes can skip subtypeof calls
 				if (AvmCore::isNullOrUndefined(atom))
 				{
 					atom = 0;
@@ -160,7 +160,7 @@ namespace avmplus
 				else if (atomKind(atom) == kObjectType)
 				{
 					Traits* actual = AvmCore::atomToScriptObject(atom)->traits();
-					if (actual->containsInterface(t))
+					if (actual->subtypeof(t))
 					{
 						atom = (Atom)atomPtr(atom);
 						break;
@@ -1803,7 +1803,7 @@ namespace avmplus
 		if ((atom&7) == kObjectType)
 		{
 			ScriptObject* so = AvmCore::atomToScriptObject(atom);
-			if (so->traits()->containsInterface(expected))
+			if (so->traits()->subtypeof(expected))
 			{
 				return so;
 			}

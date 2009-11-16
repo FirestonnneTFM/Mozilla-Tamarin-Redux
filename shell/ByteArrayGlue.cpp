@@ -767,7 +767,7 @@ namespace avmplus {
 			// try to get traits from flash.utils.ByteArray
 			Traits *baTraits = cur->pool->getTraits(core->internConstantStringLatin1("ByteArray"), ns);
 			// and see if the original traits contains it!
-			return t->containsInterface(baTraits) != 0;
+			return t->subtypeof(baTraits) != 0;
 		}
 		return false;
  	}

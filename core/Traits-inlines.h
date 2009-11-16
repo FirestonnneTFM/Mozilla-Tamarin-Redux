@@ -261,7 +261,12 @@ REALLY_INLINE TraitsMetadatap Traits::getTraitsMetadata()
 
 REALLY_INLINE bool Traits::containsInterface(Traitsp t)
 {
-    return this == t || this->getTraitsBindings()->containsInterface(t);
+    return subtypeof(t);
+}
+
+REALLY_INLINE bool Traits::subtypeof(Traitsp t)
+{
+    return this == t || this->getTraitsBindings()->subtypeof(t);
 }
 
 REALLY_INLINE BuiltinType Traits::getBuiltinType(const Traitsp t)

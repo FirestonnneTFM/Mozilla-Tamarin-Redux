@@ -148,7 +148,7 @@ namespace avmplus
 		SlotStorageType calcSlotAddrAndSST(uint32_t i, void* pin, void*& pout) const;
 		Traitsp getInterface(uint32 i) const;
 		MethodInfo* getMethod(uint32_t i) const;
-		bool FASTCALL containsInterface(Traitsp t) const;
+		bool FASTCALL subtypeof(Traitsp t) const;
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
 		Binding findBinding(Stringp name, NamespaceSetp nsset) const;
@@ -346,7 +346,8 @@ namespace avmplus
 	public:
 		TraitsBindingsp getTraitsBindings();
 		TraitsMetadatap getTraitsMetadata();
-		bool containsInterface(Traitsp t);
+		bool containsInterface(Traitsp t); // legacy name
+		bool subtypeof(Traitsp t);
 		
 	public:
 		void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;

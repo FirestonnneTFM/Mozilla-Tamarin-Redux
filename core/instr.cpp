@@ -231,7 +231,7 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
         ScriptObject* ctor = AvmCore::atomToScriptObject(obj)->getSlotObject(AvmCore::bindingToSlotId(b));
         AvmCore* core = toplevel->core();
         if (!ctor ||
-            (!ctor->traits()->containsInterface(CLASS_TYPE) && !ctor->traits()->containsInterface(FUNCTION_TYPE)))
+            (!ctor->traits()->subtypeof(CLASS_TYPE) && !ctor->traits()->subtypeof(FUNCTION_TYPE)))
             toplevel->throwTypeError(kNotConstructorError, core->toErrorString(multiname));
         // inlined equivalent of op_construct
         return ctor->construct(argc, atomv);
@@ -333,7 +333,7 @@ Atom coerceImpl(const Toplevel* toplevel, Atom atom, Traits* expected)
         return unreachableAtom;
     }
 
-    if (!actual->containsInterface(expected))
+    if (!actual->subtypeof(expected))
     {
         // failed
 #ifdef AVMPLUS_VERBOSE
@@ -350,7 +350,7 @@ void coerceobj(E caller_env, ScriptObject* obj, Traits* type) {
 	#ifdef DOPROF // Adding this ifdef because this does not compile with Symbian emulator WINSCW compiler (it expects >=3 parameters for _nvprof).
     _nvprof("coerceobj",1);
 	#endif // DOPROF
-    if (obj && !obj->traits()->containsInterface(type)) {
+    if (obj && !obj->traits()->subtypeof(type)) {
         AvmCore* core = caller_env->core();
         caller_env->toplevel()->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(obj->atom()), core->toErrorString(type));
     }

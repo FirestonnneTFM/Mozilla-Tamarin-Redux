@@ -1609,7 +1609,7 @@ namespace avmplus
 					Traits *t = pool->resolveTypeName(pos, toplevel);
 					if (!t || !t->isInterface())
 					{
-						// error, can't extend interface
+						// error, can't implement non-interface type
 						toplevel->throwVerifyError(kCannotImplementError, core->toErrorString(&mn), core->toErrorString(t));
 					}
 				}
@@ -1687,17 +1687,17 @@ namespace avmplus
 			iinit->makeMethodOf(itraits);
 			itraits->init = iinit;
 
-			// parse the interfaces.  resolving type refs here means interface heirarchy must be a DAG.
+#ifdef AVMPLUS_VERBOSE
+			// print the interfaces.  interfaces have been resolved above so any
+			// errors would have been reported earlier.
 			for (int j=0, n=interfaceCount; j < n; j++)
 			{
 				Traits *interfaceTraits = pool->resolveTypeName(interfacePos, toplevel);
-				(void)interfaceTraits;
-#ifdef AVMPLUS_VERBOSE
 				if(pool->isVerbose(VB_parse)) {
 					core->console << "		  interface["<<j<<"]=" << interfaceTraits <<"\n";
 				}
-#endif
 			}
+#endif
 						
 			instances.set(i, itraits);
 
