@@ -182,6 +182,13 @@ namespace avmshell
 				Platform::GetInstance()->exit(exitCode);
 		}
 #endif
+
+#ifdef VMCFG_AOT
+        int exitCode = shell->evaluateFile(settings, NULL);
+        if (exitCode != 0) 
+            Platform::GetInstance()->exit(exitCode);
+        return;
+#endif
 		
 		// execute each abc file
 		for (int i=0 ; i < settings.numfiles ; i++ ) {
@@ -986,6 +993,7 @@ namespace avmshell
 		}
 #endif
 
+#ifndef VMCFG_AOT
 		if (settings.numfiles == 0) {
 			// no files, so we need something more
 			if (!settings.do_selftest && !settings.do_repl) {
@@ -993,6 +1001,7 @@ namespace avmshell
 				usage();
 			}
 		}
+#endif
 
 #ifdef VMCFG_EVAL
 		if (settings.do_repl)

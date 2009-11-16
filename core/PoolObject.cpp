@@ -75,6 +75,9 @@ namespace avmplus
 		, _method_name_indices(0)
 #endif
 		, api(api)
+#ifdef VMCFG_AOT
+		, aotInfo(NULL)
+#endif
 	{
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 		core->addLivePool(this);

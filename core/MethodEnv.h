@@ -151,7 +151,7 @@ namespace avmplus
 		Atom getpropertylate_i(Atom obj, int32_t index) const;
 		Atom getpropertylate_u(Atom obj, uint32_t index) const;
 
-#if defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT || defined VMCFG_AOT
 		void setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
 		void initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
 		Atom getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index);

@@ -1519,7 +1519,13 @@ namespace avmplus
 		}
 
 		AbcGen gen(gc); 
-		TraitsBindings* tb = _buildTraitsBindings(toplevel, &gen);
+		AbcGen *pgen;
+#if defined(VMCFG_AOT)
+         pgen = (!(this->init)) || (!(this->init->isCompiledMethod())) ? &gen : 0; 
+#else
+         pgen = &gen;
+#endif	
+ 		TraitsBindings* tb = _buildTraitsBindings(toplevel, pgen);
 		this->genInitBody(toplevel, gen);
 
 		// leave m_tmref as empty, we don't need it yet
@@ -1620,6 +1626,75 @@ namespace avmplus
 
 		linked = true;
 	}
+    
+#ifdef VMCFG_AOT
+
+    static inline void hookUpActivationTraitsInitMethodForTraitsMethod(AvmCore* core, Toplevel *toplevel, MethodInfo* m)
+    {
+        AvmAssert(m->needActivation());
+		
+		const AOTInfo* aotInfo = m->pool()->aotInfo;
+        Traits* activationTraits = m->activationTraits();
+        AvmAssert(activationTraits != NULL);
+		
+        AvmAssert(aotInfo->activationTraits != NULL);
+		AvmAssert(m->method_id() < aotInfo->nActivationTraits);
+        AvmAssert(aotInfo->activationTraits[m->method_id()] == activationTraits);
+		
+		AvmAssert(aotInfo->activationTraitsInitFunctions != NULL);
+		// See comment in initActivationTraits about why this can be called more than once per Traits
+		if (activationTraits->init == NULL) {
+		if (aotInfo->activationTraitsInitFunctions[m->method_id()]) {
+            NativeMethodInfo compiledMethodInfo;
+            compiledMethodInfo.thunker = aotThunker;
+            compiledMethodInfo.handler.function = aotInfo->activationTraitsInitFunctions[m->method_id()];
+            activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo);
+        }
+		m->resolveActivation(toplevel);
+    }
+    }
+
+    void Traits::initActivationTraits(Toplevel *toplevel)
+    {
+		// Note: this can be called multiple times per Traits from initScript, which must call this in case it's needed
+		// but is itself called once per Toplevel
+        const uint8_t* pos = traitsPosStart();
+
+        if (this->init->needActivation()) {
+            MethodInfo* m = this->init;
+            hookUpActivationTraitsInitMethodForTraitsMethod(core, toplevel, this->init);
+        }
+
+		NameEntry ne;
+		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
+		for (uint32_t i = 0; i < nameCount; i++)
+        {
+			ne.readNameEntry(pos);
+
+			switch (ne.kind)
+            {
+				case TRAIT_Slot:
+				case TRAIT_Const:
+				case TRAIT_Class:
+                    break;
+				case TRAIT_Method:
+				case TRAIT_Getter:
+				case TRAIT_Setter:
+				{
+					MethodInfo* m = pool->getMethodInfo(ne.id);
+                    if (m->needActivation()) {
+                        hookUpActivationTraitsInitMethodForTraitsMethod(core, toplevel, m);
+                    }
+                    break;
+				}
+				default:
+					// unsupported traits type -- can't happen, caught in AbcParser::parseTraits
+					AvmAssert(0);
+					break;
+            }
+        } // for i
+    }
+#endif
 
 	// static
 	bool Traits::isMachineCompatible(const Traits* a, const Traits* b)

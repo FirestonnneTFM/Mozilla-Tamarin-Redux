@@ -46,6 +46,7 @@ namespace avmplus
 {
 	// ---------------
 
+#ifndef VMCFG_AOT
 	NativeInitializer::NativeInitializer(AvmCore* _core, 
 											const uint8_t* _abcData,
 											uint32_t _abcDataLen,
@@ -60,6 +61,25 @@ namespace avmplus
 		classCount(_classCount)
 	{
 	}
+#else
+	NativeInitializer::NativeInitializer(AvmCore* _core, 
+											const AOTInfo *_aotInfo,
+											uint32_t _methodCount,
+											uint32_t _classCount) :
+		core(_core),
+		abcData(_aotInfo->abcBytes),
+		abcDataLen(_aotInfo->nABCBytes),
+		methods((MethodType*)core->GetGC()->Calloc((_methodCount>0 ? _methodCount : 1), sizeof(MethodType), GC::kZero)),
+		classes((ClassType*)core->GetGC()->Calloc((_classCount>0 ? _classCount : 1), sizeof(ClassType), GC::kZero)),
+		methodCount(_methodCount),
+		classCount(_classCount)
+	    , aotInfo(_aotInfo)
+		, compiledMethods(_aotInfo->abcMethods)
+		, compiledMethodCount(_aotInfo->nABCMethods)
+	{
+	}
+#endif
+
 
 #ifdef AVMPLUS_STATIC_POINTERS
 	void NativeInitializer::fillInMethods(const NativeMethodInfo* _methodEntry)
@@ -105,4 +125,28 @@ namespace avmplus
 		core->GetGC()->Free(methods);
 		core->GetGC()->Free(classes);
 	}
+
+#ifdef VMCFG_AOT
+	bool NativeInitializer::getCompiledInfo(NativeMethodInfo *info, Multiname &returnTypeName, uint32_t i) const
+	{
+		info->thunker = (AvmThunkNativeThunker)0;
+
+		if (i < compiledMethodCount && compiledMethods[i])
+		{
+			bool isNumberRetType = false;
+			if (NUMBER_TYPE) {
+				Multiname numberTypeName(NUMBER_TYPE->ns(), NUMBER_TYPE->name());
+				isNumberRetType = returnTypeName.matches(&numberTypeName);
+			}
+			info->thunker = isNumberRetType ? (AvmThunkNativeThunker)aotThunkerN : (AvmThunkNativeThunker)aotThunker;
+			info->handler.function = compiledMethods[i];
+			return true;
+		}
+		else
+		{
+			info->handler.function = (AvmThunkNativeFunctionHandler)0;
+			return false;
+		}
+	}
+#endif
 }

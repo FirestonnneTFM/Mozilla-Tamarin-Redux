@@ -193,7 +193,9 @@ namespace avmplus
 		static const int PROTOFUNC				= 0x02000000;
 // end AVMPLUS_UNCHECKED_HACK
 
-		// unused:								= 0x04000000;
+#ifdef VMCFG_AOT
+		static const int AOT_COMPILED			= 0x04000000;
+#endif
 		// unused:								= 0x08000000;
 		// unused:								= 0x10000000;
 		// unused:								= 0x20000000;
@@ -213,6 +215,10 @@ namespace avmplus
 		// special ctor for the methodinfo generated for slot-initialization when no init method is present
 		enum InitMethodStub { kInitMethodStub };
 		MethodInfo(InitMethodStub, Traits* declTraits);
+
+#ifdef VMCFG_AOT
+        MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info);
+#endif
 
 		static uintptr_t verifyEnterGPR(MethodEnv* env, int argc, uint32* ap);
 		static double verifyEnterFPR(MethodEnv* env, int argc, uint32* ap);
@@ -311,6 +317,12 @@ namespace avmplus
 		inline void setVerifyPending() { _flags |= VERIFY_PENDING; }
 #endif
 
+#ifdef VMCFG_AOT
+		static inline int compiledMethodFlags() { return NATIVE | ABSTRACT_METHOD; }
+		inline int isCompiledMethod() const { return _flags & AOT_COMPILED; }
+		inline void setCompiledMethod() { _flags |= AOT_COMPILED; }
+#endif
+
 	public:
 
 #if VMCFG_METHOD_NAMES
@@ -339,7 +351,15 @@ namespace avmplus
 		inline void set_abc_body_pos(const uint8_t* p) { AvmAssert(!isNative()); _abc.body_pos = p; }
 		inline void set_abc_body_pos_wb(MMgc::GC* gc, const uint8_t* p) { AvmAssert(!isNative()); WB(gc, this, &_abc.body_pos, p); }
 
-		inline ExceptionHandlerTable* abc_exceptions() const { AvmAssert(!isNative()); return _abc.exceptions; }
+		inline ExceptionHandlerTable* abc_exceptions() const
+		{
+#ifdef VMCFG_AOT
+			AvmAssert(!isNative()||isCompiledMethod());	
+#else
+			AvmAssert(!isNative());
+#endif
+			return _abc.exceptions;
+		}
 		inline void set_abc_exceptions(MMgc::GC* gc, ExceptionHandlerTable* e) { AvmAssert(!isNative()); WB(gc, this, &_abc.exceptions, e); }
 
 	#ifdef AVMPLUS_WORD_CODE

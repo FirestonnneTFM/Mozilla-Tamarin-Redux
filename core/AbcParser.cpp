@@ -37,6 +37,10 @@
 
 #include "avmplus.h"
 
+#ifdef VMCFG_AOT
+#include "AOTCompiler.h"
+#endif
+
 namespace avmplus
 {
     /**
@@ -68,6 +72,41 @@ namespace avmplus
 			}
 		}
 
+#ifdef VMCFG_AOT
+		if(!natives) // no natives -- runtime-loaded script
+		{
+			if(version == 0 && code.getSize() == 24) // only ABC "references" -- these are 0.0 version followed by SHA1
+			{
+				void *sha1 = (void *)(code.getBuffer() + 4);
+				for(int i = 0; i < nAOTInfos; i++)
+				{
+					const AOTInfo *aotInfo = &aotInfos[i];
+					AvmAssert(aotInfo != NULL);
+					
+					MMGC_STATIC_ASSERT(sizeof(aotInfo->origABCSHA1) == 20);
+					if(!memcmp(aotInfo->origABCSHA1, sha1, 20))
+					{
+						ReadOnlyScriptBufferImpl scriptBufferImpl(aotInfo->abcBytes, aotInfo->nABCBytes);
+						ScriptBuffer code(&scriptBufferImpl);
+						
+						NativeInitializer ninit(core, aotInfo, 0, 0);
+						PoolObject *pool = decodeAbc(core, code, toplevel, domain, &ninit, api);
+						AvmAssert(pool != NULL);
+						AvmAssert(!pool->isBuiltin);
+						AvmAssert(pool->aotInfo == aotInfo);
+#ifdef DEBUGGER
+						// TODO: is there a better pace to do this for both builtins and user scripts?
+						addAOTDebugInfo(pool);
+#endif
+						return pool;
+					}
+				}
+			}
+			toplevel->throwVerifyError( kCorruptABCError ); // not a reference or not found	
+			return NULL;
+		}
+#endif
+		
 		AbcParser parser(core, code, toplevel, domain, natives);
 		PoolObject *pObject = parser.parse(api);
  		if ( !pObject ) {
@@ -77,7 +116,71 @@ namespace avmplus
 		}
  		else
  			return pObject;
+	}
+
+#if defined(VMCFG_AOT) && defined(DEBUGGER)
+	void AbcParser::addAOTDebugInfo(PoolObject *pool)
+	{
+		AvmCore *core = pool->core;
+		const AOTInfo *aotInfo = pool->aotInfo;
+		Debugger *debugger = core->debugger();
+		
+		if(debugger)
+		{
+			const MethodDebugInfo* methodDebugInfos = aotInfo->methodDebugInfos;
+		
+			if(methodDebugInfos != NULL)
+			{				
+				// create the structure representing the ABC
+				AbcFile* abc = new (core->GetGC()) AbcFile(core, 0);
+				
+				for(int n = 0; n < aotInfo->nABCMethods; n++)
+				{
+					MethodInfo *f = pool->getMethodInfo(n);
+					
+					// create DMIs
+					const MethodDebugInfo &info = methodDebugInfos[n];
+					DebuggerMethodInfo* dmi = DebuggerMethodInfo::create(core, info.local_count, -1, info.scope_count);
+					pool->_method_dmi.set(n, dmi);
+					
+					// set the file in the MethodInfo
+					f->setFile(abc);
+					
+					// get a SourceFile
+					SourceFile *src = NULL;
+					
+					if(info.file_name)
+					{
+						Stringp fileName = pool->getString(info.file_name);
+						src = abc->sourceNamed(fileName);
+						if(!src)
+						{
+							src = new (core->GetGC()) SourceFile(core->GetGC(), fileName);
+							abc->sourceAdd(src);
+						}
+					}
+					
+					// set register names
+					for(int i = 0; i < info.local_count; i++)
+					{
+						int name = info.local_names[i];
+						
+						if(name)
+							f->setRegName(i, pool->getString(name));
+					}
+					
+					// add line info
+					if(src)
+						for(int i = 0; i < info.line_count; i++)
+							src->addLine(info.lines[i], f, 0);
+				}
+				// hook the ABC in
+				debugger->pool2abcIndex.add(pool, (const void *)debugger->abcList.size());
+				debugger->abcList.add(abc);
+			}
+		}
     }
+#endif
 
 	int AbcParser::canParse(ScriptBuffer code, int* version)
 	{
@@ -92,6 +195,9 @@ namespace avmplus
 			*version = v;
 		
 		switch (v) {
+#ifdef VMCFG_AOT
+			case 0: // just a "reference" to an AOT-ed ABC!
+#endif
 			case (46<<16|16):
 				return 0;
 			default:
@@ -173,7 +279,7 @@ namespace avmplus
 		return pool->cpool_ns[index];
 	}
 
-	#ifdef AVMPLUS_VERBOSE
+#if defined(VMCFG_AOT) || defined(AVMPLUS_VERBOSE)
 	void AbcParser::parseTypeName(const byte* &pc, Multiname& m) const
 	{
 		// only save the type name for now.  verifier will resolve to traits
@@ -581,6 +687,10 @@ namespace avmplus
 			// MethodInfo
 			const int param_count = readU30(pos);
 
+#ifdef VMCFG_AOT
+			const byte* ret_type_pos = pos;
+#endif
+
 		// @todo -- we should add an AbcParser equivalent of skipU30;
 		// then the next two clauses would be 			
 		//		skipU30(pos, param_count+1);
@@ -639,9 +749,32 @@ namespace avmplus
 				}
 			}
 
+#ifdef VMCFG_AOT
+			bool isCompiled = false;
+			{
+				Multiname returnTypeName;
+				parseTypeName(ret_type_pos, returnTypeName);
+
+				NativeMethodInfo compiledMethodInfo;
+
+				if (!ni && natives->getCompiledInfo(&compiledMethodInfo, returnTypeName, i))
+				{
+					ni = &compiledMethodInfo;
+					abcFlags |= MethodInfo::compiledMethodFlags();
+					isCompiled = true;
+				}
+			}
+#endif
+
 			const int optional_count = (abcFlags & MethodInfo::HAS_OPTIONAL) ? readU30(pos) : 0;
 
 			MethodInfo* info = new (core->GetGC()) MethodInfo(i, pool, info_pos, abcFlags, ni);
+			
+#ifdef VMCFG_AOT
+			if(isCompiled)
+				info->setCompiledMethod();
+#endif
+			
 			#if VMCFG_METHOD_NAMES
 			if (core->config.methodNames)
 			{
@@ -808,7 +941,11 @@ namespace avmplus
 
 			int code_length = readU30(pos);
 
-			if (code_length <= 0) 
+			if (code_length <= 0
+#ifdef VMCFG_AOT
+				&& !info->needActivation() // AOT allows a dummy body so that it can represent activation traits
+#endif
+				) 
 			{
 				toplevel->throwVerifyError(kInvalidCodeLengthError, core->toErrorString(code_length));
 			}
@@ -954,17 +1091,54 @@ namespace avmplus
 			}
 			else
 			{
-				// native methods should not have bodies!
-				toplevel->throwVerifyError(kIllegalNativeMethodBodyError, core->toErrorString(info));
+#ifdef VMCFG_AOT
+				if (info->needActivation())
+				{
+					Namespacep ns = NULL;
+					Stringp name = NULL;
+					#ifdef AVMPLUS_VERBOSE
+					if (core->config.methodNames)
+					{
+						ns = core->getPublicNamespace(pool);
+						name = core->internString(info->getMethodNameWithTraits(info->declaringTraits()));
+					}
+					#endif
+					// activation traits are raw types, not subclasses of object.  this is
+					// okay because they aren't accessable to the programming model.
+					Traits* act = parseTraits(sizeof(ScriptObject), 
+											  sizeof(ScriptObject),
+											  NULL, 
+											  ns, 
+											  name, 
+											  NULL, 
+											  pos,
+											  TRAITSTYPE_ACTIVATION, 
+											  NULL);
+						act->final = true;
+						info->init_activationTraits(act);
+						pool->aotInfo->activationTraits[method_index] = act;
+				} else
+#endif
+				{
+					// native methods should not have bodies!
+					toplevel->throwVerifyError(kIllegalNativeMethodBodyError, core->toErrorString(info));
+				}
 			}
-		}
+    	}
     }
 
     void AbcParser::parseCpool(API api)
     {
 		pool = new (core->GetGC()) PoolObject(core, code, pos, api);
 		pool->domain = domain;
+		
+#ifdef VMCFG_AOT
+		AvmAssert(natives != 0);
+		pool->isBuiltin = natives->hasBuiltins();
+		pool->aotInfo = natives->get_aotInfo();
+#else
 		pool->isBuiltin = (natives != NULL);
+#endif
 
 		uint32 int_count = readU30(pos);
 		// sanity check to prevent huge allocations
@@ -1505,6 +1679,9 @@ namespace avmplus
 			#endif
 
 			pool->_scripts.set(i, traits);
+#ifdef VMCFG_AOT
+			pool->aotInfo->scriptTraits[i] = traits;
+#endif
 		}
 
 		return true;

@@ -235,6 +235,9 @@ namespace avmplus
 #ifdef DEBUGGER
 	public:
 		virtual uint64 size() const;
+#endif
+#if defined(DEBUGGER) || defined(VMCFG_AOT)
+	public:
 		virtual MethodEnv* getCallMethodEnv() { return NULL; }
 #endif
 		

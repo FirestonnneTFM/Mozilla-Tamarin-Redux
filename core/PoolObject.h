@@ -238,6 +238,10 @@ namespace avmplus
 	#endif
 		// @todo, privatize & make into bitfield (requires API churn)
 		bool						isBuiltin;	// true if this pool is baked into the player.  used to control whether callees will set their context.
+
+	#ifdef VMCFG_AOT
+		const AOTInfo* aotInfo;
+	#endif
 	};
 }
 

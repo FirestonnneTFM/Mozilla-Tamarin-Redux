@@ -38,6 +38,9 @@
 #ifndef __avmplus_Exception__
 #define __avmplus_Exception__
 
+#ifdef VMCFG_AOT
+	extern "C" void llvm_unwind();
+#endif
 
 namespace avmplus
 {
@@ -175,6 +178,9 @@ namespace avmplus
 		}
 		~ExceptionFrame() { endTry(); }
 		void beginTry(AvmCore* core);
+#ifdef VMCFG_AOT
+		void beginLlvmUnwindTry(AvmCore* core);
+#endif
 		void endTry();
 		void beginCatch();
 		void throwException(Exception *exception);
@@ -190,7 +196,9 @@ namespace avmplus
 		CallStackNode*		callStack;
 #endif /* DEBUGGER */
 		CatchAction			catchAction;
-
+#ifdef VMCFG_AOT
+		int					llvmUnwindStyle;
+#endif
 	// ------------------------ DATA SECTION END
 
 	};
