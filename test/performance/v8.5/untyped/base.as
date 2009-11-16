@@ -36,11 +36,11 @@
 // running the benchmark, but the running time of these functions will
 // not be accounted for in the benchmark score.
 class Benchmark {
-    public var name:String;
-    public var run:Function;
-    public var Setup:Function;
-    public var TearDown:Function;
-    public function Benchmark(name:String, run:Function, setup:Function=null, tearDown:Function=null) {
+    public var name;
+    public var run;
+    public var Setup;
+    public var TearDown;
+    public function Benchmark(name, run, setup, tearDown) {
         this.name = name;
         this.run = run;
         this.Setup = setup ? setup : new Function();
@@ -53,16 +53,16 @@ class Benchmark {
 // run the benchmark. The benchmark score is computed later once a
 // full benchmark suite has run to completion.
 class BenchmarkResult {
-    private var benchmark:Benchmark;
-    private var time:Number;
-    public function BenchmarkResult(benchmark:Benchmark, time:Number):void {
+    private var benchmark;
+    private var time;
+    public function BenchmarkResult(benchmark, time) {
         this.benchmark = benchmark;
         this.time = time;
     }
 
     // Automatically convert results to numbers. Used by the geometric
     // mean computation.
-    public function valueOf():Number {
+    public function valueOf() {
       return this.time;
     }
 }
@@ -77,20 +77,20 @@ class BenchmarkResult {
 class BenchmarkSuite {
     
     // Keep track of all declared benchmark suites.
-    static var suites:Array = [];
+    static var suites = [];
 
     // Scores are not comparable across versions. Bump the version if
     // you're making changes that will affect that scores, e.g. if you add
     // a new benchmark or change an existing one.
-    public var version:String = '5';
-    private var name:String;
-    private var reference:Number;
-    private var benchmarks:Array;
-    private var results:Array;
+    public var version = '5';
+    private var name;
+    private var reference;
+    private var benchmarks;
+    private var results;
     private var runner;
-    static private var scores:Array;
+    static private var scores;
     
-    public function BenchmarkSuite(name:String, reference:Number, benchmarks:Array):void {
+    public function BenchmarkSuite(name, reference, benchmarks) {
         this.name = name;
         this.reference = reference;
         this.benchmarks = benchmarks;
@@ -101,11 +101,11 @@ class BenchmarkSuite {
     // each individual benchmark to avoid running for too long in the
     // context of browsers. Once done, the final score is reported to the
     // runner.
-    public static function RunSuites(runner):void {
+    public static function RunSuites(runner) {
         var continuation = null;
-        var length:int = suites.length;
+        var length = suites.length;
         BenchmarkSuite.scores = [];
-        var index:int = 0;
+        var index = 0;
         function RunStep() {
             while (continuation || index < length) {
                 if (continuation) {
@@ -132,17 +132,17 @@ class BenchmarkSuite {
     // Counts the total number of registered benchmarks. Useful for
     // showing progress as a percentage.
     public function CountBenchmarks() {
-        var result:Number = 0;
-        for (var i:int = 0; i < suites.length; i++) {
+        var result = 0;
+        for (var i = 0; i < suites.length; i++) {
             result += suites[i].benchmarks.length;
         }
         return result;
     }
 
     // Computes the geometric mean of a set of numbers.
-    public static function GeometricMean (numbers:Array):Number {
-        var log:Number = 0;
-        for (var i:int = 0; i < numbers.length; i++) {
+    public static function GeometricMean (numbers) {
+        var log = 0;
+        for (var i  = 0; i < numbers.length; i++) {
             log += Math.log(numbers[i]);
         }
         return Math.pow(Math.E, log / numbers.length);
@@ -150,7 +150,7 @@ class BenchmarkSuite {
 
     // Converts a score value to a string with at least three significant
     // digits.
-    public static function FormatScore(value:Number):Number {
+    public static function FormatScore(value) {
         if (value > 100) {
             return value.toFixed(0);
         } else {
@@ -160,16 +160,16 @@ class BenchmarkSuite {
 
     // Notifies the runner that we're done running a single benchmark in
     // the benchmark suite. This can be useful to report progress.
-    public function NotifyStep(result:*):void {
+    public function NotifyStep(result) {
         this.results.push(result);
         if (this.runner.NotifyStep) this.runner.NotifyStep(result.benchmark.name);
     }
 
     // Notifies the runner that we're done with running a suite and that
     // we have a result which can be reported to the user if needed.
-    public function NotifyResult():void {
-        var mean:Number = BenchmarkSuite.GeometricMean(this.results);
-        var score:Number = this.reference / mean;
+    public function NotifyResult() {
+        var mean = BenchmarkSuite.GeometricMean(this.results);
+        var score = this.reference / mean;
         BenchmarkSuite.scores.push(score);
         if (this.runner.NotifyResult) {
             var formatted = BenchmarkSuite.FormatScore(100 * score);
@@ -179,7 +179,7 @@ class BenchmarkSuite {
 
 
     // Notifies the runner that running a benchmark resulted in an error.
-    public function NotifyError(error:*):void {
+    public function NotifyError(error) {
         if (this.runner.NotifyError) {
             this.runner.NotifyError(this.name, error);
         }
@@ -190,14 +190,14 @@ class BenchmarkSuite {
 
     // Runs a single benchmark for at least a second and computes the
     // average time it takes to run a single iteration.
-    public function RunSingleBenchmark(benchmark:Benchmark):void {
-        var elapsed:int = 0;
-        var start:int = new Date();
-        for (var n:int = 0; elapsed < 1000; n++) {
+    public function RunSingleBenchmark(benchmark) {
+        var elapsed = 0;
+        var start = new Date();
+        for (var n = 0; elapsed < 1000; n++) {
             benchmark.run();
             elapsed = new Date() - start;
         }
-        var usec:int = (elapsed * 1000) / n;
+        var usec = (elapsed * 1000) / n;
         this.NotifyStep(new BenchmarkResult(benchmark, usec));
     }
 
@@ -205,7 +205,7 @@ class BenchmarkSuite {
     // individual benchmark in the suite and returns a continuation
     // function which can be invoked to run the next benchmark. Once the
     // last benchmark has been executed, null is returned.
-    public function RunStep(runner):Function {
+    public function RunStep(runner) {
         this.results = [];
         this.runner = runner;
         var length = this.benchmarks.length;
@@ -252,9 +252,9 @@ class BenchmarkSuite {
 
 // To make the benchmark results predictable, we replace Math.random
 // with a 100% deterministic alternative.
-var seed:int = 49734321;
+var seed = 49734321;
 class Math2 {
-    public static function random():Number {
+    public static function random() {
         // Robert Jenkins' 32 bit integer hash function.
         seed = ((seed + 0x7ed55d16) + (seed << 12))  & 0xffffffff;
         seed = ((seed ^ 0xc761c23c) ^ (seed >>> 19)) & 0xffffffff;
