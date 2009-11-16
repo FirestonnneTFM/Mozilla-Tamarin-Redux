@@ -40,27 +40,26 @@
 #ifndef __GCObject__
 #define __GCObject__
 
+#ifdef __GNUC__
+	#define GNUC_ONLY(x) x
+#else
+	#define GNUC_ONLY(x)
+#endif
+
 // VC++ wants these declared
 //void *operator new(size_t size);
 //void *operator new[] (size_t size);
 
-// Sun Studio doesn't support default parameters for operator new
-#ifdef __SUNPRO_CC
-inline void *operator new(size_t size, MMgc::GC *gc)
+// Sun Studio doesn't support default parameters for operator new, so break up as two functions
+REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc)
 {
 	return gc->Alloc(size, MMgc::GC::kContainsPointers|MMgc::GC::kZero);
 }
 
-inline void *operator new(size_t size, MMgc::GC *gc, int flags)
+REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc, int flags)
 {
 	return gc->Alloc(size, flags);
 }
-#else
-inline void *operator new(size_t size, MMgc::GC *gc, int flags=MMgc::GC::kContainsPointers|MMgc::GC::kZero)
-{
-	return gc->Alloc(size, flags);
-}
-#endif
 
 namespace MMgc
 {
@@ -70,19 +69,12 @@ namespace MMgc
 	class GCObject
 	{
 	public:
-		static void *operator new(size_t size, GC *gc, size_t extra = 0)
-#ifdef __GNUC__
-			// add this to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
-			throw()
-#endif
-		{
-			return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero);
-		}
+		// 'throw()' annotation to avoid GCC warning: 'operator new' must not return NULL unless it is declared 'throw()' (or -fcheck-new is in effect)
+		static void *operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw());
 
-		static void operator delete (void *gcObject)
-		{
-			GC::GetGC(gcObject)->Free(gcObject);
-		}
+		static void *operator new(size_t size, GC *gc) GNUC_ONLY(throw());
+		
+		static void operator delete(void *gcObject);
 		
 		GCWeakRef *GetWeakRef() const;
 	};
@@ -97,11 +89,52 @@ namespace MMgc
 	public:
 		GCWeakRef *GetWeakRef() const;
 		
-		virtual ~GCFinalizedObject() { }
-		static void *operator new(size_t size, GC *gc, size_t extra = 0);
+		virtual ~GCFinalizedObject();
+		static void* operator new(size_t size, GC *gc, size_t extra);
+		static void* operator new(size_t size, GC *gc);
 		static void operator delete (void *gcObject);
 	};
 
+	REALLY_INLINE static void *GCObject::operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw())
+	{
+		return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero);
+	}
+	
+	REALLY_INLINE static void *GCObject::operator new(size_t size, GC *gc) GNUC_ONLY(throw())
+	{
+		return gc->Alloc(size, GC::kContainsPointers|GC::kZero);
+	}
+	
+	REALLY_INLINE static void GCObject::operator delete(void *gcObject)
+	{
+		GC::GetGC(gcObject)->Free(gcObject);
+	}
+	
+	REALLY_INLINE GCFinalizedObject::~GCFinalizedObject()
+	{
+		// Nothing
+	}
+
+	REALLY_INLINE GCWeakRef* GCFinalizedObject::GetWeakRef() const
+	{
+		return GC::GetWeakRef(this);
+	}
+	
+	REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, size_t extra)
+	{
+		return gc->AllocExtra(size, extra, GC::kFinalize|GC::kContainsPointers|GC::kZero);
+	}
+	
+	REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc)
+	{
+		return gc->Alloc(size, GC::kFinalize|GC::kContainsPointers|GC::kZero);
+	}
+	
+	REALLY_INLINE void GCFinalizedObject::operator delete (void *gcObject)
+	{
+		GC::GetGC(gcObject)->Free(gcObject);
+	}		
+	
 	/**
 	 * Base class for reference counted objects.
 	 *
@@ -335,9 +368,14 @@ namespace MMgc
 		void DumpHistory();
 #endif
 
-		static void *operator new(size_t size, GC *gc, size_t extra = 0)
+		REALLY_INLINE static void *operator new(size_t size, GC *gc, size_t extra)
 		{
 			return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
+		}
+		
+		REALLY_INLINE static void *operator new(size_t size, GC *gc)
+		{
+			return gc->Alloc(size, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
 		}
 		
 	private:
@@ -485,6 +523,8 @@ namespace MMgc
 
 // put spaces around the template arg to avoid possible digraph warnings
 #define DRC(_type) MMgc::RCPtr< _type >
+
+#undef GNUC_ONLY
 
 }
 
