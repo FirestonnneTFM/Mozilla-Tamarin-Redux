@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-	Namespacep Multiname::getNamespace(int i) const
+	Namespacep Multiname::getNamespace(int32_t i) const
 	{
 		AvmAssert(!isRtns() && !isAnyNamespace());
 		if (flags&NSSET)

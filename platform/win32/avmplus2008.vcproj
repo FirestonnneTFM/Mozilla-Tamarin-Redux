@@ -2004,6 +2004,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\Multiname-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Multiname.h"
 				>
 			</File>
