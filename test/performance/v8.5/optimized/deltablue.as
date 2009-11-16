@@ -22,6 +22,7 @@
 // others have been modified more aggresively to make it feel
 // more like a JavaScript program.
 
+load("base.as");
 
 var DeltaBlue = new BenchmarkSuite('DeltaBlue', 71104, [
   new Benchmark('DeltaBlue', deltaBlue)
@@ -878,3 +879,8 @@ function deltaBlue() {
   chainTest(100);
   projectionTest(100);
 }
+
+// Run the test
+BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+                           NotifyScore: PrintScore });
+

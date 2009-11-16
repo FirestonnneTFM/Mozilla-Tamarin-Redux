@@ -29,6 +29,7 @@
  * and disclaimer.
  */
 
+load("base.as");
 
 // The code has been adapted for use as a benchmark by Google.
 var Crypto = new BenchmarkSuite('Crypto', 203037, [
@@ -1417,7 +1418,7 @@ if(rng_pool == null) {
   rng_pptr = 0;
   var t;
   while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
-    t = Math.floor(65536 * Math.random());
+    t = Math.floor(65536 * Math.random2());
     rng_pool[rng_pptr++] = t >>> 8;
     rng_pool[rng_pptr++] = t & 255;
   }
@@ -1696,3 +1697,8 @@ function decrypt() {
     throw new Error("Crypto operation failed");
   }
 }
+
+// Run the test
+BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+                           NotifyScore: PrintScore });
+                           
