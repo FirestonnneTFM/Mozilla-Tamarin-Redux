@@ -50,7 +50,7 @@
 .*/performance/sunspider/.*
 .*/platform/win32/obj/.*
 .*/platform/win32/Windows.*/.*
-.*/test/performance/v8/.*
+.*/test/performance/v8.*/.*
 
 
 
