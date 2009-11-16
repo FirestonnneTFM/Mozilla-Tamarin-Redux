@@ -64,7 +64,7 @@ function GeneratePayloadTree(depth, key) {
 function GenerateKey() {
   // The benchmark framework guarantees that Math.random is
   // deterministic; see base.js.
-  return Math.random2();
+  return Math2.random();
 }
 
 

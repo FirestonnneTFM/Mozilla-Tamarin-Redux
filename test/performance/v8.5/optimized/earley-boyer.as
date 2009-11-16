@@ -1955,7 +1955,7 @@ function sc_pregexpSplit(re, s) {
            (peephole (hole 1 "Math.floor(Math.random()*" 'n ")")))
 */
 function sc_random(n) {
-    return Math.floor(Math.random2()*n);
+    return Math.floor(Math2.random()*n);
 }
 
 /*** META ((export current-date)
