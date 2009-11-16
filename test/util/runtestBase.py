@@ -205,7 +205,7 @@ class RuntestBase:
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
-                   'showtimes','java=','html','random']
+                   'showtimes','java=','html','random', 'playerglobalabc=', 'toplevelabc=']
 
     def parseOptions(self):
         try:
@@ -225,12 +225,12 @@ class RuntestBase:
                 self.avm = v
             elif o in ('-a', '--asc'):
                 self.asc = v
-            elif o in ('-g', '--globalabc'):
+            elif o in ('-b', '--builtinabc', '-g', '--globalabc'):
                 self.builtinabc = v
-            elif o in ('-b', '--builtinabc'):
-                self.builtinabc = v
-            elif o in ('-s', '--shellabc'):
+            elif o in ('-s', '--shellabc', '--toplevelabc'):
                 self.shellabc = v
+            elif o in ('--playerglobalabc',):
+                self.playerglobalabc = v
             elif o in ('-x', '--exclude'):
                 self.exclude += v.split(',')
                 # remove any trailing /,\ and whitespace from exclude list
