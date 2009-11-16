@@ -34,6 +34,7 @@
 // The benchmark was originally implemented in BCPL by
 // Martin Richards.
 
+load("base.as");
 
 var Richards = new BenchmarkSuite('Richards', 34886, [
   new Benchmark("Richards", runRichards)
@@ -537,3 +538,8 @@ Packet.prototype.addTo = function (queue) {
 Packet.prototype.toString = function () {
   return "Packet";
 };
+
+// Run the test
+BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+                           NotifyScore: PrintScore });
+

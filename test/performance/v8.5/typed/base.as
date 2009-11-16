@@ -83,7 +83,7 @@ BenchmarkSuite.version = '5';
 
 // To make the benchmark results predictable, we replace Math.random
 // with a 100% deterministic alternative.
-Math.random = (function() {
+Math.random2 = (function() {
   var seed = 49734321;
   return function() {
     // Robert Jenkins' 32 bit integer hash function.
@@ -262,3 +262,20 @@ BenchmarkSuite.prototype.RunStep = function(runner) {
   // Start out running the setup.
   return RunNextSetup();
 }
+
+// Functions provided to work in tamarin testing framework
+function PrintResult(name, result) {
+    print('name '+name);
+    print('metric v8 ' + result);
+}
+
+function PrintScore(score) {
+    print('----');
+    print('Score: ' + score);
+}
+// Provide an alert() function
+function alert(msg){
+    print(msg);
+}
+//Provide load() as a no-op, handled for ASC via dir.asc_args
+function load(src){}
