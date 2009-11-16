@@ -268,14 +268,30 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	ClassClosure *SamplerScript::getType(SamplerObjectType sot, const void *ptr)
+	ClassClosure *SamplerScript::getType(Toplevel* ss_toplevel, SamplerObjectType sot, const void *ptr)
 	{
+        Toplevel* tl;
+        
         switch (sotGetKind(sot))
         {
             case kSOT_String:
-				return sotGetToplevel(sot)->stringClass;
+            {
+                // toplevel can be null here if there was no CodeContext active
+                // when the sample was taken (ie, string was allocated from C++ code).
+                // in that case, use the TL from the SamplerScript itself... it isn't
+                // technically the right one to use, but is adequate for our purposes here
+                // (it will return a stringClass or namespaceClass that will be valid
+                // for the sampler)
+                tl = sotGetToplevel(sot);
+                if (!tl) tl = ss_toplevel;
+				return tl->stringClass;
+            }
             case kSOT_Namespace:
-				return sotGetToplevel(sot)->namespaceClass;
+            {
+                tl = sotGetToplevel(sot);
+                if (!tl) tl = ss_toplevel;
+				return tl->namespaceClass;
+            }
             default:
                 AvmAssert(0);
             case kSOT_Object:
@@ -283,7 +299,7 @@ namespace avmplus
 		}
 		
         VTable* vt = sotGetVTable(sot);
-        Toplevel* tl = vt->toplevel();
+        tl = vt->toplevel();
         AvmCore* core = tl->core();
         
 		ClassClosure *type;
@@ -416,7 +432,7 @@ namespace avmplus
 					return NULL;
 				if (sample.ptr != NULL )
 					nsam->setRef((AvmPlusScriptableObject*)sample.ptr);
-				nsam->set_type(getType(sample.sot, sample.ptr));
+				nsam->set_type(getType(toplevel, sample.sot, sample.ptr));
 				nsam->setSize(sample.alloc_size);
 				return nsam;
 			}
