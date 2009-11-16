@@ -44,11 +44,11 @@ package richards {
  * The Richards benchmark simulates the task dispatcher of an
  * operating system.
  **/
-    public function runRichards():void {
-        var scheduler:Scheduler = new Scheduler();
+    public function runRichards() {
+        var scheduler = new Scheduler();
         scheduler.addIdleTask(ID_IDLE, 0, null, COUNT);
 
-        var queue:Packet = new Packet(null, ID_WORKER, KIND_WORK);
+        var queue = new Packet(null, ID_WORKER, KIND_WORK);
         queue = new Packet(queue,  ID_WORKER, KIND_WORK);
         scheduler.addWorkerTask(ID_WORKER, 1000, queue);
 
@@ -70,14 +70,14 @@ package richards {
 
         if (scheduler.queueCount != EXPECTED_QUEUE_COUNT ||
             scheduler.holdCount != EXPECTED_HOLD_COUNT) {
-            var msg:String =
+            var msg =
                "Error during execution: queueCount = " + scheduler.queueCount +
                ", holdCount = " + scheduler.holdCount + ".";
             throw new Error(msg);
         }
     }
 
-    var COUNT:int = 1000;
+    var COUNT = 1000;
 
 /**
  * These two constants specify how many times a packet is queued and
@@ -86,8 +86,8 @@ package richards {
  * correct run so if the actual queue or hold count is different from
  * the expected there must be a bug in the implementation.
  **/
-    const EXPECTED_QUEUE_COUNT:int = 2322;
-    const EXPECTED_HOLD_COUNT:int = 928;
+    var EXPECTED_QUEUE_COUNT = 2322;
+    var EXPECTED_HOLD_COUNT = 928;
 
 
 /**
@@ -96,28 +96,28 @@ package richards {
  * which holds tasks and the data queue they are processing.
  * @constructor
  */
-    const ID_IDLE:int       = 0;
-    const ID_WORKER:int     = 1;
-    const ID_HANDLER_A:int  = 2;
-    const ID_HANDLER_B:int  = 3;
-    const ID_DEVICE_A:int   = 4;
-    const ID_DEVICE_B:int   = 5;
-    const NUMBER_OF_IDS:int = 6;
+    public var ID_IDLE       = 0;
+    public var ID_WORKER     = 1;
+    public var ID_HANDLER_A  = 2;
+    public var ID_HANDLER_B  = 3;
+    public var ID_DEVICE_A   = 4;
+    public var ID_DEVICE_B   = 5;
+    public var NUMBER_OF_IDS = 6;
 
-    const KIND_DEVICE:int   = 0;
-    const KIND_WORK:int     = 1;
+    public var KIND_DEVICE   = 0;
+    public var KIND_WORK     = 1;
 
     public class Scheduler {
-        public var queueCount:int;
-        public var holdCount:int;
-        public var blocks:Vector.<TaskControlBlock>;
-        public var list:TaskControlBlock;
-        public var currentTcb:TaskControlBlock;
-        public var currentId:int;
+        public var queueCount;
+        public var holdCount;
+        public var blocks;
+        public var list;
+        public var currentTcb;
+        public var currentId;
         public function Scheduler() {
             this.queueCount = 0;
             this.holdCount = 0;
-            this.blocks = new Vector.<TaskControlBlock>(NUMBER_OF_IDS);
+            this.blocks = new Array(NUMBER_OF_IDS);
             this.list = null;
             this.currentTcb = null;
             this.currentId = null;
@@ -130,7 +130,7 @@ package richards {
  * @param {Packet} queue the queue of work to be processed by the task
  * @param {int} count the number of times to schedule the task
  */
-        public function addIdleTask(id:int, priority:int, queue:Packet, count:int):void {
+        public function addIdleTask(id, priority, queue, count) {
             this.addRunningTask(id, priority, queue, new IdleTask(this, 1, count));
         };
 
@@ -140,7 +140,7 @@ package richards {
  * @param {int} priority the task's priority
  * @param {Packet} queue the queue of work to be processed by the task
  */
-        public function addWorkerTask(id:int, priority:int, queue:Packet):void {
+        public function addWorkerTask(id, priority, queue) {
             this.addTask(id, priority, queue, new WorkerTask(this, ID_HANDLER_A, 0));
         };
 
@@ -150,7 +150,7 @@ package richards {
  * @param {int} priority the task's priority
  * @param {Packet} queue the queue of work to be processed by the task
  */
-        public function addHandlerTask(id:int, priority:int, queue:Packet):void {
+        public function addHandlerTask(id, priority, queue) {
             this.addTask(id, priority, queue, new HandlerTask(this));
         };
 
@@ -160,7 +160,7 @@ package richards {
  * @param {int} priority the task's priority
  * @param {Packet} queue the queue of work to be processed by the task
  */
-        public function addDeviceTask(id:int, priority:int, queue:Packet):void {
+        public function addDeviceTask(id, priority, queue) {
             this.addTask(id, priority, queue, new DeviceTask(this))
         };
 
@@ -171,7 +171,7 @@ package richards {
  * @param {Packet} queue the queue of work to be processed by the task
  * @param {Task} task the task to add
  */
-        public function addRunningTask(id:int, priority:int, queue:Packet, task:Task):void {
+        public function addRunningTask(id, priority, queue, task) {
             this.addTask(id, priority, queue, task);
             this.currentTcb.setRunning();
         };
@@ -183,7 +183,7 @@ package richards {
  * @param {Packet} queue the queue of work to be processed by the task
  * @param {Task} task the task to add
  */
-        public function addTask(id:int, priority:int, queue:Packet, task:Task):void {
+        public function addTask(id, priority, queue, task) {
             this.currentTcb = new TaskControlBlock(this.list, id, priority, queue, task);
             this.list = this.currentTcb;
             this.blocks[id] = this.currentTcb;
@@ -192,7 +192,7 @@ package richards {
 /**
  * Execute the tasks managed by this scheduler.
  */
-        public function schedule():void {
+        public function schedule() {
             this.currentTcb = this.list;
             while (this.currentTcb != null) {
                 if (this.currentTcb.isHeldOrSuspended()) {
@@ -208,8 +208,8 @@ package richards {
  * Release a task that is currently blocked and return the next block to run.
  * @param {int} id the id of the task to suspend
  */
-        public function release(id:int):TaskControlBlock {
-            var tcb:TaskControlBlock = this.blocks[id];
+        public function release(id) {
+            var tcb = this.blocks[id];
             if (tcb == null) return tcb;
             tcb.markAsNotHeld();
             if (tcb.priority > this.currentTcb.priority) {
@@ -224,7 +224,7 @@ package richards {
  * to run.  The blocked task will not be made runnable until it is explicitly
  * released, even if new work is added to it.
  */
-        public function holdCurrent():TaskControlBlock {
+        public function holdCurrent() {
             this.holdCount++;
             this.currentTcb.markAsHeld();
             return this.currentTcb.link;
@@ -234,7 +234,7 @@ package richards {
  * Suspend the currently executing task and return the next task control block
  * to run.  If new work is added to the suspended task it will be made runnable.
  */
-        public function suspendCurrent():TaskControlBlock {
+        public function suspendCurrent() {
             this.currentTcb.markAsSuspended();
             return this.currentTcb;
         };
@@ -245,8 +245,8 @@ package richards {
  * suspended.
  * @param {Packet} packet the packet to add
  */
-        public function queue(packet:Packet):TaskControlBlock {
-            var t:TaskControlBlock = this.blocks[packet.id];
+        public function queue(packet) {
+            var t = this.blocks[packet.id];
             if (t == null) return t;
             this.queueCount++;
             packet.link = null;
@@ -267,14 +267,14 @@ package richards {
  * @constructor
  */
     public class TaskControlBlock {
-        public var link:TaskControlBlock;
-        public var id:int;
-        public var priority:int;
-        public var queue:Packet;
-        public var task:Task;
-        public var state:int;
+        public var link;
+        public var id;
+        public var priority;
+        public var queue;
+        public var task;
+        public var state;
   
-        public function TaskControlBlock(link:TaskControlBlock, id:int, priority:int, queue:Packet, task:Task):void {
+        public function TaskControlBlock(link, id, priority, queue, task) {
             this.link = link;
             this.id = id;
             this.priority = priority;
@@ -290,56 +290,56 @@ package richards {
 /**
  * The task is running and is currently scheduled.
  */
-        const STATE_RUNNING = 0;
+        var STATE_RUNNING = 0;
 
 /**
  * The task has packets left to process.
  */
-        const STATE_RUNNABLE = 1;
+        var STATE_RUNNABLE = 1;
 
 /**
  * The task is not currently running.  The task is not blocked as such and may
 * be started by the scheduler.
  */
-        const STATE_SUSPENDED = 2;
+        var STATE_SUSPENDED = 2;
 
 /**
  * The task is blocked and cannot be run until it is explicitly released.
  */
-        const STATE_HELD = 4;
+        var STATE_HELD = 4;
 
-        const STATE_SUSPENDED_RUNNABLE = STATE_SUSPENDED | STATE_RUNNABLE;
-        const STATE_NOT_HELD = ~STATE_HELD;
+        var STATE_SUSPENDED_RUNNABLE = STATE_SUSPENDED | STATE_RUNNABLE;
+        var STATE_NOT_HELD = ~STATE_HELD;
 
-        public function setRunning():void {
+        public function setRunning() {
             this.state = STATE_RUNNING;
         };
 
-        public function markAsNotHeld():void {
+        public function markAsNotHeld() {
             this.state = this.state & STATE_NOT_HELD;
         };
 
-        public function markAsHeld():void {
+        public function markAsHeld() {
             this.state = this.state | STATE_HELD;
         };
 
-        public function isHeldOrSuspended():Boolean {
+        public function isHeldOrSuspended() {
             return (this.state & STATE_HELD) != 0 || (this.state == STATE_SUSPENDED);
         };
 
-        public function markAsSuspended():void {
+        public function markAsSuspended() {
             this.state = this.state | STATE_SUSPENDED;
         };
 
-        public function markAsRunnable():void {
+        public function markAsRunnable() {
             this.state = this.state | STATE_RUNNABLE;
         };
 
 /**
  * Runs this task, if it is ready to be run, and returns the next task to run.
  */
-        public function run():TaskControlBlock {
-            var packet:Packet;
+        public function run() {
+            var paacket;
             if (this.state == STATE_SUSPENDED_RUNNABLE) {
                 packet = this.queue;
                 this.queue = packet.link;
@@ -359,7 +359,7 @@ package richards {
  * necessary, and returns the next runnable object to run (the one
  * with the highest priority).
  */
-        public function checkPriorityAdd(task:TaskControlBlock, packet:Packet):TaskControlBlock {
+        public function checkPriorityAdd(task, packet) {
             if (this.queue == null) {
                 this.queue = packet;
                 this.markAsRunnable();
@@ -370,14 +370,14 @@ package richards {
             return task;
         };
 
-        public function toString():String {
+        public function toString() {
             return "tcb { " + this.task + "@" + this.state + " }";
         };
     } // class TaskControlBlock
 
     public interface Task {
-        function run(packet:Packet):TaskControlBlock;
-        function toString():String;
+        function run(packet);
+        function toString();
     } // interface Task
 
 /**
@@ -390,18 +390,18 @@ package richards {
  */
     public class IdleTask implements Task {
 
-        private var count:int;
-        private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
+        private var count;
+        private var scheduler;
+        private var v1;
+        private var v2;
 
-        public function IdleTask(scheduler:Scheduler, v1:int, count:int) {
+        public function IdleTask(scheduler, v1, count) {
             this.scheduler = scheduler;
             this.v1 = v1;
             this.count = count;
         }
 
-        public function run(packet:Packet):TaskControlBlock {
+        public function run(packet) {
             this.count--;
             if (this.count == 0) return this.scheduler.holdCurrent();
             if ((this.v1 & 1) == 0) {
@@ -412,7 +412,7 @@ package richards {
                 return this.scheduler.release(ID_DEVICE_B);
             }
         };
-        public function toString():String {
+        public function toString() {
             return "IdleTask"
         };
 
@@ -425,18 +425,18 @@ package richards {
  * @constructor
  */
     public class DeviceTask implements Task {
-        private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
-        public function DeviceTask(scheduler:Scheduler) {
+        private var scheduler;
+        private var v1;
+        private var v2;
+        public function DeviceTask(scheduler) {
             this.scheduler = scheduler;
             this.v1 = null;
         }
 
-        public function run(packet:Packet):TaskControlBlock {
+        public function run(packet) {
             if (packet == null) {
                 if (this.v1 == null) return this.scheduler.suspendCurrent();
-                var v:* = this.v1;
+                var v = this.v1;
                 this.v1 = null;
                 return this.scheduler.queue(v);
             } else {
@@ -445,7 +445,7 @@ package richards {
             }
         };
 
-        public function toString():String {
+        public function toString() {
             return "DeviceTask";
         };
     } // class DeviceTask
@@ -458,17 +458,17 @@ package richards {
  * @constructor
  */
     public class WorkerTask implements Task {
-        private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
+        private var scheduler;
+        private var v1;
+        private var v2;
 
-        public function WorkerTask(scheduler:Scheduler, v1:int, v2:int) {
+        public function WorkerTask(scheduler, v1, v2) {
             this.scheduler = scheduler;
             this.v1 = v1;
             this.v2 = v2;
         }
 
-        public function run(packet:Packet):TaskControlBlock {
+        public function run(packet) {
             if (packet == null) {
                 return this.scheduler.suspendCurrent();
             } else {
@@ -488,7 +488,7 @@ package richards {
              }
         };
 
-        public function toString():String {
+        public function toString() {
             return "WorkerTask";
         };
     } // class WorkerTask
@@ -499,16 +499,16 @@ package richards {
  * @constructor
  */
     public class HandlerTask implements Task {
-        private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
-        public function HandlerTask(scheduler:Scheduler):void {
+        private var scheduler;
+        private var v1;
+        private var v2;
+        public function HandlerTask(scheduler) {
             this.scheduler = scheduler;
             this.v1 = null;
             this.v2 = null;
         }
 
-        public function run(packet:Packet):TaskControlBlock {
+        public function run(packet) {
             if (packet != null) {
                 if (packet.kind == KIND_WORK) {
                     this.v1 = packet.addTo(this.v1);
@@ -517,8 +517,8 @@ package richards {
                 }
             }
             if (this.v1 != null) {
-                var count:int = this.v1.a1;
-                var v:*;
+                var count = this.v1.a1;
+                var v;
                 if (count < DATA_SIZE) {
                     if (this.v2 != null) {
                         v = this.v2;
@@ -536,7 +536,7 @@ package richards {
             return this.scheduler.suspendCurrent();
         };
 
-        public function toString():String {
+        public function toString() {
             return "HandlerTask";
         };
     } // class HandlerTask
@@ -545,7 +545,7 @@ package richards {
  * P a c k e t
  * --- */
 
-    const DATA_SIZE = 4;
+    var DATA_SIZE = 4;
 
 /**
  * A simple package of data that is manipulated by the tasks.  The exact layout
@@ -560,25 +560,25 @@ package richards {
  * @constructor
  */
     public class Packet {
-        public var link:Packet;
-        public var id:int;
-        public var kind:int; 
-        public var a1:int;
-        public var a2:Vector.<int>;
+        public var link;
+        public var id;
+        public var kind; 
+        public var a1;
+        public var a2;
 
-        public function Packet(link:Packet, id:int, kind:int):void {
+        public function Packet(link, id, kind) {
             this.link = link;
             this.id = id;
             this.kind = kind;
             this.a1 = 0;
-            this.a2 = new Vector.<int>(DATA_SIZE);
+            this.a2 = new Array(DATA_SIZE);
         }
 
 /**
  * Add this packet to the end of a worklist, and return the worklist.
  * @param {Packet} queue the worklist to add this packet to
  */
-        public function addTo(queue:Packet):Packet {
+        public function addTo(queue) {
             this.link = null;
             if (queue == null) return this;
             var peek, next = queue;
@@ -588,14 +588,13 @@ package richards {
             return queue;
         };
 
-        public function toString():String {
+        public function toString() {
             return "Packet";
         };
     } // class Packet
 
 // Run the test
     BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
-                               NotifyScore: PrintScore,
-                               NotifyError: PrintError });
+                               NotifyScore: PrintScore });
 
 }
