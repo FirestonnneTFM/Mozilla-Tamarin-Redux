@@ -323,7 +323,7 @@ abcasm/.*, .*, verify_skip, abcasm tests not compatible with --verify
 #  Bugs 
 ####################
 mops/mops:Range read test byte min , ppc64.* , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=528533
-
+ecma3/Date/e15_9_5_37_1 , x64-mac.*-Ojit , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=529306
 
 ####################
 #  Bug 529122 - All these only fail on x64-ppc in -Dinterp mode - skipping entire failing test due to number of failures.
