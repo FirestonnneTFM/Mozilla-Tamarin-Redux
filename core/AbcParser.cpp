@@ -1657,7 +1657,7 @@ namespace avmplus
 											core->kglobal, 
 											script, 
 											script_pos,
-											TRAITSTYPE_SCRIPT_FROM_ABC,
+											TRAITSTYPE_SCRIPT,
 											NULL);
 
 			if( !traits ) return false; // parseTraits failed
@@ -1815,6 +1815,7 @@ namespace avmplus
 					<< "\n";
 			}
 #endif
+			TraitsPosType postype = (flags & 4) ? TRAITSTYPE_INTERFACE : TRAITSTYPE_INSTANCE;
 			uint16_t sizeofInstance = 0;
 			uint16_t offsetofSlots = 0;
 			computeInstanceSizeAndSlotsOffset(i, baseTraits, sizeofInstance, offsetofSlots);
@@ -1825,7 +1826,7 @@ namespace avmplus
 										  name, 
 										  0, 
 										  instancepos,
-										  TRAITSTYPE_INSTANCE_FROM_ABC, 
+										  postype, 
 										  protectedNamespace);
 			if( !itraits ) return false;
 			if (!baseTraits && core->traits.object_itraits == NULL)
@@ -1839,10 +1840,8 @@ namespace avmplus
 			itraits->set_needsHashtable((flags&1) == 0);
 			itraits->final	 = (flags&2) != 0;
 
-			if (flags & 4)
+			if (itraits->isInterface())
 			{
-				itraits->m_isInterface = true;
-
 				// check for slotCount != 0 now done at resolve time
 
 				// interface base must be *
@@ -1938,7 +1937,7 @@ namespace avmplus
 											core->internString(core->concatStrings(name, core->newConstantStringLatin1("$"))), 
 											NULL, 
 											class_pos,
-											TRAITSTYPE_CLASS_FROM_ABC, 
+											TRAITSTYPE_CLASS, 
 											itraits->protectedNamespace);
 
 			ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
