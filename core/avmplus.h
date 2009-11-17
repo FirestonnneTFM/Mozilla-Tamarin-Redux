@@ -110,6 +110,7 @@ namespace avmplus
 	class Atan2Method;
 	class AtomArray;
 	class AvmCore;
+    class AvmPlusScriptableObject;
 	class MethodFrame;
 	class BooleanClass;
 	class BuiltinTraits;
@@ -216,6 +217,10 @@ namespace avmplus
 	typedef struct FramePtr_* FramePtr;
 }
 
+#ifdef VMCFG_AOT
+struct ABCInfo;
+#endif
+
 #include "avm.h"
 
 namespace avmplus
@@ -318,6 +323,9 @@ namespace avmplus
 #include "E4XNode.h"
 #include "AbcGen.h"
 #include "instr.h"
+#ifdef VMCFG_AOT
+#include "AOTCompiler.h"
+#endif
 
 // inline implementations
 #include "AbcEnv-inlines.h"

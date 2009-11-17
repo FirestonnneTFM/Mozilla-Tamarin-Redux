@@ -626,7 +626,7 @@ namespace avmplus
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 
-#if defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT || defined VMCFG_AOT
 
 	Atom MethodEnv::getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index)
 	{

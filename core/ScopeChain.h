@@ -48,10 +48,14 @@ namespace avmplus
 	{
 	private:
 		ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits);
+		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra);
 
 	public:
 
 		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra);
+#ifdef VMCFG_AOT
+		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra);
+#endif
 		static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits);
 
 		const ScopeTypeChain* cloneWithNewTraits(MMgc::GC* gc, Traits* traits) const;

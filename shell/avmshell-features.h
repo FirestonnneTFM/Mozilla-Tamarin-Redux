@@ -79,6 +79,10 @@
   #define AVMFEATURE_JIT               1
 #endif
 
+#ifndef AVMFEATURE_AOT
+  #define AVMFEATURE_AOT               0
+#endif
+
 #ifndef AVMFEATURE_ABC_INTERP
   #define AVMFEATURE_ABC_INTERP        1
 #endif

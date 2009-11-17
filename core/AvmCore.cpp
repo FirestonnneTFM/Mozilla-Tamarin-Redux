@@ -43,6 +43,10 @@
 #include "../nanojit/nanojit.h"
 #endif
 
+#ifdef VMCFG_AOT
+#include "AOTCompiler.h"
+#endif
+
 //GCC only allows intrinsics if sse2 is enabled
 #if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
@@ -322,7 +326,18 @@ namespace avmplus
 	
 		builtinDomain = new (GetGC()) Domain(this, NULL);
 		
+#ifdef VMCFG_AOT
+        NativeInitializer ninit(this,
+								&builtin_aotInfo,
+								avmplus::NativeID::builtin_abc_method_count,
+								avmplus::NativeID::builtin_abc_class_count);
+        ninit.fillInClasses(avmplus::NativeID::builtin_classEntries);
+        ninit.fillInMethods(avmplus::NativeID::builtin_methodEntries);
+        builtinPool = ninit.parseBuiltinABC(builtinDomain);
+#else
 		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this);
+#endif
+		AvmAssert(builtinPool->isBuiltin);
 
 		// whack the the non-interruptable bit on all builtin functions
 		for(int i=0, size=builtinPool->methodCount(); i<size; i++)
@@ -413,6 +428,32 @@ namespace avmplus
 		return toplevel;
 	}
 
+	static void initScriptActivationTraits(AvmCore* core, Toplevel* toplevel, MethodInfo* method)
+	{
+#ifdef VMCFG_AOT
+		PoolObject* pool = method->pool();
+		const AOTInfo* aotInfo = pool->aotInfo;
+		if (method->needActivation()) {
+			Traits* activationTraits = method->activationTraits();
+			AvmAssert(activationTraits != NULL);
+			AvmAssert(method->method_id() < aotInfo->nActivationTraits);
+			aotInfo->activationTraits[method->method_id()] = activationTraits;
+			if (aotInfo->activationTraitsInitFunctions[method->method_id()] != NULL) {
+				NativeMethodInfo compiledMethodInfo;
+				compiledMethodInfo.thunker = aotThunker;
+				compiledMethodInfo.handler.function = aotInfo->activationTraitsInitFunctions[method->method_id()];
+				activationTraits->init = new (core->gc) MethodInfo(MethodInfo::kInitMethodStub, activationTraits, &compiledMethodInfo);
+			}
+			method->resolveActivation(toplevel);
+		}
+		method->declaringTraits()->initActivationTraits(toplevel);
+#else
+		(void)core;
+		(void)toplevel;
+		(void)method;
+#endif
+	}
+	
 	static ScriptEnv* initScript(AvmCore* core, Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits)
 	{
 		// [ed] 3/24/06 why do we really care if a script is dynamic or not?
@@ -426,6 +467,7 @@ namespace avmplus
 		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable, abcEnv);
 		scriptVTable->init = scriptEnv;
 		core->exportDefs(scriptTraits, scriptEnv);
+		initScriptActivationTraits(core, toplevel, scriptTraits->init);
 		return scriptEnv;
 	}
 	
@@ -460,6 +502,7 @@ namespace avmplus
 			domainEnv->setToplevel(toplevel);
 			
 			main = toplevel->mainEntryPoint();
+			initScriptActivationTraits(this, toplevel, main->method);
 		}
 		else
 		{

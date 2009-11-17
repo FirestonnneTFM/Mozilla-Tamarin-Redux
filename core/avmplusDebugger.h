@@ -432,6 +432,7 @@ namespace avmplus
 		AbcInfo* abcAt(int index) const;
 
 	protected:
+		friend class AbcParser;
 		friend class DebugStackFrame;
 
 		AvmCore *core;

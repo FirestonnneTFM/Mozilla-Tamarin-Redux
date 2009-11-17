@@ -39,6 +39,11 @@
 #ifndef __avmplus_NativeFunction__
 #define __avmplus_NativeFunction__
 
+#ifdef VMCFG_AOT
+#include "CdeclThunk.h"
+struct AOTInfo;
+#endif
+
 namespace avmplus
 {
 	typedef avmplus::AbcEnv* AvmInstance;
@@ -74,8 +79,8 @@ namespace avmplus
 	typedef double (*AvmThunkNativeThunkerN)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
 #ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
-	typedef void (AvmObjectT::*AvmThunkNativeMethodHandler)();
-	typedef void (*AvmThunkNativeFunctionHandler)(AvmObject obj);
+	typedef void (AvmPlusScriptableObject::*AvmThunkNativeMethodHandler)();
+	typedef void (*AvmThunkNativeFunctionHandler)(AvmPlusScriptableObject* obj);
 #endif
 
 	const uintptr_t kUnboxMask = ~uintptr_t(7);
@@ -223,8 +228,12 @@ namespace avmplus
 	{
 	public:
 		NativeInitializer(AvmCore* core, 
-			const uint8_t* abcData,
-			uint32_t abcDataLen,
+			#ifdef VMCFG_AOT
+				const AOTInfo *aotInfo,
+			#else
+				const uint8_t* abcData,
+				uint32_t abcDataLen,
+			#endif
 			uint32_t methodCount,
 			uint32_t classCount);
 
@@ -234,10 +243,23 @@ namespace avmplus
 
 		const NativeMethodInfo* getNativeInfo(uint32_t i) const { return get_method(i); }
 	
+		#ifdef VMCFG_AOT
+			bool getCompiledInfo(NativeMethodInfo *info, Multiname &returnTypeName, uint32_t i) const;
+			bool hasBuiltins() const { return methodCount || classCount; }
+			const AOTInfo* get_aotInfo() const { return aotInfo; }
+		#endif
+
 		#ifdef AVMPLUS_STATIC_POINTERS
 			void fillInMethods(const NativeMethodInfo* methodEntry);
 			void fillInClasses(const NativeClassInfo* classEntry);
-			inline const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return classes[i]; }
+			#ifdef VMCFG_AOT
+				inline const NativeClassInfo* get_class(uint32_t i) const
+				{
+					return i < classCount ? classes[i] : 0;
+				}
+			#else
+				inline const NativeClassInfo* get_class(uint32_t i) const { AvmAssert(i < classCount); return classes[i]; }
+			#endif
 		#else
 			typedef void (*FillInProc)(NativeMethodInfo* m, NativeClassInfo* c);
 			void fillIn(FillInProc p);
@@ -256,13 +278,18 @@ namespace avmplus
 		#endif
 
 	private:
-		AvmCore* const			core;
-		const uint8_t* const	abcData;
-		uint32_t const			abcDataLen;
-		MethodType* const		methods;
-		ClassType* const		classes;
-		const uint32_t			methodCount;
-		const uint32_t			classCount;
+		AvmCore* const                          core;
+		const uint8_t* const                    abcData;
+		uint32_t const                          abcDataLen;
+		MethodType* const                       methods;
+		ClassType* const                        classes;
+		const uint32_t                          methodCount;
+		const uint32_t                          classCount;
+		#ifdef VMCFG_AOT
+        const AOTInfo*                          aotInfo;
+        const AvmThunkNativeFunctionHandler*    compiledMethods;
+        const uint32_t                          compiledMethodCount;
+		#endif
 	};
 
 #ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
@@ -284,8 +311,15 @@ namespace avmplus
 		{ return new (cvtable->gc(), cvtable->getExtraSize()) FQCLS(cvtable); }
 #endif
 
+#ifdef VMCFG_AOT
+	#define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME) \
+		extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain); \
+		extern const NativeClassInfo NAME##_classEntries[]; \
+		extern const NativeMethodInfo NAME##_methodEntries[];
+#else
 	#define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME) \
 		extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain);
+#endif
 
 #ifdef AVMPLUS_STATIC_POINTERS
 
@@ -294,8 +328,13 @@ namespace avmplus
 	
 	// ---------------
 
+#ifdef VMCFG_AOT
+	#define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME) \
+		const NativeMethodInfo NAME##_methodEntries[] = {
+#else
 	#define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME) \
 		static const NativeMethodInfo NAME##_methodEntries[] = {
+#endif
 			
 #ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
@@ -314,6 +353,13 @@ namespace avmplus
 	#define AVMTHUNK_NATIVE_METHOD_NAMESPACE(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(avmplus::Namespace, METHID, IMPL)
 
+#ifdef VMCFG_AOT
+	// AOT build env is ok with designated inits
+	#define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
+		{ { function: reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
+	#define AVMTHUNK_END_NATIVE_METHODS() \
+		{ { NULL }, NULL, -1 } };
+#else
 #ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
 	// C++ won't let us auto-init a union to a field other than the first one, nor will it
 	// allow us to reliably cast between a pointer-to-function and pointer-to-member-function,
@@ -339,6 +385,7 @@ namespace avmplus
 		{ NULL, -1 } };
 
 #endif
+#endif
 
 	// ---------------
 
@@ -351,6 +398,9 @@ namespace avmplus
 	#define AVMTHUNK_END_NATIVE_CLASSES() \
 		{ NULL, -1, 0, 0, 0, 0 } };
 
+#ifdef VMCFG_AOT
+	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME)
+#else
 	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
 		PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain) { \
 			NativeInitializer ninit(core, \
@@ -362,6 +412,7 @@ namespace avmplus
 			ninit.fillInMethods(NAME##_methodEntries); \
 			return ninit.parseBuiltinABC(domain); \
 		}
+#endif
 #else
 
 	#define AVMTHUNK_BEGIN_NATIVE_TABLES(NAME) \
