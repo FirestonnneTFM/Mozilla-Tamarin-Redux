@@ -146,8 +146,12 @@ bool VMPI_commitMemory(void* address, size_t size)
 
 bool VMPI_decommitMemory(char *address, size_t size)
 {
-	VMPI_releaseMemoryRegion(address, size);
-	// re-reserve it
+	// re-map it as PROT_NONE
+
+	// NOTE: we don't release it hear like Mac does, if we do another thread in the process
+	// could reserve it after we munmap it and even worse if that happened the mmap call would
+	// still work causing both mmap callers to think they mapped the memory.  Mac does have
+	// to release first but it can tell that the following reserve succeeded or not.
 	char *addr = (char*)mmap((maddr_ptr)address,
 							 size,
 							 PROT_NONE,
