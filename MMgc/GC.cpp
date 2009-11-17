@@ -3076,7 +3076,8 @@ bail:
 	
 	void GC::WriteBarrierTrap(const void *container)
 	{
-		InlineWriteBarrierTrap(container);
+		if (marking)
+			InlineWriteBarrierTrap(container);
 	}
 	
 	void GC::privateWriteBarrier(const void *container, const void *address, const void *value)
@@ -3092,14 +3093,14 @@ bail:
 	/* static */ void GC::WriteBarrierRC(const void *address, const void *value)
 	{
 		GC* gc = GC::GetGC(address);
-		gc->privateInlineWriteBarrierRC(gc->FindBeginningFast(address), address, value);
+		gc->privateInlineWriteBarrierRC(address, value);
 	}
 	
 	/* static */ void GC::WriteBarrierRC_ctor(const void *address, const void *value)
 	{
 		GC* gc = GC::GetGC(address);
-		void* const container = gc->FindBeginningFast(address);
-		gc->InlineWriteBarrierTrap(container);
+		if (gc->marking)
+			gc->InlineWriteBarrierTrap(gc->FindBeginningFast(address));
 		gc->WriteBarrierWriteRC_ctor(address, value);
 	}
 	
@@ -3112,15 +3113,17 @@ bail:
 	/* static */ void GC::WriteBarrier(const void *address, const void *value)
 	{
 		GC* gc = GC::GetGC(address);
-		gc->privateInlineWriteBarrier(gc->FindBeginningFast(address), address, value);
+		gc->privateInlineWriteBarrier(address, value);
 	}
 
-	void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
+	// It might appear that this can be optimized easily, but not so - there's a
+	// lot of logic hiding here, and little to gain from hand-inlining.
+
+	void GC::privateConservativeWriteBarrierNoSubstitute(const void *address)
 	{
-		(void)value;  // Can't get rid of this parameter now; part of an existing API
-		
+		GCAssert(marking);
 		if(IsPointerToGCPage(address))
-			InlineWriteBarrierTrap(FindBeginningFast(address));
+		   InlineWriteBarrierTrap(FindBeginningFast(address));
 	}
 	
 	void GC::WriteBarrierNoSubstitute(const void *container, const void *value)
@@ -3130,7 +3133,8 @@ bail:
 		GCAssert(container != NULL);
 		GCAssert(IsPointerToGCPage(container));
 		GCAssert(FindBeginningGuarded(container) == container);
-		InlineWriteBarrierTrap(container);
+		if (marking)
+			InlineWriteBarrierTrap(container);
 	}
 
 	// Add 'container' to the remembered set.

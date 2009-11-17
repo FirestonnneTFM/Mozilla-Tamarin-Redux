@@ -134,6 +134,7 @@ namespace MMgc
 	/*private*/
 	REALLY_INLINE void GC::InlineWriteBarrierTrap(const void *container)
 	{
+		GCAssert(marking);
 		GCAssert(IsPointerToGCPage(container));
 		
 		POLICY_PROFILING_ONLY(int stage=0;)
@@ -143,17 +144,17 @@ namespace MMgc
 		// It's good to check 'marking' because it provides a performance boost if it is
 		// true less than maybe 2/3 of the time - it avoids more expensive computation.
 		// We don't check 'collecting' because that's much less often true; it's checked
-		// inside WriteBarrierHit.
+		// inside WriteBarrierHit.  We make it a precondition for this function because
+		// some computations can be elided if it is checked earlier.
 		//
 		// Testing shows that it's /sometimes/ useful to check the right hand side of the
 		// assignment for NULL, but this depends on the program and for the time being
 		// the right hand side isn't available here and isn't checked.
-		if (marking) {
+		
+		if (IsMarkedThenMakeQueued(container))
+		{
 			POLICY_PROFILING_ONLY(stage=1;)
-			if (IsMarkedThenMakeQueued(container)) {
-				POLICY_PROFILING_ONLY(stage=2;)
-				WriteBarrierHit(container);
-			}
+			WriteBarrierHit(container);
 		}
 		POLICY_PROFILING_ONLY( policy.signalWriteBarrierWork(stage); )
 	}
@@ -163,7 +164,7 @@ namespace MMgc
 		GCAssert(!container || IsPointerToGCPage(container));
 		GCAssert(((uintptr_t)address & 3) == 0);
 		
-		if (container) {
+		if (container && marking) {
 			GCAssert(address >= container);
 			GCAssert(address < (char*)container + Size(container));
 			InlineWriteBarrierTrap(container);
@@ -171,6 +172,22 @@ namespace MMgc
 		WriteBarrierWrite(address, value);
 	}
 
+	REALLY_INLINE void GC::privateInlineWriteBarrier(const void *address, const void *value)
+	{
+		GCAssert(((uintptr_t)address & 3) == 0);
+		
+		if (marking) {
+			const void* container = FindBeginningFast(address);
+			
+			GCAssert(IsPointerToGCPage(container));
+			GCAssert(address >= container);
+			GCAssert(address < (char*)container + Size(container));
+			
+			InlineWriteBarrierTrap(container);
+		}
+		WriteBarrierWrite(address, value);
+	}
+	
 	REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *container, const void *address, const void *value)
 	{
 		GCAssert(IsPointerToGCPage(container));
@@ -179,10 +196,35 @@ namespace MMgc
 		GCAssert(address >= container);
 		GCAssert(address < (char*)container + Size(container));
 		
-		InlineWriteBarrierTrap(container);
+		if (marking)
+			InlineWriteBarrierTrap(container);
 		WriteBarrierWriteRC(address, value);
 	}
 
+	REALLY_INLINE void GC::privateInlineWriteBarrierRC(const void *address, const void *value)
+	{
+		if (marking) {
+			const void* container = FindBeginningFast(address);
+
+			GCAssert(IsPointerToGCPage(container));
+			GCAssert(((uintptr_t)container & 3) == 0);
+			GCAssert(((uintptr_t)address & 2) == 0);
+			GCAssert(address >= container);
+			GCAssert(address < (char*)container + Size(container));
+			
+			InlineWriteBarrierTrap(container);
+		}
+		WriteBarrierWriteRC(address, value);
+	}
+
+	REALLY_INLINE void GC::ConservativeWriteBarrierNoSubstitute(const void *address, const void *value)
+	{
+		(void)value;  // Can't get rid of this parameter now; part of an existing API
+		
+		if (marking)
+			privateConservativeWriteBarrierNoSubstitute(address);
+	}
+	
 	/**
 	 * WB is a smart pointer write barrier meant to be used on any field of a GC object that
 	 * may point to another GC object.  A write barrier may only be avoided if if the field is
