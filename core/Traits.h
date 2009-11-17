@@ -146,9 +146,8 @@ namespace avmplus
 		uint32_t getSlotOffset(uint32_t i) const;
 		// if you need SST you probably want offset too
 		SlotStorageType calcSlotAddrAndSST(uint32_t i, void* pin, void*& pout) const;
-		Traitsp getInterface(uint32 i) const;
+		Traitsp getInterface(uint32_t i) const;
 		MethodInfo* getMethod(uint32_t i) const;
-		bool FASTCALL subtypeof(Traitsp t) const;
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
 		Binding findBinding(Stringp name, NamespaceSetp nsset) const;
@@ -162,6 +161,7 @@ namespace avmplus
 		Binding valueAt(int32_t index) const;
 
 	private:
+		bool FASTCALL subtypeof(Traitsp t) const;
 		SlotInfo* getSlots();
 		const SlotInfo* getSlots() const;
 
@@ -435,6 +435,18 @@ namespace avmplus
 							// If the traits are for a type that implements its own construct method, m_immplementsNewInterfaces must be set to true.  
 	private:	uint32_t				m_implementsNewInterfaces:1; // does this type implement interfaces not implemented by its base?
 	// ------------------------ DATA SECTION END
+	};
+
+	// iterates over each interface supertype of the given traits.
+	class InterfaceIterator
+	{
+		const TraitsBindings* tb;
+		uint32_t i;
+	public:
+		InterfaceIterator(Traits*);
+		InterfaceIterator(const TraitsBindings*);
+		bool hasNext();
+		Traits* next();
 	};
 }
 

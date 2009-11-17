@@ -357,13 +357,9 @@ namespace avmplus
 	bool TraitsBindings::checkLegalInterfaces(AvmCore* core) const
 	{
 		// make sure every interface method is implemented
-		const TraitsBindings::InterfaceInfo* tbi		= this->getInterfaces();
-		const TraitsBindings::InterfaceInfo* tbi_end	= tbi + this->interfaceCapacity;
-		for ( ; tbi < tbi_end; ++tbi) 
+		for (InterfaceIterator iter(this); iter.hasNext();)
 		{
-			Traitsp ifc = tbi->t;
-			if (!ifc || !ifc->isInterface())
-				continue;
+			Traits* ifc = iter.next();
 
 			// don't need to bother checking interfaces in our parent.
 			if (this->base && this->base->subtypeof(ifc))

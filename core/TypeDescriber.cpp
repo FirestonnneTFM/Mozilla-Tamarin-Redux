@@ -226,13 +226,10 @@ namespace avmplus
 		if (flags & INCLUDE_INTERFACES)
 		{
 			interfaces = new_array();
-			for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
+			for (InterfaceIterator iter(traits); iter.hasNext();)
 			{
-				Traitsp ti = tb->getInterface(i);
-				if (ti && ti->isInterface())
-				{
-					pushstr(interfaces, describeClassName(ti));
-				}
+				Traits* ti = iter.next();
+				pushstr(interfaces, describeClassName(ti));
 			}
 		}
 
@@ -262,18 +259,15 @@ namespace avmplus
 
 			// Don't want interface methods, so post-process and wipe out any
 			// bindings that were added.
-			for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
+			for (InterfaceIterator ifc_iter(traits); ifc_iter.hasNext();)
 			{
-				Traitsp ti = tb->getInterface(i);
-				if (ti && ti->isInterface())
+				Traitsp ti = ifc_iter.next();
+				TraitsBindingsp tbi = ti->getTraitsBindings();
+				StTraitsBindingsIterator iter(tbi);
+				while (iter.next())
 				{
-					TraitsBindingsp tbi = ti->getTraitsBindings();
-					StTraitsBindingsIterator iter(tbi);
-					while (iter.next())
-					{
-						if (!iter.key()) continue;
-						mybind->add(iter.key(), iter.ns(), BIND_NONE);
-					}
+					if (!iter.key()) continue;
+					mybind->add(iter.key(), iter.ns(), BIND_NONE);
 				}
 			}
 			
