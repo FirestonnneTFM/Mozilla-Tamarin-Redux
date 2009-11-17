@@ -1106,17 +1106,17 @@ namespace avmplus
 				if (this == t->init)
 				{
 					// careful, name could be null, that's ok for init methods
-					if (t->posType() == TRAITSTYPE_SCRIPT_FROM_ABC)
+					if (t->posType() == TRAITSTYPE_SCRIPT)
 					{
 						name = tname->appendLatin1("$init");
 					}
-					else if (t->posType() == TRAITSTYPE_CLASS_FROM_ABC)
+					else if (t->posType() == TRAITSTYPE_CLASS)
 					{
 						name = tname->appendLatin1("cinit");
 					}
 					else
 					{
-						AvmAssert(t->posType() == TRAITSTYPE_INSTANCE_FROM_ABC || t->posType() == TRAITSTYPE_ACTIVATION);
+						AvmAssert(t->isInstanceType() || t->isActivationTraits());
 						name = tname;
 					}
 				}

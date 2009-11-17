@@ -596,12 +596,13 @@ namespace avmplus
 		TraitsPosPtr pos = m_traitsPos;
 		switch (posType())
 		{
-			case TRAITSTYPE_INSTANCE_FROM_ABC:	
+			case TRAITSTYPE_INTERFACE:	
+			case TRAITSTYPE_INSTANCE:	
 				pos = skipToInstanceInitPos(pos);
 				// fall thru, no break
 
-			case TRAITSTYPE_CLASS_FROM_ABC:
-			case TRAITSTYPE_SCRIPT_FROM_ABC:
+			case TRAITSTYPE_CLASS:
+			case TRAITSTYPE_SCRIPT:
 				AvmCore::skipU30(pos, 1);		// skip in init_index
 				break;
 
@@ -620,7 +621,7 @@ namespace avmplus
 
 	TraitsPosPtr Traits::skipToInstanceInitPos(TraitsPosPtr pos) const
 	{
-		AvmAssert(posType() == TRAITSTYPE_INSTANCE_FROM_ABC && pos != NULL);
+		AvmAssert(isInstanceType() && pos != NULL);
 		AvmCore::skipU30(pos, 2);		// skip the QName & base traits 
 		const uint8_t theflags = *pos++;		
 		const bool hasProtected = (theflags & 8) != 0;
@@ -1199,7 +1200,7 @@ namespace avmplus
 			if (seen.indexOf(self) < 0)
 				seen.add(self);
 
-			if (self->posType() == TRAITSTYPE_INSTANCE_FROM_ABC)
+			if (self->isInstanceType())
 			{
 				const uint8_t* pos = skipToInterfaceCount(self->m_traitsPos);
 				const uint32_t interfaceCount = AvmCore::readU30(pos);
@@ -1233,7 +1234,7 @@ namespace avmplus
 	{
 		bool addedNewInterface = false;
 
-		if (this->posType() == TRAITSTYPE_INSTANCE_FROM_ABC)
+		if (this->isInstanceType())
 		{
 			const uint8_t* pos = skipToInterfaceCount(this->m_traitsPos);
 			const uint32_t interfaceCount = AvmCore::readU30(pos);
@@ -1545,9 +1546,10 @@ namespace avmplus
 
 		switch (posType())
 		{
-			case TRAITSTYPE_INSTANCE_FROM_ABC:
-			case TRAITSTYPE_CLASS_FROM_ABC:
-			case TRAITSTYPE_SCRIPT_FROM_ABC:
+			case TRAITSTYPE_INTERFACE:
+			case TRAITSTYPE_INSTANCE:
+			case TRAITSTYPE_CLASS:
+			case TRAITSTYPE_SCRIPT:
 			case TRAITSTYPE_ACTIVATION:
 			case TRAITSTYPE_CATCH:
 				computeSlotAreaCountAndSize(tb, slotAreaCount, slotAreaSize);

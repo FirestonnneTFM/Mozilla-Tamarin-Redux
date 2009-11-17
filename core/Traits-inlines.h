@@ -294,9 +294,14 @@ REALLY_INLINE bool Traits::isXMLType() const
     return ((1<<builtinType) & XML_TYPE_MASK) != 0;
 }
 
+REALLY_INLINE bool Traits::isInstanceType() const
+{
+    return posType() == TRAITSTYPE_INSTANCE || posType() == TRAITSTYPE_INTERFACE;
+}
+
 REALLY_INLINE bool Traits::isInterface() const
 {
-    return m_isInterface != 0;
+    return posType() == TRAITSTYPE_INTERFACE;
 }
 
 REALLY_INLINE TraitsPosType Traits::posType() const

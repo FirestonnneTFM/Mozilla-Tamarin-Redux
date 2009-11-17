@@ -44,14 +44,14 @@ namespace avmplus
 	// Note: we rely on being able to store this in 3 bits. 
 	enum TraitsPosType
 	{
-		TRAITSTYPE_INSTANCE_FROM_ABC		= 0,	
-		TRAITSTYPE_CLASS_FROM_ABC			= 1,
-		TRAITSTYPE_SCRIPT_FROM_ABC			= 2,
-		TRAITSTYPE_CATCH					= 3,
-		TRAITSTYPE_ACTIVATION				= 4,
-		TRAITSTYPE_NVA						= 5,		// null/void/any -- traitsPos will always be null
-		TRAITSTYPE_RT						= 6			// Traits defined at runtime, e.g. instantiated parameterized types
-		//TRAITSTYPE_unused					= 7
+		TRAITSTYPE_INSTANCE					= 0,	// instance info in abc (non-interface)
+		TRAITSTYPE_CLASS					= 1,	// class info in abc
+		TRAITSTYPE_SCRIPT					= 2,	// script info in abc
+		TRAITSTYPE_CATCH					= 3,	// synthetic catch type
+		TRAITSTYPE_ACTIVATION				= 4,	// activation info from abc
+		TRAITSTYPE_NVA						= 5,	// null/void/any -- traitsPos will always be null
+		TRAITSTYPE_RT						= 6,	// Traits defined at runtime, e.g. instantiated parameterized types
+		TRAITSTYPE_INTERFACE				= 7		// instance info in abc (interface)
 	};
 	
 	const uint32_t NOT_DERIVED_OR_XML_MASK = 
@@ -256,7 +256,6 @@ namespace avmplus
 	class Traits : public MMgc::GCObject 
 	{
 		friend class TraitsBindings;	// for m_sizeofInstance
-		friend class AbcParser; // only for access to m_isInterface
 		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif
@@ -370,7 +369,8 @@ namespace avmplus
 		bool isMachineType() const;
 		bool isNumeric() const;
 		bool isXMLType() const;
-		bool isInterface() const;
+		bool isInterface() const;		// true if this is an interface type
+		bool isInstanceType() const;	// interface type or class instance type
 #ifdef VMCFG_AOT
         // returns true, if the slot storage type for this traits is ScriptObject*.
         inline bool isSSTObject() const { return ((1<<builtinType) & SSTOBJECT_TYPE_MASK) != 0; }
@@ -436,11 +436,10 @@ namespace avmplus
 	private:	const uint8_t			m_posType;					// TraitsPosType enumeration -- only need 3 bits but stored in byte for faster access
 	private:	uint8_t					m_bindingCapLog2;			// if nonzero, log2 of the cap needed for bindings
 	private:	uint8_t					m_interfaceCapLog2;			// if nonzero, log2 of the cap needed for interfaces
-	// 8 bits follow
+	// 7 bits follow
 	private:	uint32_t				m_needsHashtable:1;			// If true, the class needs a hash table. Typically true for dynamic classes, but will be false for XML
 	private:	uint32_t				linked:1;					// set once signature types have been resolved */
 	public:		uint32_t				final:1;					// set when the class cannot be extended */
-	private:	uint32_t				m_isInterface:1;			// true for types that are interfaces */
 	public:		uint32_t				commonBase:1;				// used for Verify::findCommonBase */
 	public:		uint32_t				isDictionary:1;				// how we implement dictionary or strict style lookups
 							// If hasCustomConstruct is false, the JIT will early bind to the AS defined constructor. 
