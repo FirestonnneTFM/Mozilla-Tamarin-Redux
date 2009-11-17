@@ -332,6 +332,7 @@ namespace avmplus
 #include "AbcParser-inlines.h"
 #include "atom-inlines.h"
 #include "AvmCore-inlines.h"
+#include "Coder-inlines.h"
 #include "instr-inlines.h"
 #include "Multiname-inlines.h"
 #include "PoolObject-inlines.h"

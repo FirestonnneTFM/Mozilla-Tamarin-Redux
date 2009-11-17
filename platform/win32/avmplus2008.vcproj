@@ -1816,6 +1816,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\Coder-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Coder.h"
 				>
 			</File>
