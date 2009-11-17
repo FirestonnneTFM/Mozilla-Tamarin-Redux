@@ -101,6 +101,7 @@ hg status
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
+hg diff core/builtin.cpp
 hg diff core/builtin.cpp > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
@@ -109,6 +110,7 @@ cd $basedir
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
+hg diff core/builtin.h
 hg diff core/builtin.h > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
@@ -153,6 +155,7 @@ hg status
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
+hg diff shell/shell_toplevel.cpp
 hg diff shell/shell_toplevel.cpp > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
@@ -161,6 +164,7 @@ cd $basedir
 test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
     rm $basedir/build/buildbot/slaves/scripts/builtin.diff
 }
+hg diff shell/shell_toplevel.h
 hg diff shell/shell_toplevel.h > $basedir/build/buildbot/slaves/scripts/builtin.diff
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
