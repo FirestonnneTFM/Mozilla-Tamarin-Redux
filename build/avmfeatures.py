@@ -62,10 +62,15 @@ def featureSettings(o):
         args += "-DAVMFEATURE_VTUNE=0 "
     if o.getBoolArg("jit"):
         args += "-DAVMFEATURE_JIT=1 -DAVMFEATURE_WORDCODE_INTERP=0 "
+    arg = o.getBoolArg("aot")
+    if (arg == True):
+        args += "-DAVMFEATURE_AOT=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_AOT=0 "
     if o.getBoolArg("abc-interp"):
         args += "-DAVMFEATURE_ABC_INTERP=1 -DAVMFEATURE_WORDCODE_INTERP=0 "
     if o.getBoolArg("wordcode-interp"):
-        args += "-DAVMFEATURE_WORDCODE_INTERP=1 -DAVMFEATURE_JIT=0 -DAVMFEATURE_ABC_INTERP=0 "
+        args += "-DAVMFEATURE_WORDCODE_INTERP=1 -DAVMFEATURE_ABC_INTERP=0 -DAVMFEATURE_JIT=0 "
     arg = o.getBoolArg("threaded-interp")
     if (arg == True):
         args += "-DAVMFEATURE_THREADED_INTERP=1 "

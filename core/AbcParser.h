@@ -72,11 +72,15 @@ namespace avmplus
 		  */
 		static int canParse(ScriptBuffer code, int* version = NULL);
 
+#if defined(VMCFG_AOT) && defined(DEBUGGER)
+		static void addAOTDebugInfo(PoolObject *pool);
+#endif
+		
 	protected:
 		PoolObject* parse(API api);
 		MethodInfo* resolveMethodInfo(uint32 index) const;
 
-		#ifdef AVMPLUS_VERBOSE
+		#if defined(VMCFG_AOT) || defined(AVMPLUS_VERBOSE)
 		void parseTypeName(const byte* &p, Multiname& m) const;
 		#endif
 

@@ -89,6 +89,8 @@
 #undef VMCFG_PRECOMP_NAMES
 #undef VMCFG_LOOKUP_CACHE
 #undef FEATURE_NANOJIT
+#undef VMCFG_AOT
+#undef VMCFG_AOTSHELL
 #undef VMCFG_INTERPRETER
 #undef VMCFG_INTERPRETER
 #undef VMCFG_WORDCODE
@@ -322,6 +324,15 @@
  */
 #if !defined AVMFEATURE_JIT || AVMFEATURE_JIT != 0 && AVMFEATURE_JIT != 1
 #  error "AVMFEATURE_JIT must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_AOT
+ *
+ * Enables the ahead-of-time compiler. This feature is highly experimental.
+ */
+#if !defined AVMFEATURE_AOT || AVMFEATURE_AOT != 0 && AVMFEATURE_AOT != 1
+#  error "AVMFEATURE_AOT must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -605,6 +616,12 @@
 #endif
 
 #endif
+#if AVMFEATURE_AOT
+#if AVMSYSTEM_IA32+AVMSYSTEM_ARM != 1
+#  error "Exactly one of AVMSYSTEM_IA32,AVMSYSTEM_ARM must be defined."
+#endif
+
+#endif
 
 
 #if AVMFEATURE_THREADED_INTERP
@@ -632,15 +649,15 @@
 #if AVMSYSTEM_IA32+AVMSYSTEM_AMD64+AVMSYSTEM_ARM+AVMSYSTEM_PPC+AVMSYSTEM_SPARC+AVMSYSTEM_MIPS > 1
 #  error "At most one of AVMSYSTEM_IA32,AVMSYSTEM_AMD64,AVMSYSTEM_ARM,AVMSYSTEM_PPC,AVMSYSTEM_SPARC,AVMSYSTEM_MIPS must be defined."
 #endif
+#if AVMFEATURE_WORDCODE_INTERP+AVMFEATURE_ABC_INTERP > 1
+#  error "At most one of AVMFEATURE_WORDCODE_INTERP,AVMFEATURE_ABC_INTERP must be defined."
+#endif
 #if AVMFEATURE_WORDCODE_INTERP+AVMFEATURE_JIT > 1
 #  error "At most one of AVMFEATURE_WORDCODE_INTERP,AVMFEATURE_JIT must be defined."
 #endif
 
 #if AVMSYSTEM_UNIX+AVMSYSTEM_MAC+AVMSYSTEM_WIN32+AVMSYSTEM_SYMBIAN != 1
 #  error "Exactly one of AVMSYSTEM_UNIX,AVMSYSTEM_MAC,AVMSYSTEM_WIN32,AVMSYSTEM_SYMBIAN must be defined."
-#endif
-#if AVMFEATURE_WORDCODE_INTERP+AVMFEATURE_ABC_INTERP != 1
-#  error "Exactly one of AVMFEATURE_WORDCODE_INTERP,AVMFEATURE_ABC_INTERP must be defined."
 #endif
 
 #if AVMSYSTEM_32BIT
@@ -783,6 +800,12 @@
 #endif
 #if AVMFEATURE_JIT
 #  define FEATURE_NANOJIT
+#endif
+#if AVMFEATURE_AOT
+#  define VMCFG_AOT
+#endif
+#if AVMFEATURE_AOT
+#  define VMCFG_AOTSHELL
 #endif
 #if AVMFEATURE_ABC_INTERP
 #  define VMCFG_INTERPRETER

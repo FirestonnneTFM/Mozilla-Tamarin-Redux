@@ -374,6 +374,20 @@ var FEATURES =
   </feature>
 
   <feature>
+    <desc>Enables the ahead-of-time compiler. This feature is highly experimental. </desc>
+
+    <name> AVMFEATURE_AOT  </name>
+	<requires>
+	 <exactly-one> 
+	  <name> AVMSYSTEM_IA32 </name>
+	  <name> AVMSYSTEM_ARM </name>
+	 </exactly-one>
+	</requires>
+	<defines> VMCFG_AOT </defines>
+	<defines> VMCFG_AOTSHELL </defines>
+  </feature>
+
+  <feature>
     <desc> Selects the ABC interpreter.  Appropriate for platforms that run 
 	       the interpreter only for initialization code and for 
            platforms that are exceptionally memory-constrained. </desc>
@@ -409,13 +423,14 @@ var FEATURES =
 	 <defines>   AVMPLUS_DIRECT_THREADED </defines>  <!-- FIXME: legacy name -->
   </feature>
 
-  <exactly-one>
+  <at-most-one>
     <!-- Though it is believed that it is possible to run avmplus with just a JIT,
-         doing so is not supported at this time.  -->
+         doing so is not supported at this time. Also note that some build configurations
+         (such as AOT) may wish to have no interpreter or JIT. -->
 		 
     <name>  AVMFEATURE_WORDCODE_INTERP  </name>
     <name>  AVMFEATURE_ABC_INTERP  </name>
-  </exactly-one>
+  </at-most-one>
 
   <at-most-one>
     <!-- The wordcode interpreter and JIT both use a LookupCache, and there can only

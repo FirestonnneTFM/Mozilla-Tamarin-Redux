@@ -78,6 +78,10 @@ namespace avmplus
 	const uint32_t MACHINE_TYPE_MASK = (1<<BUILTIN_object) | (1<<BUILTIN_void) | (1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_boolean) | (1<<BUILTIN_number);
 	const uint32_t NUMERIC_TYPE_MASK = (1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number);
 	const uint32_t XML_TYPE_MASK = (1<<BUILTIN_xml) | (1<<BUILTIN_xmlList);
+#ifdef VMCFG_AOT
+    const uint32_t SSTOBJECT_TYPE_MASK = ~ ((1<<BUILTIN_int) | (1<<BUILTIN_uint) | (1<<BUILTIN_number) | (1<<BUILTIN_boolean) | (1<<BUILTIN_any) | (1<<BUILTIN_object) | (1<<BUILTIN_string) | (1<<BUILTIN_namespace));
+    const uint32_t SSTATOM_TYPE_MASK = (1<<BUILTIN_object) | (1<<BUILTIN_any);
+#endif
 
 	typedef const uint8_t* TraitsPosPtr;
 
@@ -355,6 +359,10 @@ namespace avmplus
 		
 		void resolveSignatures(const Toplevel* toplevel);
 
+#ifdef VMCFG_AOT
+        void initActivationTraits(Toplevel *toplevel);
+#endif
+
 		// convenient wrapper to check for null (returns "BUILTIN_any")
 		static BuiltinType getBuiltinType(const Traitsp t);
 
@@ -363,6 +371,11 @@ namespace avmplus
 		bool isNumeric() const;
 		bool isXMLType() const;
 		bool isInterface() const;
+#ifdef VMCFG_AOT
+        // returns true, if the slot storage type for this traits is ScriptObject*.
+        inline bool isSSTObject() const { return ((1<<builtinType) & SSTOBJECT_TYPE_MASK) != 0; }
+        inline static bool isSSTAtom(Traits* t) { return ((1<<getBuiltinType(t)) & SSTATOM_TYPE_MASK) != 0; }
+#endif
 
 		TraitsPosType posType() const;
 		bool isResolved() const;

@@ -118,7 +118,18 @@ namespace avmplus
 		this->stacktop = core->gc->allocaTop();
 		
 		savedMethodFrame = core->currentMethodFrame;
+#ifdef VMCFG_AOT
+		this->llvmUnwindStyle = 0;
+#endif
 	}
+
+#ifdef VMCFG_AOT
+	void ExceptionFrame::beginLlvmUnwindTry(AvmCore *core)
+	{
+		beginTry(core);
+		this->llvmUnwindStyle = 1;
+	}
+#endif
 
 	void ExceptionFrame::endTry()
 	{
@@ -135,6 +146,13 @@ namespace avmplus
 	void ExceptionFrame::throwException(Exception *exception)
 	{
 		core->exceptionAddr = exception;
+#ifdef VMCFG_AOT
+		if(this->llvmUnwindStyle) {
+			llvm_unwind();
+			return;
+		}
+#endif
+
 		VMPI_longjmpNoUnwind(jmpbuf, 1); 
 	}
 
