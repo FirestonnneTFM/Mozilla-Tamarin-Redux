@@ -1,4 +1,5 @@
 /* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,198 +42,106 @@
 
 namespace avmplus
 {
-	class CodeWriter {
-	public:
+    class CodeWriter {
+    public:
 
-		CodeWriter ()
-        { }
-		virtual ~CodeWriter ()
-		{ }
+        CodeWriter();
+        virtual ~CodeWriter();
 
-		virtual void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) 
-		{ 
-			(void)state; 
-			(void)pc; 
-			(void)opcode; 
-            (void)type;
-		}
+        virtual void write(FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type);
+        virtual void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
+        virtual void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        virtual void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr_t opd1, uint32_t opd2, Traits* type);
+        virtual void writeNip(FrameState* state, const byte *pc);
+        virtual void writeCheckNull(FrameState* state, uint32_t index);
+        virtual void writeCoerce(FrameState* state, uint32_t index, Traits* type);
+        virtual void writePrologue(FrameState* state, const byte *pc);
+        virtual void writeEpilogue(FrameState* state);
+        virtual void writeBlockStart(FrameState* state);
+        virtual void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
+        virtual void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
+        virtual void formatOperand(PrintWriter& buffer, Value& v);
+        virtual void cleanup();
 
-		virtual void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
-		{
-			(void)state;
-			(void)pc; 
-			(void)opcode; 
-			(void)opd1;
-			(void)type;
-		}
-
-		virtual void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
-		{
-			(void)state;
-			(void)pc;
-			(void)opcode;
-			(void)opd1;
-			(void)opd2;
-			(void)type;
-		}
-
-		virtual void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
-		{
-			(void)state;
-			(void)pc;
-			(void)opcode;
-			(void)opd1;
-			(void)opd2;
-			(void)type;
-		}
-
-		virtual void writeNip (FrameState* state, const byte *pc)
-		{
-			(void)state;
-			(void)pc;
-		}
-
-		virtual void writeCheckNull(FrameState* state, uint32_t index)
-        {
-            (void)state;
-            (void)index;
-        }
-
-		virtual void writeCoerce(FrameState* state, uint32_t index, Traits* type)
-		{
-			(void)state;
-            (void)index;
-			(void)type;
-		}
-
-		virtual void writePrologue(FrameState* state, const byte *pc)
-		{ 
-			(void)state; 
-            (void)pc;
-		}
-
-		virtual void writeEpilogue(FrameState* state)
-		{ 
-			(void)state; 
-		}
-
-		virtual void writeBlockStart(FrameState* state)
-		{ 
-			(void)state; 
-		}
-
-		virtual void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode)
-        {
-            (void)state;
-            (void)pc;
-            (void)opcode;
-        }
-
-		virtual void writeFixExceptionsAndLabels(FrameState* state, const byte *pc)
-        {
-            (void)state;
-            (void)pc;
-        }
-
-		virtual void formatOperand(PrintWriter& buffer, Value& v)
-        {
-            (void)buffer;
-            (void)&v;
-        }
-
-		virtual void cleanup() {
-			// empty
-		}
-
-		// convenience functions
-		void write (FrameState* state, const byte *pc, AbcOpcode opcode) {
-			write(state, pc, opcode, NULL);
-		}
-
-		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1) {
-			writeOp1(state, pc, opcode, opd1, NULL);
-		}
-
-		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2) {
-			writeOp2(state, pc, opcode, opd1, opd2, NULL);
-		}
-	};
+        // convenience functions
+        void write(FrameState* state, const byte *pc, AbcOpcode opcode);
+        void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1);
+        void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2);
+    };
 
 #if defined FEATURE_TEEWRITER
-	class TeeWriter : public CodeWriter {
-	public:
-		CodeWriter* coder1;  // deleted elsewhere
-		CodeWriter* coder2;
+    class TeeWriter : public CodeWriter {
+    public:
+        CodeWriter* coder1;  // deleted elsewhere
+        CodeWriter* coder2;
 
-		TeeWriter (CodeWriter* coder1, CodeWriter* coder2);
-		~TeeWriter ();
-		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
-		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
-		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type);
-		void writeNip(FrameState* state, const byte *pc);
-		void writeCheckNull(FrameState* state, uint32_t index);
-		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
-		void writePrologue(FrameState* state, const byte *pc);
-		void writeEpilogue(FrameState* state);
-		void writeBlockStart(FrameState* state);
-		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
-		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
-		void formatOperand(PrintWriter& buffer, Value& v);
-		void cleanup();
-	};
+        TeeWriter(CodeWriter* coder1, CodeWriter* coder2);
+        ~TeeWriter();
+        void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
+        void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
+        void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr_t opd1, uint32_t opd2, Traits* type);
+        void writeNip(FrameState* state, const byte *pc);
+        void writeCheckNull(FrameState* state, uint32_t index);
+        void writeCoerce(FrameState* state, uint32_t index, Traits *type);
+        void writePrologue(FrameState* state, const byte *pc);
+        void writeEpilogue(FrameState* state);
+        void writeBlockStart(FrameState* state);
+        void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
+        void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
+        void formatOperand(PrintWriter& buffer, Value& v);
+        void cleanup();
+    };
 #endif // FEATURE_TEEWRITER
 
-	class NullWriter : public CodeWriter {
-	public:
-		CodeWriter* coder;       // the next leg of the pipeline
+    class NullWriter : public CodeWriter {
+    public:
+        CodeWriter* coder;       // the next leg of the pipeline
 
-		NullWriter (CodeWriter* coder);
-		~NullWriter ();
-		void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
-		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
-		void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type);
-		void writeNip(FrameState* state, const byte *pc);
-		void writeCheckNull(FrameState* state, uint32_t index);
-		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
-		void writePrologue(FrameState* state, const byte *pc);
-		void writeEpilogue(FrameState* state);
-		void writeBlockStart(FrameState* state);
-		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
-		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
-		void formatOperand(PrintWriter& buffer, Value& v);
-		void cleanup();
-	};
+        NullWriter(CodeWriter* coder);
+        ~NullWriter();
+        void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
+        void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
+        void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr_t opd1, uint32_t opd2, Traits* type);
+        void writeNip(FrameState* state, const byte *pc);
+        void writeCheckNull(FrameState* state, uint32_t index);
+        void writeCoerce(FrameState* state, uint32_t index, Traits *type);
+        void writePrologue(FrameState* state, const byte *pc);
+        void writeEpilogue(FrameState* state);
+        void writeBlockStart(FrameState* state);
+        void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
+        void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
+        void formatOperand(PrintWriter& buffer, Value& v);
+        void cleanup();
+    };
 
 #ifdef VMCFG_LOOKUP_CACHE
-	/**
-	 * helper class for building the layout of a lookup cache, used during
-	 * jit compilation or wordcode translation.
-	 */
-	class LookupCacheBuilder
-	{
-		// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
-		uint32_t* caches;		
+    /**
+     * helper class for building the layout of a lookup cache, used during
+     * jit compilation or wordcode translation.
+     */
+    class LookupCacheBuilder
+    {
+        // entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
+        uint32_t* caches;
 
-		// number of entries in 'caches'
-		int num_caches;
+        // number of entries in 'caches'
+        int num_caches;
 
-	public:
-		// next free entry in 'caches'
-		int next_cache;
-		uint32_t get_entry(int i) {
-			return caches[i];
-		}
+    public:
+        // next free entry in 'caches'
+        int next_cache;
+        uint32_t get_entry(int i);
 
-	public:
-		LookupCacheBuilder();
+    public:
+        LookupCacheBuilder();
 
-		/** allocate a new cache slot or reuse an existing one with the same imm30 */
-		uint32_t allocateCacheSlot(uint32_t imm30);
+        /** allocate a new cache slot or reuse an existing one with the same imm30 */
+        uint32_t allocateCacheSlot(uint32_t imm30);
 
-		void cleanup();
-	};
+        void cleanup();
+    };
 #endif
 }
 #endif  /* __avmplus_Coder__ */

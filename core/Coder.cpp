@@ -1,5 +1,5 @@
 /* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4: */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -42,7 +42,7 @@
 namespace avmplus
 {
 #if defined FEATURE_TEEWRITER
-    TeeWriter::TeeWriter (CodeWriter* coder1, CodeWriter* coder2)
+    TeeWriter::TeeWriter(CodeWriter* coder1, CodeWriter* coder2)
         : coder1(coder1)
         , coder2(coder2)
     {
@@ -50,13 +50,13 @@ namespace avmplus
         AvmAssert(coder2 != NULL);
     }
 
-    TeeWriter::~TeeWriter () 
+    TeeWriter::~TeeWriter()
     {
     }
 
     void TeeWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type) {
-        coder1->write (state, pc, opcode, type);
-        coder2->write (state, pc, opcode, type);
+        coder1->write(state, pc, opcode, type);
+        coder2->write(state, pc, opcode, type);
     }
 
     void TeeWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type)
@@ -65,16 +65,16 @@ namespace avmplus
         coder2->writeOp1(state, pc, opcode, opd1, type);
     }
 
-    void TeeWriter::writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+    void TeeWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
     {
-        coder1->writeOp2 (state, pc, opcode, opd1, opd2, type);
-        coder2->writeOp2 (state, pc, opcode, opd1, opd2, type);
+        coder1->writeOp2(state, pc, opcode, opd1, opd2, type);
+        coder2->writeOp2(state, pc, opcode, opd1, opd2, type);
     }
 
     void TeeWriter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
     {
-        coder1->writeInterfaceCall (state, pc, opcode, opd1, opd2, type);
-        coder2->writeInterfaceCall (state, pc, opcode, opd1, opd2, type);
+        coder1->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
+        coder2->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
     }
 
     void TeeWriter::writeNip(FrameState* state, const byte *pc)
@@ -89,10 +89,10 @@ namespace avmplus
         coder2->writeCheckNull(state, index);
     }
 
-	void TeeWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    void TeeWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
     {
-        coder1->writeCoerce (state, index, type);
-        coder2->writeCoerce (state, index, type);
+        coder1->writeCoerce(state, index, type);
+        coder2->writeCoerce(state, index, type);
     }
 
     void TeeWriter::writePrologue(FrameState* state, const byte *pc)
@@ -114,8 +114,8 @@ namespace avmplus
     }
 
     void TeeWriter::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode) {
-        coder1->writeOpcodeVerified (state, pc, opcode);
-        coder2->writeOpcodeVerified (state, pc, opcode);
+        coder1->writeOpcodeVerified(state, pc, opcode);
+        coder2->writeOpcodeVerified(state, pc, opcode);
     }
 
     void TeeWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc) {
@@ -128,61 +128,61 @@ namespace avmplus
         coder2->formatOperand(buffer, v);
     }
 
-	void TeeWriter::cleanup() {
-		coder1->cleanup();
-		coder2->cleanup();
-	}
+    void TeeWriter::cleanup() {
+        coder1->cleanup();
+        coder2->cleanup();
+    }
 
 #endif // FEATURE_TEEWRITER
 
-    NullWriter::NullWriter (CodeWriter* coder)
+    NullWriter::NullWriter(CodeWriter* coder)
         : coder(coder) {
         AvmAssert(coder != NULL);
     }
 
-    NullWriter::~NullWriter ()
-	{}
+    NullWriter::~NullWriter()
+    {}
 
-	void NullWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type) 
+    void NullWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
     {
-		coder->write(state, pc, opcode, type);
-	}
+        coder->write(state, pc, opcode, type);
+    }
 
-	void NullWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd, Traits *type)
-	{
-		coder->writeOp1(state, pc, opcode, opd, type);
-	}
+    void NullWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd, Traits *type)
+    {
+        coder->writeOp1(state, pc, opcode, opd, type);
+    }
 
-	void NullWriter::writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
-	{
-        coder->writeOp2 (state, pc, opcode, opd1, opd2, type);
-	}
+    void NullWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+    {
+        coder->writeOp2(state, pc, opcode, opd1, opd2, type);
+    }
 
     void NullWriter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
     {
         coder->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
     }
 
-	void NullWriter::writeNip(FrameState* state, const byte *pc)
-	{
+    void NullWriter::writeNip(FrameState* state, const byte *pc)
+    {
         coder->writeNip(state, pc);
-	}
+    }
 
     void NullWriter::writeCheckNull(FrameState* state, uint32_t index)
     {
         coder->writeCheckNull(state, index);
     }
 
-	void NullWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    void NullWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
     {
-        coder->writeCoerce (state, index, type);
+        coder->writeCoerce(state, index, type);
     }
 
-	void NullWriter::writePrologue(FrameState* state, const byte *pc)
-	{
+    void NullWriter::writePrologue(FrameState* state, const byte *pc)
+    {
         coder->writePrologue(state, pc);
-	}
-  
+    }
+
     void NullWriter::writeEpilogue(FrameState* state)
     {
         coder->writeEpilogue(state);
@@ -193,63 +193,107 @@ namespace avmplus
         coder->writeBlockStart(state);
     }
 
-	void NullWriter::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode) 
+    void NullWriter::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode)
     {
-		coder->writeOpcodeVerified(state, pc, opcode);
-	}
+        coder->writeOpcodeVerified(state, pc, opcode);
+    }
 
-	void NullWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc)
+    void NullWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc)
     {
-		coder->writeFixExceptionsAndLabels(state, pc);
-	}
+        coder->writeFixExceptionsAndLabels(state, pc);
+    }
 
     void NullWriter::formatOperand(PrintWriter& buffer, Value& v)
-	{
+    {
         coder->formatOperand(buffer, v);
     }
 
-	void NullWriter::cleanup()
-	{
-		coder->cleanup();
-	}
+    void NullWriter::cleanup()
+    {
+        coder->cleanup();
+    }
 
 #ifdef VMCFG_LOOKUP_CACHE
-	LookupCacheBuilder::LookupCacheBuilder() 
-	{
-		this->next_cache = 0;
-		this->caches = NULL;
-		this->num_caches = 0;
-	}
+    LookupCacheBuilder::LookupCacheBuilder()
+    {
+        this->next_cache = 0;
+        this->caches = NULL;
+        this->num_caches = 0;
+    }
 
-	void LookupCacheBuilder::cleanup()
-	{
-		if (caches) {
-			mmfx_delete_array(caches);
-			caches = NULL;
-		}
-	}
+    void LookupCacheBuilder::cleanup()
+    {
+        if (caches) {
+            mmfx_delete_array(caches);
+            caches = NULL;
+        }
+    }
 
-	// The cache structure is expected to be small in the normal case, so use a
-	// linear list.  For some programs, notably classical JS programs, it may however
-	// be larger, and we may need a more sophisticated structure.
-	uint32_t LookupCacheBuilder::allocateCacheSlot(uint32_t imm30)
-	{
-		for ( int i=0 ; i < next_cache ; i++ )
-			if (caches[i] == imm30)
-				return i;
-		if (next_cache == num_caches) {
-			uint32_t newcap = num_caches + num_caches/2 + 5; // 0 5 12 23 39 66 ...
-			uint32_t* new_cache = mmfx_new_array(uint32_t, newcap);
-			if (num_caches > 0) {
-				VMPI_memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
-				mmfx_delete_array(caches);
-			}
-			caches = new_cache;
-			num_caches = newcap;
-		}
-		caches[next_cache] = imm30;
-		return next_cache++;
-	}
+    // The cache structure is expected to be small in the normal case, so use a
+    // linear list.  For some programs, notably classical JS programs, it may however
+    // be larger, and we may need a more sophisticated structure.
+    uint32_t LookupCacheBuilder::allocateCacheSlot(uint32_t imm30)
+    {
+        for ( int i=0 ; i < next_cache ; i++ )
+            if (caches[i] == imm30)
+                return i;
+        if (next_cache == num_caches) {
+            uint32_t newcap = num_caches + num_caches/2 + 5; // 0 5 12 23 39 66 ...
+            uint32_t* new_cache = mmfx_new_array(uint32_t, newcap);
+            if (num_caches > 0) {
+                VMPI_memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
+                mmfx_delete_array(caches);
+            }
+            caches = new_cache;
+            num_caches = newcap;
+        }
+        caches[next_cache] = imm30;
+        return next_cache++;
+    }
 #endif // VMCFG_LOOKUP_CACHE
 
+    CodeWriter::~CodeWriter()
+    { }
+
+    void CodeWriter::write(FrameState*, const byte *, AbcOpcode, Traits*)
+    { }
+
+    void CodeWriter::writeOp1(FrameState*, const byte *, AbcOpcode, uint32_t, Traits*)
+    { }
+
+    void CodeWriter::writeOp2(FrameState*, const byte *, AbcOpcode, uint32_t, uint32_t, Traits*)
+    { }
+
+    void CodeWriter::writeInterfaceCall(FrameState*, const byte *, AbcOpcode, uintptr_t, uint32_t, Traits*)
+    { }
+
+    void CodeWriter::writeNip(FrameState*, const byte *)
+    { }
+
+    void CodeWriter::writeCheckNull(FrameState*, uint32_t)
+    { }
+
+    void CodeWriter::writeCoerce(FrameState*, uint32_t, Traits*)
+    { }
+
+    void CodeWriter::writePrologue(FrameState*, const byte *)
+    { }
+
+    void CodeWriter::writeEpilogue(FrameState*)
+    { }
+
+    void CodeWriter::writeBlockStart(FrameState*)
+    { }
+
+    void CodeWriter::writeOpcodeVerified(FrameState*, const byte *, AbcOpcode)
+    { }
+
+    void CodeWriter::writeFixExceptionsAndLabels(FrameState*, const byte *)
+    { }
+
+    void CodeWriter::formatOperand(PrintWriter&, Value&)
+    { }
+
+    void CodeWriter::cleanup()
+    { }
 }
