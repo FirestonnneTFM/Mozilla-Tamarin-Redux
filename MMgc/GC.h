@@ -615,10 +615,9 @@ namespace MMgc
 		size_t gcAllocatedBeforeSweep;
 		size_t gcBytesUsedBeforeSweep;
 		
-		// Barrier stages hit (writes examined by InlineWriteBarrierTrap) overall, less the last
-		// collection cycle, and for the last collection cycle. 
-		uint64_t barrierStageTotal[3];
-		uint32_t barrierStageLastCollection[3];
+		// Barrier stages hit in InlineWriteBarrier: examine mark, and hit the barrier.
+		uint64_t barrierStageTotal[2];
+		uint32_t barrierStageLastCollection[2];
 
 		// Reap work, overall
 		uint64_t objectsReaped;
@@ -1051,10 +1050,26 @@ namespace MMgc
 		/*REALLY_INLINE*/ void privateInlineWriteBarrier(const void *container, const void *address, const void *value);
 
 		/**
+		 * Like the preceding but computes 'container' only if 'marking' is true (important optimization).
+		 */
+		/*REALLY_INLINE*/ void privateInlineWriteBarrier(const void *address, const void *value);
+		
+		/**
 		 * Implementation of privateWriteBarrierRC; too large to be inlined everywhere.
 		 */
 		/*REALLY_INLINE*/ void privateInlineWriteBarrierRC(const void *container, const void *address, const void *value);
 
+		/**
+		 * Like the preceding but computes 'container' only if 'marking' is true (important optimization).
+		 */
+		/*REALLY_INLINE*/ void privateInlineWriteBarrierRC(const void *address, const void *value);
+		
+		/**
+		 * Out-of-line implementation of ConservativeWriteBarrierNoSubstitute, called only
+		 * when 'marking' is true.
+		 */
+		void privateConservativeWriteBarrierNoSubstitute(const void *address);
+		
 	public:
 		/**
 		 * General, conditional write barrier trap.  Tests that incremental marking is in fact ongoing
@@ -1069,6 +1084,8 @@ namespace MMgc
 		/**
 		 * Inline implementation of WriteBarrierTrap; probably too large to be inlined everywhere
 		 * so use sparingly.  AvmCore::atomWriteBarrier benefits substantially from inlining it.
+		 *
+		 * PRECONDITION: 'marking' must be true when this is called.
 		 */
 		/*REALLY_INLINE*/ void InlineWriteBarrierTrap(const void *container);
 		
