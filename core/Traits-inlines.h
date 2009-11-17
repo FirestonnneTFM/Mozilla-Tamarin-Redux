@@ -90,7 +90,7 @@ REALLY_INLINE SlotStorageType TraitsBindings::calcSlotAddrAndSST(uint32_t i, voi
     return SlotStorageType(offsetAndSST & 7);
 }
 
-REALLY_INLINE Traitsp TraitsBindings::getInterface(uint32 i) const
+REALLY_INLINE Traitsp TraitsBindings::getInterface(uint32_t i) const
 {
     AvmAssert(i < interfaceCapacity);
     return getInterfaces()[i].t;
@@ -358,6 +358,28 @@ REALLY_INLINE bool Traits::implementsNewInterfaces() const
 {
     AvmAssert(linked);
     return m_implementsNewInterfaces;
+}
+
+REALLY_INLINE InterfaceIterator::InterfaceIterator(Traits* t)
+    : tb(t->getTraitsBindings()), i(0)
+{ }
+
+REALLY_INLINE InterfaceIterator::InterfaceIterator(const TraitsBindings* tb)
+    : tb(tb), i(0)
+{ }
+
+REALLY_INLINE bool InterfaceIterator::hasNext()
+{
+    Traits* ti;
+    while (i < tb->interfaceCapacity && ((ti = tb->getInterface(i)) == NULL || !ti->isInterface()))
+        i++;
+    return i < tb->interfaceCapacity;
+}
+
+REALLY_INLINE Traits* InterfaceIterator::next()
+{
+    AvmAssert(tb->getInterface(i)->isInterface());
+    return tb->getInterface(i++);
 }
 
 } // namespace avmplus

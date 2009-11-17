@@ -126,11 +126,9 @@ namespace avmplus
 			return NULL;
 		
 		TraitsBindingsp tb = traits->getTraitsBindings();
-		for (uint32_t k = 0; k < tb->interfaceCapacity ; ++k) 
+		for (InterfaceIterator ifc_iter(traits); ifc_iter.hasNext();)
 		{
-			Traitsp ifc = tb->getInterface(k);
-			if (!ifc || !ifc->isInterface())
-				continue;
+			Traits* ifc = ifc_iter.next();
 			
 			TraitsBindingsp ifcd = ifc->getTraitsBindings();
 			StTraitsBindingsIterator iter(ifcd);
