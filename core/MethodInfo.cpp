@@ -470,15 +470,18 @@ namespace avmplus
             }
             case BUILTIN_int:
             {
-                return core->intToAtom(*(const int32_t*)src);
+				// this looks weird, but is correct for big-endian systems (eg PPC64)
+                return core->intToAtom((int32_t)*(const intptr_t*)src);
             }
             case BUILTIN_uint:
             {
-                return core->uintToAtom(*(const uint32_t*)src);
+				// this looks weird, but is correct for big-endian systems (eg PPC64)
+                return core->uintToAtom((uint32_t)*(const uintptr_t*)src);
             }
             case BUILTIN_boolean:
             {
-                return *(const int32_t*)src ? trueAtom : falseAtom;
+				// this looks weird, but is correct for big-endian systems (eg PPC64)
+                return *(const intptr_t*)src ? trueAtom : falseAtom;
             }
             case BUILTIN_any:
             case BUILTIN_object:
