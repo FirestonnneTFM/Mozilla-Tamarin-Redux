@@ -688,21 +688,24 @@ namespace avmplus
 					*(double*)dst = AvmCore::number_d(src);
                     break;
 				}
-				case BUILTIN_int:
-				{
-					*(int32_t*)dst = AvmCore::integer_i(src);
+                case BUILTIN_int:
+                {
+					// this looks weird, but is correct for big-endian systems (eg PPC64)
+                    *(intptr_t*)dst = AvmCore::integer_i(src);
                     break;
-				}
-				case BUILTIN_uint:
-				{
-					*(uint32_t*)dst = AvmCore::integer_u(src);
+                }
+                case BUILTIN_uint:
+                {
+					// this looks weird, but is correct for big-endian systems (eg PPC64)
+                    *(uintptr_t*)dst = AvmCore::integer_u(src);
                     break;
-				}
-				case BUILTIN_boolean:
-				{
-					*(int32_t*)dst = (int32_t)atomGetBoolean(src);
+                }
+                case BUILTIN_boolean:
+                {
+					// this looks weird, but is correct for big-endian systems (eg PPC64)
+                    *(intptr_t*)dst = (int32_t)atomGetBoolean(src);
                     break;
-				}
+                }
 				case BUILTIN_any:
 				case BUILTIN_object:
 				case BUILTIN_void:

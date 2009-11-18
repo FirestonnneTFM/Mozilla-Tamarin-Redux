@@ -51,7 +51,6 @@
 # name, type [skip], notes
 
 testMemstats.py, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=529160
-testDebugger.py, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=529453
 
 
 
