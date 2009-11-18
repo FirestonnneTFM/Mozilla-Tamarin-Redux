@@ -2048,6 +2048,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\NamespaceSet-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\NativeFunction.cpp"
 				>
 			</File>

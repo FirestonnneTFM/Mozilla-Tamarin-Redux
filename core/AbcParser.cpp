@@ -431,14 +431,14 @@ namespace avmplus
 			Multiname mn;
 			const uint32_t qn_index = resolveQName(pos, mn);
 			Namespacep ns;
-			NamespaceSet* nss;
+			const NamespaceSet* nss;
 			if (mn.namespaceCount() > 1) {
 				nss = (NamespaceSet*) mn.getNsset();
-				ns = nss->namespaces[0];
+				ns = nss->nsAt(0);
 			}
 			else {
 				ns = mn.getNamespace();
-				nss = new (core->GetGC()) NamespaceSet(ns);
+				nss = NamespaceSet::create(core->GetGC(), ns);
 			}
 			// TODO name can come out null and fire all kinds of asserts from a broken compiler
 			// and crash a release build, not sure if null is valid in any cases but there's definitely
@@ -1411,15 +1411,13 @@ namespace avmplus
 			if (ns_count > (uint32)(abcEnd - pos))
 				toplevel->throwVerifyError(kCorruptABCError);
 
-			NamespaceSet* namespace_set = core->newNamespaceSet(ns_count);
-			Namespacep* nss = namespace_set->namespaces;
+			NamespaceSet* namespace_set = NamespaceSet::_create(core->GetGC(), ns_count);
 			for(uint32 j=0; j < ns_count; ++j)
 			{
 				Namespacep ns = parseNsRef(pos);
 				if (!ns)
 					toplevel->throwVerifyError(kIllegalNamespaceError);
-				//namespace_set->namespaces[j] = ns;
-				WBRC(core->GetGC(), namespace_set, &nss[j], ns);
+				namespace_set->_initNsAt(j, ns);
 			}
 			cpool_ns_set.set(i, namespace_set);
 
@@ -1535,14 +1533,16 @@ namespace avmplus
     {
         // check to see if the base namespace has been added, if so then
         // all versions have been added
-        Namespace* ns = nss->namespaces[0];
+        Namespace* ns = nss->nsAt(0);
         if (!ns->isPrivate()) {
 			// compute the compatible apis for all namespaces and construct a namespace
 			// with that composite api
 			API apis = 0;
-			for (int i=0; i<nss->size; ++i) {
-				AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nss->namespaces[i]->getType(), nss->namespaces[i]->getURI()) ? nss->namespaces[i]->getAPI() != 0 : true);
-				apis |= ApiUtils::getCompatibleAPIs(core, nss->namespaces[i]->getAPI());
+            for (NamespaceSetIterator iter(nss); iter.hasNext();) 
+            {
+                Namespacep nsi = iter.next();
+				AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nsi->getType(), nsi->getURI()) ? nsi->getAPI() != 0 : true);
+				apis |= ApiUtils::getCompatibleAPIs(core, nsi->getAPI());
 			}
 			ns = ApiUtils::getVersionedNamespace(core, ns, apis);
 			if (!domain->getNamedTrait(name, ns)) {
@@ -1558,13 +1558,12 @@ namespace avmplus
 
 	void AbcParser::addNamedTraits(Namespacep ns, Stringp name, Traits* itraits)
 	{
-		NamespaceSet* nss = new (core->GetGC()) NamespaceSet(ns);
-		addNamedTraits(nss, name, itraits);
+		addNamedTraits(NamespaceSet::create(core->GetGC(), ns), name, itraits);
 	}
 
 	void AbcParser::addNamedScript(NamespaceSetp nss, Stringp name, MethodInfo* script)
 	{
-		Namespacep ns = nss->namespaces[0]; // just need one
+		Namespacep ns = nss->nsAt(0); // just need one
 		if (ns->isPrivate()) 
 		{
 			pool->addPrivateNamedScript(name, ns, script);
@@ -1572,13 +1571,15 @@ namespace avmplus
 		else 
 		{
 			// use the first namespace to see if its been added
-			MethodInfo* s = domain->getNamedScript(name, nss->namespaces[0]);
+			MethodInfo* s = domain->getNamedScript(name, ns);
 			if (!s)
 			{
 				API apis = 0;
-				for (int i=0; i<nss->size; ++i) {
-					AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nss->namespaces[i]->getType(), nss->namespaces[i]->getURI()) ? nss->namespaces[i]->getAPI() != 0 : true);
-					apis |= ApiUtils::getCompatibleAPIs(core, nss->namespaces[i]->getAPI());
+                for (NamespaceSetIterator iter(nss); iter.hasNext();) 
+                {
+                    Namespacep nsi = iter.next();
+					AvmAssert(pool->isBuiltin && ApiUtils::isVersionedNS(core, nsi->getType(), nsi->getURI()) ? nsi->getAPI() != 0 : true);
+					apis |= ApiUtils::getCompatibleAPIs(core, nsi->getAPI());
 				}
 				ns = ApiUtils::getVersionedNamespace(core, ns, apis);
 				domain->addNamedScript(name, ns, script);
@@ -1724,16 +1725,16 @@ namespace avmplus
 			Namespacep ns;
 			Stringp name;
 			name = mn.getName();
-			NamespaceSet* nss;
+			const NamespaceSet* nss;
 			if (mn.namespaceCount() > 1) 
 			{
-				nss = (NamespaceSet*) mn.getNsset();
-				ns = nss->namespaces[0];
+				nss = mn.getNsset();
+				ns = nss->nsAt(0);
 			}
 			else 
 			{
 				ns = mn.getNamespace();
-				nss = new (core->GetGC()) NamespaceSet(ns);
+				nss = NamespaceSet::create(core->GetGC(), ns);
 			}
 
 			// resolving base class type means class heirarchy must be a Tree

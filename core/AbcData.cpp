@@ -50,7 +50,7 @@ namespace avmplus
 			Multiname name;
 			t->pool->parseMultiname(name, nameId);
 			if (name.isNsset())
-				name.setNamespace(name.getNsset()->namespaces[0]);
+				name.setNamespace(name.getNsset()->nsAt(0));
 			
 			AvmAssert(!name.isNsset());
 			

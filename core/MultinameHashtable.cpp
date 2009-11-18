@@ -163,7 +163,7 @@ namespace avmplus
 		static const Quad kBindAmbiguous = { NULL, NULL, BIND_AMBIGUOUS, 0, 0 };
 	#endif
 	
-		int nsCount = nsset->size;
+		int nsCount = nsset->count();
 		int j;
 
 		const Quad* match = &kBindNone;
@@ -190,7 +190,7 @@ namespace avmplus
 				uintptr probeURI = probeNS ? probeNS->m_uri : 0;
 				for (j=0; j < nsCount; j++)
 				{
-					Namespacep ns = nsset->namespaces[j];
+					Namespacep ns = nsset->nsAt(j);
 					AvmAssert(ns->getURI()->isInterned());
 					if (probeNS==ns || (probeURI == ns->m_uri && (probeAPIs & ns->m_api)))
 					{
@@ -220,7 +220,7 @@ found1:
 					uintptr probeURI = t[k].ns->m_uri;
 					for (j=0; j < nsCount; j++)
 					{
-						Namespacep ns = nsset->namespaces[j];
+						Namespacep ns = nsset->nsAt(j);
 						if ((probeNS==ns || matchNS(probeURI, probeAPIs, ns)) && matchValue != t[k].value)
 						{
 							return &kBindAmbiguous;

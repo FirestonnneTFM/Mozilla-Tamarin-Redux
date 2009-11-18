@@ -40,25 +40,39 @@
 
 namespace avmplus
 {
-	NamespaceSet::NamespaceSet(int nsCount)
+	/*static*/ NamespaceSet* NamespaceSet::_create(MMgc::GC* gc, uint32_t count)
 	{
-		this->size = nsCount;
+        AvmAssert(count <= 0x7fffffff); // should be impossible since ABC only allow U30...
+		size_t extra = (count >= 1 ? count-1 : 0)*sizeof(Namespacep);
+		NamespaceSet* nsset = new (gc, extra) NamespaceSet;
+        nsset->_countAndFlags = count<<1;
+        return nsset;
 	}
 
+	/*static*/ const NamespaceSet* NamespaceSet::create(MMgc::GC* gc, Namespacep ns)
+	{
+		NamespaceSet* nsset = new (gc) NamespaceSet;
+        nsset->_countAndFlags = (1<<1) | (ns->isPublic() ? 1 : 0);
+        nsset->_namespaces[0] = ns;
+        return nsset;
+	}
 
 //#ifdef AVMPLUS_VERBOSE
 	// Made available in non-AVMPLUS_VERBOSE builds for describeType
 	Stringp NamespaceSet::format(AvmCore* core) const
 	{
 		Stringp s = core->newConstantStringLatin1("{");
-		for (int i=0,n=size; i < n; i++) 
+        bool comma = false;
+		for (NamespaceSetIterator iter(this); iter.hasNext();) 
 		{
-			if (namespaces[i]->isPublic())
+            if (comma)
+				s = core->concatStrings(s, core->newConstantStringLatin1(","));
+            Namespacep ns = iter.next();
+			if (ns->isPublic())
 				s = core->concatStrings(s, core->newConstantStringLatin1("public"));
 			else
-				s = core->concatStrings(s, namespaces[i]->getURI());
-			if (i+1 < n)
-				s = core->concatStrings(s, core->newConstantStringLatin1(","));
+				s = core->concatStrings(s, ns->getURI());
+			comma = true;
 		}
 		s = core->concatStrings(s, core->newConstantStringLatin1("}"));
 		return s;

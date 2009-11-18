@@ -63,7 +63,7 @@ REALLY_INLINE void Multiname::setName(const Multiname* other)
 
 REALLY_INLINE int32_t Multiname::namespaceCount() const
 {
-    return (nsset && (flags & NSSET)) ? nsset->size : 1;
+    return (nsset && (flags & NSSET)) ? nsset->count() : 1;
 }
 
 REALLY_INLINE Namespacep Multiname::getNamespace() const
@@ -161,6 +161,22 @@ REALLY_INLINE Multiname::~Multiname()
     next_index = 0;
 }
 
+REALLY_INLINE bool Multiname::containsAnyPublicNamespace() const
+{
+    if (!nsset) 
+        return false; // note, also handles this->ns == null
+
+    if (flags & NSSET)
+    {
+        return this->nsset->containsAnyPublicNamespace();
+    }
+    else
+    {
+        return this->ns->isPublic();
+    }
+}
+
+
 /**
  * return the flags we want to keep when copying a compile-time
  * multiname into a runtime temporary multiname
@@ -219,6 +235,13 @@ REALLY_INLINE int32_t Multiname::isNsset() const
     return flags & NSSET;
 }
 
+REALLY_INLINE bool Multiname::isValidDynamicName() const 
+{
+    // return !isAnyName() && !isAttr() && containsAnyPublicNamespace();
+    // consolidate the above to insure against compiler stupidity
+    return ((flags & (ATTR|RTNAME)) == 0) && name != NULL && containsAnyPublicNamespace();
+}
+
 REALLY_INLINE int32_t Multiname::isParameterizedType() const
 {
     return flags&TYPEPARAM;
@@ -230,14 +253,6 @@ REALLY_INLINE void Multiname::setAttr(bool b)
         flags |= ATTR;
     else
         flags &= ~ATTR;
-}
-
-REALLY_INLINE void Multiname::setPublic(bool b)
-{
-    if (b)
-        flags |= PUBLICNS;
-    else
-        flags &= ~PUBLICNS;
 }
 
 REALLY_INLINE void Multiname::setQName()

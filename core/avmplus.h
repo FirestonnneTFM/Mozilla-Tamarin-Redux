@@ -335,6 +335,7 @@ namespace avmplus
 #include "Coder-inlines.h"
 #include "instr-inlines.h"
 #include "Multiname-inlines.h"
+#include "NamespaceSet-inlines.h"
 #include "PoolObject-inlines.h"
 #include "ScopeChain-inlines.h"
 #include "Toplevel-inlines.h"

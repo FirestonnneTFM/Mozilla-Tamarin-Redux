@@ -1398,7 +1398,6 @@ const int kBufferPadding = 16;
 		Namespacep newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public, int32_t api = 0);
 		Namespacep newPublicNamespace(Stringp uri);
-		NamespaceSet* newNamespaceSet(int nsCount);
 
 		Stringp uintToString(uint32 i);
 		Stringp intToString(int i);

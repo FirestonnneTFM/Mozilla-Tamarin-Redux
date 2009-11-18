@@ -46,7 +46,7 @@ namespace avmplus
 		if (flags&NSSET)
 		{
 			AvmAssert(i >= 0 && i < namespaceCount());
-			return nsset ? nsset->namespaces[i] : NULL;
+			return nsset ? nsset->nsAt(i) : NULL;
 		}
 		else
 		{
@@ -59,35 +59,13 @@ namespace avmplus
 	{
 		if (flags & NSSET)
 		{
-			if( !nsset ) return false;
-			for (int i=0; i < nsset->size; i++)
-				if (nsset->namespaces[i] == ns)
-					return true;
-			return false;
+            return nsset && nsset->contains(ns);
 		}
 		else
 		{
 			return this->ns == ns;
 		}
 	}
-
-    bool Multiname::containsAnyPublicNamespace() const
-    {
-        if (!nsset) 
-			return false; // note, also handles this->ns == null
-
-        if (flags & NSSET)
-        {
-            for (int i=0; i < nsset->size; i++)
-                if (nsset->namespaces[i]->isPublic())
-                    return true;
-            return false;
-        }
-        else
-        {
-            return this->ns->isPublic();
-        }
-    }
 
 	bool Multiname::matches(const Multiname* qname) const
 	{

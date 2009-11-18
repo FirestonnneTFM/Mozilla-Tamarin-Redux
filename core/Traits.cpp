@@ -480,10 +480,12 @@ namespace avmplus
 									  Binding binding) const
 	{
 		int32_t apis = 0;
-		for (int i=0; i<nss->size; ++i) {
-			 apis |= ApiUtils::getCompatibleAPIs(core, nss->namespaces[i]->getAPI());
+		for (NamespaceSetIterator iter(nss); iter.hasNext();) 
+        {
+            Namespacep ns = iter.next();
+			 apis |= ApiUtils::getCompatibleAPIs(core, ns->getAPI());
 		}
-		Namespacep ns = ApiUtils::getVersionedNamespace(core, nss->namespaces[0], apis);
+		Namespacep ns = ApiUtils::getVersionedNamespace(core, nss->nsAt(0), apis);
 		bindings->add(name, ns, binding);
 	}
 		
@@ -817,12 +819,12 @@ namespace avmplus
 			Namespacep ns;
 			NamespaceSetp compat_nss;
 			if (mn.namespaceCount() > 1) {
-				ns = mn.getNsset()->namespaces[0];
+				ns = mn.getNsset()->nsAt(0);
 				compat_nss = mn.getNsset();
 			}
 			else {
 				ns = mn.getNamespace();
-				compat_nss = new (core->GetGC()) NamespaceSet(ns);
+				compat_nss = NamespaceSet::create(core->GetGC(), ns);
 			}
 			
 			switch (ne.kind)
@@ -1297,7 +1299,7 @@ namespace avmplus
 			Traits* t = this->pool->resolveTypeName(pos, toplevel);
 
 			// this assumes we save name/ns in all builds, not just verbose
-			NamespaceSetp nss = new (core->GetGC()) NamespaceSet(this->ns());
+			NamespaceSetp nss = NamespaceSet::create(core->GetGC(), this->ns());
 			NamespaceSetp compat_nss = nss;
 			addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR));
 			// the Sampler can call subtypeof() on a catch object, so we must ensure the list is valid.
