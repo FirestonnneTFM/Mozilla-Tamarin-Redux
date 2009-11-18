@@ -55,7 +55,7 @@ canaries/.*           , canaries  , include , canaries testsuite
 
 sunspider/.*          , misc    , skip  , skip sunspider
 jsbench/.*            , misc    , skip  , skip jsbench
-v8/.*                 , misc    , skip  , skip v8
+v8.*/.*               , misc    , skip  , skip v8
 
 misc/.*               , miscdir    , include  , misc testsuite
 
@@ -69,7 +69,7 @@ mmgc/.*               , .*      , skip , mmgc diagnostic tests
 sunspider/.*          , misc-mobile.*  , skip  , skip sunspider
 sunspider/.*          , misc-mobile.*  , skip  , skip sunspider
 jsbench/.*            , misc-mobile.*  , skip  , skip jsbench
-v8/.*                 , misc-mobile.*  , skip  , skip v8
+v8.*/.*               , misc-mobile.*  , skip  , skip v8
 canaries/.*           , misc-mobile.*  , skip  , skip canaries as they require additional files to run which will not be on the device
 .*/canaries/.*        , misc-mobile.*  , skip  , skip canaries as they require additional files to run which will not be on the device
 
