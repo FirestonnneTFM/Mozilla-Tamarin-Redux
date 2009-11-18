@@ -59,8 +59,7 @@ namespace avmplus
 		const static int32_t RTNS   = 0x04;	// runtime namespace
 		const static int32_t RTNAME = 0x08;	// runtime name
 		const static int32_t NSSET  = 0x10;
-		const static int32_t PUBLICNS = 0x20; // temporary flag to support 46.15; public implied
-		const static int32_t TYPEPARAM = 0x40;
+		const static int32_t TYPEPARAM = 0x20;
 		#ifdef FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif 
@@ -98,6 +97,7 @@ namespace avmplus
 
 		bool contains(Namespacep ns) const;
 	    bool containsAnyPublicNamespace() const;
+		bool isValidDynamicName() const;		
 
 		/**
 		 * return the flags we want to keep when copying a compile-time
@@ -122,7 +122,6 @@ namespace avmplus
 		int32_t isParameterizedType() const;
 
 		void setAttr(bool b=true);
-		void setPublic(bool b=true);
 		void setQName();
 		void setRtns();
 		void setRtname();

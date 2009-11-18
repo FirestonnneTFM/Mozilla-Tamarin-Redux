@@ -378,14 +378,14 @@ namespace avmplus
 				if (!bMatch)
 				{
 					int newNameCount = m->namespaceCount() + 1;
-					NamespaceSet *nsset = core->newNamespaceSet(newNameCount);
+					NamespaceSet* nsset = NamespaceSet::_create(core->GetGC(), newNameCount);
 					for (int i=0, n=m->namespaceCount(); i < n; i++)
 					{
-						nsset->namespaces[i] = m->getNamespace(i);
+						nsset->_initNsAt(i, m->getNamespace(i));
 					}
 					//Stringp s1 = string(getDefaultNamespace()->getPrefix());
 					//Stringp s2 = string(getDefaultNamespace()->getURI());
-					nsset->namespaces[newNameCount-1] = this->getDefaultNamespace();
+					nsset->_initNsAt(newNameCount-1, this->getDefaultNamespace());
 					out.setNsset(nsset);
 				}
 				else
@@ -537,14 +537,14 @@ namespace avmplus
 		{
 		case BKIND_NONE:
 			{
-				// Property does not have binding.  Might be a dynamic property.
-				// Have to walk the prototype chain.
-				const ScriptObject* curObj = AvmCore::isObject(obj) ?
-												AvmCore::atomToScriptObject(obj) :
-												toPrototype(obj);
-				
-				if (curObj->isValidDynamicName(multiname))
+				if (multiname->isValidDynamicName())
 				{
+                    // Property does not have binding.  Might be a dynamic property.
+                    // Have to walk the prototype chain.
+                    const ScriptObject* curObj = AvmCore::isObject(obj) ?
+                                                    AvmCore::atomToScriptObject(obj) :
+                                                    toPrototype(obj);
+                    
 					// Walk the prototype chain looking for the property.
 					while ((!result) && (curObj != NULL))
 					{
@@ -585,7 +585,7 @@ namespace avmplus
 				if (AvmCore::isObject(obj))
 				{
 					ScriptObject* o = AvmCore::atomToScriptObject(obj);
-					if (o->isValidDynamicName(multiname) && o->traits()->needsHashtable())
+					if (multiname->isValidDynamicName() && o->traits()->needsHashtable())
 					{
 						result = o->deleteMultinameProperty(multiname);
 					}
@@ -655,9 +655,9 @@ namespace avmplus
 				// to their __proto__ object.  but they are sealed, so fail if
 				// the property is not found on the proto chain.
 
-				ScriptObject* delegate = toPrototype(obj);
-				if (delegate->isValidDynamicName(multiname))
+				if (multiname->isValidDynamicName())
 				{
+                    ScriptObject* delegate = toPrototype(obj);
 					return delegate->ScriptObject::getStringPropertyFromProtoChain(multiname->getName(), delegate, toTraits(obj));
 				}
 				else

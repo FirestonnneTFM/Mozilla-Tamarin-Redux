@@ -41,31 +41,45 @@
 
 namespace avmplus
 {
+	class NamespaceSetIterator
+	{
+    private:
+		const NamespaceSet* const nsset;
+		uint32_t i;
+	public:
+		NamespaceSetIterator(const NamespaceSet* n);
+        bool hasNext() const;
+        Namespacep next();
+	};
+
 	/**
 	 * NamespaceSet is a reference to 0 or more namespaces.  It consists
 	 * of a list of namespaces.
 	 */
 	class NamespaceSet : public MMgc::GCObject
 	{
+        friend class AbcParser;
+        friend class AvmCore;
+        friend class Toplevel;
+    private:
+        // hi 31 bits: count
+        // lo bit: containsAnyPublic flag
+		uint32_t _countAndFlags;
+		Namespacep _namespaces[1/*namespaceCount*/];
+    
+    private:
+		NamespaceSet();
+        
+        // these are only for use by friends
+        static NamespaceSet* _create(MMgc::GC* gc, uint32_t count);
+        void _initNsAt(uint32_t i, Namespacep ns);
+
 	public:
-		int size;
-		Namespacep namespaces[1/*namespaceCount*/];
-
-		NamespaceSet(int namespaceCount);
-
-		NamespaceSet(Namespace* ns)
-		{
-			this->size = 1;
-			this->namespaces[0] = ns;
-		}
-
-		bool contains(Namespace* ns) const
-		{
-			for (int i=0,n=size; i < n; i++)
-				if (namespaces[i] == ns)
-					return true;
-			return false;
-		}
+        static const NamespaceSet* create(MMgc::GC* gc, Namespacep ns);
+		bool contains(Namespace* ns) const;
+		bool containsAnyPublicNamespace() const;
+		uint32_t count() const;
+		Namespacep nsAt(uint32_t i) const;
 
 //#ifdef AVMPLUS_VERBOSE
 	public:

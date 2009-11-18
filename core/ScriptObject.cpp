@@ -193,19 +193,12 @@ namespace avmplus
 
 	bool ScriptObject::hasMultinameProperty(const Multiname* multiname) const
 	{
-		if (traits()->needsHashtable())
-		{
-			if (isValidDynamicName(multiname))
+		if (traits()->needsHashtable() && multiname->isValidDynamicName())
 			{
 				return hasAtomProperty(multiname->getName()->atom());
 			}
 			else
 			{
-				return false;
-			}
-		}
-		else
-		{
 			// ISSUE should this walk the proto chain?
 			return false;
 		}
@@ -260,7 +253,7 @@ namespace avmplus
 
 	void ScriptObject::setMultinameProperty(const Multiname* name, Atom value)
 	{
-		if (traits()->needsHashtable() && isValidDynamicName(name))
+		if (traits()->needsHashtable() && name->isValidDynamicName())
 		{
 			setStringProperty(name->getName(), value);
 		}
@@ -337,7 +330,7 @@ namespace avmplus
 	
 	bool ScriptObject::deleteMultinameProperty(const Multiname* name)
 	{
-		if (traits()->needsHashtable() && isValidDynamicName(name))
+		if (traits()->needsHashtable() && name->isValidDynamicName())
 		{
 			return deleteStringProperty(name->getName());
 		}
@@ -454,7 +447,7 @@ namespace avmplus
 
 	Atom ScriptObject::getMultinameProperty(const Multiname* multiname) const
 	{
-		if (isValidDynamicName(multiname))
+		if (multiname->isValidDynamicName())
 		{
 			return getStringProperty(multiname->getName());
 		}

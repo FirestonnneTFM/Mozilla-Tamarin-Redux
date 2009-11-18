@@ -3484,12 +3484,6 @@ return the result of the comparison ToPrimitive(x) == y.
 		return newNamespace(uri, Namespace::NS_Public, this->getAPI(NULL)); 
 	}
 
-	NamespaceSet* AvmCore::newNamespaceSet(int nsCount)
-	{
-		size_t extra = (nsCount >= 1 ? nsCount-1 : 0)*sizeof(Atom);
-		return new (GetGC(), extra) NamespaceSet(nsCount);
-	}
-
 	Atom AvmCore::uintToAtom(uint32_t n)
 	{
 #ifdef AVMPLUS_64BIT
@@ -4449,33 +4443,32 @@ return the result of the comparison ToPrimitive(x) == y.
 		this->largest_api = 0x1 << (apis_count-1);
 		this->active_api_flags = 0;
 		// cache public namespaces
-		this->publicNamespaces = newNamespaceSet(apis_count);
-		Namespacep* namespaces = this->publicNamespaces->namespaces;
+		this->publicNamespaces = NamespaceSet::_create(GetGC(), apis_count);
 		for (uint32_t i = 0; i < apis_count; ++i) {
 			Namespacep ns = this->internNamespace(this->newNamespace(kEmptyString, Namespace::NS_Public, 0x1<<i));
-			WBRC(GetGC(), this->publicNamespaces, &namespaces[i], ns);
+            publicNamespaces->_initNsAt(i, ns);
 		}
 	}
 
 	Namespacep AvmCore::findPublicNamespace()
 	{	
-		return publicNamespaces->namespaces[ApiUtils::toVersion(this, this->getAPI(NULL))-apis_start];
+		return publicNamespaces->nsAt(ApiUtils::toVersion(this, this->getAPI(NULL))-apis_start);
 	}
 
 	Namespacep AvmCore::getPublicNamespace(PoolObject* pool)
 	{
 		AvmAssert(pool != NULL);
-		return publicNamespaces->namespaces[ApiUtils::toVersion(this, pool->getAPI())-apis_start];
+		return publicNamespaces->nsAt(ApiUtils::toVersion(this, pool->getAPI())-apis_start);
 	}
 
 	Namespacep AvmCore::getPublicNamespace(int32_t api) 
 	{
-		return publicNamespaces->namespaces[ApiUtils::toVersion(this, api)-apis_start];
+		return publicNamespaces->nsAt(ApiUtils::toVersion(this, api)-apis_start);
 	}
 
 	Namespacep AvmCore::getAnyPublicNamespace() 
 	{
-		return publicNamespaces->namespaces[ApiUtils::toVersion(this, largest_api)-apis_start];
+		return publicNamespaces->nsAt(ApiUtils::toVersion(this, largest_api)-apis_start);
 	}
 
 	// global helpers
