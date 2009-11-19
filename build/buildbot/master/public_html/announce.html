@@ -37,7 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 -->
 <div class="Announcement">
-
+<iframe width="100%" height="30" frameborder="0" scrolling="no" src="status.html"></iframe>
 <center>
     <table width="100%" valign="top" bgcolor="#efefef" style="border-top-left-radius: 10px; -webkit-border-top-left-radius: 40px;  -webkit-border-top-right-radius: 40px;  -webkit-border-bottom-left-radius: 40px;  -webkit-border-bottom-right-radius: 40px; ">
         <tr>
@@ -87,11 +87,6 @@
             </td>
             <td width="72%">
                 <table width="100%">
-                    <tr>
-                        <td class="Event" align="center">Phase</td>
-                        <td class="Event" align="center">Status</td>
-                        <td class="Event" align="center">Builders</td>
-                    </tr>
                     <script language="javascript">
                         var compile = "builder=windows-compile&builder=windows64-compile&builder=mac-intel-10.4-compile&builder=mac-intel-10.5-compile&builder=mac64-intel-compile&builder=mac-ppc-10.4a-compile&builder=mac-ppc-10.4b-compile&builder=mac-ppc-10.5a-compile&builder=mac-ppc-10.5b-compile&builder=mac64-ppc-compile&builder=linux-compile&builder=linux64-compile&builder=winmobile-emulator-compile&builder=solaris-sparc-compile"
                         var smoke = "builder=windows-smoke&builder=windows64-smoke&builder=mac-intel-10.4-smoke&builder=mac-intel-10.5-smoke&builder=mac64-intel-smoke&builder=mac-ppc-10.4a-smoke&builder=mac-ppc-10.4b-smoke&builder=mac-ppc-10.5a-smoke&builder=mac-ppc-10.5b-smoke&builder=mac64-ppc-smoke&builder=linux-smoke&builder=linux64-smoke&builder=winmobile-emulator-smoke&builder=solaris-sparc-smoke"
@@ -111,19 +106,30 @@
                             return type + "?" + content + "&reload=30";
                         }
 
+                        function DisplayHeader(name) {
+                            //document.write('<tr><td class="Event" align="center" colspan="3">'+name+'</td></tr>');
+                            document.write('<tr><td class="Event" align="center">Phase</td><td class="Event" align="center">Status</td><td class="Event" align="center">'+name+' Builders</td></tr>');
+                        }
                         function DisplayBar(content, name, builder) {
                             document.write("<tr><td><a href='" + GetUrl(waterfall, content) + "'>" + name + "</a></td><td><iframe width='60' height='20' frameborder='0' scrolling='no' src='" + status_url + builder + "'></iframe></td><td width='99%'><iframe width='100%' height='20' frameborder='0' scrolling='no' src='" + GetUrl(bar, content) + "'></iframe></td></tr>\n");
                         }
-
+                        
+                        DisplayHeader("Main Build Phase 1");
                         DisplayBar(compile, "Compile", "compile");
                         DisplayBar(smoke, "Smoke", "smoke");
                         DisplayBar(test, "Test", "test");
+                        
+                        DisplayHeader("Main Build Phase 2");
+                        DisplayBar(performance, "Performance", "performance");
+                        DisplayBar(deep, "Deep-Test", "deep");
+                        
+                        DisplayHeader("Sandbox Build");
                         DisplayBar(compile_sandbox, "Sandbox&nbsp;Compile", "compile-sandbox");
                         DisplayBar(smoke_sandbox, "Sandbox&nbsp;Smoke", "smoke-sandbox");
                         DisplayBar(test_sandbox, "Sandbox&nbsp;Test", "test-sandbox");
-                        DisplayBar(performance, "Performance", "performance");
-                        DisplayBar(deep, "Deep-Test", "deep");
+                        
                     </script>
+                    
                 </table>
             </td>
             <td width="3%">
