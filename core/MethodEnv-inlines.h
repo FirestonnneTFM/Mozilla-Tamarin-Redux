@@ -170,6 +170,8 @@ REALLY_INLINE FunctionEnv::FunctionEnv(MethodInfo* _method, ScopeChain* _scope)
     : MethodEnv(_method, _scope)
 { }
 
+#ifdef FEATURE_NANOJIT
+
 #if VMCFG_METHODENV_IMPL32
 
 REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, VTable* v)
@@ -180,7 +182,8 @@ REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, uint32_t c)
     : MethodEnvProcHolder((GprMethodProc)p), imtMapCount(c)
 { }
 
-#else
+#else // !VMCFG_METHODENV_IMPL32
+
 REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, VTable* v)
     : MethodEnvProcHolder((MethodInfo*)&methodProcHolder), vtable(v), methodProcHolder((GprMethodProc)p)
 { }
@@ -188,7 +191,8 @@ REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, VTable* v)
 REALLY_INLINE ImtThunkEnv::ImtThunkEnv(GprImtThunkProc p, uint32_t c)
     : MethodEnvProcHolder((MethodInfo*)&methodProcHolder), imtMapCount(c), methodProcHolder((GprMethodProc)p)
 { }
-#endif
+
+#endif // VMCFG_METHODENV_IMPL32
 
 REALLY_INLINE GprImtThunkProc ImtThunkEnv::implImtGPR() const
 {
@@ -199,5 +203,7 @@ REALLY_INLINE ImtThunkEntry* ImtThunkEnv::entries() const
 {
     return (ImtThunkEntry*)(this+1);
 }
+
+#endif // FEATURE_NANOJIT
 
 } // namespace avmplus
