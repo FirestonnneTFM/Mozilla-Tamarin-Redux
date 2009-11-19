@@ -43,7 +43,7 @@ namespace avmplus
 {
 	// note that some of these have (partial) guts of Toplevel::coerce replicated here, for efficiency.
 	// if you find bugs here, you might need to update Toplevel::coerce as well (and vice versa).
-	Atom* FASTCALL MethodEnv::unbox1(Atom atom, Traits* t, Atom* args)
+	Atom* FASTCALL MethodEnv::coerceUnbox1(Atom atom, Traits* t, Atom* args)
 	{
 		// using computed-gotos here doesn't move the needle appreciably in my testing
 		switch (Traits::getBuiltinType(t))
@@ -316,7 +316,7 @@ namespace avmplus
 		}
 		else
 		{
-			unbox1(thisArg, ms->paramTraits(0), &thisArg);
+			coerceUnbox1(thisArg, ms->paramTraits(0), &thisArg);
 			return endCoerce(0, (uint32_t*)&thisArg, ms);
 		}
 	}
@@ -457,7 +457,7 @@ namespace avmplus
 		const int32_t param_count = ms->param_count();
 		int32_t end = argc >= param_count ? param_count : argc;
 		for (int32_t i=0; i <= end; i++)
-			args = unbox1(in[i], ms->paramTraits(i), args);
+			args = coerceUnbox1(in[i], ms->paramTraits(i), args);
 		while (end < argc)
 			*args++ = in[++end];
 	}
@@ -466,24 +466,24 @@ namespace avmplus
 	{
 		int32_t argc = a->getLength();
 
-		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
+		Atom *args = coerceUnbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
 		const int32_t param_count = ms->param_count();
 		int32_t end = argc >= param_count ? param_count : argc;
 		for (int32_t i=0; i < end; i++)
-			args = unbox1(a->getUintProperty(i), ms->paramTraits(i+1), args);
+			args = coerceUnbox1(a->getUintProperty(i), ms->paramTraits(i+1), args);
 		while (end < argc)
 			*args++ = a->getUintProperty(end++);
 	}
 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 	{
-		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
+		Atom *args = coerceUnbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
 		const int32_t param_count = ms->param_count();
 		int32_t end = argc >= param_count ? param_count : argc;
 		for (int32_t i=0; i < end; i++)
-			args = unbox1(in[i], ms->paramTraits(i+1), args);
+			args = coerceUnbox1(in[i], ms->paramTraits(i+1), args);
 		while (end < argc)
 			*args++ = in[end++];
 	}
