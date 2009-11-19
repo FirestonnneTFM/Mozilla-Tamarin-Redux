@@ -47,24 +47,20 @@ namespace avmplus
 
 #if VMCFG_METHODENV_IMPL32
 	protected:
-		inline MethodEnvProcHolder(GprMethodProc p) : _implGPR(p) { }
-	public:
-		inline GprMethodProc implGPR() const { return _implGPR; }
-		inline FprMethodProc implFPR() const { return _implFPR; }
-	protected:
+		MethodEnvProcHolder(GprMethodProc p);
 		union {
 			GprMethodProc _implGPR;
 			FprMethodProc _implFPR;
 		};
 #else
 	protected:
-		inline MethodEnvProcHolder(MethodInfo* m) : method(m) { }
-	public:
-		inline GprMethodProc implGPR() const { return method->implGPR(); }
-		inline FprMethodProc implFPR() const { return method->implFPR(); }
+		MethodEnvProcHolder(MethodInfo* m);
 	public:
 		MethodInfo* const method;
 #endif
+	public:
+		GprMethodProc implGPR() const;
+		FprMethodProc implFPR() const;
 	};
 	
 	class MethodEnv : public MethodEnvProcHolder
@@ -72,7 +68,7 @@ namespace avmplus
 		friend class CodegenLIR;
 	#if VMCFG_METHODENV_IMPL32
 		friend class MethodInfo;
-		static uintptr_t delegateInvoke(MethodEnv* env, int argc, uint32_t *ap);
+		static uintptr_t delegateInvoke(MethodEnv* env, int32_t argc, uint32_t *ap);
 	#endif
 	public:
 		/** vtable for the activation scope inside this method */
@@ -83,15 +79,15 @@ namespace avmplus
 
 		MethodEnv(MethodInfo* method, ScopeChain* scope);
 
-		REALLY_INLINE AbcEnv* abcEnv() const { return _scope->abcEnv(); }
-		REALLY_INLINE AvmCore* core() const { return method->pool()->core; }
-		REALLY_INLINE CodeContext* codeContext() const { return abcEnv()->codeContext(); }
-		REALLY_INLINE DomainEnv* domainEnv() const { return abcEnv()->domainEnv(); }
-		REALLY_INLINE ScopeChain* scope() const { return _scope; }
-		REALLY_INLINE MethodEnv* super_init() const { AvmAssert(vtable()->base != NULL); return vtable()->base->init; }
-		REALLY_INLINE Toplevel* toplevel() const { return vtable()->toplevel(); }
-		inline Stringp traitsName() const { return vtable()->traits->name(); }
-		inline Namespacep traitsNs() const { return vtable()->traits->ns(); }
+		AbcEnv* abcEnv() const;
+		AvmCore* core() const;
+		CodeContext* codeContext() const;
+		DomainEnv* domainEnv() const;
+		ScopeChain* scope() const;
+		MethodEnv* super_init() const;
+		Toplevel* toplevel() const;
+		Stringp traitsName() const;
+		Namespacep traitsNs() const;
 
 		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
@@ -117,18 +113,18 @@ namespace avmplus
 		 */
 		Atom coerceEnter(Atom thisArg);
 		Atom coerceEnter(Atom thisArg, ArrayObject* a);
-		Atom coerceEnter(Atom thisArg, int argc, Atom* argv);
-		Atom coerceEnter(int argc, Atom* argv);
+		Atom coerceEnter(Atom thisArg, int32_t argc, Atom* argv);
+		Atom coerceEnter(int32_t argc, Atom* argv);
 
 	private:
 		MethodSignaturep get_ms();
-		inline bool isInterpreted();
-		Atom endCoerce(int argc, uint32_t *ap, MethodSignaturep ms);
-		int  startCoerce(int argc, MethodSignaturep ms);
-		Atom coerceUnboxEnter(int argc, Atom* atomv);
+		bool isInterpreted();
+		Atom endCoerce(int32_t argc, uint32_t *ap, MethodSignaturep ms);
+		int32_t  startCoerce(int32_t argc, MethodSignaturep ms);
+		Atom coerceUnboxEnter(int32_t argc, Atom* atomv);
 		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms);
-		void unboxCoerceArgs(int argc, Atom* in, uint32_t *ap, MethodSignaturep ms);
-		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32_t *argv, MethodSignaturep ms);
+		void unboxCoerceArgs(int32_t argc, Atom* in, uint32_t *ap, MethodSignaturep ms);
+		void unboxCoerceArgs(Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms);
 		void FASTCALL nullcheckfail(Atom atom);
 		Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args);
 
@@ -138,16 +134,10 @@ namespace avmplus
 	// helper functions used from compiled code
 	public:
 		/** null pointer check */
-	    inline void nullcheck(Atom atom)
-		{
-			// Shark recommends inlining the isNullOrUndefined call
-			if (AvmCore::isNullOrUndefined(atom))
-				nullcheckfail(atom);
-		}
-		
+	    void nullcheck(Atom atom);
 	    void npe();
 
-		ArrayObject* createRest(Atom* argv, int argc);
+		ArrayObject* createRest(Atom* argv, int32_t argc);
 		Atom getpropertylate_i(Atom obj, int32_t index) const;
 		Atom getpropertylate_u(Atom obj, uint32_t index) const;
 
@@ -158,8 +148,8 @@ namespace avmplus
 		Atom delpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom index);
 
 		void initMultinameLateForDelete(Multiname& name, Atom index);
-		ArrayObject* createArgumentsHelper(int argc, uint32_t *ap);
-		ArrayObject* createRestHelper(int argc, uint32_t *ap);
+		ArrayObject* createArgumentsHelper(int32_t argc, uint32_t *ap);
+		ArrayObject* createRestHelper(int32_t argc, uint32_t *ap);
 #endif
 
 		ScriptObject* newcatch(Traits *traits);
@@ -171,19 +161,19 @@ namespace avmplus
 		/**
 		 * implementation of object initializers
 		 */
-		ScriptObject* op_newobject(Atom* sp, int argc) const;
+		ScriptObject* op_newobject(Atom* sp, int32_t argc) const;
 
 		/** Implementation of OP_nextname */		
-		Atom nextname(Atom objAtom, int index) const;
+		Atom nextname(Atom objAtom, int32_t index) const;
 
 		/** Implementation of OP_nextvalue */
-		Atom nextvalue(Atom objAtom, int index) const;
+		Atom nextvalue(Atom objAtom, int32_t index) const;
 
 		/** Implementation of OP_hasnext */		
-		int hasnext(Atom objAtom, int index) const;
+		int32_t hasnext(Atom objAtom, int32_t index) const;
 
 		/** Implementation of OP_hasnext2 */		
-		int hasnextproto(Atom& objAtom, int& index) const;
+		int32_t hasnextproto(Atom& objAtom, int& index) const;
 		
 		/**
 		 * OP_newfunction
@@ -207,7 +197,7 @@ namespace avmplus
 		void setpropertylate_u(Atom obj, uint32_t index, Atom value) const;
 
 		/** same as callproperty but only considers the bindings in given vtable */
-		Atom callsuper(const Multiname* name, int argc, Atom* atomv) const;
+		Atom callsuper(const Multiname* name, int32_t argc, Atom* atomv) const;
 
 		Atom delproperty(Atom obj, const Multiname* multiname) const;
 
@@ -234,7 +224,7 @@ namespace avmplus
 		/** Implementation of OP_findproperty */		
 		Atom findproperty(ScopeChain* outer, 
 						  Atom* scopes,
-						  int extraScopes,
+						  int32_t extraScopes,
 						  const Multiname* multiname,
 						  bool strict,
 						  Atom* withBase);
@@ -248,7 +238,7 @@ namespace avmplus
 		Namespace* internRtns(Atom ns);
 
 		/** Creates the arguments array */
-		ArrayObject* createArguments(Atom *atomv, int argc);
+		ArrayObject* createArguments(Atom *atomv, int32_t argc);
 
 		/**
 		 * E4X descendants operator (..)
@@ -266,7 +256,7 @@ namespace avmplus
 		void debugEnter(Traits** frameTraits, 
 						CallStackNode* callstack,
 						FramePtr framep, 
-						volatile sintptr *eip);
+						volatile intptr_t *eip);
 
 		void debugEnterInner();
 
@@ -279,8 +269,7 @@ namespace avmplus
 		class ActivationMethodTablePair
 		{
 		public:
-			ActivationMethodTablePair(VTable *a, WeakKeyHashtable*wkh) :
-				activation(a), methodTable(wkh) {}
+			ActivationMethodTablePair(VTable *a, WeakKeyHashtable*wkh);
 		// ------------------------ DATA SECTION BEGIN
 		public:
 			VTable* const activation;
@@ -293,27 +282,22 @@ namespace avmplus
 		// and the 3rd bit is a flag for "am I a ScriptEnv"
 		enum { kIsScriptEnv = 4 };
 
-		ActivationMethodTablePair* getPair() const { return (ActivationMethodTablePair*)(activationOrMCTable&~7); }		
-		int getType() const { return activationOrMCTable&3; }
-		void setActivationOrMCTable(void *ptr, int type) 
-		{
-			AvmAssert((uintptr_t(ptr) & 7) == 0);
-			WB(core()->GetGC(), this, &activationOrMCTable, (uintptr_t)ptr | type | (activationOrMCTable & kIsScriptEnv));
-		}
+		ActivationMethodTablePair* getPair() const;
+		int32_t getType() const;
+		void setActivationOrMCTable(void *ptr, int32_t type);
 
 	protected:
-		inline void setIsScriptEnv() { activationOrMCTable |= kIsScriptEnv; }
+		void setIsScriptEnv();
 
 	public:
-		inline bool isScriptEnv() const { return (activationOrMCTable & kIsScriptEnv) != 0; }
+		bool isScriptEnv() const;
 
 #ifdef DEBUGGER
 		uint64_t invocationCount() const;
 #endif
 
 	protected:
-
-		inline VTable* vtable() const { return _scope->vtable(); }
+		VTable* vtable() const;
 
 	// ------------------------ DATA SECTION BEGIN
 #if VMCFG_METHODENV_IMPL32
@@ -344,12 +328,7 @@ namespace avmplus
 	class ScriptEnv : public MethodEnv
 	{
 	public:
-		ScriptEnv(MethodInfo* _method, VTable* _vtable, AbcEnv* _abcEnv)
-			: MethodEnv(_method, createScriptScope(_method->declaringScope(), _vtable, _abcEnv))
-		{
-			setIsScriptEnv(); 
-		}
-
+		ScriptEnv(MethodInfo* _method, VTable* _vtable, AbcEnv* _abcEnv);
 		ScriptObject* initGlobal();
 	
 	private:
@@ -364,10 +343,7 @@ namespace avmplus
 	class FunctionEnv : public MethodEnv
 	{
 	  public:
-		FunctionEnv(MethodInfo* _method, ScopeChain* _scope)
-			: MethodEnv(_method, _scope) 
-		{
-		}
+		FunctionEnv(MethodInfo* _method, ScopeChain* _scope);
 	// ------------------------ DATA SECTION BEGIN
 	  public:
 		DRCWB(ClassClosure*) closure;
@@ -386,33 +362,10 @@ namespace avmplus
 	class ImtThunkEnv : public MethodEnvProcHolder
 	{
 	public:
-#if VMCFG_METHODENV_IMPL32
-		inline ImtThunkEnv(GprImtThunkProc p, VTable* v) : 
-			MethodEnvProcHolder((GprMethodProc)p), 
-			vtable(v) 
-		{ 
-		}
-		inline ImtThunkEnv(GprImtThunkProc p, uint32_t c) : 
-			MethodEnvProcHolder((GprMethodProc)p), 
-			imtMapCount(c) 
-		{ 
-		}
-#else
-		inline ImtThunkEnv(GprImtThunkProc p, VTable* v) : 
-			MethodEnvProcHolder((MethodInfo*)&methodProcHolder), 
-			vtable(v),
-			methodProcHolder((GprMethodProc)p)
-		{ 
-		}
-		inline ImtThunkEnv(GprImtThunkProc p, uint32_t c) : 
-			MethodEnvProcHolder((MethodInfo*)&methodProcHolder), 
-			imtMapCount(c),
-			methodProcHolder((GprMethodProc)p)
-		{ 
-		}
-#endif
-		inline GprImtThunkProc implImtGPR() const { return (GprImtThunkProc)this->implGPR(); }
-		inline ImtThunkEntry* entries() const { return (ImtThunkEntry*)(this+1); }
+		ImtThunkEnv(GprImtThunkProc p, VTable* v);
+		ImtThunkEnv(GprImtThunkProc p, uint32_t c);
+		GprImtThunkProc implImtGPR() const;
+		ImtThunkEntry* entries() const;
 
 	// ------------------------ DATA SECTION BEGIN
 	public:
