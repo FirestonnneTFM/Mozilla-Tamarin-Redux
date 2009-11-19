@@ -67,10 +67,24 @@ td.Event, td.Activity, td.Change, td.Time, td.Builder {
 	background-color: #8fdf5f;
 }
 
+.successstatus {
+	color: #000000;
+	border: 1px solid #2f8f0f;
+	background-color: #8fdf5f;
+        font-size: 14px;
+}
+
 .failure {
 	color: #FFFFFF;
 	border: 1px solid #f33636;
 	background-color: #e98080;
+}
+
+.failurestatus {
+	color: #000000;
+	border: 1px solid #f33636;
+	background-color: #e98080;
+        font-size: 14px;
 }
 
 .warnings {
