@@ -87,7 +87,7 @@ namespace avmplus
 	/**
 	 * ordinary MethodInfo for abc or native method.
 	 */
-	MethodInfo::MethodInfo(int method_id, 
+	MethodInfo::MethodInfo(int32_t method_id, 
 							PoolObject* pool, 
 							const uint8_t* abc_info_pos, 
 							uint8_t abcFlags,
@@ -206,7 +206,7 @@ namespace avmplus
 	}
 #endif
 
-	/*static*/ uintptr_t MethodInfo::verifyEnterGPR(MethodEnv* env, int argc, uint32* ap)
+	/*static*/ uintptr_t MethodInfo::verifyEnterGPR(MethodEnv* env, int32_t argc, uint32_t* ap)
 	{
 		MethodInfo* f = env->method;
 
@@ -229,7 +229,7 @@ namespace avmplus
 		return f->implGPR()(env, argc, ap);
 	}
 
-	/*static*/ double MethodInfo::verifyEnterFPR(MethodEnv* env, int argc, uint32* ap)
+	/*static*/ double MethodInfo::verifyEnterFPR(MethodEnv* env, int32_t argc, uint32_t* ap)
 	{
 		MethodInfo* f = env->method;
 
@@ -615,12 +615,12 @@ namespace avmplus
 			dmi->file = file;
 	}
 
-	Stringp MethodInfo::getArgName(int index) 
+	Stringp MethodInfo::getArgName(int32_t index) 
 	{ 
 		return getRegName(index); 
 	}
 
-	Stringp MethodInfo::getLocalName(int index) 
+	Stringp MethodInfo::getLocalName(int32_t index) 
 	{ 
 		return getRegName(index+getMethodSignature()->param_count()); 
 	}
@@ -653,7 +653,7 @@ namespace avmplus
 		return _pool->getDebuggerMethodInfo(method_id);
 	}
 
-	Stringp MethodInfo::getRegName(int slot) const 
+	Stringp MethodInfo::getRegName(int32_t slot) const 
 	{
 		DebuggerMethodInfo* dmi = this->dmi();
 
@@ -663,7 +663,7 @@ namespace avmplus
 		return this->pool()->core->kundefined;
 	}
 
-	void MethodInfo::setRegName(int slot, Stringp name)
+	void MethodInfo::setRegName(int32_t slot, Stringp name)
 	{
 		DebuggerMethodInfo* dmi = this->dmi();
 
@@ -682,7 +682,7 @@ namespace avmplus
 
     // note that the "local" can be a true local (0..local_count-1) 
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-	Atom MethodInfo::boxOneLocal(FramePtr src, int srcPos, Traits** traitArr)
+	Atom MethodInfo::boxOneLocal(FramePtr src, int32_t srcPos, Traits** traitArr)
 	{
 		// if we are running jit then the types are native and we need to box em.
 		if (_flags & JIT_IMPL)
@@ -709,9 +709,9 @@ namespace avmplus
 	 *
 	 * If the method is interpreted then we just copy the Atom, no conversion is needed.
 	 */
-	void MethodInfo::boxLocals(FramePtr src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length)
+	void MethodInfo::boxLocals(FramePtr src, int32_t srcPos, Traits** traitArr, Atom* dest, int32_t destPos, int32_t length)
 	{
-        for(int i = srcPos, n = srcPos+length; i < n; i++)
+        for(int32_t i = srcPos, n = srcPos+length; i < n; i++)
         {
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
             dest[destPos++] = boxOneLocal(src, i, traitArr);
@@ -721,7 +721,7 @@ namespace avmplus
     
     // note that the "local" can be a true local (0..local_count-1) 
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-	void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int dstPos, Traits** traitArr)
+	void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int32_t dstPos, Traits** traitArr)
 	{
 		if (_flags & JIT_IMPL)
 		{
@@ -781,9 +781,9 @@ namespace avmplus
 	 *
 	 * If the method is interpreted then we just copy the Atom, no conversion is needed.
 	 */
-	void MethodInfo::unboxLocals(const Atom* src, int srcPos, Traits** traitArr, FramePtr dest, int destPos, int length)
+	void MethodInfo::unboxLocals(const Atom* src, int32_t srcPos, Traits** traitArr, FramePtr dest, int32_t destPos, int32_t length)
 	{
-        for (int i = destPos, n = destPos+length; i < n; i++)
+        for (int32_t i = destPos, n = destPos+length; i < n; i++)
         {
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
             unboxOneLocal(src[srcPos++], dest, i, traitArr);
@@ -864,13 +864,13 @@ namespace avmplus
 	 * args, not counting the instance which is arg[0].  the
 	 * layout is [instance][arg1..argN]
 	 */
-	void MethodSignature::boxArgs(AvmCore* core, int argc, const uint32_t* ap, Atom* out) const
+	void MethodSignature::boxArgs(AvmCore* core, int32_t argc, const uint32_t* ap, Atom* out) const
 	{
 		MMGC_STATIC_ASSERT(sizeof(Atom) == sizeof(void*));	// if this ever changes, this function needs smartening
 		typedef const Atom* ConstAtomPtr;
 		// box the typed args, up to param_count
-		const int param_count = this->param_count();
-		for (int i=0; i <= argc; i++)
+		const int32_t param_count = this->param_count();
+		for (int32_t i=0; i <= argc; i++)
 		{
 			const BuiltinType bt = (i <= param_count) ? this->paramTraitsBT(i) : BUILTIN_any;
             out[i] = nativeArgToAtom(core, (void*)ap, bt);
@@ -956,8 +956,8 @@ namespace avmplus
 				optional_count = AvmCore::readU30(pos);
 				for (uint32_t j=0; j < optional_count; j++)
 				{
-					const int param = param_count-optional_count+1+j;
-					const int index = AvmCore::readU30(pos);
+					const int32_t param = param_count-optional_count+1+j;
+					const int32_t index = AvmCore::readU30(pos);
 					CPoolKind kind = (CPoolKind)*pos++;
 
 					// check that the default value is legal for the param type
@@ -974,7 +974,7 @@ namespace avmplus
 				{
 					ms->_max_stack = AvmCore::readU30(body_pos);
 					ms->_local_count = AvmCore::readU30(body_pos);
-					const int init_scope_depth = AvmCore::readU30(body_pos);
+					const int32_t init_scope_depth = AvmCore::readU30(body_pos);
 					ms->_max_scope = AvmCore::readU30(body_pos) - init_scope_depth;
 				#ifdef AVMPLUS_WORD_CODE
 				#else
@@ -992,10 +992,10 @@ namespace avmplus
 			returnType = pool->core->traits.void_itraits;
 			receiverType = declaringTraits();
 			// values derived from Traits::genInitBody()
-			const int max_stack = 2;
-			const int local_count = 1;
-			const int init_scope_depth = 1;
-			const int max_scope_depth = 1;
+			const int32_t max_stack = 2;
+			const int32_t local_count = 1;
+			const int32_t init_scope_depth = 1;
+			const int32_t max_scope_depth = 1;
 			ms->_max_stack = max_stack;
 			ms->_local_count = local_count;
 			ms->_max_scope = max_scope_depth - init_scope_depth;
@@ -1037,7 +1037,7 @@ namespace avmplus
 		return ms;
 	}
 
-	void MethodInfo::update_max_stack(int max_stack)
+	void MethodInfo::update_max_stack(int32_t max_stack)
 	{
 		MethodSignature* ms = (MethodSignature*)_msref->get();
 		if (ms)
@@ -1083,9 +1083,9 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint32 MethodInfo::size()  
+	uint32_t MethodInfo::size()  
 	{
-		uint32 size = sizeof(MethodInfo);
+		uint32_t size = sizeof(MethodInfo);
 		size += getMethodSignature()->param_count() * 2 * sizeof(Atom);
 		size += codeSize();
 		return size;
@@ -1113,7 +1113,7 @@ namespace avmplus
 	Stringp MethodInfo::getMethodNameWithTraits(Traits* t, bool includeAllNamespaces) const 
 	{
 		Stringp name = NULL;
-		const int method_id = this->method_id();
+		const int32_t method_id = this->method_id();
 		
 		PoolObject* pool = this->pool();
 		AvmCore* core = pool->core;
@@ -1142,7 +1142,7 @@ namespace avmplus
 						{ "Vector.<uint>", "Vector$uint" }, 
 						{ "Vector.<*>", "Vector$object" },
 					};
-					for (int i = 0; i < 4; ++i)
+					for (int32_t i = 0; i < 4; ++i)
 					{
 						if (tname->equalsLatin1(kNameMap[i].n))
 						{

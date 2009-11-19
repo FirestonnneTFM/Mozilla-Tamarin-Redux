@@ -205,7 +205,7 @@ namespace avmplus
 	}
 	
 	// helper
-	inline int MethodEnv::startCoerce(int argc, MethodSignaturep ms)
+	inline int32_t MethodEnv::startCoerce(int32_t argc, MethodSignaturep ms)
 	{
 		// getting toplevel() is slightly more expensive than it used to be (more indirection)...
 		// so only extract in the (rare) event of an exception
@@ -228,19 +228,19 @@ namespace avmplus
 		}
 
 		// now unbox everything, including instance and rest args
-		const int param_count = ms->param_count();
-		const int extra = argc > param_count ? argc - param_count : 0;
+		const int32_t param_count = ms->param_count();
+		const int32_t extra = argc > param_count ? argc - param_count : 0;
 		AvmAssert(ms->rest_offset() > 0 && extra >= 0);
 
 		return extra;
 	}
 
 	// helper
-	inline Atom MethodEnv::endCoerce(int argc, uint32_t *ap, MethodSignaturep ms)
+	inline Atom MethodEnv::endCoerce(int32_t argc, uint32_t *ap, MethodSignaturep ms)
 	{
 		// we know we have verified the method, so we can go right into it.
 		AvmCore* core = this->core();
-		const int bt = ms->returnTraitsBT();
+		const int32_t bt = ms->returnTraitsBT();
 		if (bt == BUILTIN_number)
 		{
 			AvmAssert(method->implFPR() != NULL);
@@ -323,12 +323,12 @@ namespace avmplus
 	
 	Atom MethodEnv::coerceEnter(Atom thisArg, ArrayObject *a)
 	{
-		int argc = a->getLength();
+		int32_t argc = a->getLength();
 		if (argc == 0)
 			return coerceEnter(thisArg);
 
 		MethodSignaturep ms = get_ms();
-		const int extra = startCoerce(argc, ms);
+		const int32_t extra = startCoerce(argc, ms);
 
 		// check receiver type first
 		// caller will coerce instance if necessary,
@@ -341,13 +341,13 @@ namespace avmplus
 			MMgc::GC::AllocaAutoPtr _atomv;
 			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
 			atomv[0] = thisArg;
-			for ( int i=0 ; i < argc ; i++ )
+			for (int32_t i=0 ; i < argc ; i++ )
 				atomv[i+1] = a->getUintProperty(i);
 			return coerceEnter(argc, atomv);
 		}
 		else
 		{
-			const int rest_offset = ms->rest_offset();
+			const int32_t rest_offset = ms->rest_offset();
 			const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 			MMgc::GC::AllocaAutoPtr _ap;
 			uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
@@ -369,7 +369,7 @@ namespace avmplus
 	{
 		MethodSignaturep ms = get_ms();
 
-		const int extra = startCoerce(argc, ms);
+		const int32_t extra = startCoerce(argc, ms);
 
 		// check receiver type first
 		// caller will coerce instance if necessary,
@@ -387,7 +387,7 @@ namespace avmplus
 		}
 		else
 		{
-			const int rest_offset = ms->rest_offset();
+			const int32_t rest_offset = ms->rest_offset();
 			const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 			MMgc::GC::AllocaAutoPtr _ap;
 			uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
@@ -401,7 +401,7 @@ namespace avmplus
 	// ("sibcalls") -- see http://www.ddj.com/architect/184401756 for a useful explanation.
 	// anyway, since we really want coerceUnboxEnter to be a tailcall from
 	// here, be sure to keep it using a compatible signature...
-	Atom MethodEnv::coerceEnter(int argc, Atom* atomv)
+	Atom MethodEnv::coerceEnter(int32_t argc, Atom* atomv)
 	{
 		// Trying hard here to allow this to be a tail call, so don't inline
 		// coerceUnboxEnter into this function - the allocation it performs
@@ -418,9 +418,9 @@ namespace avmplus
 			MethodSignaturep ms = get_ms();
 			AvmAssert(atomv[0] == toplevel->coerce(atomv[0], ms->paramTraits(0)));
 			startCoerce(argc, ms);
-			const int param_count = ms->param_count();
-			const int end = argc >= param_count ? param_count : argc;
-			for ( int i=1 ; i <= end ; i++ )
+			const int32_t param_count = ms->param_count();
+			const int32_t end = argc >= param_count ? param_count : argc;
+			for (int32_t i=1 ; i <= end ; i++ )
 				atomv[i] = coerceAtom(core, atomv[i], ms->paramTraits(i), toplevel);
 			return interpBoxed(this, argc, atomv, ms);
 		}
@@ -431,12 +431,12 @@ namespace avmplus
 
 	// In principle we want this to be inlined if the compiler is not tailcall-aware,
 	// and not inlined if it is tailcall-aware (as doing so may inhibit tail calls).
-	Atom MethodEnv::coerceUnboxEnter(int argc, Atom* atomv)
+	Atom MethodEnv::coerceUnboxEnter(int32_t argc, Atom* atomv)
 	{
 		MethodSignaturep ms = get_ms();
 		AvmAssert(atomv[0] == toplevel()->coerce(atomv[0], ms->paramTraits(0)));
-		const int extra = startCoerce(argc, ms);
-		const int rest_offset = ms->rest_offset();
+		const int32_t extra = startCoerce(argc, ms);
+		const int32_t rest_offset = ms->rest_offset();
 		const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 		MMgc::GC::AllocaAutoPtr _ap;
 		uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
@@ -450,13 +450,13 @@ namespace avmplus
 	 * args, not counting the instance which is arg[0].  the
 	 * layout is [instance][arg1..argN]
 	 */
-	void MethodEnv::unboxCoerceArgs(int argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
+	void MethodEnv::unboxCoerceArgs(int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 	{
 		Atom* args = (Atom*)argv;
 
-		const int param_count = ms->param_count();
-		int end = argc >= param_count ? param_count : argc;
-		for (int i=0; i <= end; i++)
+		const int32_t param_count = ms->param_count();
+		int32_t end = argc >= param_count ? param_count : argc;
+		for (int32_t i=0; i <= end; i++)
 			args = unbox1(in[i], ms->paramTraits(i), args);
 		while (end < argc)
 			*args++ = in[++end];
@@ -464,32 +464,32 @@ namespace avmplus
 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms)
 	{
-		int argc = a->getLength();
+		int32_t argc = a->getLength();
 
 		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
-		const int param_count = ms->param_count();
-		int end = argc >= param_count ? param_count : argc;
-		for (int i=0; i < end; i++)
+		const int32_t param_count = ms->param_count();
+		int32_t end = argc >= param_count ? param_count : argc;
+		for (int32_t i=0; i < end; i++)
 			args = unbox1(a->getUintProperty(i), ms->paramTraits(i+1), args);
 		while (end < argc)
 			*args++ = a->getUintProperty(end++);
 	}
 
-	void MethodEnv::unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
+	void MethodEnv::unboxCoerceArgs(Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 	{
 		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
-		const int param_count = ms->param_count();
-		int end = argc >= param_count ? param_count : argc;
-		for (int i=0; i < end; i++)
+		const int32_t param_count = ms->param_count();
+		int32_t end = argc >= param_count ? param_count : argc;
+		for (int32_t i=0; i < end; i++)
 			args = unbox1(in[i], ms->paramTraits(i+1), args);
 		while (end < argc)
 			*args++ = in[end++];
 	}
 
 #if VMCFG_METHODENV_IMPL32
-	uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32_t *ap)
+	uintptr_t MethodEnv::delegateInvoke(MethodEnv* env, int32_t argc, uint32_t *ap)
 	{
 		env->_implGPR = env->method->implGPR();
 		AvmAssert(env->_implGPR != (GprMethodProc)MethodEnv::delegateInvoke);
@@ -525,7 +525,7 @@ namespace avmplus
 	void MethodEnv::debugEnter(	Traits** frameTraits, 
 								CallStackNode* callstack,
 								FramePtr framep, 
-								volatile sintptr *eip)
+								volatile intptr_t *eip)
 	{
 		AvmAssert(this != 0);
 		AvmAssert(callstack != 0); 
@@ -555,7 +555,7 @@ namespace avmplus
 
 		// method_id can legitimately be -1 for activations, but we don't care about those here,
 		// so just ignore them.
-		const int method_id = this->method->method_id();
+		const int32_t method_id = this->method->method_id();
 		if (method_id >= 0)
 		{
 			this->abcEnv()->invocationCount(method_id) += 1;	// returns a reference, so this works
@@ -579,7 +579,7 @@ namespace avmplus
 		// trigger a faked "line number changed" since we exited the function and are now back on the old line (well, almost)
 		if (core->callStack && core->callStack->linenum() > 0)
 		{
-			int line = core->callStack->linenum();
+			int32_t line = core->callStack->linenum();
 			core->callStack->set_linenum(-1);
 			Debugger* debugger = core->debugger();
 			if (debugger) 
@@ -589,7 +589,7 @@ namespace avmplus
 
 	uint64_t MethodEnv::invocationCount() const 
 	{ 
-		const int method_id = this->method->method_id();
+		const int32_t method_id = this->method->method_id();
 		if (method_id < 0) return 0;
 		return this->abcEnv()->invocationCount(method_id);
 	}
@@ -616,13 +616,13 @@ namespace avmplus
 		toplevel()->throwTypeError(kConvertNullToObjectError);
 	}
 
-	ArrayObject* MethodEnv::createRest(Atom* argv, int argc)
+	ArrayObject* MethodEnv::createRest(Atom* argv, int32_t argc)
 	{
 		// create arguments Array using argv[param_count..argc]
 		MethodSignaturep ms = get_ms();
-		const int param_count = ms->param_count();
+		const int32_t param_count = ms->param_count();
 		Atom* extra = argv + param_count + 1;
-		const int extra_count = argc > param_count ? argc - param_count : 0;
+		const int32_t extra_count = argc > param_count ? argc - param_count : 0;
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 

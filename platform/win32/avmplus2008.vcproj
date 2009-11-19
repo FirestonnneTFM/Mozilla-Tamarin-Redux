@@ -1992,11 +1992,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\MethodEnv-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\MethodEnv.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\core\MethodInfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\MethodInfo-inlines.h"
 				>
 			</File>
 			<File
