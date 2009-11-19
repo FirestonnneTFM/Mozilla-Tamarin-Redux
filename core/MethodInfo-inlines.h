@@ -39,6 +39,7 @@
 
 namespace avmplus
 {
+#ifdef DEBUGGER
 REALLY_INLINE DebuggerMethodInfo::DebuggerMethodInfo(int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes) :
     firstSourceLine(0),
     lastSourceLine(0),
@@ -47,6 +48,7 @@ REALLY_INLINE DebuggerMethodInfo::DebuggerMethodInfo(int32_t _local_count, uint3
     local_count(_local_count),
     max_scopes(_max_scopes)
 {}
+#endif
 
 REALLY_INLINE MethodInfoProcHolder::MethodInfoProcHolder(GprMethodProc p)
     : _implGPR(p)
