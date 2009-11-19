@@ -458,6 +458,7 @@ namespace avmplus
 	#endif
 	}
 
+#ifdef DEBUGGER
     // note that the "local" can be a true local (0..local_count-1) 
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
 	static Atom nativeLocalToAtom(AvmCore* core, void* src, BuiltinType bt)
@@ -500,6 +501,7 @@ namespace avmplus
             }
         }
     }
+#endif
     
 	// this looks deceptively similar to nativeLocalToAtom, but is subtly different:
 	// for locals, int/uint/bool are always stored as a 32-bit value in the 4 bytes
@@ -517,11 +519,11 @@ namespace avmplus
             }
             case BUILTIN_int:
             {
-                return core->intToAtom(*(const intptr_t*)src);
+                return core->intToAtom((int32_t)*(const intptr_t*)src);
             }
             case BUILTIN_uint:
             {
-                return core->uintToAtom(*(const uintptr_t*)src);
+                return core->uintToAtom((uint32_t)*(const uintptr_t*)src);
             }
             case BUILTIN_boolean:
             {
