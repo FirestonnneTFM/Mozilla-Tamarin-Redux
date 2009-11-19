@@ -470,18 +470,15 @@ namespace avmplus
             }
             case BUILTIN_int:
             {
-				// this looks weird, but is correct for big-endian systems (eg PPC64)
-                return core->intToAtom((int32_t)*(const intptr_t*)src);
+                return core->intToAtom(*(const int32_t*)src);
             }
             case BUILTIN_uint:
             {
-				// this looks weird, but is correct for big-endian systems (eg PPC64)
-                return core->uintToAtom((uint32_t)*(const uintptr_t*)src);
+                return core->uintToAtom(*(const uint32_t*)src);
             }
             case BUILTIN_boolean:
             {
-				// this looks weird, but is correct for big-endian systems (eg PPC64)
-                return *(const intptr_t*)src ? trueAtom : falseAtom;
+                return *(const int32_t*)src ? trueAtom : falseAtom;
             }
             case BUILTIN_any:
             case BUILTIN_object:
@@ -504,6 +501,53 @@ namespace avmplus
         }
     }
     
+	// this looks deceptively similar to nativeLocalToAtom, but is subtly different:
+	// for locals, int/uint/bool are always stored as a 32-bit value in the 4 bytes
+	// of the memory slot (regardless of wordsize and endianness); 
+	// for args, int/uint/bool are always expanded to full intptr size. In practice
+	// this only makes a difference on big-endian 64-bit systems (eg PPC64) which makes
+	// it a hard bug to notice.
+    static Atom nativeArgToAtom(AvmCore* core, void* src, BuiltinType bt)
+    {
+        switch (bt)
+        {
+            case BUILTIN_number:
+            {
+                return core->doubleToAtom(unpack_double(src));
+            }
+            case BUILTIN_int:
+            {
+                return core->intToAtom(*(const intptr_t*)src);
+            }
+            case BUILTIN_uint:
+            {
+                return core->uintToAtom(*(const uintptr_t*)src);
+            }
+            case BUILTIN_boolean:
+            {
+                return *(const intptr_t*)src ? trueAtom : falseAtom;
+            }
+            case BUILTIN_any:
+            case BUILTIN_object:
+            case BUILTIN_void:
+            {
+                return *(const Atom*)src;
+            }
+            case BUILTIN_string:
+            {
+                return (*(const Stringp*)src)->atom();
+            }
+            case BUILTIN_namespace:
+            {
+                return (*(const Namespacep*)src)->atom();
+            }
+            default:
+            {
+                return (*(ScriptObject**)src)->atom();
+            }
+        }
+    }
+
 #ifdef DEBUGGER
 
 	/*static*/ DebuggerMethodInfo* DebuggerMethodInfo::create(AvmCore* core, int32_t local_count, uint32_t codeSize, int32_t max_scopes)
@@ -690,20 +734,17 @@ namespace avmplus
 				}
                 case BUILTIN_int:
                 {
-					// this looks weird, but is correct for big-endian systems (eg PPC64)
-                    *(intptr_t*)dst = AvmCore::integer_i(src);
+                    *(int32_t*)dst = AvmCore::integer_i(src);
                     break;
                 }
                 case BUILTIN_uint:
                 {
-					// this looks weird, but is correct for big-endian systems (eg PPC64)
-                    *(uintptr_t*)dst = AvmCore::integer_u(src);
+                    *(uint32_t*)dst = AvmCore::integer_u(src);
                     break;
                 }
                 case BUILTIN_boolean:
                 {
-					// this looks weird, but is correct for big-endian systems (eg PPC64)
-                    *(intptr_t*)dst = (int32_t)atomGetBoolean(src);
+                    *(int32_t*)dst = (int32_t)atomGetBoolean(src);
                     break;
                 }
 				case BUILTIN_any:
@@ -830,7 +871,7 @@ namespace avmplus
 		for (int i=0; i <= argc; i++)
 		{
 			const BuiltinType bt = (i <= param_count) ? this->paramTraitsBT(i) : BUILTIN_any;
-            out[i] = nativeLocalToAtom(core, (void*)ap, bt);
+            out[i] = nativeArgToAtom(core, (void*)ap, bt);
             ap += (bt == BUILTIN_number ? sizeof(double) : sizeof(Atom)) / sizeof(int32_t);
 		}
 	}
