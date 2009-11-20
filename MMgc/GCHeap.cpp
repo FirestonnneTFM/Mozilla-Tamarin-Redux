@@ -339,6 +339,12 @@ namespace MMgc
 		if (zero) {
 			VMPI_memset(baseAddr, 0, size * kBlockSize);
 		}
+
+		// fail the allocation if we hit soft limit and canFail
+		if(status == kMemSoftLimit && (flags & kCanFail) != 0) {
+			FreeInternal(baseAddr, true);
+			return NULL;
+		}				   
 		
 		return baseAddr;
 	}
@@ -1159,6 +1165,11 @@ namespace MMgc
 
 	void GCHeap::ExpandHeap(size_t askSize, bool canFail)
 	{
+		// once we hit soft limit don't allow canFail allocs
+		if(canFail && status == kMemSoftLimit) {
+			return;
+		}			
+			
 		bool result = ExpandHeapInternal(askSize);
 		if(!result)
 		{ 
