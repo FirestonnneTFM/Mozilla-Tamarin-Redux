@@ -64,6 +64,11 @@ REALLY_INLINE FprMethodProc MethodInfoProcHolder::implFPR() const
     return _implFPR;
 }
 
+REALLY_INLINE bool MethodInfoProcHolder::isInterpreted() const
+{
+    return _implGPR == interpGPR || _implFPR == interpFPR;
+}
+
 REALLY_INLINE uintptr_t MethodInfo::iid() const
 {
     return ((uintptr_t)this)>>3;
