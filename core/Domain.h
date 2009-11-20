@@ -109,8 +109,6 @@ namespace avmplus
 		/*virtual*/ void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize);
 
 	private:
-		// verifies that the Traits correspond to a memory object
-		GlobalMemoryProvider* getGlobalMemoryProvider(ScriptObject*) const;
 		// subscribes to the memory object "mem" such that "mem" will call our
 		// notifyGlobalMemoryChanged when it moves
 		bool globalMemorySubscribe(ScriptObject* providerObject);
