@@ -57,10 +57,8 @@ namespace avmshell
 		bool Grow(uint32_t newCapacity);
 		U8 *GetBuffer() const { return m_array; }
 
- 		typedef void (Domain::*GlobalMemoryNotifyFunc)(unsigned char *, uint32_t) const;
- 
- 		bool GlobalMemorySubscribe(const Domain *subscriber, GlobalMemoryNotifyFunc notify);
- 		bool GlobalMemoryUnsubscribe(const Domain *subscriber);
+        bool addSubscriber(GlobalMemorySubscriber* subscriber);
+        bool removeSubscriber(GlobalMemorySubscriber* subscriber);
 
 	protected:
  		// singly linked list of all subscribers to this ByteArray...
@@ -77,12 +75,11 @@ namespace avmshell
  			// ByteArray don't result in a DomainEnv not being
  			// collectable because a ByteArray refers to it and
  			// is referenced by another live DomainEnv
- 			MMgc::GCWeakRef *weakDomain;
- 			GlobalMemoryNotifyFunc notify;
+ 			MMgc::GCWeakRef* weakSubscriber;
  			// next link
- 			SubscriberLink *next;
+ 			SubscriberLink* next;
  		};
- 		SubscriberLink *m_subscriberRoot;
+ 		SubscriberLink* m_subscriberRoot;
  
  		void NotifySubscribers();
 		void ThrowMemoryError();
@@ -114,7 +111,7 @@ namespace avmshell
 		uint32_t m_filePointer;
 	};
 	
-	class ByteArrayObject : public ScriptObject
+	class ByteArrayObject : public ScriptObject, public GlobalMemoryProvider
 	{
 	public:
 		ByteArrayObject(VTable *ivtable, ScriptObject *delegate);
@@ -180,16 +177,13 @@ namespace avmshell
 
 		void writeFile(Stringp filename);
 
- 	protected:
-		// If this ByteArray is attached as MOPS memory to the
-		// domain, must notify of changes.
-		friend class avmplus::Domain;
- 
-	private:
- 		bool globalMemorySubscribe(const Domain *subscriber,
- 			ByteArray::GlobalMemoryNotifyFunc notify);
- 		bool globalMemoryUnsubscribe(const Domain *subscriber);
+		/*virtual*/ GlobalMemoryProvider* getGlobalMemoryProvider() { return this; }
 
+        // from GlobalMemoryProvider
+        /*virtual*/ bool addSubscriber(GlobalMemorySubscriber* subscriber) { return m_byteArray.addSubscriber(subscriber); }
+        /*virtual*/ bool removeSubscriber(GlobalMemorySubscriber* subscriber) { return m_byteArray.removeSubscriber(subscriber); }
+
+	private:
 		MMgc::Cleaner c;
 		ByteArrayFile m_byteArray;
 		

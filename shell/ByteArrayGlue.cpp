@@ -182,45 +182,46 @@ namespace avmshell
  		{
  			AvmAssert(m_length >= Domain::GLOBAL_MEMORY_MIN_SIZE);
  
- 			Domain *dom = (Domain *)curLink->weakDomain->get();
+ 			GlobalMemorySubscriber* subscriber = (GlobalMemorySubscriber*)curLink->weakSubscriber->get();
  
- 			if(dom)
+ 			if (subscriber)
  			{
- 				(dom->*(curLink->notify))(m_array, m_length);
+ 				subscriber->notifyGlobalMemoryChanged(m_array, m_length);
  				prevNext = &curLink->next;
  			}
  			else
+            {
  				// Domain went away? remove link
  				MMgc::GC::WriteBarrier(prevNext, curLink->next);
+            }
  			curLink = curLink->next;
  		}
  	}
  
- 	bool ByteArray::GlobalMemorySubscribe(const Domain *subscriber, GlobalMemoryNotifyFunc notify)
+ 	bool ByteArray::addSubscriber(GlobalMemorySubscriber* subscriber)
  	{
  		if(m_length >= Domain::GLOBAL_MEMORY_MIN_SIZE)
  		{
- 			GlobalMemoryUnsubscribe(subscriber);
+ 			removeSubscriber(subscriber);
 			SubscriberLink *newLink = new (MMgc::GC::GetGC(subscriber)) SubscriberLink;
- 			newLink->weakDomain = subscriber->GetWeakRef();
- 			newLink->notify = notify;
+ 			newLink->weakSubscriber = subscriber->GetWeakRef();
  			MMgc::GC::WriteBarrier(&newLink->next, m_subscriberRoot);
  			MMgc::GC::WriteBarrier(&m_subscriberRoot, newLink);
  			// notify the new "subscriber" of the current state of the world
- 			(subscriber->*notify)(m_array, m_length);
+ 			subscriber->notifyGlobalMemoryChanged(m_array, m_length);
  			return true;
  		}
  		return false;
  	}
  
- 	bool ByteArray::GlobalMemoryUnsubscribe(const Domain *subscriber)
+ 	bool ByteArray::removeSubscriber(GlobalMemorySubscriber* subscriber)
  	{
  		SubscriberLink **prevNext = &m_subscriberRoot;
  		SubscriberLink *curLink = m_subscriberRoot;
  
  		while(curLink)
  		{
- 			if(curLink->weakDomain->get() == (MMgc::GCObject *)subscriber)
+ 			if ((GlobalMemorySubscriber*)curLink->weakSubscriber->get() == subscriber)
  			{
  				MMgc::GC::WriteBarrier(prevNext, curLink->next);
  				return true;
@@ -611,16 +612,6 @@ namespace avmshell
 		m_byteArray.Write(b, len);
 	}
 	
- 	bool ByteArrayObject::globalMemorySubscribe(const Domain *subscriber, ByteArray::GlobalMemoryNotifyFunc notify)
- 	{
- 		return m_byteArray.GlobalMemorySubscribe(subscriber, notify);
- 	}
- 
- 	bool ByteArrayObject::globalMemoryUnsubscribe(const Domain *subscriber)
- 	{
- 		return m_byteArray.GlobalMemoryUnsubscribe(subscriber);
- 	}
-
 	//
 	// ByteArrayClass
 	//
@@ -749,45 +740,3 @@ namespace avmshell
 
 }	
 
-namespace avmplus {
- 	// memory object glue
- 	bool Domain::isMemoryObject(Traits *t) const
- 	{
-		Traits *cur = t;
-
-		// walk the traits to find a builtin pool
-		while(cur && !cur->pool->isBuiltin)
-			cur = cur->base;
-
-		// have a traits with a builtin pool
-		if(cur)
-		{
-			Stringp uri = core->internConstantStringLatin1("flash.utils");
-			Namespace* ns = core->internNamespace(core->newNamespace(uri, Namespace::NS_Public, core->getAPI(NULL)));
-			// try to get traits from flash.utils.ByteArray
-			Traits *baTraits = cur->pool->getTraits(core->internConstantStringLatin1("ByteArray"), ns);
-			// and see if the original traits contains it!
-			return t->subtypeof(baTraits) != 0;
-		}
-		return false;
- 	}
- 
- 	bool Domain::globalMemorySubscribe(ScriptObject *mem) const
- 	{
-		if(isMemoryObject(mem->traits()))
-		{
-			avmshell::ByteArray::GlobalMemoryNotifyFunc notify = &Domain::notifyGlobalMemoryChanged;
- 			return ((avmshell::ByteArrayObject *)mem)->globalMemorySubscribe(this, notify);
-		}
-		return false;
- 	}
- 
- 	bool Domain::globalMemoryUnsubscribe(ScriptObject *mem) const
- 	{
-		if(isMemoryObject(mem->traits()))
-		{
-	 		return ((avmshell::ByteArrayObject *)mem)->globalMemoryUnsubscribe(this);
-		}
-		return false;
- 	}
-}	
