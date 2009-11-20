@@ -1874,6 +1874,10 @@ namespace MMgc
 			gc_total += gc->GetNumBlocks() * kBlockSize;
 		}
 
+#ifdef MMGC_MEMORY_PROFILER
+		fixedMalloc.DumpMemoryInfo();
+#endif
+
 		// Gross stats are not meaningful if the profiler is running, see bugzilla 490014.
 		// Disabling their printing is just an expedient fix to avoid misleading data being
 		// printed.  There are other, more complicated, fixes we should adopt.

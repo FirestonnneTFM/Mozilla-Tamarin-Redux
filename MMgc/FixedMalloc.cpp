@@ -196,7 +196,7 @@ namespace MMgc
 		totalAskSize += totalAskSizeLargeAllocs;
 #endif
 
-		// not entirely accurate
+		// not entirely accurate, assumes large allocations using all of last page (large ask size not stored)
 		totalAllocated += numLargeChunks * GCHeap::kBlockSize;
 	}
 
@@ -274,5 +274,20 @@ namespace MMgc
 		}	
 		return total;
 	}
+
+#ifdef MMGC_MEMORY_PROFILER
+	void FixedMalloc::DumpMemoryInfo()
+	{
+		size_t inUse, ask;
+		GetUsageInfo(ask, inUse);
+		GCLog("[mem] FixedMalloc total %d pages inuse %d bytes ask %d bytes\n", GetTotalSize(), inUse, ask);
+		for (int i=0; i<kNumSizeClasses; i++) {
+			m_allocs[i].GetUsageInfo(ask, inUse);
+			if( m_allocs[i].GetNumChunks() > 0)
+				GCLog("[mem] FixedMalloc[%d] total %d pages inuse %d bytes ask %d bytes\n", kSizeClasses[i], m_allocs[i].GetNumChunks(), inUse, ask);
+		}
+		GCLog("[mem] FixedMalloc[large] total %d pages\n", numLargeChunks);
+	}
+#endif
 }
 
