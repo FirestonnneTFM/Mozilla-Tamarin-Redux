@@ -2031,14 +2031,17 @@ bail:
 
 		int efficiency = maxAlloc > 0 ? inUse * 100 / maxAlloc : 100;
 		if(inUse) {
-			GCLog("Allocator(%d):   %d%% efficiency %d bytes (%d kb) in use out of %d bytes (%d kb)\n", a->GetItemSize(), efficiency, inUse, inUse>>10, maxAlloc, maxAlloc>>10);
+			const char *name = a->ContainsPointers() ? a->ContainsRCObjects() ? "rc" : "gc" : "opaque";
+			if(heap->config.verbose)
+				GCLog("[mem] gc[%d] %s allocator:   %d%% efficiency %d bytes (%d kb) in use out of %d bytes (%d kb)\n", a->GetItemSize(), name, efficiency, inUse, inUse>>10, maxAlloc, maxAlloc>>10);
 #ifdef MMGC_MEMORY_PROFILER
 			if(heap->HooksEnabled())
 			{
 				size_t askSize = a->GetTotalAskSize();
 				internal_waste = inUse - askSize;
 				size_t internal_efficiency = askSize * 100 / inUse;
-				GCLog("\t\t\t\t %u%% internal efficiency %u bytes (%u kb) actually requested out of %d bytes(%d kb)\n", internal_efficiency, (uint32_t) askSize, (uint32_t)(askSize>>10), inUse, inUse>>10);
+				if(heap->config.verbose)
+					GCLog("\t\t\t\t %u%% internal efficiency %u bytes (%u kb) actually requested out of %d bytes(%d kb)\n", internal_efficiency, (uint32_t) askSize, (uint32_t)(askSize>>10), inUse, inUse>>10);
 			}
 #endif
 		}

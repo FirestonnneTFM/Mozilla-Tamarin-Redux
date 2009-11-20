@@ -131,6 +131,10 @@ namespace MMgc
 		 */
 		size_t GetBytesInUse();
 
+#ifdef MMGC_MEMORY_PROFILER
+		void DumpMemoryInfo();
+#endif
+
 	private:
 		// Initialize FixedMalloc.  Must be called from GCHeap during GCHeap setup.
 		void InitInstance(GCHeap *heap);
