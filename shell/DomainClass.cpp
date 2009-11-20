@@ -188,12 +188,12 @@ namespace avmshell
 
  	ByteArrayObject* DomainObject::get_domainMemory() const
  	{
- 		return (ByteArrayObject*)domainEnv->domain()->globalMemory();
+ 		return (ByteArrayObject*)domainEnv->domain()->get_globalMemory();
  	}
  
  	void DomainObject::set_domainMemory(ByteArrayObject* mem)
  	{
- 		if(!domainEnv->domain()->setGlobalMemory(mem))
+ 		if(!domainEnv->domain()->set_globalMemory(mem))
  			toplevel()->throwError(kEndOfFileError);
  	}
 
