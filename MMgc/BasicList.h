@@ -85,6 +85,29 @@ namespace MMgc
 			items[count] = item;
 			count++;
 		}
+
+		bool TryAdd(T item)
+		{
+			if (holes && iteratorCount == 0)
+				Compact();
+			if (count == capacity)
+			{
+				uint32_t tryCapacity = capacity + growthIncrement;
+				T* newItems = mmfx_new_array_opt(T,  tryCapacity, (MMgc::FixedMallocOpts)(kZero|kCanFail));
+				
+				if (newItems == NULL)
+					return false;
+
+				capacity = tryCapacity;
+				if (items)
+					VMPI_memcpy(newItems, items, count * sizeof(T));
+				mmfx_delete_array(items);
+				items = newItems;
+			}
+			items[count] = item;
+			count++;
+			return true;
+		}
 		
 		void Remove(T item)
 		{

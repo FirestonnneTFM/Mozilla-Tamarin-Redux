@@ -2128,8 +2128,15 @@ namespace MMgc
 	// Every new GC must register itself with the GCHeap.
 	void GCHeap::AddGC(GC *gc)
 	{ 
-		MMGC_LOCK(list_lock);
-		gcManager.addGC(gc); 
+		bool bAdded = false;
+		{
+			MMGC_LOCK(list_lock);
+			bAdded = gcManager.tryAddGC(gc);
+		}
+		if (!bAdded)
+		{
+			Abort();
+		}
 	}		
 		
 	// When the GC is destroyed it must remove itself from the GCHeap.
@@ -2144,8 +2151,15 @@ namespace MMgc
 	
 	void GCHeap::AddOOMCallback(OOMCallback *p) 
 	{
-		MMGC_LOCK(list_lock);
-		callbacks.Add(p); 
+		bool bAdded = false;
+		{
+			MMGC_LOCK(list_lock);
+			bAdded = callbacks.TryAdd(p);
+		}
+		if (!bAdded)
+		{
+			Abort();
+		}
 	}
 	
 	void GCHeap::RemoveOOMCallback(OOMCallback *p) 
