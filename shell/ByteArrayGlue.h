@@ -111,7 +111,7 @@ namespace avmshell
 		uint32_t m_filePointer;
 	};
 	
-	class ByteArrayObject : public ScriptObject, public GlobalMemoryProvider
+	class ByteArrayObject : public ScriptObject, virtual public GlobalMemoryProvider
 	{
 	public:
 		ByteArrayObject(VTable *ivtable, ScriptObject *delegate);
