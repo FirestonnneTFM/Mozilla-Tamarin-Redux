@@ -943,13 +943,15 @@ namespace MMgc
 			SetGCContextVariable(i, NULL);
 		}
 
-		gcheap->AddGC(this);
-		gcheap->AddOOMCallback(this);
  		allocaInit();
 
 		emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef));
 		MMGC_GCENTER(this);
 		emptyWeakRef = new (this) GCWeakRef(NULL);
+
+		gcheap->AddGC(this);
+		gcheap->AddOOMCallback(this);
+
 	}
 
 #ifdef _MSC_VER
