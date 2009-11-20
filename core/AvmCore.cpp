@@ -2003,7 +2003,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // not be JITted based on memory, configuration, or heuristics.
 
 		ExceptionHandlerTable* exceptions;
-        if (info->implGPR() == avmplus::interpGPR || info->implFPR() == avmplus::interpFPR)
+        if (info->isInterpreted())
             exceptions = info->word_code_exceptions();
         else
 			exceptions = info->abc_exceptions();

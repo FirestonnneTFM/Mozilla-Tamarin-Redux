@@ -86,6 +86,7 @@ namespace avmplus
 	public:
 		GprMethodProc implGPR() const;
 		FprMethodProc implFPR() const;
+		bool isInterpreted() const;
 	};
 
 	/**
