@@ -41,6 +41,67 @@
 
 namespace avmplus
 {
+	// only unbox the value (convert atom to native representation), coerce
+	// must have already happened.
+	Atom* FASTCALL MethodEnv::unbox1(Atom atom, Traits* t, Atom* arg0)
+	{
+		// atom must be correct type already, we're just unboxing it.
+		AvmAssert(atom == this->toplevel()->coerce(atom, t));
+		switch (Traits::getBuiltinType(t))
+		{
+			case BUILTIN_any:
+			case BUILTIN_object:
+			case BUILTIN_void:
+				// my, that was easy
+				break;
+
+			case BUILTIN_boolean:
+				atom = (Atom) ((atom>>3) != 0);
+				break;
+
+			case BUILTIN_int:
+				atom = AvmCore::integer_i(atom);
+				break;
+
+			case BUILTIN_uint:
+				atom = AvmCore::integer_u(atom);
+				break;
+
+			case BUILTIN_number:
+			{
+				#ifdef AVMPLUS_64BIT
+					AvmAssert(sizeof(Atom) == sizeof(double));
+					union 
+					{
+						double d;
+						Atom a;
+					};
+					d = AvmCore::number_d(atom);
+					atom = a;
+				#else
+					AvmAssert(sizeof(Atom)*2 == sizeof(double));
+					union 
+					{
+						double d;
+						Atom a[2];
+					};
+					d = AvmCore::number_d(atom);
+					arg0[0] = a[0];
+					arg0 += 1;
+					atom = a[1];	// fall thru, will be handled at end
+				#endif
+				break;
+			}
+
+			default:
+				atom = (Atom)atomPtr(atom);
+				break;
+		}
+		// every case increments by at least 1
+		arg0[0] = atom;
+		return arg0+1;
+	}
+
 	// note that some of these have (partial) guts of Toplevel::coerce replicated here, for efficiency.
 	// if you find bugs here, you might need to update Toplevel::coerce as well (and vice versa).
 	Atom* FASTCALL MethodEnv::coerceUnbox1(Atom atom, Traits* t, Atom* args)
@@ -303,24 +364,28 @@ namespace avmplus
 	Atom MethodEnv::coerceEnter(Atom thisArg)
 	{
 		MethodSignaturep ms = get_ms();
-
 		startCoerce(0, ms);
-		// check receiver type first
-		// caller will coerce instance if necessary,
-		// so make sure it was done.
-		AvmAssert(thisArg == toplevel()->coerce(thisArg, ms->paramTraits(0)));
+
 		if (isInterpreted())
 		{
+			// caller will coerce instance if necessary, so make sure it was done.
+			AvmAssert(thisArg == this->toplevel()->coerce(thisArg, ms->paramTraits(0)));
 			// Tail call inhibited by &thisArg, and also by &thisArg in "else" clause
 			return interpBoxed(this, 0, &thisArg, ms);
 		}
 		else
 		{
-			coerceUnbox1(thisArg, ms->paramTraits(0), &thisArg);
-			return endCoerce(0, (uint32_t*)&thisArg, ms);
+			union {
+				Atom a;
+				double d;
+			} unboxedThis;
+			// no need to coerce, caller has done it already
+			unbox1(thisArg, ms->paramTraits(0), (Atom*)&unboxedThis);
+			return endCoerce(0, (uint32_t*)&unboxedThis, ms);
 		}
 	}
 	
+	// specialized to be called from Function.apply
 	Atom MethodEnv::coerceEnter(Atom thisArg, ArrayObject *a)
 	{
 		int32_t argc = a->getLength();
@@ -330,13 +395,11 @@ namespace avmplus
 		MethodSignaturep ms = get_ms();
 		const int32_t extra = startCoerce(argc, ms);
 
-		// check receiver type first
-		// caller will coerce instance if necessary,
-		// so make sure it was done.
-		AvmAssert(thisArg == toplevel()->coerce(thisArg, ms->paramTraits(0)));
-
 		if (isInterpreted())
 		{
+			// caller will coerce instance if necessary, so make sure it was done.
+			AvmAssert(thisArg == toplevel()->coerce(thisArg, ms->paramTraits(0)));
+
 			// Tail call inhibited by local allocation/deallocation
 			MMgc::GC::AllocaAutoPtr _atomv;
 			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
@@ -361,23 +424,19 @@ namespace avmplus
 	// If TRY captures the current stack top and the CATCH and/or FINALLY just reset it, then
 	// we're done.
 	//
-	// Then we can just call it AVMPI_alloca() and be done.
-	//
-	// Woot!
-	
+	// Then we can just call it AVMPI_alloca() and be done.  W00t!
+
+	// specialized to be called from Function.call
 	Atom MethodEnv::coerceEnter(Atom thisArg, int argc, Atom *argv)
 	{
 		MethodSignaturep ms = get_ms();
-
 		const int32_t extra = startCoerce(argc, ms);
-
-		// check receiver type first
-		// caller will coerce instance if necessary,
-		// so make sure it was done.
-		AvmAssert(thisArg == toplevel()->coerce(thisArg, ms->paramTraits(0)));
 
 		if (isInterpreted())
 		{
+			// caller will coerce instance if necessary, so make sure it was done.
+			AvmAssert(thisArg == toplevel()->coerce(thisArg, ms->paramTraits(0)));
+
 			// Tail call inhibited by local allocation/deallocation
 			MMgc::GC::AllocaAutoPtr _atomv;
 			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
@@ -416,7 +475,10 @@ namespace avmplus
 			Toplevel* toplevel = this->toplevel();
 			
 			MethodSignaturep ms = get_ms();
+
+			// caller will coerce instance if necessary, so make sure it was done.
 			AvmAssert(atomv[0] == toplevel->coerce(atomv[0], ms->paramTraits(0)));
+
 			startCoerce(argc, ms);
 			const int32_t param_count = ms->param_count();
 			const int32_t end = argc >= param_count ? param_count : argc;
@@ -434,8 +496,11 @@ namespace avmplus
 	Atom MethodEnv::coerceUnboxEnter(int32_t argc, Atom* atomv)
 	{
 		MethodSignaturep ms = get_ms();
-		AvmAssert(atomv[0] == toplevel()->coerce(atomv[0], ms->paramTraits(0)));
 		const int32_t extra = startCoerce(argc, ms);
+
+		// caller will coerce instance if necessary, so make sure it was done.
+		AvmAssert(atomv[0] == toplevel()->coerce(atomv[0], ms->paramTraits(0)));
+
 		const int32_t rest_offset = ms->rest_offset();
 		const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 		MMgc::GC::AllocaAutoPtr _ap;
@@ -456,7 +521,8 @@ namespace avmplus
 
 		const int32_t param_count = ms->param_count();
 		int32_t end = argc >= param_count ? param_count : argc;
-		for (int32_t i=0; i <= end; i++)
+		args = unbox1(in[0], ms->paramTraits(0), args); // no need to coerce
+		for (int32_t i=1; i <= end; i++)
 			args = coerceUnbox1(in[i], ms->paramTraits(i), args);
 		while (end < argc)
 			*args++ = in[++end];
@@ -466,7 +532,7 @@ namespace avmplus
 	{
 		int32_t argc = a->getLength();
 
-		Atom *args = coerceUnbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
+		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
 		const int32_t param_count = ms->param_count();
 		int32_t end = argc >= param_count ? param_count : argc;
@@ -478,7 +544,7 @@ namespace avmplus
 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 	{
-		Atom *args = coerceUnbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
+		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
 
 		const int32_t param_count = ms->param_count();
 		int32_t end = argc >= param_count ? param_count : argc;
