@@ -127,6 +127,7 @@ namespace avmplus
 		void unboxCoerceArgs(Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms);
 		void FASTCALL nullcheckfail(Atom atom);
 		Atom* FASTCALL coerceUnbox1(Atom atom, Traits* t, Atom* args);
+		Atom* FASTCALL unbox1(Atom atom, Traits* t, Atom* args);
 
 		VTable* getActivationVTable();
 		VTable* buildActivationVTable();
