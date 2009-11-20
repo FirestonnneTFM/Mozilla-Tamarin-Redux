@@ -41,7 +41,7 @@
 
 namespace avmshell
 {
-	class ByteArray
+	class ByteArray : public GlobalMemoryProvider
 	{
 	public:
 		ByteArray();
@@ -57,8 +57,9 @@ namespace avmshell
 		bool Grow(uint32_t newCapacity);
 		U8 *GetBuffer() const { return m_array; }
 
-        bool addSubscriber(GlobalMemorySubscriber* subscriber);
-        bool removeSubscriber(GlobalMemorySubscriber* subscriber);
+        // from GlobalMemoryProvider
+        /*virtual*/ bool addSubscriber(GlobalMemorySubscriber* subscriber);
+        /*virtual*/ bool removeSubscriber(GlobalMemorySubscriber* subscriber);
 
 	protected:
  		// singly linked list of all subscribers to this ByteArray...
@@ -111,7 +112,7 @@ namespace avmshell
 		uint32_t m_filePointer;
 	};
 	
-	class ByteArrayObject : public ScriptObject, virtual public GlobalMemoryProvider
+	class ByteArrayObject : public ScriptObject
 	{
 	public:
 		ByteArrayObject(VTable *ivtable, ScriptObject *delegate);
@@ -177,11 +178,7 @@ namespace avmshell
 
 		void writeFile(Stringp filename);
 
-		/*virtual*/ GlobalMemoryProvider* getGlobalMemoryProvider() { return this; }
-
-        // from GlobalMemoryProvider
-        /*virtual*/ bool addSubscriber(GlobalMemorySubscriber* subscriber) { return m_byteArray.addSubscriber(subscriber); }
-        /*virtual*/ bool removeSubscriber(GlobalMemorySubscriber* subscriber) { return m_byteArray.removeSubscriber(subscriber); }
+		/*virtual*/ GlobalMemoryProvider* getGlobalMemoryProvider() { return &m_byteArray; }
 
 	private:
 		MMgc::Cleaner c;
