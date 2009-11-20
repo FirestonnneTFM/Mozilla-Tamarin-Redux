@@ -101,7 +101,7 @@ namespace MMgc
 		/**
 		 * Register the GC with the manager.  GC must not already be registered.
 		 */
-		void addGC(GC* gc) { collectors.Add(gc); }
+		bool tryAddGC(GC* gc) { return collectors.TryAdd(gc); }
 		
 		/**
 		 * Unregister the GC with the manager.  The GC must be registered.
