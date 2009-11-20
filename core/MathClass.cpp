@@ -94,9 +94,9 @@ namespace avmplus
 		return MathUtils::atan(x);
 	}
 
-	double MathClass::atan2(double x, double y)
+	double MathClass::atan2(double y, double x)
 	{
-		return MathUtils::atan2(x, y);
+		return MathUtils::atan2(y, x);
 	}
 
 	double MathClass::ceil(double x)
