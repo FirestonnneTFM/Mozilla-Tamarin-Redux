@@ -139,14 +139,19 @@ typedef void *maddr_ptr;
 #endif
 
 #ifdef __GNUC__
-#define REALLY_INLINE inline __attribute__((always_inline))
+// don't force inlining when debugging, just causes pain.
+#  ifdef DEBUG
+#    define REALLY_INLINE inline
+#  else
+#    define REALLY_INLINE inline __attribute__((always_inline))
+#  endif
 // only define FASTCALL for x86-32; other gcc versions will spew warnings
-#ifdef AVMPLUS_IA32
-#ifndef VMCFG_AOT // Doesn't work with llvm compiler (need a better symbol for this, but don't know one) 
-	#define FASTCALL __attribute__((fastcall))
-#endif
-#endif
-#endif
+#  ifdef AVMPLUS_IA32
+#    ifndef VMCFG_AOT // Doesn't work with llvm compiler (need a better symbol for this, but don't know one) 
+#      define FASTCALL __attribute__((fastcall))
+#    endif
+#  endif
+#endif // __GNUC__
 
 #if defined(__GNUC__)
 	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
