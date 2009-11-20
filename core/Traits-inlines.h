@@ -59,14 +59,12 @@ REALLY_INLINE TraitsBindings::TraitsBindings(Traits* _owner,
                     TraitsBindingsp _base,
                     MultinameHashtable* _bindings,
                     uint32_t _slotCount,
-                    uint32_t _methodCount,
-                    uint32_t _interfaceCapacity) :
+                    uint32_t _methodCount) :
     owner(_owner),
     base(_base),
     m_bindings(_bindings),
     slotCount(_slotCount),
     methodCount(_methodCount),
-    interfaceCapacity(_interfaceCapacity),
     m_slotSize(0)
 { }
 
@@ -88,12 +86,6 @@ REALLY_INLINE SlotStorageType TraitsBindings::calcSlotAddrAndSST(uint32_t i, voi
     uint32_t offsetAndSST = getSlots()[i].offsetAndSST;
     pout = (void*)(((uint32_t*)pin) + (offsetAndSST >> 3));
     return SlotStorageType(offsetAndSST & 7);
-}
-
-REALLY_INLINE Traitsp TraitsBindings::getInterface(uint32_t i) const
-{
-    AvmAssert(i < interfaceCapacity);
-    return getInterfaces()[i].t;
 }
 
 REALLY_INLINE MethodInfo* TraitsBindings::getMethod(uint32_t i) const
@@ -132,24 +124,14 @@ REALLY_INLINE const TraitsBindings::SlotInfo* TraitsBindings::getSlots() const
     return (const SlotInfo*)(this + 1);
 }
 
-REALLY_INLINE TraitsBindings::InterfaceInfo* TraitsBindings::getInterfaces()
-{
-    return (InterfaceInfo*)(getSlots() + slotCount);
-}
-
-REALLY_INLINE const TraitsBindings::InterfaceInfo* TraitsBindings::getInterfaces() const
-{
-    return (const InterfaceInfo*)(getSlots() + slotCount);
-}
-
 REALLY_INLINE TraitsBindings::BindingMethodInfo* TraitsBindings::getMethods()
 {
-    return (BindingMethodInfo*)(getInterfaces() + interfaceCapacity);
+    return (BindingMethodInfo*)(getSlots() + slotCount);
 }
 
 REALLY_INLINE const TraitsBindings::BindingMethodInfo* TraitsBindings::getMethods() const
 {
-    return (const BindingMethodInfo*)(getInterfaces() + interfaceCapacity);
+    return (const BindingMethodInfo*)(getSlots() + slotCount);
 }
 
 REALLY_INLINE void TraitsBindings::setSlotInfo(uint32_t i, Traits* t, SlotStorageType sst, uint32_t offset)
@@ -266,7 +248,25 @@ REALLY_INLINE bool Traits::containsInterface(Traitsp t)
 
 REALLY_INLINE bool Traits::subtypeof(Traitsp t)
 {
-    return this == t || this->getTraitsBindings()->subtypeof(t);
+    // test primary supertypes or positive cache hit
+    size_t off = t->m_supertype_offset;
+    if (t == *((Traits**)(uintptr_t(this)+off)))
+        return true;
+
+    // return false if t was primary and not found, or if negative cache hit
+    if (off != offsetof(Traits, m_supertype_cache) || t == m_supertype_neg_cache)
+        return false;
+
+    // check self because it won't be in m_secondary_supertypes
+    if (this == t)
+        return true;
+
+    return secondary_subtypeof(t);
+}
+
+REALLY_INLINE bool Traits::isPrimary() const
+{
+    return m_supertype_offset != offsetof(Traits, m_supertype_cache);
 }
 
 REALLY_INLINE BuiltinType Traits::getBuiltinType(const Traitsp t)
@@ -366,25 +366,26 @@ REALLY_INLINE bool Traits::implementsNewInterfaces() const
 }
 
 REALLY_INLINE InterfaceIterator::InterfaceIterator(Traits* t)
-    : tb(t->getTraitsBindings()), i(0)
-{ }
+{
+    st = t->m_secondary_supertypes;
+}
 
 REALLY_INLINE InterfaceIterator::InterfaceIterator(const TraitsBindings* tb)
-    : tb(tb), i(0)
-{ }
+{
+    st = tb->owner->m_secondary_supertypes;
+}
 
 REALLY_INLINE bool InterfaceIterator::hasNext()
 {
-    Traits* ti;
-    while (i < tb->interfaceCapacity && ((ti = tb->getInterface(i)) == NULL || !ti->isInterface()))
-        i++;
-    return i < tb->interfaceCapacity;
+    while (*st != NULL && !(*st)->isInterface())
+        st++;
+    return *st != NULL;
 }
 
 REALLY_INLINE Traits* InterfaceIterator::next()
 {
-    AvmAssert(tb->getInterface(i)->isInterface());
-    return tb->getInterface(i++);
+    AvmAssert(*st != NULL && (*st)->isInterface());
+    return *st++;
 }
 
 } // namespace avmplus

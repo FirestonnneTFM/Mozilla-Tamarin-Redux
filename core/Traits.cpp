@@ -52,16 +52,12 @@ namespace avmplus
 												TraitsBindingsp _base, 
 												MultinameHashtable* _bindings, 
 												uint32_t slotCount, 
-												uint32_t methodCount,
-												uint32_t interfaceCapacity)
+												uint32_t methodCount)
 	{
-		AvmAssert(interfaceCapacity > 0);
-
 		const uint32_t extra = slotCount * sizeof(SlotInfo) + 
-						methodCount * sizeof(MethodInfo) +
-						interfaceCapacity * sizeof(InterfaceInfo);
+						methodCount * sizeof(MethodInfo);
 
-		TraitsBindings* tb = new (gc, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount, interfaceCapacity);
+		TraitsBindings* tb = new (gc, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount);
 		if (_base)
 		{
 			if (_base->slotCount)
@@ -150,68 +146,6 @@ namespace avmplus
 		return BIND_NONE;
 	}
 
-	bool TraitsBindings::addOneInterface(Traitsp intf)
-	{
-		AvmAssert(intf != NULL);
-		AvmAssert(this->interfaceCapacity > 0);
-
-		InterfaceInfo* set = getInterfaces();
-        int32_t n = 7;
-		const uint32_t bitMask = this->interfaceCapacity - 1;
-		// skip lower 3 bits since they are always zero and don't contribute to hash
-		uint32_t i = (uintptr_t(intf) >> 3) & bitMask;
-        for (;;)
-        {
-            Traitsp k;
-			// when adding, intf probably isn't present, check for null first
-            if ((k = set[i].t) == NULL)
-            {
-				// since this is in the cache, no need for WB: 
-				// intf isn't going to go away before we do
-				set[i].t = intf;
-				return true; // true == added
-            }
-            else if (k == intf)
-            {
-				// already added, we're done
-                return false; // false == not added
-            }
-            else
-            {
-                i = (i + (n++)) & bitMask;                // quadratic probe
-            }
-        }
-	}
-
-	bool FASTCALL TraitsBindings::subtypeof(Traitsp intf) const
-	{
-		AvmAssert(intf != NULL);
-		AvmAssert(this->interfaceCapacity > 0);
-
-		const InterfaceInfo* set = getInterfaces();
-        int32_t n = 7;
-		const uint32_t bitMask = this->interfaceCapacity - 1;
-		// skip lower 3 bits since they are always zero and don't contribute to hash
-		uint32_t i = (uintptr_t(intf) >> 3) & bitMask;
-        for (;;)
-        {
-            Traitsp k;
-			// subtypeof succeeds much more often than it fails (~10x) so check for that first
-            if ((k = set[i].t) == intf)
-            {
-				return true; 
-            }
-            else if (k == NULL)
-            {
-                return false; 
-            }
-            else
-            {
-                i = (i + (n++)) & bitMask;                // quadratic probe
-            }
-        }
-	}
-
 	void TraitsBindings::buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo, uint32_t slotAreaCount, uint32_t slotAreaSize) const
 	{
 		MMGC_STATIC_ASSERT(kUnusedAtomTag == 0 && kObjectType == 1 && kStringType == 2 && kNamespaceType == 3);
@@ -295,7 +229,7 @@ namespace avmplus
 
 		// allow subclass param 0 to implement or extend base param 0
 		virtTraits = virtms->paramTraits(0);
-		if (!subtypeof(virtTraits) || !Traits::isMachineCompatible(this->owner, virtTraits))
+		if (!owner->subtypeof(virtTraits) || !Traits::isMachineCompatible(this->owner, virtTraits))
 		{
 			if (!this->owner->isMachineType() && virtTraits == core->traits.object_itraits)
 			{
@@ -362,7 +296,7 @@ namespace avmplus
 			Traits* ifc = ifc_iter.next();
 
 			// don't need to bother checking interfaces in our parent.
-			if (this->base && this->base->subtypeof(ifc))
+			if (this->base && this->base->owner->subtypeof(ifc))
 				continue;
 
 			TraitsBindingsp ifcd = ifc->getTraitsBindings();
@@ -441,9 +375,8 @@ namespace avmplus
 	
 	void TraitsBindings::fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel)
 	{
-		if (owner->isInterface())
-			return;
-		
+		AvmAssert(!owner->isInterface());
+
 		if (!ifc->linked) 
 		{
 			// toplevel will be non-null only for the first call (will be null afterwards) --
@@ -532,7 +465,7 @@ namespace avmplus
 				   uint16_t _sizeofInstance,
 				   uint16_t _offsetofSlots,
 				   TraitsPosPtr traitsPos,
-				   TraitsPosType posType) : 
+				   TraitsPosType posType) :
 		core(_pool->core),
 		base(_base),
 		pool(_pool),
@@ -560,6 +493,8 @@ namespace avmplus
 				break;
 		}
 #endif
+		build_primary_supertypes();
+		build_secondary_supertypes();
     }
 
 	/*static*/ Traits* Traits::newTraits(PoolObject* pool,
@@ -1194,70 +1129,24 @@ namespace avmplus
 	}
 
 	// Flex apps often have many interfaces redundantly listed, so first time thru,
-	// eliminate redundant ones.
-	void Traits::countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_GCObjects>& seen)
+	// eliminate redundant ones.  We do this by only adding and recursing when the
+	// interface is not already in the list and not already in the base class's list.
+	uint32_t Traits::countNewInterfaces(List<Traitsp, LIST_GCObjects>& seen)
 	{
-		for (Traitsp self = this; self != NULL; self = self->base)
-		{
-			if (seen.indexOf(self) < 0)
-				seen.add(self);
-
-			if (self->isInstanceType())
-			{
-				const uint8_t* pos = skipToInterfaceCount(self->m_traitsPos);
-				const uint32_t interfaceCount = AvmCore::readU30(pos);
-				for (uint32_t j = 0; j < interfaceCount; j++)
-				{
-					Traitsp intf = self->pool->resolveTypeName(pos, toplevel);
-					AvmAssert(intf && intf->isInterface());
-					// an interface can "extend" multiple other interfaces, so we must recurse here.
-					intf->countInterfaces(toplevel, seen);
-				}
+		const uint8_t* pos = skipToInterfaceCount(this->m_traitsPos);
+		const uint32_t interfaceCount = AvmCore::readU30(pos);
+		for (uint32_t j = 0; j < interfaceCount; j++) {
+			// we know all interfaces have been resolved already, it is done
+			// before traits construction in AbcParser::parseInstanceInfos().
+			Traitsp intf = pool->resolveTypeName(pos, NULL);
+			AvmAssert(intf && intf->isInterface() && intf->base == NULL);
+			// an interface can "extend" multiple other interfaces, so we must recurse here.
+			if (!base || (!base->subtypeof(intf) && seen.indexOf(intf) < 0)) {
+				seen.add(intf);
+				intf->countNewInterfaces(seen);
 			}
 		}
-	}
-
-	// Note that the interface list for a given TraitsBindings is flat and inclusive.
-	// in the original version of Tamarin, the interface list was flat, and included
-	// all Interfaces implemented by the Traits, as well as all parent Traits... but
-	// not the Traits itself (ie "this" is missing). 
-	//
-	// when TraitsBindings were added, we changed the interface list to be hierarchical,
-	// so that only the interfaces not implemented by parents were in the list... thus
-	// you had to walk up the tree to check for interface implementation. this proved
-	// to be too slow (eg for subtypeof which is used heavily by coerceEnter),
-	// thus the current implementation has gone back to a flat implementation, but
-	// with 'this' included in the list this time.
-	//
-	// aside from subtypeof, this affected a few other areas of the code that
-	// thought they had to walk the TraitsBindings inheritance tree to get all
-	// interfaces (notable IMT thunk generation and TypeDescriber).
-	bool Traits::addInterfaces(TraitsBindings* tb, const Toplevel* toplevel)
-	{
-		bool addedNewInterface = false;
-
-		if (this->isInstanceType())
-		{
-			const uint8_t* pos = skipToInterfaceCount(this->m_traitsPos);
-			const uint32_t interfaceCount = AvmCore::readU30(pos);
-			for (uint32_t j = 0; j < interfaceCount; j++)
-			{
-				// never need to pass toplevel here: we've already validated the typenames in AbcParser::parseInstanceInfos
-				Traitsp ifc = this->pool->resolveTypeName(pos, /*toplevel*/NULL);
-				AvmAssert(ifc && ifc->isInterface());
-				if (tb->addOneInterface(ifc))
-				{
-					addedNewInterface = true;
-					tb->fixOneInterfaceBindings(ifc, toplevel);
-				}
-
-				// an interface can "extend" multiple other interfaces, so we must recurse here.
-				if (ifc->addInterfaces(tb, toplevel))
-					addedNewInterface = true;
-			}
-		}
-
-		return addedNewInterface;
+		return seen.size();
 	}
 
 	static uint8_t calcLog2(uint32_t cap)
@@ -1302,24 +1191,13 @@ namespace avmplus
 			NamespaceSetp nss = NamespaceSet::create(core->GetGC(), this->ns());
 			NamespaceSetp compat_nss = nss;
 			addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR));
-			// the Sampler can call subtypeof() on a catch object, so we must ensure the list is valid.
-			// we add ourself to it, and since the algorithm requires at least one unused entry in the table, we use a size of 2, not 1.
-			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, /*interfaceCap*/2);
+			// bindings just need room for one slot binding
+			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);
 			thisData->m_slotSize = is8ByteSlot(t) ? 8 : 4;
-			thisData->addOneInterface(this);
 		}
 		else
 		{
-			if (m_interfaceCapLog2 == 0)
-			{
-				List<Traitsp, LIST_GCObjects> seen(gc);
-				countInterfaces(toplevel, seen);
-				// a little redundant, but clarity is king
-				m_interfaceCapLog2 = calcLog2(MathUtils::nextPowerOfTwo((5*seen.size() >> 2) + 1));
-				AvmAssert(m_interfaceCapLog2 > 0);
-			}
-
 			TraitsBindingsp basetb = this->base ? this->base->getTraitsBindings() : NULL;
 
 			// Copy protected traits from base class into new protected namespace
@@ -1342,25 +1220,23 @@ namespace avmplus
 			uint32_t n64BitNonPointerSlots = 0;
 			buildBindings(basetb, bindings, slotCount, methodCount, n32BitNonPointerSlots, n64BitNonPointerSlots, toplevel);
 			
-			thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount, (1U << m_interfaceCapLog2));
-			
+			thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount);
 			thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen, n32BitNonPointerSlots, n64BitNonPointerSlots);
 
-			if (basetb)
-			{
+			if (basetb) {
 				thisData->m_slotSize += basetb->m_slotSize;
-				// we implement everything our parent does, so re-add from there 
-				// rather than walking the whole hierarchy:
-				const TraitsBindings::InterfaceInfo* tbi = basetb->getInterfaces();
-				const TraitsBindings::InterfaceInfo* tbi_end = tbi + basetb->interfaceCapacity;
-				for ( ; tbi < tbi_end; ++tbi) 
-				{
-					if (tbi->t)
-						thisData->addOneInterface(tbi->t);
+			}
+
+			if (!isInterface() && m_implementsNewInterfaces) {
+				// fix up interface bindings
+				for (InterfaceIterator it(this); it.hasNext(); ) {
+					Traits* t = it.next();
+					if (!base || !base->subtypeof(t)) {
+						// new interface not implemented in base.
+						thisData->fixOneInterfaceBindings(t, toplevel);
+					}
 				}
 			}
-			thisData->addOneInterface(this);
-			this->m_implementsNewInterfaces = addInterfaces(thisData, toplevel);
 		}
 
 		// hashtable (if we have one) must start on pointer-sized boundary...
@@ -1533,13 +1409,10 @@ namespace avmplus
 		// in which case let's do it now
 		if (this->isInterface())
 		{
-			TraitsBindings::InterfaceInfo* tbi = tb->getInterfaces();
-			TraitsBindings::InterfaceInfo* tbi_end = tbi + tb->interfaceCapacity;
-			for ( ; tbi < tbi_end; ++tbi) 
-			{
-				Traits* ti = tbi->t;
-				if (!ti || ti->linked || ti == this) continue;
-				ti->resolveSignatures(toplevel);
+			for (Traits** t = this->m_secondary_supertypes; *t != NULL; t++) {
+				Traits* ti = *t;
+				if (!ti->linked)
+					ti->resolveSignatures(toplevel);
 			}
 		}
 
@@ -2047,4 +1920,131 @@ failure:
 		return tm;
 	}
 
+	// Count supertypes in the given list, like strlen().
+	static uint32_t countSupertypes(Traits** list)
+	{
+		uint32_t n = 0;
+		for (Traits** t = list; *t != NULL; t++)
+			n++;
+		return n;
+	}
+
+	// Initialize the m_primary_supertypes array by copying down the entries
+	// from our base class (if it exists), and adding this traits if there is room.
+	void Traits::build_primary_supertypes()
+	{
+		MMGC_STATIC_ASSERT(offsetof(Traits, m_primary_supertypes) + sizeof(m_primary_supertypes) < 256);
+		MMGC_STATIC_ASSERT(offsetof(Traits, m_supertype_cache) < 256);
+
+		// compute m_supertype_offset and fill in m_primary_supertypes
+		if (!base) {
+			// class roots and interfaces
+			m_supertype_offset = isInterface() ? offsetof(Traits, m_supertype_cache) : offsetof(Traits, m_primary_supertypes);
+			WB(core->gc, this, &m_primary_supertypes[0], this);
+		} else {
+			// single inherited classes
+			AvmAssert(!isInterface());
+			for (int i=0; i < MAX_PRIMARY_SUPERTYPE; i++)
+				WB(core->gc, this, &m_primary_supertypes[i], base->m_primary_supertypes[i]);
+			size_t off = base->m_supertype_offset;
+			if (off != offsetof(Traits, m_supertype_cache) &&
+				(off += sizeof(Traits*)) - offsetof(Traits, m_primary_supertypes) < sizeof(m_primary_supertypes)) {
+				AvmAssert(off == (uint8_t) off);
+				m_supertype_offset = uint8_t(off);
+				WB(core->gc, this, (Traits*)(uintptr_t(this)+off), this);
+			} else {
+				// Inheritance is too deep to add this traits to m_primary_supertypes.
+				// Make this traits "secondary", set m_supertype_offset to the cache.
+				m_supertype_offset = offsetof(Traits, m_supertype_cache);
+			}
+		}
+	}
+
+	// Initialize the m_secondary_supertypes array as follows:
+	//   * if this traits adds a new interface, create a new list with all
+	//     the entries from the base class, plus the base class itself,
+	//     plus the new interfaces
+	//   * if we do not add new interfaces and there's no base class,
+	//     use the empty list.
+	//   * if there is a base class, and the base class is primary, just
+	//     copy base->m_secondary_supertypes (containing any base interfaces)
+	//   * otherwise create a new secondary_supertypes list with everything
+	//     from the base class, plus the base class itself.  Install this list
+	//     back in the base class so it can be shared by other leaf classes.
+	void Traits::build_secondary_supertypes()
+	{
+		MMgc::GC* gc = core->GetGC();
+		List<Traitsp, LIST_GCObjects> seen(gc);
+		uint32_t count;
+		if (!isInstanceType() || (count = countNewInterfaces(seen)) == 0) {
+			// no new interfaces, attempt to share the base type's secondary list
+			if (!base) {
+				this->m_secondary_supertypes = core->_emptySupertypeList;
+			} else {
+				Traits** base_list = base->m_secondary_supertypes;
+				// If we require base in our secondary_supertypes list, so will other
+				// sibling leaf types.  Try to share the seconary_supertypes list by
+				// inserting base at position 0.
+				if (base->isPrimary() || base_list[0] == base) {
+					// just copy the base list.
+					this->m_secondary_supertypes = base_list;
+				} else {
+					// must prepend base to base_list, save the copy on this type and base.
+					count = countSupertypes(base_list);
+					Traits** list = allocSupertypeList(gc, count + 1);
+					WB(gc, list, list, base);
+					for (uint32_t i=0; i < count; i++)
+						WB(gc, list, list+i+1, base_list[i]);
+					base->m_secondary_supertypes = list;
+					this->m_secondary_supertypes = list;
+				}
+			}
+		} else {
+			// this type implements new interfaces so we need a new list
+			this->m_implementsNewInterfaces = true;
+			if (base && !base->isPrimary() && base->m_secondary_supertypes[0] != base) {
+				seen.add(base);
+				count++;
+			}
+			Traits** list;
+			uint32_t baseCount = base ? countSupertypes(base->m_secondary_supertypes) : 0;
+			if (baseCount > 0) {
+				uint32_t total = count + baseCount;
+				list = allocSupertypeList(gc, total);
+				for (Traits **d = list, **s = base->m_secondary_supertypes; *s != NULL; s++, d++)
+					WB(gc, list, d, *s);
+			} else {
+				list = allocSupertypeList(gc, count);
+			}
+			this->m_secondary_supertypes = list;
+			for (uint32_t i=0; i < count; i++) {
+				#ifdef DEBUG
+				// will have gotten set if assert didn't fire.
+				AvmAssert(!secondary_subtypeof(seen[i]));
+				m_supertype_neg_cache = NULL;
+				#endif
+				WB(gc, list, list+baseCount+i, seen[i]);
+			}
+		}
+	}
+
+	// search interfaces and bases that didn't fit in m_primary_supertypes,
+	// and cache positive/negative results
+	bool Traits::secondary_subtypeof(Traits* t)
+	{
+		for (Traits** s = m_secondary_supertypes; *s != NULL; s++) {
+			if (t == *s) {
+				m_supertype_cache = t;
+				return true;
+			}
+		}
+		m_supertype_neg_cache = t;
+		return false;
+	}
+
+	// create a new supertype list of the given length
+	Traits** Traits::allocSupertypeList(GC* gc, uint32_t size)
+	{
+		return (Traits**) gc->Alloc((size+1) * sizeof(Traits*), MMgc::GC::kZero);
+	}
 }

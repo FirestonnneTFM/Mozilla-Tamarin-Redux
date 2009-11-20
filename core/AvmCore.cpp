@@ -267,6 +267,7 @@ namespace avmplus
 		WordcodeTranslator::swprofStart();
 #endif
 
+		_emptySupertypeList = Traits::allocSupertypeList(gc, 0);
 	}
 
 	AvmCore::~AvmCore()

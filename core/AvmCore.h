@@ -1451,7 +1451,12 @@ const int kBufferPadding = 16;
 		bool lookupCacheIsValid(uint32_t t) const;
 		void invalidateLookupCache();
 #endif
+
+	private:
+		friend class Traits;
+		Traits** _emptySupertypeList; // empty supertype list shared by many Traits
 		
+	public:
 		// avoid multiple inheritance issues
 		class GCInterface : MMgc::GCCallback
 		{
