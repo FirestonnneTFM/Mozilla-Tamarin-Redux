@@ -41,11 +41,6 @@
  
 namespace MMgc
 {
-	GCWeakRef* GCObject::GetWeakRef() const
-	{
-		return GC::GetWeakRef(this);
-	}
-
 #ifdef MMGC_RC_HISTORY
 	
 	void RCObject::DumpHistory()
