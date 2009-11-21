@@ -110,6 +110,11 @@ namespace MMgc
 		GC::GetGC(gcObject)->Free(gcObject);
 	}
 	
+	REALLY_INLINE GCWeakRef* GCObject::GetWeakRef() const
+	{
+		return GC::GetWeakRef(this);
+	}
+
 	REALLY_INLINE GCFinalizedObject::~GCFinalizedObject()
 	{
 		// Nothing
