@@ -345,7 +345,7 @@ namespace avmplus
 		void build_secondary_supertypes();
 		bool FASTCALL secondary_subtypeof(Traitsp t);	// slow path called by subtypeof()
 		bool isPrimary() const;
-		static uint32_t countNewInterfaces(Traits* base, Traits* t, List<Traitsp, LIST_GCObjects>& seen);
+		uint32_t countNewInterfaces(List<Traitsp, LIST_GCObjects>& seen);
 
 	public:
 		void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;
