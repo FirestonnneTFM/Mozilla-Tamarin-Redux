@@ -1131,19 +1131,19 @@ namespace avmplus
 	// Flex apps often have many interfaces redundantly listed, so first time thru,
 	// eliminate redundant ones.  We do this by only adding and recursing when the
 	// interface is not already in the list and not already in the base class's list.
-	uint32_t Traits::countNewInterfaces(List<Traitsp, LIST_GCObjects>& seen)
+	uint32_t Traits::countNewInterfaces(Traits* base, Traits* t, List<Traitsp, LIST_GCObjects>& seen)
 	{
-		const uint8_t* pos = skipToInterfaceCount(this->m_traitsPos);
+		const uint8_t* pos = skipToInterfaceCount(t->m_traitsPos);
 		const uint32_t interfaceCount = AvmCore::readU30(pos);
 		for (uint32_t j = 0; j < interfaceCount; j++) {
 			// we know all interfaces have been resolved already, it is done
 			// before traits construction in AbcParser::parseInstanceInfos().
-			Traitsp intf = pool->resolveTypeName(pos, NULL);
+			Traitsp intf = t->pool->resolveTypeName(pos, NULL);
 			AvmAssert(intf && intf->isInterface() && intf->base == NULL);
 			// an interface can "extend" multiple other interfaces, so we must recurse here.
-			if (!base || (!base->subtypeof(intf) && seen.indexOf(intf) < 0)) {
+			if ((!base || !base->subtypeof(intf)) && seen.indexOf(intf) < 0) {
 				seen.add(intf);
-				intf->countNewInterfaces(seen);
+				intf->countNewInterfaces(base, intf, seen);
 			}
 		}
 		return seen.size();
@@ -1976,7 +1976,7 @@ failure:
 		MMgc::GC* gc = core->GetGC();
 		List<Traitsp, LIST_GCObjects> seen(gc);
 		uint32_t count;
-		if (!isInstanceType() || (count = countNewInterfaces(seen)) == 0) {
+		if (!isInstanceType() || (count = countNewInterfaces(base, this, seen)) == 0) {
 			// no new interfaces, attempt to share the base type's secondary list
 			if (!base) {
 				this->m_secondary_supertypes = core->_emptySupertypeList;
@@ -2018,14 +2018,32 @@ failure:
 			}
 			this->m_secondary_supertypes = list;
 			for (uint32_t i=0; i < count; i++) {
-				#ifdef DEBUG
-				// will have gotten set if assert didn't fire.
-				AvmAssert(!secondary_subtypeof(seen[i]));
-				m_supertype_neg_cache = NULL;
-				#endif
 				WB(gc, list, list+baseCount+i, seen[i]);
 			}
 		}
+
+#ifdef DEBUG
+		// sanity check to make sure we don't have any duplicate supertypes.
+		List<Traitsp, LIST_GCObjects> supertypes(gc);
+		for (uint32_t i = 0; i < MAX_PRIMARY_SUPERTYPE; i++) {
+			Traits* t = m_primary_supertypes[i];
+			if (t != NULL) {
+				if (supertypes.indexOf(t) != -1) {
+					core->console << "t " << this << " dup primary " << t << "\n";
+					AvmAssert(false);
+				}
+				supertypes.add(t);
+			}
+		}
+		for (Traits** st = m_secondary_supertypes; *st != NULL; st++) {
+			Traits* t = *st;
+			if (supertypes.indexOf(t) != -1) {
+				core->console << "t " << this << " dup secondary " << t << "\n";
+				AvmAssert(false);
+			}
+			supertypes.add(t);
+		}
+#endif
 	}
 
 	// search interfaces and bases that didn't fit in m_primary_supertypes,
