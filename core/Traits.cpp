@@ -1128,22 +1128,30 @@ namespace avmplus
 		return pos;
 	}
 
-	// Flex apps often have many interfaces redundantly listed, so first time thru,
-	// eliminate redundant ones.  We do this by only adding and recursing when the
-	// interface is not already in the list and not already in the base class's list.
-	uint32_t Traits::countNewInterfaces(Traits* base, Traits* t, List<Traitsp, LIST_GCObjects>& seen)
+	// Apps often have many interfaces redundantly listed, so first time thru,
+	// eliminate redundant ones.  We do this by only adding new interfaces to
+	// the "seen" list and only traversing new super-interfaces.  An interface
+	// is NEW if our base class does not implement it.
+	uint32_t Traits::countNewInterfaces(List<Traitsp, LIST_GCObjects>& seen)
 	{
-		const uint8_t* pos = skipToInterfaceCount(t->m_traitsPos);
-		const uint32_t interfaceCount = AvmCore::readU30(pos);
-		for (uint32_t j = 0; j < interfaceCount; j++) {
-			// we know all interfaces have been resolved already, it is done
-			// before traits construction in AbcParser::parseInstanceInfos().
-			Traitsp intf = t->pool->resolveTypeName(pos, NULL);
-			AvmAssert(intf && intf->isInterface() && intf->base == NULL);
-			// an interface can "extend" multiple other interfaces, so we must recurse here.
-			if ((!base || !base->subtypeof(intf)) && seen.indexOf(intf) < 0) {
-				seen.add(intf);
-				intf->countNewInterfaces(base, intf, seen);
+		// each Traits* added to this list is rooted via Domain and PoolObject,
+		// so it is okay for this Stack to be opaque to the GC.
+		Stack<Traits*> pending;
+		pending.add(this);
+		while (!pending.isEmpty()) {
+			Traits* t = pending.pop();
+			const uint8_t* pos = skipToInterfaceCount(t->m_traitsPos);
+			const uint32_t interfaceCount = AvmCore::readU30(pos);
+			for (uint32_t j = 0; j < interfaceCount; j++) {
+				// we know all interfaces have been resolved already, it is done
+				// before traits construction in AbcParser::parseInstanceInfos().
+				Traitsp intf = t->pool->resolveTypeName(pos, NULL);
+				AvmAssert(intf && intf->isInterface() && intf->base == NULL);
+				// an interface can "extend" multiple other interfaces, so we must recurse here.
+				if ((!base || !base->subtypeof(intf)) && seen.indexOf(intf) < 0) {
+					seen.add(intf);
+					pending.add(intf);
+				}
 			}
 		}
 		return seen.size();
@@ -1976,7 +1984,7 @@ failure:
 		MMgc::GC* gc = core->GetGC();
 		List<Traitsp, LIST_GCObjects> seen(gc);
 		uint32_t count;
-		if (!isInstanceType() || (count = countNewInterfaces(base, this, seen)) == 0) {
+		if (!isInstanceType() || (count = countNewInterfaces(seen)) == 0) {
 			// no new interfaces, attempt to share the base type's secondary list
 			if (!base) {
 				this->m_secondary_supertypes = core->_emptySupertypeList;
