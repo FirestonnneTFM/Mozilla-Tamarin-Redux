@@ -204,7 +204,7 @@ as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip
 ####################
 # -Dgreedy bugs
 ####################
-as3/DescribeType/describetype       ,   x64-win.*-Dgreedy , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=527346
+as3/DescribeType/describeType       ,   x64-win.*-Dgreedy , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=527346
 
 ####################
 # skip slow tests in test phase, -Dgreedy passes
