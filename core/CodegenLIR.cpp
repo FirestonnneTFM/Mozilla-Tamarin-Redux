@@ -147,12 +147,6 @@ return *((intptr_t*)&_method);
 #define PTR_SCALE 2
 #endif
 
-namespace nanojit
-{
-    // table of LIR instruction sizes
-    extern const uint8_t insSizes[];
-}
-
 namespace avmplus
 {
         #define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
@@ -5248,6 +5242,18 @@ namespace avmplus
 
     void CodegenLIR::deadvars_kill(nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels)
     {
+        // table of LIR instruction sizes (private to this file)
+        // TODO this can go away if we turn this kill pass into a LirReader
+        // and do the work inline with the assembly pass.
+        static const uint8_t lirSizes[] = {
+        #define OPDEF(op, number, operands, repkind) sizeof(LIns##repkind),
+        #define OPDEF64(op, number, operands, repkind) OPDEF(op, number, operands, repkind)
+        #include "../nanojit/LIRopcode.tbl"
+        #undef OPDEF
+        #undef OPDEF64
+                0
+        };
+
         verbose_only(LirNameMap *names = frag->lirbuf->names;)
         verbose_only(bool verbose = names && pool->isVerbose(VB_jit); )
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
@@ -5270,7 +5276,7 @@ namespace avmplus
                             verbose_only(if (verbose)
                                 AvmLog("- %s\n", names->formatIns(i));)
                             // erase the store by rewriting it as a skip
-                            LIns* prevIns = (LIns*) (uintptr_t(i) - insSizes[op]);
+                            LIns* prevIns = (LIns*) (uintptr_t(i) - lirSizes[op]);
                             i->initLInsSk(prevIns);
                             continue;
                         } else {
