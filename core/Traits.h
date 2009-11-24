@@ -170,7 +170,7 @@ namespace avmplus
 
 		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
-		void fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel);
+		void fixOneInterfaceBindings(Traitsp ifc);
 
 	// ------------------------ DATA SECTION BEGIN
 		public:		const Traitsp					owner;
@@ -346,6 +346,7 @@ namespace avmplus
 		bool FASTCALL secondary_subtypeof(Traitsp t);	// slow path called by subtypeof()
 		bool isPrimary() const;
 		uint32_t countNewInterfaces(List<Traitsp, LIST_GCObjects>& seen);
+		void resolveSignaturesSelf(const Toplevel* toplevel);
 
 	public:
 		void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;
