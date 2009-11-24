@@ -373,17 +373,10 @@ namespace avmplus
 		return true;
 	}
 	
-	void TraitsBindings::fixOneInterfaceBindings(Traitsp ifc, const Toplevel* toplevel)
+	void TraitsBindings::fixOneInterfaceBindings(Traitsp ifc)
 	{
 		AvmAssert(!owner->isInterface());
-
-		if (!ifc->linked) 
-		{
-			// toplevel will be non-null only for the first call (will be null afterwards) --
-			// but all our interfaces will be resolved by then
-			AvmAssert(toplevel != NULL);
-			ifc->resolveSignatures(toplevel);
-		}
+		AvmAssert(ifc->linked);
 
 		TraitsBindingsp ifcd = ifc->getTraitsBindings();
 		StTraitsBindingsIterator iter(ifcd);
@@ -1241,7 +1234,7 @@ namespace avmplus
 					Traits* t = it.next();
 					if (!base || !base->subtypeof(t)) {
 						// new interface not implemented in base.
-						thisData->fixOneInterfaceBindings(t, toplevel);
+						thisData->fixOneInterfaceBindings(t);
 					}
 				}
 			}
@@ -1377,6 +1370,64 @@ namespace avmplus
 	}
 
 	/**
+	 * add t to pending[] ahead of any existing entries that are
+	 * subtypes or implementers of t, so that when we iterate through
+	 * pending[] we will traverse the inheritance DAG top-down.
+	 */
+	void insertSupertype(Traits* t, List<Traits*> &pending) 
+	{
+		uint32_t i = 0; 
+		for (uint32_t n = pending.size(); i < n; i++) {
+			if (pending[i]->subtypeof(t)) {
+				pending.insert(i, t);
+				return;
+			}
+		}
+		pending.add(t);
+	}
+
+	/**
+	 * resolve this traits signatures by visiting all supertypes in
+	 * top-down toplogical order, then resolving our own signatures.  The top-down
+	 * order ensures that we resolve base classes and interfaces first, while
+	 * avoiding recursion.
+	 */
+	void Traits::resolveSignatures(const Toplevel* toplevel)
+	{
+		// toplevel actually can be null, when resolving the builtin classes...
+		// but they should never cause verification errors in functioning builds
+		if (linked)
+			return;
+
+		List<Traits*> pending(core->gc);
+		// copy primary supertypes into pending.
+		// primary_supertypes[] is already in top-down order.
+		for (int32_t i = 0; i < MAX_PRIMARY_SUPERTYPE; i++) {
+			Traits* t = m_primary_supertypes[i];
+			if (t == NULL || t == this)
+				break;
+			if (!t->linked)
+				pending.add(t);
+		}
+
+		// copy other base types, and interfaces, into pending[] by 
+		// and maintaining the partial ordering that each type's bases and
+		// interfaces are visited before that type itself is visited.
+		for (Traits** st = m_secondary_supertypes; *st != NULL; st++) {
+			Traits* t = *st;
+			if (t != this && !t->linked)
+				insertSupertype(t, pending);
+		}
+
+		for (uint32_t i = 0, n = pending.size(); i < n; i++) {
+			AvmAssert(!pending[i]->linked);
+			pending[i]->resolveSignaturesSelf(toplevel);
+		}
+
+		this->resolveSignaturesSelf(toplevel);
+	}
+
+	/**
 	 * This must be called before any method is verified or any
 	 * instances are created.  It is not done eagerly in AbcParser
 	 * because doing so would prevent circular type references between
@@ -1384,23 +1435,18 @@ namespace avmplus
 	 *
 	 * Resolve the type and position/width of each slot.
 	 */
-	void Traits::resolveSignatures(const Toplevel* toplevel)
+	void Traits::resolveSignaturesSelf(const Toplevel* toplevel)
 	{
-		// toplevel actually can be null, when resolving the builtin classes...
-		// but they should never cause verification errors in functioning builds
-		//AvmAssert(toplevel != NULL);
-		
-		if (linked)
-			return;
+#ifdef DEBUG
+		AvmAssert(!linked);
+		// make sure our supertypes are resolved. (must be done before calling _buildTraitsBindings)
+		for (Traits* t = this->base; t != NULL; t = t->base)
+			AvmAssert(t->linked);
+		for (Traits** st = this->m_secondary_supertypes; *st != NULL; st++)
+			AvmAssert(*st == this || (*st)->linked);
+#endif
 
 		MMgc::GC* gc = core->GetGC();
-		for (Traits* t = this->base; t != NULL; t = t->base)
-		{
-			// make sure our base classes our resolved. (must be done before calling _buildTraitsBindings)
-			if (!t->linked) 
-				t->resolveSignatures(toplevel);
-		}
-
 		AbcGen gen(gc); 
 		AbcGen *pgen;
 #if defined(VMCFG_AOT)
@@ -1412,17 +1458,6 @@ namespace avmplus
 		this->genInitBody(toplevel, gen);
 
 		// leave m_tmref as empty, we don't need it yet
-
-		// all interfaces should have been resolved inside _buildTraitsBindings, UNLESS we are an interface ourself...
-		// in which case let's do it now
-		if (this->isInterface())
-		{
-			for (Traits** t = this->m_secondary_supertypes; *t != NULL; t++) {
-				Traits* ti = *t;
-				if (!ti->linked)
-					ti->resolveSignatures(toplevel);
-			}
-		}
 
 		uint32_t slotAreaSize = 0;
 		uint32_t slotAreaCount = 0;
