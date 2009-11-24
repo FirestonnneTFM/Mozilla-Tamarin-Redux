@@ -54,7 +54,10 @@ namespace avmshell
 		m_array    = NULL;
 	}
 
-	ByteArray::ByteArray(const ByteArray &lhs)
+	ByteArray::ByteArray(const ByteArray &lhs) 
+        // GCC will warn if we don't explicitly init GlobalMemoryProvider, 
+        // even though it has no fields or ctor... sigh
+        : GlobalMemoryProvider()
 	{
 		m_subscriberRoot = NULL;
 		m_array    = mmfx_new_array(uint8_t, lhs.m_length);
