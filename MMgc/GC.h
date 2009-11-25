@@ -548,7 +548,10 @@ namespace MMgc
  		// Called from adjustPolicyForNextMajorCycle to compute the effective L for the next
  		// collection cycle
  		void adjustL();
- 
+
+		// Called from the policy manager's constructor
+		void adjustPolicyInitially();
+		
  		// Called from the policy event handler to compute the GC policy for the next 
  		// major collection cycle (from the end of one FinishIncrementalMark to the start
  		// of the next one)
