@@ -51,18 +51,14 @@ namespace MMgc
 
 	REALLY_INLINE void* FixedMalloc::Alloc(size_t size, FixedMallocOpts flags)
 	{
-		void *item;
-		GCAssert(size + 3 > size);
-		// overflow detection
-		if(size+3 < size)
-			return NULL;
+		// Observe that no size overflow check is needed for small allocations;
+		// the large-object allocator performs the necessary checking in that case.
 
 		if (size <= (size_t)kLargestAlloc) {
-			item = FindSizeClass(size)->Alloc(size, flags);
+			return FindSizeClass(size)->Alloc(size, flags);
 		} else {
-			item = LargeAlloc(size, flags);
+			return LargeAlloc(size, flags);
 		}
-		return item;
 	}
 
 	REALLY_INLINE void *FixedMalloc::PleaseAlloc(size_t size)
