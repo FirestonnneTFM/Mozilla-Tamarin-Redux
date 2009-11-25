@@ -152,6 +152,7 @@ namespace MMgc
 		  numRegionBlocks(0),
 		  numAlloc(0),
 		  codeMemory(0),
+		  externalPressure(0),
 		  config(c),
  		  status(kMemNormal),
 		  statusNotificationBeingSent(false),
@@ -326,13 +327,7 @@ namespace MMgc
 				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
 #endif
-
-			size_t total = GetTotalHeapSize() ;
-			if(config.heapSoftLimit && total > config.heapSoftLimit && status == kMemNormal)
-			{
-				GCDebugMsg(false, "*** Alloc exceeded softlimit: ask for %d, usedheapsize =%d, totalHeap =%d\n", size, GetUsedHeapSize(), total );
-				StatusChangeNotify(kMemSoftLimit);
-			}
+			CheckForSoftLimitExceeded(size);
 		}
 
 		// Zero out the memory, if requested to do so
@@ -542,22 +537,62 @@ namespace MMgc
 		CheckForStatusReturnToNormal();
 	}
 
+	// m_spinlock is held
+	void GCHeap::CheckForHardLimitExceeded()
+	{
+		if (!HardLimitExceeded())
+			return;
+		
+		// if we're already failing then fail hard
+		if (status == kMemHardLimit)
+			Abort();
+			
+		// bail on double faults
+		if(statusNotificationBeingSent)
+			Abort();
+				
+		// invoke callbacks to free up memory
+		StatusChangeNotify(kMemHardLimit);
+	}
+
+	// m_spinlock is held
+	void GCHeap::CheckForSoftLimitExceeded(size_t request)
+	{
+		if(config.heapSoftLimit == 0 || status != kMemNormal || !SoftLimitExceeded())
+			return;
+
+		size_t externalBlocks = externalPressure / kBlockSize;
+		GCDebugMsg(false, "*** Alloc exceeded softlimit: ask for %u, usedheapsize =%u, totalHeap =%u, of which external =%u\n", 
+				   unsigned(request), 
+				   unsigned(GetUsedHeapSize() + externalBlocks), 
+				   unsigned(GetTotalHeapSize() + externalBlocks),
+				   unsigned(externalBlocks));
+		StatusChangeNotify(kMemSoftLimit);
+	}
+	
+	// m_spinlock is held
 	void GCHeap::CheckForStatusReturnToNormal()
 	{
 		if(!statusNotificationBeingSent && statusNotNormalOrAbort())
 		{
-			size_t total = GetTotalHeapSize();
+			size_t externalBlocks = externalPressure / kBlockSize;
+			size_t total = GetTotalHeapSize() + externalBlocks;
+
 			// return to normal if we drop below heapSoftLimit
 			if(config.heapSoftLimit != 0 && status == kMemSoftLimit)
 			{
-				if (total < config.heapSoftLimit)
+				if (!SoftLimitExceeded())
 				{
-					GCDebugMsg(false, "### Alloc dropped below softlimit: usedheapsize =%d, totalHeap =%d\n",  GetUsedHeapSize(), total );
+					size_t used = GetUsedHeapSize() + externalBlocks;
+					GCDebugMsg(false, "### Alloc dropped below softlimit: usedheapsize =%u, totalHeap =%u, of which external =%u\n", 
+							   unsigned(used), 
+							   unsigned(total),
+							   unsigned(externalBlocks) );
 					StatusChangeNotify(kMemNormal);
 				}
 			}
 			// or if we shrink to below %10 of the max
-			else if(maxTotalHeapSize / kBlockSize * 9 > total * 10)
+			else if ((maxTotalHeapSize / kBlockSize + externalBlocks) * 9 > total * 10)
 				StatusChangeNotify(kMemNormal);
 		}
 	}
@@ -1165,38 +1200,22 @@ namespace MMgc
 
 	void GCHeap::ExpandHeap(size_t askSize, bool canFail)
 	{
-		// once we hit soft limit don't allow canFail allocs
-		if(canFail && status == kMemSoftLimit) {
-			return;
-		}			
-			
-		bool result = ExpandHeapInternal(askSize);
-		if(!result)
-		{ 
-			// random policy choice: don't invoke OOM callbacks for
-			// canFail allocs
-			if(status != kMemHardLimit && !canFail) {
+		if (canFail) {
+			// once we hit soft limit don't allow canFail allocs
+			if(status == kMemSoftLimit)
+				return;
 
-				if(statusNotificationBeingSent)
-					Abort();
-				
-
-				// invoke callbacks
-				StatusChangeNotify(kMemHardLimit);
-
-				
-				// try again
-				result = ExpandHeapInternal(askSize);
-			}
-
-			if(!result) {
-				if(canFail)
-					return;
-				else 
-					Abort();
-			}
+			// random policy choice: don't invoke OOM callbacks for canFail allocs
+			if (HardLimitExceeded())
+				return;
 		}
-
+		
+		// Check the hard limit, trigger cleanup if hit
+		CheckForHardLimitExceeded();
+		
+		if (!ExpandHeapInternal(askSize))
+			Abort();
+		
 		// The guard on instance being non-NULL is a hack, to be fixed later (now=2009-07-20).
 		// Some VMPI layers (WinMo is at least one of them) try to grab the GCHeap instance to get
 		// at the map of private pages.  But the GCHeap instance is not available during the initial
@@ -1215,6 +1234,16 @@ namespace MMgc
 		}
 	} 
 
+	bool GCHeap::HardLimitExceeded()
+	{
+		return GetTotalHeapSize() + externalPressure/kBlockSize > config.heapLimit;
+	}
+	
+	bool GCHeap::SoftLimitExceeded()
+	{
+		return GetTotalHeapSize() + externalPressure/kBlockSize > config.heapSoftLimit;
+	}
+	
 #define roundUp(_s, _inc) (((_s + _inc - 1) / _inc) * _inc)
 	 
 	bool GCHeap::ExpandHeapInternal(size_t askSize)
@@ -1229,10 +1258,10 @@ namespace MMgc
 #else
 		const size_t defaultReserve = kDefaultReserve;
 #endif
-		
-		if(GetTotalHeapSize() > config.heapLimit)
+
+		if (HardLimitExceeded())
 			return false;
-		
+
 		char *baseAddr = NULL;
 		char *newRegionAddr = NULL;
 		size_t newRegionSize = 0;
@@ -1701,12 +1730,14 @@ namespace MMgc
 	}
 #endif
 
+	/*static*/
 	void GCHeap::SignalObjectTooLarge()
 	{
 		GCLog("Implementation limit exceeded: attempting to allocate too-large object\n");
 		GetGCHeap()->Abort();
 	}
 
+	/*static*/
 	void GCHeap::SignalInconsistentHeapState(const char* reason)
 	{
 		GCAssert(!"Inconsistent heap state; aborting");
@@ -1714,6 +1745,36 @@ namespace MMgc
 		GetGCHeap()->Abort();
 	}
 	
+	/*static*/
+	void GCHeap::SignalExternalAllocation(size_t nbytes)
+	{
+		GCHeap* heap = GetGCHeap();
+		
+		MMGC_LOCK(heap->m_spinlock);
+		
+		heap->externalPressure += nbytes;
+
+		// cleanup actions if necessary
+		heap->CheckForHardLimitExceeded();
+			
+		// check again - if we still can't allocate then fail hard
+		if (heap->HardLimitExceeded())
+			heap->Abort();
+
+		heap->CheckForSoftLimitExceeded((nbytes + kBlockSize - 1) / kBlockSize);	// size only used for GC messages, OK to round up
+	}
+	
+	/*static*/
+	void GCHeap::SignalExternalDeallocation(size_t nbytes)
+	{
+		GCHeap* heap = GetGCHeap();
+		
+		MMGC_LOCK(heap->m_spinlock);
+		
+		heap->externalPressure -= nbytes;
+		heap->CheckForStatusReturnToNormal();
+	}
+
 	// This can *always* be called.  It will clean up the state on the current thread
 	// if appropriate, otherwise do nothing.  It *must* be called by host code if the
 	// host code jumps past an MMGC_ENTER instance.  (The Flash player does that, in

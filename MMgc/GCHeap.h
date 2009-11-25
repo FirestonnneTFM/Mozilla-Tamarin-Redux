@@ -295,6 +295,27 @@ namespace MMgc
 		 */
 		static void SignalImminentAbort();
 		
+		/**
+		 * Signal that client code has performed an allocation from memory known not to be
+		 * controlled by MMgc, and wants this memory accounted for.  (A typical case is when
+		 * system memory is allocated for rendering buffers.)
+		 *
+		 * Let 'total memory volume' be the sum of the memory volume controlled by MMgc,
+		 * plus the volume added by SignalExternalAllocation, minus the volume subtracted
+		 * by SignalExternalDeallocation.  MMgc performs its out-of-memory avoidance
+		 * actions (actions for crossing the soft and hard limits) based on total memory
+		 * volume.
+		 */
+		static void SignalExternalAllocation(size_t nbytes);
+		
+		/**
+		 * Signal that client code has performed a deallocation of memory known not to be
+		 * controlled by MMgc, and wants this memory accounted for.
+		 *
+		 * @see SignalExternalAllocation
+		 */
+		static void SignalExternalDeallocation(size_t nbytes);
+		
 		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
 		/**
@@ -729,8 +750,12 @@ namespace MMgc
 			}
 		}
 
+		bool HardLimitExceeded();
+		bool SoftLimitExceeded();
 		void StatusChangeNotify(MemoryStatus to);
 		void CheckForStatusReturnToNormal();
+		void CheckForHardLimitExceeded();
+		void CheckForSoftLimitExceeded(size_t request);
 
 		void ValidateHeapBlocks();
 
@@ -778,6 +803,7 @@ namespace MMgc
 		HeapBlock freelists[kNumFreeLists];
 		size_t numAlloc;
 		size_t codeMemory;
+		size_t externalPressure;
 		vmpi_spin_lock_t m_spinlock;
 		GCHeapConfig config;
 		GCManager gcManager;		
