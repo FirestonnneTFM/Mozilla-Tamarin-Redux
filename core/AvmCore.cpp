@@ -203,11 +203,11 @@ namespace avmplus
 
 		numStrings = 1024; // power of 2
 		strings = mmfx_new_array(DRC(Stringp), numStrings);
-		VMPI_memset(strings, 0, numStrings*sizeof(Stringp));
+		VMPI_memset(strings, 0, numStrings*sizeof(DRC(Stringp)));
 
 		numNamespaces = 1024;  // power of 2
 		namespaces = mmfx_new_array(DRC(Namespacep), numNamespaces);
-		VMPI_memset(namespaces, 0, numNamespaces*sizeof(Namespacep));
+		VMPI_memset(namespaces, 0, numNamespaces*sizeof(DRC(Namespacep)));
 
 		console.setCore(this);
 		
@@ -3062,11 +3062,11 @@ return the result of the comparison ToPrimitive(x) == y.
 	 * uri.  We assume uri's are already interned, so interning a namespace
 	 * is quick because uri's can be compared quickly.
 	 */
-	int AvmCore::findNamespace(Namespacep ns)
+	int AvmCore::findNamespace(Namespacep ns, bool canRehash)
 	{
         int m = numNamespaces;
 		// 80% load factor
-        if (nsCount*5 >= 4*m) {
+        if (canRehash && nsCount*5 >= 4*m) {
             rehashNamespaces(m = m << 1);
 		}
 
@@ -3292,7 +3292,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int oldStringCount = numStrings;
 
 		strings = mmfx_new_array(DRC(Stringp), newlen);
-		VMPI_memset(strings, 0, newlen*sizeof(Stringp));
+		VMPI_memset(strings, 0, newlen*sizeof(DRC(Stringp)));
 		numStrings = newlen;
 
 #ifdef _DEBUG // debug sanity checks
@@ -3355,14 +3355,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		int oldCount = numNamespaces;
 
 		namespaces = mmfx_new_array(DRC(Namespacep), newlen);
-		VMPI_memset(namespaces, 0, newlen*sizeof(Namespacep));
+		VMPI_memset(namespaces, 0, newlen*sizeof(DRC(Namespacep)));
 		numNamespaces = newlen;
 		
         for (int i=0; i < oldCount; i++)
         {
 			Namespacep o = old[i];
             if (o != NULL)
-                namespaces[findNamespace(o)] = o;
+                namespaces[findNamespace(o, /*canRehash = */ false)] = o;
         }
 
 		// Clear old namespaces table so it can be collected.

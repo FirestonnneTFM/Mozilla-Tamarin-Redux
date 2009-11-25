@@ -1333,7 +1333,7 @@ const int kBufferPadding = 16;
 		int findString(Stringp s);
 
 		/** search the namespace intern table */
-		int findNamespace(Namespacep ns);
+		int findNamespace(Namespacep ns, bool canRehash = true);
 		Namespacep gotNamespace(Stringp uri, int32_t api);
 
 	public:
