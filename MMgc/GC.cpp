@@ -183,6 +183,7 @@ namespace MMgc
 			barrierStageLastCollection[i] = 0;
 		}
 #endif
+		adjustPolicyInitially();
 	}
 	
 	void GCPolicyManager::shutdown()
@@ -314,6 +315,16 @@ namespace MMgc
  			L_actual = (L_actual + L_ideal) / 2;
  	}
 
+	// Called at the start
+	void GCPolicyManager::adjustPolicyInitially()
+	{
+		remainingMajorAllocationBudget = double(lowerLimitCollectionThreshold()) * 4096.0;
+		remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+ 		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
+		if (gc->greedy)
+			remainingMinorAllocationBudget = GREEDY_TRIGGER;
+	}
+	
  	// Called when a collection ends
  	void GCPolicyManager::adjustPolicyForNextMajorCycle()
  	{
@@ -372,6 +383,8 @@ namespace MMgc
  
  	uint32_t GCPolicyManager::incrementalMarkMilliseconds()
  	{
+		// Bad to divide by 0 here.
+		GCAssert(minorAllocationBudget != 0);
  		return uint32_t(P * 1000.0 * double(minorAllocationBudget - remainingMinorAllocationBudget) / double(minorAllocationBudget));
  	}
  
