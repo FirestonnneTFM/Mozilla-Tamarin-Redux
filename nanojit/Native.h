@@ -64,14 +64,14 @@ namespace nanojit {
         // flags; upper bits reserved
         LIR64    = 0x40,            // result is double or quad
 
-#define OPDEF(op, number, repkind) \
+#define OPDEF(op, number, args, repkind) \
         LIR_##op = (number),
-#define OPD64(op, number, repkind) \
+#define OPDEF64(op, number, args, repkind) \
         LIR_##op = ((number) | LIR64),
 #include "LIRopcode.tbl"
         LIR_sentinel,
 #undef OPDEF
-#undef OPD64
+#undef OPDEF64
 
 #ifdef NANOJIT_64BIT
 #  define PTR_SIZE(a,b)  b
@@ -181,10 +181,6 @@ namespace nanojit {
         #define gpn(r)                    regNames[(r)]
         #define fpn(r)                    regNames[(r)]
     #elif defined(NJ_VERBOSE)
-        // Used for printing native instructions.  Like Assembler::outputf(),
-        // but only outputs if LC_Assembly is set.  Also prepends the output
-        // with the address of the current native instruction if
-        // LC_NoCodeAddrs is not set.  
         #define asm_output(...) do { \
             counter_increment(native); \
             if (_logc->lcbits & LC_Assembly) { \
@@ -194,7 +190,9 @@ namespace nanojit {
                 else \
                    VMPI_memset(outline, (int)' ', 10+3); \
                 sprintf(&outline[13], ##__VA_ARGS__); \
-                output(); \
+                Assembler::outputAlign(outline, 35); \
+                _allocator.formatRegisters(outline, _thisfrag); \
+                Assembler::output_asm(outline); \
                 outputAddr=(_logc->lcbits & LC_NoCodeAddrs) ? false : true;    \
             } \
         } while (0) /* no semi */

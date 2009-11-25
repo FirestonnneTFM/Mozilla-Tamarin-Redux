@@ -81,7 +81,6 @@ namespace nanojit
         (void)logc;
         verbose_only( _logc = logc; )
         verbose_only( _outputCache = 0; )
-        verbose_only( outline[0] = '\0'; )
         verbose_only( outlineEOL[0] = '\0'; )
         verbose_only( outputAddr = false; )
 
@@ -143,10 +142,7 @@ namespace nanojit
             vicIns->setReg(UnknownReg);
 
             // Restore vicIns.
-            verbose_only( if (_logc->lcbits & LC_Assembly) {
-                            setOutputForEOL("  <= restore %s",
-                            _thisfrag->lirbuf->names->formatRef(vicIns)); } )
-            asm_restore(vicIns, r);
+            asm_restore(vicIns, vicIns->resv(), r);
 
             // r ends up staying active, but the LIns defining it changes.
             _allocator.addActive(r, ins);
@@ -299,36 +295,39 @@ namespace nanojit
     }
     #endif /* _DEBUG */
 
-    void Assembler::findRegFor2(RegisterMask allow, LIns* ia, Register& ra, LIns* ib, Register& rb)
+    void Assembler::findRegFor2(RegisterMask allow, LIns* ia, Reservation* &resva, LIns* ib, Reservation* &resvb)
     {
-        if (ia == ib) {
-            ra = rb = findRegFor(ia, allow);
-        } else {
-            // You might think we could just do this:
-            //
-            //   ra = findRegFor(ia, allow);
-            //   rb = findRegFor(ib, allow & ~rmask(ra));
-            //
-            // But if 'ib' was already in an allowed register, the first
-            // findRegFor() call could evict it, whereupon the second
-            // findRegFor() call would immediately restore it, which is
-            // sub-optimal.  What we effectively do instead is this:
-            //
-            //   ra = findRegFor(ia, allow & ~rmask(rb));
-            //   rb = findRegFor(ib, allow & ~rmask(ra));
-            //
-            // but we have to determine what 'rb' initially is to avoid the
-            // mutual dependency between the assignments.
-            bool rbDone = !ib->isUnusedOrHasUnknownReg() && (rb = ib->getReg(), allow & rmask(rb));
+        if (ia == ib)
+        {
+            findRegFor(ia, allow);
+            resva = resvb = ia->resvUsed();
+        }
+        else
+        {
+            resvb = ib->resv();
+            bool rbDone = (resvb->used && isKnownReg(resvb->reg) && (allow & rmask(resvb->reg)));
             if (rbDone) {
-                allow &= ~rmask(rb);    // ib already in an allowable reg, keep that one
+                // ib already assigned to an allowable reg, keep that one
+                allow &= ~rmask(resvb->reg);
             }
-            ra = findRegFor(ia, allow);
+            Register ra = findRegFor(ia, allow);
+            resva = ia->resv();
+            NanoAssert(error() || (resva->used && isKnownReg(ra)));
             if (!rbDone) {
                 allow &= ~rmask(ra);
-                rb = findRegFor(ib, allow);
+                findRegFor(ib, allow);
+                resvb = ib->resvUsed();
             }
         }
+    }
+
+    // XXX: this will replace findRegFor2() once Reservations are fully removed
+    void Assembler::findRegFor2b(RegisterMask allow, LIns* ia, Register &ra, LIns* ib, Register &rb)
+    {
+        Reservation *resva, *resvb;
+        findRegFor2(allow, ia, resva, ib, resvb);
+        ra = resva->reg;
+        rb = resvb->reg;
     }
 
     Register Assembler::findSpecificRegFor(LIns* i, Register w)
@@ -496,9 +495,9 @@ namespace nanojit
     {
         int d = disp(ins);
         Register r = ins->getReg();
-        verbose_only( if (d && (_logc->lcbits & LC_Assembly)) {
-                         setOutputForEOL("  <= spill %s",
-                         _thisfrag->lirbuf->names->formatRef(ins)); } )
+        verbose_only( if (d && (_logc->lcbits & LC_RegAlloc)) {
+                         outputForEOL("  <= spill %s",
+                                      _thisfrag->lirbuf->names->formatRef(ins)); } )
         asm_spill(r, d, pop, ins->isQuad());
     }
 
@@ -555,10 +554,7 @@ namespace nanojit
         vic->setReg(UnknownReg);
 
         // Restore vic.
-        verbose_only( if (_logc->lcbits & LC_Assembly) {
-                        setOutputForEOL("  <= restore %s",
-                        _thisfrag->lirbuf->names->formatRef(vic)); } )
-        asm_restore(vic, r);
+        asm_restore(vic, vic->resv(), r);
     }
 
     void Assembler::patch(GuardRecord *lr)
@@ -926,8 +922,8 @@ namespace nanojit
                  instructions in reverse order, if some previously visited
                  instruction uses the value computed by this instruction, then
                  this instruction will already have a register assigned to
-                 hold that value.  Hence we can consult the instruction to
-                 detect whether its value is in fact used (i.e. not dead).
+                 hold that value.  Hence we can consult the Reservation to
+                 detect whether the value is in fact used (i.e. not dead).
 
               Note that the backwards code traversal can make register
               allocation confusing.  (For example, we restore a value before
@@ -952,17 +948,6 @@ namespace nanojit
             bool required = ins->isStmt() || ins->isUsed();
             if (!required)
                 continue;
-
-#ifdef NJ_VERBOSE
-            // Output the register post-state and/or activation post-state.
-            // Because asm output comes in reverse order, doing it now means
-            // it is printed after the LIR and asm, exactly when the
-            // post-state should be shown.
-            if ((_logc->lcbits & LC_Assembly) && (_logc->lcbits & LC_Activation))
-                printActivationState();
-            if ((_logc->lcbits & LC_Assembly) && (_logc->lcbits & LC_RegAlloc))
-                printRegState();
-#endif
 
             LOpcode op = ins->opcode();
             switch(op)
@@ -1010,7 +995,7 @@ namespace nanojit
                     if (isKnownReg(r)) {
                         _allocator.retire(r);
                         ins->setReg(UnknownReg);
-                        asm_restore(ins, r);
+                        asm_restore(ins, ins->resv(), r);
                     }
                     freeRsrcOf(ins, 0);
                     break;
@@ -1411,7 +1396,7 @@ namespace nanojit
                     if (ARM_VFP && op == LIR_fcall)
                     {
                         // fcall
-                        rr = asm_prep_fcall(ins);
+                        rr = asm_prep_fcall(getresv(ins), ins);
                     }
                     else
                     {
@@ -1572,6 +1557,8 @@ namespace nanojit
 
     void Assembler::arFree(uint32_t idx)
     {
+        verbose_only( printActivationState(" >FP"); )
+
         AR &ar = _activation;
         LIns *i = ar.entry[idx];
         NanoAssert(i != 0);
@@ -1582,46 +1569,19 @@ namespace nanojit
     }
 
 #ifdef NJ_VERBOSE
-    void Assembler::printRegState()
+    void Assembler::printActivationState(const char* what)
     {
+        if (!(_logc->lcbits & LC_Activation))
+            return;
+
         char* s = &outline[0];
-        VMPI_memset(s, ' ', 26);  s[26] = '\0';
+        VMPI_memset(s, ' ', 45);  s[45] = '\0';
         s += VMPI_strlen(s);
-        VMPI_sprintf(s, "RR");
-        s += VMPI_strlen(s);
-
-        for (Register r = FirstReg; r <= LastReg; r = nextreg(r)) {
-            LIns *ins = _allocator.getActive(r);
-            if (ins) {
-                NanoAssertMsg(!_allocator.isFree(r),
-                              "Coding error; register is both free and active! " );
-                const char* n = _thisfrag->lirbuf->names->formatRef(ins);
-
-                if (ins->isop(LIR_param) && ins->paramKind()==1 &&
-                    r == Assembler::savedRegs[ins->paramArg()])
-                {
-                    // dont print callee-saved regs that arent used
-                    continue;
-                }
-
-                const char* rname = ins->isQuad() ? fpn(r) : gpn(r);
-                VMPI_sprintf(s, " %s(%s)", rname, n);
-                s += VMPI_strlen(s);
-            }
-        }
-        output();
-    }
-
-    void Assembler::printActivationState()
-    {
-        char* s = &outline[0];
-        VMPI_memset(s, ' ', 26);  s[26] = '\0';
-        s += VMPI_strlen(s);
-        VMPI_sprintf(s, "AR");
+        VMPI_sprintf(s, "%s", what);
         s += VMPI_strlen(s);
 
         int32_t max = _activation.tos < NJ_MAX_STACK_ENTRY ? _activation.tos : NJ_MAX_STACK_ENTRY;
-        for (int32_t i = _activation.lowwatermark; i < max; i++) {
+        for(int32_t i = _activation.lowwatermark; i < max; i++) {
             LIns *ins = _activation.entry[i];
             if (ins) {
                 const char* n = _thisfrag->lirbuf->names->formatRef(ins);
@@ -1645,7 +1605,7 @@ namespace nanojit
             }
             s += VMPI_strlen(s);
         }
-        output();
+        output(&outline[0]);
     }
 #endif
 
@@ -1665,6 +1625,7 @@ namespace nanojit
         int32_t start = ar.lowwatermark;
         int32_t i = 0;
         NanoAssert(start>0);
+        verbose_only( printActivationState(" <FP"); )
 
         if (size == 1) {
             // easy most common case -- find a hole, or make the frame bigger
@@ -1942,43 +1903,74 @@ namespace nanojit
     }
 
 #ifdef NJ_VERBOSE
+    // "outline" must be able to hold the output line in addition to the
+    // outlineEOL buffer, which is concatenated onto outline just before it
+    // is printed.
     char Assembler::outline[8192];
     char Assembler::outlineEOL[512];
 
-    void Assembler::output()
+    void Assembler::outputForEOL(const char* format, ...)
     {
-        // The +1 is for the terminating NUL char.
-        VMPI_strncat(outline, outlineEOL, sizeof(outline)-(strlen(outline)+1));
-
-        if (_outputCache) {
-            char* str = new (alloc) char[VMPI_strlen(outline)+1];
-            VMPI_strcpy(str, outline);
-            _outputCache->insert(str);
-        } else {
-            _logc->printf("%s\n", outline);
-        }
-
-        outline[0] = '\0';
+        va_list args;
+        va_start(args, format);
         outlineEOL[0] = '\0';
+        vsprintf(outlineEOL, format, args);
     }
 
     void Assembler::outputf(const char* format, ...)
     {
-        va_list args;
+        va_list     args;
         va_start(args, format);
-
         outline[0] = '\0';
-        vsprintf(outline, format, args);
-        output();
+
+        // Format the output string and remember the number of characters
+        // that were written.
+        uint32_t outline_len = vsprintf(outline, format, args);
+
+        // Add the EOL string to the output, ensuring that we leave enough
+        // space for the terminating NULL character, then reset it so it
+        // doesn't repeat on the next outputf.
+        VMPI_strncat(outline, outlineEOL, sizeof(outline)-(outline_len+1));
+        outlineEOL[0] = '\0';
+
+        output(outline);
     }
 
-    void Assembler::setOutputForEOL(const char* format, ...)
+    void Assembler::output(const char* s)
     {
-        va_list args;
-        va_start(args, format);
+        if (_outputCache)
+        {
+            char* str = new (alloc) char[VMPI_strlen(s)+1];
+            VMPI_strcpy(str, s);
+            _outputCache->insert(str);
+        }
+        else
+        {
+            _logc->printf("%s\n", s);
+        }
+    }
 
+    void Assembler::output_asm(const char* s)
+    {
+        if (!(_logc->lcbits & LC_Assembly))
+            return;
+
+        // Add the EOL string to the output, ensuring that we leave enough
+        // space for the terminating NULL character, then reset it so it
+        // doesn't repeat on the next outputf.
+        VMPI_strncat(outline, outlineEOL, sizeof(outline)-(strlen(outline)+1));
         outlineEOL[0] = '\0';
-        vsprintf(outlineEOL, format, args);
+
+        output(s);
+    }
+
+    char* Assembler::outputAlign(char *s, int col)
+    {
+        int len = (int)VMPI_strlen(s);
+        int add = ((col-len)>0) ? col-len : 1;
+        VMPI_memset(&s[len], ' ', add);
+        s[col] = '\0';
+        return &s[col];
     }
 #endif // NJ_VERBOSE
 

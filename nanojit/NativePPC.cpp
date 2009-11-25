@@ -570,7 +570,7 @@ namespace nanojit
         FMR(r, s);
     }
 
-    void Assembler::asm_restore(LIns *i, Register r) {
+    void Assembler::asm_restore(LIns *i, Reservation *, Register r) {
         int d;
         if (i->isop(LIR_alloc)) {
             d = disp(i);
@@ -592,10 +592,13 @@ namespace nanojit
             } else {
                 LWZ(r, d, FP);
             }
+            verbose_only( if (_logc->lcbits & LC_RegAlloc) {
+                            outputForEOL("  <= restore %s",
+                            _thisfrag->lirbuf->names->formatRef(i)); } )
         }
     }
 
-    Register Assembler::asm_prep_fcall(LIns *ins) {
+    Register Assembler::asm_prep_fcall(Reservation*, LIns *ins) {
         return prepResultReg(ins, rmask(F1));
     }
 
@@ -891,7 +894,7 @@ namespace nanojit
         RegisterMask allow = FpRegs;
         Register rr = prepResultReg(ins, allow);
         Register ra, rb;
-        findRegFor2(allow, lhs, ra, rhs, rb);
+        findRegFor2b(allow, lhs, ra, rhs, rb);
         switch (op) {
             case LIR_fadd: FADD(rr, ra, rb); break;
             case LIR_fsub: FSUB(rr, ra, rb); break;
