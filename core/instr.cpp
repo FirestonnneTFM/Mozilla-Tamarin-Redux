@@ -230,8 +230,7 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
     {
         ScriptObject* ctor = AvmCore::atomToScriptObject(obj)->getSlotObject(AvmCore::bindingToSlotId(b));
         AvmCore* core = toplevel->core();
-        if (!ctor ||
-            (!ctor->traits()->subtypeof(CLASS_TYPE) && !ctor->traits()->subtypeof(FUNCTION_TYPE)))
+        if (!ctor)
             toplevel->throwTypeError(kNotConstructorError, core->toErrorString(multiname));
         // inlined equivalent of op_construct
         return ctor->construct(argc, atomv);
