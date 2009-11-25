@@ -64,6 +64,12 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm || 
   fail=1
 }
 
+# Release-fpu_ARM
+test -f $buildsdir/$change-${changeid}/$platform/$shell_release_fpu_arm || {
+  echo "message: Release-fpu Failed"
+  fail=1
+}
+
 # Debug_ARM
 test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_arm || {
   echo "message: Debug Failed"
