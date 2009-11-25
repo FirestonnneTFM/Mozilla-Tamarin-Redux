@@ -495,10 +495,6 @@ namespace nanojit
 
     void Assembler::JMP32(S n, NIns* t)    { emit_target32(n,X64_jmp, t); asm_output("jmp %p", t); }
 
-    void Assembler::JMPX(R indexreg, NIns** table)  { emitrxb_imm(X64_jmpx, (R)0, indexreg, (Register)5, (int32_t)(uintptr_t)table); asm_output("jmpq [%s*8 + %p]", RQ(indexreg), (void*)table); }
-
-    void Assembler::JMPXB(R indexreg, R tablereg)   { emitxb(X64_jmpxb, indexreg, tablereg); asm_output("jmp [%s*8 + %s]", RQ(indexreg), RQ(tablereg)); }
-
     void Assembler::JO( S n, NIns* t)      { emit_target32(n,X64_jo,  t); asm_output("jo %p", t); }
     void Assembler::JE( S n, NIns* t)      { emit_target32(n,X64_je,  t); asm_output("je %p", t); }
     void Assembler::JL( S n, NIns* t)      { emit_target32(n,X64_jl,  t); asm_output("jl %p", t); }
@@ -1110,7 +1106,7 @@ namespace nanojit
         LIns *a = cond->oprnd1();
         Register ra, rb;
         if (a != b) {
-            findRegFor2(GpRegs, a, ra, b, rb);
+            findRegFor2b(GpRegs, a, ra, b, rb);
         } else {
             // optimize-me: this will produce a const result!
             ra = rb = findRegFor(a, GpRegs);
@@ -1238,11 +1234,12 @@ namespace nanojit
 
     void Assembler::fcmp(LIns *a, LIns *b) {
         Register ra, rb;
-        findRegFor2(FpRegs, a, ra, b, rb);
+        findRegFor2b(FpRegs, a, ra, b, rb);
         UCOMISD(ra, rb);
     }
 
-    void Assembler::asm_restore(LIns *ins, Register r) {
+    void Assembler::asm_restore(LIns *ins, Reservation *, Register r) {
+        (void) r;
         if (ins->isop(LIR_alloc)) {
             int d = disp(ins);
             LEAQRM(r, d, FP);
@@ -1273,6 +1270,9 @@ namespace nanojit
                 MOVLRM(r, d, FP);
             }
         }
+        verbose_only( if (_logc->lcbits & LC_RegAlloc) {
+                        outputForEOL("  <= restore %s",
+                        _thisfrag->lirbuf->names->formatRef(ins)); } )
     }
 
     void Assembler::asm_cond(LIns *ins) {
@@ -1459,7 +1459,7 @@ namespace nanojit
         TODO(asm_qjoin);
     }
 
-    Register Assembler::asm_prep_fcall(LIns *ins) {
+    Register Assembler::asm_prep_fcall(Reservation*, LIns *ins) {
         return prepResultReg(ins, rmask(XMM0));
     }
 
@@ -1746,18 +1746,18 @@ namespace nanojit
 
     void Assembler::asm_jtbl(LIns* ins, NIns** table)
     {
-        // exclude R12 because ESP and R12 cannot be used as an index
+        // exclude R12 becuase ESP and R12 cannot be used as an index
         // (index=100 in SIB means "none")
         Register indexreg = findRegFor(ins->oprnd1(), GpRegs & ~rmask(R12));
         if (isS32((intptr_t)table)) {
             // table is in low 2GB or high 2GB, can use absolute addressing
             // jmpq [indexreg*8 + table]
-            JMPX(indexreg, table);
+            emitrxb_imm(X64_jmpx, (Register)0, indexreg, (Register)5, (int32_t)(uintptr_t)table);
         } else {
             // don't use R13 for base because we want to use mod=00, i.e. [index*8+base + 0]
             Register tablereg = registerAllocTmp(GpRegs & ~(rmask(indexreg)|rmask(R13)));
             // jmp [indexreg*8 + tablereg]
-            JMPXB(indexreg, tablereg);
+            emitxb(X64_jmpxb, indexreg, tablereg);
             // tablereg <- #table
             asm_quad(tablereg, (uint64_t)table);
         }
