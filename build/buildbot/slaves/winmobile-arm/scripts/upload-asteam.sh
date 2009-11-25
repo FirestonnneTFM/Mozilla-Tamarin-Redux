@@ -56,6 +56,9 @@
 # Release-wordcode_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode_arm
 
+# Release-FPU_ARM
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_fpu_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_fpu_arm
+
 # Debug_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_arm
 

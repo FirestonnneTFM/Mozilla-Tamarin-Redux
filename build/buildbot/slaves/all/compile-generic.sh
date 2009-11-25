@@ -56,6 +56,7 @@ showhelp ()
     echo "       <change>   changeset that is going to be built"
     echo "       <config>   config options passed to configure.py"
     echo "       <filename> name of the shell, do not include file extenstion"
+    echo "       <boolean> optional, if shell should be uploaded to server"
     exit 1
 }
 config=$2
@@ -66,7 +67,10 @@ filename=$3
 test "$filename" = "" && {
     showhelp
 }
-
+upload=$4
+test "$upload" = "true" || {
+    upload=false;
+}
 
 
 ##
@@ -121,9 +125,12 @@ cd $basedir/core
 hg revert avmplusVersion.h
 
 
+
 # Post the build shell to ASTEAM
-cd $basedir/build/buildbot/slaves/scripts/
-. ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension $ftp_asteam/$branch/${change}-${changeid}/$platform/$filename$shell_extension
+if ${upload}; then
+    cd $basedir/build/buildbot/slaves/scripts/
+    . ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension $ftp_asteam/$branch/${change}-${changeid}/$platform/$filename$shell_extension
+fi
 
 echo "build succeeded"
 rm -rf $basedir/objdir
