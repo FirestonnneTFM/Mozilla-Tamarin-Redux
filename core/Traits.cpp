@@ -468,7 +468,9 @@ namespace avmplus
 		m_sizeofInstance(_sizeofInstance),
 		m_offsetofSlots(_offsetofSlots),
 		builtinType(BUILTIN_none),
-		m_posType(uint8_t(posType))
+		m_posType(uint8_t(posType)),
+        // assume everything in builtin pools have custom construct unless stated otherwise
+        hasCustomConstruct(_pool->isBuiltin)    
 	{
 		AvmAssert(m_tbref->get() == NULL);
 		AvmAssert(m_tmref->get() == NULL);
