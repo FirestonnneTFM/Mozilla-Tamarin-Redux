@@ -5246,11 +5246,11 @@ namespace avmplus
         // TODO this can go away if we turn this kill pass into a LirReader
         // and do the work inline with the assembly pass.
         static const uint8_t lirSizes[] = {
-        #define OPDEF(op, number, operands, repkind) sizeof(LIns##repkind),
-        #define OPDEF64(op, number, operands, repkind) OPDEF(op, number, operands, repkind)
+        #define OPDEF(op, number, repkind) sizeof(LIns##repkind),
+        #define OPD64(op, number, repkind) OPDEF(op, number, repkind)
         #include "../nanojit/LIRopcode.tbl"
         #undef OPDEF
-        #undef OPDEF64
+        #undef OPD64
                 0
         };
 
