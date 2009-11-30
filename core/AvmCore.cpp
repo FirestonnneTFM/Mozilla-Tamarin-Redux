@@ -3839,14 +3839,16 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		// Try a simple case first to see if we have a in-range float value
 
-#ifdef WIN32 // should be any intel build
+#if defined(WIN32) && defined(AVMPLUS_IA32) // this is the same #define as in MathUtils for the real2int there
 		// WIN32's real2int returns 0x80000000 if d is not in a valid integer range
-		int intval = MathUtils::real2int (d);
+		int intval = MathUtils::real2int(d);
 		if (intval != 0x80000000) 
 			return intval;
-#elif defined(AVMPLUS_SPARC)
-		int intval = MathUtils::real2int (d);
-		if (intval != 0x7fffffff && intval != 0x80000000)
+#elif defined(AVMPLUS_SPARC) || defined(AVMPLUS_ARM)
+		// real2int in those cases just maps to an int cast which should give: 		
+		// +/-0.0:0 +/-nan:0 +/-ind:0 -inf:0x80000000 +inf:0x7fffffff den:0 >=0x7fffffff:x7fffffff <=0x80000000:0x80000000
+		int intval = MathUtils::real2int(d);
+		if (intval != 0x7fffffff && intval != (int)0x80000000)
 			return intval;
 #endif
 
