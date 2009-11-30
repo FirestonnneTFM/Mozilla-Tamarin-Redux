@@ -1877,6 +1877,9 @@ bail:
 	}
 
 #elif defined(SOLARIS)
+#include <ucontext.h>
+#include <sys/frame.h>
+#include <sys/stack.h>
 
 #ifdef MMGC_SPARC
 #define FLUSHWIN() asm("ta 3"); 

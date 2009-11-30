@@ -40,17 +40,8 @@
 #include "avmshell.h"
 #include "PosixPartialPlatform.h"
 
-#if (defined(AVMPLUS_UNIX) && !defined(SOLARIS))
-	#include <sys/signal.h>
-	#include <unistd.h>
-#endif
-
-#if defined(SOLARIS)
-	#include <signal.h>
-	#include <unistd.h>
-	#include <ucontext.h>
-	extern "C" greg_t _getsp(void);
-#endif
+#include <signal.h>
+#include <unistd.h>
 
 #include <sys/resource.h>
 

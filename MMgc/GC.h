@@ -55,7 +55,7 @@
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
 	jmp_buf __mmgc_env;													\
 	VMPI_setjmpNoUnwind(__mmgc_env);													\
-	_stack = (void*)_getsp();											\
+	asm ("mov %%sp, %0":"=r" (_stack));									\
 	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
 
 #elif AVMSYSTEM_MAC == 1 && AVMSYSTEM_PPC == 1
