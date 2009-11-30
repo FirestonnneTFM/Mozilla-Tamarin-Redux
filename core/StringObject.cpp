@@ -1084,7 +1084,9 @@ namespace avmplus
 		// ASCII character, return the cached character
 		if (m_length == 0 && numChars == 1)
 		{
-			wchar ch = (charWidth == k8) ? rightStr.p8[0] : rightStr.p16[0];
+			// Sun studio generated wrong code for the following Conditional operator.
+			// Add type conversion to wchar as a workaround.
+			wchar ch = (charWidth == k8) ? (wchar)rightStr.p8[0] : (wchar)rightStr.p16[0];
 			if (ch < 128)
 				return gc->core()->cachedChars[ch];
 		}
