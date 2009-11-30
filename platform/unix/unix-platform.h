@@ -109,14 +109,7 @@
 #include <pthread.h>
 
 #ifdef SOLARIS
-  #include <alloca.h>
-  #include <ucontext.h>
-  #include <sys/frame.h>
-  #include <sys/stack.h>
-  extern "C" greg_t _getsp(void);
-#endif
-
-#ifdef SOLARIS
+ #include <alloca.h>
 typedef caddr_t maddr_ptr;
 #else
 typedef void *maddr_ptr;

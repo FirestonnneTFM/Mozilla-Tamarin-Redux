@@ -60,11 +60,8 @@
 #endif
 
 #ifdef SOLARIS
-	#include <ucontext.h>
-	#include <dlfcn.h>
 	#include <procfs.h>
 	#include <sys/stat.h>
-	extern "C" caddr_t _getfp(void);
 	typedef caddr_t maddr_ptr;
 #else
 	typedef void *maddr_ptr;
@@ -382,11 +379,7 @@ uint64_t VMPI_getPerformanceCounter()
 		bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip)
 		{
 			void **ebp;
-		#ifdef SOLARIS
-			ebp = (void **)_getfp();
-		#else
 			asm("mov %%ebp, %0" : "=r" (ebp));
-		#endif
 
 			while(framesToSkip-- && *ebp)
 			{
