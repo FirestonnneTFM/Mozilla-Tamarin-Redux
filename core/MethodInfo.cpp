@@ -55,7 +55,7 @@ namespace avmplus
 	 * object traits and catch-block activation traits.
 	 */
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
-		MethodInfoProcHolder(verifyEnterGPR),
+		MethodInfoProcHolder(),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
 		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
 		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
@@ -68,7 +68,7 @@ namespace avmplus
 
 #ifdef VMCFG_AOT
     MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info) :
-        MethodInfoProcHolder(verifyEnterGPR),
+        MethodInfoProcHolder(),
         _msref(declTraits->pool->core->GetGC()->emptyWeakRef),
 		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
 		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
@@ -92,7 +92,7 @@ namespace avmplus
 							const uint8_t* abc_info_pos, 
 							uint8_t abcFlags,
 							const NativeMethodInfo* native_info) : 
-		MethodInfoProcHolder(verifyEnterGPR),
+		MethodInfoProcHolder(),
 		_msref(pool->core->GetGC()->emptyWeakRef),
 		_declaringScopeOrTraits(uintptr_t(0) | IS_TRAITS),
 		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
@@ -184,7 +184,14 @@ namespace avmplus
 			_implFPR = avmplus::interpFPR;
 		else
 			_implGPR = avmplus::interpGPR;
+		AvmAssert(isInterpreted());
     }
+
+	void MethodInfo::setNativeImpl(GprMethodProc p)
+	{
+		_implGPR = p;
+		AvmAssert(!isInterpreted());
+	}
 
 #ifdef DEBUGGER
 	/*static*/ AvmBox MethodInfo::debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
@@ -278,7 +285,7 @@ namespace avmplus
 			{
 				u.thunker = this->thunker();
 			}
-			this->_implGPR = u.implGPR;
+			this->setNativeImpl(u.implGPR);
 		}
 		else
 		{

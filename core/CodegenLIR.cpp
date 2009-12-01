@@ -5449,7 +5449,7 @@ namespace avmplus
                 void *vp;
             } u;
             u.vp = frag->code();
-            info->_implGPR = u.fp;
+            info->setNativeImpl(u.fp);
             // mark method as been JIT'd
             info->_flags |= MethodInfo::JIT_IMPL;
             #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
