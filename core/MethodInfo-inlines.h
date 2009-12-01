@@ -50,8 +50,8 @@ REALLY_INLINE DebuggerMethodInfo::DebuggerMethodInfo(int32_t _local_count, uint3
 {}
 #endif
 
-REALLY_INLINE MethodInfoProcHolder::MethodInfoProcHolder(GprMethodProc p)
-    : _implGPR(p)
+REALLY_INLINE MethodInfoProcHolder::MethodInfoProcHolder()
+    : _implGPR(MethodInfo::verifyEnterGPR)
 {}
 
 REALLY_INLINE GprMethodProc MethodInfoProcHolder::implGPR() const

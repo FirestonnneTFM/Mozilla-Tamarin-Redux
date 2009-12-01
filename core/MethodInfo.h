@@ -82,7 +82,7 @@ namespace avmplus
 			GprMethodProc _implGPR;
 			FprMethodProc _implFPR;
 		};
-		MethodInfoProcHolder(GprMethodProc p);
+		MethodInfoProcHolder();
 	public:
 		GprMethodProc implGPR() const;
 		FprMethodProc implFPR() const;
@@ -266,6 +266,7 @@ namespace avmplus
 
 		void verify(Toplevel* toplevel, AbcEnv* abc_env);
         void setInterpImpl();
+		void setNativeImpl(GprMethodProc p);
 
 	public:
 		
