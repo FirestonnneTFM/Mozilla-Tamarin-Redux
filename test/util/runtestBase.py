@@ -61,7 +61,6 @@ import shutil
 import which
 
 import threadpool
-import subProcess
 
 # For Python 2.6 and above, use native subprocess.Popen
 if sys.version_info[0] >= 3 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6):
