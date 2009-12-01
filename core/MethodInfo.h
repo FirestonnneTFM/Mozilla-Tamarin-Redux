@@ -305,7 +305,7 @@ namespace avmplus
 #endif
 
 #ifdef VMCFG_AOT
-		static int32_t compiledMethodFlags() const;
+		static int32_t compiledMethodFlags();
 		int32_t isCompiledMethod() const;
 		void setCompiledMethod();
 #endif

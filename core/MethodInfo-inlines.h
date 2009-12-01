@@ -215,7 +215,7 @@ REALLY_INLINE void MethodInfo::setVerifyPending()
 #endif
 
 #ifdef VMCFG_AOT
-REALLY_INLINE int32_t MethodInfo::compiledMethodFlags() const;
+REALLY_INLINE int32_t MethodInfo::compiledMethodFlags()
 {
     return NATIVE | ABSTRACT_METHOD;
 }
