@@ -373,6 +373,17 @@ namespace MMgc
 		return m_itemSize - DebugSize();
 	}
 
+#ifdef _DEBUG
+	bool FixedAlloc::QueryOwnsObject(const void* item)
+	{
+		const char* ci = (const char*) item;
+		for ( FixedBlock* fb=m_firstBlock ; fb != NULL ; fb=fb->next )
+			if (ci >= (const char*)fb->items && ci < (const char*)fb->items + m_itemsPerBlock*m_itemSize)
+				return true;
+		return false;
+	}
+#endif
+	
 #ifdef MMGC_MEMORY_INFO
 	/* static */
 	void FixedAlloc::VerifyFreeBlockIntegrity(const void* item, uint32_t size)

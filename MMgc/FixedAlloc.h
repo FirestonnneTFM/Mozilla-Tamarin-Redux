@@ -140,7 +140,10 @@ namespace MMgc
 
 		// A no-argument constructor used only by FixedAllocSafe
 		FixedAlloc();
-
+#ifdef _DEBUG
+		bool QueryOwnsObject(const void* item);
+#endif
+		
 	public:		// Really private, but Symbian compiler requires this structure to be public
 
 		struct FixedBlock
@@ -197,7 +200,6 @@ namespace MMgc
 
 		bool IsOnFreelist(FixedBlock *b, void *item);
 		bool IsInUse(FixedBlock *b, void *item);
-
 	};
 
 	/**
@@ -217,6 +219,10 @@ namespace MMgc
 
 		void Free(void *ptr);
 
+#ifdef _DEBUG
+		bool QueryOwnsObject(const void* item);
+#endif
+		
 		static FixedAllocSafe *GetFixedAllocSafe(void *item);
 
 	private:
