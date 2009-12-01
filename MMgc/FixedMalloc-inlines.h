@@ -71,6 +71,10 @@ namespace MMgc
 		if(item == 0)
 			return;
 
+#ifdef _DEBUG
+		EnsureFixedMallocMemory(item);
+#endif
+
 		// small things are never allocated on the 4K boundary b/c the block
 		// header structure is stored there, large things always are		
 		if(IsLargeAlloc(item)) {

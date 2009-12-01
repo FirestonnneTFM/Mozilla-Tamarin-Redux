@@ -137,6 +137,9 @@ namespace MMgc
 	#ifdef MMGC_MEMORY_PROFILER
 		totalAskSizeLargeAllocs = 0;
 	#endif
+	#ifdef _DEBUG
+		largeObjects = NULL;
+	#endif
 
 		// Create all the allocators up front (not lazy)
 		// so that we don't have to check the pointers for
@@ -234,6 +237,9 @@ namespace MMgc
 		// fresh memory poisoning
 			if((flags & kZero) == 0)
 				memset(item, 0xfa, size - DebugSize());
+
+		// enregister
+			AddToLargeObjectTracker(item);
 #endif
 		}
 		return item;
@@ -242,6 +248,9 @@ namespace MMgc
 	
 	void FixedMalloc::LargeFree(void *item)
 	{
+#ifdef _DEBUG
+		RemoveFromLargeObjectTracker(item);
+#endif
 #ifdef MMGC_HOOKS
 		if(m_heap->HooksEnabled()) {
 	#ifdef MMGC_MEMORY_PROFILER
@@ -289,5 +298,46 @@ namespace MMgc
 		GCLog("[mem] FixedMalloc[large] total %d pages\n", numLargeChunks);
 	}
 #endif
+
+#ifdef _DEBUG
+	// If this returns then item was definitely allocated by an allocator
+	// owned by this FixedMalloc.
+	void FixedMalloc::EnsureFixedMallocMemory(const void* item)
+	{
+		for (int i=0; i<kNumSizeClasses; i++) 
+			if (m_allocs[i].QueryOwnsObject(item))
+				return;
+		
+		for ( LargeObject* lo=largeObjects; lo != NULL ; lo=lo->next)
+			if (lo->item == item)
+				return;
+		
+		GCAssertMsg(false, "Trying to delete an object with FixedMalloc::Free that was not allocated with FixedMalloc::Alloc\n");
+	}
+
+	void FixedMalloc::AddToLargeObjectTracker(const void* item)
+	{
+		LargeObject* lo = (LargeObject*)Alloc(sizeof(LargeObject));
+		lo->item = item;
+		lo->next = largeObjects;
+		largeObjects = lo;
+	}
+	
+	void FixedMalloc::RemoveFromLargeObjectTracker(const void* item)
+	{
+		LargeObject *lo, *prev;
+		for ( prev=NULL, lo=largeObjects ; lo != NULL ; prev=lo, lo=lo->next ) {
+			if (lo->item == item) {
+				if (prev != NULL)
+					prev->next = lo->next;
+				else
+					largeObjects = lo->next;
+				Free(lo);
+				return;
+			}
+		}
+	}
+#endif
+	
 }
 

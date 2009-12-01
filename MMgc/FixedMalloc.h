@@ -158,11 +158,36 @@ namespace MMgc
 		GCHeap *m_heap;
 		FixedAllocSafe m_allocs[kNumSizeClasses];	
 		size_t numLargeChunks;
-
+		
 #ifdef MMGC_MEMORY_PROFILER
 		size_t totalAskSizeLargeAllocs;
 #endif
-
+		
+#ifdef _DEBUG
+		// For debugging we track live large objects in this list.  If there are a lot
+		// of large objects then a list may slow down debug builds too much; in that
+		// case we can move to a tree or similar structure.  (It's useful to avoid using
+		// large objects in this data structure.)
+		struct LargeObject
+		{
+			const void *item;		// Start of a block
+			LargeObject* next;		// Next object
+		};
+		LargeObject *largeObjects;	// Initially NULL 
+#endif
+		
+#ifdef _DEBUG
+		// If this returns then item was definitely allocated by an allocator
+		// owned by this FixedMalloc.
+		void EnsureFixedMallocMemory(const void* item);
+		
+		// Track large object
+		void AddToLargeObjectTracker(const void* item);
+		
+		// Untrack large object
+		void RemoveFromLargeObjectTracker(const void* item);
+#endif
+		
 		// @return a thread-safe allocator for objects of the given size.
 		FixedAllocSafe* FindSizeClass(size_t size);
 

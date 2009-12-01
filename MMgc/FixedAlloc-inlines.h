@@ -94,6 +94,14 @@ namespace MMgc
 		FixedAlloc::Free(ptr);
 	}
 
+#ifdef _DEBUG
+	REALLY_INLINE bool FixedAllocSafe::QueryOwnsObject(const void* item)
+	{
+		MMGC_LOCK(m_spinlock);
+		return FixedAlloc::QueryOwnsObject(item);
+	}
+#endif
+	
 	/*static*/
 	REALLY_INLINE FixedAllocSafe* FixedAllocSafe::GetFixedAllocSafe(void *item)
 	{
@@ -111,6 +119,7 @@ namespace MMgc
 	{
 		FixedAlloc::Free(item);
 	}
+
 }
 
 #endif /* __FixedAlloc_inlines__ */
