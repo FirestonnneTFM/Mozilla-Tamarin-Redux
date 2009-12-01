@@ -121,6 +121,7 @@ namespace avmplus
 		bool isInterpreted();
 		Atom endCoerce(int32_t argc, uint32_t *ap, MethodSignaturep ms);
 		int32_t  startCoerce(int32_t argc, MethodSignaturep ms);
+		void argcError(int32_t argc); // never returns; throws argument count error
 		Atom coerceUnboxEnter(int32_t argc, Atom* atomv);
 		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms);
 		void unboxCoerceArgs(int32_t argc, Atom* in, uint32_t *ap, MethodSignaturep ms);

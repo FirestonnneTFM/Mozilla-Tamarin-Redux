@@ -264,6 +264,16 @@ namespace avmplus
 			return toplevel->coerce(atom, t);
 		}
 	}
+
+	void MethodEnv::argcError(int32_t argc)
+	{
+		MethodSignaturep ms = get_ms();
+		AvmAssert(!ms->argcOk(argc));
+		toplevel()->argumentErrorClass()->throwError(kWrongArgumentCountError, 
+												   core()->toErrorString(method), 
+												   core()->toErrorString(ms->requiredParamCount()), 
+												   core()->toErrorString(argc));
+	}
 	
 	// helper
 	inline int32_t MethodEnv::startCoerce(int32_t argc, MethodSignaturep ms)
@@ -272,12 +282,7 @@ namespace avmplus
 		// so only extract in the (rare) event of an exception
 
 		if (!ms->argcOk(argc))
-		{
-			toplevel()->argumentErrorClass()->throwError(kWrongArgumentCountError, 
-													   core()->toErrorString(method), 
-													   core()->toErrorString(ms->requiredParamCount()), 
-													   core()->toErrorString(argc));
-		}
+			argcError(argc);
 
 		// Can happen with duplicate function definitions from corrupt ABC data.  F1 is defined
 		// and F2 overrides the F1 slot which is okay as long as F1's MethodEnv is never called again.
