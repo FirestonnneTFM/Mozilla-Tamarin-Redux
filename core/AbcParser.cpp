@@ -724,7 +724,7 @@ namespace avmplus
             uint32_t name_index = readU30(pos);
             (void)name_index;
 			CHECK_POS(pos);
-			const uint8_t abcFlags = *pos++;
+			uint8_t abcFlags = *pos++;
 
 			#ifdef AVMPLUS_VERBOSE
 			if(pool->isVerbose(VB_parse)) {
