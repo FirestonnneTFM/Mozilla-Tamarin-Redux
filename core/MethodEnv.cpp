@@ -336,16 +336,6 @@ namespace avmplus
 		}
 	}
 
-	// In interp-only builds this could still be delegateInvoke or verifyEnter.
-	//
-	// OPTIMIZEME: It would be nice to avoid the unbox / rebox paths through
-	// those functions in interpreter-only builds!
-	
-	inline bool MethodEnv::isInterpreted()
-	{
-		return implGPR() == interpGPR || implFPR() == interpFPR;
-	}
-	
 	inline MethodSignaturep MethodEnv::get_ms()
 	{
 		if (!method->isResolved())

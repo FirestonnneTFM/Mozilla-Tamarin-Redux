@@ -160,6 +160,11 @@ REALLY_INLINE VTable* MethodEnv::vtable() const
     return _scope->vtable();
 }
 
+REALLY_INLINE bool MethodEnv::isInterpreted()
+{
+    return method->isInterpreted();
+}
+
 REALLY_INLINE ScriptEnv::ScriptEnv(MethodInfo* _method, VTable* _vtable, AbcEnv* _abcEnv)
     : MethodEnv(_method, createScriptScope(_method->declaringScope(), _vtable, _abcEnv))
 {
