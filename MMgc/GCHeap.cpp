@@ -327,7 +327,8 @@ namespace MMgc
 				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
 #endif
-			CheckForSoftLimitExceeded(size);
+			if((flags & kCanFail) == 0)
+				CheckForSoftLimitExceeded(size);
 		}
 
 		// Zero out the memory, if requested to do so
