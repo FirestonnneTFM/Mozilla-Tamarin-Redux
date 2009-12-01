@@ -1504,8 +1504,10 @@ namespace avmplus
 			{
 				uint32 index = readU30(pos);
 
-				if(!index || index >= cpool_mn_offsets.size())
-					toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(cpool_mn_offsets.size()));
+                // compare index against mn_count, *not* cpool_mn_offsets.size(), as the latter is still being built...
+                // it's ok to forward-reference here.
+				if(!index || index >= mn_count)
+					toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(mn_count));
 
 				index = readU30(pos);
 				if(index != 1)
