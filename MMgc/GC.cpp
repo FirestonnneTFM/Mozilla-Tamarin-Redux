@@ -3312,7 +3312,7 @@ bail:
 
 	void GC::ClearWeakRef(const void *item)
 	{
-		GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item, /*rehash=*/!collecting);
+		GCWeakRef *ref = (GCWeakRef*) weakRefs.remove(item);
 		GCAssert(weakRefs.get(item) == NULL);
 		GCAssert(ref != NULL || heap->GetStatus() == kMemAbort);
 		if(ref) {

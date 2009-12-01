@@ -57,7 +57,7 @@ namespace MMgc
 
 		REALLY_INLINE const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
 		REALLY_INLINE const void* get(intptr_t key) { return get((const void*)key); }
-		const void* remove(const void* key, bool rehashIfNeeded=true);
+		const void* remove(const void* key);
 		// updates value if present, adds and grows if necessary if not
 		void put(const void* key, const void* value);
 		REALLY_INLINE void add(const void* key, const void* value) { put(key, value); }
@@ -232,7 +232,7 @@ namespace MMgc
 	}
 	
 	template <class KEYHANDLER, class ALLOCHANDLER>
-	const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key, bool rehashIfNeeded/*=true*/)
+	const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::remove(const void* key)
 	{
 		const void* ret = NULL;
 		uint32_t i = find(key, table, tableSize);
@@ -244,7 +244,7 @@ namespace MMgc
 			numDeleted++;
 			// this helps a bit on pathologic memory profiler use case, needs more investigation
 			// 20% deleted == rehash
-			if (rehashIfNeeded && numDeleted * 10 >= tableSize)
+			if ((numValues - numDeleted) * 10 < tableSize)
 			{
 				grow(true);
 			}
@@ -266,7 +266,7 @@ namespace MMgc
 		// else stay the same
 		if (4*occupiedSlots > tableSize)
 			newTableSize <<= 1;
-		else if (20*occupiedSlots < tableSize && tableSize > kDefaultSize && table)
+		else if (10*occupiedSlots < tableSize && tableSize > kDefaultSize && table)
 			newTableSize >>= 1;
 
 		const void** newTable;
