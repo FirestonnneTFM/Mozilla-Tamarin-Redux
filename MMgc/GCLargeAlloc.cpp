@@ -49,12 +49,10 @@ namespace MMgc
 #endif
 	}
 
-#if defined DEBUG || defined MMGC_MEMORY_PROFILER
 	void* GCLargeAlloc::Alloc(size_t originalSize, size_t requestSize, int flags)
-#else
-	void* GCLargeAlloc::Alloc(size_t requestSize, int flags)
-#endif
 	{
+		(void)originalSize;
+
 		GCHeap::CheckForAllocSizeOverflow(requestSize, sizeof(LargeBlock)+GCHeap::kBlockSize);
 
 		int blocks = (int)((requestSize+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize);
@@ -79,7 +77,6 @@ namespace MMgc
 				block->flags |= kMarkFlag;
 
 #ifdef _DEBUG
-			(void)originalSize;
 			if (flags & GC::kZero)
 			{
 				// AllocBlock should take care of this
@@ -90,24 +87,15 @@ namespace MMgc
 			}
 #endif
 
-#ifdef MMGC_HOOKS
-			GCHeap* heap = GCHeap::GetGCHeap();
-			if(heap->HooksEnabled()) {
-				size_t userSize = block->size - DebugSize();
 #ifdef MMGC_MEMORY_PROFILER
+			if(GCHeap::GetGCHeap()->HooksEnabled())
 				m_totalAskSize += originalSize;
-				heap->AllocHook(GetUserPointer(item), originalSize, userSize);
-#else
-				heap->AllocHook(GetUserPointer(item), 0, userSize);
 #endif
-			}
-#endif
-
-			m_gc->SignalAllocWork(block->size);
 		}
 		return item;
 	}
 
+	
 	void GCLargeAlloc::Free(const void *item)
 	{
 		GCAssertMsg(!m_startedFinalize, "GCLargeAlloc::Free is not allowed during finalization; caller must guard against this.");
@@ -119,13 +107,11 @@ namespace MMgc
 		if(heap->HooksEnabled())
 		{
 			const void* p = GetUserPointer(item);
-			size_t userSize = GC::Size(p);
-			heap->FreeHook(p, userSize, 0xca);
 #ifdef MMGC_MEMORY_PROFILER
 			if(heap->GetProfiler())
 				m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
 #endif
-			heap->FinalizeHook(p, userSize);
+			heap->FinalizeHook(p, GC::Size(p));
 		}
 #endif
 

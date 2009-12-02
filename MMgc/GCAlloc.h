@@ -98,13 +98,8 @@ namespace MMgc
 		GCAlloc(GC* gc, int itemSize, bool containsPointers, bool isRC, int sizeClassIndex);
 		~GCAlloc();
 		
-#if defined DEBUG || defined MMGC_MEMORY_PROFILER
 		void* Alloc(size_t size, int flags);
-#else
-		void* Alloc(int flags);
-#endif
 		static void Free(const void *ptr);
-		
 		void Finalize();
 		void ClearMarks();
 #ifdef _DEBUG
@@ -175,39 +170,33 @@ namespace MMgc
 	private:
 		const static int kBlockSize = 4096;
 
-		const static short kFlagNeedsSweeping = 1;	// set if the block had finalized objects and needs to be swept
-		const static short kFlagWeakRefs = 2;		// set if the block may have weak refs and we should check during free
-
-		// Objects on the free list all have a next pointer in the first word and
-		// the object index within its block as the second word.  Only the low 16 bits
-		// of the second word are significant: the reference counter messes around
-		// with the high 16 bits during pinning; it may pin dead objects.  Those that
-		// use the index must be careful to mask off the high bits.
-		
 		struct GCBlock : GCBlockHeader
 		{
-			GCAlloc *alloc;			// the allocator that owns this block
-			GCBlock* prev;			// the previous block on the list of all blocks ('next' is in the block header)
-			void*  firstFree;       // first item on free list
-			GCBlock *prevFree;		// the previous block on the lists of blocks with free or sweepable objects
-			GCBlock *nextFree;		// the next block on the lists of blocks with free or sweepable objects
-			uint32_t* bits;			// the header bits for this block
-			short numFree;			// the number of free objects in this block
-			uint8_t slowFlags;		// flags for special circumstances: kFlagNeedsSweeping, etc
-			bool finalizeState:1;	// whether we've been visited during the Finalize stage
-			char   *items;			// pointer to the array of objects in the block
+			GCAlloc *alloc;			
+			GCBlock* prev;
+			char*  nextItem;
+			void*  firstFree;        // first item on free list
+			GCBlock *prevFree;
+			GCBlock *nextFree;
+			uint32_t* bits;
+			short numItems;
+			bool needsSweeping:1; 
+			bool finalizeState:1;  // whether we've been visited during the Finalize stage
+			char   *items;
 
 			int GetCount() const;
+
 			uint32_t *GetBits() const;
-			void FreeSweptItem(const void *item, int index);
-			int needsSweeping();
-			void setNeedsSweeping(int v);
+
+			void FreeItem(const void *item, int index);
+
+			bool IsFull();
 		};
 		
 		static GCBlock *GetBlock(const void *item);
 		
 #ifdef MMGC_MEMORY_INFO
-		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size, uint32_t limit=~0U);
+		static void VerifyFreeBlockIntegrity(const void* item, uint32_t size);
 #endif
 
 		// The list of chunk blocks
@@ -219,12 +208,6 @@ namespace MMgc
 
 		// List of blocks that need sweeping
 		GCBlock* m_needsSweeping;
-
-		// Quick list of free objects.  See comment in GCAlloc.cpp for general information.
-		
-		void *m_qList;				// Linked list of some free objects for this allocator
-		int   m_qBudget;			// Number of items we can yet free before obtaining a larger budget 
-		int	  m_qBudgetObtained;	// Quick list budget actually obtained from the GC for this allocator
 
 		int    m_itemsPerBlock;
 		uint32_t    m_itemSize;
@@ -251,7 +234,6 @@ namespace MMgc
 		
 #ifdef _DEBUG
 		bool IsOnEitherList(GCBlock *b);
-		void VerifyNotFree(GCBlock* b, const void *item);
 #endif
 
 		GCBlock* CreateChunk(int flags);
@@ -269,17 +251,6 @@ namespace MMgc
 
 		// not a hot method
 		void RemoveFromSweepList(GCBlock *b);
-
-#if defined DEBUG || defined MMGC_MEMORY_PROFILER
-		void* AllocSlow(size_t askSize, int flags);
-#else
-		void* AllocSlow(int flags);
-#endif
-		void FillQuickList(GCBlock* b);
-		void CoalesceQuickList();
-		void QuickListBudgetExhausted();
-		void FreeSlow(GCBlock* b, int index, const void* item);
-		static void ClearNonRCObject(GCAlloc* alloc, void* item, size_t size);
 
 		bool Sweep(GCBlock *b);
 		void SweepGuts(GCBlock *b);

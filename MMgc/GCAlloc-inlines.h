@@ -156,7 +156,6 @@ namespace MMgc
 		GCBlock *block = GetBlock(item);
 		if(to) {
 			SetBit(block, GetIndex(block, item), kHasWeakRef);
-			block->slowFlags |= kFlagWeakRefs;
 		} else {
 			ClearBits(block, GetIndex(block, item), kHasWeakRef);
 		}
@@ -164,7 +163,7 @@ namespace MMgc
 	
 	REALLY_INLINE void GCAlloc::AddToFreeList(GCBlock *b)
 	{
-		GCAssert(!IsOnEitherList(b) && !b->needsSweeping());
+		GCAssert(!IsOnEitherList(b) && !b->needsSweeping);
 		b->prevFree = NULL;
 		b->nextFree = m_firstFree;
 		if (m_firstFree) {
@@ -189,7 +188,7 @@ namespace MMgc
 
 	REALLY_INLINE void GCAlloc::AddToSweepList(GCBlock *b)
 	{
-		GCAssert(!IsOnEitherList(b) && !b->needsSweeping());
+		GCAssert(!IsOnEitherList(b) && !b->needsSweeping);
 		b->prevFree = NULL;
 		b->nextFree = m_needsSweeping;
 		if (m_needsSweeping) {
@@ -197,7 +196,7 @@ namespace MMgc
 			m_needsSweeping->prevFree = b;
 		}
 		m_needsSweeping = b;
-		b->setNeedsSweeping(kFlagNeedsSweeping);
+		b->needsSweeping = true;
 	}
 
 	REALLY_INLINE void GCAlloc::RemoveFromSweepList(GCBlock *b)
@@ -210,7 +209,7 @@ namespace MMgc
 		
 		if (b->nextFree)
 			b->nextFree->prevFree = b->prevFree;
-		b->setNeedsSweeping(0);
+		b->needsSweeping = false;
 		b->nextFree = b->prevFree = NULL;
 	}
 
@@ -300,23 +299,26 @@ namespace MMgc
 
 	REALLY_INLINE int GCAlloc::GCBlock::GetCount() const
 	{
-		return alloc->m_itemsPerBlock;
+		if (nextItem) {
+			return GCAlloc::GetIndex(this, nextItem);
+		} else {
+			return alloc->m_itemsPerBlock;
+		}
 	}
 
 	REALLY_INLINE uint32_t *GCAlloc::GCBlock::GetBits() const
 	{
 		return bits;
 	}
-	
-	REALLY_INLINE int GCAlloc::GCBlock::needsSweeping()
+
+	REALLY_INLINE bool GCAlloc::GCBlock::IsFull()
 	{
-		return slowFlags & kFlagNeedsSweeping;
-	}
-	
-	REALLY_INLINE void GCAlloc::GCBlock::setNeedsSweeping(int v)
-	{
-		GCAssert(v == 0 || v == kFlagNeedsSweeping);
-		slowFlags = (uint8_t)((slowFlags & ~kFlagNeedsSweeping) | v);
+		bool full = (nextItem == firstFree);
+		// the only time nextItem and firstFree should be equal is when they
+		// are both zero which is also when we are full, assert to be sure
+		GCAssert(!full || nextItem==0);
+		GCAssert(!full || numItems == alloc->m_itemsPerBlock);
+		return full;
 	}
 
 	REALLY_INLINE GCAllocIterator::GCAllocIterator(MMgc::GCAlloc* alloc) 
