@@ -109,8 +109,7 @@ namespace avmshell
 		if (script->global == NULL)
 		{
 			script->initGlobal();
-			Atom argv[1] = { script->global->atom() };
-			script->coerceEnter(0, argv);
+			script->coerceEnter(script->global->atom());
 		}
 
 		return script->global;
