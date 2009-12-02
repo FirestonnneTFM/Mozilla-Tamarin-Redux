@@ -53,7 +53,7 @@
 // Sun Studio doesn't support default parameters for operator new, so break up as two functions
 REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc)
 {
-	return gc->Alloc(size, MMgc::GC::kContainsPointers|MMgc::GC::kZero);
+	return gc->AllocPtrZero(size);
 }
 
 REALLY_INLINE void *operator new(size_t size, MMgc::GC *gc, int flags)
@@ -97,17 +97,17 @@ namespace MMgc
 
 	REALLY_INLINE void *GCObject::operator new(size_t size, GC *gc, size_t extra) GNUC_ONLY(throw())
 	{
-		return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero);
+		return gc->AllocExtraPtrZero(size, extra);
 	}
 	
 	REALLY_INLINE void *GCObject::operator new(size_t size, GC *gc) GNUC_ONLY(throw())
 	{
-		return gc->Alloc(size, GC::kContainsPointers|GC::kZero);
+		return gc->AllocPtrZero(size);
 	}
 	
 	REALLY_INLINE void GCObject::operator delete(void *gcObject)
 	{
-		GC::GetGC(gcObject)->Free(gcObject);
+		GC::GetGC(gcObject)->FreeNotNull(gcObject);
 	}
 	
 	REALLY_INLINE GCWeakRef* GCObject::GetWeakRef() const
@@ -127,17 +127,17 @@ namespace MMgc
 	
 	REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc, size_t extra)
 	{
-		return gc->AllocExtra(size, extra, GC::kFinalize|GC::kContainsPointers|GC::kZero);
+		return gc->AllocExtraPtrZeroFinalized(size, extra);
 	}
 	
 	REALLY_INLINE void* GCFinalizedObject::operator new(size_t size, GC *gc)
 	{
-		return gc->Alloc(size, GC::kFinalize|GC::kContainsPointers|GC::kZero);
+		return gc->AllocPtrZeroFinalized(size);
 	}
 	
 	REALLY_INLINE void GCFinalizedObject::operator delete (void *gcObject)
 	{
-		GC::GetGC(gcObject)->Free(gcObject);
+		GC::GetGC(gcObject)->FreeNotNull(gcObject);
 	}		
 	
 	/**
@@ -168,6 +168,16 @@ namespace MMgc
 		friend class GC;
 		friend class ZCT;
 	public:
+		REALLY_INLINE static void *operator new(size_t size, GC *gc, size_t extra)
+		{
+			return gc->AllocExtraRCObject(size, extra);
+		}
+		
+		REALLY_INLINE static void *operator new(size_t size, GC *gc)
+		{
+			return gc->AllocRCObject(size);
+		}
+		
 		REALLY_INLINE RCObject()
 		{
 			// composite == 0 is special, it means a deleted object in Release builds
@@ -373,16 +383,6 @@ namespace MMgc
 		void DumpHistory();
 #endif
 
-		REALLY_INLINE static void *operator new(size_t size, GC *gc, size_t extra)
-		{
-			return gc->AllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
-		}
-		
-		REALLY_INLINE static void *operator new(size_t size, GC *gc)
-		{
-			return gc->Alloc(size, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
-		}
-		
 	private:
 
 		// @return non-zero if the object is in the ZCT
@@ -419,7 +419,9 @@ namespace MMgc
 			composite = (composite&~(ZCT_INDEX|((~reaping&1)<<STACK_PIN_SHIFT))) | ((index<<8)|ZCTFLAG);
 		}
 
-		// Fields in 'composite'
+		// Fields in 'composite'.  Note that STACK_PIN /must/ be in the top half
+		// of the word, see comments in ZCT::PinStackObjects and above GCAlloc::GCBlock.
+
 		static const uint32_t ZCTFLAG	         = 0x80000000;			// The object is in the ZCT
 		static const uint32_t STICKYFLAG         = 0x40000000;			// The object is sticky (RC overflow)
 		static const uint32_t STACK_PIN          = 0x20000000;			// The object has been pinned

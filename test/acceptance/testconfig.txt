@@ -256,6 +256,13 @@ regress/bug_498979, .*-Dverifyall.*, skip, https://bugzilla.mozilla.org/show_bug
 # ProcessSampling:GetSizeSamples intermittently fails
 as3/sampling/ProcessSampling ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
 
+# Only occurs in DD mode when the test is run as part of a group of tests.
+# FAILURES:
+#  as3/sampling/Callback.abc : unexpected exit code expected:0 actual:-6 FAILED!
+#  as3/sampling/Callback.abc : captured output: Sampling api: callback | Sample stream corrupt - last sample is not for same object.
+as3/sampling/Callback:.* ,  .* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=532361
+
+
 ####################
 # ATS Skipped tests - These tests will not be exported when generating ATS swfs
 ####################

@@ -156,6 +156,7 @@ namespace MMgc
 		GCBlock *block = GetBlock(item);
 		if(to) {
 			SetBit(block, GetIndex(block, item), kHasWeakRef);
+			block->slowFlags |= kFlagWeakRefs;
 		} else {
 			ClearBits(block, GetIndex(block, item), kHasWeakRef);
 		}
@@ -163,7 +164,7 @@ namespace MMgc
 	
 	REALLY_INLINE void GCAlloc::AddToFreeList(GCBlock *b)
 	{
-		GCAssert(!IsOnEitherList(b) && !b->needsSweeping);
+		GCAssert(!IsOnEitherList(b) && !b->needsSweeping());
 		b->prevFree = NULL;
 		b->nextFree = m_firstFree;
 		if (m_firstFree) {
@@ -188,7 +189,7 @@ namespace MMgc
 
 	REALLY_INLINE void GCAlloc::AddToSweepList(GCBlock *b)
 	{
-		GCAssert(!IsOnEitherList(b) && !b->needsSweeping);
+		GCAssert(!IsOnEitherList(b) && !b->needsSweeping());
 		b->prevFree = NULL;
 		b->nextFree = m_needsSweeping;
 		if (m_needsSweeping) {
@@ -196,7 +197,7 @@ namespace MMgc
 			m_needsSweeping->prevFree = b;
 		}
 		m_needsSweeping = b;
-		b->needsSweeping = true;
+		b->setNeedsSweeping(kFlagNeedsSweeping);
 	}
 
 	REALLY_INLINE void GCAlloc::RemoveFromSweepList(GCBlock *b)
@@ -209,7 +210,7 @@ namespace MMgc
 		
 		if (b->nextFree)
 			b->nextFree->prevFree = b->prevFree;
-		b->needsSweeping = false;
+		b->setNeedsSweeping(0);
 		b->nextFree = b->prevFree = NULL;
 	}
 
@@ -299,26 +300,23 @@ namespace MMgc
 
 	REALLY_INLINE int GCAlloc::GCBlock::GetCount() const
 	{
-		if (nextItem) {
-			return GCAlloc::GetIndex(this, nextItem);
-		} else {
-			return alloc->m_itemsPerBlock;
-		}
+		return alloc->m_itemsPerBlock;
 	}
 
 	REALLY_INLINE uint32_t *GCAlloc::GCBlock::GetBits() const
 	{
 		return bits;
 	}
-
-	REALLY_INLINE bool GCAlloc::GCBlock::IsFull()
+	
+	REALLY_INLINE int GCAlloc::GCBlock::needsSweeping()
 	{
-		bool full = (nextItem == firstFree);
-		// the only time nextItem and firstFree should be equal is when they
-		// are both zero which is also when we are full, assert to be sure
-		GCAssert(!full || nextItem==0);
-		GCAssert(!full || numItems == alloc->m_itemsPerBlock);
-		return full;
+		return slowFlags & kFlagNeedsSweeping;
+	}
+	
+	REALLY_INLINE void GCAlloc::GCBlock::setNeedsSweeping(int v)
+	{
+		GCAssert(v == 0 || v == kFlagNeedsSweeping);
+		slowFlags = (slowFlags & ~kFlagNeedsSweeping) | v;
 	}
 
 	REALLY_INLINE GCAllocIterator::GCAllocIterator(MMgc::GCAlloc* alloc) 
