@@ -288,7 +288,7 @@ namespace MMgc
 				}
 #endif
 				p[0] = (char*)p + m_itemSize;
-				p[1] = (void*)i;
+				p[1] = (void*)(intptr_t)i;
 				p = (void**)((char*)p + m_itemSize);
 			}
 #ifdef MMGC_HOOKS
@@ -297,7 +297,7 @@ namespace MMgc
 			}
 #endif
 			p[0] = NULL;
-			p[1] = (void*)limit;
+			p[1] = (void*)(intptr_t)limit;
 
 			// Set all the mark bits to 'free'
 			uint32_t *pbits = b->GetBits();
@@ -584,7 +584,7 @@ namespace MMgc
 		// non-pointer-containing.)
 
 		p[0] = a->m_qList;
-		p[1] = (void*)index;
+		p[1] = (void*)(intptr_t)index;
 		
 		a->m_qList = p;
 		
@@ -612,7 +612,7 @@ namespace MMgc
 			void** p = (void**)item;
 			
 			p[0] = b->firstFree;
-			p[1] = (void*)index;
+			p[1] = (void*)(intptr_t)index;
 			b->firstFree = (void*)item;
 			b->numFree++;
 			Sweep(b);
@@ -623,7 +623,7 @@ namespace MMgc
 		void** p = (void**)item;
 		
 		p[0] = m_qList;
-		p[1] = (void*)index;
+		p[1] = (void*)(intptr_t)index;
 		
 		m_qList = p;
 
@@ -1071,7 +1071,7 @@ namespace MMgc
 #endif
 		// Add this item to the free list
 		((void**)item)[0] = oldFree;	
-		((void**)item)[1] = (void*)index;
+		((void**)item)[1] = (void*)(intptr_t)index;
 	}
 	
 	void GCAlloc::GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated)	
