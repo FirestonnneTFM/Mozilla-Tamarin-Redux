@@ -316,7 +316,7 @@ namespace MMgc
 	REALLY_INLINE void GCAlloc::GCBlock::setNeedsSweeping(int v)
 	{
 		GCAssert(v == 0 || v == kFlagNeedsSweeping);
-		slowFlags = (slowFlags & ~kFlagNeedsSweeping) | v;
+		slowFlags = (uint8_t)((slowFlags & ~kFlagNeedsSweeping) | v);
 	}
 
 	REALLY_INLINE GCAllocIterator::GCAllocIterator(MMgc::GCAlloc* alloc) 
