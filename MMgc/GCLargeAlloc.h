@@ -62,8 +62,13 @@ namespace MMgc
 		GCLargeAlloc(GC* gc);
 		~GCLargeAlloc();
 
+#if defined DEBUG || defined MMGC_MEMORY_PROFILER
 		void* Alloc(size_t originalSize, size_t requestSize, int flags);
+#else
+		void* Alloc(size_t requestSize, int flags);
+#endif
 		void Free(const void *ptr);
+
 		void Finalize();
 		void ClearMarks();
 
