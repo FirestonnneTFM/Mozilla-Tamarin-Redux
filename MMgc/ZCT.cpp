@@ -539,7 +539,7 @@ namespace MMgc
 		GCAssert(*(intptr_t*)obj != 0);			// That's the vtable normally
 		GCAssert(gc->IsFinalized(obj));
 		((GCFinalizedObject*)obj)->~GCFinalizedObject();
-		gc->FreeNotNull(obj);
+		gc->Free(obj);
 		
 		GCAssert(gc->weakRefs.get(obj) == NULL);
 	}
@@ -609,14 +609,6 @@ namespace MMgc
 			
 			int32_t bits = gc->GetPageMapValue((uintptr_t)val); 
 			bool doit = false;
-
-			// Note: this will pin objects on the free list.  There's a DEBUG-only
-			// test for that (to avoid false positives) but in release mode it
-			// creates a problem: the object index is stored in the second word
-			// of free objects.  The fix is to guarantee that pinning will only
-			// mess with the top half of the second word and that the index will
-			// only occupy the bottom half.  It's ugly but relatively painless.
-
 			if (bits == GC::kGCAllocPage) {
 				doit = GCAlloc::IsRCObject(val) && GCAlloc::FindBeginning(val) == GetRealPointer(val);
 			} 

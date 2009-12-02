@@ -102,21 +102,20 @@ namespace MMgc
 	}
 #endif
 	
-	REALLY_INLINE bool GCPolicyManager::signalAllocWork(size_t nbytes)
+ 	REALLY_INLINE bool GCPolicyManager::queryCollectionWork()
+ 	{
+ 		return remainingMinorAllocationBudget <= 0;
+ 	}
+	
+	REALLY_INLINE void GCPolicyManager::signalAllocWork(size_t nbytes)
 	{
 #ifdef MMGC_POLICY_PROFILING
 		objectsAllocated++;
 		bytesAllocated += nbytes;
 #endif
 		remainingMinorAllocationBudget -= int32_t(nbytes);
- 		return remainingMinorAllocationBudget <= 0;
 	}
 
-	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
-	{
-		remainingMinorAllocationBudget += int32_t(nbytes);
-	}
-	
 	// GC
 	
 	REALLY_INLINE void *GC::GetGCContextVariable(int var) const
@@ -139,12 +138,6 @@ namespace MMgc
 		policy.queueFullCollection();
 	}
 
-	REALLY_INLINE void GC::SignalAllocWork(size_t size)
-	{
-		if (policy.signalAllocWork(size))
-			CollectionWork();
-	}
-	
 	REALLY_INLINE void *GC::PleaseAlloc(size_t size, int flags)
 	{
 		return Alloc(size, flags | kCanFail);			
@@ -152,7 +145,6 @@ namespace MMgc
 
 	// Normally extra will not be zero (overloaded 'new' operators take care of that)
 	// so the overflow check is not actually redundant.
-
 	REALLY_INLINE void *GC::AllocExtra(size_t size, size_t extra, int flags)
 	{
 		return Alloc(GCHeap::CheckForAllocSizeOverflow(size, extra), flags);
@@ -162,102 +154,22 @@ namespace MMgc
 	{
 		return Alloc(GCHeap::CheckForCallocSizeOverflow(count, elsize), flags);
 	}
-
-#ifdef MMGC_MEMORY_PROFILER
-	#define SIZEARG size ,
-#else
-	#define SIZEARG 
-#endif
 	
-	// See comments around GC::Alloc that explain why the guard and table lookup for the
-	// small-allocator cases are correct.
-
-	REALLY_INLINE void *GC::AllocPtrZero(size_t size)
-	{
-#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
-		if (size <= kLargestAlloc)
-			return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero));
-#endif
-		return Alloc(size, GC::kContainsPointers|GC::kZero);
-	}
-
-	REALLY_INLINE void *GC::AllocPtrZeroFinalized(size_t size)
-	{
-#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
-		if (size <= kLargestAlloc)
-			return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kFinalize));
-#endif
-		return Alloc(size, GC::kContainsPointers|GC::kZero|GC::kFinalize);
-	}
-	
-	REALLY_INLINE void *GC::AllocRCObject(size_t size)
-	{
-#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
-		if (size <= kLargestAlloc)
-			return GetUserPointer(containsPointersRCAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize));
-#endif
-		return Alloc(size, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
-	}
-	
+#if !defined _DEBUG && !defined MMGC_MEMORY_INFO && !defined AVMPLUS_SAMPLER && !defined MMGC_HOOKS
 	REALLY_INLINE void* GC::AllocDouble()
 	{
-#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
-		return GetUserPointer(noPointersAllocs[0]->Alloc(0));
+		if (policy.queryCollectionWork())
+			CollectionWork();
+		policy.signalAllocWork(8);
+		return GetUserPointer(noPointersAllocs[0]->Alloc(8,0));
+	}
 #else
+	REALLY_INLINE void* GC::AllocDouble()
+	{
 		return Alloc(8,0);
+	}
 #endif
-	}
-
-	// For AllocExtra the trick is that we can compute (size|extra) quickly without risk of overflow
-	// and compare it to half the maximum small-alloc size (rounded down to 8 bytes), and if the guard
-	// passes then we can definitely take the quick path.  Most allocations are small.
-	//
-	// As 'extra' won't usually be known at compile time the fallback case won't usually compile away,
-	// though, so we risk bloating the code slightly here.
-
-	REALLY_INLINE void *GC::AllocExtraPtrZero(size_t size, size_t extra)
-	{
-#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
-		if ((size|extra) <= (kLargestAlloc/2 & ~7)) {
-			size += extra;
-			return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero));
-		}
-#endif
-		return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero);
-	}
-	
-	REALLY_INLINE void *GC::AllocExtraPtrZeroFinalized(size_t size, size_t extra)
-	{
-#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
-		if ((size|extra) <= (kLargestAlloc/2 & ~7)) {
-			size += extra;
-			return GetUserPointer(containsPointersAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kFinalize));
-		}
-#endif
-		return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kFinalize);
-	}
-	
-	REALLY_INLINE void *GC::AllocExtraRCObject(size_t size, size_t extra)
-	{
-#if !defined _DEBUG && !defined AVMPLUS_SAMPLER
-		if ((size|extra) <= (kLargestAlloc/2 & ~7)) {
-			size += extra;
-			return GetUserPointer(containsPointersRCAllocs[sizeClassIndex[(size-1)>>3]]->Alloc(SIZEARG GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize));
-		}
-#endif
-		return OutOfLineAllocExtra(size, extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
-	}
-	
-#undef SIZEARG
-
-	// Implementations of operator delete call FreeNotNull directly.
-	REALLY_INLINE void GC::Free(const void *item)
-	{
-		if(item == NULL)
-			return;
-		FreeNotNull(item);
-	}
-
+			
 	REALLY_INLINE void GC::AddRCRootSegment(RCRootSegment *segment)
 	{
 		segment->next = rcRootSegments;
