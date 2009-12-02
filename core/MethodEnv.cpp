@@ -1004,8 +1004,7 @@ namespace avmplus
 		if (!global)
 		{
 			global = script->initGlobal();
-			Atom argv[1] = { global->atom() };
-			script->coerceEnter(0, argv);
+			script->coerceEnter(global->atom());
 		}
 		return global;
 	}
@@ -1464,8 +1463,7 @@ namespace avmplus
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = base->methods[m];
-			Atom atomv_out[1] = { atomv[0] };
-			Atom method = f->coerceEnter(0, atomv_out);
+			Atom method = f->coerceEnter(atomv[0]);
 			return toplevel->op_call(method, argc, atomv);
 		}
 		}
@@ -1540,8 +1538,7 @@ namespace avmplus
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
-			Atom atomv_out[1] = { obj };
-			return f->coerceEnter(0, atomv_out);
+			return f->coerceEnter(obj);
 		}
 		}
     }
@@ -1771,8 +1768,7 @@ namespace avmplus
 			if (global == NULL)
 			{
 				global = script->initGlobal();
-				Atom argv[1] = { script->global->atom() };
-				script->coerceEnter(0, argv);
+				script->coerceEnter(script->global->atom());
 			}
 			return global->atom();
 		}
