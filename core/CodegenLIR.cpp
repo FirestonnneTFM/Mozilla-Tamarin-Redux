@@ -843,9 +843,9 @@ namespace avmplus
             return out->insLoad(op, base, disp);
         }
 
-        LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+        LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d) {
             AvmAssert(base && value && base->isPtr());
-            return out->insStorei(value, base, d);
+            return out->insStore(op, value, base, d);
         }
 
         LIns *insBranch(LOpcode op, LIns *cond, LIns *to) {
@@ -964,12 +964,12 @@ namespace avmplus
             return out->insLoad(op, base, d);
         }
 
-        LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+        LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d) {
             if (base == vars) {
                 trackStore(value, d);
                 DEFER_STORES(return 0;)
             }
-            return out->insStorei(value, base, d);
+            return out->insStore(op, value, base, d);
         }
 
         LIns *ins0(LOpcode op) {
@@ -1206,12 +1206,12 @@ namespace avmplus
             return out->insCall(call,args);
         }
 
-        LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+        LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d) {
             if (base == vars)
                 trackStore(value, d,false);
             else if (base == traits)
                 trackStore(value, d,true);
-            return out->insStorei(value, base, d);
+            return out->insStore(op, value, base, d);
         }
 
     };
