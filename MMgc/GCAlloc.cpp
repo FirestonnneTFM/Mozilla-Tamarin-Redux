@@ -265,7 +265,7 @@ namespace MMgc
 
 			// calculate back from end (better alignment, no dead space at end)
 			b->items = (char*)b+GCHeap::kBlockSize - m_itemsPerBlock * m_itemSize;
-			b->numFree = m_itemsPerBlock;
+			b->numFree = (short)m_itemsPerBlock;
 
 			// explode the new block onto its free list
 			//
