@@ -1452,6 +1452,14 @@ const int kBufferPadding = 16;
 		void invalidateLookupCache();
 #endif
 
+#ifdef VMCFG_NANOJIT
+    private:
+        // when set, we flush all binding caches at the end of the next gc sweep.
+        bool m_flushBindingCachesNextSweep;
+    public:
+        void flushBindingCachesNextSweep();
+#endif
+
 	private:
 		friend class Traits;
 		Traits** _emptySupertypeList; // empty supertype list shared by many Traits

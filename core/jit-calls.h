@@ -252,6 +252,7 @@
             // must be a primitive: int, bool, string, namespace, or number
             c.call_handler = callprop_prim_handlers[AvmCore::bindingKind(b)];
             c.tag = atomKind(obj);
+            AvmAssert(c.tag != 0);
         }
         return c.call_handler(c, obj, argc, args, env);
     }
@@ -262,7 +263,7 @@
     // AND the multiname has runtime parts, so we couldn't use a CallCache.
     Atom callprop_late(MethodEnv* caller_env, Atom base, const Multiname* name, int argc, Atom* args)
     {
-        CallCache c(name);  // temporary cache, just so we can call the generic handler.
+        CallCache c(name, NULL);  // temporary cache, just so we can call the generic handler.
         return callprop_generic(c, base, argc, args, caller_env);
     }
     FUNCTION(FUNCADDR(callprop_late), SIG5(A,P,A,P,I,P), callprop_late)
@@ -415,6 +416,7 @@
             // must be a primitive: int, bool, string, namespace, or number
             c.get_handler = getprop_prim_handlers[AvmCore::bindingKind(b)];
             c.tag = atomKind(obj);
+            AvmAssert(c.tag != 0);
         }
         return c.get_handler(c, env, obj);
     }
@@ -422,7 +424,7 @@
 
     Atom getprop_late(MethodEnv* env, Atom obj, const Multiname* name)
     {
-        GetCache c(name);
+        GetCache c(name, NULL);
         return getprop_generic(c, env, obj);
     }
     FUNCTION(FUNCADDR(getprop_late), SIG3(A,P,A,P), getprop_late)
@@ -636,7 +638,7 @@
     // fully dynamic generic handler for OP_setproperty
     void setprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom val)
     {
-        SetCache c(name);  // temporary cache, just so we can call the generic handler.
+        SetCache c(name, NULL);  // temporary cache, just so we can call the generic handler.
         setprop_generic(c, obj, val, env);
     }
     FUNCTION(FUNCADDR(setprop_late), SIG4(V,P,A,P,A), setprop_late)

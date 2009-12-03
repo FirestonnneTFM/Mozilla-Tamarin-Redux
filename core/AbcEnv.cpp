@@ -49,6 +49,9 @@ namespace avmplus
 #ifdef DEBUGGER
 		  , m_invocationCounts(NULL)
 #endif
+#ifdef VMCFG_NANOJIT
+		  , m_core(_pool->core)
+#endif
 	{
 #ifdef DEBUGGER
 		if (_pool->core->debugger())
@@ -57,6 +60,17 @@ namespace avmplus
 		}
 #endif		
 	}
+
+	AbcEnv::~AbcEnv()
+    {
+        #ifdef VMCFG_NANOJIT
+        // if any AbcEnv goes away, we have to flush the BindingCache entries for all 
+        // extant pools. Since AvmCore keeps a list of all live pools, we just set a flag 
+        // in AvmCore that triggers the flush in postsweep(). (Note that we can't rely on our pool
+        // being valid here; it might have already been collected!)
+        m_core->flushBindingCachesNextSweep();
+        #endif
+    }
 
 	ScriptEnv* AbcEnv::getScriptEnv(Stringp name, Namespacep ns)
 	{		
