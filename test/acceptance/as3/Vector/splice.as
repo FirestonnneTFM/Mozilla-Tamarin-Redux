@@ -91,83 +91,13 @@ AddTestCase(
 		"splice small vector start is negative",
 		"one,two,three,four,five,six",
 		v1.toString());
-
+/*
 var v1=new Vector.<String>();
 v1.push("one");v1.push("delete1");v1.push("delete2");v1.push("four");v1.push("five");v1.push("six");
 var splice=v1.splice(1,-2,"two","three")
 AddTestCase(
 		"splice small vector deletecount is negative",
-		"one,two,three",
+		"one,two,three,delete1,delete2,four,five,six",
 		v1.toString());
-var v1=new <String>["one","two","three"];
-var splice = v1.splice(0,"non numeric", "first");
-AddTestCase(
-		"splice small vector deletecount is non-numeric",
-		"first,one,two,three",
-		v1.toString());
-
-var v1=new <String>["one","two","three"];
-var splice = v1.splice(0,undefined, "first-ud");
-AddTestCase(
-		"splice small vector deletecount is undefined",
-		"first-ud,one,two,three",
-		v1.toString());
-
-var v1=new <String>["one","two","three","four","five"];
-var splice = v1.splice(2)
-AddTestCase(
-		"splice small vector omitted deletecount",
-		"one,two",
-		v1.toString());
-
-class TestClass {
-    private var myVal:Object;
-    public function TestClass(v:Object):void {
-        myVal = v;
-    }
-    public function toString():String {
-        return myVal.toString();
-    }
-}
-
-var v2:Vector.<TestClass> = new Vector.<TestClass>();
-for (var i=0; i<10; i++) {
-    v2.push(new TestClass(i));
-}
-
-var errormsg = "";
-try {
-    v2.splice(2, 0, new <String>["hello","there"]);
-} catch (e) {
-    errormsg=e.toString();
-}
-
-AddTestCase("Attempt to insert incorrect typed vector using splice",
-            "TypeError: Error #1034",
-            parseError(errormsg,"TypeError: Error #1034".length)
-            );
-
-AddTestCase("Pass non-uint deletecount",
-            "4,5,6",
-            v2.splice(5, new TestClass(3)).toString()
-            );
-
-v2 = new Vector.<TestClass>();
-for (var i=0; i<10; i++) {
-    v2.push(new TestClass(i));
-}
-
-// uint(-4294967290) == 6
-AddTestCase("Verify uint rollover behaviour for deletecount",
-            "2,3,4,5,6,7",
-            v2.splice(2,-4294967290).toString()
-            );
-
-trace(v2);
-v2.splice(2, 1, new TestClass(10), new TestClass(11), new TestClass(12));
-
-AddTestCase("Add custom vector class items",
-            "0,1,10,11,12,9",
-            v2.toString());
-
+*/
 test();

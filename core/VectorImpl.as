@@ -103,6 +103,9 @@ AS3 function every(checker:Function, thisObj: Object=null): Boolean {
 AS3 function forEach(eacher:Function, thisObj: Object=null): void { 
     _forEach(this, eacher, (thisObj is Object ? thisObj : null));
 }
+AS3 function map(mapper:Function, thisObj:Object=null) { 
+    this.private::_map(mapper, thisObj is Object ? thisObj : null);
+}
 
 AS3 native function push(...items:Array): uint;
 
@@ -121,17 +124,9 @@ private function _slice(start: Number=0, end: Number=0x7fffffff) {
     return result;
 }
 
-private function _splice(start, deleteCount:uint, items:Array) {
+private function _splice(start, deleteCount, items : Array) {
     var first:uint  = clamp( start, length );
-    var delcnt:uint;
-
-    //  Constrain the deleteCount to a value within 
-    //  this Vector's bounds.  clamp() can't be used
-    //  because clamp() yields an index, not a count.
-    if ( deleteCount > length )
-        delcnt = length - first;
-    else
-        delcnt = deleteCount;
+    var delcnt:uint = clamp( deleteCount, length-first );
 
     var result = newThisType();
     result.private::_spliceHelper(0, delcnt, 0, this, first);
@@ -176,11 +171,11 @@ prototype.every = function(checker, thisObj=void 0) : Boolean {
     return _every(castToThisType(this), checker, thisObj is Object ? thisObj : null);
 }
 
-private native function _filter(callback:Function, thisObject):*;
+private native function _filter(callback:Function, thisObject):Array;
 prototype.filter = function(checker, thisObj=void 0) {
-	return castToThisType(this).private::_filter(checker, thisObj is Object ? thisObj : null);
+    return castToThisType(this).private::_filter(checker, thisObj is Object ? thisObj : null);
 }
-		
+
 private static native function _forEach(o, callback:Function, thisObject):void;
 prototype.forEach = function(eacher, thisObj=void 0) {
     _forEach(castToThisType(this), eacher, (thisObj is Object ? thisObj : null));
@@ -194,9 +189,9 @@ prototype.lastIndexOf = function (value, from=void 0) {
     return castToThisType(this).AS3::lastIndexOf(value, from == undefined ? Infinity : Number(from));
 }
 
-private native function _map(callback:Function, thisObject):*;
+private native function _map(callback:Function, thisObject):Array;
 prototype.map = function(mapper, thisObj=void 0) {
-	return castToThisType(this).private::_map(mapper, thisObj is Object ? thisObj : null);
+    return castToThisType(this).private::_map(mapper, thisObj is Object ? thisObj : null);
 }
 
 prototype.pop = function() {
@@ -232,8 +227,8 @@ prototype.sort = function(comparefn){
     return _sort(castToThisType(this), a);
 }
 
-prototype.splice = function(start, deleteCount:uint=uint.MAX_VALUE, ...items){
-    return castToThisType(this)._splice(Number(start), deleteCount, items);
+prototype.splice = function(start, deleteCount, ...items){
+    return castToThisType(this)._splice(Number(start), Number(deleteCount), items);
 }
 
 prototype.unshift = function(...items){
