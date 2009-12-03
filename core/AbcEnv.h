@@ -42,7 +42,7 @@
 namespace avmplus
 {
 	// runtime info associated with a pool
-	class AbcEnv : public MMgc::GCObject
+	class AbcEnv : public MMgc::GCFinalizedObject
 	{
 		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
@@ -50,6 +50,7 @@ namespace avmplus
 
 	public:
 		AbcEnv(PoolObject* _pool, DomainEnv* _domainEnv, CodeContext * _codeContext);
+        ~AbcEnv();
 
 		PoolObject* pool() const;
 		DomainEnv* domainEnv() const;
@@ -83,6 +84,9 @@ namespace avmplus
 		DWB(MultinameHashtable*)	m_privateScriptEnvs;
 #ifdef DEBUGGER
 		DWB(uint64_t*)				m_invocationCounts;	// actual size will hold pool->methodCount methods, only allocated if debugger exists
+#endif
+#ifdef VMCFG_NANOJIT
+        AvmCore* const              m_core;
 #endif
 		MethodEnv*					m_methods[1];		// actual size will hold pool->methodCount methods
 	// ------------------------ DATA SECTION END

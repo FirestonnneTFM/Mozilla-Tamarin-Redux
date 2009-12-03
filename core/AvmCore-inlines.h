@@ -629,6 +629,13 @@ REALLY_INLINE void AvmCore::invalidateLookupCache()
 }
 #endif // VMCFG_LOOKUP_CACHE
 
+#ifdef VMCFG_NANOJIT
+REALLY_INLINE void AvmCore::flushBindingCachesNextSweep() 
+{ 
+	m_flushBindingCachesNextSweep = true; 
+}
+#endif // VMCFG_NANOJIT
+
 // NOTE, the code in enter/exit is replicated in CodegenLIR.cpp;
 // if you make changes here, you may need to make changes there as well.
 REALLY_INLINE void MethodFrame::enter(AvmCore* core, MethodEnv* e)

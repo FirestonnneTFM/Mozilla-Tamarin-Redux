@@ -47,6 +47,10 @@
 #include "AOTCompiler.h"
 #endif
 
+#ifdef VMCFG_NANOJIT
+#include "CodegenLIR.h"
+#endif
+
 //GCC only allows intrinsics if sse2 is enabled
 #if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
@@ -128,6 +132,9 @@ namespace avmplus
 		, currentMethodFrame(NULL)
 #ifdef VMCFG_LOOKUP_CACHE
 		, lookup_cache_timestamp(1)
+#endif
+#ifdef VMCFG_NANOJIT
+		, m_flushBindingCachesNextSweep(false)
 #endif
 		, gcInterface(g)
     {
@@ -2897,6 +2904,18 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	void AvmCore::postsweep()
 	{
+#ifdef VMCFG_NANOJIT
+        if (m_flushBindingCachesNextSweep)
+        {
+            for (LivePoolNode* node = livePools; node != NULL; node = node->next)
+            {
+                PoolObject* pool = (PoolObject*)(void*)(node->pool->get());
+                if (pool && pool->codeMgr)
+                    pool->codeMgr->flushBindingCaches();
+            }
+            m_flushBindingCachesNextSweep = false;
+        }
+#endif	
 #ifdef DEBUGGER
 		if (_sampler)
 			_sampler->postsweep();

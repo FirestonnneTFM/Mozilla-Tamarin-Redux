@@ -592,9 +592,9 @@ namespace avmplus
         interruptable(true),
         globalMemoryInfo(NULL),
         patches(*alloc1),
-        call_cache_builder(*alloc1, initCodeMgr(pool)->allocator),
-        get_cache_builder(*alloc1, pool->codeMgr->allocator),
-        set_cache_builder(*alloc1, pool->codeMgr->allocator)
+        call_cache_builder(*alloc1, *initCodeMgr(pool)),
+        get_cache_builder(*alloc1, *pool->codeMgr),
+        set_cache_builder(*alloc1, *pool->codeMgr)
     {
         state = NULL;
 
@@ -5102,8 +5102,19 @@ namespace avmplus
 #ifdef NJ_VERBOSE
         , labels(allocator, &log)
 #endif
+        , bindingCaches(NULL)
     {
         verbose_only( log.lcbits = 0; )
+    }
+
+    void CodeMgr::flushBindingCaches()
+    {
+        // this clears vtable so all kObjectType receivers are invalidated.
+        // of course, this field is also "tag" for primitive receivers, 
+        // but 0 is never a legal value there (and this is asserted when the tag is set)
+        // so this should safely invalidate those as well (though we don't really need to invalidate them)
+        for (BindingCache* b = bindingCaches; b != NULL; b = b->next)
+            b->vtable = NULL;
     }
 
 #ifdef _DEBUG
@@ -5546,20 +5557,20 @@ namespace avmplus
    }
 #endif
 
-    BindingCache::BindingCache(const Multiname* name)
-        : name(name)
+    REALLY_INLINE BindingCache::BindingCache(const Multiname* name, BindingCache* next)
+        : name(name), next(next)
     {}
 
-    CallCache::CallCache(const Multiname* name)
-        : BindingCache(name), call_handler(callprop_miss)
+    REALLY_INLINE CallCache::CallCache(const Multiname* name, BindingCache* next)
+        : BindingCache(name, next), call_handler(callprop_miss)
     {}
 
-    GetCache::GetCache(const Multiname* name)
-        : BindingCache(name), get_handler(getprop_miss)
+    REALLY_INLINE GetCache::GetCache(const Multiname* name, BindingCache* next)
+        : BindingCache(name, next), get_handler(getprop_miss)
     {}
 
-    SetCache::SetCache(const Multiname* name)
-        : BindingCache(name), set_handler(setprop_miss)
+    REALLY_INLINE SetCache::SetCache(const Multiname* name, BindingCache* next)
+        : BindingCache(name, next), set_handler(setprop_miss)
     {}
 
     template <class C>
@@ -5580,7 +5591,8 @@ namespace avmplus
         C* c = findCacheSlot(name);
         if (!c) {
             _nvprof("binding cache bytes", sizeof(C));
-            c = new (alloc) C(name);
+            c = new (codeMgr.allocator) C(name, codeMgr.bindingCaches);
+            codeMgr.bindingCaches = c;
             caches.add(c);
         }
         return c;

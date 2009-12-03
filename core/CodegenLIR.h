@@ -101,6 +101,8 @@ namespace avmplus
         {}
     };
 
+    class BindingCache;
+
     /**
      * CodeMgr manages memory for compiled code, including the code itself
      * (in a nanojit::CodeAlloc), and any data with code lifetime
@@ -114,7 +116,10 @@ namespace avmplus
     #ifdef NJ_VERBOSE
         LabelMap    labels;     // pretty names for addresses in verbose code listing
     #endif
+        BindingCache* bindingCaches;    // head of linked list of all BindingCaches allocated by this codeMgr
+                                        // (only for flushing... lifetime is still managed by codeAlloc)
         CodeMgr();
+        void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
     };
 
     /**
@@ -234,7 +239,7 @@ namespace avmplus
     // binding cache common code
     class BindingCache {
     public:
-        BindingCache(const Multiname*);
+        BindingCache(const Multiname*, BindingCache* next);
         union {
             VTable* vtable;         // for kObjectType receivers
             Atom tag;               // for primitive receivers
@@ -243,14 +248,15 @@ namespace avmplus
             ptrdiff_t slot_offset;  // for gets of a slot
             MethodEnv* method;      // calls to a method
         };
-        const Multiname* name;      // multiname for this entry, saved when cache created.
+        const Multiname* const name;      // multiname for this entry, saved when cache created.
+        BindingCache* const next;         // singly-linked list
     };
 
     // cache for late bound calls
     class CallCache: public BindingCache {
     public:
         typedef Atom (*Handler)(CallCache&, Atom base, int argc, Atom* args, MethodEnv*);
-        CallCache(const Multiname*);
+        CallCache(const Multiname*, BindingCache* next);
         Handler call_handler;
     };
 
@@ -258,7 +264,7 @@ namespace avmplus
     class GetCache: public BindingCache {
     public:
         typedef Atom (*Handler)(GetCache&, MethodEnv*, Atom);
-        GetCache(const Multiname*);
+        GetCache(const Multiname*, BindingCache* next);
         Handler get_handler;
     };
 
@@ -268,7 +274,7 @@ namespace avmplus
     class SetCache: public BindingCache {
     public:
         typedef void (*Handler)(SetCache&, Atom obj, Atom val, MethodEnv*);
-        SetCache(const Multiname*);
+        SetCache(const Multiname*, BindingCache* next);
         Handler set_handler;
         union {
             Traits* slot_type;  // slot or setter type, for implicit coercion
@@ -281,14 +287,14 @@ namespace avmplus
     class CacheBuilder
     {
         SeqBuilder<C*> caches;   // each entry points to an initialized cache
-        Allocator& alloc;                   // this allocator is used for new caches
+        CodeMgr& codeMgr;                   // this allocator is used for new caches
         C* findCacheSlot(const Multiname*);
     public:
         /** each new entry will be initialized with the given handler.
          *  temp_alloc is the allocator for this cache builder, with short lifetime.
-         *  cache_alloc is used to allocate memory for the method's caches, with method lifetime */
-        CacheBuilder(Allocator& builder_alloc, Allocator& cache_alloc)
-            : caches(builder_alloc), alloc(cache_alloc) {}
+         *  codeMgr.allocator is used to allocate memory for the method's caches, with method lifetime */
+        CacheBuilder(Allocator& builder_alloc, CodeMgr& codeMgr)
+            : caches(builder_alloc), codeMgr(codeMgr) {}
 
         /** allocate a new cache slot or reuse an existing one with the same multiname */
         C* allocateCacheSlot(const Multiname* name);
