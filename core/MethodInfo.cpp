@@ -177,6 +177,18 @@ namespace avmplus
 		WB(pool()->core->GetGC(), this, &_activationScopeOrTraits, uintptr_t(s)); 
 	}
 
+	static bool hasTypedArgs(MethodSignaturep ms)
+	{
+		int32_t param_count = ms->param_count();
+		for (int32_t i = 1; i <= param_count; i++) {
+			if (ms->paramTraits(i) != NULL) {
+				// at least one parameter is typed; need full coerceEnter
+				return true;
+			}
+		}
+		return false;
+	}
+
     void MethodInfo::setInterpImpl() 
 	{
 		MethodSignaturep ms = getMethodSignature();
@@ -185,11 +197,13 @@ namespace avmplus
 		else
 			_implGPR = avmplus::interpGPR;
 		AvmAssert(isInterpreted());
+		_invoker = hasTypedArgs(ms) ? MethodEnv::coerceEnter_interp : MethodEnv::coerceEnter_interp_nocoerce;
     }
 
 	void MethodInfo::setNativeImpl(GprMethodProc p)
 	{
 		_implGPR = p;
+		_invoker = MethodEnv::coerceEnter_generic;
 		AvmAssert(!isInterpreted());
 	}
 
@@ -257,6 +271,30 @@ namespace avmplus
 
         AvmAssert(f->implFPR() != MethodInfo::verifyEnterFPR);
 		return f->implFPR()(env, argc, ap);
+	}
+
+	// entry point when the first call to the method is late bound.
+	/*static*/ Atom MethodInfo::verifyCoerceEnter(MethodEnv* env, int argc, Atom* args)
+	{
+		MethodInfo* f = env->method;
+
+		#ifdef AVMPLUS_VERIFYALL
+		// never verify late in verifyall mode
+		AvmAssert(!f->pool()->core->config.verifyall);
+		#endif
+
+		f->verify(env->toplevel(), env->abcEnv());
+
+#if VMCFG_METHODENV_IMPL32
+		// we got here by calling env->_implGPR, which now is pointing to verifyEnter(),
+		// but next time we want to call the real code, not verifyEnter again.
+		// All other MethodEnv's in their default state will call the target method
+		// directly and never go through verifyEnter().
+		env->_implGPR = f->implGPR();
+#endif
+
+        AvmAssert(f->_invoker != MethodInfo::verifyCoerceEnter);
+		return f->invoke(env, argc, args);
 	}
 
 	void MethodInfo::verify(Toplevel *toplevel, AbcEnv* abc_env)

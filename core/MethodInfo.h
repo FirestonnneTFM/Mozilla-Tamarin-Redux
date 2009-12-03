@@ -45,8 +45,13 @@
 
 namespace avmplus
 {
+	// signature for method invocation when caller coerces args and boxes results
 	typedef uintptr_t (*GprMethodProc)(MethodEnv*, int32_t, uint32_t *);
 	typedef double (*FprMethodProc)(MethodEnv*, int32_t, uint32_t *);
+
+	// signature for invocation when callee coerces & boxes,
+	// caller is calling an unknown function with an unknown signature
+	typedef Atom (*AtomMethodProc)(MethodEnv*, int, Atom*);
 
 #ifdef DEBUGGER
 	class AbcFile;
@@ -74,7 +79,6 @@ namespace avmplus
 
 	class MethodInfoProcHolder : public MMgc::GCObject
 	{
-		friend class CodegenLIR;
 		friend class ImtThunkEnv;
 	protected:
 		union 
@@ -82,11 +86,16 @@ namespace avmplus
 			GprMethodProc _implGPR;
 			FprMethodProc _implFPR;
 		};
+
+		/** pointer to invoker used when callee must coerce args */
+		AtomMethodProc _invoker;
+
 		MethodInfoProcHolder();
 	public:
 		GprMethodProc implGPR() const;
 		FprMethodProc implFPR() const;
 		bool isInterpreted() const;
+		Atom invoke(MethodEnv*, int32_t, Atom*);
 	};
 
 	/**
@@ -217,6 +226,7 @@ namespace avmplus
 
 		static uintptr_t verifyEnterGPR(MethodEnv* env, int32_t argc, uint32_t* ap);
 		static double verifyEnterFPR(MethodEnv* env, int32_t argc, uint32_t* ap);
+		static Atom verifyCoerceEnter(MethodEnv* env, int32_t argc, Atom* args);
 
 		uintptr_t iid() const;
 
