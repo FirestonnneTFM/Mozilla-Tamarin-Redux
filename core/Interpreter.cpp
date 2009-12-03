@@ -212,7 +212,7 @@ namespace avmplus
 		Atom* const atomv = (Atom*)ap;
 		MethodSignaturep ms = env->method->getMethodSignature();
 		ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
-		Atom a = interpBoxed(env, argc, atomv, ms);
+		Atom a = interpBoxed(env, argc, atomv);
 		const BuiltinType bt = ms->returnTraitsBT();
 		const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
 		if ((1U<<bt) & ATOM_MASK)
@@ -231,7 +231,7 @@ namespace avmplus
 		Atom* const atomv = (Atom*)ap;
 		MethodSignaturep ms = env->method->getMethodSignature();
 		ms->boxArgs(env->core(), argc, (uint32 *)ap, atomv);
-		Atom a = interpBoxed(env, argc, atomv, ms);
+		Atom a = interpBoxed(env, argc, atomv);
 		return AvmCore::number_d(a);
 	}
 
@@ -262,12 +262,12 @@ namespace avmplus
         #error "interpGetOpcodeLabels needs a critical section or eager initialization for this compiler / platform combination"
     #endif
 		
-		return (void**)interpBoxed(NULL, 0, NULL, NULL);
+		return (void**)interpBoxed(NULL, 0, NULL);
 	}
 	
 #endif // AVMPLUS_DIRECT_THREADED
 
-    Atom interpBoxed(register MethodEnv* env, register int _argc, register Atom* _atomv, MethodSignaturep ms)
+    Atom interpBoxed(register MethodEnv* env, register int _argc, register Atom* _atomv)
     {
 #ifdef AVMPLUS_DIRECT_THREADED
 		
@@ -718,6 +718,7 @@ namespace avmplus
  		// I do *not* like making pc 'volatile'; a smart compiler may handle it well
  		// and only spill to memory across a call, but a dumb compiler may not ever
  		// keep the value in a register at all.
+		MethodSignaturep ms = env->method->getMethodSignature();
 #if !defined AVMPLUS_WORD_CODE || defined AVMPLUS_VERBOSE
 	#ifdef AVMPLUS_WORD_CODE
  		register const bytecode_t* volatile codeStart = info->word_code_start();

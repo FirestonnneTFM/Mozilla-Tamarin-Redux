@@ -343,43 +343,18 @@ namespace avmplus
 		return method->getMethodSignature();
 	}
 	
-	// Optimization opportunities: since we call interp() directly, it is
+	// Optimization opportunities: since we call interpBoxed() directly, it is
 	// probably possible to allocate its stack frame here and pass it in.
-	// If we do so then interp() should deallocate it.  This affords us
+	// If we do so then interpBoxed() should deallocate it.  This affords us
 	// the optimization of getting rid of alloca() allocation here, 
 	// which means improved tail calls for once.  For another, if the argv
 	// pointer points into the stack segment s.t. argv+argc+1 equals the
 	// current stack pointer then the stack may be extended in place 
 	// provided there's space.  But that optimization may equally well
-	// be performed inside interp(), and in fact if we alloc temp
-	// space on the alloca stack here then interp() would always perform
-	// that optimization.  So we'd just be moving the decision into interp().
-	
-	// fast/optimized call to a function without parameters
-	Atom MethodEnv::coerceEnter(Atom thisArg)
-	{
-		MethodSignaturep ms = get_ms();
-		startCoerce(0, ms);
+	// be performed inside interpBoxed(), and in fact if we alloc temp
+	// space on the alloca stack here then interpBoxed() would always perform
+	// that optimization.  So we'd just be moving the decision into interpBoxed().
 
-		if (isInterpreted())
-		{
-			// caller will coerce instance if necessary, so make sure it was done.
-			AvmAssert(thisArg == this->toplevel()->coerce(thisArg, ms->paramTraits(0)));
-			// Tail call inhibited by &thisArg, and also by &thisArg in "else" clause
-			return interpBoxed(this, 0, &thisArg, ms);
-		}
-		else
-		{
-			union {
-				Atom a;
-				double d;
-			} unboxedThis;
-			// no need to coerce, caller has done it already
-			unbox1(thisArg, ms->paramTraits(0), (Atom*)&unboxedThis);
-			return endCoerce(0, (uint32_t*)&unboxedThis, ms);
-		}
-	}
-	
 	// specialized to be called from Function.apply
 	Atom MethodEnv::coerceEnter(Atom thisArg, ArrayObject *a)
 	{
@@ -393,7 +368,7 @@ namespace avmplus
 		if (isInterpreted())
 		{
 			// caller will coerce instance if necessary, so make sure it was done.
-			AvmAssert(thisArg == toplevel()->coerce(thisArg, ms->paramTraits(0)));
+			AvmAssert(thisArg == coerce(this, thisArg, ms->paramTraits(0)));
 
 			// Tail call inhibited by local allocation/deallocation
 			MMgc::GC::AllocaAutoPtr _atomv;
@@ -424,13 +399,16 @@ namespace avmplus
 	// specialized to be called from Function.call
 	Atom MethodEnv::coerceEnter(Atom thisArg, int argc, Atom *argv)
 	{
+		if (argc == 0)
+			return coerceEnter(thisArg);
+
 		MethodSignaturep ms = get_ms();
 		const int32_t extra = startCoerce(argc, ms);
 
 		if (isInterpreted())
 		{
 			// caller will coerce instance if necessary, so make sure it was done.
-			AvmAssert(thisArg == toplevel()->coerce(thisArg, ms->paramTraits(0)));
+			AvmAssert(thisArg == coerce(this, thisArg, ms->paramTraits(0)));
 
 			// Tail call inhibited by local allocation/deallocation
 			MMgc::GC::AllocaAutoPtr _atomv;
@@ -445,7 +423,7 @@ namespace avmplus
 			const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 			MMgc::GC::AllocaAutoPtr _ap;
 			uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
-				
+
 			unboxCoerceArgs(thisArg, argc, argv, ap, ms);
 			return endCoerce(argc, ap, ms);
 		}
@@ -453,56 +431,66 @@ namespace avmplus
 
 	// note that GCC typically restricts tailcalls to functions with similar signatures
 	// ("sibcalls") -- see http://www.ddj.com/architect/184401756 for a useful explanation.
-	// anyway, since we really want coerceUnboxEnter to be a tailcall from
+	// anyway, since we really want interpBoxed to be a tailcall from
 	// here, be sure to keep it using a compatible signature...
-	Atom MethodEnv::coerceEnter(int32_t argc, Atom* atomv)
+	Atom MethodEnv::coerceEnter_interp(MethodEnv* env, int32_t argc, Atom* atomv)
 	{
-		// Trying hard here to allow this to be a tail call, so don't inline
-		// coerceUnboxEnter into this function - the allocation it performs
-		// may prevent the compiler from performing the tail call.
-		//
-		// The tail call is important in order to keep stack consumption down in an
+		// The tail call to interpBoxed is important in order to keep stack consumption down in an
 		// interpreter-only configuration, but it's good always.
 
-		if (isInterpreted())
-		{
-			AvmCore* core = this->core();
-			Toplevel* toplevel = this->toplevel();
-			
-			MethodSignaturep ms = get_ms();
+		AvmAssert(env->isInterpreted());
+		AvmCore* core = env->core();
+		Toplevel* toplevel = env->toplevel();
 
-			// caller will coerce instance if necessary, so make sure it was done.
-			AvmAssert(atomv[0] == toplevel->coerce(atomv[0], ms->paramTraits(0)));
-
-			startCoerce(argc, ms);
-			const int32_t param_count = ms->param_count();
-			const int32_t end = argc >= param_count ? param_count : argc;
-			for (int32_t i=1 ; i <= end ; i++ )
-				atomv[i] = coerceAtom(core, atomv[i], ms->paramTraits(i), toplevel);
-			return interpBoxed(this, argc, atomv, ms);
-		}
-		else
-			return coerceUnboxEnter(argc, atomv);
-	}
-
-
-	// In principle we want this to be inlined if the compiler is not tailcall-aware,
-	// and not inlined if it is tailcall-aware (as doing so may inhibit tail calls).
-	Atom MethodEnv::coerceUnboxEnter(int32_t argc, Atom* atomv)
-	{
-		MethodSignaturep ms = get_ms();
-		const int32_t extra = startCoerce(argc, ms);
+		MethodSignaturep ms = env->get_ms();
+		env->startCoerce(argc, ms);
 
 		// caller will coerce instance if necessary, so make sure it was done.
-		AvmAssert(atomv[0] == toplevel()->coerce(atomv[0], ms->paramTraits(0)));
+		AvmAssert(atomv[0] == coerce(env, atomv[0], ms->paramTraits(0)));
+
+		const int32_t param_count = ms->param_count();
+		const int32_t end = argc >= param_count ? param_count : argc;
+		for (int32_t i=1 ; i <= end ; i++ )
+			atomv[i] = coerceAtom(core, atomv[i], ms->paramTraits(i), toplevel);
+		return interpBoxed(env, argc, atomv);
+	}
+
+	Atom MethodEnv::coerceEnter_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* atomv)
+	{
+		// The tail call to interpBoxed is important in order to keep stack consumption down in an
+		// interpreter-only configuration, but it's good always.
+
+		MethodSignaturep ms = env->get_ms();
+		env->startCoerce(argc, ms);
+
+#ifdef DEBUG
+		AvmAssert(env->isInterpreted());
+		// caller will coerce instance if necessary, so make sure it was done.
+		AvmAssert(atomv[0] == coerce(env, atomv[0], ms->paramTraits(0)));
+		const int32_t param_count = ms->param_count();
+		const int32_t end = argc >= param_count ? param_count : argc;
+		for (int32_t i=1 ; i <= end ; i++ )
+			AvmAssert(ms->paramTraits(i) == NULL);
+#endif
+
+		return interpBoxed(env, argc, atomv);
+	}
+
+	Atom MethodEnv::coerceEnter_generic(MethodEnv *env, int32_t argc, Atom* atomv)
+	{
+		MethodSignaturep ms = env->get_ms();
+		const int32_t extra = env->startCoerce(argc, ms);
+
+		// caller will coerce instance if necessary, so make sure it was done.
+		AvmAssert(atomv[0] == coerce(env, atomv[0], ms->paramTraits(0)));
 
 		const int32_t rest_offset = ms->rest_offset();
 		const size_t extra_sz = rest_offset + sizeof(Atom)*extra;
 		MMgc::GC::AllocaAutoPtr _ap;
-		uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
+		uint32_t *ap = (uint32_t *)VMPI_alloca(env->core(), _ap, extra_sz);
 			
-		unboxCoerceArgs(argc, atomv, ap, ms);
-		return endCoerce(argc, ap, ms);
+		env->unboxCoerceArgs(argc, atomv, ap, ms);
+		return env->endCoerce(argc, ap, ms);
 	}
 
 	/**
@@ -523,6 +511,7 @@ namespace avmplus
 			*args++ = in[++end];
 	}
 
+	// specialized for Function.apply
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms)
 	{
 		int32_t argc = a->getLength();
@@ -537,6 +526,7 @@ namespace avmplus
 			*args++ = a->getUintProperty(end++);
 	}
 
+	// specialized for Function.call 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, int32_t argc, Atom* in, uint32_t *argv, MethodSignaturep ms)
 	{
 		Atom *args = unbox1(thisArg, ms->paramTraits(0), (Atom *) argv);
@@ -1841,7 +1831,6 @@ namespace avmplus
 			toplevel->throwTypeError(kFilterError, core()->toErrorString(toplevel->toTraits(obj)));
 		}
 	}
-
 		
 	/**
 	 * implements ECMA implicit coersion.  returns the coerced value,

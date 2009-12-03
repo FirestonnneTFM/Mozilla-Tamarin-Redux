@@ -160,6 +160,20 @@ REALLY_INLINE VTable* MethodEnv::vtable() const
     return _scope->vtable();
 }
 
+// specialized for calling init/get functions with no parameters
+REALLY_INLINE Atom MethodEnv::coerceEnter(Atom thisArg)
+{
+    return method->invoke(this, 0, &thisArg);
+}
+
+// general case for method calls
+REALLY_INLINE Atom MethodEnv::coerceEnter(int32_t argc, Atom* args)
+{
+    Atom result = method->invoke(this, argc, args);
+    AvmAssert(VMPI_memset(args, 0, (argc+1)*sizeof(Atom)) == args); // clobber incoming args in DEBUG
+    return result;
+}
+
 REALLY_INLINE bool MethodEnv::isInterpreted()
 {
     return method->isInterpreted();

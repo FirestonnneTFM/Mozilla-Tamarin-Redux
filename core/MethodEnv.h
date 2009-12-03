@@ -66,8 +66,9 @@ namespace avmplus
 	class MethodEnv : public MethodEnvProcHolder
 	{
 		friend class CodegenLIR;
-	#if VMCFG_METHODENV_IMPL32
 		friend class MethodInfo;
+		friend class MethodInfoProcHolder;
+	#if VMCFG_METHODENV_IMPL32
 		static uintptr_t delegateInvoke(MethodEnv* env, int32_t argc, uint32_t *ap);
 	#endif
 	public:
@@ -117,11 +118,14 @@ namespace avmplus
 		Atom coerceEnter(int32_t argc, Atom* argv);
 
 	private:
+		static Atom coerceEnter_interp(MethodEnv* env, int32_t argc, Atom* argv);
+		static Atom coerceEnter_interp_nocoerce(MethodEnv* env, int32_t argc, Atom* argv);
+		static Atom coerceEnter_generic(MethodEnv* env, int32_t argc, Atom* argv);
+
 		MethodSignaturep get_ms();
 		bool isInterpreted();
 		Atom endCoerce(int32_t argc, uint32_t *ap, MethodSignaturep ms);
 		int32_t  startCoerce(int32_t argc, MethodSignaturep ms);
-		void argcError(int32_t argc); // never returns; throws argument count error
 		Atom coerceUnboxEnter(int32_t argc, Atom* atomv);
 		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32_t *argv, MethodSignaturep ms);
 		void unboxCoerceArgs(int32_t argc, Atom* in, uint32_t *ap, MethodSignaturep ms);
@@ -135,9 +139,9 @@ namespace avmplus
 
 	// helper functions used from compiled code
 	public:
-		/** null pointer check */
-	    void nullcheck(Atom atom);
-	    void npe();
+		void argcError(int32_t argc); // never returns; throws argument count error
+	    void nullcheck(Atom atom);	  // null pointer check
+	    void npe();					  // never returns; throws null pointer error
 
 		ArrayObject* createRest(Atom* argv, int32_t argc);
 		Atom getpropertylate_i(Atom obj, int32_t index) const;

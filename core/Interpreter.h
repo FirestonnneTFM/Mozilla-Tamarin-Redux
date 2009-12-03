@@ -63,10 +63,10 @@ namespace avmplus
 	 */
 	uintptr_t interpGPR(MethodEnv* method, int argc, uint32 *ap); // returns Atom, int/uint, or a pointer
 	double interpFPR(MethodEnv* method, int argc, uint32 *ap); // really returns double
-	// note, the MethodSignature passed in *must* correspond to method->method->getMethodSignature --
-	// it is an argument because all callers already have the correct MethodSignature available
-	// and it makes a significant speed difference in interp mode (vs re-grabbing from the cache)
-	Atom interpBoxed(MethodEnv* method, int argc, Atom* ap, MethodSignaturep ms);	// actually returns an atom!
+
+	// main interpreter method.  Signature should correspond to AtomMethodProc to allow tail calls to here
+	Atom interpBoxed(MethodEnv* method, int argc, Atom* ap);
+
 #ifdef AVMPLUS_DIRECT_THREADED
 	void** interpGetOpcodeLabels();
 #endif

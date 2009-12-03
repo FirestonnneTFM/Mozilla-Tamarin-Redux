@@ -102,15 +102,7 @@ namespace avmplus
 	Atom FunctionObject::AS3_call(Atom thisArg, Atom *argv, int argc)
 	{
 		thisArg = get_coerced_receiver(thisArg);
-
-		if (argc > 0) 
-		{
-			return _call->coerceEnter(thisArg, argc, argv);
-		}
-		else
-		{
-			return _call->coerceEnter(thisArg);
-		}
+		return _call->coerceEnter(thisArg, argc, argv);
 	}
 
 	/**
@@ -127,11 +119,11 @@ namespace avmplus
 		{
 			AvmCore* core = this->core();
 
+			// FIXME: why not declare argArray as Array in Function.as?
 			if (!AvmCore::istype(argArray, ARRAY_TYPE))
 				toplevel()->throwTypeError(kApplyError);
 
 			return _call->coerceEnter(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
-			
 		}
 		else
 		{

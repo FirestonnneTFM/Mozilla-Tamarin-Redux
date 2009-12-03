@@ -51,7 +51,7 @@ REALLY_INLINE DebuggerMethodInfo::DebuggerMethodInfo(int32_t _local_count, uint3
 #endif
 
 REALLY_INLINE MethodInfoProcHolder::MethodInfoProcHolder()
-    : _implGPR(MethodInfo::verifyEnterGPR)
+    : _implGPR(MethodInfo::verifyEnterGPR), _invoker(MethodInfo::verifyCoerceEnter)
 {}
 
 REALLY_INLINE GprMethodProc MethodInfoProcHolder::implGPR() const
@@ -67,6 +67,11 @@ REALLY_INLINE FprMethodProc MethodInfoProcHolder::implFPR() const
 REALLY_INLINE bool MethodInfoProcHolder::isInterpreted() const
 {
     return _implGPR == interpGPR || _implFPR == interpFPR;
+}
+
+REALLY_INLINE Atom MethodInfoProcHolder::invoke(MethodEnv* env, int32_t argc, Atom* args)
+{
+    return _invoker(env, argc, args);
 }
 
 REALLY_INLINE uintptr_t MethodInfo::iid() const
