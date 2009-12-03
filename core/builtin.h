@@ -70,7 +70,7 @@ namespace avmplus {
     class NumberClass; //Number$
     class ObjectClass; //Object$
     class ObjectVectorClass; //__AS3__.vec::Vector$object$
-    class ObjectVectorObject; //__AS3__.vec::Vector$object
+    class ObjectVectorObject; //__AS3__.vec::Vector
     class QNameClass; //QName$
     class QNameObject; //QName
     class RangeErrorClass; //RangeError$
@@ -232,12 +232,12 @@ const uint32_t __AS3___vec_Vector_object_length_get = 246;
 const uint32_t __AS3___vec_Vector_object_length_set = 247;
 const uint32_t __AS3___vec_Vector_object_fixed_set = 248;
 const uint32_t __AS3___vec_Vector_object_fixed_get = 249;
-const uint32_t __AS3___vec_Vector_object_AS3_push = 256;
-const uint32_t __AS3___vec_Vector_object_private__reverse = 257;
-const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 261;
-const uint32_t __AS3___vec_Vector_object_AS3_unshift = 263;
-const uint32_t __AS3___vec_Vector_object_private__filter = 264;
-const uint32_t __AS3___vec_Vector_object_private__map = 265;
+const uint32_t __AS3___vec_Vector_object_AS3_push = 257;
+const uint32_t __AS3___vec_Vector_object_private__reverse = 258;
+const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 262;
+const uint32_t __AS3___vec_Vector_object_AS3_unshift = 264;
+const uint32_t __AS3___vec_Vector_object_private__filter = 265;
+const uint32_t __AS3___vec_Vector_object_private__map = 266;
 const uint32_t __AS3___vec_Vector_object_AS3_pop = 270;
 const uint32_t __AS3___vec_Vector_int_private__every = 300;
 const uint32_t __AS3___vec_Vector_int_private__forEach = 301;
@@ -247,12 +247,12 @@ const uint32_t __AS3___vec_Vector_int_length_get = 305;
 const uint32_t __AS3___vec_Vector_int_length_set = 306;
 const uint32_t __AS3___vec_Vector_int_fixed_set = 307;
 const uint32_t __AS3___vec_Vector_int_fixed_get = 308;
-const uint32_t __AS3___vec_Vector_int_AS3_push = 315;
-const uint32_t __AS3___vec_Vector_int_private__reverse = 316;
-const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 320;
-const uint32_t __AS3___vec_Vector_int_AS3_unshift = 322;
-const uint32_t __AS3___vec_Vector_int_private__filter = 323;
-const uint32_t __AS3___vec_Vector_int_private__map = 324;
+const uint32_t __AS3___vec_Vector_int_AS3_push = 316;
+const uint32_t __AS3___vec_Vector_int_private__reverse = 317;
+const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 321;
+const uint32_t __AS3___vec_Vector_int_AS3_unshift = 323;
+const uint32_t __AS3___vec_Vector_int_private__filter = 324;
+const uint32_t __AS3___vec_Vector_int_private__map = 325;
 const uint32_t __AS3___vec_Vector_int_AS3_pop = 329;
 const uint32_t __AS3___vec_Vector_uint_private__every = 359;
 const uint32_t __AS3___vec_Vector_uint_private__forEach = 360;
@@ -262,12 +262,12 @@ const uint32_t __AS3___vec_Vector_uint_length_get = 364;
 const uint32_t __AS3___vec_Vector_uint_length_set = 365;
 const uint32_t __AS3___vec_Vector_uint_fixed_set = 366;
 const uint32_t __AS3___vec_Vector_uint_fixed_get = 367;
-const uint32_t __AS3___vec_Vector_uint_AS3_push = 374;
-const uint32_t __AS3___vec_Vector_uint_private__reverse = 375;
-const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 379;
-const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 381;
-const uint32_t __AS3___vec_Vector_uint_private__filter = 382;
-const uint32_t __AS3___vec_Vector_uint_private__map = 383;
+const uint32_t __AS3___vec_Vector_uint_AS3_push = 375;
+const uint32_t __AS3___vec_Vector_uint_private__reverse = 376;
+const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 380;
+const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 382;
+const uint32_t __AS3___vec_Vector_uint_private__filter = 383;
+const uint32_t __AS3___vec_Vector_uint_private__map = 384;
 const uint32_t __AS3___vec_Vector_uint_AS3_pop = 388;
 const uint32_t __AS3___vec_Vector_double_private__every = 418;
 const uint32_t __AS3___vec_Vector_double_private__forEach = 419;
@@ -277,12 +277,12 @@ const uint32_t __AS3___vec_Vector_double_length_get = 423;
 const uint32_t __AS3___vec_Vector_double_length_set = 424;
 const uint32_t __AS3___vec_Vector_double_fixed_set = 425;
 const uint32_t __AS3___vec_Vector_double_fixed_get = 426;
-const uint32_t __AS3___vec_Vector_double_AS3_push = 433;
-const uint32_t __AS3___vec_Vector_double_private__reverse = 434;
-const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 438;
-const uint32_t __AS3___vec_Vector_double_AS3_unshift = 440;
-const uint32_t __AS3___vec_Vector_double_private__filter = 441;
-const uint32_t __AS3___vec_Vector_double_private__map = 442;
+const uint32_t __AS3___vec_Vector_double_AS3_push = 434;
+const uint32_t __AS3___vec_Vector_double_private__reverse = 435;
+const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 439;
+const uint32_t __AS3___vec_Vector_double_AS3_unshift = 441;
+const uint32_t __AS3___vec_Vector_double_private__filter = 442;
+const uint32_t __AS3___vec_Vector_double_private__map = 443;
 const uint32_t __AS3___vec_Vector_double_AS3_pop = 447;
 const uint32_t Math_private__min = 461;
 const uint32_t Math_private__max = 462;

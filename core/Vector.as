@@ -80,10 +80,6 @@ package __AS3__.vec
             return _filter(checker, thisObj);
         }
         
-        AS3 function map(mapper : Function, thisObj: Object=null): Vector$object {
-            return _map(mapper, thisObj);
-        }
-        
         AS3 native function pop();
 
         AS3 function reverse() : Vector$object {
@@ -104,7 +100,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$object {
+        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$object {
             return this._splice(start, deleteCount, items);
         }
 
@@ -158,13 +154,9 @@ package __AS3__.vec
         AS3 function concat(...items) : Vector$int {
             return _concat(items);
         }
-		
+
         AS3 function filter(checker:Function, thisObj: Object=null): Vector$int {
             return _filter(checker, thisObj);
-        }
-        
-        AS3 function map(mapper : Function, thisObj: Object=null): Vector$int {
-            return _map(mapper, thisObj);
         }
         
         AS3 native function pop(): int ;
@@ -186,7 +178,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$int {
+        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$int {
             return this._splice(start, deleteCount, items);
         }
 
@@ -245,10 +237,6 @@ package __AS3__.vec
             return _filter(checker, thisObj);
         }
         
-        AS3 function map(mapper : Function, thisObj: Object=null): Vector$uint {
-            return _map(mapper, thisObj);
-        }
-        
         AS3 native function pop(): uint ;
 
         AS3 function reverse() : Vector$uint {
@@ -269,7 +257,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$uint {
+        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$uint {
             return this._splice(start, deleteCount, items);
         }
 
@@ -327,10 +315,6 @@ package __AS3__.vec
             return _filter(checker, thisObj);
         }
         
-        AS3 function map(mapper : Function, thisObj: Object=null): Vector$double {
-            return _map(mapper, thisObj);
-        }
-        
         AS3 native function pop(): Number ;
 
         AS3 function reverse() : Vector$double {
@@ -351,7 +335,7 @@ package __AS3__.vec
             _sort(this, a);
             return this;
         }
-        AS3 function splice(start: Number, deleteCount:uint = uint.MAX_VALUE, ...items): Vector$double {
+        AS3 function splice(start: Number, deleteCount: Number, ...items): Vector$double {
             return this._splice(start, deleteCount, items);
         }
 
