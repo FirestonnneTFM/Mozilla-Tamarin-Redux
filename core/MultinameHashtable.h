@@ -91,12 +91,6 @@ namespace avmplus
 		void grow();
 
 	public:
-		/**
-		 * since identifiers are always interned strings, they can't be 0,
-		 * so we can use 0 as the empty value.
-		 */
-		const static Atom EMPTY = 0;
-
 		/** kDefaultCapacity must be a power of 2 */
 		const static int kDefaultCapacity = 8;
 

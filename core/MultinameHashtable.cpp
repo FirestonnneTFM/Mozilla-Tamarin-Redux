@@ -153,6 +153,12 @@ namespace avmplus
 		return i;
 	}
 
+	/**
+	 * since identifiers are always interned strings, they can't be 0,
+	 * so we can use 0 as the empty value.
+	 */
+	static const Stringp EMPTY = NULL;
+
 	const MultinameHashtable::Quad* MultinameHashtable::getNSSet(Stringp mnameName, NamespaceSetp nsset) const
 	{
 	#ifdef AVMPLUS_64BIT
