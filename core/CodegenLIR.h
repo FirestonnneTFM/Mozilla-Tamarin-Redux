@@ -305,14 +305,38 @@ namespace avmplus
     /** helper code to make LIR generation nice and tidy */
     class LirHelper {
     protected: // methods
+        static BuiltinType bt(Traits *t);
         LIns* eq0(LIns* i);             // eq(i, imm(0))
         LIns* peq0(LIns* ptr);          // peq(ptr, immq(0))
         LIns* qlo(LIns* q);             // LIR_qlo(q)
         LIns* i2p(LIns* i);             // 32bit: nop, 64bit: i2q(i)
         LIns* u2p(LIns* u);             // 32bit: nop, 64bit: u2q(i)
         LIns* p2i(LIns* ptr);           // 32bit: nop, 64bit: qlo(ptr)
+        LIns* InsConst(int32_t c);
+        LIns* InsConstPtr(const void *p);
+        LIns* InsConstAtom(Atom c);
+        LIns* callIns(const CallInfo *, uint32_t argc, ...);
+        LIns* peq(LIns* a, Atom b);
+        LIns* choose(LIns* c, Atom t, LIns* f);
+        LIns* andp(LIns* a, Atom mask);
+        LIns* orp(LIns* a, Atom mask);
+        LIns* ori(LIns* a, int32_t mask);
+        LIns* ret(LIns* a);
+        LIns* label();
+        LIns* jlt(LIns* a, int32_t b);
+        LIns* jgt(LIns* a, int32_t b);
+        LIns* jne(LIns* a, int32_t b);
+        LIns* sti(LIns* val, LIns* p, int32_t d);
+        LIns* stp(LIns* val, LIns* p, int32_t d);
+        LIns* ldp(LIns* p, int32_t d);
+        LIns* live(LIns*);
+        LIns* param(int n, const char *name);
+        LIns* lshi(LIns* a, int32_t b);
+        LIns* ushp(LIns* a, int32_t b);
+
     protected: // data
         LirWriter *lirout;
+        Fragment *frag;
     };
 
     struct GlobalMemoryInfo
@@ -353,7 +377,6 @@ namespace avmplus
         MethodInfo *info;
         const MethodSignaturep ms;
         PoolObject *pool;
-        Fragment *frag;
         FrameState *state;
         LIns *vars, *varTraits;
         LIns *env_param, *argc_param, *ap_param;
@@ -386,7 +409,6 @@ namespace avmplus
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
         LIns *loadAtomRep(LIns* value, Traits* valType);
-        LIns *callIns(const CallInfo *, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *localGet(int i);
         LIns *localGetp(int i);
@@ -428,7 +450,6 @@ namespace avmplus
         // on successful jit, allocate memory for BindingCache instances, if necessary
         void initBindingCache();
 
-        static BuiltinType bt(Traits *t);
         LIns *loadIns(LOpcode op, size_t disp, LIns *base);
         LIns *Ins(LOpcode op);
         LIns *Ins(LOpcode op, LIns *a);
@@ -436,9 +457,6 @@ namespace avmplus
         LIns *i2dIns(LIns* v);
         LIns *u2dIns(LIns* v);
         LIns *binaryIns(LOpcode op, LIns *a, LIns *b);
-        LIns *InsConst(int32_t c);
-        LIns *InsConstPtr(const void *p);
-        LIns *InsConstAtom(Atom c);
 
         /** emit a constructor call, and early bind if possible */
         void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
