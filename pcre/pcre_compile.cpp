@@ -5925,7 +5925,6 @@ while (!work_stack.isEmpty())
        new_item.code = scode;
        new_item.bracket_map = wi_bracket_map;
        work_stack.push(new_item);
-       break;
        }
 
      /* Capturing brackets */
@@ -5938,7 +5937,6 @@ while (!work_stack.isEmpty())
        int new_map = wi_bracket_map | ((n < 32)? (1 << n) : 1);
        new_item.bracket_map = new_map;
        work_stack.push(new_item);
-       break;
        }
 
      /* Other brackets */
@@ -5949,7 +5947,6 @@ while (!work_stack.isEmpty())
        new_item.code = scode;
        new_item.bracket_map = wi_bracket_map;
        work_stack.push(new_item);
-       break;
        }
 
      /* .* means "start at start or after \n" if it isn't in brackets that
