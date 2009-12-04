@@ -2250,13 +2250,17 @@ namespace avmplus
 		if (!value.notNull)
 		{
 		    coder->writeCheckNull(state, i);
-			for (int j=0, n = frameSize; j < n; j++) 
-			{
-				// also mark all copies of value.ins as non-null
-				Value &v2 = state->value(j);
-				if (v2.ins == value.ins)
-					v2.notNull = true;
-			}
+			value.notNull = true;
+            if (value.ins != NULL)
+            {
+                for (int j=0, n = frameSize; j < n; j++) 
+                {
+                    // also mark all copies of value.ins as non-null
+                    Value &v2 = state->value(j);
+                    if (v2.ins == value.ins)
+                        v2.notNull = true;
+                }
+            }
 		}
 	}
     #else
