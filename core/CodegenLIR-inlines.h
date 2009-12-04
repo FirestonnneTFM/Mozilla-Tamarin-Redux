@@ -60,7 +60,7 @@ inline void JITCodeInfo::clear()
 }
 #endif // VTUNE
 
-inline BuiltinType CodegenLIR::bt(Traits *t)
+inline BuiltinType LirHelper::bt(Traits *t)
 {
     return Traits::getBuiltinType(t);
 }
@@ -101,17 +101,17 @@ inline LIns* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b)
     return lirout->ins2(op,a,b);
 }
 
-inline LIns* CodegenLIR::InsConst(int32_t c)
+inline LIns* LirHelper::InsConst(int32_t c)
 {
     return lirout->insImm(c);
 }
 
-inline LIns* CodegenLIR::InsConstPtr(const void *p)
+inline LIns* LirHelper::InsConstPtr(const void *p)
 {
     return lirout->insImmPtr(p);
 }
 
-inline LIns* CodegenLIR::InsConstAtom(Atom c)
+inline LIns* LirHelper::InsConstAtom(Atom c)
 {
     return lirout->insImmPtr((void*)c);
 }
@@ -148,6 +148,98 @@ inline LIns* LirHelper::peq0(LIns* ptr)
 inline LIns* LirHelper::eq0(LIns* ptr)
 {
     return lirout->ins_eq0(ptr);
+}
+
+inline LIns* LirHelper::peq(LIns* a, Atom b)
+{
+    return lirout->ins2(LIR_peq, a, InsConstAtom(b));
+}
+
+inline LIns* LirHelper::choose(LIns* cond, Atom t, LIns* f)
+{
+    return lirout->ins_choose(cond, InsConstAtom(t), f, true/*use_cmov*/);
+}
+
+inline LIns* LirHelper::andp(LIns* a, Atom mask)
+{
+    return lirout->ins2(LIR_piand, a, InsConstAtom(mask));
+}
+
+inline LIns* LirHelper::orp(LIns* a, Atom mask)
+{
+    return lirout->ins2(LIR_pior, a, InsConstAtom(mask));
+}
+
+inline LIns* LirHelper::ori(LIns* a, int32_t mask)
+{
+    return lirout->ins2(LIR_or, a, InsConst(mask));
+}
+
+inline LIns* LirHelper::ret(LIns* a)
+{
+    return lirout->ins1(LIR_ret, a);
+}
+
+inline LIns* LirHelper::label()
+{
+    return lirout->ins0(LIR_label);
+}
+
+inline LIns* LirHelper::jlt(LIns *a, int32_t b)
+{
+    return lirout->insBranch(LIR_jt, lirout->ins2(LIR_lt, a, InsConst(b)), NULL);
+}
+
+inline LIns* LirHelper::jgt(LIns *a, int32_t b)
+{
+    return lirout->insBranch(LIR_jt, lirout->ins2(LIR_gt, a, InsConst(b)), NULL);
+}
+
+inline LIns* LirHelper::jne(LIns *a, int32_t b)
+{
+    return lirout->insBranch(LIR_jf, lirout->ins2(LIR_eq, a, InsConst(b)), NULL);
+}
+
+inline LIns* LirHelper::stp(LIns* val, LIns* p, int32_t d)
+{
+    return lirout->insStorei(val, p, d);
+}
+
+inline LIns* LirHelper::sti(LIns* val, LIns* p, int32_t d)
+{
+    return lirout->insStorei(val, p, d);
+}
+
+inline LIns* LirHelper::ldp(LIns* p, int32_t d)
+{
+    return lirout->insLoad(LIR_ldp, p, d);
+}
+
+inline LIns* LirHelper::live(LIns* a)
+{
+    return lirout->ins1(LIR_live, a);
+}
+
+inline LIns* LirHelper::param(int id, const char *name)
+{
+    LIns* param = lirout->insParam(id, 0);
+#ifdef NJ_VERBOSE
+    if (frag->lirbuf->names)
+        frag->lirbuf->names->addName(param, name);
+#else
+    (void)name;
+#endif
+    return param;
+}
+
+inline LIns* LirHelper::lshi(LIns* a, int32_t b)
+{
+    return lirout->ins2(LIR_lsh, a, InsConst(b));
+}
+
+inline LIns* LirHelper::ushp(LIns* a, int32_t b)
+{
+    return lirout->ins2(LIR_pursh, a, InsConst(b));
 }
 
 } // namespace
