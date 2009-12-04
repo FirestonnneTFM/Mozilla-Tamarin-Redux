@@ -255,10 +255,10 @@ namespace avmplus
     };
 
     static const MopsInfo kMopsInfo[5] = {
-        { 1, FUNCTIONID(mop_li8), FUNCTIONID(mop_si8) },    
+        { 1, FUNCTIONID(mop_li8), FUNCTIONID(mop_si8) },
         { 2, FUNCTIONID(mop_li16), FUNCTIONID(mop_si16) },
         { 4, FUNCTIONID(mop_li32), FUNCTIONID(mop_si32) },
-        { 4, FUNCTIONID(mop_lf32), FUNCTIONID(mop_sf32) }, 
+        { 4, FUNCTIONID(mop_lf32), FUNCTIONID(mop_sf32) },
         { 8, FUNCTIONID(mop_lf64), FUNCTIONID(mop_sf64) }
     };
 
@@ -1942,7 +1942,7 @@ namespace avmplus
             break;
         }
 
-        case OP_istypelate: 
+        case OP_istypelate:
         {
             emitPrep(state);
             // null check for the type value T in (x is T).  This also preserves
@@ -3315,7 +3315,7 @@ namespace avmplus
                 }
                 else {
                     // switch collapses into a single target
-                    branchIns(LIR_j, 0, targetpc_off); 
+                    branchIns(LIR_j, 0, targetpc_off);
                 }
                 break;
             }
@@ -4898,7 +4898,7 @@ namespace avmplus
     LIns* CodegenLIR::mopAddrToRangeCheckedRealAddr(LIns* mopAddr, int32_t const size)
     {
         AvmAssert(size > 0);    // it's signed to help make the int promotion correct
-        
+
         if (!globalMemoryInfo)
         {
             globalMemoryInfo = (GlobalMemoryInfo*)pool->codeMgr->allocator.alloc(sizeof(GlobalMemoryInfo));
@@ -4911,7 +4911,7 @@ namespace avmplus
         verbose_only( if (frag->lirbuf->names) {
             frag->lirbuf->names->addName(mopsMemorySize, "mopsMemorySize");
         })
-        
+
         // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
         // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
         LInsp lhs = mopAddr;
@@ -5114,7 +5114,7 @@ namespace avmplus
     void CodeMgr::flushBindingCaches()
     {
         // this clears vtable so all kObjectType receivers are invalidated.
-        // of course, this field is also "tag" for primitive receivers, 
+        // of course, this field is also "tag" for primitive receivers,
         // but 0 is never a legal value there (and this is asserted when the tag is set)
         // so this should safely invalidate those as well (though we don't really need to invalidate them)
         for (BindingCache* b = bindingCaches; b != NULL; b = b->next)
@@ -5146,7 +5146,7 @@ namespace avmplus
     };
 #endif
 
-    void analyze_edge(LIns* label, nanojit::BitSet &livein, 
+    void analyze_edge(LIns* label, nanojit::BitSet &livein,
                       HashMap<LIns*, nanojit::BitSet*> &labels,
                       InsList* looplabels)
     {
@@ -5430,10 +5430,10 @@ namespace avmplus
         #endif
 
         LirReader bufreader(frag->lastIns);
-        
+
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
-        
+
         assm->beginAssembly(frag);
         assm->assemble(frag, &bufreader);
         assm->endAssembly(frag);
