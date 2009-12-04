@@ -318,7 +318,7 @@ namespace avmplus
     struct GlobalMemoryInfo
     {
         uint8_t* base;
-        uint32_t size; 
+        uint32_t size;
     };
 
     /**
