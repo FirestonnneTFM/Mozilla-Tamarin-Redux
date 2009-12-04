@@ -3313,6 +3313,10 @@ namespace avmplus
                         }
                     }
                 }
+                else {
+                    // switch collapses into a single target
+                    branchIns(LIR_j, 0, targetpc_off); 
+                }
                 break;
             }
 
