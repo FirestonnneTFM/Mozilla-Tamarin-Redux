@@ -463,7 +463,7 @@ namespace avmplus
 		c[CLSID].sizeofClass = sizeof(FQCLS); \
 		c[CLSID].offsetofSlotsClass = OFFSETOFSLOTSCLS; \
 		c[CLSID].sizeofInstance = sizeof(INST); \
-		c[CLSID].offsetofSlots = OFFSETOFSLOTSINST;
+		c[CLSID].offsetofSlotsInstance = OFFSETOFSLOTSINST;
 
 	#define AVMTHUNK_END_NATIVE_CLASSES() 
 
