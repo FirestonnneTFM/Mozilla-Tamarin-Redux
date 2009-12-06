@@ -51,10 +51,8 @@
 
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
 # define SSE2_ONLY(...) __VA_ARGS__
-# define HAVE_CMOV(config) config.sse2
 #else
 # define SSE2_ONLY(...)
-# define HAVE_CMOV(config) false
 #endif
 
 #ifdef _MSC_VER
@@ -97,34 +95,6 @@ bar = _method; \
 return foo;
 #else
 #define RETURN_METHOD_PTR(_class, _method) \
-return *((intptr_t*)&_method);
-#endif
-
-// VOID variant
-#ifdef AVMPLUS_ARM
-#ifdef _MSC_VER
-#define RETURN_VOID_METHOD_PTR(_class, _method) \
-return *((int*)&_method);
-#else
-#define RETURN_VOID_METHOD_PTR(_class, _method) \
-union { \
-    void (_class::*bar)(); \
-    int foo[2]; \
-}; \
-bar = _method; \
-return foo[1];
-#endif
-
-#elif defined AVMPLUS_MAC
-#define RETURN_VOID_METHOD_PTR(_class, _method) \
-union { \
-    void (_class::*bar)(); \
-    intptr_t foo; \
-}; \
-bar = _method; \
-return foo;
-#else
-#define RETURN_VOID_METHOD_PTR(_class, _method) \
 return *((intptr_t*)&_method);
 #endif
 
