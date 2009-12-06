@@ -274,10 +274,6 @@ const int kBufferPadding = 16;
 		void setCacheSizes(const CacheSizes& cs);
 
 	public:
-        #if defined FEATURE_NANOJIT
-		void initMultinameLate(Multiname& name, Atom index);
-        #endif
-
 		/**
 		 * Redirects the standard output of the VM to the specified
 		 * output stream.  Output from print() statements and

@@ -4283,27 +4283,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif		
 
-#if defined FEATURE_NANOJIT
-
-	void AvmCore::initMultinameLate(Multiname& name, Atom index)
-	{
-		if (isObject(index))
-		{
-			ScriptObject* i = atomToScriptObject(index);
-			if (i->traits() == traits.qName_itraits)
-			{
-				QNameObject* qname = (QNameObject*) i;
-				bool attr = name.isAttr();
-				qname->getMultiname(name);
-				name.setAttr(attr);
-				return;
-			}
-		}
-
-		name.setName(intern(index));
-	}		
-#endif // NANOJIT
-
 #ifdef AVMPLUS_VERIFYALL
 	void AvmCore::enqFunction(MethodInfo* f) {
 		if (config.verifyall &&

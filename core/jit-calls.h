@@ -791,7 +791,26 @@
     METHOD(COREADDR(AvmCore::compare), SIG3(A,P,A,A), compare)
     CSEMETHOD(ENVADDR(MethodEnv::createRestHelper), SIG3(P,P,I,P), createRestHelper)
     CSEMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), SIG3(P,P,I,P), createArgumentsHelper)
-    METHOD(COREADDR(AvmCore::initMultinameLate), SIG3(V,P,P,A), initMultinameLate)
+
+	void initMultinameLate(AvmCore* core, Multiname& name, Atom index)
+	{
+		if (AvmCore::isObject(index))
+		{
+			ScriptObject* i = AvmCore::atomToScriptObject(index);
+			if (i->traits() == core->traits.qName_itraits)
+			{
+				QNameObject* qname = (QNameObject*) i;
+				bool attr = name.isAttr();
+				qname->getMultiname(name);
+				name.setAttr(attr);
+				return;
+			}
+		}
+
+		name.setName(core->intern(index));
+	}		
+    FUNCTION(FUNCADDR(initMultinameLate), SIG3(V,P,P,A), initMultinameLate)
+
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), SIG3(V,P,P,A), initMultinameLateForDelete)
     CSEFUNCTION(FUNCADDR(MathUtils::doubleToBool), SIG1(I,F), doubleToBool)
     METHOD(CLASSCLOSUREADDR(ClassClosure::newInstance), SIG1(P,P), newInstance)

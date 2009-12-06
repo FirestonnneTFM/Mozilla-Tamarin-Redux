@@ -402,7 +402,7 @@ namespace avmplus
     }
 
     // call
-    LIns* CodegenLIR::callIns(const CallInfo *ci, uint32_t argc, ...)
+    LIns* LirHelper::callIns(const CallInfo *ci, uint32_t argc, ...)
     {
         AvmAssert(argc <= MAXARGS);
         AvmAssert(argc == ci->count_args());
@@ -5421,7 +5421,7 @@ namespace avmplus
         CodeMgr *mgr = pool->codeMgr;
         verbose_only(if (pool->isVerbose(VB_jit)) {
             Allocator live_alloc;
-            live(live_alloc, frag, &mgr->log);
+            nanojit::live(live_alloc, frag, &mgr->log);
         })
 
         Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log);
