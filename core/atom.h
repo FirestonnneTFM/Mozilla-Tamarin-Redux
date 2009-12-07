@@ -61,8 +61,6 @@ namespace avmplus
     typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32_t Atom;
     #endif
 
-    typedef struct Binding_* Binding;
-
     /**
      * The AtomConstants namespace defines constants for
      * manipulating atoms.
@@ -207,29 +205,7 @@ namespace avmplus
     // WARNING: do not pass a (signed) intptr_t value; you may get incorrect results.
     bool            atomIsValidIntptrValue_u(const uintptr_t u);
 
-    // ---------------------------------------------------------------------------------
-
-    typedef struct Binding_* Binding;
-
-    enum BindingKind
-    {
-        BKIND_NONE              = 0,        // no such binding (id == 0)            000
-        BKIND_METHOD            = 1,        // MethodEnv*                           001
-        BKIND_VAR               = 2,        // int local slot number (r/w var)      010
-        BKIND_CONST             = 3,        // int local slot number (r/o const)    011
-        BKIND_unused            = 4,        // not in use                           100
-        BKIND_GET               = 5,        // get-only property                    101
-        BKIND_SET               = 6,        // set-only property                    110
-        BKIND_GETSET            = 7         // readwrite property                   111
-    };
-
-    // A couple of common Binding results that are worth having constants for
-    const Binding BIND_AMBIGUOUS = (Binding)-1;
-    const Binding BIND_NONE      = (Binding)BKIND_NONE;      // no such binding
-
-    // ---------------------------------------------------------------------------------
-
-    // macro for profiling the frequencies of different Atom or Binding tags.
+    // macro for profiling the frequencies of different Atom tags.
     // Must include vprof.h.  usage:   tagprof("histogram for my_atom", my_atom);
     #ifdef DOPROF
     #  define tagprof(n,v) _nhprof(n, uintptr_t(v)&7, 8, 0, 1, 2, 3, 4, 5, 6, 7)

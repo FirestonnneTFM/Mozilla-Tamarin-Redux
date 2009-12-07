@@ -2028,6 +2028,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\MultinameHashtable-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\MultinameHashtable.h"
 				>
 			</File>
