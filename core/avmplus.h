@@ -339,6 +339,7 @@ namespace avmplus
 #include "MethodEnv-inlines.h"
 #include "MethodInfo-inlines.h"
 #include "Multiname-inlines.h"
+#include "MultinameHashtable-inlines.h"
 #include "NamespaceSet-inlines.h"
 #include "PoolObject-inlines.h"
 #include "ScopeChain-inlines.h"
