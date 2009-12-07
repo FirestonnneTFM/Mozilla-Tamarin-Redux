@@ -757,9 +757,13 @@ function checkRequirements(feature) {
     var name = feature.name;
     var requires = feature.requires;
     var precludes = feature.precludes;
+    var defines = feature.defines;
     var s = [];
-	var items;
-	
+    var items;
+
+    if (defines.length() == 0)
+        fail("Feature has no DEFINES clauses: " + name);
+
     if (requires.length() + precludes.length() > 0)
         s.push("#if " + name);
 
