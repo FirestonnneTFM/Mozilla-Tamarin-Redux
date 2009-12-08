@@ -218,7 +218,18 @@ namespace avmplus
 			runningCallback = true;
 			pauseSampling();
 			Atom args[1] = { nullObjectAtom };
-			Atom ret = callback->call(0, args);
+			Atom ret = AtomConstants::falseAtom;
+			TRY(core, kCatchAction_Ignore)
+			{
+				ret = callback->call(0, args);
+			}
+			CATCH(Exception* pExceptionToIgnore)
+			{
+				(void) pExceptionToIgnore;
+			}
+			END_CATCH
+			END_TRY
+			
 			if( ret == falseAtom)
 				stopSampling();
 			else
