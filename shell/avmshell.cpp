@@ -748,8 +748,6 @@ namespace avmshell
                                 else if (!VMPI_strncmp(p, "occupancy",9)) 
                                     MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
 #if defined FEATURE_NANOJIT
-                                else if (!VMPI_strncmp(p, "minaddr", 8))
-                                    settings.do_verbose |= (nanojit::LC_NoCodeAddrs)<<16; 
                                 else if (!VMPI_strncmp(p, "jit", 3))
                                     settings.do_verbose |= VB_jit | ((nanojit::LC_Activation | nanojit::LC_Liveness | nanojit::LC_ReadLIR 
                                                                     | nanojit::LC_AfterSF    | nanojit::LC_RegAlloc | nanojit::LC_Assembly
