@@ -35,6 +35,7 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
+#include "MMgc.h"
 #include "GCDebug.h"
 
 namespace MMgc

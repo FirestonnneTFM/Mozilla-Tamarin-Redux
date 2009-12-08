@@ -56,8 +56,8 @@
 				RuntimeLibrary="1"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmplus.h"
 				ProgramDataBaseFileName="$(IntDir)/eval.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
@@ -214,8 +214,8 @@
 				BufferSecurityCheck="true"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmplus.h"
 				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/eval.pdb"
 				BrowseInformation="1"
@@ -537,8 +537,8 @@
 				BufferSecurityCheck="true"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmplus.h"
 				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/eval.pdb"
 				BrowseInformation="1"
@@ -697,8 +697,9 @@
 				RuntimeLibrary="1"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmplus.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				ProgramDataBaseFileName="$(IntDir)/eval.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
@@ -1438,6 +1439,42 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FE}"
 			>
+			<File
+				RelativePath="..\..\core\avmplus.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
 			<File
 				RelativePath="..\..\eval\eval-abc.cpp"
 				>
