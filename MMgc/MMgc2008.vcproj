@@ -61,7 +61,8 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				TreatWChar_tAsBuiltInType="false"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="MMgc.h"
 				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -224,7 +225,8 @@
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="MMgc.h"
 				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
@@ -383,6 +385,8 @@
 				ExceptionHandling="0"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="MMgc.h"
 				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -534,7 +538,8 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				TreatWChar_tAsBuiltInType="false"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="MMgc.h"
 				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -1431,6 +1436,38 @@
 			<File
 				RelativePath=".\FixedMalloc.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\FixedMalloc.h"
