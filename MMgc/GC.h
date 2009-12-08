@@ -1357,7 +1357,6 @@ namespace MMgc
 		void FinishIncrementalMark(bool scanStack);
 
 		bool m_markStackOverflow;
-		bool m_inMarkStackOverflow;
 		void HandleMarkStackOverflow();
 		void SignalMarkStackOverflow(GCWorkItem& item);
 		
@@ -1463,7 +1462,7 @@ namespace MMgc
 		void Finalize();
 		void Sweep();
 		void ForceSweepAtShutdown();
-		void MarkAllRoots();
+		void MarkAllRoots(bool deep=false);
 		void Mark();
 		void MarkQueueAndStack(bool scanStack=true);
 		void MarkItem(GCWorkItem &wi);

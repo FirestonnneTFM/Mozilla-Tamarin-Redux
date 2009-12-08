@@ -890,7 +890,6 @@ namespace MMgc
 		emptyWeakRefRoot(0),
 		marking(false),
 		m_markStackOverflow(false),
-		m_inMarkStackOverflow(false),
 		mark_item_recursion_control(20),	// About 3KB as measured with GCC 4.1 on MacOS X (144 bytes / frame), May 2009
 		memStart(MAX_UINTPTR),
 		memEnd(0),
@@ -2420,7 +2419,7 @@ bail:
 	// The mark stack overflow logic depends on this calling MarkItem directly 
 	// for each of the roots.
 
-	void GC::MarkAllRoots()
+	void GC::MarkAllRoots(bool deep)
 	{
 		// Need to do this while holding the root lock so we don't end 
 		// up trying to scan a deleted item later, another reason to keep
@@ -2430,8 +2429,11 @@ bail:
 		GCRoot *r = m_roots;
 		while(r) {
 			GCWorkItem item = r->GetWorkItem();
-			if(item.ptr)
+			if(item.ptr) {
 				MarkItem(item);
+				if (deep)
+					Mark();
+			}
 			r = r->next;
 		}
 	}
@@ -2450,34 +2452,31 @@ bail:
 	// which in turn calls GC::SignalMarkStackOverflow to handle the overflow.  Overflow
 	// is handled by discarding some elements and setting the global m_markStackOverflow flag.
 	//
-	// When marking has exhausted the mark stack and the collector enters FinishIncrementalMark,
-	// m_markStackOverflow is tested: if it is set then it is cleared and the present method,
-	// GC::HandleMarkStackOverflow, is called to refill the mark stack.  This process is
-	// repeated in FinishIncrementalMark.  Once marking completes without causing a mark stack
-	// overflow, FinishIncrementalMark marks from the roots and the stack again, and as this
-	// process may also cause a mark stack overflow, it too is iterated until the overflow flag
-	// is no longer set.
+	// Any code that needs to drive marking to completion - FinishIncrementalMark and Sweep
+	// do, as they depend on the heap having been marked before running finalizers and
+	// clearing out empty blocks - must test m_markStackOverflow: if it is set then it must
+	// be cleared and the present method, GC::HandleMarkStackOverflow, is called to mop up.
+	// The caller must perform this test repeatedly until the flag is no longer set.
 	//
-	// The job of HandleMarkStackOverflow is to find all marked heap objects that point to
-	// unmarked objects, and to push those unmarked objects onto the mark stack so that
-	// the marker can continue to work on these.
+	// The job of HandleMarkStackOverflow is to find marked heap objects that point to
+	// unmarked objects, and to mark those objects.  Effectively it uses the heap as a
+	// queue of candidate objects, thus minimizing the use of the mark stack.  Since marking
+	// uses the mark stack the marking performed by HandleMarkStackOverflow may also
+	// overflow the mark stack, but once a marked object has been visited by 
+	// HandleMarkStackOverflow it will not point to any unmarked objects.  There are object
+	// graphs containing pointers from objects visited later to objects skipped earlier
+	// that may require recovery to be run multiple times, if marking overflows the mark
+	// stack, but each recovery pass will mark all objects where the reference is from
+	// an earlier object to a later object, and all non-overflowing subgraphs of those
+	// objects in either direction.
 	//
-	// Completion of the overflow handling is guaranteed because the only mutator work that is
-	// allowed to take place during overflow handling is storing pointers of existing objects
-	// into the roots.  Since each restart makes it possible to scan at least one stack
-	// segment's worth of new objects (511 on 32-bit systems) and no new objects can be created,
-	// progress is always made.
-	//
-	// Performance might be an issue because the restart may happen several times and the
+	// Performance might be an issue as the restart may happen several times and the
 	// scanning performed by HandleMarkStackOverflow covers the entire heap every time.  It could
 	// be more efficient to interleave restarting and marking (eg, never fill the mark stack
 	// during restarting, but mark after filling it partly, and remember the place in the heap
 	// where scanning left off, and then iterate), but we should cross that bridge if and when
 	// restarting turns out to be a problem in practice.  (If it does, caching more mark stack
 	// segments may be a better first fix, too.)
-	//
-	// (Overflow handling assumes that there are no non-gcobjects on the mark stack
-	// that won't be recovered by marking from the roots and program stack.)
 
 	void GC::HandleMarkStackOverflow()
 	{
@@ -2485,7 +2484,7 @@ bail:
 		// for us: it pushes referenced objects that are not marked.  (MarkAllRoots calls
 		// MarkItem on each root.)
 
-		MarkAllRoots();
+		MarkAllRoots(true);
 
 		// For all iterator types, GetNextMarkedObject returns true if 'item' has been
 		// updated to reference a marked, non-free object to mark, false if the allocator
@@ -2499,15 +2498,13 @@ bail:
 			while (iter1.GetNextMarkedObject(ptr, size)) {
 				GCWorkItem item(ptr, size, true);
 				MarkItem(item);
-				if (m_markStackOverflow)
-					return;
+				Mark();
 			}
 			GCAllocIterator iter2(containsPointersAllocs[i]);
 			while (iter2.GetNextMarkedObject(ptr, size)) {
 				GCWorkItem item(ptr, size, true);
 				MarkItem(item);
-				if (m_markStackOverflow)
-					return;
+				Mark();
 			}
 		}
 
@@ -2515,8 +2512,7 @@ bail:
 		while (iter3.GetNextMarkedObject(ptr, size)) {
 			GCWorkItem item(ptr, size, true);
 			MarkItem(item);
-			if (m_markStackOverflow)
-				return;
+			Mark();
 		}
 	}
 
@@ -2528,44 +2524,17 @@ bail:
 	//
 	// The literature (Jones & Lins) does not provide a lot of guidance.  Intuitively it
 	// seems that we want to maximize the number of items that remain on the stack so
-	// that the marker will perform the maximal amount of work before we enter the
-	// stack overflow recovery code (in HandleMarkStackOverflow, above).  This suggests
-	// either dropping 'item' on the floor or popping a single item off the stack
-	// and pushing 'item', keeping the stack full.  On the other hand, that strategy
-	// means that SignalMarkStackOverflow may be called a lot, slowing down marking in
-	// general (every call to PushWorkItem will call out to SignalMarkStackOverflow).
-	//
-	// On the third hand, mark stack overflow indicates a system in dire circumstances
-	// and we can afford for things to be slowish.
-	//
-	// I've chosen a trade-off, popping off half the elements before pushing 'item'.
-	// In practice, this means the overflow mechanism converges with little performance
-	// impact on eg the heap_stress benchmark.
+	// that the marker will finish processing the maximal number of objects before we
+	// enter the stack overflow recovery code (in HandleMarkStackOverflow, above).  Ergo
+	// we drop 'item' on the floor.
 
 	void GC::SignalMarkStackOverflow(GCWorkItem& item)
 	{
 		GCAssert(item.ptr != NULL);
- 
- 		if (m_inMarkStackOverflow) {
- 			// If we're unlucky the popping below may free a segment that is picked up
- 			// by some other thread, so the final PushWorkItem may fail and we may
- 			// end up back here.  If that happens, just clear the queued state of 'item'.
- 			
-			if (item.IsGCItem())
-				ClearQueued(item.ptr);
- 			return;
- 		}
- 
- 		m_inMarkStackOverflow = true;
- 		m_markStackOverflow = true;
- 		for ( int i=int(m_incrementalWork.Count()/2) ; i > 0 ; i-- ) {
- 			GCWorkItem item = m_incrementalWork.Pop();
-			if (item.IsGCItem())
-				ClearQueued(item.ptr);
- 		}
- 		PushWorkItem(item);
- 		m_inMarkStackOverflow = false;
-	}
+ 		if (item.IsGCItem())
+			ClearQueued(item.ptr);
+		m_markStackOverflow = true;
+ 	}
 
 #if 0
 	// TODO: SSE2 version
@@ -3672,7 +3641,6 @@ bail:
 			m_barrierWork.Clear();
 			ClearMarks();
 			m_markStackOverflow = false;
-			m_inMarkStackOverflow = false;
 			collecting = false;
 			marking = false;
 		}
