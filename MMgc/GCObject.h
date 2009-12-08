@@ -255,7 +255,9 @@ namespace MMgc
 		 */
 		REALLY_INLINE void Stick()
 		{ 
-			composite = STICKYFLAG;
+			if (InZCT())
+				GC::GetGC(this)->RemoveFromZCT(this REFCOUNT_PROFILING_ARG(true));
+			composite |= STICKYFLAG;
 		}
 
 		/**
