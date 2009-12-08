@@ -3545,7 +3545,7 @@ bail:
 	{
 		bool edge = false;
 		bool releaseThread = false;
- 		if(enter == NULL && stackEnter != NULL) {
+ 		if(enter == NULL) {
 			// don't clear this yet: we want to retain the value
 			// until after Collect() is called, in case a presweep()
 			// hook needs to make an allocation.
