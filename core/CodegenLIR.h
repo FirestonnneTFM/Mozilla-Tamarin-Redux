@@ -328,6 +328,7 @@ namespace avmplus
         LIns* jne(LIns* a, int32_t b);
         LIns* sti(LIns* val, LIns* p, int32_t d);
         LIns* stp(LIns* val, LIns* p, int32_t d);
+        LIns* stq(LIns* val, LIns* p, int32_t d);
         LIns* ldp(LIns* p, int32_t d);
         LIns* live(LIns*);
         LIns* param(int n, const char *name);
@@ -433,7 +434,6 @@ namespace avmplus
         LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
         debug_only( bool isPointer(int i); )
-        void label(CodegenLabel &label, LIns *bb);
         void emitPrep(FrameState*);
         void emitSampleCheck();
         bool verbose();
@@ -453,7 +453,6 @@ namespace avmplus
         LIns *loadIns(LOpcode op, size_t disp, LIns *base);
         LIns *Ins(LOpcode op);
         LIns *Ins(LOpcode op, LIns *a);
-        void storeIns(LIns *val, int32_t disp, LIns *base);
         LIns *i2dIns(LIns* v);
         LIns *u2dIns(LIns* v);
         LIns *binaryIns(LOpcode op, LIns *a, LIns *b);

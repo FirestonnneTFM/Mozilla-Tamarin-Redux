@@ -448,11 +448,7 @@ namespace avmplus
 
     LIns* CodegenLIR::ptrToNativeRep(Traits*t, LIns* ptr)
     {
-        if (t->isMachineType())
-        {
-            return binaryIns(LIR_pior, ptr, InsConstAtom(kObjectType));
-        }
-        return ptr;
+        return t->isMachineType() ? orp(ptr, kObjectType) : ptr;
     }
 
 #ifdef _DEBUG
@@ -494,18 +490,16 @@ namespace avmplus
             return callIns(FUNCTIONID(uintToAtom), 2, coreAddr, native);
 
         case BUILTIN_boolean:
-            return u2p(binaryIns(LIR_or, // could be add
-                                 binaryIns(LIR_lsh, native, InsConst(3)),
-                                 InsConst(kBooleanType)));
+            return u2p(ori(lshi(native, 3), kBooleanType));
 
         case BUILTIN_string:
-            return binaryIns(LIR_pior, native, InsConstAtom(kStringType));
+            return orp(native, kStringType);
 
         case BUILTIN_namespace:
-            return binaryIns(LIR_pior, native, InsConstAtom(kNamespaceType));
+            return orp(native, kNamespaceType);
 
         default:
-            return binaryIns(LIR_pior, native, InsConstAtom(kObjectType));
+            return orp(native, kObjectType);
         }
     }
 
@@ -513,7 +507,7 @@ namespace avmplus
     {
         LIns* ap = InsAlloc(sizeof(Atom)*count);
         for (int i=0; i < count; i++)
-            storeIns(loadAtomRep(index++), i * sizeof(Atom), ap);
+            stp(loadAtomRep(index++), ap, i * sizeof(Atom));
         return ap;
     }
 
@@ -524,11 +518,11 @@ namespace avmplus
             core->console << "          store args\n";
         #endif
         LIns* ap = InsAlloc(sizeof(Atom)*(count+1));
-        storeIns(receiver, 0, ap);
+        stp(receiver, ap, 0);
         for (int i=1; i <= count; i++)
         {
             LIns* v = loadAtomRep(index++);
-            storeIns(v, sizeof(Atom)*i, ap);
+            stp(v, ap, sizeof(Atom)*i);
         }
         return ap;
     }
@@ -654,14 +648,14 @@ namespace avmplus
             if (atom->isconst())
                 return InsConst((int32_t)atomGetBoolean((Atom)atom->constvalp()));
             else
-                return p2i(binaryIns(LIR_pursh, atom, InsConst(3)));
+                return p2i(ushp(atom, 3));
 
         default:
             // pointer type
             if (atom->isconstp())
                 return InsConstPtr(atomPtr((Atom)atom->constvalp()));
             else
-                return binaryIns(LIR_piand, atom, InsConstAtom(~7));
+                return andp(atom, ~7);
         }
 
 #ifdef __GNUC__
@@ -1327,7 +1321,7 @@ namespace avmplus
         env_param = lirout->insParam(0, 0);
         argc_param = lirout->insParam(1, 0);
     #ifdef AVMPLUS_64BIT
-        argc_param = lirout->ins1(LIR_qlo, argc_param);
+        argc_param = qlo(argc_param);
     #endif
         ap_param = lirout->insParam(2, 0);
 
@@ -1344,12 +1338,12 @@ namespace avmplus
         // save env in MethodFrame.envOrCodeContext
         //     explicitly leave IS_EXPLICIT_CODECONTEXT clear
         //     explicitly leave DXNS_NOT_NULL clear, dxns is effectively null without doing the store here.
-        storeIns(env_param, offsetof(MethodFrame,envOrCodeContext), methodFrame);
-        storeIns(currentMethodFrame, offsetof(MethodFrame,next), methodFrame);
-        storeIns(methodFrame, offsetof(AvmCore,currentMethodFrame), coreAddr);
+        stp(env_param, methodFrame, offsetof(MethodFrame,envOrCodeContext));
+        stp(currentMethodFrame, methodFrame, offsetof(MethodFrame,next));
+        stp(methodFrame, coreAddr, offsetof(AvmCore,currentMethodFrame));
         #ifdef _DEBUG
         // poison MethodFrame.dxns since it's uninitialized by default
-        storeIns(InsConstPtr((void*)(uintptr_t)0xdeadbeef), offsetof(MethodFrame,dxns), methodFrame);
+        stp(InsConstPtr((void*)(uintptr_t)0xdeadbeef), methodFrame, offsetof(MethodFrame,dxns));
         #endif
 
         // allocate room for our local variables
@@ -1371,9 +1365,9 @@ namespace avmplus
         LIns *c = binaryIns(LIR_pult, methodFrame, d);
         LIns *b = branchIns(LIR_jf, c);
         callIns(FUNCTIONID(handleStackOverflowMethodEnv), 1, env_param);
-        LIns *label = Ins(LIR_label);
-        verbose_only( if (lirbuf->names) { lirbuf->names->addName(label, "begin");  })
-        b->setTarget(label);
+        LIns *begin_label = label();
+        verbose_only( if (lirbuf->names) { lirbuf->names->addName(begin_label, "begin");  })
+        b->setTarget(begin_label);
 
         // we emit the undefined constant here since we use it so often and
         // to ensure it dominates all uses.
@@ -1464,13 +1458,13 @@ namespace avmplus
                 LIns* br = branchIns(LIR_jt, cmp); // will patch
                 copyParam(loc, offset);
 
-                LIns *label = Ins(LIR_label);
+                LIns *optional_label = label();
                 verbose_only( if (lirbuf->names) {
                     char str[64];
                     VMPI_sprintf(str,"param_%d",i);
-                    lirbuf->names->addName(label,str);
+                    lirbuf->names->addName(optional_label,str);
                 })
-                br->setTarget(label);
+                br->setTarget(optional_label);
             }
         }
         else
@@ -1619,7 +1613,7 @@ namespace avmplus
     {
         // our new extended BB now starts here, this means that any branch targets
         // should hit the next instruction our bb start instruction
-        LIns* bb = Ins(LIR_label);  // mark start of block
+        LIns* bb = label();  // mark start of block
         verbose_only( if (frag->lirbuf->names) {
             char str[64];
             VMPI_sprintf(str,"B%d",(int)state->pc);
@@ -1641,7 +1635,7 @@ namespace avmplus
         if (interruptable && core->config.interrupts && state->targetOfBackwardsBranch)
         {
             if (state->insideTryBlock)
-                storeIns(InsConstPtr((void*)state->pc), 0, _save_eip);
+                stp(InsConstPtr((void*)state->pc), _save_eip, 0);
 
             LIns* interrupted = loadIns(LIR_ld, offsetof(AvmCore,interrupted), coreAddr);
             LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(AvmCore::NotInterrupted)));
@@ -2838,7 +2832,7 @@ namespace avmplus
             default: {
                 // checking pointer for null
                 LIns *value = localGetp(index);
-                LIns* br = branchIns(LIR_jt, binaryIns(LIR_peq, value, InsConstPtr(0))); // will be patched
+                LIns* br = branchIns(LIR_jt, peq0(value)); // will be patched
                 patchLater(br, npe_label);
             }
         }
@@ -2852,7 +2846,7 @@ namespace avmplus
         // update bytecode ip if necessary
         if (state->insideTryBlock && lastPcSave != state->pc)
         {
-            storeIns(InsConstPtr((void*)state->pc), 0, _save_eip);
+            stp(InsConstPtr((void*)state->pc), _save_eip, 0);
             lastPcSave = state->pc;
         }
     }
@@ -2965,20 +2959,23 @@ namespace avmplus
             switch (bt(state->value(index).traits)) {
             case BUILTIN_number:
                 v = localGetq(index);
+                stq(v, ap, disp);
                 break;
             case BUILTIN_int:
                 v = i2p(localGet(index));
+                stp(v, ap, disp);
                 break;
             case BUILTIN_uint:
             case BUILTIN_boolean:
                 v = u2p(localGet(index));
+                stp(v, ap, disp);
                 break;
             default:
                 v = localGetp(index);
+                stp(v, ap, disp);
                 break;
             }
             index++;
-            storeIns(v, disp, ap);
             disp += v->isQuad() ? sizeof(double) : sizeof(Atom);
         }
 
@@ -3117,7 +3114,7 @@ namespace avmplus
         {
             // slot type is Atom (for *, Object) or RCObject* (String, Namespace, or other user types)
             const CallInfo *wbAddr = FUNCTIONID(privateWriteBarrierRC);
-            if(slotType == NULL || slotType == OBJECT_TYPE) {
+            if (slotType == NULL || slotType == OBJECT_TYPE) {
                 // use fast atom wb
                 wbAddr = FUNCTIONID(atomWriteBarrier);
             }
@@ -3127,8 +3124,12 @@ namespace avmplus
                     leaIns(offset, ptr),
                     value);
         }
-        else {
-            storeIns(value, offset, ptr);
+        else if (slotType == NUMBER_TYPE) {
+            // slot type is double or int
+            stq(value, ptr, offset);
+        } else {
+            AvmAssert(slotType == INT_TYPE || slotType == UINT_TYPE || slotType == BOOLEAN_TYPE);
+            sti(value, ptr, offset);
         }
     }
 
@@ -3315,7 +3316,7 @@ namespace avmplus
 
                 // replicate MethodFrame dtor inline -- must come after endTry call (if any)
                 LIns* nextMethodFrame = loadIns(LIR_ldp, offsetof(MethodFrame,next), methodFrame);
-                storeIns(nextMethodFrame, offsetof(AvmCore,currentMethodFrame), coreAddr);
+                stp(nextMethodFrame, coreAddr, offsetof(AvmCore,currentMethodFrame));
 
                 Traits* t = ms->returnTraits();
                 LIns* retvalue;
@@ -3342,14 +3343,14 @@ namespace avmplus
                     Ins(LIR_fret, retvalue);
                     break;
                 case BUILTIN_int:
-                    Ins(LIR_ret, i2p(retvalue));
+                    ret(i2p(retvalue));
                     break;
                 case BUILTIN_uint:
                 case BUILTIN_boolean:
-                    Ins(LIR_ret, u2p(retvalue));
+                    ret(u2p(retvalue));
                     break;
                 default:
-                    Ins(LIR_ret, retvalue);
+                    ret(retvalue);
                     break;
                 }
                 break;
@@ -3550,8 +3551,8 @@ namespace avmplus
                 int32_t index_index = (int32_t) op2;
                 LIns* obj = InsAlloc(sizeof(Atom));
                 LIns* index = InsAlloc(sizeof(int32_t));
-                storeIns(loadAtomRep(obj_index), 0, obj);       // Atom obj
-                storeIns(localGet(index_index), 0, index);      // int32 index
+                stp(loadAtomRep(obj_index), obj, 0);       // Atom obj
+                sti(localGet(index_index), index, 0);      // int32 index
                 LIns* i1 = callIns(FUNCTIONID(hasnextproto), 3,
                                      env_param, obj, index);
                 localSet(obj_index, loadIns(LIR_ldp, 0, obj), OBJECT_TYPE);  // Atom obj
@@ -4251,7 +4252,7 @@ namespace avmplus
                     {
                         // copy the compile-time namespace to the temp multiname
                         LIns* mSpace = InsConstPtr(multiname->ns);
-                        storeIns(mSpace, offsetof(Multiname, ns), _tempname);
+                        stp(mSpace, _tempname, offsetof(Multiname, ns));
                     }
                     else
                     {
@@ -4260,7 +4261,7 @@ namespace avmplus
                         LIns* internNs = callIns(FUNCTIONID(internRtns), 2,
                             env_param, nsAtom);
 
-                        storeIns(internNs, offsetof(Multiname,ns), _tempname);
+                        stp(internNs, _tempname, offsetof(Multiname,ns));
                     }
 
                     AvmAssert(state->value(objDisp).notNull);
@@ -4699,28 +4700,28 @@ namespace avmplus
         this->labelCount = state->verifier->labelCount;
 
         if (mop_rangeCheckFailed_label.has_preds) {
-            LIns* label = Ins(LIR_label);
-            verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "mop_rangeCheckFailed"); })
-            setLabelPos(mop_rangeCheckFailed_label, label);
+            LIns* range_label = label();
+            verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(range_label, "mop_rangeCheckFailed"); })
+            setLabelPos(mop_rangeCheckFailed_label, range_label);
             callIns(FUNCTIONID(mop_rangeCheckFailed), 1, env_param);
         }
 
         if (npe_label.has_preds) {
-            LIns *label = Ins(LIR_label);
-            verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "npe"); })
-            setLabelPos(npe_label, label);
+            LIns *npelabel = label();
+            verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(npelabel, "npe"); })
+            setLabelPos(npe_label, npelabel);
             callIns(FUNCTIONID(npe), 1, env_param);
         }
 
         if (interrupt_label.has_preds) {
-            LIns *label = Ins(LIR_label);
-            verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "interrupt"); })
-            setLabelPos(interrupt_label, label);
+            LIns *intlabel = label();
+            verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(intlabel, "interrupt"); })
+            setLabelPos(interrupt_label, intlabel);
             callIns(FUNCTIONID(handleInterruptMethodEnv), 1, env_param);
         }
 
         if (info->hasExceptions()) {
-            LIns *catchlabel = Ins(LIR_label);
+            LIns *catchlabel = label();
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(catchlabel, "catch"); })
             exBranch->setTarget(catchlabel);
 
@@ -4795,8 +4796,8 @@ namespace avmplus
     LIns* CodegenLIR::copyMultiname(const Multiname* multiname)
     {
         LIns* name = InsAlloc(sizeof(Multiname));
-        storeIns(InsConst(multiname->ctFlags()), offsetof(Multiname, flags), name);
-        storeIns(InsConst(multiname->next_index), offsetof(Multiname, next_index), name);
+        sti(InsConst(multiname->ctFlags()), name, offsetof(Multiname, flags));
+        sti(InsConst(multiname->next_index), name, offsetof(Multiname, next_index));
         return name;
     }
 
@@ -4820,7 +4821,7 @@ namespace avmplus
         {
             // copy the compile-time name to the temp name
             LIns* mName = InsConstPtr(multiname->name);
-            storeIns(mName, offsetof(Multiname,name), _tempname);
+            stp(mName, _tempname, offsetof(Multiname,name));
         }
 
         if (multiname->isRtns())
@@ -4830,13 +4831,13 @@ namespace avmplus
             LIns* internNs = callIns(FUNCTIONID(internRtns), 2,
                 env_param, nsAtom);
 
-            storeIns(internNs, offsetof(Multiname,ns), _tempname);
+            stp(internNs, _tempname, offsetof(Multiname,ns));
         }
         else
         {
             // copy the compile-time namespace to the temp multiname
             LIns* mSpace = InsConstPtr(multiname->ns);
-            storeIns(mSpace, offsetof(Multiname, ns), _tempname);
+            stp(mSpace, _tempname, offsetof(Multiname, ns));
         }
 
         // Call initMultinameLate as the last step, since if a runtime

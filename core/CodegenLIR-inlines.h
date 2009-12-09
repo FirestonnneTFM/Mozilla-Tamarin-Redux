@@ -81,11 +81,6 @@ inline LIns* CodegenLIR::Ins(LOpcode op, LIns *a)
     return lirout->ins1(op, a);
 }
 
-inline void CodegenLIR::storeIns(LIns *val, int32_t disp, LIns *base)
-{
-    lirout->insStorei(val, base, disp);
-}
-
 inline LIns* CodegenLIR::i2dIns(LIns* v)
 {
     return lirout->ins1(LIR_i2f, v);
@@ -202,11 +197,19 @@ inline LIns* LirHelper::jne(LIns *a, int32_t b)
 
 inline LIns* LirHelper::stp(LIns* val, LIns* p, int32_t d)
 {
+    AvmAssert(val->isPtr());
     return lirout->insStorei(val, p, d);
 }
 
 inline LIns* LirHelper::sti(LIns* val, LIns* p, int32_t d)
 {
+    AvmAssert(!val->isQuad());
+    return lirout->insStorei(val, p, d);
+}
+
+inline LIns* LirHelper::stq(LIns* val, LIns* p, int32_t d)
+{
+    AvmAssert(val->isQuad());
     return lirout->insStorei(val, p, d);
 }
 
