@@ -2851,6 +2851,12 @@ namespace avmplus
         }
     }
 
+    void LirHelper::liveAlloc(LIns* alloc)
+    {
+        if (alloc->isop(LIR_alloc))
+            live(alloc);
+    }
+
     void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
     {
         emitPrep(state);
@@ -3022,6 +3028,9 @@ namespace avmplus
             out = callIns(fid, 5, target, method, InsConst(argc), apAddr, iid);
         }
 
+        // ensure the stack-allocated args are live until after the call
+        liveAlloc(ap);
+
         if (opcode != OP_constructsuper && opcode != OP_construct)
         {
             localSet(dest, out, result);
@@ -3166,6 +3175,7 @@ namespace avmplus
         LIns* func = loadAtomRep(ctor_index);
         LIns* args = storeAtomArgs(InsConstAtom(nullObjectAtom), argc, ctor_index+1);
         LIns* newobj = callIns(FUNCTIONID(op_construct), 4, env_param, func, InsConst(argc), args);
+        liveAlloc(args);
         localSet(ctor_index, atomToNativeRep(itraits, newobj), itraits);
     }
 
@@ -3493,6 +3503,7 @@ namespace avmplus
 
                 LIns* i3 = callIns(FUNCTIONID(getsuper), 3,
                     env_param, obj, multi);
+                liveAlloc(multi);
 
                 i3 = atomToNativeRep(result, i3);
                 localSet(objDisp, i3, result);
@@ -3513,7 +3524,7 @@ namespace avmplus
 
                 callIns(FUNCTIONID(setsuper), 4,
                     env_param, obj, multi, value);
-
+                liveAlloc(multi);
                 break;
             }
 
@@ -3577,6 +3588,7 @@ namespace avmplus
 
                 LIns* i3 = callIns(FUNCTIONID(newfunction), 4,
                     env_param, InsConstPtr(func), outer, ap);
+                liveAlloc(ap);
 
                 AvmAssert(!result->isMachineType());
                 localSet(index, i3, result);
@@ -3595,6 +3607,7 @@ namespace avmplus
                 LIns* func = loadAtomRep(funcDisp);
                 LIns* ap = storeAtomArgs(loadAtomRep(funcDisp+1), argc, funcDisp+2);
                 LIns* i3 = callIns(FUNCTIONID(op_call), 4, env_param, func, InsConst(argc), ap);
+                liveAlloc(ap);
                 localSet(dest, atomToNativeRep(result, i3), result);
                 break;
             }
@@ -3646,7 +3659,9 @@ namespace avmplus
                 else {
                     // generic late bound call to anything
                     out = callIns(FUNCTIONID(callprop_late), 5, env_param, base, multi, InsConst(argc), ap);
+                    liveAlloc(multi);
                 }
+                liveAlloc(ap);
                 localSet(baseDisp, atomToNativeRep(result, out), result);
                 break;
             }
@@ -3670,6 +3685,8 @@ namespace avmplus
                 LIns* ap = storeAtomArgs(loadAtomRep(objDisp), argc, argv);
                 LIns* i3 = callIns(FUNCTIONID(construct_late), 4,
                     env_param, multi, InsConst(argc), ap);
+                liveAlloc(multi);
+                liveAlloc(ap);
 
                 localSet(objDisp, atomToNativeRep(result, i3), result);
                 break;
@@ -3695,6 +3712,8 @@ namespace avmplus
 
                 LIns* i3 = callIns(FUNCTIONID(callsuper), 4,
                     env_param, multi, InsConst(argc), ap);
+                liveAlloc(multi);
+                liveAlloc(ap);
 
                 localSet(objDisp, atomToNativeRep(result, i3), result);
                 break;
@@ -3716,6 +3735,7 @@ namespace avmplus
 
                 LIns* i3 = callIns(FUNCTIONID(op_applytype), 4,
                     env_param, func, InsConst(argc), ap);
+                liveAlloc(ap);
 
                 localSet(dest, atomToNativeRep(result, i3), result);
                 break;
@@ -3733,6 +3753,7 @@ namespace avmplus
 
                 LIns* i3 = callIns(FUNCTIONID(op_newobject), 3,
                     env_param, leaIns(sizeof(Atom)*(2*argc-1), ap), InsConst(argc));
+                liveAlloc(ap);
 
                 localSet(dest, ptrToNativeRep(result, i3), result);
                 break;
@@ -3767,6 +3788,7 @@ namespace avmplus
                 // convert array elements to Atom[]
                 LIns* ap = storeAtomArgs(argc, arg0);
                 LIns* i3 = callIns(FUNCTIONID(newarray), 3, env_param, InsConst(argc), ap);
+                liveAlloc(ap);
 
                 AvmAssert(!result->isMachineType());
                 localSet(arg0, i3, result);
@@ -3788,6 +3810,7 @@ namespace avmplus
 
                 LIns* i3 = callIns(FUNCTIONID(newclass), 5,
                     env_param, InsConstPtr(ctraits), base, outer, ap);
+                liveAlloc(ap);
 
                 AvmAssert(!result->isMachineType());
                 localSet(localindex, i3, result);
@@ -3810,6 +3833,7 @@ namespace avmplus
 
                 out = callIns(FUNCTIONID(getdescendants), 3,
                     envArg, obj, multi);
+                liveAlloc(multi);
 
                 localSet(objDisp, atomToNativeRep(result, out), result);
                 break;
@@ -3853,6 +3877,8 @@ namespace avmplus
                     env_param, outer, ap, InsConst(extraScopes), multi,
                     InsConst((int32_t)(opcode == OP_findpropstrict)),
                     withBase);
+                liveAlloc(multi);
+                liveAlloc(ap);
 
                 localSet(dest, atomToNativeRep(result, i3), result);
                 break;
@@ -4015,6 +4041,7 @@ namespace avmplus
                     if (multiname->isRuntime()) {
                         //return getprop_late(obj, name);
                         value = callIns(FUNCTIONID(getprop_late), 3, env_param, obj, multi);
+                        liveAlloc(multi);
                     } else {
                         // static name, use property cache
                         GetCache* cache = get_cache_builder.allocateCacheSlot(multiname);
@@ -4216,6 +4243,7 @@ namespace avmplus
                         } else {
                             // last resort slow path for OP_setproperty
                             callIns(FUNCTIONID(setprop_late), 4, env_param, obj, multi, value);
+                            liveAlloc(multi);
                         }
                     }
                     else
@@ -4223,6 +4251,7 @@ namespace avmplus
                         // initproplate is rare in jit code because we typically interpret static
                         // initializers, and constructor initializers tend to early-bind successfully.
                         callIns(FUNCTIONID(initprop_late), 4, env_param, obj, multi, value);
+                        liveAlloc(multi);
                     }
                 }
                 break;
@@ -4242,6 +4271,7 @@ namespace avmplus
 
                     LIns* i3 = callIns(FUNCTIONID(delproperty), 3,
                         env_param, obj, multi);
+                    liveAlloc(multi);
 
                     localSet(objDisp, atomToNativeRep(result, i3), result);
                 } else {
@@ -4263,6 +4293,7 @@ namespace avmplus
 
                         stp(internNs, _tempname, offsetof(Multiname,ns));
                     }
+                    liveAlloc(_tempname);
 
                     AvmAssert(state->value(objDisp).notNull);
                     LIns* obj = loadAtomRep(objDisp);
