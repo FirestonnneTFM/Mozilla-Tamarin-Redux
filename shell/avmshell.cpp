@@ -675,7 +675,7 @@ namespace avmshell
 						settings.incremental = false;
 					}
 #ifdef DEBUGGER
-					else if (!VMPI_strcmp(arg+2, "astrace")) {
+					else if (!VMPI_strcmp(arg+2, "astrace") && i+1 < argc ) {
 						settings.astrace_console = VMPI_strtol(argv[++i], 0, 10);
 					}
 					else if (!VMPI_strcmp(arg+2, "language")) {
@@ -775,13 +775,13 @@ namespace avmshell
 						usage();
 					}
 				} 
-				else if (!VMPI_strcmp(arg, "-cache_bindings")) {
+				else if (!VMPI_strcmp(arg, "-cache_bindings") && i+1 < argc) {
 					settings.cacheSizes.bindings = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 				}
-				else if (!VMPI_strcmp(arg, "-cache_metadata")) {
+				else if (!VMPI_strcmp(arg, "-cache_metadata") && i+1 < argc) {
 					settings.cacheSizes.metadata = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 				}
-				else if (!VMPI_strcmp(arg, "-cache_methods")) {
+				else if (!VMPI_strcmp(arg, "-cache_methods") && i+1 < argc ) {
 					settings.cacheSizes.methods = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 				}
 #ifdef FEATURE_NANOJIT
@@ -790,7 +790,7 @@ namespace avmshell
 				} 
 #endif /* FEATURE_NANOJIT */
 #ifdef AVMPLUS_JITMAX
-				else if (!VMPI_strcmp(arg, "-jitmax")) {
+				else if (!VMPI_strcmp(arg, "-jitmax") && i+1 < argc ) {
 					extern int jitmin;
 					extern int jitmax;
 					
@@ -820,7 +820,7 @@ namespace avmshell
 					MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
 					MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
 				}
-				else if (!VMPI_strcmp(arg, "-memlimit")) {
+				else if (!VMPI_strcmp(arg, "-memlimit") && i+1 < argc ) {
 					MMgc::GCHeap::GetGCHeap()->Config().heapLimit = VMPI_strtol(argv[++i], 0, 10);
 				}
 #ifdef MMGC_POLICY_PROFILING
@@ -831,7 +831,7 @@ namespace avmshell
 				else if (!VMPI_strcmp(arg, "-eagersweep")) {
 					MMgc::GCHeap::GetGCHeap()->Config().eagerSweeping = true;
 				}
-				else if (!VMPI_strcmp(arg, "-load")) {
+				else if (!VMPI_strcmp(arg, "-load") && i+1 < argc ) {
 					double load;
 					double limit;
 					int nchar;
@@ -850,7 +850,7 @@ namespace avmshell
 						usage();
 					}
 				}
-				else if (!VMPI_strcmp(arg, "-gcwork")) {
+				else if (!VMPI_strcmp(arg, "-gcwork") && i+1 < argc ) {
 					double work;
 					int nchar;
 					const char* val = argv[++i];
@@ -884,7 +884,7 @@ namespace avmshell
 				}
 #endif /* VMCFG_EVAL */
 #ifdef VMCFG_WORKERTHREADS
-				else if (!VMPI_strcmp(arg, "-workers")) {
+				else if (!VMPI_strcmp(arg, "-workers") && i+1 < argc ) {
 					const char *val = argv[++i];
 					int nchar;
 					if (val == NULL)
