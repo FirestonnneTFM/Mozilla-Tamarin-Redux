@@ -47,7 +47,7 @@ namespace MMgc
     typedef void* (*GCMallocFuncPtr)(size_t size);
     typedef void (*GCFreeFuncPtr)(void* mem);
 
-	enum FixedMallocOpts { kNone=0, kZero=1, kCanFail=2 };
+	enum FixedMallocOpts { kNone=0, kZero=1, kCanFail=2, kCanFailAndZero=3 };
 	
     #ifndef NULL
     #define NULL 0
