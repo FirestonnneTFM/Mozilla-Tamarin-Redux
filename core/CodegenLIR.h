@@ -334,6 +334,7 @@ namespace avmplus
         LIns* param(int n, const char *name);
         LIns* lshi(LIns* a, int32_t b);
         LIns* ushp(LIns* a, int32_t b);
+        void  liveAlloc(LIns* expr);        // extend lifetime of LIR_alloc, otherwise no-op
 
     protected: // data
         LirWriter *lirout;
