@@ -64,6 +64,10 @@
     #define ABI_FUNCTION ABI_CDECL
     #define ABI_FAST     ABI_FASTCALL
     #define ABI_METHOD   ABI_THISCALL
+#elif defined(__SUNPRO_CC)
+    #define ABI_FUNCTION ABI_CDECL
+    #define ABI_FAST     ABI_CDECL
+    #define ABI_METHOD   ABI_CDECL
 #else
     // gcc, probably
     #define ABI_FUNCTION ABI_CDECL
