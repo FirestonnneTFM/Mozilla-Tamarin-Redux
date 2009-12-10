@@ -126,6 +126,7 @@ class RuntestBase:
     
     apiVersioning = False
     csv = False
+    cygwin = False
     debug = False
     eval = False      # Run the source file (.as, .js) but, do not magically prepend included files
     forcerebuild = False
@@ -367,8 +368,16 @@ class RuntestBase:
     def determineOS(self):
         _os = platform.system()
         ostype = ''
+        # When running on a windows system we can either be running with cygwin python
+        # or with a windows-native python.  Legacy code requires that ostype be kept
+        # as win for the osName, but one can check for the python type by querying
+        # the self.cygwin boolean:
+        # self.osName='win' and not self.cygwin == windows python
+        # self.cygwin = cygwin python
+        
         if re.search('(CYGWIN_NT)', _os):
             ostype='win'
+            self.cygwin = True
         if re.search('(Windows)', _os):
             ostype='win'
             self.useShell = False
@@ -728,7 +737,11 @@ class RuntestBase:
             deps = glob(join(testdir,'*'+self.sourceExt))
             deps.sort()
             for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
-                cmd += ' -in %s' % string.replace(util, '$', '\$')
+                if self.osName == 'win' and not self.cygwin:
+                    # don't escape $ when running windows python
+                    cmd += ' -in %s' % util 
+                else:
+                    cmd += ' -in %s' % string.replace(util, '$', '\$')
                 
         elif as_file.endswith(self.abcasmExt):
             cmd = '%s -j "%s" ' % (self.abcasmRunner,self.java)
