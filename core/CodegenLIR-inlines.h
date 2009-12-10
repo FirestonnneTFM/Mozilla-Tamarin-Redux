@@ -65,7 +65,7 @@ inline BuiltinType LirHelper::bt(Traits *t)
     return Traits::getBuiltinType(t);
 }
 
-inline LIns* CodegenLIR::loadIns(LOpcode op, size_t disp, LIns *base)
+inline LIns* CodegenLIR::loadIns(LOpcode op, int32_t disp, LIns *base)
 {
     AvmAssert(isS32(disp));
     return lirout->insLoad(op, base, (int32_t)disp);

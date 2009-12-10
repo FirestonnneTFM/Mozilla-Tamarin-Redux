@@ -217,19 +217,36 @@ namespace avmplus
 
     #include "../core/jit-calls.h"
 
+#if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(AVMPLUS_UNALIGNED_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
+    #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+#endif
+
     struct MopsInfo
     {
         uint32_t size;
+#ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+        LOpcode loadOp;
+        LOpcode storeOp;
+#else
         const CallInfo* loadCall;
         const CallInfo* storeCall;
+#endif
     };
 
     static const MopsInfo kMopsInfo[5] = {
-        { 1, FUNCTIONID(mop_li8), FUNCTIONID(mop_si8) },
+#ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+        { 1, LIR_ldzb, LIR_stb },
+        { 2, LIR_ldzs, LIR_sts },
+        { 4, LIR_ld, LIR_sti },
+        { 4, LIR_ld32f, LIR_st32f }, 
+        { 8, LIR_ldq, LIR_stqi }
+#else
+        { 1, FUNCTIONID(mop_li8), FUNCTIONID(mop_si8) },    
         { 2, FUNCTIONID(mop_li16), FUNCTIONID(mop_si16) },
         { 4, FUNCTIONID(mop_li32), FUNCTIONID(mop_si32) },
-        { 4, FUNCTIONID(mop_lf32), FUNCTIONID(mop_sf32) },
+        { 4, FUNCTIONID(mop_lf32), FUNCTIONID(mop_sf32) }, 
         { 8, FUNCTIONID(mop_lf64), FUNCTIONID(mop_sf64) }
+#endif
     };
 
 #if NJ_SOFTFLOAT
@@ -797,6 +814,18 @@ namespace avmplus
                 case LIR_ldq:
                 case LIR_ldc:
                 case LIR_ldqc:
+#ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+                case LIR_ldzb:
+                case LIR_ldzs:
+                case LIR_ldsb:
+                case LIR_ldss:
+                case LIR_ld32f:
+                case LIR_ldcb:
+                case LIR_ldcs:
+                case LIR_ldcsb:
+                case LIR_ldcss:
+                case LIR_ldc32f:
+#endif
                     // all loads require base to be a pointer, regardless of the value size
                     AvmAssert(base->isPtr());
                     break;
@@ -3215,8 +3244,14 @@ namespace avmplus
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = localGet(index);
                 const MopsInfo& mi = kMopsInfo[opcode-OP_li8];
-                LIns* realAddr = mopAddrToRangeCheckedRealAddr(mopAddr, mi.size);
+            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+                int32_t disp = 0;
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
+                LIns* i2 = loadIns(mi.loadOp, disp, realAddr);
+            #else
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, NULL);
                 LIns* i2 = callIns(mi.loadCall, 1, realAddr);
+            #endif
                 localSet(index, i2, result);
                 break;
             }
@@ -3231,8 +3266,14 @@ namespace avmplus
                 LIns* svalue = (opcode == OP_sf32 || opcode == OP_sf64) ? localGetq(sp-1) : localGet(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsInfo[opcode-OP_si8];
-                LIns* realAddr = mopAddrToRangeCheckedRealAddr(mopAddr, mi.size);
+            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+                int32_t disp = 0;
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
+                lirout->insStore(mi.storeOp, svalue, realAddr, disp);
+            #else
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, NULL);
                 callIns(mi.storeCall, 2, realAddr, svalue);
+            #endif
                 break;
             }
 
@@ -4897,7 +4938,12 @@ namespace avmplus
         return loadIns(LIR_ldcp, offsetof(VTable,_toplevel), vtable);
     }
 
-    LIns* CodegenLIR::mopAddrToRangeCheckedRealAddr(LIns* mopAddr, int32_t const size)
+    static bool sumFitsInInt32(int32_t a, int32_t b)
+    {
+        return int64_t(a) + int64_t(b) == int64_t(a + b);
+    }
+
+    LIns* CodegenLIR::mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp)
     {
         AvmAssert(size > 0);    // it's signed to help make the int promotion correct
 
@@ -4909,23 +4955,100 @@ namespace avmplus
             pool->domain->addGlobalMemoryBaseRef(&globalMemoryInfo->base);
             pool->domain->addGlobalMemorySizeRef(&globalMemoryInfo->size);
         }
-        LInsp mopsMemorySize = loadIns(LIR_ldc, 0, InsConstPtr(&globalMemoryInfo->size));
-        verbose_only( if (frag->lirbuf->names) {
-            frag->lirbuf->names->addName(mopsMemorySize, "mopsMemorySize");
-        })
 
-        // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
-        // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
-        LInsp lhs = mopAddr;
-        LInsp rhs = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
-        LInsp br = branchIns(LIR_jt, binaryIns(LIR_ugt, lhs, rhs));
-        patchLater(br, mop_rangeCheckFailed_label);
+        if (disp != NULL)
+        {
+            *disp = 0;
+
+            // mopAddr is an int (an offset from globalMemoryBase) on all archs. 
+            // if mopAddr is an expression of the form
+            //      expr+const
+            //      const+expr
+            //      expr-const
+            //      (but not const-expr)
+            // then try to pull the constant out and return it as a displacement to
+            // be used in the instruction as an addressing-mode offset.
+            // (but only if caller requests it that way.)
+            for (;;)
+            {
+                LOpcode const op = mopAddr->opcode();
+                if (op != LIR_add && op != LIR_sub)
+                    break;
+                
+                int32_t imm;
+                LInsp nonImm;
+                if (mopAddr->oprnd2()->isconst())
+                {
+                    imm = mopAddr->oprnd2()->imm32();
+                    nonImm = mopAddr->oprnd1();
+                
+                    if (op == LIR_sub)
+                        imm = -imm;
+                }
+                else if (mopAddr->oprnd1()->isconst())
+                {
+                    // don't try to optimize const-expr
+                    if (op == LIR_sub)
+                        break;
+                        
+                    imm = mopAddr->oprnd1()->imm32();
+                    nonImm = mopAddr->oprnd2();
+                }
+                else
+                {
+                    break;
+                }
+
+                if (!sumFitsInInt32(*disp, imm))
+                    break;
+
+                *disp += imm;
+                mopAddr = nonImm;
+            }
+        }
 
         LInsp mopsMemoryBase = loadIns(LIR_ldcp, 0, InsConstPtr(&globalMemoryInfo->base));
-        verbose_only( if (frag->lirbuf->names) {
-            frag->lirbuf->names->addName(mopsMemoryBase, "mopsMemoryBase");
-        })
-        return binaryIns(LIR_addp, mopsMemoryBase, u2p(mopAddr));
+        LInsp mopsMemorySize = loadIns(LIR_ldc, 0, InsConstPtr(&globalMemoryInfo->size));
+        
+        LInsp lhs, rhs, br;
+        if (!disp || *disp == 0)
+        {
+            // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
+            // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
+            lhs = mopAddr;
+            rhs = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
+            br = branchIns(LIR_jt, binaryIns(LIR_ugt, lhs, rhs));
+            patchLater(br, mop_rangeCheckFailed_label);
+        }
+        else
+        {
+            // @todo, can we get by with a simpler test here?
+            lhs = binaryIns(LIR_add, mopAddr, InsConst(*disp));
+            rhs = InsConst(0);
+            br = branchIns(LIR_jt, binaryIns(LIR_lt, lhs, rhs));
+            patchLater(br, mop_rangeCheckFailed_label);
+
+            lhs = binaryIns(LIR_add, mopAddr, InsConst(*disp+size));
+            rhs = mopsMemorySize;
+            br = branchIns(LIR_jt, binaryIns(LIR_gt, lhs, rhs));
+            patchLater(br, mop_rangeCheckFailed_label);
+        }
+
+        // if mopAddr is a compiletime constant, we still have to do the range-check above
+        // (since globalMemorySize can vary at runtime), but we might be able to encode
+        // the address into the displacement (if any)...
+        if (mopAddr->isconst() && disp != NULL && sumFitsInInt32(*disp, mopAddr->imm32()))
+        {
+            *disp += mopAddr->imm32();
+            return mopsMemoryBase;
+        }
+        // note: we can use piadd here only because we know this is never a GCObject.
+        // (if it was, we'd have to use LIR_addp, which is restricted from certain 
+        // optimizations that can leave dangling interior pointers)
+        //
+        // (yes, i2p, not u2p... it might legitimately be negative due to the
+        // displacement optimization loop above.)
+        return binaryIns(LIR_piadd, mopsMemoryBase, i2p(mopAddr));
     }
 
     LIns* CodegenLIR::loadEnvScope()
