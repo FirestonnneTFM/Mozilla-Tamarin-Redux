@@ -80,15 +80,7 @@ size_t VMPI_getVMPageSize()
 
 bool VMPI_canMergeContiguousRegions()
 {
-#ifdef MMGC_64BIT		
-	return true;
-#else
-	// this would be nice to keep the region list short but
-	// doing so would require additional work to perform de-reserve (region splitting), when
-	// that happens turn this back on for 10 5 and up, turning it on effectively disables de-reserve
-	// which is why its on for 64 bit (we're we never de-reserve)
-	return false;
-#endif
+	return VMPI_useVirtualMemory();
 }
 
 bool VMPI_areNewPagesDirty()
@@ -167,6 +159,7 @@ bool VMPI_decommitMemory(char *address, size_t size)
 	{
 		result = vm_map(mach_task_self(), (vm_address_t*)&address, size, 0, FALSE, MEMORY_OBJECT_NULL, 0, FALSE, VM_PROT_NONE, VM_PROT_READ|VM_PROT_WRITE|VM_PROT_EXECUTE, VM_INHERIT_NONE);
 	}
+	//	return false; // for testing RemovePartialBlock
 	return (result == KERN_SUCCESS);
 }
 
