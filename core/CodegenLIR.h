@@ -420,7 +420,7 @@ namespace avmplus
         LIns *branchIns(LOpcode op, LIns *cond, int target_off);
         LIns *retIns(LIns *val);
         LIns *loadToplevel();
-        LIns* mopAddrToRangeCheckedRealAddr(LIns* mopAddr, int32_t const size);
+        LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
         LIns *loadEnvScope();
         LIns *loadEnvVTable();
         LIns *loadEnvAbcEnv();
@@ -451,7 +451,7 @@ namespace avmplus
         // on successful jit, allocate memory for BindingCache instances, if necessary
         void initBindingCache();
 
-        LIns *loadIns(LOpcode op, size_t disp, LIns *base);
+        LIns *loadIns(LOpcode op, int32_t disp, LIns *base);
         LIns *Ins(LOpcode op);
         LIns *Ins(LOpcode op, LIns *a);
         LIns *i2dIns(LIns* v);
