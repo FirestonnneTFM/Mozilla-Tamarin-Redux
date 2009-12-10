@@ -579,6 +579,7 @@ namespace MMgc
 		class Region
 		{
 		public:
+			Region(GCHeap *heap, char *baseAddr, char *rTop, char *cTop, size_t blockId);
 			Region *prev;
 			char *baseAddr;
 			char *reserveTop;
@@ -702,7 +703,20 @@ namespace MMgc
 		void FreeInternal(const void *item, bool profile);
 	
 		HeapBlock *Split(HeapBlock *block, size_t size);
+
+		// abandon a block of memory that may maps completely to the committed portion of region
 		void RemoveBlock(HeapBlock *block);
+		
+#ifdef MMGC_MAC
+		// Abandon a block of memory that may be in the middle of a
+		// region.  On mac decommit is a two step process, release and
+		// reserve, another thread could steal the memory between the
+		// two operations so we have to be prepared to ditch a block
+		// we try to decommit.  This is a horrible hack that can go
+		// away if OS X fixes its mmap impl to be like windows, linux
+		// and solaris (atomic decommit with VirtualFree/mmap)
+		void RemovePartialBlock(HeapBlock *block);
+#endif
 
 		void Commit(HeapBlock *block);
 
@@ -783,7 +797,7 @@ namespace MMgc
 		 * maintain a freelist although in practice they come and go
 		 * rarely we want don't want any longevity bugs
 		 */
-		Region *NewRegion();
+		Region *NewRegion(char *baseAddr, char *rTop, char *cTop, size_t blockId);
 		void FreeRegion(Region *r);
 
 		// data section
