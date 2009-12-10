@@ -718,7 +718,7 @@ namespace avmplus
  		// I do *not* like making pc 'volatile'; a smart compiler may handle it well
  		// and only spill to memory across a call, but a dumb compiler may not ever
  		// keep the value in a register at all.
-		MethodSignaturep ms = env->method->getMethodSignature();
+		MethodSignaturep volatile ms = env->method->getMethodSignature();
 #if !defined AVMPLUS_WORD_CODE || defined AVMPLUS_VERBOSE
 	#ifdef AVMPLUS_WORD_CODE
  		register const bytecode_t* volatile codeStart = info->word_code_start();
