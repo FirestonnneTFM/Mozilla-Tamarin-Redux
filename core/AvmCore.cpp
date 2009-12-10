@@ -95,6 +95,53 @@ namespace avmplus
 	#else
 		const uint32_t AvmCore::DEFAULT_VERBOSE_ON = ((uint32_t)~0);
 	#endif
+
+    static bool substrMatches(const char* pattern, const char* p, const char* e)
+    {
+        int const patlen = VMPI_strlen(pattern);
+        return (e-p) >= patlen && !VMPI_strncmp(p, pattern, patlen);
+    }
+
+    /*static*/ uint32_t AvmCore::parseVerboseFlags(const char* p)
+    {
+        uint32_t r = 0;
+
+        for (;;) 
+        {
+            const char* e = p;
+            // stop on null or end-of-line... use >=32 to catch those plus other unlikely/uninteresting cases
+            while (*e >= 32 && *e != ',') 
+                e++;
+
+            if (substrMatches("parse", p, e))
+                r |= VB_parse;
+            else if (substrMatches("verify", p, e))
+                r |= VB_verify;
+            else if (substrMatches("interp", p, e))
+                r |= VB_interp;
+            else if (substrMatches("traits", p, e))
+                r |= VB_traits;
+            else if (substrMatches("builtins", p, e))
+                r |= VB_builtins;
+            else if (substrMatches("memstats", p, e)) 
+                MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
+            else if (substrMatches("sweep", p, e)) 
+                MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
+            else if (substrMatches("occupancy", p, e)) 
+                MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
+#if defined FEATURE_NANOJIT
+            else if (substrMatches("jit", p, e))
+                r |= VB_jit | ((nanojit::LC_Activation | nanojit::LC_Liveness | nanojit::LC_ReadLIR 
+                                                | nanojit::LC_AfterSF    | nanojit::LC_RegAlloc | nanojit::LC_Assembly
+                                                ) << 16); // stuff LC_Bits into the upper 16bits
+#endif /* FEATURE_NANOJIT */
+            if (*e < 32)
+                break;
+            p = e+1;
+        }
+
+        return r;
+    }
 #endif
 
 	// a single string with characters 0x00...0x7f (inclusive)

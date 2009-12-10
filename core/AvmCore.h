@@ -160,7 +160,7 @@ const int kBufferPadding = 16;
 		// default set of flags to enable for "verbose" with no specific qualifiers
 		static const uint32_t DEFAULT_VERBOSE_ON;
 #endif
-		
+
 	public:
 		/**
 		 * The console object.  Text to be displayed to the developer
@@ -300,6 +300,7 @@ const int kBufferPadding = 16;
 		#ifdef AVMPLUS_VERBOSE
 		bool isVerbose(uint32_t b) const;
         static bool isBitSet(uint32_t v, uint32_t bit);
+        static uint32_t parseVerboseFlags(const char* arg);
 		#endif
 
 	    void SetJITEnabled(bool isEnabled);

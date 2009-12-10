@@ -723,38 +723,7 @@ namespace avmshell
 					else if (!VMPI_strncmp(arg+2, "verbose", 7)) {
 						settings.do_verbose = AvmCore::DEFAULT_VERBOSE_ON; // all 'on' by default
 						if (arg[9] == '=') {
-                            // specific options so turn-off 'all'
-                            settings.do_verbose = 0;
-                            const char* p = &arg[10];
-                            const char* e = p;
-                            while(*e) {
-                                e = p;
-                                while(*e && *e!=',') e++;
-                                if (!p) break;
-                                if (!VMPI_strncmp(p, "parse", 5))
-                                    settings.do_verbose |= VB_parse;
-                                else if (!VMPI_strncmp(p, "verify", 6))
-                                    settings.do_verbose |= VB_verify;
-                                else if (!VMPI_strncmp(p, "interp", 6))
-                                    settings.do_verbose |= VB_interp;
-                                else if (!VMPI_strncmp(p, "traits", 6))
-                                    settings.do_verbose |= VB_traits;
-                                else if (!VMPI_strncmp(p, "builtins", 8))
-                                    settings.do_verbose |= VB_builtins;
-                                else if (!VMPI_strncmp(p, "memstats",8)) 
-                                    MMgc::GCHeap::GetGCHeap()->Config().gcstats = true;
-                                else if (!VMPI_strncmp(p, "sweep",5)) 
-                                    MMgc::GCHeap::GetGCHeap()->Config().autoGCStats = true;
-                                else if (!VMPI_strncmp(p, "occupancy",9)) 
-                                    MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
-#if defined FEATURE_NANOJIT
-                                else if (!VMPI_strncmp(p, "jit", 3))
-                                    settings.do_verbose |= VB_jit | ((nanojit::LC_Activation | nanojit::LC_Liveness | nanojit::LC_ReadLIR 
-                                                                    | nanojit::LC_AfterSF    | nanojit::LC_RegAlloc | nanojit::LC_Assembly
-                                                                    ) << 16); // stuff LC_Bits into the upper 16bits
-#endif /* FEATURE_NANOJIT */
-                                p = e+1;
-                            }
+                            settings.do_verbose = AvmCore::parseVerboseFlags(&arg[10]);
                         }
 					}
 #endif /* AVMPLUS_VERBOSE */
