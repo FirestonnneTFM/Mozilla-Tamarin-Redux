@@ -48,8 +48,9 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=windows
-export basedir=c:/buildbot/$branch/${platform}-deep/$branch
-export buildsdir=c:/buildbot/$branch/${platform}-deep/builds
+workdir=`pwd`
+export basedir=`cygpath -m ${workdir}/../../../..`
+export buildsdir=`cygpath -m ${basedir}/../builds`
 
 export shell_release_cov=avmshell_cov.exe
 export shell_release_debugger_cov=avmshell_s_cov.exe

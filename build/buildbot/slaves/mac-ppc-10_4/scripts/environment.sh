@@ -48,8 +48,9 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=mac
-export basedir=/Users/build/buildbot/$branch/mac-ppc-10_4/$branch
-export buildsdir=$basedir/../builds
+workdir=`pwd`
+export basedir=`cd ${workdir}/../../../..; pwd`
+export buildsdir=`cd ${basedir}/../builds; pwd`
 
 export shell_release=${shell_release}_104_ppc
 export shell_release_wordcode=${shell_release_wordcode}_104_ppc

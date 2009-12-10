@@ -48,8 +48,9 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=linux
-export basedir=~/buildbot/$branch/$platform-performance/$branch
-export buildsdir=$basedir/../builds
+workdir=`pwd`
+export basedir=`cd ${workdir}/../../../..; pwd`
+export buildsdir=`cd ${basedir}/../builds; pwd`
 
 
 lockfile=~/asteamlin4.lck

@@ -48,10 +48,11 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=winmobile
-export basedir=c:/buildbot/$branch/$platform-arm/$branch
-export buildsdir=c:/buildbot/$branch/$platform-arm/builds
-export uploadbuildsdir=/c/buildbot/$branch/$platform-arm/builds
-export EMULATORDIR=c:/buildbot/$branch/$platform-arm/emulator
+workdir=`pwd`
+export basedir=`cygpath -m ${workdir}/../../../..`
+export buildsdir=`cygpath -m ${basedir}/../builds`
+export uploadbuildsdir=`cygpath -u ${buildsdir}`
+export EMULATORDIR=`cygpath -m ${basedir}/../emulator`
 
 export shell_release_arm=avmshell_arm$shell_extension
 export shell_release_wordcode_arm=avmshell_wordcode_arm$shell_extension

@@ -48,7 +48,8 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=windows
-export basedir=c:/buildbot/$branch/${platform}-p3-deep/$branch
-export buildsdir=c:/buildbot/$branch/${platform}-p3-deep/builds
+workdir=`pwd`
+export basedir=`cygpath -m ${workdir}/../../../..`
+export buildsdir=`cygpath -m ${basedir}/../builds`
 
 export PYTHONWIN=c:/Python26/python.exe

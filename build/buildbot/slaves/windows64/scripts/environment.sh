@@ -48,8 +48,10 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=windows
-export basedir=c:/buildbot/$branch/${platform}64/$branch
-export buildsdir=c:/buildbot/$branch/${platform}64/builds
+workdir=`pwd`
+export basedir=`cygpath -m ${workdir}/../../../..`
+export buildsdir=`cygpath -m ${basedir}/../builds`
+
 
 VS_HOME_PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0"
 VS_HOME="c:\Program Files (x86)\Microsoft Visual Studio 9.0"

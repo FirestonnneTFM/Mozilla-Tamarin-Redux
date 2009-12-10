@@ -48,8 +48,9 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=winmobile
-export basedir=c:/buildbot/$branch/$platform-performance/$branch
-export buildsdir=$basedir/../builds
+workdir=`pwd`
+export basedir=`cygpath -m ${workdir}/../../../..`
+export buildsdir=`cygpath -m ${basedir}/../builds`
 
 
 export shell_release=avmshell_arm$shell_extension
