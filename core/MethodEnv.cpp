@@ -1052,8 +1052,20 @@ namespace avmplus
 
 	Atom MethodEnv::nextname(Atom objAtom, int index) const
 	{
-		if (index <= 0)
+        //  Handle special case inputs;
+        //  bad index returns null,
+        //  null object throws error.
+        if (index <= 0)
+        {
 			return nullStringAtom;
+        }
+
+        if (AvmCore::isNullOrUndefined(objAtom))
+        {
+            toplevel()->throwTypeError(
+                           (objAtom == undefinedAtom) ? kConvertUndefinedToObjectError :
+                           kConvertNullToObjectError);
+        }
 
 		switch (objAtom&7)
 		{
@@ -1069,8 +1081,20 @@ namespace avmplus
 
 	Atom MethodEnv::nextvalue(Atom objAtom, int index) const
 	{
-		if (index <= 0)
+        //  Handle special case inputs;
+        //  bad index returns undefined,
+        //  null object throws error.
+        if (index <= 0)
+        {
 			return undefinedAtom;
+        }
+
+        if (AvmCore::isNullOrUndefined(objAtom))
+        {
+            toplevel()->throwTypeError(
+                           (objAtom == undefinedAtom) ? kConvertUndefinedToObjectError :
+                           kConvertNullToObjectError);
+        }
 
 		switch (objAtom&7)
 		{
