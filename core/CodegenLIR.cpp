@@ -2917,7 +2917,7 @@ namespace avmplus
             // sp[-argc] = callmethod(disp_id, argc, ...);
             // method_id is disp_id of virtual method
             LIns* vtable = loadVTable(objDisp);
-            method = loadIns(LIR_ldcp, offsetof(VTable,methods)+sizeof(uintptr)*method_id, vtable);
+            method = loadIns(LIR_ldcp, offsetof(VTable,methods)+int32_t(sizeof(uintptr))*method_id, vtable);
             break;
         }
         case OP_callsuperid:
@@ -2927,7 +2927,7 @@ namespace avmplus
             // method_id is disp_id of super method
             LIns* declvtable = loadEnvVTable();
             LIns* basevtable = loadIns(LIR_ldcp, offsetof(VTable, base), declvtable);
-            method = loadIns(LIR_ldcp, offsetof(VTable,methods)+sizeof(uintptr)*method_id, basevtable);
+            method = loadIns(LIR_ldcp, offsetof(VTable,methods)+int32_t(sizeof(uintptr))*method_id, basevtable);
             break;
         }
         case OP_callstatic:
@@ -2935,7 +2935,7 @@ namespace avmplus
             // stack in: obj arg1..N
             // stack out: result
             LIns* abcenv = loadEnvAbcEnv();
-            method = loadIns(LIR_ldcp, offsetof(AbcEnv,m_methods)+sizeof(uintptr)*method_id, abcenv);
+            method = loadIns(LIR_ldcp, offsetof(AbcEnv,m_methods)+int32_t(sizeof(uintptr))*method_id, abcenv);
             break;
         }
         case OP_callinterface:
