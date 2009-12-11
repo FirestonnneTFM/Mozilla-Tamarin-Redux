@@ -2930,7 +2930,7 @@ namespace avmplus
             // stack in: obj arg1..N
             // stack out: result
             LIns* abcenv = loadEnvAbcEnv();
-            method = loadIns(LIR_ldcp, int32_t(offsetof(VTable,methods)+sizeof(MethodEnv*)*method_id), abcenv);
+            method = loadIns(LIR_ldcp, int32_t(offsetof(AbcEnv,m_methods)+sizeof(MethodEnv*)*method_id), abcenv);
             break;
         }
         case OP_callinterface:
