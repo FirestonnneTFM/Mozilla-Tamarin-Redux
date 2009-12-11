@@ -216,45 +216,59 @@ namespace avmplus
 		return (*ite->implImtGPR())(ite, argc, ap, iid);
 	}
 
-	void VTable::resolveImtSlot(uint32_t slot)
+	// Copy the imt thunk from the base vtable - callers must make sure
+	// that the stub can be copied from the base class - i.e. resolveImtSlotFromBase
+	// or resolveImtSlotSelf must have already been called successfully on the base vtable.
+	void VTable::resolveImtSlotFromBase(uint32_t slot)
+	{
+		AvmCore* core = traits->core;
+		MMgc::GC* gc = core->GetGC();
+
+		ImtThunkEnv* ite = base->imt[slot];
+		// copy down imt stub from base class
+		AvmAssert(ite != NULL);
+
+		// if base->imt[i] is really an IMT thunk, use it.
+		// BUT, it might be a plain MethodEnv* from a single-entry case, in which case
+		// we want to use our own MethodEnv at the same disp-id. Alas, we don't have the disp-id 
+		// handy at this point, since we didn't build the ImtEntry chain. Rather than build it in 
+		// all cases, let's compare vs our parent's method list; linear search, but I'm guessing that's
+		// still a net win vs. doing the ImtEntry chain building. (Our base's TB is most likely still
+		// in the cache since we used it inside buildImtEntries.)
+		TraitsBindingsp tb = base->traits->getTraitsBindings();
+		for (uint32_t j = 0; j < tb->methodCount; ++j)
+		{
+			if (ite == (ImtThunkEnv*)base->methods[j])
+			{
+				ite = (ImtThunkEnv*)this->methods[j];
+				break;
+			}
+		}
+		WB(gc, this, &imt[slot], ite);
+	}
+
+	// returns false if we need to copy the imt stub from base,
+	// otherwise returns true
+	bool VTable::resolveImtSlotSelf(uint32_t slot)
 	{
 		AvmAssert(this->linked);
 		AvmAssert(this->base != NULL); // only Object has null base, and it has no Interfaces
 		AvmAssert(!traits->isInterface());
 		AvmAssert(traits->core->IsJITEnabled());
 		
-		AvmCore* core = traits->core;
-		MMgc::GC* gc = core->GetGC();
-
 		ImtThunkEnv* ite;
 		uint32_t imtMapCount = 0;
+
 		ImtEntry* imtMap = buildImtEntries(this, slot, imtMapCount);
 		if (!imtMap)
 		{
-			// copy down imt stub from base class
-			AvmAssert(base->imt[slot] != NULL);
-			if (base->imt[slot]->implImtGPR() == VTable::resolveImt)
-				base->resolveImtSlot(slot); 
-			ite = base->imt[slot];
-			// if base->imt[i] is really an IMT thunk, use it.
-			// BUT, it might be a plain MethodEnv* from a single-entry case, in which case
-			// we want to use our own MethodEnv at the same disp-id. Alas, we don't have the disp-id 
-			// handy at this point, since we didn't build the ImtEntry chain. Rather than build it in 
-			// all cases, let's compare vs our parent's method list; linear search, but I'm guessing that's
-			// still a net win vs. doing the ImtEntry chain building. (Our base's TB is most likely still
-			// in the cache since we used it inside buildImtEntries.)
-			TraitsBindingsp tb = base->traits->getTraitsBindings();
-			for (uint32_t j = 0; j < tb->methodCount; ++j)
-			{
-				if (ite == (ImtThunkEnv*)base->methods[j])
-				{
-					ite = (ImtThunkEnv*)this->methods[j];
-					break;
-				}
-			}
+			return false;
 		}
 		else
 		{
+			AvmCore* core = traits->core;
+			MMgc::GC* gc = core->GetGC();
+
 			AvmAssert(imtMapCount > 0);
 			if (imtMapCount == 1)
 			{
@@ -278,8 +292,41 @@ namespace avmplus
 				}
 				sortImtThunkEntries(ite->entries(), ite->imtMapCount);
 			}
+			WB(gc, this, &imt[slot], ite);
 		}
-		WB(gc, this, &imt[slot], ite);
+		return true;
+	}
+
+	void VTable::resolveImtSlot(uint32_t slot)
+	{
+		AvmCore* core = traits->core;
+		MMgc::GC* gc = core->GetGC();
+
+		if( this->resolveImtSlotSelf(slot) )
+			return;
+
+		List<VTable*> work_stack(gc);
+
+		work_stack.add(this);
+
+		// Walk up the base VTables until we find one where the slot
+		// can be resolved without copying it from its base
+		VTable* cur = this->base;
+		while(cur->imt[slot]->implImtGPR() == VTable::resolveImt 
+			&& !cur->resolveImtSlotSelf(slot) ) 
+		{
+			work_stack.add(cur);
+			cur = cur->base;
+		}
+
+		// work backwards through the base types, copying
+		// the imt stub down as we go
+		uint32 size = work_stack.size();
+		for(uint32 i = 0; i < size; ++i)
+		{
+			cur = work_stack[size-i-1];
+			cur->resolveImtSlotFromBase(slot);
+		}
 	}
 	
 #endif // FEATURE_NANOJIT
