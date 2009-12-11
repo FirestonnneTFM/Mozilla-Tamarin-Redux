@@ -2917,7 +2917,7 @@ namespace avmplus
             // sp[-argc] = callmethod(disp_id, argc, ...);
             // method_id is disp_id of virtual method
             LIns* vtable = loadVTable(objDisp);
-            method = loadIns(LIR_ldcp, offsetof(VTable,methods)+int32_t(sizeof(uintptr))*method_id, vtable);
+            method = loadIns(LIR_ldcp, int32_t(offsetof(VTable,methods))+int32_t(sizeof(uintptr))*method_id, vtable);
             break;
         }
         case OP_callsuperid:
@@ -2927,7 +2927,7 @@ namespace avmplus
             // method_id is disp_id of super method
             LIns* declvtable = loadEnvVTable();
             LIns* basevtable = loadIns(LIR_ldcp, offsetof(VTable, base), declvtable);
-            method = loadIns(LIR_ldcp, offsetof(VTable,methods)+int32_t(sizeof(uintptr))*method_id, basevtable);
+            method = loadIns(LIR_ldcp, int32_t(offsetof(VTable,methods))+int32_t(sizeof(uintptr))*method_id, basevtable);
             break;
         }
         case OP_callstatic:
@@ -2935,7 +2935,7 @@ namespace avmplus
             // stack in: obj arg1..N
             // stack out: result
             LIns* abcenv = loadEnvAbcEnv();
-            method = loadIns(LIR_ldcp, offsetof(AbcEnv,m_methods)+int32_t(sizeof(uintptr))*method_id, abcenv);
+            method = loadIns(LIR_ldcp, int32_t(offsetof(VTable,methods))+int32_t(sizeof(uintptr))*method_id, abcenv);
             break;
         }
         case OP_callinterface:
@@ -4943,12 +4943,68 @@ namespace avmplus
         return int64_t(a) + int64_t(b) == int64_t(a + b);
     }
 
+        // we want to fail range-check if
+        //
+        //      (mopAddr + disp < 0 || mopAddr + disp + size > mopsMemorySize)
+        //
+        // which is the same as
+        //
+        //      (mopAddr < -disp || mopAddr > mopsMemorySize - size - disp)
+        //
+        // which is the same as
+        //
+        //      (!(mopAddr >= -disp && mopAddr <= mopsMemorySize - size - disp))
+        //
+        // or
+        //      (!(mopAddr >= -disp && mopAddr < mopsMemorySize - size - disp + 1))
+        //
+        // and since (x >= min && x < max) is equivalent to (unsigned)(x-min) < (unsigned)(max-min)
+        //
+        //      (mopAddr + disp >= mopsMemorySize - size - disp + 1 + disp)
+        //
+        // thus
+        //
+        //      (mopAddr + disp > mopsMemorySize - size))
+        //
+
+    static void realityCheck()
+    {
+        for (int64_t mopsMemorySize = 8; mopsMemorySize <= 2147483647; ++mopsMemorySize)
+        {
+            printf("size %d\n",(int32_t)mopsMemorySize);
+            for (int64_t mopAddr = -2147483648; mopAddr <= 2147483647; ++mopAddr)
+            {
+                printf("  mopAddr %d\n",(int32_t)mopAddr);
+                for (int64_t disp = -2147483648; disp <= 2147483647; ++disp)
+                {
+                    //printf("  disp %d\n",(int32_t)disp);
+                    for (int64_t size = 1; size <= 8; ++size)
+                    {
+                        bool a = int32_t(mopAddr) + int32_t(disp) < 0 || 
+                                int32_t(mopAddr) + int32_t(disp) > int32_t(mopsMemorySize) - int32_t(size);
+                        bool b = int32_t(mopAddr) < int32_t(disp) || 
+                                int32_t(mopAddr) > int32_t(mopsMemorySize) - int32_t(disp) - int32_t(size) ;
+                        bool z = uint32_t(int32_t(mopAddr) + int32_t(disp)) > uint32_t(int32_t(mopsMemorySize) - int32_t(size));
+                        if (a != z)
+                        {
+                            printf("a=%d b=%d z=%d for mopAddr=%lld disp=%lld size=%lld mopsMemorySize=%lld (lhs=%x rhs=%x)\n",
+                                a,b,z,mopAddr,disp,size,mopsMemorySize,
+                                uint32_t(int32_t(mopAddr) + int32_t(disp)), uint32_t(int32_t(mopsMemorySize) - int32_t(size)));
+                                exit(-1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     LIns* CodegenLIR::mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp)
     {
         AvmAssert(size > 0);    // it's signed to help make the int promotion correct
 
         if (!globalMemoryInfo)
         {
+            realityCheck();
             globalMemoryInfo = (GlobalMemoryInfo*)pool->codeMgr->allocator.alloc(sizeof(GlobalMemoryInfo));
             globalMemoryInfo->base = pool->domain->globalMemoryBase();
             globalMemoryInfo->size = pool->domain->globalMemorySize();
