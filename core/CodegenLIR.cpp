@@ -1071,7 +1071,7 @@ namespace avmplus
                     a = isPromote(a->opcode()) ? a->oprnd1() : imm2Int(a);
                     b = isPromote(b->opcode()) ? b->oprnd1() : imm2Int(b);
                     if (a && b)
-                        return out->ins2(LOpcode(op & ~LIR64), a, b);
+                        return out->ins2(f64arith_to_i32arith(op), a, b);
                 }
                 else if (op == LIR_quad) {
                     // const fold
@@ -4647,7 +4647,7 @@ namespace avmplus
             #ifdef AVMPLUS_64BIT
                 // 32-bit signed and unsigned values fit in 64-bit registers
                 // so we can promote and simply do a signed 64bit compare
-                LOpcode qcmp = LOpcode(icmp | LIR64);
+                LOpcode qcmp = i32cmp_to_i64cmp(icmp);
                 NanoAssert((icmp == LIR_eq && qcmp == LIR_qeq) ||
                            (icmp == LIR_lt && qcmp == LIR_qlt) ||
                            (icmp == LIR_le && qcmp == LIR_qle));
@@ -4664,7 +4664,7 @@ namespace avmplus
             #ifdef AVMPLUS_64BIT
                 // 32-bit signed and unsigned values fit in 64-bit registers
                 // so we can promote and simply do a signed 64bit compare
-                LOpcode qcmp = LOpcode(icmp | LIR64);
+                LOpcode qcmp = i32cmp_to_i64cmp(icmp);
                 NanoAssert((icmp == LIR_eq && qcmp == LIR_qeq) ||
                            (icmp == LIR_lt && qcmp == LIR_qlt) ||
                            (icmp == LIR_le && qcmp == LIR_qle));
@@ -5381,11 +5381,9 @@ namespace avmplus
         // TODO this can go away if we turn this kill pass into a LirReader
         // and do the work inline with the assembly pass.
         static const uint8_t lirSizes[] = {
-        #define OPDEF(op, number, repkind) sizeof(LIns##repkind),
-        #define OPD64(op, number, repkind) OPDEF(op, number, repkind)
+        #define OPDEF(op, number, repkind, retType) sizeof(LIns##repkind),
         #include "../nanojit/LIRopcode.tbl"
         #undef OPDEF
-        #undef OPD64
                 0
         };
 
