@@ -98,7 +98,7 @@ namespace avmplus
 
     static bool substrMatches(const char* pattern, const char* p, const char* e)
     {
-        int const patlen = VMPI_strlen(pattern);
+        ptrdiff_t const patlen = VMPI_strlen(pattern);
         return (e-p) >= patlen && !VMPI_strncmp(p, pattern, patlen);
     }
 
