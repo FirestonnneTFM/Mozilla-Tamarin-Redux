@@ -71,7 +71,7 @@ namespace avmplus
         // int atoms always fit in int32 on 32-bit
         (void)atom;
         return true;
-#endif      
+#endif
     }
 
     REALLY_INLINE bool atomCanBeUint32(Atom atom)
@@ -84,16 +84,16 @@ namespace avmplus
 #else
         // int atoms always fit in uint32 on 32-bit, if they are >= 0
         return atom >= 0;
-#endif      
+#endif
     }
 
-    REALLY_INLINE intptr_t atomGetIntptr(Atom a) 
-    { 
+    REALLY_INLINE intptr_t atomGetIntptr(Atom a)
+    {
         AvmAssert(atomIsIntptr(a));
         AvmAssert(atomIsValidIntptrValue(intptr_t(a) >> 3));
-        return intptr_t(a) >> 3; 
+        return intptr_t(a) >> 3;
     }
-    
+
     REALLY_INLINE bool atomIsValidIntptrValue(const intptr_t i)
     {
 #ifdef AVMPLUS_64BIT

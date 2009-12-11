@@ -169,7 +169,7 @@ namespace avmplus
 
     #define ISNULL(a) (((uintptr)a) < (uintptr)kSpecialType)
 
-    // returns true if atom type is int. 
+    // returns true if atom type is int.
     // Note that this DOES NOT imply that the Atom's value will
     // fit into an int32 (or a uint32); an integer atom's value
     // will always fit into an intptr_t, which may be more than
@@ -177,7 +177,7 @@ namespace avmplus
     bool            atomIsIntptr(Atom atom);
 
     // return true iff both atoms are of the given type. sometimes this is slightly
-    // faster than calling atomIs(b1)&&atomIs(b2). (And yes, "atomIsBoth" is poor 
+    // faster than calling atomIs(b1)&&atomIs(b2). (And yes, "atomIsBoth" is poor
     // grammar in English, but follows the "atomIsXXX -> bool" pattern)
     bool            atomIsBothIntptr(Atom atom1, Atom atom2);
 
