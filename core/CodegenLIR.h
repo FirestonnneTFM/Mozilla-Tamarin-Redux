@@ -304,8 +304,15 @@ namespace avmplus
 
     /** helper code to make LIR generation nice and tidy */
     class LirHelper {
-    protected: // methods
+    protected:
+        LirHelper(AvmCore*);
+        ~LirHelper();
+        void cleanup();
+
+    protected:
         static BuiltinType bt(Traits *t);
+        LIns* nativeToAtom(LIns* value, Traits* valType);
+        LIns* atomToNative(BuiltinType, LIns* i);
         LIns* eq0(LIns* i);             // eq(i, imm(0))
         LIns* peq0(LIns* ptr);          // peq(ptr, immq(0))
         LIns* qlo(LIns* q);             // LIR_qlo(q)
@@ -339,6 +346,10 @@ namespace avmplus
     protected: // data
         LirWriter *lirout;
         Fragment *frag;
+        AvmCore* core;
+        LIns *coreAddr;
+        Allocator* alloc1;    // allocator used in first pass, while writing LIR
+        Allocator* lir_alloc; // allocator with LIR buffer lifetime
     };
 
     struct GlobalMemoryInfo
@@ -372,10 +383,7 @@ namespace avmplus
        #endif /* VTUNE */
 
     private:
-        Allocator* alloc1;    // allocator used in first pass, while writing LIR
-        Allocator* lir_alloc; // allocator with LIR buffer lifetime
         LogControl log;
-        AvmCore *core;
         MethodInfo *info;
         const MethodSignaturep ms;
         PoolObject *pool;
@@ -386,7 +394,6 @@ namespace avmplus
         LIns *methodFrame;
         LIns *csn;
         LIns *undefConst;
-        LIns *coreAddr;
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
         CodegenLabel mop_rangeCheckFailed_label;
@@ -407,10 +414,8 @@ namespace avmplus
         LIns *InsAlloc(int32_t);
         LIns *atomToNativeRep(int loc, LIns *i);
         LIns *atomToNativeRep(Traits *, LIns *i);
-        LIns *atomToNativeRep(BuiltinType, LIns *i);
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
-        LIns *loadAtomRep(LIns* value, Traits* valType);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *localGet(int i);
         LIns *localGetp(int i);

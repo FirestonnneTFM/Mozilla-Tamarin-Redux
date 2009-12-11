@@ -476,10 +476,10 @@ namespace avmplus
 
     LIns* CodegenLIR::loadAtomRep(int i)
     {
-        return loadAtomRep(localCopy(i), state->value(i).traits);
+        return nativeToAtom(localCopy(i), state->value(i).traits);
     }
 
-    LIns* CodegenLIR::loadAtomRep(LIns* native, Traits* t)
+    LIns* LirHelper::nativeToAtom(LIns* native, Traits* t)
     {
         switch (bt(t)) {
         case BUILTIN_number:
@@ -560,13 +560,11 @@ namespace avmplus
     }
 
     CodegenLIR::CodegenLIR(MethodInfo* i) :
+        LirHelper(i->pool()->core),
 #ifdef VTUNE
         jitInfoList(i->core()->gc),
         jitPendingRecords(i->core()->gc),
 #endif
-        alloc1(mmfx_new( Allocator() )),
-        lir_alloc(mmfx_new( Allocator() )),
-        core(i->pool()->core),
         info(i),
         ms(i->getMethodSignature()),
         pool(i->pool()),
@@ -600,10 +598,7 @@ namespace avmplus
     void CodegenLIR::cleanup()
     {
         finddef_cache_builder.cleanup();
-        mmfx_delete( alloc1 );
-        alloc1 = NULL;
-        mmfx_delete( lir_alloc );
-        lir_alloc = NULL;
+        LirHelper::cleanup();
     }
 
     #ifdef AVMPLUS_MAC_CARBON
@@ -631,10 +626,10 @@ namespace avmplus
 
     LIns* CodegenLIR::atomToNativeRep(Traits* t, LIns* atom)
     {
-        return atomToNativeRep(bt(t), atom);
+        return atomToNative(bt(t), atom);
     }
 
-    LIns* CodegenLIR::atomToNativeRep(BuiltinType bt, LIns* atom)
+    LIns* LirHelper::atomToNative(BuiltinType bt, LIns* atom)
     {
         switch (bt)
         {
@@ -3684,7 +3679,7 @@ namespace avmplus
                     Traits* slotType = state->verifier->readBinding(baseTraits, b);
                     // todo if funcValue is already a ScriptObject then don't box it, use a different helper.
                     LIns* funcValue = loadFromSlot(baseDisp, AvmCore::bindingToSlotId(b), slotType);
-                    LIns* funcAtom = loadAtomRep(funcValue, slotType);
+                    LIns* funcAtom = nativeToAtom(funcValue, slotType);
                     out = callIns(FUNCTIONID(op_call), 4, env_param, funcAtom, InsConst(argc), ap);
                 }
                 else if (!name->isRuntime()) {
@@ -5725,6 +5720,25 @@ namespace avmplus
             caches.add(c);
         }
         return c;
+    }
+
+    LirHelper::LirHelper(AvmCore* core) :
+        core(core),
+        alloc1(mmfx_new(Allocator())),
+        lir_alloc(mmfx_new(Allocator()))
+    { }
+
+    LirHelper::~LirHelper()
+    {
+        cleanup();
+    }
+
+    void LirHelper::cleanup()
+    {
+        mmfx_delete( alloc1 );
+        alloc1 = NULL;
+        mmfx_delete( lir_alloc );
+        lir_alloc = NULL;
     }
 }
 
