@@ -87,6 +87,10 @@ namespace avmplus
 #if defined FEATURE_NANOJIT
 		void resolveImtSlot(uint32_t slot);
 
+		// Helpers for resolveImtSlot
+		void resolveImtSlotFromBase(uint32_t slot);
+		bool resolveImtSlotSelf(uint32_t slot);
+
 		// return uint64_t, not uintptr_t: see note for GprImtThunkProc
 		static GprImtThunkProcRetType resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
 		static GprImtThunkProcRetType dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
