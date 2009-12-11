@@ -238,13 +238,13 @@ namespace avmplus
         { 1, LIR_ldzb, LIR_stb },
         { 2, LIR_ldzs, LIR_sts },
         { 4, LIR_ld, LIR_sti },
-        { 4, LIR_ld32f, LIR_st32f }, 
+        { 4, LIR_ld32f, LIR_st32f },
         { 8, LIR_ldq, LIR_stqi }
 #else
-        { 1, FUNCTIONID(mop_li8), FUNCTIONID(mop_si8) },    
+        { 1, FUNCTIONID(mop_li8), FUNCTIONID(mop_si8) },
         { 2, FUNCTIONID(mop_li16), FUNCTIONID(mop_si16) },
         { 4, FUNCTIONID(mop_li32), FUNCTIONID(mop_si32) },
-        { 4, FUNCTIONID(mop_lf32), FUNCTIONID(mop_sf32) }, 
+        { 4, FUNCTIONID(mop_lf32), FUNCTIONID(mop_sf32) },
         { 8, FUNCTIONID(mop_lf64), FUNCTIONID(mop_sf64) }
 #endif
     };
@@ -4955,7 +4955,7 @@ namespace avmplus
         {
             *disp = 0;
 
-            // mopAddr is an int (an offset from globalMemoryBase) on all archs. 
+            // mopAddr is an int (an offset from globalMemoryBase) on all archs.
             // if mopAddr is an expression of the form
             //      expr+const
             //      const+expr
@@ -4969,14 +4969,14 @@ namespace avmplus
                 LOpcode const op = mopAddr->opcode();
                 if (op != LIR_add && op != LIR_sub)
                     break;
-                
+
                 int32_t imm;
                 LInsp nonImm;
                 if (mopAddr->oprnd2()->isconst())
                 {
                     imm = mopAddr->oprnd2()->imm32();
                     nonImm = mopAddr->oprnd1();
-                
+
                     if (op == LIR_sub)
                         imm = -imm;
                 }
@@ -4985,7 +4985,7 @@ namespace avmplus
                     // don't try to optimize const-expr
                     if (op == LIR_sub)
                         break;
-                        
+
                     imm = mopAddr->oprnd1()->imm32();
                     nonImm = mopAddr->oprnd2();
                 }
@@ -5004,7 +5004,7 @@ namespace avmplus
 
         LInsp mopsMemoryBase = loadIns(LIR_ldcp, 0, InsConstPtr(&globalMemoryInfo->base));
         LInsp mopsMemorySize = loadIns(LIR_ldc, 0, InsConstPtr(&globalMemoryInfo->size));
-        
+
         LInsp lhs, rhs, br;
         if (!disp || *disp == 0)
         {
@@ -5038,7 +5038,7 @@ namespace avmplus
             return mopsMemoryBase;
         }
         // note: we can use piadd here only because we know this is never a GCObject.
-        // (if it was, we'd have to use LIR_addp, which is restricted from certain 
+        // (if it was, we'd have to use LIR_addp, which is restricted from certain
         // optimizations that can leave dangling interior pointers)
         //
         // (yes, i2p, not u2p... it might legitimately be negative due to the

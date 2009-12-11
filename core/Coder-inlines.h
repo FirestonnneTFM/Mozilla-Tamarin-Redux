@@ -45,17 +45,17 @@ REALLY_INLINE CodeWriter::CodeWriter()
 // convenience functions
 REALLY_INLINE void CodeWriter::write(FrameState* state, const byte *pc, AbcOpcode opcode)
 {
-	write(state, pc, opcode, NULL);
+    write(state, pc, opcode, NULL);
 }
 
 REALLY_INLINE void CodeWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1)
 {
-	writeOp1(state, pc, opcode, opd1, NULL);
+    writeOp1(state, pc, opcode, opd1, NULL);
 }
 
 REALLY_INLINE void CodeWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2)
 {
-	writeOp2(state, pc, opcode, opd1, opd2, NULL);
+    writeOp2(state, pc, opcode, opd1, opd2, NULL);
 }
 
 #ifdef VMCFG_LOOKUP_CACHE
