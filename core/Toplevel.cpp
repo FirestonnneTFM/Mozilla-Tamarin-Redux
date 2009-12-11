@@ -982,7 +982,7 @@ namespace avmplus
 			{
 				int32_t curPos = pos;
 				int len = 2;
-				if (pos < (in->length() - 5) && str[pos] == 'u')
+				if (pos <= (in->length() - 5) && str[pos] == 'u')
 				{
 					len = 4;
 					pos++;
