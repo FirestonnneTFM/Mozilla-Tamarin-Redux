@@ -163,7 +163,7 @@ REALLY_INLINE Multiname::~Multiname()
 
 REALLY_INLINE bool Multiname::containsAnyPublicNamespace() const
 {
-    if (!nsset) 
+    if (!nsset)
         return false; // note, also handles this->ns == null
 
     if (flags & NSSET)
@@ -235,7 +235,7 @@ REALLY_INLINE int32_t Multiname::isNsset() const
     return flags & NSSET;
 }
 
-REALLY_INLINE bool Multiname::isValidDynamicName() const 
+REALLY_INLINE bool Multiname::isValidDynamicName() const
 {
     // return !isAnyName() && !isAttr() && containsAnyPublicNamespace();
     // consolidate the above to insure against compiler stupidity

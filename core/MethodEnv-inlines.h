@@ -41,92 +41,92 @@ namespace avmplus
 {
 #if VMCFG_METHODENV_IMPL32
 REALLY_INLINE MethodEnvProcHolder::MethodEnvProcHolder(GprMethodProc p)
-	: _implGPR(p)
+    : _implGPR(p)
 { }
 
 REALLY_INLINE GprMethodProc MethodEnvProcHolder::implGPR() const
 {
-	return _implGPR;
+    return _implGPR;
 }
 
 REALLY_INLINE FprMethodProc MethodEnvProcHolder::implFPR() const
 {
-	return _implFPR;
+    return _implFPR;
 }
 
 #else
 
 REALLY_INLINE MethodEnvProcHolder::MethodEnvProcHolder(MethodInfo* m)
-	: method(m)
+    : method(m)
 { }
 
 REALLY_INLINE GprMethodProc MethodEnvProcHolder::implGPR() const
 {
-	return method->implGPR();
+    return method->implGPR();
 }
 
 REALLY_INLINE FprMethodProc MethodEnvProcHolder::implFPR() const
 {
-	return method->implFPR();
+    return method->implFPR();
 }
 #endif
 
 REALLY_INLINE AbcEnv* MethodEnv::abcEnv() const
 {
-	return _scope->abcEnv();
+    return _scope->abcEnv();
 }
 
 REALLY_INLINE AvmCore* MethodEnv::core() const
 {
-	return method->pool()->core;
+    return method->pool()->core;
 }
 
 REALLY_INLINE CodeContext* MethodEnv::codeContext() const
 {
-	return abcEnv()->codeContext();
+    return abcEnv()->codeContext();
 }
 
 REALLY_INLINE DomainEnv* MethodEnv::domainEnv() const
 {
-	return abcEnv()->domainEnv();
+    return abcEnv()->domainEnv();
 }
 
 REALLY_INLINE ScopeChain* MethodEnv::scope() const
 {
-	return _scope;
+    return _scope;
 }
 
 REALLY_INLINE MethodEnv* MethodEnv::super_init() const
 {
-	AvmAssert(vtable()->base != NULL);
-	return vtable()->base->init;
+    AvmAssert(vtable()->base != NULL);
+    return vtable()->base->init;
 }
 
 REALLY_INLINE Toplevel* MethodEnv::toplevel() const
 {
-	return vtable()->toplevel();
+    return vtable()->toplevel();
 }
 
 REALLY_INLINE Stringp MethodEnv::traitsName() const
 {
-	return vtable()->traits->name();
+    return vtable()->traits->name();
 }
 
 REALLY_INLINE Namespacep MethodEnv::traitsNs() const
 {
-	return vtable()->traits->ns();
+    return vtable()->traits->ns();
 }
 
 /** null pointer check called from jit code */
 REALLY_INLINE void MethodEnv::nullcheck(Atom atom)
 {
-	// Shark recommends inlining the isNullOrUndefined call
-	if (AvmCore::isNullOrUndefined(atom))
-		nullcheckfail(atom);
+    // Shark recommends inlining the isNullOrUndefined call
+    if (AvmCore::isNullOrUndefined(atom))
+        nullcheckfail(atom);
 }
 
 REALLY_INLINE MethodEnv::ActivationMethodTablePair::ActivationMethodTablePair(VTable *a, WeakKeyHashtable*wkh)
-	: activation(a), methodTable(wkh)
+    : activation(a), methodTable(wkh)
 {}
 
 REALLY_INLINE MethodEnv::ActivationMethodTablePair* MethodEnv::getPair() const

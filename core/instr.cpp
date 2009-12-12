@@ -347,9 +347,9 @@ Atom coerceImpl(const Toplevel* toplevel, Atom atom, Traits* expected)
 
 template <class E>
 void coerceobj(E caller_env, ScriptObject* obj, Traits* type) {
-	#ifdef DOPROF // Adding this ifdef because this does not compile with Symbian emulator WINSCW compiler (it expects >=3 parameters for _nvprof).
+    #ifdef DOPROF // Adding this ifdef because this does not compile with Symbian emulator WINSCW compiler (it expects >=3 parameters for _nvprof).
     _nvprof("coerceobj",1);
-	#endif // DOPROF
+    #endif // DOPROF
     if (obj && !obj->traits()->subtypeof(type)) {
         AvmCore* core = caller_env->core();
         caller_env->toplevel()->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(obj->atom()), core->toErrorString(type));
@@ -364,14 +364,14 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
 
 #ifdef AVMPLUS_64BIT
 // since 64-bit int atoms expect exactly 53 bits of precision, we want to shift bit 53+3 up into the sign bit and back down
-#  define SIGN_EXTEND(v)       ((intptr_t(v) << 8) >> 8)	
+#  define SIGN_EXTEND(v)       ((intptr_t(v) << 8) >> 8)
 #else
 #  define SIGN_EXTEND(v)       (intptr_t(v))
 #endif
 
     // integer optimization based on the one from Interpreter.cpp, modified
     // to reduce the # of alu instructions
-    if (atomIsBothIntptr(lhs,rhs)) 
+    if (atomIsBothIntptr(lhs,rhs))
     {
         intptr_t const sum = SIGN_EXTEND(lhs + rhs - kIntptrType);
         if ((lhs ^ rhs) < 0 || (lhs ^ sum) >= 0) {
@@ -390,7 +390,7 @@ Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
         // which is assumed to be taken care of by IEEE 748 double add.
         goto add_numbers;
     }
-    
+
     if (AvmCore::isString(lhs) || AvmCore::isString(rhs) || AvmCore::isDate(lhs) || AvmCore::isDate(rhs))
     {
         goto concat_strings;
@@ -464,7 +464,7 @@ int32_t FASTCALL mop_li16(const void* addr)
     return *(const uint16_t*)(addr);
 #else
     const uint8_t* u = (const uint8_t*)addr;
-    return (uint16_t(u[1]) << 8) | 
+    return (uint16_t(u[1]) << 8) |
             uint16_t(u[0]);
 #endif
 }
