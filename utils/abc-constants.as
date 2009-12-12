@@ -319,8 +319,8 @@ const opNames = [
 "pushscope     ",
 "pushnamespace ",
 "hasnext2      ",
-"OP_0x33       ",
-"OP_0x34       ",
+"OP_0x33       ", // lix8 (internal)
+"OP_0x34       ", // lix16 (internal)
 "li8           ",
 "li16          ",
 "li32          ",

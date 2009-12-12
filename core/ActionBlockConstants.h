@@ -150,6 +150,8 @@ namespace avmplus
 			OP_pushscope = 0x30,
 			OP_pushnamespace = 0x31,
 			OP_hasnext2 = 0x32,
+			OP_lix8 = 0x33, // NEW internal only
+			OP_lix16 = 0x34, // NEW internal only
 			OP_li8 = 0x35,
 			OP_li16 = 0x36,
 			OP_li32 = 0x37,

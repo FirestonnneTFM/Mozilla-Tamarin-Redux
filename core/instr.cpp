@@ -451,13 +451,30 @@ void FASTCALL mop_rangeCheckFailed(MethodEnv* env)
 // note: all of the mop_xxx load/store functions assume
 // that the caller has done range checking, and the address
 // is safe for its intended use...
-int32_t FASTCALL mop_li8(const void* addr)
+int32_t FASTCALL mop_lix8(const void* addr)
+{
+    // loads a signed byte, sign-extends
+    return *(const int8_t*)(addr);
+}
+
+int32_t FASTCALL mop_liz8(const void* addr)
 {
     // loads an unsigned byte, zero-extends
     return *(const uint8_t*)(addr);
 }
 
-int32_t FASTCALL mop_li16(const void* addr)
+int32_t FASTCALL mop_lix16(const void* addr)
+{
+    // loads an signed short, sign-extends
+#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+    return *(const int16_t*)(addr);
+#else
+    const uint8_t* u = (const uint8_t*)addr;
+    return int16_t((uint16_t(u[1]) << 8) | uint16_t(u[0]));
+#endif
+}
+
+int32_t FASTCALL mop_liz16(const void* addr)
 {
     // loads an unsigned short, zero-extends
 #if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)

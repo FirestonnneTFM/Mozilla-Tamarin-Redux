@@ -1789,6 +1789,20 @@ namespace avmplus
 			// loads
 			case OP_li8:
 			case OP_li16:
+                if (pc+1 < code_end && 
+                    ((opcode == OP_li8 && pc[1] == OP_sxi8) || (opcode == OP_li16 && pc[1] == OP_sxi16)))
+                {
+                    checkStack(1,1);
+                    emitCoerce(INT_TYPE, sp);
+                    coder->write(state, pc, (opcode == OP_li8) ? OP_lix8 : OP_lix16);
+                    state->pop_push(1, INT_TYPE);
+                    // ++pc; // do not skip the sign-extend; if it's the target
+                    // of an implicit label, skipping it would cause verification failure.
+                    // instead, just emit it, and rely on LIR to ignore sxi instructions
+                    // in these situations.
+                    break;
+                }
+                // else fall thru
 			case OP_li32:
 			case OP_lf32:
 			case OP_lf64:

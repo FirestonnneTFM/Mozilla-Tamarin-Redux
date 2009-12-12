@@ -637,6 +637,8 @@ namespace avmplus
 		case OP_convert_s:
 		case OP_esc_xelem: 
 		case OP_esc_xattr:
+		case OP_lix8:
+		case OP_lix16:
   		    emitOp0(pc, wordCode(opcode));
 			break;
 		case OP_throw:

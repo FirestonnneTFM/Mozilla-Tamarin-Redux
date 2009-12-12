@@ -619,6 +619,8 @@ namespace avmplus
 			 XXX(0x133)
 			 XXX(0x134)
 #endif
+			 III(0x135, L_lix8)
+			 III(0x136, L_lix16)
 #  if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
@@ -2197,16 +2199,32 @@ namespace avmplus
 
 			
 			// loads
+#ifdef AVMPLUS_WORD_CODE
+			INSTR(lix8) {
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
+				MOPS_LOAD(i1, int8_t, lix8, i32l);	// i32l = result
+				sp[0] = MAKE_INTEGER(i32l);		// always fits in atom
+				NEXT;
+			}
+
+			INSTR(lix16) {
+				i1 = AvmCore::integer(sp[0]);		// i1 = addr
+				MOPS_LOAD(i1, int16_t, lix16, i32l);	// i32l = result
+				sp[0] = MAKE_INTEGER(i32l);		// always fits in atom
+				NEXT;
+			}
+#endif
+
 			INSTR(li8) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
-				MOPS_LOAD(i1, uint8_t, li8, ub2);	// ub2 = result
+				MOPS_LOAD(i1, uint8_t, liz8, ub2);	// ub2 = result
 				sp[0] = MAKE_INTEGER(ub2);		// always fits in atom
 				NEXT;
 			}
 
 			INSTR(li16) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
-				MOPS_LOAD(i1, uint16_t, li16, uh2l);	// uh2l = result
+				MOPS_LOAD(i1, uint16_t, liz16, uh2l);	// uh2l = result
 				sp[0] = MAKE_INTEGER(uh2l);		// always fits in atom
 				NEXT;
 			}
