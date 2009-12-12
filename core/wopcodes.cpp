@@ -400,6 +400,8 @@ namespace avmplus
 		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobalstrict") },
 		{    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugenter") },
 		{    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugexit") },
+		{    1,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("lix8") }, 
+		{    1,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("lix16") }, 
 		// DO NOT ALTER OR MOVE THE NEXT LINE.
 		// END
 	};

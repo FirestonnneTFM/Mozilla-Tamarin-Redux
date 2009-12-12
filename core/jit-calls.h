@@ -839,8 +839,10 @@ SSE2_ONLY(
 
     // MOPS helper functions
     FASTFUNCTION(FUNCADDR(mop_rangeCheckFailed), SIG1(V,P), mop_rangeCheckFailed)
-    FASTFUNCTION(FUNCADDR(mop_li8), SIG1(I,P), mop_li8)
-    FASTFUNCTION(FUNCADDR(mop_li16), SIG1(I,P), mop_li16)
+    FASTFUNCTION(FUNCADDR(mop_lix8), SIG1(I,P), mop_lix8)
+    FASTFUNCTION(FUNCADDR(mop_lix16), SIG1(I,P), mop_lix16)
+    FASTFUNCTION(FUNCADDR(mop_liz8), SIG1(I,P), mop_liz8)
+    FASTFUNCTION(FUNCADDR(mop_liz16), SIG1(I,P), mop_liz16)
     FASTFUNCTION(FUNCADDR(mop_li32), SIG1(I,P), mop_li32)
     FASTFUNCTION(FUNCADDR(mop_lf32), SIG1(F,P), mop_lf32)
     FASTFUNCTION(FUNCADDR(mop_lf64), SIG1(F,P), mop_lf64)

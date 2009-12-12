@@ -253,8 +253,10 @@ namespace avmplus
 		WOP_findpropglobalstrict = 0x132,
 		WOP_debugenter = 0x133,
 		WOP_debugexit = 0x134,
+		WOP_lix8 = 0x135,
+		WOP_lix16 = 0x136,
 		
-		WOP_LAST = 0x134
+		WOP_LAST = 0x136
 	};
 	
 	struct WordOpcodeAttr
