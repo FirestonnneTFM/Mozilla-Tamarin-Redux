@@ -37,77 +37,134 @@
 
 package avmplus
 {
+	use namespace AS3;
 	// -------------- internal --------------
 	
 	[native("DescribeTypeClass::describeTypeJSON")]
 	internal native function describeTypeJSON(o:*, flags:uint):Object;
 
+	internal const extendsXml:XML = <extendsClass />;
+	internal const implementsXml:XML = <implementsInterface />;
+	internal const constructorXml:XML = <constructor />;
+	internal const constantXml:XML = <constant />;
+	internal const variableXml:XML = <variable />;
+	internal const accessorXml:XML= <accessor />;
+	internal const methodXml:XML = <method />;
+	internal const parameterXml:XML = <parameter />;
+	internal const metadataXml:XML = <metadata />;
+	internal const argXml:XML = <arg />;
+	internal const typeXml:XML = <type />;
+	internal const factoryXml:XML = <factory />;
+		
+	
 	internal function describeParams(x:XML, parameters:Object):void
 	{
+		var c:XMLList = x.*;
 		for (var i in parameters)
 		{
 			var p = parameters[i];
-			var f:XML = <parameter index={i+1} type={p.type} optional={p.optional}/>
-			x.appendChild(f);
+			var f:XML = parameterXml.copy();
+			f.@index = i+1;
+			f.@type = p.type;
+			f.@optional = p.optional;
+			
+			c[c.length()] = f;
 		}
 	}
 
 	internal function describeMetadata(x:XML, metadata:Array):void
 	{
+		var c:XMLList = x.*;
 		for each (var md in metadata)
 		{
-			var m:XML = <metadata name={md.name}/>
+			var m:XML = metadataXml.copy();
+			m.@name = md.name;
 			for each (var i in md.value)
 			{
-				var a:XML = <arg key={i.key} value={i.value}/>
-				m.appendChild(a);
+				var a:XML = argXml.copy()
+				a.@key = i.key;
+				a.@value = i.value;
+				
+				m.AS3::appendChild(a);
 			}
-			x.appendChild(m);
+			c[c.length()] = m;
 		}
 	}
 
-	internal function finish(x:XML, e:XML, i:Object):void
+	internal function finish(e:XML, i:Object):void
 	{
 		if (i.uri !== null) e.@uri = i.uri;
 		if (i.metadata !== null) describeMetadata(e, i.metadata);
-		x.appendChild(e);
 	}
 	
 	internal function describeTraits(x:XML, traits:Object):void
 	{
+		var c:XMLList = x.*;
+		
 		for each (var i in traits.bases)
 		{
-			var e:XML = <extendsClass type={i}/>
-			x.appendChild(e);
+			var base:String = i;
+			
+			var e:XML = extendsXml.copy();
+			e.@type = base;
+			
+			c[c.length()] = e;
 		}
 		for each (var i in traits.interfaces)
 		{
-			var e:XML = <implementsInterface type={i}/>
-			x.appendChild(e);
+			var interf:String = i;
+			
+			var e:XML = implementsXml.copy();
+			e.@type = interf;
+			
+			c[c.length()] = e;
 		}
 		if (traits.constructor !== null)
 		{
-			var e:XML = <constructor/>
+			var e:XML = constructorXml.copy();
 			describeParams(e, traits.constructor);
-			x.appendChild(e);
+			c[c.length()] = e;
 		}
+		
 		for each (var i in traits.variables)
 		{
-			var e:XML = (i.access == "readonly") ? <constant/> : <variable/>
-			e.@name = i.name;
-			e.@type = i.type;
-			finish(x, e, i);
+			var variable:Object = i;
+			
+			var e:XML = (variable.access == "readonly") ? constantXml.copy() : variableXml.copy();
+			e.@name = variable.name;
+			e.@type = variable.type;
+			
+			finish(e, variable);
+			
+			c[c.length()] = e;
 		}
 		for each (var i in traits.accessors)
 		{
-			var e:XML = <accessor name={i.name} access={i.access} type={i.type} declaredBy={i.declaredBy}/>
-			finish(x, e, i);
+			var accessor:Object = i;
+			
+			var e:XML = accessorXml.copy();
+			e.@name = accessor.name;
+			e.@access = accessor.access;
+			e.@type = accessor.type;
+			e.@declaredBy = accessor.declaredBy;
+			
+			finish(e, accessor);
+			
+			c[c.length()] = e;
 		}
 		for each (var i in traits.methods)
 		{
-			var e:XML = <method name={i.name} declaredBy={i.declaredBy} returnType={i.returnType}/>
-			describeParams(e, i.parameters);
-			finish(x, e, i);
+			var method:Object = i;
+			
+			var e:XML = methodXml.copy();
+			e.@name = method.name;
+			e.@declaredBy = method.declaredBy;
+			e.@returnType = method.returnType;
+			
+			describeParams(e, method.parameters);
+			finish(e, method);
+			
+			c[c.length()] = e;
 		}
 		describeMetadata(x, traits.metadata);
 	}
@@ -147,7 +204,8 @@ package avmplus
 	public function describeType(value:*, flags:uint):XML
 	{
 		var o:Object = describeTypeJSON(value, flags);
-		var x:XML = <type name={o.name}/>
+		var x:XML = typeXml.copy();
+		x.@name = o.name;
 		if (o.traits.bases.length)
 			x.@base = o.traits.bases[0];
 		x.@isDynamic = o.isDynamic;
@@ -158,9 +216,10 @@ package avmplus
 		var oi:Object = describeTypeJSON(value, flags | USE_ITRAITS);
 		if (oi !== null)
 		{
-			var e:XML = <factory type={oi.name}/>
+			var e:XML = factoryXml.copy();
+			e.@type = oi.name;
 			describeTraits(e, oi.traits);
-			x.appendChild(e);
+			x.AS3::appendChild(e);
 		}
 
 		return x;
