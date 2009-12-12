@@ -42,67 +42,67 @@ namespace avmplus
 {
 
 REALLY_INLINE ScopeTypeChain::ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits)
-	: size(_size), fullsize(_fullsize), _traits(traits)
+    : size(_size), fullsize(_fullsize), _traits(traits)
 { }
 
 REALLY_INLINE const ScopeTypeChain* ScopeTypeChain::createEmpty(MMgc::GC* gc, Traits* traits)
 {
-	return create(gc, traits, NULL, NULL, NULL, NULL);
+    return create(gc, traits, NULL, NULL, NULL, NULL);
 }
 
 REALLY_INLINE Traits* ScopeTypeChain::traits() const
 {
-	return _traits;
+    return _traits;
 }
 
 REALLY_INLINE Traits* ScopeTypeChain::getScopeTraitsAt(uint32_t i) const
 {
-	return (Traits*)(_scopes[i] & ~ISWITH);
+    return (Traits*)(_scopes[i] & ~ISWITH);
 }
 
 REALLY_INLINE bool ScopeTypeChain::getScopeIsWithAt(uint32_t i) const
 {
-	return (_scopes[i] & ISWITH) != 0;
+    return (_scopes[i] & ISWITH) != 0;
 }
 
 REALLY_INLINE void ScopeTypeChain::setScopeAt(uint32_t i, Traits* t, bool w)
 {
-	_scopes[i] = uintptr_t(t) | (w ? ISWITH : 0);
+    _scopes[i] = uintptr_t(t) | (w ? ISWITH : 0);
 }
 
 REALLY_INLINE ScopeChain::ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns)
-	: _vtable(vtable), _abcEnv(abcEnv), _scopeTraits(scopeTraits), _defaultXmlNamespace(dxns)
+    : _vtable(vtable), _abcEnv(abcEnv), _scopeTraits(scopeTraits), _defaultXmlNamespace(dxns)
 { }
 
 REALLY_INLINE VTable* ScopeChain::vtable() const
 {
-	return _vtable;
+    return _vtable;
 }
 
 REALLY_INLINE AbcEnv* ScopeChain::abcEnv() const
 {
-	return _abcEnv;
+    return _abcEnv;
 }
 
 REALLY_INLINE const ScopeTypeChain* ScopeChain::scopeTraits() const
 {
-	return _scopeTraits;
+    return _scopeTraits;
 }
 
 REALLY_INLINE int32_t ScopeChain::getSize() const
 {
-	return _scopeTraits->size;
+    return _scopeTraits->size;
 }
 
 REALLY_INLINE Atom ScopeChain::getScope(int32_t i) const
 {
-	AvmAssert(i >= 0 && i < _scopeTraits->size);
-	return _scopes[i];
+    AvmAssert(i >= 0 && i < _scopeTraits->size);
+    return _scopes[i];
 }
 
 REALLY_INLINE Namespacep ScopeChain::getDefaultNamespace() const
 {
-	return _defaultXmlNamespace;
+    return _defaultXmlNamespace;
 }
 
 } // namespace avmplus

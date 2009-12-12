@@ -796,23 +796,23 @@
     CSEMETHOD(ENVADDR(MethodEnv::createRestHelper), SIG3(P,P,I,P), createRestHelper)
     CSEMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), SIG3(P,P,I,P), createArgumentsHelper)
 
-	void initMultinameLate(AvmCore* core, Multiname& name, Atom index)
-	{
-		if (AvmCore::isObject(index))
-		{
-			ScriptObject* i = AvmCore::atomToScriptObject(index);
-			if (i->traits() == core->traits.qName_itraits)
-			{
-				QNameObject* qname = (QNameObject*) i;
-				bool attr = name.isAttr();
-				qname->getMultiname(name);
-				name.setAttr(attr);
-				return;
-			}
-		}
+    void initMultinameLate(AvmCore* core, Multiname& name, Atom index)
+    {
+        if (AvmCore::isObject(index))
+        {
+            ScriptObject* i = AvmCore::atomToScriptObject(index);
+            if (i->traits() == core->traits.qName_itraits)
+            {
+                QNameObject* qname = (QNameObject*) i;
+                bool attr = name.isAttr();
+                qname->getMultiname(name);
+                name.setAttr(attr);
+                return;
+            }
+        }
 
-		name.setName(core->intern(index));
-	}		
+        name.setName(core->intern(index));
+    }
     FUNCTION(FUNCADDR(initMultinameLate), SIG3(V,P,P,A), initMultinameLate)
 
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), SIG3(V,P,P,A), initMultinameLateForDelete)
