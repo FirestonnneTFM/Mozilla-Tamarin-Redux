@@ -368,9 +368,9 @@ namespace avmplus
 		AvmCore *core = this->core();
 		ArrayObject *a = toplevel()->arrayClass->newArray(results);
 
-		a->setAtomProperty(toplevel()->regexpClass()->kindex,
+		a->setAtomProperty(toplevel()->regexpClass()->kindex->atom(),
 			   core->intToAtom(utf8Subject.toIndex(ovector[0])));
-		a->setAtomProperty(toplevel()->regexpClass()->kinput,
+		a->setAtomProperty(toplevel()->regexpClass()->kinput->atom(),
 			   subject->atom());
 		a->setLength(results);
 

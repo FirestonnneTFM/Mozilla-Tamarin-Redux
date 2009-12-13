@@ -53,8 +53,8 @@ namespace avmplus
 		ScriptObject* object_prototype = toplevel()->objectClass->prototype;
 		prototype = new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype);
 
-		kindex = core->internConstantStringLatin1("index")->atom();
-		kinput = core->internConstantStringLatin1("input")->atom();		
+		kindex = core->internConstantStringLatin1("index");
+		kinput = core->internConstantStringLatin1("input");
 	}
 	
 	// this = argv[0] (ignored)
