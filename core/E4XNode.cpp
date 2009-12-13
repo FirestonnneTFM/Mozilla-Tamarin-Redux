@@ -668,15 +668,15 @@ namespace avmplus
 #endif
 
 	// E4X 9.1.1.9, page 17
-	Atom E4XNode::_equals(Toplevel* toplevel, AvmCore *core, E4XNode *v) const
+	bool E4XNode::_equals(Toplevel* toplevel, AvmCore *core, E4XNode *v) const
 	{
 		core->stackCheck(toplevel);
 		
 		if (this == v)
-			return trueAtom;
+			return true;
 
 		if (this->getClass() != v->getClass())
-			return falseAtom;
+			return false;
 		
 		Multiname m;
 		Multiname m2;
@@ -684,15 +684,15 @@ namespace avmplus
 		if (this->getQName(&m, publicNS))
 		{
 			if (v->getQName(&m2, publicNS) == 0)
-				return falseAtom;
+				return false;
 
 			// QName/AttributeName comparision here
 			if (!m.matches(&m2))
-				return falseAtom;
+				return false;
 		}
 		else if (v->getQName(&m2, publicNS) != 0)
 		{
-			return falseAtom;
+			return false;
 		}
 
 // Not enabled after discussion with JeffD.  If the namespaces are important, they're 
@@ -700,7 +700,7 @@ namespace avmplus
 #if 0 
 		// NOT part of the original spec.  Added in later (bug 144429)
 		if (this->numNamespaces() != v->numNamespaces())
-			return falseAtom;
+			return false;
 
 		// Order of namespaces does not matter
 		AtomArray *ns1 = getNamespaces();
@@ -717,19 +717,19 @@ namespace avmplus
 
 			// A match was not found
 			if (n2 == numNamespaces())
-				return falseAtom;
+				return false;
 		}
 #endif
 
 		if (this->numAttributes() != v->numAttributes())
-			return falseAtom;
+			return false;
 
 		if (this->numChildren() != v->numChildren())
-			return falseAtom;
+			return false;
 
 		if (this->getValue() != v->getValue() && 
 			(this->getValue()==NULL || v->getValue()==NULL || *getValue() != *v->getValue()))
-			return falseAtom;
+			return false;
 
 		// step 8
 		// for each a in x.attributes
@@ -740,7 +740,7 @@ namespace avmplus
 			bool bFoundMatch = false;
 			for (uint32 k2 = 0; k2 < v->numAttributes(); k2++)
 			{
-				if (x1->_equals (toplevel, core, v->getAttribute(k2)) == trueAtom)
+				if (x1->_equals(toplevel, core, v->getAttribute(k2)))
 				{
 					bFoundMatch = true;
 					break;
@@ -748,7 +748,7 @@ namespace avmplus
 			}
 
 			if (!bFoundMatch)
-				return falseAtom;
+				return false;
 		}
 
 		// step 9
@@ -756,11 +756,11 @@ namespace avmplus
 		{
 			E4XNode *x1 = _getAt(i);
 			E4XNode *x2 = v->_getAt(i);
-			if (x1->_equals (toplevel, core, x2) == falseAtom)
-				return falseAtom;
+			if (!x1->_equals(toplevel, core, x2))
+				return false;
 		}
 
-		return trueAtom;
+		return true;
 	}
 
 	// E4X 9.1.1.11, page 18
