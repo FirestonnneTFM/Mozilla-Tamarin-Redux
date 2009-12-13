@@ -1657,7 +1657,7 @@ namespace avmplus
 
 		E4XNode *v = AvmCore::atomToXML(value);
 
-		return getNode()->_equals (toplevel(), core, v) == trueAtom; // rhino
+		return getNode()->_equals(toplevel(), core, v); // rhino
 		//SPEC - return (core()->equals (this->atom(), value) == trueAtom);
 	}
 
