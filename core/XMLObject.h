@@ -257,10 +257,10 @@ namespace avmplus
 		Namespace *GenerateUniquePrefix (Namespace *ns, const AtomArray *namespaces) const;
 
 		static bool notifyNeeded(E4XNode* target);
-		void issueNotifications(AvmCore* core, Toplevel* top, E4XNode* initialTarget, Atom target, Atom type, Atom value, Atom detail=undefinedAtom);
+		void issueNotifications(AvmCore* core, Toplevel* top, E4XNode* initialTarget, Atom target, Stringp type, Atom value, Atom detail=undefinedAtom);
 
-		void childChanges(Atom type, Atom value, E4XNode* prior=0);
-		void nonChildChanges(Atom type, Atom value, Atom detail=undefinedAtom);
+		void childChanges(Stringp type, Atom value, E4XNode* prior=0);
+		void nonChildChanges(Stringp type, Atom value, Atom detail=undefinedAtom);
 
 		// accessors to node functions
 		int getClass() const; 

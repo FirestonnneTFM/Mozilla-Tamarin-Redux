@@ -2581,7 +2581,7 @@ namespace avmplus
 	/**
 	 * Notification on generic node addition from XML or XMLList 
 	 */
-	void XMLObject::childChanges(Atom type, Atom value, E4XNode* prior)
+	void XMLObject::childChanges(Stringp type, Atom value, E4XNode* prior)
 	{
 		AvmCore* core = this->core();
 		Toplevel* top = this->toplevel();
@@ -2621,7 +2621,7 @@ namespace avmplus
 		}
 	}
 
-	void XMLObject::nonChildChanges(Atom type, Atom value, Atom detail)
+	void XMLObject::nonChildChanges(Stringp type, Atom value, Atom detail)
 	{
 		AvmCore* core = this->core();
 		Toplevel* top = this->toplevel();
@@ -2636,7 +2636,7 @@ namespace avmplus
 	/**
 	 * Perform the callback for each node in which the notification property is set.
 	 */
-	void XMLObject::issueNotifications(AvmCore* core, Toplevel* top, E4XNode* initialTarget, Atom target, Atom type, Atom value, Atom detail)
+	void XMLObject::issueNotifications(AvmCore* core, Toplevel* top, E4XNode* initialTarget, Atom target, Stringp type, Atom value, Atom detail)
 	{
 		// start notification at initialtarget
 		E4XNode* volatile node = initialTarget;
@@ -2648,7 +2648,7 @@ namespace avmplus
 			if (methodObj) 
 			{
 				XMLObject* currentTarget = new (core->GetGC())  XMLObject(top->xmlClass(), node);
-				Atom argv[6] = { top->atom(), currentTarget->atom(), type, target, value, detail };
+				Atom argv[6] = { top->atom(), currentTarget->atom(), type->atom(), target, value, detail };
 				int argc = 5;
 
 				//EnterScriptTimeout enterScriptTimeout(core);				
