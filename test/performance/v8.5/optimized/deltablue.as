@@ -48,7 +48,7 @@ public class OrderedCollection {
     private var elms:Array;
     
     public function OrderedCollection() {
-        this.elms = new Array();
+        this.elms = [];
     }
     
     public function add(elm):void {
@@ -64,7 +64,9 @@ public class OrderedCollection {
     }
     
     public function removeFirst():*{
-        return this.elms.pop();
+        var elm = elms[elms.length-1]
+        elms.length --;
+        return elm;
     }
     
     public function remove(elm):void {

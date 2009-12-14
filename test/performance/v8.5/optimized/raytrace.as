@@ -512,37 +512,42 @@ package FlogRayTracer {
 
     
         public var canvas:Object; /* 2d context we can render to */
-        public var options:Object;
+        public var canvasHeight:int = 100;
+        public var canvasWidth:int = 100;
+        public var pixelWidth:int = 2;
+        public var pixelHeight:int = 2;
+        public var renderDiffuse:Boolean = false;
+        public var renderShadows:Boolean = false;
+        public var renderHighlights:Boolean = false;
+        public var renderReflections:Boolean = false;
+        public var rayDepth:int = 2;
         public var result:Array = [];
     
     
-        public function Engine(options:Object = null):void{
-            if (options) {
-                this.options = options;
-            } else {
-                this.options = {
-                  canvasHeight: 100,
-                  canvasWidth: 100,
-                  pixelWidth: 2,
-                  pixelHeight: 2,
-                  renderDiffuse: false,
-                  renderShadows: false,
-                  renderHighlights: false,
-                  renderReflections: false,
-                  rayDepth: 2
-                };
-            }
-
-            this.options.canvasHeight /= this.options.pixelHeight;
-            this.options.canvasWidth /= this.options.pixelWidth;
+        public function Engine(canvasHeight:int, canvasWidth:int, pixelWidth:int,
+                                pixelHeight:int, renderDiffuse:Boolean, renderShadows:Boolean,
+                                renderHighlights:Boolean, renderReflections:Boolean, rayDepth:int):void{
+                  
+            this.canvasHeight = canvasHeight;
+            this.canvasWidth = canvasWidth;
+            this.pixelWidth = pixelWidth;
+            this.pixelHeight = pixelHeight;
+            this.renderDiffuse = renderDiffuse;
+            this.renderShadows = renderShadows;
+            this.renderHighlights = renderHighlights;
+            this.renderReflections = renderReflections;
+            this.rayDepth = rayDepth;
+            
+            this.canvasHeight /= this.pixelHeight;
+            this.canvasWidth /= this.pixelWidth;
 
             /* TODO: dynamically _include other scripts */
         }
 
-        public function setPixel (x, y, color):void{
+        public function setPixel (x:int, y:int, color:Color):void{
             var pxW:int, pxH:int;
-            pxW = this.options.pixelWidth;
-            pxH = this.options.pixelHeight;
+            pxW = this.pixelWidth;
+            pxH = this.pixelHeight;
     
             if (this.canvas) {
                 this.canvas.fillStyle = color.toString();
@@ -561,8 +566,8 @@ package FlogRayTracer {
                 this.canvas
             }
 
-            var canvasHeight:int = this.options.canvasHeight;
-            var canvasWidth:int = this.options.canvasWidth;
+            var canvasHeight:int = this.canvasHeight;
+            var canvasWidth:int = this.canvasWidth;
 
             for(var y:int=0; y < canvasHeight; y++){
                 for(var x:int=0; x < canvasWidth; x++){
@@ -633,7 +638,7 @@ package FlogRayTracer {
                                 info.position
                             ).normalize();
 
-                if(this.options.renderDiffuse){
+                if(this.renderDiffuse){
                     var L:Number = v.dot(info.normal);
                     if(L > 0.0){
                         color = Color.add(
@@ -651,9 +656,9 @@ package FlogRayTracer {
 
                 // The greater the depth the more accurate the colours, but
                 // this is exponentially (!) expensive
-                if(depth <= this.options.rayDepth){
+                if(depth <= this.rayDepth){
                     // calculate reflection ray
-                    if(this.options.renderReflections && info.shape.material.reflection > 0)
+                    if(this.renderReflections && info.shape.material.reflection > 0)
                     {
                         var reflectionRay:Ray = this.getReflectionRay(info.position, info.normal, ray.direction);
                         var refl:IntersectionInfo = this.testIntersection(reflectionRay, scene, info.shape);
@@ -679,7 +684,7 @@ package FlogRayTracer {
 
                 var shadowInfo:IntersectionInfo = new IntersectionInfo();
 
-                if(this.options.renderShadows){
+                if(this.renderShadows){
                     var shadowRay:Ray = new Ray(info.position, v);
 
                     shadowInfo = this.testIntersection(shadowRay, scene, info.shape);
@@ -691,7 +696,7 @@ package FlogRayTracer {
                 }
 
                 // Phong specular highlights
-                if(this.options.renderHighlights && !shadowInfo.isHit && info.shape.material.gloss > 0){
+                if(this.renderHighlights && !shadowInfo.isHit && info.shape.material.gloss > 0){
                     var Lv:RVector = RVector.subtract(
                                   info.shape.position,
                                   light.position
@@ -798,17 +803,15 @@ package FlogRayTracer {
         var rayDepth:int = 2;//$F('rayDepth');
 
         var raytracer:Engine = new Engine(
-            {
-                canvasWidth: imageWidth,
-                canvasHeight: imageHeight,
-                pixelWidth: pixelSize[0],
-                pixelHeight: pixelSize[1],
-                "renderDiffuse": renderDiffuse,
-                "renderHighlights": renderHighlights,
-                "renderShadows": renderShadows,
-                "renderReflections": renderReflections,
-                "rayDepth": rayDepth
-            }
+                imageWidth,
+                imageHeight,
+                pixelSize[0],
+                pixelSize[1],
+                renderDiffuse,
+                renderHighlights,
+                renderShadows,
+                renderReflections,
+                rayDepth
         );
 
         raytracer.renderScene(scene);
