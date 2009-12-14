@@ -122,8 +122,8 @@ namespace MMgc
 
 		// Allocate a new block
 
-		int numBlocks = kBlockSize/GCHeap::kBlockSize;
-		GCBlock* b = (GCBlock*) m_gc->AllocBlock(numBlocks, GC::kGCAllocPage, /*zero*/true,  (flags&GC::kCanFail) != 0);
+		GCAssert(uint32_t(kBlockSize) == GCHeap::kBlockSize);
+		GCBlock* b = (GCBlock*) m_gc->AllocBlock(1, GC::kGCAllocPage, /*zero*/true,  (flags&GC::kCanFail) != 0);
 
 		if (b) 
 		{
@@ -223,11 +223,23 @@ namespace MMgc
 		m_gc->FreeBlock(b, 1);
 	}
 
+#if defined DEBUG || defined MMGC_MEMORY_PROFILER
 	void* GCAlloc::Alloc(size_t size, int flags)
+#else
+	void* GCAlloc::Alloc(int flags)
+#endif
 	{
-		(void)size;
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
+		// Allocation must be signalled before we allocate because no GC work must be allowed to
+		// come between an allocation and an initialization - if it does, we may crash, as 
+		// GCFinalizedObject subclasses may not have a valid vtable, but the GC depends on them
+		// having it.  In principle we could signal allocation late but only set the object
+		// flags after signaling, but we might still cause trouble for the profiler, which also
+		// depends on non-interruptibility.
+
+		m_gc->SignalAllocWork(m_itemSize);
+		
 		GCBlock* b = m_firstFree;
 	start:
 		if (b == NULL) {
@@ -314,9 +326,18 @@ namespace MMgc
 		GCAssert((uintptr_t(item) & ~0xfff) == (uintptr_t) b);
 		GCAssert((uintptr_t(item) & 7) == 0);
 
+#ifdef MMGC_HOOKS
+		GCHeap* heap = GCHeap::GetGCHeap();
+		if(heap->HooksEnabled())
+		{
+			size_t userSize = m_itemSize - DebugSize();
 #ifdef MMGC_MEMORY_PROFILER
-		if(GCHeap::GetGCHeap()->HooksEnabled())
 			m_totalAskSize += size;
+			heap->AllocHook(GetUserPointer(item), size, userSize);
+#else
+			heap->AllocHook(GetUserPointer(item), 0, userSize);
+#endif
+		}
 #endif
 
 		return item;
@@ -329,15 +350,17 @@ namespace MMgc
 		GCAlloc *a = b->alloc;
 	
 #ifdef MMGC_HOOKS
-		if(GCHeap::GetGCHeap()->HooksEnabled())
+		GCHeap* heap = GCHeap::GetGCHeap();
+		if(heap->HooksEnabled())
 		{
 			const void* p = GetUserPointer(item);
-			GCHeap* heap = GCHeap::GetGCHeap();
+			size_t userSize = GC::Size(p);
 #ifdef MMGC_MEMORY_PROFILER
 			if(heap->GetProfiler())
 				a->m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
 #endif
-			heap->FinalizeHook(p, GC::Size(p));
+			heap->FinalizeHook(p, userSize);
+			heap->FreeHook(p, userSize, 0xca);
 		}
 #endif
 
