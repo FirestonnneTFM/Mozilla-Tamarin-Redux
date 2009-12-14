@@ -98,8 +98,13 @@ namespace MMgc
 		GCAlloc(GC* gc, int itemSize, bool containsPointers, bool isRC, int sizeClassIndex);
 		~GCAlloc();
 		
+#if defined DEBUG || defined MMGC_MEMORY_PROFILER
 		void* Alloc(size_t size, int flags);
+#else
+		void* Alloc(int flags);
+#endif
 		static void Free(const void *ptr);
+		
 		void Finalize();
 		void ClearMarks();
 #ifdef _DEBUG

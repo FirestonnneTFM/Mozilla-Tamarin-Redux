@@ -353,25 +353,17 @@ namespace MMgc
 		/**
 		 * Situation: signal that some number of bytes have just been successfully
 		 * allocated and are about to be returned to the caller of the allocator.
+		 *
+		 * @return true if collection work should be triggered because the allocation
+		 * budget has been exhausted.
 		 */
-		/*REALLY_INLINE*/ void signalAllocWork(size_t nbytes);
+		/*REALLY_INLINE*/ bool signalAllocWork(size_t nbytes);
 
 		/**
 		 * Situation: signal that some number of bytes have just been successfully
 		 * freed.
 		 */
 		/*REALLY_INLINE*/ void signalFreeWork(size_t nbytes);
-
-		/**
-		 * Situation: we've just entered the allocator and we need to know whether the
-		 * allocation budget has already been exhausted so that collection work should
-		 * be triggered.
-		 *
-		 * Note the decision is independent of the request size; consequently, we only
-		 * react /after/ the budget is exhausted, and this may cause us to overallocate
-		 * a little (typically) or more than that (rarely).
-		 */
-		/*REALLY_INLINE*/ bool queryCollectionWork();
 
 		/**
 		 * Situation: the incremental marker has been started, and we need to know whether
@@ -870,22 +862,25 @@ namespace MMgc
 		/**
 		 * Main interface for allocating memory.  Default flags are
 		 * no finalization, not containing pointers, not zero'd, and not ref-counted.
+		 *
+		 * This function returns NULL only if kCanFail is passed in 'flags'.
 		 */
 		void *Alloc(size_t size, int flags=0);
 
 		/**
-		 * Just like Alloc but can return NULL
+		 * Specialized implementations of Alloc().  Flags are omitted, each function is annotated
+		 * with the flags they assume.   Additionally, 'size' is usually known statically in the 
+		 * calling context (typically a 'new' operator).  Finally, these are always inlined.
+		 * The result is that most computation boils away and we're left with just a call to the
+		 * underlying primitive operator.
 		 */
-		void *PleaseAlloc(size_t size, int flags=0);
+		void *AllocPtrZero(size_t size);			// Flags: GC::kContainsPointers|GC::kZero
+		void *AllocPtrZeroFinalized(size_t size);	// Flags: GC::kContainsPointers|GC::kZero|GC::kFinalize
+		void *AllocRCObject(size_t size);			// Flags: GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize
 
 		/**
-		 * Like Alloc but optimized for the case of allocating one
-		 * 8-byte non-pointer-containing non-finalizable non-rc
-		 * non-zeroed object (a box for an IEEE double).
-		 *
-		 * Note, the interaction with the policy manager, sampler, profiler etc
-		 * in AllocDouble() should be the same as in Alloc(), which is defined
-		 * in GC.cpp.
+		 * Like Alloc but optimized for the case of allocating one 8-byte non-pointer-containing
+		 * non-finalizable non-rc non-zeroed object (a box for an IEEE double).
 		 */
 		void* AllocDouble();
 
@@ -894,8 +889,33 @@ namespace MMgc
 		 * separate function in order to allow for a fast object overflow check.
 		 */
 		void *AllocExtra(size_t size, size_t extra, int flags=0);
+
+		/**
+		 * Specialized implementations of Alloc().  See above for explanations.
+		 */
+		void *AllocExtraPtrZero(size_t size, size_t extra);				// Flags: GC::kContainsPointers|GC::kZero
+		void *AllocExtraPtrZeroFinalized(size_t size, size_t extra);	// Flags: GC::kContainsPointers|GC::kZero|GC::kFinalize
+		void *AllocExtraRCObject(size_t size, size_t extra);			// Flags: GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize
 		
+		/**
+		 * Out-of-line version of AllocExtra, used by the specialized versions
+		 */
+		void *OutOfLineAllocExtra(size_t size, size_t extra, int flags);
+		
+		/**
+		 * Just like Alloc but can return NULL
+		 */
+		void *PleaseAlloc(size_t size, int flags=0);
+		
+		/**
+		 * Signal that we've allocated some memory and that collection can be triggered
+		 * if necessary.
+		 */
+		void SignalAllocWork(size_t size);
+
 	private:
+		const static size_t kLargestAlloc = 1968;
+
 		class RCRootSegment : public GCRoot
 		{
 		public:
@@ -941,10 +961,15 @@ namespace MMgc
 		void *Calloc(size_t num, size_t elsize, int flags=0);
 
 		/**
-		 * One can free a GC allocated pointer.
+		 * One can free a GC allocated pointer.  The pointer may be NULL.
 		 */
 		void Free(const void *ptr);
 
+		/**
+		 * One can free a GC allocated pointer.  The pointer must not be NULL.
+		 */
+		void FreeNotNull(const void *ptr);
+		
 		/**
 		 * @return the size of a managed object given a user or real pointer to its
 		 * beginning.  The returned value may be bigger than what was asked for.
@@ -1328,8 +1353,39 @@ namespace MMgc
 
 		GCHashtable weakRefs;
 
+		// BEGIN FLAGS
+		// The flags are hot, group them and hope they end up in the same cache line
+		
+		// True when the GC is being destroyed
 		bool destroying;
 
+		/**
+		 * True if incremental marking is on and some objects have been marked.
+		 * This means write barriers are enabled.
+		 *
+		 * The GC thread may read and write this flag.  Application threads in
+		 * requests have read-only access.
+		 *
+		 * It is possible for marking==true and collecting==false but not vice versa.
+		 */
+		bool marking;
+		
+		/**
+		 * True during the sweep phase of collection.  Several things have to
+		 * behave a little differently during this phase.  For example,
+		 * GC::Free() does nothing during sweep phase; otherwise finalizers
+		 * could be called twice.
+		 *
+		 * Also, Collect() uses this to protect itself from recursive calls
+		 * (from badly behaved finalizers).
+		 *
+		 * It is possible for marking==true and collecting==false but not vice versa.
+		 */
+		bool collecting;
+		
+		// END FLAGS
+		
+		
 		// we track the top and bottom of the stack for cleaning purposes.
 		// the top tells us how far up the stack as been dirtied.
 		// the bottom is also tracked so we can ensure we're on the same
@@ -1342,16 +1398,6 @@ namespace MMgc
 
 		GCRoot* emptyWeakRefRoot;
 
-		/**
-		 * True if incremental marking is on and some objects have been marked.
-		 * This means write barriers are enabled.
-		 *
-		 * The GC thread may read and write this flag.  Application threads in
-		 * requests have read-only access.
-		 *
-		 * Note that this is not obviously exclusive with 'collecting'.
-		 */
-		bool marking;
 		GCMarkStack m_incrementalWork;
 		void StartIncrementalMark();
 		void FinishIncrementalMark(bool scanStack);
@@ -1380,6 +1426,17 @@ namespace MMgc
 
 		const static int16_t kSizeClasses[kNumSizeClasses];		
 		const static uint8_t kSizeClassIndex[246];
+
+		// These two members help optimize GC::Alloc: by keeping a pointer in the GC instance
+		// for the kSizeClassIndex table we avoid code generation SNAFUs when compiling with -fPIC,
+		// which is the default on Mac at least.  (GCC generates a call-to-next-instruction-and-pop
+		// to obtain the PC address, from which it can compute the table address.  Keeping the
+		// member here effectively hoists that computation out of the allocator.)  And by keeping
+		// a lookup table of allocators indexed by the flag bits of interest we avoid a decision
+		// tree inside GC::Alloc.
+
+		const uint8_t* const sizeClassIndex;
+		GCAlloc** allocsTable[(kRCObject|kContainsPointers)+1];
 
 		void *m_contextVars[GCV_COUNT];
 
@@ -1472,17 +1529,6 @@ namespace MMgc
 		void SweepNeedsSweeping();
 		
 	private:
-		/**
-		 * True during the sweep phase of collection.  Several things have to
-		 * behave a little differently during this phase.  For example,
-		 * GC::Free() does nothing during sweep phase; otherwise finalizers
-		 * could be called twice.
-		 *
-		 * Also, Collect() uses this to protect itself from recursive calls
-		 * (from badly behaved finalizers).
-		 */
-		bool collecting;
- 
 		bool finalizedValue;
 
 		void AddToSmallEmptyBlockList(GCAlloc::GCBlock *b);
