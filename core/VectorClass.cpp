@@ -691,7 +691,7 @@ namespace avmplus
 
 		Atom *arr = m_array;
 
-		ScriptObject* so_args = (args&7)==kObjectType ?  AvmCore::atomToScriptObject(args) : 0;
+		ScriptObject* so_args = atomKind(args)==kObjectType ?  AvmCore::atomToScriptObject(args) : 0;
 		ObjectVectorObject* vec_args = isVector(args);
 
 		if (l_shiftAmount < 0) 

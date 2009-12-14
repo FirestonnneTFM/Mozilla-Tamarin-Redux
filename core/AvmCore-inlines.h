@@ -179,17 +179,17 @@ REALLY_INLINE void AvmCore::stackCheck(Toplevel* toplevel)
 
 REALLY_INLINE /*static*/ bool AvmCore::isObject(Atom atom)
 {
-	return (atom&7) == kObjectType && !isNull(atom);
+	return atomKind(atom) == kObjectType && !isNull(atom);
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isPointer(Atom atom)
 {
-	return (atom&7) < kSpecialType || (atom&7) == kDoubleType;
+	return atomKind(atom) < kSpecialType || atomKind(atom) == kDoubleType;
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isNamespace(Atom atom)
 {
-	return (atom&7) == kNamespaceType && !isNull(atom);
+	return atomKind(atom) == kNamespaceType && !isNull(atom);
 }
 
 REALLY_INLINE /*static*/ BindingKind AvmCore::bindingKind(Binding b)
@@ -283,7 +283,7 @@ REALLY_INLINE bool AvmCore::isFunction(Atom atom)
 /** Helper method; returns true if atom's type is double */
 REALLY_INLINE /*static*/ bool AvmCore::isDouble(Atom atom)
 {
-	return (atom&7) == kDoubleType;
+	return atomKind(atom) == kDoubleType;
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isNumber(Atom atom)
@@ -295,7 +295,7 @@ REALLY_INLINE /*static*/ bool AvmCore::isNumber(Atom atom)
 
 REALLY_INLINE /*static*/ bool AvmCore::isBoolean(Atom atom)
 {
-	return (atom&7) == kBooleanType;
+	return atomKind(atom) == kBooleanType;
 }
 
 REALLY_INLINE /*static*/ bool AvmCore::isNull(Atom atom)
@@ -533,14 +533,14 @@ REALLY_INLINE /*static*/ bool AvmCore::isDictionaryLookup(Atom key, Atom obj)
 
 REALLY_INLINE /*static*/ Namespacep AvmCore::atomToNamespace(Atom atom)
 {
-	AvmAssert((atom&7)==kNamespaceType);
-	return (Namespacep)(atom&~7);
+	AvmAssert(atomKind(atom)==kNamespaceType);
+	return (Namespacep)atomPtr(atom);
 }
 
 REALLY_INLINE /*static*/ double AvmCore::atomToDouble(Atom atom)
 {
-	AvmAssert((atom&7)==kDoubleType);
-	return *(const double*)(atom&~7);
+	AvmAssert(atomKind(atom)==kDoubleType);
+	return *(const double*)atomPtr(atom);
 }
 
 /**
@@ -550,8 +550,8 @@ REALLY_INLINE /*static*/ double AvmCore::atomToDouble(Atom atom)
  */
 REALLY_INLINE /*static*/ Stringp AvmCore::atomToString(Atom atom)
 {
-	AvmAssert((atom&7)==kStringType);
-	return (Stringp)(atom&~7);
+	AvmAssert(atomKind(atom)==kStringType);
+	return (Stringp)atomPtr(atom);
 }
 
 // Avoid adding validation checks here and returning NULL.  If this
@@ -559,8 +559,8 @@ REALLY_INLINE /*static*/ Stringp AvmCore::atomToString(Atom atom)
 // or AbcParser/Verifier should be enhanced to catch this case.
 REALLY_INLINE /*static*/ ScriptObject* AvmCore::atomToScriptObject(const Atom atom)
 {
-	AvmAssert((atom&7)==kObjectType);
-	return (ScriptObject*)(atom&~7);
+	AvmAssert(atomKind(atom)==kObjectType);
+	return (ScriptObject*)atomPtr(atom);
 }
 
 // Helper function, allows generic objects to work with InlineHashtable

@@ -772,8 +772,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (isNull(lhs)) lhs = 0;
 		if (isNull(rhs)) rhs = 0;
 
-		int ltype = (int)(lhs & 7);
-        int rtype = (int)(rhs & 7);
+		int ltype = (int)atomKind(lhs);
+        int rtype = (int)atomKind(rhs);
 
 		// See E4X 11.5.1, pg 53.  
 		if ((ltype == kObjectType) && (isXMLList(lhs)))
@@ -921,8 +921,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (isNull(lhs)) return isNull(rhs) ? trueAtom : falseAtom;
 		if (isNull(rhs)) return falseAtom; // We already know that lhs is not null
 
-        int ltype = lhs & 7;
-        int rtype = rhs & 7;
+        int ltype = atomKind(lhs);
+        int rtype = atomKind(rhs);
         if (ltype == rtype)
         {
             // same type
@@ -1369,7 +1369,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			case kIntptrType:
 				{
@@ -1400,7 +1400,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			case kIntptrType:
                 return atomGetIntptr(atom) != 0;
@@ -1443,7 +1443,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (!isNull(atom))
 		{
 			double value;
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			case kSpecialType:
 				return kNaN;
@@ -1516,7 +1516,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
 		if (!isNull(atom))
 		{
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			case kBooleanType:
 				return booleanStrings[atom>>3];
@@ -2106,7 +2106,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	void AvmCore::increment_i(Atom *ap, int delta)
 	{
-		switch (*ap & 7)
+		switch (atomKind(*ap))
 		{
 		case kBooleanType:
 			*ap = intToAtom(delta+(sint32((sintptr)*ap>>3)));
@@ -2673,7 +2673,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		if (!isNull(a))
 		{
-			switch (a&7)
+			switch (atomKind(a))
 			{
 			case kStringType:
 				return EscapeElementValue (string(a), true);
@@ -2829,7 +2829,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		if (!isNull(arg))
 		{
-			switch (arg&7)
+			switch (atomKind(arg))
 			{
 			default:
 			case kObjectType:
@@ -3731,7 +3731,7 @@ return the result of the comparison ToPrimitive(x) == y.
     {
 		if (!isNull(atom))
 		{
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			default:
 			case kNamespaceType:

@@ -988,7 +988,7 @@ namespace avmplus
 
 	ScriptObject* ArraySort::toFieldObject(Atom atom) const
 	{
-		if ((atom&7) != kObjectType)
+		if (atomKind(atom) != kObjectType)
 		{
 			#if 0
 			/* cn: ifdefed out, not sure what the intent was here, but calling code in FieldCompare

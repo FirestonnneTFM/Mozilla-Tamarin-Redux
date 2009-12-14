@@ -124,7 +124,7 @@ VTable* toVTable(E env, Atom atom)
             return AvmCore::atomToScriptObject(atom)->vtable;
 
         Toplevel* toplevel = env->toplevel();
-        switch (atom&7)
+        switch (atomKind(atom))
         {
         case kNamespaceType:
             return toplevel->namespaceClass->ivtable();
@@ -251,7 +251,7 @@ Atom constructprop(Toplevel* toplevel, const Multiname* multiname, int argc, Ato
         toplevel->throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
     }
     default:
-        if ((obj&7)==kObjectType)
+        if (atomKind(obj)==kObjectType)
         {
             return AvmCore::atomToScriptObject(obj)->constructProperty(multiname, argc, atomv);
         }

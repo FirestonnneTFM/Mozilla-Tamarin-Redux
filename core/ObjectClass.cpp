@@ -145,12 +145,12 @@ namespace avmplus
 		AvmCore* core = this->core();
 		name = name ? core->internString(name) : (Stringp)core->knull;
 
-		if ((thisAtom&7) == kObjectType)
+		if (atomKind(thisAtom) == kObjectType)
 		{
 			ScriptObject* obj = AvmCore::atomToScriptObject(thisAtom);
 			return obj->getStringPropertyIsEnumerable(name);
 		}
-		else if ((thisAtom&7) == kNamespaceType)
+		else if (atomKind(thisAtom) == kNamespaceType)
 		{
 			// Special case:
 			// E4X 13.2.5.1, 13.2.5.2 specifies that prefix and uri
@@ -168,7 +168,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		name = name ? core->internString(name) : (Stringp)core->knull;
 
-		if ((thisAtom&7) == kObjectType)
+		if (atomKind(thisAtom) == kObjectType)
 		{
 			ScriptObject* obj = AvmCore::atomToScriptObject(thisAtom);
 			obj->setStringPropertyIsEnumerable(name, enumerable);
