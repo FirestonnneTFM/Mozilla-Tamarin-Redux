@@ -33,6 +33,7 @@
 // also has to deal with a lot of changes to the large tree object
 // graph.
 
+load("base.as")
 var Splay = new BenchmarkSuite('Splay', 126125, [
   new Benchmark("Splay", SplayRun, SplaySetup, SplayTearDown)
 ]);
@@ -376,3 +377,6 @@ SplayTree.Node.prototype.traverse_ = function(f) {
     current = current.right;
   }
 };
+// Run the test
+    BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+                               NotifyScore: PrintScore });

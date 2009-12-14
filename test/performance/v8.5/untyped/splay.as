@@ -33,92 +33,101 @@
 // also has to deal with a lot of changes to the large tree object
 // graph.
 
-var Splay = new BenchmarkSuite('Splay', 126125, [
-  new Benchmark("Splay", SplayRun, SplaySetup, SplayTearDown)
-]);
+package {
+    load("base.as");
+    var s=new Splayer();
+    var Splay = new BenchmarkSuite('Splay', 126125, [
+        new Benchmark("Splay", s.SplayRun, s.SplaySetup, s.SplayTearDown)
+        ]);
 
-
+    public class PayloadData {
+// Vector is 400ms slower
+//        var array;
+        var array;
+        var string;
+        var left;
+        var right;
+        public function PayloadData(array,string,left=null,right=null) {
+            this.array=array;
+            this.string=string;
+            this.left=left;
+            this.right=right;
+        }        
+    }
 // Configuration.
-var kSplayTreeSize = 8000;
-var kSplayTreeModifications = 80;
-var kSplayTreePayloadDepth = 5;
+    public class Splayer {
+        var kSplayTreeSize = 8000;
+        var kSplayTreeModifications = 80;
+        var kSplayTreePayloadDepth = 5;
+ 
+        var splayTree = null;
 
-var splayTree = null;
-
-
-function GeneratePayloadTree(depth, key) {
-  if (depth == 0) {
-    return {
-      array  : [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
-      string : 'String for key ' + key + ' in leaf node'
-    };
-  } else {
-    return {
-      left:  GeneratePayloadTree(depth - 1, key),
-      right: GeneratePayloadTree(depth - 1, key)
-    };
-  }
-}
+        public function GeneratePayloadTree(depth, key) {
+            if (depth == 0) {
+// Vector 400s slower                return new PayloadData(new <int>[0,1,2,3,4,5,6,7,8],'String for key in leaf node',key);
+                return new PayloadData([0,1,2,3,4,5,6,7,8],'String for key '+key+' in leaf node');
+            } else {
+                return new PayloadData(null,null,GeneratePayloadTree(depth - 1, key),GeneratePayloadTree(depth - 1, key));
+            }
+        }
 
 
-function GenerateKey() {
+        public function GenerateKey() {
   // The benchmark framework guarantees that Math.random is
   // deterministic; see base.js.
-  return Math2.random();
-}
+            return Math2.random();
+        }
 
 
-function InsertNewNode() {
+        public function InsertNewNode() {
   // Insert new node with a unique key.
-  var key;
-  do {
-    key = GenerateKey();
-  } while (splayTree.find(key) != null);
-  splayTree.insert(key, GeneratePayloadTree(kSplayTreePayloadDepth, key));
-  return key;
-}
+            var key;
+            do {
+               key = GenerateKey();
+            } while (splayTree.find(key) != null);
+            splayTree.insert(key, GeneratePayloadTree(kSplayTreePayloadDepth, key));
+            return key;
+        }
 
 
+        public function SplaySetup() {
+            splayTree = new SplayTree();
+            for (var i = 0; i < kSplayTreeSize; i++) { InsertNewNode(); }
+        }
 
-function SplaySetup() {
-  splayTree = new SplayTree();
-  for (var i = 0; i < kSplayTreeSize; i++) InsertNewNode();
-}
 
-
-function SplayTearDown() {
+        public function SplayTearDown() {
   // Allow the garbage collector to reclaim the memory
   // used by the splay tree no matter how we exit the
   // tear down function.
-  var keys = splayTree.exportKeys();
-  splayTree = null;
+            var keys = splayTree.exportKeys();
+            splayTree = null;
 
   // Verify that the splay tree has the right size.
-  var length = keys.length;
-  if (length != kSplayTreeSize) {
-    throw new Error("Splay tree has wrong size");
-  }
+            var length = keys.length;
+            if (length != kSplayTreeSize) {
+                throw new Error("Splay tree has wrong size");
+            }
 
   // Verify that the splay tree has sorted, unique keys.
-  for (var i = 0; i < length - 1; i++) {
-    if (keys[i] >= keys[i + 1]) {
-      throw new Error("Splay tree not sorted");
-    }
-  }
-}
+            for (var i = 0; i < length - 1; i++) {
+                if (keys[i] >= keys[i + 1]) {
+                    throw new Error("Splay tree not sorted");
+                }
+            }
+        }
 
 
-function SplayRun() {
+        public function SplayRun() {
   // Replace a few nodes in the splay tree.
-  for (var i = 0; i < kSplayTreeModifications; i++) {
-    var key = InsertNewNode();
-    var greatest = splayTree.findGreatestLessThan(key);
-    if (greatest == null) splayTree.remove(key);
-    else splayTree.remove(greatest.key);
-  }
-}
-
-
+            for (var i = 0; i < kSplayTreeModifications; i++) {
+                var key = InsertNewNode();
+                var greatest = splayTree.findGreatestLessThan(key);
+                if (greatest == null) splayTree.remove(key);
+                else splayTree.remove(greatest.key);
+            }    
+        }
+    }
 /**
  * Constructs a Splay tree.  A splay tree is a self-balancing binary
  * search tree with the additional property that recently accessed
@@ -127,9 +136,10 @@ function SplayRun() {
  *
  * @constructor
  */
-function SplayTree() {
-};
 
+    public class SplayTree {
+        public function SplayTree() {
+        }
 
 /**
  * Pointer to the root node of the tree.
@@ -137,15 +147,15 @@ function SplayTree() {
  * @type {SplayTree.Node}
  * @private
  */
-SplayTree.prototype.root_ = null;
+        private var root_ = null;
 
 
 /**
  * @return {boolean} Whether the tree is empty.
  */
-SplayTree.prototype.isEmpty = function() {
-  return !this.root_;
-};
+        public function isEmpty() {
+            return !this.root_;
+        };
 
 
 /**
@@ -156,29 +166,29 @@ SplayTree.prototype.isEmpty = function() {
  * @param {number} key Key to insert into the tree.
  * @param {*} value Value to insert into the tree.
  */
-SplayTree.prototype.insert = function(key, value) {
-  if (this.isEmpty()) {
-    this.root_ = new SplayTree.Node(key, value);
-    return;
-  }
+        public function insert(key, value) {
+            if (this.isEmpty()) {
+                this.root_ = new Node(key, value);
+                return;
+            }
   // Splay on the key to move the last node on the search path for
   // the key to the root of the tree.
-  this.splay_(key);
-  if (this.root_.key == key) {
-    return;
-  }
-  var node = new SplayTree.Node(key, value);
-  if (key > this.root_.key) {
-    node.left = this.root_;
-    node.right = this.root_.right;
-    this.root_.right = null;
-  } else {
-    node.right = this.root_;
-    node.left = this.root_.left;
-    this.root_.left = null;
-  }
-  this.root_ = node;
-};
+            this.splay_(key);
+           if (this.root_.key == key) {
+                return;
+            }
+            var node = new Node(key, value);
+            if (key > this.root_.key) {
+                node.left = this.root_;
+                node.right = this.root_.right;
+                this.root_.right = null;
+            } else {
+                node.right = this.root_;
+                node.left = this.root_.left;
+                this.root_.left = null;
+            }
+            this.root_ = node;
+        };
 
 
 /**
@@ -189,28 +199,28 @@ SplayTree.prototype.insert = function(key, value) {
  * @param {number} key Key to find and remove from the tree.
  * @return {SplayTree.Node} The removed node.
  */
-SplayTree.prototype.remove = function(key) {
-  if (this.isEmpty()) {
-    throw Error('Key not found: ' + key);
-  }
-  this.splay_(key);
-  if (this.root_.key != key) {
-    throw Error('Key not found: ' + key);
-  }
-  var removed = this.root_;
-  if (!this.root_.left) {
-    this.root_ = this.root_.right;
-  } else {
-    var right = this.root_.right;
-    this.root_ = this.root_.left;
+        public function remove(key) {
+            if (this.isEmpty()) {
+                throw Error('Key not found: ' + key);
+            }
+            this.splay_(key);
+            if (this.root_.key != key) {
+                throw Error('Key not found: ' + key);
+            }
+            var removed = this.root_;
+            if (!this.root_.left) {
+                this.root_ = this.root_.right;
+            } else {
+                var right = this.root_.right;
+                this.root_ = this.root_.left;
     // Splay to make sure that the new root has an empty right child.
-    this.splay_(key);
+                this.splay_(key);
     // Insert the original right child as the right child of the new
     // root.
-    this.root_.right = right;
-  }
-  return removed;
-};
+                this.root_.right = right;
+            }
+            return removed;
+        };
 
 
 /**
@@ -220,48 +230,47 @@ SplayTree.prototype.remove = function(key) {
  * @param {number} key Key to find in the tree.
  * @return {SplayTree.Node} Node having the specified key.
  */
-SplayTree.prototype.find = function(key) {
-  if (this.isEmpty()) {
-    return null;
-  }
-  this.splay_(key);
-  return this.root_.key == key ? this.root_ : null;
-};
+        public function find(key) {
+            if (this.isEmpty()) {
+                return null;
+            }
+            this.splay_(key);
+            return this.root_.key == key ? this.root_ : null;
+        };
 
 
 /**
  * @return {SplayTree.Node} Node having the maximum key value that
  *     is less or equal to the specified key value.
  */
-SplayTree.prototype.findGreatestLessThan = function(key) {
-  if (this.isEmpty()) {
-    return null;
-  }
+        public function findGreatestLessThan(key) {
+            if (this.isEmpty()) {
+                return null;
+            }
   // Splay on the key to move the node with the given key or the last
   // node on the search path to the top of the tree.
-  this.splay_(key);
+            this.splay_(key);
   // Now the result is either the root node or the greatest node in
   // the left subtree.
-  if (this.root_.key <= key) {
-    return this.root_;
-  } else if (this.root_.left) {
-    return this.findMax(this.root_.left);
-  } else {
-    return null;
-  }
-};
-
+            if (this.root_.key <= key) {
+                return this.root_;
+            } else if (this.root_.left) {
+                return this.findMax(this.root_.left);
+            } else {
+                return null;
+            }
+        };
 
 /**
  * @return {Array<*>} An array containing all the keys of tree's nodes.
  */
-SplayTree.prototype.exportKeys = function() {
-  var result = [];
-  if (!this.isEmpty()) {
-    this.root_.traverse_(function(node) { result.push(node.key); });
-  }
-  return result;
-};
+        public function exportKeys() {
+            var result = new Vector.<Number>();
+            if (!this.isEmpty()) {
+                this.root_.traverse_(function (node) {result.push(node.key)} );
+            }
+            return result;
+        };
 
 
 /**
@@ -274,67 +283,69 @@ SplayTree.prototype.exportKeys = function() {
  * @param {number} key Key to splay the tree on.
  * @private
  */
-SplayTree.prototype.splay_ = function(key) {
-  if (this.isEmpty()) {
-    return;
-  }
+        public function splay_(key) {
+           if (this.isEmpty()) {
+               return;
+            }
   // Create a dummy node.  The use of the dummy node is a bit
   // counter-intuitive: The right child of the dummy node will hold
   // the L tree of the algorithm.  The left child of the dummy node
   // will hold the R tree of the algorithm.  Using a dummy node, left
   // and right will always be nodes and we avoid special cases.
-  var dummy, left, right;
-  dummy = left = right = new SplayTree.Node(null, null);
-  var current = this.root_;
-  while (true) {
-    if (key < current.key) {
-      if (!current.left) {
-        break;
-      }
-      if (key < current.left.key) {
+            var dummy;
+            var left;
+            var right;
+            dummy = left = right = new Node(null, null);
+            var current = this.root_;
+            while (true) {
+                if (key < current.key) {
+                    if (!current.left) {
+                        break;
+                    }
+                    if (key < current.left.key) {
         // Rotate right.
-        var tmp = current.left;
-        current.left = tmp.right;
-        tmp.right = current;
-        current = tmp;
-        if (!current.left) {
-          break;
-        }
-      }
+                        var tmp = current.left;
+                        current.left = tmp.right;
+                        tmp.right = current;
+                        current = tmp;
+                        if (!current.left) {
+                            break;
+                        }
+                    }
       // Link right.
-      right.left = current;
-      right = current;
-      current = current.left;
-    } else if (key > current.key) {
-      if (!current.right) {
-        break;
-      }
-      if (key > current.right.key) {
+                    right.left = current;
+                    right = current;
+                    current = current.left;
+                } else if (key > current.key) {
+                    if (!current.right) {
+                        break;
+                    }
+                    if (key > current.right.key) {
         // Rotate left.
-        var tmp = current.right;
-        current.right = tmp.left;
-        tmp.left = current;
-        current = tmp;
-        if (!current.right) {
-          break;
-        }
-      }
+                        var tmp = current.right;
+                        current.right = tmp.left;
+                        tmp.left = current;
+                        current = tmp;
+                        if (!current.right) {
+                            break;
+                        }
+                    }
       // Link left.
-      left.right = current;
-      left = current;
-      current = current.right;
-    } else {
-      break;
-    }
-  }
+                    left.right = current;
+                    left = current;
+                    current = current.right;
+                } else {
+                    break;
+                }
+            }
   // Assemble.
-  left.right = current.left;
-  right.left = current.right;
-  current.left = dummy.right;
-  current.right = dummy.left;
-  this.root_ = current;
-};
-
+            left.right = current.left;
+            right.left = current.right;
+            current.left = dummy.right;
+            current.right = dummy.left;
+            this.root_ = current;
+        };
+    }
 
 /**
  * Constructs a Splay tree node.
@@ -342,22 +353,25 @@ SplayTree.prototype.splay_ = function(key) {
  * @param {number} key Key.
  * @param {*} value Value.
  */
-SplayTree.Node = function(key, value) {
-  this.key = key;
-  this.value = value;
-};
+    public class Node {
+        public var key;
+        public var value;
+        public function Node(key,value) {
+            this.key = key;
+            this.value = value;
+        };
 
 
 /**
  * @type {SplayTree.Node}
  */
-SplayTree.Node.prototype.left = null;
+        public var left = null;
 
 
 /**
  * @type {SplayTree.Node}
  */
-SplayTree.Node.prototype.right = null;
+        public var right = null;
 
 
 /**
@@ -367,12 +381,18 @@ SplayTree.Node.prototype.right = null;
  * @param {function(SplayTree.Node)} f Visitor function.
  * @private
  */
-SplayTree.Node.prototype.traverse_ = function(f) {
-  var current = this;
-  while (current) {
-    var left = current.left;
-    if (left) left.traverse_(f);
-    f(current);
-    current = current.right;
-  }
-};
+        public function traverse_(f): void {
+            var current = this;
+            while (current) {
+                var left = current.left;
+                if (left) left.traverse_(f);
+                f(current);
+                current = current.right;
+            }
+        };
+    }
+
+// Run the test
+    BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+                               NotifyScore: PrintScore });
+}
