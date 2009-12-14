@@ -29,6 +29,11 @@
  * and disclaimer.
  */
 
+/*
+OPTIMIZATIONS:
+1) int() casting in asm3(), suqareTo() and reduce()
+
+*/
  
 package crypto {
     
@@ -92,11 +97,15 @@ public class am3 implements iam {
         var xl:int = x&0x3fff, xh:int = x>>14;
         while(--n >= 0) {
             var l:int = this_array[i]&0x3fff;
-            var h:int = this_array[i++]>>14;
-            var m:int = xh*l+h*xl;
-            l = xl*l+((m&0x3fff)<<14)+w_array[j] + c;
-            c = (l>>28)+(m>>14)+xh*h;
-            w_array[j++] = l&0xfffffff;
+            var h:int = this_array[int(i++)]>>14;
+            var m:int = int(xh*l)+int(h*xl);
+            l = int(xl*l)
+            l +=((m&0x3fff)<<14)
+            l += w_array[j] 
+            l += c;
+            c = (l>>28)+(m>>14)
+            c = c + int(xh*h);
+            w_array[int(j++)] = l&0xfffffff;
         }
         return c;
   }
@@ -231,7 +240,7 @@ public class BigInteger {
     }
     
     public function intAt(s:String,i:int):int {
-        var c:int = BI_RC[s.charCodeAt(i)];
+        var c:int = BI_RC[int(s.charCodeAt(i))];
         return (c==null)?-1:c;
     }
 
@@ -326,14 +335,14 @@ public class BigInteger {
         var i:int = 0, c:int = 0, m:int = Math.min(a.t,this.t);
         while(i < m) {
             c += this_array[i]+a_array[i];
-            r_array[i++] = c&BI_DM;
+            r_array[int(i++)] = c&BI_DM;
             c >>= BI_DB;
         }
         if(a.t < this.t) {
             c += a.s;
             while(i < this.t) {
                 c += this_array[i];
-                r_array[i++] = c&BI_DM;
+                r_array[int(i++)] = c&BI_DM;
                 c >>= BI_DB;
             }
             c += this.s;
@@ -342,14 +351,14 @@ public class BigInteger {
             c += this.s;
             while(i < a.t) {
                 c += a_array[i];
-                r_array[i++] = c&BI_DM;
+                r_array[int(i++)] = c&BI_DM;
                 c >>= BI_DB;
             }
             c += a.s;
         }
         r.s = (c<0)?-1:0;
-        if(c > 0) r_array[i++] = c;
-        else if(c < -1) r_array[i++] = BI_DV+c;
+        if(c > 0) r_array[int(i++)] = c;
+        else if(c < -1) r_array[int(i++)] = BI_DV+c;
         r.t = i;
         r.clamp();
     }
@@ -367,11 +376,11 @@ public class BigInteger {
     // bnpDAddOffset
     public function dAddOffset(n:int,w:int):void {
         var this_array:Vector.<int> = this.array;
-        while(this.t <= w) this_array[this.t++] = 0;
+        while(this.t <= w) this_array[int(this.t++)] = 0;
         this_array[w] += n;
         while(this_array[w] >= BI_DV) {
             this_array[w] -= BI_DV;
-            if(++w >= this.t) this_array[this.t++] = 0;
+            if(++w >= this.t) this_array[int(this.t++)] = 0;
             ++this_array[w];
         }
     }
@@ -385,9 +394,9 @@ public class BigInteger {
         var i:int = Math.min(this.t+a.t,n);
         r.s = 0; // assumes a,this >= 0
         r.t = i;
-        while(i > 0) r_array[--i] = 0;
+        while(i > 0) r_array[int(--i)] = 0;
         var j:int;
-        for(j = r.t-this.t; i < j; ++i) r_array[i+this.t] = this.am.am(0,a_array[i],r,i,0,this.t,this);
+        for(j = r.t-this.t; i < j; ++i) r_array[int(i+this.t)] = this.am.am(0,a_array[i],r,i,0,this.t,this);
         for(j = Math.min(a.t,n); i < j; ++i) this.am.am(0,a_array[i],r,i,0,n-i,this);
         r.clamp();
     }
@@ -403,7 +412,7 @@ public class BigInteger {
         r.s = 0; // assumes a,this >= 0
         while(--i >= 0) r_array[i] = 0;
         for(i = Math.max(n-this.t,0); i < a.t; ++i)
-            r_array[this.t+i-n] = this.am.am(n-i,a_array[i],r,0,0,this.t+i-n,this);
+            r_array[int(int(this.t+i)-n)] = this.am.am(n-i,a_array[i],r,0,0,this.t+i-n,this);
         r.clamp();
         r.drShiftTo(1,r);
     }
@@ -505,7 +514,7 @@ public class BigInteger {
             while(i >= 0) {
                 if(p < 8) {
                     d = (this_array[i]&((1<<p)-1))<<(8-p);
-                    d |= this_array[--i]>>(p+=BI_DB-8);
+                    d |= this_array[int(--i)]>>(p+=BI_DB-8);
                 }
                 else {
                     d = (this_array[i]>>(p-=8))&0xff;
@@ -513,7 +522,7 @@ public class BigInteger {
                 }
                 if((d&0x80) != 0) d |= -256;
                 if(k == 0 && (this.s&0x80) != (d&0x80)) ++k;
-                if(k > 0 || d != this.s) r[k++] = d;
+                if(k > 0 || d != this.s) r[int(k++)] = d;
             }
         }
         return r;
@@ -754,17 +763,17 @@ public class BigInteger {
             if(sh == 0)
                 this_array[this.t++] = x;
             else if(sh+k > BI_DB) {
-                this_array[this.t-1] |= (x&((1<<(BI_DB-sh))-1))<<sh;
-                this_array[this.t++] = (x>>(BI_DB-sh));
+                this_array[int(this.t-1)] |= (x&((1<<(BI_DB-sh))-1))<<sh;
+                this_array[int(this.t++)] = (x>>(BI_DB-sh));
             }
             else
-                this_array[this.t-1] |= x<<sh;
+                this_array[int(this.t-1)] |= x<<sh;
             sh += k;
             if(sh >= BI_DB) sh -= BI_DB;
         }
         if(k == 8 && (s[0]&0x80) != 0) {
             this.s = -1;
-            if(sh > 0) this_array[this.t-1] |= ((1<<(BI_DB-sh))-1)<<sh;
+            if(sh > 0) this_array[int(this.t-1)] |= ((1<<(BI_DB-sh))-1)<<sh;
         }
       
         this.clamp();
@@ -776,7 +785,7 @@ public class BigInteger {
     public function clamp():void {
         var this_array:Vector.<int> = this.array;
         var c:int = this.s&BI_DM;
-        while(this.t > 0 && this_array[this.t-1] == c) --this.t;
+        while(this.t > 0 && this_array[int(this.t-1)] == c) --this.t;
     }
     
     // (public) return string representation in given radix
@@ -798,7 +807,7 @@ public class BigInteger {
             while(i >= 0) {
                 if(p < k) {
                     d = (this_array[i]&((1<<p)-1))<<(k-p);
-                    d |= this_array[--i]>>(p+=BI_DB-k);
+                    d |= this_array[int(--i)]>>(p+=BI_DB-k);
                 }
                 else {
                     d = (this_array[i]>>(p-=k))&km;
@@ -876,7 +885,7 @@ public class BigInteger {
     public function drShiftTo(n:int,r:BigInteger):void {
         var this_array:Vector.<int> = this.array;
         var r_array:Vector.<int> = r.array;
-        for(var i:int = n; i < this.t; ++i) r_array[i-n] = this_array[i];
+        for(var i:int = n; i < this.t; ++i) r_array[int(i-n)] = this_array[i];
         r.t = Math.max(this.t-n,0);
         r.s = this.s;
     }
@@ -971,7 +980,7 @@ public class BigInteger {
         var i:int = x.t;
         r.t = i+y.t;
         while(--i >= 0) r_array[i] = 0;
-        for(i = 0; i < y.t; ++i) r_array[i+x.t] = x.am.am(0,y_array[i],r,i,0,x.t,x);
+        for(i = 0; i < y.t; ++i) r_array[int(i+x.t)] = x.am.am(0,y_array[i],r,i,0,x.t,x);
         r.s = 0;
         r.clamp();
         if(this.s != a.s) BigInteger.ZERO.subTo(r,r);
@@ -984,16 +993,16 @@ public class BigInteger {
         var x_array:Vector.<int> = x.array;
         var r_array:Vector.<int> = r.array;
 
-        var i:int = r.t = 2*x.t;
+        var i:int = r.t = int(2*x.t);
         while(--i >= 0) r_array[i] = 0;
         for(i = 0; i < x.t-1; ++i) {
-            var c:int = x.am.am(i,x_array[i],r,2*i,0,1,x);
-            if((r_array[i+x.t]+=x.am.am(i+1,2*x_array[i],r,2*i+1,c,x.t-i-1,x)) >= BI_DV) {
-                r_array[i+x.t] -= BI_DV;
-                r_array[i+x.t+1] = 1;
+            var c:int = x.am.am(i,x_array[i],r,int(2*i),0,1,x);
+            if(int((r_array[int(i+x.t)]+=x.am.am(i+1,int(2*x_array[i]),r,int(2*i)+1,c,int(x.t-i)-1,x))) >= BI_DV) {
+                r_array[int(i+x.t)] -= BI_DV;
+                r_array[int(i+x.t+1)] = 1;
             }
         }
-        if(r.t > 0) r_array[r.t-1] += x.am.am(i,x_array[i],r,2*i,0,1,x);
+        if(r.t > 0) r_array[int(r.t-1)] += x.am.am(i,x_array[i],r,int(2*i),0,1,x);
         r.s = 0;
         r.clamp();
     }
@@ -1379,7 +1388,7 @@ public class Montgomery implements ModularReduction {
         for(var i:int = 0; i < this.m.t; ++i) {
             // faster way of calculating u0 = x[i]*mp mod DV
             var j:int = x_array[i]&0x7fff;
-            var u0:int = (j*this.mpl+(((j*this.mph+(x_array[i]>>15)*this.mpl)&this.um)<<15))&BigInteger.BI_DM;
+            var u0:int = (int(j*this.mpl)+(((int(j*this.mph)+int((x_array[i]>>15)*this.mpl))&this.um)<<15))&BigInteger.BI_DM;
             // use am to combine the multiply-shift-add into one call
             j = i+this.m.t;
             x_array[j] += this.m.am.am(0,u0,x,i,0,this.m.t,this.m);

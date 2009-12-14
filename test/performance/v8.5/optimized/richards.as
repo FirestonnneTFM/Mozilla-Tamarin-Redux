@@ -290,26 +290,26 @@ package richards {
 /**
  * The task is running and is currently scheduled.
  */
-        const STATE_RUNNING = 0;
+        const STATE_RUNNING:int = 0;
 
 /**
  * The task has packets left to process.
  */
-        const STATE_RUNNABLE = 1;
+        const STATE_RUNNABLE:int = 1;
 
 /**
  * The task is not currently running.  The task is not blocked as such and may
 * be started by the scheduler.
  */
-        const STATE_SUSPENDED = 2;
+        const STATE_SUSPENDED:int = 2;
 
 /**
  * The task is blocked and cannot be run until it is explicitly released.
  */
-        const STATE_HELD = 4;
+        const STATE_HELD:int = 4;
 
-        const STATE_SUSPENDED_RUNNABLE = STATE_SUSPENDED | STATE_RUNNABLE;
-        const STATE_NOT_HELD = ~STATE_HELD;
+        const STATE_SUSPENDED_RUNNABLE:int = STATE_SUSPENDED | STATE_RUNNABLE;
+        const STATE_NOT_HELD:int = ~STATE_HELD;
 
         public function setRunning():void {
             this.state = STATE_RUNNING;
@@ -392,8 +392,8 @@ package richards {
 
         private var count:int;
         private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
+        private var v1:int;
+        private var v2:int;
 
         public function IdleTask(scheduler:Scheduler, v1:int, count:int) {
             this.scheduler = scheduler;
@@ -426,8 +426,8 @@ package richards {
  */
     public class DeviceTask implements Task {
         private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
+        private var v1:Packet;
+        private var v2:Packet;
         public function DeviceTask(scheduler:Scheduler) {
             this.scheduler = scheduler;
             this.v1 = null;
@@ -436,7 +436,7 @@ package richards {
         public function run(packet:Packet):TaskControlBlock {
             if (packet == null) {
                 if (this.v1 == null) return this.scheduler.suspendCurrent();
-                var v:* = this.v1;
+                var v:Packet = this.v1;
                 this.v1 = null;
                 return this.scheduler.queue(v);
             } else {
@@ -459,8 +459,8 @@ package richards {
  */
     public class WorkerTask implements Task {
         private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
+        private var v1:int;
+        private var v2:int;
 
         public function WorkerTask(scheduler:Scheduler, v1:int, v2:int) {
             this.scheduler = scheduler;
@@ -479,7 +479,7 @@ package richards {
                 }
                 packet.id = this.v1;
                 packet.a1 = 0;
-                for (var i = 0; i < DATA_SIZE; i++) {
+                for (var i:int = 0; i < DATA_SIZE; i++) {
                     this.v2++;
                     if (this.v2 > 26) this.v2 = 1;
                     packet.a2[i] = this.v2;
@@ -500,8 +500,8 @@ package richards {
  */
     public class HandlerTask implements Task {
         private var scheduler:Scheduler;
-        private var v1:*;
-        private var v2:*;
+        private var v1:Packet;
+        private var v2:Packet;
         public function HandlerTask(scheduler:Scheduler):void {
             this.scheduler = scheduler;
             this.v1 = null;
@@ -518,7 +518,7 @@ package richards {
             }
             if (this.v1 != null) {
                 var count:int = this.v1.a1;
-                var v:*;
+                var v:Packet;
                 if (count < DATA_SIZE) {
                     if (this.v2 != null) {
                         v = this.v2;
@@ -545,7 +545,7 @@ package richards {
  * P a c k e t
  * --- */
 
-    const DATA_SIZE = 4;
+    const DATA_SIZE:int = 4;
 
 /**
  * A simple package of data that is manipulated by the tasks.  The exact layout
