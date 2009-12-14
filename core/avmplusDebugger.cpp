@@ -817,7 +817,7 @@ namespace avmplus
 				// it is stored as an atom.)
 				if (info->needRestOrArguments())
 				{
-					int atomType = ar[0] & 7;
+					int atomType = atomKind(ar[0]);
 					if (atomType == 0) // 0 is not a legal atom type, so ar[0] is not an atom
 					{
 						ScriptObject* obj = (ScriptObject*)ar[0];

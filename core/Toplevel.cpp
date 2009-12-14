@@ -116,7 +116,7 @@ namespace avmplus
 	{
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			default:
 			
@@ -153,7 +153,7 @@ namespace avmplus
 	{
 		if (!AvmCore::isNullOrUndefined(atom))
 		{
-			switch (atom&7)
+			switch (atomKind(atom))
 			{
 			case kObjectType:
 				return AvmCore::atomToScriptObject(atom)->traits();
@@ -189,7 +189,7 @@ namespace avmplus
 		if (!AvmCore::isNullOrUndefined(attributeName))
 		{
 			AvmCore* core = this->core();
-			switch (attributeName&7)
+			switch (atomKind(attributeName))
 			{
 			case kNamespaceType:
 				attributeName = AvmCore::atomToNamespace(attributeName)->getURI()->atom();
@@ -247,7 +247,7 @@ namespace avmplus
 
 		if (!AvmCore::isNullOrUndefined(p))
 		{
-			switch (p & 7)
+			switch (atomKind(p))
 			{
 			case kNamespaceType:
 				s = AvmCore::atomToNamespace(p)->getURI();
@@ -447,7 +447,7 @@ namespace avmplus
 	Atom Toplevel::instanceof(Atom atom, Atom ctor)
 	{
 		AvmCore* core = this->core();
-		if ((ctor&7) != kObjectType ||
+		if (atomKind(ctor) != kObjectType ||
 			(!AvmCore::istype(ctor, core->traits.function_itraits) &&
 			!AvmCore::istype(ctor, core->traits.class_itraits)))
 		{
@@ -509,7 +509,7 @@ namespace avmplus
 			nameatom = name->atom();
 		}
 
-		ScriptObject* o = (obj&7)==kObjectType ? 
+		ScriptObject* o = atomKind(obj)==kObjectType ? 
 				AvmCore::atomToScriptObject(obj) : 
 				this->toPrototype(obj);
 		do
@@ -643,7 +643,7 @@ namespace avmplus
 		}
 
 		case BKIND_NONE:
-			if ((obj&7) == kObjectType)
+			if (atomKind(obj) == kObjectType)
 			{
 				// try dynamic lookup on instance.  even if the traits are sealed,
 				// we might need to search the prototype chain

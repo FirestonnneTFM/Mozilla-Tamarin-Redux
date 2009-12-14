@@ -312,7 +312,7 @@ namespace avmplus
 		// Helper method to init the vector with another object
 		void initWithObj(Atom obj) 
 		{
-			ScriptObject* so_args = (obj&7)==kObjectType ?  AvmCore::atomToScriptObject(obj) : 0;
+			ScriptObject* so_args = atomKind(obj)==kObjectType ?  AvmCore::atomToScriptObject(obj) : 0;
 			if( so_args )
 			{
 				uint32 len = ArrayClass::getLengthHelper(toplevel(), so_args);

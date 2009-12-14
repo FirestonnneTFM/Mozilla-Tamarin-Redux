@@ -528,7 +528,7 @@ namespace avmplus
 		Atom result = toplevel->callproperty(atom(), &tempname, 0, atomv_out, vtable);
 
 		// if result is primitive, return it
-		if ((result&7) != kObjectType)
+		if (atomKind(result) != kObjectType)
 			return result;
 
 		// otherwise call this.toString()
@@ -537,7 +537,7 @@ namespace avmplus
 		result = toplevel->callproperty(atom(), &tempname, 0, atomv_out, vtable);
 
 		// if result is primitive, return it
-		if ((result&7) != kObjectType)
+		if (atomKind(result) != kObjectType)
 			return result;
 
 		// could not convert to primitive.
@@ -564,7 +564,7 @@ namespace avmplus
 		Atom result = toplevel->callproperty(atom(), &tempname, 0, atomv_out, vtable);
 
 		// if result is primitive, return its ToString
-		if ((result&7) != kObjectType)
+		if (atomKind(result) != kObjectType)
 			return core->string(result)->atom();
 
 		// otherwise call this.valueOf()
@@ -573,7 +573,7 @@ namespace avmplus
 		result = toplevel->callproperty(atom(), &tempname, 0, atomv_out, vtable);
 
 		// if result is primitive, return it
-		if ((result&7) != kObjectType)
+		if (atomKind(result) != kObjectType)
 			return core->string(result)->atom();
 
 		// could not convert to primitive.

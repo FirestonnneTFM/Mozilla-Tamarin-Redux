@@ -1802,7 +1802,7 @@ namespace avmplus
             emitDoubleConst(state, sp+1, pool->cpool_double[imm30]);
             break;
         case OP_pushnan:
-            emitDoubleConst(state, sp+1, (double*)(core->kNaN & ~7));
+            emitDoubleConst(state, sp+1, (double*)atomPtr(core->kNaN));
             break;
         case OP_lookupswitch:
             emit(state, opcode, state->pc+imm24, imm30b /*count*/);

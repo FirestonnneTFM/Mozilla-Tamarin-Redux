@@ -74,7 +74,7 @@ namespace avmplus
 	
 	bool Exception::isValid()
 	{
-		return (atom&7)==kObjectType;
+		return atomKind(atom) == kObjectType;
 	}
 	
 	//
