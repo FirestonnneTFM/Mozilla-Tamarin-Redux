@@ -99,8 +99,7 @@ v8.*/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_
 v8.*/.*/base.as,   .*, skip, included by test files
 v8.*/.*/run.as ,   .*, skip, file used to run entire suite at once
 v8.*/.*/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_bug.cgi?id=464134
-v8.*/.*/regexp.as, .*, skip, new test
-v8.*/.*/splay.as, .*, skip, new test
+
 
 # v8 tests: larger values are faster
 v8.*/.*           ,  .*  , largerValuesFaster, reports v8 metric: http://v8.googlecode.com/svn/data/benchmarks/v3/run.html
