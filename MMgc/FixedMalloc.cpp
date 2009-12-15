@@ -238,8 +238,10 @@ namespace MMgc
 			if((flags & kZero) == 0)
 				memset(item, 0xfa, size - DebugSize());
 
+#ifndef AVMPLUS_SAMPLER
 		// enregister
 			AddToLargeObjectTracker(item);
+#endif
 #endif
 		}
 		return item;
@@ -249,7 +251,9 @@ namespace MMgc
 	void FixedMalloc::LargeFree(void *item)
 	{
 #ifdef _DEBUG
+#ifndef AVMPLUS_SAMPLER
 		RemoveFromLargeObjectTracker(item);
+#endif
 #endif
 #ifdef MMGC_HOOKS
 		if(m_heap->HooksEnabled()) {
@@ -301,20 +305,30 @@ namespace MMgc
 
 #ifdef _DEBUG
 	// If this returns then item was definitely allocated by an allocator
-	// owned by this FixedMalloc.
+	// owned by this FixedMalloc.  Large objects must be handled one of
+	// two ways depending on whether the sampler is operating: if it is,
+	// we can't allocate storage to track large objects (see bugzilla 533954),
+	// so fall back on a less accurate method.
+	
 	void FixedMalloc::EnsureFixedMallocMemory(const void* item)
 	{
 		for (int i=0; i<kNumSizeClasses; i++) 
 			if (m_allocs[i].QueryOwnsObject(item))
 				return;
 		
+#ifdef AVMPLUS_SAMPLER
+		if (m_heap->SafeSize(item) != (size_t)-1)
+			return;
+#else
 		for ( LargeObject* lo=largeObjects; lo != NULL ; lo=lo->next)
 			if (lo->item == item)
 				return;
+#endif
 		
 		GCAssertMsg(false, "Trying to delete an object with FixedMalloc::Free that was not allocated with FixedMalloc::Alloc\n");
 	}
 
+#ifndef AVMPLUS_SAMPLER
 	void FixedMalloc::AddToLargeObjectTracker(const void* item)
 	{
 		LargeObject* lo = (LargeObject*)Alloc(sizeof(LargeObject));
@@ -337,7 +351,8 @@ namespace MMgc
 			}
 		}
 	}
-#endif
+#endif // !AVMPLUS_SAMPLER
+#endif // _DEBUG
 	
 }
 

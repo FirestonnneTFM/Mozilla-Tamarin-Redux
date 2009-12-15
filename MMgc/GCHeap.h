@@ -371,8 +371,11 @@ namespace MMgc
 		 */
 		void Free(void *item, size_t /*ignore*/) { FreeInternal(item, true); }
 
-
+		// Return the size (in blocks) of a valid item
 		size_t Size(const void *item);
+
+		// Return the size (in blocks) of an item, or (size_t)-1 if the item is not valid.
+		size_t SafeSize(const void *item);
 
 		/**
 		 * Returns the used heap size, that is, the total
