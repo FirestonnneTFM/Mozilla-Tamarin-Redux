@@ -345,17 +345,33 @@ Atom coerceImpl(const Toplevel* toplevel, Atom atom, Traits* expected)
     return atom;
 }
 
-template <class E>
-void coerceobj(E caller_env, ScriptObject* obj, Traits* type) {
-    #ifdef DOPROF // Adding this ifdef because this does not compile with Symbian emulator WINSCW compiler (it expects >=3 parameters for _nvprof).
-    _nvprof("coerceobj",1);
-    #endif // DOPROF
-    if (obj && !obj->traits()->subtypeof(type)) {
-        AvmCore* core = caller_env->core();
-        caller_env->toplevel()->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(obj->atom()), core->toErrorString(type));
-    }
+#define AssertObjTraits(env,t) \
+    AvmAssert(t && !t->isMachineType());\
+    AvmAssert(t != env->core()->traits.string_itraits);\
+    AvmAssert(t != env->core()->traits.namespace_itraits);
+
+static void throwCheckTypeError(MethodEnv* env, Atom atom, Traits* t)
+{
+    AvmCore *core = env->core();
+        env->toplevel()->throwTypeError(kCheckTypeFailedError,
+            core->atomToErrorString(atom),
+            core->toErrorString(t));
 }
-template void coerceobj(MethodEnv*, ScriptObject*, Traits*);
+
+void coerceobj_obj(MethodEnv* caller_env, ScriptObject* obj, Traits* t)
+{
+    AssertObjTraits(caller_env, t);
+    if (obj && !obj->traits()->subtypeof(t))
+        throwCheckTypeError(caller_env, obj->atom(), t);
+}
+
+void coerceobj_atom(MethodEnv *env, Atom atom, Traits* t)
+{
+    AssertObjTraits(env, t);
+    if (!AvmCore::isNullOrUndefined(atom) &&
+            (atomKind(atom) != kObjectType || !atomObj(atom)->traits()->subtypeof(t)))
+        throwCheckTypeError(env, atom, t);
+}
 
 Atom op_add(AvmCore* core, Atom lhs, Atom rhs)
 {

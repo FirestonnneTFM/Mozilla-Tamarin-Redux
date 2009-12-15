@@ -80,6 +80,7 @@ namespace avmplus
 	class MethodInfoProcHolder : public MMgc::GCObject
 	{
 		friend class ImtThunkEnv;
+		friend class InvokerCompiler;
 	protected:
 		union 
 		{

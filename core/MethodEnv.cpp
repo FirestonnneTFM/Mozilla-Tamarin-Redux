@@ -1855,37 +1855,6 @@ namespace avmplus
 			toplevel->throwTypeError(kFilterError, core()->toErrorString(toplevel->toTraits(obj)));
 		}
 	}
-		
-	/**
-	 * implements ECMA implicit coersion.  returns the coerced value,
-	 * or throws a TypeError if coersion is not possible.
-	 */
-    ScriptObject* MethodEnv::coerceAtom2SO(Atom atom, Traits* expected) const
-    {
-		AvmAssert(expected != NULL);
-		AvmAssert(!expected->isMachineType());
-		AvmAssert(expected != core()->traits.string_itraits);
-		AvmAssert(expected != core()->traits.namespace_itraits);
-
-		if (AvmCore::isNullOrUndefined(atom))
-			return NULL;
-
-		if (atomKind(atom) == kObjectType)
-		{
-			ScriptObject* so = AvmCore::atomToScriptObject(atom);
-			if (so->traits()->subtypeof(expected))
-			{
-				return so;
-			}
-		}
-
-		// failed
-#ifdef AVMPLUS_VERBOSE
-		//core->console << "checktype failed " << expected << " <- " << atom << "\n";
-#endif
-		toplevel()->throwTypeError(kCheckTypeFailedError, core()->atomToErrorString(atom), core()->toErrorString(expected));
-		return NULL;
-    }
 
 	VTable* MethodEnv::buildActivationVTable()
 	{

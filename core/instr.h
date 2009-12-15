@@ -175,11 +175,18 @@ template <class E>
 Atom coerce(E env, Atom atom, Traits* expected);
 
 /**
- * coerce specialized for objects; coerceobj() either throws an error
- * or returns with no side effects
+ * coerce specialized for ScriptObject* based types;
+ * coerceobj() either throws an error or returns with no side effects
+ * after returning, caller can safely downcast obj.  obj can still be null.
  */
-template <class E>
-void coerceobj(E env, ScriptObject* obj, Traits*);
+void coerceobj_obj(MethodEnv* env, ScriptObject* obj, Traits*);
+
+/**
+ * generic coerceobj accepting any value and coercing to one of the ScriptObject*
+ * types.  If this method returns, caller can safely use (ScriptObject*)atomPtr(atom).
+ * (note: result can still be null).
+ */
+void coerceobj_atom(MethodEnv* env, Atom atom, Traits*);
 
 /**
  * generic implementation of OP_add

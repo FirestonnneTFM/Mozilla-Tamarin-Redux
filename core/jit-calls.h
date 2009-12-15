@@ -441,7 +441,6 @@
     METHOD(ENVADDR(MethodEnv::hasnext), SIG3(I,P,A,I), hasnext)
     METHOD(COREADDR(AvmCore::coerce_s), SIG2(P,P,A), coerce_s)
     METHOD(COREADDR(AvmCore::string), SIG2(P,P,A), string)
-    METHOD(ENVADDR(MethodEnv::coerceAtom2SO), SIG3(P,P,A,P), coerceAtom2SO)
     CSEMETHOD(COREADDR(AvmCore::doubleToString), SIG2(P,P,F), doubleToString)
     CSEMETHOD(COREADDR(AvmCore::uintToString), SIG2(P,P,U), uintToString)
     CSEMETHOD(COREADDR(AvmCore::intToString), SIG2(P,P,I), intToString)
@@ -871,10 +870,12 @@ SSE2_ONLY(
     typedef Atom (*op_in_MethodEnv)(MethodEnv*, Atom, Atom);
     FUNCTION(FUNCADDR((op_in_MethodEnv)&op_in<MethodEnv*>), SIG3(A,P,A,A), op_in)
 
-    typedef void (*coerceobj_MethodEnv)(MethodEnv*, ScriptObject*, Traits*);
-    FUNCTION(FUNCADDR((coerceobj_MethodEnv)&coerceobj<MethodEnv*>), SIG3(V,P,P,P), coerceobj)
+    FUNCTION(FUNCADDR(&coerceobj_obj), SIG3(V,P,P,P), coerceobj_obj)
+    FUNCTION(FUNCADDR(&coerceobj_atom), SIG3(V,P,A,P), coerceobj_atom)
 
     typedef Atom (*coerce_MethodEnv)(MethodEnv*, Atom, Traits*);
     CSEFUNCTION(FUNCADDR((coerce_MethodEnv)&coerce<MethodEnv*>), SIG3(A,P,A,P), coerce)
 
     CSEFUNCTION(FUNCADDR(finddef_cache), SIG3(P,P,P,U), finddef_cache)
+
+    METHOD(ENVADDR(MethodEnv::argcError), SIG2(V,P,I), argcError)

@@ -324,6 +324,9 @@ namespace avmplus
 				u.thunker = this->thunker();
 			}
 			this->setNativeImpl(u.implGPR);
+#ifdef FEATURE_NANOJIT
+			InvokerCompiler::initCompilerHook(this);
+#endif
 		}
 		else
 		{
