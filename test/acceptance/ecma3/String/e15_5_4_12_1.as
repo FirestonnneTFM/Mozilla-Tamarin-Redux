@@ -57,13 +57,6 @@ function getTestCases() {
     for ( var i = 0; i <= 0x017f; i++ ) {
         var U = new Unicode( i );
 
-        // XXX DF fails in java
-
-        if ( i == 0x00DF ) {
-            continue;
-        }
-
-
         array[item++] = new TestCase(   SECTION,
                                         "var s = new String( String.fromCharCode("+i+") ); s.toUpperCase().charCodeAt(0)",
                                         U.upper,
