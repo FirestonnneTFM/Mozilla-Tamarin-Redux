@@ -256,8 +256,6 @@ namespace avmplus
 		 */
 		void checkfilter(Atom obj);
 
-		ScriptObject* coerceAtom2SO(Atom atom, Traits *expected) const;
-
 #ifdef DEBUGGER
 		void debugEnter(Traits** frameTraits, 
 						CallStackNode* callstack,

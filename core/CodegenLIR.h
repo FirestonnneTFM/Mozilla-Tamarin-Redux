@@ -310,6 +310,7 @@ namespace avmplus
         void cleanup();
 
     protected:
+        LIns* downcast_obj(LIns* atom, LIns* env, Traits* t); // atom -> typed scriptobj
         static BuiltinType bt(Traits *t);
         LIns* nativeToAtom(LIns* value, Traits* valType);
         LIns* atomToNative(BuiltinType, LIns* i);
@@ -508,6 +509,72 @@ namespace avmplus
         void fixExceptionsAndLabels(FrameState* state, const byte* pc);
         void formatOperand(PrintWriter& buffer, Value& v);
         void cleanup();
+    };
+
+    /**
+     * compiles MethodEnv::coerceEnter, specialized for the method being
+     * called, where the expected arg count and argument types are known.  This
+     * allows all the arg coersion to be unrolled and specialized.
+     *
+     * Native methods and JIT methods are compiled in this way.  Interpreted
+     * methods do not gain enough from compilation since the method bodies are
+     * interpreted, and since arguments only need to be coerced, not unboxed.
+     *
+     * Compilation occurs on the second invocation.
+     */
+    class InvokerCompiler: public LirHelper {
+    public:
+        // installs hook to enable lazy compilation
+        static void initCompilerHook(MethodInfo* info);
+    private:
+        // hook called on the first invocation; installs jitInvokerNow, yielding a 1-call delay
+        static Atom jitInvokerNext(MethodEnv* env, int argc, Atom* args);
+
+        // compile and invoke
+        static Atom jitInvokerNow(MethodEnv* env, int argc, Atom* args);
+
+        // main compiler driver
+        static AtomMethodProc compile(MethodInfo* info);
+
+        // sets up compiler pipeline
+        InvokerCompiler(MethodInfo*);
+
+        // compiler front end; generates LIR
+        void generate_lir();
+
+        // compiler back end; generates native code from LIR
+        void* assemble();
+
+        // generates argc check
+        void emit_argc_check(LIns* argc_param);
+
+        // downcast and unbox (and optionally copy) each arg
+        void downcast_args(LIns* env_param, LIns* argc_param, LIns* args_param);
+
+        // downcast and unbox one arg
+        void downcast_arg(int arg, int offset, LIns* env_param, LIns* args_param);
+
+        // downcast and unbox the value for the given type.
+        LIns* downcast_expr(LIns* val, Traits* t, LIns* env);
+
+        // generate code to call the underlying method directly
+        void call_method(LIns* env_param, LIns* argc_param);
+
+        // is verbose-mode enabled?
+        bool verbose();
+
+        // should unmodified args be copied?  true if we are not coercing in-place
+        bool copyArgs(); // true if un-modified args must be copied anyway
+
+        // # of bytes needed for the unboxed representation of this arg
+        int32_t argSize(int32_t i);
+
+    private:
+        MethodInfo* method;     // MethodInfo for method that we will call
+        MethodSignaturep ms;    // the signature for same
+        LIns* maxargs_br;       // branch that tests for too many args
+        LIns* minargs_br;       // branch that tests for not enough args
+        LIns* args_out;         // separate allocation for outgoing args (optional, NULL if unused)
     };
 }
 

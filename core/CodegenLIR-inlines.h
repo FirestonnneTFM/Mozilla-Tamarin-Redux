@@ -245,4 +245,9 @@ REALLY_INLINE LIns* LirHelper::ushp(LIns* a, int32_t b)
     return lirout->ins2(LIR_pursh, a, InsConst(b));
 }
 
+inline bool InvokerCompiler::copyArgs()
+{
+    return args_out->isop(LIR_alloc);
+}
+
 } // namespace
