@@ -570,6 +570,12 @@ namespace MMgc
 	}
 #endif
 
+	REALLY_INLINE void GC::PreventImmediateReaping(RCObject* obj)
+	{
+		if (obj->InZCT())
+			zct.Remove(obj);
+	}
+
 	/*static*/
 	REALLY_INLINE const void *GC::Pointer(const void *p) 
 	{

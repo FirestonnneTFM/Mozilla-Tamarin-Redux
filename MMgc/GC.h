@@ -1566,16 +1566,18 @@ namespace MMgc
 		void AddToZCT(RCObject *obj);
 #endif
 
-		// Public for one hack from splay.cpp - no one else should call
-		// this out of the GC.  (The usage pattern in that file could be
-		// abstracted into a better API function here, probably.)
-public:
 #ifdef MMGC_REFCOUNT_PROFILING
 		REALLY_INLINE void RemoveFromZCT(RCObject *obj, bool final=false);
 #else
 		REALLY_INLINE void RemoveFromZCT(RCObject *obj);
 #endif
 
+	public:
+		// PreventImmediateReaping is used by Flash Player for older content: it means to flag
+		// the object so that it won't be reaped until it goes through a 1 -> 0 reference count
+		// transition.  Also see the 'dontAddToZCTDuringCollection' configuration variable.
+		void PreventImmediateReaping(RCObject* obj);
+		
 		static const void *Pointer(const void *p);
 
 public:
