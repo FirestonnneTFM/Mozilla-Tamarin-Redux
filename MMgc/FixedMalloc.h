@@ -181,11 +181,13 @@ namespace MMgc
 		// owned by this FixedMalloc.
 		void EnsureFixedMallocMemory(const void* item);
 		
+#ifndef AVMPLUS_SAMPLER
 		// Track large object
 		void AddToLargeObjectTracker(const void* item);
 		
 		// Untrack large object
 		void RemoveFromLargeObjectTracker(const void* item);
+#endif
 #endif
 		
 		// @return a thread-safe allocator for objects of the given size.

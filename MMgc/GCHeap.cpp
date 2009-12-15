@@ -871,6 +871,15 @@ namespace MMgc
 		return NULL;
 	}
 	
+	size_t GCHeap::SafeSize(const void *item)
+	{
+		MMGC_LOCK(m_spinlock);
+		HeapBlock *block = AddrToBlock(item);
+		if (block == NULL || block->size == 0)
+			return (size_t)-1;
+		return block->size;
+	}
+
 	GCHeap::HeapBlock* GCHeap::AllocBlock(size_t size, bool& zero)
 	{
 		uint32_t startList = GetFreeListIndex(size);
