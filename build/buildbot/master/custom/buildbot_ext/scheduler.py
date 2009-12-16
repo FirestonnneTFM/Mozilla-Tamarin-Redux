@@ -92,6 +92,9 @@ class BuilderDependent(Dependent):
         # - multiple builders can be dependent on the same upstream builder
         self.builderDependencies = builderDependencies
         self.callbackInterval = callbackInterval
+        # TODO: self.upstream is set to None upon init in Dependent ... not sure why, so this is a workaround
+        # see http://github.com/djmitche/buildbot/commit/4066acfdd6477e59b00767c1c5607e4666e15d6d
+        self.upstream = upstream
         
         if fileIsImportant:
             assert callable(fileIsImportant)
@@ -112,6 +115,7 @@ class BuilderDependent(Dependent):
             
             # Make sure that the dependent builder is defined in the upstream scheduler
             if dependent_builder not in self.upstream.listBuilderNames():
+            #if dependent_builder not in self.findUpstreamScheduler().listBuilderNames():
                 errmsg = "The dependent builder %s is not defined in the upstream scheduler %s" % (dependent_builder, self.upstream.name)
                 assert False, errmsg
                 
