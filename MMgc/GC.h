@@ -50,7 +50,7 @@
 	__asm { mov _stack,esp };											\
 	_size = (uint32_t)(_gc->GetStackTop() - (uintptr_t)_stack);
 
-#elif AVMSYSTEM_SPARC == 1
+#elif defined MMGC_SPARC
 
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
 	jmp_buf __mmgc_env;													\
@@ -58,17 +58,30 @@
 	asm ("mov %%sp, %0":"=r" (_stack));									\
 	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
 
-#elif AVMSYSTEM_MAC == 1 && AVMSYSTEM_PPC == 1
+#elif defined MMGC_MAC && defined MMGC_PPC
 
 register void *mmgc_sp __asm__("r1");
 
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
 	jmp_buf __mmgc_env;													\
-	VMPI_setjmpNoUnwind(__mmgc_env);													\
+	VMPI_setjmpNoUnwind(__mmgc_env);									\
+	_stack = (void*)mmgc_sp;											\
+	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
+
+#elif defined MMGC_MAC && !defined MMGC_PPC
+
+register void *mmgc_sp __asm__("esp");
+
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
+	jmp_buf __mmgc_env;													\
+	VMPI_setjmpNoUnwind(__mmgc_env);									\
 	_stack = (void*)mmgc_sp;											\
 	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
 
 #else
+
+// This is not always safe, see https://bugzilla.mozilla.org/show_bug.cgi?id=506013.
+// Generally speaking we want a per-platform implementation of this macro.
 
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
 	jmp_buf __mmgc_env;													\
