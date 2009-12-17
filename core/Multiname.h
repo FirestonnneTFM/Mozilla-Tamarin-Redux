@@ -157,7 +157,12 @@ namespace avmplus
 
 	// version of multiname sporting write barriers
 	// NOTE NOTE NOTE
-	// This is embedded into other GCObjects, it's not a GCObject by itself
+	// This is embedded into other GCObjects, it's not a GCObject by itself.
+	//
+	// NOTE NOTE NOTE
+	// Special care must be taken if this object is not embedded within the first 4K of a GC object,
+	// because write barriers must be handled differently.  See comments to setMultiname below and
+	// comments on the destructor in Multiname.cpp.
 	class HeapMultiname 
 	{
 	public:
@@ -171,6 +176,10 @@ namespace avmplus
 		const HeapMultiname& operator=(const HeapMultiname& that);
 		const HeapMultiname& operator=(const Multiname& that);
 
+		// Use this to set when the location of the HeapMultiname within its parent
+		// object is not within the first block of the parent object.  See bugzilla 525875.
+		void setMultiname(MMgc::GC* gc, const void* container, const Multiname& other);
+		
 		Stringp getName() const;
 		int32_t namespaceCount() const;
 		Namespacep getNamespace(int32_t i) const;
