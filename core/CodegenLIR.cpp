@@ -85,7 +85,7 @@ bar = _method; \
 return foo[0];
 #endif
 
-#elif defined AVMPLUS_MAC
+#elif defined __GNUC__
 #define RETURN_METHOD_PTR(_class, _method) \
 union { \
     int (_class::*bar)(); \
@@ -119,12 +119,10 @@ return *((intptr_t*)&_method);
 
 namespace avmplus
 {
-        #define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
         #define COREADDR(f) coreAddr((int (AvmCore::*)())(&f))
         #define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
         #define ENVADDR(f) envAddr((int (MethodEnv::*)())(&f))
         #define TOPLEVELADDR(f) toplevelAddr((int (Toplevel::*)())(&f))
-        #define SCRIPTADDR(f) scriptAddr((int (ScriptObject::*)())(&f))
         #define ARRAYADDR(f) arrayAddr((int (ArrayObject::*)())(&f))
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
@@ -165,11 +163,6 @@ namespace avmplus
             RETURN_METHOD_PTR(Debugger, f);
         }
     #endif /* DEBUGGER */
-
-        intptr_t scriptAddr(int (ScriptObject::*f)())
-        {
-            RETURN_METHOD_PTR(ScriptObject, f);
-        }
 
         intptr_t  arrayAddr(int (ArrayObject::*f)())
         {
