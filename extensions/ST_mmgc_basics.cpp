@@ -188,7 +188,9 @@ verifyPass((int)fm->GetBytesInUse()==start, "(int)fm->GetBytesInUse()==start", _
 verifyPass((int)fm->GetTotalSize()==starttotal, "(int)fm->GetTotalSize()==starttotal", __FILE__, __LINE__);
     obj=fm->Calloc(1024,10);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
-verifyPass((int)fm->GetBytesInUse()==start+1024*12, "(int)fm->GetBytesInUse()==start+1024*12", __FILE__, __LINE__);
+// FixedMalloc is currently (as of redux 3229) tracking large allocs using a list of
+// small objects, in some debug modes.  So we can't have a precise test here.
+verifyPass((int)fm->GetBytesInUse()>=start+1024*12 && (int)fm->GetBytesInUse()<=start+1024*12+64, "(int)fm->GetBytesInUse()>=start+1024*12 && (int)fm->GetBytesInUse()<=start+1024*12+64", __FILE__, __LINE__);
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
 verifyPass((int)fm->GetTotalSize()==starttotal+3, "(int)fm->GetTotalSize()==starttotal+3", __FILE__, __LINE__);
     fm->Free(obj);

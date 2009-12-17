@@ -142,7 +142,9 @@ delete gc;
     %%verify (int)fm->GetTotalSize()==starttotal
     obj=fm->Calloc(1024,10);
 //    AvmLog("fm->GetBytesInUse()=%d\n",(int)fm->GetBytesInUse());
-    %%verify (int)fm->GetBytesInUse()==start+1024*12
+// FixedMalloc is currently (as of redux 3229) tracking large allocs using a list of
+// small objects, in some debug modes.  So we can't have a precise test here.
+    %%verify (int)fm->GetBytesInUse()>=start+1024*12 && (int)fm->GetBytesInUse()<=start+1024*12+64
 //    AvmLog("fm->GetTotalSize()=%d\n",(int)fm->GetTotalSize());
     %%verify (int)fm->GetTotalSize()==starttotal+3
     fm->Free(obj);
