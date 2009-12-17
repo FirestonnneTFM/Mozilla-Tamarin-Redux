@@ -362,7 +362,8 @@ namespace avmplus
 				Note: allocated using arrays of intptr_t (rather than char) to ensure alignment is acceptable.
 			*/
 		#define MAKE_BUF(name, type) \
-			intptr_t name[(sizeof(type)+sizeof(intptr_t)-1)/sizeof(intptr_t)]
+			intptr_t name##_data[(sizeof(type)+sizeof(intptr_t)-1)/sizeof(intptr_t)];\
+			type* const name = (type*) name##_data /* no semi */
 
 		#if defined FEATURE_NANOJIT
 			MAKE_BUF(jit_buf, CodegenLIR);
