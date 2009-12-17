@@ -327,6 +327,10 @@ namespace avmplus
 	AvmCore::~AvmCore()
 	{		
 #ifdef DEBUGGER
+		if (gc)
+		{
+			gc->SetAttachedSampler(NULL);
+		}
 		delete _sampler;
 		_sampler = NULL;
 #endif
