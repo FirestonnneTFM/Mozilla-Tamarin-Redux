@@ -207,11 +207,22 @@ namespace avmplus
 	// Write barrier note: the container for a HeapMultiname is *not* 'this'; 
 	// HeapMultiname figures as a field in eg QNameObject and XMLListObject.
 	// You *must* call FindBeginningFast(this) to get the right container.
-	
+	//
+	// NOTE NOTE NOTE
+	// This version is only safe if 'this' is on the first block of the object - because
+	// GC::GetGC() is not reliable otherwise.  See bugzilla 525875.  Use the more
+	// reliable version below if in doubt.
 	void HeapMultiname::setMultiname(const Multiname& that)
 	{
 		MMgc::GC* gc = this->gc();
 		const void *container = gc->FindBeginningFast(this);
+		setMultiname(gc, container, that);
+	}
+	
+	// This is always safe.  We must /not/ use WB_NULL here, only the full WB functions that
+	// take the gc and container explicitly will be safe.  See bugzilla 525875. 
+	void HeapMultiname::setMultiname(MMgc::GC* gc, const void* container, const Multiname& that)
+	{
 		WBRC(gc, container, &name.name, that.name);
 		
 		bool const this_nsset = name.isNsset() != 0;
@@ -223,9 +234,9 @@ namespace avmplus
 			// any existing value (before setting a new one) because WB/WBRC
 			// assume any existing value is a GCObject/RCObject respectively.
 			if (this_nsset)
-				WB_NULL(&name.ns);
+				WB(gc, container, &name.ns, NULL);	// DO NOT USE WB_NULL
 			else
-				WBRC_NULL(&name.ns);
+				WB(gc, container, &name.ns, NULL);	// DO NOT USE WB_NULL
 		}
 
 		if (that_nsset) 
@@ -241,6 +252,9 @@ namespace avmplus
 		name.next_index = that.next_index;
 	}
 
+	// This is only safe if 'this' is on the first block of the object - because GC::GetGC() is
+	// not reliable otherwise.  See bugzilla 525875.  To destroy objects beyond the first block,
+	// use the safe version of setMultiname() with an empty Multiname argument.
 	HeapMultiname::~HeapMultiname()
 	{
 		// Our embedded Multiname will zero itself, but we should call WBRC to 

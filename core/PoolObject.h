@@ -47,22 +47,19 @@ namespace avmplus
 
 #ifdef VMCFG_PRECOMP_NAMES
 	
-	// This needs to be a root because there are GCObjects referenced from the multinames
-	// that are not protected by write barriers (namely, the NamespaceSet objects).
-	// Other objects in the multinames are RC; the PrecomputedMultinames constructor
-	// explicitly increments their reference counts, and the destructor decrements
-	// them.  There are no barriers here, because we want to be able to reach in
-	// and reference a Multiname structure directly.
-	
-	class PrecomputedMultinames : public MMgc::GCRoot
+	/* This should not be a root because it can be large and root scanning is atomic,
+	 * leading to uncontrollable GC pauses for large roots.
+	 *
+	 * The use of HeapMultiname guarantees correct write barrier behavior for the parts
+	 * of multinames.  The object itself is anchored in a PoolObject.
+	 */
+	class PrecomputedMultinames : public MMgc::GCFinalizedObject
 	{
 	public:
-		void *operator new(size_t size, size_t extra=0);
-		PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool);		
+		PrecomputedMultinames(PoolObject* pool);
 		~PrecomputedMultinames();
-		void Initialize(PoolObject* pool);		// Eagerly parses all multinames
 		uint32_t nNames;						// Number of elements
-		Multiname multinames[1];				// Allocated size is MAX(1,nName)
+		HeapMultiname multinames[1];			// Allocated size is MAX(1,nName)
 	};
 	
 #endif  // VMCFG_PRECOMP_NAMES
@@ -124,7 +121,7 @@ namespace avmplus
 
 #ifdef VMCFG_PRECOMP_NAMES
 	private:
-		PrecomputedMultinames* precompNames;	// a GCRoot
+		DWB(PrecomputedMultinames*) precompNames;	// a GCFinalizedObject
 	public:
 		void initPrecomputedMultinames();
 		const Multiname* precomputedMultiname(int32_t index);

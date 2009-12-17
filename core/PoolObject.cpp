@@ -86,10 +86,6 @@ namespace avmplus
 
 	PoolObject::~PoolObject()
 	{
-		#ifdef VMCFG_PRECOMP_NAMES
-		delete precompNames;
-		#endif
-
 		#ifdef VMCFG_NANOJIT
 		mmfx_delete( codeMgr );
 		#endif
@@ -684,27 +680,39 @@ range_error:
 	{
 		if (this->precompNames == NULL)
         {
-            size_t const s = sizeof(PrecomputedMultinames) - sizeof(Multiname) + this->cpool_mn_offsets.size() * sizeof(Multiname);
-			this->precompNames = new (s) PrecomputedMultinames(core->GetGC(), this);
+			size_t nNames = this->cpool_mn_offsets.size();
+			if (nNames == 0)
+				nNames = 1;
+			this->precompNames = new (core->GetGC(), (nNames-1)*sizeof(HeapMultiname)) PrecomputedMultinames(this);
         }
     }
 
-	PrecomputedMultinames::PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool)
-		: MMgc::GCRoot(gc)
-		, nNames (0)
+	PrecomputedMultinames::PrecomputedMultinames(PoolObject* pool)
+		: nNames (0)
 	{
+		// The HeapMultinames will all have been initialized to zero on allocation, which is the
+		// state the HeapMultiname constructor would have left them in, had it been run (though
+		// it hasn't).  So below it is correct to assign the Multiname mn to the HeapMultiname
+		// multinames[i], the assignment operator will operate on sane values and will handle
+		// write barriers correctly.
 		nNames = pool->cpool_mn_offsets.size();
+		MMgc::GC* gc = MMgc::GC::GetGC(this);
+		const void* container = gc->FindBeginningFast(this);
 		for (uint32_t i=1; i < nNames; i++) {
 			Multiname mn;
 			pool->parseMultiname(mn, i);
-			mn.IncrementRef();
-			multinames[i] = mn;
+			multinames[i].setMultiname(gc, container, mn);
 		}
 	}
 	
 	PrecomputedMultinames::~PrecomputedMultinames() {
+		// Destroy each HeapMultiname to properly decrement reference counts on
+		// RC'd parts of HeapMultiname.
+		MMgc::GC* gc = MMgc::GC::GetGC(this);
+		const void* container = gc->FindBeginningFast(this);
+		Multiname mn;
 		for (uint32_t i=1; i < nNames; i++) 
-			multinames[i].DecrementRef();
+			multinames[i].setMultiname(gc, container, mn);
 	}
 #endif
 	

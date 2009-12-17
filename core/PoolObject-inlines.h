@@ -41,15 +41,9 @@ namespace avmplus
 {
 
 #ifdef VMCFG_PRECOMP_NAMES
-REALLY_INLINE void* PrecomputedMultinames::operator new(size_t size, size_t extra)
-{
-    //  GCRoot requires this allocation to come from FixedMalloc
-    return MMgc::FixedMalloc::GetFixedMalloc()->Alloc(size+extra, MMgc::kZero);
-}
-
 REALLY_INLINE const Multiname* PoolObject::precomputedMultiname(int32_t index)
 {
-    return &precompNames->multinames[index];
+    return precompNames->multinames[index];
 }
 #endif
 
