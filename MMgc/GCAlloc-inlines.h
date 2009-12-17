@@ -116,6 +116,13 @@ namespace MMgc
 	}
 
 	/*static*/
+	REALLY_INLINE bool GCAlloc::IsQueued(GCAlloc::GCBlock *block, int index)
+	{
+		uint32_t* bits = block->GetBits() + (index >> 3);
+		return (*bits & (kQueued << ((index&7)<<2))) != 0;
+	}
+	
+	/*static*/
 	REALLY_INLINE void GCAlloc::ClearFinalized(const void *item)
 	{
 		GCBlock *block = GetBlock(item);
@@ -140,14 +147,14 @@ namespace MMgc
 	REALLY_INLINE bool GCAlloc::ContainsPointers(const void *item)
 	{
 		GCBlock *block = GetBlock(item);
-		return block->alloc->ContainsPointers();
+		return ((GCAlloc*)block->alloc)->ContainsPointers();
 	}
 
 	/*static*/
 	REALLY_INLINE bool GCAlloc::IsRCObject(const void *item)
 	{
 		GCBlock *block = GetBlock(item);
-		return item >= block->items && block->alloc->ContainsRCObjects();
+		return item >= block->items && ((GCAlloc*)block->alloc)->ContainsRCObjects();
 	}
 
 	/*static*/
@@ -216,7 +223,7 @@ namespace MMgc
 	/*static*/
 	REALLY_INLINE int GCAlloc::GetIndex(const GCBlock *block, const void *item)
 	{
-		int index = (int)((((char*) item - block->items) * block->alloc->multiple) >> block->alloc->shift);
+		int index = (int)((((char*) item - block->items) * ((GCAlloc*)block->alloc)->multiple) >> ((GCAlloc*)block->alloc)->shift);
 #ifdef _DEBUG
 		GCAssert(((char*) item - block->items) / block->size == (uint32_t) index);
 #endif
@@ -302,7 +309,7 @@ namespace MMgc
 		if (nextItem) {
 			return GCAlloc::GetIndex(this, nextItem);
 		} else {
-			return alloc->m_itemsPerBlock;
+			return ((GCAlloc*)alloc)->m_itemsPerBlock;
 		}
 	}
 
@@ -317,7 +324,7 @@ namespace MMgc
 		// the only time nextItem and firstFree should be equal is when they
 		// are both zero which is also when we are full, assert to be sure
 		GCAssert(!full || nextItem==0);
-		GCAssert(!full || numItems == alloc->m_itemsPerBlock);
+		GCAssert(!full || numItems == ((GCAlloc*)alloc)->m_itemsPerBlock);
 		return full;
 	}
 

@@ -44,7 +44,7 @@ namespace MMgc
 	/**
 	 * This is a garbage collecting allocator for large memory blocks.
 	 */
-	class GCLargeAlloc
+	class GCLargeAlloc : public GCAllocBase
 	{
 		friend class GC;
 		friend class GCLargeAllocIterator;
@@ -67,7 +67,7 @@ namespace MMgc
 #else
 		void* Alloc(size_t requestSize, int flags);
 #endif
-		void Free(const void *ptr);
+		virtual void Free(const void *ptr);
 
 		void Finalize();
 		void ClearMarks();
@@ -122,7 +122,9 @@ namespace MMgc
 		struct LargeBlock : GCBlockHeader
 		{
 			uint32_t flags;
-
+#ifndef MMGC_64BIT
+			uint32_t padding;
+#endif
 			int GetNumBlocks() const;
 		};
 

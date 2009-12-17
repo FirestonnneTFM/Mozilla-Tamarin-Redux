@@ -1056,6 +1056,9 @@ namespace MMgc
 		 */
 		bool IncrementalMarking();
 
+	private:
+		void AbortFree(const void* item);
+
 		//////////////////////////////////////////////////////////////////////////
 		//
 		// Write barrier.  Those that are REALLY_INLINE are defined in WriteBarrier.h.

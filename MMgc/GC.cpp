@@ -756,11 +756,6 @@ namespace MMgc
 	}
 #endif
 
-	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
-	{
-		remainingMinorAllocationBudget += int32_t(nbytes);
-	}
-	
 	void GCPolicyManager::signalBlockAllocation(size_t blocks) {
 		blocksOwned += blocks;
 		if (blocksOwned > maxBlocksOwned)
@@ -1371,75 +1366,8 @@ namespace MMgc
 		return AllocExtra(size, extra, flags);
 	}
 
-	void GC::FreeNotNull(const void *item)
+	void GC::AbortFree(const void* item)
 	{
-		GCAssert(item != NULL);
-		GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
-
-		// Collecting is true only if marking is true (global invariant), so subsume the test,
-		// collecting is almost never true anyway.
-		
-		GCAssert(collecting == false || marking == true);
-
-		if (marking) {
-			// We can't allow free'ing something during Sweeping, otherwise alloc counters
-			// get decremented twice and destructors will be called twice.
-
-			if(collecting)
-				goto bail;
-			
-			// If its on the work queue don't delete it, if this item is
-			// really garbage we're just leaving it for the next sweep.
-			//
-			// OPTIMIZEME: IsQueued() is pretty expensive, because it computes
-			// the bits index and reads the bits array.  If marking is true much
-			// of the time then this could become a bottleneck.  As we improve
-			// GC incrementality, marking /is/ expected to be true much of the time.
-			//
-			// Could we optimize by having a flag that's set when the mark queue
-			// isn't empty?  We'd need to worry about the barrier queue too and that
-			// will usually not be empty.  So:
-			//
-			//  - short term do nothing, or maybe land the bit vector improvement
-			//  - with a card marking barrier the barrier queue doesn't matter,
-			//    maybe the mark queue flag will help then (but then we'll also have
-			//    the bit vector improvement)
-			//
-			// A further observation is that we only care about objects owned by
-			// a particular allocator being queued or not.  Since we can spend a little
-			// more effort when pushing something on the barrier stack, perhaps we
-			// could have a quick test on "anything on the mark stack for any allocator,
-			// or anything on the barrier stack belonging to this allocator?".
-			// Again, future work.
-
-			if(IsQueued(item)) 
-				goto bail;
-		}
-
-#ifdef _DEBUG
-		// RCObject have contract that they must clean themselves, since they 
-		// have to scan themselves to decrement other RCObjects they might as well
-		// clean themselves too, better than suffering a memset later
-		if(IsRCObject(item))
-		{
-			 RCObjectZeroCheck((RCObject*)item);
-		}
-#endif
-
-		// All hooks are called inside the Free functions.  The calls to Free should
-		// be tail calls on reasonable compilers.
-
-		policy.signalFreeWork(Size(item));
-		
-		if (GCLargeAlloc::IsLargeBlock(GetRealPointer(item))) {
-			largeAlloc->Free(GetRealPointer(item));
-		} else {
-			GCAlloc::Free(GetRealPointer(item));
-		}
-		return;
-
-bail:
-
 		// this presumes we got here via delete, maybe we should have
 		// delete call something other than the public Free to distinguish
 		if(IsFinalized(item))
@@ -1577,10 +1505,11 @@ bail:
 		GCAlloc::GCBlock *b = smallEmptyPageList;
 		while(b) {
 			GCAlloc::GCBlock *next = GCAlloc::Next(b);
+			GCAlloc* alloc = (GCAlloc*)b->alloc;
 #ifdef _DEBUG
-			b->alloc->SweepGuts(b);
+			alloc->SweepGuts(b);
 #endif
-			b->alloc->FreeChunk(b);
+			alloc->FreeChunk(b);
 
 			sweepResults++;
 			b = next;
@@ -2317,13 +2246,14 @@ bail:
 				} else if(bits == kGCAllocPage) {
 					// go through all marked objects
 					GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
-                    for (int i=0; i < b->alloc->m_itemsPerBlock; i++) {
+					GCAlloc* alloc = (GCAlloc*)b->alloc;
+                    for (int i=0; i < alloc->m_itemsPerBlock; i++) {
                         // If the mark is 0, delete it.
                         int marked = GCAlloc::GetBit(b, i, GCAlloc::kMark);
                         if (!marked) {
-                            void* item = (char*)b->items + b->alloc->m_itemSize*i;
+                            void* item = (char*)b->items + alloc->m_itemSize*i;
                             if(GCAlloc::ContainsPointers(item)) {
-								UnmarkedScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
+								UnmarkedScan(GetUserPointer(item), alloc->m_itemSize - DebugSize());
 							}
 						}
 					}
@@ -2455,15 +2385,16 @@ bail:
 			{
 				// go through all marked objects
 				GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
-                for (int i=0; i < b->alloc->m_itemsPerBlock; i++) 
+				GCAlloc* alloc = (GCAlloc*)b->alloc;
+                for (int i=0; i < alloc->m_itemsPerBlock; i++) 
 				{
                     int marked = GCAlloc::GetBit(b, i, GCAlloc::kMark);
                     if (marked) 
 					{
-                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
+                        void* item = (char*)b->items + alloc->m_itemSize*i;
                         if(GCAlloc::ContainsPointers(item)) 
 						{
-							ProbeForMatch(GetUserPointer(item), b->alloc->m_itemSize - DebugSize(), val, recurseDepth, currentDepth);
+							ProbeForMatch(GetUserPointer(item), alloc->m_itemSize - DebugSize(), val, recurseDepth, currentDepth);
 						}
 					}
 				}				
@@ -2883,7 +2814,7 @@ bail:
 				if((bits2 & ((GCAlloc::kMark|GCAlloc::kQueued)<<shift)) == 0)
 				{
 					uint32_t itemSize = block->size - (uint32_t)DebugSize();
-					if(block->alloc->ContainsPointers())
+					if(((GCAlloc*)block->alloc)->ContainsPointers())
 					{
 						const void *realItem = GetUserPointer(item);
 						GCWorkItem newItem(realItem, itemSize, true);
@@ -3457,14 +3388,15 @@ bail:
 				{
 					// go through all marked objects in this page
 					GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
-                    for (int i=0; i< b->alloc->m_itemsPerBlock; i++) {
+					GCAlloc* alloc = (GCAlloc*)b->alloc;
+                    for (int i=0; i< alloc->m_itemsPerBlock; i++) {
                         // find all marked objects and search them
                         if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
                             continue;
 
-						if(b->alloc->ContainsPointers()) {
-	                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
-							WhitePointerScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
+						if(alloc->ContainsPointers()) {
+	                        void* item = (char*)b->items + alloc->m_itemSize*i;
+							WhitePointerScan(GetUserPointer(item), alloc->m_itemSize - DebugSize());
 						}
 					}
 					m += GCHeap::kBlockSize;
