@@ -41,6 +41,11 @@
 
 namespace MMgc
 {
+	/*virtual*/
+	GCAllocBase::~GCAllocBase()
+	{
+	}
+
 	GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, int _sizeClassIndex) : 
 		m_sizeClassIndex(_sizeClassIndex),
 		containsPointers(_containsPointers), 
@@ -343,11 +348,29 @@ namespace MMgc
 		return item;
 	}
 
-	/* static */
+	/*virtual*/
 	void GCAlloc::Free(const void *item)
 	{
+#ifdef _DEBUG
+		// RCObject have contract that they must clean themselves, since they 
+		// have to scan themselves to decrement other RCObjects they might as well
+		// clean themselves too, better than suffering a memset later
+		if(IsRCObject(GetUserPointer(item)))
+			m_gc->RCObjectZeroCheck((RCObject*)GetUserPointer(item));
+#endif
+
 		GCBlock *b = GetBlock(item);
-		GCAlloc *a = b->alloc;
+		int index = GetIndex(b, item);
+		
+		// We can't allow free'ing something during Sweeping, otherwise alloc counters
+		// get decremented twice and destructors will be called twice.
+		GCAssert(m_gc->collecting == false || m_gc->marking == true);
+		if (m_gc->marking && (m_gc->collecting || IsQueued(b,index))) {
+			m_gc->AbortFree(GetUserPointer(item));
+			return;
+		}
+	
+		m_gc->policy.signalFreeWork(m_itemSize);
 	
 #ifdef MMGC_HOOKS
 		GCHeap* heap = GCHeap::GetGCHeap();
@@ -357,7 +380,7 @@ namespace MMgc
 			size_t userSize = GC::Size(p);
 #ifdef MMGC_MEMORY_PROFILER
 			if(heap->GetProfiler())
-				a->m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
+				m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
 #endif
 			heap->FinalizeHook(p, userSize);
 			heap->FreeHook(p, userSize, 0xca);
@@ -373,7 +396,6 @@ namespace MMgc
 		}
 #endif
 
-		int index = GetIndex(b, item);
 		if(GetBit(b, index, kHasWeakRef)) {
 			b->gc->ClearWeakRef(GetUserPointer(item));
 		}
@@ -384,20 +406,20 @@ namespace MMgc
 #ifdef _DEBUG
 			bool gone =
 #endif
-				a->Sweep(b);
+				Sweep(b);
 			GCAssertMsg(!gone, "How can a page I'm about to free an item on be empty?");
 			wasFull = false;
 		}
 
 		if(wasFull) {
-			a->AddToFreeList(b);
+			AddToFreeList(b);
 		}
 
 		b->FreeItem(item, index);
 
 		if(b->numItems == 0) {
-			a->UnlinkChunk(b);
-			a->FreeChunk(b);
+			UnlinkChunk(b);
+			FreeChunk(b);
 		}
 	}
 
@@ -477,7 +499,7 @@ namespace MMgc
 						obj->~GCFinalizedObject();
 
 #if defined(_DEBUG)
-						if(b->alloc->ContainsRCObjects()) {
+						if(((GCAlloc*)b->alloc)->ContainsRCObjects()) {
 							m_gc->RCObjectZeroCheck((RCObject*)obj);
 						}
 #endif
@@ -669,7 +691,7 @@ namespace MMgc
 		int itemNum = GetIndex(block, item);
 
 		// skip pointers into dead space at end of block
-		if (itemNum > block->alloc->m_itemsPerBlock - 1)
+		if (itemNum > ((GCAlloc*)block->alloc)->m_itemsPerBlock - 1)
 			return bogusPointerReturnValue;
 
 		// skip pointers into objects
@@ -715,7 +737,7 @@ namespace MMgc
 	REALLY_INLINE void GCAlloc::GCBlock::FreeItem(const void *item, int index)
 	{
 #ifdef MMGC_MEMORY_INFO
-		GCAssert(alloc->m_numAlloc != 0);
+		GCAssert(((GCAlloc*)alloc)->m_numAlloc != 0);
 #endif
 
 #ifdef _DEBUG		
@@ -730,7 +752,7 @@ namespace MMgc
 		void *oldFree = firstFree;
 		firstFree = (void*)item;
 #ifdef MMGC_MEMORY_INFO
-		alloc->m_numAlloc--;
+		((GCAlloc*)alloc)->m_numAlloc--;
 #endif
 		numItems--;
 
@@ -750,7 +772,7 @@ namespace MMgc
 		// page is subsequently emptied out and returned to the block manager.
 		// Massively boxing programs have alloc/free patterns that are biased
 		// toward non-RC objects carved off the ends of blocks.)
-		if(!alloc->ContainsRCObjects())
+		if(!((GCAlloc*)alloc)->ContainsRCObjects())
 			VMPI_memset((char*)item, 0, size);
 #endif
 		// Add this item to the free list

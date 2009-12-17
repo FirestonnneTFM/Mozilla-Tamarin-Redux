@@ -112,6 +112,11 @@ namespace MMgc
  		return remainingMinorAllocationBudget <= 0;
 	}
 
+	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
+	{
+		remainingMinorAllocationBudget += int32_t(nbytes);
+	}
+	
 	// GC
 	
 	REALLY_INLINE void *GC::GetGCContextVariable(int var) const
@@ -251,6 +256,13 @@ namespace MMgc
 		if(item == NULL)
 			return;
 		FreeNotNull(item);
+	}
+
+	REALLY_INLINE void GC::FreeNotNull(const void *item)
+	{
+		GCAssert(item != NULL);
+		GCAssertMsg(onThread(), "GC called from a different thread or not associated with a thread, missing MMGC_GCENTER macro perhaps.");
+		GetBlockHeader(item)->alloc->Free(GetRealPointer(item));
 	}
 
 	REALLY_INLINE void GC::AddRCRootSegment(RCRootSegment *segment)

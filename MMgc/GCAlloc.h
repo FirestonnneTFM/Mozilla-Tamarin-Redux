@@ -42,6 +42,12 @@
 
 namespace MMgc
 {
+	class GCAllocBase {
+	public:
+		virtual ~GCAllocBase();
+		virtual void Free(const void* item) = 0;
+	};
+	
 	// Some common functionality for GCAlloc and GCLargeAlloc follows.  (Could be
 	// in a separate header file.)
 	
@@ -51,6 +57,7 @@ namespace MMgc
 	struct GCBlockHeader
 	{
 		GC*				gc;		// The GC that owns this block
+		GCAllocBase*    alloc;	// the allocator that owns this block
 		GCBlockHeader*	next;	// The next block in the list of blocks for the allocator
 		uint32_t		size;	// Size of objects stored in this block
 	};
@@ -88,10 +95,12 @@ namespace MMgc
 	 * heap size / minimim heap size ratio.
 	 * 
 	 */
-	class GCAlloc 
+	class GCAlloc : public GCAllocBase
 	{
 		friend class GC;
 		friend class GCAllocIterator;
+		
+		struct GCBlock;
 	public:
 		enum ItemBit { kMark=1, kQueued=2, kFinalize=4, kHasWeakRef=8, kFreelist=kMark|kQueued };
 
@@ -103,7 +112,7 @@ namespace MMgc
 #else
 		void* Alloc(int flags);
 #endif
-		static void Free(const void *ptr);
+		virtual void Free(const void* item);
 		
 		void Finalize();
 		void ClearMarks();
@@ -129,6 +138,8 @@ namespace MMgc
 
 		static bool IsQueued(const void *item);
 
+		static bool IsQueued(GCBlock *block, int index);
+		
 		// not a hot method
 		static void ClearFinalized(const void *item);
 
@@ -177,7 +188,6 @@ namespace MMgc
 
 		struct GCBlock : GCBlockHeader
 		{
-			GCAlloc *alloc;			
 			GCBlock* prev;
 			char*  nextItem;
 			void*  firstFree;        // first item on free list

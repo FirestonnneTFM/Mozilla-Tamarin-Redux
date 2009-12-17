@@ -79,6 +79,7 @@ namespace MMgc
 			block->flags |= ((flags&GC::kContainsPointers) != 0) ? kContainsPointers : 0;
 			block->flags |= ((flags&GC::kRCObject) != 0) ? kRCObject : 0;
 			block->gc = this->m_gc;
+			block->alloc= this;
 			block->next = m_blocks;
 			block->size = computedSize;
 			m_blocks = block;
@@ -120,26 +121,43 @@ namespace MMgc
 	void GCLargeAlloc::Free(const void *item)
 	{
 		GCAssertMsg(!m_startedFinalize, "GCLargeAlloc::Free is not allowed during finalization; caller must guard against this.");
+#ifdef _DEBUG
+		// RCObject have contract that they must clean themselves, since they 
+		// have to scan themselves to decrement other RCObjects they might as well
+		// clean themselves too, better than suffering a memset later
+		if(IsRCObject(GetUserPointer(item)))
+			m_gc->RCObjectZeroCheck((RCObject*)GetUserPointer(item));
+#endif
 
 		LargeBlock *b = GetLargeBlock(item);
 
+		// We can't allow free'ing something during Sweeping, otherwise alloc counters
+		// get decremented twice and destructors will be called twice.
+		GCAssert(m_gc->collecting == false || m_gc->marking == true);
+		if (m_gc->marking && (m_gc->collecting || GCLargeAlloc::IsQueued(b))) {
+			m_gc->AbortFree(GetUserPointer(item));
+			return;
+		}
+		
+		m_gc->policy.signalFreeWork(b->size);
+		
 #ifdef MMGC_HOOKS
 		GCHeap* heap = GCHeap::GetGCHeap();
 		if(heap->HooksEnabled())
 		{
 			const void* p = GetUserPointer(item);
 			size_t userSize = GC::Size(p);
-			heap->FreeHook(p, userSize, 0xca);
 #ifdef MMGC_MEMORY_PROFILER
 			if(heap->GetProfiler())
 				m_totalAskSize -= heap->GetProfiler()->GetAskSize(p);
 #endif
 			heap->FinalizeHook(p, userSize);
+			heap->FreeHook(p, userSize, 0xca);
 		}
 #endif
 
 		if(b->flags & kHasWeakRef)
-			b->gc->ClearWeakRef(GetUserPointer(item));
+			m_gc->ClearWeakRef(GetUserPointer(item));
 
 		LargeBlock **prev = &m_blocks;
 		while(*prev)
