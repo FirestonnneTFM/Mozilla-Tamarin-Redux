@@ -157,7 +157,7 @@ public:
 void ST_mmgc_threads::test0() {
 	   startSlave();
 	   MMGC_GCENTER(gc);
-   	   /*RCObject *obj =*/ new (gc) RCObjectNotifier(&isDead);
+   	   RCObjectNotifier *obj = new (gc) RCObjectNotifier(&isDead);
 	   {
           MMGC_GC_ROOT_THREAD(gc);
 		  kick();
@@ -173,6 +173,8 @@ verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 
 	   pthread_join(pthread, NULL);
+
+	   printf("Ignore this: %d\n", *obj->isDead);
 
 }
 void create_mmgc_threads(AvmCore* core) { new ST_mmgc_threads(core); }
