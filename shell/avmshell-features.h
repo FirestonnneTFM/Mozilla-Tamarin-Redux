@@ -104,7 +104,7 @@
 #endif
 
 #ifndef AVMFEATURE_SELFTEST
-  #define AVMFEATURE_SELFTEST          1
+  #define AVMFEATURE_SELFTEST          0
 #endif
 
 // https://bugzilla.mozilla.org/show_bug.cgi?id=491866
