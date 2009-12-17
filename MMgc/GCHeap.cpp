@@ -276,7 +276,8 @@ namespace MMgc
 		VMPI_lockDestroy(&list_lock);
 		
 		if(enterFrame)
-			enterFrame->Destroy();
+			enterFrame->Destroy();	// Destroy the pointed-to value
+		enterFrame.destroy();		// Destroy the thread-local itself
 	}
 
 	void* GCHeap::Alloc(size_t size, uint32_t flags)
