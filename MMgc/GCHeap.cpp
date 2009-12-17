@@ -1315,7 +1315,7 @@ namespace MMgc
 		// Check the hard limit, trigger cleanup if hit
 		CheckForHardLimitExceeded();
 		
-		if (!ExpandHeapInternal(askSize))
+		if (!ExpandHeapInternal(askSize) && !canFail)
 			Abort();
 		
 		// The guard on instance being non-NULL is a hack, to be fixed later (now=2009-07-20).
