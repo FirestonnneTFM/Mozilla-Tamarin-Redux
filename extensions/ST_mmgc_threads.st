@@ -135,6 +135,7 @@ private:
 	delete gc;
 
 %%test mmgc_gc_root_thread
+/*
 	   startSlave();
 	   MMGC_GCENTER(gc);
    	   RCObjectNotifier *obj = new (gc) RCObjectNotifier(&isDead);
@@ -155,3 +156,4 @@ private:
 	   pthread_join(pthread, NULL);
 
 	   printf("Ignore this: %d\n", *obj->isDead);
+*/
