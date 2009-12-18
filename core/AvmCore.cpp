@@ -515,15 +515,15 @@ namespace avmplus
 	
 	static ScriptEnv* initScript(AvmCore* core, Toplevel* toplevel, AbcEnv* abcEnv, Traits* scriptTraits)
 	{
-		// [ed] 3/24/06 why do we really care if a script is dynamic or not?
-		//AvmAssert(scriptTraits->needsHashtable);
-
-		bool wasResolved = scriptTraits->isResolved();
 		VTable* scriptVTable = core->newVTable(scriptTraits, toplevel->object_ivtable, toplevel);
-		AvmAssert(scriptTraits->isResolved());
-		if (!wasResolved)
-			scriptTraits->init_declaringScopes(ScopeTypeChain::createEmpty(core->GetGC(), scriptTraits));
-		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable, abcEnv);
+        const ScopeTypeChain* scriptSTC = scriptTraits->declaringScope();
+        if (!scriptSTC)
+        {
+            scriptSTC = ScopeTypeChain::createEmpty(core->GetGC(), scriptTraits);
+	        scriptTraits->setDeclaringScopes(scriptSTC);
+        }
+        ScopeChain* scriptScope = ScriptEnv::createScriptScope(scriptSTC, scriptVTable, abcEnv);
+		ScriptEnv* scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptScope);
 		scriptVTable->init = scriptEnv;
 		core->exportDefs(scriptTraits, scriptEnv);
 		initScriptActivationTraits(core, toplevel, scriptTraits->init);
@@ -3446,7 +3446,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	
 	VTable* AvmCore::newVTable(Traits* traits, VTable* base, Toplevel* toplevel)
 	{
-		traits->resolveSignatures(toplevel);
 		const uint32_t count = traits->getTraitsBindings()->methodCount;
 		size_t extraSize = sizeof(MethodEnv*)*(count > 0 ? count-1 : 0);
 		return new (GetGC(), extraSize) VTable(traits, base, toplevel);
@@ -4360,7 +4359,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			while (!verifyQueue.isEmpty()) {
 				MethodInfo* f = verifyQueue.removeLast();
 				if (!f->isVerified()) {
-					if (f->hasNoScopeAndNotClassInitializer()) {
+					if (f->declaringTraits()->init != f && f->declaringScope() == NULL) {
 						verifyQueue2.add(f);
 						continue;
 					}

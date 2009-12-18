@@ -56,20 +56,22 @@ namespace avmplus
 			// create a temp object vtable to use, since the real one isn't created yet
 			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
 			// of Object and Class have the right scope.
-		object_ivtable = core->newVTable(core->traits.object_itraits, NULL, NULL);
+		object_ivtable = core->newVTable(core->traits.object_itraits, NULL, this);
 		Namespacep publicNS = core->getPublicNamespace(core->getDefaultAPI());
 		ScopeChain* object_iscope = ScopeChain::create(gc, object_ivtable, abcEnv, core->traits.object_istc, NULL, publicNS);
 		object_ivtable->resolveSignatures(object_iscope);
 
 		// global objects are subclasses of Object
-		bool wasResolved = mainTraits->isResolved();
 		VTable* mainVTable = core->newVTable(mainTraits, object_ivtable, this);
-		AvmAssert(mainTraits->isResolved());
-		if (!wasResolved)
-			mainTraits->init_declaringScopes(ScopeTypeChain::createEmpty(core->GetGC(), mainTraits));
-		ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, mainVTable, abcEnv);
+        const ScopeTypeChain* toplevel_STC = mainTraits->declaringScope();
+        if (!toplevel_STC)
+        {
+            toplevel_STC = ScopeTypeChain::createEmpty(core->GetGC(), mainTraits);
+	        mainTraits->setDeclaringScopes(toplevel_STC);
+        }
+        toplevel_scope = ScriptEnv::createScriptScope(toplevel_STC, mainVTable, abcEnv);
+		ScriptEnv* main = new (gc) ScriptEnv(mainTraits->init, toplevel_scope);
 		mainVTable->init = main;
-		toplevel_scope = ScopeChain::create(gc, mainVTable, abcEnv, mainTraits->init->declaringScope(), NULL, publicNS);
 		mainVTable->resolveSignatures(toplevel_scope);
 
 		_global = new (gc, mainVTable->getExtraSize()) ScriptObject(mainVTable, NULL);
@@ -782,9 +784,6 @@ namespace avmplus
 		Binding b = BIND_NONE;
 		if (traits && ref.isBinding())
 		{
-			if (!traits->isResolved())
-				traits->resolveSignatures(this);
-				
 			b = traits->getTraitsBindings()->findBindingAndDeclarer(ref, declarer);
 			if (b == BIND_AMBIGUOUS)
 			{

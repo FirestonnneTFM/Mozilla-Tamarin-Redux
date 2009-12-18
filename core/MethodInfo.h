@@ -45,6 +45,20 @@
 
 namespace avmplus
 {
+     class ScopeOrTraits
+     {
+     private:
+ 		static const uintptr_t IS_SCOPE = 0x01;
+     private:
+ 		uintptr_t _scopeOrTraits;	// if LSB clr, Traits*   if LSB set, ScopeTypeChain*
+     public:
+         explicit ScopeOrTraits(Traits* t);
+         Traits* getTraits() const;
+         const ScopeTypeChain* getScope() const;
+         void setTraits(MMgc::GC* gc, void* container, Traits* t);
+         void setScope(MMgc::GC* gc, void* container, const ScopeTypeChain* s);
+     };
+
 	// signature for method invocation when caller coerces args and boxes results
 	typedef uintptr_t (*GprMethodProc)(MethodEnv*, int32_t, uint32_t *);
 	typedef double (*FprMethodProc)(MethodEnv*, int32_t, uint32_t *);
@@ -371,12 +385,7 @@ namespace avmplus
 		Traits* activationTraits() const;
 		const ScopeTypeChain* activationScope() const;
 
-        bool hasNoScopeAndNotClassInitializer() const;
-    
-		// note, these are called "init" (rather than "set") because they 
-		// should be called exactly once per MethodInfo.
 		void init_activationTraits(Traits* t);
-		void init_declaringScope(const ScopeTypeChain* s);
 		
 		MethodSignaturep getMethodSignature();
 		void update_max_stack(int32_t max_stack);
@@ -384,8 +393,6 @@ namespace avmplus
 	private:
 		MethodSignature* FASTCALL _getMethodSignature();
 		MethodSignature* FASTCALL _buildMethodSignature(const Toplevel* toplevel);
-
-		void init_activationScope(const ScopeTypeChain* s);
 
 	private:
 		struct NativeInfo
@@ -414,14 +421,11 @@ namespace avmplus
 	#endif
 		};
 
-	private:
-		static const uintptr_t IS_TRAITS = 0x01;
-	
 	// ------------------------ DATA SECTION BEGIN
 	private:
 		DWB(MMgc::GCWeakRef*)	_msref;						// our MethodSignature 
-		uintptr_t				_declaringScopeOrTraits;	// if LSB set, Traits*   if LSB clr, ScopeTypeChain*
-		uintptr_t				_activationScopeOrTraits;	// if LSB set, Traits*   if LSB clr, ScopeTypeChain*
+		ScopeOrTraits			_declarer;	
+		ScopeOrTraits			_activation;	
 		PoolObject* const		_pool;
 		const uint8_t* const	_abc_info_pos;		// pointer to abc MethodInfo record 
 		int						_flags;				// see bitmask defs above 

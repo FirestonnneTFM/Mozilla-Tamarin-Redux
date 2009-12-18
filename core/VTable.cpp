@@ -352,7 +352,7 @@ namespace avmplus
 		if (!traits->isResolved())
 		{
 			traits->resolveSignatures(toplevel());
-			traits->init_declaringScopes(scope->scopeTraits());
+			traits->setDeclaringScopes(scope->scopeTraits());
 		}
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -497,8 +497,6 @@ namespace avmplus
 		}
 
 		AvmAssert(itraits != NULL);
-		itraits->resolveSignatures(toplevel);
-		ctraits->resolveSignatures(toplevel);
 
 		VTable* objVecVTable = toplevel->objectVectorClass->vtable;
 		AbcEnv* objVecAbcEnv = toplevel->vectorobj_cscope->abcEnv();

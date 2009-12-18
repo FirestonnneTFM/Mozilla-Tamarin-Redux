@@ -39,6 +39,36 @@
 
 namespace avmplus
 {
+
+REALLY_INLINE ScopeOrTraits::ScopeOrTraits(Traits* t) : _scopeOrTraits((uintptr_t)t) 
+{ 
+}
+
+REALLY_INLINE Traits* ScopeOrTraits::getTraits() const
+{
+    return (!(_scopeOrTraits & IS_SCOPE)) ?
+            ((Traits*)(_scopeOrTraits)) :
+            ((const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE))->traits();
+}
+
+REALLY_INLINE const ScopeTypeChain* ScopeOrTraits::getScope() const
+{
+    return (!(_scopeOrTraits & IS_SCOPE)) ?
+            ((Traits*)(_scopeOrTraits))->declaringScope() :
+            ((const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE));
+}
+
+REALLY_INLINE void ScopeOrTraits::setTraits(MMgc::GC* gc, void* container, Traits* t)
+{
+	WB(gc, container, &_scopeOrTraits, uintptr_t(t)); 
+}
+
+
+REALLY_INLINE void ScopeOrTraits::setScope(MMgc::GC* gc, void* container, const ScopeTypeChain* s)
+{
+	WB(gc, container, &_scopeOrTraits, uintptr_t(s) | IS_SCOPE); 
+}
+
 #ifdef DEBUGGER
 REALLY_INLINE DebuggerMethodInfo::DebuggerMethodInfo(int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes) :
     firstSourceLine(0),
@@ -340,6 +370,27 @@ REALLY_INLINE int32_t MethodInfo::method_id() const
 {
     return _method_id;
 }
+
+REALLY_INLINE Traits* MethodInfo::declaringTraits() const
+{
+    return _declarer.getTraits();
+}
+
+REALLY_INLINE const ScopeTypeChain* MethodInfo::declaringScope() const
+{
+    return _declarer.getScope();
+}
+
+REALLY_INLINE Traits* MethodInfo::activationTraits() const
+{
+    return _activation.getTraits();
+}
+
+REALLY_INLINE const ScopeTypeChain* MethodInfo::activationScope() const
+{
+    return _activation.getScope();
+}
+
 
 REALLY_INLINE MethodSignaturep MethodInfo::getMethodSignature()
 {

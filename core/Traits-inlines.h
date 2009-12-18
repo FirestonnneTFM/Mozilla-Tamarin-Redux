@@ -59,29 +59,34 @@ REALLY_INLINE TraitsBindings::TraitsBindings(Traits* _owner,
                     TraitsBindingsp _base,
                     MultinameHashtable* _bindings,
                     uint32_t _slotCount,
-                    uint32_t _methodCount) :
+                    uint32_t _methodCount,
+                    bool typesValid) :
     owner(_owner),
     base(_base),
     m_bindings(_bindings),
     slotCount(_slotCount),
     methodCount(_methodCount),
-    m_slotSize(0)
+    m_slotSize(0),
+    m_typesValid(typesValid?1:0)
 { }
 
 REALLY_INLINE Traitsp TraitsBindings::getSlotTraits(uint32_t i) const
 {
+    AvmAssert(m_typesValid);
     AvmAssert(i < slotCount);
     return getSlots()[i].type;
 }
 
 REALLY_INLINE uint32_t TraitsBindings::getSlotOffset(uint32_t i) const
 {
+    AvmAssert(m_typesValid);
     AvmAssert(i < slotCount);
     return getSlots()[i].offset();
 }
 
 REALLY_INLINE SlotStorageType TraitsBindings::calcSlotAddrAndSST(uint32_t i, void* pin, void*& pout) const
 {
+    AvmAssert(m_typesValid);
     AvmAssert(i < slotCount);
     uint32_t offsetAndSST = getSlots()[i].offsetAndSST;
     pout = (void*)(((uint32_t*)pin) + (offsetAndSST >> 3));
@@ -90,6 +95,7 @@ REALLY_INLINE SlotStorageType TraitsBindings::calcSlotAddrAndSST(uint32_t i, voi
 
 REALLY_INLINE MethodInfo* TraitsBindings::getMethod(uint32_t i) const
 {
+    AvmAssert(m_typesValid);
     AvmAssert(i < methodCount);
     return getMethods()[i].f;
 }
@@ -116,26 +122,31 @@ REALLY_INLINE Binding TraitsBindings::valueAt(int32_t index) const
 
 REALLY_INLINE TraitsBindings::SlotInfo* TraitsBindings::getSlots()
 {
+    AvmAssert(m_typesValid);
     return (SlotInfo*)(this + 1);
 }
 
 REALLY_INLINE const TraitsBindings::SlotInfo* TraitsBindings::getSlots() const
 {
+    AvmAssert(m_typesValid);
     return (const SlotInfo*)(this + 1);
 }
 
 REALLY_INLINE TraitsBindings::BindingMethodInfo* TraitsBindings::getMethods()
 {
+    AvmAssert(m_typesValid);
     return (BindingMethodInfo*)(getSlots() + slotCount);
 }
 
 REALLY_INLINE const TraitsBindings::BindingMethodInfo* TraitsBindings::getMethods() const
 {
+    AvmAssert(m_typesValid);
     return (const BindingMethodInfo*)(getSlots() + slotCount);
 }
 
 REALLY_INLINE void TraitsBindings::setSlotInfo(uint32_t i, Traits* t, SlotStorageType sst, uint32_t offset)
 {
+    AvmAssert(m_typesValid);
     AvmAssert(i < slotCount);
     // don't need WB here
     getSlots()[i].type = t;
@@ -147,6 +158,7 @@ REALLY_INLINE void TraitsBindings::setSlotInfo(uint32_t i, Traits* t, SlotStorag
 
 REALLY_INLINE void TraitsBindings::setMethodInfo(uint32_t i, MethodInfo* f)
 {
+    AvmAssert(m_typesValid);
     AvmAssert(i < methodCount);
     // don't need WB here
     getMethods()[i].f = f;
@@ -172,6 +184,13 @@ REALLY_INLINE TraitsMetadata::MetadataPtr TraitsMetadata::getMetadataPos(PoolObj
     return metadataPos;
 }
 
+REALLY_INLINE const ScopeTypeChain* Traits::declaringScope() const
+{
+    // don't assert, some callers need to know
+    // AvmAssert(m_declaringScope != NULL);
+    return m_declaringScope;
+}
+
 REALLY_INLINE uint16_t Traits::getSizeOfInstance() const
 {
     return m_sizeofInstance;
@@ -179,26 +198,26 @@ REALLY_INLINE uint16_t Traits::getSizeOfInstance() const
 
 REALLY_INLINE uint32_t Traits::getHashtableOffset() const
 {
-    AvmAssert(linked);
+    AvmAssert(m_resolved);
     return m_hashTableOffset;
 }
 
 REALLY_INLINE uint32_t Traits::getTotalSize() const
 {
-    AvmAssert(linked);
+    AvmAssert(m_resolved);
     return m_totalSize;
 }
 
 REALLY_INLINE uint32_t Traits::getSlotAreaSize() const
 {
-    AvmAssert(linked);
+    AvmAssert(m_resolved);
     return getTotalSize() - m_sizeofInstance - (m_hashTableOffset ? sizeof(InlineHashtable) : 0);
 }
 
 // in bytes. includes size for all base classes too.
 REALLY_INLINE uint32_t Traits::getExtraSize() const
 {
-    AvmAssert(linked);
+    AvmAssert(m_resolved);
     AvmAssert(getTotalSize() >= m_sizeofInstance);
     return getTotalSize() - m_sizeofInstance;
 }
@@ -223,7 +242,6 @@ REALLY_INLINE Traits* Traits::newParameterizedCTraits(Stringp name, Namespacep n
 
 REALLY_INLINE TraitsBindingsp Traits::getTraitsBindings()
 {
-    AvmAssert(this->linked);
     AvmAssert(m_tbref != NULL);
     TraitsBindings* tb;
     if ((tb = (TraitsBindings*)m_tbref->get()) == NULL)
@@ -233,7 +251,6 @@ REALLY_INLINE TraitsBindingsp Traits::getTraitsBindings()
 
 REALLY_INLINE TraitsMetadatap Traits::getTraitsMetadata()
 {
-    AvmAssert(this->linked);
     AvmAssert(m_tmref != NULL);
     TraitsMetadata* tm;
     if ((tm = (TraitsMetadata*)m_tmref->get()) == NULL)
@@ -311,7 +328,7 @@ REALLY_INLINE TraitsPosType Traits::posType() const
 
 REALLY_INLINE bool Traits::isResolved() const
 {
-    return linked;
+    return m_resolved;
 }
 
 REALLY_INLINE bool Traits::isActivationTraits() const
@@ -321,13 +338,13 @@ REALLY_INLINE bool Traits::isActivationTraits() const
 
 REALLY_INLINE bool Traits::needsHashtable() const
 {
-    AvmAssert(linked);
+    AvmAssert(m_resolved);
     return m_needsHashtable;
 }
 
 REALLY_INLINE void Traits::set_needsHashtable(bool v)
 {
-    AvmAssert(!linked);
+    AvmAssert(!m_resolved);
     m_needsHashtable = v;
 }
 
@@ -361,8 +378,14 @@ REALLY_INLINE void Traits::set_names(Namespacep p_ns, Stringp p_name)
 // essential for efficient building of IMT thunks.
 REALLY_INLINE bool Traits::implementsNewInterfaces() const
 {
-    AvmAssert(linked);
+    AvmAssert(m_resolved);
     return m_implementsNewInterfaces;
+}
+
+REALLY_INLINE void Traits::setDeclaringScopes(const ScopeTypeChain* stc) 
+{ 
+    AvmAssert(stc != NULL);
+    m_declaringScope = stc;
 }
 
 REALLY_INLINE InterfaceIterator::InterfaceIterator(Traits* t)

@@ -92,8 +92,7 @@ Binding getBinding(E env, Traits* traits, const Multiname* ref)
     Binding b = BIND_NONE;
     if (traits && ref->isBinding())
     {
-        if (!traits->isResolved())
-            traits->resolveSignatures(env->toplevel());
+        // note, you no longer must resolve the traits in order to find the binding!
 
         TraitsBindingsp tb = traits->getTraitsBindings();
         if (!ref->isNsset())

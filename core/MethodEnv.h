@@ -332,10 +332,8 @@ namespace avmplus
 	class ScriptEnv : public MethodEnv
 	{
 	public:
-		ScriptEnv(MethodInfo* _method, VTable* _vtable, AbcEnv* _abcEnv);
+		ScriptEnv(MethodInfo* _method, ScopeChain* _scope);
 		ScriptObject* initGlobal();
-	
-	private:
 		static ScopeChain* createScriptScope(const ScopeTypeChain* stc, VTable* _vtable, AbcEnv* _abcEnv);
 		
 	// ------------------------ DATA SECTION BEGIN

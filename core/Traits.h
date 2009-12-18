@@ -129,14 +129,15 @@ namespace avmplus
 							TraitsBindingsp _base, 
 							MultinameHashtable* _bindings,
 							uint32_t _slotCount, 
-							uint32_t _methodCount);
+							uint32_t _methodCount,
+                            bool typesValid);
 
 	public:
 		static const uint32_t MAX_SLOT_OFFSET = (1U << 31) - 1;
 
 	public:
 		
-		static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameHashtable* _bindings, uint32_t slotCount, uint32_t methodCount);
+		static TraitsBindings* alloc(MMgc::GC* gc, Traits* _owner, TraitsBindingsp _base, MultinameHashtable* _bindings, uint32_t slotCount, uint32_t methodCount, bool typesValid);
 
 		void buildSlotDestroyInfo(MMgc::GC* gc, FixedBitSet& slotDestroyInfo, uint32_t slotAreaCount, uint32_t sizeOfSlotArea) const;
 
@@ -179,11 +180,13 @@ namespace avmplus
 		private:    Traits**						m_interfaces;
 		public:		const uint32_t					slotCount;			// including slots in our base classes
 		public:		const uint32_t					methodCount;		// including methods in our base classes
-		private:	uint32_t						m_slotSize;			// size of slot area in bytes, including base classes
-		// plus extra at end
+		private:	uint32_t						m_slotSize;			// size of slot area in bytes, including base classes (only valid after resolveSignatures)
+        private:    const uint32_t                  m_typesValid;       // bool, just int for alignment
+        // plus extra at end, iff m_typesValid is nonzero
 	// ------------------------ DATA SECTION END
 
 	};
+
 
 	// NOTE: caller must check for null key, eg,
 	//
@@ -251,6 +254,7 @@ namespace avmplus
 
 	public:
         
+        const ScopeTypeChain* declaringScope() const;
 		uint16_t getSizeOfInstance() const;
 		uint32_t getTotalSize() const;		
 		uint32_t getHashtableOffset() const;
@@ -269,21 +273,28 @@ namespace avmplus
 
 		void computeSlotAreaCountAndSize(TraitsBindings* tb, uint32_t& slotCount, uint32_t& size) const; 
         
-		uint32_t computeSlotAreaStart(uint32_t nPointerSlots, uint32_t n32BitNonPointerSlots, uint32_t n64BitNonPointerSlots) const;
+        struct SlotSizeInfo
+        {
+            uint32_t pointerSlotCount;
+            uint32_t nonPointer32BitSlotCount;
+            uint32_t nonPointer64BitSlotCount;
+            
+            SlotSizeInfo() : pointerSlotCount(0), nonPointer32BitSlotCount(0), nonPointer64BitSlotCount(0) { }
+        };
+        
+		uint32_t computeSlotAreaStart(const SlotSizeInfo& slotSizeInfo) const;
 		
 		void buildBindings(TraitsBindingsp basetb, 
 							MultinameHashtable* bindings, 
 							uint32_t& slotCount, 
 							uint32_t& methodCount,
-							uint32_t& n32BitNonPointerSlots,
-							uint32_t& n64BitNonPointerSlots,
+							SlotSizeInfo* sizeInfo,
 							const Toplevel* toplevel) const;
 		uint32_t finishSlotsAndMethods(TraitsBindingsp basetb, 
 									TraitsBindings* tb, 
 									const Toplevel* toplevel,
 									AbcGen* abcGen,
-									uint32_t n32BitNonPointerSlots,
-									uint32_t n64BitNonPointerSlots) const;
+									const SlotSizeInfo& sizeInfo) const;
 		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen);
 
 		TraitsMetadata* _buildTraitsMetadata();
@@ -394,9 +405,7 @@ namespace avmplus
 		Stringp format(AvmCore* core, bool includeAllNamespaces = false) const;
 #endif
 
-		// call init_declaringScope for each method that we own. this should be
-		// called exactly once per Traits, *after* the Traits has been resolved.
-		void init_declaringScopes(const ScopeTypeChain* stc);
+		void setDeclaringScopes(const ScopeTypeChain* stc);
 		
 		Namespacep ns() const;
 		Stringp name() const;
@@ -518,6 +527,8 @@ namespace avmplus
 	private:	FixedBitSet				m_slotDestroyInfo;	
 	private:	DWB(MMgc::GCWeakRef*)	m_tbref;				// our TraitsBindings 
 	private:	DWB(MMgc::GCWeakRef*)	m_tmref;				// our TraitsMetadata
+	private:	DWB(const ScopeTypeChain*)	
+                                        m_declaringScope;
 #ifdef VMCFG_CACHE_GQCN
 	private:	DRCWB(Stringp)			_fullname;		// value returned by formatClassName
 #endif
@@ -531,7 +542,7 @@ namespace avmplus
 	private:    uint8_t					m_supertype_offset;			// if this traits is primary, == offset in primary_supertypes array; otherwise == offset of supertype_cache
 	// 7 bits follow
 	private:	uint32_t				m_needsHashtable:1;			// If true, the class needs a hash table. Typically true for dynamic classes, but will be false for XML
-	private:	uint32_t				linked:1;					// set once signature types have been resolved */
+	private:	uint32_t				m_resolved:1;				// set once signature types have been resolved */
 	public:		uint32_t				final:1;					// set when the class cannot be extended */
 	public:		uint32_t				commonBase:1;				// used for Verify::findCommonBase */
 	public:		uint32_t				isDictionary:1;				// how we implement dictionary or strict style lookups

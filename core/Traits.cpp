@@ -52,13 +52,15 @@ namespace avmplus
 												TraitsBindingsp _base, 
 												MultinameHashtable* _bindings, 
 												uint32_t slotCount, 
-												uint32_t methodCount)
+												uint32_t methodCount,
+                                                bool typesValid)
 	{
-		const uint32_t extra = slotCount * sizeof(SlotInfo) + 
-						methodCount * sizeof(MethodInfo);
+		const uint32_t extra = typesValid ? 
+                                slotCount * sizeof(SlotInfo) + methodCount * sizeof(MethodInfo) :
+                                0;
 
-		TraitsBindings* tb = new (gc, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount);
-		if (_base)
+		TraitsBindings* tb = new (gc, extra) TraitsBindings(_owner, _base, _bindings, slotCount, methodCount, typesValid);
+		if (_base && typesValid)
 		{
 			if (_base->slotCount)
 			{
@@ -333,8 +335,8 @@ namespace avmplus
 					}
 					case BKIND_METHOD:
 					{
-						MethodInfo* virt = ifcd->getMethod(AvmCore::bindingToMethodId(iBinding));
-						MethodInfo* over = this->getMethod(AvmCore::bindingToMethodId(cBinding));
+						MethodInfo* virt = ifcd->getMethods()[AvmCore::bindingToMethodId(iBinding)].f;
+						MethodInfo* over = this->getMethods()[AvmCore::bindingToMethodId(cBinding)].f;
 						if (!checkOverride(core, virt, over))
 							return false;
 						break;
@@ -349,8 +351,8 @@ namespace avmplus
 							if (!AvmCore::hasGetterBinding(cBinding))
 								return false;
 							
-							MethodInfo* virt = ifcd->getMethod(AvmCore::bindingToGetterId(iBinding));
-							MethodInfo* over = this->getMethod(AvmCore::bindingToGetterId(cBinding));
+							MethodInfo* virt = ifcd->getMethods()[AvmCore::bindingToGetterId(iBinding)].f;
+							MethodInfo* over = this->getMethods()[AvmCore::bindingToGetterId(cBinding)].f;
 							if (!checkOverride(core, virt, over))
 								return false;
 						}
@@ -376,7 +378,6 @@ namespace avmplus
 	void TraitsBindings::fixOneInterfaceBindings(Traitsp ifc)
 	{
 		AvmAssert(!owner->isInterface());
-		AvmAssert(ifc->linked);
 
 		TraitsBindingsp ifcd = ifc->getTraitsBindings();
 		StTraitsBindingsIterator iter(ifcd);
@@ -724,8 +725,7 @@ namespace avmplus
 								MultinameHashtable* bindings, 
 								uint32_t& slotCount, 
 								uint32_t& methodCount,
-								uint32_t& n32BitNonPointerSlots,
-								uint32_t& n64BitNonPointerSlots,
+								SlotSizeInfo* slotSizeInfo,
 								const Toplevel* toplevel) const
 	{
 		const uint8_t* pos = traitsPosStart();
@@ -766,9 +766,9 @@ namespace avmplus
 					uint32_t slot_id = sic.calc_id(ne.id);
 					if (toplevel)
 					{
-						AvmAssert(!this->linked);
+						AvmAssert(!this->m_resolved);
 						
-						// first time thru, we must do some additional verification checks... these were formerly 
+						// when we resolve, we must do some additional verification checks... these were formerly 
 						// done in AbcParser::parseTraits but require the base class to be resolved first, so we
 						// now defer it to here.
 						
@@ -794,19 +794,28 @@ namespace avmplus
 							toplevel->throwVerifyError(kIllegalSlotError, core->toErrorString(this));
 
 					}
-					AvmAssert(!(ne.id > nameCount));						// unhandled verify error
-					AvmAssert(!(basetb && slot_id < basetb->slotCount));	// unhandled verify error
-					AvmAssert(!(bindings->get(name, ns) != BIND_NONE));		// unhandled verify error
+                    // these assertions are commented out because the new lazy-init code can
+                    // fire them inapppriately -- they all indicate malformed ABC, but they 
+                    // *can* occur on a pre-resolve build of TraitsBindings. We'll just let
+                    // them slide by since we check for them all at resolve time.
+					// AvmAssert(!(ne.id > nameCount));						// unhandled verify error
+					// AvmAssert(!(basetb && slot_id < basetb->slotCount));	// unhandled verify error
+					// AvmAssert(!(bindings->get(name, ns) != BIND_NONE));		// unhandled verify error
 					addVersionedBindings(bindings, name, compat_nss, AvmCore::makeSlotBinding(slot_id, ne.kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST));
+                    if (slotSizeInfo != NULL)
+                    {   
+                        // only do this if we need it -- doing it too early could cause us to reference a not-yet-loaded
+                        // type which we don't need yet, causing an unnecessary verification failure
 					Traitsp slotType = (ne.kind == TRAIT_Class) ? 
 										pool->getClassTraits(ne.info) :
 										pool->resolveTypeName(ne.info, toplevel);
 					if (!isPointerSlot(slotType))
 					{
 						if (is8ByteSlot(slotType))
-							++n64BitNonPointerSlots;
+                                slotSizeInfo->nonPointer64BitSlotCount += 1;
 						else
-							++n32BitNonPointerSlots;
+                                slotSizeInfo->nonPointer32BitSlotCount += 1;
+                        }
 					}
 					break;
 				}
@@ -876,6 +885,8 @@ namespace avmplus
 			}
 		} // for i
 		slotCount = sic.slotCount();
+        if (slotSizeInfo)
+            slotSizeInfo->pointerSlotCount = slotCount - (slotSizeInfo->nonPointer32BitSlotCount + slotSizeInfo->nonPointer64BitSlotCount + baseSlotCount);
 	}
 		
 	namespace
@@ -964,10 +975,12 @@ namespace avmplus
 		}
 	}
 	
-	inline uint32_t Traits::computeSlotAreaStart(uint32_t nPointerSlots, uint32_t n32BitNonPointerSlots, uint32_t n64BitNonPointerSlots) const
+	inline uint32_t Traits::computeSlotAreaStart(const SlotSizeInfo& slotSizeInfo) const
 	{
 		// Actual size of slots can be larger because of padding inserted at beginning of slot area and between 4 byte slots and 8 byte slots.
-		uint32_t minSizeOfSlots = (nPointerSlots * sizeof(void*)) + (n32BitNonPointerSlots * 4) + (n64BitNonPointerSlots * 8);
+		uint32_t minSizeOfSlots = (slotSizeInfo.pointerSlotCount * sizeof(void*)) + 
+                                    (slotSizeInfo.nonPointer32BitSlotCount * 4) + 
+                                    (slotSizeInfo.nonPointer64BitSlotCount * 8);
         uint32_t result = 0;
 		if (base && minSizeOfSlots)
 		{
@@ -998,8 +1011,8 @@ namespace avmplus
 				//
 				// If either of these asserts fail, the slot offset calculation code in finishSlotsAndMethods
 				// will most likely produce incorrect slot offsets for 8 byte slots.
-                AvmAssert(((result % 8) == 0) || (!align8ByteSlots) || (n64BitNonPointerSlots == 0));
-                AvmAssert(((result % 8) == 0) || (!alignPointersTo8Bytes) || (nPointerSlots == 0));
+                AvmAssert(((result % 8) == 0) || (!align8ByteSlots) || (slotSizeInfo.nonPointer64BitSlotCount == 0));
+                AvmAssert(((result % 8) == 0) || (!alignPointersTo8Bytes) || (slotSizeInfo.pointerSlotCount == 0));
 			}
 		}
 		else
@@ -1014,23 +1027,20 @@ namespace avmplus
 									TraitsBindings* tb, 
 									const Toplevel* toplevel,
 									AbcGen* abcGen,
-									uint32_t n32BitNonPointerSlots,
-									uint32_t n64BitNonPointerSlots) const
+									const SlotSizeInfo& sizeInfo) const
 	{
 		const uint8_t* pos = traitsPosStart();
 		
 		SlotIdCalcer sic(basetb ? basetb->slotCount : 0, this->allowEarlyBinding());
-		uint32_t nBaseSlots = tb->base ? tb->base->slotCount : 0;
-		uint32_t nPointerSlots = tb->slotCount - (n32BitNonPointerSlots + n64BitNonPointerSlots + nBaseSlots);
 		
-		int32_t slotAreaStart = computeSlotAreaStart(nPointerSlots, n32BitNonPointerSlots, n64BitNonPointerSlots);
+		int32_t slotAreaStart = computeSlotAreaStart(sizeInfo);
 		
 		int32_t next32BitSlotOffset = slotAreaStart;
-		int32_t endOf32BitSlots = next32BitSlotOffset + (n32BitNonPointerSlots * 4);
-		int32_t nextPointerSlotOffset = alignPointersTo8Bytes && (nPointerSlots != 0) ? pad8(endOf32BitSlots) : endOf32BitSlots;
-		int32_t endOfPointerSlots = nextPointerSlotOffset + (nPointerSlots * sizeof(void*));
-		int32_t next64BitSlotOffset = align8ByteSlots && (n64BitNonPointerSlots != 0) ? pad8(endOfPointerSlots) : endOfPointerSlots;
-		int32_t endOf64BitSlots = next64BitSlotOffset + (n64BitNonPointerSlots * 8);
+		int32_t endOf32BitSlots = next32BitSlotOffset + (sizeInfo.nonPointer32BitSlotCount * 4);
+		int32_t nextPointerSlotOffset = alignPointersTo8Bytes && (sizeInfo.pointerSlotCount != 0) ? pad8(endOf32BitSlots) : endOf32BitSlots;
+		int32_t endOfPointerSlots = nextPointerSlotOffset + (sizeInfo.pointerSlotCount * sizeof(void*));
+		int32_t next64BitSlotOffset = align8ByteSlots && (sizeInfo.nonPointer64BitSlotCount != 0) ? pad8(endOfPointerSlots) : endOfPointerSlots;
+		int32_t endOf64BitSlots = next64BitSlotOffset + (sizeInfo.nonPointer64BitSlotCount * 8);
 
 		NameEntry ne;
 		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
@@ -1165,8 +1175,6 @@ namespace avmplus
 
 	TraitsBindings* Traits::_buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen)
 	{
-		// no, this can be called before the resolved bit is set
-		//AvmAssert(this->linked);
 #ifdef AVMPLUS_VERBOSE
 		if (pool->isVerbose(VB_traits))
 		{
@@ -1195,7 +1203,7 @@ namespace avmplus
 			NamespaceSetp compat_nss = nss;
 			addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR));
 			// bindings just need room for one slot binding
-			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0);
+			thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, true);
 			thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);
 			thisData->m_slotSize = is8ByteSlot(t) ? 8 : 4;
 		}
@@ -1217,16 +1225,18 @@ namespace avmplus
 				}
 			}
 			
+            SlotSizeInfo _slotSizeInfo;
+            SlotSizeInfo* slotSizeInfo = (m_resolved || toplevel != NULL) ? &_slotSizeInfo : NULL;
+
 			uint32_t slotCount = 0;
 			uint32_t methodCount = 0;
-			uint32_t n32BitNonPointerSlots = 0;
-			uint32_t n64BitNonPointerSlots = 0;
-			buildBindings(basetb, bindings, slotCount, methodCount, n32BitNonPointerSlots, n64BitNonPointerSlots, toplevel);
+			buildBindings(basetb, bindings, slotCount, methodCount, slotSizeInfo, toplevel);
 			
-			thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount);
-			thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen, n32BitNonPointerSlots, n64BitNonPointerSlots);
-
-			if (basetb) {
+			thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount, slotSizeInfo != NULL);
+            if (slotSizeInfo)
+            {
+                thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen, *slotSizeInfo);
+                if (basetb)
 				thisData->m_slotSize += basetb->m_slotSize;
 			}
 
@@ -1246,6 +1256,8 @@ namespace avmplus
 		// much easier to always round slotsize up unconditionally rather than
 		// only for cases with hashtable, so that's what we'll do. (MMgc currently
 		// allocate in 8-byte increments anyway, so we're not really losing any space.)
+        // (only really necessary to do this if we calced slotSizeInfo, but simpler & harmless
+        // to just do it unconditionally)
 		thisData->m_slotSize = (thisData->m_slotSize + (sizeof(uintptr_t)-1)) & ~(sizeof(uintptr_t)-1);
 		
 		// remember the cap we need
@@ -1274,8 +1286,6 @@ namespace avmplus
 
 	TraitsMetadata* Traits::_buildTraitsMetadata()
 	{
-		AvmAssert(this->linked);
-
 #ifdef AVMPLUS_VERBOSE
 		if (pool->isVerbose(VB_traits))
 		{
@@ -1345,32 +1355,6 @@ namespace avmplus
 		return tm;
 	}
 
-	void Traits::init_declaringScopes(const ScopeTypeChain* stc) 
-	{ 
-		AvmAssert(linked);
-		if (!linked)
-			return;
-		
-		if (this->init)
-			this->init->init_declaringScope(stc);
-
-		{
-			TraitsBindingsp tb = this->getTraitsBindings();
-			const TraitsBindings::BindingMethodInfo* tbm		= tb->getMethods();
-			const TraitsBindings::BindingMethodInfo* tbm_end	= tbm + tb->methodCount;
-			for ( ; tbm < tbm_end; ++tbm) 
-			{
-				if (tbm->f == NULL)
-					continue;
-					
-				if (tbm->f->declaringTraits() == this)
-				{
-					tbm->f->init_declaringScope(stc);
-				}
-			}
-		}
-	}
-
 	/**
 	 * add t to pending[] ahead of any existing entries that are
 	 * subtypes or implementers of t, so that when we iterate through
@@ -1398,7 +1382,7 @@ namespace avmplus
 	{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds
-		if (linked)
+		if (m_resolved)
 			return;
 
 		List<Traits*> pending(core->gc);
@@ -1408,7 +1392,7 @@ namespace avmplus
 			Traits* t = m_primary_supertypes[i];
 			if (t == NULL || t == this)
 				break;
-			if (!t->linked)
+			if (!t->m_resolved)
 				pending.add(t);
 		}
 
@@ -1417,12 +1401,12 @@ namespace avmplus
 		// interfaces are visited before that type itself is visited.
 		for (Traits** st = m_secondary_supertypes; *st != NULL; st++) {
 			Traits* t = *st;
-			if (t != this && !t->linked)
+			if (t != this && !t->m_resolved)
 				insertSupertype(t, pending);
 		}
 
 		for (uint32_t i = 0, n = pending.size(); i < n; i++) {
-			AvmAssert(!pending[i]->linked);
+			AvmAssert(!pending[i]->m_resolved);
 			pending[i]->resolveSignaturesSelf(toplevel);
 		}
 
@@ -1440,12 +1424,12 @@ namespace avmplus
 	void Traits::resolveSignaturesSelf(const Toplevel* toplevel)
 	{
 #ifdef DEBUG
-		AvmAssert(!linked);
+		AvmAssert(!m_resolved);
 		// make sure our supertypes are resolved. (must be done before calling _buildTraitsBindings)
 		for (Traits* t = this->base; t != NULL; t = t->base)
-			AvmAssert(t->linked);
+			AvmAssert(t->m_resolved);
 		for (Traits** st = this->m_secondary_supertypes; *st != NULL; st++)
-			AvmAssert(*st == this || (*st)->linked);
+			AvmAssert(*st == this || (*st)->m_resolved);
 #endif
 
 		MMgc::GC* gc = core->GetGC();
@@ -1456,6 +1440,8 @@ namespace avmplus
 #else
          pgen = &gen;
 #endif	
+        // we might already have one -- if so, toss it
+        m_tbref = gc->emptyWeakRef;
  		TraitsBindings* tb = _buildTraitsBindings(toplevel, pgen);
 		this->genInitBody(toplevel, gen);
 
@@ -1493,6 +1479,7 @@ namespace avmplus
 		}
 
 		// make sure all the methods have resolved types
+		if (tb->methodCount)
 		{
 			const TraitsBindings::BindingMethodInfo* tbm		= tb->getMethods();
 			const TraitsBindings::BindingMethodInfo* tbm_end	= tbm + tb->methodCount;
@@ -1533,7 +1520,7 @@ namespace avmplus
 
 		if (!legal)
 		{
-			AvmAssert(!linked);
+			AvmAssert(!m_resolved);
 			Multiname qname(ns(), name());
 			if (toplevel)
 				toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(&qname), core->toErrorString(this));
@@ -1542,7 +1529,7 @@ namespace avmplus
 
 		tb->buildSlotDestroyInfo(gc, m_slotDestroyInfo, slotAreaCount, slotAreaSize);
 
-		linked = true;
+		m_resolved = true;
 	}
     
 #ifdef VMCFG_AOT
@@ -1748,6 +1735,7 @@ namespace avmplus
 		{
 			// make one
 			this->init = new (gc) MethodInfo(MethodInfo::kInitMethodStub, this);
+            AvmAssert(this->init->declaringTraits() == this);
 
 			newMethodBody.writeInt(2); // max_stack
 			newMethodBody.writeInt(1); //local_count
@@ -1771,7 +1759,7 @@ namespace avmplus
 
 	void Traits::destroyInstance(ScriptObject* obj) const
 	{
-		AvmAssert(linked);
+		AvmAssert(m_resolved);
 
 		InlineHashtable* ht = m_hashTableOffset ? obj->getTableNoInit() : NULL;
 
@@ -1949,18 +1937,12 @@ failure:
 
 	TraitsBindings* FASTCALL Traits::_getTraitsBindings() 
 	{ 
-		AvmAssert(this->linked);
-		// note: TraitsBindings are always built the first time in resolveSignature; this is only 
-		// executed for subsequent re-buildings. Thus we pass NULL for toplevel (it's only used
-		// for verification errors, but those will have been caught prior to this) and for
-		// abcGen (since it only needs to be done once).
 		TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL);
 		return tb;
 	}
 
 	TraitsMetadata* FASTCALL Traits::_getTraitsMetadata() 
 	{ 
-		AvmAssert(this->linked);
 		TraitsMetadata* tm = _buildTraitsMetadata();
 		return tm;
 	}
