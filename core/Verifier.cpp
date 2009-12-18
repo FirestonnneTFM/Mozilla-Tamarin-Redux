@@ -250,7 +250,7 @@ namespace avmplus
         // initial scope chain types 
         int outer_depth = 0;
 
-        if (info->hasNoScopeAndNotClassInitializer())
+        if (info->declaringTraits()->init != info && info->declaringScope() == NULL)
         {
             // this can occur when an activation scope inside a class instance method
             // contains a nested getter, setter, or method.  In that case the scope 
@@ -785,8 +785,10 @@ namespace avmplus
 				ctraits->resolveSignatures(toplevel);
 				itraits->resolveSignatures(toplevel);
 
-				ctraits->init_declaringScopes(cscope);
-				itraits->init_declaringScopes(iscope);
+                // we must always set the scopes here, whether or not they have been set yet and
+                // whether or not the traits were resolved already.
+                ctraits->setDeclaringScopes(cscope);
+                itraits->setDeclaringScopes(iscope);
 
 				emitCoerce(CLASS_TYPE, state->sp()); 
 				coder->writeOp1(state, pc, opcode, imm30, ctraits);

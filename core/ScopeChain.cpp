@@ -115,7 +115,7 @@ namespace avmplus
 		Stringp r = core->kEmptyString;
 		r = r->appendLatin1("STC:[traits=");
 		r = r->append(_traits->format(core));
-		r = r->appendLatin1(",");
+		r = r->appendLatin1(";");
 		for (int32_t i = 0; i < fullsize; i++)
 		{
 			if (i > 0)
@@ -123,7 +123,8 @@ namespace avmplus
 			Traits* t = getScopeTraitsAt(i);
 			bool b = getScopeIsWithAt(i);
 			r = r->append(t->format(core));
-			r = r->appendLatin1(b?":1":":0");
+            if (b)
+                r = r->appendLatin1("(iswith)");
 		}
 		r = r->appendLatin1("]");
 		return r;
@@ -135,6 +136,7 @@ namespace avmplus
 		AvmAssert(vtable->traits == scopeTraits->traits());
 		const int32_t scopeTraitsSize = scopeTraits->size;
 		const int32_t outerSize = outer ? outer->_scopeTraits->size : 0;
+        AvmAssert(scopeTraitsSize >= outerSize);
 		const size_t padSize = scopeTraitsSize > 0 ? sizeof(Atom) * (scopeTraitsSize-1) : 0;
 		ScopeChain* nscope = new(gc, padSize) ScopeChain(vtable, abcEnv, scopeTraits, dxns);
 		for (int32_t i=0; i < outerSize; i ++)

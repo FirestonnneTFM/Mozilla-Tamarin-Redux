@@ -179,8 +179,8 @@ REALLY_INLINE bool MethodEnv::isInterpreted()
     return method->isInterpreted();
 }
 
-REALLY_INLINE ScriptEnv::ScriptEnv(MethodInfo* _method, VTable* _vtable, AbcEnv* _abcEnv)
-    : MethodEnv(_method, createScriptScope(_method->declaringScope(), _vtable, _abcEnv))
+REALLY_INLINE ScriptEnv::ScriptEnv(MethodInfo* _method, ScopeChain* _scope)
+    : MethodEnv(_method, _scope)
 {
     setIsScriptEnv();
 }

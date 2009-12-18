@@ -230,6 +230,7 @@ namespace avmplus
 	static VTable* _newVT(Toplevel* toplevel, PoolObject* pool, uint16_t sz)
 	{
 		Traits* t = Traits::newTraits(pool, NULL, sz, 0, 0, TRAITSTYPE_RT);
+        t->resolveSignatures(toplevel);
 		return toplevel->core()->newVTable(t, NULL, toplevel);
 	}
 #endif

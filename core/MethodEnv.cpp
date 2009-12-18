@@ -1265,9 +1265,6 @@ namespace avmplus
 				toplevel->throwTypeError(kCorruptABCError);
 		}
 
-		ctraits->resolveSignatures(toplevel);
-		itraits->resolveSignatures(toplevel);
-
 		VTable* ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, toplevel);
 		
 		// This is a little weird, as the cvtable should have the ivtable as its base

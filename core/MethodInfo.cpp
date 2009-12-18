@@ -57,8 +57,8 @@ namespace avmplus
 	MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits) :
 		MethodInfoProcHolder(),
 		_msref(declTraits->pool->core->GetGC()->emptyWeakRef),
-		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
-		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
+		_declarer(declTraits),
+		_activation(NULL),
 		_pool(declTraits->pool),
 		_abc_info_pos(NULL),
 		_flags(RESOLVED),
@@ -70,8 +70,8 @@ namespace avmplus
     MethodInfo::MethodInfo(InitMethodStub, Traits* declTraits, const NativeMethodInfo* native_info) :
         MethodInfoProcHolder(),
         _msref(declTraits->pool->core->GetGC()->emptyWeakRef),
-		_declaringScopeOrTraits(uintptr_t(declTraits) | IS_TRAITS),
-		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
+		_declarer(declTraits),
+		_activation(NULL),
         _pool(declTraits->pool),
         _abc_info_pos(NULL),
         _flags(RESOLVED),
@@ -94,14 +94,14 @@ namespace avmplus
 							const NativeMethodInfo* native_info) : 
 		MethodInfoProcHolder(),
 		_msref(pool->core->GetGC()->emptyWeakRef),
-		_declaringScopeOrTraits(uintptr_t(0) | IS_TRAITS),
-		_activationScopeOrTraits(uintptr_t(0) | IS_TRAITS),
+		_declarer(NULL),
+		_activation(NULL),
 		_pool(pool),
 		_abc_info_pos(abc_info_pos),
 		_flags(abcFlags),
 		_method_id(method_id)
 	{
-
+        AvmAssert(method_id >= 0);
 #if !defined(MEMORY_INFO)
 		MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
 #endif
@@ -116,65 +116,10 @@ namespace avmplus
 		}
 	}
 
-    // WARNING the logic 'declaringTraits()->init' appears to imply 
-    // a class initializer, but the condition could be generated for
-    // some other combination of traits and methods - short of it is 
-    // don't trust the name of this function.
-    bool MethodInfo::hasNoScopeAndNotClassInitializer() const
-    {
-        AvmAssert(_declaringScopeOrTraits != 0);
-        bool b = ((_declaringScopeOrTraits & IS_TRAITS)==1) && declaringTraits()->init != this;
-        return b;
-    }
- 
-	Traits* MethodInfo::declaringTraits() const 
-	{ 
-		if (_declaringScopeOrTraits & IS_TRAITS)
-			return (Traits*)(_declaringScopeOrTraits & ~IS_TRAITS);
-
-		return ((const ScopeTypeChain*)(_declaringScopeOrTraits))->traits(); 
-	}
-
-	const ScopeTypeChain* MethodInfo::declaringScope() const 
-	{ 
-		AvmAssert(!(_declaringScopeOrTraits & IS_TRAITS));
-		AvmAssert(_declaringScopeOrTraits != 0);
-		return ((const ScopeTypeChain*)(_declaringScopeOrTraits)); 
-	}
-
-	void MethodInfo::init_declaringScope(const ScopeTypeChain* s) 
-	{ 
-		AvmAssert(_declaringScopeOrTraits & IS_TRAITS);
-		AvmAssert(((Traits*)(_declaringScopeOrTraits & ~IS_TRAITS)) == s->traits());
-		WB(pool()->core->GetGC(), this, &_declaringScopeOrTraits, uintptr_t(s)); 
-	}
-
-	Traits* MethodInfo::activationTraits() const 
-	{ 
-		if (_activationScopeOrTraits & IS_TRAITS)
-			return (Traits*)(_activationScopeOrTraits & ~IS_TRAITS);
-
-		return ((const ScopeTypeChain*)(_activationScopeOrTraits))->traits(); 
-	}
-
-	const ScopeTypeChain* MethodInfo::activationScope() const 
-	{ 
-		AvmAssert(!(_activationScopeOrTraits & IS_TRAITS));
-		AvmAssert(_activationScopeOrTraits != 0);
-		return ((const ScopeTypeChain*)(_activationScopeOrTraits)); 
-	}
-
 	void MethodInfo::init_activationTraits(Traits* t) 
 	{ 
-		AvmAssert(_activationScopeOrTraits == (uintptr_t(0) | IS_TRAITS));
-		WB(pool()->core->GetGC(), this, &_activationScopeOrTraits, uintptr_t(t) | IS_TRAITS); 
-	}
-
-	void MethodInfo::init_activationScope(const ScopeTypeChain* s) 
-	{ 
-		AvmAssert(_activationScopeOrTraits & IS_TRAITS);
-		AvmAssert(((Traits*)(_activationScopeOrTraits & ~IS_TRAITS)) == s->traits());
-		WB(pool()->core->GetGC(), this, &_activationScopeOrTraits, uintptr_t(s)); 
+		AvmAssert(_activation.getTraits() == NULL);
+        _activation.setTraits(pool()->core->GetGC(), this, t);
 	}
 
 	static bool hasTypedArgs(MethodSignaturep ms)
@@ -859,10 +804,9 @@ namespace avmplus
 		AvmAssert(!(_flags & PROTOFUNC));
 // end AVMPLUS_UNCHECKED_HACK
 		
-		AvmAssert(_declaringScopeOrTraits & IS_TRAITS);
-		if (_declaringScopeOrTraits == (uintptr_t(0) | IS_TRAITS))
+		if (_declarer.getTraits() == NULL)
 		{
-			WB(pool()->core->GetGC(), this, &_declaringScopeOrTraits, uintptr_t(traits) | IS_TRAITS); 
+            _declarer.setTraits(pool()->core->GetGC(), this, traits);
 			_flags |= NEED_CLOSURE;
 			return true;
 		}
@@ -883,10 +827,10 @@ namespace avmplus
 		// to clear out data on AbstractionFunction so it can correctly be re-initialized.
 		// If our old function is ever used incorrectly, we throw an verify error in 
 		// MethodEnv::coerceEnter.
-		if (_declaringScopeOrTraits != (uintptr_t(0) | IS_TRAITS))
+		if (_declarer.getTraits() != NULL)
 		{
 			this->_flags &= ~RESOLVED;
-			this->_declaringScopeOrTraits = uintptr_t(0) | IS_TRAITS;
+            _declarer.setTraits(pool()->core->GetGC(), this, NULL);
 			this->_msref = pool()->core->GetGC()->emptyWeakRef;
 		}
 // begin AVMPLUS_UNCHECKED_HACK
@@ -903,8 +847,9 @@ namespace avmplus
 		AvmCore* core = pool()->core;
 		Traits* ftraits = fscope->traits();
 		AvmAssert(fscope->traits() == core->traits.function_itraits);
-		WB(core->GetGC(), this, &_declaringScopeOrTraits, uintptr_t(fscope)); 
+        _declarer.setScope(pool()->core->GetGC(), this, fscope);
 		
+        AvmAssert(declaringTraits() == ftraits);
 		return ftraits;
 	}
 	
@@ -1124,9 +1069,9 @@ namespace avmplus
 		const ScopeTypeChain* ascope = this->declaringScope()->cloneWithNewTraits(pool()->core->GetGC(), atraits);
 
 		atraits->resolveSignatures(toplevel);
-		atraits->init_declaringScopes(ascope);
+		atraits->setDeclaringScopes(ascope);
 
-		this->init_activationScope(ascope);
+        _activation.setScope(pool()->core->GetGC(), this, ascope);
 		
 		return atraits;
 	}
