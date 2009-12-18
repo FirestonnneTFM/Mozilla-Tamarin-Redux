@@ -219,7 +219,7 @@ namespace avmplus
 		setMultiname(gc, container, that);
 	}
 	
-	// This is always safe.  We must /not/ use WB_NULL here, only the full WB functions that
+	// This is always safe.  We must /not/ use WBRC_NULL here, only the full WBRC functions that
 	// take the gc and container explicitly will be safe.  See bugzilla 525875. 
 	void HeapMultiname::setMultiname(MMgc::GC* gc, const void* container, const Multiname& that)
 	{
@@ -234,9 +234,9 @@ namespace avmplus
 			// any existing value (before setting a new one) because WB/WBRC
 			// assume any existing value is a GCObject/RCObject respectively.
 			if (this_nsset)
-				WB(gc, container, &name.ns, NULL);	// DO NOT USE WB_NULL
+				WB_NULL(&name.ns);						// WB_NULL is safe
 			else
-				WB(gc, container, &name.ns, NULL);	// DO NOT USE WB_NULL
+				WBRC(gc, container, &name.ns, NULL);	// DO NOT USE WBRC_NULL
 		}
 
 		if (that_nsset) 
