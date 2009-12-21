@@ -358,6 +358,8 @@ namespace avmplus
         uint8_t* base;
         uint32_t size;
     };
+    
+    class MopsRangeCheckFilter;
 
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
@@ -389,6 +391,7 @@ namespace avmplus
         const MethodSignaturep ms;
         PoolObject *pool;
         FrameState *state;
+        MopsRangeCheckFilter* mopsRangeCheckFilter;
         LIns *vars, *varTraits;
         LIns *env_param, *argc_param, *ap_param;
         LIns *_save_eip, *_ef;

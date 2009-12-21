@@ -76,15 +76,11 @@ namespace avmplus
 		 * global memory access glue
 		 */
 		enum {
-			GLOBAL_MEMORY_MIN_SIZE =
-// if we have JIT support for MOPS we can optimize range checks
-// against ranges that can fit within the minimum memory size
-// so it's worth burning a little space
-//#ifdef AVMPLUS_IA32
-//				1024
-//#else
-				8
-//#endif
+            // Must be at least 8 [ie, largest single load/store op we provide]
+            // Used to be 1024 on x86 to enhance certain range checks in MIR;
+            // these optimizations are missing in nanojit so the minimum is
+            // set smaller for now.
+			GLOBAL_MEMORY_MIN_SIZE = 8
 		};
 
 		REALLY_INLINE Domain* base() const { return m_base; }

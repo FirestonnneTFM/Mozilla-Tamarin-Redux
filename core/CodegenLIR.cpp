@@ -260,6 +260,115 @@ namespace avmplus
 #endif
      };
 
+    class MopsRangeCheckFilter: public LirWriter
+    {
+    private:
+        LInsp curMopAddr;
+        LInsp curMemBase;
+        LInsp curMemSize;
+        int32_t activeMin, activeMax;
+        
+    private:
+        void clear();
+
+    public:
+        MopsRangeCheckFilter(LirWriter* out);
+
+        bool updateActiveRange(LInsp mopAddr, int32_t curDisp, int32_t curExtent);
+        LInsp mopsMemoryBase(GlobalMemoryInfo* gmi);
+        LInsp mopsMemorySize(GlobalMemoryInfo* gmi);
+            
+        // overrides from LirWriter
+        LIns* ins0(LOpcode v);
+        LIns* insCall(const CallInfo* call, LInsp args[]);
+    };
+
+    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out)
+        : LirWriter(out)
+    {
+        clear();
+    }
+
+    void MopsRangeCheckFilter::clear()
+    {
+        curMopAddr = curMemBase = curMemSize = NULL;
+        activeMin = int32_t(0x7fffffff);
+        activeMax = int32_t(0x80000000);
+    }
+
+    bool MopsRangeCheckFilter::updateActiveRange(LInsp mopAddr, int32_t curDisp, int32_t curExtent)
+    {
+        bool emitCheck = true;
+        if (!curMopAddr)
+        {
+            curMopAddr = mopAddr;
+            activeMin = curDisp;
+            activeMax = curExtent;
+        }
+        else
+        {  
+            if (curMopAddr == mopAddr)
+            {
+                if (curDisp >= activeMin && curExtent <= activeMax)
+                {
+                    // there are still-valid range checks that already cover us, no need to emit another one here
+                    // (ie, if the check we are emit would fail, a previous check within the same memory-is-valid
+                    // code range would already have failed). This is a tiny percentage for most tests (<1%)
+                    // but at least one test (scimark) approached 10%, so it seems worth leaving in.
+                    emitCheck = false;
+                }
+                else
+                {
+                    if (activeMin > curDisp) 
+                        activeMin = curDisp;
+                    if (activeMax < curExtent) 
+                        activeMax = curExtent;
+                }
+            }
+            else
+            {
+                clear();
+            }
+        }
+        return emitCheck;
+    }
+
+    LInsp MopsRangeCheckFilter::mopsMemoryBase(GlobalMemoryInfo* gmi)
+    {
+        if (!curMemBase)
+        {
+            // don't use cse-able load, semantics aren't right
+            curMemBase = out->insLoad(LIR_ldp, out->insImmPtr(&gmi->base), 0);
+        }
+        return curMemBase;
+    }
+
+    LInsp MopsRangeCheckFilter::mopsMemorySize(GlobalMemoryInfo* gmi)
+    {
+        if (!curMemSize)
+        {
+            // don't use cse-able load, semantics aren't right.
+            curMemSize = out->insLoad(LIR_ld, out->insImmPtr(&gmi->size), 0);
+        }
+        return curMemSize;
+    }
+
+    LIns* MopsRangeCheckFilter::ins0(LOpcode v)
+    {
+        if (v == LIR_label)
+            clear();
+        return LirWriter::ins0(v);
+    }
+
+    LInsp MopsRangeCheckFilter::insCall(const CallInfo *ci, LInsp args[])
+    {
+        // calls could potentially resize globalMemorySize, so we
+        // can't collapse range checks across them
+        if (!ci->_cse)
+            clear();
+        return LirWriter::insCall(ci, args);
+    }
+
 #if NJ_SOFTFLOAT
 
     static double i2f(int32_t i) { return i; }
@@ -579,6 +688,7 @@ namespace avmplus
         info(i),
         ms(i->getMethodSignature()),
         pool(i->pool()),
+        mopsRangeCheckFilter(NULL),
         interruptable(true),
         globalMemoryInfo(NULL),
         patches(*alloc1),
@@ -4963,6 +5073,12 @@ namespace avmplus
     {
         AvmAssert(size > 0);    // it's signed to help make the int promotion correct
 
+        if (!mopsRangeCheckFilter)
+        {
+            mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(lirout);
+            lirout = mopsRangeCheckFilter;
+        }
+
         if (!globalMemoryInfo)
         {
             globalMemoryInfo = (GlobalMemoryInfo*)pool->codeMgr->allocator.alloc(sizeof(GlobalMemoryInfo));
@@ -4971,11 +5087,10 @@ namespace avmplus
             pool->domain->addGlobalMemoryBaseRef(&globalMemoryInfo->base);
             pool->domain->addGlobalMemorySizeRef(&globalMemoryInfo->size);
         }
-
+        
+        int32_t curDisp = 0;
         if (disp != NULL)
         {
-            *disp = 0;
-
             // mopAddr is an int (an offset from globalMemoryBase) on all archs.
             // if mopAddr is an expression of the form
             //      expr+const
@@ -5015,49 +5130,52 @@ namespace avmplus
                     break;
                 }
 
-                if (!sumFitsInInt32(*disp, imm))
+                if (!sumFitsInInt32(curDisp, imm))
                     break;
 
-                *disp += imm;
+                curDisp += imm;
                 mopAddr = nonImm;
             }
+            *disp = curDisp;
         }
 
-        LInsp mopsMemoryBase = loadIns(LIR_ldcp, 0, InsConstPtr(&globalMemoryInfo->base));
-        LInsp mopsMemorySize = loadIns(LIR_ldc, 0, InsConstPtr(&globalMemoryInfo->size));
+        int32_t const curExtent = curDisp+size;
+        bool const emitCheck = mopsRangeCheckFilter->updateActiveRange(mopAddr, curDisp, curExtent);
 
-        LInsp lhs, rhs, br;
-        if (!disp || *disp == 0)
+        LInsp mopsMemoryBase = mopsRangeCheckFilter->mopsMemoryBase(globalMemoryInfo);
+        
+        if (emitCheck)
         {
-            // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
-            // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
-            lhs = mopAddr;
-            rhs = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
-            br = branchIns(LIR_jt, binaryIns(LIR_ugt, lhs, rhs));
-            patchLater(br, mop_rangeCheckFailed_label);
-        }
-        else
-        {
-            // @todo, can we get by with a simpler test here?
-            lhs = binaryIns(LIR_add, mopAddr, InsConst(*disp));
-            rhs = InsConst(0);
-            br = branchIns(LIR_jt, binaryIns(LIR_lt, lhs, rhs));
-            patchLater(br, mop_rangeCheckFailed_label);
+            LInsp mopsMemorySize = mopsRangeCheckFilter->mopsMemorySize(globalMemoryInfo);
 
-            lhs = binaryIns(LIR_add, mopAddr, InsConst(*disp+size));
-            rhs = mopsMemorySize;
-            br = branchIns(LIR_jt, binaryIns(LIR_gt, lhs, rhs));
-            patchLater(br, mop_rangeCheckFailed_label);
+            if (curDisp == 0)
+            {
+                // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
+                // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
+                LInsp br = branchIns(LIR_jt, binaryIns(LIR_ugt, mopAddr, binaryIns(LIR_sub, mopsMemorySize, InsConst(size))));
+                patchLater(br, mop_rangeCheckFailed_label);
+            }
+            else
+            {
+                LInsp addr_hi = binaryIns(LIR_add, mopAddr, InsConst(curExtent));
+                LInsp br_hi = branchIns(LIR_jt, binaryIns(LIR_gt, addr_hi, mopsMemorySize));
+                patchLater(br_hi, mop_rangeCheckFailed_label);
+
+                LInsp addr_lo = binaryIns(LIR_add, mopAddr, InsConst(curDisp));
+                LInsp br_lo = branchIns(LIR_jt, binaryIns(LIR_lt, addr_lo, InsConst(0)));
+                patchLater(br_lo, mop_rangeCheckFailed_label);
+            }
         }
 
         // if mopAddr is a compiletime constant, we still have to do the range-check above
         // (since globalMemorySize can vary at runtime), but we might be able to encode
-        // the address into the displacement (if any)...
-        if (mopAddr->isconst() && disp != NULL && sumFitsInInt32(*disp, mopAddr->imm32()))
+        // the entire address into the displacement (if any)...
+        if (mopAddr->isconst() && disp != NULL && sumFitsInInt32(curDisp, mopAddr->imm32()))
         {
             *disp += mopAddr->imm32();
             return mopsMemoryBase;
         }
+
         // note: we can use piadd here only because we know this is never a GCObject.
         // (if it was, we'd have to use LIR_addp, which is restricted from certain
         // optimizations that can leave dangling interior pointers)
