@@ -195,11 +195,11 @@ Atom op_add(AvmCore*, Atom lhs, Atom rhs);
 
 void FASTCALL mop_rangeCheckFailed(MethodEnv* env);
 // load-and-sign-extend
-int32_t FASTCALL mop_lix8(const void* addr); 
+int32_t FASTCALL mop_lix8(const void* addr);
 int32_t FASTCALL mop_lix16(const void* addr);
 // load-and-zero-extend
 int32_t FASTCALL mop_liz8(const void* addr);
-int32_t FASTCALL mop_liz16(const void* addr); 
+int32_t FASTCALL mop_liz16(const void* addr);
 int32_t FASTCALL mop_li32(const void* addr);
 double FASTCALL mop_lf32(const void* addr);
 double FASTCALL mop_lf64(const void* addr);
