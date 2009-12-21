@@ -844,9 +844,8 @@ namespace avmplus
 
 		// type of F is synthetic subclass of Function, with a unique
 		// [[call]] property and a unique scope
-		AvmCore* core = pool()->core;
 		Traits* ftraits = fscope->traits();
-		AvmAssert(fscope->traits() == core->traits.function_itraits);
+		AvmAssert(fscope->traits() == pool()->core->traits.function_itraits);
         _declarer.setScope(pool()->core->GetGC(), this, fscope);
 		
         AvmAssert(declaringTraits() == ftraits);
