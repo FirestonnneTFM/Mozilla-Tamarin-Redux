@@ -231,7 +231,7 @@ namespace avmplus
         { 1, LIR_ldzb },
         { 2, LIR_ldzs },
         { 4, LIR_ld },
-        { 4, LIR_ld32f }, 
+        { 4, LIR_ld32f },
         { 8, LIR_ldq }
 #else
         { 1, FUNCTIONID(mop_lix8) },
@@ -249,7 +249,7 @@ namespace avmplus
         { 1, LIR_stb },
         { 2, LIR_sts },
         { 4, LIR_sti },
-        { 4, LIR_st32f }, 
+        { 4, LIR_st32f },
         { 8, LIR_stqi }
 #else
         { 1, FUNCTIONID(mop_si8) },
@@ -3238,7 +3238,7 @@ namespace avmplus
                     (opcode == OP_sxi16 && val->opcode() == LIR_ldss))
                 {
                     // if we are sign-extending the result of a load-and-sign-extend
-                    // instruction, no need to do anything. 
+                    // instruction, no need to do anything.
                     break;
                 }
                 LIns* sh = InsConst(kShiftAmt[opcode - OP_sxi1]);
