@@ -151,6 +151,7 @@
   #define AVMSYSTEM_PPC		0
   #define AVMSYSTEM_AMD64	0
   #define AVMSYSTEM_SPARC	0
+  #define AVMSYSTEM_MIPS   0
 
   #if defined(__ARMCC__)
     #define AVMSYSTEM_ARM    1
