@@ -402,7 +402,13 @@ namespace avmplus
 					ok = false;
 			}
 			if (!ok)
+			{
 				bgn = end + 1;
+                // in this case we don't want to just throw out the
+                // the value entirely as that would break existing content
+				if (start < end)
+					dest = dest->append(m_str->substring(start, end));
+            }
 			bgn = m_str->indexOfCharCode('&', bgn, last);
 		}
 		// add any remaining text
