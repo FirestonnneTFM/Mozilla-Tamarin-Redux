@@ -170,7 +170,8 @@ namespace avmplus
 		, passAllExceptionsToDebugger(false)
 #endif
 #ifdef AVMPLUS_VERIFYALL
-		, verifyQueue(g, 0)
+		, verifyFunctionQueue(g, 0)
+		, verifyTraitsQueue(g, 0)
 #endif
 		, livePools(NULL)
 		, m_tbCache(new (g) QCache(CacheSizes::DEFAULT_BINDINGS, g))
@@ -4338,16 +4339,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (config.verifyall &&
                 f && !f->isVerified() && !f->isVerifyPending()) {
 			f->setVerifyPending();
-			verifyQueue.add(f);
+			verifyFunctionQueue.add(f);
 		}
 	}
 
 	void AvmCore::enqTraits(Traits* t) {
         if (config.verifyall && !t->isInterface()) {
-			TraitsBindingsp td = t->getTraitsBindings();
-            enqFunction(t->init);
-		    for (int i=0, n=td->methodCount; i < n; i++)
-                enqFunction(td->getMethod(i));
+            if (verifyTraitsQueue.indexOf(t) < 0)
+                verifyTraitsQueue.add(t);
         }
 	}
 
@@ -4356,8 +4355,16 @@ return the result of the comparison ToPrimitive(x) == y.
 		int verified = 0;
 		do {
 			verified = 0;
-			while (!verifyQueue.isEmpty()) {
-				MethodInfo* f = verifyQueue.removeLast();
+            while (!verifyTraitsQueue.isEmpty()) {
+                Traits* t = verifyTraitsQueue.removeFirst();
+                t->resolveSignatures(toplevel);
+                TraitsBindingsp td = t->getTraitsBindings();
+                enqFunction(t->init);
+                for (int i=0, n=td->methodCount; i < n; i++)
+                    enqFunction(td->getMethod(i));
+            }
+			while (!verifyFunctionQueue.isEmpty()) {
+				MethodInfo* f = verifyFunctionQueue.removeLast();
 				if (!f->isVerified()) {
 					if (f->declaringTraits()->init != f && f->declaringScope() == NULL) {
 						verifyQueue2.add(f);
@@ -4370,7 +4377,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				}
 			}
 			while (!verifyQueue2.isEmpty())
-				verifyQueue.add(verifyQueue2.removeLast());
+				verifyFunctionQueue.add(verifyQueue2.removeLast());
 		} while (verified > 0);
 	}
 #endif
