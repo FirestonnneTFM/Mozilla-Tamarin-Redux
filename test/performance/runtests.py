@@ -99,6 +99,8 @@ class PerformanceRuntest(RuntestBase):
         self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
+        # Load root .asc_args and .java_args files
+        self.parseRootConfigFiles()
         self.preProcessTests()
         self.runTests(self.tests)
         #self.cleanup()
