@@ -342,7 +342,7 @@ namespace avmplus
 		{
 			value = AvmCore::integer(atom);						
 		}
-		void atomToValue(Atom atom, sint64& value)
+		void atomToValue(Atom atom, int64_t& value)
 		{
 			value = AvmCore::integer(int(atom));						
 		}
@@ -379,7 +379,7 @@ namespace avmplus
 		{
 			return core()->uintToAtom(value);
 		}
-		Atom valueToAtom(sint64 value) const
+		Atom valueToAtom(int64_t value) const
 		{
 			return core()->intToAtom(int(value));
 		}
