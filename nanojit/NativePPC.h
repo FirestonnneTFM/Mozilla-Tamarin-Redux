@@ -54,7 +54,7 @@
 
 namespace nanojit
 {
-#define NJ_MAX_STACK_ENTRY              4096
+#define NJ_MAX_STACK_ENTRY              256
 #define NJ_ALIGN_STACK                  16
 #define NJ_JTBL_SUPPORTED               1
 #define NJ_EXPANDED_LOADSTORE_SUPPORTED 0
@@ -258,6 +258,9 @@ namespace nanojit
     static const int NumSavedRegs = 18; // R13-R30
 #endif
 
+    static inline bool isValidDisplacement(LOpcode, int32_t) {
+        return true;
+    }
     static inline bool IsFpReg(Register r) {
         return r >= F0;
     }

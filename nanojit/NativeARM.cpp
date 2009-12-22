@@ -117,7 +117,7 @@ Assembler::CountLeadingZeroes(uint32_t data)
 // (even though this is a legal instruction there). Since we currently only compile for ARMv5
 // for emulation, we don't care too much (but we DO care for ARMv6+ since those are "real"
 // devices).
-#elif defined(__GNUC__) && !(defined(ANDROID) && __ARM_ARCH__ <= 5)
+#elif defined(__GNUC__) && !(defined(ANDROID) && __ARM_ARCH__ <= 5) 
     // GCC can use inline assembler to insert a CLZ instruction.
     __asm (
         "   clz     %0, %1  \n"
@@ -469,7 +469,7 @@ Assembler::genPrologue()
 
     // NJ_RESV_OFFSET is space at the top of the stack for us
     // to use for parameter passing (8 bytes at the moment)
-    uint32_t stackNeeded = max_out_args + STACK_GRANULARITY * _activation.stackSlotsNeeded();
+    uint32_t stackNeeded = max_out_args + STACK_GRANULARITY * _activation.tos;
     uint32_t savingCount = 2;
 
     uint32_t savingMask = rmask(FP) | rmask(LR);
@@ -596,7 +596,7 @@ Assembler::genEpilogue()
  * - both doubles and 32-bit arguments are placed on stack with 32-bit
  *   alignment.
  */
-void
+void 
 Assembler::asm_arg(ArgSize sz, LInsp arg, Register& r, int& stkd)
 {
     // The stack pointer must always be at least aligned to 4 bytes.
@@ -722,7 +722,7 @@ Assembler::asm_arg_64(LInsp arg, Register& r, int& stkd)
     }
 }
 
-void
+void 
 Assembler::asm_regarg(ArgSize sz, LInsp p, Register r)
 {
     NanoAssert(isKnownReg(r));
@@ -1047,7 +1047,7 @@ do_peep_2_1(/*OUT*/NIns* merged, NIns i1, NIns i2)
          ld/str rY, [fp, #-4]
          ==>
          ld/stmdb fp, {rX, rY}
-         when
+         when 
          X < Y and X != fp and Y != fp and X != 15 and Y != 15
     */
     if (is_ldstr_reg_fp_minus_imm(&isLoadX, &rX, &immX, i1) &&
@@ -1227,11 +1227,11 @@ Assembler::asm_store32(LOpcode op, LIns *value, int dr, LIns *base)
         findRegFor2(GpRegs, value, ra, base, rb);
     }
 
-    if (isU12(-dr) || isU12(dr)) {
-        STR(ra, rb, dr);
-    } else {
+    if (!isS12(dr)) {
         STR(ra, IP, 0);
         asm_add_imm(IP, rb, dr);
+    } else {
+        STR(ra, rb, dr);
     }
 }
 
@@ -1264,7 +1264,7 @@ Assembler::asm_restore(LInsp i, Register r)
             // See if we can merge this load into an immediately following
             // one, by creating or extending an LDM instruction.
             if (/* is it safe to poke _nIns[1] ? */
-                does_next_instruction_exist(_nIns, codeStart, codeEnd,
+                does_next_instruction_exist(_nIns, codeStart, codeEnd, 
                                                    exitStart, exitEnd)
                 && /* can we merge _nIns[0] into _nIns[1] ? */
                    do_peep_2_1(&merged, _nIns[0], _nIns[1])) {
@@ -1295,7 +1295,7 @@ Assembler::asm_spill(Register rr, int d, bool pop, bool quad)
             // See if we can merge this store into an immediately following one,
             // one, by creating or extending a STM instruction.
             if (/* is it safe to poke _nIns[1] ? */
-                does_next_instruction_exist(_nIns, codeStart, codeEnd,
+                does_next_instruction_exist(_nIns, codeStart, codeEnd, 
                                                    exitStart, exitEnd)
                 && /* can we merge _nIns[0] into _nIns[1] ? */
                    do_peep_2_1(&merged, _nIns[0], _nIns[1])) {
@@ -1912,7 +1912,7 @@ Assembler::asm_ld_imm(Register d, int32_t imm, bool chk /* = true */)
         ++_nSlot;
         offset += sizeof(_nSlot);
     }
-    NanoAssert((isU12(-offset) || isU12(offset)) && (offset <= -8));
+    NanoAssert(isS12(offset) && (offset <= -8));
 
     // Write the literal.
     *(_nSlot++) = imm;
@@ -2194,11 +2194,15 @@ Assembler::asm_cmp(LIns *cond)
     // ready to issue the compare
     if (rhs->isconst()) {
         int c = rhs->imm32();
-        Register r = findRegFor(lhs, GpRegs);
         if (c == 0 && cond->isop(LIR_eq)) {
-            TST(r, r);
-        } else {
+            Register r = findRegFor(lhs, GpRegs);
+            TST(r,r);
+            // No 64-bit immediates so fall-back to below
+        } else if (!rhs->isQuad()) {
+            Register r = getBaseReg(condop, lhs, c, GpRegs);
             asm_cmpi(r, c);
+        } else {
+            NanoAssert(0);
         }
     } else {
         Register ra, rb;
@@ -2252,7 +2256,7 @@ Assembler::asm_cond(LInsp ins)
 {
     Register r = prepResultReg(ins, AllowableFlagRegs);
     LOpcode op = ins->opcode();
-
+    
     switch(op)
     {
         case LIR_eq:  SETEQ(r); break;
@@ -2379,7 +2383,7 @@ Assembler::asm_arith(LInsp ins)
             // We try to use rb as the first operand by default because it is
             // common for (rr == ra) and is thus likely to be the most
             // efficient method.
-
+            
             if ((ARM_ARCH > 5) || (rr != rb)) {
                 // IP is used to temporarily store the high word of the result from
                 // SMULL, so we make use of this to perform an overflow check, as
@@ -2394,7 +2398,7 @@ Assembler::asm_arith(LInsp ins)
             } else {
                 // ARM_ARCH is ARMv5 (or below) and rr == rb, so we must
                 // find a different way to encode the instruction.
-
+                
                 // If possible, swap the arguments to avoid the restriction.
                 if (rr != ra) {
                     // We know that rr == rb, so this will be something like
@@ -2415,7 +2419,7 @@ Assembler::asm_arith(LInsp ins)
                     //     bits are zero.
                     //   - Any argument lower than (or equal to) 0xffff that
                     //     also overflows is guaranteed to set output bit 31.
-                    //
+                    // 
                     // Thus, we know we have _not_ overflowed if:
                     //   abs(rX)&0xffff0000 == 0 AND result[31] == 0
                     //
@@ -2436,7 +2440,7 @@ Assembler::asm_arith(LInsp ins)
                 }
             }
             break;
-
+        
         // The shift operations need a mask to match the JavaScript
         // specification because the ARM architecture allows a greater shift
         // range than JavaScript.
@@ -2486,39 +2490,22 @@ Assembler::asm_load32(LInsp ins)
     int d = ins->disp();
 
     Register rr = prepResultReg(ins, GpRegs);
-    Register ra = getBaseReg(base, d, GpRegs);
+    Register ra = getBaseReg(op, base, d, GpRegs);
 
-    switch (op) {
+    switch(op) {
         case LIR_ldzb:
         case LIR_ldcb:
-            if (isU12(-d) || isU12(d)) {
-                LDRB(rr, ra, d);
-            } else {
-                LDRB(rr, IP, 0);
-                asm_add_imm(IP, ra, d);
-            }
+            LDRB(rr, ra, d);
             return;
         case LIR_ldzs:
         case LIR_ldcs:
-            // These are expected to be 2-byte aligned.  (Not all ARM machines
-            // can handle unaligned accesses.)
-            // Similar to the ldcb/ldzb case, but the max offset is smaller.
-            if (isU8(-d) || isU8(d)) {
-                LDRH(rr, ra, d);
-            } else {
-                LDRH(rr, IP, 0);
-                asm_add_imm(IP, ra, d);
-            }
+            // these are expected to be 2 or 4-byte aligned
+            LDRH(rr, ra, d);
             return;
         case LIR_ld:
         case LIR_ldc:
-            // These are expected to be 4-byte aligned.
-            if (isU12(-d) || isU12(d)) {
-                LDR(rr, ra, d);
-            } else {
-                LDR(rr, IP, 0);
-                asm_add_imm(IP, ra, d);
-            }
+            // these are expected to be 4-byte aligned
+            LDR(rr, ra, d);
             return;
         case LIR_ldsb:
         case LIR_ldss:
