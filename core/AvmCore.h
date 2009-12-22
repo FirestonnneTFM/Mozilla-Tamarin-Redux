@@ -214,8 +214,10 @@ const int kBufferPadding = 16;
 		#endif
 		
 #ifdef AVMPLUS_VERIFYALL
+    private:
+        List<MethodInfo*, LIST_GCObjects> verifyFunctionQueue;
+        List<Traits*, LIST_GCObjects> verifyTraitsQueue;
 	public:
-        List<MethodInfo*, LIST_GCObjects> verifyQueue;
 		void enqFunction(MethodInfo* f);
 		void enqTraits(Traits* t);
 		void verifyEarly(Toplevel* toplevel, AbcEnv* abc_env);
