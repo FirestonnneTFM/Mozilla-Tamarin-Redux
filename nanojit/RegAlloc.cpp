@@ -53,7 +53,7 @@ namespace nanojit
         return cnt;
     }
 
-    bool RegAlloc::isConsistent(Register r, LIns* i) const
+    bool RegAlloc::isConsistent(Register r, LIns* i)
     {
         NanoAssert(r != UnknownReg);
         return (isFree(r)  && !getActive(r)     && !i) ||

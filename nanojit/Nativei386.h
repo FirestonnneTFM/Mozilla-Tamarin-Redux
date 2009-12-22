@@ -93,7 +93,7 @@ namespace nanojit
 {
     const int NJ_MAX_REGISTERS = 24; // gpregs, x87 regs, xmm regs
 
-    #define NJ_MAX_STACK_ENTRY 4096
+    #define NJ_MAX_STACK_ENTRY 256
     #define NJ_MAX_PARAMETERS 1
     #define NJ_JTBL_SUPPORTED 1
     #define NJ_EXPANDED_LOADSTORE_SUPPORTED 1
@@ -157,6 +157,10 @@ namespace nanojit
 
     static const RegisterMask AllowableFlagRegs = 1<<EAX |1<<ECX | 1<<EDX | 1<<EBX;
 
+    static inline bool isValidDisplacement(LOpcode, int32_t) {
+        return true;
+    }
+
     #define _rmask_(r)      (1<<(r))
     #define _is_xmm_reg_(r) ((_rmask_(r)&XmmRegs)!=0)
     #define _is_x87_reg_(r) ((_rmask_(r)&x87Regs)!=0)
@@ -189,11 +193,11 @@ namespace nanojit
  #define IMM8(i)    \
      _nIns -= 1;     \
      *((int8_t*)_nIns) = (int8_t)(i)
-
+ 
  #define IMM16(i)    \
      _nIns -= 2;     \
      *((int16_t*)_nIns) = (int16_t)(i)
-
+ 
 #define IMM32(i)    \
     _nIns -= 4;     \
     *((int32_t*)_nIns) = (int32_t)(i)
@@ -451,8 +455,8 @@ namespace nanojit
 
 // note: movzx/movsx are being output with an 8/16 suffix to indicate the size
 // being loaded. this doesn't really match standard intel format (though is arguably
-// terser and more obvious in this case) and would probably be nice to fix.
-// (likewise, the 8/16 bit stores being output as "mov8" and "mov16" respectively.)
+// terser and more obvious in this case) and would probably be nice to fix. 
+// (likewise, the 8/16 bit stores being output as "mov8" and "mov16" respectively.) 
 
 // load 16-bit, sign extend
 #define LD16S(r,d,b) do { count_ld(); ALU2m(0x0fbf,r,d,b); asm_output("movsx16 %s,%d(%s)", gpn(r),d,gpn(b)); } while(0)
