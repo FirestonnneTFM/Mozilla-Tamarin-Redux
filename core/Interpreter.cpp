@@ -1958,7 +1958,7 @@ namespace avmplus
 // How will RTTI caching affect that?
 
 #ifdef VMCFG_PRECOMP_NAMES
-#  define GET_MULTINAME_PTR(decl, arg)  decl = pool->precomputedMultiname(arg)
+#  define GET_MULTINAME_PTR(decl, arg)  decl = pool->precomputedMultiname(uint32_t(arg))
 #else
 #  define GET_MULTINAME_PTR(decl, arg)  Multiname _multiname; pool->parseMultiname(_multiname, arg); decl = &_multiname
 #endif
