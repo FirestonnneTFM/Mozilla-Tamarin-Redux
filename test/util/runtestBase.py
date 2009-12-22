@@ -94,6 +94,7 @@ class RuntestBase:
     escbin = ''
     includes = None
     java = 'java'
+    javaargs = ''
     js_output = ''
     js_output_f = None
     logFileType = 'html'
@@ -194,6 +195,7 @@ class RuntestBase:
         print '    --html          also create an html output file'
         print '    --notimecheck   do not recompile .abc if timestamp is older than .as'
         print '    --java          location of java executable (default=java)'
+        print '    --javaargs      arguments to pass to java'
         print '    --random        run tests in random order'
         
         
@@ -205,7 +207,9 @@ class RuntestBase:
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
-                   'showtimes','java=','html','random', 'playerglobalabc=', 'toplevelabc=']
+                   'showtimes','java=','html','random', 'playerglobalabc=', 'toplevelabc=',
+                   'javaargs='
+                   ]
 
     def parseOptions(self):
         try:
@@ -256,6 +260,8 @@ class RuntestBase:
                 self.debug = True
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
+                if not pexpect:
+                    print 'To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net'
             elif o in ('-q', '--quiet'):
                 self.quiet = True
             elif o in ('--html',):
@@ -266,6 +272,8 @@ class RuntestBase:
                 self.show_time = True
             elif o in ('--java',):
                 self.java = v
+            elif o in ('--javaargs',):
+                self.javaargs = v
             elif o in ('--random',):
                 self.random = True
             
@@ -614,6 +622,25 @@ class RuntestBase:
                     settings[names[0]][names[1]][fields[2]]=fields[3]
         return settings, includes
     
+    def parseRootConfigFiles(self):
+        # Load any root .asc_args and .java_args files so they don' have to be
+        # loaded over and over again when compiling tests
+        
+        # Loads root asc_args file and modifies arglist accordingly
+        
+        if isfile('./dir.asc_args'):  # load root dir.asc_args
+            ascArgsList = parseArgStringToList(self.ascargs)
+            ascArgsList = self.parseAscArgs(ascArgsList, './dir.asc_args', './')
+            self.ascargs = ' '.join(ascArgsList)
+            
+        
+        # Loads root asc_args file and modifies arglist accordingly
+        if isfile('./dir.java_args'):  # load root dir.asc_args
+            javaArgsList = parseArgStringToList(self.javaargs)
+            javaArgsList = self.parseAscArgs(javaArgsList, './dir.java_args', './')
+            self.javaargs = ' '.join(javaArgsList)
+        
+        
     ### Output / Printing functions ###
     
     def err_print(self, m):
@@ -703,27 +730,33 @@ class RuntestBase:
             if not isfile(builtinabc):
                 exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
         
+            javaArgList = parseArgStringToList(self.javaargs)
+            javaArgList = self.loadArgsFile(javaArgList, dir, as_file, 'java_args')
+            
             if asc.endswith('.jar'):
-                cmd = '"%s" -jar %s' % (self.java,asc)
+                cmd = self.java
+                for arg in javaArgList:
+                    cmd += ' %s' % arg
+                cmd += ' -jar %s' %  asc
             else:
                 cmd = asc
             
-            arglist = parseArgStringToList(ascargs)
+            ascArgList = parseArgStringToList(ascargs)
         
             # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
-            arglist = self.loadAscArgs(arglist, dir, as_file)
+            ascArgList = self.loadArgsFile(ascArgList, dir, as_file, 'asc_args')
             
             (testdir, ext) = splitext(as_file)
             
             if self.genAtsSwfs:
-                arglist.extend(genAtsArgs(dir,file,self.atstemplate))
+                ascArgList.extend(genAtsArgs(dir,file,self.atstemplate))
             
             for arg in extraArgs:
                 cmd += ' %s' % arg
         
                                   
             cmd += ' -import %s' % builtinabc
-            for arg in arglist:
+            for arg in ascArgList:
                 cmd += ' %s' % arg
             
             for p in self.parents(dir):
@@ -778,7 +811,7 @@ class RuntestBase:
                     self.ashErrors.append("abc files %s.abc not created" % (testdir))
                 total -= 1;
         else:  #pexpect available
-            child = pexpect.spawn('"%s" -classpath %s macromedia.asc.embedding.Shell' % (self.java,self.asc))
+            child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
             child.logfile = None
             child.expect("\(ash\)")
             child.expect("\(ash\)")
@@ -792,44 +825,53 @@ class RuntestBase:
                     (dir, file) = split(test)
                     (testdir, ext) = splitext(test)
                     
-                    # look for .asc_args files to specify dir / file level compile args
-                    arglist = self.loadAscArgs(arglist, dir, test)
-                    
-                    if self.genAtsSwfs:
-                        # get settings as ats excluded files are defined there
-                        settings = self.getLocalSettings(testdir)
-                        if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
-                            self.js_print('ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip']))
-                            continue
-                        arglist.extend(genAtsArgs(dir,file,self.atstemplate))
-                    
-                    cmd = "asc -import %s " % (self.builtinabc)
-                    for arg in arglist:
-                        cmd += ' %s' % arg
-                    
-                    for p in self.parents(dir):
-                        if p=='':
-                            p='.'
-                        shell = join(p,"shell.as")
-                        if isfile(shell):
-                            cmd += " -in " + shell
-                            break
-                    
-                    deps = glob(join(testdir,"*.as"))
-                    deps.sort()
-                    for util in deps + glob(join(dir,"*Util.as")):
-                        cmd += " -in %s" % util #no need to prepend \ to $ when using ash
-                    cmd += " %s" % test
-                    
-                    if self.debug:
-                        self.js_print(cmd)
+                    # Check for a local .java_args file (either dir or file specific)
+                    # Not ideal - but we try to load a .java_args file, and if one is loaded, then we revert to compiling
+                    # without ash, as there is no way to pass new java args to the already running ash process
+                    javaArgList = []
+                    javaArgList = self.loadArgsFile(javaArgList, dir, test, 'java_args')
+                    if javaArgList:
+                        self.compile_test(test)
                     else:
-                        self.js_print("Compiling %s" % test)
-                    
-                    if exists(testdir+".abc"):
-                        os.unlink(testdir+".abc")
-                    child.sendline(cmd)
-                    child.expect("\(ash\)")
+                        # look for .asc_args files to specify dir / file level compile args
+                        arglist = self.loadArgsFile(arglist, dir, test, 'asc_args')
+                        
+                        if self.genAtsSwfs:
+                            # get settings as ats excluded files are defined there
+                            settings = self.getLocalSettings(testdir)
+                            if settings.has_key('.*') and settings['.*'].has_key('ats_skip'):
+                                self.js_print('ATS Skipping %s ... reason: %s' % (test,settings['.*']['ats_skip']))
+                                continue
+                            arglist.extend(genAtsArgs(dir,file,self.atstemplate))
+                        
+                        cmd = "asc -import %s " % (self.builtinabc)
+                        for arg in arglist:
+                            cmd += ' %s' % arg
+                        
+                        for p in self.parents(dir):
+                            if p=='':
+                                p='.'
+                            shell = join(p,"shell.as")
+                            if isfile(shell):
+                                cmd += " -in " + shell
+                                break
+                        
+                        deps = glob(join(testdir,"*.as"))
+                        deps.sort()
+                        for util in deps + glob(join(dir,"*Util.as")):
+                            cmd += " -in %s" % util #no need to prepend \ to $ when using ash
+                        cmd += " %s" % test
+                        
+                        if self.debug:
+                            self.js_print(cmd)
+                        else:
+                            self.js_print("Compiling %s" % test)
+                        
+                        if exists(testdir+".abc"):
+                            os.unlink(testdir+".abc")
+                        child.sendline(cmd)
+                        child.expect("\(ash\)")
+                        
                     if not exists(testdir+".abc"):
                         print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                         self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
@@ -841,20 +883,16 @@ class RuntestBase:
                     #print("%d remaining, %s" % (total,cmd))
         end_time = datetime.today() 
     
-    def loadAscArgs(self, arglist,dir,file):
+    def loadArgsFile(self, arglist,dir,file, filetype='asc_args'):
         # It is possible that file is actually a partial path rooted to acceptance,
         # so make sure that we are only dealing with the actual filename
         file = split(file)[1]
         
-        # Loads an asc_args file and modifies arglist accordingly
-        if isfile('./dir.asc_args'):  # load root dir.asc_args
-            arglist = self.parseAscArgs(arglist, './dir.asc_args', './')
-            
-        if isfile(dir+'/dir.asc_args'):  # dir takes precedence over root
-            arglist = self.parseAscArgs(arglist, dir+'/dir.asc_args', dir)
-
-        if file and isfile('%s/%s.asc_args' % (dir, file)):  # file takes precendence over directory
-            arglist = self.parseAscArgs(arglist, '%s/%s.asc_args' % (dir, file), dir)
+        if isfile('%s/dir.%s' % (dir, filetype)):  # dir takes precedence over root
+            arglist = self.parseAscArgs(arglist, '%s/dir.%s' % (dir, filetype), dir)
+        
+        if file and isfile('%s/%s.%s' % (dir, file, filetype)):  # file takes precendence over directory
+            arglist = self.parseAscArgs(arglist, '%s/%s.%s' % (dir, file, filetype), dir)
 
         return arglist
     
