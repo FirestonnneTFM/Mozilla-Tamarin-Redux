@@ -449,7 +449,7 @@ namespace avmplus
 					*this << va_arg(ap, int);
 					break;
 				case 'D':
-					*this << va_arg(ap, int64);
+					*this << va_arg(ap, int64_t);
 					break;
 				}
 			} else {

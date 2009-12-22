@@ -192,7 +192,7 @@ namespace avmplus
 		MMGC_STATIC_ASSERT(sizeof(uint16) == 2);
 		MMGC_STATIC_ASSERT(sizeof(int32) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
-		MMGC_STATIC_ASSERT(sizeof(int64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(int64_t) == 8);
 		MMGC_STATIC_ASSERT(sizeof(uint64) == 8);
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
@@ -4043,7 +4043,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
     	double_int du, duh, two32;
     	uint64 sign_d;
-    	int64 MASK;
+    	int64_t MASK;
     	uint32 DI_H, u_tmp, expon, shift_amount;
     
 		//  Algorithm Outline 

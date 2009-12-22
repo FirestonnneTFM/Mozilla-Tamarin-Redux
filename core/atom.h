@@ -44,7 +44,7 @@
 namespace avmplus
 {
     // Atom should really be an intptr_t, but doing so can cause problematic compiles
-    // because some platforms define intptr_t as an int64, and some as a long, which
+    // because some platforms define intptr_t as an int64_t, and some as a long, which
     // create different overload possibilities in a few cases. Ideally, Atom should
     // be a unique pointer type (as it is in TT) but for now, avoid the code churn
     // by defining it the "old" way
