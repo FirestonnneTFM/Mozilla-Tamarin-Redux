@@ -227,7 +227,7 @@ namespace avmplus
 			  uint64 lvalue;
 		};
 		dvalue = value;
-		return ( ( int64(lvalue) & ~0x8000000000000000ULL ) > 0x7ff0000000000000ULL ); 
+		return ( ( int64_t(lvalue) & ~0x8000000000000000ULL ) > 0x7ff0000000000000ULL ); 
 		//return x != x;
 	}
 
@@ -1456,10 +1456,10 @@ namespace avmplus
 		double y = quickPowTen(exp10);
 		double estimate = x*y;
 		uint64 mantissaEstimate = frexp(estimate,&e);
-		int64 lowBits = (int64)(mantissaEstimate % 2048); // two^p-n = 2^(64-53) = 2^11 = 2048
+		int64_t lowBits = (int64_t)(mantissaEstimate % 2048); // two^p-n = 2^(64-53) = 2^11 = 2048
 
 		// check if slop is large enough to make a difference when rounding to 53 bits
-		int64 diff = lowBits - 1024;
+		int64_t diff = lowBits - 1024;
 		if ( (diff >= 0 && diff <= slop) ||
 			 (diff < 0 && -diff <= slop) )
 		{
