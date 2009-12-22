@@ -223,11 +223,8 @@ namespace avmplus
 	{
 		MethodInfo* f = env->method;
 
-f->pool()->core->console<<"LATE verify "<<f<<"\n";
 		#ifdef AVMPLUS_VERIFYALL
 		// never verify late in verifyall mode
-AvmAssert(!f->isVerified());
-AvmAssert(!f->isVerifyPending());
 		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif
 
