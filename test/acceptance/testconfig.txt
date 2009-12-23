@@ -67,11 +67,11 @@ util/shell_ats, .*, skip, shell file for ats media creation
 ####################
 # force JIT -Ojit
 ####################
-as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*(-Ojit|-Djitordie).*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-as3/Vector/nonindexproperty:index -6.*          , [^ppc].*((-Ojit|-Djitordie).*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:.*, [^ppc].*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:.*, [^ppc].*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:.*, [^ppc].*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*(-Ojit|-Djitordie).*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*          , .*((-Ojit|-Djitordie).*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:.*, .*(-Ojit|-Djitordie).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=521879
 
 ####################
 # abcasm:
