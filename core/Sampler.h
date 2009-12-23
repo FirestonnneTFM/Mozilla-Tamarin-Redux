@@ -128,7 +128,7 @@ namespace avmplus
 	// The fields are written out to the sample stream as they are defined here.  
 	struct Sample
 	{
-		uint64 micros;
+		uint64_t micros;
 		uint32 sampleType;
 		union {
 			// not filled in for sampleType==DELETED_OBJECT_SAMPLE
@@ -139,16 +139,16 @@ namespace avmplus
 				void *trace; 
 			} stack;
 			// deleted object size record, instead of stack
-			uint64 size; 
+			uint64_t size; 
 		};
 		// filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
-		uint64 id; 
+		uint64_t id; 
 
 		// Following three fields are only filled in for sampleType==NEW_OBJECT_SAMPLE or NEW_AUX_SAMPLE
 		// They are not present in the sample stream for other sample types
 		SamplerObjectType sot;
 		void *ptr;
-		uint64 alloc_size; // size for new mem sample
+		uint64_t alloc_size; // size for new mem sample
 	};
 
 	class Sampler : public MMgc::GCRoot
@@ -172,8 +172,8 @@ namespace avmplus
 		void init(bool sampling, bool autoStart);
 		void sampleCheck() { if(takeSample) sample(); }
 
-		uint64 recordAllocationInfo(AvmPlusScriptableObject *obj, SamplerObjectType sot);
-		uint64 recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true, bool forceWrite = false);
+		uint64_t recordAllocationInfo(AvmPlusScriptableObject *obj, SamplerObjectType sot);
+		uint64_t recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true, bool forceWrite = false);
 		void recordDeallocationSample(const void* item, uint64_t size);
 
 		virtual void startSampling();

@@ -2250,7 +2250,7 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint64 String::size() const
+	uint64_t String::size() const
 	{
 		return GC::Size(this) - sizeof(AvmPlusScriptableObject);
 	}

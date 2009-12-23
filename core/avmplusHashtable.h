@@ -107,7 +107,7 @@ namespace avmplus
 		void setAtomPropertyIsEnumerable(Atom name, bool enumerable);
 
 #ifdef DEBUGGER
-		inline uint64 size() const
+		inline uint64_t size() const
 		{
 			return m_size * 2 * sizeof(Atom);
 		}

@@ -46,7 +46,7 @@ namespace avmplus
 void BigInteger::setFromDouble(double value)
 {
 	int e;
-	uint64 mantissa = MathUtils::frexp(value,&e); // value = mantissa*2^e, mantissa and e are integers.	
+	uint64_t mantissa = MathUtils::frexp(value,&e); // value = mantissa*2^e, mantissa and e are integers.	
 	numWords = (2 + ((e > 0 ? e : -e) /32));
 
 	AvmAssert(numWords <= kMaxBigIntegerBufferSize);
@@ -88,9 +88,9 @@ double BigInteger::doubleValueOf() const
 	bool bit54 = false;
 	bool rest = false;
 
-	const uint64 ONEL = 1UL;
-	uint64 resultMantissa = 0;
-	uint64 w = 0;
+	const uint64_t ONEL = 1UL;
+	uint64_t resultMantissa = 0;
+	uint64_t w = 0;
 	int pos = 53;
 	int bits = bitsInTopWord;
 	int wshift = 0;
@@ -165,7 +165,7 @@ double BigInteger::doubleValueOf() const
 	{
 		if (expBase2 < 64)
 		{
-			uint64 uint64_1 = 1;
+			uint64_t uint64_1 = 1;
 			result *= (double)(uint64_1 << expBase2);
 		}
 		else
@@ -207,14 +207,14 @@ int32 BigInteger::compare(const BigInteger *other) const
 //  use this with a zero second argument for basic multiplication.
 void BigInteger::multAndIncrementBy(int32 factor, int32 addition)	
 {
-	uint64 opResult;
+	uint64_t opResult;
 
 	// perform mult op, moving carry forward.
-	uint64 carry = addition; // init cary with first addition
+	uint64_t carry = addition; // init cary with first addition
 	int x;
 	for(x=0; x < numWords; x++)
 	{
-		opResult = (uint64)wordBuffer[x] * (uint64)factor + carry;
+		opResult = (uint64_t)wordBuffer[x] * (uint64_t)factor + carry;
 		carry = opResult >> 32;
 		wordBuffer[x] = (uint32)(opResult & 0xffffffff);
 	}
@@ -253,12 +253,12 @@ BigInteger* BigInteger::mult(const BigInteger* smallerNum, BigInteger* result) c
 	// do the math like gradeschool.  To optimize, use an FFT (http://numbers.computation.free.fr/Constants/Algorithms/fft.html)
 	for(int x = 0; x < smallerNum->numWords; x++) 
 	{
-		uint64 factor = (uint64) smallerNum->wordBuffer[x];
+		uint64_t factor = (uint64_t) smallerNum->wordBuffer[x];
 		if (factor) // if 0, nothing to do.
 		{
 			uint32* pResult = result->wordBuffer+x; // each pass we rewrite elements of result offset by the pass iteration
-			uint64  product;
-			uint64  carry = 0;
+			uint64_t  product;
+			uint64_t  carry = 0;
 
 			for(int y = 0; y < biggerNum->numWords; y++)
 			{
@@ -308,17 +308,17 @@ BigInteger* BigInteger::quickDivMod(const BigInteger* divisor, BigInteger* resid
 	BigInteger decrement;
 	decrement.setFromInteger(0);
 	result->setNumWords(divisor->numWords, true);
-	uint64 factor;
+	uint64_t factor;
 
 	//do // need to loop over dword chunks of residual to make this handle division of any arbitrary bigIntegers
 	{
 		// guess largest factor that * divisor will fit into residual
-		const uint64 n = (uint64)(residual->wordBuffer[residual->numWords-1]);
+		const uint64_t n = (uint64_t)(residual->wordBuffer[residual->numWords-1]);
 		factor = n / divisor->wordBuffer[dWords-1];
 		if ( ((factor <= 0) || (factor > 10))   // over estimate of 9 could be 10
 			 && residual->numWords > 1 && dWords > 1)
 		{
-			uint64 bigR = ( ((uint64)residual->wordBuffer[residual->numWords-1]) << 32) 
+			uint64_t bigR = ( ((uint64_t)residual->wordBuffer[residual->numWords-1]) << 32) 
 							 + (residual->wordBuffer[residual->numWords-2]);
 			factor =  bigR / divisor->wordBuffer[dWords-1];
 			if (factor > 9)  
@@ -600,15 +600,15 @@ BigInteger *BigInteger::addOrSubtract(const BigInteger* smallerNum, bool isAdd, 
 
 	// do the math: loop over common words of both numbers, performing - or + and carrying the  
 	//  overflow/borrow forward to next word.
-	uint64 borrow = 0;
-	uint64 x;
+	uint64_t borrow = 0;
+	uint64_t x;
 	int index;
 	for( index = 0; index < smallerNum->numWords; index++)
 	{
 		if (isAdd)
-			x = ((uint64)biggerNum->wordBuffer[index]) + smallerNum->wordBuffer[index] + borrow;
+			x = ((uint64_t)biggerNum->wordBuffer[index]) + smallerNum->wordBuffer[index] + borrow;
 		else
-			x = ((uint64)biggerNum->wordBuffer[index]) - smallerNum->wordBuffer[index] - borrow; // note x is unsigned.  Ok even if result would be negative however
+			x = ((uint64_t)biggerNum->wordBuffer[index]) - smallerNum->wordBuffer[index] - borrow; // note x is unsigned.  Ok even if result would be negative however
 		borrow = x >> 32 & (uint32)1;
 		result->wordBuffer[index] = (uint32)(x & 0xffffffff);
 	}
@@ -617,9 +617,9 @@ BigInteger *BigInteger::addOrSubtract(const BigInteger* smallerNum, bool isAdd, 
 	for( ; index < biggerNum->numWords; index++)
 	{
 		if (isAdd)
-			x = ((uint64)biggerNum->wordBuffer[index]) + borrow;
+			x = ((uint64_t)biggerNum->wordBuffer[index]) + borrow;
 		else
-			x = ((uint64)biggerNum->wordBuffer[index]) - borrow;
+			x = ((uint64_t)biggerNum->wordBuffer[index]) - borrow;
 		borrow = x >> 32 & (uint32)1;
 		result->wordBuffer[index] = (uint32)(x & 0xffffffff);
 	}

@@ -211,7 +211,7 @@ namespace avmplus
 		TraceLevel					astrace_callback;
 		DRCWB(FunctionObject*)		trace_callback;
 		bool						in_trace;
-		uint64						astraceStartTime;
+		uint64_t						astraceStartTime;
 		
 		void disableAllTracing();  // shuts down all tracing operations
 		
