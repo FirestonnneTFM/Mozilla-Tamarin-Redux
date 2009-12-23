@@ -325,7 +325,6 @@ var FEATURES =
     <defines>  VMCFG_VERIFYALL </defines>
     <defines>  AVMPLUS_VERBOSE </defines>
     <defines>  DEBUGGER </defines>           <!-- FIXME: legacy name -->
-    <defines>  AVMPLUS_VERIFYALL </defines>  <!-- FIXME: legacy name -->
   </feature>
 
   <feature>

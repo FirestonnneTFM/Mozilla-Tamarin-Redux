@@ -81,7 +81,6 @@
 #undef VMCFG_VERIFYALL
 #undef AVMPLUS_VERBOSE
 #undef DEBUGGER
-#undef AVMPLUS_VERIFYALL
 #undef AVMPLUS_SAMPLER
 #undef VTUNE
 #undef AVMPLUS_VERBOSE
@@ -172,7 +171,7 @@
 
 /* AVMSYSTEM_ARM_FPU
  *
- * Enables the just-in-time compiler to generate vector floating point 
+ * Enables the just-in-time compiler to generate vector floating point
  * instructions for ARM based architectures.
  */
 #if !defined AVMSYSTEM_ARM_FPU || AVMSYSTEM_ARM_FPU != 0 && AVMSYSTEM_ARM_FPU != 1
@@ -209,7 +208,7 @@
 
 /* AVMSYSTEM_PPC
  *
- * Selects the PowerPC / Power architecture.  Whether it's the 32-bit or the 
+ * Selects the PowerPC / Power architecture.  Whether it's the 32-bit or the
  * 64-bit version of the architecture is controlled independently.
  */
 #if !defined AVMSYSTEM_PPC || AVMSYSTEM_PPC != 0 && AVMSYSTEM_PPC != 1
@@ -277,7 +276,7 @@
  * run-time and human-readable error messages for run-time errors.
  * 
  * There is a performance penalty to enabling this; clients that want
- * maximal execution performance and don't care about debugging should 
+ * maximal execution performance and don't care about debugging should
  * disable it.
  * 
  * If you enable the debugger you may want to consider enabling support for
@@ -294,7 +293,7 @@
  *
  * Enable the sample-based memory profiler.  This makes allocation a
  * little more expensive if a sampler callback is not installed, and
- * more expensive still if it is installed.  
+ * more expensive still if it is installed.
  * 
  * FIXME: more information needed.
  * 
@@ -338,8 +337,8 @@
 
 /* AVMFEATURE_ABC_INTERP
  *
- * Selects the ABC interpreter.  Appropriate for platforms that run 
- * the interpreter only for initialization code and for 
+ * Selects the ABC interpreter.  Appropriate for platforms that run
+ * the interpreter only for initialization code and for
  * platforms that are exceptionally memory-constrained.
  */
 #if !defined AVMFEATURE_ABC_INTERP || AVMFEATURE_ABC_INTERP != 0 && AVMFEATURE_ABC_INTERP != 1
@@ -431,10 +430,10 @@
 
 /* AVMFEATURE_CPP_EXCEPTIONS
  *
- * Support C++ exceptions in the MMgc API.  At the time of writing (Apr 2009) 
+ * Support C++ exceptions in the MMgc API.  At the time of writing (Apr 2009)
  * this means decorating the global new and delete operator with appropriate 'throw'
  * clauses.  It is unlikely to mean anything more, as AVM+ and MMgc do not use and
- * do not generally support C++ exceptions.  
+ * do not generally support C++ exceptions.
  * 
  * Note that even if this is enabled, the global new and delete operators may
  * not throw exceptions when memory can't be allocated, because the out-of-memory
@@ -461,9 +460,9 @@
 
 /* AVMFEATURE_JNI
  *
- * Enable interfacing to Java so you can access java methods/properties like 
+ * Enable interfacing to Java so you can access java methods/properties like
  * native AS properties; e.g.
- * var hello = JObject.create("java.lang.String", " hello world ");  
+ * var hello = JObject.create("java.lang.String", " hello world ");
  * print(hello.indexOf('o'));
  */
 #if !defined AVMFEATURE_JNI || AVMFEATURE_JNI != 0 && AVMFEATURE_JNI != 1
@@ -776,9 +775,6 @@
 #endif
 #if AVMFEATURE_DEBUGGER
 #  define DEBUGGER
-#endif
-#if AVMFEATURE_DEBUGGER
-#  define AVMPLUS_VERIFYALL
 #endif
 #if AVMFEATURE_ALLOCATION_SAMPLER
 #  define AVMPLUS_SAMPLER

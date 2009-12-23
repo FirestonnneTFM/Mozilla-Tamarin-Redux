@@ -660,11 +660,11 @@ namespace avmshell
                         settings.fixed_esp = true;
                     }
 #endif /* AVMPLUS_IA32 */
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 					else if (!VMPI_strcmp(arg+2, "verifyall")) {
 						settings.verifyall = true;
 					}
-#endif /* AVMPLUS_VERIFYALL */
+#endif /* VMCFG_VERIFYALL */
 					else if (!VMPI_strcmp(arg+2, "greedy")) {
 						settings.greedy = true;
 					}
@@ -1051,7 +1051,7 @@ namespace avmshell
 #ifdef AVMPLUS_JITMAX
         AvmLog("          [-jitmax N-M] jit the Nth to Mth methods only; N- and -M are also valid.\n");
 #endif
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 	    AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
 #endif
 #ifdef AVMPLUS_SELFTEST

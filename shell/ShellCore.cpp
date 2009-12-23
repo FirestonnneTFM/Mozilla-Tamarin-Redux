@@ -378,7 +378,7 @@ namespace avmshell
 		this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
 
 		config.interrupts = settings.interrupts;
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 		config.verifyall = settings.verifyall;
 #endif
 #if defined FEATURE_NANOJIT

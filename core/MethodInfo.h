@@ -172,7 +172,7 @@ namespace avmplus
 
 		static const int32_t VERIFIED				= 0x00010000;
 
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 		static const int32_t VERIFY_PENDING			= 0x00020000;
 #endif
 
@@ -323,7 +323,7 @@ namespace avmplus
 		void makeNonInterruptible();
 		void setKind(TraitKind kind);
 
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 		int32_t isVerified() const;
 		int32_t isVerifyPending() const;
 		void setVerified();

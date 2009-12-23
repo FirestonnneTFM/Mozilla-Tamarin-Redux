@@ -169,7 +169,7 @@ namespace avmplus
 		, langID(-1)
 		, passAllExceptionsToDebugger(false)
 #endif
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 		, verifyFunctionQueue(g, 0)
 		, verifyTraitsQueue(g, 0)
 #endif
@@ -577,7 +577,7 @@ namespace avmplus
 			initScript(this, toplevel, abcEnv, pool->getScriptTraits(i));
 		}
 
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 		if (config.verifyall) {
 			for (int i=0, n=pool->scriptCount(); i < n; i++)
 				enqTraits(pool->getScriptTraits(i));
@@ -4334,7 +4334,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif		
 
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 	void AvmCore::enqFunction(MethodInfo* f) {
 		if (config.verifyall &&
                 f && !f->isVerified() && !f->isVerifyPending()) {
