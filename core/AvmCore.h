@@ -213,7 +213,7 @@ const int kBufferPadding = 16;
 			bool				passAllExceptionsToDebugger;
 		#endif
 		
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
     private:
         List<MethodInfo*, LIST_GCObjects> verifyFunctionQueue;
         List<Traits*, LIST_GCObjects> verifyTraitsQueue;

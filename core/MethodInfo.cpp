@@ -176,7 +176,7 @@ namespace avmplus
 	{
 		MethodInfo* f = env->method;
 
-		#ifdef AVMPLUS_VERIFYALL
+		#ifdef VMCFG_VERIFYALL
 		// never verify late in verifyall mode
 		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif
@@ -199,7 +199,7 @@ namespace avmplus
 	{
 		MethodInfo* f = env->method;
 
-		#ifdef AVMPLUS_VERIFYALL
+		#ifdef VMCFG_VERIFYALL
 		// never verify late in verifyall mode
 		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif
@@ -223,7 +223,7 @@ namespace avmplus
 	{
 		MethodInfo* f = env->method;
 
-		#ifdef AVMPLUS_VERIFYALL
+		#ifdef VMCFG_VERIFYALL
 		// never verify late in verifyall mode
 		AvmAssert(!f->pool()->core->config.verifyall);
 		#endif

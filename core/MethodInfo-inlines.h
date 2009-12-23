@@ -227,7 +227,7 @@ REALLY_INLINE void MethodInfo::setKind(TraitKind kind)
         _flags |= MethodInfo::IS_SETTER;
 }
 
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 REALLY_INLINE int32_t MethodInfo::isVerified() const
 {
     return _flags & VERIFIED;

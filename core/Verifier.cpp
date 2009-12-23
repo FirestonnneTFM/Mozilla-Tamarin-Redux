@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 	class VerifyallWriter : public NullWriter {
 		MethodInfo *info;
 		AvmCore *core;
@@ -72,7 +72,7 @@ namespace avmplus
 			coder->writeOp1(state, pc, opcode, opd1, type);
 		}
 	};
-#endif // AVMPLUS_VERIFYALL
+#endif // VMCFG_VERIFYALL
 
 #ifdef AVMPLUS_WORD_CODE
     inline WordOpcode wordCode(AbcOpcode opcode) {
@@ -196,7 +196,7 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 		}
 
-#ifdef AVMPLUS_VERIFYALL
+#ifdef VMCFG_VERIFYALL
 		// push the verifyall filter onto the front of the coder pipeline
 		VerifyallWriter verifyallWriter(info, coder);
 		if (core->config.verifyall)
