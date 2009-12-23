@@ -287,25 +287,6 @@ versioning/.*, .*, apiversioning, skip versioning when not defined in avm
 
 
 ####################
-#  String failures on solaris after "String Class Cleanup" (bug 514084)
-####################
-e4x/Expressions/e11_1_5,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-e4x/Expressions/e11_1_4,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-e4x/TypeConversion/e10_2_1_2,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-e4x/Global/e13_1_2_1,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/GlobalObject/e15_1_2_5_.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/GlobalObject/e15_1_2_4,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/Unicode/.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/TypeConversion/e9_7,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/String/e15_5_3_2_3,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/String/e15_5_4_12_.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/String/e15_5_4_5_4,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/String/e15_5_4_11_.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/String/toLocaleLowerCase.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/String/toLocaleUpperCase.*,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-ecma3/RegExp/multibyte_regress,  (sparc|x86)-sol-.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=515340
-
-####################
 #  --verify skips
 ####################
 abcasm/.*, .*, verify_skip, abcasm tests not compatible with --verify
