@@ -830,9 +830,9 @@ namespace avmplus
 
 	
 #ifdef DEBUGGER
-	uint64 ScriptObject::size() const
+	uint64_t ScriptObject::size() const
 	{
-		uint64 size = traits()->getTotalSize();
+		uint64_t size = traits()->getTotalSize();
 		if(traits()->needsHashtable())
 		{
 			size += getTable()->size();

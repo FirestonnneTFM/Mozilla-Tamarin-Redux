@@ -116,7 +116,7 @@ namespace avmplus
 		int nextNameIndex(int index);
 
 #ifdef DEBUGGER
-		uint64 size() const { return sizeof(Namespace) - sizeof(AvmPlusScriptableObject); }
+		uint64_t size() const { return sizeof(Namespace) - sizeof(AvmPlusScriptableObject); }
 #endif
 
 //#ifdef AVMPLUS_VERBOSE

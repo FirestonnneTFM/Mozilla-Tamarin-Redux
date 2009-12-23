@@ -194,7 +194,7 @@ namespace avmplus
 		MMGC_STATIC_ASSERT(sizeof(int32) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
 		MMGC_STATIC_ASSERT(sizeof(int64_t) == 8);
-		MMGC_STATIC_ASSERT(sizeof(uint64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(uint64_t) == 8);
 		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
 #ifdef AVMPLUS_64BIT
@@ -4026,7 +4026,7 @@ return the result of the comparison ToPrimitive(x) == y.
     
     typedef union {  
 	    double d;
-		uint64 i;
+		uint64_t i;
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)		
 		struct { 
 			uint32 il, ih;
@@ -4043,7 +4043,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	int AvmCore::doubleToInt32(double d)
 	{
     	double_int du, duh, two32;
-    	uint64 sign_d;
+    	uint64_t sign_d;
     	int64_t MASK;
     	uint32 DI_H, u_tmp, expon, shift_amount;
     
@@ -4078,7 +4078,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			duh.i = du.i;
 			MASK = 0x8000000000000000ll;
 			MASK = MASK >> shift_amount;
-			duh.i &= (uint64)MASK;
+			duh.i &= (uint64_t)MASK;
 			du.d -= duh.d;
 		}
 	    
@@ -4092,7 +4092,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			shift_amount = expon - (0x3ff - 11);
 			MASK = 0x8000000000000000ll;
 			MASK = MASK >> shift_amount;
-			du.i &= (uint64)MASK;
+			du.i &= (uint64_t)MASK;
 			sign_d = du.i & 0x8000000000000000ull;
 			two32.i = 0x41f0000000000000ull ^ sign_d;
 			du.d -= two32.d;

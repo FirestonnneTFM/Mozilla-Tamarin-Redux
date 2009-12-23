@@ -57,7 +57,7 @@ namespace avmplus
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(SamplerObjectType sot);
 
-		virtual uint64 size() const = 0;
+		virtual uint64_t size() const = 0;
 
 		inline AvmCore* core() const
 		{

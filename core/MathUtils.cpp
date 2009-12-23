@@ -211,7 +211,7 @@ namespace avmplus
 
 	int32_t MathUtils::isInfinite(double x)
 	{
-		union { double d; uint64 v; }; d = x;
+		union { double d; uint64_t v; }; d = x;
 		if ((v & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
 			return 0;
 		if (v & 0x8000000000000000LL)
@@ -224,7 +224,7 @@ namespace avmplus
 	{
 		union {
 			  double dvalue;
-			  uint64 lvalue;
+			  uint64_t lvalue;
 		};
 		dvalue = value;
 		return ( ( int64_t(lvalue) & ~0x8000000000000000ULL ) > 0x7ff0000000000000ULL ); 
@@ -233,7 +233,7 @@ namespace avmplus
 
 	bool MathUtils::isNegZero(double x)
 	{
-		union { double d; uint64 v; }; d = x;
+		union { double d; uint64_t v; }; d = x;
 		return (v == 0x8000000000000000LL);
 	}
 
@@ -1737,7 +1737,7 @@ namespace avmplus
 	// Use left shifts to compute powers of 2 < 63
 	static inline double quickPowTwo(int32_t exp)
 	{
-		static uint64 one = 1; // max we can shift is 64bits
+		static uint64_t one = 1; // max we can shift is 64bits
 		if (exp < 64 && exp > 0)
 			return (double)(one << exp);
 		else

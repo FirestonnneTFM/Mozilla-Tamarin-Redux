@@ -526,9 +526,9 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint64 ArrayObject::size() const
+	uint64_t ArrayObject::size() const
 	{
-		uint64 s = ScriptObject::size();
+		uint64_t s = ScriptObject::size();
 		if (isSimpleDense())
 		{
 			s += getLength()*sizeof(Atom);

@@ -74,7 +74,7 @@ namespace avmplus
 		VTable* ivtable() const;
 
 #ifdef DEBUGGER
-		virtual uint64 size() const;
+		virtual uint64_t size() const;
 #endif
 
 		virtual Stringp implToString() const;

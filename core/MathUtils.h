@@ -97,7 +97,7 @@ namespace avmplus
 		static bool equals(double x, double y);
 		static double exp(double value);
 		static double floor(double value);
-		static uint64  frexp(double x, int32_t *eptr);
+		static uint64_t  frexp(double x, int32_t *eptr);
 		inline static double infinity() { return kInfinity; }
 		inline static double neg_infinity() { return kNegInfinity; }
 		/// Return 1 if value is +Infinity, -1 if -Infinity, 0 otherwise.
@@ -286,7 +286,7 @@ namespace avmplus
 
 		double value;	   // double value for quick work when e and mantissa are small;
 		int32_t e;			   	   
-		uint64 mantissa;   // on input, value = mantissa*2^e;  Only last 53 bits are used
+		uint64_t mantissa;   // on input, value = mantissa*2^e;  Only last 53 bits are used
 		int32_t mantissaPrec;  // how many bits of precision are actually used in the mantissa;
 		int32_t base10Exp;	   // the (derived) base 10 exponent of value.
 		bool finished;	   // set to true when we've output all relevant digits.

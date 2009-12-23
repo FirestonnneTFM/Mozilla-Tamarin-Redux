@@ -114,10 +114,10 @@ namespace avmplus
 		Atom get_object();
 		double get_size();
 		void setRef(AvmPlusScriptableObject* o) { obj = o; }
-		void setSize(uint64 s) { size = s; }
+		void setSize(uint64_t s) { size = s; }
 	private:
 		DRCWB(AvmPlusScriptableObject*) obj;
-		uint64 size;
+		uint64_t size;
         
 		DECLARE_SLOTS_NewObjectSampleObject;
 	};
