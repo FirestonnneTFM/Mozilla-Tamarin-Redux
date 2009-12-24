@@ -3549,8 +3549,8 @@ namespace avmplus
             {
                 int32_t index = (int32_t) op1;
                 AvmAssert(state->value(index).traits == BOOLEAN_TYPE);
-                LIns* value = localGet(index);
-                LIns* i3 = binaryIns(LIR_xor, value, InsConst(1));
+                LIns* value = localGet(index); // 0 or 1
+                LIns* i3 = eq0(value); // 1 or 0
                 localSet(index, i3, result);
                 break;
             }
