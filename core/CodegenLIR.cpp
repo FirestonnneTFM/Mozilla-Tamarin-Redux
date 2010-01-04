@@ -5143,28 +5143,54 @@ namespace avmplus
         bool const emitCheck = mopsRangeCheckFilter->updateActiveRange(mopAddr, curDisp, curExtent);
 
         LInsp mopsMemoryBase = mopsRangeCheckFilter->mopsMemoryBase(globalMemoryInfo);
-        
+
         if (emitCheck)
         {
             LInsp mopsMemorySize = mopsRangeCheckFilter->mopsMemorySize(globalMemoryInfo);
-
+            
+            LInsp cond;
             if (curDisp == 0)
             {
                 // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
                 // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
-                LInsp br = branchIns(LIR_jt, binaryIns(LIR_ugt, mopAddr, binaryIns(LIR_sub, mopsMemorySize, InsConst(size))));
-                patchLater(br, mop_rangeCheckFailed_label);
+                if (size == 1)
+                {
+                    // (a > b) == (a >= b-1)
+                    // (assuming 0 < b < 0xffffffff, which is always the case here)
+                    cond = binaryIns(LIR_uge, mopAddr, mopsMemorySize);
+                }
+                else
+                {
+                    // it's better to do (addr > mopsMemorySize-size), rather than
+                    // (addr+size > mopsMemorySize), because we know mopsMemorySize-size
+                    // cannot underflow, but addr+size might underflow or overflow
+                    LInsp mopsEnd = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
+                    cond = binaryIns(LIR_ugt, mopAddr, mopsEnd);
+                }
             }
             else
             {
-                LInsp addr_hi = binaryIns(LIR_add, mopAddr, InsConst(curExtent));
-                LInsp br_hi = branchIns(LIR_jt, binaryIns(LIR_gt, addr_hi, mopsMemorySize));
-                patchLater(br_hi, mop_rangeCheckFailed_label);
+                LInsp effMopAddr = binaryIns(LIR_add, mopAddr, InsConst(curDisp));
+                cond = binaryIns(LIR_lt, effMopAddr, InsConst(0));
+                patchLater(branchIns(LIR_jt, cond), mop_rangeCheckFailed_label);
 
-                LInsp addr_lo = binaryIns(LIR_add, mopAddr, InsConst(curDisp));
-                LInsp br_lo = branchIns(LIR_jt, binaryIns(LIR_lt, addr_lo, InsConst(0)));
-                patchLater(br_lo, mop_rangeCheckFailed_label);
+                if (size == 1)
+                {
+                    // (a > b) == (a >= b-1)
+                    // (assuming 0 < b < 0xffffffff, which is always the case here)
+                    cond = binaryIns(LIR_ge, effMopAddr, mopsMemorySize);
+                }
+                else
+                {
+                    // it's better to do (addr > mopsMemorySize-size), rather than
+                    // (addr+size > mopsMemorySize), because we know mopsMemorySize-size
+                    // cannot underflow, but addr+size might underflow or overflow
+                    LInsp mopsEnd = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
+                    cond = binaryIns(LIR_gt, effMopAddr, mopsEnd);
+                }
             }
+
+            patchLater(branchIns(LIR_jt, cond), mop_rangeCheckFailed_label);
         }
 
         // if mopAddr is a compiletime constant, we still have to do the range-check above
