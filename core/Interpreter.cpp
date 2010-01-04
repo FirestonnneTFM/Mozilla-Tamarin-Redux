@@ -123,7 +123,7 @@ namespace avmplus
 #  define ABC_CODE_ONLY(x)   x
 #endif
 	
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 #  define PEEPHOLE_ONLY(x)  x
 #else
 #  define PEEPHOLE_ONLY(x)
@@ -295,7 +295,7 @@ namespace avmplus
 #    endif
 #  endif // threading discipline
 #  define IIM(a,b) III(a,b)
-#  if defined AVMPLUS_PEEPHOLE_OPTIMIZER
+#  if defined VMCFG_WORDCODE_PEEPHOLE
 #      define IIP(a,b) III(a,b)
 #  else
 #      define IIP(a,b) XXX(a)
@@ -626,7 +626,7 @@ namespace avmplus
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
 			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
 			AvmAssert(opcode_labels[257] == &&L_pushbits);
-#    ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#    ifdef VMCFG_WORDCODE_PEEPHOLE
 			AvmAssert(opcode_labels[48 + 256] == &&L_swap_pop);
 #    endif
 #  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
@@ -1486,7 +1486,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			sub_two_values_and_next:
 #endif
 				if (IS_BOTH_INTEGER(a1, a2)) { 
@@ -1537,7 +1537,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			mul_two_values_and_next:
 #endif
 				// OPTIMIZEME - multiplication of small integers might be optimized?
@@ -1569,7 +1569,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			div_two_values_and_next:
 #endif
 				if (IS_BOTH_DOUBLE(a1, a2)) {
@@ -1589,7 +1589,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			mod_two_values_and_next:
 #endif
 				if (IS_BOTH_INTEGER(a1, a2) && a2 != zeroIntAtom) {
@@ -1682,7 +1682,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			bitand_two_values_and_next:
 #endif
 				BITOP_TWO_VALUES_AND_NEXT(&, a1, a2, sp[0], 0);
@@ -1692,7 +1692,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			bitor_two_values_and_next:
 #endif
 				BITOP_TWO_VALUES_AND_NEXT(|, a1, a2, sp[0], 0);
@@ -1702,7 +1702,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			bitxor_two_values_and_next:
 #endif
 				BITOP_TWO_VALUES_AND_NEXT(^, a1, a2, sp[0], kIntptrType);
@@ -2867,7 +2867,7 @@ namespace avmplus
 				NEXT;
 			}
 
-#  ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#  ifdef VMCFG_WORDCODE_PEEPHOLE
 
 #    define FETCH_LL(a1, a2) \
 		u1 = *pc++;				\
@@ -3164,7 +3164,7 @@ namespace avmplus
 			    NEXT;
 			}
 
-#  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
+#  endif // VMCFG_WORDCODE_PEEPHOLE
 					
 			INSTR(findpropglobal) {
 				b1 = false;  // whether to throw or not

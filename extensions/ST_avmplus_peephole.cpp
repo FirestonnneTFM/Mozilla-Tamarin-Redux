@@ -40,7 +40,7 @@
 
 #include "avmshell.h"
 #ifdef VMCFG_SELFTEST
-#if defined AVMPLUS_PEEPHOLE_OPTIMIZER
+#if defined VMCFG_WORDCODE_PEEPHOLE
 namespace avmplus {
 class ST_avmplus_peephole : public Selftest {
 public:

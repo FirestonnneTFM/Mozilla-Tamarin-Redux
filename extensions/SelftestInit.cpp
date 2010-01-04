@@ -39,7 +39,7 @@
 namespace avmplus {
 #ifdef VMCFG_SELFTEST
 extern void create_avmplus_basics(AvmCore* core);
-#if defined AVMPLUS_PEEPHOLE_OPTIMIZER
+#if defined VMCFG_WORDCODE_PEEPHOLE
 extern void create_avmplus_peephole(AvmCore* core);
 #endif
 extern void create_mmgc_basics(AvmCore* core);
@@ -48,7 +48,7 @@ extern void create_mmgc_threads(AvmCore* core);
 #endif
 void SelftestRunner::createGeneratedSelftestClasses() {
 create_avmplus_basics(core);
-#if defined AVMPLUS_PEEPHOLE_OPTIMIZER
+#if defined VMCFG_WORDCODE_PEEPHOLE
 create_avmplus_peephole(core);
 #endif
 create_mmgc_basics(core);

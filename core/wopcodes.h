@@ -201,7 +201,7 @@ namespace avmplus
 		WOP_debugfile = 0xF1,
 		WOP_pushbits = 0x101,
 		WOP_push_doublebits = 0x102,
-		// begin AVMPLUS_PEEPHOLE_OPTIMIZER
+		// begin VMCFG_WORDCODE_PEEPHOLE
 		WOP_get2locals = 0x103,
 		WOP_get3locals = 0x104,
 		WOP_get4locals = 0x105,
@@ -248,7 +248,7 @@ namespace avmplus
 		WOP_ifstricteq_lb = 0x12E,
 		WOP_ifstrictne_lb = 0x12F,
 		WOP_swap_pop = 0x130,
-		// end AVMPLUS_PEEPHOLE_OPTIMIZER
+		// end VMCFG_WORDCODE_PEEPHOLE
 		WOP_findpropglobal = 0x131,
 		WOP_findpropglobalstrict = 0x132,
 		WOP_debugenter = 0x133,
