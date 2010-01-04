@@ -168,7 +168,7 @@ namespace avmplus
 		buffer_info* buffers;			// newest buffer first
 		uint32_t buffer_offset;			// offset of first word of current buffer
 		buffer_info* spare_buffer;		// may be populated during peephole optimization; reused by refill
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 		void** opcode_labels;
 #endif
 		PoolObject *pool;
