@@ -225,7 +225,6 @@ namespace avmplus
 
 	void AtomArray::push (Atom a)
 	{
-        AvmAssert(a);
 		checkCapacity (m_length + 1);
 		setAtInternal(m_length++, a);
 	}
