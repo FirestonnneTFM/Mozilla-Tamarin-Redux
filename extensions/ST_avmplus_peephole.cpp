@@ -39,7 +39,7 @@
 // ***** END LICENSE BLOCK ***** */
 
 #include "avmshell.h"
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 namespace avmplus {
 class ST_avmplus_peephole : public Selftest {

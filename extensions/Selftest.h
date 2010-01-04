@@ -37,7 +37,7 @@
 
 #include "avmplus.h"
 
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 
 namespace avmplus
 {
@@ -140,4 +140,4 @@ namespace avmplus
 	};
 }
 
-#endif // AVMPLUS_SELFTEST
+#endif // VMCFG_SELFTEST
