@@ -136,7 +136,10 @@ namespace avmplus
 
 		MethodInfo* getNamedScript(const Multiname* multiname) const;
 
+		// search metadata record at meta_pos for name, return true if present
+		bool hasMetadataName(const uint8_t* meta_pos, const String* name);
 		const byte* getMetadataInfoPos(uint32_t index);
+
 		Traits* getTraits(Stringp name, Namespacep ns, bool recursive=true) const;
 		Traits* getTraits(const Multiname& n, const Toplevel* toplevel, bool recursive=true) const;
 		Traits* getTraits(Stringp name, bool recursive=true) const;

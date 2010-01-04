@@ -691,9 +691,9 @@ namespace avmplus
 			const byte* ret_type_pos = pos;
 #endif
 
-		// @todo -- we should add an AbcParser equivalent of skipU30;
+		// @todo -- we should add an AbcParser equivalent of skipU32;
 		// then the next two clauses would be 			
-		//		skipU30(pos, param_count+1);
+		//		skipU32(pos, param_count+1);
 		// in non-verbose builds
 			#ifdef AVMPLUS_VERBOSE
 			Multiname returnTypeName;

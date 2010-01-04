@@ -121,8 +121,8 @@ namespace avmplus
 
 		// note: reading of max_stack, etc (and validating the values)
 		// is now handled by MethodInfo::resolveSignature.
-		AvmCore::skipU30(pos, 4);
-        code_length = AvmCore::readU30(pos);
+		AvmCore::skipU32(pos, 4);
+        code_length = AvmCore::readU32(pos);
 
         code_pos = pos;
 
@@ -1840,7 +1840,7 @@ namespace avmplus
 
 				#ifdef AVMPLUS_64BIT
 				const byte* new_pc = (const byte *) (uintptr(imm30) | (((uintptr) imm30b) << 32));
-				const byte* new_code_end = new_pc + AvmCore::readU30 (nextpc);
+				const byte* new_code_end = new_pc + AvmCore::readU32 (nextpc);
 				#else
 				const byte* new_pc = (const byte*) imm30;
 				const byte* new_code_end = new_pc + imm30b;

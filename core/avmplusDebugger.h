@@ -467,7 +467,7 @@ namespace avmplus
 
 		static int readS24(const byte *pc) { return AvmCore::readS24(pc); }
 		static int readU16(const byte *pc) { return AvmCore::readU16(pc); }
-		static int readU30(const byte *&pc) { return AvmCore::readU30(pc); }
+		static int readU32(const byte *&pc) { return AvmCore::readU32(pc); }
 
 	};
 

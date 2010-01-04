@@ -880,7 +880,7 @@ namespace avmplus
 		GC* gc = core->GetGC();
 
 		const byte* pos = this->_abc_info_pos;
-		const uint32_t param_count = pos ? AvmCore::readU30(pos) : 0;
+		const uint32_t param_count = pos ? AvmCore::readU32(pos) : 0;
 		uint32_t optional_count = 0;
 		uint32_t rest_offset = 0;
 		Traits* returnType;
@@ -909,7 +909,7 @@ namespace avmplus
 				untyped_args += (argType == NULL);
 // end AVMPLUS_UNCHECKED_HACK
 			}
-			AvmCore::skipU30(pos); // name_index;
+			AvmCore::skipU32(pos); // name_index;
 			pos++; // abcFlags;
 // begin AVMPLUS_UNCHECKED_HACK
 			// toplevel!=NULL check is so we only check when resolveSignature calls us (not subsequently)
@@ -946,11 +946,11 @@ namespace avmplus
 // end AVMPLUS_UNCHECKED_HACK
 			if (hasOptional())
 			{
-				optional_count = AvmCore::readU30(pos);
+				optional_count = AvmCore::readU32(pos);
 				for (uint32_t j=0; j < optional_count; j++)
 				{
 					const int32_t param = param_count-optional_count+1+j;
-					const int32_t index = AvmCore::readU30(pos);
+					const int32_t index = AvmCore::readU32(pos);
 					CPoolKind kind = (CPoolKind)*pos++;
 
 					// check that the default value is legal for the param type
@@ -965,14 +965,14 @@ namespace avmplus
 				const byte* body_pos = this->abc_body_pos();
 				if (body_pos)
 				{
-					ms->_max_stack = AvmCore::readU30(body_pos);
-					ms->_local_count = AvmCore::readU30(body_pos);
-					const int32_t init_scope_depth = AvmCore::readU30(body_pos);
-					ms->_max_scope = AvmCore::readU30(body_pos) - init_scope_depth;
+					ms->_max_stack = AvmCore::readU32(body_pos);
+					ms->_local_count = AvmCore::readU32(body_pos);
+					const int32_t init_scope_depth = AvmCore::readU32(body_pos);
+					ms->_max_scope = AvmCore::readU32(body_pos) - init_scope_depth;
 				#ifdef VMCFG_WORDCODE
 				#else
 					ms->_abc_code_start = body_pos;
-					AvmCore::skipU30(ms->_abc_code_start); // code_length
+					AvmCore::skipU32(ms->_abc_code_start); // code_length
 				#endif
 				}
 			}
@@ -995,7 +995,7 @@ namespace avmplus
 		#if defined(VMCFG_WORDCODE) || defined(VMCFG_AOT)
 		#else
 			ms->_abc_code_start = this->abc_body_pos();
-			AvmCore::skipU30(ms->_abc_code_start, 5);
+			AvmCore::skipU32(ms->_abc_code_start, 5);
 		#endif
 		}
 		ms->_frame_size = ms->_local_count + ms->_max_scope + ms->_max_stack;

@@ -1207,7 +1207,7 @@ namespace avmplus
 
 	unsigned int Toplevel::readU30(const byte *&p) const
 	{
-		unsigned int result = AvmCore::readU30(p);
+		unsigned int result = AvmCore::readU32(p);
 		if (result & 0xc0000000)
 			throwVerifyError(kCorruptABCError);
 		return result;

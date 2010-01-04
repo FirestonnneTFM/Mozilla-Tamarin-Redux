@@ -442,10 +442,10 @@ namespace avmplus
 	{
 		if (meta_pos)
 		{
-			uint32_t metadata_count = AvmCore::readU30(meta_pos);
+			uint32_t metadata_count = AvmCore::readU32(meta_pos);
 			while (metadata_count--)
 			{
-				const uint32_t metadata_index = AvmCore::readU30(meta_pos);
+				const uint32_t metadata_index = AvmCore::readU32(meta_pos);
 				ScriptObject* md = describeMetadataInfo(pool, metadata_index);
 				if (md)
 					pushobj(a, md);
@@ -458,7 +458,7 @@ namespace avmplus
 		list.ensureCapacity(val_count);
 		while (val_count--)
 		{
-			list.add(AvmCore::readU30(pos));
+			list.add(AvmCore::readU32(pos));
 		}
 	}
 
@@ -467,7 +467,7 @@ namespace avmplus
 		AvmCore* core = m_toplevel->core();
 		const uint8_t* metadata_pos = pool->metadata_infos[metadata_index];
 
-		const uint32_t name_index = (metadata_pos) ? AvmCore::readU30(metadata_pos) : 0;
+		const uint32_t name_index = (metadata_pos) ? AvmCore::readU32(metadata_pos) : 0;
 		// A bit of a hack: if the pool is builtin, always omit metadata chunks with names of "Version"
 		// or "native", since these are used for reserved purposes internally.
 		Stringp name = poolstr(pool, name_index);
@@ -475,7 +475,7 @@ namespace avmplus
 		if (pool->isBuiltin && (name == core->kVersion || name == str(kstrid_native))) 
 			return NULL;
 
-		const uint32_t val_count = (metadata_pos) ? AvmCore::readU30(metadata_pos) : 0;
+		const uint32_t val_count = (metadata_pos) ? AvmCore::readU32(metadata_pos) : 0;
 
 		ScriptObject* o = new_object();
 		ArrayObject* a = new_array();

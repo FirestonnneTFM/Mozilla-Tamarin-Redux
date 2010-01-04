@@ -907,12 +907,9 @@ const int kBufferPadding = 16;
 		/** 
          * Helper function; reads an unsigned 32-bit integer from pc 
          * See AbcParser::readS32 for more explanation of the variable length
-         * encoding scheme.  
-         * 
-         * 2nd argument is set to the actual size, in bytes, of the number read in,
-         * and third argument is the version of the ABC 
+         * encoding scheme.
          */
-		static uint32 readU30(const byte *&p)
+		static uint32_t readU32(const byte *&p)
 		{
 			// @todo -- needs to be moved into AvmCore-inlines.h, 
 			// but first we must determine whether it should be inline, REALLY_INLINE, etc...
@@ -946,9 +943,9 @@ const int kBufferPadding = 16;
 			return result;
 		}
 
-		// when you need to skip over a u30 and don't care about the result,
+		// when you need to skip over a U32 and don't care about the result,
 		// this is slightly faster.
-		static void skipU30(const uint8_t*& p, int count = 1)
+		static void skipU32(const uint8_t*& p, int count = 1)
 		{
 			// @todo -- needs to be moved into AvmCore-inlines.h, 
 			// but first we must determine whether it should be inline, REALLY_INLINE, etc...

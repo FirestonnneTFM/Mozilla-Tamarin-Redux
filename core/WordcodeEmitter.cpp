@@ -70,7 +70,7 @@ namespace avmplus
 		AvmAssert(info != NULL);
 
 		const byte* pos = info->abc_body_pos();
-		AvmCore::skipU30(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
+		AvmCore::skipU32(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
 		code_start = pos;
 		pool = info->pool();		
 		boot();
@@ -774,7 +774,7 @@ namespace avmplus
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
-		*dest++ = (intptr_t)(int32_t)AvmCore::readU30(pc);
+		*dest++ = (intptr_t)(int32_t)AvmCore::readU32(pc);
 #ifdef VMCFG_WORDCODE_PEEPHOLE
 		peep(opcode, dest-2);
 #endif
@@ -803,8 +803,8 @@ namespace avmplus
 		CHECK(3);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
-		*dest++ = (intptr_t)(int32_t)AvmCore::readU30(pc);
-		*dest++ = (intptr_t)(int32_t)AvmCore::readU30(pc);
+		*dest++ = (intptr_t)(int32_t)AvmCore::readU32(pc);
+		*dest++ = (intptr_t)(int32_t)AvmCore::readU32(pc);
 #ifdef VMCFG_WORDCODE_PEEPHOLE
 		peep(opcode, dest-3);
 #endif
@@ -866,9 +866,9 @@ namespace avmplus
 		CHECK(5);
 		pc++;
 		uint8_t debug_type = *pc++;
-		uint32_t index = AvmCore::readU30(pc);
+		uint32_t index = AvmCore::readU32(pc);
 		uint8_t reg = *pc++;
-		uint32_t extra = AvmCore::readU30(pc);
+		uint32_t extra = AvmCore::readU32(pc);
 		// 4 separate operands to match the value in the operand count table,
 		// though obviously we could pack debug_type and reg into one word and
 		// we could also omit extra.
@@ -896,7 +896,7 @@ namespace avmplus
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(WOP_pushbits);
-		*dest++ = (intptr_t)((int16_t)AvmCore::readU30(pc) << 3) | kIntptrType;
+		*dest++ = (intptr_t)((int16_t)AvmCore::readU32(pc) << 3) | kIntptrType;
 #ifdef VMCFG_WORDCODE_PEEPHOLE
 		peep(WOP_pushbits, dest-2);
 #endif
@@ -917,7 +917,7 @@ namespace avmplus
 	{
 		// FIXME: wrong for 64-bit, we want 32 bits of payload
 		pc++;
-		int32_t value = pool->cpool_int[AvmCore::readU30(pc)];
+		int32_t value = pool->cpool_int[AvmCore::readU32(pc)];
 		if (atomIsValidIntptrValue(value)) {
 			CHECK(2);
 			*dest++ = NEW_OPCODE(WOP_pushbits);
@@ -946,7 +946,7 @@ namespace avmplus
 	{
 		// FIXME: wrong for 64-bit, we want 32 bits of payload
 		pc++;
-		uint32_t value = pool->cpool_uint[AvmCore::readU30(pc)];
+		uint32_t value = pool->cpool_uint[AvmCore::readU32(pc)];
 		if (atomIsValidIntptrValue_u(value)) {
 			CHECK(2);
 			*dest++ = NEW_OPCODE(WOP_pushbits);
@@ -982,7 +982,7 @@ namespace avmplus
 		uint32_t base_offset = uint32_t(buffer_offset + (dest - buffers->data));
 		intptr_t default_offset = AvmCore::readS24(pc);
 		pc += 3;
-		uint32_t case_count = AvmCore::readU30(pc);
+		uint32_t case_count = AvmCore::readU32(pc);
 		CHECK(3);
 		*dest++ = NEW_OPCODE(OP_lookupswitch);
 		emitRelativeOffset(base_offset, base_pc, default_offset);

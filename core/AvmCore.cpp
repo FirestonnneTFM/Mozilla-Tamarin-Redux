@@ -466,7 +466,7 @@ namespace avmplus
 			}
 			else
 			{
-				imm32 = AvmCore::readU30(pc);
+				imm32 = AvmCore::readU32(pc);
 			}
 
 			if( opcode == OP_debug )
@@ -476,7 +476,7 @@ namespace avmplus
 			}
 			if( op_count > 1 )
 			{
-				imm32b = AvmCore::readU30(pc);
+				imm32b = AvmCore::readU32(pc);
 			}
 		}
 	}
@@ -1593,7 +1593,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_pushstring:
 			{
 				buffer << opcodeInfo[opcode].name;
-				uint32 index = readU30(pc);
+				uint32 index = readU32(pc);
 				if (index < pool->constantStringCount)
 				{
 					String *s = format(pool->getString(index)->atom());
@@ -1607,7 +1607,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_pushint:
 			{
 				buffer << opcodeInfo[opcode].name;
-				uint32 index = readU30(pc);
+				uint32 index = readU32(pc);
 				if (index < pool->cpool_int.size())
 					buffer << " " << pool->cpool_int[index];
 				break;
@@ -1615,7 +1615,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_pushuint:
 			{
 				buffer << opcodeInfo[opcode].name;
-				uint32 index = readU30(pc);
+				uint32 index = readU32(pc);
 				if (index < pool->cpool_uint.size())
 					buffer << " " << (double)pool->cpool_uint[index];
 				break;
@@ -1623,7 +1623,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_pushdouble:
 			{
 				buffer << opcodeInfo[opcode].name;
-				uint32 index = readU30(pc);
+				uint32 index = readU32(pc);
 				if (index > 0 && index < pool->cpool_double.size())
 				{
 					buffer << " " << *pool->cpool_double[index];
@@ -1637,7 +1637,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_pushnamespace:
 			{
 				buffer << opcodeInfo[opcode].name;
-				uint32 index = readU30(pc);
+				uint32 index = readU32(pc);
 				if (index < pool->cpool_ns.size())
                 {
 					buffer << " " << pool->cpool_ns[index]->getURI();
@@ -1658,7 +1658,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_astype: 
 			{
 				buffer << opcodeInfo[opcode].name << " ";
-				formatMultiname(buffer, readU30(pc), pool);
+				formatMultiname(buffer, readU32(pc), pool);
 				break;
 			}
 			case OP_callproperty:
@@ -1667,8 +1667,8 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_callsuper:
 			case OP_callsupervoid:
 			{
-				uint32 index = readU30(pc);
-				int argc = readU30(pc);
+				uint32 index = readU32(pc);
+				int argc = readU32(pc);
 				buffer << opcodeInfo[opcode].name << " ";
 				formatMultiname(buffer, index, pool);
 				buffer << " " << argc;
@@ -1677,12 +1677,12 @@ return the result of the comparison ToPrimitive(x) == y.
 			case OP_callstatic:
 			case OP_newfunction:
 			{
-				int method_id = readU30(pc);
+				int method_id = readU32(pc);
 				MethodInfo* f = pool->getMethodInfo(method_id);
 				buffer << opcodeInfo[opcode].name << " method_id=" << method_id;
 				if (opcode == OP_callstatic)
 				{
-					buffer << " argc=" << (int)readU30(pc); // argc
+					buffer << " argc=" << (int)readU32(pc); // argc
 				}
 				Stringp fname = f->getMethodName();
 				if (fname)
@@ -1694,7 +1694,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				
 			case OP_newclass: 
 			{
-                uint32_t id = readU30(pc);
+                uint32_t id = readU32(pc);
 				Traits* c = pool->getClassTraits(id);
 				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
@@ -1703,7 +1703,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				ptrdiff_t target = off + readS24(pc);
 				pc += 3;
-				int maxindex = readU30(pc);
+				int maxindex = readU32(pc);
 				buffer << opcodeInfo[opcode].name << " default:" << (int)target << " maxcase:"<<maxindex;
 				for (int i=0; i <= maxindex; i++)
 				{
@@ -1749,13 +1749,13 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					buffer << opcodeInfo[opcode].name
 					<< ' '
-					<< (int)readU30(pc);
+					<< (int)readU32(pc);
 				}
 					break;
 				case 2:
 				{
-					int first = readU30(pc);
-					int second = readU30(pc);
+					int first = readU32(pc);
+					int second = readU32(pc);
 					buffer << opcodeInfo[opcode].name
 					<< ' '
 					<< first
