@@ -2771,7 +2771,7 @@ namespace avmplus
             int imm8=0, imm24=0;
             AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
             const byte* new_pc = (const byte *) (uintptr(opd1) | (((uintptr) opd2) << 32));
-            const byte* new_code_end = new_pc + AvmCore::readU30 (nextpc);
+            const byte* new_code_end = new_pc + AvmCore::readU32 (nextpc);
             #else
             const byte* new_pc = (const byte*) opd1;
             const byte* new_code_end = new_pc + opd2;
@@ -3435,7 +3435,7 @@ namespace avmplus
 
                 // Compute address of jump table
                 const byte* pc = 4 + abcStart + state->pc;
-                AvmCore::readU30(pc);  // skip count
+                AvmCore::readU32(pc);  // skip count
 
                 // Delete any trailing table entries that == default case (effective for asc output)
                 while (count > 0 && targetpc_off == (state->pc + AvmCore::readS24(pc+3*(count-1))))

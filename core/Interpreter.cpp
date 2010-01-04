@@ -154,7 +154,7 @@ namespace avmplus
 	}
 
 	inline uintptr_t readU30(const uint8_t*& pc) {
-		return AvmCore::readU30(pc);
+		return AvmCore::readU32(pc);
 	}
 #endif
 

@@ -208,7 +208,7 @@ namespace avmplus
 		if (dataP->abcPtr >= _abcStringStart && dataP->abcPtr < _abcStringEnd)
 		{
 			// String not created yet; grab the pointer to the (verified) ABC data
-			uint32_t len = AvmCore::readU30(dataP->abcPtr);
+			uint32_t len = AvmCore::readU32(dataP->abcPtr);
 			Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, true);
 			// must be made sticky for now...
 			s->Stick();
@@ -467,13 +467,13 @@ range_error:
             // U16 name_index
 			// parse a multiname with one namespace (aka qname)
 
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			if (!index)
 				m.setAnyNamespace();
 			else
 				m.setNamespace(getNamespace(index));
 
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			if (!index)
 				m.setAnyName();
 			else
@@ -490,7 +490,7 @@ range_error:
 			// U16 name_index
 			// parse a multiname with just a name; ns fetched at runtime
 
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			if (!index)
 				m.setAnyName();
 			else
@@ -515,13 +515,13 @@ range_error:
 		case CONSTANT_Multiname:
 		case CONSTANT_MultinameA:
 		{
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			if (!index)
 				m.setAnyName();
 			else
 				m.setName(getString(index));
 
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			AvmAssert(index != 0);
 			m.setNsset(getNamespaceSet(index));
 			m.setAttr(kind==CONSTANT_MultinameA);
@@ -533,7 +533,7 @@ range_error:
 		{
 			m.setRtname();
 
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			AvmAssert(index != 0);
 			m.setNsset(getNamespaceSet(index));
 
@@ -543,11 +543,11 @@ range_error:
 
 		case CONSTANT_TypeName:
 		{
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			parseMultiname(_abcStart + cpool_mn_offsets[index], m);
-			index = AvmCore::readU30(pos);
+			index = AvmCore::readU32(pos);
 			AvmAssert(index==1);
-			m.setTypeParameter(AvmCore::readU30(pos));
+			m.setTypeParameter(AvmCore::readU32(pos));
 			break;
 		}
 		
@@ -675,6 +675,25 @@ range_error:
 		return f;
 	}
 	
+	// search metadata record at meta_pos for name, return true if present
+	bool PoolObject::hasMetadataName(const uint8_t* meta_pos, const String* name)
+	{
+		AvmAssert(meta_pos && name->isInterned());
+		uint32_t metadata_count = AvmCore::readU32(meta_pos);
+		for (uint32_t i=0; i < metadata_count; i++) {
+			uint32_t metadata_index = AvmCore::readU32(meta_pos);
+			const uint8_t* metadata_pos = getMetadataInfoPos(metadata_index);
+			if (metadata_pos) {
+				uint32_t name_index = AvmCore::readU32(metadata_pos);
+				AvmCore::skipU32(metadata_pos, 1); // skip val_count
+				if (name_index > 0 && name_index < constantStringCount &&
+						getString(name_index) == name)
+					return true;
+			}
+		}
+		return false;
+	}
+
 #ifdef VMCFG_PRECOMP_NAMES
 	void PoolObject::initPrecomputedMultinames()
 	{

@@ -59,12 +59,12 @@ REALLY_INLINE const byte* PoolObject::getMetadataInfoPos(uint32_t index)
 
 REALLY_INLINE Traits* PoolObject::resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid) const
 {
-    return resolveTypeName(AvmCore::readU30(pc), toplevel, allowVoid);
+    return resolveTypeName(AvmCore::readU32(pc), toplevel, allowVoid);
 }
 
 REALLY_INLINE void PoolObject::resolveQName(const byte* &p, Multiname &m, const Toplevel* toplevel) const
 {
-    resolveQName(AvmCore::readU30(p), m, toplevel);
+    resolveQName(AvmCore::readU32(p), m, toplevel);
 }
 
 REALLY_INLINE void PoolObject::parseMultiname(Multiname& m, uint32_t index) const

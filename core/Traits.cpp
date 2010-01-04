@@ -536,7 +536,7 @@ namespace avmplus
 
 			case TRAITSTYPE_CLASS:
 			case TRAITSTYPE_SCRIPT:
-				AvmCore::skipU30(pos, 1);		// skip in init_index
+				AvmCore::skipU32(pos, 1);		// skip in init_index
 				break;
 
 			case TRAITSTYPE_ACTIVATION:
@@ -555,15 +555,15 @@ namespace avmplus
 	TraitsPosPtr Traits::skipToInstanceInitPos(TraitsPosPtr pos) const
 	{
 		AvmAssert(isInstanceType() && pos != NULL);
-		AvmCore::skipU30(pos, 2);		// skip the QName & base traits 
+		AvmCore::skipU32(pos, 2);		// skip the QName & base traits 
 		const uint8_t theflags = *pos++;		
 		const bool hasProtected = (theflags & 8) != 0;
 		if (hasProtected)
 		{
-			AvmCore::skipU30(pos);
+			AvmCore::skipU32(pos);
 		}
-		const uint32_t interfaceCount = AvmCore::readU30(pos);
-		AvmCore::skipU30(pos, interfaceCount);
+		const uint32_t interfaceCount = AvmCore::readU32(pos);
+		AvmCore::skipU32(pos, interfaceCount);
 		return pos;
 	}
 
@@ -662,7 +662,7 @@ namespace avmplus
 	
 	void NameEntry::readNameEntry(const uint8_t*& pos)
 	{
-		qni = AvmCore::readU30(pos);
+		qni = AvmCore::readU32(pos);
 		tag = *pos++;
 		kind = (TraitKind) (tag & 0x0f);
 		value_kind = CONSTANT_unused_0x00;
@@ -673,21 +673,21 @@ namespace avmplus
 		{
 			case TRAIT_Slot:
 			case TRAIT_Const:
-				id = AvmCore::readU30(pos);				// slot id
-				info = AvmCore::readU30(pos);			// value type
-				value_index = AvmCore::readU30(pos);	// value index
+				id = AvmCore::readU32(pos);				// slot id
+				info = AvmCore::readU32(pos);			// value type
+				value_index = AvmCore::readU32(pos);	// value index
 				if (value_index)
 					value_kind = (CPoolKind)*pos++;		// value kind
 				break;
 			case TRAIT_Class:
-				id = AvmCore::readU30(pos);		// slot id
-				info = AvmCore::readU30(pos);	// classinfo
+				id = AvmCore::readU32(pos);		// slot id
+				info = AvmCore::readU32(pos);	// classinfo
 				break;
 			case TRAIT_Getter:
 			case TRAIT_Setter:
 			case TRAIT_Method:
-				AvmCore::skipU30(pos);			// disp id (never used)
-				id = AvmCore::readU30(pos);		// method index
+				AvmCore::skipU32(pos);			// disp id (never used)
+				id = AvmCore::readU32(pos);		// method index
 				info = 0;
 				break;
 			default:
@@ -698,8 +698,8 @@ namespace avmplus
 		meta_pos = pos;
 		if (tag & ATTR_metadata)
 		{
-			uint32_t metaCount = AvmCore::readU30(pos);
-			AvmCore::skipU30(pos, metaCount);
+			uint32_t metaCount = AvmCore::readU32(pos);
+			AvmCore::skipU32(pos, metaCount);
 		}
 	}
 	
@@ -739,7 +739,7 @@ namespace avmplus
 		SlotIdCalcer sic(baseSlotCount, this->allowEarlyBinding());
 
 		NameEntry ne;
-		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
+		const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
 		for (uint32_t i = 0; i < nameCount; i++)
 		{
 			ne.readNameEntry(pos);
@@ -1043,7 +1043,7 @@ namespace avmplus
 		int32_t endOf64BitSlots = next64BitSlotOffset + (sizeInfo.nonPointer64BitSlotCount * 8);
 
 		NameEntry ne;
-		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
+		const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
 		for (uint32_t i = 0; i < nameCount; i++)
 		{
             AvmAssert(next32BitSlotOffset <= endOf32BitSlots);
@@ -1126,10 +1126,10 @@ namespace avmplus
 	static const uint8_t* skipToInterfaceCount(const uint8_t* pos)
 	{
 		AvmAssert(pos != NULL);
-		AvmCore::skipU30(pos, 2);		// skip the QName + basetraits
+		AvmCore::skipU32(pos, 2);		// skip the QName + basetraits
 		const uint8_t theflags = *pos++;		
 		if (theflags & 8)
-			AvmCore::skipU30(pos);	// skip protected namespace
+			AvmCore::skipU32(pos);	// skip protected namespace
 		return pos;
 	}
 
@@ -1146,7 +1146,7 @@ namespace avmplus
 		while (!pending.isEmpty()) {
 			Traits* t = pending.pop();
 			const uint8_t* pos = skipToInterfaceCount(t->m_traitsPos);
-			const uint32_t interfaceCount = AvmCore::readU30(pos);
+			const uint32_t interfaceCount = AvmCore::readU32(pos);
 			for (uint32_t j = 0; j < interfaceCount; j++) {
 				// we know all interfaces have been resolved already, it is done
 				// before traits construction in AbcParser::parseInstanceInfos().
@@ -1305,7 +1305,7 @@ namespace avmplus
 		tm->methodMetadataPos = (TraitsMetadata::MetadataPtr*)(tm->slotMetadataPos + tm->slotCount);
 
 		const uint8_t* pos = traitsPosStart();
-		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
+		const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
 		SlotIdCalcer sic(td->base ? td->base->slotCount : 0, this->allowEarlyBinding());
 		NameEntry ne;
 		for (uint32_t i = 0; i < nameCount; i++)
@@ -1571,7 +1571,7 @@ namespace avmplus
         }
 
 		NameEntry ne;
-		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
+		const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
 		for (uint32_t i = 0; i < nameCount; i++)
         {
 			ne.readNameEntry(pos);
@@ -1704,16 +1704,16 @@ namespace avmplus
 			if (!pos) 
 				toplevel->throwVerifyError(kCorruptABCError);
 
-			uint32_t maxStack = AvmCore::readU30(pos);
+			uint32_t maxStack = AvmCore::readU32(pos);
 			// the code we're generating needs at least 2
 			maxStack = maxStack > 1 ? maxStack : 2;
 			newMethodBody.writeInt(maxStack); // max_stack
-			newMethodBody.writeInt(AvmCore::readU30(pos)); //local_count
-			newMethodBody.writeInt(AvmCore::readU30(pos)); //init_scope_depth
-			newMethodBody.writeInt(AvmCore::readU30(pos)); //max_scope_depth
+			newMethodBody.writeInt(AvmCore::readU32(pos)); //local_count
+			newMethodBody.writeInt(AvmCore::readU32(pos)); //init_scope_depth
+			newMethodBody.writeInt(AvmCore::readU32(pos)); //max_scope_depth
 
 			// skip real code length
-			uint32_t code_length = AvmCore::readU30(pos);
+			uint32_t code_length = AvmCore::readU32(pos);
 		
 			// if first instruction is OP_constructsuper keep it as first instruction
 			if (*pos == OP_constructsuper)
