@@ -183,7 +183,7 @@ namespace avmplus
 		void makeAndInsertBackpatch(const uint8_t* target_pc, uintptr_t patch_offset);
 		void boot();
 
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 		
 		// The structures are laid out so as to improve packing and conserve space.  The
 		// included initialization code below knows the order of fields.
@@ -231,7 +231,7 @@ namespace avmplus
 		uint32_t calculateInstructionWidth(uintptr_t opcode) {
 			return wopAttrs[opcode].width;
 		}
-#endif	// AVMPLUS_PEEPHOLE_OPTIMIZER
+#endif	// VMCFG_WORDCODE_PEEPHOLE
 
 		LookupCacheBuilder cache_builder;
 	};

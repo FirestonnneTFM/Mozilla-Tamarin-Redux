@@ -41,7 +41,7 @@
 
 namespace avmplus
 {
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 
 const WordcodeEmitter::peep_state_t WordcodeEmitter::states[] = {
 //n  s  t  g  f
@@ -700,5 +700,5 @@ bool WordcodeEmitter::commit(uint32 action)
     }
 }
 
-#endif // AVMPLUS_PEEPHOLE_OPTIMIZER
+#endif // VMCFG_WORDCODE_PEEPHOLE
 }

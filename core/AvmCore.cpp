@@ -1927,7 +1927,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				break;
 			}
 
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef VMCFG_WORDCODE_PEEPHOLE
 			case WOP_subtract_lb:
 			case WOP_multiply_lb:
 			case WOP_divide_lb:
@@ -1980,7 +1980,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				buffer << " " << (uint32)(off + 4 + offset);
 				break;
 			}
-#endif // AVMPLUS_PEEPHOLE_OPTIMIZER
+#endif // VMCFG_WORDCODE_PEEPHOLE
 
 			default:
 				switch (wopAttrs[opcode].width) {
