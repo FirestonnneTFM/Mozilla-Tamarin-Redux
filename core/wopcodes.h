@@ -38,7 +38,7 @@
 namespace avmplus 
 {
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 
 	// Try to keep the opcodes commented out if the table in Interpreter.cpp does
 	// not use them; it's the best way of catching errors elsewhere.
@@ -281,6 +281,6 @@ namespace avmplus
 	
 	extern const WordOpcodeAttr wopAttrs[];
 	
-#endif // AVMPLUS_WORD_CODE
+#endif // VMCFG_WORDCODE
 
 }

@@ -37,7 +37,7 @@
 
 #include "avmplus.h"
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 
 // FIXME the following is required because FrameState has dependencies on the jitters
 #include "FrameState.h"
@@ -1508,4 +1508,4 @@ namespace avmplus
 #endif  // VMCFG_WORDCODE_PEEPHOLE
 
 }
-#endif // AVMPLUS_WORD_CODE
+#endif // VMCFG_WORDCODE

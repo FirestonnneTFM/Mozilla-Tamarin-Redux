@@ -39,7 +39,7 @@
 
 namespace avmplus
 {
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 
 	class TranslatedCode : public MMgc::GCObject
 	{

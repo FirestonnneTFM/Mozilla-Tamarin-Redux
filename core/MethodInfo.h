@@ -366,7 +366,7 @@ namespace avmplus
 		ExceptionHandlerTable* abc_exceptions() const;
 		void set_abc_exceptions(MMgc::GC* gc, ExceptionHandlerTable* e);
 
-	#ifdef AVMPLUS_WORD_CODE
+	#ifdef VMCFG_WORDCODE
 		ExceptionHandlerTable* word_code_exceptions() const;
 		void set_word_code_exceptions(MMgc::GC* gc, ExceptionHandlerTable* e);
 		const uintptr_t* word_code_start() const;
@@ -410,7 +410,7 @@ namespace avmplus
 	#ifdef VMCFG_LOOKUP_CACHE
 			int						lookup_cache_size;     // Number of items in lookup cache
 	#endif
-	#ifdef AVMPLUS_WORD_CODE
+	#ifdef VMCFG_WORDCODE
 			struct 
 			{
 				TranslatedCode*			translated_code;	// The object that contains the code pointed to by body_pos, written with explicit WB
@@ -462,7 +462,7 @@ namespace avmplus
 		int32_t max_scope() const;
 		int32_t frame_size() const;
 
-	#ifdef AVMPLUS_WORD_CODE
+	#ifdef VMCFG_WORDCODE
 	#else
 		const uint8_t* abc_code_start() const;
 	#endif
@@ -479,7 +479,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION BEGIN
 	private:
 		Traits*		_returnTraits;		// written with explicit WB
-	#ifdef AVMPLUS_WORD_CODE
+	#ifdef VMCFG_WORDCODE
 	#else
 		const uint8_t*	_abc_code_start; // start of ABC body
 	#endif

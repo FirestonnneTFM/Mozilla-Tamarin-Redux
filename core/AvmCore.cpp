@@ -1767,7 +1767,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 	
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 	void AvmCore::formatBits(PrintWriter& buffer, uint32 bits)
 	{
 		Atom a = (Atom)(intptr_t)(int32)bits;
@@ -2012,7 +2012,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		}
     }
-#endif // AVMPLUS_WORD_CODE
+#endif // VMCFG_WORDCODE
 #endif // AVMPLUS_VERBOSE
 
 	ExceptionHandler* AvmCore::beginCatch(ExceptionFrame *ef,
@@ -2056,7 +2056,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		//[ed] we only call this from methods with catch blocks, when exceptions != NULL
 		AvmAssert(info->abc_exceptions() != NULL);
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 		// This is hacky and will go away.  If the target method was not jitted, use
         // word_code.exceptions, otherwise use info->exceptions.  methods may or may
         // not be JITted based on memory, configuration, or heuristics.

@@ -406,7 +406,6 @@ var FEATURES =
     <defines>    VMCFG_WORDCODE_PEEPHOLE  </defines>
     <defines>    VMCFG_PRECOMP_NAMES </defines>
     <defines>    VMCFG_LOOKUP_CACHE </defines>
-    <defines>    AVMPLUS_WORD_CODE </defines>  <!-- FIXME: legacy name -->
   </feature>
 
   <feature>
