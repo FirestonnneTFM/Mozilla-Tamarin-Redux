@@ -163,6 +163,7 @@ package abcdump
         var local_count:int
         var max_scope:int
         var max_stack:int
+        var code_offset:uint
         var code_length:uint
         var code:ByteArray
         var activation:Traits
@@ -208,7 +209,8 @@ package abcdump
                 dumpPrint(indent+"// local_count="+local_count+
                           " max_scope=" + max_scope +
                           " max_stack=" + max_stack +
-                          " code_len=" + code.length) 
+                          " code_len=" + code.length +
+                          " code_offset=" + code_offset) 
                 code.position = 0
                 var labels:LabelInfo = new LabelInfo()
                 while (code.bytesAvailable > 0)
@@ -892,8 +894,10 @@ package abcdump
                 var code_length = readU32()
                 m.code = new ByteArray()
                 m.code.endian = "littleEndian"
-                if (code_length > 0)
+                if (code_length > 0) {
+                    m.code_offset = data.position;
                     data.readBytes(m.code, 0, code_length)
+                }
                 var ex_count = readU32()
                 for (var j:int = 0; j < ex_count; j++)
                 {
