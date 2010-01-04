@@ -67,7 +67,7 @@ namespace avmplus
 	// main interpreter method.  Signature should correspond to AtomMethodProc to allow tail calls to here
 	Atom interpBoxed(MethodEnv* method, int argc, Atom* ap);
 
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 	void** interpGetOpcodeLabels();
 #endif
 }

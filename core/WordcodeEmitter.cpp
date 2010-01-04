@@ -58,7 +58,7 @@ namespace avmplus
 		, buffers(NULL)
 		, buffer_offset(0)
 		, spare_buffer(NULL)
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 		, opcode_labels(interpGetOpcodeLabels())
 #endif
 		, pool(NULL)
@@ -87,7 +87,7 @@ namespace avmplus
 		, buffers(NULL)
 		, buffer_offset(0)
 		, spare_buffer(NULL)
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 		, opcode_labels(interpGetOpcodeLabels())
 #endif
 		, pool(NULL)

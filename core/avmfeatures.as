@@ -419,7 +419,6 @@ var FEATURES =
      <name>      AVMFEATURE_THREADED_INTERP </name>
      <requires>  AVMFEATURE_WORDCODE_INTERP </requires>
      <defines>   VMCFG_WORDCODE_THREADED </defines>
-     <defines>   AVMPLUS_DIRECT_THREADED </defines>  <!-- FIXME: legacy name -->
   </feature>
 
   <at-most-one>

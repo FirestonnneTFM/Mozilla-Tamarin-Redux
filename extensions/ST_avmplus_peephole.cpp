@@ -53,7 +53,7 @@ static const char* ST_names[];
 void test0();
 
 private:
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
     void** opcode_labels; // the name is not arbitrary
 #endif
 
@@ -69,14 +69,14 @@ case 0: test0(); return;
 }
 void ST_avmplus_peephole::prologue() {
 
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 	opcode_labels = interpGetOpcodeLabels();
 #endif
 
 }
 void ST_avmplus_peephole::epilogue() {
 
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
     opcode_labels = NULL; // interpGetOpcodeLables() returns a pointer to static data
 #endif
 

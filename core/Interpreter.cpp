@@ -174,7 +174,7 @@ namespace avmplus
 // needed to regenerate core/FastInterpreter.cpp is described in a comment
 // at the head of utils/x86rewrite.as, which you will need to run.
 
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 #  ifndef AVMPLUS_WORD_CODE
 #    error "Need word code enabled for this"
 #  endif
@@ -241,7 +241,7 @@ namespace avmplus
 #  endif
 #endif // _MSC_VER
 
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 
 	void** interpGetOpcodeLabels() {
 		// *** NOTE ON THREAD SAFETY ***
@@ -265,11 +265,11 @@ namespace avmplus
 		return (void**)interpBoxed(NULL, 0, NULL);
 	}
 	
-#endif // AVMPLUS_DIRECT_THREADED
+#endif // VMCFG_DIRECT_THREADED
 
     Atom interpBoxed(register MethodEnv* env, register int _argc, register Atom* _atomv)
     {
-#ifdef AVMPLUS_DIRECT_THREADED
+#ifdef VMCFG_DIRECT_THREADED
 		
 		// If env is NULL return the jump table.  Optionally initialize it here on those
 		// platforms where compile-time initialization is not possible or practical.
@@ -635,7 +635,7 @@ namespace avmplus
 		return (Atom)opcode_labels;
 		} // env == 0?
 		
-#endif  // !AVMPLUS_DIRECT_THREADED
+#endif  // !VMCFG_DIRECT_THREADED
 
  		// These are local variables that are allocated to alloca'd memory;
  		// if alloca() is the real alloca() then that makes no difference, but
@@ -871,7 +871,7 @@ namespace avmplus
 		
 #ifdef AVMPLUS_WORD_CODE
 
-#  if defined AVMPLUS_DIRECT_THREADED
+#  if defined VMCFG_DIRECT_THREADED
 #    if defined GNUC_THREADING
 #      define INSTR(op)       L_##op:  VERBOSE;
 #      define NEXT            goto *(*pc++)
@@ -888,7 +888,7 @@ namespace avmplus
 				__asm jmp eax \
 		   }
 #    endif // threading discipline
-#  else // AVMPLUS_DIRECT_THREADED
+#  else // VMCFG_DIRECT_THREADED
 #    define INSTR(op)       case WOP_##op: VERBOSE; 
 #    define NEXT            continue
 #  endif
@@ -2827,7 +2827,7 @@ namespace avmplus
 					
 #endif // !AVMPLUS_WORD_CODE
 
-#if defined(AVMPLUS_WORD_CODE) && !defined(AVMPLUS_DIRECT_THREADED)
+#if defined(AVMPLUS_WORD_CODE) && !defined(VMCFG_DIRECT_THREADED)
 			// Fleshes out the dispatch table so that it's 0..255, allows
 			// some compilers to generate better code for the switch at the
 			// top, which switches on the low 8 bits.  (0 is an illegal
@@ -3335,7 +3335,7 @@ namespace avmplus
 	void showState(MethodInfo* info, const bytecode_t *code_start, const bytecode_t *pc, Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep, int max_scope)
     {
 #ifdef AVMPLUS_WORD_CODE
-#  ifdef AVMPLUS_DIRECT_THREADED
+#  ifdef VMCFG_DIRECT_THREADED
 		// 'opcode' is really a code pointer.
 		void* address = (void*)*pc;
 		WordOpcode opcode = (WordOpcode)0;
