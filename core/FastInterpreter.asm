@@ -1039,7 +1039,7 @@ $LN448@interp:
 ; 156  : 			core->console << "interp " << info << '\n';
 ; 157  : 		#endif
 ; 158  : 
-; 159  : #ifdef AVMPLUS_WORD_CODE
+; 159  : #ifdef VMCFG_WORDCODE
 ; 160  : 		const uint32* pos = info->word_code.body_pos;
 
 	mov	eax, DWORD PTR [esi+56]
@@ -1931,7 +1931,7 @@ $LN443@interp:
 	mov	DWORD PTR _init_scope_depth$[ebp], eax
 	mov	DWORD PTR _max_scope_depth$[ebp], esi
 
-; 465  : #else // !AVMPLUS_WORD_CODE
+; 465  : #else // !VMCFG_WORDCODE
 ; 466  : 		const byte* pos = info->body_pos;
 ; 467  : 		int max_stack = AvmCore::readU30(pos);
 ; 468  : 		int local_count = AvmCore::readU30(pos);
@@ -1939,7 +1939,7 @@ $LN443@interp:
 ; 470  : 		int max_scope_depth = AvmCore::readU30(pos);
 ; 471  : 		AvmCore::readU30(pos); // code_length
 ; 472  : 		const byte * volatile code_start = pos;
-; 473  : #endif // AVMPLUS_WORD_CODE
+; 473  : #endif // VMCFG_WORDCODE
 ; 474  : 		int volatile max_scope = MethodInfo::maxScopeDepth(info, max_scope_depth - init_scope_depth);
 
 	sub	esi, eax
@@ -2269,10 +2269,10 @@ $LN536@interp:
 
 	lea	edx, DWORD PTR [eax+56]
 
-; 565  : #ifndef AVMPLUS_WORD_CODE
+; 565  : #ifndef VMCFG_WORDCODE
 ; 566  :         const List<int,LIST_NonGCObjects>& cpool_int = pool->cpool_int;
 ; 567  :         const List<uint32,LIST_NonGCObjects>& cpool_uint = pool->cpool_uint;
-; 568  : #endif // !AVMPLUS_WORD_CODE
+; 568  : #endif // !VMCFG_WORDCODE
 ; 569  :         const List<double*, LIST_GCObjects>& cpool_double = pool->cpool_double;
 
 	lea	ecx, DWORD PTR [eax+40]
@@ -2303,7 +2303,7 @@ $LN536@interp:
 ; 580  : 		env->debugEnter(argc, ap, NULL, local_count, NULL, framep, 0);  // call it but make sure that callStackNode is not re-init'd
 ; 581  : 		#endif
 ; 582  : 
-; 583  : #ifdef AVMPLUS_WORD_CODE
+; 583  : #ifdef VMCFG_WORDCODE
 ; 584  : 		const uint32* pc = code_start;
 
 	mov	edi, DWORD PTR _code_start$[ebp]
@@ -2377,7 +2377,7 @@ $MainLoop$39596:
 ; 620  : 		// SAVE_EXPC and variants saves the address of the current opcode in the local 'expc'.
 ; 621  : 		// Used in the case of exceptions.
 ; 622  : 
-; 623  : #ifdef AVMPLUS_WORD_CODE
+; 623  : #ifdef VMCFG_WORDCODE
 ; 624  : 
 ; 625  : #  if defined AVMPLUS_DIRECT_THREADED
 ; 626  : #    if defined GNUC_THREADING
@@ -2406,7 +2406,7 @@ $MainLoop$39596:
 ; 649  : #  define SAVE_EXPC       expc = pc-1-code_start
 ; 650  : #  define SAVE_EXPC_S24   expc = pc-2-code_start
 ; 651  : 
-; 652  : #else // !AVMPLUS_WORD_CODE
+; 652  : #else // !VMCFG_WORDCODE
 ; 653  : 
 ; 654  : #  if defined AVMPLUS_VERBOSE
 ; 655  : #    define INSTR(op) case OP_##op: \
@@ -2424,10 +2424,10 @@ $MainLoop$39596:
 ; 667  : #  define SAVE_EXPC	      expc = pc-1-code_start
 ; 668  : #  define SAVE_EXPC_S24   expc = pc-4-code_start
 ; 669  : 
-; 670  : #endif // AVMPLUS_WORD_CODE
+; 670  : #endif // VMCFG_WORDCODE
 ; 671  : 		
 ; 672  : 	MainLoop:
-; 673  : #ifdef AVMPLUS_WORD_CODE
+; 673  : #ifdef VMCFG_WORDCODE
 ; 674  : 		TRY_UNLESS(core, !info->word_code.exceptions, kCatchAction_SearchForActionScriptExceptionHandler) {
 
 	mov	eax, DWORD PTR _info$[ebp]
@@ -2575,7 +2575,7 @@ $LL420@interp:
 ; 690  : 			
 ; 691  :         for (;;)
 ; 692  :         {
-; 693  : #  if defined AVMPLUS_WORD_CODE && !defined AVMPLUS_DIRECT_THREADED
+; 693  : #  if defined VMCFG_WORDCODE && !defined AVMPLUS_DIRECT_THREADED
 ; 694  : 			// See comments around INSTR(ext) below.
 ; 695  : 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
 ; 696  : 			switch ((*pc++) & 255)
@@ -2592,7 +2592,7 @@ $L_coerce_a$39620:
 
 ; 736  : 			}
 ; 737  : 
-; 738  : #ifndef AVMPLUS_WORD_CODE
+; 738  : #ifndef VMCFG_WORDCODE
 ; 739  :             INSTR(nop) {
 ; 740  : 				// FIXME: In the direct threaded translation these should probably
 ; 741  : 				// not be in the instruction stream at all.
@@ -2600,7 +2600,7 @@ $L_coerce_a$39620:
 ; 743  : 			}
 ; 744  : #endif
 ; 745  : 					
-; 746  : #ifndef AVMPLUS_WORD_CODE
+; 746  : #ifndef VMCFG_WORDCODE
 ; 747  :             INSTR(label) {
 ; 748  : 				// FIXME: In the direct threaded translation these should probably
 ; 749  : 				// not be in the instruction stream at all.
@@ -2608,7 +2608,7 @@ $L_coerce_a$39620:
 ; 751  : 			}
 ; 752  : #endif
 ; 753  : 					
-; 754  : #ifndef AVMPLUS_WORD_CODE
+; 754  : #ifndef VMCFG_WORDCODE
 ; 755  : 			INSTR(timestamp) {
 ; 756  : 				// FIXME: In the direct threaded translation these should probably
 ; 757  : 				// not be in the instruction stream at all.
@@ -2763,7 +2763,7 @@ $L_debugfile$39632:
 ; 809  : 				NEXT;
 ; 810  : 			}
 ; 811  : 
-; 812  : #ifndef AVMPLUS_WORD_CODE
+; 812  : #ifndef VMCFG_WORDCODE
 ; 813  : 			INSTR(debug) {
 ; 814  : 				pc += AvmCore::calculateInstructionWidth(pc-1) - 1;
 ; 815  : 				NEXT;
@@ -2938,7 +2938,7 @@ $L_pushdouble$39647:
 ; 860  :                 NEXT;
 ; 861  : 			}
 ; 862  : 
-; 863  : #ifndef AVMPLUS_WORD_CODE
+; 863  : #ifndef VMCFG_WORDCODE
 ; 864  :             INSTR(pushint) {
 ; 865  : 				// FIXME
 ; 866  : 				// Here we want the translator to direct threaded code
@@ -2951,7 +2951,7 @@ $L_pushdouble$39647:
 ; 873  : 			}
 ; 874  : #endif
 ; 875  : 					
-; 876  : #ifndef AVMPLUS_WORD_CODE
+; 876  : #ifndef VMCFG_WORDCODE
 ; 877  :             INSTR(pushuint) {
 ; 878  : 				// FIXME
 ; 879  : 				// Here we want the translator to direct threaded code
@@ -6116,7 +6116,7 @@ $L_lookupswitch$39999:
 ; 1452 : 			}
 ; 1453 : 				
 ; 1454 : 			INSTR(lookupswitch) {
-; 1455 : #ifdef AVMPLUS_WORD_CODE
+; 1455 : #ifdef VMCFG_WORDCODE
 ; 1456 : 				const uint32* base = pc-1;
 ; 1457 : 				uint32 index = AvmCore::integer_u(*(sp--));
 
@@ -11110,7 +11110,7 @@ $L_astype$40469:
 
 ; 2178 : 			}
 ; 2179 : 
-; 2180 : #ifndef AVMPLUS_WORD_CODE
+; 2180 : #ifndef VMCFG_WORDCODE
 ; 2181 :             INSTR(pushshort) {
 ; 2182 :                 // this just pushes an integer since we dont have short atoms
 ; 2183 :                 *(++sp) = ((signed short)U30ARG)<<3|kIntegerType;
@@ -11555,7 +11555,7 @@ $L_getscopeobject$40494:
 ; 2254 :                 NEXT;
 ; 2255 : 			}
 ; 2256 : 
-; 2257 : #ifndef AVMPLUS_WORD_CODE
+; 2257 : #ifndef VMCFG_WORDCODE
 ; 2258 :             INSTR(pushbyte) {
 ; 2259 : 				sp++;
 ; 2260 :                 sp[0] = MAKE_INTEGER((sint8)U8ARG);
@@ -11828,7 +11828,7 @@ $L_newcatch$40513:
 	mov	edi, DWORD PTR _pc$[ebp]
 
 ; 2319 : 				int catch_index = U30ARG;
-; 2320 : #ifdef AVMPLUS_WORD_CODE
+; 2320 : #ifdef VMCFG_WORDCODE
 ; 2321 : 				Traits *t = info->word_code.exceptions->exceptions[catch_index].scopeTraits;
 ; 2322 : #else
 ; 2323 : 				Traits *t = info->exceptions->exceptions[catch_index].scopeTraits;
@@ -12358,7 +12358,7 @@ $LN500@interp:
 ; 690  : 			
 ; 691  :         for (;;)
 ; 692  :         {
-; 693  : #  if defined AVMPLUS_WORD_CODE && !defined AVMPLUS_DIRECT_THREADED
+; 693  : #  if defined VMCFG_WORDCODE && !defined AVMPLUS_DIRECT_THREADED
 ; 694  : 			// See comments around INSTR(ext) below.
 ; 695  : 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
 ; 696  : 			switch ((*pc++) & 255)
@@ -12373,7 +12373,7 @@ $LN11@interp:
 ; 2420 : 
 ; 2421 : 			// 'OP_abs_jump' always boils away in the translation to word code, see
 ; 2422 : 			// comments in Translator.cpp.
-; 2423 : #ifndef AVMPLUS_WORD_CODE
+; 2423 : #ifndef VMCFG_WORDCODE
 ; 2424 : 			INSTR(abs_jump)	{
 ; 2425 : 				if (interruptable && core->interrupted) {
 ; 2426 : 					SAVE_EXPC;
@@ -12390,9 +12390,9 @@ $LN11@interp:
 ; 2437 : #  endif // AVMPLUS_64BIT
 ; 2438 : 				NEXT;
 ; 2439 :             }
-; 2440 : #endif // !AVMPLUS_WORD_CODE
+; 2440 : #endif // !VMCFG_WORDCODE
 ; 2441 : 
-; 2442 : #if defined(AVMPLUS_WORD_CODE) && !defined(AVMPLUS_DIRECT_THREADED)
+; 2442 : #if defined(VMCFG_WORDCODE) && !defined(AVMPLUS_DIRECT_THREADED)
 ; 2443 : 			// Fleshes out the dispatch table so that it's 0..255, allows
 ; 2444 : 			// some compilers to generate better code for the switch at the
 ; 2445 : 			// top, which switches on the low 8 bits.  (0 is an illegal
@@ -12402,7 +12402,7 @@ $LN11@interp:
 ; 2449 : 			}
 ; 2450 : #endif
 ; 2451 : 
-; 2452 : #ifdef AVMPLUS_WORD_CODE
+; 2452 : #ifdef VMCFG_WORDCODE
 ; 2453 : #  ifndef AVMPLUS_DIRECT_THREADED
 ; 2454 : 			INSTR(ext) {
 ; 2455 : 			// When using token threading, opcodes for introduced (rewritten) instructions are 
@@ -12482,7 +12482,7 @@ $L_illegal_op$40569:
 	jmp	$MainLoop$39596
 $L_returnvoid$39610:
 
-; 699  : #  endif // AVMPLUS_WORD_CODE && !AVMPLUS_DIRECT_THREADING
+; 699  : #  endif // VMCFG_WORDCODE && !AVMPLUS_DIRECT_THREADING
 ; 700  :             {
 ; 701  : 
 ; 702  : #endif // SWITCH_DISPATCH

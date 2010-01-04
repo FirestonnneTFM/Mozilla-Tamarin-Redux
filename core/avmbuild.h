@@ -87,7 +87,7 @@
 // and because support for this case (word code + jit) is likely to be removed anyway.
 //
 // For word code + jit, define a verifier output module that can drive two code generators.
-#if defined AVMPLUS_WORD_CODE && defined FEATURE_NANOJIT
+#if defined VMCFG_WORDCODE && defined FEATURE_NANOJIT
     #define FEATURE_TEEWRITER
 #endif
 

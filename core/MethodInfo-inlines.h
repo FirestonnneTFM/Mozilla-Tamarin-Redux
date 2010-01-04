@@ -325,7 +325,7 @@ REALLY_INLINE void MethodInfo::set_abc_exceptions(MMgc::GC* gc, ExceptionHandler
     WB(gc, this, &_abc.exceptions, e);
 }
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 
 REALLY_INLINE ExceptionHandlerTable* MethodInfo::word_code_exceptions() const
 {
@@ -350,7 +350,7 @@ REALLY_INLINE void MethodInfo::set_word_code(MMgc::GC* gc, TranslatedCode* trans
     AvmAssert(!isNative());
     WB(gc, this, &_abc.word_code.translated_code, translated_code);
 }
-#endif // AVMPLUS_WORD_CODE
+#endif // VMCFG_WORDCODE
 
 #ifdef VMCFG_LOOKUP_CACHE
 REALLY_INLINE int32_t MethodInfo::lookup_cache_size() const
@@ -451,7 +451,7 @@ REALLY_INLINE int32_t MethodSignature::frame_size() const
     return _frame_size;
 }
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 #else
 REALLY_INLINE const uint8_t* MethodSignature::abc_code_start() const
 {

@@ -138,7 +138,7 @@ namespace avmplus
 		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
 		bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
 		bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const byte *pc);
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 		uint32_t allocateCacheSlot(uint32_t imm30);
 #endif
 		Binding findMathFunction(TraitsBindingsp math, const Multiname& name, Binding b, int argc);

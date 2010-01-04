@@ -312,14 +312,14 @@ namespace avmplus
 
 		#if defined FEATURE_NANOJIT
 			MAKE_BUF(jit_buf, CodegenLIR);
-			#if defined AVMPLUS_WORD_CODE
+			#if defined VMCFG_WORDCODE
 			MAKE_BUF(teeWriter_buf, TeeWriter);
 			#endif
 			#ifdef FEATURE_CFGWRITER
 			MAKE_BUF(cfg_buf, CFGWriter);
 			#endif
 		#endif
-			#if defined AVMPLUS_WORD_CODE
+			#if defined VMCFG_WORDCODE
 			MAKE_BUF(translator_buf, WordcodeEmitter);
 			#else
 			MAKE_BUF(stubWriter_buf, CodeWriter);
@@ -334,7 +334,7 @@ namespace avmplus
 					
 					// note placement-new usage!
 					CodegenLIR* jit = new(jit_buf) CodegenLIR(this);
-					#if defined AVMPLUS_WORD_CODE
+					#if defined VMCFG_WORDCODE
 					WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
 					TeeWriter* teeWriter = new(teeWriter_buf) TeeWriter(translator, jit);
 					coder = teeWriter;
@@ -369,7 +369,7 @@ namespace avmplus
 						}
 						setInterpImpl();
 					}
-	                #ifdef AVMPLUS_WORD_CODE
+	                #ifdef VMCFG_WORDCODE
 					else {
 						if (_abc.word_code.translated_code) 
 						{
@@ -385,7 +385,7 @@ namespace avmplus
 				else
 				{
 					// NOTE copied below
-					#if defined AVMPLUS_WORD_CODE
+					#if defined VMCFG_WORDCODE
 					WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
 					coder = translator;
 					#else
@@ -399,7 +399,7 @@ namespace avmplus
 #else // FEATURE_NANOJIT
 
 				// NOTE copied from above
-				#if defined AVMPLUS_WORD_CODE
+				#if defined VMCFG_WORDCODE
 				WordcodeEmitter* translator = new(translator_buf) WordcodeEmitter(this, toplevel);
 				coder = translator;
 				#else
@@ -969,7 +969,7 @@ namespace avmplus
 					ms->_local_count = AvmCore::readU30(body_pos);
 					const int32_t init_scope_depth = AvmCore::readU30(body_pos);
 					ms->_max_scope = AvmCore::readU30(body_pos) - init_scope_depth;
-				#ifdef AVMPLUS_WORD_CODE
+				#ifdef VMCFG_WORDCODE
 				#else
 					ms->_abc_code_start = body_pos;
 					AvmCore::skipU30(ms->_abc_code_start); // code_length
@@ -992,7 +992,7 @@ namespace avmplus
 			ms->_max_stack = max_stack;
 			ms->_local_count = local_count;
 			ms->_max_scope = max_scope_depth - init_scope_depth;
-		#if defined(AVMPLUS_WORD_CODE) || defined(VMCFG_AOT)
+		#if defined(VMCFG_WORDCODE) || defined(VMCFG_AOT)
 		#else
 			ms->_abc_code_start = this->abc_body_pos();
 			AvmCore::skipU30(ms->_abc_code_start, 5);

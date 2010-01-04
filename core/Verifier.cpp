@@ -74,7 +74,7 @@ namespace avmplus
 	};
 #endif // VMCFG_VERIFYALL
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
     inline WordOpcode wordCode(AbcOpcode opcode) {
         return (WordOpcode)opcodeInfo[opcode].wordCode;
     }

@@ -48,7 +48,7 @@
 #endif
 #endif
 
-// The macro AVMPLUS_WORD_CODE is true if the representation of ABC code is as an array of words and
+// The macro VMCFG_WORDCODE is true if the representation of ABC code is as an array of words and
 // not an array of bytes.
 
 namespace avmplus
@@ -115,7 +115,7 @@ namespace avmplus
 #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntptrType) | (b ^ kIntptrType)) & 7) == 0) // less control flow but more registers -- which is better?
 #define IS_BOTH_DOUBLE(a,b)  ((((a ^ kDoubleType) | (b ^ kDoubleType)) & 7) == 0)
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 #  define WORD_CODE_ONLY(x)  x
 #  define ABC_CODE_ONLY(x)
 #else
@@ -142,13 +142,13 @@ namespace avmplus
 #  define DEBUG_ONLY(x)
 #endif
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 	typedef uintptr_t bytecode_t;
 #else
 	typedef uint8_t bytecode_t;
 #endif
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 	inline intptr_t readS24(const uint8_t* pc) {
 		return AvmCore::readS24(pc);
 	}
@@ -175,7 +175,7 @@ namespace avmplus
 // at the head of utils/x86rewrite.as, which you will need to run.
 
 #ifdef VMCFG_DIRECT_THREADED
-#  ifndef AVMPLUS_WORD_CODE
+#  ifndef VMCFG_WORDCODE
 #    error "Need word code enabled for this"
 #  endif
 #  if defined __GNUC__
@@ -300,7 +300,7 @@ namespace avmplus
 #  else
 #      define IIP(a,b) XXX(a)
 #  endif
-#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#  if defined DEBUGGER || !defined VMCFG_WORDCODE
 #      define IID(a,b) III(a,b)
 #  else
 #      define IID(a,b) XXX(a)
@@ -612,7 +612,7 @@ namespace avmplus
 			 IIP(0x130, L_swap_pop)
 			 III(0x131, L_findpropglobal)
 			 III(0x132, L_findpropglobalstrict)
-#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER && defined VMCFG_WORDCODE
 			 IID(0x133, L_debugenter)
 			 IID(0x134, L_debugexit)
 #else
@@ -691,7 +691,7 @@ namespace avmplus
  			core->console << "interp " << info << '\n';
 #endif
  		
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
  		// OPTIMIZEME - code does not belong here, should be moved off the fast path.
  		//
   		// Should not have to do this on every entry, but the logic that tries to do
@@ -721,14 +721,14 @@ namespace avmplus
  		// and only spill to memory across a call, but a dumb compiler may not ever
  		// keep the value in a register at all.
 		MethodSignaturep volatile ms = env->method->getMethodSignature();
-#if !defined AVMPLUS_WORD_CODE || defined AVMPLUS_VERBOSE
-	#ifdef AVMPLUS_WORD_CODE
+#if !defined VMCFG_WORDCODE || defined AVMPLUS_VERBOSE
+	#ifdef VMCFG_WORDCODE
  		register const bytecode_t* volatile codeStart = info->word_code_start();
 	#else
  		register const bytecode_t* volatile codeStart = ms->abc_code_start();
 	#endif
 #endif
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
  		register const bytecode_t* /* NOT VOLATILE */ pc = info->word_code_start();
 #else
  		register const bytecode_t* /* NOT VOLATILE */ pc = ms->abc_code_start();
@@ -840,7 +840,7 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		CallStackNode* volatile callStackNode = NULL;
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 		if (core->debugger()) 
 		{
 			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, (FramePtr)framep, /*frameTraits*/0, &expc);
@@ -869,7 +869,7 @@ namespace avmplus
 #  define VERBOSE
 #endif
 		
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 
 #  if defined VMCFG_DIRECT_THREADED
 #    if defined GNUC_THREADING
@@ -910,7 +910,7 @@ namespace avmplus
 #    define SAVE_EXPC_S24     expc = (intptr_t)(pc-1)
 #  endif
 
-#else // !AVMPLUS_WORD_CODE
+#else // !VMCFG_WORDCODE
 
 #  define INSTR(op) case OP_##op: VERBOSE;
 
@@ -921,7 +921,7 @@ namespace avmplus
 #  define SAVE_EXPC	        expc = pc-1-codeStart
 #  define SAVE_EXPC_S24     expc = pc-4-codeStart
 
-#endif // AVMPLUS_WORD_CODE
+#endif // VMCFG_WORDCODE
 		
 		// The following variables are here for the following purposes:
 		//
@@ -955,13 +955,13 @@ namespace avmplus
 		float f2l;					// ditto
 		double d2l;					// ditto
 		Atom a1l;					// ditto
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 		register uint32_t tmp_u30;
 		const bytecode_t* tmp_pc;
 #endif
 		
 	MainLoop:
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 		TRY_UNLESS_HEAPMEM((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, ef), core, !info->word_code_exceptions(), kCatchAction_SearchForActionScriptExceptionHandler) {
 #else
 		TRY_UNLESS_HEAPMEM((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, ef), core, !info->abc_exceptions(), kCatchAction_SearchForActionScriptExceptionHandler) {
@@ -975,7 +975,7 @@ namespace avmplus
 #  ifdef SUPERWORD_PROFILING
 			WordcodeTranslator::swprofPC(pc);
 #  endif
-#  ifdef AVMPLUS_WORD_CODE
+#  ifdef VMCFG_WORDCODE
 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
 			switch ((*pc++) & 65535)
 #  else
@@ -992,7 +992,7 @@ namespace avmplus
 			INSTR(returnvalue) {
 				a1 = *sp;
 			return_value_from_interpreter:
-#if defined DEBUGGER && !defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER && !defined VMCFG_WORDCODE
 				if (callStackNode) 
 				{	
 					env->debugExit(callStackNode); 
@@ -1008,31 +1008,31 @@ namespace avmplus
 				return a1;
 			}
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
             INSTR(nop) {
                 NEXT;
 			}
 #endif
 					
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
             INSTR(label) {
                 NEXT;
 			}
 #endif
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 			INSTR(timestamp) {
                 NEXT;
 			}
 #endif
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 			INSTR(coerce_a) { // no-op since interpreter only uses atoms
                 NEXT;
 			}
 #endif
 
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER || !defined VMCFG_WORDCODE
 			INSTR(debugline) {
 				SAVE_EXPC;
 				u1 = U30ARG;
@@ -1041,7 +1041,7 @@ namespace avmplus
 			}
 #endif
 										
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER || !defined VMCFG_WORDCODE
 			INSTR(debug) {
 				WORD_CODE_ONLY( pc += 4 );
 				ABC_CODE_ONLY( pc += AvmCore::calculateInstructionWidth(pc-1) - 1 );
@@ -1049,7 +1049,7 @@ namespace avmplus
 			}
 #endif
 
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER || !defined VMCFG_WORDCODE
 			INSTR(debugfile) {
 				SAVE_EXPC;
 				u1 = U30ARG;
@@ -1058,7 +1058,7 @@ namespace avmplus
 			}
 #endif
 
-#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER && defined VMCFG_WORDCODE
 			INSTR(debugenter) {
 				AvmAssert(core->debugger() != NULL);
 				AvmAssert(callStackNode == NULL);
@@ -1068,7 +1068,7 @@ namespace avmplus
 			}
 #endif
 
-#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER && defined VMCFG_WORDCODE
 			INSTR(debugexit) {
 				AvmAssert(core->debugger() != NULL);
 				AvmAssert(callStackNode != NULL);
@@ -1103,14 +1103,14 @@ namespace avmplus
                 NEXT;
 			}
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
             INSTR(pushint) {
                 *(++sp) = core->intToAtom(pool->cpool_int[(uint32_t)U30ARG]);
                 NEXT;
 			}
 #endif
 					
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
             INSTR(pushuint) {
                 *(++sp) = core->uintToAtom(pool->cpool_uint[(uint32_t)U30ARG]);
                 NEXT;
@@ -1215,7 +1215,7 @@ namespace avmplus
                 NEXT;
 			}
 
-#ifndef AVMPLUS_WORD_CODE	/* Jump table forwards to convert_d */
+#ifndef VMCFG_WORDCODE	/* Jump table forwards to convert_d */
             INSTR(coerce_d) {
 				goto convert_d_impl;
 			}
@@ -1233,7 +1233,7 @@ namespace avmplus
 				NEXT;
 			}
 
-#ifndef AVMPLUS_WORD_CODE	/* Jump table forwards to convert_b */
+#ifndef VMCFG_WORDCODE	/* Jump table forwards to convert_b */
             INSTR(coerce_b) {
 				goto convert_b_impl;
 			}
@@ -1724,7 +1724,7 @@ namespace avmplus
 			}
 				
 			INSTR(lookupswitch) {
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 				const uintptr_t* base = pc-1;
 				uint32_t index = AvmCore::integer_i(*(sp--));
 				intptr_t default_offset = S24ARG;
@@ -2199,7 +2199,7 @@ namespace avmplus
 
 			
 			// loads
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 			INSTR(lix8) {
 				i1 = AvmCore::integer(sp[0]);		// i1 = addr
 				MOPS_LOAD(i1, int8_t, lix8, i32l);	// i32l = result
@@ -2567,7 +2567,7 @@ namespace avmplus
 				NEXT;
 			}
 				
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
             INSTR(pushshort) {
                 // this just pushes an integer since we dont have short atoms
                 *(++sp) = MAKE_INTEGER(((int16_t)U30ARG));
@@ -2637,7 +2637,7 @@ namespace avmplus
                 NEXT;
 			}
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
             INSTR(pushbyte) {
 				*(++sp) = MAKE_INTEGER((int8_t)U8ARG);
                 NEXT;
@@ -2706,7 +2706,7 @@ namespace avmplus
             INSTR(newcatch) {
 				SAVE_EXPC;
 				u1 = U30ARG;  // catch_index
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 				t1 = info->word_code_exceptions()->exceptions[u1].scopeTraits;
 #else
 				t1 = info->abc_exceptions()->exceptions[u1].scopeTraits;
@@ -2743,7 +2743,7 @@ namespace avmplus
 				NEXT;
 			}
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 			INSTR(coerce_i) {
 				goto convert_i_impl;
 			}
@@ -2759,7 +2759,7 @@ namespace avmplus
                 NEXT;
 			}
 
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 			INSTR(coerce_u) {
 				goto convert_u_impl;
 			}
@@ -2807,7 +2807,7 @@ namespace avmplus
 
 			// 'OP_abs_jump' always boils away in the translation to word code, see
 			// comments in WordcodeTranslator.cpp.
-#ifndef AVMPLUS_WORD_CODE
+#ifndef VMCFG_WORDCODE
 					
 			INSTR(abs_jump)	{
 				if (core->interruptCheck(interruptable)) {
@@ -2825,9 +2825,9 @@ namespace avmplus
 				NEXT;
             }
 					
-#endif // !AVMPLUS_WORD_CODE
+#endif // !VMCFG_WORDCODE
 
-#if defined(AVMPLUS_WORD_CODE) && !defined(VMCFG_DIRECT_THREADED)
+#if defined(VMCFG_WORDCODE) && !defined(VMCFG_DIRECT_THREADED)
 			// Fleshes out the dispatch table so that it's 0..255, allows
 			// some compilers to generate better code for the switch at the
 			// top, which switches on the low 8 bits.  (0 is an illegal
@@ -2837,7 +2837,7 @@ namespace avmplus
 			}
 #endif
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 #  ifdef MSVC_X86_REWRITE_THREADING
 			default:
 				// Keep L_illegal_op and L_push_doublebits alive...
@@ -3216,7 +3216,7 @@ namespace avmplus
 		CATCH (Exception *exception)
 		{
 			// find handler; rethrow if no handler.
-#if defined AVMPLUS_WORD_CODE && !defined DEBUGGER
+#if defined VMCFG_WORDCODE && !defined DEBUGGER
 			ExceptionHandler *handler = core->findExceptionHandler(info, (uintptr_t*)expc-1-info->word_code_start(), exception);
 #else
 			ExceptionHandler *handler = core->findExceptionHandler(info, expc, exception);
@@ -3237,7 +3237,7 @@ namespace avmplus
 			if (callStackNode != NULL)
 				core->callStack = callStackNode;
 #endif
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 			pc = info->word_code_start() + handler->target;
 #else
 			pc = codeStart + handler->target;
@@ -3334,7 +3334,7 @@ namespace avmplus
      */
 	void showState(MethodInfo* info, const bytecode_t *code_start, const bytecode_t *pc, Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep, int max_scope)
     {
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 #  ifdef VMCFG_DIRECT_THREADED
 		// 'opcode' is really a code pointer.
 		void* address = (void*)*pc;
@@ -3404,7 +3404,7 @@ namespace avmplus
 		}
 #endif
 		core->console << (int)off << ':';
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 		core->formatOpcode(core->console, pc, (WordOpcode)((int32_t)opcode&0xffff), off, pool);
 #else
 		core->formatOpcode(core->console, pc, opcode, off, pool);

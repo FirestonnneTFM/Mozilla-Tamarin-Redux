@@ -41,7 +41,7 @@
 namespace avmplus
 {
 
-#ifdef AVMPLUS_WORD_CODE
+#ifdef VMCFG_WORDCODE
 
 #if defined _DEBUG || defined DEBUGGER || defined AVMPLUS_VERBOSE
 #  define N(x)  , x
@@ -406,6 +406,6 @@ namespace avmplus
 		// END
 	};
 
-#endif // AVMPLUS_WORD_CODE
+#endif // VMCFG_WORDCODE
 
 }

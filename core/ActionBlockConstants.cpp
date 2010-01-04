@@ -127,7 +127,7 @@ namespace avmplus
 #else
 #  define N(x)
 #endif
-#if defined AVMPLUS_WORD_CODE
+#if defined VMCFG_WORDCODE
 #  define W(x)  , x
 #else
 #  define W(x)
@@ -379,7 +379,7 @@ namespace avmplus
 		{   -1,  0,   0    W(0)                   N("OP_0xEC") },
 		{   -1,  0,   0    W(0)                   N("OP_0xED") },
 		{    2,  0,   0    W(0)                   N("abs_jump") },
-#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#  if defined DEBUGGER || !defined VMCFG_WORDCODE
 		{    4,  1,   0    W(WOP_debug)           N("debug") },
 		{    1,  1,   0    W(WOP_debugline)       N("debugline") },
 		{    1,  1,   0    W(WOP_debugfile)       N("debugfile") },
