@@ -39,7 +39,7 @@
 // ***** END LICENSE BLOCK ***** */
 
 #include "avmshell.h"
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 #if defined VMCFG_WORKERTHREADS
 namespace avmplus {
 class ST_mmgc_threads : public Selftest {

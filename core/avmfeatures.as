@@ -448,7 +448,6 @@ var FEATURES =
 
    <name>     AVMFEATURE_SELFTEST </name>
    <defines>  VMCFG_SELFTEST </defines>
-   <defines>  AVMPLUS_SELFTEST </defines> <!-- FIXME: legacy name -->
   </feature>
 
   <feature>

@@ -167,7 +167,7 @@ namespace avmshell
 		if (!shell->setup(settings))
 			Platform::GetInstance()->exit(1);
 		
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 		if (settings.do_selftest) {
 			shell->executeSelftest(settings);
 			return;
@@ -692,7 +692,7 @@ namespace avmshell
 						i++;
 					}
 #endif /* DEBUGGER */
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 					else if (!VMPI_strncmp(arg+2, "selftest", 8)) {
 						settings.do_selftest = true;
 						if (arg[10] == '=') {
@@ -718,7 +718,7 @@ namespace avmshell
 								settings.st_name = NULL;
 						}
 					}
-#endif /* AVMPLUS_SELFTEST */
+#endif /* VMCFG_SELFTEST */
 #ifdef AVMPLUS_VERBOSE
 					else if (!VMPI_strncmp(arg+2, "verbose", 7)) {
 						settings.do_verbose = AvmCore::DEFAULT_VERBOSE_ON; // all 'on' by default
@@ -980,7 +980,7 @@ namespace avmshell
 		}
 #endif
 		
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 		if (settings.do_selftest)
 		{
 			// Presumably we'd want to use the selftest harness to test multiple workers eventually.
@@ -1054,7 +1054,7 @@ namespace avmshell
 #ifdef VMCFG_VERIFYALL
 	    AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
 #endif
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 		AvmLog("          [-Dselftest[=component,category,test]]");
 		AvmLog("                        run selftests\n");
 #endif

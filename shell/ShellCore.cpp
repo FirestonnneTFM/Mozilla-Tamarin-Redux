@@ -341,7 +341,7 @@ namespace avmshell
 	
 #endif // AVMSHELL_PROJECTOR_SUPPORT
 
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 	void ShellCore::executeSelftest(ShellCoreSettings& settings)
 	{
 		setStackLimit();

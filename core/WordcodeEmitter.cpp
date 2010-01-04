@@ -76,7 +76,7 @@ namespace avmplus
 		boot();
 	}
 
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 	WordcodeEmitter::WordcodeEmitter(AvmCore* core, uint8_t* code_start)
 		: WordcodeTranslator()
 		, info(NULL)
@@ -99,7 +99,7 @@ namespace avmplus
 		boot();
 	}
 	
-#endif // AVMPLUS_SELFTEST
+#endif // VMCFG_SELFTEST
 	
 	void WordcodeEmitter::boot() {
 		computeExceptionFixups();

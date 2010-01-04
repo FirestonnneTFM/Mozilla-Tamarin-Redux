@@ -50,7 +50,7 @@ namespace avmplus
 	class WordcodeEmitter : public WordcodeTranslator {
 	public:
 		WordcodeEmitter(MethodInfo* info, Toplevel* toplevel);
-#    ifdef AVMPLUS_SELFTEST
+#    ifdef VMCFG_SELFTEST
 		WordcodeEmitter(AvmCore* core, uint8_t* code_start);
 #    endif
 		virtual ~WordcodeEmitter();

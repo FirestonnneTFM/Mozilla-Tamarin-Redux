@@ -37,7 +37,7 @@
 // Initialization code for generated selftest code
 #include "avmshell.h"
 namespace avmplus {
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 extern void create_avmplus_basics(AvmCore* core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 extern void create_avmplus_peephole(AvmCore* core);
@@ -56,5 +56,5 @@ create_mmgc_basics(core);
 create_mmgc_threads(core);
 #endif
 }
-#endif // AVMPLUS_SELFTEST
+#endif // VMCFG_SELFTEST
 }

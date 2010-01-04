@@ -39,7 +39,7 @@
 
 #include "avmshell.h"
 
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 
 // The logging infrastructure uses stdio for the time being, this needs to be fixed.
 #ifdef AVMPLUS_WIN32
@@ -229,4 +229,4 @@ namespace avmplus
     }
 	
 }
-#endif // AVMPLUS_SELFTEST
+#endif // VMCFG_SELFTEST

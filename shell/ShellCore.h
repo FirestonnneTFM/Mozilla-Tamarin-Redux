@@ -148,7 +148,7 @@ namespace avmshell
 		int executeProjector(char *executablePath);
 #endif
 
-#ifdef AVMPLUS_SELFTEST
+#ifdef VMCFG_SELFTEST
 		void executeSelftest(ShellCoreSettings& settings);
 #endif
 
