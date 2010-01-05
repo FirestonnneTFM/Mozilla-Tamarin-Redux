@@ -113,7 +113,7 @@ namespace avmplus
 		AvmAssert(argv != NULL); // need at least one arg spot passed in
 
 		ScriptObject* obj = newInstance();
-
+		AvmAssert(obj != NULL); //should never be null
 		Atom a = obj->atom();
 		argv[0] = a; // new object is receiver
 		ivtable->init->coerceEnter(argc, argv);
