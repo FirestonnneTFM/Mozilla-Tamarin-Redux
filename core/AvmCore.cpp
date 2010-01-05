@@ -187,7 +187,7 @@ namespace avmplus
 		, gcInterface(g)
     {
 		// sanity check for all our types
-		MMGC_STATIC_ASSERT(sizeof(int8) == 1);
+		MMGC_STATIC_ASSERT(sizeof(int8_t) == 1);
 		MMGC_STATIC_ASSERT(sizeof(uint8) == 1);		
 		MMGC_STATIC_ASSERT(sizeof(int16_t) == 2);
 		MMGC_STATIC_ASSERT(sizeof(uint16_t) == 2);
@@ -1602,7 +1602,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				break;
 			}
 			case OP_pushbyte:
-				buffer << opcodeInfo[opcode].name << " " << int(int8(*pc));
+				buffer << opcodeInfo[opcode].name << " " << int(int8_t(*pc));
 				break;
 			case OP_pushint:
 			{
