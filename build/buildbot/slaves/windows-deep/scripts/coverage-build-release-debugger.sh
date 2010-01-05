@@ -81,7 +81,7 @@ $bullseyedir/cov01 --on
 # name of the executable that we want ($3)
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/compile-generic.sh $change "--enable-shell --enable-debugger" ${shell_release_debugger_cov}
+../all/compile-generic.sh $change "--enable-shell --enable-debugger" ${build_shell_release_debugger_cov}
 
 
 
