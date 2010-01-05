@@ -113,7 +113,7 @@ typedef int32_t		int32;
 //typedef int16_t    sint16;
 typedef uint8_t		uint8;
 //typedef int8_t     int8;
-typedef int8_t		sint8;
+//typedef int8_t     sint8;
 typedef uintptr_t	uintptr;
 //typedef intptr_t   sintptr;
 typedef uint8_t		byte;
