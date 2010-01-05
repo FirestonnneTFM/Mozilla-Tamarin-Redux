@@ -667,19 +667,13 @@ template <class ARG_TYPE_ITER1, class ARG_TYPE_ITER2> static int32_t apArgDescSi
 // this stuff is hackery to help development -- gcc targets should have .s files for production
 #define ASM_BP __asm__("stmdb sp!, {a1, a2, a3, a4}\n swi 0x80\n ldmia sp!, {a1, a2, a3, a4}")
 #define ASM_FUNC_BEGIN(R, N, A) \
-    typedef R (* N##_type)A; \
-    static void N##_impl () __attribute__((noinline)); \
-    static void* N##_addr () __attribute__((noinline)); \
-    N##_type N = (N##_type)N##_addr(); \
-    static void* N##_addr () { \
-        void* result; \
-        __asm__("adr %[result], L"#N"_astart" : [result] "=r" (result)); \
-        N##_impl(); /* does nothing */ \
-        return result; \
-    } \
-    static void N##_impl () { __asm__ ("b L"#N"_aend\n L"#N"_astart: ");
-#define ASM_FUNC_END(N) __asm__ ("L"#N"_aend: "); }
-#define ASM_REDIR(F) __asm__ ( "b L"#F"_astart");
+    extern R N A; \
+    __asm__(".section	__TEXT,__text,regular,pure_instructions"); \
+    __asm__(".align	2"); \
+    __asm__(".globl	_"#N" "); \
+    __asm__("_"#N": ");
+#define ASM_FUNC_END(N)
+#define ASM_REDIR(F) __asm__ ( "b _"#F" ");
 
 #endif
     

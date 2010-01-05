@@ -44,7 +44,14 @@ namespace avmplus
 {
     using namespace MMgc;
     
-    Debugger::Debugger(avmplus::AvmCore*, TraceLevel)
+	Debugger::Debugger(AvmCore *core, TraceLevel tracelevel)
+        : astrace_console(tracelevel)
+        , astrace_callback(TRACE_OFF)
+        , in_trace(false)
+        , astraceStartTime(VMPI_getTime())
+        , core(core)
+        , abcList(core->GetGC())
+        , pool2abcIndex()
     {
     }
 
