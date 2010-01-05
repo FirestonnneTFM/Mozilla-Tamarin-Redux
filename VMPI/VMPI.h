@@ -108,15 +108,14 @@ namespace avmplus
 typedef uint32_t	uint32;
 typedef int32_t		int32;
 //typedef int32_t    sint32;
-//typedef uint16_t   uint16_t;
+//typedef uint16_t   uint16;
 //typedef int16_t    int16;
 //typedef int16_t    sint16;
 typedef uint8_t		uint8;
-//typedef int8_t     int8_t;
+//typedef int8_t     int8;
 typedef int8_t		sint8;
 typedef uintptr_t	uintptr;
-typedef intptr_t	sintptr;
-
+//typedef intptr_t   sintptr;
 typedef uint8_t		byte;
 }
 /* wchar is our version of wchar_t, since wchar_t is different sizes

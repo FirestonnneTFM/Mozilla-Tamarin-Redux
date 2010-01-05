@@ -165,7 +165,7 @@ namespace avmplus
 #if defined AVMPLUS_MAC && defined AVMPLUS_64BIT
 	PrintWriter& PrintWriter::operator<< (ptrdiff_t value)
 	{
-		// use the sintptr version - it is 64, not 32 bits
+		// use the intptr_t version - it is 64, not 32 bits
 		Stringp s = MathUtils::convertIntegerToStringRadix(m_core, (intptr_t) value, 10, MathUtils::kTreatAsSigned);
 		return *this << s;
 	}

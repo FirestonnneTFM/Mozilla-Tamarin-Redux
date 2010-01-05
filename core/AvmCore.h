@@ -1181,11 +1181,11 @@ const int kBufferPadding = 16;
 		 *         exception if no handler is found.
 		 */
 		ExceptionHandler* findExceptionHandler(MethodInfo *info,
-											   sintptr pc,
+											   intptr_t pc,
 											   Exception *exception);
 		
 		ExceptionHandler* beginCatch(ExceptionFrame *ef,
-				MethodInfo *info, sintptr pc, Exception *exception);
+				MethodInfo *info, intptr_t pc, Exception *exception);
 
 		/**
 		 * Just like findExceptionHandler(), except that this function
@@ -1194,7 +1194,7 @@ const int kBufferPadding = 16;
 		 * it can't find a handler.
 		 */
 		ExceptionHandler* findExceptionHandlerNoRethrow(MethodInfo *info,
-														sintptr pc,
+														intptr_t pc,
 														Exception *exception);
 
 		/**
