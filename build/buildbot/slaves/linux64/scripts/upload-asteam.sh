@@ -50,23 +50,8 @@
 
 
 
-# Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_64}
-
-# Release-wordcode
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_wordcode_64}
-
-# Release_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger_64}
-
-# Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_64}
-
-#Debug_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger_64}
-
-# Release-VProf
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_vprof_64}
+## Upload the normal binaries for this machine
+../all/upload-asteam.sh $change
 
 # Test media
 . ../all/util-upload-ftp-asteam.sh $basedir/test/acceptance/acceptance-tests-abcs.zip $ftp_asteam/$branch/$change-${changeid}/acceptance-tests-abcs.zip

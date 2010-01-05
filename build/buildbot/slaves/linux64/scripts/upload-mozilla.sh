@@ -50,29 +50,8 @@
 
 
 
-# Since all is good, lets post the builds
-ssh stage.mozilla.org "~/setupbuilds.sh $branch $change-$changeid"
-
-
-# Release
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_64}
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_64} ${shell_release_64}"
-
-# Release_Debugger
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_debugger_64}
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_debugger_64} ${shell_release_debugger_64}"
-
-# Debug
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_debug_64}
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_debug_64} ${shell_debug_64}"
-
-#Debug_Debugger
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_debug_debugger_64}
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_debug_debugger_64} ${shell_debug_debugger_64}"
-
-#Release-Vprof
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release_vprof} $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_vprof_64}
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_vprof_64} ${shell_release_vprof_64}"
+## Upload the normal binaries for this machine
+../all/upload-mozilla.sh $change
 
 
 # Test media
