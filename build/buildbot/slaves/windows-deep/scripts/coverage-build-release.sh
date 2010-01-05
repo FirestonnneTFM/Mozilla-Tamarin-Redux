@@ -81,7 +81,7 @@ $bullseyedir/cov01 --on
 # name of the executable that we want ($3)
 ##
 cd $basedir/build/buildbot/slaves/scripts/
-../all/compile-generic.sh $change "--enable-shell" ${shell_release_cov}
+../all/compile-generic.sh $change "--enable-shell" ${build_shell_release_cov}
 
 
 
