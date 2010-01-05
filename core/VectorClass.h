@@ -330,9 +330,9 @@ namespace avmplus
 
 		enum { kGrowthIncr = 4096 };
 
-		void atomToValue(Atom atom, sint16& value)
+		void atomToValue(Atom atom, int16_t& value)
 		{
-			value = (sint16) AvmCore::integer(atom);						
+			value = (int16_t) AvmCore::integer(atom);						
 		}
 		void atomToValue(Atom atom, uint16_t& value)
 		{
@@ -363,7 +363,7 @@ namespace avmplus
 			value = AvmCore::atomToScriptObject(atom);
 		}
 
-		Atom valueToAtom(sint16 value) const
+		Atom valueToAtom(int16_t value) const
 		{
 			return core()->intToAtom(value);
 		}
