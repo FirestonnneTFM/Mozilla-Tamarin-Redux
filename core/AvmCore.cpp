@@ -2114,13 +2114,13 @@ return the result of the comparison ToPrimitive(x) == y.
 		switch (atomKind(*ap))
 		{
 		case kBooleanType:
-			*ap = intToAtom(delta+(sint32((sintptr)*ap>>3)));
+			*ap = intToAtom(delta+(int32_t((sintptr)*ap>>3)));
             return;
 		case kIntptrType:
 			*ap = intToAtom(delta + int32_t(atomGetIntptr(*ap)));
 			return;
 		case kDoubleType:
-			*ap = intToAtom((int)((sint32)atomToDouble(*ap)+delta));
+			*ap = intToAtom((int)((int32_t)atomToDouble(*ap)+delta));
 			return;
         default:
 			*ap = intToAtom(integer(*ap)+delta);

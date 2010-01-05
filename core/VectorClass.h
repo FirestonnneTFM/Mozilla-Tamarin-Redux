@@ -338,7 +338,7 @@ namespace avmplus
 		{
 			value = (uint16) AvmCore::integer_u(atom);			
 		}
-		void atomToValue(Atom atom, sint32& value)
+		void atomToValue(Atom atom, int32_t& value)
 		{
 			value = AvmCore::integer(atom);						
 		}
@@ -371,7 +371,7 @@ namespace avmplus
 		{
 			return core()->uintToAtom(value);
 		}
-		Atom valueToAtom(sint32 value) const
+		Atom valueToAtom(int32_t value) const
 		{
 			return core()->intToAtom(value);
 		}
@@ -427,10 +427,10 @@ namespace avmplus
 		}
 	};
 
-	class IntVectorObject : public TypedVectorObject<sint32> {
+	class IntVectorObject : public TypedVectorObject<int32_t> {
 	public:
 		IntVectorObject(VTable *ivtable, ScriptObject *delegate)
-			: TypedVectorObject<sint32>(ivtable, delegate)
+			: TypedVectorObject<int32_t>(ivtable, delegate)
 		{
 		}
 

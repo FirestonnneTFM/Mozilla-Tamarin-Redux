@@ -1558,7 +1558,7 @@ namespace avmplus
 	  /--------------------------------------------*/
 	void MathUtils::RandomFastInit(pTRandomFast pRandomFast)
 	{
-		sint32 n = 31; // Changed from 32 to 31 per Prince
+		int32_t n = 31; // Changed from 32 to 31 per Prince
 
 		/* The sequence always starts with 1. */
 		//    pRandomFast->uValue = 1L;
@@ -1634,9 +1634,9 @@ namespace avmplus
 	  / Exit
 	  /   Returns the next pseudorandom value in the sequence.
 	  /--------------------------------------------*/
-	sint32 MathUtils::RandomPureHasher(sint32 iSeed)
+	int32_t MathUtils::RandomPureHasher(int32_t iSeed)
 	{
-		sint32   iResult;
+		int32_t   iResult;
 
 		/* Adapted from "A Recursive Implementation of the Perlin Noise Function,"
 		   /  by Greg Ward, Graphics Gems II, p. 396. */
@@ -1662,7 +1662,7 @@ namespace avmplus
 		return iResult;
 	}
 	/* ------------------------------------------------------------------------------ */
-	sint32 MathUtils::GenerateRandomNumber(pTRandomFast pRandomFast)
+	int32_t MathUtils::GenerateRandomNumber(pTRandomFast pRandomFast)
 	{
 		/* Fill out gRandomFast if it is uninitialized.
 		   /  This means seed hasn't been set.  Sequence of numbers will be
@@ -1680,7 +1680,7 @@ namespace avmplus
 		return aNum & kRandomPureMax;
 	}
 
-	sint32 MathUtils::Random(sint32 range, pTRandomFast pRandomFast)
+	int32_t MathUtils::Random(int32_t range, pTRandomFast pRandomFast)
 	{
 		if (range > 0) {
 			return GenerateRandomNumber(pRandomFast) % range;
