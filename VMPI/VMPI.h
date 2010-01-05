@@ -108,7 +108,7 @@ namespace avmplus
 typedef uint32_t	uint32;
 typedef int32_t		int32;
 //typedef int32_t		sint32;
-typedef uint16_t	uint16;
+//typedef uint16_t	uint16_t;
 
 typedef int16_t		int16;
 

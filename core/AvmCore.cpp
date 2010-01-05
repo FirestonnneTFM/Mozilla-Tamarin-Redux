@@ -190,7 +190,7 @@ namespace avmplus
 		MMGC_STATIC_ASSERT(sizeof(int8) == 1);
 		MMGC_STATIC_ASSERT(sizeof(uint8) == 1);		
 		MMGC_STATIC_ASSERT(sizeof(int16) == 2);
-		MMGC_STATIC_ASSERT(sizeof(uint16) == 2);
+		MMGC_STATIC_ASSERT(sizeof(uint16_t) == 2);
 		MMGC_STATIC_ASSERT(sizeof(int32) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
 		MMGC_STATIC_ASSERT(sizeof(int64_t) == 8);

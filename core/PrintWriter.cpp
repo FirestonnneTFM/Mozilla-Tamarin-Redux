@@ -298,7 +298,7 @@ namespace avmplus
 		writeHexNibble(value&0x0f);
 	}
 
-	void PrintWriter::writeHexWord(uint16 value)
+	void PrintWriter::writeHexWord(uint16_t value)
 	{
 		writeHexByte((uint8)(value>>8));
 		writeHexByte((uint8)(value&0xff));

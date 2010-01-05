@@ -334,9 +334,9 @@ namespace avmplus
 		{
 			value = (sint16) AvmCore::integer(atom);						
 		}
-		void atomToValue(Atom atom, uint16& value)
+		void atomToValue(Atom atom, uint16_t& value)
 		{
-			value = (uint16) AvmCore::integer_u(atom);			
+			value = (uint16_t) AvmCore::integer_u(atom);			
 		}
 		void atomToValue(Atom atom, int32_t& value)
 		{
@@ -367,7 +367,7 @@ namespace avmplus
 		{
 			return core()->intToAtom(value);
 		}
-		Atom valueToAtom(uint16 value) const
+		Atom valueToAtom(uint16_t value) const
 		{
 			return core()->uintToAtom(value);
 		}

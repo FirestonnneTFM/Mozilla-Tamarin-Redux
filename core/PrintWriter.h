@@ -141,7 +141,7 @@ namespace avmplus
 		void formatTypeName(Traits* t);
 
 		void writeHexByte(uint8 value);
-		void writeHexWord(uint16 value);
+		void writeHexWord(uint16_t value);
 		void writeHexAddr(uintptr value);
 		
 		#ifdef AVMPLUS_VERBOSE
