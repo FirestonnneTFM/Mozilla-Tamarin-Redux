@@ -94,12 +94,23 @@ cd objdir
 
 python ../configure.py $config
 
+echo ""
+echo "*******************************************************************************"
+echo "Makefile:"
+echo ""
+cat Makefile
+echo ""
+echo "*******************************************************************************"
 topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
 CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
-echo ""
 echo compiler version: 
-eval ${CXX} --version
+if [ `uname` == "SunOS" ]; then
+    eval ${CXX} -V
+else
+    eval ${CXX} --version
+fi
 echo ""
+echo "*******************************************************************************"
 echo ""
 
 make $make_opt clean
@@ -120,6 +131,16 @@ mkdir -p $buildsdir/${change}-${changeid}/$platform
 chmod 777 $buildsdir/${change}-${changeid}/$platform
 cp shell/$shell $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
 chmod 777 $buildsdir/${change}-${changeid}/$platform/$filename$shell_extension
+
+echo ""
+echo "*******************************************************************************"
+echo "shell compiled with these features:"
+features=`$buildsdir/${change}-${changeid}/$platform/$filename$shell_extension -Dversion | grep AVM | sed 's/\;/ /g' | sed 's/features //g'`
+for i in ${features}; do
+    echo feature: $i
+done
+echo ""
+echo "*******************************************************************************"
 
 cd $basedir/core
 hg revert avmplusVersion.h
