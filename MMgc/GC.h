@@ -68,7 +68,7 @@ register void *mmgc_sp __asm__("r1");
 	_stack = (void*)mmgc_sp;											\
 	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
 
-#elif defined MMGC_MAC && !defined MMGC_PPC
+#elif defined MMGC_MAC && !defined MMGC_PPC && !defined MMGC_ARM
 
 register void *mmgc_sp __asm__("esp");
 
