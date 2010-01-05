@@ -44,8 +44,9 @@ namespace avmplus
 {
 	using namespace MMgc;
 
+    // sadly, declaring this "static" produces spurious warnings in some GCC versions
 	template<class T>
-	static void inline read(uint8_t*& p, T& u)
+	/*static*/ void inline read(uint8_t*& p, T& u)
 	{
 		// weirdly, declaring a naked union here causes the ARM gcc compiler
 		// to issue bogus "unused" warnings for p8 and pT. Declaring it as
@@ -62,7 +63,7 @@ namespace avmplus
 	}
 
 	template<class T>
-	static void inline write(uint8_t*& p, T u)
+	/*static*/ void inline write(uint8_t*& p, T u)
 	{
 		// weirdly, declaring a naked union here causes the ARM gcc compiler
 		// to issue bogus "unused" warnings for p8 and pT. Declaring it as
