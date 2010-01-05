@@ -503,11 +503,12 @@ namespace MMgc
 
 	REALLY_INLINE void DeleteTaggedArrayWithHeaderChecked(void* p, bool primitive)
 	{
-		(void)primitive;
-		if(p) 
+		if (p) 
 		{
-			// not using DeleteTaggedArrayWithHeader, that's for non-Simple case with count cookie
-			DeleteTaggedScalar( p );
+			if (primitive)
+				DeleteTaggedScalar(p);
+			else
+				DeleteTaggedArrayWithHeader(p);
 		}
 	}
 }

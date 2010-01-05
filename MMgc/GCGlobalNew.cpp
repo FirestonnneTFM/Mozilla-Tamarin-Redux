@@ -275,14 +275,15 @@ namespace MMgc
 
 	void DeleteTaggedArrayWithHeaderChecked(void* p, bool primitive)
 	{
-		(void)primitive;
-		if(p) 
+		if (p) 
 		{
 #ifdef MMGC_DELETE_DEBUGGING
-			VerifyTaggedArray( p, primitive );
+			VerifyTaggedArray(p, primitive);
 #endif
-			// not using DeleteTaggedArrayWithHeader, that's for non-Simple case with count cookie
-			DeleteTaggedScalar( p );
+			if (primitive)
+				DeleteTaggedScalar(p);
+			else
+				DeleteTaggedArrayWithHeader(p);
 		}
 	}
 
