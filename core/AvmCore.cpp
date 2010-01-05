@@ -195,13 +195,13 @@ namespace avmplus
 		MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
 		MMGC_STATIC_ASSERT(sizeof(int64_t) == 8);
 		MMGC_STATIC_ASSERT(sizeof(uint64_t) == 8);
-		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
+		MMGC_STATIC_ASSERT(sizeof(intptr_t) == sizeof(void *));
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
 #ifdef AVMPLUS_64BIT
-		MMGC_STATIC_ASSERT(sizeof(sintptr) == 8);
+		MMGC_STATIC_ASSERT(sizeof(intptr_t) == 8);
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == 8);		
 #else
-		MMGC_STATIC_ASSERT(sizeof(sintptr) == 4);
+		MMGC_STATIC_ASSERT(sizeof(intptr_t) == 4);
 		MMGC_STATIC_ASSERT(sizeof(uintptr) == 4);		
 #endif	
 			
@@ -2016,7 +2016,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif // AVMPLUS_VERBOSE
 
 	ExceptionHandler* AvmCore::beginCatch(ExceptionFrame *ef,
-		MethodInfo *info, sintptr pc, Exception *exception)
+		MethodInfo *info, intptr_t pc, Exception *exception)
 	{
 		ef->beginCatch();
 		ExceptionHandler* handler = findExceptionHandler(info,pc,exception);
@@ -2025,7 +2025,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 	ExceptionHandler* AvmCore::findExceptionHandler(MethodInfo *info,
-												    sintptr pc,
+												    intptr_t pc,
 												    Exception *exception)
 	{
 		ExceptionHandler* handler = findExceptionHandlerNoRethrow(info, pc, exception);
@@ -2038,7 +2038,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 	ExceptionHandler* AvmCore::findExceptionHandlerNoRethrow(MethodInfo *info,
-															 sintptr pc,
+															 intptr_t pc,
 															 Exception *exception)
 	{
 		// If this exception is an EXIT_EXCEPTION, it cannot
@@ -2114,7 +2114,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		switch (atomKind(*ap))
 		{
 		case kBooleanType:
-			*ap = intToAtom(delta+(int32_t((sintptr)*ap>>3)));
+			*ap = intToAtom(delta+(int32_t((intptr_t)*ap>>3)));
             return;
 		case kIntptrType:
 			*ap = intToAtom(delta + int32_t(atomGetIntptr(*ap)));
