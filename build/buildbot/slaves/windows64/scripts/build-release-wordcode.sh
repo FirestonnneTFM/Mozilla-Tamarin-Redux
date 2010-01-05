@@ -37,6 +37,7 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
+
 ##
 # Bring in the environment variables
 ##
@@ -49,19 +50,10 @@
 . ../all/util-calculate-change.sh $1
 
 
-
-# Release
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_64
-
-# Release-wordcode
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_release_wordcode} $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_wordcode}_64
-
-# Release_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger_64
-
-# Debug
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_64
-
-#Debug_Debugger
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_debugger_64
+##
+# Execute the common build script.
+# Just need to pass in the target to get the 64bit builds
+##
+cd $basedir/build/buildbot/slaves/scripts/
+../all/build-release-wordcode.sh $change "--target=x86_64-win --enable-wordcode-interp"
 

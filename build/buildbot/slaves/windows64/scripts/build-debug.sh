@@ -51,48 +51,9 @@
 
 
 
+
+# Execute the common build script.
+# Just need to pass in the target to get the 64bit builds
 ##
-# Update the version string
-##
-. ../all/util-update-version.sh
-
-
-##
-# Make sure that there are no left over directories from previous compile
-##
-cd $basedir/platform/win32
-test -d x64 && {
-    echo Remove directory $basedir/platform/win32/x64
-    rm -rf x64
-}
-
-
-test -f build.out && rm -f build.out
-
-echo "devenv avmplus2008.sln /clean Debug\|x64"
-devenv avmplus2008.sln /clean Debug\|x64
-
-echo "devenv avmplus2008.sln /rebuild Debug\|x64 /out build.out"
-devenv avmplus2008.sln /rebuild Debug\|x64 /out build.out
-res=$?
-cat build.out
-
-test "$res" = "0" || {
-    echo "build failed return value $res"
-}
-test -f x64/Debug/avmplus_d_64.exe || {
-    echo "avmshell is missing, build failed"
-    cd $basedir/core
-    hg revert avmplusVersion.h
-    exit 1
-}
-
-mkdir -p $buildsdir/${change}-${changeid}/$platform
-cp x64/Debug/avmplus_d_64.exe $buildsdir/${change}-${changeid}/$platform/${shell_debug}
-
-cd $basedir/core
-hg revert avmplusVersion.h
-
-echo "build succeeded"
-rm -rf $basedir/platform/win32/x64
-exit 0
+cd $basedir/build/buildbot/slaves/scripts/
+../all/build-debug.sh $change "--target=x86_64-win"

@@ -46,3 +46,11 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/win32cpuid.cpp \
   $(NULL)
 endif
+
+ifeq (x86_64,$(TARGET_CPU))
+ifeq (windows,$(TARGET_OS))
+avmplus_MASMSRCS := $(avmplus_MASMSRCS) \
+  $(curdir)/win64setjmp.asm
+  $(NULL)
+endif
+endif

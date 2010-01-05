@@ -58,6 +58,10 @@ ssh stage.mozilla.org "~/setupbuilds.sh $branch $change-$changeid"
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release_64
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release_64 $shell_release_64"
 
+# Release-wordcode
+. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_release_wordcode} $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_release_wordcode}_64
+echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_release_wordcode}_64 ${shell_release_wordcode}_64"
+
 # Release_Debugger
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release_debugger_64
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release_debugger_64 $shell_release_debugger_64"

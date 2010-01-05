@@ -210,6 +210,13 @@ class Configuration:
 				else:
 					self._acvars.update({'ASM' : 'armasm.exe -nologo -arch 5T'})
 				
+				
+            if self._target[1] == "x86_64":
+                if sys.platform.startswith('cygwin'):
+                    self._acvars.update({'MASM' : '$(topsrcdir)/build/cygwin-wrapper.sh ml64.exe -nologo -c '})
+                else:
+                    self._acvars.update({'MASM' : 'ml64.exe -nologo -c '})
+
             if sys.platform.startswith('cygwin'):
                 self._acvars.update({'CXX'          : '$(topsrcdir)/build/cygwin-wrapper.sh cl.exe -nologo'})
                 self._acvars.update({'CC'           : '$(topsrcdir)/build/cygwin-wrapper.sh cl.exe -nologo'})
