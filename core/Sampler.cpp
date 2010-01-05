@@ -438,7 +438,7 @@ namespace avmplus
 
 			
 //			if( !uid )
-//				uid = (uint64)-1;
+//				uid = (uint64_t)-1;
 
 			writeRawSample(DELETED_OBJECT_SAMPLE);
 			write(currentSample, uid);

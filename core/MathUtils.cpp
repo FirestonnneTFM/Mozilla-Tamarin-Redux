@@ -1455,7 +1455,7 @@ namespace avmplus
 		double x = f->doubleValueOf();
 		double y = quickPowTen(exp10);
 		double estimate = x*y;
-		uint64 mantissaEstimate = frexp(estimate,&e);
+		uint64_t mantissaEstimate = frexp(estimate,&e);
 		int64_t lowBits = (int64_t)(mantissaEstimate % 2048); // two^p-n = 2^(64-53) = 2^11 = 2048
 
 		// check if slop is large enough to make a difference when rounding to 53 bits
@@ -1472,7 +1472,7 @@ namespace avmplus
 	MathUtils::findClosestFloat(BigInteger* f, int32_t e, double estimate)
 	{
 		int32_t k;
-		uint64 m = frexp(estimate,&k);
+		uint64_t m = frexp(estimate,&k);
 		BigInteger *m = BigInteger::newFromUint64(m);
 		BigInteger* compX;
 		BigInteger* compY;
