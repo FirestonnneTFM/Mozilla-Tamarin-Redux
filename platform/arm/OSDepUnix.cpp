@@ -43,11 +43,11 @@
 
 namespace avmplus
 {
-	uint64 OSDep::currentTimeMillis()
+	uint64_t OSDep::currentTimeMillis()
 	{
 		struct timeval tv;
 		::gettimeofday(&tv, NULL);
-		uint64 result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+		uint64_t result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 		return result;
 	}
 }

@@ -314,13 +314,13 @@ namespace avmplus
 		return x;
 	}
 
-	uint64 MathUtils::frexp(double x, int *eptr)
+	uint64_t MathUtils::frexp(double x, int *eptr)
 	{
 		double fracMantissa = ExtractFraction(x, eptr);
 		// correct mantissa and eptr to get integer values
 		//  for both
 		*eptr -= 53; // 52 mantissa bits + the hidden bit
-		return (uint64)((fracMantissa) * (double)(1LL << 53));
+		return (uint64_t)((fracMantissa) * (double)(1LL << 53));
 	}
 	
 	double MathUtils::log(double value)
