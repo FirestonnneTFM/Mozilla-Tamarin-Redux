@@ -107,7 +107,7 @@ namespace avmplus
 
         NamespaceType getType() const
         {
-            return (NamespaceType)(((sint32)m_uri)&7);
+            return (NamespaceType)(((int32_t)m_uri)&7);
         }
 
 		// Iterator support - for in, for each
