@@ -159,7 +159,7 @@ namespace avmplus
 		return (int) (Day(t) - DayFromYear((int) YearFromTime(t)));
 	}
 
-	static const uint16 kMonthOffset[2][13] = {
+	static const uint16_t kMonthOffset[2][13] = {
 		//    Jan Feb Mar Apr May  Jun  Jul  Aug  Sep  Oct  Nov  Dec  Total
 		{ 0,  31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 },
 		{ 0,  31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 }

@@ -148,7 +148,7 @@ const WordcodeEmitter::peep_transition_t WordcodeEmitter::transitions[] = {
 { WOP_pop, 49 },
 };
 
-const uint16 WordcodeEmitter::toplevel[] = {
+const uint16_t WordcodeEmitter::toplevel[] = {
 0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    nop                  throw                getsuper             setsuper             dxns                 dxnslate            
 0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    ifnlt                ifnle                ifngt                ifnge               
 0, 0, 0, 0, 0, 0, 0, 0, // jump                 iftrue               iffalse              ifeq                 ifne                 iflt                 ifle                 ifgt                

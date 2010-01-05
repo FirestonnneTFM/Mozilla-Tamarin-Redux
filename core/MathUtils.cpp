@@ -995,8 +995,8 @@ namespace avmplus
 		#if 0 // ifdef WIN32
 		// On Windows, set the FPU control word to round
 		// down for the rest of this operation.
-		volatile uint16 oldcw;
-		volatile uint16 newcw;
+		volatile uint16_t oldcw;
+		volatile uint16_t newcw;
 		_asm fnstcw [oldcw];
 		_asm mov ax,[oldcw];
 		_asm or ax,0xc3f;
