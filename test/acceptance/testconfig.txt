@@ -146,29 +146,6 @@ ecma3/String/split_504567:'babab',   .*   , expectedfail, bug https://bugzilla.m
 ####################
 as3/Vector/concat:concat multiple int vectors, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=504525
 
-####################
-# -Djitordie
-####################
-# The following testcases are not able to be jitted
-# https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-as3/Definitions/Function/functionReturnTypes, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-as3/ShellClasses/Domain, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/Array/e15_4_4_4_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/Expressions/e11_2_1_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/Expressions/e11_4_6, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/Expressions/e11_4_7, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/GlobalObject/e15_1_2_3_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/GlobalObject/e15_1_2_3_2, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/LexicalConventions/e7_7_3, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/LexicalConventions/e7_7_4, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/RegExp/eperlstress_001, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/RegExp/eperlstress_002, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/String/e15_5_3_2_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/String/e15_5_3_2_2, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/TypeConversion/e9_3_1_1, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/Unicode/uc_006, .*-Djitordie , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-regress/vector_domain_bug, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
-ecma3/String/e15_5_4_4_4_rt, .*-Djitordie , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=493949
 
 ####################
 # Windows Mobile
