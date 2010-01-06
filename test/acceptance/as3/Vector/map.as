@@ -129,6 +129,8 @@ AddTestCase(   "map vector of int",
                "1,4,9,16",
                v1.map(mapper4).toString());
 
+/*
+ *  Fix reverted until it can be versioned.
 // From https://bugzilla.mozilla.org/show_bug.cgi?id=507501
 function convertToUpper(item:String, index:int, v:Vector.<String>):String {
     return item.toUpperCase();
@@ -145,6 +147,7 @@ AddTestCase("Vector map to uppercase",
 
 AddTestCase("Type check", true, vec is Vector.<String>);
 AddTestCase("Type check returned map value", true, vec.map(convertToUpper) is Vector.<String>);
+*/
 
 // Custom vector type
 class TestClass {
