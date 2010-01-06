@@ -1455,9 +1455,19 @@ namespace MMgc
 					newRegionAddr = (char*) VMPI_reserveMemoryRegion(region->reserveTop,
 												  (size - commitAvail)*kBlockSize);
 					newRegionSize = size - commitAvail;
+
+					// check for contiguity
+					if(newRegionAddr && newRegionAddr != region->reserveTop) {
+						// we can't use this space since we need commitAvail from prev region to meet
+						// the size requested, toss it
+						ReleaseMemory(newRegionAddr,  newRegionSize*kBlockSize);
+						newRegionAddr = NULL;
+						newRegionSize = 0;
+					}
 				}
-				
-				if (newRegionAddr != NULL) {
+
+				if (newRegionAddr == region->reserveTop)  // we'll use the region below as a separate region if its not contiguous
+				{
 					// We were able to reserve some space.
 					
 					// Commit available space from the existing region.
@@ -1509,7 +1519,7 @@ namespace MMgc
 			
 			// - Go for the default reservation size unless the requested
 			//   size is bigger.
-			if (size < defaultReserve) {
+			if (newRegionAddr == NULL && size < defaultReserve) {
 				newRegionAddr = (char*) VMPI_reserveMemoryRegion(NULL,
 												  defaultReserve*kBlockSize);
 				newRegionSize = defaultReserve;
