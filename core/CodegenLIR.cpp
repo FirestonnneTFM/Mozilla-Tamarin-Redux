@@ -232,7 +232,7 @@ namespace avmplus
         { 2, LIR_ldzs },
         { 4, LIR_ld },
         { 4, LIR_ld32f },
-        { 8, LIR_ldq }
+        { 8, LIR_ldf }
 #else
         { 1, FUNCTIONID(mop_lix8) },
         { 2, FUNCTIONID(mop_lix16) },
@@ -250,7 +250,7 @@ namespace avmplus
         { 2, LIR_sts },
         { 4, LIR_sti },
         { 4, LIR_st32f },
-        { 8, LIR_stqi }
+        { 8, LIR_stfi }
 #else
         { 1, FUNCTIONID(mop_si8) },
         { 2, FUNCTIONID(mop_si16) },
@@ -528,7 +528,7 @@ namespace avmplus
         Value &v = state->value(i);
         switch (bt(v.traits)) {
         case BUILTIN_number:
-            return v.ins = lirout->insLoad(LIR_ldq, vars, i*8);
+            return v.ins = lirout->insLoad(LIR_ldf, vars, i*8);
         case BUILTIN_boolean:
         case BUILTIN_int:
         case BUILTIN_uint:
@@ -549,7 +549,7 @@ namespace avmplus
     LIns* CodegenLIR::localGetq(int i) {
         Value& v = state->value(i);
         NanoAssert(v.traits == NUMBER_TYPE);
-        LIns *r = v.ins = lirout->insLoad(LIR_ldq, vars, i*8);
+        LIns *r = v.ins = lirout->insLoad(LIR_ldf, vars, i*8);
         NanoAssert(r->isQuad());
         return r;
     }
@@ -816,18 +816,6 @@ namespace avmplus
             return out->ins0(op);
         }
 
-        LIns *insParam(int32_t i, int32_t kind) {
-            return out->insParam(i, kind);
-        }
-
-        LIns *insImm(int32_t i) {
-            return out->insImm(i);
-        }
-
-        LIns *insImmq(uint64_t i) {
-            return out->insImmq(i);
-        }
-
         LIns *ins1(LOpcode op, LIns *a) {
             switch (op) {
                 case LIR_fneg:
@@ -927,9 +915,14 @@ namespace avmplus
         LIns *insLoad(LOpcode op, LIns *base, int32_t disp) {
             switch (op) {
                 case LIR_ld:
-                case LIR_ldq:
                 case LIR_ldc:
+                case LIR_ldf:
+                case LIR_ldfc:
+#ifdef AVMPLUS_64BIT
+                // should only use these opcodes in 64-bit builds
+                case LIR_ldq:
                 case LIR_ldqc:
+#endif
 #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
                 case LIR_ldzb:
                 case LIR_ldzs:
@@ -1195,6 +1188,10 @@ namespace avmplus
                         return out->ins2(f64arith_to_i32arith(op), a, b);
                 }
                 else if (op == LIR_quad) {
+#ifndef AVMPLUS_64BIT
+                    // should only use this opcode in 64-bit builds
+                    AvmAssert(0);
+#endif
                     // const fold
                     return insImm(AvmCore::integer_d(v->imm64f()));
                 }
@@ -1710,7 +1707,7 @@ namespace avmplus
         Traits* type = ms->paramTraits(i);
         switch (bt(type)) {
         case BUILTIN_number:
-            localSet(i, loadIns(LIR_ldqc, offset, apArg),type);
+            localSet(i, loadIns(LIR_ldfc, offset, apArg),type);
             offset += sizeof(double);
             break;
         case BUILTIN_int:
@@ -2819,8 +2816,7 @@ namespace avmplus
     void CodegenLIR::emitDoubleConst(FrameState* state, int index, double* pd)
     {
         this->state = state;
-        uint64_t *pquad = (uint64_t*) pd;
-        localSet(index, lirout->insImmq(*pquad), NUMBER_TYPE);
+        localSet(index, lirout->insImmf(*pd), NUMBER_TYPE);
     }
 
     void CodegenLIR::writeCoerce(FrameState* state, uint32_t loc, Traits* result)
@@ -3199,7 +3195,7 @@ namespace avmplus
         // get
         LOpcode op;
         switch (bt(slotType)) {
-        case BUILTIN_number:    op = LIR_ldq;   break;
+        case BUILTIN_number:    op = LIR_ldf;   break;
         case BUILTIN_int:
         case BUILTIN_uint:
         case BUILTIN_boolean:   op = LIR_ld;    break;
@@ -5464,17 +5460,28 @@ namespace avmplus
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_sti:
                 case LIR_stqi:
+#ifndef AVMPLUS_64BIT
+                    // should only use this opcode in 64-bit builds
+                    AvmAssert(0);
+#endif
+                case LIR_sti:
+                case LIR_stfi:
                     if (i->oprnd2() == vars) {
                         int d = i->disp() >> 3;
                         livein.clear(d);
                     }
                     break;
-                case LIR_ld:
-                case LIR_ldc:
                 case LIR_ldq:
                 case LIR_ldqc:
+#ifndef AVMPLUS_64BIT
+                    // should only use these opcodes in 64-bit builds
+                    AvmAssert(0);
+#endif
+                case LIR_ld:
+                case LIR_ldc:
+                case LIR_ldf:
+                case LIR_ldfc:
                     if (i->oprnd1() == vars) {
                         int d = i->disp() >> 3;
                         livein.set(d);
@@ -5566,8 +5573,13 @@ namespace avmplus
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_sti:
                 case LIR_stqi:
+#ifndef AVMPLUS_64BIT
+                    // should only use this opcode in 64-bit builds
+                    AvmAssert(0);
+#endif
+                case LIR_sti:
+                case LIR_stfi:
                     if (i->oprnd2() == vars) {
                         int d = i->disp() >> 3;
                         if (!livein.get(d)) {
@@ -5582,10 +5594,16 @@ namespace avmplus
                         }
                     }
                     break;
-                case LIR_ld:
-                case LIR_ldc:
                 case LIR_ldq:
                 case LIR_ldqc:
+#ifndef AVMPLUS_64BIT
+                    // should only use these opcodes in 64-bit builds
+                    AvmAssert(0);
+#endif
+                case LIR_ld:
+                case LIR_ldc:
+                case LIR_ldf:
+                case LIR_ldfc:
                     if (i->oprnd1() == vars) {
                         int d = i->disp() >> 3;
                         livein.set(d);
