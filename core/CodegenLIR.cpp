@@ -3299,10 +3299,10 @@ namespace avmplus
         if (ctraits) {
             itraits = ctraits->itraits;
             if (itraits && !itraits->hasCustomConstruct) {
-                Toplevel* toplevel = state->verifier->getToplevel(this);
-                itraits->resolveSignatures(toplevel);
-                AvmAssert(itraits->init->isResolved());
-                if (itraits->init->getMethodSignature()->argcOk(argc)) {
+                // Cannot resolve signatures now because that could cause a premature verification failure,
+                // one that should occur in the class's script-init.
+                // If it's already resolved then we're good to go.
+                if (itraits->init && itraits->init->isResolved() && itraits->init->getMethodSignature()->argcOk(argc)) {
                     state->verifier->emitCheckNull(ctor_index);
                     state->verifier->emitCoerceArgs(itraits->init, argc, true);
                     emitCall(state, OP_construct, 0, argc, itraits);
