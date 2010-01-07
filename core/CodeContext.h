@@ -40,32 +40,35 @@
 
 namespace avmplus
 {
-	// CodeContext is used to track which security context we are in.
-	// When an AS3 method is called, the AS3 method will ensure that core->codeContext() will return its context.
-	class CodeContext : public MMgc::GCObject
-	{
-	public:		
-		virtual ~CodeContext() {}
+    // CodeContext is used to track which security context we are in.
+    // When an AS3 method is called, the AS3 method will ensure that core->codeContext() will return its context.
+    class CodeContext : public MMgc::GCObject
+    {
+    public:     
+        virtual ~CodeContext() {}
 #ifdef DEBUGGER
-		virtual DomainEnv* domainEnv() const = 0;
+        virtual DomainEnv* domainEnv() const = 0;
 #endif
-	};
+    };
 
-	class EnterCodeContext
-	{
-	public:
-		inline explicit EnterCodeContext(AvmCore* core, CodeContext* new_cc) : m_core(core)
-		{
-			m_frame.enter(m_core, new_cc);
-		}
-		inline ~EnterCodeContext()
-		{
-			m_frame.exit(m_core);
-		}
-	private:
-		AvmCore* const m_core;
-		MethodFrame m_frame;
-	};
+    class EnterCodeContext
+    {
+    public:
+        inline explicit EnterCodeContext(AvmCore* core, CodeContext* new_cc) : m_core(core)
+        {
+            m_frame.enter(m_core, new_cc);
+            // fix for https://bugzilla.mozilla.org/show_bug.cgi?id=537980
+            // ensure that dxns has a suitable default value for artifical MethodFrames 
+            m_frame.setDxns(m_core->publicNamespace);
+        }
+        inline ~EnterCodeContext()
+        {
+            m_frame.exit(m_core);
+        }
+    private:
+        AvmCore* const m_core;
+        MethodFrame m_frame;
+    };
 }
 
 #endif /* __avmplus_CodeContext__ */
