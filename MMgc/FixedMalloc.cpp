@@ -138,7 +138,10 @@ namespace MMgc
 		totalAskSizeLargeAllocs = 0;
 	#endif
 	#ifdef _DEBUG
+	#ifndef AVMPLUS_SAMPLER
 		largeObjects = NULL;
+		VMPI_lockInit(&m_largeObjectLock);
+	#endif
 	#endif
 
 		// Create all the allocators up front (not lazy)
@@ -160,6 +163,13 @@ namespace MMgc
 		for (int i=0; i<kNumSizeClasses; i++) {
 			m_allocs[i].Destroy();
 		}		
+
+	#ifdef _DEBUG
+	#ifndef AVMPLUS_SAMPLER
+		VMPI_lockDestroy(&m_largeObjectLock);
+	#endif
+	#endif
+
 		FixedMalloc::instance = NULL;
 	}
 	
@@ -320,9 +330,12 @@ namespace MMgc
 		if (m_heap->SafeSize(item) != (size_t)-1)
 			return;
 #else
-		for ( LargeObject* lo=largeObjects; lo != NULL ; lo=lo->next)
-			if (lo->item == item)
-				return;
+		{
+			MMGC_LOCK(m_largeObjectLock);
+			for ( LargeObject* lo=largeObjects; lo != NULL ; lo=lo->next)
+				if (lo->item == item)
+					return;
+		}
 #endif
 		
 		GCAssertMsg(false, "Trying to delete an object with FixedMalloc::Free that was not allocated with FixedMalloc::Alloc\n");
@@ -331,6 +344,7 @@ namespace MMgc
 #ifndef AVMPLUS_SAMPLER
 	void FixedMalloc::AddToLargeObjectTracker(const void* item)
 	{
+		MMGC_LOCK(m_largeObjectLock);
 		LargeObject* lo = (LargeObject*)Alloc(sizeof(LargeObject));
 		lo->item = item;
 		lo->next = largeObjects;
@@ -339,6 +353,7 @@ namespace MMgc
 	
 	void FixedMalloc::RemoveFromLargeObjectTracker(const void* item)
 	{
+		MMGC_LOCK(m_largeObjectLock);
 		LargeObject *lo, *prev;
 		for ( prev=NULL, lo=largeObjects ; lo != NULL ; prev=lo, lo=lo->next ) {
 			if (lo->item == item) {
