@@ -116,7 +116,7 @@ namespace nanojit
 
     public:
         AR();
-        
+
         uint32_t stackSlotsNeeded() const;
 
         void clear();
@@ -145,7 +145,7 @@ namespace nanojit
 
     inline AR::AR()
     {
-         _entries[0] = NULL; 
+         _entries[0] = NULL;
          clear();
     }
 
@@ -226,8 +226,6 @@ namespace nanojit
         void add(LIns *label, NIns *addr, RegAlloc &regs);
         LabelState *get(LIns *);
     };
-
-    typedef SeqBuilder<char*> StringList;
 
     /** map tracking the register allocation state at each bailout point
      *  (represented by SideExit*) in a trace fragment. */
@@ -330,7 +328,7 @@ namespace nanojit
 
             Register    getBaseReg(LIns *i, int &d, RegisterMask allow);
 #if NJ_USES_QUAD_CONSTANTS
-            const uint64_t* 
+            const uint64_t*
                         findQuadConstant(uint64_t q);
 #endif
             int         findMemFor(LIns* i);
@@ -362,7 +360,7 @@ namespace nanojit
             NInsMap             _patches;
             LabelStateMap       _labels;
         #if NJ_USES_QUAD_CONSTANTS
-            QuadConstantMap     _quadConstants; 
+            QuadConstantMap     _quadConstants;
         #endif
 
             // We generate code into two places:  normal code chunks, and exit
