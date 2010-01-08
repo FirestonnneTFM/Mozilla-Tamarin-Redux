@@ -164,6 +164,11 @@ namespace MMgc
 #endif
 		
 #ifdef _DEBUG
+		// If this returns then item was definitely allocated by an allocator
+		// owned by this FixedMalloc.
+		void EnsureFixedMallocMemory(const void* item);
+		
+#ifndef AVMPLUS_SAMPLER
 		// For debugging we track live large objects in this list.  If there are a lot
 		// of large objects then a list may slow down debug builds too much; in that
 		// case we can move to a tree or similar structure.  (It's useful to avoid using
@@ -174,21 +179,16 @@ namespace MMgc
 			LargeObject* next;		// Next object
 		};
 		LargeObject *largeObjects;	// Initially NULL 
-#endif
 		
-#ifdef _DEBUG
-		// If this returns then item was definitely allocated by an allocator
-		// owned by this FixedMalloc.
-		void EnsureFixedMallocMemory(const void* item);
-		
-#ifndef AVMPLUS_SAMPLER
+		vmpi_spin_lock_t m_largeObjectLock;
+
 		// Track large object
 		void AddToLargeObjectTracker(const void* item);
 		
 		// Untrack large object
 		void RemoveFromLargeObjectTracker(const void* item);
-#endif
-#endif
+#endif // !AVMPLUS_SAMPLER
+#endif // _DEBUG
 		
 		// @return a thread-safe allocator for objects of the given size.
 		FixedAllocSafe* FindSizeClass(size_t size);
