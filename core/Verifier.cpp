@@ -424,6 +424,7 @@ namespace avmplus
 					
 					if (pc == code_pos + handler->target)
 					{
+						// FIXME: bug 538639: At the top of a catch block, we generate coerce when an unbox is all that is needed
 						emitCoerce(handler->traits, sp);
 					}
 				}
