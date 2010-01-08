@@ -508,6 +508,16 @@ namespace nanojit
         return out->ins1(v, i);
     }
 
+    inline double do_join(int32_t c1, int32_t c2)
+    {
+        union {
+            double d;
+            uint64_t u64;
+        } u;
+        u.u64 = uint32_t(c1) | uint64_t(c2)<<32;
+        return u.d;
+    }
+
     LIns* ExprFilter::ins2(LOpcode v, LIns* oprnd1, LIns* oprnd2)
     {
         NanoAssert(oprnd1 && oprnd2);
@@ -542,14 +552,8 @@ namespace nanojit
             int32_t r;
 
             switch (v) {
-            case LIR_qjoin: {
-                union {
-                    double d;
-                    uint64_t u64;
-                } u;
-                u.u64 = c1 | uint64_t(c2)<<32;
-                return insImmf(u.d);
-            }
+            case LIR_qjoin: 
+                return insImmf(do_join(c1, c2));
             case LIR_eq:
                 return insImm(c1 == c2);
             case LIR_ov:
