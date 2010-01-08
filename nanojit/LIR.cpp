@@ -75,50 +75,26 @@ namespace nanojit
 
     // implementation
 #ifdef NJ_VERBOSE
-    /* A listing filter for LIR, going through backwards.  It merely
-       passes its input to its output, but notes it down too.  When
-       destructed, prints out what went through.  Is intended to be
-       used to print arbitrary intermediate transformation stages of
-       LIR. */
-    class ReverseLister : public LirFilter
+    void ReverseLister::finish()
     {
-        Allocator&   _alloc;
-        LirNameMap*  _names;
-        const char*  _title;
-        StringList   _strs;
-        LogControl*  _logc;
-    public:
-        ReverseLister(LirFilter* in, Allocator& alloc,
-                      LirNameMap* names, LogControl* logc, const char* title)
-            : LirFilter(in)
-            , _alloc(alloc)
-            , _names(names)
-            , _title(title)
-            , _strs(alloc)
-            , _logc(logc)
-        { }
+        _logc->printf("\n");
+        _logc->printf("=== BEGIN %s ===\n", _title);
+        int j = 0;
+        for (Seq<char*>* p = _strs.get(); p != NULL; p = p->tail)
+            _logc->printf("  %02d: %s\n", j++, p->head);
+        _logc->printf("=== END %s ===\n", _title);
+        _logc->printf("\n");
+    }
 
-        void finish()
-        {
-            _logc->printf("\n");
-            _logc->printf("=== BEGIN %s ===\n", _title);
-            int j = 0;
-            for (Seq<char*>* p = _strs.get(); p != NULL; p = p->tail)
-                _logc->printf("  %02d: %s\n", j++, p->head);
-            _logc->printf("=== END %s ===\n", _title);
-            _logc->printf("\n");
-        }
-
-        LInsp read()
-        {
-            LInsp i = in->read();
-            const char* str = _names->formatIns(i);
-            char* cpy = new (_alloc) char[strlen(str)+1];
-            VMPI_strcpy(cpy, str);
-            _strs.insert(cpy);
-            return i;
-        }
-    };
+    LInsp ReverseLister::read()
+    {
+        LInsp i = in->read();
+        const char* str = _names->formatIns(i);
+        char* cpy = new (_alloc) char[strlen(str)+1];
+        VMPI_strcpy(cpy, str);
+        _strs.insert(cpy);
+        return i;
+    }
 #endif
 
 #ifdef NJ_PROFILE
@@ -532,6 +508,16 @@ namespace nanojit
         return out->ins1(v, i);
     }
 
+    inline double do_join(int32_t c1, int32_t c2)
+    {
+        union {
+            double d;
+            uint64_t u64;
+        } u;
+        u.u64 = uint32_t(c1) | uint64_t(c2)<<32;
+        return u.d;
+    }
+
     LIns* ExprFilter::ins2(LOpcode v, LIns* oprnd1, LIns* oprnd2)
     {
         NanoAssert(oprnd1 && oprnd2);
@@ -564,12 +550,10 @@ namespace nanojit
             int32_t c2 = oprnd2->imm32();
             double d;
             int32_t r;
-            uint64_t q;
 
             switch (v) {
-            case LIR_qjoin:
-                q = c1 | uint64_t(c2)<<32;
-                return insImmq(q);
+            case LIR_qjoin: 
+                return insImmf(do_join(c1, c2));
             case LIR_eq:
                 return insImm(c1 == c2);
             case LIR_ov:
@@ -891,7 +875,7 @@ namespace nanojit
         case LTy_I32:   op = LIR_sti;   break;
         case LTy_I64:   op = LIR_stqi;  break;
         case LTy_F64:   op = LIR_stfi;  break;
-        case LTy_Void:  NanoAssert(0);  break; 
+        case LTy_Void:  NanoAssert(0);  break;
         default:        NanoAssert(0);  break;
         }
         return insStore(op, value, base, d);
@@ -1465,18 +1449,16 @@ namespace nanojit
      * if showLiveRefs == true, also print the set of live expressions next to
      * each instruction
      */
-    void live(Allocator& alloc, Fragment *frag, LogControl *logc)
+    void live(LirFilter* in, Allocator& alloc, Fragment *frag, LogControl *logc)
     {
         // traverse backwards to find live exprs and a few other stats.
 
         LiveTable live(alloc);
         uint32_t exits = 0;
-        LirReader br(frag->lastIns);
-        StackFilter sf(&br, alloc, frag->lirbuf, frag->lirbuf->sp, frag->lirbuf->rp);
         int total = 0;
         if (frag->lirbuf->state)
-            live.add(frag->lirbuf->state, sf.pos());
-        for (LInsp ins = sf.read(); !ins->isop(LIR_start); ins = sf.read())
+            live.add(frag->lirbuf->state, in->pos());
+        for (LInsp ins = in->read(); !ins->isop(LIR_start); ins = in->read())
         {
             total++;
 
@@ -1559,6 +1541,7 @@ namespace nanojit
                 case LIR_stfi:
                 case LIR_stb:
                 case LIR_sts:
+                case LIR_st32f:
                 case LIR_eq:
                 case LIR_lt:
                 case LIR_gt:
@@ -2166,7 +2149,9 @@ namespace nanojit
             logc->printf("\n");
             logc->printf("=== Results of liveness analysis:\n");
             logc->printf("===\n");
-            live(alloc, frag, logc);
+            LirReader br(frag->lastIns);
+            StackFilter sf(&br, alloc, frag->lirbuf, frag->lirbuf->sp, frag->lirbuf->rp);
+            live(&sf, alloc, frag, logc);
         })
 
         /* Set up the generic text output cache for the assembler */
