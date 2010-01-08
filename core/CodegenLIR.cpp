@@ -5722,7 +5722,8 @@ namespace avmplus
         CodeMgr *mgr = pool->codeMgr;
         verbose_only(if (pool->isVerbose(VB_jit)) {
             Allocator live_alloc;
-            nanojit::live(live_alloc, frag, &mgr->log);
+            LirReader in(frag->lastIns);
+            nanojit::live(&in, live_alloc, frag, &mgr->log);
         })
 
         Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log);
@@ -6224,7 +6225,8 @@ namespace avmplus
 
         verbose_only(if (verbose()) {
             Allocator live_alloc;
-            nanojit::live(live_alloc, frag, &codeMgr->log);
+            LirReader in(frag->lastIns);
+            nanojit::live(&in, live_alloc, frag, &codeMgr->log);
         })
 
         Assembler *assm = new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator, *lir_alloc,
