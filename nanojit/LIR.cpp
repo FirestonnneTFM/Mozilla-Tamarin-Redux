@@ -507,7 +507,11 @@ namespace nanojit
 
         return out->ins1(v, i);
     }
-
+    
+    // This is an ugly workaround for an apparent compiler
+    // bug; in VC2008, compiling with optimization on
+    // will produce spurious errors if this code is inlined
+    // into ExprFilter::ins2(). See https://bugzilla.mozilla.org/show_bug.cgi?id=538504
     inline double do_join(int32_t c1, int32_t c2)
     {
         union {
