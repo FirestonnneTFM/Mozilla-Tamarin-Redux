@@ -143,7 +143,17 @@
 #endif
 
 #ifndef AVMFEATURE_HEAP_ALLOCA
-  #define AVMFEATURE_HEAP_ALLOCA       0
+	#if AVMSYSTEM_SYMBIAN
+		// symbian doesn't support alloca
+		#define AVMFEATURE_HEAP_ALLOCA       1
+	#elif AVMSYSTEM_WIN32 && defined(__MSVC_RUNTIME_CHECKS)
+	    // MSVC's runtime stack checking isn't smart about longjmp/setjmp,
+	    // and will get all crashy if used in the wrong way. RTC is typically
+	    // only in Debug builds though, so just fall back to heap-always for those.
+		#define AVMFEATURE_HEAP_ALLOCA       1
+	#else
+		#define AVMFEATURE_HEAP_ALLOCA       0
+	#endif
 #endif
 
 #ifndef AVMFEATURE_STATIC_FUNCTION_PTRS
