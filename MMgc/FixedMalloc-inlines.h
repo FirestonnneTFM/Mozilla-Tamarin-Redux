@@ -53,6 +53,9 @@ namespace MMgc
 	{
 		// Observe that no size overflow check is needed for small allocations;
 		// the large-object allocator performs the necessary checking in that case.
+#ifdef _DEBUG
+		m_heap->CheckForOOMAbortAllocation();
+#endif
 
 		if (size <= (size_t)kLargestAlloc) {
 			return FindSizeClass(size)->Alloc(size, flags);

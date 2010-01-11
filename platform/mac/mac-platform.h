@@ -113,6 +113,10 @@
 #include <new>
 #include <libkern/OSAtomic.h>
 
+#ifdef DEBUG
+#include <assert.h>
+#endif
+
 typedef void *maddr_ptr;
 
 #ifdef AVMPLUS_MAC_CARBON
@@ -172,33 +176,62 @@ typedef void *maddr_ptr;
 struct vmpi_spin_lock_t
 {
 	volatile OSSpinLock lock;
+#ifdef DEBUG
+    pthread_t ownerThread;
+#endif
 };
 
 REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
 	lock->lock = OS_SPINLOCK_INIT;
+#ifdef DEBUG
+	lock->ownerThread = NULL;
+#endif
 }
 
 REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
 	lock->lock = OS_SPINLOCK_INIT;
+#ifdef DEBUG
+	lock->ownerThread = NULL;
+#endif
 }
 
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t* lock)
 {
+#ifdef DEBUG
+	if(!::OSSpinLockTry((OSSpinLock*)&lock->lock)) {
+		// deadlock assert
+		assert(lock->ownerThread != pthread_self());
+		::OSSpinLockLock((OSSpinLock*)&lock->lock);
+	}
+	lock->ownerThread = pthread_self();
+#else
 	::OSSpinLockLock((OSSpinLock*)&lock->lock);
+#endif
 	return true;
 }
 
 REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t* lock)
 {
+#ifdef DEBUG
+	lock->ownerThread = NULL;
+#endif
 	::OSSpinLockUnlock((OSSpinLock*)&lock->lock);
 	return true;
 }
 
 REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock)
 {
-	return ::OSSpinLockTry((OSSpinLock*)&lock->lock);
+	if(::OSSpinLockTry((OSSpinLock*)&lock->lock))
+	{
+#ifdef DEBUG
+		assert(lock->ownerThread == NULL);
+		lock->ownerThread = pthread_self();
+#endif		
+		return true;
+	}
+	return false;
 }
 
 #endif // __avmplus_mac_platform__
