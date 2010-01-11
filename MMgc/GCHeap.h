@@ -600,7 +600,7 @@ namespace MMgc
 			use this check in places where we are doing an alloc that might
 			call GCHeap::Alloc
 		 */
-		bool CheckForOOMAbortAllocation();
+		void CheckForOOMAbortAllocation();
 #endif
 
 	private:
