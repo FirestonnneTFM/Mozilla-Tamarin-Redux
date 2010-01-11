@@ -234,6 +234,10 @@ namespace MMgc
 	void* GCAlloc::Alloc(int flags)
 #endif
 	{
+#ifdef DEBUG
+		m_gc->heap->CheckForOOMAbortAllocation();
+#endif
+
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
 		// Allocation must be signalled before we allocate because no GC work must be allowed to
