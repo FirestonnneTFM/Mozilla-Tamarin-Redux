@@ -2421,7 +2421,7 @@ namespace MMgc
 	}
 
 #ifdef DEBUG
-	bool GCHeap::CheckForOOMAbortAllocation()
+	void GCHeap::CheckForOOMAbortAllocation()
 	{
 		if(statusNotificationBeingSent() && status == kMemAbort)
 			GCAssertMsg(false, "Its not legal to perform allocations during OOM kMemAbort callback");
