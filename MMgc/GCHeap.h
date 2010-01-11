@@ -595,6 +595,14 @@ namespace MMgc
 
 		bool IsAddressInHeap(void *);
 
+#ifdef DEBUG
+		/** illegal to perform an allocation during OOM status notifications
+			use this check in places where we are doing an alloc that might
+			call GCHeap::Alloc
+		 */
+		bool CheckForOOMAbortAllocation();
+#endif
+
 	private:
 
 		GCHeap(const GCHeapConfig &config);
@@ -781,6 +789,8 @@ namespace MMgc
  		void Enter(EnterFrame *frame);
  		void Leave();
 
+		bool statusNotificationBeingSent();
+
 		bool statusNotNormalOrAbort()
 		{
 			return status != kMemNormal && status != kMemAbort;
@@ -822,6 +832,7 @@ namespace MMgc
 		size_t codeMemory;
 		size_t externalPressure;
 		vmpi_spin_lock_t m_spinlock;
+		vmpi_thread_t m_notificationThread;
 		GCHeapConfig config;
 		GCManager gcManager;		
  		BasicList<OOMCallback*> callbacks;
@@ -830,7 +841,6 @@ namespace MMgc
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
 		MemoryStatus status;
-		bool statusNotificationBeingSent;
  		uint32_t enterCount;
  		vmpi_thread_t const primordialThread;
 
@@ -858,9 +868,14 @@ namespace MMgc
 
 	REALLY_INLINE size_t GCHeap::Size(const void *item)
 	{
-		MMGC_LOCK(m_spinlock);
+		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 		HeapBlock *block = AddrToBlock(item);
 		return block->size;
+	}
+
+	REALLY_INLINE bool GCHeap::statusNotificationBeingSent()
+	{
+		return m_notificationThread != NULL;
 	}
 }
 

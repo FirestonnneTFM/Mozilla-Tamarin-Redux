@@ -55,6 +55,9 @@ namespace MMgc
 	void* GCLargeAlloc::Alloc(size_t requestSize, int flags)
 #endif
 	{
+#ifdef DEBUG
+		m_gc->heap->CheckForOOMAbortAllocation();
+#endif
 		GCHeap::CheckForAllocSizeOverflow(requestSize, sizeof(LargeBlock)+GCHeap::kBlockSize);
 
 		int blocks = (int)((requestSize+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize);

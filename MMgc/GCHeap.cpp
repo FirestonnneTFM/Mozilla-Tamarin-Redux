@@ -153,9 +153,9 @@ namespace MMgc
 		  numAlloc(0),
 		  codeMemory(0),
 		  externalPressure(0),
+		  m_notificationThread(NULL),
 		  config(c),
  		  status(kMemNormal),
-		  statusNotificationBeingSent(false),
 		  enterCount(0),
 		  primordialThread(VMPI_currentThread()),
 	#ifdef MMGC_MEMORY_PROFILER
@@ -287,20 +287,22 @@ namespace MMgc
 
 		char *baseAddr = 0;
 		bool zero = (flags & kZero) != 0;
-		// nested block to keep memset/memory commit out of critical section
+		bool canFail = (flags & kCanFail) != 0;
+
 		{
-			MMGC_LOCK(m_spinlock);
-
+			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+			
 			HeapBlock *block = AllocBlock(size, zero);
-
+			
 			if(!block) {
-				if((flags & kExpand) == 0)
+				if((flags & kExpand) == 0) {
 					return NULL;
-
-				ExpandHeap(size, (flags & kCanFail) != 0);
+				}
+				
+				ExpandHeap(size, canFail);
 				block = AllocBlock(size, zero);
 				if(!block) {
-					if (!(flags & kCanFail))
+					if (!canFail)
 					{
 						GCAssertMsg(0, "Internal error: ExpandHeap should have aborted if it can't satisfy the request");
 						SignalInconsistentHeapState("Failed to abort");
@@ -309,7 +311,7 @@ namespace MMgc
 					return NULL;
 				}
 			}
-
+			
 			GCAssert(block->size == size);
 			
 			numAlloc += size;
@@ -328,28 +330,32 @@ namespace MMgc
 				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
 #endif
-			if((flags & kCanFail) == 0)
+			
+			if(canFail)
 				CheckForSoftLimitExceeded(size);
+			
 		}
-
+	
 		// Zero out the memory, if requested to do so
 		if (zero) {
 			VMPI_memset(baseAddr, 0, size * kBlockSize);
 		}
-
+		
 		// fail the allocation if we hit soft limit and canFail
-		if(status == kMemSoftLimit && (flags & kCanFail) != 0) {
+		if(status == kMemSoftLimit && canFail) {
 			FreeInternal(baseAddr, true);
 			return NULL;
 		}				   
-		
+
 		return baseAddr;
 	}
 
 	void GCHeap::FreeInternal(const void *item, bool profile)
 	{
 		(void)profile;
-		MMGC_LOCK(m_spinlock);
+
+		// recursive free calls are allowed from StatusChangeNotify
+		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 
 		HeapBlock *block = AddrToBlock(item);
 		GCAssertMsg(block != NULL, "Bogus item");
@@ -398,7 +404,7 @@ namespace MMgc
 		if(decommitSize < (size_t)kMinHeapIncrement)
 			return;
 
-		MMGC_LOCK(m_spinlock);
+		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 
 	restart:
 
@@ -545,13 +551,8 @@ namespace MMgc
 		if (!HardLimitExceeded())
 			return;
 		
-		// if we're already failing then fail hard
-		if (status == kMemHardLimit)
-			Abort();
-			
-		// bail on double faults
-		if(statusNotificationBeingSent)
-			Abort();
+		if(statusNotificationBeingSent())
+			return;
 				
 		// invoke callbacks to free up memory
 		StatusChangeNotify(kMemHardLimit);
@@ -569,13 +570,17 @@ namespace MMgc
 				   unsigned(GetUsedHeapSize() + externalBlocks), 
 				   unsigned(GetTotalHeapSize() + externalBlocks),
 				   unsigned(externalBlocks));
+
+		if(statusNotificationBeingSent())
+			return;
+
 		StatusChangeNotify(kMemSoftLimit);
 	}
 	
 	// m_spinlock is held
 	void GCHeap::CheckForStatusReturnToNormal()
 	{
-		if(!statusNotificationBeingSent && statusNotNormalOrAbort())
+		if(!statusNotificationBeingSent() && statusNotNormalOrAbort())
 		{
 			size_t externalBlocks = externalPressure / kBlockSize;
 			size_t total = GetTotalHeapSize() + externalBlocks;
@@ -875,7 +880,7 @@ namespace MMgc
 	
 	size_t GCHeap::SafeSize(const void *item)
 	{
-		MMGC_LOCK(m_spinlock);
+		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 		HeapBlock *block = AddrToBlock(item);
 		if (block == NULL || block->size == 0)
 			return (size_t)-1;
@@ -1776,7 +1781,7 @@ namespace MMgc
 		(void)gotSize;
 		{
 #ifdef MMGC_MEMORY_PROFILER
-			MMGC_LOCK(m_spinlock);
+			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 			if(hasSpy) {
 				VMPI_spyCallback();
 			}
@@ -1799,7 +1804,7 @@ namespace MMgc
 		(void)item,(void)size;
 		{
 #ifdef MMGC_MEMORY_PROFILER
-			MMGC_LOCK(m_spinlock);
+			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 			if(profiler)
 				profiler->RecordDeallocation(item, size);
 #endif
@@ -1843,7 +1848,7 @@ namespace MMgc
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
 	{
 		(void)size;
-		if (attempt == 0 && !statusNotificationBeingSent)
+		if (attempt == 0 && !statusNotificationBeingSent())
 			StatusChangeNotify(kMemHardLimit);
 		else
 			Abort();
@@ -1870,7 +1875,7 @@ namespace MMgc
 	{
 		GCHeap* heap = GetGCHeap();
 		
-		MMGC_LOCK(heap->m_spinlock);
+		MMGC_LOCK_ALLOW_RECURSION(heap->m_spinlock, heap->m_notificationThread);
 		
 		heap->externalPressure += nbytes;
 
@@ -1889,7 +1894,7 @@ namespace MMgc
 	{
 		GCHeap* heap = GetGCHeap();
 		
-		MMGC_LOCK(heap->m_spinlock);
+		MMGC_LOCK_ALLOW_RECURSION(heap->m_spinlock, heap->m_notificationThread);
 		
 		heap->externalPressure -= nbytes;
 		heap->CheckForStatusReturnToNormal();
@@ -2287,17 +2292,9 @@ namespace MMgc
 	*/
 	void GCHeap::StatusChangeNotify(MemoryStatus to)
 	{
-		statusNotificationBeingSent = true;
+		m_notificationThread = VMPI_currentThread();
 		MemoryStatus oldStatus = status;
 		status = to;
-		
-		// unlock the heap so that memory operations are allowed
-
-		// this isn't right, really what we want is to allow this
-		// thread to call Free but keep other threads out, so what we
-		// really want is a lock operation that allows repeated same
-		// thread locks
-		VMPI_lockRelease(&m_spinlock);
 		
 		BasicListIterator<OOMCallback*> iter(callbacks);
 		OOMCallback *cb = NULL;
@@ -2310,9 +2307,7 @@ namespace MMgc
 				cb->memoryStatusChange(oldStatus, to);
 		} while(cb != NULL);
 
-		statusNotificationBeingSent = false;
-
-		VMPI_lockAcquire(&m_spinlock);
+		m_notificationThread = NULL;
 
 		CheckForStatusReturnToNormal();
 	}
@@ -2424,4 +2419,12 @@ namespace MMgc
 	{
 		heap->lastRegion = this;
 	}
+
+#ifdef DEBUG
+	bool GCHeap::CheckForOOMAbortAllocation()
+	{
+		if(statusNotificationBeingSent() && status == kMemAbort)
+			GCAssertMsg(false, "Its not legal to perform allocations during OOM kMemAbort callback");
+	}
+#endif
 }
