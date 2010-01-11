@@ -41,7 +41,6 @@
 
 namespace MMgc
 {
-
 	/**
 	 * GCAcquireSpinlock is a convenience class which acquires
 	 * the specified spinlock at construct time, then releases
@@ -84,6 +83,36 @@ namespace MMgc
 		GCAcquireSpinlock();
 		GCAcquireSpinlock(const GCAcquireSpinlock&);
 		GCAcquireSpinlock& operator=(const GCAcquireSpinlock&);
+	};
+
+	class GCAcquireSpinlockWithRecursion 
+	{
+	public:
+		REALLY_INLINE explicit GCAcquireSpinlockWithRecursion(vmpi_spin_lock_t *sl, vmpi_thread_t owner)
+			: m_spinlock(sl)
+		{
+			if(!VMPI_lockTestAndAcquire(sl)) {
+				if(VMPI_currentThread() == owner) {
+					m_spinlock = NULL;
+				} else {
+					VMPI_lockAcquire(sl);
+				}				
+			}
+		}
+
+		~GCAcquireSpinlockWithRecursion()
+		{
+			if(m_spinlock)
+				VMPI_lockRelease(m_spinlock);
+		}
+		
+	private:
+		vmpi_spin_lock_t *m_spinlock;
+
+	private: // not implemented
+		GCAcquireSpinlockWithRecursion();
+		GCAcquireSpinlockWithRecursion(const GCAcquireSpinlockWithRecursion&);
+		GCAcquireSpinlockWithRecursion& operator=(const GCAcquireSpinlockWithRecursion&);
 	};
 }
 

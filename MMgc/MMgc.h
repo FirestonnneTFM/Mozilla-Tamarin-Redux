@@ -120,9 +120,11 @@
 
 #ifdef MMGC_LOCKING
 #define MMGC_LOCK(_x) MMgc::GCAcquireSpinlock _lock(&_x)
+#define MMGC_LOCK_ALLOW_RECURSION(_x, _t) MMgc::GCAcquireSpinlockWithRecursion _lock(&_x, _t)
 #include "GCSpinLock.h"
 #else
 #define MMGC_LOCK(_x) 
+#define MMGC_LOCK_ALLOW_RECURSION(_x, _t) 
 #endif
 
 // This keeps a graph of the edges the marker finds which are printed out in Sweep
