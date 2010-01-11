@@ -344,27 +344,32 @@ namespace MMgc
 #ifndef AVMPLUS_SAMPLER
 	void FixedMalloc::AddToLargeObjectTracker(const void* item)
 	{
-		MMGC_LOCK(m_largeObjectLock);
 		LargeObject* lo = (LargeObject*)Alloc(sizeof(LargeObject));
 		lo->item = item;
+		MMGC_LOCK(m_largeObjectLock);
 		lo->next = largeObjects;
 		largeObjects = lo;
 	}
 	
 	void FixedMalloc::RemoveFromLargeObjectTracker(const void* item)
 	{
-		MMGC_LOCK(m_largeObjectLock);
-		LargeObject *lo, *prev;
-		for ( prev=NULL, lo=largeObjects ; lo != NULL ; prev=lo, lo=lo->next ) {
-			if (lo->item == item) {
-				if (prev != NULL)
-					prev->next = lo->next;
-				else
-					largeObjects = lo->next;
-				Free(lo);
-				return;
+		void *loToFree=NULL;
+		{
+			MMGC_LOCK(m_largeObjectLock);
+			LargeObject *lo, *prev;
+			for ( prev=NULL, lo=largeObjects ; lo != NULL ; prev=lo, lo=lo->next ) {
+				if (lo->item == item) {
+					if (prev != NULL)
+						prev->next = lo->next;
+					else
+						largeObjects = lo->next;
+					loToFree = lo;
+					break;
+				}
 			}
 		}
+		if(loToFree)
+			Free(loToFree);
 	}
 #endif // !AVMPLUS_SAMPLER
 #endif // _DEBUG
