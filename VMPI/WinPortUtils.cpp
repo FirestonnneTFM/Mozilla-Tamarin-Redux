@@ -312,3 +312,21 @@ const char *VMPI_getenv(const char *env)
 #endif
 	return val;
 }
+
+
+// Helper functions for VMPI_callWithRegistersSaved, kept in this file to prevent them from
+// being inlined in MMgcPortWin.cpp.
+
+void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+{
+	(void)buf;
+	volatile int temp = 0;
+	fn((void*)((uintptr_t)&temp & ~7), arg);
+}
+
+void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+{
+	(void)buf;
+	(void)fn;
+	(void)arg;
+}

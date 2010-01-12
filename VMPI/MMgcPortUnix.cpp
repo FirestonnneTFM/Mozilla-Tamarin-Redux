@@ -441,7 +441,7 @@ uintptr_t VMPI_getThreadStackBase()
 
 #endif
 
-// Defined in UnixDebugUtils.cpp to prevent them from being inlined below
+// Defined in PosixPortUtils.cpp to prevent them from being inlined below
 
 extern void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
 extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);

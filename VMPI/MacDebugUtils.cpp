@@ -52,20 +52,3 @@ void VMPI_debugBreak()
 {
 	abort();
 }
-
-// Helper functions for VMPI_callWithRegistersSaved, kept in this file to prevent them from
-// being inlined in MMgcPortMac.cpp.
-
-void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
-{
-	(void)buf;					// Keep it alive
-	volatile int temp = 0;
-	fn((void*)((uintptr_t)&temp & ~7), arg);
-}
-
-void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
-{
-	(void)buf;
-	(void)fn;
-	(void)arg;
-}
