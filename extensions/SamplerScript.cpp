@@ -809,5 +809,33 @@ namespace avmplus
 	{
 		return new (core()->gc, ivtable->getExtraSize()) StackFrameObject(ivtable, prototype);
 	}
+
+	/*static*/
+	ArrayObject* SamplerScript::getLexicalScopes(ScriptObject *, FunctionObject *function)
+	{
+#ifdef DEBUGGER
+		if(function != NULL && function->getCallMethodEnv())
+			return function->getCallMethodEnv()->getLexicalScopes();
+		else
+			return NULL;
+#else
+		(void)function;
+		return NULL;
+#endif	
+	}
+
+	/*static*/
+	Atom SamplerScript::getSavedThis(ScriptObject *, FunctionObject *method)
+	{
+#ifdef DEBUGGER
+		if(method != NULL && Traits::getBuiltinType(method->vtable->traits) == BUILTIN_methodClosure)
+			return ((MethodClosure*)method)->peek_savedThis();
+		else
+			return undefinedAtom;
+#else
+		(void)method;
+		return undefinedAtom;
+#endif
+	}		
 }
 

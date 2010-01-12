@@ -182,31 +182,33 @@ const uint32_t flash_utils_ByteArray_position_get = 201;
 const uint32_t flash_utils_ByteArray_position_set = 202;
 const uint32_t flash_utils_ByteArray_endian_get = 203;
 const uint32_t flash_utils_ByteArray_endian_set = 204;
-const uint32_t native_script_function_flash_sampler_isGetterSetter = 207;
-const uint32_t native_script_function_flash_sampler__getInvocationCount = 208;
-const uint32_t native_script_function_flash_sampler_getSampleCount = 212;
-const uint32_t native_script_function_flash_sampler_getSamples = 213;
-const uint32_t native_script_function_flash_sampler_getMemberNames = 214;
-const uint32_t native_script_function_flash_sampler_getSize = 215;
-const uint32_t native_script_function_flash_sampler__setSamplerCallback = 216;
-const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 219;
-const uint32_t native_script_function_flash_sampler_pauseSampling = 220;
-const uint32_t native_script_function_flash_sampler_stopSampling = 221;
-const uint32_t native_script_function_flash_sampler_startSampling = 222;
-const uint32_t native_script_function_flash_sampler_clearSamples = 223;
-const uint32_t flash_sampler_NewObjectSample_object_get = 230;
-const uint32_t flash_sampler_NewObjectSample_size_get = 231;
-const uint32_t flash_trace_Trace_setLevel = 237;
-const uint32_t flash_trace_Trace_getLevel = 238;
-const uint32_t flash_trace_Trace_setListener = 239;
-const uint32_t flash_trace_Trace_getListener = 240;
-const uint32_t flash_utils_Dictionary_private_init = 244;
-const uint32_t avmplus_JObject_create = 251;
-const uint32_t avmplus_JObject_createArray = 252;
-const uint32_t avmplus_JObject_toArray = 253;
-const uint32_t avmplus_JObject_constructorSignature = 254;
-const uint32_t avmplus_JObject_methodSignature = 255;
-const uint32_t avmplus_JObject_fieldSignature = 256;
+const uint32_t native_script_function_flash_sampler_getSavedThis = 207;
+const uint32_t native_script_function_flash_sampler_getLexicalScopes = 208;
+const uint32_t native_script_function_flash_sampler_isGetterSetter = 209;
+const uint32_t native_script_function_flash_sampler__getInvocationCount = 210;
+const uint32_t native_script_function_flash_sampler_getSampleCount = 214;
+const uint32_t native_script_function_flash_sampler_getSamples = 215;
+const uint32_t native_script_function_flash_sampler_getMemberNames = 216;
+const uint32_t native_script_function_flash_sampler_getSize = 217;
+const uint32_t native_script_function_flash_sampler__setSamplerCallback = 218;
+const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 221;
+const uint32_t native_script_function_flash_sampler_pauseSampling = 222;
+const uint32_t native_script_function_flash_sampler_stopSampling = 223;
+const uint32_t native_script_function_flash_sampler_startSampling = 224;
+const uint32_t native_script_function_flash_sampler_clearSamples = 225;
+const uint32_t flash_sampler_NewObjectSample_object_get = 232;
+const uint32_t flash_sampler_NewObjectSample_size_get = 233;
+const uint32_t flash_trace_Trace_setLevel = 239;
+const uint32_t flash_trace_Trace_getLevel = 240;
+const uint32_t flash_trace_Trace_setListener = 241;
+const uint32_t flash_trace_Trace_getListener = 242;
+const uint32_t flash_utils_Dictionary_private_init = 246;
+const uint32_t avmplus_JObject_create = 253;
+const uint32_t avmplus_JObject_createArray = 254;
+const uint32_t avmplus_JObject_toArray = 255;
+const uint32_t avmplus_JObject_constructorSignature = 256;
+const uint32_t avmplus_JObject_methodSignature = 257;
+const uint32_t avmplus_JObject_fieldSignature = 258;
 
 extern AvmBox shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_JObject_methodSignature_thunk  shell_toplevel_s2a_oos_rest_thunk
@@ -308,6 +310,10 @@ extern AvmBox shell_toplevel_s2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBo
 
 extern AvmBox shell_toplevel_a2a_os_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_JObject_create_thunk  shell_toplevel_a2a_os_rest_thunk
+
+extern AvmBox shell_toplevel_func_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define native_script_function_flash_sampler_getSavedThis_thunk  shell_toplevel_func_a2a_oo_thunk
+#define native_script_function_flash_sampler_getLexicalScopes_thunk  shell_toplevel_func_a2a_oo_thunk
 
 extern double shell_toplevel_func_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_flash_sampler_getSampleCount_thunk  shell_toplevel_func_d2d_o_thunk
