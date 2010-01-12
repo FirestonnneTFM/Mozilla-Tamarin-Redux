@@ -77,6 +77,9 @@ namespace avmplus
 		static double _getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32 type);
 		static bool isGetterSetter(ScriptObject* self, Atom a, QNameObject* name);
 
+		static ArrayObject* getLexicalScopes(ScriptObject* self, FunctionObject *function);
+		static Atom getSavedThis(ScriptObject* self, FunctionObject *method);		
+		
 #ifdef DEBUGGER
 	private:		
 		static ClassClosure* getType(Toplevel* toplevel, SamplerObjectType sot, const void *obj);

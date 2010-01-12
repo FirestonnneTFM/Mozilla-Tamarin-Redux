@@ -428,4 +428,21 @@ package flash.sampler
      */
     [native("SamplerScript::isGetterSetter")]
     public native function isGetterSetter(obj:Object, qname:QName):Boolean;
+
+   /**
+     * Expose the lexical scope of a Function so that activation objects and with objects and all
+     * captured scope objects can be seen by the profiler as being retained by the Function instance.
+     * @param obj A function
+     * @return An array containings all the lexical scope elements
+     */
+    [native("SamplerScript::getLexicalScopes")]
+    public native function getLexicalScopes(obj:Function):Array;
+
+   /**
+     * Returns the saved "this" from a Method closure that you normal can't see from AS.
+     * @param obj A MethodClosure instnace
+     * @return An object that is the "this" of the MethodClosure
+     */
+    [native("SamplerScript::getLexicalScopes")]
+    public native function getSavedThis(obj:Function):Object;
 };
