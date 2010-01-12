@@ -63,6 +63,15 @@
 		return;
 
 
+#define MMGC_ENTER_RETURN_NO_GUARD(_val)		\
+	MMgc::GCHeap::EnterLock();					\
+	MMgc::EnterFrame _ef;						\
+	MMgc::GCHeap::EnterRelease();				\
+	_ef.status = VMPI_setjmpNoUnwind(_ef.jmpbuf);            \
+	if(_ef.status != 0)							\
+		return _val;
+
+
 #define MMGC_ENTER_RETURN(_val)					\
 	MMgc::GCHeap::EnterLock();					\
 	if(MMgc::GCHeap::ShouldNotEnter())			\
