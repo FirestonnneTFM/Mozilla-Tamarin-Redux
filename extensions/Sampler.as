@@ -443,6 +443,6 @@ package flash.sampler
      * @param obj A MethodClosure instnace
      * @return An object that is the "this" of the MethodClosure
      */
-    [native("SamplerScript::getLexicalScopes")]
+    [native("SamplerScript::getSavedThis")]
     public native function getSavedThis(obj:Function):Object;
 };
