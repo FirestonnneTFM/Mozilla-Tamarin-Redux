@@ -170,7 +170,7 @@ namespace MMgc
 
 		// Capture the stack extent; then scan the stack and pin objects from it
 		// only if scanStack is true
-		GCWorkItem PinProgramStack(bool scanStack);
+		static void DoPinProgramStack(void* stackTop, void* arg);
 		
 		// Scan the AllocaStackSegments and pin all objects directly reachable from them.
 		void PinRootSegments();
@@ -221,7 +221,7 @@ namespace MMgc
 
 #ifdef _DEBUG
 		// Debugging code that needs to be validated: reference count validation during reaping
-		void SetupDefRefValidation(GCWorkItem& stack);
+		static void DoSetupDefRefValidation(void* stackTop, void* arg);
 		void FinishDefRefValidation();
 		void DefRefValidate(RCObject* obj);
 #endif // _DEBUG

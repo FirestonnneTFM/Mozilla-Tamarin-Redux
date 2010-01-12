@@ -336,6 +336,27 @@ void VMPI_desetupPCResolution()
 	// TODO
 }
 
+uintptr_t VMI_getThreadStackBase() const
+{
+	TThreadStackInfo info;
+	RThread mythread;
+	mythread.StackInfo(info);
+	return uintptr_t(info.iBase);
+}
+
+// Defined in SymbianDebugUtils.cpp to prevent them from being inlined below
+
+extern void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+	jmp_buf buf;
+	VMPI_setjmpNoUnwind(buf);					// Save registers
+	CallWithRegistersSaved2(fn, arg, &buf);		// Computes the stack pointer, calls fn
+	CallWithRegistersSaved3(fn, &arg, &buf);	// Probably prevents the previous call from being a tail call
+}
+
 #ifdef MMGC_MEMORY_PROFILER
 
 	bool VMPI_captureStackTrace(uintptr_t* buffer, size_t bufferSize, uint32_t framesToSkip)
