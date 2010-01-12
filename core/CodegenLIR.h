@@ -482,7 +482,6 @@ namespace avmplus
         void emitCopy(FrameState* state, int src, int dest);
         void emitGetscope(FrameState* state, int scope, int dest);
         void emitKill(FrameState* state, int i);
-        void emitBlockEnd(FrameState* state);
         void emitIntConst(FrameState* state, int index, int32_t c);
         void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
         void emitDoubleConst(FrameState* state, int index, double* pd);
