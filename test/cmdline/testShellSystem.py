@@ -50,6 +50,17 @@ def run():
     r.run_test('exec','%s testdata/exec.abc' %r.avm,expectedout=['result=0'])
     r.run_test('argv 0','%s testdata/argv.abc --' %r.avm,expectedout=['argv.length=0'])
     r.run_test('argv n','%s testdata/argv.abc -- zero one two"' %r.avm,expectedout=['argv.length=3','argv\[0\]=zero','argv\[1\]=one','argv\[2\]=two'])
+    # Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=507454
+    #      avmshell commandline args with values can't assume the values are present
+    #      Prior to fix the shell would segfault on these tests
+    r.run_test('memlimit no value','%s -memlimit' %r.avm,expectedout=['Unrecognized option -memlimit'],expectedcode=1)
+    r.run_test('load no value','%s -load' %r.avm,expectedout=['Unrecognized option -load'],expectedcode=1)
+    r.run_test('gcwork no value','%s -gcwork' %r.avm,expectedout=['Unrecognized option -gcwork'],expectedcode=1)
+    r.run_test('cache_bindings no value','%s -cache_bindings' %r.avm,expectedout=['Unrecognized option -cache_bindings'],expectedcode=1)
+    r.run_test('cache_metadata no value','%s -cache_metadata' %r.avm,expectedout=['Unrecognized option -cache_metadata'],expectedcode=1)
+    r.run_test('cache_methods no value','%s -cache_methods' %r.avm,expectedout=['Unrecognized option -cache_methods'],expectedcode=1)
+    r.run_test('Dastrace no value','%s -Dastrace' %r.avmrd,expectedout=['Unrecognized option -Dastrace'],expectedcode=1)
+    
 
 if __name__ == '__main__':
     r=RunTestLib()
