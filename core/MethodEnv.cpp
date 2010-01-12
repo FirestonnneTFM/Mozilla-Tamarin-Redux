@@ -1947,4 +1947,21 @@ namespace avmplus
 		AvmAssert((env->method->unboxThis() != 0) == u); 
 	}
 #endif
+
+#ifdef DEBUGGER
+	ArrayObject* MethodEnv::getLexicalScopes()
+	{
+		if(_scope->getSize() == 0)
+			return NULL;
+
+		ArrayObject *scopes = toplevel()->arrayClass->newArray(_scope->getSize());
+
+		for(int i=_scope->getSize()-1, j=0; i >= 0; i--, j++) {
+			Atom scope = _scope->getScope(i);
+			scopes->setUintProperty(j, scope);
+		}
+
+		return scopes;
+	}
+#endif
 }

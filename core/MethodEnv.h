@@ -265,6 +265,8 @@ namespace avmplus
 		void debugEnterInner();
 
 		void debugExit(CallStackNode* callstack);
+
+		ArrayObject *getLexicalScopes();
 #endif
 
 	private:
