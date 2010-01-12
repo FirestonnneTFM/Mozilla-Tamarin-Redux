@@ -1234,22 +1234,22 @@ namespace avmplus
             bool is = false;
             if (t == NUMBER_TYPE)
             {
-                is = val->isFloat() || val->isQuad();
+                is = val->isF64() || val->isQuad();
                 AvmAssert(is);
             }
             else if (t == INT_TYPE)
             {
-                is = !val->isQuad() && !val->isFloat();
+                is = !val->isQuad() && !val->isF64();
                 AvmAssert(is);
             }
             else if (t == UINT_TYPE)
             {
-                is = !val->isQuad() && !val->isFloat();
+                is = !val->isQuad() && !val->isF64();
                 AvmAssert(is);
             }
             else if (t == BOOLEAN_TYPE)
             {
-                is = !val->isQuad() && !val->isFloat();
+                is = !val->isQuad() && !val->isF64();
                 AvmAssert(is);
             }
             else
