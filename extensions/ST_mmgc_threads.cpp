@@ -115,6 +115,13 @@ private:
 		pthread_mutex_unlock (&pmutex);
 	}
 	
+	static void kickAndWait(void* arg)
+	{
+		ST_mmgc_threads* self = (ST_mmgc_threads*)arg;
+		self->kick();
+		self->wait();
+	}
+	
 };
 ST_mmgc_threads::ST_mmgc_threads(AvmCore* core)
     : Selftest(core, "mmgc", "threads", ST_mmgc_threads::ST_names)
@@ -155,14 +162,11 @@ public:
 };
 
 void ST_mmgc_threads::test0() {
-/*
 	   startSlave();
 	   MMGC_GCENTER(gc);
    	   RCObjectNotifier *obj = new (gc) RCObjectNotifier(&isDead);
 	   {
-          MMGC_GC_ROOT_THREAD(gc);
-		  kick();
-    	  wait();
+		  gc->CreateRootFromCurrentStack(kickAndWait, this);
        }
 
 verifyPass(result, "result", __FILE__, __LINE__);
@@ -176,7 +180,6 @@ verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 	   pthread_join(pthread, NULL);
 
 	   printf("Ignore this: %d\n", *obj->isDead);
-*/
 
 }
 void create_mmgc_threads(AvmCore* core) { new ST_mmgc_threads(core); }

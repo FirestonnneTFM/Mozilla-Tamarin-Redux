@@ -515,4 +515,20 @@ extern void VMPI_desetupPCResolution();
  */
 extern const char *VMPI_getenv(const char *name);
 
+/**
+ * Save all registers into the stack and invoke 'fn' in a non-tail fashion, passing it
+ * a conservative approximation to the true stack top (the lowest live address) as
+ * well as 'arg'.  The hot part of the stack - where the registers are saved - is
+ * volatile; once the function returns that part of the stack does not reliably contain
+ * the saved registers any longer.  The size of the hot part of the stack is
+ * platform-dependent.
+ */
+extern void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg);
+
+/* Compute the highest address of stack memory that the calling thread will use.
+ *
+ * @note MMgc assumes the stack grows down.
+ */
+extern uintptr_t VMPI_getThreadStackBase();
+
 #endif /* __avmplus_VMPI__ */

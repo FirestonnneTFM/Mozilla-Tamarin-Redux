@@ -96,7 +96,7 @@
  *   the user define the components, categories, and tests to run.
  *
  *   Each generated file is compiled conditionally on the existence of
- *   AVMPLUS_SELFTEST and also each of the names declared in %%ifdef
+ *   VMCFG_SELFTEST and also each of the names declared in %%ifdef
  *   statements.
  *
  *   The code that is generated comprises a class and its methods, all
@@ -260,7 +260,7 @@ package selftest
 		st.ifdef_text = null;
 		if (st.ifdefs.length > 0)
 			st.ifdef_text = "#if defined " + st.ifdefs.join(" && defined ");
-		s.push("#ifdef AVMPLUS_SELFTEST");
+		s.push("#ifdef VMCFG_SELFTEST");
 		if (st.ifdef_text != null)
 			s.push(st.ifdef_text);
 		s.push("namespace avmplus {");
@@ -375,7 +375,7 @@ package selftest
 		s.push("// Initialization code for generated selftest code");
 		s.push("#include \"avmshell.h\"");
 		s.push("namespace avmplus {");
-		s.push("#ifdef AVMPLUS_SELFTEST");
+		s.push("#ifdef VMCFG_SELFTEST");
 		for ( var i=0 ; i < selftests.length ; i++ ) {
 			var st = selftests[i];
 			if (st.ifdef_text != null)
@@ -394,7 +394,7 @@ package selftest
 				s.push("#endif");
 		}
 		s.push("}");
-		s.push("#endif // AVMPLUS_SELFTEST");
+		s.push("#endif // VMCFG_SELFTEST");
 		s.push("}");
 		return s.join("\n") + "\n";
     }
