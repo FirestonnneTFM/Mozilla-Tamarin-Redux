@@ -389,7 +389,7 @@ namespace MMgc
 		
 		size_t decommitSize;
 		// commit if > kDecommitThresholdPercentage is free
-		if(freeSize * 100 > heapSize * kDecommitThresholdPercentage)
+		if(FreeMemoryExceedsDecommitThreshold())
 			decommitSize = int((freeSize * 100 - heapSize * kDecommitThresholdPercentage) / 100);
 		else
 			return;
@@ -580,6 +580,9 @@ namespace MMgc
 	// m_spinlock is held
 	void GCHeap::CheckForStatusReturnToNormal()
 	{
+		// heap won't return to normal until it shrinks which requires a decommit call
+		Decommit();
+
 		if(!statusNotificationBeingSent() && statusNotNormalOrAbort())
 		{
 			size_t externalBlocks = externalPressure / kBlockSize;
@@ -2427,4 +2430,17 @@ namespace MMgc
 			GCAssertMsg(false, "Its not legal to perform allocations during OOM kMemAbort callback");
 	}
 #endif
+
+	bool GCHeap::QueryCanReturnToNormal()
+	{
+		// must be below soft limit _AND_ above decommit threshold
+		return GetUsedHeapSize() + externalPressure/kBlockSize < config.heapSoftLimit &&
+			FreeMemoryExceedsDecommitThreshold();
+
+	}
+	
+	bool GCHeap::FreeMemoryExceedsDecommitThreshold()
+	{
+		return GetFreeHeapSize() * 100 > GetTotalHeapSize() * kDecommitThresholdPercentage;
+	}
 }
