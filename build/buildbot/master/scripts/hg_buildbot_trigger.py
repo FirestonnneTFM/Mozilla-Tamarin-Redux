@@ -87,7 +87,7 @@ while True:
         revision = line[line.find(":")+1:].strip()
 
 # Write out a file that contains the output from "hg log"
-filename = "change-%s.%s" % (revision[0:revision.find(":"),PRIORITY)]
+filename = "change-%s.%s" % (revision[0:revision.find(":")],PRIORITY)
 changefile = open("/var/log/%s" % filename, "w")
 changefile.write(out)
 changefile.close()
