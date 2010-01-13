@@ -110,7 +110,8 @@ package {
 	var oi = describeType(new Foo2(2), FLASH10_FLAGS);
 	var oc = describeType(Foo2, FLASH10_FLAGS);
 	var ov = describeType(new Vector.<String>(), FLASH10_FLAGS);
-	
+    var oi2 = describeType(IBar, FLASH10_FLAGS);
+
 	var expected = []
 	var xc = 
 <type name="Foo2" base="Class" isDynamic="true" isFinal="true" isStatic="true">
@@ -236,7 +237,15 @@ package {
     <accessor name="length" access="readwrite" type="uint" declaredBy="__AS3__.vec::Vector.&lt;*&gt;"/>
 </type>
 
-
+    var xi2 =
+<type name="IBar" base="Class" isDynamic="true" isFinal="true" isStatic="true">
+  <extendsClass type="Class"/>
+  <extendsClass type="Object"/>
+  <accessor name="prototype" access="readonly" type="*" declaredBy="Class"/>
+  <factory type="IBar">
+    <method name="i0" declaredBy="IBar" returnType="*" uri="IBar"/>
+  </factory>
+</type>
 	
 	function sortXMLAttrs(x:XML):XML
 	{
@@ -294,6 +303,7 @@ package {
 	AddTestCase("sortXML(oc)", String(sortXML(xc)), String(sortXML(oc)));	// describeType doesn't return the children in a canonical order; sort for stability
 	AddTestCase("sortXML(oi)", String(sortXML(xi)), String(sortXML(oi)));	// describeType doesn't return the children in a canonical order; sort for stability
 	AddTestCase("sortXML(ov)", String(sortXML(xv)), String(sortXML(ov)));	// describeType doesn't return the children in a canonical order; sort for stability
+	AddTestCase("sortXML(oi2)", String(sortXML(xi2)), String(sortXML(oi2)));	// describeType doesn't return the children in a canonical order; sort for stability
 	AddTestCase("getQualifiedClassName(Object)", "Object", getQualifiedClassName(Object));
 	AddTestCase("getQualifiedClassName(Foo)", "Foo", getQualifiedClassName(Foo));
 	AddTestCase("getQualifiedClassName(Foo2)", "Foo2", getQualifiedClassName(Foo2));
