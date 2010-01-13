@@ -53,10 +53,11 @@ from StringIO import StringIO
 from buildbot.scripts import runner
 
 
-if len(sys.argv)==1:
+if len(sys.argv)==2:
         print("ERROR: must pass scp upload destination as parameter")
         sys.exit(1)
 DESTINATION = sys.argv[1]
+PRIORITY = sys.argv[2]
 
 
 revision=''
@@ -86,7 +87,7 @@ while True:
         revision = line[line.find(":")+1:].strip()
 
 # Write out a file that contains the output from "hg log"
-filename = "change-%s" % revision[0:revision.find(":")]
+filename = "change-%s.%s" % (revision[0:revision.find(":"),PRIORITY)]
 changefile = open("/var/log/%s" % filename, "w")
 changefile.write(out)
 changefile.close()
