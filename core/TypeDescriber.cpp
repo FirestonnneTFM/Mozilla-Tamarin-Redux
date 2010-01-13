@@ -168,7 +168,7 @@ namespace avmplus
 	void TypeDescriber::addBindings(AvmCore* core, MultinameHashtable* bindings, TraitsBindingsp tb, uint32_t flags)
 	{
 		if (!tb) return;
-		if ((flags & TypeDescriber::HIDE_OBJECT) && !tb->base) return;
+		if ((flags & TypeDescriber::HIDE_OBJECT) && !tb->base && !tb->owner->isInterface()) return;
 		addBindings(core, bindings, tb->base, flags);
 		StTraitsBindingsIterator iter(tb);
 		uint32_t curapi = core->getAPI(NULL);
