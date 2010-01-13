@@ -44,4 +44,3 @@ done
 echo "running $PYTHON $0.py --ignore-unknown-flags $args"
 
 eval "'$PYTHON' '$0.py' --ignore-unknown-flags $args"
-
