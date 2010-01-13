@@ -58,4 +58,3 @@
 cd performance;${py} ./runtests.py  --avm=${avmrd} --vmargs="-Dnoincgc" sunspider/
 
 
-
