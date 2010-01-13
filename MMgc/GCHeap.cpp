@@ -580,9 +580,6 @@ namespace MMgc
 	// m_spinlock is held
 	void GCHeap::CheckForStatusReturnToNormal()
 	{
-		// heap won't return to normal until it shrinks which requires a decommit call
-		Decommit();
-
 		if(!statusNotificationBeingSent() && statusNotNormalOrAbort())
 		{
 			size_t externalBlocks = externalPressure / kBlockSize;
