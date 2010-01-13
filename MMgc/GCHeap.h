@@ -603,6 +603,10 @@ namespace MMgc
 		void CheckForOOMAbortAllocation();
 #endif
 
+		/** Return true if enough free memory exists such that if Decommit was called
+			we would no longer be above the soft limit */
+		bool QueryCanReturnToNormal();
+
 	private:
 
 		GCHeap(const GCHeapConfig &config);
@@ -781,6 +785,7 @@ namespace MMgc
 		void CheckForStatusReturnToNormal();
 		void CheckForHardLimitExceeded();
 		void CheckForSoftLimitExceeded(size_t request);
+		bool FreeMemoryExceedsDecommitThreshold();
 
 		void ValidateHeapBlocks();
 
