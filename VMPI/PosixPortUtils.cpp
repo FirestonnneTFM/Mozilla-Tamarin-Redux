@@ -211,3 +211,23 @@ const char *VMPI_getenv(const char *name)
 {
 	return getenv(name);
 }
+
+// Helper functions for VMPI_callWithRegistersSaved, kept in this file to prevent them from
+// being inlined in MMgcPortUnix.cpp / MMgcPortMac.cpp.
+
+// Registers have been flushed; compute a stack pointer and call the user function.
+void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+{
+	(void)buf;
+	volatile int temp = 0;
+	fn((void*)((uintptr_t)&temp & ~7), arg);
+}
+
+// Do nothing - just called to prevent another call from being a tail call, and to keep some values alive
+void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+{
+	(void)buf;
+	(void)fn;
+	(void)arg;
+}
+
