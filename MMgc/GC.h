@@ -1286,6 +1286,8 @@ namespace MMgc
 		void ShouldBeInactive();
 #endif
 
+ 		bool onThread();
+
 	private:
 
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
@@ -1302,8 +1304,6 @@ namespace MMgc
 		GCAutoEnter *GetAutoEnter();
 
  		vmpi_spin_lock_t m_gcLock;
-
- 		bool onThread();
 
 		// store a handle to the thread that create the GC to ensure thread safety
 		vmpi_thread_t m_gcThread;
