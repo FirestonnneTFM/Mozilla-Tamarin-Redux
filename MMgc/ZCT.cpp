@@ -328,9 +328,8 @@ namespace MMgc
 		//
 		// For some generally difficult problems around pinning see bugzilla #506644.
 
-		GCWorkItem stack;		// "stack" needed for SetupDefRefValidation if validateDefRef is true
-		if (scanStack || gc->validateDefRef)
-			stack = PinProgramStack(scanStack);
+		if (scanStack)
+			VMPI_callWithRegistersSaved(ZCT::DoPinProgramStack, this);
 		PinRootSegments();
 		
 		// Invoke prereap on all callbacks
@@ -338,7 +337,8 @@ namespace MMgc
 			cb->prereap();
 		
 #ifdef _DEBUG
-		SetupDefRefValidation(stack);
+		if (gc->validateDefRef)
+			VMPI_callWithRegistersSaved(ZCT::DoSetupDefRefValidation, this);
 #endif
 		
 		// We perform depth-first reaping using the ZCT as a stack.
@@ -416,7 +416,8 @@ namespace MMgc
 				GCAssert(!Get(i)->IsPinned());
 			}
 		}
-		FinishDefRefValidation();
+		if (gc->validateDefRef)
+			FinishDefRefValidation();
 #endif
 		
 #ifdef MMGC_POLICY_PROFILING
@@ -529,7 +530,8 @@ namespace MMgc
 	{
 		obj->ClearZCTFlag();
 #ifdef _DEBUG
-		DefRefValidate(obj);
+		if (gc->validateDefRef)
+			DefRefValidate(obj);
 #endif
 		// Invoke prereap on all callbacks.
 		// FIXME: This is fairly wasteful and it would be good to be rid of it.
@@ -546,27 +548,25 @@ namespace MMgc
 
 #ifdef _DEBUG
 	// FIXME: document the purpose & mechanisms of DefRef validation
-	void ZCT::SetupDefRefValidation(GCWorkItem& stack)
+
+	/*static*/
+	void ZCT::DoSetupDefRefValidation(void* stackPointer, void* arg)
 	{
-		if(!gc->validateDefRef)
-			return;
-		
-		gc->Trace(stack.ptr, stack._size);
+		ZCT* zct = (ZCT*)arg;
+		GC* gc = zct->gc;
+		char* stackBase = (char*)gc->GetStackTop();
+		gc->Trace(stackPointer, uint32_t(stackBase - (char*)stackPointer));
 	}
 	
 	void ZCT::FinishDefRefValidation()
 	{
-		if(!gc->validateDefRef) 
-			return;
-
 		gc->Sweep();
 	}
 
 	void ZCT::DefRefValidate(RCObject* obj)
 	{
-		if(!gc->validateDefRef || !gc->GetMark(obj))
+		if(!gc->GetMark(obj))
 			return;
-		
 #ifdef MMGC_RC_HISTORY
 		obj->DumpHistory();
 #endif
@@ -574,13 +574,13 @@ namespace MMgc
 	}
 #endif // _DEBUG
 
-	GCWorkItem ZCT::PinProgramStack(bool scanStack)
+	/*static*/
+	void ZCT::DoPinProgramStack(void* stackPointer, void* arg)
 	{
-		GCWorkItem stack;
-		MMGC_GET_STACK_EXTENTS(gc, stack.ptr, stack._size);
-		if (scanStack)
-			PinStackObjects(stack.ptr, stack._size);
-		return stack;
+		ZCT* zct = (ZCT*)arg;
+		GC* gc = zct->gc;
+		char* stackBase = (char*)gc->GetStackTop();
+		zct->PinStackObjects(stackPointer, stackBase - (char*)stackPointer);
 	}
 	
 	void ZCT::PinRootSegments()

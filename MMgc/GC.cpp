@@ -1722,45 +1722,75 @@ namespace MMgc
 			addr += GCHeap::kBlockSize;
 		}
 	}
-	
 
 	void GC::CleanStack(bool force)
 	{
 		if(!force && (stackCleaned || rememberedStackTop == 0))
 			return;
-
 		stackCleaned = true;
-		
-		register void *stackP = 0;
-		size_t size;
+		VMPI_callWithRegistersSaved(GC::DoCleanStack, this);
+	}
 
-		MMGC_GET_STACK_EXTENTS(this, stackP, size);
-
-		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)stackEnter > (char*)stackP)) {
-			size_t amount = (char*) stackP - (char*)rememberedStackTop;
+	/*static*/
+	void GC::DoCleanStack(void* stackPointer, void* arg)
+	{
+		GC* gc = (GC*)arg; 
+		if( ((char*) stackPointer > (char*)gc->rememberedStackTop) && ((char *)gc->stackEnter > (char*)stackPointer)) {
+			size_t amount = (char*)stackPointer - (char*)gc->rememberedStackTop;
 			VMPI_cleanStack(amount);
 		}
 	}
-
-	#if defined(MMGC_PPC) && defined(__GNUC__)
-	__attribute__((noinline)) 
-	#endif
+	
 	void GC::MarkQueueAndStack(bool scanStack)
 	{
-		if(scanStack) {
-			GCWorkItem item;
-			MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
-			GCAssert(item.ptr != NULL);
+		if(scanStack)
+			VMPI_callWithRegistersSaved(GC::DoMarkFromStack, this);
+		else
+			Mark();
+	}
+	
+	/*static*/
+	void GC::DoMarkFromStack(void* stackPointer, void* arg)
+	{
+		GC* gc = (GC*)arg;
+		char* stackBase = (char*)gc->GetStackTop();		
 
-			// this is where we will clear to when CleanStack is called
-			if(rememberedStackTop < item.ptr) {
-				rememberedStackTop = item.ptr;
-			}
-			PushWorkItem(item);
-		}
-		Mark();
+		// this is where we will clear to when CleanStack is called
+		if(gc->rememberedStackTop < stackPointer)
+			gc->rememberedStackTop = stackPointer;
+
+		// Push the stack onto the mark stack and then mark synchronously until
+		// everything reachable from the stack has been marked.
+
+		GCWorkItem item(stackPointer, uint32_t(stackBase - (char*)stackPointer), false);
+		gc->PushWorkItem(item);
+		gc->Mark();
 	}
 
+	struct CreateRootFromCurrentStackArgs
+	{
+		GC* gc;
+		void (*fn)(void* arg);
+		void *arg;
+	};
+	
+	static void DoCreateRootFromCurrentStack(void* stackPointer, void* arg)
+	{
+		CreateRootFromCurrentStackArgs* context = (CreateRootFromCurrentStackArgs*)arg;
+		MMgc::GC::AutoRCRootSegment root(context->gc, stackPointer, uint32_t((char*)context->gc->GetStackTop() - (char*)stackPointer));
+		MMgc::GCAutoEnterPause mmgc_enter_pause(context->gc);
+		context->fn(context->arg);						// Should not be a tail call as those stack variables have destructors
+	}
+	
+	void GC::CreateRootFromCurrentStack(void (*fn)(void* arg), void* arg)
+	{
+		CreateRootFromCurrentStackArgs arg2;
+		arg2.gc = this;
+		arg2.fn = fn;
+		arg2.arg = arg;
+		VMPI_callWithRegistersSaved(DoCreateRootFromCurrentStack, &arg2);
+	}
+	
 	void GCRoot::init(GC* _gc, const void *_object, size_t _size)
 	{
 		gc = _gc;
@@ -1900,125 +1930,6 @@ namespace MMgc
 	}
 
 #endif
-	
-#ifdef WIN32
-
-	uintptr_t GC::GetOSStackTop() const
-	{
-		MEMORY_BASIC_INFORMATION __mib;
-		VirtualQuery(&__mib, &__mib, sizeof(MEMORY_BASIC_INFORMATION));
-		return (uintptr_t)__mib.BaseAddress + __mib.RegionSize;
-	}
-
-#elif defined(SOLARIS)
-#include <ucontext.h>
-#include <sys/frame.h>
-#include <sys/stack.h>
-
-#ifdef MMGC_SPARC
-#define FLUSHWIN() asm("ta 3"); 
-#else
-#define FLUSHWIN() 
-#endif
-	pthread_key_t stackTopKey = NULL;
-
-	uintptr_t	GC::GetOSStackTop() const
-	{
-		FLUSHWIN();
-
-		if(stackTopKey == NULL)
-			{
-				int res = pthread_key_create(&stackTopKey, NULL);
-				GCAssert(res == 0);
-			}
-
-		void *stackTop = pthread_getspecific(stackTopKey);
-		if(stackTop)
-			return (uintptr_t)stackTop;
-
-		struct frame *sp;
-		int i;
-		int *iptr;
-
-		stack_t st;
-		stack_getbounds(&st);
-		uintptr_t stack_base = (uintptr_t)st.ss_sp + st.ss_size;
-		pthread_setspecific(stackTopKey, (void*)stack_base);
-		return (uintptr_t)stack_base;
-	}
-#elif defined(AVMPLUS_UNIX) // SOLARIS
-	pthread_key_t stackTopKey = 0;
-
-	uintptr_t GC::GetOSStackTop() const
-	{
-		if(stackTopKey == 0)
-		{
-#ifdef DEBUG		  
-			int res = 
-#endif
-			  pthread_key_create(&stackTopKey, NULL);
-			GCAssert(res == 0);
-		}
-
-		void *stackTop = pthread_getspecific(stackTopKey);
-		if(stackTop)
-			return (uintptr_t)stackTop;
-
-		size_t sz;
-		void *s_base;
-		pthread_attr_t attr;
-		
-		pthread_attr_init(&attr);
-		// WARNING: stupid expensive function, hence the TLS
-		int res = pthread_getattr_np(pthread_self(),&attr);
-		GCAssert(res == 0);
-		
-		if(res)
-		{
-			// not good
-			return 0;
-		}
-
-		res = pthread_attr_getstack(&attr,&s_base,&sz);
-		GCAssert(res == 0);
-		pthread_attr_destroy(&attr);
-
-		stackTop = (void*) ((size_t)s_base + sz);
-		// stackTop has to be greater than current stack pointer
-		GCAssert(stackTop > &sz);
-		pthread_setspecific(stackTopKey, stackTop);
-		return (uintptr_t)stackTop;
-		
-	}
-#endif // AVMPLUS_UNIX
-
-#if defined(_MAC) || defined(MMGC_MAC_NO_CARBON)
-	uintptr_t GC::GetOSStackTop() const
-	{
-		return (uintptr_t)pthread_get_stackaddr_np(pthread_self());
-	}
-#endif
-
-#if defined(LINUX) && defined(MMGC_ARM) && !defined(AVMPLUS_UNIX)
-	uintptr_t GC::GetOSStackTop() const
-	{
-		void* sp;
-		pthread_attr_t attr;
-		pthread_getattr_np(pthread_self(), &attr);
-		pthread_attr_getstackaddr(&attr, &sp);
-		return (uintptr_t)sp;
-	}
-#endif
-
-#ifdef VMCFG_SYMBIAN
-	uintptr_t GC::GetOSStackTop() const
-	{
-		TThreadStackInfo info;
-		RThread mythread;
-		mythread.StackInfo(info);
-		return uintptr_t(info.iBase);
-	}
-#endif // VMCFG_SYMBIAN
 
 	void GC::gclog(const char *format, ...)
 	{

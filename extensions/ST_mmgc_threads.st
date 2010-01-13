@@ -117,6 +117,13 @@ private:
 		pthread_mutex_unlock (&pmutex);
 	}
 	
+	static void kickAndWait(void* arg)
+	{
+		ST_mmgc_threads* self = (ST_mmgc_threads*)arg;
+		self->kick();
+		self->wait();
+	}
+	
 %%prologue
 	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
 	if (gc==NULL) {
@@ -135,14 +142,11 @@ private:
 	delete gc;
 
 %%test mmgc_gc_root_thread
-/*
 	   startSlave();
 	   MMGC_GCENTER(gc);
    	   RCObjectNotifier *obj = new (gc) RCObjectNotifier(&isDead);
 	   {
-          MMGC_GC_ROOT_THREAD(gc);
-		  kick();
-    	  wait();
+		  gc->CreateRootFromCurrentStack(kickAndWait, this);
        }
 
 	   %%verify result
@@ -156,4 +160,3 @@ private:
 	   pthread_join(pthread, NULL);
 
 	   printf("Ignore this: %d\n", *obj->isDead);
-*/

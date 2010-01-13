@@ -42,69 +42,15 @@
 
 #define MMGC_GCENTER(_gc)  MMgc::GCAutoEnter __mmgc_auto_enter(_gc);
 
-#if defined(MMGC_IA32) && defined(_MSC_VER)
-
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
-	jmp_buf __mmgc_env;													\
-	VMPI_setjmpNoUnwind(__mmgc_env);													\
-	__asm { mov _stack,esp };											\
-	_size = (uint32_t)(_gc->GetStackTop() - (uintptr_t)_stack);
-
-#elif defined MMGC_SPARC
-
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
-	jmp_buf __mmgc_env;													\
-	VMPI_setjmpNoUnwind(__mmgc_env);													\
-	asm ("mov %%sp, %0":"=r" (_stack));									\
-	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
-
-#elif defined MMGC_MAC && defined MMGC_PPC
-
-register void *mmgc_sp __asm__("r1");
-
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
-	jmp_buf __mmgc_env;													\
-	VMPI_setjmpNoUnwind(__mmgc_env);									\
-	_stack = (void*)mmgc_sp;											\
-	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
-
-#elif defined MMGC_MAC && !defined MMGC_PPC && !defined MMGC_ARM
-
-register void *mmgc_sp __asm__("esp");
-
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
-	jmp_buf __mmgc_env;													\
-	VMPI_setjmpNoUnwind(__mmgc_env);									\
-	_stack = (void*)mmgc_sp;											\
-	_size = (uint32_t)(_gc->GetOSStackTop() - (uintptr_t)_stack);
-
-#else
-
-// This is not always safe, see https://bugzilla.mozilla.org/show_bug.cgi?id=506013.
-// Generally speaking we want a per-platform implementation of this macro.
-
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size)						\
-	jmp_buf __mmgc_env;													\
-	VMPI_setjmpNoUnwind(__mmgc_env);													\
-	_stack = &__mmgc_env;												\
-	_size = (uint32_t)(_gc->GetStackTop() - (uintptr_t)_stack);
-
-#endif
-
-// This macro creates a GC root of the current threads stack, there
-// are two use cases for this: 
+// MMGC_GC_ROOT_THREAD is obsolete; the mechanism is not safe.
 //
-// 1) the main thread is halting to let another thread run doing
-// possible GC activity (debugger use case)
+// Instead you must use a pattern like this:
 //
-// 2) the stack is moving to another area of memory (stack switching)
-// but the old stack must still get scanned
-#define MMGC_GC_ROOT_THREAD(_gc)						\
-	void *__stack;										\
-	size_t __stackSize;									\
-	MMGC_GET_STACK_EXTENTS(_gc, __stack, __stackSize);	\
-	MMgc::GC::AutoRCRootSegment __root(_gc, __stack, __stackSize);	\
-	MMgc::GCAutoEnterPause __mmgc_enter_pause(_gc);
+//    gc->CreateRootFromCurrentStack(fn, arg)
+//
+// where 'fn' takes a single void* and will be passed 'arg'.  While 'fn' is active the
+// stack and registers active at the time CreateRootFromCurrentStack was called will
+// be a GC root.
 
 // Enable our own alloca() replacement that always allocates in the heap, this is good on
 // systems with limited memory or limited stack
@@ -967,6 +913,20 @@ namespace MMgc
 		void FreeRCRoot(void* mem);
 		
 		/**
+		 * Save the processor context on the stack, make a GC root from the stack, and call 'fn'
+		 * with 'arg' as the only argument.  The GC root is active during the invocation of 'fn'.
+		 *
+		 * There are two main uses for this:
+		 *
+		 * 1) the main thread is halting to let another thread run doing
+		 *    possible GC activity (debugger use case)
+		 *
+		 * 2) the stack is moving to another area of memory (stack switching)
+		 *    but the old stack must still get scanned		 
+		 */
+		void CreateRootFromCurrentStack(void (*fn)(void* arg), void* arg);
+		
+		/**
 		 * overflow checking way to call Alloc for a # of n size'd items,
 		 * all instance of Alloc(num*sizeof(thing)) should be replaced with:
 		 * Calloc(num, sizeof(thing))
@@ -1308,9 +1268,11 @@ namespace MMgc
 
 		void ClearWeakRef(const void *obj);
 
-		// legacy API that gets physical start of OS thread
-		uintptr_t GetOSStackTop() const;
-
+		// @return The highest stack address, ie the stack 'base' in common parlance.
+		// @fixme This is misnamed, 'GetStackBase' would be better.  We can't
+		// rename the function now (== 8 January 2010) because it's used externally
+		// by performance code and we don't want the churn, but it should be renamed
+		// and post-Flash10.1 we will do so.
 		uintptr_t GetStackTop() const;
 
 		uintptr_t GetStackEnter() const;
@@ -1539,6 +1501,9 @@ namespace MMgc
 		void Mark();
 		void MarkQueueAndStack(bool scanStack=true);
 		void MarkItem(GCWorkItem &wi);
+
+		static void DoCleanStack(void* stackPointer, void* arg);
+		static void DoMarkFromStack(void* stackPointer, void* arg);
 
 	public:
 		// Sweep all small-block pages that need sweeping

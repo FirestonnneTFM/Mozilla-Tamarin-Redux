@@ -477,7 +477,7 @@ namespace MMgc
 	{
 		// temporary crutch until we're moved over to the MMGC_GCENTER system
 		if(stackEnter == NULL)
-			return GetOSStackTop();
+			return VMPI_getThreadStackBase();
 		return GetStackEnter();
 	}
 

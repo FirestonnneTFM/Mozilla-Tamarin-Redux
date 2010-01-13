@@ -62,6 +62,9 @@
 #ifdef SOLARIS
 	#include <procfs.h>
 	#include <sys/stat.h>
+	#include <ucontext.h>
+	#include <sys/frame.h>
+	#include <sys/stack.h>
 	typedef caddr_t maddr_ptr;
 #else
 	typedef void *maddr_ptr;
@@ -73,6 +76,14 @@
 static size_t pagesize = 4096;
 #else
 static size_t pagesize = size_t(sysconf(_SC_PAGESIZE));
+#endif
+
+// It's possible to use the flushw instruction on sparc9, but this should always work
+
+#if defined SOLARIS && defined MMGC_SPARC
+	#define FLUSHWIN() asm("ta 3"); 
+#else
+	#define FLUSHWIN() 
 #endif
 
 size_t VMPI_getVMPageSize()
@@ -339,6 +350,138 @@ uint64_t VMPI_getPerformanceCounter()
 	#error "High resolution timer needs to be defined for this platform"
 #endif
 }
+
+#ifdef SOLARIS
+
+pthread_key_t stackTopKey = NULL;
+
+uintptr_t VMPI_getThreadStackBase()
+{
+	FLUSHWIN();
+	
+	// FIXME: race condition
+	if(stackTopKey == NULL)
+	{
+		int res = pthread_key_create(&stackTopKey, NULL);
+		GCAssert(res == 0);
+	}
+	
+	void *stackTop = pthread_getspecific(stackTopKey);
+	if(stackTop)
+		return (uintptr_t)stackTop;
+	
+	struct frame *sp;
+	int i;
+	int *iptr;
+	
+	stack_t st;
+	stack_getbounds(&st);
+	uintptr_t stack_base = (uintptr_t)st.ss_sp + st.ss_size;
+	pthread_setspecific(stackTopKey, (void*)stack_base);
+	return (uintptr_t)stack_base;
+}
+
+#elif defined AVMPLUS_UNIX
+
+pthread_key_t stackTopKey = 0;
+
+uintptr_t VMPI_getThreadStackBase()
+{
+	// FIXME: race condition
+	if(stackTopKey == 0)
+	{
+#ifdef DEBUG		  
+		int res = 
+#endif
+		pthread_key_create(&stackTopKey, NULL);
+		GCAssert(res == 0);
+	}
+	
+	void *stackTop = pthread_getspecific(stackTopKey);
+	if(stackTop)
+		return (uintptr_t)stackTop;
+	
+	size_t sz;
+	void *s_base;
+	pthread_attr_t attr;
+	
+	pthread_attr_init(&attr);
+	// WARNING: stupid expensive function, hence the TLS
+	int res = pthread_getattr_np(pthread_self(),&attr);
+	GCAssert(res == 0);
+	
+	if(res)
+	{
+		// not good
+		return 0;
+	}
+	
+	res = pthread_attr_getstack(&attr,&s_base,&sz);
+	GCAssert(res == 0);
+	pthread_attr_destroy(&attr);
+	
+	stackTop = (void*) ((size_t)s_base + sz);
+	// stackTop has to be greater than current stack pointer
+	GCAssert(stackTop > &sz);
+	pthread_setspecific(stackTopKey, stackTop);
+	return (uintptr_t)stackTop;
+	
+}
+
+#elif defined(LINUX) && defined(MMGC_ARM)
+
+uintptr_t VMPI_getThreadStackBase()
+{
+	void* sp;
+	pthread_attr_t attr;
+	pthread_getattr_np(pthread_self(), &attr);
+	pthread_attr_getstackaddr(&attr, &sp);
+	return (uintptr_t)sp;
+}
+
+#endif
+
+// Defined in PosixPortUtils.cpp to prevent them from being inlined below
+
+extern void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+
+#if defined SOLARIS
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+	ucontext_t buf;
+
+	FLUSHWIN();
+
+	getcontext(&buf);							// Save registers - POSIX method
+	CallWithRegistersSaved2(fn, arg, &buf);		// Computes the stack pointer, calls fn
+	CallWithRegistersSaved3(fn, &arg, &buf);	// Probably prevents the previous call from being a tail call
+}
+
+#elif defined AVMPLUS_LINUX || defined __GNUC__	// Assume gcc for Linux
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+	__builtin_unwind_init();					// Save registers - GCC intrinsic
+	CallWithRegistersSaved2(fn, arg, NULL);		// Computes the stack pointer, calls fn
+	CallWithRegistersSaved3(fn, &arg, NULL);	// Probably prevents the previous call from being a tail call
+}
+
+#else
+
+// Is getcontext() reliably available on POSIX systems?  If so it would be good
+// to use it instead of setjmp, and fall back on setjmp on non-POSIX systems.
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+	jmp_buf buf;
+	VMPI_setjmpNoUnwind(buf);					// Save registers
+	CallWithRegistersSaved2(fn, arg, &buf);		// Computes the stack pointer, calls fn
+	CallWithRegistersSaved3(fn, &arg, &buf);	// Probably prevents the previous call from being a tail call
+}
+
+#endif
 
 #ifdef MMGC_MEMORY_PROFILER
 

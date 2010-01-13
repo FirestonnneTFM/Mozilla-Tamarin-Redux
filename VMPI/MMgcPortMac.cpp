@@ -233,6 +233,29 @@ uint64_t VMPI_getPerformanceCounter()
 	return mach_absolute_time();
 }
 
+uintptr_t VMPI_getThreadStackBase()
+{
+	return (uintptr_t)pthread_get_stackaddr_np(pthread_self());
+}
+
+// Defined in PosixPortUtils.cpp to prevent them from being inlined below
+
+extern void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
+
+void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
+{
+#if defined MMGC_IA32
+	void* buf = NULL;
+	__builtin_unwind_init();					// Save registers - GCC intrinsic.  Not reliable on 10.4 PPC or 64-bit
+#else
+	jmp_buf buf;
+	VMPI_setjmpNoUnwind(buf);					// Save registers - not always reliable
+#endif
+	CallWithRegistersSaved2(fn, arg, &buf);		// Computes the stack pointer, calls fn
+	CallWithRegistersSaved3(fn, &arg, &buf);	// Probably prevents the previous call from being a tail call
+}
+
 #ifdef MMGC_MEMORY_PROFILER
 
 #ifdef MMGC_PPC
