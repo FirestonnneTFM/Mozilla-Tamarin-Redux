@@ -40,6 +40,6 @@
 echo args=$* >> /var/log/hg-buildbot-trigger.log
 echo "HG_NODE=$HG_NODE" >> /var/log/hg-buildbot-trigger.log
 echo "HG_URL=$HG_URL" >> /var/log/hg-buildbot-trigger.log
-python /e/repo/qe-hooks/buildbot/scripts/tamarin-redux/hg_buildbot_trigger.py $*
+python /e/repo/tamarin-redux/build/buildbot/master/scripts/hg_buildbot_trigger.py $*
 echo done >> /var/log/hg-buildbot-trigger.log
 exit 0
