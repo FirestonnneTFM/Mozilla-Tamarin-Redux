@@ -344,7 +344,7 @@ uintptr_t VMI_getThreadStackBase() const
 	return uintptr_t(info.iBase);
 }
 
-// Defined in SymbianDebugUtils.cpp to prevent them from being inlined below
+// Defined in SymbianPortUtils.cpp to prevent them from being inlined below
 
 extern void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
 extern void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf);
