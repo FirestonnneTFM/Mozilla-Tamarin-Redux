@@ -1,3 +1,4 @@
+#!/bin/sh
 #  ***** BEGIN LICENSE BLOCK *****
 #  Version: MPL 1.1/GPL 2.0/LGPL 2.1
 # 
@@ -34,5 +35,11 @@
 #  the terms of any one of the MPL, the GPL or the LGPL.
 # 
 #  ***** END LICENSE BLOCK ****
-[hooks]
-incoming.test = bash /e/repo/tamarin-redux/build/buildbot/master/scripts/hgbuildbot_trigger.sh brbaker@10.171.22.12:/cygdrive/e/AVMTeam/buildbot/master-tamarin-redux/changes/pending 2
+(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
+
+echo args=$* >> /var/log/hg-buildbot-trigger.log
+echo "HG_NODE=$HG_NODE" >> /var/log/hg-buildbot-trigger.log
+echo "HG_URL=$HG_URL" >> /var/log/hg-buildbot-trigger.log
+python /e/repo/tamarin-redux/build/buildbot/master/scripts/hg_buildbot_trigger_sb.py $*
+echo done >> /var/log/hg-buildbot-trigger.log
+exit 0

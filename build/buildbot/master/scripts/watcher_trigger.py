@@ -192,6 +192,8 @@ while True:
                     
                 else: # there must be sandbox builds, a.k.a. priority3
                     #log("SANDBOX: %s" % sandboxRequests)
+                    # sort the sandbox builds so that they are in timestamp order
+                    priority3.sort()
                     change = priority3[0]
                     log("going to build: %s" % change)
                     # TODO: Should catch any errors in triggereing the build and
