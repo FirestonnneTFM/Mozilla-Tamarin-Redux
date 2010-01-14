@@ -354,7 +354,7 @@ namespace avmplus
 
 		PoolObject* pool() const;
 		AvmThunkNativeThunker thunker() const;
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 		AvmThunkNativeMethodHandler handler_method() const;
 		AvmThunkNativeFunctionHandler handler_function() const;
 #endif
@@ -398,7 +398,7 @@ namespace avmplus
 		struct NativeInfo
 		{
 			AvmThunkNativeThunker thunker;
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 			AvmThunkNativeHandler handler;
 #endif
 		};
