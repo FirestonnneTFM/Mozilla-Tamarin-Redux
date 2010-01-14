@@ -75,21 +75,49 @@ out = commands.getoutput("hg -v log -r %s" % revision)
 
 print("hg -v log:\n%s" % out)
 
-# TODO: or maybe use --template instead of trying hard to parse everything
-#out = commands.getoutput("hg --template SOMETHING log -r %s" % CHANGESET_ID)
-
+# Find the revision
 s = StringIO(out)
 while True:
     line = s.readline()
     if not line:
         break
     if line.startswith("changeset:"):
-        revision = line[line.find(":")+1:].strip()
+        revision = line[line.find(":")+1:].strip().replace(":","-")
+
+# Hardcode this for now, the code below would return
+# 'http://asteam.macromedia.com:8000/tamarin-redux-10.1'
+# which is not a correct value, so hack this for now
+url = 'http://asteam.macromedia.com/hg/tamarin-redux-10.1/'
+#showconfig = commands.getoutput("hg showconfig")
+# Find the path.default
+#s = StringIO(showconfig)
+#while True:
+#    line = s.readline()
+#    if not line:
+#        break
+#    if line.startswith("paths.default="):
+#        url = line[line.find("=")+1:].strip()
 
 # Write out a file that contains the output from "hg log"
-filename = "change-%s.%s" % (revision[0:revision.find(":")],PRIORITY)
+filename = "change-%s.%s" % (revision,PRIORITY)
+
 changefile = open("/var/log/%s" % filename, "w")
-changefile.write(out)
+changefile.write("url:         %s\n" % url)
+s = StringIO(out)
+while True:
+    line = s.readline()
+    if not line:
+        break
+    if line.startswith("files:"):
+        orig = line[line.find(":")+1:].strip()
+        changefile.write("files:       %s\n" % filename)
+    elif line.startswith("description:"):
+        changefile.write(line)
+        changefile.write("%s\n\n" % orig)
+    else:
+        changefile.write(line)
+
+# Close the file
 changefile.close()
 
 # Copy the change file out to buildbot master host machine

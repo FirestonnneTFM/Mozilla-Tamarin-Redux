@@ -423,22 +423,6 @@ namespace nanojit
                           (offsetof(LInsSti, ins) - offsetof(LInsSti, oprnd_2)) );
     }
 
-    bool LIns::isFloat() const {
-        switch (opcode()) {
-            default:
-                return false;
-            case LIR_fadd:
-            case LIR_fsub:
-            case LIR_fmul:
-            case LIR_fdiv:
-            case LIR_fneg:
-            case LIR_fcall:
-            case LIR_i2f:
-            case LIR_u2f:
-                return true;
-        }
-    }
-
     LIns* LirWriter::ins2i(LOpcode v, LIns* oprnd1, int32_t imm)
     {
         return ins2(v, oprnd1, insImm(imm));
@@ -507,7 +491,11 @@ namespace nanojit
 
         return out->ins1(v, i);
     }
-
+    
+    // This is an ugly workaround for an apparent compiler
+    // bug; in VC2008, compiling with optimization on
+    // will produce spurious errors if this code is inlined
+    // into ExprFilter::ins2(). See https://bugzilla.mozilla.org/show_bug.cgi?id=538504
     inline double do_join(int32_t c1, int32_t c2)
     {
         union {

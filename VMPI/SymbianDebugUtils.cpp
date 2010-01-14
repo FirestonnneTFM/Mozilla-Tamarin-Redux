@@ -51,5 +51,3 @@ void VMPI_debugBreak()
 {
 //	ASSERT( false );
 }
-
-

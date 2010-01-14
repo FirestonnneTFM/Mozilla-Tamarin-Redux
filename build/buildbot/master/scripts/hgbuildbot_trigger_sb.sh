@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #  ***** BEGIN LICENSE BLOCK *****
 #  Version: MPL 1.1/GPL 2.0/LGPL 2.1
 # 
@@ -37,38 +37,9 @@
 #  ***** END LICENSE BLOCK ****
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-
-##
-# Bring in the environment variables
-##
-. ./environment.sh
-
-
-##
-# Calculate the change number and change id
-##
-. ../all/util-calculate-change.sh $1
-
-
-export COVFILE=$buildsdir/${change}-${changeid}/$platform/avm.cov
-test -f $COVFILE && rm -f $COVFILE
-
-cd $buildsdir/${change}-${changeid}/$platform/
-files=`ls *.cov`
-
-$bullseyedir/covmerge -c $files
-
-
-$bullseyedir/covdir -q
-fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
-cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
-
-
-
-echo "message: total function coverage:           $fnpct"
-echo "message: total condition/decision coverage: $cdpct"
-
-. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
-
-echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/avm.cov code coverage data file avm.cov"
-
+echo args=$* >> /var/log/hg-buildbot-trigger.log
+echo "HG_NODE=$HG_NODE" >> /var/log/hg-buildbot-trigger.log
+echo "HG_URL=$HG_URL" >> /var/log/hg-buildbot-trigger.log
+python /e/repo/tamarin-redux/build/buildbot/master/scripts/hg_buildbot_trigger_sb.py $*
+echo done >> /var/log/hg-buildbot-trigger.log
+exit 0

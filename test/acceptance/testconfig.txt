@@ -269,3 +269,5 @@ versioning/.*, .*, apiversioning, skip versioning when not defined in avm
 abcasm/.*, .*, verify_skip, abcasm tests not compatible with --verify
 
 
+ecma3/Statements/etry_008 , sparc-sol-tvm-.*((?!Dinterp).)*$ , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=538635
+ecma3/Date/e15_9_5_4:\(\).toTimeString\(\) , sparc-sol-tvm-(release|releasedebugger|release-Ojit), expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=538635

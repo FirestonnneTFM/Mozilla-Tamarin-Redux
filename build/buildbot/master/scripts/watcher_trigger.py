@@ -37,7 +37,7 @@
 #
 # ***** END LICENSE BLOCK *****
 
-import os, xmlrpclib, time, shutil, subprocess, getopt
+import sys, os, xmlrpclib, time, shutil, subprocess, getopt
 from buildbot.scripts import runner
 from sys import argv, exit
 from getopt import getopt
@@ -163,30 +163,44 @@ while True:
 
             files = os.listdir(PENDING_BUILDS)
             if len(files) > 0:
-                files.sort() # files are in arbitary order be default
-                log("found the following: %s" % files)
-
-                ## First look for 'change-XXXX' files, these are tamarin-redux builds and
-                ## have the highest priority.
-                priorityRequests = getPriorityRequests(files)
-                if len(priorityRequests) > 0:
-                    #log("PRIORITY: %s" % priorityRequests)
-                    for change in priorityRequests:
+                # filter the change requests into priority category
+                priority1 = [file for file in files if file.endswith('.1')]
+                priority2 = [file for file in files if file.endswith('.2')]
+                priority3 = [file for file in files if file.endswith('.3')]
+                
+                # Priority1 builds can be batched, these are tamarin-redux-10.1
+                if len(priority1) > 0:
+                    #log("PRIORITY1: %s" % priority1)
+                    for change in priority1:
+                        log("going to build: %s" % change)
+                        # TODO: Should catch any errors in triggereing the build and
+                        # then move the file back into PENDING_BUILDS
+                        shutil.move("%s/%s" % (PENDING_BUILDS, change), PROCESSED_BUILDS)
+                        triggerBuild(change, 'sandbox')
+                    log("No more priority1 pending changes")
+                
+                # Priority2 builds can be batched, these are tamarin-redux
+                elif len(priority2) > 0:
+                    #log("PRIORITY2: %s" % priority2)
+                    for change in priority2:
                         log("going to build: %s" % change)
                         # TODO: Should catch any errors in triggereing the build and
                         # then move the file back into PENDING_BUILDS
                         shutil.move("%s/%s" % (PENDING_BUILDS, change), PROCESSED_BUILDS)
                         triggerBuild(change)
-                    log("No more pending changes")
-                else: # there must be sandbox builds
-                    sandboxRequests = getSandboxRequests(files)
+                    log("No more priority2 pending changes")
+                    
+                else: # there must be sandbox builds, a.k.a. priority3
                     #log("SANDBOX: %s" % sandboxRequests)
-                    change = sandboxRequests[0]
+                    # sort the sandbox builds so that they are in timestamp order
+                    priority3.sort()
+                    change = priority3[0]
                     log("going to build: %s" % change)
                     # TODO: Should catch any errors in triggereing the build and
                     # then move the file back into PENDING_BUILDS
                     shutil.move("%s/%s" % (PENDING_BUILDS, change), PROCESSED_BUILDS)
                     triggerBuild(change, 'sandbox')
+                
             else:
                 log("There are no pending builds.")
 

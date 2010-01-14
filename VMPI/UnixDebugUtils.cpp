@@ -51,3 +51,4 @@ void VMPI_debugBreak()
 {
 	raise(SIGTRAP);
 }
+

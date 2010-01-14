@@ -35,4 +35,4 @@
 # 
 #  ***** END LICENSE BLOCK ****
 [hooks]
-incoming.test = bash /e/repo/qe-hooks/buildbot/scripts/tamarin-redux/hgbuildbot_trigger.sh brbaker@10.171.22.12:/cygdrive/e/AVMTeam/buildbot/master-tamarin-redux/changes/pending
+incoming.test = bash /e/repo/tamarin-redux/build/buildbot/master/scripts/hgbuildbot_trigger.sh brbaker@10.171.22.12:/cygdrive/e/AVMTeam/buildbot/master-tamarin-redux/changes/pending 2

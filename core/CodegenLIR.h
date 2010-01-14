@@ -360,6 +360,7 @@ namespace avmplus
     };
     
     class MopsRangeCheckFilter;
+    class PrologWriter;
 
     /**
      * CodegenLIR is a kitchen sink class containing all state for all passes
@@ -413,7 +414,10 @@ namespace avmplus
         CacheBuilder<CallCache> call_cache_builder;
         CacheBuilder<GetCache> get_cache_builder;
         CacheBuilder<SetCache> set_cache_builder;
+        PrologWriter *prolog;
+        LIns* prologLastIns;
         verbose_only(VerboseWriter *vbWriter;)
+        verbose_only(LirNameMap* vbNames;)
 
         LIns *InsAlloc(int32_t);
         LIns *atomToNativeRep(int loc, LIns *i);
@@ -428,11 +432,11 @@ namespace avmplus
         LIns *branchIns(LOpcode op, LIns *cond);
         LIns *branchIns(LOpcode op, LIns *cond, int target_off);
         LIns *retIns(LIns *val);
-        LIns *loadToplevel();
         LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
         LIns *loadEnvScope();
         LIns *loadEnvVTable();
         LIns *loadEnvAbcEnv();
+        LIns *loadEnvToplevel();
         LIns *copyMultiname(const Multiname* multiname);
         LIns *initMultiname(const Multiname* multiname, int& csp, bool isDelete =false);
         LIns *storeAtomArgs(int count, int index);
@@ -471,7 +475,6 @@ namespace avmplus
         void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
 
         void formatOperand(PrintWriter& buffer, LIns* oprnd);
-        bool prologue(FrameState* state);
         void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
         void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
         void emitIf(FrameState* state, AbcOpcode opcode, int target_off, int lhs, int rhs);
@@ -479,7 +482,6 @@ namespace avmplus
         void emitCopy(FrameState* state, int src, int dest);
         void emitGetscope(FrameState* state, int scope, int dest);
         void emitKill(FrameState* state, int i);
-        void emitBlockEnd(FrameState* state);
         void emitIntConst(FrameState* state, int index, int32_t c);
         void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
         void emitDoubleConst(FrameState* state, int index, double* pd);

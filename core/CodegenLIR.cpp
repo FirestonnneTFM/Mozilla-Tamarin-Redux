@@ -681,6 +681,7 @@ namespace avmplus
 
     CodegenLIR::CodegenLIR(MethodInfo* i) :
         LirHelper(i->pool()->core),
+        overflow(false),
 #ifdef VTUNE
         jitInfoList(i->core()->gc),
         jitPendingRecords(i->core()->gc),
@@ -694,7 +695,8 @@ namespace avmplus
         patches(*alloc1),
         call_cache_builder(*alloc1, *initCodeMgr(pool)),
         get_cache_builder(*alloc1, *pool->codeMgr),
-        set_cache_builder(*alloc1, *pool->codeMgr)
+        set_cache_builder(*alloc1, *pool->codeMgr),
+        prolog(NULL)
     {
         state = NULL;
 
@@ -704,8 +706,6 @@ namespace avmplus
 
         abcStart = NULL;
         abcEnd   = NULL;
-
-        overflow = false;
 
         #ifdef VTUNE
         hasDebugInfo = false;
@@ -990,11 +990,6 @@ namespace avmplus
     };
 #endif //  _DEBUG
 
-// if DEFER_STORES is defined, we defer local variable stores to the
-// ends of basic blocks, then only emit the ones that are live
-// #define DEFER_STORES(...) __VA_ARGS__
-#define DEFER_STORES(...)
-
     class CopyPropagation: public LirWriter
     {
         AvmCore* core;
@@ -1044,14 +1039,6 @@ namespace avmplus
             dirty.set(i);
         }
 
-        void trackMerge(int i, LIns *cur, LIns *target) {
-            (void) i; (void) cur; (void) target;
-            /*if (cur != target) {
-                tracker[i] = 0;
-                dirty.clear(i);
-            }*/
-        }
-
         LIns *insLoad(LOpcode op, LIns *base, int32_t d) {
             if (base == vars) {
                 AvmAssert((d&7) == 0);
@@ -1069,63 +1056,41 @@ namespace avmplus
         LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d) {
             if (base == vars) {
                 trackStore(value, d);
-                DEFER_STORES(return 0;)
             }
             return out->insStore(op, value, base, d);
         }
 
         LIns *ins0(LOpcode op) {
             if (op == LIR_label) {
-                DEFER_STORES(saveState();)
                 clearState();
             }
             return out->ins0(op);
         }
 
         LIns *insBranch(LOpcode v, LInsp cond, LInsp to) {
-            DEFER_STORES(saveState();)
             return out->insBranch(v, cond, to);
         }
 
         LIns *insJtbl(LIns* index, uint32_t size) {
-            DEFER_STORES(saveState();)
             return out->insJtbl(index, size);
         }
 
         LIns *insCall(const CallInfo *call, LInsp args[]) {
             #ifdef DEBUGGER
-            if (core->debugger())
-            {
-                DEFER_STORES(
-                    if (!call->_cse)
-                        saveState();
-                )
-                LIns *i = out->insCall(call, args);
+            if (core->debugger() && !call->_cse) {
                 // debugger might have modified locals, so make sure we reload after call.
-                if (!call->_cse)
-                    clearState();
-                return i;
+                clearState();
             }
             #endif
-
-            DEFER_STORES(
-                if (hasExceptions && !call->_cse)
-                    saveState();
-            )
             return out->insCall(call, args);
         }
-
-        // TODO
-        // * reset when vars passed as arg to a function that could modify vars (debugenter/exit)
-        // * handle load/store size mismatches -- loading high word of quad, etc
-        // * suppress stores until ends of blocks
     };
 
     void emitStart(Allocator& alloc, LirBuffer *lirbuf, LirWriter* &lirout) {
         (void)alloc;
         (void)lirbuf;
         debug_only(
-            // catch problems before they hit the buffer
+            // catch problems before they hit the writer pipeline
             lirout = new (alloc) ValidateWriter(lirout);
         )
         lirout->ins0(LIR_start);
@@ -1269,22 +1234,22 @@ namespace avmplus
             bool is = false;
             if (t == NUMBER_TYPE)
             {
-                is = val->isFloat() || val->isQuad();
+                is = val->isF64() || val->isQuad();
                 AvmAssert(is);
             }
             else if (t == INT_TYPE)
             {
-                is = !val->isQuad() && !val->isFloat();
+                is = !val->isQuad() && !val->isF64();
                 AvmAssert(is);
             }
             else if (t == UINT_TYPE)
             {
-                is = !val->isQuad() && !val->isFloat();
+                is = !val->isQuad() && !val->isF64();
                 AvmAssert(is);
             }
             else if (t == BOOLEAN_TYPE)
             {
-                is = !val->isQuad() && !val->isFloat();
+                is = !val->isQuad() && !val->isF64();
                 AvmAssert(is);
             }
             else
@@ -1322,6 +1287,78 @@ namespace avmplus
 
     };
 #endif
+
+    // writer for the prolog.  instructions written here dominate code in the
+    // body, and so are added to the body's CseFilter
+    class PrologWriter : public LirWriter
+    {
+    public:
+    	LIns* lastIns;
+    	LIns* env_scope;
+    	LIns* env_vtable;
+    	LIns* env_abcenv;
+    	LIns* env_toplevel;
+
+    	PrologWriter(LirWriter *out):
+    		LirWriter(out),
+    		lastIns(NULL),
+    		env_scope(NULL),
+    		env_vtable(NULL),
+    		env_abcenv(NULL),
+    		env_toplevel(NULL)
+    	{}
+
+        virtual LInsp ins0(LOpcode v) {
+            return lastIns = out->ins0(v);
+        }
+        virtual LInsp ins1(LOpcode v, LIns* a) {
+            return lastIns = out->ins1(v, a);
+        }
+        virtual LInsp ins2(LOpcode v, LIns* a, LIns* b) {
+            return lastIns = out->ins2(v, a, b);
+        }
+        virtual LInsp ins3(LOpcode v, LIns* a, LIns* b, LIns* c) {
+            return lastIns = out->ins3(v, a, b, c);
+        }
+        virtual LInsp insGuard(LOpcode v, LIns *c, GuardRecord *gr) {
+            return lastIns = out->insGuard(v, c, gr);
+        }
+        virtual LInsp insBranch(LOpcode v, LInsp condition, LInsp to) {
+            return lastIns = out->insBranch(v, condition, to);
+        }
+        // arg: 0=first, 1=second, ...
+        // kind: 0=arg 1=saved-reg
+        virtual LInsp insParam(int32_t arg, int32_t kind) {
+            return lastIns = out->insParam(arg, kind);
+        }
+        virtual LInsp insImm(int32_t imm) {
+            return lastIns = out->insImm(imm);
+        }
+        virtual LInsp insImmq(uint64_t imm) {
+            return lastIns = out->insImmq(imm);
+        }
+        virtual LInsp insImmf(double d) {
+            return lastIns = out->insImmf(d);
+        }
+        virtual LInsp insLoad(LOpcode op, LIns* base, int32_t d) {
+            return lastIns = out->insLoad(op, base, d);
+        }
+        virtual LInsp insStore(LOpcode op, LIns* value, LIns* base, int32_t d) {
+            return lastIns = out->insStore(op, value, base, d);
+        }
+        // args[] is in reverse order, ie. args[0] holds the rightmost arg.
+        virtual LInsp insCall(const CallInfo *call, LInsp args[]) {
+            return lastIns = out->insCall(call, args);
+        }
+        virtual LInsp insAlloc(int32_t size) {
+            NanoAssert(size != 0);
+            return lastIns = out->insAlloc(size);
+        }
+        virtual LInsp insJtbl(LIns* index, uint32_t size) {
+            return lastIns = out->insJtbl(index, size);
+        }
+
+    };
 
     // Generate the prolog for a function with this C++ signature:
     //
@@ -1405,7 +1442,7 @@ namespace avmplus
     // jump forward, pick a catch block, then jump backwards to the catch block.
     //
 
-    bool CodegenLIR::prologue(FrameState* state)
+    void CodegenLIR::writePrologue(FrameState* state, const byte* /* pc */)
     {
         this->state = state;
         abcStart = state->verifier->code_pos;
@@ -1413,23 +1450,31 @@ namespace avmplus
         framesize = state->verifier->frameSize;
 
         frag = new (*lir_alloc) Fragment(abcStart verbose_only(, 0));
-        LirBuffer *lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
-        lirbuf->abi = ABI_CDECL;
-        lirout = new (*alloc1) LirBufWriter(lirbuf);
+        LirBuffer *prolog_buf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
+        prolog_buf->abi = ABI_CDECL;
+
+        lirout = new (*alloc1) LirBufWriter(prolog_buf);
+
         debug_only(
             lirout = new (*alloc1) ValidateWriter(lirout);
         )
         verbose_only(
             vbWriter = 0;
+            vbNames = 0;
             if (verbose() && !core->quiet_opt()) {
-                lirbuf->names = new (*lir_alloc) LirNameMap(*lir_alloc, &pool->codeMgr->labels);
-                lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->names, &log);
+                vbNames = new (*lir_alloc) LirNameMap(*lir_alloc, &pool->codeMgr->labels);
+                prolog_buf->names = vbNames;
+                lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, vbNames, &log, "PROLOG");
             }
         )
+        prolog = new (*alloc1) PrologWriter(lirout);
+        LirWriter *redirectWriter = lirout = new (*lir_alloc) LirWriter(prolog);
         LoadFilter *loadfilter = 0;
+        CseFilter *csefilter = 0;
         if (core->config.cseopt) {
             loadfilter = new (*alloc1) LoadFilter(lirout, *alloc1);
-            lirout = new (*alloc1) CseFilter(loadfilter, *alloc1);
+            csefilter = new (*alloc1) CseFilter(loadfilter, *alloc1);
+            lirout = csefilter;
         }
         #if NJ_SOFTFLOAT
         lirout = new (*alloc1) SoftFloatFilter(lirout);
@@ -1447,10 +1492,7 @@ namespace avmplus
         }
         #endif
 
-        emitStart(*alloc1, lirbuf, lirout);
-
-        if (overflow)
-            return false;
+        emitStart(*alloc1, prolog_buf, lirout);
 
         // last pc value that we generated a store for
         lastPcSave = 0;
@@ -1469,8 +1511,8 @@ namespace avmplus
 
         // allocate room for a MethodFrame structure
         methodFrame = InsAlloc(sizeof(MethodFrame));
-        verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(methodFrame, "methodFrame");
+        verbose_only( if (vbNames) {
+            vbNames->addName(methodFrame, "methodFrame");
         })
 
         coreAddr = InsConstPtr(core);
@@ -1490,16 +1532,16 @@ namespace avmplus
 
         // allocate room for our local variables
         vars = InsAlloc(framesize * 8);
-        lirbuf->sp = vars;
+        prolog_buf->sp = vars;
         if (loadfilter)
             loadfilter->sp = vars;
         copier->init(vars);
 
-        verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(env_param, "env");
-            lirbuf->names->addName(argc_param, "argc");
-            lirbuf->names->addName(ap_param, "ap");
-            lirbuf->names->addName(vars, "vars");
+        verbose_only( if (vbNames) {
+            vbNames->addName(env_param, "env");
+            vbNames->addName(argc_param, "argc");
+            vbNames->addName(ap_param, "ap");
+            vbNames->addName(vars, "vars");
         })
 
         // stack overflow check - use methodFrame address as comparison
@@ -1508,7 +1550,7 @@ namespace avmplus
         LIns *b = branchIns(LIR_jf, c);
         callIns(FUNCTIONID(handleStackOverflowMethodEnv), 1, env_param);
         LIns *begin_label = label();
-        verbose_only( if (lirbuf->names) { lirbuf->names->addName(begin_label, "begin");  })
+        verbose_only( if (vbNames) { vbNames->addName(begin_label, "begin");  })
         b->setTarget(begin_label);
 
         // we emit the undefined constant here since we use it so often and
@@ -1522,8 +1564,8 @@ namespace avmplus
             // IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
             // note that this now updates traits for values on the scopechain as well as locals
             varTraits = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(Traits*));
-            verbose_only( if (lirbuf->names) {
-                lirbuf->names->addName(varTraits, "varTraits");
+            verbose_only( if (vbNames) {
+                vbNames->addName(varTraits, "varTraits");
             })
             debug_only( checker->init(vars,varTraits); )
         }
@@ -1539,9 +1581,9 @@ namespace avmplus
             // offsets of local vars, rel to current ESP
             _save_eip = InsAlloc(sizeof(intptr_t));
             _ef       = InsAlloc(sizeof(ExceptionFrame));
-            verbose_only( if (lirbuf->names) {
-                lirbuf->names->addName(_save_eip, "_save_eip");
-                lirbuf->names->addName(_ef, "_ef");
+            verbose_only( if (vbNames) {
+                vbNames->addName(_save_eip, "_save_eip");
+                vbNames->addName(_ef, "_ef");
             })
         }
 
@@ -1550,8 +1592,8 @@ namespace avmplus
         {
             // Allocate space for the call stack
             csn = InsAlloc(sizeof(CallStackNode));
-            verbose_only( if (lirbuf->names) {
-                lirbuf->names->addName(csn, "csn");
+            verbose_only( if (vbNames) {
+                vbNames->addName(csn, "csn");
             })
         }
         #endif
@@ -1601,10 +1643,10 @@ namespace avmplus
                 copyParam(loc, offset);
 
                 LIns *optional_label = label();
-                verbose_only( if (lirbuf->names) {
+                verbose_only( if (vbNames) {
                     char str[64];
                     VMPI_sprintf(str,"param_%d",i);
-                    lirbuf->names->addName(optional_label,str);
+                    vbNames->addName(optional_label,str);
                 })
                 br->setTarget(optional_label);
             }
@@ -1651,18 +1693,12 @@ namespace avmplus
             firstLocal++;
         }
 
-        if (firstLocal < state->verifier->local_count)
-        {
-            // set remaining locals to undefined
-            for (int i=firstLocal, n=state->verifier->local_count; i < n; i++)
-            {
-                if(!(state->value(i).traits == NULL)){ // expecting *
-                    AvmAssertMsg(0,"(state->value(i).traits != NULL)");
-                    return false; // fail verify
-                }
-                localSet(i, undefConst, VOID_TYPE);
-            }
-        }
+		// set remaining locals to undefined
+		for (int i=firstLocal, n = state->verifier->local_count; i < n; i++)
+		{
+			AvmAssert(bt(state->value(i).traits) == BUILTIN_any);
+			localSet(i, undefConst, VOID_TYPE);
+		}
 
         #ifdef DEBUGGER
         if (core->debugger())
@@ -1682,6 +1718,26 @@ namespace avmplus
         }
         #endif // DEBUGGER
 
+        /// SWITCH PIPELINE FROM PROLOG TO BODY
+        verbose_only( if (vbWriter) { vbWriter->flush();} )
+        // we have written the prolog to prolog_buf, now create a new
+        // LirBuffer to hold the body, and redirect further output to the body.
+        LirBuffer *body_buf = new (*lir_alloc) LirBuffer(*lir_alloc);
+        LirWriter *body = new (*alloc1) LirBufWriter(body_buf);
+        debug_only(
+            body = new (*alloc1) ValidateWriter(body);
+        )
+        verbose_only(
+            if (verbose() && !core->quiet_opt()) {
+                AvmAssert(vbNames != NULL);
+                body_buf->names = vbNames;
+                body = vbWriter = new (*alloc1) VerboseWriter(*alloc1, body, vbNames, &log);
+            }
+        )
+        body->ins0(LIR_start);
+        redirectWriter->out = body;
+        /// END SWITCH CODE
+
         if (info->hasExceptions()) {
             // _ef.beginTry(core);
             callIns(FUNCTIONID(beginTry), 2, _ef, coreAddr);
@@ -1699,7 +1755,6 @@ namespace avmplus
             exBranch = 0;
         }
         verbose_only( if (vbWriter) { vbWriter->flush();} )
-        return true;
     }
 
     void CodegenLIR::copyParam(int i, int& offset) {
@@ -1794,29 +1849,6 @@ namespace avmplus
             Value &v = state->value(i);
             if (v.killed)
                 localSet(i, undefConst, VOID_TYPE);
-        }
-    }
-
-    void CodegenLIR::emitBlockEnd(FrameState* state)
-    {
-        this->state = state;
-        // our eBB now terminates.  For all branch instructions we are
-        // able to detect this situation and have already generated the
-        // correct spill code prior to the jump, only for the case where
-        // the pc is a target of a jump do we not know enough during emit()
-        // to do this.  The Verifier tracks this information and merges
-        // the states across the various blocks generating this op prior
-        // to the merge.  After this emit, we should receive a writeBlockStart()
-        // from the Verifier.
-    }
-
-    void CodegenLIR::writePrologue(FrameState* state, const byte *pc)
-    {
-        (void)pc;
-        if( !prologue(state) )
-        {
-            if (!overflow)
-                state->verifier->verifyFailed(kCorruptABCError);
         }
     }
 
@@ -3988,14 +4020,12 @@ namespace avmplus
                 int objDisp = sp;
                 Multiname* multiname = (Multiname*) op1;
 
-                LIns* envArg = env_param;
-                LIns* out;
                 LIns* multi = initMultiname(multiname, objDisp);
                 LIns* obj = loadAtomRep(objDisp);
                 AvmAssert(state->value(objDisp).notNull);
 
-                out = callIns(FUNCTIONID(getdescendants), 3,
-                    envArg, obj, multi);
+                LIns* out = callIns(FUNCTIONID(getdescendants), 3,
+                    env_param, obj, multi);
                 liveAlloc(multi);
 
                 localSet(objDisp, atomToNativeRep(result, out), result);
@@ -4954,6 +4984,11 @@ namespace avmplus
         Ins(LIR_live, coreAddr);
         Ins(LIR_live, undefConst);
 
+        if (prolog->env_scope)	live(prolog->env_scope);
+        if (prolog->env_vtable)  	live(prolog->env_vtable);
+        if (prolog->env_abcenv)  	live(prolog->env_abcenv);
+        if (prolog->env_toplevel)	live(prolog->env_toplevel);
+
         if (info->hasExceptions()) {
             Ins(LIR_live, _ef);
             Ins(LIR_live, _save_eip);
@@ -4981,6 +5016,7 @@ namespace avmplus
         }
 
         frag->lastIns = last;
+        prologLastIns = prolog->lastIns;
 
         info->set_lookup_cache_size(finddef_cache_builder.next_cache);
     }
@@ -5052,12 +5088,6 @@ namespace avmplus
         }
 
         return _tempname;
-    }
-
-    LIns* CodegenLIR::loadToplevel()
-    {
-        LIns* vtable = loadEnvVTable();
-        return loadIns(LIR_ldcp, offsetof(VTable,_toplevel), vtable);
     }
 
     static bool sumFitsInInt32(int32_t a, int32_t b)
@@ -5209,22 +5239,61 @@ namespace avmplus
 
     LIns* CodegenLIR::loadEnvScope()
     {
-        LIns* scope = loadIns(LIR_ldcp, offsetof(MethodEnv,_scope), env_param);
+    	LIns* scope = prolog->env_scope;
+    	if (!scope)
+        {
+    		prolog->env_scope = scope = prolog->insLoad(LIR_ldcp, env_param, offsetof(MethodEnv, _scope));
+            verbose_only( if (vbNames) {
+                vbNames->addName(scope, "env_scope");
+            })
+            verbose_only( if (vbWriter) { vbWriter->flush(); } )
+        }
         return scope;
     }
 
     LIns* CodegenLIR::loadEnvVTable()
     {
-        LIns* scope = loadIns(LIR_ldcp, offsetof(MethodEnv,_scope), env_param);
-        LIns* vtable = loadIns(LIR_ldcp, offsetof(ScopeChain,_vtable), scope);
+        LIns* scope = loadEnvScope();
+        LIns* vtable = prolog->env_vtable;
+        if (!vtable)
+        {
+        	prolog->env_vtable = vtable = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _vtable));
+            verbose_only( if (vbNames) {
+                vbNames->addName(vtable, "env_vtable");
+            })
+            verbose_only( if (vbWriter) { vbWriter->flush(); } )
+        }
         return vtable;
     }
 
     LIns* CodegenLIR::loadEnvAbcEnv()
     {
-        LIns* scope = loadIns(LIR_ldcp, offsetof(MethodEnv,_scope), env_param);
-        LIns* abcenv = loadIns(LIR_ldcp, offsetof(ScopeChain,_abcEnv), scope);
+        LIns* scope = loadEnvScope();
+        LIns* abcenv = prolog->env_abcenv;
+        if (!abcenv)
+        {
+        	prolog->env_abcenv = abcenv = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _abcEnv));
+            verbose_only( if (vbNames) {
+                vbNames->addName(abcenv, "env_abcenv");
+            })
+            verbose_only( if (vbWriter) { vbWriter->flush(); } )
+        }
         return abcenv;
+    }
+
+    LIns* CodegenLIR::loadEnvToplevel()
+    {
+        LIns* vtable = loadEnvVTable();
+        LIns* toplevel = prolog->env_toplevel;
+        if (!toplevel)
+        {
+			prolog->env_toplevel = toplevel = prolog->insLoad(LIR_ldcp, vtable, offsetof(VTable, _toplevel));
+            verbose_only( if (vbNames) {
+                vbNames->addName(toplevel, "env_toplevel");
+            })
+            verbose_only( if (vbWriter) { vbWriter->flush(); } )
+        }
+        return toplevel;
     }
 
     LIns* CodegenLIR::loadVTable(int i)
@@ -5239,7 +5308,7 @@ namespace avmplus
             return loadIns(LIR_ldcp, offsetof(ScriptObject, vtable), localGetp(i));
         }
 
-        LIns* toplevel = loadToplevel();
+        LIns* toplevel = loadEnvToplevel();
 
         int offset;
         if (t == NAMESPACE_TYPE)    offset = offsetof(Toplevel, namespaceClass);
@@ -5404,12 +5473,14 @@ namespace avmplus
 
 #ifdef _DEBUG
     class ValidateReader: public LirFilter {
+    	LirReader reader;
     public:
-        ValidateReader(LirFilter *in) : LirFilter(in)
+        ValidateReader(LIns *lastIns) : LirFilter(NULL), reader(lastIns)
         {}
 
-        LIns* read() {
-            LIns *i = in->read();
+        LIns* read()
+        {
+            LIns *i = reader.read();
             switch (i->opcode()) {
             case LIR_jt:
             case LIR_jf:
@@ -5424,8 +5495,36 @@ namespace avmplus
             }
             return i;
         }
+
+        LIns* pos()
+		{
+        	return reader.pos();
+		}
     };
+#else
+    typedef LirReader ValidateReader;
 #endif
+
+    // read all of in1, followed by all of in2
+    class SeqReader: public LirFilter
+    {
+    	ValidateReader r1, r2;
+    public:
+    	SeqReader(LIns* lastIns1, LIns* lastIns2) : LirFilter(NULL), r1(lastIns1), r2(lastIns2)
+    	{
+    		in = &r1;
+    	}
+
+    	LIns* read()
+		{
+    		LIns* ins = in->read();
+    		if (ins->isop(LIR_start) && in == &r1) {
+    			in = &r2;
+    			ins = in->read();
+    		}
+    		return ins;
+		}
+    };
 
     void analyze_edge(LIns* label, nanojit::BitSet &livein,
                       HashMap<LIns*, nanojit::BitSet*> &labels,
@@ -5452,7 +5551,7 @@ namespace avmplus
         do {
             again = false;
             livein.reset();
-            LirReader in(frag->lastIns);
+            SeqReader in(frag->lastIns, prologLastIns);
             for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
                 LOpcode op = i->opcode();
                 switch (op) {
@@ -5565,7 +5664,7 @@ namespace avmplus
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *vars = lirbuf->sp;
         livein.reset();
-        LirReader in(frag->lastIns);
+        SeqReader in(frag->lastIns, prologLastIns);
         for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
             LOpcode op = i->opcode();
             switch (op) {
@@ -5587,6 +5686,8 @@ namespace avmplus
                                 AvmLog("- %s\n", names->formatIns(i));)
                             // erase the store by rewriting it as a skip
                             LIns* prevIns = (LIns*) (uintptr_t(i) - lirSizes[op]);
+                            if (prologLastIns == i)
+                            	prologLastIns = prevIns;
                             i->initLInsSk(prevIns);
                             continue;
                         } else {
@@ -5704,25 +5805,32 @@ namespace avmplus
     int jitmax = 0x7fffffff;
 #endif
 
+#ifdef NJ_VERBOSE
+    void listing(const char* title, LogControl &log, Fragment* frag, LIns* prologLastIns)
+    {
+        SeqReader seqReader(frag->lastIns, prologLastIns);
+        Allocator lister_alloc;
+        ReverseLister lister(&seqReader, lister_alloc, frag->lirbuf->names, &log, title);
+        for (LIns* ins = lister.read(); !ins->isop(LIR_start); ins = lister.read())
+        {}
+        lister.finish();
+    }
+#endif
+
     void CodegenLIR::emitMD()
     {
+        PERFM_NTPROF("compile");
         mmfx_delete( alloc1 );
         alloc1 = NULL;
 
-        PERFM_NTPROF("compile");
-        debug_only(
-            LirReader reader(frag->lastIns);
-            ValidateReader validator(&reader);
-            for (LIns* i = validator.read(); !i->isop(LIR_start); i = validator.read())
-            { }
-        )
+        CodeMgr *mgr = pool->codeMgr;
+        verbose_only(if (verbose()) listing("Initial LIR", mgr->log, frag, prologLastIns); )
 
         deadvars();
 
-        CodeMgr *mgr = pool->codeMgr;
         verbose_only(if (pool->isVerbose(VB_jit)) {
             Allocator live_alloc;
-            LirReader in(frag->lastIns);
+            SeqReader in(frag->lastIns, prologLastIns);
             nanojit::live(&in, live_alloc, frag, &mgr->log);
         })
 
@@ -5731,13 +5839,12 @@ namespace avmplus
         assm->cgen = this;
         #endif
 
-        LirReader bufreader(frag->lastIns);
-
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
 
         assm->beginAssembly(frag);
-        assm->assemble(frag, &bufreader);
+        SeqReader seqReader(frag->lastIns, prologLastIns);
+        assm->assemble(frag, &seqReader);
         assm->endAssembly(frag);
         PERFM_TPROF_END();
 

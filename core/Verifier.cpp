@@ -424,6 +424,7 @@ namespace avmplus
 					
 					if (pc == code_pos + handler->target)
 					{
+						// FIXME: bug 538639: At the top of a catch block, we generate coerce when an unbox is all that is needed
 						emitCoerce(handler->traits, sp);
 					}
 				}
@@ -954,7 +955,7 @@ namespace avmplus
 				Traits *t = checkTypeName(imm30); // CONSTANT_Multiname
 				int index = sp;
 				Traits* rhs = state->value(index).traits;
-				if (!canAssign(t, rhs) || !Traits::isMachineCompatible(t, rhs))
+				if (!canAssign(t, rhs))
 				{
 					Traits* resultType = t;
 					// result is typed value or null, so if type can't hold null,
@@ -2309,7 +2310,7 @@ namespace avmplus
 	{
 		Value &v = state->value(index);
    		Traits* rhs = v.traits;
-	    if ((!canAssign(target, rhs) || !Traits::isMachineCompatible(target, rhs)))
+	    if (!canAssign(target, rhs))
    			coder->writeCoerce(state, index, target);
 		state->setType(index, target, v.notNull);
 	}
