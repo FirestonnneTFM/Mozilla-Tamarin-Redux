@@ -267,7 +267,7 @@ namespace avmplus
         LInsp curMemBase;
         LInsp curMemSize;
         int32_t activeMin, activeMax;
-        
+
     private:
         void clear();
 
@@ -277,7 +277,7 @@ namespace avmplus
         bool updateActiveRange(LInsp mopAddr, int32_t curDisp, int32_t curExtent);
         LInsp mopsMemoryBase(GlobalMemoryInfo* gmi);
         LInsp mopsMemorySize(GlobalMemoryInfo* gmi);
-            
+
         // overrides from LirWriter
         LIns* ins0(LOpcode v);
         LIns* insCall(const CallInfo* call, LInsp args[]);
@@ -306,7 +306,7 @@ namespace avmplus
             activeMax = curExtent;
         }
         else
-        {  
+        {
             if (curMopAddr == mopAddr)
             {
                 if (curDisp >= activeMin && curExtent <= activeMax)
@@ -319,9 +319,9 @@ namespace avmplus
                 }
                 else
                 {
-                    if (activeMin > curDisp) 
+                    if (activeMin > curDisp)
                         activeMin = curDisp;
-                    if (activeMax < curExtent) 
+                    if (activeMax < curExtent)
                         activeMax = curExtent;
                 }
             }
@@ -5083,7 +5083,7 @@ namespace avmplus
             pool->domain->addGlobalMemoryBaseRef(&globalMemoryInfo->base);
             pool->domain->addGlobalMemorySizeRef(&globalMemoryInfo->size);
         }
-        
+
         int32_t curDisp = 0;
         if (disp != NULL)
         {
@@ -5143,7 +5143,7 @@ namespace avmplus
         if (emitCheck)
         {
             LInsp mopsMemorySize = mopsRangeCheckFilter->mopsMemorySize(globalMemoryInfo);
-            
+
             LInsp cond;
             if (curDisp == 0)
             {
