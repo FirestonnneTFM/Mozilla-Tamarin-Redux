@@ -267,7 +267,7 @@ namespace avmplus
         LInsp curMemBase;
         LInsp curMemSize;
         int32_t activeMin, activeMax;
-        
+
     private:
         void clear();
 
@@ -277,7 +277,7 @@ namespace avmplus
         bool updateActiveRange(LInsp mopAddr, int32_t curDisp, int32_t curExtent);
         LInsp mopsMemoryBase(GlobalMemoryInfo* gmi);
         LInsp mopsMemorySize(GlobalMemoryInfo* gmi);
-            
+
         // overrides from LirWriter
         LIns* ins0(LOpcode v);
         LIns* insCall(const CallInfo* call, LInsp args[]);
@@ -306,7 +306,7 @@ namespace avmplus
             activeMax = curExtent;
         }
         else
-        {  
+        {
             if (curMopAddr == mopAddr)
             {
                 if (curDisp >= activeMin && curExtent <= activeMax)
@@ -319,9 +319,9 @@ namespace avmplus
                 }
                 else
                 {
-                    if (activeMin > curDisp) 
+                    if (activeMin > curDisp)
                         activeMin = curDisp;
-                    if (activeMax < curExtent) 
+                    if (activeMax < curExtent)
                         activeMax = curExtent;
                 }
             }
@@ -1293,20 +1293,20 @@ namespace avmplus
     class PrologWriter : public LirWriter
     {
     public:
-    	LIns* lastIns;
-    	LIns* env_scope;
-    	LIns* env_vtable;
-    	LIns* env_abcenv;
-    	LIns* env_toplevel;
+        LIns* lastIns;
+        LIns* env_scope;
+        LIns* env_vtable;
+        LIns* env_abcenv;
+        LIns* env_toplevel;
 
-    	PrologWriter(LirWriter *out):
-    		LirWriter(out),
-    		lastIns(NULL),
-    		env_scope(NULL),
-    		env_vtable(NULL),
-    		env_abcenv(NULL),
-    		env_toplevel(NULL)
-    	{}
+        PrologWriter(LirWriter *out):
+            LirWriter(out),
+            lastIns(NULL),
+            env_scope(NULL),
+            env_vtable(NULL),
+            env_abcenv(NULL),
+            env_toplevel(NULL)
+        {}
 
         virtual LInsp ins0(LOpcode v) {
             return lastIns = out->ins0(v);
@@ -1693,12 +1693,12 @@ namespace avmplus
             firstLocal++;
         }
 
-		// set remaining locals to undefined
-		for (int i=firstLocal, n = state->verifier->local_count; i < n; i++)
-		{
-			AvmAssert(bt(state->value(i).traits) == BUILTIN_any);
-			localSet(i, undefConst, VOID_TYPE);
-		}
+        // set remaining locals to undefined
+        for (int i=firstLocal, n = state->verifier->local_count; i < n; i++)
+        {
+            AvmAssert(bt(state->value(i).traits) == BUILTIN_any);
+            localSet(i, undefConst, VOID_TYPE);
+        }
 
         #ifdef DEBUGGER
         if (core->debugger())
@@ -4984,10 +4984,10 @@ namespace avmplus
         Ins(LIR_live, coreAddr);
         Ins(LIR_live, undefConst);
 
-        if (prolog->env_scope)	live(prolog->env_scope);
-        if (prolog->env_vtable)  	live(prolog->env_vtable);
-        if (prolog->env_abcenv)  	live(prolog->env_abcenv);
-        if (prolog->env_toplevel)	live(prolog->env_toplevel);
+        if (prolog->env_scope)  live(prolog->env_scope);
+        if (prolog->env_vtable)     live(prolog->env_vtable);
+        if (prolog->env_abcenv)     live(prolog->env_abcenv);
+        if (prolog->env_toplevel)   live(prolog->env_toplevel);
 
         if (info->hasExceptions()) {
             Ins(LIR_live, _ef);
@@ -5113,7 +5113,7 @@ namespace avmplus
             pool->domain->addGlobalMemoryBaseRef(&globalMemoryInfo->base);
             pool->domain->addGlobalMemorySizeRef(&globalMemoryInfo->size);
         }
-        
+
         int32_t curDisp = 0;
         if (disp != NULL)
         {
@@ -5173,7 +5173,7 @@ namespace avmplus
         if (emitCheck)
         {
             LInsp mopsMemorySize = mopsRangeCheckFilter->mopsMemorySize(globalMemoryInfo);
-            
+
             LInsp cond;
             if (curDisp == 0)
             {
@@ -5239,10 +5239,10 @@ namespace avmplus
 
     LIns* CodegenLIR::loadEnvScope()
     {
-    	LIns* scope = prolog->env_scope;
-    	if (!scope)
+        LIns* scope = prolog->env_scope;
+        if (!scope)
         {
-    		prolog->env_scope = scope = prolog->insLoad(LIR_ldcp, env_param, offsetof(MethodEnv, _scope));
+            prolog->env_scope = scope = prolog->insLoad(LIR_ldcp, env_param, offsetof(MethodEnv, _scope));
             verbose_only( if (vbNames) {
                 vbNames->addName(scope, "env_scope");
             })
@@ -5257,7 +5257,7 @@ namespace avmplus
         LIns* vtable = prolog->env_vtable;
         if (!vtable)
         {
-        	prolog->env_vtable = vtable = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _vtable));
+            prolog->env_vtable = vtable = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _vtable));
             verbose_only( if (vbNames) {
                 vbNames->addName(vtable, "env_vtable");
             })
@@ -5272,7 +5272,7 @@ namespace avmplus
         LIns* abcenv = prolog->env_abcenv;
         if (!abcenv)
         {
-        	prolog->env_abcenv = abcenv = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _abcEnv));
+            prolog->env_abcenv = abcenv = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _abcEnv));
             verbose_only( if (vbNames) {
                 vbNames->addName(abcenv, "env_abcenv");
             })
@@ -5287,7 +5287,7 @@ namespace avmplus
         LIns* toplevel = prolog->env_toplevel;
         if (!toplevel)
         {
-			prolog->env_toplevel = toplevel = prolog->insLoad(LIR_ldcp, vtable, offsetof(VTable, _toplevel));
+            prolog->env_toplevel = toplevel = prolog->insLoad(LIR_ldcp, vtable, offsetof(VTable, _toplevel));
             verbose_only( if (vbNames) {
                 vbNames->addName(toplevel, "env_toplevel");
             })
@@ -5473,7 +5473,7 @@ namespace avmplus
 
 #ifdef _DEBUG
     class ValidateReader: public LirFilter {
-    	LirReader reader;
+        LirReader reader;
     public:
         ValidateReader(LIns *lastIns) : LirFilter(NULL), reader(lastIns)
         {}
@@ -5497,9 +5497,9 @@ namespace avmplus
         }
 
         LIns* pos()
-		{
-        	return reader.pos();
-		}
+        {
+            return reader.pos();
+        }
     };
 #else
     typedef LirReader ValidateReader;
@@ -5508,22 +5508,22 @@ namespace avmplus
     // read all of in1, followed by all of in2
     class SeqReader: public LirFilter
     {
-    	ValidateReader r1, r2;
+        ValidateReader r1, r2;
     public:
-    	SeqReader(LIns* lastIns1, LIns* lastIns2) : LirFilter(NULL), r1(lastIns1), r2(lastIns2)
-    	{
-    		in = &r1;
-    	}
+        SeqReader(LIns* lastIns1, LIns* lastIns2) : LirFilter(NULL), r1(lastIns1), r2(lastIns2)
+        {
+            in = &r1;
+        }
 
-    	LIns* read()
-		{
-    		LIns* ins = in->read();
-    		if (ins->isop(LIR_start) && in == &r1) {
-    			in = &r2;
-    			ins = in->read();
-    		}
-    		return ins;
-		}
+        LIns* read()
+        {
+            LIns* ins = in->read();
+            if (ins->isop(LIR_start) && in == &r1) {
+                in = &r2;
+                ins = in->read();
+            }
+            return ins;
+        }
     };
 
     void analyze_edge(LIns* label, nanojit::BitSet &livein,
@@ -5687,7 +5687,7 @@ namespace avmplus
                             // erase the store by rewriting it as a skip
                             LIns* prevIns = (LIns*) (uintptr_t(i) - lirSizes[op]);
                             if (prologLastIns == i)
-                            	prologLastIns = prevIns;
+                                prologLastIns = prevIns;
                             i->initLInsSk(prevIns);
                             continue;
                         } else {

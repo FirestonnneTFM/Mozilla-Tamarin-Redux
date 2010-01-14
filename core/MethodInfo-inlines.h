@@ -40,8 +40,8 @@
 namespace avmplus
 {
 
-REALLY_INLINE ScopeOrTraits::ScopeOrTraits(Traits* t) : _scopeOrTraits((uintptr_t)t) 
-{ 
+REALLY_INLINE ScopeOrTraits::ScopeOrTraits(Traits* t) : _scopeOrTraits((uintptr_t)t)
+{
 }
 
 REALLY_INLINE Traits* ScopeOrTraits::getTraits() const
@@ -60,13 +60,13 @@ REALLY_INLINE const ScopeTypeChain* ScopeOrTraits::getScope() const
 
 REALLY_INLINE void ScopeOrTraits::setTraits(MMgc::GC* gc, void* container, Traits* t)
 {
-	WB(gc, container, &_scopeOrTraits, uintptr_t(t)); 
+    WB(gc, container, &_scopeOrTraits, uintptr_t(t));
 }
 
 
 REALLY_INLINE void ScopeOrTraits::setScope(MMgc::GC* gc, void* container, const ScopeTypeChain* s)
 {
-	WB(gc, container, &_scopeOrTraits, uintptr_t(s) | IS_SCOPE); 
+    WB(gc, container, &_scopeOrTraits, uintptr_t(s) | IS_SCOPE);
 }
 
 #ifdef DEBUGGER
