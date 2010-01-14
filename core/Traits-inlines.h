@@ -382,8 +382,8 @@ REALLY_INLINE bool Traits::implementsNewInterfaces() const
     return m_implementsNewInterfaces;
 }
 
-REALLY_INLINE void Traits::setDeclaringScopes(const ScopeTypeChain* stc) 
-{ 
+REALLY_INLINE void Traits::setDeclaringScopes(const ScopeTypeChain* stc)
+{
     AvmAssert(stc != NULL);
     m_declaringScope = stc;
 }

@@ -358,7 +358,7 @@ namespace avmplus
         uint8_t* base;
         uint32_t size;
     };
-    
+
     class MopsRangeCheckFilter;
 
     /**
