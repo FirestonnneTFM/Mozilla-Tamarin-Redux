@@ -78,7 +78,7 @@ namespace avmplus
 	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 	typedef double (*AvmThunkNativeThunkerN)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	typedef void (AvmPlusScriptableObject::*AvmThunkNativeMethodHandler)();
 	typedef void (*AvmThunkNativeFunctionHandler)(AvmPlusScriptableObject* obj);
 #endif
@@ -183,12 +183,12 @@ namespace avmplus
 
 	#define AvmThunkConstant_AvmString(v)		(env->method->pool()->getString(v))
 	
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	#define AVMTHUNK_GET_METHOD_HANDLER(env)	((env)->method->handler_method())
 	#define AVMTHUNK_GET_FUNCTION_HANDLER(env)	((env)->method->handler_function())
 #endif
 
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	union AvmThunkNativeHandler
 	{
 		AvmThunkNativeMethodHandler method;
@@ -199,7 +199,7 @@ namespace avmplus
 	struct NativeMethodInfo
 	{
 	public:
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 		AvmThunkNativeHandler handler;
 #endif
 		AvmThunkNativeThunker thunker;
@@ -292,7 +292,7 @@ namespace avmplus
 		#endif
 	};
 
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
 		reinterpret_cast<AvmThunkNativeMethodHandler>((void(CLS::*)())(PTR))
 #endif
@@ -336,7 +336,7 @@ namespace avmplus
 		static const NativeMethodInfo NAME##_methodEntries[] = {
 #endif
 			
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
 		{ { _NATIVE_METHOD_CAST_PTR(CLS, &IMPL) }, (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID },
 #else
@@ -360,7 +360,7 @@ namespace avmplus
 	#define AVMTHUNK_END_NATIVE_METHODS() \
 		{ { NULL }, NULL, -1 } };
 #else
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	// C++ won't let us auto-init a union to a field other than the first one, nor will it
 	// allow us to reliably cast between a pointer-to-function and pointer-to-member-function,
 	// thus this inline function to massage the few places that need it.
@@ -425,7 +425,7 @@ namespace avmplus
 
 	#define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME) 
 
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
 		m[METHID].handler.method = _NATIVE_METHOD_CAST_PTR(CLS, &IMPL); \
 		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; 
@@ -443,7 +443,7 @@ namespace avmplus
 	#define AVMTHUNK_NATIVE_METHOD_NAMESPACE(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(avmplus::Namespace, METHID, IMPL)
 
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 	#define AVMTHUNK_NATIVE_FUNCTION(METHID, IMPL) \
 		m[METHID].handler.function = reinterpret_cast<AvmThunkNativeFunctionHandler>(IMPL); \
 		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; 

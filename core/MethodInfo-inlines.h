@@ -277,7 +277,7 @@ REALLY_INLINE AvmThunkNativeThunker MethodInfo::thunker() const
     return _native.thunker;
 }
 
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 REALLY_INLINE AvmThunkNativeMethodHandler MethodInfo::handler_method() const
 {
     AvmAssert(isNative());

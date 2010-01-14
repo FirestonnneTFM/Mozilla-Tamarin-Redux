@@ -109,7 +109,7 @@ namespace avmplus
 		if (native_info)
 		{
 			this->_native.thunker = native_info->thunker;
-#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS
+#ifdef VMCFG_INDIRECT_NATIVE_THUNKS
 			this->_native.handler = native_info->handler;
 #endif
 			this->_flags |= NEEDS_CODECONTEXT | NEEDS_DXNS | ABSTRACT_METHOD;
