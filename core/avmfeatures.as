@@ -545,7 +545,7 @@ var FEATURES =
             This decreases code size at the expense of slightly slower thunks
             and an extra field in NativeMethodInfo. </desc>
     <name> AVMFEATURE_INDIRECT_NATIVE_THUNKS </name>
-    <defines> AVMPLUS_INDIRECT_NATIVE_THUNKS </defines>
+    <defines> VMCFG_INDIRECT_NATIVE_THUNKS </defines>
   </feature>
 
   <feature>

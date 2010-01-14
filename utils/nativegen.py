@@ -52,9 +52,8 @@ try:
 except ImportError:
 	pass
 
-parser = OptionParser(usage="usage: %prog [--directthunks] [importfile [, importfile]...] file...")
+parser = OptionParser(usage="usage: %prog [importfile [, importfile]...] file...")
 parser.add_option("-n", "--nativemapname", help="no longer supported")
-parser.add_option("-u", "--directthunks", action="store_true", default=False, help="generate a unique (direct) thunk for every native method (don't recycle thunks with similar signatures)")
 parser.add_option("-v", "--thunkvprof", action="store_true", default=False)
 parser.add_option("-e", "--externmethodandclassetables", action="store_true", default=False, help="generate extern decls for method and class tables")
 parser.add_option("--native-id-namespace", dest="nativeIDNS", default="avmplus::NativeID", help="Specifies the C++ namespace in which all generated should be in.")
@@ -1289,41 +1288,49 @@ class AbcThunkGen:
 		if opts.thunkvprof:
 			out_c.println("#define DOPROF")
 			out_c.println('#include "../vprof/vprof.h"')
-		if opts.directthunks:
-			out_c.println("")
-			out_c.println("#ifdef AVMPLUS_INDIRECT_NATIVE_THUNKS")
-			out_c.println("  #error nativegen.py: --directthunks requires AVMFEATURE_INDIRECT_NATIVE_THUNKS=0")
-			out_c.println("#endif")
-			out_c.println("")
-			for receiver,m in self.all_thunks:
-				thunkname = m.native_id_name;
-				self.emitThunkProto(thunkname, receiver, m);
-				self.emitThunkBody(thunkname, receiver, m, True);
-		else:
-			out_c.println("")
-			out_c.println("#ifndef AVMPLUS_INDIRECT_NATIVE_THUNKS")
-			out_c.println("  #error nativegen.py: --directthunks requires AVMFEATURE_INDIRECT_NATIVE_THUNKS=1")
-			out_c.println("#endif")
-			out_c.println("")
-			for sig in unique_thunk_sigs:
-				users = unique_thunk_sigs[sig]
-				receiver = None;
-				m = None;
-				out_c.println('')
-				for native_name in users:
-					out_c.println("// "+native_name);
-					receiver = users[native_name][0];
-					m = users[native_name][1];
-				thunkname = name+"_"+sig;
-				self.emitThunkProto(thunkname, receiver, m);
-				for native_name in users:
-					# use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
-					# (sad but true, happens in some environments)
-					out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
-				out_h.println("")
-				# if there's only one client of the thunk, emit a direct call even if direct thunks aren't requested
-				do_direct = (len(users) == 1)
-				self.emitThunkBody(thunkname, receiver, m, do_direct)
+
+		# emit direct thunks, guarded by ifndef VMCFG_INDIRECT_NATIVE_THUNKS
+		out_c.println("")
+		out_c.println("#ifndef VMCFG_INDIRECT_NATIVE_THUNKS")
+		out_c.println("")
+		for receiver,m in self.all_thunks:
+			thunkname = m.native_id_name;
+			self.emitThunkProto(thunkname, receiver, m);
+			self.emitThunkBody(thunkname, receiver, m, True);
+
+		out_c.println("")
+		out_c.println("#else // VMCFG_INDIRECT_NATIVE_THUNKS")
+
+		out_h.println("")
+		out_h.println("#ifdef VMCFG_INDIRECT_NATIVE_THUNKS")
+		out_h.println("")
+
+		# emit indirect thunks, guarded by ifdef VMCFG_INDIRECT_NATIVE_THUNKS
+		for sig in unique_thunk_sigs:
+			users = unique_thunk_sigs[sig]
+			receiver = None;
+			m = None;
+			out_c.println('')
+			for native_name in users:
+				out_c.println("// "+native_name);
+				receiver = users[native_name][0];
+				m = users[native_name][1];
+			thunkname = name+"_"+sig;
+			self.emitThunkProto(thunkname, receiver, m);
+			for native_name in users:
+				# use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
+				# (sad but true, happens in some environments)
+				out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
+			out_h.println("")
+			# if there's only one client of the thunk, emit a direct call even if direct thunks aren't requested
+			do_direct = (len(users) == 1)
+			self.emitThunkBody(thunkname, receiver, m, do_direct)
+
+		out_c.println("")
+		out_c.println("#endif // VMCFG_INDIRECT_NATIVE_THUNKS")
+
+		out_h.println("#endif // VMCFG_INDIRECT_NATIVE_THUNKS")
+		out_h.println("")
 
 		out_c.println("")
 		self.printStructAsserts(out_c, abc)

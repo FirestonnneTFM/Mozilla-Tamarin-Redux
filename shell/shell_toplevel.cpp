@@ -46,10 +46,1161 @@ const uint32_t shell_toplevel_abc_length = 13534;
 
 /* thunks (40 unique signatures, 89 total) */
 
-#ifndef AVMPLUS_INDIRECT_NATIVE_THUNKS
-  #error nativegen.py: --directthunks requires AVMFEATURE_INDIRECT_NATIVE_THUNKS=1
-#endif
+#ifndef VMCFG_INDIRECT_NATIVE_THUNKS
 
+AvmBox avmplus_Domain_currentDomain_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::DomainClass* const obj = (::avmshell::DomainClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    ::avmshell::DomainObject* const ret = obj->get_currentDomain();
+    return (AvmBox) ret;
+}
+AvmBox avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::DomainClass* const obj = (::avmshell::DomainClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->get_MIN_DOMAIN_MEMORY_LENGTH();
+    return (AvmBox) ret;
+}
+AvmBox avmplus_Domain_private_init_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::DomainObject* const obj = (::avmshell::DomainObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->init(
+        (::avmshell::DomainObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_Domain_loadBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::DomainObject* const obj = (::avmshell::DomainObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBox const ret = obj->loadBytes(
+        (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_Domain_getClass_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::DomainObject* const obj = (::avmshell::DomainObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    ClassClosure* const ret = obj->getClass(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_Domain_domainMemory_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::DomainObject* const obj = (::avmshell::DomainObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    ::avmshell::ByteArrayObject* const ret = obj->get_domainMemory();
+    return (AvmBox) ret;
+}
+AvmBox avmplus_Domain_domainMemory_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::DomainObject* const obj = (::avmshell::DomainObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->set_domainMemory(
+        (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_readFile_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayClass* const obj = (::avmshell::ByteArrayClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    ::avmshell::ByteArrayObject* const ret = obj->readFile(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_writeFile_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeFile(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_readBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmObject
+        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
+    };
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->readBytes(
+        (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+        , (argc < 2 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff2]))
+        , (argc < 3 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff3]))
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmObject
+        , argoff3 = argoff2 + AvmThunkArgSize_uint32_t
+    };
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeBytes(
+        (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+        , (argc < 2 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff2]))
+        , (argc < 3 ? AvmThunkCoerce_int32_t_uint32_t(0) : AvmThunkUnbox_uint32_t(argv[argoff3]))
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeBoolean_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeBoolean(
+        AvmThunkUnbox_AvmBool32(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeByte(
+        AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeShort(
+        AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeInt(
+        AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeUnsignedInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeUnsignedInt(
+        AvmThunkUnbox_uint32_t(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeFloat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeFloat(
+        AvmThunkUnbox_double(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeDouble_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeDouble(
+        AvmThunkUnbox_double(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeUTF_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeUTF(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_writeUTFBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->writeUTFBytes(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_readBoolean_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBool32 const ret = obj->readBoolean();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_readByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    int32_t const ret = obj->readByte();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_readUnsignedByte_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->readUnsignedByte();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_readShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    int32_t const ret = obj->readShort();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_readUnsignedShort_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->readUnsignedShort();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_readInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    int32_t const ret = obj->readInt();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_readUnsignedInt_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->readUnsignedInt();
+    return (AvmBox) ret;
+}
+double flash_utils_ByteArray_readFloat_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = obj->readFloat();
+    return ret;
+}
+double flash_utils_ByteArray_readDouble_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = obj->readDouble();
+    return ret;
+}
+AvmBox flash_utils_ByteArray_readUTF_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->readUTF();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_readUTFBytes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->readUTFBytes(
+        AvmThunkUnbox_uint32_t(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_length_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->get_length();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_length_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->set_length(
+        AvmThunkUnbox_uint32_t(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_private_zlib_compress_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->zlib_compress();
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_private_zlib_uncompress_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->zlib_uncompress();
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_private__toString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->_toString();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_bytesAvailable_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->get_bytesAvailable();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_position_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->get_position();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_position_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->set_position(
+        AvmThunkUnbox_uint32_t(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_utils_ByteArray_endian_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->get_endian();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_ByteArray_endian_set_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::ByteArrayObject* const obj = (::avmshell::ByteArrayObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->set_endian(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox flash_sampler_NewObjectSample_object_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    NewObjectSampleObject* const obj = (NewObjectSampleObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBox const ret = obj->get_object();
+    return (AvmBox) ret;
+}
+double flash_sampler_NewObjectSample_size_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    NewObjectSampleObject* const obj = (NewObjectSampleObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = obj->get_size();
+    return ret;
+}
+AvmBox native_script_function_flash_sampler_clearSamples_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    SamplerScript::clearSamples(obj);
+    return kAvmThunkUndefined;
+}
+AvmBox native_script_function_flash_sampler_startSampling_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    SamplerScript::startSampling(obj);
+    return kAvmThunkUndefined;
+}
+AvmBox native_script_function_flash_sampler_stopSampling_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    SamplerScript::stopSampling(obj);
+    return kAvmThunkUndefined;
+}
+AvmBox native_script_function_flash_sampler_pauseSampling_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    SamplerScript::pauseSampling(obj);
+    return kAvmThunkUndefined;
+}
+AvmBox native_script_function_flash_sampler_sampleInternalAllocs_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    SamplerScript::sampleInternalAllocs(obj
+        , AvmThunkUnbox_AvmBool32(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox native_script_function_flash_sampler__setSamplerCallback_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    SamplerScript::_setSamplerCallback(obj
+        , (FunctionObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+double native_script_function_flash_sampler_getSize_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = SamplerScript::getSize(obj
+        , AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    return ret;
+}
+AvmBox native_script_function_flash_sampler_getMemberNames_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmBox
+    };
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBox const ret = SamplerScript::getMemberNames(obj
+        , AvmThunkUnbox_AvmBox(argv[argoff1])
+        , (argc < 2 ? false : AvmThunkUnbox_AvmBool32(argv[argoff2]))
+    );
+    return (AvmBox) ret;
+}
+AvmBox native_script_function_flash_sampler_getSamples_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBox const ret = SamplerScript::getSamples(obj);
+    return (AvmBox) ret;
+}
+double native_script_function_flash_sampler_getSampleCount_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = SamplerScript::getSampleCount(obj);
+    return ret;
+}
+double native_script_function_flash_sampler__getInvocationCount_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmBox
+        , argoff3 = argoff2 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = SamplerScript::_getInvocationCount(obj
+        , AvmThunkUnbox_AvmBox(argv[argoff1])
+        , (QNameObject*)AvmThunkUnbox_AvmObject(argv[argoff2])
+        , AvmThunkUnbox_uint32_t(argv[argoff3])
+    );
+    return ret;
+}
+AvmBox native_script_function_flash_sampler_isGetterSetter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmBox
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBool32 const ret = SamplerScript::isGetterSetter(obj
+        , AvmThunkUnbox_AvmBox(argv[argoff1])
+        , (QNameObject*)AvmThunkUnbox_AvmObject(argv[argoff2])
+    );
+    return (AvmBox) ret;
+}
+AvmBox native_script_function_flash_sampler_getLexicalScopes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    ArrayObject* const ret = SamplerScript::getLexicalScopes(obj
+        , (FunctionObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox native_script_function_flash_sampler_getSavedThis_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ScriptObject* const obj = AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBox const ret = SamplerScript::getSavedThis(obj
+        , (FunctionObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox flash_trace_Trace_setLevel_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_int32_t
+    };
+    (void)env;
+    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBox const ret = obj->setLevel(
+        AvmThunkUnbox_int32_t(argv[argoff1])
+        , (argc < 2 ? 2 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    return (AvmBox) ret;
+}
+AvmBox flash_trace_Trace_getLevel_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)env;
+    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    int32_t const ret = obj->getLevel(
+        (argc < 1 ? 2 : AvmThunkUnbox_int32_t(argv[argoff1]))
+    );
+    return (AvmBox) ret;
+}
+AvmBox flash_trace_Trace_setListener_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBox const ret = obj->setListener(
+        (FunctionObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox flash_trace_Trace_getListener_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    TraceClass* const obj = (TraceClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    FunctionObject* const ret = obj->getListener();
+    return (AvmBox) ret;
+}
+AvmBox flash_utils_Dictionary_private_init_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    DictionaryObject* const obj = (DictionaryObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->init(
+        AvmThunkUnbox_AvmBool32(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_JObject_create_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    const uint32_t argoffV = argoff1 + AvmThunkArgSize_AvmString;
+    (void)env;
+    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    JObject* const ret = obj->create(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+        , (argc <= 1 ? NULL : argv + argoffV)
+        , (argc <= 1 ? 0 : argc - 1)
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_JObject_createArray_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmObject
+        , argoff3 = argoff2 + AvmThunkArgSize_int32_t
+    };
+    (void)env;
+    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    JObject* const ret = obj->createArray(
+        (JObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+        , AvmThunkUnbox_int32_t(argv[argoff2])
+        , (ArrayObject*)(argc < 3 ? AvmThunkCoerce_AvmBox_AvmObject(kAvmThunkNull) : (ArrayObject*)AvmThunkUnbox_AvmObject(argv[argoff3]))
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_JObject_toArray_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    ArrayObject* const ret = obj->toArray(
+        (JObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_JObject_constructorSignature_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    const uint32_t argoffV = argoff1 + AvmThunkArgSize_AvmString;
+    (void)env;
+    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->constructorSignature(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+        , (argc <= 1 ? NULL : argv + argoffV)
+        , (argc <= 1 ? 0 : argc - 1)
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_JObject_methodSignature_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmObject
+    };
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_AvmString;
+    (void)env;
+    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->methodSignature(
+        (JObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+        , AvmThunkUnbox_AvmString(argv[argoff2])
+        , (argc <= 2 ? NULL : argv + argoffV)
+        , (argc <= 2 ? 0 : argc - 2)
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_JObject_fieldSignature_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    JObjectClass* const obj = (JObjectClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->fieldSignature(
+        (JObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+        , AvmThunkUnbox_AvmString(argv[argoff2])
+    );
+    return (AvmBox) ret;
+}
+double avmplus_MI_plus_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::MIObject* const obj = (::avmshell::MIObject*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = obj->::avmshell::MIObjectImpl::plus(
+        AvmThunkUnbox_double(argv[argoff1])
+    );
+    return ret;
+}
+AvmBox avmplus_System_exit_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->exit(
+        AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_System_exec_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    int32_t const ret = obj->exec(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_System_getAvmplusVersion_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->getAvmplusVersion();
+    return (AvmBox) ret;
+}
+AvmBox avmplus_System_trace_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->trace(
+        (ArrayObject*)AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_System_write_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->write(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_System_debugger_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->debugger();
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_System_isDebugger_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBool32 const ret = obj->isDebugger();
+    return (AvmBox) ret;
+}
+AvmBox avmplus_System_getTimer_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    uint32_t const ret = obj->getTimer();
+    return (AvmBox) ret;
+}
+AvmBox avmplus_System_private_getArgv_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    ArrayObject* const ret = obj->getArgv();
+    return (AvmBox) ret;
+}
+AvmBox avmplus_System_readLine_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->readLine();
+    return (AvmBox) ret;
+}
+double avmplus_System_totalMemory_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = obj->get_totalMemory();
+    return ret;
+}
+double avmplus_System_freeMemory_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = obj->get_freeMemory();
+    return ret;
+}
+double avmplus_System_privateMemory_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    double const ret = obj->get_privateMemory();
+    return ret;
+}
+AvmBox avmplus_System_forceFullCollection_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->forceFullCollection();
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_System_queueCollection_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->queueCollection();
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_System_ns_example_nstest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->ns_example_nstest();
+    return kAvmThunkUndefined;
+}
+AvmBox avmplus_System_isGlobal_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::SystemClass* const obj = (::avmshell::SystemClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBool32 const ret = obj->isGlobal(
+        AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_File_exists_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmBool32 const ret = obj->exists(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_File_read_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    AvmString const ret = obj->read(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+    );
+    return (AvmBox) ret;
+}
+AvmBox avmplus_File_write_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+{
+    enum {
+        argoff0 = 0
+        , argoff1 = argoff0 + AvmThunkArgSize_AvmObject
+        , argoff2 = argoff1 + AvmThunkArgSize_AvmString
+    };
+    (void)argc;
+    (void)env;
+    ::avmshell::FileClass* const obj = (::avmshell::FileClass*)AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0]);
+    obj->write(
+        AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmThunkUnbox_AvmString(argv[argoff2])
+    );
+    return kAvmThunkUndefined;
+}
+
+#else // VMCFG_INDIRECT_NATIVE_THUNKS
 
 // avmplus_JObject_methodSignature
 AvmBox shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
@@ -733,6 +1884,8 @@ AvmBox shell_toplevel_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
         AvmThunkUnbox_AvmObject(argv[argoff1])
     );
 }
+
+#endif // VMCFG_INDIRECT_NATIVE_THUNKS
 
 class SlotOffsetsAndAsserts
 {
