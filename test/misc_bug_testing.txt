@@ -57,4 +57,3 @@
 # https://bugzilla.mozilla.org/show_bug.cgi?id=482794
 cd performance;${py} ./runtests.py  --avm=${avmrd} --vmargs="-Dnoincgc" sunspider/
 
-
