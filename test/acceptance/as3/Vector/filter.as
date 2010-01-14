@@ -108,8 +108,6 @@ AddTestCase(	"filter use thisobj",
 		"messagemessagemessage",
 		msg);
 
-/*
- * Test fails because fix reverted until it can be versioned.
 // Bugzilla https://bugzilla.mozilla.org/show_bug.cgi?id=513095
 var items:Vector.<String> = new Vector.<String>;
 items.push("one");
@@ -125,7 +123,6 @@ AddTestCase("Bug 513095: Type-check filter function",
             "two",
             filtered.toString()
             );
-*/
 
 class TestClass {
     private var myVal:Object;
