@@ -117,12 +117,12 @@ cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
 ##
 # Post coverage data to ASTEAM
 ##
-. ${basedir}/build/buildbot/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/$change/$platform/avm.cov
+. ${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh $COVFILE $ftp_asteam/$branch/${change}-${changeid}/$platform/avm.cov
 
 
 echo "message: total function coverage:           $fnpct"
 echo "message: total condition/decision coverage: $cdpct"
-echo "url: http://10.60.48.47/builds/$branch/$change/linux/avm.cov code coverage data file avm.cov"
+echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/avm.cov code coverage data file avm.cov"
 
 ##
 # Ensure that the system is torn down and clean
