@@ -171,7 +171,7 @@ prototype.every = function(checker, thisObj=void 0) : Boolean {
     return _every(castToThisType(this), checker, thisObj is Object ? thisObj : null);
 }
 
-private native function _filter(callback:Function, thisObject):Array;
+private native function _filter(callback:Function, thisObject):*;
 prototype.filter = function(checker, thisObj=void 0) {
     return castToThisType(this).private::_filter(checker, thisObj is Object ? thisObj : null);
 }
@@ -189,7 +189,7 @@ prototype.lastIndexOf = function (value, from=void 0) {
     return castToThisType(this).AS3::lastIndexOf(value, from == undefined ? Infinity : Number(from));
 }
 
-private native function _map(callback:Function, thisObject):Array;
+private native function _map(callback:Function, thisObject):*;
 prototype.map = function(mapper, thisObj=void 0) {
     return castToThisType(this).private::_map(mapper, thisObj is Object ? thisObj : null);
 }
