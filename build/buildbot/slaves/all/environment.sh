@@ -78,7 +78,6 @@ export shell_release_min=avmshell_min$shell_extension
 export shell_debug_min=avmshell_d_min$shell_extension
 
 export jit="-Ojit"
-export mir="-Dforcemir"
 export interp="-Dinterp"
 
 
