@@ -84,16 +84,19 @@ while True:
     if line.startswith("changeset:"):
         revision = line[line.find(":")+1:].strip().replace(":","-")
 
-showconfig = commands.getoutput("hg showconfig")
-url = ''
+# Hardcode this for now, the code below would return
+# 'http://asteam.macromedia.com:8000/tamarin-redux-10.1'
+# which is not a correct value, so hack this for now
+url = 'http://asteam.macromedia.com/hg/tamarin-redux-10.1/'
+#showconfig = commands.getoutput("hg showconfig")
 # Find the path.default
-s = StringIO(showconfig)
-while True:
-    line = s.readline()
-    if not line:
-        break
-    if line.startswith("paths.default="):
-        url = line[line.find("=")+1:].strip()
+#s = StringIO(showconfig)
+#while True:
+#    line = s.readline()
+#    if not line:
+#        break
+#    if line.startswith("paths.default="):
+#        url = line[line.find("=")+1:].strip()
 
 # Write out a file that contains the output from "hg log"
 filename = "change-%s.%s" % (revision,PRIORITY)
