@@ -49,10 +49,10 @@ from buildbot.sourcestamp import SourceStamp
 from buildbot.changes.maildir import MaildirService
 from buildbot.process.properties import Properties
 
-from buildbot.scheduler import *
+from buildbot import scheduler
 
 
-class Scheduler(Scheduler):
+class Scheduler(scheduler.Scheduler):
     '''The buildbot.scheduler.Scheduler class is sublclassed (with the same name to not have 
         to modify any of the master.cfg code) from the original source to add the ability to 
         handle buildsets'''
@@ -69,7 +69,12 @@ class Scheduler(Scheduler):
         buildset_builderNames = []
         for builder_name in self.builderNames:
             # Get a builder from the BotMaster:
-            builder = self.parent.botmaster.builders.get(builder_name)
+            try:
+                builder = self.parent.botmaster.builders.get(builder_name)
+            except AttributeError:
+                # when this scheduler is used by the AnyBranchScheduler, botmaster is one level up from normal
+                builder = self.parent.parent.botmaster.builders.get(builder_name)
+                
             if builder.builder_status.getState()[0] == 'idle':
                 buildset_builderNames.append(builder_name)
 
@@ -79,7 +84,13 @@ class Scheduler(Scheduler):
                                properties=self.properties)
         self.submitBuildSet(bs)
 
-class BuilderDependent(Dependent):
+class AnyBranchScheduler(scheduler.AnyBranchScheduler):
+    '''The buildbot.scheduler.AnyBranchScheduler is subclassed to use our modified
+       Scheduler (above) with the buildsets additions'''
+    schedulerFactory = Scheduler
+    
+
+class BuilderDependent(scheduler.Dependent):
     """This scheduler runs some set of 'downstream' builds when the
     'upstream' scheduler has completed successfully."""
     
@@ -87,7 +98,7 @@ class BuilderDependent(Dependent):
     
     def __init__(self, name, upstream, callbackInterval, builderNames, builderDependencies, 
                     properties={}, fileIsImportant=None):
-        Dependent.__init__(self, name, upstream, builderNames, properties)
+        scheduler.Dependent.__init__(self, name, upstream, builderNames, properties)
         # - each builder must have a dependent that is in the upstream builder
         # - multiple builders can be dependent on the same upstream builder
         self.builderDependencies = builderDependencies
