@@ -205,6 +205,12 @@ namespace avmplus
     // WARNING: do not pass a (signed) intptr_t value; you may get incorrect results.
     bool            atomIsValidIntptrValue_u(const uintptr_t u);
 
+    // make an int atom from a signed value known to fit
+    Atom atomFromIntptrValue(const intptr_t i);
+
+    // make an int atom from an unsigned value known to fit
+    Atom atomFromIntptrValue_u(const uintptr_t u);
+
     // macro for profiling the frequencies of different Atom tags.
     // Must include vprof.h.  usage:   tagprof("histogram for my_atom", my_atom);
     #ifdef DOPROF

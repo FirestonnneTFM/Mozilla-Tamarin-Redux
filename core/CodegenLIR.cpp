@@ -612,17 +612,17 @@ namespace avmplus
 
         case BUILTIN_int:
             if (native->isconst()) {
-                Atom a = core->intToAtom(native->imm32());
-                if (atomIsIntptr(a))
-                    return InsConstAtom(a);
+                int32_t val = native->imm32();
+                if (atomIsValidIntptrValue(val))
+                    return InsConstAtom(atomFromIntptrValue(val));
             }
             return callIns(FUNCTIONID(intToAtom), 2, coreAddr, native);
 
         case BUILTIN_uint:
             if (native->isconst()) {
-                Atom a = core->uintToAtom(native->imm32());
-                if (atomIsIntptr(a))
-                    return InsConstAtom(a);
+                uint32_t val = native->imm32();
+                if (atomIsValidIntptrValue_u(val))
+                    return InsConstAtom(atomFromIntptrValue_u(val));
             }
             return callIns(FUNCTIONID(uintToAtom), 2, coreAddr, native);
 

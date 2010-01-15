@@ -111,6 +111,18 @@ namespace avmplus
         return (u & MASK) == 0;
     }
 
+    REALLY_INLINE Atom atomFromIntptrValue(const intptr_t i)
+    {
+    	AvmAssert(atomIsValidIntptrValue(i));
+    	return ((Atom)i)<<3 | kIntptrType;
+    }
+
+    REALLY_INLINE Atom atomFromIntptrValue_u(const uintptr_t u)
+    {
+    	AvmAssert(atomIsValidIntptrValue_u(u));
+    	return ((Atom)u)<<3 | kIntptrType;
+    }
+
     // unwrap an atom and return a ScriptObject*.  Doesn't use atomPtr(), because
     // using subtract allows the expression to be folded with other pointer math,
     // unlike the & ~7 in atomPtr().
