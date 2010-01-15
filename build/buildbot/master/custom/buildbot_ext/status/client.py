@@ -41,7 +41,6 @@ class StatusClientPerspective(SCP):
         d['revision'] = build.getSourceStamp().revision
         d['branch'] = build.getSourceStamp().branch
         d['patch'] = build.getSourceStamp().patch
-        d['number'] = build.getNumber()
         
         # convert the changes into a passable object
         authors = []
