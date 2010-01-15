@@ -990,11 +990,6 @@ namespace avmplus
     };
 #endif //  _DEBUG
 
-// if DEFER_STORES is defined, we defer local variable stores to the
-// ends of basic blocks, then only emit the ones that are live
-// #define DEFER_STORES(...) __VA_ARGS__
-#define DEFER_STORES(...)
-
     class CopyPropagation: public LirWriter
     {
         AvmCore* core;
@@ -1015,23 +1010,6 @@ namespace avmplus
             this->vars = vars;
         }
 
-        void saveState() {
-            LIns *vars = this->vars;
-            for (int i=0, n=nvar; i < n; i++) {
-                LIns *v = tracker[i];
-                if (!v)
-                    continue;
-                if (dirty.get(i)) {
-                    if (v->isLoad() && v->oprnd1() == vars && v->disp() == int32_t(i*sizeof(double))) {
-                        // not modified
-                        continue;
-                    }
-                    out->insStorei(v, vars, i*sizeof(double));
-                    dirty.clear(i);
-                }
-            }
-        }
-
         void clearState() {
             VMPI_memset(tracker, 0, nvar*sizeof(LInsp));
             dirty.reset();
@@ -1042,14 +1020,6 @@ namespace avmplus
             int i = d >> 3;
             tracker[i] = value;
             dirty.set(i);
-        }
-
-        void trackMerge(int i, LIns *cur, LIns *target) {
-            (void) i; (void) cur; (void) target;
-            /*if (cur != target) {
-                tracker[i] = 0;
-                dirty.clear(i);
-            }*/
         }
 
         LIns *insLoad(LOpcode op, LIns *base, int32_t d) {
@@ -1069,56 +1039,34 @@ namespace avmplus
         LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d) {
             if (base == vars) {
                 trackStore(value, d);
-                DEFER_STORES(return 0;)
             }
             return out->insStore(op, value, base, d);
         }
 
         LIns *ins0(LOpcode op) {
             if (op == LIR_label) {
-                DEFER_STORES(saveState();)
                 clearState();
             }
             return out->ins0(op);
         }
 
         LIns *insBranch(LOpcode v, LInsp cond, LInsp to) {
-            DEFER_STORES(saveState();)
             return out->insBranch(v, cond, to);
         }
 
         LIns *insJtbl(LIns* index, uint32_t size) {
-            DEFER_STORES(saveState();)
             return out->insJtbl(index, size);
         }
 
         LIns *insCall(const CallInfo *call, LInsp args[]) {
             #ifdef DEBUGGER
-            if (core->debugger())
-            {
-                DEFER_STORES(
-                    if (!call->_cse)
-                        saveState();
-                )
-                LIns *i = out->insCall(call, args);
+            if (core->debugger() && !call->_cse) {
                 // debugger might have modified locals, so make sure we reload after call.
-                if (!call->_cse)
-                    clearState();
-                return i;
+                clearState();
             }
             #endif
-
-            DEFER_STORES(
-                if (hasExceptions && !call->_cse)
-                    saveState();
-            )
             return out->insCall(call, args);
         }
-
-        // TODO
-        // * reset when vars passed as arg to a function that could modify vars (debugenter/exit)
-        // * handle load/store size mismatches -- loading high word of quad, etc
-        // * suppress stores until ends of blocks
     };
 
     void emitStart(Allocator& alloc, LirBuffer *lirbuf, LirWriter* &lirout) {
@@ -1795,19 +1743,6 @@ namespace avmplus
             if (v.killed)
                 localSet(i, undefConst, VOID_TYPE);
         }
-    }
-
-    void CodegenLIR::emitBlockEnd(FrameState* state)
-    {
-        this->state = state;
-        // our eBB now terminates.  For all branch instructions we are
-        // able to detect this situation and have already generated the
-        // correct spill code prior to the jump, only for the case where
-        // the pc is a target of a jump do we not know enough during emit()
-        // to do this.  The Verifier tracks this information and merges
-        // the states across the various blocks generating this op prior
-        // to the merge.  After this emit, we should receive a writeBlockStart()
-        // from the Verifier.
     }
 
     void CodegenLIR::writePrologue(FrameState* state, const byte *pc)
