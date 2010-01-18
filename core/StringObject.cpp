@@ -2396,9 +2396,10 @@ namespace avmplus
 
 	// Analyze a UTF-16 string buffer and find out about the character widths.
 	// chars >= 0x10000 are encoded as 0xD800 + (upper 10 bits) and 0xDC00 + (lower 10 bits)
-	// Returns false if a starting surrogate pair character is not followed by a 2nd pair character
+	// Returns false in strict mode if a starting surrogate pair character is not followed 
+	// by a correct 2nd pair character
 
-	static bool _analyzeUtf16(const wchar* p, int32_t len, StringWidths& r)
+	static bool _analyzeUtf16(const wchar* p, int32_t len, StringWidths& r, bool strict)
 	{
 		r.ascii = r.w8 = r.w16 = r.w32 = 0;
 		while (len-- > 0)
@@ -2413,9 +2414,15 @@ namespace avmplus
 			else 
 			{
 				if (len == 0 || *p < 0xDC00 || *p > 0xDFFF)
-					return false;
+				{
+					if (strict)
+						return false;
+					// found one or two characters depending on whether the 2nd surrpgate character was present
+					r.w16 += len ? 2 : 1;
+				}
+				else
+					r.w32++;
 				p++; len--;
-				r.w32++;
 			}
 		}
 		return true;
@@ -2524,7 +2531,8 @@ namespace avmplus
 	}
 
 	// Create a string out of an UTF-16 buffer.
-	Stringp String::createUTF16(AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth, bool staticBuf)
+	Stringp String::createUTF16
+		(AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth, bool staticBuf, bool strict)
 	{
 		if (buffer == NULL)
 		{
@@ -2541,7 +2549,7 @@ namespace avmplus
 		{
 			// determine the string width to use
 			StringWidths widths;
-			if (!_analyzeUtf16(buffer, len, widths))
+			if (!_analyzeUtf16(buffer, len, widths, strict))
 			{
 				// TODO: bad character sequence error
 				return NULL;
