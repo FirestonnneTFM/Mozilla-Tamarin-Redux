@@ -612,17 +612,17 @@ namespace avmplus
 
         case BUILTIN_int:
             if (native->isconst()) {
-                Atom a = core->intToAtom(native->imm32());
-                if (atomIsIntptr(a))
-                    return InsConstAtom(a);
+                int32_t val = native->imm32();
+                if (atomIsValidIntptrValue(val))
+                    return InsConstAtom(atomFromIntptrValue(val));
             }
             return callIns(FUNCTIONID(intToAtom), 2, coreAddr, native);
 
         case BUILTIN_uint:
             if (native->isconst()) {
-                Atom a = core->uintToAtom(native->imm32());
-                if (atomIsIntptr(a))
-                    return InsConstAtom(a);
+                uint32_t val = native->imm32();
+                if (atomIsValidIntptrValue_u(val))
+                    return InsConstAtom(atomFromIntptrValue_u(val));
             }
             return callIns(FUNCTIONID(uintToAtom), 2, coreAddr, native);
 
@@ -1008,23 +1008,6 @@ namespace avmplus
 
         void init(LIns *vars) {
             this->vars = vars;
-        }
-
-        void saveState() {
-            LIns *vars = this->vars;
-            for (int i=0, n=nvar; i < n; i++) {
-                LIns *v = tracker[i];
-                if (!v)
-                    continue;
-                if (dirty.get(i)) {
-                    if (v->isLoad() && v->oprnd1() == vars && v->disp() == int32_t(i*sizeof(double))) {
-                        // not modified
-                        continue;
-                    }
-                    out->insStorei(v, vars, i*sizeof(double));
-                    dirty.clear(i);
-                }
-            }
         }
 
         void clearState() {
