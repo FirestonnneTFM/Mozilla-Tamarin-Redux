@@ -152,9 +152,10 @@ namespace MMgc
 	{
 		if (table && table != EMPTY)
 			ALLOCHANDLER::free(table);
+		table = EMPTY;
 		tableSize = 4;
 		numValues = 4;
-		table = EMPTY;
+		numDeleted = 0;
 	}
 
 	template <class KEYHANDLER, class ALLOCHANDLER>
