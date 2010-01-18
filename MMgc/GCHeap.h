@@ -847,7 +847,6 @@ namespace MMgc
 		friend class EnterFrame;
 		MemoryStatus status;
  		uint32_t enterCount;
- 		vmpi_thread_t const primordialThread;
 
 		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 

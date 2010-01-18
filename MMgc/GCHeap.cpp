@@ -157,7 +157,6 @@ namespace MMgc
 		  config(c),
  		  status(kMemNormal),
 		  enterCount(0),
-		  primordialThread(VMPI_currentThread()),
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
 	#endif
@@ -1996,8 +1995,7 @@ namespace MMgc
 			MMGC_LOCK(m_spinlock);
 
 			// only safe to run bail out code on primary thread
-			if(VMPI_currentThread() == primordialThread && 
-			   status == kMemAbort && !abortStatusNotificationSent) {
+			if(status == kMemAbort && !abortStatusNotificationSent) {
 				abortStatusNotificationSent = true;
 				StatusChangeNotify(kMemAbort);
 			}
