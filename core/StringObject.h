@@ -128,16 +128,19 @@ namespace avmplus
 												bool staticBuf = false, bool strict = true);
 		/**
 		Create a string using UTF-16 data. If the desired width is too small to fit the source data, 
-		return NULL.
+		or if the data contains an invalid surrogate pair if "strict" is true, return NULL. If
+		"strict" is false, invalid surrogate pairs are treated as two separate characters.
 		@param	avm					the AvmCore instance to use
 		@param	buffer				the UTF-16 buffer; if NULL, assume an empty string.
 		@param	len					the size in characters. If < 0, assume NULL termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
-		@return						the String instance, or NULL on  characters too wide
+		@param  strict				if false, return NULL on invalid surrogate pairs
+		@return						the String instance, or NULL on errors
 		*/
 		static	Stringp				createUTF16(AvmCore* core, const wchar* buffer, int32_t len = -1, 
-												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
+												 String::Width desiredWidth = String::kDefaultWidth, 
+												 bool staticBuf = false, bool strict = true);
 
 		virtual						~String();
 

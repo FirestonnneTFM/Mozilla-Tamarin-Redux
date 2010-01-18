@@ -1337,10 +1337,10 @@ const int kBufferPadding = 16;
 		// String creation. If len is omitted, zero-termination is assumed.
 		Stringp newStringLatin1(const char* str, int len = -1);
 		Stringp newStringUTF8(const char* str, int len = -1, bool strict = false);
-		Stringp newStringUTF16(const wchar* str, int len = -1);
+		Stringp newStringUTF16(const wchar* str, int len = -1, bool strict = false);
 
 		// decodes UTF16LE or UTF16BE.
-		Stringp newStringEndianUTF16(bool littleEndian, const wchar* str, int len = -1);
+		Stringp newStringEndianUTF16(bool littleEndian, const wchar* str, int len = -1, bool strict = false);
 		
 		// like newStringLatin1, but the string constant is assumed to remain valid
 		// for the life of the AvmCore. Generally, should only be used for literal

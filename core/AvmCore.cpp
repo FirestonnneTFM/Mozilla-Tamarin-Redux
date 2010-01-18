@@ -3789,9 +3789,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		return String::createUTF8(this, (const utf8_t*)s, len, String::kDefaultWidth, false, strict);
 	}
 
-	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
+	Stringp AvmCore::newStringUTF16(const wchar* s, int len, bool strict)
 	{
-		return String::createUTF16(this, s, len);
+		return String::createUTF16(this, s, len, String::kDefaultWidth, false, strict);
 	}
 
 	// "swap16" is apparently reserved/defined in some build environments...
@@ -3802,7 +3802,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return (lo << 8) | hi;
 	}
 
-	Stringp AvmCore::newStringEndianUTF16(bool littleEndian, const wchar* s, int len)
+	Stringp AvmCore::newStringEndianUTF16(bool littleEndian, const wchar* s, int len, bool strict)
 	{
 	#ifdef AVMPLUS_LITTLE_ENDIAN
 		const bool nativeIsLE = true;
@@ -3811,7 +3811,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	#endif
 		if (littleEndian == nativeIsLE)
 		{
-			return newStringUTF16(s, len);
+			return newStringUTF16(s, len, strict);
 		}
 		else
 		{
@@ -3827,7 +3827,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				swapped[i] = avmSwap16(s[i]);
 			}
-			return newStringUTF16(swapped, len);
+			return newStringUTF16(swapped, len, strict);
 		}
 	}
 
