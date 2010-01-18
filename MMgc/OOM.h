@@ -85,8 +85,25 @@
 	if(_ef.status != 0)							\
 		return _val;
 
+
 namespace MMgc
 {
+
+	class AbortUnwindObject
+	{
+
+		public:
+			AbortUnwindObject() : next(NULL), previous(NULL)  {}
+			virtual ~AbortUnwindObject(){;}
+			virtual void Unwind(){/*noop in base*/}
+
+		private:
+			AbortUnwindObject *next;
+			AbortUnwindObject *previous;
+	
+		friend class EnterFrame;
+	};
+
 	class EnterFrame
 	{
 		friend class GCHeap;
@@ -101,10 +118,22 @@ namespace MMgc
 		void SetActiveGC(GC *gc) { m_gc = gc; }
 		void SetCollectingGC(GC *gc){ m_collectingGC = gc; }
 		GC* GetCollectingGC(){return m_collectingGC;}
+
+		void UnwindAllObjects();
+		
+		//  It is the caller's responsibility to make sure the AbortUnwindObject has not already been added to this list
+		//  This method is not thread safe.
+		void AddAbortUnwindObject(AbortUnwindObject *obj);
+
+		//  It is the caller's responsibility to make sure the AbortUnwindObject has previously been added to the list
+		//  This method is not thread safe.
+		void RemoveAbortUnwindObject(AbortUnwindObject *obj);
+
 	private:
 		GCHeap *m_heap;
 		GC *m_gc;
 		GC *m_collectingGC;
+		AbortUnwindObject *m_abortUnwindList;
 
 	};
 	
