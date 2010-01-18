@@ -3476,7 +3476,7 @@ namespace MMgc
             // but also assert that GCAutoEnter is being used incorrectly. Thus, if you see this 
             // assert fire, the GCAutoEnter in question is nested inside another one and shouldn't
             // be necessary. https://bugzilla.mozilla.org/show_bug.cgi?id=540088
-            AvmAssert(m_prevgc == NULL);
+            GCAssert(m_prevgc == NULL);
 			gc->SetStackEnter(this);
 		}
 	}
