@@ -3465,18 +3465,16 @@ namespace MMgc
 		if(gc && gc->GetStackEnter() == 0) {
 			m_gc = gc;
 			m_prevgc = gc->heap->SetActiveGC(gc);
-            // You might think that it's odd to save and restore a value that we expect to be null,
-            // and you'd be right. The issue is that m_prevgc should it fact be null; using 
-            // nested GCAutoEnters should not happen in intended usage (there should be exactly
-            // one active GCAutoEnter for each entry point). In practice, however, this has been
-            // known to creep into client code, and the consequences of not handling this can result
-            // in hard-to-debug crashes in obscure situations. At present we know of no compile-time 
-            // way of ensuring this usage can't happen, so we are taking a belt-and-suspenders
-            // approach to fixing it: save and restore the active gc (since it's cheap to do so)
-            // but also assert that GCAutoEnter is being used incorrectly. Thus, if you see this 
-            // assert fire, the GCAutoEnter in question is nested inside another one and shouldn't
-            // be necessary. https://bugzilla.mozilla.org/show_bug.cgi?id=540088
-            GCAssert(m_prevgc == NULL);
+            // In theory, nested GCAutoEnter usage should be unnecessary and avoided
+            // (thus we'd expect gc->heap->GetActiveGC() == NULL upon entry to this function). 
+            // In practice, however, nested usage is extant in Flash in a few areas that are
+            // nontrivial to refactor to avoid this, and the consequences of not handling this can result
+            // in hard-to-debug crashes in obscure situations. Thus we are allowing the not-recommended 
+            // nested usage by saving and restoring the active gc (since it's cheap to do so). 
+            // If you want to detect these situations, uncomment the assert below (but do not check
+            // in such a change unless you want to make nested GCAutoEnter usage officially deprecated,
+            // which we are not yet prepared to do.) see https://bugzilla.mozilla.org/show_bug.cgi?id=540088
+            // GCAssert(m_prevgc == NULL); 
 			gc->SetStackEnter(this);
 		}
 	}
