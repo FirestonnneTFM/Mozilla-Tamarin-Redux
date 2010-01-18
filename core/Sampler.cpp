@@ -161,7 +161,7 @@ namespace avmplus
 		callback(NULL),
 		timerHandle(0),
 		uids(1024),
-		ptrSamples(NULL),
+		ptrSamples(1024),
 		takeSample(0),
 		numSamples(0), 
 		samples_size(0),
@@ -413,8 +413,8 @@ namespace avmplus
 
 		write(currentSample, s.id);
 
-		AvmAssertMsg( ptrSamples->get(obj)==0, "Missing dealloc sample - same memory alloc'ed twice.\n");
-		ptrSamples->add(obj, currentSample);
+		AvmAssertMsg( ptrSamples.get(obj)==0, "Missing dealloc sample - same memory alloc'ed twice.\n");
+		ptrSamples.add(obj, currentSample);
 
 		write(currentSample, s.ptr);
 
@@ -455,7 +455,7 @@ namespace avmplus
 		{
 
 		byte* oldptr = 0;
-		if( (oldptr = (byte*)ptrSamples->get(item)) != 0 )
+		if( (oldptr = (byte*)ptrSamples.get(item)) != 0 )
 		{
 #ifdef _DEBUG
 				void* oldval = 0;
@@ -464,7 +464,7 @@ namespace avmplus
 				rewind(oldptr, sizeof(void*));
 #endif
 			write(oldptr, (void*)0);
-			ptrSamples->remove(item);
+			ptrSamples.remove(item);
 		}
 		}
 		if(uid)
@@ -475,9 +475,7 @@ namespace avmplus
 	{
 		//samples->free();
 		currentSample = samples;
-		GCHashtable_VMPI* t = ptrSamples;
-		ptrSamples = mmfx_new( MMgc::GCHashtable_VMPI(4096) );
-		mmfx_delete( t );
+        ptrSamples.clear();
 		numSamples = 0;
 	}
 
@@ -491,7 +489,7 @@ namespace avmplus
 			int megs = (callback != NULL) ? 16 : 256;
 			while(!currentSample && megs > 0) {
 				samples_size = megs*1024*1024;
-				currentSample = samples = mmfx_new_array(byte, samples_size);
+				currentSample = samples = (byte*)VMPI_alloc(samples_size);
 				megs >>= 1;
 			}
 			if(!currentSample) {
@@ -502,11 +500,6 @@ namespace avmplus
 
 		init(_sampling, autoStartSampling);
 		
-		if( !ptrSamples ) 
-		{
-		    ptrSamples = mmfx_new( MMgc::GCHashtable_VMPI(1024) );
-		}
-
 		samplingNow = true;
 		if(timerHandle == 0)
 			timerHandle = OSDep::startIntWriteTimer(1, &takeSample);
@@ -535,18 +528,13 @@ namespace avmplus
 			return;
 
 		if( samples )
-			mmfx_delete_array(samples);
+			VMPI_free(samples);
 		samples = 0;
 		samples_size = 0;
 
 		if(timerHandle != 0) {
 			OSDep::stopTimer(timerHandle);
 			timerHandle = 0;
-		}
-
-		if( ptrSamples ) {
-			mmfx_delete(ptrSamples);
-			ptrSamples = 0;
 		}
 
 		samplingNow = false;

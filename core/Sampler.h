@@ -227,7 +227,7 @@ namespace avmplus
 		DRC(ScriptObject*)	callback;
 		uintptr_t			timerHandle;
 		MMgc::GCHashtable_VMPI		uids;		// important to use the VMPI variant for non-MMGC-based memory allocation.
-		MMgc::GCHashtable_VMPI*		ptrSamples;	// important to use the VMPI variant for non-MMGC-based memory allocation.
+		MMgc::GCHashtable_VMPI		ptrSamples;	// important to use the VMPI variant for non-MMGC-based memory allocation.
 		int32_t				takeSample;
 		uint32_t			numSamples;
 		uint32_t			samples_size;
