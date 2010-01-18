@@ -1823,7 +1823,7 @@ namespace MMgc
 	}
 #endif // MMGC_HOOKS
 
-	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL), m_collectingGC(NULL)
+	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL), m_collectingGC(NULL), m_abortUnwindList(NULL)
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
 		if(heap->GetStackEntryAddress() == NULL) {
@@ -1843,6 +1843,54 @@ namespace MMgc
 		}
 	}
 	
+	void EnterFrame::UnwindAllObjects()
+	{
+
+		while(m_abortUnwindList)
+		{
+			AbortUnwindObject *previous = m_abortUnwindList;		
+			m_abortUnwindList->Unwind();
+			//  The unwind call may remove the handler or may leave it on this list.  If it leaves it, then make sure to advance the list, 
+			//  otherwise, the list will automatically advance if it's removed.
+			if (m_abortUnwindList == previous)
+			{
+				m_abortUnwindList = m_abortUnwindList->next;
+			}
+		}
+	}
+
+	void EnterFrame::AddAbortUnwindObject(AbortUnwindObject *obj)
+	{
+
+		//  Push it on the front
+		obj->next = m_abortUnwindList;
+		if (m_abortUnwindList)
+		{
+			m_abortUnwindList->previous = obj;
+		}
+		m_abortUnwindList = obj;
+	}
+
+	void EnterFrame::RemoveAbortUnwindObject(AbortUnwindObject *obj)
+	{
+		if (obj == m_abortUnwindList)
+		{
+			m_abortUnwindList = obj->next;
+		}
+
+		if (obj->previous != NULL)
+		{
+			(obj->previous)->next = obj->next;
+		}
+		if (obj->next != NULL)
+		{
+			(obj->next)->previous = obj->previous;
+		}
+
+		obj->next = NULL;
+		obj->previous = NULL;
+	}
+
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
 	{
@@ -1975,6 +2023,7 @@ namespace MMgc
 			// thing happens.
 			if (ef->m_heap != NULL)
 			{
+				ef->UnwindAllObjects();
 				VMPI_longjmpNoUnwind(ef->jmpbuf, 1);
 			}
 		}
