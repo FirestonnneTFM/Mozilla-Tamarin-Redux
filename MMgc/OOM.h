@@ -98,7 +98,7 @@ namespace MMgc
 		int status;
 		void Destroy() { m_heap = NULL; }
 		GC* GetActiveGC() { return m_gc; }
-		void SetActiveGC(GC *gc) { m_gc = gc; }
+		GC* SetActiveGC(GC *gc) { GC* prev = m_gc; m_gc = gc; return prev; }
 		void SetCollectingGC(GC *gc){ m_collectingGC = gc; }
 		GC* GetCollectingGC(){return m_collectingGC;}
 	private:

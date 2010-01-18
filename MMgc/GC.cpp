@@ -3460,21 +3460,38 @@ namespace MMgc
  		mmfx_delete(seg);
  	} 
 
-	GCAutoEnter::GCAutoEnter(GC *gc) : gc(NULL) 
+	GCAutoEnter::GCAutoEnter(GC *gc) : m_gc(NULL), m_prevgc(NULL)
 	{ 
 		if(gc && gc->GetStackEnter() == 0) {
-			this->gc = gc;
-			gc->heap->SetActiveGC(gc);
+			m_gc = gc;
+			m_prevgc = gc->heap->SetActiveGC(gc);
+            // You might think that it's odd to save and restore a value that we expect to be null,
+            // and you'd be right. The issue is that m_prevgc should it fact be null; using 
+            // nested GCAutoEnters should not happen in intended usage (there should be exactly
+            // one active GCAutoEnter for each entry point). In practice, however, this has been
+            // known to creep into client code, and the consequences of not handling this can result
+            // in hard-to-debug crashes in obscure situations. At present we know of no compile-time 
+            // way of ensuring this usage can't happen, so we are taking a belt-and-suspenders
+            // approach to fixing it: save and restore the active gc (since it's cheap to do so)
+            // but also assert that GCAutoEnter is being used incorrectly. Thus, if you see this 
+            // assert fire, the GCAutoEnter in question is nested inside another one and shouldn't
+            // be necessary. https://bugzilla.mozilla.org/show_bug.cgi?id=540088
+            AvmAssert(m_prevgc == NULL);
 			gc->SetStackEnter(this);
 		}
 	}
 	
 	GCAutoEnter::~GCAutoEnter() 
 	{ 
-		if(gc) {
-			gc->SetStackEnter(NULL); 
-			gc->heap->SetActiveGC(NULL);
-			gc = NULL;
+		if(m_gc) {
+            GCAssert(m_gc->GetStackEnter() == uintptr_t(this));
+			m_gc->SetStackEnter(NULL); 
+        #ifdef DEBUG
+            GC* curgc = 
+        #endif
+                m_gc->heap->SetActiveGC(m_prevgc);
+            GCAssert(curgc == m_gc);
+			m_gc = NULL;
 		}
 	}
 

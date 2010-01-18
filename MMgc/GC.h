@@ -1763,9 +1763,10 @@ public:
 	public:
 		GCAutoEnter(GC *gc);
 		~GCAutoEnter();
-		void Destroy() { gc = NULL; }
+		void Destroy() { m_gc = m_prevgc = NULL; }
 	private:
-		GC* gc;
+		GC* m_gc;
+        GC* m_prevgc;
 	};
 
 	/**
