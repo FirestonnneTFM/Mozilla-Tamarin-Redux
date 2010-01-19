@@ -1818,7 +1818,15 @@ namespace MMgc
 	{
 		(void)poison,(void)item,(void)size;
 #ifdef MMGC_MEMORY_INFO
-		DebugFree(item, poison, size);
+		DebugFree(item, poison, size, true);
+#endif
+	}
+
+	void GCHeap::PseudoFreeHook(const void *item, size_t size, int poison)
+	{
+		(void)poison,(void)item,(void)size;
+#ifdef MMGC_MEMORY_INFO
+		DebugFree(item, poison, size, false);
 #endif
 	}
 #endif // MMGC_HOOKS

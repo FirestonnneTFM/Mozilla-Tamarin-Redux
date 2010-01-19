@@ -145,6 +145,11 @@ namespace MMgc
 			CollectionWork();
 	}
 	
+	REALLY_INLINE void GC::SignalFreeWork(size_t size)
+	{
+		policy.signalFreeWork(size);
+	}
+	
 	REALLY_INLINE void *GC::PleaseAlloc(size_t size, int flags)
 	{
 		return Alloc(size, flags | kCanFail);			
