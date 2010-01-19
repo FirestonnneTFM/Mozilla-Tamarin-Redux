@@ -50,8 +50,8 @@ namespace avmplus
 
 		AvmCore* core = this->core();
 
-		ScriptObject* object_prototype = toplevel()->objectClass->prototype;
-		prototype = new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype);
+		ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
+		setPrototypePtr(new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype));
 
 		kindex = core->internConstantStringLatin1("index");
 		kinput = core->internConstantStringLatin1("input");

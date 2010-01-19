@@ -92,7 +92,7 @@ namespace avmplus
 		toplevel->methodClosureClass = this;
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosureClass));
 
-		prototype = toplevel->functionClass->createEmptyFunction();
+		setPrototypePtr(toplevel->functionClass->createEmptyFunction());
 	}
 
 	// Function called as constructor ... not supported from user code
@@ -116,8 +116,8 @@ namespace avmplus
 			// since MC inherits from CC, we must explicitly set the prototype and delegate since the
 			// ctor will leave those null (and without delegate set, apply() and friends won't be found
 			// in pure ES3 code)
-			mc->prototype = prototype;
-			mc->setDelegate(prototype);
+			mc->setPrototypePtr(prototypePtr());
+			mc->setDelegate(prototypePtr());
 			mcWeakAtom = AvmCore::genericObjectToAtom(mc->GetWeakRef());
 			mcTable->add(obj, mcWeakAtom);
 		}

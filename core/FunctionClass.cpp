@@ -49,8 +49,8 @@ namespace avmplus
 		toplevel->functionClass = this;
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(FunctionClass));
 
-		prototype = createEmptyFunction();
-		prototype->setDelegate(toplevel->objectClass->prototype);
+		setPrototypePtr(createEmptyFunction());
+		prototypePtr()->setDelegate(toplevel->objectClass->prototypePtr());
 
 		//
 		// now that Object, Class, and Function are initialized, we

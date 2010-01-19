@@ -66,7 +66,7 @@ namespace avmplus
 		 * than Date.prototype
 		 */
 		DateObject(DateClass *type, const Date& date)
-			: ScriptObject(type->ivtable(), type->prototype)
+			: ScriptObject(type->ivtable(), type->prototypePtr())
 		{
 			AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
 			this->date = date;

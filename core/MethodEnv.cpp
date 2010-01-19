@@ -1022,7 +1022,7 @@ namespace avmplus
 		// object not defined yet.  define it by running the script that exports it
 		this->vtable()->resolveSignatures(this->scope());
 		// resolving the vtable also resolves the traits, if necessary
-		ScriptObject* delegate = this->toplevel()->objectClass->prototype;
+		ScriptObject* delegate = this->toplevel()->objectClass->prototypePtr();
 		return global = this->core()->newObject(this->vtable(), delegate);
 	}
 
@@ -1033,7 +1033,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 
 		ScriptObject* o = new (core->GetGC(), object_ivtable->getExtraSize()) 
-			ScriptObject(object_ivtable, toplevel()->objectClass->prototype,
+			ScriptObject(object_ivtable, toplevel()->objectClass->prototypePtr(),
 					2*argc+1);
 
 		for (; argc-- > 0; sp -= 2)
@@ -1154,7 +1154,7 @@ namespace avmplus
 			case kNamespaceType:
 				{
 					index = AvmCore::atomToNamespace(objAtom)->nextNameIndex(index);
-					delegate = toplevel()->namespaceClass->prototype;
+					delegate = toplevel()->namespaceClass->prototypePtr();
 				}
 				break;
 			default:
@@ -1211,11 +1211,11 @@ namespace avmplus
 
 		FunctionEnv* fenv = new (gc) FunctionEnv(function, fscope);
 		FunctionObject* c = new (gc, fvtable->getExtraSize()) FunctionObject(fvtable, fenv);
-		c->setDelegate(functionClass->prototype);
+		c->setDelegate(functionClass->prototypePtr());
 
 		c->createVanillaPrototype();
-		c->prototype->setStringProperty(core->kconstructor, c->atom());
-		c->prototype->setStringPropertyIsEnumerable(core->kconstructor, false);
+		c->prototypePtr()->setStringProperty(core->kconstructor, c->atom());
+		c->prototypePtr()->setStringPropertyIsEnumerable(core->kconstructor, false);
 
 		fenv->closure = c;
 		
@@ -1345,19 +1345,19 @@ namespace avmplus
 		else
 		{
 			cc = new (core->GetGC(), cvtable->getExtraSize()) ClassClosure(cvtable);
-			AvmAssert(cc->prototype == NULL);
+			AvmAssert(cc->prototypePtr() == NULL);
 			cc->createVanillaPrototype();
 		}
 
-		if (cc->prototype)
+		if (cc->prototypePtr())
 		{
 			// C.prototype.__proto__ = Base.prototype
 			if (base != NULL) 
-				cc->prototype->setDelegate( base->prototype );
+				cc->prototypePtr()->setDelegate( base->prototypePtr() );
 
 			// C.prototype.constructor = C {DontEnum}
-			cc->prototype->setStringProperty(core->kconstructor, cc->atom());
-			cc->prototype->setStringPropertyIsEnumerable(core->kconstructor, false);
+			cc->prototypePtr()->setStringProperty(core->kconstructor, cc->atom());
+			cc->prototypePtr()->setStringPropertyIsEnumerable(core->kconstructor, false);
 		}
 		
 		if (bt != BUILTIN_class)
@@ -1368,7 +1368,7 @@ namespace avmplus
 
 		if (toplevel->classClass)
 		{
-			cc->setDelegate( toplevel->classClass->prototype );
+			cc->setDelegate( toplevel->classClass->prototypePtr() );
 		}
 
 		// Invoke the class init function.

@@ -173,7 +173,7 @@ namespace avmshell
 	{
 		ShellCodeContext* codeContext = (ShellCodeContext*)core()->codeContext();
 
-		DomainObject* domainObject = (DomainObject*) createInstance(ivtable(), prototype);
+		DomainObject* domainObject = (DomainObject*) createInstance(ivtable(), prototypePtr());
 		domainObject->domainEnv = codeContext->domainEnv();
 		domainObject->domainToplevel = toplevel();
 		

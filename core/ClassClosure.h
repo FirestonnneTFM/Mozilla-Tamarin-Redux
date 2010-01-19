@@ -53,6 +53,10 @@ namespace avmplus
 		Atom get_prototype();
 		void set_prototype(Atom p);
 
+		REALLY_INLINE ScriptObject* prototypePtr() { return prototype; }
+		
+		void setPrototypePtr(ScriptObject* p);
+
 		void createVanillaPrototype();
 
 		/**
@@ -84,7 +88,7 @@ namespace avmplus
 		Stringp format(AvmCore* core) const;
 #endif
 	// ------------------------ DATA SECTION BEGIN
-	public: DRCWB(ScriptObject*) prototype;
+	private: DRCWB(ScriptObject*) prototype;
 	DECLARE_SLOTS_ClassClosure;
 	// ------------------------ DATA SECTION END
 	};

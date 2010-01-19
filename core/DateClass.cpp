@@ -44,8 +44,8 @@ namespace avmplus
 	DateClass::DateClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		ScriptObject* object_prototype = toplevel()->objectClass->prototype;
-		prototype = new (core()->GetGC(), ivtable()->getExtraSize()) DateObject(this, object_prototype);
+		ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
+		setPrototypePtr(new (core()->GetGC(), ivtable()->getExtraSize()) DateObject(this, object_prototype));
 	}
 	
 	// this = argv[0] (ignored)

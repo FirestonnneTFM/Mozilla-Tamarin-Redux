@@ -70,7 +70,7 @@ namespace avmplus
 
 		if (AvmCore::isNullOrUndefined(value))
 		{
-			this->prototype = NULL;
+			setPrototypePtr(NULL);
 		}
 		else
 		{
@@ -80,8 +80,13 @@ namespace avmplus
 			}
 
 			// allow any prototype object.  if the object has methods or slots, so be it
-			this->prototype = AvmCore::atomToScriptObject(value);
+			setPrototypePtr(AvmCore::atomToScriptObject(value));
 		}
+	}
+
+	void ClassClosure::setPrototypePtr(ScriptObject* p)
+	{
+		prototype = p;
 	}
 
 	VTable* ClassClosure::ivtable() const

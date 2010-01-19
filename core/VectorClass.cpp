@@ -289,7 +289,7 @@ namespace avmplus
 		: ClassClosure(vtable)
     {
 		toplevel()->intVectorClass = this;
-        prototype = toplevel()->objectClass->construct();
+        setPrototypePtr(toplevel()->objectClass->construct());
 	}
 
 	ScriptObject* IntVectorClass::createInstance(VTable *ivtable,
@@ -307,7 +307,7 @@ namespace avmplus
 		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
-		IntVectorObject* v = (IntVectorObject*)createInstance(ivtable(), prototype);
+		IntVectorObject* v = (IntVectorObject*)createInstance(ivtable(), prototypePtr());
 
 		v->initWithObj(argv[1]);
 
@@ -318,7 +318,7 @@ namespace avmplus
 	{
 		VTable* ivtable = this->ivtable();
 		IntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			IntVectorObject(ivtable, prototype);
+			IntVectorObject(ivtable, prototypePtr());
 		v->set_length(length);
 		return v;
 	}
@@ -337,7 +337,7 @@ namespace avmplus
 		: ClassClosure(vtable)
     {
 		toplevel()->uintVectorClass = this;
-        prototype = toplevel()->objectClass->construct();
+        setPrototypePtr( toplevel()->objectClass->construct());
 	}
 
 	ScriptObject* UIntVectorClass::createInstance(VTable *ivtable,
@@ -356,7 +356,7 @@ namespace avmplus
 		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
-		UIntVectorObject* v = (UIntVectorObject*)createInstance(ivtable(), prototype);
+		UIntVectorObject* v = (UIntVectorObject*)createInstance(ivtable(), prototypePtr());
 
 		v->initWithObj(argv[1]);
 
@@ -367,7 +367,7 @@ namespace avmplus
 	{
 		VTable* ivtable = this->ivtable();
 		UIntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			UIntVectorObject(ivtable, prototype);
+		UIntVectorObject(ivtable, prototypePtr());
 		v->set_length(length);
 		return v;
 	}
@@ -385,7 +385,7 @@ namespace avmplus
 		: ClassClosure(vtable)
 	{
 		toplevel()->doubleVectorClass = this;
-        prototype = toplevel()->objectClass->construct();
+        setPrototypePtr( toplevel()->objectClass->construct());
 	}
 
 	ScriptObject* DoubleVectorClass::createInstance(VTable *ivtable,
@@ -404,7 +404,7 @@ namespace avmplus
 		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
-		DoubleVectorObject* v = (DoubleVectorObject*)createInstance(ivtable(), prototype);
+		DoubleVectorObject* v = (DoubleVectorObject*)createInstance(ivtable(), prototypePtr());
 
 		v->initWithObj(argv[1]);
 
@@ -415,7 +415,7 @@ namespace avmplus
 	{
 		VTable* ivtable = this->ivtable();
 		DoubleVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			DoubleVectorObject(ivtable, prototype);
+			DoubleVectorObject(ivtable, prototypePtr());
 		v->set_length(length);
 		return v;
 	}
@@ -433,7 +433,7 @@ namespace avmplus
 	: ClassClosure(vtable)
 	{
 		toplevel()->vectorClass = this;
-		prototype = toplevel()->objectClass->construct();
+		setPrototypePtr( toplevel()->objectClass->construct());
 		instantiated_types = new (core()->GetGC(), 0) HeapHashtable(core()->GetGC());
 	}
 
@@ -482,10 +482,10 @@ namespace avmplus
 
 			ObjectVectorClass* new_type = new (vtab->gc(), vtab->getExtraSize()) ObjectVectorClass(vtab);
 			new_type->index_type = (ClassClosure*)AvmCore::atomToScriptObject(type);
-			new_type->setDelegate(toplevel()->classClass->prototype);
+			new_type->setDelegate(toplevel()->classClass->prototypePtr());
 
 			// Is this right?  Should each instantiation get its own prototype?
-			new_type->prototype = toplevel()->objectVectorClass->prototype;
+			new_type->setPrototypePtr(toplevel()->objectVectorClass->prototypePtr());
 			instantiated_types->add(type, new_type->atom());
 		}
 		return (Atom)instantiated_types->get(type);
@@ -501,7 +501,7 @@ namespace avmplus
 		if( AvmCore::istype(argv[1], ivtable()->traits ) )
 			return argv[1];
 
-		ObjectVectorObject* v = (ObjectVectorObject*)createInstance(ivtable(), prototype);
+		ObjectVectorObject* v = (ObjectVectorObject*)createInstance(ivtable(), prototypePtr());
 
 		v->initWithObj(argv[1]);
 
@@ -531,7 +531,7 @@ namespace avmplus
     {
 		if( !toplevel()->objectVectorClass )
 			toplevel()->objectVectorClass = this;
-        prototype = toplevel()->objectClass->construct();
+        setPrototypePtr(toplevel()->objectClass->construct());
 	}
 
 	ScriptObject* ObjectVectorClass::createInstance(VTable *ivtable,
@@ -546,7 +546,7 @@ namespace avmplus
 	{
 		VTable* ivtable = this->ivtable();
 		ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			ObjectVectorObject(ivtable, prototype);
+			ObjectVectorObject(ivtable, prototypePtr());
 		v->set_type(this->index_type->atom());
 		v->set_length(length);
 		return v;

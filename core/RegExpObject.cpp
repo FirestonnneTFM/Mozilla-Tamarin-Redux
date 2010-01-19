@@ -102,7 +102,7 @@ namespace avmplus
 	RegExpObject::RegExpObject(RegExpClass *type,
 							   Stringp pattern,
 							   Stringp options)
-	   : ScriptObject(type->ivtable(), type->prototype), m_source(pattern)
+	   : ScriptObject(type->ivtable(), type->prototypePtr()), m_source(pattern)
 	{
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
 		// m_source = pattern;  -- no, now done in the initializer list above
