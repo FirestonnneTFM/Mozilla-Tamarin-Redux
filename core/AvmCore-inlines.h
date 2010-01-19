@@ -438,6 +438,11 @@ REALLY_INLINE /*static*/ bool AvmCore::isName(Atom atom)
 	return isString(atom) && atomToString(atom)->isInterned();
 }
 
+REALLY_INLINE ScriptObject* AvmCore::newObject(VTable *vtable, ScriptObject *delegate)
+{
+	return new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
+}
+
 /** Helper function; reads a signed 24-bit integer from pc */
 REALLY_INLINE /*static*/ int AvmCore::readS24(const byte *pc)
 {
