@@ -229,9 +229,9 @@ namespace avmplus
         // this should be able to go away.
 		virtual GlobalMemoryProvider* getGlobalMemoryProvider() { AvmAssert(0); return NULL; }
 		
-		static ScriptObject* genericCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype);
-		static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype);
-		static ScriptObject* generalCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype);
+		static ScriptObject* genericCreateInstance(ClassClosure* cls, VTable* ivtable);
+		static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable);
+		static ScriptObject* generalCreateInstance(ClassClosure* cls, VTable* ivtable);
 		
 #ifdef AVMPLUS_VERBOSE
 	public:

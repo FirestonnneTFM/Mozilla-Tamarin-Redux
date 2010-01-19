@@ -3014,6 +3014,9 @@ namespace avmplus
             live(alloc);
     }
 
+    // This is for VTable->createInstance which is called by OP_construct
+    FUNCTION(CALL_INDIRECT, SIG3(V,P,P,P), createInstance)
+
     void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
     {
         emitPrep(state);
@@ -3083,7 +3086,8 @@ namespace avmplus
             LIns* vtable = loadVTable(objDisp);
             LIns* ivtable = loadIns(LIR_ldcp, offsetof(VTable, ivtable), vtable);
             method = loadIns(LIR_ldcp, offsetof(VTable, init), ivtable);
-            LIns* inst = callIns(FUNCTIONID(newInstance),1, localGetp(objDisp));
+            LIns* createInstance = loadIns(LIR_ldp, offsetof(VTable, createInstance), ivtable);
+            LIns* inst = callIns(FUNCTIONID(createInstance), 3, createInstance, localGetp(objDisp), ivtable);
             localSet(dest, inst, result);
             break;
         }
