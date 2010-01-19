@@ -164,7 +164,11 @@ namespace avmplus
 		if (!stop && !exited)
 		{
 			MethodInfo* f = core->callStack->info();
-			if (f && f->hasMethodBody()) 
+#ifdef VMCFG_AOT
+			if (f && (f->hasMethodBody() || f->isCompiledMethod())) 
+#else
+			if (f && f->hasMethodBody()) 				
+#endif
 			{
 				AbcFile* abc = f->file();
 				if (abc)
@@ -875,8 +879,14 @@ namespace avmplus
 		*firstLocal = indexOfFirstLocal();
 		if (trace->framep() && trace->info())
 		{
+#ifdef VMCFG_AOT
+			*pastLastLocal = trace->info()->local_count();
+			if (*pastLastLocal < *firstLocal)
+				*pastLastLocal = *firstLocal;
+#else			
 			const MethodSignature* ms = trace->info()->getMethodSignature();
 			*pastLastLocal = ms->local_count();
+#endif			
 		}
 		else
 		{
