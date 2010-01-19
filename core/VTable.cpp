@@ -337,6 +337,7 @@ namespace avmplus
 		base(_base),
 		ivtable(NULL),
 		traits(traits),
+		createInstance(ScriptObject::genericCreateInstance),
 		linked(false)
 	{
 		AvmAssert(traits != NULL);

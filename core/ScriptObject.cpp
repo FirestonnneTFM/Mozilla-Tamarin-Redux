@@ -801,6 +801,44 @@ namespace avmplus
 		return 0;
 	}
 
+	// We want to specialize the case where no custom createInstance gets in the
+	// way: in this case, the first createInstance call performs error checking up
+	// the chain and for subsequent calls all that error checking is redundant, all
+	// we need to do is create the object.
+	//
+	// We rely on the rule (ScriptObject.h) that if createInstance is overridden
+	// then it either always returns a new object without reaching the base case
+	// that calls newObject, or it always reaches that base case.  With this fact
+	// we can compute the correct creation function. 
+	
+	/*static*/
+	ScriptObject* ScriptObject::genericCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype)
+	{
+		// Assume there's an override and create the object.  If the base case
+		// is reached, ivtable->basecase is set to true.  Install the correct
+		// creation function based on the computed information.
+		
+		ivtable->basecase = false;
+		ScriptObject* so = cls->createInstance(ivtable, prototype);
+		if (ivtable->basecase)
+			ivtable->createInstance = fastCreateInstance;
+		else
+			ivtable->createInstance = generalCreateInstance;
+		return so;
+	}
+
+	/*static*/
+	ScriptObject* ScriptObject::fastCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype)
+	{
+		return cls->core()->newObject(ivtable, prototype);
+	}
+
+	/*static*/
+	ScriptObject* ScriptObject::generalCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype)
+	{
+		return cls->createInstance(ivtable, prototype);
+	}
+	
 	/**
 	 * the default implementation calls the delegate (should be the base class objects) 
 	 * so that derived classes delegate object allocation to the base class.  If you 
@@ -825,10 +863,10 @@ namespace avmplus
 			}
 		}
 
+		ivtable->basecase = true;
 		return core()->newObject(ivtable, prototype);
 	}
 
-	
 #ifdef DEBUGGER
 	uint64_t ScriptObject::size() const
 	{

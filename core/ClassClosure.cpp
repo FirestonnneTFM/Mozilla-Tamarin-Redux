@@ -98,7 +98,7 @@ namespace avmplus
 		if (prototype == NULL) // ES3 spec, 13.2.2 (we've already ensured prototype is either an Object or null)
 			prototype = AvmCore::atomToScriptObject(toplevel()->objectClass->get_prototype());
 
-		ScriptObject *obj = createInstance(ivtable, prototype);
+		ScriptObject *obj = ivtable->createInstance(this, ivtable, prototype);
 
 		return obj;
 	}
