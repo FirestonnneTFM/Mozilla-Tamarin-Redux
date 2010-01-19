@@ -1066,6 +1066,14 @@ return the result of the comparison ToPrimitive(x) == y.
 					{
 						MethodInfo* info = callStackNode->info();
 						
+#ifdef VMCFG_AOT
+						// bparadie 2009-11-12: In LLVMEmitter exceptfilt will be set to either 0 = catch nothing, -1 = catch anything, 
+						// or the pointer of the exception handler. exceptfilt is being passed to abcOP_debugEnter as the 5th parameter 
+						// and ends up in callStackNode.m_eip. In other words kCatchAction_SearchForActionScriptExceptionHandler in 
+						// AvmCore::willExceptionBeCaught() can return true if callStackNode->eip() != 0.
+						if (info && info->isCompiledMethod() && callStackNode->eip() != 0) 
+							return true;
+#endif
 						// native methods don't have exception handlers
 						if (info && info->isNative()) 
 							continue;

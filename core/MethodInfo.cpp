@@ -707,7 +707,11 @@ namespace avmplus
 	{
         for(int32_t i = srcPos, n = srcPos+length; i < n; i++)
         {
+#ifdef VMCFG_AOT			
+            AvmAssert(i >= 0 && (dmi() == NULL || i < local_count())); 
+#else			
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
+#endif			
             dest[destPos++] = boxOneLocal(src, i, traitArr);
         }
 	}
@@ -779,7 +783,11 @@ namespace avmplus
 	{
         for (int32_t i = destPos, n = destPos+length; i < n; i++)
         {
+#ifdef VMCFG_AOT			
+            AvmAssert(i >= 0 && (dmi() == NULL || i < local_count())); 
+#else			
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
+#endif			
             unboxOneLocal(src[srcPos++], dest, i, traitArr);
         }
 	}
