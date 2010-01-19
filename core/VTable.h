@@ -138,8 +138,10 @@ namespace avmplus
 		DWB(VTable*) base;
 		DWB(VTable*) ivtable;
 		Traits* const traits;
+		ScriptObject* (*createInstance)(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype);
+		bool basecase;
 		bool linked;	// @todo -- surely there's a spare bit we can use for this.
-		bool pad[3];
+		bool pad[2];
 
 #if defined FEATURE_NANOJIT
 		ImtThunkEnv* imt[VTable::IMT_SIZE];

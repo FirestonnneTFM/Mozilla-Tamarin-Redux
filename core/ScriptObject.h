@@ -199,6 +199,14 @@ namespace avmplus
 		// have the same instance and method.
 		virtual bool isMethodClosure() { return false; }
 
+		// Create an instance of ScriptObject or a ScriptObject subclass.
+		//
+		// If createInstance is overridden in a subclass then the overriding method must
+		// either /always/ return a new object of the subclass without reaching the base case
+		// (where ScriptObject::createInstance calls newObject) or it must /always/
+		// reach the base case.  The reason for this restriction is that createInstance
+		// custom creation functions are computed based on whether createInstance is
+		// overridden or not; see ScriptObject.cpp.
 		virtual ScriptObject* createInstance(VTable* ivtable, ScriptObject* prototype);
 
 		// The maximum integer key we can use with our ScriptObject
@@ -220,6 +228,10 @@ namespace avmplus
         // versions of ByteArray between Tamarin and Flash/AIR. When we someday unify them,
         // this should be able to go away.
 		virtual GlobalMemoryProvider* getGlobalMemoryProvider() { AvmAssert(0); return NULL; }
+		
+		static ScriptObject* genericCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype);
+		static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype);
+		static ScriptObject* generalCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype);
 		
 #ifdef AVMPLUS_VERBOSE
 	public:
