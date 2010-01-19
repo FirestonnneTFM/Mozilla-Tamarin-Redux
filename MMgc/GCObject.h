@@ -161,6 +161,31 @@ namespace MMgc
 	 * (Under complicated scenarios it is possible for an object allocated during reaping
 	 * to be erroneously deleted, see https://bugzilla.mozilla.org/show_bug.cgi?id=506644,
 	 * so client code may want to take note of that.)
+	 *
+	 *
+	 * Invariants on 'composite'.
+	 *
+	 * The field 'compsite' holds reference counts, the ZCT index, and flag bits.  We depend
+	 * on object layout being such that this field is the second word of the object.  This
+	 * field is used for a heuristic defense-in-depth mechanism:
+	 *
+	 *  - In release builds its value is zero iff the object's destructor has been run and
+	 *    the object has not been reallocated (ie the object may or may not yet have been
+	 *    placed on a free list).
+	 *  - In debug builds its value is zero iff the object's destructor has been run and the
+	 *    object has not yet been put on the free list or been reallocated.  Once it's been
+	 *    put on the free list the composite word is a cookie, 0xCACACACA or 0xBABABABA.
+	 * 
+	 * The RC operations check whether the object is free - and if it is, then the operations
+	 * have no effect.  This is useful because of the current finalization semantics:
+	 * finalization and destruction are intertwined, so that the C++ destructor performs both
+	 * jobs.  Thus an object can't be finalized without being destroyed.  Finalizers run
+	 * in arbitrary order; thus a finalizer for an object that's part of an object network
+	 * will not know whether it is safe to operate on other objects in that network.  The
+	 * extra guards on RC operations makes this safer.  It only works because all objects that
+	 * are finalizable are finalized together, before any of them are swept or reallocated.
+	 * It is also an expense that everyone pays for.  The only fix is a change to how
+	 * finalization is handled.
 	 */
 
 	class RCObject : public GCFinalizedObject
@@ -180,16 +205,15 @@ namespace MMgc
 		
 		REALLY_INLINE RCObject()
 		{
-			// composite == 0 is special, it means a deleted object in Release builds
-			// b/c RCObjects have a vtable we "know" composite isn't the first word and thus
-			// won't be trampled by the freelist
 			composite = 1;
 			GC::GetGC(this)->AddToZCT(this REFCOUNT_PROFILING_ARG(true));
 		}
 
 		REALLY_INLINE ~RCObject()
 		{
-			// for explicit deletion
+			// The ZCT reaper removes the object from the ZCT before deleting it,
+			// but when non-GC code explicitly deletes the object we may find that
+			// it is already in the ZCT.  So remove it if necessary.
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this REFCOUNT_PROFILING_ARG(true));
 			composite = 0;
@@ -213,17 +237,11 @@ namespace MMgc
 		void Pin()
 		{
 #ifdef _DEBUG
-			// this is a deleted object but 0xca indicates the InZCT flag so we
-			// might erroneously get here for a deleted RCObject
+			// This is a deleted object so ignore it.
 			if(composite == 0xcacacaca || composite == 0xbabababa)
 				return;
 #endif
-
-			// In Release builds, a deleted object is indicated by
-			// composite == 0.  We must not set the STACK_PIN bit
-			// on a deleted object, because if we do, it transforms
-			// from a deleted object into a zero-ref count live object,
-			// causing nasty crashes down the line.
+			// This is a deleted/free object so ignore it.
 			if (composite == 0)
 				return;
 			
@@ -238,6 +256,15 @@ namespace MMgc
 		 */
 		void Unpin()
 		{
+#ifdef _DEBUG
+			// This is a deleted object so ignore it.
+			if(composite == 0xcacacaca || composite == 0xbabababa)
+				return;
+#endif
+			// This is a deleted/free object so ignore it.
+			if (composite == 0)
+				return;
+			
 			composite &= ~STACK_PIN;
 		}
 
@@ -265,6 +292,15 @@ namespace MMgc
 		 */
 		REALLY_INLINE void Stick()
 		{ 
+#ifdef _DEBUG
+			// This is a deleted object so ignore it.
+			if(composite == 0xcacacaca || composite == 0xbabababa)
+				return;
+#endif
+			// This is a deleted/free object so ignore it.
+			if (composite == 0)
+				return;
+			
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this REFCOUNT_PROFILING_ARG(true));
 			composite |= STICKYFLAG;
@@ -283,16 +319,22 @@ namespace MMgc
 		 */
 		REALLY_INLINE void IncrementRef() 
 		{
+#ifdef _DEBUG
+			// This is a deleted object so ignore it.
+			if(composite == 0xcacacaca || composite == 0xbabababa)
+				return;
+#endif
+			// This is a deleted/free object so ignore it.
+			if (composite == 0)
+				return;
+			
 			REFCOUNT_PROFILING_ONLY( GC::GetGC(this)->policy.signalIncrementRef(); )
-			if(Sticky() || composite == 0)
+			if(Sticky())
 				return;
 #ifdef _DEBUG
 			GC* gc = GC::GetGC(this);
 			GCAssert(gc->IsRCObject(this));
 			GCAssert(this == gc->FindBeginningGuarded(this));
-			// don't touch swept objects
-			if(composite == 0xcacacaca || composite == 0xbabababa)
-				return;
 #endif
 
 			composite++;
@@ -322,18 +364,25 @@ namespace MMgc
 		 */
 		REALLY_INLINE void DecrementRef() 
 		{ 
+#ifdef _DEBUG
+			// This is a deleted object so ignore it.
+			if(composite == 0xcacacaca || composite == 0xbabababa)
+				return;
+#endif
+			// This is a deleted/free object so ignore it.
+			if (composite == 0)
+				return;
+			
 			REFCOUNT_PROFILING_ONLY( GC::GetGC(this)->policy.signalDecrementRef(); )
-			if(Sticky() || composite == 0)
+			if(Sticky())
 				return;
 
 #ifdef _DEBUG
 			GC* gc = GC::GetGC(this);
 			GCAssert(gc->IsRCObject(this));
 			GCAssert(this == gc->FindBeginningGuarded(this));
-			// don't touch swept objects
-			if(composite == 0xcacacaca || composite == 0xbabababa)
-				return;
-		
+
+			// ???
 			if(gc->Destroying())
 				return;
 
@@ -365,20 +414,9 @@ namespace MMgc
 			if(GC::GetGC(this)->keepDRCHistory)
 				history.Add(GCHeap::GetGCHeap()->GetProfiler()->GetStackTrace());
 #endif
-			// ??? unclear what the following comment pertains to -- lars, 2009-06-09
-			
-			// the delete flag works around the fact that DecrementRef
-			// may be called after ~RCObject since all dtors are called
-			// in one pass.  For example a FunctionScriptObject may be
-			// the sole reference to a ScopeChain and dec its ref in 
-			// ~FunctionScriptObject during a sweep, but since ScopeChain's
-			// are smaller the ScopeChain was already finalized, thus the
-			// push crashes b/c the history object has been destructed.
-			
-			// composite == 1 is the same as (rc == 1 && !notSticky && !notInZCT)
-			if(RefCount() == 0) {
+
+			if(RefCount() == 0)
 				GC::GetGC(this)->AddToZCT(this);
-			}
 		}
 		
 #ifdef MMGC_RC_HISTORY

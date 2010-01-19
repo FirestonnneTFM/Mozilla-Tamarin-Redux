@@ -872,6 +872,12 @@ namespace MMgc
 		 */
 		void SignalAllocWork(size_t size);
 
+		/**
+		 * Signal that we've freed some memory.  This should not have any side effects,
+		 * ie, it should not trigger collection.
+		 */
+		void SignalFreeWork(size_t size);
+
 	private:
 		const static size_t kLargestAlloc = 1968;
 
@@ -1501,6 +1507,7 @@ namespace MMgc
 		void Mark();
 		void MarkQueueAndStack(bool scanStack=true);
 		void MarkItem(GCWorkItem &wi);
+		void EstablishSweepInvariants();
 
 		static void DoCleanStack(void* stackPointer, void* arg);
 		static void DoMarkFromStack(void* stackPointer, void* arg);
@@ -1526,6 +1533,15 @@ namespace MMgc
 		 */
 		GCLargeAlloc::LargeBlock *largeEmptyPageList;
 		
+		/**
+		 * Free list budget management for small-block allocators
+		 */
+		void ObtainQuickListBudget(size_t nbytes);
+		void RelinquishQuickListBudget(size_t nbytes);
+
+		size_t remainingQuickListBudget;
+		uint32_t victimIterator;
+
 		vmpi_spin_lock_t m_rootListLock;
 
 		GCRoot *m_roots;
