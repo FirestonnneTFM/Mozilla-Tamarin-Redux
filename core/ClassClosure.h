@@ -53,8 +53,7 @@ namespace avmplus
 		Atom get_prototype();
 		void set_prototype(Atom p);
 
-		REALLY_INLINE ScriptObject* prototypePtr() { return prototype; }
-		
+		ScriptObject* prototypePtr();
 		void setPrototypePtr(ScriptObject* p);
 
 		void createVanillaPrototype();

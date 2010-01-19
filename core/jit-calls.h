@@ -816,7 +816,6 @@
 
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), SIG3(V,P,P,A), initMultinameLateForDelete)
     CSEFUNCTION(FUNCADDR(MathUtils::doubleToBool), SIG1(I,F), doubleToBool)
-    METHOD(CLASSCLOSUREADDR(ClassClosure::newInstance), SIG1(P,P), newInstance)
 
     METHOD(EFADDR(ExceptionFrame::endTry), SIG1(V,P), endTry)
     METHOD(EFADDR(ExceptionFrame::beginTry), SIG2(V,P,P), beginTry)

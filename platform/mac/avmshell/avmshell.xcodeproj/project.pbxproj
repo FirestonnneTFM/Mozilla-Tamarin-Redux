@@ -455,6 +455,7 @@
 		075CBE9610739FF5009E599C /* GC-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GC-inlines.h"; path = "../../../MMgc/GC-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBECC1074ACB7009E599C /* GCAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCAlloc-inlines.h"; path = "../../../MMgc/GCAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBF191074B252009E599C /* GCLargeAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCLargeAlloc-inlines.h"; path = "../../../MMgc/GCLargeAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
+		075EB7B011009E3B002F92B5 /* ClassClosure-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ClassClosure-inlines.h"; path = "../../../core/ClassClosure-inlines.h"; sourceTree = SOURCE_ROOT; };
 		076899071019D3AC00BC72AA /* ZCT-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ZCT-inlines.h"; path = "../../../MMgc/ZCT-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07689A9E101DC28000BC72AA /* ZCT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZCT.cpp; path = ../../../MMgc/ZCT.cpp; sourceTree = SOURCE_ROOT; };
 		07689A9F101DC28000BC72AA /* ZCT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZCT.h; path = ../../../MMgc/ZCT.h; sourceTree = SOURCE_ROOT; };
@@ -1036,6 +1037,7 @@
 				079DF7DE0F3A882D0031D1B4 /* BuiltinTraits.cpp */,
 				079DF7DF0F3A882D0031D1B4 /* BuiltinTraits.h */,
 				079DF7E00F3A882D0031D1B4 /* ClassClosure.cpp */,
+				075EB7B011009E3B002F92B5 /* ClassClosure-inlines.h */,
 				079DF7E10F3A882D0031D1B4 /* ClassClosure.h */,
 				079DF7E20F3A882D0031D1B4 /* CodeContext.h */,
 				079DF9200F3A891C0031D1B4 /* CodegenLIR.cpp */,

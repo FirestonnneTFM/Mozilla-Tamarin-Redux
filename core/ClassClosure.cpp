@@ -91,19 +91,6 @@ namespace avmplus
 			this->ivtable()->createInstance = ScriptObject::genericCreateInstance;
 	}
 
-	VTable* ClassClosure::ivtable() const
-	{
-		return vtable->ivtable;
-	}
-
-	// Called from construct or generated code to alloc a new instance
-	ScriptObject* ClassClosure::newInstance() 
-	{
-		VTable* ivtable = this->ivtable();
-		AvmAssert(ivtable != NULL);
-		return ivtable->createInstance(this, ivtable);
-	}
-
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
