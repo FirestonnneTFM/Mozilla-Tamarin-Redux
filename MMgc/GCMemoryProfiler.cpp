@@ -708,7 +708,7 @@ namespace MMgc
 	 * allocate the memory such that we can detect underwrites, overwrites and remember
 	 * the allocation stack in case of a leak.   Memory is laid out like so:
 	 *
-	 * first four bytes == size / 4 
+	 * first four bytes == size
 	 * second four bytes == stack trace index
 	 * size data bytes
 	 * 4 bytes == 0xdeadbeef
@@ -737,39 +737,41 @@ namespace MMgc
 	#endif
 	}
 
-	void DebugFreeHelper(const void *item, int poison, size_t wholeSize)
+	void DebugFreeHelper(const void *item, int poison, size_t wholeSize, bool actualFree)
 	{
 		uint32_t *ip = (uint32_t*) item;
-		uint32_t size = *ip;
- 		uint32_t *endMarker = ip + 2 + (size>>2);
+		if (actualFree) {
+			uint32_t size = *ip;
+			uint32_t *endMarker = ip + 2 + (size>>2);
+
+			// this can be called twice on some memory in inc gc 
+			if(size == 0)
+				return;
+
+			if (*endMarker != 0xdeadbeef)
+			{
+				// if you get here, you have a buffer overrun.  The stack trace about to
+				// be printed tells you where the block was allocated from.  To find the
+				// overrun, put a memory breakpoint on the location endMarker is pointing to.
+				GCDebugMsg(false, "Memory overwrite detected\n");
+				PrintAllocStackTrace(item);
+				GCAssert(false);
+			}
+		}
 
 		// clean up
 		*ip = 0;
 		ip += 2;
-
-		// this can be called twice on some memory in inc gc 
-		if(size == 0)
-			return;
-
-		if (*endMarker != 0xdeadbeef)
-		{
-			// if you get here, you have a buffer overrun.  The stack trace about to
-			// be printed tells you where the block was allocated from.  To find the
-			// overrun, put a memory breakpoint on the location endMarker is pointing to.
-			GCDebugMsg(false, "Memory overwrite detected\n");
-			PrintAllocStackTrace(item);
-			GCAssert(false);
-		}
-
+		
 		// size is the non-Debug size, so add 4 to get last 4 bytes, don't
 		// touch write back pointer space
 		VMPI_memset(ip, poison, wholeSize+4);
 	}
 
-	void *DebugFree(const void *item, int poison, size_t size)
+	void *DebugFree(const void *item, int poison, size_t size, bool actualFree)
 	{
 		item = GetRealPointer(item);
-		DebugFreeHelper(item, poison, size);
+		DebugFreeHelper(item, poison, size, actualFree);
 		return (void*)item;
 	}
 
