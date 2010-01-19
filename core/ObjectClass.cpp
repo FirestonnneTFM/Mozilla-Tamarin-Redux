@@ -52,20 +52,20 @@ namespace avmplus
 
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(ObjectClass));
         // it is correct call construct() when this.prototype == null
-        prototype = construct();
+        setPrototypePtr(construct());
 	}
 
 	void ObjectClass::initPrototype()
 	{
 		// patch global.__proto__ = Object.prototype
 		Toplevel* toplevel = this->toplevel();
-		toplevel->global()->setDelegate(prototype);				// global.__proto__ = Object.prototype
-		this->setDelegate(toplevel->classClass->prototype);		// Object.__proto__ = Class.prototype
+		toplevel->global()->setDelegate(prototypePtr());				// global.__proto__ = Object.prototype
+		this->setDelegate(toplevel->classClass->prototypePtr());		// Object.__proto__ = Class.prototype
 	}
 
 	ScriptObject* ObjectClass::construct()
 	{
-		return (ScriptObject*) core()->newObject(ivtable(), prototype);
+		return (ScriptObject*) core()->newObject(ivtable(), prototypePtr());
 	}
 
 	// this = argv[0]

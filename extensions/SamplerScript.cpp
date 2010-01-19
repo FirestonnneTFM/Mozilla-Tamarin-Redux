@@ -783,7 +783,7 @@ namespace avmplus
 
 	ScriptObject *SampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
 	{
-		return new (core()->gc, ivtable->getExtraSize()) SampleObject(ivtable, prototype);
+		return new (core()->gc, ivtable->getExtraSize()) SampleObject(ivtable, prototypePtr());
 	}
 
 	NewObjectSampleClass::NewObjectSampleClass(VTable *vtable)
@@ -793,7 +793,7 @@ namespace avmplus
 	
 	ScriptObject *NewObjectSampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
 	{
-		return new (core()->gc, ivtable->getExtraSize()) NewObjectSampleObject(ivtable, prototype);
+		return new (core()->gc, ivtable->getExtraSize()) NewObjectSampleObject(ivtable, prototypePtr());
 	}
 
 	DeleteObjectSampleClass::DeleteObjectSampleClass(VTable* vtable) : SampleClass(vtable)
@@ -802,12 +802,12 @@ namespace avmplus
 	
 	ScriptObject* DeleteObjectSampleClass::createInstance(VTable* ivtable, ScriptObject* /*delegate*/)
 	{
-		return new (core()->gc, ivtable->getExtraSize()) DeleteObjectSampleObject(ivtable, prototype);
+		return new (core()->gc, ivtable->getExtraSize()) DeleteObjectSampleObject(ivtable, prototypePtr());
 	}
 
 	ScriptObject* StackFrameClass::createInstance(VTable* ivtable, ScriptObject* /*delegate*/)
 	{
-		return new (core()->gc, ivtable->getExtraSize()) StackFrameObject(ivtable, prototype);
+		return new (core()->gc, ivtable->getExtraSize()) StackFrameObject(ivtable, prototypePtr());
 	}
 
 	/*static*/

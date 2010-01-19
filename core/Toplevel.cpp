@@ -123,10 +123,10 @@ namespace avmplus
 			default:
 			
 			case kNamespaceType:
-				return namespaceClass->prototype;
+				return namespaceClass->prototypePtr();
 
 			case kStringType:
-				return stringClass->prototype;
+				return stringClass->prototypePtr();
 
 			case kObjectType:
 				return AvmCore::atomToScriptObject(atom)->getDelegate();
@@ -134,10 +134,10 @@ namespace avmplus
 			case kDoubleType:
 			case kIntptrType:
 				// ISSUE what about int?
-				return numberClass->prototype;
+				return numberClass->prototypePtr();
 
 			case kBooleanType:
-				return booleanClass->prototype;
+				return booleanClass->prototypePtr();
 			}
 		}
 		else
@@ -461,7 +461,7 @@ namespace avmplus
 
 		ClassClosure* c = (ClassClosure*)AvmCore::atomToScriptObject(ctor);
 
-		ScriptObject *proto = c->prototype;
+		ScriptObject *proto = c->prototypePtr();
 		ScriptObject *o = toPrototype(atom);
 
 		for (; o != NULL; o = o->getDelegate())

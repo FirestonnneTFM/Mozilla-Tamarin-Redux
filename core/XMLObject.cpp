@@ -80,7 +80,7 @@
 namespace avmplus
 {
 	XMLObject::XMLObject(XMLClass *type, E4XNode *node)
-		: ScriptObject(type->ivtable(), type->prototype), m_node(node)
+		: ScriptObject(type->ivtable(), type->prototypePtr()), m_node(node)
 	{
 		SAMPLE_FRAME("XML", this->core());
 		this->publicNS = core()->findPublicNamespace();
@@ -88,7 +88,7 @@ namespace avmplus
 
 	// This is considered the "toXML function"
 	XMLObject::XMLObject(XMLClass *type, Stringp str, Namespace *defaultNamespace)
-		: ScriptObject(type->ivtable(), type->prototype)
+		: ScriptObject(type->ivtable(), type->prototypePtr())
 	{
 		SAMPLE_FRAME("XML", this->core());
 		#if 0//def _DEBUG
@@ -2776,7 +2776,7 @@ namespace avmplus
 	/////////////////////////////////////////////////////////////////
 
 	QNameObject::QNameObject (QNameClass *factory, const Multiname &name)
-		: ScriptObject(factory->ivtable(), factory->prototype), m_mn(name)
+		: ScriptObject(factory->ivtable(), factory->prototypePtr()), m_mn(name)
 	{
 	}
 
@@ -2790,7 +2790,7 @@ namespace avmplus
 	 * inside the QName to differentiate betweent the two types.
 	 */
 	QNameObject::QNameObject(QNameClass *factory, Namespace *ns, Atom nameatom, bool bA)
-		: ScriptObject(factory->ivtable(), factory->prototype)
+		: ScriptObject(factory->ivtable(), factory->prototypePtr())
 	{
 		AvmCore *core = this->core();
 
@@ -2841,7 +2841,7 @@ namespace avmplus
 	 * called when no namespace specified.
 	 */
 	QNameObject::QNameObject(QNameClass *factory, Atom nameatom, bool bA)
-	: ScriptObject(factory->ivtable(), factory->prototype)
+	: ScriptObject(factory->ivtable(), factory->prototypePtr())
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();

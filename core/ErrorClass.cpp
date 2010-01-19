@@ -46,7 +46,7 @@ namespace avmplus
 	{
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
 
-		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
+		setPrototypePtr(createInstance(ivtable(), toplevel()->objectClass->prototypePtr()));
 	}
 	
 	/**

@@ -622,7 +622,7 @@ namespace avmshell
 	ByteArrayClass::ByteArrayClass(VTable *vtable)
 		: ClassClosure(vtable)
     {
-        prototype = toplevel()->objectClass->construct();
+        setPrototypePtr(toplevel()->objectClass->construct());
 	}
 
 	ScriptObject* ByteArrayClass::createInstance(VTable *ivtable,

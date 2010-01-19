@@ -41,7 +41,7 @@
 namespace avmplus
 {
 	XMLListObject::XMLListObject(XMLListClass *type, Atom tObject, const Multiname* tProperty)
-		: ScriptObject(type->ivtable(), type->prototype), m_targetObject(tObject), 
+		: ScriptObject(type->ivtable(), type->prototypePtr()), m_targetObject(tObject), 
 		  m_appended(false), m_children(0)
 	{
 		if (tProperty)

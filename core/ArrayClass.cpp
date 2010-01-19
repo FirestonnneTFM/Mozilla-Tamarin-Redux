@@ -72,8 +72,8 @@ namespace avmplus
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(ArrayClass));
 
 		VTable* ivtable = this->ivtable();
-		ScriptObject* objectPrototype = toplevel->objectClass->prototype;
-		prototype = new (core->GetGC(), ivtable->getExtraSize()) ArrayObject(ivtable, objectPrototype, 0);
+		ScriptObject* objectPrototype = toplevel->objectClass->prototypePtr();
+		setPrototypePtr(new (core->GetGC(), ivtable->getExtraSize()) ArrayObject(ivtable, objectPrototype, 0));
 
 		// According to ECMAscript spec (ECMA-262.pdf)
 		// generic support: concat, join, pop, push, reverse, shift, slice, sort, splice, unshift
@@ -1375,7 +1375,7 @@ namespace avmplus
 	{
 		VTable* ivtable = this->ivtable();
 		ArrayObject *a = new (core()->GetGC(), ivtable->getExtraSize()) 
-			ArrayObject(ivtable, prototype, capacity);
+			ArrayObject(ivtable, prototypePtr(), capacity);
 		return a;
 	}
 
