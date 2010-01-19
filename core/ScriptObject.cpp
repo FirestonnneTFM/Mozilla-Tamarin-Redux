@@ -812,8 +812,16 @@ namespace avmplus
 	// we can compute the correct creation function. 
 	
 	/*static*/
-	ScriptObject* ScriptObject::genericCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype)
+	ScriptObject* ScriptObject::genericCreateInstance(ClassClosure* cls, VTable* ivtable)
 	{
+		ScriptObject* prototype = cls->prototypePtr();
+		if (prototype == NULL)
+		{
+			// ES3 spec, 13.2.2 (we've already ensured prototype is either an Object or null)
+			prototype = AvmCore::atomToScriptObject(cls->toplevel()->objectClass->get_prototype());
+			cls->setPrototypePtr(prototype);
+		}
+
 		// Assume there's an override and create the object.  If the base case
 		// is reached, ivtable->basecase is set to true.  Install the correct
 		// creation function based on the computed information.
@@ -828,15 +836,15 @@ namespace avmplus
 	}
 
 	/*static*/
-	ScriptObject* ScriptObject::fastCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype)
+	ScriptObject* ScriptObject::fastCreateInstance(ClassClosure* cls, VTable* ivtable)
 	{
-		return cls->core()->newObject(ivtable, prototype);
+		return cls->core()->newObject(ivtable, cls->prototypePtr());
 	}
 
 	/*static*/
-	ScriptObject* ScriptObject::generalCreateInstance(ClassClosure* cls, VTable* ivtable, ScriptObject* prototype)
+	ScriptObject* ScriptObject::generalCreateInstance(ClassClosure* cls, VTable* ivtable)
 	{
-		return cls->createInstance(ivtable, prototype);
+		return cls->createInstance(ivtable, cls->prototypePtr());
 	}
 	
 	/**

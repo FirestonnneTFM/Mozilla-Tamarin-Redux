@@ -87,6 +87,8 @@ namespace avmplus
 	void ClassClosure::setPrototypePtr(ScriptObject* p)
 	{
 		prototype = p;
+		if (p == NULL)
+			this->ivtable()->createInstance = ScriptObject::genericCreateInstance;
 	}
 
 	VTable* ClassClosure::ivtable() const
@@ -99,13 +101,7 @@ namespace avmplus
 	{
 		VTable* ivtable = this->ivtable();
 		AvmAssert(ivtable != NULL);
-
-		if (prototype == NULL) // ES3 spec, 13.2.2 (we've already ensured prototype is either an Object or null)
-			prototype = AvmCore::atomToScriptObject(toplevel()->objectClass->get_prototype());
-
-		ScriptObject *obj = ivtable->createInstance(this, ivtable, prototype);
-
-		return obj;
+		return ivtable->createInstance(this, ivtable);
 	}
 
 	// this = argv[0] (ignored)
