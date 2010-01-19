@@ -144,7 +144,7 @@ namespace MMgc
 	/** 
 	* Given a pointer to user memory do debug checks and return pointer to real memory
 	*/
-	void *DebugFree(const void *item, int poison, size_t size);		
+	void *DebugFree(const void *item, int poison, size_t size, bool actualFree);		
 
 	/**
 	* Given a user pointer back up to real beginning

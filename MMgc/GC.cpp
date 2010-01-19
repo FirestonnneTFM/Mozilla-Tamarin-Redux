@@ -893,6 +893,8 @@ namespace MMgc
 		finalizedValue(true),
 		smallEmptyPageList(NULL),
 		largeEmptyPageList(NULL),
+		remainingQuickListBudget(0),
+		victimIterator(0),
 		m_roots(0),
 		m_callbacks(0),
 		zct()
@@ -925,6 +927,23 @@ namespace MMgc
 		VMPI_lockInit(&m_gcLock);
 		VMPI_lockInit(&m_rootListLock);
 
+		// Global budget for blocks on the quick lists of small-object allocators.  This
+		// budget serves as a throttle on the free lists during times when the GC is not
+		// running; when the GC is running the periodic flushing of the quick lists
+		// makes the budget irrelevant.  The budget is global so that very active allocators
+		// can have long free lists at the expense of inactive allocators, which must have
+		// short ones.
+		//
+		// This is somewhat arbitrary: 4 blocks per allocator.  Must initialize this before we
+		// create allocators because they will request a budget when they're created.  The
+		// total budget /must/ accomodate at least one block per alloc, and makes very little
+		// sense if it is not at least two blocks per alloc.  (Note no memory is allocated, it's 
+		// just a budget.)
+		//
+		// See comment in GCAlloc.cpp for more about the quick lists.
+
+		remainingQuickListBudget = (3*kNumSizeClasses) * 4 * GCHeap::kBlockSize;
+		
 		// Create all the allocators up front (not lazy)
 		// so that we don't have to check the pointers for
 		// NULL on every allocation.
@@ -1376,8 +1395,43 @@ namespace MMgc
 			ClearWeakRef(item);
 	}
 
+	// Observe that nbytes is never more than kBlockSize, and the budget applies only to
+	// objects tied up in quick lists, not in on-block free lists.  So given that the
+	// total budget for the GC is at least kBlockSize, the loop is guaranteed to terminate.
+
+	void GC::ObtainQuickListBudget(size_t nbytes)
+	{
+		// Flush quick lists until we have enough for the requested budget.  We 
+		// pick victims in round-robin fashion: there's a major iterator that 
+		// selects the allocator pool, and a minor iterator that selects an
+		// allocator in that pool.
+		
+		while (remainingQuickListBudget <= nbytes) {
+			GCAlloc** allocs = NULL;
+			switch (victimIterator % 3) {
+				case 0: allocs = containsPointersAllocs; break;
+				case 1: allocs = containsPointersRCAllocs; break;
+				case 2: allocs = noPointersAllocs; break;
+			}
+			allocs[victimIterator / 3]->CoalesceQuickList();
+			victimIterator = (victimIterator + 1) % (3*kNumSizeClasses);
+		}
+
+		remainingQuickListBudget -= nbytes;
+	}
+
+	void GC::RelinquishQuickListBudget(size_t nbytes)
+	{
+		remainingQuickListBudget += nbytes;
+	}
+	
 	void GC::ClearMarks()
 	{
+		// ClearMarks may sweep, although I'm far from sure that that's a good idea,
+		// as SignalImminentAbort calls ClearMarks.
+
+		EstablishSweepInvariants();
+
 		for (int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->ClearMarks();
 			containsPointersAllocs[i]->ClearMarks();
@@ -1407,6 +1461,8 @@ namespace MMgc
 
 	void GC::SweepNeedsSweeping()
 	{
+		EstablishSweepInvariants();
+		
 		// clean up any pages that need sweeping
 		for(int i=0; i < kNumSizeClasses; i++) {
 			containsPointersRCAllocs[i]->SweepNeedsSweeping();
@@ -1415,6 +1471,15 @@ namespace MMgc
 		}
 	}
 
+	void GC::EstablishSweepInvariants()
+	{
+		for(int i=0; i < kNumSizeClasses; i++) {
+			containsPointersRCAllocs[i]->CoalesceQuickList();
+			containsPointersAllocs[i]->CoalesceQuickList();
+			noPointersAllocs[i]->CoalesceQuickList();
+		}
+	}
+	
 	void GC::ForceSweepAtShutdown()
 	{
 		// There are two preconditions for Sweep: the mark stacks must be empty, and
@@ -1447,6 +1512,14 @@ namespace MMgc
 		GCAssert(m_incrementalWork.Count() == 0);
 		GCAssert(m_barrierWork.Count() == 0);
 		
+		// This clears the quick lists in the small-block allocators.  It's crucial
+		// that we do that before we set 'collecting' and call any callbacks, because
+		// the cleared quick lists make sure that the slow allocation path that
+		// checks m_gc->collecting is taken, and that is required in order to
+		// allocate objects as marked under some circumstances.
+
+		EstablishSweepInvariants();
+
 		collecting = true;
 		zct.StartCollecting();
 		

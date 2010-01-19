@@ -437,6 +437,8 @@ namespace MMgc
 		void FinalizeHook(const void *item, size_t size);
 		// called when object is really dead and can be poisoned
 		void FreeHook(const void *item, size_t size, int poison);
+		// called when object is initialized-as-if-freed and can be poisoned
+		void PseudoFreeHook(const void *item, size_t size, int poison);
 #endif
 
 #ifdef MMGC_MEMORY_PROFILER
