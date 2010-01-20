@@ -114,8 +114,14 @@ namespace MMgc
 				unsigned int itemNum = 0;
 				while(itemNum++ < m_itemsPerBlock) {
 					if(IsInUse(m_firstBlock, mem)) {
-						GCLog("Leaked %d byte item.  Addr: 0x%p\n", GetItemSize(), GetUserPointer(mem));
-						PrintAllocStackTrace(GetUserPointer(mem));
+						// supress output in release build UNLESS the profiler is on
+#ifndef DEBUG
+						if(m_heap->GetProfiler() != NULL)
+#endif
+						{
+							GCLog("Leaked %d byte item.  Addr: 0x%p\n", GetItemSize(), GetUserPointer(mem));
+							PrintAllocStackTrace(GetUserPointer(mem));
+						}
 					}
 					mem_c += m_itemSize;
 				}
