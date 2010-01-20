@@ -4912,6 +4912,7 @@ namespace avmplus
 
         if (mop_rangeCheckFailed_label.has_preds) {
             LIns* range_label = label();
+            Ins(LIR_regfence);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(range_label, "mop_rangeCheckFailed"); })
             setLabelPos(mop_rangeCheckFailed_label, range_label);
             callIns(FUNCTIONID(mop_rangeCheckFailed), 1, env_param);
@@ -4919,6 +4920,7 @@ namespace avmplus
 
         if (npe_label.has_preds) {
             LIns *npelabel = label();
+            Ins(LIR_regfence);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(npelabel, "npe"); })
             setLabelPos(npe_label, npelabel);
             callIns(FUNCTIONID(npe), 1, env_param);
@@ -4926,6 +4928,7 @@ namespace avmplus
 
         if (interrupt_label.has_preds) {
             LIns *intlabel = label();
+            Ins(LIR_regfence);
             verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(intlabel, "interrupt"); })
             setLabelPos(interrupt_label, intlabel);
             callIns(FUNCTIONID(handleInterruptMethodEnv), 1, env_param);
