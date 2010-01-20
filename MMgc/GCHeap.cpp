@@ -342,7 +342,7 @@ namespace MMgc
 		
 		// fail the allocation if we hit soft limit and canFail
 		if(status == kMemSoftLimit && canFail) {
-			FreeInternal(baseAddr, true);
+			FreeInternal(baseAddr, (flags & kProfile) != 0);
 			return NULL;
 		}				   
 
@@ -2478,7 +2478,7 @@ namespace MMgc
 #ifdef DEBUG
 	void GCHeap::CheckForOOMAbortAllocation()
 	{
-		if(statusNotificationBeingSent() && status == kMemAbort)
+		if(m_notificationThread == VMPI_currentThread() && status == kMemAbort)
 			GCAssertMsg(false, "Its not legal to perform allocations during OOM kMemAbort callback");
 	}
 #endif
