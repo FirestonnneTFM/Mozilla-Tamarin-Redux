@@ -100,6 +100,7 @@
 #undef VMCFG_SELFTEST
 #undef VMCFG_EVAL
 #undef AVMPLUS_JIT_READONLY
+#undef VMCFG_PROTECT_JITMEM
 #undef MMGC_LOCKING
 #undef MMGC_USE_SYSTEM_MALLOC
 #undef MMGC_ENABLE_CPP_EXCEPTIONS
@@ -389,9 +390,8 @@
 
 /* AVMFEATURE_PROTECT_JITMEM
  *
- * Makes JIT code buffers read-only to reduce the probability of heap overflow attacks.
- * If you select this then the MMgc platform layer must be able to set the protection
- * on the pages containing JIT code.
+ * Makes all JIT code buffers read-only whenever JIT code is executing,
+ * to reduce the probability of heap overflow attacks.
  */
 #if !defined AVMFEATURE_PROTECT_JITMEM || AVMFEATURE_PROTECT_JITMEM != 0 && AVMFEATURE_PROTECT_JITMEM != 1
 #  error "AVMFEATURE_PROTECT_JITMEM must be defined and 0 or 1 (only)."
@@ -828,6 +828,9 @@
 #endif
 #if AVMFEATURE_PROTECT_JITMEM
 #  define AVMPLUS_JIT_READONLY
+#endif
+#if AVMFEATURE_PROTECT_JITMEM
+#  define VMCFG_PROTECT_JITMEM
 #endif
 #if AVMFEATURE_SHARED_GCHEAP
 #  define MMGC_LOCKING
