@@ -456,11 +456,11 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc> Makes JIT code buffers read-only to reduce the probability of heap overflow attacks.
-           If you select this then the MMgc platform layer must be able to set the protection
-           on the pages containing JIT code.  </desc>
+    <desc> Makes all JIT code buffers read-only whenever JIT code is executing,
+           to reduce the probability of heap overflow attacks. </desc>
     <name> AVMFEATURE_PROTECT_JITMEM </name>
-    <defines> AVMPLUS_JIT_READONLY </defines>
+    <defines> AVMPLUS_JIT_READONLY </defines> <!-- fixme: legacy name -->
+    <defines> VMCFG_PROTECT_JITMEM </defines>
   </feature>
 
   <feature>
