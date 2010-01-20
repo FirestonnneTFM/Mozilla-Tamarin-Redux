@@ -305,7 +305,7 @@ namespace avmplus
     /** helper code to make LIR generation nice and tidy */
     class LirHelper {
     protected:
-        LirHelper(AvmCore*);
+        LirHelper(PoolObject*);
         ~LirHelper();
         void cleanup();
 
@@ -347,7 +347,8 @@ namespace avmplus
     protected: // data
         LirWriter *lirout;
         Fragment *frag;
-        AvmCore* core;
+        PoolObject* pool;
+        AvmCore *core;
         LIns *coreAddr;
         Allocator* alloc1;    // allocator used in first pass, while writing LIR
         Allocator* lir_alloc; // allocator with LIR buffer lifetime

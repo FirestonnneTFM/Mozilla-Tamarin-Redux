@@ -680,7 +680,7 @@ namespace avmplus
     }
 
     CodegenLIR::CodegenLIR(MethodInfo* i) :
-        LirHelper(i->pool()->core),
+        LirHelper(i->pool()),
         overflow(false),
 #ifdef VTUNE
         jitInfoList(i->core()->gc),
@@ -5847,13 +5847,17 @@ namespace avmplus
 
         bool keep = //!info->hasExceptions() &&
             !assm->error();
-    #ifdef AVMPLUS_JITMAX
+#ifdef AVMPLUS_JITMAX
         jitcount++;
         keep = keep && (jitcount >= jitmin && jitcount <= jitmax);
         //AvmLog(stderr, "jitcount %d keep %d\n", jitcount, (int)keep);
-    #endif
+#endif
         //_nvprof("keep",keep);
         if (keep) {
+#if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
+            if (verbose())
+                AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
+#endif
             // save pointer to generated code
             union {
                 GprMethodProc fp;
@@ -5865,17 +5869,16 @@ namespace avmplus
             info->_flags |= MethodInfo::JIT_IMPL;
             InvokerCompiler::initCompilerHook(info);
             _nvprof("JIT method bytes", CodeAlloc::size(assm->codeList));
-            #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
-            if (verbose())
-                AvmLog("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
-            #endif
         } else {
-            // assm puked, or we did something untested, so interpret.
-            overflow = true;
-            #if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
+#if defined AVMPLUS_JITMAX && defined NJ_VERBOSE
             if (verbose())
                 AvmLog("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
-            #endif
+#endif
+            mgr->codeAlloc.freeAll(assm->codeList);
+            // assm puked, or we did something untested, so interpret.
+            overflow = true;
+            if (assm->codeList)
+                mgr->codeAlloc.freeAll(assm->codeList);
             PERFM_NVPROF("lir-error",1);
         }
 
@@ -6000,8 +6003,9 @@ namespace avmplus
         return c;
     }
 
-    LirHelper::LirHelper(AvmCore* core) :
-        core(core),
+    LirHelper::LirHelper(PoolObject* pool) :
+        pool(pool),
+        core(pool->core),
         alloc1(mmfx_new(Allocator())),
         lir_alloc(mmfx_new(Allocator()))
     { }
@@ -6017,6 +6021,7 @@ namespace avmplus
         alloc1 = NULL;
         mmfx_delete( lir_alloc );
         lir_alloc = NULL;
+        pool->codeMgr->codeAlloc.markAllExec();
     }
 
     // check valid pointer and unbox it (returns ScriptObject*)
@@ -6050,16 +6055,49 @@ namespace nanojit
     void Allocator::postReset() {
     }
 
-    // static
+#ifdef VMCFG_PROTECT_JITMEM
     void* CodeAlloc::allocCodeChunk(size_t nbytes) {
         size_t npages = (nbytes + GCHeap::kBlockSize - 1) / GCHeap::kBlockSize;
-        return GCHeap::GetGCHeap()->AllocCodeMemory(npages);
+        void* addr = GCHeap::GetGCHeap()->AllocCodeMemory(npages);
+        return addr;
     }
 
-    // static
     void CodeAlloc::freeCodeChunk(void* addr, size_t) {
         return GCHeap::GetGCHeap()->FreeCodeMemory(addr);
     }
+
+    void CodeAlloc::markCodeChunkExec(void* addr, size_t nbytes) {
+        //printf("protect   %d %p\n", (int)nbytes, addr);
+        VMPI_setPageProtection(addr, nbytes, true, false); // RX
+    }
+
+    void CodeAlloc::markCodeChunkWrite(void* addr, size_t nbytes) {
+        //printf("unprotect %d %p\n", (int)nbytes, addr);
+        VMPI_setPageProtection(addr, nbytes, false, true); // RW
+    }
+
+#else
+
+    void* CodeAlloc::allocCodeChunk(size_t nbytes) {
+        size_t npages = (nbytes + GCHeap::kBlockSize - 1) / GCHeap::kBlockSize;
+        void* addr = GCHeap::GetGCHeap()->AllocCodeMemory(npages);
+        VMPI_setPageProtection(addr, nbytes, true, true); // RWX
+        return addr;
+    }
+
+    void CodeAlloc::freeCodeChunk(void* addr, size_t nbytes) {
+        VMPI_setPageProtection(addr, nbytes, false, true); // RW
+        return GCHeap::GetGCHeap()->FreeCodeMemory(addr);
+    }
+
+    void CodeAlloc::markCodeChunkExec(void*, size_t) {
+        // no-op
+    }
+
+    void CodeAlloc::markCodeChunkWrite(void*, size_t) {
+        // no-op
+    }
+#endif
 }
 
 //
@@ -6139,7 +6177,7 @@ namespace avmplus
     }
 
     InvokerCompiler::InvokerCompiler(MethodInfo* method)
-        : LirHelper(method->pool()->core)
+        : LirHelper(method->pool())
         , method(method)
         , ms(method->getMethodSignature())
         , maxargs_br(NULL)
