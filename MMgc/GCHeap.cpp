@@ -342,7 +342,7 @@ namespace MMgc
 		
 		// fail the allocation if we hit soft limit and canFail
 		if(status == kMemSoftLimit && canFail) {
-			FreeInternal(baseAddr, true);
+			FreeInternal(baseAddr, (flags & kProfile) != 0);
 			return NULL;
 		}				   
 
