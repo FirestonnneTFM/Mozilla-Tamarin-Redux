@@ -466,7 +466,7 @@ namespace MMgc
 		// again when we call back to Alloc, below.
 		
 		m_gc->SignalFreeWork(m_itemSize);
-		
+
   		GCBlock* b = m_firstFree;
   
 		while (b == NULL) {
@@ -491,7 +491,7 @@ namespace MMgc
 		GCAssert(b == m_firstFree);
 		GCAssert(b->firstFree != NULL);
   		
-		if (!m_gc->collecting)
+		if (!m_gc->collecting && !m_gc->greedy)
 		{
 			// Fast path: fill the quick list from b, then tail-call Alloc()
 			FillQuickList(b);
@@ -510,14 +510,19 @@ namespace MMgc
 			// slow-path allocation.
 			FillQuickList(b);
 			GCAssert(m_qList != NULL);
+            if (m_gc->greedy)
+                m_gc->policy.beforeAllocationInGreedyMode(m_itemSize);
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
 			void *item = Alloc(askSize, flags);
 #else
 			void *item = Alloc(flags);
 #endif
-			int index = GetIndex(b, item);
-			if(b->finalizeState != m_gc->finalizedValue)
+            if (m_gc->greedy)
+                m_gc->policy.afterAllocationInGreedyMode();
+			if(m_gc->collecting && b->finalizeState != m_gc->finalizedValue) {
+                int index = GetIndex(b, item);
 				SetBit(b, index, kMark);
+            }
 			CoalesceQuickList();
 			GCAssert(m_qList == NULL);
 			

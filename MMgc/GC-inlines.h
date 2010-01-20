@@ -109,7 +109,11 @@ namespace MMgc
 		bytesAllocated += nbytes;
 #endif
 		remainingMinorAllocationBudget -= int32_t(nbytes);
- 		return remainingMinorAllocationBudget <= 0;
+        
+        // Important to use < 0 not <= 0: in greedy mode we set the budget to
+        // exactly the object size we're about to allocate.  Using <= 0 would
+        // cause the allocation never to succeed.
+ 		return remainingMinorAllocationBudget < 0;
 	}
 
 	REALLY_INLINE void GCPolicyManager::signalFreeWork(size_t nbytes)
