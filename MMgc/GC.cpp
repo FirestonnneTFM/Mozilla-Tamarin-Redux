@@ -781,7 +781,17 @@ namespace MMgc
 		(void)gc;
 		// do nothing for the moment
 	}
-	
+
+	void GCPolicyManager::beforeAllocationInGreedyMode(size_t nbytes)
+    {
+        remainingMinorAllocationBudget = nbytes;
+    }
+    
+    void GCPolicyManager::afterAllocationInGreedyMode()
+    {
+        remainingMinorAllocationBudget = GREEDY_TRIGGER;
+    }
+    
 	REALLY_INLINE void GCPolicyManager::signalMarkWork(size_t nbytes)
 	{
 		objectsScannedLastCollection++;
@@ -2415,12 +2425,12 @@ namespace MMgc
 		SweepNeedsSweeping();
 
 		// at this point every object should have no marks or be marked kFreelist
-#ifdef _DEBUG		
-		for(int i=0; i < kNumSizeClasses; i++) {
-			containsPointersRCAllocs[i]->CheckMarks();
-			containsPointersAllocs[i]->CheckMarks();
-			noPointersAllocs[i]->CheckMarks();
-		}
+#ifdef _DEBUG
+        for(int i=0; i < kNumSizeClasses; i++) {
+            containsPointersRCAllocs[i]->CheckMarks();
+            containsPointersAllocs[i]->CheckMarks();
+            noPointersAllocs[i]->CheckMarks();
+        }
 #endif
 
 #ifdef MMGC_HEAP_GRAPH
@@ -3031,7 +3041,6 @@ namespace MMgc
 		if(heap->Config().autoGCStats)
 			DumpPauseInfo();
 #endif
-		
 	}
 
 #ifdef _DEBUG
