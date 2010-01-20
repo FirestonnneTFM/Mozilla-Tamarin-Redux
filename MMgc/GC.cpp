@@ -784,7 +784,7 @@ namespace MMgc
 
 	void GCPolicyManager::beforeAllocationInGreedyMode(size_t nbytes)
     {
-        remainingMinorAllocationBudget = nbytes;
+        remainingMinorAllocationBudget = int32_t(nbytes);
     }
     
     void GCPolicyManager::afterAllocationInGreedyMode()
