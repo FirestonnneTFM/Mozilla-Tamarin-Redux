@@ -231,7 +231,7 @@ namespace avmplus
 		
 		static ScriptObject* genericCreateInstance(ClassClosure* cls, VTable* ivtable);
 		static ScriptObject* fastCreateInstance(ClassClosure* cls, VTable* ivtable);
-		static ScriptObject* generalCreateInstance(ClassClosure* cls, VTable* ivtable);
+		static ScriptObject* slowCreateInstance(ClassClosure* cls, VTable* ivtable);
 		
 #ifdef AVMPLUS_VERBOSE
 	public:

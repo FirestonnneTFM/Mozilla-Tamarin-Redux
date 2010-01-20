@@ -831,7 +831,7 @@ namespace avmplus
 		if (ivtable->basecase)
 			ivtable->createInstance = fastCreateInstance;
 		else
-			ivtable->createInstance = generalCreateInstance;
+			ivtable->createInstance = slowCreateInstance;
 		return so;
 	}
 
@@ -842,7 +842,7 @@ namespace avmplus
 	}
 
 	/*static*/
-	ScriptObject* ScriptObject::generalCreateInstance(ClassClosure* cls, VTable* ivtable)
+	ScriptObject* ScriptObject::slowCreateInstance(ClassClosure* cls, VTable* ivtable)
 	{
 		return cls->createInstance(ivtable, cls->prototypePtr());
 	}
