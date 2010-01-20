@@ -153,8 +153,17 @@ namespace avmplus
 
 		if (m_info)
 		{
+#ifdef VMCFG_AOT	
+			const int32_t local_count = m_info->local_count();
+			const int32_t max_scope = m_info->max_scopes();			
+			if (m_framep == NULL)
+				return;
+#else			
             MethodSignaturep const ms = m_info->getMethodSignature();
-            for (int i = (ms->max_scope() + ms->local_count() - 1), n = ms->local_count(); i >= n; --i)
+			const int32_t local_count = ms->local_count();
+			const int32_t max_scope = ms->max_scope();			
+#endif
+			for (int i = (max_scope + local_count - 1), n = local_count; i >= n; --i)
             {
                 Atom const scope = m_info->boxOneLocal(m_framep, i, m_traits);
                 AvmAssert(atomKind(scope) != kUnusedAtomTag);
