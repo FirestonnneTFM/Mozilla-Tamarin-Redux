@@ -1869,7 +1869,7 @@ namespace MMgc
 
 	void EnterFrame::AddAbortUnwindObject(AbortUnwindObject *obj)
 	{
-
+		GCAssertMsg(!EnterFrame::IsAbortUnwindObjectInList(obj), "obj can't be added to list twice!");
 		//  Push it on the front
 		obj->next = m_abortUnwindList;
 		if (m_abortUnwindList)
@@ -1881,6 +1881,8 @@ namespace MMgc
 
 	void EnterFrame::RemoveAbortUnwindObject(AbortUnwindObject *obj)
 	{
+		GCAssertMsg(obj == m_abortUnwindList || obj->previous != NULL, "Object not in list");
+
 		if (obj == m_abortUnwindList)
 		{
 			m_abortUnwindList = obj->next;
@@ -1898,6 +1900,31 @@ namespace MMgc
 		obj->next = NULL;
 		obj->previous = NULL;
 	}
+
+#ifdef DEBUG
+	
+	AbortUnwindObject::~AbortUnwindObject()
+	{
+		GCAssertMsg(!EnterFrame::IsAbortUnwindObjectInList(this), "RemoveAbortUnwindObject not called, dangling pointer in list.");
+	}
+
+	/*static*/ 
+	bool EnterFrame::IsAbortUnwindObjectInList(AbortUnwindObject *obj)
+	{
+		GCHeap *heap = GCHeap::GetGCHeap();
+		EnterFrame *frame;
+		if(heap && (frame = heap->GetEnterFrame()))
+		{
+			AbortUnwindObject *list = frame->m_abortUnwindList;
+			while(list) {
+				if(list == obj)
+					return true;
+				list = list->next;
+			}
+		}
+		return false;
+	}
+#endif
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
