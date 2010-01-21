@@ -1913,7 +1913,7 @@ namespace MMgc
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
 		EnterFrame *frame;
-		if(heap && (frame = heap->GetEnterFrame()))
+		if(heap && (frame = heap->GetEnterFrame()) != NULL)
 		{
 			AbortUnwindObject *list = frame->m_abortUnwindList;
 			while(list) {
