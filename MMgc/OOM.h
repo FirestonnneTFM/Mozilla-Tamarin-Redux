@@ -94,7 +94,12 @@ namespace MMgc
 
 		public:
 			AbortUnwindObject() : next(NULL), previous(NULL)  {}
-			virtual ~AbortUnwindObject(){;}
+			virtual ~AbortUnwindObject()
+#ifdef DEBUG
+					;
+#else
+					{}
+#endif
 			virtual void Unwind(){/*noop in base*/}
 
 		private:
@@ -128,6 +133,10 @@ namespace MMgc
 		//  It is the caller's responsibility to make sure the AbortUnwindObject has previously been added to the list
 		//  This method is not thread safe.
 		void RemoveAbortUnwindObject(AbortUnwindObject *obj);
+
+#ifdef DEBUG
+		static bool IsAbortUnwindObjectInList(AbortUnwindObject *obj);
+#endif			
 
 	private:
 		GCHeap *m_heap;
