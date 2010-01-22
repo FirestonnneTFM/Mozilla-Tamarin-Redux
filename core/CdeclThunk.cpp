@@ -84,6 +84,9 @@ namespace avmplus
                 if ((bt == BUILTIN_any || bt == BUILTIN_object) && _a == dblAtom())
                     _a = core->doubleToAtom(*dblPtr());
                 
+                // should not be in here if we want a void return type.
+                AvmAssert(bt != BUILTIN_void);
+                
                 switch(bt)
                 {
                 case BUILTIN_any:
@@ -123,6 +126,10 @@ namespace avmplus
 
                     switch(Traits::getBuiltinType(t))
                     {
+                    case BUILTIN_void:
+                        AvmAssert(a == AtomConstants::undefinedAtom);
+                        _a = AtomConstants::undefinedAtom;
+                        break;
                     case BUILTIN_int:
                         setInt((intptr_t)a);
                         break;
