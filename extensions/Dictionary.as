@@ -66,6 +66,8 @@ package flash.utils
  * @langversion 3.0
  * @see ../../operators.html#strict_equality === (strict equality)
  * 
+ *  
+ *  @playerversion Lite 4
  */
 [native(cls="DictionaryClass", instance="DictionaryObject", methods="auto")]
 dynamic public class Dictionary
@@ -81,6 +83,8 @@ dynamic public class Dictionary
   	 *
   	 * @playerversion Flash 9
  	 * @langversion 3.0
+ 	 *  
+ 	 *  @playerversion Lite 4
  	 */
 	public function Dictionary(weakKeys:Boolean=false)
 	{
