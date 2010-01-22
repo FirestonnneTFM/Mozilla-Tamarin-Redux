@@ -294,6 +294,9 @@ package flash.sampler
             _setSamplerCallback(null);
         }
     }
+    /**
+    * @private
+    */
     [native("SamplerScript::_setSamplerCallback")]
     native function _setSamplerCallback(f:Function):void;
     
