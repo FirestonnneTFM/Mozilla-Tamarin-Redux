@@ -84,6 +84,11 @@ class AcceptanceRuntest(RuntestBase):
         print '    --atsdir        base output directory for ats swfs - defaults to ATS_SWFS'
         print '    --threads       number of threads to run (default=# of cpu/cores), set to 1 to have tests finish sequentially'
         print '    --verify        run a verify pass instead of running abcs'
+        print '    --aotsdk        location of the AOT sdk used to compile tests to standalone executables.'
+        print '    --aotout        where the resulting binaries should be put (defaults to the location of the as file).'
+        print '    --aotargs       any extra arguments to pass to compile.py.'
+        print '    --remoteip      IP/DNS address of the machine to run the tests on.'
+        print '    --remoteuser    user name to use to connect to the remote machine.'
         exit(c)
     
     def setOptions(self):
@@ -111,6 +116,16 @@ class AcceptanceRuntest(RuntestBase):
             elif o in ('--verify',):
                 self.verify = True
                 self.vmargs = '-Dverifyall -Dverbose=verify'
+            elif o in ('--aotsdk',):
+                self.aotsdk = v
+            elif o in ('--aotout',):
+                self.aotout = v
+            elif o in ('--aotargs',):
+                self.aotextraargs = v
+            elif o in ('--remoteip',):
+                self.remoteip = v
+            elif o in ('--remoteuser',):
+                self.remoteuser = v
                 
     def run(self):
         self.setEnvironVars()
@@ -272,7 +287,40 @@ class AcceptanceRuntest(RuntestBase):
         lassert = 0
         starttime=time()
         
-        if ast.endswith(self.abcasmExt):
+        if self.aotsdk and self.aotout:
+            avm_args = ""
+            if isfile("%s.avm_args" % ast):
+                avm_args = open("%s.avm_args" % ast).readline()
+                if avm_args.find("mops") >= 0:
+                    avm_args = ""
+            progname = string.replace(testName, ".abc", "")
+            progname = string.replace(progname, "/", ".")
+            progpath = os.path.join(self.aotout, progname)
+            if self.remoteip:
+                retryCount = 5
+                while retryCount > 0:
+                    # copy file to remote device
+                    cmd = "scp %s %s@%s:" % (progpath, self.remoteuser, self.remoteip)
+                    print "about to execute: " + cmd
+                    self.run_pipe(cmd)
+                    # run app
+                    cmd = "ssh %s@%s ./%s %s" % (self.remoteuser, self.remoteip, progname, avm_args)
+                    print "about to execute: " + cmd
+                    (f,err,exitcode) = self.run_pipe(cmd)
+                    if exitcode != 0:
+                        sleep(5)
+                        retryCount -= 1
+                    else:
+                        break
+                # delete app
+                cmd = "ssh %s@%s rm %s" % (self.remoteuser, self.remoteip, progname)
+                print "about to execute: " + cmd
+                self.run_pipe(cmd)
+            else:
+                cmd = "%s %s" % (progpath, avm_args)
+                # print "about to execute: " + cmd
+                (f,err,exitcode) = self.run_pipe(cmd)
+        elif ast.endswith(self.abcasmExt):
             # make sure util file has been compiled
             if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
                 self.run_pipe('"%s" -jar %s %s' % (self.java, self.asc, self.abcasmShell+'.as'))
