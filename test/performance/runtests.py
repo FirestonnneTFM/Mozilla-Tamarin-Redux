@@ -123,9 +123,6 @@ class PerformanceRuntest(RuntestBase):
         print " -k --socketlog     logs results to a socket server"
         print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
         print " -m --memory        logs the high water memory mark"
-        print "    --aotsdk        location of the AOT sdk used to compile tests to standalone executables."
-        print "    --aotout        where the resulting binaries should be put (defaults to the location of the as file)."
-        print "    --aotargs       any extra arguments to pass to compile.py."
         print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
         print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
         print "    --nooptimize    do not optimize files when compiling"
@@ -161,12 +158,6 @@ class PerformanceRuntest(RuntestBase):
                 self.vmname = v
             elif o in ('-m', '--memory'):
                 self.memory = True
-            elif o in ('--aotsdk'):
-                self.aotsdk = v
-            elif o in ('--aotout'):
-                self.aotout = v
-            elif o in ('--aotargs'):
-                self.aotextraargs = v
             elif o in ('--vmversion',):
                 self.vmversion = v
             elif o in ('--vmargs2',):
@@ -209,7 +200,6 @@ class PerformanceRuntest(RuntestBase):
         if self.optimize:
             args.append('-optimize -AS3')
         RuntestBase.compile_test(self, as_file, args)
-        RuntestBase.compile_aot(self, splitext(as_file)[0] + ".abc")
     
     def formatExceptionInfo(maxTBlevel=5):
         cla, exc, trbk = sys.exc_info()
@@ -265,10 +255,9 @@ class PerformanceRuntest(RuntestBase):
 
 
     def preProcessTests(self):
-        if not self.aotsdk:
-            self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
-            if self.avm2:
-                self.checkExecutable(self.avm2, '--avm2 must be set to avmplus')
+        self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
+        if self.avm2:
+            self.checkExecutable(self.avm2, '--avm2 must be set to avmplus')
             
         # Print run info and headers
         self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True, csv=False)
@@ -408,14 +397,7 @@ class PerformanceRuntest(RuntestBase):
         for i in range(self.iterations):
             memoryhigh = 0
             memoryhigh2 = 0
-            if self.aotsdk and self.aotout:
-                progname = string.replace(testName, ".as", "")
-                progname = string.replace(progname, "/", ".")
-                (f1,err,exitcode) = self.run_pipe(os.path.join(self.aotout, progname))
-                # print "about to execute: " + os.path.join(self.aotout, progname)
-                exitcode = 0 # hack!
-            else:
-                (f1,err,exitcode) = self.run_pipe("%s %s %s" % (self.avm, self.vmargs, abc))
+            (f1,err,exitcode) = self.run_pipe("%s %s %s" % (self.avm, self.vmargs, abc))
             out1.append(f1)
             if len(self.avm2)>0:
                 if len(self.vmargs2)>0:
