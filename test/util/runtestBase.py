@@ -61,7 +61,6 @@ import shutil
 import which
 
 import threadpool
-import subProcess
 
 # For Python 2.6 and above, use native subprocess.Popen
 if sys.version_info[0] >= 3 or (sys.version_info[0] == 2 and sys.version_info[1] >= 6):
@@ -108,11 +107,6 @@ class RuntestBase:
     testconfig = 'testconfig.txt'
     vmargs = ''
     vmtype = ''
-    aotsdk = None
-    aotout = None
-    remoteip = None
-    remoteuser = None
-    aotextraargs = ""
     
     args = []
     ashErrors = []
@@ -212,7 +206,6 @@ class RuntestBase:
         self.options = 'vE:a:g:b:s:x:htfc:dq'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                   'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'playerglobalabc=', 'toplevelabc=',
                    'javaargs='
@@ -515,7 +508,7 @@ class RuntestBase:
                 newargs.append(convertFromCygwin(t).strip())
             self.args = newargs
         
-        if not self.rebuildtests and self.aotsdk==None:
+        if not self.rebuildtests:
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
 
     def createOutputFile(self):
@@ -703,33 +696,6 @@ class RuntestBase:
     
 
     ### ASC / Compiling Functions ###
-
-    def compile_aot(self, abcfile, extraabcs = []):
-        # compile the abc to an executable
-        if self.aotsdk:
-            try:
-				output = os.path.dirname(abcfile)
-				if self.aotout:
-					output = self.aotout
-				
-				outname = string.replace(abcfile, "./", "")
-				outname = string.replace(outname, ".abc", "")
-				outname = string.replace(outname, "/", ".")
-				outabc = os.path.join(output, outname + ".abc")
-				
-				shutil.copyfile(abcfile, outabc)
-				self.js_print('AOT compilation of %s' % (outabc))
-        
-				t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
-				(f,err,exitcode) = self.run_pipe('python2.5 %s %s --output %s --name %s %s %s %s' % (
-					os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
-				
-				for line in f:
-					self.js_print(("file '%s'>>> " % abcfile) + line.strip())
-				for line in err:
-					self.js_print(("file '%s'>>> " % abcfile) + line.strip())
-            except:
-				self.js_print('AOT compilation of %s FAILED' % (abcfile))
     
     def compile_test(self, as_file, extraArgs=[]):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
@@ -843,19 +809,6 @@ class RuntestBase:
                 if exists(testdir+".abc")==False:
                     print("ERROR abc files %s.abc not created" % (testdir))
                     self.ashErrors.append("abc files %s.abc not created" % (testdir))
-                else:
-                    extrabcs = []
-                    # print "test: %s" % test
-                    if test.endswith(self.abcasmExt):
-                        extrabcs = [self.abcasmShell+'.abc']
-                        if not exists(self.abcasmShell+'.abc'):  # compile abcasmShell with no additional args
-                            self.run_pipe('java -jar %s %s' % (self.asc, self.abcasmShell+'.as'))
-                    if isfile("%s.avm_args" % test):
-                        if open("%s.avm_args" % test).read().find("mops.abc_") >= 0:
-                            mopshelper = os.path.join(self.aotout, "mopshelper.abc")
-                            shutil.copy("mops/mops.abc_", mopshelper)
-                            extrabcs += [mopshelper]
-                    self.compile_aot(testdir+".abc", extrabcs)
                 total -= 1;
         else:  #pexpect available
             child = pexpect.spawn('"%s" %s -classpath %s macromedia.asc.embedding.Shell' % (self.java, self.javaargs, self.asc))
