@@ -203,13 +203,13 @@ REALLY_INLINE LIns* LirHelper::stp(LIns* val, LIns* p, int32_t d)
 
 REALLY_INLINE LIns* LirHelper::sti(LIns* val, LIns* p, int32_t d)
 {
-    AvmAssert(!val->isQuad());
+    AvmAssert(val->isI32());
     return lirout->insStorei(val, p, d);
 }
 
 REALLY_INLINE LIns* LirHelper::stq(LIns* val, LIns* p, int32_t d)
 {
-    AvmAssert(val->isQuad());
+    AvmAssert(val->isI64() || val->isF64());
     return lirout->insStorei(val, p, d);
 }
 
