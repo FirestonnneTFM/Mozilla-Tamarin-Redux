@@ -4942,7 +4942,7 @@ namespace avmplus
             // exception case
             LIns *exptr = loadIns(LIR_ldp, offsetof(AvmCore, exceptionAddr), coreAddr);
             LIns *exAtom = loadIns(LIR_ldp, offsetof(Exception, atom), exptr);
-            localSet(state->verifier->stackBase, exAtom, NULL_TYPE);
+            localSet(state->verifier->stackBase, exAtom, NULL);
             // need to convert exception from atom to native rep, at top of
             // catch handler.  can't do it here because it could be any type.
 
