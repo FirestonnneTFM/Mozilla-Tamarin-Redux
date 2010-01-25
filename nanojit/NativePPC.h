@@ -160,7 +160,7 @@ namespace nanojit
         Rlr  = 8,
         Rctr = 9,
 
-        UnknownReg = 127,
+        deprecated_UnknownReg = 127,
         FirstReg = R0,
         LastReg = F31
     };
@@ -259,6 +259,9 @@ namespace nanojit
     static const int NumSavedRegs = 18; // R13-R30
 #endif
 
+    static inline bool IsGpReg(Register r) {
+        return r <= R31;
+    }
     static inline bool IsFpReg(Register r) {
         return r >= F0;
     }
