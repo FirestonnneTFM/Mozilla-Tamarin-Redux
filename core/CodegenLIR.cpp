@@ -412,7 +412,7 @@ namespace avmplus
         }
 
         LIns *split(LIns *a) {
-            if (a->isQuad() && !a->isop(LIR_qjoin)) {
+            if (a->isF64() && !a->isop(LIR_qjoin)) {
                 // all quad-sized args must be qjoin's for soft-float
                 a = ins2(LIR_qjoin, lo(a), hi(a));
             }
@@ -542,7 +542,7 @@ namespace avmplus
         Value& v = state->value(i);
         NanoAssert(v.traits == INT_TYPE || v.traits == UINT_TYPE || v.traits == BOOLEAN_TYPE);
         LIns *r = v.ins = lirout->insLoad(LIR_ld, vars, i*8);
-        NanoAssert(!r->isQuad());
+        NanoAssert(r->isI32());
         return r;
     }
 
@@ -550,7 +550,7 @@ namespace avmplus
         Value& v = state->value(i);
         NanoAssert(v.traits == NUMBER_TYPE);
         LIns *r = v.ins = lirout->insLoad(LIR_ldf, vars, i*8);
-        NanoAssert(r->isQuad());
+        NanoAssert(r->isF64());
         return r;
     }
 
@@ -796,200 +796,6 @@ namespace avmplus
 #endif
     }
 
-#ifdef _DEBUG
-    class ValidateWriter: public LirWriter
-    {
-        bool isCondOrConst(LIns *i) {
-            return i->isCond() || i->isconst();
-        }
-    public:
-        ValidateWriter(LirWriter *out) : LirWriter(out)
-        {}
-        LIns *ins0(LOpcode op) {
-            switch (op) {
-                case LIR_skip: AvmAssert(false); break;
-                case LIR_label: break;
-                case LIR_start: break;
-                case LIR_regfence: break;
-                default:AvmAssert(false);
-            }
-            return out->ins0(op);
-        }
-
-        LIns *ins1(LOpcode op, LIns *a) {
-            switch (op) {
-                case LIR_fneg:
-                case LIR_fret:
-                case LIR_qlo:
-                case LIR_qhi:
-                    AvmAssert(a->isQuad());
-                    break;
-                case LIR_not:
-                case LIR_neg:
-                case LIR_i2f: case LIR_u2f:
-                case LIR_i2q: case LIR_u2q:
-                    AvmAssert(!a->isQuad());
-                    break;
-                case LIR_ret:
-                    AvmAssert(a->isPtr());
-                    break;
-                case LIR_live:
-                    break;
-                case LIR_callh:
-                    AvmAssert(a->isop(LIR_icall));
-                    break;
-                default:
-                    AvmAssert(false);
-            }
-            return out->ins1(op, a);
-        }
-
-        LIns *ins2(LOpcode op, LIns *a, LIns *b) {
-            switch (op) {
-                case LIR_fadd:
-                case LIR_fsub:
-                case LIR_fmul:
-                case LIR_fdiv:
-                case LIR_feq:
-                case LIR_flt:
-                case LIR_fgt:
-                case LIR_fle:
-                case LIR_fge:
-                case LIR_qaddp:
-                case LIR_qior:
-                case LIR_qxor:
-                case LIR_qiand:
-                case LIR_qiadd:
-                case LIR_qeq:
-                case LIR_qlt:   case LIR_qult:
-                case LIR_qgt:   case LIR_qugt:
-                case LIR_qle:   case LIR_qule:
-                case LIR_qge:   case LIR_quge:
-                    AvmAssert(a->isQuad() && b->isQuad());
-                    break;
-                case LIR_qjoin:
-                case LIR_add:
-                case LIR_iaddp:
-                case LIR_sub:
-                case LIR_mul:
-                case LIR_and:
-                case LIR_or:
-                case LIR_xor:
-                case LIR_lsh:
-                case LIR_rsh:
-                case LIR_ush:
-                case LIR_eq:
-                case LIR_lt:    case LIR_ult:
-                case LIR_gt:    case LIR_ugt:
-                case LIR_le:    case LIR_ule:
-                case LIR_ge:    case LIR_uge:
-                    AvmAssert(!a->isQuad() && !b->isQuad());
-                    break;
-                case LIR_qilsh:
-                case LIR_qirsh:
-                case LIR_qursh:
-                    AvmAssert(a->isQuad() && !b->isQuad());
-                    break;
-                default:
-                    AvmAssert(false);
-                    break;
-            }
-            return out->ins2(op, a, b);
-        }
-
-        LIns *ins3(LOpcode op, LIns* a, LIns* b, LIns* c) {
-            switch (op) {
-                case LIR_cmov:
-                    AvmAssert(isCondOrConst(a) && !b->isQuad() && !c->isQuad());
-                    break;
-                case LIR_qcmov:
-                    AvmAssert(isCondOrConst(a) && b->isQuad() && c->isQuad());
-                    break;
-                default:
-                    AvmAssert(false);
-                    break;
-            }
-            return out->ins3(op, a, b, c);
-        }
-
-        LIns *insLoad(LOpcode op, LIns *base, int32_t disp) {
-            switch (op) {
-                case LIR_ld:
-                case LIR_ldc:
-                case LIR_ldf:
-                case LIR_ldfc:
-#ifdef AVMPLUS_64BIT
-                // should only use these opcodes in 64-bit builds
-                case LIR_ldq:
-                case LIR_ldqc:
-#endif
-#ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
-                case LIR_ldzb:
-                case LIR_ldzs:
-                case LIR_ldsb:
-                case LIR_ldss:
-                case LIR_ld32f:
-                case LIR_ldcb:
-                case LIR_ldcs:
-                case LIR_ldcsb:
-                case LIR_ldcss:
-                case LIR_ldc32f:
-#endif
-                    // all loads require base to be a pointer, regardless of the value size
-                    AvmAssert(base->isPtr());
-                    break;
-                default:
-                    AvmAssert(false);
-                    break;
-            }
-            return out->insLoad(op, base, disp);
-        }
-
-        LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d) {
-            AvmAssert(base && value && base->isPtr());
-            return out->insStore(op, value, base, d);
-        }
-
-        LIns *insBranch(LOpcode op, LIns *cond, LIns *to) {
-            switch (op) {
-                case LIR_jt: AvmAssert(cond->isCond() && (!to || to->isop(LIR_label))); break;
-                case LIR_jf: AvmAssert(cond->isCond() && (!to || to->isop(LIR_label))); break;
-                case LIR_j:  AvmAssert(!cond && (!to || to->isop(LIR_label))); break;
-                default: AvmAssert(false);
-            }
-            return out->insBranch(op, cond, to);
-        }
-
-        LIns* insJtbl(LIns* index, uint32_t size) {
-            AvmAssert(!index->isQuad());
-            return out->insJtbl(index, size);
-        }
-
-        LIns *insGuard(LOpcode v, LIns *cond, GuardRecord *gr) {
-            AvmAssert(false);
-            return out->insGuard(v, cond, gr);
-        }
-
-        LIns *insAlloc(int32_t size) {
-            AvmAssert(size >= 4 && isU16((size+3)>>2));
-            return out->insAlloc(size);
-        }
-
-        LIns *insCall(const CallInfo *call, LInsp args[]) {
-            uint32_t argt = call->_argtypes;
-            for (uint32_t i = 0; i < MAXARGS; i++) {
-                argt >>= ARGSIZE_SHIFT;
-                ArgSize sz = ArgSize(argt & ARGSIZE_MASK_ANY);
-                if (sz == ARGSIZE_NONE)
-                    break;
-                AvmAssert((sz == ARGSIZE_I || sz == ARGSIZE_U || sz == ARGSIZE_Q || sz == ARGSIZE_F) &&
-                          ((sz == ARGSIZE_I || sz == ARGSIZE_U) == !args[i]->isQuad()));
-            }
-            return out->insCall(call, args);
-        }
-    };
-#endif //  _DEBUG
-
     class CopyPropagation: public LirWriter
     {
         AvmCore* core;
@@ -1071,10 +877,9 @@ namespace avmplus
 
     void emitStart(Allocator& alloc, LirBuffer *lirbuf, LirWriter* &lirout) {
         (void)alloc;
-        (void)lirbuf;
         debug_only(
             // catch problems before they hit the writer pipeline
-            lirout = new (alloc) ValidateWriter(lirout);
+            lirout = new (alloc) ValidateWriter(lirout, "emitStart");
         )
         lirout->ins0(LIR_start);
 
@@ -1217,22 +1022,12 @@ namespace avmplus
             bool is = false;
             if (t == NUMBER_TYPE)
             {
-                is = val->isF64() || val->isQuad();
+                is = val->isF64() || val->isI64();
                 AvmAssert(is);
             }
-            else if (t == INT_TYPE)
+            else if (t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE)
             {
-                is = !val->isQuad() && !val->isF64();
-                AvmAssert(is);
-            }
-            else if (t == UINT_TYPE)
-            {
-                is = !val->isQuad() && !val->isF64();
-                AvmAssert(is);
-            }
-            else if (t == BOOLEAN_TYPE)
-            {
-                is = !val->isQuad() && !val->isF64();
+                is = val->isI32();
                 AvmAssert(is);
             }
             else
@@ -1439,7 +1234,8 @@ namespace avmplus
         lirout = new (*alloc1) LirBufWriter(prolog_buf);
 
         debug_only(
-            lirout = new (*alloc1) ValidateWriter(lirout);
+            lirout = new (*alloc1) ValidateWriter(lirout,
+                                                  "writePrologue(prologue)");
         )
         verbose_only(
             vbWriter = 0;
@@ -1708,7 +1504,7 @@ namespace avmplus
         LirBuffer *body_buf = new (*lir_alloc) LirBuffer(*lir_alloc);
         LirWriter *body = new (*alloc1) LirBufWriter(body_buf);
         debug_only(
-            body = new (*alloc1) ValidateWriter(body);
+            body = new (*alloc1) ValidateWriter(body, "writePrologue(body)");
         )
         verbose_only(
             if (verbose() && !core->quiet_opt()) {
@@ -3143,7 +2939,7 @@ namespace avmplus
                 break;
             }
             index++;
-            disp += v->isQuad() ? sizeof(double) : sizeof(Atom);
+            disp += (v->isI64() || v->isF64()) ? sizeof(double) : sizeof(Atom);
         }
 
         // patch the size to what we actually need
@@ -5461,55 +5257,31 @@ namespace avmplus
             b->vtable = NULL;
     }
 
-#ifdef _DEBUG
-    class ValidateReader: public LirFilter {
-        LirReader reader;
-    public:
-        ValidateReader(LIns *lastIns) : LirFilter(NULL), reader(lastIns)
-        {}
-
-        LIns* read()
-        {
-            LIns *i = reader.read();
-            switch (i->opcode()) {
-            case LIR_jt:
-            case LIR_jf:
-            case LIR_j:
-                AvmAssert(i->getTarget() != NULL && i->getTarget() == i->oprnd2() && i->oprnd2()->isop(LIR_label));
-                break;
-            case LIR_jtbl:
-                AvmAssert(i->getTableSize() > 0);
-                for (uint32_t j=0, n=i->getTableSize(); j < n; j++)
-                    AvmAssert(i->getTarget(j) != NULL && i->getTarget(j)->isop(LIR_label));
-                break;
-            }
-            return i;
-        }
-
-        LIns* pos()
-        {
-            return reader.pos();
-        }
-    };
-#else
-    typedef LirReader ValidateReader;
-#endif
-
     // read all of in1, followed by all of in2
     class SeqReader: public LirFilter
     {
-        ValidateReader r1, r2;
+        LirReader r1, r2;
+#ifdef _DEBUG
+        ValidateReader v1, v2;
+#endif
+        LirFilter *p1, *p2;
     public:
-        SeqReader(LIns* lastIns1, LIns* lastIns2) : LirFilter(NULL), r1(lastIns1), r2(lastIns2)
+        SeqReader(LIns* lastIns1, LIns* lastIns2)
+            : LirFilter(NULL), r1(lastIns1), r2(lastIns2),
+#ifdef _DEBUG
+            v1(&r1), v2(&r2), p1(&v1), p2(&v2)
+#else
+            p1(&r1), p2(&r2) 
+#endif
         {
-            in = &r1;
+            in = p1;
         }
 
         LIns* read()
         {
             LIns* ins = in->read();
-            if (ins->isop(LIR_start) && in == &r1) {
-                in = &r2;
+            if (ins->isop(LIR_start) && in == p1) {
+                in = p2;
                 ins = in->read();
             }
             return ins;
@@ -6195,7 +5967,7 @@ namespace avmplus
         lirbuf->abi = ABI_CDECL;
         LirWriter* lirout = new (*alloc1) LirBufWriter(lirbuf);
         debug_only(
-            lirout = new (*alloc1) ValidateWriter(lirout);
+            lirout = new (*alloc1) ValidateWriter(lirout, "InvokerCompiler");
         )
         verbose_only(
             if (verbose() && !core->quiet_opt()) {
