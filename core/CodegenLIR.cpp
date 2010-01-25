@@ -5267,7 +5267,7 @@ namespace avmplus
 #ifdef _DEBUG
             v1(&r1), v2(&r2), p1(&v1), p2(&v2)
 #else
-            p1(r1), p2(r2) 
+            p1(&r1), p2(&r2) 
 #endif
         {
             in = p1;
