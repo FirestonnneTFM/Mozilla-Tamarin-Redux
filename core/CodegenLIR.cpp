@@ -412,7 +412,7 @@ namespace avmplus
         }
 
         LIns *split(LIns *a) {
-            if (a->isQuad() && !a->isop(LIR_qjoin)) {
+            if (a->isF64() && !a->isop(LIR_qjoin)) {
                 // all quad-sized args must be qjoin's for soft-float
                 a = ins2(LIR_qjoin, lo(a), hi(a));
             }
@@ -542,7 +542,7 @@ namespace avmplus
         Value& v = state->value(i);
         NanoAssert(v.traits == INT_TYPE || v.traits == UINT_TYPE || v.traits == BOOLEAN_TYPE);
         LIns *r = v.ins = lirout->insLoad(LIR_ld, vars, i*8);
-        NanoAssert(!r->isQuad());
+        NanoAssert(r->isI32());
         return r;
     }
 
@@ -550,7 +550,7 @@ namespace avmplus
         Value& v = state->value(i);
         NanoAssert(v.traits == NUMBER_TYPE);
         LIns *r = v.ins = lirout->insLoad(LIR_ldf, vars, i*8);
-        NanoAssert(r->isQuad());
+        NanoAssert(r->isF64());
         return r;
     }
 
@@ -1022,22 +1022,12 @@ namespace avmplus
             bool is = false;
             if (t == NUMBER_TYPE)
             {
-                is = val->isF64() || val->isQuad();
+                is = val->isF64() || val->isI64();
                 AvmAssert(is);
             }
-            else if (t == INT_TYPE)
+            else if (t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE)
             {
-                is = !val->isQuad() && !val->isF64();
-                AvmAssert(is);
-            }
-            else if (t == UINT_TYPE)
-            {
-                is = !val->isQuad() && !val->isF64();
-                AvmAssert(is);
-            }
-            else if (t == BOOLEAN_TYPE)
-            {
-                is = !val->isQuad() && !val->isF64();
+                is = val->isI32();
                 AvmAssert(is);
             }
             else
@@ -2945,7 +2935,7 @@ namespace avmplus
                 break;
             }
             index++;
-            disp += v->isQuad() ? sizeof(double) : sizeof(Atom);
+            disp += (v->isI64() || v->isF64()) ? sizeof(double) : sizeof(Atom);
         }
 
         // patch the size to what we actually need
