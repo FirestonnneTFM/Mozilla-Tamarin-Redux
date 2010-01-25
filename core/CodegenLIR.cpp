@@ -876,7 +876,7 @@ namespace avmplus
     };
 
     void emitStart(Allocator& alloc, LirBuffer *lirbuf, LirWriter* &lirout) {
-        (void)alloc;
+        (void)alloc; (void)lirbuf;
         debug_only(
             // catch problems before they hit the writer pipeline
             lirout = new (alloc) ValidateWriter(lirout, "emitStart");
