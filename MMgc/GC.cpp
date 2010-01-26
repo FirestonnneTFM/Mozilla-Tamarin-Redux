@@ -890,6 +890,7 @@ namespace MMgc
 		destroying(false),
 		marking(false),
 		collecting(false),
+        markerActive(0),
 		stackCleaned(true),
 		rememberedStackTop(0),
 		stackEnter(0),
@@ -1079,7 +1080,7 @@ namespace MMgc
 	{
 		GCAssertMsg(!scanStack || onThread(), "Full collection with stack scan requested however the GC isn't associated with a thread, missing MMGC_GCENTER macro.");
 
-		if (nogc || collecting || Reaping()) {
+		if (nogc || markerActive || collecting || Reaping()) {
 			return;
 		}
 		
@@ -1105,7 +1106,9 @@ namespace MMgc
 	REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
 	{
 		GCAssert(item.ptr != NULL);
+		markerActive++;
 		MarkItem(item);
+		markerActive--;
 	}
 #else	
 	REALLY_INLINE void GC::PushWorkItem(GCWorkItem item)
@@ -1660,10 +1663,7 @@ namespace MMgc
 	{
 		GCAssert(size > 0);
 	
-		void *item = heapAlloc(size, zero ? GCHeap::kZero : 0);
-
-		if(!item)
-			item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? GCHeap::kCanFail : 0));
+		void *item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? GCHeap::kCanFail : 0));
 
 		// mark GC pages in page map, small pages get marked one,
 		// the first page of large pages is 3 and the rest are 2
@@ -1737,10 +1737,12 @@ namespace MMgc
 	
 	void GC::Mark()
 	{
+		markerActive++;
 		while(m_incrementalWork.Count()) {
  			GCWorkItem item = m_incrementalWork.Pop();
 			MarkItem(item);
 		}
+		markerActive--;
 	}
 
 	void GC::MarkGCPages(void *item, uint32_t numPages, int to)
@@ -2457,6 +2459,7 @@ namespace MMgc
 		// the root set small.
 		
 		MMGC_LOCK(m_rootListLock);
+		markerActive++;
 		GCRoot *r = m_roots;
 		while(r) {
 			GCWorkItem item = r->GetWorkItem();
@@ -2467,6 +2470,7 @@ namespace MMgc
 			}
 			r = r->next;
 		}
+		markerActive--;
 	}
 
 	// Recover from a mark stack overflow.
@@ -2524,6 +2528,8 @@ namespace MMgc
 		void* ptr;
 		uint32_t size;
 		
+		markerActive++;
+		
 		for(int i=0; i < kNumSizeClasses; i++) {
 			GCAllocIterator iter1(containsPointersRCAllocs[i]);
 			while (iter1.GetNextMarkedObject(ptr, size)) {
@@ -2545,6 +2551,8 @@ namespace MMgc
 			MarkItem(item);
 			Mark();
 		}
+		
+		markerActive--;
 	}
 
 	// Signal that attempting to push 'item' onto 'stack' overflowed 'stack'.
@@ -2675,6 +2683,8 @@ namespace MMgc
 
 	void GC::MarkItem(GCWorkItem &wi)
 	{
+		GCAssert(markerActive);
+
 		size_t size = wi.GetSize();
 		uintptr_t *p = (uintptr_t*) wi.ptr;
 
@@ -2894,6 +2904,8 @@ namespace MMgc
 
 	void GC::IncrementalMark()
 	{
+        GCAssert(!markerActive);
+        
 		uint32_t time = incrementalValidation ? 1 : policy.incrementalMarkMilliseconds();
 #ifdef _DEBUG
 		time = 1;
@@ -2914,6 +2926,8 @@ namespace MMgc
 			}
 		}
 		
+        markerActive++;
+        
 		policy.signal(GCPolicyManager::START_IncrementalMark);
 		
 		// FIXME: tune this so that getPerformanceCounter() overhead is noise
@@ -2952,6 +2966,8 @@ namespace MMgc
 
 		policy.signal(GCPolicyManager::END_IncrementalMark);
 
+        markerActive--;
+        
 		if(heap->Config().gcstats) {
 			numObjects = policy.objectsMarked() - numObjects;
 			objSize = policy.bytesMarked() - objSize;
@@ -3634,7 +3650,7 @@ namespace MMgc
  		// we do nothing, which means we rely on reserve or other
  		// listeners to free memory or head straight to abort
  
- 		if(to == kMemHardLimit || to == kMemSoftLimit) {
+ 		if(to == kFreeMemoryIfPossible) {
  			if(onThread()) {
  				Collect();
  			} else {

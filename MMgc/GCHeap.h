@@ -424,6 +424,12 @@ namespace MMgc
 		 */
 		void Decommit();
 
+		void PreventDestruct(){preventDestruct++;}
+		void AllowDestruct(){GCAssert(preventDestruct > 0); preventDestruct--; }
+
+
+
+
 		static size_t SizeToBlocks(size_t bytes) { return ((bytes + kBlockSize - 1) & ~(kBlockSize-1)) / kBlockSize; }
 
 #ifdef MMGC_HOOKS
@@ -678,7 +684,7 @@ namespace MMgc
 		 *
 		 * @param size the number of pages to expand the heap by
 		 */	 
-		void ExpandHeap(size_t size, bool canFail=false);
+		bool ExpandHeap(size_t size);
 		bool ExpandHeapInternal(size_t size);
 		
 		// Block struct used for free lists and memory traversal
@@ -781,9 +787,11 @@ namespace MMgc
 			}
 		}
 
-		bool HardLimitExceeded();
-		bool SoftLimitExceeded();
+		bool HardLimitExceeded(size_t additionalAllocationAmt = 0);
+		bool SoftLimitExceeded(size_t additionalAllocationAmt = 0);
 		void StatusChangeNotify(MemoryStatus to);
+		void SendFreeMemorySignal(size_t minimumBlocksToFree = kMaxObjectSize);
+		void CheckForMemoryLimitsExceeded();
 		void CheckForStatusReturnToNormal();
 		void CheckForHardLimitExceeded();
 		void CheckForSoftLimitExceeded(size_t request);
@@ -848,6 +856,7 @@ namespace MMgc
 		friend class EnterFrame;
 		MemoryStatus status;
  		uint32_t enterCount;
+		uint32_t preventDestruct;
 
 		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 
@@ -875,7 +884,8 @@ namespace MMgc
 	{
 		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 		HeapBlock *block = AddrToBlock(item);
-		return block->size;
+	
+		return block ? block->size : 0;
 	}
 
 	REALLY_INLINE bool GCHeap::statusNotificationBeingSent()
