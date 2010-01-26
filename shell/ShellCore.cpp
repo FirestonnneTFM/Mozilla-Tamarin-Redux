@@ -65,6 +65,8 @@ namespace avmshell
 		, verifyall(AvmCore::verifyall_default)
 		, sse2(AvmCore::sse2_default)
         , fixed_esp(AvmCore::fixed_esp_default)
+		, arm_arch(AvmCore::arm_arch_default)
+        , arm_vfp(AvmCore::arm_vfp_default)
 		, greedy(false)
 		, nogc(false)
 		, incremental(true)
@@ -387,6 +389,10 @@ namespace avmshell
 	#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		config.sse2 = settings.sse2;
         config.fixed_esp = settings.fixed_esp;
+	#endif
+	#if defined(AVMPLUS_ARM)
+		config.arm_arch = settings.arm_arch;
+        config.arm_vfp = settings.arm_vfp;
 	#endif
 #endif
 
