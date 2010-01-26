@@ -105,6 +105,14 @@ const int kBufferPadding = 16;
         bool fixed_esp;
 		bool use_cmov;
 
+        // what version of ARM architecture is assumed by nanojit;
+        // currently must be 5<=arch<=7
+		uint8_t arm_arch;
+        // is the nanojit allowed to use VFP instructions?
+        bool arm_vfp;
+        // is the nanojit allowed to use Thumb2 instructions?
+		bool arm_thumb2;
+
         /**
 		 * If this switch is set, executing code will check the
 		 * "interrupted" flag to see whether an interrupt needs
@@ -153,6 +161,10 @@ const int kBufferPadding = 16;
 		static const bool cseopt_default;
 		static const bool sse2_default;
         static const bool fixed_esp_default;
+        static const bool use_cmov_default;
+		static const uint8_t arm_arch_default;
+        static const bool arm_vfp_default;
+        static const bool arm_thumb2_default;
 		static const bool interrupts_default;
 		static const bool jitordie_default;
 		
