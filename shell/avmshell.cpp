@@ -665,6 +665,14 @@ namespace avmshell
                         settings.fixed_esp = true;
                     }
 #endif /* AVMPLUS_IA32 */
+#if defined(AVMPLUS_ARM) && defined(FEATURE_NANOJIT)
+					else if (!VMPI_strcmp(arg+2, "arm_arch")) {
+						settings.arm_arch = VMPI_strtol(argv[++i], 0, 10);
+					}
+                    else if (!VMPI_strcmp(arg+2, "arm_vfp")) {
+                        settings.arm_vfp = true;
+                    }
+#endif /* AVMPLUS_IA32 */
 #ifdef VMCFG_VERIFYALL
 					else if (!VMPI_strcmp(arg+2, "verifyall")) {
 						settings.verifyall = true;
@@ -1051,6 +1059,10 @@ namespace avmshell
 	#ifdef AVMPLUS_IA32
         AvmLog("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         AvmLog("          [-Dfixedesp]  pre-decrement stack for all needed call usage upon method entry\n");
+	#endif
+	#ifdef AVMPLUS_ARM
+        AvmLog("          [-Darm_arch N]  nanojit assumes ARMvN architecture (default=5)\n");
+        AvmLog("          [-Darm_vfp]     nanojit uses VFP rather than SoftFloat\n");
 	#endif
 #endif
 #ifdef AVMPLUS_JITMAX
