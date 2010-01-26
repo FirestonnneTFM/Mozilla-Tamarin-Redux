@@ -46,6 +46,7 @@ namespace avmplus
 	{
 		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
+        friend class MopsRangeCheckFilter;
 		#endif
 
 	public:
