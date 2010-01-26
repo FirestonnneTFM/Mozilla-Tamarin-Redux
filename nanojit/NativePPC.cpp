@@ -1187,7 +1187,6 @@ namespace nanojit
 
     void Assembler::asm_cmov(LIns *ins) {
         LOpcode op    = ins->opcode();
-		(void)op;
         LIns* cond    = ins->oprnd1();
         LIns* iftrue  = ins->oprnd2();
         LIns* iffalse = ins->oprnd3();

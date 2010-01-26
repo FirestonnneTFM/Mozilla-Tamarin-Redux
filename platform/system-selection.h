@@ -229,8 +229,4 @@
   #define AVMSYSTEM_DOUBLE_MSW_FIRST 0
 #endif
 
-#ifndef AVMSYSTEM_ARM_FPU
-  #define AVMSYSTEM_ARM_FPU 0
-#endif
-
 #endif
