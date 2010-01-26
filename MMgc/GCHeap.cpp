@@ -258,12 +258,7 @@ namespace MMgc
 		if(profiler)
 			delete profiler;
 
-			if (holes && iteratorCount == 0)
-				Compact();
-			if (count == capacity)
-			{
-				capacity += growthIncrement;
-				T* newItems = mmfx_new_array_opt(T,  capacity, kZero);		if(hasSpy)
+		if(hasSpy)
 			VMPI_spyTeardown();
 		profiler = NULL;
 #endif

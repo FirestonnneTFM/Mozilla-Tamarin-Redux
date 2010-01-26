@@ -1476,11 +1476,12 @@ namespace nanojit
 
     class LirBufWriter : public LirWriter
     {
-        LirBuffer*    _buf;        // underlying buffer housing the instructions
+        LirBuffer*              _buf;        // underlying buffer housing the instructions
+        const avmplus::Config&  _config;
 
         public:
-            LirBufWriter(LirBuffer* buf)
-                : LirWriter(0), _buf(buf) {
+            LirBufWriter(LirBuffer* buf, const avmplus::Config& config)
+                : LirWriter(0), _buf(buf), _config(config) {
             }
 
             // LirWriter interface
@@ -1545,9 +1546,6 @@ namespace nanojit
         }
     };
 
-    class Assembler;
-
-    void compile(Assembler *assm, Fragment *frag, Allocator& alloc, bool optimize verbose_only(, LabelMap*));
     verbose_only(void live(LirFilter* in, Allocator& alloc, Fragment* frag, LogControl*);)
 
     class StackFilter: public LirFilter

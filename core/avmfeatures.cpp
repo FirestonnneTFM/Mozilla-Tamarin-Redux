@@ -65,9 +65,6 @@ const char * const avmfeatures = ""
   #if AVMSYSTEM_DOUBLE_MSW_FIRST
     "AVMSYSTEM_DOUBLE_MSW_FIRST;"
   #endif
-  #if AVMSYSTEM_ARM_FPU
-    "AVMSYSTEM_ARM_FPU;"
-  #endif
   #if AVMSYSTEM_IA32
     "AVMSYSTEM_IA32;"
   #endif
