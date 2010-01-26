@@ -291,7 +291,7 @@ namespace MMgc
 		bool canFail = (flags & kCanFail) != 0;
 
 		{
-			MMGC_LOCK_ALLOW_RECURSION(m_spinlock);
+			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 			
 			HeapBlock *block = AllocBlock(size, zero);
 			
@@ -2423,7 +2423,7 @@ namespace MMgc
 	bool GCHeap::ShouldNotEnter()
 	{
 		// don't enter if the heap is already gone or we're aborting but not on the aborting call stack in a nested enter call
-		GCHeap *gcheap = GetGCHeap();
+		GCHeap *heap = GetGCHeap();
 		if(heap == NULL || 
 		   (heap->GetStatus() == kMemAbort && 
 			(heap->GetEnterFrame() == NULL || heap->GetEnterFrame()->Suspended())))
