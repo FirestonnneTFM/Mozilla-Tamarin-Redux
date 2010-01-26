@@ -76,6 +76,8 @@ namespace avmshell
 		bool verifyall;					// copy to config
 		bool sse2;						// copy to config
         bool fixed_esp;                 // copy to config
+		uint8_t arm_arch;               // copy to config
+        bool arm_vfp;                   // copy to config
 		bool greedy;					// copy to each GC
 		bool nogc;						// copy to each GC
 		bool incremental;				// copy to each GC
