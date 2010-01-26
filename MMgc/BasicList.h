@@ -49,7 +49,8 @@ namespace MMgc
 					  capacity(0), 
 					  items(NULL), 
 					  iteratorCount(0),
-					  holes(false)
+					  holes(false), 
+					  cursor(0)
 		{
 		}
 		
@@ -67,6 +68,7 @@ namespace MMgc
 			}
 			count = capacity = iteratorCount = 0;
 			holes = false;
+			cursor = 0;
 		}
 		
 		void Add(T item)
@@ -82,7 +84,21 @@ namespace MMgc
 				mmfx_delete_array(items);
 				items = newItems;
 			}
-			items[count] = item;
+			uint32_t numHoles = 0;
+			if (holes)
+			{
+				uint32_t numFound = 0;
+				for (uint32_t j = 0; numFound < count && j < capacity; j++) 
+				{
+					if (items[j] == NULL)
+					{
+						numHoles++;
+					} else {
+						numFound++;
+					}
+				}
+			}
+			items[count+numHoles] = item;
 			count++;
 		}
 
@@ -104,7 +120,21 @@ namespace MMgc
 				mmfx_delete_array(items);
 				items = newItems;
 			}
-			items[count] = item;
+			uint32_t numHoles = 0;
+			if (holes)
+			{
+				uint32_t numFound = 0;
+				for (uint32_t j = 0; numFound < count && j < capacity; j++) 
+				{
+					if (items[j] == NULL)
+					{
+						numHoles++;
+					} else {
+						numFound++;
+					}
+				}
+			}
+			items[count+numHoles] = item;
 			count++;
 			return true;
 		}
@@ -121,6 +151,21 @@ namespace MMgc
 				GCAssertMsg(false, "Bug: should not try to remove something that's not in the list");
 				return;
 			}
+			
+			//  If the item we deleted occured is our cursor, set our cursor to the next item
+			if ( i == cursor)
+			{
+				do {
+					cursor ++;
+				}while (items[cursor] == NULL && cursor < capacity); 
+				
+				//  If our "next item" is the last item, then reset the list to the front.
+				if (cursor == capacity)
+				{
+					cursor = 0;
+				}
+			}
+			
 			items[i] = NULL;
 			count--;
 			if (i != count)
@@ -133,6 +178,10 @@ namespace MMgc
 			return items[i]; 
 		}
 		
+		//   Call "SetCursor" on the list to have future iterators begin iterating from that position in the list.  
+		//   The iterator will still iterate through all items in the list once by wrapping to the front when the end is hit.
+		void SetCursor( uint32_t newCursor ) { cursor = newCursor;}
+		uint32_t GetCursor ( ){ return cursor;}
 		uint32_t Count() const { return count; }
 
 		// iterator needs this to give complete iteration in the face of in-flight mutation
@@ -165,6 +214,7 @@ namespace MMgc
 				{
 					if (items[j] != NULL) 
 					{
+						if (cursor == j) cursor = i;
 						items[i++] = items[j++];
 						items[j-1] = NULL; // NULL it so next item goes in this hole
 					} 
@@ -186,16 +236,22 @@ namespace MMgc
 		T *items;
 		uint32_t iteratorCount;
 		bool holes;
+		uint32_t cursor;	
 
 	};
 
+	//  The BasicListIterator will iterate through items in the BasicList starting with the List's "cursor position"
+	//  if "SetCursor" is never called on the BasicList passed into this BasicListIterator, then the list will iterate starting
+	//  at position 0.  The iterator will still iterate through all items in the list once by wrapping to the front when the end is hit.
 	template<typename T>
 	class BasicListIterator
 	{
 	public:
-		BasicListIterator(BasicList<T>& bl) : index(0), bl(bl) 
+		BasicListIterator(BasicList<T>& bl) : bl(bl), bListEnd(false)
 		{
+			index = bl.GetCursor();
 			bl.IteratorAttach();
+		
 		}
 		~BasicListIterator()
 		{
@@ -203,18 +259,48 @@ namespace MMgc
 		}
 		T next() 
 		{ 
+			if (bListEnd) return NULL;
+
 			T t = NULL;
-			// iterate over holes until end
-			while (index < bl.Limit() && t == NULL) 
+			if (index >= bl.GetCursor())
 			{
-				t = bl.Get(index++);
+				// iterate over holes until end
+				while (index < bl.Limit() && t == NULL) 
+				{
+					t = bl.Get(index++);
+				}
+				
+				if (index == bl.Limit() && bl.GetCursor() != 0)
+				{
+					index = 0;
+				}
+			} 
+			else 
+			{
+				while(index < bl.GetCursor() && t == NULL)
+				{
+					t = bl.Get(index++);
+				}
+				if (index == bl.GetCursor())
+				{
+					bListEnd = true;
+				}
 			}
 			return t;
+		}
+		void MarkCursorInList()
+		{
+			while (index < bl.Limit() && bl.Get(index) == NULL) 
+			{
+				index ++;
+			}
+			bl.SetCursor( (index < bl.Limit()) ? index : 0);
 		}
 
 	private:
 		uint32_t index;
 		BasicList<T> &bl;
+		bool bListEnd;
 	};
 }
 

@@ -1663,10 +1663,7 @@ namespace MMgc
 	{
 		GCAssert(size > 0);
 	
-		void *item = heapAlloc(size, zero ? GCHeap::kZero : 0);
-
-		if(!item)
-			item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? GCHeap::kCanFail : 0));
+		void *item = heapAlloc(size, GCHeap::kExpand| (zero ? GCHeap::kZero : 0) | (canFail ? GCHeap::kCanFail : 0));
 
 		// mark GC pages in page map, small pages get marked one,
 		// the first page of large pages is 3 and the rest are 2
@@ -3653,7 +3650,7 @@ namespace MMgc
  		// we do nothing, which means we rely on reserve or other
  		// listeners to free memory or head straight to abort
  
- 		if(to == kMemHardLimit || to == kMemSoftLimit) {
+ 		if(to == kFreeMemoryIfPossible) {
  			if(onThread()) {
  				Collect();
  			} else {

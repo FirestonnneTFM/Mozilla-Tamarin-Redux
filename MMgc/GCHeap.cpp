@@ -157,6 +157,7 @@ namespace MMgc
 		  config(c),
  		  status(kMemNormal),
 		  enterCount(0),
+		  preventDestruct(0),
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
 	#endif
@@ -183,7 +184,10 @@ namespace MMgc
 		// Create the initial heap
 		{
 			MMGC_LOCK(m_spinlock);
-			ExpandHeap((int)config.initialSize);
+			if (!ExpandHeap((int)config.initialSize))
+			{
+				Abort();
+			}
 		}
 
 		fixedMalloc.InitInstance(this);
@@ -283,31 +287,42 @@ namespace MMgc
 
 		char *baseAddr = 0;
 		bool zero = (flags & kZero) != 0;
-		bool canFail = (flags & kCanFail) != 0;
-
 		{
 			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 			
 			HeapBlock *block = AllocBlock(size, zero);
 			
-			if(!block) {
-				if((flags & kExpand) == 0) {
-					return NULL;
-				}
-				
-				ExpandHeap(size, canFail);
+			//  Try to expand if the flag is set
+			if(!block && (flags & kExpand)) {
+				ExpandHeap(size);
+				block = AllocBlock(size, zero);						
+			}
+
+			//  If expand didn't work, or expand flag not set, then try to free 
+			//  memory then realloc from the heap
+			if (!block)
+			{
+				SendFreeMemorySignal(size);
 				block = AllocBlock(size, zero);
-				if(!block) {
-					if (!canFail)
-					{
-						GCAssertMsg(0, "Internal error: ExpandHeap should have aborted if it can't satisfy the request");
-						SignalInconsistentHeapState("Failed to abort");
-						/*NOTREACHED*/
-					}
+			}
+
+			//  Retry to expand if the expand is set
+			if(!block && (flags & kExpand)) {
+				ExpandHeap(size);
+				block = AllocBlock(size, zero);						
+			}
+
+			//  If we're still unable to allocate, we're done
+			if (!block)
+			{
+				if (flags & kCanFail)
+				{
 					return NULL;
+				} else {
+					Abort();
 				}
 			}
-			
+
 			GCAssert(block->size == size);
 			
 			numAlloc += size;
@@ -326,10 +341,9 @@ namespace MMgc
 				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
 #endif
-			
-			if(canFail)
-				CheckForSoftLimitExceeded(size);
-			
+
+			CheckForMemoryLimitsExceeded();
+
 		}
 	
 		// Zero out the memory, if requested to do so
@@ -338,12 +352,39 @@ namespace MMgc
 		}
 		
 		// fail the allocation if we hit soft limit and canFail
-		if(status == kMemSoftLimit && canFail) {
+		if(status == kMemSoftLimit && (flags & kCanFail) != 0) {
 			FreeInternal(baseAddr, (flags & kProfile) != 0);
 			return NULL;
 		}				   
 
 		return baseAddr;
+	}
+
+	void GCHeap::CheckForMemoryLimitsExceeded()
+	{
+
+		//  If we're already in the process of sending out memory notifications, don't bother verifying now.
+		if (status == MMgc::kMemAbort || statusNotificationBeingSent())
+			return;
+
+		size_t overage = 0;
+		if (SoftLimitExceeded())
+		{
+			overage = GetTotalHeapSize() + externalPressure/kBlockSize - config.heapSoftLimit;
+		} 
+		else if (HardLimitExceeded())
+		{
+			overage = (GetTotalHeapSize() + externalPressure/kBlockSize) - config.heapLimit + (config.heapLimit / 10);
+		}
+
+		if (overage)
+		{
+			SendFreeMemorySignal(overage);
+	
+			CheckForHardLimitExceeded();
+
+			CheckForSoftLimitExceeded(overage);
+		}
 	}
 
 	void GCHeap::FreeInternal(const void *item, bool profile)
@@ -383,22 +424,39 @@ namespace MMgc
 		size_t heapSize = GetTotalHeapSize();
 		size_t freeSize = GetFreeHeapSize();
 		
-		size_t decommitSize;
+		size_t decommitSize = 0;
 		// commit if > kDecommitThresholdPercentage is free
 		if(FreeMemoryExceedsDecommitThreshold())
+		{
 			decommitSize = int((freeSize * 100 - heapSize * kDecommitThresholdPercentage) / 100);
-		else
+		}
+		//  If we're over the heapLimit, attempt to decommit enough to get just under the limit
+		else if ( (heapSize > config.heapLimit) && ((heapSize - freeSize) < config.heapLimit))
+		{
+			decommitSize = heapSize - config.heapLimit + 1;
+			
+		} 
+		//  If we're over the SoftLimit, attempt to decommit enough to get just under the softLimit
+		else if ((config.heapSoftLimit!= 0) &&  (heapSize > config.heapSoftLimit) && ((heapSize - freeSize) < config.heapSoftLimit))
+		{
+			decommitSize = heapSize - config.heapSoftLimit + 1;
+		} 
+		else {		
 			return;
-				
+		}
+
+		if ((decommitSize < (size_t)kMinHeapIncrement) && (freeSize > (size_t)kMinHeapIncrement))
+		{
+		
+			decommitSize = kMinHeapIncrement;
+		}
+
 		//  Don't decommit more than our initial config size.
 		if (heapSize - decommitSize < config.initialSize)
 		{
 			decommitSize = heapSize - config.initialSize;
 		}
 
-		// don't trifle
-		if(decommitSize < (size_t)kMinHeapIncrement)
-			return;
 
 		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 
@@ -547,11 +605,7 @@ namespace MMgc
 		if (!HardLimitExceeded())
 			return;
 		
-		if(statusNotificationBeingSent())
-			return;
-				
-		// invoke callbacks to free up memory
-		StatusChangeNotify(kMemHardLimit);
+		Abort();
 	}
 
 	// m_spinlock is held
@@ -641,7 +695,7 @@ namespace MMgc
 				if(block) {
 					nextRegion = (Region*)(void *)block->baseAddr;	
 				} else {
-					ExpandHeap(1, false);
+					ExpandHeap(1);
 					// just calling ExpandHeap should set nextRegion
 					GCAssertMsg(nextRegion != NULL, "ExpandHeap didn't set nextRegion");
 				}
@@ -1302,24 +1356,17 @@ namespace MMgc
 		CheckFreelist();
 	}
 
-	void GCHeap::ExpandHeap(size_t askSize, bool canFail)
-	{
-		if (canFail) {
-			// once we hit soft limit don't allow canFail allocs
-			if(status == kMemSoftLimit)
-				return;
-
-			// random policy choice: don't invoke OOM callbacks for canFail allocs
-			if (HardLimitExceeded())
-				return;
+	bool GCHeap::ExpandHeap(size_t askSize)
+	{				
+		
+		//  Look ahead at memory limits to see if we should trigger a free memory signal
+		if ( (HardLimitExceeded(askSize) || SoftLimitExceeded(askSize)))
+		{
+			SendFreeMemorySignal(askSize);
 		}
-		
-		// Check the hard limit, trigger cleanup if hit
-		CheckForHardLimitExceeded();
-		
-		if (!ExpandHeapInternal(askSize) && !canFail)
-			Abort();
-		
+
+		bool bRetVal = ExpandHeapInternal(askSize);
+
 		// The guard on instance being non-NULL is a hack, to be fixed later (now=2009-07-20).
 		// Some VMPI layers (WinMo is at least one of them) try to grab the GCHeap instance to get
 		// at the map of private pages.  But the GCHeap instance is not available during the initial
@@ -1336,16 +1383,19 @@ namespace MMgc
 #endif
 			}
 		}
+
+		return bRetVal;
 	} 
 
-	bool GCHeap::HardLimitExceeded()
+	bool GCHeap::HardLimitExceeded(size_t additionalAllocationAmt)
 	{
-		return GetTotalHeapSize() + externalPressure/kBlockSize > config.heapLimit;
+		return GetTotalHeapSize() + externalPressure/kBlockSize + additionalAllocationAmt > config.heapLimit;
 	}
 	
-	bool GCHeap::SoftLimitExceeded()
+	bool GCHeap::SoftLimitExceeded(size_t additionalAllocationAmt)
 	{
-		return GetTotalHeapSize() + externalPressure/kBlockSize > config.heapSoftLimit;
+		if (config.heapSoftLimit == 0) return false;
+		return GetTotalHeapSize() + externalPressure/kBlockSize + additionalAllocationAmt > config.heapSoftLimit;
 	}
 	
 #define roundUp(_s, _inc) (((_s + _inc - 1) / _inc) * _inc)
@@ -1857,7 +1907,6 @@ namespace MMgc
 	
 	void EnterFrame::UnwindAllObjects()
 	{
-
 		while(m_abortUnwindList)
 		{
 			AbortUnwindObject *previous = m_abortUnwindList;		
@@ -1955,9 +2004,8 @@ namespace MMgc
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
 	{
-		(void)size;
 		if (attempt == 0 && !statusNotificationBeingSent())
-			StatusChangeNotify(kMemHardLimit);
+			SendFreeMemorySignal(size/kBlockSize + 1);
 		else
 			Abort();
 	}
@@ -1987,14 +2035,8 @@ namespace MMgc
 		
 		heap->externalPressure += nbytes;
 
-		// cleanup actions if necessary
-		heap->CheckForHardLimitExceeded();
-			
-		// check again - if we still can't allocate then fail hard
-		if (heap->HardLimitExceeded())
-			heap->Abort();
+		heap->CheckForMemoryLimitsExceeded();
 
-		heap->CheckForSoftLimitExceeded((nbytes + kBlockSize - 1) / kBlockSize);	// size only used for GC messages, OK to round up
 	}
 	
 	/*static*/
@@ -2117,10 +2159,9 @@ namespace MMgc
 		enterCount--;
 
 		// last one out of the pool pulls the plug
-		if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
-			GCHeap *heapToDestroy = GCHeap::instance;
+		if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent && preventDestruct == 0) {
 			GCHeap::instance = NULL;
-			heapToDestroy->DestroyInstance();
+			DestroyInstance();
 		}
 		EnterRelease();				
 	}
@@ -2393,8 +2434,51 @@ namespace MMgc
 	   its here that we call out to the mutator which may call
 	   back in to free memory or try to get more.
 	*/
+
+	void GCHeap::SendFreeMemorySignal(size_t minimumBlocksToFree)
+	{
+		//  If we're already in the process of sending out memory notifications, don't bother verifying now.
+		//  Also, we only want to send the "free memory" signal while our memory is in a normal state.  Once
+		//  we've entered softLimit or abort state, we want to allow the softlimit or abort processing to return
+		//  the heap to normal before continuing.  
+	
+		if (statusNotificationBeingSent() || status != kMemNormal)
+			return;
+
+		m_notificationThread = VMPI_currentThread();
+
+		size_t startingTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
+		size_t currentTotal = startingTotal;
+		
+		BasicListIterator<OOMCallback*> iter(callbacks);
+		OOMCallback *cb = NULL;
+		bool bContinue = true;	
+		do {
+			cb = iter.next();
+			if(cb)
+			{
+				cb->memoryStatusChange(kFreeMemoryIfPossible, kFreeMemoryIfPossible);
+				Decommit();
+				currentTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
+
+				//  If we've freed MORE than the minimum amount, we can stop freeing
+				if ((startingTotal - currentTotal) > minimumBlocksToFree)
+				{
+					bContinue = false;
+				}
+			}
+		} while(cb != NULL && bContinue);
+
+		iter.MarkCursorInList();
+		m_notificationThread = NULL;
+	}
+
 	void GCHeap::StatusChangeNotify(MemoryStatus to)
 	{
+		//  If we're already in the process of sending this notification, don't resend
+		if (statusNotificationBeingSent() && to == status)
+			return;
+
 		m_notificationThread = VMPI_currentThread();
 		MemoryStatus oldStatus = status;
 		status = to;
@@ -2408,6 +2492,7 @@ namespace MMgc
 			if(cb)
 				cb->memoryStatusChange(oldStatus, to);
 		} while(cb != NULL);
+
 
 		m_notificationThread = NULL;
 
@@ -2552,8 +2637,7 @@ namespace MMgc
 	{
 		// must be below soft limit _AND_ above decommit threshold
 		return GetUsedHeapSize() + externalPressure/kBlockSize < config.heapSoftLimit &&
-			FreeMemoryExceedsDecommitThreshold();
-
+			FreeMemoryExceedsDecommitThreshold();		
 	}
 	
 	bool GCHeap::FreeMemoryExceedsDecommitThreshold()
