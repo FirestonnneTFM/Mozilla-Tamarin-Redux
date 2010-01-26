@@ -1833,10 +1833,17 @@ namespace MMgc
 	}
 #endif // MMGC_HOOKS
 
-	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL), m_collectingGC(NULL), m_abortUnwindList(NULL)
+	EnterFrame::EnterFrame() : 
+		m_heap(NULL), 
+		m_gc(NULL),
+		m_collectingGC(NULL),
+		m_abortUnwindList(NULL),
+		m_previous(NULL),
+		m_suspended(false)
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
-		if(heap->GetStackEntryAddress() == NULL) {
+		EnterFrame *ef = m_previous = heap->GetEnterFrame();
+		if(ef == NULL || ef->Suspended()) {
 			m_heap = heap;
 			heap->Enter(this);
 		}
@@ -1927,6 +1934,28 @@ namespace MMgc
 		return false;
 	}
 #endif
+
+	SuspendEnterFrame::SuspendEnterFrame() : m_ef(NULL)
+	{
+		GCHeap *heap = GCHeap::GetGCHeap();
+		if(heap) {
+			EnterFrame *ef = heap->GetEnterFrame();
+			if(ef) {
+				ef->Suspend();
+				m_ef = ef;
+			}
+		}
+	}
+
+	SuspendEnterFrame::~SuspendEnterFrame() 
+	{
+		if(m_ef)
+			m_ef->Resume();
+		GCHeap *heap = GCHeap::GetGCHeap();
+		GCAssertMsg(heap->GetEnterFrame() == m_ef, "EnterFrame's not unwound properly");
+		if(heap->GetStatus() == kMemAbort)
+			heap->Abort();
+	}
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
@@ -2076,31 +2105,26 @@ namespace MMgc
 
 	void GCHeap::Leave()
 	{
-		GCHeap *heapToDestroy=NULL;
 		{
 			MMGC_LOCK(m_spinlock);
 
-			// only safe to run bail out code on primary thread
 			if(status == kMemAbort && !abortStatusNotificationSent) {
 				abortStatusNotificationSent = true;
 				StatusChangeNotify(kMemAbort);
 			}
 		}
 	
-		EnterLock();				
+		EnterLock();
+			   
 		// do this after StatusChangeNotify it affects ShouldNotEnter
-		enterFrame = NULL;
+		enterFrame = enterFrame->Previous();
 
 		enterCount--;
 
+		// last one out of the pool pulls the plug
 		if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
-			// last one out of the pool pulls the plug
-			heapToDestroy = instance;
-			instance = NULL;
-		}
-		if(heapToDestroy != NULL) {
-			// any thread can call this, just need to make sure all other
-			// threads are done, hence the ref counting
+			GCHeap *heapToDestroy = GCHeap::instance;
+			GCHeap::instance = NULL;
 			heapToDestroy->DestroyInstance();
 		}
 		EnterRelease();				
@@ -2399,8 +2423,10 @@ namespace MMgc
 	bool GCHeap::ShouldNotEnter()
 	{
 		// don't enter if the heap is already gone or we're aborting but not on the aborting call stack in a nested enter call
-		if(GetGCHeap() == NULL || 
-		   (MMgc::GCHeap::GetGCHeap()->GetStatus() == MMgc::kMemAbort && MMgc::GCHeap::GetGCHeap()->GetEnterFrame() == NULL))
+		GCHeap *gcheap = GetGCHeap();
+		if(heap == NULL || 
+		   (heap->GetStatus() == kMemAbort && 
+			(heap->GetEnterFrame() == NULL || heap->GetEnterFrame()->Suspended())))
 			return true;
 		return false;
 	}
