@@ -611,7 +611,7 @@ namespace avmplus
 				void *ptr = sotGetGCPointer(s.sot);
 				if (ptr != NULL && !GC::GetMark(ptr))
 				{
-					GCWorkItem item(ptr, (uint32)GC::Size(ptr), true);
+					GCWorkItem item(ptr, (uint32)GC::Size(ptr), GCWorkItem::kGCObject);
 					// NOTE that PushWorkItem_MayFail can fail due to mark stack overflow in tight memory situations.
 					// This failure is visible as GC::GetMarkStackOverflow() being true.  The GC compensates
 					// for that but it seems hard to compensate for it here.  The most credible workaround

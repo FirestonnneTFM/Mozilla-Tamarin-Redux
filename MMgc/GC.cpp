@@ -1146,7 +1146,7 @@ namespace MMgc
  			// grab the stack, push it, and 
 			MarkQueueAndStack();
 		} else {
-			GCWorkItem item(stackStart, stackSize, false);
+			GCWorkItem item(stackStart, stackSize, GCWorkItem::kNonGCObject);
 			PushWorkItem(item);
 			Mark();
 		}
@@ -1845,7 +1845,7 @@ namespace MMgc
 		// Push the stack onto the mark stack and then mark synchronously until
 		// everything reachable from the stack has been marked.
 
-		GCWorkItem item(stackPointer, uint32_t(stackBase - (char*)stackPointer), false);
+		GCWorkItem item(stackPointer, uint32_t(stackBase - (char*)stackPointer), GCWorkItem::kStackMemory);
 		gc->PushWorkItem(item);
 		gc->Mark();
 	}
@@ -2527,13 +2527,13 @@ namespace MMgc
 		for(int i=0; i < kNumSizeClasses; i++) {
 			GCAllocIterator iter1(containsPointersRCAllocs[i]);
 			while (iter1.GetNextMarkedObject(ptr, size)) {
-				GCWorkItem item(ptr, size, true);
+				GCWorkItem item(ptr, size, GCWorkItem::kGCObject);
 				MarkItem(item);
 				Mark();
 			}
 			GCAllocIterator iter2(containsPointersAllocs[i]);
 			while (iter2.GetNextMarkedObject(ptr, size)) {
-				GCWorkItem item(ptr, size, true);
+				GCWorkItem item(ptr, size, GCWorkItem::kGCObject);
 				MarkItem(item);
 				Mark();
 			}
@@ -2541,7 +2541,7 @@ namespace MMgc
 
 		GCLargeAllocIterator iter3(largeAlloc);
 		while (iter3.GetNextMarkedObject(ptr, size)) {
-			GCWorkItem item(ptr, size, true);
+			GCWorkItem item(ptr, size, GCWorkItem::kGCObject);
 			MarkItem(item);
 			Mark();
 		}
@@ -2670,17 +2670,6 @@ namespace MMgc
 
 #endif
 
-#ifdef MMGC_INTERIOR_PTRS
-	inline bool IsLargeAllocPage(int bits) {
-		return (bits == GC::kGCLargeAllocPageFirst
-				|| bits == GC::kGCLargeAllocPageRest);
-	}
-#else
-	inline bool IsLargeAllocPage(int bits) {
-		return bits == GC::kGCLargeAllocPageFirst;
-	}
-#endif
-	
 	// This will mark the item whether the item was previously marked or not.
 	// The mark stack overflow logic depends on that.
 
@@ -2713,7 +2702,7 @@ namespace MMgc
 		const size_t markstackCutoff = 400;
 		if (size > markstackCutoff)
 		{
-			PushWorkItem(GCWorkItem(p + markstackCutoff / sizeof(uintptr_t), uint32_t(size - markstackCutoff), false));
+			PushWorkItem(GCWorkItem(p + markstackCutoff / sizeof(uintptr_t), uint32_t(size - markstackCutoff), GCWorkItem::kNonGCObject));
 			size = markstackCutoff;
 		}
 
@@ -2761,43 +2750,51 @@ namespace MMgc
 			if (bits == kGCAllocPage)
 			{
 				const void *item;
+                int itemNum;
 				GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) (val & ~0xFFF);
 
-#ifdef MMGC_INTERIOR_PTRS
-				item = (void*) val;
-#else
-				// back up to real beginning
-				item = GetRealPointer((const void*) (val & ~7));
-#endif
+                if (wi.HasInteriorPtrs())
+                {
+                    item = (void*) val;
 
-				// guard against bogus pointers to the block header
-				if(item < block->items)
-					continue;
+                    // guard against bogus pointers to the block header
+                    if(item < block->items)
+                        continue;
+                    
+                    itemNum = GCAlloc::GetIndex(block, item);
+                    
+                    // adjust |item| to the beginning of the allocation
+                    item = block->items + itemNum * block->size;
+                }
+                else
+                {
+                    // back up to real beginning
+                    item = GetRealPointer((const void*) (val & ~7));
+                    
+                    // guard against bogus pointers to the block header
+                    if(item < block->items)
+                        continue;
+                    
+                    itemNum = GCAlloc::GetIndex(block, item);
 
-				int itemNum = GCAlloc::GetIndex(block, item);
-#ifdef MMGC_INTERIOR_PTRS
-				// adjust |item| to the beginning of the allocation
-				item = block->items + itemNum * block->size;
-#else
-				// if |item| doesn't point to the beginning of an allocation,
-				// it's not considered a pointer.
-				if (block->items + itemNum * block->size != item)
-				{
+                    // if |item| doesn't point to the beginning of an allocation,
+                    // it's not considered a pointer.
+                    if (block->items + itemNum * block->size != item)
+                    {
 #ifdef MMGC_64BIT
-// Doubly-inherited classes have two vtables so are offset 8 more bytes than normal. 
-// Handle that here (shows up with PlayerScriptBufferImpl object in the Flash player)
-					if ((block->items + itemNum * block->size + sizeof(void *)) == item)
-						item = block->items + itemNum * block->size;
-					else
+                        // Doubly-inherited classes have two vtables so are offset 8 more bytes than normal. 
+                        // Handle that here (shows up with PlayerScriptBufferImpl object in the Flash player)
+                        if ((block->items + itemNum * block->size + sizeof(void *)) == item)
+                            item = block->items + itemNum * block->size;
+                        else
 #endif // MMGC_64BIT
-						continue;
-				}
-#endif
+                            continue;
+                    }
+                }
 
 #ifdef MMGC_POINTINESS_PROFILING
 				actually_is_pointer++;
 #endif
-
 
 				// inline IsWhite/SetBit
 				// FIXME: see if using 32 bit values is faster
@@ -2811,7 +2808,7 @@ namespace MMgc
 					if(((GCAlloc*)block->alloc)->ContainsPointers())
 					{
 						const void *realItem = GetUserPointer(item);
-						GCWorkItem newItem(realItem, itemSize, true);
+						GCWorkItem newItem(realItem, itemSize, GCWorkItem::kGCObject);
 						if(((uintptr_t)realItem & ~0xfff) != thisPage || mark_item_recursion_control == 0)
 						{							
 							*pbits = bits2 | (GCAlloc::kQueued << shift);
@@ -2835,34 +2832,35 @@ namespace MMgc
 #endif				
 				}
 			}
-			else if (IsLargeAllocPage(bits))
+			else if (bits == GC::kGCLargeAllocPageFirst || (wi.HasInteriorPtrs() && bits == GC::kGCLargeAllocPageRest))
 			{
-				//largeAlloc->ConservativeMark(work, (void*) (val&~7), workitem.ptr);
 				const void* item;
 
-#ifdef MMGC_INTERIOR_PTRS
-				if (bits == kGCLargeAllocPageFirst)
-				{
-					// guard against bogus pointers to the block header
-					if ((val & 0xffff) < sizeof(GCLargeAlloc::LargeBlock))
-						continue;
+                if (wi.HasInteriorPtrs())
+                {
+                    if (bits == kGCLargeAllocPageFirst)
+                    {
+                        // guard against bogus pointers to the block header
+                        if ((val & 0xffff) < sizeof(GCLargeAlloc::LargeBlock))
+                            continue;
 
-					item = (void *) ((val & ~0xfff) |
-									 sizeof(GCLargeAlloc::LargeBlock));
-				}
-				else
-				{
-					item = GetRealPointer(FindBeginning((void *) val));
-				}
-#else
-				// back up to real beginning
-				item = GetRealPointer((const void*) (val & ~7));
+                        item = (void *) ((val & ~0xfff) | sizeof(GCLargeAlloc::LargeBlock));
+                    }
+                    else
+                    {
+                        item = GetRealPointer(FindBeginning((void *) val));
+                    }
+                }
+                else
+                {
+                    // back up to real beginning
+                    item = GetRealPointer((const void*) (val & ~7));
 
-				// If |item| doesn't point to the start of the page, it's not
-				// really a pointer.
-				if(((uintptr_t) item & 0xfff) != sizeof(GCLargeAlloc::LargeBlock))
-					continue;
-#endif
+                    // If |item| doesn't point to the start of the page, it's not
+                    // really a pointer.
+                    if(((uintptr_t) item & 0xfff) != sizeof(GCLargeAlloc::LargeBlock))
+                        continue;
+                }
 
 #ifdef MMGC_POINTINESS_PROFILING
 				actually_is_pointer++;
@@ -2875,7 +2873,7 @@ namespace MMgc
 					if((b->flags & GCLargeAlloc::kContainsPointers) != 0) 
 					{
 						b->flags |= GCLargeAlloc::kQueuedFlag;
-						PushWorkItem(GCWorkItem(GetUserPointer(item), itemSize, true));
+						PushWorkItem(GCWorkItem(GetUserPointer(item), itemSize, GCWorkItem::kGCObject));
 					} 
 					else
 					{
@@ -3181,7 +3179,7 @@ namespace MMgc
 			SetMark(container);
 			return;
 		}
-		GCWorkItem item(container, (uint32_t)Size(container), true);
+		GCWorkItem item(container, (uint32_t)Size(container), GCWorkItem::kGCObject);
 		// Note, pushing directly here works right now because PushWorkItem never
 		// performs any processing (breaking up a large object into shorter
 		// segments, for example).  If that changes, we must probably introduce

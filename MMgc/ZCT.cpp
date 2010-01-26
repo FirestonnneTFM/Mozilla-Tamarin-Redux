@@ -607,16 +607,26 @@ namespace MMgc
 			if(val < _memStart || val >= _memEnd)
 				continue;
 			
-			int32_t bits = gc->GetPageMapValue((uintptr_t)val); 
-			bool doit = false;
-			if (bits == GC::kGCAllocPage) {
-				doit = GCAlloc::IsRCObject(val) && GCAlloc::FindBeginning(val) == GetRealPointer(val);
-			} 
-			else if(bits == GC::kGCLargeAllocPageFirst) {
-				doit = GCLargeAlloc::IsRCObject(val) && GCLargeAlloc::FindBeginning(val) == GetRealPointer(val);
-			}
+            // Any pointer into the object pins the object.
+            
+			switch (gc->GetPageMapValue((uintptr_t)val)) {
+                case GC::kGCAllocPage:
+                    val = GCAlloc::IsRCObject(val) ? GetUserPointer(GCAlloc::FindBeginning(val)) : NULL;
+                    break;
+                case GC::kGCLargeAllocPageRest:
+                    do {
+                        val = (const void*) ((uintptr_t)val - GCHeap::kBlockSize);
+                    } while (gc->GetPageMapValue((uintptr_t)val) == GC::kGCLargeAllocPageRest);
+                    /*FALLTHROUGH*/
+                case GC::kGCLargeAllocPageFirst:
+                    val = GCLargeAlloc::IsRCObject(val) ? GetUserPointer(GCLargeAlloc::FindBeginning(val)) : NULL;
+                    break;
+                default:
+                    val = NULL;
+                    break;
+            }
 			
-			if(doit) {
+			if(val) {
 				// We must pin all objects that are reachable from the stack whether they're in
 				// the ZCT or not, because destroying an object not in the ZCT may push additional
 				// references onto the ZCT, and if those are reachable from the stack they must
