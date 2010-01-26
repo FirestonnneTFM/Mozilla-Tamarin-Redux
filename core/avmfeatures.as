@@ -185,15 +185,6 @@ var FEATURES =
     <defines>  VMCFG_DOUBLE_MSW_FIRST </defines>
   </feature>
 
-  <feature>
-    <desc> Enables the just-in-time compiler to generate vector floating point
-           instructions for ARM based architectures.  </desc>
-
-    <name> AVMSYSTEM_ARM_FPU  </name>
-    <requires>AVMSYSTEM_ARM</requires>
-    <defines> NJ_ARM_VFP </defines>
-  </feature>
-
   <!-- CPU architectures, one of these is required for the JIT -->
 
   <feature>

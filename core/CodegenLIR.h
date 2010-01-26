@@ -44,8 +44,6 @@
 using namespace MMgc;
 #include "../nanojit/nanojit.h"
 
-#define NJ_SOFTFLOAT !ARM_VFP
-
 #ifdef DEBUGGER
 #define DEBUGGER_ONLY(...) __VA_ARGS__
 #else
