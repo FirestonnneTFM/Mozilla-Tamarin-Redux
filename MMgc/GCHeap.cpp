@@ -171,7 +171,6 @@ namespace MMgc
 		  abortStatusNotificationSent(false)
 	{		
 		VMPI_lockInit(&m_spinlock);
-		VMPI_lockInit(&list_lock);
 		VMPI_lockInit(&gclog_spinlock);
 
 		// Initialize free lists
@@ -258,7 +257,13 @@ namespace MMgc
 		hooksEnabled = false;
 		if(profiler)
 			delete profiler;
-		if(hasSpy)
+
+			if (holes && iteratorCount == 0)
+				Compact();
+			if (count == capacity)
+			{
+				capacity += growthIncrement;
+				T* newItems = mmfx_new_array_opt(T,  capacity, kZero);		if(hasSpy)
 			VMPI_spyTeardown();
 		profiler = NULL;
 #endif
@@ -271,9 +276,6 @@ namespace MMgc
 
 		VMPI_lockAcquire(&gclog_spinlock);
 		VMPI_lockDestroy(&gclog_spinlock);
-		
-		VMPI_lockAcquire(&list_lock);
-		VMPI_lockDestroy(&list_lock);
 		
 		if(enterFrame)
 			enterFrame->Destroy();	// Destroy the pointed-to value
@@ -1831,10 +1833,17 @@ namespace MMgc
 	}
 #endif // MMGC_HOOKS
 
-	EnterFrame::EnterFrame() : m_heap(NULL), m_gc(NULL), m_collectingGC(NULL), m_abortUnwindList(NULL)
+	EnterFrame::EnterFrame() : 
+		m_heap(NULL), 
+		m_gc(NULL),
+		m_collectingGC(NULL),
+		m_abortUnwindList(NULL),
+		m_previous(NULL),
+		m_suspended(false)
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
-		if(heap->GetStackEntryAddress() == NULL) {
+		EnterFrame *ef = m_previous = heap->GetEnterFrame();
+		if(ef == NULL || ef->Suspended()) {
 			m_heap = heap;
 			heap->Enter(this);
 		}
@@ -1925,6 +1934,28 @@ namespace MMgc
 		return false;
 	}
 #endif
+
+	SuspendEnterFrame::SuspendEnterFrame() : m_ef(NULL)
+	{
+		GCHeap *heap = GCHeap::GetGCHeap();
+		if(heap) {
+			EnterFrame *ef = heap->GetEnterFrame();
+			if(ef) {
+				ef->Suspend();
+				m_ef = ef;
+			}
+		}
+	}
+
+	SuspendEnterFrame::~SuspendEnterFrame() 
+	{
+		if(m_ef)
+			m_ef->Resume();
+		GCHeap *heap = GCHeap::GetGCHeap();
+		GCAssertMsg(heap->GetEnterFrame() == m_ef, "EnterFrame's not unwound properly");
+		if(heap->GetStatus() == kMemAbort)
+			heap->Abort();
+	}
 
 #ifdef MMGC_USE_SYSTEM_MALLOC
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
@@ -2074,31 +2105,26 @@ namespace MMgc
 
 	void GCHeap::Leave()
 	{
-		GCHeap *heapToDestroy=NULL;
 		{
 			MMGC_LOCK(m_spinlock);
 
-			// only safe to run bail out code on primary thread
 			if(status == kMemAbort && !abortStatusNotificationSent) {
 				abortStatusNotificationSent = true;
 				StatusChangeNotify(kMemAbort);
 			}
 		}
 	
-		EnterLock();				
+		EnterLock();
+			   
 		// do this after StatusChangeNotify it affects ShouldNotEnter
-		enterFrame = NULL;
+		enterFrame = enterFrame->Previous();
 
 		enterCount--;
 
+		// last one out of the pool pulls the plug
 		if(status == kMemAbort && enterCount == 0 && abortStatusNotificationSent) {
-			// last one out of the pool pulls the plug
-			heapToDestroy = instance;
-			instance = NULL;
-		}
-		if(heapToDestroy != NULL) {
-			// any thread can call this, just need to make sure all other
-			// threads are done, hence the ref counting
+			GCHeap *heapToDestroy = GCHeap::instance;
+			GCHeap::instance = NULL;
 			heapToDestroy->DestroyInstance();
 		}
 		EnterRelease();				
@@ -2382,7 +2408,6 @@ namespace MMgc
 		OOMCallback *cb = NULL;
 		do {
 			{
-				MMGC_LOCK(list_lock);
 				cb = iter.next();
 			}
 			if(cb)
@@ -2398,8 +2423,10 @@ namespace MMgc
 	bool GCHeap::ShouldNotEnter()
 	{
 		// don't enter if the heap is already gone or we're aborting but not on the aborting call stack in a nested enter call
-		if(GetGCHeap() == NULL || 
-		   (MMgc::GCHeap::GetGCHeap()->GetStatus() == MMgc::kMemAbort && MMgc::GCHeap::GetGCHeap()->GetEnterFrame() == NULL))
+		GCHeap *heap = GetGCHeap();
+		if(heap == NULL || 
+		   (heap->GetStatus() == kMemAbort && 
+			(heap->GetEnterFrame() == NULL || heap->GetEnterFrame()->Suspended())))
 			return true;
 		return false;
 	}
@@ -2414,8 +2441,12 @@ namespace MMgc
 	{ 
 		bool bAdded = false;
 		{
-			MMGC_LOCK(list_lock);
+			MMGC_LOCK(m_spinlock);
+			// hack to allow GCManager's list back in for list mem operations
+			vmpi_thread_t notificationThreadSave = m_notificationThread;
+			m_notificationThread = VMPI_currentThread();
 			bAdded = gcManager.tryAddGC(gc);
+			m_notificationThread = notificationThreadSave;
 		}
 		if (!bAdded)
 		{
@@ -2426,8 +2457,12 @@ namespace MMgc
 	// When the GC is destroyed it must remove itself from the GCHeap.
 	void GCHeap::RemoveGC(GC *gc) 
 	{ 
-		MMGC_LOCK(list_lock);
+		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+		// hack to allow GCManager's list back in for list mem operations
+		vmpi_thread_t notificationThreadSave = m_notificationThread;
+		m_notificationThread = VMPI_currentThread();
 		gcManager.removeGC(gc); 
+		m_notificationThread = notificationThreadSave;
 		EnterFrame* ef = GetEnterFrame();
 		if (ef && ef->GetActiveGC() == gc)
 			ef->SetActiveGC(NULL);
@@ -2437,8 +2472,12 @@ namespace MMgc
 	{
 		bool bAdded = false;
 		{
-			MMGC_LOCK(list_lock);
+			MMGC_LOCK(m_spinlock);
+			// hack to allow GCManager's list back in for list mem operations
+			vmpi_thread_t notificationThreadSave = m_notificationThread;
+			m_notificationThread = VMPI_currentThread();	
 			bAdded = callbacks.TryAdd(p);
+			m_notificationThread = notificationThreadSave;			
 		}
 		if (!bAdded)
 		{
@@ -2448,8 +2487,12 @@ namespace MMgc
 	
 	void GCHeap::RemoveOOMCallback(OOMCallback *p) 
 	{ 
-		MMGC_LOCK(list_lock);
+		MMGC_LOCK(m_spinlock);
+		// hack to allow GCManager's list back in for list mem operations
+		vmpi_thread_t notificationThreadSave = m_notificationThread;
+		m_notificationThread = VMPI_currentThread();	
 		callbacks.Remove(p); 
+		m_notificationThread = notificationThreadSave;		
 	}
 
 	GCHeap::Region *GCHeap::NewRegion(char *baseAddr, char *rTop, char *cTop, size_t blockId)

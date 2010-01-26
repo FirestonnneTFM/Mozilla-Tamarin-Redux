@@ -85,10 +85,10 @@
 	if(_ef.status != 0)							\
 		return _val;
 
+#define MMGC_ENTER_SUSPEND MMgc::SuspendEnterFrame _efSuspend
 
 namespace MMgc
 {
-
 	class AbortUnwindObject
 	{
 
@@ -138,14 +138,29 @@ namespace MMgc
 		static bool IsAbortUnwindObjectInList(AbortUnwindObject *obj);
 #endif			
 
+		bool Suspended() { return m_suspended; }
+		void Resume() { m_suspended = false; }
+		void Suspend() { m_suspended = true; }
+		EnterFrame *Previous() { return m_previous; }
+
 	private:
 		GCHeap *m_heap;
 		GC *m_gc;
 		GC *m_collectingGC;
 		AbortUnwindObject *m_abortUnwindList;
-
+		EnterFrame *m_previous;
+		bool m_suspended;
 	};
 	
+	class SuspendEnterFrame
+	{
+	public:
+		SuspendEnterFrame();
+		~SuspendEnterFrame();
+	private:
+		EnterFrame *m_ef;
+	};
+
 	typedef enum _MemoryStatus {
 		kMemNormal,
 		kMemSoftLimit,
