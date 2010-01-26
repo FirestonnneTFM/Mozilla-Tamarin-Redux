@@ -700,7 +700,6 @@ namespace MMgc
 		friend class GCAlloc;
 		friend class GCLargeAlloc;
 		friend class RCObject;
-		friend class GCInterval;
 		friend class ZCT;
 		friend class AutoRCRootSegment;
 		friend class GCPolicyManager;
@@ -1378,6 +1377,19 @@ namespace MMgc
 		 */
 		bool collecting;
 		
+        /**
+         * Nonzero if IncrementalMark is currently active.  This is more specific than 'marking';
+         * Collect() uses this to protect itself from recursive calls during OOM handling.
+         * (Those calls should not happen because the only allocation to happen during marking
+         * is the mark stack and it should be careful not to invoke OOM handling, but debugging
+		 * code and other ad-hoc code may interfere.  This state variable is cheap insurance.)
+		 *
+		 * The flag is a counter because some functions call both Mark and MarkItem, and then
+		 * Mark also calls MarkItem, so the flag may needs to be set and reset on several levels.
+		 * The counter takes care of this naturally.
+         */
+        uint32_t markerActive;
+        
 		// END FLAGS
 		
 		

@@ -40,24 +40,7 @@
 
 namespace avmplus
 {
-    // needs to be a subclass of GCObject so we can convert to/from a WeakRef...
-    // Domain wants to be a finalized object anyway so let's use GCFinalizedObject
-    class GlobalMemorySubscriber : public MMgc::GCFinalizedObject
-    {
-    public:
-        virtual void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize) = 0;
-    };
-
-    // an ABC
-    class GlobalMemoryProvider
-    {
-    public:
-        virtual ~GlobalMemoryProvider() {}
-        virtual bool addSubscriber(GlobalMemorySubscriber* subscriber) = 0;
-        virtual bool removeSubscriber(GlobalMemorySubscriber* subscriber) = 0;
-    };
-
-	class Domain : public GlobalMemorySubscriber
+	class Domain : public MMgc::GCObject
 	{
 	public:
 		Domain(AvmCore* core, Domain* base);
@@ -72,71 +55,8 @@ namespace avmplus
 		void addNamedTrait(Stringp name, Namespace* ns, Traits* v) { m_namedTraits->add(name, ns, (Binding)v); }
 		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) { m_namedScripts->add(name, ns, (Binding)v); }
 
-		/**
-		 * global memory access glue
-		 */
-		enum {
-            // Must be at least 8 [ie, largest single load/store op we provide]
-            // Used to be 1024 on x86 to enhance certain range checks in MIR;
-            // these optimizations are missing in nanojit so the minimum is
-            // set smaller for now.
-			GLOBAL_MEMORY_MIN_SIZE = 8
-		};
-
 		REALLY_INLINE Domain* base() const { return m_base; }
 		REALLY_INLINE AvmCore* core() const { return m_core; }
-		REALLY_INLINE uint8_t* globalMemoryBase() const { return m_globalMemoryBase; }
-		REALLY_INLINE uint32_t globalMemorySize() const { return m_globalMemorySize; }
-
-		// global memory object accessor (will always be a ByteArray but
-		// ByteArray isn't part of AVMPlus proper so plumbing is a little
-		// weird...)
-		ScriptObject* get_globalMemory() const { return m_globalMemoryProviderObject; }
-		bool set_globalMemory(ScriptObject* providerObject);
-
-		// mark a pointer to pointer as being a reference to the global memory
-		// so that it gets updated if the global memory moves
-		void addGlobalMemoryBaseRef(uint8_t** baseRef);
-		// mark a pointer to uint32_t as being a reference to
-		// the current size of the global memory so it can get updated
-		void addGlobalMemorySizeRef(uint32_t* sizeRef);
-
-        // from GlobalMemorySubscriber
-		/*virtual*/ void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize);
-
-	private:
-		// subscribes to the memory object "mem" such that "mem" will call our
-		// notifyGlobalMemoryChanged when it moves
-		bool globalMemorySubscribe(ScriptObject* providerObject);
-		// stops "mem" from notifying us if it moves
-		bool globalMemoryUnsubscribe(ScriptObject* providerObject);
-
-	private:
-
-        // number of memory base or size references per "chunk"
-        // these references are stored in linked list with each link
-        // storing REFS_PER_CHUNK values to minimize overhead
-        enum { REFS_PER_CHUNK = 254 }; // TODO chunk size is right?
-
-        // chunk link for references to global memory base
-        struct BaseRefChunk : public MMgc::GCObject
-        {
-            uint8_t** refs[REFS_PER_CHUNK];
-            DWB(BaseRefChunk *) next;
-        };
-
-        // same as above but for reference to global memory size
-        struct SizeRefChunk : public MMgc::GCObject
-        {
-            uint32_t* refs[REFS_PER_CHUNK];
-            DWB(SizeRefChunk *) next;
-        };
-
-        // allocate "scratch" as a struct to make it easier to allocate pre-zeroed
-        struct Scratch
-        {
-            uint8_t scratch[GLOBAL_MEMORY_MIN_SIZE];
-        };
 
 	private:
 		Domain* const                   m_base;
@@ -145,18 +65,6 @@ namespace avmplus
 		DWB(MultinameHashtable*)        m_namedTraits;
 		/** domain-wide type table of scripts, indexed by definition name */
 		DWB(MultinameHashtable*)        m_namedScripts;
-		// scratch memory to use if the memory object is NULL...
-        // allocated via mmfx_new, which is required by nanojit
-        Scratch*                        m_globalMemoryScratch;
-		// backing store / current size for global memory
-		uint8_t*                        m_globalMemoryBase;
-		uint32_t                        m_globalMemorySize;
-        // the actual memory object (can be NULL)
-        DRCWB(ScriptObject*)            m_globalMemoryProviderObject;
-        DWB(BaseRefChunk *)             m_globalMemoryBaseRefs;
-		DWB(SizeRefChunk *)             m_globalMemorySizeRefs;
-        uint32_t                        m_globalMemoryBaseRefNum;
-		uint32_t                        m_globalMemorySizeRefNum;
 	};
 
 }

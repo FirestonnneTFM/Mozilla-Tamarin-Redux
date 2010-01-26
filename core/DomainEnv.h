@@ -41,10 +41,29 @@
 
 namespace avmplus
 {
-	class DomainEnv : public MMgc::GCObject
+    // needs to be a subclass of GCObject so we can convert to/from a WeakRef...
+    // DomainEnv wants to be a finalized object anyway so let's use GCFinalizedObject
+    class GlobalMemorySubscriber : public MMgc::GCFinalizedObject
+    {
+    public:
+        virtual void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize) = 0;
+    };
+
+    // an ABC
+    class GlobalMemoryProvider
+    {
+    public:
+        virtual ~GlobalMemoryProvider() {}
+        virtual bool addSubscriber(GlobalMemorySubscriber* subscriber) = 0;
+        virtual bool removeSubscriber(GlobalMemorySubscriber* subscriber) = 0;
+    };
+
+	class DomainEnv : public GlobalMemorySubscriber
 	{
-	  public:
+        friend class MopsRangeCheckFilter;
+    public:
 		DomainEnv(AvmCore *core, Domain *domain, DomainEnv* base);
+        virtual ~DomainEnv();
 		
 		// these peek into base DomainEnv as appropriate
 		MethodEnv* getScriptInit(Namespacep ns, Stringp name) const;
@@ -67,12 +86,56 @@ namespace avmplus
 		Toplevel* toplevel() const;
 		void setToplevel(Toplevel *t) { m_toplevel = t; }
 		
+		/**
+		 * global memory access glue
+		 */
+		enum {
+            // Must be at least 8 [ie, largest single load/store op we provide]
+            // But using larger values allows us to collapse a lot of range checks in the JIT
+			GLOBAL_MEMORY_MIN_SIZE = 1024
+		};
+
+		REALLY_INLINE uint8_t* globalMemoryBase() const { return m_globalMemoryBase; }
+		REALLY_INLINE uint32_t globalMemorySize() const { return m_globalMemorySize; }
+
+		// global memory object accessor (will always be a ByteArray but
+		// ByteArray isn't part of AVMPlus proper so plumbing is a little
+		// weird...)
+		ScriptObject* get_globalMemory() const { return m_globalMemoryProviderObject; }
+		bool set_globalMemory(ScriptObject* providerObject);
+
+        // from GlobalMemorySubscriber
+		/*virtual*/ void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize);
+
+	private:
+		// subscribes to the memory object "mem" such that "mem" will call our
+		// notifyGlobalMemoryChanged when it moves
+		bool globalMemorySubscribe(ScriptObject* providerObject);
+		// stops "mem" from notifying us if it moves
+		bool globalMemoryUnsubscribe(ScriptObject* providerObject);
+
+	private:
+
+        // allocate "scratch" as a struct to make it easier to allocate pre-zeroed
+        struct Scratch
+        {
+            uint8_t scratch[GLOBAL_MEMORY_MIN_SIZE];
+        };
+
 	// ------------------------ DATA SECTION BEGIN
 	private:
-		Domain* const				m_domain;		// Domain associated with this DomainEnv 
-		DomainEnv* const			m_base;			// Parent DomainEnv 
-		DWB(MultinameHashtable*)	m_namedScripts;	// table of named program init functions. (ns,name => MethodEnv) 
-		DWB(Toplevel*)				m_toplevel;
+		Domain* const                   m_domain;		// Domain associated with this DomainEnv 
+		DomainEnv* const                m_base;			// Parent DomainEnv 
+		DWB(MultinameHashtable*)        m_namedScripts;	// table of named program init functions. (ns,name => MethodEnv) 
+		DWB(Toplevel*)                  m_toplevel;
+		// scratch memory to use if the memory object is NULL...
+        // allocated via mmfx_new, which is required by nanojit
+        Scratch*                        m_globalMemoryScratch;
+		// backing store / current size for global memory
+		uint8_t*                        m_globalMemoryBase;
+		uint32_t                        m_globalMemorySize;
+        // the actual memory object (can be NULL)
+        DRCWB(ScriptObject*)            m_globalMemoryProviderObject;
 	// ------------------------ DATA SECTION END
 	};
 }

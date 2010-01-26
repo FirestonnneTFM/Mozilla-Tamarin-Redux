@@ -352,12 +352,6 @@ namespace avmplus
         Allocator* lir_alloc; // allocator with LIR buffer lifetime
     };
 
-    struct GlobalMemoryInfo
-    {
-        uint8_t* base;
-        uint32_t size;
-    };
-
     class MopsRangeCheckFilter;
     class PrologWriter;
 
@@ -401,7 +395,6 @@ namespace avmplus
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
         CodegenLabel mop_rangeCheckFailed_label;
-        GlobalMemoryInfo* globalMemoryInfo; // allocated with CodeMgr, so lifetime is same as the code's
         intptr_t lastPcSave;
         SeqBuilder<Patch> patches;
         LIns *exBranch;
@@ -435,6 +428,7 @@ namespace avmplus
         LIns *loadEnvScope();
         LIns *loadEnvVTable();
         LIns *loadEnvAbcEnv();
+        LIns *loadEnvDomainEnv();
         LIns *loadEnvToplevel();
         LIns *copyMultiname(const Multiname* multiname);
         LIns *initMultiname(const Multiname* multiname, int& csp, bool isDelete =false);
