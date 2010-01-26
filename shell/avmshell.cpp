@@ -122,6 +122,11 @@ namespace avmshell
 			ShellSettings settings;
 			parseCommandLine(argc, argv, settings);
 			
+			{
+			  // code coverage/cheap test
+			  MMGC_ENTER_SUSPEND;
+			}
+
 			if (settings.do_log)
 			  initializeLogging(settings.numfiles > 0 ? settings.filenames[0] : "AVMLOG");
 			
