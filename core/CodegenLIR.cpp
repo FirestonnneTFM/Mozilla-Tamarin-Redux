@@ -263,102 +263,243 @@ namespace avmplus
     class MopsRangeCheckFilter: public LirWriter
     {
     private:
+        LirWriter* const prolog_out;
         LInsp const env_domainenv;
-        LInsp curMopAddr;
         LInsp curMemBase;
         LInsp curMemSize;
-        int32_t activeMin, activeMax;
+        LInsp curMopAddr;
+        LInsp curRangeCheckLHS;
+        LInsp curRangeCheckRHS;
+        int32_t curRangeCheckMinValue;
+        int32_t curRangeCheckMaxValue;
 
     private:
-        void clear();
+        void clearMemBaseAndSize();
+
+        static void extractConstantDisp(LInsp& mopAddr, int32_t& curDisp);
 
     public:
-        MopsRangeCheckFilter(LirWriter* out, LInsp env_domainenv);
+        MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LInsp env_domainenv);
 
-        bool updateActiveRange(LInsp mopAddr, int32_t curDisp, int32_t curExtent);
-        LInsp mopsMemoryBase();
-        LInsp mopsMemorySize();
+        LInsp emitRangeCheck(LInsp& mopAddr, int32_t const size, int32_t* disp, LInsp& br);
+        void flushRangeChecks();
 
         // overrides from LirWriter
         LIns* ins0(LOpcode v);
         LIns* insCall(const CallInfo* call, LInsp args[]);
     };
 
-    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out, LInsp env_domainenv) : 
+    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LInsp env_domainenv) : 
         LirWriter(out), 
-        env_domainenv(env_domainenv)
+        prolog_out(prolog_out),
+        env_domainenv(env_domainenv), 
+        curMemBase(NULL),
+        curMemSize(NULL),
+        curMopAddr(NULL),
+        curRangeCheckLHS(NULL),
+        curRangeCheckRHS(NULL),
+        curRangeCheckMinValue(int32_t(0x7fffffff)),
+        curRangeCheckMaxValue(int32_t(0x80000000))
     {
-        clear();
+        clearMemBaseAndSize();
     }
 
-    void MopsRangeCheckFilter::clear()
+    void MopsRangeCheckFilter::clearMemBaseAndSize()
     {
-        curMopAddr = curMemBase = curMemSize = NULL;
-        activeMin = int32_t(0x7fffffff);
-        activeMax = int32_t(0x80000000);
+        curMemBase = curMemSize = NULL;
     }
 
-    bool MopsRangeCheckFilter::updateActiveRange(LInsp mopAddr, int32_t curDisp, int32_t curExtent)
+    void MopsRangeCheckFilter::flushRangeChecks()
     {
-        bool emitCheck = true;
-        if (!curMopAddr)
+        AvmAssert((curRangeCheckLHS != NULL) == (curRangeCheckRHS != NULL));
+        if (curRangeCheckLHS)
         {
-            curMopAddr = mopAddr;
-            activeMin = curDisp;
-            activeMax = curExtent;
+            curRangeCheckLHS = curRangeCheckRHS = curMopAddr = NULL;
+            curRangeCheckMinValue = int32_t(0x7fffffff);
+            curRangeCheckMaxValue = int32_t(0x80000000);
+            // but don't clearMemBaseAndSize()!
         }
         else
         {
-            if (curMopAddr == mopAddr)
+            AvmAssert(curMopAddr == NULL);
+            AvmAssert(curRangeCheckMinValue == int32_t(0x7fffffff));
+            AvmAssert(curRangeCheckMaxValue == int32_t(0x80000000));
+        }
+    }
+
+    static bool sumFitsInInt32(int32_t a, int32_t b)
+    {
+        return int64_t(a) + int64_t(b) == int64_t(a + b);
+    }
+
+    /*static*/ void MopsRangeCheckFilter::extractConstantDisp(LInsp& mopAddr, int32_t& curDisp)
+    {
+        // mopAddr is an int (an offset from globalMemoryBase) on all archs.
+        // if mopAddr is an expression of the form
+        //      expr+const
+        //      const+expr
+        //      expr-const
+        //      (but not const-expr)
+        // then try to pull the constant out and return it as a displacement to
+        // be used in the instruction as an addressing-mode offset.
+        // (but only if caller requests it that way.)
+        for (;;)
+        {
+            LOpcode const op = mopAddr->opcode();
+            if (op != LIR_add && op != LIR_sub)
+                break;
+
+            int32_t imm;
+            LInsp nonImm;
+            if (mopAddr->oprnd2()->isconst())
             {
-                if (curDisp >= activeMin && curExtent <= activeMax)
-                {
-                    // there are still-valid range checks that already cover us, no need to emit another one here
-                    // (ie, if the check we are emit would fail, a previous check within the same memory-is-valid
-                    // code range would already have failed). This is a tiny percentage for most tests (<1%)
-                    // but at least one test (scimark) approached 10%, so it seems worth leaving in.
-                    emitCheck = false;
-                }
-                else
-                {
-                    if (activeMin > curDisp)
-                        activeMin = curDisp;
-                    if (activeMax < curExtent)
-                        activeMax = curExtent;
-                }
+                imm = mopAddr->oprnd2()->imm32();
+                nonImm = mopAddr->oprnd1();
+
+                if (op == LIR_sub)
+                    imm = -imm;
+            }
+            else if (mopAddr->oprnd1()->isconst())
+            {
+                // don't try to optimize const-expr
+                if (op == LIR_sub)
+                    break;
+
+                imm = mopAddr->oprnd1()->imm32();
+                nonImm = mopAddr->oprnd2();
             }
             else
             {
-                clear();
+                break;
+            }
+
+            if (!sumFitsInInt32(curDisp, imm))
+                break;
+
+            curDisp += imm;
+            mopAddr = nonImm;
+        }
+    }
+    
+    LInsp MopsRangeCheckFilter::emitRangeCheck(LInsp& mopAddr, int32_t const size, int32_t* disp, LInsp& br)
+    {
+        int32_t offsetMin = 0;
+        if (disp != NULL)
+        {
+            *disp = 0;
+            extractConstantDisp(mopAddr, *disp);
+            offsetMin = *disp;
+        }
+
+        int32_t offsetMax = offsetMin + size;
+
+        AvmAssert((curRangeCheckLHS != NULL) == (curRangeCheckRHS != NULL));
+
+        AvmAssert(mopAddr != NULL);
+        if (curRangeCheckLHS != NULL && curMopAddr == mopAddr)
+        {
+            int32_t n_curRangeCheckMin = curRangeCheckMinValue;
+            if (n_curRangeCheckMin > offsetMin) 
+                n_curRangeCheckMin = offsetMin;
+            int32_t n_curRangeCheckMax = curRangeCheckMaxValue;
+            if (n_curRangeCheckMax < offsetMax) 
+                n_curRangeCheckMax = offsetMax;
+
+            if ((n_curRangeCheckMax - n_curRangeCheckMin) <= DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
+            {
+                if (curRangeCheckMinValue != n_curRangeCheckMin)
+                {
+                    LInsp lhs_constant = prolog_out->insImm(curRangeCheckMinValue);
+                    curRangeCheckLHS->initLInsOp2(LIR_add, curRangeCheckLHS->oprnd1(), lhs_constant);
+                }
+                if ((n_curRangeCheckMax - n_curRangeCheckMin) != (curRangeCheckMaxValue - curRangeCheckMinValue))
+                {
+                    LInsp rhs_constant = prolog_out->insImm(curRangeCheckMaxValue - curRangeCheckMinValue);
+                    curRangeCheckRHS->initLInsOp2(LIR_sub, curRangeCheckRHS->oprnd1(), rhs_constant);
+                }
+                curRangeCheckMinValue = n_curRangeCheckMin;
+                curRangeCheckMaxValue = n_curRangeCheckMax;
+            }
+            else
+            {
+                // if collapsed ranges get too large, pre-emptively flush, so that the
+                // range-checking code can always assume the range is within minsize
+                flushRangeChecks();
             }
         }
-        return emitCheck;
-    }
-
-    LInsp MopsRangeCheckFilter::mopsMemoryBase()
-    {
+        else
+        {
+            flushRangeChecks();
+        }
+        
         if (!curMemBase)
         {
+            //AvmAssert(curMemSize == NULL);
             // don't use cse-able load, semantics aren't right
             curMemBase = out->insLoad(LIR_ldp, env_domainenv, offsetof(DomainEnv,m_globalMemoryBase));
-        }
-        return curMemBase;
-    }
-
-    LInsp MopsRangeCheckFilter::mopsMemorySize()
-    {
-        if (!curMemSize)
-        {
-            // don't use cse-able load, semantics aren't right.
             curMemSize = out->insLoad(LIR_ld, env_domainenv, offsetof(DomainEnv,m_globalMemorySize));
         }
-        return curMemSize;
+
+        AvmAssert((curRangeCheckLHS != NULL) == (curRangeCheckRHS != NULL));
+
+        if (!curRangeCheckLHS)
+        {
+            AvmAssert(!curMopAddr);
+            curMopAddr = mopAddr;
+            curRangeCheckMinValue = offsetMin;
+            curRangeCheckMaxValue = offsetMax;
+
+            AvmAssert(env_domainenv != NULL);
+            
+            // we want to pass range-check if
+            //
+            //      (curMopAddr+curRangeCheckMin >= 0 && curMopAddr+curRangeCheckMax <= mopsMemorySize)
+            //
+            // which is the same as
+            //
+            //      (curMopAddr >= -curRangeCheckMin && curMopAddr <= mopsMemorySize - curRangeCheckMax)
+            //
+            // which is the same as
+            //
+            //      (curMopAddr >= -curRangeCheckMin && curMopAddr < mopsMemorySize - curRangeCheckMax + 1)
+            //
+            // and since (x >= min && x < max) is equivalent to (unsigned)(x-min) < (unsigned)(max-min)
+            //
+            //      (unsigned(curMopAddr + curRangeCheckMin) < unsigned(mopsMemorySize - curRangeCheckMax + 1 + curRangeCheckMin))
+            //
+            // from there, you'd think you could do
+            //
+            //      (curMopAddr < mopsMemorySize - curRangeCheckMax + 1))
+            //
+            // but that is only valid if you are certain that curMopAddr>0, due to the unsigned casting...
+            // and curMopAddr could be anything, which is really the point of this whole exercise. Instead, settle for
+            //
+            //      (unsigned(curMopAddr + curRangeCheckMin) <= unsigned(mopsMemorySize - (curRangeCheckMax-curRangeCheckMin)))
+            //
+
+            AvmAssert(curRangeCheckMaxValue > curRangeCheckMinValue);
+            AvmAssert(curRangeCheckMaxValue - curRangeCheckMinValue <= DomainEnv::GLOBAL_MEMORY_MIN_SIZE);
+
+            LInsp lhs_constant = prolog_out->insImm(curRangeCheckMinValue);
+            LInsp rhs_constant = prolog_out->insImm(curRangeCheckMaxValue - curRangeCheckMinValue);
+
+            curRangeCheckLHS = this->ins2(LIR_add, curMopAddr, lhs_constant);
+            curRangeCheckRHS = this->ins2(LIR_sub, curMemSize, rhs_constant);
+
+            LInsp cond = this->ins2(LIR_ule, curRangeCheckLHS, curRangeCheckRHS);
+            br = this->insBranch(LIR_jf, cond, NULL);
+        }
+
+        return curMemBase;
     }
 
     LIns* MopsRangeCheckFilter::ins0(LOpcode v)
     {
         if (v == LIR_label)
-            clear();
+        {
+            flushRangeChecks();
+            clearMemBaseAndSize();
+        }
         return LirWriter::ins0(v);
     }
 
@@ -367,7 +508,10 @@ namespace avmplus
         // calls could potentially resize globalMemorySize, so we
         // can't collapse range checks across them
         if (!ci->_cse)
-            clear();
+        {
+            flushRangeChecks();
+            clearMemBaseAndSize();
+        }
         return LirWriter::insCall(ci, args);
     }
 
@@ -4880,130 +5024,27 @@ namespace avmplus
         return _tempname;
     }
 
-    static bool sumFitsInInt32(int32_t a, int32_t b)
-    {
-        return int64_t(a) + int64_t(b) == int64_t(a + b);
-    }
-
     LIns* CodegenLIR::mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp)
     {
         AvmAssert(size > 0);    // it's signed to help make the int promotion correct
 
         if (!mopsRangeCheckFilter)
         {
-            mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(lirout, loadEnvDomainEnv());
+            mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(lirout, prolog, loadEnvDomainEnv());
             lirout = mopsRangeCheckFilter;
         }
-
-        int32_t curDisp = 0;
-        if (disp != NULL)
-        {
-            // mopAddr is an int (an offset from globalMemoryBase) on all archs.
-            // if mopAddr is an expression of the form
-            //      expr+const
-            //      const+expr
-            //      expr-const
-            //      (but not const-expr)
-            // then try to pull the constant out and return it as a displacement to
-            // be used in the instruction as an addressing-mode offset.
-            // (but only if caller requests it that way.)
-            for (;;)
-            {
-                LOpcode const op = mopAddr->opcode();
-                if (op != LIR_add && op != LIR_sub)
-                    break;
-
-                int32_t imm;
-                LInsp nonImm;
-                if (mopAddr->oprnd2()->isconst())
-                {
-                    imm = mopAddr->oprnd2()->imm32();
-                    nonImm = mopAddr->oprnd1();
-
-                    if (op == LIR_sub)
-                        imm = -imm;
-                }
-                else if (mopAddr->oprnd1()->isconst())
-                {
-                    // don't try to optimize const-expr
-                    if (op == LIR_sub)
-                        break;
-
-                    imm = mopAddr->oprnd1()->imm32();
-                    nonImm = mopAddr->oprnd2();
-                }
-                else
-                {
-                    break;
-                }
-
-                if (!sumFitsInInt32(curDisp, imm))
-                    break;
-
-                curDisp += imm;
-                mopAddr = nonImm;
-            }
-            *disp = curDisp;
-        }
-
-        int32_t const curExtent = curDisp+size;
-        bool const emitCheck = mopsRangeCheckFilter->updateActiveRange(mopAddr, curDisp, curExtent);
-
-        LInsp mopsMemoryBase = mopsRangeCheckFilter->mopsMemoryBase();
-
-        if (emitCheck)
-        {
-            LInsp mopsMemorySize = mopsRangeCheckFilter->mopsMemorySize();
-
-            LInsp cond;
-            if (curDisp == 0)
-            {
-                // note that the mops "addr" (offset from globalMemoryBase) is in fact a signed int, so we have to check
-                // for it being < 0 ... but we can get by with a single unsigned compare since all values < 0 will be > size
-                if (size == 1)
-                {
-                    // (a > b) == (a >= b-1)
-                    // (assuming 0 < b < 0xffffffff, which is always the case here)
-                    cond = binaryIns(LIR_uge, mopAddr, mopsMemorySize);
-                }
-                else
-                {
-                    // it's better to do (addr > mopsMemorySize-size), rather than
-                    // (addr+size > mopsMemorySize), because we know mopsMemorySize-size
-                    // cannot underflow, but addr+size might underflow or overflow
-                    LInsp mopsEnd = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
-                    cond = binaryIns(LIR_ugt, mopAddr, mopsEnd);
-                }
-            }
-            else
-            {
-                LInsp effMopAddr = binaryIns(LIR_add, mopAddr, InsConst(curDisp));
-                cond = binaryIns(LIR_lt, effMopAddr, InsConst(0));
-                patchLater(branchIns(LIR_jt, cond), mop_rangeCheckFailed_label);
-
-                if (size == 1)
-                {
-                    // (a > b) == (a >= b-1)
-                    // (assuming 0 < b < 0xffffffff, which is always the case here)
-                    cond = binaryIns(LIR_ge, effMopAddr, mopsMemorySize);
-                }
-                else
-                {
-                    // it's better to do (addr > mopsMemorySize-size), rather than
-                    // (addr+size > mopsMemorySize), because we know mopsMemorySize-size
-                    // cannot underflow, but addr+size might underflow or overflow
-                    LInsp mopsEnd = binaryIns(LIR_sub, mopsMemorySize, InsConst(size));
-                    cond = binaryIns(LIR_gt, effMopAddr, mopsEnd);
-                }
-            }
-
-            patchLater(branchIns(LIR_jt, cond), mop_rangeCheckFailed_label);
-        }
+        
+        // note, mopAddr and disp are both in/out parameters
+        LInsp br = NULL;
+        LInsp mopsMemoryBase = mopsRangeCheckFilter->emitRangeCheck(mopAddr, size, disp, br);
+        if (br)
+            patchLater(br, mop_rangeCheckFailed_label);
+        
 
         // if mopAddr is a compiletime constant, we still have to do the range-check above
         // (since globalMemorySize can vary at runtime), but we might be able to encode
         // the entire address into the displacement (if any)...
-        if (mopAddr->isconst() && disp != NULL && sumFitsInInt32(curDisp, mopAddr->imm32()))
+        if (mopAddr->isconst() && disp != NULL && sumFitsInInt32(*disp, mopAddr->imm32()))
         {
             *disp += mopAddr->imm32();
             return mopsMemoryBase;
@@ -5014,7 +5055,7 @@ namespace avmplus
         // optimizations that can leave dangling interior pointers)
         //
         // (yes, i2p, not u2p... it might legitimately be negative due to the
-        // displacement optimization loop above.)
+        // displacement optimization in emitCheck().)
         return binaryIns(LIR_piadd, mopsMemoryBase, i2p(mopAddr));
     }
 
