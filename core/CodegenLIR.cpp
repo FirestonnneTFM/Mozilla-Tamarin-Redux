@@ -369,7 +369,7 @@ namespace avmplus
         return LirWriter::insCall(ci, args);
     }
 
-#if NJ_SOFTFLOAT
+#if defined(NANOJIT_ARM)
 
     static double i2f(int32_t i) { return i; }
     static double u2f(uint32_t u) { return u; }
@@ -495,7 +495,8 @@ namespace avmplus
             }
         }
     };
-#endif // NJ_SOFTFLOAT
+    
+#endif // defined(NANOJIT_ARM)
 
     /**
      * ---------------------------------
@@ -1231,7 +1232,7 @@ namespace avmplus
         LirBuffer *prolog_buf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         prolog_buf->abi = ABI_CDECL;
 
-        lirout = new (*alloc1) LirBufWriter(prolog_buf);
+        lirout = new (*alloc1) LirBufWriter(prolog_buf, core->config);
 
         debug_only(
             lirout = new (*alloc1) ValidateWriter(lirout,
@@ -1255,9 +1256,12 @@ namespace avmplus
             csefilter = new (*alloc1) CseFilter(loadfilter, *alloc1);
             lirout = csefilter;
         }
-        #if NJ_SOFTFLOAT
-        lirout = new (*alloc1) SoftFloatFilter(lirout);
-        #endif
+#if defined(NANOJIT_ARM)
+        if (!core->config.arm_vfp)
+        {
+            lirout = new (*alloc1) SoftFloatFilter(lirout);
+        }
+#endif
         lirout = new (*alloc1) Specializer(lirout, core->config);
         CopyPropagation *copier = new (*alloc1) CopyPropagation(core, *alloc1, lirout,
             framesize, info->hasExceptions() != 0);
@@ -1502,7 +1506,7 @@ namespace avmplus
         // we have written the prolog to prolog_buf, now create a new
         // LirBuffer to hold the body, and redirect further output to the body.
         LirBuffer *body_buf = new (*lir_alloc) LirBuffer(*lir_alloc);
-        LirWriter *body = new (*alloc1) LirBufWriter(body_buf);
+        LirWriter *body = new (*alloc1) LirBufWriter(body_buf, core->config);
         debug_only(
             body = new (*alloc1) ValidateWriter(body, "writePrologue(body)");
         )
@@ -5965,7 +5969,7 @@ namespace avmplus
         frag = new (*lir_alloc) Fragment(0 verbose_only(, 0));
         LirBuffer* lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
-        LirWriter* lirout = new (*alloc1) LirBufWriter(lirbuf);
+        LirWriter* lirout = new (*alloc1) LirBufWriter(lirbuf, core->config);
         debug_only(
             lirout = new (*alloc1) ValidateWriter(lirout, "InvokerCompiler");
         )
@@ -5980,9 +5984,12 @@ namespace avmplus
                 lirout = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->names, &codeMgr->log);
             }
         )
-        #if NJ_SOFTFLOAT
-        lirout = new (*alloc1) SoftFloatFilter(lirout);
-        #endif
+#if defined(NANOJIT_ARM)
+        if (!core->config.arm_vfp)
+        {
+            lirout = new (*alloc1) SoftFloatFilter(lirout);
+        }
+#endif
         // add other LirWriters here
         this->lirout = lirout;
         emitStart(*alloc1, lirbuf, lirout);

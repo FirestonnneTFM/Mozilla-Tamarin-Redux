@@ -44,7 +44,7 @@ namespace avmplus
 #if defined FEATURE_NANOJIT
 	class ImtThunkEnv;
 
-#if NJ_SOFTFLOAT
+#ifdef AVMPLUS_ARM
 	// returning uint64_t here rather than uintptr_t is a trick: normally
 	// we provide both GPR and FPR versions of calls, on the theory that
 	// this is necessary to ensure the return value is always correct. in practice,
