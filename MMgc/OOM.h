@@ -162,9 +162,11 @@ namespace MMgc
 	};
 
 	typedef enum _MemoryStatus {
+		//  Events (never manifest as permanent status on GCHeap
+		kFreeMemoryIfPossible,
+		//  Status Values
 		kMemNormal,
 		kMemSoftLimit,
-		kMemHardLimit,
 		kMemAbort
 	} MemoryStatus;
 
