@@ -843,7 +843,6 @@ namespace MMgc
 		GCHeapConfig config;
 		GCManager gcManager;		
  		BasicList<OOMCallback*> callbacks;
- 		vmpi_spin_lock_t list_lock;
 
 		GCThreadLocal<EnterFrame*> enterFrame;
 		friend class EnterFrame;
