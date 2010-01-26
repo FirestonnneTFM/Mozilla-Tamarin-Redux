@@ -459,7 +459,10 @@ class PerformanceRuntest(RuntestBase):
                                 rl=[]
                                 rl=line.rsplit()
                                 if len(rl)>2:
-                                    resultList2.append(int(rl[2]))
+									if "." in rl[2]:
+										resultList2.append(float(rl[2]))
+									else:
+										resultList2.append(int(rl[2]))
                             elif self.perfm:
                                 self.parsePerfm(line, perfm2Dict)
                     if self.memory:
