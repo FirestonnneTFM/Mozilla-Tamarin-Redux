@@ -667,7 +667,7 @@ namespace avmshell
 #endif /* AVMPLUS_IA32 */
 #if defined(AVMPLUS_ARM) && defined(FEATURE_NANOJIT)
 					else if (!VMPI_strcmp(arg+2, "arm_arch")) {
-						settings.arm_arch = VMPI_strtol(argv[++i], 0, 10);
+						settings.arm_arch = (uint8_t)VMPI_strtol(argv[++i], 0, 10);
 					}
                     else if (!VMPI_strcmp(arg+2, "arm_vfp")) {
                         settings.arm_vfp = true;
