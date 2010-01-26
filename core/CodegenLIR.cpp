@@ -263,6 +263,7 @@ namespace avmplus
     class MopsRangeCheckFilter: public LirWriter
     {
     private:
+        LInsp const env_domainenv;
         LInsp curMopAddr;
         LInsp curMemBase;
         LInsp curMemSize;
@@ -272,19 +273,20 @@ namespace avmplus
         void clear();
 
     public:
-        MopsRangeCheckFilter(LirWriter* out);
+        MopsRangeCheckFilter(LirWriter* out, LInsp env_domainenv);
 
         bool updateActiveRange(LInsp mopAddr, int32_t curDisp, int32_t curExtent);
-        LInsp mopsMemoryBase(GlobalMemoryInfo* gmi);
-        LInsp mopsMemorySize(GlobalMemoryInfo* gmi);
+        LInsp mopsMemoryBase();
+        LInsp mopsMemorySize();
 
         // overrides from LirWriter
         LIns* ins0(LOpcode v);
         LIns* insCall(const CallInfo* call, LInsp args[]);
     };
 
-    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out)
-        : LirWriter(out)
+    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out, LInsp env_domainenv) : 
+        LirWriter(out), 
+        env_domainenv(env_domainenv)
     {
         clear();
     }
@@ -333,22 +335,22 @@ namespace avmplus
         return emitCheck;
     }
 
-    LInsp MopsRangeCheckFilter::mopsMemoryBase(GlobalMemoryInfo* gmi)
+    LInsp MopsRangeCheckFilter::mopsMemoryBase()
     {
         if (!curMemBase)
         {
             // don't use cse-able load, semantics aren't right
-            curMemBase = out->insLoad(LIR_ldp, out->insImmPtr(&gmi->base), 0);
+            curMemBase = out->insLoad(LIR_ldp, env_domainenv, offsetof(DomainEnv,m_globalMemoryBase));
         }
         return curMemBase;
     }
 
-    LInsp MopsRangeCheckFilter::mopsMemorySize(GlobalMemoryInfo* gmi)
+    LInsp MopsRangeCheckFilter::mopsMemorySize()
     {
         if (!curMemSize)
         {
             // don't use cse-able load, semantics aren't right.
-            curMemSize = out->insLoad(LIR_ld, out->insImmPtr(&gmi->size), 0);
+            curMemSize = out->insLoad(LIR_ld, env_domainenv, offsetof(DomainEnv,m_globalMemorySize));
         }
         return curMemSize;
     }
@@ -692,7 +694,6 @@ namespace avmplus
         pool(i->pool()),
         mopsRangeCheckFilter(NULL),
         interruptable(true),
-        globalMemoryInfo(NULL),
         patches(*alloc1),
         call_cache_builder(*alloc1, *initCodeMgr(pool)),
         get_cache_builder(*alloc1, *pool->codeMgr),
@@ -1076,6 +1077,7 @@ namespace avmplus
         LIns* env_scope;
         LIns* env_vtable;
         LIns* env_abcenv;
+        LIns* env_domainenv;
         LIns* env_toplevel;
 
         PrologWriter(LirWriter *out):
@@ -1084,6 +1086,7 @@ namespace avmplus
             env_scope(NULL),
             env_vtable(NULL),
             env_abcenv(NULL),
+            env_domainenv(NULL),
             env_toplevel(NULL)
         {}
 
@@ -4770,9 +4773,10 @@ namespace avmplus
         Ins(LIR_live, coreAddr);
         Ins(LIR_live, undefConst);
 
-        if (prolog->env_scope)  live(prolog->env_scope);
+        if (prolog->env_scope)      live(prolog->env_scope);
         if (prolog->env_vtable)     live(prolog->env_vtable);
         if (prolog->env_abcenv)     live(prolog->env_abcenv);
+        if (prolog->env_domainenv)  live(prolog->env_domainenv);
         if (prolog->env_toplevel)   live(prolog->env_toplevel);
 
         if (info->hasExceptions()) {
@@ -4887,17 +4891,8 @@ namespace avmplus
 
         if (!mopsRangeCheckFilter)
         {
-            mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(lirout);
+            mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(lirout, loadEnvDomainEnv());
             lirout = mopsRangeCheckFilter;
-        }
-
-        if (!globalMemoryInfo)
-        {
-            globalMemoryInfo = (GlobalMemoryInfo*)pool->codeMgr->allocator.alloc(sizeof(GlobalMemoryInfo));
-            globalMemoryInfo->base = pool->domain->globalMemoryBase();
-            globalMemoryInfo->size = pool->domain->globalMemorySize();
-            pool->domain->addGlobalMemoryBaseRef(&globalMemoryInfo->base);
-            pool->domain->addGlobalMemorySizeRef(&globalMemoryInfo->size);
         }
 
         int32_t curDisp = 0;
@@ -4954,11 +4949,11 @@ namespace avmplus
         int32_t const curExtent = curDisp+size;
         bool const emitCheck = mopsRangeCheckFilter->updateActiveRange(mopAddr, curDisp, curExtent);
 
-        LInsp mopsMemoryBase = mopsRangeCheckFilter->mopsMemoryBase(globalMemoryInfo);
+        LInsp mopsMemoryBase = mopsRangeCheckFilter->mopsMemoryBase();
 
         if (emitCheck)
         {
-            LInsp mopsMemorySize = mopsRangeCheckFilter->mopsMemorySize(globalMemoryInfo);
+            LInsp mopsMemorySize = mopsRangeCheckFilter->mopsMemorySize();
 
             LInsp cond;
             if (curDisp == 0)
@@ -5039,10 +5034,10 @@ namespace avmplus
 
     LIns* CodegenLIR::loadEnvVTable()
     {
-        LIns* scope = loadEnvScope();
         LIns* vtable = prolog->env_vtable;
         if (!vtable)
         {
+            LIns* scope = loadEnvScope();
             prolog->env_vtable = vtable = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _vtable));
             verbose_only( if (vbNames) {
                 vbNames->addName(vtable, "env_vtable");
@@ -5054,10 +5049,10 @@ namespace avmplus
 
     LIns* CodegenLIR::loadEnvAbcEnv()
     {
-        LIns* scope = loadEnvScope();
         LIns* abcenv = prolog->env_abcenv;
         if (!abcenv)
         {
+            LIns* scope = loadEnvScope();
             prolog->env_abcenv = abcenv = prolog->insLoad(LIR_ldcp, scope, offsetof(ScopeChain, _abcEnv));
             verbose_only( if (vbNames) {
                 vbNames->addName(abcenv, "env_abcenv");
@@ -5067,12 +5062,27 @@ namespace avmplus
         return abcenv;
     }
 
+    LIns* CodegenLIR::loadEnvDomainEnv()
+    {
+        LIns* domainenv = prolog->env_domainenv;
+        if (!domainenv)
+        {
+            LIns* abcenv = loadEnvAbcEnv();
+            prolog->env_domainenv = domainenv = prolog->insLoad(LIR_ldcp, abcenv, offsetof(AbcEnv, m_domainEnv));
+            verbose_only( if (vbNames) {
+                vbNames->addName(domainenv, "env_domainenv");
+            })
+            verbose_only( if (vbWriter) { vbWriter->flush(); } )
+        }
+        return domainenv;
+    }
+
     LIns* CodegenLIR::loadEnvToplevel()
     {
-        LIns* vtable = loadEnvVTable();
         LIns* toplevel = prolog->env_toplevel;
         if (!toplevel)
         {
+            LIns* vtable = loadEnvVTable();
             prolog->env_toplevel = toplevel = prolog->insLoad(LIR_ldcp, vtable, offsetof(VTable, _toplevel));
             verbose_only( if (vbNames) {
                 vbNames->addName(toplevel, "env_toplevel");

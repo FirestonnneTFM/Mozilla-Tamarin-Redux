@@ -182,17 +182,17 @@ namespace avmshell
 	
 	int DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH()
  	{
- 		return Domain::GLOBAL_MEMORY_MIN_SIZE;
+ 		return DomainEnv::GLOBAL_MEMORY_MIN_SIZE;
  	}
 
  	ByteArrayObject* DomainObject::get_domainMemory() const
  	{
- 		return (ByteArrayObject*)domainEnv->domain()->get_globalMemory();
+ 		return (ByteArrayObject*)domainEnv->get_globalMemory();
  	}
  
  	void DomainObject::set_domainMemory(ByteArrayObject* mem)
  	{
- 		if(!domainEnv->domain()->set_globalMemory(mem))
+ 		if(!domainEnv->set_globalMemory(mem))
  			toplevel()->throwError(kEndOfFileError);
  	}
 

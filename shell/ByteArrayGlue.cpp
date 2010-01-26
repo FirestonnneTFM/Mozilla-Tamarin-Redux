@@ -162,7 +162,7 @@ namespace avmshell
 	
 	void ByteArray::SetLength(uint32_t newLength)
 	{
- 		if(m_subscriberRoot && m_length < Domain::GLOBAL_MEMORY_MIN_SIZE)
+ 		if(m_subscriberRoot && m_length < DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
  			ThrowMemoryError();
 		if (newLength > m_capacity)
 		{
@@ -183,7 +183,7 @@ namespace avmshell
  
  		while(curLink != NULL) // notify subscribers
  		{
- 			AvmAssert(m_length >= Domain::GLOBAL_MEMORY_MIN_SIZE);
+ 			AvmAssert(m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE);
  
  			GlobalMemorySubscriber* subscriber = (GlobalMemorySubscriber*)curLink->weakSubscriber->get();
  
@@ -203,7 +203,7 @@ namespace avmshell
  
  	bool ByteArray::addSubscriber(GlobalMemorySubscriber* subscriber)
  	{
- 		if(m_length >= Domain::GLOBAL_MEMORY_MIN_SIZE)
+ 		if(m_length >= DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
  		{
  			removeSubscriber(subscriber);
 			SubscriberLink *newLink = new (MMgc::GC::GetGC(subscriber)) SubscriberLink;

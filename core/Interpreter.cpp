@@ -716,7 +716,7 @@ namespace avmplus
 
  		register List<double*, LIST_GCObjects> const & cpool_double = pool->cpool_double;
  		register const bool interruptable = !info->isNonInterruptible();
- 		register const Domain* envDomain = env->domainEnv()->domain();
+ 		register const DomainEnv* envDomain = env->domainEnv();
  		// I do *not* like making pc 'volatile'; a smart compiler may handle it well
  		// and only spill to memory across a call, but a dumb compiler may not ever
  		// keep the value in a register at all.
