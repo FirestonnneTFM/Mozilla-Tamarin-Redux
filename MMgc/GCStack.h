@@ -40,23 +40,36 @@
 #define __GCStack__
 
 namespace MMgc
-{	
+{
 	/**
 	 * Conservative collector unit of work
 	 */
 	class GCWorkItem
 	{
 	public:
+        // It's possible to 'or' kIsGCItem and kHasInteriorPtrs together, and when
+        // MMGC_INTERIOR_PTRS is defined this happens automatically in the GCWorkItem
+        // constructor.
+        
+        enum GCWorkItemType
+        {
+            kNonGCObject=0,
+            kGCObject=1,
+            kHasInteriorPtrs=2,
+            kStackMemory=2          // convenient shorthand for kNonGCObject|kHasInteriorPtrs
+        };
+        
 		// FIXME? The initialization is redundant for most locals and for the mark stack we
 		// don't want to have to init all the elements in the array as it makes allocating a mark
 		// stack segment expensive.  I believe we could safely get rid of the two initializing
 		// clauses here.  --lars
 		GCWorkItem() : ptr(NULL), _size(0) { }
-		inline GCWorkItem(const void *p, uint32_t s, bool isGCItem);
-		
-		uint32_t GetSize() const { return _size & ~1; }
-		uint32_t IsGCItem() const { return _size & 1; }
-		
+		GCWorkItem(const void *p, uint32_t s, GCWorkItemType itemType);
+
+		uint32_t GetSize() const { return _size & ~3; }
+		uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
+		uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
+
 		// If a WI is a GC item, `ptr` is the UserPointer; it must not
 		// be the RealPointer nor an interior pointer
 		const void *ptr;

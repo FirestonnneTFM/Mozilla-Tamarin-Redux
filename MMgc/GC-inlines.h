@@ -60,7 +60,7 @@ namespace MMgc
 
 	REALLY_INLINE GCWorkItem GCRoot::GetWorkItem() const
 	{
-		return GCWorkItem(object, (uint32_t)size, false);
+		return GCWorkItem(object, (uint32_t)size, GCWorkItem::kNonGCObject);
 	}
 
 	// GCPolicyManager
@@ -669,9 +669,13 @@ namespace MMgc
 		this->size = _size;
 	}
 	
-	REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, uint32_t s, bool isGCItem)
+	REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, uint32_t s, GCWorkItemType workItemType)
 		: ptr(p)
-		, _size(s | uint32_t(isGCItem))
+#ifdef MMGC_INTERIOR_PTRS
+		, _size(s | uint32_t(kHasInteriorPointers) | uint32_t(workItemType))
+#else
+        , _size(s | uint32_t(workItemType))
+#endif
 	{
 #ifdef _DEBUG
 		if (IsGCItem()) {
