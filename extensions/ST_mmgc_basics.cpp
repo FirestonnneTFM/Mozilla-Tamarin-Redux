@@ -60,6 +60,7 @@ void test7();
 void test8();
 void test9();
 void test10();
+void test11();
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
@@ -69,7 +70,7 @@ private:
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
     : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names)
 {}
-const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerDelete", NULL };
+const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete", NULL };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -83,6 +84,7 @@ case 7: test7(); return;
 case 8: test8(); return;
 case 9: test9(); return;
 case 10: test10(); return;
+case 11: test11(); return;
 }
 }
 void ST_mmgc_basics::prologue() {
@@ -107,6 +109,19 @@ class DeleteInFinalizer : public GCFinalizedObject {
   GCFinalizedObject *small;
   
 };
+
+// Any small object would do
+class AllocInFinalizer2 : public GCObject {
+public:
+    void* dummy;
+};
+
+class AllocInFinalizer : public GCFinalizedObject {
+public:
+    AllocInFinalizer() {}
+    ~AllocInFinalizer() { new (GC::GetGC(this)) AllocInFinalizer2(); }
+};
+
 void ST_mmgc_basics::test0() {
 verifyPass(gc != NULL, "gc != NULL", __FILE__, __LINE__);
 
@@ -244,8 +259,16 @@ verifyPass(MMgc::GCLargeAlloc::GetMark(obj)==false, "MMgc::GCLargeAlloc::GetMark
     MMgc::GCLargeAlloc::SetMark(obj);
 verifyPass(MMgc::GCLargeAlloc::GetMark(obj)==true, "MMgc::GCLargeAlloc::GetMark(obj)==true", __FILE__, __LINE__);
 
+// Bugzilla 542529 - in debug mode we would assert here due to logic flaws in the allocatr
 }
 void ST_mmgc_basics::test10() {
+    MMGC_GCENTER(gc);
+    new (gc) AllocInFinalizer();
+    gc->Collect(false);
+verifyPass(true, "true", __FILE__, __LINE__);
+
+}
+void ST_mmgc_basics::test11() {
     MMGC_GCENTER(gc);
 	new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
 	//delete m;	delete m; // this verifies we crash, it does	
