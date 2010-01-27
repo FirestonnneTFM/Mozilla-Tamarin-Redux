@@ -404,15 +404,28 @@ namespace MMgc
   		}
 #endif
   		
-		void* item = m_qList;
-		if (item == NULL) {
+		if (m_qList == NULL) {
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
 			return AllocSlow(askSize, flags);
 #else
 			return AllocSlow(flags);
 #endif
 		}
-  
+
+#if defined DEBUG || defined MMGC_MEMORY_PROFILER
+        return AllocFromQuickList(askSize, flags);
+#else
+        return AllocFromQuickList(flags);
+#endif
+    }
+    
+#if defined DEBUG || defined MMGC_MEMORY_PROFILER
+	REALLY_INLINE void* GCAlloc::AllocFromQuickList(size_t askSize, int flags)
+#else
+	REALLY_INLINE void* GCAlloc::AllocFromQuickList(int flags)
+#endif
+    {
+		void* item = m_qList;
 		void**p = (void**)item;
 		m_qList = (void**)p[0];
 		GCBlock* b = GetBlock(item);
@@ -462,11 +475,6 @@ namespace MMgc
 	void *GCAlloc::AllocSlow(int flags)
 #endif
 	{
-		// We signaled allocation work early, so undo that - we'll signal allocation
-		// again when we call back to Alloc, below.
-		
-		m_gc->SignalFreeWork(m_itemSize);
-
   		GCBlock* b = m_firstFree;
   
 		while (b == NULL) {
@@ -493,13 +501,13 @@ namespace MMgc
   		
 		if (!m_gc->collecting && !m_gc->greedy)
 		{
-			// Fast path: fill the quick list from b, then tail-call Alloc()
+			// Fast path: fill the quick list from b, then tail-call AllocFromQuickList()
 			FillQuickList(b);
 			GCAssert(m_qList != NULL);
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
-			return Alloc(askSize, flags);
+			return AllocFromQuickList(askSize, flags);
 #else
-			return Alloc(flags);
+			return AllocFromQuickList(flags);
 #endif
  		}
 		else
@@ -508,17 +516,14 @@ namespace MMgc
 			// punt: fill the quick list, alloc, set the bits, then coalesce
 			// to clear the list and establish the situation that triggers
 			// slow-path allocation.
+
 			FillQuickList(b);
 			GCAssert(m_qList != NULL);
-            if (m_gc->greedy)
-                m_gc->policy.beforeAllocationInGreedyMode(m_itemSize);
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
-			void *item = Alloc(askSize, flags);
+			void *item = AllocFromQuickList(askSize, flags);
 #else
-			void *item = Alloc(flags);
+			void *item = AllocFromQuickList(flags);
 #endif
-            if (m_gc->greedy)
-                m_gc->policy.afterAllocationInGreedyMode();
 			if(m_gc->collecting && b->finalizeState != m_gc->finalizedValue) {
                 int index = GetIndex(b, item);
 				SetBit(b, index, kMark);

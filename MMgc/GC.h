@@ -413,17 +413,6 @@ namespace MMgc
 		 */
 		void SignalImminentAbort();
 
-		/**
-         * Called from GCAlloc::AllocSlow in order to allow allocation in greedy mode;
-         * nbytes is the size of the object.
-         */
-        void beforeAllocationInGreedyMode(size_t nbytes);
-        
-		/**
-         * Called from GCAlloc::AllocSlow in order to restore greedy mode.
-         */
-        void afterAllocationInGreedyMode();
-        
 		// ----- Public data --------------------------------------
 		
 		// Elapsed time (in ticks) for various collection phases, and the maximum phase time

@@ -782,16 +782,6 @@ namespace MMgc
 		// do nothing for the moment
 	}
 
-	void GCPolicyManager::beforeAllocationInGreedyMode(size_t nbytes)
-    {
-        remainingMinorAllocationBudget = int32_t(nbytes);
-    }
-    
-    void GCPolicyManager::afterAllocationInGreedyMode()
-    {
-        remainingMinorAllocationBudget = GREEDY_TRIGGER;
-    }
-    
 	REALLY_INLINE void GCPolicyManager::signalMarkWork(size_t nbytes)
 	{
 		objectsScannedLastCollection++;
