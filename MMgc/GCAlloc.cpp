@@ -425,7 +425,10 @@ namespace MMgc
 	REALLY_INLINE void* GCAlloc::AllocFromQuickList(int flags)
 #endif
     {
+        // This is absurd.
+#if defined DEBUG || defined MMGC_MEMORY_PROFILER
         (void)askSize;
+#endif
 		void* item = m_qList;
 		void**p = (void**)item;
 		m_qList = (void**)p[0];
