@@ -282,8 +282,10 @@ namespace MMgc
 
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
 		void* AllocSlow(size_t askSize, int flags);
+		void* AllocFromQuickList(size_t askSize, int flags);
 #else
 		void* AllocSlow(int flags);
+		void* AllocFromQuickList(int flags);
 #endif
 		void FillQuickList(GCBlock* b);
 		void CoalesceQuickList();
