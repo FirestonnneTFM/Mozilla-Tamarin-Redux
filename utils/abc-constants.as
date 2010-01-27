@@ -80,7 +80,9 @@ const CONSTANT_TypeName             :int = 0x1D
 const constantKinds:Array = [ "0", "utf8", "2",
 "int", "uint", "private", "double", "qname", "namespace",
 "multiname", "false", "true", "null", "@qname", "@multiname", "rtqname",
-"@rtqname", "[qname]", "@[qname]", "[name]", "@[name]", "nsset"
+"@rtqname", "[qname]", "@[qname]", "[name]", "@[name]", "nsset", "packagens",
+"packageinternalns", "protectedns", "staticprotectedns", "staticprotectedns2",
+"multiname", "multiname2", "typename"
 ]
 
 const TRAIT_Slot		:int = 0x00

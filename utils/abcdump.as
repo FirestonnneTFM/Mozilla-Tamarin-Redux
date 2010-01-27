@@ -64,6 +64,8 @@ package abcdump
     " -i   Print information about the ABC, but do not dump the byte code.",
     "",
     " -abs Print the bytecode, but no information about the ABC",
+    " -api Print the public API exposed by this abc/swf",
+    " -mdversions Use in conjunction with -api when the abc/swf uses old-style versioning"
     ].join("\n");
 
     const TAB = "  "
@@ -80,6 +82,106 @@ package abcdump
         if (doExtractInfo)
             print((doExtractAbs ? "// " : "") + s)
     }
+    
+    function toStringNull(x) {
+        return (x == null) ? "<null>" : x.toString()
+    }
+    
+    // keep track of old-style versioning metadata in a global stack
+    var currentVersionMetadata:Array = new Array()
+    var apiVersionNames:Array = ["9", "air1", "10", "air1.5", "air1.5.1",
+                              "10.0.32", "air1.5.2", "10.1", "air2",
+                              "fpsys", "airsys"]
+    
+    function getVersionMetadata():Array {
+        if (currentVersionMetadata.length > 0)
+            return currentVersionMetadata[currentVersionMetadata.length - 1]
+        
+        return []
+    }
+        
+    function pushVersionMetadata(md:Array):Boolean {
+        if(md == null)
+            return false
+
+        var vers:Array = []
+        for each(var m in md) {
+            if(m.name == "Version")
+                for each(var t:Tuple in m.tuples)
+                    vers.push(t.value)
+            if(m.name == "API")
+                for each(var t:Tuple in m.tuples)
+                    vers.push(currentVersionMetadata[int(t.value) - 660])
+        }
+
+        if(vers.length > 0) {
+            currentVersionMetadata.push(vers)
+            return true
+        }
+        return false
+    }
+    
+    function popVersionMetadata(cond:Boolean):void {
+        if(cond)
+            currentVersionMetadata.pop()
+    }
+    
+    class ABCNamespace
+    {
+        public var kind:int
+        public var uri:String
+        public var apiVersions:Array = new Array()
+
+        public function ABCNamespace(ns:String, k:int = 0x08 /* CONSTANT_Namespace */) {
+            kind = k
+            uri = ns == null ? null : stripVersioningChars(ns)
+        }
+        
+        public function clone():ABCNamespace {
+            var ns:ABCNamespace = new ABCNamespace(uri, kind)
+            ns.apiVersions = apiVersions.concat()
+            return ns
+        }
+        
+        function stripVersioningChars(s:String) {
+            var c:int = s.charCodeAt(s.length-1)
+            if(c > 0xE000) {
+                if(c > 0xE294)
+                   apiVersions.push(apiVersionNames[c - 0xE294])
+                return stripVersioningChars(s.slice(0,s.length-1))
+            }
+            return s
+        }
+        
+        public function toString(useMD:Boolean = false):String {
+            var vers:Array = useMD ? getVersionMetadata() : apiVersions
+            return (uri == null ? "" : uri) + (vers.length > 0 && doDumpAPI ? ("[api: " + vers.join(',') + "]") : "") // + ("(" + constantKinds[kind] + ")")
+        }
+        
+        public function isHidden():Boolean {
+            return (kind == CONSTANT_PrivateNs || kind == CONSTANT_PackageInternalNs)
+        }
+    }
+    
+    class QualifiedName
+    {
+        public var ns:ABCNamespace
+        public var localname:String
+        
+        public function QualifiedName(n:ABCNamespace, ln:String) {
+            ns = n
+            localname = ln
+        }
+        
+        public function toString(useMD:Boolean = false):String {
+            var nsstr = (ns == null ? "" : ns.toString(useMD))
+            return (nsstr == "" ? "" : nsstr + "::") + localname
+        }
+        
+        public function isHidden():Boolean {
+            return ns.isHidden()
+        }
+    }
 
     class Multiname
     {
@@ -91,9 +193,48 @@ package abcdump
             this.name = name
         }
         
-        public function toString()
+        public function toString(useMD:Boolean = false)
         {
-            return /*'{' + nsset + '}::' + */name
+            if (nsset.length == 1)
+                return (new QualifiedName(nsset[0], name).toString(useMD))
+            else
+                return '{' + joinNsset(nsset, useMD) + '}::' + toStringNull(name)
+        }
+        
+        function joinNsset(nsset:Array, useMD:Boolean):String {
+            var s:String = ""
+            for each (var ns:ABCNamespace in nsset) {
+                s += (ns.toString(useMD) + ", ")
+            }
+            return s
+        }
+        
+        public function isHidden():Boolean {
+            for each(var ns in nsset)
+                if (ns.isHidden())
+                    return true
+            return false
+        }
+        
+        public static function createMultiname(nsset:Array, name:String, flatten:Boolean) {
+            if(flatten) {
+                var cur:ABCNamespace = nsset[0].clone()
+                for(var i:int=1; i<nsset.length; i++) {
+                    var ns:ABCNamespace = nsset[i]
+                    if (cur.uri == ns.uri) {
+                        for each(var v:String in ns.apiVersions)
+                            if(cur.apiVersions.indexOf(v) == -1)
+                                cur.apiVersions.push(v)
+                    } else {
+                        cur = null
+                        break
+                    }
+                }
+                
+                if(cur)
+                    return new QualifiedName(cur, name)
+            }
+            return new Multiname(nsset, name)
         }
     }
     
@@ -118,17 +259,33 @@ package abcdump
         }
     }
     
-    dynamic class MetaData
+    class Tuple
     {
-        var name:String
+        public var key:String
+        public var value:String
+        
+        function Tuple(k:String, v:String) {
+            key = k
+            value = v
+        }
+    }
+    
+    class MetaData
+    {
+        public var name:String
+        public var tuples:Vector.<Tuple> = new Vector.<Tuple>()
+        
         public function toString():String 
         {
             var last:String
             var s:String = last = '['+name+'('
-            var n
-            for (n in this)
-                s = (last = s + n + "=" + '"' + this[n] + '"') + ','
-            return last + ')]'
+            for each (var t:Tuple in tuples)
+                s = (last = s + t.key + "=" + '"' + t.value + '"') + ','
+                return last + ')]'
+                }
+        
+        public function addPair(k:String, v:String) {
+            tuples.push(new Tuple(k, v))
         }
     }
     
@@ -175,28 +332,33 @@ package abcdump
         
         public function format():String
         {
-            var name = this.name ? this.name : "function"
+            var name = this.name ? (this.name is String ? this.name : this.name.toString(useMetadataVersions)) : "function"
 
-            return name + "(" + paramTypes + "):" + returnType + "\t/* disp_id=" + id + " method_id=" + method_id + " */"
+            return name + "(" + paramTypes + "):" + returnType + (doDumpAPI ? "" : "\t/* disp_id=" + id + " method_id=" + method_id + " */")
         }
 
         function dump(abc:Abc, indent:String, attr:String="")
         {
+            if(doDumpAPI && name && (name is String || name.isHidden()))
+                return;
+            
             dumped = true
             dumpPrint("")
 
-            if (metadata) {
+            if (metadata && !doDumpAPI) {
                 for each (var md in metadata)
                     dumpPrint(indent+md)
             }
+            
+            var mdpushed:Boolean = pushVersionMetadata(metadata)
 
             var s:String = ""
-            if (flags & NATIVE)
+            if (flags & NATIVE && !doDumpAPI)
                 s = "native "
             s += traitKinds[kind] + " " 
 
             dumpPrint(indent+attr+s+format())
-            if (code)
+            if (code && !doDumpAPI)
             {
                 dumpPrint(indent+"{")
                 var oldindent = indent
@@ -363,6 +525,8 @@ package abcdump
                 }
                 dumpPrint(oldindent+"}\n")
             }
+            
+            popVersionMetadata(mdpushed)
         }
         
         function readU32():int
@@ -397,28 +561,33 @@ package abcdump
         var value
         public function format():String
         {
-            return traitKinds[kind] + " " + name + ":" + type + 
+            return traitKinds[kind] + " " + name.toString(useMetadataVersions) + ":" + type + 
                 (value !== undefined ? (" = " + (value is String ? ('"'+value+'"') : value)) : "") + 
-                "\t/* slot_id " + id + " */"
+                (doDumpAPI ? "" : "\t/* slot_id " + id + " */")
         }
         function dump(abc:Abc, indent:String, attr:String="")
         {
+            if(doDumpAPI && name.isHidden())
+                return
+            
+            var mdpushed:Boolean = pushVersionMetadata(metadata)
+    
             if (kind == TRAIT_Const || kind == TRAIT_Slot)
             {
-                if (metadata) {
+                if (metadata && !doDumpAPI) {
                     for each (var md in metadata)
                         dumpPrint(indent+md)
                 }
                 dumpPrint(indent+attr+format())
+                popVersionMetadata(mdpushed)
                 return
             }
             
             // else, class
-            
             var ct:Traits = value
             var it:Traits = ct.itraits
             dumpPrint('')
-            if (metadata) {
+            if (metadata && !doDumpAPI) {
                 for each (var md in metadata)
                     dumpPrint(indent+md)
             }
@@ -431,19 +600,30 @@ package abcdump
                     def = "dynamic " + def;
                 if (it.flags & CLASS_FLAG_final)
                     def = "final " + def;
-                    
             }
-            dumpPrint(indent+attr+def+" "+name+" extends "+it.base)
+            
+            dumpPrint(indent+attr+def+" "+name.toString(useMetadataVersions)+" extends "+it.base)
             var oldindent = indent
             indent += TAB
             if (it.interfaces.length > 0)
                 dumpPrint(indent+"implements "+it.interfaces)
-            dumpPrint(oldindent+"{")
-            it.init.dump(abc,indent)
-            it.dump(abc,indent)
-            ct.dump(abc,indent,"static ")
-            ct.init.dump(abc,indent,"static ")
-            dumpPrint(oldindent+"}\n")
+            
+            if(doDumpAPI) {
+                var prefix:String = indent+attr+def+" "+name.toString(useMetadataVersions)+" "
+                it.init.dump(abc,prefix)
+                it.dump(abc,indent,prefix)
+                ct.dump(abc,indent,prefix + "static ")
+                ct.init.dump(abc,indent,prefix + "static ")
+            } else {
+                dumpPrint(oldindent+"{")
+                it.init.dump(abc,indent)
+                it.dump(abc,indent)
+                ct.dump(abc,indent,"static ")
+                ct.init.dump(abc,indent,"static ")
+                dumpPrint(oldindent+"}\n")
+            }
+            
+            popVersionMetadata(mdpushed)
         }
     }
     
@@ -454,7 +634,7 @@ package abcdump
         var itraits:Traits
         var base
         var flags:int
-        var protectedNs:Namespace
+        var protectedNs:ABCNamespace
         const interfaces:Array = []
         const names:Object = {}
         const slots:Array = []
@@ -494,9 +674,10 @@ package abcdump
         var instances:Array
         var classes:Array
         var scripts:Array
+        var metadata:Array
         
-        var publicNs = new Namespace("")
-        var anyNs = new Namespace("*")
+        var publicNs = new ABCNamespace("")
+        var anyNs = new ABCNamespace("*")
 
         var magic:int
         
@@ -598,8 +779,9 @@ package abcdump
             // namespaces
             n = readU32()
             namespaces = [publicNs]
+            var nskind = 0;
             for (i=1; i < n; i++)
-                switch (data.readByte())
+                switch (nskind = data.readByte())
                 {
                 case CONSTANT_Namespace:
                 case CONSTANT_PackageNs:
@@ -608,13 +790,12 @@ package abcdump
                 case CONSTANT_StaticProtectedNs:
                 case CONSTANT_StaticProtectedNs2:
                 {
-                    namespaces[i] = new Namespace(strings[readU32()])
-                    // todo mark kind of namespace.
+                    namespaces[i] = new ABCNamespace(strings[readU32()], nskind)
                     break;
                 }
                 case CONSTANT_PrivateNs:
                     readU32();
-                    namespaces[i] = new Namespace(null, "private")
+                    namespaces[i] = new ABCNamespace("private", nskind)
                     break;
                 }
 
@@ -645,12 +826,12 @@ package abcdump
                 {
                 case CONSTANT_Qname:
                 case CONSTANT_QnameA:
-                    names[i] = new QName(namespaces[readU32()], strings[readU32()])
+                    names[i] = new QualifiedName(namespaces[readU32()], strings[readU32()])
                     break;
                 
                 case CONSTANT_RTQname:
                 case CONSTANT_RTQnameA:
-                    names[i] = new QName(strings[readU32()])
+                    names[i] = new QualifiedName(null, strings[readU32()])
                     break;
                 
                 case CONSTANT_RTQnameL:
@@ -660,18 +841,18 @@ package abcdump
                 
                 case CONSTANT_NameL:
                 case CONSTANT_NameLA:
-                    names[i] = new QName(new Namespace(""), null)
+                    names[i] = new QualifiedName(publicNs, null)
                     break;
                 
                 case CONSTANT_Multiname:
                 case CONSTANT_MultinameA:
                     var name = strings[readU32()]
-                    names[i] = new Multiname(nssets[readU32()], name)
+                    names[i] = Multiname.createMultiname(nssets[readU32()], name, doDumpAPI)
                     break;
 
                 case CONSTANT_MultinameL:
                 case CONSTANT_MultinameLA:
-                    names[i] = new Multiname(nssets[readU32()], null)
+                    names[i] = Multiname.createMultiname(nssets[readU32()], null, doDumpAPI)
                     break;
                     
                 case CONSTANT_TypeName:
@@ -697,7 +878,7 @@ package abcdump
         function parseMethodInfos()
         {
             var start:int = data.position
-            names[0] = new QName(publicNs,"*")
+            names[0] = new QualifiedName(publicNs, "*")
             var method_count:int = readU32()
             methods = []
             for (var i:int=0; i < method_count; i++)
@@ -748,6 +929,7 @@ package abcdump
 
         function parseMetadataInfos()
         {
+            var start:int = data.position
             var count:int = readU32()
             metadata = []
             for (var i:int=0; i < count; i++)
@@ -757,11 +939,18 @@ package abcdump
                 m.name = strings[readU32()];
                 var values_count:int = readU32();
                 var names:Array = []
+                var keys:Array = []
+                var values:Array = []
+                
                 for(var q:int = 0; q < values_count; ++q)
-                    names[q] = strings[readU32()] // name 
+                    keys[q] = strings[readU32()]
                 for(var q:int = 0; q < values_count; ++q)
-                    m[names[q]] = strings[readU32()] // value
+                    values[q] = strings[readU32()]
+                        
+                for(var q:int = 0; q < values_count; ++q)
+                    m.addPair(keys[q], values[q])
             }
+            infoPrint("MetadataInfo count " +values_count+ " size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
         }
 
         function parseInstanceInfos()
@@ -918,7 +1107,7 @@ package abcdump
         {
             for each (var t in scripts)
             {
-                dumpPrint("// " + indent+t.name)
+                infoPrint(indent+t.name)
                 t.dump(this,indent)
                 t.init.dump(this,indent)
             }
@@ -1210,6 +1399,9 @@ package abcdump
                     return result;
                 }
             }
+            
+            // unreachable, but fixes a spurious compiler warning
+            return result;
         }
     }
 
@@ -1231,6 +1423,11 @@ package abcdump
         } else if (arg == '-abs') {
             // suppress info output   
             doExtractInfo = false
+        } else if (arg == '-api') {   
+            doDumpAPI = true;
+            doExtractInfo = false
+        } else if (arg == '-mdversions') {
+            useMetadataVersions = true
         } else {
             print('Unknown option '+arg)
             help()
@@ -1250,6 +1447,8 @@ package abcdump
     var doExtractAbc = false
     var doExtractInfo = true
     var doExtractAbs = true
+    var doDumpAPI = false
+    var useMetadataVersions = false
     var currentFname = ''
     var currentFcount = 0
     for each (var file in System.argv)
@@ -1306,7 +1505,7 @@ package abcdump
         }
     }
 
-    if (System.argv<2)
+    if (System.argv.length < 1)
         help();
 }
 
