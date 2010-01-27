@@ -51,6 +51,19 @@ class DeleteInFinalizer : public GCFinalizedObject {
   GCFinalizedObject *small;
   
 };
+
+// Any small object would do
+class AllocInFinalizer2 : public GCObject {
+public:
+    void* dummy;
+};
+
+class AllocInFinalizer : public GCFinalizedObject {
+public:
+    AllocInFinalizer() {}
+    ~AllocInFinalizer() { new (GC::GetGC(this)) AllocInFinalizer2(); }
+};
+
 %%decls
 private:
     MMgc::GC *gc;
@@ -194,6 +207,13 @@ delete gc;
     %%verify MMgc::GCLargeAlloc::GetMark(obj)==false
     MMgc::GCLargeAlloc::SetMark(obj);
     %%verify MMgc::GCLargeAlloc::GetMark(obj)==true
+
+// Bugzilla 542529 - in debug mode we would assert here due to logic flaws in the allocatr
+%%test finalizerAlloc
+    MMGC_GCENTER(gc);
+    new (gc) AllocInFinalizer();
+    gc->Collect(false);
+    %%verify true
 
 %%test finalizerDelete
     MMGC_GCENTER(gc);
