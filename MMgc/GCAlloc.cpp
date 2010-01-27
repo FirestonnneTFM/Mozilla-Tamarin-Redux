@@ -425,6 +425,7 @@ namespace MMgc
 	REALLY_INLINE void* GCAlloc::AllocFromQuickList(int flags)
 #endif
     {
+        (void)askSize;
 		void* item = m_qList;
 		void**p = (void**)item;
 		m_qList = (void**)p[0];
