@@ -75,6 +75,7 @@ private:
 	{
 		wait();
         {
+	  MMGC_ENTER_VOID;
 		 MMGC_GCENTER(gc);	
   	     result &= !isDead;
 	     gc->ReapZCT();
