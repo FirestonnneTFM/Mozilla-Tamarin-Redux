@@ -110,8 +110,6 @@ const int kBufferPadding = 16;
 		uint8_t arm_arch;
         // is the nanojit allowed to use VFP instructions?
         bool arm_vfp;
-        // is the nanojit allowed to use Thumb2 instructions?
-		bool arm_thumb2;
 
         /**
 		 * If this switch is set, executing code will check the
@@ -164,7 +162,6 @@ const int kBufferPadding = 16;
         static const bool use_cmov_default;
 		static const uint8_t arm_arch_default;
         static const bool arm_vfp_default;
-        static const bool arm_thumb2_default;
 		static const bool interrupts_default;
 		static const bool jitordie_default;
 		
