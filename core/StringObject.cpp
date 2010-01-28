@@ -223,19 +223,23 @@ namespace avmplus
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
+        AvmAssert(patlen > 0);
 		
 		// even with REALLY_INLINE, some compilers will be reluctant to inline equalsImpl here,
 		// so we explicitly repeat the code here.
+		const PATTERN pat0 = pat[0];
 		const STR* const end = str + right;
 		for (const STR* probe = str + start; probe <= end; ++probe)
 		{
-			for (int32_t j = 0; j < patlen; j++)
-			{
-				if (probe[j] != pat[j])
-					goto no_match;
-			}
-			return int32_t(uintptr_t(probe - str));
-  
+		    if (probe[0] == pat0)
+		    {
+    			for (int32_t j = 1; j < patlen; j++)
+    			{
+	    			if (probe[j] != pat[j])
+		    			goto no_match;
+			    }
+			    return int32_t(uintptr_t(probe - str));
+            }
 		no_match: 
 			// some compilers will complain about a label with no statement following,
 			// hence the continue
@@ -262,27 +266,30 @@ namespace avmplus
 
 	// apparently SunPro compiler doesn't like combining REALLY_INLINE with static functions.
 	template <typename STR, typename PATTERN>
-	/*static*/ REALLY_INLINE int32_t lastIndexOfImpl(const STR* str, int32_t start, const PATTERN* pat, int32_t patlen)
+	/*static*/ REALLY_INLINE int32_t lastIndexOfImpl(const STR* str, int32_t const start, const PATTERN* pat, int32_t patlen)
 	{
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
+        AvmAssert(patlen > 0);
 
 		// even with REALLY_INLINE, some compilers will be reluctant to inline equalsImpl here,
 		// so we explicitly repeat the code here.
-		const STR* probe = str + start;
-		for ( ; start >= 0 ; start-- )
+		const PATTERN pat0 = pat[0];
+		for (const STR* probe = str + start; probe >= str; --probe)
 		{
-			for (int32_t j = 0; j < patlen; j++)
-			{
-				if (pat[j] != probe[j])
-				{
-					break;
-				}
-				if (j == (patlen - 1))
-					return start;
-			}
-
-			probe--;
+		    if (probe[0] == pat0)
+		    {
+			    for (int32_t j = 1; j < patlen; j++)
+			    {
+				    if (pat[j] != probe[j])
+				        goto no_match;
+			    }
+    			return int32_t(uintptr_t(probe - str));
+            }
+        no_match:
+			// some compilers will complain about a label with no statement following,
+			// hence the continue
+			continue;
 		}
 		return -1;
  	}
@@ -834,6 +841,8 @@ namespace avmplus
 			start = len;
 
 		int32_t sublen = substr->length();
+		if (sublen == 0)
+			return start;
 
 		// right is the last character in selfString subStr could be found at
 		// (and further, and there isn't enough of selfString remaining for a match to be possible)
@@ -960,6 +969,10 @@ namespace avmplus
 
 		if (sublen < 0)
 			sublen = Length(p);
+
+		if (sublen == 0)
+			return start;
+
 		int32_t right = end - sublen; 
 		if (right < 0)
 			return -1;
