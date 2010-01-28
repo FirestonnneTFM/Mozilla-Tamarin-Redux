@@ -1354,7 +1354,7 @@ namespace avmplus
     //
     // Locals for Exception-handling, only present when method has try/catch blocks:
     //
-    // _save_eip (LIR_alloc, int32_t) storage for the current ABC-based "pc", used by exception
+    // _save_eip (LIR_alloc, intptr_t) storage for the current ABC-based "pc", used by exception
     // handling to determine which catch blocks are in scope.  The value is an ABC
     // instruction offset, which is how catch handler records are indexed.
     //
@@ -1435,7 +1435,7 @@ namespace avmplus
         env_param = lirout->insParam(0, 0);
         argc_param = lirout->insParam(1, 0);
     #ifdef AVMPLUS_64BIT
-        argc_param = qlo(argc_param);
+        argc_param = lirout->ins1(LIR_q2i, argc_param);
     #endif
         ap_param = lirout->insParam(2, 0);
 
@@ -2958,7 +2958,7 @@ namespace avmplus
     void LirHelper::liveAlloc(LIns* alloc)
     {
         if (alloc->isop(LIR_alloc))
-            live(alloc);
+            plive(alloc);
     }
 
     void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
@@ -3478,14 +3478,14 @@ namespace avmplus
                     Ins(LIR_fret, retvalue);
                     break;
                 case BUILTIN_int:
-                    ret(i2p(retvalue));
+                    pret(i2p(retvalue));
                     break;
                 case BUILTIN_uint:
                 case BUILTIN_boolean:
-                    ret(u2p(retvalue));
+                    pret(u2p(retvalue));
                     break;
                 default:
-                    ret(retvalue);
+                    pret(retvalue);
                     break;
                 }
                 break;
@@ -4912,29 +4912,29 @@ namespace avmplus
 
         // extend live range of critical stuff
         // fixme -- this should be automatic based on live analysis
-        Ins(LIR_live, methodFrame);
-        Ins(LIR_live, env_param);
-        Ins(LIR_live, coreAddr);
-        Ins(LIR_live, undefConst);
+        Ins(LIR_plive, methodFrame);
+        Ins(LIR_plive, env_param);
+        Ins(LIR_plive, coreAddr);
+        Ins(LIR_plive, undefConst);
 
-        if (prolog->env_scope)      live(prolog->env_scope);
-        if (prolog->env_vtable)     live(prolog->env_vtable);
-        if (prolog->env_abcenv)     live(prolog->env_abcenv);
-        if (prolog->env_domainenv)  live(prolog->env_domainenv);
-        if (prolog->env_toplevel)   live(prolog->env_toplevel);
+        if (prolog->env_scope)      plive(prolog->env_scope);
+        if (prolog->env_vtable)     plive(prolog->env_vtable);
+        if (prolog->env_abcenv)     plive(prolog->env_abcenv);
+        if (prolog->env_domainenv)  plive(prolog->env_domainenv);
+        if (prolog->env_toplevel)   plive(prolog->env_toplevel);
 
         if (info->hasExceptions()) {
-            Ins(LIR_live, _ef);
-            Ins(LIR_live, _save_eip);
+            Ins(LIR_plive, _ef);
+            Ins(LIR_plive, _save_eip);
         }
 
-        LIns* last = Ins(LIR_live, vars);
+        LIns* last = Ins(LIR_plive, vars);
 
         #ifdef DEBUGGER
         if (core->debugger())
         {
-            Ins(LIR_live, csn);
-            last = Ins(LIR_live, varTraits);
+            Ins(LIR_plive, csn);
+            last = Ins(LIR_plive, varTraits);
         }
         #endif
 
@@ -5369,6 +5369,7 @@ namespace avmplus
                 LOpcode op = i->opcode();
                 switch (op) {
                 case LIR_ret:
+                case LIR_qret:
                 case LIR_fret:
                     livein.reset();
                     break;
@@ -5482,6 +5483,7 @@ namespace avmplus
             LOpcode op = i->opcode();
             switch (op) {
                 case LIR_ret:
+                case LIR_qret:
                 case LIR_fret:
                     livein.reset();
                     break;
@@ -6086,7 +6088,7 @@ namespace avmplus
         }
 
         // mark the endpoint of generated LIR with an instruction the Assembler allows at the end
-        frag->lastIns = live(env_param);
+        frag->lastIns = plive(env_param);
 
         // we're done with LIR generation, free up what we can.
         mmfx_delete(alloc1);
@@ -6243,9 +6245,9 @@ namespace avmplus
             break;
         }
         LIns* result = callIns(call, 3, env_param, argc_param, args_out);
-        live(args_out);
+        plive(args_out);
         // box and return the result
-        ret(nativeToAtom(result, ms->returnTraits()));
+        pret(nativeToAtom(result, ms->returnTraits()));
     }
 
     LIns* InvokerCompiler::downcast_expr(LIns* atom, Traits* t, LIns* env)
