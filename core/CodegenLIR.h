@@ -327,7 +327,7 @@ namespace avmplus
         LIns* andp(LIns* a, Atom mask);
         LIns* orp(LIns* a, Atom mask);
         LIns* ori(LIns* a, int32_t mask);
-        LIns* ret(LIns* a);
+        LIns* pret(LIns* a);
         LIns* label();
         LIns* jlt(LIns* a, int32_t b);
         LIns* jgt(LIns* a, int32_t b);
@@ -336,7 +336,7 @@ namespace avmplus
         LIns* stp(LIns* val, LIns* p, int32_t d);
         LIns* stq(LIns* val, LIns* p, int32_t d);
         LIns* ldp(LIns* p, int32_t d);
-        LIns* live(LIns*);
+        LIns* plive(LIns*);
         LIns* param(int n, const char *name);
         LIns* lshi(LIns* a, int32_t b);
         LIns* ushp(LIns* a, int32_t b);
