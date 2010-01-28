@@ -89,7 +89,6 @@ namespace avmplus
     const bool AvmCore::use_cmov_default = true;
     const uint8_t AvmCore::arm_arch_default = 5;
     const bool AvmCore::arm_vfp_default = false;
-    const bool AvmCore::arm_thumb2_default = false;
 	const bool AvmCore::interrupts_default = false;
 	const bool AvmCore::jitordie_default = false;
 
@@ -232,7 +231,6 @@ namespace avmplus
 
 		config.arm_arch = arm_arch_default;
         config.arm_vfp = arm_vfp_default;
-        config.arm_thumb2 = arm_thumb2_default;
 
 #ifdef VTUNE
 		VTuneStatus = CheckVTuneStatus();
