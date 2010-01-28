@@ -124,7 +124,7 @@ REALLY_INLINE LIns* LirHelper::u2p(LIns *i)
 REALLY_INLINE LIns* LirHelper::p2i(LIns *i)
 {
 #ifdef NANOJIT_64BIT
-    return lirout->ins1(LIR_qlo, i);
+    return lirout->ins1(LIR_q2i, i);
 #else
     return i;
 #endif
@@ -170,9 +170,9 @@ REALLY_INLINE LIns* LirHelper::ori(LIns* a, int32_t mask)
     return lirout->ins2(LIR_or, a, InsConst(mask));
 }
 
-REALLY_INLINE LIns* LirHelper::ret(LIns* a)
+REALLY_INLINE LIns* LirHelper::pret(LIns* a)
 {
-    return lirout->ins1(LIR_ret, a);
+    return lirout->ins1(LIR_pret, a);
 }
 
 REALLY_INLINE LIns* LirHelper::label()
@@ -218,9 +218,9 @@ REALLY_INLINE LIns* LirHelper::ldp(LIns* p, int32_t d)
     return lirout->insLoad(LIR_ldp, p, d);
 }
 
-REALLY_INLINE LIns* LirHelper::live(LIns* a)
+REALLY_INLINE LIns* LirHelper::plive(LIns* a)
 {
-    return lirout->ins1(LIR_live, a);
+    return lirout->ins1(LIR_plive, a);
 }
 
 REALLY_INLINE LIns* LirHelper::param(int id, const char *name)
