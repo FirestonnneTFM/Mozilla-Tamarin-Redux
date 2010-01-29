@@ -319,6 +319,40 @@ package {
 	AddTestCase("describeType(null, FLASH10_FLAGS).toXMLString()", '<type name="null" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(null, FLASH10_FLAGS).toXMLString());
 	AddTestCase("describeType(void 0, FLASH10_FLAGS).toXMLString()", '<type name="void" isDynamic="false" isFinal="true" isStatic="false"/>', describeType(void 0, FLASH10_FLAGS).toXMLString());
 
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=524810
+    var untypedInt = 34;
+    AddTestCase("var untypedInt = 34; getQualifiedClassName(untypedInt)", "int", getQualifiedClassName(untypedInt));
+    
+    var typedInt:int = 1;
+    AddTestCase("var typedInt:int = 1; getQualifiedClassName(typedInt)", "int", getQualifiedClassName(typedInt));
+    
+    var typedNumberIntValue:Number = 4;
+    AddTestCase("var typedNumberIntValue:Number = 4; getQualifiedClassName(typedNumberIntValue)", "int", getQualifiedClassName(typedNumberIntValue));
+    
+    var typedNumber:Number = 3.14159;
+    AddTestCase("var typedNumber:Number = 3.14159; getQualifiedClassName(typedNumber)", "Number", getQualifiedClassName(typedNumber));
+    
+    var inf:Number = Infinity;
+    AddTestCase("var inf:Number = Infinity; getQualifiedClassName(inf)", "Number", getQualifiedClassName(inf));
+    
+    var nan:Number = NaN;
+    AddTestCase("var nan:Number = NaN; getQualifiedClassName(nan)", "Number", getQualifiedClassName(nan));
+    
+    var int_nan:int = NaN;
+    AddTestCase("var int_nan:int = NaN; getQualifiedClassName(int_nan)", "int", getQualifiedClassName(int_nan));
+    
+    var obj:Object = 3;
+    AddTestCase("var obj:Object = 3; getQualifiedClassName(obj)", "int", getQualifiedClassName(obj));
+    
+    var objNum:Object = 3.4;
+    AddTestCase("var objNum:Object = 3.4; getQualifiedClassName(objNum)", "Number", getQualifiedClassName(objNum));
+    
+    var bool:Boolean = 0;
+    AddTestCase("var bool:Boolean = 0; getQualifiedClassName(bool)", "Boolean", getQualifiedClassName(bool));
+    
+    var bool2:Boolean = 1;
+    AddTestCase("var bool2:Boolean = 1; getQualifiedClassName(bool2)", "Boolean", getQualifiedClassName(bool2));
+    
 
     test();
     
