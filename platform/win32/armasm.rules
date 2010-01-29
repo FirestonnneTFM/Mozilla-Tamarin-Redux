@@ -7,9 +7,9 @@
 		<CustomBuildRule
 			Name="Arm asm"
 			DisplayName="Arm asm"
-			CommandLine="armasm -arch 6 -list &quot;$(IntDir)\$(InputName).list&quot; -o &quot;$(IntDir)\$(InputName).obj&quot; [$Inputs] "
+			CommandLine="armasm -arch 7 -list &quot;$(IntDir)\$(InputName).list&quot; -o &quot;$(IntDir)\$(InputName).obj&quot; [$Inputs] "
 			Outputs="$(IntDir)\$(InputName).obj"
-			FileExtensions="*.armasm"
+			FileExtensions="*.armasm;*.s"
 			ExecutionDescription="Executing ARM Assembler..."
 			>
 			<Properties>
