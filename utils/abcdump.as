@@ -65,7 +65,8 @@ package abcdump
     "",
     " -abs Print the bytecode, but no information about the ABC",
     " -api Print the public API exposed by this abc/swf",
-    " -mdversions Use in conjunction with -api when the abc/swf uses old-style versioning"
+    " -mdversions Use in conjunction with -api when the abc/swf uses old-style versioning",
+    " -dumppools Print out the contents of the constant pools"
     ].join("\n");
 
     const TAB = "  "
@@ -267,6 +268,10 @@ package abcdump
         function Tuple(k:String, v:String) {
             key = k
             value = v
+        }
+        
+        public function toString() {
+            return key + "=" + value
         }
     }
     
@@ -737,6 +742,22 @@ package abcdump
                 return result;
             return   result & 0x0fffffff | data.readUnsignedByte()<<28;
         }
+      
+        function dumpPool(name:String, pool:Array)
+        {
+            if(!doDumpPools)
+                return
+            
+            for(var i:int = 0; i<pool.length; i++)
+                infoPrint(name + "[" + i + "] = " + pool[i])
+        }
+        
+        function padString(s:String, l:uint)
+        {
+            if(s.length < l)
+                return padString(s + " ", l)
+            return s
+        }
         
         function parseCpool()
         {
@@ -751,18 +772,21 @@ package abcdump
             ints = [0]
             for (i=1; i < n; i++)
                 ints[i] = readU32()
-                
+            dumpPool("int", ints)
+            
             // uints
             n = readU32()
             uints = [0]
             for (i=1; i < n; i++)
                 uints[i] = uint(readU32())
-                
+            dumpPool("uint", uints)
+            
             // doubles
             n = readU32()
             doubles = [NaN]
             for (i=1; i < n; i++)
                 doubles[i] = data.readDouble()
+            dumpPool("double", doubles)
 
             infoPrint("Cpool numbers size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
             start = data.position
@@ -772,6 +796,7 @@ package abcdump
             strings = [""]
             for (i=1; i < n; i++)
                 strings[i] = data.readUTFBytes(readU32())
+            dumpPool("string", strings)
 
             infoPrint("Cpool strings count "+ n +" size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
             start = data.position
@@ -780,7 +805,7 @@ package abcdump
             n = readU32()
             namespaces = [publicNs]
             var nskind = 0;
-            for (i=1; i < n; i++)
+            for (i=1; i < n; i++) {
                 switch (nskind = data.readByte())
                 {
                 case CONSTANT_Namespace:
@@ -798,6 +823,9 @@ package abcdump
                     namespaces[i] = new ABCNamespace("private", nskind)
                     break;
                 }
+                if(doDumpPools)
+                    infoPrint("namespace[" + i + "] = " + padString(constantKinds[nskind], 20) + ": " + namespaces[i].uri)
+            }
 
             infoPrint("Cpool namespaces count "+ n +" size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
             start = data.position
@@ -809,8 +837,14 @@ package abcdump
             {
                 var count:int = readU32()
                 var nsset = nssets[i] = []
-                for (j=0; j < count; j++)
-                    nsset[j] = namespaces[readU32()]
+                var nsids = []
+                for (j=0; j < count; j++) {
+                    var nsid = readU32()
+                    nsids.push(nsid)
+                    nsset[j] = namespaces[nsid]
+                }
+                if(doDumpPools)
+                    infoPrint("nsset[" + i + "] = {" + nsids.join(", ") + "}")
             }
 
             infoPrint("Cpool nssets count "+ n +" size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
@@ -821,8 +855,9 @@ package abcdump
             names = [null]
             namespaces[0] = anyNs
             strings[0] = "*" // any name
-            for (i=1; i < n; i++)
-                switch (data.readByte())
+            for (i=1; i < n; i++) {
+                var nametype = data.readByte()
+                switch (nametype)
                 {
                 case CONSTANT_Qname:
                 case CONSTANT_QnameA:
@@ -867,6 +902,9 @@ package abcdump
                 default:
                     throw new Error("invalid kind " + data[data.position-1])
                 }
+                if(doDumpPools)
+                    infoPrint("name[" + i + "] = " + padString(constantKinds[nametype], 12) + ": " + names[i])
+            }
 
             infoPrint("Cpool names count "+ n +" size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
             start = data.position
@@ -949,6 +987,9 @@ package abcdump
                         
                 for(var q:int = 0; q < values_count; ++q)
                     m.addPair(keys[q], values[q])
+                
+                if(doDumpPools)
+                    infoPrint("metadata[" + i + "] = {" + m.tuples.join(", ") + "}")
             }
             infoPrint("MetadataInfo count " +values_count+ " size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
         }
@@ -1428,6 +1469,8 @@ package abcdump
             doExtractInfo = false
         } else if (arg == '-mdversions') {
             useMetadataVersions = true
+        } else if (arg == '-pools') {
+            doDumpPools = true
         } else {
             print('Unknown option '+arg)
             help()
@@ -1448,6 +1491,7 @@ package abcdump
     var doExtractInfo = true
     var doExtractAbs = true
     var doDumpAPI = false
+    var doDumpPools = false
     var useMetadataVersions = false
     var currentFname = ''
     var currentFcount = 0
