@@ -150,6 +150,7 @@ class RuntestBase:
     verify = False
     writeResultProperties = False   # used by the asc runtests.py to write to a result.properties file used by the asc ant scripts
     
+    randomSeed = None # can be specified so that random run runs in same order
     start_time = None
     testTimeOut = -1 #by default tests will NOT timeout
     threads = 1
@@ -202,6 +203,7 @@ class RuntestBase:
         print '    --java          location of java executable (default=java)'
         print '    --javaargs      arguments to pass to java'
         print '    --random        run tests in random order'
+        print '    --seed          explicitly specify random seed for --random'
         
         
 
@@ -213,7 +215,7 @@ class RuntestBase:
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
-                   'showtimes','java=','html','random', 'playerglobalabc=', 'toplevelabc=',
+                   'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
                    'javaargs='
                    ]
 
@@ -282,6 +284,8 @@ class RuntestBase:
                 self.javaargs = v
             elif o in ('--random',):
                 self.random = True
+            elif o in ('--seed',):
+                self.randomSeed = int(v)
             
         return opts
     
@@ -1094,6 +1098,10 @@ class RuntestBase:
     def runTests(self, testList):
         testnum = len(testList)
         if self.random:
+            if not self.randomSeed:
+                self.randomSeed = abs(hash(os.urandom(20)))     # Take the absolute val so that seeds are not negative
+            self.js_print('Running tests in random order.  Random Seed = %s' % self.randomSeed)
+            random.seed(self.randomSeed)
             random.shuffle(testList)
             
         if self.verify:
