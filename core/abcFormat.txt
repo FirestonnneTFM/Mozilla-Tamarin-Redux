@@ -131,7 +131,8 @@ ConstantMultiname {
          U30 name_index				// CONSTANT_utf8, 0=AnyName wildcard
       }
       kind=27 { // CONSTANT_MultinameL	
-	 U30 namespace_set_index	
+	 U30 namespace_set_index
+      }	
       kind=17,18 // CONSTANT_RTQnameL + CONSTANT_RTQnameLA
    }
 }
@@ -184,7 +185,8 @@ InstanceInfo {
     U8  flags                         // 1 = sealed, 0 = dynamic
 				      // 2 = final
 				      // 4 = interface
-    U30 protectedNS                   if flags & 8
+				      // 8 = protected
+    U30 protectedNS                   // if flags & 8
     U30 interfaces_count
     U30 interfaces[interfaces_count]  // CONSTANT_Multiname (references)
     U30 iinit_index                   // MethodInfo
