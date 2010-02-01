@@ -105,8 +105,8 @@ class Errors
 
 namespace avmplus
 {
-    // Error message strings only in DEBUGGER builds.
-    #ifdef DEBUGGER
+    // Error message strings only in non-stubbed DEBUGGER builds.
+    #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
     namespace ErrorConstants
     {
 		LangName languageNames[] =
@@ -224,7 +224,7 @@ namespace avmplus
         MMGC_STATIC_ASSERT((sizeof errorConstants/sizeof errorConstants[0]) == kLanguages);
         
     }
-    #endif /* DEBUGGER */
+    #endif /* defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB) */
 }
 ]]>
         </dotCpp>
@@ -342,8 +342,8 @@ namespace avmplus
 {{ErrorGenerator.ConstantEnums}}
         };
 
-        // Error message strings only in DEBUGGER builds.
-        #ifdef DEBUGGER
+        // Error message strings only in non-stubbed DEBUGGER builds.
+        #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
 		const int kLanguages = LANG_count;
         const int kNumErrorConstants = {{ErrorGenerator.last_repeat_count}};
         extern const char* errorConstants[kLanguages][kNumErrorConstants];

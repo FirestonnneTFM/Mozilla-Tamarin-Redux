@@ -61,6 +61,10 @@
   #endif
 #endif
 
+#ifndef AVMFEATURE_DEBUGGER_STUB
+  #define AVMFEATURE_DEBUGGER_STUB        0
+#endif
+
 #ifndef AVMFEATURE_ALLOCATION_SAMPLER
   // This is compatible with existing behavior: debugging support enables 
   // sampling support.
