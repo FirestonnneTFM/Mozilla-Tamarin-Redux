@@ -47,15 +47,17 @@ namespace MMgc
 	static int markstack_allowance = 2*MARKSTACK_ALLOWANCE;		// Two stacks!
 #endif
 
-	static inline void* AllocStackSegment(size_t nbytes, bool mustSucceed)
+	static inline void* AllocStackSegment(bool mustSucceed)
 	{
 #ifdef TESTING_MARKSTACK
 		if (markstack_allowance == 0)
 			return NULL;
 		--markstack_allowance;
 #endif
-		nbytes = (nbytes + 4095) & ~4095;
-		return FixedMalloc::GetFixedMalloc()->Alloc(nbytes, mustSucceed ? kNone : kCanFail);
+        if (mustSucceed)
+            return GCHeap::GetGCHeap()->Alloc(1, GCHeap::flags_Alloc);
+        else 
+            return GCHeap::GetGCHeap()->AllocNoOOM(1, GCHeap::flags_Alloc | GCHeap::kCanFail);
 	}
 
 	static inline void FreeStackSegment(void* p)
@@ -63,7 +65,7 @@ namespace MMgc
 #ifdef TESTING_MARKSTACK
 		++markstack_allowance;
 #endif
-		FixedMalloc::GetFixedMalloc()->Free(p);
+        GCHeap::GetGCHeap()->FreeNoOOM(p);
 	}
 	
 	GCMarkStack::GCMarkStack()
@@ -77,6 +79,7 @@ namespace MMgc
 		, m_maxDepth(0)
 #endif
 	{
+        GCAssert(sizeof(GCMarkStack::GCStackSegment) <= GCHeap::kBlockSize);
 		PushSegment(true);
 		GCAssert(Invariants());
 	}
@@ -109,7 +112,7 @@ namespace MMgc
 		GCAssert(sizeof(GCStackSegment) <= 4096);
 		GCAssert(m_top == m_limit);
 		if (m_extraSegment == NULL) {
-			void *memory = AllocStackSegment(sizeof(GCStackSegment), mustSucceed);
+			void *memory = AllocStackSegment(mustSucceed);
 			if (memory == NULL)
 				return false;
 			m_extraSegment = new (memory) GCStackSegment();

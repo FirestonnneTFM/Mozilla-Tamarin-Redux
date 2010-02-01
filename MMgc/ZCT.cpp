@@ -149,10 +149,10 @@ namespace MMgc
 		
 		const uint32_t numblocks = RCObject::ZCT_CAPACITY / CAPACITY(RCObject**) / CAPACITY(RCObject***);
 
-		blocktable = (RCObject***) gc->heapAlloc(numblocks);	// must succeed, so use default flags
+		blocktable = (RCObject***) GCHeap::GetGCHeap()->Alloc(numblocks);	// must succeed, so use default flags
 		for ( uint32_t i=0 ; i < CAPACITY(RCObject**)*numblocks ; i++ )
 			blocktable[i] = NULL;
-		blocktable[0] = (RCObject**) gc->heapAlloc(1);			// must succeed, so use default flags
+		blocktable[0] = (RCObject**) GCHeap::GetGCHeap()->Alloc(1);			// must succeed, so use default flags
 		blocktop = blocktable + 1;
 
 		budget = 0;
@@ -166,7 +166,7 @@ namespace MMgc
 	{
 		ClearBlockTable();
 		ClearFreeList();
-		gc->heapFree(blocktable);
+        GCHeap::GetGCHeap()->Free(blocktable);
 	}
 	
 	void ZCT::StartCollecting()
@@ -671,7 +671,7 @@ namespace MMgc
 		while (freeList != NULL) {
 			void* item = (void*)freeList;
 			freeList = (void**)*freeList;
-			gc->heapFree(item);
+            GCHeap::GetGCHeap()->FreeNoOOM(item);
 		}
 	}
 	
@@ -686,10 +686,8 @@ namespace MMgc
 			block = (RCObject**)freeList;
 			freeList = (void**)*freeList;
 		}
-		else {
-			// The flags are the default flags for heapAlloc + kCanFail
-			block = (RCObject**)gc->heapAlloc(1, GCHeap::kExpand|GCHeap::kZero|GCHeap::kProfile|GCHeap::kCanFail);
-		}
+		else
+			block = (RCObject**)GCHeap::GetGCHeap()->AllocNoOOM(1, GCHeap::flags_Alloc|GCHeap::kCanFail);
 #ifdef ZCT_TESTING
 		if (block != NULL)
 			--zct_allowance;
