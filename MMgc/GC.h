@@ -688,6 +688,7 @@ namespace MMgc
 		friend class GCCallback;
 		friend class GCAlloc;
 		friend class GCLargeAlloc;
+        friend class GCMarkStack;
 		friend class RCObject;
 		friend class ZCT;
 		friend class AutoRCRootSegment;

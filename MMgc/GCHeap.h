@@ -326,8 +326,12 @@ namespace MMgc
 			kExpand=1,
 			kZero=2,
 			kProfile=4,
-			kCanFail=8
+			kCanFail=8,
+            kNoOOMHandling=16   // INTERNAL USE ONLY
 		};
+
+        // Default flags for Alloc, AllocNoOOM
+        static const uint32_t flags_Alloc = kExpand | kZero | kProfile;
 
 		/**
 		 * Allocates a block from the heap.
@@ -335,7 +339,14 @@ namespace MMgc
 		 *             to allocate.
 		 * @return pointer to beginning of block, or NULL if failed.
 		 */
-		void *Alloc(size_t size, uint32_t flags=kExpand | kZero | kProfile);
+		void *Alloc(size_t size, uint32_t flags=flags_Alloc);
+        
+        /**
+         * Allocates a block from the heap, but is guaranteed never to run OOM handling.
+         * You can call this without kCanFail but a failed allocation will result in
+         * an immediate abort.
+         */
+		void *AllocNoOOM(size_t size, uint32_t flags=flags_Alloc) { return Alloc(size, flags|kNoOOMHandling); }
 
 		/**
 		 * Allocate memory that the JIT will use for object code.
@@ -353,8 +364,16 @@ namespace MMgc
 		 *             pointer that was previously returned by
 		 *             a call to Alloc.
 		 */
-		void Free(void *item) { FreeInternal(item, true); }
-		void FreeNoProfile(void *item) { FreeInternal(item, false); }
+		void Free(void *item) { FreeInternal(item, true, true); }
+        
+        /**
+         * Frees a block, but is guaranteed never to run OOM handling (which could
+         * happen if internal data structures are shuffled in response to 
+         * a large part of the heap becoming free and being decommitted, say).
+         */
+        void FreeNoOOM(void* item) { FreeInternal(item, true, false); }
+        
+		void FreeNoProfile(void *item) { FreeInternal(item, false, true); }
 
 		/**
 		 * Free memory allocated from AllocCodeMemory.
@@ -369,7 +388,7 @@ namespace MMgc
 		/**
 		 * Added for NJ's portability needs cause it doesn't always MMgc 
 		 */
-		void Free(void *item, size_t /*ignore*/) { FreeInternal(item, true); }
+		void Free(void *item, size_t /*ignore*/) { FreeInternal(item, true, true); }
 
 		// Return the size (in blocks) of a valid item
 		size_t Size(const void *item);
@@ -723,7 +742,7 @@ namespace MMgc
 		void FreeBlock(HeapBlock *block);
 		void FreeAll();
 
-		void FreeInternal(const void *item, bool profile);
+		void FreeInternal(const void *item, bool profile, bool oomHandling);
 	
 		HeapBlock *Split(HeapBlock *block, size_t size);
 
@@ -857,6 +876,7 @@ namespace MMgc
 		MemoryStatus status;
  		uint32_t enterCount;
 		uint32_t preventDestruct;
+        bool m_oomHandling;                 // temporarily false when allocating or deallocating with kNoOOMHandling
 
 		vmpi_spin_lock_t gclog_spinlock;	// a lock used by GC::gclog for exclusive access to GCHeap::DumpMemoryInfo
 
