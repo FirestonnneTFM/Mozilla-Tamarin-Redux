@@ -319,6 +319,15 @@ var FEATURES =
   </feature>
 
   <feature>
+    <desc>  This is used to compile AVM with the debugger API enabled, but
+            certain bits of functionality reduced to no-ops. </desc>
+
+    <name>     AVMFEATURE_DEBUGGER_STUB  </name>
+    <requires>  AVMFEATURE_DEBUGGER  </requires>
+    <defines>  VMCFG_DEBUGGER_STUB  </defines>
+  </feature>
+
+  <feature>
     <desc> Enable the sample-based memory profiler.  This makes allocation a
            little more expensive if a sampler callback is not installed, and
            more expensive still if it is installed.

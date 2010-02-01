@@ -687,7 +687,7 @@ namespace avmshell
 					else if (!VMPI_strcmp(arg+2, "noincgc")) {
 						settings.incremental = false;
 					}
-#ifdef DEBUGGER
+#if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
 					else if (!VMPI_strcmp(arg+2, "astrace") && i+1 < argc ) {
 						settings.astrace_console = VMPI_strtol(argv[++i], 0, 10);
 					}
@@ -704,7 +704,7 @@ namespace avmshell
 						}
 						i++;
 					}
-#endif /* DEBUGGER */
+#endif /* defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB) */
 #ifdef VMCFG_SELFTEST
 					else if (!VMPI_strncmp(arg+2, "selftest", 8)) {
 						settings.do_selftest = true;

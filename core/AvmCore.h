@@ -1122,6 +1122,7 @@ const int kBufferPadding = 16;
 		 */
 		bool willExceptionBeCaught(Exception* exception);
 
+		#ifndef VMCFG_DEBUGGER_STUB
 		/**
 		 * findErrorMessage searches an error messages table.
 		 * Only available in debugger builds.
@@ -1130,6 +1131,7 @@ const int kBufferPadding = 16;
 								 int* mapTable,
 								 const char** errorTable,
 								 int numErrors);
+		#endif
 
 		/**
 		 * Determines the language id of the given platform

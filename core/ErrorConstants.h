@@ -282,8 +282,8 @@ namespace avmplus
             kArrayFilterNonNullObjectError                  = 1510
         };
 
-        // Error message strings only in DEBUGGER builds.
-        #ifdef DEBUGGER
+        // Error message strings only in non-stubbed DEBUGGER builds.
+        #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
 		const int kLanguages = LANG_count;
         const int kNumErrorConstants = 133;
         extern const char* errorConstants[kLanguages][kNumErrorConstants];
