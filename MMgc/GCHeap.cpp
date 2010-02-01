@@ -2491,7 +2491,7 @@ namespace MMgc
 	void GCHeap::StatusChangeNotify(MemoryStatus to)
 	{
 		//  If we're already in the process of sending this notification, don't resend
-		if (statusNotificationBeingSent() && to == status || !m_oomHandling)
+		if ((statusNotificationBeingSent() && to == status) || !m_oomHandling)
 			return;
 
 		m_notificationThread = VMPI_currentThread();
