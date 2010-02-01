@@ -3420,7 +3420,7 @@ namespace MMgc
 		if(!siz)
 			siz = heap->Size(ptr);
 		policy.signalBlockDeallocation(siz);
-		heap->FreeInternal(ptr, profile);
+		heap->FreeInternal(ptr, profile, true);
 	}
 	
 	size_t GC::GetBytesInUse()
