@@ -1126,6 +1126,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return langID;
 	}
 
+#ifndef VMCFG_DEBUGGER_STUB
 	String* AvmCore::findErrorMessage(int errorID,
 									  int* mapTable,  /* 2 ints per entry i, i+1 */
 									  const char** errorTable,
@@ -1158,13 +1159,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 #endif
+#endif
 	
 	String* AvmCore::getErrorMessage(int errorID)
 	{
 		Stringp buffer = newConstantStringLatin1("Error #");
 		buffer = concatStrings(buffer, internInt(errorID));
 
-        #ifdef DEBUGGER
+        #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
 		if (_debugger)
 		{
 			// errorConstants is declared char* but is encoded as UTF8
