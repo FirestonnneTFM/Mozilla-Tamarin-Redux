@@ -61,6 +61,10 @@ class AggregateMailNotifier(MailNotifier):
     into single emails that only fire once a scheduler group of builders is finished building.
     '''
     
+    # compare_attrs is used to compare two instances of the same class - the attributes in this list are compared to each
+    # other to determine if it is the same class object
+    compare_attrs = MailNotifier.compare_attrs + ['schedulerGroupsSendFirst', 'schedulerGroups']
+    
     def __init__(self, fromaddr, mode="all", categories=None, builders=None,
                  addLogs=False, relayhost="localhost",
                  subject="",

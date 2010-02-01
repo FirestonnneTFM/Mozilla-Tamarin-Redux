@@ -29,6 +29,12 @@ from aggregateMailNotifier import AggregateMailNotifier
 
 
 class CustomMail(AggregateMailNotifier):
+    '''Custom Mail class that extends default buildbot mail behavior.'''
+    
+    # compare_attrs is used to compare two instances of the same class - the attributes in this list are compared to each
+    # other to determine if it is the same class object
+    compare_attrs = AggregateMailNotifier.compare_attrs + ['branch']
+    
     def __init__(self, fromaddr, mode="all", categories=None, builders=None, branch="",
                  addLogs=False, relayhost="localhost",
                  subject="[buildbot-%(result)s] %(blamelist)s: %(branch)s rev %(src)s",
