@@ -158,6 +158,7 @@ namespace MMgc
  		  status(kMemNormal),
 		  enterCount(0),
 		  preventDestruct(0),
+          m_oomHandling(true),
 	#ifdef MMGC_MEMORY_PROFILER
 		  hasSpy(false),
 	#endif
@@ -290,6 +291,9 @@ namespace MMgc
 		{
 			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 			
+            bool saved_oomHandling = m_oomHandling;
+            m_oomHandling = saved_oomHandling && (flags & kNoOOMHandling) == 0;
+            
 			HeapBlock *block = AllocBlock(size, zero);
 			
 			//  Try to expand if the flag is set
@@ -317,6 +321,7 @@ namespace MMgc
 			{
 				if (flags & kCanFail)
 				{
+                    m_oomHandling = saved_oomHandling;
 					return NULL;
 				} else {
 					Abort();
@@ -344,6 +349,7 @@ namespace MMgc
 
 			CheckForMemoryLimitsExceeded();
 
+            m_oomHandling = saved_oomHandling;
 		}
 	
 		// Zero out the memory, if requested to do so
@@ -353,9 +359,9 @@ namespace MMgc
 		
 		// fail the allocation if we hit soft limit and canFail
 		if(status == kMemSoftLimit && (flags & kCanFail) != 0) {
-			FreeInternal(baseAddr, (flags & kProfile) != 0);
+			FreeInternal(baseAddr, (flags & kProfile) != 0, m_oomHandling);
 			return NULL;
-		}				   
+		}
 
 		return baseAddr;
 	}
@@ -387,13 +393,16 @@ namespace MMgc
 		}
 	}
 
-	void GCHeap::FreeInternal(const void *item, bool profile)
+	void GCHeap::FreeInternal(const void *item, bool profile, bool oomHandling)
 	{
 		(void)profile;
 
 		// recursive free calls are allowed from StatusChangeNotify
 		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 
+        bool saved_oomHandling = m_oomHandling;
+        m_oomHandling = saved_oomHandling && oomHandling;
+        
 		HeapBlock *block = AddrToBlock(item);
 		GCAssertMsg(block != NULL, "Bogus item");
 
@@ -413,6 +422,8 @@ namespace MMgc
 #endif
 
 		FreeBlock(block);
+        
+        m_oomHandling = saved_oomHandling;
 	}
 
 	void GCHeap::Decommit()
@@ -421,6 +432,11 @@ namespace MMgc
 		if(!config.returnMemory)
 			return;
 		
+        // don't decommit if OOM handling is disabled; there's a guard in the OOM code so this
+        // should never happen, but belt and suspenders...
+        if (!m_oomHandling)
+            return;
+
 		size_t heapSize = GetTotalHeapSize();
 		size_t freeSize = GetFreeHeapSize();
 		
@@ -1357,8 +1373,7 @@ namespace MMgc
 	}
 
 	bool GCHeap::ExpandHeap(size_t askSize)
-	{				
-		
+	{
 		//  Look ahead at memory limits to see if we should trigger a free memory signal
 		if ( (HardLimitExceeded(askSize) || SoftLimitExceeded(askSize)))
 		{
@@ -2442,7 +2457,7 @@ namespace MMgc
 		//  we've entered softLimit or abort state, we want to allow the softlimit or abort processing to return
 		//  the heap to normal before continuing.  
 	
-		if (statusNotificationBeingSent() || status != kMemNormal)
+		if (statusNotificationBeingSent() || status != kMemNormal || !m_oomHandling)
 			return;
 
 		m_notificationThread = VMPI_currentThread();
@@ -2476,7 +2491,7 @@ namespace MMgc
 	void GCHeap::StatusChangeNotify(MemoryStatus to)
 	{
 		//  If we're already in the process of sending this notification, don't resend
-		if (statusNotificationBeingSent() && to == status)
+		if (statusNotificationBeingSent() && to == status || !m_oomHandling)
 			return;
 
 		m_notificationThread = VMPI_currentThread();
