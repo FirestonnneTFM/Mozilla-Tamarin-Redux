@@ -44,8 +44,8 @@
 
 namespace avmplus
 {
-    // Error message strings only in DEBUGGER builds.
-    #ifdef DEBUGGER
+    // Error message strings only in non-stubbed DEBUGGER builds.
+    #if defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB)
     namespace ErrorConstants
     {
 		LangName languageNames[] =
@@ -2455,5 +2455,5 @@ namespace avmplus
         MMGC_STATIC_ASSERT((sizeof errorConstants/sizeof errorConstants[0]) == kLanguages);
         
     }
-    #endif /* DEBUGGER */
+    #endif /* defined(DEBUGGER) && !defined(VMCFG_DEBUGGER_STUB) */
 }

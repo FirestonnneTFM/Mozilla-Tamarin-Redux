@@ -80,6 +80,7 @@
 #undef VMCFG_VERIFYALL
 #undef AVMPLUS_VERBOSE
 #undef DEBUGGER
+#undef VMCFG_DEBUGGER_STUB
 #undef AVMPLUS_SAMPLER
 #undef VTUNE
 #undef AVMPLUS_VERBOSE
@@ -272,6 +273,16 @@
  */
 #if !defined AVMFEATURE_DEBUGGER || AVMFEATURE_DEBUGGER != 0 && AVMFEATURE_DEBUGGER != 1
 #  error "AVMFEATURE_DEBUGGER must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMFEATURE_DEBUGGER_STUB
+ *
+ * This is used to compile AVM with the debugger API enabled, but
+ * certain bits of functionality reduced to no-ops.
+ */
+#if !defined AVMFEATURE_DEBUGGER_STUB || AVMFEATURE_DEBUGGER_STUB != 0 && AVMFEATURE_DEBUGGER_STUB != 1
+#  error "AVMFEATURE_DEBUGGER_STUB must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -587,6 +598,11 @@
 
 
 
+#if AVMFEATURE_DEBUGGER_STUB
+#  if !AVMFEATURE_DEBUGGER
+#    error "AVMFEATURE_DEBUGGER is required for AVMFEATURE_DEBUGGER_STUB"
+#  endif
+#endif
 
 
 #if AVMFEATURE_JIT
@@ -752,6 +768,9 @@
 #endif
 #if AVMFEATURE_DEBUGGER
 #  define DEBUGGER
+#endif
+#if AVMFEATURE_DEBUGGER_STUB
+#  define VMCFG_DEBUGGER_STUB
 #endif
 #if AVMFEATURE_ALLOCATION_SAMPLER
 #  define AVMPLUS_SAMPLER
