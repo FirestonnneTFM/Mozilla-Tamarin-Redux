@@ -68,7 +68,10 @@ namespace avmplus
         // extant pools. Since AvmCore keeps a list of all live pools, we just set a flag 
         // in AvmCore that triggers the flush in postsweep(). (Note that we can't rely on our pool
         // being valid here; it might have already been collected!)
-        m_core->flushBindingCachesNextSweep();
+        // the avmcore's lifetime is owned by the host and could be deleted so check for that first
+        AvmCore *current = MMgc::GC::GetGC(this)->core();
+        if(current == m_core)   
+            m_core->flushBindingCachesNextSweep();
         #endif
     }
 
