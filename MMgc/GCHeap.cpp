@@ -2396,7 +2396,7 @@ namespace MMgc
 
 	void GCHeap::TrackSystemAlloc(void *addr, size_t askSize)
 	{
-		MMGC_LOCK(m_spinlock);
+		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 		if(!IsProfilerInitialized())
 			InitProfiler();
 		if(profiler)
@@ -2405,7 +2405,7 @@ namespace MMgc
 
 	void GCHeap::TrackSystemFree(void *addr)
 	{
-		MMGC_LOCK(m_spinlock);
+		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 		if(addr && profiler)
 			profiler->RecordDeallocation(addr, VMPI_size(addr));
 	}
