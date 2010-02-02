@@ -69,7 +69,7 @@ const int kBufferPadding = 16;
         VB_verify       = 1<<2, // verification information
         VB_interp       = 1<<3, // interpreter information
         VB_jit          = 1<<4, // jit information
-        VB_traits       = 1<<5, // traits creation information
+        VB_traits       = 1<<5 // traits creation information
     };
 
 	struct Config

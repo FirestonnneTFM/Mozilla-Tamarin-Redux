@@ -144,7 +144,7 @@ namespace avmshell
 
 	// exit codes
 	enum {
-		OUT_OF_MEMORY = 128,
+		OUT_OF_MEMORY = 128
 	};
 	
 	// swf support, impl code in swf.cpp
