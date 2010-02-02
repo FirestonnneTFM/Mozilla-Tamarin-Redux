@@ -346,7 +346,6 @@ namespace MMgc
 				profiler->RecordAllocation(baseAddr, size * kBlockSize, size * kBlockSize);
 			}
 #endif
-
 			CheckForMemoryLimitsExceeded();
 
             m_oomHandling = saved_oomHandling;
@@ -2065,6 +2064,24 @@ namespace MMgc
 		heap->CheckForStatusReturnToNormal();
 	}
 
+	/*static*/
+	void GCHeap::SignalExternalFreeMemory(size_t minimumBytesToFree /*= kMaxObjectSize */)
+	{
+		GCHeap* heap = GetGCHeap();
+		GCAssertMsg(heap, "GCHeap not valid!");
+
+		MMGC_LOCK_ALLOW_RECURSION(heap->m_spinlock, heap->m_notificationThread);
+
+		// When calling SendFreeMemorySignal with kMaxObjectSize it will try to release 
+		// as much memory as possible. Otherwise it interprets the parameter as number 
+		// of blocks to be freed. This function uses bytes instead. The value is converted 
+		// to blocks here, except when kMaxObjectSize has been passed in so that it will 
+		// still trigger freeing maximum amount of memory. The division may lose some 
+		// precision, but SendFreeMemorySignal adds one more block to the requested amount
+		// so that is ok.
+		heap->SendFreeMemorySignal((minimumBytesToFree != kMaxObjectSize) ? minimumBytesToFree / GCHeap::kBlockSize : minimumBytesToFree);
+	}
+
 	// This can *always* be called.  It will clean up the state on the current thread
 	// if appropriate, otherwise do nothing.  It *must* be called by host code if the
 	// host code jumps past an MMGC_ENTER instance.  (The Flash player does that, in
@@ -2448,6 +2465,8 @@ namespace MMgc
 	/* this method is the heart of the OOM system.
 	   its here that we call out to the mutator which may call
 	   back in to free memory or try to get more.
+
+	   Note! The caller needs to hold on to the m_spinlock before calling this!
 	*/
 
 	void GCHeap::SendFreeMemorySignal(size_t minimumBlocksToFree)
