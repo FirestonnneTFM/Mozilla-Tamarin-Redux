@@ -137,7 +137,7 @@ namespace MMgc
 		// We can't allow free'ing something during Sweeping, otherwise alloc counters
 		// get decremented twice and destructors will be called twice.
 		GCAssert(m_gc->collecting == false || m_gc->marking == true);
-		if (m_gc->marking && (m_gc->collecting || GCLargeAlloc::IsQueued(b))) {
+		if (m_gc->marking && (m_gc->collecting || IsProtectedAgainstFree(b))) {
 			m_gc->AbortFree(GetUserPointer(item));
 			return;
 		}

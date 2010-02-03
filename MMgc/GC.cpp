@@ -2679,9 +2679,11 @@ namespace MMgc
 		uintptr_t *p = (uintptr_t*) wi.ptr;
 
 		// Control mark stack growth:
+        //
 		// Here we consider whether to split the object into multiple pieces.
-		// A cutoff of 400 is somewhat arbitrary; it can't be too small
-		// because then we'll split too many objects, and it can't be too large
+		// A cutoff of kLargestAlloc is imposed on us by external factors, see
+        // discussion below.  Ideally we'd choose a limit that isn't "too small"
+		// because then we'll split too many objects, and isn't "too large"
 		// because then the mark stack growth won't be throttled properly.
 		//
 		// See bugzilla #495049 for a discussion of this problem.
@@ -2689,21 +2691,59 @@ namespace MMgc
 		// If the cutoff is exceeded split the work item into two chunks:
 		// a small head (which we mark now) and a large tail (which we push
 		// onto the stack).  The tail is a non-gcobject regardless of whether
-		// the head is a gcobject.  The head must be marked first because this
+		// the head is a gcobject.  THE HEAD MUST BE MARKED FIRST because this
 		// ensures that the mark on the object is set immediately; that is
 		// necessary for write barrier correctness.
 		//
+        // Why use kLargestAlloc as the split value?
+        //
+        // Unfortunately for correctness THE HEAD MUST ALSO BE MARKED LAST,
+        // because the queued bit is traditionally used to prevent the object
+        // from being deleted explicitly by GC::Free while the object is
+        // on the mark stack.  We can't have it both ways, so split objects
+        // are protected against being freed by carrying another bit that
+        // prevents deletion when it is set.  Because we do not want to expand
+        // the number of header bits per object from 4 to 8, we only have
+        // this extra bit on large objects (where there's plenty of space).
+        // Thus the cutoff for splitting is exactly kLargestObject: only
+        // large objects that can carry this bit are split.
+        //
+        // In addition, the queued flag still prevents the object from
+        // being deleted.
+        //
+        // The free-protection flags are reset by a special GCWorkItem
+        // that is pushed on the stack below the two parts of the object that
+        // is being split; when that is later popped, it resets the flag
+        // and returns.
+        //
+        // Th complexity with the free-protection flags may go away if we
+        // move to a write barrier that does not depend on the queued bit,
+        // for example, a card-marking barrier.
+        //
 		// If a mark stack overflow occurs the large tail may be popped
 		// and discarded.  This is not a problem: the object as a whole
 		// is marked, but points to unmarked storage, and the latter
 		// objects will be picked up as per normal.  Discarding the
 		// tail is entirely equivalent to discarding the work items that
 		// would result from scanning the tail.
-		const size_t markstackCutoff = 400;
-		if (size > markstackCutoff)
+
+		if (size > kLargestAlloc)
 		{
-			PushWorkItem(GCWorkItem(p + markstackCutoff / sizeof(uintptr_t), uint32_t(size - markstackCutoff), GCWorkItem::kNonGCObject));
-			size = markstackCutoff;
+            if (wi.IsProtectionItem()) {
+                // Unprotect an item that was protected earlier, see comment block above.
+                GCLargeAlloc::UnprotectAgainstFree(p);
+                return;
+            }
+
+            if (wi.IsGCItem()) {
+                // Need to protect it against 'Free': push a magic item representing this object
+                // that will prevent this split item from being freed, see comment block above.
+                GCLargeAlloc::ProtectAgainstFree(p);
+                PushWorkItem(GCWorkItem(p, GCWorkItem::kProtectionSize, GCWorkItem::kGCObject));
+            }
+
+			PushWorkItem(GCWorkItem(p + kLargestAlloc / sizeof(uintptr_t), uint32_t(size - kLargestAlloc), GCWorkItem::kNonGCObject));
+			size = kLargestAlloc;
 		}
 
 		policy.signalMarkWork(size);

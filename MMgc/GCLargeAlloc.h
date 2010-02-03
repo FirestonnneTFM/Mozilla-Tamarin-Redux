@@ -55,7 +55,8 @@ namespace MMgc
 			kFinalizeFlag     = 0x4,
 			kHasWeakRef       = 0x8,
 			kContainsPointers = 0x10,
-			kRCObject         = 0x20
+			kRCObject         = 0x20,
+            kProtectedFlag    = 0x40    // protected from Free, see comments around GC::MarkItem
 		};
 
 	public:
@@ -95,6 +96,12 @@ namespace MMgc
 
 		static bool IsQueued(const void *item);
 
+        static void ProtectAgainstFree(const void *item);
+        
+        static void UnprotectAgainstFree(const void *item);
+        
+		static bool IsProtectedAgainstFree(const void *item);
+        
 		static void* FindBeginning(const void *item);
 
 		// not a hot method
