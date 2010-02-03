@@ -84,6 +84,61 @@ class Scheduler(scheduler.Scheduler):
                                properties=self.properties)
         self.submitBuildSet(bs)
 
+class PhaseTwoScheduler(Scheduler):
+    changeDir = ""
+    def __init__(self, name, branch, treeStableTimer, builderNames,
+             fileIsImportant=None, properties={}, categories=None, builderDependencies=[], changeDir=".", priority=1):
+
+        Scheduler.__init__(self, name, branch, treeStableTimer, builderNames, 
+            fileIsImportant, properties, categories)
+        # - each builder must have a dependent that is in the upstream builder
+        # - multiple builders can be dependent on the same upstream builder
+        self.builderDependencies = builderDependencies
+        self.changeDir = changeDir
+        self.priority = priority
+
+    def fireTimer(self):
+        # clear out our state
+        self.timer = None
+        self.nextBuildTime = None
+        changes = self.unimportantChanges + self.importantChanges
+        self.importantChanges = []
+        self.unimportantChanges = []
+
+        buildset_builderNames = []
+        # There may be multiple build requests, only process the very last one (latest)
+        change = changes[-1]
+        # Only add builders that are:
+        #    1) dependent builder is listed in the change request, this means that the upstream builder was online
+        #    2) builder is online
+        f = open("%s/change-%s.%s" % (self.changeDir, change.revision, self.priority))
+        phase1Builders = []
+        for line in f.readlines():
+            if line.startswith("builders:"):
+                phase1Builders = line[line.find(":")+1:].strip().split()
+                break
+            
+        # builders is a list of builders that built the request in Phase1
+        for p1Builder in phase1Builders:
+            # Get the depenent builder
+            for dependent in self.builderDependencies:
+                if p1Builder == dependent[1]:
+                    p2Builder = dependent[0]
+                    break
+            
+            # See if the builder is online
+            # Get a builder from the BotMaster:
+            builder = self.parent.botmaster.builders.get(p2Builder)
+            # Add the builder to the set if it is idle (not building and not offline)
+            if builder.builder_status.getState()[0] == 'idle':
+                buildset_builderNames.append(p2Builder)
+
+        # create a BuildSet, submit it to the BuildMaster
+        bs = buildset.BuildSet(buildset_builderNames,
+                               SourceStamp(changes=changes),
+                               properties=self.properties)
+        self.submitBuildSet(bs)
+
 class AnyBranchScheduler(scheduler.AnyBranchScheduler):
     '''The buildbot.scheduler.AnyBranchScheduler is subclassed to use our modified
        Scheduler (above) with the buildsets additions'''

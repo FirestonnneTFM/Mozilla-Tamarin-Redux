@@ -48,13 +48,14 @@ from commonsteps import *
 class argo:
     
     HG_URL = "http://asteam.macromedia.com/hg/tamarin-redux-argo/"
+    BRANCH = "tamarin-argo"
     
     ####### SCHEDULERS
     from buildbot.scheduler import *
     # custom.buildbot_ext.scheduler import MUST happen after importing buildbot.scheduler
     from custom.buildbot_ext.scheduler import *
 
-    compile = Scheduler(name="compile-argo", branch="tamarin-redux-argo", treeStableTimer=30, fileIsImportant=startCompile,
+    compile = Scheduler(name="compile-argo", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile,
                      builderNames=["windows-compile-argo", "windows64-compile-argo",
                                    "mac-intel-10.4-compile-argo", "mac-intel-10.5-compile-argo", "mac64-intel-compile-argo",
                                    "mac-ppc-10.4a-compile-argo", "mac-ppc-10.4b-compile-argo", 
@@ -116,9 +117,8 @@ class argo:
                                   ["solaris-sparc-test-argo", "solaris-sparc-smoke-argo"],
                                  ])
 
-    """
-    performance = PhaseTwoScheduler(name="performance-argo", branch="tamarin-redux-argo", treeStableTimer=30, 
-                    fileIsImportant=startPerformanceRun, priority=1,
+    performance = PhaseTwoScheduler(name="performance-argo", branch="%s-performance" % BRANCH, treeStableTimer=30, 
+                    fileIsImportant=startPerformanceRun, priority=1, changeDir="changes/perf/processed",
                     builderNames=["windows-performance-argo",
                                    "mac-performance-argo", "mac64-performance-argo",
                                    "mac-ppc-performance-argo",
@@ -133,8 +133,9 @@ class argo:
                                   ["winmobile-performance-argo", "winmobile-emulator-test-argo"]
                                  ])
     
-    deep = PhaseTwoScheduler(name="deep-argo", branch="tamarin-redux-argo", treeStableTimer=30, fileIsImportant=startCompile,
-                        priority=1, builderNames=[
+    deep = PhaseTwoScheduler(name="deep-argo", branch="%s-deep" % BRANCH, treeStableTimer=30, 
+                    fileIsImportant=startCompile, priority=1, changeDir="changes/deep/processed",
+                    builderNames=[
                                     "windows-deep-argo",
                                     "windows-p3-deep-argo",
                                     "windows-frr-argo",
@@ -151,13 +152,11 @@ class argo:
                                   ["windows-frr-argo", "windows-test-argo"], 
                                   ["mac-ppc-deep-argo", "mac-ppc-10.5a-test-argo"], 
                                   ["solaris-sparc-deep-argo", "solaris-sparc-test-argo"], 
-                                  #["windows64-deep-argo", "windows64-test-argo"], 
+                                  ["windows64-deep-argo", "windows64-test-argo"], 
                                   ["winmobile-emulator-deep-argo", "winmobile-emulator-test-argo"],
                                  ])
-    """
 
-
-    schedulers = [compile, smoke, test]
+    schedulers = [compile, smoke, test, performance, deep]
     
     
 
@@ -188,6 +187,7 @@ class argo:
     windows_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
+                env={'branch': WithProperties('%s','branch')},
                 description='running file-check against source...',
                 descriptionDone='finished file-check.',
                 name="FileCheck",
@@ -195,9 +195,9 @@ class argo:
     )
     windows_compile_factory.addStep(compile_buildcheck)
     windows_compile_factory.addStep(util_upload_asteam)
-    windows_compile_factory.addStep(util_upload_mozilla)
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-sizereport.sh',WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting win release-sizereport build...',
                 descriptionDone='finished win release-sizereport build.',
                 name='Build_Release_sizereport',
@@ -230,7 +230,6 @@ class argo:
     windows_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-shell --enable-debug --enable-debugger --target=x86_64-win ", upload="false"))
     windows_64_compile_factory.addStep(compile_buildcheck_local)
     windows_64_compile_factory.addStep(util_upload_asteam)
-    windows_64_compile_factory.addStep(util_upload_mozilla)
 
     windows_64_compile_builder = {
                 'name': "windows64-compile-argo",
@@ -264,7 +263,6 @@ class argo:
     mac_intel_104_compile_factory.addStep(compile_generic(name="Selftest_PPC", shellname="avmshell_test_104_ppc", args="--enable-shell --enable-selftest --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_104_compile_factory.addStep(util_upload_asteam_local)
-    mac_intel_104_compile_factory.addStep(util_upload_mozilla_local)
 
     mac_intel_104_compile_builder = {
                 'name': "mac-intel-10.4-compile-argo",
@@ -299,7 +297,6 @@ class argo:
     mac_intel_105_compile_factory.addStep(compile_generic(name="Selftest_PPC", shellname="avmshell_test_ppc", args="--enable-shell --enable-selftest --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_105_compile_factory.addStep(util_upload_asteam_local)
-    mac_intel_105_compile_factory.addStep(util_upload_mozilla_local)
 
     mac_intel_105_compile_builder = {
                 'name': "mac-intel-10.5-compile-argo",
@@ -330,7 +327,6 @@ class argo:
     mac_intel_64_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_64_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc64-darwin", upload="false"))
     mac_intel_64_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_64_compile_factory.addStep(util_upload_asteam_local)
-    mac_intel_64_compile_factory.addStep(util_upload_mozilla_local)
 
     mac_intel_64_compile_builder = {
                 'name': "mac64-intel-compile-argo",
@@ -444,6 +440,7 @@ class argo:
     linux_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     linux_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-cov.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting linux code coverage release build...',
                 descriptionDone='finished linux code coverage release build.',
                 name="Build_Release_cov",
@@ -451,7 +448,6 @@ class argo:
     )
     linux_compile_factory.addStep(compile_buildcheck_local)
     linux_compile_factory.addStep(util_upload_asteam_local)
-    linux_compile_factory.addStep(util_upload_mozilla)
 
     linux_compile_builder = {
                 'name': "linux-compile-argo",
@@ -479,7 +475,6 @@ class argo:
     linux_64_compile_factory.addStep(compile_testmedia)
     linux_64_compile_factory.addStep(compile_buildcheck_local)
     linux_64_compile_factory.addStep(util_upload_asteam_local)
-    linux_64_compile_factory.addStep(util_upload_mozilla_local)
 
     linux_64_compile_builder = {
                 'name': "linux64-compile-argo",
@@ -505,9 +500,9 @@ class argo:
     winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --target=arm-windows", upload="false"))
     winmobile_emulator_compile_factory.addStep(compile_buildcheck_local)
     winmobile_emulator_compile_factory.addStep(util_upload_asteam_local)
-    winmobile_emulator_compile_factory.addStep(util_upload_mozilla_local)
     winmobile_emulator_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-mobile-pocketpc-arm-sizereport.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting to run sizereport...',
                 descriptionDone='finished sizereport.',
                 name="Build_Release_sizereport",
@@ -539,7 +534,6 @@ class argo:
     solaris_sparc_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     solaris_sparc_compile_factory.addStep(compile_buildcheck_local)
     solaris_sparc_compile_factory.addStep(util_upload_asteam)
-    solaris_sparc_compile_factory.addStep(util_upload_mozilla)
 
     solaris_sparc_compile_builder = {
                 'name': "solaris-sparc-compile-argo",
@@ -1021,6 +1015,7 @@ class argo:
     linux_test_factory.addStep(test_differential)
     linux_test_factory.addStep(TestSuiteShellCommand(
                 command=['./run-tests-release-cov.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting to run release code coverage vmtests...',
                 descriptionDone='finished release code coverage vmtests.',
                 name="Testsuite_Release-cov",
@@ -1099,7 +1094,7 @@ class argo:
     }
 
 
-    """
+
     ################################################################################
     ################################################################################
     ####                                                                        ####
@@ -1127,10 +1122,10 @@ class argo:
     windows_performance_factory.addStep(bb_lockrelease)
 
     windows_performance_builder = {
-                'name': "windows-performance",
+                'name': "windows-performance-argo",
                 'slavename': "asteamwin1",
                 'factory': windows_performance_factory,
-                'builddir': './windows-performance',
+                'builddir': './argo-windows-performance',
     }
 
 
@@ -1152,10 +1147,10 @@ class argo:
     mac_performance_factory.addStep(bb_lockrelease)
 
     mac_performance_builder = {
-                'name': "mac-performance",
+                'name': "mac-performance-argo",
                 'slavename': "asteammac2",
                 'factory': mac_performance_factory,
-                'builddir': './mac-performance',
+                'builddir': './argo-mac-performance',
     }
 
 
@@ -1176,10 +1171,10 @@ class argo:
     mac_64_performance_factory.addStep(bb_lockrelease)
 
     mac_64_performance_builder = {
-                'name': "mac64-performance",
+                'name': "mac64-performance-argo",
                 'slavename': "asteammac7",
                 'factory': mac_64_performance_factory,
-                'builddir': './mac64-performance',
+                'builddir': './argo-mac64-performance',
     }
 
 
@@ -1200,10 +1195,10 @@ class argo:
     mac_ppc_performance_factory.addStep(bb_lockrelease)
 
     mac_ppc_performance_builder = {
-                'name': "mac-ppc-performance",
+                'name': "mac-ppc-performance-argo",
                 'slavename': "asteammac3",
                 'factory': mac_ppc_performance_factory,
-                'builddir': './mac-ppc-performance',
+                'builddir': './argo-mac-ppc-performance',
     }
 
 
@@ -1225,10 +1220,10 @@ class argo:
     linux_performance_factory.addStep(bb_lockrelease)
 
     linux_performance_builder = {
-                'name': "linux-performance",
+                'name': "linux-performance-argo",
                 'slavename': "asteamlin4",
                 'factory': linux_performance_factory,
-                'builddir': './linux-performance',
+                'builddir': './argo-linux-performance',
     }
 
 
@@ -1248,10 +1243,10 @@ class argo:
     winmobile_performance_factory.addStep(bb_lockrelease)
 
     winmobile_performance_builder = {
-                'name': "winmobile-performance",
+                'name': "winmobile-performance-argo",
                 'slavename': "asteamwin5",
                 'factory': winmobile_performance_factory,
-                'builddir': './winmobile-performance',
+                'builddir': './argo-winmobile-performance',
     }
 
     ################################################################################
@@ -1282,10 +1277,10 @@ class argo:
     windows_deep_factory.addStep(util_process_clean)
 
     windows_deep_builder = {
-                'name': "windows-deep",
+                'name': "windows-deep-argo",
                 'slavename': "asteamwin10",
                 'factory': windows_deep_factory,
-                'builddir': './windows-deep',
+                'builddir': './argo-windows-deep',
     }
 
     ##################################
@@ -1311,10 +1306,10 @@ class argo:
     windows_p3_deep_factory.addStep(util_process_clean)
 
     windows_p3_deep_builder = {
-                'name': "windows-p3-deep",
+                'name': "windows-p3-deep-argo",
                 'slavename': "asteamwin13",
                 'factory': windows_p3_deep_factory,
-                'builddir': './windows-p3-deep',
+                'builddir': './argo-windows-p3-deep',
     }
 
 
@@ -1324,6 +1319,7 @@ class argo:
     windows_frr_factory = factory.BuildFactory()
     windows_frr_factory.addStep(BuildShellCommand(
                 command=['./build-frr.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='building frr...',
                 descriptionDone='finished building frr.',
                 name="BuildFRR",
@@ -1332,25 +1328,19 @@ class argo:
     )
     windows_frr_factory.addStep(BuildShellCommand(
                 command=['./run-frunit.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='running frunit...',
                 descriptionDone='finished running frunit.',
                 name="RunFrunit",
                 workdir="../scripts",
                 timeout=3600)
     )
-    windows_frr_factory.addStep(BuildShellCommand(
-                command=['./run-winmo-frunit.sh', WithProperties('%s','revision')],
-                description='running winmo frunit...',
-                descriptionDone='finished running winmo frunit.',
-                name="RunWinmoFrunit",
-                workdir="../scripts",
-                timeout=3600)
-    )
+
     windows_frr_builder = {
-                'name': "windows-frr",
+                'name': "windows-frr-argo",
                 'slavename': "asteamwin12",
                 'factory': windows_frr_factory,
-                'builddir': './windows-frr',
+                'builddir': './argo-windows-frr',
     }
 
     ##################################
@@ -1374,10 +1364,10 @@ class argo:
     mac_ppc_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     mac_ppc_deep_factory.addStep(util_process_clean)
     mac_ppc_deep_builder = {
-                'name': "mac-ppc-deep",
+                'name': "mac-ppc-deep-argo",
                 'slavename': "asteammac10",
                 'factory': mac_ppc_deep_factory,
-                'builddir': './mac-ppc-deep',
+                'builddir': './argo-mac-ppc-deep',
     }
 
     ########################################
@@ -1399,10 +1389,10 @@ class argo:
     solaris_sparc_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     solaris_sparc_deep_factory.addStep(util_process_clean)
     solaris_sparc_deep_builder = {
-                'name': "solaris-sparc-deep",
+                'name': "solaris-sparc-deep-argo",
                 'slavename': "asteamsol1",
                 'factory': solaris_sparc_deep_factory,
-                'builddir': './solaris-sparc-deep',
+                'builddir': './argo-solaris-sparc-deep',
     }
 
     ##################################
@@ -1414,13 +1404,14 @@ class argo:
     windows_64_deep_factory.addStep(sync_update)
     windows_64_deep_factory.addStep(bb_slaveupdate(slave="windows64-deep"))
     windows_64_deep_factory.addStep(download_testmedia)
-    windows_64_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="x64-win-tvm-debug-deep", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="x64-win-tvm-debugdebugger-deep", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="x64-win-tvm-debug-deep", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="x64-win-tvm-debugdebugger-deep", scriptargs=""))
     windows_64_deep_factory.addStep(deep_release_esc)
     windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-Dverifyall", shellname="avmshell_s_64", vmargs="-Dverifyall", config="", scriptargs=""))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-Dverifyall", shellname="avmshell_sd_64", vmargs="-Dverifyall", config="", scriptargs=""))
     windows_64_deep_factory.addStep( TestSuiteShellCommand(
                 command=['../all/run-acceptance-avmdiff-3264.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting to run 32-64 differential vmtests...',
                 descriptionDone='finished 32-64 differential vmtests.',
                 name="Testsuite_Differential3264",
@@ -1432,10 +1423,10 @@ class argo:
     windows_64_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     windows_64_deep_factory.addStep(util_process_clean)
     windows_64_deep_builder = {
-                'name': "windows64-deep",
+                'name': "windows64-deep-argo",
                 'slavename': "asteamwin11",
                 'factory': windows_64_deep_factory,
-                'builddir': './windows64-deep',
+                'builddir': './argo-windows64-deep',
     }
 
     ##################################
@@ -1453,10 +1444,10 @@ class argo:
     winmobile_emulator_deep_factory.addStep(test_emulator_release_jit_mobile_local)
     winmobile_emulator_deep_factory.addStep(util_process_clean)
     winmobile_emulator_deep_builder = {
-                'name': "winmobile-emulator-deep",
+                'name': "winmobile-emulator-deep-argo",
                 'slavename': "asteamwin20",
                 'factory': winmobile_emulator_deep_factory,
-                'builddir': './winmobile-emulator-deep',
+                'builddir': './argo-winmobile-emulator-deep',
     }
 
     ##################################
@@ -1482,12 +1473,12 @@ class argo:
     linux_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     linux_deep_factory.addStep(util_process_clean)
     linux_deep_builder = {
-                'name': "linux-deep",
+                'name': "linux-deep-argo",
                 'slavename': "asteamlin9",
                 'factory': linux_deep_factory,
-                'builddir': './linux-deep',
+                'builddir': './argo-linux-deep',
     }
-    """    
+
     
     builders = [
                 windows_compile_builder,
@@ -1534,6 +1525,22 @@ class argo:
                 linux_64_test_builder,
                 winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
+
+                windows_performance_builder,
+                mac_performance_builder,
+                mac_64_performance_builder,
+                mac_ppc_performance_builder,
+                linux_performance_builder,
+                winmobile_performance_builder,
+
+                windows_deep_builder,
+                windows_p3_deep_builder,
+                mac_ppc_deep_builder,
+                windows_64_deep_builder,
+                solaris_sparc_deep_builder,
+                winmobile_emulator_deep_builder,
+                linux_deep_builder,
+                windows_frr_builder
 
                 ]
 

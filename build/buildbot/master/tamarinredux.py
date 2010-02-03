@@ -48,13 +48,14 @@ from commonsteps import *
 class tamarinredux:
     
     HG_URL = "http://asteam.macromedia.com/hg/tamarin-redux/"
+    BRANCH = "tamarin-redux"
     
     ####### SCHEDULERS
     from buildbot.scheduler import *
     # custom.buildbot_ext.scheduler import MUST happen after importing buildbot.scheduler
     from custom.buildbot_ext.scheduler import *
 
-    compile = Scheduler(name="compile", branch="tamarin-redux", treeStableTimer=30, fileIsImportant=startCompile,
+    compile = Scheduler(name="compile", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile,
                      builderNames=["windows-compile", "windows64-compile",
                                    "mac-intel-10.4-compile", "mac-intel-10.5-compile", "mac64-intel-compile",
                                    "mac-ppc-10.4a-compile", "mac-ppc-10.4b-compile", 
@@ -116,7 +117,8 @@ class tamarinredux:
                                   ["solaris-sparc-test", "solaris-sparc-smoke"],
                                  ])
 
-    performance = BuilderDependent(name="performance",upstream=test, callbackInterval=60, fileIsImportant=startPerformanceRun,
+    performance = PhaseTwoScheduler(name="performance", branch="%s-perf" % BRANCH, treeStableTimer=30, 
+                    fileIsImportant=startPerformanceRun, priority=2, changeDir="changes/perf/processed",
                     builderNames=["windows-performance",
                                    "mac-performance", "mac64-performance",
                                    "mac-ppc-performance",
@@ -131,7 +133,8 @@ class tamarinredux:
                                   ["winmobile-performance", "winmobile-emulator-test"]
                                  ])
 
-    deep = BuilderDependent(name="deep",upstream=test, callbackInterval=60, fileIsImportant=startCompile,
+    deep = PhaseTwoScheduler(name="deep", branch="%s-deep" % BRANCH, treeStableTimer=30, 
+                    fileIsImportant=startCompile, priority=2, changeDir="changes/deep/processed",
                     builderNames=[
                                     "windows-deep",
                                     "windows-p3-deep",
@@ -186,6 +189,7 @@ class tamarinredux:
     windows_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
+                env={'branch': WithProperties('%s','branch')},
                 description='running file-check against source...',
                 descriptionDone='finished file-check.',
                 name="FileCheck",
@@ -196,6 +200,7 @@ class tamarinredux:
     windows_compile_factory.addStep(util_upload_mozilla)
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-sizereport.sh',WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting win release-sizereport build...',
                 descriptionDone='finished win release-sizereport build.',
                 name='Build_Release_sizereport',
@@ -442,6 +447,7 @@ class tamarinredux:
     linux_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     linux_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-cov.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting linux code coverage release build...',
                 descriptionDone='finished linux code coverage release build.',
                 name="Build_Release_cov",
@@ -506,6 +512,7 @@ class tamarinredux:
     winmobile_emulator_compile_factory.addStep(util_upload_mozilla_local)
     winmobile_emulator_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-mobile-pocketpc-arm-sizereport.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting to run sizereport...',
                 descriptionDone='finished sizereport.',
                 name="Build_Release_sizereport",
@@ -807,7 +814,7 @@ class tamarinredux:
     windows_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     windows_test_factory.addStep(test_differential)
     windows_test_factory.addStep(util_process_clean)
-
+    
     windows_test_builder = {
                 'name': "windows-test",
                 'slavename': "asteamwin2",
@@ -1019,6 +1026,7 @@ class tamarinredux:
     linux_test_factory.addStep(test_differential)
     linux_test_factory.addStep(TestSuiteShellCommand(
                 command=['./run-tests-release-cov.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting to run release code coverage vmtests...',
                 descriptionDone='finished release code coverage vmtests.',
                 name="Testsuite_Release-cov",
@@ -1322,6 +1330,7 @@ class tamarinredux:
     windows_frr_factory = factory.BuildFactory()
     windows_frr_factory.addStep(BuildShellCommand(
                 command=['./build-frr.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='building frr...',
                 descriptionDone='finished building frr.',
                 name="BuildFRR",
@@ -1330,20 +1339,14 @@ class tamarinredux:
     )
     windows_frr_factory.addStep(BuildShellCommand(
                 command=['./run-frunit.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='running frunit...',
                 descriptionDone='finished running frunit.',
                 name="RunFrunit",
                 workdir="../scripts",
                 timeout=3600)
     )
-    windows_frr_factory.addStep(BuildShellCommand(
-                command=['./run-winmo-frunit.sh', WithProperties('%s','revision')],
-                description='running winmo frunit...',
-                descriptionDone='finished running winmo frunit.',
-                name="RunWinmoFrunit",
-                workdir="../scripts",
-                timeout=3600)
-    )
+
     windows_frr_builder = {
                 'name': "windows-frr",
                 'slavename': "asteamwin12",
@@ -1412,13 +1415,14 @@ class tamarinredux:
     windows_64_deep_factory.addStep(sync_update)
     windows_64_deep_factory.addStep(bb_slaveupdate(slave="windows64-deep"))
     windows_64_deep_factory.addStep(download_testmedia)
-    windows_64_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="x64-win-tvm-debug-deep", scriptargs=""))
-    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="x64-win-tvm-debugdebugger-deep", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="x64-win-tvm-debug-deep", scriptargs=""))
+    windows_64_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="x64-win-tvm-debugdebugger-deep", scriptargs=""))
     windows_64_deep_factory.addStep(deep_release_esc)
     windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-Dverifyall", shellname="avmshell_s_64", vmargs="-Dverifyall", config="", scriptargs=""))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger-Dverifyall", shellname="avmshell_sd_64", vmargs="-Dverifyall", config="", scriptargs=""))
     windows_64_deep_factory.addStep( TestSuiteShellCommand(
                 command=['../all/run-acceptance-avmdiff-3264.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting to run 32-64 differential vmtests...',
                 descriptionDone='finished 32-64 differential vmtests.',
                 name="Testsuite_Differential3264",

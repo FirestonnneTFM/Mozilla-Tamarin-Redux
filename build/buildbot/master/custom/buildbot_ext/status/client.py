@@ -21,11 +21,12 @@ class BuilderGroup(BG):
     def __init__(self):
         BG.__init__(self)
         self.failures = False
-        
+        self.onlineslaves = []
         
     def reset(self):
         BG.reset(self)
         self.failures = False
+        self.onlineslaves = []
 
 class StatusClientPerspective(SCP):
     passBuilderGroups = []
@@ -231,3 +232,96 @@ class PBListener(base.StatusReceiverMultiService):
         p.attached(mind) # perhaps .callLater(0) ?
         return (pb.IPerspective, p,
                 lambda p=p,mind=mind: p.detached(mind))
+
+
+class PhaseOneListener(base.StatusReceiverMultiService):
+    compare_attrs = ["denotesPassSchedulerGroups", "changeDir", "priority"]
+    
+    def __init__(self, denotesPassSchedulerGroups=None, changeDir=None, priority=1):
+        base.StatusReceiverMultiService.__init__(self)
+        self.passBuilderGroups = []
+        if denotesPassSchedulerGroups:
+            self.setupDenotesPassSchedulerGroup(denotesPassSchedulerGroups)
+        self.changeDir = changeDir
+        self.priority = priority
+        
+    def setupDenotesPassSchedulerGroup(self, schedulerGroups):
+        for schedulerGroup in schedulerGroups:
+            group = BuilderGroup()
+            if isinstance(schedulerGroup, list):    
+                for scheduler in schedulerGroup:
+                    group.addBuilderNames(scheduler.listBuilderNames())
+            else:
+                group.addBuilderNames(schedulerGroup.listBuilderNames())
+            self.passBuilderGroups.append(group)
+            
+    def setServiceParent(self, parent):
+        """
+        @type  parent: L{buildbot.master.BuildMaster}
+        """
+        base.StatusReceiverMultiService.setServiceParent(self, parent)
+        self.setup()
+
+    def setup(self):
+        self.status = self.parent.getStatus()
+        self.status.subscribe(self)
+    
+    def builderAdded(self, name, builder):
+        return self
+
+    def setPassBuilderGroups(self, passBuilderGroups):
+        self.passBuilderGroups = passBuilderGroups
+
+    def buildFinished(self, name, build, results):
+        
+        # TODO: most of this code is copied from aggregateMailNotifier ... need to consolidate code
+        if self.passBuilderGroups:
+            currentBuilder = build.getBuilder()
+            currentBuilderName = currentBuilder.getName()
+            revision = build.getSourceStamp().revision
+            
+            for builderGroup in self.passBuilderGroups:
+                if builderGroup.containsBuilder(currentBuilderName):
+                    builderGroup.onlineslaves.append(currentBuilderName)
+                    # if this is the first run, set the currentBuild when first called
+                    if builderGroup.currentBuild == 0:
+                        builderGroup.currentBuild = revision
+                    if builderGroup.currentBuild == revision:
+                        if results != 0:
+                            builderGroup.failures = True
+                        # Are there any builders left?
+                        for builder in builderGroup.builderNames:
+                            # The current builder will always have a building state,
+                            # so do not check state if current builder
+                            if builder != currentBuilderName:
+                                state = self.status.getBuilder(builder).getState()[0]
+                                if state == "building":     # if any are building we can return
+                                    return
+                        # Nothing is building - should we send out a pass notification?
+                        if not builderGroup.failures:
+                            # All builders passed, trigger a request
+                            self._writeBuildRequest(build, builderGroup.onlineslaves)
+                        builderGroup.reset()
+                        return
+                    else:   # builderGroup.currentBuild != revision
+                        # new revision - reset BuilderGroup just in case
+                        builderGroup.reset()
+                        builderGroup.currentBuild = revision
+                    break
+                        
+    def _writeBuildRequest(self, build, onlineslaves):
+
+        for change in build.getSourceStamp().changes:
+            out  = "changeset:   %s\n" % (change.revision)
+            out += "user:        %s\n" % (change.who)
+            out += "date:        %s\n" % (change.getTime())
+            out += "files:       %s\n" % (' '.join(change.files))
+            out += "builders:    %s\n" % (' '.join(onlineslaves))
+            out += "description:\n%s\n" % (change.comments)
+            
+            filename = "change-%s.%s" % (change.revision,self.priority)
+            changefile = open("%s/%s" % (self.changeDir,filename), "w")
+            changefile.write(out)
+            changefile.close()
+
+        
