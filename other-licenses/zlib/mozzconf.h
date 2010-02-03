@@ -62,6 +62,11 @@
 #define inflateBack MOZ_Z_inflateBack
 #define inflateBackEnd MOZ_Z_inflateBackEnd
 #define zlibCompileFlags MOZ_Z_zlibCompileFlags
+/* workaround for compiling on android */
+#ifdef compress
+#undef compress
+#endif
+
 #define compress MOZ_Z_compress
 #define compress2 MOZ_Z_compress2
 #define compressBound MOZ_Z_compressBound
