@@ -43,7 +43,9 @@ extern void create_avmplus_basics(AvmCore* core);
 extern void create_avmplus_peephole(AvmCore* core);
 #endif
 #if defined AVMPLUS_WIN32
+#if !defined VMCFG_ARM
 extern void create_mmgc_bugzilla_543560(AvmCore* core);
+#endif
 #endif
 extern void create_mmgc_basics(AvmCore* core);
 #if defined VMCFG_WORKERTHREADS
@@ -55,7 +57,9 @@ create_avmplus_basics(core);
 create_avmplus_peephole(core);
 #endif
 #if defined AVMPLUS_WIN32
+#if !defined VMCFG_ARM
 create_mmgc_bugzilla_543560(core);
+#endif
 #endif
 create_mmgc_basics(core);
 #if defined VMCFG_WORKERTHREADS
