@@ -677,6 +677,7 @@ namespace MMgc
         , _size(s | uint32_t(workItemType))
 #endif
 	{
+        GCAssert((s & 3) == 0);
 #ifdef _DEBUG
 		if (IsGCItem()) {
 			GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
