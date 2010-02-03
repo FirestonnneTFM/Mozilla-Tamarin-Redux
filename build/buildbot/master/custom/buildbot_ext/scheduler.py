@@ -124,14 +124,12 @@ class PhaseTwoScheduler(Scheduler):
             for dependent in self.builderDependencies:
                 if p1Builder == dependent[1]:
                     p2Builder = dependent[0]
-                    break
-            
-            # See if the builder is online
-            # Get a builder from the BotMaster:
-            builder = self.parent.botmaster.builders.get(p2Builder)
-            # Add the builder to the set if it is idle (not building and not offline)
-            if builder.builder_status.getState()[0] == 'idle':
-                buildset_builderNames.append(p2Builder)
+                    # See if the builder is online
+                    # Get a builder from the BotMaster:
+                    builder = self.parent.botmaster.builders.get(p2Builder)
+                    # Add the builder to the set if it is idle (not building and not offline)
+                    if builder.builder_status.getState()[0] == 'idle':
+                        buildset_builderNames.append(p2Builder)
 
         # create a BuildSet, submit it to the BuildMaster
         bs = buildset.BuildSet(buildset_builderNames,
