@@ -44,12 +44,12 @@
 using namespace MMgc;
 class DeleteInFinalizer : public GCFinalizedObject {
  public:
-  DeleteInFinalizer(GCFinalizedObject *big, GCFinalizedObject *small) : big(big), small(small) {};
-  ~DeleteInFinalizer() { delete big; delete small; }
+  // note "small" is a reserved identifier in Visual C++ for Windows Mobile (#defined to be 'char')
+  DeleteInFinalizer(GCFinalizedObject *big, GCFinalizedObject *small_) : big(big), small_(small_) {};
+  ~DeleteInFinalizer() { delete big; delete small_; }
  private:
   GCFinalizedObject *big;
-  GCFinalizedObject *small;
-  
+  GCFinalizedObject *small_;
 };
 
 // Any small object would do
