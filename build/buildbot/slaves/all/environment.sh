@@ -48,7 +48,12 @@ export sleeptime=`expr $RANDOM % 60 + 60`
 ## Used by make in the build scripts
 export make_opt=""
 
-export branch=tamarin-redux
+## Only set the branch if it has not already been set
+echo branch [before]: $branch
+if [ "$branch" == "" ]; then
+    export branch=tamarin-redux
+fi
+echo branch [after]: $branch
 
 export shellABC=shell_toplevel.abc
 export builtinABC=builtin.abc
