@@ -131,6 +131,27 @@ namespace MMgc
 	}
 
 	/*static*/
+	REALLY_INLINE bool GCLargeAlloc::IsProtectedAgainstFree(const void *item)
+	{
+		LargeBlock *block = GetLargeBlock(item);
+		return (block->flags & (kQueuedFlag|kProtectedFlag)) != 0;
+	}
+    
+    /*static*/ 
+    REALLY_INLINE void GCLargeAlloc::ProtectAgainstFree(const void *item)
+    {
+		LargeBlock *block = GetLargeBlock(item);
+		block->flags |= kProtectedFlag;
+    }
+    
+    /*static*/ 
+    REALLY_INLINE void GCLargeAlloc::UnprotectAgainstFree(const void *item)
+    {
+		LargeBlock *block = GetLargeBlock(item);
+		block->flags &= ~kProtectedFlag;
+    }
+        
+	/*static*/
 	REALLY_INLINE void* GCLargeAlloc::FindBeginning(const void *item)
 	{
 		LargeBlock *block = GetLargeBlock(item);

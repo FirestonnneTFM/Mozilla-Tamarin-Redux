@@ -51,6 +51,8 @@ namespace MMgc
         // MMGC_INTERIOR_PTRS is defined this happens automatically in the GCWorkItem
         // constructor.
         
+        // We only have two bits here because GCRoot items can be a multiple of 4 bytes.
+
         enum GCWorkItemType
         {
             kNonGCObject=0,
@@ -69,7 +71,10 @@ namespace MMgc
 		uint32_t GetSize() const { return _size & ~3; }
 		uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
 		uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
+        uint32_t IsProtectionItem() const { return GetSize() == kProtectionSize; }
 
+        static const uint32_t kProtectionSize = ~0U - 3;
+        
 		// If a WI is a GC item, `ptr` is the UserPointer; it must not
 		// be the RealPointer nor an interior pointer
 		const void *ptr;

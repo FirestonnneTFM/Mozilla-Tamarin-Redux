@@ -24,6 +24,8 @@
 /* Begin PBXBuildFile section */
 		0715396D0F507325004E398F /* eval-avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0715396B0F507325004E398F /* eval-avmplus.cpp */; };
 		0715396E0F507325004E398F /* eval-avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0715396B0F507325004E398F /* eval-avmplus.cpp */; };
+		0721CA0B111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */; };
+		0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */; };
 		072EA0EA0F4C1CE9009F11E6 /* eval-abc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D20F4C1CE9009F11E6 /* eval-abc.cpp */; };
 		072EA0EB0F4C1CE9009F11E6 /* eval-cogen-expr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D50F4C1CE9009F11E6 /* eval-cogen-expr.cpp */; };
 		072EA0EC0F4C1CE9009F11E6 /* eval-cogen-stmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0D70F4C1CE9009F11E6 /* eval-cogen-stmt.cpp */; };
@@ -417,6 +419,8 @@
 		071536DF0F501242004E398F /* eval-compile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-compile.h"; path = "../../../eval/eval-compile.h"; sourceTree = SOURCE_ROOT; };
 		0715396B0F507325004E398F /* eval-avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-avmplus.cpp"; path = "../../../eval/eval-avmplus.cpp"; sourceTree = SOURCE_ROOT; };
 		0715396C0F507325004E398F /* eval-avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-avmplus.h"; path = "../../../eval/eval-avmplus.h"; sourceTree = SOURCE_ROOT; };
+		0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_543560.st; path = ../../../extensions/ST_mmgc_543560.st; sourceTree = SOURCE_ROOT; };
+		0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_543560.cpp; path = ../../../extensions/ST_mmgc_543560.cpp; sourceTree = SOURCE_ROOT; };
 		072EA0D10F4C1CE9009F11E6 /* eval-abc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-abc-inlines.h"; path = "../../../eval/eval-abc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		072EA0D20F4C1CE9009F11E6 /* eval-abc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "eval-abc.cpp"; path = "../../../eval/eval-abc.cpp"; sourceTree = SOURCE_ROOT; };
 		072EA0D30F4C1CE9009F11E6 /* eval-abc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "eval-abc.h"; path = "../../../eval/eval-abc.h"; sourceTree = SOURCE_ROOT; };
@@ -962,6 +966,7 @@
 				0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */,
 				0772CCF40F3C3084008DDBB6 /* ST_mmgc_basics.st */,
 				D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */,
+				0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */,
 			);
 			name = sources;
 			sourceTree = "<group>";
@@ -1345,6 +1350,7 @@
 				079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */,
 				079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */,
 				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
+				0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */,
 			);
 			name = selftest;
 			sourceTree = "<group>";
@@ -1803,6 +1809,7 @@
 				D9AA8809103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */,
 				D9FDA5B91045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 				E8B532071069A1DE00ED299A /* instr.cpp in Sources */,
+				0721CA0B111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1983,6 +1990,7 @@
 				D9AA880A103E1F5E006CE4FC /* GCGlobalNew.cpp in Sources */,
 				D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 				E8B532061069A1DE00ED299A /* instr.cpp in Sources */,
+				0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
