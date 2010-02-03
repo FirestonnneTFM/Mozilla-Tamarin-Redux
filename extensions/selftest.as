@@ -394,7 +394,11 @@ package selftest
 			var st = selftests[i];
 			if (st.ifdef_text != null)
 				s.push(st.ifdef_text);
+			if (st.ifndef_text != null)
+				s.push(st.ifndef_text);
 			s.push("extern void create_" + st.component + "_" + st.category + "(AvmCore* core);");
+			if (st.ifndef_text != null)
+				s.push("#endif");
 			if (st.ifdef_text != null)
 				s.push("#endif");
 		}
@@ -403,7 +407,11 @@ package selftest
 			var st = selftests[i];
 			if (st.ifdef_text != null)
 				s.push(st.ifdef_text);
+			if (st.ifndef_text != null)
+				s.push(st.ifndef_text);
 			s.push("create_" + st.component + "_" + st.category + "(core);");
+			if (st.ifndef_text != null)
+				s.push("#endif");
 			if (st.ifdef_text != null)
 				s.push("#endif");
 		}
