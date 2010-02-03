@@ -53,6 +53,7 @@ echo branch [before]: $branch
 if [ "$branch" == "" ]; then
     export branch=tamarin-redux
 fi
+export branch=`echo $branch | sed 's/\(-deep\|-performance\)//'`
 echo branch [after]: $branch
 
 export shellABC=shell_toplevel.abc
