@@ -1902,6 +1902,12 @@ namespace MMgc
 	{
 		GCHeap *heap = GCHeap::GetGCHeap();
 		EnterFrame *ef = m_previous = heap->GetEnterFrame();
+
+		if(ef && ef->Suspended()) {
+			// propagate the active gc from the suspended frame
+			m_gc = ef->GetActiveGC();
+		}
+
 		if(ef == NULL || ef->Suspended()) {
 			m_heap = heap;
 			heap->Enter(this);
