@@ -46,13 +46,16 @@ from buildbot.steps.trigger import Trigger
 from commonsteps import *
 
 class sandbox:
+    
+    BRANCH = "sandbox"
+    
     ####### SCHEDULERS
     from buildbot.scheduler import *
     # custom.buildbot_ext.scheduler import MUST happen after importing buildbot.scheduler
     from custom.buildbot_ext.scheduler import *
     
     #### SANDBOX
-    compile = Scheduler(name="compile-sandbox", branch="sandbox", treeStableTimer=30,
+    compile = Scheduler(name="compile-sandbox", branch=BRANCH, treeStableTimer=30,
                      builderNames=["windows-compile-sandbox", "windows64-compile-sandbox",
                                    "mac-intel-10.4-compile-sandbox", "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
                                    "mac-ppc-10.4a-compile-sandbox", "mac-ppc-10.4b-compile-sandbox", 
@@ -144,6 +147,7 @@ class sandbox:
     sb_windows_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     sb_windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
+                env={'branch': WithProperties('%s','branch')},
                 description='running file-check against source...',
                 descriptionDone='finished file-check.',
                 name="FileCheck",
@@ -151,13 +155,6 @@ class sandbox:
     )
     sb_windows_compile_factory.addStep(compile_buildcheck)
     sb_windows_compile_factory.addStep(util_upload_asteam)
-    #sb_windows_compile_factory.addStep(BuildShellCommand(
-    #            command=['./build-release-sizereport.sh',WithProperties('%s','revision')],
-    #            description='starting win release-sizereport build...',
-    #            descriptionDone='finished win release-sizereport build.',
-    #            name='Build_Release_sizereport',
-    #            workdir="../repo/build/buildbot/slaves/scripts")
-    #)
 
 
     sb_windows_compile_builder = {
@@ -394,6 +391,7 @@ class sandbox:
     sb_linux_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     sb_linux_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-cov.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting linux code coverage release build...',
                 descriptionDone='finished linux code coverage release build.',
                 name="Build_Release_cov",
@@ -452,13 +450,6 @@ class sandbox:
     sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --target=arm-windows", upload="false"))
     sb_winmobile_emulator_compile_factory.addStep(compile_buildcheck_local)
     sb_winmobile_emulator_compile_factory.addStep(util_upload_asteam_local)
-    #sb_winmobile_emulator_compile_factory.addStep(BuildShellCommand(
-    #            command=['./build-release-mobile-pocketpc-arm-sizereport.sh', WithProperties('%s','revision')],
-    #            description='starting to run sizereport...',
-    #            descriptionDone='finished sizereport.',
-    #            name="Build_Release_sizereport",
-    #            workdir="../repo/build/buildbot/slaves/scripts")
-    #)
 
     sb_winmobile_emulator_compile_builder = {
                 'name': "winmobile-emulator-compile-sandbox",
@@ -962,6 +953,7 @@ class sandbox:
     sb_linux_test_factory.addStep(test_differential)
     sb_linux_test_factory.addStep(TestSuiteShellCommand(
                 command=['./run-tests-release-cov.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
                 description='starting to run release code coverage vmtests...',
                 descriptionDone='finished release code coverage vmtests.',
                 name="Testsuite_Release-cov",

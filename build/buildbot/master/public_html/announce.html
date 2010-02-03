@@ -46,12 +46,11 @@
 
                 <table valign="top" width="100%">
                     <tr><td style="text-align: right;"><b>7d
-                    summary:</b></td><td><a href="analytics/status.html">interactive applet</a></td></tr>
+                    summary:</b></td><td><a target="_blank" href="analytics/status.html">interactive applet</a></td></tr>
                     <tr>
                     <td colspan="2" align="center">
-                        <a target="_blank"
-                    href="analytics/buildbotstatus.png"
-                    class="highslide" onclick="hs.expand(this);">
+                        <a href="analytics/buildbotstatus.png"
+                    class="highslide" onclick="return hs.expand(this);">
                         <img src="analytics/buildbotstatus-tn.png"/>
                         </a></td>
                     </tr>
@@ -113,6 +112,8 @@
                         var compile_argo = "builder=windows-compile-argo&builder=windows64-compile-argo&builder=mac-intel-10.4-compile-argo&builder=mac-intel-10.5-compile-argo&builder=mac64-intel-compile-argo&builder=mac-ppc-10.4a-compile-argo&builder=mac-ppc-10.4b-compile-argo&builder=mac-ppc-10.5a-compile-argo&builder=mac-ppc-10.5b-compile-argo&builder=mac64-ppc-compile-argo&builder=linux-compile-argo&builder=linux64-compile-argo&builder=winmobile-emulator-compile-argo&builder=solaris-sparc-compile-argo"
                         var smoke_argo = "builder=windows-smoke-argo&builder=windows64-smoke-argo&builder=mac-intel-10.4-smoke-argo&builder=mac-intel-10.5-smoke-argo&builder=mac64-intel-smoke-argo&builder=mac-ppc-10.4a-smoke-argo&builder=mac-ppc-10.4b-smoke-argo&builder=mac-ppc-10.5a-smoke-argo&builder=mac-ppc-10.5b-smoke-argo&builder=mac64-ppc-smoke-argo&builder=linux-smoke-argo&builder=linux64-smoke-argo&builder=winmobile-emulator-smoke-argo&builder=solaris-sparc-smoke-argo"
                         var test_argo = "builder=windows-test-argo&builder=windows64-test-argo&builder=mac-intel-10.4-test-argo&builder=mac-intel-10.5-test-argo&builder=mac64-intel-test-argo&builder=mac-ppc-10.4a-test-argo&builder=mac-ppc-10.4b-test-argo&builder=mac-ppc-10.5a-test-argo&builder=mac-ppc-10.5b-test-argo&builder=mac64-ppc-test-argo&builder=linux-test-argo&builder=linux64-test-argo&builder=winmobile-emulator-test-argo&builder=solaris-sparc-test-argo"
+                        var performance_argo = "builder=windows-performance-argo&builder=mac-performance-argo&builder=mac64-performance-argo&builder=mac-ppc-performance-argo&builder=linux-performance-argo&builder=winmobile-performance-argo"
+                        var deep_argo = "builder=windows-deep-argo&builder=windows-p3-deep-argo&builder=mac-ppc-deep-argo&builder=windows64-deep-argo&builder=solaris-sparc-deep-argo&builder=winmobile-emulator-deep-argo&builder=linux-deep-argo&builder=windows-frr-argo"
 
                         var compile_sandbox = "builder=windows-compile-sandbox&builder=windows64-compile-sandbox&builder=mac-intel-10.4-compile-sandbox&builder=mac-intel-10.5-compile-sandbox&builder=mac64-intel-compile-sandbox&builder=mac-ppc-10.4a-compile-sandbox&builder=mac-ppc-10.4b-compile-sandbox&builder=mac-ppc-10.5a-compile-sandbox&builder=mac-ppc-10.5b-compile-sandbox&builder=mac64-ppc-compile-sandbox&builder=linux-compile-sandbox&builder=linux64-compile-sandbox&builder=winmobile-emulator-compile-sandbox&builder=solaris-sparc-compile-sandbox"
                         var smoke_sandbox = "builder=windows-smoke-sandbox&builder=windows64-smoke-sandbox&builder=mac-intel-10.4-smoke-sandbox&builder=mac-intel-10.5-smoke-sandbox&builder=mac64-intel-smoke-sandbox&builder=mac-ppc-10.4a-smoke-sandbox&builder=mac-ppc-10.4b-smoke-sandbox&builder=mac-ppc-10.5a-smoke-sandbox&builder=mac-ppc-10.5b-smoke-sandbox&builder=mac64-ppc-smoke-sandbox&builder=linux-smoke-sandbox&builder=linux64-smoke-sandbox&builder=winmobile-emulator-smoke-sandbox&builder=solaris-sparc-smoke-sandbox"
@@ -147,6 +148,10 @@
                         DisplayBar(compile_argo, "Compile", "compile-argo");
                         DisplayBar(smoke_argo, "Smoke", "smoke-argo");
                         DisplayBar(test_argo, "Test", "test-argo");
+                        
+                        DisplayHeader("Argo Build Phase 2");
+                        DisplayBar(performance_argo, "Performance", "performance-argo");
+                        DisplayBar(deep_argo, "Deep-Test", "deep-argo");
                         
                         DisplayHeader("Sandbox Build");
                         DisplayBar(compile_sandbox, "Sandbox&nbsp;Compile", "compile-sandbox");
