@@ -3548,7 +3548,7 @@ namespace MMgc
 
 	GCAutoEnter::GCAutoEnter(GC *gc) : m_gc(NULL), m_prevgc(NULL)
 	{ 
-		if(gc && gc->GetStackEnter() == 0) {
+		if(gc) {
 			m_gc = gc;
 			m_prevgc = gc->heap->SetActiveGC(gc);
             // In theory, nested GCAutoEnter usage should be unnecessary and avoided
@@ -3561,15 +3561,16 @@ namespace MMgc
             // in such a change unless you want to make nested GCAutoEnter usage officially deprecated,
             // which we are not yet prepared to do.) see https://bugzilla.mozilla.org/show_bug.cgi?id=540088
             // GCAssert(m_prevgc == NULL); 
-			gc->SetStackEnter(this);
+			if (gc->GetStackEnter() == 0)
+				gc->SetStackEnter(this);
 		}
 	}
 	
 	GCAutoEnter::~GCAutoEnter() 
 	{ 
 		if(m_gc) {
-            GCAssert(m_gc->GetStackEnter() == uintptr_t(this));
-			m_gc->SetStackEnter(NULL); 
+            if (m_gc->GetStackEnter() == uintptr_t(this))
+				m_gc->SetStackEnter(NULL); 
         #ifdef DEBUG
             GC* curgc = 
         #endif
