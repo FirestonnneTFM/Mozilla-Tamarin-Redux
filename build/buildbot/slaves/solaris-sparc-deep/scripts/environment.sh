@@ -51,7 +51,3 @@ workdir=`pwd`
 export basedir=`cd ${workdir}/../../../..; pwd`
 export buildsdir=`cd ${basedir}/../builds; pwd`
 
-# Need to get all builds from mozilla since machine does not have access to adobe network
-export vmbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds
-export ftp_asteam=${vmbuilds}/..
-export ascbuilds=ftp://ftp.mozilla.org/pub/js/tamarin/builds/asc/latest

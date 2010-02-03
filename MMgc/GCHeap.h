@@ -315,6 +315,18 @@ namespace MMgc
 		 * @see SignalExternalAllocation
 		 */
 		static void SignalExternalDeallocation(size_t nbytes);
+
+		/**
+		 * Signal that client code wants the MMgc to release memory back to the system.
+		 * This will trigger synchronous and asynchronous memory cleanup. 
+		 *
+		 * @param bytesToFree very rough number of bytes to be freed, will try to free
+		 *                    memory up to that amount, but may be less or more.
+		 *                    When not defined defaults to kMaxObjectSize, which will 
+		 *                    release as much as possible.
+		 */
+		static void SignalExternalFreeMemory(size_t bytesToFree = kMaxObjectSize);
+		
 		
 		inline FixedMalloc* GetFixedMalloc() { return FixedMalloc::GetFixedMalloc(); }
 
