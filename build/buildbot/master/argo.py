@@ -63,7 +63,8 @@ class argo:
                                    "mac64-ppc-compile-argo",
                                    "linux-compile-argo", "linux64-compile-argo",
                                    "winmobile-emulator-compile-argo",
-                                   "solaris-sparc-compile-argo"])
+                                   "solaris-sparc-compile-argo",
+                                   "android-compile-argo"])
 
     smoke = BuilderDependent(name="smoke-argo",upstream=compile, callbackInterval=60,
                     builderNames=["windows-smoke-argo", "windows64-smoke-argo",
@@ -73,7 +74,8 @@ class argo:
                                    "mac64-ppc-smoke-argo",
                                    "linux-smoke-argo", "linux64-smoke-argo",
                                    "winmobile-emulator-smoke-argo",
-                                   "solaris-sparc-smoke-argo"],
+                                   "solaris-sparc-smoke-argo",
+                                   "android-smoke-argo"],
                     builderDependencies=[
                                   ["windows-smoke-argo", "windows-compile-argo"], 
                                   ["windows64-smoke-argo", "windows64-compile-argo"], 
@@ -89,6 +91,7 @@ class argo:
                                   ["linux64-smoke-argo", "linux64-compile-argo"],
                                   ["winmobile-emulator-smoke-argo", "winmobile-emulator-compile-argo"],
                                   ["solaris-sparc-smoke-argo", "solaris-sparc-compile-argo"],
+                                  ["android-smoke-argo","android-compile-argo"],
                                  ])
 
     test = BuilderDependent(name="test-argo",upstream=smoke, callbackInterval=60,
@@ -99,7 +102,8 @@ class argo:
                                    "mac64-ppc-test-argo",
                                    "linux-test-argo", "linux64-test-argo",
                                    "winmobile-emulator-test-argo",
-                                   "solaris-sparc-test-argo"],
+                                   "solaris-sparc-test-argo",
+                                   "android-test-argo"],
                     builderDependencies=[
                                   ["windows-test-argo", "windows-smoke-argo"], 
                                   ["windows64-test-argo", "windows64-smoke-argo"], 
@@ -115,6 +119,7 @@ class argo:
                                   ["linux64-test-argo", "linux64-smoke-argo"],
                                   ["winmobile-emulator-test-argo", "winmobile-emulator-smoke-argo"],
                                   ["solaris-sparc-test-argo", "solaris-sparc-smoke-argo"],
+                                  ["android-test-argo", "android-smoke-argo"],
                                  ])
 
     performance = PhaseTwoScheduler(name="performance-argo", branch="%s-performance" % BRANCH, treeStableTimer=30, 
@@ -421,7 +426,6 @@ class argo:
     }
 
 
-
     ###################################
     #### builder for linux-compile ####
     ###################################
@@ -540,6 +544,60 @@ class argo:
                 'slavename': "asteamsol4",
                 'factory': solaris_sparc_compile_factory,
                 'builddir': './argo-solaris-sparc-compile',
+    }
+
+    ###########################################
+    #### builder for android on mac        ####
+    ###########################################
+
+    android_compile_factory = factory.BuildFactory();
+    android_compile_factory.addStep(sync_clean)
+    android_compile_factory.addStep(sync_clone(url=HG_URL))
+    android_compile_factory.addStep(sync_update)
+    android_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-server"))
+    android_compile_factory.addStep(compile_builtin)
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-debug-shell-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='building debug shell...',
+                descriptionDone='finished building debug shell.',
+                name="Build_Debug",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-release-shell-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='building release shell...',
+                descriptionDone='finished building release shell.',
+                name="Build_Release",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-check-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running build check...',
+                descriptionDone='finished build check.',
+                name="Build_Check",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./upload-asteam-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running upload to asteam...',
+                descriptionDone='finished upload to asteam.',
+                name="Upload_ASTEAM",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+
+    android_compile_builder = {
+                'name': "android-compile-argo",
+                'slavename': "asteammac12",
+                'factory': android_compile_factory,
+                'builddir': './argo-android-compile',
     }
 
     ################################################################################
@@ -774,6 +832,20 @@ class argo:
                 'builddir': './argo-solaris-sparc-smoke',
     }
 
+
+    #########################################
+    #### builder for android-smoke       ####
+    #########################################
+    android_smoke_factory = factory.BuildFactory()
+    android_smoke_factory.addStep(download_testmedia)
+    android_smoke_factory.addStep(util_process_clean)
+
+    android_smoke_builder = {
+                'name': "android-smoke-argo",
+                'slavename': "asteammac12",
+                'factory': android_smoke_factory,
+                'builddir': './argo-android-smoke',
+    }
 
 
 
@@ -1091,6 +1163,19 @@ class argo:
                 'slavename': "asteamsol4",
                 'factory': solaris_sparc_test_factory,
                 'builddir': './argo-solaris-sparc-test',
+    }
+    
+    ########################################
+    #### builder for android-test       ####
+    ########################################
+    android_test_factory = factory.BuildFactory()
+    android_test_factory.addStep(util_process_clean)
+
+    android_test_builder = {
+                'name': "android-test-argo",
+                'slavename': "asteammac12",
+                'factory': android_test_factory,
+                'builddir': './argo-android-test',
     }
 
 
@@ -1495,6 +1580,7 @@ class argo:
                 linux_64_compile_builder,
                 winmobile_emulator_compile_builder,
                 solaris_sparc_compile_builder,
+                android_compile_builder,
                 
                 windows_smoke_builder,
                 windows_64_smoke_builder,
@@ -1510,6 +1596,7 @@ class argo:
                 linux_64_smoke_builder,
                 winmobile_emulator_smoke_builder,
                 solaris_sparc_smoke_builder,
+                android_smoke_builder,
                 
                 windows_test_builder,
                 windows_64_test_builder,
@@ -1525,6 +1612,7 @@ class argo:
                 linux_64_test_builder,
                 winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
+                android_test_builder,
 
                 windows_performance_builder,
                 mac_performance_builder,

@@ -63,7 +63,8 @@ class tamarinredux:
                                    "mac64-ppc-compile",
                                    "linux-compile", "linux64-compile",
                                    "winmobile-emulator-compile",
-                                   "solaris-sparc-compile"])
+                                   "solaris-sparc-compile",
+                                   "android-compile"])
 
     smoke = BuilderDependent(name="smoke",upstream=compile, callbackInterval=60,
                     builderNames=["windows-smoke", "windows64-smoke",
@@ -73,7 +74,8 @@ class tamarinredux:
                                    "mac64-ppc-smoke",
                                    "linux-smoke", "linux64-smoke",
                                    "winmobile-emulator-smoke",
-                                   "solaris-sparc-smoke"],
+                                   "solaris-sparc-smoke",
+                                   "android-smoke"],
                     builderDependencies=[
                                   ["windows-smoke", "windows-compile"], 
                                   ["windows64-smoke", "windows64-compile"], 
@@ -89,6 +91,7 @@ class tamarinredux:
                                   ["linux64-smoke", "linux64-compile"],
                                   ["winmobile-emulator-smoke", "winmobile-emulator-compile"],
                                   ["solaris-sparc-smoke", "solaris-sparc-compile"],
+                                  ["android-smoke","android-compile"],
                                  ])
 
     test = BuilderDependent(name="test",upstream=smoke, callbackInterval=60,
@@ -99,7 +102,8 @@ class tamarinredux:
                                    "mac64-ppc-test",
                                    "linux-test", "linux64-test",
                                    "winmobile-emulator-test",
-                                   "solaris-sparc-test"],
+                                   "solaris-sparc-test",
+                                   "android-test"],
                     builderDependencies=[
                                   ["windows-test", "windows-smoke"], 
                                   ["windows64-test", "windows64-smoke"], 
@@ -115,6 +119,7 @@ class tamarinredux:
                                   ["linux64-test", "linux64-smoke"],
                                   ["winmobile-emulator-test", "winmobile-emulator-smoke"],
                                   ["solaris-sparc-test", "solaris-sparc-smoke"],
+                                  ["android-test", "android-smoke"],
                                  ])
 
     performance = PhaseTwoScheduler(name="performance", branch="%s-perf" % BRANCH, treeStableTimer=30, 
@@ -553,6 +558,69 @@ class tamarinredux:
                 'builddir': './solaris-sparc-compile',
     }
 
+    ###########################################
+    #### builder for android on mac        ####
+    ###########################################
+
+    android_compile_factory = factory.BuildFactory();
+    android_compile_factory.addStep(sync_clean)
+    android_compile_factory.addStep(sync_clone(url=HG_URL))
+    android_compile_factory.addStep(sync_update)
+    android_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-server"))
+    android_compile_factory.addStep(compile_builtin)
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-debug-shell-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='building debug shell...',
+                descriptionDone='finished building debug shell.',
+                name="Build_Debug",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-release-shell-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='building release shell...',
+                descriptionDone='finished building release shell.',
+                name="Build_Release",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-check-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running build check...',
+                descriptionDone='finished build check.',
+                name="Build_Check",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./upload-asteam-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running upload to asteam...',
+                descriptionDone='finished upload to asteam.',
+                name="Upload_ASTEAM",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    android_compile_factory.addStep(BuildShellCommand(
+                command=['./upload-mozilla-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running upload to mozilla...',
+                descriptionDone='finished upload to mozilla.',
+                name="Upload_MOZILLA",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+
+    android_compile_builder = {
+                'name': "android-compile",
+                'slavename': "asteammac12",
+                'factory': android_compile_factory,
+                'builddir': './android-compile',
+    }
+
     ################################################################################
     ################################################################################
     ####                                                                        ####
@@ -785,6 +853,19 @@ class tamarinredux:
                 'builddir': './solaris-sparc-smoke',
     }
 
+    #########################################
+    #### builder for android-smoke       ####
+    #########################################
+    android_smoke_factory = factory.BuildFactory()
+    android_smoke_factory.addStep(download_testmedia)
+    android_smoke_factory.addStep(util_process_clean)
+
+    android_smoke_builder = {
+                'name': "android-smoke",
+                'slavename': "asteammac12",
+                'factory': android_smoke_factory,
+                'builddir': './android-smoke',
+    }
 
 
 
@@ -1104,6 +1185,18 @@ class tamarinredux:
                 'builddir': './solaris-sparc-test',
     }
 
+    ########################################
+    #### builder for android-test       ####
+    ########################################
+    android_test_factory = factory.BuildFactory()
+    android_test_factory.addStep(util_process_clean)
+
+    android_test_builder = {
+                'name': "android-test",
+                'slavename': "asteammac12",
+                'factory': android_test_factory,
+                'builddir': './android-test',
+    }
 
 
     ################################################################################
@@ -1506,6 +1599,7 @@ class tamarinredux:
                 linux_64_compile_builder,
                 winmobile_emulator_compile_builder,
                 solaris_sparc_compile_builder,
+                android_compile_builder,
                 
                 windows_smoke_builder,
                 windows_64_smoke_builder,
@@ -1521,6 +1615,7 @@ class tamarinredux:
                 linux_64_smoke_builder,
                 winmobile_emulator_smoke_builder,
                 solaris_sparc_smoke_builder,
+                android_smoke_builder,
                 
                 windows_test_builder,
                 windows_64_test_builder,
@@ -1536,6 +1631,7 @@ class tamarinredux:
                 linux_64_test_builder,
                 winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
+                android_test_builder,
 
                 windows_performance_builder,
                 mac_performance_builder,

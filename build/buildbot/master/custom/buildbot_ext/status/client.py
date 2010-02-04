@@ -310,18 +310,22 @@ class PhaseOneListener(base.StatusReceiverMultiService):
                     break
                         
     def _writeBuildRequest(self, build, onlineslaves):
-
-        for change in build.getSourceStamp().changes:
-            out  = "changeset:   %s\n" % (change.revision)
-            out += "user:        %s\n" % (change.who)
-            out += "date:        %s\n" % (change.getTime())
-            out += "files:       %s\n" % (' '.join(change.files))
-            out += "builders:    %s\n" % (' '.join(onlineslaves))
-            out += "description:\n%s\n" % (change.comments)
-            
-            filename = "change-%s.%s" % (change.revision,self.priority)
-            changefile = open("%s/%s" % (self.changeDir,filename), "w")
-            changefile.write(out)
-            changefile.close()
+        """ Only send the LAST change into the next phases as this is what the build
+        system actually built. Since thenext phases can have there own "changeIsImportant"
+        functions to determine whether or not to run, we MUST only send in changes that were
+        actually built by the previous phase 
+        """        
+        change = build.getSourceStamp().changes[-1:]
+        out  = "changeset:   %s\n" % (change.revision)
+        out += "user:        %s\n" % (change.who)
+        out += "date:        %s\n" % (change.getTime())
+        out += "files:       %s\n" % (' '.join(change.files))
+        out += "builders:    %s\n" % (' '.join(onlineslaves))
+        out += "description:\n%s\n" % (change.comments)
+        
+        filename = "change-%s.%s" % (change.revision,self.priority)
+        changefile = open("%s/%s" % (self.changeDir,filename), "w")
+        changefile.write(out)
+        changefile.close()
 
         
