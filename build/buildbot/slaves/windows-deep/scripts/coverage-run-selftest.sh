@@ -50,7 +50,7 @@
 . ../all/util-calculate-change.sh $1
 
 
-export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_selftest_cov}
+export AVM=$buildsdir/${change}-${changeid}/${platform}/${shell_release_cov}
 export COVFILE=$buildsdir/${change}-${changeid}/$platform/selftest.cov
 
 

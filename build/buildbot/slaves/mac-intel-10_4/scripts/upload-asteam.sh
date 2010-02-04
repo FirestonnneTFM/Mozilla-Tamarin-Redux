@@ -67,6 +67,3 @@
 #Debug_Debugger
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc
 
-#SelfTest
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/${shell_selftest}_ppc $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_selftest}_ppc
-
