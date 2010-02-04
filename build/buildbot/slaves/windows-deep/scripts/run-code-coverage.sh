@@ -54,7 +54,6 @@ set -x	# activate debugging
 ./coverage-build-debug.sh $change:$changeid
 ./coverage-build-release-debugger.sh $change:$changeid
 ./coverage-build-debug-debugger.sh $change:$changeid
-./coverage-build-selftest.sh $change:$changeid
 
 
 ./coverage-build-check.sh $change:$changeid

@@ -74,10 +74,6 @@ echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changei
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_debug_debugger
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_debug_debugger $shell_debug_debugger"
 
-# SelfTest
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_selftest $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_selftest
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_selftest $shell_selftest"
-
 # Release-vprof
 . ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $scp_mozilla/$branch/$change-${changeid}/$platform/$shell_release_vprof
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/$shell_release_vprof $shell_release_vprof"

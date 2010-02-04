@@ -74,8 +74,3 @@ echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changei
 echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_debug_debugger}_ppc ${shell_debug_debugger}_ppc"
 
 
-# SelfTest
-. ../all/util-upload-scp-mozilla.sh $buildsdir/$change-${changeid}/$platform/${shell_selftest}_ppc $scp_mozilla/$branch/$change-${changeid}/$platform/${shell_selftest}_ppc
-echo "url: ftp://ftp.mozilla.org/pub/js/tamarin/builds/$branch/$change-${changeid}/$platform/${shell_selftest}_ppc ${shell_selftest}_ppc"
-
-

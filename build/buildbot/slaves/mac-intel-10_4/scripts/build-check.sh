@@ -88,13 +88,6 @@ test -f $buildsdir/$change-${changeid}/$platform/${shell_debug_debugger}_ppc || 
 }
 
 
-# SelfTest
-test -f $buildsdir/$change-${changeid}/$platform/${shell_selftest}_ppc || {
-  echo "message: SelfTest PPC Failed"
-  fail=1
-}
-
-
 if test "${fail}" = 1; then
    echo Failing the build
    exit 1
