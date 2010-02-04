@@ -67,7 +67,7 @@ export shell_release_vprof=avmshell-vprof$shell_extension
 export shell_release_vprof_64=avmshell-vprof-64$shell_extension
 
 export shell=avmshell$shell_extension
-export shell_selftest=avmshell_test$shell_extension
+export shell_selftest=avmshell$shell_extension
 export shell_release=avmshell$shell_extension
 export shell_release_wordcode=avmshell_wordcode$shell_extension
 export shell_debug=avmshell_d$shell_extension

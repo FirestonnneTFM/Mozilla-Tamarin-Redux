@@ -74,12 +74,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger_cov || {
   fail=1
 }
 
-# Selftest
-test -f $buildsdir/$change-${changeid}/$platform/$shell_selftest_cov || {
-  echo "message: SelfTest Failed"
-  fail=1
-}
-
 
 if test "${fail}" = 1; then
    echo Failing the build
