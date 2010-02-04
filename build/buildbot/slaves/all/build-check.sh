@@ -88,17 +88,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger || {
   fail=1
 }
 
-#selftest
-test -f $buildsdir/$change-${changeid}/$platform/$shell_selftest || {
-  if [ "$platform" = "mac64-ppc" -o "$platform" = "mac64-intel" -o "$platform" = "windows64" -o "$platform" = "linux64" ]
-  then
-    echo "message: warning not building selftest shell on $platform platform"
-  else
-    echo "message: selftest Failed"
-    fail=1
-  fi
-}
-
 # builtin.abc
 test -f $basedir/core/$builtinABC || {
   echo "message: builtin.abc Failed"
