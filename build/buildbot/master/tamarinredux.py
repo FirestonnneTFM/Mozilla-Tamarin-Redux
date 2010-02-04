@@ -191,7 +191,6 @@ class tamarinredux:
     windows_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     windows_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     windows_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof", args="--enable-shell --enable-perfm", upload="false"))
-    windows_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
                 env={'branch': WithProperties('%s','branch')},
@@ -263,13 +262,11 @@ class tamarinredux:
     mac_intel_104_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_104", args="--enable-shell --enable-debugger", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_104", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof_104", args="--enable-shell --enable-perfm", upload="false"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test_104", args="--enable-shell --enable-selftest", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_104_ppc", args="--enable-shell --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_104_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_104_ppc", args="--enable-shell --enable-debug --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="ReleaseDebugger_PPC", shellname="avmshell_s_104_ppc", args="--enable-shell --enable-debugger --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_104_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin", upload="false"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="Selftest_PPC", shellname="avmshell_test_104_ppc", args="--enable-shell --enable-selftest --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_104_compile_factory.addStep(util_upload_asteam_local)
     mac_intel_104_compile_factory.addStep(util_upload_mozilla_local)
@@ -298,13 +295,11 @@ class tamarinredux:
     mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof", args="--enable-shell --enable-perfm", upload="false"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_ppc", args="--enable-shell --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_ppc", args="--enable-shell --enable-debug --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger_PPC", shellname="avmshell_s_ppc", args="--enable-shell --enable-debugger --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger_PPC", shellname="avmshell_sd_ppc", args="--enable-shell --enable-debug --enable-debugger --target=ppc-darwin", upload="false"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="Selftest_PPC", shellname="avmshell_test_ppc", args="--enable-shell --enable-selftest --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_buildcheck_local)
     mac_intel_105_compile_factory.addStep(util_upload_asteam_local)
     mac_intel_105_compile_factory.addStep(util_upload_mozilla_local)
@@ -449,7 +444,6 @@ class tamarinredux:
     linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     linux_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof", args="--enable-shell --enable-perfm", upload="false"))
-    linux_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     linux_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-cov.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -546,7 +540,6 @@ class tamarinredux:
     solaris_sparc_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug", upload="false"))
     solaris_sparc_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     solaris_sparc_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
-    solaris_sparc_compile_factory.addStep(compile_generic(name="Selftest", shellname="avmshell_test", args="--enable-shell --enable-selftest", upload="false"))
     solaris_sparc_compile_factory.addStep(compile_buildcheck_local)
     solaris_sparc_compile_factory.addStep(util_upload_asteam)
     solaris_sparc_compile_factory.addStep(util_upload_mozilla)
