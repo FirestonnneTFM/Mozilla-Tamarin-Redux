@@ -64,6 +64,7 @@ class sandbox:
                                    "linux-compile-sandbox", "linux64-compile-sandbox",
                                    "winmobile-emulator-compile-sandbox",
                                    "solaris-sparc-compile-sandbox",
+                                   "android-compile-sandbox",
                                    ])
 
     smoke = BuilderDependent(name="smoke-sandbox",upstream=compile, callbackInterval=60,
@@ -74,7 +75,8 @@ class sandbox:
                                    "mac64-ppc-smoke-sandbox",
                                    "linux-smoke-sandbox", "linux64-smoke-sandbox",
                                    "winmobile-emulator-smoke-sandbox",
-                                   "solaris-sparc-smoke-sandbox"],
+                                   "solaris-sparc-smoke-sandbox",
+                                   "android-smoke-sandbox"],
                     builderDependencies=[
                                   ["windows-smoke-sandbox", "windows-compile-sandbox"], 
                                   ["windows64-smoke-sandbox", "windows64-compile-sandbox"], 
@@ -90,6 +92,7 @@ class sandbox:
                                   ["linux64-smoke-sandbox", "linux64-compile-sandbox"],
                                   ["winmobile-emulator-smoke-sandbox", "winmobile-emulator-compile-sandbox"],
                                   ["solaris-sparc-smoke-sandbox", "solaris-sparc-compile-sandbox"],
+                                  ["android-smoke-sandbox","android-compile-sandbox"],
                                  ])
 
     test = BuilderDependent(name="test-sandbox",upstream=smoke, callbackInterval=60,
@@ -100,7 +103,8 @@ class sandbox:
                                    "mac64-ppc-test-sandbox",
                                    "linux-test-sandbox", "linux64-test-sandbox",
                                    "winmobile-emulator-test-sandbox",
-                                   "solaris-sparc-test-sandbox"],
+                                   "solaris-sparc-test-sandbox",
+                                   "android-test-sandbox"],
                     builderDependencies=[
                                   ["windows-test-sandbox", "windows-smoke-sandbox"], 
                                   ["windows64-test-sandbox", "windows64-smoke-sandbox"], 
@@ -116,6 +120,7 @@ class sandbox:
                                   ["linux64-test-sandbox", "linux64-smoke-sandbox"],
                                   ["winmobile-emulator-test-sandbox", "winmobile-emulator-smoke-sandbox"],
                                   ["solaris-sparc-test-sandbox", "solaris-sparc-smoke-sandbox"],
+                                  ["android-test-sandbox", "android-smoke-sandbox"],
                                  ])
 
     schedulers = [compile, smoke, test]
@@ -484,6 +489,59 @@ class sandbox:
                 'builddir': './sandbox-solaris-sparc-compile',
     }
 
+    ###########################################
+    #### builder for android on mac        ####
+    ###########################################
+
+    sb_android_compile_factory = factory.BuildFactory();
+    sb_android_compile_factory.addStep(sync_clean)
+    sb_android_compile_factory.addStep(sync_clone_sandbox)
+    sb_android_compile_factory.addStep(sync_update)
+    sb_android_compile_factory.addStep(bb_slaveupdate(slave="mac-intel-server"))
+    sb_android_compile_factory.addStep(compile_builtin)
+    sb_android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-debug-shell-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='building debug shell...',
+                descriptionDone='finished building debug shell.',
+                name="Build_Debug",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    sb_android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-release-shell-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='building release shell...',
+                descriptionDone='finished building release shell.',
+                name="Build_Release",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    sb_android_compile_factory.addStep(BuildShellCommand(
+                command=['./build-check-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running build check...',
+                descriptionDone='finished build check.',
+                name="Build_Check",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+    sb_android_compile_factory.addStep(BuildShellCommand(
+                command=['./upload-asteam-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='running upload to asteam...',
+                descriptionDone='finished upload to asteam.',
+                name="Upload_ASTEAM",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
+
+    sb_android_compile_builder = {
+                'name': "android-compile-sandbox",
+                'slavename': "asteammac12",
+                'factory': sb_android_compile_factory,
+                'builddir': './sandbox-android-compile',
+    }
 
     ################################################################################
     ################################################################################
@@ -714,6 +772,20 @@ class sandbox:
                 'slavename': "asteamsol4",
                 'factory': sb_solaris_sparc_smoke_factory,
                 'builddir': './sandbox-solaris-sparc-smoke',
+    }
+    
+    #########################################
+    #### builder for android-smoke       ####
+    #########################################
+    sb_android_smoke_factory = factory.BuildFactory()
+    sb_android_smoke_factory.addStep(download_testmedia)
+    sb_android_smoke_factory.addStep(util_process_clean)
+
+    sb_android_smoke_builder = {
+                'name': "android-smoke-sandbox",
+                'slavename': "asteammac12",
+                'factory': sb_android_smoke_factory,
+                'builddir': './sanbox-android-smoke',
     }
 
     ################################################################################
@@ -1030,6 +1102,21 @@ class sandbox:
                 'builddir': './sandbox-solaris-sparc-test',
     }
     
+    ########################################
+    #### builder for android-test       ####
+    ########################################
+    sb_android_test_factory = factory.BuildFactory()
+    sb_android_test_factory.addStep(util_process_clean)
+
+    sb_android_test_builder = {
+                'name': "android-test-sandbox",
+                'slavename': "asteammac12",
+                'factory': sb_android_test_factory,
+                'builddir': './sandbox-android-test',
+    }
+    
+    
+    
     builders = [
                 sb_windows_compile_builder,
                 sb_windows_64_compile_builder,
@@ -1045,6 +1132,7 @@ class sandbox:
                 sb_linux_64_compile_builder,
                 sb_winmobile_emulator_compile_builder,
                 sb_solaris_sparc_compile_builder,
+                sb_android_compile_builder,
                 
                 sb_windows_smoke_builder,
                 sb_windows_64_smoke_builder,
@@ -1060,6 +1148,7 @@ class sandbox:
                 sb_linux_64_smoke_builder,
                 sb_winmobile_emulator_smoke_builder,
                 sb_solaris_sparc_smoke_builder,
+                sb_android_smoke_builder,
                 
                 sb_windows_test_builder,
                 sb_windows_64_test_builder,
@@ -1075,6 +1164,7 @@ class sandbox:
                 sb_linux_64_test_builder,
                 sb_winmobile_emulator_test_builder,
                 sb_solaris_sparc_test_builder,
+                sb_android_test_builder,
 
                 ]
 
