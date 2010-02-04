@@ -54,23 +54,31 @@
 # Make sure that there are no left over directories from previous compile
 ##
 cd $basedir
-test -d objdir-release && {
-    echo Remove directory $basedir/objdir-release
-    rm -rf $basedir/objdir-release
+test -d objdir && {
+    echo Remove directory $basedir/objdir
+    rm -rf $basedir/objdir
 }
 
-mkdir objdir-release
+mkdir objdir
 
-cd objdir-release
+cd objdir
 
-python ../configure.py --enable-shell --disable-eval
+python ../configure.py --enable-shell --disable-eval --disable-selftest
 
+echo ""
+echo "*******************************************************************************"
+echo "Makefile:"
+echo ""
+cat Makefile
+echo ""
+echo "*******************************************************************************"
 topsrcdir=`grep topsrcdir= Makefile | awk -F"=" '{print $2}'`
 CXX=`grep CXX= Makefile | awk -F"=" '{print $2}'| sed 's/(/{/' | sed 's/)/}/' | sed 's/-nologo//'`
 echo ""
 echo compiler version: 
 eval ${CXX} --version
 echo ""
+echo "*******************************************************************************"
 echo ""
 
 make $make_opt clean
@@ -81,23 +89,23 @@ test "$res" = "0" || {
     echo "build failed return value $res"
     exit $res
 }
-test -f "$basedir/objdir-release/shell/avmshell.map" || {
+test -f "$basedir/objdir/shell/avmshell.map" || {
     echo "avmshell.map file was not created"
     exit 1
 }
 
 cd $basedir/utils
-python ./sizereport.py --vmversion=$change --product=tamarin-redux --socketlog --prefix=message: --map=../objdir-release/shell/avmshell.map
+python ./sizereport.py --vmversion=$change --product=${branch} --socketlog --prefix=message: --map=../objdir/shell/avmshell.map
 
 echo url: "http://tamarin-builds.mozilla.org/report/index.cfm?mode=size&rollupname=sizereport&hostip=10.60.147.246&configbaseline=tamarin-redux&config1=tamarin-redux&config2=tamarin-redux&baselineBuild=1094&topBuild=${change}" size report
 
-# We have had some problems in the past with deleting the objdir-release directory after running the 
+# We have had some problems in the past with deleting the objdir directory after running the 
 # sizereport, give the script a couple of seconds to make sure that the python process completely
 # shutsdown prior to trying to remove the directory
 sleep 10
 
 cd $basedir
-test -d objdir-release && {
-    echo Remove directory $basedir/objdir-release
-    rm -rf $basedir/objdir-release
+test -d objdir && {
+    echo Remove directory $basedir/objdir
+    rm -rf $basedir/objdir
 }
