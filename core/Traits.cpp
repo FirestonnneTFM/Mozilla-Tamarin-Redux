@@ -1902,9 +1902,6 @@ namespace avmplus
 			(1<<BKIND_GET) | (1<<BKIND_SET)							// BKIND_GETSET
 		};
 
-		if ((kLegalBaseKinds[baseBindingKind] & dkMask) == 0)
-			goto failure;
-
 		// given baseBindingKind, which desiredKinds *require* override?
 		static const uint8_t kOverrideRequired[8] = 
 		{
@@ -1918,6 +1915,9 @@ namespace avmplus
 			(1<<BKIND_GET) | (1<<BKIND_SET)							// BKIND_GETSET
 		};
 		
+		if ((kLegalBaseKinds[baseBindingKind] & dkMask) == 0)
+			goto failure;
+
 		if (((kOverrideRequired[baseBindingKind] & dkMask) ? ATTR_override : 0) != (tag & ATTR_override))
 			goto failure;
 
