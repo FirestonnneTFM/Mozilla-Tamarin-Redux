@@ -176,7 +176,7 @@ namespace avmshell
 		void breakpoint(char *location);
 		void deleteBreakpoint(char *idstr);
 		void showBreakpoints();
-		void bt();
+        static void bt();
 		void locals();
 		void info();
 		void set();
@@ -208,7 +208,7 @@ namespace avmshell
 				
 		char* lineStart(int linenum);
 		Atom ease2Atom(const char* to, Atom baseline);
-		MethodInfo* functionFor(SourceInfo* src, int line);
+        static MethodInfo* functionFor(SourceInfo* src, int line);
 
 		/**
 		 * @name command name arrays and support code
