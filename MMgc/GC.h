@@ -716,6 +716,18 @@ namespace MMgc
 		avmplus::AvmCore *core() const;
 
 		/**
+        * Convenience to access the GC instance associated with the current 
+        * execution context.
+        */
+       static GC* current();
+
+       /**
+        * Convenience to access the GC instance associated with the current 
+        * execution context.
+        */
+       static GC* GetActiveGC();
+
+       /**
 		 * greedy is a debugging flag.  When set, every allocation will cause
 		 * a garbage collection.  This makes code run abysmally slow, but can
 		 * be useful for detecting mark bugs or computing true peak live size.

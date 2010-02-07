@@ -332,6 +332,10 @@ namespace avmplus
 		_emptySupertypeList = Traits::allocSupertypeList(gc, 0);
 	}
 
+    AvmCore* AvmCore::getActiveCore() {
+        return GC::GetActiveGC()->core();
+    }
+
 	AvmCore::~AvmCore()
 	{		
 #ifdef DEBUGGER
