@@ -211,6 +211,7 @@ namespace avmshell
 
 	void DebugCLI::bt()
 	{
+        AvmCore* core = AvmCore::getActiveCore();
 		//core->stackTrace->dump(core->console);
 		//core->console << '\n';
 
@@ -219,8 +220,8 @@ namespace avmshell
 		for(int k=0; k<frameCount; k++)
 		{
 			Atom* ptr;
-			int count, line; 
-			SourceInfo* src;
+           int count, line = -1; 
+           SourceInfo* src = NULL;
 			DebugFrame* frame = core->debugger()->frameAt(k);
 
 			// source information
@@ -247,8 +248,8 @@ namespace avmshell
 			for(int i=0; i<count; i++)
 			{
 				// write out the name
-                Stringp nm = info->getArgName(i);
-				if (info && (nm != core->kundefined))
+               Stringp nm;
+               if (info && ((nm = info->getArgName(i)) != core->kundefined))
 					core->console << nm << "=";
 
 				core->console << core->format(*ptr++);
@@ -256,12 +257,10 @@ namespace avmshell
 					core->console << ",";
 			}
 			core->console << ") at ";
-			if (src)
-				core->console << src->name();
+            if (src) 
+                core->console << src->name() << ":" << (line) << "\n";
 			else
-				core->console << "???";
-
-			core->console << ":" << (line) << "\n";
+                core->console << "???\n";
 		}
 	}
 
