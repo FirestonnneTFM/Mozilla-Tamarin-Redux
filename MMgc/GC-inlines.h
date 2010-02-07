@@ -138,6 +138,10 @@ namespace MMgc
 		return (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 	}
 
+    REALLY_INLINE GC* GC::GetActiveGC() {
+        return GCHeap::GetGCHeap()->GetEnterFrame()->GetActiveGC();
+    }
+
 	REALLY_INLINE void GC::QueueCollection()
 	{
 		policy.queueFullCollection();

@@ -708,7 +708,14 @@ const int kBufferPadding = 16;
 		/** Destructor */
 		~AvmCore();
 
-		/**
+	   /**
+        * Convenience method to access the AvmCore associated 
+        * the current thread. Performance may vary across platforms
+        * since the implementation depends on thread local storage.
+        */
+       static AvmCore* getActiveCore();
+
+       /**
 		 * Parses builtin.abc into a PoolObject, to be executed
 		 * later for each new Toplevel
 		 */
