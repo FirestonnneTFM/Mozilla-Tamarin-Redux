@@ -167,8 +167,9 @@ namespace MMgc
 		, P(0.005)				// seconds; 5ms.  The marker /will/ overshoot this significantly
 		, R(R_INITIAL_VALUE)	// bytes/second; will be updated on-line
 		, L_ideal(heap->Config().gcLoad)
-		, L_actual(L_ideal)
-		, T(1.0-(1.0/L_ideal))
+        , L_cutoff(heap->Config().gcLoadCutoff)
+		, L_actual(L_ideal[0])
+		, T(1.0-(1.0/L_actual))
 		, G(heap->Config().gcEfficiency)
 		, X(heap->Config().gcLoadCeiling)
 		, remainingMajorAllocationBudget(0)
@@ -299,20 +300,26 @@ namespace MMgc
 
 	// The throttles here guard against excessive growth.
 
-	void GCPolicyManager::adjustL()
+	void GCPolicyManager::adjustL(double H)
 	{
+        int i=0;
+        while (H / (1024*1024) >= L_cutoff[i])
+            i++;
+
+        double L_selected = L_ideal[i];
 		double a = double(timeEndToEndLastCollection);
   		double b = double(timeInLastCollection);
+
 		if (b > a*G) {
 			double growth = (L_actual - 1) * (1 + timeInLastCollection/timeEndToEndLastCollection);
 			if (growth > 1)
 				growth = 1;
 			L_actual = L_actual + growth;
-			if (X != 0 && L_actual > X*L_ideal)
-				L_actual = X*L_ideal;
+			if (X != 0 && L_actual > X*L_selected)
+				L_actual = X*L_selected;
 		}
  		else
- 			L_actual = (L_actual + L_ideal) / 2;
+ 			L_actual = (L_actual + L_selected) / 2;
  	}
 
 	// Called at the start
@@ -328,12 +335,13 @@ namespace MMgc
  	// Called when a collection ends
  	void GCPolicyManager::adjustPolicyForNextMajorCycle()
  	{
+		double H = double(gc->GetBytesInUse());
+        
   		// Compute L_actual, which takes into account how much time we spent in GC
 		// during the last cycle
-		adjustL();
+		adjustL(H);
 
   		// The budget is H(L-1), with a floor
-		double H = double(gc->GetBytesInUse());
 		double remainingBeforeGC = double(lowerLimitCollectionThreshold()) * 4096.0 - H;
 		remainingMajorAllocationBudget = H * (L_actual - 1.0);
 		if (remainingMajorAllocationBudget < remainingBeforeGC)

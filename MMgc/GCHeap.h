@@ -45,7 +45,10 @@ namespace MMgc
 	{
 	public:
 		GCHeapConfig();
-		
+        
+        static const size_t kNumLoadFactors = 7;
+		static const size_t kDefaultHeapLimit = (size_t)-1;
+
 		size_t initialSize;
 		/**
 		 * if the heap gets this big we stop expanding
@@ -75,10 +78,10 @@ namespace MMgc
 #ifdef MMGC_HEAP_GRAPH
 		bool dumpFalsePositives;
 #endif
-		double gcLoad;			// GC load factor: policy aims for a heap size that is gcLoad*H where H is the live size following GC
+		double gcLoad[kNumLoadFactors];		  // GC load factors: policy aims for a heap size that is gcLoad*H where H is the live size following GC
+        double gcLoadCutoff[kNumLoadFactors]; // Heap sizes (MB) following GC below which the corresponding load factor applies, last entry is +infinity
 		double gcLoadCeiling;	// Max multiple of gcLoad policy should use after adjusting L for various factors (0=unlimited)
 		double gcEfficiency;    // Max fraction of time to spend in the collector while the incremental collector is active
-		static const size_t kDefaultHeapLimit = (size_t)-1;
 	};
 	
 	/**

@@ -37,6 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "MMgc.h"
+#include <float.h>
 
 #ifdef AVMPLUS_SAMPLER
 namespace avmplus
@@ -109,10 +110,30 @@ namespace MMgc
 #ifdef MMGC_HEAP_GRAPH
 		dumpFalsePositives(false),
 #endif
-		gcLoad(2.0),
 		gcLoadCeiling(1.0),	// 1.0 is probably OK for desktop, maybe less so for mobile - more experiments needed
 		gcEfficiency(0.25)
 	{
+        // Bugzilla 544695 - large heaps need to be controlled more tightly than
+        // small heaps due to the reliance of the Player on the GC for removing some
+        // objects from the AS2 scriptThreadList and because people don't want to
+        // use as much memory as a single policy across all heap sizes would require.
+        // As reference counting takes care of a lot of storage management, there's
+        // little harm in running the incremental GC more aggressively in large 
+        // heaps - most of the time is spent elsewhere.
+        //
+        // These numbers are not based on any profiling data but are intended to be
+        // approximately right.  The 1.05 could be a little too tight; we'll see.
+        
+        GCAssert(GCHeapConfig::kNumLoadFactors >= 7);
+
+		gcLoad[0] = 2.5;  gcLoadCutoff[0] = 10;     // Breathing room for warmup
+        gcLoad[1] = 2.0;  gcLoadCutoff[1] = 25;     // Classical 2x factor
+        gcLoad[2] = 1.75; gcLoadCutoff[2] = 50;     // Tighten
+        gcLoad[3] = 1.5;  gcLoadCutoff[3] = 75;     //   the
+        gcLoad[4] = 1.25; gcLoadCutoff[4] = 100;    //     screws
+        gcLoad[5] = 1.1;  gcLoadCutoff[5] = 150;    // Large heaps are
+        gcLoad[6] = 1.05; gcLoadCutoff[6] = DBL_MAX;//   controlled (very) tightly
+        
 #ifdef MMGC_64BIT
 		trimVirtualMemory = false; // no need
 #endif
