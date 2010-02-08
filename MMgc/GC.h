@@ -498,7 +498,7 @@ namespace MMgc
  
  		// Called from adjustPolicyForNextMajorCycle to compute the effective L for the next
  		// collection cycle
- 		void adjustL();
+ 		void adjustL(double H);
 
 		// Called from the policy manager's constructor
 		void adjustPolicyInitially();
@@ -614,9 +614,12 @@ namespace MMgc
 		// approximate mark rate in bytes/sec, [1M,infty)
 		double R;
 
-		// requested inverse load factor (1,infty)
-		double L_ideal;
-		
+		// requested inverse load factors (1,infty)
+		double* L_ideal;
+        
+        // upper heap size (MB) at which the corresponding L_ideal applies
+		double* L_cutoff;
+        
 		// adjusted inverse load factor (adjusted for heap pressure, growth, etc)
 		double L_actual;
 		
@@ -626,7 +629,7 @@ namespace MMgc
 		// ratio of gc work to mutator work while the gc is running
 		double G;
 
-		// largest multiple of L_ideal to which L_actual can grow (unless 0, which means unlimited)
+		// largest multiple of a selected L_ideal to which L_actual can grow (unless 0, which means unlimited)
 		double X;
 
 		// the remaining allocation budget for the major GC cycle.  (This can go negative

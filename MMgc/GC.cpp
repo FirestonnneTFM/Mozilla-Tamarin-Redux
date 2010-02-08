@@ -167,8 +167,9 @@ namespace MMgc
 		, P(0.005)				// seconds; 5ms.  The marker /will/ overshoot this significantly
 		, R(R_INITIAL_VALUE)	// bytes/second; will be updated on-line
 		, L_ideal(heap->Config().gcLoad)
-		, L_actual(L_ideal)
-		, T(1.0-(1.0/L_ideal))
+        , L_cutoff(heap->Config().gcLoadCutoff)
+		, L_actual(L_ideal[0])
+		, T(1.0-(1.0/L_actual))
 		, G(heap->Config().gcEfficiency)
 		, X(heap->Config().gcLoadCeiling)
 		, remainingMajorAllocationBudget(0)
@@ -299,27 +300,38 @@ namespace MMgc
 
 	// The throttles here guard against excessive growth.
 
-	void GCPolicyManager::adjustL()
+	void GCPolicyManager::adjustL(double H)
 	{
+        int i=0;
+        while (H / (1024*1024) >= L_cutoff[i])
+            i++;
+
+        double L_selected = L_ideal[i];
 		double a = double(timeEndToEndLastCollection);
   		double b = double(timeInLastCollection);
+
 		if (b > a*G) {
 			double growth = (L_actual - 1) * (1 + timeInLastCollection/timeEndToEndLastCollection);
 			if (growth > 1)
 				growth = 1;
 			L_actual = L_actual + growth;
-			if (X != 0 && L_actual > X*L_ideal)
-				L_actual = X*L_ideal;
+			if (X != 0 && L_actual > X*L_selected)
+				L_actual = X*L_selected;
 		}
  		else
- 			L_actual = (L_actual + L_ideal) / 2;
+ 			L_actual = (L_actual + L_selected) / 2;
  	}
 
 	// Called at the start
 	void GCPolicyManager::adjustPolicyInitially()
 	{
 		remainingMajorAllocationBudget = double(lowerLimitCollectionThreshold()) * 4096.0;
-		remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+
+        if (gc->incremental)
+            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+        else 
+            remainingMinorAllocationBudget = remainingMajorAllocationBudget;
+
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
 		if (gc->greedy)
 			remainingMinorAllocationBudget = GREEDY_TRIGGER;
@@ -328,17 +340,23 @@ namespace MMgc
  	// Called when a collection ends
  	void GCPolicyManager::adjustPolicyForNextMajorCycle()
  	{
+		double H = double(gc->GetBytesInUse());
+        
   		// Compute L_actual, which takes into account how much time we spent in GC
 		// during the last cycle
-		adjustL();
+		adjustL(H);
 
   		// The budget is H(L-1), with a floor
-		double H = double(gc->GetBytesInUse());
 		double remainingBeforeGC = double(lowerLimitCollectionThreshold()) * 4096.0 - H;
 		remainingMajorAllocationBudget = H * (L_actual - 1.0);
 		if (remainingMajorAllocationBudget < remainingBeforeGC)
 			remainingMajorAllocationBudget = remainingBeforeGC;
-  		remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+        
+        if (gc->incremental)
+            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+        else
+            remainingMinorAllocationBudget = remainingMajorAllocationBudget;
+
 #ifdef MMGC_POLICY_PROFILING
 		if (summarizeGCBehavior())
 			GCLog("[gcbehavior] policy: mark-rate=%.2f (MB/sec) adjusted-L=%.2f kbytes-live=%.0f kbytes-target=%.0f\n", 
@@ -383,6 +401,8 @@ namespace MMgc
  
  	uint32_t GCPolicyManager::incrementalMarkMilliseconds()
  	{
+        // Nonsensical to call this in non-incremental mode
+        GCAssert(gc->incremental);
 		// Bad to divide by 0 here.
 		GCAssert(minorAllocationBudget != 0);
  		return uint32_t(P * 1000.0 * double(minorAllocationBudget - remainingMinorAllocationBudget) / double(minorAllocationBudget));
@@ -2429,14 +2449,16 @@ namespace MMgc
 		markerGraph.clear();
 #endif
 
-		MarkAllRoots();
+        if (incremental)
+            MarkAllRoots();
 		
 		policy.signal(GCPolicyManager::END_StartIncrementalMark);
 		
 		// FIXME (policy): arguably a bug to do this here if StartIncrementalMark has exhausted its quantum
 		// doing eager sweeping.
 
-		IncrementalMark();
+        if (incremental)
+            IncrementalMark();
 	}
 
 	// The mark stack overflow logic depends on this calling MarkItem directly 
