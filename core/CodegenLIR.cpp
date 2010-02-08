@@ -2011,7 +2011,7 @@ namespace avmplus
             break;
 
         case OP_urshift:
-            emit(state, opcode, 0, 0, INT_TYPE);
+            emit(state, opcode, 0, 0, UINT_TYPE);
             break;
 
         case OP_bitnot:
