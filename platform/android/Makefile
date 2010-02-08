@@ -385,13 +385,13 @@ endif
 	@echo "=== done:" $@ "==="
 
 $(OBJDIR)/avmshell/%.o: ../../shell/%.cpp
-	${call compile-files,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
 
 $(OBJDIR)/avmshell/%.o: ../../extensions/%.cpp
-	${call compile-files,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
 
 $(OBJDIR)/avmshell/%.o: %.cpp
-	${call compile-files,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
 
 default_target:
 	@$(MAKE) -j4 ${FINAL_TARGET}
