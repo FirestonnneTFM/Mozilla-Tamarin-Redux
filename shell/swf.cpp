@@ -127,22 +127,29 @@ namespace avmshell
 		return magic == SWF || magic == SWC;
 	}
 
-	void handleDoABC2(SwfParser &parser, int taglen,
+ 	static const int stagDoABC  = 72;
+ 	static const int stagDoABC2 = 82;
+
+	void handleDoABC(int type, SwfParser &parser, int taglen,
 						  DomainEnv* domainEnv, Toplevel*& toplevel, CodeContext* codeContext)
 	{
 		MMgc::GC *gc = toplevel->gc();
 		AvmCore *core = toplevel->core();
 		int tagstart = parser.pos;
 		const int kDoAbcLazyInitializeFlag = 1;
+        uint32_t flags = 0;
 
-		// Flags (UI32) A 32-bit flags value, which may
-		// contain the following bits set: kDoAbcLazyInitializeFlag = 1: Indicates that
-		// the ABC block should not be executed immediately, but only parsed. A later
-		// finddef may cause its scripts to execute.
-		uint32_t flags = parser.readU32();
+        if (type == stagDoABC2)
+        {
+            // Flags (UI32) A 32-bit flags value, which may
+            // contain the following bits set: kDoAbcLazyInitializeFlag = 1: Indicates that
+            // the ABC block should not be executed immediately, but only parsed. A later
+            // finddef may cause its scripts to execute.
+            uint32_t flags = parser.readU32();
 
-		// skip the abc name
-		parser.skipString();
+            // skip the abc name
+            parser.skipString();
+        }
 
 		// parse and execute the abc.
 		int abclen = taglen - (parser.pos - tagstart);
@@ -158,8 +165,6 @@ namespace avmshell
 		}
 		parser.pos += abclen;
 	}
-
-	static const int stagDoABC2 = 82;
 
 	/*
 	 * Execute a swf as follows:
@@ -205,8 +210,8 @@ namespace avmshell
 			uint32_t taglen = (tag & 63);
 			if (taglen == 63)
 				taglen = parser.readU32();
-			if (type == stagDoABC2)
-				handleDoABC2(parser, taglen, domainEnv, toplevel, codeContext);		
+			if (type == stagDoABC || type == stagDoABC2)
+				handleDoABC(type, parser, taglen, domainEnv, toplevel, codeContext);		
 			else
 				parser.pos += taglen;
 		}
