@@ -330,7 +330,7 @@ namespace MMgc
         if (gc->incremental)
             remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
         else 
-            remainingMinorAllocationBudget = remainingMajorAllocationBudget;
+            remainingMinorAllocationBudget = int32_t(remainingMajorAllocationBudget);
 
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
 		if (gc->greedy)
@@ -355,7 +355,7 @@ namespace MMgc
         if (gc->incremental)
             remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
         else
-            remainingMinorAllocationBudget = remainingMajorAllocationBudget;
+            remainingMinorAllocationBudget = int32_t(remainingMajorAllocationBudget);
 
 #ifdef MMGC_POLICY_PROFILING
 		if (summarizeGCBehavior())
