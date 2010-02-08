@@ -944,14 +944,14 @@ namespace nanojit
 #ifndef NANOJIT_64BIT
         NanoAssert(op != LIR_qcall); // qcall should only be possible on 64-bit arch
 #endif
+#if defined(NANOJIT_ARM)
+        // SoftFloat: convert LIR_fcall to LIR_icall.
+        if (!_config.arm_vfp && op == LIR_fcall)
+            op = LIR_icall;
+#endif
 
         int32_t argc = ci->count_args();
         NanoAssert(argc <= (int)MAXARGS);
-
-#if defined(NANOJIT_ARM)
-        if (!_config.arm_vfp && op == LIR_fcall)
-            op = LIR_callh;
-#endif
 
         // Allocate space for and copy the arguments.  We use the same
         // allocator as the normal LIR buffers so it has the same lifetime.
@@ -962,11 +962,7 @@ namespace nanojit
         // Allocate and write the call instruction.
         LInsC* insC = (LInsC*)_buf->makeRoom(sizeof(LInsC));
         LIns*  ins  = insC->getLIns();
-#ifndef NANOJIT_64BIT
-        ins->initLInsC(op==LIR_callh ? LIR_icall : op, args2, ci);
-#else
         ins->initLInsC(op, args2, ci);
-#endif
         return ins;
     }
 
@@ -2201,6 +2197,127 @@ namespace nanojit
         return out->ins0(op);
     }
 
+
+    static double FASTCALL i2f(int32_t i)           { return i; }
+    static double FASTCALL u2f(uint32_t u)          { return u; }
+    static double FASTCALL fneg(double a)           { return -a; }
+    static double FASTCALL fadd(double a, double b) { return a + b; }
+    static double FASTCALL fsub(double a, double b) { return a - b; }
+    static double FASTCALL fmul(double a, double b) { return a * b; }
+    static double FASTCALL fdiv(double a, double b) { return a / b; }
+    static int32_t FASTCALL feq(double a, double b) { return a == b; }
+    static int32_t FASTCALL flt(double a, double b) { return a <  b; }
+    static int32_t FASTCALL fgt(double a, double b) { return a >  b; }
+    static int32_t FASTCALL fle(double a, double b) { return a <= b; }
+    static int32_t FASTCALL fge(double a, double b) { return a >= b; }
+
+    #define SIG_F_I     (ARGSIZE_F | ARGSIZE_I << ARGSIZE_SHIFT*1)
+    #define SIG_F_U     (ARGSIZE_F | ARGSIZE_U << ARGSIZE_SHIFT*1)
+    #define SIG_F_F     (ARGSIZE_F | ARGSIZE_F << ARGSIZE_SHIFT*1)
+    #define SIG_F_FF    (ARGSIZE_F | ARGSIZE_F << ARGSIZE_SHIFT*1 | ARGSIZE_F << ARGSIZE_SHIFT*2)
+    #define SIG_B_FF    (ARGSIZE_B | ARGSIZE_F << ARGSIZE_SHIFT*1 | ARGSIZE_F << ARGSIZE_SHIFT*2)
+
+    #define SF_CALLINFO(name, typesig) \
+        static const CallInfo name##_ci = \
+            { (intptr_t)&name, typesig, /*cse*/1, /*fold*/1, ABI_FASTCALL verbose_only(, #name) }
+
+    SF_CALLINFO(i2f,  SIG_F_I);
+    SF_CALLINFO(u2f,  SIG_F_U);
+    SF_CALLINFO(fneg, SIG_F_F);
+    SF_CALLINFO(fadd, SIG_F_FF);
+    SF_CALLINFO(fsub, SIG_F_FF);
+    SF_CALLINFO(fmul, SIG_F_FF);
+    SF_CALLINFO(fdiv, SIG_F_FF);
+    SF_CALLINFO(feq,  SIG_B_FF);
+    SF_CALLINFO(flt,  SIG_B_FF);
+    SF_CALLINFO(fgt,  SIG_B_FF);
+    SF_CALLINFO(fle,  SIG_B_FF);
+    SF_CALLINFO(fge,  SIG_B_FF);
+
+    SoftFloatOps::SoftFloatOps()
+    {
+        memset(opmap, 0, sizeof(opmap));
+        opmap[LIR_i2f] = &i2f_ci;
+        opmap[LIR_u2f] = &u2f_ci;
+        opmap[LIR_fneg] = &fneg_ci;
+        opmap[LIR_fadd] = &fadd_ci;
+        opmap[LIR_fsub] = &fsub_ci;
+        opmap[LIR_fmul] = &fmul_ci;
+        opmap[LIR_fdiv] = &fdiv_ci;
+        opmap[LIR_feq] = &feq_ci;
+        opmap[LIR_flt] = &flt_ci;
+        opmap[LIR_fgt] = &fgt_ci;
+        opmap[LIR_fle] = &fle_ci;
+        opmap[LIR_fge] = &fge_ci;
+    }
+
+    const SoftFloatOps softFloatOps;
+
+    SoftFloatFilter::SoftFloatFilter(LirWriter *out) : LirWriter(out)
+    {}
+
+    LIns* SoftFloatFilter::split(LIns *a) {
+        if (a->isF64() && !a->isop(LIR_qjoin)) {
+            // all F64 args must be qjoin's for soft-float
+            a = ins2(LIR_qjoin, ins1(LIR_qlo, a), ins1(LIR_qhi, a));
+        }
+        return a;
+    }
+
+    LIns* SoftFloatFilter::split(const CallInfo *call, LInsp args[]) {
+        LIns *lo = out->insCall(call, args);
+        LIns *hi = out->ins1(LIR_callh, lo);
+        return out->ins2(LIR_qjoin, lo, hi);
+    }
+
+    LIns* SoftFloatFilter::fcall1(const CallInfo *call, LIns *a) {
+        LIns *args[] = { split(a) };
+        return split(call, args);
+    }
+
+    LIns* SoftFloatFilter::fcall2(const CallInfo *call, LIns *a, LIns *b) {
+        LIns *args[] = { split(b), split(a) };
+        return split(call, args);
+    }
+
+    LIns* SoftFloatFilter::fcmp(const CallInfo *call, LIns *a, LIns *b) {
+        LIns *args[] = { split(b), split(a) };
+        return out->ins2(LIR_eq, out->insCall(call, args), out->insImm(1));
+    }
+
+    LIns* SoftFloatFilter::ins1(LOpcode op, LIns *a) {
+        const CallInfo *ci = softFloatOps.opmap[op];
+        if (ci)
+            return fcall1(ci, a);
+        if (op == LIR_fret)
+            return out->ins1(op, split(a));
+        return out->ins1(op, a);
+    }
+
+    LIns* SoftFloatFilter::ins2(LOpcode op, LIns *a, LIns *b) {
+        const CallInfo *ci = softFloatOps.opmap[op];
+        if (ci) {
+            if ((op >= LIR_feq && op <= LIR_fge))
+                return fcmp(ci, a, b);
+            return fcall2(ci, a, b);
+        }
+        return out->ins2(op, a, b);
+    }
+
+    LIns* SoftFloatFilter::insCall(const CallInfo *ci, LInsp args[]) {
+        uint32_t argt = ci->_argtypes;
+
+        for (uint32_t i = 0, argsizes = argt >> ARGSIZE_SHIFT; argsizes != 0; i++, argsizes >>= ARGSIZE_SHIFT)
+            args[i] = split(args[i]);
+
+        if ((argt & ARGSIZE_MASK_ANY) == ARGSIZE_F) {
+            // this function returns a double as two 32bit values, so replace
+            // call with qjoin(qhi(call), call)
+            return split(ci, args);
+        }
+        return out->insCall(ci, args);
+    }
+
     #endif /* FEATURE_NANOJIT */
 
 #if defined(NJ_VERBOSE)
@@ -2290,11 +2407,6 @@ namespace nanojit
         }
     }
 
-#define HOWTO_DEBUG \
-    "  One way to debug this:  change the failing NanoAssertMsgf(0, ...) call to a\n" \
-    "  printf(...) call and rerun with verbose output.  If you're lucky, this error\n" \
-    "  message will appear before the block containing the erroneous instruction.\n\n"
-
     void ValidateWriter::typeCheckArgs(LOpcode op, int nArgs, LTy formals[], LIns* args[])
     {
         // Type-check the arguments.
@@ -2309,15 +2421,10 @@ namespace nanojit
                 // to be caught by test suites whereas error messages may not
                 // be.
                 NanoAssertMsgf(0,
-                    "\n\n"
-                    "LIR type error (%s):\n"
-                    "  in instruction with opcode: %s\n"
-                    "  in argument %d with opcode: %s\n"
-                    "  argument has type %s, expected %s\n"
-                    HOWTO_DEBUG,
-                    _whereInPipeline,
-                    lirNames[op],
-                    i+1, lirNames[args[i]->opcode()],
+                    "LIR type error (%s): arg %d of '%s' is '%s' "
+                    "which has type %s (expected %s)",
+                    _whereInPipeline, i+1, lirNames[op],
+                    lirNames[args[i]->opcode()],
                     type2string(actual), type2string(formal));
             }
         }
@@ -2327,27 +2434,16 @@ namespace nanojit
                                                 LIns* arg, const char* shouldBeDesc)
     {
         NanoAssertMsgf(0,
-            "\n\n"
-            "  LIR structure error (%s):\n"
-            "    in instruction with opcode: %s\n"
-            "    %s %d has opcode: %s\n"
-            "    it should be: %s\n"
-            HOWTO_DEBUG,
-            _whereInPipeline,
-            lirNames[op],
-            argDesc, argN, lirNames[arg->opcode()],
-            shouldBeDesc);
+            "LIR structure error (%s): %s %d of '%s' is '%s' (expected %s)",
+            _whereInPipeline, argDesc, argN, 
+            lirNames[op], lirNames[arg->opcode()], shouldBeDesc);
     }
 
     void ValidateWriter::errorPlatformShouldBe(LOpcode op, int nBits)
     {
         NanoAssertMsgf(0,
-            "\n\n"
-            "  LIR structure error (%s):\n"
-            "    %s should only occur on %d-bit platforms\n"
-            HOWTO_DEBUG,
-            _whereInPipeline,
-            lirNames[op], nBits);
+            "LIR platform error (%s): '%s' should only occur on %d-bit platforms",
+            _whereInPipeline, lirNames[op], nBits);
     }
 
     void ValidateWriter::checkLInsIsACondOrConst(LOpcode op, int argN, LIns* ins)
@@ -2555,8 +2651,10 @@ namespace nanojit
             break;
 
         case LIR_callh:
-            checkLInsHasOpcode(op, 1, a, LIR_fcall);
-            formals[0] = LTy_F64;
+            // The operand of a LIR_callh is LIR_icall, even though the
+            // function being called has a return type of LTy_F64.
+            checkLInsHasOpcode(op, 1, a, LIR_icall);
+            formals[0] = LTy_I32;
             break;
 
         case LIR_file:
