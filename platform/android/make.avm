@@ -185,7 +185,7 @@ AVMPLUS_OBJS := $(addprefix ${OBJDIR}/avm/, $(AVMPLUS_SRCS:.cpp=.o))
 AVMPLUS_DEPS := $(addprefix ${OBJDIR}/avm/, $(AVMPLUS_SRCS:.cpp=.d))
 
 $(OBJDIR)/avm/%.o: %.cpp
-	${call compile-files,avm,${AVMPLUS_DEFS}}
+	${call compile-files-arm,avm,${AVMPLUS_DEFS}}
 
 
 # clz is not supported on thumb before armv6t2

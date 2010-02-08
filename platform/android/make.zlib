@@ -67,7 +67,7 @@ ZLIB_DEPS := $(addprefix ${OBJDIR}/zlib/, $(notdir $(addsuffix .d, $(basename ${
 ZLIB_LIB := ${LIBDIR}/libzlib.a
 
 $(OBJDIR)/zlib/%.o: ${ZLIB_DIR}/%.c
-	${call compile-c-files,zlib,${ZLIB_DEFS}}
+	${call compile-c-files-arm,zlib,${ZLIB_DEFS}}
 
 ${ZLIB_LIB}: ${ZLIB_OBJS}
 	${call make-lib,${ZLIB_OBJS}}
