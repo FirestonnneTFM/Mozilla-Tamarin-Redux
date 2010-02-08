@@ -145,7 +145,7 @@ namespace avmshell
             // contain the following bits set: kDoAbcLazyInitializeFlag = 1: Indicates that
             // the ABC block should not be executed immediately, but only parsed. A later
             // finddef may cause its scripts to execute.
-            uint32_t flags = parser.readU32();
+            flags = parser.readU32();
 
             // skip the abc name
             parser.skipString();
