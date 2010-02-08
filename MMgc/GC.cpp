@@ -326,7 +326,12 @@ namespace MMgc
 	void GCPolicyManager::adjustPolicyInitially()
 	{
 		remainingMajorAllocationBudget = double(lowerLimitCollectionThreshold()) * 4096.0;
-		remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+
+        if (gc->incremental)
+            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+        else 
+            remainingMinorAllocationBudget = remainingMajorAllocationBudget;
+
  		remainingMajorAllocationBudget -= remainingMinorAllocationBudget;
 		if (gc->greedy)
 			remainingMinorAllocationBudget = GREEDY_TRIGGER;
@@ -346,7 +351,12 @@ namespace MMgc
 		remainingMajorAllocationBudget = H * (L_actual - 1.0);
 		if (remainingMajorAllocationBudget < remainingBeforeGC)
 			remainingMajorAllocationBudget = remainingBeforeGC;
-  		remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+        
+        if (gc->incremental)
+            remainingMinorAllocationBudget = minorAllocationBudget = int32_t(remainingMajorAllocationBudget * T);
+        else
+            remainingMinorAllocationBudget = remainingMajorAllocationBudget;
+
 #ifdef MMGC_POLICY_PROFILING
 		if (summarizeGCBehavior())
 			GCLog("[gcbehavior] policy: mark-rate=%.2f (MB/sec) adjusted-L=%.2f kbytes-live=%.0f kbytes-target=%.0f\n", 
@@ -391,6 +401,8 @@ namespace MMgc
  
  	uint32_t GCPolicyManager::incrementalMarkMilliseconds()
  	{
+        // Nonsensical to call this in non-incremental mode
+        GCAssert(gc->incremental);
 		// Bad to divide by 0 here.
 		GCAssert(minorAllocationBudget != 0);
  		return uint32_t(P * 1000.0 * double(minorAllocationBudget - remainingMinorAllocationBudget) / double(minorAllocationBudget));
@@ -2437,14 +2449,16 @@ namespace MMgc
 		markerGraph.clear();
 #endif
 
-		MarkAllRoots();
+        if (incremental)
+            MarkAllRoots();
 		
 		policy.signal(GCPolicyManager::END_StartIncrementalMark);
 		
 		// FIXME (policy): arguably a bug to do this here if StartIncrementalMark has exhausted its quantum
 		// doing eager sweeping.
 
-		IncrementalMark();
+        if (incremental)
+            IncrementalMark();
 	}
 
 	// The mark stack overflow logic depends on this calling MarkItem directly 
