@@ -39,6 +39,7 @@
 #if defined FEATURE_NANOJIT
 #include "../nanojit/nanojit.h"
 #endif
+#include <float.h>
 
 namespace avmshell
 {
@@ -818,20 +819,47 @@ namespace avmshell
 					double limit;
 					int nchar;
 					const char* val = argv[++i];
-					size_t len = VMPI_strlen(val);
+                    const char* origval = val;
+                    size_t k = 0;
 					// limit=0 is legal, it means unlimited
-					if (VMPI_sscanf(val, "%lf,%lf%n", &load, &limit, &nchar) == 2 && size_t(nchar) == len && load > 1.0 && limit >= 0.0) {
-						MMgc::GCHeap::GetGCHeap()->Config().gcLoad = load;
-						MMgc::GCHeap::GetGCHeap()->Config().gcLoadCeiling = limit;
-					}
-					else if (VMPI_sscanf(val, "%lf%n", &load, &nchar) == 1 && size_t(nchar) == len && load > 1.0) {
-						MMgc::GCHeap::GetGCHeap()->Config().gcLoad = load;
+                    for (;;) {
+                        if (k < MMgc::GCHeapConfig::kNumLoadFactors) {
+                            if (VMPI_sscanf(val, "%lf,%lf%n", &load, &limit, &nchar) == 2 && load > 1.0 && limit >= 0.0) {
+                                MMgc::GCHeap::GetGCHeap()->Config().gcLoad[k] = load;
+                                MMgc::GCHeap::GetGCHeap()->Config().gcLoadCutoff[k] = limit;
+                                k++;
+                                val += nchar;
+                                if (*val == 0) {
+                                    MMgc::GCHeap::GetGCHeap()->Config().gcLoadCutoff[k-1] = DBL_MAX;
+                                    break;
+                                }
+                                if (*val == ',') {
+                                    val++;
+                                    continue;
+                                }
+                            }
+                            else if (VMPI_sscanf(val, "%lf%n", &load, &nchar) == 1 && val[nchar] == 0 && load > 1.0) {
+                                MMgc::GCHeap::GetGCHeap()->Config().gcLoad[k] = load;
+                                MMgc::GCHeap::GetGCHeap()->Config().gcLoadCutoff[k] = DBL_MAX;
+                                break;
+                            }
+                        }
+                        AvmLog("Bad value to -load: %s\n", origval);
+                        usage();
+                    }
+				}
+                else if (!VMPI_strcmp(arg, "-loadCeiling") && i+1 < argc) {
+					double ceiling;
+					int nchar;
+					const char* val = argv[++i];
+					if (VMPI_sscanf(val, "%lf%n", &ceiling, &nchar) == 1 && size_t(nchar) == VMPI_strlen(val) && ceiling >= 1.0) {
+						MMgc::GCHeap::GetGCHeap()->Config().gcLoadCeiling = ceiling;
 					}
 					else {
-						AvmLog("Bad value to -load: %s\n", val);
+						AvmLog("Bad value to -loadCeiling: %s\n", val);
 						usage();
 					}
-				}
+                }
 				else if (!VMPI_strcmp(arg, "-gcwork") && i+1 < argc ) {
 					double work;
 					int nchar;
@@ -1024,7 +1052,11 @@ namespace avmshell
 #ifdef MMGC_POLICY_PROFILING
 		AvmLog("          [-gcbehavior] summarize GC behavior and policy computation\n"); 
 #endif
-		AvmLog("          [-load L[,X]] GC load factor (default 2.0) and max multiplier (default 3.0)\n");
+		AvmLog("          [-load L,B, ...\n"
+               "                        GC load factor L up to a post-GC heap size of B megabytes.\n"
+               "                        Up to %d pairs can be accommodated, the limit for the last pair\n"
+               "                        will be ignored and can be omitted\n", int(MMgc::GCHeapConfig::kNumLoadFactors));
+        AvmLog("          [-loadCeiling X] GC load multiplier ceiling (default 1.0)\n");
 		AvmLog("          [-gcwork G]   Max fraction of time (default 0.25) we're willing to spend in GC\n");
 		AvmLog("          [-stack N]    Stack size in bytes (will be honored approximately).\n"
 			   "                        Be aware of the stack margin: %u\n", avmshell::kStackMargin);
