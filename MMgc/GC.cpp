@@ -2764,7 +2764,9 @@ namespace MMgc
                 PushWorkItem(GCWorkItem(p, GCWorkItem::kProtectionSize, GCWorkItem::kGCObject));
             }
 
-			PushWorkItem(GCWorkItem(p + kLargestAlloc / sizeof(uintptr_t), uint32_t(size - kLargestAlloc), GCWorkItem::kNonGCObject));
+			PushWorkItem(GCWorkItem(p + kLargestAlloc / sizeof(uintptr_t), 
+                                    uint32_t(size - kLargestAlloc), 
+                                    wi.HasInteriorPtrs() ? GCWorkItem::kStackMemory : GCWorkItem::kNonGCObject));
 			size = kLargestAlloc;
 		}
 
