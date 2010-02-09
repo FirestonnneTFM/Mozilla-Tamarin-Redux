@@ -168,6 +168,14 @@ package flash.sampler
     	 */
     	public native function get object():*;
 
+        /**
+         * The NewObjectSample object size. If the object has been garbagecollected, this property is
+         * undefined and a corresponding DeleteObjectSample exists. For FlashPlayer debugger version only.
+         * @playerversion Flash 9.0.115.0
+         * @langversion 3.0     
+         * @keyword NewObjectSample, NewObjectSample.size, size 
+         * @see flash.sampler.DeleteObjectSample         
+         */
         public native function get size() : Number;
     };
 	
@@ -433,7 +441,7 @@ package flash.sampler
     public native function isGetterSetter(obj:Object, qname:QName):Boolean;
 
    /**
-     * Expose the lexical scope of a Function so that activation objects and with objects and all
+     * Expose the lexical scope of a Function so that activation objects and all
      * captured scope objects can be seen by the profiler as being retained by the Function instance.
      * @param obj A function
      * @return An array containings all the lexical scope elements
