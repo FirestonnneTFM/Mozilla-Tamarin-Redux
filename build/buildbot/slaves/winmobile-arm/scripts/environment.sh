@@ -59,7 +59,7 @@ export shell_release_wordcode_arm=avmshell_wordcode_arm$shell_extension
 export shell_release_fpu_arm=avmshell_fpu_arm$shell_extension
 export shell_release_thumb=avmshell_thumb$shell_extension
 export shell_debug_arm=avmshell_arm_d$shell_extension
-export shell_debug_thumb=avmshell_thumb_d$shell_extension
+export shell_debug_fpu_arm=avmshell_fpu_arm_d$shell_extension
 
 export EMULATOR="c:/Program Files (x86)/Microsoft Device Emulator/1.0/DeviceEmulator.exe"
 export EMULATORIMAGE="c:/Program Files (x86)/Windows Mobile 6 SDK/PocketPC/DeviceemulationV650/0409/PPC_USA_GSM_VR.BIN"

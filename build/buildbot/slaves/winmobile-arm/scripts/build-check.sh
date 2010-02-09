@@ -76,6 +76,12 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_arm || {
   fail=1
 }
 
+# Debug-fpu_ARM
+test -f $buildsdir/$change-${changeid}/$platform/$shell_debug_fpu_arm || {
+  echo "message: Debug-fpu Failed"
+  fail=1
+}
+
 
 
 # builtin.abc
