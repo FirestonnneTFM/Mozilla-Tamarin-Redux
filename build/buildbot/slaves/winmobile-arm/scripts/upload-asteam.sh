@@ -62,3 +62,5 @@
 # Debug_ARM
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_arm
 
+# Debug-FPU_ARM
+. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_debug_fpu_arm $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_debug_fpu_arm
