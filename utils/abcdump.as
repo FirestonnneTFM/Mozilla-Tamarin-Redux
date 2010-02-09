@@ -1193,8 +1193,9 @@ package abcdump
     }
     
     const stagDoABC                 :int = 72;   // embedded .abc (AVM+) bytecode
-    const stagSymbolClass               :int = 76;
-    const stagDoABC2                  :int = 82;   // revised ABC version with a name
+    const stagSymbolClass           :int = 76;
+    const stagMetadata              :int = 77;
+    const stagDoABC2                :int = 82;   // revised ABC version with a name
 
     var tagNames:Array = [
         "End",                  // 00
@@ -1298,7 +1299,7 @@ package abcdump
         "74 (invalid)",         // 74
         "75 (invalid)",         // 75
         "SymbolClass",          // 76
-        "77 (invalid)",         // 77
+        "Metadata",             // 77
         "78 (invalid)",         // 78
         "79 (invalid)",         // 79
         "80 (invalid)",         // 80
@@ -1353,6 +1354,9 @@ package abcdump
                     new Abc(data2).dump("  ")
                     infoPrint("")
                     break 
+                case stagMetadata:
+                    infoPrint(new XML(readString()));
+                    break;
                 default:
                     data.position += length
                 }
