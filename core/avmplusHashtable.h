@@ -245,8 +245,19 @@ namespace avmplus
 		/**
 		 * Adds a name/value pair to a hash table.  Automatically
 		 * grows the hash table if it is full.
+         *
+         * If the table can't be expanded because the number of elements
+         * in the table is at the maximum allowable then one of two
+         * things can happen:
+         *
+         *  - if toplevel is NULL then add() will call GCHeap::SignalObjectTooLarge,
+         *    which will call GCHeap::Abort() and shut down the player
+         *  - otherwise, add() will throw an Error object with tag kOutOfMemoryError
+         *
+         * Generally, toplevel should only be non-NULL if the operation originated
+         * in AS3 code.
 		 */
-		void add(Atom name, Atom value);
+		void add(Atom name, Atom value, Toplevel* toplevel=NULL);
 
 		/**
 		 * Called to grow the InlineHashtable, particularly by add.
@@ -257,8 +268,19 @@ namespace avmplus
 		 * - Rehashes the current table into the new one
 		 * - Deletes the old array of Atoms and sets the Atom
 		 *   pointer to our new array of Atoms
+         *
+         * If the table can't be expanded because the number of elements
+         * in the table is at the maximum allowable then one of two 
+         * things can happen:
+         *
+         *  - if toplevel is NULL then add() will call GCHeap::SignalObjectTooLarge,
+         *    which will call GCHeap::Abort() and shut down the player
+         *  - otherwise, grow() will throw an Error object with tag kOutOfMemoryError
+         *
+         * Generally, toplevel should only be non-NULL if the operation originated
+         * in AS3 code.
 		 */
-		bool grow();
+		void grow(Toplevel* toplevel=NULL);
 
 		/**
 		 * Allow caller to enumerate all entries in the table.
@@ -274,6 +296,7 @@ namespace avmplus
 	private:
 		void put(Atom name, Atom value);
 		int rehash(const Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen) const;
+        void throwFailureToGrow(AvmCore* core);
 
 	private:
 		//
@@ -341,7 +364,7 @@ namespace avmplus
 		inline int next(int index) { return ht.next(index); }
 		inline Atom keyAt(int index) { return ht.keyAt(index); }
 		inline Atom valueAt(int index) { return ht.valueAt(index); }
-		virtual void add(Atom name, Atom value) { ht.add(name, value); }
+		virtual void add(Atom name, Atom value, Toplevel* toplevel=NULL) { ht.add(name, value, toplevel); }
 		virtual Atom get(Atom name) { return ht.get(name); }
 		virtual Atom remove(Atom name) { return ht.remove(name); }
 		virtual bool contains(Atom name) const { return ht.contains(name); }
@@ -368,7 +391,7 @@ namespace avmplus
 		inline int next(int index) { return ht.next(index); }
 		inline Atom keyAt(int index) { return ht.keyAt(index); }
 		inline MMgc::RCObject* valueAt(int index) { return untagAtom(ht.valueAt(index)); }
-		void add(Atom name, MMgc::RCObject* value) { ht.add(name, tagObject(value)); }
+		void add(Atom name, MMgc::RCObject* value, Toplevel* toplevel=NULL) { ht.add(name, tagObject(value), toplevel); }
 		MMgc::RCObject* get(Atom name) { return untagAtom(ht.get(name)); }
 		MMgc::RCObject* remove(Atom name) { return untagAtom(ht.remove(name)); }
 		bool contains(Atom name) const { return ht.contains(name); }
@@ -385,7 +408,7 @@ namespace avmplus
 	{
 	public:
 		WeakKeyHashtable(MMgc::GC* _gc) : HeapHashtable(_gc) { }
-		virtual void add(Atom key, Atom value);
+		virtual void add(Atom key, Atom value, Toplevel* toplevel=NULL);
 		virtual Atom get(Atom key) { return ht.get(getKey(key)); }
 		virtual Atom remove(Atom key) { return ht.remove(getKey(key)); }
 		virtual bool contains(Atom key) const { return ht.contains(getKey(key)); }
@@ -402,7 +425,7 @@ namespace avmplus
 	{
 	public:
 		WeakValueHashtable(MMgc::GC* _gc) : HeapHashtable(_gc) { }
-		virtual void add(Atom key, Atom value);
+		virtual void add(Atom key, Atom value, Toplevel* toplevel=NULL);
 		virtual Atom get(Atom key) { return getValue(key, ht.get(key)); }
 		virtual Atom remove(Atom key) { return getValue(key, ht.remove(key)); }
 		virtual bool weakValues() const { return true; }
