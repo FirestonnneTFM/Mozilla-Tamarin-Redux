@@ -314,9 +314,9 @@ class PhaseOneListener(base.StatusReceiverMultiService):
         system actually built. Since thenext phases can have there own "changeIsImportant"
         functions to determine whether or not to run, we MUST only send in changes that were
         actually built by the previous phase 
-        """        
-        change = build.getSourceStamp().changes[-1:]
-        out  = "changeset:   %s\n" % (change.revision)
+        """
+        change = build.getSourceStamp().changes[-1]
+        out  = "changeset:   %s\n" % (build.getSourceStamp().revision)
         out += "user:        %s\n" % (change.who)
         out += "date:        %s\n" % (change.getTime())
         out += "files:       %s\n" % (' '.join(change.files))
