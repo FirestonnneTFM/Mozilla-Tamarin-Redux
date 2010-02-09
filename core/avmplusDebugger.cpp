@@ -502,10 +502,9 @@ namespace avmplus
 					// this means that we have a new source line for the given offset
 					const byte* pc2 = pc+1;
 					int line = readU32(pc2);
-					if (active == NULL)
-						AvmAssert(0 == 1); // means OP_debugline appeared before OP_debugfile which is WRONG!  Fix compiler
-					else
+					if (active != NULL)
 						active->addLine(line, m, (int)(pc - abc_start));
+					// else, OP_line occurred before OP_file: fix the compiler!
  					break;
 				}
 
