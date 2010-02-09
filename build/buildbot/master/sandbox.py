@@ -1064,8 +1064,6 @@ class sandbox:
     sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
     sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
     sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Debug", shellname="avmshell_arm_d", vmargs="", config="", scriptargs="--timeout=300 --random"))
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Debug-interp", shellname="avmshell_arm_d", vmargs="-Dinterp", config="", scriptargs="--timeout=300 --random"))
     sb_winmobile_emulator_test_factory.addStep(util_process_clean)
 
     sb_winmobile_emulator_test_builder = {
