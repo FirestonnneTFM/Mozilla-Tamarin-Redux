@@ -157,7 +157,7 @@ namespace MMgc
 			{
 				do {
 					cursor ++;
-				}while (items[cursor] == NULL && cursor < capacity); 
+				}while (cursor < capacity && items[cursor] == NULL);
 				
 				//  If our "next item" is the last item, then reset the list to the front.
 				if (cursor == capacity)
