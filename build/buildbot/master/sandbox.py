@@ -447,6 +447,7 @@ class sandbox:
     sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --target=arm-windows", upload="false"))
     sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-fpu-ARM", shellname="avmshell_fpu_arm", args="--enable-shell --enable-arm-fpu --target=arm-windows", upload="false"))
     sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --target=arm-windows", upload="false"))
+    sb_winmobile_emulator_compile_factory.addStep(compile_generic(name="Debug-fpu-ARM", shellname="avmshell_fpu_arm_d", args="--enable-shell --enable-debug --enable-arm-fpu --target=arm-windows", upload="false"))
     sb_winmobile_emulator_compile_factory.addStep(compile_buildcheck_local)
     sb_winmobile_emulator_compile_factory.addStep(util_upload_asteam_local)
 
@@ -1059,10 +1060,12 @@ class sandbox:
     #### builder for winmobile-emulator-test-sandbox ####
     #####################################################
     sb_winmobile_emulator_test_factory = factory.BuildFactory()
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_release_mobile)
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_release_interp_mobile)
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_release_interp_wordcode_mobile)
-    sb_winmobile_emulator_test_factory.addStep(test_emulator_release_jit_mobile)
+    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
+    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
+    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Debug", shellname="avmshell_arm_d", vmargs="", config="", scriptargs="--timeout=300 --random"))
+    sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Debug-interp", shellname="avmshell_arm_d", vmargs="-Dinterp", config="", scriptargs="--timeout=300 --random"))
     sb_winmobile_emulator_test_factory.addStep(util_process_clean)
 
     sb_winmobile_emulator_test_builder = {
