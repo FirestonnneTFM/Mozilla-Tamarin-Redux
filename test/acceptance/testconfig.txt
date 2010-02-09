@@ -158,6 +158,14 @@ as3/Vector/concat:concat multiple int vectors, .*, expectedfail, https://bugzill
 mops/mops, arm-winmobile-tvm.*, skip, multiple abc files not supported on winmo devices
 abcasm/.*, arm-winmobile-tvm.*, skip, multiple abc files not supported on winmo devices
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+regress/bug_515935, arm-winmobile.*-debug, skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544549
+ecma3/Expressions/e11_2_1_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
+ecma3/Expressions/e11_4_6, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
+ecma3/RegExp/eperlstress_001, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
+ecma3/RegExp/eperlstress_002, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
+ecma3/GlobalObject/e15_1_2_3_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
+ecma3/String/e15_5_3_2_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
+ecma3/TypeConversion/e9_3_1_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
 
 
 ####################
@@ -165,19 +173,20 @@ ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile
 ####################
 # emulator is not using DST by default
 # do not use wildcard match (.*) at end, fully specify matches so -deep ending will not match
-ecma3/Date/e15_9_5_14, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, emulator DST problem
-ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, emulator DST problem
-ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, emulator DST problem
-ecma3/Unicode/u9000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Unicode/u6000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Unicode/u5000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Unicode/u7000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Unicode/u8000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Unicode/uE000_PrivateUseArea, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Unicode/uAC00_HangulSyllables, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-ecma3/Date/e15_9_5_10, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
-mops/mops, arm-winmobile-emulator-tvm-release(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Date/e15_9_5_14, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, emulator DST problem
+ecma3/Unicode/u9000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u6000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u5000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u7000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u8000_CJKUnifiedIdeographs, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/uE000_PrivateUseArea, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/uAC00_HangulSyllables, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Unicode/uA000_YiSyllables, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+ecma3/Date/e15_9_5_10, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
+mops/mops, arm-winmobile-emulator-tvm-(release|debug)(|-wordcode)(|-Dinterp|-Ojit), skip, tests run too slowly on winmo
 
 as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
