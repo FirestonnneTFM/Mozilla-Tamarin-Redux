@@ -103,6 +103,18 @@ def test_generic(name, shellname, vmargs, config, scriptargs):
             )
     
 
+def test_emulator_generic(name, shellname, vmargs, config, scriptargs):
+    # factory.addStep(test_emulator_generic("Release", "avmshell", "", "", ""))
+    return TestSuiteShellCommand(
+            command=['../all/run-acceptance-emulator-generic.sh', WithProperties('%s','revision'), '%s' % shellname, '%s' % vmargs, '%s' % config, '%s' % scriptargs],
+            env={'branch': WithProperties('%s','branch')},
+            description='starting to run %s vmtests...' % name,
+            descriptionDone='finished %s vmtests' % name,
+            name="Testsuite_%s" % name,
+            workdir="../repo/build/buildbot/slaves/scripts"
+            )
+
+
 sync_clean = ShellCommand(
             command=["rm", "-Rf", "repo"],
             env={'branch': WithProperties('%s','branch')},
@@ -223,70 +235,6 @@ test_emulator_smoke_mobile = TestSuiteShellCommand(
             description='starting to run smoke tests...',
             descriptionDone='finished smoke tests.',
             name="SmokeTest",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_mobile = TestSuiteShellCommand(
-            command=['../all/run-acceptance-release-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting to run release vmtests...',
-            descriptionDone='finished release vmtests.',
-            name="Testsuite_Release",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_mobile_local = TestSuiteShellCommand(
-            command=['./run-acceptance-release-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting to run release vmtests...',
-            descriptionDone='finished release vmtests.',
-            name="Testsuite_Release",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_interp_mobile = TestSuiteShellCommand(
-            command=['../all/run-acceptance-release-interp-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting to run -interp release vmtests...',
-            descriptionDone='finished -interp release vmtests.',
-            name="Testsuite_Release-interp",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_interp_mobile_local = TestSuiteShellCommand(
-            command=['./run-acceptance-release-interp-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting to run -interp release vmtests...',
-            descriptionDone='finished -interp release vmtests.',
-            name="Testsuite_Release-interp",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_interp_wordcode_mobile = TestSuiteShellCommand(
-            command=['../all/run-acceptance-release-interp-wc-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting to run -interp release-wordcode vmtests...',
-            descriptionDone='finished -interp release-wordcode vmtests.',
-            name="Testsuite_Release-wordcode-interp",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_interp_wordcode_mobile_local = TestSuiteShellCommand(
-            command=['./run-acceptance-release-interp-wc-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting to run -interp release-wordcode vmtests...',
-            descriptionDone='finished -interp release-wordcode vmtests.',
-            name="Testsuite_Release-wordcode-interp",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_jit_mobile = TestSuiteShellCommand(
-            command=['../all/run-acceptance-release-jit-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting vm tests with force jit release...',
-            descriptionDone='finished vm tests with force jit release.',
-            name="Testsuite_Release-jit",
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-test_emulator_release_jit_mobile_local = TestSuiteShellCommand(
-            command=['./run-acceptance-release-jit-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting vm tests with force jit release...',
-            descriptionDone='finished vm tests with force jit release.',
-            name="Testsuite_Release-jit",
             workdir="../repo/build/buildbot/slaves/scripts")
 
 test_selftest = TestSuiteShellCommand(

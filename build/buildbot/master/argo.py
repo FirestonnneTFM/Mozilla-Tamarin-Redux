@@ -496,6 +496,7 @@ class argo:
     winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-wordcode-ARM", shellname="avmshell_wordcode_arm", args="--enable-shell --enable-wordcode-interp --target=arm-windows", upload="false"))
     winmobile_emulator_compile_factory.addStep(compile_generic(name="Release-fpu-ARM", shellname="avmshell_fpu_arm", args="--enable-shell --enable-arm-fpu --target=arm-windows", upload="false"))
     winmobile_emulator_compile_factory.addStep(compile_generic(name="DebugARM", shellname="avmshell_arm_d", args="--enable-shell --enable-debug --target=arm-windows", upload="false"))
+    winmobile_emulator_compile_factory.addStep(compile_generic(name="Debug-fpu-ARM", shellname="avmshell_fpu_arm_d", args="--enable-shell --enable-debug --enable-arm-fpu --target=arm-windows", upload="false"))
     winmobile_emulator_compile_factory.addStep(compile_buildcheck_local)
     winmobile_emulator_compile_factory.addStep(util_upload_asteam_local)
     winmobile_emulator_compile_factory.addStep(BuildShellCommand(
@@ -1122,10 +1123,12 @@ class argo:
     #### builder for winmobile-emulator-test ####
     #############################################
     winmobile_emulator_test_factory = factory.BuildFactory()
-    winmobile_emulator_test_factory.addStep(test_emulator_release_mobile)
-    winmobile_emulator_test_factory.addStep(test_emulator_release_interp_mobile)
-    winmobile_emulator_test_factory.addStep(test_emulator_release_interp_wordcode_mobile)
-    winmobile_emulator_test_factory.addStep(test_emulator_release_jit_mobile)
+    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="", scriptargs=""))
+    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
+    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Debug", shellname="avmshell_arm_d", vmargs="", config="", scriptargs="--timeout=300 --random"))
+    winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Debug-interp", shellname="avmshell_arm_d", vmargs="-Dinterp", config="", scriptargs="--timeout=300 --random"))
     winmobile_emulator_test_factory.addStep(util_process_clean)
 
     winmobile_emulator_test_builder = {
@@ -1516,10 +1519,10 @@ class argo:
     winmobile_emulator_deep_factory.addStep(sync_update)
     winmobile_emulator_deep_factory.addStep(bb_slaveupdate(slave="winmobile-arm-deep"))
     winmobile_emulator_deep_factory.addStep(download_testmedia)
-    winmobile_emulator_deep_factory.addStep(test_emulator_release_mobile_local)
-    winmobile_emulator_deep_factory.addStep(test_emulator_release_interp_mobile_local)
-    winmobile_emulator_deep_factory.addStep(test_emulator_release_interp_wordcode_mobile_local)
-    winmobile_emulator_deep_factory.addStep(test_emulator_release_jit_mobile_local)
+    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release", shellname="avmshell_arm", vmargs="", config="arm-winmobile-emulator-tvm-release-deep", scriptargs=""))
+    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-interp", shellname="avmshell_arm", vmargs="-Dinterp", config="arm-winmobile-emulator-tvm-release-Dinterp-deep", scriptargs=""))
+    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="arm-winmobile-emulator-tvm-release-Dinterp-deep", scriptargs=""))
+    winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="arm-winmobile-emulator-tvm-release-Ojit-deep", scriptargs=""))
     winmobile_emulator_deep_factory.addStep(util_process_clean)
     winmobile_emulator_deep_builder = {
                 'name': "winmobile-emulator-deep-argo",
