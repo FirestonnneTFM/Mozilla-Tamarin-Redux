@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2009-2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -49,21 +49,51 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+showhelp ()
+{
+    echo ""
+    echo "usage: run-acceptance-emulator-generic.sh <change> <filename> <vmargs> <config> <scriptargs>"
+    echo "  <change>     build number of shell to test"
+    echo "  <filename>   name of the shell, do not include file extenstion"
+    echo "  <vmargs>     vmargs to be passed or empty quoted string"
+    echo "  <config>     custom config string to be passed to runtests.py"
+    echo "               or an empty string"
+    echo "  <scriptargs> (optional) additional runtests.py args to be passed, can be"
+    echo "               args and test/directories to run, value is appended to call"
+    exit 1
+}
+
+if [ "$#" -lt 4 ]
+then
+    echo "not enough args passed"
+    showhelp
+fi
+
+filename=$2
+vmargs=$3
+config=$4
+
+# assign the remaining positional params to scriptargs
+shift 4
+scriptargs=$*
+
+
+export shell=$filename$shell_extension
+
 
 ##
 # Download the AVMSHELL if it does not exist
 ##
-echo "$buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm"
-if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm" ]; then
-    echo "Download AVMSHELL"
-    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell_release_wordcode_arm $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm
+if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell" ]; then
+    echo "Download AVMSHELL: ${shell}"
+    ../all/util-download.sh $vmbuilds/$branch/$change-${changeid}/$platform/$shell $buildsdir/$change-${changeid}/$platform/$shell
     ret=$?
     test "$ret" = "0" || {
-        echo "Downloading of $shell_release_wordcode_arm failed"
-        rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm
+        echo "Downloading of $shell failed"
+        rm -f $buildsdir/$change-${changeid}/$platform/$shell
         exit 1
     }
-    chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm
+    chmod +x $buildsdir/$change-${changeid}/$platform/$shell
 fi
 
 
@@ -81,16 +111,28 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     }
 fi
 
+
 echo ""
-echo "Building ABC files using the following ASC version:"
+echo "Missing media will be compiled using the following ASC version:"
 echo "`java -jar $basedir/utils/asc.jar`"
 echo ""
 
-export CERUNNER=$basedir/build/buildbot/slaves/all/tools/wmrunner.exe
-export AVM=$buildsdir/$change-${changeid}/$platform/$shell_release_wordcode_arm
+
+
 export ASC=$basedir/utils/asc.jar
 export BUILTINABC=$basedir/core/$builtinABC
 export SHELLABC=$basedir/shell/$shellABC
+export AVM=$buildsdir/$change-${changeid}/$platform/$shell
+export CERUNNER=$basedir/build/buildbot/slaves/all/tools/wmrunner.exe
+
+echo AVM=$AVM
+echo "`$AVM`"
+test -f $AVM || {
+  echo "ERROR: $AVM not found"
+  exit 1
+}
+
+
 
 ##
 # Ensure that the system is clean and ready
@@ -99,6 +141,7 @@ cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-clean.sh
 
 cd $basedir/test/acceptance
+
 # If available, use windows python (instead of cygwin python)
 # Threading only works with windows python, $PYTHONWIN env variable must point to windows install
 # $PYTHONWIN must be defined with forward slashes, e.g: c:/Python26/python.exe
@@ -109,8 +152,14 @@ else
     py=$PYTHONWIN
 fi
 
-echo "message: $py ./runtests.py  --vmargs=-Dinterp --config=arm-winmobile-emulator-tvm-release-Dinterp-deep --notimecheck"
-$py ./runtests.py  --vmargs=-Dinterp --config=arm-winmobile-emulator-tvm-release-Dinterp-deep --notimecheck
+if [ "$config" != "" ]
+then
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs}"
+    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs}
+else
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs}" 
+    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs}
+fi
 
 ##
 # Ensure that the system is torn down and clean

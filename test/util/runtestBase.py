@@ -347,7 +347,12 @@ class RuntestBase:
                 
         self.vmtype = 'release'
         if self.osName=='winmobile-emulator':
-            self.vmtype = 'release'
+            # try to determine vmtype by filename
+            vm = splitext(split(self.avm)[1])[0]
+            if '_d' in vm:
+                self.vmtype = 'debug'
+            else:
+                self.vmtype = 'release'
         elif not self.runSource and not self.rebuildtests:
             (f,err,exitcode) = self.run_pipe('%s' % self.avm)
             # determine avmshell type
