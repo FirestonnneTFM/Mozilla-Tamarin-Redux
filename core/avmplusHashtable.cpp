@@ -221,17 +221,14 @@ namespace avmplus
 		#endif
 	}
 
-	void InlineHashtable::add(Atom name, Atom value)
+	void InlineHashtable::add(Atom name, Atom value, Toplevel* toplevel)
 	{
 		if (isFull())
-		{
-			if (!grow())
-				return;
-		}
+            grow(toplevel);
 		put(name, value);
 	}
 
-	bool InlineHashtable::grow()
+	void InlineHashtable::grow(Toplevel* toplevel)
 	{
 		// grow the table by 2N+1
 		//     new = 2*old+1 ; old == o.atoms.length/2
@@ -243,8 +240,10 @@ namespace avmplus
 		const uint32_t newCapacity = hasDeletedItems() ? oldCapacity : MathUtils::nextPowerOfTwo(oldCapacity+1);
 		if (newCapacity > MAX_CAPACITY)
 		{
-			AvmAssert(!"InlineHashtable::grow attempted to grow to %d capacity, rejecting\n");
-			return false;
+            if (toplevel != NULL)
+                toplevel->throwError(kOutOfMemoryError);
+            else 
+                GCHeap::SignalObjectTooLarge();
 		}
 		const Atom* atoms = getAtoms();
 		GC* gc = GC::GetGC(atoms);
@@ -255,7 +254,6 @@ namespace avmplus
 		setAtoms(newAtoms);
 		setCapacity(newCapacity);
 		clrHasDeletedItems();
-		return true;
 	}
 
 	Atom InlineHashtable::keyAt(int index)
@@ -343,12 +341,11 @@ namespace avmplus
 		return key;
 	}
 
-	void WeakKeyHashtable::add(Atom key, Atom value)
+	void WeakKeyHashtable::add(Atom key, Atom value, Toplevel* toplevel)
 	{
 		if (ht.isFull()) {
 			prune();
-			if (!ht.grow())
-				return;
+            ht.grow(toplevel);
 		}
 		ht.put(getKey(key), value);
 	}
@@ -397,12 +394,11 @@ namespace avmplus
 		return value;
 	}
 
-	void WeakValueHashtable::add(Atom key, Atom value)
+	void WeakValueHashtable::add(Atom key, Atom value, Toplevel* toplevel)
 	{
 		if (ht.isFull()) {
 			prune();
-			if (!ht.grow())
-				return;
+			ht.grow(toplevel);
 		}
 		if(AvmCore::isPointer(value)) {
 			// Don't know if value is GCObject or GCFinalizedObject so can't go via the
