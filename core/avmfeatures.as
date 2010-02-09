@@ -244,6 +244,7 @@ var FEATURES =
 
     <name>      AVMSYSTEM_MIPS </name>
     <defines>   VMCFG_MIPS </defines>
+    <defines>   AVMPLUS_MIPS </defines>  <!-- FIXME: legacy name -->
   </feature>
 
   <at-most-one>
