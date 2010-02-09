@@ -70,6 +70,7 @@
 #undef MMGC_SPARC
 #undef AVMPLUS_SPARC
 #undef VMCFG_MIPS
+#undef AVMPLUS_MIPS
 #undef AVMPLUS_UNIX
 #undef AVMPLUS_MAC
 #undef MMGC_MAC
@@ -738,6 +739,9 @@
 #endif
 #if AVMSYSTEM_MIPS
 #  define VMCFG_MIPS
+#endif
+#if AVMSYSTEM_MIPS
+#  define AVMPLUS_MIPS
 #endif
 #if AVMSYSTEM_UNIX
 #  define AVMPLUS_UNIX
