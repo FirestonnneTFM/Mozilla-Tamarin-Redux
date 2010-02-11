@@ -46,16 +46,19 @@ REALLY_INLINE ScopeOrTraits::ScopeOrTraits(Traits* t) : _scopeOrTraits((uintptr_
 
 REALLY_INLINE Traits* ScopeOrTraits::getTraits() const
 {
-    return (!(_scopeOrTraits & IS_SCOPE)) ?
-            ((Traits*)(_scopeOrTraits)) :
-            ((const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE))->traits();
+    if (!(_scopeOrTraits & IS_SCOPE))
+        return (Traits*)(_scopeOrTraits);
+    
+    const ScopeTypeChain* sc = (const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE);
+    return sc ? sc->traits() : NULL;
 }
 
 REALLY_INLINE const ScopeTypeChain* ScopeOrTraits::getScope() const
 {
-    return (!(_scopeOrTraits & IS_SCOPE)) ?
-            ((Traits*)(_scopeOrTraits))->declaringScope() :
-            ((const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE));
+    if (!(_scopeOrTraits & IS_SCOPE))
+        return _scopeOrTraits ? ((Traits*)(_scopeOrTraits))->declaringScope() : NULL;
+
+    return ((const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE));
 }
 
 REALLY_INLINE void ScopeOrTraits::setTraits(MMgc::GC* gc, void* container, Traits* t)
