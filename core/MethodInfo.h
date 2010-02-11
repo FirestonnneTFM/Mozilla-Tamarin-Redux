@@ -295,7 +295,7 @@ namespace avmplus
 
 	public:
 		
-		Traits* makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope);
+		void makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope);
 		bool makeMethodOf(Traits* type);
 
 		int32_t allowExtraArgs() const;

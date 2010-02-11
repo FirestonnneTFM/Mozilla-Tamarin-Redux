@@ -722,9 +722,44 @@ namespace avmplus
 			{
 				checkStack(0,1);
 				MethodInfo* f = checkMethodInfo(imm30);
-				// duplicate-function-definition handling now happens inside makeIntoPrototypeFunction()
-				const ScopeTypeChain* fscope = ScopeTypeChain::create(core->GetGC(), core->traits.function_itraits, scope, state, NULL, NULL);
-				Traits* ftraits = f->makeIntoPrototypeFunction(toplevel, fscope);
+                Traits* ftraits = core->traits.function_itraits;
+                const ScopeTypeChain* fscope = ScopeTypeChain::create(core->GetGC(), ftraits, scope, state, NULL, NULL);
+                // Duplicate function definitions aren't strictly legal, but can occur
+                // in otherwise "well formed" ABC due to old, buggy versions of ASC.
+                // Specifically, code of the form
+                //
+                //    public function simpleTest():void
+                //    {
+                //      var f:Function = function():void { } 
+                //      f();
+                //      f = function functwo (x):void { }
+                //      f(8);
+                //    }
+                //
+                // could cause the second interior function ("functwo") to include a bogus, unused OP_newfunction
+                // call to itself inside the body of functwo. This caused the scope to get reinitialized
+                // and generally caused havok. However, we want to allow existing code of this form to continue
+                // to work, so check to see if we already have a declaringScope, and if so, require that
+                // it match this one.
+                const ScopeTypeChain* curScope = f->declaringScope();
+                if (curScope != NULL)
+                {
+                    if (!curScope->equals(fscope))
+                    {
+                        // if f->method_id() == imm30, f == info, and therefore
+                        // curScope == scope -- don't redefine, don't fail verification,
+                        // just accept it. see https://bugzilla.mozilla.org/show_bug.cgi?id=544370
+                        if (f->method_id() != int32_t(imm30))
+                            toplevel->throwVerifyError(kCorruptABCError);
+                        
+                        AvmAssert(curScope->equals(scope));
+                    }
+                    AvmAssert(f->isResolved());
+                }
+                else
+                {
+                    f->makeIntoPrototypeFunction(toplevel, fscope);
+                }
 				coder->writeOp1(state, pc, opcode, imm30, ftraits);
 				state->push(ftraits, true);
 				break;

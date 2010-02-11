@@ -131,6 +131,27 @@ namespace avmplus
 	}
 	#endif
 
+	bool ScopeTypeChain::equals(const ScopeTypeChain* that) const
+	{
+        if (this != that)
+        {
+            if (!this || !that) 
+                return false;
+                
+            if (this->size != that->size || 
+                this->fullsize != that->fullsize ||
+                this->_traits != that->_traits)
+                return false;
+
+            for (int32_t i = 0, n = this->fullsize; i < n; i++)
+            {
+                if (this->_scopes[i] != that->_scopes[i])
+                    return false;
+            }
+        }
+        return true;
+	}
+
 	/*static*/ ScopeChain* ScopeChain::create(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, const ScopeChain* outer, Namespacep dxns)
 	{
 		AvmAssert(vtable->traits == scopeTraits->traits());
