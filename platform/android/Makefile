@@ -330,7 +330,7 @@ ifneq ($(ENABLE_NANOJIT),true)
 	AVMSHELL_DEFS := ${AVMSHELL_DEFS} -DAVMPLUS_DISABLE_NJ
 endif
 
-LDFLAGS := -lc -lm -lstdc++ -lssl
+LDFLAGS := -lc -lm -lstdc++ -lssl -lgcc
 
 #****************************************************************************
 # Shell Source files

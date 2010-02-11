@@ -829,18 +829,12 @@ namespace avmplus
 		}
 	}
 
-	Traits* MethodInfo::makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope)
+	void MethodInfo::makeIntoPrototypeFunction(const Toplevel* toplevel, const ScopeTypeChain* fscope)
 	{
-		// Duplicate function definitions can happen with well formed ABC data.  We need
-		// to clear out data on AbstractionFunction so it can correctly be re-initialized.
-		// If our old function is ever used incorrectly, we throw an verify error in 
-		// MethodEnv::coerceEnter.
-		if (_declarer.getTraits() != NULL)
-		{
-			this->_flags &= ~RESOLVED;
-            _declarer.setTraits(pool()->core->GetGC(), this, NULL);
-			this->_msref = pool()->core->GetGC()->emptyWeakRef;
-		}
+        AvmAssert(_declarer.getScope() == NULL);
+        
+        _declarer.setScope(toplevel->core()->GetGC(), this, fscope);
+
 // begin AVMPLUS_UNCHECKED_HACK
 		this->_flags |= PROTOFUNC;
 // end AVMPLUS_UNCHECKED_HACK
@@ -849,15 +843,6 @@ namespace avmplus
 		// this does not set the verified flag, so real verification will
 		// still happen before the function runs the first time.
 		resolveSignature(toplevel);
-
-		// type of F is synthetic subclass of Function, with a unique
-		// [[call]] property and a unique scope
-		Traits* ftraits = fscope->traits();
-		AvmAssert(fscope->traits() == pool()->core->traits.function_itraits);
-        _declarer.setScope(pool()->core->GetGC(), this, fscope);
-		
-        AvmAssert(declaringTraits() == ftraits);
-		return ftraits;
 	}
 	
 	/**

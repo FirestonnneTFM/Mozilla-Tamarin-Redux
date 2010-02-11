@@ -66,6 +66,8 @@ namespace avmplus
 		#if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core) const;
 		#endif
+        
+        bool equals(const ScopeTypeChain* that) const;
 
 	private:
 		void setScopeAt(uint32_t i, Traits* t, bool w);

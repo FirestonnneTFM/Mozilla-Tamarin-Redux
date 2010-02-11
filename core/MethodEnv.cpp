@@ -284,14 +284,8 @@ namespace avmplus
 		if (!ms->argcOk(argc))
 			argcError(argc);
 
-		// Can happen with duplicate function definitions from corrupt ABC data.  F1 is defined
-		// and F2 overrides the F1 slot which is okay as long as F1's MethodEnv is never called again.
-		if (method->declaringScope() != this->scope()->scopeTraits())
-		{
-			//core()->console<<method<<" "<<int(method->declaringTraits()->posType())<<"\n";
-			//core()->console<<"expected "<<this->scope()->scopeTraits()<<" but got "<<method->declaringScope()<<"\n";
-			toplevel()->throwVerifyError(kCorruptABCError);
-		}
+		// Should no longer be possible to have mismatched scopes; we should reject any such functions in makeIntoPrototypeFunction
+		AvmAssert(method->declaringScope() == this->scope()->scopeTraits());
 
 		// now unbox everything, including instance and rest args
 		const int32_t param_count = ms->param_count();
@@ -1203,7 +1197,11 @@ namespace avmplus
 		fvtable->ivtable = toplevel->object_ivtable;
 		AvmAssert(fvtable->linked);
 
-		ScopeChain* fscope = ScopeChain::create(gc, fvtable, this->abcEnv(), function->declaringScope(), outer, core->dxns());
+        const ScopeTypeChain* fstc = function->declaringScope();
+        // functions should never have 'extra' scopes
+        AvmAssert(fstc->size == fstc->fullsize);
+
+		ScopeChain* fscope = ScopeChain::create(gc, fvtable, this->abcEnv(), fstc, outer, core->dxns());
 		for (int i=outer->getSize(), n=fscope->getSize(); i < n; i++)
 		{
 			fscope->setScope(gc, i, *scopes++);
