@@ -333,7 +333,7 @@ You are attempting to use an  invalid file with the player: the tool that genera
 	]]></description></error>
  
    <error id="1047" label="kMissingEntryPointError">
-    Es wurde kein Zugangspunkt gefunden.
+    Es wurde kein Einsprungspunkt gefunden.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
