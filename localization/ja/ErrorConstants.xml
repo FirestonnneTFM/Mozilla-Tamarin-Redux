@@ -101,7 +101,7 @@
 var big:Sprite = new Sprite();
 var error:int = big.length(); </code></pre>
 	]]></description></error>
-  <error id="1007" label="kConstructOfNonFunctionError">コンストラクタ以外にインスタンス化が試行されました。</error>
+  <error id="1007" label="kConstructOfNonFunctionError">コンストラクター以外にインスタンス化が試行されました。</error>
   <error id="1008" label="kAmbiguousBindingError">%1 があいまいです。一致するバインディングが複数見つかりました。</error>
   <error id="1009" label="kConvertNullToObjectError">
     null のオブジェクト参照のプロパティまたはメソッドにアクセスすることはできません。
@@ -370,7 +370,7 @@ You are attempting to use an  invalid file with the player: the tool that genera
 	]]></description></error>
  
    <error id="1054" label="kIllegalExceptionHandlerError">
-    例外ハンドラの範囲またはターゲットオフセットが無効です。
+    例外ハンドラーの範囲またはターゲットオフセットが無効です。
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
@@ -435,7 +435,7 @@ var m1:uint = uint(m0&lt;&lt;24);</code></pre>
    <!--<error id="1062" label="kPackageCircularityError">Package %a imported while being defined</error>-->
   <error id="1063" label="kWrongArgumentCountError">%1 の引数の数が一致していません。%2 が必要ですが、%3 が指定されました。</error>
   <error id="1064" label="kCannotCallMethodAsConstructor">
-    メソッド %1 をコンストラクタとして呼び出すことはできません。
+    メソッド %1 をコンストラクターとして呼び出すことはできません。
     <description><![CDATA[
 	Extracted methods are permanently bound to the object they are extracted from. 
 	Therefore, they can not later be called as a constructor. For example, the following 
@@ -520,7 +520,7 @@ class B extends A {
 	You are trying to call <code>math()</code> as a function, but the Math class is a class with static methods.
 	]]></description></error>
   <error id="1076" label="kMathNotConstructorError">
-    Math はコンストラクタではありません。
+    Math はコンストラクターではありません。
     <description><![CDATA[
 	You can not instantiate the Math class. 
  	]]></description></error>
@@ -693,7 +693,7 @@ class B extends A {
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-  <error id="1115" label="kNotConstructorError">%1 はコンストラクタではありません。</error>
+  <error id="1115" label="kNotConstructorError">%1 はコンストラクターではありません。</error>
   <error id="1116" label="kApplyError">Function.prototype.apply の 2 番目の引数は配列でなければなりません。</error>
   <error id="1117" label="kXMLInvalidName">無効な XML 名 : %1。</error>
   <error id="1118" label="kXMLIllegalCyclicalLoop">ノード間に不正な周期的なループがあります。</error>
@@ -705,8 +705,8 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 を明示的に登録するには、オブジェクトとインデックスが必要です。</error>
   <error id="1125" label="kOutOfRangeError">インデックス %1 は %2 の範囲外です。</error>
   <error id="1126" label="kVectorFixedError">固定ベクターの長さは変更できません。</error>
-  <error id="1127" label="kTypeAppOfNonParamType">非パラメータ化された型に対して型指定を実行しようとしました。</error>
-  <error id="1128" label="kWrongTypeArgCountError">%1 の型パラメータ数が正しくありません。%2 である必要がありますが、%3 が指定されました。</error>
+  <error id="1127" label="kTypeAppOfNonParamType">非パラメーター化された型に対して型指定を実行しようとしました。</error>
+  <error id="1128" label="kWrongTypeArgCountError">%1 の型パラメーター数が正しくありません。%2 である必要がありますが、%3 が指定されました。</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  
   <error id="1500" hidden="true" label="kFileOpenError">ファイル %1 を開く際にエラーが発生しました。</error>
