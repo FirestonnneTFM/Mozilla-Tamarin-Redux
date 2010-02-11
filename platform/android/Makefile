@@ -330,7 +330,7 @@ ifneq ($(ENABLE_NANOJIT),true)
 	AVMSHELL_DEFS := ${AVMSHELL_DEFS} -DAVMPLUS_DISABLE_NJ
 endif
 
-LDFLAGS := -lc -lm -lstdc++ -lssl
+LDFLAGS := -lc -lm -lstdc++ -lssl -lgcc
 
 #****************************************************************************
 # Shell Source files
@@ -385,13 +385,13 @@ endif
 	@echo "=== done:" $@ "==="
 
 $(OBJDIR)/avmshell/%.o: ../../shell/%.cpp
-	${call compile-files,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
 
 $(OBJDIR)/avmshell/%.o: ../../extensions/%.cpp
-	${call compile-files,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
 
 $(OBJDIR)/avmshell/%.o: %.cpp
-	${call compile-files,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
 
 default_target:
 	@$(MAKE) -j4 ${FINAL_TARGET}
