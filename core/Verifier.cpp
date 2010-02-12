@@ -746,10 +746,10 @@ namespace avmplus
                 {
                     if (!curScope->equals(fscope))
                     {
-                        // if f->method_id() == imm30, f == info, and therefore
+                        // if info->method_id() == imm30, f == info, and therefore
                         // curScope == scope -- don't redefine, don't fail verification,
                         // just accept it. see https://bugzilla.mozilla.org/show_bug.cgi?id=544370
-                        if (f->method_id() != int32_t(imm30))
+                        if (info->method_id() != int32_t(imm30))
                             toplevel->throwVerifyError(kCorruptABCError);
                         
                         AvmAssert(curScope->equals(scope));
