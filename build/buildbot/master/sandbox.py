@@ -396,6 +396,20 @@ class sandbox:
                 name="Build_Release_cov",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
+    sb_linux_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=mips-linux', 'avmshell_mips', 'true'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'mips-linux-gnu-g++',
+                    'CC' : 'mips-linux-gnu-gcc',
+                    'LD' : 'mips-linux-gnu-ar',
+                    'AR' : 'mips-linux-gnu-ar',
+                }
+                description='starting release-mips build...',
+                descriptionDone='finished release-mips build.',
+                name="Build_Release-MIPS",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
     sb_linux_compile_factory.addStep(compile_buildcheck_local)
     sb_linux_compile_factory.addStep(util_upload_asteam_local)
 
