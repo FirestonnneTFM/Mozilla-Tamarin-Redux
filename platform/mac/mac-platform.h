@@ -78,12 +78,16 @@
 #define VMPI_exit    ::exit
 
 // Set up a jmp_buf suitable for VMPI_longjmpNoUnwind.
-#define VMPI_setjmpNoUnwind ::setjmp
+// Use the routine version with an underscore to avoid system calls
+// to query the signal mask.
+#define VMPI_setjmpNoUnwind ::_setjmp
 
 // Jump to an active jmp_buf that was set up by VMPI_setjmpNoUnwind.
 // Under no circumstances may C++ destructors be unwound during the
 // jump (MSVC likes to do this by default).
-#define VMPI_longjmpNoUnwind ::longjmp
+// Use the routine version with an underscore to avoid system calls
+// to query the signal mask.
+#define VMPI_longjmpNoUnwind ::_longjmp
 
 #include <stddef.h>
 #include <string.h>
@@ -112,6 +116,7 @@
 #include <pthread.h>
 #include <new>
 #include <libkern/OSAtomic.h>
+#include <signal.h>
 
 #ifdef DEBUG
 #include <assert.h>
