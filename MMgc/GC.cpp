@@ -3762,8 +3762,6 @@ namespace MMgc
 
 		// Make it squeaky clean
 		SetStackEnter(NULL,false);
-		VMPI_lockRelease(&m_gcLock);
-		m_gcThread = NULL;		
 	}
 	
 	GC::AutoRCRootSegment::AutoRCRootSegment(GC* gc, void* mem, size_t size)
