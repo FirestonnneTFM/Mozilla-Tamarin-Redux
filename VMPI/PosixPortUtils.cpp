@@ -46,7 +46,7 @@
 #endif // AVMPLUS_UNIX
 
 #ifdef AVMPLUS_MAC
-	#include <malloc/malloc.h>
+    #include <malloc/malloc.h>
 #endif //AVMPLUS_MAC
 
 #include <sys/mman.h>
@@ -230,4 +230,45 @@ void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* ar
 	(void)fn;
 	(void)arg;
 }
+
+#if defined(AVMPLUS_MAC) && defined(DEBUG)
+uint32_t querySignalMask() {
+	// will save just the 32 signals to avoid exposing sigset_t in ExceptionFrame
+	sigset_t set;
+	uint32_t mask = 0;
+	if (sigprocmask(0, NULL, &set) == -1) {
+		VMPI_debugLog("signal mask query failed\n");
+		VMPI_debugBreak();
+	}
+
+	for (int i = 0; i< 32; i++) {
+		if (sigismember(&set, i))
+			mask |= (1 << i);
+	}
+	return mask;
+	
+}
+
+void assertSignalMask(uint32_t expected) {
+	
+	sigset_t current_mask;
+	sigemptyset(&current_mask);
+		
+	if (sigprocmask(0, NULL, &current_mask) == -1)  {
+		VMPI_debugLog("signal mask query failed\n");
+		VMPI_debugBreak();
+	} else {
+		for (int i = 0; i< 32; i++) {
+			bool result = sigismember(&current_mask, i);
+			if (result != (bool)(expected  & (1 << i))) {
+				VMPI_debugLog("masks not equal\n");
+				VMPI_debugBreak();
+			}
+		}
+	}
+}
+
+#endif
+
+
 
