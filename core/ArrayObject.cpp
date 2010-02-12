@@ -438,17 +438,26 @@ namespace avmplus
 			uint32 oldLength = getLength();
 			if (newLength < oldLength) 
 			{
-				uint32 deleteStart = newLength;
 				uint32 denseLength = getDenseLength();
 				if (newLength < denseLength)
 				{
-					this->m_denseArr.splice (deleteStart, 0, (denseLength - deleteStart), 0);
-					deleteStart = denseLength;
+					this->m_denseArr.splice(newLength, 0, (denseLength - newLength), 0);
 				}
-
-				for (uint32 i = deleteStart; i < oldLength; i++) {
-					delUintProperty(i);
-				}
+                
+                // everything remaining must be in the NON-dense portion, ie, in our hashtable.
+                // in theory we need to call delUintProperty on every one of these, but in practice,
+                // user AS3 code can't override delUintProperty, and no existing VM/Flash/AIR classes subclass ArrayObject,
+                // so we can (and should) short-circuit this and just process the items actually present.
+                // (this is MUCH faster if the sole item was at index 0xfffffff0...)
+                InlineHashtable* ht = this->getTable();
+                for (int i = ht->next(0); i != 0; i = ht->next(i)) {
+                    Atom k = ht->keyAt(i);
+                    uint32_t index;
+                    if (AvmCore::getIndexFromAtom(k, &index) && index >= newLength)
+                    {
+                        ht->remove(k);
+                    }
+                }
 			}
 			m_length = newLength;
 		}
