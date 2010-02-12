@@ -45,6 +45,13 @@
 	}
 #endif
 
+#if defined(AVMPLUS_MAC)  && defined(DEBUG)
+// definition in MacDebugUtils.cpp
+void assertSignalMask(uint32_t expected); 
+uint32_t querySignalMask(); 
+#endif
+
+
 namespace avmplus
 {
 	//
@@ -121,6 +128,10 @@ namespace avmplus
 #ifdef VMCFG_AOT
 		this->llvmUnwindStyle = 0;
 #endif
+
+#if defined(AVMPLUS_MAC) && defined(DEBUG)
+		this->contextExtra = querySignalMask();
+#endif		
 	}
 
 #ifdef VMCFG_AOT
@@ -130,6 +141,8 @@ namespace avmplus
 		this->llvmUnwindStyle = 1;
 	}
 #endif
+
+
 
 	void ExceptionFrame::endTry()
 	{
@@ -159,6 +172,10 @@ namespace avmplus
 	void ExceptionFrame::beginCatch()
 	{
 		core->exceptionFrame = prevFrame;
+#if defined(AVMPLUS_MAC) && defined(DEBUG)
+  		assertSignalMask(this->contextExtra);
+#endif		
+
 
 #ifdef DEBUGGER
 		//AvmAssert(callStack && callStack->env);
