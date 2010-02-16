@@ -289,10 +289,10 @@ namespace avmplus
         LIns* insCall(const CallInfo* call, LInsp args[]);
     };
 
-    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LInsp env_domainenv) : 
-        LirWriter(out), 
+    inline MopsRangeCheckFilter::MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LInsp env_domainenv) :
+        LirWriter(out),
         prolog_out(prolog_out),
-        env_domainenv(env_domainenv), 
+        env_domainenv(env_domainenv),
         curMemBase(NULL),
         curMemSize(NULL),
         curMopAddr(NULL),
@@ -380,7 +380,7 @@ namespace avmplus
             mopAddr = nonImm;
         }
     }
-    
+
     LInsp MopsRangeCheckFilter::emitRangeCheck(LInsp& mopAddr, int32_t const size, int32_t* disp, LInsp& br)
     {
         int32_t offsetMin = 0;
@@ -399,10 +399,10 @@ namespace avmplus
         if (curRangeCheckLHS != NULL && curMopAddr == mopAddr)
         {
             int32_t n_curRangeCheckMin = curRangeCheckMinValue;
-            if (n_curRangeCheckMin > offsetMin) 
+            if (n_curRangeCheckMin > offsetMin)
                 n_curRangeCheckMin = offsetMin;
             int32_t n_curRangeCheckMax = curRangeCheckMaxValue;
-            if (n_curRangeCheckMax < offsetMax) 
+            if (n_curRangeCheckMax < offsetMax)
                 n_curRangeCheckMax = offsetMax;
 
             if ((n_curRangeCheckMax - n_curRangeCheckMin) <= DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
@@ -431,7 +431,7 @@ namespace avmplus
         {
             flushRangeChecks();
         }
-        
+
         if (!curMemBase)
         {
             //AvmAssert(curMemSize == NULL);
@@ -450,7 +450,7 @@ namespace avmplus
             curRangeCheckMaxValue = offsetMax;
 
             AvmAssert(env_domainenv != NULL);
-            
+
             // we want to pass range-check if
             //
             //      (curMopAddr+curRangeCheckMin >= 0 && curMopAddr+curRangeCheckMax <= mopsMemorySize)
@@ -4909,13 +4909,13 @@ namespace avmplus
             mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(lirout, prolog, loadEnvDomainEnv());
             lirout = mopsRangeCheckFilter;
         }
-        
+
         // note, mopAddr and disp are both in/out parameters
         LInsp br = NULL;
         LInsp mopsMemoryBase = mopsRangeCheckFilter->emitRangeCheck(mopAddr, size, disp, br);
         if (br)
             patchLater(br, mop_rangeCheckFailed_label);
-        
+
 
         // if mopAddr is a compiletime constant, we still have to do the range-check above
         // (since globalMemorySize can vary at runtime), but we might be able to encode
@@ -5198,7 +5198,7 @@ namespace avmplus
 #ifdef _DEBUG
             v1(&r1), v2(&r2), p1(&v1), p2(&v2)
 #else
-            p1(&r1), p2(&r2) 
+            p1(&r1), p2(&r2)
 #endif
         {
             in = p1;
