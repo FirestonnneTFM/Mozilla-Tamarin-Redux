@@ -481,7 +481,7 @@ int32_t FASTCALL mop_liz8(const void* addr)
 int32_t FASTCALL mop_lix16(const void* addr)
 {
     // loads an signed short, sign-extends
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     return *(const int16_t*)(addr);
 #else
     const uint8_t* u = (const uint8_t*)addr;
@@ -492,7 +492,7 @@ int32_t FASTCALL mop_lix16(const void* addr)
 int32_t FASTCALL mop_liz16(const void* addr)
 {
     // loads an unsigned short, zero-extends
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     return *(const uint16_t*)(addr);
 #else
     const uint8_t* u = (const uint8_t*)addr;
@@ -503,7 +503,7 @@ int32_t FASTCALL mop_liz16(const void* addr)
 
 int32_t FASTCALL mop_li32(const void* addr)
 {
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     return *(const int32_t*)(addr);
 #else
     const uint8_t* u = (const uint8_t*)addr;
@@ -516,7 +516,7 @@ int32_t FASTCALL mop_li32(const void* addr)
 
 double FASTCALL mop_lf32(const void* addr)
 {
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     return *(const float*)(addr);
 #else
     union {
@@ -534,7 +534,7 @@ double FASTCALL mop_lf32(const void* addr)
 
 double FASTCALL mop_lf64(const void* addr)
 {
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     return *(const double*)(addr);
 #else
     union {
@@ -564,7 +564,7 @@ void FASTCALL mop_si8(void* addr, int32_t value)
 
 void FASTCALL mop_si16(void* addr, int32_t value)
 {
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     *(uint16_t*)(addr) = uint16_t(value);
 #else
     uint8_t* u = (uint8_t*)addr;
@@ -575,7 +575,7 @@ void FASTCALL mop_si16(void* addr, int32_t value)
 
 void FASTCALL mop_si32(void* addr, int32_t value)
 {
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     *(int32_t*)(addr) = int32_t(value);
 #else
     uint8_t* u = (uint8_t*)addr;
@@ -588,7 +588,7 @@ void FASTCALL mop_si32(void* addr, int32_t value)
 
 void mop_sf32(void* addr, double value)
 {
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     *(float*)(addr) = float(value);
 #else
     union {
@@ -606,7 +606,7 @@ void mop_sf32(void* addr, double value)
 
 void mop_sf64(void* addr, double value)
 {
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     *(double*)(addr) = double(value);
 #else
     union {

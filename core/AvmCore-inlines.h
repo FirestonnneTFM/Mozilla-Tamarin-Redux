@@ -446,7 +446,7 @@ REALLY_INLINE ScriptObject* AvmCore::newObject(VTable *vtable, ScriptObject *del
 /** Helper function; reads a signed 24-bit integer from pc */
 REALLY_INLINE /*static*/ int AvmCore::readS24(const byte *pc)
 {
-	#ifdef AVMPLUS_UNALIGNED_ACCESS
+	#ifdef VMCFG_UNALIGNED_ACCESS
 		// unaligned short access still faster than 2 byte accesses
 		return ((uint16_t*)pc)[0] | ((int8_t*)pc)[2]<<16;
 	#else
@@ -470,7 +470,7 @@ REALLY_INLINE /*static*/ int AvmCore::calculateInstructionWidth(const byte* p)
 /** Helper function; reads an unsigned 16-bit integer from pc */
 REALLY_INLINE /*static*/ int32_t AvmCore::readU16(const byte *pc)
 {
-	#ifdef AVMPLUS_UNALIGNED_ACCESS
+	#ifdef VMCFG_UNALIGNED_ACCESS
 		// unaligned short access still faster than 2 byte accesses
 		return *((uint16_t*)pc);
 	#else

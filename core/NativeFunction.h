@@ -135,7 +135,7 @@ namespace avmplus
 	#if defined(AVMPLUS_64BIT)
 		AvmAssert(sizeof(AvmBox) == sizeof(double));
 		return *(const double*)b;
-	#elif defined(AVMPLUS_UNALIGNED_ACCESS)
+	#elif defined(VMCFG_UNALIGNED_ACCESS)
 		AvmAssert(sizeof(AvmBox)*2 == sizeof(double));
 		return *(const double*)b;
 	#else
