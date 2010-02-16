@@ -155,6 +155,16 @@ var FEATURES =
   </feature>
 
   <feature>
+    <desc> Selects an architecture that allows load/store of unaligned words.
+        There may be a performance penalty, but it will not generate a runtime
+        fault, and will be at least as efficient as separate instructions to load
+        and assembly the word one byte at a time.</desc>
+
+    <name>      AVMSYSTEM_UNALIGNED_ACCESS </name>
+    <defines>   VMCFG_UNALIGNED_ACCESS </defines>
+  </feature>
+
+  <feature>
     <desc> Selects a big-endian architecture: the most significant byte of a word
            is stored at the lowest byte address of the word </desc>
 
@@ -195,7 +205,6 @@ var FEATURES =
     <defines>   VMCFG_IA32 </defines>
     <defines>   MMGC_IA32 </defines>     <!-- FIXME: legacy name -->
     <defines>   AVMPLUS_IA32 </defines>  <!-- FIXME: legacy name -->
-    <defines>   AVMPLUS_UNALIGNED_ACCESS </defines>
   </feature>
 
   <feature>
@@ -206,7 +215,6 @@ var FEATURES =
     <defines>  VMCFG_AMD64 </defines>
     <defines>  MMGC_AMD64 </defines>     <!-- FIXME: legacy name -->
     <defines>  AVMPLUS_AMD64 </defines>  <!-- FIXME: legacy name -->
-    <defines>  AVMPLUS_UNALIGNED_ACCESS </defines>
   </feature>
 
   <feature>
