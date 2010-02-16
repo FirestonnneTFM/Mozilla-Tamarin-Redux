@@ -357,6 +357,8 @@
 		D5AD1DAE0F979A4A002B2FE2 /* SpyUtilsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */; };
 		D5AD1E2B0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
 		D5AD1E2C0F97D7C7002B2FE2 /* ThreadsPosix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */; };
+		D92373DE11222458006D8AA3 /* njconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D92373DC11222458006D8AA3 /* njconfig.cpp */; };
+		D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D92373DC11222458006D8AA3 /* njconfig.cpp */; };
 		D935BDEC0FA0EBA7001E3E70 /* avm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D935BDEB0FA0EBA7001E3E70 /* avm.cpp */; };
 		D935BDED0FA0EBA7001E3E70 /* avm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D935BDEB0FA0EBA7001E3E70 /* avm.cpp */; };
 		D940B6770F61C60300E72086 /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
@@ -847,6 +849,8 @@
 		8DD76F6C0486A84900D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpyUtilsPosix.cpp; path = ../../../VMPI/SpyUtilsPosix.cpp; sourceTree = SOURCE_ROOT; };
 		D5AD1E2A0F97D7C7002B2FE2 /* ThreadsPosix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadsPosix.cpp; path = ../../../VMPI/ThreadsPosix.cpp; sourceTree = SOURCE_ROOT; };
+		D92373DC11222458006D8AA3 /* njconfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = njconfig.cpp; path = ../../../nanojit/njconfig.cpp; sourceTree = SOURCE_ROOT; };
+		D92373DD11222458006D8AA3 /* njconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = njconfig.h; path = ../../../nanojit/njconfig.h; sourceTree = SOURCE_ROOT; };
 		D935BDEB0FA0EBA7001E3E70 /* avm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avm.cpp; path = ../../../core/avm.cpp; sourceTree = SOURCE_ROOT; };
 		D935BDEE0FA0EC17001E3E70 /* avm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avm.h; path = ../../../core/avm.h; sourceTree = SOURCE_ROOT; };
 		D94236930F8ACAE400F97706 /* MacDebugUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacDebugUtils.cpp; path = ../../../VMPI/MacDebugUtils.cpp; sourceTree = SOURCE_ROOT; };
@@ -1387,6 +1391,8 @@
 		079DFA860F3A965C0031D1B4 /* mmgc */ = {
 			isa = PBXGroup;
 			children = (
+				D92373DC11222458006D8AA3 /* njconfig.cpp */,
+				D92373DD11222458006D8AA3 /* njconfig.h */,
 				07D28FEA106CF00D0050C864 /* AllocationMacros.h */,
 				07C0F7BE0FDE897100B0E09A /* BasicList.h */,
 				079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */,
@@ -1808,6 +1814,7 @@
 				D9FDA5B91045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 				E8B532071069A1DE00ED299A /* instr.cpp in Sources */,
 				0721CA0B111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
+				D92373DE11222458006D8AA3 /* njconfig.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1989,6 +1996,7 @@
 				D9FDA5B81045C32D00C96421 /* ST_mmgc_threads.cpp in Sources */,
 				E8B532061069A1DE00ED299A /* instr.cpp in Sources */,
 				0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
+				D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
