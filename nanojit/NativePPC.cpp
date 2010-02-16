@@ -214,8 +214,8 @@ namespace nanojit
         switch (ins->opcode()) {
             case LIR_ldf:
             case LIR_ldfc:
-            CASE64(LIR_ldq:)
-            CASE64(LIR_ldqc:)
+            case LIR_ldq:
+            case LIR_ldqc:
                 // handled by mainline code below for now
                 break;
             case LIR_ld32f:
@@ -308,7 +308,7 @@ namespace nanojit
 
         switch (op) {
             case LIR_stfi:
-            CASE64(LIR_stqi:)
+            case LIR_stqi:
                 // handled by mainline code below for now
                 break;
             case LIR_st32f:
@@ -320,6 +320,18 @@ namespace nanojit
         }
 
         Register ra = getBaseReg(base, dr, GpRegs);
+
+    #if !PEDANTIC && !defined NANOJIT_64BIT
+        if (value->isop(LIR_quad) && isS16(dr) && isS16(dr+4)) {
+            // quad constant and short offset
+            uint64_t q = value->imm64();
+            STW(R0, dr, ra);   // hi
+            asm_li(R0, int32_t(q>>32)); // hi
+            STW(R0, dr+4, ra); // lo
+            asm_li(R0, int32_t(q));     // lo
+            return;
+        }
+    #endif // !PEDANTIC
 
         // general case for any value
     #if !defined NANOJIT_64BIT
@@ -367,30 +379,30 @@ namespace nanojit
         Register r = deprecated_prepResultReg(ins, GpRegs);
         switch (op) {
         case LIR_eq: case LIR_feq:
-        CASE64(LIR_qeq:)
+        case LIR_qeq:
             EXTRWI(r, r, 1, 4*cr+COND_eq); // extract CR7.eq
             MFCR(r);
             break;
         case LIR_lt: case LIR_ult:
         case LIR_flt: case LIR_fle:
-        CASE64(LIR_qlt:) CASE64(LIR_qult:)
+        case LIR_qlt: case LIR_qult:
             EXTRWI(r, r, 1, 4*cr+COND_lt); // extract CR7.lt
             MFCR(r);
             break;
         case LIR_gt: case LIR_ugt:
         case LIR_fgt: case LIR_fge:
-        CASE64(LIR_qgt:) CASE64(LIR_qugt:)
+        case LIR_qgt: case LIR_qugt:
             EXTRWI(r, r, 1, 4*cr+COND_gt); // extract CR7.gt
             MFCR(r);
             break;
         case LIR_le: case LIR_ule:
-        CASE64(LIR_qle:) CASE64(LIR_qule:)
+        case LIR_qle: case LIR_qule:
             EXTRWI(r, r, 1, 4*cr+COND_eq); // extract CR7.eq
             MFCR(r);
             CROR(CR7, eq, lt, eq);
             break;
         case LIR_ge: case LIR_uge:
-        CASE64(LIR_qge:) CASE64(LIR_quge:)
+        case LIR_qge: case LIR_quge:
             EXTRWI(r, r, 1, 4*cr+COND_eq); // select CR7.eq
             MFCR(r);
             CROR(CR7, eq, gt, eq);
@@ -457,25 +469,25 @@ namespace nanojit
         switch (cond->opcode()) {
         case LIR_eq:
         case LIR_feq:
-        CASE64(LIR_qeq:)
+        case LIR_qeq:
             if (onfalse) BNE(cr,bd); else BEQ(cr,bd);
             break;
         case LIR_lt: case LIR_ult:
         case LIR_flt: case LIR_fle:
-        CASE64(LIR_qlt:) CASE64(LIR_qult:)
+        case LIR_qlt: case LIR_qult:
             if (onfalse) BNL(cr,bd); else BLT(cr,bd);
             break;
         case LIR_le: case LIR_ule:
-        CASE64(LIR_qle:) CASE64(LIR_qule:)
+        case LIR_qle: case LIR_qule:
             if (onfalse) BGT(cr,bd); else BLE(cr,bd);
             break;
         case LIR_gt: case LIR_ugt:
         case LIR_fgt: case LIR_fge:
-        CASE64(LIR_qgt:) CASE64(LIR_qugt:)
+        case LIR_qgt: case LIR_qugt:
             if (onfalse) BNG(cr,bd); else BGT(cr,bd);
             break;
         case LIR_ge: case LIR_uge:
-        CASE64(LIR_qge:) CASE64(LIR_quge:)
+        case LIR_qge: case LIR_quge:
             if (onfalse) BLT(cr,bd); else BGE(cr,bd);
             break;
         default:
@@ -495,25 +507,25 @@ namespace nanojit
         switch (condop) {
         case LIR_eq:
         case LIR_feq:
-        CASE64(LIR_qeq:)
+        case LIR_qeq:
             if (onfalse) BNECTR(cr); else BEQCTR(cr);
             break;
         case LIR_lt: case LIR_ult:
-        CASE64(LIR_qlt:) CASE64(LIR_qult:)
+        case LIR_qlt: case LIR_qult:
         case LIR_flt: case LIR_fle:
             if (onfalse) BNLCTR(cr); else BLTCTR(cr);
             break;
         case LIR_le: case LIR_ule:
-        CASE64(LIR_qle:) CASE64(LIR_qule:)
+        case LIR_qle: case LIR_qule:
             if (onfalse) BGTCTR(cr); else BLECTR(cr);
             break;
         case LIR_gt: case LIR_ugt:
-        CASE64(LIR_qgt:) CASE64(LIR_qugt:)
+        case LIR_qgt: case LIR_qugt:
         case LIR_fgt: case LIR_fge:
             if (onfalse) BNGCTR(cr); else BGTCTR(cr);
             break;
         case LIR_ge: case LIR_uge:
-        CASE64(LIR_qge:) CASE64(LIR_quge:)
+        case LIR_qge: case LIR_quge:
             if (onfalse) BLTCTR(cr); else BGECTR(cr);
             break;
         default:
@@ -547,26 +559,22 @@ namespace nanojit
                     CMPWI(cr, ra, d);
                     return;
                 }
-    #if defined NANOJIT_64BIT
                 if (condop >= LIR_qeq && condop <= LIR_qge) {
                     CMPDI(cr, ra, d);
                     TODO(cmpdi);
                     return;
                 }
-    #endif
             }
             if (isU16(d)) {
                 if ((condop == LIR_eq || condop >= LIR_ult && condop <= LIR_uge)) {
                     CMPLWI(cr, ra, d);
                     return;
                 }
-    #if defined NANOJIT_64BIT
                 if ((condop == LIR_qeq || condop >= LIR_qult && condop <= LIR_quge)) {
                     CMPLDI(cr, ra, d);
                     TODO(cmpldi);
                     return;
                 }
-    #endif
             }
         }
     #endif
@@ -575,18 +583,14 @@ namespace nanojit
         Register rb = b==a ? ra : findRegFor(b, allow & ~rmask(ra));
         if (condop >= LIR_eq && condop <= LIR_ge) {
             CMPW(cr, ra, rb);
-        } 
-        else if (condop >= LIR_ult && condop <= LIR_uge) {
+        } else if (condop >= LIR_ult && condop <= LIR_uge) {
             CMPLW(cr, ra, rb);
-        } 
-    #if defined NANOJIT_64BIT
-        else if (condop >= LIR_qeq && condop <= LIR_qge) {
+        } else if (condop >= LIR_qeq && condop <= LIR_qge) {
             CMPD(cr, ra, rb);
         }
         else if (condop >= LIR_qult && condop <= LIR_quge) {
             CMPLD(cr, ra, rb);
         }
-    #endif
         else if (condop >= LIR_feq && condop <= LIR_fge) {
             // set the lt/gt bit for fle/fge.  We don't do this for
             // int/uint because in those cases we can invert the branch condition.
@@ -846,7 +850,7 @@ namespace nanojit
                 // ppc arith immediate ops sign-exted the imm16 value
                 switch (op) {
                 case LIR_add:
-                CASE32(LIR_iaddp:)
+                case LIR_iaddp:
                 CASE64(LIR_qiadd:)
                 CASE64(LIR_qaddp:)
                     ADDI(rr, ra, rhsc);
@@ -897,7 +901,7 @@ namespace nanojit
             CASE64(LIR_qiadd:)
             CASE64(LIR_qaddp:)
             case LIR_add:
-            CASE32(LIR_iaddp:)
+            case LIR_iaddp:
                 ADD(rr, ra, rb);
                 break;
             CASE64(LIR_qiand:)
@@ -1006,7 +1010,6 @@ namespace nanojit
         NanoAssertMsg(0, "NJ_F2I_SUPPORTED not yet supported for this architecture");
     }
 
-    #if defined NANOJIT_64BIT
     // XXX: this is sub-optimal, see https://bugzilla.mozilla.org/show_bug.cgi?id=540368#c7.
     void Assembler::asm_q2i(LIns *ins) {
         Register rr = deprecated_prepResultReg(ins, GpRegs);
@@ -1030,8 +1033,7 @@ namespace nanojit
             break;
         }
     }
-    #endif
-    
+
     void Assembler::asm_quad(LIns *ins) {
     #ifdef NANOJIT_64BIT
         Register r = ins->deprecated_getReg();
@@ -1170,13 +1172,9 @@ namespace nanojit
         LIns* iffalse = ins->oprnd3();
 
         NanoAssert(cond->isCmp());
-    #ifdef NANOJIT_64BIT
         NanoAssert((ins->opcode() == LIR_cmov  && iftrue->isI32() && iffalse->isI32()) ||
                    (ins->opcode() == LIR_qcmov && iftrue->isI64() && iffalse->isI64()));
-    #else
-        NanoAssert((ins->opcode() == LIR_cmov  && iftrue->isI32() && iffalse->isI32()));
-    #endif
-    
+
         // fixme: we could handle fpu registers here, too, since we're just branching
         Register rr = deprecated_prepResultReg(ins, GpRegs);
         findSpecificRegFor(iftrue, rr);
@@ -1190,12 +1188,8 @@ namespace nanojit
     RegisterMask Assembler::hint(LIns* ins) {
         LOpcode op = ins->opcode();
         RegisterMask prefer = 0;
-        if (op == LIR_icall)
+        if (op == LIR_icall || op == LIR_qcall)
             prefer = rmask(R3);
-    #ifdef NANOJIT_64BIT
-        else if (op == LIR_qcall)
-            prefer = rmask(R3);
-    #endif
         else if (op == LIR_fcall)
             prefer = rmask(F1);
         else if (op == LIR_param) {
