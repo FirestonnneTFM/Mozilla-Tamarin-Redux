@@ -141,7 +141,7 @@ namespace MMgc
 	void* FixedAlloc::Alloc(size_t size, FixedMallocOpts opts)
 	{ 
 		(void)size;
-		GCAssertMsg(m_heap->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER must be on the stack");
+		GCAssertMsg(m_heap->IsStackEntered() || (opts&kCanFail) != 0, "MMGC_ENTER must be on the stack");
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 
 		if(!m_firstFree) {

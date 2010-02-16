@@ -61,6 +61,7 @@ void test8();
 void test9();
 void test10();
 void test11();
+void test12();
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
@@ -70,7 +71,7 @@ private:
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
     : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names)
 {}
-const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete", NULL };
+const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete","nestedGCs", NULL };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -85,6 +86,7 @@ case 8: test8(); return;
 case 9: test9(); return;
 case 10: test10(); return;
 case 11: test11(); return;
+case 12: test12(); return;
 }
 }
 void ST_mmgc_basics::prologue() {
@@ -280,7 +282,26 @@ verifyPass(true, "true", __FILE__, __LINE__);
 			 
 
 									
-									   
+}
+void ST_mmgc_basics::test12() {
+    GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+    MMGC_GCENTER(gc);
+    void *a = gc->Alloc(8);			       
+    {
+        MMGC_GCENTER(gcb);
+        a = gcb->Alloc(8);
+        {
+            MMGC_GCENTER(gc);
+            a = gc->Alloc(8);
+        }
+        a = gcb->Alloc(8);
+    }
+    a = gc->Alloc(8);
+    // just fishing for asserts/hangs/crashes
+verifyPass(true  , "true  ", __FILE__, __LINE__);
+    delete gcb;
+    
+
 
 }
 void create_mmgc_basics(AvmCore* core) { new ST_mmgc_basics(core); }
