@@ -46,6 +46,7 @@
 #undef VMCFG_64BIT
 #undef MMGC_64BIT
 #undef AVMPLUS_64BIT
+#undef VMCFG_UNALIGNED_ACCESS
 #undef VMCFG_BIG_ENDIAN
 #undef AVMPLUS_BIG_ENDIAN
 #undef VMCFG_LITTLE_ENDIAN
@@ -55,11 +56,9 @@
 #undef VMCFG_IA32
 #undef MMGC_IA32
 #undef AVMPLUS_IA32
-#undef AVMPLUS_UNALIGNED_ACCESS
 #undef VMCFG_AMD64
 #undef MMGC_AMD64
 #undef AVMPLUS_AMD64
-#undef AVMPLUS_UNALIGNED_ACCESS
 #undef VMCFG_ARM
 #undef MMGC_ARM
 #undef AVMPLUS_ARM
@@ -132,6 +131,18 @@
  */
 #if !defined AVMSYSTEM_64BIT || AVMSYSTEM_64BIT != 0 && AVMSYSTEM_64BIT != 1
 #  error "AVMSYSTEM_64BIT must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMSYSTEM_UNALIGNED_ACCESS
+ *
+ * Selects an architecture that allows load/store of unaligned words.
+ * There may be a performance penalty, but it will not generate a runtime
+ * fault, and will be at least as efficient as separate instructions to load
+ * and assembly the word one byte at a time.
+ */
+#if !defined AVMSYSTEM_UNALIGNED_ACCESS || AVMSYSTEM_UNALIGNED_ACCESS != 0 && AVMSYSTEM_UNALIGNED_ACCESS != 1
+#  error "AVMSYSTEM_UNALIGNED_ACCESS must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -557,6 +568,7 @@
 #    error "AVMSYSTEM_32BIT is precluded for AVMSYSTEM_64BIT"
 #  endif
 #endif
+
 #if AVMSYSTEM_BIG_ENDIAN
 #  if AVMSYSTEM_LITTLE_ENDIAN
 #    error "AVMSYSTEM_LITTLE_ENDIAN is precluded for AVMSYSTEM_BIG_ENDIAN"
@@ -668,6 +680,9 @@
 #if AVMSYSTEM_64BIT
 #  define AVMPLUS_64BIT
 #endif
+#if AVMSYSTEM_UNALIGNED_ACCESS
+#  define VMCFG_UNALIGNED_ACCESS
+#endif
 #if AVMSYSTEM_BIG_ENDIAN
 #  define VMCFG_BIG_ENDIAN
 #endif
@@ -695,9 +710,6 @@
 #if AVMSYSTEM_IA32
 #  define AVMPLUS_IA32
 #endif
-#if AVMSYSTEM_IA32
-#  define AVMPLUS_UNALIGNED_ACCESS
-#endif
 #if AVMSYSTEM_AMD64
 #  define VMCFG_AMD64
 #endif
@@ -706,9 +718,6 @@
 #endif
 #if AVMSYSTEM_AMD64
 #  define AVMPLUS_AMD64
-#endif
-#if AVMSYSTEM_AMD64
-#  define AVMPLUS_UNALIGNED_ACCESS
 #endif
 #if AVMSYSTEM_ARM
 #  define VMCFG_ARM

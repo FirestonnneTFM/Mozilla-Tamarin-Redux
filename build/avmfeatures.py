@@ -50,6 +50,11 @@ def featureSettings(o):
         args += "-DAVMFEATURE_DEBUGGER=1 "
     if (arg == False):
         args += "-DAVMFEATURE_DEBUGGER=0 "
+    arg = o.getBoolArg("debugger-stub")
+    if (arg == True):
+        args += "-DAVMFEATURE_DEBUGGER_STUB=1 "
+    if (arg == False):
+        args += "-DAVMFEATURE_DEBUGGER_STUB=0 "
     arg = o.getBoolArg("allocation-sampler")
     if (arg == True):
         args += "-DAVMFEATURE_ALLOCATION_SAMPLER=1 "
