@@ -43,7 +43,7 @@ namespace avmplus
 
 REALLY_INLINE ScopeTypeChain::ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits)
     : size(_size), fullsize(_fullsize), _traits(traits)
-{ 
+{
     AvmAssert(size == fullsize || size+1 == fullsize);
 }
 
