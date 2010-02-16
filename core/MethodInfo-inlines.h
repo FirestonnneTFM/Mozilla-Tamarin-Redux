@@ -48,7 +48,7 @@ REALLY_INLINE Traits* ScopeOrTraits::getTraits() const
 {
     if (!(_scopeOrTraits & IS_SCOPE))
         return (Traits*)(_scopeOrTraits);
-    
+
     const ScopeTypeChain* sc = (const ScopeTypeChain*)(_scopeOrTraits & ~IS_SCOPE);
     return sc ? sc->traits() : NULL;
 }
