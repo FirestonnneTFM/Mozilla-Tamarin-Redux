@@ -142,6 +142,7 @@ AVMPLUS_SRCS := \
 	Assembler.cpp \
 	Fragmento.cpp \
 	LIR.cpp \
+	njconfig.cpp \
 	RegAlloc.cpp \
 	pcre_chartables.cpp \
 	pcre_compile.cpp \

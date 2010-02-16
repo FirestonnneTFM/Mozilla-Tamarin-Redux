@@ -37,10 +37,6 @@
 
 #include "avmshell.h"
 
-#if defined FEATURE_NANOJIT && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-bool P4Available();
-#endif
-
 #include "shell_toplevel.cpp"
 
 #ifdef VMCFG_TEST_API_VERSIONING
@@ -63,17 +59,15 @@ namespace avmshell
 		, enter_debugger_on_launch(false)
 		, interrupts(AvmCore::interrupts_default)
 		, verifyall(AvmCore::verifyall_default)
-		, sse2(AvmCore::sse2_default)
-        , fixed_esp(AvmCore::fixed_esp_default)
-		, arm_arch(AvmCore::arm_arch_default)
-        , arm_vfp(AvmCore::arm_vfp_default)
 		, greedy(false)
 		, nogc(false)
 		, incremental(true)
 		, langID(-1)
-		, cseopt(AvmCore::cseopt_default)
 		, jitordie(AvmCore::jitordie_default)
 		, runmode(AvmCore::runmode_default)
+#ifdef FEATURE_NANOJIT
+        , njconfig()
+#endif
 		, st_component(NULL)
 		, st_category(NULL)
 		, st_name(NULL)
@@ -353,15 +347,6 @@ namespace avmshell
 	
 	bool ShellCore::setup(ShellCoreSettings& settings)
 	{
-#if defined FEATURE_NANOJIT && (defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-	#ifdef AVMPLUS_SSE2_ALWAYS
-		config.sse2 = true;
-	#else
-		if (!P4Available())
-			config.sse2 = false;
-	#endif
-#endif
-
 		// set the default api version
 		if (settings.api <= _max_version_num) {
 			this->defaultAPIVersion = settings.api;
@@ -383,17 +368,9 @@ namespace avmshell
 #ifdef VMCFG_VERIFYALL
 		config.verifyall = settings.verifyall;
 #endif
-#if defined FEATURE_NANOJIT
-		config.cseopt = settings.cseopt;
 		config.jitordie = settings.jitordie;
-	#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-		config.sse2 = settings.sse2;
-        config.fixed_esp = settings.fixed_esp;
-	#endif
-	#if defined(AVMPLUS_ARM)
-		config.arm_arch = settings.arm_arch;
-        config.arm_vfp = settings.arm_vfp;
-	#endif
+#if defined FEATURE_NANOJIT
+		config.njconfig = settings.njconfig;
 #endif
 
 #ifdef AVMPLUS_VERBOSE

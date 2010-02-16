@@ -74,6 +74,11 @@ const int kBufferPadding = 16;
 
 	struct Config
 	{
+#ifdef FEATURE_NANOJIT
+        // options for nanojit
+        nanojit::Config njconfig;
+#endif
+
 		/**
 		 * The verbose flag may be set to display each bytecode
 		 * instruction as it is executed, along with a snapshot of
@@ -91,26 +96,6 @@ const int kBufferPadding = 16;
 
 		enum Runmode runmode;
 
-		/**
-		 * To speed up initialization, we don't use jit on
-		 * $init methods; we use interp instead.  For testing
-		 * purposes, one may want to force the jit to be used
-		 * for all code including $init methods.  The
-		 * jit switch forces all code to run through the jit
-		 * instead of interpreter.
-		 */
-		bool cseopt;
-
-		bool sse2;
-        bool fixed_esp;
-		bool use_cmov;
-
-        // what version of ARM architecture is assumed by nanojit;
-        // currently must be 5<=arch<=7
-		uint8_t arm_arch;
-        // is the nanojit allowed to use VFP instructions?
-        bool arm_vfp;
-
         /**
 		 * If this switch is set, executing code will check the
 		 * "interrupted" flag to see whether an interrupt needs
@@ -119,9 +104,6 @@ const int kBufferPadding = 16;
 		bool interrupts;
 
 		bool verifyall;
-
-        bool show_stats;
-        bool tree_opt;
 		
 		bool jitordie;		// Always JIT, and if the JIT fails then abort
 	};
@@ -153,15 +135,7 @@ const int kBufferPadding = 16;
 		static const bool methodNames_default;
 		static const bool oldVectorMethodNames_default;
 		static const bool verifyall_default;
-		static const bool show_stats_default;
-		static const bool tree_opt_default;
 		static const Runmode runmode_default;
-		static const bool cseopt_default;
-		static const bool sse2_default;
-        static const bool fixed_esp_default;
-        static const bool use_cmov_default;
-		static const uint8_t arm_arch_default;
-        static const bool arm_vfp_default;
 		static const bool interrupts_default;
 		static const bool jitordie_default;
 		

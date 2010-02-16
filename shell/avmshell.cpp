@@ -660,18 +660,18 @@ namespace avmshell
 					}
 #if defined(AVMPLUS_IA32) && defined(FEATURE_NANOJIT)
 					else if (!VMPI_strcmp(arg+2, "nosse")) {
-						settings.sse2 = false;
+						settings.njconfig.i386_sse2 = false;
 					}
                     else if (!VMPI_strcmp(arg+2, "fixedesp")) {
-                        settings.fixed_esp = true;
+                        settings.njconfig.i386_fixed_esp = true;
                     }
 #endif /* AVMPLUS_IA32 */
 #if defined(AVMPLUS_ARM) && defined(FEATURE_NANOJIT)
 					else if (!VMPI_strcmp(arg+2, "arm_arch")) {
-						settings.arm_arch = (uint8_t)VMPI_strtol(argv[++i], 0, 10);
+						settings.njconfig.arm_arch = (uint8_t)VMPI_strtol(argv[++i], 0, 10);
 					}
                     else if (!VMPI_strcmp(arg+2, "arm_vfp")) {
-                        settings.arm_vfp = true;
+                        settings.njconfig.arm_vfp = true;
                     }
 #endif /* AVMPLUS_IA32 */
 #ifdef VMCFG_VERIFYALL
@@ -743,7 +743,7 @@ namespace avmshell
 #endif /* AVMPLUS_VERBOSE */
 #ifdef FEATURE_NANOJIT
 					else if (!VMPI_strcmp(arg+2, "nocse")) {
-						settings.cseopt = false;
+						settings.njconfig.cseopt = false;
 					}
 					else if (!VMPI_strcmp(arg+2, "jitordie")) {
 						settings.runmode = RM_jit_all;

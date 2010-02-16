@@ -114,7 +114,7 @@ REALLY_INLINE bool AvmCore::quiet_opt() const
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
 REALLY_INLINE bool AvmCore::use_sse2() const 
 { 
-	return config.sse2; 
+	return config.njconfig.i386_sse2; 
 }
 #endif
 
