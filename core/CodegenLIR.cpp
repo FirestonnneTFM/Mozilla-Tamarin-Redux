@@ -1042,7 +1042,7 @@ namespace avmplus
             bool is = false;
             if (t == NUMBER_TYPE)
             {
-                is = val->isF64() || val->isI64();
+                is = val->isN64();
                 AvmAssert(is);
             }
             else if (t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE)
