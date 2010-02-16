@@ -2174,7 +2174,7 @@ namespace avmplus
 #define MOPS_RANGE_CHECK(addr, type) \
 		if (uint32_t(addr) > (envDomain->globalMemorySize() - sizeof(type))) { avmplus::mop_rangeCheckFailed(env); }
 
-#if defined(AVMPLUS_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
+#if defined(VMCFG_UNALIGNED_ACCESS) && defined(AVMPLUS_LITTLE_ENDIAN)
     #define MOPS_LOAD(addr, type, call, result) \
             MOPS_RANGE_CHECK(addr, type) \
             union { const uint8_t* p8; const type* p; }; \

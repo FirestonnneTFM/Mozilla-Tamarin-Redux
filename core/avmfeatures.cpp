@@ -56,6 +56,9 @@ const char * const avmfeatures = ""
   #if AVMSYSTEM_64BIT
     "AVMSYSTEM_64BIT;"
   #endif
+  #if AVMSYSTEM_UNALIGNED_ACCESS
+    "AVMSYSTEM_UNALIGNED_ACCESS;"
+  #endif
   #if AVMSYSTEM_BIG_ENDIAN
     "AVMSYSTEM_BIG_ENDIAN;"
   #endif

@@ -210,7 +210,7 @@ namespace avmplus
 
     #include "../core/jit-calls.h"
 
-#if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(AVMPLUS_UNALIGNED_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
+#if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(VMCFG_UNALIGNED_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
     #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE
 #endif
 
