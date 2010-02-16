@@ -130,10 +130,12 @@ REALLY_INLINE LIns* LirHelper::p2i(LIns *i)
 #endif
 }
 
+#if NJ_SOFTFLOAT_SUPPORTED
 REALLY_INLINE LIns* LirHelper::qlo(LIns* q)
 {
     return lirout->ins1(LIR_qlo, q);
 }
+#endif
 
 REALLY_INLINE LIns* LirHelper::peq0(LIns* ptr)
 {
@@ -209,7 +211,7 @@ REALLY_INLINE LIns* LirHelper::sti(LIns* val, LIns* p, int32_t d)
 
 REALLY_INLINE LIns* LirHelper::stq(LIns* val, LIns* p, int32_t d)
 {
-    AvmAssert(val->isI64() || val->isF64());
+    AvmAssert(val->isN64());
     return lirout->insStorei(val, p, d);
 }
 

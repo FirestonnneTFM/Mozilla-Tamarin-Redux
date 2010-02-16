@@ -957,14 +957,12 @@ namespace avmplus
                     if (a && b)
                         return out->ins2(f64arith_to_i32arith(op), a, b);
                 }
+#ifdef AVMPLUS_64BIT
                 else if (op == LIR_quad) {
-#ifndef AVMPLUS_64BIT
-                    // should only use this opcode in 64-bit builds
-                    AvmAssert(0);
-#endif
                     // const fold
                     return insImm(AvmCore::integer_d(v->imm64f()));
                 }
+#endif
             }
 
             SSE2_ONLY(if(config.sse2) {
@@ -1131,9 +1129,11 @@ namespace avmplus
         virtual LInsp insImm(int32_t imm) {
             return lastIns = out->insImm(imm);
         }
+#ifdef AVMPLUS_64BIT
         virtual LInsp insImmq(uint64_t imm) {
             return lastIns = out->insImmq(imm);
         }
+#endif
         virtual LInsp insImmf(double d) {
             return lastIns = out->insImmf(d);
         }
@@ -2957,7 +2957,7 @@ namespace avmplus
                 break;
             }
             index++;
-            disp += (v->isI64() || v->isF64()) ? sizeof(double) : sizeof(Atom);
+            disp += v->isN64() ? sizeof(double) : sizeof(Atom);
         }
 
         // patch the size to what we actually need
@@ -5240,15 +5240,11 @@ namespace avmplus
                 LOpcode op = i->opcode();
                 switch (op) {
                 case LIR_ret:
-                case LIR_qret:
+                CASE64(LIR_qret:)
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_stqi:
-#ifndef AVMPLUS_64BIT
-                    // should only use this opcode in 64-bit builds
-                    AvmAssert(0);
-#endif
+                CASE64(LIR_stqi:)
                 case LIR_sti:
                 case LIR_stfi:
                     if (i->oprnd2() == vars) {
@@ -5256,12 +5252,8 @@ namespace avmplus
                         livein.clear(d);
                     }
                     break;
-                case LIR_ldq:
-                case LIR_ldqc:
-#ifndef AVMPLUS_64BIT
-                    // should only use these opcodes in 64-bit builds
-                    AvmAssert(0);
-#endif
+                CASE64(LIR_ldq:)
+                CASE64(LIR_ldqc:)
                 case LIR_ld:
                 case LIR_ldc:
                 case LIR_ldf:
@@ -5304,7 +5296,7 @@ namespace avmplus
                     for (uint32_t j=0, n=i->getTableSize(); j < n; j++)
                         analyze_edge(i->getTarget(j), livein, labels, &looplabels);
                     break;
-                case LIR_qcall:
+                CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
                     if (catcher && !i->isCse()) {
@@ -5337,9 +5329,9 @@ namespace avmplus
         // TODO this can go away if we turn this kill pass into a LirReader
         // and do the work inline with the assembly pass.
         static const uint8_t lirSizes[] = {
-        #define OPDEF(op, number, repkind, retType) sizeof(LIns##repkind),
+        #define OP___(op, number, repkind, retType) sizeof(LIns##repkind),
         #include "../nanojit/LIRopcode.tbl"
-        #undef OPDEF
+        #undef OP___
                 0
         };
 
@@ -5354,11 +5346,11 @@ namespace avmplus
             LOpcode op = i->opcode();
             switch (op) {
                 case LIR_ret:
-                case LIR_qret:
+                CASE64(LIR_qret:)
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_stqi:
+                CASE64(LIR_stqi:)
 #ifndef AVMPLUS_64BIT
                     // should only use this opcode in 64-bit builds
                     AvmAssert(0);
@@ -5381,12 +5373,8 @@ namespace avmplus
                         }
                     }
                     break;
-                case LIR_ldq:
-                case LIR_ldqc:
-#ifndef AVMPLUS_64BIT
-                    // should only use these opcodes in 64-bit builds
-                    AvmAssert(0);
-#endif
+                CASE64(LIR_ldq:)
+                CASE64(LIR_ldqc:)
                 case LIR_ld:
                 case LIR_ldc:
                 case LIR_ldf:
@@ -5419,7 +5407,7 @@ namespace avmplus
                     for (uint32_t j = 0, n = i->getTableSize(); j < n; j++)
                         analyze_edge(i->getTarget(j), livein, labels, 0);
                     break;
-                case LIR_qcall:
+                CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
                     if (catcher && !i->isCse()) {
