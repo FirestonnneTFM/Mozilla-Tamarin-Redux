@@ -727,11 +727,6 @@ namespace avmplus
         #ifdef VTUNE
         hasDebugInfo = false;
        #endif /* VTUNE */
-
-#if defined(NANOJIT_IA32) && defined(AVMPLUS_SSE2_ALWAYS)
-        // verify that we sniffed it correctly.
-		AvmAssert(core->config.njconfig.i386_sse2 != 0);
-#endif
     }
 
     CodegenLIR::~CodegenLIR() {
