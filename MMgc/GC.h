@@ -1407,6 +1407,7 @@ namespace MMgc
 		bool stackCleaned;
 		const void *rememberedStackTop;
 		GCAutoEnter* stackEnter;
+		uint32_t enterCount;
 
 		GCRoot* emptyWeakRefRoot;
 

@@ -140,14 +140,14 @@ namespace MMgc
 
 	REALLY_INLINE void* NewTaggedScalar(size_t size, FixedMallocOpts opts)
 	{
-		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
+		GCAssertMsg(GCHeap::GetGCHeap()->IsStackEntered() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
 		
 		return TaggedAlloc(size, opts, MMGC_SCALAR_GUARD);
 	}
 
 	void* NewTaggedArray(size_t count, size_t elsize, FixedMallocOpts opts, bool isPrimitive) 
 	{
-		GCAssertMsg(GCHeap::GetGCHeap()->StackEnteredCheck() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
+		GCAssertMsg(GCHeap::GetGCHeap()->IsStackEntered() || (opts&kCanFail) != 0, "MMGC_ENTER macro must exist on the stack");
 
 		size_t size = GCHeap::CheckForCallocSizeOverflow(count, elsize);
 		if(!isPrimitive)

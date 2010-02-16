@@ -227,4 +227,22 @@ delete gc;
 			 
 
 									
-									   
+%%test nestedGCs
+    GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+    MMGC_GCENTER(gc);
+    void *a = gc->Alloc(8);			       
+    {
+        MMGC_GCENTER(gcb);
+        a = gcb->Alloc(8);
+        {
+            MMGC_GCENTER(gc);
+            a = gc->Alloc(8);
+        }
+        a = gcb->Alloc(8);
+    }
+    a = gc->Alloc(8);
+    // just fishing for asserts/hangs/crashes
+    %%verify true  
+    delete gcb;
+    
+

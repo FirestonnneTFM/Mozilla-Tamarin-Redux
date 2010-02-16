@@ -904,6 +904,7 @@ namespace MMgc
 		stackCleaned(true),
 		rememberedStackTop(0),
 		stackEnter(0),
+		enterCount(0),
 		emptyWeakRefRoot(0),
 		m_markStackOverflow(false),
 		mark_item_recursion_control(20),	// About 3KB as measured with GCC 4.1 on MacOS X (144 bytes / frame), May 2009
@@ -3613,20 +3614,23 @@ namespace MMgc
 	GCAutoEnter::GCAutoEnter(GC *gc) : m_gc(NULL), m_prevgc(NULL)
 	{ 
 		if(gc) {
-			m_gc = gc;
-			m_prevgc = gc->heap->SetActiveGC(gc);
-            // In theory, nested GCAutoEnter usage should be unnecessary and avoided
-            // (thus we'd expect gc->heap->GetActiveGC() == NULL upon entry to this function). 
-            // In practice, however, nested usage is extant in Flash in a few areas that are
-            // nontrivial to refactor to avoid this, and the consequences of not handling this can result
-            // in hard-to-debug crashes in obscure situations. Thus we are allowing the not-recommended 
-            // nested usage by saving and restoring the active gc (since it's cheap to do so). 
-            // If you want to detect these situations, uncomment the assert below (but do not check
-            // in such a change unless you want to make nested GCAutoEnter usage officially deprecated,
-            // which we are not yet prepared to do.) see https://bugzilla.mozilla.org/show_bug.cgi?id=540088
-            // GCAssert(m_prevgc == NULL); 
-			if (gc->GetStackEnter() == 0)
-				gc->SetStackEnter(this);
+			if(gc->heap->GetEnterFrame()->GetActiveGC() != gc) {
+				m_gc = gc;
+				m_prevgc = gc->heap->SetActiveGC(gc);
+
+				// In theory, nested GCAutoEnter usage should be unnecessary and avoided
+				// (thus we'd expect gc->heap->GetActiveGC() == NULL upon entry to this function). 
+				// In practice, however, nested usage is extant in Flash in a few areas that are
+				// nontrivial to refactor to avoid this, and the consequences of not handling this can result
+				// in hard-to-debug crashes in obscure situations. Thus we are allowing the not-recommended 
+				// nested usage by saving and restoring the active gc (since it's cheap to do so). 
+				// If you want to detect these situations, uncomment the assert below (but do not check
+				// in such a change unless you want to make nested GCAutoEnter usage officially deprecated,
+				// which we are not yet prepared to do.) see https://bugzilla.mozilla.org/show_bug.cgi?id=540088
+				// GCAssert(m_prevgc == NULL); 
+				if (gc->GetStackEnter() == 0)
+					gc->SetStackEnter(this);
+			}
 		}
 	}
 	
@@ -3666,11 +3670,12 @@ namespace MMgc
 			// hook needs to make an allocation.
  			// stackEnter = NULL;
 			edge = true;
-			releaseThread = true;
+			releaseThread = --enterCount == 0;
  		} else if(stackEnter == NULL) {
  			stackEnter = enter;
 			edge = true;
-			VMPI_lockAcquire(&m_gcLock);
+			if(enterCount++ == 0)
+				VMPI_lockAcquire(&m_gcLock);
 			m_gcThread = VMPI_currentThread();
  		}
 
