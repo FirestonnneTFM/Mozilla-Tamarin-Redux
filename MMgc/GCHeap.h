@@ -612,8 +612,12 @@ namespace MMgc
 		void *GetStackEntryAddress() { return (void*)GetEnterFrame(); }
 		EnterFrame *GetEnterFrame() { return enterFrame; }
 
-		GC* SetActiveGC(GC* gc) { return enterFrame ? enterFrame->SetActiveGC(gc) : NULL; }
-		inline bool StackEnteredCheck() { return !entryChecksEnabled || GetEnterFrame() != NULL; }
+		GC* SetActiveGC(GC* gc) 
+		{
+ 			GCAssertMsg(IsStackEntered(), "A MMGC_ENTER macro must exist to use GCHeap memory");
+			return GetEnterFrame()->SetActiveGC(gc); 
+		}
+		inline bool IsStackEntered() { return !entryChecksEnabled || GetEnterFrame() != NULL; }
 		
 		// remove this and make them always enabled once its possible
 		inline void SetEntryChecks(bool to) { entryChecksEnabled = to; }
