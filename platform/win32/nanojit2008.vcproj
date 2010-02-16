@@ -1783,6 +1783,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\nanojit\njconfig.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\nanojit\RegAlloc.cpp"
 				>
 			</File>
@@ -1834,6 +1838,10 @@
 			</File>
 			<File
 				RelativePath="..\..\nanojit\NativeX64.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\nanojit\njconfig.h"
 				>
 			</File>
 			<File

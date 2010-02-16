@@ -74,17 +74,15 @@ namespace avmshell
 		bool enter_debugger_on_launch;
 		bool interrupts;				// copy to config
 		bool verifyall;					// copy to config
-		bool sse2;						// copy to config
-        bool fixed_esp;                 // copy to config
-		uint8_t arm_arch;               // copy to config
-        bool arm_vfp;                   // copy to config
 		bool greedy;					// copy to each GC
 		bool nogc;						// copy to each GC
 		bool incremental;				// copy to each GC
 		int langID;						// copy to ShellCore?
-		bool cseopt;					// copy to config
 		bool jitordie;					// copy to config
 		Runmode runmode;				// copy to config
+#ifdef FEATURE_NANOJIT
+        nanojit::Config njconfig;       // copy to config
+#endif
 		AvmCore::CacheSizes cacheSizes;	// Default to unlimited
 		const char* st_component;
 		const char* st_category;
