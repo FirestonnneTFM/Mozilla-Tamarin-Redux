@@ -5356,10 +5356,6 @@ namespace avmplus
                     livein.reset();
                     break;
                 CASE64(LIR_stqi:)
-#ifndef AVMPLUS_64BIT
-                    // should only use this opcode in 64-bit builds
-                    AvmAssert(0);
-#endif
                 case LIR_sti:
                 case LIR_stfi:
                     if (i->oprnd2() == vars) {
