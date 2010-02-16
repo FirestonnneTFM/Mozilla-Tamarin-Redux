@@ -80,15 +80,7 @@ namespace avmplus
 	const bool AvmCore::methodNames_default = true;
 	const bool AvmCore::oldVectorMethodNames_default = true;
 	const bool AvmCore::verifyall_default = false;
-	const bool AvmCore::show_stats_default = false;
-	const bool AvmCore::tree_opt_default = false;
 	const Runmode AvmCore::runmode_default = RM_mixed;
-	const bool AvmCore::cseopt_default = true;
-	const bool AvmCore::sse2_default = true;
-    const bool AvmCore::fixed_esp_default = false;
-    const bool AvmCore::use_cmov_default = true;
-    const uint8_t AvmCore::arm_arch_default = 5;
-    const bool AvmCore::arm_vfp_default = false;
 	const bool AvmCore::interrupts_default = false;
 	const bool AvmCore::jitordie_default = false;
 
@@ -217,20 +209,10 @@ namespace avmplus
 		config.oldVectorMethodNames = oldVectorMethodNames_default;
 
 	   	config.verifyall = verifyall_default;
-		config.show_stats = show_stats_default;
-		config.tree_opt = tree_opt_default;
 
 		// jit flag forces use of jit-compiler instead of interpreter
 		config.runmode = runmode_default;
-		config.cseopt = cseopt_default;
 		config.jitordie = jitordie_default;
-
-		config.sse2 = sse2_default;
-        config.fixed_esp = fixed_esp_default;
-        config.use_cmov = use_cmov_default;
-
-		config.arm_arch = arm_arch_default;
-        config.arm_vfp = arm_vfp_default;
 
 #ifdef VTUNE
 		VTuneStatus = CheckVTuneStatus();

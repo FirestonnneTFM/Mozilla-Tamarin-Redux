@@ -727,6 +727,11 @@ namespace avmplus
         #ifdef VTUNE
         hasDebugInfo = false;
        #endif /* VTUNE */
+
+#if defined(NANOJIT_IA32) && defined(AVMPLUS_SSE2_ALWAYS)
+        // verify that we sniffed it correctly.
+		AvmAssert(core->config.njconfig.i386_sse2 != 0);
+#endif
     }
 
     CodegenLIR::~CodegenLIR() {
@@ -917,9 +922,9 @@ namespace avmplus
      */
     class Specializer: public ExprFilter
     {
-        Config &config;
+        const nanojit::Config& config;
     public:
-        Specializer(LirWriter *out, Config &config) : ExprFilter(out), config(config)
+        Specializer(LirWriter *out, const nanojit::Config& config) : ExprFilter(out), config(config)
         {}
 
         bool isPromote(LOpcode op) {
@@ -957,17 +962,15 @@ namespace avmplus
                     if (a && b)
                         return out->ins2(f64arith_to_i32arith(op), a, b);
                 }
+#ifdef AVMPLUS_64BIT
                 else if (op == LIR_quad) {
-#ifndef AVMPLUS_64BIT
-                    // should only use this opcode in 64-bit builds
-                    AvmAssert(0);
-#endif
                     // const fold
                     return insImm(AvmCore::integer_d(v->imm64f()));
                 }
+#endif
             }
 
-            SSE2_ONLY(if(config.sse2) {
+            SSE2_ONLY(if(config.i386_sse2) {
                 if (call == FUNCTIONID(integer_d))
                     call = FUNCTIONID(integer_d_sse2);
                 else if (call == FUNCTIONID(doubleToAtom))
@@ -1039,7 +1042,7 @@ namespace avmplus
             bool is = false;
             if (t == NUMBER_TYPE)
             {
-                is = val->isF64() || val->isI64();
+                is = val->isN64();
                 AvmAssert(is);
             }
             else if (t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE)
@@ -1131,9 +1134,11 @@ namespace avmplus
         virtual LInsp insImm(int32_t imm) {
             return lastIns = out->insImm(imm);
         }
+#ifdef AVMPLUS_64BIT
         virtual LInsp insImmq(uint64_t imm) {
             return lastIns = out->insImmq(imm);
         }
+#endif
         virtual LInsp insImmf(double d) {
             return lastIns = out->insImmf(d);
         }
@@ -1250,7 +1255,7 @@ namespace avmplus
         LirBuffer *prolog_buf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         prolog_buf->abi = ABI_CDECL;
 
-        lirout = new (*alloc1) LirBufWriter(prolog_buf, core->config);
+        lirout = new (*alloc1) LirBufWriter(prolog_buf, core->config.njconfig);
 
         debug_only(
             lirout = new (*alloc1) ValidateWriter(lirout,
@@ -1269,18 +1274,18 @@ namespace avmplus
         LirWriter *redirectWriter = lirout = new (*lir_alloc) LirWriter(prolog);
         LoadFilter *loadfilter = 0;
         CseFilter *csefilter = 0;
-        if (core->config.cseopt) {
+        if (core->config.njconfig.cseopt) {
             loadfilter = new (*alloc1) LoadFilter(lirout, *alloc1);
             csefilter = new (*alloc1) CseFilter(loadfilter, *alloc1);
             lirout = csefilter;
         }
 #if defined(NANOJIT_ARM)
-        if (!core->config.arm_vfp)
+        if (core->config.njconfig.soft_float)
         {
             lirout = new (*alloc1) SoftFloatFilter(lirout);
         }
 #endif
-        lirout = new (*alloc1) Specializer(lirout, core->config);
+        lirout = new (*alloc1) Specializer(lirout, core->config.njconfig);
         CopyPropagation *copier = new (*alloc1) CopyPropagation(core, *alloc1, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
@@ -1524,7 +1529,7 @@ namespace avmplus
         // we have written the prolog to prolog_buf, now create a new
         // LirBuffer to hold the body, and redirect further output to the body.
         LirBuffer *body_buf = new (*lir_alloc) LirBuffer(*lir_alloc);
-        LirWriter *body = new (*alloc1) LirBufWriter(body_buf, core->config);
+        LirWriter *body = new (*alloc1) LirBufWriter(body_buf, core->config.njconfig);
         debug_only(
             body = new (*alloc1) ValidateWriter(body, "writePrologue(body)");
         )
@@ -2961,7 +2966,7 @@ namespace avmplus
                 break;
             }
             index++;
-            disp += (v->isI64() || v->isF64()) ? sizeof(double) : sizeof(Atom);
+            disp += v->isN64() ? sizeof(double) : sizeof(Atom);
         }
 
         // patch the size to what we actually need
@@ -5244,15 +5249,11 @@ namespace avmplus
                 LOpcode op = i->opcode();
                 switch (op) {
                 case LIR_ret:
-                case LIR_qret:
+                CASE64(LIR_qret:)
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_stqi:
-#ifndef AVMPLUS_64BIT
-                    // should only use this opcode in 64-bit builds
-                    AvmAssert(0);
-#endif
+                CASE64(LIR_stqi:)
                 case LIR_sti:
                 case LIR_stfi:
                     if (i->oprnd2() == vars) {
@@ -5260,12 +5261,8 @@ namespace avmplus
                         livein.clear(d);
                     }
                     break;
-                case LIR_ldq:
-                case LIR_ldqc:
-#ifndef AVMPLUS_64BIT
-                    // should only use these opcodes in 64-bit builds
-                    AvmAssert(0);
-#endif
+                CASE64(LIR_ldq:)
+                CASE64(LIR_ldqc:)
                 case LIR_ld:
                 case LIR_ldc:
                 case LIR_ldf:
@@ -5308,7 +5305,7 @@ namespace avmplus
                     for (uint32_t j=0, n=i->getTableSize(); j < n; j++)
                         analyze_edge(i->getTarget(j), livein, labels, &looplabels);
                     break;
-                case LIR_qcall:
+                CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
                     if (catcher && !i->isCse()) {
@@ -5341,9 +5338,9 @@ namespace avmplus
         // TODO this can go away if we turn this kill pass into a LirReader
         // and do the work inline with the assembly pass.
         static const uint8_t lirSizes[] = {
-        #define OPDEF(op, number, repkind, retType) sizeof(LIns##repkind),
+        #define OP___(op, number, repkind, retType) sizeof(LIns##repkind),
         #include "../nanojit/LIRopcode.tbl"
-        #undef OPDEF
+        #undef OP___
                 0
         };
 
@@ -5358,11 +5355,11 @@ namespace avmplus
             LOpcode op = i->opcode();
             switch (op) {
                 case LIR_ret:
-                case LIR_qret:
+                CASE64(LIR_qret:)
                 case LIR_fret:
                     livein.reset();
                     break;
-                case LIR_stqi:
+                CASE64(LIR_stqi:)
 #ifndef AVMPLUS_64BIT
                     // should only use this opcode in 64-bit builds
                     AvmAssert(0);
@@ -5385,12 +5382,8 @@ namespace avmplus
                         }
                     }
                     break;
-                case LIR_ldq:
-                case LIR_ldqc:
-#ifndef AVMPLUS_64BIT
-                    // should only use these opcodes in 64-bit builds
-                    AvmAssert(0);
-#endif
+                CASE64(LIR_ldq:)
+                CASE64(LIR_ldqc:)
                 case LIR_ld:
                 case LIR_ldc:
                 case LIR_ldf:
@@ -5423,7 +5416,7 @@ namespace avmplus
                     for (uint32_t j = 0, n = i->getTableSize(); j < n; j++)
                         analyze_edge(i->getTarget(j), livein, labels, 0);
                     break;
-                case LIR_qcall:
+                CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
                     if (catcher && !i->isCse()) {
@@ -5524,7 +5517,7 @@ namespace avmplus
             nanojit::live(&in, live_alloc, frag, &mgr->log);
         })
 
-        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log);
+        Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log, core->config.njconfig);
         #ifdef VTUNE
         assm->cgen = this;
         #endif
@@ -5893,7 +5886,7 @@ namespace avmplus
         frag = new (*lir_alloc) Fragment(0 verbose_only(, 0));
         LirBuffer* lirbuf = frag->lirbuf = new (*lir_alloc) LirBuffer(*lir_alloc);
         lirbuf->abi = ABI_CDECL;
-        LirWriter* lirout = new (*alloc1) LirBufWriter(lirbuf, core->config);
+        LirWriter* lirout = new (*alloc1) LirBufWriter(lirbuf, core->config.njconfig);
         debug_only(
             lirout = new (*alloc1) ValidateWriter(lirout, "InvokerCompiler");
         )
@@ -5909,7 +5902,7 @@ namespace avmplus
             }
         )
 #if defined(NANOJIT_ARM)
-        if (!core->config.arm_vfp)
+        if (core->config.njconfig.soft_float)
         {
             lirout = new (*alloc1) SoftFloatFilter(lirout);
         }
@@ -6068,7 +6061,7 @@ namespace avmplus
         })
 
         Assembler *assm = new (*lir_alloc) Assembler(codeMgr->codeAlloc, codeMgr->allocator, *lir_alloc,
-            core, &codeMgr->log);
+            core, &codeMgr->log, core->config.njconfig);
         verbose_only( StringList asmOutput(*lir_alloc); )
         verbose_only( assm->_outputCache = &asmOutput; )
         LirReader bufreader(frag->lastIns);

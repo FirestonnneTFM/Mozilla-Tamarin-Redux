@@ -261,6 +261,7 @@ namespace avmplus
 #include "NamespaceSet.h"
 #include "Multiname.h"
 #include "Sampler.h"
+#include "../nanojit/njconfig.h"
 #include "AvmCore.h"
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"
