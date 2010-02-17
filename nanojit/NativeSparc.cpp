@@ -676,11 +676,11 @@ namespace nanojit
         else
             {
                 int c = rhs->imm32();
-                if (op == LIR_add || op == LIR_iaddp)
+                if (op == LIR_add || op == LIR_iaddp) {
                     ADDCC(rr, L2, rr);
-                else if (op == LIR_sub)
+                } else if (op == LIR_sub) {
                     SUBCC(rr, L2, rr);
-                else if (op == LIR_and)
+                } else if (op == LIR_and)
                     AND(rr, L2, rr);
                 else if (op == LIR_or)
                     OR(rr, L2, rr);
@@ -787,6 +787,8 @@ namespace nanojit
             case LIR_uge: MOVCS (iffalsereg, 1, 0, 0, rr); break;
                 debug_only( default: NanoAssert(0); break; )
                     }
+        } else if (op == LIR_qcmov) {
+            NanoAssert(0);
         }
         /*const Register iftruereg =*/ findSpecificRegFor(iftrue, rr);
         asm_cmp(condval);
