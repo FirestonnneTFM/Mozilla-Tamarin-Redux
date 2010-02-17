@@ -56,6 +56,9 @@ namespace avmplus
 	{
 		MMGC_STATIC_ASSERT(sizeof(InlineHashtable) == (sizeof(void*) * 2));
 
+        // isEmpty() requires this, so let's insure it...
+		MMGC_STATIC_ASSERT(EMPTY == 0);
+        
 		capacity = MathUtils::nextPowerOfTwo(capacity);
 		setCapacity(capacity*2);
 		AvmAssert(getCapacity());
@@ -84,7 +87,9 @@ namespace avmplus
 	}
 
 	void InlineHashtable::put(Atom name, Atom value)
-	{
+	{   
+        AvmAssert(name != EMPTY && value != EMPTY);
+
 		Atom* atoms = getAtoms();
 		int i = find(name, atoms, getCapacity());
 		GC *gc = GC::GetGC(atoms);
@@ -95,7 +100,7 @@ namespace avmplus
 			m_size++;
 		}
 		//atoms[i+1] = value;
-		WBATOM( gc, atoms, &atoms[i+1], value);
+		WBATOM(gc, atoms, &atoms[i+1], value);
 	}
 
     Atom InlineHashtable::get(Atom name) const
@@ -256,26 +261,6 @@ namespace avmplus
 		clrHasDeletedItems();
 	}
 
-	Atom InlineHashtable::keyAt(int index)
-	{
-		const Atom* atoms = getAtoms();
-		return atoms[(index-1)<<1];
-	}
-
-	Atom InlineHashtable::valueAt(int index)
-	{
-		const Atom* atoms = getAtoms();
-		return atoms[((index-1)<<1)+1];
-	}
-
-/*	void InlineHashtable::removeAt(int index)
-	{
-		int i = (index-1)<<1;
-        atoms[i] = DELETED;
-		atoms[i+1] = DELETED;
-		setHasDeletedItems(true);
-	}*/
-
 	// call this method using the previous value returned
 	// by this method starting with 0, until 0 is returned.
 	int InlineHashtable::next(int index)
@@ -328,7 +313,73 @@ namespace avmplus
 			}
 		}
 	}
+
+    /*virtual*/ HeapHashtableRC::~HeapHashtableRC() 
+    { 
+        ht.destroy(); 
+    }
 	
+    /*virtual*/ HeapHashtable::~HeapHashtable() 
+    { 
+        ht.destroy(); 
+    }
+    
+    /*virtual*/ int HeapHashtable::next(int index)
+    {
+        return ht.next(index); 
+    }
+    
+    /*virtual*/ void HeapHashtable::add(Atom name, Atom value, Toplevel* toplevel /*=NULL*/)
+    {
+        ht.add(name, value, toplevel);
+    }
+
+    /*virtual*/ Atom HeapHashtable::get(Atom name)
+    {
+        return ht.get(name);
+    }
+
+    /*virtual*/ Atom HeapHashtable::remove(Atom name)
+    {
+        return ht.remove(name);
+    }
+
+    /*virtual*/ bool HeapHashtable::contains(Atom name) const
+    {
+        return ht.contains(name);
+    }
+
+    /*virtual*/ bool HeapHashtable::weakKeys() const
+    {
+        return false;
+    }
+
+    /*virtual*/ bool HeapHashtable::weakValues() const
+    {
+        return false;
+    }
+
+
+    /*virtual*/ Atom WeakKeyHashtable::get(Atom key)
+    {
+        return ht.get(getKey(key));
+    }
+
+    /*virtual*/ Atom WeakKeyHashtable::remove(Atom key)
+    {
+        return ht.remove(getKey(key));
+    }
+
+    /*virtual*/ bool WeakKeyHashtable::contains(Atom key) const
+    {
+        return ht.contains(getKey(key));
+    }
+
+    /*virtual*/ bool WeakKeyHashtable::weakKeys() const
+    {
+        return true;
+    }
+
 	Atom WeakKeyHashtable::getKey(Atom key) const
 	{
 		// this gets a weak ref number, ie double keys, okay I guess
@@ -341,7 +392,7 @@ namespace avmplus
 		return key;
 	}
 
-	void WeakKeyHashtable::add(Atom key, Atom value, Toplevel* toplevel)
+	/*virtual*/ void WeakKeyHashtable::add(Atom key, Atom value, Toplevel* toplevel)
 	{
 		if (ht.isFull()) {
 			prune();
@@ -368,6 +419,36 @@ namespace avmplus
 			}
 		}
 	}
+
+	/*virtual*/ int WeakKeyHashtable::next(int index)
+    {
+		if (index != 0) {
+			index = index<<1;
+		}
+		// Advance to first non-empty slot.
+		Atom* const atoms = ht.getAtoms();
+		int const cap = ht.getCapacity();
+		while (index < cap) 
+        {
+			Atom const a = atoms[index];
+            if (AvmCore::isGenericObject(a)) 
+            {
+                GCWeakRef* weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
+                if (weakRef->get())
+                    return (index>>1)+1;
+                
+                atoms[index] = InlineHashtable::DELETED;
+                atoms[index+1] = InlineHashtable::DELETED;
+                ht.setHasDeletedItems();
+            } 
+			else if (ht.enumerable(a)) 
+            {
+				return (index>>1)+1;
+			}
+			index += 2;
+		}
+		return 0;
+    }
 	
 	Atom WeakValueHashtable::getValue(Atom key, Atom value)
 	{
@@ -394,7 +475,7 @@ namespace avmplus
 		return value;
 	}
 
-	void WeakValueHashtable::add(Atom key, Atom value, Toplevel* toplevel)
+	/*virtual*/ void WeakValueHashtable::add(Atom key, Atom value, Toplevel* toplevel)
 	{
 		if (ht.isFull()) {
 			prune();
@@ -408,6 +489,21 @@ namespace avmplus
 		}
 		ht.put(key, value);
 	}
+
+    /*virtual*/ Atom WeakValueHashtable::get(Atom key) 
+    { 
+        return getValue(key, ht.get(key)); 
+    }
+    
+    /*virtual*/ Atom WeakValueHashtable::remove(Atom key) 
+    { 
+        return getValue(key, ht.remove(key)); 
+    }
+    
+    /*virtual*/ bool WeakValueHashtable::weakValues() const 
+    { 
+        return true; 
+    }
 
 	void WeakValueHashtable::prune()
 	{

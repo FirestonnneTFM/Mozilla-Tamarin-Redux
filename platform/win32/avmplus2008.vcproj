@@ -1740,6 +1740,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\avmplusHashtable-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\avmplusList.h"
 				>
 			</File>
