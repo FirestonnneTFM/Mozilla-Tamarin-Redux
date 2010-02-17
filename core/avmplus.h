@@ -335,6 +335,7 @@ namespace avmplus
 #include "AbcParser-inlines.h"
 #include "atom-inlines.h"
 #include "AvmCore-inlines.h"
+#include "avmplusHashtable-inlines.h"
 #include "ClassClosure-inlines.h"
 #include "Coder-inlines.h"
 #include "instr-inlines.h"
