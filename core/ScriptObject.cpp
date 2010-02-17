@@ -151,11 +151,9 @@ namespace avmplus
 			const ScriptObject *o = this;
 			do
 			{
-				InlineHashtable *table = o->getTable();
-				const Atom* atoms = table->getAtoms();
-				int i = table->find(name, atoms, table->getCapacity());
-				if (atoms[i] != InlineHashtable::EMPTY)
-					return atoms[i+1];
+                Atom const value = o->getTable()->getNonEmpty(name);
+                if (!InlineHashtable::isEmpty(value))
+                    return value;
 			}
 			while ((o = o->delegate) != NULL);
 			return undefinedAtom;
@@ -177,10 +175,9 @@ namespace avmplus
 			}
 			do
 			{
-				const Atom* atoms = o->getTable()->getAtoms();
-				int i = o->getTable()->find(searchname, atoms, o->getTable()->getCapacity());
-				if (atoms[i] != InlineHashtable::EMPTY)
-					return atoms[i+1];
+                Atom const value = o->getTable()->getNonEmpty(searchname);
+                if (!InlineHashtable::isEmpty(value))
+                    return value;
 			}
 			while ((o = o->delegate) != NULL);
 		}
@@ -358,11 +355,9 @@ namespace avmplus
 				const ScriptObject *o = this;
 				do
 				{
-					InlineHashtable *table = o->getTable();
-					const Atom* atoms = table->getAtoms();
-					int i = table->find(name, atoms, table->getCapacity());
-					if (atoms[i] != InlineHashtable::EMPTY)
-						return atoms[i+1];
+                    Atom const value = o->getTable()->getNonEmpty(name);
+                    if (!InlineHashtable::isEmpty(value))
+                        return value;
 				}
 				while ((o = o->delegate) != NULL);
 				return undefinedAtom;
@@ -755,11 +750,8 @@ namespace avmplus
 		InlineHashtable *ht = getTable();
 		if (uint32_t(index)-1 >= ht->getCapacity()/2)
 			return nullStringAtom;
-		const Atom* atoms = ht->getAtoms();
-		Atom m = ht->removeDontEnumMask(atoms[(index-1)<<1]);
-		if (AvmCore::isNullOrUndefined(m))
-			return nullStringAtom;
-		return m;
+		Atom m = ht->keyAt(index);
+		return AvmCore::isNullOrUndefined(m) ? nullStringAtom : m;
 	}
 
 	Atom ScriptObject::nextValue(int index)
@@ -770,11 +762,10 @@ namespace avmplus
 		InlineHashtable *ht = getTable();
 		if (uint32_t(index)-1 >= ht->getCapacity()/2)
 			return undefinedAtom;
-		const Atom* atoms = ht->getAtoms();
-		Atom m = ht->removeDontEnumMask(atoms[(index-1)<<1]);
+		Atom m = ht->keyAt(index);
 		if (AvmCore::isNullOrUndefined(m))
 			return nullStringAtom;
-		return atoms[((index-1)<<1)+1];
+		return ht->valueAt(index);
 	}
 
 	int ScriptObject::nextNameIndex(int index)
@@ -783,22 +774,8 @@ namespace avmplus
 
 		if (!traits()->needsHashtable())
 			return 0;
-
-		// todo clean this up.
-		if (index != 0) {
-			index = index<<1;
-		}
-		// Advance to first non-empty slot.
-		InlineHashtable* table = getTable();
-		const Atom* atoms = table->getAtoms();
-		int numAtoms = table->getCapacity();
-		while (index < numAtoms) {
-			Atom m = atoms[index];
-			if (table->enumerable(m))
-				return (index>>1)+1;
-			index += 2;
-		}
-		return 0;
+        
+        return getTable()->next(index);
 	}
 
 	/**
