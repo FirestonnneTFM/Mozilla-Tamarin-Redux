@@ -175,53 +175,9 @@ namespace avmplus
 	{
 		AvmAssert(index >= 0);
 
-		// this can happen if you break in debugger in a subclasses constructor before super
+		// hht could be null if you break in debugger in a subclasses constructor before super
 		// has been called -- let's do it in all builds, it's better than crashing.
 		HeapHashtable* hht = getHeapHashtable();
-		if (!hht)
-		{
-			return 0;
-		}
-
-		// Advance to first non-empty slot.
-		index <<= 1;
-		InlineHashtable* const ht = hht->get_ht();
-		Atom* const atoms = ht->getAtoms();
-		int const numAtoms = ht->getCapacity();
-		if (hht->weakKeys())
-		{
-			while (index < numAtoms) 
-			{
-				Atom const a = atoms[index];
-				if (AvmCore::isGenericObject(a)) 
-				{
-					GCWeakRef *weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
-					if (weakRef->get())
-						return (index>>1)+1;
-					
-					atoms[index] = InlineHashtable::DELETED;
-					atoms[index+1] = InlineHashtable::DELETED;
-					ht->setHasDeletedItems();
-				} 
-				else if (a != 0 && a != InlineHashtable::DELETED) 
-				{
-					return (index>>1)+1;
-				}
-				index += 2;
-			}
-		}
-		else
-		{
-			while (index < numAtoms) 
-			{
-				Atom const a = atoms[index];
-				if (a != 0 && a != InlineHashtable::DELETED) 
-				{
-					return (index>>1)+1;
-				}
-				index += 2;
-			}
-		}
-		return 0;
+        return hht ? hht->next(index) : 0;
 	}
 }	
