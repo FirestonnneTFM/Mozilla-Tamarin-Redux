@@ -44,7 +44,6 @@ namespace avmplus
 	{
 	public:
 		Domain(AvmCore* core, Domain* base);
-		~Domain();
 		
 		Traits* getNamedTraits(Stringp name, Namespacep ns, bool recursive/*=true*/);
 		Traits* getNamedTraits(const Multiname* multiname, bool recursive/*=true*/);
@@ -54,6 +53,10 @@ namespace avmplus
 		Traits* getNamedTrait(Stringp name, Namespace* ns) { return (Traits*)m_namedTraits->get(name, ns); }
 		void addNamedTrait(Stringp name, Namespace* ns, Traits* v) { m_namedTraits->add(name, ns, (Binding)v); }
 		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) { m_namedScripts->add(name, ns, (Binding)v); }
+
+        // returns NULL if the type doesn't exist yet.
+		ClassClosure* getParameterizedType(ClassClosure* type);
+		void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
 
 		REALLY_INLINE Domain* base() const { return m_base; }
 		REALLY_INLINE AvmCore* core() const { return m_core; }
@@ -65,6 +68,7 @@ namespace avmplus
 		DWB(MultinameHashtable*)        m_namedTraits;
 		/** domain-wide type table of scripts, indexed by definition name */
 		DWB(MultinameHashtable*)        m_namedScripts;
+		DWB(HeapHashtable*)             m_parameterizedTypes;
 	};
 
 }

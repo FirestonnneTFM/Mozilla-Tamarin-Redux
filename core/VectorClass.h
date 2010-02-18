@@ -610,8 +610,6 @@ namespace avmplus
 		static Stringp makeVectorClassName(AvmCore* core, Traits* t);
 	
 	private:
-		DWB(HeapHashtable*) instantiated_types;
-		
 		DECLARE_SLOTS_VectorClass;
 	};
 
