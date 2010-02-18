@@ -480,6 +480,19 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 		AvmCore* core = toplevel->core();
 		Namespacep traitsNs = this->traits->ns();
+
+		VTable* objVecVTable = toplevel->objectVectorClass->vtable;
+		AbcEnv* objVecAbcEnv = toplevel->vectorobj_cscope->abcEnv();
+		Toplevel* objVecToplevel = objVecVTable->toplevel();
+		VTable* objVecIVTable = objVecVTable->ivtable;
+        
+        // these cases should all be filtered out by the caller;
+        // we only want to handle Vector<SomeObject> here
+        AvmAssert(param_traits != NULL && 
+                    param_traits != toplevel->intClass->vtable->traits->itraits &&
+                    param_traits != toplevel->uintClass->vtable->traits->itraits &&
+                    param_traits != toplevel->numberClass->vtable->traits->itraits);
+
 		PoolObject* traitsPool = this->traits->pool;
 
 		Stringp classname = core->internString(fullname->appendLatin1("$"));
@@ -487,7 +500,10 @@ namespace avmplus
 		Traits* itraits;
 		if (!ctraits)
 		{
-			ctraits = this->traits->newParameterizedCTraits(classname, traitsNs);
+            // important: base the new ctraits on objVecVTable->traits, *not* this->traits;
+            // we want the result to be based off ObjectVectorClass, not VectorClass
+            // (otherwise sizeofInstance would be too small and we'd be crashy)
+			ctraits = objVecVTable->traits->newParameterizedCTraits(classname, traitsNs);
 			itraits = traitsPool->resolveParameterizedType(toplevel, this->ivtable->traits, param_traits);
 			ctraits->itraits = itraits;
 		}
@@ -497,11 +513,6 @@ namespace avmplus
 		}
 
 		AvmAssert(itraits != NULL);
-
-		VTable* objVecVTable = toplevel->objectVectorClass->vtable;
-		AbcEnv* objVecAbcEnv = toplevel->vectorobj_cscope->abcEnv();
-		Toplevel* objVecToplevel = objVecVTable->toplevel();
-		VTable* objVecIVTable = objVecVTable->ivtable;
 
 		VTable* cvtab = core->newVTable(ctraits, objVecToplevel->class_ivtable, objVecToplevel); 
 		ScopeChain* cvtab_cscope = toplevel->vectorobj_cscope->cloneWithNewVTable(core->GetGC(), cvtab, objVecAbcEnv);
