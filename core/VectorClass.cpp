@@ -434,7 +434,6 @@ namespace avmplus
 	{
 		toplevel()->vectorClass = this;
 		setPrototypePtr( toplevel()->objectClass->construct());
-		instantiated_types = new (core()->GetGC(), 0) HeapHashtable(core()->GetGC());
 	}
 
 	/*static*/ Stringp VectorClass::makeVectorClassName(AvmCore* core, Traits* t)
@@ -448,47 +447,69 @@ namespace avmplus
 
 	Atom VectorClass::applyTypeArgs(int argc, Atom* argv)
 	{
+        Toplevel* toplevel = this->toplevel();
+        
 		//Vector only takes 1 type argument
 		AvmAssert(argc==1);
 		if (argc != 1)
 		{
-			toplevel()->typeErrorClass()->throwError(kWrongTypeArgCountError, traits()->formatClassName(), core()->toErrorString(1), core()->toErrorString(argc));
+			toplevel->typeErrorClass()->throwError(kWrongTypeArgCountError, traits()->formatClassName(), core()->toErrorString(1), core()->toErrorString(argc));
 		}
-		Atom type = argv[0];
-		AvmCore* core = this->core();
 
-		if (ISNULL(type))
-			return toplevel()->objectVectorClass->atom();
+		Atom const typeAtom = argv[0];
 
-		if (atomKind(type) != kObjectType)
-			toplevel()->throwVerifyError(kCorruptABCError);
+        ClassClosure* parameterizedType;
+        if (ISNULL(typeAtom))
+        {
+            parameterizedType = toplevel->objectVectorClass;
+        }
+        else
+        {
+            if (atomKind(typeAtom) != kObjectType)
+                toplevel->throwVerifyError(kCorruptABCError);
 
-		ScriptObject* so = AvmCore::atomToScriptObject(type);
+            ScriptObject* typeObj = AvmCore::atomToScriptObject(typeAtom);
+            if (typeObj == toplevel->intClass)
+            {
+                parameterizedType = toplevel->intVectorClass;
+            }
+            else if (typeObj == toplevel->uintClass)
+            {
+                parameterizedType = toplevel->uintVectorClass;
+            }
+            else if (typeObj == toplevel->numberClass)
+            {
+                parameterizedType = toplevel->doubleVectorClass;
+            }
+            else
+            {
+                // if we have an object, we must have an itraits (otherwise the typearg is not a Class)
+                Traits* typeTraits = typeObj->vtable->traits->itraits;
+                if (!typeTraits)
+                    toplevel->throwVerifyError(kCorruptABCError);
 
-		if (so == toplevel()->intClass)
-			return toplevel()->intVectorClass->atom();
-		else if (so == toplevel()->numberClass)
-			return toplevel()->doubleVectorClass->atom();
-		else if (so == toplevel()->uintClass)
-			return toplevel()->uintVectorClass->atom();
+                ClassClosure* typeClass = (ClassClosure*)typeObj;
+                Domain* typeDomain = typeObj->traits()->pool->domain;
+                if ((parameterizedType = typeDomain->getParameterizedType(typeClass)) == NULL)
+                {
+                    Stringp fullname = VectorClass::makeVectorClassName(core(), typeTraits);
 
-		Traits* param_traits = so->vtable->ivtable->traits;
+                    VTable* vt = this->vtable->newParameterizedVTable(typeTraits, fullname);
 
-		if (!instantiated_types->contains(type))
-		{
-			Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
+                    ObjectVectorClass* parameterizedVector = new (vt->gc(), vt->getExtraSize()) ObjectVectorClass(vt);
+                    parameterizedVector->index_type = typeClass;
+                    parameterizedVector->setDelegate(toplevel->classClass->prototypePtr());
 
-			VTable* vtab = this->vtable->newParameterizedVTable(param_traits, fullname);
+                    // Is this right?  Should each instantiation get its own prototype?
+                    parameterizedVector->setPrototypePtr(toplevel->objectVectorClass->prototypePtr());
+                    typeDomain->addParameterizedType(typeClass, parameterizedVector);
 
-			ObjectVectorClass* new_type = new (vtab->gc(), vtab->getExtraSize()) ObjectVectorClass(vtab);
-			new_type->index_type = (ClassClosure*)AvmCore::atomToScriptObject(type);
-			new_type->setDelegate(toplevel()->classClass->prototypePtr());
+                    parameterizedType = parameterizedVector;
+                }
+            }
+        }
 
-			// Is this right?  Should each instantiation get its own prototype?
-			new_type->setPrototypePtr(toplevel()->objectVectorClass->prototypePtr());
-			instantiated_types->add(type, new_type->atom());
-		}
-		return (Atom)instantiated_types->get(type);
+        return parameterizedType->atom();
 	}
 
 	Atom ObjectVectorClass::call(int argc, Atom* argv) 
