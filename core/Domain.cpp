@@ -41,10 +41,11 @@
 namespace avmplus
 {
 	Domain::Domain(AvmCore* core, Domain* base) : 
-            m_base(base),
-		    m_core(core),
-            m_namedTraits(new (core->GetGC()) MultinameHashtable()),
-            m_namedScripts(new (core->GetGC()) MultinameHashtable())
+        m_base(base),
+        m_core(core),
+        m_namedTraits(new (core->GetGC()) MultinameHashtable()),
+        m_namedScripts(new (core->GetGC()) MultinameHashtable()),
+		m_parameterizedTypes(new (core->GetGC(), 0) HeapHashtable(core->GetGC()))
 	{
 	}
 
@@ -95,6 +96,23 @@ namespace avmplus
 		}
 		return f;
 	}
+
+    ClassClosure* Domain::getParameterizedType(ClassClosure* type) 
+    { 
+        AvmAssert(type != NULL);
+        Atom a = type ? m_parameterizedTypes->get(type->atom()) : nullObjectAtom;
+        return AvmCore::isObject(a) ? (ClassClosure*)AvmCore::atomToScriptObject(a) : NULL;
+    }
+
+	void Domain::addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType)
+    {
+        AvmAssert(type && parameterizedType);
+        if (type && parameterizedType)
+        {
+            AvmAssert(!m_parameterizedTypes->contains(type->atom()));
+            m_parameterizedTypes->add(type->atom(), parameterizedType->atom());
+        }
+    }
 }
 
 
