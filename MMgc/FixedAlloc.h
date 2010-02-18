@@ -52,6 +52,7 @@ namespace MMgc
 	class FixedAlloc 
 	{
 		friend class FixedMalloc;
+		friend class FixedAllocSafe;
 		friend class FastAllocator;
 		friend class GC;
 
@@ -228,6 +229,9 @@ namespace MMgc
 	private:
 		// default ctor used only by FixedMalloc
 		FixedAllocSafe();
+
+        // for explicit destruction from FixedMalloc
+        void Destroy();
 
 		vmpi_spin_lock_t m_spinlock;
 	};
