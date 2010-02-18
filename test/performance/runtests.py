@@ -70,7 +70,7 @@ class PerformanceRuntest(RuntestBase):
     iterations = 1
     vmname = 'unknown'
     memory = False
-    vmversion = ''
+    avm2version = ''
     vmargs2 = ''
     optimize = True
     perfm = False
@@ -95,7 +95,6 @@ class PerformanceRuntest(RuntestBase):
         self.setTimestamp()
         self.checkPath(['avm2'])
         self.determineOS()
-        self.getVersion()
         self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
@@ -127,6 +126,7 @@ class PerformanceRuntest(RuntestBase):
         print "    --aotout        where the resulting binaries should be put (defaults to the location of the as file)."
         print "    --aotargs       any extra arguments to pass to compile.py."
         print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
+        print "    --vm2version    specify version of avm2"
         print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
         print "    --nooptimize    do not optimize files when compiling"
         print "    --perfm         parse the perfm results from avm"
@@ -138,7 +138,7 @@ class PerformanceRuntest(RuntestBase):
         RuntestBase.setOptions(self)
         self.options += 'S:i:lkr:mp'
         self.longOptions.extend(['avm2=','avmname=','avm2name=','iterations=','log','socketlog',
-                                 'runtime=','memory','larger','vmversion=','vmargs2=','nooptimize',
+                                 'runtime=','memory','larger','vmversion=', 'vm2version=','vmargs2=','nooptimize',
                                  'perfm','csv','prettyprint'])
     
     def parseOptions(self):
@@ -168,7 +168,9 @@ class PerformanceRuntest(RuntestBase):
             elif o in ('--aotargs'):
                 self.aotextraargs = v
             elif o in ('--vmversion',):
-                self.vmversion = v
+                self.avmversion = v
+            elif o in ('--vm2version',):
+                self.avm2version = v
             elif o in ('--vmargs2',):
                 self.vmargs2 = v
             elif o in ('--nooptimize',):
@@ -179,27 +181,6 @@ class PerformanceRuntest(RuntestBase):
                 self.csv = True
             elif o in ('-p', '--prettyprint'):
                 self.prettyprint = True
-    
-    
-    def getVersion(self):
-        # ================================================
-        # Determine the version number associated with the 
-        # VM, will be cyclone if not from build machine
-        # ================================================
-        if not self.vmversion:
-            (f,err,exitcode) = self.run_pipe("%s" % self.avm)
-            try:
-                for line in f:
-                    if re.search(" build ",line):
-                        version = line.split()
-                        version = version[len(version)-1]
-                        if version.find(":") != -1:     # if this is an actual build we need to remove the hash
-                            version = version.split(":")
-                            version = version[0]
-                        self.vmversion = version
-                        break
-            except:
-                self.vmversion = 'unknown'
     
     def compile_test(self, as_file):
         if not isfile(self.shellabc):
@@ -225,11 +206,11 @@ class PerformanceRuntest(RuntestBase):
     def socketlog(self, msg):
         if self.logresults:
             if not self.socketlogFile:
-                file="socketlog-%s.txt" % self.vmversion
+                file="socketlog-%s.txt" % self.avmversion
                 ctr=0
                 while os.path.exists(file):
                     ctr += 1
-                    file = "socketlog-%s-%s.txt" % (self.vmversion,ctr)
+                    file = "socketlog-%s-%s.txt" % (self.avmversion,ctr)
                 self.socketlogFile=file
             open(self.socketlogFile,'a').write(msg)
             try:
@@ -267,19 +248,21 @@ class PerformanceRuntest(RuntestBase):
     def preProcessTests(self):
         if not self.aotsdk:
             self.checkExecutable(self.avm, 'AVM environment variable or --avm must be set to avmplus')
+            if not self.avmversion:
+                self.avmversion = self.getAvmVersion(self.avm)
             if self.avm2:
                 self.checkExecutable(self.avm2, '--avm2 must be set to avmplus')
+                if not self.avm2version:
+                    self.avm2version = self.getAvmVersion(self.avm2)
             
         # Print run info and headers
         self.js_print('Executing %d test(s)' % len(self.tests), overrideQuiet=True, csv=False)
-        self.js_print("%s: %s %s" % (self.avmname, self.avm, self.vmargs))
-        if len(self.avm2)>0:
-            if len(self.vmargs2)>0:
-                self.js_print("%s: %s %s" % (self.avm2name, self.avm2, self.vmargs2))
-            else:
-                self.js_print("%s: %s" % (self.avm2name, self.avm2))
+        
+        self.js_print("%s: %s %s version: %s" % (self.avmname, self.avm, self.vmargs, self.avmversion))
+        if self.avm2:
+            self.js_print("%s: %s %s version: %s" % (self.avm2name, self.avm2, self.vmargs2, self.avm2version))
         self.js_print('iterations: %s' % self.iterations)
-        if len(self.avm2)>0:
+        if self.avm2:
             if self.iterations == 1:
                 self.js_print("\n%-50s %7s %7s %7s %7s\n" % ("test",self.avmname,self.avm2name, "%sp", "metric"))
             else:
@@ -544,7 +527,7 @@ class PerformanceRuntest(RuntestBase):
                     self.js_print("%-50s %7s %7s" % (testName,formatMemory(memoryhigh), metric))
                 config = "%s" % self.vmargs.replace(" ", "")
                 config = config.replace("-memstats","")
-                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
+                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmversion, self.vmname))
         else:
             if len(self.avm2)>0:
                 if self.iterations == 1:
@@ -622,14 +605,14 @@ class PerformanceRuntest(RuntestBase):
                                 #calc confidence and mean for each stat
                                 def perfmSocketlog(metric,key):
                                   self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % 
-                                           (testName, metric,min(perfm1Dict[key]), conf95(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
+                                           (testName, metric,min(perfm1Dict[key]), conf95(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.avmversion, self.vmname))
                                 perfmSocketlog('vprof-compile-time','compile')
                                 perfmSocketlog('vprof-code-size','code')
                                 perfmSocketlog('vprof-verify-time','verify')
                                 perfmSocketlog('vprof-ir-bytes','irbytes')
                                 perfmSocketlog('vprof-ir-time','ir')
                                 perfmSocketlog('vprof-count','count')
-                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
+                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.avmversion, self.vmname))
                         runResults = ''
                         if self.csv:
                             for i in range(self.iterations):
