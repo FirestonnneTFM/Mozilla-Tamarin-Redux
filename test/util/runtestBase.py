@@ -87,8 +87,10 @@ class RuntestBase:
     asc = ''
     ascargs = ''
     atsDir = 'ATS_SWFS'
+    ascversion = ''
     avm = ''
     avmce = ''
+    avmversion = ''
     builtinabc = ''
     config = ''
     escbin = ''
@@ -251,6 +253,7 @@ class RuntestBase:
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
                 self.forcerebuild = True
+                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-c', '--config'):
                 self.config = v
             elif o in ('--ascargs',):
@@ -268,6 +271,7 @@ class RuntestBase:
                 self.debug = True
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
+                self.ascversion = self.getAscVersion(self.asc)
                 if not pexpect:
                     print 'To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net'
             elif o in ('-q', '--quiet'):
@@ -292,7 +296,7 @@ class RuntestBase:
     
     ### Config and Settings ###
 
-    def determineConfig(self):
+    def determineConfig(self, vm='tvm'):
         # ================================================
         # Determine the configruation if it has not been 
         # passed into the script:
@@ -378,7 +382,10 @@ class RuntestBase:
                     self.vmtype = 'debug'
                 else:
                     self.vmtype = 'release'
-                
+            
+            # get the build number and hash
+            self.avmversion = self.getAvmVersion(txt=f[1])
+            
             f = ' '.join(f)
             # determine if api versioning switch is available
             if re.search('(api)', f):
@@ -386,7 +393,7 @@ class RuntestBase:
             
         wordcode = '-wordcode' if re.search('wordcode', self.avm) else ''
         
-        self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
+        self.config = cputype+'-'+self.osName+'-'+vm+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
     
     def determineOS(self):
         _os = platform.system()
@@ -1038,8 +1045,6 @@ class RuntestBase:
             except:
                 pass  
     
-    
-    
     ### Process Management ###  
     
     def killCurrentPids(self):
@@ -1097,6 +1102,11 @@ class RuntestBase:
     
     def preProcessTests(self):  # don't need AVM if rebuilding tests
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
+        if self.avmversion:
+            self.js_print('avm version: %s' % self.avmversion)
+        if self.ascversion:
+            self.js_print('asc version: %s' % self.ascversion)
+
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
 
 
@@ -1246,6 +1256,29 @@ class RuntestBase:
             exit(1)
 
     ### Misc Functions ###
+
+    def getAscVersion(self, asc):
+        if asc.endswith('.jar'):
+            cmd = '"%s" -jar %s' % (self.java,asc)
+        else:
+            cmd = asc
+         
+        (f,err,exitcode) = self.run_pipe(cmd)
+        
+        try:
+            return re.compile('.*build (\d+|\S+)').search(f[1]).group(1)
+        except:
+            return 'unknown'
+    
+    def getAvmVersion(self, vm=None, txt=None):
+        '''Pull the avm version out of the vm info or description string if provided.'''
+        if vm:
+            (f,err,exitcode) = self.run_pipe('%s' % vm)
+            txt = f[1]
+        try:
+            return re.compile('.*build (\d+:\S+|\S+)').search(txt).group(1)
+        except:
+            return 'unknown'
 
     def compareAbcAsmOutput(self, file, output):
         # return diff
