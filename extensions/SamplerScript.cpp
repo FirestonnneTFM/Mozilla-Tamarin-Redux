@@ -811,28 +811,40 @@ namespace avmplus
 	}
 
 	/*static*/
-	ArrayObject* SamplerScript::getLexicalScopes(ScriptObject *, FunctionObject *function)
+	ArrayObject* SamplerScript::getLexicalScopes(ScriptObject *self, FunctionObject *function)
 	{
 #ifdef DEBUGGER
+		AvmCore* core = self->core();
+		Sampler *s = core->get_sampler();
+		if (!s || !trusted(self))
+			return NULL;
+
 		if(function != NULL && function->getCallMethodEnv())
 			return function->getCallMethodEnv()->getLexicalScopes();
 		else
 			return NULL;
 #else
+		(void)self;
 		(void)function;
 		return NULL;
 #endif	
 	}
 
 	/*static*/
-	Atom SamplerScript::getSavedThis(ScriptObject *, FunctionObject *method)
+	Atom SamplerScript::getSavedThis(ScriptObject *self, FunctionObject *method)
 	{
 #ifdef DEBUGGER
+		AvmCore* core = self->core();
+		Sampler *s = core->get_sampler();
+		if (!s || !trusted(self))
+			return undefinedAtom;
+
 		if(method != NULL && Traits::getBuiltinType(method->vtable->traits) == BUILTIN_methodClosure)
 			return ((MethodClosure*)method)->peek_savedThis();
 		else
 			return undefinedAtom;
 #else
+		(void)self;
 		(void)method;
 		return undefinedAtom;
 #endif
