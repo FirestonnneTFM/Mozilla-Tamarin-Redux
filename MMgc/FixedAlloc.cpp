@@ -435,8 +435,16 @@ namespace MMgc
 	
 	FixedAllocSafe::~FixedAllocSafe()
 	{
-		VMPI_lockDestroy(&m_spinlock);
+        // Don't call Destroy, because it calls FixedAlloc::Destroy, which is also
+        // called from FixedAlloc::~FixedAlloc, which we just called. 
+        VMPI_lockDestroy(&m_spinlock);
 	}
+
+    void FixedAllocSafe::Destroy()
+    {
+        FixedAlloc::Destroy();
+        VMPI_lockDestroy(&m_spinlock);
+    }
 
 	// FastAllocator
 	
