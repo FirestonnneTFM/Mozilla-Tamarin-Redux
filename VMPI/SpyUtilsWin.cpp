@@ -146,32 +146,39 @@ void VMPI_spyCallback()
 {
 	if(mmgc_spy_signal) 
 	{
-		mmgc_spy_signal = 0;
-
-		void *pipe = OpenAndConnectToNamedPipe("MMgc_Spy");
-
-		spyStream = HandleToStream(pipe);
-		GCAssert(spyStream != NULL);
-		RedirectLogOutput(SpyLog);
-
-		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfoLocked();
-
-		fflush(spyStream);
-
-		CloseNamedPipe(pipe);
-		RedirectLogOutput(NULL);
-		spyStream = NULL;	
+		VMPI_lockAcquire(&lock);
+		if(mmgc_spy_signal) 
+		{
+			mmgc_spy_signal = 0;
+			
+			void *pipe = OpenAndConnectToNamedPipe("MMgc_Spy");
+			
+			spyStream = HandleToStream(pipe);
+			GCAssert(spyStream != NULL);
+			RedirectLogOutput(SpyLog);
+			
+			MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
+			
+			fflush(spyStream);
+			
+			CloseNamedPipe(pipe);
+			RedirectLogOutput(NULL);
+			spyStream = NULL;	
+		}
+		VMPI_lockRelease(&lock);
 	}
 }
 
 bool VMPI_spySetup()
 {
+	VMPI_lockInit(&lock);
 	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
 	return true;
 }
 
 void VMPI_spyTeardown()
 {
+	VMPI_lockDestroy(&lock);
 	spyRunning = false;
 }
 

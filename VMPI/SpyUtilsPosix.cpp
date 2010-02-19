@@ -143,23 +143,24 @@ extern void RedirectLogOutput(void (*)(const char*));
 
 void VMPI_spyCallback()
 {
-	pthread_mutex_lock(&spy_mutex);
-
 	if(spy_connected)
 	{
-		spy_connected = false;
+		pthread_mutex_lock(&spy_mutex);
+		if(spy_connected)
+		{
+			spy_connected = false;
 
-		RedirectLogOutput(SpyLog);
-		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfoLocked();
-		RedirectLogOutput(NULL);
-		
-		//we are done dumping memory info to the spy
-		//signal the condition variable to 
-		//wake up SpyConnectionLoop thread
-		pthread_cond_signal(&spy_cond);
+			RedirectLogOutput(SpyLog);
+			MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
+			RedirectLogOutput(NULL);
+			
+			//we are done dumping memory info to the spy
+			//signal the condition variable to 
+			//wake up SpyConnectionLoop thread
+			pthread_cond_signal(&spy_cond);
+		}
+		pthread_mutex_unlock(&spy_mutex);	
 	}
-	
-	pthread_mutex_unlock(&spy_mutex);	
 }
 
 bool VMPI_spySetup()
