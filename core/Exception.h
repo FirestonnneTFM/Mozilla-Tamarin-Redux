@@ -175,7 +175,7 @@ namespace avmplus
 		{
 			core = NULL;
 			this->catchAction = kCatchAction_Unknown;
-#if defined(AVMPLUS_MAC) && defined(DEBUG)
+#ifdef DEBUG
 			this->contextExtra = 0;
 #endif
 		}
@@ -191,7 +191,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION BEGIN
 	public:
 		jmp_buf				jmpbuf;
-#if defined(AVMPLUS_MAC) && defined(DEBUG)
+#ifdef DEBUG
 		// save and restore additional state alongside jmpbuf 
 		uint32_t                        contextExtra;
 #endif
