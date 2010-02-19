@@ -39,19 +39,36 @@
 # usage: ./android_shell.sh <vmargs> file.abc
 # assumes the android shell is deployed to /data/app/avmshell
 #
+filelist=""
+flatfilelist=""
 if [ "$1" = "" ]
 then
     adb shell "cd /data/app;./avmshell"
 else
     args=""
-    last=""
     for a in $*
     do
-       args="$args $last"
-       last=$a
+       echo "$a" | grep ".*\.abc" > /dev/null
+       res=$?
+       if [ "$res" = "0" ]
+       then
+           file=$a
+           flatfile=`basename $a`
+           filelist="$filelist $flatfile"
+           adb push $file /data/app/$flatfile 2> /dev/null
+           args="$args $flatfile"       
+       else
+           args="$args $a"
+       fi
     done
-    echo     adb push $last /data/app/avmtest.abc 2> /dev/null
-    echo     adb shell "cd /data/app;./avmshell $args ./avmtest.abc"
-    adb push $last /data/app/avmtest.abc 2> /dev/null
-    adb shell "cd /data/app;./avmshell $args ./avmtest.abc"
+    # workaround for adb not returning exit code, run a shell script and print exit code to stdout
+    adb shell "/data/app/android_runner.sh $args" > /tmp/stdout
+    ret=`cat /tmp/stdout | grep "EXITCODE=" | awk -F= '{printf("%d",$2)}'`
+    for a in $filelist
+    do
+        adb shell "rm /data/app/$a"
+    done
+    cat /tmp/stdout
+    rm -f /tmp/stdout
+    exit $ret
 fi
