@@ -1860,22 +1860,18 @@ namespace MMgc
 		(void)item;
 		(void)askSize;
 		(void)gotSize;
-		{
 #ifdef MMGC_MEMORY_PROFILER
-			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
-			if(hasSpy) {
-				VMPI_spyCallback();
-			}
-			if(profiler)
-				profiler->RecordAllocation(item, askSize, gotSize);
+		if(hasSpy) {
+			VMPI_spyCallback();
+		}
+		if(profiler)
+			profiler->RecordAllocation(item, askSize, gotSize);
 #endif
 
-		}
 #ifdef MMGC_MEMORY_INFO
 		DebugDecorate(item, gotSize);
 #endif
 #ifdef AVMPLUS_SAMPLER
-		// this can't be called with the heap lock locked.
 		avmplus::recordAllocationSample(item, gotSize);
 #endif
 	}
@@ -1883,13 +1879,10 @@ namespace MMgc
 	void GCHeap::FinalizeHook(const void *item, size_t size)
 	{
 		(void)item,(void)size;
-		{
 #ifdef MMGC_MEMORY_PROFILER
-			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
-			if(profiler)
-				profiler->RecordDeallocation(item, size);
+		if(profiler)
+			profiler->RecordDeallocation(item, size);
 #endif
-		}
 		
 #ifdef AVMPLUS_SAMPLER
 		avmplus::recordDeallocationSample(item, size);
@@ -2237,11 +2230,6 @@ namespace MMgc
 	void GCHeap::DumpMemoryInfo()
 	{
 		MMGC_LOCK(m_spinlock);
-		DumpMemoryInfoLocked();
-	}
-
-	void GCHeap::DumpMemoryInfoLocked()
-	{
 		size_t priv = VMPI_getPrivateResidentPageCount() * VMPI_getVMPageSize();
 		size_t mmgc = GetTotalHeapSize() * GCHeap::kBlockSize;
 		size_t unmanaged = GetFixedMalloc()->GetTotalSize() * GCHeap::kBlockSize;

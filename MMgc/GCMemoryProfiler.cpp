@@ -97,6 +97,7 @@ namespace MMgc
 	{
 		VMPI_setupPCResolution();
 		simpleDump = !VMPI_hasSymbols();
+		VMPI_lockInit(&lock);
 	}
 
 	MemoryProfiler::~MemoryProfiler()
@@ -120,6 +121,7 @@ namespace MMgc
 			delete (AllocInfo*)allocIter.value();
 		}
 		VMPI_desetupPCResolution();		
+		VMPI_lockDestroy(&lock);
 	}
 
 	const char *MemoryProfiler::GetAllocationNameFromTrace(StackTrace *trace)
@@ -159,6 +161,12 @@ namespace MMgc
 
 	StackTrace *MemoryProfiler::GetAllocationTrace(const void *obj)
 	{
+		MMGC_LOCK(lock);
+		return GetAllocationTraceLocked(obj);
+	}
+
+	StackTrace *MemoryProfiler::GetAllocationTraceLocked(const void *obj)
+	{
 		AllocInfo* info = (AllocInfo*)allocInfoTable.get(obj);
 		GCAssert(info != NULL);
 		return info ? info->allocTrace : NULL;
@@ -166,6 +174,7 @@ namespace MMgc
 
 	StackTrace *MemoryProfiler::GetDeletionTrace(const void *obj)
 	{
+		MMGC_LOCK(lock);
 		AllocInfo* info = (AllocInfo*)allocInfoTable.get(obj);
 		GCAssert(info != NULL);
 		return info ? info->deleteTrace : NULL;
@@ -173,6 +182,7 @@ namespace MMgc
 
 	const char * MemoryProfiler::GetAllocationName(const void *obj)
 	{
+		MMGC_LOCK(lock);
 		AllocInfo *info = (AllocInfo*)allocInfoTable.get(obj);
 		if(info)
 			return GetAllocationNameFromTrace(info->allocTrace);
@@ -203,9 +213,10 @@ namespace MMgc
 
 	void MemoryProfiler::RecordAllocation(const void *item, size_t askSize, size_t gotSize)
 	{
+		MMGC_LOCK(lock);
 		(void)askSize;
 
-		StackTrace *trace = GetStackTrace();
+		StackTrace *trace = GetStackTraceLocked();
 
 		ChangeSize(trace, (int)gotSize);
 
@@ -221,7 +232,7 @@ namespace MMgc
 
 		if(memtype)
 		{
-			trace->master = GetAllocationTrace(memtype);
+			trace->master = GetAllocationTraceLocked(memtype);
 			memtype = NULL;
 		}
 		
@@ -234,6 +245,7 @@ namespace MMgc
 
 	void MemoryProfiler::RecordDeallocation(const void *item, size_t size)
 	{
+		MMGC_LOCK(lock);
 		// This should be a remove, but calling remove a lot has performance issues
 		// When we fix the perf issues with GCHashtable::remove, we should change this back to a remove.
 		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
@@ -244,7 +256,7 @@ namespace MMgc
 		// FIXME: how to know this is a sweep?
 
 		// store deletion trace
-		info->deleteTrace = GetStackTrace();
+		info->deleteTrace = GetStackTraceLocked();
 
 #if 0
 		if(poison == 0xba) {
@@ -255,6 +267,12 @@ namespace MMgc
 	}
 	
 	StackTrace *MemoryProfiler::GetStackTrace()
+	{
+		MMGC_LOCK(lock);
+		return GetStackTraceLocked();
+	}
+
+	StackTrace *MemoryProfiler::GetStackTraceLocked()
 	{
 		uintptr_t trace[kMaxStackTrace];
 		VMPI_memset(trace, 0, sizeof(trace));
@@ -270,6 +288,7 @@ namespace MMgc
 	
 	size_t MemoryProfiler::GetAskSize(const void* item)
 	{
+		MMGC_LOCK(lock);
 		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
 		//failing this assert means that either FinalizeHook() was called before GetAsk()
 		//or this item is being double deleted
@@ -369,6 +388,8 @@ namespace MMgc
 			DumpSimple();
 			return;
 		}
+
+		MMGC_LOCK(lock);
 
 		// Note: it's important to use the VMPI variant of GCHashtable for this.
 		GCHashtable_VMPI packageTable(128);
@@ -540,6 +561,8 @@ namespace MMgc
 	
 	void MemoryProfiler::DumpSimple()
 	{
+		MMGC_LOCK(lock);
+
 		// rip through all allocation sites and dump them all without any sorting
 		// useful on WinMo or other platforms where we don't have symbol names
 		// at runtime, and just need to dump the raw addresses (which makes sorting impossible)
