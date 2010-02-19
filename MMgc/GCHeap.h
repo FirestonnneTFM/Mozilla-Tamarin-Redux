@@ -600,7 +600,6 @@ namespace MMgc
 		void log_percentage(const char *, size_t bytes, size_t relativeTo);
 
 		void DumpMemoryInfo();
-		void DumpMemoryInfoLocked();
 
 #ifdef MMGC_MEMORY_PROFILER
 #ifdef MMGC_USE_SYSTEM_MALLOC
