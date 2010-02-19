@@ -95,8 +95,7 @@ namespace avmplus
 			InlineHashtable* iht;
 		};
 		p = (uint8_t*)this + vtable->traits->getHashtableOffset();
-		iht->initialize(this->gc(), capacity);
-		iht->setDontEnumSupport();
+		iht->initializeWithDontEnumSupport(this->gc(), capacity);
 	}
 	
 	InlineHashtable* ScriptObject::getTable() const
@@ -110,7 +109,7 @@ namespace avmplus
 		p = (uint8_t*)this + vtable->traits->getHashtableOffset();
 		if(!vtable->traits->isDictionary)
 		{
-			if (iht->getCapacity() == 0)
+			if (iht->needsInitialize())
 				const_cast<ScriptObject*>(this)->initHashtable(); 
 			return iht;
 		}
@@ -747,9 +746,7 @@ namespace avmplus
 		AvmAssert(traits()->needsHashtable());
 		AvmAssert(index > 0);
 
-		InlineHashtable *ht = getTable();
-		if (uint32_t(index)-1 >= ht->getCapacity()/2)
-			return nullStringAtom;
+		InlineHashtable* ht = getTable();
 		Atom m = ht->keyAt(index);
 		return AvmCore::isNullOrUndefined(m) ? nullStringAtom : m;
 	}
@@ -759,9 +756,7 @@ namespace avmplus
 		AvmAssert(traits()->needsHashtable());
 		AvmAssert(index > 0);
 
-		InlineHashtable *ht = getTable();
-		if (uint32_t(index)-1 >= ht->getCapacity()/2)
-			return undefinedAtom;
+		InlineHashtable* ht = getTable();
 		Atom m = ht->keyAt(index);
 		if (AvmCore::isNullOrUndefined(m))
 			return nullStringAtom;
