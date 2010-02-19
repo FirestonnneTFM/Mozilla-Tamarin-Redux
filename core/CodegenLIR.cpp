@@ -205,7 +205,7 @@ namespace avmplus
     #elif defined AVMPLUS_MAC_CARBON
     #  define SETJMP setjmpAddress
     #else
-    #  define SETJMP ((uintptr)::setjmp)
+    #  define SETJMP ((uintptr)VMPI_setjmpNoUnwind)
     #endif // _MSC_VER
 
     #include "../core/jit-calls.h"

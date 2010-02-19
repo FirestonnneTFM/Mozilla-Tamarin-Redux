@@ -231,8 +231,9 @@ void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* ar
 	(void)arg;
 }
 
-#if defined(AVMPLUS_MAC) && defined(DEBUG)
+
 uint32_t querySignalMask() {
+#if (defined(AVMPLUS_MAC) || defined(__linux__)) && defined(DEBUG)
 	// will save just the 32 signals to avoid exposing sigset_t in ExceptionFrame
 	sigset_t set;
 	uint32_t mask = 0;
@@ -246,11 +247,16 @@ uint32_t querySignalMask() {
 			mask |= (1 << i);
 	}
 	return mask;
-	
+#else
+	// will use the setjmp/longjmp calls that do save and restore
+	// signal masks, so no need to verify that the signal mask
+	// hasn't changed.
+	return 0;
+#endif
 }
 
 void assertSignalMask(uint32_t expected) {
-	
+#if (defined(AVMPLUS_MAC) || defined(__linux__)) && defined(DEBUG)	
 	sigset_t current_mask;
 	sigemptyset(&current_mask);
 		
@@ -266,9 +272,15 @@ void assertSignalMask(uint32_t expected) {
 			}
 		}
 	}
+#else // do nothing	
+	(void)expected;
+	// will use the setjmp/longjmp calls that do save and restore
+	// signal masks, so no need to verify that the signal mask
+	// hasn't changed.
+
+#endif 
 }
 
-#endif
 
 
 

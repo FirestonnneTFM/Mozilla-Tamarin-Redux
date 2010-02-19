@@ -78,12 +78,29 @@
 #define VMPI_exit    ::exit
 
 // Set up a jmp_buf suitable for VMPI_longjmpNoUnwind.
+#ifdef __linux__
+// Use the routine version with an underscore to avoid system calls
+// to query the signal mask.
+#ifdef _setjmp
+#warning definded
+#endif
+#define VMPI_setjmpNoUnwind ::_setjmp
+#else
+// Don't assume _setjmp is available
 #define VMPI_setjmpNoUnwind ::setjmp
+#endif
 
 // Jump to an active jmp_buf that was set up by VMPI_setjmpNoUnwind.
 // Under no circumstances may C++ destructors be unwound during the
 // jump (MSVC likes to do this by default).
+#ifdef __linux__
+// Use the routine version with an underscore to avoid system calls
+// to query the signal mask.
+#define VMPI_longjmpNoUnwind ::_longjmp
+#else
+// Don't assume _longjmp is avialable
 #define VMPI_longjmpNoUnwind ::longjmp
+#endif
 
 #include <stddef.h>
 #include <string.h>
@@ -107,6 +124,7 @@
 
 #include <unistd.h>
 #include <pthread.h>
+#include <signal.h>
 
 #ifdef SOLARIS
  #include <alloca.h>
