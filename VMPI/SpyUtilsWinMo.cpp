@@ -63,6 +63,7 @@ void WriteOnNamedSignal(const char* name, uint32_t *addr);
 
 static SignalData *sig_data=NULL;
 static bool spyRunning=false;
+static vmpi_spin_lock_t lock;
 
 DWORD WINAPI WaitForMemorySignal(LPVOID)
 {

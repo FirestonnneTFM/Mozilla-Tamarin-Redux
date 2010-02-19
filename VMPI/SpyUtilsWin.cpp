@@ -61,6 +61,7 @@ public:
 
 static bool spyRunning=false;
 static SignalData *sig_data;
+static vmpi_spin_lock_t lock;
 
 DWORD WINAPI WaitForMemorySignal(LPVOID)
 {
