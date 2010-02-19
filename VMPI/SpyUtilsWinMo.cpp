@@ -77,7 +77,9 @@ DWORD WINAPI WaitForMemorySignal(LPVOID)
 		//ReadMsgQueue(sig_data->eventHandle, buff, 256, &bytesread, INFINITE, 0);
 		CloseMsgQueue(sd->eventHandle);
 		if(spyRunning) {
+			VMPI_lockAcquire(&lock);
 			*(sig_data->profilerAddr) = true;		
+			VMPI_lockRelease(&lock);
 			WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", sd->profilerAddr);
 			break;
 		}
@@ -131,31 +133,38 @@ void VMPI_spyCallback()
 {
 	if(mmgc_spy_signal) 
 	{
-		mmgc_spy_signal = 0;
+		VMPI_lockAcquire(&lock);
+		if(mmgc_spy_signal) 
+		{
+			mmgc_spy_signal = 0;
 
-		spyStream = fopen("Temp\\gcstats.txt", "w");
+			spyStream = fopen("Temp\\gcstats.txt", "w");
 
-		GCAssert(spyStream != NULL);
-		RedirectLogOutput(SpyLog);
-
-		MMgc::GCHeap::GetGCHeap()->DumpMemoryInfoLocked();
-
-		fflush(spyStream);
-
-		fclose(spyStream);
-		RedirectLogOutput(NULL);
-		spyStream = NULL;	
+			GCAssert(spyStream != NULL);
+			RedirectLogOutput(SpyLog);
+			
+			MMgc::GCHeap::GetGCHeap()->DumpMemoryInfo();
+			
+			fflush(spyStream);
+			
+			fclose(spyStream);
+			RedirectLogOutput(NULL);
+			spyStream = NULL;	
+		}
+		VMPI_lockRelase(&lock);
  	}
 }
 
 bool VMPI_spySetup()
 {
+	VMPI_lockInit(&lock);
 	WriteOnNamedSignal("MMgc::MemoryProfiler::DumpFatties", &mmgc_spy_signal);
 	return true;
 }
 
 void VMPI_spyTeardown()
 {
+	VMPI_lockDestroy(&lock);
 	spyRunning = false;
 }
 

@@ -96,6 +96,9 @@ namespace MMgc
 		size_t GetAskSize(const void* item);
 
 	private:
+		StackTrace *GetStackTraceLocked();
+		StackTrace *GetAllocationTraceLocked(const void *obj);
+
 		const char *Intern(const char *name, size_t len);
 		const char *GetPackage(StackTrace *trace);
 		const char *GetAllocationNameFromTrace(StackTrace *trace);
@@ -114,6 +117,8 @@ namespace MMgc
 
 		//table to store allocation specific information
 		GCHashtable_VMPI allocInfoTable;
+
+		vmpi_spin_lock_t lock;
 	};
 
 #else // MMGC_MEMORY_PROFILER
