@@ -53,11 +53,22 @@ namespace avmplus
         // nothing, here only for HeapHashtable, which explicitly calls destroy()
     }
 
+	REALLY_INLINE void InlineHashtable::initializeWithDontEnumSupport(MMgc::GC* gc, int capacity)
+	{
+        initialize(gc, capacity);
+        m_atomsAndFlags |= kDontEnumBit; 
+    }
+    
     REALLY_INLINE uint32_t InlineHashtable::getSize() const 
     { 
         return m_size; 
     }
-    
+
+    REALLY_INLINE bool InlineHashtable::needsInitialize() const 
+    { 
+        return m_logCapacity == 0; 
+    }
+
     REALLY_INLINE uint32_t InlineHashtable::getCapacity() const 
     { 
         return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0; 
@@ -66,11 +77,6 @@ namespace avmplus
     REALLY_INLINE uintptr_t InlineHashtable::hasDontEnumSupport() const 
     { 
         return (m_atomsAndFlags & kDontEnumBit); 
-    }
-    
-    REALLY_INLINE void InlineHashtable::setDontEnumSupport() 
-    { 
-        m_atomsAndFlags |= kDontEnumBit; 
     }
     
     REALLY_INLINE Atom InlineHashtable::removeDontEnumMask(Atom a) const 
@@ -147,14 +153,16 @@ namespace avmplus
 
     REALLY_INLINE Atom InlineHashtable::keyAt(int i) const
     {
-        const Atom* const atoms = getAtoms();
-        return removeDontEnumMask(atoms[(i-1)<<1]);
+        int const index = (i-1)<<1;
+        int const cap = getCapacity();
+        return index < cap ? removeDontEnumMask(getAtoms()[index]) : nullStringAtom;
     }
 
     REALLY_INLINE Atom InlineHashtable::valueAt(int i) const
     {
-        const Atom* const atoms = getAtoms();
-        return atoms[((i-1)<<1)+1];
+        int const index = ((i-1)<<1)+1;
+        int const cap = getCapacity();
+        return index < cap ? getAtoms()[index] : undefinedAtom;
     }
 
     // @todo -- move this mess to VMPI, see https://bugzilla.mozilla.org/show_bug.cgi?id=546354
@@ -240,11 +248,6 @@ namespace avmplus
         ht.reset(); 
     }
     
-    REALLY_INLINE uint32_t HeapHashtableRC::getCapacity() const 
-    { 
-        return ht.getCapacity(); 
-    }
-    
     REALLY_INLINE uint32_t HeapHashtableRC::getSize() const 
     { 
         return ht.getSize(); 
@@ -308,11 +311,6 @@ namespace avmplus
     REALLY_INLINE void HeapHashtable::reset() 
     { 
         ht.reset(); 
-    }
-    
-    REALLY_INLINE uint32_t HeapHashtable::getCapacity() const 
-    { 
-        return ht.getCapacity(); 
     }
     
     REALLY_INLINE uint32_t HeapHashtable::getSize() const 
