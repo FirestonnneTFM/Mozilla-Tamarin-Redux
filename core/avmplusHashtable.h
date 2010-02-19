@@ -73,16 +73,14 @@ namespace avmplus
 		/** kDefaultCapacity must be a power of 2 */
 		const static int kDefaultCapacity = 2;
     
-		void initialize(MMgc::GC *gc, int capacity = kDefaultCapacity);
+		void initialize(MMgc::GC* gc, int capacity = kDefaultCapacity);
+		void initializeWithDontEnumSupport(MMgc::GC* gc, int capacity = kDefaultCapacity);
 		void destroy(); 
 		void reset();
 
 		uint32_t getSize() const;
-		uint32_t getCapacity() const;
+		bool needsInitialize() const;
 
-		uintptr_t hasDontEnumSupport() const;
-		void setDontEnumSupport();
-		
 		bool getAtomPropertyIsEnumerable(Atom name) const;
 		void setAtomPropertyIsEnumerable(Atom name, bool enumerable);
 
@@ -254,6 +252,9 @@ namespace avmplus
         static uint32_t FindOneBit(uint32_t value);
 		Atom removeDontEnumMask(Atom a) const;
 		bool enumerable(Atom a) const;
+		uint32_t getCapacity() const;
+		uintptr_t hasDontEnumSupport() const;
+		
 
 	// ------------------------ DATA SECTION BEGIN
 	private:
@@ -286,7 +287,6 @@ namespace avmplus
 		InlineHashtable* get_ht();
 
 		void reset();
-		uint32_t getCapacity() const;
 		uint32_t getSize() const;
 
 		virtual int next(int index);
@@ -313,7 +313,6 @@ namespace avmplus
         virtual ~HeapHashtableRC();
 	
 		void reset();
-		uint32_t getCapacity() const;
 		uint32_t getSize() const;
 
 		int next(int index);
