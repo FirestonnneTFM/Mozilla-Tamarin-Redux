@@ -124,7 +124,7 @@ LIBDIR				:= ${BUILD_INT_DIR}/lib
 
 # warnings for both c and c++
 # disable -Werror 2/1/2010 dschaffe
-FLASH_C_WARNINGS := -Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wlogical-op -Wmissing-include-dirs -Wpointer-arith -Wstrict-aliasing=3 -Wstrict-overflow=1 -Wwrite-strings -Wno-missing-field-initializers -Wno-type-limits -Wno-unused-parameter
+FLASH_C_WARNINGS := -Wall -Wdisabled-optimization -Wextra -Wformat=2 -Winit-self -Winvalid-pch -Wlogical-op -Wmissing-include-dirs -Wpointer-arith -Wstrict-aliasing=3 -Wstrict-overflow=1 -Wwrite-strings -Wno-missing-field-initializers -Wno-type-limits -Wno-unused-parameter -Wno-clobbered 
 
 # additional warnings that are only for c++
 FLASH_CXX_WARNINGS := -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wstrict-null-sentinel -Wno-missing-braces -Wno-multichar -Wno-psabi -Wno-reorder -Wno-switch -Wno-invalid-offsetof
@@ -212,38 +212,34 @@ ifeq (${VERBOSE},)
 
 # compile-files-arm function:
 # ${1} = obj directory name
-# ${2} = *_DEFS defines
 define compile-files-arm
 	@mkdir -p ${OBJDIR}/${1}
 	@echo C++ arm   $<
-	@$(CC) $(FLASH_CXXFLAGS_ARM) $(2) $(INC) -o $@ -c $< 
+	@$(CC) $(FLASH_CXXFLAGS_ARM) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 # compile-files function:
 # ${1} = obj directory name
-# ${2} = *_DEFS defines
 define compile-files
 	@mkdir -p ${OBJDIR}/${1}
 	@echo C++ thumb $<
-	@$(CC) $(FLASH_CXXFLAGS_THUMB) $(2) $(INC) -o $@ -c $< 
+	@$(CC) $(FLASH_CXXFLAGS_THUMB) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 # compile-c-files-arm function:
 # ${1} = obj directory name
-# ${2} = *_DEFS defines
 define compile-c-files-arm
 	@mkdir -p ${OBJDIR}/${1}
 	@echo C arm $<
-	@$(CC) $(FLASH_CFLAGS_ARM) $(2) $(INC) -o $@ -c $< 
+	@$(CC) $(FLASH_CFLAGS_ARM) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 # compile-c-files function:
 # ${1} = obj directory name
-# ${2} = *_DEFS defines
 define compile-c-files
 	@mkdir -p ${OBJDIR}/${1}
 	@echo C thumb $<
-	@$(CC) $(FLASH_CFLAGS_THUMB) $(2) $(INC) -o $@ -c $< 
+	@$(CC) $(FLASH_CFLAGS_THUMB) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 # compile-asm-files function:
@@ -259,12 +255,12 @@ else
 define compile-files-arm
 	@echo compiling arm
 	@mkdir -p ${OBJDIR}/${1}
-	$(CC) $(FLASH_CXXFLAGS_ARM) $(2) $(INC) -o $@ -c $< 
+	$(CC) $(FLASH_CXXFLAGS_ARM) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 define compile-files
 	@mkdir -p ${OBJDIR}/${1}
-	$(CC) $(FLASH_CXXFLAGS_THUMB) $(2) $(INC) -o $@ -c $< 
+	$(CC) $(FLASH_CXXFLAGS_THUMB) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 # compile-c-files-arm function:
@@ -272,7 +268,7 @@ endef
 # ${2} = *_DEFS defines
 define compile-c-files-arm
 	@mkdir -p ${OBJDIR}/${1}
-	$(CC) $(FLASH_CFLAGS_ARM) $(2) $(INC) -o $@ -c $< 
+	$(CC) $(FLASH_CFLAGS_ARM) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 # compile-c-files function:
@@ -280,7 +276,7 @@ endef
 # ${2} = *_DEFS defines
 define compile-c-files
 	@mkdir -p ${OBJDIR}/${1}
-	$(CC) $(FLASH_CFLAGS_THUMB) $(2) $(INC) -o $@ -c $< 
+	$(CC) $(FLASH_CFLAGS_THUMB) ${AVMSHELL_DEFS} $(INC) -o $@ -c $< 
 endef
 
 # compile-asm-files function:
@@ -316,19 +312,17 @@ endif
 # end make.common
 
 # Modify variables set by make.common before including other makefiles:
-INC := -I. -I.. -I../.. -I../../shell -I../../core -I../../MMgc -I../../pcre -I../../extensions -I../../VMPI -I../../other-licenses/zlib $(INC)
+INC := -I. -I.. -I../.. -I../../shell -I../../core -I../../eval -I../../MMgc -I../../pcre -I../../extensions -I../../VMPI -I../../other-licenses/zlib $(INC)
 
-include $(ANDROID_MAKEFILE_DIR)/make.avm
-include $(ANDROID_MAKEFILE_DIR)/make.mmgc
-include $(ANDROID_MAKEFILE_DIR)/make.zlib
-
-INC := ${INC}
-
-AVMSHELL_DEFS :=  -DAVMSHELL_BUILD -DNO_SYS_SIGNAL -DAVMPLUS_UNIX -DAVMPLUS_SHELL -DAVMPLUS_DISABLE_MIR -DNO_CONSOLE_FWRITE -DUSE_PTHREAD_MUTEX -DMMGC_CUSTOM_BUILD -DAVMFEATURE_DEBUGGER=0 -DAVMFEATURE_ALLOCATION_SAMPLER=0 -DAVMFEATURE_VTUNE=0 -DAVMFEATURE_JIT=1 -DAVMFEATURE_WORDCODE_INTERP=0 -DAVMFEATURE_AOT=0 -DAVMFEATURE_THREADED_INTERP=0 -DAVMFEATURE_SELFTEST=0 -DAVMFEATURE_EVAL=0 -DAVMFEATURE_PROTECT_JITMEM=0 -DAVMFEATURE_USE_SYSTEM_MALLOC=0 -DAVMFEATURE_INTERIOR_POINTERS=0 -DAVMFEATURE_JNI=0 -DAVMFEATURE_HEAP_ALLOCA=0 -DAVMFEATURE_STATIC_FUNCTION_PTRS=1 -DAVMFEATURE_INDIRECT_NATIVE_THUNKS=1 -DAVMFEATURE_OVERRIDE_GLOBAL_NEW=0 -DAVMFEATURE_MEMORY_PROFILER=0 -DAVMFEATURE_CACHE_GQCN=0 -DAVMFEATURE_API_VERSIONING=0
+AVMSHELL_DEFS := -DUNIX -DLINUX -DUSE_PTHREAD_MUTEX -DNO_SYS_SIGNAL -DHAVE_STDARG -DNO_CONSOLE_FWRITE -DAVMPLUS_ARM -DAVMPLUS_UNIX -DAVMSHELL_BUILD 
 
 ifneq ($(ENABLE_NANOJIT),true)
 	AVMSHELL_DEFS := ${AVMSHELL_DEFS} -DAVMPLUS_DISABLE_NJ
 endif
+
+include $(ANDROID_MAKEFILE_DIR)/make.avm
+include $(ANDROID_MAKEFILE_DIR)/make.mmgc
+include $(ANDROID_MAKEFILE_DIR)/make.zlib
 
 LDFLAGS := -lc -lm -lstdc++ -lssl -lgcc
 
@@ -385,13 +379,13 @@ endif
 	@echo "=== done:" $@ "==="
 
 $(OBJDIR)/avmshell/%.o: ../../shell/%.cpp
-	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell}
 
 $(OBJDIR)/avmshell/%.o: ../../extensions/%.cpp
-	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell}
 
 $(OBJDIR)/avmshell/%.o: %.cpp
-	${call compile-files-arm,avmshell,${AVMSHELL_DEFS}}
+	${call compile-files-arm,avmshell}
 
 default_target:
 	@$(MAKE) -j4 ${FINAL_TARGET}

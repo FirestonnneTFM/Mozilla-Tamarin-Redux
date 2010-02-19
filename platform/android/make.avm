@@ -39,18 +39,6 @@
 AVMPLUS_DIR := ../..
 
 #****************************************************************************
-# Include paths
-#****************************************************************************
-
-AVMPLUS_INCS := -I${AVMPLUS_DIR}/core -I${AVMPLUS_DIR}/pcre -I${AVMPLUS_DIR}/MMgc -I${AVMPLUS_DIR}/pcre -I${AVMPLUS_DIR}/VMPI -I${AVMPLUS_DIR}/platform -I${AVMPLUS_DIR}/extensions
-
-AVMPLUS_DEFS := -DAVMPLUS_DISABLE_MIR -DUNIX -DLINUX -DUSE_PTHREAD_MUTEX -DMMGC_CUSTOM_BUILD -DAVMPLUS_ARM -DAVMPLUS_UNIX -DHAVE_STDARG -Wno-clobbered -DAVMSHELL_BUILD -DAVMFEATURE_EVAL=0
-
-ifneq ($(ENABLE_NANOJIT),true)
-	AVMPLUS_DEFS := ${AVMPLUS_DEFS} -DAVMPLUS_DISABLE_NJ
-endif
-
-#****************************************************************************
 # Source files
 #****************************************************************************
 
@@ -169,7 +157,21 @@ AVMPLUS_SRCS := \
 	PosixPortUtils.cpp \
 	AvmDebug.cpp \
 	AvmLog.cpp \
-	Coder.cpp
+	Coder.cpp \
+    eval-abc.cpp \
+    eval-avmplus.cpp \
+    eval-cogen.cpp \
+    eval-cogen-expr.cpp \
+    eval-cogen-stmt.cpp \
+    eval-compile.cpp \
+    eval-lex.cpp \
+    eval-lex-xml.cpp \
+    eval-parse.cpp \
+    eval-parse-expr.cpp \
+    eval-parse-stmt.cpp \
+    eval-parse-xml.cpp \
+    eval-unicode.cpp \
+    eval-util.cpp \
 
 ifeq ($(ENABLE_NANOJIT),true)
 	AVMPLUS_SRCS := ${AVMPLUS_SRCS} NativeARM.cpp
@@ -179,20 +181,21 @@ vpath %.cpp ${AVMPLUS_DIR}/core	\
 	${AVMPLUS_DIR}/nanojit	\
 	${AVMPLUS_DIR}/pcre	\
 	${AVMPLUS_DIR}/platform/unix \
-	${AVMPLUS_DIR}/VMPI
+ 	${AVMPLUS_DIR}/VMPI \
+ 	${AVMPLUS_DIR}/eval
 
 AVMPLUS_LIB := ${LIBDIR}/libavmplus.a
 AVMPLUS_OBJS := $(addprefix ${OBJDIR}/avm/, $(AVMPLUS_SRCS:.cpp=.o))
 AVMPLUS_DEPS := $(addprefix ${OBJDIR}/avm/, $(AVMPLUS_SRCS:.cpp=.d))
 
 $(OBJDIR)/avm/%.o: %.cpp
-	${call compile-files-arm,avm,${AVMPLUS_DEFS}}
+	${call compile-files-arm,avm}
 
 
 # clz is not supported on thumb before armv6t2
 ifneq (${TARGET_ARCH}, ARMV7-A)
 $(OBJDIR)/avm/NativeARM.o: $(AVMPLUS_DIR)/nanojit/NativeARM.cpp
-	${call compile-files-arm,avm,${AVMPLUS_DEFS}}
+	${call compile-files-arm,avm}
 endif
 
 ${AVMPLUS_LIB}: ${AVMPLUS_OBJS}
