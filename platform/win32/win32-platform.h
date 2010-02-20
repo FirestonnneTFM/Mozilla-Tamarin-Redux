@@ -163,12 +163,12 @@ typedef void *maddr_ptr;
 	{
 		_int64 __cdecl longjmp64(jmp_buf jmpbuf, _int64 arg);
 	}
-	#define VMPI_setjmpNoUnwind(buf)    ::setjmp(buf)
-	#define VMPI_longjmpNoUnwind(buf,n) ::longjmp64(buf,n)
+	#define VMPI_setjmpNoUnwind     ::setjmp
+	#define VMPI_longjmpNoUnwind    ::longjmp64
 #else
 	#include <setjmp.h>
-	#define VMPI_setjmpNoUnwind(buf)    ::setjmp(buf)
-	#define VMPI_longjmpNoUnwind(buf,n) ::longjmp(buf,n)
+	#define VMPI_setjmpNoUnwind     ::setjmp
+	#define VMPI_longjmpNoUnwind    ::longjmp
 #endif
 
 #ifndef UNDER_CE
