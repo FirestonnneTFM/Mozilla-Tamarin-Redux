@@ -425,7 +425,7 @@ var FEATURES =
 
      <name>      AVMFEATURE_THREADED_INTERP </name>
      <requires>  AVMFEATURE_WORDCODE_INTERP </requires>
-     <defines>   VMCFG_WORDCODE_THREADED </defines>
+     <defines>   VMCFG_DIRECT_THREADED </defines>
   </feature>
 
   <at-most-one>

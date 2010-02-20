@@ -138,7 +138,7 @@
 #  ifndef VMCFG_WORDCODE
 #    error "You must have word code enabled to perform superword profiling"
 #  endif
-#  ifdef VMCFG_WORDCODE_THREADED
+#  ifdef VMCFG_DIRECT_THREADED
 #    error "You must disable direct threading to perform superword profiling"
 #  endif
 #endif
