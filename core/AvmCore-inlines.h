@@ -108,11 +108,6 @@ REALLY_INLINE QCache* AvmCore::msCache()
 
 #ifdef FEATURE_NANOJIT // accessors
 
-REALLY_INLINE bool AvmCore::quiet_opt() const
-{
-    return false;
-}
-
 #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
 REALLY_INLINE bool AvmCore::use_sse2() const
 {
