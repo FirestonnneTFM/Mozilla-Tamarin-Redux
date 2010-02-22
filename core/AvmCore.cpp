@@ -88,9 +88,9 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
     #if defined FEATURE_NANOJIT
-        const uint32_t AvmCore::DEFAULT_VERBOSE_ON = ((uint32_t)~0 & ~(nanojit::LC_FragProfile<<16));
-    #else
-        const uint32_t AvmCore::DEFAULT_VERBOSE_ON = ((uint32_t)~0);
+ 		const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0 & ~(nanojit::LC_FragProfile); // LC_FragProfile changes generated code!?!
+ 	#else
+ 	    const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0;
     #endif
 
     static bool substrMatches(const char* pattern, const char* p, const char* e)
@@ -99,9 +99,10 @@ namespace avmplus
         return (e-p) >= patlen && !VMPI_strncmp(p, pattern, patlen);
     }
 
-    /*static*/ uint32_t AvmCore::parseVerboseFlags(const char* p)
+    /*static*/ uint32_t AvmCore::parseVerboseFlags(const char* p, char*& badFlag)
     {
         uint32_t r = 0;
+        badFlag = 0;
 
         for (;;)
         {
@@ -128,10 +129,14 @@ namespace avmplus
                 MMgc::GCHeap::GetGCHeap()->Config().verbose = true;
 #if defined FEATURE_NANOJIT
             else if (substrMatches("jit", p, e))
-                r |= VB_jit | ((nanojit::LC_Activation | nanojit::LC_Liveness | nanojit::LC_ReadLIR
-                                                | nanojit::LC_AfterSF    | nanojit::LC_RegAlloc | nanojit::LC_Assembly
-                                                ) << 16); // stuff LC_Bits into the upper 16bits
+                 r |= VB_jit | LC_Assembly;
+             else if (substrMatches("opt", p, e))
+                 r |= VB_jit | LC_Assembly | LC_Liveness | LC_ReadLIR | LC_AfterSF;
+             else if (substrMatches("regs", p, e))
+                 r |= VB_jit | LC_Assembly | LC_Activation | LC_RegAlloc;
 #endif /* FEATURE_NANOJIT */
+             else 
+                 badFlag = (char*)p;
             if (*e < 32)
                 break;
             p = e+1;

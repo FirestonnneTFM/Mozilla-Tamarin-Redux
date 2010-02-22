@@ -66,12 +66,13 @@ const int kBufferPadding = 16;
 
     enum VB_Bits {
         // Output control bits for verbose mode
-        VB_builtins     = 1<<0, // display output for builtins (default is to ignore any builtins)
-        VB_parse        = 1<<1, // abc parsing information
-        VB_verify       = 1<<2, // verification information
-        VB_interp       = 1<<3, // interpreter information
-        VB_jit          = 1<<4, // jit information
-        VB_traits       = 1<<5 // traits creation information
+        VB_builtins     = 1<<31, // display output for builtins (default is to ignore any builtins)
+        VB_parse        = 1<<30, // abc parsing information
+        VB_verify       = 1<<29, // verification information
+        VB_interp       = 1<<28, // interpreter information
+        VB_jit          = 1<<27, // jit information
+        VB_traits       = 1<<26  // traits creation information
+        // @warning make sure these don't collide with LC_xxx bits 
     };
 
     struct Config
@@ -279,7 +280,6 @@ const int kBufferPadding = 16;
         Config config;
 
         #ifdef FEATURE_NANOJIT // accessors
-            bool quiet_opt() const;
             #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
             bool use_sse2() const;
             #endif
@@ -287,7 +287,7 @@ const int kBufferPadding = 16;
         #ifdef AVMPLUS_VERBOSE
         bool isVerbose(uint32_t b) const;
         static bool isBitSet(uint32_t v, uint32_t bit);
-        static uint32_t parseVerboseFlags(const char* arg);
+        static uint32_t parseVerboseFlags(const char* arg, char*& badFlag);
         #endif
 
         void SetJITEnabled(bool isEnabled);

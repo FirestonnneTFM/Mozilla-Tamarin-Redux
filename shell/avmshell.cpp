@@ -737,7 +737,12 @@ namespace avmshell
 					else if (!VMPI_strncmp(arg+2, "verbose", 7)) {
 						settings.do_verbose = AvmCore::DEFAULT_VERBOSE_ON; // all 'on' by default
 						if (arg[9] == '=') {
-                            settings.do_verbose = AvmCore::parseVerboseFlags(&arg[10]);
+                            char* badFlag;
+                            settings.do_verbose = AvmCore::parseVerboseFlags(&arg[10], badFlag);
+                            if (badFlag) {
+                                AvmLog("Unknown verbose flag while parsing '%s'\n", badFlag);
+                                usage();
+                            }
                         }
 					}
 #endif /* AVMPLUS_VERBOSE */
