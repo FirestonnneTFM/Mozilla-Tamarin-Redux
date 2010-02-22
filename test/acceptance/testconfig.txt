@@ -164,6 +164,20 @@ ecma3/TypeConversion/e9_3_1_1, arm-winmobile.*-debug, expectedfail, bug https://
 
 
 ####################
+# Android 
+####################
+regress/bug_515935 , arm-android.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=547282
+ecma3/Unicode/u5000_CJKUnifiedIdeographs , arm-android.*, skip , test runs too slowly
+ecma3/Unicode/u7000_CJKUnifiedIdeographs , arm-android.*, skip , test runs too slowly
+ecma3/Unicode/u6000_CJKUnifiedIdeographs , arm-android.*, skip , test runs too slowly
+ecma3/Unicode/u8000_CJKUnifiedIdeographs , arm-android.*, skip , test runs too slowly
+ecma3/Unicode/u9000_CJKUnifiedIdeographs , arm-android.*, skip , test runs too slowly
+ecma3/Unicode/uE000_PrivateUseArea , arm-android.*, skip , test runs too slowly
+ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA , arm-android.*, skip , test runs too slowly
+ecma3/Unicode/uAC00_HangulSyllables , arm-android.*, skip , test runs too slowly
+mops/mops , arm-android.* , skip , test runs too slowly
+
+####################
 # Windows Mobile Emulator
 ####################
 # emulator is not using DST by default
