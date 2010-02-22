@@ -271,6 +271,7 @@ namespace avmplus
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
         AvmAssert(patlen > 0);
+        AvmAssert(start >= 0);
 
 		// even with REALLY_INLINE, some compilers will be reluctant to inline equalsImpl here,
 		// so we explicitly repeat the code here.
@@ -909,10 +910,13 @@ namespace avmplus
 	{
 		if (substr == NULL)
 			return -1;
-			
-		int32_t len = this->length();
+        
+        // lastIndexOf("anything", negative-number) can't match anything, ever:
+        // match FP10's behavior and return -1 immediately
 		if (start < 0)
-			start = 0;
+			return -1;
+
+		int32_t len = this->length();
 		if (start > len)
 			start = len;
 
