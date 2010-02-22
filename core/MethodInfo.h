@@ -437,6 +437,9 @@ namespace avmplus
             NativeInfo          _native;            // stuff used only for Native methods (formerly in NativeMethod)
             AbcInfo             _abc;               // stuff used only for bytecode methods (formerly in MethodInfo)
         };
+#if VMCFG_METHOD_NAMES && defined(AVMPLUS_SAMPLER)
+        mutable DRCWB(Stringp)  _methodName;
+#endif
     // ------------------------ DATA SECTION END
     };
 
