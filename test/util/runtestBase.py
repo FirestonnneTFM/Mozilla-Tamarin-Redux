@@ -358,8 +358,8 @@ class RuntestBase:
         self.vmtype = 'release'
         if self.osName=='winmobile-emulator':
             # try to determine vmtype by filename
-            vm = splitext(split(self.avm)[1])[0]
-            if '_d' in vm:
+            vm_name = splitext(split(self.avm)[1])[0]
+            if '_d' in vm_name:
                 self.vmtype = 'debug'
             else:
                 self.vmtype = 'release'
@@ -376,12 +376,12 @@ class RuntestBase:
                 elif re.search('release',f[1]):
                     self.vmtype = 'release'
                 else:   # try to determine vmtype by filename
-                    vm = splitext(split(self.avm)[1])[0]
-                    if '_sd' in vm:
+                    vm_name = splitext(split(self.avm)[1])[0]
+                    if '_sd' in vm_name:
                         self.vmtype = 'debugdebugger'
-                    elif '_s' in vm:
+                    elif '_s' in vm_name:
                         self.vmtype = 'releasedebugger'
-                    elif '_d' in vm:
+                    elif '_d' in vm_name:
                         self.vmtype = 'debug'
                     else:
                         self.vmtype = 'release'
