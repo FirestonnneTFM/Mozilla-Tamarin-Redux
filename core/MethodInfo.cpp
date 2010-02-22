@@ -1095,7 +1095,28 @@ namespace avmplus
 #if VMCFG_METHOD_NAMES
     Stringp MethodInfo::getMethodName(bool includeAllNamespaces) const
     {
-        return getMethodNameWithTraits(this->declaringTraits(), includeAllNamespaces);
+        Stringp methodName = NULL;
+
+#ifdef AVMPLUS_SAMPLER
+        // We cache method names, because the profiler requests them over and
+        // over.  (Bug 2547382)
+        methodName = _methodName;
+#endif
+
+        if (!methodName)
+        {
+            Traits* declaringTraits = this->declaringTraits();
+
+            methodName = getMethodNameWithTraits(declaringTraits, includeAllNamespaces);
+
+#ifdef AVMPLUS_SAMPLER
+            Sampler* sampler = declaringTraits ? declaringTraits->core->get_sampler() : NULL;
+            if (sampler && sampler->sampling())
+                _methodName = methodName;
+#endif
+        }
+
+        return methodName;
     }
 
     Stringp MethodInfo::getMethodNameWithTraits(Traits* t, bool includeAllNamespaces) const
