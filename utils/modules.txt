@@ -87,6 +87,7 @@ nanojit nanojit:RegAlloc.obj
 nanojit avmplus:RegAlloc.obj
 nanojit avmplus:Allocator.obj
 nanojit avmplus:Containers.obj
+nanojit avmplus:njconfig.obj
 
 vm avmplus:Interpreter.obj
 vm avmplus::Interpreter
