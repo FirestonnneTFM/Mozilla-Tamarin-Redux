@@ -815,16 +815,22 @@ namespace avmplus
 
     class CopyPropagation: public LirWriter
     {
-        AvmCore* core;
         LInsp *tracker;
         LIns *vars;
         int nvar;
-        nanojit::BitSet dirty;
-        bool hasExceptions;
+#ifdef DEBUGGER
+        bool haveDebugger;
+#else
+        static const bool haveDebugger = false;
+#endif
     public:
-        CopyPropagation(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar, bool ex)
-            : LirWriter(out), core(core), vars(NULL), nvar(nvar), dirty(alloc, nvar), hasExceptions(ex)
+        CopyPropagation(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar)
+            : LirWriter(out), vars(NULL), nvar(nvar)
+#ifdef DEBUGGER
+            , haveDebugger(core->debugger() != NULL)
+#endif        
         {
+            (void) core;
             tracker = new (alloc) LInsp[nvar];
             clearState();
         }
@@ -835,14 +841,12 @@ namespace avmplus
 
         void clearState() {
             VMPI_memset(tracker, 0, nvar*sizeof(LInsp));
-            dirty.reset();
         }
 
         void trackStore(LIns *value, int d) {
             AvmAssert((d&7) == 0);
             int i = d >> 3;
             tracker[i] = value;
-            dirty.set(i);
         }
 
         LIns *insLoad(LOpcode op, LIns *base, int32_t d) {
@@ -882,12 +886,10 @@ namespace avmplus
         }
 
         LIns *insCall(const CallInfo *call, LInsp args[]) {
-            #ifdef DEBUGGER
-            if (core->debugger() && !call->_cse) {
+            if (haveDebugger && !call->_cse) {
                 // debugger might have modified locals, so make sure we reload after call.
                 clearState();
             }
-            #endif
             return out->insCall(call, args);
         }
     };
@@ -1281,8 +1283,7 @@ namespace avmplus
         }
 #endif
         lirout = new (*alloc1) Specializer(lirout, core->config.njconfig);
-        CopyPropagation *copier = new (*alloc1) CopyPropagation(core, *alloc1, lirout,
-            framesize, info->hasExceptions() != 0);
+        CopyPropagation *copier = new (*alloc1) CopyPropagation(core, *alloc1, lirout, framesize);
         lirout = this->copier = copier;
 
         #if defined(DEBUGGER) && defined(_DEBUG)
