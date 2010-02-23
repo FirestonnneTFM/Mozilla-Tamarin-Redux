@@ -765,7 +765,7 @@ namespace MMgc
 		HeapBlock *Split(HeapBlock *block, size_t size);
 
 		// abandon a block of memory that may maps completely to the committed portion of region
-		void RemoveBlock(HeapBlock *block);
+		void RemoveBlock(HeapBlock *block, bool release=true);
 		
 #ifdef MMGC_MAC
 		// Abandon a block of memory that may be in the middle of a
@@ -775,14 +775,14 @@ namespace MMgc
 		// we try to decommit.  This is a horrible hack that can go
 		// away if OS X fixes its mmap impl to be like windows, linux
 		// and solaris (atomic decommit with VirtualFree/mmap)
-		void RemovePartialBlock(HeapBlock *block);
+		void RemoveLostBlock(HeapBlock *block);
 #endif
 
 		void Commit(HeapBlock *block);
 
 		HeapBlock *AddrToBlock(const void *item) const;
 		Region *AddrToRegion(const void *item) const;
-		void RemoveRegion(Region *r);
+		void RemoveRegion(Region *r, bool release=true);
 
 		// debug only freelist consistency checks
 #ifdef _DEBUG
