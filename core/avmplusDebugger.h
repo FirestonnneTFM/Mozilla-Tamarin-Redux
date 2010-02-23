@@ -74,6 +74,7 @@ namespace avmplus
 		virtual int functionCount() const = 0;
 
 		/**
+		 * @deprecated
 		 * Access to each function.  This is 
 		 * accomplished via a call to locationFor
 		 * which translates a source line number to a
@@ -163,6 +164,17 @@ namespace avmplus
 		 * This pointer for the frame
 		 */
 		virtual bool dhis(Atom& a) = 0;
+		
+		/**
+		 * Acquire the String representation of the method's name.
+		 */
+		virtual bool methodName(Stringp& result);
+
+		/**
+		 * Acquire the String representation of the particular formal argument's name.
+		 */
+
+		virtual bool argumentName(int which, Stringp& result);
 	};
 
 	// forward refs
@@ -590,6 +602,10 @@ namespace avmplus
 		 * This pointer for the frame.  
 		 */
 		bool dhis(Atom& a);
+
+		bool methodName(Stringp& result);
+
+		bool argumentName(int which, Stringp& result);
 
 		// constructor 
 		DebugStackFrame(int nbr, CallStackNode* trace, Debugger* debug);
