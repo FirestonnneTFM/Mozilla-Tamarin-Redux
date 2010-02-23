@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -83,169 +82,16 @@ namespace MMgc
 		return GetFixedBlock(item)->size;
 	}
 
-#ifdef MMGC_HOOKS
-
-	REALLY_INLINE void FixedAlloc::AllocHook(size_t size, void *item)
-	{
-		FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-		if(m_heap->HooksEnabled())
-		{
-#ifdef MMGC_MEMORY_PROFILER
-			m_totalAskSize += size;
-#endif
-			m_heap->AllocHook(item, size, b->size - DebugSize());
-		}
-	}
-
-	REALLY_INLINE void FixedAlloc::FreeHook(void *item)
-	{
-		FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-		GCHeap *heap = b->alloc->m_heap;
-		if(heap->HooksEnabled()) {
-#ifdef MMGC_MEMORY_PROFILER
-			if(heap->GetProfiler())
-				b->alloc->m_totalAskSize -= heap->GetProfiler()->GetAskSize(item);
-#endif			
-			heap->FinalizeHook(item, b->size - DebugSize());
-			heap->FreeHook(item, b->size - DebugSize(), 0xed);
-		}
-	}
-
-#endif // MMGC_HOOKS
-
 	REALLY_INLINE void* FixedAllocSafe::Alloc(size_t size, FixedMallocOpts flags)
 	{
-		void *item;
-		{
-			MMGC_LOCK(m_spinlock);
-			item = FixedAlloc::AllocSansHook(size, flags); 
-		}
-#ifdef MMGC_HOOKS
-		AllocHook(size, item);
-#endif
-		return item;
+		MMGC_LOCK(m_spinlock);
+		return FixedAlloc::Alloc(size, flags); 
 	}
 
 	REALLY_INLINE void FixedAllocSafe::Free(void *ptr)
 	{
-#ifdef MMGC_HOOKS
-		FreeHook(ptr);
-#endif
-		{
-			MMGC_LOCK(m_spinlock);
-			FixedAlloc::FreeSansHook(ptr);
-		}
-	}
-
-	REALLY_INLINE void* FixedAlloc::AllocSansHook(size_t size, FixedMallocOpts opts)
-	{ 
-		(void)size;
-		GCAssertMsg(m_heap->IsStackEntered() || (opts&kCanFail) != 0, "MMGC_ENTER must be on the stack");
-		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
-
-		if(!m_firstFree) {
-			bool canFail = (opts & kCanFail) != 0;
-			CreateChunk(canFail);
-			if(!m_firstFree) {
-				if (!canFail) {
-					GCAssertMsg(0, "Memory allocation failed to abort properly");
-					GCHeap::SignalInconsistentHeapState("Failed to abort");
-					/*NOTREACHED*/
-				}
-				return NULL;
-			}
-		}
-
-		FixedBlock* b = m_firstFree;
-		GCAssert(b && !IsFull(b));
-
-		b->numAlloc++;
-
-		// Consume the free list if available
-		void *item = NULL;
-		if (b->firstFree) {
-			item = b->firstFree;
-			b->firstFree = *((void**)item);
-			// assert that the freelist hasn't been tampered with (by writing to the first 4 bytes)
-			GCAssert(b->firstFree == NULL || 
-					(b->firstFree >= b->items && 
-					(((uintptr_t)b->firstFree - (uintptr_t)b->items) % b->size) == 0 && 
-					(uintptr_t) b->firstFree < ((uintptr_t)b & ~0xfff) + GCHeap::kBlockSize));
-#ifdef MMGC_MEMORY_INFO				
-			//check for writes on deleted memory
-			VerifyFreeBlockIntegrity(item, b->size);
-#endif
-		} else {
-			// Take next item from end of block
-			item = b->nextItem;
-			GCAssert(item != 0);
-			if(!IsFull(b)) {
-				// There are more items at the end of the block
-				b->nextItem = (void *) ((uintptr_t)item+m_itemSize);
-			} else {
-				b->nextItem = 0;
-			}
-		}
-
-		// If we're out of free items, be sure to remove ourselves from the
-		// list of blocks with free items.  
-		if (IsFull(b)) {
-			m_firstFree = b->nextFree;
-			b->nextFree = NULL;
-			GCAssert(b->prevFree == NULL);
-
-			if (m_firstFree)
-				m_firstFree->prevFree = 0;
-		}
-
-		item = GetUserPointer(item);
-
-#ifdef _DEBUG
-		// fresh memory poisoning
-		if((opts & kZero) == 0)
-			memset(item, 0xfa, b->size - DebugSize());
-#endif
-
-		if((opts & kZero) != 0)
-			memset(item, 0, b->size - DebugSize());
-
-		return item;
-	}
-
-	/*static*/
-	REALLY_INLINE void FixedAlloc::FreeSansHook(void *item)
-	{
-		FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-
-		GCAssertMsg(b->alloc->m_heap->IsAddressInHeap(item), "Bogus pointer passed to free");
-
-		item = GetRealPointer(item);
-
-		// Add this item to the free list
-		*((void**)item) = b->firstFree;
-		b->firstFree = item;
-
-		// We were full but now we have a free spot, add us to the free block list.
-		if (b->numAlloc == b->alloc->m_itemsPerBlock)
-		{
-			GCAssert(!b->nextFree && !b->prevFree);
-			b->nextFree = b->alloc->m_firstFree;
-			if (b->alloc->m_firstFree)
-				b->alloc->m_firstFree->prevFree = b;
-			b->alloc->m_firstFree = b;
-		}
-#ifdef _DEBUG
-		else // we should already be on the free list
-		{
-			GCAssert ((b == b->alloc->m_firstFree) || b->prevFree);
-		}
-#endif
-
-		b->numAlloc--;
-
-		if(b->numAlloc == 0) {
-			b->alloc->FreeChunk(b);
-		}
+		MMGC_LOCK(m_spinlock);
+		FixedAlloc::Free(ptr);
 	}
 
 #ifdef _DEBUG

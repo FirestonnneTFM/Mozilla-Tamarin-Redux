@@ -50,12 +50,12 @@ namespace MMgc
 	
 	REALLY_INLINE void *GCRoot::operator new(size_t size)
 	{
-		return FixedMalloc::GetFixedMalloc()->OutOfLineAlloc(size, MMgc::kZero);
+		return FixedMalloc::GetFixedMalloc()->Alloc(size, MMgc::kZero);
 	}
         
 	REALLY_INLINE void GCRoot::operator delete (void *object)
 	{
-		FixedMalloc::GetFixedMalloc()->OutOfLineFree(object);
+		FixedMalloc::GetFixedMalloc()->Free(object);
 	}
 
 	REALLY_INLINE GCWorkItem GCRoot::GetWorkItem() const
