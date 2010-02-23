@@ -560,7 +560,7 @@ namespace MMgc
 					{
 #ifdef MMGC_MAC
 						// this can happen on mac where we release and re-reserve the memory and another thread may steal it from us
-						RemovePartialBlock(block);
+						RemoveLostBlock(block);
 						goto restart;
 #else
 						// if the VM API's fail us bail
@@ -692,7 +692,7 @@ namespace MMgc
 
 #ifdef MMGC_MAC
 
-	void GCHeap::RemovePartialBlock(HeapBlock *block)
+	void GCHeap::RemoveLostBlock(HeapBlock *block)
 	{
 		if(config.verbose) {
 			GCLog("Removing block %p %d\n", block->baseAddr, block->size);
@@ -702,7 +702,7 @@ namespace MMgc
 		{
 			Region *region = AddrToRegion(block->baseAddr);
 			if(region->baseAddr == block->baseAddr && region->reserveTop == block->endAddr()) {
-				RemoveBlock(block);
+				RemoveBlock(block, /*release*/false);
 				return;
 			}
 		}
@@ -713,7 +713,7 @@ namespace MMgc
 			size_t numBlocks = (r->commitTop - block->baseAddr) / kBlockSize;
 			char *next = Split(block, numBlocks)->baseAddr;
 			// remove it
-			RemovePartialBlock(block);
+			RemoveLostBlock(block);
 			block = AddrToBlock(next);
 		}
 
@@ -764,7 +764,7 @@ namespace MMgc
 		// create temporary region for this block
 		Region temp(this, block->baseAddr, block->endAddr(), block->endAddr(), regionBlockId +  (block->baseAddr - regionBaseAddr) / kBlockSize);
 
-		RemoveBlock(block);
+		RemoveBlock(block, /*release*/false);
 		
 		// pop temp from freelist, put there by RemoveBlock
 		freeRegion = *(Region**)freeRegion;
@@ -782,7 +782,7 @@ namespace MMgc
 
 #endif
 
-	void GCHeap::RemoveBlock(HeapBlock *block)
+	void GCHeap::RemoveBlock(HeapBlock *block, bool release)
 	{	
 		Region *region = AddrToRegion(block->baseAddr);
 		
@@ -881,7 +881,7 @@ namespace MMgc
 		}
 
 		blocksLen = newBlocksLen;
-		RemoveRegion(region);
+		RemoveRegion(region, release);
 
 		// make sure we did everything correctly
 		CheckFreelist();
@@ -1828,14 +1828,16 @@ namespace MMgc
 		return true;
 	}
 
-	void GCHeap::RemoveRegion(Region *region)
+	void GCHeap::RemoveRegion(Region *region, bool release)
 	{
 		Region **next = &lastRegion;
 		while(*next != region) 
 			next = &((*next)->prev);
 		*next = region->prev;
-		ReleaseMemory(region->baseAddr,
-					  region->reserveTop-region->baseAddr);		
+		if(release) {
+			ReleaseMemory(region->baseAddr,
+						  region->reserveTop-region->baseAddr);		
+		}
 		if(config.verbose) {
 			GCLog("unreserved region 0x%p - 0x%p (commitTop: %p)\n", region->baseAddr, region->reserveTop, region->commitTop);
 			DumpHeapRep();

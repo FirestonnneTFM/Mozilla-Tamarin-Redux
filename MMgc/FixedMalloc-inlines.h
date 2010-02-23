@@ -66,7 +66,7 @@ namespace MMgc
 
 	REALLY_INLINE void *FixedMalloc::PleaseAlloc(size_t size)
 	{	
-		return Alloc(size, kCanFail);
+		return OutOfLineAlloc(size, kCanFail);
 	}
 
 	REALLY_INLINE void FixedMalloc::Free(void *item)
