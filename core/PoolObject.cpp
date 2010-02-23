@@ -211,7 +211,8 @@ namespace avmplus
         {
             // String not created yet; grab the pointer to the (verified) ABC data
             uint32_t len = AvmCore::readU32(dataP->abcPtr);
-            Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, true);
+            // strict=false for bug-compatibility with swfs with incorrect utf8 encoding of strings
+            Stringp s = core->internStringUTF8((const char*) dataP->abcPtr, len, true, false);
             // must be made sticky for now...
             s->Stick();
             dataP->str = s;

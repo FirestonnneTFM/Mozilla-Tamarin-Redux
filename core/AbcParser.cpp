@@ -1262,9 +1262,8 @@ namespace avmplus
             int len = readU30(pos);
 
             // check to see if we are trying to read past the file end or the beginning.
-            // Also check for valid UTF8.
-            if (pos < abcStart || pos+len >= abcEnd ||
-                UnicodeUtils::Utf8ToUtf16((const uint8*) pos, len, NULL, 0, true) < 0)
+            // FIXME: bug #545652, should check if UTF8 is valid, skipping for compatibility.
+            if (pos < abcStart || pos+len >= abcEnd) 
             {
                 // if we throw a verify error here, _abcStringEnd will never be set, and _abcStrings
                 // will be left in an inconsistent state. having _abcStringStart set but not _abcStringEnd

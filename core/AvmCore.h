@@ -1358,7 +1358,7 @@ const int kBufferPadding = 16;
 
         // variants on the newStringXXX() calls that also intern the string.
         Stringp internStringLatin1(const char* s, int len = -1);
-        Stringp internStringUTF8(const char* s, int len = -1, bool constant = false);
+        Stringp internStringUTF8(const char* s, int len = -1, bool constant = false, bool strict = true);
         Stringp internStringUTF16(const wchar* s, int len = -1);
 
         // like internStringLatin1, but the string constant is assumed to remain valid
