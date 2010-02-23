@@ -209,9 +209,9 @@ REALLY_INLINE LIns* LirHelper::sti(LIns* val, LIns* p, int32_t d)
     return lirout->insStorei(val, p, d);
 }
 
-REALLY_INLINE LIns* LirHelper::stq(LIns* val, LIns* p, int32_t d)
+REALLY_INLINE LIns* LirHelper::stf(LIns* val, LIns* p, int32_t d)
 {
-    AvmAssert(val->isN64());
+    AvmAssert(val->isF64());
     return lirout->insStorei(val, p, d);
 }
 

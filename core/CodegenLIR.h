@@ -334,7 +334,7 @@ namespace avmplus
         LIns* jne(LIns* a, int32_t b);
         LIns* sti(LIns* val, LIns* p, int32_t d);
         LIns* stp(LIns* val, LIns* p, int32_t d);
-        LIns* stq(LIns* val, LIns* p, int32_t d);
+        LIns* stf(LIns* val, LIns* p, int32_t d);
         LIns* ldp(LIns* p, int32_t d);
         LIns* plive(LIns*);
         LIns* param(int n, const char *name);
@@ -424,7 +424,7 @@ namespace avmplus
         LIns *leaIns(int32_t d, LIns *base);
         LIns *localGet(int i);
         LIns *localGetp(int i);
-        LIns *localGetq(int i);
+        LIns *localGetf(int i);
         LIns *localCopy(int i); // sniff's type
         LIns *branchIns(LOpcode op, LIns *cond);
         LIns *branchIns(LOpcode op, LIns *cond, int target_off);
@@ -509,7 +509,7 @@ namespace avmplus
         void writeEpilogue(FrameState* state);
         void writeBlockStart(FrameState* state);
         void writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode);
-        void fixExceptionsAndLabels(FrameState* state, const byte* pc);
+        void writeFixExceptionsAndLabels(FrameState* state, const byte* pc);
         void formatOperand(PrintWriter& buffer, Value& v);
         void cleanup();
     };
