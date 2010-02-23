@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,196 +43,219 @@
 #ifdef DEBUGGER
 namespace avmshell
 {
-	/**
-	 * Represents a single breakpoint in the Debugger.
-	 */
-	class BreakAction : public MMgc::GCObject
-	{
-	public:
-		BreakAction *prev;
-		BreakAction *next;
-		SourceFile *sourceFile;
-		int id;
-		Stringp filename;
-		int linenum;
+    /**
+     * Represents a single breakpoint in the Debugger.
+     */
+    class BreakAction : public MMgc::GCObject
+    {
+    public:
+        BreakAction *prev;
+        BreakAction *next;
+        SourceFile *sourceFile;
+        int id;
+        Stringp filename;
+        int linenum;
 
-		BreakAction(SourceFile *sourceFile,
-					int id,
-					Stringp filename,
-					int linenum)
-		{
-			this->sourceFile = sourceFile;
-			this->id = id;
-			this->filename = filename;
-			this->linenum = linenum;
-		}
-		
-		void print(PrintWriter& out);
-	};
+        BreakAction(SourceFile *sourceFile,
+                    int id,
+                    Stringp filename,
+                    int linenum)
+        {
+            this->sourceFile = sourceFile;
+            this->id = id;
+            this->filename = filename;
+            this->linenum = linenum;
+        }
 
-	/**
-	 * A simple command line interface for the Debugger.
-	 * Supports a gdb-like command line.
-	 */
-	class DebugCLI : public avmplus::Debugger
-	{
-	public:
-		/** @name command codes */
-		/*@{*/
-		const static int CMD_UNKNOWN		= 0;
-		const static int CMD_QUIT			= 1;
-		const static int CMD_CONTINUE		= 2;
-		const static int CMD_STEP			= 3;
-		const static int CMD_NEXT			= 4;
-		const static int CMD_FINISH			= 5;
-		const static int CMD_BREAK			= 6;
-		const static int CMD_SET			= 7;
-		const static int CMD_LIST			= 8;
-		const static int CMD_PRINT			= 9;
-		const static int CMD_TUTORIAL		= 10;
-		const static int CMD_INFO			= 11;
-		const static int CMD_HOME			= 12;
-		const static int CMD_RUN			= 13;
-		const static int CMD_FILE			= 14;
-		const static int CMD_DELETE			= 15;
-		const static int CMD_SOURCE			= 16;
-		const static int CMD_COMMENT		= 17;
-		const static int CMD_CLEAR			= 18;
-		const static int CMD_HELP			= 19;
-		const static int CMD_SHOW			= 20;
-		const static int CMD_KILL			= 21;
-		const static int CMD_HANDLE			= 22;
-		const static int CMD_DISPLAY		= 25;
-		const static int CMD_UNDISPLAY		= 26;
-		const static int CMD_COMMANDS		= 27;
-		const static int CMD_PWD            = 28;
-		const static int CMD_CF             = 29;
-		const static int CMD_CONDITION		= 30;
-		const static int CMD_AWATCH			= 31;
-		const static int CMD_WATCH			= 32;
-		const static int CMD_RWATCH			= 33;
-		const static int CMD_WHAT			= 34;
-		const static int CMD_DISASSEMBLE	= 35;
-		const static int CMD_HALT			= 36;
-		const static int CMD_MCTREE			= 37;
-		const static int CMD_VIEW_SWF		= 38;
-		/*@}*/
+        void print(PrintWriter& out);
+    };
 
-		/** @name info sub commands */
-		/*@{*/
-		const static int INFO_UNKNOWN_CMD	= 100;
-		const static int INFO_ARGS_CMD		= 101;
-		const static int INFO_BREAK_CMD		= 102;
-		const static int INFO_FILES_CMD		= 103;
-		const static int INFO_HANDLE_CMD	= 104;
-		const static int INFO_FUNCTIONS_CMD	= 105;
-		const static int INFO_LOCALS_CMD	= 106;
-		const static int INFO_SOURCES_CMD	= 107;
-		const static int INFO_STACK_CMD		= 108;
-		const static int INFO_VARIABLES_CMD	= 109;
-		const static int INFO_DISPLAY_CMD	= 110;
-		const static int INFO_TARGETS_CMD   = 111;
-		const static int INFO_SWFS_CMD		= 112;
-		/*@}*/
+    /**
+     * A simple command line interface for the Debugger.
+     * Supports a gdb-like command line.
+     */
+    class DebugCLI : public avmplus::Debugger
+    {
+    public:
+        /** @name command codes */
+        /*@{*/
+        const static int CMD_UNKNOWN        = 0;
+        const static int CMD_QUIT           = 1;
+        const static int CMD_CONTINUE       = 2;
+        const static int CMD_STEP           = 3;
+        const static int CMD_NEXT           = 4;
+        const static int CMD_FINISH         = 5;
+        const static int CMD_BREAK          = 6;
+        const static int CMD_SET            = 7;
+        const static int CMD_LIST           = 8;
+        const static int CMD_PRINT          = 9;
+        const static int CMD_TUTORIAL       = 10;
+        const static int CMD_INFO           = 11;
+        const static int CMD_HOME           = 12;
+        const static int CMD_RUN            = 13;
+        const static int CMD_FILE           = 14;
+        const static int CMD_DELETE         = 15;
+        const static int CMD_SOURCE         = 16;
+        const static int CMD_COMMENT        = 17;
+        const static int CMD_CLEAR          = 18;
+        const static int CMD_HELP           = 19;
+        const static int CMD_SHOW           = 20;
+        const static int CMD_KILL           = 21;
+        const static int CMD_HANDLE         = 22;
+        const static int CMD_DISPLAY        = 25;
+        const static int CMD_UNDISPLAY      = 26;
+        const static int CMD_COMMANDS       = 27;
+        const static int CMD_PWD            = 28;
+        const static int CMD_CF             = 29;
+        const static int CMD_CONDITION      = 30;
+        const static int CMD_AWATCH         = 31;
+        const static int CMD_WATCH          = 32;
+        const static int CMD_RWATCH         = 33;
+        const static int CMD_WHAT           = 34;
+        const static int CMD_DISASSEMBLE    = 35;
+        const static int CMD_HALT           = 36;
+        const static int CMD_MCTREE         = 37;
+        const static int CMD_VIEW_SWF       = 38;
+        /*@}*/
 
-		/** @name show subcommands */
-		/*@{*/
-		const static int SHOW_UNKNOWN_CMD	= 200;
-		const static int SHOW_NET_CMD		= 201;
-		const static int SHOW_FUNC_CMD		= 202;
-		const static int SHOW_URI_CMD		= 203;
-		const static int SHOW_PROPERTIES_CMD= 204;
-		const static int SHOW_FILES_CMD		= 205;
-		const static int SHOW_BREAK_CMD		= 206;
-		const static int SHOW_VAR_CMD		= 207;
-		const static int SHOW_MEM_CMD		= 208;
-		/*@}*/
+        /** @name info sub commands */
+        /*@{*/
+        const static int INFO_UNKNOWN_CMD   = 100;
+        const static int INFO_ARGS_CMD      = 101;
+        const static int INFO_BREAK_CMD     = 102;
+        const static int INFO_FILES_CMD     = 103;
+        const static int INFO_HANDLE_CMD    = 104;
+        const static int INFO_FUNCTIONS_CMD = 105;
+        const static int INFO_LOCALS_CMD    = 106;
+        const static int INFO_SOURCES_CMD   = 107;
+        const static int INFO_STACK_CMD     = 108;
+        const static int INFO_VARIABLES_CMD = 109;
+        const static int INFO_DISPLAY_CMD   = 110;
+        const static int INFO_TARGETS_CMD   = 111;
+        const static int INFO_SWFS_CMD      = 112;
+        /*@}*/
 
-		/** @name misc subcommands */
-		/*@{*/
-		const static int ENABLE_ONCE_CMD	= 301;
-		/*@}*/
+        /** @name show subcommands */
+        /*@{*/
+        const static int SHOW_UNKNOWN_CMD   = 200;
+        const static int SHOW_NET_CMD       = 201;
+        const static int SHOW_FUNC_CMD      = 202;
+        const static int SHOW_URI_CMD       = 203;
+        const static int SHOW_PROPERTIES_CMD= 204;
+        const static int SHOW_FILES_CMD     = 205;
+        const static int SHOW_BREAK_CMD     = 206;
+        const static int SHOW_VAR_CMD       = 207;
+        const static int SHOW_MEM_CMD       = 208;
+        /*@}*/
 
-		/**
-		 * StringIntArray is used to store the command arrays
-		 * used to translate command strings into command codes
-		 */
-		struct StringIntArray
-		{
-			const char *text;
-			int id;
-		};
-		
-		DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel);
-		~DebugCLI();
-		
-		void enterDebugger();
-		void setCurrentSource(Stringp file);
-		bool filterException(Exception *exception, bool willBeCaught);
-		bool hitWatchpoint() { return false; }
+        /** @name misc subcommands */
+        /*@{*/
+        const static int ENABLE_ONCE_CMD    = 301;
+        /*@}*/
 
-		/**
-		 * @name command implementations
-		 */
-		/*@{*/
-		void breakpoint(char *location);
-		void deleteBreakpoint(char *idstr);
-		void showBreakpoints();
+        /**
+         * StringIntArray is used to store the command arrays
+         * used to translate command strings into command codes
+         */
+        struct StringIntArray
+        {
+            const char *text;
+            int id;
+        };
+
+        DebugCLI(AvmCore *core, Debugger::TraceLevel tracelevel);
+        ~DebugCLI();
+
+        void enterDebugger();
+        void setCurrentSource(Stringp file);
+        bool filterException(Exception *exception, bool willBeCaught);
+        bool hitWatchpoint() { return false; }
+
+        /**
+         * @name command implementations
+         */
+        /*@{*/
+        void breakpoint(char *location);
+        void deleteBreakpoint(char *idstr);
+        void showBreakpoints();
         static void bt();
-		void locals();
-		void info();
-		void set();
-		void list(const char* line);
-		void print(const char *name);
-		void quit();
-		/*@}*/
+        static bool printFrame(int frameNumber);
+        static bool locals(int frameNumber);
+        static bool arguments(int frameNumber);
 
-		void activate() { activeFlag = true; }
-		
-	private:
-		bool activeFlag;
-		char *currentSource;
-		uint32_t currentSourceLen;
-		Stringp currentFile;
-		int breakpointCount;
+
+        void info();
+        void set();
+        void list(const char* line);
+        void print(const char *name);
+        void quit();
+        /*@}*/
+
+        void activate() { activeFlag = true; }
+
+                // support for interaction with native debugger.
+
+        enum AutoVarKind { // C terminology
+            AUTO_LOCAL,
+            AUTO_ARGUMENT
+        };
+
+    private:
+        static Atom autoAtomAt(DebugFrame* frame, int index, AutoVarKind kind);
+    public:
+        static Atom autoAtomKindAt(int frameNumber, int autoIndex, AutoVarKind kind);
+        static ScriptObject* autoVarAsObject(int frameNumber, int index, AutoVarKind kind);
+        static bool autoVarAsBoolean(int frameNumber, int index, AutoVarKind kind);
+        static Stringp autoVarAsString(int frameNumber, int index, AutoVarKind kind);
+        // returns double, cf AvmCore::number_d, ok for interactive use
+        static double autoVarAsInteger(int frameNumber, int localIndex, AutoVarKind kind);
+        static double autoVarAsDouble(int frameNumber, int localIndex, AutoVarKind kind);
+
+
+    private:
+        bool activeFlag;
+        char *currentSource;
+        uint32_t currentSourceLen;
+        Stringp currentFile;
+        int breakpointCount;
         bool warnMissingSource;
 
-		BreakAction *firstBreakAction, *lastBreakAction;
-		
-		enum { kMaxCommandLine = 1024 };
-		char commandLine[kMaxCommandLine];
-		char lastCommand[kMaxCommandLine];
-		char *currentToken;
-		char *nextToken();
+        BreakAction *firstBreakAction, *lastBreakAction;
 
-		void printIP();
-		void displayLines(int linenum, int count);
-				
-		char* lineStart(int linenum);
-		Atom ease2Atom(const char* to, Atom baseline);
+        enum { kMaxCommandLine = 1024 };
+        char commandLine[kMaxCommandLine];
+        char lastCommand[kMaxCommandLine];
+        char *currentToken;
+        char *nextToken();
+
+        void printIP();
+        void displayLines(int linenum, int count);
+
+        char* lineStart(int linenum);
+        Atom ease2Atom(const char* to, Atom baseline);
         static MethodInfo* functionFor(SourceInfo* src, int line);
 
-		/**
-		 * @name command name arrays and support code
-		 */
-		/*@{*/
-		int determineCommand(StringIntArray cmdList[],
-							 const char *input,
-							 int defCmd);
-		const char* commandNumberToCommandName(StringIntArray cmdList[],
-											   int cmdNumber);
-		int commandFor(const char *input) {
-			return determineCommand(commandArray, input, CMD_UNKNOWN);
-		}
-		int infoCommandFor(const char *input) {
-			return determineCommand(infoCommandArray, input, INFO_UNKNOWN_CMD);
-		}
-		
-		static StringIntArray commandArray[];
-		static StringIntArray infoCommandArray[];
-		static StringIntArray showCommandArray[];
-		/*@}*/
-	};
+        /**
+         * @name command name arrays and support code
+         */
+        /*@{*/
+        int determineCommand(StringIntArray cmdList[],
+                             const char *input,
+                             int defCmd);
+        const char* commandNumberToCommandName(StringIntArray cmdList[],
+                                               int cmdNumber);
+        int commandFor(const char *input) {
+            return determineCommand(commandArray, input, CMD_UNKNOWN);
+        }
+        int infoCommandFor(const char *input) {
+            return determineCommand(infoCommandArray, input, INFO_UNKNOWN_CMD);
+        }
+
+        static StringIntArray commandArray[];
+        static StringIntArray infoCommandArray[];
+        static StringIntArray showCommandArray[];
+        /*@}*/
+    };
 }
 #endif
 
