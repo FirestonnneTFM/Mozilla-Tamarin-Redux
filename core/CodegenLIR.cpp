@@ -564,7 +564,7 @@ namespace avmplus
         return r;
     }
 
-    LIns* CodegenLIR::localGetq(int i) {
+    LIns* CodegenLIR::localGetf(int i) {
         Value& v = state->value(i);
         NanoAssert(v.traits == NUMBER_TYPE);
         LIns *r = v.ins = lirout->insLoad(LIR_ldf, vars, i*8);
@@ -1659,7 +1659,7 @@ namespace avmplus
         verbose_only( if (vbWriter) { vbWriter->flush();} )
     }
 
-    void CodegenLIR::fixExceptionsAndLabels(FrameState* state, const byte* pc)
+    void CodegenLIR::writeFixExceptionsAndLabels(FrameState* state, const byte* pc)
     {
         (void)state;
         (void)pc;
@@ -2300,7 +2300,7 @@ namespace avmplus
         case BUILTIN_uint:
             return callIns(FUNCTIONID(uintToString), 2, coreAddr, localGet(index));
         case BUILTIN_number:
-            return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetq(index));
+            return callIns(FUNCTIONID(doubleToString), 2, coreAddr, localGetf(index));
         case BUILTIN_boolean: {
             // load "true" or "false" string constant from AvmCore.booleanStrings[]
             LIns *offset = binaryIns(LIR_pilsh, i2p(localGet(index)), InsConst(PTR_SCALE));
@@ -2697,7 +2697,7 @@ namespace avmplus
             else if (in == NUMBER_TYPE)
             {
                 // narrowing conversion number->int
-                LIns* ins = localGetq(loc);
+                LIns* ins = localGetf(loc);
                 localSet(loc, callIns(FUNCTIONID(integer_d), 1, ins), result);
             }
             else
@@ -2715,7 +2715,7 @@ namespace avmplus
             }
             else if (in == NUMBER_TYPE)
             {
-                LIns* ins = localGetq(loc);
+                LIns* ins = localGetf(loc);
                 localSet(loc, callIns(FUNCTIONID(integer_d), 1, ins), result);
             }
             else
@@ -2729,7 +2729,7 @@ namespace avmplus
         {
             if (in == NUMBER_TYPE)
             {
-                localSet(loc, callIns(FUNCTIONID(doubleToBool), 1, localGetq(loc)), result);
+                localSet(loc, callIns(FUNCTIONID(doubleToBool), 1, localGetf(loc)), result);
             }
             else if (in == INT_TYPE || in == UINT_TYPE)
             {
@@ -2936,8 +2936,8 @@ namespace avmplus
             LIns *v;
             switch (bt(state->value(index).traits)) {
             case BUILTIN_number:
-                v = localGetq(index);
-                stq(v, ap, disp);
+                v = localGetf(index);
+                stf(v, ap, disp);
                 break;
             case BUILTIN_int:
                 v = i2p(localGet(index));
@@ -3107,7 +3107,7 @@ namespace avmplus
         }
         else if (slotType == NUMBER_TYPE) {
             // slot type is double or int
-            stq(value, ptr, offset);
+            stf(value, ptr, offset);
         } else {
             AvmAssert(slotType == INT_TYPE || slotType == UINT_TYPE || slotType == BOOLEAN_TYPE);
             sti(value, ptr, offset);
@@ -3215,7 +3215,7 @@ namespace avmplus
             case OP_sf32:
             case OP_sf64:
             {
-                LIns* svalue = (opcode == OP_sf32 || opcode == OP_sf64) ? localGetq(sp-1) : localGet(sp-1);
+                LIns* svalue = (opcode == OP_sf32 || opcode == OP_sf64) ? localGetf(sp-1) : localGet(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
             #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
@@ -3382,7 +3382,7 @@ namespace avmplus
 
             case OP_negate: {
                 int32_t index = (int32_t) op1;
-                localSet(index, Ins(LIR_fneg, localGetq(index)),result);
+                localSet(index, Ins(LIR_fneg, localGetf(index)),result);
                 break;
             }
 
@@ -3400,7 +3400,7 @@ namespace avmplus
             case OP_declocal: {
                 int32_t index = (int32_t) op1;
                 int32_t incr = (int32_t) op2; // 1 or -1
-                localSet(index, binaryIns(LIR_fadd, localGetq(index), i2dIns(InsConst(incr))), result);
+                localSet(index, binaryIns(LIR_fadd, localGetf(index), i2dIns(InsConst(incr))), result);
                 break;
             }
 
@@ -3425,7 +3425,7 @@ namespace avmplus
 
             case OP_modulo: {
                 LIns* out = callIns(FUNCTIONID(mod), 2,
-                    localGetq(sp-1), localGetq(sp));
+                    localGetf(sp-1), localGetf(sp));
                 localSet(sp-1,  out, result);
                 break;
             }
@@ -3440,7 +3440,7 @@ namespace avmplus
                     case OP_multiply:   op = LIR_fmul; break;
                     case OP_subtract:   op = LIR_fsub; break;
                 }
-                localSet(sp-1, binaryIns(op, localGetq(sp-1), localGetq(sp)), result);
+                localSet(sp-1, binaryIns(op, localGetf(sp-1), localGetf(sp)), result);
                 break;
             }
 
@@ -4115,7 +4115,7 @@ namespace avmplus
                     {
                         if( valueType == NUMBER_TYPE )
                         {
-                            LIns* value = localGetq(sp);
+                            LIns* value = localGetf(sp);
                             callIns(FUNCTIONID(DoubleVectorObject_setNativeIntProperty), 3,
                                 localGetp(objDisp), index, value);
                         }
@@ -4187,7 +4187,7 @@ namespace avmplus
                     {
                         if( valueType == NUMBER_TYPE )
                         {
-                            LIns* value = localGetq(sp);
+                            LIns* value = localGetf(sp);
                             callIns(FUNCTIONID(DoubleVectorObject_setNativeUintProperty), 3,
                                 localGetp(objDisp), index, value);
                         }
@@ -5036,7 +5036,7 @@ namespace avmplus
     {
         if (t == NUMBER_TYPE)
         {
-            return localGetq(i);
+            return localGetf(i);
         }
         if (t == INT_TYPE || t == BOOLEAN_TYPE)
         {
