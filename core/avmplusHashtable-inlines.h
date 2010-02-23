@@ -288,6 +288,12 @@ namespace avmplus
         return ht.contains(name); 
     }
     
+    // used by Flash
+    REALLY_INLINE size_t HeapHashtableRC::getAllocatedSize() const
+    {
+        return ht.getCapacity() * sizeof(Atom);
+    }
+
     REALLY_INLINE Atom HeapHashtableRC::tagObject(MMgc::RCObject* obj)  
     { 
         return (Atom)obj | kObjectType; 

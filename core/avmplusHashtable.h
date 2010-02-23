@@ -324,6 +324,9 @@ namespace avmplus
 		MMgc::RCObject* remove(Atom name);
 		bool contains(Atom name) const;
 		
+        // used by Flash
+        size_t getAllocatedSize() const;
+        
 	private:
 		Atom tagObject(MMgc::RCObject* obj);
 		MMgc::RCObject* untagAtom(Atom a);
