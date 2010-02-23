@@ -201,14 +201,6 @@ namespace MMgc
 
 		bool IsOnFreelist(FixedBlock *b, void *item);
 		bool IsInUse(FixedBlock *b, void *item);
-
-		void* AllocSansHook(size_t size, FixedMallocOpts flags=kNone);
-		static void FreeSansHook(void *item);
-
-#ifdef MMGC_HOOKS
-		void AllocHook(size_t size, void *item);
-		static void FreeHook(void *ptr);
-#endif
 	};
 
 	/**
