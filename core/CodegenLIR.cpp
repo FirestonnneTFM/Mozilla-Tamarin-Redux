@@ -590,7 +590,7 @@ namespace avmplus
         (void)type;
         // note that this now updates traits for values on the scopechain as well as locals
         DEBUGGER_ONLY(
-            if (core->debugger() && i < (state->verifier->local_count + state->verifier->max_scope)) {
+            if (haveDebugger && i < (state->verifier->local_count + state->verifier->max_scope)) {
                 lirout->insStorei(InsConstPtr(type), varTraits, i*sizeof(Traits*));
             }
         )
@@ -714,6 +714,7 @@ namespace avmplus
         get_cache_builder(*alloc1, *pool->codeMgr),
         set_cache_builder(*alloc1, *pool->codeMgr),
         prolog(NULL)
+        DEBUGGER_ONLY(, haveDebugger(core->debugger() != NULL) )
     {
         state = NULL;
 
@@ -1288,7 +1289,7 @@ namespace avmplus
 
         #if defined(DEBUGGER) && defined(_DEBUG)
         DebuggerCheck *checker = NULL;
-        if (core->debugger()) {
+        if (haveDebugger) {
             checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, state->verifier->local_count + state->verifier->max_scope);
             lirout = checker;
         }
@@ -1360,8 +1361,7 @@ namespace avmplus
         undefConst = InsConstAtom(undefinedAtom);
 
         #ifdef DEBUGGER
-        if (core->debugger())
-        {
+        if (haveDebugger) {
             // pointers to traits so that the debugger can decode the locals
             // IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
             // note that this now updates traits for values on the scopechain as well as locals
@@ -1390,8 +1390,7 @@ namespace avmplus
         }
 
         #ifdef DEBUGGER
-        if (core->debugger())
-        {
+        if (haveDebugger) {
             // Allocate space for the call stack
             csn = InsAlloc(sizeof(CallStackNode));
             verbose_only( if (vbNames) {
@@ -1503,10 +1502,8 @@ namespace avmplus
         }
 
         #ifdef DEBUGGER
-        if (core->debugger())
-        {
-            for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
-            {
+        if (haveDebugger) {
+            for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i) {
                 localSet(i, undefConst, VOID_TYPE);
             }
 
@@ -1752,7 +1749,7 @@ namespace avmplus
             #ifdef VTUNE
             const bool do_emit = true;
             #else
-            const bool do_emit = core->debugger() != NULL;
+            const bool do_emit = haveDebugger;
             #endif
             Stringp str = pool->getString(imm30);  // assume been checked already
             if(do_emit) emit(state, opcode, (uintptr)str);
@@ -1932,9 +1929,8 @@ namespace avmplus
         }
 
         case OP_popscope:
-            #ifdef DEBUGGER
-            if (core->debugger()) emitKill(state, ms->local_count()/*scopeBase*/ + state->scopeDepth);
-            #endif
+            if (haveDebugger)
+                emitKill(state, ms->local_count()/*scopeBase*/ + state->scopeDepth);
             break;
 
         case OP_getslot:
@@ -2029,7 +2025,7 @@ namespace avmplus
             #ifdef VTUNE
             const bool do_emit = true;
             #else
-            const bool do_emit = core->debugger() != NULL;
+            const bool do_emit = haveDebugger;
             #endif
             // we actually do generate code for these, in debugger mode
             if (do_emit) emit(state, opcode, imm30);
@@ -3304,8 +3300,7 @@ namespace avmplus
                 // ISSUE if a method has multiple returns this causes some bloat
 
                 #ifdef DEBUGGER
-                if (core->debugger())
-                {
+                if (haveDebugger) {
                     callIns(FUNCTIONID(debugExit), 2,
                         env_param, csn);
                     // now we toast the cse and restore contents in order to
@@ -4431,8 +4426,7 @@ namespace avmplus
             case OP_debugfile:
             {
             #ifdef DEBUGGER
-            if (core->debugger())
-            {
+            if (haveDebugger) {
                 // todo refactor api's so we don't have to pass argv/argc
                 LIns* debugger = loadIns(LIR_ldcp, offsetof(AvmCore, _debugger),
                                             coreAddr);
@@ -4450,8 +4444,7 @@ namespace avmplus
             case OP_debugline:
             {
             #ifdef DEBUGGER
-            if (core->debugger())
-            {
+            if (haveDebugger) {
                 // todo refactor api's so we don't have to pass argv/argc
                 LIns* debugger = loadIns(LIR_ldcp, offsetof(AvmCore, _debugger),
                                             coreAddr);
@@ -4803,8 +4796,7 @@ namespace avmplus
         LIns* last = Ins(LIR_plive, vars);
 
         #ifdef DEBUGGER
-        if (core->debugger())
-        {
+        if (haveDebugger) {
             Ins(LIR_plive, csn);
             last = Ins(LIR_plive, varTraits);
         }
@@ -5446,10 +5438,6 @@ namespace avmplus
 
     void CodegenLIR::deadvars()
     {
-        // if debugging, don't eliminate vars.  this way the debugger sees the true
-        // variable state at each safe point.
-        DEBUGGER_ONLY(if (core->debugger()) return; )
-
         // allocator used only for duration of this phase.  no exceptions are
         // thrown while this phase runs, hence no try/catch is necessary.
         Allocator dv_alloc;
@@ -5497,7 +5485,10 @@ namespace avmplus
         CodeMgr *mgr = pool->codeMgr;
         verbose_only(if (verbose()) listing("Initial LIR", mgr->log, frag, prologLastIns); )
 
-        deadvars();
+        // if debugging, don't eliminate vars.  this way the debugger sees the true
+        // variable state at each safe point.
+        if (!haveDebugger)
+            deadvars();
 
         verbose_only(if (pool->isVerbose(VB_jit)) {
             Allocator live_alloc;

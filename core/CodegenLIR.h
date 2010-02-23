@@ -410,6 +410,11 @@ namespace avmplus
         LIns* prologLastIns;
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LirNameMap* vbNames;)
+#ifdef DEBUGGER
+        bool haveDebugger;
+#else
+        static const bool haveDebugger = false;
+#endif
 
         LIns *InsAlloc(int32_t);
         LIns *atomToNativeRep(int loc, LIns *i);
