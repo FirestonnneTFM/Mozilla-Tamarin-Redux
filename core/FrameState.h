@@ -82,7 +82,6 @@ namespace avmplus
         int32_t withBase;
         bool initialized;
         bool targetOfBackwardsBranch;
-        bool insideTryBlock;
 
     public:
         FrameState(Verifier*);
