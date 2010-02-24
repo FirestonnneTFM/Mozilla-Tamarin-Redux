@@ -358,10 +358,6 @@ namespace avmplus
                     ExceptionHandler* handler = &info->abc_exceptions()->exceptions[i];
                     if (pc >= code_pos + handler->from && pc <= code_pos + handler->to)
                     {
-                        // Set the insideTryBlock flag, so lir can
-                        // react appropriately.
-                        state->insideTryBlock = true;
-
                         // If this instruction can throw exceptions, add an edge to
                         // the catch handler.
                         if (opcodeInfo[opcode].canThrow || pc == code_pos + handler->from)
@@ -2976,8 +2972,7 @@ namespace avmplus
         label(),
     #endif
           pc(0), scopeDepth(0), stackDepth(0), withBase(-1),
-          initialized(false), targetOfBackwardsBranch(false),
-          insideTryBlock(false)
+          initialized(false), targetOfBackwardsBranch(false)
     {
         locals = (Value*)mmfx_alloc_opt(sizeof(Value) * verifier->frameSize, MMgc::kZero);
     }
