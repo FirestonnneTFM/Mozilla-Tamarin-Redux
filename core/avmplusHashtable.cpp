@@ -153,6 +153,18 @@ namespace avmplus
         return i;
 	}
 		
+	void InlineHashtable::deletePairAt(int i)
+	{
+		Atom* atoms = getAtoms();
+        // decrement refcount as necessary.
+        AvmCore::atomWriteBarrier_dtor(&atoms[i]);
+        AvmCore::atomWriteBarrier_dtor(&atoms[i+1]);
+        // calls above set the slot to 0, we want DELETED
+        atoms[i] = DELETED;
+        atoms[i+1] = DELETED;
+        setHasDeletedItems();
+	}
+
 	Atom InlineHashtable::remove(Atom name)
 	{
 		Atom* atoms = getAtoms();
@@ -161,13 +173,7 @@ namespace avmplus
         if (removeDontEnumMask(atoms[i]) == name)
         {
 			val = atoms[i+1];
-            // decrement refcount as necessary.
-            AvmCore::atomWriteBarrier_dtor(&atoms[i]);
-            AvmCore::atomWriteBarrier_dtor(&atoms[i+1]);
-            // calls above set the slot to 0, we want DELETED
-            atoms[i] = DELETED;
-			atoms[i+1] = DELETED;
-			setHasDeletedItems();
+            deletePairAt(i);
         }
 		return val;
 	}
@@ -408,13 +414,7 @@ namespace avmplus
 			if(AvmCore::isGenericObject(atoms[i])) {
 				GCWeakRef *ref = (GCWeakRef*)AvmCore::atomToGenericObject(atoms[i]);
 				if(ref && ref->get() == NULL) {
-                    // decrement refcount as necessary.
-                    AvmCore::atomWriteBarrier_dtor(&atoms[i]);
-                    AvmCore::atomWriteBarrier_dtor(&atoms[i+1]);
-					// inlined delete
-					atoms[i] = InlineHashtable::DELETED;
-					atoms[i+1] = InlineHashtable::DELETED;
-					ht.setHasDeletedItems();
+                    ht.deletePairAt(i);
 				}
 			}
 		}
@@ -437,9 +437,7 @@ namespace avmplus
                 if (weakRef->get())
                     return (index>>1)+1;
                 
-                atoms[index] = InlineHashtable::DELETED;
-                atoms[index+1] = InlineHashtable::DELETED;
-                ht.setHasDeletedItems();
+                ht.deletePairAt(index);
             } 
 			else if (ht.enumerable(a)) 
             {
@@ -512,10 +510,7 @@ namespace avmplus
 			if(AvmCore::isPointer(atoms[i+1])) {
 				GCWeakRef *ref = (GCWeakRef*)atomPtr(atoms[i+1]);
 				if(ref && ref->get() == NULL) {
-					// inlined delete
-					atoms[i] = InlineHashtable::DELETED;
-					atoms[i+1] = InlineHashtable::DELETED;
-					ht.setHasDeletedItems();
+                    ht.deletePairAt(i);
 				}
 			}
 		}
