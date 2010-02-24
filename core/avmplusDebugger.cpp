@@ -700,11 +700,11 @@ namespace avmplus
 		return breakpoints.get(linenum);
 	}
 
-	bool DebugFrame::methodName(Stringp& result) {
+	bool DebugFrame::methodName(Stringp&) {
 		return false; // base implementation
 	}
 	
-	bool DebugFrame::argumentName(int which, Stringp& result) {
+	bool DebugFrame::argumentName(int, Stringp&) {
 		return false; // base implementation
 	}
 
