@@ -707,6 +707,7 @@ namespace avmplus
         info(i),
         ms(i->getMethodSignature()),
         pool(i->pool()),
+        state(NULL),
         mopsRangeCheckFilter(NULL),
         interruptable(true),
         patches(*alloc1),
@@ -716,8 +717,6 @@ namespace avmplus
         prolog(NULL)
         DEBUGGER_ONLY(, haveDebugger(core->debugger() != NULL) )
     {
-        state = NULL;
-
         #ifdef AVMPLUS_MAC_CARBON
         setjmpInit();
         #endif
@@ -837,7 +836,7 @@ namespace avmplus
             : LirWriter(out), vars(NULL), nvar(nvar)
 #ifdef DEBUGGER
             , haveDebugger(core->debugger() != NULL)
-#endif        
+#endif
         {
             (void) core;
             tracker = new (alloc) LInsp[nvar];
@@ -1385,8 +1384,7 @@ namespace avmplus
         interruptable = ! info->isNonInterruptible();
 
         // then space for the exception frame, be safe if its an init stub
-        if (info->hasExceptions())
-        {
+        if (info->hasExceptions()) {
             // [_save_eip][ExceptionFrame]
             // offsets of local vars, rel to current ESP
             _save_eip = InsAlloc(sizeof(intptr_t));
@@ -1395,6 +1393,9 @@ namespace avmplus
                 vbNames->addName(_save_eip, "_save_eip");
                 vbNames->addName(_ef, "_ef");
             })
+        } else {
+            _save_eip = NULL;
+            _ef = NULL;
         }
 
         #ifdef DEBUGGER
@@ -1586,35 +1587,32 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::emitCopy(FrameState* state, int src, int dest) {
-        this->state = state;
+    void CodegenLIR::emitCopy(int src, int dest) {
         localSet(dest, localCopy(src), state->value(src).traits);
     }
 
-    void CodegenLIR::emitGetscope(FrameState* state, int scope_index, int dest)
+    void CodegenLIR::emitGetscope(int scope_index, int dest)
     {
-        this->state = state;
         Traits* t = info->declaringScope()->getScopeTraitsAt(scope_index);
         LIns* scope = loadEnvScope();
         LIns* scopeobj = loadIns(LIR_ldcp, offsetof(ScopeChain,_scopes) + scope_index*sizeof(Atom), scope);
         localSet(dest, atomToNativeRep(t, scopeobj), t);
     }
 
-    void CodegenLIR::emitSwap(FrameState* state, int i, int j) {
-        this->state = state;
+    void CodegenLIR::emitSwap(int i, int j) {
         LIns* t = localCopy(i);
         localSet(i, localCopy(j), state->value(j).traits);
         localSet(j, t, state->value(i).traits);
     }
 
-    void CodegenLIR::emitKill(FrameState* state, int i)
+    void CodegenLIR::emitKill(int i)
     {
-        this->state = state;
         localSet(i, undefConst, VOID_TYPE);
     }
 
     void CodegenLIR::writeBlockStart(FrameState* state)
     {
+        this->state = state;
         // our new extended BB now starts here, this means that any branch targets
         // should hit the next instruction our bb start instruction
         LIns* bb = label();  // mark start of block
@@ -1636,11 +1634,8 @@ namespace avmplus
 
         // If this is a backwards branch, generate an interrupt check.
         // current verifier state, includes tack pointer.
-        if (interruptable && core->config.interrupts && state->targetOfBackwardsBranch)
-        {
-            if (state->insideTryBlock)
-                stp(InsConstPtr((void*)state->pc), _save_eip, 0);
-
+        if (interruptable && core->config.interrupts && state->targetOfBackwardsBranch) {
+            emitSetPc();
             LIns* interrupted = loadIns(LIR_ld, offsetof(AvmCore,interrupted), coreAddr);
             LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(AvmCore::NotInterrupted)));
             patchLater(br, interrupt_label);
@@ -1659,12 +1654,10 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode)
+    void CodegenLIR::writeOpcodeVerified(FrameState*, const byte*, AbcOpcode)
     {
-        (void)state;
-        (void)pc;
-        (void)opcode;
         verbose_only( if (vbWriter) { vbWriter->flush();} )
+        this->state = NULL;
     }
 
     void CodegenLIR::writeFixExceptionsAndLabels(FrameState* state, const byte* pc)
@@ -1676,7 +1669,8 @@ namespace avmplus
     void CodegenLIR::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
     {
       //AvmLog("CodegenLIR::write %x\n", opcode);
-
+        this->state = state;
+        emitSetPc();
         const byte* nextpc = pc;
         unsigned int imm30=0, imm30b=0;
         int imm8=0, imm24=0;
@@ -1696,7 +1690,7 @@ namespace avmplus
             imm30 = opcode-OP_getlocal0;
             // hack imm30 and fall through
         case OP_getlocal:
-            emitCopy(state, imm30, sp+1);
+            emitCopy(imm30, sp+1);
             break;
         case OP_setlocal0:
         case OP_setlocal1:
@@ -1705,51 +1699,51 @@ namespace avmplus
             imm30 = opcode-OP_setlocal0;
             // hack imm30 and fall through
         case OP_setlocal:
-            emitCopy(state, sp, imm30);
+            emitCopy(sp, imm30);
             break;
         case OP_pushtrue:
-            emitIntConst(state, sp+1, 1);
+            emitIntConst(sp+1, 1);
             break;
         case OP_pushfalse:
-            emitIntConst(state, sp+1, 0);
+            emitIntConst(sp+1, 0);
             break;
         case OP_pushnull:
-            emitPtrConst(state, sp+1, 0, NULL_TYPE);
+            emitPtrConst(sp+1, 0, NULL_TYPE);
             break;
         case OP_pushundefined:
-            emitPtrConst(state, sp+1, (void*)undefinedAtom, VOID_TYPE);
+            emitPtrConst(sp+1, (void*)undefinedAtom, VOID_TYPE);
             break;
         case OP_pushshort:
-            emitIntConst(state, sp+1, (signed short)imm30);
+            emitIntConst(sp+1, (int16_t)imm30);
             break;
         case OP_pushbyte:
-            emitIntConst(state, sp+1, (signed char)imm8);
+            emitIntConst(sp+1, (int8_t)imm8);
             break;
         case OP_pushstring:
-            emitPtrConst(state, sp+1, pool->getString(imm30), STRING_TYPE);
+            emitPtrConst(sp+1, pool->getString(imm30), STRING_TYPE);
             break;
         case OP_pushnamespace:
-            emitPtrConst(state, sp+1, pool->cpool_ns[imm30], NAMESPACE_TYPE);
+            emitPtrConst(sp+1, pool->cpool_ns[imm30], NAMESPACE_TYPE);
             break;
         case OP_pushint:
-            emitIntConst(state, sp+1, pool->cpool_int[imm30]);
+            emitIntConst(sp+1, pool->cpool_int[imm30]);
             break;
         case OP_pushuint:
-            emitIntConst(state, sp+1, pool->cpool_uint[imm30]);
+            emitIntConst(sp+1, pool->cpool_uint[imm30]);
             break;
         case OP_pushdouble:
-            emitDoubleConst(state, sp+1, pool->cpool_double[imm30]);
+            emitDoubleConst(sp+1, pool->cpool_double[imm30]);
             break;
         case OP_pushnan:
-            emitDoubleConst(state, sp+1, (double*)atomPtr(core->kNaN));
+            emitDoubleConst(sp+1, (double*)atomPtr(core->kNaN));
             break;
         case OP_lookupswitch:
-            emit(state, opcode, state->pc+imm24, imm30b /*count*/);
+            emit(opcode, state->pc+imm24, imm30b /*count*/);
             break;
         case OP_throw:
         case OP_returnvalue:
         case OP_returnvoid:
-            emit(state, opcode, sp);
+            emit(opcode, sp);
             break;
         case OP_debugfile:
         {
@@ -1760,53 +1754,53 @@ namespace avmplus
             const bool do_emit = haveDebugger;
             #endif
             Stringp str = pool->getString(imm30);  // assume been checked already
-            if(do_emit) emit(state, opcode, (uintptr)str);
+            if(do_emit) emit(opcode, (uintptr)str);
 #endif
             break;
         }
         case OP_dxns:
         {
             Stringp str = pool->getString(imm30);  // assume been checked already
-            emit(state, opcode, (uintptr)str);
+            emit(opcode, (uintptr)str);
             break;
         }
         case OP_dxnslate:
             // codgen will call intern on the input atom.
-            emit(state, opcode, sp);
+            emit(opcode, sp);
             break;
         case OP_kill:
-            emitKill(state, imm30);
+            emitKill(imm30);
             break;
         case OP_inclocal:
         case OP_declocal:
-            emit(state, opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE);
+            emit(opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE);
             break;
         case OP_inclocal_i:
         case OP_declocal_i:
-            emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE);
+            emit(opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE);
             break;
         case OP_lessthan:
         case OP_greaterthan:
         case OP_lessequals:
         case OP_greaterequals:
-            emit(state, opcode, 0, 0, BOOLEAN_TYPE);
+            emit(opcode, 0, 0, BOOLEAN_TYPE);
             break;
 
         case OP_getdescendants:
         {
             const Multiname *name = pool->precomputedMultiname(imm30);
-            emit(state, opcode, (uintptr)name, 0, NULL);
+            emit(opcode, (uintptr)name, 0, NULL);
             break;
         }
 
         case OP_checkfilter:
-            emit(state, opcode, sp, 0, NULL);
+            emit(opcode, sp, 0, NULL);
             break;
 
         case OP_deleteproperty:
         {
             const Multiname *name = pool->precomputedMultiname(imm30);
-            emit(state, opcode, (uintptr)name, 0, BOOLEAN_TYPE);
+            emit(opcode, (uintptr)name, 0, BOOLEAN_TYPE);
             break;
         }
 
@@ -1814,7 +1808,7 @@ namespace avmplus
         {
             const Multiname *name = pool->precomputedMultiname(imm30);
             Traits *t = pool->getTraits(*name, state->verifier->getToplevel(this));
-            emit(state, OP_astype, (uintptr)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
+            emit(OP_astype, (uintptr)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
             break;
         }
         case OP_astypelate:
@@ -1825,7 +1819,7 @@ namespace avmplus
             if (ct && (t=ct->itraits) != 0)
                 if (t->isMachineType())
                     t = OBJECT_TYPE;
-            emit(state, opcode, 0, 0, t);
+            emit(opcode, 0, 0, t);
             break;
         }
 
@@ -1880,7 +1874,6 @@ namespace avmplus
             //sp[0] = istype(sp[0], itraits);
             const Multiname *name = pool->precomputedMultiname(imm30);
             Traits* itraits = pool->getTraits(*name, state->verifier->getToplevel(this));
-            emitPrep(state);
             LIns* obj = loadAtomRep(sp);
             LIns* out = callIns(FUNCTIONID(istype), 2, obj, InsConstPtr(itraits));
             localSet(sp, out, BOOLEAN_TYPE);
@@ -1889,7 +1882,6 @@ namespace avmplus
 
         case OP_istypelate:
         {
-            emitPrep(state);
             // null check for the type value T in (x is T).  This also preserves
             // any side effects from loading T, even if we end up inlining T.itraits() as a const.
             state->verifier->emitCheckNull(sp);
@@ -1914,31 +1906,31 @@ namespace avmplus
         case OP_applytype:
             // * is ok for the type, as Vector classes have no statics
             // when we implement type parameters fully, we should do something here.
-            emit(state, opcode, imm30/*argc*/, 0, NULL);
+            emit(opcode, imm30/*argc*/, 0, NULL);
             break;
 
         case OP_newobject:
-            emit(state, opcode, imm30, 0, OBJECT_TYPE);
+            emit(opcode, imm30, 0, OBJECT_TYPE);
             break;
 
         case OP_newarray:
-            emit(state, opcode, imm30, 0, ARRAY_TYPE);
+            emit(opcode, imm30, 0, ARRAY_TYPE);
             break;
 
         case OP_newactivation:
-            emit(state, opcode, 0, 0, info->activationTraits());
+            emit(opcode, 0, 0, info->activationTraits());
             break;
 
         case OP_newcatch:
         {
             ExceptionHandler* handler = &info->abc_exceptions()->exceptions[imm30];
-            emit(state, opcode, 0, 0, handler->scopeTraits);
+            emit(opcode, 0, 0, handler->scopeTraits);
             break;
         }
 
         case OP_popscope:
             if (haveDebugger)
-                emitKill(state, ms->local_count()/*scopeBase*/ + state->scopeDepth);
+                emitKill(ms->local_count()/*scopeBase*/ + state->scopeDepth);
             break;
 
         case OP_getslot:
@@ -1946,85 +1938,85 @@ namespace avmplus
             Value& obj = state->peek();
             int index = imm30-1;
             Traits* slotTraits = obj.traits ? obj.traits->getTraitsBindings()->getSlotTraits(index) : NULL;
-            emitGetslot(state, index, sp, slotTraits);
+            emitGetslot(index, sp, slotTraits);
             break;
         }
 
         case OP_setslot:
-            emitSetslot(state, OP_setslot, imm30-1, sp-1);
+            emitSetslot(OP_setslot, imm30-1, sp-1);
             break;
 
         case OP_dup:
-            emitCopy(state, sp, sp+1);
+            emitCopy(sp, sp+1);
             break;
 
         case OP_swap:
-            emitSwap(state, sp, sp-1);
+            emitSwap(sp, sp-1);
             break;
 
         case OP_equals:
         case OP_strictequals:
         case OP_instanceof:
         case OP_in:
-            emit(state, opcode, 0, 0, BOOLEAN_TYPE);
+            emit(opcode, 0, 0, BOOLEAN_TYPE);
             break;
 
         case OP_not:
-            emit(state, opcode, sp);
+            emit(opcode, sp);
             break;
 
         case OP_modulo:
         case OP_subtract:
         case OP_divide:
         case OP_multiply:
-            emit(state, opcode, 0, 0, NUMBER_TYPE);
+            emit(opcode, 0, 0, NUMBER_TYPE);
             break;
 
         case OP_increment:
         case OP_decrement:
-            emit(state, opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE);
+            emit(opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE);
             break;
 
         case OP_increment_i:
         case OP_decrement_i:
-            emit(state, opcode, sp, opcode == OP_increment_i ? 1 : -1, INT_TYPE);
+            emit(opcode, sp, opcode == OP_increment_i ? 1 : -1, INT_TYPE);
             break;
 
         case OP_add_i:
         case OP_subtract_i:
         case OP_multiply_i:
-            emit(state, opcode, 0, 0, INT_TYPE);
+            emit(opcode, 0, 0, INT_TYPE);
             break;
 
         case OP_negate:
-            emit(state, opcode, sp, 0, NUMBER_TYPE);
+            emit(opcode, sp, 0, NUMBER_TYPE);
             break;
 
         case OP_negate_i:
-            emit(state, opcode, sp, 0, INT_TYPE);
+            emit(opcode, sp, 0, INT_TYPE);
             break;
 
         case OP_bitand:
         case OP_bitor:
         case OP_bitxor:
-            emit(state, opcode, 0, 0, INT_TYPE);
+            emit(opcode, 0, 0, INT_TYPE);
             break;
 
         case OP_lshift:
         case OP_rshift:
-            emit(state, opcode, 0, 0, INT_TYPE);
+            emit(opcode, 0, 0, INT_TYPE);
             break;
 
         case OP_urshift:
-            emit(state, opcode, 0, 0, UINT_TYPE);
+            emit(opcode, 0, 0, UINT_TYPE);
             break;
 
         case OP_bitnot:
-            emit(state, opcode, sp, 0, INT_TYPE);
+            emit(opcode, sp, 0, INT_TYPE);
             break;
 
         case OP_typeof:
-            emit(state, opcode, sp, 0, STRING_TYPE);
+            emit(opcode, sp, 0, STRING_TYPE);
             break;
 
         case OP_debugline:
@@ -2036,28 +2028,28 @@ namespace avmplus
             const bool do_emit = haveDebugger;
             #endif
             // we actually do generate code for these, in debugger mode
-            if (do_emit) emit(state, opcode, imm30);
+            if (do_emit) emit(opcode, imm30);
             #endif
             break;
         }
         case OP_nextvalue:
         case OP_nextname:
-            emit(state, opcode, 0, 0, NULL);
+            emit(opcode, 0, 0, NULL);
             break;
 
         case OP_hasnext:
-            emit(state, opcode, 0, 0, INT_TYPE);
+            emit(opcode, 0, 0, INT_TYPE);
             break;
 
         case OP_hasnext2:
-            emit(state, opcode, imm30, imm30b, BOOLEAN_TYPE);
+            emit(opcode, imm30, imm30b, BOOLEAN_TYPE);
             break;
 
         // sign extends
         case OP_sxi1:
         case OP_sxi8:
         case OP_sxi16:
-            emit(state, opcode, sp, 0, INT_TYPE);
+            emit(opcode, sp, 0, INT_TYPE);
             break;
 
         // loads
@@ -2070,7 +2062,7 @@ namespace avmplus
         case OP_lf64:
         {
             Traits* result = (opcode == OP_lf32 || opcode == OP_lf64) ? NUMBER_TYPE : INT_TYPE;
-            emit(state, opcode, sp, 0, result);
+            emit(opcode, sp, 0, result);
             break;
         }
 
@@ -2081,7 +2073,7 @@ namespace avmplus
         case OP_sf32:
         case OP_sf64:
         {
-            emit(state, opcode, 0, 0, VOID_TYPE);
+            emit(opcode, 0, 0, VOID_TYPE);
             break;
         }
 
@@ -2091,7 +2083,6 @@ namespace avmplus
 
         case OP_add:
         {
-            emitPrep(state);
             Value& val1 = state->value(sp-1);
             Value& val2 = state->value(sp);
             if ((val1.traits == STRING_TYPE && val1.notNull) || (val2.traits == STRING_TYPE && val2.notNull)) {
@@ -2120,13 +2111,12 @@ namespace avmplus
         }
 
         case OP_convert_s:
-            emitPrep(state);
             localSet(sp, convertToString(sp), STRING_TYPE);
             break;
 
         case OP_esc_xelem:
         case OP_esc_xattr:
-            emit(state, opcode, sp, 0, STRING_TYPE);
+            emit(opcode, sp, 0, STRING_TYPE);
             break;
 
         case OP_debug:
@@ -2147,14 +2137,14 @@ namespace avmplus
         if (captured_depth > 0)
         {
             // enclosing scope
-            emitGetscope(state, 0, state->sp()+1);
+            emitGetscope(0, state->sp()+1);
         }
         else
         {
             // local scope
             if (state->scopeDepth > 0)
             {
-                emitCopy(state, state->verifier->scopeBase, state->sp()+1);
+                emitCopy(state->verifier->scopeBase, state->sp()+1);
                 // this will copy type and all attributes too
             }
             else
@@ -2167,9 +2157,10 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+    void CodegenLIR::writeOp1(FrameState* state, const byte *, AbcOpcode opcode, uint32_t opd1, Traits *type)
     {
-        (void)pc;
+        this->state = state;
+        emitSetPc();
         switch (opcode) {
         case OP_iflt:
         case OP_ifle:
@@ -2186,7 +2177,7 @@ namespace avmplus
         {
             int32_t offset = (int32_t) opd1;
             int lhs = state->sp()-1;
-            emitIf(state, opcode, state->pc+4/*size*/+offset, lhs, lhs+1);
+            emitIf(opcode, state->pc+4/*size*/+offset, lhs, lhs+1);
             break;
         }
         case OP_iftrue:
@@ -2194,27 +2185,27 @@ namespace avmplus
         {
             int32_t offset = (int32_t) opd1;
             int sp = state->sp();
-            emitIf(state, opcode, state->pc+4/*size*/+offset, sp, 0);
+            emitIf(opcode, state->pc+4/*size*/+offset, sp, 0);
             break;
         }
         case OP_jump:
         {
             int32_t offset = (int32_t) opd1;
-            emit(state, opcode, state->pc+4/*size*/+offset);
+            emit(opcode, state->pc+4/*size*/+offset);
             break;
         }
         case OP_getslot:
-            emitGetslot(state, opd1, state->sp(), type);
+            emitGetslot(opd1, state->sp(), type);
             break;
         case OP_getglobalslot:
             emitGetGlobalScope();
-            emitGetslot(state, opd1, state->sp(), type);
+            emitGetslot(opd1, state->sp(), type);
             break;
         case OP_setglobalslot:
-            emitSetslot(state, OP_setglobalslot, opd1, 0 /* computed or ignored */);
+            emitSetslot(OP_setglobalslot, opd1, 0 /* computed or ignored */);
             break;
         case OP_call:
-            emit(state, opcode, opd1 /*argc*/, 0, NULL);
+            emit(opcode, opd1 /*argc*/, 0, NULL);
             break;
 
         case OP_construct:
@@ -2222,42 +2213,42 @@ namespace avmplus
             const uint32_t argc = opd1;
             int ctor_index = state->sp() - argc;
             Traits* ctraits = state->value(ctor_index).traits;
-            emitConstruct(state, argc, ctor_index, ctraits);
+            emitConstruct(argc, ctor_index, ctraits);
             break;
         }
         case OP_getouterscope:
-            emitGetscope(state, opd1, state->sp()+1);
+            emitGetscope(opd1, state->sp()+1);
             break;
         case OP_getscopeobject:
-            emitCopy(state, opd1+state->verifier->scopeBase, state->sp()+1);
+            emitCopy(opd1+state->verifier->scopeBase, state->sp()+1);
             break;
         case OP_newfunction:
             AvmAssert(pool->getMethodInfo(opd1)->declaringTraits() == type);
-            emit(state, opcode, opd1, state->sp()+1, type);
+            emit(opcode, opd1, state->sp()+1, type);
             break;
         case OP_pushscope:
         case OP_pushwith:
-            emitCopy(state, state->sp(), opd1);
+            emitCopy(state->sp(), opd1);
             break;
         case OP_findpropstrict:
         case OP_findproperty:
         {
             const Multiname *name = pool->precomputedMultiname(opd1);
-            emit(state, opcode, (uintptr)name, 0, OBJECT_TYPE);
+            emit(opcode, (uintptr)name, 0, OBJECT_TYPE);
             break;
         }
         case OP_findpropglobalstrict:
         {
             // NOTE opcode not supported, deoptimizing
             const Multiname *name = pool->precomputedMultiname(opd1);
-            emit(state, OP_findpropstrict, (uintptr)name, 0, OBJECT_TYPE);
+            emit(OP_findpropstrict, (uintptr)name, 0, OBJECT_TYPE);
             break;
         }
         case OP_findpropglobal:
         {
             // NOTE opcode not supported, deoptimizing
             const Multiname *name = pool->precomputedMultiname(opd1);
-            emit(state, OP_findproperty, (uintptr)name, 0, OBJECT_TYPE);
+            emit(OP_findproperty, (uintptr)name, 0, OBJECT_TYPE);
             break;
         }
 
@@ -2265,7 +2256,7 @@ namespace avmplus
         {
             Traits* ctraits = pool->getClassTraits(opd1);
             AvmAssert(ctraits == type);
-            emit(state, opcode, (uintptr)(void*)ctraits, state->sp(), type);
+            emit(opcode, (uintptr)(void*)ctraits, state->sp(), type);
             break;
         }
 
@@ -2276,7 +2267,6 @@ namespace avmplus
             const Multiname *multiname = pool->precomputedMultiname(opd1);
             AvmAssert(multiname->isBinding());
             int32_t dest_index = state->sp() + 1;
-            emitPrep(state);
             // This allocates a cache slot even if the finddef ultimately becomes dead.
             // As long as caches tend to be small compared to size of pool data and code,
             // filtering out dead cache lines isn't worth the complexity.
@@ -2327,7 +2317,6 @@ namespace avmplus
     /** emit code for * -> Number conversion */
     LIns* CodegenLIR::coerceToNumber(int index)
     {
-        // assume emitPrep() already called
         Value& value = state->value(index);
         Traits* in = value.traits;
 
@@ -2341,7 +2330,6 @@ namespace avmplus
 
     LIns* CodegenLIR::convertToString(int index)
     {
-        // assume emitPrep() already called
         Value& value = state->value(index);
         Traits* in = value.traits;
         Traits* stringType = STRING_TYPE;
@@ -2360,20 +2348,22 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::writeNip(FrameState* state, const byte *pc)
+    void CodegenLIR::writeNip(FrameState* state, const byte *)
     {
-        (void)pc;
-        emitCopy(state, state->sp(), state->sp()-1);
+        this->state = state;
+        emitSetPc();
+        emitCopy(state->sp(), state->sp()-1);
     }
 
-    void CodegenLIR::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits *type)
+    void CodegenLIR::writeInterfaceCall(FrameState* state, const byte *, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits *type)
     {
-        (void)pc;
+        this->state = state;
+        emitSetPc();
         switch (opcode) {
         case OP_callproperty:
         case OP_callproplex:
         case OP_callpropvoid:
-            emitCall(state, OP_callinterface, opd1, opd2, type);
+            emitCall(OP_callinterface, opd1, opd2, type);
             break;
         default:
             AvmAssert(false);
@@ -2383,12 +2373,13 @@ namespace avmplus
 
     void CodegenLIR::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits *type)
     {
-        (void)pc;
+        this->state = state;
+        emitSetPc();
         switch (opcode) {
 
         case OP_constructsuper:
             // opd1=unused, opd2=argc
-            emitCall(state, opcode, 0, opd2, VOID_TYPE);
+            emitCall(opcode, 0, opd2, VOID_TYPE);
             break;
 
         case OP_setsuper:
@@ -2411,7 +2402,7 @@ namespace avmplus
                 {
                     int slot_id = AvmCore::bindingToSlotId(b);
                     state->verifier->emitCoerce(propType, state->sp());
-                    emitSetslot(state, OP_setslot, slot_id, ptrIndex);
+                    emitSetslot(OP_setslot, slot_id, ptrIndex);
                 }
                 // else, ignore write to readonly accessor
             }
@@ -2426,12 +2417,12 @@ namespace avmplus
                     AvmAssert(f != NULL);
                     MethodSignaturep fms = f->getMethodSignature();
                     state->verifier->emitCoerceArgs(f, 1);
-                    emitCall(state, OP_callsuperid, disp_id, 1, fms->returnTraits());
+                    emitCall(OP_callsuperid, disp_id, 1, fms->returnTraits());
                 }
                 // else, ignore write to readonly accessor
             }
             else {
-                emit(state, opcode, (uintptr)name);
+                emit(opcode, (uintptr)name);
             }
             break;
         }
@@ -2450,7 +2441,7 @@ namespace avmplus
             if (AvmCore::isSlotBinding(b))
             {
                 int slot_id = AvmCore::bindingToSlotId(b);
-                emitGetslot(state, slot_id, state->sp()-(n-1), propType);
+                emitGetslot(slot_id, state->sp()-(n-1), propType);
             }
             else
             if (AvmCore::hasGetterBinding(b))
@@ -2463,10 +2454,10 @@ namespace avmplus
                 state->verifier->emitCoerceArgs(f, 0);
                 MethodSignaturep fms = f->getMethodSignature();
                 Traits* resultType = fms->returnTraits();
-                emitCall(state, OP_callsuperid, disp_id, 0, resultType);
+                emitCall(OP_callsuperid, disp_id, 0, resultType);
             }
             else {
-                emit(state, opcode, (uintptr)name, 0, propType);
+                emit(opcode, (uintptr)name, 0, propType);
             }
             break;
         }
@@ -2491,12 +2482,12 @@ namespace avmplus
 
                 MethodSignaturep mms = m->getMethodSignature();
                 Traits* resultType = mms->returnTraits();
-                emitCall(state, OP_callsuperid, disp_id, argc, resultType);
+                emitCall(OP_callsuperid, disp_id, argc, resultType);
             }
             else {
 
                 // TODO optimize other cases
-                emit(state, opcode, (uintptr)name, argc, NULL);
+                emit(opcode, (uintptr)name, argc, NULL);
             }
 
             break;
@@ -2516,14 +2507,14 @@ namespace avmplus
             {
                 int slot_id = AvmCore::bindingToSlotId(b);
                 int ctor_index = state->sp()-(n-1);
-                emitGetslot(state, slot_id, ctor_index, type);
+                emitGetslot(slot_id, ctor_index, type);
                 obj.notNull = false;
                 obj.traits = type;
-                emitConstruct(state, argc, ctor_index, type);
+                emitConstruct(argc, ctor_index, type);
             }
             else
             {
-                emit(state, opcode, (uintptr)name, argc, NULL);
+                emit(opcode, (uintptr)name, argc, NULL);
             }
             break;
         }
@@ -2546,17 +2537,17 @@ namespace avmplus
                 AvmAssert(f != NULL);
 
                 if (!obj.traits->isInterface()) {
-                    emitCall(state, OP_callmethod, disp_id, 0, type);
+                    emitCall(OP_callmethod, disp_id, 0, type);
                 }
                 else {
                     // FIXME f->iid() is a 64 bit value, being passed through a 32 bit
                     // location. need to understand why this works.
-                    emitCall(state, OP_callinterface, f->iid(), 0, type);
+                    emitCall(OP_callinterface, f->iid(), 0, type);
                 }
                 AvmAssert(type == f->getMethodSignature()->returnTraits());
             }
             else {
-                emit(state, OP_getproperty, opd1, 0, type);
+                emit(OP_getproperty, opd1, 0, type);
             }
             break;
         }
@@ -2580,22 +2571,22 @@ namespace avmplus
                 AvmAssert(f != NULL);
 
                 if (!obj.traits->isInterface()) {
-                    emitCall(state, OP_callmethod, disp_id, 1, type);
+                    emitCall(OP_callmethod, disp_id, 1, type);
                 }
                 else {
                     // FIXME f->iid() is a 64 bit value, being passed through a 32 bit
                     // location. need to understand why this works.
-                    emitCall(state, OP_callinterface, f->iid(), 1, type);
+                    emitCall(OP_callinterface, f->iid(), 1, type);
                 }
             }
             else {
-                emit(state, opcode, (uintptr)name);
+                emit(opcode, (uintptr)name);
             }
             break;
         }
 
         case OP_setslot:
-            emitSetslot(state, OP_setslot, opd1, opd2);
+            emitSetslot(OP_setslot, opd1, opd2);
             break;
 
         case OP_abs_jump:
@@ -2608,6 +2599,7 @@ namespace avmplus
             const byte* new_pc = (const byte *) (uintptr(opd1) | (((uintptr) opd2) << 32));
             const byte* new_code_end = new_pc + AvmCore::readU32 (nextpc);
             #else
+            (void)pc;
             const byte* new_pc = (const byte*) opd1;
             const byte* new_code_end = new_pc + opd2;
             #endif
@@ -2617,20 +2609,20 @@ namespace avmplus
         }
 
         case OP_callmethod:
-            emitCall(state, opcode, opd1, opd2, type);
+            emitCall(opcode, opd1, opd2, type);
             break;
 
         case OP_callproperty:
         case OP_callproplex:
         case OP_callpropvoid:
         {
-            emit(state, opcode, opd1, opd2, NULL);
+            emit(opcode, opd1, opd2, NULL);
             break;
         }
 
         case OP_callstatic:
             // opd1=method_id, opd2=argc
-            emitCall(state, OP_callstatic, opd1, opd2, type);
+            emitCall(OP_callstatic, opd1, opd2, type);
             break;
 
         default:
@@ -2639,27 +2631,25 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::emitIntConst(FrameState* state, int index, int32_t c)
+    void CodegenLIR::emitIntConst(int index, int32_t c)
     {
-        this->state = state;
         localSet(index, lirout->insImm(c), INT_TYPE);
     }
 
-    void CodegenLIR::emitPtrConst(FrameState* state, int index, void* c, Traits* type)
+    void CodegenLIR::emitPtrConst(int index, void* c, Traits* type)
     {
-        this->state = state;
         localSet(index, lirout->insImmPtr(c), type);
     }
 
-    void CodegenLIR::emitDoubleConst(FrameState* state, int index, double* pd)
+    void CodegenLIR::emitDoubleConst(int index, double* pd)
     {
-        this->state = state;
         localSet(index, lirout->insImmf(*pd), NUMBER_TYPE);
     }
 
     void CodegenLIR::writeCoerce(FrameState* state, uint32_t loc, Traits* result)
     {
-        emitPrep(state);
+        this->state = state;
+        emitSetPc();
 
         Value& value = state->value(loc);
         Traits* in = value.traits;
@@ -2788,7 +2778,8 @@ namespace avmplus
 
     void CodegenLIR::writeCheckNull(FrameState* state, uint32_t index)
     {
-        emitPrep(state);
+        this->state = state;
+        emitSetPc();
 
         // The result is either unchanged or an exception is thrown, so
         // we don't save the result.  This is the null pointer check.
@@ -2819,13 +2810,10 @@ namespace avmplus
         // else: number, int, uint, and boolean, are never null
     }
 
-    void CodegenLIR::emitPrep(FrameState* state)
+    void CodegenLIR::emitSetPc()
     {
-        this->state = state;
-
         // update bytecode ip if necessary
-        if (state->insideTryBlock && lastPcSave != state->pc)
-        {
+        if (_save_eip && lastPcSave != state->pc) {
             stp(InsConstPtr((void*)state->pc), _save_eip, 0);
             lastPcSave = state->pc;
         }
@@ -2840,10 +2828,8 @@ namespace avmplus
     // This is for VTable->createInstance which is called by OP_construct
     FUNCTION(CALL_INDIRECT, SIG3(V,P,P,P), createInstance)
 
-    void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
+    void CodegenLIR::emitCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
     {
-        emitPrep(state);
-
         int sp = state->sp();
 
         int dest = sp-argc;
@@ -3023,8 +3009,6 @@ namespace avmplus
 
     LIns* CodegenLIR::loadFromSlot(int ptr_index, int slot, Traits* slotType)
     {
-        // assumes emitPrep already called and state already saved
-
         Traits *t = state->value(ptr_index).traits;
         LIns *ptr = localGetp(ptr_index);
         AvmAssert(state->value(ptr_index).notNull);
@@ -3046,15 +3030,13 @@ namespace avmplus
         return loadIns(op, offset, ptr);
     }
 
-    void CodegenLIR::emitGetslot(FrameState *state, int slot, int ptr_index, Traits *slotType)
+    void CodegenLIR::emitGetslot(int slot, int ptr_index, Traits *slotType)
     {
-        emitPrep(state);
         localSet(ptr_index, loadFromSlot(ptr_index, slot, slotType), slotType);
     }
 
-    void CodegenLIR::emitSetslot(FrameState *state, AbcOpcode opcode, int slot, int ptr_index)
+    void CodegenLIR::emitSetslot(AbcOpcode opcode, int slot, int ptr_index)
     {
-        emitPrep(state);
         int sp = state->sp();
 
         Traits* t;
@@ -3132,10 +3114,8 @@ namespace avmplus
      * used, and we know that it doesn't use custom native instance initializer
      * code, as indicated by the itraits->hasCustomConstruct flag.
     */
-    void CodegenLIR::emitConstruct(FrameState* state, int argc, int ctor_index, Traits* ctraits)
+    void CodegenLIR::emitConstruct(int argc, int ctor_index, Traits* ctraits)
     {
-        emitPrep(state);
-
         // attempt to early bind to constructor method.
         Traits* itraits = NULL;
         if (ctraits) {
@@ -3147,7 +3127,7 @@ namespace avmplus
                 if (itraits->init && itraits->init->isResolved() && itraits->init->getMethodSignature()->argcOk(argc)) {
                     state->verifier->emitCheckNull(ctor_index);
                     state->verifier->emitCoerceArgs(itraits->init, argc, true);
-                    emitCall(state, OP_construct, 0, argc, itraits);
+                    emitCall(OP_construct, 0, argc, itraits);
                     return;
                 }
             }
@@ -3165,10 +3145,8 @@ namespace avmplus
 
     typedef const CallInfo *CallInfop;
 
-    void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
+    void CodegenLIR::emit(AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
     {
-        emitPrep(state);
-
         int sp = state->sp();
 
         switch (opcode)
@@ -4480,10 +4458,8 @@ namespace avmplus
 
     } // emit()
 
-    void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, int target_off, int a, int b)
+    void CodegenLIR::emitIf(AbcOpcode opcode, int target_off, int a, int b)
     {
-        this->state = state;
-
 #ifdef DEBUGGER
         Sampler* s = core->get_sampler();
         if (s && s->sampling() && target_off < state->pc)

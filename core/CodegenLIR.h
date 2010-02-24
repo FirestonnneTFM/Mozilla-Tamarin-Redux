@@ -446,7 +446,7 @@ namespace avmplus
         LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
         debug_only( bool isPointer(int i); )
-        void emitPrep(FrameState*);
+        void emitSetPc();
         void emitSampleCheck();
         bool verbose();
         void patchLater(LIns *br, CodegenLabel &);
@@ -470,21 +470,21 @@ namespace avmplus
         LIns *binaryIns(LOpcode op, LIns *a, LIns *b);
 
         /** emit a constructor call, and early bind if possible */
-        void emitConstruct(FrameState*, int argc, int ctor_index, Traits* ctraits);
+        void emitConstruct(int argc, int ctor_index, Traits* ctraits);
 
         void formatOperand(PrintWriter& buffer, LIns* oprnd);
-        void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
-        void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
-        void emitIf(FrameState* state, AbcOpcode opcode, int target_off, int lhs, int rhs);
-        void emitSwap(FrameState* state, int i, int j);
-        void emitCopy(FrameState* state, int src, int dest);
-        void emitGetscope(FrameState* state, int scope, int dest);
-        void emitKill(FrameState* state, int i);
-        void emitIntConst(FrameState* state, int index, int32_t c);
-        void emitPtrConst(FrameState* state, int index, void* c, Traits* type);
-        void emitDoubleConst(FrameState* state, int index, double* pd);
-        void emitGetslot(FrameState*, int slot, int ptr_index, Traits *slotType);
-        void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
+        void emitCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
+        void emit(AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
+        void emitIf(AbcOpcode opcode, int target_off, int lhs, int rhs);
+        void emitSwap(int i, int j);
+        void emitCopy(int src, int dest);
+        void emitGetscope(int scope, int dest);
+        void emitKill(int i);
+        void emitIntConst(int index, int32_t c);
+        void emitPtrConst(int index, void* c, Traits* type);
+        void emitDoubleConst(int index, double* pd);
+        void emitGetslot(int slot, int ptr_index, Traits *slotType);
+        void emitSetslot(AbcOpcode opcode, int slot, int ptr_index);
         void emitGetGlobalScope();
         void localSet(int i, LIns* o, Traits* type);
         LIns* convertToString(int i);
