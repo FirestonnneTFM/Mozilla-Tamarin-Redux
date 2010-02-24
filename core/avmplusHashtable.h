@@ -110,18 +110,6 @@ namespace avmplus
 		bool contains(Atom name) const;
 
 		/**
-		 * Finds the hash bucket corresponding to the key x
-		 * in the hash table starting at t, containing tLen
-		 * atoms.
-		 *
-		 * This is a quadratic probe, but we only hit even-numbered
-		 * slots since those hold keys.
-		 */
-		int find(Atom x, const Atom *t, uint32_t tLen) const;
-		int find(Stringp x, const Atom *t, uint32_t tLen) const;
-		int find(Atom x) const;
-
-		/**
 		 * Adds a name/value pair to a hash table.  Automatically
 		 * grows the hash table if it is full.
          *
@@ -254,7 +242,21 @@ namespace avmplus
 		bool enumerable(Atom a) const;
 		uint32_t getCapacity() const;
 		uintptr_t hasDontEnumSupport() const;
-		
+
+        void deletePairAt(int i);
+
+		/**
+		 * Finds the hash bucket corresponding to the key x
+		 * in the hash table starting at t, containing tLen
+		 * atoms.
+		 *
+		 * This is a quadratic probe, but we only hit even-numbered
+		 * slots since those hold keys.
+		 */
+		int find(Atom x, const Atom *t, uint32_t tLen) const;
+		int find(Stringp x, const Atom *t, uint32_t tLen) const;
+		int find(Atom x) const;
+
 
 	// ------------------------ DATA SECTION BEGIN
 	private:
