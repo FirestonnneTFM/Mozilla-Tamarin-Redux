@@ -541,43 +541,43 @@ namespace avmplus
 
             case OP_pushnull:
                 checkStack(0,1);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, NULL_TYPE);
                 state->push(NULL_TYPE);
                 break;
 
             case OP_pushundefined:
                 checkStack(0,1);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, VOID_TYPE);
                 state->push(VOID_TYPE);
                 break;
 
             case OP_pushtrue:
                 checkStack(0,1);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, BOOLEAN_TYPE);
                 state->push(BOOLEAN_TYPE, true);
                 break;
 
             case OP_pushfalse:
                 checkStack(0,1);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, BOOLEAN_TYPE);
                 state->push(BOOLEAN_TYPE, true);
                 break;
 
             case OP_pushnan:
                 checkStack(0,1);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, NUMBER_TYPE);
                 state->push(NUMBER_TYPE, true);
                 break;
 
             case OP_pushshort:
                 checkStack(0,1);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, INT_TYPE);
                 state->push(INT_TYPE, true);
                 break;
 
             case OP_pushbyte:
                 checkStack(0,1);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, INT_TYPE);
                 state->push(INT_TYPE, true);
                 break;
 
@@ -610,7 +610,7 @@ namespace avmplus
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantStringCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantStringCount));
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, STRING_TYPE);
                 state->push(STRING_TYPE, pool->getString(imm30) != NULL);
                 break;
 
@@ -618,7 +618,7 @@ namespace avmplus
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantIntCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantIntCount));
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, INT_TYPE);
                 state->push(INT_TYPE,true);
                 break;
 
@@ -626,7 +626,7 @@ namespace avmplus
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantUIntCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantUIntCount));
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, UINT_TYPE);
                 state->push(UINT_TYPE,true);
                 break;
 
@@ -634,7 +634,7 @@ namespace avmplus
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantDoubleCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantDoubleCount));
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, NUMBER_TYPE);
                 state->push(NUMBER_TYPE, true);
                 break;
 
@@ -642,7 +642,7 @@ namespace avmplus
                 checkStack(0,1);
                 if (imm30 == 0 || imm30 >= pool->constantNsCount)
                     verifyFailed(kCpoolIndexRangeError, core->toErrorString(imm30), core->toErrorString(pool->constantNsCount));
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, NAMESPACE_TYPE);
                 state->push(NAMESPACE_TYPE, pool->cpool_ns[imm30] != NULL);
                 break;
 
@@ -693,10 +693,9 @@ namespace avmplus
             case OP_kill:
             {
                 //checkStack(0,0)
-                Value &v = checkLocal(imm30);
-                coder->write(state, pc, opcode);
-                v.notNull = false;
-                v.traits = NULL;
+                checkLocal(imm30);
+                coder->write(state, pc, opcode, NULL);
+                state->setType(imm30, NULL, false);
                 break;
             }
 
@@ -1645,7 +1644,7 @@ namespace avmplus
             case OP_not:
                 checkStack(1,1);
                 emitCoerce(BOOLEAN_TYPE, sp);
-                coder->write(state, pc, opcode);
+                coder->write(state, pc, opcode, BOOLEAN_TYPE);
                 state->pop_push(1, BOOLEAN_TYPE);
                 break;
 
