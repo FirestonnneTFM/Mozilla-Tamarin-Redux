@@ -480,7 +480,7 @@ namespace avmplus
         void emitCopy(int src, int dest);
         void emitGetscope(int scope, int dest);
         void emitKill(int i);
-        void emitIntConst(int index, int32_t c);
+        void emitIntConst(int index, int32_t c, Traits* type);
         void emitPtrConst(int index, void* c, Traits* type);
         void emitDoubleConst(int index, double* pd);
         void emitGetslot(int slot, int ptr_index, Traits *slotType);

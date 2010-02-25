@@ -1607,7 +1607,7 @@ namespace avmplus
 
     void CodegenLIR::emitKill(int i)
     {
-        localSet(i, undefConst, VOID_TYPE);
+        localSet(i, undefConst, NULL);
     }
 
     void CodegenLIR::writeBlockStart(FrameState* state)
@@ -1702,39 +1702,51 @@ namespace avmplus
             emitCopy(sp, imm30);
             break;
         case OP_pushtrue:
-            emitIntConst(sp+1, 1);
+            AvmAssert(type == BOOLEAN_TYPE);
+            emitIntConst(sp+1, 1, type);
             break;
         case OP_pushfalse:
-            emitIntConst(sp+1, 0);
+            AvmAssert(type == BOOLEAN_TYPE);
+            emitIntConst(sp+1, 0, type);
             break;
         case OP_pushnull:
-            emitPtrConst(sp+1, 0, NULL_TYPE);
+            AvmAssert(type == NULL_TYPE);
+            emitPtrConst(sp+1, 0, type);
             break;
         case OP_pushundefined:
-            emitPtrConst(sp+1, (void*)undefinedAtom, VOID_TYPE);
+            AvmAssert(type == VOID_TYPE);
+            emitPtrConst(sp+1, (void*)undefinedAtom, type);
             break;
         case OP_pushshort:
-            emitIntConst(sp+1, (int16_t)imm30);
+            AvmAssert(type == INT_TYPE);
+            emitIntConst(sp+1, (signed short)imm30, type);
             break;
         case OP_pushbyte:
-            emitIntConst(sp+1, (int8_t)imm8);
+            AvmAssert(type == INT_TYPE);
+            emitIntConst(sp+1, (signed char)imm8, type);
             break;
         case OP_pushstring:
-            emitPtrConst(sp+1, pool->getString(imm30), STRING_TYPE);
+            AvmAssert(type == STRING_TYPE);
+            emitPtrConst(sp+1, pool->getString(imm30), type);
             break;
         case OP_pushnamespace:
-            emitPtrConst(sp+1, pool->cpool_ns[imm30], NAMESPACE_TYPE);
+            AvmAssert(type == NAMESPACE_TYPE);
+            emitPtrConst(sp+1, pool->cpool_ns[imm30], type);
             break;
         case OP_pushint:
-            emitIntConst(sp+1, pool->cpool_int[imm30]);
+            AvmAssert(type == INT_TYPE);
+            emitIntConst(sp+1, pool->cpool_int[imm30], type);
             break;
         case OP_pushuint:
-            emitIntConst(sp+1, pool->cpool_uint[imm30]);
+            AvmAssert(type == UINT_TYPE);
+            emitIntConst(sp+1, pool->cpool_uint[imm30], type);
             break;
         case OP_pushdouble:
+            AvmAssert(type == NUMBER_TYPE);
             emitDoubleConst(sp+1, pool->cpool_double[imm30]);
             break;
         case OP_pushnan:
+            AvmAssert(type == NUMBER_TYPE);
             emitDoubleConst(sp+1, (double*)atomPtr(core->kNaN));
             break;
         case OP_lookupswitch:
@@ -1962,7 +1974,8 @@ namespace avmplus
             break;
 
         case OP_not:
-            emit(opcode, sp);
+            AvmAssert(type == BOOLEAN_TYPE);
+            emit(opcode, sp, 0, type);
             break;
 
         case OP_modulo:
@@ -2631,9 +2644,9 @@ namespace avmplus
         }
     }
 
-    void CodegenLIR::emitIntConst(int index, int32_t c)
+    void CodegenLIR::emitIntConst(int index, int32_t c, Traits* type)
     {
-        localSet(index, lirout->insImm(c), INT_TYPE);
+        localSet(index, lirout->insImm(c), type);
     }
 
     void CodegenLIR::emitPtrConst(int index, void* c, Traits* type)
@@ -3363,7 +3376,7 @@ namespace avmplus
             case OP_not:
             {
                 int32_t index = (int32_t) op1;
-                AvmAssert(state->value(index).traits == BOOLEAN_TYPE);
+                AvmAssert(state->value(index).traits == BOOLEAN_TYPE && result == BOOLEAN_TYPE);
                 LIns* value = localGet(index); // 0 or 1
                 LIns* i3 = eq0(value); // 1 or 0
                 localSet(index, i3, result);
