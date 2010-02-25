@@ -5206,9 +5206,7 @@ namespace avmplus
     void CodegenLIR::deadvars_analyze(Allocator& alloc, nanojit::BitSet& livein,
         HashMap<LIns*, nanojit::BitSet*> &labels)
     {
-        LirBuffer *lirbuf = frag->lirbuf;
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
-        LIns *vars = lirbuf->sp;
         InsList looplabels(alloc);
 
         verbose_only(int iter = 0;)
@@ -5319,8 +5317,6 @@ namespace avmplus
         verbose_only(LirNameMap *names = frag->lirbuf->names;)
         verbose_only(bool verbose = names && pool->isVerbose(LC_Liveness);)
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
-        LirBuffer *lirbuf = frag->lirbuf;
-        LIns *vars = lirbuf->sp;
         livein.reset();
         SeqReader in(frag->lastIns, prologLastIns);
         for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
