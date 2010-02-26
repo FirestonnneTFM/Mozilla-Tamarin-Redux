@@ -3210,6 +3210,76 @@ return the result of the comparison ToPrimitive(x) == y.
         return other;
     }
 
+	Stringp AvmCore::internSubstring(Stringp s, int32_t start, int32_t end)
+	{
+		// this is (currently) only called by XMLParser, which only passes us
+		// valid values -- skip the checks in the name of performance.
+		AvmAssert(start < end);
+		AvmAssert(start >= 0 && start <= s->length());
+		AvmAssert(end >= 0 && end <= s->length());
+		
+		if (start == 0 && end == s->length())
+			return internString(s);
+
+		int32_t const len = end - start;
+		String::Width const w = s->getWidth();
+        
+        int i;
+        {
+            // enclose this in braces to ensure we don't use Pointers
+            // across an allocation (eg, substring())
+            String::Pointers ptrs(s);
+            i = (w == String::k8) ?
+                findStringLatin1((const char*)ptrs.p8 + start, len) : 
+                findStringUTF16(ptrs.p16 + start, len);
+        }
+        
+        Stringp other;
+        if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
+        {
+            if (other == AVMPLUS_STRING_DELETED)
+            {
+                deletedCount--;
+                AvmAssert(deletedCount >= 0);
+            }
+
+#ifdef DEBUGGER
+            DRC(Stringp)* oldStrings = strings;
+#endif
+
+            other = s->substring(start, end);
+            /*
+                substring() attempts to make a dependent string when possible;
+                normally this is highly desirable, but for interned strings,
+                we must be cautious: we usually call this function from XML parsing,
+                and it would be bad if we forced a giant string of XML to be
+                held in memory because of one tiny dependent string in the intern table.
+                The simplest fix is to call fixDependentString(): if the
+                string is dependent, it's converted to dynamic (unless the length of the
+                dependent string is very close to the size of the master string, in which
+                case there's no memory to be saved by doing the conversion).
+            */
+            other->fixDependentString();
+
+#ifdef DEBUGGER
+            // re-find if String ctor caused rehash
+            if (strings != oldStrings)
+            {
+                String::Pointers ptrs(s);
+                i = (w == String::k8) ?
+                    findStringLatin1((const char*)ptrs.p8 + start, len) : 
+                    findStringUTF16(ptrs.p16 + start, len);
+            }
+#endif
+
+            strings[i] = other;
+            stringCount++;
+            other->setInterned();
+        }
+        return other;
+	}
+
+
     // note, this assumes Latin-1, not UTF8.
     Stringp AvmCore::internConstantStringLatin1(const char* s)
     {
