@@ -364,6 +364,8 @@ namespace avmplus
 							ch = m_str[bgn++];
 							if (ch >= 'A' && ch <= 'F')
 								ch -= 7;
+							else if (ch >= 'a' && ch <= 'f')
+								ch -= ('a' - 'A' + 7);
 							ch -= '0';
 							if (ch >= 0 && ch < base)
 								value = (value * base) + ch;
