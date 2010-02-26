@@ -866,6 +866,15 @@ class tamarinredux:
     #########################################
     android_smoke_factory = factory.BuildFactory()
     android_smoke_factory.addStep(download_testmedia)
+    android_smoke_factory.addStep(BuildShellCommand(
+                command=['./run-smoketests-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
     android_smoke_factory.addStep(util_process_clean)
 
     android_smoke_builder = {
@@ -1197,6 +1206,15 @@ class tamarinredux:
     #### builder for android-test       ####
     ########################################
     android_test_factory = factory.BuildFactory()
+    android_test_factory.addStep(TestSuiteShellCommand(
+                command=['./run-acceptancetests-android.sh', WithProperties('%s','revision')],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run acceptance tests...',
+                descriptionDone='finished acceptance tests.',
+                name="Testsuite_Release",
+                workdir="../repo/build/buildbot/slaves/scripts",
+                timeout=3600)
+    )
     android_test_factory.addStep(util_process_clean)
 
     android_test_builder = {
