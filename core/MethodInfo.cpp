@@ -1071,9 +1071,9 @@ namespace avmplus
     }
 
 #ifdef DEBUGGER
-    uint32_t MethodInfo::size()
+    uint64_t MethodInfo::bytesUsed()
     {
-        uint32_t size = sizeof(MethodInfo);
+        uint64_t size = sizeof(MethodInfo);
         size += getMethodSignature()->param_count() * 2 * sizeof(Atom);
         size += codeSize();
         return size;

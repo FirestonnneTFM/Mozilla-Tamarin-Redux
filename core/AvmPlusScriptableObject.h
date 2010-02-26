@@ -57,7 +57,16 @@ namespace avmplus
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(SamplerObjectType sot);
 
-		virtual uint64_t size() const = 0;
+		/**
+		 * Returns the number of bytes of memory taken by this object, that are not
+		 * also shared by any other objects.  For example, a dependent String would
+		 * include sizeof(String) but not the size of the buffer of the master string;
+		 * but a dynamic String would include both sizeof(String) and the size of
+		 * the buffer.
+		 *
+		 * Used by the profiler to tell the user the shallow size of the object.
+		 */
+		virtual uint64_t bytesUsed() const = 0;
 
 		inline AvmCore* core() const
 		{

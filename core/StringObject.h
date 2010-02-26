@@ -446,7 +446,8 @@ namespace avmplus
 		static	uint32_t			unicharToUpper(uint32_t ch);
 		static	uint32_t			unicharToLower(uint32_t ch);
 #ifdef DEBUGGER
-		virtual uint64_t				size() const;
+		virtual uint64_t			bytesUsed() const;
+				Stringp				getMasterString() const; // used by profiler
 #endif
 
 	private:

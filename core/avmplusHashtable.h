@@ -85,7 +85,10 @@ namespace avmplus
 		void setAtomPropertyIsEnumerable(Atom name, bool enumerable);
 
 #ifdef DEBUGGER
-		uint64_t size() const;
+		/**
+		 * Basically the same as AvmPlusScriptableObject::bytesUsed().
+		 */
+		uint64_t bytesUsed() const;
 #endif
 
 		Atom get(Atom name) const;

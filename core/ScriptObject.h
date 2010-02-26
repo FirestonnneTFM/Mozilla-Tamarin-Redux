@@ -228,7 +228,7 @@ namespace avmplus
 		
 #ifdef DEBUGGER
 	public:
-		virtual uint64_t size() const;
+		virtual uint64_t bytesUsed() const;
 #endif
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
 	public:
