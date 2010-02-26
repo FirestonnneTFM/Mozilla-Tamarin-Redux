@@ -2267,9 +2267,29 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint64_t String::size() const
+	uint64_t String::bytesUsed() const
 	{
-		return GC::Size(this) - sizeof(AvmPlusScriptableObject);
+		uint64_t bytesUsed = sizeof(String);
+
+		// If getType() == kDependent, the buffer's memory is account for by
+		// the string upon which this string depends, so we should not include
+		// it here.
+		//
+		// If getType() == kStatic, the buffer's memory is not on the GC heap,
+		// and freeing the string would not free the buffer, so we should not
+		// include its size here.
+		if (getType() == kDynamic)
+			bytesUsed += GC::Size(m_buffer.pv);
+
+		return bytesUsed;
+	}
+
+	Stringp String::getMasterString() const
+	{
+		if (isDependent())
+			return m_extra.master;
+		else
+			return NULL;
 	}
 #endif
 
