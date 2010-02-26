@@ -328,7 +328,7 @@ namespace avmplus
 		if (bgn < 0)
 		{
 			return intern ?
-					m_str->intern_substring(start, last) :
+					core->internSubstring(m_str.str(), start, last) :
 					m_str->substring(start, last);
 		}
 		
@@ -386,7 +386,7 @@ namespace avmplus
 				} 
 				else if (len <= 4) // Our xmlEntities are only 4 characters or less
 				{
-					Atom entityAtom = m_str->intern_substring(bgn, end)->atom();
+					Atom entityAtom = core->internSubstring(m_str.str(), bgn, end)->atom();
 					Atom result = core->xmlEntities->get(entityAtom);
 					if (result != undefinedAtom) 
 					{

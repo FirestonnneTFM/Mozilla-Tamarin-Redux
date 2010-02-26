@@ -848,18 +848,15 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint64_t ScriptObject::size() const
+	uint64_t ScriptObject::bytesUsed() const
 	{
-		uint64_t size = traits()->getTotalSize();
+		uint64_t bytesUsed = traits()->getTotalSize();
 		if(traits()->needsHashtable())
 		{
-			size += getTable()->size();
+			bytesUsed += getTable()->bytesUsed();
 		}
-		size -= sizeof(AvmPlusScriptableObject);
-		return size;
+		return bytesUsed;
 	}
-
-	
 #endif
 
 	Stringp ScriptObject::implToString() const

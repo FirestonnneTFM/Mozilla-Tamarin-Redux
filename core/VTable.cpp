@@ -447,17 +447,17 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint32 VTable::size() const
+	uint64_t VTable::bytesUsed() const
 	{
-		uint32 size = sizeof(VTable);
+		uint64_t bytesUsed = sizeof(VTable);
 
 		if(ivtable != NULL)
-			size += ivtable->size();
+			bytesUsed += ivtable->bytesUsed();
 
 		const TraitsBindingsp td = traits->getTraitsBindings();
 		const uint32_t n = td->methodCount;
 		const uint32_t baseMethodCount = base ? td->base->methodCount : 0;
-		size += td->methodCount*sizeof(MethodInfo*);
+		bytesUsed += td->methodCount*sizeof(MethodInfo*);
 
 		for (uint32_t i=0; i < n; i++)
 		{
@@ -469,10 +469,10 @@ namespace avmplus
 			}
 			else if(method != NULL)
 			{
-				size += method->size();
+				bytesUsed += method->bytesUsed();
 			}
 		}
-		return size;
+		return bytesUsed;
 	}
 #endif
 

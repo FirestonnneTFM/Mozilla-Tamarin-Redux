@@ -79,7 +79,9 @@ namespace avmplus
 
 		static ArrayObject* getLexicalScopes(ScriptObject* self, FunctionObject *function);
 		static Atom getSavedThis(ScriptObject* self, FunctionObject *method);		
-		
+
+		static Stringp getMasterString(ScriptObject* self, Stringp str);
+
 #ifdef DEBUGGER
 	private:		
 		static ClassClosure* getType(Toplevel* toplevel, SamplerObjectType sot, const void *obj);

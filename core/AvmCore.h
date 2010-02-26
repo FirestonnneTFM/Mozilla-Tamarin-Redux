@@ -1377,6 +1377,8 @@ const int kBufferPadding = 16;
         Stringp internDouble(double d);
         Stringp internUint32(uint32 ui);
 
+        Stringp internSubstring(Stringp s, int32_t start, int32_t end);
+
 
 #ifdef DEBUGGER
         /**
