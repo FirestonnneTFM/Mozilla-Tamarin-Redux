@@ -822,7 +822,7 @@ namespace avmplus
 
 //////////////////////////////// Accessors /////////////////////////////////
 
-	wchar String::charAt(int32_t index) const
+	wchar FASTCALL String::charAt(int32_t index) const
 	{
 		AvmAssert(index >= 0 && index < m_length);
 
@@ -2292,16 +2292,6 @@ namespace avmplus
 			return NULL;
 	}
 #endif
-
-/////////////////////////////////// StringIndexer //////////////////////////////////////
-
-	StringIndexer::StringIndexer(Stringp s) : 
-		m_str(s),
-		m_ptrs(s),
-		m_latin1(s->getWidth() == String::k8)
-	{ 
-		AvmAssert(s != NULL);
-	}
 
 ////////////////////////////// Helpers: Width Analysis /////////////////////////////////
 

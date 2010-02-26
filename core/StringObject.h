@@ -624,30 +624,23 @@ namespace avmplus
 	/**
 	The StringIndexer class provides quick access to single characters by index.
 	Use an instance of this class on the stack if multiple index access is required.
-	This class does not need to call getData() for each index access, which charAt()
-	without a Pointers argument does internally.
+	Previously, this class allowed for faster access, as the interior pointer
+    didn't need to be recalculated; later changes made this unsafe, so this class
+    exists mostly for legacy purposes at this point.
 	*/
 
 	class StringIndexer
 	{
 	public:
 		/// The constructor takes the string to index.
-				explicit			StringIndexer(Stringp s);
+		REALLY_INLINE	explicit	StringIndexer(Stringp s) : m_str(s) { AvmAssert(s != NULL); }
 		/// Return the embedded string.
 		REALLY_INLINE	String*		operator->() const { return m_str; }
 		/// Quick index operator.
- 		REALLY_INLINE	wchar		operator[](int index) const 
-  		{ 
-  			AvmAssert(index >= 0 && index < m_str->length());
-  			return m_latin1 ?
- 					m_ptrs.p8[index] :
- 					m_ptrs.p16[index];
-  		}
+ 		REALLY_INLINE	wchar		operator[](int index) const { return m_str->charAt(index); }
 
 	private:
 				Stringp const volatile	m_str;
- 				String::Pointers const	m_ptrs;
-				int const				m_latin1; // actually a bool, int-sized for speed
 
 		// do not create on the heap
 				void*		operator new(size_t); // unimplemented
