@@ -123,7 +123,6 @@ namespace MMgc
 	
 	void GCLargeAlloc::Free(const void *item)
 	{
-		GCAssertMsg(!m_startedFinalize, "GCLargeAlloc::Free is not allowed during finalization; caller must guard against this.");
 #ifdef _DEBUG
 		// RCObject have contract that they must clean themselves, since they 
 		// have to scan themselves to decrement other RCObjects they might as well
