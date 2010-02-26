@@ -1955,9 +1955,9 @@ namespace avmplus
         checkPropertyMultiname(n, multiname);
         Traits* t = state->peek(n).traits;
 
-        Binding b = toplevel->getBinding(t, &multiname);
         if (t)
             t->resolveSignatures(toplevel);
+        Binding b = toplevel->getBinding(t, &multiname);
 
         emitCheckNull(sp-(n-1));
 
