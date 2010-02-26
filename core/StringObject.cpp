@@ -77,15 +77,6 @@ namespace avmplus
 	};
 	static const Zero k_zero = { 0 };
 
-	REALLY_INLINE String::Pointers::Pointers(const String* const self)
-	{
-		AvmAssert(self != NULL);
-		if (!self->isDependent())
-			p8 = self->m_buffer.p8;
-		else
-			p8 = self->m_extra.master->m_buffer.p8 + self->m_buffer.offset_bytes;
-	}
-
 /////////////////////////// Helpers: Widening //////////////////////////////
 
 	REALLY_INLINE void _widen8_16(const uint8_t* src, wchar* dst, int32_t len)
@@ -571,7 +562,7 @@ namespace avmplus
 		Stringp newStr = createDynamic(_gc(this), NULL, m_length, w, is7bit);
 		
 		Pointers ptrs(this);
-		Pointers new_ptrs(this);
+		Pointers new_ptrs(newStr);
 		_copyBuffers(ptrs.pv, new_ptrs.pv, m_length, getWidth(), w);
 
 		VERIFY_7BIT(newStr);
@@ -646,8 +637,7 @@ namespace avmplus
 		GC* gc = _gc(this);
 		MMGC_MEM_TYPE( this );
 		void* buf = gc->Alloc(bytes, 0);
-		Pointers ptrs(this);
-		VMPI_memcpy(buf, ptrs.pv, bytes);
+		VMPI_memcpy(buf, Pointers(this).pv, bytes);
 		WB(gc, this, &this->m_buffer.pv, buf);
 		if (isDependent())
 			WBRC_NULL(&m_extra.master);
@@ -822,7 +812,7 @@ namespace avmplus
 
 //////////////////////////////// Accessors /////////////////////////////////
 
-	wchar String::charAt(int32_t index) const
+	wchar FASTCALL String::charAt(int32_t index) const
 	{
 		AvmAssert(index >= 0 && index < m_length);
 
@@ -1070,8 +1060,7 @@ namespace avmplus
 		if (leftStr == NULL || leftStr->m_length == 0)
 			return rightStr;
 
-		Stringp volatile rightStrKeeper = rightStr;
-		return leftStr->_append(&rightStrKeeper, Pointers(rightStr), rightStr->length(), rightStr->getWidth());
+		return leftStr->_append(rightStr, Pointers(rightStr), rightStr->length(), rightStr->getWidth());
 	}
 
 	Stringp String::append(Stringp rightStr)
@@ -1079,17 +1068,13 @@ namespace avmplus
 		if (rightStr == NULL || rightStr->m_length == 0)
 			return this;
 
-		Stringp volatile rightStrKeeper = rightStr;
-		return _append(&rightStrKeeper, Pointers(rightStr), rightStr->length(), rightStr->getWidth());
+		return _append(rightStr, Pointers(rightStr), rightStr->length(), rightStr->getWidth());
 	}
 
-	// rightStrPtr is unused within _append, but is used as a trick to ensure the caller can
-	// force a reference to it onto the stack. This is necessary because on x86-64 systems (and probably other
-	// register-heavy systems), rightStr can come in entirely in registers, then be optimized away before MMgc 
-	// is called, meaning it can get collected in odd situations. This trick is a horrible, horrible hack to 
-	// force it to continue to live on the stack.
-
-	Stringp String::_append(Stringp volatile * /*rightStrPtr*/, const Pointers& rightStr, int32_t numChars, Width charWidth)
+    // NB: if rightStrPtr is nonnull, it is assumed to be the source of rightStr.
+    // In this case, rightStr is assumed to be invalidate by any possible GC activity,
+    // and will be re-created from rightStrPtr.
+	Stringp String::_append(Stringp rightStrPtr, const Pointers& rightStr, int32_t numChars, Width charWidth)
 	{
 		if (numChars <= 0)
 			return this;
@@ -1147,13 +1132,12 @@ namespace avmplus
 			default:;	// kStatic
 		}
 
-		Pointers my_ptrs(this);
 		// the big check: are there enough chars left?
 		if (numChars <= charsLeft)
 		{
 			// the right-hand string fits into the buffer end
 			_copyBuffers(rightStr.pv, 
-						 my_ptrs.p8 + (m_length << thisWidth),	// m_length << thiswidth is safe by definition
+						 Pointers(this).p8 + (m_length << thisWidth),	// m_length << thiswidth is safe by definition
 						 numChars, charWidth, newWidth);
 
 			charsUsed += numChars;
@@ -1189,13 +1173,19 @@ namespace avmplus
 
 		const bool is7bit = false; // actually, might be, we just haven't checked yet.
 		Stringp newStr = createDynamic(gc, NULL, newLen, newWidth, is7bit, extra);
+
+        // note that createDynamic has invalidated any existing Pointers structs...
+        const void* srcLeft = Pointers(this).pv;
+        const void* srcRight = rightStrPtr ? Pointers(rightStrPtr).pv : rightStr.pv;
+
 		// copy leftStr
-		void* ptr = _copyBuffers(my_ptrs.pv, 
+		void* ptr = _copyBuffers(srcLeft, 
 					  newStr->m_buffer.pv, 
 					  m_length, 
 					  thisWidth, newWidth);
+
 		// append src
-		_copyBuffers(rightStr.pv, 
+		_copyBuffers(srcRight, 
 					  ptr,
 					  numChars, 
 					  charWidth, newWidth);
@@ -1262,27 +1252,6 @@ namespace avmplus
 		// a new static string pointing to the substring... do not do this.
 		// it will break static strings that point directly into ABC buffers.
 		return createDependent(gc, master, start, end - start);
-	}
-
-	Stringp String::intern_substring(int32_t start, int32_t end)
-	{
-		// this is (currently) only called by XMLParser, which only passes us
-		// valid values -- skip the checks in the name of performance.
-		AvmAssert(start < end);
-		AvmAssert(start >= 0 && start <= this->length());
-		AvmAssert(end >= 0 && end <= this->length());
-		
-		AvmCore* core = _core(this);
-		if (start == 0 && end == this->length())
-			return core->internString(this);
-
-		int32_t const len = end - start;
-		String::Width const w = this->getWidth();
-		Pointers ptrs(this);
-		if (w == String::k8)
-			return core->internStringLatin1((const char*)ptrs.p8 + start, len);
-		else
-			return core->internStringUTF16(ptrs.p16 + start, len);
 	}
 
 	Stringp String::substr(int32_t start, int32_t len)
@@ -2028,17 +1997,17 @@ namespace avmplus
 		// Flag to detect whether any changes were made
 		bool changed = false;
 
-		Pointers src(this);
-
 		// 0xFF is a special case: ToUpper(0xFF) == 0x178, so we need a wider string
 		// if the string contains 0xFF
 		Width w = getWidth();
-		if (w == k8 && VMPI_memchr(src.p8, 0xFF, m_length) != 0)
+		if (w == k8 && VMPI_memchr(Pointers(this).p8, 0xFF, m_length) != 0)
 			w = k16;
 
 		GC* gc = _gc(this);
 		const bool is7bit = false;
 		Stringp newStr = createDynamic(gc, NULL, m_length, w, is7bit);
+
+		Pointers src(this); // can't re-use the Pointers from VMPI_memchr; createDynamic may have invalidated it
 		Pointers dst(newStr);
 
 		int32_t i;
@@ -2267,21 +2236,31 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint64_t String::size() const
+	uint64_t String::bytesUsed() const
 	{
-		return GC::Size(this) - sizeof(AvmPlusScriptableObject);
+		uint64_t bytesUsed = sizeof(String);
+
+		// If getType() == kDependent, the buffer's memory is account for by
+		// the string upon which this string depends, so we should not include
+		// it here.
+		//
+		// If getType() == kStatic, the buffer's memory is not on the GC heap,
+		// and freeing the string would not free the buffer, so we should not
+		// include its size here.
+		if (getType() == kDynamic)
+			bytesUsed += GC::Size(m_buffer.pv);
+
+		return bytesUsed;
+	}
+
+	Stringp String::getMasterString() const
+	{
+		if (isDependent())
+			return m_extra.master;
+		else
+			return NULL;
 	}
 #endif
-
-/////////////////////////////////// StringIndexer //////////////////////////////////////
-
-	StringIndexer::StringIndexer(Stringp s) : 
-		m_str(s),
-		m_ptrs(s),
-		m_latin1(s->getWidth() == String::k8)
-	{ 
-		AvmAssert(s != NULL);
-	}
 
 ////////////////////////////// Helpers: Width Analysis /////////////////////////////////
 
@@ -2505,7 +2484,7 @@ namespace avmplus
 				s = createDynamic(gc, buffer, widths.w8, String::k8, is7bit);
 				uint32_t uch;
 				int32_t bytesRead;
-				Pointers dst(s);
+				Pointers dst(s); // NB, we assume that Utf8ToUcs4 doesn't allocate memory!
 				while (len > 0)
 				{
 					if (*((int8_t*) buffer) > 0)
@@ -2645,7 +2624,6 @@ namespace avmplus
 		int32_t len = 0;
 
 		MMgc::GC* gc = _gc(str);
-		String::Pointers ptrs(str);
 		if (str->getWidth() == String::k8)
 		{
 			len = str->m_length;
@@ -2653,7 +2631,7 @@ namespace avmplus
 			// if we know it's 7-bit, we don't need to walk it.
 			if (!(str->m_bitsAndFlags & String::TSTR_7BIT_FLAG))
 			{
-				const uint8_t* srcBuf = (const uint8_t*) ptrs.p8;
+				const uint8_t* srcBuf = String::Pointers(str).p8;
 				int32_t auxchars = 0;
 				for (int32_t i = str->m_length; i--;)
 					auxchars += (*srcBuf++ > 127);
@@ -2667,8 +2645,9 @@ namespace avmplus
 			
 			// Deliberately using gc'ed memory here (not mmfx, unmanaged memory)
 			// so that longjmp's past our dtor won't cause a long-term leak
-			const uint8_t* srcBuf = (const uint8_t*) ptrs.p8;
 			char* dstBuf = (char*)gc->Alloc(uint32_t(len)+1, 0);
+            // can't re-use the Pointers from 7BIT above; gc->Alloc may have invalidated it
+			const uint8_t* srcBuf = String::Pointers(str).p8;
 			m_buffer = dstBuf;
 			m_length = len;
 
@@ -2696,13 +2675,13 @@ namespace avmplus
 		}
 		else
 		{
-			const wchar* data = ptrs.p16;
-			len = UnicodeUtils::Utf16ToUtf8(data, str->length(), NULL, 0);
+			len = UnicodeUtils::Utf16ToUtf8(String::Pointers(str).p16, str->length(), NULL, 0);
 			char* dstBuf = (char*) gc->Alloc(uint32_t(len)+1, 0);
 			m_buffer = dstBuf;
 			m_length = len;
 			dstBuf[len] = 0;
-			UnicodeUtils::Utf16ToUtf8(data, str->length(), (uint8_t*) dstBuf, len);
+            // can't re-use the Pointers from Utf16ToUtf8 above; gc->Alloc may have invalidated it
+			UnicodeUtils::Utf16ToUtf8(String::Pointers(str).p16, str->length(), (uint8_t*) dstBuf, len);
 		}
 	}
 

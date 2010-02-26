@@ -102,7 +102,10 @@ namespace avmplus
 #endif
 
 #ifdef DEBUGGER
-		uint32 size() const;
+		/**
+		 * Basically the same as AvmPlusScriptableObject::bytesUsed().
+		 */
+		uint64_t bytesUsed() const;
 #endif
 	
 	// ------------------------ DATA SECTION BEGIN

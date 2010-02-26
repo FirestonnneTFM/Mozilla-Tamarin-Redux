@@ -271,7 +271,7 @@ package flash.sampler
 	public native function sampleInternalAllocs(b:Boolean):void;
 
 	/**
-     * Set a callback function for the sampler - this function will be called when the sample stream is almost
+     * Sets a callback function for the sampler - this function will be called when the sample stream is almost
      * exhausted.  This should be used to process samples before the sample buffer is filled.  pauseSampling will be called
      * before the callback is called, and startSampling will be called after the callback has been executed.
      * @langversion 3.0
@@ -451,9 +451,29 @@ package flash.sampler
 
    /**
      * Returns the saved "this" from a Method closure that you normal can't see from AS.
-     * @param obj A MethodClosure instnace
+     * @param obj A MethodClosure instance
      * @return An object that is the "this" of the MethodClosure
      */
     [native("SamplerScript::getSavedThis")]
     public native function getSavedThis(obj:Function):Object;
+
+   /**
+     * Returns the master string upon which this string depends, or null if this
+     * string does not depend on another string.  For example, if you call
+     * <code>String.substr()</code>, the returned string will often actually be
+     * implemented as just a pointer into the original string, for the sake of efficiency.
+     * In normal usage, this is an implementation detail which is not visible to the user;
+     * however, it can be confusing when using a profiler to analyze your program's
+     * memory consumption, because the string may be shown as taking less memory
+     * than would be needed for the string's value.  In addition, a string might
+     * be retained in memory solely because it is the master for other strings.
+     * <code>getMasterString()</code> allows profilers to show the user an accurate
+     * graph of string dependencies.
+     * @param str A string
+     * @return The string upon which the passed-in string depends, or null if the
+     * passed-in string does not depend on another string
+     * @langversion 3.0     
+     */
+    [native("SamplerScript::getMasterString")]
+    public native function getMasterString(str:String):String;
 };

@@ -491,7 +491,7 @@ namespace avmplus
 		case kNamespaceType:
 			AvmPlusScriptableObject *o = (AvmPlusScriptableObject*)(a&~7);
 			if(o)
-				return (double)o->size();
+				return (double)o->bytesUsed();
 		}
 		return 4;
 #else
@@ -849,5 +849,25 @@ namespace avmplus
 		return undefinedAtom;
 #endif
 	}		
+
+	/*static*/
+	Stringp SamplerScript::getMasterString(ScriptObject *self, Stringp str)
+	{
+#ifdef DEBUGGER
+		AvmCore* core = self->core();
+		Sampler *s = core->get_sampler();
+		if (!s || !trusted(self))
+			return NULL;
+
+		if(str != NULL)
+			return str->getMasterString();
+		else
+			return NULL;
+#else
+		(void)self;
+		(void)str;
+		return NULL;
+#endif
+	}
 }
 

@@ -124,11 +124,11 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint64_t ClassClosure::size() const
+	uint64_t ClassClosure::bytesUsed() const
 	{
-		uint64_t size = ScriptObject::size();
-		size += vtable->size();
-		return size;
+		uint64_t bytesUsed = ScriptObject::bytesUsed();
+		bytesUsed += vtable->bytesUsed();
+		return bytesUsed;
 	}
 #endif
 
