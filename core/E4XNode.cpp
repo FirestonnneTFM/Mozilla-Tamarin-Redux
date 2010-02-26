@@ -362,8 +362,8 @@ namespace avmplus
 		Stringp prefix = core->kEmptyString;
 		if (pos > 0)
 		{
-			prefix = tagName->intern_substring(0, pos);
-			tagName = tagName->intern_substring(pos + 1, tagName->length());
+			prefix = core->internSubstring(tagName, 0, pos);
+			tagName = core->internSubstring(tagName, pos + 1, tagName->length());
 		}
 
 		// An attribute without a prefix is unqualified and does not inherit a namespace

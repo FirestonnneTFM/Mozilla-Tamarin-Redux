@@ -77,6 +77,8 @@ namespace avmplus
 	*/
 	class String : public AvmPlusScriptableObject
 	{
+        friend class AvmCore;   // for internSubstring
+
 	public:
 
 		/// String type constants. Note that isDependent() and isStatic() rely on using these values as bitflags.
@@ -346,7 +348,6 @@ namespace avmplus
 		and holds a reference to the original string.
 		*/
 				Stringp	FASTCALL	substring(int32_t start, int32_t end = 0x7fffffff);
-				Stringp	FASTCALL	intern_substring(int32_t start, int32_t end = 0x7fffffff);
 
 		/**
 		Implement String.slice(). The resulting String object points into the original string, 
@@ -523,6 +524,9 @@ namespace avmplus
 			This is a TEMPORARY struct, always stack-allocated, that is used to extract the current starting
 			pointer for a string. It may look superficially similar to the "Buffer" struct, but is different,
 			in that the pointer is always correct (unlike Buffer, which might actually be an offset into a master).
+            
+            WARNING: this struct is not valid across a GC collection; if you do anything that could trigger
+            a collection (most commonly, any sort of allocation), you must assume the contents of this are invalid.
 		*/
 		struct Pointers
 		{
@@ -532,7 +536,14 @@ namespace avmplus
 				uint8_t*		p8;
 				wchar*			p16;
 			};
-			REALLY_INLINE explicit Pointers(const String* const self);
+			REALLY_INLINE explicit Pointers(const String* const self)
+            {
+                AvmAssert(self != NULL);
+                if (!self->isDependent())
+                    p8 = self->m_buffer.p8;
+                else
+                    p8 = self->m_extra.master->m_buffer.p8 + self->m_buffer.offset_bytes;
+            }
 			REALLY_INLINE explicit Pointers(const uint8_t* _p8) { p8 = const_cast<uint8_t*>(_p8); }
 			REALLY_INLINE explicit Pointers(const uint16_t* _p16) { p16 = const_cast<uint16_t*>(_p16); }
 		};
@@ -554,7 +565,7 @@ namespace avmplus
 		/**
 		Low-level append worker. 
 		*/
-				Stringp				_append(Stringp volatile * rightStrPtr, const Pointers& rightStr, int32_t numChars, Width width);
+				Stringp				_append(Stringp rightStrPtr, const Pointers& rightStr, int32_t numChars, Width width);
 
 		#ifdef _DEBUG
 			void verify7bit() const;
@@ -636,6 +647,7 @@ namespace avmplus
 		REALLY_INLINE	explicit	StringIndexer(Stringp s) : m_str(s) { AvmAssert(s != NULL); }
 		/// Return the embedded string.
 		REALLY_INLINE	String*		operator->() const { return m_str; }
+		REALLY_INLINE	String*		str() const { return m_str; }
 		/// Quick index operator.
  		REALLY_INLINE	wchar		operator[](int index) const { return m_str->charAt(index); }
 
