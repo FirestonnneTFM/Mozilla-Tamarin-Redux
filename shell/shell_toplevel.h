@@ -63,7 +63,7 @@ namespace avmplus {
     class NewObjectSampleObject; //flash.sampler::NewObjectSample
     class SampleClass; //flash.sampler::Sample$
     class SampleObject; //flash.sampler::Sample
-    class ScriptObject; //avmplus::System
+    class ScriptObject; //avmplus::File
     class StackFrameClass; //flash.sampler::StackFrame$
     class StackFrameObject; //flash.sampler::StackFrame
     class String; //String
@@ -182,33 +182,34 @@ const uint32_t flash_utils_ByteArray_position_get = 201;
 const uint32_t flash_utils_ByteArray_position_set = 202;
 const uint32_t flash_utils_ByteArray_endian_get = 203;
 const uint32_t flash_utils_ByteArray_endian_set = 204;
-const uint32_t native_script_function_flash_sampler_getSavedThis = 207;
-const uint32_t native_script_function_flash_sampler_getLexicalScopes = 208;
-const uint32_t native_script_function_flash_sampler_isGetterSetter = 209;
-const uint32_t native_script_function_flash_sampler__getInvocationCount = 210;
-const uint32_t native_script_function_flash_sampler_getSampleCount = 214;
-const uint32_t native_script_function_flash_sampler_getSamples = 215;
-const uint32_t native_script_function_flash_sampler_getMemberNames = 216;
-const uint32_t native_script_function_flash_sampler_getSize = 217;
-const uint32_t native_script_function_flash_sampler__setSamplerCallback = 218;
-const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 221;
-const uint32_t native_script_function_flash_sampler_pauseSampling = 222;
-const uint32_t native_script_function_flash_sampler_stopSampling = 223;
-const uint32_t native_script_function_flash_sampler_startSampling = 224;
-const uint32_t native_script_function_flash_sampler_clearSamples = 225;
-const uint32_t flash_sampler_NewObjectSample_object_get = 232;
-const uint32_t flash_sampler_NewObjectSample_size_get = 233;
-const uint32_t flash_trace_Trace_setLevel = 239;
-const uint32_t flash_trace_Trace_getLevel = 240;
-const uint32_t flash_trace_Trace_setListener = 241;
-const uint32_t flash_trace_Trace_getListener = 242;
-const uint32_t flash_utils_Dictionary_private_init = 246;
-const uint32_t avmplus_JObject_create = 253;
-const uint32_t avmplus_JObject_createArray = 254;
-const uint32_t avmplus_JObject_toArray = 255;
-const uint32_t avmplus_JObject_constructorSignature = 256;
-const uint32_t avmplus_JObject_methodSignature = 257;
-const uint32_t avmplus_JObject_fieldSignature = 258;
+const uint32_t native_script_function_flash_sampler_getMasterString = 207;
+const uint32_t native_script_function_flash_sampler_getSavedThis = 208;
+const uint32_t native_script_function_flash_sampler_getLexicalScopes = 209;
+const uint32_t native_script_function_flash_sampler_isGetterSetter = 210;
+const uint32_t native_script_function_flash_sampler__getInvocationCount = 211;
+const uint32_t native_script_function_flash_sampler_getSampleCount = 215;
+const uint32_t native_script_function_flash_sampler_getSamples = 216;
+const uint32_t native_script_function_flash_sampler_getMemberNames = 217;
+const uint32_t native_script_function_flash_sampler_getSize = 218;
+const uint32_t native_script_function_flash_sampler__setSamplerCallback = 219;
+const uint32_t native_script_function_flash_sampler_sampleInternalAllocs = 222;
+const uint32_t native_script_function_flash_sampler_pauseSampling = 223;
+const uint32_t native_script_function_flash_sampler_stopSampling = 224;
+const uint32_t native_script_function_flash_sampler_startSampling = 225;
+const uint32_t native_script_function_flash_sampler_clearSamples = 226;
+const uint32_t flash_sampler_NewObjectSample_object_get = 233;
+const uint32_t flash_sampler_NewObjectSample_size_get = 234;
+const uint32_t flash_trace_Trace_setLevel = 240;
+const uint32_t flash_trace_Trace_getLevel = 241;
+const uint32_t flash_trace_Trace_setListener = 242;
+const uint32_t flash_trace_Trace_getListener = 243;
+const uint32_t flash_utils_Dictionary_private_init = 247;
+const uint32_t avmplus_JObject_create = 254;
+const uint32_t avmplus_JObject_createArray = 255;
+const uint32_t avmplus_JObject_toArray = 256;
+const uint32_t avmplus_JObject_constructorSignature = 257;
+const uint32_t avmplus_JObject_methodSignature = 258;
+const uint32_t avmplus_JObject_fieldSignature = 259;
 
 extern AvmBox avmplus_Domain_currentDomain_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -267,6 +268,7 @@ extern double native_script_function_flash_sampler__getInvocationCount_thunk(Avm
 extern AvmBox native_script_function_flash_sampler_isGetterSetter_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox native_script_function_flash_sampler_getLexicalScopes_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox native_script_function_flash_sampler_getSavedThis_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+extern AvmBox native_script_function_flash_sampler_getMasterString_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox flash_trace_Trace_setLevel_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox flash_trace_Trace_getLevel_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 extern AvmBox flash_trace_Trace_setListener_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -304,6 +306,9 @@ extern AvmBox avmplus_File_write_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* 
 
 extern AvmBox shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_JObject_methodSignature_thunk  shell_toplevel_s2a_oos_rest_thunk
+
+extern AvmBox shell_toplevel_func_s2a_os_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#define native_script_function_flash_sampler_getMasterString_thunk  shell_toplevel_func_s2a_os_thunk
 
 extern AvmBox shell_toplevel_func_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define native_script_function_flash_sampler__setSamplerCallback_thunk  shell_toplevel_func_v2a_oo_thunk
