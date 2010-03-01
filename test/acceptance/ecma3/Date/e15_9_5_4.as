@@ -119,12 +119,8 @@ function getTestCases() {
     {
        givenDate = new Date(date_given_in_milliseconds);
        
-       status = '().toTimeString()';   
-       // !!!!! Fix when bug 149722 is fixed!!!!!
-       //actual = givenDate.toTimeString();
-       actual = cnERR;
-       // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      
+       status = '('  +  givenDate  +  ').toTimeString()'; 
+       actual = givenDate.toTimeString();
        expect = extractTimeString(givenDate);
        addTestCase();
     }
@@ -143,19 +139,19 @@ function getTestCases() {
  */
 function extractTimeString(date)
 {
-  regexp = new RegExp(date.toDateString() + '(.*)' + '$');
-
-  try
-  {
-    hopeThisIsTimeString = date.toString().match(regexp)[1];
-  }
-  catch(e)
-  {
-    return cnERR;
-  }
-
-  // trim any leading or trailing spaces 
-  return trimL(trimR(hopeThisIsTimeString));
+  year = date.getFullYear(); 
+  // strip the year off date.toDateString().
+  // the pattern for regexp:   /(.*)year$/ 
+  regexp = new RegExp('(.*)' +   year  +  '$');
+  reducedDateString = (date.toDateString()).match(regexp)[1];
+  
+  // now extract the middle of date.toString()
+  // the pattern for regexp:  /reducedDateString(.*)year$/
+  regexp=new RegExp( reducedDateString  +  '(.*)'  +  year  +  '$');
+  hopeThisIsTimeString = (date.toString()).match(regexp)[1];
+  // trim any trailing spaces -
+  return trimR(hopeThisIsTimeString);
+  
 }
 
 
