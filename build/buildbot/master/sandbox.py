@@ -787,7 +787,7 @@ class sandbox:
     #########################################
     sb_android_smoke_factory = factory.BuildFactory()
     sb_android_smoke_factory.addStep(download_testmedia)
-    android_smoke_factory.addStep(BuildShellCommand(
+    sb_android_smoke_factory.addStep(BuildShellCommand(
                 command=['./run-smoketests-android.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
                 description='starting to run smoke tests...',

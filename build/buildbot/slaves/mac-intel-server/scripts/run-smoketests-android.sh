@@ -104,7 +104,7 @@ export avmd=$AVM
 export avmdd=$AVM
 
 cd $basedir/test
-$py ./runsmokes.py --testfile=./runsmokes-arm.txt --time=120
+$py ./runsmokes.py --testfile=./runsmokes-arm-android.txt --time=120
 ret=$?
 
 echo "lock release"
