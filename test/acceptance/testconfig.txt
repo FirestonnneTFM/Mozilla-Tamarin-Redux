@@ -108,8 +108,6 @@ abcasm/.*, .*diff, skip, trim down tests
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue: avmdiff does not handle .exitcode
 regress/bug_515935, .*diff, skip, known issue: avmdiff does not handle .exitcode
 as3/RuntimeErrors/Error1034TypeCoercionFailed , .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=510225
-ecma3/GlobalObject/e15_1_2_2_2  , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
-ecma3/TypeConversion/e9_3_1_3_rt   , linux-diff , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 
 
 # specific skips when running differential testing between 32bit and 64bit shells
@@ -127,8 +125,6 @@ as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatc
 ####################
 # Number
 ####################
-ecma3/TypeConversion/e9_3_1_3_rt:parseInt.*123456789012345678.*   , x86-lnx-tvm-release.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
-ecma3/GlobalObject/e15_1_2_2_2:parseInt.*123456789012345678.*   , x86-lnx-tvm-release.* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/Number/e15_7_4_6_1:Section R-(1|2|3|4|5|6|7|8|10|11|12|13|14|16|17) .* , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=513039
 ecma3/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
 ecma3/Number/e15_7_4_6_1:Section C , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
