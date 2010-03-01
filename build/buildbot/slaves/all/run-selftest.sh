@@ -81,6 +81,11 @@ cat selftest.out
 passes=`grep pass selftest.out | wc -l`
 fails=`grep fail selftest.out | wc -l`
 
+# a non-zero exit code indicates an avm crash, therefore increment the failures by 1
+if [ "$ret" -ne "0" ]; then
+    let fails=fails+1
+fi
+
 echo "passes            : $passes"
 echo "failures          : $fails"
 
