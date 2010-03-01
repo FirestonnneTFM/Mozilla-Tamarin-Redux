@@ -305,7 +305,7 @@ class RuntestBase:
             if re.search('\(console\) 32-bit', f):
                 cputype='arm'
                 self.osName='winmobile-emulator'
-            elif re.search('Bourne-Again shell script', f) and re.search('android',self.avm):
+            elif (re.search('Bourne-Again shell script', f) or re.search('python script', f)) and re.search('android',self.avm):
                 cputype='arm-android'
             elif re.search('(Mach-O universal binary)', f):
                 # multiple architectures
