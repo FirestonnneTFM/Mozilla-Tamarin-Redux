@@ -472,7 +472,6 @@ namespace avmplus
         /** emit a constructor call, and early bind if possible */
         void emitConstruct(int argc, int ctor_index, Traits* ctraits);
 
-        void formatOperand(PrintWriter& buffer, LIns* oprnd);
         void emitCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
         void emit(AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
         void emitIf(AbcOpcode opcode, int target_off, int lhs, int rhs);
