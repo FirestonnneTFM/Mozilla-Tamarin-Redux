@@ -73,6 +73,21 @@ namespace avmplus
 		return traits;
 	}
 	
+    Traits* Domain::getNamedTrait(Stringp name, Namespace* ns) 
+    { 
+        return (Traits*)m_namedTraits->get(name, ns); 
+    }
+
+    void Domain::addNamedTrait(Stringp name, Namespace* ns, Traits* v) 
+    { 
+        m_namedTraits->add(name, ns, (Binding)v); 
+    }
+
+    void Domain::addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) 
+    { 
+        m_namedScripts->add(name, ns, (Binding)v); 
+    }
+
 	MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns)
 	{
 		MethodInfo* f = NULL;

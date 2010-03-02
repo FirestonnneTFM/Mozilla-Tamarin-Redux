@@ -142,14 +142,14 @@ namespace avmplus
         bool hasMetadataName(const uint8_t* meta_pos, const String* name);
         const byte* getMetadataInfoPos(uint32_t index);
 
-        Traits* getTraits(Stringp name, Namespacep ns, bool recursive=true) const;
-        Traits* getTraits(const Multiname& n, const Toplevel* toplevel, bool recursive=true) const;
-        Traits* getTraits(Stringp name, bool recursive=true) const;
+        Traits* getTraits(Stringp name, Namespacep ns) const;
+        Traits* getTraits(const Multiname& n, const Toplevel* toplevel) const;
+        Traits* getTraits(Stringp name) const;
 
         Traits* getBuiltinTraits(Stringp name) const;
 
         void addPrivateNamedScript(Stringp name, Namespacep ns, MethodInfo *a);
-        void addNamedTraits(Stringp name, Namespacep ns, Traits* traits);
+        Traits* addUniqueTraits(Stringp name, Namespacep ns, Traits* traits);
 
         /** deferred parsing */
         void parseMultiname(const byte *pos, Multiname& m) const;
