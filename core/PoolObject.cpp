@@ -197,6 +197,25 @@ namespace avmplus
         return NULL;
     }
 
+    Traits* PoolObject::addUniqueParameterizedITraits(AvmCore* core, const Toplevel* toplevel, Traits* base, Traits* param_traits)
+    {
+        // this - is the pool where our param_traits reside
+        AvmAssert(param_traits->pool == this);        
+        Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
+        Traits* r = getTraits(Multiname(base->ns(), fullname), toplevel); // careful, toplevel can be null!
+        if (!r)
+        {
+            // below we are exposing this trait domain-wide, and this can occur
+            // during interp, abc parsing, method resolution, etc. That is, under many
+            // conditions.  This seems ripe for potential issues as it throws a lot
+            // of non-determinism into these searches.  Not to mention that it appears
+            // this code by-passes versioning altogether. 
+            r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
+            r = domain->addUniqueTrait(fullname, base->ns(), r);  // getTraits() above also checks the domain.
+        }
+        return r;    
+    }
+    
     Namespace* PoolObject::getNamespace(int32_t index) const
     {
         return cpool_ns[index];
@@ -659,14 +678,7 @@ range_error:
                     break;
                 default:
                 {
-                    Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
-                    r = param_traits->pool->getTraits(Multiname(base->ns(), fullname), toplevel);
-
-                    if (!r)
-                    {
-                        r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
-                        param_traits->pool->domain->addUniqueTrait(fullname, base->ns(), r);
-                    }
+                    r = param_traits->pool->addUniqueParameterizedITraits(core, toplevel, base, param_traits);
                     break;
                 }
             }
