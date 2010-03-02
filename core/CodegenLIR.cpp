@@ -5050,24 +5050,13 @@ namespace avmplus
     void CodegenLIR::formatOperand(PrintWriter& buffer, Value& v)
     {
 #ifdef NJ_VERBOSE
-        if (v.ins) formatOperand(buffer, v.ins);
+        if (v.ins && verbose())
+            buffer.format("@%s", frag->lirbuf->names->formatRef(v.ins));
 #else
         (void)buffer;
         (void)v;
 #endif
     }
-
-#ifdef NJ_VERBOSE
-    void CodegenLIR::formatOperand(PrintWriter& buffer, LIns* opr)
-    {
-        if (opr) {
-            buffer.format("@%s", frag->lirbuf->names->formatRef(opr));
-        }
-        else {
-            buffer << "0";
-        }
-    }
-#endif /* NJ_VERBOSE */
 
     /* set position of label */
     void CodegenLIR::setLabelPos(CodegenLabel& l, LIns* bb) {
@@ -5087,7 +5076,7 @@ namespace avmplus
 #ifdef NJ_VERBOSE
     bool CodegenLIR::verbose()
     {
-        return (state && state->verifier->verbose) || pool->isVerbose(VB_jit);
+        return pool->isVerbose(VB_jit);
     }
 #endif
 
@@ -5479,19 +5468,29 @@ namespace avmplus
         mmfx_delete( alloc1 );
         alloc1 = NULL;
 
-        CodeMgr *mgr = pool->codeMgr;
-        verbose_only(if (pool->isVerbose(LC_ReadLIR)) listing("Initial LIR", mgr->log, frag, prologLastIns); )
-
         // if debugging, don't eliminate vars.  this way the debugger sees the true
         // variable state at each safe point.
         if (!haveDebugger)
             deadvars();
 
-        verbose_only(if (pool->isVerbose(LC_Liveness)) {
+        CodeMgr *mgr = pool->codeMgr;
+        #ifdef NJ_VERBOSE
+        if (pool->isVerbose(LC_ReadLIR)) {
+            StUTF8String name(info->format(core));
+            char *title = new (*lir_alloc) char[VMPI_strlen(name.c_str()) + 20];
+            VMPI_sprintf(title, "Final LIR %s", name.c_str());
+            listing(title, mgr->log, frag, prologLastIns);
+        }
+        if (pool->isVerbose(LC_Liveness)) {
             Allocator live_alloc;
             SeqReader in(frag->lastIns, prologLastIns);
             nanojit::live(&in, live_alloc, frag, &mgr->log);
-        })
+        }
+        if (pool->isVerbose(LC_Assembly)) {
+            StUTF8String name(info->format(core));
+            mgr->log.printf("jit-assembler %s\n", name.c_str());
+        }
+        #endif
 
         Assembler *assm = new (*lir_alloc) Assembler(mgr->codeAlloc, mgr->allocator, *lir_alloc, core, &mgr->log, core->config.njconfig);
         #ifdef VTUNE
