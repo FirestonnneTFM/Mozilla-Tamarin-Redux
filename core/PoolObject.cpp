@@ -665,7 +665,7 @@ range_error:
                     if (!r)
                     {
                         r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
-                        param_traits->pool->domain->addNamedTrait(fullname, base->ns(), r);
+                        param_traits->pool->domain->addUniqueTrait(fullname, base->ns(), r);
                     }
                     break;
                 }
