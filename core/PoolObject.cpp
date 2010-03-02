@@ -138,7 +138,7 @@ namespace avmplus
     Traits* PoolObject::getTraits(Stringp name, Namespace* ns) const
     {
         // look for class in VM-wide type table
-        Traits* t = domain->getNamedTraits(name, ns, true);
+        Traits* t = domain->getNamedTraits(name, ns);
 
         // look for class in current ABC file
         if (t == NULL)
@@ -184,7 +184,7 @@ namespace avmplus
     Traits* PoolObject::addUniqueTraits(Stringp name, Namespace* ns, Traits* traits)
     {
         // look for class in VM-wide type table
-        Traits* t = domain->getNamedTraits(name, ns, false);
+        Traits* t = domain->getNamedTraitsNoRecurse(name, ns);
 
         // look for class in current ABC file
         if (t == NULL)
