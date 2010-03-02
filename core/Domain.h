@@ -50,7 +50,7 @@ namespace avmplus
 		MethodInfo* getNamedScript(Stringp name, Namespacep ns);
 		MethodInfo* getNamedScript(const Multiname* multiname);
 		
-		void addNamedTrait(Stringp name, Namespace* ns, Traits* v);
+        Traits* addUniqueTrait(Stringp name, Namespace* ns, Traits* v) ;
 		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v);
 
         // returns NULL if the type doesn't exist yet.
