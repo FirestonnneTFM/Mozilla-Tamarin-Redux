@@ -1883,11 +1883,7 @@ namespace avmplus
 
             instances.set(i, itraits);
 
-            if (pool->getTraits(name, ns, false) == NULL)
-            {
-                pool->addNamedTraits(name, ns, itraits);
-            }
-            else
+            if (pool->addUniqueTraits(name, ns, itraits) != NULL)
             {
                 // error, can't redefine a class or interface
                 //toplevel->definitionErrorClass()->throwError(kRedefinedError, core->toErrorString(&mn));

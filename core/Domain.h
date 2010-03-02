@@ -50,9 +50,9 @@ namespace avmplus
 		MethodInfo* getNamedScript(Stringp name, Namespacep ns);
 		MethodInfo* getNamedScript(const Multiname* multiname);
 		
-		Traits* getNamedTrait(Stringp name, Namespace* ns) { return (Traits*)m_namedTraits->get(name, ns); }
-		void addNamedTrait(Stringp name, Namespace* ns, Traits* v) { m_namedTraits->add(name, ns, (Binding)v); }
-		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) { m_namedScripts->add(name, ns, (Binding)v); }
+		Traits* getNamedTrait(Stringp name, Namespace* ns);
+		void addNamedTrait(Stringp name, Namespace* ns, Traits* v);
+		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v);
 
         // returns NULL if the type doesn't exist yet.
 		ClassClosure* getParameterizedType(ClassClosure* type);
