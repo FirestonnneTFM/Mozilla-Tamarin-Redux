@@ -56,7 +56,7 @@ namespace avmplus
 			traits = m_base->getNamedTraits(name, ns);
 		}
 		if (!traits) {
-			traits = (Traits*) m_namedTraits->get(name, ns);
+			traits = getNamedTraitsNoRecurse(name, ns);
 		}
 		return traits;
 	}
@@ -66,9 +66,14 @@ namespace avmplus
 		return (Traits*) m_namedTraits->get(name, ns);
 	}
 
-    void Domain::addNamedTrait(Stringp name, Namespace* ns, Traits* v) 
+    Traits* Domain::addUniqueTrait(Stringp name, Namespace* ns, Traits* v) 
     { 
-        m_namedTraits->add(name, ns, (Binding)v); 
+        Traits* t = getNamedTraitsNoRecurse(name, ns);
+        if (t == NULL) {
+            m_namedTraits->add(name, ns, (Binding)v); 
+            t = v; // return trait that we'd get from a getNamedTrait() call.
+        }
+        return t;
     }
 
     void Domain::addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) 
