@@ -351,7 +351,7 @@ class AcceptanceRuntest(RuntestBase):
             else:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName))
             
-        if f and not self.verify:
+        if not self.verify:
             try:
                 outputLines = []
                 for line in f+err:
@@ -399,7 +399,7 @@ class AcceptanceRuntest(RuntestBase):
                     outputCalls.append((self.js_print,(testName, 'expected failure: exitcode reason: %s'%res,self.expfailmsgs)))
                     lexpfail += 1
                 elif res2==None:
-                    outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d FAILED!' % (exitcodeExp,exitcode), self.failmsgs)))
+                    outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d Signal Name: %s FAILED!' % (exitcodeExp,exitcode,getSignalName(abs(exitcode))), self.failmsgs)))
                     outputCalls.append((self.fail,(testName, 'captured output: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
                     lfail+= 1
             elif err!=[]:
@@ -410,8 +410,13 @@ class AcceptanceRuntest(RuntestBase):
                     outputCalls.append((self.fail,(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,self.expfailmsgs)))
                     lexpfail += 1
                 else:
-                    lfail = 1
-                    outputCalls.append((self.fail,(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
+                    # test may not have any output but is still passing if a non-standard exitcode was expected (e.g. VerifyErrors)
+                    if exitcodeExp != 0 and exitcode==exitcodeExp:
+                        #outputCalls.append((self.js_print,('  Expected Exit Code: %s Actual Exit Code: %s PASSED' % (exitcodeExp, exitcode),)))
+                        lpass = 1
+                    else:
+                        lfail = 1
+                        outputCalls.append((self.fail,(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
                  
         self.allfails += lfail
         self.allpasses += lpass
