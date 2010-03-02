@@ -649,7 +649,7 @@
     // fully dynamic generic handler for OP_intproperty
     void initprop_late(MethodEnv* env, Atom obj, const Multiname* name, Atom value)
     {
-        tagprof("initprop_late", ojb);
+        tagprof("initprop_late", obj);
         env->initproperty(obj, name, value, toVTable(env->toplevel(), obj));
     }
     FUNCTION(FUNCADDR(initprop_late), SIG4(V,P,A,P,A), initprop_late)

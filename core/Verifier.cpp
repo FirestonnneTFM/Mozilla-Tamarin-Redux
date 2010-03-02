@@ -186,7 +186,7 @@ namespace avmplus
 
         #ifdef AVMPLUS_VERBOSE
         if (verbose)
-            core->console << "verify " << info << '\n';
+            core->console << "\nverify " << info << '\n';
         secondTry = false;
         #endif
 
@@ -273,6 +273,13 @@ namespace avmplus
 
         TRY(core, kCatchAction_Rethrow) {
 
+        #ifdef AVMPLUS_VERBOSE
+        if (verbose) {
+            printScope("outer-scope", scope);
+            StringBuffer buf(core);
+            printState(buf, state);
+        }
+        #endif
         coder->writePrologue(state, code_pos);
 
         PERFM_NVPROF("abc-bytes", code_length);
@@ -306,15 +313,18 @@ namespace avmplus
                     checkTarget(pc);
                 }
 
-                #ifdef AVMPLUS_VERBOSE
-                if (verbose)
-                    core->console << "B" << (pc - code_pos) << ":\n";
-                #endif
-
                 // now load the merged state
                 state->init(blockState);
                 state->targetOfBackwardsBranch = blockState->targetOfBackwardsBranch;
                 state->pc = (int)(pc - code_pos);
+
+#ifdef AVMPLUS_VERBOSE
+                if (verbose) {
+                    StringBuffer buf(core);
+                    buf << "B" << (pc - code_pos) << ":";
+                    printState(buf, state);
+                }
+#endif
 
                 // found the start of a new basic block
                 coder->writeBlockStart(state);
@@ -358,8 +368,14 @@ namespace avmplus
                     ExceptionHandler* handler = &info->abc_exceptions()->exceptions[i];
                     if (pc >= code_pos + handler->from && pc <= code_pos + handler->to)
                     {
-                        // If this instruction can throw exceptions, add an edge to
-                        // the catch handler.
+                        // If this instruction can throw exceptions, treat it as an edge to
+                        // each in-scope catch handler.
+                        //
+                        // We also check a virtual edge to the catch block from the
+                        // first opcode in the try block, whether it throws or not, to handle
+                        // the case of an empty try block;  the verifier will still verify the
+                        // unreachable catch block, and it must start with the exception value
+                        // on the stack, or else underflow will occur.
                         if (opcodeInfo[opcode].canThrow || pc == code_pos + handler->from)
                         {
                             // TODO check stack is empty because catch handlers assume so.
@@ -424,6 +440,7 @@ namespace avmplus
                     {
                         // FIXME: bug 538639: At the top of a catch block, we generate coerce when an unbox is all that is needed
                         emitCoerce(handler->traits, sp);
+                        coder->writeOpcodeVerified(state, pc, opcode);
                     }
                 }
             }
@@ -447,9 +464,7 @@ namespace avmplus
 
             #ifdef AVMPLUS_VERBOSE
             if (verbose)
-            {
-                showState(state, pc, unreachable);
-            }
+                printOpcode(pc, unreachable);
             #endif
 
             if (unreachable)
@@ -757,6 +772,10 @@ namespace avmplus
                 {
                     f->makeIntoPrototypeFunction(toplevel, fscope);
                 }
+                #ifdef AVMPLUS_VERBOSE
+                if (verbose)
+                    printScope("function-scope", f->declaringScope());
+                #endif
                 coder->writeOp1(state, pc, opcode, imm30, ftraits);
                 state->push(ftraits, true);
                 break;
@@ -822,6 +841,11 @@ namespace avmplus
                 // whether or not the traits were resolved already.
                 ctraits->setDeclaringScopes(cscope);
                 itraits->setDeclaringScopes(iscope);
+
+                #ifdef AVMPLUS_VERBOSE
+                if (verbose)
+                    printScope("class-scope", cscope);
+                #endif
 
                 emitCoerce(CLASS_TYPE, state->sp());
                 coder->writeOp1(state, pc, opcode, imm30, ctraits);
@@ -1905,6 +1929,12 @@ namespace avmplus
             }
 
             coder->writeOpcodeVerified(state, pc, opcode);
+            #ifdef AVMPLUS_VERBOSE
+            if (verbose) {
+                StringBuffer buf(core);
+                printState(buf, state);
+            }
+            #endif
         }
 
         if (!blockEnd)
@@ -2549,8 +2579,6 @@ namespace avmplus
         FrameState *targetState = getFrameState((int)(target-code_pos));
         if (!targetState->initialized)
         {
-            //if (verbose)
-            //  core->console << "merge first target=" << targetState->pc << "\n";
             // first time visiting target block
             targetState->init(state);
             targetState->initialized = true;
@@ -2573,18 +2601,30 @@ namespace avmplus
                 // check for null in op_pushscope/pushwith
             }
 
-            //if (verbose)
-            //  showState(targetState, targetState->pc+code_pos, false);
+#ifdef AVMPLUS_VERBOSE
+            if (verbose) {
+                core->console << "------------------------------------\n";
+                StringBuffer buf(core);
+                buf << "MERGE FIRST B" << targetState->pc << ":";
+                printState(buf, targetState);
+                core->console << "------------------------------------\n";
+            }
+#endif
         }
         else
         {
-            /*if (verbose)
+#ifdef AVMPLUS_VERBOSE
+            if (verbose)
             {
-                core->console << "merge current=" << (int)state->pc << "\n";
-                showState(state, code_pos+state->pc, false);
-                core->console << "merge target=" << (int)targetState->pc << "\n";
-                showState(targetState, code_pos+targetState->pc, false);
-            }*/
+                core->console << "------------------------------------\n";
+                StringBuffer buf(core);
+                buf << "MERGE CURRENT " << (int)state->pc << ":";
+                printState(buf, state);
+                buf.reset();
+                buf << "MERGE TARGET B" << (int)targetState->pc << ":";
+                printState(buf, targetState);
+            }
+#endif
 
             // check matching stack depth
             if (state->stackDepth != targetState->stackDepth)
@@ -2653,10 +2693,14 @@ namespace avmplus
                 targetState->setType(i, t3, notNull, isWith);
             }
 
-            /*if (verbose) {
-                core->console << "after merge\n";
-                showState(targetState, code_pos+targetState->pc, false);
-            }*/
+#ifdef AVMPLUS_VERBOSE
+            if (verbose) {
+                StringBuffer buf(core);
+                buf << "AFTER MERGE B" << targetState->pc << ":";
+                printState(buf, targetState);
+                core->console << "------------------------------------\n";
+            }
+#endif
         }
     }
 
@@ -2884,83 +2928,93 @@ namespace avmplus
     }
 
     #ifdef AVMPLUS_VERBOSE
+    void Verifier::printOpcode(const byte* pc, bool unreachable)
+    {
+        int offset = int(pc - code_pos);
+        core->console << (unreachable ? "- " : "  ") << offset << ':';
+        core->formatOpcode(core->console, pc, (AbcOpcode)*pc, offset, pool);
+        core->console << '\n';
+    }
+
     /**
      * display contents of current stack frame only.
      */
-    void Verifier::showState(FrameState *state, const byte* pc, bool unreachable)
+    void Verifier::printState(StringBuffer& prefix, FrameState *state)
     {
-        // stack
-        core->console << "                        stack:";
-        for (int i=stackBase, n=state->sp(); i <= n; i++) {
-            core->console << " ";
-            printValue(state->value(i));
+        PrintWriter& out = core->console;
+        if (prefix.length() > 0) {
+            char buf[80]; // plenty for currently known prefixes
+            VMPI_sprintf(buf, "%-23s[", prefix.c_str());
+            out << buf;
+        } else {
+            out << "                       [";
         }
-        core->console << '\n';
-
-        // scope chain
-        core->console << "                        scope: ";
-        const ScopeTypeChain* declaringScope = info->declaringScope();
-        if (declaringScope && declaringScope->size > 0)
-        {
-            core->console << "[";
-            for (int i=0, n=declaringScope->size; i < n; i++)
-            {
-                Value v;
-                v.traits = declaringScope->getScopeTraitsAt(i);
-                v.isWith = declaringScope->getScopeIsWithAt(i);
-                v.killed = false;
-                v.notNull = true;
-                #if defined FEATURE_NANOJIT
-                v.ins = 0;
-                #endif
-                printValue(v);
-                if (i+1 < n)
-                    core->console << " ";
-            }
-            core->console << "] ";
-        }
-        for (int i=scopeBase, n=stackBase; i < n; i++)
-        {
-            if (i-scopeBase < state->scopeDepth)
-                printValue(state->value(i));
-            else
-                core->console << "~";
-            core->console << " ";
-        }
-        core->console << '\n';
 
         // locals
-        core->console << "                         locals: ";
-        for (int i=0, n=scopeBase; i < n; i++) {
+        for (int i=0, n = scopeBase; i < n; i++) {
             printValue(state->value(i));
-            core->console << " ";
+            if (i+1 < n)
+                out << ' ';
         }
-        core->console << '\n';
+        out << "] {";
 
-        // opcode
-        if (unreachable)
-            core->console << "- ";
-        else
-            core->console << "  ";
-        core->console << (uint64_t)state->pc << ':';
-        core->formatOpcode(core->console, pc, (AbcOpcode)*pc, (int)(state->pc), pool);
-        core->console << '\n';
+        // scope chain
+        for (int i = scopeBase, n = scopeBase + state->scopeDepth; i < n; i++) {
+            printValue(state->value(i));
+            if (i+1 < n)
+                out << ' ';
+        }
+        out << "} (";
+
+        // stack
+        int stackStart;
+        const int stackLimit = 20; // don't display more than this, to reduce verbosity
+        if (state->stackDepth > stackLimit) {
+            stackStart = stackBase + state->stackDepth - stackLimit;
+            out << "..." << stackStart << ": ";
+        } else {
+            stackStart = stackBase;
+        }
+        for (int i = stackStart, n = stackBase + state->stackDepth; i < n; i++) {
+            printValue(state->value(i));
+            if (i+1 < n)
+                out << ' ';
+        }
+        out << ")\n";
+    }
+
+    /** display contents of a captured scope chain */
+    void Verifier::printScope(const char* title, const ScopeTypeChain* scope)
+    {
+        PrintWriter& out = core->console;
+        out << "  " << title << " = ";
+        if (scope && scope->size > 0) {
+            out << '[';
+            for (int i=0, n=scope->size; i < n; i++) {
+                Traits* t = scope->getScopeTraitsAt(i);
+                if (!t)
+                    out << "*!";
+                else
+                    out << t->format(core);
+                if (i+1 < n)
+                    out << ' ';
+            }
+            out << "]\n";
+        } else {
+            out << "null\n";
+        }
     }
 
     void Verifier::printValue(Value& v)
     {
         Traits* t = v.traits;
-        if (!t)
-        {
-            core->console << "*";
-        }
-        else
-        {
+        if (!t) {
+            core->console << (v.notNull ? "*!" : "*");
+        } else {
             core->console << t->format(core);
-            if (!t->isNumeric() && !v.notNull && t != BOOLEAN_TYPE && t != NULL_TYPE)
-                core->console << "?";
+            if (!t->isNumeric() && t != BOOLEAN_TYPE && t != NULL_TYPE && t != VOID_TYPE)
+                core->console << (v.notNull ? "" : "?");
         }
-
         coder->formatOperand(core->console, v);
     }
     #endif /* AVMPLUS_VERBOSE */

@@ -150,7 +150,9 @@ namespace avmplus
     public:
         bool verbose;
         bool secondTry;
-        void showState(FrameState* state, const byte* pc, bool unreachable);
+        void printScope(const char* title, const ScopeTypeChain*);
+        void printState(StringBuffer& prefix, FrameState* state);
+        void printOpcode(const byte* pc, bool unreachable);
         void verifyWarn(int errorId, ...);
         #endif
 
