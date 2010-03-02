@@ -49,11 +49,11 @@ namespace avmplus
 	{
 	}
 
-	Traits* Domain::getNamedTraits(Stringp name, Namespacep ns, bool recursive/*=true*/)
+	Traits* Domain::getNamedTraits(Stringp name, Namespacep ns)
 	{
 		Traits *traits = NULL;
-		if (recursive && m_base) {
-			traits = m_base->getNamedTraits(name, ns, true);
+		if (m_base) {
+			traits = m_base->getNamedTraits(name, ns);
 		}
 		if (!traits) {
 			traits = (Traits*) m_namedTraits->get(name, ns);
@@ -61,22 +61,10 @@ namespace avmplus
 		return traits;
 	}
 
-	Traits* Domain::getNamedTraits(const Multiname *multiname, bool recursive/*=true*/)
+	Traits* Domain::getNamedTraitsNoRecurse(Stringp name, Namespacep ns)
 	{
-		Traits *traits = NULL;
-		if (recursive && m_base) {
-			traits = m_base->getNamedTraits(multiname, true);
-		}
-		if (!traits) {
-			traits = (Traits*) m_namedTraits->getMulti(multiname);
-		}
-		return traits;
+		return (Traits*) m_namedTraits->get(name, ns);
 	}
-	
-    Traits* Domain::getNamedTrait(Stringp name, Namespace* ns) 
-    { 
-        return (Traits*)m_namedTraits->get(name, ns); 
-    }
 
     void Domain::addNamedTrait(Stringp name, Namespace* ns, Traits* v) 
     { 
