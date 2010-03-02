@@ -150,6 +150,7 @@ namespace avmplus
 
         void addPrivateNamedScript(Stringp name, Namespacep ns, MethodInfo *a);
         Traits* addUniqueTraits(Stringp name, Namespacep ns, Traits* traits);
+        Traits* addUniqueParameterizedITraits(AvmCore* core, const Toplevel* toplevel, Traits* base, Traits* param_traits);
 
         /** deferred parsing */
         void parseMultiname(const byte *pos, Multiname& m) const;
