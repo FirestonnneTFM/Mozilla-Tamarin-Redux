@@ -45,12 +45,11 @@ namespace avmplus
 	public:
 		Domain(AvmCore* core, Domain* base);
 		
-		Traits* getNamedTraits(Stringp name, Namespacep ns, bool recursive/*=true*/);
-		Traits* getNamedTraits(const Multiname* multiname, bool recursive/*=true*/);
+		Traits* getNamedTraits(Stringp name, Namespacep ns);
+        Traits* getNamedTraitsNoRecurse(Stringp name, Namespacep ns);
 		MethodInfo* getNamedScript(Stringp name, Namespacep ns);
 		MethodInfo* getNamedScript(const Multiname* multiname);
 		
-		Traits* getNamedTrait(Stringp name, Namespace* ns);
 		void addNamedTrait(Stringp name, Namespace* ns, Traits* v);
 		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v);
 
