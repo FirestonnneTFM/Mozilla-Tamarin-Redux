@@ -4774,14 +4774,9 @@ namespace avmplus
                     branchIns(LIR_j, 0, handler_pc_off);
                 }
             }
+            plive(_ef);
+            plive(_save_eip);
         }
-
-        // extend live range of critical stuff
-        // fixme -- this should be automatic based on live analysis
-        Ins(LIR_plive, methodFrame);
-        Ins(LIR_plive, env_param);
-        Ins(LIR_plive, coreAddr);
-        Ins(LIR_plive, undefConst);
 
         if (prolog->env_scope)      plive(prolog->env_scope);
         if (prolog->env_vtable)     plive(prolog->env_vtable);
@@ -4789,19 +4784,20 @@ namespace avmplus
         if (prolog->env_domainenv)  plive(prolog->env_domainenv);
         if (prolog->env_toplevel)   plive(prolog->env_toplevel);
 
-        if (info->hasExceptions()) {
-            Ins(LIR_plive, _ef);
-            Ins(LIR_plive, _save_eip);
-        }
-
-        LIns* last = Ins(LIR_plive, vars);
-
         #ifdef DEBUGGER
         if (haveDebugger) {
-            Ins(LIR_plive, csn);
-            last = Ins(LIR_plive, varTraits);
+            plive(csn);
+            plive(varTraits);
         }
         #endif
+
+        // extend live range of critical stuff
+        // fixme -- this should be automatic based on live analysis
+        plive(methodFrame);
+        plive(env_param);
+        frag->lastIns = plive(coreAddr);
+        prologLastIns = prolog->lastIns;
+
 
         for (Seq<Patch>* p = patches.get(); p != NULL; p = p->tail) {
             Patch& patch = p->head;
@@ -4813,9 +4809,6 @@ namespace avmplus
                 patch.br->setTarget(patch.label->bb);
             }
         }
-
-        frag->lastIns = last;
-        prologLastIns = prolog->lastIns;
 
         info->set_lookup_cache_size(finddef_cache_builder.next_cache);
     }
@@ -5320,6 +5313,7 @@ namespace avmplus
         verbose_only(bool verbose = names && pool->isVerbose(LC_Liveness);)
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         livein.reset();
+        bool vars_touched = false;
         SeqReader in(frag->lastIns, prologLastIns);
         for (LIns *i = in.read(); !i->isop(LIR_start); i = in.read()) {
             LOpcode op = i->opcode();
@@ -5345,6 +5339,7 @@ namespace avmplus
                             continue;
                         } else {
                             livein.clear(d);
+                            vars_touched = true;
                         }
                     }
                     break;
@@ -5402,6 +5397,9 @@ namespace avmplus
                 AvmLog("  %s\n", names->formatIns(i));
             })
         }
+        // if we have not removed all stores to vars, mark it live
+        if (vars_touched)
+            plive(vars);
     }
 
     /*
@@ -5464,14 +5462,20 @@ namespace avmplus
 
     void CodegenLIR::emitMD()
     {
+        // if debugging, don't eliminate vars.  this way the debugger sees the true
+        // variable state at each safe point.
+        if (haveDebugger) {
+            plive(vars);
+        } else {
+            deadvars();  // deadvars_kill() will add live(vars) if necessary
+        } 
+
+        // do this very last so it's after LIR_live(vars)
+        frag->lastIns = plive(undefConst);
+
         PERFM_NTPROF("compile");
         mmfx_delete( alloc1 );
         alloc1 = NULL;
-
-        // if debugging, don't eliminate vars.  this way the debugger sees the true
-        // variable state at each safe point.
-        if (!haveDebugger)
-            deadvars();
 
         CodeMgr *mgr = pool->codeMgr;
         #ifdef NJ_VERBOSE
