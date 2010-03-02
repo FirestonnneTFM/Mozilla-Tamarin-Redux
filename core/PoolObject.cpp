@@ -135,10 +135,10 @@ namespace avmplus
         return (Traits*) _namedTraits->getName(name);
     }
 
-    Traits* PoolObject::getTraits(Stringp name, Namespace* ns, bool recursive/*=true*/) const
+    Traits* PoolObject::getTraits(Stringp name, Namespace* ns) const
     {
         // look for class in VM-wide type table
-        Traits* t = domain->getNamedTraits(name, ns, recursive);
+        Traits* t = domain->getNamedTraits(name, ns, true);
 
         // look for class in current ABC file
         if (t == NULL)
@@ -146,12 +146,12 @@ namespace avmplus
         return t;
     }
 
-    Traits* PoolObject::getTraits(Stringp name, bool recursive/*=true*/) const
+    Traits* PoolObject::getTraits(Stringp name) const
     {
-        return getTraits(name, core->getPublicNamespace((PoolObject*) this), recursive);
+        return getTraits(name, core->getPublicNamespace((PoolObject*) this));
     }
 
-    Traits* PoolObject::getTraits(const Multiname& mname, const Toplevel* toplevel, bool recursive/*=true*/) const
+    Traits* PoolObject::getTraits(const Multiname& mname, const Toplevel* toplevel) const
     {
         // do full lookup of multiname, error if more than 1 match
         // return Traits if 1 match, NULL if 0 match, throw ambiguity error if >1 match
@@ -161,7 +161,7 @@ namespace avmplus
             // multiname must not be an attr name, have wildcards, or have runtime parts.
             for (int32_t i=0, n=mname.namespaceCount(); i < n; i++)
             {
-                Traits* t = getTraits(mname.getName(), mname.getNamespace(i), recursive);
+                Traits* t = getTraits(mname.getName(), mname.getNamespace(i));
                 if (t != NULL)
                 {
                     if (match == NULL)
@@ -181,9 +181,20 @@ namespace avmplus
         return match;
     }
 
-    void PoolObject::addNamedTraits(Stringp name, Namespace* ns, Traits* traits)
+    Traits* PoolObject::addUniqueTraits(Stringp name, Namespace* ns, Traits* traits)
     {
+        // look for class in VM-wide type table
+        Traits* t = domain->getNamedTraits(name, ns, false);
+
+        // look for class in current ABC file
+        if (t == NULL)
+            t = (Traits*) _namedTraits->get(name, ns);
+
+        if (t != NULL)
+            return t;
+
         _namedTraits->add(name, ns, (Binding)traits);
+        return NULL;
     }
 
     Namespace* PoolObject::getNamespace(int32_t index) const
