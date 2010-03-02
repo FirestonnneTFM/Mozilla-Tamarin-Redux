@@ -1554,7 +1554,7 @@ namespace avmplus
                 apis |= ApiUtils::getCompatibleAPIs(core, nsi->getAPI());
             }
             ns = ApiUtils::getVersionedNamespace(core, ns, apis);
-            if (!domain->getNamedTrait(name, ns)) {
+            if (!domain->getNamedTraitsNoRecurse(name, ns)) {
                 domain->addNamedTrait(name, ns, itraits);
             }
         }
