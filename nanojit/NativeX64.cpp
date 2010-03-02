@@ -451,8 +451,7 @@ namespace nanojit
 // XORPD because it's one byte shorter.  This is ok because it's only used for
 // zeroing an XMM register;  hence the single argument.
 // Also note that (unlike most SSE2 instructions) XORPS does not have a prefix, thus emitrr() should be used.
-    void Assembler::XORPS(        R r)  { emitrr(X64_xorps,    r,r); asm_output("xorps %s, %s",   RQ(r),RQ(r)); }
-    void Assembler::XORPS(   R l, R r)  { emitrr(X64_xorps,    l,r); asm_output("xorps %s, %s",   RQ(l),RQ(r)); }
+    void Assembler::XORPS(        R r)  { emitrr(X64_xorps,   r,r); asm_output("xorps %s, %s",   RQ(r),RQ(r)); }
     void Assembler::DIVSD(   R l, R r)  { emitprr(X64_divsd,   l,r); asm_output("divsd %s, %s",   RQ(l),RQ(r)); }
     void Assembler::MULSD(   R l, R r)  { emitprr(X64_mulsd,   l,r); asm_output("mulsd %s, %s",   RQ(l),RQ(r)); }
     void Assembler::ADDSD(   R l, R r)  { emitprr(X64_addsd,   l,r); asm_output("addsd %s, %s",   RQ(l),RQ(r)); }
@@ -805,7 +804,7 @@ namespace nanojit
 
     // binary op with integer registers
     void Assembler::asm_arith(LIns *ins) {
-        Register rr, ra, rb = UnspecifiedReg;   // init to shut GCC up
+        Register rr, ra, rb;
 
         switch (ins->opcode()) {
         case LIR_lsh: case LIR_qilsh:
@@ -896,7 +895,8 @@ namespace nanojit
         ArgSize sizes[MAXARGS];
         int argc = call->get_sizes(sizes);
 
-        if (!call->isIndirect()) {
+        bool indirect = call->isIndirect();
+        if (!indirect) {
             verbose_only(if (_logc->lcbits & LC_Assembly)
                 outputf("        %p:", _nIns);
             )
@@ -908,21 +908,16 @@ namespace nanojit
                 CALLRAX();
                 asm_quad(RAX, (uint64_t)target, /*canClobberCCs*/true);
             }
-            // Call this now so that the arg setup can involve 'rr'.
-            freeResourcesOf(ins);
         } else {
             // Indirect call: we assign the address arg to RAX since it's not
             // used for regular arguments, and is otherwise scratch since it's
             // clobberred by the call.
-            CALLRAX();
-
-            // Call this now so that the arg setup can involve 'rr'.
-            freeResourcesOf(ins);
-
-            // Assign the call address to RAX.  Must happen after freeResourcesOf()
-            // since RAX is usually the return value and will be allocated until that point.
             asm_regarg(ARGSIZE_P, ins->arg(--argc), RAX);
+            CALLRAX();
         }
+
+        // Call this now so that the arg setup can involve 'rr'. 
+        freeResourcesOf(ins);
 
     #ifdef _WIN64
         int stk_used = 32; // always reserve 32byte shadow area
@@ -1385,13 +1380,15 @@ namespace nanojit
         }
         else {
             int d = findMemFor(ins);
-            if (IsFpReg(r)) {
-                NanoAssert(ins->isF64());
+            if (ins->isF64()) {
+                NanoAssert(IsFpReg(r));
                 MOVSDRM(r, d, FP);
-            } else if (ins->isN64()) {
+            } else if (ins->isI64()) {
+                NanoAssert(IsGpReg(r));
                 MOVQRM(r, d, FP);
             } else {
                 NanoAssert(ins->isI32());
+                NanoAssert(IsGpReg(r));
                 MOVLRM(r, d, FP);
             }
         }
@@ -1477,19 +1474,16 @@ namespace nanojit
         int32_t dr;
         switch (ins->opcode()) {
             case LIR_ldq:
-            case LIR_ldqc:
                 beginLoadRegs(ins, GpRegs, rr, dr, rb);
                 NanoAssert(IsGpReg(rr));
                 MOVQRM(rr, dr, rb);     // general 64bit load, 32bit const displacement
                 break;
             case LIR_ldf:
-            case LIR_ldfc:
                 beginLoadRegs(ins, FpRegs, rr, dr, rb);
                 NanoAssert(IsFpReg(rr));
                 MOVSDRM(rr, dr, rb);    // load 64bits into XMM
                 break;
             case LIR_ld32f:
-            case LIR_ldc32f:
                 beginLoadRegs(ins, FpRegs, rr, dr, rb);
                 NanoAssert(IsFpReg(rr));
                 CVTSS2SD(rr, rr);
@@ -1508,25 +1502,20 @@ namespace nanojit
         int32_t d;
         beginLoadRegs(ins, GpRegs, r, d, b);
         LOpcode op = ins->opcode();
-        switch(op) {
+        switch (op) {
             case LIR_ldzb:
-            case LIR_ldcb:
                 MOVZX8M( r, d, b);
                 break;
             case LIR_ldzs:
-            case LIR_ldcs:
                 MOVZX16M(r, d, b);
                 break;
             case LIR_ld:
-            case LIR_ldc:
                 MOVLRM(  r, d, b);
                 break;
             case LIR_ldsb:
-            case LIR_ldcsb:
                 MOVSX8M( r, d, b);
                 break;
             case LIR_ldss:
-            case LIR_ldcss:
                 MOVSX16M( r, d, b);
                 break;
             default:
@@ -1700,8 +1689,6 @@ namespace nanojit
     // Register clean-up for 2-address style unary ops of the form R = (op) R.
     // Pairs with beginOp1Regs() and beginOp2Regs().
     void Assembler::endOpRegs(LIns* ins, Register rr, Register ra) {
-        (void) rr; // quell warnings when NanoAssert is compiled out.
-
         LIns* a = ins->oprnd1();
 
         // We're finished with 'ins'.
@@ -1719,35 +1706,29 @@ namespace nanojit
 
     void Assembler::asm_fneg(LIns *ins) {
         Register rr, ra;
-        beginOp1Regs(ins, FpRegs, rr, ra);
-        if (isS32((uintptr_t)negateMask)) {
-            // builtin code is in bottom or top 2GB addr space, use absolute addressing
-            XORPSA(rr, (int32_t)(uintptr_t)negateMask);
-        } else if (isTargetWithinS32((NIns*)negateMask)) {
-            // jit code is within +/-2GB of builtin code, use rip-relative
-            XORPSM(rr, (NIns*)negateMask);
+        if (isS32((uintptr_t)negateMask) || isTargetWithinS32((NIns*)negateMask)) {
+            beginOp1Regs(ins, FpRegs, rr, ra);
+            if (isS32((uintptr_t)negateMask)) {
+                // builtin code is in bottom or top 2GB addr space, use absolute addressing
+                XORPSA(rr, (int32_t)(uintptr_t)negateMask);
+            } else {
+                // jit code is within +/-2GB of builtin code, use rip-relative
+                XORPSM(rr, (NIns*)negateMask);
+            }
+            if (ra != rr)
+                asm_nongp_copy(rr,ra);
+            endOpRegs(ins, rr, ra);
+
         } else {
             // This is just hideous - can't use RIP-relative load, can't use
             // absolute-address load, and cant move imm64 const to XMM.
-            // Solution: move negateMask into a temp GP register, then copy to
-            // a temp XMM register.
-            // Nb: we don't want any F64 values to end up in a GpReg, nor any
-            // I64 values to end up in an FpReg.
-            // 
-            //   # 'gt' and 'ga' are temporary GpRegs.
-            //   # ins->oprnd1() is in 'rr' (FpRegs)
-            //   mov   gt, 0x8000000000000000
-            //   mov   rt, gt
-            //   xorps rr, rt
-            Register rt = registerAllocTmp(FpRegs & ~(rmask(ra)|rmask(rr)));
-            Register gt = registerAllocTmp(GpRegs);
-            XORPS(rr, rt);
-            MOVQXR(rt, gt);
-            asm_quad(gt, negateMask[0], /*canClobberCCs*/true);
+            // so do it all in a GPR.  hrmph.
+            rr = prepareResultReg(ins, GpRegs);
+            ra = findRegFor(ins->oprnd1(), GpRegs & ~rmask(rr));
+            XORQRR(rr, ra);                                     // xor rr, ra
+            asm_quad(rr, negateMask[0], /*canClobberCCs*/true); // mov rr, 0x8000000000000000
+            freeResourcesOf(ins);
         }
-        if (ra != rr)
-            asm_nongp_copy(rr,ra);
-        endOpRegs(ins, rr, ra);
     }
 
     void Assembler::asm_spill(Register rr, int d, bool /*pop*/, bool quad) {

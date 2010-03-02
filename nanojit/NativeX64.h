@@ -478,7 +478,6 @@ namespace nanojit
         void MOVSXDR(Register l, Register r);\
         void MOVZX8(Register l, Register r);\
         void XORPS(Register r);\
-        void XORPS(Register l, Register r);\
         void DIVSD(Register l, Register r);\
         void MULSD(Register l, Register r);\
         void ADDSD(Register l, Register r);\
