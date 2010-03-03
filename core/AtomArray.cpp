@@ -120,7 +120,7 @@ namespace avmplus
 		Atom *arr = m_atoms;
 		Atom retAtom = arr[0];
 		setAtInternal(0, 0);
-		VMPI_memmove (arr, arr + 1, (m_length - 1) * sizeof(Atom));
+		moveAtoms (0, 1, m_length - 1);
 		arr[m_length - 1] = 0; // clear item so GC can collect it.
 		m_length--;
 
@@ -150,14 +150,14 @@ namespace avmplus
 
 			// shift elements down
 			int toMove = m_length - insertPoint - deleteCount;
-			VMPI_memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
+			moveAtoms (insertPoint + insertCount, insertPoint + deleteCount, toMove);
 
 			// clear top part for RC purposes
 			VMPI_memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(Atom));
 		}
 		else if (l_shiftAmount > 0)
 		{
-			VMPI_memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
+			moveAtoms (insertPoint + l_shiftAmount, insertPoint, m_length - insertPoint);
 			// clear for RC purposes
 			VMPI_memset (arr + insertPoint, 0, l_shiftAmount * sizeof(Atom));
 		}
@@ -184,7 +184,7 @@ namespace avmplus
 
 		checkCapacity (m_length + argc);
 		Atom *arr = m_atoms;
-		VMPI_memmove (arr + argc, arr, m_length * sizeof(Atom));
+		moveAtoms (argc, 0, m_length);
 		// clear moved element for RC purposes
 		VMPI_memset (arr, 0, argc * sizeof(Atom));
 		for(int i=0; i<argc; i++) {
@@ -253,7 +253,7 @@ namespace avmplus
 		if (m_length)
 		{
 			// shift down entries
-			VMPI_memmove (arr + index, arr + index + 1, (this->m_length - index) * sizeof(Atom));
+			moveAtoms (index, index + 1, m_length - index);
 		}
 		arr[m_length] = 0; // clear our entry so GC can collect it
 	}
@@ -265,9 +265,8 @@ namespace avmplus
 		checkCapacity (m_length + 1);
 		m_length++;
 
-		Atom *arr = m_atoms;
 		// shift entries up by one to make room
-		VMPI_memmove (arr + index + 1, arr + index, (m_length - index - 1) * sizeof(Atom));
+		moveAtoms (index + 1, index, m_length - index - 1);
 		// this element is still in the array so don't let setAtInternal decrement its count
 		m_atoms[index] = 0;
 		setAtInternal(index, a);
