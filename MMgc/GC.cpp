@@ -2750,7 +2750,7 @@ namespace MMgc
 		// tail is entirely equivalent to discarding the work items that
 		// would result from scanning the tail.
 
-		if (size > kLargestAlloc)
+		if (size > kMarkItemSplitThreshold)
 		{
             if (wi.IsProtectionItem()) {
                 // Unprotect an item that was protected earlier, see comment block above.
@@ -3258,6 +3258,18 @@ namespace MMgc
 		if (!m_barrierWork.Push(item))
 			PushWorkItem(item);
 	}
+
+	void GC::movePointers(void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers)
+	{
+		if(marking && GetMark(dstArray) && ContainsPointers(dstArray) &&
+		   // don't push small items that are moving pointers inside the same array
+		   (dstArray != srcArray || Size(dstArray) > kMarkItemSplitThreshold)) {
+			// this could be optimized to just re-scan the dirty region
+			GCWorkItem item(dstArray, (uint32_t)Size(dstArray), GCWorkItem::kGCObject);
+			PushWorkItem(item);
+		}
+		VMPI_memmove(dstArray + dstOffset, srcArray + srcOffset, numPointers * sizeof(void*));
+ 	}
 	
 	bool GC::ContainsPointers(const void *item)
 	{

@@ -136,6 +136,23 @@ namespace avmplus
 			AvmAssert(data != NULL);
 			data[index] = value;
 		}
+
+		void arraycopy(const T* src, uint32_t srcStart, T* dst, uint32_t dstStart, size_t nbr)
+		{
+			// we have 2 cases, either closing a gap or opening it.
+			if ((src == dst) && (srcStart > dstStart) )
+			{
+				for(size_t i=0; i<nbr; i++)
+					dst[i+dstStart] = src[i+srcStart];	
+			}
+			else
+			{
+				dstStart--;
+				srcStart--;
+				for(size_t i=nbr; i>0; i--)
+					dst[i+dstStart] = src[i+srcStart];
+			}
+		}
 	};
 	
 	template<class T, class ListAllocPolicy>
@@ -153,6 +170,27 @@ namespace avmplus
 			AvmAssert(data != NULL);
 			WB(gc, data, &data[index], value);
 		}
+
+		void arraycopy(const T* src, uint32_t srcStart, T* dst, uint32_t dstStart, size_t nbr)
+		{
+			if(gc) {
+				gc->movePointers((void**)dst, dstStart, (const void**)src, srcStart, nbr);
+			} else {
+				// we have 2 cases, either closing a gap or opening it.
+				if ((src == dst) && (srcStart > dstStart) )
+				{
+					for(size_t i=0; i<nbr; i++)
+						dst[i+dstStart] = src[i+srcStart];	
+				}
+				else
+				{
+					dstStart--;
+					srcStart--;
+					for(size_t i=nbr; i>0; i--)
+						dst[i+dstStart] = src[i+srcStart];
+				}
+			}		       
+		}
 	};
 
 	template<class T, class ListAllocPolicy>
@@ -169,6 +207,27 @@ namespace avmplus
 			AvmAssert(index < max);
 			AvmAssert(data != NULL);
 			WBRC(gc, data, &data[index], value);
+		}
+
+		void arraycopy(const T* src, uint32_t srcStart, T* dst, uint32_t dstStart, size_t nbr)
+		{
+			if(gc) {
+				gc->movePointers(dst, dstStart, src, srcStart, nbr);
+			} else {
+				// we have 2 cases, either closing a gap or opening it.
+				if ((src == dst) && (srcStart > dstStart) )
+				{
+					for(size_t i=0; i<nbr; i++)
+						dst[i+dstStart] = src[i+srcStart];	
+				}
+				else
+				{
+					dstStart--;
+					srcStart--;
+					for(size_t i=nbr; i>0; i--)
+						dst[i+dstStart] = src[i+srcStart];
+				}
+			}		       
 		}
 	};
 
@@ -287,7 +346,7 @@ namespace avmplus
 			ensureCapacity(len+l.size());
 			// FIXME: make RCObject version
 			AvmAssert(kElementType != LIST_RCObjects);
-			arraycopy(l.getData(), 0, data, len, l.size());
+			arraycopy(l.getData(), 0, data, (uint32_t)len, (size_t) l.size());
 			len += l.size();
 		}
 
@@ -397,21 +456,6 @@ namespace avmplus
 				newMax = max * 2;
 		
 			ensureCapacity(newMax);
-		}
-
-		void arraycopy(const T* src, int srcStart, T* dst, int dstStart, int nbr)
-		{
-			// we have 2 cases, either closing a gap or opening it.
-			if ((src == dst) && (srcStart > dstStart) )
-			{
-				for(int i=0; i<nbr; i++)
-					dst[i+dstStart] = src[i+srcStart];	
-			}
-			else
-			{
-				for(int i=nbr-1; i>=0; i--)
-					dst[i+dstStart] = src[i+srcStart];
-			}
 		}
 	};
 }

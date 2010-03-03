@@ -721,13 +721,12 @@ namespace avmplus
 
 			// shift elements down
 			int toMove = m_length - insertPoint - deleteCount;
-			VMPI_memmove(arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
-
+			movePointers(insertPoint + insertCount, insertPoint + deleteCount, toMove);
 			nullAtomRange(arr + m_length - numberBeingDeleted, numberBeingDeleted);
 		}
 		else if (l_shiftAmount > 0)
 		{
-			VMPI_memmove(arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
+			movePointers(insertPoint + l_shiftAmount, insertPoint, m_length - insertPoint);
 			//clear for gc purposes
 			nullAtomRange(arr + insertPoint, l_shiftAmount);
 		}
@@ -783,7 +782,7 @@ namespace avmplus
 				toplevel()->throwRangeError(kVectorFixedError);
 			grow (m_length + argc);
 			Atom *arr = m_array;
-			VMPI_memmove(arr + argc, arr, m_length * sizeof(Atom));
+			movePointers(argc, 0, m_length);
 			// clear moved element for RC purposes
 			nullAtomRange(arr, argc);
 			m_length += argc;
