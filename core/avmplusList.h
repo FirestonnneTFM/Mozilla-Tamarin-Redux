@@ -147,9 +147,7 @@ namespace avmplus
 			}
 			else
 			{
-				dstStart--;
-				srcStart--;
-				for(size_t i=nbr; i>0; i--)
+				for(intptr_t i=nbr-1; i>=0; i--)
 					dst[i+dstStart] = src[i+srcStart];
 			}
 		}
@@ -184,9 +182,7 @@ namespace avmplus
 				}
 				else
 				{
-					dstStart--;
-					srcStart--;
-					for(size_t i=nbr; i>0; i--)
+					for(intptr_t i=nbr-1; i>=0; i--)
 						dst[i+dstStart] = src[i+srcStart];
 				}
 			}		       
@@ -212,7 +208,7 @@ namespace avmplus
 		void arraycopy(const T* src, uint32_t srcStart, T* dst, uint32_t dstStart, size_t nbr)
 		{
 			if(gc) {
-				gc->movePointers(dst, dstStart, src, srcStart, nbr);
+				gc->movePointers((void**)dst, dstStart, (const void**)src, srcStart, nbr);
 			} else {
 				// we have 2 cases, either closing a gap or opening it.
 				if ((src == dst) && (srcStart > dstStart) )
@@ -222,9 +218,7 @@ namespace avmplus
 				}
 				else
 				{
-					dstStart--;
-					srcStart--;
-					for(size_t i=nbr; i>0; i--)
+					for(intptr_t i=nbr-1; i>=0; i--)
 						dst[i+dstStart] = src[i+srcStart];
 				}
 			}		       
