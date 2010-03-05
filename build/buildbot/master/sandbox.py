@@ -396,20 +396,6 @@ class sandbox:
                 name="Build_Release_cov",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
-    sb_linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=mips-linux', 'avmshell_mips', 'true'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'CXX': 'mips-linux-gnu-g++',
-                    'CC' : 'mips-linux-gnu-gcc',
-                    'LD' : 'mips-linux-gnu-ar',
-                    'AR' : 'mips-linux-gnu-ar',
-                }
-                description='starting release-mips build...',
-                descriptionDone='finished release-mips build.',
-                name="Build_Release-MIPS",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
     sb_linux_compile_factory.addStep(compile_buildcheck_local)
     sb_linux_compile_factory.addStep(util_upload_asteam_local)
 
@@ -787,7 +773,7 @@ class sandbox:
     #########################################
     sb_android_smoke_factory = factory.BuildFactory()
     sb_android_smoke_factory.addStep(download_testmedia)
-    sb_android_smoke_factory.addStep(BuildShellCommand(
+    sb_android_smoke_factory.addStep(TestSuiteShellCommand(
                 command=['./run-smoketests-android.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
                 description='starting to run smoke tests...',
@@ -1123,7 +1109,7 @@ class sandbox:
     #### builder for android-test       ####
     ########################################
     sb_android_test_factory = factory.BuildFactory()
-    android_test_factory.addStep(TestSuiteShellCommand(
+    sb_android_test_factory.addStep(TestSuiteShellCommand(
                 command=['./run-acceptancetests-android.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
                 description='starting to run acceptance tests...',
