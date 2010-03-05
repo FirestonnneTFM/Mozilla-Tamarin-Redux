@@ -79,7 +79,7 @@ while True:
     newdata=s.recv(1024)
 #    print("data: "+newdata)
     result+=newdata
-    if result.find("EXITCODE")>-1:
+    if re.search("EXITCODE=[0-9]+\s",result):
         break
     if result.find("-- application argument")>-1:
         break
@@ -89,7 +89,7 @@ while True:
         print("error: timeout detected")
         break
 s.close()
-if result.find("EXITCODE")>-1:
+if re.search("EXITCODE=[0-9]+\s",result):
     exitcode=result[result.find("EXITCODE")+9:]
     if exitcode.find("$")>-1:
         exitcode=exitcode[0:exitcode.find("$")]
