@@ -893,8 +893,18 @@ namespace MMgc
 		 */
 		void SignalFreeWork(size_t size);
 
+		/**
+		 * Replacement for VMPI_memmove for arrays of GC pointers that
+		 * will properly account for mark state (since the GC now
+		 * splits up large objects on the mark stack a memmove from the mutator
+		 * can occur while an objection is partially marked).  Start must be
+		 * a GC object and src and dst must be pointers in start.
+		 */
+		void movePointers(void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers);
+
 	private:
 		const static size_t kLargestAlloc = 1968;
+		const static size_t kMarkItemSplitThreshold = kLargestAlloc;
 
 		class RCRootSegment : public GCRoot
 		{
