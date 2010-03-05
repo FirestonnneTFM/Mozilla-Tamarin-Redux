@@ -452,20 +452,6 @@ class tamarinredux:
                 name="Build_Release_cov",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
-    linux_compile_factory.addStep(BuildShellCommand(
-                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --target=mips-linux', 'avmshell_mips', 'true'],
-                env={
-                    'branch': WithProperties('%s','branch'),
-                    'CXX': 'mips-linux-gnu-g++',
-                    'CC' : 'mips-linux-gnu-gcc',
-                    'LD' : 'mips-linux-gnu-ar',
-                    'AR' : 'mips-linux-gnu-ar',
-                }
-                description='starting release-mips build...',
-                descriptionDone='finished release-mips build.',
-                name="Build_Release-MIPS",
-                workdir="../repo/build/buildbot/slaves/scripts")
-    )
     linux_compile_factory.addStep(compile_buildcheck_local)
     linux_compile_factory.addStep(util_upload_asteam_local)
     linux_compile_factory.addStep(util_upload_mozilla)
@@ -866,7 +852,7 @@ class tamarinredux:
     #########################################
     android_smoke_factory = factory.BuildFactory()
     android_smoke_factory.addStep(download_testmedia)
-    android_smoke_factory.addStep(BuildShellCommand(
+    android_smoke_factory.addStep(TestSuiteShellCommand(
                 command=['./run-smoketests-android.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
                 description='starting to run smoke tests...',
@@ -1402,6 +1388,8 @@ class tamarinredux:
     windows_deep_factory.addStep(test_misc)
     windows_deep_factory.addStep(compile_generic(name="Release-api", shellname="avmshell_api", args="--enable-shell --enable-api-versioning", upload="true"))
     windows_deep_factory.addStep(test_generic(name="Release-api", shellname="avmshell_api", vmargs="", config="", scriptargs="versioning/"))
+    windows_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true"))
+    windows_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air", vmargs="", config="", scriptargs=""))
     windows_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     windows_deep_factory.addStep(util_process_clean)
@@ -1488,8 +1476,10 @@ class tamarinredux:
     mac_ppc_deep_factory.addStep(test_generic(name="DebugDebugger64", shellname="avmshell_sd_64_ppc", vmargs="", config="ppc-mac-tvm-debugdebugger-deep", scriptargs=""))
     mac_ppc_deep_factory.addStep(deep_release_esc)
     mac_ppc_deep_factory.addStep(test_misc)
-    mac_ppc_deep_factory.addStep(compile_generic(name="Release-api", shellname="avmshell_api", args="--enable-shell --enable-api-versioning", upload="true"))
-    mac_ppc_deep_factory.addStep(test_generic(name="Release-api", shellname="avmshell_api", vmargs="", config="", scriptargs="versioning/"))
+    mac_ppc_deep_factory.addStep(compile_generic(name="Release-api", shellname="avmshell_api_ppc", args="--enable-shell --enable-api-versioning", upload="true"))
+    mac_ppc_deep_factory.addStep(test_generic(name="Release-api", shellname="avmshell_api_ppc", vmargs="", config="", scriptargs="versioning/"))
+    mac_ppc_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air_ppc", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true"))
+    mac_ppc_deep_factory.addStep(test_generic(name="ReleasDebugger-air", shellname="avmshell_air_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_ppc", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_ppc_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     mac_ppc_deep_factory.addStep(util_process_clean)
@@ -1534,6 +1524,8 @@ class tamarinredux:
     windows_64_deep_factory.addStep(sync_update)
     windows_64_deep_factory.addStep(bb_slaveupdate(slave="windows64-deep"))
     windows_64_deep_factory.addStep(download_testmedia)
+    windows_64_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger --target=x86_64-win", upload="true"))
+    windows_64_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air_64", vmargs="", config="", scriptargs=""))
     windows_64_deep_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="x64-win-tvm-debug-deep", scriptargs=""))
     windows_64_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="x64-win-tvm-debugdebugger-deep", scriptargs=""))
     windows_64_deep_factory.addStep(deep_release_esc)
@@ -1599,6 +1591,8 @@ class tamarinredux:
     linux_deep_factory.addStep(test_misc)
     linux_deep_factory.addStep(compile_generic(name="Release-api", shellname="avmshell_api", args="--enable-shell --enable-api-versioning", upload="true"))
     linux_deep_factory.addStep(test_generic(name="Release-api", shellname="avmshell_api", vmargs="", config="", scriptargs="versioning/"))
+    linux_deep_factory.addStep(compile_generic(name="ReleaseDebugger-air", shellname="avmshell_air", args="--enable-shell --enable-override-global-new --enable-use-system-malloc --enable-debugger", upload="true"))
+    linux_deep_factory.addStep(test_generic(name="ReleaseDebugger-air", shellname="avmshell_air", vmargs="", config="", scriptargs=""))
     linux_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     linux_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     linux_deep_factory.addStep(util_process_clean)
