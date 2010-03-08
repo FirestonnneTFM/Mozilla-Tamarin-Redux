@@ -330,6 +330,8 @@ class RuntestBase:
                 cputype='ppc'
             elif re.search('(mips)', f.lower()):
                 cputype='mips'
+            elif re.search('(arm)', f.lower()):
+                cputype='arm'
             elif re.search('(32-bit|80386|i386)', f):
                 cputype='x86'
             elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f):
@@ -340,7 +342,7 @@ class RuntestBase:
                 
         except:
             try:
-                cputype={'AMD64':'x86','x86':'x86','i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','mips':'mips','':'x86'}[platform.machine()]
+                cputype={'AMD64':'x86','x86':'x86','i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','mips':'mips','armv7l':'arm','':'x86'}[platform.machine()]
                 if cputype == 'x86' and splitext(self.avm)[0][-2:] == '64':
                     cputype == 'x64'
             except:

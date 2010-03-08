@@ -109,8 +109,7 @@ if MMGC_DYNAMIC:
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
 
 arm_fpu = o.getBoolArg("arm-fpu",False)  
-if arm_fpu:
-    APP_CPPFLAGS += "-DAVMSYSTEM_ARM_FPU=1 "
+arm_neon = o.getBoolArg("arm-neon",False)  
 
 the_os, cpu = config.getTarget()
 
@@ -135,7 +134,11 @@ if config.getCompiler() == 'GCC':
         else: # gcc 4.3 or later
             APP_CXXFLAGS += "-Werror -Wempty-body -Wno-logical-op -Wmissing-field-initializers -Wstrict-aliasing=3 -Wno-array-bounds -Wno-clobbered -Wstrict-overflow=0 -funit-at-a-time  "
     if arm_fpu:
-        OPT_CXXFLAGS += "-mfloat-abi=softfp -mfpu=vfp -march=armv6"  # compile to use hardware fpu and armv6
+        OPT_CXXFLAGS += "-mfloat-abi=softfp -mfpu=vfp -march=armv6 -Wno-cast-align "  # compile to use hardware fpu and armv6
+        DEBUG_CXXFLAGS += OPT_CXXFLAGS
+    if arm_neon:
+        OPT_CXXFLAGS += "-mfloat-abi=softfp -mfpu=neon -march=armv7-a -Wno-cast-align "  # compile to use neon vfp and armv7
+        DEBUG_CXXFLAGS += OPT_CXXFLAGS
     if config.getDebug():
         APP_CXXFLAGS += ""
     else:
@@ -191,6 +194,10 @@ if zlib_lib is not None:
 else:
     AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,zlib)'
 
+sys_root_dir = o.getStringArg('sys-root-dir')
+if sys_root_dir is not None:
+    OS_LDFLAGS += " --sysroot=%s " % sys_root_dir
+    OPT_CXXFLAGS += " --sysroot=%s " % sys_root_dir
 
 if the_os == "darwin":
     AVMSHELL_LDFLAGS += " -exported_symbols_list "  + thisdir + "/platform/mac/avmshell/exports.exp"
