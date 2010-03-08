@@ -59,6 +59,7 @@ namespace avmshell
 		, enter_debugger_on_launch(false)
 		, interrupts(AvmCore::interrupts_default)
 		, verifyall(AvmCore::verifyall_default)
+		, verifyonly(AvmCore::verifyonly_default)
 		, greedy(false)
 		, nogc(false)
 		, incremental(true)
@@ -367,6 +368,7 @@ namespace avmshell
 		config.interrupts = settings.interrupts;
 #ifdef VMCFG_VERIFYALL
 		config.verifyall = settings.verifyall;
+		config.verifyonly = settings.verifyonly;
 #endif
 		config.jitordie = settings.jitordie;
 #if defined FEATURE_NANOJIT
@@ -501,22 +503,33 @@ namespace avmshell
 				handleAOT(this, shell_domain, shell_domainEnv, shell_toplevel, codeContext);
 			} else
 #endif
+			AvmCore* core = shell_toplevel->core();
 			if (AbcParser::canParse(code) == 0) {
+				#ifdef VMCFG_VERIFYALL
+				if (config.verbose_vb & VB_verify)
+					console << "ABC " << filename << "\n";
+				#endif
 				uint32_t api = this->getAPI(NULL);
 				handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
 			}
 			else if (isSwf(code)) {
+				#ifdef VMCFG_VERIFYALL
+				if (config.verbose_vb & VB_verify)
+					console << "SWF " << filename << "\n";
+				#endif
 				handleSwf(filename, code, shell_domainEnv, shell_toplevel, codeContext);
 			}
 			else {
 #ifdef VMCFG_EVAL
-				// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
-				String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
-				String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
-				ScriptBuffer empty;		// With luck: allow the
-				code = empty;			//    buffer to be garbage collected
-				uint32_t api = this->getAPI(NULL);
-				handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+				if (!core->config.verifyonly) {
+					// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
+					String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
+					String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
+					ScriptBuffer empty;		// With luck: allow the
+					code = empty;			//    buffer to be garbage collected
+					uint32_t api = this->getAPI(NULL);
+					handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+				}
 #else
 				console << "unknown input format in file: " << filename << "\n";
 				return(1);

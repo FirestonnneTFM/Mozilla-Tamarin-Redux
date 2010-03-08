@@ -108,6 +108,11 @@ namespace avmplus
         MMGC_STATIC_ASSERT(offsetof(MethodInfo, _implGPR) == 0);
 #endif
 
+#ifdef VMCFG_VERIFYALL
+        if (abcFlags & MethodInfo::NATIVE && !native_info && pool->core->config.verifyonly)
+            _flags |= ABSTRACT_METHOD;
+#endif
+
         if (native_info)
         {
             this->_native.thunker = native_info->thunker;
