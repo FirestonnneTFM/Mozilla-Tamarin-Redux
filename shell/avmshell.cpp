@@ -678,6 +678,10 @@ namespace avmshell
 					else if (!VMPI_strcmp(arg+2, "verifyall")) {
 						settings.verifyall = true;
 					}
+					else if (!VMPI_strcmp(arg+2, "verifyonly")) {
+						settings.verifyall = true;
+						settings.verifyonly = true;
+					}
 #endif /* VMCFG_VERIFYALL */
 					else if (!VMPI_strcmp(arg+2, "greedy")) {
 						settings.greedy = true;
@@ -1107,6 +1111,7 @@ namespace avmshell
 #endif
 #ifdef VMCFG_VERIFYALL
 	    AvmLog("          [-Dverifyall] verify greedily instead of lazily\n");
+	    AvmLog("          [-Dverifyonly] verify greedily and don't execute anything\n");
 #endif
 #ifdef VMCFG_SELFTEST
 		AvmLog("          [-Dselftest[=component,category,test]]");

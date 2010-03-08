@@ -82,6 +82,7 @@ namespace avmplus
     const bool AvmCore::methodNames_default = true;
     const bool AvmCore::oldVectorMethodNames_default = true;
     const bool AvmCore::verifyall_default = false;
+    const bool AvmCore::verifyonly_default = false;
     const Runmode AvmCore::runmode_default = RM_mixed;
     const bool AvmCore::interrupts_default = false;
     const bool AvmCore::jitordie_default = false;
@@ -216,6 +217,7 @@ namespace avmplus
         config.oldVectorMethodNames = oldVectorMethodNames_default;
 
         config.verifyall = verifyall_default;
+        config.verifyonly = verifyonly_default;
 
         // jit flag forces use of jit-compiler instead of interpreter
         config.runmode = runmode_default;
@@ -541,7 +543,7 @@ namespace avmplus
         // get the main entry point and its global traits
         if (pool->scriptCount() == 0)
         {
-            toplevel->verifyErrorClass()->throwError(kMissingEntryPointError);
+            toplevel->throwVerifyError(kMissingEntryPointError);
         }
 
         if (domainEnv == NULL)
@@ -596,6 +598,10 @@ namespace avmplus
         bool createdToplevel = (toplevel == NULL);
 
         ScriptEnv* main = prepareActionPool(pool, domainEnv, toplevel, codeContext);
+#ifdef VMCFG_VERIFYALL
+        if (config.verifyonly)
+            return undefinedAtom;
+#endif
 
         if (!createdToplevel)
         {

@@ -110,6 +110,10 @@ namespace avmplus
 
     ClassClosure* Toplevel::resolveBuiltinClass(int class_id)
     {
+#ifdef VMCFG_VERIFYALL
+        if (core()->config.verifyonly)
+            return NULL;
+#endif
         ClassClosure* cc = findClassInPool(class_id, core()->builtinPool);
         //builtinClasses[class_id] = cc;
         WBRC(core()->GetGC(), _builtinClasses, &_builtinClasses[class_id], cc);
@@ -1215,22 +1219,44 @@ namespace avmplus
         return result;
     }
 
+#ifdef VMCFG_VERIFYALL
+#   define VERIFYFAILED(core, msg) verifyFailed(core, msg)
+    void verifyFailed(AvmCore* core, String* msg)
+    {
+        if (core->config.verifyonly) {
+            core->console << "VERIFY FAILED: " << msg << '\n';
+            exit(1);
+        }
+    }
+#else
+#   define VERIFYFAILED(core, msg) 
+#endif
+
     void Toplevel::throwVerifyError(int id) const
     {
+        VERIFYFAILED(core(), core()->formatErrorMessageV(id));
         verifyErrorClass()->throwError(id);
     }
 
 #ifdef DEBUGGER
     void Toplevel::throwVerifyError(int id, Stringp arg1) const
     {
+        VERIFYFAILED(core(), core()->formatErrorMessageV(id, arg1));
         verifyErrorClass()->throwError(id, arg1);
     }
 
     void Toplevel::throwVerifyError(int id, Stringp arg1, Stringp arg2) const
     {
+        VERIFYFAILED(core(), core()->formatErrorMessageV(id, arg1, arg2));
         verifyErrorClass()->throwError(id, arg1, arg2);
     }
 #endif
+
+    void Toplevel::throwVerifyError(int id, Stringp arg1, Stringp arg2, Stringp arg3) const
+    {
+        VERIFYFAILED(core(), core()->formatErrorMessageV(id, arg1, arg2, arg3));
+        verifyErrorClass()->throwError(id, arg1, arg2, arg3);
+    }
 
     void Toplevel::throwTypeError(int id) const
     {

@@ -73,7 +73,7 @@ namespace avmplus
 
 		#define AvmAssert(x)					_AvmAssert((x), __LINE__,__FILE__)
 		#define _AvmAssert(x, line_, file_)		__AvmAssert((x), line_, file_)
-		#define __AvmAssert(x, line_, file_)	do { AvmAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")"); } while (0) /* no semi */
+		#define __AvmAssert(x, line_, file_)	do { AvmAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")\n"); } while (0) /* no semi */
 		
 	#else
 		#define AvmAssertMsg(x,y)	do { } while (0) /* no semi */
