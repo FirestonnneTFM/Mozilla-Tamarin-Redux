@@ -741,8 +741,14 @@ namespace avmplus
             if (abcFlags & MethodInfo::NATIVE)
             {
                 ni = natives ? natives->getNativeInfo(i) : NULL;
-                if (!ni)
-                {
+#ifdef VMCFG_VERIFYALL
+                if (core->config.verifyonly) {
+                    // if it has native methods then treat it as builtin
+                    pool->isBuiltin = true;
+                }
+                else
+#endif
+                if (!ni) {
                     // If this assert hits, you're missing a native method.  Method "i"
                     // corresponds to the function of the same number in
                     // source\avmglue\avmglue.h if you're running the Flash player.

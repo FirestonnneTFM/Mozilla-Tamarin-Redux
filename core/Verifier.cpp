@@ -181,7 +181,6 @@ namespace avmplus
     // Presumably it's here to remove a warning about variable clobbered by longjmp
     void Verifier::verify(CodeWriter * volatile coder)
     {
-      //AvmLog("begin verify\n");
         SAMPLE_FRAME("[verify]", core);
 
         #ifdef AVMPLUS_VERBOSE
@@ -1925,7 +1924,7 @@ namespace avmplus
             }
             default:
                 // size was nonzero, but no case handled the opcode.  someone asleep at the wheel!
-                AvmAssert(false);
+                AvmAssertMsg(false, "Unhandled opcode");
             }
 
             coder->writeOpcodeVerified(state, pc, opcode);
@@ -2568,7 +2567,7 @@ namespace avmplus
             v2.verify(&stubWriter);
         }
         #endif
-        core->throwErrorV(toplevel->verifyErrorClass(), errorID, arg1, arg2, arg3);
+        toplevel->throwVerifyError(errorID, arg1, arg2, arg3);
 
         // This function throws, and should never return.
         AvmAssert(false);

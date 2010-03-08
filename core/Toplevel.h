@@ -91,6 +91,7 @@ namespace avmplus
         void throwVerifyError(int id) const;
         void throwVerifyError(int id, Stringp arg1) const;
         void throwVerifyError(int id, Stringp arg1, Stringp arg2) const;
+        void throwVerifyError(int id, Stringp arg1, Stringp arg2, Stringp arg3) const;
 
         void throwTypeError(int id) const;
         void throwTypeError(int id, Stringp arg1) const;

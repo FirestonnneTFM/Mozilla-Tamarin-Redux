@@ -1526,6 +1526,12 @@ namespace avmplus
             Multiname qname(ns(), name());
             if (toplevel)
                 toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(&qname), core->toErrorString(this));
+#ifdef VMCFG_VERIFYALL
+            else {
+                if (core->config.verifyonly)
+                    core->console << "ILLEGAL OVERRIDE\n";
+            }
+#endif
             AvmAssert(!"unhandled verify error");
         }
 
@@ -1928,7 +1934,7 @@ namespace avmplus
 failure:
 
 #ifdef AVMPLUS_VERBOSE
-        if (pool->isVerbose(VB_traits))
+        if (pool->isVerbose(VB_traits) || pool->core->config.verifyonly)
             core->console << "illegal override in "<< this << ": " << Multiname(ns,name) <<"\n";
 #endif
         if (toplevel)

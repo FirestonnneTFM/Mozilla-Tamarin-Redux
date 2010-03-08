@@ -131,7 +131,8 @@ namespace avmshell
  	static const int stagDoABC2 = 82;
 
 	void handleDoABC(int type, SwfParser &parser, int taglen,
-						  DomainEnv* domainEnv, Toplevel*& toplevel, CodeContext* codeContext)
+				  DomainEnv* domainEnv, Toplevel*& toplevel, CodeContext* codeContext,
+				  List<PoolObject*> &deferred)
 	{
 		MMgc::GC *gc = toplevel->gc();
 		AvmCore *core = toplevel->core();
@@ -156,10 +157,12 @@ namespace avmshell
 		ReadOnlyScriptBufferImpl* abcbuf = new (gc) ReadOnlyScriptBufferImpl(&parser.swf[parser.pos], abclen);
 		ScriptBuffer code(abcbuf);
 
-		// FIXME get this from the SWF
+		// FIXME get api from the SWF
 		uint32_t api = core->getAPI(NULL);
 		if (flags & kDoAbcLazyInitializeFlag) {
-			core->parseActionBlock(code, 0, toplevel, domainEnv->domain(), NULL, api);
+			PoolObject* pool = core->parseActionBlock(code, 0, toplevel, domainEnv->domain(), NULL, api);
+			deferred.add(pool);
+			// defer: handleActionPool(pool/* result of parse */, domainEnv, toplevel, codeContext);
 		} else {
 			core->handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext, api);
 		}
@@ -181,6 +184,7 @@ namespace avmshell
 		parser.pos = 4; // skip magic #
 		uint32_t swflen = parser.readU32();
 		AvmCore *core = toplevel->core();
+		List<PoolObject*> deferred(core->gc);
 		if (swf[0] == 'C') {
 			// decompress the swf
 			MMgc::GC *gc = toplevel->gc();
@@ -211,9 +215,12 @@ namespace avmshell
 			if (taglen == 63)
 				taglen = parser.readU32();
 			if (type == stagDoABC || type == stagDoABC2)
-				handleDoABC(type, parser, taglen, domainEnv, toplevel, codeContext);		
+				handleDoABC(type, parser, taglen, domainEnv, toplevel, codeContext, deferred);		
 			else
 				parser.pos += taglen;
+		}
+		for (int i = 0, n = deferred.size(); i < n; i++) {
+			core->handleActionPool(deferred[i], domainEnv, toplevel, codeContext);
 		}
 	}
 }
