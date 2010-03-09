@@ -248,9 +248,6 @@ namespace avmplus
             state->setType(i, ms->paramTraits(i), notNull);
         }
 
-        // initial scope chain types
-        int outer_depth = 0;
-
         if (info->declaringTraits()->init != info && info->declaringScope() == NULL)
         {
             // this can occur when an activation scope inside a class instance method
@@ -261,8 +258,7 @@ namespace avmplus
             verifyFailed(kNoScopeError, core->toErrorString(info));
         }
 
-        const ScopeTypeChain* scope = info->declaringScope();
-        state->scopeDepth = outer_depth;
+        state->scopeDepth = 0;
 
         // resolve catch block types
         parseExceptionHandlers();
@@ -274,7 +270,7 @@ namespace avmplus
 
         #ifdef AVMPLUS_VERBOSE
         if (verbose) {
-            printScope("outer-scope", scope);
+            printScope("outer-scope", info->declaringScope());
             StringBuffer buf(core);
             printState(buf, state);
         }
@@ -382,7 +378,7 @@ namespace avmplus
                             int saveScopeDepth = state->scopeDepth;
                             Value stackEntryZero = saveStackDepth > 0 ? state->stackValue(0) : state->value(0);
                             state->stackDepth = 0;
-                            state->scopeDepth = outer_depth;
+                            state->scopeDepth = 0;
 
                             // add edge from try statement to catch block
                             const byte* target = code_pos + handler->target;
@@ -734,7 +730,7 @@ namespace avmplus
                 checkStack(0,1);
                 MethodInfo* f = checkMethodInfo(imm30);
                 Traits* ftraits = core->traits.function_itraits;
-                const ScopeTypeChain* fscope = ScopeTypeChain::create(core->GetGC(), ftraits, scope, state, NULL, NULL);
+                const ScopeTypeChain* fscope = ScopeTypeChain::create(core->GetGC(), ftraits, info->declaringScope(), state, NULL, NULL);
                 // Duplicate function definitions aren't strictly legal, but can occur
                 // in otherwise "well formed" ABC due to old, buggy versions of ASC.
                 // Specifically, code of the form
@@ -763,7 +759,7 @@ namespace avmplus
                         if (info->method_id() != int32_t(imm30))
                             toplevel->throwVerifyError(kCorruptABCError);
 
-                        AvmAssert(curScope->equals(scope));
+                        AvmAssert(curScope->equals(info->declaringScope()));
                     }
                     AvmAssert(f->isResolved());
                 }
@@ -782,7 +778,7 @@ namespace avmplus
 
             case OP_getlex:
             {
-                if (state->scopeDepth + scope->size == 0)
+                if (state->scopeDepth + info->declaringScope()->size == 0)
                     verifyFailed(kFindVarWithNoScopeError);
                 Multiname multiname;
                 checkConstantMultiname(imm30, multiname);
@@ -797,7 +793,7 @@ namespace avmplus
             case OP_findpropstrict:
             case OP_findproperty:
             {
-                if (state->scopeDepth + scope->size == 0)
+                if (state->scopeDepth + info->declaringScope()->size == 0)
                     verifyFailed(kFindVarWithNoScopeError);
                 Multiname multiname;
                 checkConstantMultiname(imm30, multiname);
@@ -818,7 +814,7 @@ namespace avmplus
                 Traits *itraits = ctraits->itraits;
 
                 // add a type constraint for the "this" scope of static methods
-                const ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), ctraits, scope, state, NULL, ctraits);
+                const ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), ctraits, info->declaringScope(), state, NULL, ctraits);
 
                 if (state->scopeDepth > 0)
                 {
@@ -1433,6 +1429,7 @@ namespace avmplus
                     verifyFailed(kScopeStackOverflowError);
 
                 Traits* scopeTraits = state->peek().traits;
+                const ScopeTypeChain* scope = info->declaringScope();
                 if (scope->fullsize > (scope->size+state->scopeDepth))
                 {
                     // extra constraints on type of pushscope allowed
@@ -1495,7 +1492,7 @@ namespace avmplus
             }
             case OP_popscope:
                 //checkStack(0,0)
-                if (state->scopeDepth-- <= outer_depth)
+                if (state->scopeDepth-- <= 0)
                     verifyFailed(kScopeStackUnderflowError);
 
                 coder->write(state, pc, opcode);
@@ -1562,6 +1559,7 @@ namespace avmplus
             case OP_setglobalslot:
             {
                 // FIXME need test case
+                const ScopeTypeChain* scope = info->declaringScope();
                 if (!state->scopeDepth && !scope->size)
                     verifyFailed(kNoGlobalScopeError);
                 Traits *globalTraits = scope->size > 0 ? scope->getScopeTraitsAt(0) : state->scopeValue(0).traits;
