@@ -65,6 +65,7 @@ class sandbox:
                                    "winmobile-emulator-compile-sandbox",
                                    "solaris-sparc-compile-sandbox",
                                    "android-compile-sandbox",
+                                   "linux-arm-compile-sandbox",
                                    ])
 
     smoke = BuilderDependent(name="smoke-sandbox",upstream=compile, callbackInterval=60,
@@ -76,7 +77,8 @@ class sandbox:
                                    "linux-smoke-sandbox", "linux64-smoke-sandbox",
                                    "winmobile-emulator-smoke-sandbox",
                                    "solaris-sparc-smoke-sandbox",
-                                   "android-smoke-sandbox"],
+                                   "android-smoke-sandbox",
+                                   "linux-arm-smoke-sandbox"],
                     builderDependencies=[
                                   ["windows-smoke-sandbox", "windows-compile-sandbox"], 
                                   ["windows64-smoke-sandbox", "windows64-compile-sandbox"], 
@@ -93,6 +95,7 @@ class sandbox:
                                   ["winmobile-emulator-smoke-sandbox", "winmobile-emulator-compile-sandbox"],
                                   ["solaris-sparc-smoke-sandbox", "solaris-sparc-compile-sandbox"],
                                   ["android-smoke-sandbox","android-compile-sandbox"],
+                                  ["linux-arm-smoke-sandbox","linux-compile-sandbox"],
                                  ])
 
     test = BuilderDependent(name="test-sandbox",upstream=smoke, callbackInterval=60,
@@ -104,7 +107,8 @@ class sandbox:
                                    "linux-test-sandbox", "linux64-test-sandbox",
                                    "winmobile-emulator-test-sandbox",
                                    "solaris-sparc-test-sandbox",
-                                   "android-test-sandbox"],
+                                   "android-test-sandbox",
+                                   "linux-arm-test-sandbox"],
                     builderDependencies=[
                                   ["windows-test-sandbox", "windows-smoke-sandbox"], 
                                   ["windows64-test-sandbox", "windows64-smoke-sandbox"], 
@@ -121,6 +125,7 @@ class sandbox:
                                   ["winmobile-emulator-test-sandbox", "winmobile-emulator-smoke-sandbox"],
                                   ["solaris-sparc-test-sandbox", "solaris-sparc-smoke-sandbox"],
                                   ["android-test-sandbox", "android-smoke-sandbox"],
+                                  ["linux-arm-test-sandbox", "linux-arm-smoke-sandbox"],
                                  ])
 
     schedulers = [compile, smoke, test]
@@ -396,6 +401,34 @@ class sandbox:
                 name="Build_Release_cov",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
+    sb_linux_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'arm-none-linux-gnueabi-g++',
+                    'CC' : 'arm-none-linux-gnueabi-gcc',
+                    'LD' : 'arm-none-linux-gnueabi-ld',
+                    'AR' : 'arm-none-linux-gnueabi-ar',
+                },
+                description='starting Release_arm-linux build...',
+                descriptionDone='finished Release_arm-linux build.',
+                name="Release_arm-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_linux_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm_d', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'arm-none-linux-gnueabi-g++',
+                    'CC' : 'arm-none-linux-gnueabi-gcc',
+                    'LD' : 'arm-none-linux-gnueabi-ld',
+                    'AR' : 'arm-none-linux-gnueabi-ar',
+                },
+                description='starting Debug_arm-linux build...',
+                descriptionDone='finished Debug_arm-linux build.',
+                name="Debug_arm-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
     sb_linux_compile_factory.addStep(compile_buildcheck_local)
     sb_linux_compile_factory.addStep(util_upload_asteam_local)
 
@@ -535,6 +568,22 @@ class sandbox:
                 'slavename': "asteammac12",
                 'factory': sb_android_compile_factory,
                 'builddir': './sandbox-android-compile',
+    }
+    
+    ###############################
+    #### builder for linux-arm ####
+    ###############################
+    sb_linux_arm_compile_factory = factory.BuildFactory()
+    sb_linux_arm_compile_factory.addStep(sync_clean)
+    sb_linux_arm_compile_factory.addStep(sync_clone_sandbox)
+    sb_linux_arm_compile_factory.addStep(sync_update)
+    sb_linux_arm_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+
+    sb_linux_arm_compile_builder = {
+                'name': "linux-arm-compile-sandbox",
+                'slavename': "asteamlinarm1",
+                'factory': sb_linux_arm_compile_factory,
+                'builddir': './sandbox-linux-arm-compile',
     }
 
     ################################################################################
@@ -789,6 +838,28 @@ class sandbox:
                 'slavename': "asteammac12",
                 'factory': sb_android_smoke_factory,
                 'builddir': './sanbox-android-smoke',
+    }
+    
+    ###########################################
+    #### builder for linxu-arm-smoke       ####
+    ###########################################
+    sb_linux_arm_smoke_factory = factory.BuildFactory()
+    sb_linux_arm_smoke_factory.addStep(download_testmedia)
+    sb_linux_arm_smoke_factory.addStep(TestSuiteShellCommand(
+                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    sb_linux_arm_smoke_factory.addStep(util_process_clean)
+
+    sb_linux_arm_smoke_builder = {
+                'name': "linux-arm-smoke-sandbox",
+                'slavename': "asteamlinarm1",
+                'factory': sb_linux_arm_smoke_factory,
+                'builddir': './sandbox-linux-arm-smoke',
     }
 
     ################################################################################
@@ -1127,6 +1198,26 @@ class sandbox:
                 'builddir': './sandbox-android-test',
     }
     
+    ##########################################
+    #### builder for linux-arm-test       ####
+    ##########################################
+    sb_linux_arm_test_factory = factory.BuildFactory()
+    sb_linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
+    sb_linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
+    sb_linux_arm_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    sb_linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
+    sb_linux_arm_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
+    
+    sb_linux_arm_test_factory.addStep(util_process_clean)
+
+    sb_linux_arm_test_builder = {
+                'name': "linux-arm-test-sandbox",
+                'slavename': "asteamlinarm1",
+                'factory': sb_linux_arm_test_factory,
+                'builddir': './sandbox-linux-arm-test',
+    }
+    
+    
     
     
     builders = [
@@ -1145,6 +1236,7 @@ class sandbox:
                 sb_winmobile_emulator_compile_builder,
                 sb_solaris_sparc_compile_builder,
                 sb_android_compile_builder,
+                sb_linux_arm_compile_builder,
                 
                 sb_windows_smoke_builder,
                 sb_windows_64_smoke_builder,
@@ -1161,6 +1253,7 @@ class sandbox:
                 sb_winmobile_emulator_smoke_builder,
                 sb_solaris_sparc_smoke_builder,
                 sb_android_smoke_builder,
+                sb_linux_arm_smoke_builder,
                 
                 sb_windows_test_builder,
                 sb_windows_64_test_builder,
@@ -1177,6 +1270,7 @@ class sandbox:
                 sb_winmobile_emulator_test_builder,
                 sb_solaris_sparc_test_builder,
                 sb_android_test_builder,
+                sb_linux_arm_test_builder,
 
                 ]
 
