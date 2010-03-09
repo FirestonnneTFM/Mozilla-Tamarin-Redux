@@ -441,8 +441,8 @@ package flash.sampler
     public native function isGetterSetter(obj:Object, qname:QName):Boolean;
 
    /**
-     * Expose the lexical scope of a Function so that activation objects and all
-     * captured scope objects can be seen by the profiler as being retained by the Function instance.
+     * Exposes the lexical scope of a Function so that captured scope objects (including activation 
+     * objects and with scopes) are seen by the profiler as being retained by the Function instance.
      * @param obj A function
      * @return An array containings all the lexical scope elements
      */
