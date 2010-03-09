@@ -46,7 +46,8 @@
 #undef VMCFG_64BIT
 #undef MMGC_64BIT
 #undef AVMPLUS_64BIT
-#undef VMCFG_UNALIGNED_ACCESS
+#undef VMCFG_UNALIGNED_INT_ACCESS
+#undef VMCFG_UNALIGNED_FP_ACCESS
 #undef VMCFG_BIG_ENDIAN
 #undef AVMPLUS_BIG_ENDIAN
 #undef VMCFG_LITTLE_ENDIAN
@@ -134,15 +135,28 @@
 #endif
 
 
-/* AVMSYSTEM_UNALIGNED_ACCESS
+/* AVMSYSTEM_UNALIGNED_INT_ACCESS
  *
- * Selects an architecture that allows load/store of unaligned words.
+ * Selects an architecture that allows load/store of unaligned 16- and 32-bit ints.
  * There may be a performance penalty, but it will not generate a runtime
  * fault, and will be at least as efficient as separate instructions to load
  * and assembly the word one byte at a time.
  */
-#if !defined AVMSYSTEM_UNALIGNED_ACCESS || AVMSYSTEM_UNALIGNED_ACCESS != 0 && AVMSYSTEM_UNALIGNED_ACCESS != 1
-#  error "AVMSYSTEM_UNALIGNED_ACCESS must be defined and 0 or 1 (only)."
+#if !defined AVMSYSTEM_UNALIGNED_INT_ACCESS || AVMSYSTEM_UNALIGNED_INT_ACCESS != 0 && AVMSYSTEM_UNALIGNED_INT_ACCESS != 1
+#  error "AVMSYSTEM_UNALIGNED_INT_ACCESS must be defined and 0 or 1 (only)."
+#endif
+
+
+/* AVMSYSTEM_UNALIGNED_FP_ACCESS
+ *
+ * Selects an architecture that allows load/store of unaligned 32- and 64-bit floats.
+ * There may be a performance penalty, but it will not generate a runtime
+ * fault, and will be at least as efficient as separate instructions to load
+ * and assembly the word one byte at a time. (Note that if this is not set,
+ * it is assumed that 64-bit floats require 8-byte alignment.)
+ */
+#if !defined AVMSYSTEM_UNALIGNED_FP_ACCESS || AVMSYSTEM_UNALIGNED_FP_ACCESS != 0 && AVMSYSTEM_UNALIGNED_FP_ACCESS != 1
+#  error "AVMSYSTEM_UNALIGNED_FP_ACCESS must be defined and 0 or 1 (only)."
 #endif
 
 
@@ -569,6 +583,7 @@
 #  endif
 #endif
 
+
 #if AVMSYSTEM_BIG_ENDIAN
 #  if AVMSYSTEM_LITTLE_ENDIAN
 #    error "AVMSYSTEM_LITTLE_ENDIAN is precluded for AVMSYSTEM_BIG_ENDIAN"
@@ -680,8 +695,11 @@
 #if AVMSYSTEM_64BIT
 #  define AVMPLUS_64BIT
 #endif
-#if AVMSYSTEM_UNALIGNED_ACCESS
-#  define VMCFG_UNALIGNED_ACCESS
+#if AVMSYSTEM_UNALIGNED_INT_ACCESS
+#  define VMCFG_UNALIGNED_INT_ACCESS
+#endif
+#if AVMSYSTEM_UNALIGNED_FP_ACCESS
+#  define VMCFG_UNALIGNED_FP_ACCESS
 #endif
 #if AVMSYSTEM_BIG_ENDIAN
 #  define VMCFG_BIG_ENDIAN

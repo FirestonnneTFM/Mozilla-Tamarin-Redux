@@ -155,13 +155,24 @@ var FEATURES =
   </feature>
 
   <feature>
-    <desc> Selects an architecture that allows load/store of unaligned words.
+    <desc> Selects an architecture that allows load/store of unaligned 16- and 32-bit ints.
         There may be a performance penalty, but it will not generate a runtime
         fault, and will be at least as efficient as separate instructions to load
         and assembly the word one byte at a time.</desc>
 
-    <name>      AVMSYSTEM_UNALIGNED_ACCESS </name>
-    <defines>   VMCFG_UNALIGNED_ACCESS </defines>
+    <name>      AVMSYSTEM_UNALIGNED_INT_ACCESS </name>
+    <defines>   VMCFG_UNALIGNED_INT_ACCESS </defines>
+  </feature>
+
+  <feature>
+    <desc> Selects an architecture that allows load/store of unaligned 32- and 64-bit floats.
+        There may be a performance penalty, but it will not generate a runtime
+        fault, and will be at least as efficient as separate instructions to load
+        and assembly the word one byte at a time. (Note that if this is not set,
+        it is assumed that 64-bit floats require 8-byte alignment.)</desc>
+
+    <name>      AVMSYSTEM_UNALIGNED_FP_ACCESS </name>
+    <defines>   VMCFG_UNALIGNED_FP_ACCESS </defines>
   </feature>
 
   <feature>

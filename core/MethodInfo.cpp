@@ -446,7 +446,7 @@ namespace avmplus
 
     REALLY_INLINE double unpack_double(const void* src)
     {
-    #if defined(AVMPLUS_64BIT) || defined(VMCFG_UNALIGNED_ACCESS)
+    #if defined(AVMPLUS_64BIT) || defined(VMCFG_UNALIGNED_FP_ACCESS)
         return *(const double*)src;
     #else
         union {
