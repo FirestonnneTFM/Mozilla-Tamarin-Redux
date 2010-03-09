@@ -503,7 +503,6 @@ namespace avmshell
 				handleAOT(this, shell_domain, shell_domainEnv, shell_toplevel, codeContext);
 			} else
 #endif
-			AvmCore* core = shell_toplevel->core();
 			if (AbcParser::canParse(code) == 0) {
 				#ifdef VMCFG_VERIFYALL
 				if (config.verbose_vb & VB_verify)
@@ -521,6 +520,7 @@ namespace avmshell
 			}
 			else {
 #ifdef VMCFG_EVAL
+				AvmCore* core = shell_toplevel->core();
 				if (!core->config.verifyonly) {
 					// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
 					String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
