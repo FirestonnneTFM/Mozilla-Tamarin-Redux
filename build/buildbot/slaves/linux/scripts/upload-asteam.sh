@@ -57,7 +57,7 @@
 
 
 # Release_Coverage
-. ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/${shell_release}_cov $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release}_cov
+. ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/${shell_release_debugger}_cov $ftp_asteam/$branch/$change-${changeid}/$platform/${shell_release_debugger}_cov
 
 # Release_arm-linux
 . ../all/util-upload-ftp-asteam.sh $buildsdir/${change}-${changeid}/$platform/avmshell_neon_arm $ftp_asteam/$branch/$change-${changeid}/$platform/avmshell_neon_arm
