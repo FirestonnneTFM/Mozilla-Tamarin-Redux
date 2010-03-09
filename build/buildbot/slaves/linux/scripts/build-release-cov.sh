@@ -114,7 +114,7 @@ chmod 777 $buildsdir/${change}-${changeid}/$platform/${shell_release_debugger}_c
 # Post coverage data to ASTEAM
 ##
 mv ../${branch}-src.zip .
-${basedir}/../scripts/common/all/util-upload-ftp-asteam.sh ${branch}-src.zip $ftp_asteam/$branch/$change/$platform/${branch}-src.zip
+${basedir}/build/buildbot/slaves/all/util-upload-ftp-asteam.sh ${branch}-src.zip $ftp_asteam/$branch/$change/$platform/${branch}-src.zip
 
 cd $basedir/core
 hg revert avmplusVersion.h
