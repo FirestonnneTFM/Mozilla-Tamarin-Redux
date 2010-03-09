@@ -1,4 +1,3 @@
-#!/bin/bash
 #  ***** BEGIN LICENSE BLOCK *****
 #  Version: MPL 1.1/GPL 2.0/LGPL 2.1
 # 
@@ -16,7 +15,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -35,53 +34,21 @@
 #  the terms of any one of the MPL, the GPL or the LGPL.
 # 
 #  ***** END LICENSE BLOCK ****
-(set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
-##
-# Bring in the environment variables
-##
-. ./environment.sh
+from twisted.application import service
+from buildbot.slave.bot import BuildSlave
 
+basedir = r'/home/build/buildbot/tamarin-redux/linux-arm'
+host = '10.171.22.12'
+port = 9750
+slavename = 'asteamlinarm1'
+passwd = 'asteam'
+keepalive = 600
+usepty = 1
+umask = None
 
-##
-# Calculate the change number and change id
-##
-. ../all/util-calculate-change.sh $1
-
-
-##
-# Upload the common builds
-##
-. ../all/build-check.sh
-
-
-fail=0
-
-
-# ReleaseDebugger_Coverage
-test -f $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_cov || {
-  echo "message: ReleaseDebugger_Coverage Failed"
-  fail=1
-}
-
-# Release_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm || {
-  echo "message: Release_arm-linux Failed"
-  fail=1
-}
-
-# Debug_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm_d || {
-  echo "message: Debug_arm-linux Failed"
-  fail=1
-}
-
-if test "${fail}" = 1; then
-   echo Failing the build
-   exit 1
-fi
-
-
-
-
+application = service.Application('buildslave')
+s = BuildSlave(host, port, slavename, passwd, basedir, keepalive, usepty,
+               umask=umask)
+s.setServiceParent(application)
 
