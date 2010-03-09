@@ -49,6 +49,12 @@
 . ../all/util-calculate-change.sh $1
 
 
+configfile=$2
+test "$configfile" = "" && {
+    configfile=./runsmokes.txt
+}
+
+
 ##
 # Download the shell_release
 ##
@@ -158,7 +164,7 @@ else
 fi
 
 cd $basedir/test
-$py ./runsmokes.py --testfile=./runsmokes.txt --time=120
+$py ./runsmokes.py --testfile="$configfile" --time=120
 ret=$?
 
 exitcode=0

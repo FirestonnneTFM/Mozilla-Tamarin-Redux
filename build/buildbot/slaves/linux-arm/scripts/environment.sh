@@ -16,7 +16,7 @@
 # 
 #  The Initial Developer of the Original Code is
 #  Adobe System Incorporated.
-#  Portions created by the Initial Developer are Copyright (C) 2009
+#  Portions created by the Initial Developer are Copyright (C) 2010
 #  the Initial Developer. All Rights Reserved.
 # 
 #  Contributor(s):
@@ -38,50 +38,24 @@
 (set -o igncr) 2>/dev/null && set -o igncr; # comment is needed
 
 ##
-# Bring in the environment variables
+# Set any variables that my be needed higher up the chain
 ##
-. ./environment.sh
-
-
-##
-# Calculate the change number and change id
-##
-. ../all/util-calculate-change.sh $1
-
+export shell_extension=
 
 ##
-# Upload the common builds
+# Bring in the BRANCH environment variables
 ##
-. ../all/build-check.sh
+. ../all/environment.sh
+
+export platform=linux
+workdir=`pwd`
+export basedir=`cd ${workdir}/../../../..; pwd`
+export buildsdir=`cd ${basedir}/../builds; pwd`
 
 
-fail=0
-
-
-# ReleaseDebugger_Coverage
-test -f $buildsdir/$change-${changeid}/$platform/${shell_release_debugger}_cov || {
-  echo "message: ReleaseDebugger_Coverage Failed"
-  fail=1
-}
-
-# Release_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm || {
-  echo "message: Release_arm-linux Failed"
-  fail=1
-}
-
-# Debug_arm-linux
-test -f $buildsdir/$change-${changeid}/$platform/avmshell_neon_arm_d || {
-  echo "message: Debug_arm-linux Failed"
-  fail=1
-}
-
-if test "${fail}" = 1; then
-   echo Failing the build
-   exit 1
-fi
-
-
-
+export shell_release=avmshell_neon_arm
+export shell_release_debugger=avmshell_neon_arm
+export shell_debug=avmshell_neon_arm_d
+export shell_debug_debugger=avmshell_neon_arm_d
 
 
