@@ -64,7 +64,8 @@ class tamarinredux:
                                    "linux-compile", "linux64-compile",
                                    "winmobile-emulator-compile",
                                    "solaris-sparc-compile",
-                                   "android-compile"])
+                                   "android-compile",
+                                   "linux-arm-compile"])
 
     smoke = BuilderDependent(name="smoke",upstream=compile, callbackInterval=60,
                     builderNames=["windows-smoke", "windows64-smoke",
@@ -75,7 +76,8 @@ class tamarinredux:
                                    "linux-smoke", "linux64-smoke",
                                    "winmobile-emulator-smoke",
                                    "solaris-sparc-smoke",
-                                   "android-smoke"],
+                                   "android-smoke",
+                                   "linux-arm-smoke"],
                     builderDependencies=[
                                   ["windows-smoke", "windows-compile"], 
                                   ["windows64-smoke", "windows64-compile"], 
@@ -92,6 +94,7 @@ class tamarinredux:
                                   ["winmobile-emulator-smoke", "winmobile-emulator-compile"],
                                   ["solaris-sparc-smoke", "solaris-sparc-compile"],
                                   ["android-smoke","android-compile"],
+                                  ["linux-arm-smoke","linux-compile"],
                                  ])
 
     test = BuilderDependent(name="test",upstream=smoke, callbackInterval=60,
@@ -103,7 +106,8 @@ class tamarinredux:
                                    "linux-test", "linux64-test",
                                    "winmobile-emulator-test",
                                    "solaris-sparc-test",
-                                   "android-test"],
+                                   "android-test",
+                                   "linux-arm-test"],
                     builderDependencies=[
                                   ["windows-test", "windows-smoke"], 
                                   ["windows64-test", "windows64-smoke"], 
@@ -120,6 +124,7 @@ class tamarinredux:
                                   ["winmobile-emulator-test", "winmobile-emulator-smoke"],
                                   ["solaris-sparc-test", "solaris-sparc-smoke"],
                                   ["android-test", "android-smoke"],
+                                  ["linux-arm-test", "linux-arm-smoke"],
                                  ])
 
     performance = PhaseTwoScheduler(name="performance", branch="%s-perf" % BRANCH, treeStableTimer=30, 
@@ -452,6 +457,34 @@ class tamarinredux:
                 name="Build_Release_cov",
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
+    linux_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'arm-none-linux-gnueabi-g++',
+                    'CC' : 'arm-none-linux-gnueabi-gcc',
+                    'LD' : 'arm-none-linux-gnueabi-ld',
+                    'AR' : 'arm-none-linux-gnueabi-ar',
+                },
+                description='starting Release_arm-linux build...',
+                descriptionDone='finished Release_arm-linux build.',
+                name="Release_arm-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    linux_compile_factory.addStep(BuildShellCommand(
+                command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm_d', 'false'],
+                env={
+                    'branch': WithProperties('%s','branch'),
+                    'CXX': 'arm-none-linux-gnueabi-g++',
+                    'CC' : 'arm-none-linux-gnueabi-gcc',
+                    'LD' : 'arm-none-linux-gnueabi-ld',
+                    'AR' : 'arm-none-linux-gnueabi-ar',
+                },
+                description='starting Debug_arm-linux build...',
+                descriptionDone='finished Debug_arm-linux build.',
+                name="Debug_arm-linux",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
     linux_compile_factory.addStep(compile_buildcheck_local)
     linux_compile_factory.addStep(util_upload_asteam_local)
     linux_compile_factory.addStep(util_upload_mozilla)
@@ -613,6 +646,22 @@ class tamarinredux:
                 'slavename': "asteammac12",
                 'factory': android_compile_factory,
                 'builddir': './android-compile',
+    }
+    
+    ###############################
+    #### builder for linux-arm ####
+    ###############################
+    linux_arm_compile_factory = factory.BuildFactory()
+    linux_arm_compile_factory.addStep(sync_clean)
+    linux_arm_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm_compile_factory.addStep(sync_update)
+    linux_arm_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+
+    linux_arm_compile_builder = {
+                'name': "linux-arm-compile",
+                'slavename': "asteamlinarm1",
+                'factory': linux_arm_compile_factory,
+                'builddir': './linux-arm-compile',
     }
 
     ################################################################################
@@ -870,6 +919,27 @@ class tamarinredux:
                 'builddir': './android-smoke',
     }
 
+    ###########################################
+    #### builder for linxu-arm-smoke       ####
+    ###########################################
+    linux_arm_smoke_factory = factory.BuildFactory()
+    linux_arm_smoke_factory.addStep(download_testmedia)
+    linux_arm_smoke_factory.addStep(TestSuiteShellCommand(
+                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    linux_arm_smoke_factory.addStep(util_process_clean)
+
+    linux_arm_smoke_builder = {
+                'name': "linux-arm-smoke",
+                'slavename': "asteamlinarm1",
+                'factory': linux_arm_smoke_factory,
+                'builddir': './linux-arm-smoke',
+    }
 
 
     ################################################################################
@@ -1208,6 +1278,26 @@ class tamarinredux:
                 'slavename': "asteammac12",
                 'factory': android_test_factory,
                 'builddir': './android-test',
+    }
+    
+    
+    ##########################################
+    #### builder for linux-arm-test       ####
+    ##########################################
+    linux_arm_test_factory = factory.BuildFactory()
+    linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
+    linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
+    linux_arm_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
+    linux_arm_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
+    
+    linux_arm_test_factory.addStep(util_process_clean)
+
+    linux_arm_test_builder = {
+                'name': "linux-arm-test",
+                'slavename': "asteamlinarm1",
+                'factory': linux_arm_test_factory,
+                'builddir': './linux-arm-test',
     }
 
 
@@ -1620,6 +1710,7 @@ class tamarinredux:
                 winmobile_emulator_compile_builder,
                 solaris_sparc_compile_builder,
                 android_compile_builder,
+                linux_arm_compile_builder,
                 
                 windows_smoke_builder,
                 windows_64_smoke_builder,
@@ -1636,6 +1727,7 @@ class tamarinredux:
                 winmobile_emulator_smoke_builder,
                 solaris_sparc_smoke_builder,
                 android_smoke_builder,
+                linux_arm_smoke_builder,
                 
                 windows_test_builder,
                 windows_64_test_builder,
@@ -1652,6 +1744,7 @@ class tamarinredux:
                 winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
                 android_test_builder,
+                linux_arm_test_builder,
 
                 windows_performance_builder,
                 mac_performance_builder,
