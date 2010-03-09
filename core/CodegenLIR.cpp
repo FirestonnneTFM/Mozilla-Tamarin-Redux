@@ -210,54 +210,47 @@ namespace avmplus
 
     #include "../core/jit-calls.h"
 
-#if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(VMCFG_UNALIGNED_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
-    #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+#if NJ_EXPANDED_LOADSTORE_SUPPORTED
+    static const size_t TAGSIZE = sizeof(uint8_t);  // 1 byte
+    static const LOpcode LIR_ST_TAG = LIR_stb;      // store byte
+    static const LOpcode LIR_LD_TAG = LIR_ldzb;     // load byte
+#else
+    static const size_t TAGSIZE = sizeof(uint32_t); // 1 int
+    static const LOpcode LIR_ST_TAG = LIR_sti;      // load int
+    static const LOpcode LIR_LD_TAG = LIR_ld;       // store int
+#endif
+
+#if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
+    #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
+#endif
+
+#if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(VMCFG_UNALIGNED_FP_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
+    #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
 #endif
 
     struct MopsInfo
     {
         uint32_t size;
-#ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
         LOpcode op;
-#else
         const CallInfo* call;
-#endif
     };
 
     static const MopsInfo kMopsLoadInfo[7] = {
-#ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
-        { 1, LIR_ldsb },
-        { 2, LIR_ldss },
-        { 1, LIR_ldzb },
-        { 2, LIR_ldzs },
-        { 4, LIR_ld },
-        { 4, LIR_ld32f },
-        { 8, LIR_ldf }
-#else
-        { 1, FUNCTIONID(mop_lix8) },
-        { 2, FUNCTIONID(mop_lix16) },
-        { 1, FUNCTIONID(mop_liz8) },
-        { 2, FUNCTIONID(mop_liz16) },
-        { 4, FUNCTIONID(mop_li32) },
-        { 4, FUNCTIONID(mop_lf32) },
-        { 8, FUNCTIONID(mop_lf64) }
-#endif
+        { 1, LIR_ldsb, FUNCTIONID(mop_lix8) },
+        { 2, LIR_ldss, FUNCTIONID(mop_lix16) },
+        { 1, LIR_ldzb, FUNCTIONID(mop_liz8) },
+        { 2, LIR_ldzs, FUNCTIONID(mop_liz16) },
+        { 4, LIR_ld, FUNCTIONID(mop_li32) },
+        { 4, LIR_ld32f, FUNCTIONID(mop_lf32) },
+        { 8, LIR_ldf, FUNCTIONID(mop_lf64) }
     };
 
     static const MopsInfo kMopsStoreInfo[5] = {
-#ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
-        { 1, LIR_stb },
-        { 2, LIR_sts },
-        { 4, LIR_sti },
-        { 4, LIR_st32f },
-        { 8, LIR_stfi }
-#else
-        { 1, FUNCTIONID(mop_si8) },
-        { 2, FUNCTIONID(mop_si16) },
-        { 4, FUNCTIONID(mop_si32) },
-        { 4, FUNCTIONID(mop_sf32) },
-        { 8, FUNCTIONID(mop_sf64) }
-#endif
+        { 1, LIR_stb, FUNCTIONID(mop_si8) },
+        { 2, LIR_sts, FUNCTIONID(mop_si16) },
+        { 4, LIR_sti, FUNCTIONID(mop_si32) },
+        { 4, LIR_st32f, FUNCTIONID(mop_sf32) },
+        { 8, LIR_stfi, FUNCTIONID(mop_sf64) }
      };
 
     class MopsRangeCheckFilter: public LirWriter
@@ -3181,13 +3174,29 @@ namespace avmplus
             case OP_li8:
             case OP_li16:
             case OP_li32:
+            {
+                int32_t index = (int32_t) op1;
+                LIns* mopAddr = localGet(index);
+                const MopsInfo& mi = kMopsLoadInfo[opcode-OP_lix8];
+            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
+                int32_t disp = 0;
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
+                LIns* i2 = loadIns(mi.op, disp, realAddr);
+            #else
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, NULL);
+                LIns* i2 = callIns(mi.call, 1, realAddr);
+            #endif
+                localSet(index, i2, result);
+                break;
+            }
+
             case OP_lf32:
             case OP_lf64:
             {
                 int32_t index = (int32_t) op1;
                 LIns* mopAddr = localGet(index);
                 const MopsInfo& mi = kMopsLoadInfo[opcode-OP_lix8];
-            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
                 LIns* i2 = loadIns(mi.op, disp, realAddr);
@@ -3203,13 +3212,28 @@ namespace avmplus
             case OP_si8:
             case OP_si16:
             case OP_si32:
+            {
+                LIns* svalue = localGet(sp-1);
+                LIns* mopAddr = localGet(sp);
+                const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
+            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
+                int32_t disp = 0;
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
+                lirout->insStore(mi.op, svalue, realAddr, disp);
+            #else
+                LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, NULL);
+                callIns(mi.call, 2, realAddr, svalue);
+            #endif
+                break;
+            }
+
             case OP_sf32:
             case OP_sf64:
             {
-                LIns* svalue = (opcode == OP_sf32 || opcode == OP_sf64) ? localGetf(sp-1) : localGet(sp-1);
+                LIns* svalue = localGetf(sp-1);
                 LIns* mopAddr = localGet(sp);
                 const MopsInfo& mi = kMopsStoreInfo[opcode-OP_si8];
-            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE
+            #ifdef VMCFG_MOPS_USE_EXPANDED_LOADSTORE_FP
                 int32_t disp = 0;
                 LIns* realAddr = mopAddrToRangeCheckedRealAddrAndDisp(mopAddr, mi.size, &disp);
                 lirout->insStore(mi.op, svalue, realAddr, disp);

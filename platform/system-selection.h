@@ -232,7 +232,8 @@
 #include "../nanojit/njcpudetect.h"
 
 #if AVMSYSTEM_IA32 || AVMSYSTEM_AMD64
-  #define AVMSYSTEM_UNALIGNED_ACCESS 1
+  #define AVMSYSTEM_UNALIGNED_INT_ACCESS 1
+  #define AVMSYSTEM_UNALIGNED_FP_ACCESS  1
 #elif AVMSYSTEM_ARM
   #if AVMSYSTEM_WEBOS
     // At the time of this writing (Feb 2010), Palm's webOS deliberately enables software interrupts 
@@ -240,7 +241,7 @@
     // accesses vastly slower than aligned (reportedly on the order of 1000x). Unless they change this 
     // policy (or give us a way to change it selectively) we will consider all webOS builds not to
     // support unaligned access, regardless of the processor variant.
-    #define AVMSYSTEM_UNALIGNED_ACCESS 0
+    #define AVMSYSTEM_UNALIGNED_INT_ACCESS 0
   #else
     //
     // ARM is a little complicated:
@@ -250,13 +251,16 @@
     // ARMv7 (e.g. Cortex-A8): Unaligned access support cannot be disabled; you always have it.
     //
     #if NJ_COMPILER_ARM_ARCH >= 7
-      #define AVMSYSTEM_UNALIGNED_ACCESS 1
+      #define AVMSYSTEM_UNALIGNED_INT_ACCESS 1
     #else
-      #define AVMSYSTEM_UNALIGNED_ACCESS 0
+      #define AVMSYSTEM_UNALIGNED_INT_ACCESS 0
     #endif
   #endif
+  // VFP rules are different from int rules on ARM
+  #define AVMSYSTEM_UNALIGNED_FP_ACCESS  0
 #elif AVMSYSTEM_PPC || AVMSYSTEM_SPARC || AVMSYSTEM_MIPS
-  #define AVMSYSTEM_UNALIGNED_ACCESS 0
+  #define AVMSYSTEM_UNALIGNED_INT_ACCESS 0
+  #define AVMSYSTEM_UNALIGNED_FP_ACCESS  0
 #else
   #error "Error in test to determine endianness"
 #endif
