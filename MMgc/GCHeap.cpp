@@ -1448,9 +1448,6 @@ namespace MMgc
 		const size_t defaultReserve = kDefaultReserve;
 #endif
 
-		if (HardLimitExceeded())
-			return false;
-
 		char *baseAddr = NULL;
 		char *newRegionAddr = NULL;
 		size_t newRegionSize = 0;
@@ -1489,6 +1486,11 @@ namespace MMgc
 				newHeapBlocksSize = numHeapBlocksToNumBlocks(blocksLen + size + extraBlocks);
 			}
 		}		
+
+		// At this point we have adjusted/calculated the final size that would need to be committed. 
+		// We need to check that against the hardlimit to see if we are going to go above it. 
+		if (HardLimitExceeded())
+			return false;
 
 		if(config.useVirtualMemory)
 		{
