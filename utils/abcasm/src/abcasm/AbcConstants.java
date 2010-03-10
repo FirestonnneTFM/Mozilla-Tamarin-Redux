@@ -277,6 +277,7 @@ interface AbcConstants {
     int OP_debugline = 0xF0;
     int OP_debugfile = 0xF1;
     int OP_bkptline = 0xF2;
+    int OP_timestamp = 0xF3;
 
     String[] opNames = {
         "OP_0x00       ",

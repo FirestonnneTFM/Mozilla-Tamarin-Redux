@@ -141,7 +141,7 @@ namespace avmplus
 		// BEGIN
 		// opd throw stk
 		{   -1,  0,   0    W(0)                   N("OP_0x00") },
-		{    0,  0,   0    W(0)                   N("OP_0x01") },
+		{    0,  0,   0    W(0)                   N("bkpt") },
 		{    0,  0,   0    W(0)                   N("nop") },
 		{    0,  1,  -1    W(WOP_throw)           N("throw") },
 		{    1,  1,   0    W(WOP_getsuper)        N("getsuper") },
@@ -390,7 +390,7 @@ namespace avmplus
 		{    1,  0,   0    W(0)                   N("OP_0xF0") },
 		{    1,  0,   0    W(0)                   N("OP_0xF1") },
 #endif
-		{    1,  0,   0    W(0)                   N("OP_0xF2") },
+		{    1,  0,   0    W(0)                   N("bkptline") },
 		{    0,  0,   0    W(0)                   N("timestamp") },
 		{   -1,  0,   0    W(0)                   N("OP_0xF4") },
 		{   -1,  0,   0    W(0)                   N("OP_0xF5") },

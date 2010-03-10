@@ -613,6 +613,7 @@ integer_operands_insn
 		  'newarray' | 'newcatch' | 'newobject' |
 		  'pushbyte' | 'pushshort' | 
 		  'setlocal' /* | 'setslot' | 'setglobalslot' */
+          | 'bkptline'
 	  )
 	  operands = integer_operands_list
 	  {
@@ -722,7 +723,7 @@ no_operand_insn
 		'subtract' | 'subtract_i' | 'swap' |
 		'throw' | 'typeof' |
 		'urshift'
-
+        | 'bkpt' | 'timestamp' 
 		)
 	{
 	    $decl::method_body_info.insn(opcode);
