@@ -46,7 +46,6 @@ namespace avmplus
 		Domain(AvmCore* core, Domain* base);
 		
 		Traits* getNamedTraits(Stringp name, Namespacep ns);
-        Traits* getNamedTraitsNoRecurse(Stringp name, Namespacep ns);
 		MethodInfo* getNamedScript(Stringp name, Namespacep ns);
 		MethodInfo* getNamedScript(const Multiname* multiname);
 		
