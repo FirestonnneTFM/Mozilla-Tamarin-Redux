@@ -51,5 +51,7 @@ if __name__ == '__main__':
     for node in nodes.split():
         if node.startswith("126c6ef95f51"):
             sys.exit(1)
+        if node.startswith("66eb823ce125"):
+            sys.exit(1)
 
     sys.exit(0)
