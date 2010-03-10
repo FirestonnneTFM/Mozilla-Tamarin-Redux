@@ -2208,7 +2208,11 @@ namespace MMgc
 		EnterLock();
 			   
 		// do this after StatusChangeNotify it affects ShouldNotEnter
-		enterFrame = enterFrame->Previous();
+		
+		// need to check if enterFrame is valid, it might have been nulled out by SignalImminentAbort
+		EnterFrame* enter = enterFrame;
+		if (enter)
+			enterFrame = enter->Previous();
 
 		enterCount--;
 
