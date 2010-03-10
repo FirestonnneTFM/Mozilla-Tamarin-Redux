@@ -557,6 +557,9 @@ namespace avmplus
 		switch (opcode) {
 		case OP_coerce_a:
 		case OP_nop:
+                case OP_bkpt:
+                case OP_bkptline:
+                case OP_timestamp:
 		    // do nothing, all values on stack are atoms
 		    break;
 		case OP_label:
