@@ -76,11 +76,11 @@ set -e
 
 if [ $# -lt 1 ]
 then
-    echo "usage: $0 -f"
+    echo "usage: $0 rev"
     echo "Pulls and commits the latest nanojit-central changes to this repo"
+    echo "rev can be tip or a specific rev to pull"
     exit 1
 fi
-if [ $1 != '-f' ]; then exit 1; fi
 
 # random part of names
 RAND="$RANDOM$RANDOM"
@@ -89,6 +89,7 @@ SRCDIR=$(hg root)
 SCRIPTDIR=$SRCDIR/utils/nanojit-import
 TMPDIR=/tmp/nj-$RAND
 
+NANOJIT_CENTRAL_NEW_REV=$1
 NANOJIT_CENTRAL_REV=$(cat $SCRIPTDIR/nanojit-import-rev)
 NANOJIT_CENTRAL_REPO=http://hg.mozilla.org/projects/nanojit-central
 NANOJIT_CENTRAL_LOCAL=$TMPDIR/nanojit-central
@@ -102,7 +103,7 @@ fi
 mkdir $TMPDIR
 rm -Rf $NANOJIT_CENTRAL_LOCAL $TMPDIR/import-splicemap $TMPDIR/import-revmap
 
-hg clone $NANOJIT_CENTRAL_REPO $NANOJIT_CENTRAL_LOCAL
+hg clone -r$NANOJIT_CENTRAL_NEW_REV $NANOJIT_CENTRAL_REPO $NANOJIT_CENTRAL_LOCAL
 
 python $SCRIPTDIR/find-child.py \
     --src=$NANOJIT_CENTRAL_LOCAL \
