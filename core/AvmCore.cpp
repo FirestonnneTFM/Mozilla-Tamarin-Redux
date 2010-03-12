@@ -3216,30 +3216,30 @@ return the result of the comparison ToPrimitive(x) == y.
         return other;
     }
 
-	Stringp AvmCore::internSubstring(Stringp s, int32_t start, int32_t end)
-	{
-		// this is (currently) only called by XMLParser, which only passes us
-		// valid values -- skip the checks in the name of performance.
-		AvmAssert(start < end);
-		AvmAssert(start >= 0 && start <= s->length());
-		AvmAssert(end >= 0 && end <= s->length());
-		
-		if (start == 0 && end == s->length())
-			return internString(s);
+    Stringp AvmCore::internSubstring(Stringp s, int32_t start, int32_t end)
+    {
+        // this is (currently) only called by XMLParser, which only passes us
+        // valid values -- skip the checks in the name of performance.
+        AvmAssert(start < end);
+        AvmAssert(start >= 0 && start <= s->length());
+        AvmAssert(end >= 0 && end <= s->length());
 
-		int32_t const len = end - start;
-		String::Width const w = s->getWidth();
-        
+        if (start == 0 && end == s->length())
+            return internString(s);
+
+        int32_t const len = end - start;
+        String::Width const w = s->getWidth();
+
         int i;
         {
             // enclose this in braces to ensure we don't use Pointers
             // across an allocation (eg, substring())
             String::Pointers ptrs(s);
             i = (w == String::k8) ?
-                findStringLatin1((const char*)ptrs.p8 + start, len) : 
+                findStringLatin1((const char*)ptrs.p8 + start, len) :
                 findStringUTF16(ptrs.p16 + start, len);
         }
-        
+
         Stringp other;
         if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
         {
@@ -3273,7 +3273,7 @@ return the result of the comparison ToPrimitive(x) == y.
             {
                 String::Pointers ptrs(s);
                 i = (w == String::k8) ?
-                    findStringLatin1((const char*)ptrs.p8 + start, len) : 
+                    findStringLatin1((const char*)ptrs.p8 + start, len) :
                     findStringUTF16(ptrs.p16 + start, len);
             }
 #endif
@@ -3283,7 +3283,7 @@ return the result of the comparison ToPrimitive(x) == y.
             other->setInterned();
         }
         return other;
-	}
+    }
 
 
     // note, this assumes Latin-1, not UTF8.
