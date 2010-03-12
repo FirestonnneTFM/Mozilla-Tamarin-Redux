@@ -128,9 +128,9 @@ namespace avmplus
 			WB(gc, gc->FindBeginningFast(this), &m_atoms, atoms);
 		}
 
-		void moveAtoms(Atom *atoms, uint32_t dstOffset, uint32_t srcOffset, size_t numAtoms)
+		void moveAtoms(uint32_t dstOffset, uint32_t srcOffset, size_t numAtoms)
 		{
-			MMgc::GC::GetGC(this)->movePointers((void**)atoms, dstOffset, (const void**)atoms, srcOffset, numAtoms);
+			MMgc::GC::GetGC(this)->movePointers((void**)m_atoms, dstOffset, (const void**)m_atoms, srcOffset, numAtoms);
 		}
 	};
 }
