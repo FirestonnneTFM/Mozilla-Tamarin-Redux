@@ -1887,11 +1887,8 @@ namespace avmplus
 
             instances.set(i, itraits);
 
-            if (pool->addUniqueTraits(name, ns, itraits) != NULL)
-            {
-                // error, can't redefine a class or interface
-                //toplevel->definitionErrorClass()->throwError(kRedefinedError, core->toErrorString(&mn));
-            }
+            // add the trait if we've not seen it before
+            pool->addUniqueTraits(name, ns, itraits);
         }
 
         return true;

@@ -485,6 +485,7 @@ package abcdump
                         case OP_getlocal:
                         case OP_kill:
                         case OP_setlocal:
+                        case OP_bkptline:
                         case OP_debugline:
                         case OP_getglobalslot:
                         case OP_getslot:

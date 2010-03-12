@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,41 +34,25 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-#ifndef __avmplus_Domain__
-#define __avmplus_Domain__
-
-namespace avmplus
+function hello()
 {
-	class Domain : public MMgc::GCObject
-	{
-	public:
-		Domain(AvmCore* core, Domain* base);
-		
-		Traits* getNamedTraits(Stringp name, Namespacep ns);
-		MethodInfo* getNamedScript(Stringp name, Namespacep ns);
-		MethodInfo* getNamedScript(const Multiname* multiname);
-		
-        Traits* addUniqueTrait(Stringp name, Namespace* ns, Traits* v) ;
-		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v);
+	getlocal0
+	pushscope
+        
+        bkpt
+	pushstring "Hello, world"
+	.print
 
-        // returns NULL if the type doesn't exist yet.
-		ClassClosure* getParameterizedType(ClassClosure* type);
-		void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
+	findpropstrict START
+	pushstring ".print demo"
+	callproperty START 1
 
-		REALLY_INLINE Domain* base() const { return m_base; }
-		REALLY_INLINE AvmCore* core() const { return m_core; }
+	findpropstrict PASS
+	pushstring "hello"
+	callproperty PASS 1
 
-	private:
-		Domain* const                   m_base;
-		AvmCore* const                  m_core;
-		/** The domain-wide traits table (type name => instance Traits) */
-		DWB(MultinameHashtable*)        m_namedTraits;
-		/** domain-wide type table of scripts, indexed by definition name */
-		DWB(MultinameHashtable*)        m_namedScripts;
-		DWB(HeapHashtable*)             m_parameterizedTypes;
-	};
+	findpropstrict END
+	callproperty END 0
 
+	returnvoid
 }
-
-#endif /* __avmplus_Domain__ */
