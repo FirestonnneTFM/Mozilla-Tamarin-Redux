@@ -525,9 +525,9 @@ namespace avmplus
 			return NULL;
 		}
 
-		void movePointers(uint32_t dstOffset, uint32_t srcOffset, size_t num)
+		void movePointers(Atom* array, uint32_t dstOffset, uint32_t srcOffset, size_t num)
 		{
-			gc()->movePointers((void**)(void*)m_array, dstOffset, (const void**)(void*)m_array, srcOffset, num);
+			gc()->movePointers((void**)(void*)array, dstOffset, (const void**)(void*)array, srcOffset, num);
 		}
 
 		DRCWB(ClassClosure*) t;
