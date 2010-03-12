@@ -188,29 +188,6 @@ namespace MMgc
 		return true;
 	}
 	
-	GCWorkItem *GCMarkStack::GetItemAbove(GCWorkItem *item) 
-	{
-		if(item == Peek())
-			return NULL;
-		GCStackSegment *seg = m_topSegment;
-		GCStackSegment *last = NULL;
-		while(seg) {
-			if(item >= seg->m_items && item < seg->m_items + kMarkStackItems) {
-				if(item+1 == seg->m_items + kMarkStackItems) {
-					// The two items spanned a segment, above is first item in next 
-					// segment (or "last" in the backwards traversal sense).
-					return &last->m_items[0];
-				} else {
-					return item+1;
-				}
-			}
-			last = seg;
-			seg = seg->m_prev;
-		}
-		GCAssertMsg(false, "Invalid attempt to get the item above an item not in the stack.");
-		return NULL;
-	}
-
 #ifdef _DEBUG
 	bool GCMarkStack::Invariants()
 	{
