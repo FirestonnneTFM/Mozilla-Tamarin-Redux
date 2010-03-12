@@ -306,7 +306,7 @@ namespace avmplus
 #      define IID(a,b) XXX(a)
 #  endif
 			 XXX(0x00)
-			 XXX(0x01)
+                         XXX(0x01) /* OP_bkpt */
 			 XXX(0x02) /* OP_nop */
 			 III(0x03, L_throw)
 			 III(0x04, L_getsuper)
@@ -547,7 +547,7 @@ namespace avmplus
 			 IID(0xEF, L_debug)
 			 IID(0xF0, L_debugline)
 			 IID(0xF1, L_debugfile)
-			 XXX(0xF2)
+                         XXX(0xF2) /* OP_bkptline */
 	 		 XXX(0xF3) /* OP_timestamp */
 			 XXX(0xF4)
 			 XXX(0xF5)
@@ -1022,6 +1022,19 @@ namespace avmplus
 
 #ifndef VMCFG_WORDCODE
 			INSTR(timestamp) {
+                NEXT;
+			}
+#endif
+
+#ifndef VMCFG_WORDCODE
+                        INSTR(bkpt) {
+                NEXT;
+			}
+#endif
+
+#ifndef VMCFG_WORDCODE
+                        INSTR(bkptline) {
+                U30ARG;
                 NEXT;
 			}
 #endif

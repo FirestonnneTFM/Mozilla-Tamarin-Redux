@@ -135,7 +135,7 @@ namespace avmplus
 		}
 
 		// Is this a <!DOCTYPE> declaration?
-		if (m_str->matchesLatin1("<!DOCTYPE", 8, start))
+		if (m_str->matchesLatin1_caseless("<!DOCTYPE", 8, start))
 		{
 			// Scan forward for '>', but check for embedded <>
 			int32_t depth = 0;

@@ -51,24 +51,16 @@ namespace avmplus
 
 	Traits* Domain::getNamedTraits(Stringp name, Namespacep ns)
 	{
-		Traits *traits = NULL;
-		if (m_base) {
+		Traits *traits = (Traits*) m_namedTraits->get(name, ns);
+		if (!traits && m_base) {
 			traits = m_base->getNamedTraits(name, ns);
-		}
-		if (!traits) {
-			traits = getNamedTraitsNoRecurse(name, ns);
-		}
+        }
 		return traits;
-	}
-
-	Traits* Domain::getNamedTraitsNoRecurse(Stringp name, Namespacep ns)
-	{
-		return (Traits*) m_namedTraits->get(name, ns);
 	}
 
     Traits* Domain::addUniqueTrait(Stringp name, Namespace* ns, Traits* v) 
     { 
-        Traits* t = getNamedTraitsNoRecurse(name, ns);
+        Traits* t = getNamedTraits(name, ns);
         if (t == NULL) {
             m_namedTraits->add(name, ns, (Binding)v); 
             t = v; // return trait that we'd get from a getNamedTrait() call.

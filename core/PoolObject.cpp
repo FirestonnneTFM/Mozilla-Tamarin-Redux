@@ -132,6 +132,7 @@ namespace avmplus
     Traits* PoolObject::getBuiltinTraits(Stringp name) const
     {
         AvmAssert(BIND_NONE == 0);
+        AvmAssert(!domain->base()); // _namedTraits contains builtins iff base is null, see addUniqueTraits()
         return (Traits*) _namedTraits->getName(name);
     }
 
@@ -183,18 +184,13 @@ namespace avmplus
 
     Traits* PoolObject::addUniqueTraits(Stringp name, Namespace* ns, Traits* traits)
     {
-        // look for class in VM-wide type table
-        Traits* t = domain->getNamedTraitsNoRecurse(name, ns);
-
-        // look for class in current ABC file
-        if (t == NULL)
-            t = (Traits*) _namedTraits->get(name, ns);
-
+        // don't add if we already have a traits with this name
+        Traits* t = getTraits(name, ns);
         if (t != NULL)
             return t;
 
         _namedTraits->add(name, ns, (Binding)traits);
-        return NULL;
+        return traits;
     }
 
     Traits* PoolObject::addUniqueParameterizedITraits(AvmCore* core, const Toplevel* toplevel, Traits* base, Traits* param_traits)
