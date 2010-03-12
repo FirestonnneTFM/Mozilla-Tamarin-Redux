@@ -84,6 +84,19 @@ namespace avmplus
    };
    #endif /* VTUNE */
 
+
+   /**
+    * Each InEdge record tracks an unpatched branch.  When the target code
+    * is generated in emitLabel(), we patch each tracked instruction or
+    * jtbl entry.
+    */
+    struct InEdge {
+        LIns *branchIns;        // the branch instruction that needs patching
+        uint32_t index;         // if br is a jtbl, which index in table to patch
+        InEdge(LIns *br) : branchIns(br), index(0) {}
+        InEdge(LIns *jtbl, uint32_t index) : branchIns(jtbl), index(index) {}
+    };
+
     /**
      * CodegenLabel: information about a LIR label that hasn't been generated yet.
      * Once code at the label is generated, we fill in bb.  Later, we'll patch
@@ -92,11 +105,22 @@ namespace avmplus
      */
     class CodegenLabel {
     public:
-        LIns *bb;
-        int has_preds:1;
-        int jtbl_forward_target:1;
-        CodegenLabel() : bb(0), has_preds(0), jtbl_forward_target(0)
+        LIns *labelIns;                 // the LIR_label instruction for this code position
+        nanojit::BitSet *notnull;       // merged nullability information for vars at this label
+        Seq<InEdge> *unpatchedEdges;    // branches to this label that need patching
+#ifdef NJ_VERBOSE
+        const char* name;
+        CodegenLabel() : labelIns(0), notnull(0), unpatchedEdges(0), name(0)
         {}
+        CodegenLabel(const char* name) : labelIns(0), notnull(0), unpatchedEdges(0), name(name)
+        {}
+#else
+        CodegenLabel() : labelIns(0), notnull(0), unpatchedEdges(0)
+        {}
+        CodegenLabel(const char*) : labelIns(0), notnull(0), unpatchedEdges(0)
+        {}
+#endif
+
     };
 
     class BindingCache;
@@ -118,22 +142,6 @@ namespace avmplus
                                         // (only for flushing... lifetime is still managed by codeAlloc)
         CodeMgr();
         void flushBindingCaches();      // invalidate all binding caches for this codemgr... needed when AbcEnv is unloaded
-    };
-
-    /**
-     * Each Patch record tracks a label for which we have not yet
-     * generated LIR code.  At the end of code generation we'll iterate
-     * through a list of these and patch all the unsatisfied forward branches.
-     */
-    class Patch {
-    public:
-        LIns *br;               // the branch instruction that needs patching
-        CodegenLabel *label;    // information about the target of the branch
-        uint32_t index;         // if br is a jtbl, which index in table to patch
-        Patch() : br(0), label(0), index(0) {}
-        Patch(int) : br(0), label(0), index(0) {}
-        Patch(LIns *br, CodegenLabel &l) : br(br), label(&l), index(0) {}
-        Patch(LIns *jtbl, CodegenLabel &l, uint32_t index) : br(jtbl), label(&l), index(index) {}
     };
 
     // Binding Cache Design
@@ -298,7 +306,7 @@ namespace avmplus
         C* allocateCacheSlot(const Multiname* name);
     };
 
-    class CopyPropagation;
+    class VarTracker;
 
     /** helper code to make LIR generation nice and tidy */
     class LirHelper {
@@ -322,6 +330,7 @@ namespace avmplus
         LIns* InsConstPtr(const void *p);
         LIns* InsConstAtom(Atom c);
         LIns* callIns(const CallInfo *, uint32_t argc, ...);
+        LIns* callIns(const CallInfo *, uint32_t argc, va_list args);
         LIns* peq(LIns* a, Atom b);
         LIns* choose(LIns* c, Atom t, LIns* f);
         LIns* andp(LIns* a, Atom mask);
@@ -384,22 +393,22 @@ namespace avmplus
         MethodInfo *info;
         const MethodSignaturep ms;
         PoolObject *pool;
-        FrameState *state;
+        const FrameState *state;
         MopsRangeCheckFilter* mopsRangeCheckFilter;
-        LIns *vars, *varTraits;
+        LIns *vars, *tags, *varTraits;
         LIns *env_param, *argc_param, *ap_param;
         LIns *_save_eip, *_ef;
         LIns *methodFrame;
         LIns *csn;
         LIns *undefConst;
         bool interruptable;
-        CodegenLabel interrupt_label, npe_label;
+        CodegenLabel npe_label;
+        CodegenLabel interrupt_label;
         CodegenLabel mop_rangeCheckFailed_label;
+        CodegenLabel catch_label;
         intptr_t lastPcSave;
-        SeqBuilder<Patch> patches;
-        LIns *exBranch;
         LIns *setjmpResult;
-        CopyPropagation *copier;
+        VarTracker *varTracker;
         int framesize;
         int labelCount;
         LookupCacheBuilder finddef_cache_builder;
@@ -408,12 +417,20 @@ namespace avmplus
         CacheBuilder<SetCache> set_cache_builder;
         PrologWriter *prolog;
         LIns* prologLastIns;
+        HashMap<int, CodegenLabel*> *blockLabels;
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LirNameMap* vbNames;)
 #ifdef DEBUGGER
         bool haveDebugger;
 #else
         static const bool haveDebugger = false;
+#endif
+#ifdef DEBUG
+        /** jit_sst is an array of sst_mask bytes, used to double check that we
+         *  are modelling storage types the same way the verifier did for us.
+         *  Mismatches are caught in writeOpcodeVerified() after the Verifier has
+         *  updated Value.sst_mask. */
+        uint8_t *jit_sst;   // array of SST masks to sanity check with FrameState
 #endif
 
         LIns *InsAlloc(int32_t);
@@ -425,9 +442,9 @@ namespace avmplus
         LIns *localGet(int i);
         LIns *localGetp(int i);
         LIns *localGetf(int i);
-        LIns *localCopy(int i); // sniff's type
-        LIns *branchIns(LOpcode op, LIns *cond);
-        LIns *branchIns(LOpcode op, LIns *cond, int target_off);
+        LIns *localCopy(int i); // sniff's type from FrameState
+        void branchToLabel(LOpcode op, LIns *cond, CodegenLabel& label);
+        void branchToAbcPos(LOpcode op, LIns *cond, int target_off);
         LIns *retIns(LIns *val);
         LIns* mopAddrToRangeCheckedRealAddrAndDisp(LIns* mopAddr, int32_t const size, int32_t* disp);
         LIns *loadEnvScope();
@@ -440,7 +457,7 @@ namespace avmplus
         LIns *storeAtomArgs(int count, int index);
         LIns *storeAtomArgs(LIns *obj, int count, int index);
         LIns *promoteNumberIns(Traits *t, int i);
-        LIns *loadVTable(int i);
+        LIns *loadVTable(LIns* obj, Traits* t);
         LIns *cmpEq(const CallInfo *fid, int lhsi, int rhsi);
         LIns *cmpLt(int lhsi, int rhsi);
         LIns *cmpLe(int lhsi, int rhsi);
@@ -449,14 +466,20 @@ namespace avmplus
         void emitSetPc();
         void emitSampleCheck();
         bool verbose();
+        CodegenLabel& getCodegenLabel(int pc_off);
+        CodegenLabel& createLabel(const char *name);
+        CodegenLabel& createLabel(const char *prefix, int id);
         void patchLater(LIns *br, CodegenLabel &);
-        void patchLater(LIns *br, int pc_off);
         void patchLater(LIns *jtbl, CodegenLabel &, uint32_t index);
         void patchLater(LIns *jtbl, int pc_off, uint32_t index);
-        void setLabelPos(CodegenLabel &l, LIns *target);
+        void emitLabel(CodegenLabel &l);
         void deadvars();
-        void deadvars_analyze(Allocator& alloc, nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels);
-        void deadvars_kill(nanojit::BitSet& livein, HashMap<LIns*, nanojit::BitSet*> &labels);
+        void deadvars_analyze(Allocator& alloc,
+                nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
+                nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels);
+        void deadvars_kill(
+                nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
+                nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels);
         void copyParam(int i, int &offset);
 
         // on successful jit, allocate memory for BindingCache instances, if necessary
@@ -468,11 +491,26 @@ namespace avmplus
         LIns *i2dIns(LIns* v);
         LIns *u2dIns(LIns* v);
         LIns *binaryIns(LOpcode op, LIns *a, LIns *b);
+        LIns* callIns(const CallInfo *, uint32_t argc, ...);
 
         /** emit a constructor call, and early bind if possible */
-        void emitConstruct(int argc, int ctor_index, Traits* ctraits);
+        void emitConstruct(int argc, LIns* ctor, Traits* ctraits);
 
-        void emitCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
+        void emitCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodSignaturep);
+        void emitCall(AbcOpcode opcode, intptr_t method_id, int argc, LIns* obj, Traits* objType, Traits* result, MethodSignaturep);
+
+        /** Verifier has already coerced args and emitted the null check; JIT just double checks and emits code */
+        void emitTypedCall(AbcOpcode opcode, intptr_t method_id, int argc, Traits* result, MethodInfo*);
+
+        /** emit a JIT-discovered early bound call.  JIT must coerce args and receiver to the proper type */
+        void emitCoerceCall(AbcOpcode opcode, intptr_t method_id, int argc, MethodInfo*);
+
+        /** emit a JIT-discovered early bound call to newInstance and invoke the initializer function */
+        void emitConstructCall(intptr_t method_id, int argc, LIns* ctor, Traits* ctraits);
+
+        /** helper to coerce args to an early bound call to the required types */
+        void coerceArgs(MethodSignaturep mms, int argc, int firstArg);
+
         void emit(AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
         void emitIf(AbcOpcode opcode, int target_off, int lhs, int rhs);
         void emitSwap(int i, int j);
@@ -484,12 +522,16 @@ namespace avmplus
         void emitDoubleConst(int index, double* pd);
         void emitGetslot(int slot, int ptr_index, Traits *slotType);
         void emitSetslot(AbcOpcode opcode, int slot, int ptr_index);
+        void emitSetslot(AbcOpcode opcode, int slot, int ptr_index, LIns* value);
         void emitGetGlobalScope();
+        void emitCoerce(uint32_t index, Traits* type);
+        void emitCheckNull(LIns* ptr, Traits* type);
         void localSet(int i, LIns* o, Traits* type);
         LIns* convertToString(int i);
         LIns* coerceToString(int i);
         LIns* coerceToNumber(int i);
         LIns* loadFromSlot(int ptr_index, int slot, Traits* slotType);
+        LIns* coerceToType(int i, Traits*);
 
     public:
         CodegenLIR(MethodInfo* info);
@@ -497,19 +539,18 @@ namespace avmplus
         void emitMD();
 
         // CodeWriter methods
-        void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type = NULL);
-        void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
-        void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-        void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
-        void writeNip(FrameState* state, const byte *pc);
-        void writeCheckNull(FrameState* state, uint32_t index);
-        void writeCoerce(FrameState* state, uint32_t index, Traits *type);
-        void writePrologue(FrameState* state, const byte *pc);
-        void writeEpilogue(FrameState* state);
-        void writeBlockStart(FrameState* state);
-        void writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode);
-        void writeFixExceptionsAndLabels(FrameState* state, const byte* pc);
-        void formatOperand(PrintWriter& buffer, Value& v);
+        void write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type);
+        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type);
+        void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type);
+        void writeNip(const FrameState* state, const byte *pc);
+        void writeCheckNull(const FrameState* state, uint32_t index);
+        void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
+        void writePrologue(const FrameState* state, const byte *pc);
+        void writeEpilogue(const FrameState* state);
+        void writeBlockStart(const FrameState* state);
+        void writeOpcodeVerified(const FrameState* state, const byte* pc, AbcOpcode opcode);
+        void writeFixExceptionsAndLabels(const FrameState* state, const byte* pc);
         void cleanup();
     };
 
