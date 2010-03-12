@@ -86,6 +86,10 @@ REALLY_INLINE void FrameState::setType(int32_t i, Traits* t, bool notNull, bool 
     v.traits = t;
     v.notNull = notNull;
     v.isWith = isWith;
+#ifdef VMCFG_NANOJIT
+    BuiltinType bt = Traits::getBuiltinType(t);
+    v.sst_mask = 1 << valueStorageType(bt);
+#endif
 }
 
 REALLY_INLINE void FrameState::pop(int32_t n)
@@ -95,6 +99,11 @@ REALLY_INLINE void FrameState::pop(int32_t n)
 }
 
 REALLY_INLINE Value& FrameState::peek(int32_t n)
+{
+    return value(verifier->stackBase+stackDepth-n);
+}
+
+REALLY_INLINE const Value& FrameState::peek(int32_t n) const
 {
     return value(verifier->stackBase+stackDepth-n);
 }

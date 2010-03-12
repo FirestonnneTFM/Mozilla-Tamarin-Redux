@@ -37,7 +37,6 @@
 
 
 #include "avmplus.h"
-#include "FrameState.h" // FIXME required because FrameState has dependencies on the jitters
 
 namespace avmplus
 {

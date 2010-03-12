@@ -38,7 +38,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
-#include "FrameState.h" // FIXME required because FrameState has dependencies on the jitters
+
+#ifdef FEATURE_NANOJIT
+#include "CodegenLIR.h"
+#endif
+
+//#define DOPROF
+#include "../vprof/vprof.h"
 
 namespace avmplus
 {
@@ -54,13 +60,13 @@ namespace avmplus
             core = info->pool()->core;
         }
 
-        void write (FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) {
+        void write (const FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type) {
             if (opcode == OP_newactivation)
                 core->enqTraits(type);
             coder->write(state, pc, opcode, type);
         }
 
-        void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
+        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type) {
             if (opcode == OP_newfunction) {
                 MethodInfo *f = info->pool()->getMethodInfo(opd1);
                 AvmAssert(f->declaringTraits() == type);
@@ -86,8 +92,10 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
         , bool secondTry
 #endif
-        ) : blockStates(NULL)
+        ) : tryFrom(NULL), tryTo(NULL)
           , ms(info->getMethodSignature())
+          , worklist(NULL)
+          , blockStates(NULL)
     {
 #ifdef AVMPLUS_VERBOSE
         this->secondTry = secondTry;
@@ -108,32 +116,17 @@ namespace avmplus
             verifyFailed(kCannotVerifyUntilReferencedError);
         }
 
-        #ifdef AVMPLUS_VERBOSE
-        this->verbose = pool->isVerbose(VB_verify);
-        #endif
-
         max_stack = ms->max_stack();
         local_count = ms->local_count();
         max_scope = ms->max_scope();
 
         stackBase = scopeBase + max_scope;
         frameSize = stackBase + max_stack;
+        state = NULL;
 
-        const byte* pos = info->abc_body_pos();
-
-        // note: reading of max_stack, etc (and validating the values)
-        // is now handled by MethodInfo::resolveSignature.
-        AvmCore::skipU32(pos, 4);
-        code_length = AvmCore::readU32(pos);
-
-        code_pos = pos;
-
-        pos += code_length;
-
-        exceptions_pos = pos;
-
-        state       = NULL;
-        labelCount = 0;
+        #ifdef AVMPLUS_VERBOSE
+        verbose = pool->isVerbose(VB_verify);
+        #endif
 
         #ifdef VMCFG_PRECOMP_NAMES
         pool->initPrecomputedMultinames();
@@ -149,6 +142,125 @@ namespace avmplus
             delete blockStates;
         }
     }
+
+    void Verifier::parseBodyHeader()
+    {
+        // note: reading of max_stack, etc (and validating the values)
+        // is handled by MethodInfo::resolveSignature.
+        const byte* pos = info->abc_body_pos();
+        AvmCore::skipU32(pos, 4);
+        code_length = AvmCore::readU32(pos);
+        code_pos = pos;
+        pos += code_length;
+    }
+
+    // ScopeWriter implements the scope-type-capturing functionality
+    // for OP_newfunction and OP_newclass, as well as error checking
+    // to handle illegally capturing incompatible scopes for the same
+    // function.  All other opcodes are ignored.  Expected to be used
+    // in the verifier's phase 2 when each bytecode is only visited once.
+    class ScopeWriter: public NullWriter
+    {
+        MethodInfo* info;
+        Toplevel* toplevel;
+    public:
+        ScopeWriter(CodeWriter* coder, MethodInfo* info, Toplevel* toplevel)
+            : NullWriter(coder), info(info), toplevel(toplevel)
+        {}
+
+        void writeOp1(const FrameState* state, const byte* pc, AbcOpcode opcode, uint32_t imm30, Traits* type)
+        {
+            if (opcode == OP_newfunction) {
+                PoolObject* pool = info->pool();
+                AvmCore* core = pool->core;
+                const ScopeTypeChain* scope = info->declaringScope();
+                MethodInfo* f = pool->getMethodInfo(imm30);
+                Traits* ftraits = core->traits.function_itraits;
+                const ScopeTypeChain* fscope = ScopeTypeChain::create(core->GetGC(), ftraits, scope, state, NULL, NULL);
+                // Duplicate function definitions aren't strictly legal, but can occur
+                // in otherwise "well formed" ABC due to old, buggy versions of ASC.
+                // Specifically, code of the form
+                //
+                //    public function simpleTest():void
+                //    {
+                //      var f:Function = function():void { }
+                //      f();
+                //      f = function functwo (x):void { }
+                //      f(8);
+                //    }
+                //
+                // could cause the second interior function ("functwo") to include a bogus, unused OP_newfunction
+                // call to itself inside the body of functwo. This caused the scope to get reinitialized
+                // and generally caused havok. However, we want to allow existing code of this form to continue
+                // to work, so check to see if we already have a declaringScope, and if so, require that
+                // it match this one.
+                const ScopeTypeChain* curScope = f->declaringScope();
+                if (curScope != NULL)
+                {
+                    if (!curScope->equals(fscope))
+                    {
+                        // if info->method_id() == imm30, f == info, and therefore
+                        // curScope == scope -- don't redefine, don't fail verification,
+                        // just accept it. see https://bugzilla.mozilla.org/show_bug.cgi?id=544370
+                        if (info->method_id() != int32_t(imm30))
+                            toplevel->throwVerifyError(kCorruptABCError);
+
+                        AvmAssert(curScope->equals(scope));
+                    }
+                    AvmAssert(f->isResolved());
+                }
+                else
+                {
+                    f->makeIntoPrototypeFunction(toplevel, fscope);
+                }
+
+                #ifdef AVMPLUS_VERBOSE
+                if (state->verifier->verbose)
+                    state->verifier->printScope("function-scope", fscope);
+                #endif
+            } else if (opcode == OP_newclass) {
+                PoolObject* pool = info->pool();
+                AvmCore* core = pool->core;
+                const ScopeTypeChain* scope = info->declaringScope();
+                Traits* ctraits = type;
+                // the actual result type will be the static traits of the new class.
+                // make sure the traits came from this pool.  they have to because
+                // the class_index operand is resolved from the current pool.
+                AvmAssert(ctraits->pool == pool);
+                Traits *itraits = ctraits->itraits;
+
+                // add a type constraint for the "this" scope of static methods
+                const ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), ctraits, scope, state, NULL, ctraits);
+
+                if (state->scopeDepth > 0)
+                {
+                    // innermost scope must be the base class object or else createInstance()
+                    // will malfunction because it will use the wrong [base] class object to
+                    // construct the instance.  See ScriptObject::createInstance()
+                    Traits* baseCTraits = state->scopeValue(state->scopeDepth-1).traits;
+                    if (!baseCTraits || baseCTraits->itraits != itraits->base)
+                        state->verifier->verifyFailed(kCorruptABCError);
+                }
+
+                // add a type constraint for the "this" scope of instance methods
+                const ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), itraits, cscope, NULL, ctraits, itraits);
+
+                ctraits->resolveSignatures(toplevel);
+                itraits->resolveSignatures(toplevel);
+
+                // we must always set the scopes here, whether or not they have been set yet and
+                // whether or not the traits were resolved already.
+                ctraits->setDeclaringScopes(cscope);
+                itraits->setDeclaringScopes(iscope);
+
+                #ifdef AVMPLUS_VERBOSE
+                if (state->verifier->verbose)
+                    state->verifier->printScope("class-scope", cscope);
+                #endif
+            }
+            coder->writeOp1(state, pc, opcode, imm30, type);
+        }
+    };
 
     /**
      * (done) branches stay in code block
@@ -179,95 +291,37 @@ namespace avmplus
      */
     // Sun's C++ compiler wants "volatile" here because the declaration has it
     // Presumably it's here to remove a warning about variable clobbered by longjmp
-    void Verifier::verify(CodeWriter * volatile coder)
+    void Verifier::verify(CodeWriter * volatile emitter)
     {
         SAMPLE_FRAME("[verify]", core);
-
-        #ifdef AVMPLUS_VERBOSE
-        if (verbose)
-            core->console << "\nverify " << info << '\n';
-        secondTry = false;
-        #endif
-
-        const int param_count = ms->param_count();
-
-        if (local_count < param_count+1)
-        {
-            // must have enough locals to hold all parameters including this
-            toplevel->throwVerifyError(kCorruptABCError);
-        }
-
-#ifdef VMCFG_VERIFYALL
-        // push the verifyall filter onto the front of the coder pipeline
-        VerifyallWriter verifyallWriter(info, coder);
-        if (core->config.verifyall)
-            coder = &verifyallWriter;
-#endif
-
-        this->coder = coder;
-
-    state = mmfx_new( FrameState(this) );
-
-        if (info->needRest())
-        {
-            // param_count+1 <= max_reg
-            checkLocal(param_count+1);
-
-            state->setType(param_count+1, ARRAY_TYPE, true);
-
-            #ifdef AVMPLUS_VERBOSE
-            if (verbose && info->needArguments())
-            {
-                // warning, NEED_ARGUMENTS wins
-                core->console << "WARNING, NEED_REST overrides NEED_ARGUMENTS when both are set\n";
-            }
-            #endif
-        }
-        else if (info->needArguments())
-        {
-            // param_count+1 <= max_reg
-            checkLocal(param_count+1);
-
-            // E3 style arguments array is an Object, E4 says Array, E4 wins...
-            state->setType(param_count+1, ARRAY_TYPE, true);
-        }
-        else
-        {
-            // param_count <= max_reg
-            checkLocal(param_count);
-        }
-
-        // initialize method param types.
-        // We already verified param_count is a legal register so
-        // don't checkLocal(i) inside the loop.
-        // MethodInfo::verify takes care of resolving param&return type
-        // names to Traits pointers, and resolving optional param default values.
-        for (int i=0; i <= param_count; i++)
-        {
-            bool notNull = (i==0); // this is not null, but other params could be
-            state->setType(i, ms->paramTraits(i), notNull);
-        }
-
-        if (info->declaringTraits()->init != info && info->declaringScope() == NULL)
-        {
-            // this can occur when an activation scope inside a class instance method
-            // contains a nested getter, setter, or method.  In that case the scope
-            // is not captured when the containing function is verified.  This isn't a
-            // bug because such nested functions aren't suppported by AS3.  This
-            // verify error is how we don't let those constructs run.
-            verifyFailed(kNoScopeError, core->toErrorString(info));
-        }
-
-        state->scopeDepth = 0;
-
-        // resolve catch block types
-        parseExceptionHandlers();
-
-        int actualCount = 0;
-        blockEnd = false;    // extended basic block ending
+        PERFM_NVPROF("abc-bytes", code_length);
 
         TRY(core, kCatchAction_Rethrow) {
 
+        CodeWriter stubWriter;
+        CodeWriter* coder = &stubWriter;
+
+        #ifdef AVMPLUS_VERBOSE
+        if (verbose)
+            core->console << "\ntypecheck " << info << '\n';
+        secondTry = false;
+        #endif
+
+        // Verify in two passes.  Phase 1 does type modelling and
+        // iterates to a fixed point to determine the types and nullability
+        // of each frame variable at branch targets.  Phase 2 includes the
+        // emitter and ScopeWriter, and visits opcodes in linear order.
+        // Errors detected by these additional CodeWriters can be reported
+        // in phase 2.  In each phase, the CodeWriter protocol is obeyed:
+        // writePrologue(), visits to explicit and implicit operations using
+        // other writeXXX() methods, then writeEpilogue().
+
+        emitPass = false;
+        // phase 1 - iterate to a fixed point
+        this->coder = coder;
+        parseBodyHeader();          // set code_pos & code_length
+        parseExceptionHandlers();   // resolve catch block types
+        checkParams();
         #ifdef AVMPLUS_VERBOSE
         if (verbose) {
             printScope("outer-scope", info->declaringScope());
@@ -276,13 +330,127 @@ namespace avmplus
         }
         #endif
         coder->writePrologue(state, code_pos);
+        verifyBlock(coder, code_pos);
+        for (FrameState* succ = worklist; succ != NULL; succ = worklist) {
+            worklist = succ->wl_next;
+            succ->wl_pending = false;
+            verifyBlock(coder, loadBlockState(succ));
+        }
+        coder->writeEpilogue(state);
 
-        PERFM_NVPROF("abc-bytes", code_length);
+        // phase 2 - traverse code in abc order and emit
+        mmfx_delete(state);
+        coder = emitter;
 
-        int size;
-        for (const byte* pc = code_pos, *code_end=code_pos+code_length; pc < code_end; pc += size)
+        #ifdef VMCFG_VERIFYALL
+        // push the verifyall filter onto the front of the coder pipeline
+        VerifyallWriter verifyallWriter(info, coder);
+        if (core->config.verifyall)
+            coder = &verifyallWriter;
+        #endif
+
+        // save computed ScopeTypeChain for OP_newfunction and OP_newclass
+        ScopeWriter scopeWriter(coder, info, toplevel);
+        coder = &scopeWriter;
+
+        #ifdef AVMPLUS_VERBOSE
+        if (verbose)
+            core->console << "\nverify " << info << '\n';
+        #endif
+
+        emitPass = true;
+        this->coder = coder;
+        parseBodyHeader();          // reset code_pos & code_length
+        checkParams();
+        coder->writePrologue(state, code_pos);
+        verifyBlock(coder, code_pos);
+        for (int i=0, n=getBlockCount(); i < n; i++)
+            verifyBlock(coder, loadBlockState(blockStates->at(i)));
+        coder->writeEpilogue(state);
+
+        } CATCH (Exception *exception) {
+            core->throwException(exception); // re-throw
+        }
+        END_CATCH
+        END_TRY
+    }
+
+    const byte* Verifier::loadBlockState(FrameState* blk)
+    {
+        // now load the saved state at this block
+        state->init(blk);
+        state->targetOfBackwardsBranch = blk->targetOfBackwardsBranch;
+        state->pc = blk->pc;
+
+#ifdef AVMPLUS_VERBOSE
+        if (verbose) {
+            StringBuffer buf(core);
+            buf << "B" << blk->pc << ":";
+            printState(buf, state);
+        }
+#endif
+
+        // found the start of a new basic block
+        coder->writeBlockStart(state);
+        state->targetOfBackwardsBranch = false;
+        return code_pos + blk->pc;
+    }
+
+    void Verifier::checkParams()
+    {
+        const int param_count = ms->param_count();
+
+        if (local_count < param_count+1) {
+            // must have enough locals to hold all parameters including this
+            toplevel->throwVerifyError(kCorruptABCError);
+        }
+
+        // initial scope chain types
+        if (info->declaringTraits()->init != info && info->declaringScope() == NULL) {
+            // this can occur when an activation scope inside a class instance method
+            // contains a nested getter, setter, or method.  In that case the scope
+            // is not captured when the containing function is verified.  This isn't a
+            // bug because such nested functions aren't suppported by AS3.  This
+            // verify error is how we don't let those constructs run.
+            verifyFailed(kNoScopeError, core->toErrorString(info));
+        }
+
+        state = mmfx_new( FrameState(this) );
+
+        // initialize method param types.
+        // We already verified param_count is a legal register so
+        // don't checkLocal(i) inside the loop.
+        // MethodInfo::verify takes care of resolving param&return type
+        // names to Traits pointers, and resolving optional param default values.
+        for (int i=0; i <= param_count; i++)
+            state->setType(i, ms->paramTraits(i), i == 0);
+
+        int first_local = param_count+1;
+        if (info->needRest() || info->needArguments()) {
+            // NEED_REST overrides NEED_ARGUMENTS when both are set
+            checkLocal(first_local);  // ensure param_count+1 <= max_reg
+            state->setType(first_local, ARRAY_TYPE, true);
+            first_local++;
+        } else {
+            checkLocal(param_count);  // ensure param_count <= max_reg
+        }
+
+        for (int i=first_local; i < local_count; i++)
+            state->setType(i, NULL); // void would be more precise.
+    }
+
+    // verify one superblock, return at the end.  The end of the block is when
+    // we reach a terminal opcode (jump, lookupswitch, returnvalue, returnvoid,
+    // or throw), or when we fall into the beginning of another block.
+    void Verifier::verifyBlock(CodeWriter *coder, const byte* start_pos)
+    {
+        _nvprof("verify-block", 1);
+        ExceptionHandlerTable* exTable = info->abc_exceptions();
+        const byte* nextpc;
+        for (const byte* pc = nextpc = start_pos, *code_end=code_pos+code_length; pc < code_end; pc = nextpc)
         {
-            SAMPLE_CHECK();
+            // should we make a new sample frame in this method?
+            // SAMPLE_CHECK();
             PERFM_NVPROF("abc-verify", 1);
 
             coder->writeFixExceptionsAndLabels(state, pc);
@@ -291,187 +459,75 @@ namespace avmplus
             if (opcodeInfo[opcode].operandCount == -1)
                 verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
 
-            if (opcode == OP_label)
-            {
-                // insert a label here
-                // FIXME not necessarily the target of a backward edge. maybe the abc parser
-                //       should erase labels that are not sinks of back edges.
-                getFrameState((int)(pc-code_pos))->targetOfBackwardsBranch = true;
+            int logical_pc = int(pc - code_pos);
+            state->pc = logical_pc;
+
+            // test for the start of a new block
+            if (pc != start_pos && (opcode == OP_label || hasFrameState(logical_pc))) {
+                checkTarget(pc-1, pc);
+                return;
             }
 
-            bool unreachable = false;
-            FrameState* blockState = blockStates ? blockStates->get(pc) : NULL;
-            if (blockState)
-            {
-                if (!blockEnd || !blockState->initialized)
-                {
-                    checkTarget(pc);
-                }
-
-                // now load the merged state
-                state->init(blockState);
-                state->targetOfBackwardsBranch = blockState->targetOfBackwardsBranch;
-                state->pc = (int)(pc - code_pos);
-
-#ifdef AVMPLUS_VERBOSE
-                if (verbose) {
-                    StringBuffer buf(core);
-                    buf << "B" << (pc - code_pos) << ":";
-                    printState(buf, state);
-                }
-#endif
-
-                // found the start of a new basic block
-                coder->writeBlockStart(state);
-
-                state->targetOfBackwardsBranch = false;
-
-                actualCount++;
-                blockEnd = false;
-
-                if (!blockState->targetOfBackwardsBranch)
-                {
-                    #ifdef FEATURE_NANOJIT
-                        // fixme: CodegenLIR wants to do all patching in epilog() so we cannot
-                        // free the block early.
-                    #else
-                        // lir and translator are okay with this
-                        blockStates->remove(pc);
-                        mmfx_delete( blockState );
-                    #endif
-                }
-            }
-            else
-            {
-                if (blockEnd)
-                {
-                    // the next instruction is not reachable because it comes after
-                    // a jump, throw, or return, and there are no branch targets
-                    // inbetween the branch/jump/return and this instruction.
-                    // So, don't verify it.
-                    unreachable = true;
-                }
-            }
-
-            state->pc = (int)(pc - code_pos);
             int sp = state->sp();
 
-            if (info->abc_exceptions())
-            {
-                for (int i=0, n=info->abc_exceptions()->exception_count; i < n; i++)
-                {
-                    ExceptionHandler* handler = &info->abc_exceptions()->exceptions[i];
-                    if (pc >= code_pos + handler->from && pc <= code_pos + handler->to)
-                    {
+            if (pc < tryTo && pc >= tryFrom && opcodeInfo[opcode].canThrow) {
+                for (int i=0, n=exTable->exception_count; i < n; i++) {
+                    ExceptionHandler* handler = &exTable->exceptions[i];
+                    if (pc >= code_pos + handler->from && pc < code_pos + handler->to) {
                         // If this instruction can throw exceptions, treat it as an edge to
                         // each in-scope catch handler.
-                        //
-                        // We also check a virtual edge to the catch block from the
-                        // first opcode in the try block, whether it throws or not, to handle
-                        // the case of an empty try block;  the verifier will still verify the
-                        // unreachable catch block, and it must start with the exception value
-                        // on the stack, or else underflow will occur.
-                        if (opcodeInfo[opcode].canThrow || pc == code_pos + handler->from)
-                        {
-                            // TODO check stack is empty because catch handlers assume so.
-                            int saveStackDepth = state->stackDepth;
-                            int saveScopeDepth = state->scopeDepth;
-                            Value stackEntryZero = saveStackDepth > 0 ? state->stackValue(0) : state->value(0);
-                            state->stackDepth = 0;
-                            state->scopeDepth = 0;
+                        int saveStackDepth = state->stackDepth;
+                        int saveScopeDepth = state->scopeDepth;
+                        Value stackEntryZero = saveStackDepth > 0 ? state->stackValue(0) : state->value(0);
+                        state->stackDepth = 0;
+                        state->scopeDepth = 0;
 
-                            // add edge from try statement to catch block
-                            const byte* target = code_pos + handler->target;
-                            // atom received as *, will coerce to correct type in catch handler.
-                            state->push(NULL);
+                        // add edge from try statement to catch block
+                        const byte* target = code_pos + handler->target;
+                        // atom received as *, will coerce to correct type in catch handler.
+                        state->push(NULL); // type * is NULL
+                        checkTarget(pc, target);
+                        state->pop();
 
-                            checkTarget(target);
-                            state->pop();
-
-                            state->stackDepth = saveStackDepth;
-                            state->scopeDepth = saveScopeDepth;
-                            if (saveStackDepth > 0)
-                                state->stackValue(0) = stackEntryZero;
-
-                            // Search forward for OP_killreg in the try block
-                            // Set these registers to killed in the catch state
-                            if (pc == code_pos + handler->from)
-                            {
-                                FrameState *catchState = blockStates->get(target);
-                                AvmAssert(catchState != 0);
-
-                                for (const byte *temp = pc; temp <= code_pos + handler->to; )
-                                {
-                                    if( *temp == OP_lookupswitch )
-                                    {
-                                        // Variable length instruction
-                                        const byte *temp2 = temp+4;
-                                        const int case_count = toplevel->readU30(temp2)+1;
-                                        temp += AvmCore::calculateInstructionWidth(temp) + 3*case_count;
-                                    }
-                                    else
-                                    {
-                                        // If this instruction is OP_killreg, kill the register
-                                        // in the catch block state too
-                                        if (*temp == OP_kill)
-                                        {
-                                            const byte* temp2 = temp+1;
-                                            int local = toplevel->readU30(temp2);
-                                            if (local >= local_count)
-                                                verifyFailed(kInvalidRegisterError, core->toErrorString(local));
-                                            Value& v = catchState->value(local);
-                                            v.notNull = false;
-                                            v.traits = NULL;
-                                            v.killed = true;
-                                        }
-                                        temp += AvmCore::calculateInstructionWidth(temp);
-                                    }
-                                }
-                            }
-                        }
+                        state->stackDepth = saveStackDepth;
+                        state->scopeDepth = saveScopeDepth;
+                        if (saveStackDepth > 0)
+                            state->stackValue(0) = stackEntryZero;
                     }
+                }
+            }
 
-                    if (pc == code_pos + handler->target)
-                    {
+            if (tryFrom >= code_pos && tryTo <= (code_pos + code_length) && pc >= tryFrom) {
+                // all catch targets must be after the earliest try range since from <= to <= catch
+                for (int i=0, n=exTable->exception_count; i < n; i++) {
+                    ExceptionHandler* handler = &exTable->exceptions[i];
+                    if (pc == code_pos + handler->target) {
+                        AvmAssert(sp == stackBase); // if not, a VerifyError should have already occurred.
                         // FIXME: bug 538639: At the top of a catch block, we generate coerce when an unbox is all that is needed
                         emitCoerce(handler->traits, sp);
                         coder->writeOpcodeVerified(state, pc, opcode);
                     }
                 }
             }
-            unsigned int imm30=0, imm30b=0;
-            int imm8=0, imm24=0;
 
-            const byte* nextpc = pc;
+            uint32_t imm30=0, imm30b=0;
+            int32_t imm8=0, imm24=0;
             AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
-            // make sure U30 operands are within bounds.
-            if (opcode != OP_pushshort && ((imm30|imm30b) & 0xc0000000))
-            {
-                // don't report error if first operand of abs_jump (pc) is large.
-                if (opcode != OP_abs_jump || (imm30b & 0xc0000000))
-                {
-                    verifyFailed(kCorruptABCError);
-                }
-            }
-            size = int(nextpc-pc);
-            if (pc+size > code_end)
+
+            // make sure U30 operands are within bounds,
+            // except for OP_pushshort, whose operand is sign extended from 16 bits,
+            // and except for OP_abs_jump which can be full 32bit.
+            if (opcode != OP_pushshort && ((imm30|imm30b) & 0xc0000000) && (opcode != OP_abs_jump || (imm30b & 0xc0000000)))
+                verifyFailed(kCorruptABCError);
+            if (nextpc > code_end)
                 verifyFailed(kLastInstExceedsCodeSizeError);
 
             #ifdef AVMPLUS_VERBOSE
             if (verbose)
-                printOpcode(pc, unreachable);
+                printOpcode(pc);
             #endif
 
-            if (unreachable)
-            {
-                // Even if unreachable, we have to properly advance
-                // past the variable-sized OP_lookupswitch
-                if (opcode == OP_lookupswitch)
-                    size += 3*(imm30b+1);
-
-                continue;
-            }
-
+            _nvprof("verify-instr", 1);
             switch (opcode)
             {
             case OP_iflt:
@@ -489,7 +545,7 @@ namespace avmplus
                 checkStack(2,0);
                 coder->writeOp1(state, pc, opcode, imm24);
                 state->pop(2);
-                checkTarget(nextpc+imm24);
+                checkTarget(pc, nextpc+imm24);
                 break;
 
             case OP_iftrue:
@@ -498,15 +554,15 @@ namespace avmplus
                 emitCoerce(BOOLEAN_TYPE, sp);
                 coder->writeOp1(state, pc, opcode, imm24);
                 state->pop();
-                checkTarget(nextpc+imm24);
+                checkTarget(pc, nextpc+imm24);
                 break;
 
             case OP_jump:
                 //checkStack(0,0)
                 coder->writeOp1(state, pc, opcode, imm24);
-                checkTarget(nextpc+imm24);  // target block;
-                blockEnd = true;
-                break;
+                checkTarget(pc, nextpc+imm24);  // target block;
+                coder->writeOpcodeVerified(state, pc, opcode);
+                return;
 
             case OP_lookupswitch:
             {
@@ -514,40 +570,40 @@ namespace avmplus
                 peekType(INT_TYPE);
                 coder->write(state, pc, opcode);
                 state->pop();
-                checkTarget(pc+imm24);
+                checkTarget(pc, pc+imm24);
                 uint32_t case_count = 1 + imm30b;
-                if (pc + size + 3*case_count > code_end)
+                if (nextpc + 3*case_count > code_end)
                     verifyFailed(kLastInstExceedsCodeSizeError);
                 for (uint32_t i=0; i < case_count; i++)
                 {
-                    int off = AvmCore::readS24(pc+size);
-                    checkTarget(pc+off);
-                    size += 3;
+                    int off = AvmCore::readS24(nextpc);
+                    checkTarget(pc, pc+off);
+                    nextpc += 3;
                 }
-                blockEnd = true;
-                break;
+                coder->writeOpcodeVerified(state, pc, opcode);
+                return;
             }
 
             case OP_throw:
                 checkStack(1,0);
                 coder->write(state, pc, opcode);
                 state->pop();
-                blockEnd = true;
-                break;
+                coder->writeOpcodeVerified(state, pc, opcode);
+                return;
 
             case OP_returnvalue:
                 checkStack(1,0);
                 emitCoerce(ms->returnTraits(), sp);
                 coder->write(state, pc, opcode);
                 state->pop();
-                blockEnd = true;
-                break;
+                coder->writeOpcodeVerified(state, pc, opcode);
+                return;
 
             case OP_returnvoid:
                 //checkStack(0,0)
                 coder->write(state, pc, opcode);
-                blockEnd = true;
-                break;
+                coder->writeOpcodeVerified(state, pc, opcode);
+                return;
 
             case OP_pushnull:
                 checkStack(0,1);
@@ -728,49 +784,8 @@ namespace avmplus
             case OP_newfunction:
             {
                 checkStack(0,1);
-                MethodInfo* f = checkMethodInfo(imm30);
+                checkMethodInfo(imm30);
                 Traits* ftraits = core->traits.function_itraits;
-                const ScopeTypeChain* fscope = ScopeTypeChain::create(core->GetGC(), ftraits, info->declaringScope(), state, NULL, NULL);
-                // Duplicate function definitions aren't strictly legal, but can occur
-                // in otherwise "well formed" ABC due to old, buggy versions of ASC.
-                // Specifically, code of the form
-                //
-                //    public function simpleTest():void
-                //    {
-                //      var f:Function = function():void { }
-                //      f();
-                //      f = function functwo (x):void { }
-                //      f(8);
-                //    }
-                //
-                // could cause the second interior function ("functwo") to include a bogus, unused OP_newfunction
-                // call to itself inside the body of functwo. This caused the scope to get reinitialized
-                // and generally caused havok. However, we want to allow existing code of this form to continue
-                // to work, so check to see if we already have a declaringScope, and if so, require that
-                // it match this one.
-                const ScopeTypeChain* curScope = f->declaringScope();
-                if (curScope != NULL)
-                {
-                    if (!curScope->equals(fscope))
-                    {
-                        // if info->method_id() == imm30, f == info, and therefore
-                        // curScope == scope -- don't redefine, don't fail verification,
-                        // just accept it. see https://bugzilla.mozilla.org/show_bug.cgi?id=544370
-                        if (info->method_id() != int32_t(imm30))
-                            toplevel->throwVerifyError(kCorruptABCError);
-
-                        AvmAssert(curScope->equals(info->declaringScope()));
-                    }
-                    AvmAssert(f->isResolved());
-                }
-                else
-                {
-                    f->makeIntoPrototypeFunction(toplevel, fscope);
-                }
-                #ifdef AVMPLUS_VERBOSE
-                if (verbose)
-                    printScope("function-scope", f->declaringScope());
-                #endif
                 coder->writeOp1(state, pc, opcode, imm30, ftraits);
                 state->push(ftraits, true);
                 break;
@@ -807,41 +822,6 @@ namespace avmplus
                 checkStack(1, 1);
                 // must be a CONSTANT_Multiname
                 Traits* ctraits = checkClassInfo(imm30);
-                // the actual result type will be the static traits of the new class.
-                // make sure the traits came from this pool.  they have to because
-                // the class_index operand is resolved from the current pool.
-                AvmAssert(ctraits->pool == pool);
-                Traits *itraits = ctraits->itraits;
-
-                // add a type constraint for the "this" scope of static methods
-                const ScopeTypeChain* cscope = ScopeTypeChain::create(core->GetGC(), ctraits, info->declaringScope(), state, NULL, ctraits);
-
-                if (state->scopeDepth > 0)
-                {
-                    // innermost scope must be the base class object or else createInstance()
-                    // will malfunction because it will use the wrong [base] class object to
-                    // construct the instance.  See ScriptObject::createInstance()
-                    Traits* baseCTraits = state->scopeValue(state->scopeDepth-1).traits;
-                    if (!baseCTraits || baseCTraits->itraits != itraits->base)
-                        verifyFailed(kCorruptABCError);
-                }
-
-                // add a type constraint for the "this" scope of instance methods
-                const ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), itraits, cscope, NULL, ctraits, itraits);
-
-                ctraits->resolveSignatures(toplevel);
-                itraits->resolveSignatures(toplevel);
-
-                // we must always set the scopes here, whether or not they have been set yet and
-                // whether or not the traits were resolved already.
-                ctraits->setDeclaringScopes(cscope);
-                itraits->setDeclaringScopes(iscope);
-
-                #ifdef AVMPLUS_VERBOSE
-                if (verbose)
-                    printScope("class-scope", cscope);
-                #endif
-
                 emitCoerce(CLASS_TYPE, state->sp());
                 coder->writeOp1(state, pc, opcode, imm30, ctraits);
                 state->pop_push(1, ctraits, true);
@@ -1891,36 +1871,27 @@ namespace avmplus
             case OP_abs_jump:
             {
                 // first ensure the executing code isn't user code (only VM generated abc can use this op)
-                if(pool->isCodePointer(pc))
-                {
+                if (pool->isCodePointer(pc))
                     verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
-                }
 
                 #ifdef AVMPLUS_64BIT
                 const byte* new_pc = (const byte *) (uintptr(imm30) | (((uintptr) imm30b) << 32));
-                const byte* new_code_end = new_pc + AvmCore::readU32 (nextpc);
+                uint32_t new_len = AvmCore::readU32(nextpc);
                 #else
                 const byte* new_pc = (const byte*) imm30;
-                const byte* new_code_end = new_pc + imm30b;
+                uint32_t new_len = imm30b;
                 #endif
 
                 // now ensure target points to within pool's script buffer
                 if(!pool->isCodePointer(new_pc))
-                {
                     verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
-                }
-
-                // FIXME: what other verification steps should we do here?
 
                 const byte* old_pc = pc;
-                pc = code_pos = new_pc;
-                code_end = new_code_end;
-                size = 0;
-
-                exceptions_pos = code_end;
-                code_length = int(code_end - pc);
+                code_pos = pc = nextpc = new_pc;
+                code_length = new_len;
+                code_end = pc + new_len;
                 parseExceptionHandlers();
-
+                exTable = info->abc_exceptions();
                 coder->writeOp2(state, old_pc, opcode, imm30, imm30b);
                 break;
             }
@@ -1938,24 +1909,7 @@ namespace avmplus
             #endif
         }
 
-        if (!blockEnd)
-        {
-            verifyFailed(kCannotFallOffMethodError);
-        }
-        if (blockStates && actualCount != labelCount)
-        {
-            verifyFailed(kInvalidBranchTargetError);
-        }
-
-        coder->writeEpilogue(state);
-
-        } CATCH (Exception *exception) {
-
-            // re-throw exception
-            core->throwException(exception);
-        }
-        END_CATCH
-        END_TRY
+        verifyFailed(kCannotFallOffMethodError);
     }
 
     void Verifier::checkPropertyMultiname(uint32_t &depth, Multiname &multiname)
@@ -2032,17 +1986,15 @@ namespace avmplus
         emitCoerceArgs(m, argc);
         if (!t->isInterface())
         {
-            coder->writeOp2(state, pc, OP_callmethod, disp_id, argc, resultType);
+            coder->writeMethodCall(state, pc, OP_callmethod, m, disp_id, argc, resultType);
             if (opcode == OP_callpropvoid)
-            {
                 coder->write(state, pc, OP_pop);
-            }
         }
         else
         {
             // NOTE when the interpreter knows how to dispatch through an
             // interface, we can rewrite this call as a 'writeOp2'.
-            coder->writeInterfaceCall(state, pc, opcode, m->iid(), argc, resultType);
+            coder->writeMethodCall(state, pc, opcode, m, m->iid(), argc, resultType);
         }
 
         state->pop_push(n, resultType);
@@ -2066,31 +2018,31 @@ namespace avmplus
 
         if (slotType == core->traits.int_ctraits)
         {
-            coder->write(state, pc, OP_convert_i);
+            coder->write(state, pc, OP_convert_i, INT_TYPE);
             state->setType(sp, INT_TYPE, true);
         }
         else
         if (slotType == core->traits.uint_ctraits)
         {
-            coder->write(state, pc, OP_convert_u);
+            coder->write(state, pc, OP_convert_u, UINT_TYPE);
             state->setType(sp, UINT_TYPE, true);
         }
         else
         if (slotType == core->traits.number_ctraits)
         {
-            coder->write(state, pc, OP_convert_d);
+            coder->write(state, pc, OP_convert_d, NUMBER_TYPE);
             state->setType(sp, NUMBER_TYPE, true);
         }
         else
         if (slotType == core->traits.boolean_ctraits)
         {
-            coder->write(state, pc, OP_convert_b);
+            coder->write(state, pc, OP_convert_b, BOOLEAN_TYPE);
             state->setType(sp, BOOLEAN_TYPE, true);
         }
         else
         if (slotType == core->traits.string_ctraits)
         {
-            coder->write(state, pc, OP_convert_s);
+            coder->write(state, pc, OP_convert_s, STRING_TYPE);
             state->setType(sp, STRING_TYPE, true);
         }
         else
@@ -2308,44 +2260,27 @@ namespace avmplus
 
     FrameState *Verifier::getFrameState(int target_off)
     {
-        if (!blockStates)
-            blockStates = new (core->GetGC()) GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects>(core->GetGC());
-        const byte *target = code_pos + target_off;
-        FrameState *targetState;
-        // get state for target address or create a new one if none exists
-        if ( (targetState = blockStates->get(target)) == 0 )
-        {
-            targetState = mmfx_new( FrameState(this) );
-            targetState->pc = int(target - code_pos);
-            blockStates->put(target, targetState);
-            labelCount++;
-        }
-        return targetState;
+        return blockStates ? blockStates->get(code_pos + target_off) : NULL;
     }
 
-    #if defined FEATURE_NANOJIT
+    bool Verifier::hasFrameState(int target_off)
+    {
+        return blockStates && blockStates->containsKey(code_pos + target_off);
+    }
+
+    int Verifier::getBlockCount()
+    {
+        return blockStates ? blockStates->size() : 0;
+    }
+
     void Verifier::emitCheckNull(int i)
     {
         Value& value = state->value(i);
-        if (!value.notNull)
-        {
+        if (!value.notNull) {
             coder->writeCheckNull(state, i);
             value.notNull = true;
-            if (value.ins != NULL)
-            {
-                for (int j=0, n = frameSize; j < n; j++)
-                {
-                    // also mark all copies of value.ins as non-null
-                    Value &v2 = state->value(j);
-                    if (v2.ins == value.ins)
-                        v2.notNull = true;
-                }
-            }
         }
     }
-    #else
-    inline void Verifier::emitCheckNull(int i) { (void) i; }
-    #endif
 
     void Verifier::checkCallMultiname(AbcOpcode /*opcode*/, Multiname* name) const
     {
@@ -2372,9 +2307,7 @@ namespace avmplus
     void Verifier::emitCoerce(Traits* target, int index)
     {
         Value &v = state->value(index);
-        Traits* rhs = v.traits;
-        if (!canAssign(target, rhs))
-            coder->writeCoerce(state, index, target);
+        coder->writeCoerce(state, index, target);
         state->setType(index, target, v.notNull);
     }
 
@@ -2394,7 +2327,7 @@ namespace avmplus
             verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
     }
 
-    void Verifier::emitCoerceArgs(MethodInfo* m, int argc, bool isctor)
+    void Verifier::emitCoerceArgs(MethodInfo* m, int argc)
     {
         if (!m->isResolved())
             m->resolveSignature(toplevel);
@@ -2416,8 +2349,7 @@ namespace avmplus
         }
 
         // coerce receiver type
-        if (!isctor)  // don't coerce if this is for a ctor, since the ctor will be on the stack instead of the new object
-            emitCoerce(mms->paramTraits(0), state->sp()-(n-1));
+        emitCoerce(mms->paramTraits(0), state->sp()-(n-1));
     }
 
     bool Verifier::canAssign(Traits* lhs, Traits* rhs) const
@@ -2560,11 +2492,12 @@ namespace avmplus
     void Verifier::verifyFailed(int errorID, Stringp arg1, Stringp arg2, Stringp arg3) const
     {
         #ifdef AVMPLUS_VERBOSE
-        if (!secondTry && !verbose)
-        {
+        if (!secondTry && !verbose) {
             // capture the verify trace even if verbose is false.
             Verifier v2(info, toplevel, abc_env, true);
             v2.verbose = true;
+            v2.tryFrom = tryFrom;
+            v2.tryTo = tryTo;
             CodeWriter stubWriter;
             v2.verify(&stubWriter);
         }
@@ -2575,34 +2508,35 @@ namespace avmplus
         AvmAssert(false);
     }
 
-    void Verifier::checkTarget(const byte* target)
+    void Verifier::checkTarget(const byte* current, const byte* target)
     {
-        FrameState *targetState = getFrameState((int)(target-code_pos));
-        if (!targetState->initialized)
-        {
+        int target_off = int(target - code_pos);
+        if (emitPass) {
+            AvmAssert(hasFrameState(target_off));
+            return;
+        }
+
+        // branches must stay inside code, and back edges must land on an OP_label,
+        // or a location already known as a forward-branch target
+        if (target_off < 0 || target_off >= code_length ||
+            (target <= current && !hasFrameState(target_off) && code_pos[target_off] != OP_label)) {
+            verifyFailed(kInvalidBranchTargetError);
+        }
+
+        FrameState *targetState = getFrameState(target_off);
+        bool targetChanged;
+        if (!targetState) {
+            if (!blockStates)
+                blockStates = new (core->GetGC()) GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects>(core->GetGC());
+            targetState = mmfx_new( FrameState(this) );
+            targetState->pc = target_off;
+            blockStates->put(target, targetState);
+
             // first time visiting target block
+            targetChanged = true;
             targetState->init(state);
-            targetState->initialized = true;
 
-            // if this label is a loop header then clear the notNull flag for
-            // any state entry that might become null in the loop body.  this
-            // prevents us from needing to re-verify the loop, at a cost of a
-            // few more null pointer checks.
-            if (targetState->targetOfBackwardsBranch)
-            {
-                // null check on all locals
-                for (int i=0, n=local_count; i < n; i++)
-                    targetState->value(i).notNull = false;
-
-                // and all stack entries
-                for (int i=stackBase, n=i+state->stackDepth; i < n; i++)
-                    targetState->value(i).notNull = false;
-
-                // we don't have to clear notNull on scope stack entries because we
-                // check for null in op_pushscope/pushwith
-            }
-
-#ifdef AVMPLUS_VERBOSE
+            #ifdef AVMPLUS_VERBOSE
             if (verbose) {
                 core->console << "------------------------------------\n";
                 StringBuffer buf(core);
@@ -2610,99 +2544,94 @@ namespace avmplus
                 printState(buf, targetState);
                 core->console << "------------------------------------\n";
             }
-#endif
+            #endif
+        } else {
+            targetChanged = mergeState(targetState);
         }
-        else
+        targetState->targetOfBackwardsBranch |= (target <= current);
+        if (targetChanged && !targetState->wl_pending) {
+            targetState->wl_pending = true;
+            targetState->wl_next = worklist;
+            worklist = targetState;
+        }
+    }
+
+    bool Verifier::mergeState(FrameState* targetState)
+    {
+#ifdef AVMPLUS_VERBOSE
+        if (verbose) {
+            core->console << "------------------------------------\n";
+            StringBuffer buf(core);
+            buf << "MERGE CURRENT " << (int)state->pc << ":";
+            printState(buf, state);
+            buf.reset();
+            buf << "MERGE TARGET B" << (int)targetState->pc << ":";
+            printState(buf, targetState);
+        }
+#endif
+
+        // check matching stack depth
+        if (state->stackDepth != targetState->stackDepth)
+            verifyFailed(kStackDepthUnbalancedError, core->toErrorString((int)state->stackDepth), core->toErrorString((int)targetState->stackDepth));
+
+        // check matching scope chain depth
+        if (state->scopeDepth != targetState->scopeDepth)
+            verifyFailed(kScopeDepthUnbalancedError, core->toErrorString(state->scopeDepth), core->toErrorString(targetState->scopeDepth));
+
+        // Merge types of locals, scopes, and operands.
+        // Merge could preserve common interfaces even when
+        // common supertype does not:
+        //    class A implements I {}
+        //    class B implements I {}
+        //    var i:I = b ? new A : new B
+        // Doing so would require different specification for verify-time analysis,
+        // essentially a differnet ABC spec, yet each abc version needs predictable
+        // verifier semantics.
+        // On the other hand, later optimization passes are free to be as accurate as
+        // they like, if it produces better code.
+
+        bool targetChanged = false;
+        const int scopeTop  = scopeBase + targetState->scopeDepth;
+        const int stackTop  = stackBase + targetState->stackDepth;
+        for (int i=0, n=stackTop; i < n; i++)
         {
-#ifdef AVMPLUS_VERBOSE
-            if (verbose)
-            {
-                core->console << "------------------------------------\n";
-                StringBuffer buf(core);
-                buf << "MERGE CURRENT " << (int)state->pc << ":";
-                printState(buf, state);
-                buf.reset();
-                buf << "MERGE TARGET B" << (int)targetState->pc << ":";
-                printState(buf, targetState);
-            }
-#endif
+            // ignore empty locations between scopeTop and stackBase
+            if (i >= scopeTop && i < stackBase)
+                continue;
 
-            // check matching stack depth
-            if (state->stackDepth != targetState->stackDepth)
-            {
-                verifyFailed(kStackDepthUnbalancedError, core->toErrorString((int)state->stackDepth), core->toErrorString((int)targetState->stackDepth));
+            const Value& curValue = state->value(i);
+            Value& targetValue = targetState->value(i);
+
+            if (curValue.isWith != targetValue.isWith) {
+                // failure: pushwith on one edge, pushscope on other edge, cannot merge.
+                verifyFailed(kCannotMergeTypesError, core->toErrorString(targetValue.traits), core->toErrorString(curValue.traits));
             }
 
-            // check matching scope chain depth
-            if (state->scopeDepth != targetState->scopeDepth)
-            {
-                verifyFailed(kScopeDepthUnbalancedError, core->toErrorString(state->scopeDepth), core->toErrorString(targetState->scopeDepth));
-            }
+            Traits* merged_traits = findCommonBase(targetValue.traits, curValue.traits);
+            bool merged_notNull = targetValue.notNull && curValue.notNull;
 
-            // merge types of locals, scopes, and operands
-            // ISSUE merge should preserve common interfaces even when
-            // common supertype does not:
-            //    class A implements I {}
-            //    class B implements I {}
-            //    var i:I = b ? new A : new B
+            if (targetValue.traits != merged_traits || targetValue.notNull != merged_notNull)
+                targetChanged = true;
 
-            const int scopeTop  = scopeBase + targetState->scopeDepth;
-            const int stackTop  = stackBase + targetState->stackDepth;
-            for (int i=0, n=stackTop; i < n; i++)
-            {
-                if (i >= scopeTop && i < stackBase)
-                {
-                    // invalid location, ignore it.
-                    continue;
-                }
-
-                Value& curValue = state->value(i);
-                Value& targetValue = targetState->value(i);
-                if (curValue.killed || targetValue.killed)
-                {
-                    // this reg has been killed in one or both states;
-                    // ignore it.
-                    continue;
-                }
-
-                Traits* t1 = targetValue.traits;
-                Traits* t2 = curValue.traits;
-                bool isWith = curValue.isWith;
-
-                if (isWith != targetValue.isWith)
-                {
-                    // failure: pushwith on one edge, pushscope on other edge, cannot merge.
-                    verifyFailed(kCannotMergeTypesError, core->toErrorString(t1), core->toErrorString(t2));
-                }
-
-                Traits* t3 = (t1 == t2) ? t1 : findCommonBase(t1, t2);
-
-                bool notNull = targetValue.notNull && curValue.notNull;
-                if (targetState->pc < state->pc &&
-                    (t3 != t1 || ((t1 && !t1->isNumeric()) && (notNull != targetValue.notNull))))
-                {
-                    // failure: merge on back-edge
-                    verifyFailed(kCannotMergeTypesError, core->toErrorString(t1), core->toErrorString(t3));
-                }
-
-                // if we're targeting a label we can't propagate notNull since we don't yet know
-                // the state of all the other possible branches.  Another possible fix would be to
-                // enforce a null check at each branch to the target.
-                if (targetState->targetOfBackwardsBranch)
-                    notNull = false;
-
-                targetState->setType(i, t3, notNull, isWith);
-            }
-
-#ifdef AVMPLUS_VERBOSE
-            if (verbose) {
-                StringBuffer buf(core);
-                buf << "AFTER MERGE B" << targetState->pc << ":";
-                printState(buf, targetState);
-                core->console << "------------------------------------\n";
-            }
+            targetValue.traits = merged_traits;
+            targetValue.notNull = merged_notNull;
+#ifdef VMCFG_NANOJIT
+            uint8_t merged_sst = targetValue.sst_mask | curValue.sst_mask;
+            if (targetValue.sst_mask != merged_sst)
+                targetChanged = true;
+            targetValue.sst_mask = merged_sst;
 #endif
         }
+
+#ifdef AVMPLUS_VERBOSE
+        if (verbose) {
+            StringBuffer buf(core);
+            buf << "AFTER MERGE B" << targetState->pc << ":";
+            printState(buf, targetState);
+            core->console << "------------------------------------\n";
+        }
+#endif
+        return targetChanged;
     }
 
     /**
@@ -2710,20 +2639,14 @@ namespace avmplus
      */
     Traits* Verifier::findCommonBase(Traits* t1, Traits* t2)
     {
-        AvmAssert(t1 != t2);
+        if (t1 == t2)
+            return t1;
 
         if (t1 == NULL) {
             // assume t1 is always non-null
             Traits *temp = t1;
             t1 = t2;
             t2 = temp;
-        }
-
-        if (!Traits::isMachineCompatible(t1,t2))
-        {
-            // these two types are incompatible machine types that require
-            // coersions before the join node.
-            verifyFailed(kCannotMergeTypesError, core->toErrorString(t1), core->toErrorString(t2));
         }
 
         if (t1 == NULL_TYPE && t2 && !t2->isMachineType())
@@ -2755,13 +2678,6 @@ namespace avmplus
         do t->commonBase = false;
         while ((t = t->base) != NULL);
 
-        // found common base, possibly *
-        if (!Traits::isMachineCompatible(t1,common) || !Traits::isMachineCompatible(t2,common))
-        {
-            // these two types are incompatible types that require
-            // coersions before the join node.
-            verifyFailed(kCannotMergeTypesError, core->toErrorString(t1), core->toErrorString(t2));
-        }
         return common;
     }
 
@@ -2855,7 +2771,12 @@ namespace avmplus
 
     void Verifier::parseExceptionHandlers()
     {
-        const byte* pos = exceptions_pos;
+        if (info->abc_exceptions()) {
+            AvmAssert(tryFrom && tryTo);
+            return;
+        }
+
+        const byte* pos = code_pos + code_length;
         int exception_count = toplevel->readU30(pos);   // will be nonnegative and less than 0xC0000000
 
         if (exception_count != 0)
@@ -2903,11 +2824,20 @@ namespace avmplus
                 if (handler->from < 0 ||
                     handler->to < handler->from ||
                     handler->target < handler->to ||
-                    handler->target > code_length)
+                    handler->target >= code_length)
                 {
                     // illegal range in handler record
                     verifyFailed(kIllegalExceptionHandlerError);
                 }
+
+                // save maximum try range
+                if (!tryFrom || (code_pos + handler->from) < tryFrom)
+                    tryFrom = code_pos + handler->from;
+                if (code_pos + handler->to > tryTo)
+                    tryTo = code_pos + handler->to;
+
+                // note: since we require (code_len > target >= to >= from >= 0),
+                // all implicit exception edges are forward edges.
 
                 // handler->traits = t
                 WB(core->GetGC(), table, &handler->traits, t);
@@ -2917,7 +2847,6 @@ namespace avmplus
 
                 // handler->scopeTraits = scopeTraits
                 WB(core->GetGC(), table, &handler->scopeTraits, scopeTraits);
-                getFrameState(handler->target)->targetOfBackwardsBranch = true;
             }
 
             info->set_abc_exceptions(core->GetGC(), table);
@@ -2929,10 +2858,10 @@ namespace avmplus
     }
 
     #ifdef AVMPLUS_VERBOSE
-    void Verifier::printOpcode(const byte* pc, bool unreachable)
+    void Verifier::printOpcode(const byte* pc)
     {
         int offset = int(pc - code_pos);
-        core->console << (unreachable ? "- " : "  ") << offset << ':';
+        core->console << "  " << offset << ':';
         core->formatOpcode(core->console, pc, (AbcOpcode)*pc, offset, pool);
         core->console << '\n';
     }
@@ -3009,24 +2938,36 @@ namespace avmplus
     void Verifier::printValue(Value& v)
     {
         Traits* t = v.traits;
+        PrintWriter& out = core->console;
         if (!t) {
-            core->console << (v.notNull ? "*!" : "*");
+            out << (v.notNull ? "*!" : "*");
         } else {
-            core->console << t->format(core);
+            out << t->format(core);
             if (!t->isNumeric() && t != BOOLEAN_TYPE && t != NULL_TYPE && t != VOID_TYPE)
-                core->console << (v.notNull ? "" : "?");
+                out << (v.notNull ? "" : "?");
         }
-        coder->formatOperand(core->console, v);
+#ifdef VMCFG_NANOJIT
+        if (v.sst_mask) {
+            out << '[';
+            if (v.sst_mask & (1 << SST_atom))            out << 'A';
+            if (v.sst_mask & (1 << SST_string))          out << 'S';
+            if (v.sst_mask & (1 << SST_namespace))       out << 'N';
+            if (v.sst_mask & (1 << SST_scriptobject))    out << 'O';
+            if (v.sst_mask & (1 << SST_int32))           out << 'I';
+            if (v.sst_mask & (1 << SST_uint32))          out << 'U';
+            if (v.sst_mask & (1 << SST_bool32))          out << 'B';
+            if (v.sst_mask & (1 << SST_double))          out << 'D';
+            out << ']';
+        }
+#endif
     }
     #endif /* AVMPLUS_VERBOSE */
 
     FrameState::FrameState(Verifier* verifier)
-        : verifier(verifier),
-    #if defined FEATURE_NANOJIT
-        label(),
-    #endif
+        : verifier(verifier), wl_next(NULL),
           pc(0), scopeDepth(0), stackDepth(0), withBase(-1),
-          initialized(false), targetOfBackwardsBranch(false)
+          targetOfBackwardsBranch(false),
+          wl_pending(false)
     {
         locals = (Value*)mmfx_alloc_opt(sizeof(Value) * verifier->frameSize, MMgc::kZero);
     }
@@ -3069,7 +3010,7 @@ namespace avmplus
         this->~CFGWriter();
     }
 
-    void CFGWriter::writeEpilogue(FrameState* state)
+    void CFGWriter::writeEpilogue(const FrameState* state)
     {
         Block* b;
         AvmCore *core = info->pool()->core;
@@ -3099,7 +3040,7 @@ namespace avmplus
         coder->writeEpilogue(state);
     }
 
-    void CFGWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits*type)
+    void CFGWriter::write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits*type)
     {
       //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
       Block* b = blocks.get(state->pc);
@@ -3132,7 +3073,7 @@ namespace avmplus
         coder->write(state, pc, opcode, type);
     }
 
-    void CFGWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+    void CFGWriter::writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
     {
       //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
       Block* b=blocks.get(state->pc);
@@ -3207,7 +3148,7 @@ namespace avmplus
         coder->writeOp1(state, pc, opcode, opd1, type);
     }
 
-    void CFGWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+    void CFGWriter::writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
     {
       //AvmLog ("%i: %s\n", state->pc, opcodeInfo[opcode].name);
       Block* b=blocks.get(state->pc);
