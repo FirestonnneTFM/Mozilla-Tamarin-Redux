@@ -457,6 +457,48 @@
     METHOD(ENVADDR(MethodEnv::nullcheck), SIG2(V,P,A), nullcheck)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toVTable), SIG2(P,P,A), toVTable)
 
+    union AnyVal {
+        Atom atom;              // SST_atom
+        const Namespace* ns;    // SST_namespace
+        String* str;            // SST_string
+        ScriptObject* obj;      // SST_scriptobject
+        int32_t i;              // SST_int32
+        uint32_t u;             // SST_uint32
+        int32_t b;              // SST_bool32
+        double d;               // SST_double
+    };
+
+    Atom makeatom(AvmCore* core, AnyVal* native, SlotStorageType tag)
+    {
+        switch (tag) {
+        default:
+            AvmAssert(false);
+        case SST_atom:
+            AvmAssert(atomKind(native->atom) != 0);
+            return native->atom;
+        case SST_namespace:
+            AvmAssert(atomKind(native->atom) == 0);
+            return native->ns->atom();
+        case SST_string:
+            AvmAssert(atomKind(native->atom) == 0);
+            AvmAssert(uintptr_t(native->str) > 1000 || native->str == 0);
+            return native->str->atom();
+        case SST_scriptobject:
+            AvmAssert(atomKind(native->atom) == 0);
+            return native->obj->atom();
+        case SST_int32:
+            return core->intToAtom(native->i);
+        case SST_uint32:
+            return core->uintToAtom(native->u);
+        case SST_bool32:
+            AvmAssert(native->b == 0 || native->b == 1);
+            return native->b ? trueAtom : falseAtom;
+        case SST_double:
+            return core->doubleToAtom(native->d);
+        }
+    }
+    CSEFUNCTION(FUNCADDR(makeatom), SIG3(A,P,P,I), makeatom)
+
     void setprop_miss(SetCache& c, Atom obj, Atom val, MethodEnv* env);
 
     void setprop_generic(SetCache& c, Atom obj, Atom val, MethodEnv* env)

@@ -47,6 +47,8 @@
 
 ForIn_7({ length:4, company:"netscape", year:2000, 0:"zero" });
 
+    test();
+
 	function ForIn_7( object ) {
         var result1 = 0;
         var result2 = 0;
