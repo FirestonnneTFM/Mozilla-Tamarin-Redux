@@ -827,7 +827,7 @@ namespace nanojit
         if (oprnd1->isconst() && oprnd2->isconst()) {
             int32_t c1 = oprnd1->imm32();
             int32_t c2 = oprnd2->imm32();
-            double d;
+            double d = 0.0;
 
             switch (op) {
             case LIR_addxov:    d = double(c1) + double(c2);    break;
@@ -2899,6 +2899,8 @@ namespace nanojit
         LIns* args[1];
 
         switch (op) {
+        default:
+            NanoAssert(0);
         case LIR_x:
         case LIR_xbarrier:
             checkLInsIsNull(op, 1, cond);
@@ -2918,9 +2920,6 @@ namespace nanojit
             formals[0] = LTy_I32;   // unlike xt/xf/jt/jf, this is an index, not a condition
             args[0] = cond;
             break;
-
-        default:
-            NanoAssert(0);
         }
 
         typeCheckArgs(op, nArgs, formals, args);
