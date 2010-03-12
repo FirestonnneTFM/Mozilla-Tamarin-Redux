@@ -1229,7 +1229,7 @@ namespace avmplus
         }
     }
 #else
-#   define VERIFYFAILED(core, msg) 
+#   define VERIFYFAILED(core, msg)
 #endif
 
     void Toplevel::throwVerifyError(int id) const
