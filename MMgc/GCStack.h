@@ -60,16 +60,6 @@ namespace MMgc
             kHasInteriorPtrs=2,
             kStackMemory=2          // convenient shorthand for kNonGCObject|kHasInteriorPtrs
         };
-
-		// A sentinel is a work item that doesn't actually do any mark work but 
-		// causes some action to be taken when encountered, see GC::HandleLargeMarkItem.
-		// It is stored in lower bits of ptr, so again we only have 2 bits to play with.
-		enum GCSentinelItemType
-		{
-			kDeadItem=3, // Pop asserts on 0
-			kGCLargeAlloc=1,
-			kGCRoot=2,
-		};
         
 		// FIXME? The initialization is redundant for most locals and for the mark stack we
 		// don't want to have to init all the elements in the array as it makes allocating a mark
@@ -77,25 +67,17 @@ namespace MMgc
 		// clauses here.  --lars
 		GCWorkItem() : ptr(NULL), _size(0) { }
 		GCWorkItem(const void *p, uint32_t s, GCWorkItemType itemType);
-		GCWorkItem(const void *p, GCSentinelItemType type);
 
 		uint32_t GetSize() const { return _size & ~3; }
 		uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
 		uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
-        uint32_t IsSentinelItem() const { return GetSize() == kSentinelSize; }
-		uint32_t GetSentinelType() const { return iptr & 3; }
-		void *GetSentinelPointer() const { return (void*) (iptr & ~3); }
+        uint32_t IsProtectionItem() const { return GetSize() == kProtectionSize; }
 
-		void Clear();
-
-        static const uint32_t kSentinelSize = ~0U - 3;
+        static const uint32_t kProtectionSize = ~0U - 3;
         
 		// If a WI is a GC item, `ptr` is the UserPointer; it must not
 		// be the RealPointer nor an interior pointer
-		union {
-			const void *ptr;
-			uintptr_t iptr;
-		};
+		const void *ptr;
 		
 		// The low bit of _size stores whether this is a GC item.
 		// Always access this through `GetSize` and `IsGCItem`
@@ -164,18 +146,8 @@ namespace MMgc
 #ifdef MMGC_MARKSTACK_DEPTH
 		/** @return the number of elements on the stack when its depth was the greatest */
 		uint32_t MaxCount();
-#endif	 
-
-		// Return pointer to top item on stack w/o popping.  This is
-		// used by GCRoot to clear its work item when they are
-		// deleted.
-		GCWorkItem *Peek();
-
-		// Retrieve the item above, if the item passed is the top of the 
-		// stack NULL is returned, if the item isn't in the stack we assert
-		// and return NULL.
-		GCWorkItem *GetItemAbove(GCWorkItem *item);
-
+#endif
+	
 	protected:
 		// no implementation of these
 		GCMarkStack(const GCMarkStack& other);
@@ -248,12 +220,6 @@ namespace MMgc
 				PopSegment();
 		GCAssert(Invariants());
 		return t;
-	}
-
-	REALLY_INLINE GCWorkItem *GCMarkStack::Peek()
-	{
-		GCAssert(m_top > m_base);
-		return m_top-1;
 	}
 	
 	REALLY_INLINE uint32_t GCMarkStack::Count()
