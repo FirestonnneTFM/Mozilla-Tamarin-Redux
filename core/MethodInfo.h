@@ -349,10 +349,10 @@ namespace avmplus
         Stringp format(AvmCore* core) const;
 #endif
 #ifdef DEBUGGER
-		/**
-		 * Basically the same as AvmPlusScriptableObject::bytesUsed().
-		 */
-		uint64_t bytesUsed();
+        /**
+         * Basically the same as AvmPlusScriptableObject::bytesUsed().
+         */
+        uint64_t bytesUsed();
 #endif
 
     public:

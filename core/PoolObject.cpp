@@ -196,7 +196,7 @@ namespace avmplus
     Traits* PoolObject::addUniqueParameterizedITraits(AvmCore* core, const Toplevel* toplevel, Traits* base, Traits* param_traits)
     {
         // this - is the pool where our param_traits reside
-        AvmAssert(param_traits->pool == this);        
+        AvmAssert(param_traits->pool == this);
         Stringp fullname = VectorClass::makeVectorClassName(core, param_traits);
         Traits* r = getTraits(Multiname(base->ns(), fullname), toplevel); // careful, toplevel can be null!
         if (!r)
@@ -205,13 +205,13 @@ namespace avmplus
             // during interp, abc parsing, method resolution, etc. That is, under many
             // conditions.  This seems ripe for potential issues as it throws a lot
             // of non-determinism into these searches.  Not to mention that it appears
-            // this code by-passes versioning altogether. 
+            // this code by-passes versioning altogether.
             r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
             r = domain->addUniqueTrait(fullname, base->ns(), r);  // getTraits() above also checks the domain.
         }
-        return r;    
+        return r;
     }
-    
+
     Namespace* PoolObject::getNamespace(int32_t index) const
     {
         return cpool_ns[index];
