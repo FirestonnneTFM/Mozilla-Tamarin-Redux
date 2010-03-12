@@ -89,19 +89,18 @@ namespace avmplus
 		virtual void emitAbsJump(const uint8_t *new_pc);
 
 		// CodeWriter
-		void write(FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type = NULL);
-		void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);
-		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
-		void writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type = NULL);
-		void writeNip(FrameState* state, const byte *pc);
-		void writeCheckNull(FrameState* state, uint32_t index);
-		void writeCoerce(FrameState* state, uint32_t index, Traits *type);
-		void writePrologue(FrameState* state, const byte *pc);
-		void writeEpilogue(FrameState* state);
-		void writeBlockStart(FrameState* state);
-		void writeOpcodeVerified(FrameState* state, const byte *pc, AbcOpcode opcode);
-		void writeFixExceptionsAndLabels(FrameState* state, const byte *pc);
-		void formatOperand(PrintWriter& buffer, Value& v);
+		void write(const FrameState* state, const byte *pc, AbcOpcode opcode, Traits *type = NULL);
+		void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);
+		void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
+		void writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo*, uintptr_t disp_id, uint32_t argc, Traits* type = NULL);
+		void writeNip(const FrameState* state, const byte *pc);
+		void writeCheckNull(const FrameState* state, uint32_t index);
+		void writeCoerce(const FrameState* state, uint32_t index, Traits *type);
+		void writePrologue(const FrameState* state, const byte *pc);
+		void writeEpilogue(const FrameState* state);
+		void writeBlockStart(const FrameState* state);
+		void writeOpcodeVerified(const FrameState* state, const byte *pc, AbcOpcode opcode);
+		void writeFixExceptionsAndLabels(const FrameState* state, const byte *pc);
 		void cleanup();
 
 	private:
