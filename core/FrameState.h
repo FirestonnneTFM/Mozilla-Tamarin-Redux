@@ -40,10 +40,6 @@
 #ifndef __avmplus_FrameState__
 #define __avmplus_FrameState__
 
-#if defined FEATURE_NANOJIT
-#  include "CodegenLIR.h"
-#endif
-
 namespace avmplus
 {
     /**
@@ -53,12 +49,18 @@ namespace avmplus
     {
     public:
         Traits* traits;
-    #if defined FEATURE_NANOJIT
-        LIns* ins;
-    #endif
         bool notNull;
         bool isWith;
-        bool killed;
+#if defined FEATURE_NANOJIT
+        // One bit for each of 8 possible SlotStorageTypes for the native representation
+        // of this value.  The JIT uses this mask to handle control-flow merges
+        // of incompatible values (e.g. int and String*).  At merge points, masks
+        // are OR-ed together.
+        // if more than one byte is set, the type will be Object or *, and the JIT
+        // will use a separate tag byte to convert the native represenation to Atom.
+        // See CodegenLIR::localGetp().
+        uint8_t sst_mask;
+#endif
     };
 
     /**
@@ -72,16 +74,14 @@ namespace avmplus
         // length is verifier->frameSize, one entry per local, scope, and stack operand
         Value *locals;
     public:
-        Verifier *verifier;
-    #if defined FEATURE_NANOJIT
-        CodegenLabel label;
-    #endif
+        Verifier *verifier;  // ideally this would be const Verifier*
+        FrameState* wl_next; // next block in verifier->worklist.  ideally this is only accessed by Verifier.
         int32_t pc; // offset from code_start
         int32_t scopeDepth;
         int32_t stackDepth;
         int32_t withBase;
-        bool initialized;
-        bool targetOfBackwardsBranch;
+        bool targetOfBackwardsBranch; // true if this block is reachable from later code (in linear ABC order)
+        bool wl_pending;    // true if this is in verifier->worklist.  Verifier::checkTarget() sets to true.
 
     public:
         FrameState(Verifier*);
@@ -98,13 +98,11 @@ namespace avmplus
         void setType(int32_t i, Traits* t, bool notNull=false, bool isWith=false);
         void pop(int32_t n=1);
         Value& peek(int32_t n=1);
+        const Value& peek(int32_t n) const;
         void pop_push(int32_t n, Traits* type, bool notNull=false);
         void push(Value& _value);
         void push(Traits* traits, bool notNull=false);
     };
 }
-
-// inline method definitions
-#include "FrameState-inlines.h"
 
 #endif /* __avmplus_FrameState__ */

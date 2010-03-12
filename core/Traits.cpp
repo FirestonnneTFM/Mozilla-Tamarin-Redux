@@ -594,21 +594,27 @@ namespace avmplus
         return slotOffset;
     }
 
-    static SlotStorageType bt2sst(BuiltinType bt)
+    SlotStorageType valueStorageType(BuiltinType bt)
     {
-        AvmAssert(bt != BUILTIN_void);
         switch (bt)
         {
             case BUILTIN_int:       return SST_int32;
             case BUILTIN_uint:      return SST_uint32;
             case BUILTIN_number:    return SST_double;
             case BUILTIN_boolean:   return SST_bool32;
+            case BUILTIN_void:      return SST_atom;
             case BUILTIN_any:       return SST_atom;
             case BUILTIN_object:    return SST_atom;
             case BUILTIN_string:    return SST_string;
             case BUILTIN_namespace: return SST_namespace;
             default:                return SST_scriptobject;
         }
+    }
+
+    REALLY_INLINE SlotStorageType slotStorageType(BuiltinType bt)
+    {
+        AvmAssert(bt != BUILTIN_void); // actual slots cannot be type void.
+        return valueStorageType(bt);
     }
 
     // Sun compilers don't allow static and REALLY_INLINE
@@ -1072,7 +1078,7 @@ namespace avmplus
                                         pool->resolveTypeName(ne.info, toplevel);
                     uint32_t slotOffset = computeSlotOffset(slotType, next32BitSlotOffset, nextPointerSlotOffset, next64BitSlotOffset);
                     AvmAssert(slotOffset >= sizeof(ScriptObject));
-                    tb->setSlotInfo(slotid, slotType, bt2sst(getBuiltinType(slotType)), slotOffset);
+                    tb->setSlotInfo(slotid, slotType, slotStorageType(getBuiltinType(slotType)), slotOffset);
 
                     if (abcGen)
                         genDefaultValue(ne.value_index, slotid, toplevel, slotType, ne.value_kind, *abcGen);
@@ -1206,7 +1212,7 @@ namespace avmplus
             addVersionedBindings(bindings, this->name(), compat_nss, AvmCore::makeSlotBinding(0, BKIND_VAR));
             // bindings just need room for one slot binding
             thisData = TraitsBindings::alloc(gc, this, /*base*/NULL, bindings, /*slotCount*/1, /*methodCount*/0, true);
-            thisData->setSlotInfo(0, t, bt2sst(getBuiltinType(t)), this->m_sizeofInstance);
+            thisData->setSlotInfo(0, t, slotStorageType(getBuiltinType(t)), this->m_sizeofInstance);
             thisData->m_slotSize = is8ByteSlot(t) ? 8 : 4;
         }
         else
