@@ -109,8 +109,13 @@ namespace MMgc
 		GCRoot *prev;
 		const void *object;
 		size_t size;
+		GCWorkItem *markStackSentinel;
 
 		GCWorkItem GetWorkItem() const;
+
+		GCWorkItem *GetMarkStackSentinelPointer();
+		void SetMarkStackSentinelPointer(GCWorkItem *wi);
+		void ClearMarkStackSentinelPointer();
 	};
 
 	/**
@@ -904,6 +909,8 @@ namespace MMgc
 
 	private:
 		const static size_t kLargestAlloc = 1968;
+
+		// See comments for HandleLargeMarkItem.
 		const static size_t kMarkItemSplitThreshold = kLargestAlloc;
 
 		class RCRootSegment : public GCRoot
@@ -1546,7 +1553,9 @@ namespace MMgc
 		void Mark();
 		void MarkQueueAndStack(bool scanStack=true);
 		void MarkItem(GCWorkItem &wi);
+		bool HandleLargeMarkItem(GCWorkItem &wi, size_t &size);
 		void EstablishSweepInvariants();
+		void ClearMarkStack();
 
 		static void DoCleanStack(void* stackPointer, void* arg);
 		static void DoMarkFromStack(void* stackPointer, void* arg);

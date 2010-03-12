@@ -1788,9 +1788,9 @@ namespace avmplus
 
             case OP_nop:
                 // those show up but will be ignored
-            case OP_bkpt:      
+            case OP_bkpt:
             case OP_bkptline:
-            case OP_timestamp: 
+            case OP_timestamp:
                 coder->write(state, pc, OP_nop);
                 break;
 

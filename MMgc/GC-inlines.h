@@ -58,6 +58,16 @@ namespace MMgc
 		FixedMalloc::GetFixedMalloc()->Free(object);
 	}
 
+	REALLY_INLINE void GCRoot::ClearMarkStackSentinelPointer()
+	{
+		markStackSentinel = NULL;
+	}
+
+	REALLY_INLINE GCWorkItem *GCRoot::GetMarkStackSentinelPointer()
+	{
+		return markStackSentinel;
+	}
+
 	REALLY_INLINE GCWorkItem GCRoot::GetWorkItem() const
 	{
 		return GCWorkItem(object, (uint32_t)size, GCWorkItem::kNonGCObject);
@@ -687,6 +697,18 @@ namespace MMgc
 			GCAssert(GC::GetGC(p)->FindBeginningGuarded(p) == p);
 		}
 #endif
+	}
+
+	REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, GCSentinelItemType type)
+		: iptr(uintptr_t(p) | type),
+		  _size(kSentinelSize)
+	{}
+
+	REALLY_INLINE void GCWorkItem::Clear()
+	{
+		iptr = kDeadItem;
+		// use sentinel so we're skipped off the fast path in MarkItem
+		_size = kSentinelSize;
 	}
 }
 

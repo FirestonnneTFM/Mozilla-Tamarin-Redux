@@ -5492,7 +5492,7 @@ namespace avmplus
             plive(vars);
         } else {
             deadvars();  // deadvars_kill() will add live(vars) if necessary
-        } 
+        }
 
         // do this very last so it's after LIR_live(vars)
         frag->lastIns = plive(undefConst);
