@@ -54,78 +54,73 @@ namespace avmplus
     {
     }
 
-    void TeeWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type) {
+    void TeeWriter::write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type) {
         coder1->write(state, pc, opcode, type);
         coder2->write(state, pc, opcode, type);
     }
 
-    void TeeWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type)
+    void TeeWriter::writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type)
     {
         coder1->writeOp1(state, pc, opcode, opd1, type);
         coder2->writeOp1(state, pc, opcode, opd1, type);
     }
 
-    void TeeWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+    void TeeWriter::writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
     {
         coder1->writeOp2(state, pc, opcode, opd1, opd2, type);
         coder2->writeOp2(state, pc, opcode, opd1, opd2, type);
     }
 
-    void TeeWriter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
+    void TeeWriter::writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits* type)
     {
-        coder1->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
-        coder2->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
+        coder1->writeMethodCall(state, pc, opcode, m, disp_id, argc, type);
+        coder2->writeMethodCall(state, pc, opcode, m, disp_id, argc, type);
     }
 
-    void TeeWriter::writeNip(FrameState* state, const byte *pc)
+    void TeeWriter::writeNip(const FrameState* state, const byte *pc)
     {
         coder1->writeNip(state, pc);
         coder2->writeNip(state, pc);
     }
 
-    void TeeWriter::writeCheckNull(FrameState* state, uint32_t index)
+    void TeeWriter::writeCheckNull(const FrameState* state, uint32_t index)
     {
         coder1->writeCheckNull(state, index);
         coder2->writeCheckNull(state, index);
     }
 
-    void TeeWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    void TeeWriter::writeCoerce(const FrameState* state, uint32_t index, Traits *type)
     {
         coder1->writeCoerce(state, index, type);
         coder2->writeCoerce(state, index, type);
     }
 
-    void TeeWriter::writePrologue(FrameState* state, const byte *pc)
+    void TeeWriter::writePrologue(const FrameState* state, const byte *pc)
     {
         coder1->writePrologue(state, pc);
         coder2->writePrologue(state, pc);
     }
 
-    void TeeWriter::writeEpilogue(FrameState* state)
+    void TeeWriter::writeEpilogue(const FrameState* state)
     {
         coder1->writeEpilogue(state);
         coder2->writeEpilogue(state);
     }
 
-    void TeeWriter::writeBlockStart(FrameState* state)
+    void TeeWriter::writeBlockStart(const FrameState* state)
     {
         coder1->writeBlockStart(state);
         coder2->writeBlockStart(state);
     }
 
-    void TeeWriter::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode) {
+    void TeeWriter::writeOpcodeVerified(const FrameState* state, const byte* pc, AbcOpcode opcode) {
         coder1->writeOpcodeVerified(state, pc, opcode);
         coder2->writeOpcodeVerified(state, pc, opcode);
     }
 
-    void TeeWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc) {
+    void TeeWriter::writeFixExceptionsAndLabels(const FrameState* state, const byte* pc) {
         coder1->writeFixExceptionsAndLabels(state, pc);
         coder2->writeFixExceptionsAndLabels(state, pc);
-    }
-
-    void TeeWriter::formatOperand(PrintWriter& buffer, Value& v) {
-        coder1->formatOperand(buffer, v);
-        coder2->formatOperand(buffer, v);
     }
 
     void TeeWriter::cleanup() {
@@ -143,69 +138,64 @@ namespace avmplus
     NullWriter::~NullWriter()
     {}
 
-    void NullWriter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
+    void NullWriter::write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
     {
         coder->write(state, pc, opcode, type);
     }
 
-    void NullWriter::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd, Traits *type)
+    void NullWriter::writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd, Traits *type)
     {
         coder->writeOp1(state, pc, opcode, opd, type);
     }
 
-    void NullWriter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
+    void NullWriter::writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type)
     {
         coder->writeOp2(state, pc, opcode, opd1, opd2, type);
     }
 
-    void NullWriter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits* type)
+    void NullWriter::writeMethodCall(const FrameState* state, const byte *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits* type)
     {
-        coder->writeInterfaceCall(state, pc, opcode, opd1, opd2, type);
+        coder->writeMethodCall(state, pc, opcode, m, disp_id, argc, type);
     }
 
-    void NullWriter::writeNip(FrameState* state, const byte *pc)
+    void NullWriter::writeNip(const FrameState* state, const byte *pc)
     {
         coder->writeNip(state, pc);
     }
 
-    void NullWriter::writeCheckNull(FrameState* state, uint32_t index)
+    void NullWriter::writeCheckNull(const FrameState* state, uint32_t index)
     {
         coder->writeCheckNull(state, index);
     }
 
-    void NullWriter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
+    void NullWriter::writeCoerce(const FrameState* state, uint32_t index, Traits *type)
     {
         coder->writeCoerce(state, index, type);
     }
 
-    void NullWriter::writePrologue(FrameState* state, const byte *pc)
+    void NullWriter::writePrologue(const FrameState* state, const byte *pc)
     {
         coder->writePrologue(state, pc);
     }
 
-    void NullWriter::writeEpilogue(FrameState* state)
+    void NullWriter::writeEpilogue(const FrameState* state)
     {
         coder->writeEpilogue(state);
     }
 
-    void NullWriter::writeBlockStart(FrameState* state)
+    void NullWriter::writeBlockStart(const FrameState* state)
     {
         coder->writeBlockStart(state);
     }
 
-    void NullWriter::writeOpcodeVerified(FrameState* state, const byte* pc, AbcOpcode opcode)
+    void NullWriter::writeOpcodeVerified(const FrameState* state, const byte* pc, AbcOpcode opcode)
     {
         coder->writeOpcodeVerified(state, pc, opcode);
     }
 
-    void NullWriter::writeFixExceptionsAndLabels(FrameState* state, const byte* pc)
+    void NullWriter::writeFixExceptionsAndLabels(const FrameState* state, const byte* pc)
     {
         coder->writeFixExceptionsAndLabels(state, pc);
-    }
-
-    void NullWriter::formatOperand(PrintWriter& buffer, Value& v)
-    {
-        coder->formatOperand(buffer, v);
     }
 
     void NullWriter::cleanup()
@@ -255,43 +245,40 @@ namespace avmplus
     CodeWriter::~CodeWriter()
     { }
 
-    void CodeWriter::write(FrameState*, const byte *, AbcOpcode, Traits*)
+    void CodeWriter::write(const FrameState*, const byte *, AbcOpcode, Traits*)
     { }
 
-    void CodeWriter::writeOp1(FrameState*, const byte *, AbcOpcode, uint32_t, Traits*)
+    void CodeWriter::writeOp1(const FrameState*, const byte *, AbcOpcode, uint32_t, Traits*)
     { }
 
-    void CodeWriter::writeOp2(FrameState*, const byte *, AbcOpcode, uint32_t, uint32_t, Traits*)
+    void CodeWriter::writeOp2(const FrameState*, const byte *, AbcOpcode, uint32_t, uint32_t, Traits*)
     { }
 
-    void CodeWriter::writeInterfaceCall(FrameState*, const byte *, AbcOpcode, uintptr_t, uint32_t, Traits*)
+    void CodeWriter::writeMethodCall(const FrameState*, const byte *, AbcOpcode, MethodInfo*, uintptr_t, uint32_t, Traits*)
     { }
 
-    void CodeWriter::writeNip(FrameState*, const byte *)
+    void CodeWriter::writeNip(const FrameState*, const byte *)
     { }
 
-    void CodeWriter::writeCheckNull(FrameState*, uint32_t)
+    void CodeWriter::writeCheckNull(const FrameState*, uint32_t)
     { }
 
-    void CodeWriter::writeCoerce(FrameState*, uint32_t, Traits*)
+    void CodeWriter::writeCoerce(const FrameState*, uint32_t, Traits*)
     { }
 
-    void CodeWriter::writePrologue(FrameState*, const byte *)
+    void CodeWriter::writePrologue(const FrameState*, const byte *)
     { }
 
-    void CodeWriter::writeEpilogue(FrameState*)
+    void CodeWriter::writeEpilogue(const FrameState*)
     { }
 
-    void CodeWriter::writeBlockStart(FrameState*)
+    void CodeWriter::writeBlockStart(const FrameState*)
     { }
 
-    void CodeWriter::writeOpcodeVerified(FrameState*, const byte *, AbcOpcode)
+    void CodeWriter::writeOpcodeVerified(const FrameState*, const byte *, AbcOpcode)
     { }
 
-    void CodeWriter::writeFixExceptionsAndLabels(FrameState*, const byte *)
-    { }
-
-    void CodeWriter::formatOperand(PrintWriter&, Value&)
+    void CodeWriter::writeFixExceptionsAndLabels(const FrameState*, const byte *)
     { }
 
     void CodeWriter::cleanup()

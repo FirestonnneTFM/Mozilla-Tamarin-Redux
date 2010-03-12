@@ -103,6 +103,7 @@ namespace avmplus
         SST_double
     };
     bool isAtomOrRCObjectSlot(SlotStorageType sst);
+    SlotStorageType valueStorageType(BuiltinType bt);
 
     class TraitsBindings : public QCachedItem
     {

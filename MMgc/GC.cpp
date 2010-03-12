@@ -1006,24 +1006,6 @@ namespace MMgc
 		gcheap->AddGC(this);
 		gcheap->AddOOMCallback(this);
 
-#ifdef _DEBUG
-		// self test for tricky GCRoot deletion logic
-		GCRoot *fauxRoot = new GCRoot(this, new char[kMarkItemSplitThreshold*2], kMarkItemSplitThreshold*2);
-		MarkAllRoots();
-		// tail of fauxRoot is on stack
-		GCWorkItem *sentinel = fauxRoot->GetMarkStackSentinelPointer();
-		GCAssert(sentinel->GetSentinelPointer() == fauxRoot);
-		GCWorkItem *tail = m_incrementalWork.GetItemAbove(sentinel);
-		GCAssert(tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End());
-		GCAssert(sentinel != NULL);
-		delete [] (char*)fauxRoot->Get();
-		delete fauxRoot;
-		GCAssert(sentinel->GetSentinelType() == GCWorkItem::kDeadItem);
-		GCAssert(m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() == GCWorkItem::kDeadItem);
-		Mark();
-		ClearMarkStack();
-		ClearMarks();
-#endif
 	}
 
 #ifdef _MSC_VER
@@ -1162,7 +1144,7 @@ namespace MMgc
 
 		// Kill incremental mark since we're gonna wipe the marks.
 		marking = false;
-		ClearMarkStack();
+		m_incrementalWork.Clear();
 		m_barrierWork.Clear();
 		
 		// Clear all mark bits.
@@ -1521,20 +1503,6 @@ namespace MMgc
 			noPointersAllocs[i]->CoalesceQuickList();
 		}
 	}
-
-	void GC::ClearMarkStack()
-	{
-		// GCRoot have pointers into the mark stack, clear them.
-		{
-			MMGC_LOCK(m_rootListLock);
-			GCRoot *r = m_roots;
-			while(r) {
-				r->ClearMarkStackSentinelPointer();
-				r = r->next;
-			}
-		}
-		m_incrementalWork.Clear();
-	}
 	
 	void GC::ForceSweepAtShutdown()
 	{
@@ -1546,7 +1514,7 @@ namespace MMgc
 		// will be finalized and deallocated and the blocks will be returned to the block
 		// manager.
 
-		ClearMarkStack();
+		m_incrementalWork.Clear();
 		m_barrierWork.Clear();
 		
 		ClearMarks();
@@ -1924,7 +1892,6 @@ namespace MMgc
 		gc = _gc;
 		object = _object;
 		size = _size;
-		markStackSentinel = NULL;
 		GCAssert(size % 2 == 0);
 		gc->AddRoot(this);
 	}
@@ -1941,7 +1908,9 @@ namespace MMgc
 
 	GCRoot::~GCRoot()
 	{
-		Destroy();
+		if(gc) {
+			gc->RemoveRoot(this);
+		}
 	}
 
 	void GCRoot::Set(const void * _object, size_t _size)
@@ -1950,29 +1919,12 @@ namespace MMgc
 		this->size = _size;
 	}
 
-	void GCRoot::SetMarkStackSentinelPointer(GCWorkItem *wi)
-	{
-		if(markStackSentinel != NULL) {
-			// There is already a sentinel for this item and above
-			// will be a fragment of the root, clear them both since
-			// we need to rescan the whole thing.
-			GCWorkItem *markStackItem = gc->m_incrementalWork.GetItemAbove(markStackSentinel);
-
-			// markStackItem can be NULL if the sentinel was on the top of the stack.
-			if(markStackItem)
-				markStackItem->Clear();
-			markStackSentinel->Clear();
-		}
-		markStackSentinel = wi;
-	}
-
 	void GCRoot::Destroy()
 	{
 		Set(NULL, 0);
 		if(gc) {
 			gc->RemoveRoot(this);
 		}
-		SetMarkStackSentinelPointer(NULL);
 		gc = NULL;
 	}
 
@@ -2525,14 +2477,6 @@ namespace MMgc
 		while(r) {
 			GCWorkItem item = r->GetWorkItem();
 			if(item.ptr) {
-				// If this root will be split push a sentinel item and store
-				// a pointer to it in the root.   This will allow us to clean
-				// the stack if the root is deleted.  See GCRoot::Destroy and
-				// GC::HandleLargeMarkItem
-				if(item.GetSize() > kMarkItemSplitThreshold) {
-					PushWorkItem(GCWorkItem(r, GCWorkItem::kGCRoot));
-					r->SetMarkStackSentinelPointer(m_incrementalWork.Peek());
-				}
 				MarkItem(item);
 				if (deep)
 					Mark();
@@ -2747,84 +2691,6 @@ namespace MMgc
 
 #endif
 
-	// HandleLargeMarkItem handles work items that are too big to
-	// marked atomically.  We split the work item into two chunks: a
-	// small head (which we mark now) and a large tail (which we push
-	// onto the stack).  The tail is a non-gcobject regardless of
-	// whether the head is a gcobject.  THE HEAD MUST BE MARKED FIRST
-	// because this ensures that the mark on the object is set
-	// immediately; that is necessary for write barrier correctness.
-	//
-	// Why use kLargestAlloc as the split value?
-	//
-	// Unfortunately for correctness THE HEAD MUST ALSO BE MARKED LAST,
-	// because the queued bit is traditionally used to prevent the object
-	// from being deleted explicitly by GC::Free while the object is
-	// on the mark stack.  We can't have it both ways, so split objects
-	// are protected against being freed by carrying another bit that
-	// prevents deletion when it is set.  Because we do not want to expand
-	// the number of header bits per object from 4 to 8, we only have
-	// this extra bit on large objects (where there's plenty of space).
-	// Thus the cutoff for splitting is exactly kLargestObject: only
-	// large objects that can carry this bit are split.
-	//
-	// In addition, the queued flag still prevents the object from
-	// being deleted.
-	//
-	// The free-protection flags are reset by a special GCWorkItem
-	// that is pushed on the stack below the two parts of the object that
-	// is being split; when that is later popped, it resets the flag
-	// and returns.
-	//
-	// The complexity with the free-protection flags may go away if we
-	// move to a write barrier that does not depend on the queued bit,
-	// for example, a card-marking barrier.
-	//
-	// If a mark stack overflow occurs the large tail may be popped
-	// and discarded.  This is not a problem: the object as a whole
-	// is marked, but points to unmarked storage, and the latter
-	// objects will be picked up as per normal.  Discarding the
-	// tail is entirely equivalent to discarding the work items that
-	// would result from scanning the tail.
-	//
-	// Large GCRoot's are also split in MarkAllRoots and we store a
-	// pointer to the tail work item in the GCRoot itself.  If a
-	// GCRoot is deleted it uses these pointers to clear that work
-	// items.  A sentinel work item is pushed before the remainder
-	// which clears the pointers in the GCRoot.
-
-	bool GC::HandleLargeMarkItem(GCWorkItem &wi, size_t& size)
-	{
-		if (wi.IsSentinelItem()) {			
-			if(wi.GetSentinelType() == GCWorkItem::kGCLargeAlloc) {
-				// Unprotect an item that was protected earlier, see comment block above.
-				GCLargeAlloc::UnprotectAgainstFree(wi.GetSentinelPointer());
-			}
-			
-			if(wi.GetSentinelType() == GCWorkItem::kGCRoot) {
-				// The GCRoot is no longer on the stack, clear the pointers into the stack.
-				GCRoot *sentinelRoot = (GCRoot*)wi.GetSentinelPointer();
-				sentinelRoot->ClearMarkStackSentinelPointer();
-			}
-			return true;
-		}
-		
-		if (wi.IsGCItem()) {
-			// Need to protect it against 'Free': push a magic item representing this object
-			// that will prevent this split item from being freed, see comment block above.
-			GCLargeAlloc::ProtectAgainstFree(wi.ptr);
-			PushWorkItem(GCWorkItem(wi.ptr, GCWorkItem::kGCLargeAlloc));
-		}
-
-		PushWorkItem(GCWorkItem((void*)(wi.iptr + kLargestAlloc),
-								uint32_t(size - kLargestAlloc), 
-								wi.HasInteriorPtrs() ? GCWorkItem::kStackMemory : GCWorkItem::kNonGCObject));
-
-		size = kLargestAlloc;
-		return false;
-	}
-	
-
 	// This will mark the item whether the item was previously marked or not.
 	// The mark stack overflow logic depends on that.
 
@@ -2835,22 +2701,74 @@ namespace MMgc
 		size_t size = wi.GetSize();
 		uintptr_t *p = (uintptr_t*) wi.ptr;
 
-		// Control mark stack growth and ensure incrementality:
-		//
+		// Control mark stack growth:
+        //
 		// Here we consider whether to split the object into multiple pieces.
 		// A cutoff of kLargestAlloc is imposed on us by external factors, see
-		// discussion below.  Ideally we'd choose a limit that isn't "too small"
+        // discussion below.  Ideally we'd choose a limit that isn't "too small"
 		// because then we'll split too many objects, and isn't "too large"
 		// because then the mark stack growth won't be throttled properly.
 		//
 		// See bugzilla #495049 for a discussion of this problem.
 		//
-		// See comments above HandleLargeMarkItem for the mechanics of how this
-		// is done and why kMarkItemSplitThreshold == kLargestAlloc
+		// If the cutoff is exceeded split the work item into two chunks:
+		// a small head (which we mark now) and a large tail (which we push
+		// onto the stack).  The tail is a non-gcobject regardless of whether
+		// the head is a gcobject.  THE HEAD MUST BE MARKED FIRST because this
+		// ensures that the mark on the object is set immediately; that is
+		// necessary for write barrier correctness.
+		//
+        // Why use kLargestAlloc as the split value?
+        //
+        // Unfortunately for correctness THE HEAD MUST ALSO BE MARKED LAST,
+        // because the queued bit is traditionally used to prevent the object
+        // from being deleted explicitly by GC::Free while the object is
+        // on the mark stack.  We can't have it both ways, so split objects
+        // are protected against being freed by carrying another bit that
+        // prevents deletion when it is set.  Because we do not want to expand
+        // the number of header bits per object from 4 to 8, we only have
+        // this extra bit on large objects (where there's plenty of space).
+        // Thus the cutoff for splitting is exactly kLargestObject: only
+        // large objects that can carry this bit are split.
+        //
+        // In addition, the queued flag still prevents the object from
+        // being deleted.
+        //
+        // The free-protection flags are reset by a special GCWorkItem
+        // that is pushed on the stack below the two parts of the object that
+        // is being split; when that is later popped, it resets the flag
+        // and returns.
+        //
+        // Th complexity with the free-protection flags may go away if we
+        // move to a write barrier that does not depend on the queued bit,
+        // for example, a card-marking barrier.
+        //
+		// If a mark stack overflow occurs the large tail may be popped
+		// and discarded.  This is not a problem: the object as a whole
+		// is marked, but points to unmarked storage, and the latter
+		// objects will be picked up as per normal.  Discarding the
+		// tail is entirely equivalent to discarding the work items that
+		// would result from scanning the tail.
+
 		if (size > kMarkItemSplitThreshold)
 		{
-			if(HandleLargeMarkItem(wi, size))
-				return;
+            if (wi.IsProtectionItem()) {
+                // Unprotect an item that was protected earlier, see comment block above.
+                GCLargeAlloc::UnprotectAgainstFree(p);
+                return;
+            }
+
+            if (wi.IsGCItem()) {
+                // Need to protect it against 'Free': push a magic item representing this object
+                // that will prevent this split item from being freed, see comment block above.
+                GCLargeAlloc::ProtectAgainstFree(p);
+                PushWorkItem(GCWorkItem(p, GCWorkItem::kProtectionSize, GCWorkItem::kGCObject));
+            }
+
+			PushWorkItem(GCWorkItem(p + kLargestAlloc / sizeof(uintptr_t), 
+                                    uint32_t(size - kLargestAlloc), 
+                                    wi.HasInteriorPtrs() ? GCWorkItem::kStackMemory : GCWorkItem::kNonGCObject));
+			size = kLargestAlloc;
 		}
 
 		policy.signalMarkWork(size);
@@ -3163,7 +3081,7 @@ namespace MMgc
 			FlushBarrierWork();									//    m_markStackOverflow
 			MarkQueueAndStack(scanStack);						//       to true again
 		}
-		ClearMarkStack();				// Frees any cached resources
+		m_incrementalWork.Clear();				// Frees any cached resources
 		m_barrierWork.Clear();
 		zct.Prune();							// Frees unused memory
 		
@@ -3347,7 +3265,8 @@ namespace MMgc
 		   // don't push small items that are moving pointers inside the same array
 		   (dstArray != srcArray || Size(dstArray) > kMarkItemSplitThreshold)) {
 			// this could be optimized to just re-scan the dirty region
-			WriteBarrierHit(dstArray);
+			GCWorkItem item(dstArray, (uint32_t)Size(dstArray), GCWorkItem::kGCObject);
+			PushWorkItem(item);
 		}
 		VMPI_memmove(dstArray + dstOffset, srcArray + srcOffset, numPointers * sizeof(void*));
  	}
@@ -3850,7 +3769,7 @@ namespace MMgc
 		
 		if (collecting || marking)
 		{
-			ClearMarkStack();
+			m_incrementalWork.Clear();
 			m_barrierWork.Clear();
 			ClearMarks();
 			m_markStackOverflow = false;

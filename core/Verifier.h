@@ -65,10 +65,7 @@ namespace avmplus
     class Verifier
     {
     public:
-        CodeWriter* coder;
         AvmCore *core;
-        GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
-        FrameState *state;
 
         int max_scope;
         int max_stack;
@@ -79,15 +76,11 @@ namespace avmplus
             int local_count;
         };
 
-        int frameSize;
-        int code_length;
-        const byte* code_pos;
-        const byte* exceptions_pos;
-
-        MethodInfo *info;
-        const MethodSignaturep ms;
-        PoolObject *pool;
-        int labelCount;
+        int frameSize;          // local_count + max_scope + max_stack
+        int code_length;        // size of abc bytecode (bytes)
+        const byte* code_pos;   // start of abc bytecode
+        const byte* tryFrom;   // start of earliest try region
+        const byte* tryTo;     // end of latest try region
 
         Verifier(MethodInfo *info, Toplevel* toplevel, AbcEnv* abc_env
 #ifdef AVMPLUS_VERBOSE
@@ -103,7 +96,9 @@ namespace avmplus
          */
         // Sun's C++ compiler wants "volatile" here because the definition has it
         void verify(CodeWriter * volatile coder);
-        FrameState* getFrameState(int pc_off);
+        bool hasFrameState(int pc_off);
+        bool canAssign(Traits* lhs, Traits* rhs) const;
+        int getBlockCount();
 
         // provide access to known jitters
         #if defined FEATURE_NANOJIT
@@ -111,16 +106,30 @@ namespace avmplus
         #endif
 
     private:
+        MethodInfo *info;
+        const MethodSignaturep ms;
+        PoolObject *pool;
+        CodeWriter* coder;
+        FrameState *worklist;
         Toplevel* toplevel;
         AbcEnv*   abc_env;
+        GCSortedMap<const byte*, FrameState*, LIST_NonGCObjects> *blockStates;
+        FrameState *state;
+        bool emitPass;
+        FrameState* getFrameState(int pc_off);
+        void verifyBlock(CodeWriter *, const byte*);
+        void identifyBlocks(const byte*, int);
+        void dfsBlock(const byte*, int);
+        const byte* loadBlockState(FrameState* blk);
+        void checkParams();
         Value& checkLocal(int local);
-        MethodInfo*  checkDispId(Traits* traits, uint32_t disp_id);
-        MethodInfo*  checkMethodInfo(uint32_t method_id);
-        Traits*            checkClassInfo(uint32_t class_id);
-        void checkTarget(const byte* target);
+        MethodInfo* checkDispId(Traits* traits, uint32_t disp_id);
+        MethodInfo* checkMethodInfo(uint32_t method_id);
+        Traits* checkClassInfo(uint32_t class_id);
+        void checkTarget(const byte* current, const byte* target);
+        bool mergeState(FrameState*);
         void checkCpoolOperand(uint32_t index, int requiredAtomType);
         void checkConstantMultiname(uint32_t index, Multiname &m);
-        bool canAssign(Traits* lhs, Traits* rhs) const;
         Traits* checkSlot(Traits* traits, int slot_id);
         Traits* findCommonBase(Traits* t1, Traits* t2);
         void printValue(Value& v);
@@ -129,7 +138,7 @@ namespace avmplus
         Traits* emitCoerceSuper(int index);
         void checkCallMultiname(AbcOpcode opcode, Multiname* multiname) const;
         void checkPropertyMultiname(uint32_t &depth, Multiname& multiname);
-        void parseExceptionHandlers();
+        void parseBodyHeader();
         void checkStack(uint32_t pop, uint32_t push);
         void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
         void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);
@@ -145,6 +154,7 @@ namespace avmplus
 #endif
         Binding findMathFunction(TraitsBindingsp math, const Multiname& name, Binding b, int argc);
         Binding findStringFunction(TraitsBindingsp string, const Multiname& name, Binding b, int argc);
+        void parseExceptionHandlers();
 
         #ifdef AVMPLUS_VERBOSE
     public:
@@ -152,19 +162,16 @@ namespace avmplus
         bool secondTry;
         void printScope(const char* title, const ScopeTypeChain*);
         void printState(StringBuffer& prefix, FrameState* state);
-        void printOpcode(const byte* pc, bool unreachable);
+        void printOpcode(const byte* pc);
         void verifyWarn(int errorId, ...);
         #endif
-
-    private:
-        bool blockEnd;  // share between methods
 
     public:
         // NOTE these methods used to be private but the jit needs access to
         // them for now. further refactoring should attempt to remove such back
         // references
         void verifyFailed(int errorID, Stringp a1=0, Stringp a2=0, Stringp a3=0) const;
-        void emitCoerceArgs(MethodInfo* m, int argc, bool isctor=false);
+        void emitCoerceArgs(MethodInfo* m, int argc);
         Traits* readBinding(Traits* traits, Binding b);
         void emitCoerce(Traits* target, int i);
         void emitCheckNull(int index);
@@ -204,10 +211,10 @@ namespace avmplus
         ~CFGWriter();
 
         // CodeWriter methods
-        void write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits*);
-        void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
-        void writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
-        void writeEpilogue(FrameState*);
+        void write(const FrameState* state, const byte* pc, AbcOpcode opcode, Traits*);
+        void writeOp1(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type);
+        void writeOp2(const FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type);
+        void writeEpilogue(const FrameState*);
         void cleanup();
     };
 #endif // FEATURE_CFGWRITER

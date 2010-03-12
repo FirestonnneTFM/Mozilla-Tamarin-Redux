@@ -39,10 +39,6 @@
 
 #ifdef VMCFG_WORDCODE
 
-// FIXME the following is required because FrameState has dependencies on the jitters
-#include "FrameState.h"
-
-
 namespace avmplus
 {
 	using namespace MMgc;
@@ -307,7 +303,10 @@ namespace avmplus
 #endif
 
 		while (exception_fixes != NULL && exception_fixes->pc <= pc) {
-			AvmAssert(exception_fixes->pc == pc);
+			// the Verifier can skip dead code.  if this happens and we had a catch_info
+			// record on a dead location, then the fixup floats to the next valid pc,
+			// which is the one passed into this call.
+			//AvmAssert(exception_fixes->pc == pc);
 			exceptions_consumed = true;
 			*exception_fixes->fixup_loc = (int)(buffer_offset + (dest - buffers->data));
 			catch_info* tmp = exception_fixes;
@@ -345,47 +344,33 @@ namespace avmplus
 		return (WordOpcode)opcodeInfo[opcode].wordCode;
 	}
 
-    void WordcodeEmitter::writePrologue(FrameState* state, const byte *pc)
+    void WordcodeEmitter::writePrologue(const FrameState*, const byte *pc)
 	{
-		(void)state;
-		(void)pc;
         #if defined DEBUGGER
 		if (core->debugger()) emitOp0(pc, WOP_debugenter);
+		#else
+		(void)pc;
         #endif
         computeExceptionFixups();
 	}
 
-	void WordcodeEmitter::writeEpilogue(FrameState* state)
+	void WordcodeEmitter::writeEpilogue(const FrameState*)
 	{
-		(void)state;
 		epilogue();
 	}
 
-	void WordcodeEmitter::writeBlockStart(FrameState* state)
-	{
-		(void)state;
-	}
+	void WordcodeEmitter::writeBlockStart(const FrameState*)
+	{}
 
-	void WordcodeEmitter::writeOpcodeVerified(FrameState *state, const byte *pc, AbcOpcode opcode)
-	{
-	    (void)state;
-		(void)pc;
-		(void)opcode;
-	}
+	void WordcodeEmitter::writeOpcodeVerified(const FrameState*, const byte*, AbcOpcode)
+	{}
 
-    void WordcodeEmitter::writeFixExceptionsAndLabels(FrameState* state, const byte *pc)
+    void WordcodeEmitter::writeFixExceptionsAndLabels(const FrameState*, const byte *pc)
 	{
-		(void)state;
 		fixExceptionsAndLabels(pc);
 	}
 
-    void WordcodeEmitter::formatOperand(PrintWriter& buffer, Value& v)
-	{
-		(void)buffer;
-		(void)v;
-	}
-
-	void WordcodeEmitter::writeOp1(FrameState *state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+	void WordcodeEmitter::writeOp1(const FrameState *state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
 	{
 		(void)type;
 		switch (opcode) {
@@ -460,50 +445,41 @@ namespace avmplus
 		}
 	}
 
-	void WordcodeEmitter::writeNip(FrameState* state, const byte *pc)
+	void WordcodeEmitter::writeNip(const FrameState* state, const byte *pc)
 	{
 	    write(state, pc, OP_swap);
 		write(state, pc, OP_pop);
 	}
 
-	void WordcodeEmitter::writeCheckNull(FrameState* state, uint32_t index)
-    {
-	    (void)state;
-	    (void)index;
-    }
+	void WordcodeEmitter::writeCheckNull(const FrameState*, uint32_t)
+    {}
 
-	void WordcodeEmitter::writeInterfaceCall(FrameState* state, const byte *pc, AbcOpcode opcode, uintptr opd1, uint32_t opd2, Traits *type)
+	void WordcodeEmitter::writeMethodCall(const FrameState*, const byte *pc, AbcOpcode opcode, MethodInfo* m, uintptr_t disp_id, uint32_t argc, Traits *)
 	{
-		(void)state;
-		(void)opd1;
-		(void)opd2;
-		(void)type;
+		(void)m;
 		switch (opcode) {
 		case OP_callproperty: 
 		case OP_callproplex: 
 		case OP_callpropvoid:
-		    // opd1=m->iid(), opd2=argc
+			AvmAssert(m->declaringTraits()->isInterface());
+		    // disp_id=m->iid(), opd2=argc
 		    emitOp2(pc, wordCode(opcode));
             break;
+		case OP_callmethod:
+		    emitOp2(wordCode(opcode), uint32_t(disp_id+1), argc);
+			break;
         default:
             AvmAssert(false);
             break;
         }
     }
 
-	void WordcodeEmitter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits *type)
+	void WordcodeEmitter::writeOp2(const FrameState*, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits*)
 	{
-		(void)type;
 		(void)pc;
-		(void)state;
 		switch (opcode) {
 		case OP_setslot:
 		    emitOp1(WOP_setslot, opd1+1);
-			break;
-
-		case OP_callmethod:
-		    // opd1=disp_id
-		    emitOp2(wordCode(opcode), opd1+1, opd2);
 			break;
 		case OP_callproperty: 
 		case OP_callproplex: 
@@ -548,12 +524,9 @@ namespace avmplus
 		}
 	}
 
-	void WordcodeEmitter::write(FrameState* state, const byte* pc, AbcOpcode opcode, Traits *type)
+	void WordcodeEmitter::write(const FrameState*, const byte* pc, AbcOpcode opcode, Traits*)
 	{
-		(void)state;
-		(void)type;
 	  //AvmLog("WordcodeEmitter::write %x\n", opcode);
-
 		switch (opcode) {
 		case OP_coerce_a:
 		case OP_nop:
@@ -762,12 +735,8 @@ namespace avmplus
 
 	}
 
-	void WordcodeEmitter::writeCoerce(FrameState* state, uint32_t index, Traits *type)
-    {
-	    (void) state;
-	    (void) index;
-	    (void) type;
-    }
+	void WordcodeEmitter::writeCoerce(const FrameState*, uint32_t, Traits*)
+    {}
 
 	void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
 	{
