@@ -5729,6 +5729,9 @@ namespace nanojit
     void LirNameMap::formatGuard(LIns*, char*) {
         AvmAssert(false);
     }
+    void LirNameMap::formatGuardXov(LIns*, char*) {
+        AvmAssert(false);
+    }
     #endif
 
     void* Allocator::allocChunk(size_t size) {
