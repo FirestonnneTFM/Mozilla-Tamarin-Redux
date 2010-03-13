@@ -60,10 +60,11 @@
  *
  * Grammar
  *
- *   file      ::= component category ifdef* (decls | methods | prologue | epilogue | test)*
+ *   file      ::= component category ifdef* prefix? (decls | methods | prologue | epilogue | test)*
  *   component ::= SOL "%%component" ident EOL
  *   category  ::= SOL "%%category" ident EOL
  *   ifdef     ::= SOL ( "%%ifdef" | "%%ifndef" ) ident EOL
+ *   prefix    ::= SOL "%%prefix" EOL text
  *   decls     ::= SOL "%%decls" EOL text
  *   methods   ::= SOL "%%methods" EOL text
  *   prologue  ::= SOL "%%prologue" EOL text
@@ -99,12 +100,18 @@
  *   VMCFG_SELFTEST and also each of the names declared in %%ifdef
  *   statements.
  *
- *   The code that is generated comprises a class and its methods, all
- *   within a "namespace avmplus" block. Text in %%decls blocks is
- *   inserted verbatim into the class definition; text in %%methods
- *   blocks is inserted verbatim into the top level of the file.
- *   These sections allow the test case to define and use auxiliary
- *   data and methods.
+ *   Code is generated into a "namespace avmplus" block.
+
+ *   The %%prefix text, if any, is inserted verbatim before generated
+ *   classes or methods; it is useful for "use namespace", class 
+ *   definitions, and so on.
+ *
+ *   Apart from the prefix, the code that is generated comprises a
+ *   class and its methods. Text in %%decls blocks is inserted
+ *   verbatim into the class definition; text in %%methods blocks is
+ *   inserted verbatim into the top level of the file following the
+ *   class definition.  These sections allow the test case to define
+ *   and use auxiliary data and methods.
  *
  *   The code in a %%prologue section will be run once, before any
  *   test in the file is run.  The code in an %%epilogue section will
@@ -132,6 +139,7 @@ package selftest
 		var category = null;
 		var ifdefs = [];
 		var ifndefs = [];
+		var prefix = [];
 		var decls = [];
 		var methods = [];
 		var prologue = null;
@@ -179,28 +187,35 @@ package selftest
 				state = 1;
 				st.ifndefs.push(res[1]);
 			}
+			else if (line.match(/^\s*%%prefix/)) {
+				if (state > 2)
+					throw "Too late to define prefix";
+			    state = 2;
+				st.prefix = text();
+				state = 3;
+			}
 			else if (line.match(/^\s*%%decls/)) {
-				state = 2;
+				state = 3;
 				pushMultiple(st.decls, text());
 			}
 			else if (line.match(/^\s*%%methods/)) {
-				state = 2;
+				state = 3;
 				pushMultiple(st.methods, text());
 			}
 			else if (line.match(/^\s*%%prologue/)) {
-				state = 2;
+				state = 3;
 				if (st.prologue != null)
 					throw "Prologue already defined";
 				st.prologue = text();
 			}
 			else if (line.match(/^\s*%%epilogue/)) {
-				state = 2;
+				state = 3;
 				if (st.epilogue != null)
 					throw "Epilogue already defined";
 				st.epilogue = text();
 			}
 			else if (res = /^\s*%%test\s+([a-zA-Z_][a-zA-Z0-9_]+)\s*$/.exec(line)) {
-				state = 2;
+				state = 3;
 				var loc = i;
 				var t = [];
 				var vs = 0;
@@ -276,6 +291,9 @@ package selftest
 		if (st.ifndef_text != null)
 			s.push(st.ifndef_text);
 		s.push("namespace avmplus {");
+
+		for ( var i=0 ; i < st.prefix.length ; i++ )
+			s.push(st.prefix[i]);
 
 		s.push("class " + classname + " : public Selftest {");
         s.push("public:");
