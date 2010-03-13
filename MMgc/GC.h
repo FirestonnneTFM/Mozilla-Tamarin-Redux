@@ -1806,7 +1806,7 @@ public:
 	public:
 		GCAutoEnter(GC *gc);
 		~GCAutoEnter();
-		void Destroy() { m_gc = m_prevgc = NULL; }
+		void Destroy() { m_gc = NULL; }
 	private:
 		GC* m_gc;
         GC* m_prevgc;
