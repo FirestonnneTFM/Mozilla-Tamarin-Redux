@@ -3265,8 +3265,7 @@ namespace MMgc
 		   // don't push small items that are moving pointers inside the same array
 		   (dstArray != srcArray || Size(dstArray) > kMarkItemSplitThreshold)) {
 			// this could be optimized to just re-scan the dirty region
-			GCWorkItem item(dstArray, (uint32_t)Size(dstArray), GCWorkItem::kGCObject);
-			PushWorkItem(item);
+			InlineWriteBarrierTrap(dstArray);
 		}
 		VMPI_memmove(dstArray + dstOffset, srcArray + srcOffset, numPointers * sizeof(void*));
  	}
