@@ -2756,7 +2756,7 @@ namespace avmplus
 		if (pos < m_lastPos)
 			m_lastPos = m_lastUtf8Pos = 0;
 
-		int32_t utf8Pos = m_lastPos;
+		int32_t utf8Pos = m_lastUtf8Pos;
 
 		const utf8_t* p = (const utf8_t*) this->c_str() + m_lastUtf8Pos;
 		for (int32_t i = m_lastPos; i < pos; i++)
