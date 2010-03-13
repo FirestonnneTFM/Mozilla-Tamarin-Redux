@@ -3656,7 +3656,13 @@ namespace MMgc
         #endif
                 m_gc->heap->SetActiveGC(m_prevgc);
             GCAssert(curgc == m_gc);
-			m_gc = NULL;
+			m_gc = m_prevgc = NULL;
+		}
+		else
+		{
+			if (m_prevgc){
+				m_prevgc->heap->SetActiveGC(m_prevgc);
+			}
 		}
 	}
 
