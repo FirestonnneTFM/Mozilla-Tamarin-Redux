@@ -615,7 +615,7 @@ namespace avmplus
                     f->setNeedsDxns();
 
                 // only export one name for an accessor
-                if (script && !domain->getNamedScript(name,ns))
+                if (script)
                     addNamedScript(nss, name, script);
 
                 break;
@@ -1589,7 +1589,7 @@ namespace avmplus
                     apis |= ApiUtils::getCompatibleAPIs(core, nsi->getAPI());
                 }
                 ns = ApiUtils::getVersionedNamespace(core, ns, apis);
-                domain->addNamedScript(name, ns, script);
+                domain->addUniqueScript(name, ns, script);
             }
             else
             {

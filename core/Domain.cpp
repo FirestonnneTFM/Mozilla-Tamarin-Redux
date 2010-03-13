@@ -51,11 +51,13 @@ namespace avmplus
 
 	Traits* Domain::getNamedTraits(Stringp name, Namespacep ns)
 	{
-		Traits *traits = (Traits*) m_namedTraits->get(name, ns);
-		if (!traits && m_base) {
-			traits = m_base->getNamedTraits(name, ns);
-        }
-		return traits;
+        Traits* f = NULL;
+        Domain* dom = this;
+        do {
+            f = (Traits*) dom->m_namedTraits->get(name, ns);
+            dom = dom->m_base;
+        } while (!f && dom);
+		return f;
 	}
 
     Traits* Domain::addUniqueTrait(Stringp name, Namespace* ns, Traits* v) 
@@ -68,34 +70,37 @@ namespace avmplus
         return t;
     }
 
-    void Domain::addNamedScript(Stringp name, Namespace* ns, MethodInfo* v) 
+	MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns) const
+	{
+        MethodInfo* f = NULL;
+        const Domain* dom = this;
+        do {
+            f = (MethodInfo*) dom->m_namedScripts->get(name, ns);
+            dom = dom->m_base;
+        } while (!f && dom);
+		return f;
+	}
+
+	MethodInfo* Domain::getNamedScript(const Multiname* mn) const
+	{
+        MethodInfo* f = NULL;
+        const Domain* dom = this;
+        do {
+            f = (MethodInfo*) dom->m_namedScripts->getMulti(mn);
+            dom = dom->m_base;
+        } while (!f && dom);
+		return f;
+	}
+
+    MethodInfo* Domain::addUniqueScript(Stringp name, Namespace* ns, MethodInfo* v) 
     { 
-        m_namedScripts->add(name, ns, (Binding)v); 
+        MethodInfo* t = getNamedScript(name, ns);
+        if (t == NULL) {
+            m_namedScripts->add(name, ns, (Binding)v); 
+            t = v; // return script that we'd get from a getNamedScript() call.
+        }
+        return t;
     }
-
-	MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns)
-	{
-		MethodInfo* f = NULL;
-		if (m_base) {
-			f = m_base->getNamedScript(name, ns);
-		}
-		if (!f) {
-			f = (MethodInfo*)m_namedScripts->get(name, ns);
-		}
-		return f;
-	}
-
-	MethodInfo* Domain::getNamedScript(const Multiname *multiname)
-	{
-		MethodInfo* f = NULL;
-		if (m_base) {
-			f = m_base->getNamedScript(multiname);
-		}
-		if (!f) {
-			f = (MethodInfo*)m_namedScripts->getMulti(multiname);
-		}
-		return f;
-	}
 
     ClassClosure* Domain::getParameterizedType(ClassClosure* type) 
     { 
