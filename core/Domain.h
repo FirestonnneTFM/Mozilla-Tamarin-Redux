@@ -46,11 +46,11 @@ namespace avmplus
 		Domain(AvmCore* core, Domain* base);
 		
 		Traits* getNamedTraits(Stringp name, Namespacep ns);
-		MethodInfo* getNamedScript(Stringp name, Namespacep ns);
-		MethodInfo* getNamedScript(const Multiname* multiname);
+		MethodInfo* getNamedScript(Stringp name, Namespacep ns) const;
+		MethodInfo* getNamedScript(const Multiname* mn) const;
 		
         Traits* addUniqueTrait(Stringp name, Namespace* ns, Traits* v) ;
-		void addNamedScript(Stringp name, Namespace* ns, MethodInfo* v);
+		MethodInfo* addUniqueScript(Stringp name, Namespace* ns, MethodInfo* v);
 
         // returns NULL if the type doesn't exist yet.
 		ClassClosure* getParameterizedType(ClassClosure* type);

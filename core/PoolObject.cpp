@@ -138,12 +138,12 @@ namespace avmplus
 
     Traits* PoolObject::getTraits(Stringp name, Namespace* ns) const
     {
-        // look for class in VM-wide type table
-        Traits* t = domain->getNamedTraits(name, ns);
-
-        // look for class in current ABC file
+        // look for class locally 
+        Traits* t = (Traits*) _namedTraits->get(name, ns);
+        
+        // then in vm-wide table
         if (t == NULL)
-            t = (Traits*) _namedTraits->get(name, ns);
+            t = domain->getNamedTraits(name, ns);
         return t;
     }
 
@@ -684,16 +684,17 @@ range_error:
 
     void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, MethodInfo *script)
     {
-        _privateNamedScripts->add(name, ns, (Binding)script);
+        // only add it if subsequent lookup wouldn't find it 
+        Multiname mn(ns, name);
+        if (!getNamedScript(&mn))
+            _privateNamedScripts->add(name, ns, (Binding)script);
     }
 
     MethodInfo* PoolObject::getNamedScript(const Multiname* multiname) const
     {
-        MethodInfo* f = domain->getNamedScript(multiname);
+        MethodInfo* f = (MethodInfo*)_privateNamedScripts->getMulti(multiname);
         if (!f)
-        {
-            f = (MethodInfo*)_privateNamedScripts->getMulti(multiname);
-        }
+            f = domain->getNamedScript(multiname); 
         return f;
     }
 
