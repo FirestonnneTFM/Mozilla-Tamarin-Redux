@@ -3265,8 +3265,7 @@ namespace MMgc
 		   // don't push small items that are moving pointers inside the same array
 		   (dstArray != srcArray || Size(dstArray) > kMarkItemSplitThreshold)) {
 			// this could be optimized to just re-scan the dirty region
-			GCWorkItem item(dstArray, (uint32_t)Size(dstArray), GCWorkItem::kGCObject);
-			PushWorkItem(item);
+			InlineWriteBarrierTrap(dstArray);
 		}
 		VMPI_memmove(dstArray + dstOffset, srcArray + srcOffset, numPointers * sizeof(void*));
  	}
@@ -3656,7 +3655,13 @@ namespace MMgc
         #endif
                 m_gc->heap->SetActiveGC(m_prevgc);
             GCAssert(curgc == m_gc);
-			m_gc = NULL;
+			m_gc = m_prevgc = NULL;
+		}
+		else
+		{
+			if (m_prevgc){
+				m_prevgc->heap->SetActiveGC(m_prevgc);
+			}
 		}
 	}
 
