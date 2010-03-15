@@ -2676,6 +2676,8 @@ namespace avmplus
 		else
 		{
 			len = UnicodeUtils::Utf16ToUtf8(String::Pointers(str).p16, str->length(), NULL, 0);
+			if (len < 0)
+				len = 0;
 			char* dstBuf = (char*) gc->Alloc(uint32_t(len)+1, 0);
 			m_buffer = dstBuf;
 			m_length = len;
