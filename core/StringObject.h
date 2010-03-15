@@ -48,19 +48,19 @@ namespace avmplus
 
 	/**
 	A String can have many faces, dependent on the way the string data is stored. 
-	The most common is the kDirect type, meaning that the string data follows the
-	instance data. The kStatic type has the string instance point to a static buffer.
+	The most common is the kDynamic type, meaning that the string data is owned by
+	the string instance. The kStatic type has the string instance point to a static buffer.
 	This buffer must exist as long as the string exists; character constants are
 	ideal candidates for this type. The kDependent type is a string that points
 	into another string; this type is created in a substring or concatenation operation. 
 	Strings cannot be deleted directly, because they may be referenced be dependent strings.
 	<p>
 	String concatenation attempts first to use additional memory that the memory 
-	allocator has left behind when a kDirect string was allocated. If the right-hand
+	allocator has left behind when a kDynamic string was allocated. If the right-hand
 	string fits into that buffer, the data is appended, and a dependent string is returned,
-	pointing to the new, larger buffer(the original string keeps its initial length
+	pointing to the new, larger buffer (the original string keeps its initial length
 	and thus does not know about the additional data). If the data does not fit, a new
-	kDirect string is allocated with some extra bytes at the end, assuming that there may
+	kDynamic string is allocated with some extra bytes at the end, assuming that there may
 	be more characters to append. The minimum of extra characters is 32, then it is twice 
 	the new length, up to a platform-dependent maximum(usually 64K). This value can be 
 	tweaked for platforms with memory constraints in favor of more copying operations.
@@ -311,7 +311,7 @@ namespace avmplus
 		/**
 		Concatenate two strings, and return the result. If the right string fits into the buffer
 		end of the left string, append the data and return a new dependent string pointing
-		to that buffer. If it does not fit, create a kDirect string containing the entire
+		to that buffer. If it does not fit, create a kDynamic string containing the entire
 		buffer, with extra padding at the end to support in-place concatenation.
 		@param	left				the left string; may be NULL
 		@param	right				the right string; may be NULL, although not meaningful
