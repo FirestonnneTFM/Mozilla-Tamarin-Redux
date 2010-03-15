@@ -134,7 +134,6 @@ namespace avmshell
 				  DomainEnv* domainEnv, Toplevel*& toplevel, CodeContext* codeContext,
 				  List<PoolObject*> &deferred)
 	{
-		MMgc::GC *gc = toplevel->gc();
 		AvmCore *core = toplevel->core();
 		int tagstart = parser.pos;
 		const int kDoAbcLazyInitializeFlag = 1;
@@ -153,9 +152,13 @@ namespace avmshell
         }
 
 		// parse and execute the abc.
+
+		// allocate a new buffer and copy abc into it; the abc buffer will be referenced
+		// by PoolObject and can outlive the swf it came from.  Using a ReadOnlyScriptBuffer
+		// avoids copying, but interior pointers to the swf data do not pin the swf in memory.
 		int abclen = taglen - (parser.pos - tagstart);
-		ReadOnlyScriptBufferImpl* abcbuf = new (gc) ReadOnlyScriptBufferImpl(&parser.swf[parser.pos], abclen);
-		ScriptBuffer code(abcbuf);
+		ScriptBuffer code(core->newScriptBuffer(abclen));
+		VMPI_memcpy(&code[0], &parser.swf[parser.pos], abclen);
 
 		// FIXME get api from the SWF
 		uint32_t api = core->getAPI(NULL);
@@ -187,10 +190,8 @@ namespace avmshell
 		List<PoolObject*> deferred(core->gc);
 		if (swf[0] == 'C') {
 			// decompress the swf
-			MMgc::GC *gc = toplevel->gc();
 			swflen -= 8;
-			BasicScriptBufferImpl* newswfbuf = new (gc, swflen) BasicScriptBufferImpl(swflen);
-			ScriptBuffer newswf(newswfbuf);
+			ScriptBuffer newswf(core->newScriptBuffer(swflen));
 			uLongf dlen = swflen;
 			int e = uncompress((Bytef*)&newswf[0], &dlen, (Bytef*)&swf[8], (uLongf)swf.getSize()-8);
 			if (e != Z_OK) {
