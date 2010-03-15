@@ -69,6 +69,7 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_avmplus_basics.cpp \
   $(curdir)/../extensions/ST_avmplus_peephole.cpp \
   $(curdir)/../extensions/ST_mmgc_basics.cpp \
+  $(curdir)/../extensions/ST_mmgc_dependent.cpp \
   $(curdir)/../extensions/ST_mmgc_threads.cpp \
   $(curdir)/../extensions/ST_mmgc_543560.cpp \
   $(NULL)
