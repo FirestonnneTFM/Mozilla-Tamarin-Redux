@@ -324,6 +324,20 @@ namespace MMgc
 		 */
 		/*REALLY_INLINE*/ void signalFreeWork(size_t nbytes);
 
+        /**
+         * Situation: external code has allocated memory whose lifetime is tied to a
+         * GC object.  This memory is to be accounted for in GC policy in the normal 
+         * way (ie incorporated into the computation of H).
+         */
+        void signalDependentAllocation(size_t nbytes);
+        
+        /**
+         * Situation: external code has deallocated memory whose lifetime was tied to a
+         * GC object; the memory must previously have been accounted for through a call
+         * to signalDependentAllocation().
+         */
+        void signalDependentDeallocation(size_t nbytes);
+
 		/**
 		 * Situation: the incremental marker has been started, and we need to know whether
 		 * to run another mark increment or push the conclusion to a finish (because the
@@ -412,6 +426,11 @@ namespace MMgc
 		 * Called by the owner when the owner is notified of an imminent abort
 		 */
 		void SignalImminentAbort();
+
+        /**
+         * Compute the load factor is for a given heap size (in bytes).
+         */
+        double queryLoadForHeapsize(double H);
 
 		// ----- Public data --------------------------------------
 		
@@ -531,6 +550,9 @@ namespace MMgc
 		size_t blocksOwned;
 		size_t maxBlocksOwned;
 		
+        // Dependent allocation for this GC
+        size_t dependentAllocation;
+
 		// The number of objects scanned since startup (which is equivalent to the number
 		// of calls to GC::MarkItem), less the number scanned during the last
 		// collection cycle.
@@ -870,17 +892,32 @@ namespace MMgc
 		void *PleaseAlloc(size_t size, int flags=0);
 		
 		/**
-		 * Signal that we've allocated some memory and that collection can be triggered
-		 * if necessary.
+		 * Signal that client code has performed an allocation from memory known not to be
+		 * controlled by this GC, and wants this memory accounted for because its lifetime
+         * is tied to objects that this GC controls.  (A typical case is when fixed or system
+         * memory is tied to a host object, eg BitmapData in Flash Player.)
+		 *
+         * The GC may use this information to drive garbage collection, and may perform
+         * GC activity during this call.
 		 */
-		void SignalAllocWork(size_t size);
-
+		void SignalDependentAllocation(size_t nbytes);
+		
 		/**
-		 * Signal that we've freed some memory.  This should not have any side effects,
-		 * ie, it should not trigger collection.
+		 * Signal that client code has performed a deallocation of memory known not to be
+		 * controlled by this GC, and wants this memory accounted for.
+         *
+         * The GC may use this information to drive garbage collection, and may perform
+         * GC activity during this call.
+         *
+         * It is crucial that SignalDependentDeallocation is called only to account for
+         * objects previously accounted for by SignalDependentAllocation, and that it is
+         * called for all objects accounted for by SignalDependentAllocation as those
+         * objects are being destroyed.  The GC verifies neither of those conditions.
+		 *
+		 * @see SignalDependentAllocation
 		 */
-		void SignalFreeWork(size_t size);
-
+		void SignalDependentDeallocation(size_t nbytes);
+        
 		/**
 		 * Replacement for VMPI_memmove for arrays of GC pointers that
 		 * will properly account for mark state (since the GC now
@@ -891,6 +928,18 @@ namespace MMgc
 		void movePointers(void **dstArray, uint32_t dstOffset, const void **srcArray, uint32_t srcOffset, size_t numPointers);
 
 	private:
+		/**
+		 * Signal that we've allocated some memory and that collection can be triggered
+		 * if necessary.
+		 */
+		void SignalAllocWork(size_t size);
+        
+		/**
+		 * Signal that we've freed some memory.  This should not have any side effects,
+		 * ie, it should not trigger collection.
+		 */
+		void SignalFreeWork(size_t size);
+        
 		const static size_t kLargestAlloc = 1968;
 		const static size_t kMarkItemSplitThreshold = kLargestAlloc;
 

@@ -1671,6 +1671,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\ST_mmgc_dependent.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\extensions\ST_mmgc_threads.cpp"
 				>
 			</File>
