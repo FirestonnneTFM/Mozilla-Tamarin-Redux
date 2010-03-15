@@ -126,6 +126,7 @@ namespace MMgc
 		, timeEndOfLastCollection(0)
 		, blocksOwned(0)
 		, maxBlocksOwned(0)
+        , dependentAllocation(0)
 		, objectsScannedTotal(0)
 		, objectsScannedLastCollection(0)
 		, bytesScannedTotal(0)
@@ -298,15 +299,19 @@ namespace MMgc
 			R = R_LOWER_LIMIT;
 	}
 
+    double GCPolicyManager::queryLoadForHeapsize(double H)
+    {
+        int i=0;
+        while (H / (1024*1024) >= L_cutoff[i])
+            i++;
+        return L_ideal[i];
+    }
+    
 	// The throttles here guard against excessive growth.
 
 	void GCPolicyManager::adjustL(double H)
 	{
-        int i=0;
-        while (H / (1024*1024) >= L_cutoff[i])
-            i++;
-
-        double L_selected = L_ideal[i];
+        double L_selected = queryLoadForHeapsize(H);
 		double a = double(timeEndToEndLastCollection);
   		double b = double(timeInLastCollection);
 
@@ -340,7 +345,7 @@ namespace MMgc
  	// Called when a collection ends
  	void GCPolicyManager::adjustPolicyForNextMajorCycle()
  	{
-		double H = double(gc->GetBytesInUse());
+		double H = double(gc->GetBytesInUse() + dependentAllocation);
         
   		// Compute L_actual, which takes into account how much time we spent in GC
 		// during the last cycle
@@ -786,6 +791,14 @@ namespace MMgc
 		blocksOwned -= blocks;
 	}
 
+    void GCPolicyManager::signalDependentAllocation(size_t nbytes) {
+        dependentAllocation += nbytes;
+    }
+    
+    void GCPolicyManager::signalDependentDeallocation(size_t nbytes) {
+        dependentAllocation -= nbytes;
+    }
+    
 	void GCPolicyManager::signalMemoryStatusChange(MemoryStatus from, MemoryStatus to) {
 		(void)from;
 		(void)to;
@@ -1448,6 +1461,47 @@ namespace MMgc
 	{
 		remainingQuickListBudget += nbytes;
 	}
+
+    // I can think of two alternative policies for handling dependent allocations.
+    // 
+    // One is to treat all memory the same: external code calls SignalDependentAllocation
+    // and SignalDependentDeallocation to account for the volume of data that are
+    // dependent on but not allocated by the GC, and the GC incorporates these data
+    // into policy decisions, heap target computation, and so on.
+    //    
+    //   (Benefits: few surprises policy-wise.
+    //   
+    //   Problems: If the volume (in bytes) of dependent data swamps the normal data
+    //   then the collection policy may not work all that well -- collection cost may be
+    //   too high, and memory usage may also be too high because the budget is L times
+    //   the live memory, which may include a lot of bitmap data.)
+    //
+    // The other is to treat dependent memory differently.  SignalDependentAllocation
+    // and SignalDependentDeallocation will account for the external memory, and if
+    // the volume of dependent memory is high relative to the budget (which is
+    // computed without regard for the volume of dependent memory) then those two
+    // methods will drive the collector forward one step.
+    //
+    //   (Benefits: not overly sensitive to the volume of bitmap data, especially in
+    //   computing the budget, yet a sufficient number of allocations will force the gc
+    //   cycle to complete.
+    //
+    //   Problems: It is a bit ad-hoc and it may fail to reclaim a large volume of
+    //   bitmap data quickly enough.)
+    //
+    // I'm guessing the former is better, for now.
+            
+    void GC::SignalDependentAllocation(size_t nbytes)
+    {
+        policy.signalDependentAllocation(nbytes);
+        SignalAllocWork(nbytes);
+    }
+    
+    void GC::SignalDependentDeallocation(size_t nbytes)
+    {
+        policy.signalDependentDeallocation(nbytes);
+        SignalFreeWork(nbytes);
+    }
 	
 	void GC::ClearMarks()
 	{

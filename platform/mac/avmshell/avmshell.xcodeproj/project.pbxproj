@@ -330,6 +330,8 @@
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
+		07E2E7AE114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
+		07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */; };
 		07ED27F00FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		07ED27F10FBD78C4007E3950 /* GCStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07ED27EF0FBD78C4007E3950 /* GCStack.cpp */; };
 		191659980FB88A1400F3DCD3 /* CodeAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 191659960FB88A1400F3DCD3 /* CodeAlloc.cpp */; };
@@ -810,6 +812,8 @@
 		07DA49E70F80C906007939FD /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = manifest.mk; path = ../../../MMgc/manifest.mk; sourceTree = SOURCE_ROOT; };
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
+		07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_dependent.cpp; path = ../../../extensions/ST_mmgc_dependent.cpp; sourceTree = SOURCE_ROOT; };
+		07E2E7AD114EE67C00B3AFCD /* ST_mmgc_dependent.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_dependent.st; path = ../../../extensions/ST_mmgc_dependent.st; sourceTree = SOURCE_ROOT; };
 		07E65EDF10BC19A7000D1EB6 /* AbcParser-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcParser-inlines.h"; path = "../../../core/AbcParser-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07E65EE010BC19A7000D1EB6 /* Coder-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Coder-inlines.h"; path = "../../../core/Coder-inlines.h"; sourceTree = SOURCE_ROOT; };
 		07E65EE110BC19A7000D1EB6 /* FrameState-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FrameState-inlines.h"; path = "../../../core/FrameState-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -969,6 +973,7 @@
 				0772CCF20F3C3084008DDBB6 /* ST_avmplus_basics.st */,
 				0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */,
 				0772CCF40F3C3084008DDBB6 /* ST_mmgc_basics.st */,
+				07E2E7AD114EE67C00B3AFCD /* ST_mmgc_dependent.st */,
 				D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */,
 				0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */,
 			);
@@ -1353,6 +1358,7 @@
 				079DF9A10F3A8AAB0031D1B4 /* ST_avmplus_basics.cpp */,
 				079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */,
 				079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */,
+				07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */,
 				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
 				0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */,
 			);
@@ -1817,6 +1823,7 @@
 				E8B532071069A1DE00ED299A /* instr.cpp in Sources */,
 				0721CA0B111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
 				D92373DE11222458006D8AA3 /* njconfig.cpp in Sources */,
+				07E2E7AE114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1999,6 +2006,7 @@
 				E8B532061069A1DE00ED299A /* instr.cpp in Sources */,
 				0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
 				D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */,
+				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
