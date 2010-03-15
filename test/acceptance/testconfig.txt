@@ -179,6 +179,7 @@ ecma3/Unicode/uE000_PrivateUseArea , arm-.*(?<!-deep)$ , skip , test runs too sl
 ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA , arm-.*(?<!-deep)$ , skip , test runs too slowly
 ecma3/Unicode/uAC00_HangulSyllables , arm-.*(?<!-deep)$ , skip , test runs too slowly
 ecma3/Unicode/uA000_YiSyllables, arm-.*(?<!-deep)$ , skip, tests run too slowly on winmo
+mops/mops , arm-.*(?<!-deep)$ , skip , test runs too slowly
 
 
 
@@ -191,7 +192,6 @@ ecma3/Date/e15_9_5_14, arm-winmobile-emulator-tvm-.*(?<!-deep)$, skip, emulator 
 ecma3/Date/e15_9_5_34_1, arm-winmobile-emulator-tvm-.*(?<!-deep)$, skip, emulator DST problem
 ecma3/Date/e15_9_5_35_1, arm-winmobile-emulator-tvm-.*(?<!-deep)$, skip, emulator DST problem
 ecma3/Date/e15_9_5_10, arm-winmobile-emulator-tvm-.*(?<!-deep)$, skip, tests run too slowly on winmo
-mops/mops , arm-winmobile-emulator-tvm-.*(?<!-deep)$ , skip , test runs too slowly
 
 as3/RuntimeErrors/Error1115NotAConstructor:.* , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
