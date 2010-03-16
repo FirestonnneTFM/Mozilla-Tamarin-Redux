@@ -5753,7 +5753,7 @@ namespace avmplus
                 CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
-                    if (catcher && !i->isCse()) {
+                    if (catcher && !i->callInfo()->_cse) {
                         // non-cse call is like a conditional forward branch to the catcher label.
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
@@ -5787,7 +5787,7 @@ namespace avmplus
         // TODO this can go away if we turn this kill pass into a LirReader
         // and do the work inline with the assembly pass.
         static const uint8_t lirSizes[] = {
-        #define OP___(op, number, repkind, retType) sizeof(LIns##repkind),
+        #define OP___(op, number, repkind, retType, isCse) sizeof(LIns##repkind),
         #include "../nanojit/LIRopcode.tbl"
         #undef OP___
                 0
@@ -5916,7 +5916,7 @@ namespace avmplus
                 CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
-                    if (catcher && !i->isCse()) {
+                    if (catcher && !i->callInfo()->_cse) {
                         // non-cse call is like a conditional branch to the catcher label.
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
