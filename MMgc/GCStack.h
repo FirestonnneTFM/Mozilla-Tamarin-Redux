@@ -60,6 +60,16 @@ namespace MMgc
             kHasInteriorPtrs=2,
             kStackMemory=2          // convenient shorthand for kNonGCObject|kHasInteriorPtrs
         };
+
+		// A sentinel is a work item that doesn't actually do any mark work but 
+		// causes some action to be taken when encountered, see GC::HandleLargeMarkItem.
+		// It is stored in lower bits of ptr, so again we only have 2 bits to play with.
+		enum GCSentinelItemType
+		{
+			kDeadItem=3, // Pop asserts on 0
+			kGCLargeAlloc=1,
+			kGCRoot=2,
+		};
         
 		// FIXME? The initialization is redundant for most locals and for the mark stack we
 		// don't want to have to init all the elements in the array as it makes allocating a mark
@@ -67,17 +77,30 @@ namespace MMgc
 		// clauses here.  --lars
 		GCWorkItem() : ptr(NULL), _size(0) { }
 		GCWorkItem(const void *p, uint32_t s, GCWorkItemType itemType);
+		GCWorkItem(const void *p, GCSentinelItemType type);
 
 		uint32_t GetSize() const { return _size & ~3; }
 		uint32_t IsGCItem() const { return _size & uint32_t(kGCObject); }
 		uint32_t HasInteriorPtrs() const { return _size & uint32_t(kHasInteriorPtrs); }
-        uint32_t IsProtectionItem() const { return GetSize() == kProtectionSize; }
+        uint32_t IsSentinelItem() const { return GetSize() == kSentinelSize; }
+		uint32_t GetSentinelType() const { return iptr & 3; }
+		void *GetSentinelPointer() const { return (void*) (iptr & ~3); }
 
-        static const uint32_t kProtectionSize = ~0U - 3;
+		// Cancel item by clearing its pointer, setting sentinel to
+		// kDeadItem, and setting size to kSentinelSize.  See MarkItem
+		// and HandleLargeMarkItem.
+		void Clear();
+
+        static const uint32_t kSentinelSize = ~0U - 3;
         
 		// If a WI is a GC item, `ptr` is the UserPointer; it must not
-		// be the RealPointer nor an interior pointer
-		const void *ptr;
+		// be the RealPointer nor an interior pointer.  When _size
+		// is kSentinelSize the lower 2 bits of ptr contain the sentinel
+		// type.
+		union {
+			const void *ptr;
+			uintptr_t iptr;
+		};
 		
 		// The low bit of _size stores whether this is a GC item.
 		// Always access this through `GetSize` and `IsGCItem`
@@ -146,8 +169,21 @@ namespace MMgc
 #ifdef MMGC_MARKSTACK_DEPTH
 		/** @return the number of elements on the stack when its depth was the greatest */
 		uint32_t MaxCount();
-#endif
-	
+#endif	 
+
+		/** 
+		 * Get a pointer to the top of the stack.  
+		 * @return top of stack 
+		 */
+		GCWorkItem *Peek();
+
+		/** Retrieve the item above an existing stack item. If the
+		 * item passed is the top of the stack NULL is returned.  The
+		 * item must be in the stack.
+		 * @return item above argument
+		 */
+		GCWorkItem *GetItemAbove(GCWorkItem *item);
+
 	protected:
 		// no implementation of these
 		GCMarkStack(const GCMarkStack& other);
@@ -220,6 +256,12 @@ namespace MMgc
 				PopSegment();
 		GCAssert(Invariants());
 		return t;
+	}
+
+	REALLY_INLINE GCWorkItem *GCMarkStack::Peek()
+	{
+		GCAssert(m_top > m_base);
+		return m_top-1;
 	}
 	
 	REALLY_INLINE uint32_t GCMarkStack::Count()

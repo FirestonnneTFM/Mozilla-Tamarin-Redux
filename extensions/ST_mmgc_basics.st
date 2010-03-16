@@ -1,4 +1,4 @@
-// -*- mode: c -*-
+// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -245,4 +245,36 @@ delete gc;
     %%verify true  
     delete gcb;
     
+%%test regression_551169
+    {
+        GC *testGC = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        { 
+            MMGC_GCENTER(testGC);
+            testGC->StartIncrementalMark();
+            // self test for tricky GCRoot deletion logic
+            // do this a bunch, idea is to try to hit GetItemAbove border edge cases
+            for(int i=0;i<10000;i++) {
+                GCRoot *fauxRoot = new GCRoot(testGC, new char[GC::kMarkItemSplitThreshold*2], GC::kMarkItemSplitThreshold*2);
+                testGC->MarkAllRoots();
+                // tail of fauxRoot is on stack
+                GCWorkItem *sentinel = fauxRoot->GetMarkStackSentinelPointer();
+                if(sentinel) {
+                    %%verify sentinel->GetSentinelPointer() == fauxRoot
+                    GCWorkItem *tail = testGC->m_incrementalWork.GetItemAbove(sentinel);
+                    %%verify tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End()
+                    %%verify sentinel != NULL
+                }
+                delete [] (char*)fauxRoot->Get();
+                delete fauxRoot;
+                if(sentinel) {
+                    %%verify sentinel->GetSentinelType() == GCWorkItem::kDeadItem
+                    %%verify testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() == GCWorkItem::kDeadItem
+                }
+            }
+            testGC->Mark();
+            testGC->ClearMarkStack();
+            testGC->ClearMarks();
+            delete testGC;
+        }
+    }
 

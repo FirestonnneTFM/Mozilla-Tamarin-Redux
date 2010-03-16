@@ -1,5 +1,5 @@
 // Generated from ST_mmgc_basics.st
-// -*- mode: c -*-
+// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -62,6 +62,7 @@ void test9();
 void test10();
 void test11();
 void test12();
+void test13();
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
@@ -71,7 +72,7 @@ private:
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
     : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names)
 {}
-const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete","nestedGCs", NULL };
+const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete","nestedGCs","regression_551169", NULL };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -87,6 +88,7 @@ case 9: test9(); return;
 case 10: test10(); return;
 case 11: test11(); return;
 case 12: test12(); return;
+case 13: test13(); return;
 }
 }
 void ST_mmgc_basics::prologue() {
@@ -301,6 +303,39 @@ void ST_mmgc_basics::test12() {
 verifyPass(true  , "true  ", __FILE__, __LINE__);
     delete gcb;
     
+}
+void ST_mmgc_basics::test13() {
+    {
+        GC *testGC = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        { 
+            MMGC_GCENTER(testGC);
+            testGC->StartIncrementalMark();
+            // self test for tricky GCRoot deletion logic
+            // do this a bunch, idea is to try to hit GetItemAbove border edge cases
+            for(int i=0;i<10000;i++) {
+                GCRoot *fauxRoot = new GCRoot(testGC, new char[GC::kMarkItemSplitThreshold*2], GC::kMarkItemSplitThreshold*2);
+                testGC->MarkAllRoots();
+                // tail of fauxRoot is on stack
+                GCWorkItem *sentinel = fauxRoot->GetMarkStackSentinelPointer();
+                if(sentinel) {
+verifyPass(sentinel->GetSentinelPointer() == fauxRoot, "sentinel->GetSentinelPointer() == fauxRoot", __FILE__, __LINE__);
+                    GCWorkItem *tail = testGC->m_incrementalWork.GetItemAbove(sentinel);
+verifyPass(tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End(), "tail->iptr + tail->GetSize() == (uintptr_t) fauxRoot->End()", __FILE__, __LINE__);
+verifyPass(sentinel != NULL, "sentinel != NULL", __FILE__, __LINE__);
+                }
+                delete [] (char*)fauxRoot->Get();
+                delete fauxRoot;
+                if(sentinel) {
+verifyPass(sentinel->GetSentinelType() == GCWorkItem::kDeadItem, "sentinel->GetSentinelType() == GCWorkItem::kDeadItem", __FILE__, __LINE__);
+verifyPass(testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() == GCWorkItem::kDeadItem, "testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() == GCWorkItem::kDeadItem", __FILE__, __LINE__);
+                }
+            }
+            testGC->Mark();
+            testGC->ClearMarkStack();
+            testGC->ClearMarks();
+            delete testGC;
+        }
+    }
 
 
 }
