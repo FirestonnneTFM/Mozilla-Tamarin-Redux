@@ -2573,7 +2573,7 @@ namespace MMgc
 					PushWorkItem(GCWorkItem(r, GCWorkItem::kGCRoot));
 					GCWorkItem *item = m_incrementalWork.Peek();
 					// test for mark stack overflow
-					if(item->ptr == r)
+					if(item->GetSentinelPointer() == r)
 						r->SetMarkStackSentinelPointer(item);
 				}
 				MarkItem(item);
