@@ -67,6 +67,9 @@
 namespace avmplus
 {
 	class AvmCore;
+#ifdef VMCFG_SELFTEST
+	class ST_mmgc_basics;
+#endif
 }
 
 namespace MMgc
@@ -80,6 +83,9 @@ namespace MMgc
 	class GCRoot
 	{
 		friend class GC;
+#ifdef VMCFG_SELFTEST
+		friend class avmplus::ST_mmgc_basics;
+#endif
 		GCRoot();
 		void init(GC*gc, const void *object, size_t size);
 	public:
@@ -109,8 +115,22 @@ namespace MMgc
 		GCRoot *prev;
 		const void *object;
 		size_t size;
+		GCWorkItem *markStackSentinel;
 
 		GCWorkItem GetWorkItem() const;
+
+		GCWorkItem *GetMarkStackSentinelPointer();
+
+		// SetMarkStackSentinelPointer stores the pointer and clears
+		// the existing one if it exists.  Since all the roots are
+		// pushed in StartIncrementalMark and FinishIncrementalMark
+		// the root can be on the stack twice.
+		void SetMarkStackSentinelPointer(GCWorkItem *wi);
+		
+		// ClearMarkStackSentinelPointer just sets the pointer to
+		// NULL, use SetMarkStackSentinelPointer(NULL) to also clear
+		// the work item off the mark stack.
+		void ClearMarkStackSentinelPointer();
 	};
 
 	/**
@@ -718,6 +738,9 @@ namespace MMgc
 		friend class ZCT;
 		friend class AutoRCRootSegment;
 		friend class GCPolicyManager;
+#ifdef VMCFG_SELFTEST
+		friend class avmplus::ST_mmgc_basics;
+#endif
 	public:
 
 		/**
@@ -953,6 +976,8 @@ namespace MMgc
 		void SignalFreeWork(size_t size);
         
 		const static size_t kLargestAlloc = 1968;
+
+		// See comments for HandleLargeMarkItem.
 		const static size_t kMarkItemSplitThreshold = kLargestAlloc;
 
 		class RCRootSegment : public GCRoot
@@ -1595,7 +1620,9 @@ namespace MMgc
 		void Mark();
 		void MarkQueueAndStack(bool scanStack=true);
 		void MarkItem(GCWorkItem &wi);
+		bool HandleLargeMarkItem(GCWorkItem &wi, size_t &size);
 		void EstablishSweepInvariants();
+		void ClearMarkStack();
 
 		static void DoCleanStack(void* stackPointer, void* arg);
 		static void DoMarkFromStack(void* stackPointer, void* arg);

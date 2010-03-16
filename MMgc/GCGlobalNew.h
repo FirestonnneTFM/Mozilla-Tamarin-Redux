@@ -333,10 +333,12 @@ namespace MMgc
 
 	DECLARE_PRIM_ARRAY(uint8_t)
 	DECLARE_PRIM_ARRAY(int8_t)
-#ifdef __GNUC__
-	// msvc correctly treats char and (u)int8_t as the same but gcc doesn't
+#if defined(__GNUC__) || (defined(__ARMCC__)
+	// msvc treats char and (u)int8_t as the same but gcc and armcc don't
 	DECLARE_PRIM_ARRAY(char)
-#endif		
+#elif !defined(_MSC_VER)
+#error "Unknown compiler, check whether your compiler compiles with the above declaration, if it does you probably want it"
+#endif
 	DECLARE_PRIM_ARRAY(uint16_t)
 	DECLARE_PRIM_ARRAY(int16_t)
 	DECLARE_PRIM_ARRAY(uint32_t)
