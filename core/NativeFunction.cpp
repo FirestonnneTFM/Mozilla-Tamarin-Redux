@@ -114,7 +114,7 @@ namespace avmplus
 	{
 		AvmAssert(domain != NULL);
 		
-		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ConstDataScriptBufferImpl(abcData, abcDataLen));
+		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(abcData, abcDataLen));
 
 		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, ApiUtils::getLargestAPI(core)/*active api*/);
 	}
