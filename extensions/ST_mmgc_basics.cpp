@@ -223,7 +223,7 @@ void ST_mmgc_basics::test7() {
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
-    gh->Config().heapLimit = 1024;
+//gh->Config().heapLimit = 1024;
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
@@ -333,8 +333,8 @@ verifyPass(testGC->m_incrementalWork.GetItemAbove(sentinel)->GetSentinelType() =
             testGC->Mark();
             testGC->ClearMarkStack();
             testGC->ClearMarks();
-            delete testGC;
         }
+        delete testGC;
     }
 
 
