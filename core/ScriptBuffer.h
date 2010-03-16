@@ -62,13 +62,10 @@ namespace avmplus
 		byte& operator[] (int index) {
 			return buffer[index];
 		}
-		bool isConstant() const { return constantData; }
 	protected:
-		ScriptBufferImpl(bool isConstant)
-			: constantData(isConstant) {}
+		ScriptBufferImpl() {}
 		byte *buffer;
 		size_t size;
-		const bool constantData;
 	};
 
 	/**
@@ -79,7 +76,7 @@ namespace avmplus
 	{
 	public:
 		BasicScriptBufferImpl(size_t _size)
-		: ScriptBufferImpl(false)
+		: ScriptBufferImpl()
 		{
 			this->size = _size;
 			buffer = (byte*)(this+1);
@@ -100,29 +97,12 @@ namespace avmplus
 	{
 	public:
 		ReadOnlyScriptBufferImpl(const byte * _buf, size_t _size)
-		: ScriptBufferImpl(false)
+		: ScriptBufferImpl()
 		{
 			this->size = _size;
 			this->buffer = (byte*) _buf;
 		}
 	};
-
-	/**
-	 * ConstDataScriptBufferImpl is a ScriptBuffer implementation that
-	 * points to an a buffer that is in the executable's constant data
-	 * segment and can't be unloaded.
-	 */
-	class ConstDataScriptBufferImpl : public ScriptBufferImpl
-	{
-	public:
-		ConstDataScriptBufferImpl(const byte * _buf, size_t _size)
-		: ScriptBufferImpl(true)
-		{
-			this->size = _size;
-			this->buffer = (byte*) _buf;
-		}
-	};
-	
 	
 	/**
 	 * ScriptBuffer is a "handle" for ScriptBufferImpl which is more convenient
