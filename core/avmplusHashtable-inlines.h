@@ -92,7 +92,7 @@ namespace avmplus
 #ifdef DEBUGGER
     REALLY_INLINE uint64_t InlineHashtable::bytesUsed() const
     {
-        return m_size * 2 * sizeof(Atom);
+        return getCapacity() * sizeof(Atom);
     }
 #endif
 
