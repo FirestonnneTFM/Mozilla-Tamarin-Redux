@@ -53,11 +53,11 @@
 #define FUNCTIONID(n) &ci_##n
 
 #ifdef NJ_VERBOSE
-    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
-        static const CallInfo ci_##name = { f, sig, cse, fold, abi, #name };
+    #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
+        static const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet, #name };
 #else
-    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
-        static const CallInfo ci_##name = { f, sig, cse, fold, abi };
+    #define DEFINE_CALLINFO(f, sig, abi, isPure, storeAccSet, name) \
+        static const CallInfo ci_##name = { f, sig, abi, isPure, storeAccSet };
 #endif
 
 #if _MSC_VER
@@ -76,16 +76,16 @@
 #endif
 
 #define FUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f,sig,0,0,ABI_FUNCTION,name)
+    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 0, ACC_STORE_ANY, name)
 #define FASTFUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f,sig,0,0,ABI_FAST,name)
-#define CSEFUNCTION(f, sig, name) \
-    DEFINE_CALLINFO(f,sig,1,0,ABI_FUNCTION,name)
+    DEFINE_CALLINFO(f, sig, ABI_FAST, 0, ACC_STORE_ANY, name)
+#define PUREFUNCTION(f, sig, name) \
+    DEFINE_CALLINFO(f, sig, ABI_FUNCTION, 1, ACC_NONE, name)
 
 #define METHOD(f, sig, name) \
-    DEFINE_CALLINFO(f,sig,0,0,ABI_METHOD,name)
-#define CSEMETHOD(f, sig, name) \
-    DEFINE_CALLINFO(f,sig,1,0,ABI_METHOD,name)
+    DEFINE_CALLINFO(f, sig, ABI_METHOD, 0, ACC_STORE_ANY, name)
+#define PUREMETHOD(f, sig, name) \
+    DEFINE_CALLINFO(f, sig, ABI_METHOD, 1, ACC_NONE, name)
 
     FUNCTION(CALL_INDIRECT, SIG4(U,P,P,I,P), icalli)
     FUNCTION(CALL_INDIRECT, SIG4(A,P,P,I,P), acalli)
@@ -441,21 +441,21 @@
     METHOD(ENVADDR(MethodEnv::hasnext), SIG3(I,P,A,I), hasnext)
     METHOD(COREADDR(AvmCore::coerce_s), SIG2(P,P,A), coerce_s)
     METHOD(COREADDR(AvmCore::string), SIG2(P,P,A), string)
-    CSEMETHOD(COREADDR(AvmCore::doubleToString), SIG2(P,P,F), doubleToString)
-    CSEMETHOD(COREADDR(AvmCore::uintToString), SIG2(P,P,U), uintToString)
-    CSEMETHOD(COREADDR(AvmCore::intToString), SIG2(P,P,I), intToString)
-    CSEMETHOD(COREADDR(AvmCore::doubleToAtom), SIG2(A,P,F), doubleToAtom)
-    CSEFUNCTION(FUNCADDR(AvmCore::boolean), SIG1(I,A), boolean)
-    CSEFUNCTION(FUNCADDR(AvmCore::toUInt32), SIG1(U,A), toUInt32)
-    CSEFUNCTION(FUNCADDR(AVMCORE_integer_d), SIG1(I,F), integer_d)
-    CSEFUNCTION(FUNCADDR(AvmCore::integer_i), SIG1(I,A), integer_i)
-    CSEFUNCTION(FUNCADDR(AvmCore::number_d), SIG1(F,A), number_d)
-    CSEFUNCTION(FUNCADDR(AvmCore::integer_u), SIG1(U,A), integer_u)
-    CSEFUNCTION(FUNCADDR(AVMCORE_integer), SIG1(I,A), integer)
-    CSEFUNCTION(FUNCADDR(AvmCore::number), SIG1(F,A), number)
+    PUREMETHOD(COREADDR(AvmCore::doubleToString), SIG2(P,P,F), doubleToString)
+    PUREMETHOD(COREADDR(AvmCore::uintToString), SIG2(P,P,U), uintToString)
+    PUREMETHOD(COREADDR(AvmCore::intToString), SIG2(P,P,I), intToString)
+    PUREMETHOD(COREADDR(AvmCore::doubleToAtom), SIG2(A,P,F), doubleToAtom)
+    PUREFUNCTION(FUNCADDR(AvmCore::boolean), SIG1(I,A), boolean)
+    PUREFUNCTION(FUNCADDR(AvmCore::toUInt32), SIG1(U,A), toUInt32)
+    PUREFUNCTION(FUNCADDR(AVMCORE_integer_d), SIG1(I,F), integer_d)
+    PUREFUNCTION(FUNCADDR(AvmCore::integer_i), SIG1(I,A), integer_i)
+    PUREFUNCTION(FUNCADDR(AvmCore::number_d), SIG1(F,A), number_d)
+    PUREFUNCTION(FUNCADDR(AvmCore::integer_u), SIG1(U,A), integer_u)
+    PUREFUNCTION(FUNCADDR(AVMCORE_integer), SIG1(I,A), integer)
+    PUREFUNCTION(FUNCADDR(AvmCore::number), SIG1(F,A), number)
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
     METHOD(ENVADDR(MethodEnv::nullcheck), SIG2(V,P,A), nullcheck)
-    CSEMETHOD(TOPLEVELADDR(Toplevel::toVTable), SIG2(P,P,A), toVTable)
+    PUREMETHOD(TOPLEVELADDR(Toplevel::toVTable), SIG2(P,P,A), toVTable)
 
     union AnyVal {
         Atom atom;              // SST_atom
@@ -497,7 +497,7 @@
             return core->doubleToAtom(native->d);
         }
     }
-    CSEFUNCTION(FUNCADDR(makeatom), SIG3(A,P,P,I), makeatom)
+    PUREFUNCTION(FUNCADDR(makeatom), SIG3(A,P,P,I), makeatom)
 
     void setprop_miss(SetCache& c, Atom obj, Atom val, MethodEnv* env);
 
@@ -762,16 +762,16 @@
     {
         return AvmCore::istype(val, t); // implicitly cast bool -> int
     }
-    CSEFUNCTION(FUNCADDR(istype), SIG2(I,A,P), istype)
+    PUREFUNCTION(FUNCADDR(istype), SIG2(I,A,P), istype)
 
-    CSEMETHOD(COREADDR(AvmCore::stricteq), SIG3(A,P,A,A), stricteq)
+    PUREMETHOD(COREADDR(AvmCore::stricteq), SIG3(A,P,A,A), stricteq)
     METHOD(COREADDR(AvmCore::equals), SIG3(A,P,A,A), equals)
-    CSEMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
+    PUREMETHOD(COREADDR(AvmCore::concatStrings), SIG3(P,P,P,P), concatStrings)
 
     FUNCTION(FUNCADDR(op_add), SIG3(A,P,A,A), op_add)
 
-    CSEMETHOD(COREADDR(AvmCore::EscapeAttributeValue), SIG2(P,P,A), EscapeAttributeValue)
-    CSEMETHOD(COREADDR(AvmCore::ToXMLString), SIG2(P,P,A), ToXMLString)
+    PUREMETHOD(COREADDR(AvmCore::EscapeAttributeValue), SIG2(P,P,A), EscapeAttributeValue)
+    PUREMETHOD(COREADDR(AvmCore::ToXMLString), SIG2(P,P,A), ToXMLString)
     METHOD(ENVADDR(MethodEnv::delpropertyHelper), SIG4(A,P,A,P,A), delpropertyHelper)
     METHOD(ENVADDR(MethodEnv::internRtns), SIG2(P,P,A), internRtns)
     METHOD(ENVADDR(MethodEnv::delproperty), SIG3(A,P,A,P), delproperty)
@@ -827,15 +827,15 @@
     METHOD(ENVADDR(MethodEnv::setsuper), SIG4(V,P,A,P,A), setsuper)
     METHOD(ENVADDR(MethodEnv::getsuper), SIG3(A,P,A,P), getsuper)
     METHOD(COREADDR(AvmCore::throwAtom), SIG2(V,P,A), throwAtom)
-    CSEFUNCTION(FUNCADDR(MathUtils::mod), SIG2(F,F,F), mod)
-    CSEMETHOD(COREADDR(AvmCore::_typeof), SIG2(P,P,A), typeof)
+    PUREFUNCTION(FUNCADDR(MathUtils::mod), SIG2(F,F,F), mod)
+    PUREMETHOD(COREADDR(AvmCore::_typeof), SIG2(P,P,A), typeof)
     FUNCTION(FUNCADDR(AvmCore::atomWriteBarrier), SIG4(V,P,P,P,A), atomWriteBarrier)
     METHOD(GCADDR(GC::privateWriteBarrierRC), SIG4(V,P,P,P,P), privateWriteBarrierRC)
-    CSEMETHOD(COREADDR(AvmCore::uintToAtom), SIG2(A,P,U), uintToAtom)
-    CSEMETHOD(COREADDR(AvmCore::intToAtom), SIG2(A,P,I), intToAtom)
+    PUREMETHOD(COREADDR(AvmCore::uintToAtom), SIG2(A,P,U), uintToAtom)
+    PUREMETHOD(COREADDR(AvmCore::intToAtom), SIG2(A,P,I), intToAtom)
     METHOD(COREADDR(AvmCore::compare), SIG3(A,P,A,A), compare)
-    CSEMETHOD(ENVADDR(MethodEnv::createRestHelper), SIG3(P,P,I,P), createRestHelper)
-    CSEMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), SIG3(P,P,I,P), createArgumentsHelper)
+    PUREMETHOD(ENVADDR(MethodEnv::createRestHelper), SIG3(P,P,I,P), createRestHelper)
+    PUREMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), SIG3(P,P,I,P), createArgumentsHelper)
 
     void initMultinameLate(AvmCore* core, Multiname& name, Atom index)
     {
@@ -857,7 +857,7 @@
     FUNCTION(FUNCADDR(initMultinameLate), SIG3(V,P,P,A), initMultinameLate)
 
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), SIG3(V,P,P,A), initMultinameLateForDelete)
-    CSEFUNCTION(FUNCADDR(MathUtils::doubleToBool), SIG1(I,F), doubleToBool)
+    PUREFUNCTION(FUNCADDR(MathUtils::doubleToBool), SIG1(I,F), doubleToBool)
 
     METHOD(EFADDR(ExceptionFrame::endTry), SIG1(V,P), endTry)
     METHOD(EFADDR(ExceptionFrame::beginTry), SIG2(V,P,P), beginTry)
@@ -865,8 +865,8 @@
     METHOD(COREADDR(AvmCore::beginCatch), SIG5(P,P,P,P,P,P), beginCatch)
 
 SSE2_ONLY(
-    CSEMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), SIG2(A,P,F), doubleToAtom_sse2)
-    CSEFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), SIG1(I,F), integer_d_sse2)
+    PUREMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), SIG2(A,P,F), doubleToAtom_sse2)
+    PUREFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), SIG1(I,F), integer_d_sse2)
 )
 
 #ifdef DEBUGGER
@@ -902,8 +902,8 @@ SSE2_ONLY(
     FUNCTION(FUNCADDR((newarray_MethodEnv)&newarray<MethodEnv*>), SIG3(P,P,I,P), newarray)
 
     typedef Atom (*astype_late_MethodEnv)(MethodEnv*, Atom, Atom);
-    CSEFUNCTION(FUNCADDR((astype_late_MethodEnv)&astype_late<MethodEnv*>), SIG3(A,P,A,A), astype_late)
-    CSEFUNCTION(FUNCADDR(AvmCore::astype), SIG2(A,A,P), astype)
+    PUREFUNCTION(FUNCADDR((astype_late_MethodEnv)&astype_late<MethodEnv*>), SIG3(A,P,A,A), astype_late)
+    PUREFUNCTION(FUNCADDR(AvmCore::astype), SIG2(A,A,P), astype)
 
     typedef Atom (*instanceof_MethodEnv)(MethodEnv*, Atom, Atom);
     FUNCTION(FUNCADDR((instanceof_MethodEnv)&instanceof<MethodEnv*>), SIG3(A,P,A,A), instanceof)
@@ -915,8 +915,8 @@ SSE2_ONLY(
     FUNCTION(FUNCADDR(&coerceobj_atom), SIG3(V,P,A,P), coerceobj_atom)
 
     typedef Atom (*coerce_MethodEnv)(MethodEnv*, Atom, Traits*);
-    CSEFUNCTION(FUNCADDR((coerce_MethodEnv)&coerce<MethodEnv*>), SIG3(A,P,A,P), coerce)
+    PUREFUNCTION(FUNCADDR((coerce_MethodEnv)&coerce<MethodEnv*>), SIG3(A,P,A,P), coerce)
 
-    CSEFUNCTION(FUNCADDR(finddef_cache), SIG3(P,P,P,U), finddef_cache)
+    PUREFUNCTION(FUNCADDR(finddef_cache), SIG3(P,P,P,U), finddef_cache)
 
     METHOD(ENVADDR(MethodEnv::argcError), SIG2(V,P,I), argcError)

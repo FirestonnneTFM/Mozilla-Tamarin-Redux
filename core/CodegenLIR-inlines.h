@@ -65,10 +65,10 @@ REALLY_INLINE BuiltinType LirHelper::bt(Traits *t)
     return Traits::getBuiltinType(t);
 }
 
-REALLY_INLINE LIns* CodegenLIR::loadIns(LOpcode op, int32_t disp, LIns *base)
+REALLY_INLINE LIns* CodegenLIR::loadIns(LOpcode op, int32_t disp, LIns *base, AccSet accSet)
 {
     AvmAssert(isS32(disp));
-    return lirout->insLoad(op, base, (int32_t)disp);
+    return lirout->insLoad(op, base, (int32_t)disp, accSet);
 }
 
 REALLY_INLINE LIns* CodegenLIR::Ins(LOpcode op)
