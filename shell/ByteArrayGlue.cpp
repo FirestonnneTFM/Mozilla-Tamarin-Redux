@@ -235,6 +235,13 @@ namespace avmshell
  		return false;
 	}
 
+#ifdef DEBUGGER
+    uint64_t ByteArray::bytesUsed() const
+    {
+        return m_capacity * sizeof(U8);
+    }
+#endif
+
 	//
 	// ByteArrayFile
 	//
@@ -615,6 +622,15 @@ namespace avmshell
 		m_byteArray.Write(b, len);
 	}
 	
+#ifdef DEBUGGER
+    uint64_t ByteArrayObject::bytesUsed() const
+    {
+        uint64_t size = ScriptObject::bytesUsed();
+        size += m_byteArray.bytesUsed();
+        return size;
+    }
+#endif
+
 	//
 	// ByteArrayClass
 	//

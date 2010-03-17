@@ -61,6 +61,13 @@ namespace avmshell
         /*virtual*/ bool addSubscriber(GlobalMemorySubscriber* subscriber);
         /*virtual*/ bool removeSubscriber(GlobalMemorySubscriber* subscriber);
 
+#ifdef DEBUGGER
+    public:
+        // Called by the profiler to determine the number of bytes attributed
+        // to this object, not including sizeof(*this).
+        virtual uint64_t bytesUsed() const;
+#endif
+
 	protected:
  		// singly linked list of all subscribers to this ByteArray...
  		// in practice, there isn't much liklihood of too many
@@ -179,6 +186,11 @@ namespace avmshell
 		void writeFile(Stringp filename);
 
 		/*virtual*/ GlobalMemoryProvider* getGlobalMemoryProvider() { return &m_byteArray; }
+
+#ifdef DEBUGGER
+    public:
+        virtual uint64_t bytesUsed() const;
+#endif
 
 	private:
 		MMgc::Cleaner c;
