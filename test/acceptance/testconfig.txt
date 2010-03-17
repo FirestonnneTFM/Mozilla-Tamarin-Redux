@@ -180,6 +180,7 @@ ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA , arm-.*(?<!-deep)$ , skip , 
 ecma3/Unicode/uAC00_HangulSyllables , arm-.*(?<!-deep)$ , skip , test runs too slowly
 ecma3/Unicode/uA000_YiSyllables, arm-.*(?<!-deep)$ , skip, tests run too slowly on winmo
 mops/mops , arm-.*(?<!-deep)$ , skip , test runs too slowly
+regress/bug_515935 , arm-lnx-tvm-debug , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=552927
 
 
 
