@@ -326,6 +326,13 @@ namespace avmplus
 			return;
 		}
 
+#ifdef DEBUGGER
+		virtual uint64_t bytesUsed() const
+		{
+			return VectorBaseObject::bytesUsed() + m_capacity*sizeof(T);
+		}
+#endif
+
 	protected:
 
 		enum { kGrowthIncr = 4096 };
