@@ -305,6 +305,14 @@ namespace avmplus
 
 		virtual bool weakKeys() const;
 		virtual bool weakValues() const;
+
+#ifdef DEBUGGER
+	public:
+        /**
+         * Basically the same as AvmPlusScriptableObject::bytesUsed().
+         */
+        virtual uint64_t bytesUsed() const;
+#endif
 	};
 
 	// Holds RCObject values, not Atom values.  Otherwise like HeapHashtable.

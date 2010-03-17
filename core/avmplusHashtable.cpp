@@ -365,6 +365,12 @@ namespace avmplus
         return false;
     }
 
+#ifdef DEBUGGER
+    /*virtual*/ uint64_t HeapHashtable::bytesUsed() const
+    {
+        return GC::Size(this) + ht.bytesUsed();
+    }
+#endif
 
     /*virtual*/ Atom WeakKeyHashtable::get(Atom key)
     {
