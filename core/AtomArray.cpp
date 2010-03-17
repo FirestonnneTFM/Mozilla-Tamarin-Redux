@@ -223,6 +223,16 @@ namespace avmplus
 		}
 	}
 
+#ifdef DEBUGGER
+    uint64_t AtomArray::bytesUsed() const
+    {
+        if (m_atoms)
+            return capacity() * sizeof(Atom);
+        else
+            return 0;
+    }
+#endif
+
 	void AtomArray::push (Atom a)
 	{
 		checkCapacity (m_length + 1);

@@ -111,6 +111,10 @@ namespace avmplus
 
 		void checkCapacity (int newLength);
 
+#ifdef DEBUGGER
+        uint64_t bytesUsed() const; // used by profiler
+#endif
+
 	private:
 		uint32	m_length;
 		Atom* m_atoms;
