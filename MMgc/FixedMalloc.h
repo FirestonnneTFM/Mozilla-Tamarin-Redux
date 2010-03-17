@@ -158,10 +158,22 @@ namespace MMgc
 		GCHeap *m_heap;
 		FixedAllocSafe m_allocs[kNumSizeClasses];	
 		size_t numLargeChunks;
+		vmpi_spin_lock_t m_largeAllocInfoLock;
+		
 		
 #ifdef MMGC_MEMORY_PROFILER
 		size_t totalAskSizeLargeAllocs;
 #endif
+		/**
+		 * @return the total number of blocks allocated by FixedMalloc for Large Allocations
+		 */
+		size_t GetNumLargeChunks();
+		
+		/** 
+		 * Updates the large allocator stats while allocation and free
+		 */
+		void UpdateLargeAllocStats(void* item, int blocksNeeded);
+		void UpdateLargeFreeStats(void* item, int blocksAllocated);
 		
 #ifdef _DEBUG
 		// If this returns then item was definitely allocated by an allocator
