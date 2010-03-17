@@ -185,7 +185,9 @@ void VMPI_releaseAlignedMemory(void* address)
 #define state_Private 6
 #define state_size 7
 
-#ifdef LINUX
+// Note: the linux #define provided by the compiler.
+
+#ifdef linux
 
 size_t VMPI_getPrivateResidentPageCount()
 {
@@ -428,7 +430,7 @@ uintptr_t VMPI_getThreadStackBase()
 	
 }
 
-#elif defined(LINUX) && defined(MMGC_ARM)
+#elif defined(linux) && defined(MMGC_ARM)
 
 uintptr_t VMPI_getThreadStackBase()
 {
@@ -459,7 +461,7 @@ void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void
 	CallWithRegistersSaved3(fn, &arg, &buf);	// Probably prevents the previous call from being a tail call
 }
 
-#elif defined AVMPLUS_LINUX || defined __GNUC__	// Assume gcc for Linux
+#elif defined linux || defined __GNUC__	// Assume gcc for Linux
 
 void VMPI_callWithRegistersSaved(void (*fn)(void* stackPointer, void* arg), void* arg)
 {

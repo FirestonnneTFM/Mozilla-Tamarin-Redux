@@ -231,9 +231,10 @@ void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* ar
 	(void)arg;
 }
 
+// Note: the linux #define provided by the compiler.
 
 uint32_t querySignalMask() {
-#if (defined(AVMPLUS_MAC) || defined(__linux__)) && defined(DEBUG)
+#if (defined(AVMPLUS_MAC) || defined(linux)) && defined(DEBUG)
 	// will save just the 32 signals to avoid exposing sigset_t in ExceptionFrame
 	sigset_t set;
 	uint32_t mask = 0;
@@ -256,7 +257,7 @@ uint32_t querySignalMask() {
 }
 
 void assertSignalMask(uint32_t expected) {
-#if (defined(AVMPLUS_MAC) || defined(__linux__)) && defined(DEBUG)	
+#if (defined(AVMPLUS_MAC) || defined(linux)) && defined(DEBUG)	
 	sigset_t current_mask;
 	sigemptyset(&current_mask);
 		

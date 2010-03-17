@@ -77,13 +77,12 @@
 #define VMPI_abort   ::abort
 #define VMPI_exit    ::exit
 
+// Note: the linux #define provided by the compiler.
+
 // Set up a jmp_buf suitable for VMPI_longjmpNoUnwind.
-#ifdef __linux__
+#ifdef linux
 // Use the routine version with an underscore to avoid system calls
 // to query the signal mask.
-#ifdef _setjmp
-#warning definded
-#endif
 #define VMPI_setjmpNoUnwind ::_setjmp
 #else
 // Don't assume _setjmp is available
@@ -93,7 +92,7 @@
 // Jump to an active jmp_buf that was set up by VMPI_setjmpNoUnwind.
 // Under no circumstances may C++ destructors be unwound during the
 // jump (MSVC likes to do this by default).
-#ifdef __linux__
+#ifdef linux
 // Use the routine version with an underscore to avoid system calls
 // to query the signal mask.
 #define VMPI_longjmpNoUnwind ::_longjmp
