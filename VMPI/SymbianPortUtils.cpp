@@ -262,7 +262,7 @@ const char *VMPI_getenv(const char *name)
 // being inlined in MMgcPortSymbian.cpp.
 
 // Registers have been flushed; compute a stack pointer and call the user function.
-static void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
 	(void)buf;
 	volatile int temp = 0;
@@ -270,7 +270,7 @@ static void CallWithRegistersSaved2(void (*fn)(void* stackPointer, void* arg), v
 }
 
 // Do nothing - just called to prevent another call from being a tail call, and to keep some values alive
-static void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
+void CallWithRegistersSaved3(void (*fn)(void* stackPointer, void* arg), void* arg, void* buf)
 {
 	(void)buf;
 	(void)fn;
