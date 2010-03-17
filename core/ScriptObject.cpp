@@ -853,7 +853,19 @@ namespace avmplus
 		uint64_t bytesUsed = traits()->getTotalSize();
 		if(traits()->needsHashtable())
 		{
-			bytesUsed += getTable()->bytesUsed();
+			if (traits()->isDictionary)
+			{
+				union {
+					uint8_t* p;
+					HeapHashtable** hht;
+				};
+				p = (uint8_t*)this + traits()->getHashtableOffset();
+				bytesUsed += (*hht)->bytesUsed();
+			}
+			else
+			{
+				bytesUsed += getTable()->bytesUsed();
+			}
 		}
 		return bytesUsed;
 	}
