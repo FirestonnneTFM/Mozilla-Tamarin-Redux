@@ -45,7 +45,7 @@
 	}
 #endif
 
-#if (defined(AVMPLUS_MAC) || defined(__linux__))  && defined(DEBUG)
+#if (defined(AVMPLUS_MAC) || defined(linux))  && defined(DEBUG)
 // definition in PosixPortUtils.cpp
 void assertSignalMask(uint32_t expected); 
 uint32_t querySignalMask(); 
@@ -129,7 +129,7 @@ namespace avmplus
 		this->llvmUnwindStyle = 0;
 #endif
 
-#if (defined(AVMPLUS_MAC) || defined(__linux__))  && defined(DEBUG)
+#if (defined(AVMPLUS_MAC) || defined(linux))  && defined(DEBUG)
 		this->contextExtra = querySignalMask();
 #endif		
 	}
@@ -173,7 +173,7 @@ namespace avmplus
 	{
 		core->exceptionFrame = prevFrame;
 
-#if (defined(AVMPLUS_MAC) || defined(__linux__))  && defined(DEBUG)
+#if (defined(AVMPLUS_MAC) || defined(linux))  && defined(DEBUG)
   		assertSignalMask(this->contextExtra);
 #endif		
 
