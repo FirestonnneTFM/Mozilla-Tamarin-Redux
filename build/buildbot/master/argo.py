@@ -153,10 +153,12 @@ class argo:
                                     "solaris-sparc-deep-argo",
                                     "windows64-deep-argo",
                                     "linux-deep-argo",
+                                    "linux-arm-deep-argo",
                                     "winmobile-emulator-deep-argo",
                                  ],
                     builderDependencies=[
                                   ["linux-deep-argo", "linux-test-argo"],
+                                  ["linux-arm-deep-argo", "linux-arm-test-argo"],
                                   ["windows-deep-argo", "windows-test-argo"],
                                   ["windows-p3-deep-argo", "windows-test-argo"],
                                   ["windows-frr-argo", "windows-test-argo"], 
@@ -1675,6 +1677,25 @@ class argo:
                 'factory': linux_deep_factory,
                 'builddir': './argo-linux-deep',
     }
+    
+    
+    ######################################
+    #### builder for linux-arm-deep   ####
+    ######################################
+    linux_arm_deep_factory = factory.BuildFactory()
+    linux_arm_deep_factory.addStep(sync_clean)
+    linux_arm_deep_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm_deep_factory.addStep(sync_update)
+    linux_arm_deep_factory.addStep(bb_slaveupdate(slave="linux-arm-deep"))
+    linux_arm_deep_factory.addStep(download_testmedia)
+    linux_arm_deep_factory.addStep(test_generic(name="Debug-softfloat", shellname="avmshell_neon_arm_d", vmargs="", config="", scriptargs=""))
+    linux_arm_deep_factory.addStep(util_process_clean)
+    linux_arm_deep_builder = {
+                'name': "linux-arm-deep-argo",
+                'slavename': "asteambeagleboard3",
+                'factory': linux_arm_deep_factory,
+                'builddir': './argo-linux-arm-deep',
+    }
 
     
     builders = [
@@ -1727,7 +1748,7 @@ class argo:
                 winmobile_emulator_test_builder,
                 solaris_sparc_test_builder,
                 android_test_builder,
-                linux_arm__builder,
+                linux_arm_test_builder,
 
                 windows_performance_builder,
                 mac_performance_builder,
@@ -1743,6 +1764,7 @@ class argo:
                 solaris_sparc_deep_builder,
                 winmobile_emulator_deep_builder,
                 linux_deep_builder,
+                linux_arm_deep_builder,
                 windows_frr_builder
 
                 ]

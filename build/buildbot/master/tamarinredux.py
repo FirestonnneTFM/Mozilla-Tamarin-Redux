@@ -153,10 +153,12 @@ class tamarinredux:
                                     "solaris-sparc-deep",
                                     "windows64-deep",
                                     "linux-deep",
+                                    "linux-arm-deep",
                                     "winmobile-emulator-deep",
                                  ],
                     builderDependencies=[
                                   ["linux-deep", "linux-test"],
+                                  ["linux-arm-deep", "linux-arm-test"],
                                   ["windows-deep", "windows-test"],
                                   ["windows-p3-deep", "windows-test"],
                                   ["windows-frr", "windows-test"], 
@@ -1694,6 +1696,24 @@ class tamarinredux:
     }
     
     
+    ######################################
+    #### builder for linux-arm-deep   ####
+    ######################################
+    linux_arm_deep_factory = factory.BuildFactory()
+    linux_arm_deep_factory.addStep(sync_clean)
+    linux_arm_deep_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm_deep_factory.addStep(sync_update)
+    linux_arm_deep_factory.addStep(bb_slaveupdate(slave="linux-arm-deep"))
+    linux_arm_deep_factory.addStep(download_testmedia)
+    linux_arm_deep_factory.addStep(test_generic(name="Debug-softfloat", shellname="avmshell_neon_arm_d", vmargs="", config="", scriptargs=""))
+    linux_arm_deep_factory.addStep(util_process_clean)
+    linux_arm_deep_builder = {
+                'name': "linux-arm-deep",
+                'slavename': "asteambeagleboard3",
+                'factory': linux_arm_deep_factory,
+                'builddir': './linux-arm-deep',
+    }
+    
     builders = [
                 windows_compile_builder,
                 windows_64_compile_builder,
@@ -1760,6 +1780,7 @@ class tamarinredux:
                 solaris_sparc_deep_builder,
                 winmobile_emulator_deep_builder,
                 linux_deep_builder,
+                linux_arm_deep_builder,
                 windows_frr_builder
                 ]
 
