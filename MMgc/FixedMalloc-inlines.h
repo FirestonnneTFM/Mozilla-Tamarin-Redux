@@ -151,7 +151,7 @@ namespace MMgc
 		return numLargeChunks;
 	}
 	
-	REALLY_INLINE void FixedMalloc::UpdateLargeAllocStats(void* item, int blocksNeeded)
+	REALLY_INLINE void FixedMalloc::UpdateLargeAllocStats(void* item, size_t blocksNeeded)
 	{
 		(void)item;
 		MMGC_LOCK(m_largeAllocInfoLock);
@@ -167,7 +167,7 @@ namespace MMgc
 #endif
 	}
 	
-	REALLY_INLINE void FixedMalloc::UpdateLargeFreeStats(void* item, int blocksAllocated)
+	REALLY_INLINE void FixedMalloc::UpdateLargeFreeStats(void* item, size_t blocksAllocated)
 	{
 		(void)item;
 		MMGC_LOCK(m_largeAllocInfoLock);
