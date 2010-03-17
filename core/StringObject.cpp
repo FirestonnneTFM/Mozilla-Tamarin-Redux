@@ -1262,9 +1262,7 @@ namespace avmplus
 			start = m_length;
 
 		int32_t end;
-		if (len >= 0x7ffffff)
-			end = 0x7fffffff; 
-		else if ((len > 0xffffff) || (len > 0xffffff)) // might overflow - use doubles
+		if ((len > 0x3fffffff) || (start > 0x3fffffff)) // might overflow - use doubles
 			end = int32_t(double(len) + double(start)); 
 		else
 			end = start + len;
@@ -2122,11 +2120,11 @@ namespace avmplus
 		// Do some sanity checks on our ints to see if they will fall within a valid integer range
 		// !!@what about negative values?
 		int end;
-		if (count == 0x7ffffff)			
+		if (count == 0x7fffffff)	// largest positive int value, also the default arg	
 		{
 			end = len; 
 		}
-		else if ((count > 0xffffff) || (start > 0xffffff)) // might overflow - use doubles
+		else if ((count > 0x3fffffff) || (start > 0x3fffffff)) // might overflow - use doubles
 		{
 			end = (int)NativeObjectHelpers::ClampIndex(double(count) + double(start), len); 
 		}
