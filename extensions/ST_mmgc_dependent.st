@@ -78,16 +78,19 @@ private:
     delete gc;
 
 %%test dependent_alloc
-    MMGC_GCENTER(gc);
-
-    int count = 100;
     size_t maxheap = 0;
-    for (int c=0; c<count; c++) {
-      (void)(new (gc) DependentAllocHolder());
-      size_t heapsize = GCHeap::GetGCHeap()->GetTotalHeapSize()*GCHeap::kBlockSize;
-      printf("%lu\n", (unsigned long)heapsize);
-      if (heapsize > maxheap)
-	maxheap = heapsize;
+    {
+        MMGC_GCENTER(gc);
+
+        int count = 100;
+        size_t maxheap = 0;
+        for (int c=0; c<count; c++) {
+            (void)(new (gc) DependentAllocHolder());
+            size_t heapsize = gc->policy.blocksOwnedByGC() * GCHeap::kBlockSize;
+            // printf("%lu\n", (unsigned long)heapsize);
+            if (heapsize > maxheap)
+                maxheap = heapsize;
+        }
     }
     
     // This is tricky to get right but for this test the 16MB blocks will dominate
