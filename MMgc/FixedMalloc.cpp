@@ -134,6 +134,7 @@ namespace MMgc
 	{
 		m_heap = heap;
 		numLargeChunks = 0;
+		VMPI_lockInit(&m_largeAllocInfoLock);
 	#ifdef MMGC_MEMORY_PROFILER
 		totalAskSizeLargeAllocs = 0;
 	#endif
@@ -164,12 +165,13 @@ namespace MMgc
 			m_allocs[i].Destroy();
 		}		
 
+		VMPI_lockDestroy(&m_largeAllocInfoLock);
 	#ifdef _DEBUG
 	#ifndef AVMPLUS_SAMPLER
 		VMPI_lockDestroy(&m_largeObjectLock);
 	#endif
 	#endif
-
+		
 		FixedMalloc::instance = NULL;
 	}
 	
@@ -205,12 +207,14 @@ namespace MMgc
 			totalAllocated += allocated;
 		}
 
+		{
 #ifdef MMGC_MEMORY_PROFILER
-		totalAskSize += totalAskSizeLargeAllocs;
+			MMGC_LOCK(m_largeAllocInfoLock);
+			totalAskSize += totalAskSizeLargeAllocs;
 #endif
-
+		}
 		// not entirely accurate, assumes large allocations using all of last page (large ask size not stored)
-		totalAllocated += numLargeChunks * GCHeap::kBlockSize;
+		totalAllocated += (GetNumLargeChunks() * GCHeap::kBlockSize);
 	}
 
 	void *FixedMalloc::LargeAlloc(size_t size, FixedMallocOpts flags)
@@ -230,19 +234,17 @@ namespace MMgc
 		void *item = m_heap->Alloc(blocksNeeded, gcheap_flags);
 		if(item)
 		{
-			numLargeChunks += blocksNeeded;
 			
 			item = GetUserPointer(item);
 #ifdef MMGC_HOOKS
 			if(m_heap->HooksEnabled())
 			{
-#ifdef MMGC_MEMORY_PROFILER
-				totalAskSizeLargeAllocs += (size - DebugSize());
-#endif
 				m_heap->AllocHook(item, size - DebugSize(), Size(item));
 			}
 #endif // MMGC_HOOKS
-		
+			
+			UpdateLargeAllocStats(item, blocksNeeded);
+				
 #ifdef _DEBUG
 		// fresh memory poisoning
 			if((flags & kZero) == 0)
@@ -265,17 +267,15 @@ namespace MMgc
 		RemoveFromLargeObjectTracker(item);
 #endif
 #endif
+		UpdateLargeFreeStats(item, GCHeap::SizeToBlocks(LargeSize(item)));
+		
 #ifdef MMGC_HOOKS
-		if(m_heap->HooksEnabled()) {
-	#ifdef MMGC_MEMORY_PROFILER
-			if(m_heap->GetProfiler())
-				totalAskSizeLargeAllocs -= m_heap->GetProfiler()->GetAskSize(item);
-	#endif
+		if(m_heap->HooksEnabled())
+		{
 			m_heap->FinalizeHook(item, Size(item));
 			m_heap->FreeHook(item, Size(item), 0xfa);
 		}
 #endif
-		numLargeChunks -= GCHeap::SizeToBlocks(LargeSize(item));
 		m_heap->FreeNoProfile(GetRealPointer(item));
 	}
 	
@@ -291,7 +291,7 @@ namespace MMgc
 	
 	size_t FixedMalloc::GetTotalSize()
 	{
-		size_t total = numLargeChunks;
+		size_t total = GetNumLargeChunks();
 		for (int i=0; i<kNumSizeClasses; i++) {
 			total += m_allocs[i].GetNumChunks();
 		}	
@@ -309,7 +309,7 @@ namespace MMgc
 			if( m_allocs[i].GetNumChunks() > 0)
 				GCLog("[mem] FixedMalloc[%d] total %d pages inuse %d bytes ask %d bytes\n", kSizeClasses[i], m_allocs[i].GetNumChunks(), inUse, ask);
 		}
-		GCLog("[mem] FixedMalloc[large] total %d pages\n", numLargeChunks);
+		GCLog("[mem] FixedMalloc[large] total %d pages\n", GetNumLargeChunks());
 	}
 #endif
 
