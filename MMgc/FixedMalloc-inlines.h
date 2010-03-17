@@ -145,6 +145,44 @@ namespace MMgc
 		return &m_allocs[index];
 	}
 
+	REALLY_INLINE size_t FixedMalloc::GetNumLargeChunks()
+	{
+		MMGC_LOCK(m_largeAllocInfoLock);
+		return numLargeChunks;
+	}
+	
+	REALLY_INLINE void FixedMalloc::UpdateLargeAllocStats(void* item, int blocksNeeded)
+	{
+		(void)item;
+		MMGC_LOCK(m_largeAllocInfoLock);
+		numLargeChunks += blocksNeeded;
+		
+#ifdef MMGC_HOOKS
+		if(m_heap->HooksEnabled()) {
+#ifdef MMGC_MEMORY_PROFILER
+		if(m_heap->GetProfiler()) 
+			totalAskSizeLargeAllocs += m_heap->GetProfiler()->GetAskSize(item);
+#endif
+		}
+#endif
+	}
+	
+	REALLY_INLINE void FixedMalloc::UpdateLargeFreeStats(void* item, int blocksAllocated)
+	{
+		(void)item;
+		MMGC_LOCK(m_largeAllocInfoLock);
+#ifdef MMGC_HOOKS
+		if(m_heap->HooksEnabled()) {
+#ifdef MMGC_MEMORY_PROFILER
+			if(m_heap->GetProfiler()) 
+				totalAskSizeLargeAllocs -= m_heap->GetProfiler()->GetAskSize(item);
+#endif
+		}
+#endif
+		numLargeChunks -= blocksAllocated;
+		
+	}
+
 }
 
 #endif /* __FixedMalloc_inlines__ */
