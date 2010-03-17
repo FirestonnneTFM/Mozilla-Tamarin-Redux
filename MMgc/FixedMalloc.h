@@ -172,8 +172,8 @@ namespace MMgc
 		/** 
 		 * Updates the large allocator stats while allocation and free
 		 */
-		void UpdateLargeAllocStats(void* item, int blocksNeeded);
-		void UpdateLargeFreeStats(void* item, int blocksAllocated);
+		void UpdateLargeAllocStats(void* item, size_t blocksNeeded);
+		void UpdateLargeFreeStats(void* item, size_t blocksAllocated);
 		
 #ifdef _DEBUG
 		// If this returns then item was definitely allocated by an allocator
