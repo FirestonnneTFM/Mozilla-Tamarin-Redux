@@ -1092,9 +1092,10 @@ namespace MMgc
 		GCAssertMsg(GetNumBlocks() == 0, "GC accounting off");
 
 		if(stackEnter != NULL) {
-			VMPI_lockRelease(&m_gcLock);	
-			stackEnter->Destroy();
+			stackEnter->Destroy(false);
 		}
+
+		GCAssertMsg(enterCount == 0, "GC enter/exit paths broken");
 
 		VMPI_lockDestroy(&m_gcLock);
 		VMPI_lockDestroy(&m_rootListLock);
@@ -3747,98 +3748,103 @@ namespace MMgc
  		mmfx_delete(seg);
  	} 
 
-	GCAutoEnter::GCAutoEnter(GC *gc) : m_gc(NULL), m_prevgc(NULL)
+	GCAutoEnter::GCAutoEnter(GC *gc, EnterType type) : m_gc(NULL), m_prevgc(NULL)
 	{ 
 		if(gc) {
 			if(gc->heap->GetEnterFrame()->GetActiveGC() != gc) {
-				m_gc = gc;
-				m_prevgc = gc->heap->SetActiveGC(gc);
-
-				// In theory, nested GCAutoEnter usage should be unnecessary and avoided
-				// (thus we'd expect gc->heap->GetActiveGC() == NULL upon entry to this function). 
-				// In practice, however, nested usage is extant in Flash in a few areas that are
-				// nontrivial to refactor to avoid this, and the consequences of not handling this can result
-				// in hard-to-debug crashes in obscure situations. Thus we are allowing the not-recommended 
-				// nested usage by saving and restoring the active gc (since it's cheap to do so). 
-				// If you want to detect these situations, uncomment the assert below (but do not check
-				// in such a change unless you want to make nested GCAutoEnter usage officially deprecated,
-				// which we are not yet prepared to do.) see https://bugzilla.mozilla.org/show_bug.cgi?id=540088
-				// GCAssert(m_prevgc == NULL); 
-				if (gc->GetStackEnter() == 0)
-					gc->SetStackEnter(this);
+				// must enter first as it acquires the gc lock
+				if(gc->ThreadEnter(this, /*doCollectionWork=*/true, type == kTryEnter)) {
+					m_gc = gc;
+					m_prevgc = gc->heap->SetActiveGC(gc);
+				}
 			}
 		}
 	}
-	
-	GCAutoEnter::~GCAutoEnter() 
+ 
+	GCAutoEnter::~GCAutoEnter()
+	{ 
+		Destroy(true); 
+	}
+
+	/*virtual*/ 
+	void GCAutoEnter::Unwind()
+	{
+		if(m_gc) {
+			m_gc->SignalImminentAbort();
+		}
+	}
+
+	void GCAutoEnter::Destroy(bool doCollectionWork)
 	{ 
 		if(m_gc) {
-            if (m_gc->GetStackEnter() == uintptr_t(this))
-				m_gc->SetStackEnter(NULL); 
-        #ifdef DEBUG
-            GC* curgc = 
-        #endif
-                m_gc->heap->SetActiveGC(m_prevgc);
-            GCAssert(curgc == m_gc);
+#ifdef DEBUG
+			GC* curgc = 
+#endif
+				m_gc->heap->SetActiveGC(m_prevgc);
+			GCAssert(curgc == m_gc);
+			m_gc->ThreadLeave(doCollectionWork);
 			m_gc = m_prevgc = NULL;
-		}
-		else
-		{
-			if (m_prevgc){
-				m_prevgc->heap->SetActiveGC(m_prevgc);
-			}
 		}
 	}
 
 	GCAutoEnterPause::GCAutoEnterPause(GC *gc) : gc(gc), enterSave(gc->GetAutoEnter())
 	{ 
 		GCAssertMsg(gc->GetStackEnter() != 0, "Invalid MMGC_GC_ROOT_THREAD usage, GC not already entered, random crashes will ensue");
-		gc->SetStackEnter(NULL, false);
+		gc->ThreadLeave(/*doCollectionWork=*/false);
 	}
 	
 	GCAutoEnterPause::~GCAutoEnterPause() 
 	{ 
 		GCAssertMsg(gc->GetStackEnter() == 0, "Invalid MMGC_GC_ROOT_THREAD usage, GC not exitted properly, random crashes will ensue");
-		gc->SetStackEnter(enterSave, false); 
+		gc->ThreadEnter(enterSave, false, false); 
 	}
 
- 	void GC::SetStackEnter(GCAutoEnter *enter, bool doCollectionWork) 
+ 	bool GC::ThreadEnter(GCAutoEnter *enter, bool doCollectionWork, bool tryEnter) 
 	{
-		bool edge = false;
-		bool releaseThread = false;
- 		if(enter == NULL) {
-			// don't clear this yet: we want to retain the value
-			// until after Collect() is called, in case a presweep()
-			// hook needs to make an allocation.
- 			// stackEnter = NULL;
-			edge = true;
-			releaseThread = --enterCount == 0;
- 		} else if(stackEnter == NULL) {
- 			stackEnter = enter;
-			edge = true;
-			if(enterCount++ == 0)
+		if(!VMPI_lockTestAndAcquire(&m_gcLock)) {
+			if(tryEnter)
+				return false;
+			if(m_gcThread != VMPI_currentThread())
 				VMPI_lockAcquire(&m_gcLock);
-			m_gcThread = VMPI_currentThread();
- 		}
-
-		if(edge && doCollectionWork && !destroying) {
-			if(policy.queryFullCollectionQueued())
-				Collect(false);
-			else
-				ReapZCT(false);
-
-			if(!stackCleaned)
-				CleanStack();			
 		}
 
-		if(releaseThread) {
-			GCAssert(enter == NULL);
+		if(enterCount++ == 0) {
+			stackEnter = enter;
+			m_gcThread = VMPI_currentThread();
+			if(doCollectionWork) {
+				ThreadEdgeWork();			
+			}
+		}
+		return true;
+	}
+
+	void GC::ThreadLeave( bool doCollectionWork) 
+	{
+		if(--enterCount == 0) {
+			if(doCollectionWork) {
+				ThreadEdgeWork();
+			}
+			
  			stackEnter = NULL;
 			// cleared so we remain thread ambivalent
 			rememberedStackTop = NULL; 					
 			m_gcThread = NULL;
 			VMPI_lockRelease(&m_gcLock);
 		}
+	}
+
+	void GC::ThreadEdgeWork()
+	{
+		if(destroying)
+			return;
+		
+		if(policy.queryFullCollectionQueued())
+			Collect(false);
+		else
+			ReapZCT(false);
+		
+		if(!stackCleaned)
+			CleanStack();
 	}
  
  	void GC::memoryStatusChange(MemoryStatus, MemoryStatus to)
@@ -3857,26 +3863,10 @@ namespace MMgc
  				Collect();
  			} else {
 				//  If we're not already in the middle of collecting from another thread's GC, then try to...
- 				if(m_gcThread == NULL && heap->GetEnterFrame()->GetCollectingGC() == NULL && VMPI_lockTestAndAcquire(&m_gcLock)) {
-					
-					// got it
-					m_gcThread = VMPI_currentThread();
- 					
-					//  Tell the heap that we are temporarily invoking a "collect" on this GC, and have locked the gcLock.  
-					//  This will allow "GCHeap::Abort" to release the lock if Abort is thrown while collecting
-					heap->GetEnterFrame()->SetCollectingGC(this);
-
-					//  If collect fails due to allocation here, then we'll end up leaving this thread, need to store off this gclock so that if abort is called
-					//  we know whassup
+				GCAutoEnter enter(this, GCAutoEnter::kTryEnter);
+				if(enter.Entered()) {
 					Collect(false);
-
-					//  Set collecting GC back to NULL now that we are finished
-					heap->GetEnterFrame()->SetCollectingGC(NULL);
-					
-					m_gcThread = NULL;;
-
- 					VMPI_lockRelease(&m_gcLock);
- 				}		
+				}
  				// else nothing can be done
  			}
 		}
@@ -3907,8 +3897,9 @@ namespace MMgc
 			marking = false;
 		}
 
-		// Make it squeaky clean
-		SetStackEnter(NULL,false);
+		if(GetAutoEnter() != NULL) {
+			GetAutoEnter()->Destroy(false);
+		}
 	}
 	
 	GC::AutoRCRootSegment::AutoRCRootSegment(GC* gc, void* mem, size_t size)
