@@ -39,9 +39,7 @@
 
 #include "MMgc.h"
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
+#include <signal.h>
 
 void VMPI_debugLog(const char* message)
 {
@@ -50,5 +48,5 @@ void VMPI_debugLog(const char* message)
 
 void VMPI_debugBreak()
 {
-	abort();
+	raise(SIGTRAP);
 }
