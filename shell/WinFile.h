@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -42,24 +44,24 @@
 
 namespace avmshell
 {
-	class WinFile : public File
-	{
-	public:
-		WinFile() : file(0) {}
-		virtual ~WinFile();
+    class WinFile : public File
+    {
+    public:
+        WinFile() : file(0) {}
+        virtual ~WinFile();
 
-		virtual bool open(const char* filename, File::OpenAttribute flags);
-		virtual void close();
-		virtual size_t read(void* buffer, size_t bytesToRead);
-		virtual size_t write(const void* buffer, size_t bytesToWrite);
-		virtual int64_t getPosition() const;
-		virtual bool setPosition(int64_t pos);
-		virtual int64_t size() const;
-		virtual bool isEOF() const;
+        virtual bool open(const char* filename, File::OpenAttribute flags);
+        virtual void close();
+        virtual size_t read(void* buffer, size_t bytesToRead);
+        virtual size_t write(const void* buffer, size_t bytesToWrite);
+        virtual int64_t getPosition() const;
+        virtual bool setPosition(int64_t pos);
+        virtual int64_t size() const;
+        virtual bool isEOF() const;
 
-	private:
-		FILE* file;
-	};
+    private:
+        FILE* file;
+    };
 }
 
 #endif /* __avmshell_WinFile__ */

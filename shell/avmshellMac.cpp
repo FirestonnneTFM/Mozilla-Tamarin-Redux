@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -46,76 +48,76 @@
 
 namespace avmshell
 {
-	class MacPlatform : public PosixPartialPlatform
-	{
-	public:
-		MacPlatform(void* stackbase) : stackbase(stackbase) {}
-		virtual ~MacPlatform() {}
-		
-		virtual void setTimer(int seconds, AvmTimerCallback callback, void* callbackData);
-		virtual uintptr_t getMainThreadStackLimit();
-		
-	private:
-		void* stackbase;
-	};
+    class MacPlatform : public PosixPartialPlatform
+    {
+    public:
+        MacPlatform(void* stackbase) : stackbase(stackbase) {}
+        virtual ~MacPlatform() {}
 
-	uintptr_t MacPlatform::getMainThreadStackLimit()
-	{
-		struct rlimit r;
-		size_t stackheight = avmshell::kStackSizeFallbackValue;
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=504976: setting the height to kStackSizeFallbackValue
-		// is not ideal if the stack is meant to be unlimited but is an OK workaround for the time being.
-		if (getrlimit(RLIMIT_STACK, &r) == 0 && r.rlim_cur != RLIM_INFINITY)
-			stackheight = size_t(r.rlim_cur);
-		return uintptr_t(stackbase) - stackheight + avmshell::kStackMargin;
-	}
+        virtual void setTimer(int seconds, AvmTimerCallback callback, void* callbackData);
+        virtual uintptr_t getMainThreadStackLimit();
 
-	AvmTimerCallback pCallbackFunc = 0;
-	void* pCallbackData = 0;
-	
-	void MacPlatform::setTimer(int seconds, AvmTimerCallback callback, void* callbackData)
-	{
-		extern void alarmProc(int);
-		
-		pCallbackFunc = callback;
-		pCallbackData = callbackData;
-		
-		signal(SIGALRM, alarmProc);
-		alarm(seconds);
-		
-	}
-	
-	void alarmProc(int /*signum*/)
-	{
-		pCallbackFunc(pCallbackData);
-	}	
+    private:
+        void* stackbase;
+    };
+
+    uintptr_t MacPlatform::getMainThreadStackLimit()
+    {
+        struct rlimit r;
+        size_t stackheight = avmshell::kStackSizeFallbackValue;
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=504976: setting the height to kStackSizeFallbackValue
+        // is not ideal if the stack is meant to be unlimited but is an OK workaround for the time being.
+        if (getrlimit(RLIMIT_STACK, &r) == 0 && r.rlim_cur != RLIM_INFINITY)
+            stackheight = size_t(r.rlim_cur);
+        return uintptr_t(stackbase) - stackheight + avmshell::kStackMargin;
+    }
+
+    AvmTimerCallback pCallbackFunc = 0;
+    void* pCallbackData = 0;
+
+    void MacPlatform::setTimer(int seconds, AvmTimerCallback callback, void* callbackData)
+    {
+        extern void alarmProc(int);
+
+        pCallbackFunc = callback;
+        pCallbackData = callbackData;
+
+        signal(SIGALRM, alarmProc);
+        alarm(seconds);
+
+    }
+
+    void alarmProc(int /*signum*/)
+    {
+        pCallbackFunc(pCallbackData);
+    }
 }
 
 avmshell::MacPlatform* gPlatformHandle = NULL;
 
 avmshell::Platform* avmshell::Platform::GetInstance()
 {
-	AvmAssert(gPlatformHandle != NULL);
-	return gPlatformHandle;
+    AvmAssert(gPlatformHandle != NULL);
+    return gPlatformHandle;
 }
 
 int main(int argc, char *argv[])
 {
 #ifdef AVMPLUS_MACH_EXCEPTIONS
-	GenericGuard::staticInit();
+    GenericGuard::staticInit();
 #endif
 
-	char* dummy;
-	avmshell::MacPlatform platformInstance(&dummy);
-	gPlatformHandle = &platformInstance;
-	
-	int code = avmshell::Shell::run(argc, argv);
-	if (code == avmshell::OUT_OF_MEMORY)
-		write(1, "OUT OF MEMORY\n", 14);
+    char* dummy;
+    avmshell::MacPlatform platformInstance(&dummy);
+    gPlatformHandle = &platformInstance;
+
+    int code = avmshell::Shell::run(argc, argv);
+    if (code == avmshell::OUT_OF_MEMORY)
+        write(1, "OUT OF MEMORY\n", 14);
 
 #ifdef AVMPLUS_MACH_EXCEPTIONS
-	GenericGuard::staticDestroy();
-#endif	
+    GenericGuard::staticDestroy();
+#endif
 
-	return code;
+    return code;
 }

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* -*- Mode: C++; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: t; -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -42,221 +44,221 @@
 namespace avmshell
 {
     #define M_ERROR_CLASS(class_id) ((ErrorClass*)m_toplevel->getPlayerClass(avmplus::NativeID::abcclass_##class_id))
-	
-	bool DataInput::ReadBoolean()
-	{
-		U8 value;		
 
-		Read(&value, 1);
-		return value != 0;
-	}
+    bool DataInput::ReadBoolean()
+    {
+        U8 value;
 
-	U8 DataInput::ReadU8()
-	{
-		U8 value;
+        Read(&value, 1);
+        return value != 0;
+    }
 
-		Read(&value, 1);
-		return value;
-	}
+    U8 DataInput::ReadU8()
+    {
+        U8 value;
 
-	unsigned short DataInput::ReadU16()
-	{
-		unsigned short value;
+        Read(&value, 1);
+        return value;
+    }
 
-		Read(&value, 2);
-		ConvertU16(value);
-		return value;
-	}
-	
-	uint32_t DataInput::ReadU32()
-	{
-		uint32_t value;
-		Read(&value, 4);
-		ConvertU32(value);
-		return value;
-	}
+    unsigned short DataInput::ReadU16()
+    {
+        unsigned short value;
 
-	float DataInput::ReadFloat()
-	{
-		union {
-			uint32_t u;
-			float f;
-		} ptr;
-		ptr.u = ReadU32();
-		return ptr.f;
-	}
+        Read(&value, 2);
+        ConvertU16(value);
+        return value;
+    }
 
-	double DataInput::ReadDouble()
-	{
-		union {
-			uint64_t u;
-			double d;
-		} ptr;
+    uint32_t DataInput::ReadU32()
+    {
+        uint32_t value;
+        Read(&value, 4);
+        ConvertU32(value);
+        return value;
+    }
 
-		Read(&ptr.d, 8);
-		ConvertU64(ptr.u);
-		return ptr.d;
-	}
+    float DataInput::ReadFloat()
+    {
+        union {
+            uint32_t u;
+            float f;
+        } ptr;
+        ptr.u = ReadU32();
+        return ptr.f;
+    }
 
-	String* DataInput::ReadUTFBytes(uint32_t length)
-	{
-		CheckEOF(length);
-		
-		char *buffer = mmfx_new_array_opt( char, length+1, MMgc::kCanFail );
-		if (!buffer) {
-			ThrowMemoryError();
-		}
+    double DataInput::ReadDouble()
+    {
+        union {
+            uint64_t u;
+            double d;
+        } ptr;
 
-		Read(buffer, length);
-		buffer[length] = 0;
-		
-		// Since this is supposed to read UTF8 into a string, it really should ignore the UTF8 BOM that
-		// might reasonably occur at the head of the data.
-		char* utf8chars = buffer;
-		if (length >= 3 && (unsigned char)buffer[0] == 0xEF && (unsigned char)buffer[1] == 0xBB && (unsigned char)buffer[2] == 0xBF) 
-		{
-			utf8chars += 3;
-		}
+        Read(&ptr.d, 8);
+        ConvertU64(ptr.u);
+        return ptr.d;
+    }
 
-		String *out = m_toplevel->core()->newStringUTF8(utf8chars);
-		mmfx_delete_array( buffer );
-		
-		return out;
-	}
-	
-	String* DataInput::ReadUTF()
-	{
-		return ReadUTFBytes(ReadU16());
-	}
+    String* DataInput::ReadUTFBytes(uint32_t length)
+    {
+        CheckEOF(length);
 
-	void DataInput::ReadByteArray(ByteArray& buffer,
-								  uint32_t offset,
-								  uint32_t count)
-	{
-		uint32_t available = Available();
-		
-		if (count == 0) {
-			count = available;
-		}
-		
-		if (count > available) {
-			ThrowEOFError();
-		}
+        char *buffer = mmfx_new_array_opt( char, length+1, MMgc::kCanFail );
+        if (!buffer) {
+            ThrowMemoryError();
+        }
 
-		// Grow the buffer if necessary
-		if (offset + count >= buffer.GetLength()) {
-			buffer.SetLength(offset + count);
-		}
+        Read(buffer, length);
+        buffer[length] = 0;
 
-		Read(buffer.GetBuffer() + offset, count);
-	}
+        // Since this is supposed to read UTF8 into a string, it really should ignore the UTF8 BOM that
+        // might reasonably occur at the head of the data.
+        char* utf8chars = buffer;
+        if (length >= 3 && (unsigned char)buffer[0] == 0xEF && (unsigned char)buffer[1] == 0xBB && (unsigned char)buffer[2] == 0xBF)
+        {
+            utf8chars += 3;
+        }
 
-	void DataInput::CheckEOF(uint32_t count)
-	{
-		if (Available() < count) {
-			ThrowEOFError();
-		}
-	}
+        String *out = m_toplevel->core()->newStringUTF8(utf8chars);
+        mmfx_delete_array( buffer );
 
-	void DataInput::ThrowEOFError()
-	{
-		m_toplevel->throwError(kEndOfFileError);
-	}
+        return out;
+    }
 
-	void DataInput::ThrowMemoryError()
-	{
-		m_toplevel->throwError(kOutOfMemoryError);
-	}
-	
-	//
-	// DataOutput
-	//
+    String* DataInput::ReadUTF()
+    {
+        return ReadUTFBytes(ReadU16());
+    }
 
-	void DataOutput::ThrowRangeError()
-	{
-		m_toplevel->throwRangeError(kInvalidRangeError);
-	}
-	
-	void DataOutput::WriteBoolean(bool value)
-	{
-		WriteU8(value ? 1 : 0);
-	}
+    void DataInput::ReadByteArray(ByteArray& buffer,
+                                  uint32_t offset,
+                                  uint32_t count)
+    {
+        uint32_t available = Available();
 
-	void DataOutput::WriteU8(U8 value)
-	{
-		Write(&value, 1);
-	}
+        if (count == 0) {
+            count = available;
+        }
 
-	void DataOutput::WriteU16(unsigned short value)
-	{
-		ConvertU16(value);
-		Write(&value, 2);
-	}
+        if (count > available) {
+            ThrowEOFError();
+        }
 
-	void DataOutput::WriteU32(uint32_t value)
-	{
-		ConvertU32(value);
-		Write(&value, 4);
-	}
-	
-	void DataOutput::WriteFloat(float value)
-	{
-		union {
-			uint32_t u;
-			float v;
-		} ptr;
-		ptr.v = value;
-		WriteU32(ptr.u);
-	}
+        // Grow the buffer if necessary
+        if (offset + count >= buffer.GetLength()) {
+            buffer.SetLength(offset + count);
+        }
 
-	void DataOutput::WriteDouble(double value)
-	{
-		union {
-			uint64_t u;
-			double v;
-		} ptr;
-		ptr.v = value;
-		ConvertU64(ptr.u);
-		Write(&ptr.u, 8);
-	}
+        Read(buffer.GetBuffer() + offset, count);
+    }
 
-	void DataOutput::WriteUTF(String *str)
-	{
-		StUTF8String utf8(str);
-		uint32_t length = utf8.length();
-		if (length > 65535) {
-			ThrowRangeError();
-		}
-		WriteU16((unsigned short)length);
-		Write(utf8.c_str(), length*sizeof(char));
-	}
+    void DataInput::CheckEOF(uint32_t count)
+    {
+        if (Available() < count) {
+            ThrowEOFError();
+        }
+    }
 
-	void DataOutput::WriteUTFBytes(String *str)
-	{
-		StUTF8String utf8(str);
-		int len = utf8.length();
-		Write(utf8.c_str(), len*sizeof(char));
-	}
-	
-	void DataOutput::WriteByteArray(ByteArray& buffer,
-									uint32_t offset,
-									uint32_t count)
-	{
-		if (buffer.GetLength() < offset)
-			offset = buffer.GetLength();
+    void DataInput::ThrowEOFError()
+    {
+        m_toplevel->throwError(kEndOfFileError);
+    }
 
-		if (count == 0) {
-			count = buffer.GetLength()-offset;
-		}
+    void DataInput::ThrowMemoryError()
+    {
+        m_toplevel->throwError(kOutOfMemoryError);
+    }
 
-		if (count > buffer.GetLength()-offset) {
-			ThrowRangeError();
-		}
-			
-		if (count > 0) {
-			Write(buffer.GetBuffer()+offset, count);
-		}
-	}
+    //
+    // DataOutput
+    //
+
+    void DataOutput::ThrowRangeError()
+    {
+        m_toplevel->throwRangeError(kInvalidRangeError);
+    }
+
+    void DataOutput::WriteBoolean(bool value)
+    {
+        WriteU8(value ? 1 : 0);
+    }
+
+    void DataOutput::WriteU8(U8 value)
+    {
+        Write(&value, 1);
+    }
+
+    void DataOutput::WriteU16(unsigned short value)
+    {
+        ConvertU16(value);
+        Write(&value, 2);
+    }
+
+    void DataOutput::WriteU32(uint32_t value)
+    {
+        ConvertU32(value);
+        Write(&value, 4);
+    }
+
+    void DataOutput::WriteFloat(float value)
+    {
+        union {
+            uint32_t u;
+            float v;
+        } ptr;
+        ptr.v = value;
+        WriteU32(ptr.u);
+    }
+
+    void DataOutput::WriteDouble(double value)
+    {
+        union {
+            uint64_t u;
+            double v;
+        } ptr;
+        ptr.v = value;
+        ConvertU64(ptr.u);
+        Write(&ptr.u, 8);
+    }
+
+    void DataOutput::WriteUTF(String *str)
+    {
+        StUTF8String utf8(str);
+        uint32_t length = utf8.length();
+        if (length > 65535) {
+            ThrowRangeError();
+        }
+        WriteU16((unsigned short)length);
+        Write(utf8.c_str(), length*sizeof(char));
+    }
+
+    void DataOutput::WriteUTFBytes(String *str)
+    {
+        StUTF8String utf8(str);
+        int len = utf8.length();
+        Write(utf8.c_str(), len*sizeof(char));
+    }
+
+    void DataOutput::WriteByteArray(ByteArray& buffer,
+                                    uint32_t offset,
+                                    uint32_t count)
+    {
+        if (buffer.GetLength() < offset)
+            offset = buffer.GetLength();
+
+        if (count == 0) {
+            count = buffer.GetLength()-offset;
+        }
+
+        if (count > buffer.GetLength()-offset) {
+            ThrowRangeError();
+        }
+
+        if (count > 0) {
+            Write(buffer.GetBuffer()+offset, count);
+        }
+    }
 }
 
 

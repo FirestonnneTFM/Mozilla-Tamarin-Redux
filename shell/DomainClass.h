@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,40 +43,40 @@
 
 namespace avmshell
 {
-	class DomainObject : public ScriptObject
-	{
-	public:		
-		DomainObject(VTable *vtable, ScriptObject *delegate);
-		~DomainObject();
-
-		void init(DomainObject *base);
-		Atom loadBytes(ByteArrayObject *bytes);
-		ClassClosure* getClass(Stringp name);
-		// AS3 declaration requires these are ByteArrayObject
- 		ByteArrayObject* get_domainMemory() const;
- 		void set_domainMemory(ByteArrayObject* mem);
-		
-		DWB(DomainEnv*) domainEnv;
-		DWB(Toplevel*) domainToplevel;
-
-	  private:
-	    ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
-		
-		DECLARE_SLOTS_DomainObject;
-	};
-
-	class DomainClass : public ClassClosure
-	{
+    class DomainObject : public ScriptObject
+    {
     public:
-		DomainClass(VTable* cvtable);
+        DomainObject(VTable *vtable, ScriptObject *delegate);
+        ~DomainObject();
 
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+        void init(DomainObject *base);
+        Atom loadBytes(ByteArrayObject *bytes);
+        ClassClosure* getClass(Stringp name);
+        // AS3 declaration requires these are ByteArrayObject
+        ByteArrayObject* get_domainMemory() const;
+        void set_domainMemory(ByteArrayObject* mem);
 
-		DomainObject* get_currentDomain();
- 		int get_MIN_DOMAIN_MEMORY_LENGTH();
-		
-		DECLARE_SLOTS_DomainClass;
-	};
+        DWB(DomainEnv*) domainEnv;
+        DWB(Toplevel*) domainToplevel;
+
+      private:
+        ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
+
+        DECLARE_SLOTS_DomainObject;
+    };
+
+    class DomainClass : public ClassClosure
+    {
+    public:
+        DomainClass(VTable* cvtable);
+
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+
+        DomainObject* get_currentDomain();
+        int get_MIN_DOMAIN_MEMORY_LENGTH();
+
+        DECLARE_SLOTS_DomainClass;
+    };
 }
 
 #endif /* __avmshell_DomainClass__ */

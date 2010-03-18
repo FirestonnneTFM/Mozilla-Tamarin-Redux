@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -44,7 +46,7 @@
 
 namespace avmshell
 {
-	
+
 //#include "platformutils.h"
 #ifndef PLAYERASSERT
 #define PLAYERASSERT AvmAssert
@@ -53,25 +55,25 @@ namespace avmshell
 
 
 inline bool PlatformZlibInflate(
-							const U8* pbCompressed, 
-							int nbCompressed,
-							U8* pbDecompressedOut,
-							int* pnbDecompressedOut
-							)
+                            const U8* pbCompressed,
+                            int nbCompressed,
+                            U8* pbDecompressedOut,
+                            int* pnbDecompressedOut
+                            )
 {
-	PLAYERASSERT(nbCompressed > 0);
-	PLAYERASSERT(*pnbDecompressedOut >= nbCompressed);
-	PLAYERASSERT(sizeof(uLongf) == sizeof(int)); // Ensure cast is safe
+    PLAYERASSERT(nbCompressed > 0);
+    PLAYERASSERT(*pnbDecompressedOut >= nbCompressed);
+    PLAYERASSERT(sizeof(uLongf) == sizeof(int)); // Ensure cast is safe
 
-	int error = uncompress(
-						pbDecompressedOut, 
-						(uLongf*) pnbDecompressedOut, 
-						pbCompressed, 
-						nbCompressed
-						);
+    int error = uncompress(
+                        pbDecompressedOut,
+                        (uLongf*) pnbDecompressedOut,
+                        pbCompressed,
+                        nbCompressed
+                        );
 
-	PLAYERASSERT(error == Z_OK);
-	return (error == Z_OK);
+    PLAYERASSERT(error == Z_OK);
+    return (error == Z_OK);
 }
 
 
@@ -81,35 +83,35 @@ inline bool PlatformZlibInflate(
 class PlatformZlibStream
 {
 public:
-	inline PlatformZlibStream();
-	inline ~PlatformZlibStream();
+    inline PlatformZlibStream();
+    inline ~PlatformZlibStream();
 
-	//
-	// Set compressed input stream
-	//
-	inline void SetNextIn(const U8* pbCompressed);	// set next input byte
-	inline void SetAvailIn(int nb);						// set number of bytes available at next_in
-	inline int AvailIn();								// get number of bytes available at next_in
+    //
+    // Set compressed input stream
+    //
+    inline void SetNextIn(const U8* pbCompressed);  // set next input byte
+    inline void SetAvailIn(int nb);                     // set number of bytes available at next_in
+    inline int AvailIn();                               // get number of bytes available at next_in
 
-	//
-	// Try decompressing some bytes
-	//
-	inline bool Inflate();	// returns false at end of stream!
-	inline int InflateWithStatus(); // returns the Z_* error code instead of true/false
+    //
+    // Try decompressing some bytes
+    //
+    inline bool Inflate();  // returns false at end of stream!
+    inline int InflateWithStatus(); // returns the Z_* error code instead of true/false
 
-	//
-	// Get decompressed output stream
-	//
-	inline void SetNextOut(U8* pbDecompressed);	// set next output byte should be put there
-	inline U8* NextOut();							// get next output byte should be put there
+    //
+    // Get decompressed output stream
+    //
+    inline void SetNextOut(U8* pbDecompressed); // set next output byte should be put there
+    inline U8* NextOut();                           // get next output byte should be put there
 
-	inline void SetAvailOut(int nb);				// set remaining free space at next_out
-	inline int AvailOut();							// get remaining free space at next_out
+    inline void SetAvailOut(int nb);                // set remaining free space at next_out
+    inline int AvailOut();                          // get remaining free space at next_out
 
-	inline int TotalOut();							// get total nb of bytes output so far
+    inline int TotalOut();                          // get total nb of bytes output so far
 
 private:
-	z_stream m_zstream;
+    z_stream m_zstream;
 };
 
 
@@ -118,84 +120,84 @@ private:
 
 PlatformZlibStream::PlatformZlibStream()
 {
-	VMPI_memset(&m_zstream, 0, sizeof m_zstream);
-	int error = inflateInit(&m_zstream);
-	(void)error;
-	PLAYERASSERT(error == Z_OK);
+    VMPI_memset(&m_zstream, 0, sizeof m_zstream);
+    int error = inflateInit(&m_zstream);
+    (void)error;
+    PLAYERASSERT(error == Z_OK);
 }
 
 
 PlatformZlibStream::~PlatformZlibStream()
 {
-	int error = inflateEnd(&m_zstream);
-	(void)error;
-	PLAYERASSERT(error == Z_OK);
+    int error = inflateEnd(&m_zstream);
+    (void)error;
+    PLAYERASSERT(error == Z_OK);
 }
 
 
 void PlatformZlibStream::SetNextIn(const U8* pbCompressed)
 {
-	m_zstream.next_in = (Bytef*) pbCompressed;
+    m_zstream.next_in = (Bytef*) pbCompressed;
 }
 
 
 void PlatformZlibStream::SetAvailIn(int nb)
 {
-	PLAYERASSERT(nb >= 0);
-	m_zstream.avail_in = nb;
+    PLAYERASSERT(nb >= 0);
+    m_zstream.avail_in = nb;
 }
 
 
 int PlatformZlibStream::AvailIn()
 {
-	//PLAYERASSERT(m_zstream.avail_in >= 0);
-	return m_zstream.avail_in;
+    //PLAYERASSERT(m_zstream.avail_in >= 0);
+    return m_zstream.avail_in;
 }
 
 
 bool PlatformZlibStream::Inflate()
 {
-	int error = inflate(&m_zstream, Z_NO_FLUSH);
-	PLAYERASSERT(error == Z_OK || error == Z_STREAM_END);
-	return (error == Z_OK);
+    int error = inflate(&m_zstream, Z_NO_FLUSH);
+    PLAYERASSERT(error == Z_OK || error == Z_STREAM_END);
+    return (error == Z_OK);
 }
 
 int PlatformZlibStream::InflateWithStatus()
 {
-	return inflate(&m_zstream, Z_NO_FLUSH);
+    return inflate(&m_zstream, Z_NO_FLUSH);
 }
 
 
 void PlatformZlibStream::SetNextOut(U8* pbDecompressed)
 {
-	m_zstream.next_out = (Bytef*) pbDecompressed;
+    m_zstream.next_out = (Bytef*) pbDecompressed;
 }
 
 
 U8* PlatformZlibStream::NextOut()
 {
-	return m_zstream.next_out;
+    return m_zstream.next_out;
 }
 
 
 void PlatformZlibStream::SetAvailOut(int nb)
 {
-	PLAYERASSERT(nb >= 0);
-	m_zstream.avail_out = nb;
+    PLAYERASSERT(nb >= 0);
+    m_zstream.avail_out = nb;
 }
 
 
 int PlatformZlibStream::AvailOut()
 {
-	//PLAYERASSERT(m_zstream.avail_out >= 0);
-	return m_zstream.avail_out;
+    //PLAYERASSERT(m_zstream.avail_out >= 0);
+    return m_zstream.avail_out;
 }
 
 
 int PlatformZlibStream::TotalOut()
 {
-	//PLAYERASSERT(m_zstream.total_out >= 0);
-	return m_zstream.total_out;
+    //PLAYERASSERT(m_zstream.total_out >= 0);
+    return m_zstream.total_out;
 }
 
 /////////////////////////////////////////////////////////////////////////////

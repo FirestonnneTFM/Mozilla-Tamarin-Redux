@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -47,518 +49,518 @@
 
 namespace avmshell
 {
-	const int kScriptTimeout = 15;
-	const int kScriptGracePeriod = 5;
+    const int kScriptTimeout = 15;
+    const int kScriptGracePeriod = 5;
 
-	ShellCoreSettings::ShellCoreSettings()
-		: arguments(NULL)
-		, numargs(-1)
-		, nodebugger(false)
-		, astrace_console(0)
-		, do_verbose(0)
-		, enter_debugger_on_launch(false)
-		, interrupts(AvmCore::interrupts_default)
-		, verifyall(AvmCore::verifyall_default)
-		, verifyonly(AvmCore::verifyonly_default)
-		, greedy(false)
-		, nogc(false)
-		, incremental(true)
-		, langID(-1)
-		, jitordie(AvmCore::jitordie_default)
-		, runmode(AvmCore::runmode_default)
+    ShellCoreSettings::ShellCoreSettings()
+        : arguments(NULL)
+        , numargs(-1)
+        , nodebugger(false)
+        , astrace_console(0)
+        , do_verbose(0)
+        , enter_debugger_on_launch(false)
+        , interrupts(AvmCore::interrupts_default)
+        , verifyall(AvmCore::verifyall_default)
+        , verifyonly(AvmCore::verifyonly_default)
+        , greedy(false)
+        , nogc(false)
+        , incremental(true)
+        , langID(-1)
+        , jitordie(AvmCore::jitordie_default)
+        , runmode(AvmCore::runmode_default)
 #ifdef FEATURE_NANOJIT
         , njconfig()
 #endif
-		, st_component(NULL)
-		, st_category(NULL)
-		, st_name(NULL)
-		, api(0xffffffff)
-	{
-	}
+        , st_component(NULL)
+        , st_category(NULL)
+        , st_name(NULL)
+        , api(0xffffffff)
+    {
+    }
 
-	ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
-	{
-		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count, 
-																sizeof(ClassClosure*), 
-																MMgc::GC::kZero | MMgc::GC::kContainsPointers);
-	}
+    ShellToplevel::ShellToplevel(AbcEnv* abcEnv) : Toplevel(abcEnv)
+    {
+        shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count,
+                                                                sizeof(ClassClosure*),
+                                                                MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+    }
 
-	ShellCore::ShellCore(MMgc::GC* gc) 
-		: AvmCore(gc)
-	{
-		systemClass = NULL;
-		
-		gracePeriod = false;
-		inStackOverflow = false;
-		
-		allowDebugger = -1;	// aka "not yet set" 
-		
-		consoleOutputStream = new (gc) ConsoleOutputStream();
-		
-		setConsoleStream(consoleOutputStream);
+    ShellCore::ShellCore(MMgc::GC* gc)
+        : AvmCore(gc)
+    {
+        systemClass = NULL;
 
-		setAPIInfo(_min_version_num,
-				   _max_version_num-_min_version_num+1,
-				   _uris_count,
-				   (const char**) _uris,
-				   (int32_t*) _api_compat);
-	}
-	
-	void ShellCore::stackOverflow(Toplevel* toplevel)
-	{
-		if (inStackOverflow)
-		{
-			// Already handling a stack overflow, so do not
-			// re-enter handler.
-			return;
-		}
-			
-		// Temporarily disable stack overflow checks
-		// so that we can construct an exception object.
-		// There should be plenty of margin before the
-		// actual stack bottom to do this.
-		inStackOverflow = true;
+        gracePeriod = false;
+        inStackOverflow = false;
 
-		Stringp errorMessage = getErrorMessage(kStackOverflowError);
-		Atom args[2] = { nullObjectAtom, errorMessage->atom() };
-		Atom errorAtom = toplevel->errorClass()->construct(1, args);
-		Exception *exception = new (GetGC()) Exception(this, errorAtom);
+        allowDebugger = -1; // aka "not yet set"
 
-		// Restore stack overflow checks
-		inStackOverflow = false;
+        consoleOutputStream = new (gc) ConsoleOutputStream();
 
-		// Throw the stack overflow exception
-		throwException(exception);
-	}
-	
-	/* static */
-	void ShellCore::interruptTimerCallback(void* data)
-	{
-		((AvmCore*)data)->raiseInterrupt(ScriptTimeout);
-	}
-	
-	void ShellCore::interrupt(Toplevel *toplevel, InterruptReason)
-	{
-		if (gracePeriod) {
-			// This script has already had its chance; it violated
-			// the grace period.
-			// Throw an exception it cannot catch.
-			Stringp errorMessage = getErrorMessage(kScriptTerminatedError);
-			Atom args[2] = { nullObjectAtom, errorMessage->atom() };
-			Atom errorAtom = toplevel->errorClass()->construct(1, args);
-			Exception *exception = new (GetGC()) Exception(this, errorAtom);
-			exception->flags |= Exception::EXIT_EXCEPTION;
-			throwException(exception);
-		}
-		
-		// Give the script an additional grace period to
-		// clean up, and throw an exception.
-		gracePeriod = true;
-		
-		Platform::GetInstance()->setTimer(kScriptGracePeriod, interruptTimerCallback, this);
-		
-		toplevel->throwError(kScriptTimeoutError);
-	}
-	
-	void ShellCore::initShellPool()
-	{
+        setConsoleStream(consoleOutputStream);
+
+        setAPIInfo(_min_version_num,
+                   _max_version_num-_min_version_num+1,
+                   _uris_count,
+                   (const char**) _uris,
+                   (int32_t*) _api_compat);
+    }
+
+    void ShellCore::stackOverflow(Toplevel* toplevel)
+    {
+        if (inStackOverflow)
+        {
+            // Already handling a stack overflow, so do not
+            // re-enter handler.
+            return;
+        }
+
+        // Temporarily disable stack overflow checks
+        // so that we can construct an exception object.
+        // There should be plenty of margin before the
+        // actual stack bottom to do this.
+        inStackOverflow = true;
+
+        Stringp errorMessage = getErrorMessage(kStackOverflowError);
+        Atom args[2] = { nullObjectAtom, errorMessage->atom() };
+        Atom errorAtom = toplevel->errorClass()->construct(1, args);
+        Exception *exception = new (GetGC()) Exception(this, errorAtom);
+
+        // Restore stack overflow checks
+        inStackOverflow = false;
+
+        // Throw the stack overflow exception
+        throwException(exception);
+    }
+
+    /* static */
+    void ShellCore::interruptTimerCallback(void* data)
+    {
+        ((AvmCore*)data)->raiseInterrupt(ScriptTimeout);
+    }
+
+    void ShellCore::interrupt(Toplevel *toplevel, InterruptReason)
+    {
+        if (gracePeriod) {
+            // This script has already had its chance; it violated
+            // the grace period.
+            // Throw an exception it cannot catch.
+            Stringp errorMessage = getErrorMessage(kScriptTerminatedError);
+            Atom args[2] = { nullObjectAtom, errorMessage->atom() };
+            Atom errorAtom = toplevel->errorClass()->construct(1, args);
+            Exception *exception = new (GetGC()) Exception(this, errorAtom);
+            exception->flags |= Exception::EXIT_EXCEPTION;
+            throwException(exception);
+        }
+
+        // Give the script an additional grace period to
+        // clean up, and throw an exception.
+        gracePeriod = true;
+
+        Platform::GetInstance()->setTimer(kScriptGracePeriod, interruptTimerCallback, this);
+
+        toplevel->throwError(kScriptTimeoutError);
+    }
+
+    void ShellCore::initShellPool()
+    {
 #ifdef VMCFG_AOT
         NativeInitializer shellNInit(this,
-			&shell_toplevel_aotInfo,
+            &shell_toplevel_aotInfo,
             avmplus::NativeID::shell_toplevel_abc_method_count,
             avmplus::NativeID::shell_toplevel_abc_class_count);
         shellNInit.fillInClasses(avmplus::NativeID::shell_toplevel_classEntries);
         shellNInit.fillInMethods(avmplus::NativeID::shell_toplevel_methodEntries);
         shellPool = shellNInit.parseBuiltinABC(builtinDomain);
 #else
-		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this);
+        shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this);
 #endif
-	}
+    }
 
-	Toplevel* ShellCore::initShellBuiltins()
-	{
-		// Initialize a new Toplevel.  This will also create a new
-		// DomainEnv based on the builtinDomain.
-		Toplevel* toplevel = initTopLevel();
+    Toplevel* ShellCore::initShellBuiltins()
+    {
+        // Initialize a new Toplevel.  This will also create a new
+        // DomainEnv based on the builtinDomain.
+        Toplevel* toplevel = initTopLevel();
 
-		// Initialize the shell builtins in the new Toplevel
-		handleActionPool(shellPool,
-						 toplevel->domainEnv(),
-						 toplevel,
-						 NULL);
+        // Initialize the shell builtins in the new Toplevel
+        handleActionPool(shellPool,
+                         toplevel->domainEnv(),
+                         toplevel,
+                         NULL);
 
-		return toplevel;
-	}
-	
-	Toplevel* ShellCore::createToplevel(AbcEnv* abcEnv)
-	{
-		return new (GetGC()) ShellToplevel(abcEnv);
-	}
+        return toplevel;
+    }
+
+    Toplevel* ShellCore::createToplevel(AbcEnv* abcEnv)
+    {
+        return new (GetGC()) ShellToplevel(abcEnv);
+    }
 
 #ifdef VMCFG_EVAL
 
-	// FIXME, this is currently hokey for several reasons:
-	//
-	//  - Does not try to determine whether input is Latin1, UTF8, or indeed, already UTF16,
-	//    but assumes UTF8, which can be dangerous.  Falls back to latin1 if the utf8 conversion
-	//    fails, this seems ill-defined in the string layer though so it's just one more hack.
-	//
-	//  - Does not create an UTF16 string.  The string layer is actually broken on this count,
-	//    because requesting an empty UTF16 string returns a constant that is a Latin1 string,
-	//    and appending to it won't force the representation to UTF16 unless the data require
-	//    that to happen.  See <URL:https://bugzilla.mozilla.org/show_bug.cgi?id=473995>.
-	//
-	//  - May incur copying because the terminating NUL is not accounted for in the original
-	//    creation
+    // FIXME, this is currently hokey for several reasons:
+    //
+    //  - Does not try to determine whether input is Latin1, UTF8, or indeed, already UTF16,
+    //    but assumes UTF8, which can be dangerous.  Falls back to latin1 if the utf8 conversion
+    //    fails, this seems ill-defined in the string layer though so it's just one more hack.
+    //
+    //  - Does not create an UTF16 string.  The string layer is actually broken on this count,
+    //    because requesting an empty UTF16 string returns a constant that is a Latin1 string,
+    //    and appending to it won't force the representation to UTF16 unless the data require
+    //    that to happen.  See <URL:https://bugzilla.mozilla.org/show_bug.cgi?id=473995>.
+    //
+    //  - May incur copying because the terminating NUL is not accounted for in the original
+    //    creation
 
-	String* ShellCore::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
-	{
-		String* s = newStringUTF8((const char*)bytes, nbytes);
-		if (s == NULL)
-			s = newStringLatin1((const char*)bytes, nbytes);
-		if (terminate)
-			s = s->appendLatin1("\0", 1);
-		return s;
-	}
+    String* ShellCore::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
+    {
+        String* s = newStringUTF8((const char*)bytes, nbytes);
+        if (s == NULL)
+            s = newStringLatin1((const char*)bytes, nbytes);
+        if (terminate)
+            s = s->appendLatin1("\0", 1);
+        return s;
+    }
 
-	String* ShellCore::readFileForEval(String* referencingFile, String* filename)
-	{
-		// FIXME, filename sanitazion is more complicated than this
-		if (referencingFile != NULL && filename->charAt(0) != '/' && filename->charAt(0) != '\\') {
-			// find the last slash if any, truncate the string there, append the
-			// new filename
-			int32_t x = referencingFile->lastIndexOf(newStringLatin1("/"));
-			if (x != -1)
-				filename = referencingFile->substring(0,x+1)->append(filename);
-		}
-		filename = filename->appendLatin1("\0", 1);
-		
-		// FIXME, not obvious that UTF8 is correct for all operating systems (far from it!)
-		StUTF8String fn(filename);
-		FileInputStream f(fn.c_str());
-		if (!f.valid() || (uint64_t) f.length() >= UINT32_T_MAX)
-			return NULL;
+    String* ShellCore::readFileForEval(String* referencingFile, String* filename)
+    {
+        // FIXME, filename sanitazion is more complicated than this
+        if (referencingFile != NULL && filename->charAt(0) != '/' && filename->charAt(0) != '\\') {
+            // find the last slash if any, truncate the string there, append the
+            // new filename
+            int32_t x = referencingFile->lastIndexOf(newStringLatin1("/"));
+            if (x != -1)
+                filename = referencingFile->substring(0,x+1)->append(filename);
+        }
+        filename = filename->appendLatin1("\0", 1);
 
-		uint32_t nbytes = (uint32_t) f.available();
-		uint8_t* bytes = new uint8_t[nbytes];
-		f.read(bytes, nbytes);
-		String* str = decodeBytesAsUTF16String(bytes, nbytes, true);
-		delete [] bytes;
-		return str;
-	}
-	
-	// input is always NUL-terminated
-	void ShellCore::evaluateString(String* input, bool record_time)
-	{
-		setStackLimit();
-		
-		ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-		codeContext->m_domainEnv = shell_domainEnv;
+        // FIXME, not obvious that UTF8 is correct for all operating systems (far from it!)
+        StUTF8String fn(filename);
+        FileInputStream f(fn.c_str());
+        if (!f.valid() || (uint64_t) f.length() >= UINT32_T_MAX)
+            return NULL;
 
-		TRY(this, kCatchAction_ReportAsError) 
-		{
-			// Always Latin-1 here
-			input = input->appendLatin1("\0", 1);
-			double then = 0, now = 0;
-			if (record_time) 
-				then = VMPI_getDate();
-			uint32_t api = this->getAPI(NULL);
-			Atom result = handleActionSource(input, NULL, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
-			if (record_time) 
-				now = VMPI_getDate();
-			if (result != undefinedAtom)
-				console << string(result) << "\n";
-			if (record_time)
-				console << "Elapsed time: " << (now - then)/1000 << "s\n";
-		}
-		CATCH(Exception *exception)
-		{
+        uint32_t nbytes = (uint32_t) f.available();
+        uint8_t* bytes = new uint8_t[nbytes];
+        f.read(bytes, nbytes);
+        String* str = decodeBytesAsUTF16String(bytes, nbytes, true);
+        delete [] bytes;
+        return str;
+    }
+
+    // input is always NUL-terminated
+    void ShellCore::evaluateString(String* input, bool record_time)
+    {
+        setStackLimit();
+
+        ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
+        codeContext->m_domainEnv = shell_domainEnv;
+
+        TRY(this, kCatchAction_ReportAsError)
+        {
+            // Always Latin-1 here
+            input = input->appendLatin1("\0", 1);
+            double then = 0, now = 0;
+            if (record_time)
+                then = VMPI_getDate();
+            uint32_t api = this->getAPI(NULL);
+            Atom result = handleActionSource(input, NULL, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+            if (record_time)
+                now = VMPI_getDate();
+            if (result != undefinedAtom)
+                console << string(result) << "\n";
+            if (record_time)
+                console << "Elapsed time: " << (now - then)/1000 << "s\n";
+        }
+        CATCH(Exception *exception)
+        {
 #ifdef DEBUGGER
-			if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-			{
-				console << string(exception->atom) << "\n";
-			}
-			if (exception->getStackTrace()) {
-				console << exception->getStackTrace()->format(this) << '\n';
-			}
+            if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+            {
+                console << string(exception->atom) << "\n";
+            }
+            if (exception->getStackTrace()) {
+                console << exception->getStackTrace()->format(this) << '\n';
+            }
 #else
-			console << string(exception->atom) << "\n";
+            console << string(exception->atom) << "\n";
 #endif
-		}
-		END_CATCH
-		END_TRY
-	}
-	
+        }
+        END_CATCH
+        END_TRY
+    }
+
 #endif // VMCFG_EVAL
-	
+
 #ifdef AVMSHELL_PROJECTOR_SUPPORT
-	
-	// Run a known projector file
-	int ShellCore::executeProjector(char *executablePath)
-	{
-		AvmAssert(isValidProjectorFile(executablePath));
-		
-		uint8_t header[8];
-		
-		FileInputStream file(executablePath);
-		
-		file.seek(file.length() - 8);
-		file.read(header, 8);
-		
-		int abcLength = (header[4]     |
-						 header[5]<<8  |
-						 header[6]<<16 |
-						 header[7]<<24);
-		
-		ScriptBuffer code = newScriptBuffer(abcLength);
-		file.seek(file.length() - 8 - abcLength);
-		file.read(code.getBuffer(), abcLength);
-		
-		return handleArbitraryExecutableContent(code, executablePath);
-	}
-	
-	/* static */
-	bool ShellCore::isValidProjectorFile(const char* filename)
-	{
-		FileInputStream file(filename);
-		uint8_t header[8];
-		
-		if (!file.valid())
-			return false;
-		
-		file.seek(file.length() - 8);
-		file.read(header, 8);
-		
-		// Check the magic number
-		if (header[0] != 0x56 || header[1] != 0x34 || header[2] != 0x12 || header[3] != 0xFA)
-			return false;
-		
-		return true;
-	}
-	
+
+    // Run a known projector file
+    int ShellCore::executeProjector(char *executablePath)
+    {
+        AvmAssert(isValidProjectorFile(executablePath));
+
+        uint8_t header[8];
+
+        FileInputStream file(executablePath);
+
+        file.seek(file.length() - 8);
+        file.read(header, 8);
+
+        int abcLength = (header[4]     |
+                         header[5]<<8  |
+                         header[6]<<16 |
+                         header[7]<<24);
+
+        ScriptBuffer code = newScriptBuffer(abcLength);
+        file.seek(file.length() - 8 - abcLength);
+        file.read(code.getBuffer(), abcLength);
+
+        return handleArbitraryExecutableContent(code, executablePath);
+    }
+
+    /* static */
+    bool ShellCore::isValidProjectorFile(const char* filename)
+    {
+        FileInputStream file(filename);
+        uint8_t header[8];
+
+        if (!file.valid())
+            return false;
+
+        file.seek(file.length() - 8);
+        file.read(header, 8);
+
+        // Check the magic number
+        if (header[0] != 0x56 || header[1] != 0x34 || header[2] != 0x12 || header[3] != 0xFA)
+            return false;
+
+        return true;
+    }
+
 #endif // AVMSHELL_PROJECTOR_SUPPORT
 
 #ifdef VMCFG_SELFTEST
-	void ShellCore::executeSelftest(ShellCoreSettings& settings)
-	{
-		setStackLimit();
-		::selftests(this, settings.st_component, settings.st_category, settings.st_name);
-	}
+    void ShellCore::executeSelftest(ShellCoreSettings& settings)
+    {
+        setStackLimit();
+        ::selftests(this, settings.st_component, settings.st_category, settings.st_name);
+    }
 #endif
-	
-	bool ShellCore::setup(ShellCoreSettings& settings)
-	{
-		// set the default api version
-		if (settings.api <= _max_version_num) {
-			this->defaultAPIVersion = settings.api;
-		}
-		else {
-			// if there is at least on versioned uri, then there must be a version matrix
-			if (_uris_count > 0) {
-				// last api of any row is largestApiUtils::getLargestVersion(this);
-				this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
-			}
-			else {
-				this->defaultAPIVersion = 0;
-			}
-		}
-		//console << "defaultAPIVersion=" << defaultAPIVersion;
-		this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
 
-		config.interrupts = settings.interrupts;
+    bool ShellCore::setup(ShellCoreSettings& settings)
+    {
+        // set the default api version
+        if (settings.api <= _max_version_num) {
+            this->defaultAPIVersion = settings.api;
+        }
+        else {
+            // if there is at least on versioned uri, then there must be a version matrix
+            if (_uris_count > 0) {
+                // last api of any row is largestApiUtils::getLargestVersion(this);
+                this->defaultAPIVersion = ((uint32_t*)_versions)[_versions_count[0]-1];
+            }
+            else {
+                this->defaultAPIVersion = 0;
+            }
+        }
+        //console << "defaultAPIVersion=" << defaultAPIVersion;
+        this->setActiveAPI(ApiUtils::toAPI(this, this->defaultAPIVersion));
+
+        config.interrupts = settings.interrupts;
 #ifdef VMCFG_VERIFYALL
-		config.verifyall = settings.verifyall;
-		config.verifyonly = settings.verifyonly;
+        config.verifyall = settings.verifyall;
+        config.verifyonly = settings.verifyonly;
 #endif
-		config.jitordie = settings.jitordie;
+        config.jitordie = settings.jitordie;
 #if defined FEATURE_NANOJIT
-		config.njconfig = settings.njconfig;
+        config.njconfig = settings.njconfig;
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-        if (settings.do_verbose & VB_builtins) 
+        if (settings.do_verbose & VB_builtins)
             config.verbose_vb = settings.do_verbose;  // ~builtins then skip verbose settings during setup()
 #endif
-		config.runmode = settings.runmode;
-		
+        config.runmode = settings.runmode;
+
 #ifdef VMCFG_METHOD_NAMES
-		// verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
-		if (settings.do_verbose)
-			config.methodNames = true;
+        // verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
+        if (settings.do_verbose)
+            config.methodNames = true;
     #ifdef DEBUGGER
-		// debugger in avmshell always enables methodnames. 
-		if (allowDebugger)
-			config.methodNames = true;
-	#endif
+        // debugger in avmshell always enables methodnames.
+        if (allowDebugger)
+            config.methodNames = true;
+    #endif
 #endif // VMCFG_METHOD_NAMES
-			
+
 #ifdef DEBUGGER
-		langID = settings.langID;
+        langID = settings.langID;
 #endif
 
-		TRY(this, kCatchAction_ReportAsError)
-		{
-			setStackLimit();
-			
-			allowDebugger = !settings.nodebugger;
-			
-			setCacheSizes(settings.cacheSizes);
+        TRY(this, kCatchAction_ReportAsError)
+        {
+            setStackLimit();
 
-			SystemClass::user_argc = settings.numargs;
-			SystemClass::user_argv = settings.arguments;
+            allowDebugger = !settings.nodebugger;
+
+            setCacheSizes(settings.cacheSizes);
+
+            SystemClass::user_argc = settings.numargs;
+            SystemClass::user_argv = settings.arguments;
 
 #ifdef DEBUGGER
-			initBuiltinPool((avmplus::Debugger::TraceLevel)settings.astrace_console);
+            initBuiltinPool((avmplus::Debugger::TraceLevel)settings.astrace_console);
 #else
-			initBuiltinPool();
+            initBuiltinPool();
 #endif
-			initShellPool();
-			
-			// init toplevel internally
-			shell_toplevel = initShellBuiltins();
-			
-			// Create a new Domain for the user code
-			shell_domain = new (GetGC()) Domain(this, builtinDomain);
-			
-			// Return a new DomainEnv for the user code
-			shell_domainEnv = new (GetGC()) DomainEnv(this, shell_domain, shell_toplevel->domainEnv());
-        
+            initShellPool();
+
+            // init toplevel internally
+            shell_toplevel = initShellBuiltins();
+
+            // Create a new Domain for the user code
+            shell_domain = new (GetGC()) Domain(this, builtinDomain);
+
+            // Return a new DomainEnv for the user code
+            shell_domainEnv = new (GetGC()) DomainEnv(this, shell_domain, shell_toplevel->domainEnv());
+
 #ifdef AVMPLUS_VERBOSE
-            config.verbose_vb = settings.do_verbose;  // builtins is done, so propagate verbose 
+            config.verbose_vb = settings.do_verbose;  // builtins is done, so propagate verbose
 #endif
-			return true;
-		}
-		CATCH(Exception *exception)
-		{
+            return true;
+        }
+        CATCH(Exception *exception)
+        {
 #ifdef DEBUGGER
-			if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-				console << string(exception->atom) << "\n";
-			
-			if (exception->getStackTrace())
-				console << exception->getStackTrace()->format(this) << '\n';
+            if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+                console << string(exception->atom) << "\n";
+
+            if (exception->getStackTrace())
+                console << exception->getStackTrace()->format(this) << '\n';
 #else
-			// [ed] always show error, even in release mode,
-			// see bug #121382
-			console << string(exception->atom) << "\n";
+            // [ed] always show error, even in release mode,
+            // see bug #121382
+            console << string(exception->atom) << "\n";
 #endif /* DEBUGGER */
-			return false;
-		}
-		END_CATCH
-		END_TRY
-	}
-	
-	int ShellCore::evaluateFile(ShellCoreSettings& settings, const char* filename)
-	{
+            return false;
+        }
+        END_CATCH
+        END_TRY
+    }
+
+    int ShellCore::evaluateFile(ShellCoreSettings& settings, const char* filename)
+    {
 #ifdef VMCFG_AOT
         ScriptBuffer dummyScriptBuffer;
         return handleArbitraryExecutableContent(dummyScriptBuffer, NULL);
 #endif
 
-		if (config.interrupts)
-			Platform::GetInstance()->setTimer(kScriptTimeout, interruptTimerCallback, this);
-		
+        if (config.interrupts)
+            Platform::GetInstance()->setTimer(kScriptTimeout, interruptTimerCallback, this);
+
 #ifdef AVMPLUS_VERBOSE
-		if (config.verbose_vb)
-			console << "run " << filename << "\n";
+        if (config.verbose_vb)
+            console << "run " << filename << "\n";
 #endif
-		
-		FileInputStream f(filename);
-		bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
-		if (!isValid) {
-			console << "cannot open file: " << filename << "\n";
-			return(1);
-		}
-		
-		// parse new bytecode
-		ScriptBuffer code = newScriptBuffer((size_t)f.available());
-		f.read(code.getBuffer(), (size_t)f.available());
-		
+
+        FileInputStream f(filename);
+        bool isValid = f.valid() && ((uint64_t)f.length() < UINT32_T_MAX); //currently we cannot read files > 4GB
+        if (!isValid) {
+            console << "cannot open file: " << filename << "\n";
+            return(1);
+        }
+
+        // parse new bytecode
+        ScriptBuffer code = newScriptBuffer((size_t)f.available());
+        f.read(code.getBuffer(), (size_t)f.available());
+
 #ifdef DEBUGGER
-		if (settings.enter_debugger_on_launch)
-		{
-			// Activate the debug CLI and stop at
-			// start of program
-			debugCLI()->activate();
-			debugCLI()->stepInto();
-		}
+        if (settings.enter_debugger_on_launch)
+        {
+            // Activate the debug CLI and stop at
+            // start of program
+            debugCLI()->activate();
+            debugCLI()->stepInto();
+        }
 #else
-		// placate MSVC - settings is unreferenced if this is not here
-		(void)settings.enter_debugger_on_launch;
+        // placate MSVC - settings is unreferenced if this is not here
+        (void)settings.enter_debugger_on_launch;
 #endif
 
-		return handleArbitraryExecutableContent(code, filename);
-	}
+        return handleArbitraryExecutableContent(code, filename);
+    }
 
-	int ShellCore::handleArbitraryExecutableContent(ScriptBuffer& code, const char * filename)
-	{
-		setStackLimit();
-		
-		TRY(this, kCatchAction_ReportAsError)
-		{
-			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-			codeContext->m_domainEnv = shell_domainEnv;
+    int ShellCore::handleArbitraryExecutableContent(ScriptBuffer& code, const char * filename)
+    {
+        setStackLimit();
+
+        TRY(this, kCatchAction_ReportAsError)
+        {
+            ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
+            codeContext->m_domainEnv = shell_domainEnv;
 
 #ifdef VMCFG_AOT
             if (filename == NULL) {
-				handleAOT(this, shell_domain, shell_domainEnv, shell_toplevel, codeContext);
-			} else
+                handleAOT(this, shell_domain, shell_domainEnv, shell_toplevel, codeContext);
+            } else
 #endif
-			if (AbcParser::canParse(code) == 0) {
-				#ifdef VMCFG_VERIFYALL
-				if (config.verbose_vb & VB_verify)
-					console << "ABC " << filename << "\n";
-				#endif
-				uint32_t api = this->getAPI(NULL);
-				handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
-			}
-			else if (isSwf(code)) {
-				#ifdef VMCFG_VERIFYALL
-				if (config.verbose_vb & VB_verify)
-					console << "SWF " << filename << "\n";
-				#endif
-				handleSwf(filename, code, shell_domainEnv, shell_toplevel, codeContext);
-			}
-			else {
+            if (AbcParser::canParse(code) == 0) {
+                #ifdef VMCFG_VERIFYALL
+                if (config.verbose_vb & VB_verify)
+                    console << "ABC " << filename << "\n";
+                #endif
+                uint32_t api = this->getAPI(NULL);
+                handleActionBlock(code, 0, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+            }
+            else if (isSwf(code)) {
+                #ifdef VMCFG_VERIFYALL
+                if (config.verbose_vb & VB_verify)
+                    console << "SWF " << filename << "\n";
+                #endif
+                handleSwf(filename, code, shell_domainEnv, shell_toplevel, codeContext);
+            }
+            else {
 #ifdef VMCFG_EVAL
-				AvmCore* core = shell_toplevel->core();
-				if (!core->config.verifyonly) {
-					// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
-					String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
-					String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
-					ScriptBuffer empty;		// With luck: allow the
-					code = empty;			//    buffer to be garbage collected
-					uint32_t api = this->getAPI(NULL);
-					handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
-				}
+                AvmCore* core = shell_toplevel->core();
+                if (!core->config.verifyonly) {
+                    // FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
+                    String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
+                    String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)VMPI_strlen(filename));
+                    ScriptBuffer empty;     // With luck: allow the
+                    code = empty;           //    buffer to be garbage collected
+                    uint32_t api = this->getAPI(NULL);
+                    handleActionSource(code_string, filename_string, shell_domainEnv, shell_toplevel, NULL, codeContext, api);
+                }
 #else
-				console << "unknown input format in file: " << filename << "\n";
-				return(1);
+                console << "unknown input format in file: " << filename << "\n";
+                return(1);
 #endif // VMCFG_EVAL
-			}
-		}
-		CATCH(Exception *exception)
-		{
+            }
+        }
+        CATCH(Exception *exception)
+        {
 #ifdef DEBUGGER
-			if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-			{
-				console << string(exception->atom) << "\n";
-			}
-			if (exception->getStackTrace()) {
-				console << exception->getStackTrace()->format(this) << '\n';
-			}
+            if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+            {
+                console << string(exception->atom) << "\n";
+            }
+            if (exception->getStackTrace()) {
+                console << exception->getStackTrace()->format(this) << '\n';
+            }
 #else
-			// [ed] always show error, even in release mode,
-			// see bug #121382
-			console << string(exception->atom) << "\n";
+            // [ed] always show error, even in release mode,
+            // see bug #121382
+            console << string(exception->atom) << "\n";
 #endif /* DEBUGGER */
-			
-			return 1;
-		}
-		END_CATCH
-		END_TRY
-		
-		return 0;
-	}
+
+            return 1;
+        }
+        END_CATCH
+        END_TRY
+
+        return 0;
+    }
 
 }
 

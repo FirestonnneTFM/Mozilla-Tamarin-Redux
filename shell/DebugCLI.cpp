@@ -211,7 +211,7 @@ namespace avmshell
         return "?";
     }
 
-    bool DebugCLI::printFrame(int k) 
+    bool DebugCLI::printFrame(int k)
     {
         Atom* ptr;
         int count, line = -1;
@@ -219,10 +219,10 @@ namespace avmshell
         AvmCore* core = AvmCore::getActiveCore();
         DebugFrame* frame = core->debugger()->frameAt(k);
         if (frame == NULL) return false;
-        
+
         // source information
         frame->sourceLocation(src, line);
-        
+
         core->console << "#" << k << "   ";
 
         // this
@@ -549,10 +549,10 @@ namespace avmshell
         AvmCore* core = AvmCore::getActiveCore();
         DebugFrame* frame = core->debugger()->frameAt(frameNumber);
         if (frame == NULL) return false;
-        
+
         // source information
         frame->sourceLocation(src, line);
-        
+
         // method
         MethodInfo* info = functionFor(src, line);
         if (info) {
@@ -587,7 +587,7 @@ namespace avmshell
          }
          return false;
      }
-    
+
     Atom DebugCLI::ease2Atom(const char* to, Atom baseline)
     {
         // first make a string out of the value

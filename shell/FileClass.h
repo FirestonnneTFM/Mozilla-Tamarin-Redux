@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,39 +43,39 @@
 
 namespace avmshell
 {
-	/**
-	 * A simple class that has some native methods.
-	 * Included as an example for writers of native methods,
-	 * and also to provide some useful QA instrumentation.
-	 */
-	class FileClass : public ClassClosure
-	{
+    /**
+     * A simple class that has some native methods.
+     * Included as an example for writers of native methods,
+     * and also to provide some useful QA instrumentation.
+     */
+    class FileClass : public ClassClosure
+    {
     public:
-		FileClass(VTable* cvtable);
+        FileClass(VTable* cvtable);
 
-		/**
-		 * Implementation of File.exists
-		 * AS usage: exists = File.exists(filename);
-		 * Tests whether file "filename" exists.
-		 */
-		bool exists(Stringp filename);
+        /**
+         * Implementation of File.exists
+         * AS usage: exists = File.exists(filename);
+         * Tests whether file "filename" exists.
+         */
+        bool exists(Stringp filename);
 
-		/**
-		 * Implementation of File.read
-		 * AS usage: data = File.read(filename);
-		 * Reads the file "filename" into memory and returns
-		 * it as a string
-		 */
-		Stringp read(Stringp filename);
+        /**
+         * Implementation of File.read
+         * AS usage: data = File.read(filename);
+         * Reads the file "filename" into memory and returns
+         * it as a string
+         */
+        Stringp read(Stringp filename);
 
-		/**
-		 * Implementation of File.write
-		 * AS usage: File.write(filename, data);
-		 * Writes the text "data" to the file "filename"
-		 */
-		void write(Stringp filename, Stringp data);
-		
-		DECLARE_SLOTS_FileClass;
+        /**
+         * Implementation of File.write
+         * AS usage: File.write(filename, data);
+         * Writes the text "data" to the file "filename"
+         */
+        void write(Stringp filename, Stringp data);
+
+        DECLARE_SLOTS_FileClass;
     };
 }
 

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,160 +42,160 @@
 
 namespace avmshell
 {
-	DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
-		: ScriptObject(vtable, delegate)
-	{
-	}
+    DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
+        : ScriptObject(vtable, delegate)
+    {
+    }
 
-	DomainObject::~DomainObject()
-	{
-	}
+    DomainObject::~DomainObject()
+    {
+    }
 
-	void DomainObject::init(DomainObject *parentDomain)
-	{
-		ShellCore *core = (ShellCore*) this->core();
+    void DomainObject::init(DomainObject *parentDomain)
+    {
+        ShellCore *core = (ShellCore*) this->core();
 
-		Domain* baseDomain;
-		if (parentDomain) {
-			baseDomain = parentDomain->domainEnv->domain();
-		} else {
-			baseDomain = core->builtinDomain;
-		}
-		
-		Domain* domain = new (core->GetGC()) Domain(core, baseDomain);
+        Domain* baseDomain;
+        if (parentDomain) {
+            baseDomain = parentDomain->domainEnv->domain();
+        } else {
+            baseDomain = core->builtinDomain;
+        }
 
-		if (parentDomain) {
-			domainToplevel = parentDomain->domainToplevel;
-		} else {
-			domainToplevel = core->initShellBuiltins();
-		}
-		
-		domainEnv = new (core->GetGC()) DomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
-	}
+        Domain* domain = new (core->GetGC()) Domain(core, baseDomain);
 
-	Atom DomainObject::loadBytes(ByteArrayObject *b)
-	{
-		AvmCore* core = this->core();
-		if (!b)
-			toplevel()->throwTypeError(kNullArgumentError, core->toErrorString("bytes"));
+        if (parentDomain) {
+            domainToplevel = parentDomain->domainToplevel;
+        } else {
+            domainToplevel = core->initShellBuiltins();
+        }
 
-		ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext();
-		codeContext->m_domainEnv = domainEnv;
+        domainEnv = new (core->GetGC()) DomainEnv(core, domain, parentDomain ? parentDomain->domainEnv : (DomainEnv*)NULL);
+    }
 
-		// parse new bytecode
-		size_t len = b->get_length();
-		ScriptBuffer code = core->newScriptBuffer(len);
-		VMPI_memcpy(code.getBuffer(), &b->GetByteArray()[0], len); 
-		Toplevel *toplevel = domainToplevel;
+    Atom DomainObject::loadBytes(ByteArrayObject *b)
+    {
+        AvmCore* core = this->core();
+        if (!b)
+            toplevel()->throwTypeError(kNullArgumentError, core->toErrorString("bytes"));
 
-		uint32_t api = core->getAPI(NULL);
-		return core->handleActionBlock(code, 0,
-								  domainEnv,
-								  toplevel,
-								  NULL, codeContext, 
-								  api);
-	}
+        ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext();
+        codeContext->m_domainEnv = domainEnv;
 
-	ScriptObject* DomainObject::finddef(const Multiname& multiname,
-										DomainEnv* domainEnv)
-	{
-		Toplevel* toplevel = this->toplevel();
+        // parse new bytecode
+        size_t len = b->get_length();
+        ScriptBuffer code = core->newScriptBuffer(len);
+        VMPI_memcpy(code.getBuffer(), &b->GetByteArray()[0], len);
+        Toplevel *toplevel = domainToplevel;
 
-		ScriptEnv* script = (ScriptEnv*) domainEnv->getScriptInit(multiname);
-		if (script == (ScriptEnv*)BIND_AMBIGUOUS)
+        uint32_t api = core->getAPI(NULL);
+        return core->handleActionBlock(code, 0,
+                                  domainEnv,
+                                  toplevel,
+                                  NULL, codeContext,
+                                  api);
+    }
+
+    ScriptObject* DomainObject::finddef(const Multiname& multiname,
+                                        DomainEnv* domainEnv)
+    {
+        Toplevel* toplevel = this->toplevel();
+
+        ScriptEnv* script = (ScriptEnv*) domainEnv->getScriptInit(multiname);
+        if (script == (ScriptEnv*)BIND_AMBIGUOUS)
             toplevel->throwReferenceError(kAmbiguousBindingError, multiname);
 
-		if (script == (ScriptEnv*)BIND_NONE)
+        if (script == (ScriptEnv*)BIND_NONE)
             toplevel->throwReferenceError(kUndefinedVarError, multiname);
 
-		if (script->global == NULL)
-		{
-			script->initGlobal();
-			script->coerceEnter(script->global->atom());
-		}
+        if (script->global == NULL)
+        {
+            script->initGlobal();
+            script->coerceEnter(script->global->atom());
+        }
 
-		return script->global;
-	}
-	
-	ClassClosure* DomainObject::getClass(Stringp name)
-	{
-		AvmCore *core = this->core();
+        return script->global;
+    }
 
-		if (name == NULL) {
-			toplevel()->throwArgumentError(kNullArgumentError, core->toErrorString("name"));
-		}
-			
+    ClassClosure* DomainObject::getClass(Stringp name)
+    {
+        AvmCore *core = this->core();
 
-		// Search for a dot from the end.
-		int dot = name->lastIndexOf(core->cachedChars[(int)'.']);
+        if (name == NULL) {
+            toplevel()->throwArgumentError(kNullArgumentError, core->toErrorString("name"));
+        }
 
-		// If there is a '.', this is a fully-qualified
-		// class name in a package.  Must turn it into
-		// a namespace-qualified multiname.
-		Namespace* ns;
-		Stringp className;
-		if (dot >= 0) {
-			Stringp uri = core->internString(name->substring(0, dot));
-			ns = core->internNamespace(core->newNamespace(uri, Namespace::NS_Public, core->getAPI(NULL)));
-			className = core->internString(name->substring(dot+1, name->length()));
-		} else {
-			ns = core->findPublicNamespace();
-			className = core->internString(name);
-		}
 
-		Multiname multiname(ns, className);
+        // Search for a dot from the end.
+        int dot = name->lastIndexOf(core->cachedChars[(int)'.']);
 
-		ScriptObject *container = finddef(multiname, domainEnv);
-		if (!container) {
-			toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
-		}
-		Atom atom = toplevel()->getproperty(container->atom(),
-											&multiname,
-											container->vtable);
+        // If there is a '.', this is a fully-qualified
+        // class name in a package.  Must turn it into
+        // a namespace-qualified multiname.
+        Namespace* ns;
+        Stringp className;
+        if (dot >= 0) {
+            Stringp uri = core->internString(name->substring(0, dot));
+            ns = core->internNamespace(core->newNamespace(uri, Namespace::NS_Public, core->getAPI(NULL)));
+            className = core->internString(name->substring(dot+1, name->length()));
+        } else {
+            ns = core->findPublicNamespace();
+            className = core->internString(name);
+        }
 
-		if (!AvmCore::istype(atom, core->traits.class_itraits)) {
-			toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
-		}			
-		return (ClassClosure*)AvmCore::atomToScriptObject(atom);
-	}
+        Multiname multiname(ns, className);
 
-	DomainClass::DomainClass(VTable *cvtable)
-		: ClassClosure(cvtable)
-	{
-		createVanillaPrototype();
-	}
+        ScriptObject *container = finddef(multiname, domainEnv);
+        if (!container) {
+            toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
+        }
+        Atom atom = toplevel()->getproperty(container->atom(),
+                                            &multiname,
+                                            container->vtable);
 
-	ScriptObject* DomainClass::createInstance(VTable *ivtable,
-											  ScriptObject *prototype)
-	{
-		return new (core()->GetGC(), ivtable->getExtraSize()) DomainObject(ivtable, prototype);
-	}
+        if (!AvmCore::istype(atom, core->traits.class_itraits)) {
+            toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
+        }
+        return (ClassClosure*)AvmCore::atomToScriptObject(atom);
+    }
 
-	DomainObject* DomainClass::get_currentDomain()
-	{
-		ShellCodeContext* codeContext = (ShellCodeContext*)core()->codeContext();
+    DomainClass::DomainClass(VTable *cvtable)
+        : ClassClosure(cvtable)
+    {
+        createVanillaPrototype();
+    }
 
-		DomainObject* domainObject = (DomainObject*) createInstance(ivtable(), prototypePtr());
-		domainObject->domainEnv = codeContext->domainEnv();
-		domainObject->domainToplevel = toplevel();
-		
-		return domainObject;
-	}
-	
-	int DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH()
- 	{
- 		return DomainEnv::GLOBAL_MEMORY_MIN_SIZE;
- 	}
+    ScriptObject* DomainClass::createInstance(VTable *ivtable,
+                                              ScriptObject *prototype)
+    {
+        return new (core()->GetGC(), ivtable->getExtraSize()) DomainObject(ivtable, prototype);
+    }
 
- 	ByteArrayObject* DomainObject::get_domainMemory() const
- 	{
- 		return (ByteArrayObject*)domainEnv->get_globalMemory();
- 	}
- 
- 	void DomainObject::set_domainMemory(ByteArrayObject* mem)
- 	{
- 		if(!domainEnv->set_globalMemory(mem))
- 			toplevel()->throwError(kEndOfFileError);
- 	}
+    DomainObject* DomainClass::get_currentDomain()
+    {
+        ShellCodeContext* codeContext = (ShellCodeContext*)core()->codeContext();
+
+        DomainObject* domainObject = (DomainObject*) createInstance(ivtable(), prototypePtr());
+        domainObject->domainEnv = codeContext->domainEnv();
+        domainObject->domainToplevel = toplevel();
+
+        return domainObject;
+    }
+
+    int DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH()
+    {
+        return DomainEnv::GLOBAL_MEMORY_MIN_SIZE;
+    }
+
+    ByteArrayObject* DomainObject::get_domainMemory() const
+    {
+        return (ByteArrayObject*)domainEnv->get_globalMemory();
+    }
+
+    void DomainObject::set_domainMemory(ByteArrayObject* mem)
+    {
+        if(!domainEnv->set_globalMemory(mem))
+            toplevel()->throwError(kEndOfFileError);
+    }
 
 }
