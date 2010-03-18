@@ -1913,7 +1913,6 @@ namespace MMgc
 	EnterFrame::EnterFrame() : 
 		m_heap(NULL), 
 		m_gc(NULL),
-		m_collectingGC(NULL),
 		m_abortUnwindList(NULL),
 		m_previous(NULL),
 		m_suspended(false)
@@ -2132,16 +2131,8 @@ namespace MMgc
 		// If the current thread is holding a lock for a GC that's not currently active on the thread
 		// then break the lock: the current thread is collecting in that GC, but the Abort has cancelled
 		// the collection.
+		ef->UnwindAllObjects();
 
-		if (ef->m_collectingGC)
-		{
-			ef->m_collectingGC->SignalImminentAbort();
-			ef->m_collectingGC = NULL;
-		}
-
-		if(ef->m_gc)
-			ef->m_gc->SignalImminentAbort();
-		
 		// Clear the enterFrame because we're jumping past MMGC_ENTER.
 		GetGCHeap()->enterFrame = NULL;
 	}
@@ -2164,18 +2155,6 @@ namespace MMgc
 
 		if (ef != NULL)
 		{
-			// If the current thread is holding a lock for a GC that's not currently active on the thread
-			// then break the lock: the current thread is collecting in that GC, but the Abort has cancelled
-			// the collection.
-			if (ef->m_collectingGC)
-			{
-				ef->m_collectingGC->SignalImminentAbort();
-				ef->m_collectingGC = NULL;
-			}
-			if(ef->m_gc)
-			{
-				ef->m_gc->SignalImminentAbort();
-			}
 			// Guard against repeated jumps: ef->m_heap doubles as a flag.  We go Abort->longjmp->~EnterFrame->Leave
 			// and Leave calls StatusChangeNotify and the host code might do another allocation during shutdown
 			// in which case we want to go to VMPI_abort instead.  At that point m_heap will be NULL and the right

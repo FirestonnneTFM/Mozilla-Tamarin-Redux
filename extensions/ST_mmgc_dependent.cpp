@@ -112,7 +112,7 @@ void ST_mmgc_dependent::test0() {
                 maxheap = heapsize;
         }
     }
-
+    
     // This is tricky to get right but for this test the 16MB blocks will dominate
     // completely.  So assume that heap size must stay below L*2*16MB for the
     // L that applies at 32MB.
