@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -42,21 +44,21 @@
 
 namespace avmshell
 {
-	class PosixPartialPlatform : public Platform
-	{
-	public:
-		virtual ~PosixPartialPlatform() {}
+    class PosixPartialPlatform : public Platform
+    {
+    public:
+        virtual ~PosixPartialPlatform() {}
 
-		virtual void exit(int code);
+        virtual void exit(int code);
 
-		virtual File* createFile();
-		virtual void destroyFile(File* file);
+        virtual File* createFile();
+        virtual void destroyFile(File* file);
 
-		virtual void initializeLogging(const char* filename);
+        virtual void initializeLogging(const char* filename);
 
-		virtual int logMessage(const char* message);
-		virtual char* getUserInput(char* buffer, int bufferSize);
-	};
+        virtual int logMessage(const char* message);
+        virtual char* getUserInput(char* buffer, int bufferSize);
+    };
 }
 
 #endif /* __avmshell_PosixPartial_Platform__ */

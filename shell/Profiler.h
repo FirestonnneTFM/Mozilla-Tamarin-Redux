@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -42,31 +44,31 @@
 #ifdef DEBUGGER
 namespace avmshell
 {
-	/**
-	 * Dummy implementation of the Profiler interface.
-	 */
-	class Profiler : public avmplus::Profiler
-	{
-	public:
-		Profiler(AvmCore*) {}
-		
-		void sendDebugFileURL(String * /*url*/) {}
-		void sendLineTimestamp(int /*linenumber*/) {}
-		void setEnabled(bool /*on*/) {}
-		void sendFunctionEnter(MethodInfo* /*method*/) {}
-		void sendFunctionExit() {}
-		void sendCatch(MethodInfo* /*method*/) {}
-		void addScriptObject(ScriptObject * /*scriptObject*/) {}
-		void deleteScriptObject(ScriptObject * /*scriptObject*/) {}
-		void sendHeapDump(String * /*heapDumpName*/) {}
-		int computeStringSize(String * /*myString*/) { return 0; }		
+    /**
+     * Dummy implementation of the Profiler interface.
+     */
+    class Profiler : public avmplus::Profiler
+    {
+    public:
+        Profiler(AvmCore*) {}
 
-		void sample(uint64_t /*time*/, Stringp /*stackTrace*/) {}
-		void allocationSample(uint64_t /*time*/, Stringp /*stackTrace*/, uint64_t /*allocId*/, Stringp /*type*/) {}
-		void deallocationSample(uint64_t /*time*/, uint64_t /*id*/) {}
-		void getMembers() {}
+        void sendDebugFileURL(String * /*url*/) {}
+        void sendLineTimestamp(int /*linenumber*/) {}
+        void setEnabled(bool /*on*/) {}
+        void sendFunctionEnter(MethodInfo* /*method*/) {}
+        void sendFunctionExit() {}
+        void sendCatch(MethodInfo* /*method*/) {}
+        void addScriptObject(ScriptObject * /*scriptObject*/) {}
+        void deleteScriptObject(ScriptObject * /*scriptObject*/) {}
+        void sendHeapDump(String * /*heapDumpName*/) {}
+        int computeStringSize(String * /*myString*/) { return 0; }
 
-	};
+        void sample(uint64_t /*time*/, Stringp /*stackTrace*/) {}
+        void allocationSample(uint64_t /*time*/, Stringp /*stackTrace*/, uint64_t /*allocId*/, Stringp /*type*/) {}
+        void deallocationSample(uint64_t /*time*/, uint64_t /*id*/) {}
+        void getMembers() {}
+
+    };
 }
 #endif
 

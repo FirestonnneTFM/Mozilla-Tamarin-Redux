@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -39,51 +41,51 @@
 
 namespace avmshell
 {
-	FileInputStream::FileInputStream(const char *filename)
-	{
-		file = Platform::GetInstance()->createFile();
-		if(file)
-		{
-			if(file->open(filename, File::OPEN_READ_BINARY))
-			{
-				len = file->size();
-			}
-			else
-			{
-				Platform::GetInstance()->destroyFile(file);
-				file = NULL;
-			}
-		}
-	}
+    FileInputStream::FileInputStream(const char *filename)
+    {
+        file = Platform::GetInstance()->createFile();
+        if(file)
+        {
+            if(file->open(filename, File::OPEN_READ_BINARY))
+            {
+                len = file->size();
+            }
+            else
+            {
+                Platform::GetInstance()->destroyFile(file);
+                file = NULL;
+            }
+        }
+    }
 
-	bool FileInputStream::valid() const
-	{
-		return file != NULL;
-	}
+    bool FileInputStream::valid() const
+    {
+        return file != NULL;
+    }
 
-	FileInputStream::~FileInputStream()
-	{
-		Platform::GetInstance()->destroyFile(file);
-	}
+    FileInputStream::~FileInputStream()
+    {
+        Platform::GetInstance()->destroyFile(file);
+    }
 
-	void FileInputStream::seek(int64_t offset)
-	{
-		file->setPosition(offset);
-	}
-	
-	int64_t FileInputStream::available()
-	{
-		int64_t pos = file->getPosition();
-		if(pos >= 0 )
-		{
-			return len - pos;
-		}
-		return 0;
-	}
+    void FileInputStream::seek(int64_t offset)
+    {
+        file->setPosition(offset);
+    }
 
-	size_t FileInputStream::read(void *buffer,
-							  size_t count)
-	{
-		return file->read(buffer, count);
-	}
+    int64_t FileInputStream::available()
+    {
+        int64_t pos = file->getPosition();
+        if(pos >= 0 )
+        {
+            return len - pos;
+        }
+        return 0;
+    }
+
+    size_t FileInputStream::read(void *buffer,
+                              size_t count)
+    {
+        return file->read(buffer, count);
+    }
 }

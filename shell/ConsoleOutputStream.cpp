@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,32 +42,32 @@
 
 namespace avmshell
 {
-	int ConsoleOutputStream::write(const void *buffer,
-								   int count)
-	{
-		//Currently this method is called from avmplus::PrintWriter class
-		//which can pass 1-4 bytes of data at at time.
-		//To do a new/delete for small bursts of data could be inefficient.
-		//So for data < 256 bytes we use a stack buffer to copy and log the message
-		if(count < 256)
-		{
-			char message[256];
-			VMPI_strncpy(message, (const char*) buffer, count);
-			message[count] = '\0';
+    int ConsoleOutputStream::write(const void *buffer,
+                                   int count)
+    {
+        //Currently this method is called from avmplus::PrintWriter class
+        //which can pass 1-4 bytes of data at at time.
+        //To do a new/delete for small bursts of data could be inefficient.
+        //So for data < 256 bytes we use a stack buffer to copy and log the message
+        if(count < 256)
+        {
+            char message[256];
+            VMPI_strncpy(message, (const char*) buffer, count);
+            message[count] = '\0';
 
-			return Platform::GetInstance()->logMessage(message);
-		}
-		else
-		{
-			char* message = new char[count+1];
-			VMPI_strncpy(message, (const char*)buffer, count);
-			message[count] = '\0';
+            return Platform::GetInstance()->logMessage(message);
+        }
+        else
+        {
+            char* message = new char[count+1];
+            VMPI_strncpy(message, (const char*)buffer, count);
+            message[count] = '\0';
 
-			int i = Platform::GetInstance()->logMessage(message);
+            int i = Platform::GetInstance()->logMessage(message);
 
-			delete [] message;
+            delete [] message;
 
-			return i;
-		}
-	}
+            return i;
+        }
+    }
 }

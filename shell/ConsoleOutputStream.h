@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,19 +43,19 @@
 
 namespace avmshell
 {
-	/**
-	 * ConsoleOutputStream is a subclass of OutputStream
-	 * that writes output to the standard output.
-	 *
-	 * This is used for routing print() statements and
-	 * exception messages to stdout in the AVM+
-	 * command-line shell.
-	 */
-	class ConsoleOutputStream : public OutputStream
-	{
-	public:
-		int write(const void *buffer, int count);
-	};
+    /**
+     * ConsoleOutputStream is a subclass of OutputStream
+     * that writes output to the standard output.
+     *
+     * This is used for routing print() statements and
+     * exception messages to stdout in the AVM+
+     * command-line shell.
+     */
+    class ConsoleOutputStream : public OutputStream
+    {
+    public:
+        int write(const void *buffer, int count);
+    };
 }
 
 #endif /* __avmshell_ConsoleOutputStream__ */

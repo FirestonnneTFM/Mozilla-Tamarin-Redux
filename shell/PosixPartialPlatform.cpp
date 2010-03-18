@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
 * Version: MPL 1.1/GPL 2.0/LGPL 2.1
 *
@@ -40,38 +42,38 @@
 
 namespace avmshell
 {
-	void PosixPartialPlatform::exit(int code)
-	{
-		::exit(code);
-	}
+    void PosixPartialPlatform::exit(int code)
+    {
+        ::exit(code);
+    }
 
-	File* PosixPartialPlatform::createFile()
-	{
-		return mmfx_new( PosixFile() );
-	}
+    File* PosixPartialPlatform::createFile()
+    {
+        return mmfx_new( PosixFile() );
+    }
 
-	void PosixPartialPlatform::destroyFile(File* file)
-	{
-		mmfx_delete( file );
-	}
+    void PosixPartialPlatform::destroyFile(File* file)
+    {
+        mmfx_delete( file );
+    }
 
-	void PosixPartialPlatform::initializeLogging(const char* filename)
-	{
-		FILE *f = freopen(filename, "w", stdout);
-		if (!f)
-			AvmLog("freopen %s failed.\n",filename);
-	}
+    void PosixPartialPlatform::initializeLogging(const char* filename)
+    {
+        FILE *f = freopen(filename, "w", stdout);
+        if (!f)
+            AvmLog("freopen %s failed.\n",filename);
+    }
 
-	int PosixPartialPlatform::logMessage(const char* message)
-	{
-		return fprintf(stdout, "%s", message);
-	}
-	
-	char* PosixPartialPlatform::getUserInput(char* buffer, int bufferSize)
-	{
-		fflush(stdout);
-		if (!fgets(buffer, bufferSize, stdin))
-			*buffer = 0;
-		return buffer;
-	}
+    int PosixPartialPlatform::logMessage(const char* message)
+    {
+        return fprintf(stdout, "%s", message);
+    }
+
+    char* PosixPartialPlatform::getUserInput(char* buffer, int bufferSize)
+    {
+        fflush(stdout);
+        if (!fgets(buffer, bufferSize, stdin))
+            *buffer = 0;
+        return buffer;
+    }
 }
