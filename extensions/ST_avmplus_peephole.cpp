@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 // Generated from ST_avmplus_peephole.st
 // -*- mode: c++ -*-
 //
@@ -70,7 +72,7 @@ case 0: test0(); return;
 void ST_avmplus_peephole::prologue() {
 
 #ifdef AVMPLUS_DIRECT_THREADED
-	opcode_labels = interpGetOpcodeLabels();
+    opcode_labels = interpGetOpcodeLabels();
 #endif
 
 }

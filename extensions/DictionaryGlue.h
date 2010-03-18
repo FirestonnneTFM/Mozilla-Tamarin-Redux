@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,44 +43,44 @@
 
 namespace avmplus
 {
-	class DictionaryObject : public ScriptObject
-	{
-	public:
-		DictionaryObject(VTable *vtable, ScriptObject *delegate);
+    class DictionaryObject : public ScriptObject
+    {
+    public:
+        DictionaryObject(VTable *vtable, ScriptObject *delegate);
 
-		void init(bool weakKeys);
-	
-		// multiname and Stringp forms fall through to ScriptObject
-		virtual Atom getAtomProperty(Atom name) const;
-		virtual bool hasAtomProperty(Atom name) const;
-		virtual bool deleteAtomProperty(Atom name);
-		virtual void setAtomProperty(Atom name, Atom value);
+        void init(bool weakKeys);
 
-		virtual Atom nextName(int index);
-		virtual int nextNameIndex(int index);
+        // multiname and Stringp forms fall through to ScriptObject
+        virtual Atom getAtomProperty(Atom name) const;
+        virtual bool hasAtomProperty(Atom name) const;
+        virtual bool deleteAtomProperty(Atom name);
+        virtual void setAtomProperty(Atom name, Atom value);
 
-		bool isUsingWeakKeys() const { return getHeapHashtable()->weakKeys(); }
+        virtual Atom nextName(int index);
+        virtual int nextNameIndex(int index);
 
-	private:
-		inline HeapHashtable* getHeapHashtable() const 
-		{
-			// uintptr_t (rather than char*) to avoid "increases required alignment" warning
-			return *(HeapHashtable**)(uintptr_t(this) + vtable->traits->getHashtableOffset());
-		}
-		
-		Atom FASTCALL getKeyFromObject(Atom object) const;
-		
-		DECLARE_SLOTS_DictionaryObject;
-	};
+        bool isUsingWeakKeys() const { return getHeapHashtable()->weakKeys(); }
 
-	class DictionaryClass : public ClassClosure
-	{
-	public:
-		DictionaryClass(VTable *vtable);
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-		
-		DECLARE_SLOTS_DictionaryClass;
-	};
+    private:
+        inline HeapHashtable* getHeapHashtable() const
+        {
+            // uintptr_t (rather than char*) to avoid "increases required alignment" warning
+            return *(HeapHashtable**)(uintptr_t(this) + vtable->traits->getHashtableOffset());
+        }
+
+        Atom FASTCALL getKeyFromObject(Atom object) const;
+
+        DECLARE_SLOTS_DictionaryObject;
+    };
+
+    class DictionaryClass : public ClassClosure
+    {
+    public:
+        DictionaryClass(VTable *vtable);
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+
+        DECLARE_SLOTS_DictionaryClass;
+    };
 }
 
 #endif /* DICTIONARYGLUE_INCLUDED */

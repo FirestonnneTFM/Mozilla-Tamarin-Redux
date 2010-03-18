@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,136 +42,136 @@
 
 namespace avmplus
 {
-	struct Sample;
-	
-	class TraceClass : public ClassClosure
-	{
-    public:
-		TraceClass(VTable* cvtable);
+    struct Sample;
 
-		int getLevel(int target);
-		Atom setLevel(int lvl, int target);
-		Atom setListener(FunctionObject* f);
-		FunctionObject* getListener();
-        
+    class TraceClass : public ClassClosure
+    {
+    public:
+        TraceClass(VTable* cvtable);
+
+        int getLevel(int target);
+        Atom setLevel(int lvl, int target);
+        Atom setListener(FunctionObject* f);
+        FunctionObject* getListener();
+
         DECLARE_SLOTS_TraceClass;
     };
 
-	class SamplerScript
-	{
-	private:
-		static bool trusted(ScriptObject* self) { return self->toplevel()->sampler_trusted(self); }
-		explicit SamplerScript(); // unimplemented, not constructable
-		
-	public:
-		enum { GET = 1, SET = 2 };
+    class SamplerScript
+    {
+    private:
+        static bool trusted(ScriptObject* self) { return self->toplevel()->sampler_trusted(self); }
+        explicit SamplerScript(); // unimplemented, not constructable
 
-		static double getSize(ScriptObject* self, Atom o);
-		static Atom getMemberNames(ScriptObject* self, Atom o, bool instanceNames);
-		static Atom getSamples(ScriptObject* self);
-		static void clearSamples(ScriptObject* self);
-		static void startSampling(ScriptObject* self);
-		static void stopSampling(ScriptObject* self);
-		static void pauseSampling(ScriptObject* self);
-		static void sampleInternalAllocs(ScriptObject* self, bool b);
-		static double getSampleCount(ScriptObject* self);
-		static void _setSamplerCallback(ScriptObject* self, ScriptObject* callback);
-		static double _getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32 type);
-		static bool isGetterSetter(ScriptObject* self, Atom a, QNameObject* name);
+    public:
+        enum { GET = 1, SET = 2 };
 
-		static ArrayObject* getLexicalScopes(ScriptObject* self, FunctionObject *function);
-		static Atom getSavedThis(ScriptObject* self, FunctionObject *method);		
+        static double getSize(ScriptObject* self, Atom o);
+        static Atom getMemberNames(ScriptObject* self, Atom o, bool instanceNames);
+        static Atom getSamples(ScriptObject* self);
+        static void clearSamples(ScriptObject* self);
+        static void startSampling(ScriptObject* self);
+        static void stopSampling(ScriptObject* self);
+        static void pauseSampling(ScriptObject* self);
+        static void sampleInternalAllocs(ScriptObject* self, bool b);
+        static double getSampleCount(ScriptObject* self);
+        static void _setSamplerCallback(ScriptObject* self, ScriptObject* callback);
+        static double _getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32 type);
+        static bool isGetterSetter(ScriptObject* self, Atom a, QNameObject* name);
 
-		static Stringp getMasterString(ScriptObject* self, Stringp str);
+        static ArrayObject* getLexicalScopes(ScriptObject* self, FunctionObject *function);
+        static Atom getSavedThis(ScriptObject* self, FunctionObject *method);
+
+        static Stringp getMasterString(ScriptObject* self, Stringp str);
 
 #ifdef DEBUGGER
-	private:		
-		static ClassClosure* getType(Toplevel* toplevel, SamplerObjectType sot, const void *obj);
-		
-		friend class SampleIterator;
-		static ScriptObject* makeSample(ScriptObject* self, const Sample& sample);
-		static bool set_stack(ScriptObject* self, const Sample& sample, SampleObject* sam);
-		static SampleObject* new_sam(ScriptObject* self, const Sample& sample, int clsid);
+    private:
+        static ClassClosure* getType(Toplevel* toplevel, SamplerObjectType sot, const void *obj);
+
+        friend class SampleIterator;
+        static ScriptObject* makeSample(ScriptObject* self, const Sample& sample);
+        static bool set_stack(ScriptObject* self, const Sample& sample, SampleObject* sam);
+        static SampleObject* new_sam(ScriptObject* self, const Sample& sample, int clsid);
 #endif
-	};
+    };
 
-	class SampleClass : public ClassClosure
-	{
-	public:
-		SampleClass(VTable *vtable);
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-		
-		DECLARE_SLOTS_SampleClass;
-	};
+    class SampleClass : public ClassClosure
+    {
+    public:
+        SampleClass(VTable *vtable);
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
-	class SampleObject : public ScriptObject
-	{
-		friend class SamplerScript;
-	public:
-		SampleObject(VTable *vtable, ScriptObject *delegate);
-        
-		DECLARE_SLOTS_SampleObject;
-	};
+        DECLARE_SLOTS_SampleClass;
+    };
 
-	class NewObjectSampleObject : public SampleObject
-	{
-		friend class SamplerScript;
-	public:
-		NewObjectSampleObject(VTable *vtable, ScriptObject *delegate);
-		Atom get_object();
-		double get_size();
-		void setRef(AvmPlusScriptableObject* o) { obj = o; }
-		void setSize(uint64_t s) { size = s; }
-	private:
-		DRCWB(AvmPlusScriptableObject*) obj;
-		uint64_t size;
-        
-		DECLARE_SLOTS_NewObjectSampleObject;
-	};
+    class SampleObject : public ScriptObject
+    {
+        friend class SamplerScript;
+    public:
+        SampleObject(VTable *vtable, ScriptObject *delegate);
 
-	class NewObjectSampleClass : public SampleClass
-	{
-	public:
-		NewObjectSampleClass(VTable *vtable);
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-		
-		DECLARE_SLOTS_NewObjectSampleClass;
-	};
+        DECLARE_SLOTS_SampleObject;
+    };
 
-	class DeleteObjectSampleObject : public SampleObject
-	{
-		friend class SamplerScript;
-	public:
-		DeleteObjectSampleObject(VTable *vtable, ScriptObject *delegate);
+    class NewObjectSampleObject : public SampleObject
+    {
+        friend class SamplerScript;
+    public:
+        NewObjectSampleObject(VTable *vtable, ScriptObject *delegate);
+        Atom get_object();
+        double get_size();
+        void setRef(AvmPlusScriptableObject* o) { obj = o; }
+        void setSize(uint64_t s) { size = s; }
+    private:
+        DRCWB(AvmPlusScriptableObject*) obj;
+        uint64_t size;
 
-		DECLARE_SLOTS_DeleteObjectSampleObject;
-	};
+        DECLARE_SLOTS_NewObjectSampleObject;
+    };
 
-	class DeleteObjectSampleClass : public SampleClass
-	{
-	public:
-		DeleteObjectSampleClass(VTable *vtable);
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-		
-		DECLARE_SLOTS_DeleteObjectSampleClass;
-	};
+    class NewObjectSampleClass : public SampleClass
+    {
+    public:
+        NewObjectSampleClass(VTable *vtable);
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
-	class StackFrameObject : public ScriptObject
-	{
-		friend class SamplerScript;
-	public:
-		StackFrameObject(VTable *vtable, ScriptObject *delegate) : ScriptObject(vtable, delegate) {}
-		
-		DECLARE_SLOTS_StackFrameObject;
-	};
+        DECLARE_SLOTS_NewObjectSampleClass;
+    };
 
-	class StackFrameClass : public ClassClosure
-	{
-	public:
-		StackFrameClass(VTable *vtable) : ClassClosure(vtable) { }
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-		
-		DECLARE_SLOTS_StackFrameClass;
-	};
+    class DeleteObjectSampleObject : public SampleObject
+    {
+        friend class SamplerScript;
+    public:
+        DeleteObjectSampleObject(VTable *vtable, ScriptObject *delegate);
+
+        DECLARE_SLOTS_DeleteObjectSampleObject;
+    };
+
+    class DeleteObjectSampleClass : public SampleClass
+    {
+    public:
+        DeleteObjectSampleClass(VTable *vtable);
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+
+        DECLARE_SLOTS_DeleteObjectSampleClass;
+    };
+
+    class StackFrameObject : public ScriptObject
+    {
+        friend class SamplerScript;
+    public:
+        StackFrameObject(VTable *vtable, ScriptObject *delegate) : ScriptObject(vtable, delegate) {}
+
+        DECLARE_SLOTS_StackFrameObject;
+    };
+
+    class StackFrameClass : public ClassClosure
+    {
+    public:
+        StackFrameClass(VTable *vtable) : ClassClosure(vtable) { }
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+
+        DECLARE_SLOTS_StackFrameClass;
+    };
 }
 #endif // __avmplus_SamplerScript__
