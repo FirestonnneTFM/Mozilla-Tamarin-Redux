@@ -902,11 +902,13 @@ namespace MMgc
 			HeapBlock *next = NULL;
 			if(block->size) {
 				next = block + block->size;
+				GCAssert(next - blocks < (intptr_t)blocksLen);
 				GCAssert(next->sizePrevious == block->size);
 			}
 			HeapBlock *prev = NULL;
 			if(block->sizePrevious) {
 				prev = block - block->sizePrevious;
+				GCAssert(prev - blocks >= 0);
 				GCAssert(prev->size == block->sizePrevious);
 			} else if(block != blocks) {
 				// I have no prev and I'm not the first, check sentinel
@@ -1016,7 +1018,7 @@ namespace MMgc
 							}
 						}
 						
-						if(totalSize > size) {
+						if(totalSize >= size) {
 							decommittedSuitableBlock = firstFree;
 						} else {
 							// now try successors
@@ -1102,13 +1104,13 @@ namespace MMgc
 				RemoveFromList(block);
 
 				size_t amountRecommitted = block->committed ? 0 : block->size;
-					
+
 				while(block->size < size)
 				{
 					HeapBlock *nextBlock = block + block->size;
 
 					RemoveFromList(nextBlock);
-						
+					
 					// Increase size of current block
 					block->size += nextBlock->size;
 					amountRecommitted += nextBlock->committed ? 0 : nextBlock->size;
@@ -1205,10 +1207,19 @@ namespace MMgc
 			{
 				GCAssert(block != block->next);
 				GCAssert(block != block->next->next || block->next == freelist);
+
+				// Coalescing is eager so no block on the list should have adjacent blocks
+				// that are also on the free list and in the same committed state
+
 				if(block->sizePrevious)
 				{
 					HeapBlock *prev = block - block->sizePrevious;
 					GCAssert(block->sizePrevious == prev->size);
+					GCAssert(prev->inUse() || prev->size == 0 || prev->committed != block->committed);
+				}
+				{
+					HeapBlock *next = block + block->size;
+					GCAssert(next->inUse() || next->size == 0 || next->committed != block->committed);
 				}
 			}
 			freelist++;
@@ -1294,27 +1305,6 @@ namespace MMgc
 		return r1 == r2 || r1->reserveTop == r2->baseAddr;
 	}
 
-	void GCHeap::AddToFreeList(HeapBlock *block)
-	{
-		int index = GetFreeListIndex(block->size);
-		HeapBlock *freelist = &freelists[index];
-
-		HeapBlock *pointToInsert = freelist;
-		
-		// Note: We don't need to bother searching for the right
-		// insertion point if we know all blocks on this free list
-		// are the same size.
-		if (block->size >= kUniqueThreshold) {
-			while ((pointToInsert = pointToInsert->next) != freelist) {
-				if (pointToInsert->size >= block->size) {
-					break;
-				}
-			}
-		}
-
-		AddToFreeList(block, pointToInsert);
-	}
-		
 	void GCHeap::AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert)
 	{
 		CheckFreelist();
@@ -1326,6 +1316,80 @@ namespace MMgc
 
 		CheckFreelist();
 	}						   
+
+	void GCHeap::AddToFreeList(HeapBlock* block, bool makeDirty)
+	{
+		GCAssert(block->size != 0);
+
+		// Try to coalesce a committed block with its committed non-sentinel predecessor
+		if(block->committed && block->sizePrevious)
+		{
+			HeapBlock *prevBlock = block - block->sizePrevious;
+			GCAssert(prevBlock->size > 0 || !prevBlock->committed);
+
+			if (!prevBlock->inUse() && prevBlock->committed) 
+			{
+				// Remove predecessor block from free list
+				RemoveFromList(prevBlock);
+				
+				// Increase size of predecessor block
+				prevBlock->size += block->size;
+				
+				block->size = 0;
+				block->sizePrevious = 0;
+				block->baseAddr = 0;				
+				
+				block = prevBlock;
+				makeDirty = makeDirty || block->dirty;
+			}
+		}
+
+		// Try to coalesce a committed block with its committed non-sentinel successor
+		if (block->committed)
+		{
+			HeapBlock *nextBlock = block + block->size;
+			GCAssert(nextBlock->size > 0 || !nextBlock->committed);
+
+			if (!nextBlock->inUse() && nextBlock->committed) {
+				// Remove successor block from free list
+				RemoveFromList(nextBlock);
+
+				// Increase size of current block
+				block->size += nextBlock->size;
+				nextBlock->size = 0;
+				nextBlock->baseAddr = 0;
+				nextBlock->sizePrevious = 0;
+				makeDirty = makeDirty || nextBlock->dirty;
+			}
+		}
+
+		// Update sizePrevious in the next block
+		HeapBlock *nextBlock = block + block->size;
+		nextBlock->sizePrevious = block->size;
+
+		block->dirty = block->dirty || makeDirty;
+
+		// Add the coalesced block to the right free list, in the right
+		// position.  Free lists are ordered by increasing block size.
+		{
+			int index = GetFreeListIndex(block->size);
+			HeapBlock *freelist = &freelists[index];
+			HeapBlock *pointToInsert = freelist;
+
+			// If the block size is below kUniqueThreshold then its free list
+			// will have blocks of only one size and no search is needed.
+
+			if (block->size >= kUniqueThreshold) {
+				while ((pointToInsert = pointToInsert->next) != freelist) {
+					if (pointToInsert->size >= block->size) {
+						break;
+					}
+				}
+			}
+
+			AddToFreeList(block, pointToInsert);
+		}
+	}
 
 	void GCHeap::FreeBlock(HeapBlock *block)
 	{
@@ -1344,52 +1408,7 @@ namespace MMgc
 		VMPI_memset(block->baseAddr, 0xfb, block->size * kBlockSize);
 #endif
 		
-		// Try to coalesce this block with its predecessor
-		if(block->sizePrevious)
-		{
-			HeapBlock *prevBlock = block - block->sizePrevious;
-			if (!prevBlock->inUse() && prevBlock->committed) 
-			{
-				// Remove predecessor block from free list
-				RemoveFromList(prevBlock);
-				
-				// Increase size of predecessor block
-				prevBlock->size += block->size;
-				
-				block->size = 0;
-				block->sizePrevious = 0;
-				block->baseAddr = 0;				
-				
-				block = prevBlock;
-			}
-		}
-
-		// Try to coalesce this block with its successor
-		HeapBlock *nextBlock = block + block->size;
-
-		GCAssert(block->size != 0);
-
-		if (!nextBlock->inUse() && nextBlock->committed) {
-			// Remove successor block from free list
-			RemoveFromList(nextBlock);
-
-			// Increase size of current block
-			block->size += nextBlock->size;
-			nextBlock->size = 0;
-			nextBlock->baseAddr = 0;
-			nextBlock->sizePrevious = 0;
-		}
-
-		// Update sizePrevious in the next block
-		nextBlock = block + block->size;
-		nextBlock->sizePrevious = block->size;
-
-		// Add this block to the right free list
-		block->dirty = true;
-
-		AddToFreeList(block);
-
-		CheckFreelist();
+		AddToFreeList(block, true);
 	}
 
 	bool GCHeap::ExpandHeap(size_t askSize)
