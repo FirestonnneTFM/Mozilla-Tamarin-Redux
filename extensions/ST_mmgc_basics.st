@@ -245,6 +245,22 @@ delete gc;
     %%verify true  
     delete gcb;
     
+%%test collectDormantGC
+	{
+		GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+		{
+			MMGC_GCENTER(gcb);
+			gcb->Alloc(8);
+		}
+		
+		// this will cause a Collection in gcb
+		GCHeap::SignalExternalFreeMemory();
+		delete gcb;
+
+		// just fishing for asserts/hangs/crashes
+		%%verify true  
+    }
+
 %%test regression_551169
     {
         GC *testGC = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
@@ -277,4 +293,3 @@ delete gc;
         }
         delete testGC;
     }
-

@@ -1392,7 +1392,9 @@ namespace MMgc
 
 		friend class GCAutoEnter;
 		friend class GCAutoEnterPause;
-		void SetStackEnter(GCAutoEnter *enter, bool doCollectionWork=true);
+		bool ThreadEnter(GCAutoEnter *enter, bool doCollectionWork, bool tryEnter);
+		void ThreadLeave(bool doCollectionWork);
+		void ThreadEdgeWork();
 
 		GCAutoEnter *GetAutoEnter();
 
@@ -1877,12 +1879,18 @@ public:
 	 * Stack object that takes care of many things including defining stack
 	 * boundaries, doing low stack queued collections/ZCT reaps and stack cleaning
 	 */
-	class GCAutoEnter
+	class GCAutoEnter : public AbortUnwindObject
 	{
 	public:
-		GCAutoEnter(GC *gc);
+		enum EnterType {
+			kNormal=0,
+			kTryEnter=1
+		};
+		GCAutoEnter(GC *gc, EnterType type=kNormal);
 		~GCAutoEnter();
-		void Destroy() { m_gc = NULL; }
+		bool Entered();
+		void Destroy(bool doCollectionWork); 
+		virtual void Unwind();
 	private:
 		GC* m_gc;
         GC* m_prevgc;

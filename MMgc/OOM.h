@@ -121,8 +121,6 @@ namespace MMgc
 		void Destroy() { m_heap = NULL; }
 		GC* GetActiveGC() { return m_gc; }
 		GC* SetActiveGC(GC *gc) { GC* prev = m_gc; m_gc = gc; return prev; }
-		void SetCollectingGC(GC *gc){ m_collectingGC = gc; }
-		GC* GetCollectingGC(){return m_collectingGC;}
 
 		void UnwindAllObjects();
 		
@@ -146,7 +144,6 @@ namespace MMgc
 	private:
 		GCHeap *m_heap;
 		GC *m_gc;
-		GC *m_collectingGC;
 		AbortUnwindObject *m_abortUnwindList;
 		EnterFrame *m_previous;
 		bool m_suspended;

@@ -706,6 +706,11 @@ namespace MMgc
 		// use sentinel so we're skipped off the fast path in MarkItem
 		_size = kSentinelSize;
 	}
+
+	REALLY_INLINE bool GCAutoEnter::Entered()
+	{
+		return m_gc != NULL;
+	}
 }
 
 #endif /* __GC_inlines__ */
