@@ -754,8 +754,15 @@ namespace MMgc
 		};
 
 		// Core methods
-		void AddToFreeList(HeapBlock *block);
+
+		// Add a block to the free list, coalescing committed blocks with adjacent 
+		// committed blocks.  The coalesced block is marked dirty if makeDirty is true
+		// or if any of the blocks that were coalesced were dirty.
+		void AddToFreeList(HeapBlock *block, bool makeDirty=false);
+
+		// Add a block to the free list, prior to pointToInsert.
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
+
 		HeapBlock *AllocBlock(size_t size, bool& zero);
 		void FreeBlock(HeapBlock *block);
 		void FreeAll();
