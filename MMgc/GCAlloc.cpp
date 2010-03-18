@@ -221,19 +221,17 @@ namespace MMgc
 
 	GCAlloc::GCBlock* GCAlloc::CreateChunk(int flags)
 	{
-		// Get space in the bitmap.  Do this before allocating the actual block,
-		// since we might call GC::AllocBlock for more bitmap space and thus
-		// cause some incremental marking.
-		uint32_t* bits = NULL;
-
-		if(!m_bitsInPage) {
-			// Note, bits will leak if AllocBlock aborts due to OOM, but that isn't much of a problem
-			bits = m_gc->GetBits(m_numBitmapBytes, m_sizeClassIndex);
-		}
-
-		// Allocate a new block
-
+        // Too many definitions of kBlockSize, make sure they're at least in sync.
+        
 		GCAssert(uint32_t(kBlockSize) == GCHeap::kBlockSize);
+
+		// Get bitmap space; this may trigger OOM handling.
+
+		uint32_t* bits = m_bitsInPage ? NULL : m_gc->AllocBits(m_numBitmapBytes, m_sizeClassIndex);
+
+		// Allocate a new block; this may trigger OOM handling (though that
+        // won't affect the bitmap space, which is not GC'd individually).
+
 		GCBlock* b = (GCBlock*) m_gc->AllocBlock(1, GC::kGCAllocPage, /*zero*/true,  (flags&GC::kCanFail) != 0);
 
 		if (b) 
