@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 // Generated from ST_mmgc_threads.st
 // -*- mode: c -*-
 //
@@ -51,78 +53,78 @@ virtual void epilogue();
 private:
 static const char* ST_names[];
 void test0();
-	
+
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
     MMgc::FixedMalloc *fm;
-	bool waiting;
-	bool result;
-	bool isDead;
-	pthread_t pthread;
-	pthread_mutex_t pmutex;	
-	pthread_cond_t pcond;
+    bool waiting;
+    bool result;
+    bool isDead;
+    pthread_t pthread;
+    pthread_mutex_t pmutex;
+    pthread_cond_t pcond;
 
-	static void* slaveRunner(void *arg)
+    static void* slaveRunner(void *arg)
     {
-	    ((ST_mmgc_threads*)arg)->slaveRun();
-		return NULL;
+        ((ST_mmgc_threads*)arg)->slaveRun();
+        return NULL;
     }
 
-	void slaveRun()
-	{
-		wait();
+    void slaveRun()
+    {
+        wait();
         {
-	  MMGC_ENTER_VOID;
-		 MMGC_GCENTER(gc);	
-  	     result &= !isDead;
-	     gc->ReapZCT();
-  	     result &= !isDead;
-	     gc->Collect();
-		 result &= !isDead;
-		}
- 		kick();
-	}
-
-	void startSlave()
-	{
-	   pthread_create(&pthread, NULL, slaveRunner, this);
-	}
-	
-	void kick()
-    {
-		pthread_mutex_lock (&pmutex);
-		while(!waiting) {
-			pthread_mutex_unlock (&pmutex);
-			usleep(100);
-		    pthread_mutex_lock (&pmutex);
+      MMGC_ENTER_VOID;
+         MMGC_GCENTER(gc);
+         result &= !isDead;
+         gc->ReapZCT();
+         result &= !isDead;
+         gc->Collect();
+         result &= !isDead;
         }
-		pthread_cond_signal (&pcond);
-		while(waiting) {
-			pthread_mutex_unlock (&pmutex);
-			usleep(100);
-		    pthread_mutex_lock (&pmutex);
-        }
-		pthread_mutex_unlock (&pmutex);
+        kick();
     }
 
-	void wait()
-	{
-		pthread_mutex_lock (&pmutex);
-		GCAssert(waiting == false);
-		waiting = true;
-		pthread_cond_wait (&pcond, &pmutex);
-		waiting = false;
-		pthread_mutex_unlock (&pmutex);
-	}
-	
-	static void kickAndWait(void* arg)
-	{
-		ST_mmgc_threads* self = (ST_mmgc_threads*)arg;
-		self->kick();
-		self->wait();
-	}
-	
+    void startSlave()
+    {
+       pthread_create(&pthread, NULL, slaveRunner, this);
+    }
+
+    void kick()
+    {
+        pthread_mutex_lock (&pmutex);
+        while(!waiting) {
+            pthread_mutex_unlock (&pmutex);
+            usleep(100);
+            pthread_mutex_lock (&pmutex);
+        }
+        pthread_cond_signal (&pcond);
+        while(waiting) {
+            pthread_mutex_unlock (&pmutex);
+            usleep(100);
+            pthread_mutex_lock (&pmutex);
+        }
+        pthread_mutex_unlock (&pmutex);
+    }
+
+    void wait()
+    {
+        pthread_mutex_lock (&pmutex);
+        GCAssert(waiting == false);
+        waiting = true;
+        pthread_cond_wait (&pcond, &pmutex);
+        waiting = false;
+        pthread_mutex_unlock (&pmutex);
+    }
+
+    static void kickAndWait(void* arg)
+    {
+        ST_mmgc_threads* self = (ST_mmgc_threads*)arg;
+        self->kick();
+        self->wait();
+    }
+
 };
 ST_mmgc_threads::ST_mmgc_threads(AvmCore* core)
     : Selftest(core, "mmgc", "threads", ST_mmgc_threads::ST_names)
@@ -134,22 +136,22 @@ case 0: test0(); return;
 }
 }
 void ST_mmgc_threads::prologue() {
-	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
-	if (gc==NULL) {
-	    MMgc::GCHeap::Init();
-	    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
-	}
-	pthread_mutex_init(&pmutex, NULL);
-	pthread_cond_init(&pcond, NULL);
-	result = true;
+    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+    if (gc==NULL) {
+        MMgc::GCHeap::Init();
+        gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+    }
+    pthread_mutex_init(&pmutex, NULL);
+    pthread_cond_init(&pcond, NULL);
+    result = true;
     isDead = false;
-	waiting = false;
+    waiting = false;
 
 }
 void ST_mmgc_threads::epilogue() {
-	pthread_mutex_destroy(&pmutex);
-	pthread_cond_destroy(&pcond);
-	delete gc;
+    pthread_mutex_destroy(&pmutex);
+    pthread_cond_destroy(&pcond);
+    delete gc;
 
 }
 using namespace MMgc;
@@ -157,30 +159,30 @@ using namespace MMgc;
 class RCObjectNotifier : public RCObject
 {
 public:
-		RCObjectNotifier(bool *isDead) : isDead(isDead) {}
-		~RCObjectNotifier() { *isDead = true; isDead = NULL; }
-		bool *isDead;
+        RCObjectNotifier(bool *isDead) : isDead(isDead) {}
+        ~RCObjectNotifier() { *isDead = true; isDead = NULL; }
+        bool *isDead;
 };
 
 void ST_mmgc_threads::test0() {
-	   startSlave();
-	   MMGC_GCENTER(gc);
-   	   RCObjectNotifier *obj = new (gc) RCObjectNotifier(&isDead);
-	   {
-		  gc->CreateRootFromCurrentStack(kickAndWait, this);
+       startSlave();
+       MMGC_GCENTER(gc);
+       RCObjectNotifier *obj = new (gc) RCObjectNotifier(&isDead);
+       {
+          gc->CreateRootFromCurrentStack(kickAndWait, this);
        }
 
 verifyPass(result, "result", __FILE__, __LINE__);
 
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
-	   gc->ReapZCT();
+       gc->ReapZCT();
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
-	   gc->Collect();
+       gc->Collect();
 verifyPass(!isDead, "!isDead", __FILE__, __LINE__);
 
-	   pthread_join(pthread, NULL);
+       pthread_join(pthread, NULL);
 
-	   printf("Ignore this: %d\n", *obj->isDead);
+       printf("Ignore this: %d\n", *obj->isDead);
 
 }
 void create_mmgc_threads(AvmCore* core) { new ST_mmgc_threads(core); }

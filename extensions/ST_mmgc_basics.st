@@ -1,4 +1,5 @@
-// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -71,11 +72,11 @@ private:
     MMgc::FixedMalloc *fm;
 
 %%prologue
-	gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
-	if (gc==NULL) {
-	    MMgc::GCHeap::Init();
-	    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
-	}
+    gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+    if (gc==NULL) {
+        MMgc::GCHeap::Init();
+        gc=new MMgc::GC(MMgc::GCHeap::GetGCHeap(), MMgc::GC::kIncrementalGC);
+    }
 
 %%epilogue
 delete gc;
@@ -97,7 +98,7 @@ delete gc;
     int inuse=(int)gc->GetBytesInUse();
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
 //    AvmLog("bytes in use before %d after %d\n",inuse,(int)gc->GetBytesInUse());
-	%%verify gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize()
+    %%verify gc->GetBytesInUse()==inuse + sizeof(MyGCObject) + DebugSize()
     delete mygcobject;
 
 %%test collect
@@ -108,7 +109,7 @@ delete gc;
     %%verify (int)gc->GetBytesInUse()>inuse
     delete mygcobject;
 //    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
-    gc->Collect();      
+    gc->Collect();
 //    AvmLog("collect: inuse=%d current=%d\n",inuse,(int)gc->GetBytesInUse());
     %%verify (int)gc->GetBytesInUse()<=inuse
 
@@ -117,7 +118,7 @@ delete gc;
 
 %%test fixedAlloc
     MMgc::FixedAlloc *fa;
-	fa=new MMgc::FixedAlloc(2048,MMgc::GCHeap::GetGCHeap());                                        
+    fa=new MMgc::FixedAlloc(2048,MMgc::GCHeap::GetGCHeap());
     %%verify (int)fa->GetMaxAlloc()==0
     %%verify (int)fa->GetNumChunks()==0
     void *data1=fa->Alloc(2048);
@@ -133,7 +134,7 @@ delete gc;
     %%verify (int)fa->GetMaxAlloc()==1
     %%verify (int)fa->GetNumChunks()==1
     fa->Free(data2);
-    delete fa;								  
+    delete fa;
 
 %%test fixedMalloc
     fm=MMgc::FixedMalloc::GetFixedMalloc();
@@ -174,10 +175,10 @@ delete gc;
 //    %%verify (int)gh->GetTotalHeapSize()==128
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
     %%verify (int)gh->GetFreeHeapSize()==startfreeheap
-	   void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
+       void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
     %%verify (int)gh->GetTotalHeapSize()>startfreeheap
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-	   gh->FreeNoProfile(data);												   
+       gh->FreeNoProfile(data);
 
 %%test gcmethods
     MMGC_GCENTER(gc);
@@ -191,7 +192,7 @@ delete gc;
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
     void *obj=gc->Alloc(10024,0);
-	%%verify MMgc::GCLargeAlloc::IsLargeBlock(GetRealPointer(obj))==true
+    %%verify MMgc::GCLargeAlloc::IsLargeBlock(GetRealPointer(obj))==true
     %%verify MMgc::GCLargeAlloc::FindBeginning(obj)==GetRealPointer(obj)
     %%verify MMgc::GCLargeAlloc::IsFinalized(obj)==false
     MMgc::GCLargeAlloc::SetFinalize(obj);
@@ -217,20 +218,20 @@ delete gc;
 
 %%test finalizerDelete
     MMGC_GCENTER(gc);
-	new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
-	//delete m;	delete m; // this verifies we crash, it does	
-	gc->Collect(false);
-	%%verify true
+    new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
+    //delete m; delete m; // this verifies we crash, it does
+    gc->Collect(false);
+    %%verify true
     GCFinalizedObject *gcfo = new (gc) GCFinalizedObject();
     gcfo->~GCFinalizedObject();
     gcfo->~GCFinalizedObject(); // this used to be a deleteing dtor and would crash, not anymore
-			 
 
-									
+
+
 %%test nestedGCs
     GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
     MMGC_GCENTER(gc);
-    void *a = gc->Alloc(8);			       
+    void *a = gc->Alloc(8);
     {
         MMGC_GCENTER(gcb);
         a = gcb->Alloc(8);
@@ -242,29 +243,29 @@ delete gc;
     }
     a = gc->Alloc(8);
     // just fishing for asserts/hangs/crashes
-    %%verify true  
+    %%verify true
     delete gcb;
-    
-%%test collectDormantGC
-	{
-		GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
-		{
-			MMGC_GCENTER(gcb);
-			gcb->Alloc(8);
-		}
-		
-		// this will cause a Collection in gcb
-		GCHeap::SignalExternalFreeMemory();
-		delete gcb;
 
-		// just fishing for asserts/hangs/crashes
-		%%verify true  
+%%test collectDormantGC
+    {
+        GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
+        {
+            MMGC_GCENTER(gcb);
+            gcb->Alloc(8);
+        }
+
+        // this will cause a Collection in gcb
+        GCHeap::SignalExternalFreeMemory();
+        delete gcb;
+
+        // just fishing for asserts/hangs/crashes
+        %%verify true
     }
 
 %%test regression_551169
     {
         GC *testGC = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
-        { 
+        {
             MMGC_GCENTER(testGC);
             testGC->StartIncrementalMark();
             // self test for tricky GCRoot deletion logic

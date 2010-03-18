@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -49,135 +51,135 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	DictionaryClass::DictionaryClass(VTable *vtable)
-	: ClassClosure(vtable)
-	{		
-		createVanillaPrototype();
-		vtable->traits->itraits->isDictionary = true;
-	}
+    DictionaryClass::DictionaryClass(VTable *vtable)
+    : ClassClosure(vtable)
+    {
+        createVanillaPrototype();
+        vtable->traits->itraits->isDictionary = true;
+    }
 
-	ScriptObject *DictionaryClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
-	{
- 		GCAssert(ivtable->traits->isDictionary == true);
-		return new (core()->GetGC(), ivtable->getExtraSize()) DictionaryObject(ivtable, prototypePtr());
-	}
-	
-	DictionaryObject::DictionaryObject(VTable *vtable, ScriptObject *delegate)
-		: ScriptObject(vtable, delegate)
-	{
-		GCAssert(vtable->traits->isDictionary == true);
-	}
+    ScriptObject *DictionaryClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
+    {
+        GCAssert(ivtable->traits->isDictionary == true);
+        return new (core()->GetGC(), ivtable->getExtraSize()) DictionaryObject(ivtable, prototypePtr());
+    }
 
-	void DictionaryObject::init(bool weakKeys)
-	{
-		GCAssert(vtable->traits->isDictionary == true);
-		MMgc::GC* gc = this->gc();
-		
-		HeapHashtable* ht = weakKeys ? new (gc) WeakKeyHashtable(gc) 
-									: new (gc) HeapHashtable(gc);
+    DictionaryObject::DictionaryObject(VTable *vtable, ScriptObject *delegate)
+        : ScriptObject(vtable, delegate)
+    {
+        GCAssert(vtable->traits->isDictionary == true);
+    }
 
-		//store pointer of newly created hashtable, encapsulated with writebarrier, 
-		//at the hashtable offset address of the corresponding traits
-		union {
-			uint8_t* p;
-			HeapHashtable** hht;
-		};
-		p = (uint8_t*)this + vtable->traits->getHashtableOffset();
-		WB(gc, this, hht, ht);
-	}
+    void DictionaryObject::init(bool weakKeys)
+    {
+        GCAssert(vtable->traits->isDictionary == true);
+        MMgc::GC* gc = this->gc();
 
-	Atom FASTCALL DictionaryObject::getKeyFromObject(Atom key) const
-	{
-		AvmAssert(AvmCore::isObject(key));
-		ScriptObject* obj = AvmCore::atomToScriptObject(key);
-		AvmAssert(Traits::getBuiltinType(obj->traits()) != BUILTIN_qName);
-		AvmAssert(MMgc::GC::Size(obj) >= sizeof(ScriptObject));
-		(void)obj;
+        HeapHashtable* ht = weakKeys ? new (gc) WeakKeyHashtable(gc)
+                                    : new (gc) HeapHashtable(gc);
 
-		// This commented-out code probably pertains to Bugzilla 507699:
-		// "Dictionary key of Xml type are not matching."
-		//
-		// FIXME: this doesn't work, need to convert back to an XMLObject
-		// on the way out or intern XMLObject's somehow
-		//if(AvmCore::isXML(key))
-		//	key = AvmCore::genericObjectToAtom(AvmCore::atomToXML(key));
-		
-		return key;
-	}
+        //store pointer of newly created hashtable, encapsulated with writebarrier,
+        //at the hashtable offset address of the corresponding traits
+        union {
+            uint8_t* p;
+            HeapHashtable** hht;
+        };
+        p = (uint8_t*)this + vtable->traits->getHashtableOffset();
+        WB(gc, this, hht, ht);
+    }
 
-	Atom DictionaryObject::getAtomProperty(Atom key) const
-	{
-		if (AvmCore::isObject(key)) 
-		{
-			return getHeapHashtable()->get(getKeyFromObject(key));
-		} 
+    Atom FASTCALL DictionaryObject::getKeyFromObject(Atom key) const
+    {
+        AvmAssert(AvmCore::isObject(key));
+        ScriptObject* obj = AvmCore::atomToScriptObject(key);
+        AvmAssert(Traits::getBuiltinType(obj->traits()) != BUILTIN_qName);
+        AvmAssert(MMgc::GC::Size(obj) >= sizeof(ScriptObject));
+        (void)obj;
 
-		return ScriptObject::getAtomProperty(key);
-	}
+        // This commented-out code probably pertains to Bugzilla 507699:
+        // "Dictionary key of Xml type are not matching."
+        //
+        // FIXME: this doesn't work, need to convert back to an XMLObject
+        // on the way out or intern XMLObject's somehow
+        //if(AvmCore::isXML(key))
+        //  key = AvmCore::genericObjectToAtom(AvmCore::atomToXML(key));
 
-	bool DictionaryObject::hasAtomProperty(Atom key) const
-	{
-		if (AvmCore::isObject(key)) 
-		{
-			return getHeapHashtable()->contains(getKeyFromObject(key));
-		}
+        return key;
+    }
 
-		return ScriptObject::hasAtomProperty(key);
-	}
+    Atom DictionaryObject::getAtomProperty(Atom key) const
+    {
+        if (AvmCore::isObject(key))
+        {
+            return getHeapHashtable()->get(getKeyFromObject(key));
+        }
 
-	bool DictionaryObject::deleteAtomProperty(Atom key)
-	{
-		if (AvmCore::isObject(key)) 
-		{
-			getHeapHashtable()->remove(getKeyFromObject(key));
-			return true;
-		}
+        return ScriptObject::getAtomProperty(key);
+    }
 
-		return ScriptObject::deleteAtomProperty(key);
-	}
+    bool DictionaryObject::hasAtomProperty(Atom key) const
+    {
+        if (AvmCore::isObject(key))
+        {
+            return getHeapHashtable()->contains(getKeyFromObject(key));
+        }
 
-	void DictionaryObject::setAtomProperty(Atom key, Atom value)
-	{
-		if (AvmCore::isObject(key)) 
-		{
-			getHeapHashtable()->add(getKeyFromObject(key), value);
-			return;
-		}
-		
-		ScriptObject::setAtomProperty(key, value);
-	}
+        return ScriptObject::hasAtomProperty(key);
+    }
 
-	Atom DictionaryObject::nextName(int index)
-	{
-		Atom k = ScriptObject::nextName(index);
+    bool DictionaryObject::deleteAtomProperty(Atom key)
+    {
+        if (AvmCore::isObject(key))
+        {
+            getHeapHashtable()->remove(getKeyFromObject(key));
+            return true;
+        }
 
-		if (AvmCore::isGenericObject(k) && getHeapHashtable()->weakKeys()) 
-		{
-			GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(k);
-			union {
-				GCObject* key_o;
-				ScriptObject* key;
-			};
-			key_o = ref->get();
-			if (key) 
-			{
-				AvmAssert(key->traits() != NULL);
-				return key->atom();
-			}
+        return ScriptObject::deleteAtomProperty(key);
+    }
 
-			return undefinedAtom;
-		}
+    void DictionaryObject::setAtomProperty(Atom key, Atom value)
+    {
+        if (AvmCore::isObject(key))
+        {
+            getHeapHashtable()->add(getKeyFromObject(key), value);
+            return;
+        }
 
-		return k;
-	}
+        ScriptObject::setAtomProperty(key, value);
+    }
 
-	int DictionaryObject::nextNameIndex(int index)
-	{
-		AvmAssert(index >= 0);
+    Atom DictionaryObject::nextName(int index)
+    {
+        Atom k = ScriptObject::nextName(index);
 
-		// hht could be null if you break in debugger in a subclasses constructor before super
-		// has been called -- let's do it in all builds, it's better than crashing.
-		HeapHashtable* hht = getHeapHashtable();
+        if (AvmCore::isGenericObject(k) && getHeapHashtable()->weakKeys())
+        {
+            GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(k);
+            union {
+                GCObject* key_o;
+                ScriptObject* key;
+            };
+            key_o = ref->get();
+            if (key)
+            {
+                AvmAssert(key->traits() != NULL);
+                return key->atom();
+            }
+
+            return undefinedAtom;
+        }
+
+        return k;
+    }
+
+    int DictionaryObject::nextNameIndex(int index)
+    {
+        AvmAssert(index >= 0);
+
+        // hht could be null if you break in debugger in a subclasses constructor before super
+        // has been called -- let's do it in all builds, it's better than crashing.
+        HeapHashtable* hht = getHeapHashtable();
         return hht ? hht->next(index) : 0;
-	}
-}	
+    }
+}

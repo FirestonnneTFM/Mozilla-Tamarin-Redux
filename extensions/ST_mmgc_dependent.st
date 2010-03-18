@@ -1,4 +1,5 @@
-// -*- mode: c -*-
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -41,7 +42,7 @@
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
 // gets to run after the first part of the large object has been popped off the mark stack
 // but before the rest has been handled.
-									   
+
 %%component mmgc
 %%category  dependent
 
@@ -92,7 +93,7 @@ private:
                 maxheap = heapsize;
         }
     }
-    
+
     // This is tricky to get right but for this test the 16MB blocks will dominate
     // completely.  So assume that heap size must stay below L*2*16MB for the
     // L that applies at 32MB.

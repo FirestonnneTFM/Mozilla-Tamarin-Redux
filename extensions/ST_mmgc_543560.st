@@ -1,4 +1,5 @@
-// -*- mode: c -*-
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -41,7 +42,7 @@
 // of how we perform large-object splitting.  The setup is that user code that deletes the object
 // gets to run after the first part of the large object has been popped off the mark stack
 // but before the rest has been handled.
-									   
+
 %%component mmgc
 %%category bugzilla_543560
 %%ifdef     AVMPLUS_WIN32
@@ -74,7 +75,7 @@ struct BigThing : public MMgc::GCFinalizedObject
 
     virtual ~BigThing()
     {
-		//printf("~BigThing: %u 0x%08X 0x%08X\n", m_serial, this, this + 1);
+        //printf("~BigThing: %u 0x%08X 0x%08X\n", m_serial, this, this + 1);
     }
     DWB(BigThing*) m_next;
     DWB(BigThing*) m_prev;
@@ -146,7 +147,7 @@ private:
     gc->Collect();
 
     for (int j = 0; j < 100000; ++j) {
-		//printf("j: %d\n", j);
+        //printf("j: %d\n", j);
         for (int i = 0; i < 500; ++i) {
             new (gc) SmallThing();
             if ((theRoot->m_bigThings) && (MMgc::GC::GetMark(theRoot->m_bigThings))) {
@@ -158,9 +159,9 @@ private:
                 MMgc::GCHeap::GetGCHeap()->Decommit();
             }
         }
-        
+
     }
     delete theRoot;
-    
+
     // Will crash if it fails so the %%verify is just token
     %%verify true
