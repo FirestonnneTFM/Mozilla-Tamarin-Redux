@@ -114,10 +114,6 @@ as3/RuntimeErrors/Error1034TypeCoercionFailed , .*3264-diff , skip , both produc
 ecma3/Math/e15_8_2_16 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_18 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
-as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType:.*, .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521879
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch:.*, .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521879
-as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch:.*, .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521879
-
 
 ####################
 # Number
