@@ -996,7 +996,7 @@ namespace MMgc
 		allocsTable[kRCObject|kContainsPointers] = containsPointersRCAllocs;
 		allocsTable[0] = noPointersAllocs;
 
-		pageMap = (unsigned char*) heapAlloc(1);
+		pageMap = (unsigned char*) heap->Alloc(1);  // Expansions use heap->AllocNoOOM, can't use heapAlloc here
 
 		VMPI_memset(m_bitsFreelists, 0, sizeof(uint32_t*) * kNumSizeClasses);
 		m_bitsNext = (uint32_t*)heapAlloc(1);
@@ -1072,7 +1072,7 @@ namespace MMgc
 			pageList = next;
 		}
 
-		heapFree(pageMap);
+		heap->Free(pageMap);    // Was allocated with heap->Alloc and heap->AllocNoOOM, can't use heapFree here
 
 		delete emptyWeakRefRoot;
 		GCAssert(!m_roots);
@@ -1088,7 +1088,7 @@ namespace MMgc
 		}
 		
 		zct.Destroy();
-			
+        
 		GCAssertMsg(GetNumBlocks() == 0, "GC accounting off");
 
 		if(stackEnter != NULL) {
@@ -1759,8 +1759,10 @@ namespace MMgc
 
 	void GC::FreeBlock(void *ptr, uint32_t size)
 	{
-		heapFree(ptr, size, false);
+        // Bugzilla 551833:  Unmark first so that any OOM or other action triggered
+        // by heapFree does not examine bits representing pages that are gone.
 		UnmarkGCPages(ptr, size);
+		heapFree(ptr, size, false);
 	}
 
 	REALLY_INLINE void GC::SetPageMapValue(uintptr_t addr, int val)
@@ -1825,6 +1827,19 @@ namespace MMgc
 		markerActive--;
 	}
 
+    // This must not trigger OOM handling.  It is /possible/ to restructure the
+    // function to allow the use of heapAlloc() and heapFree() but the contortions
+    // and resulting fragility really do not seem worth it.  (Consider that
+    // heapAlloc can trigger OOM which can invoke GC which can run finalizers
+    // which can perform allocation that can cause MarkGCPages to be reentered.)
+    //
+    // The use of non-OOM functions may of course lead to worse OOM behavior, but
+    // if the allocation of large page maps cause OOM events as a result of
+    // increased fragmentation then the proper fix would be to restructure the page
+    // map to be less monolithic.
+    //
+    // (See Bugzilla 551833.)
+
 	void GC::MarkGCPages(void *item, uint32_t numPages, int to)
 	{
 		uintptr_t addr = (uintptr_t)item;
@@ -1854,7 +1869,7 @@ namespace MMgc
 
         uint32_t numPagesNeeded = (uint32_t)(((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1);
 		if(numPagesNeeded > heap->Size(pageMap)) {
-			dst = (unsigned char*)heapAlloc(numPagesNeeded);
+			dst = (unsigned char*)heap->AllocNoOOM(numPagesNeeded);
 		}
 
 		if(shiftAmount || dst != pageMap) {
@@ -1863,7 +1878,7 @@ namespace MMgc
 				VMPI_memset(dst, 0, shiftAmount);
 			}
 			if(dst != pageMap) {
-				heapFree(pageMap);
+				heap->FreeNoOOM(pageMap);
 				pageMap = dst;
 			}
 		}
@@ -3406,7 +3421,7 @@ namespace MMgc
 		}
 	}
 
-	uint32_t *GC::GetBits(int numBytes, int sizeClass)
+	uint32_t *GC::AllocBits(int numBytes, int sizeClass)
 	{
 		uint32_t *bits;
 
@@ -3425,9 +3440,13 @@ namespace MMgc
 			return bits;
 		}
 
-		if(!m_bitsNext)
+		if(!m_bitsNext) {
+            // Bugzilla 551833: It's OK to use heapAlloc here (as opposed to
+            // heap->AllocNoOOM, say) because the caller knows AllocBits()
+            // can trigger OOM.
 			m_bitsNext = (uint32_t*)heapAlloc(1);
-
+        }
+        
 		int leftOver = GCHeap::kBlockSize - ((uintptr_t)m_bitsNext & 0xfff);
 		if(leftOver >= numBytes) {
 			bits = m_bitsNext;
@@ -3448,7 +3467,7 @@ namespace MMgc
 			}
 			m_bitsNext = 0;
 			// recurse rather than duplicating code
-			return GetBits(numBytes, sizeClass);
+			return AllocBits(numBytes, sizeClass);
 		}
 		return bits;
 	}
