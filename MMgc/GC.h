@@ -1397,7 +1397,7 @@ namespace MMgc
 
 		// heapAlloc is like heap->Alloc except that it also calls policy.signalBlockAllocation
 		// if the allocation succeeded.
-		void *heapAlloc(size_t size, int flags=GCHeap::kExpand|GCHeap::kZero|GCHeap::kProfile);
+		void *heapAlloc(size_t size, int flags=GCHeap::flags_Alloc);
 
 		// heapFree is like heap->Free except that it also calls policy.signalBlockDeallocation.
 		void heapFree(void *ptr, size_t siz=0, bool profile=true);
@@ -1429,7 +1429,7 @@ namespace MMgc
 		// FIXME: only used for FixedAlloc, GCAlloc sized dynamically
 		const static int kPageUsableSpace = 3936;
 
-		uint32_t *GetBits(int numBytes, int sizeClass);
+		uint32_t *AllocBits(int numBytes, int sizeClass);
 
 		void FreeBits(uint32_t *bits, int sizeClass);
 
