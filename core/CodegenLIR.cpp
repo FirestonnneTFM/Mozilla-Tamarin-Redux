@@ -672,10 +672,8 @@ namespace avmplus
             CodeMgr *mgr = mmfx_new( CodeMgr() );
             pool->codeMgr = mgr;
 #ifdef NJ_VERBOSE
-            if (pool->isVerbose(VB_jit)) {
+            if (pool->isVerbose(VB_jit))
                 mgr->log.lcbits = pool->verbose_vb;
-                mgr->labels.add(pool->core, sizeof(AvmCore), 0, "core");
-            }
 #endif
         }
         return pool->codeMgr;
@@ -1231,8 +1229,8 @@ namespace avmplus
         // create params for saved regs -- processor specific
         for (int i=0; i < NumSavedRegs; i++) {
             LIns *p = lirout->insParam(i, 1); (void) p;
-            verbose_only(if (lirbuf->names)
-                lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
+            verbose_only(if (lirbuf->printer)
+                lirbuf->printer->lirNameMap->addName(p, regNames[Assembler::savedRegs[i]]);)
         }
     }
 
@@ -1590,8 +1588,9 @@ namespace avmplus
             vbWriter = 0;
             vbNames = 0;
             if (verbose()) {
-                vbNames = new (*lir_alloc) LirNameMap(*lir_alloc, &pool->codeMgr->labels);
-                prolog_buf->names = vbNames;
+                vbNames = new (*lir_alloc) LInsPrinter(*lir_alloc);
+                vbNames->addrNameMap->addAddrRange(pool->core, sizeof(AvmCore), 0, "core");
+                prolog_buf->printer = vbNames;
                 lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, vbNames, &log, "PROLOG");
             }
         )
@@ -1643,7 +1642,7 @@ namespace avmplus
         // allocate room for a MethodFrame structure
         methodFrame = InsAlloc(sizeof(MethodFrame));
         verbose_only( if (vbNames) {
-            vbNames->addName(methodFrame, "methodFrame");
+            vbNames->lirNameMap->addName(methodFrame, "methodFrame");
         })
 
         coreAddr = InsConstPtr(core);
@@ -1671,12 +1670,12 @@ namespace avmplus
         }
         varTracker->init(vars, tags);
 
-        verbose_only( if (prolog_buf->names) {
-            prolog_buf->names->addName(env_param, "env");
-            prolog_buf->names->addName(argc_param, "argc");
-            prolog_buf->names->addName(ap_param, "ap");
-            prolog_buf->names->addName(vars, "vars");
-            prolog_buf->names->addName(tags, "tags");
+        verbose_only( if (prolog_buf->printer) {
+            prolog_buf->printer->lirNameMap->addName(env_param, "env");
+            prolog_buf->printer->lirNameMap->addName(argc_param, "argc");
+            prolog_buf->printer->lirNameMap->addName(ap_param, "ap");
+            prolog_buf->printer->lirNameMap->addName(vars, "vars");
+            prolog_buf->printer->lirNameMap->addName(tags, "tags");
         })
 
         // stack overflow check - use methodFrame address as comparison
@@ -1698,7 +1697,7 @@ namespace avmplus
             // note that this now updates traits for values on the scopechain as well as locals
             varTraits = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(Traits*));
             verbose_only( if (vbNames) {
-                vbNames->addName(varTraits, "varTraits");
+                vbNames->lirNameMap->addName(varTraits, "varTraits");
             })
             debug_only( checker->init(vars,varTraits); )
         }
@@ -1714,8 +1713,8 @@ namespace avmplus
             _save_eip = InsAlloc(sizeof(intptr_t));
             _ef       = InsAlloc(sizeof(ExceptionFrame));
             verbose_only( if (vbNames) {
-                vbNames->addName(_save_eip, "_save_eip");
-                vbNames->addName(_ef, "_ef");
+                vbNames->lirNameMap->addName(_save_eip, "_save_eip");
+                vbNames->lirNameMap->addName(_ef, "_ef");
             })
         } else {
             _save_eip = NULL;
@@ -1727,7 +1726,7 @@ namespace avmplus
             // Allocate space for the call stack
             csn = InsAlloc(sizeof(CallStackNode));
             verbose_only( if (vbNames) {
-                vbNames->addName(csn, "csn");
+                vbNames->lirNameMap->addName(csn, "csn");
             })
         }
         #endif
@@ -1854,7 +1853,7 @@ namespace avmplus
         verbose_only(
             if (verbose()) {
                 AvmAssert(vbNames != NULL);
-                body_buf->names = vbNames;
+                body_buf->printer = vbNames;
                 body = vbWriter = new (*alloc1) VerboseWriter(*alloc1, body, vbNames, &log);
             }
         )
@@ -5300,7 +5299,7 @@ namespace avmplus
         {
             prolog->env_scope = scope = prolog->insLoad(LIR_ldp, env_param, offsetof(MethodEnv, _scope), ACC_READONLY);
             verbose_only( if (vbNames) {
-                vbNames->addName(scope, "env_scope");
+                vbNames->lirNameMap->addName(scope, "env_scope");
             })
             verbose_only( if (vbWriter) { vbWriter->flush(); } )
         }
@@ -5315,7 +5314,7 @@ namespace avmplus
             LIns* scope = loadEnvScope();
             prolog->env_vtable = vtable = prolog->insLoad(LIR_ldp, scope, offsetof(ScopeChain, _vtable), ACC_READONLY);
             verbose_only( if (vbNames) {
-                vbNames->addName(vtable, "env_vtable");
+                vbNames->lirNameMap->addName(vtable, "env_vtable");
             })
             verbose_only( if (vbWriter) { vbWriter->flush(); } )
         }
@@ -5330,7 +5329,7 @@ namespace avmplus
             LIns* scope = loadEnvScope();
             prolog->env_abcenv = abcenv = prolog->insLoad(LIR_ldp, scope, offsetof(ScopeChain, _abcEnv), ACC_READONLY);
             verbose_only( if (vbNames) {
-                vbNames->addName(abcenv, "env_abcenv");
+                vbNames->lirNameMap->addName(abcenv, "env_abcenv");
             })
             verbose_only( if (vbWriter) { vbWriter->flush(); } )
         }
@@ -5345,7 +5344,7 @@ namespace avmplus
             LIns* abcenv = loadEnvAbcEnv();
             prolog->env_domainenv = domainenv = prolog->insLoad(LIR_ldp, abcenv, offsetof(AbcEnv, m_domainEnv), ACC_READONLY);
             verbose_only( if (vbNames) {
-                vbNames->addName(domainenv, "env_domainenv");
+                vbNames->lirNameMap->addName(domainenv, "env_domainenv");
             })
             verbose_only( if (vbWriter) { vbWriter->flush(); } )
         }
@@ -5360,7 +5359,7 @@ namespace avmplus
             LIns* vtable = loadEnvVTable();
             prolog->env_toplevel = toplevel = prolog->insLoad(LIR_ldp, vtable, offsetof(VTable, _toplevel), ACC_READONLY);
             verbose_only( if (vbNames) {
-                vbNames->addName(toplevel, "env_toplevel");
+                vbNames->lirNameMap->addName(toplevel, "env_toplevel");
             })
             verbose_only( if (vbWriter) { vbWriter->flush(); } )
         }
@@ -5446,7 +5445,7 @@ namespace avmplus
 
 #ifdef NJ_VERBOSE
         if (vbNames && label.name)
-            vbNames->addName(label.labelIns, label.name);
+            vbNames->lirNameMap->addName(label.labelIns, label.name);
 #endif
     }
 
@@ -5577,11 +5576,7 @@ namespace avmplus
         return lirout->insAlloc(size >= 4 ? size : 4);
     }
 
-    CodeMgr::CodeMgr() : codeAlloc()
-#ifdef NJ_VERBOSE
-        , labels(allocator, &log)
-#endif
-        , bindingCaches(NULL)
+    CodeMgr::CodeMgr() : codeAlloc(), bindingCaches(NULL)
     {
         verbose_only( log.lcbits = 0; )
     }
@@ -5798,8 +5793,11 @@ namespace avmplus
     void CodegenLIR::deadvars_kill(nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
             nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
     {
-        verbose_only(LirNameMap *names = frag->lirbuf->names;)
-        verbose_only(bool verbose = names && pool->isVerbose(VB_jit); )
+#ifdef NJ_VERBOSE
+        LInsPrinter *printer = frag->lirbuf->printer;
+        bool verbose = printer && pool->isVerbose(VB_jit);
+        InsBuf b;
+#endif
         LIns *catcher = this->catch_label.labelIns;
         varlivein.reset();
         taglivein.reset();
@@ -5823,7 +5821,7 @@ namespace avmplus
                         int d = i->disp() >> 3;
                         if (!varlivein.get(d)) {
                             verbose_only(if (verbose)
-                                AvmLog("- %s\n", names->formatIns(i));)
+                                AvmLog("- %s\n", printer->formatIns(&b, i));)
                             // erase the store by rewriting it as a skip
                             LIns* prevIns = findPrevIns(i);
                             if (prologLastIns == i)
@@ -5839,7 +5837,7 @@ namespace avmplus
                         int d = i->disp() / TAGSIZE;
                         if (!taglivein.get(d)) {
                             verbose_only(if (verbose)
-                                AvmLog("- %s\n", names->formatIns(i));)
+                                AvmLog("- %s\n", printer->formatIns(&b, i));)
                             // erase the store by rewriting it as a skip
                             LIns* prevIns = findPrevIns(i);
                             if (prologLastIns == i)
@@ -5927,7 +5925,7 @@ namespace avmplus
                     break;
             }
             verbose_only(if (verbose) {
-                AvmLog("  %s\n", names->formatIns(i));
+                AvmLog("  %s\n", printer->formatIns(&b, i));
             })
         }
         // if we have not removed all stores to the tags array, mark it live
@@ -5991,7 +5989,7 @@ namespace avmplus
     {
         SeqReader seqReader(frag->lastIns, prologLastIns);
         Allocator lister_alloc;
-        ReverseLister lister(&seqReader, lister_alloc, frag->lirbuf->names, &log, title);
+        ReverseLister lister(&seqReader, lister_alloc, frag->lirbuf->printer, &log, title);
         for (LIns* ins = lister.read(); !ins->isop(LIR_start); ins = lister.read())
         {}
         lister.finish();
@@ -6254,10 +6252,10 @@ namespace nanojit
     }
 
     #ifdef NJ_VERBOSE
-    void LirNameMap::formatGuard(LIns*, char*) {
+    void LInsPrinter::formatGuard(InsBuf*, LIns*) {
         AvmAssert(false);
     }
-    void LirNameMap::formatGuardXov(LIns*, char*) {
+    void LInsPrinter::formatGuardXov(InsBuf*, LIns*) {
         AvmAssert(false);
     }
     #endif
@@ -6419,8 +6417,9 @@ namespace avmplus
                 core->console <<
                     " required=" << ms->requiredParamCount() <<
                     " optional=" << (ms->param_count() - ms->requiredParamCount()) << "\n";
-                lirbuf->names = new (*lir_alloc) LirNameMap(*lir_alloc, &codeMgr->labels);
-                lirout = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->names, &codeMgr->log);
+                lirbuf->printer = new (*lir_alloc) LInsPrinter(*lir_alloc);
+                lirbuf->printer->addrNameMap->addAddrRange(pool->core, sizeof(AvmCore), 0, "core");
+                lirout = new (*alloc1) VerboseWriter(*alloc1, lirout, lirbuf->printer, &codeMgr->log);
             }
         )
 #if defined(NANOJIT_ARM)

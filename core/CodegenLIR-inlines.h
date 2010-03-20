@@ -229,8 +229,8 @@ REALLY_INLINE LIns* LirHelper::param(int id, const char *name)
 {
     LIns* param = lirout->insParam(id, 0);
 #ifdef NJ_VERBOSE
-    if (frag->lirbuf->names)
-        frag->lirbuf->names->addName(param, name);
+    if (frag->lirbuf->printer)
+        frag->lirbuf->printer->lirNameMap->addName(param, name);
 #else
     (void)name;
 #endif
