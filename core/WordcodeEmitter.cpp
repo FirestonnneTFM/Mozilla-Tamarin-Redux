@@ -344,14 +344,23 @@ namespace avmplus
 		return (WordOpcode)opcodeInfo[opcode].wordCode;
 	}
 
-    void WordcodeEmitter::writePrologue(const FrameState*, const byte *pc)
+    void WordcodeEmitter::writePrologue(const FrameState* state, const byte *pc)
 	{
         #if defined DEBUGGER
 		if (core->debugger()) emitOp0(pc, WOP_debugenter);
 		#else
 		(void)pc;
         #endif
-        computeExceptionFixups();
+		const byte* tryFrom = state->verifier->tryFrom;
+		const byte* tryTo = state->verifier->tryTo;
+		const byte* code_end = code_start + state->verifier->code_length;
+		if (tryFrom >= code_start && tryTo <= code_end) {
+		    // we're in the same abc code that contains try blocks
+	        computeExceptionFixups();
+		} else {
+		    // we're in vm-generated abc code preceding an OP_abs_jump,
+		    // or the method doesn't have try blocks.
+		}
 	}
 
 	void WordcodeEmitter::writeEpilogue(const FrameState*)
