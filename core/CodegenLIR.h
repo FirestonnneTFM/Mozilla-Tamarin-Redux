@@ -135,9 +135,6 @@ namespace avmplus
         CodeAlloc   codeAlloc;  // allocator for code memory
         LogControl  log;        // controller for verbose output
         Allocator   allocator;  // data with same lifetime of this CodeMgr
-    #ifdef NJ_VERBOSE
-        LabelMap    labels;     // pretty names for addresses in verbose code listing
-    #endif
         BindingCache* bindingCaches;    // head of linked list of all BindingCaches allocated by this codeMgr
                                         // (only for flushing... lifetime is still managed by codeAlloc)
         CodeMgr();
@@ -419,7 +416,7 @@ namespace avmplus
         LIns* prologLastIns;
         HashMap<int, CodegenLabel*> *blockLabels;
         verbose_only(VerboseWriter *vbWriter;)
-        verbose_only(LirNameMap* vbNames;)
+        verbose_only(LInsPrinter* vbNames;)
 #ifdef DEBUGGER
         bool haveDebugger;
 #else
