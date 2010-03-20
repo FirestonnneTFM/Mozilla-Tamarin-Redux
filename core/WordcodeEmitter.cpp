@@ -161,14 +161,8 @@ namespace avmplus
 			label_info* l = labels;
 			while (l != NULL && l->old_offset != old_offset)
 				l = l->next;
-			// See https://bugzilla.mozilla.org/show_bug.cgi?id=481171.  Arguably this is a verification
-			// error, but work around the lack of a verification error here.
-			if (l == NULL) {
-				if (avm_toplevel != NULL)
-					core->throwErrorV(avm_toplevel->verifyErrorClass(), kInvalidBranchTargetError);
-				else
-					core->throwAtom(core->newStringLatin1("word code translator: missing LABEL for backward branch")->atom());
-			}
+			// See https://bugzilla.mozilla.org/show_bug.cgi?id=481171.  Verifier should have caught the invalid target.
+			AvmAssert(l != NULL);
 			*dest++ = l->new_offset - base_offset;
 		}
 		else
@@ -368,8 +362,10 @@ namespace avmplus
 		epilogue();
 	}
 
-	void WordcodeEmitter::writeBlockStart(const FrameState*)
-	{}
+	void WordcodeEmitter::writeBlockStart(const FrameState* state)
+	{
+		emitLabel(state->verifier->code_pos + state->pc);
+	}
 
 	void WordcodeEmitter::writeOpcodeVerified(const FrameState*, const byte*, AbcOpcode)
 	{}
@@ -545,7 +541,7 @@ namespace avmplus
 		    // do nothing, all values on stack are atoms
 		    break;
 		case OP_label:
-		    emitLabel(pc);
+			// do nothing, we generate implicit and explicit labels in writeBlockStart()
 			break;
 		case OP_pushfalse:
 		case OP_pushtrue:
