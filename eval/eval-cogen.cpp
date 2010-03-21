@@ -228,7 +228,7 @@ namespace avmplus
 		{
 			// OPTIMIZEME: don't need to register backpatches for branches to known labels.
 			code.emitU8((uint8_t)opcode);
-			code.emitS24(0);
+			code.emitS24(3);
 			stackMovement(opcode);
 			label->backpatches = ALLOC(Seq<uint32_t>, (code.size() - 3, label->backpatches));
 		}
@@ -240,6 +240,13 @@ namespace avmplus
 			code.emitU8((uint8_t)OP_label);
 		}
 		
+		// The location to be patched must contain a signed adjustment that will be
+		// added to the offset value.  For regular jump instructions this should be '3',
+		// because the jump is relative to the end of the instruction - 3 bytes after
+		// the address of the offset field.  For lookupswitch it is a value that depends
+		// on the location within the lookupswitch instruction of the offset word,
+		// because the jump is relative to the start of the instruction.
+		
 		void Cogen::fixupBackpatches(uint8_t* b) const
 		{
 			for ( Seq<Label*>* labels = this->labels.get() ; labels != NULL ; labels = labels->tl ) {
@@ -248,11 +255,8 @@ namespace avmplus
 				AvmAssert(addr != ~0U);
 				for ( Seq<uint32_t>* backpatches = labels->hd->backpatches ; backpatches != NULL ; backpatches = backpatches->tl ) {
 					uint32_t loc = backpatches->hd;
-					// '3' is right for all jump instructions, but not for lookupswitch.
-					// It's easy to generalize this for lookupswitch later by storing
-					// the adjustment in the location to be patched, and then reading 
-					// it from there, or by storing the adjustment with the backpatches.
-					int32_t offset = (int32_t)(addr - (loc + 3));
+					int32_t adjustment = readS24(b + loc);
+					int32_t offset = (int32_t)(addr - (loc + adjustment));
 					backward = backward || offset < 0;
 					emitS24(b + loc, offset);
 				}
@@ -284,48 +288,24 @@ namespace avmplus
 			return abc->addQName(ns, abc->addString(((SimpleName*)t->name)->name));
 		}
 	
-		/*
+		void Cogen::I_lookupswitch(Label* default_label, Label** case_labels, uint32_t ncases) 
+		{
+			AvmAssert( ncases > 0 );
+			AvmAssert( default_label != NULL );
+			// AvmAssert( forall c in case_labels c != NULL );
 
-		// Here, case_labels must be an array with a "length" property
-		// that denotes the number of case labels in the array.
-		// length cannot be 0.
-		//
-		// Either default_label is undefined and all the elements of
-		// case_labels are also undefined, or default_label is a label
-		// structure, and all the elements of case_labels between 0
-		// and length-1 are label structures as well.
-		//
-		// In the former case, labels are created for the
-		// default_label and for all the case_labels; the array is
-		// updated; and the new default_label is returned.
-
-		inline void Cogen::I_lookupswitch(default_label, case_labels) {
-			Util::assert( case_labels.push ); // ES4: really "case_labels is Array"
-			Util::assert( case_labels.length > 0 );
-
-			stack(-1);
-
-			if (default_label === undefined) {
-				default_label = newLabel();
-				for ( var i=0, limit=case_labels.length ; i < limit ; i++ ) {
-					Util::assert( case_labels[i] === undefined );
-					case_labels[i] = newLabel();
-				}
+			uint32_t here = code.size();
+			code.emitU8((uint8_t)OP_lookupswitch);
+			code.emitS24((int32_t)(here - code.size()));
+			default_label->backpatches = ALLOC(Seq<uint32_t>, (code.size() - 3, default_label->backpatches));
+			code.emitU30(ncases - 1);
+			for ( uint32_t i=0 ; i < ncases ; i++ ) {
+				Label* label = case_labels[i];
+				code.emitS24((int32_t)(here - code.size()));
+				label->backpatches = ALLOC(Seq<uint32_t>, (code.size() - 3, label->backpatches));
 			}
-
-			inline void Cogen::map_func(L) { return L.name };
-			list3(default_label.name, Util::map(map_func, case_labels));
-			var base = code.length;
-			code.uint8(0x1B);
-			relativeOffset(base, default_label);
-			code.uint30(case_labels.length-1);
-			for ( var i=0, limit=case_labels.length ; i < limit ; i++ )
-				relativeOffset(base, case_labels[i]);
-
-			return default_label;
+		    stackMovement(OP_lookupswitch);
 		}
-
-		*/
 
 		void FunctionDefn::cogenGuts(Compiler* compiler, ABCMethodInfo** info, ABCMethodBodyInfo** body)
 		{
@@ -337,9 +317,57 @@ namespace avmplus
 				name = compiler->SYM_anonymous;
 			
 			SeqBuilder<uint32_t> param_types(allocator);
-			for ( Seq<FunctionParam*>* params = this->params ; params != NULL ; params = params->tl )
+			SeqBuilder<DefaultValue*> default_values(allocator);
+			uint32_t numdefaults = 0;
+			for ( Seq<FunctionParam*>* params = this->params ; params != NULL ; params = params->tl ) {
 				param_types.addAtEnd(Cogen::emitTypeName(compiler, params->hd->type_name));
-			*info = ALLOC(ABCMethodInfo, (compiler, abc->addString(name), numparams, param_types.get(), Cogen::emitTypeName(compiler, return_type_name)));
+				if (params->hd->default_value != NULL) {
+					Expr* dv = params->hd->default_value;
+					uint32_t cv = 0;
+					uint32_t ct = 0;
+					switch (dv->tag()) {
+						case TAG_literalString:
+							ct = CONSTANT_Utf8;
+							cv = abc->addString(((LiteralString*)dv)->value);
+							break;
+						case TAG_literalUInt:
+							ct = CONSTANT_UInt;
+							cv = abc->addUInt(((LiteralUInt*)dv)->value);
+							break;
+						case TAG_literalInt:
+							ct = CONSTANT_Int;
+							cv = abc->addInt(((LiteralInt*)dv)->value);
+							break;
+						case TAG_literalDouble:
+						case TAG_literalBoolean:
+							ct = CONSTANT_Double;
+							cv = abc->addDouble(((LiteralDouble*)dv)->value);
+							if (((LiteralBoolean*)dv)->value)
+								ct = CONSTANT_True;
+							else
+								ct = CONSTANT_False;
+							break;
+						case TAG_literalNull:
+							ct = CONSTANT_Null;
+							break;
+						default:
+							// EXTENDME: we can sort-of support arbitrary default values here if we want to.
+							//
+							// AS3 does not support default value other than the six cases above.  Doing better
+							// would be nice.
+							//
+							// We can use one of the obscure namespace default values as a placeholder, then 
+							// generate code to test for that value and compute the correct default value.  
+							// But the signature of the function won't be right; the type of the argument 
+							// must be '*'.  May be close enough, as long as we assign a provided argument 
+							// value to a typed slot and get a type check on entry.
+							compiler->syntaxError(params->hd->default_value->pos, SYNTAXERR_IMPOSSIBLE_DEFAULT);
+					}
+					numdefaults++;
+					default_values.addAtEnd(ALLOC(DefaultValue, (ct, cv)));
+				}
+			}
+			*info = ALLOC(ABCMethodInfo, (compiler, abc->addString(name), numparams, param_types.get(), numdefaults, default_values.get(), Cogen::emitTypeName(compiler, return_type_name)));
 			traits = ALLOC(ABCTraitsTable, (compiler));
 			*body = ALLOC(ABCMethodBodyInfo, (compiler, *info, traits, 1 + numparams + (uses_arguments || (rest_param != NULL))));
 

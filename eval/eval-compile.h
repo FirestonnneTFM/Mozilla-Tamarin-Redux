@@ -39,7 +39,7 @@
 // This file is included into eval.h
 
 /**
- * The inside the compiler acts as a coordinating class, managing memory, interning strings, 
+ * The compiler acts as a coordinating class, managing memory, interning strings, 
  * knowing about settings, etc.  Pretty much everyone points to a compiler instance,
  * which in turn provides the host context and allocator instances.
  */
@@ -56,7 +56,7 @@ public:
 	Str* intern(uint32_t u);							// convert to base-10 string, then intern it
 
 	// A lineno of 0 is ignored here
-	void syntaxError(uint32_t lineno, const char* fmt, ...);
+	void syntaxError(uint32_t lineno, SyntaxError fmt, ...);
 	void internalError(uint32_t lineno, const char* fmt, ...);
 	
 	HostContext * const context;	// For access to the host environment
@@ -91,6 +91,7 @@ public:
 	Str * const SYM_;			// ""
 	Str * const SYM_Array;
 	Str * const SYM_Namespace;
+	Str * const SYM_Number;
 	Str * const SYM_Object;
 	Str * const SYM_RegExp;
 	Str * const SYM_XML;
@@ -101,6 +102,7 @@ public:
 	Str * const SYM_each;
 	Str * const SYM_get;
 	Str * const SYM_include;
+	Str * const SYM_int;
 	Str * const SYM_length;
 	Str * const SYM_namespace;
 #ifdef DEBUG
@@ -120,11 +122,13 @@ public:
 	const uint32_t NS_public;		// public
 	const uint32_t ID_Array;		// public::Array
 	const uint32_t ID_Namespace;	// public::Namespace
+	const uint32_t ID_Number;		// public::Number
 	const uint32_t ID_Object;		// public::Object
 	const uint32_t ID_RegExp;		// public::RegExp
 	const uint32_t ID_XML;			// public::XML
 	const uint32_t ID_XMLList;		// public::XMLList
 	const uint32_t ID_children;		// public::children
+	const uint32_t ID_int;			// public::int
 	const uint32_t ID_length;		// public::length
 #ifdef DEBUG
 	const uint32_t ID_print;		// public::print

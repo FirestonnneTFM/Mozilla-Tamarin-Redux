@@ -205,7 +205,7 @@ namespace avmplus
 					case T_Internal:
 					case T_Identifier:
 						if (flags & SFLAG_Interface)
-							compiler->syntaxError(position(), "Qualifier not allowed here");
+							compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
 						if (namespaceQualifier(flags, &qual))
 							break;
 
@@ -213,12 +213,12 @@ namespace avmplus
 
 						if (identValue() == compiler->SYM_include && hd2() == T_StringLiteral && L0 == L1) {
 							if (qual.tag != QUAL_none || qual.is_native || qual.is_static || qual.is_prototype)
-								compiler->syntaxError(position(), "Illegal 'include' directive");
+								compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_INCLUDE);
 							includeDirective();
 						}
 						else if (hd() == T_Identifier && identValue() == compiler->SYM_namespace) {
 							if (qual.is_native || qual.is_static || qual.is_prototype)
-								compiler->syntaxError(position(), "Illegal 'namespace' directive");
+								compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_NAMESPACE);
 							namespaceDefinition(flags, &qual);
 						}
 						else
@@ -228,24 +228,25 @@ namespace avmplus
 					case T_Const:
 					case T_Var:
 						if (flags & SFLAG_Interface)
-							compiler->syntaxError(position(), "Variable or constant definition not allowed in interface");
+							compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_IN_INTERFACE);
 						if (qual.is_native || qual.is_prototype)
-							compiler->syntaxError(position(), "Variable or constant may not be 'native' or 'prototype'");
+							compiler->syntaxError(position(), SYNTAXERR_NOT_NATIVE_OR_PROTO);
 						if (flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)) {
 							// FIXME: if inside a class, the statement goes into the instance initializer ... except if static...
 							stmts.addAtEnd(variableDefinition(&qual));
 							break;
 						}
 						else {
+							// Variable or constant may not be qualified except at the top level or inside a class
 							if (qual.is_static || qual.tag != QUAL_none)
-								compiler->syntaxError(position(), "Variable or constant may not be qualified except at the top level or inside a class");
+								compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
 							goto default_case;
 						}
 						
 					case T_Function:
 						if (!(flags & (SFLAG_Toplevel|SFLAG_Package|SFLAG_Class)))
 							if (qual.tag != QUAL_none || qual.is_native)
-								compiler->syntaxError(position(), "Illegal qualified function definition.");
+								compiler->syntaxError(position(), SYNTAXERR_QUALIFIER_NOT_ALLOWED);
 						// FIXME: if inside a class or interface, we want to pick up the methods.
 						// FIXME: if inside a class, it goes into the instance... except if static...
 						functionDefinition(&qual);
@@ -253,26 +254,26 @@ namespace avmplus
 
 					case T_Class:
 						if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
-							compiler->syntaxError(position(), "Class not allowed here");
+							compiler->syntaxError(position(), SYNTAXERR_CLASS_NOT_ALLOWED);
 						if (qual.is_native)
-							compiler->syntaxError(position(), "Class may not be 'native'");
+							compiler->syntaxError(position(), SYNTAXERR_CLASS_NATIVE);
 						classDefinition(flags, &qual);
 						break;
 						
 					case T_Interface:
 						if (!(flags & (SFLAG_Toplevel|SFLAG_Package)))
-							compiler->syntaxError(position(), "Interface not allowed here");
+							compiler->syntaxError(position(), SYNTAXERR_INTERFACE_NOT_ALLOWED);
 						if (qual.is_native)
-							compiler->syntaxError(position(), "Interface may not be 'native'");
+							compiler->syntaxError(position(), SYNTAXERR_INTERFACE_NATIVE);
 						interfaceDefinition(flags, &qual);
 						break;
 						
 					default:
 					default_case:
 						if (flags & SFLAG_Interface)
-							compiler->syntaxError(position(), "Statements not allowed in interface");
+							compiler->syntaxError(position(), SYNTAXERR_STMT_IN_INTERFACE);
 						if (qual.tag != QUAL_none || qual.is_native)
-							compiler->syntaxError(position(), "Illegal statement.");
+							compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_STMT);
 						stmts.addAtEnd(statement());
 						break;
 				}
@@ -293,31 +294,31 @@ namespace avmplus
 			switch (hd()) {
 				case T_Native:
 					if (!(flags & (SFLAG_Class|SFLAG_Package|SFLAG_Toplevel)) || qual->is_native || qual->is_prototype)
-						compiler->syntaxError(position(), "'native' not allowed here");
+						compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "native");
 					eat(T_Native);
 					qual->is_native = true;
 					return true;
 				case T_Private:
 					if (!(flags & SFLAG_Class) || qual->tag != QUAL_none || qual->is_prototype)
-						compiler->syntaxError(position(), "'private' not allowed here");
+						compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "private");
 					eat(T_Private);
 					qual->tag = QUAL_private;
 					return true;
 				case T_Protected:
 					if (!(flags & SFLAG_Class) || qual->tag != QUAL_none || qual->is_prototype)
-						compiler->syntaxError(position(), "'protected' not allowed here");
+						compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "protected");
 					eat(T_Protected);
 					qual->tag = QUAL_protected;
 					return true;
 				case T_Public:
 					if (!(flags & (SFLAG_Class|SFLAG_Package)) || qual->tag != QUAL_none || qual->is_prototype)
-						compiler->syntaxError(position(), "'public' not allowed here");
+						compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "public");
 					eat(T_Protected);
 					qual->tag = QUAL_public;
 					return true;
 				case T_Internal:
 					if (!(flags & (SFLAG_Class|SFLAG_Package)) || qual->tag != QUAL_none || qual->is_prototype)
-						compiler->syntaxError(position(), "'internal' not allowed here");
+						compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "internal");
 					eat(T_Internal);
 					qual->tag = QUAL_internal;
 					return true;
@@ -326,14 +327,14 @@ namespace avmplus
 						return false;
 					if ((flags & SFLAG_Class) && identValue() == compiler->SYM_static) {
 						if (qual->is_static || qual->is_prototype)
-							compiler->syntaxError(position(), "'static' not allowed here");
+							compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "static");
 						next();
 						qual->is_static = true;
 						return true;
 					}
 					if ((flags & SFLAG_Class) && identValue() == compiler->SYM_prototype) {
 						if (qual->is_static || qual->is_prototype || qual->is_native || qual->tag != QUAL_none)
-							compiler->syntaxError(position(), "'prototype' not allowed here");
+							compiler->syntaxError(position(), SYNTAXERR_KWD_NOT_ALLOWED, "prototype");
 						next();
 						qual->is_prototype = true;
 						return true;
@@ -423,14 +424,14 @@ namespace avmplus
 		{
 			uint32_t pos = position();
 			if (!(flags & (SFLAG_Function|SFLAG_Toplevel)))	// no classes yet...
-				compiler->syntaxError(pos, "'namespace' definition not allowed here");
+				compiler->syntaxError(pos, SYNTAXERR_KWD_NOT_ALLOWED, "namespace");
 			eat(T_Identifier);
 			Str * name = identifier();
 			if (match(T_Assign)) {
 				if (hd() == T_Identifier || hd() == T_StringLiteral)
 					addNamespaceBinding(name, primaryExpression());
 				else
-					compiler->syntaxError(pos, "Illegal 'namespace' definition");
+					compiler->syntaxError(pos, SYNTAXERR_ILLEGAL_NAMESPACE);
 			}
 			else
 				addNamespaceBinding(name, NULL);
@@ -445,7 +446,7 @@ namespace avmplus
 			eat(T_StringLiteral);
 			semicolon();
 			if (!compiler->origin_is_file)
-				compiler->syntaxError(pos, "The 'include' directive is only allowed in programs whose origin is a file");
+				compiler->syntaxError(pos, SYNTAXERR_INCLUDE_ORIGIN);
 			
 			// The current lexer state - including the state variables that are a part of the
 			// parser object - gets pushed onto a stack, a new lexer is created for the new
@@ -462,7 +463,7 @@ namespace avmplus
 			uint32_t inputlen;
 			const wchar* input = compiler->context->readFileForEval(compiler->filename, newFile->s, &inputlen);
 			if (input == NULL)
-				compiler->syntaxError(pos, "An include file could not be opened or read");
+				compiler->syntaxError(pos, SYNTAXERR_INCLUDE_INACCESSIBLE);
 			
 			included_input = input;		// freed in onEOS below
 #ifdef DEBUG
@@ -565,7 +566,7 @@ namespace avmplus
 			for ( Seq<Binding*>* bindings = rib->bindings.get() ; bindings != NULL ; bindings = bindings->tl ) {
 				if (bindings->hd->name == name) {
 					if (bindings->hd->kind != kind)
-						compiler->syntaxError(0, "Conflicting binding of name");
+						compiler->syntaxError(0, SYNTAXERR_REDEFINITION);
 					return bindings->hd;
 				}
 			}
@@ -596,20 +597,20 @@ namespace avmplus
 			if (!b)
 				topRib->bindings.addAtEnd(ALLOC(Binding, (name, type_name, TAG_varBinding)));
 			else if (!sameName(b->type_name, type_name))
-				compiler->syntaxError(0, "Conflicting binding of names: mismatching types");
+				compiler->syntaxError(0, SYNTAXERR_REDEFINITION_TYPE);
 		}
 		
 		void Parser::addConstBinding(Str* name, QualifiedName* type_name)
 		{
 			if (findBinding(name, TAG_constBinding))
-				compiler->syntaxError(0, "Redundant constant binding");
+				compiler->syntaxError(0, SYNTAXERR_REDUNDANT_CONST);
 			topRib->bindings.addAtEnd(ALLOC(Binding, (name, type_name, TAG_constBinding)));
 		}
 		
 		void Parser::addMethodBinding(FunctionDefn* fn, BindingRib* rib)
 		{
 			if (findBinding(fn->name, TAG_methodBinding, rib))
-				compiler->syntaxError(0, "Redundant method binding");
+				compiler->syntaxError(0, SYNTAXERR_REDUNDANT_METHOD);
 			rib->bindings.addAtEnd(ALLOC(Binding, (fn->name, NULL, TAG_methodBinding)));
 			rib->functionDefinitions.addAtEnd(fn);
 		}
@@ -617,7 +618,7 @@ namespace avmplus
 		void Parser::addNamespaceBinding(Str* name, Expr* expr)
 		{
 			if (findBinding(name, TAG_namespaceBinding))
-				compiler->syntaxError(0, "Redundant namespace binding");
+				compiler->syntaxError(0, SYNTAXERR_REDUNDANT_NAMESPACE);
 			topRib->bindings.addAtEnd(ALLOC(Binding, (name, NULL, TAG_namespaceBinding)));	// FIXME: type for 'Namespace'
 			topRib->namespaces.addAtEnd(ALLOC(NamespaceDefn, (name, expr)));
 		}
@@ -658,7 +659,7 @@ namespace avmplus
 		FunctionDefn* Parser::functionGuts(Qualifier* qual, bool require_name)
 		{
 			if (qual->is_native)
-				compiler->syntaxError(position(), "'native' functions are not supported.");
+				compiler->syntaxError(position(), SYNTAXERR_NATIVE_NOT_SUPPORTED);
 
 			uint32_t numparams = 0;
 			bool default_value_required = false;
@@ -696,7 +697,7 @@ namespace avmplus
 						param_default_value = assignmentExpression(0);
 					}
 					else if (default_value_required)
-						compiler->syntaxError(pos, "Default value required here.");
+						compiler->syntaxError(pos, SYNTAXERR_DEFAULT_VALUE_REQD);
 					addVarBinding(param_name, param_type_name);
 					params.addAtEnd(ALLOC(FunctionParam, (param_name, param_type_name, param_default_value)));
 					if (hd() == T_RightParen)
@@ -826,8 +827,13 @@ namespace avmplus
 		void Parser::eat(Token tc)
 		{
 			Token tk = hd();
-			if (tk != tc)
-				compiler->syntaxError(position(), "Wrong token, expected %d got %d", tc, tk);
+			if (tk != tc) {
+#ifdef DEBUG
+				compiler->syntaxError(position(), SYNTAXERR_WRONG_TOKEN, tc, tk);
+#else
+				compiler->syntaxError(position(), SYNTAXERR_WRONG_TOKEN);	// FIXME: not adequate
+#endif
+			}
 			next();
 		}
 		
@@ -843,7 +849,7 @@ namespace avmplus
 		Str* Parser::identifier()
 		{
 			if (hd() != T_Identifier)
-				compiler->syntaxError(position(), "Expected identifier");
+				compiler->syntaxError(position(), SYNTAXERR_EXPECTED_IDENT);
 			Str* name = V0.s;
 			next();
 			return name;

@@ -122,7 +122,7 @@ namespace avmplus
 				switch (c) {
 					case 0:
 						if (idx == limit)
-							compiler->syntaxError(lineno, "Unexpected end of program in regexp literal");
+							compiler->syntaxError(lineno, SYNTAXERR_EOT_IN_REGEXP);
 						break;
 					case '/':
 						if (!in_charset)
@@ -139,7 +139,7 @@ namespace avmplus
 						switch (c) {
 							case 0:
 								if (idx == limit)
-									compiler->syntaxError(lineno, "Unexpected end of program in regexp literal");
+									compiler->syntaxError(lineno, SYNTAXERR_EOT_IN_REGEXP);
 								break;
 							case '\r':
 								if (*idx == '\n')
@@ -166,7 +166,7 @@ namespace avmplus
 					case '\r':
 					case UNICHAR_LS:
 					case UNICHAR_PS:
-						compiler->syntaxError(lineno, "Illegal newline in regexp literal");
+						compiler->syntaxError(lineno, SYNTAXERR_NEWLINE_IN_REGEXP);
 				}
 				s.append(c);
 			}
@@ -256,7 +256,7 @@ namespace avmplus
 							idx = limit;
 							return compiler->parser.onEOS(&lineno, &val);
 						}
-						compiler->syntaxError(lineno, "Illegal character in input: NUL");
+						compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR_NUL);
 						
 					case '\n' :
 						lineno++;
@@ -1127,7 +1127,7 @@ namespace avmplus
 							idx += 2;
 							mark = idx;
 							if (!hexDigits(-1))
-								compiler->syntaxError(lineno, "Illegal hexadecimal literal: no digits");
+								compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
 							return integerLiteral(16);
 							
 						case '.':
@@ -1205,7 +1205,7 @@ namespace avmplus
 		{
 			int c = *idx;
 			if ((c >= '0' && c <= '9') || isUnicodeIdentifierStart(c))
-				compiler->syntaxError(lineno, "Illegal character following numeric literal: %c", c);
+				compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR_POSTNUMBER, c);
 		}
 		
 		// Returns true iff the literal contains a decimal point or an
@@ -1214,7 +1214,7 @@ namespace avmplus
 		bool Lexer::numberLiteralPrime() 
 		{
 			if (!decimalDigits(-1))
-				compiler->syntaxError(lineno, "Illegal number: no digits");
+				compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
 			
 			switch (*idx) {
 				case '.':
@@ -1241,7 +1241,7 @@ namespace avmplus
 		void Lexer::numberFraction(bool has_leading_digits) 
 		{
 			if (!decimalDigits (-1) && !has_leading_digits)
-				compiler->syntaxError(lineno, "Illegal number: must have digits before or after decimal point");
+				compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
 			
 			switch (*idx) {
 				case 'e':
@@ -1263,7 +1263,7 @@ namespace avmplus
 					break;
 			}
 			if (!decimalDigits(-1))
-				compiler->syntaxError(lineno, "Illegal number: missing digits in exponent");
+				compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
 		}
 		
 		bool Lexer::digits(int k, int attrmask)
@@ -1313,7 +1313,7 @@ namespace avmplus
 				if (c == 0) {
 					if (idx >= limit) {
 						idx = limit;
-						compiler->syntaxError(lineno, "End of input in block comment");
+						compiler->syntaxError(lineno, SYNTAXERR_EOI_IN_COMMENT);
 					}
 					continue;
 				}
@@ -1344,7 +1344,7 @@ namespace avmplus
 			
 			if (notPartOfIdent(c) && c != '\\') {
 				if (idx == start)
-					compiler->syntaxError(lineno, "Invalid character in input: %c", *idx);
+					compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR, *idx);
 				val.s = compiler->intern(start, uint32_t(idx-start));
 				DEBUG_ONLY(last_token = T_Identifier);
 				return T_Identifier;
@@ -1392,12 +1392,12 @@ namespace avmplus
 				uint32_t l;
 				TokenValue v;
 				if (subscan.lex(&l, &v) != T_Identifier)
-					compiler->syntaxError(lineno, "Illegal identifier: escape sequence makes it look like a keyword");
+					compiler->syntaxError(lineno, SYNTAXERR_IDENT_IS_KWD);
 				AvmAssert(subscan.lex(&l, &v) == T_EOS);
 			}
 			
 			if (s.length() == 0)
-				compiler->syntaxError(lineno, "Invalid character in input: %c", *idx);
+				compiler->syntaxError(lineno, SYNTAXERR_ILLEGALCHAR, *idx);
 
 			val.s = s.str();
 			DEBUG_ONLY(last_token = T_Identifier);
@@ -1482,7 +1482,7 @@ namespace avmplus
 						break;  // syntax error
 				}
 				
-				compiler->syntaxError(lineno, "Unterminated string literal");
+				compiler->syntaxError(lineno, SYNTAXERR_UNTERMINATED_STRING);
 			}
 		}
 		
@@ -1552,7 +1552,7 @@ namespace avmplus
 					
 				case 0:
 					if (idx+1 >= limit)
-						compiler->syntaxError(lineno, "End of input in escape sequence");
+						compiler->syntaxError(lineno, SYNTAXERR_EOI_IN_ESC);
 					idx++;
 					return 0;
 					
@@ -1560,7 +1560,7 @@ namespace avmplus
 				case     '\r':
 				case UNICHAR_LS:
 				case UNICHAR_PS:
-					compiler->syntaxError(lineno, "Illegal line terminator in escape sequence");
+					compiler->syntaxError(lineno, SYNTAXERR_EOL_IN_ESC);
 					
 				default:
 					return *idx++;
@@ -1571,7 +1571,7 @@ namespace avmplus
 		{
 			int c;
 			if ((c = *idx) >= 128 || (char_attrs[c] & CHAR_ATTR_OCTAL) == 0)
-				compiler->syntaxError(lineno, "Expecting octal character, got %c", c);
+				compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
 			
 			if (c == '0') {
 				idx++;
@@ -1601,7 +1601,7 @@ namespace avmplus
 		{
 			mark = idx;
 			if (!hexDigits(n))
-				compiler->syntaxError(lineno, "Wrong number of hexadecimal digits; expected %d", n);
+				compiler->syntaxError(lineno, SYNTAXERR_ILLEGAL_NUMBER);
 			return (int)parseInt(16);
 		}
 		
@@ -1613,7 +1613,7 @@ namespace avmplus
 				idx++;
 				mark = idx;
 				if (!hexDigits(-1) || *idx != '}')
-					compiler->syntaxError(lineno, "Invalid variable-length unicode escape");
+					compiler->syntaxError(lineno, SYNTAXERR_INVALID_VAR_ESC);
 				int n = (int)parseInt(16);
 				idx++;
 				return n;
@@ -1762,25 +1762,25 @@ namespace avmplus
 			*buf = 0;
 			switch (t) {
 				case T_Identifier:
-					strcpy(buf, "I ");
+					VMPI_strcpy(buf, "I ");
 					getn(buf+2, v.s, sizeof(buf)-2);
 					break;
 				case T_StringLiteral:
-					strcpy(buf, "S ");
+					VMPI_strcpy(buf, "S ");
 					getn(buf+2, v.s, sizeof(buf)-2);
 					break;
 				case T_RegexpLiteral:
-					strcpy(buf, "R ");
+					VMPI_strcpy(buf, "R ");
 					getn(buf+2, v.s, sizeof(buf)-2);
 					break;
 				case T_IntLiteral:
-					sprintf(buf, "i %d", v.i);
+					VMPI_sprintf(buf, "i %d", v.i);
 					break;
 				case T_UIntLiteral:
-					sprintf(buf, "u %u", v.u);
+					VMPI_sprintf(buf, "u %u", v.u);
 					break;
 				case T_DoubleLiteral:
-					sprintf(buf, "d %g", v.d);
+					VMPI_sprintf(buf, "d %g", v.d);
 					break;
 				default:
 					break;

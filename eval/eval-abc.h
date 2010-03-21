@@ -169,6 +169,8 @@ public:
 				  uint32_t name, 
 				  uint32_t param_count,
 				  Seq<uint32_t>* params,
+				  uint32_t option_count,
+				  Seq<DefaultValue*>* default_values,
 				  uint32_t return_type);
 	
 	virtual uint32_t size();
@@ -180,6 +182,8 @@ public:
 	const uint32_t name;
 	const uint32_t param_count;
 	Seq<uint32_t> * const param_types;
+	const uint32_t option_count;
+	Seq<DefaultValue*> * const default_values;
 	const uint32_t return_type;
 	
 private:

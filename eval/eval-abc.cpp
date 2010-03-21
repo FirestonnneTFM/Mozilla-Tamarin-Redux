@@ -486,11 +486,15 @@ namespace avmplus
 									 uint32_t name, 
 									 uint32_t param_count,
 									 Seq<uint32_t>* param_types,
+									 uint32_t option_count,
+									 Seq<DefaultValue*>* default_values,
 									 uint32_t return_type)
 			: index(compiler->abc.addMethod(this))
 			, name(name)
 			, param_count(param_count)
 			, param_types(param_types)
+			, option_count(option_count)
+			, default_values(default_values)
 			, return_type(return_type)
 			, flags(~0U)
 		{
@@ -502,12 +506,17 @@ namespace avmplus
 			uint32_t param_size = 0;
 			for ( Seq<uint32_t>* param_types = this->param_types ; param_types != NULL ; param_types = param_types->tl )
 				param_size += lenU30(param_types->hd);
+			uint32_t option_size = option_count > 0 ? lenU30(option_count) : 0;
+			for ( Seq<DefaultValue*>* default_values = this->default_values ; default_values != NULL ; default_values = default_values->tl ) {
+				option_size += lenU30(default_values->hd->index);
+				option_size += 1;
+			}
 			reported_size = (lenU30(param_count) +
 							 lenU30(return_type) + 
 							 param_size +
 							 lenU30(name) +
 							 1 /* flags */ + 
-							 0 /* option_info */ +
+							 option_size +
 							 0 /* param_names */);
 			return reported_size;
 		}
@@ -516,12 +525,23 @@ namespace avmplus
 		{
 			DEBUG_ONLY( uint8_t* b0 = b; )
 			AvmAssert(flags != ~0U);
+			if (option_count > 0)
+				flags |= MethodInfo::HAS_OPTIONAL;
+			else
+				flags &= ~MethodInfo::HAS_OPTIONAL;
 			b = emitU30(b, param_count);
 			b = emitU30(b, return_type);
 			for ( Seq<uint32_t>* param_types = this->param_types ; param_types != NULL ; param_types = param_types->tl )
 				b = emitU30(b, param_types->hd);
 			b = emitU30(b, name);
 			*b++ = (uint8_t)flags;
+			if (option_count > 0) {
+				b = emitU30(b, option_count);
+				for ( Seq<DefaultValue*>* default_values = this->default_values ; default_values != NULL ; default_values = default_values->tl ) {
+					b = emitU30(b, default_values->hd->index);
+					*b++ = (uint8_t)default_values->hd->tag;
+				}
+			}
 			AvmAssert( b == b0 + reported_size );
 			return b;
 		}

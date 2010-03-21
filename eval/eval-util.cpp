@@ -123,6 +123,7 @@ namespace avmplus
 		template class SeqBuilder<Binding*>;
 		template class SeqBuilder<CaseClause*>;
 		template class SeqBuilder<CatchClause*>;
+		template class SeqBuilder<DefaultValue*>;
 		template class SeqBuilder<Expr*>;
 		template class SeqBuilder<FunctionDefn*>;
 		template class SeqBuilder<FunctionParam*>;
@@ -172,8 +173,6 @@ namespace avmplus
 				append(*other++);
 		}
 
-		inline uint32_t min(uint32_t a, uint32_t b) { return a < b ? a : b; }
-
 		void StringBuilder::append(const wchar* ptr, const wchar* lim)
 		{
 			if (lim == NULL) {
@@ -185,7 +184,7 @@ namespace avmplus
 				uint32_t avail = SBChunk::chunksize - nextchar;
 				uint32_t need = uint32_t(lim - ptr);
 				uint32_t k = min(need, avail);
-				memcpy(chunk->data + nextchar, ptr, k*sizeof(wchar));
+				VMPI_memcpy(chunk->data + nextchar, ptr, k*sizeof(wchar));
 				ptr += k;
 				nextchar += k;
 				len += k;
@@ -209,7 +208,7 @@ namespace avmplus
 
 			wchar* buf = new wchar[len];
 			wchar* p = copyInto(buf, chunk->next);
-			memcpy(p, chunk->data, nextchar*sizeof(wchar));
+			VMPI_memcpy(p, chunk->data, nextchar*sizeof(wchar));
 			Str* result = allocator->compiler->intern(buf, len);
 			delete [] buf;
 			return result;
@@ -242,7 +241,7 @@ namespace avmplus
 			wchar *p = buf;
 			if (c->next != NULL)
 				p = copyInto(buf, c->next);
-			memcpy(p, c->data, SBChunk::chunksize*sizeof(wchar));
+			VMPI_memcpy(p, c->data, SBChunk::chunksize*sizeof(wchar));
 			return p+SBChunk::chunksize;
 		}
 		
@@ -372,6 +371,11 @@ namespace avmplus
 			return out;
 		}
 		
+		int32_t readS24(uint8_t* in)
+		{
+			return ((in[0] | (in[1] << 8) | (in[2] << 16)) << 8) >> 8;
+		}
+		
 		uint32_t utf8length(Str* str) 
 		{
 			uint32_t len = 0;
@@ -442,7 +446,7 @@ namespace avmplus
 			if (last != NULL) {
 				last->end = out;
 				for ( Chunk* c = first ; c != NULL ; c = c->next ) {
-					memcpy( b, c->start, c->end - c->start );
+					VMPI_memcpy( b, c->start, c->end - c->start );
 					b += c->end - c->start;
 				}
 			}

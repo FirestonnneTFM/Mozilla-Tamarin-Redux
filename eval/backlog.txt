@@ -5,19 +5,25 @@ and pick tasks off it.
 Current status: We can run almost all of the ecma3/ and e4x/
 acceptance tests from source.
 
-Work list is organized as P1/P2/P3/P4 where these currently mean:
+Work list is organized as P1/P2/P3/P4/P5 where P1 is highest and these mean:
 
   - P1 - basic functionality
   - P2 - rough compatibility with ES3
   - P3 - rough compatibility with AS3 and E4X
   - P4 - quality requirements / subtle semantics
+  - P5 - desirable extensions
 
 Note that FIXMEs in the code are generally not noted here.
 
 
 Lexer:
 
-  (nothing pending)
+  P5:
+  - triple-quoted strings a la Python/ES4, or @"..." a la C#
+  - alternatively, a backtick form would allow us to usurp E4X syntax when
+    that is useful, because E4X would be available under backtick.  
+	`<foo>...</foo>; `"..."; `if.  Notably we could then do Vector<int>,
+	not have to do Vector.<int> (well, there may be other conditions too).
 
 
 Parser:
@@ -26,7 +32,7 @@ Parser:
   - 'package', 'class', and 'interface' are parsed but mainly superficially, see FIXMEs
   - 'public', 'private', 'protected', 'native', 'static', 'prototype', and named NS are parsed but not really used anywhere
   - lots of places that parse by 'identifier()' should parse by something that handles both id and id::id
-  - generic types (ie, Vector)
+  - generic types (ie, Vector) 
   - 'super' both stmt and expr
   - getter and setter functions
 
@@ -37,8 +43,6 @@ Code generator:
   - return/continue/break out of "finally" clause
 
   P3:
-  - default argument values
-  - multiple type-annotated catch clauses
   - 'import' statement
   - 'const' statement and definition
   - 'use namespace' statement
@@ -53,7 +57,6 @@ Code generator:
 ABC layer:
 
   P3:
-  - default argument values
   - instance
   - class
 
@@ -61,7 +64,32 @@ ABC layer:
 Code quality, utility, API, etc:
 
   P4:
-  - RTC error messages should be localizable and have IDs
+  - Transition to VMPI_ forms of libc functions everywhere.  I've converted the code
+    but I need to provide macros in the standalone compiler setup as well.  Also note
+	that the VMPI layer in Tamarin does not currently provide a mapping for vsnprintf,
+	for example.
+
+  - Syntax error messages are more ad-hoc than they need be, probably.  See the
+    string constants in eval-compile.cpp.
+
+  - Syntax error messages sometimes provides less information than they need to;
+    the "wrong token" error is the worst but others are bad too.
+
+  - Eval code should not use unadorned 'new' for anything; instead the HostContext
+    should have alloc() and free() methods for allocating memory.  These should be
+	used with placement new or just by themselves as appropriate, and we should
+	never use 'delete' for anything.  Nor should there be any use of malloc or
+	calloc or similar.  The purpose of this rule is to not depend on the memory
+	management provided by new or delete, as they sometimes are diverted to FixedMalloc
+	and sometimes not (depending on platform), when eval is embedded in the avm.
+	
+	Now, Tommy says that we should be moving toward a world where we assume that
+	new and delete are overloaded and point to FixedMalloc, but there are some
+	platforms where that is actually hard (toolchain issues).  So if there's not
+	a lot of work to abstract it out - and there's no reason that it should be
+	a lot of work because almost all allocation goes through the Allocator anyway -
+	then we should probably do it.  (Would also let us know something about the
+	memory consumption of eval.)
 
   Optimizations:
   - Store local variables in registers if the function does not close over
@@ -185,25 +213,3 @@ Tests in the e4x test suite that fail for apparently no fault of eval:
 	so who knows what's actually going on here.  It's possible that there's magic
 	somewhere in Tamarin to handle * as * for E4X and as [public] for everyone
 	else.
-	
-Test case workarounds and/or bug fixes implemented:
-
-  - There is a fixture issue:
-      - ecma3/Math/e15_8_2_14.as: 'test' defined in that file does not override the function
-	    'test' defined in shell.as as it should.  Currently fixed that by renaming the function
-		as 'test0' but the bug must be fixed.
-	  - ecma3/String/e15_5_4_7_2: 'ToInteger', also defined in shell.as, is overridden by
-	    an incompatible ToInteger value.  But it's the former that is called, causing one test
-		to fail.  Fixed this by moving ToInteger into the only function that called it.
-
-  - ecma3/Function/regress_49286.as assumes 'eval' is not defined; changed this to 'evalXXX'.
-
-  - ecma3/ObjectObjects/e15_2_4_2.as and ecma3/ObjectObjects/toLocaleString_rt.as depend on
-    the serial number the VM assigns to function objects, but the code generation of eval may
-	lay out the ABC file differently from ASC.  So make the test cases independent of this by
-	matching the general patterns, not specific strings.
-	
-  - shell.as defines SECTION and VERSION by just assigning to top-level properties, not with 'var'
-    statements.  That means that test cases that reference these will fail (a couple of them,
-	I forget the numbers right now).  Fixes this by adding a 'var' keyword.
-

@@ -45,6 +45,13 @@ public:
 	Seq<uint32_t>* backpatches;	// not a SeqBuilder so that we don't have to spend space on storing an allocator in every label object
 };
 
+class DefaultValue {
+public:
+	DefaultValue(uint32_t tag, uint32_t index) : tag(tag), index(index) {}
+	const uint32_t tag;
+	const uint32_t index;
+};
+
 /**
  * Instruction and value emitter.
  *
@@ -152,7 +159,7 @@ public:
 	void I_label(Label* label);
 	void I_lessequals();
 	void I_lessthan();
-	void I_lookupswitch(Label* default_label, Label** case_labels, uint32_t ncases);  // unclear semantics for now
+	void I_lookupswitch(Label* default_label, Label** case_labels, uint32_t ncases);
 	void I_lshift();
 	void I_modulo();
 	void I_multiply();
@@ -217,7 +224,7 @@ public:
 
 	Label*   newLabel();
 	uint32_t getTemp();
-	void unstructuredControlFlow(Ctx* ctx, bool (hit)(Ctx*,void*), void* package, bool jump, const char* msg, uint32_t pos=0);
+	void unstructuredControlFlow(Ctx* ctx, bool (hit)(Ctx*,void*), void* package, bool jump, SyntaxError msg, uint32_t pos=0);
 	void standardMethod(bool is_function, Seq<Str*>* params, Seq<FunctionDefn*>* functions, Seq<Str*>* vars, Seq<Stmt*>* stmts);
 	uint32_t arguments(Seq<Expr*>* args);
     void startCatch();
