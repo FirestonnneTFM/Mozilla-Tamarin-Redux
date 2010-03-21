@@ -67,7 +67,7 @@ namespace avmplus
 								idx += 4;
 								return xmlMarkup(T_XmlComment, "-->");
 							}
-							compiler->syntaxError(lineno, "Invalid sequence starting with '<!'");
+							compiler->syntaxError(lineno, SYNTAXERR_INVALID_LEFTBANG);
 							
 						case '?':
 							idx += 2;
@@ -87,7 +87,7 @@ namespace avmplus
 						idx += 2;
 						return T_XmlSlashRightAngle;
 					}
-					compiler->syntaxError(lineno, "Invalid sequence starting with '/'");
+					compiler->syntaxError(lineno, SYNTAXERR_INVALID_SLASH);
 					
 				case '>':
 					idx += 1;
@@ -142,8 +142,8 @@ namespace avmplus
 				idx++;
 			}
 			if (idx == limit)
-				compiler->syntaxError(l, "Unterminated XML token");
-			idx += strlen(terminator);
+				compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
+			idx += VMPI_strlen(terminator);
 			val.s = compiler->intern(mark, uint32_t(idx-mark));
 			return token;
 		}
@@ -196,7 +196,7 @@ namespace avmplus
 			while (idx < limit && *idx != terminator)
 				idx++;
 			if (idx == limit)
-				compiler->syntaxError(l, "Unterminated XML token");
+				compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
 			idx++;
 			val.s = compiler->intern(mark, uint32_t(idx-mark));
 			return T_XmlString;

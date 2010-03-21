@@ -55,7 +55,7 @@ namespace avmplus
 			QualifiedName* n = nameExpression(false);
 			if ((n->qualifier != NULL && n->qualifier->tag() != TAG_simpleName) ||
 				n->name->tag() != TAG_simpleName)
-				compiler->syntaxError(n->pos, "Illegal type name");
+				compiler->syntaxError(n->pos, SYNTAXERR_ILLEGAL_TYPENAME);
 			return n;
 		}
 
@@ -140,7 +140,7 @@ namespace avmplus
 					break;
 					
 				default:
-					compiler->syntaxError(position(), "String, number, or identifier required as field name in object initializer");
+					compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_FIELDNAME);
 					break;
 			}
 			next();
@@ -296,7 +296,7 @@ namespace avmplus
 				case T_Identifier:
 					return (QualifiedName*)primaryExpression();
 				default:
-					compiler->syntaxError(position(), "Invalid property identifier");
+					compiler->syntaxError(position(), SYNTAXERR_ILLEGAL_PROPNAME);
 					/*NOTREACHED*/
 					return NULL;
 			}

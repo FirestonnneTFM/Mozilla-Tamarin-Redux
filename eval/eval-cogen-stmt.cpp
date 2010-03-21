@@ -203,7 +203,7 @@ namespace avmplus
 			}
 		}
 
-		void Cogen::unstructuredControlFlow(Ctx* ctx, bool (hit)(Ctx*,void*), void* package, bool jump, const char* msg, uint32_t pos) 
+		void Cogen::unstructuredControlFlow(Ctx* ctx, bool (hit)(Ctx*,void*), void* package, bool jump, SyntaxError msg, uint32_t pos) 
 		{
 			while (ctx != NULL) {
 				if (hit(ctx, package)) {
@@ -235,7 +235,7 @@ namespace avmplus
 				}
 				ctx = ctx->next;
 			}
-			compiler->syntaxError(pos, "%s", msg);
+			compiler->syntaxError(pos, msg);
 		}
 
 		inline bool mustPushThis(CtxType tag) {
@@ -487,7 +487,7 @@ namespace avmplus
 										   hitBreak,
 										   (void*)label,
 										   true,
-										   (label == NULL ? "No 'break' allowed here" : "'break' to undefined label"),
+										   (label == NULL ? SYNTAXERR_ILLEGAL_BREAK : SYNTAXERR_BREAK_LABEL_UNDEF),
 										   pos);
 		}
 
@@ -502,7 +502,7 @@ namespace avmplus
 										   hitContinue,
 										   (void*)label,
 										   true,
-										   (label == NULL ? "No 'continue' allowed here" : "'continue' to undefined label"),
+										   (label == NULL ? SYNTAXERR_ILLEGAL_CONTINUE : SYNTAXERR_CONTINUE_LABEL_UNDEF),
 										   pos);
 		}
 		
@@ -534,7 +534,7 @@ namespace avmplus
 										   hitFunction,
 										   NULL,
 										   false,
-										   "No 'return' allowed here.");
+										   SYNTAXERR_RETURN_OUTSIDE_FN);
 			
 			if (expr == NULL)
 				cogen->I_returnvoid();
@@ -560,140 +560,161 @@ namespace avmplus
 			cogen->I_kill(scopereg);
 		}
 
+		// OPTIMIZEME: we can do better here for switches that are sparse overall (cover a large range)
+		// but which have significant dense segments.  Consider a scanner that handles unicode: it may
+		// have a lot of cases for values in the ASCII range and then a few cases to handle unicode
+		// outliers, like unicode space characters.  It will fail the 'fast' test but would benefit
+		// from being rewritten as a dense switch whose default case switches further on the outlying
+		// values.
+
 		void SwitchStmt::cogen(Cogen* cogen, Ctx* ctx)
 		{
 			int32_t low, high;
-			bool has_default;
-			if (analyze(&low, &high, &has_default))
-				cogenFast(cogen, ctx, low, high, has_default);
+			if (analyze(&low, &high))
+				cogenFast(cogen, ctx, low, high);
 			else
 				cogenSlow(cogen, ctx);
 		}
-		
-		// FIXME: implement switch statement analysis and fast switch generation
-		// (Expand the use of tags on expr nodes to enable analysis; implement I_lookupswitch in the back-end too.)
 
-		bool SwitchStmt::analyze(int32_t* /* low*/, int32_t* /* high*/, bool* /* has_default*/)
+		// Trigger lookupswitch if
+		//  - all cases are integer constants
+		//  - there are at least 4 cases
+		//  - all cases in U30 range when biased by low
+		//  - at least 1/3 of the values in the switch range are present
+
+		bool SwitchStmt::analyze(int32_t* low, int32_t* high)
 		{
-			return false;
-			/*
-			let cases = s.cases;
 			uint32_t count = 0;
 			*low = 0x7FFFFFFF;
 			*high = (-0x7FFFFFFF - 1);
-			*has_default = false;
 			
-			for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
-				let e = cases[i].expr;
+			for ( Seq<CaseClause*>* cases = this->cases ; cases != NULL ; cases = cases->tl ) {
+				Expr* e = cases->hd->expr;
 				if (e == NULL)
-					*has_default = true;
-				else if (e is LiteralInt) {
-					low = Math.min(low, e.intValue);
-					high = Math.max(high, e.intValue);
+					;
+				else if (e->tag() == TAG_literalInt) {
+					int32_t v = ((LiteralInt*)e)->value;
+					*low = min(*low, v);
+					*high = max(*high, v);
 					count++;
 				}
 				else
 					return false;
 			}
-			if (count < 4)
-				return false;
-			if (count * 3 < ((high - low) + 1))
-				return false;
-			return [low,high,has_default];
-			 */
+			const uint32_t ncases = uint32_t(*high - *low + 1);
+			return count >= 4 && ncases < (1<<30) && count * 3 >= ncases;
 		}
 		
-		void SwitchStmt::cogenFast(Cogen*, Ctx*, int32_t /*low*/, int32_t /*high*/, bool /*has_default*/)
+		void SwitchStmt::cogenFast(Cogen* cogen, Ctx* ctx, int32_t low, int32_t high)
 		{
-			// No-op until the analyze() method is implemented
-			/*
-			let count = 0;
-			let {expr, cases} = s;
-			let {asm, cp} = ctx;
-			let t = asm.getTemp();
+			AvmAssert( high > low );
+			AvmAssert( high - low + 1 < (1 << 30) );
+
+			// Lcase[i] has the label for value (low+i)
+			// Ldefault is the default case (whether or not there is a default in the switch)
+
+			Compiler* compiler = cogen->compiler;
+			uint32_t tmp = cogen->getTemp();
+			const uint32_t ncases = high - low + 1;
+			Label** Lcase;
+#ifdef AVMC_STANDALONE
+			Lcase = (Label**)alloca(sizeof(Label*) * ncases);
+#else
+			MMgc::GC::AllocaAutoPtr _Lcase;
+			Lcase = (Label**)VMPI_alloca(compiler->context->core, _Lcase, sizeof(Label*) * ncases);
+#endif
+			Label* Ldefault = cogen->newLabel();
+			Label* Lbreak = cogen->newLabel();
+			BreakCtx nctx(Lbreak, ctx);
 			
-			let Ldef = asm.newLabel();
-			let Lcases = new Array(high-low+1);
-			let Lbreak = asm.newLabel();
-			let nctx = pushBreak(ctx, Lbreak);
-			let ldef_emitted = false;
+			for ( uint32_t i=0 ; i < ncases ; i++ )
+				Lcase[i] = Ldefault;
 			
-			cgExpr(ctx, expr);                    // switch value
-			asm.I_pushint(cp.int32(low));         // offset
-			asm.I_subtract();                     // bias it
-			asm.I_dup();
-			asm.I_convert_i();                    // convert to int
-			asm.I_dup();
-			asm.I_setlocal(t);                    //   and save
-			asm.I_equals();                       // if computed value and int value are 
-			asm.I_getlocal(t);                    // otherwise dispatch
-			asm.killTemp(t);
-			asm.I_swap();
-			asm.I_iffalse(Ldef);                  //   not the same then default case
-			
-			let Ldefault = asm.I_lookupswitch(undefined, Lcases);
-			
-			// Make a prepass to find all the case labels that do not have a
-			// case (except maybe the default case).  If Lcases[i] is not
-			// handled then Lhandled[i] will be false.
-			
-			let Lhandled = new Array(Lcases.length);
-			for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
-				let c = cases[i];
-				let e = c.expr;
-				
-				if (e != null) {
-					assert(e is LiteralInt);
-					Lhandled[e.intValue - low] = true;
+			for ( Seq<CaseClause*>* cases = this->cases ; cases != NULL ; cases = cases->tl ) {
+				Expr* e = cases->hd->expr;
+				if (e != NULL) {
+					AvmAssert( e->tag() == TAG_literalInt);
+					int32_t v = ((LiteralInt*)e)->value - low;
+					// A value may be duplicated in the switch; generate only one label, and
+					// observe that the label is only emitted for the first (sequential case),
+					// the others are unreachable except by fallthrough.
+					if (Lcase[v] == Ldefault)
+						Lcase[v] = cogen->newLabel();
 				}
 			}
+
+			expr->cogen(cogen);								// switch value
+			cogen->I_coerce_a();
+			cogen->I_setlocal(tmp);
+
+			// Case clauses are triggered by strict equality, so if the type of the 
+			// dispatch value is not int then we definitely won't hit any of the
+			// clauses.  Also, test for 'int' tests for integer values in the 'int'
+			// range that are represented as Number, which is what we want here.
 			
-			// Now emit code for all the cases.  If there is a default
-			// case then all unhandled labels are emitted there.
+			// Test applicability of the dispatch value.  In the absence of static type
+			// information this is fairly painful, we must not have observable side
+			// effects (eg valueOf conversion) or overflow & truncate.  The rules are:
+			//
+			//    if (low != 0) then 
+			//        if (value is not Number) then skip to default
+			//    subtract low from value
+			//    if (value is not int) then skip to default
+			// 
+			// OPTIMIZEME: avoid type tests if the type is known and if we've verified that
+			// the JIT does not perform that optimization.  (It might, but it would have to
+			// track the type from the original expression through tmp, and ignore all the
+			// coerce_a instructions, so it's unlikely that it's currently performing it.)
+
+			if (low != 0) {
+				cogen->I_getlocal(tmp);
+				cogen->I_istype(compiler->ID_Number);
+				cogen->I_iffalse(Ldefault);
+
+				cogen->I_getlocal(tmp);
+				cogen->I_pushint(cogen->emitInt(low));
+				cogen->I_subtract();
+				cogen->I_coerce_a();
+				cogen->I_setlocal(tmp);
+			}
 			
-			for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
-				let c = cases[i];
-				let e = c.expr;
-				
-				if (e == null) {
-					asm.I_label(Ldef);
-					asm.I_pop();
-					asm.I_label(Ldefault);
-					ldef_emitted = true;
-					for ( let j=0, jlimit=Lhandled.length ; j < jlimit ; j++ )
-						if (!Lhandled[j])
-							asm.I_label(Lcases[j]);
+			cogen->I_getlocal(tmp);
+			cogen->I_istype(compiler->ID_int);
+			cogen->I_iffalse(Ldefault);
+
+			cogen->I_getlocal(tmp);
+			cogen->I_coerce_i();		// not redundant, the representation could have been Number
+			cogen->I_lookupswitch(Ldefault, Lcase, ncases);
+			
+			for ( Seq<CaseClause*>* cases = this->cases ; cases != NULL ; cases = cases->tl ) {
+				CaseClause* c = cases->hd;
+				Expr* e = c->expr;
+
+				if (e == NULL) {
+					AvmAssert(Ldefault != NULL);
+					cogen->I_label(Ldefault);
+					Ldefault = NULL;
 				}
 				else {
-					assert(e is LiteralInt);
-					
+					AvmAssert(e->tag() == TAG_literalInt);
+					int32_t v = ((LiteralInt*)e)->value - low;
+
 					// There might be duplicate case selector values, but only the first one counts.
-					if (Lcases[e.intValue - low] !== false) {
-						asm.I_label(Lcases[e.intValue - low]);
-						Lcases[e.intValue - low] = false;
+					if (Lcase[v] != NULL) {
+						cogen->I_label(Lcase[v]);
+						Lcase[v] = NULL;
 					}
 				}
 				
-				let stmts = c.stmts;
-				for ( let j=0, jlimit=stmts.length ; j < jlimit ; j++ )
-					cgStmt(nctx, stmts[j] );
+				for ( Seq<Stmt*>* stmts = c->stmts ; stmts != NULL ; stmts = stmts->tl )
+					stmts->hd->cogen(cogen, &nctx);
 			}
 			
-			// If there was not a default case then map unhandled case
-			// values to this point.
+			if (Ldefault != NULL)
+				cogen->I_label(Ldefault);
 			
-			if (!has_default) {
-				for ( let j=0, jlimit=Lhandled.length ; j < jlimit ; j++ )
-					if (!Lhandled[j])
-						asm.I_label(Lcases[j]);
-			}
-			
-			if (!ldef_emitted) {
-				asm.I_label(Ldef);
-				asm.I_pop();
-			}
-			asm.I_label(Lbreak);
-			 */
+			cogen->I_label(Lbreak);
+			cogen->I_kill(tmp);
 		}
 		
 		void SwitchStmt::cogenSlow(Cogen* cogen, Ctx* ctx)
@@ -872,10 +893,6 @@ namespace avmplus
 			Label* Lend = cogen->newLabel();
 			cogen->I_jump(Lend);
 
-			// More general than we need it or indeed can support for ES3, so catch the problem
-			// in debug mode at least.
-			AvmAssert(this->catches == NULL || this->catches->tl == NULL);
-
 			for( Seq<CatchClause*>* catches = this->catches ; catches != NULL ; catches = catches->tl )
 				cgCatch(cogen, ctx, code_start, code_end, Lend, catches->hd);
 			
@@ -888,7 +905,7 @@ namespace avmplus
 			uint32_t catch_idx = cogen->emitException(code_start,
 													  code_end,
 													  cogen->getCodeLength(),
-													  0, 
+													  cogen->emitTypeName(compiler, catchClause->type_name), 
 													  cogen->abc->addQName(compiler->NS_public, cogen->emitString(catchClause->name)));
 			
 			cogen->startCatch();

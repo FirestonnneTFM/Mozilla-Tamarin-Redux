@@ -144,7 +144,7 @@ namespace avmplus
 					break;
 				case TAG_computedName:
 					if (ns_wildcard)
-						compiler->syntaxError(qname->pos, "Illegal qualified name");
+						compiler->syntaxError(qname->pos, SYNTAXERR_ILLEGAL_QNAME);
 					namereg = cogen->getTemp();
 					((ComputedName*)name)->expr->cogen(cogen);
 					cogen->I_setlocal(namereg);
@@ -523,7 +523,8 @@ namespace avmplus
 			while (*t != '/')
 				t--;
 			
-			// FIXME: semantics: creating a new RegExp object every time is not compatible with ES3
+			// Creating a new RegExp object every time is not compatible with ES3, but it is
+			// what ASC does, and with luck ES3.1 will change to match this behavior.
 			//
 			// FIXME: semantics: findpropstrict(""::RegExp) is not quite right here.
 			// Doing so creates a spoofing hole / surprising trap.  We want an OP_newregexp instruction.

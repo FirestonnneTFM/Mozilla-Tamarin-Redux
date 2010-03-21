@@ -342,7 +342,7 @@ namespace avmplus
 		void Parser::xmlAssert(XmlContext* ctx, Token t, Escapement esc)
 		{
 			if (T0 != t)
-				compiler->syntaxError(position(), "Unexpected token in XML parsing");
+				compiler->syntaxError(position(), SYNTAXERR_UNEXPECTED_TOKEN_XML);
 			switch (t) {
 				case T_XmlProcessingInstruction:
 				case T_XmlComment:

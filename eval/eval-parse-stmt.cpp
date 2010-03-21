@@ -78,7 +78,7 @@ namespace avmplus
 						return stmt;
 					}
 					else {
-						compiler->syntaxError(position(), "'default' not expected here.");
+						compiler->syntaxError(position(), SYNTAXERR_DEFAULT_NOT_EXPECTED);
 						/*NOTREACHED*/
 						return NULL;
 					}
@@ -152,7 +152,7 @@ namespace avmplus
 													   ALLOC(LiteralFunction, (fn))))));
 					}
 					else {
-						compiler->syntaxError(position(), "Function definitions cannot be block-local.");
+						compiler->syntaxError(position(), SYNTAXERR_NO_FUNCTIONS_IN_BLOCKS);
 						/*NOTREACHED*/
 						return NULL;
 					}
@@ -185,7 +185,7 @@ namespace avmplus
 					return;
 				default:
 					if (!newline ())
-						compiler->syntaxError(position(), "Expecting semicolon or newline, found %d", (int)hd());
+						compiler->syntaxError(position(), SYNTAXERR_SEMICOLON_OR_NEWLINE);
 					// Inserting it
 					return;
 			}
@@ -250,7 +250,7 @@ namespace avmplus
 				if (!is_const)
 					addVarBinding(name, type_name);
 				if (is_const && hd() != T_Assign)
-					compiler->syntaxError(*pos, "'const' bindings must be initialized");
+					compiler->syntaxError(*pos, SYNTAXERR_CONST_INIT_REQD);
 				if (match(T_Assign)) {
 					Expr* init = assignmentExpression(flags);
 					Expr* lhs = ALLOC(QualifiedName, (NULL, ALLOC(SimpleName, (name)), false, *pos));
@@ -279,7 +279,7 @@ namespace avmplus
 			uint32_t pos = position();
 			eat(T_Use);
 			if (!(hd() == T_Identifier && identValue() == compiler->SYM_namespace))
-				compiler->syntaxError(pos, "Illegal 'use' directive.");
+				compiler->syntaxError(pos, SYNTAXERR_ILLEGAL_USE);
 			eat(T_Identifier);
 			Str* ns = identifier();
 			return ALLOC(UseNamespaceStmt, (pos, ns));
@@ -329,11 +329,11 @@ namespace avmplus
 			eat (T_Return);
 			uint32_t pos = position();
 			if (topRib->tag != RIB_Function)
-				compiler->syntaxError(pos, "'return' statement only allowed inside a function.");
+				compiler->syntaxError(pos, SYNTAXERR_RETURN_OUTSIDE_FN);
 			Expr* expr = NULL;
 			if (noNewline()) {
 				if (topRib->is_void)
-					compiler->syntaxError(pos, "'void' function cannot return a value.");
+					compiler->syntaxError(pos, SYNTAXERR_VOIDFN_RETURNS_VALUE);
 				expr = commaExpression(0);
 			}
 			return ALLOC(ReturnStmt, (pos, expr));
@@ -371,7 +371,7 @@ namespace avmplus
 			setUsesDefaultXmlNamespace();
 			return ALLOC(DefaultXmlNamespaceStmt, (pos, commaExpression(0)));
 		failure:
-			compiler->syntaxError(pos, "Expected 'default xml namespace'");
+			compiler->syntaxError(pos, SYNTAXERR_EXPECT_DXNS);
 			/*NOTREACHED*/
 			return NULL;
 		}
@@ -437,7 +437,7 @@ namespace avmplus
 			
 			if (match(T_In)) {
 				if (numbindings > 1)
-					compiler->syntaxError(pos, "Only one variable binding allowed in for-in");
+					compiler->syntaxError(pos, SYNTAXERR_FOR_IN_ONEBINDING);
 
 				Expr* objexpr = commaExpression(0);
 				eat (T_RightParen);
@@ -448,7 +448,7 @@ namespace avmplus
 			}
 			else {
 				if (is_each)
-					compiler->syntaxError(pos, "'for each' requires use of the 'in' form.");
+					compiler->syntaxError(pos, SYNTAXERR_FOR_EACH_REQS_IN);
 
 				eat(T_Semicolon);
 				Expr* test = hd() == T_Semicolon ? NULL : commaExpression(0);
@@ -493,7 +493,7 @@ namespace avmplus
 						eat(T_Default);
 						eat(T_Colon);
 						if (hasDefault)
-							compiler->syntaxError(position(), "Duplicate 'default' clause in 'switch'");
+							compiler->syntaxError(position(), SYNTAXERR_DUPLICATE_DEFAULT);
 						hasDefault = true;
 						cases.addAtEnd(last = ALLOC(CaseClause, (0, NULL)));
 						break;
@@ -510,7 +510,7 @@ namespace avmplus
 					just_a_statement:
 					default: {
 						if (last == NULL)
-							compiler->syntaxError(position(), "Expecting 'case' or 'default'");
+							compiler->syntaxError(position(), SYNTAXERR_EXPECT_CASE_OR_DEFAULT);
 						AvmAssert(last->stmts == NULL);
 						SeqBuilder<Stmt*> stmts(allocator);
 						while (hd() != T_RightBrace && hd() != T_Case && hd() != T_Default)

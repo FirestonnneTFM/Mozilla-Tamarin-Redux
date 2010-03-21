@@ -65,12 +65,20 @@ uint8_t* emitS24(uint8_t* out, int32_t val);
 uint8_t* emitDouble(uint8_t* out, double d);
 uint8_t* emitUtf8(uint8_t* out, Str* s);
 
+int32_t readS24(uint8_t* in);
+
 void formatUtf8(char* buf, size_t bufsiz, const wchar* s);
 
 #ifdef DEBUG
 // Get up to limit-1 characters from s into buf, chop high bits, NUL-terminate, return buf
 char* getn(char* buf, const Str* s, size_t limit);
 #endif
+
+inline uint32_t min(uint32_t a, uint32_t b) { return a < b ? a : b; }
+inline uint32_t max(uint32_t a, uint32_t b) { return a > b ? a : b; }
+
+inline int32_t min(int32_t a, int32_t b) { return a < b ? a : b; }
+inline int32_t max(int32_t a, int32_t b) { return a > b ? a : b; }
 
 /**
  * Convenience wrapper for accumulating string values for

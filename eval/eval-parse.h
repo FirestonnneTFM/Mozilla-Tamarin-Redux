@@ -253,6 +253,14 @@ enum Tag {
 	TAG_objectRef,				// instance of ObjectRef
 	TAG_qualifiedName,			// instance of QualifiedName
 	TAG_literalString,			// instance of LiteralString
+	TAG_literalUndefined,
+	TAG_literalNull,
+	TAG_literalBoolean,
+	TAG_literalInt,
+	TAG_literalUInt,
+	TAG_literalDouble,
+	TAG_literalRegExp,
+	TAG_literalFunction
 };
 
 // Tags returned from NameComponent::tag()
@@ -358,18 +366,21 @@ class LiteralUndefined : public Expr {
 public:
 	LiteralUndefined(uint32_t pos) : Expr(pos) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalUndefined; }
 };
 
 class LiteralNull : public Expr {
 public:
 	LiteralNull(uint32_t pos) : Expr(pos) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalNull; }
 };
 
 class LiteralInt : public Expr {
 public:
 	LiteralInt(int32_t value, uint32_t pos) : Expr(pos), value(value) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalInt; }
 	const int32_t value;
 };
 
@@ -377,6 +388,7 @@ class LiteralUInt : public Expr {
 public:
 	LiteralUInt(uint32_t value, uint32_t pos) : Expr(pos), value(value) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalUInt; }
 	const uint32_t value;
 };
 
@@ -384,6 +396,7 @@ class LiteralDouble : public Expr {
 public:
 	LiteralDouble(double value, uint32_t pos) : Expr(pos), value(value) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalDouble; }
 	const double value;
 };
 
@@ -391,6 +404,7 @@ class LiteralBoolean : public Expr {
 public:
 	LiteralBoolean(bool value, uint32_t pos) : Expr(pos), value(value) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalBoolean; }
 	const bool value;
 };
 
@@ -406,6 +420,7 @@ class LiteralRegExp : public Expr {
 public:
 	LiteralRegExp(Str* value, uint32_t pos) : Expr(pos), value(value) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalRegExp; }
 	Str* const value;
 };
 
@@ -413,6 +428,7 @@ class LiteralFunction : public Expr {
 public:
 	LiteralFunction(FunctionDefn* function) : function(function) {}
 	virtual void cogen(Cogen* cogen);
+	virtual Tag tag() const { return TAG_literalFunction; }
 	FunctionDefn* const function;
 };
 
@@ -744,8 +760,8 @@ class SwitchStmt : public Stmt {
 public:
 	SwitchStmt(uint32_t pos, Expr* expr, Seq<CaseClause*>* cases) : Stmt(pos), expr(expr), cases(cases) {}
 	virtual void cogen(Cogen* cogen, Ctx* ctx);
-	bool analyze(int32_t* low, int32_t* high, bool* has_default);
-	void cogenFast(Cogen* cogen, Ctx* ctx, int32_t low, int32_t high, bool has_default);
+	bool analyze(int32_t* low, int32_t* high);
+	void cogenFast(Cogen* cogen, Ctx* ctx, int32_t low, int32_t high);
 	void cogenSlow(Cogen* cogen, Ctx* ctx);
 	Expr* const expr;
 	Seq<CaseClause*>* const cases;
@@ -755,7 +771,7 @@ class CaseClause {
 public:
 	CaseClause(uint32_t pos, Expr* expr) : pos(pos), expr(expr), stmts(NULL) {}
 	uint32_t pos;
-	Expr* const expr;
+	Expr* const expr;	// NULL denotes a default clause
 	Seq<Stmt*>* stmts;
 };
 

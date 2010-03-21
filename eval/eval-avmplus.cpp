@@ -47,7 +47,7 @@ namespace avmplus
 	{
 	public:
 		AvmplusHostContext(AvmCore* core, Toplevel* toplevel)
-			: core(core)
+			: HostContext(core)
 			, toplevel(toplevel)
 			, nextstring(0)
 		{
@@ -64,7 +64,6 @@ namespace avmplus
 		ScriptBuffer script_buffer;
 
 	private:
-		AvmCore* const core;
 		Toplevel* const toplevel;
 		wchar* strings[10];
 		int nextstring;
@@ -83,7 +82,7 @@ namespace avmplus
 			throwInternalError("includes too deeply nested");
 		StUTF16String str(core->readFileForEval(core->newStringUTF16(basename), core->newStringUTF16(filename)));	// return value is already NUL-terminated
 		wchar *s = new wchar[str.length()];
-		memcpy(s, str.c_str(), str.length()*sizeof(wchar));
+		VMPI_memcpy(s, str.c_str(), str.length()*sizeof(wchar));
 		*inputlen = str.length();
 		strings[nextstring++] = s;
 		return s;
@@ -109,7 +108,7 @@ namespace avmplus
 	void AvmplusHostContext::doubleToString(double d, char* buf, size_t bufsiz)
 	{
 		StUTF8String s(MathUtils::convertDoubleToString(core, d));
-		strncpy(buf, s.c_str(), bufsiz);
+		VMPI_strncpy(buf, s.c_str(), bufsiz);
 		buf[bufsiz-1] = 0;
 	}
 
