@@ -97,6 +97,7 @@ namespace MMgc
 		useVirtualMemory(VMPI_useVirtualMemory()),
 		trimVirtualMemory(true),
 		mergeContiguousRegions(VMPI_canMergeContiguousRegions()),
+        sloppyCommit(VMPI_canCommitAlreadyCommittedMemory()),
 		verbose(false),
 		returnMemory(true),
 		gcstats(false), // tracking
@@ -981,183 +982,183 @@ namespace MMgc
 		HeapBlock *freelist = &freelists[startList];
 
 		HeapBlock *decommittedSuitableBlock = NULL;
-		HeapBlock *blockToUse = NULL;
-
+        
+        // Search for a big enough block in the free lists
+        
 		for (uint32_t i = startList; i < kNumFreeLists; i++)
 		{
-			// Search for a big enough block in free list
 			HeapBlock *block = freelist;
 			while ((block = block->next) != freelist)
 			{
-				if (block->size >= size && block->committed) 
-				{
-					blockToUse = block;
-					goto foundone;
+                // Prefer a single committed block that is at least large enough.
+                
+				if (block->size >= size && block->committed) {
+                    RemoveFromList(block);
+                    return AllocCommittedBlock(block, size, zero);
 				}
-
-				if(config.useVirtualMemory)
-				{
-					// if the block isn't committed see if this request can be met with by committing
-					// it and combining it with its neighbors
-					if(!block->committed && !decommittedSuitableBlock)
-					{
-						size_t totalSize = block->size;
-						
-						// first try predecessors
-						HeapBlock *firstFree = block;
-						
-						// loop because we could have interleaved committed/non-committed blocks
-						while(totalSize < size && firstFree->sizePrevious != 0)
-						{	
-							HeapBlock *prevBlock = firstFree - firstFree->sizePrevious;
-							if(!prevBlock->inUse() && prevBlock->size > 0) {
-								totalSize += prevBlock->size;
-								firstFree = prevBlock;
-							} else {
-								break;
-							}
-						}
-						
-						if(totalSize >= size) {
-							decommittedSuitableBlock = firstFree;
-						} else {
-							// now try successors
-							HeapBlock *nextBlock = block + block->size;
-							while(nextBlock->size > 0 && !nextBlock->inUse() && totalSize < size) {
-								totalSize += nextBlock->size;
-								nextBlock = nextBlock + nextBlock->size;
-							}
-							
-							if(totalSize > size) {
-								decommittedSuitableBlock = firstFree;
-							}
-						}
-					}
-				}
-			}
-			freelist++;
-		}	
-		
-	foundone:
-
-		if(blockToUse)
+                
+                // Look for a sequence of decommitted and committed blocks that together would
+                // be large enough, in case a single committed block can't be found.
+                
+				if(config.useVirtualMemory && decommittedSuitableBlock == NULL && !block->committed)
+                {
+                    size_t totalSize = block->size;
+                    HeapBlock *firstFree = block;
+                    
+                    // Coalesce with predecessors
+                    while(totalSize < size && firstFree->sizePrevious != 0)
+                    {	
+                        HeapBlock *prevBlock = firstFree - firstFree->sizePrevious;
+                        if(prevBlock->inUse() || prevBlock->size == 0)
+                            break;
+                        totalSize += prevBlock->size;
+                        firstFree = prevBlock;
+                    }
+                    
+                    // Coalesce with successors
+                    HeapBlock *nextBlock = block + block->size;
+                    while (totalSize < size && !(nextBlock->inUse() || nextBlock->size == 0)) {
+                        totalSize += nextBlock->size;
+                        nextBlock = nextBlock + nextBlock->size;
+                    }
+                    
+                    // Keep it if it's large enough
+                    if(totalSize >= size)
+                        decommittedSuitableBlock = firstFree;
+                }
+            }
+            freelist++;
+        }
+        
+        // We only get here if we couldn't find a single committed large enough block.
+        
+		if (decommittedSuitableBlock != NULL)
+            return AllocCommittedBlock(CreateCommittedBlock(decommittedSuitableBlock, size),
+                                       size,
+                                       zero);
+        
+        return NULL;
+    }
+    
+    GCHeap::HeapBlock* GCHeap::AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero)
+    {
+        GCAssert(block->committed);
+        GCAssert(block->size >= size);
+        GCAssert(block->inUse());
+        
+        if(block->size > size)
 		{				
-			RemoveFromList(blockToUse);
+            HeapBlock *newBlock = Split(block, size);
+            AddToFreeList(newBlock);
+        }
+        
+        CheckFreelist();
+        
+        zero = block->dirty && zero;
+        
+#ifdef _DEBUG
+        if (!block->dirty)
+        {
+            union {
+                const char* base_c;
+                const uint32_t* base_u;
+            };
+            base_c = block->baseAddr;
+            GCAssert(*base_u == 0);
+        }
+#endif
+        return block;
+    }
 
-			if(blockToUse->size > size)
-			{
-				HeapBlock *newBlock = Split(blockToUse, size);
-							
-				// Add the newly created block to the free list
-				AddToFreeList(newBlock);
-			}
-							
-			CheckFreelist();
-			
-			zero = blockToUse->dirty && zero;
-			
-			#ifdef _DEBUG
-			if (!blockToUse->dirty)
-			{
-				union {
-					const char* base_c;
-					const uint32_t* base_u;
-				};
-				base_c = blockToUse->baseAddr;
-				GCAssert(*base_u == 0);
-			}
-			#endif
-			return blockToUse;
-		}
+    // Turn a sequence of committed and uncommitted blocks into a single committed
+    // block that's at least large enough to satisfy the request.
 
-		if(config.useVirtualMemory && decommittedSuitableBlock)
-		{
-			// first handle case where its too big
-			if(decommittedSuitableBlock->size > size)
-			{				
-				size_t toCommit = size > kMinHeapIncrement ? size : kMinHeapIncrement;
+    GCHeap::HeapBlock* GCHeap::CreateCommittedBlock(HeapBlock* block, size_t size)
+    {
+        RemoveFromList(block);
+        
+        // If the first block is too small then coalesce it with the following blocks
+        // to create a block that's large enough.  Some parts of the total block may
+        // already be committed.  If the platform allows it we commit the entire
+        // range with one call even if parts were committed before, on the assumption
+        // that that is faster than several commit() calls, one for each decommitted
+        // block.  (We have no current data to support that; now == 201-03-19.)
+        
+        if(block->size < size)
+        {				
+            size_t amountRecommitted = block->committed ? 0 : block->size;
+            bool dirty = block->dirty;
+            
+            while(block->size < size)
+            {
+                // Coalesce the next block into this one.
+                
+                HeapBlock *nextBlock = block + block->size;
+                RemoveFromList(nextBlock);
+                
+                if (nextBlock->committed)
+                    dirty = dirty || nextBlock->dirty;
+                else
+                {
+                    if (block->size + nextBlock->size >= size)  // Last block?
+                        PruneDecommittedBlock(nextBlock, block->size + nextBlock->size, size);
+                    
+                    amountRecommitted += nextBlock->size;
 
-				if(toCommit > decommittedSuitableBlock->size)
-					toCommit = decommittedSuitableBlock->size;
+                    if (!config.sloppyCommit)
+                        Commit(nextBlock);
+                }
+                    
+                block->size += nextBlock->size;
+                
+                nextBlock->size = 0;
+                nextBlock->baseAddr = 0;
+                nextBlock->sizePrevious = 0;
+            }
+            
+            (block + block->size)->sizePrevious = block->size;
+            
+            GCAssert(amountRecommitted > 0);
 
-				RemoveFromList(decommittedSuitableBlock);
-				
-				// first split off part we're gonna commit
-				if(decommittedSuitableBlock->size > toCommit) {
-					HeapBlock *newBlock = Split(decommittedSuitableBlock, toCommit);
-
-					// put the still uncommitted part back on freelist
-					AddToFreeList(newBlock);
-				}
-				
-				Commit(decommittedSuitableBlock);
-
-				if(toCommit > size) {
-					HeapBlock *newBlock = Split(decommittedSuitableBlock, size);
-					AddToFreeList(newBlock);
-				}
-			}
-			else // too small
-			{
-				// need to stitch blocks together committing uncommitted blocks
-				HeapBlock *block = decommittedSuitableBlock;
-				RemoveFromList(block);
-
-				size_t amountRecommitted = block->committed ? 0 : block->size;
-
-				while(block->size < size)
-				{
-					HeapBlock *nextBlock = block + block->size;
-
-					RemoveFromList(nextBlock);
-					
-					// Increase size of current block
-					block->size += nextBlock->size;
-					amountRecommitted += nextBlock->committed ? 0 : nextBlock->size;
-
-					nextBlock->size = 0;
-					nextBlock->baseAddr = 0;
-					nextBlock->sizePrevious = 0;
-
-					block->dirty |= nextBlock->dirty;
-				}
-
-				GCAssert(amountRecommitted > 0);
-
-				if(!VMPI_commitMemory(block->baseAddr, block->size * kBlockSize)) 
-				{
-					GCAssert(false);
-				}
-				if(config.verbose)
-					GCLog("recommitted %d pages\n", amountRecommitted);
-				numDecommitted -= amountRecommitted;
-				block->committed = true;
-
-				GCAssert(decommittedSuitableBlock->size >= size);
-
-				// split last block
-				if(block->size > size)
-				{
-					HeapBlock *newBlock = Split(block, size);
-					AddToFreeList(newBlock);
-				}
-			}
-
-			GCAssert(decommittedSuitableBlock->size == size);
-
-			// update sizePrevious in next block
-			HeapBlock *nextBlock = decommittedSuitableBlock + size;
-			nextBlock->sizePrevious = size;
-
-			CheckFreelist();
-
-			return decommittedSuitableBlock;
-		}
-	
-		CheckFreelist();
-		return 0;
+            if (config.sloppyCommit)
+                Commit(block);
+            block->dirty = dirty;
+        }
+        else
+        {
+            PruneDecommittedBlock(block, block->size, size);
+            Commit(block);
+        }
+        
+        GCAssert(block->size >= size);
+        
+        CheckFreelist();
+        
+        return block;
 	}
 
+    // If the tail of a coalesced block is decommitted and committing it creates
+    // a block that's too large for the request then we may wish to split the tail
+    // before committing it in order to avoid committing memory we won't need.
+    //
+    // 'available' is the amount of memory available including the memory in 'block',
+    // and 'request' is the amount of memory required.
+
+    void GCHeap::PruneDecommittedBlock(HeapBlock* block, size_t available, size_t request)
+    {
+        GCAssert(available >= request);
+        GCAssert(!block->committed);
+        
+        size_t toCommit = request > kMinHeapIncrement ? request : kMinHeapIncrement;
+        size_t leftOver = available - request;
+        
+        if (available > toCommit && leftOver > 0)
+        {
+            HeapBlock *newBlock = Split(block, block->size - leftOver);
+            AddToFreeList(newBlock);
+        }
+    }
+    
 	GCHeap::HeapBlock *GCHeap::Split(HeapBlock *block, size_t size)
 	{
 		GCAssert(block->size > size);
@@ -1179,20 +1180,19 @@ namespace MMgc
 
 	void GCHeap::Commit(HeapBlock *block)
 	{
-		if(!block->committed)
-		{
-			if(!VMPI_commitMemory(block->baseAddr, block->size * kBlockSize)) 
-			{
-				GCAssert(false);
-			}
-			if(config.verbose) {
-				GCLog("recommitted %d pages\n", block->size);
-				DumpHeapRep();
-			}
-			numDecommitted -= block->size;
-			block->committed = true;
-			block->dirty = false;
-		}
+		GCAssert(config.sloppyCommit || !block->committed);
+        
+        if(!VMPI_commitMemory(block->baseAddr, block->size * kBlockSize)) 
+        {
+            GCAssert(false);
+        }
+        if(config.verbose) {
+            GCLog("recommitted %d pages\n", block->size);
+            DumpHeapRep();
+        }
+        numDecommitted -= block->size;
+        block->committed = true;
+        block->dirty = false;
 	}
 
 #ifdef _DEBUG

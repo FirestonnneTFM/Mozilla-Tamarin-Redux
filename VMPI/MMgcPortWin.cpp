@@ -70,6 +70,11 @@ bool VMPI_canMergeContiguousRegions()
 	return false;
 }
 
+bool VMPI_canCommitAlreadyCommittedMemory()
+{
+    return true;
+}
+
 bool VMPI_useVirtualMemory()
 {
 	return true;

@@ -138,6 +138,11 @@ bool VMPI_canMergeContiguousRegions()
 	return false;
 }
 
+bool VMPI_canCommitAlreadyCommittedMemory()
+{
+    return false;
+}
+
 bool VMPI_useVirtualMemory()
 {
 #ifdef USE_RCHUNK

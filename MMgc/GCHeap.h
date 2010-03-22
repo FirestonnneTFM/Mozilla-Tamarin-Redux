@@ -60,15 +60,39 @@ namespace MMgc
 		 * notifications and engage collection activities
 		 */
 		size_t heapSoftLimit;
+
 		/**
 		 * If the application wants the allocator to exit when memory
 		 * runs out and reclamation efforts fail set this to a
 		 * non-zero value.   Defaults to zero.
 		 */
 		uint32_t OOMExitCode;
+        
+        /**
+         * If useVirtualMemory is true then we use virtual memory (reserve/commit/decommit/unreserve)
+         * for GCHeap memory.  Otherwise we go through aligned allocation/deallocation platform
+         * interfaces.
+         */
 		bool useVirtualMemory;
+        
+        /**
+         * If trimVirtualMemory is true then we try to reduce the use of virtual address
+         * space by deallocating regions that have no used blocks in them.
+         */
 		bool trimVirtualMemory;
+        
+        /**
+         * If mergeContiguousRegions is true then we merge adjoining regions into a single
+         * region.  This is currently (now == 2010-03-19) unused.
+         */
 		bool mergeContiguousRegions;
+
+        /**
+         * If sloppyCommit is true then VMPI_commitMemory() and VMPI_decommitMemory()
+         * can operate on ranges of memory containing both committed and decommitted blocks.
+         */
+        bool sloppyCommit;
+
 		bool verbose;
 		bool returnMemory;
 		bool gcstats;
@@ -352,7 +376,10 @@ namespace MMgc
 		 * Allocates a block from the heap.
 		 * @param size the number of pages (kBlockSize bytes apiece)
 		 *             to allocate.
-		 * @return pointer to beginning of block, or NULL if failed.
+         * @param flags  The allocation flags
+         *
+		 * @return pointer to beginning of block, or NULL if kCanFail was in flags
+         * and the allocation failed.
 		 */
 		void *Alloc(size_t size, uint32_t flags=flags_Alloc);
         
@@ -764,6 +791,9 @@ namespace MMgc
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
 
 		HeapBlock *AllocBlock(size_t size, bool& zero);
+        HeapBlock* AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero);
+        HeapBlock* CreateCommittedBlock(HeapBlock* block, size_t size);
+        void PruneDecommittedBlock(HeapBlock* block, size_t available, size_t request);
 		void FreeBlock(HeapBlock *block);
 		void FreeAll();
 

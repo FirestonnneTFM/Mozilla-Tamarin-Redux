@@ -219,6 +219,18 @@ extern size_t		VMPI_getPrivateResidentPageCount();
 extern bool			VMPI_canMergeContiguousHeapRegions();
 
 /**
+ * @return true if VMPI_commitMemory can operate on a memory range that contains a
+ * mixture of decommitted and already-committed memory, /and/ if VMPI_decommitMemory
+ * similarly can operate on a memory range that contains a mixture of committed
+ * and already-decommitted memory.
+ *
+ * A no-op if virtual memory is not to be used.
+ *
+ * True on most platforms, known to be false on Symbian.
+ */
+extern bool VMPI_canCommitAlreadyCommittedMemory();
+
+/**
 * This method is used to reserve region(s) of memory, i.e. one or more memory pages, in the system's virtual address space
 * This method is recommended to be supported on platforms with virtual memory
 * @param address optional argument, indicating the base address of the region to be reserved.
