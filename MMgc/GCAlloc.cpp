@@ -287,7 +287,7 @@ namespace MMgc
 			// the mark bits correctly.
 			
 			b->firstFree = b->items;
-			void** p = (void**)b->items;
+			void** p = (void**)(void*)b->items;
 			int limit = m_itemsPerBlock-1;
 #ifdef MMGC_HOOKS
 			GCHeap* heap = GCHeap::GetGCHeap();
@@ -301,7 +301,7 @@ namespace MMgc
 					heap->PseudoFreeHook(GetUserPointer(p), m_itemSize - DebugSize(), 0xba);
 #endif
 				p[0] = (char*)p + m_itemSize;
-				p = (void**)((char*)p + m_itemSize);
+				p = (void**)(void*)((char*)p + m_itemSize);
 			}
 #ifdef MMGC_HOOKS
 			if(heap->HooksEnabled())
