@@ -68,6 +68,19 @@
 
 	// some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
 	//	#pragma warning(error:4820) // 'bytes' bytes padding added after construct 'member_name' (MSFT system headers generate zillions of these, sadly)
+
+/**
+ * Disable PREfast analysis warnings that complain about legitimate usage.
+ */
+#ifdef _PREFAST_
+    // These are triggered by the use of named constants for configuration purposes.
+    // There is nothing wrong with using these in preference to preprocessor conditionalization.
+    #pragma warning(disable:6237)   // (<zero> && <expression>) is always zero
+    #pragma warning(disable:6239)   // (<non-zero constant> && <expression>) always evaluates to the result of <expression>
+
+    // This needs to be fixed, but reflects our generally cavalier treatment of stack overflow
+    #pragma warning(disable:6255)   // _alloca indicates failure by raising a stack overflow exception
+#endif
 #endif
 
 #define VMPI_memcpy			::memcpy
