@@ -46,6 +46,13 @@
 	available on all supported systems.
 */
 
+// Disable MSVC++ PREfast code analysis warnings triggered by template metaprogramming hackery.
+#ifdef _PREFAST_
+#pragma warning(push)
+#pragma warning(disable:6334) // sizeof expression with operator may give unexpected result
+#pragma warning(disable:6285) // result of '||' is always a non-zero constant
+#endif
+
 namespace MMgc
 {
 	template <typename _Type>
@@ -161,5 +168,9 @@ namespace MMgc
 	{
 	};
 }
+
+#ifdef _PREFAST_
+#pragma warning(pop)
+#endif
 
 #endif /* __TypeTraits__ */
