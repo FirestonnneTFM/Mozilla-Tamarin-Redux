@@ -376,7 +376,10 @@ namespace MMgc
 		 * Allocates a block from the heap.
 		 * @param size the number of pages (kBlockSize bytes apiece)
 		 *             to allocate.
-		 * @return pointer to beginning of block, or NULL if failed.
+         * @param flags  The allocation flags
+         *
+		 * @return pointer to beginning of block, or NULL if kCanFail was in flags
+         * and the allocation failed.
 		 */
 		void *Alloc(size_t size, uint32_t flags=flags_Alloc);
         
@@ -788,6 +791,9 @@ namespace MMgc
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
 
 		HeapBlock *AllocBlock(size_t size, bool& zero);
+        HeapBlock* AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero);
+        HeapBlock* CreateCommittedBlock(HeapBlock* block, size_t size);
+        void PruneDecommittedBlock(HeapBlock* block, size_t available, size_t request);
 		void FreeBlock(HeapBlock *block);
 		void FreeAll();
 
