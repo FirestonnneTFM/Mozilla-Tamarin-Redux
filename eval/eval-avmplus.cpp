@@ -99,7 +99,7 @@ namespace avmplus
 		}
 		delete [] strings[i];
 		while (i < nextstring-1) {
-			strings[i] = strings[+1];
+			strings[i] = strings[i+1];
 			i++;
 		}
 		nextstring--;
