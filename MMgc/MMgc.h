@@ -174,6 +174,7 @@ namespace MMgc
 #include "GCWeakRef.h"
 #include "WriteBarrier.h"
 
+#include "GCHashtable-inlines.h"
 #include "FixedAlloc-inlines.h"
 #include "FixedMalloc-inlines.h"
 #include "GCAlloc-inlines.h"
