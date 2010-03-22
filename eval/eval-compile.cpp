@@ -240,7 +240,7 @@ namespace avmplus
 			int k = int(VMPI_strlen(buf));
 			va_list args;
 			va_start(args,fmt);
-			vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
+			VMPI_vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
 			va_end(args);
 			
 			context->throwInternalError(buf);
@@ -248,9 +248,6 @@ namespace avmplus
 		
 		void Compiler::syntaxError(uint32_t lineno, SyntaxError fmt, ...)
 		{
-			va_list args;
-			va_start(args,fmt);
-			
 			const char* fmtstring = syntax_errors[(int)fmt];
 			char buf[500];
 			char lbuf[12];
@@ -265,8 +262,9 @@ namespace avmplus
 				buf[sizeof(buf)-1] = 0;
 			}
 			int k = int(VMPI_strlen(buf));
-			vsnprintf(buf+k, sizeof(buf)-k, fmtstring, args);
-			
+			va_list args;
+			va_start(args,fmt);
+			VMPI_vsnprintf(buf+k, sizeof(buf)-k, fmtstring, args);
 			va_end(args);
 
 			context->throwSyntaxError(buf);

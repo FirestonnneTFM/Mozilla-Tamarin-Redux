@@ -39,6 +39,8 @@
 #ifndef __avmplus_win32_platform__
 #define __avmplus_win32_platform__
 
+#include <stdarg.h>
+
 /**
  * We have avmplus.vcproj compiled with the /W4 warning level
  * which is quite picky.  Disable warnings we don't care about.
@@ -86,8 +88,17 @@
 #define VMPI_strstr			::strstr
 
 #define VMPI_sprintf		::sprintf
-#define VMPI_snprintf		::_snprintf
 #define VMPI_sscanf			::sscanf
+
+// Print rest args into s according to format.  The size of s is n.  A NUL
+// terminator is always written.  Returns the number of characters written,
+// not including the NUL.  (Hence the return value is always 0..n-1.)
+
+int VMPI_snprintf(char *s, size_t n, const char *format, ...);
+
+// As for VMPI_snprintf but with an argument list instead of rest args.
+
+int VMPI_vsnprintf(char *s, size_t n, const char *format, va_list args);
 
 #define VMPI_atoi			::atoi
 // these aren't prefixed b/c off winmo/pcre problems with ? : expressions
@@ -111,10 +122,6 @@
 #endif
 
 #define VMPI_exit           ::exit
-
-#ifdef UNDER_CE
-	#define vsnprintf ::_vsnprintf
-#endif
 
 #include <stddef.h>
 #include <memory.h>

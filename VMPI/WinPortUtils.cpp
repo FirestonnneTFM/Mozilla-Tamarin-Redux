@@ -219,6 +219,42 @@ uint64_t VMPI_getTime()
 	return timeGetTime();
 }
 
+// On Windows, _vsnprintf isn't reliable (no NUL termination) and _vsnprintf_s
+// is not compatible (throws an exception if the format is wrong).  Easy
+// enough to create our own on top of _vsnprintf by adding the terminator
+// and adjusting the return value.
+//
+// ANSI C requires vsnprintf to return the number of characters that would have
+// been printed had the buffer been unrestricted.  The MSVC _vsnprintf does not
+// do that.  Instead, return the number of characters written not including
+// the NUL in all cases.
+
+int VMPI_vsnprintf(char *s, size_t n, const char *format, va_list args)
+{
+	int ret = _vsnprintf(s, n, format, args);
+	if (ret == -1)
+		ret = int(n);
+	if (ret == int(n)) {
+		s[n-1] = 0;
+		ret--;
+	}
+	return ret;
+}
+
+// On Windows, _snprintf isn't reliable (no NUL termination) and _snpritnf_s
+// is not compatible (throws an exception if the format is wrong).  Easy 
+// enough to create our own on top of VMPI_vsnprintf.
+//
+// Return what VMPI_vsnprintf returns; see notes above.
+
+int VMPI_snprintf(char *s, size_t n, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int ret = VMPI_vsnprintf(s, n, format, args);
+	va_end(format);
+	return ret;
+}
 
 void* VMPI_alloc(size_t size)
 {

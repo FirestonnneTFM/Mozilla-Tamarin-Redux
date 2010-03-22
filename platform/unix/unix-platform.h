@@ -58,6 +58,7 @@
 
 #define VMPI_sprintf		::sprintf
 #define VMPI_snprintf		::snprintf
+#define VMPI_vsnprintf		::vsnprintf
 #define VMPI_sscanf			::sscanf
 
 #define VMPI_atoi	::atoi
