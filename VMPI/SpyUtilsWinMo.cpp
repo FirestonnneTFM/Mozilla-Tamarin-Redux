@@ -114,11 +114,6 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 
 #include "windows.h"
 
-#ifdef _MSC_VER
-	#pragma warning(disable: 4995) //disabling warning for deprecated _snprintf
-#endif
-
-
 static uint32_t mmgc_spy_signal = 0;
 
 FILE* spyStream = NULL;
