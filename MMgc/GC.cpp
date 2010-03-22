@@ -1029,6 +1029,14 @@ namespace MMgc
 	{
 		policy.shutdown();
  		allocaShutdown();
+
+		// Do this before calling GCHeap::RemoveGC as GCAutoEnter::Destroy
+		// expect this GC to still be the active GC and GCHeap::RemoveGC clears
+		// the active GC.
+		if(stackEnter != NULL) {
+			stackEnter->Destroy(false);
+		}
+
 		heap->RemoveGC(this);
 		heap->RemoveOOMCallback(this);
 
@@ -1090,10 +1098,6 @@ namespace MMgc
 		zct.Destroy();
         
 		GCAssertMsg(GetNumBlocks() == 0, "GC accounting off");
-
-		if(stackEnter != NULL) {
-			stackEnter->Destroy(false);
-		}
 
 		GCAssertMsg(enterCount == 0, "GC enter/exit paths broken");
 
