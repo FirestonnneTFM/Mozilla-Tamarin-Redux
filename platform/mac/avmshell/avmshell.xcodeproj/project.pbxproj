@@ -458,6 +458,7 @@
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
 		07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcEnv-inlines.h"; path = "../../../core/AbcEnv-inlines.h"; sourceTree = SOURCE_ROOT; };
+		075BA6EE1157D806000BDF13 /* GCHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHashtable-inlines.h"; path = "../../../MMgc/GCHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBD4B107326E4009E599C /* FixedAlloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FixedAlloc-inlines.h"; path = "../../../MMgc/FixedAlloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBD5710732FD9009E599C /* FixedMalloc-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FixedMalloc-inlines.h"; path = "../../../MMgc/FixedMalloc-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075CBE9610739FF5009E599C /* GC-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GC-inlines.h"; path = "../../../MMgc/GC-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -1422,6 +1423,7 @@
 				079DFA950F3A96BD0031D1B4 /* GCGlobalNew.h */,
 				D9AA8808103E1F5E006CE4FC /* GCGlobalNew.cpp */,
 				079DFA960F3A96BD0031D1B4 /* GCHashtable.cpp */,
+				075BA6EE1157D806000BDF13 /* GCHashtable-inlines.h */,
 				079DFA970F3A96BD0031D1B4 /* GCHashtable.h */,
 				079DFA980F3A96BD0031D1B4 /* GCHeap.cpp */,
 				079DFA990F3A96BD0031D1B4 /* GCHeap.h */,
