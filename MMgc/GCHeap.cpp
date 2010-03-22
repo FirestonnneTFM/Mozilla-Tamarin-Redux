@@ -97,6 +97,7 @@ namespace MMgc
 		useVirtualMemory(VMPI_useVirtualMemory()),
 		trimVirtualMemory(true),
 		mergeContiguousRegions(VMPI_canMergeContiguousRegions()),
+        sloppyCommit(VMPI_canCommitAlreadyCommittedMemory()),
 		verbose(false),
 		returnMemory(true),
 		gcstats(false), // tracking
