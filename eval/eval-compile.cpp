@@ -40,9 +40,6 @@
 #ifdef VMCFG_EVAL
 
 #include "eval.h"
-#ifdef _MSC_VER
-#  define snprintf _snprintf
-#endif
 
 namespace avmplus
 {
@@ -156,19 +153,19 @@ namespace avmplus
 			char buf[500];
 			char lbuf[12];
 			if (lineno != 0)
-				sprintf(lbuf, "%d", lineno);
+				VMPI_sprintf(lbuf, "%d", lineno);
 			else
-				strcpy(lbuf, "Unknown");
+				VMPI_strcpy(lbuf, "Unknown");
 			{
 				char fbuf[500];
 				formatUtf8(fbuf, sizeof(fbuf), filename);
-				snprintf(buf, sizeof(buf), "%s:%s: Internal error: ", fbuf, lbuf);
+				VMPI_snprintf(buf, sizeof(buf), "%s:%s: Internal error: ", fbuf, lbuf);
 				buf[sizeof(buf)-1] = 0;
 			}
-			int k = int(strlen(buf));
+			int k = int(VMPI_strlen(buf));
 			va_list args;
 			va_start(args,fmt);
-			vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
+			VMPI_vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
 			va_end(args);
 			
 			context->throwInternalError(buf);
@@ -179,19 +176,19 @@ namespace avmplus
 			char buf[500];
 			char lbuf[12];
 			if (lineno != 0)
-				sprintf(lbuf, "%d", lineno);
+				VMPI_sprintf(lbuf, "%d", lineno);
 			else
-				strcpy(lbuf, "Unknown");
+				VMPI_strcpy(lbuf, "Unknown");
 			{
 				char fbuf[500];
 				formatUtf8(fbuf, sizeof(fbuf), filename);
-				snprintf(buf, sizeof(buf), "%s:%s: Syntax error: ", fbuf, lbuf);
+				VMPI_snprintf(buf, sizeof(buf), "%s:%s: Syntax error: ", fbuf, lbuf);
 				buf[sizeof(buf)-1] = 0;
 			}
 			int k = int(strlen(buf));
 			va_list args;
 			va_start(args,fmt);
-			vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
+			VMPI_vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
 			va_end(args);
 			
 			context->throwSyntaxError(buf);
@@ -233,14 +230,14 @@ namespace avmplus
 			for ( Str* p = strTable[h] ; p != NULL ; p = p->next ) {
 				if (p->hash == h) 
 					if (p->length == nchars)
-						if (memcmp(p->s, chars, sizeof(wchar)*nchars) == 0)
+						if (VMPI_memcmp(p->s, chars, sizeof(wchar)*nchars) == 0)
 							return p;
 			}
 
 			// The string is not known yet
 
 			Str* str = (Str*)allocator->alloc(sizeof(Str) + sizeof(wchar)*(nchars - 1 + 1));	// -1 for the elt in Str, +1 for the NUL
-			memcpy(str->s, chars, sizeof(wchar)*nchars);
+			VMPI_memcpy(str->s, chars, sizeof(wchar)*nchars);
 			str->s[nchars] = 0;
 			str->hash = h;
 			str->ident = ~0U;

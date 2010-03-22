@@ -104,11 +104,6 @@ void WriteOnNamedSignal(const char *name, uint32_t *addr)
 
 #include "windows.h"
 
-#ifdef _MSC_VER
-	#pragma warning(disable: 4995) //disabling warning for deprecated _snprintf
-#endif
-
-
 FILE *HandleToStream(void *handle)
 {
 	return _fdopen(_open_osfhandle((intptr_t)handle, 0), "w");
