@@ -96,6 +96,11 @@ bool VMPI_canMergeContiguousRegions()
 	return true;
 }
 
+bool VMPI_canCommitAlreadyCommittedMemory()
+{
+    return true;
+}
+
 bool VMPI_useVirtualMemory()
 {
 #ifdef MMGC_SPARC
