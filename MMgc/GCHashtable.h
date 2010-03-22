@@ -96,7 +96,7 @@ namespace MMgc
 	private:
 		uint32_t find(const void* key, const void** table, uint32_t tableSize);
 
-		void grow(bool canFail);
+		void grow(bool isRemoval);
 
 		static const void* const DELETED;// = (const void*)1;
 		static const void* EMPTY[4];// = { NULL, NULL, NULL, NULL };

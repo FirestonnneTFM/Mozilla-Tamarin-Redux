@@ -179,8 +179,17 @@ namespace MMgc
 	}
     
 	template <class KEYHANDLER, class ALLOCHANDLER>
-	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::grow(bool canFail)
+	void GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::grow(bool isRemoval)
 	{
+        if (isRemoval)
+        {
+            // Bugzilla 553679: Skip table resizing in a removal situation if the heap
+            // is in an abort state, we don't want to allocate during abort if we can
+            // avoid it, and 'grow' is called when the collector clears its weak references.
+            if (GCHeap::GetGCHeap()->GetStatus() == kMemAbort)
+                return;
+        }
+        
 		uint32_t newTableSize = tableSize;
         
 		uint32_t occupiedSlots = numValues - numDeleted;
@@ -196,7 +205,7 @@ namespace MMgc
 			newTableSize >>= 1;
         
 		const void** newTable;
-		newTable = (const void**)ALLOCHANDLER::alloc(newTableSize*sizeof(const void*), canFail);
+		newTable = (const void**)ALLOCHANDLER::alloc(newTableSize*sizeof(const void*), isRemoval);
 		if (!newTable)
 			return;
 		
