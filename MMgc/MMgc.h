@@ -105,6 +105,12 @@
 	#define REFCOUNT_PROFILING_ARG(x)
 #endif
 
+#ifdef MMGC_MEMORY_PROFILER
+	#define MMGC_MEMORY_PROFILER_ARG(x) , x
+#else
+	#define MMGC_MEMORY_PROFILER_ARG(x)
+#endif
+
 #include "GCDebug.h"
 #include "GCLog.h"
 

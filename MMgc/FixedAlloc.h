@@ -144,6 +144,8 @@ namespace MMgc
 #ifdef _DEBUG
 		bool QueryOwnsObject(const void* item);
 #endif
+
+		void* AllocInline(size_t size, FixedMallocOpts flags=kNone);
 		
 	public:		// Really private, but Symbian compiler requires this structure to be public
 
@@ -201,6 +203,14 @@ namespace MMgc
 
 		bool IsOnFreelist(FixedBlock *b, void *item);
 		bool IsInUse(FixedBlock *b, void *item);
+
+		void* InlineAllocSansHook(size_t size, FixedMallocOpts flags=kNone);
+		static void InlineFreeSansHook(void *item MMGC_MEMORY_PROFILER_ARG(size_t askSize));
+		
+#ifdef MMGC_HOOKS
+		void InlineAllocHook(size_t size, void *item);
+		static void InlineFreeHook(void *ptr MMGC_MEMORY_PROFILER_ARG(size_t& askSize));
+#endif
 	};
 
 	/**
@@ -211,7 +221,8 @@ namespace MMgc
 	{
 		friend class FixedAlloc;
 		friend class FixedMalloc;
-	public:
+	private: // I only exist for the sake of my friends
+
 		FixedAllocSafe(int itemSize, GCHeap* heap);
 		
 		~FixedAllocSafe();
@@ -226,13 +237,12 @@ namespace MMgc
 		
 		static FixedAllocSafe *GetFixedAllocSafe(void *item);
 
-	private:
 		// default ctor used only by FixedMalloc
 		FixedAllocSafe();
-
-        // for explicit destruction from FixedMalloc
-        void Destroy();
-
+		
+		// for explicit destruction from FixedMalloc
+		void Destroy();
+		
 		vmpi_spin_lock_t m_spinlock;
 	};
 

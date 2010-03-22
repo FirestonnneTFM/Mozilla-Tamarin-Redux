@@ -1508,7 +1508,7 @@ namespace MMgc
 
 		// At this point we have adjusted/calculated the final size that would need to be committed. 
 		// We need to check that against the hardlimit to see if we are going to go above it. 
-		if (HardLimitExceeded())
+		if (HardLimitExceeded(size))
 			return false;
 
 		if(config.useVirtualMemory)
