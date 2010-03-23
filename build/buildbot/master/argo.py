@@ -195,7 +195,6 @@ class argo:
     windows_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug", upload="false"))
     windows_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     windows_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
-    windows_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof", args="--enable-shell --enable-perfm", upload="false"))
     windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
                 env={'branch': WithProperties('%s','branch')},
@@ -264,7 +263,6 @@ class argo:
     mac_intel_104_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_104", args="--enable-shell --enable-debug", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_104", args="--enable-shell --enable-debugger", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_104", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
-    mac_intel_104_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof_104", args="--enable-shell --enable-perfm", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_104_ppc", args="--enable-shell --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_104_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin", upload="false"))
     mac_intel_104_compile_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_104_ppc", args="--enable-shell --enable-debug --target=ppc-darwin", upload="false"))
@@ -296,7 +294,6 @@ class argo:
     mac_intel_105_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
-    mac_intel_105_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof", args="--enable-shell --enable-perfm", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Release_PPC", shellname="avmshell_ppc", args="--enable-shell --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Release-wordcode_PPC", shellname="avmshell_wordcode_ppc", args="--enable-shell --enable-wordcode-interp --target=ppc-darwin", upload="false"))
     mac_intel_105_compile_factory.addStep(compile_generic(name="Debug_PPC", shellname="avmshell_d_ppc", args="--enable-shell --enable-debug --target=ppc-darwin", upload="false"))
@@ -442,7 +439,6 @@ class argo:
     linux_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d", args="--enable-shell --enable-debug", upload="false"))
     linux_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s", args="--enable-shell --enable-debugger", upload="false"))
     linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
-    linux_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof", args="--enable-shell --enable-perfm", upload="false"))
     linux_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-cov.sh', WithProperties('%s','revision')],
                 env={'branch': WithProperties('%s','branch')},
@@ -504,7 +500,6 @@ class argo:
     linux_64_compile_factory.addStep(compile_generic(name="Debug", shellname="avmshell_d_64", args="--enable-shell --enable-debug", upload="false"))
     linux_64_compile_factory.addStep(compile_generic(name="ReleaseDebugger", shellname="avmshell_s_64", args="--enable-shell --enable-debugger", upload="false"))
     linux_64_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd_64", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
-    linux_64_compile_factory.addStep(compile_generic(name="Release_vprof", shellname="avmshell-vprof_64", args="--enable-shell --enable-perfm", upload="false"))
     linux_64_compile_factory.addStep(compile_testmedia)
     linux_64_compile_factory.addStep(compile_buildcheck_local)
     linux_64_compile_factory.addStep(util_upload_asteam_local)
@@ -1308,7 +1303,6 @@ class argo:
     windows_performance_factory.addStep(perf_release)
     windows_performance_factory.addStep(perf_release_interp)
     windows_performance_factory.addStep(perf_release_jit)
-    windows_performance_factory.addStep(perf_release_vprof)
     windows_performance_factory.addStep(util_process_clean)
     windows_performance_factory.addStep(bb_lockrelease)
 
@@ -1333,7 +1327,6 @@ class argo:
     mac_performance_factory.addStep(perf_release)
     mac_performance_factory.addStep(perf_release_interp)
     mac_performance_factory.addStep(perf_release_jit)
-    mac_performance_factory.addStep(perf_release_vprof)
     mac_performance_factory.addStep(util_process_clean)
     mac_performance_factory.addStep(bb_lockrelease)
 
@@ -1406,7 +1399,6 @@ class argo:
     linux_performance_factory.addStep(perf_release)
     linux_performance_factory.addStep(perf_release_interp)
     linux_performance_factory.addStep(perf_release_jit)
-    linux_performance_factory.addStep(perf_release_vprof)
     linux_performance_factory.addStep(util_process_clean)
     linux_performance_factory.addStep(bb_lockrelease)
 
