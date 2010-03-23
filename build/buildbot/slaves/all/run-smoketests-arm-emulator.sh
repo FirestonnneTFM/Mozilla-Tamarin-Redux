@@ -49,6 +49,10 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=smokes-arm-emulator.log
+beginSilent
+
 
 ##
 # Download the AVMSHELL if it does not exist
@@ -115,6 +119,8 @@ test "$ret" = "0" ||
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
+
+endSilent
 
 exit $exitcode
 

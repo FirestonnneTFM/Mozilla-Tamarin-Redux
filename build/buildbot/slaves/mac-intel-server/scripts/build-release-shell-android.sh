@@ -48,6 +48,10 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=build-$platform-$shell_release.log
+beginSilent
+
 cd $basedir/platform/android
 test -f avmshell && {
    rm -f ./avmshell
@@ -69,3 +73,5 @@ else
 #    exit 1
     exit 0
 fi
+
+endSilent
