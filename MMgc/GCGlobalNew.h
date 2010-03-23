@@ -336,7 +336,7 @@ namespace MMgc
 #if defined(__GNUC__) || defined(__ARMCC__)
 	// msvc treats char and (u)int8_t as the same but gcc and armcc don't
 	DECLARE_PRIM_ARRAY(char)
-#elif !defined(_MSC_VER)
+#elif !defined(_MSC_VER) && !defined(__SUNPRO_CC)
 #error "Unknown compiler, check whether your compiler compiles with the above declaration, if it does you probably want it"
 #endif
 	DECLARE_PRIM_ARRAY(uint16_t)
