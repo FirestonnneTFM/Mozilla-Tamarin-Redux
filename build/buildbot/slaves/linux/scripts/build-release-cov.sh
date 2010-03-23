@@ -49,7 +49,9 @@
 ##
 . ../all/util-calculate-change.sh $1
 
-
+# silence output if silent=true (function defined in environment.sh)
+logfile=build-release-cov.log
+beginSilent
 
 ##
 # Update the version string
@@ -120,5 +122,8 @@ cd $basedir/core
 hg revert avmplusVersion.h
 
 echo "build succeeded"
+
+endSilent
+
 #rm -rf $basedir/objdir-releasedebugger-cov
 exit 0

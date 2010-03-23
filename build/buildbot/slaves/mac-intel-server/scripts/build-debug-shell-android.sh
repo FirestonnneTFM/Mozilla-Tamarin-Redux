@@ -48,6 +48,10 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=build-$platform-$shell_debug.log
+beginSilent
+
 cd $basedir/platform/android
 test -f avmshell && {
    rm -f ./avmshell
@@ -68,3 +72,5 @@ else
     echo "avmshell was not created"
     exit 1
 fi
+
+endSilent

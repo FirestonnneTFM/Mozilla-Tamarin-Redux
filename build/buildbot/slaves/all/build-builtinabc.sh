@@ -43,10 +43,16 @@
 . ./environment.sh
 
 
+
+
 ##
 # Calculate the change number and change id
 ##
 . ../all/util-calculate-change.sh $1
+
+# silence output if silent=true (function defined in environment.sh)
+logfile=builtinabc.log
+beginSilent
 
 echo basedir=$basedir
 ##
@@ -177,6 +183,8 @@ cp $basedir/shell/$shellABC $buildsdir/${change}-${changeid}/$shellABC
 chmod 777 $buildsdir/${change}-${changeid}/$shellABC
 
 hg status
+
+endSilent
 
 exit 0
 
