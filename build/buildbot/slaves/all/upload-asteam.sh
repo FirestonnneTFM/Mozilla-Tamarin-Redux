@@ -56,9 +56,6 @@
 # Release-wordcode
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_wordcode
 
-# Release-vprof
-. ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_vprof $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_vprof
-
 # Release_Debugger
 . ../all/util-upload-ftp-asteam.sh $buildsdir/$change-${changeid}/$platform/$shell_release_debugger $ftp_asteam/$branch/$change-${changeid}/$platform/$shell_release_debugger
 

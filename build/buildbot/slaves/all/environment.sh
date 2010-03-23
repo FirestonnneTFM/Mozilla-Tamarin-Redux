@@ -62,9 +62,6 @@ export builtinABC=builtin.abc
 # builds for windows mobile (used by emulator)
 export shell_release_arm=avmshell_arm$shell_extension
 
-# builds for -vprof data
-export shell_release_vprof=avmshell-vprof$shell_extension
-export shell_release_vprof_64=avmshell-vprof-64$shell_extension
 
 export shell=avmshell$shell_extension
 export shell_selftest=avmshell$shell_extension
@@ -99,8 +96,6 @@ baselineConfigTimeJIT=${mir}
 baselineBuildTimeJIT=458340
 baselineConfigTimeInterp=${interp}
 baselineBuildTimeInterp=458340
-baselineConfigTimeVprofJIT=${mir}
-baselineBuildTimeVprofJIT=458340
 
 baslineBranchMemory=${branch}
 baselineConfigMemory=
@@ -113,7 +108,6 @@ baselineBuildMemoryInterp=966
 configDefault=
 configJIT=${jit}
 configInterp=${interp}
-configVprofJIT=-vprof${jit}
 
 # List of processes that should NEVER be running when the build is not
 # currently running any tests. This list of process will be killed if the
