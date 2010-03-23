@@ -415,6 +415,7 @@ namespace avmplus
         PrologWriter *prolog;
         LIns* prologLastIns;
         HashMap<int, CodegenLabel*> *blockLabels;
+        LirWriter* redirectWriter;
         verbose_only(VerboseWriter *vbWriter;)
         verbose_only(LInsPrinter* vbNames;)
 #ifdef DEBUGGER
