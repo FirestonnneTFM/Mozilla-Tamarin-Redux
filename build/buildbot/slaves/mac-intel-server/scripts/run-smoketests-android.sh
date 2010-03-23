@@ -48,6 +48,10 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=smokes-android.log
+beginSilent
+
 echo "running android shell remotely on host: $SHELLSERVER"
 test "$SHELLSERVER" = "" && {
     echo "message: ERROR: SHELLSERVER is not set, should be set to the shell socket server"
@@ -115,6 +119,8 @@ $workdir/socketserver-client.py lock release
 exitcode=0
 test "$ret" = "0" ||
    exitcode=1
+
+endSilent
 
 ##
 # Ensure that the system is torn down and clean

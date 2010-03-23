@@ -145,6 +145,7 @@ class RuntestBase:
     rebuildtests = False
     runSource = False # Run the source file (.as, .js) instead of .abc, magically prepend included files
     show_time = False
+    summaryonly = False
     timestampcheck = True
     timestamps = True
     useShell = True
@@ -194,6 +195,8 @@ class RuntestBase:
         print ' -f --forcerebuild  force rebuild all test files'
         print ' -c --config        sets the config string [default OS-tvm]'
         print ' -q --quiet         display minimum output during testrun'
+        print ' -l --log           also log all output to given logfile'
+        print '    --summaryonly   only display final summary'
         print '    --rebuildtests  rebuild the tests only - do not run against VM'
         print '    --showtimes     shows the time for each test'
         print '    --ascargs       args to pass to asc on rebuild of test files'
@@ -212,13 +215,13 @@ class RuntestBase:
     def setOptions(self):
         '''set the valid command line options.
             When subclassing, call this method first, then append options to each list'''
-        self.options = 'vE:a:g:b:s:x:htfc:dq'
+        self.options = 'vE:a:g:b:s:x:htfc:dql:'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
-                   'javaargs='
+                   'javaargs=', 'summaryonly', 'log='
                    ]
 
     def parseOptions(self):
@@ -276,6 +279,13 @@ class RuntestBase:
                     print 'To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net'
             elif o in ('-q', '--quiet'):
                 self.quiet = True
+            elif o in ('--summaryonly',):
+                self.summaryonly = True
+                self.quiet = True
+            elif o in ('-l', '--log'):
+                self.js_output = v
+                self.logFileType = 'txt'
+                self.createOutputFile()
             elif o in ('--html',):
                 self.htmlOutput = True
             elif o in ('--notimecheck',):
@@ -548,7 +558,8 @@ class RuntestBase:
         # and give it a sequence number.
         now = datetime.today()
         for i in count(1):
-            self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
+            if not self.js_output:
+                self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
             if not isfile(self.js_output):
                 break
         
@@ -1189,8 +1200,8 @@ class RuntestBase:
     # cleanup
     #
     def cleanup(self):
-        # Turn off quiet to display summary
-        if self.quiet:
+        # Turn off quiet to display failure summary
+        if self.quiet and not self.summaryonly:
             self.quiet = False
         
         if self.failmsgs:
@@ -1212,6 +1223,10 @@ class RuntestBase:
             self.js_print('\nASSERTIONS:', '', '<br/>')
             for m in self.assertmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
+        
+        
+        if self.quiet and self.summaryonly:
+            self.quiet = False    
         
         if self.rebuildtests:
             if self.ashErrors:

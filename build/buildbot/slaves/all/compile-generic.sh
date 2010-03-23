@@ -52,13 +52,14 @@
 showhelp ()
 {
     echo ""
-    echo "usage: compile-generic.sh <change> <config> <filename>"
-    echo "       <change>   changeset that is going to be built"
-    echo "       <config>   config options passed to configure.py"
-    echo "       <filename> name of the shell, do not include file extenstion"
-    echo "       <boolean> optional, if shell should be uploaded to server"
+    echo "usage: compile-generic.sh <change> <config> <filename> <upload>"
+    echo "       <change>       changeset that is going to be built"
+    echo "       <config>       config options passed to configure.py"
+    echo "       <filename>     name of the shell, do not include file extension"
+    echo "       <upload>       (true|false) upload shell to server"
     exit 1
 }
+
 config=$2
 test "$config" = "" && {
     showhelp
@@ -67,15 +68,20 @@ filename=$3
 test "$filename" = "" && {
     showhelp
 }
+
 upload=$4
 test "$upload" = "true" || {
-    upload=false;
+    upload=false
 }
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=build-$platform-$filename.log
+beginSilent
 
 ##
 # Update the version string
 ##
+
 . ../all/util-update-version.sh
 
 
@@ -93,6 +99,7 @@ mkdir objdir
 cd objdir
 
 python ../configure.py $config
+
 
 echo ""
 echo "*******************************************************************************"
@@ -155,5 +162,8 @@ fi
 
 echo "build succeeded"
 rm -rf $basedir/objdir
+
+endSilent
+
 exit 0
 

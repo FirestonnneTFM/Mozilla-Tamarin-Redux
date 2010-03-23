@@ -97,9 +97,13 @@ else
     export py=$PYTHONWIN
 fi
 
+if ${silent}; then
+    silentoptions="-l acceptance-android-$shell.log --summaryonly"
+fi
+
 export AVM=$workdir/shell-client-android.py
 cd $basedir/test/acceptance
-$py ./runtests.py --notimecheck --threads=1
+$py ./runtests.py --notimecheck --threads=1 ${silentoptions}
 ret=$?
 
 $workdir/socketserver-client.py lock release
@@ -107,6 +111,11 @@ $workdir/socketserver-client.py lock release
 exitcode=0
 test "$ret" = "0" ||
    exitcode=1
+
+if ${silent}; then
+    # upload log to asteam
+    . ../all/util-upload-ftp-asteam.sh acceptance-android-$shell.log $ftp_asteam/$branch/${change}-${changeid}/$platform/
+fi
 
 ##
 # Ensure that the system is torn down and clean

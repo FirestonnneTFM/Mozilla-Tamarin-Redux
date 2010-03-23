@@ -49,6 +49,10 @@
 . ../all/util-calculate-change.sh $1
 
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=smokes.log
+beginSilent
+
 configfile=$2
 test "$configfile" = "" && {
     configfile=./runsmokes.txt
@@ -176,6 +180,8 @@ test "$ret" = "0" ||
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
+
+endSilent
 
 exit $exitcode
 

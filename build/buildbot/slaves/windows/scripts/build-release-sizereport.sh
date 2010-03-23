@@ -49,6 +49,9 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=release-sizereport.log
+beginSilent
 
 ##
 # Make sure that there are no left over directories from previous compile
@@ -109,3 +112,5 @@ test -d objdir && {
     echo Remove directory $basedir/objdir
     rm -rf $basedir/objdir
 }
+
+endSilent

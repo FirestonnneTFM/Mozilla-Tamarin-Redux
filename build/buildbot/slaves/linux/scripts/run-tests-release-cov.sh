@@ -49,6 +49,9 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=coverage-${shell_release_debugger}.log
+beginSilent
 
 ##
 # Download the latest asc.jar if it does not exist
@@ -113,6 +116,7 @@ $bullseyedir/covdir -q
 fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
 cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
 
+endSilent
 
 ##
 # Post coverage data to ASTEAM
@@ -129,4 +133,5 @@ echo "url: http://10.60.48.47/builds/$branch/${change}-${changeid}/${platform}/a
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
+
 
