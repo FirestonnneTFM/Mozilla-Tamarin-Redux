@@ -152,13 +152,22 @@ else
     py=$PYTHONWIN
 fi
 
+if ${silent}; then
+    silentoptions="-l acceptance-emulator-$shell.log --summaryonly"
+fi
+
 if [ "$config" != "" ]
 then
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs}"
-    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs}
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --config=${config} --notimecheck ${scriptargs} ${silentoptions}"
+    $py ./runtests.py  --vmargs="${vmargs}" --config=${config} --notimecheck ${scriptargs} ${silentoptions}
 else
-    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs}" 
-    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs}
+    echo "message: $py ./runtests.py --vmargs=\"${vmargs}\" --notimecheck ${scriptargs} ${silentoptions}" 
+    $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs} ${silentoptions}
+fi
+
+if ${silent}; then
+    # upload log to asteam
+    . ../all/util-upload-ftp-asteam.sh acceptance-emulator-$shell.log $ftp_asteam/$branch/${change}-${changeid}/$platform/
 fi
 
 ##
@@ -166,6 +175,8 @@ fi
 ##
 cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
+
+
 
 exit 0
 

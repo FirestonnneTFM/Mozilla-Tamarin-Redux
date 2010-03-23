@@ -87,8 +87,10 @@ class RuntestBase:
     asc = ''
     ascargs = ''
     atsDir = 'ATS_SWFS'
+    ascversion = ''
     avm = ''
     avmce = ''
+    avmversion = ''
     builtinabc = ''
     config = ''
     escbin = ''
@@ -143,6 +145,7 @@ class RuntestBase:
     rebuildtests = False
     runSource = False # Run the source file (.as, .js) instead of .abc, magically prepend included files
     show_time = False
+    summaryonly = False
     timestampcheck = True
     timestamps = True
     useShell = True
@@ -150,6 +153,7 @@ class RuntestBase:
     verify = False
     writeResultProperties = False   # used by the asc runtests.py to write to a result.properties file used by the asc ant scripts
     
+    randomSeed = None # can be specified so that random run runs in same order
     start_time = None
     testTimeOut = -1 #by default tests will NOT timeout
     threads = 1
@@ -191,6 +195,8 @@ class RuntestBase:
         print ' -f --forcerebuild  force rebuild all test files'
         print ' -c --config        sets the config string [default OS-tvm]'
         print ' -q --quiet         display minimum output during testrun'
+        print ' -l --log           also log all output to given logfile'
+        print '    --summaryonly   only display final summary'
         print '    --rebuildtests  rebuild the tests only - do not run against VM'
         print '    --showtimes     shows the time for each test'
         print '    --ascargs       args to pass to asc on rebuild of test files'
@@ -202,19 +208,20 @@ class RuntestBase:
         print '    --java          location of java executable (default=java)'
         print '    --javaargs      arguments to pass to java'
         print '    --random        run tests in random order'
+        print '    --seed          explicitly specify random seed for --random'
         
         
 
     def setOptions(self):
         '''set the valid command line options.
             When subclassing, call this method first, then append options to each list'''
-        self.options = 'vE:a:g:b:s:x:htfc:dq'
+        self.options = 'vE:a:g:b:s:x:htfc:dql:'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
-                   'showtimes','java=','html','random', 'playerglobalabc=', 'toplevelabc=',
-                   'javaargs='
+                   'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
+                   'javaargs=', 'summaryonly', 'log='
                    ]
 
     def parseOptions(self):
@@ -249,6 +256,7 @@ class RuntestBase:
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
                 self.forcerebuild = True
+                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-c', '--config'):
                 self.config = v
             elif o in ('--ascargs',):
@@ -266,10 +274,18 @@ class RuntestBase:
                 self.debug = True
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
+                self.ascversion = self.getAscVersion(self.asc)
                 if not pexpect:
                     print 'To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net'
             elif o in ('-q', '--quiet'):
                 self.quiet = True
+            elif o in ('--summaryonly',):
+                self.summaryonly = True
+                self.quiet = True
+            elif o in ('-l', '--log'):
+                self.js_output = v
+                self.logFileType = 'txt'
+                self.createOutputFile()
             elif o in ('--html',):
                 self.htmlOutput = True
             elif o in ('--notimecheck',):
@@ -282,13 +298,15 @@ class RuntestBase:
                 self.javaargs = v
             elif o in ('--random',):
                 self.random = True
+            elif o in ('--seed',):
+                self.randomSeed = int(v)
             
         return opts
     
     
     ### Config and Settings ###
 
-    def determineConfig(self):
+    def determineConfig(self, vm='tvm'):
         # ================================================
         # Determine the configruation if it has not been 
         # passed into the script:
@@ -336,7 +354,7 @@ class RuntestBase:
                 cputype='x86'
             elif re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f):
                 cputype='x64'
-                
+            
             if cputype == '':
                 raise Exception()
                 
@@ -352,33 +370,42 @@ class RuntestBase:
         self.vmtype = 'release'
         if self.osName=='winmobile-emulator':
             # try to determine vmtype by filename
-            vm = splitext(split(self.avm)[1])[0]
-            if '_d' in vm:
+            vm_name = splitext(split(self.avm)[1])[0]
+            if '_d' in vm_name:
                 self.vmtype = 'debug'
             else:
                 self.vmtype = 'release'
         elif not self.runSource and not self.rebuildtests:
             (f,err,exitcode) = self.run_pipe('%s' % self.avm)
-            # determine avmshell type
-            if re.search('debug-debugger',f[1]):
-                self.vmtype = 'debugdebugger'
-            elif re.search('release-debugger',f[1]):
-                self.vmtype = 'releasedebugger'
-            elif re.search('debug',f[1]):
-                self.vmtype = 'debug'
-            elif re.search('release',f[1]):
-                self.vmtype = 'release'
-            else:   # try to determine vmtype by filename
-                vm = splitext(split(self.avm)[1])[0]
-                if '_sd' in vm:
+            try:
+                # determine avmshell type
+                if re.search('debug-debugger',f[1]):
                     self.vmtype = 'debugdebugger'
-                elif '_s' in vm:
+                elif re.search('release-debugger',f[1]):
                     self.vmtype = 'releasedebugger'
-                elif '_d' in vm:
+                elif re.search('debug',f[1]):
                     self.vmtype = 'debug'
-                else:
+                elif re.search('release',f[1]):
                     self.vmtype = 'release'
-                
+                else:   # try to determine vmtype by filename
+                    vm_name = splitext(split(self.avm)[1])[0]
+                    if '_sd' in vm_name:
+                        self.vmtype = 'debugdebugger'
+                    elif '_s' in vm_name:
+                        self.vmtype = 'releasedebugger'
+                    elif '_d' in vm_name:
+                        self.vmtype = 'debug'
+                    else:
+                        self.vmtype = 'release'
+            
+                # get the build number and hash
+                self.avmversion = self.getAvmVersion(txt=f[1])
+            except:
+                # Error getting shell info
+                self.vmtype = 'unknown'
+                self.avmversion = 'unknown'
+            
+            
             f = ' '.join(f)
             # determine if api versioning switch is available
             if re.search('(api)', f):
@@ -386,7 +413,7 @@ class RuntestBase:
             
         wordcode = '-wordcode' if re.search('wordcode', self.avm) else ''
         
-        self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
+        self.config = cputype+'-'+self.osName+'-'+vm+'-'+self.vmtype+wordcode+self.vmargs.replace(" ", "")
     
     def determineOS(self):
         _os = platform.system()
@@ -531,7 +558,8 @@ class RuntestBase:
         # and give it a sequence number.
         now = datetime.today()
         for i in count(1):
-            self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
+            if not self.js_output:
+                self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
             if not isfile(self.js_output):
                 break
         
@@ -1038,8 +1066,6 @@ class RuntestBase:
             except:
                 pass  
     
-    
-    
     ### Process Management ###  
     
     def killCurrentPids(self):
@@ -1097,12 +1123,21 @@ class RuntestBase:
     
     def preProcessTests(self):  # don't need AVM if rebuilding tests
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
+        if self.avmversion:
+            self.js_print('avm version: %s' % self.avmversion)
+        if self.ascversion:
+            self.js_print('asc version: %s' % self.ascversion)
+
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
 
 
     def runTests(self, testList):
         testnum = len(testList)
         if self.random:
+            if not self.randomSeed:
+                self.randomSeed = abs(hash(os.urandom(20)))     # Take the absolute val so that seeds are not negative
+            self.js_print('Running tests in random order.  Random Seed = %s' % self.randomSeed)
+            random.seed(self.randomSeed)
             random.shuffle(testList)
             
         if self.verify:
@@ -1165,8 +1200,8 @@ class RuntestBase:
     # cleanup
     #
     def cleanup(self):
-        # Turn off quiet to display summary
-        if self.quiet:
+        # Turn off quiet to display failure summary
+        if self.quiet and not self.summaryonly:
             self.quiet = False
         
         if self.failmsgs:
@@ -1188,6 +1223,10 @@ class RuntestBase:
             self.js_print('\nASSERTIONS:', '', '<br/>')
             for m in self.assertmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
+        
+        
+        if self.quiet and self.summaryonly:
+            self.quiet = False    
         
         if self.rebuildtests:
             if self.ashErrors:
@@ -1242,6 +1281,29 @@ class RuntestBase:
             exit(1)
 
     ### Misc Functions ###
+
+    def getAscVersion(self, asc):
+        if asc.endswith('.jar'):
+            cmd = '"%s" -jar %s' % (self.java,asc)
+        else:
+            cmd = asc
+         
+        (f,err,exitcode) = self.run_pipe(cmd)
+        
+        try:
+            return re.compile('.*build (\d+|\S+)').search(f[1]).group(1)
+        except:
+            return 'unknown'
+    
+    def getAvmVersion(self, vm=None, txt=None):
+        '''Pull the avm version out of the vm info or description string if provided.'''
+        if vm:
+            (f,err,exitcode) = self.run_pipe('%s' % vm)
+            txt = f[1]
+        try:
+            return re.compile('.*build (\d+:\S+|\S+)').search(txt).group(1)
+        except:
+            return 'unknown'
 
     def compareAbcAsmOutput(self, file, output):
         # return diff

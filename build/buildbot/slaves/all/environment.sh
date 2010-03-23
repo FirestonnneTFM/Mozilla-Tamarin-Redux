@@ -115,3 +115,28 @@ configInterp=${interp}
 # the process without the extension. Used in all/util-process-clean.sh
 export proc_names="avmshell ceremote"
 
+# Helper functions to supress output
+function beginSilent () {
+    if ${silent}; then
+        test "$logfile" = "" && {
+            echo "logfile not defined, using generic name: output.log"
+            logfile=output.log
+        }
+        # create log file in builds dir
+        mkdir -p $buildsdir/${change}-${changeid}/$platform
+        logfile=$buildsdir/${change}-${changeid}/$platform/$logfile
+        touch $logfile
+        exec 6>&1                # Link file descriptor #6 with stdout. (Saves stdout)
+        exec >> $logfile 2>&1    # Redirect all stdout and stderr output to be appended to $logfile
+    fi
+}
+
+function endSilent () {
+    if ${silent}; then
+        . ../all/util-upload-ftp-asteam.sh $logfile $ftp_asteam/$branch/${change}-${changeid}/$platform/
+        exec 1>&6 6>&-      # Restore stdout and close file descriptor #6.
+        # ${logfile##*/} == filename from end of path
+        echo "Build log can be found here: http://asteam.macromedia.com/builds/$branch/${change}-${changeid}/$platform/${logfile##*/}"
+    fi
+}
+

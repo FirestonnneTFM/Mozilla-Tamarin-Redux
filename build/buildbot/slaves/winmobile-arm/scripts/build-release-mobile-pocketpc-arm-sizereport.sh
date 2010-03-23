@@ -49,6 +49,9 @@
 ##
 . ../all/util-calculate-change.sh $1
 
+# silence output if silent=true (function defined in environment.sh)
+logfile=release-mobile-pocketpc-arm-sizereport.log
+beginSilent
 
 ##
 # Execute the common build script.
@@ -105,3 +108,5 @@ test -d objdir && {
     echo Remove directory $basedir/objdir
     rm -rf $basedir/objdir
 }
+
+endSilent
