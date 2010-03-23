@@ -172,9 +172,7 @@ class RegenerateBaseLineData:
             '../all/run-performance-release.sh',
             '../all/run-performance-release-interp.sh',
             '../all/run-performance-release-jit.sh',
-            '../all/run-performance-release-vprof.sh',
             '../all/run-performance-release-mir.sh',
-            '../all/run-performance-release-mir-vprof.sh'
             ]
         
         for cmd in perfCommands:

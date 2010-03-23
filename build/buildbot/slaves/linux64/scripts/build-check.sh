@@ -64,12 +64,6 @@ test -f $buildsdir/$change-${changeid}/$platform/$shell_release_wordcode || {
   fail=1
 }
 
-# Release-Vprof
-test -f $buildsdir/$change-${changeid}/$platform/$shell_release_vprof || {
-  echo "message: Release-vprof Failed"
-  fail=1
-}
-
 # Release_Debugger
 test -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger || {
   echo "message: Release_Debugger Failed"
