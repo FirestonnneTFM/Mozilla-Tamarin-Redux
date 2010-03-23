@@ -58,7 +58,6 @@ export shell_debug=$shell_debug_64
 export shell_release_debugger=$shell_release_debugger_64
 export shell_debug_debugger=$shell_debug_debugger_64
 export shell_selftest=$shell_selftest_64
-export shell_release_vprof=$shell_release_vprof_64
 
 
 VS_HOME_PATH="/c/Program Files (x86)/Microsoft Visual Studio 9.0"
