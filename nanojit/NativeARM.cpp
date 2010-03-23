@@ -109,9 +109,8 @@ Assembler::CountLeadingZeroes(uint32_t data)
     // ARMv4 anyway.
     NanoAssert(_config.arm_arch >= 5);
 
-#if defined(__ARMCC__) && (__ARMCC_VERSION >= 230000)
-
-    // ARMCC can do this with an intrinsic except ARMCC 2.2.x which is used by Symbian
+#if defined(__ARMCC__)
+    // ARMCC can do this with an intrinsic.
     leading_zeroes = __clz(data);
 
 // current Android GCC compiler incorrectly refuses to compile 'clz' for armv5
