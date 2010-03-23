@@ -183,7 +183,7 @@ hg status
 endSilent
 
 cd $basedir/build/buildbot/slaves/scripts
-../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/shell_toplevel.diff
+../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
 ../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 
 exit 0
