@@ -158,22 +158,18 @@ hg status
 ##
 # Diff the shell_toplevel.cpp and shell_toplevel.h files
 ##
-test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
-    rm $basedir/build/buildbot/slaves/scripts/builtin.diff
+test -f $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff && {
+    rm $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
 }
 hg diff shell/shell_toplevel.cpp
-hg diff shell/shell_toplevel.cpp > $basedir/build/buildbot/slaves/scripts/builtin.diff
-cd $basedir/build/buildbot/slaves/scripts
-../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
+hg diff shell/shell_toplevel.cpp > $basedir/build/buildbot/slaves/scripts/shell_toplevel.cpp.diff
 
 cd $basedir
-test -f $basedir/build/buildbot/slaves/scripts/builtin.diff && {
-    rm $basedir/build/buildbot/slaves/scripts/builtin.diff
+test -f $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff && {
+    rm $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 }
 hg diff shell/shell_toplevel.h
-hg diff shell/shell_toplevel.h > $basedir/build/buildbot/slaves/scripts/builtin.diff
-cd $basedir/build/buildbot/slaves/scripts
-../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/builtin.diff
+hg diff shell/shell_toplevel.h > $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 
 cd $basedir
 hg revert shell/shell_toplevel.cpp shell/shell_toplevel.h
@@ -185,6 +181,10 @@ chmod 777 $buildsdir/${change}-${changeid}/$shellABC
 hg status
 
 endSilent
+
+cd $basedir/build/buildbot/slaves/scripts
+../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/shell_toplevel.diff
+../all/util-builtin-verify.py $basedir/build/buildbot/slaves/scripts/shell_toplevel.h.diff
 
 exit 0
 
