@@ -272,6 +272,8 @@ namespace avmplus
         void clearMemBaseAndSize();
 
         static void extractConstantDisp(LInsp& mopAddr, int32_t& curDisp);
+        LIns* safeIns2(LOpcode op, LIns*, int32_t);
+        void safeRewrite(LIns* ins, int32_t);
 
     public:
         MopsRangeCheckFilter(LirWriter* out, LirWriter* prolog_out, LInsp env_domainenv);
@@ -403,15 +405,11 @@ namespace avmplus
             if ((n_curRangeCheckMax - n_curRangeCheckMin) <= DomainEnv::GLOBAL_MEMORY_MIN_SIZE)
             {
                 if (curRangeCheckMinValue != n_curRangeCheckMin)
-                {
-                    LInsp lhs_constant = prolog_out->insImm(curRangeCheckMinValue);
-                    curRangeCheckLHS->initLInsOp2(LIR_add, curRangeCheckLHS->oprnd1(), lhs_constant);
-                }
+                    safeRewrite(curRangeCheckLHS, curRangeCheckMinValue);
+
                 if ((n_curRangeCheckMax - n_curRangeCheckMin) != (curRangeCheckMaxValue - curRangeCheckMinValue))
-                {
-                    LInsp rhs_constant = prolog_out->insImm(curRangeCheckMaxValue - curRangeCheckMinValue);
-                    curRangeCheckRHS->initLInsOp2(LIR_sub, curRangeCheckRHS->oprnd1(), rhs_constant);
-                }
+                    safeRewrite(curRangeCheckRHS, curRangeCheckMaxValue - curRangeCheckMinValue);
+
                 curRangeCheckMinValue = n_curRangeCheckMin;
                 curRangeCheckMaxValue = n_curRangeCheckMax;
             }
@@ -475,17 +473,31 @@ namespace avmplus
             AvmAssert(curRangeCheckMaxValue > curRangeCheckMinValue);
             AvmAssert(curRangeCheckMaxValue - curRangeCheckMinValue <= DomainEnv::GLOBAL_MEMORY_MIN_SIZE);
 
-            LInsp lhs_constant = prolog_out->insImm(curRangeCheckMinValue);
-            LInsp rhs_constant = prolog_out->insImm(curRangeCheckMaxValue - curRangeCheckMinValue);
-
-            curRangeCheckLHS = this->ins2(LIR_add, curMopAddr, lhs_constant);
-            curRangeCheckRHS = this->ins2(LIR_sub, curMemSize, rhs_constant);
+            curRangeCheckLHS = safeIns2(LIR_add, curMopAddr, curRangeCheckMinValue);
+            curRangeCheckRHS = safeIns2(LIR_sub, curMemSize, curRangeCheckMaxValue - curRangeCheckMinValue);
 
             LInsp cond = this->ins2(LIR_ule, curRangeCheckLHS, curRangeCheckRHS);
             br = this->insBranch(LIR_jf, cond, NULL);
         }
 
         return curMemBase;
+    }
+
+    // workaround for WE2569232: don't let these adds get specialized or CSE'd.
+    LIns* MopsRangeCheckFilter::safeIns2(LOpcode op, LIns* lhs, int32_t rhsConst)
+    {
+        LIns* rhs = prolog_out->insImm(rhsConst);
+        LIns* ins = out->ins2(op, lhs, rhs);
+        AvmAssert(ins->isop(op) && ins->oprnd1() == lhs && ins->oprnd2() == rhs);
+        return ins;
+    }
+
+    // rewrite the instruction with a new rhs constant
+    void MopsRangeCheckFilter::safeRewrite(LIns* ins, int32_t rhsConst)
+    {
+        LIns* rhs = prolog_out->insImm(rhsConst);
+        AvmAssert(ins->isop(LIR_add) || ins->isop(LIR_sub));
+        ins->initLInsOp2(ins->opcode(), ins->oprnd1(), rhs);
     }
 
     LIns* MopsRangeCheckFilter::ins0(LOpcode v)
@@ -1588,7 +1600,7 @@ namespace avmplus
             }
         )
         prolog = new (*alloc1) PrologWriter(lirout);
-        LirWriter *redirectWriter = lirout = new (*lir_alloc) LirWriter(prolog);
+        redirectWriter = lirout = new (*lir_alloc) LirWriter(prolog);
         LoadFilter *loadfilter = 0;
         CseFilter *csefilter = 0;
         if (core->config.njconfig.cseopt) {
@@ -5252,10 +5264,13 @@ namespace avmplus
         AvmAssert(size > 0);    // it's signed to help make the int promotion correct
 
         if (!mopsRangeCheckFilter) {
-            // push a MopsRangeCheckFilter to the front end of the lirout pipeline, just under copier.
+            // add a MopsRangeCheckFilter to the back end of the lirout pipeline, just after CseFilter.
+            // fixme bug Bug 554030: We must put this after CseFilter and ExprFilter so that
+            // the range-check expression using LIR_add/LIR_sub are not modified (by ExprFilter)
+            // and no not become referenced by other unrelated code (by CseFilter).
             AvmAssert(lirout == varTracker);
-            mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(varTracker->out, prolog, loadEnvDomainEnv());
-            varTracker->out = mopsRangeCheckFilter;
+            mopsRangeCheckFilter = new (*alloc1) MopsRangeCheckFilter(redirectWriter->out, prolog, loadEnvDomainEnv());
+            redirectWriter->out = mopsRangeCheckFilter;
         }
 
         // note, mopAddr and disp are both in/out parameters
