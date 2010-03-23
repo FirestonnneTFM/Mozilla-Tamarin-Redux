@@ -375,16 +375,6 @@ perf_release_arm_jit = PerfShellCommand(
             timeout=3600,
             workdir="../repo/build/buildbot/slaves/scripts")
 
-perf_release_vprof = PerfShellCommand(
-            command=['../all/run-performance-release-vprof.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
-            description='starting release-vprof performance tests...',
-            descriptionDone='finished release-vprof performance tests.',
-            name='Release-vprof',
-            timeout=3600,
-            workdir="../repo/build/buildbot/slaves/scripts")
-
-
 deep_codecoverage = BuildShellCommand(
             command=['./run-code-coverage.sh', WithProperties('%s','revision')],
             env={'branch': WithProperties('%s','branch')},
