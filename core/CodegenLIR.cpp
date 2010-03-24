@@ -530,7 +530,7 @@ namespace avmplus
 
     // address calc instruction
     LIns* CodegenLIR::leaIns(int32_t disp, LIns* base) {
-        return lirout->ins2(LIR_addp, base, InsConstPtr((void*)disp));
+        return lirout->ins2(LIR_piadd, base, InsConstPtr((void*)disp));
     }
 
     // call
@@ -2658,7 +2658,7 @@ namespace avmplus
             // load "true" or "false" string constant from AvmCore.booleanStrings[]
             LIns *offset = binaryIns(LIR_pilsh, i2p(localGet(index)), InsConst(PTR_SCALE));
             LIns *arr = InsConstPtr(&core->booleanStrings);
-            return loadIns(LIR_ldp, 0, binaryIns(LIR_addp, arr, offset), ACC_READONLY);
+            return loadIns(LIR_ldp, 0, binaryIns(LIR_piadd, arr, offset), ACC_READONLY);
         }
         default:
             if (value.notNull) {
@@ -5298,10 +5298,6 @@ namespace avmplus
             return mopsMemoryBase;
         }
 
-        // note: we can use piadd here only because we know this is never a GCObject.
-        // (if it was, we'd have to use LIR_addp, which is restricted from certain
-        // optimizations that can leave dangling interior pointers)
-        //
         // (yes, i2p, not u2p... it might legitimately be negative due to the
         // displacement optimization in emitCheck().)
         return binaryIns(LIR_piadd, mopsMemoryBase, i2p(mopAddr));
@@ -5684,7 +5680,7 @@ namespace avmplus
                         taglivein.clear(d);
                     }
                     break;
-                case LIR_addp:
+                case LIR_piadd:
                     if (i->oprnd1() == vars && i->oprnd2()->isconstp()) {
                         int d = int(uintptr_t(i->oprnd2()->constvalp()) >> 3);
                         varlivein.set(d);
@@ -5866,7 +5862,7 @@ namespace avmplus
                         }
                     }
                     break;
-                case LIR_addp:
+                case LIR_piadd:
                     if (i->oprnd1() == vars && i->oprnd2()->isconstp()) {
                         int d = int(uintptr_t(i->oprnd2()->constvalp()) >> 3);
                         varlivein.set(d);
