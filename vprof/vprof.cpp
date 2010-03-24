@@ -96,7 +96,7 @@ static long glock = LOCK_IS_FREE;
 		va_start(args, format);
 
 		char buf[1024];
-		vsnprintf(buf, sizeof(buf), format, args);
+		VMPI_vsnprintf(buf, sizeof(buf), format, args);
 		
 		va_end(args);
 
