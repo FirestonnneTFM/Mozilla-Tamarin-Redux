@@ -6634,15 +6634,15 @@ namespace avmplus
         switch (ms->returnTraitsBT()) {
         case BUILTIN_number:
             call->_address = (uintptr_t) method->implFPR();
-            call->_argtypes = SIG3(F,P,I,P);
+            call->_typesig = SIG3(F,P,I,P);
             break;
         case BUILTIN_int: case BUILTIN_uint: case BUILTIN_boolean:
             call->_address = (uintptr_t) method->implGPR();
-            call->_argtypes = SIG3(I,P,I,P);
+            call->_typesig = SIG3(I,P,I,P);
             break;
         default:
             call->_address = (uintptr_t) method->implGPR();
-            call->_argtypes = SIG3(A,P,I,P);
+            call->_typesig = SIG3(A,P,I,P);
             break;
         }
         LIns* result = callIns(call, 3, env_param, argc_param, args_out);
