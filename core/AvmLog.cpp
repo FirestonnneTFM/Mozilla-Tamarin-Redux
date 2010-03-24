@@ -45,7 +45,7 @@ namespace avmplus
 		va_start(args, format);
 
 		char buf[2048];
-		vsnprintf(buf, sizeof(buf), format, args);
+		VMPI_vsnprintf(buf, sizeof(buf), format, args);
 		va_end(args);
 
 		VMPI_log(buf);
