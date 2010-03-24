@@ -383,11 +383,7 @@ namespace avmshell
 
     String* ByteArrayObject::_toString()
     {
-        union {
-            uint8_t* c;
-            wchar* c_w;
-        };
-        c = (uint8_t*)m_byteArray.GetBuffer();
+        uint8_t* c = (uint8_t*)m_byteArray.GetBuffer();
         uint32_t len = m_byteArray.GetLength();
 
         if (len >= 3)
@@ -402,12 +398,12 @@ namespace avmshell
                 //UTF-16 big endian
                 c += 2;
                 len = (len - 2) >> 1;
-                return core()->newStringEndianUTF16(/*littleEndian*/false, c_w, len);
+                return core()->newStringEndianUTF16(/*littleEndian*/false, (wchar*)c, len);
             }
             else if ((c[0] == 0xff) && (c[1] == 0xfe))
             {
                 //UTF-16 little endian
-                return core()->newStringEndianUTF16(/*littleEndian*/true, c_w, len);
+                return core()->newStringEndianUTF16(/*littleEndian*/true, (wchar*)c, len);
             }
         }
 
