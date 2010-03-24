@@ -55,7 +55,7 @@ class argo:
     # custom.buildbot_ext.scheduler import MUST happen after importing buildbot.scheduler
     from custom.buildbot_ext.scheduler import *
 
-    compile = Scheduler(name="compile-argo", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile,
+    compile = Scheduler(name="compile-argo", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile, properties={'silent':'false'},
                      builderNames=["windows-compile-argo", "windows64-compile-argo",
                                    "mac-intel-10.4-compile-argo", "mac-intel-10.5-compile-argo", "mac64-intel-compile-argo",
                                    "mac-ppc-10.4a-compile-argo", "mac-ppc-10.4b-compile-argo", 
@@ -67,7 +67,7 @@ class argo:
                                    "android-compile-argo",
                                    "linux-arm-compile-argo"])
 
-    smoke = BuilderDependent(name="smoke-argo",upstream=compile, callbackInterval=60,
+    smoke = BuilderDependent(name="smoke-argo",upstream=compile, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-smoke-argo", "windows64-smoke-argo",
                                    "mac-intel-10.4-smoke-argo", "mac-intel-10.5-smoke-argo", "mac64-intel-smoke-argo",
                                    "mac-ppc-10.4a-smoke-argo", "mac-ppc-10.4b-smoke-argo", 
@@ -97,7 +97,7 @@ class argo:
                                   ["linux-arm-smoke-argo","linux-compile-argo"],
                                  ])
 
-    test = BuilderDependent(name="test-argo",upstream=smoke, callbackInterval=60,
+    test = BuilderDependent(name="test-argo",upstream=smoke, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-test-argo", "windows64-test-argo",
                                    "mac-intel-10.4-test-argo", "mac-intel-10.5-test-argo", "mac64-intel-test-argo",
                                    "mac-ppc-10.4a-test-argo", "mac-ppc-10.4b-test-argo", 
@@ -127,7 +127,7 @@ class argo:
                                   ["linux-arm-test-argo", "linux-arm-smoke-argo"],
                                  ])
 
-    performance = PhaseTwoScheduler(name="performance-argo", branch="%s-performance" % BRANCH, treeStableTimer=30, 
+    performance = PhaseTwoScheduler(name="performance-argo", branch="%s-performance" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startPerformanceRun, priority=1, changeDir="changes/perf/processed",
                     builderNames=["windows-performance-argo",
                                    "mac-performance-argo", "mac64-performance-argo",
@@ -143,7 +143,7 @@ class argo:
                                   ["winmobile-performance-argo", "winmobile-emulator-test-argo"]
                                  ])
     
-    deep = PhaseTwoScheduler(name="deep-argo", branch="%s-deep" % BRANCH, treeStableTimer=30, 
+    deep = PhaseTwoScheduler(name="deep-argo", branch="%s-deep" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startCompile, priority=1, changeDir="changes/deep/processed",
                     builderNames=[
                                     "windows-deep-argo",

@@ -55,7 +55,7 @@ class sandbox:
     from custom.buildbot_ext.scheduler import *
     
     #### SANDBOX
-    compile = Scheduler(name="compile-sandbox", branch=BRANCH, treeStableTimer=30,
+    compile = Scheduler(name="compile-sandbox", branch=BRANCH, treeStableTimer=30, properties={'silent':'true'},
                      builderNames=["windows-compile-sandbox", "windows64-compile-sandbox",
                                    "mac-intel-10.4-compile-sandbox", "mac-intel-10.5-compile-sandbox", "mac64-intel-compile-sandbox",
                                    "mac-ppc-10.4a-compile-sandbox", "mac-ppc-10.4b-compile-sandbox", 
@@ -68,7 +68,7 @@ class sandbox:
                                    "linux-arm-compile-sandbox",
                                    ])
 
-    smoke = BuilderDependent(name="smoke-sandbox",upstream=compile, callbackInterval=60,
+    smoke = BuilderDependent(name="smoke-sandbox",upstream=compile, callbackInterval=60, properties={'silent':'true'},
                     builderNames=["windows-smoke-sandbox", "windows64-smoke-sandbox",
                                    "mac-intel-10.4-smoke-sandbox", "mac-intel-10.5-smoke-sandbox", "mac64-intel-smoke-sandbox",
                                    "mac-ppc-10.4a-smoke-sandbox", "mac-ppc-10.4b-smoke-sandbox", 
@@ -98,7 +98,7 @@ class sandbox:
                                   ["linux-arm-smoke-sandbox","linux-compile-sandbox"],
                                  ])
 
-    test = BuilderDependent(name="test-sandbox",upstream=smoke, callbackInterval=60,
+    test = BuilderDependent(name="test-sandbox",upstream=smoke, callbackInterval=60, properties={'silent':'true'},
                     builderNames=["windows-test-sandbox", "windows64-test-sandbox",
                                    "mac-intel-10.4-test-sandbox", "mac-intel-10.5-test-sandbox", "mac64-intel-test-sandbox",
                                    "mac-ppc-10.4a-test-sandbox", "mac-ppc-10.4b-test-sandbox", 
@@ -155,7 +155,7 @@ class sandbox:
     sb_windows_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     sb_windows_compile_factory.addStep(BuildShellCommand(
                 command=['../all/file-check.py', '../../../../../repo'],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='running file-check against source...',
                 descriptionDone='finished file-check.',
                 name="FileCheck",
@@ -391,7 +391,7 @@ class sandbox:
     sb_linux_compile_factory.addStep(compile_generic(name="DebugDebugger", shellname="avmshell_sd", args="--enable-shell --enable-debug --enable-debugger", upload="false"))
     sb_linux_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-cov.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='starting linux code coverage release build...',
                 descriptionDone='finished linux code coverage release build.',
                 name="Build_Release_cov",
@@ -401,6 +401,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'CXX': 'arm-none-linux-gnueabi-g++',
                     'CC' : 'arm-none-linux-gnueabi-gcc',
                     'LD' : 'arm-none-linux-gnueabi-ld',
@@ -415,6 +416,7 @@ class sandbox:
                 command=['../all/compile-generic.sh', WithProperties('%s','revision'), '--enable-shell --enable-debug --enable-arm-neon --target=arm-linux --enable-sys-root-dir=/usr/local/arm-linux/debian5', 'avmshell_neon_arm_d', 'false'],
                 env={
                     'branch': WithProperties('%s','branch'),
+                    'silent':WithProperties('%s','silent'),
                     'CXX': 'arm-none-linux-gnueabi-g++',
                     'CC' : 'arm-none-linux-gnueabi-gcc',
                     'LD' : 'arm-none-linux-gnueabi-ld',
@@ -523,7 +525,7 @@ class sandbox:
     sb_android_compile_factory.addStep(compile_builtin)
     sb_android_compile_factory.addStep(BuildShellCommand(
                 command=['./build-debug-shell-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='building debug shell...',
                 descriptionDone='finished building debug shell.',
                 name="Build_Debug",
@@ -532,7 +534,7 @@ class sandbox:
     )
     sb_android_compile_factory.addStep(BuildShellCommand(
                 command=['./build-release-shell-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='building release shell...',
                 descriptionDone='finished building release shell.',
                 name="Build_Release",
@@ -541,7 +543,7 @@ class sandbox:
     )
     sb_android_compile_factory.addStep(BuildShellCommand(
                 command=['./build-check-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='running build check...',
                 descriptionDone='finished build check.',
                 name="Build_Check",
@@ -550,7 +552,7 @@ class sandbox:
     )
     sb_android_compile_factory.addStep(BuildShellCommand(
                 command=['./upload-asteam-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='running upload to asteam...',
                 descriptionDone='finished upload to asteam.',
                 name="Upload_ASTEAM",
@@ -819,7 +821,7 @@ class sandbox:
     sb_android_smoke_factory.addStep(download_testmedia)
     sb_android_smoke_factory.addStep(TestSuiteShellCommand(
                 command=['./run-smoketests-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='starting to run smoke tests...',
                 descriptionDone='finished smoke tests.',
                 name="SmokeTest",
@@ -842,7 +844,7 @@ class sandbox:
     sb_linux_arm_smoke_factory.addStep(download_testmedia)
     sb_linux_arm_smoke_factory.addStep(TestSuiteShellCommand(
                 command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='starting to run smoke tests...',
                 descriptionDone='finished smoke tests.',
                 name="SmokeTest",
@@ -1094,7 +1096,7 @@ class sandbox:
     sb_linux_test_factory.addStep(test_differential)
     sb_linux_test_factory.addStep(TestSuiteShellCommand(
                 command=['./run-tests-release-cov.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='starting to run release code coverage vmtests...',
                 descriptionDone='finished release code coverage vmtests.',
                 name="Testsuite_Release-cov",
@@ -1177,7 +1179,7 @@ class sandbox:
     sb_android_test_factory = factory.BuildFactory()
     sb_android_test_factory.addStep(TestSuiteShellCommand(
                 command=['./run-acceptancetests-android.sh', WithProperties('%s','revision')],
-                env={'branch': WithProperties('%s','branch')},
+                env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
                 description='starting to run acceptance tests...',
                 descriptionDone='finished acceptance tests.',
                 name="Testsuite_Release",
