@@ -151,9 +151,9 @@ else
     py=$PYTHONWIN
 fi
 
-if ${silent}; then
+test "$silent" = "true" && {
     silentoptions="-l acceptance-$shell.log --summaryonly"
-fi
+}
 
 if [ "$config" != "" ]
 then
@@ -164,10 +164,10 @@ else
     $py ./runtests.py  --vmargs="${vmargs}" --notimecheck ${scriptargs} ${silentoptions}
 fi
 
-if ${silent}; then
+test "$silent" = "true" && {
     # upload log to asteam
     . ../all/util-upload-ftp-asteam.sh acceptance-$shell.log $ftp_asteam/$branch/${change}-${changeid}/$platform/
-fi
+}
 
 ##
 # Ensure that the system is torn down and clean

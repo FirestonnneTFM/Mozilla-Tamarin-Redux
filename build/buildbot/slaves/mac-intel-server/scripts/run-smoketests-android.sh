@@ -55,10 +55,12 @@ beginSilent
 echo "running android shell remotely on host: $SHELLSERVER"
 test "$SHELLSERVER" = "" && {
     echo "message: ERROR: SHELLSERVER is not set, should be set to the shell socket server"
+    endSilent
     exit 1
 }
 test "$SHELLPORT" = "" && {
     echo "message: ERROR: SHELLPORT is not set, should be set to the shell socket server port"
+    endSilent
     exit 1
 }
 
@@ -67,6 +69,7 @@ echo "lock get"
 res=$?
 test "$res" = "0" || {
     echo "message: lock acquire failed"
+    endSilent
     exit 1
 }
 
@@ -76,6 +79,7 @@ res=$?
 test "$res" = "0" || {
     echo "message: setup failed"
     $workdir/socketserver-client.py lock release
+    endSilent
     exit 1
 }
 if [ ! -e "$basedir/utils/asc.jar" ]; then
@@ -85,6 +89,7 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
+        endSilent
         exit 1
     }
 fi
@@ -121,6 +126,12 @@ test "$ret" = "0" ||
    exitcode=1
 
 endSilent
+
+test "$silent" = "true" && {
+    # display smoke results to stdout so that buildbot parses the results
+    grep passes $logfile
+    grep failures $logfile
+}
 
 ##
 # Ensure that the system is torn down and clean
