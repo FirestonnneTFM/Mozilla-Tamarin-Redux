@@ -55,7 +55,7 @@ class tamarinredux:
     # custom.buildbot_ext.scheduler import MUST happen after importing buildbot.scheduler
     from custom.buildbot_ext.scheduler import *
 
-    compile = Scheduler(name="compile", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile,
+    compile = Scheduler(name="compile", branch=BRANCH, treeStableTimer=30, fileIsImportant=startCompile, properties={'silent':'false'},
                      builderNames=["windows-compile", "windows64-compile",
                                    "mac-intel-10.4-compile", "mac-intel-10.5-compile", "mac64-intel-compile",
                                    "mac-ppc-10.4a-compile", "mac-ppc-10.4b-compile", 
@@ -67,7 +67,7 @@ class tamarinredux:
                                    "android-compile",
                                    "linux-arm-compile"])
 
-    smoke = BuilderDependent(name="smoke",upstream=compile, callbackInterval=60,
+    smoke = BuilderDependent(name="smoke",upstream=compile, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-smoke", "windows64-smoke",
                                    "mac-intel-10.4-smoke", "mac-intel-10.5-smoke", "mac64-intel-smoke",
                                    "mac-ppc-10.4a-smoke", "mac-ppc-10.4b-smoke", 
@@ -97,7 +97,7 @@ class tamarinredux:
                                   ["linux-arm-smoke","linux-compile"],
                                  ])
 
-    test = BuilderDependent(name="test",upstream=smoke, callbackInterval=60,
+    test = BuilderDependent(name="test",upstream=smoke, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-test", "windows64-test",
                                    "mac-intel-10.4-test", "mac-intel-10.5-test", "mac64-intel-test",
                                    "mac-ppc-10.4a-test", "mac-ppc-10.4b-test", 
@@ -127,7 +127,7 @@ class tamarinredux:
                                   ["linux-arm-test", "linux-arm-smoke"],
                                  ])
 
-    performance = PhaseTwoScheduler(name="performance", branch="%s-perf" % BRANCH, treeStableTimer=30, 
+    performance = PhaseTwoScheduler(name="performance", branch="%s-perf" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startPerformanceRun, priority=2, changeDir="changes/perf/processed",
                     builderNames=["windows-performance",
                                    "mac-performance", "mac64-performance",
@@ -143,7 +143,7 @@ class tamarinredux:
                                   ["winmobile-performance", "winmobile-emulator-test"]
                                  ])
 
-    deep = PhaseTwoScheduler(name="deep", branch="%s-deep" % BRANCH, treeStableTimer=30, 
+    deep = PhaseTwoScheduler(name="deep", branch="%s-deep" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
                     fileIsImportant=startCompile, priority=2, changeDir="changes/deep/processed",
                     builderNames=[
                                     "windows-deep",

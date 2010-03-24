@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
 #  for the specific language governing rights and limitations under the
 #  License.
-# 
+# a
 #  The Original Code is [Open Source Virtual Machine.].
 # 
 #  The Initial Developer of the Original Code is
@@ -77,13 +77,16 @@ def startCompile(change):
 ####### COMMON BUILD STEPS
 ############################
 
+# For an explanation of the WithProperties('(%(silent:-)s') syntax see
+# http://djmitche.github.com/buildbot/docs/current/#Using-Build-Properties
+
 def compile_generic(name, shellname, args, upload):
     # factory.addStep(compile_generic(name="Release", shellname="avmshell", args="--enable-shell", upload="false"))
     # upload: if true build will be uploaded to asteam, this is normaly done in the upload buildstep
     #         but is here for shells that are compiled in deep-testing
     return BuildShellCommand(
             command=['../all/compile-generic.sh', WithProperties('%s','revision'), '%s' % args, '%s' % shellname, '%s' % upload],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting %s build...' % name,
             descriptionDone='finished %s build' % name,
             name="Build_%s" % name,
@@ -95,11 +98,12 @@ def test_generic(name, shellname, vmargs, config, scriptargs):
     # factory.addStep(test_generic("Release", "avmshell", "", "", ""))
     return TestSuiteShellCommand(
             command=['../all/run-acceptance-generic.sh', WithProperties('%s','revision'), '%s' % shellname, '%s' % vmargs, '%s' % config, '%s' % scriptargs],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to run %s vmtests...' % name,
             descriptionDone='finished %s vmtests' % name,
             name="Testsuite_%s" % name,
-            workdir="../repo/build/buildbot/slaves/scripts"
+            workdir="../repo/build/buildbot/slaves/scripts",
+            timeout=3600,
             )
     
 
@@ -107,17 +111,18 @@ def test_emulator_generic(name, shellname, vmargs, config, scriptargs):
     # factory.addStep(test_emulator_generic("Release", "avmshell", "", "", ""))
     return TestSuiteShellCommand(
             command=['../all/run-acceptance-emulator-generic.sh', WithProperties('%s','revision'), '%s' % shellname, '%s' % vmargs, '%s' % config, '%s' % scriptargs],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to run %s vmtests...' % name,
             descriptionDone='finished %s vmtests' % name,
             name="Testsuite_%s" % name,
-            workdir="../repo/build/buildbot/slaves/scripts"
+            workdir="../repo/build/buildbot/slaves/scripts",
+            timeout=3600,
             )
 
 
 sync_clean = ShellCommand(
             command=["rm", "-Rf", "repo"],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Remove the old repository...',
             descriptionDone='Finished Removing the old repository',
             name='Source_Clean',
@@ -127,7 +132,7 @@ sync_clean = ShellCommand(
 def sync_clone(url):
     return ShellCommand(
             command=["hg", "clone", url, "repo"],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Cloning the source repository...',
             descriptionDone='Finished cloning the source repository',
             name='Source_Clone',
@@ -146,7 +151,7 @@ sync_clone_sandbox = SandboxClone(
 
 sync_update = ShellCommand(
             command=["hg", "update", "--clean",  "--rev", WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Updating the source repository...',
             descriptionDone='Finished updating the source repository',
             name='Source_Update',
@@ -156,7 +161,7 @@ sync_update = ShellCommand(
 def bb_slaveupdate(slave):
     return ShellCommand(
             command=['cp','-R','repo/build/buildbot/slaves/%s/scripts' % slave, 'repo/build/buildbot/slaves/scripts'],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             workdir='../',
             description='Updating SLAVE buildscripts',
             name='BB_SLAVEUpdate',
@@ -165,7 +170,7 @@ def bb_slaveupdate(slave):
 
 bb_lockacquire = BuildShellCommand(
             command=['../all/lock-acquire.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Acquiring machine lock...',
             descriptionDone='Acquired machine lock...',
             name="LockAcquire",
@@ -173,7 +178,7 @@ bb_lockacquire = BuildShellCommand(
 
 bb_lockrelease = BuildShellCommand(
             command=['../all/lock-release.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Releasing machine lock...',
             descriptionDone='Released machine lock...',
             name="LockRelease",
@@ -181,7 +186,7 @@ bb_lockrelease = BuildShellCommand(
 
 compile_builtin = BuildShellCommand(
             command=['../all/build-builtinabc.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to build builtin.abc..',
             descriptionDone='builtin.abc build',
             name="Compile_builtin.abc",
@@ -189,7 +194,7 @@ compile_builtin = BuildShellCommand(
 
 compile_buildcheck = BuildShellCheckCommand(
             command=['../all/build-check.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting build check...',
             descriptionDone='build check completed',
             name='Build_Check',
@@ -198,7 +203,7 @@ compile_buildcheck = BuildShellCheckCommand(
 ## Local version runs a local script and not the common
 compile_buildcheck_local = BuildShellCheckCommand(
             command=['./build-check.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting build check...',
             descriptionDone='build check completed',
             name='Build_Check',
@@ -206,7 +211,7 @@ compile_buildcheck_local = BuildShellCheckCommand(
 
 compile_testmedia = BuildShellCommand(
             command=['../all/build-acceptance-tests.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to build test abcs...',
             descriptionDone='vm test abcs built.',
             name="Compile_AS_testcases",
@@ -214,7 +219,7 @@ compile_testmedia = BuildShellCommand(
 
 download_testmedia = BuildShellCommand(
             command=['../all/download-acceptance-tests.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to downloads test abcs...',
             descriptionDone='vm test abcs downloaded.',
             name="Download_AS_testcases",
@@ -223,7 +228,7 @@ download_testmedia = BuildShellCommand(
 
 test_smoke = TestSuiteShellCommand(
             command=['../all/run-smoketests.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to run smoke tests...',
             descriptionDone='finished smoke tests.',
             name="SmokeTest",
@@ -231,7 +236,7 @@ test_smoke = TestSuiteShellCommand(
 
 test_emulator_smoke_mobile = TestSuiteShellCommand(
             command=['../all/run-smoketests-arm-emulator.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to run smoke tests...',
             descriptionDone='finished smoke tests.',
             name="SmokeTest",
@@ -239,7 +244,7 @@ test_emulator_smoke_mobile = TestSuiteShellCommand(
 
 test_selftest = TestSuiteShellCommand(
             command=['../all/run-selftest.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting selftest release...',
             descriptionDone='finished selftest release.',
             name="Testsuite_Selftest",
@@ -247,7 +252,7 @@ test_selftest = TestSuiteShellCommand(
 
 test_commandline = TestSuiteShellCommand(
             command=['../all/run-commandline-tests.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting commandline tests...',
             descriptionDone='finished commandline tests.',
             name="Testsuite_Commandline",
@@ -255,7 +260,7 @@ test_commandline = TestSuiteShellCommand(
 
 test_differential = TestSuiteShellCommand(
             command=['../all/run-acceptance-avmdiff.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting vm acceptance differential testing...',
             descriptionDone='finished vm acceptance differential testing.',
             name="Testsuite_Differential",
@@ -263,7 +268,7 @@ test_differential = TestSuiteShellCommand(
 
 test_misc = TestSuiteShellCommand(
             command=['../all/run-misc-tests.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting to run misc tests...',
             descriptionDone='finished misc tests.',
             name="MiscTest",
@@ -271,7 +276,7 @@ test_misc = TestSuiteShellCommand(
 
 util_upload_asteam = BuildShellCheckCommand(
             command=['../all/upload-asteam.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Upload bits to ASTEAM...',
             descriptionDone='Upload to ASTEAM completed',
             name='Upload_ASTEAM',
@@ -280,7 +285,7 @@ util_upload_asteam = BuildShellCheckCommand(
 ## Local version runs a local script and not the common
 util_upload_asteam_local = BuildShellCheckCommand(
             command=['./upload-asteam.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Upload bits to ASTEAM...',
             descriptionDone='Upload to ASTEAM completed',
             name='Upload_ASTEAM',
@@ -288,7 +293,7 @@ util_upload_asteam_local = BuildShellCheckCommand(
 
 util_upload_mozilla = BuildShellCheckCommand(
             command=['../all/upload-mozilla.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Upload bits to MOZILLA...',
             descriptionDone='Upload to MOZILLA completed',
             name='Upload_MOZILLA',
@@ -297,7 +302,7 @@ util_upload_mozilla = BuildShellCheckCommand(
 ## Local version runs a local script and not the common
 util_upload_mozilla_local = BuildShellCheckCommand(
             command=['./upload-mozilla.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Upload bits to MOZILLA...',
             descriptionDone='Upload to MOZILLA completed',
             name='Upload_MOZILLA',
@@ -305,7 +310,7 @@ util_upload_mozilla_local = BuildShellCheckCommand(
 
 util_process_clean = BuildShellCommand(
             command=['../all/util-process-clean.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Zombie hunting...',
             descriptionDone='Zombie hunt completed',
             name='Util_ZombieKiller',
@@ -314,7 +319,7 @@ util_process_clean = BuildShellCommand(
 
 perf_prepare = BuildShellCommand(
             command=['./prepare.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='Preparing for performance run...',
             descriptionDone='Preparation complete...',
             name="Preparation",
@@ -323,7 +328,7 @@ perf_prepare = BuildShellCommand(
 
 perf_release = PerfShellCommand(
             command=['../all/run-performance-release.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting release performance tests...',
             descriptionDone='finished release performance tests.',
             name='Release',
@@ -332,7 +337,7 @@ perf_release = PerfShellCommand(
 
 perf_release_arm = PerfShellCommand(
             command=['../all/run-performance-release-arm.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting release performance tests...',
             descriptionDone='finished release performance tests.',
             name='Release',
@@ -341,7 +346,7 @@ perf_release_arm = PerfShellCommand(
 
 perf_release_interp = PerfShellCommand(
             command=['../all/run-performance-release-interp.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting release-interp performance tests...',
             descriptionDone='finished release-interp performance tests.',
             name='ReleaseInterp',
@@ -350,7 +355,7 @@ perf_release_interp = PerfShellCommand(
 
 perf_release_arm_interp = PerfShellCommand(
             command=['../all/run-performance-release-arm-interp.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting release-interp performance tests...',
             descriptionDone='finished release-interp performance tests.',
             name='ReleaseInterp',
@@ -359,7 +364,7 @@ perf_release_arm_interp = PerfShellCommand(
 
 perf_release_jit = PerfShellCommand(
             command=['../all/run-performance-release-jit.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting release-jit performance tests...',
             descriptionDone='finished release-jit performance tests.',
             name='ReleaseJIT',
@@ -368,7 +373,7 @@ perf_release_jit = PerfShellCommand(
 
 perf_release_arm_jit = PerfShellCommand(
             command=['../all/run-performance-release-arm-jit.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting release-jit performance tests...',
             descriptionDone='finished release-jit performance tests.',
             name='ReleaseJIT',
@@ -377,7 +382,7 @@ perf_release_arm_jit = PerfShellCommand(
 
 deep_codecoverage = BuildShellCommand(
             command=['./run-code-coverage.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting code coverage...',
             descriptionDone='finished code coverage',
             name='CodeCoverage',
@@ -386,7 +391,7 @@ deep_codecoverage = BuildShellCommand(
 
 deep_release_esc = BuildShellCommand(
             command=['../all/run-release-esc.sh', WithProperties('%s','revision')],
-            env={'branch': WithProperties('%s','branch')},
+            env={'branch': WithProperties('%s','branch'), 'silent':WithProperties('%s','silent')},
             description='starting release-esc tests...',
             descriptionDone='finished release-esc tests.',
             name='Release-esc',
