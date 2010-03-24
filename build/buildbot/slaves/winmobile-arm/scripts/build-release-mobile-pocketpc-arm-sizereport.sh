@@ -98,6 +98,7 @@ test -f "$basedir/objdir/shell/avmshell.map" || {
     exit 1
 }
 
+endSilent
 cd $basedir/utils
 python ./sizereport.py --vmversion=$change --config=-arm --product=${branch} --socketlog --prefix=message: --map=../objdir/shell/avmshell.map
 
@@ -109,4 +110,4 @@ test -d objdir && {
     rm -rf $basedir/objdir
 }
 
-endSilent
+

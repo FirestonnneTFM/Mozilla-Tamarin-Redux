@@ -123,8 +123,8 @@ function beginSilent () {
             logfile=output.log
         }
         # create log file in builds dir
-        #mkdir -p $buildsdir/${change}-${changeid}/$platform
-        logfile=$logfile  #$buildsdir/${change}-${changeid}/$platform/$logfile
+        mkdir -p $buildsdir/${change}-${changeid}/$platform
+        logfile=$buildsdir/${change}-${changeid}/$platform/$logfile
         touch $logfile
         exec 6>&1                # Link file descriptor #6 with stdout. (Saves stdout)
         exec >> $logfile 2>&1    # Redirect all stdout and stderr output to be appended to $logfile

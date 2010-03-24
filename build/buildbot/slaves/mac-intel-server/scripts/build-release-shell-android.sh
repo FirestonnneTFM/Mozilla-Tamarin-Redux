@@ -67,11 +67,12 @@ then
         mkdir -p $buildsdir/$change-${changeid}/$platform
     }
     cp avmshell $buildsdir/$change-${changeid}/$platform/$shell_release
+    endSilent
     exit 0
 else
     echo "avmshell was not created"
+    endSilent
 #    exit 1
     exit 0
 fi
 
-endSilent
