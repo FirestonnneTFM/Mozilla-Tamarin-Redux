@@ -51,7 +51,7 @@ namespace MMgc
 		va_list args;
 		va_start(args, format);
 
-		int chars = vsnprintf(buf, sizeof(buf)-2, format, args);
+		int chars = VMPI_vsnprintf(buf, sizeof(buf)-2, format, args);
 		buf[chars] = '\n';
 		buf[chars+1] = '\0';
 		va_end(args);
