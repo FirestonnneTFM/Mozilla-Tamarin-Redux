@@ -229,7 +229,7 @@ package selftest
 						break;
 					vs++;
 					i++;
-					t.push("verifyPass(" + res[1] + ", \"" + res[1] + "\", __FILE__, __LINE__);");
+					t.push("verifyPass(" + res[1] + ", \"" + quote(res[1]) + "\", __FILE__, __LINE__);");
 				}
 				if (vs == 0)
 					throw "No %%verify statements for test on line " + loc;
@@ -271,6 +271,9 @@ package selftest
 			return t;
 		}
 
+		function quote(s) {
+		    return s.replace(/\"/g, "\\\"");
+		}
     }
 
     function formatSelftest(input, st) {
