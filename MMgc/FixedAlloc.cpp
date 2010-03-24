@@ -257,8 +257,20 @@ namespace MMgc
 		if (b->nextFree)
 			b->nextFree->prevFree = b->prevFree;
 
+
+		vmpi_spin_lock_t *lock = NULL;
+		if(m_isFixedAllocSafe) {
+			lock = &((FixedAllocSafe*)this)->m_spinlock;
+			VMPI_lockRelease(lock);
+		}
+
 		// Free the memory
 		m_heap->FreeNoProfile(b);
+
+		if(lock != NULL)
+			VMPI_lockAcquire(lock);
+
+
 	}
 
 	size_t FixedAlloc::GetItemSize() const
