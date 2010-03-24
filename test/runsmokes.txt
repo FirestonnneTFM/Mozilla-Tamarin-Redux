@@ -135,13 +135,8 @@ cd cmdline;${py} ./testShellSystem.py
 
 cd cmdline;${py} ./testDebugger.py
 
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} regress
 
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} as3/sampling
-
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmd} regress
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmrd} regress
-cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmdd} regress
 
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} mops
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmrd} mops
@@ -169,3 +164,8 @@ cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} ecma3/Statements
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmrd} ecma3/Statements
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmd} ecma3/Statements
 cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmdd} ecma3/Statements
+
+cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmr} regress
+cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmd} regress
+cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmrd} regress
+cd acceptance;${py} ./runtests.py  --notimecheck --avm=${avmdd} regress

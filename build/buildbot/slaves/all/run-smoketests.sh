@@ -71,7 +71,6 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
     test "$ret" = "0" || {
         echo "Downloading of $shell_release failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_release
-        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
@@ -87,7 +86,6 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_debugger" ]; 
     test "$ret" = "0" || {
         echo "Downloading of $shell_release_debugger failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger
-        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_debugger
@@ -103,7 +101,6 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_debug" ]; then
     test "$ret" = "0" || {
         echo "Downloading of $shell_debug failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_debug
-        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_debug
@@ -119,7 +116,6 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_debug_debugger" ]; th
     test "$ret" = "0" || {
         echo "Downloading of $shell_debug_debugger failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
-        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
@@ -136,7 +132,6 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
-        endSilent
         exit 1
     }
 fi

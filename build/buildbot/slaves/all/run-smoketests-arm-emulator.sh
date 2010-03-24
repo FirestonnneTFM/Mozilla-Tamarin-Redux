@@ -66,7 +66,6 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
     test "$ret" = "0" || {
         echo "Downloading of $shell_release_arm failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_arm
-        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_arm
@@ -83,7 +82,6 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
-        endSilent
         exit 1
     }
 fi
