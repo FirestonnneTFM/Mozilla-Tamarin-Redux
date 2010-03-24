@@ -37,7 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#define ARGMASK(a,n) (nanojit::ARGSIZE_##a << (ARGSIZE_SHIFT*(n)))
+#define ARGMASK(a,n) (nanojit::ARGTYPE_##a << (ARGTYPE_SHIFT*(n)))
 #define SIG0(r) ARGMASK(r,0)
 #define SIG1(r,a1) (SIG0(r) | ARGMASK(a1,1))
 #define SIG2(r,a2,a1) (SIG1(r,a1) | ARGMASK(a2,2))
@@ -48,7 +48,7 @@
 #define SIG7(r,a7,a6,a5,a4,a3,a2,a1) (SIG6(r,a6,a5,a4,a3,a2,a1) | ARGMASK(a7,7))
 #define SIG8(r,a8,a7,a6,a5,a4,a3,a2,a1) (SIG7(r,a7,a6,a5,a4,a3,a2,a1) | ARGMASK(a8,8))
 
-#define ARGSIZE_A ARGSIZE_P
+#define ARGTYPE_A ARGTYPE_P
 
 #define FUNCTIONID(n) &ci_##n
 
