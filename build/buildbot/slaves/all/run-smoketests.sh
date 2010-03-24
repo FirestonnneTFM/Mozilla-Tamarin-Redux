@@ -50,7 +50,9 @@
 
 
 # silence output if silent=true (function defined in environment.sh)
-logfile=smokes.log
+slavename=`cd ${basedir}/..; pwd`
+slavename=${slavename##*/}
+logfile=smokes-${slavename}.log
 beginSilent
 
 configfile=$2
@@ -69,6 +71,7 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release" ]; then
     test "$ret" = "0" || {
         echo "Downloading of $shell_release failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_release
+        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release
@@ -84,6 +87,7 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_release_debugger" ]; 
     test "$ret" = "0" || {
         echo "Downloading of $shell_release_debugger failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_release_debugger
+        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_release_debugger
@@ -99,6 +103,7 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_debug" ]; then
     test "$ret" = "0" || {
         echo "Downloading of $shell_debug failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_debug
+        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_debug
@@ -114,6 +119,7 @@ if [ ! -e "$buildsdir/$change-${changeid}/$platform/$shell_debug_debugger" ]; th
     test "$ret" = "0" || {
         echo "Downloading of $shell_debug_debugger failed"
         rm -f $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
+        endSilent
         exit 1
     }
     chmod +x $buildsdir/$change-${changeid}/$platform/$shell_debug_debugger
@@ -130,6 +136,7 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
+        endSilent
         exit 1
     }
 fi
@@ -182,6 +189,12 @@ cd $basedir/build/buildbot/slaves/scripts
 ../all/util-acceptance-teardown.sh
 
 endSilent
+
+test "$silent" = "true" && {
+    # display smoke results to stdout so that buildbot parses the results
+    grep passes $logfile
+    grep failures $logfile
+}
 
 exit $exitcode
 
