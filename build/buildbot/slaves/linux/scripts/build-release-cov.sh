@@ -104,6 +104,7 @@ test -f shell/${shell_release} || {
     echo "avmshell is missing, Release Debugger build failed"
     cd $basedir/core
     hg revert avmplusVersion.h
+    endSilent
     exit 1
 }
 
