@@ -557,14 +557,15 @@ class RuntestBase:
         # set the output file name.  let's base its name on the date and platform,
         # and give it a sequence number.
         now = datetime.today()
-        for i in count(1):
-            if not self.js_output:
+        if not self.js_output:
+            for i in count(1):
                 self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
-            if not isfile(self.js_output):
-                break
+                if not isfile(self.js_output):
+                    break
         
         print 'Writing results to %s' % self.js_output
         self.js_output_f = open(self.js_output, 'w')
+        self.js_output_f.close()
         
     def getTestsList(self, startDir):
         if self.altsearchpath!=None:
@@ -700,6 +701,7 @@ class RuntestBase:
         # csvOut - if False and if outputing csv, do not print out this line
         if self.quiet and not overrideQuiet:
             sys.stdout.write('.')
+            sys.stdout.flush()
         elif self.csv:
             if csvOut:
                 if csv:
@@ -712,11 +714,12 @@ class RuntestBase:
             print m
             sys.stdout.flush()
         if self.js_output:
+            self.js_output_f = open(self.js_output, 'a')
             if self.logFileType == 'html':
                 self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
             else:
                 self.js_output_f.write('%s\n' % m)
-            self.js_output_f.flush()
+            self.js_output_f.close()
 
     def printOutput(self,request, outputCalls=None):
         #execute the outputCalls
@@ -744,28 +747,28 @@ class RuntestBase:
         # compile the abc to an executable
         if self.aotsdk:
             try:
-				output = os.path.dirname(abcfile)
-				if self.aotout:
-					output = self.aotout
-				
-				outname = string.replace(abcfile, "./", "")
-				outname = string.replace(outname, ".abc", "")
-				outname = string.replace(outname, "/", ".")
-				outabc = os.path.join(output, outname + ".abc")
-				
-				shutil.copyfile(abcfile, outabc)
-				self.js_print('AOT compilation of %s' % (outabc))
+                output = os.path.dirname(abcfile)
+                if self.aotout:
+                    output = self.aotout
+                
+                outname = string.replace(abcfile, "./", "")
+                outname = string.replace(outname, ".abc", "")
+                outname = string.replace(outname, "/", ".")
+                outabc = os.path.join(output, outname + ".abc")
+                
+                shutil.copyfile(abcfile, outabc)
+                self.js_print('AOT compilation of %s' % (outabc))
         
-				t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
-				(f,err,exitcode) = self.run_pipe('python2.5 %s %s --output %s --name %s %s %s %s' % (
-					os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
-				
-				for line in f:
-					self.js_print(("file '%s'>>> " % abcfile) + line.strip())
-				for line in err:
-					self.js_print(("file '%s'>>> " % abcfile) + line.strip())
+                t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
+                (f,err,exitcode) = self.run_pipe('python2.5 %s %s --output %s --name %s %s %s %s' % (
+                    os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
+                
+                for line in f:
+                    self.js_print(("file '%s'>>> " % abcfile) + line.strip())
+                for line in err:
+                    self.js_print(("file '%s'>>> " % abcfile) + line.strip())
             except:
-				self.js_print('AOT compilation of %s FAILED' % (abcfile))
+                self.js_print('AOT compilation of %s FAILED' % (abcfile))
     
     def compile_test(self, as_file, extraArgs=[]):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
