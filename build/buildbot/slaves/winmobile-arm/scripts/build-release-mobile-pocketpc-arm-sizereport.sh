@@ -91,10 +91,12 @@ res=$?
 
 test "$res" = "0" || {
     echo "build failed return value $res"
+    endSilent
     exit $res
 }
 test -f "$basedir/objdir/shell/avmshell.map" || {
     echo "avmshell.map file was not created"
+    endSilent
     exit 1
 }
 

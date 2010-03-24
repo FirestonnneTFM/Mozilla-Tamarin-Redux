@@ -63,6 +63,7 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
+        endSilent
         exit 1
     }
 fi
@@ -83,6 +84,7 @@ export COVFILE=$buildsdir/avm.cov
 echo AVM=$AVM
 test -f $AVM || {
   echo "ERROR: $AVM not found"
+  endSilent
   exit 1
 }
 
