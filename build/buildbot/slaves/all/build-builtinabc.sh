@@ -65,6 +65,7 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
+        endSilent
         exit 1
     }
 fi
@@ -94,6 +95,7 @@ ret=$?
 test "$ret" = "0" || {
     echo "builtin.py failed"
     hg revert builtin*.cpp builtin*.h
+    endSilent
     exit 1
 }
 
@@ -149,6 +151,7 @@ python ./shell_toplevel.py
 ret=$?
 test "$ret" = "0" || {
     echo "shell_toplevel failed"
+    endSilent
     exit 1
 }
 
