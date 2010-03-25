@@ -54,19 +54,31 @@ namespace avmplus
     class EnterCodeContext
     {
     public:
-        inline explicit EnterCodeContext(AvmCore* core, CodeContext* new_cc) : m_core(core)
+        EnterCodeContext() : m_core(NULL) {}  // support dynamic entry
+        
+        explicit EnterCodeContext(AvmCore* core, CodeContext* new_cc) : m_core(NULL)
         {
-            m_frame.enter(m_core, new_cc);
+            enter(core,new_cc);
+        }
+        void enter(AvmCore* core, CodeContext* new_cc)
+        {
+            AvmAssert(core != NULL);
+            AvmAssert(m_core == NULL); // Don't permit multiple entry.            
+            m_core = core;
+            m_frame.enter(core, new_cc);
             // fix for https://bugzilla.mozilla.org/show_bug.cgi?id=537980
             // ensure that dxns has a suitable default value for artifical MethodFrames 
-            m_frame.setDxns(m_core->publicNamespace);
+            m_frame.setDxns(core->publicNamespace);
         }
-        inline ~EnterCodeContext()
+        ~EnterCodeContext()
         {
-            m_frame.exit(m_core);
+            if (m_core) {
+                m_frame.exit(m_core);
+            }
         }
     private:
-        AvmCore* const m_core;
+
+        AvmCore* m_core;
         MethodFrame m_frame;
     };
 }
