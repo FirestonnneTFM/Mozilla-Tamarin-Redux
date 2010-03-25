@@ -131,6 +131,7 @@ test -f shell/$shell || {
     echo "avmshell is missing, build failed"
     cd $basedir/core
     hg revert avmplusVersion.h
+    endSilent
     exit 1
 }
 
