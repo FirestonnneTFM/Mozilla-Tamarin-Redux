@@ -321,7 +321,7 @@ namespace avmplus
 
 	void Debugger::traceCallback(int line)
 	{
-		if (!core->callStack && core->callStack->env())
+		if (!(core->callStack && core->callStack->env()))
 			return;
 			
 		Stringp file = ( core->callStack->filename() ) ? Stringp(core->callStack->filename()) : Stringp(core->kEmptyString);
