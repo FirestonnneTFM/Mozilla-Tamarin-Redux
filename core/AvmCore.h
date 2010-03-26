@@ -233,13 +233,6 @@ const int kBufferPadding = 16;
          */
         bool interruptCheck(bool interruptable);
 
-        /**
-         * on a backwards branch, check if the interrupt flag is enabled.
-         * used by interpreter only.  A copy of this is inline-generated
-         * by CodegenLIR at loop headers.
-         */
-        void branchCheck(MethodEnv *env, bool interruptable, int go);
-
     private:
         QCache*         m_tbCache;
         QCache*         m_tmCache;
