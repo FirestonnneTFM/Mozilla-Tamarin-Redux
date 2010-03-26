@@ -166,7 +166,7 @@ fi
 
 test "$silent" = "true" && {
     # upload log to asteam
-    . $basedir/build/buildbot/slaves/scripts/all/util-upload-ftp-asteam.sh acceptance-$shell.log $ftp_asteam/$branch/${change}-${changeid}/$platform/
+    . $basedir/build/buildbot/slaves/all/util-upload-ftp-asteam.sh acceptance-$shell.log $ftp_asteam/$branch/${change}-${changeid}/$platform/
 }
 
 ##
