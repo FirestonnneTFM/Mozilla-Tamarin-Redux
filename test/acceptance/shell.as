@@ -954,6 +954,18 @@ function grabError(err, str) {
 	}
 	return num;
 }
+
+function AddErrorTest(desc:String, expectedErr:String, testFunc:Function) {
+    actualErr = null;
+    try {
+        testFunc();
+    } catch (e) {
+        actualErr = e;
+    }
+    grabError(actualErr, expectedErr);
+    AddTestCase(desc, expectedErr, actualErr.toString().substr(0, expectedErr.length));
+}
+
 var cnNoObject = 'Unexpected Error!!! Parameter to this function must be an object';
 var cnNoClass = 'Unexpected Error!!! Cannot find Class property';
 var cnObjectToString = Object.prototype.toString;
@@ -1007,6 +1019,8 @@ function printStatus (msg)
 }
 function reportCompare (expected, actual, description)
 {
+    AddTestCase(description, expected, actual);
+    /*
     var expected_t = typeof expected;
     var actual_t = typeof actual;
     var output = "";
@@ -1034,6 +1048,7 @@ function reportCompare (expected, actual, description)
             	reportFailure (output);
         }
     stopTest();
+    */
 }
 // encapsulate output in shell
 function _print(s) {
@@ -1059,4 +1074,227 @@ function versionTest(testFunc, desc, expected) {
    }
    AddTestCase(desc, expected, result);
 }
+
+// Helper functions for tests from spidermonkey (JS1_5 and greater)
+/*
+  Calculate the "order" of a set of data points {X: [], Y: []}
+  by computing successive "derivatives" of the data until
+  the data is exhausted or the derivative is linear.
+*/
+function BigO(data) {
+    var order = 0;
+    var origLength = data.X.length;
+
+    while (data.X.length > 2) {
+        var lr = new LinearRegression(data);
+        if (lr.b > 1e-6) {
+            // only increase the order if the slope
+            // is "great" enough
+            order++;
+        }
+
+        if (lr.r > 0.98 || lr.Syx < 1 || lr.b < 1e-6) {
+            // terminate if close to a line lr.r
+            // small error lr.Syx
+            // small slope lr.b
+            break;
+        }
+        data = dataDeriv(data);
+    }
+
+    if (2 == origLength - order) {
+        order = Number.POSITIVE_INFINITY;
+    }
+    return order;
+
+    function LinearRegression(data) {
+        /*
+      y = a + bx
+      for data points (Xi, Yi); 0 <= i < n
+
+      b = (n*SUM(XiYi) - SUM(Xi)*SUM(Yi))/(n*SUM(Xi*Xi) - SUM(Xi)*SUM(Xi))
+      a = (SUM(Yi) - b*SUM(Xi))/n
+    */
+        var i;
+
+        if (data.X.length != data.Y.length) {
+            throw 'LinearRegression: data point length mismatch';
+        }
+        if (data.X.length < 3) {
+            throw 'LinearRegression: data point length < 2';
+        }
+        var n = data.X.length;
+        var X = data.X;
+        var Y = data.Y;
+
+        this.Xavg = 0;
+        this.Yavg = 0;
+
+        var SUM_X = 0;
+        var SUM_XY = 0;
+        var SUM_XX = 0;
+        var SUM_Y = 0;
+        var SUM_YY = 0;
+
+        for (i = 0; i < n; i++) {
+            SUM_X += X[i];
+            SUM_XY += X[i] * Y[i];
+            SUM_XX += X[i] * X[i];
+            SUM_Y += Y[i];
+            SUM_YY += Y[i] * Y[i];
+        }
+
+        this.b = (n * SUM_XY - SUM_X * SUM_Y) / (n * SUM_XX - SUM_X * SUM_X);
+        this.a = (SUM_Y - this.b * SUM_X) / n;
+
+        this.Xavg = SUM_X / n;
+        this.Yavg = SUM_Y / n;
+
+        var SUM_Ydiff2 = 0;
+        var SUM_Xdiff2 = 0;
+        var SUM_XdiffYdiff = 0;
+
+        for (i = 0; i < n; i++) {
+            var Ydiff = Y[i] - this.Yavg;
+            var Xdiff = X[i] - this.Xavg;
+
+            SUM_Ydiff2 += Ydiff * Ydiff;
+            SUM_Xdiff2 += Xdiff * Xdiff;
+            SUM_XdiffYdiff += Xdiff * Ydiff;
+        }
+
+        var Syx2 = (SUM_Ydiff2 - Math.pow(SUM_XdiffYdiff / SUM_Xdiff2, 2)) / (n - 2);
+        var r2 = Math.pow((n * SUM_XY - SUM_X * SUM_Y), 2) / ((n * SUM_XX - SUM_X * SUM_X) * (n * SUM_YY - SUM_Y * SUM_Y));
+
+        this.Syx = Math.sqrt(Syx2);
+        this.r = Math.sqrt(r2);
+
+    }
+
+    function dataDeriv(data) {
+        if (data.X.length != data.Y.length) {
+            throw 'length mismatch';
+        }
+        var length = data.X.length;
+
+        if (length < 2) {
+            throw 'length ' + length + ' must be >= 2';
+        }
+        var X = data.X;
+        var Y = data.Y;
+
+        var deriv = {
+            X: [],
+            Y: []
+        };
+
+        for (var i = 0; i < length - 1; i++) {
+            deriv.X[i] = (X[i] + X[i + 1]) / 2;
+            deriv.Y[i] = (Y[i + 1] - Y[i]) / (X[i + 1] - X[i]);
+        }
+        return deriv;
+    }
+
+    return 0;
+}
+
+/*
+ * Date: 07 February 2001
+ *
+ * Functionality common to Array testing -
+ */
+//-----------------------------------------------------------------------------
+
+var gTestsubsuite = 'Expressions';
+
+var CHAR_LBRACKET = '[';
+var CHAR_RBRACKET = ']';
+var CHAR_QT_DBL = '"';
+var CHAR_QT = "'";
+var CHAR_NL = '\n';
+var CHAR_COMMA = ',';
+var CHAR_SPACE = ' ';
+var TYPE_STRING = typeof 'abc';
+
+
+/*
+ * If available, arr.toSource() gives more detail than arr.toString()
+ *
+ * var arr = Array(1,2,'3');
+ *
+ * arr.toSource()
+ * [1, 2, "3"]
+ *
+ * arr.toString()
+ * 1,2,3
+ *
+ * But toSource() doesn't exist in Rhino, so use our own imitation, below -
+ *
+ */
+function formatArray(arr)
+{
+  try
+  {
+    return arr.toSource();
+  }
+  catch(e)
+  {
+    return toSource(arr);
+  }
+}
+
+
+
+/*
+ * Imitate SpiderMonkey's arr.toSource() method:
+ *
+ * a) Double-quote each array element that is of string type
+ * b) Represent |undefined| and |null| by empty strings
+ * c) Delimit elements by a comma + single space
+ * d) Do not add delimiter at the end UNLESS the last element is |undefined|
+ * e) Add square brackets to the beginning and end of the string
+ */
+function toSource(arr)
+{
+  var delim = CHAR_COMMA + CHAR_SPACE;
+  var elt = '';
+  var ret = '';
+  var len = arr.length;
+
+  for (i=0; i<len; i++)
+  {
+    elt = arr[i];
+
+    switch(true)
+    {
+    case (typeof elt === TYPE_STRING) :
+      ret += doubleQuote(elt);
+      break;
+
+    case (elt === undefined || elt === null) :
+      break; // add nothing but the delimiter, below -
+
+    default:
+      ret += elt.toString();
+    }
+
+    if ((i < len-1) || (elt === undefined))
+      ret += delim;
+  }
+
+  return  CHAR_LBRACKET + ret + CHAR_RBRACKET;
+}
+
+
+function doubleQuote(text)
+{
+  return CHAR_QT_DBL + text + CHAR_QT_DBL;
+}
+
+
+function singleQuote(text)
+{
+  return CHAR_QT + text + CHAR_QT;
+}
+
 
