@@ -767,6 +767,7 @@ namespace MMgc
 			StackTrace *freeTrace;
 #endif
 			bool inUse() const { return prev == NULL; }
+            bool isSentinel() const { return baseAddr == 0; }
 			char *endAddr() const { return baseAddr + size*kBlockSize; }
 			void FreelistInit()
 			{
