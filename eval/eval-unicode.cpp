@@ -625,9 +625,9 @@ namespace avmplus
 				if (tbl->ranges[mid].lo <= c && c <= tbl->ranges[mid].hi)
 					return true;
 				if (c < tbl->ranges[mid].lo)
-					hi = mid;
+					hi = mid-1;
 				else
-					lo = mid;
+					lo = mid+1;
 			}
 
 			lo = 0;
