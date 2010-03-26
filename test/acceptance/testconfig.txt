@@ -140,6 +140,16 @@ ecma3/String/split_504567:'babab',   .*   , expectedfail, bug https://bugzilla.m
 ####################
 as3/Vector/concat:concat multiple int vectors, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=504525
 
+####################
+# Array
+####################
+as3/Array/deleteElementWhileIterating, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=553088
+as3/Array/forEach:callbackfn is called only for elements of the array.*, .* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=553088
+as3/Array/forEach:elements that are deleted.*, .* , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=553088
+as3/Array/forEach:If IsCallable\(callbackfn\) is false.*, .*, expectedfail, need to file bug
+
+
+
 
 ####################
 # Windows Mobile
@@ -176,7 +186,7 @@ ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA , arm-.*(?<!-deep)$ , skip , 
 ecma3/Unicode/uAC00_HangulSyllables , arm-.*(?<!-deep)$ , skip , test runs too slowly
 ecma3/Unicode/uA000_YiSyllables, arm-.*(?<!-deep)$ , skip, tests run too slowly on winmo
 mops/mops , arm-.*(?<!-deep)$ , skip , test runs too slowly
-regress/bug_515935 , arm-lnx-tvm-debug.* , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
+regress/bug_515935 , arm-lnx-tvm-debug , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=552927
 
 
 
@@ -212,6 +222,12 @@ ecma3/Unicode/uE000_PrivateUseArea, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-d
 ecma3/Unicode/uAC00_HangulSyllables, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
 mops/mops, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
 regress/bug_483783, .*, skip, skip slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+spidermonkey/js1_5/Array/regress-157652, .*, skip, skip slow tests
+spidermonkey/js1_5/Regress/regress-203278-1, .*, skip, skip slow tests
+spidermonkey/js1_5/Regress/regress-360969-0(5|6), .*, skip, skip slow tests
+spidermonkey/js1_5/Regress/regress-80981, .*, skip, skip slow tests
+spidermonkey/js1_5/Regress/regress-96128-n, .*, skip, skip slow tests
+spidermonkey/js1_6/extensions/regress-456826, .*, skip, skip slow tests
 
 ####################
 # run slow tests in deep test phase
@@ -227,8 +243,12 @@ ecma3/Unicode/uAC00_HangulSyllables,.*deep, include, include slow tests in deep 
 # bug 505982
 mops/mops,^((?!ppc-mac-tvm-debug-).).*deep, include, include slow tests in deep phase
 regress/bug_483783, .*deep, include, include slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
-
-
+spidermonkey/js1_5/Array/regress-157652, .*deep, include, include slow tests in deep phase
+spidermonkey/js1_5/Regress/regress-203278-1, .*deep, include, include slow tests in deep phase
+spidermonkey/js1_5/Regress/regress-360969-0(5|6), .*deep, include, include slow tests in deep phase
+spidermonkey/js1_5/Regress/regress-80981, .*deep, include, include slow tests in deep phase
+spidermonkey/js1_5/Regress/regress-96128-n, .*deep, include, include slow tests in deep phase
+spidermonkey/js1_6/extensions/regress-456826, .*deep, include, include slow tests in deep phase
 
 ####################
 # verifier
@@ -289,4 +309,104 @@ as3/sampling/FunctionEntry,		.*AOT.*	, skip, AOT does not yet support profiling
 as3/sampling/InvocationSampling,	.*AOT.*	, skip, AOT does not yet support profiling
 as3/ShellClasses/Domain.as,		.*AOT.*	, skip, AOT does not support loadBytes()
 regress/vector_domain_bug,		.*AOT.*	, skip, AOT does not support loadBytes()
+
+####################
+# Migrated spidermonkey tests
+####################
+
+# Investigating these failures
+spidermonkey/js1_2/regexp/special_characters:'xa\\f\\n\\r\\t\\vbz'.*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551718
+
+spidermonkey/js1_5/Array/regress-345961:Array.prototype.shift should preserve holes after shift, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=345961
+
+spidermonkey/js1_5/Array/regress-364104:\[2\]\.lastIndexOf\(2. -5\).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=364104
+spidermonkey/js1_5/Array/regress-364104:\[2\]\.lastIndexOf\(2. -2\).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=364104
+spidermonkey/js1_5/Array/regress-364104:\[2. 3\]\.lastIndexOf\(2. -3\).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=364104
+
+spidermonkey/js1_5/Exceptions/regress-123002:(^Class|^Section), .*, expectedfail, Class.constructor.length should list number of params in constructor function?
+spidermonkey/js1_5/Exceptions/regress-333728, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=550328
+
+
+spidermonkey/js1_5/Function/regress-364023.as, .*, skip, uses eval
+spidermonkey/js1_5/Regress/regress-159334, .*, skip, need to replicate without eval
+
+spidermonkey/js1_5/GC/.*, .*, skip, GC tests for spidermonkey
+
+spidermonkey/js1_5/Object/regress-308806-01, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550358
+
+spidermonkey/js1_5/Regress/regress-104077, .*, skip, verifyerror: https://bugzilla.mozilla.org/show_bug.cgi?id=550512
+spidermonkey/js1_5/Regress/regress-140974:^Section [3-6].*, .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550530 
+
+spidermonkey/js1_5/Regress/regress-169559, .*, skip, need to investigate if global performance is really an issue
+spidermonkey/js1_5/Regress/regress-174709, .*, skip, need to figure out what test is trying to do
+spidermonkey/js1_5/Regress/regress-179524, .*, skip, needs investigation, may not have to port this one over
+
+# Test Requires building a large string (previously evaluated using eval or Function Body form)
+spidermonkey/js1_5/Regress/regress-191633, .*, skip, test builds very large string with comments and then evals it - may need to create huge file
+spidermonkey/js1_5/Regress/regress-367561-01, .*, skip, need to build large test string
+spidermonkey/js1_5/Regress/regress-367561-03, .*, skip, need to build large test string
+spidermonkey/js1_5/Regress/regress-396684, .*, skip, need to build large test string
+spidermonkey/js1_5/Regress/regress-416628, .*, skip, need to build large test string
+spidermonkey/js1_5/String/regress-179068, .*,  skip, need to build large test string
+spidermonkey/js1_5/Expressions/regress-394673, .*, skip, need to figure out a way to evaluate a long long chain of && ||
+spidermonkey/js1_5/Regress/regress-290575, .*, skip, test evaluates function with 32768 arguments - need to convert to not use Function Body or eval
+
+spidermonkey/js1_5/Regress/regress-191668, .*, skip, should (0 <!- 0) be legal?
+spidermonkey/js1_5/Regress/regress-211590, .*, skip, need to investigate how randoms are generated - i believe we only use 32 bit integers to gen
+
+spidermonkey/js1_5/Regress/regress-303213, .*, skip, how do we handle out of memory errors?
+spidermonkey/js1_5/Regress/regress-3649-n, .*, skip, out of memory
+spidermonkey/js1_5/Regress/regress-312588, .*, skip, out of memory
+spidermonkey/js1_5/Regress/regress-310993, .*, skip, how should e4x comments behave in as3?
+spidermonkey/js1_5/Regress/regress-311071, .*, skip, how should e4x comments behave in as3?
+spidermonkey/js1_5/Regress/regress-31255, .*, skip, how should e4x comments behave in as3?
+spidermonkey/js1_5/Regress/regress-334807-0.*, .*, skip, need to investigate if this is a legit bug
+spidermonkey/js1_5/Regress/regress-352009, .*, skip, should array comprehension work?
+spidermonkey/js1_5/Regress/regress-511859:valid sequence U\+(800|10000|10FFFF), ^((?!diff).)*$, expectedfail, need to investigate
+
+spidermonkey/js1_5/Regress/regress-230216-1:Section 1.*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550976
+spidermonkey/js1_5/Regress/regress-247179:RegExp \\b.*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550984
+spidermonkey/js1_5/Regress/regress-248444:.*Section (4|5).*, ^((?!diff).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550987
+spidermonkey/js1_5/Regress/regress-252892:Section (5|7).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550990
+
+
+spidermonkey/js1_5/Regress/regress-271716-n, .*, skip, takes too long to run - tries to crash by doing while (1) a=new Array(a) - possibly run in deep?
+
+spidermonkey/js1_5/Regress/regress-274035:Array.prototype.(concat|splice).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551032
+
+spidermonkey/js1_5/Regress/regress-280769-(4|5), ^((?!diff).)*$, expectedfail, Needs further investigation into what test is trying to do
+
+spidermonkey/js1_5/Regress/regress-356693, .*, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4024
+spidermonkey/js1_5/Regress/regress-387951-01, .*, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4024
+
+spidermonkey/js1_5/Regress/regress-438415-02, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551202
+spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4).*, x64-lnx.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
+spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4|6).*, .*(mac|x86-lnx|arm-lnx).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
+spidermonkey/js1_5/Regress/regress-58116, .*-diff, skip, skip in diff testing
+spidermonkey/js1_5/Regress/regress-261887, .*-diff, skip, skip in diff testing as output can vary somewhat
+
+spidermonkey/js1_5/Scope/regress-185485:Section (2|5), ^((?!diff).)*$, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4026
+spidermonkey/js1_5/Scope/scope-004:Section (6|7).*, ^((?!diff).)*$, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4027
+
+# spidermonkey wordcode issues
+spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|jit).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
+spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|jit).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
+spidermonkey/js1_5/Array/regress-99120-02, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551845
+
+spidermonkey/js1_5/Regress/regress-283477, .*debug.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551825
+spidermonkey/js1_5/Regress/regress-283477, .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551825
+
+spidermonkey/js1_5/String/regress-157334-01, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551840
+
+spidermonkey/js1_5/Array/regress-157652, arm.*, skip, test runs out of memory on devices
+spidermonkey/js1_5/Function/regress-338121-.*, arm.*, skip, test runs out of memory on devices
+spidermonkey/js1_5/Function/regress-338001, arm.*, skip, test runs out of memory on devices
+
+### Spidermonkey JS1_6 ###
+spidermonkey/js1_6/Array/regress-290592:.*length, .*, expectedfail, related to https://bugzilla.mozilla.org/show_bug.cgi?id=551032
+spidermonkey/js1_6/Array/regress-290592:(Array.forEach.*(mutate|on sparse array)|sparsestrings: every.*), .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=553088
+spidermonkey/js1_6/Array/regress-304828, .*, skip, Array methods on String not supported
+
+spidermonkey/js1_6/Array/regress-386030, .*, skip, https://bugs.adobe.com/jira/browse/ASL-55
+spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 
