@@ -79,18 +79,6 @@ REALLY_INLINE bool AvmCore::interruptCheck(bool interruptable)
     return interruptable && (interrupted != NotInterrupted);
 }
 
-REALLY_INLINE void AvmCore::branchCheck(MethodEnv *env, bool interruptable, int go)
-{
-    if (go < 0)
-    {
-#ifdef DEBUGGER
-        sampleCheck();
-#endif
-        if (interruptCheck(interruptable))
-            handleInterruptMethodEnv(env);
-    }
-}
-
 REALLY_INLINE QCache* AvmCore::tbCache()
 {
     return m_tbCache;
