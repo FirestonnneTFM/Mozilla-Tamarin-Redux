@@ -2918,7 +2918,9 @@ namespace avmplus
 	{
 		AvmCore *core = this->core();
 
-		Stringp uri = (mn.isAnyNamespace() ? 0 : mn.getNamespace()->getURI());
+		AvmAssert(!mn.isAnyNamespace());
+
+		Stringp uri = mn.getNamespace()->getURI();
 
 		if (nsArray)
 		{
