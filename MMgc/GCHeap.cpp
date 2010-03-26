@@ -1348,7 +1348,9 @@ namespace MMgc
 		if (block->committed)
 		{
 			HeapBlock *nextBlock = block + block->size;
-			GCAssert(nextBlock->size > 0 || !nextBlock->committed);
+            // This is not correct - sentinels are not necessarily committed.  We
+            // may or may not want to fix that.
+			//GCAssert(nextBlock->size > 0 || !nextBlock->committed);
 
 			if (!nextBlock->inUse() && nextBlock->committed) {
 				// Remove successor block from free list
