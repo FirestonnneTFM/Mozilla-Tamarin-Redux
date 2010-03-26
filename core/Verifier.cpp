@@ -1618,6 +1618,7 @@ namespace avmplus
             {
                 // if either the LHS or RHS is a number type, then we know
                 // it will be a numeric comparison.
+                checkStack(2,1);
                 Value& rhs = state->peek(1);
                 Value& lhs = state->peek(2);
                 Traits *lhst = lhs.traits;
