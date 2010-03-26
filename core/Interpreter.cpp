@@ -235,6 +235,20 @@ namespace avmplus
 		return AvmCore::number_d(a);
 	}
 
+    /**
+     * on a backwards branch, check if the interrupt flag is enabled.
+     * used by interpreter only.  A copy of this is inline-generated
+     * by CodegenLIR at loop headers.
+     */
+    REALLY_INLINE void branchCheck(AvmCore* core, MethodEnv *env, bool interruptable)
+    {
+    #ifdef DEBUGGER
+        core->sampleCheck();
+    #endif
+        if (core->interruptCheck(interruptable))
+            core->handleInterruptMethodEnv(env);
+    }
+
 #ifdef _MSC_VER
 #  ifdef MSVC_X86_ASM_THREADING
 #    pragma warning(disable:4740)  // "inline assembler suppresses global optimization"
@@ -901,13 +915,13 @@ namespace avmplus
 	 // It's probably possible to adjust it on demand outside the function too,
 	 // because code that accesses it will have access to "info" and can
 	 // perform the adjustment.
-#    define SAVE_EXPC         expc = pc-1-info->word_code_start()
-#    define SAVE_EXPC_S24     expc = pc-2-info->word_code_start()
+#    define SAVE_EXPC              expc = pc-1-info->word_code_start()
+#    define SAVE_EXPC_TARGET(off)  expc = pc + (off) - info->word_code_start()
 #  else
 	 // Adjusted on demand in the CATCH clause.  Reduces size of interpreter function
 	 // by 2.5KB of object code (x86 / gcc4.0 / -O3).
-#    define SAVE_EXPC         expc = (intptr_t)pc
-#    define SAVE_EXPC_S24     expc = (intptr_t)(pc-1)
+#    define SAVE_EXPC              expc = (intptr_t)pc
+#    define SAVE_EXPC_TARGET(off)  expc = (intptr_t)(pc + (off))
 #  endif
 
 #else // !VMCFG_WORDCODE
@@ -918,8 +932,8 @@ namespace avmplus
 #  define U30ARG            (tmp_pc=pc, tmp_u30 = uint32_t(readU30(tmp_pc)), pc = tmp_pc, tmp_u30)
 #  define U8ARG             (*pc++)
 #  define S24ARG            (pc+=3, readS24(pc-3))
-#  define SAVE_EXPC	        expc = pc-1-codeStart
-#  define SAVE_EXPC_S24     expc = pc-4-codeStart
+#  define SAVE_EXPC	             expc = pc-1-codeStart
+#  define SAVE_EXPC_TARGET(off)  expc = pc + (off) - codeStart
 
 #endif // VMCFG_WORDCODE
 		
@@ -1094,8 +1108,8 @@ namespace avmplus
 			INSTR(jump) {
 				i1 = S24ARG;
 				if (i1 < 0) {
-					SAVE_EXPC_S24;
-				    core->branchCheck(env, interruptable, (int32_t)i1);
+					SAVE_EXPC_TARGET(i1);
+				    branchCheck(core, env, interruptable);
 				}
 				pc += i1;
                 NEXT;
@@ -1754,6 +1768,11 @@ namespace avmplus
 				uint32_t case_count = uint32_t(readU30(switch_pc)) + 1;
                 pc = base+readS24( index < case_count ? (switch_pc + 3*index) : pc );
 #endif
+                if (pc <= base) {
+                    // if backedge, need an interrupt check
+                    SAVE_EXPC; // interrupts should originate from target of backedge
+                    branchCheck(core, env, interruptable);
+                }
 				NEXT;
 			}
 
@@ -1771,8 +1790,8 @@ namespace avmplus
 				if (a1 == a2)
 				{
 					if (i1 < 0) {
-						SAVE_EXPC_S24;
-						core->branchCheck(env, interruptable, (int32_t)i1);
+						SAVE_EXPC_TARGET(i1);
+						branchCheck(core, env, interruptable);
 					}
                     pc += i1;
 				}
@@ -1801,7 +1820,10 @@ namespace avmplus
 	if (b1) \
 	{ \
 		if (i1 < 0) \
-			core->branchCheck(env, interruptable, (int32_t)i1); \
+		{ \
+		    SAVE_EXPC_TARGET(i1); \
+            branchCheck(core, env, interruptable); \
+		} \
 		pc += i1; \
 	}
 
@@ -1810,7 +1832,10 @@ namespace avmplus
 	if (!b1) \
 	{ \
 		if (i1 < 0) \
-			core->branchCheck(env, interruptable, (int32_t)i1); \
+		{ \
+		    SAVE_EXPC_TARGET(i1); \
+		    branchCheck(core, env, interruptable); \
+		} \
 		pc += i1; \
 	}
 
