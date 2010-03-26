@@ -175,4 +175,8 @@
     #error "Obsolete define"
 #endif
 
+//Enable this if compiling for fuzz testing, where informational asserts are not desired.
+//There are only a few informational asserts in the source code.
+//#define VMCFG_FUZZTESTING
+
 #endif /* __avmbuild__ */
