@@ -49,10 +49,6 @@
 ##
 . ../all/util-calculate-change.sh $1
 
-# silence output if silent=true (function defined in environment.sh)
-logfile=coverage-${shell_release_debugger}.log
-beginSilent
-
 ##
 # Download the latest asc.jar if it does not exist
 ##
@@ -63,7 +59,6 @@ if [ ! -e "$basedir/utils/asc.jar" ]; then
     test "$ret" = "0" || {
         echo "Downloading of asc.jar failed"
         rm -f $basedir/utils/asc.jar
-        endSilent
         exit 1
     }
 fi
@@ -84,7 +79,6 @@ export COVFILE=$buildsdir/avm.cov
 echo AVM=$AVM
 test -f $AVM || {
   echo "ERROR: $AVM not found"
-  endSilent
   exit 1
 }
 
@@ -104,21 +98,25 @@ $bullseyedir/covclear
 
 cd $basedir/test/acceptance
 
+test "$silent" = "true" && {
+    # Note that log files are not uploaded to asteam as any failures would have
+    # occured in previous steps
+    silentoptions="--summaryonly"
+}
+
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py  --notimecheck"
-python ./runtests.py --config=x86-lnx-tvm-cov-releasedebugger  --notimecheck
+echo "message: python ./runtests.py  --notimecheck ${silentoptions}"
+python ./runtests.py --config=x86-lnx-tvm-cov-releasedebugger  --notimecheck ${silentoptions}
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Dinterp   --notimecheck"
-python ./runtests.py --vmargs=-Dinterp --config=x86-lnx-tvm-cov-releasedebugger-Dinterp  --notimecheck
+echo "message: python ./runtests.py --vmargs=-Dinterp   --notimecheck ${silentoptions}"
+python ./runtests.py --vmargs=-Dinterp --config=x86-lnx-tvm-cov-releasedebugger-Dinterp  --notimecheck ${silentoptions}
 $bullseyedir/covdir -q
-echo "message: python ./runtests.py --vmargs=-Ojit   --notimecheck"
-python ./runtests.py --vmargs=-Ojit --config=x86-lnx-tvm-cov-releasedebugger-Ojit  --notimecheck
+echo "message: python ./runtests.py --vmargs=-Ojit   --notimecheck ${silentoptions}"
+python ./runtests.py --vmargs=-Ojit --config=x86-lnx-tvm-cov-releasedebugger-Ojit  --notimecheck ${silentoptions}
 $bullseyedir/covdir -q
 
 fnpct=`$bullseyedir/covdir -q | grep Total | awk '{print $6}'`
 cdpct=`$bullseyedir/covdir -q | grep Total | awk '{print $11}'`
-
-endSilent
 
 ##
 # Post coverage data to ASTEAM
