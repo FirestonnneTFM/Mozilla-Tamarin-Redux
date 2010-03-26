@@ -83,7 +83,6 @@ private:
         MMGC_GCENTER(gc);
 
         int count = 100;
-        size_t maxheap = 0;
         for (int c=0; c<count; c++) {
             (void)(new (gc) DependentAllocHolder());
             size_t heapsize = gc->policy.blocksOwnedByGC() * GCHeap::kBlockSize;
