@@ -377,7 +377,6 @@ spidermonkey/js1_5/Regress/regress-274035:Array.prototype.(concat|splice).*, ^((
 spidermonkey/js1_5/Regress/regress-280769-(4|5), ^((?!diff).)*$, expectedfail, Needs further investigation into what test is trying to do
 
 spidermonkey/js1_5/Regress/regress-356693, .*, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4024
-spidermonkey/js1_5/Regress/regress-387951-01, .*, expectedfail, https://bugs.adobe.com/jira/browse/ASC-4024
 
 spidermonkey/js1_5/Regress/regress-438415-02, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551202
 spidermonkey/js1_5/Regress/regress-58116:^.*Section (3|4).*, x64-lnx.*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551227
