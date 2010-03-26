@@ -392,7 +392,6 @@ namespace avmplus
 
         // found the start of a new basic block
         coder->writeBlockStart(state);
-        state->targetOfBackwardsBranch = false;
         return code_pos + blk->pc;
     }
 
@@ -447,6 +446,8 @@ namespace avmplus
         _nvprof("verify-block", 1);
         ExceptionHandlerTable* exTable = info->abc_exceptions();
         const byte* nextpc;
+        bool isLoopHeader = state->targetOfBackwardsBranch;
+        state->targetOfBackwardsBranch = false;
         for (const byte* pc = nextpc = start_pos, *code_end=code_pos+code_length; pc < code_end; pc = nextpc)
         {
             // should we make a new sample frame in this method?
@@ -470,12 +471,15 @@ namespace avmplus
 
             int sp = state->sp();
 
-            if (pc < tryTo && pc >= tryFrom && opcodeInfo[opcode].canThrow) {
+            if (pc < tryTo && pc >= tryFrom &&
+                (opcodeInfo[opcode].canThrow || isLoopHeader && pc == start_pos)) {
+                // If this instruction can throw exceptions, treat it as an edge to
+                // each in-scope catch handler.  The instruction can throw exceptions
+                // if canThrow = true, or if this is the target of a backedge, where
+                // the implicit interrupt check can throw an exception.
                 for (int i=0, n=exTable->exception_count; i < n; i++) {
                     ExceptionHandler* handler = &exTable->exceptions[i];
                     if (pc >= code_pos + handler->from && pc < code_pos + handler->to) {
-                        // If this instruction can throw exceptions, treat it as an edge to
-                        // each in-scope catch handler.
                         int saveStackDepth = state->stackDepth;
                         int saveScopeDepth = state->scopeDepth;
                         Value stackEntryZero = saveStackDepth > 0 ? state->stackValue(0) : state->value(0);
@@ -2548,7 +2552,10 @@ namespace avmplus
         } else {
             targetChanged = mergeState(targetState);
         }
-        targetState->targetOfBackwardsBranch |= (target <= current);
+        bool targetOfBackwardsBranch = targetState->targetOfBackwardsBranch || target <= current;
+        if (targetOfBackwardsBranch != targetState->targetOfBackwardsBranch)
+            targetChanged |= true;
+        targetState->targetOfBackwardsBranch = targetOfBackwardsBranch;
         if (targetChanged && !targetState->wl_pending) {
             targetState->wl_pending = true;
             targetState->wl_next = worklist;
