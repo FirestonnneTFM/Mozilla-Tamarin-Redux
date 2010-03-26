@@ -1762,7 +1762,8 @@ namespace MMgc
 			block = next;
 		}
 
-		AddToFreeList(block);
+		// Save off and add after initializing all blocks.
+		HeapBlock *newBlock = block;
 
 		// Initialize the rest of the new blocks to empty.
 		size_t freeBlockSize = block->size;
@@ -1795,6 +1796,8 @@ namespace MMgc
 		block->allocTrace = 0;
 		block->freeTrace = 0;
 #endif
+
+		AddToFreeList(newBlock);
 
 		// save for free'ing
 		void *oldBlocks = blocks;
