@@ -2291,7 +2291,7 @@ namespace avmplus
     {
         if (name->isAttr())
         {
-            verifyFailed(kIllegalOpMultinameError, core->toErrorString(name));
+            verifyFailed(kIllegalOpMultinameError, core->toErrorString(name), name->format(core));
         }
     }
 
