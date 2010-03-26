@@ -472,7 +472,7 @@ namespace avmplus
             int sp = state->sp();
 
             if (pc < tryTo && pc >= tryFrom &&
-                (opcodeInfo[opcode].canThrow || isLoopHeader && pc == start_pos)) {
+                (opcodeInfo[opcode].canThrow || (isLoopHeader && pc == start_pos))) {
                 // If this instruction can throw exceptions, treat it as an edge to
                 // each in-scope catch handler.  The instruction can throw exceptions
                 // if canThrow = true, or if this is the target of a backedge, where
