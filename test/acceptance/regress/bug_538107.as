@@ -47,18 +47,29 @@ startTest();
 // ED A0 80 = UTF-8 for 0xD800
 // 0xDC00 0xD800 is an invalid UTF-16 sequence
 var s = "%ED%B0%80%ED%A0%80";
-decodeURIComponent(s);
-// test here is actually to make sure that this will run, previously
-// the shell would have already thrown a runtime error:
-//  URIError: Error #1052: Invalid URI passed to decodeURIComponent function.
-AddTestCase("decodeURIComponent", 2, decodeURIComponent(s).length);
 
 
-decodeURI(s);
-// test here is actually to make sure that this will run, previously
-// the shell would have already thrown a runtime error:
-//  URIError: Error #1052: Invalid URI passed to decodeURI function.
-AddTestCase("decodeURI", 2, decodeURI(s).length);
+err = "no error";
+// looking for URIError: Error #1052: Invalid URI passed to decodeURIComponent function.
+try {
+    decodeURIComponent(s);
+} catch (e) {
+    err = grabError(e, e.toString());
+} finally {
+    AddTestCase("decodeURIComponent", "Error #1052", err );
+}
+
+
+err = "no error";
+// looking for URIError: Error #1052: Invalid URI passed to decodeURI function.
+try {
+    decodeURI(s);
+} catch (e) {
+    err = grabError(e, e.toString());
+} finally {
+    AddTestCase("decodeURI", "Error #1052", err );
+}
+
 
 test();
 
