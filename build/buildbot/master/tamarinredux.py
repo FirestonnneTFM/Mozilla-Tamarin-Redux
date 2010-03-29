@@ -1698,6 +1698,9 @@ class tamarinredux:
     linux_arm_deep_factory.addStep(bb_slaveupdate(slave="linux-arm-deep"))
     linux_arm_deep_factory.addStep(download_testmedia)
     linux_arm_deep_factory.addStep(test_generic(name="Debug-softfloat", shellname="avmshell_neon_arm_d", vmargs="", config="", scriptargs=""))
+    linux_arm_deep_factory.addStep(test_generic(name="Release-softfloat-deep", shellname="avmshell_neon_arm", vmargs="", config="arm-lnx-tvm-release-deep", scriptargs=""))
+    linux_arm_deep_factory.addStep(test_generic(name="Release-deep", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="arm-lnx-tvm-release-deep", scriptargs=""))
+    linux_arm_deep_factory.addStep(test_generic(name="Release-Dinterp-deep", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="arm-lnx-tvm-release-Dinterp-deep", scriptargs=""))
     linux_arm_deep_factory.addStep(util_process_clean)
     linux_arm_deep_builder = {
                 'name': "linux-arm-deep",
