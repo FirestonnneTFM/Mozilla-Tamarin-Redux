@@ -67,7 +67,7 @@ for (var p = 0; p < data.X.length; p++)
 
 // A bunch of shells intermittently return 2 at times - see https://bugzilla.mozilla.org/show_bug.cgi?id=551845
 // For now, change to < 3
-AddTestCase('BigO ' + order + ' < 3', true, order < 3);
+AddTestCase('BigO order < 3', true, order < 3);
 //AddTestCase('BigO < 2', true, order < 2);
 
 
