@@ -333,7 +333,7 @@ namespace MMgc
 
 	DECLARE_PRIM_ARRAY(uint8_t)
 	DECLARE_PRIM_ARRAY(int8_t)
-#if defined(__GNUC__) || defined(__ARMCC__)
+#if defined(__GNUC__) || defined(__ARMCC__) || defined(__WINSCW__)
 	// msvc treats char and (u)int8_t as the same but gcc and armcc don't
 	DECLARE_PRIM_ARRAY(char)
 #elif !defined(_MSC_VER) && !defined(__SUNPRO_CC)

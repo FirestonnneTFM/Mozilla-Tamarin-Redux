@@ -341,7 +341,7 @@ void VMPI_desetupPCResolution()
 	// TODO
 }
 
-uintptr_t VMPI_getThreadStackBase() const
+uintptr_t VMPI_getThreadStackBase()
 {
 	TThreadStackInfo info;
 	RThread mythread;
