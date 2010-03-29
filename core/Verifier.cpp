@@ -1502,21 +1502,23 @@ namespace avmplus
             {
                 checkStack(0,1);
                 const ScopeTypeChain* scope = info->declaringScope();
+                uint32_t index = imm30;
                 int captured_depth = scope->size;
                 if (captured_depth > 0)
                 {
                     // enclosing scope
-                    state->push(scope->getScopeTraitsAt(imm30), true);
+                    Traits* t = scope->getScopeTraitsAt(index);
+                    coder->writeOp1(state, pc, opcode, index, t);
+                    state->push(t, true);
                 }
                 else
                 {
                     #ifdef _DEBUG
                     if (pool->isBuiltin)
-                      core->console << "getouterscope >= depth (" << imm30 << " >= " << state->scopeDepth << ")\n";
+                      core->console << "getouterscope >= depth (" << index << " >= " << state->scopeDepth << ")\n";
                     #endif
-                    verifyFailed(kGetScopeObjectBoundsError, core->toErrorString(0));
+                    verifyFailed(kGetScopeObjectBoundsError, core->toErrorString(index));
                 }
-                coder->write(state, pc, opcode);
                 break;
             }
 
