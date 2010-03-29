@@ -65,7 +65,7 @@ for (var p = 0; p < data.X.length; p++)
 }
 // printStatus(msg);
 // printStatus('Order: ' + order);
-AddTestCase('BigO < 2', true, Boolean(order));
+AddTestCase('BigO < 3', true, order < 3);
 
 function concat(size)
 {
