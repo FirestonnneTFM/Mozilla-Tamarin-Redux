@@ -705,7 +705,6 @@ namespace nanojit
         }
         else if (oprnd1->isconst() && !oprnd2->isconst())
         {
-            LIns* t;
             switch (v) {
             case LIR_add:
             CASE32(LIR_iaddp:)
@@ -715,12 +714,13 @@ namespace nanojit
             case LIR_xor:
             case LIR_or:
             case LIR_and:
-            case LIR_eq:
+            case LIR_eq: {
                 // move const to rhs
-                t = oprnd2;
+                LIns* t = oprnd2;
                 oprnd2 = oprnd1;
                 oprnd1 = t;
                 break;
+            }
             default:
                 if (isICmpOpcode(v)) {
                     // move const to rhs, swap the operator
