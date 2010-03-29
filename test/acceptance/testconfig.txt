@@ -392,9 +392,6 @@ spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|jit).*, exp
 spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|jit).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 spidermonkey/js1_5/Array/regress-99120-02, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551845
 
-spidermonkey/js1_5/Regress/regress-283477, .*debug.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551825
-spidermonkey/js1_5/Regress/regress-283477, .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551825
-
 spidermonkey/js1_5/String/regress-157334-01, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551840
 
 spidermonkey/js1_5/Array/regress-157652, arm.*, skip, test runs out of memory on devices
