@@ -648,7 +648,6 @@ namespace avmplus
 		case OP_newcatch:
 		case OP_getslot:
 		case OP_setslot:
-		case OP_getouterscope:
 		    emitOp1(pc, wordCode(opcode));
 			break;
 		case OP_hasnext2:
