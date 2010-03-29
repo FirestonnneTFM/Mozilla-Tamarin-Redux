@@ -73,7 +73,7 @@ mmgc/outofmemory , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=54135
 # force JIT -Ojit
 ####################
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*(-Ojit|-Djitordie).*  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-as3/Vector/nonindexproperty:index -6.*          , .*((-Ojit|-Djitordie).*|diff)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/Vector/nonindexproperty:index -6.*          , .*((-Ojit|-Djitordie).*)  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 ####################
 # abcasm:
@@ -109,13 +109,11 @@ abcasm/.*, .*diff, skip, trim down tests
 # avmdiff does not handle .exitcode
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue: avmdiff does not handle .exitcode
 regress/bug_515935, .*diff, skip, known issue: avmdiff does not handle .exitcode
-as3/RuntimeErrors/Error1034TypeCoercionFailed , .*diff, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=510225
 
 
 # specific skips when running differential testing between 32bit and 64bit shells
 as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 as3/Vector/nonindexproperty , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-as3/RuntimeErrors/Error1034TypeCoercionFailed , .*3264-diff , skip , both produce the same results and therefore produce and unexpected pass bug 510225
 ecma3/Math/e15_8_2_16 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_18 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
 ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=521245
@@ -123,17 +121,17 @@ ecma3/Math/e15_8_2_7 , .*3264-diff , skip , https://bugzilla.mozilla.org/show_bu
 ####################
 # Number
 ####################
-ecma3/Number/e15_7_4_6_1:Section R-(1|2|3|4|5|6|7|8|10|11|12|13|14|16|17) .* , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=513039
-ecma3/Number/e15_7_4_6_1:Section R-(18|19) .* , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
-ecma3/Number/e15_7_4_6_1:Section C , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
-ecma3/Number/e15_7_4_7_1:Section R-1 , .* , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=442974
+ecma3/Number/e15_7_4_6_1:Section R-(1|2|3|4|5|6|7|8|10|11|12|13|14|16|17) .* , ^((?!diff).)*$ , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=513039
+ecma3/Number/e15_7_4_6_1:Section R-(18|19) .* , ^((?!diff).)*$ , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478796
+ecma3/Number/e15_7_4_6_1:Section C , ^((?!diff).)*$ , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=478804
+ecma3/Number/e15_7_4_7_1:Section R-1 , ^((?!diff).)*$ , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=442974
 
 
 ####################
 # String
 ####################
-ecma3/String/split_504567:'abab',    .*   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
-ecma3/String/split_504567:'babab',   .*   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
+ecma3/String/split_504567:'abab',    ^((?!diff).)*$   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
+ecma3/String/split_504567:'babab',   ^((?!diff).)*$   , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=504567
 
 ####################
 # Vector
@@ -399,8 +397,8 @@ spidermonkey/js1_5/Function/regress-338121-.*, arm.*, skip, test runs out of mem
 spidermonkey/js1_5/Function/regress-338001, arm.*, skip, test runs out of memory on devices
 
 ### Spidermonkey JS1_6 ###
-spidermonkey/js1_6/Array/regress-290592:.*length, .*, expectedfail, related to https://bugzilla.mozilla.org/show_bug.cgi?id=551032
-spidermonkey/js1_6/Array/regress-290592:(Array.forEach.*(mutate|on sparse array)|sparsestrings: every.*), .*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=553088
+spidermonkey/js1_6/Array/regress-290592:.*length, ^((?!diff).)*$, expectedfail, related to https://bugzilla.mozilla.org/show_bug.cgi?id=551032
+spidermonkey/js1_6/Array/regress-290592:(Array.forEach.*(mutate|on sparse array)|sparsestrings: every.*), ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=553088
 spidermonkey/js1_6/Array/regress-304828, .*, skip, Array methods on String not supported
 
 spidermonkey/js1_6/Array/regress-386030, .*, skip, https://bugs.adobe.com/jira/browse/ASL-55
