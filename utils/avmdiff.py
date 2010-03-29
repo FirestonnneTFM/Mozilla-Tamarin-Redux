@@ -146,7 +146,7 @@ def avm(vm, args):
     output = ()
     try:
         for line in p.stdout:
-            line=scrub_errors(line)
+            line=scrub_errors(line.strip())
             if len(line)>0:
                 output = output + (line,)
     finally:
