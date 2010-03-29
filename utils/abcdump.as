@@ -493,6 +493,7 @@ package abcdump
                         case OP_setslot:
                         case OP_pushshort:
                         case OP_newcatch:
+                        case OP_getouterscope:
                             s += readU32()
                             break
                         case OP_debug:
