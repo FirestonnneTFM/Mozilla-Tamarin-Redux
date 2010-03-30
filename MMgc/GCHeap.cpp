@@ -173,7 +173,8 @@ namespace MMgc
 		  numDecommitted(0),
 		  numRegionBlocks(0),
 		  numAlloc(0),
-		  codeMemory(0),
+		  gcheapCodeMemory(0),
+          externalCodeMemory(0),
 		  externalPressure(0),
 		  m_notificationThread(NULL),
 		  config(c),
@@ -397,6 +398,15 @@ namespace MMgc
         GCAssert(((uintptr_t)baseAddr >> kBlockShift) % alignment == 0);
 		return baseAddr;
 	}
+
+    void GCHeap::SignalCodeMemoryAllocation(size_t size, bool gcheap_memory)
+    {
+        if (gcheap_memory)
+            gcheapCodeMemory += size;
+        else
+            externalCodeMemory += size;
+        CheckForMemoryLimitsExceeded();
+    }
 
 	void GCHeap::CheckForMemoryLimitsExceeded()
 	{
