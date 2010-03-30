@@ -1296,7 +1296,7 @@ namespace avmplus
             // return LIns* if we can fit the constant into a i32
             if (imm->isconst())
                 ; // just use imm
-            else if (imm->isconstq()) {
+            else if (imm->isconstf()) {
                 double val = imm->imm64f();
                 double cvt = (int)val;
                 if (val == 0 || val == cvt)
