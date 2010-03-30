@@ -48,6 +48,3 @@ export shell_extension=
 
 
 export platform=android
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`

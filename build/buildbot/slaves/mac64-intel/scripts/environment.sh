@@ -48,9 +48,6 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=mac
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
 
 export shell_release=${shell_release}_64
 export shell_release_wordcode=${shell_release_wordcode}_64
