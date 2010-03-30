@@ -200,6 +200,7 @@ namespace MMgc
 		
 		/** Size of a block */
 		const static uint32_t kBlockSize = 4096;
+        const static uint32_t kBlockShift = 12;
 
 		/** 
 		 * Max allowable size for any allocation = 2^32 - 1  bytes
@@ -377,11 +378,15 @@ namespace MMgc
 		 * @param size the number of pages (kBlockSize bytes apiece)
 		 *             to allocate.
          * @param flags  The allocation flags
+         * @param alignment  The alignment expressed in the number of pages.
+         *             This must not be zero and it should be greater than 1 only when
+         *             absolutely necessary.  (The VMPI layer may require greater alignment
+         *             for code memory on some platforms.
          *
 		 * @return pointer to beginning of block, or NULL if kCanFail was in flags
          * and the allocation failed.
 		 */
-		void *Alloc(size_t size, uint32_t flags=flags_Alloc);
+		void *Alloc(size_t size, uint32_t flags=flags_Alloc, size_t alignment=1);
         
         /**
          * Allocates a block from the heap, but is guaranteed never to run OOM handling.
@@ -790,9 +795,9 @@ namespace MMgc
 		// Add a block to the free list, prior to pointToInsert.
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
 
-		HeapBlock *AllocBlock(size_t size, bool& zero);
-        HeapBlock* AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero);
-        HeapBlock* CreateCommittedBlock(HeapBlock* block, size_t size);
+		HeapBlock *AllocBlock(size_t size, bool& zero, size_t alignment);
+        HeapBlock* AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero, size_t alignment);
+        HeapBlock* CreateCommittedBlock(HeapBlock* block, size_t size, size_t alignment);
         void PruneDecommittedBlock(HeapBlock* block, size_t available, size_t request);
 		void FreeBlock(HeapBlock *block);
 		void FreeAll();

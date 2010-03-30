@@ -304,9 +304,19 @@ namespace MMgc
 		enterFrame.destroy();		// Destroy the thread-local itself
 	}
 
-	void* GCHeap::Alloc(size_t size, uint32_t flags)
+	void* GCHeap::Alloc(size_t size, uint32_t flags, size_t alignment)
 	{
 		GCAssert(size > 0);
+        GCAssert(alignment > 0);
+#ifdef DEBUG
+        {
+            // Alignment must be a power of 2
+            size_t a = alignment;
+            while ((a & 1) == 0)
+                a >>= 1;
+            GCAssert(a == 1);
+        }
+#endif
 
 		char *baseAddr = 0;
 		bool zero = (flags & kZero) != 0;
@@ -316,12 +326,12 @@ namespace MMgc
             bool saved_oomHandling = m_oomHandling;
             m_oomHandling = saved_oomHandling && (flags & kNoOOMHandling) == 0;
             
-			HeapBlock *block = AllocBlock(size, zero);
+			HeapBlock *block = AllocBlock(size, zero, alignment);
 			
 			//  Try to expand if the flag is set
 			if(!block && (flags & kExpand)) {
 				ExpandHeap(size);
-				block = AllocBlock(size, zero);						
+				block = AllocBlock(size, zero, alignment);
 			}
 
 			//  If expand didn't work, or expand flag not set, then try to free 
@@ -329,13 +339,13 @@ namespace MMgc
 			if (!block)
 			{
 				SendFreeMemorySignal(size);
-				block = AllocBlock(size, zero);
+				block = AllocBlock(size, zero, alignment);
 			}
 
 			//  Retry to expand if the expand is set
 			if(!block && (flags & kExpand)) {
 				ExpandHeap(size);
-				block = AllocBlock(size, zero);						
+				block = AllocBlock(size, zero, alignment);
 			}
 
 			//  If we're still unable to allocate, we're done
@@ -384,6 +394,7 @@ namespace MMgc
 			return NULL;
 		}
 
+        GCAssert(((uintptr_t)baseAddr >> kBlockShift) % alignment == 0);
 		return baseAddr;
 	}
 
@@ -728,7 +739,7 @@ namespace MMgc
 			if(nextRegion == NULL) {
 				// usually this is handled in ExpandHeap but could run out here
 				bool zero = false;
-				block = AllocBlock(1, zero);
+				block = AllocBlock(1, zero, 1);
 				if(block) {
 					nextRegion = (Region*)(void *)block->baseAddr;	
 				} else {
@@ -976,7 +987,17 @@ namespace MMgc
 		return block->size;
 	}
 
-	GCHeap::HeapBlock* GCHeap::AllocBlock(size_t size, bool& zero)
+    // Return the number of blocks of slop at the beginning of an object
+    // starting at baseAddr for the given alignment.  Alignment is a 
+    // number of blocks and must be a power of 2.  baseAddr must
+    // point to the beginning of a block.
+
+    static inline size_t alignmentSlop(char* baseAddr, size_t alignment)
+    {
+        return (alignment - (size_t)(((uintptr_t)baseAddr >> GCHeap::kBlockShift) & (alignment - 1))) & (alignment - 1);
+    }
+
+	GCHeap::HeapBlock* GCHeap::AllocBlock(size_t size, bool& zero, size_t alignment)
 	{
 		uint32_t startList = GetFreeListIndex(size);
 		HeapBlock *freelist = &freelists[startList];
@@ -992,9 +1013,9 @@ namespace MMgc
 			{
                 // Prefer a single committed block that is at least large enough.
                 
-				if (block->size >= size && block->committed) {
+				if (block->size - alignmentSlop(block->baseAddr, alignment) >= size && block->committed) {
                     RemoveFromList(block);
-                    return AllocCommittedBlock(block, size, zero);
+                    return AllocCommittedBlock(block, size, zero, alignment);
 				}
                 
                 // Look for a sequence of decommitted and committed blocks that together would
@@ -1004,26 +1025,28 @@ namespace MMgc
                 {
                     size_t totalSize = block->size;
                     HeapBlock *firstFree = block;
+                    size_t firstSlop = alignmentSlop(firstFree->baseAddr, alignment);
                     
                     // Coalesce with predecessors
-                    while(totalSize < size && firstFree->sizePrevious != 0)
+                    while(totalSize - firstSlop < size && firstFree->sizePrevious != 0)
                     {	
                         HeapBlock *prevBlock = firstFree - firstFree->sizePrevious;
                         if(prevBlock->inUse() || prevBlock->size == 0)
                             break;
                         totalSize += prevBlock->size;
                         firstFree = prevBlock;
+						firstSlop = alignmentSlop(firstFree->baseAddr, alignment);
                     }
                     
                     // Coalesce with successors
                     HeapBlock *nextBlock = block + block->size;
-                    while (totalSize < size && !(nextBlock->inUse() || nextBlock->size == 0)) {
+                    while (totalSize - firstSlop < size && !(nextBlock->inUse() || nextBlock->size == 0)) {
                         totalSize += nextBlock->size;
                         nextBlock = nextBlock + nextBlock->size;
                     }
                     
                     // Keep it if it's large enough
-                    if(totalSize >= size)
+                    if(totalSize - firstSlop >= size)
                         decommittedSuitableBlock = firstFree;
                 }
             }
@@ -1033,19 +1056,31 @@ namespace MMgc
         // We only get here if we couldn't find a single committed large enough block.
         
 		if (decommittedSuitableBlock != NULL)
-            return AllocCommittedBlock(CreateCommittedBlock(decommittedSuitableBlock, size),
+            return AllocCommittedBlock(CreateCommittedBlock(decommittedSuitableBlock, size, alignment),
                                        size,
-                                       zero);
-        
+                                       zero,
+									   alignment);
+
         return NULL;
     }
     
-    GCHeap::HeapBlock* GCHeap::AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero)
+    GCHeap::HeapBlock* GCHeap::AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero, size_t alignment)
     {
         GCAssert(block->committed);
         GCAssert(block->size >= size);
         GCAssert(block->inUse());
         
+        size_t slop = alignmentSlop(block->baseAddr, alignment);
+
+        if (slop > 0)
+        {
+            HeapBlock *oldBlock = block;
+            block = Split(block, slop);
+            AddToFreeList(oldBlock);
+            GCAssert(alignmentSlop(block->baseAddr, alignment) == 0);
+            GCAssert(block->size >= size);
+		}
+
         if(block->size > size)
 		{				
             HeapBlock *newBlock = Split(block, size);
@@ -1073,10 +1108,15 @@ namespace MMgc
     // Turn a sequence of committed and uncommitted blocks into a single committed
     // block that's at least large enough to satisfy the request.
 
-    GCHeap::HeapBlock* GCHeap::CreateCommittedBlock(HeapBlock* block, size_t size)
+    GCHeap::HeapBlock* GCHeap::CreateCommittedBlock(HeapBlock* block, size_t size, size_t alignment)
     {
         RemoveFromList(block);
         
+		// We'll need to allocate extra space to account for the space that will
+		// later be removed from the start of the block.
+
+        size += alignmentSlop(block->baseAddr, alignment);
+
         // If the first block is too small then coalesce it with the following blocks
         // to create a block that's large enough.  Some parts of the total block may
         // already be committed.  If the platform allows it we commit the entire
