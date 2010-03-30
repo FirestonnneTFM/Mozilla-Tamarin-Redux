@@ -65,7 +65,7 @@ class argo:
                                    "winmobile-emulator-compile-argo",
                                    "solaris-sparc-compile-argo",
                                    "android-compile-argo",
-                                   "linux-arm-compile-argo"])
+                                   "linux-arm-compile-argo", "linux-arm2-compile-argo"])
 
     smoke = BuilderDependent(name="smoke-argo",upstream=compile, callbackInterval=60, properties={'silent':'false'},
                     builderNames=["windows-smoke-argo", "windows64-smoke-argo",
@@ -77,7 +77,7 @@ class argo:
                                    "winmobile-emulator-smoke-argo",
                                    "solaris-sparc-smoke-argo",
                                    "android-smoke-argo",
-                                   "linux-arm-smoke-argo"],
+                                   "linux-arm-smoke-argo", "linux-arm2-smoke-argo"],
                     builderDependencies=[
                                   ["windows-smoke-argo", "windows-compile-argo"], 
                                   ["windows64-smoke-argo", "windows64-compile-argo"], 
@@ -95,6 +95,7 @@ class argo:
                                   ["solaris-sparc-smoke-argo", "solaris-sparc-compile-argo"],
                                   ["android-smoke-argo","android-compile-argo"],
                                   ["linux-arm-smoke-argo","linux-compile-argo"],
+                                  ["linux-arm2-smoke-argo","linux-compile-argo"],
                                  ])
 
     test = BuilderDependent(name="test-argo",upstream=smoke, callbackInterval=60, properties={'silent':'false'},
@@ -107,7 +108,7 @@ class argo:
                                    "winmobile-emulator-test-argo",
                                    "solaris-sparc-test-argo",
                                    "android-test-argo",
-                                   "linux-arm-test-argo"],
+                                   "linux-arm-test-argo", "linux-arm2-test-argo"],
                     builderDependencies=[
                                   ["windows-test-argo", "windows-smoke-argo"], 
                                   ["windows64-test-argo", "windows64-smoke-argo"], 
@@ -125,6 +126,7 @@ class argo:
                                   ["solaris-sparc-test-argo", "solaris-sparc-smoke-argo"],
                                   ["android-test-argo", "android-smoke-argo"],
                                   ["linux-arm-test-argo", "linux-arm-smoke-argo"],
+                                  ["linux-arm2-test-argo", "linux-arm2-smoke-argo"],
                                  ])
 
     performance = PhaseTwoScheduler(name="performance-argo", branch="%s-performance" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
@@ -636,9 +638,26 @@ class argo:
 
     linux_arm_compile_builder = {
                 'name': "linux-arm-compile-argo",
-                'slavename': "asteamlinarm1",
+                'slavename': "asteambeagleboard2",
                 'factory': linux_arm_compile_factory,
                 'builddir': './argo-linux-arm-compile',
+    }
+    
+    
+    ################################
+    #### builder for linux-arm2 ####
+    ################################
+    linux_arm2_compile_factory = factory.BuildFactory()
+    linux_arm2_compile_factory.addStep(sync_clean)
+    linux_arm2_compile_factory.addStep(sync_clone(url=HG_URL))
+    linux_arm2_compile_factory.addStep(sync_update)
+    linux_arm2_compile_factory.addStep(bb_slaveupdate(slave="linux-arm"))
+
+    linux_arm2_compile_builder = {
+                'name': "linux-arm2-compile-argo",
+                'slavename': "asteambeagle4",
+                'factory': linux_arm2_compile_factory,
+                'builddir': './argo-linux-arm2-compile',
     }
 
     ################################################################################
@@ -915,9 +934,32 @@ class argo:
 
     linux_arm_smoke_builder = {
                 'name': "linux-arm-smoke-argo",
-                'slavename': "asteamlinarm1",
+                'slavename': "asteambeagleboard2",
                 'factory': linux_arm_smoke_factory,
                 'builddir': './argo-linux-arm-smoke',
+    }
+    
+    
+    ###########################################
+    #### builder for linxu-arm2-smoke      ####
+    ###########################################
+    linux_arm2_smoke_factory = factory.BuildFactory()
+    linux_arm2_smoke_factory.addStep(download_testmedia)
+    linux_arm2_smoke_factory.addStep(TestSuiteShellCommand(
+                command=['../all/run-smoketests.sh', WithProperties('%s','revision'), './runsmokes-arm.txt'],
+                env={'branch': WithProperties('%s','branch')},
+                description='starting to run smoke tests...',
+                descriptionDone='finished smoke tests.',
+                name="SmokeTest",
+                workdir="../repo/build/buildbot/slaves/scripts")
+    )
+    linux_arm2_smoke_factory.addStep(util_process_clean)
+
+    linux_arm2_smoke_builder = {
+                'name': "linux-arm2-smoke-argo",
+                'slavename': "asteambeagle4",
+                'factory': linux_arm2_smoke_factory,
+                'builddir': './argo-linux-arm2-smoke',
     }
 
 
@@ -1266,17 +1308,32 @@ class argo:
     linux_arm_test_factory = factory.BuildFactory()
     linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
-    linux_arm_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
-    linux_arm_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     
     linux_arm_test_factory.addStep(util_process_clean)
 
     linux_arm_test_builder = {
                 'name': "linux-arm-test-argo",
-                'slavename': "asteamlinarm1",
+                'slavename': "asteambeagleboard2",
                 'factory': linux_arm_test_factory,
                 'builddir': './argo-linux-arm-test',
+    }
+    
+    
+    ##########################################
+    #### builder for linux-arm2-test      ####
+    ##########################################
+    linux_arm2_test_factory = factory.BuildFactory()
+    linux_arm2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
+    linux_arm2_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
+    
+    linux_arm2_test_factory.addStep(util_process_clean)
+
+    linux_arm2_test_builder = {
+                'name': "linux-arm2-test-argo",
+                'slavename': "asteambeagle4",
+                'factory': linux_arm2_test_factory,
+                'builddir': './argo-linux-arm2-test',
     }
 
 
@@ -1710,6 +1767,7 @@ class argo:
                 solaris_sparc_compile_builder,
                 android_compile_builder,
                 linux_arm_compile_builder,
+                linux_arm2_compile_builder,
                 
                 windows_smoke_builder,
                 windows_64_smoke_builder,
@@ -1727,6 +1785,7 @@ class argo:
                 solaris_sparc_smoke_builder,
                 android_smoke_builder,
                 linux_arm_smoke_builder,
+                linux_arm2_smoke_builder,
                 
                 windows_test_builder,
                 windows_64_test_builder,
@@ -1744,6 +1803,7 @@ class argo:
                 solaris_sparc_test_builder,
                 android_test_builder,
                 linux_arm_test_builder,
+                linux_arm2_test_builder,
 
                 windows_performance_builder,
                 mac_performance_builder,
