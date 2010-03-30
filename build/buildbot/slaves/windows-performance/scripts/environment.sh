@@ -48,9 +48,6 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=windows
-workdir=`pwd`
-export basedir=`cygpath -m ${workdir}/../../../..`
-export buildsdir=`cygpath -m ${basedir}/../builds`
 
 export lockfile=c:/asteamwin1.lck
 export slavename="$branch-$platform-performance"
