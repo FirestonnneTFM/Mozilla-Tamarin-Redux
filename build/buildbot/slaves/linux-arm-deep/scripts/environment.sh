@@ -48,10 +48,6 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=linux
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
-
 
 export shell_release=avmshell_neon_arm
 export shell_release_debugger=avmshell_neon_arm
