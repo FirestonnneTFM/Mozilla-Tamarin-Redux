@@ -214,42 +214,40 @@ bool VMPI_isMemoryProfilingEnabled()
 	return (env && (VMPI_strncmp(env, "1", 1) == 0));
 }
 
-/**
- * SetPageProtection changes the page access protections on a block of pages,
- * to make JIT-ted code executable or not.
- *
- * If executableFlag is true, the memory is made executable and read-only.
- *
- * If executableFlag is false, the memory is made non-executable and
- * read-write.
- */
-void VMPI_setPageProtection(void *address,
-							size_t size,
-							bool executableFlag,
-							bool writeableFlag)
+void *VMPI_allocateCodeMemory(size_t nbytes)
 {
-	(void)address;
-	(void)size;
-	(void)executableFlag;
-	(void)writeableFlag;
-/*
-  // mprotect requires that the addresses be aligned on page boundaries
-  void *endAddress = (void*) ((char*)address + size);
-  void *beginPage = (void*) ((size_t)address & ~0xFFF);
-  void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
-  size_t sizePaged = (size_t)endPage - (size_t)beginPage;
-  
-  int flags = PROT_READ;
-  if (executableFlag) {
-	flags |= PROT_EXEC;
-  }
-  if (writeableFlag) {
-	flags |= PROT_WRITE;
-  }
-  int retval = mprotect((maddr_ptr)beginPage, (unsigned int)sizePaged, flags);
-  AvmAssert(retval == 0);
-  (void)retval;
-*/
+    // See VMPI.h for documentation about the semantics of this method
+    
+    // See PosixPortUtils.cpp for many useful comments about constraints
+    // that you may wish to implement in this function
+    
+    (void)nbytes;
+    AvmAssert(!"Unimplemented: VMPI_allocateCodeMemory");
+}
+
+void VMPI_freeCodeMemory(void* address, size_t nbytes)
+{
+    // See VMPI.h for documentation about the semantics of this method
+    
+    // See PosixPortUtils.cpp for many useful comments about constraints
+    // that you may wish to implement in this function
+    
+    (void)address;
+    (void)nbytes;
+    AvmAssert(!"Unimplemented: VMPI_freeCodeMemory");
+}
+
+void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
+{
+    // See VMPI.h for documentation about the semantics of this method
+    
+    // See PosixPortUtils.cpp for many useful comments about constraints
+    // that you may wish to implement in this function
+    
+    (void)address;
+    (void)nbytes;
+    (void)makeItSo;
+    AvmAssert(!"Unimplemented: VMPI_freeCodeMemory");
 }
 
 const char *VMPI_getenv(const char *name)

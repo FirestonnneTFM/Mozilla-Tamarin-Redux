@@ -6311,49 +6311,23 @@ namespace nanojit
     void Allocator::postReset() {
     }
 
-#ifdef VMCFG_PROTECT_JITMEM
     void* CodeAlloc::allocCodeChunk(size_t nbytes) {
-        size_t npages = (nbytes + GCHeap::kBlockSize - 1) / GCHeap::kBlockSize;
-        void* addr = GCHeap::GetGCHeap()->AllocCodeMemory(npages);
-        return addr;
+        return VMPI_allocateCodeMemory(nbytes);
     }
 
-    void CodeAlloc::freeCodeChunk(void* addr, size_t) {
-        return GCHeap::GetGCHeap()->FreeCodeMemory(addr);
+    void CodeAlloc::freeCodeChunk(void* addr, size_t nbytes) {
+        VMPI_freeCodeMemory(addr, nbytes);
     }
 
     void CodeAlloc::markCodeChunkExec(void* addr, size_t nbytes) {
         //printf("protect   %d %p\n", (int)nbytes, addr);
-        VMPI_setPageProtection(addr, nbytes, true, false); // RX
+        VMPI_makeCodeMemoryExecutable(addr, nbytes, true); // RX
     }
 
     void CodeAlloc::markCodeChunkWrite(void* addr, size_t nbytes) {
         //printf("unprotect %d %p\n", (int)nbytes, addr);
-        VMPI_setPageProtection(addr, nbytes, false, true); // RW
+        VMPI_makeCodeMemoryExecutable(addr, nbytes, false); // RW
     }
-
-#else
-
-    void* CodeAlloc::allocCodeChunk(size_t nbytes) {
-        size_t npages = (nbytes + GCHeap::kBlockSize - 1) / GCHeap::kBlockSize;
-        void* addr = GCHeap::GetGCHeap()->AllocCodeMemory(npages);
-        VMPI_setPageProtection(addr, nbytes, true, true); // RWX
-        return addr;
-    }
-
-    void CodeAlloc::freeCodeChunk(void* addr, size_t nbytes) {
-        VMPI_setPageProtection(addr, nbytes, false, true); // RW
-        return GCHeap::GetGCHeap()->FreeCodeMemory(addr);
-    }
-
-    void CodeAlloc::markCodeChunkExec(void*, size_t) {
-        // no-op
-    }
-
-    void CodeAlloc::markCodeChunkWrite(void*, size_t) {
-        // no-op
-    }
-#endif
 }
 
 //

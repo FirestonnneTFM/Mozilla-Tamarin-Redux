@@ -1,5 +1,5 @@
-/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
+// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -178,7 +178,28 @@ delete gc;
        void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
     %%verify (int)gh->GetTotalHeapSize()>startfreeheap
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-       gh->FreeNoProfile(data);
+	   gh->FreeNoProfile(data);
+       
+%%test gcheapAlign
+    MMgc::GCHeap *gh=MMgc::GCHeap::GetGCHeap();
+
+    // Tricky: try to provoke some internal asserts
+    void *d[1000];
+    for ( unsigned i=0 ; i < ARRAY_SIZE(d) ; i++ ) {
+        d[i] = gh->Alloc(1);
+        void *data = gh->Alloc(10,MMgc::GCHeap::flags_Alloc, 4);
+        gh->Free(data);
+    }
+    for ( unsigned i=0 ; i < ARRAY_SIZE(d) ; i++ )
+        gh->Free(d[i]);
+
+    // 
+    for ( size_t k=2 ; k <= 256 ; k *= 2 ) {
+        void *data = gh->Alloc(10,MMgc::GCHeap::flags_Alloc, k);
+        %%verify ((uintptr_t)data & (k*MMgc::GCHeap::kBlockSize - 1)) == 0
+        %%verify gh->Size(data) == 10
+        gh->Free(data);
+    }
 
 %%test gcmethods
     MMGC_GCENTER(gc);
