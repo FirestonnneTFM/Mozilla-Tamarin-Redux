@@ -49,10 +49,6 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=mac
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
-
 
 lockfile=~/asteammac2.lck
 export slavename="$branch-$platform-performance"

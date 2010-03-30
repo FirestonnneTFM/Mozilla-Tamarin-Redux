@@ -571,10 +571,10 @@ namespace nanojit
         Register rb = b==a ? ra : findRegFor(b, allow & ~rmask(ra));
         if (isSICmpOpcode(condop)) {
             CMPW(cr, ra, rb);
-        } 
+        }
         else if (isUICmpOpcode(condop)) {
             CMPLW(cr, ra, rb);
-        } 
+        }
     #if defined NANOJIT_64BIT
         else if (isSQCmpOpcode(condop)) {
             CMPD(cr, ra, rb);
@@ -625,6 +625,8 @@ namespace nanojit
             }
             asm_li(r, i->imm32());
         }
+        // XXX: should really rematerializable isconstf() and isconstq() cases
+        // here; canRemat() assumes they will be rematerialized.
         else {
             d = findMemFor(i);
             if (IsFpReg(r)) {
@@ -838,9 +840,7 @@ namespace nanojit
                 // ppc arith immediate ops sign-exted the imm16 value
                 switch (op) {
                 case LIR_add:
-                CASE32(LIR_iaddp:)
                 CASE64(LIR_qiadd:)
-                CASE64(LIR_qaddp:)
                     ADDI(rr, ra, rhsc);
                     return;
                 case LIR_sub:
@@ -887,9 +887,7 @@ namespace nanojit
         Register rb = rhs==lhs ? ra : findRegFor(rhs, GpRegs&~rmask(ra));
         switch (op) {
             CASE64(LIR_qiadd:)
-            CASE64(LIR_qaddp:)
             case LIR_add:
-            CASE32(LIR_iaddp:)
                 ADD(rr, ra, rb);
                 break;
             CASE64(LIR_qiand:)
@@ -1023,7 +1021,7 @@ namespace nanojit
         }
     }
     #endif
-    
+
 #ifdef NANOJIT_64BIT
     void Assembler::asm_immq(LIns *ins) {
         Register r = ins->deprecated_getReg();
@@ -1207,7 +1205,7 @@ namespace nanojit
     #else
         NanoAssert((ins->opcode() == LIR_cmov  && iftrue->isI32() && iffalse->isI32()));
     #endif
-    
+
         // fixme: we could handle fpu registers here, too, since we're just branching
         Register rr = deprecated_prepResultReg(ins, GpRegs);
         findSpecificRegFor(iftrue, rr);
@@ -1361,7 +1359,6 @@ namespace nanojit
     void Assembler::asm_qbinop(LIns *ins) {
         LOpcode op = ins->opcode();
         switch (op) {
-        case LIR_qaddp:
         case LIR_qior:
         case LIR_qiand:
         case LIR_qursh:
