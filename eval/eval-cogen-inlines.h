@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -48,7 +50,7 @@ inline uint32_t Cogen::emitNamespace(uint32_t name) { return abc->addNamespace(C
 
 inline uint32_t Cogen::getTemp()
 {
-	return temp_counter++;
+    return temp_counter++;
 }
 
 inline uint32_t Cogen::getMaxStack() const { return max_stack_depth; }
@@ -58,20 +60,20 @@ inline uint32_t Cogen::getCodeLength() const { return code.size(); }
 
 inline void Cogen::startCatch()
 {
-	stack_depth = 1;
-	if (stack_depth > max_stack_depth)
-		max_stack_depth = stack_depth;
+    stack_depth = 1;
+    if (stack_depth > max_stack_depth)
+        max_stack_depth = stack_depth;
 }
 
 inline uint8_t Cogen::getFlags() const 
 {
-	return traits->getCount() > 0 ? MethodInfo::NEED_ACTIVATION : 0;
+    return traits->getCount() > 0 ? MethodInfo::NEED_ACTIVATION : 0;
 }
 
 inline AbcOpcode Cogen::binopToOpcode(Binop op, bool* isNegated)
 {
-	*isNegated = binopMapping[op].isNegated;
-	return (AbcOpcode)(binopMapping[op].abcOpcode);
+    *isNegated = binopMapping[op].isNegated;
+    return (AbcOpcode)(binopMapping[op].abcOpcode);
 }
 
 inline void Cogen::I_add() { emitOp(OP_add); }
