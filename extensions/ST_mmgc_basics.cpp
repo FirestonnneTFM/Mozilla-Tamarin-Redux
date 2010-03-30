@@ -1,7 +1,6 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
-/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 // Generated from ST_mmgc_basics.st
-// -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+// -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+// vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -66,6 +65,7 @@ void test11();
 void test12();
 void test13();
 void test14();
+void test15();
 private:
     MMgc::GC *gc;
     MMgc::FixedAlloc *fa;
@@ -75,7 +75,7 @@ private:
 ST_mmgc_basics::ST_mmgc_basics(AvmCore* core)
     : Selftest(core, "mmgc", "basics", ST_mmgc_basics::ST_names)
 {}
-const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete","nestedGCs","collectDormantGC","regression_551169", NULL };
+const char* ST_mmgc_basics::ST_names[] = {"create_gc_instance","create_gc_object","get_bytesinuse","collect","getgcheap","fixedAlloc","fixedMalloc","gcheap","gcheapAlign","gcmethods","gcLargeAlloc","finalizerAlloc","finalizerDelete","nestedGCs","collectDormantGC","regression_551169", NULL };
 void ST_mmgc_basics::run(int n) {
 switch(n) {
 case 0: test0(); return;
@@ -93,6 +93,7 @@ case 11: test11(); return;
 case 12: test12(); return;
 case 13: test13(); return;
 case 14: test14(); return;
+case 15: test15(); return;
 }
 }
 void ST_mmgc_basics::prologue() {
@@ -234,10 +235,32 @@ verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize(
        void *data = gh->Alloc(10,MMgc::GCHeap::kExpand | MMgc::GCHeap::kZero);
 verifyPass((int)gh->GetTotalHeapSize()>startfreeheap, "(int)gh->GetTotalHeapSize()>startfreeheap", __FILE__, __LINE__);
 //    AvmLog("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
-       gh->FreeNoProfile(data);
-
+	   gh->FreeNoProfile(data);
+       
 }
 void ST_mmgc_basics::test8() {
+    MMgc::GCHeap *gh=MMgc::GCHeap::GetGCHeap();
+
+    // Tricky: try to provoke some internal asserts
+    void *d[1000];
+    for ( unsigned i=0 ; i < ARRAY_SIZE(d) ; i++ ) {
+        d[i] = gh->Alloc(1);
+        void *data = gh->Alloc(10,MMgc::GCHeap::flags_Alloc, 4);
+        gh->Free(data);
+    }
+    for ( unsigned i=0 ; i < ARRAY_SIZE(d) ; i++ )
+        gh->Free(d[i]);
+
+    // 
+    for ( size_t k=2 ; k <= 256 ; k *= 2 ) {
+        void *data = gh->Alloc(10,MMgc::GCHeap::flags_Alloc, k);
+verifyPass(((uintptr_t)data & (k*MMgc::GCHeap::kBlockSize - 1)) == 0, "((uintptr_t)data & (k*MMgc::GCHeap::kBlockSize - 1)) == 0", __FILE__, __LINE__);
+verifyPass(gh->Size(data) == 10, "gh->Size(data) == 10", __FILE__, __LINE__);
+        gh->Free(data);
+    }
+
+}
+void ST_mmgc_basics::test9() {
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
@@ -245,7 +268,7 @@ verifyPass((MyGCObject *)gc->FindBeginningGuarded(mygcobject)==mygcobject, "(MyG
 verifyPass((MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject, "(MyGCObject *)gc->FindBeginningFast(mygcobject)==mygcobject", __FILE__, __LINE__);
 
 }
-void ST_mmgc_basics::test9() {
+void ST_mmgc_basics::test10() {
     MMGC_GCENTER(gc);
     MyGCObject *mygcobject;
     mygcobject = (MyGCObject *)new (gc) MyGCObject();
@@ -269,14 +292,14 @@ verifyPass(MMgc::GCLargeAlloc::GetMark(obj)==true, "MMgc::GCLargeAlloc::GetMark(
 
 // Bugzilla 542529 - in debug mode we would assert here due to logic flaws in the allocatr
 }
-void ST_mmgc_basics::test10() {
+void ST_mmgc_basics::test11() {
     MMGC_GCENTER(gc);
     new (gc) AllocInFinalizer();
     gc->Collect(false);
 verifyPass(true, "true", __FILE__, __LINE__);
 
 }
-void ST_mmgc_basics::test11() {
+void ST_mmgc_basics::test12() {
     MMGC_GCENTER(gc);
     new (gc) DeleteInFinalizer(new (gc, 100) GCFinalizedObject(), new (gc) GCFinalizedObject());
     //delete m; delete m; // this verifies we crash, it does
@@ -289,7 +312,7 @@ verifyPass(true, "true", __FILE__, __LINE__);
 
 
 }
-void ST_mmgc_basics::test12() {
+void ST_mmgc_basics::test13() {
     GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
     MMGC_GCENTER(gc);
     void *a = gc->Alloc(8);
@@ -304,11 +327,11 @@ void ST_mmgc_basics::test12() {
     }
     a = gc->Alloc(8);
     // just fishing for asserts/hangs/crashes
-verifyPass(true  , "true  ", __FILE__, __LINE__);
+verifyPass(true, "true", __FILE__, __LINE__);
     delete gcb;
 
 }
-void ST_mmgc_basics::test13() {
+void ST_mmgc_basics::test14() {
     {
         GC *gcb = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
         {
@@ -321,11 +344,11 @@ void ST_mmgc_basics::test13() {
         delete gcb;
 
         // just fishing for asserts/hangs/crashes
-verifyPass(true  , "true  ", __FILE__, __LINE__);
+verifyPass(true, "true", __FILE__, __LINE__);
     }
 
 }
-void ST_mmgc_basics::test14() {
+void ST_mmgc_basics::test15() {
     {
         GC *testGC = new GC(GCHeap::GetGCHeap(), GC::kIncrementalGC);
         {

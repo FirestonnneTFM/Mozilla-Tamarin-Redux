@@ -58,6 +58,9 @@ static size_t computePagesize()
 	return sysinfo.dwPageSize;
 }
 
+// Private to VMPI_getVMPageSize (but initialized here to avoid threading concerns).
+// DO NOT REFERENCE THIS VARIABLE ELSEWHERE.  Always call VMPI_getVMPageSize.
+
 static size_t pagesize = computePagesize();
 
 size_t VMPI_getVMPageSize()

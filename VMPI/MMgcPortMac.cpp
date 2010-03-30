@@ -71,6 +71,9 @@ static size_t computePagesize()
 	return size_t(pagesize);
 }
 
+// Private to VMPI_getVMPageSize; DO NOT REFERENCE THIS VARIABLE ELSEWHERE.
+// Always call VMPI_getVMPageSize, even inside this file.
+
 static size_t pagesize = computePagesize();
 
 size_t VMPI_getVMPageSize()

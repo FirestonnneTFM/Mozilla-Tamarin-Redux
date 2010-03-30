@@ -72,11 +72,7 @@
 
 #include <fcntl.h>
 
-#ifdef MMGC_SPARC
-static size_t pagesize = 4096;
-#else
 static size_t pagesize = size_t(sysconf(_SC_PAGESIZE));
-#endif
 
 // It's possible to use the flushw instruction on sparc9, but this should always work
 
