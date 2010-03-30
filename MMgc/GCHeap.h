@@ -528,15 +528,13 @@ namespace MMgc
 
 		void RemoveOOMCallback(OOMCallback *p);
 		
-#ifdef MMGC_USE_SYSTEM_MALLOC
-		// Signal a failure to allocate 'size' bytes from the system heap (VMPI_alloc).
-		// The value 'attempt' denotes the number of previous attempts made to satisfy
-		// this particular memory request; the implementation is at liberty to have
-		// a cutoff for the number of attempts and must signal an abort if the number
-		// of attempts exceeds the cutoff.  (Normally the cutoff would be one previous
-		// attempt.)
+		// Signal a failure to allocate 'size' bytes from the system heap (VMPI_alloc
+        // or other internal allocation).  The value 'attempt' denotes the number of
+        // previous attempts made to satisfy this particular memory request; the
+        // implementation is at liberty to have a cutoff for the number of attempts
+        // and must signal an abort if the number of attempts exceeds the cutoff.
+        // (Normally the cutoff would be one previous attempt.)
 		void SystemOOMEvent(size_t size, int attempt);
-#endif
 
 #if defined (__GNUC__)
 		void Abort() __attribute__((noreturn));

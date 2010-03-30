@@ -2102,7 +2102,6 @@ namespace MMgc
 			heap->Abort();
 	}
 
-#ifdef MMGC_USE_SYSTEM_MALLOC
 	void GCHeap::SystemOOMEvent(size_t size, int attempt)
 	{
 		if (attempt == 0 && !statusNotificationBeingSent())
@@ -2110,7 +2109,6 @@ namespace MMgc
 		else
 			Abort();
 	}
-#endif
 
 	/*static*/
 	void GCHeap::SignalObjectTooLarge()
