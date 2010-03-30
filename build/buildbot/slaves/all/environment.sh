@@ -59,6 +59,22 @@ echo branch [after]: $branch
 export shellABC=shell_toplevel.abc
 export builtinABC=builtin.abc
 
+
+workdir=`pwd`
+
+# create the builds directory if it doesn't exist
+if [ ! -d "${workdir}/../../../../../builds" ]; then
+    mkdir -p ${workdir}/../../../../../builds
+fi
+
+if [ "$OSTYPE" == "cygwin" ]; then
+    export basedir=`cygpath -m ${workdir}/../../../..`
+    export buildsdir=`cygpath -m ${basedir}/../builds`
+else
+    export basedir=`cd ${workdir}/../../../..; pwd`
+    export buildsdir=`cd ${basedir}/../builds; pwd`
+fi
+
 # builds for windows mobile (used by emulator)
 export shell_release_arm=avmshell_arm$shell_extension
 

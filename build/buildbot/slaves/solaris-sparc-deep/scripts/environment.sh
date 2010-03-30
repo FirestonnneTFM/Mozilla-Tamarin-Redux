@@ -47,7 +47,5 @@ export shell_extension=
 ##
 . ../all/environment.sh
 export platform=solaris
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
+
 
