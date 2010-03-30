@@ -192,8 +192,8 @@ endSilent
 
 test "$silent" = "true" && {
     # display smoke results to stdout so that buildbot parses the results
-    grep passes $logfile
-    grep failures $logfile
+    grep "^ *passes" $logfile
+    grep "^ *failures" $logfile
 }
 
 exit $exitcode
