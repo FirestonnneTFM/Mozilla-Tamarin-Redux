@@ -281,7 +281,7 @@ namespace nanojit
             btr RegAlloc::free[ecx], eax    // free &= ~rmask(i)
             mov r, eax
         }
-	#elif defined __SUNPRO_CC
+    #elif defined __SUNPRO_CC
         // Workaround for Sun Studio bug on handler embeded asm code.
         // See bug 544447 for detail.
         // https://bugzilla.mozilla.org/show_bug.cgi?id=544447
@@ -569,7 +569,7 @@ namespace nanojit
                 FST32(pop?1:0, dr, rb);
             }
 
-        } else if (value->isconstq()) {
+        } else if (value->isconstf()) {
             STi(rb, dr+4, value->imm64_1());
             STi(rb, dr,   value->imm64_0());
 
@@ -742,11 +742,19 @@ namespace nanojit
             // disturb the CCs!
             Register r = findRegFor(lhs, GpRegs);
             if (c == 0 && cond->isop(LIR_eq)) {
-                TEST(r, r);
+                NanoAssert(N_LOOKAHEAD >= 3);
+                if ((lhs->isop(LIR_and) || lhs->isop(LIR_or)) &&
+                    cond == lookahead[1] && lhs == lookahead[2])
+                {
+                    // Do nothing.  At run-time, 'lhs' will have just computed
+                    // by an i386 instruction that sets ZF for us ('and' or
+                    // 'or'), so we don't have to do it ourselves.
+                } else {
+                    TEST(r, r);     // sets ZF according to the value of 'lhs'
+                }
             } else {
                 CMPi(r, c);
             }
-
         } else {
             Register ra, rb;
             findRegFor2(GpRegs, lhs, ra, GpRegs, rhs, rb);
@@ -841,9 +849,9 @@ namespace nanojit
         LInsp rhs = ins->oprnd2();
 
         // Second special case.
-        // XXX: bug 547125: don't need this once LEA is used for LIR_add/LIR_addp in all cases below
-        if ((op == LIR_add || op == LIR_iaddp) && lhs->isop(LIR_alloc) && rhs->isconst()) {
-            // LIR_add(LIR_alloc, LIR_int) or LIR_addp(LIR_alloc, LIR_int) -- use lea.
+        // XXX: bug 547125: don't need this once LEA is used for LIR_add in all cases below
+        if (op == LIR_add && lhs->isop(LIR_alloc) && rhs->isconst()) {
+            // LIR_add(LIR_alloc, LIR_int) -- use lea.
             Register rr = prepareResultReg(ins, GpRegs);
             int d = findMemFor(lhs) + rhs->imm32();
 
@@ -905,7 +913,6 @@ namespace nanojit
 
             switch (op) {
             case LIR_add:
-            case LIR_addp:
             case LIR_addxov:    ADD(rr, rb); break;     // XXX: bug 547125: could use LEA for LIR_add
             case LIR_sub:
             case LIR_subxov:    SUB(rr, rb); break;
@@ -927,7 +934,6 @@ namespace nanojit
         } else {
             int c = rhs->imm32();
             switch (op) {
-            case LIR_addp:
             case LIR_add:
                 // this doesn't set cc's, only use it when cc's not required.
                 LEA(rr, c, ra);
@@ -1224,21 +1230,18 @@ namespace nanojit
             // ordinary param
             AbiKind abi = _thisfrag->lirbuf->abi;
             uint32_t abi_regcount = max_abi_regs[abi];
-            // argRegs must have as many elements as the largest argument register
-            // requirement of an abi.  Currently, this is 2, for ABI_FASTCALL.  See
-            // the definition of max_abi_regs earlier in this file.  The following
-            // assertion reflects this invariant:
-            NanoAssert(abi_regcount <= sizeof(argRegs)/sizeof(argRegs[0]));
             if (arg < abi_regcount) {
                 // Incoming arg in register.
                 prepareResultReg(ins, rmask(argRegs[arg]));
                 // No code to generate.
+
             } else {
                 // Incoming arg is on stack, and EBP points nearby (see genPrologue()).
                 Register r = prepareResultReg(ins, GpRegs);
                 int d = (arg - abi_regcount) * sizeof(intptr_t) + 8;
                 LD(r, d, FP);
             }
+
         } else {
             // Saved param.
             prepareResultReg(ins, rmask(savedRegs[arg]));
@@ -1558,7 +1561,7 @@ namespace nanojit
             NanoAssert(FST0 == rr);
             NanoAssert(!lhs->isInReg() || FST0 == lhs->getReg());
 
-            if (rhs->isconstq()) {
+            if (rhs->isconstf()) {
                 const uint64_t* p = findQuadConstant(rhs->imm64());
 
                 switch (op) {
@@ -1885,7 +1888,7 @@ namespace nanojit
             } else {
                 TEST_AH(mask);
                 FNSTSW_AX();        // requires EAX to be free
-                if (rhs->isconstq())
+                if (rhs->isconstf())
                 {
                     const uint64_t* p = findQuadConstant(rhs->imm64());
                     FCOMdm((pop?1:0), (const double*)p);

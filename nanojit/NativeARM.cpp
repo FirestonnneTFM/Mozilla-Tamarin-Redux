@@ -109,9 +109,8 @@ Assembler::CountLeadingZeroes(uint32_t data)
     // ARMv4 anyway.
     NanoAssert(_config.arm_arch >= 5);
 
-#if defined(__ARMCC__) && (__ARMCC_VERSION >= 230000)
-
-    // ARMCC can do this with an intrinsic except ARMCC 2.2.x which is used by Symbian
+#if defined(__ARMCC__)
+    // ARMCC can do this with an intrinsic.
     leading_zeroes = __clz(data);
 
 // current Android GCC compiler incorrectly refuses to compile 'clz' for armv5
@@ -1396,7 +1395,7 @@ Assembler::asm_store64(LOpcode op, LInsp value, int dr, LInsp base)
             if (_config.arm_vfp) {
                 Register rb = findRegFor(base, GpRegs);
 
-                if (value->isconstq()) {
+                if (value->isconstf()) {
                     underrunProtect(LD32_size*2 + 8);
 
                     // XXX use another reg, get rid of dependency
@@ -1429,7 +1428,7 @@ Assembler::asm_store64(LOpcode op, LInsp value, int dr, LInsp base)
 
                 // if it's a constant, make sure our baseReg/baseOffset location
                 // has the right value
-                if (value->isconstq()) {
+                if (value->isconstf()) {
                     underrunProtect(4*4);
                     asm_immf_nochk(rv, value->imm64_0(), value->imm64_1());
                 }
@@ -1445,7 +1444,7 @@ Assembler::asm_store64(LOpcode op, LInsp value, int dr, LInsp base)
             if (_config.arm_vfp) {
                 Register rb = findRegFor(base, GpRegs);
 
-                if (value->isconstq()) {
+                if (value->isconstf()) {
                     underrunProtect(LD32_size*2 + 8);
 
                     // XXX use another reg, get rid of dependency
@@ -1480,7 +1479,7 @@ Assembler::asm_store64(LOpcode op, LInsp value, int dr, LInsp base)
 
                 // if it's a constant, make sure our baseReg/baseOffset location
                 // has the right value
-                if (value->isconstq()) {
+                if (value->isconstf()) {
                     underrunProtect(4*4);
                     asm_immf_nochk(rv, value->imm64_0(), value->imm64_1());
                 }
@@ -2371,7 +2370,7 @@ Assembler::asm_arith(LInsp ins)
     // trace-tests.js so it is very unlikely to be worthwhile implementing it.
     if (rhs->isconst() && op != LIR_mul && op != LIR_mulxov)
     {
-        if ((op == LIR_add || op == LIR_iaddp || op == LIR_addxov) && lhs->isop(LIR_ialloc)) {
+        if ((op == LIR_add || op == LIR_addxov) && lhs->isop(LIR_ialloc)) {
             // Add alloc+const. The result should be the address of the
             // allocated space plus a constant.
             Register    rs = deprecated_prepResultReg(ins, allow);
@@ -2385,7 +2384,6 @@ Assembler::asm_arith(LInsp ins)
 
         switch (op)
         {
-            case LIR_iaddp:
             case LIR_add:       asm_add_imm(rr, ra, imm32);     break;
             case LIR_addxov:    asm_add_imm(rr, ra, imm32, 1);  break;
             case LIR_sub:       asm_sub_imm(rr, ra, imm32);     break;
@@ -2422,7 +2420,6 @@ Assembler::asm_arith(LInsp ins)
     const Register SBZ = (Register)0;
     switch (op)
     {
-        case LIR_iaddp:
         case LIR_add:       ADDs(rr, ra, rb, 0);    break;
         case LIR_addxov:    ADDs(rr, ra, rb, 1);    break;
         case LIR_sub:       SUBs(rr, ra, rb, 0);    break;

@@ -48,9 +48,6 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=windows
-workdir=`pwd`
-export basedir=`cygpath -m ${workdir}/../../../..`
-export buildsdir=`cygpath -m ${basedir}/../builds`
 
 export shell_release=$shell_release_64
 export shell_release_wordcode=$shell_release_wordcode_64

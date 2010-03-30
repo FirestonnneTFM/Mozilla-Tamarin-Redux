@@ -48,10 +48,6 @@ export shell_extension=.exe
 . ../all/environment.sh
 
 export platform=winmobile
-workdir=`pwd`
-export basedir=`cygpath -m ${workdir}/../../../..`
-export buildsdir=`cygpath -m ${basedir}/../builds`
-
 
 export shell_release=avmshell_arm$shell_extension
 export shell_release_arm=$shell_release

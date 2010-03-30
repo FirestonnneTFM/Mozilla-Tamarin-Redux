@@ -48,10 +48,6 @@ export shell_extension=
 . ../all/environment.sh
 
 export platform=linux
-workdir=`pwd`
-export basedir=`cd ${workdir}/../../../..; pwd`
-export buildsdir=`cd ${basedir}/../builds; pwd`
-
 
 lockfile=~/asteamlin4.lck
 export slavename="$branch-$platform-performance"

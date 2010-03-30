@@ -361,7 +361,7 @@ namespace nanojit
 
     void Assembler::asm_store_imm64(LIns *value, int dr, Register rbase)
     {
-        NanoAssert(value->isconstq());
+        NanoAssert(value->isconstf());
         int32_t msw = value->imm64_1();
         int32_t lsw = value->imm64_0();
 
@@ -530,7 +530,7 @@ namespace nanojit
         default:
             BADOPCODE(op);
         }
-        
+
         TAG("asm_store32(value=%p{%s}, dr=%d, base=%p{%s})",
             value, lirNames[value->opcode()], dr, base, lirNames[base->opcode()]);
     }
@@ -881,7 +881,7 @@ namespace nanojit
         case LIR_ldzb:          // 8-bit integer load, zero-extend to 32-bit
             asm_ldst(OP_LBU, rres, d, rbase);
             break;
-        case LIR_ldzs:          // 16-bit integer load, zero-extend to 32-bit 
+        case LIR_ldzs:          // 16-bit integer load, zero-extend to 32-bit
             asm_ldst(OP_LHU, rres, d, rbase);
             break;
         case LIR_ldsb:          // 8-bit integer load, sign-extend to 32-bit
@@ -890,7 +890,7 @@ namespace nanojit
         case LIR_ldss:          // 16-bit integer load, sign-extend to 32-bit
             asm_ldst(OP_LH, rres, d, rbase);
             break;
-        case LIR_ld:            // 32-bit integer load 
+        case LIR_ld:            // 32-bit integer load
             asm_ldst(OP_LW, rres, d, rbase);
             break;
         default:
@@ -954,7 +954,6 @@ namespace nanojit
                 // MIPS arith immediate ops sign-extend the imm16 value
                 switch (op) {
                 case LIR_add:
-                case LIR_iaddp:
                     if (ovreg != deprecated_UnknownReg)
                         SLT(ovreg, rr, ra);
                     ADDIU(rr, ra, rhsc);
@@ -1016,7 +1015,6 @@ namespace nanojit
 
         switch (op) {
             case LIR_add:
-            case LIR_iaddp:
                 if (ovreg != deprecated_UnknownReg)
                     SLT(ovreg,rr,ra);
                 ADDU(rr, ra, rb);
@@ -1104,7 +1102,7 @@ namespace nanojit
             else
                 rbase = findRegFor(base, GpRegs);
 
-            if (value->isconstq())
+            if (value->isconstf())
                 asm_store_imm64(value, dr, rbase);
             else if (!cpu_has_fpu || value->isop(LIR_ldq)) {
 
@@ -1130,7 +1128,7 @@ namespace nanojit
         }
         else
             BADOPCODE(op);
-            
+
         TAG("asm_store64(value=%p{%s}, dr=%d, base=%p{%s})",
             value, lirNames[value->opcode()], dr, base, lirNames[base->opcode()]);
     }
@@ -1504,7 +1502,7 @@ namespace nanojit
      * - 32-bit arguments are placed in registers and 32-bit aligned
      *   on the stack.
      */
-    void 
+    void
     Assembler::asm_arg(ArgType ty, LInsp arg, Register& r, Register& fr, int& stkd)
     {
         // The stack offset must always be at least aligned to 4 bytes.
@@ -1531,7 +1529,7 @@ namespace nanojit
 
     void
     Assembler::asm_call(LInsp ins)
-    { 
+    {
         Register rr;
         LOpcode op = ins->opcode();
 
