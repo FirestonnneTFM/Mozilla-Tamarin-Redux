@@ -396,14 +396,15 @@ namespace MMgc
 		void *AllocNoOOM(size_t size, uint32_t flags=flags_Alloc) { return Alloc(size, flags|kNoOOMHandling); }
 
 		/**
-		 * Allocate memory that the JIT will use for object code.
+         * Signal that code memory is about to be allocated (accounting).  May invoke
+         * OOM handling in order to make memory available if we're pushing up against
+         * preset limits.
 		 * @param size the number of blocks
+         * @param gcheap_memory   true if the memory will be allocated from GCHeap and 
+         * will be accounted for there, and we're just tracking that it is code memory;
+         * false if an external native API will be used.
 		 */
-		void *AllocCodeMemory(size_t size)
-		{
-			codeMemory += size;
-			return Alloc(size);
-		}
+        void SignalCodeMemoryAllocation(size_t size, bool gcheap_memory);
 		
 		/**
 		 * Frees a block.
@@ -423,13 +424,17 @@ namespace MMgc
 		void FreeNoProfile(void *item) { FreeInternal(item, false, true); }
 
 		/**
-		 * Free memory allocated from AllocCodeMemory.
+         * Signal that code memory was deallocated (accounting).
+         * @param size           the number of blocks
+         * @param gcheap_memory  true if the memory was allocated from GCHeap and has
+         * been accounted for and we're just tracking that it is code memory.
 		 */
-		void FreeCodeMemory(void* item)
+        void SignalCodeMemoryDeallocated(size_t size, bool gcheap_memory)
 		{
-			HeapBlock *block = AddrToBlock(item);
-			codeMemory -= block->size;
-			Free(item);
+            if (gcheap_memory)
+                gcheapCodeMemory -= size;
+            else
+                externalCodeMemory -= size;
 		}
 		
 		/**
@@ -461,7 +466,7 @@ namespace MMgc
 		 * @return the amount of code memory currently allocated.  GCHeap does not
 		 * have a notion of "free" and "used" code memory.
 		 */
-		size_t GetTotalCodeSize() const { return codeMemory; }
+        size_t GetTotalCodeSize() const { return gcheapCodeMemory + externalCodeMemory; }
 
 #ifdef MMGC_POLICY_PROFILING
 		/**
@@ -921,7 +926,8 @@ namespace MMgc
 		size_t numRegionBlocks;
 		HeapBlock freelists[kNumFreeLists];
 		size_t numAlloc;
-		size_t codeMemory;
+        size_t gcheapCodeMemory;
+        size_t externalCodeMemory;
 		size_t externalPressure;
 		vmpi_spin_lock_t m_spinlock;
 		vmpi_thread_t m_notificationThread;

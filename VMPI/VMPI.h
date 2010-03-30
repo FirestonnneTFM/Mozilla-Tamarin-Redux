@@ -269,18 +269,84 @@ extern bool			VMPI_commitMemory(void* address, size_t size);
 extern bool			VMPI_decommitMemory(char *address, size_t size);
 
 /**
- * SetPageProtection changes the page access protections on a block of pages,
- * to make JIT-ted code executable or not.
+ * Allocate memory for jitted code.
  *
- * @param address pointer to start of memory block.  It is possible that the memory block pointed to by address
- * could be acquired from more than one calls to VMPI_reserveMemoryRegion.  The implementation of this method 
- * is expected to handle such cases and identify the region boundaries if the underlying system requires
- * setting the protection flags on blocks individually if they were allocated separately.
- * @param executableFlag If executableFlag is true, the memory is made executable and read-only.
- * If executableFlag is false, the memory is made non-executable and read-write.
- * @param writeableFlag If true memory block is made read-write
+ * This method may have platform-specific constraints, which must be known
+ * to the caller and which, if violated, may cause this method to abort the
+ * process.  Typical constraints would relate to the maximum size that can be
+ * allocated and the allowable size increments (eg, 4KB, 8KB).  This is a
+ * security matter and constraints should not be removed willy-nilly.
+ *
+ * Generally speaking everything is fine if memory is allocated in multiples of
+ * the VM page size (so long as the platform does not have constraints on how many
+ * pages can be allocated at a time).
+ *
+ * On some platforms code for JIT memory is separate from other memory; on others,
+ * it can be mixed into the heap memory.  On the latter platforms it is explicitly
+ * allowed for VMPI_allocCodeMemory to call GCHeap::Alloc to obtain memory.
+ *
+ * This method /must/ call GCHeap::SignalCodeMemoryAllocation /before/ it
+ * attempts to allocate memory.  The second argument to that function /must/
+ * indicate whether GCHeap or native APIs will be used for the allocation.
+ * That call may result in out-of-memory handling mechanisms being invoke
+ * in order to keep total heap occupancy below preset limits.
+ *
+ * This method /must/ call GCHeap::SignalOOMEvent if a native API for code
+ * allocation fails to allocate memory.  See documentation for that method
+ * for how to implement retries.
+ *
+ * If VMPI_makeCodeMemoryExecutable(..., true) is a no-op due to platform
+ * constraints then the returned memory will be protected RWX.
+ *
+ * @param size  Size in bytes.
+ * @return  A pointer to the allocated memory, never NULL.
+ *
+ * @exceptions  May abort the process if its constraints are violated.
  */
-extern void VMPI_setPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
+extern void* VMPI_allocateCodeMemory(size_t size);
+
+/**
+ * Free memory that was allocated by VMPI_allocateCodeMemory.
+ *
+ * @param address  The value returned from VMPI_allocCodeMemory.
+ * @param size  The argument that was passed to VMPI_allocCodeMemory when address
+ * was returned.
+ *
+ * If VMPI_makeCodeMemoryExecutable(..., false) is a no-op due to platform
+ * constraints then this VMPI_freeCodeMemory should attempt to make the
+ * operating system unmap the memory so that executable writable memory is not
+ * sitting around unused.
+ *
+ * @exceptions  May abort the process if address was not returned by
+ * VMPI_allocateCodeMemory or size was not the size value passed to
+ * VMPI_allocateCodeMemory.
+ */
+extern void VMPI_freeCodeMemory(void* address, size_t size);
+
+/**
+ * VMPI_makeCodeMemoryExecutable makes a range of code memory executable (RX) 
+ * or not (RW).
+ *
+ * This operation may be a no-op on some platforms, see comments to
+ * VMPI_allocateCodeMemory and VMPI_freeCodeMemory.
+ * 
+ * @param address  Pointer to start of an acceptable protection boundary (typically
+ * a VM page) within the block.
+ * @param size  Size in bytes of the area to be protected in some acceptable 
+ * granule (typically one or more VM pages).
+ * @param  makeItSo  If true then memory is made executable, otherwise it is made
+ * not-executable.
+ *
+ * @exceptions  May abort the process if its constraints are violated.
+ *
+ * @note If VMPI_allocateCodeMemory uses GCHeap for its storage then it is possible
+ * that the memory block pointed to by address could be acquired from more than
+ * one call to VMPI_reserveMemoryRegion.  The implementation of this method is
+ * expected to handle such cases and identify the region boundaries if the 
+ * underlying system requires setting the protection flags on blocks individually
+ * if they were allocated separately.
+ */
+extern void VMPI_makeCodeMemoryExecutable(void *address, size_t size, bool makeItSo);
 
 /**
 * This method is used to allocate a block of memory with the base address aligned to the system page size

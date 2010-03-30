@@ -305,38 +305,121 @@ bool VMPI_isMemoryProfilingEnabled()
 #endif
 }
 
-void VMPI_setPageProtection(void *address,
-							size_t size,
-							bool executableFlag,
-							bool writeableFlag)
+// Constraint: nbytes must be a multiple of the VM page size.
+//
+// The returned memory will be aligned on a VM page boundary and cover
+// an integral number of VM pages.  This is necessary in order for
+// VMPI_makeCodeMemoryExecutable to work properly - it too operates
+// on entire VM pages.
+//
+// This function should be the same as for generic Posix platforms, if you
+// fix a bug here be sure to fix the bug there.
+
+void *VMPI_allocateCodeMemory(size_t nbytes)
 {
+    MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
+    size_t pagesize = VMPI_getVMPageSize();
+    
+    if (nbytes % pagesize != 0) {
+#ifdef DEBUG
+        char buf[256];
+        VMPI_snprintf(buf, 
+                      sizeof(buf), 
+                      "VMPI_allocateCodeMemory invariants violated: request=%lu pagesize=%lu\nAborting.\n",
+                      (unsigned long)nbytes,
+                      (unsigned long)pagesize);
+        VMPI_log(buf);
+#endif
+        VMPI_abort();
+    }
+    
+    size_t nblocks = nbytes / MMgc::GCHeap::kBlockSize;
+    heap->SignalCodeMemoryAllocation(nblocks, true);
+    return heap->Alloc(nblocks, MMgc::GCHeap::flags_Alloc, pagesize/MMgc::GCHeap::kBlockSize);
+}
+
+// Constraint: address must have been returned from VMPI_allocateCodeMemory
+// and nbytes must be the size of the allocation.  We can't quite check
+// this, so we check that the address points to a page boundary and that
+// the size is given as an integral number of VM pages and that the size
+// corresponds to GCHeap's notion of the size.
+//
+// Usage note: on Posix, where the memory goes back into the common pool
+// and isn't unmapped by the OS, it is very bad form for the client to
+// free executable memory, we do not try to detect that (in DEBUG mode)
+// but we probably should.
+//
+// This function should be the same as for generic Posix platforms, if you
+// fix a bug here be sure to fix the bug there.
+
+void VMPI_freeCodeMemory(void* address, size_t nbytes)
+{
+    MMgc::GCHeap* heap = MMgc::GCHeap::GetGCHeap();
+    size_t pagesize = VMPI_getVMPageSize();
+    size_t nblocks = heap->Size(address);
+    size_t actualBytes = nblocks * MMgc::GCHeap::kBlockSize;
+    
+    if ((uintptr_t)address % pagesize != 0 || nbytes % pagesize != 0 || nbytes != actualBytes) {
+#ifdef DEBUG
+        char buf[256];
+        VMPI_snprintf(buf,
+                      sizeof(buf),
+                      "VMPI_freeCodeMemory invariants violated: address=%lu provided=%lu actual=%lu\nAborting.\n", 
+                      (unsigned long)address,
+                      (unsigned long)nbytes, 
+                      (unsigned long)actualBytes);
+        VMPI_log(buf);
+#endif
+        VMPI_abort();
+    }
+    
+    heap->Free(address);
+    heap->SignalCodeMemoryDeallocated(nblocks, true);
+}
+
+// Constraint: address must point into a block returned from VMPI_allocateCodeMemory
+// that has not been freed, it must point to a VM page boundary, and the number of
+// bytes to protect must be an integral number of VM pages.  We can't check that
+// the memory was returned from VMPI_allocateCodeMemory though and we don't check
+// that the memory is currently allocated.
+
+void VMPI_makeCodeMemoryExecutable(void *address, size_t nbytes, bool makeItSo)
+{
+    size_t pagesize = VMPI_getVMPageSize();
+    
+    if ((uintptr_t)address % pagesize != 0 || nbytes % pagesize != 0) {
+#ifdef DEBUG
+        char buf[256];
+        VMPI_snprintf(buf, 
+                      sizeof(buf), 
+                      "VMPI_makeCodeMemoryExecutable invariants violated: address=%lu size=%lu pagesize=%lu\nAborting.\n",
+                      (unsigned long)address,
+                      (unsigned long)nbytes,
+                      (unsigned long)pagesize);
+        VMPI_log(buf);
+#endif
+        VMPI_abort();
+    }
+
 	DWORD oldProtectFlags = 0;
 	DWORD newProtectFlags = 0;
-	if ( executableFlag && writeableFlag ) {
+	if ( makeItSo )
 		newProtectFlags = PAGE_EXECUTE_READWRITE;
-	} else if ( executableFlag ) {
-		newProtectFlags = PAGE_EXECUTE_READ;
-	} else if ( writeableFlag ) {
+	else
 		newProtectFlags = PAGE_READWRITE;
-	} else {
-		newProtectFlags = PAGE_READONLY;
-	}
-	
+
 	BOOL retval;
-	MEMORY_BASIC_INFORMATION mbi;	
 	do {
+        MEMORY_BASIC_INFORMATION mbi;	
 		VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
-		size_t markSize = size > mbi.RegionSize ? mbi.RegionSize : size;
+		size_t markSize = nbytes > mbi.RegionSize ? mbi.RegionSize : nbytes;  // handle multiple adjoining regions
 		
 		retval = VirtualProtect(address, markSize, newProtectFlags, &oldProtectFlags);
-		GCAssert(retval);
-		
+		AvmAssert(retval != 0);
+
 		address = (char*) address + markSize;
-		size -= markSize;
-	} while(size > 0 && retval);
-	
-	// We should not be clobbering PAGE_GUARD protections
-	GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
+		nbytes -= markSize;
+	} while(nbytes != 0 && retval != 0);
 }
 
 const char *VMPI_getenv(const char *env) 
