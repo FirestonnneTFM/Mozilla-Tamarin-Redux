@@ -1,3 +1,5 @@
+/* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -50,9 +52,9 @@ var x = 10;
 print(x++);
 print(++x);
 function f() { 
-	 function g() { print("holy smokes, batman!"); }
-	 g();
-	 return "zappa";
+     function g() { print("holy smokes, batman!"); }
+     g();
+     return "zappa";
 }
 print(f());
 var x = 10;
@@ -142,7 +144,7 @@ finally {
 
 print("Got to end");
 function abba() {
-	 print(arguments);
+     print(arguments);
 }
 
 abba(1,2,3,4)
@@ -159,15 +161,15 @@ function typed1(x: int): void {
 
 print("hello".split("ll"));
 
-	x = 0;
+    x = 0;
 loop:
-	while(x < 10) {
-		x++;
-		continue loop;
-		print("not here");
-	}
-	
-	print(x);
+    while(x < 10) {
+        x++;
+        continue loop;
+        print("not here");
+    }
+    
+    print(x);
 
 for ( x=0 ; x < 1 ; x++ )
     for each ( i in [1,2,3] )
@@ -196,10 +198,10 @@ print("\u0041");
 print(/\u004g/);
 
 function p() {
-	     function g() { return this }
-		 var o = g() 
-		 return o == this
-	  }
+         function g() { return this }
+         var o = g() 
+         return o == this
+      }
 print(p())
 try {
     print(eval("function () { broken broken broken"));
@@ -279,7 +281,7 @@ for ( var i=5 ; i >= 0 ; i-- ) {
     case 2: print("2"); break;
     case 1: print("3"); break;
     case 4: print("4"); 
-	print("4 again"); break;
+    print("4 again"); break;
     case 5: print("5"); break;
     default: print("default"); break;
     }

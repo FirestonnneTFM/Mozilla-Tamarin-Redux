@@ -1,4 +1,5 @@
-/* -*- tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -44,204 +45,204 @@
 
 namespace avmplus
 {
-	namespace RTC
-	{
-		Token Lexer::xmlAtomImpl()
-		{
-			mark=idx;
-			switch (idx[0]) {
-				case '<':
-					switch (idx[1]) {
-						case '!':
-							if (idx[2] == '[' &&
-								idx[3] == 'C' &&
-								idx[4] == 'D' &&
-								idx[5] == 'A' &&
-								idx[6] == 'T' &&
-								idx[7] == 'A' && 
-								idx[8] == '[') {
-								idx += 9;
-								return xmlMarkup(T_XmlCDATA, "]]>");
-							}
-							if (idx[2] == '-' && idx[3] == '-') {
-								idx += 4;
-								return xmlMarkup(T_XmlComment, "-->");
-							}
-							compiler->syntaxError(lineno, SYNTAXERR_INVALID_LEFTBANG);
-							
-						case '?':
-							idx += 2;
-							return xmlMarkup(T_XmlProcessingInstruction, "?>");
-							
-						case '/':
-							idx += 2;
-							return T_XmlLeftAngleSlash;
+    namespace RTC
+    {
+        Token Lexer::xmlAtomImpl()
+        {
+            mark=idx;
+            switch (idx[0]) {
+                case '<':
+                    switch (idx[1]) {
+                        case '!':
+                            if (idx[2] == '[' &&
+                                idx[3] == 'C' &&
+                                idx[4] == 'D' &&
+                                idx[5] == 'A' &&
+                                idx[6] == 'T' &&
+                                idx[7] == 'A' && 
+                                idx[8] == '[') {
+                                idx += 9;
+                                return xmlMarkup(T_XmlCDATA, "]]>");
+                            }
+                            if (idx[2] == '-' && idx[3] == '-') {
+                                idx += 4;
+                                return xmlMarkup(T_XmlComment, "-->");
+                            }
+                            compiler->syntaxError(lineno, SYNTAXERR_INVALID_LEFTBANG);
+                            
+                        case '?':
+                            idx += 2;
+                            return xmlMarkup(T_XmlProcessingInstruction, "?>");
+                            
+                        case '/':
+                            idx += 2;
+                            return T_XmlLeftAngleSlash;
 
-						default:
-							idx += 1;
-							return T_XmlLeftAngle;
-					}
-					
-				case '/':
-					if (idx[1] == '>') {
-						idx += 2;
-						return T_XmlSlashRightAngle;
-					}
-					compiler->syntaxError(lineno, SYNTAXERR_INVALID_SLASH);
-					
-				case '>':
-					idx += 1;
-					return T_XmlRightAngle;
-					
-				case '{':
-					idx += 1;
-					return T_XmlLeftBrace;
-					
-				case '}':
-					idx += 1;
-					return T_XmlRightBrace;
+                        default:
+                            idx += 1;
+                            return T_XmlLeftAngle;
+                    }
+                    
+                case '/':
+                    if (idx[1] == '>') {
+                        idx += 2;
+                        return T_XmlSlashRightAngle;
+                    }
+                    compiler->syntaxError(lineno, SYNTAXERR_INVALID_SLASH);
+                    
+                case '>':
+                    idx += 1;
+                    return T_XmlRightAngle;
+                    
+                case '{':
+                    idx += 1;
+                    return T_XmlLeftBrace;
+                    
+                case '}':
+                    idx += 1;
+                    return T_XmlRightBrace;
 
-				case '=':
-					idx += 1;
-					return T_XmlEquals;
+                case '=':
+                    idx += 1;
+                    return T_XmlEquals;
 
-				case ' ':
-				case '\t':
-				case '\r':
-				case '\n':
-					return xmlWhitespaces();
-					
-				case '"':
-				case '\'':
-					return xmlString();
-					
-				default:
-					if (isXmlNameStart(idx[0]))
-						return xmlName();
-					else
-						return xmlText();
-			}
-		}
+                case ' ':
+                case '\t':
+                case '\r':
+                case '\n':
+                    return xmlWhitespaces();
+                    
+                case '"':
+                case '\'':
+                    return xmlString();
+                    
+                default:
+                    if (isXmlNameStart(idx[0]))
+                        return xmlName();
+                    else
+                        return xmlText();
+            }
+        }
 
-		// mark has been set at the beginning of the starting punctuation,
-		// we wish to capture the ending punctuation as well.
+        // mark has been set at the beginning of the starting punctuation,
+        // we wish to capture the ending punctuation as well.
 
-		Token Lexer::xmlMarkup(Token token, const char* terminator)
-		{
-			uint32_t l = lineno;
-			while (idx < limit && !(idx[0] == terminator[0] && idx[1] == terminator[1] && (terminator[2] == 0 || idx[2] == terminator[2]))) {
-				switch (idx[0]) {
-					case '\n':
-						lineno++;
-						break;
-					case '\r':
-						lineno++;
-						if (idx[1] == '\n')
-							idx++;
-				}
-				idx++;
-			}
-			if (idx == limit)
-				compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
-			idx += VMPI_strlen(terminator);
-			val.s = compiler->intern(mark, uint32_t(idx-mark));
-			return token;
-		}
+        Token Lexer::xmlMarkup(Token token, const char* terminator)
+        {
+            uint32_t l = lineno;
+            while (idx < limit && !(idx[0] == terminator[0] && idx[1] == terminator[1] && (terminator[2] == 0 || idx[2] == terminator[2]))) {
+                switch (idx[0]) {
+                    case '\n':
+                        lineno++;
+                        break;
+                    case '\r':
+                        lineno++;
+                        if (idx[1] == '\n')
+                            idx++;
+                }
+                idx++;
+            }
+            if (idx == limit)
+                compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
+            idx += VMPI_strlen(terminator);
+            val.s = compiler->intern(mark, uint32_t(idx-mark));
+            return token;
+        }
 
-		Token Lexer::xmlWhitespaces()
-		{
-			mark = idx;
-			while (idx < limit) {
-				switch (*idx) {
-					case ' ':
-					case '\t':
-						break;
-					case '\r':
-						lineno++;
-						if (idx[1] == '\n')
-							idx++;
-						break;
-					case '\n':
-						lineno++;
-						break;
-					default:
-						goto end_loop;
-				}
-				idx++;
-			}
-		end_loop:
-			val.s = compiler->intern(mark, uint32_t(idx-mark));
-			return T_XmlWhitespaces;
-		}
+        Token Lexer::xmlWhitespaces()
+        {
+            mark = idx;
+            while (idx < limit) {
+                switch (*idx) {
+                    case ' ':
+                    case '\t':
+                        break;
+                    case '\r':
+                        lineno++;
+                        if (idx[1] == '\n')
+                            idx++;
+                        break;
+                    case '\n':
+                        lineno++;
+                        break;
+                    default:
+                        goto end_loop;
+                }
+                idx++;
+            }
+        end_loop:
+            val.s = compiler->intern(mark, uint32_t(idx-mark));
+            return T_XmlWhitespaces;
+        }
 
-		Token Lexer::xmlName()
-		{
-			AvmAssert( isXmlNameStart(*idx) );
-			mark = idx;
-			while (isXmlNameSubsequent(*idx))
-				idx++;
-			val.s = compiler->intern(mark, uint32_t(idx-mark));
-			return T_XmlName;
-		}
-		
-		// mark has been set at the beginning of the starting punctuation,
-		// we wish to capture the ending punctuation as well.
-		
-		Token Lexer::xmlString()
-		{
-			wchar terminator = *idx;
-			uint32_t l = lineno;
-			idx++;
-			// FIXME: account for line breaks inside xml string
-			while (idx < limit && *idx != terminator)
-				idx++;
-			if (idx == limit)
-				compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
-			idx++;
-			val.s = compiler->intern(mark, uint32_t(idx-mark));
-			return T_XmlString;
-		}
-		
-		Token Lexer::xmlText()
-		{
-			mark = idx;
-			while (idx < limit) {
-				switch (*idx) {
-					case ' ':
-					case '\t':
-					case '\r':
-					case '\n':
-					case '{':
-					case '}':
-					case '<':
-					case '>':
-					case '/':
-					case '=':
-						goto end_loop;
-					default:
-						if (isXmlNameStart(*idx))
-							goto end_loop;
-				}
-				idx++;
-			}
-		end_loop:
-			val.s = compiler->intern(mark, uint32_t(idx-mark));
-			return T_XmlText;
-		}
+        Token Lexer::xmlName()
+        {
+            AvmAssert( isXmlNameStart(*idx) );
+            mark = idx;
+            while (isXmlNameSubsequent(*idx))
+                idx++;
+            val.s = compiler->intern(mark, uint32_t(idx-mark));
+            return T_XmlName;
+        }
+        
+        // mark has been set at the beginning of the starting punctuation,
+        // we wish to capture the ending punctuation as well.
+        
+        Token Lexer::xmlString()
+        {
+            wchar terminator = *idx;
+            uint32_t l = lineno;
+            idx++;
+            // FIXME: account for line breaks inside xml string
+            while (idx < limit && *idx != terminator)
+                idx++;
+            if (idx == limit)
+                compiler->syntaxError(l, SYNTAXERR_UNTERMINATED_XML);
+            idx++;
+            val.s = compiler->intern(mark, uint32_t(idx-mark));
+            return T_XmlString;
+        }
+        
+        Token Lexer::xmlText()
+        {
+            mark = idx;
+            while (idx < limit) {
+                switch (*idx) {
+                    case ' ':
+                    case '\t':
+                    case '\r':
+                    case '\n':
+                    case '{':
+                    case '}':
+                    case '<':
+                    case '>':
+                    case '/':
+                    case '=':
+                        goto end_loop;
+                    default:
+                        if (isXmlNameStart(*idx))
+                            goto end_loop;
+                }
+                idx++;
+            }
+        end_loop:
+            val.s = compiler->intern(mark, uint32_t(idx-mark));
+            return T_XmlText;
+        }
 
-		bool Lexer::isXmlNameStart(wchar c) 
-		{
-			// FIXME: isXmlNameStart is not quite right
-			return isUnicodeIdentifierStart(c) || c == ':';
-		}
-		
-		bool Lexer::isXmlNameSubsequent(wchar c)
-		{
-			// FIXME: isXmlNameSubsequent is not quite right
-			return isUnicodeIdentifierPart(c) || c == ':' || c == '.' || c == '-';
-		}
-		
-	}
+        bool Lexer::isXmlNameStart(wchar c) 
+        {
+            // FIXME: isXmlNameStart is not quite right
+            return isUnicodeIdentifierStart(c) || c == ':';
+        }
+        
+        bool Lexer::isXmlNameSubsequent(wchar c)
+        {
+            // FIXME: isXmlNameSubsequent is not quite right
+            return isUnicodeIdentifierPart(c) || c == ':' || c == '.' || c == '-';
+        }
+        
+    }
 }
 
 #endif // VMCFG_EVAL

@@ -1,4 +1,5 @@
-/* -*- tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,102 +41,102 @@
 
 inline uint32_t ABCFile::addMethod(ABCMethodInfo* m) 
 {
-	methods.addAtEnd(m);
-	return methodCount++;
+    methods.addAtEnd(m);
+    return methodCount++;
 }
 
 inline uint32_t ABCFile::addMetadata(ABCMetadataInfo* m)
 {
-	metadatas.addAtEnd(m);
-	return metadataCount++;
+    metadatas.addAtEnd(m);
+    return metadataCount++;
 }
 
 inline uint32_t ABCFile::addClassAndInstance(ABCClassInfo* c, ABCInstanceInfo* i)
 {
-	uint32_t x = addClass(c);
-	DEBUG_ONLY( uint32_t y = ) addInstance(i);
-	AvmAssert( x == y );
-	return x;
+    uint32_t x = addClass(c);
+    DEBUG_ONLY( uint32_t y = ) addInstance(i);
+    AvmAssert( x == y );
+    return x;
 }
 
 inline uint32_t ABCFile::addInstance(ABCInstanceInfo* i)
 {
-	instances.addAtEnd(i);
-	return instanceCount++;
+    instances.addAtEnd(i);
+    return instanceCount++;
 }
 
 inline uint32_t ABCFile::addClass(ABCClassInfo* c)
 {
-	classes.addAtEnd(c);
-	return classCount++;
+    classes.addAtEnd(c);
+    return classCount++;
 }
 
 inline uint32_t ABCFile::addScript(ABCScriptInfo* s)
 {
-	scripts.addAtEnd(s);
-	return scriptCount++;
+    scripts.addAtEnd(s);
+    return scriptCount++;
 }
 
 inline uint32_t ABCFile::addMethodBody(ABCMethodBodyInfo* m)
 {
-	bodies.addAtEnd(m);
-	return methodbodyCount++;
+    bodies.addAtEnd(m);
+    return methodbodyCount++;
 }
 
 inline uint8_t ABCMethodBodyInfo::getFlags()
 {
-	return cogen.getFlags();
+    return cogen.getFlags();
 }
 
 inline void ABCMethodInfo::setFlags(uint8_t flags)
 {
-	AvmAssert(this->flags == ~0U);
-	this->flags = flags;
+    AvmAssert(this->flags == ~0U);
+    this->flags = flags;
 }
 
 inline uint32_t ABCTraitsTable::addTrait(ABCTrait* t) 
 {
-	traits.addAtEnd(t);
-	return traitsCount++;
+    traits.addAtEnd(t);
+    return traitsCount++;
 }
 
 inline uint32_t ABCFile::addQName(uint32_t ns, uint32_t name, bool is_attr)
 {
-	using namespace ActionBlockConstants;
-	return multinameLookup((uint8_t)(is_attr ? CONSTANT_QnameA : CONSTANT_Qname), ns, name);
+    using namespace ActionBlockConstants;
+    return multinameLookup((uint8_t)(is_attr ? CONSTANT_QnameA : CONSTANT_Qname), ns, name);
 }
 
 inline uint32_t ABCFile::addRTQName(uint32_t name, bool is_attr)
 {
-	using namespace ActionBlockConstants;
-	return multinameLookup((uint8_t)(is_attr ? CONSTANT_RTQnameA : CONSTANT_RTQname), NO_VALUE, name);
+    using namespace ActionBlockConstants;
+    return multinameLookup((uint8_t)(is_attr ? CONSTANT_RTQnameA : CONSTANT_RTQname), NO_VALUE, name);
 }
 
 inline uint32_t ABCFile::addRTQNameL(bool is_attr)
 {
-	using namespace ActionBlockConstants;
-	return multinameLookup((uint8_t)(is_attr ? CONSTANT_RTQnameLA : CONSTANT_RTQnameL), NO_VALUE, NO_VALUE);
+    using namespace ActionBlockConstants;
+    return multinameLookup((uint8_t)(is_attr ? CONSTANT_RTQnameLA : CONSTANT_RTQnameL), NO_VALUE, NO_VALUE);
 }
 
 inline uint32_t ABCFile::addMultiname(uint32_t nsset, uint32_t name, bool is_attr)
 {
-	using namespace ActionBlockConstants;
-	return multinameLookup((uint8_t)(is_attr ? CONSTANT_MultinameA : CONSTANT_Multiname), nsset, name);
+    using namespace ActionBlockConstants;
+    return multinameLookup((uint8_t)(is_attr ? CONSTANT_MultinameA : CONSTANT_Multiname), nsset, name);
 }
 
 inline uint32_t ABCFile::addMultinameL(uint32_t nsset, bool is_attr)
 {
-	using namespace ActionBlockConstants;
-	return multinameLookup((uint8_t)(is_attr ? CONSTANT_MultinameLA : CONSTANT_MultinameL), nsset, NO_VALUE);
+    using namespace ActionBlockConstants;
+    return multinameLookup((uint8_t)(is_attr ? CONSTANT_MultinameLA : CONSTANT_MultinameL), nsset, NO_VALUE);
 }
 
 inline void ABCMethodBodyInfo::clearTraits()
 {
-	traits = NULL;
+    traits = NULL;
 }
 
 inline uint32_t ABCExceptionTable::addAtEnd(ABCExceptionInfo* e)
 {
-	exceptions.addAtEnd(e);
-	return exceptionCount++;
+    exceptions.addAtEnd(e);
+    return exceptionCount++;
 }

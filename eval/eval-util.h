@@ -1,4 +1,5 @@
-/* -*- mode: c++; tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -47,11 +48,11 @@
 
 class Str {
 public:
-	uint32_t	length;		// number of chars excluding NUL
-	uint32_t	hash;		// hash code
-	uint32_t	ident;		// ~0 or the index in the string pool
-	Str*		next;		// next in hashtable bucket
-	wchar		s[1];		// actually longer
+    uint32_t    length;     // number of chars excluding NUL
+    uint32_t    hash;       // hash code
+    uint32_t    ident;      // ~0 or the index in the string pool
+    Str*        next;       // next in hashtable bucket
+    wchar       s[1];       // actually longer
 };
 
 uint32_t hashString(const wchar* chars, uint32_t nchars);
@@ -87,40 +88,40 @@ inline int32_t max(int32_t a, int32_t b) { return a > b ? a : b; }
 
 class SBChunk {
 public:
-	enum {
-		chunksize = 100
-	};
-	
-	wchar data[chunksize];
-	SBChunk* next;
+    enum {
+        chunksize = 100
+    };
+    
+    wchar data[chunksize];
+    SBChunk* next;
 };
 
 class StringBuilder {
 public:
-	StringBuilder(Compiler* compiler);
-	~StringBuilder();
-	
-	void clear();
-	void append(Str* other);
-	void append(const char* other);
-	void append(StringBuilder* other);
-	void append(const wchar* ptr, const wchar* lim);
-	void append(int c);
-	uint32_t length();
-	Str* str();
-	char *chardata();			// NUL-terminated array, freshly allocated on every call.  Data are chopped to 7 bits.
-	
+    StringBuilder(Compiler* compiler);
+    ~StringBuilder();
+    
+    void clear();
+    void append(Str* other);
+    void append(const char* other);
+    void append(StringBuilder* other);
+    void append(const wchar* ptr, const wchar* lim);
+    void append(int c);
+    uint32_t length();
+    Str* str();
+    char *chardata();           // NUL-terminated array, freshly allocated on every call.  Data are chopped to 7 bits.
+    
 private:
-	void append(SBChunk* other);
-	wchar* copyInto(wchar* buf, SBChunk* c);
-	char* copyInto(char* buf, SBChunk* c);
-	void pushChunk();
-	void popChunk();
-	
-	Allocator* const allocator;
-	SBChunk* chunk;				// current chunk
-	uint32_t nextchar;			// next free char in chunk
-	uint32_t len;				// total length
+    void append(SBChunk* other);
+    wchar* copyInto(wchar* buf, SBChunk* c);
+    char* copyInto(char* buf, SBChunk* c);
+    void pushChunk();
+    void popChunk();
+    
+    Allocator* const allocator;
+    SBChunk* chunk;             // current chunk
+    uint32_t nextchar;          // next free char in chunk
+    uint32_t len;               // total length
 };
 
 
@@ -139,30 +140,30 @@ private:
  */
 class Allocator {
 public:
-	Allocator(Compiler* compiler);
-	~Allocator();
-	
-	void* alloc(size_t nbytes);
-	
-	Compiler* const compiler;
-	SBChunk* free_sbchunks;	// shared among all StringBuilders working off this allocator
-	
+    Allocator(Compiler* compiler);
+    ~Allocator();
+    
+    void* alloc(size_t nbytes);
+    
+    Compiler* const compiler;
+    SBChunk* free_sbchunks; // shared among all StringBuilders working off this allocator
+    
 private:
-	void* allocSlow(size_t nbytes);
-	void refill(size_t nbytes);
-	
-	class Chunk {
-	public:
-		Chunk* prev;
+    void* allocSlow(size_t nbytes);
+    void refill(size_t nbytes);
+    
+    class Chunk {
+    public:
+        Chunk* prev;
 #ifndef AVMPLUS_64BIT
-		uintptr_t padding;
+        uintptr_t padding;
 #endif
-		char data[1];
-	};
-	
-	Chunk* current_chunk;
-	char* current_top;
-	char* current_limit;
+        char data[1];
+    };
+    
+    Chunk* current_chunk;
+    char* current_top;
+    char* current_limit;
 };
 
 
@@ -179,62 +180,62 @@ private:
  */
 class ByteBuffer {
 public:
-	ByteBuffer(Allocator* allocator, uint32_t increment=100);
+    ByteBuffer(Allocator* allocator, uint32_t increment=100);
 
-	uint32_t size() const;
-	void serialize(uint8_t* b) const;
+    uint32_t size() const;
+    void serialize(uint8_t* b) const;
 
-	void emitU8(uint8_t val);
-	void emitS8(int8_t val);
-	void emitU16(uint16_t val);
-	void emitU32(uint32_t val);
-	void emitU30(uint32_t val);
-	void emitS32(int32_t val);
-	void emitS24(int32_t val);
-	void emitDouble(double d);
-	void emitUtf8(uint32_t nbytes, Str* s);
-	
+    void emitU8(uint8_t val);
+    void emitS8(int8_t val);
+    void emitU16(uint16_t val);
+    void emitU32(uint32_t val);
+    void emitU30(uint32_t val);
+    void emitS32(int32_t val);
+    void emitS24(int32_t val);
+    void emitDouble(double d);
+    void emitUtf8(uint32_t nbytes, Str* s);
+    
 private:
-	class Chunk {
-	public:
-		uint8_t* end;
-		Chunk* next;
-		uint8_t start[1];		// actually longer
-	};
-	
-	Allocator * const allocator;
-	const uint32_t increment;
-	uint8_t* out;
-	uint8_t* limit;
-	Chunk* first;
-	Chunk* last;
-	uint32_t size_rest;		// collected size of the chunks not including last
-	
-	void makeRoom(uint32_t nbytes);
-	void makeRoomSlow(uint32_t nbytes);
+    class Chunk {
+    public:
+        uint8_t* end;
+        Chunk* next;
+        uint8_t start[1];       // actually longer
+    };
+    
+    Allocator * const allocator;
+    const uint32_t increment;
+    uint8_t* out;
+    uint8_t* limit;
+    Chunk* first;
+    Chunk* last;
+    uint32_t size_rest;     // collected size of the chunks not including last
+    
+    void makeRoom(uint32_t nbytes);
+    void makeRoomSlow(uint32_t nbytes);
 };
 
 // This is useful if an allocator is in scope with the name "allocator"
-#define ALLOC(type, args)			\
-	new (allocator->alloc(sizeof(type))) type args
+#define ALLOC(type, args)           \
+    new (allocator->alloc(sizeof(type))) type args
 
 template<class T> class Seq {
 public:
-	Seq(T hd, Seq<T>* tl=NULL) : hd(hd), tl(tl) {}
-	T       hd;
-	Seq<T>* tl;
+    Seq(T hd, Seq<T>* tl=NULL) : hd(hd), tl(tl) {}
+    T       hd;
+    Seq<T>* tl;
 };
 
 template<class T> class SeqBuilder {
 public:
-	SeqBuilder(Allocator* allocator) : allocator(allocator), items(NULL), last(NULL) {}
-	
-	void addAtEnd(T item);
-	Seq<T>* get() const;
-	
+    SeqBuilder(Allocator* allocator) : allocator(allocator), items(NULL), last(NULL) {}
+    
+    void addAtEnd(T item);
+    Seq<T>* get() const;
+    
 private:
-	Allocator* allocator;
-	Seq<T>* items;
-	Seq<T>* last;
+    Allocator* allocator;
+    Seq<T>* items;
+    Seq<T>* last;
 };
 

@@ -1,4 +1,5 @@
-/* -*- tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,112 +41,112 @@
 
 inline Token Lexer::lex(uint32_t* linep, TokenValue* valuep)
 {
-	Token t = lexImpl();
-	*linep = lineno;
-	*valuep = val;
+    Token t = lexImpl();
+    *linep = lineno;
+    *valuep = val;
 #ifdef DEBUG
-	if (traceflag)
-		print(t, *linep, *valuep);
+    if (traceflag)
+        print(t, *linep, *valuep);
 #endif
-	return t;
+    return t;
 }
 
 inline Token Lexer::regexp(uint32_t* linep, TokenValue* valuep)
 {
-	Token t = regexpImpl();
-	*linep = lineno;
-	*valuep = val;
+    Token t = regexpImpl();
+    *linep = lineno;
+    *valuep = val;
 #ifdef DEBUG
-	if (traceflag)
-		print(t, *linep, *valuep);
+    if (traceflag)
+        print(t, *linep, *valuep);
 #endif
-	return t;
+    return t;
 }
 
 inline Token Lexer::divideOperator(uint32_t* linep)
 {
-	Token t = divideOperatorImpl();
-	*linep = lineno;
+    Token t = divideOperatorImpl();
+    *linep = lineno;
 #ifdef DEBUG
-	if (traceflag) {
-		TokenValue garbage;
-		garbage.i = 0;
-		print(t, *linep, garbage);
-	}
+    if (traceflag) {
+        TokenValue garbage;
+        garbage.i = 0;
+        print(t, *linep, garbage);
+    }
 #endif
-	return t;
+    return t;
 }
 
 inline Token Lexer::xmlAtom(uint32_t* linep, TokenValue* valuep)
 {
-	Token t = xmlAtomImpl();
-	*linep = lineno;
-	*valuep = val;
+    Token t = xmlAtomImpl();
+    *linep = lineno;
+    *valuep = val;
 #ifdef DEBUG
-	if (traceflag) {
-		TokenValue garbage;
-		garbage.i = 0;
-		print(t, *linep, garbage);
-	}
+    if (traceflag) {
+        TokenValue garbage;
+        garbage.i = 0;
+        print(t, *linep, garbage);
+    }
 #endif
-	return t;
+    return t;
 }
 
 inline Token Lexer::rightAngle(uint32_t* linep)
 {
-	Token t = rightAngleImpl();
-	*linep = lineno;
+    Token t = rightAngleImpl();
+    *linep = lineno;
 #ifdef DEBUG
-	if (traceflag) {
-		TokenValue garbage;
-		garbage.i = 0;
-		print(t, *linep, garbage);
-	}
+    if (traceflag) {
+        TokenValue garbage;
+        garbage.i = 0;
+        print(t, *linep, garbage);
+    }
 #endif
-	return t;
+    return t;
 }
 
 inline Token Lexer::rightShiftOrRelationalOperator(uint32_t* linep)
 {
-	Token t = rightShiftOrRelationalOperatorImpl();
-	*linep = lineno;
+    Token t = rightShiftOrRelationalOperatorImpl();
+    *linep = lineno;
 #ifdef DEBUG
-	if (traceflag) {
-		TokenValue garbage;
-		garbage.i = 0;
-		print(t, *linep, garbage);
-	}
+    if (traceflag) {
+        TokenValue garbage;
+        garbage.i = 0;
+        print(t, *linep, garbage);
+    }
 #endif
-	return t;
+    return t;
 }
 
 inline bool Lexer::octalDigits(int k) { return digits(k, CHAR_ATTR_OCTAL); }
 inline bool Lexer::decimalDigits(int k) { return digits(k, CHAR_ATTR_DECIMAL); }
 inline bool Lexer::hexDigits(int k) { return digits(k, CHAR_ATTR_HEX); }
-		
+        
 // mis-named, isSubsequent would be better?
 inline bool Lexer::notPartOfIdent(int c)
 {
-	return (c < 128 && (char_attrs[c] & CHAR_ATTR_SUBSEQUENT) == 0) || !isUnicodeIdentifierPart(c);
+    return (c < 128 && (char_attrs[c] & CHAR_ATTR_SUBSEQUENT) == 0) || !isUnicodeIdentifierPart(c);
 }
 
 inline void Lexer::xmlPushback(wchar c)
 {
-	(void)c;
-	AvmAssert(idx > src && idx[-1] == c);
-	idx--;
+    (void)c;
+    AvmAssert(idx > src && idx[-1] == c);
+    idx--;
 }
 
 #ifdef DEBUG
 
 inline void Lexer::trace()
 {
-	traceflag = true;
+    traceflag = true;
 }
 
 inline bool Lexer::getTrace() const
 {
-	return traceflag;
+    return traceflag;
 }
 
 #endif

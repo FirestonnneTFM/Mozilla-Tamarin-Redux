@@ -1,4 +1,5 @@
-/* -*- tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -55,98 +56,98 @@ inline Token Parser::hd()
 
 inline Str* Parser::identValue()
 {
-	AvmAssert(T0 == T_Identifier);
-	return V0.s;
+    AvmAssert(T0 == T_Identifier);
+    return V0.s;
 }
 
 inline Str* Parser::stringValue()
 {
-	AvmAssert(T0 == T_StringLiteral);
-	return V0.s;
+    AvmAssert(T0 == T_StringLiteral);
+    return V0.s;
 }
 
 inline Str* Parser::regexValue()
 {
-	AvmAssert(T0 == T_RegexpLiteral);
-	return V0.s;
+    AvmAssert(T0 == T_RegexpLiteral);
+    return V0.s;
 }
 
 inline int32_t Parser::intValue()
 {
-	AvmAssert(T0 == T_IntLiteral);
-	return V0.i;
+    AvmAssert(T0 == T_IntLiteral);
+    return V0.i;
 }
 
 inline uint32_t Parser::uintValue() 
 {
-	AvmAssert(T0 == T_UIntLiteral);
-	return V0.u;
+    AvmAssert(T0 == T_UIntLiteral);
+    return V0.u;
 }
 
 inline double Parser::doubleValue() 
 {
-	AvmAssert(T0 == T_DoubleLiteral);
-	return V0.d;
+    AvmAssert(T0 == T_DoubleLiteral);
+    return V0.d;
 }
 
 inline bool Parser::isOpAssign(Token t)
 {
-	return t < T_OPERATOR_SENTINEL && tokenMapping[t].isOpAssign;
+    return t < T_OPERATOR_SENTINEL && tokenMapping[t].isOpAssign;
 }
 
 inline bool Parser::isMultiplicative(Token t)
 {
-	return t < T_OPERATOR_SENTINEL && tokenMapping[t].isMultiplicative;
+    return t < T_OPERATOR_SENTINEL && tokenMapping[t].isMultiplicative;
 }
 
 inline bool Parser::isAdditive(Token t)
 {
-	return t < T_OPERATOR_SENTINEL && tokenMapping[t].isAdditive;
+    return t < T_OPERATOR_SENTINEL && tokenMapping[t].isAdditive;
 }
 
 inline bool Parser::isRelational(Token t, bool in_allowed)
 {
-	return t < T_OPERATOR_SENTINEL && tokenMapping[t].isRelational && (in_allowed || t != T_In);
+    return t < T_OPERATOR_SENTINEL && tokenMapping[t].isRelational && (in_allowed || t != T_In);
 }
 
 inline bool Parser::isEquality(Token t)
 {
-	return t < T_OPERATOR_SENTINEL && tokenMapping[t].isEquality;
+    return t < T_OPERATOR_SENTINEL && tokenMapping[t].isEquality;
 }
 
 inline bool Parser::isShift(Token t)
 {
-	return t < T_OPERATOR_SENTINEL && tokenMapping[t].isShift;
+    return t < T_OPERATOR_SENTINEL && tokenMapping[t].isShift;
 }
 
 inline Unop Parser::tokenToUnaryOperator(Token t)
 {
-	AvmAssert(t < T_OPERATOR_SENTINEL);
-	return (Unop)tokenMapping[t].unaryOp;
+    AvmAssert(t < T_OPERATOR_SENTINEL);
+    return (Unop)tokenMapping[t].unaryOp;
 }
 
 inline Binop Parser::tokenToBinaryOperator(Token t)
 {
-	AvmAssert(t < T_OPERATOR_SENTINEL);
-	return (Binop)tokenMapping[t].binaryOp;
+    AvmAssert(t < T_OPERATOR_SENTINEL);
+    return (Binop)tokenMapping[t].binaryOp;
 }
 
 inline void Parser::setUsesArguments()
 {
-	topRib->uses_arguments = true;
+    topRib->uses_arguments = true;
 }
 
 inline void Parser::setUsesDefaultXmlNamespace()
 {
-	topRib->uses_dxns = true;
+    topRib->uses_dxns = true;
 }
 
 inline void Parser::xmlAtom() 
 {
-	T0 = lexer->xmlAtom(&L0, &V0);
+    T0 = lexer->xmlAtom(&L0, &V0);
 }
 
 inline void Parser::xmlPushback(wchar c)
 {
-	lexer->xmlPushback(c);
+    lexer->xmlPushback(c);
 }
