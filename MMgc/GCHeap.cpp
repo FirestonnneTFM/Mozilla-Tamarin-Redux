@@ -1023,7 +1023,7 @@ namespace MMgc
 			{
                 // Prefer a single committed block that is at least large enough.
                 
-				if (block->size - alignmentSlop(block->baseAddr, alignment) >= size && block->committed) {
+				if (block->size >= size + alignmentSlop(block->baseAddr, alignment) && block->committed) {
                     RemoveFromList(block);
                     return AllocCommittedBlock(block, size, zero, alignment);
 				}
@@ -1033,12 +1033,14 @@ namespace MMgc
                 
 				if(config.useVirtualMemory && decommittedSuitableBlock == NULL && !block->committed)
                 {
+                    GCAssert(!block->inUse());
+
                     size_t totalSize = block->size;
                     HeapBlock *firstFree = block;
                     size_t firstSlop = alignmentSlop(firstFree->baseAddr, alignment);
                     
                     // Coalesce with predecessors
-                    while(totalSize - firstSlop < size && firstFree->sizePrevious != 0)
+                    while(totalSize < size + firstSlop && firstFree->sizePrevious != 0)
                     {	
                         HeapBlock *prevBlock = firstFree - firstFree->sizePrevious;
                         if(prevBlock->inUse() || prevBlock->size == 0)
@@ -1049,14 +1051,14 @@ namespace MMgc
                     }
                     
                     // Coalesce with successors
-                    HeapBlock *nextBlock = block + block->size;
-                    while (totalSize - firstSlop < size && !(nextBlock->inUse() || nextBlock->size == 0)) {
+                    HeapBlock *nextBlock = firstFree + firstFree->size;
+                    while (totalSize < size + firstSlop && !(nextBlock->inUse() || nextBlock->size == 0)) {
                         totalSize += nextBlock->size;
                         nextBlock = nextBlock + nextBlock->size;
                     }
                     
                     // Keep it if it's large enough
-                    if(totalSize - firstSlop >= size)
+                    if(totalSize >= size + firstSlop)
                         decommittedSuitableBlock = firstFree;
                 }
             }
