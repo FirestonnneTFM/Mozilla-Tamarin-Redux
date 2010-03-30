@@ -749,12 +749,12 @@ namespace avmplus
                 else
 #endif
                 if (!ni) {
-#ifndef VMCFG_FUZZTESTING
-                    // If this assert hits, you're missing a native method.  Method "i"
-                    // corresponds to the function of the same number in
-                    // source\avmglue\avmglue.h if you're running the Flash player.
-                    AvmAssertMsg(0, "missing native method decl");
-#endif
+                    if (pool->isBuiltin) {
+                        // If this assert hits, you're missing a native method.  Method "i"
+                        // corresponds to the function of the same number in
+                        // source\avmglue\avmglue.h if you're running the Flash player.
+                        AvmAssertMsg(0, "missing native method decl");
+                    }
                     toplevel->throwVerifyError(kIllegalNativeMethodError);
                 }
             }
