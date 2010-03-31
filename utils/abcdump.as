@@ -66,7 +66,7 @@ package abcdump
     " -abs Print the bytecode, but no information about the ABC",
     " -api Print the public API exposed by this abc/swf",
     " -mdversions Use in conjunction with -api when the abc/swf uses old-style versioning",
-    " -dumppools Print out the contents of the constant pools"
+    " -pools Print out the contents of the constant pools"
     ].join("\n");
 
     const TAB = "  "
