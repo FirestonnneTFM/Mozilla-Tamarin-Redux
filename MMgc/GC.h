@@ -1405,7 +1405,7 @@ namespace MMgc
 		friend class GCAutoEnter;
 		friend class GCAutoEnterPause;
 		bool ThreadEnter(GCAutoEnter *enter, bool doCollectionWork, bool tryEnter);
-		void ThreadLeave(bool doCollectionWork);
+		void ThreadLeave(bool doCollectionWork, GC *prevGC);
 		void ThreadEdgeWork();
 
 		GCAutoEnter *GetAutoEnter();
