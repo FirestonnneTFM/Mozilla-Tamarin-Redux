@@ -281,7 +281,7 @@ namespace MMgc
 	
 	size_t FixedMalloc::LargeSize(const void *item)
 	{
-		return m_heap->Size(item) * GCHeap::kBlockSize;
+		return m_heap->Size(GetRealPointer(item)) * GCHeap::kBlockSize;
 	}
 
 	void *FixedMalloc::Calloc(size_t count, size_t elsize, FixedMallocOpts opts)
@@ -327,7 +327,7 @@ namespace MMgc
 				return;
 		
 #ifdef AVMPLUS_SAMPLER
-		if (m_heap->SafeSize(item) != (size_t)-1)
+		if (m_heap->SafeSize(GetRealPointer(item)) != (size_t)-1)
 			return;
 #else
 		{
