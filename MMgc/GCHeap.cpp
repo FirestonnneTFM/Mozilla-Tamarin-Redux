@@ -83,6 +83,8 @@ namespace MMgc
 	// GCHeap instance has the C++ runtime call dtor which causes problems
 	AVMPLUS_ALIGN8(uint8_t) heapSpace[sizeof(GCHeap)];
 
+	const size_t kLargeItemBlockId = ~0U;
+
 	size_t GCHeap::leakedBytes;
 
 #ifdef MMGC_MEMORY_PROFILER
@@ -189,6 +191,7 @@ namespace MMgc
 	#ifdef MMGC_POLICY_PROFILING
  		  maxPrivateMemory(0),
 	#endif
+		  largeAllocs(0),
     #ifdef MMGC_HOOKS
 		  hooksEnabled(false),
     #endif
@@ -319,38 +322,27 @@ namespace MMgc
         }
 #endif
 
-		char *baseAddr = 0;
+		void *baseAddr = 0;
 		bool zero = (flags & kZero) != 0;
+		bool expand = (flags & kExpand) != 0;
 		{
 			MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
 			
             bool saved_oomHandling = m_oomHandling;
             m_oomHandling = saved_oomHandling && (flags & kNoOOMHandling) == 0;
             
-			HeapBlock *block = AllocBlock(size, zero, alignment);
-			
-			//  Try to expand if the flag is set
-			if(!block && (flags & kExpand)) {
-				ExpandHeap(size);
-				block = AllocBlock(size, zero, alignment);
-			}
+			baseAddr = AllocHelper(size, expand, zero, alignment);
 
 			//  If expand didn't work, or expand flag not set, then try to free 
 			//  memory then realloc from the heap
-			if (!block)
+			if (!baseAddr)
 			{
 				SendFreeMemorySignal(size);
-				block = AllocBlock(size, zero, alignment);
-			}
-
-			//  Retry to expand if the expand is set
-			if(!block && (flags & kExpand)) {
-				ExpandHeap(size);
-				block = AllocBlock(size, zero, alignment);
+				baseAddr = AllocHelper(size, expand, zero, alignment);
 			}
 
 			//  If we're still unable to allocate, we're done
-			if (!block)
+			if (!baseAddr)
 			{
 				if (flags & kCanFail)
 				{
@@ -360,19 +352,8 @@ namespace MMgc
 					Abort();
 				}
 			}
-
-			GCAssert(block->size == size);
 			
 			numAlloc += size;
-			
-			// copy baseAddr to a stack variable to fix :
-			// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
-			baseAddr = block->baseAddr;
-			
-#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
-			if(profiler)
-				block->allocTrace = profiler->GetStackTrace();
-#endif
 			
 #ifdef MMGC_MEMORY_PROFILER
 			if((flags & kProfile) && HooksEnabled() && profiler) {
@@ -383,7 +364,9 @@ namespace MMgc
 
             m_oomHandling = saved_oomHandling;
 		}
-	
+
+		GCAssert(Size(baseAddr) == size);
+
 		// Zero out the memory, if requested to do so
 		if (zero) {
 			VMPI_memset(baseAddr, 0, size * kBlockSize);
@@ -398,8 +381,42 @@ namespace MMgc
         GCAssert(((uintptr_t)baseAddr >> kBlockShift) % alignment == 0);
 		return baseAddr;
 	}
+	
+	void *GCHeap::AllocHelper(size_t size, bool expand, bool& zero, size_t alignment)
+	{
+		// first try to find it in our existing free memory
+		HeapBlock *block = AllocBlock(size, zero, alignment);
+		
+		//  Try to expand if the flag is set
+		if(!block && expand) {
 
-    void GCHeap::SignalCodeMemoryAllocation(size_t size, bool gcheap_memory)
+			//  Look ahead at memory limits to see if we should trigger a free memory signal
+			if ( (HardLimitExceeded(size) || SoftLimitExceeded(size)))
+			{
+				SendFreeMemorySignal(size);
+			}
+
+			// Don't allow our memory consumption to grow beyond hard limit
+			if(HardLimitExceeded(size))
+				return NULL;
+
+			if(size >= kOSAllocThreshold) {
+				return LargeAlloc(size, alignment);
+			} else {
+				ExpandHeap(size);
+				block = AllocBlock(size, zero, alignment);						
+			}		
+		}
+		
+#if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
+		if(profiler && block)
+			block->allocTrace = profiler->GetStackTrace();
+#endif
+
+		return block != NULL ? block->baseAddr : NULL;
+	}
+
+	void GCHeap::SignalCodeMemoryAllocation(size_t size, bool gcheap_memory)
     {
         if (gcheap_memory)
             gcheapCodeMemory += size;
@@ -407,7 +424,7 @@ namespace MMgc
             externalCodeMemory += size;
         CheckForMemoryLimitsExceeded();
     }
-
+		
 	void GCHeap::CheckForMemoryLimitsExceeded()
 	{
 
@@ -446,24 +463,33 @@ namespace MMgc
         m_oomHandling = saved_oomHandling && oomHandling;
         
 		HeapBlock *block = AddrToBlock(item);
-		GCAssertMsg(block != NULL, "Bogus item");
+
+		size_t size;
+		if(block == NULL) {
+			size = LargeAllocSize(item);
+		} else {
+			size = block->size;
+		}
 
 		// Update metrics
-		GCAssert(numAlloc >= (unsigned int)block->size);
-		numAlloc -= block->size;
+		GCAssert(numAlloc >= (unsigned int)size);
+		numAlloc -= size;
 		
 #if defined(MMGC_MEMORY_PROFILER) && defined(MMGC_MEMORY_INFO)
-		if(profiler)
+		if(profiler && block)
 			block->freeTrace = profiler->GetStackTrace();
 #endif
 	
 #ifdef MMGC_MEMORY_PROFILER
 		if(profile && HooksEnabled() && profiler) {
-			profiler->RecordDeallocation(item, block->size * kBlockSize);
+			profiler->RecordDeallocation(item, size * kBlockSize);
 		}
 #endif
 
-		FreeBlock(block);
+		if(block)
+			FreeBlock(block);
+		else
+			LargeFree(item);
         
         m_oomHandling = saved_oomHandling;
 	}
@@ -527,6 +553,14 @@ namespace MMgc
 
 		for (; freelist >= endOfBigFreelists && decommitSize > 0; freelist--)
 		{
+#ifdef MMGC_MAC
+			// We may call RemoveLostBlock below which splits regions
+			// and may need to create a new one, don't let it expand
+			// though, expanding while Decommit'ing would be silly.
+			if(!EnsureFreeRegion(/*expand=*/false))
+				return;
+#endif
+
 			HeapBlock *block = freelist;
 			while ((block = block->prev) != freelist && decommitSize > 0)
 			{
@@ -746,18 +780,8 @@ namespace MMgc
 
 		// if we don't line up with beginning or end we need a new region
 		if(block->baseAddr != region->baseAddr && region->commitTop != block->endAddr()) {
-			if(nextRegion == NULL) {
-				// usually this is handled in ExpandHeap but could run out here
-				bool zero = false;
-				block = AllocBlock(1, zero, 1);
-				if(block) {
-					nextRegion = (Region*)(void *)block->baseAddr;	
-				} else {
-					ExpandHeap(1);
-					// just calling ExpandHeap should set nextRegion
-					GCAssertMsg(nextRegion != NULL, "ExpandHeap didn't set nextRegion");
-				}
-			}
+
+			GCAssertMsg(HaveFreeRegion(), "Decommit was supposed to ensure this!");
 
 			NewRegion(block->endAddr(), region->reserveTop, 
 					  region->commitTop > block->endAddr() ? region->commitTop : block->endAddr(),
@@ -896,7 +920,7 @@ namespace MMgc
 		// Need to decrement blockId for regions in blocks after block
 		Region *r = lastRegion;
 		while(r) {
-			if(r->blockId > region->blockId) {
+			if(r->blockId > region->blockId && r->blockId != kLargeItemBlockId) {
 				r->blockId -= (blockSize-sen_offset);
 			}
 			r = r->prev;
@@ -980,6 +1004,8 @@ namespace MMgc
 	{
 		Region *region = AddrToRegion(item);
 		if(region) {
+			if(region->blockId == kLargeItemBlockId)
+				return NULL;
 			size_t index = ((char*)item - region->baseAddr) / kBlockSize;
 			HeapBlock *b = blocks + region->blockId + index;
 			GCAssert(item >= b->baseAddr && item < b->baseAddr + b->size * GCHeap::kBlockSize);
@@ -991,10 +1017,14 @@ namespace MMgc
 	size_t GCHeap::SafeSize(const void *item)
 	{
 		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+		GCAssert((uintptr_t(item) & (kBlockSize-1)) == 0);
 		HeapBlock *block = AddrToBlock(item);
-		if (block == NULL || block->size == 0)
-			return (size_t)-1;
-		return block->size;
+		if (block)
+			return block->size;
+		Region *r = AddrToRegion(item);
+		if(r && r->blockId == kLargeItemBlockId)
+			return LargeAllocSize(item);
+		return (size_t)-1;
 	}
 
     // Return the number of blocks of slop at the beginning of an object
@@ -1006,6 +1036,50 @@ namespace MMgc
     {
         return (alignment - (size_t)(((uintptr_t)baseAddr >> GCHeap::kBlockShift) & (alignment - 1))) & (alignment - 1);
     }
+
+	void *GCHeap::LargeAlloc(size_t size, size_t alignment)
+	{
+		size_t sizeInBytes = size * kBlockSize;
+
+		if(!EnsureFreeRegion(true))
+			return NULL;
+
+		char* addr = (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes);
+
+		if(!addr)
+			return NULL;
+		
+		if(alignmentSlop(addr, alignment) != 0) {
+			VMPI_releaseMemoryRegion(addr, sizeInBytes);
+			addr = (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes + alignment * kBlockSize);
+			if(!addr)
+				return NULL;
+		}
+
+		char *alignedAddr = addr + alignmentSlop(addr, alignment);
+		if(!VMPI_commitMemory(alignedAddr, sizeInBytes)) {
+			VMPI_releaseMemoryRegion(addr, sizeInBytes);
+			return NULL;
+		}
+
+		NewRegion(addr, addr+sizeInBytes, addr+sizeInBytes, kLargeItemBlockId);
+		largeAllocs += size;
+		CheckForNewMaxTotalHeapSize();
+
+		return alignedAddr;
+	}
+   
+	void GCHeap::LargeFree(const void *item)
+	{
+		size_t size = LargeAllocSize(item);
+		largeAllocs -= size;
+		Region *r = AddrToRegion(item);
+		RemoveRegion(r, false);
+		// Must use r->baseAddr which may be less than item due to alignment,
+		// and we must calculate full size
+		GCAssert((size_t)(r->commitTop - r->baseAddr) >= size);
+		VMPI_releaseMemoryRegion(r->baseAddr, r->commitTop - r->baseAddr);
+	}
 
 	GCHeap::HeapBlock* GCHeap::AllocBlock(size_t size, bool& zero, size_t alignment)
 	{
@@ -1452,14 +1526,6 @@ namespace MMgc
 	{
 		GCAssert(block->inUse());
 	
-		// big block's that map to a region are free'd right away
-		Region *r = AddrToRegion(block->baseAddr);
-		if(block->baseAddr == r->baseAddr && block->endAddr() == r->reserveTop)
-		{
-			RemoveBlock(block);
-			return;
-		}
-		
 #ifdef _DEBUG
 		// trash it. fb == free block
 		VMPI_memset(block->baseAddr, 0xfb, block->size * kBlockSize);
@@ -1468,16 +1534,8 @@ namespace MMgc
 		AddToFreeList(block, true);
 	}
 
-	bool GCHeap::ExpandHeap(size_t askSize)
+	void GCHeap::CheckForNewMaxTotalHeapSize()
 	{
-		//  Look ahead at memory limits to see if we should trigger a free memory signal
-		if ( (HardLimitExceeded(askSize) || SoftLimitExceeded(askSize)))
-		{
-			SendFreeMemorySignal(askSize);
-		}
-
-		bool bRetVal = ExpandHeapInternal(askSize);
-
 		// The guard on instance being non-NULL is a hack, to be fixed later (now=2009-07-20).
 		// Some VMPI layers (WinMo is at least one of them) try to grab the GCHeap instance to get
 		// at the map of private pages.  But the GCHeap instance is not available during the initial
@@ -1494,7 +1552,12 @@ namespace MMgc
 #endif
 			}
 		}
+	}
 
+	bool GCHeap::ExpandHeap( size_t askSize)
+	{
+		bool bRetVal = ExpandHeapInternal(askSize);
+		CheckForNewMaxTotalHeapSize();
 		return bRetVal;
 	} 
 
@@ -2626,7 +2689,8 @@ namespace MMgc
 
 	bool GCHeap::IsAddressInHeap(void *addr)
 	{
-		return AddrToBlock(addr) != NULL;
+		void *block = (void*)(uintptr_t(addr) & ~(uintptr_t(kBlockSize-1)));
+		return SafeSize(block) != (size_t)-1;
 	}
 
 	// Every new GC must register itself with the GCHeap.
@@ -2686,6 +2750,23 @@ namespace MMgc
 		m_notificationThread = VMPI_currentThread();	
 		callbacks.Remove(p); 
 		m_notificationThread = notificationThreadSave;		
+	}
+	
+	bool GCHeap::EnsureFreeRegion(bool allowExpansion)
+	{
+		if(!HaveFreeRegion()) {
+			bool zero = false;
+			HeapBlock *block = AllocBlock(1, zero, 1);
+			if(block) {
+				nextRegion = (Region*)(void *)block->baseAddr;	
+			} else if(allowExpansion) {
+				ExpandHeap(1);
+				// We must have hit the hard limit or OS limit
+				if(nextRegion == NULL)
+					return false;
+			}
+		}		
+		return true;
 	}
 
 	GCHeap::Region *GCHeap::NewRegion(char *baseAddr, char *rTop, char *cTop, size_t blockId)

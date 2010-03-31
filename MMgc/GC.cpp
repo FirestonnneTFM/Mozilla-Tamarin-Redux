@@ -3774,11 +3774,12 @@ namespace MMgc
 	GCAutoEnter::GCAutoEnter(GC *gc, EnterType type) : m_gc(NULL), m_prevgc(NULL)
 	{ 
 		if(gc) {
-			if(gc->heap->GetEnterFrame()->GetActiveGC() != gc) {
+			GC *prevGC = gc->heap->GetEnterFrame()->GetActiveGC();
+			if(prevGC != gc) {
 				// must enter first as it acquires the gc lock
 				if(gc->ThreadEnter(this, /*doCollectionWork=*/true, type == kTryEnter)) {
 					m_gc = gc;
-					m_prevgc = gc->heap->SetActiveGC(gc);
+					m_prevgc = prevGC;
 				}
 			}
 		}
@@ -3800,12 +3801,7 @@ namespace MMgc
 	void GCAutoEnter::Destroy(bool doCollectionWork)
 	{ 
 		if(m_gc) {
-#ifdef DEBUG
-			GC* curgc = 
-#endif
-				m_gc->heap->SetActiveGC(m_prevgc);
-			GCAssert(curgc == m_gc);
-			m_gc->ThreadLeave(doCollectionWork);
+			m_gc->ThreadLeave(doCollectionWork, m_prevgc);
 			m_gc = m_prevgc = NULL;
 		}
 	}
@@ -3813,7 +3809,7 @@ namespace MMgc
 	GCAutoEnterPause::GCAutoEnterPause(GC *gc) : gc(gc), enterSave(gc->GetAutoEnter())
 	{ 
 		GCAssertMsg(gc->GetStackEnter() != 0, "Invalid MMGC_GC_ROOT_THREAD usage, GC not already entered, random crashes will ensue");
-		gc->ThreadLeave(/*doCollectionWork=*/false);
+		gc->ThreadLeave(/*doCollectionWork=*/false, gc);
 	}
 	
 	GCAutoEnterPause::~GCAutoEnterPause() 
@@ -3831,6 +3827,8 @@ namespace MMgc
 				VMPI_lockAcquire(&m_gcLock);
 		}
 
+		heap->SetActiveGC(this);
+
 		if(enterCount++ == 0) {
 			stackEnter = enter;
 			m_gcThread = VMPI_currentThread();
@@ -3841,13 +3839,23 @@ namespace MMgc
 		return true;
 	}
 
-	void GC::ThreadLeave( bool doCollectionWork) 
+	void GC::ThreadLeave( bool doCollectionWork, GC *prevGC) 
 	{
+
 		if(--enterCount == 0) {
 			if(doCollectionWork) {
 				ThreadEdgeWork();
 			}
-			
+		}
+
+		// We always pop the active GC but have to do so before releasing the lock
+#ifdef DEBUG
+		GC* curgc = 
+#endif
+			heap->SetActiveGC(prevGC);
+		GCAssert(curgc == this);
+		
+		if(enterCount == 0) {
  			stackEnter = NULL;
 			// cleared so we remain thread ambivalent
 			rememberedStackTop = NULL; 					

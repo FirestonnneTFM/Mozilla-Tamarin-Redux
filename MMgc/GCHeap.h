@@ -227,6 +227,11 @@ namespace MMgc
 		 */
 		const static uint32_t kHugeThreshold = 128;
 
+		/**
+		 * Allocations greater than this are passed on to the OS
+		 */
+		const static uint32_t kOSAllocThreshold = 256;
+
 		/** In between sizes map this many distinct sizes to a single bin. */
 		const static uint32_t kFreeListCompression = 8;
 
@@ -237,7 +242,7 @@ namespace MMgc
 		const static uint32_t kMinHeapIncrement = 32;
 
 		/** if this much of the heap is free decommit some memory */
-		const static uint32_t kDecommitThresholdPercentage = 25;
+		const static uint32_t kDecommitThresholdPercentage = 1;
 		/** if this much of the heap is free un-reserve it */
 		const static uint32_t kReleaseThresholdPercentage = 50;
 
@@ -487,7 +492,7 @@ namespace MMgc
 		 * free space.
 		 * @return the total heap size in pages (kBlockSize bytes apiece)
 		 */
-		size_t GetTotalHeapSize() const { return blocksLen - numDecommitted; }
+		size_t GetTotalHeapSize() const { return blocksLen - numDecommitted + largeAllocs; }
 		
 		/**
 		 * gives memory back to the OS when there hasn't been any memory activity in a while
@@ -799,6 +804,7 @@ namespace MMgc
 		// Add a block to the free list, prior to pointToInsert.
 		void AddToFreeList(HeapBlock *block, HeapBlock* pointToInsert);
 
+		void *AllocHelper(size_t size, bool expand, bool& zero, size_t alignment);
 		HeapBlock *AllocBlock(size_t size, bool& zero, size_t alignment);
         HeapBlock* AllocCommittedBlock(HeapBlock* block, size_t size, bool& zero, size_t alignment);
         HeapBlock* CreateCommittedBlock(HeapBlock* block, size_t size, size_t alignment);
@@ -812,7 +818,12 @@ namespace MMgc
 
 		// abandon a block of memory that may maps completely to the committed portion of region
 		void RemoveBlock(HeapBlock *block, bool release=true);
-		
+
+		// Large* handle allocations larger than kOSAllocThreshold.
+		void *LargeAlloc(size_t size, size_t alignment);
+		void LargeFree(const void *item);
+		size_t LargeAllocSize(const void *item);
+
 #ifdef MMGC_MAC
 		// Abandon a block of memory that may be in the middle of a
 		// region.  On mac decommit is a two step process, release and
@@ -902,6 +913,8 @@ namespace MMgc
  			return bytes / kBlockSize;
  		}
 
+		void CheckForNewMaxTotalHeapSize();
+
 		/**
 		 * Regions are allocated from the blocks GCHeap manages
 		 * similar to the HeapBlocks.  Regions can come and go so we
@@ -910,6 +923,10 @@ namespace MMgc
 		 */
 		Region *NewRegion(char *baseAddr, char *rTop, char *cTop, size_t blockId);
 		void FreeRegion(Region *r);
+
+		// Used to allocate a Region outside ExpandHeap.
+		bool EnsureFreeRegion(bool allowExpansion);
+		bool HaveFreeRegion() const;
 
 		// data section
 		static GCHeap *instance;
@@ -954,6 +971,8 @@ namespace MMgc
 #ifdef MMGC_POLICY_PROFILING
 		size_t maxPrivateMemory;	// in bytes
 #endif
+		// number of blocks in LargeAlloc allocations
+		size_t largeAllocs;
 
 #ifdef MMGC_HOOKS
 		bool hooksEnabled;
@@ -965,17 +984,32 @@ namespace MMgc
 	
 	// Move the following to GCHeap-inlines.h when we have it.
 
+	REALLY_INLINE size_t GCHeap::LargeAllocSize(const void *item)
+	{
+		Region *r = AddrToRegion(item);
+		return (r->reserveTop - r->baseAddr) / kBlockSize;
+	}
+
 	REALLY_INLINE size_t GCHeap::Size(const void *item)
 	{
 		MMGC_LOCK_ALLOW_RECURSION(m_spinlock, m_notificationThread);
+		GCAssert((uintptr_t(item) & (kBlockSize-1)) == 0);
 		HeapBlock *block = AddrToBlock(item);
-	
-		return block ? block->size : 0;
+		if(block)
+			return block->size;
+		else if(AddrToRegion(item))
+			return LargeAllocSize((void*)item);
+		return 0;
 	}
 
 	REALLY_INLINE bool GCHeap::statusNotificationBeingSent()
 	{
 		return m_notificationThread != NULL;
+	}
+
+	REALLY_INLINE bool GCHeap::HaveFreeRegion() const
+	{
+		return nextRegion != NULL || freeRegion != NULL;
 	}
 }
 
