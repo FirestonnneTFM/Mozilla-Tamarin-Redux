@@ -184,7 +184,7 @@ ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA , arm-.*(?<!-deep)$ , skip , 
 ecma3/Unicode/uAC00_HangulSyllables , arm-.*(?<!-deep)$ , skip , test runs too slowly
 ecma3/Unicode/uA000_YiSyllables, arm-.*(?<!-deep)$ , skip, tests run too slowly on winmo
 mops/mops , arm-.*(?<!-deep)$ , skip , test runs too slowly
-regress/bug_515935 , arm-lnx-tvm-debug.* , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=552927
+regress/bug_515935 , arm-lnx.* , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=547282
 
 
 
@@ -396,7 +396,7 @@ spidermonkey/js1_5/Array/regress-157652, arm.*, skip, test runs out of memory on
 spidermonkey/js1_5/Function/regress-338121-.*, arm.*, skip, test runs out of memory on devices
 spidermonkey/js1_5/Function/regress-338001, arm.*, skip, test runs out of memory on devices
 
-spidermonkey/js1_5/Regress/regress-98901, .*, skip, Test fails to compile with Java 1.6 x64 - https://bugs.adobe.com/jira/browse/ASC-4041
+spidermonkey/js1_5/Regress/regress-98901, .*, skip, https://bugs.adobe.com/jira/browse/ASC-4041
 
 ### Spidermonkey JS1_6 ###
 spidermonkey/js1_6/Array/regress-290592:.*length, ^((?!diff).)*$, expectedfail, related to https://bugzilla.mozilla.org/show_bug.cgi?id=551032
