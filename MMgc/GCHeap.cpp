@@ -1033,6 +1033,9 @@ namespace MMgc
                 
 				if(config.useVirtualMemory && decommittedSuitableBlock == NULL && !block->committed)
                 {
+                    // Note, 'block' should be invariant throughout this scope, it's the block
+                    // whose successors and predecessors we're inspecting
+
                     GCAssert(!block->inUse());
 
                     size_t totalSize = block->size;
@@ -1051,7 +1054,7 @@ namespace MMgc
                     }
                     
                     // Coalesce with successors
-                    HeapBlock *nextBlock = firstFree + firstFree->size;
+                    HeapBlock *nextBlock = block + block->size;
                     while (totalSize < size + firstSlop && !(nextBlock->inUse() || nextBlock->size == 0)) {
                         totalSize += nextBlock->size;
                         nextBlock = nextBlock + nextBlock->size;
