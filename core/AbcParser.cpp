@@ -523,7 +523,9 @@ namespace avmplus
                     if (class_index >= classCount)
                         toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_index), core->toErrorString(classCount));
 
-                    Traits* ctraits = pool->getClassTraits(class_index);
+                    // class_index could be legal (<classCount) but pointing to
+                    // to a class not yet parsed (>= pool->classCount()), so handle that case.
+                    Traits* ctraits = class_index < pool->classCount() ? pool->getClassTraits(class_index) : NULL;
                     if (!ctraits)
                         toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_index));
 
