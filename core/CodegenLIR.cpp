@@ -5674,6 +5674,18 @@ namespace avmplus
         }
     }
 
+    // Treat addp(vars, const) as a load from vars[const]
+    // for the sake of dead store analysis.
+    void analyze_addp(LIns* ins, LIns* vars, nanojit::BitSet& varlivein)
+    {
+        AvmAssert(ins->isop(LIR_piadd));
+        if (ins->oprnd1() == vars && ins->oprnd2()->isconstp()) {
+            AvmAssert(IS_ALIGNED(ins->oprnd2()->constvalp(), 8));
+            int d = int(uintptr_t(ins->oprnd2()->constvalp()) >> 3);
+            varlivein.set(d);
+        }
+    }
+
     void CodegenLIR::deadvars_analyze(Allocator& alloc,
             nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
             nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
@@ -5710,10 +5722,8 @@ namespace avmplus
                     }
                     break;
                 case LIR_piadd:
-                    if (i->oprnd1() == vars && i->oprnd2()->isconstp()) {
-                        int d = int(uintptr_t(i->oprnd2()->constvalp()) >> 3);
-                        varlivein.set(d);
-                    }
+                    // treat pointer calculations into vars as a read from vars
+                    analyze_addp(i, vars, varlivein);
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ld:
@@ -5795,6 +5805,14 @@ namespace avmplus
                         nanojit::BitSet *taglset = taglabels.get(catcher);
                         if (taglset)
                             taglivein.setFrom(*taglset);
+                    }
+                    else if (i->callInfo() == FUNCTIONID(makeatom)) {
+                        // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
+                        LIns* varPtrArg = i->arg(1);  // varPtrArg == vars, OR addp(vars, index)
+                        if (varPtrArg == vars)
+                            varlivein.set(0);
+                        else if (varPtrArg->isop(LIR_piadd))
+                            analyze_addp(varPtrArg, vars, varlivein);
                     }
                     break;
                 }
@@ -5892,10 +5910,8 @@ namespace avmplus
                     }
                     break;
                 case LIR_piadd:
-                    if (i->oprnd1() == vars && i->oprnd2()->isconstp()) {
-                        int d = int(uintptr_t(i->oprnd2()->constvalp()) >> 3);
-                        varlivein.set(d);
-                    }
+                    // treat pointer calculations into vars as a read from vars
+                    analyze_addp(i, vars, varlivein);
                     break;
                 CASE64(LIR_ldq:)
                 case LIR_ld:
@@ -5961,6 +5977,14 @@ namespace avmplus
                         // the target LiveIn set (lset) is non-empty,
                         // union it with fall-through set (live).
                         taglivein.setFrom(*tag_lset);
+                    }
+                    else if (i->callInfo() == FUNCTIONID(makeatom)) {
+                        // makeatom(core, vars+offset, tag) => treat as load from vars+offset
+                        LIns* varPtrArg = i->arg(1);
+                        if (varPtrArg == vars)
+                            varlivein.set(0);
+                        else if (varPtrArg->isop(LIR_piadd))
+                            analyze_addp(varPtrArg, vars, varlivein);
                     }
                     break;
             }
