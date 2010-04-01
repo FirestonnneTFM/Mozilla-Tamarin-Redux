@@ -118,7 +118,7 @@ namespace MMgc
 
 	REALLY_INLINE FixedAllocSafe* FixedMalloc::FindSizeClass(size_t size)
 	{
-		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
+		GCAssertMsg(size > 0, "cannot allocate a 0 sized block");
 
 #ifdef _DEBUG
 		uint32_t const size8 = (uint32_t)((size+7)&~7); // round up to multiple of 8
