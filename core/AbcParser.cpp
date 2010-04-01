@@ -418,6 +418,9 @@ namespace avmplus
         // Very generous check for nameCount being way too large.
         if (nameCount > (uint32_t)(abcEnd - pos))
             toplevel->throwVerifyError(kCorruptABCError);
+        // Interfaces cant't have base traits
+        if (posType == TRAITSTYPE_INTERFACE && base != NULL)
+            toplevel->throwVerifyError(kCannotExtendError);
 
         #ifdef AVMPLUS_VERBOSE
         if (pool->isVerbose(VB_parse))
