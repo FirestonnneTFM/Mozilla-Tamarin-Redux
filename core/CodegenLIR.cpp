@@ -1012,7 +1012,7 @@ namespace avmplus
                 int stackTop = stackBase + state->stackDepth;
                 // make sure our notnull bits at the target of the backedge were safe.
                 for (int i=0, n=nvar; i < n; i++) {
-                    if (i >= scopeTop && i < stackBase || i >= stackTop)
+                    if ((i >= scopeTop && i < stackBase) || i >= stackTop)
                         continue; // skip empty locations
                     if (!isNullable(state->value(i).traits))
                         continue; // skip non-nullable types in current state
