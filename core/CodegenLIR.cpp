@@ -1002,13 +1002,20 @@ namespace avmplus
 #endif
 
 #ifdef DEBUG
-        void checkBackEdge(CodegenLabel& target) {
+        void checkBackEdge(CodegenLabel& target, const FrameState* state) {
             AvmAssert(target.labelIns != NULL);
             if (target.notnull) {
                 printNotNull(notnull, "current");
                 printNotNull(target.notnull, "target");
+                int scopeTop = state->verifier->scopeBase + state->scopeDepth;
+                int stackBase = state->verifier->stackBase;
+                int stackTop = stackBase + state->stackDepth;
                 // make sure our notnull bits at the target of the backedge were safe.
                 for (int i=0, n=nvar; i < n; i++) {
+                    if (i >= scopeTop && i < stackBase || i >= stackTop)
+                        continue; // skip empty locations
+                    if (!isNullable(state->value(i).traits))
+                        continue; // skip non-nullable types in current state
                     //  current   target    assert(!target || current)
                     //  -------   ------    ------
                     //  false     false     true
@@ -1021,7 +1028,7 @@ namespace avmplus
             }
         }
 #else
-        void checkBackEdge(CodegenLabel&)
+        void checkBackEdge(CodegenLabel&, const FrameState*)
         {}
 #endif
 
@@ -5534,7 +5541,7 @@ namespace avmplus
         LIns* br = lirout->insBranch(op, cond, labelIns);
         if (br != NULL) {
             if (labelIns != NULL) {
-                varTracker->checkBackEdge(label);
+                varTracker->checkBackEdge(label, state);
             } else {
                 label.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), label.unpatchedEdges);
                 varTracker->trackForwardEdge(label);
@@ -5594,7 +5601,7 @@ namespace avmplus
         CodegenLabel& target = getCodegenLabel(pc_off);
         if (target.labelIns != 0) {
             jtbl->setTarget(index, target.labelIns);           // backward edge
-            varTracker->checkBackEdge(target);
+            varTracker->checkBackEdge(target, state);
         } else {
             target.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(jtbl, index), target.unpatchedEdges);
             varTracker->trackForwardEdge(target);
@@ -5605,7 +5612,7 @@ namespace avmplus
         if (!br) return; // occurs if branch was unconditional and thus never emitted.
         if (target.labelIns != 0) {
             br->setTarget(target.labelIns); // backwards edge
-            varTracker->checkBackEdge(target);
+            varTracker->checkBackEdge(target, state);
         } else {
             target.unpatchedEdges = new (*alloc1) Seq<InEdge>(InEdge(br), target.unpatchedEdges);
             varTracker->trackForwardEdge(target);
