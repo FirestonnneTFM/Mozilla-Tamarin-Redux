@@ -262,7 +262,8 @@ namespace avmplus
 		PREVENT_SIGNED_CHAR_PTR(STR)
 		PREVENT_SIGNED_CHAR_PTR(PATTERN)
         AvmAssert(patlen > 0);
-        AvmAssert(start >= 0);
+		// NB: start may be negative, the following loop will exit immediately,
+		// see comment #2 in https://bugzilla.mozilla.org/show_bug.cgi?id=551825
 
 		// even with REALLY_INLINE, some compilers will be reluctant to inline equalsImpl here,
 		// so we explicitly repeat the code here.

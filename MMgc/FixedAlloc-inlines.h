@@ -221,7 +221,8 @@ namespace MMgc
 	REALLY_INLINE void FixedAlloc::InlineFreeSansHook(void *item MMGC_MEMORY_PROFILER_ARG(size_t askSize))
 	{
 		FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-		GCAssertMsg(b->alloc->m_heap->IsAddressInHeap(item), "Bogus pointer passed to free");
+        // FIXME: IsAddressInHeap acquires the heap lock which we can't do safely here
+        //		GCAssertMsg(b->alloc->m_heap->IsAddressInHeap(item), "Bogus pointer passed to free");
 
 #ifdef MMGC_MEMORY_PROFILER
 		GCHeap *heap = b->alloc->m_heap;
