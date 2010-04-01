@@ -420,7 +420,7 @@ namespace avmplus
             toplevel->throwVerifyError(kCorruptABCError);
         // Interfaces cant't have base traits
         if (posType == TRAITSTYPE_INTERFACE && base != NULL)
-            toplevel->throwVerifyError(kCannotExtendError);
+            toplevel->throwVerifyError(kCannotExtendError, name,  core->toErrorString(base));
 
         #ifdef AVMPLUS_VERBOSE
         if (pool->isVerbose(VB_parse))
