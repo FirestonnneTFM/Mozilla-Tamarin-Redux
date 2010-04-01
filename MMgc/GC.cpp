@@ -3794,7 +3794,11 @@ namespace MMgc
 	void GCAutoEnter::Unwind()
 	{
 		if(m_gc) {
-			m_gc->SignalImminentAbort();
+			GC *gc = m_gc;
+			gc->SignalImminentAbort();
+			// If enterCount == 0 ThreadLeave will do this.
+			if(gc->enterCount != 0)
+				gc->heap->GetEnterFrame()->RemoveAbortUnwindObject(this);
 		}
 	}
 
@@ -3830,6 +3834,7 @@ namespace MMgc
 		heap->SetActiveGC(this);
 
 		if(enterCount++ == 0) {
+			heap->GetEnterFrame()->AddAbortUnwindObject(enter);
 			stackEnter = enter;
 			m_gcThread = VMPI_currentThread();
 			if(doCollectionWork) {
@@ -3846,6 +3851,7 @@ namespace MMgc
 			if(doCollectionWork) {
 				ThreadEdgeWork();
 			}
+			heap->GetEnterFrame()->RemoveAbortUnwindObject(stackEnter);
 		}
 
 		// We always pop the active GC but have to do so before releasing the lock
