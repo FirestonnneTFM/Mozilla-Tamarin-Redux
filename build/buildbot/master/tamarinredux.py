@@ -135,14 +135,16 @@ class tamarinredux:
                                    "mac-performance", "mac64-performance",
                                    "mac-ppc-performance",
                                    "linux-performance",
-                                   "winmobile-performance"],
+                                   "winmobile-performance",
+                                   "android-performance"],
                     builderDependencies=[
                                   ["windows-performance", "windows-test"], 
                                   ["mac-performance", "mac-intel-10.5-test"],
                                   ["mac64-performance", "mac64-intel-test"],
                                   ["mac-ppc-performance", "mac-ppc-10.5a-test"],
                                   ["linux-performance", "linux-test"],
-                                  ["winmobile-performance", "winmobile-emulator-test"]
+                                  ["winmobile-performance", "winmobile-emulator-test"],
+                                  ["android-performance","android-test"],
                                  ])
 
     deep = PhaseTwoScheduler(name="deep", branch="%s-deep" % BRANCH, treeStableTimer=30, properties={'silent':'false'},
@@ -1485,6 +1487,50 @@ class tamarinredux:
 
 
     ###########################################
+    #### builder for android-performance ######
+    ###########################################
+    android_performance_factory = factory.BuildFactory()
+    android_performance_factory.addStep(sync_clean)
+    android_performance_factory.addStep(sync_clone(url=HG_URL))
+    android_performance_factory.addStep(sync_update)
+    android_performance_factory.addStep(bb_slaveupdate(slave="android-performance"))
+    android_performance_factory.addStep(perf_prepare)
+    android_performance_factory.addStep(BuildShellCommand(
+                command=['./run-performance-release-android.sh',WithProperties('%s','revision')],
+                env={'branch':WithProperties('%s','branch')},
+                description='running android performance...',
+                descriptionDone='finished running android performance.',
+                name="Release",
+                workdir="../scripts",
+                timeout=3600)
+    )
+    android_performance_factory.addStep(BuildShellCommand(
+                command=['./run-performance-release-android-interp.sh',WithProperties('%s','revision')],
+                env={'branch':WithProperties('%s','branch')},
+                description='running android interp performance...',
+                descriptionDone='finished running android interp performance.',
+                name="ReleaseInterp",
+                workdir="../scripts",
+                timeout=3600)
+    )
+    android_performance_factory.addStep(BuildShellCommand(
+                command=['./run-performance-release-android-jit.sh',WithProperties('%s','revision')],
+                env={'branch':WithProperties('%s','branch')},
+                description='running android jit performance...',
+                descriptionDone='finished running android jit performance.',
+                name="ReleaseJIT",
+                workdir="../scripts",
+                timeout=3600)
+    )
+
+    android_performance_builder = {
+                'name': "android-performance",
+                'slavename': "asteammac1-android",
+                'factory': android_performance_factory,
+                'builddir': './android-performance',
+    }
+
+    ###########################################
     #### builder for winmobile-performance ####
     ###########################################
     winmobile_performance_factory = factory.BuildFactory()
@@ -1827,6 +1873,7 @@ class tamarinredux:
                 mac_ppc_performance_builder,
                 linux_performance_builder,
                 winmobile_performance_builder,
+                android_performance_builder,
 
                 windows_deep_builder,
                 windows_p3_deep_builder,
