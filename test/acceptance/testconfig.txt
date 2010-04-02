@@ -322,7 +322,6 @@ spidermonkey/js1_5/Array/regress-364104:\[2\]\.lastIndexOf\(2. -2\).*, ^((?!diff
 spidermonkey/js1_5/Array/regress-364104:\[2. 3\]\.lastIndexOf\(2. -3\).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=364104
 
 spidermonkey/js1_5/Exceptions/regress-123002:(^Class|^Section), .*, expectedfail, Class.constructor.length should list number of params in constructor function?
-spidermonkey/js1_5/Exceptions/regress-333728, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=550328
 
 
 spidermonkey/js1_5/Function/regress-364023.as, .*, skip, uses eval
