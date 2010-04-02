@@ -3796,9 +3796,6 @@ namespace MMgc
 		if(m_gc) {
 			GC *gc = m_gc;
 			gc->SignalImminentAbort();
-			// If enterCount == 0 ThreadLeave will do this.
-			if(gc->enterCount != 0)
-				gc->heap->GetEnterFrame()->RemoveAbortUnwindObject(this);
 		}
 	}
 
