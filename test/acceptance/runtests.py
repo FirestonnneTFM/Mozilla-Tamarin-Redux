@@ -60,6 +60,7 @@ except ImportError:
     print "   (directory has been moved to test/util)."
 
 class AcceptanceRuntest(RuntestBase):
+    abcOnlyExt = '.abc_'  # only run, don't compile these abc files - underscore is used so that tests are not deleted when removing old abc files
     runESC = False
     escbin = '../../esc/bin/'
     
@@ -143,6 +144,9 @@ class AcceptanceRuntest(RuntestBase):
             self.setupCEEmulators()
         if self.htmlOutput and not self.rebuildtests:
             self.createOutputFile()
+        # extension lists must be tuples
+        self.otherTestExtensions = (self.abcasmExt,)
+        self.executableExtensions = (self.abcOnlyExt,)
         self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
@@ -187,7 +191,7 @@ class AcceptanceRuntest(RuntestBase):
         
         dir = os.path.split(ast)[0]
         root,ext = splitext(ast)
-        if self.runSource or self.eval:
+        if self.runSource or self.eval or ext in self.executableExtensions:
             testName = ast
         else:
             testName = root + '.abc'
@@ -222,7 +226,7 @@ class AcceptanceRuntest(RuntestBase):
             return outputCalls
         
         # delete abc if forcerebuild
-        if self.forcerebuild and isfile(testName):
+        if self.forcerebuild and isfile(testName) and ext not in self.executableExtensions:
             os.unlink(testName)
         if isfile(testName) and getmtime(ast)>getmtime(testName) and self.timestampcheck:
             self.verbose_print("%s has been modified, recompiling" % ast)
