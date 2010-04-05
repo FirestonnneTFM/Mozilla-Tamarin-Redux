@@ -128,6 +128,8 @@ class RuntestBase:
         ]
     currentPids = []
     exclude = []
+    executableExtensions = ()    # file extentions for tests that do not get compiled
+    otherTestExtensions = ()     # other file extensions that are valid tests
     longOptions = []
     tests = []
     winceProcesses = []
@@ -554,6 +556,7 @@ class RuntestBase:
         self.js_output_f = open(self.js_output, 'w')
         
     def getTestsList(self, startDir):
+        fileExtentions = (self.sourceExt,) + self.executableExtensions + self.otherTestExtensions
         if self.altsearchpath!=None:
             newstartDir=[]
             for a in startDir:
@@ -562,12 +565,12 @@ class RuntestBase:
         for i in range(len(startDir)):
             if startDir[i][-1] == '/':
                 startDir[i] = startDir[i][:-1]
-        tests = [a for a in startDir if isfile(a) and self.istest(a)]
+        tests = [a for a in startDir if isfile(a) and self.istest(a, fileExtentions)]
         for a in [d for d in startDir if isdir(d) and not (basename(d) in self.exclude)]:
             for d, dirs, files in walk(a, followlinks=True):
                 if d.startswith('./'):
                     d=d[2:]
-                tests += [(d+'/'+f) for f in files if self.istest(f)]
+                tests += [(d+'/'+f) for f in files if self.istest(f, fileExtentions)]
                 utils = [d for d in dirs if d+self.sourceExt in files]
                 for x in [x for x in self.exclude+utils if x in dirs]:
                     dirs.remove(x)
@@ -601,8 +604,8 @@ class RuntestBase:
                 settings.update(localSettings[root])
         return settings
     
-    def istest(self,f):
-        return f.endswith((self.sourceExt,self.abcasmExt)) and basename(f) != ('shell'+self.sourceExt) \
+    def istest(self,f, fileExtentions):
+        return f.endswith(fileExtentions) and basename(f) != ('shell'+self.sourceExt) \
                and not f.endswith('Util'+self.sourceExt)
         
     def parents(self, d):
@@ -774,7 +777,7 @@ class RuntestBase:
             exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
            
         (dir, file) = split(as_file)
-        self.verbose_print('   compiling %s' % file)
+        
         
         if self.genAtsSwfs:
             # get settings as ats excluded files are defined there
@@ -837,7 +840,12 @@ class RuntestBase:
         elif as_file.endswith(self.abcasmExt):
             cmd = '%s -j "%s" ' % (self.abcasmRunner,self.java)
             
+        elif as_file.endswith(self.executableExtensions):
+            # directly executable file doesn't need to be compiled
+            return
+        
         try:
+            self.verbose_print('   compiling %s' % file)
             self.verbose_print('%s %s' % (cmd,as_file))
             (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file))
             for line in f:
@@ -861,10 +869,13 @@ class RuntestBase:
                 print 'The pexpect module must be installed to generate ats swfs.'
                 exit(1)
             for test in tests:
+                if test.endswith(self.executableExtensions):
+                    total -= 1
+                    continue
                 self.js_print('%d\tcompiling %s' % (total,test))
                 self.compile_test(test)
                 (testdir, ext) = splitext(test)
-                if exists(testdir+".abc")==False:
+                if not exists(testdir+".abc"):
                     print("ERROR abc files %s.abc not created" % (testdir))
                     self.ashErrors.append("abc files %s.abc not created" % (testdir))
                 else:
@@ -890,6 +901,9 @@ class RuntestBase:
             for test in tests:
                 if test.endswith(self.abcasmExt):
                     self.compile_test(test)
+                elif test.endswith(self.executableExtensions):
+                    total -= 1
+                    continue
                 else:
                     arglist = parseArgStringToList(self.ascargs)
                 
@@ -946,7 +960,7 @@ class RuntestBase:
                     if not exists(testdir+".abc"):
                         print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
                         self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
-                    total -= 1;
+                    total -= 1
                     
                     if self.genAtsSwfs:
                         moveAtsSwf(dir,file, self.atsDir)
@@ -1118,8 +1132,7 @@ class RuntestBase:
         if self.ascversion:
             self.js_print('asc version: %s' % self.ascversion)
 
-        self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
-
+        self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True)
 
     def runTests(self, testList):
         testnum = len(testList)

@@ -73,7 +73,7 @@ verifyPass(true, "true", __FILE__, __LINE__);
 }
 void ST_mmgc_gcheap::test1() {
        GCHeap *heap = GCHeap::GetGCHeap();
-       for(int i=1;i<10;i++) {
+       for(int i=1;i<4;i++) {
        	  void *item = heap->Alloc(GCHeap::kOSAllocThreshold*i, GCHeap::flags_Alloc, 1<<i);
 verifyPass(uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0, "uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0", __FILE__, __LINE__);
 	  heap->Free(item);
