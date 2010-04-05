@@ -53,7 +53,7 @@ using namespace MMgc;
 
 %%test largeAllocAlignment
        GCHeap *heap = GCHeap::GetGCHeap();
-       for(int i=1;i<10;i++) {
+       for(int i=1;i<4;i++) {
        	  void *item = heap->Alloc(GCHeap::kOSAllocThreshold*i, GCHeap::flags_Alloc, 1<<i);
 	  %%verify uintptr_t(((GCHeap::kBlockSize<<(i-1))-1) & uintptr_t(item)) == 0
 	  heap->Free(item);
