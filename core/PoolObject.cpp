@@ -629,6 +629,7 @@ range_error:
         Traits* t = getTraits(m, toplevel);
         if(m.isParameterizedType())
         {
+            core->stackCheck(const_cast<Toplevel*>(toplevel));
             Traits* param_traits = resolveTypeName(m.getTypeParameter(), toplevel);
             t = resolveParameterizedType(toplevel, t, param_traits);
         }
