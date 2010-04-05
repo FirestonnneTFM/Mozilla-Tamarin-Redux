@@ -52,6 +52,8 @@
 		072EA1010F4C1CE9009F11E6 /* eval-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E30F4C1CE9009F11E6 /* eval-parse.cpp */; };
 		072EA1020F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E50F4C1CE9009F11E6 /* eval-unicode.cpp */; };
 		072EA1030F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
+		073AC651116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
+		073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
 		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		07689AA1101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		078F536B0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
@@ -456,6 +458,8 @@
 		072EA1080F4C1D1B009F11E6 /* smoketest.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest.as; path = ../../../eval/smoketest.as; sourceTree = SOURCE_ROOT; };
 		072EA1090F4C1D1B009F11E6 /* smoketest2.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest2.as; path = ../../../eval/smoketest2.as; sourceTree = SOURCE_ROOT; };
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
+		073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_gcheap.cpp; path = ../../../extensions/ST_mmgc_gcheap.cpp; sourceTree = SOURCE_ROOT; };
+		073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_gcheap.st; path = ../../../extensions/ST_mmgc_gcheap.st; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
 		07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcEnv-inlines.h"; path = "../../../core/AbcEnv-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075BA6EE1157D806000BDF13 /* GCHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHashtable-inlines.h"; path = "../../../MMgc/GCHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -975,6 +979,7 @@
 				0772CCF30F3C3084008DDBB6 /* ST_avmplus_peephole.st */,
 				0772CCF40F3C3084008DDBB6 /* ST_mmgc_basics.st */,
 				07E2E7AD114EE67C00B3AFCD /* ST_mmgc_dependent.st */,
+				073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */,
 				D9FDA5DB1045C5F200C96421 /* ST_mmgc_threads.st */,
 				0721CA09111A1F1500E96DF8 /* ST_mmgc_543560.st */,
 			);
@@ -1360,6 +1365,7 @@
 				079DF9A20F3A8AAB0031D1B4 /* ST_avmplus_peephole.cpp */,
 				079DF9A30F3A8AAB0031D1B4 /* ST_mmgc_basics.cpp */,
 				07E2E7AC114EE67C00B3AFCD /* ST_mmgc_dependent.cpp */,
+				073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */,
 				D9FDA5B71045C32D00C96421 /* ST_mmgc_threads.cpp */,
 				0721CA0A111A1F2A00E96DF8 /* ST_mmgc_543560.cpp */,
 			);
@@ -1826,6 +1832,7 @@
 				0721CA0B111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
 				D92373DE11222458006D8AA3 /* njconfig.cpp in Sources */,
 				07E2E7AE114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
+				073AC651116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2009,6 +2016,7 @@
 				0721CA0C111A1F2A00E96DF8 /* ST_mmgc_543560.cpp in Sources */,
 				D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */,
 				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
+				073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
