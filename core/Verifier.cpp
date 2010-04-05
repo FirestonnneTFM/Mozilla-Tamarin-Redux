@@ -2475,6 +2475,7 @@ namespace avmplus
         else
             if( name.isParameterizedType() )
             {
+                core->stackCheck(toplevel);
                 Traits* param_traits = name.getTypeParameter() ? checkTypeName(name.getTypeParameter()) : NULL ;
                 t = pool->resolveParameterizedType(toplevel, t, param_traits);
             }
