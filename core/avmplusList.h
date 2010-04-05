@@ -53,7 +53,11 @@ namespace avmplus
 	 * Note that [] operators are provided and you can violate the
 	 * set properties using these operators, if you want a real
 	 * list dont use the [] operators, if you want a general purpose
-	 * array use the [] operators.  
+	 * array use the [] operators.
+     *
+     * Note that calls to arraycopy() may have to be prefixed
+     * by "this->" to pass muster with RVCT 3.1, see
+     * https://bugzilla.mozilla.org/show_bug.cgi?id=551826.
 	 */
 
 	enum ListElementType {
@@ -323,7 +327,7 @@ namespace avmplus
 			}
 
 			//move items up
-			arraycopy(data, index, data, index + 1, len - index);
+			this->arraycopy(data, index, data, index + 1, len - index);
 
 			// The item formerly at "index" is still in the array (at index+1),
 			//   but arraycopy didn't increment its refcount.
@@ -340,7 +344,7 @@ namespace avmplus
 			ensureCapacity(len+l.size());
 			// FIXME: make RCObject version
 			AvmAssert(kElementType != LIST_RCObjects);
-			arraycopy(l.getData(), 0, data, (uint32_t)len, (size_t) l.size());
+			this->arraycopy(l.getData(), 0, data, (uint32_t)len, (size_t) l.size());
 			len += l.size();
 		}
 
@@ -379,7 +383,7 @@ namespace avmplus
 			old = data[i];
 			if(kElementType == LIST_RCObjects)
 				set(i, NULL);
-			arraycopy(data, i+1, data, i, len-i-1);
+			this->arraycopy(data, i+1, data, i, len-i-1);
 			len--;
 			// clear copy at the end so it can be collected if removed
 			// and isn't decremented on next add
