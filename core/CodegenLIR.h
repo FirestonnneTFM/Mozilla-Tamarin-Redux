@@ -524,7 +524,7 @@ namespace avmplus
         void emitGetslot(int slot, int ptr_index, Traits *slotType);
         void emitSetslot(AbcOpcode opcode, int slot, int ptr_index);
         void emitSetslot(AbcOpcode opcode, int slot, int ptr_index, LIns* value);
-        void emitGetGlobalScope();
+        void emitGetGlobalScope(int dest);
         void emitCoerce(uint32_t index, Traits* type);
         void emitCheckNull(LIns* ptr, Traits* type);
         void localSet(int i, LIns* o, Traits* type);
