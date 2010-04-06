@@ -143,16 +143,6 @@ namespace avmplus
 	 *======================================================
 	 */
 
-	union double_overlay {
-		double value;
-		#if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
-			struct { uint32_t msw, lsw; } parts;
-		#else
-			struct { uint32_t lsw, msw; } parts;
-		#endif
-	};
-		
-
 	int32_t MathUtils::isInfinite(double x)
 	{
 		double_overlay u;
