@@ -1059,7 +1059,7 @@ namespace MMgc
 				return NULL;
 		}
 
-		char *alignedAddr = addr + alignmentSlop(addr, alignment);
+		char *alignedAddr = addr + alignmentSlop(addr, alignment) * kBlockSize;
 		if(!VMPI_commitMemory(alignedAddr, sizeInBytes)) {
 			VMPI_releaseMemoryRegion(addr, sizeInBytes);
 			return NULL;
