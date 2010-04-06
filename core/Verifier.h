@@ -143,7 +143,7 @@ namespace avmplus
         void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
         void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);
         void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc);
-        void checkGetGlobalScope();
+        Traits* checkGetGlobalScope();
         void emitNip();
 
         void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
