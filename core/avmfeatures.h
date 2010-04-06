@@ -115,6 +115,8 @@
 #undef VMCFG_CACHE_GQCN
 #undef VMCFG_TEST_API_VERSIONING
 
+#undef VMCFG_TWEAK_SIN_COS_NONFINITE
+
 
 
 /* AVMSYSTEM_32BIT
@@ -572,6 +574,20 @@
 #  error "AVMFEATURE_API_VERSIONING must be defined and 0 or 1 (only)."
 #endif
 
+
+
+/* AVMTWEAK_SIN_COS_NONFINITE
+ *
+ * Various iphone SDK versions - at least - botch sin() and cos() around NaN
+ * and infinity.  See https://bugzilla.mozilla.org/show_bug.cgi?id=556149.
+ */
+#if !defined AVMTWEAK_SIN_COS_NONFINITE
+#  define AVMTWEAK_SIN_COS_NONFINITE 0
+#endif
+#if AVMTWEAK_SIN_COS_NONFINITE != 0 && AVMTWEAK_SIN_COS_NONFINITE != 1
+#  error "AVMTWEAK_SIN_COS_NONFINITE must be defined and 0 or 1 (only)."
+#endif
+
 #if AVMSYSTEM_32BIT
 #  if AVMSYSTEM_64BIT
 #    error "AVMSYSTEM_64BIT is precluded for AVMSYSTEM_32BIT"
@@ -652,6 +668,8 @@
 #    error "AVMFEATURE_WORDCODE_INTERP is required for AVMFEATURE_THREADED_INTERP"
 #  endif
 #endif
+
+
 
 
 
@@ -898,6 +916,10 @@
 #endif
 #if AVMFEATURE_API_VERSIONING
 #  define VMCFG_TEST_API_VERSIONING
+#endif
+
+#if AVMTWEAK_SIN_COS_NONFINITE
+#  define VMCFG_TWEAK_SIN_COS_NONFINITE
 #endif
 
 #ifdef AVMSHELL_BUILD

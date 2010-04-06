@@ -81,6 +81,10 @@ namespace avmplus
 
 	double MathUtils::cos(double value)
 	{
+#if defined(VMCFG_TWEAK_SIN_COS_NONFINITE)
+		if (isNaN(value) || isInfinite(value))
+			return kNaN;
+#endif
 		return ::cos(value);
 	}
 	
@@ -121,6 +125,10 @@ namespace avmplus
 	
 	double MathUtils::sin(double value)
 	{
+#if defined(VMCFG_TWEAK_SIN_COS_NONFINITE)
+		if (isNaN(value) || isInfinite(value))
+			return kNaN;
+#endif
 		return ::sin(value);
 	}
 
