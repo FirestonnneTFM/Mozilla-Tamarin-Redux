@@ -940,6 +940,7 @@ class sandbox:
     ############################################
     sb_windows_64_test_factory = factory.BuildFactory()
     sb_windows_64_test_factory.addStep(test_commandline)
+    sb_windows_64_test_factory.addStep(test_selftest)
     sb_windows_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64", vmargs="", config="", scriptargs=""))
     sb_windows_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64", vmargs="-Dinterp", config="", scriptargs=""))
     sb_windows_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1010,6 +1011,7 @@ class sandbox:
     ##############################################
     sb_mac_intel_64_test_factory = factory.BuildFactory()
     sb_mac_intel_64_test_factory.addStep(test_commandline)
+    sb_mac_intel_64_test_factory.addStep(test_selftest)
     sb_mac_intel_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64", vmargs="", config="", scriptargs=""))
     sb_mac_intel_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64", vmargs="-Dinterp", config="", scriptargs=""))
     sb_mac_intel_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1105,6 +1107,7 @@ class sandbox:
     ############################################
     sb_mac_ppc_64_test_factory = factory.BuildFactory()
     sb_mac_ppc_64_test_factory.addStep(test_commandline)
+    sb_mac_ppc_64_test_factory.addStep(test_selftest)
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64_ppc", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1159,6 +1162,7 @@ class sandbox:
     ##########################################
     sb_linux_64_test_factory = factory.BuildFactory()
     sb_linux_64_test_factory.addStep(test_commandline)
+    sb_linux_64_test_factory.addStep(test_selftest)
     sb_linux_64_test_factory.addStep(test_generic(name="Release", shellname="avmshell_64", vmargs="", config="", scriptargs=""))
     sb_linux_64_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_64", vmargs="-Dinterp", config="", scriptargs=""))
     sb_linux_64_test_factory.addStep(test_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_64", vmargs="-Dinterp", config="", scriptargs=""))
@@ -1241,6 +1245,7 @@ class sandbox:
     #### builder for linux-arm-test       ####
     ##########################################
     sb_linux_arm_test_factory = factory.BuildFactory()
+    sb_linux_arm_test_factory.addStep(test_selftest)
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
