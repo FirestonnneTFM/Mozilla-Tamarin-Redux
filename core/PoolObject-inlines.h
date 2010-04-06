@@ -62,9 +62,9 @@ REALLY_INLINE Traits* PoolObject::resolveTypeName(const byte*& pc, const Topleve
     return resolveTypeName(AvmCore::readU32(pc), toplevel, allowVoid);
 }
 
-REALLY_INLINE void PoolObject::resolveQName(const byte* &p, Multiname &m, const Toplevel* toplevel) const
+REALLY_INLINE void PoolObject::resolveBindingNameNoCheck(const byte* &p, Multiname &m, const Toplevel* toplevel) const
 {
-    resolveQName(AvmCore::readU32(p), m, toplevel);
+    resolveBindingNameNoCheck(AvmCore::readU32(p), m, toplevel);
 }
 
 REALLY_INLINE void PoolObject::parseMultiname(Multiname& m, uint32_t index) const
