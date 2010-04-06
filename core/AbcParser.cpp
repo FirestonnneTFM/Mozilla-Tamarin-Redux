@@ -301,17 +301,20 @@ namespace avmplus
     }
     #endif
 
-    uint32_t AbcParser::resolveQName(const byte* &p, Multiname &m) const
+    uint32_t AbcParser::resolveBindingName(const byte* &p, Multiname &m) const
     {
         uint32 index = readU30(p);
         if (index == 0 || index >= pool->cpool_mn_offsets.size())
-            toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantCount));
+            toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), 
+                                       core->toErrorString(pool->cpool_mn_offsets.size()));
+        pool->resolveBindingNameNoCheck(index, m, toplevel);
 
-        pool->parseMultiname(m, index);
-
-        if (!pool->isBuiltin && !m.isQName())
+        // Only builtin traits names can have multiple namespaces, which are used as an implementation
+        // mechanism of the versioning API, and express multiple introducing versions.
+        if (m.isBinding() && (m.isQName() || pool->isBuiltin))
+            return index;
+        else
             toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
-        return index;
     }
 
     MethodInfo* AbcParser::resolveMethodInfo(uint32 index) const
@@ -434,7 +437,7 @@ namespace avmplus
         for (uint32_t i=0; i < nameCount; i++)
         {
             Multiname mn;
-            const uint32_t qn_index = resolveQName(pos, mn);
+            const uint32_t qn_index = resolveBindingName(pos, mn);
             Namespacep ns;
             const NamespaceSet* nss;
             if (mn.namespaceCount() > 1) {
@@ -445,9 +448,6 @@ namespace avmplus
                 ns = mn.getNamespace();
                 nss = NamespaceSet::create(core->GetGC(), ns);
             }
-            // TODO name can come out null and fire all kinds of asserts from a broken compiler
-            // and crash a release build, not sure if null is valid in any cases but there's definitely
-            // a missing verify error here somewhere
             Stringp name = mn.getName();
             CHECK_POS(pos);
             int tag = *pos++;
@@ -1735,7 +1735,7 @@ namespace avmplus
             // CONSTANT_QName name of this class
 
             Multiname mn;
-            resolveQName(pos, mn);
+            resolveBindingName(pos, mn);
             Namespacep ns;
             Stringp name;
             name = mn.getName();
