@@ -291,14 +291,13 @@ namespace avmplus
                             MultinameHashtable* bindings,
                             uint32_t& slotCount,
                             uint32_t& methodCount,
-                            SlotSizeInfo* sizeInfo,
+                            SlotSizeInfo* slotSizeInfo,
                             const Toplevel* toplevel) const;
         uint32_t finishSlotsAndMethods(TraitsBindingsp basetb,
                                     TraitsBindings* tb,
                                     const Toplevel* toplevel,
-                                    AbcGen* abcGen,
                                     const SlotSizeInfo& sizeInfo) const;
-        TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen);
+        TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, bool includeTypes);
 
         TraitsMetadata* _buildTraitsMetadata();
 
@@ -360,12 +359,14 @@ namespace avmplus
         bool FASTCALL secondary_subtypeof(Traitsp t);   // slow path called by subtypeof()
         bool isPrimary() const;
         uint32_t countNewInterfaces(List<Traitsp, LIST_GCObjects>& seen);
+
         void resolveSignaturesSelf(const Toplevel* toplevel);
 
     public:
         void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;
-        void genInitBody(const Toplevel* toplevel, AbcGen& gen);
+        void genInitBody(const Toplevel* toplevel, TraitsBindings* tb);
 
+        void verifyBindings(const Toplevel* toplevel);
         void resolveSignatures(const Toplevel* toplevel);
 
 #ifdef VMCFG_AOT
@@ -543,16 +544,19 @@ namespace avmplus
     private:    const uint8_t           m_posType;                  // TraitsPosType enumeration -- only need 3 bits but stored in byte for faster access
     private:    uint8_t                 m_bindingCapLog2;           // if nonzero, log2 of the cap needed for bindings
     private:    uint8_t                 m_supertype_offset;         // if this traits is primary, == offset in primary_supertypes array; otherwise == offset of supertype_cache
-    // 7 bits follow
+    // 7 bits follow (8 in debug)
     private:    uint32_t                m_needsHashtable:1;         // If true, the class needs a hash table. Typically true for dynamic classes, but will be false for XML
-    private:    uint32_t                m_resolved:1;               // set once signature types have been resolved */
-    public:     uint32_t                final:1;                    // set when the class cannot be extended */
-    public:     uint32_t                commonBase:1;               // used for Verify::findCommonBase */
+    private:    uint32_t                m_resolved:1;               // set once signature types have been resolved
+    public:     uint32_t                final:1;                    // set when the class cannot be extended
+    public:     uint32_t                commonBase:1;               // used for Verify::findCommonBase
     public:     uint32_t                isDictionary:1;             // how we implement dictionary or strict style lookups
                             // If hasCustomConstruct is false, the JIT will early bind to the AS defined constructor.
     public:     uint32_t                hasCustomConstruct:1;       // does this type use the default ClassClosure::construct method or not?
                             // If the traits are for a type that implements its own construct method, m_immplementsNewInterfaces must be set to true.
     private:    uint32_t                m_implementsNewInterfaces:1; // does this type implement interfaces not implemented by its base?
+#ifdef _DEBUG
+    private:    uint32_t                m_bindingsVerified:1;       // set once bindings have been verified
+#endif
     // ------------------------ DATA SECTION END
     };
 

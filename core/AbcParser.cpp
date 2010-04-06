@@ -314,7 +314,10 @@ namespace avmplus
         if (m.isBinding() && (m.isQName() || pool->isBuiltin))
             return index;
         else
+        {
             toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
+            return 0; // not reached
+        }
     }
 
     MethodInfo* AbcParser::resolveMethodInfo(uint32 index) const
@@ -644,7 +647,8 @@ namespace avmplus
             }
 #endif
         }
-
+        
+        traits->verifyBindings(toplevel);
         return traits;
     }
 
