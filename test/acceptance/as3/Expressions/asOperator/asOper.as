@@ -55,14 +55,17 @@ function emptyFunction() {};
 var emptyObject:Object = new Object();
 var myDate:Date = new Date(1977,8,24);
 
+// https://bugzilla.mozilla.org/show_bug.cgi?id=555805 - MIN_VALUE is not a cross-platform constant.
+// Don't use it here.
+
 var valueArr:Array = [{},"string","10",null,undefined,true,false,0,1,-1,1.23,-1.23,NaN,Infinity,emptyFunction,emptyObject,
-					  myClassA, myClassB,myClassC,myDate,Number.MAX_VALUE,Number.MIN_VALUE,Number.NEGATIVE_INFINITY,Number.POSITIVE_INFINITY,
+					  myClassA, myClassB,myClassC,myDate,Number.MAX_VALUE,Number.NEGATIVE_INFINITY,Number.POSITIVE_INFINITY,
 					  uint.MAX_VALUE,uint.MIN_VALUE,int.MAX_VALUE,int.MIN_VALUE,""];
 
 // The valueDescArr array has the string representations of the valueArr values.
 // This is due to the fact that some values (objects) do not resolve to strings.
 var valueDescArr:Array = ["{}",'"string"','"10"',"null","undefined","true","false","0","1","-1","1.23","-1.23","NaN","Infinity","emptyFunction",
-							"emptyObject","myClassA","myClassB","myClassC","myDate","Number.MAX_VALUE",'Number.MIN_VALUE','Number.NEGATIVE_INFINITY','Number.POSITIVE_INFINITY',
+							"emptyObject","myClassA","myClassB","myClassC","myDate","Number.MAX_VALUE",'Number.NEGATIVE_INFINITY','Number.POSITIVE_INFINITY',
 							'uint.MAX_VALUE','uint.MIN_VALUE','int.MAX_VALUE','int.MIN_VALUE','"" (empty string)'];
 
 var typeArr:Array =		[String,Number,int,uint,Boolean,Object,	Function,TestClassA,TestClassB,TestClassC,TestInterface,Date];
@@ -95,7 +98,6 @@ resultArr[x++] =[null,	    null,	    null,	null,	null,'[object TestClassB]',   n
 resultArr[x++] =[null,	    null,	    null,	null,	null,'[object TestClassC]',   null,'[object TestClassC]','[object TestClassC]','[object TestClassC]','[object TestClassC]',null];	// myClassC
 resultArr[x++] =[null,	    null,	    null,	null,	null,'Sat Sep 24 00:00:00 GMT-0700 1977',		    null,	 null,		null,		null,	null,'Sat Sep 24 00:00:00 GMT-0700 1977'];		// myDate
 resultArr[x++] =[null,1.79769313486231e+308,null,	null,	null,1.79769313486231e+308, null,	 null,		null,		null,	null,		null];		// Number.MAX_VALUE
-resultArr[x++] =[null,4.9406564584124654e-324,null,	null,	null,4.9406564584124654e-324,		    null,	 null,		null,		null,	null,		null];		// Number.MIN_VALUE
 resultArr[x++] =[null,	    -Infinity,	    null,	null,	null,	-Infinity,		    null,	 null,		null,		null,	null,		null];		// Number.NEGATIVE_INFINITY
 resultArr[x++] =[null,	    Infinity,	    null,	null,	null,	Infinity,		    null,	 null,		null,		null,	null,		null];		// Number.POSITIVE_INFINITY
 resultArr[x++] =[null,	    4294967295,	    null,   4294967295,	null,	4294967295,		    null,	 null,		null,		null,	null,		null];		// uint.MAX_VALUE

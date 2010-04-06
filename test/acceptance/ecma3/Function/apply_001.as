@@ -1,3 +1,5 @@
+/* -*- Mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +17,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,40 +37,44 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_NumberClass__
-#define __avmplus_NumberClass__
+var SECTION = "apply_001";
+var VERSION = "";
+startTest();
 
+var TITLE = "Function.prototype.apply with very long argument lists";
 
-namespace avmplus
+writeHeaderToLog( SECTION + " "+ TITLE);
+
+var testcases = getTestCases();
+test();
+
+function getTestCases()
 {
-	/**
-	 * class Number
-	 */
-    class NumberClass : public ClassClosure
-    {
-	public:
-		NumberClass(VTable* cvtable);
+    var array = new Array();
+    var initial = 1000;
+    var limit = 10000000;
+    var multiplier = 10;
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+    function makeArray(n) {
+        var A = new Array;
+        for ( var i=0 ; i < n ; i++ )
+            A[i] = i+1;
+        return A;
+    }
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom call(int argc, Atom* argv)
-		{
-			// Note: SpiderMonkey returns 0 for Number() with no args
-			return construct(argc,argv);
-		}
+    function sum(...rest) {
+        var n = 0;
+        for ( var i=0 ; i < rest.length ; i++ )
+            n += rest[i];
+        return n;
+    }
 
-		Stringp _convert(double n, int precision, int mode);
-		Stringp _numberToString(double n, int radix);
-		double _minValue();
-        
-		DECLARE_SLOTS_NumberClass;
-    };
+    for ( var i=initial ; i < limit ; i *= multiplier ) {
+        status = 'Test apply(bigarray) #' + i;
+        actual = sum.apply(null, makeArray(i));
+        expect = (i*(i+1))/2;
+        array.push(new TestCase(SECTION, status, expect, actual));
+    }
+
+    return array;
 }
-
-#endif /* __avmplus_NumberClass__ */

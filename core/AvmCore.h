@@ -114,6 +114,16 @@ const int kBufferPadding = 16;
 
     class MethodFrame;
 
+    union double_overlay
+    {
+        double value;
+#if defined AVMPLUS_BIG_ENDIAN || defined VMCFG_DOUBLE_MSW_FIRST
+        struct { uint32_t msw, lsw; } parts;
+#else
+        struct { uint32_t lsw, msw; } parts;
+#endif
+    };
+
     /**
      * The main class of the AVM+ virtual machine.  This is the
      * main entry point to the VM for running ActionScript code.
