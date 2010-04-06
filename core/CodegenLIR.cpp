@@ -2423,7 +2423,7 @@ namespace avmplus
         }
 
         case OP_getglobalscope:
-            emitGetGlobalScope();
+            emitGetGlobalScope(sp+1);
             break;
 
         case OP_add:
@@ -2521,30 +2521,20 @@ namespace avmplus
         emitCall(opcode, method_id, argc, mms->returnTraits(), mms);
     }
 
-    void CodegenLIR::emitGetGlobalScope()
+    void CodegenLIR::emitGetGlobalScope(int dest)
     {
         const ScopeTypeChain* scope = info->declaringScope();
         int captured_depth = scope->size;
         if (captured_depth > 0)
         {
             // enclosing scope
-            emitGetscope(0, state->sp()+1);
+            emitGetscope(0, dest);
         }
         else
         {
             // local scope
-            if (state->scopeDepth > 0)
-            {
-                emitCopy(state->verifier->scopeBase, state->sp()+1);
-                // this will copy type and all attributes too
-            }
-            else
-            {
-                #ifdef _DEBUG
-                if (pool->isBuiltin)
-                    core->console << "getglobalscope >= depth (0) "<< state->scopeDepth << "\n";
-                #endif
-            }
+            AvmAssert(state->scopeDepth > 0); // verifier checked.
+            emitCopy(state->verifier->scopeBase, dest);
         }
     }
 
@@ -2588,10 +2578,13 @@ namespace avmplus
         case OP_getslot:
             emitGetslot(opd1, state->sp(), type);
             break;
-        case OP_getglobalslot:
-            emitGetGlobalScope();
-            emitGetslot(opd1, state->sp(), type);
+        case OP_getglobalslot: {
+            int32_t dest_index = state->sp(); // verifier already incremented it
+            uint32_t slot = opd1;
+            emitGetGlobalScope(dest_index);
+            emitGetslot(slot, dest_index, type /* slot type */);
             break;
+        }
         case OP_setglobalslot:
             emitSetslot(OP_setglobalslot, opd1, 0 /* computed or ignored */);
             break;
