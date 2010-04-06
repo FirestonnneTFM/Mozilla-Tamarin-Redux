@@ -92,6 +92,7 @@ export shell_release_wordcode_64=avmshell_wordcode_64$shell_extension
 export shell_debug_64=avmshell_d_64$shell_extension
 export shell_release_debugger_64=avmshell_s_64$shell_extension
 export shell_debug_debugger_64=avmshell_sd_64$shell_extension
+export shell_selftest_64=avmshell_64$shell_extension
 
 export shell_release_min=avmshell_min$shell_extension
 export shell_debug_min=avmshell_d_min$shell_extension
