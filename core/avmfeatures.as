@@ -612,6 +612,14 @@ var FEATURES =
 
   <!-- VM adjustments for various oddities: AVMTWEAK_* -->
 
+  <tweak>
+    <desc> Various iphone SDK versions - at least - botch sin() and cos() around NaN
+           and infinity.  See https://bugzilla.mozilla.org/show_bug.cgi?id=556149. </desc>
+    <name> AVMTWEAK_SIN_COS_NONFINITE </name>
+    <defines> VMCFG_TWEAK_SIN_COS_NONFINITE </defines>
+    <default> false </default>
+  </tweak>
+
 </features>;
 
 /****************************************************************************
