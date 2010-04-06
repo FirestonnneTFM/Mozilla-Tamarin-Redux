@@ -752,7 +752,7 @@ namespace avmplus
         {
             ne.readNameEntry(pos);
             Multiname mn;
-            this->pool->resolveQName(ne.qni, mn, toplevel);
+            this->pool->resolveBindingNameNoCheck(ne.qni, mn, toplevel);
             Stringp name = mn.getName();
             Namespacep ns;
             NamespaceSetp compat_nss;
@@ -1059,7 +1059,7 @@ namespace avmplus
             AvmAssert(next64BitSlotOffset <= endOf64BitSlots); (void)endOf64BitSlots;
             ne.readNameEntry(pos);
             Multiname mn;
-            this->pool->resolveQName(ne.qni, mn, toplevel);
+            this->pool->resolveBindingNameNoCheck(ne.qni, mn, toplevel);
             Namespacep ns = mn.getNamespace();
             Stringp name = mn.getName();
             // NOTE only one versioned namespace from the set needed here
@@ -1341,7 +1341,7 @@ namespace avmplus
                         Multiname qn;
                         // passing NULL for toplevel here, since it's only used if a verification error occurs --
                         // but if there was one, we would have encountered it during AbcParser::parseTraits.
-                        this->pool->resolveQName(ne.qni, qn, /*toplevel*/NULL);
+                        this->pool->resolveBindingNameNoCheck(ne.qni, qn, /*toplevel*/NULL);
                         const Binding b = td->findBinding(qn.getName(), qn.getNamespace());
                         AvmAssert(b != BIND_NONE);
                         const uint32 disp_id = uint32(uintptr_t(b) >> 3) + (ne.kind == TRAIT_Setter);
