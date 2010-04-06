@@ -53,8 +53,10 @@
 
        features           ::= "<features>" feature* at-least-one* at-most-one* exactly-one* "</features>"
        feature            ::= "<feature>" desc name defines+ precludes* requires* "</feature>"
+                            | "<tweak>" desc name default defines+ precludes* requires* "</tweak>"
        desc               ::= "<desc>" TEXT "</desc>"
        name               ::= "<name>" TEXT "</name>"
+       default            ::= "<default> "true" | "false" "</default>"
        defines            ::= "<defines>" TEXT "</defines>"
        precludes          ::= "<precludes>" TEXT "</precludes>"
        requires           ::= "<requires>" TEXT | at-most-one | at-least-one | exactly-one "</requires>"
@@ -80,6 +82,12 @@
          NOTE: A good description is absolutely essential.  It should
          state what the feature does, but also what the implications of
          selecting or deselecting it might be.
+
+       A TWEAK clause defines a named feature with a default value, which
+       provides an opportunity for workarounds for bugs and other very
+       minor issues.  TWEAKs should be used sparingly (and if they are
+       abused because it's convenient to introduce default values then
+       the default value facility will be removed).
 
        No two FEATUREs may name the same feature.
 
@@ -602,6 +610,8 @@ var FEATURES =
     <defines> VMCFG_TEST_API_VERSIONING </defines>
   </feature>
 
+  <!-- VM adjustments for various oddities: AVMTWEAK_* -->
+
 </features>;
 
 /****************************************************************************
@@ -626,10 +636,19 @@ function main() {
     for each ( feature in FEATURES.feature )
         s += undefDefines(feature);
     s += "\n";
+    for each ( feature in FEATURES.tweak )
+        s += undefDefines(feature);
+    s += "\n";
     for each ( feature in FEATURES.feature )
         s += testDefined(feature);
     s += "\n";
+    for each ( feature in FEATURES.tweak )
+        s += testDefined(feature);
+    s += "\n";
     for each ( feature in FEATURES.feature )
+        s += checkRequirements(feature);
+    s += "\n";
+    for each ( feature in FEATURES.tweak )
         s += checkRequirements(feature);
     s += "\n";
     for each ( x in FEATURES["at-least-one"] )
@@ -642,6 +661,9 @@ function main() {
         s += exactlyOne(x);
     s += "\n";
     for each ( feature in FEATURES.feature )
+        s += defineResults(feature);
+    s += "\n";
+    for each ( feature in FEATURES.tweak )
         s += defineResults(feature);
     s += "\n";
     s += "#ifdef AVMSHELL_BUILD\n";
@@ -661,6 +683,8 @@ function main() {
     s += "const char * const avmfeatures = \"\"\n"
     for each ( feature in FEATURES.feature )
         s += showFeature(feature);
+    for each ( feature in FEATURES.tweak )
+        s += showFeature(feature);
     s += ";\n\n"
     s += "#endif // AVMSHELL_BUILD\n";
     print('writing avmfeatures.cpp');
@@ -673,6 +697,8 @@ function main() {
     s += "def featureSettings(o):\n";
     s += "    args = \"\"\n";
     for each ( feature in FEATURES.feature )
+        s += configureFeature(feature);
+    for each ( feature in FEATURES.tweak )
         s += configureFeature(feature);
     s += "    return args\n";
 
@@ -758,9 +784,23 @@ function testDefined(feature) {
     s.push("");
     s.push("");
     s.push("/* " + name + "\n *\n" + formatFeature(feature) + "\n */");
-    s.push("#if !defined " + name + " || " + name + " != 0 && " + name + " != 1");
-    s.push("#  error \"" + name + " must be defined and 0 or 1 (only).\"");
-    s.push("#endif");
+    if (feature.name() == "tweak") {
+        s.push("#if !defined " + name);
+        if (feature.default.length() == 0)
+            fail("Tweak \"" + name + "\" is missing a 'default' clause.");
+	s.push("#  define " + name + " " + (feature["default"] == "true" ? 1 : 0));
+	s.push("#endif");
+        s.push("#if " + name + " != 0 && " + name + " != 1");
+	s.push("#  error \"" + name + " must be defined and 0 or 1 (only).\"");
+	s.push("#endif");
+    }
+    else {
+        if (feature.default.length() > 0)
+            fail("Feature \"" + name + "\" must not have a 'default' clause: " + feature.default);
+        s.push("#if !defined " + name + " || " + name + " != 0 && " + name + " != 1");
+	s.push("#  error \"" + name + " must be defined and 0 or 1 (only).\"");
+	s.push("#endif");
+    }
     return s.join("\n") + "\n";
 }
 
@@ -855,12 +895,18 @@ function configureFeature(feature) {
         return res;
     }
 
-    if (feature.name.indexOf("AVMFEATURE_") == 0) {
+    var len = 0;
+    if (feature.name.indexOf("AVMFEATURE_") == 0)
+        len = 11;
+    else if (feature.name.indexOf("AVMTWEAK_") == 0)
+        len = 9;
+
+    if (len > 0) {
         var enable = "-D" + feature.name + "=1 ";
         var disable = "-D" + feature.name + "=0 ";
         var dependent = complement(feature.name, FEATURES["at-most-one"]) +
                         complement(feature.name, FEATURES["exactly-one"]);
-        var feature = feature.name.substring(11).toLowerCase().replace(/_/g,"-");
+        var feature = feature.name.substring(len).toLowerCase().replace(/_/g,"-");
 
         // features without dependencies can be explicitly enabled or disabled
         if (dependent == "") {
