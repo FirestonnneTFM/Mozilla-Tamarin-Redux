@@ -249,8 +249,7 @@ function runTest()
 		findproperty COMPARE_STRICTEQ
 	pushstring "getglobalslot"
 		pushint 77 // expected
-		getglobalscope
-		getslot 1
+		getglobalslot 1
 		callpropvoid COMPARE_STRICTEQ 3
 	endTry:
 		returnvoid
