@@ -644,7 +644,8 @@ namespace avmplus
             }
 #endif
         }
-
+        
+        traits->verifyBindings(toplevel);
         return traits;
     }
 
