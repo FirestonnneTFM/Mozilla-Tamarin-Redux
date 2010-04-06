@@ -158,8 +158,8 @@ namespace avmplus
         Traits* resolveTypeName(uint32_t index, const Toplevel* toplevel, bool allowVoid=false) const;
         Traits* resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid=false) const;
 
-        void resolveQName(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
-        void resolveQName(const byte* &p, Multiname &m, const Toplevel* toplevel) const;
+        void resolveBindingNameNoCheck(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
+        void resolveBindingNameNoCheck(const byte* &p, Multiname &m, const Toplevel* toplevel) const;
 
         Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
 
