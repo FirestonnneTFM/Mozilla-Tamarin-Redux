@@ -2507,7 +2507,20 @@ namespace avmplus
             v2.tryFrom = tryFrom;
             v2.tryTo = tryTo;
             CodeWriter stubWriter;
-            v2.verify(&stubWriter);
+
+            // The second verification pass will presumably always throw an 
+            // error, which we ignore.  But we /must/ catch it so that we can
+            // clean up the verifier resources.  Cleanup happens automatically
+            // when execution reaches the end of the block.
+
+            TRY(core, kCatchAction_Ignore) {
+                v2.verify(&stubWriter);
+            }
+            CATCH(Exception *ignored) {
+                (void)ignored;
+            }
+            END_CATCH
+            END_TRY
         }
         #endif
         toplevel->throwVerifyError(errorID, arg1, arg2, arg3);
