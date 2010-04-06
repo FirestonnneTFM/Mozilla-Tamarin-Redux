@@ -42,79 +42,57 @@ var gTestfile = 'regress-333728.js';
 var BUGNUMBER = 333728;
 var summary = 'Throw ReferenceErrors for typeof(...undef)';
 var actual = '';
-var expect = 'ReferenceError';
+var expect = 'undefined';
 
 printBugNumber(BUGNUMBER);
-printStatus (summary);
+printStatus(summary);
 
-try
-{
-  actual = typeof (0, undef);
-}
-catch(ex)
-{
+try {
+  actual = typeof(0, undef);
+} catch(ex) {
   actual = ex.name;
 }
- 
-AddTestCase(summary, expect, actual + ': typeof (0, undef)');
 
-try
-{
-  actual = typeof (0 || undef);
-}
-catch(ex)
-{
+AddTestCase(summary + ': typeof (0, undef)', expect, actual.toString());
+
+try {
+  actual = typeof(0 || undef);
+} catch(ex) {
   actual = ex.name;
 }
- 
-AddTestCase(summary, expect, actual + ': typeof (0 || undef)');
 
-try
-{
-  actual = typeof (1 && undef);
-}
-catch(ex)
-{
+AddTestCase(summary + ': typeof (0 || undef)', expect, actual.toString());
+
+try {
+  actual = typeof(1 && undef);
+} catch(ex) {
   actual = ex.name;
 }
- 
-AddTestCase(summary, expect, actual + ': typeof (1 && undef)');
 
-/*
-  try
-  {
-  actual = typeof (0 ? 0 : undef);
-  }
-  catch(ex)
-  {
-  actual = ex.name;
-  }
- 
-  AddTestCase(summary, expect, actual + ': typeof (0 ? 0 : undef)');
-*/
+AddTestCase(summary + ': typeof (1 && undef)', expect, actual.toString());
 
-/*
-  try
-  {
-  actual = typeof (1 ? undef : 0);
-  }
-  catch(ex)
-  {
-  actual = ex.name;
-  }
- 
-  AddTestCase(summary, expect, actual + ': typeof (1 ? undef : 0)');
-*/
-
-try
-{
-  actual = typeof (!this ? 0 : undef);
-}
-catch(ex)
-{
+try {
+  actual = typeof(0 ? 0 : undef);
+} catch(ex) {
   actual = ex.name;
 }
- 
-AddTestCase(summary, expect, actual + ': typeof (!this ? 0 : undef)');
+
+AddTestCase(summary + ': typeof (0 ? 0 : undef)', expect, actual.toString());
+
+try {
+  actual = typeof(1 ? undef: 0);
+} catch(ex) {
+  actual = ex.name;
+}
+
+AddTestCase(summary + ': typeof (1 ? undef : 0)', expect, actual.toString());
+
+try {
+  actual = typeof(!this ? 0 : undef);
+} catch(ex) {
+  actual = ex.name;
+}
+
+AddTestCase(summary + ': typeof (!this ? 0 : undef)', expect, actual.toString());
 
 test();
