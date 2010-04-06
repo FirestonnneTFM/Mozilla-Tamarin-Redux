@@ -53,5 +53,5 @@ export shell_release=avmshell_neon_arm
 export shell_release_debugger=avmshell_neon_arm
 export shell_debug=avmshell_neon_arm_d
 export shell_debug_debugger=avmshell_neon_arm_d
-
+export shell_selftest=avmshell_neon_arm
 
