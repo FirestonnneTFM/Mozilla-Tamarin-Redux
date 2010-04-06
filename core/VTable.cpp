@@ -340,6 +340,7 @@ namespace avmplus
 		createInstance(ScriptObject::genericCreateInstance),
 		linked(false)
 	{
+		AvmAssert(toplevel != NULL);
 		AvmAssert(traits != NULL);
 	}
 
@@ -505,6 +506,8 @@ namespace avmplus
             // we want the result to be based off ObjectVectorClass, not VectorClass
             // (otherwise sizeofInstance would be too small and we'd be crashy)
 			ctraits = objVecVTable->traits->newParameterizedCTraits(classname, traitsNs);
+            ctraits->verifyBindings(toplevel);
+
 			itraits = traitsPool->resolveParameterizedType(toplevel, this->ivtable->traits, param_traits);
 			ctraits->itraits = itraits;
 		}

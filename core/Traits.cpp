@@ -514,6 +514,7 @@ namespace avmplus
         Traits* traits = new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH);
         traits->final = true;
         traits->set_names(ns, name);
+        traits->verifyBindings(toplevel);
         traits->resolveSignatures(toplevel);
         return traits;
     }
@@ -812,16 +813,16 @@ namespace avmplus
                     addVersionedBindings(bindings, name, compat_nss, AvmCore::makeSlotBinding(slot_id, ne.kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST));
                     if (slotSizeInfo != NULL)
                     {
-                        // only do this if we need it -- doing it too early could cause us to reference a not-yet-loaded
-                        // type which we don't need yet, causing an unnecessary verification failure
-                    Traitsp slotType = (ne.kind == TRAIT_Class) ?
-                                        pool->getClassTraits(ne.info) :
-                                        pool->resolveTypeName(ne.info, toplevel);
-                    if (!isPointerSlot(slotType))
-                    {
-                        if (is8ByteSlot(slotType))
+                            // only do this if we need it -- doing it too early could cause us to reference a not-yet-loaded
+                            // type which we don't need yet, causing an unnecessary verification failure
+                        Traitsp slotType = (ne.kind == TRAIT_Class) ?
+                                            pool->getClassTraits(ne.info) :
+                                            pool->resolveTypeName(ne.info, toplevel);
+                        if (!isPointerSlot(slotType))
+                        {
+                            if (is8ByteSlot(slotType))
                                 slotSizeInfo->nonPointer64BitSlotCount += 1;
-                        else
+                            else
                                 slotSizeInfo->nonPointer32BitSlotCount += 1;
                         }
                     }
@@ -1034,7 +1035,6 @@ namespace avmplus
     uint32_t Traits::finishSlotsAndMethods(TraitsBindingsp basetb,
                                     TraitsBindings* tb,
                                     const Toplevel* toplevel,
-                                    AbcGen* abcGen,
                                     const SlotSizeInfo& sizeInfo) const
     {
         const uint8_t* pos = traitsPosStart();
@@ -1079,9 +1079,6 @@ namespace avmplus
                     uint32_t slotOffset = computeSlotOffset(slotType, next32BitSlotOffset, nextPointerSlotOffset, next64BitSlotOffset);
                     AvmAssert(slotOffset >= sizeof(ScriptObject));
                     tb->setSlotInfo(slotid, slotType, slotStorageType(getBuiltinType(slotType)), slotOffset);
-
-                    if (abcGen)
-                        genDefaultValue(ne.value_index, slotid, toplevel, slotType, ne.value_kind, *abcGen);
                     break;
                 }
                 case TRAIT_Getter:
@@ -1181,7 +1178,7 @@ namespace avmplus
         return capLog;
     }
 
-    TraitsBindings* Traits::_buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen)
+    TraitsBindings* Traits::_buildTraitsBindings(const Toplevel* toplevel, bool includeTypes)
     {
 #ifdef AVMPLUS_VERBOSE
         if (pool->isVerbose(VB_traits))
@@ -1189,6 +1186,7 @@ namespace avmplus
             core->console << "Generate TraitsBindings for "<<this<<"\n";
         }
 #endif
+
         TraitsBindings* thisData = NULL;
 
         // if we know the cap we need, go there right away, otherwise start at small power of 2
@@ -1232,20 +1230,20 @@ namespace avmplus
                     }
                 }
             }
-
+            
             SlotSizeInfo _slotSizeInfo;
-            SlotSizeInfo* slotSizeInfo = (m_resolved || toplevel != NULL) ? &_slotSizeInfo : NULL;
-
+            SlotSizeInfo* slotSizeInfo = includeTypes ? &_slotSizeInfo : NULL;
+            
             uint32_t slotCount = 0;
             uint32_t methodCount = 0;
             buildBindings(basetb, bindings, slotCount, methodCount, slotSizeInfo, toplevel);
 
-            thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount, slotSizeInfo != NULL);
+            thisData = TraitsBindings::alloc(gc, this, basetb, bindings, slotCount, methodCount, includeTypes);
             if (slotSizeInfo)
             {
-                thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen, *slotSizeInfo);
+                thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, *slotSizeInfo);
                 if (basetb)
-                thisData->m_slotSize += basetb->m_slotSize;
+                    thisData->m_slotSize += basetb->m_slotSize;
             }
 
             if (!isInterface() && m_implementsNewInterfaces) {
@@ -1421,6 +1419,31 @@ namespace avmplus
         this->resolveSignaturesSelf(toplevel);
     }
 
+    void Traits::verifyBindings(const Toplevel* toplevel)
+    {
+        // builtin Traits get called before a Toplevel is created, so they
+        // get a free pass. Everyone else better pass a good value.
+        AvmAssert(toplevel != NULL || pool->isBuiltin);
+       
+#ifdef DEBUG
+        AvmAssert(!m_bindingsVerified);
+        // make sure our supertypes have verified their bindings. (must be done before calling _buildTraitsBindings)
+        for (Traits* t = this->base; t != NULL; t = t->base)
+            AvmAssert(t->m_bindingsVerified);
+        for (Traits** st = this->m_secondary_supertypes; *st != NULL; st++)
+            AvmAssert(*st == this || (*st)->m_bindingsVerified);
+#endif
+
+        AvmAssert(m_tbref == core->GetGC()->emptyWeakRef);
+        // force buildTraitsBindings to run now, so that any errors will
+        // also be reported now, instead of later when called on a QCache
+        // miss, when we don't have a valid Toplevel* for exception-throwing context.
+        _buildTraitsBindings(toplevel, /*includeTypes*/false);
+#ifdef DEBUG
+        this->m_bindingsVerified = true;
+#endif
+    }
+
     /**
      * This must be called before any method is verified or any
      * instances are created.  It is not done eagerly in AbcParser
@@ -1431,6 +1454,12 @@ namespace avmplus
      */
     void Traits::resolveSignaturesSelf(const Toplevel* toplevel)
     {
+        // builtin Traits get called before a Toplevel is created, so they
+        // get a free pass. Everyone else better pass a good value.
+        AvmAssert(toplevel != NULL || pool->isBuiltin);
+       
+        AvmAssert(m_bindingsVerified);
+            
 #ifdef DEBUG
         AvmAssert(!m_resolved);
         // make sure our supertypes are resolved. (must be done before calling _buildTraitsBindings)
@@ -1440,18 +1469,10 @@ namespace avmplus
             AvmAssert(*st == this || (*st)->m_resolved);
 #endif
 
-        MMgc::GC* gc = core->GetGC();
-        AbcGen gen(gc);
-        AbcGen *pgen;
-#if defined(VMCFG_AOT)
-         pgen = (!(this->init)) || (!(this->init->isCompiledMethod())) ? &gen : 0;
-#else
-         pgen = &gen;
-#endif
         // we might already have one -- if so, toss it
-        m_tbref = gc->emptyWeakRef;
-        TraitsBindings* tb = _buildTraitsBindings(toplevel, pgen);
-        this->genInitBody(toplevel, gen);
+        m_tbref = core->GetGC()->emptyWeakRef;
+        TraitsBindings* tb = _buildTraitsBindings(toplevel, /*includeTypes*/true);
+        genInitBody(toplevel, tb);
 
         // leave m_tmref as empty, we don't need it yet
 
@@ -1541,7 +1562,7 @@ namespace avmplus
             AvmAssert(!"unhandled verify error");
         }
 
-        tb->buildSlotDestroyInfo(gc, m_slotDestroyInfo, slotAreaCount, slotAreaSize);
+        tb->buildSlotDestroyInfo(core->GetGC(), m_slotDestroyInfo, slotAreaCount, slotAreaSize);
 
         m_resolved = true;
     }
@@ -1702,13 +1723,46 @@ namespace avmplus
         gen.setslot(slot_id);
     }
 
-    void Traits::genInitBody(const Toplevel* toplevel, AbcGen& gen)
+    void Traits::genInitBody(const Toplevel* toplevel, TraitsBindings* tb)
     {
+#if defined(VMCFG_AOT)
+        if (this->init && this->init->isCompiledMethod())
+            return;
+#endif
+
+        MMgc::GC* gc = core->GetGC();
+        AbcGen gen(gc);
+
+        const uint8_t* pos = traitsPosStart();
+
+        SlotIdCalcer sic(tb->base ? tb->base->slotCount : 0, this->allowEarlyBinding());
+
+        NameEntry ne;
+        const uint32_t nameCount = pos ? AvmCore::readU32(pos) : 0;
+        for (uint32_t i = 0; i < nameCount; i++)
+        {
+            ne.readNameEntry(pos);
+            switch (ne.kind)
+            {
+                case TRAIT_Slot:
+                case TRAIT_Const:
+                case TRAIT_Class:
+                {
+                    uint32_t slotid = sic.calc_id(ne.id);
+                    // note, for TRAIT_Class, AbcParser::parseTraits has already verified that pool->cinits[ne.info] is not null
+                    Traitsp slotType = (ne.kind == TRAIT_Class) ?
+                                        pool->getClassTraits(ne.info) :
+                                        pool->resolveTypeName(ne.info, NULL);
+                    genDefaultValue(ne.value_index, slotid, toplevel, slotType, ne.value_kind, gen);
+                    break;
+                }
+            }
+        } // for i
+
         // if initialization code gen is required, create a new method body and write it to traits->init->body_pos
         if (gen.size() == 0)
             return;
 
-        MMgc::GC* gc = core->GetGC();
         AbcGen newMethodBody(gc, uint32_t(16 + gen.size()));    // @todo 16 is a magic value that was here before I touched the code -- I don't know the significance
 
         // insert body preamble
@@ -1951,7 +2005,8 @@ failure:
 
     TraitsBindings* FASTCALL Traits::_getTraitsBindings()
     {
-        TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL);
+        AvmAssert(m_bindingsVerified);
+        TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*includeTypes*/m_resolved);
         return tb;
     }
 
