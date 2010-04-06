@@ -987,7 +987,10 @@ namespace MMgc
 	REALLY_INLINE size_t GCHeap::LargeAllocSize(const void *item)
 	{
 		Region *r = AddrToRegion(item);
-		return (r->reserveTop - r->baseAddr) / kBlockSize;
+		// Note: we can't use r->baseAddr or r->reserveTop b/c
+		// alignment might have shifted the start down and we may
+		// not have committed the whole region
+		return (r->commitTop - (char*)item) / kBlockSize;
 	}
 
 	REALLY_INLINE size_t GCHeap::Size(const void *item)
