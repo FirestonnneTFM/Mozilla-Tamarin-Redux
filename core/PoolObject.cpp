@@ -207,6 +207,7 @@ namespace avmplus
             // of non-determinism into these searches.  Not to mention that it appears
             // this code by-passes versioning altogether.
             r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns());
+            r->verifyBindings(toplevel);
             r = domain->addUniqueTrait(fullname, base->ns(), r);  // getTraits() above also checks the domain.
         }
         return r;
