@@ -588,9 +588,10 @@ range_error:
         return;
     }
 
-
-    void PoolObject::resolveQName(uint32_t index, Multiname &m, const Toplevel* toplevel) const
+    void PoolObject::resolveBindingNameNoCheck(uint32_t index, Multiname &m, const Toplevel* toplevel) const
     {
+        // FIXME: should only assert and not throw, pending correctness verification, see bug https://bugzilla.mozilla.org/show_bug.cgi?id=557541
+
         if (index == 0 || index >= cpool_mn_offsets.size())
         {
             if (toplevel)
@@ -600,7 +601,7 @@ range_error:
 
         parseMultiname(m, index);
 
-        if (!isBuiltin && !m.isQName())
+        if (!(m.isBinding() && (m.isQName() || isBuiltin)))
         {
             if (toplevel)
                 toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
@@ -630,6 +631,7 @@ range_error:
         Traits* t = getTraits(m, toplevel);
         if(m.isParameterizedType())
         {
+            core->stackCheck(const_cast<Toplevel*>(toplevel));
             Traits* param_traits = resolveTypeName(m.getTypeParameter(), toplevel);
             t = resolveParameterizedType(toplevel, t, param_traits);
         }

@@ -3382,6 +3382,7 @@ namespace avmplus
 		{
 			const Multiname* param_name;
 			GET_MULTINAME_PTR(param_name, name->getTypeParameter());
+            core->stackCheck(toplevel);
 			Traits* param_traits = name->getTypeParameter() ? getTraits(param_name, pool, toplevel, core) : NULL;
 			t = pool->resolveParameterizedType(toplevel, t, param_traits);
 		}
