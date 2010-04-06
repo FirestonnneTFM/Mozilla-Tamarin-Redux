@@ -1048,10 +1048,13 @@ namespace MMgc
 
 		if(!addr)
 			return NULL;
-		
+
+		size_t unalignedSize = sizeInBytes;
+
 		if(alignmentSlop(addr, alignment) != 0) {
 			VMPI_releaseMemoryRegion(addr, sizeInBytes);
-			addr = (char*)VMPI_reserveMemoryRegion(NULL, sizeInBytes + alignment * kBlockSize);
+			unalignedSize = sizeInBytes + (alignment-1) * kBlockSize;
+			addr = (char*)VMPI_reserveMemoryRegion(NULL, unalignedSize);
 			if(!addr)
 				return NULL;
 		}
@@ -1062,7 +1065,12 @@ namespace MMgc
 			return NULL;
 		}
 
-		NewRegion(addr, addr+sizeInBytes, addr+sizeInBytes, kLargeItemBlockId);
+		// Note that we don't actually track the beginning of the committed region
+		// LargeFree doesn't need it.
+		NewRegion(addr, 
+				  addr + unalignedSize, // reserveTop
+				  alignedAddr + sizeInBytes, // commitTop
+				  kLargeItemBlockId);
 		largeAllocs += size;
 		CheckForNewMaxTotalHeapSize();
 
@@ -1074,11 +1082,10 @@ namespace MMgc
 		size_t size = LargeAllocSize(item);
 		largeAllocs -= size;
 		Region *r = AddrToRegion(item);
-		RemoveRegion(r, false);
 		// Must use r->baseAddr which may be less than item due to alignment,
 		// and we must calculate full size
-		GCAssert((size_t)(r->commitTop - r->baseAddr) >= size);
-		VMPI_releaseMemoryRegion(r->baseAddr, r->commitTop - r->baseAddr);
+		VMPI_releaseMemoryRegion(r->baseAddr, r->reserveTop - r->baseAddr);
+		RemoveRegion(r, false);
 	}
 
 	GCHeap::HeapBlock* GCHeap::AllocBlock(size_t size, bool& zero, size_t alignment)
