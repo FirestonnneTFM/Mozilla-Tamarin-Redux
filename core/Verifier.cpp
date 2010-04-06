@@ -1531,13 +1531,11 @@ namespace avmplus
             case OP_getglobalslot:
             {
                 checkStack(0,1);
-                Value& obj = state->peek();
-                uint32_t index = imm30-1;
-                checkGetGlobalScope();
-                checkEarlySlotBinding(obj.traits);
-                Traits* slotTraits = checkSlot(obj.traits, index);
-                emitCheckNull(index);
-                coder->writeOp1(state, pc, OP_getglobalslot, index);
+                uint32_t slot = imm30-1;
+                Traits* globalTraits = checkGetGlobalScope();
+                checkEarlySlotBinding(globalTraits); // sets state->value(sp).traits so CodeWriter can see type
+                Traits* slotTraits = checkSlot(globalTraits, slot);
+                coder->writeOp1(state, pc, OP_getglobalslot, slot, slotTraits);
                 state->pop_push(1, slotTraits);
                 break;
             }
@@ -2237,31 +2235,23 @@ namespace avmplus
         state->pop_push(n, propType);
     }
 
-    void Verifier::checkGetGlobalScope()
+    Traits* Verifier::checkGetGlobalScope()
     {
         const ScopeTypeChain* scope = info->declaringScope();
         int captured_depth = scope->size;
-        if (captured_depth > 0)
-        {
+        if (captured_depth > 0) {
             // enclosing scope
-            state->push(scope->getScopeTraitsAt(0), true);
+            Traits* t = scope->getScopeTraitsAt(0);
+            state->push(t, true);
+            return t;
         }
-        else
-        {
+        else {
             // local scope
-            if (state->scopeDepth > 0)
-            {
-                // this will copy type and all attributes too
-                state->push(state->scopeValue(0));
-            }
-            else
-            {
-                #ifdef _DEBUG
-                if (pool->isBuiltin)
-                    core->console << "getglobalscope >= depth (0) "<< state->scopeDepth << "\n";
-                #endif
+            if (state->scopeDepth == 0)
                 verifyFailed(kGetScopeObjectBoundsError, core->toErrorString(0));
-            }
+            Traits* t = state->scopeValue(0).traits;
+            state->push(state->scopeValue(0));
+            return t;
         }
     }
 
