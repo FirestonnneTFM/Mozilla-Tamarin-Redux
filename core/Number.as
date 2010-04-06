@@ -49,7 +49,7 @@ package
 		public static const NaN               :Number = 0/0
 		public static const NEGATIVE_INFINITY :Number = -1/0
 		public static const POSITIVE_INFINITY :Number = 1/0
-		public static const MIN_VALUE         :Number = 4.9e-324 
+		public static const MIN_VALUE         :Number = _minValue() // typically: 4.9e-324 
 		public static const MAX_VALUE         :Number = 1.7976931348623158e+308
 
 		// these must match the same constants in MathUtils
@@ -59,6 +59,7 @@ package
 
 		private static native function _numberToString(n:Number, radix:int):String
 		private static native function _convert(n:Number, precision:int, mode:int):String
+		private static native function _minValue():Number
 
 		AS3 function toString(radix=10):String {
 			return _numberToString(this,radix)
