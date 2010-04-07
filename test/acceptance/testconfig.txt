@@ -203,11 +203,6 @@ as3/Vector/nonindexproperty:index -6.*        , arm-winmobile-emulator.*  , skip
 
 
 ####################
-# -Dgreedy bugs
-####################
-as3/DescribeType/describeType       ,   x64-win.*-Dgreedy , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=527346
-
-####################
 # skip slow tests in test phase, -Dgreedy passes
 ####################
 ecma3/Unicode/u3400_CJKUnifiedIdeographsExtensionA,((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
