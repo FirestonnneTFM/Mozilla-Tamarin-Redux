@@ -1317,7 +1317,7 @@ namespace MMgc
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{
 #ifdef _DEBUG
-		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
+		GCAssertMsg(size > 0, "cannot allocate a 0 sized block");
 		GCAssertMsg(onThread(), "GC called from different thread!");
 		
 		if(!nogc && stackEnter == NULL) {

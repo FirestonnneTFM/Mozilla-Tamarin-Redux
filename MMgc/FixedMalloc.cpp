@@ -338,7 +338,7 @@ namespace MMgc
 		}
 #endif
 		
-		GCAssertMsg(false, "Trying to delete an object with FixedMalloc::Free that was not allocated with FixedMalloc::Alloc\n");
+		GCAssertMsg(false, "Trying to delete an object with FixedMalloc::Free that was not allocated with FixedMalloc::Alloc");
 	}
 
 #ifndef AVMPLUS_SAMPLER
