@@ -1489,7 +1489,7 @@ class argo:
                 description='running android performance...',
                 descriptionDone='finished running android performance.',
                 name="Release",
-                workdir="../scripts",
+                workdir="../repo/build/buildbot/slaves/scripts",
                 timeout=3600)
     )
     android_performance_factory.addStep(BuildShellCommand(
@@ -1498,7 +1498,7 @@ class argo:
                 description='running android interp performance...',
                 descriptionDone='finished running android interp performance.',
                 name="ReleaseInterp",
-                workdir="../scripts",
+                workdir="../repo/build/buildbot/slaves/scripts",
                 timeout=3600)
     )
     android_performance_factory.addStep(BuildShellCommand(
@@ -1507,7 +1507,7 @@ class argo:
                 description='running android jit performance...',
                 descriptionDone='finished running android jit performance.',
                 name="ReleaseJIT",
-                workdir="../scripts",
+                workdir="../repo/build/buildbot/slaves/scripts",
                 timeout=3600)
     )
 
