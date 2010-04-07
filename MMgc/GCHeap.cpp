@@ -2635,7 +2635,7 @@ namespace MMgc
 			return;
 
 		m_notificationThread = VMPI_currentThread();
-
+		
 		size_t startingTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
 		size_t currentTotal = startingTotal;
 		
@@ -2646,7 +2646,10 @@ namespace MMgc
 			cb = iter.next();
 			if(cb)
 			{
+				VMPI_lockRelease(&m_spinlock);	
 				cb->memoryStatusChange(kFreeMemoryIfPossible, kFreeMemoryIfPossible);
+				VMPI_lockAcquire(&m_spinlock);	
+			
 				Decommit();
 				currentTotal = GetTotalHeapSize() + externalPressure / kBlockSize;
 
@@ -2659,6 +2662,7 @@ namespace MMgc
 		} while(cb != NULL && bContinue);
 
 		iter.MarkCursorInList();
+	
 		m_notificationThread = NULL;
 	}
 
@@ -2669,6 +2673,7 @@ namespace MMgc
 			return;
 
 		m_notificationThread = VMPI_currentThread();
+
 		MemoryStatus oldStatus = status;
 		status = to;
 		
@@ -2679,7 +2684,11 @@ namespace MMgc
 				cb = iter.next();
 			}
 			if(cb)
+			{
+				VMPI_lockRelease(&m_spinlock);	
 				cb->memoryStatusChange(oldStatus, to);
+				VMPI_lockAcquire(&m_spinlock);	
+			}
 		} while(cb != NULL);
 
 
