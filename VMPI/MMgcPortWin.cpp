@@ -115,20 +115,6 @@ static bool CommitMemory(void* address, size_t size)
 #endif //#ifdef _WIN64
 						   ,
 						   PAGE_READWRITE);
-	
-#ifdef _DEBUG
-	if (address == NULL)
-		{
-			MEMORY_BASIC_INFORMATION mbi;
-			VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
-			LPVOID lpMsgBuf;
-			FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-						   NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-						   (LPTSTR) &lpMsgBuf, 0, NULL );
-			GCAssertMsg(false, (const char*)lpMsgBuf); //todo rishit
-		}
-#endif //_DEBUG
-	
 	return address != NULL;
 }
 
