@@ -54,7 +54,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -129,7 +129,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_DEBUG;DEBUG;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_CRT_SECURE_NO_DEPRECATE;UNICODE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -218,7 +218,7 @@
 				FavorSizeOrSpeed="1"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -294,7 +294,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_CRT_SECURE_NO_DEPRECATE;UNICODE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -380,7 +380,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				ExceptionHandling="0"
 				TreatWChar_tAsBuiltInType="false"
@@ -452,7 +452,7 @@
 				ExecutionBucket="7"
 				Optimization="2"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				ExceptionHandling="0"
 				TreatWChar_tAsBuiltInType="false"
@@ -531,7 +531,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -606,7 +606,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_DEBUG;DEBUG;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_CRT_SECURE_NO_DEPRECATE;UNICODE;DEBUGGER"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -688,7 +688,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE;VTUNE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -756,7 +756,7 @@
 				ExecutionBucket="7"
 				Optimization="3"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -841,7 +841,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Oy-"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE;MMGC_MEMORY_PROFILER"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -916,7 +916,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;UNDER_CE=0x501;_WIN32_WCE=0x501;ARM;_ARM_;ARMV5;_CRT_SECURE_NO_DEPRECATE;UNICODE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -1003,7 +1003,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -1079,7 +1079,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -1155,7 +1155,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				ExceptionHandling="0"
 				TreatWChar_tAsBuiltInType="false"
@@ -1224,7 +1224,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -1362,7 +1362,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\VMPI;.;..\core;..\eval;..\platform;..\shell"
+				AdditionalIncludeDirectories="..\..\VMPI;.;..\..\core;..\..\eval;..\..\platform;..\..\shell"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMSHELL_BUILD;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -1418,23 +1418,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\FixedAlloc-inlines.h"
+				RelativePath="..\..\MMgc\FixedAlloc-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath=".\FixedAlloc.cpp"
+				RelativePath="..\..\MMgc\FixedAlloc.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\FixedAlloc.h"
+				RelativePath="..\..\MMgc\FixedAlloc.h"
 				>
 			</File>
 			<File
-				RelativePath=".\FixedMalloc-inlines.h"
+				RelativePath="..\..\MMgc\FixedMalloc-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath=".\FixedMalloc.cpp"
+				RelativePath="..\..\MMgc\FixedMalloc.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1470,147 +1470,147 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\FixedMalloc.h"
+				RelativePath="..\..\MMgc\FixedMalloc.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GC-inlines.h"
+				RelativePath="..\..\MMgc\GC-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="GC.cpp"
+				RelativePath="..\..\MMgc\GC.cpp"
 				>
 			</File>
 			<File
-				RelativePath="GC.h"
+				RelativePath="..\..\MMgc\GC.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCAlloc-inlines.h"
+				RelativePath="..\..\MMgc\GCAlloc-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="GCAlloc.cpp"
+				RelativePath="..\..\MMgc\GCAlloc.cpp"
 				>
 			</File>
 			<File
-				RelativePath="GCAlloc.h"
+				RelativePath="..\..\MMgc\GCAlloc.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCAllocObject.cpp"
+				RelativePath="..\..\MMgc\GCAllocObject.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCAllocObject.h"
+				RelativePath="..\..\MMgc\GCAllocObject.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCDebug.cpp"
+				RelativePath="..\..\MMgc\GCDebug.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCDebug.h"
+				RelativePath="..\..\MMgc\GCDebug.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCGlobalNew.cpp"
+				RelativePath="..\..\MMgc\GCGlobalNew.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCHashtable.cpp"
+				RelativePath="..\..\MMgc\GCHashtable.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCHashtable.h"
+				RelativePath="..\..\MMgc\GCHashtable.h"
 				>
 			</File>
 			<File
-				RelativePath="GCHeap.cpp"
+				RelativePath="..\..\MMgc\GCHeap.cpp"
 				>
 			</File>
 			<File
-				RelativePath="GCHeap.h"
+				RelativePath="..\..\MMgc\GCHeap.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCLargeAlloc-inlines.h"
+				RelativePath="..\..\MMgc\GCLargeAlloc-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="GCLargeAlloc.cpp"
+				RelativePath="..\..\MMgc\GCLargeAlloc.cpp"
 				>
 			</File>
 			<File
-				RelativePath="GCLargeAlloc.h"
+				RelativePath="..\..\MMgc\GCLargeAlloc.h"
 				>
 			</File>
 			<File
-				RelativePath="GCLog.cpp"
+				RelativePath="..\..\MMgc\GCLog.cpp"
 				>
 			</File>
 			<File
-				RelativePath="GCLog.h"
+				RelativePath="..\..\MMgc\GCLog.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCMemoryProfiler.cpp"
+				RelativePath="..\..\MMgc\GCMemoryProfiler.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCMemoryProfiler.h"
+				RelativePath="..\..\MMgc\GCMemoryProfiler.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCObject.cpp"
+				RelativePath="..\..\MMgc\GCObject.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCObject.h"
+				RelativePath="..\..\MMgc\GCObject.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCSpinLock.h"
+				RelativePath="..\..\MMgc\GCSpinLock.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCStack.cpp"
+				RelativePath="..\..\MMgc\GCStack.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCStack.h"
+				RelativePath="..\..\MMgc\GCStack.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCTests.cpp"
+				RelativePath="..\..\MMgc\GCTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GCTests.h"
+				RelativePath="..\..\MMgc\GCTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCTypes.h"
+				RelativePath="..\..\MMgc\GCTypes.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GCWeakRef.h"
+				RelativePath="..\..\MMgc\GCWeakRef.h"
 				>
 			</File>
 			<File
-				RelativePath=".\MMgc.h"
+				RelativePath="..\..\MMgc\MMgc.h"
 				>
 			</File>
 			<File
-				RelativePath=".\TypeTraits.h"
+				RelativePath="..\..\MMgc\TypeTraits.h"
 				>
 			</File>
 			<File
-				RelativePath=".\winbuild.h"
+				RelativePath="..\..\MMgc\winbuild.h"
 				>
 			</File>
 			<File
-				RelativePath=".\WinCEUtil.armasm"
+				RelativePath="..\..\MMgc\WinCEUtil.armasm"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1710,19 +1710,19 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\WriteBarrier.h"
+				RelativePath="..\..\MMgc\WriteBarrier.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ZCT-inlines.h"
+				RelativePath="..\..\MMgc\ZCT-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ZCT.cpp"
+				RelativePath="..\..\MMgc\ZCT.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ZCT.h"
+				RelativePath="..\..\MMgc\ZCT.h"
 				>
 			</File>
 		</Filter>
@@ -1730,11 +1730,11 @@
 			Name="platform"
 			>
 			<File
-				RelativePath="..\VMPI\MMgcPortWin.cpp"
+				RelativePath="..\..\VMPI\MMgcPortWin.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\VMPI\SpyUtilsWin.cpp"
+				RelativePath="..\..\VMPI\SpyUtilsWin.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
@@ -1786,7 +1786,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\VMPI\SpyUtilsWinMo.cpp"
+				RelativePath="..\..\VMPI\SpyUtilsWinMo.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1886,12 +1886,12 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\VMPI\ThreadsWin.cpp"
+				RelativePath="..\..\VMPI\ThreadsWin.cpp"
 				>
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\VTune\MMgc.vpj"
+			RelativePath="..\..\MMgc\VTune\MMgc.vpj"
 			>
 		</File>
 	</Files>
