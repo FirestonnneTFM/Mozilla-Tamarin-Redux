@@ -2002,8 +2002,14 @@ namespace MMgc
 		while (lastRegion != NULL) {
 			Region *region = lastRegion;
 			lastRegion = lastRegion->prev;
-			ReleaseMemory(region->baseAddr,
-						  region->reserveTop-region->baseAddr);
+			if(region->blockId == kLargeItemBlockId) {
+				// leaks can happen during abort
+				GCAssertMsg(status == kMemAbort, "Allocation of large object not freed");
+				VMPI_releaseMemoryRegion(region->baseAddr, region->reserveTop - region->baseAddr);
+			} else {
+				ReleaseMemory(region->baseAddr,
+							  region->reserveTop-region->baseAddr);
+			}
 		}
 	}
 	
