@@ -155,7 +155,6 @@ as3/Array/forEach:If IsCallable\(callbackfn\) is false.*, .*, expectedfail, need
 mops/mops, arm-winmobile-tvm.*, skip, multiple abc files not supported on winmo devices
 abcasm/.*, arm-winmobile-tvm.*, skip, multiple abc files not supported on winmo devices
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-regress/bug_515935, arm-winmobile.*-debug, skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544549
 ecma3/Expressions/e11_2_1_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
 ecma3/Expressions/e11_4_6, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
 ecma3/RegExp/eperlstress_001, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
