@@ -686,7 +686,7 @@ namespace MMgc
 	REALLY_INLINE GCWorkItem::GCWorkItem(const void *p, uint32_t s, GCWorkItemType workItemType)
 		: ptr(p)
 #ifdef MMGC_INTERIOR_PTRS
-		, _size(s | uint32_t(kHasInteriorPointers) | uint32_t(workItemType))
+		, _size(s | uint32_t(kHasInteriorPtrs) | uint32_t(workItemType))
 #else
         , _size(s | uint32_t(workItemType))
 #endif
