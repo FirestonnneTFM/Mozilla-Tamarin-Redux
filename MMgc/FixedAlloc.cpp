@@ -141,6 +141,7 @@ namespace MMgc
 	void* FixedAlloc::Alloc(size_t size, FixedMallocOpts flags)
 	{
 		void *item = InlineAllocSansHook(size, flags); 
+		GCAssertMsg(item != NULL || (flags&kCanFail), "NULL is only valid when kCanFail is set");
 #ifdef MMGC_HOOKS
 		InlineAllocHook(size, item);
 #endif

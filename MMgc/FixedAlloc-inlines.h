@@ -87,8 +87,8 @@ namespace MMgc
 
 	REALLY_INLINE void FixedAlloc::InlineAllocHook(size_t size, void *item)
 	{
-		FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
-		if(m_heap->HooksEnabled()) {
+		if(m_heap->HooksEnabled() && item != NULL) {
+            FixedBlock *b = (FixedBlock*) ((uintptr_t)item & ~0xFFF);
 			m_heap->AllocHook(item, size, b->size - DebugSize());
 		}
 	}
@@ -116,6 +116,7 @@ namespace MMgc
 		{
 			MMGC_LOCK(m_spinlock);
 			item = FixedAlloc::InlineAllocSansHook(size, flags); 
+            GCAssertMsg(item != NULL || (flags&kCanFail), "NULL is only valid when kCanFail is set");
 		}
 #ifdef MMGC_HOOKS
 		InlineAllocHook(size, item);
