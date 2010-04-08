@@ -64,6 +64,9 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # BUGS:
 # Grouped by feature or platform
 
+# This was reverted in TR because it needs versioning
+# https://bugzilla.mozilla.org/show_bug.cgi?id=538107
+regress/bug_538107 , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=538107
 
 # https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 mmgc/outofmemory , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=541358
