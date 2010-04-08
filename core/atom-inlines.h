@@ -96,18 +96,12 @@ namespace avmplus
 
     REALLY_INLINE bool atomIsValidIntptrValue(const intptr_t i)
     {
-#ifdef AVMPLUS_64BIT
-        // we want 53 bits of precision, plus 3 bits for the tag bits,
-        // so that's 64-53-3 = 8
-        return (((i << 8) >> 8) == i);
-#else
-        return (((i << 3) >> 3) == i);
-#endif
+        return (((i << atomSignExtendShift) >> atomSignExtendShift) == i);
     }
 
     REALLY_INLINE bool atomIsValidIntptrValue_u(const uintptr_t u)
     {
-        const uintptr_t MASK = ~(uintptr_t(atomMaxIntValue)>>1);
+        const uintptr_t MASK = ~uintptr_t(atomMaxIntValue);
         return (u & MASK) == 0;
     }
 

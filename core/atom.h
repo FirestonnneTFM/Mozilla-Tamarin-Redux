@@ -152,15 +152,30 @@ namespace avmplus
 
     }
 
+    // atomMinIntValue is the smallest negative (most negative) integer value representable
+    // in a native word, and atomMaxIntValue is the largest positive integer value thus 
+    // representable, in both cases constrained such that interchanging the value to and
+    // from a 'double' can be done without loss of precision.
+    //
+    //  - On 32-bit systems an intptr_t is 32 bits wide so the range is -2^28 .. 2^28-1 (29 bit range).
+    //
+    //  - On 64-bit systems an intptr_t is 64 bits wide so the value is actually constrained by
+    //    the available bits in a double.  There are 53 bits of unsigned mantissa (including the
+    //    hidden leading 1 bit), in addition to the sign bit, for a total of 54 bits, so the
+    //    range is -2^53 .. 2^53-1.
+    //
+    // atomSignExtendShift is the number of bits to shift an untagged intptr_t left and
+    // then right in order to properly sign extend it.  (I don't like the 'atom' prefix but
+    // it fits in with the pattern of the others.)
+    
 #ifdef AVMPLUS_64BIT
-    // in 64-bit builds, integer atoms can hold a 53-bit signed value.
-    // (this is so that integer values can be interchanged with doubles with no loss of precision)
     const intptr_t atomMinIntValue = -(1LL<<53);
     const intptr_t atomMaxIntValue = (1LL<<53)-1;
+    const intptr_t atomSignExtendShift = 10;         // 54 significant bits
 #else
-    // in 32-bit builds, integer atoms can hold a 29-bit signed value.
-    const intptr_t atomMinIntValue = -(1L<<29);
-    const intptr_t atomMaxIntValue = (1L<<29)-1;
+    const intptr_t atomMinIntValue = -(1L<<28);
+    const intptr_t atomMaxIntValue = (1L<<28)-1;
+    const intptr_t atomSignExtendShift = 3;          // 29 signficant bits
 #endif
 
     // sadly, these generate better code than the inlines in atom-inlines.h
