@@ -566,12 +566,12 @@ namespace avmplus
     {
         va_list ap;
         va_start(ap, argc);
-        LIns* ins = callIns(ci, argc, ap);
+        LIns* ins = vcallIns(ci, argc, ap);
         va_end(ap);
         return ins;
     }
 
-    LIns* LirHelper::callIns(const CallInfo *ci, uint32_t argc, va_list ap)
+    LIns* LirHelper::vcallIns(const CallInfo *ci, uint32_t argc, va_list ap)
     {
         AvmAssert(argc <= MAXARGS);
         AvmAssert(argc == ci->count_args());
@@ -1260,7 +1260,7 @@ namespace avmplus
 
         va_list ap;
         va_start(ap, argc);
-        LIns* ins = LirHelper::callIns(ci, argc, ap);
+        LIns* ins = LirHelper::vcallIns(ci, argc, ap);
         va_end(ap);
         return ins;
     }
