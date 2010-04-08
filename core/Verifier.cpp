@@ -2817,6 +2817,12 @@ namespace avmplus
                 if (name_index != 0)
                 {
                     pool->parseMultiname(qn, name_index);
+                    if (!qn.isBinding()) {
+                        // abc docs specify that the name is a string but asc generates QNames.
+                        // Multinames with no namespaces could be supported, but Tamarin currently can't
+                        // handle them in this context.
+                        verifyFailed(kCorruptABCError); // the error code could be more precise
+                    }
                 }
 
                 #ifdef AVMPLUS_VERBOSE
