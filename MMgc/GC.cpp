@@ -3929,6 +3929,7 @@ namespace MMgc
 			m_markStackOverflow = false;
 			collecting = false;
 			marking = false;
+            markerActive = 0;
 		}
 
 		if(GetAutoEnter() != NULL) {
