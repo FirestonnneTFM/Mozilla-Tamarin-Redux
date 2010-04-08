@@ -1329,10 +1329,10 @@ namespace avmplus
 				wch = wchar(*ptrs.p8++);
 			else
 				wch = *ptrs.p16++;
-			n = (n * 10) + wch - '0';
-			// bad character, or more than one leading zero?
+			// bad character, or leading zero?
 			if (wch < '0' || wch > '9' || (i == 1 && n == 0))
 				goto bad;
+			n = (n * 10) + wch - '0';
 		}
 		// out of range?
 		if (n >= 0xFFFFFFFF)
@@ -1375,10 +1375,10 @@ namespace avmplus
 				wch = wchar(*ptrs.p8++);
 			else
 				wch = *ptrs.p16++;
-			n = (n * 10) + wch - '0';
-			// bad character, or more than one leading zero?
+			// bad character, or leading zero?
 			if (wch < '0' || wch > '9' || (i == 1 && n == 0))
 				goto bad;
+			n = (n * 10) + wch - '0';
 			if (n & ScriptObject::MAX_INTEGER_MASK)
 				goto bad;
 		}
