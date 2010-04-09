@@ -400,7 +400,8 @@ class AcceptanceRuntest(RuntestBase):
                 # check the expectedErr - error is always the last (non-empty) line of output
                 actualErr = ''
                 for line in reversed(f):
-                    if line.strip():
+                    # make sure we have an error
+                    if re.search('.*Error:.*', line):
                         actualErr = self.getError(line.strip())
                         break
                 if actualErr != expectedErr:
