@@ -41,85 +41,85 @@
 
 namespace MMgc
 {
-	void PrintAllocStackTrace(const void *item);
-	void PrintDeleteStackTrace(const void *item);
-	const char* GetAllocationName(const void *obj);
+    void PrintAllocStackTrace(const void *item);
+    void PrintDeleteStackTrace(const void *item);
+    const char* GetAllocationName(const void *obj);
 
 #ifdef MMGC_MEMORY_PROFILER
 
-	const int kMaxStackTrace = 16; // RtlCaptureStackBackTrace stops working when this is 32
+    const int kMaxStackTrace = 16; // RtlCaptureStackBackTrace stops working when this is 32
 
 #define MMGC_MEM_TAG(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemTag(_x)
 #define MMGC_MEM_TYPE(_x) if(MMgc::GCHeap::GetGCHeap()->HooksEnabled()) MMgc::SetMemType(_x)
-	
-	class StackTrace;
 
-	void SetMemTag(const char *memtag);
-	void SetMemType(const void *memtype);
-	void PrintStackTrace(StackTrace *trace);
+    class StackTrace;
 
-	class GCStackTraceHashtableKeyHandler
-	{
-	public:
-		inline static uint32_t hash(const void* k)
-		{
-			const int* array = (const int*)k;
-			int hash = 0;
-			for(int i=0;i<kMaxStackTrace; i++)
-				hash += array[i];
-			return uint32_t(hash);
-		}
+    void SetMemTag(const char *memtag);
+    void SetMemType(const void *memtype);
+    void PrintStackTrace(StackTrace *trace);
 
-		inline static bool equal(const void* k1, const void* k2)
-		{
-			if (k1 == NULL || k2 == NULL)
-				return false;
-			return VMPI_memcmp(k1, k2, kMaxStackTrace * sizeof(void*)) == 0;
-		}
-	};
+    class GCStackTraceHashtableKeyHandler
+    {
+    public:
+        inline static uint32_t hash(const void* k)
+        {
+            const int* array = (const int*)k;
+            int hash = 0;
+            for(int i=0;i<kMaxStackTrace; i++)
+                hash += array[i];
+            return uint32_t(hash);
+        }
 
-	typedef GCHashtableBase<GCStackTraceHashtableKeyHandler,GCHashtableAllocHandler_VMPI> GCStackTraceHashtable_VMPI;
+        inline static bool equal(const void* k1, const void* k2)
+        {
+            if (k1 == NULL || k2 == NULL)
+                return false;
+            return VMPI_memcmp(k1, k2, kMaxStackTrace * sizeof(void*)) == 0;
+        }
+    };
 
-	class MemoryProfiler : public GCAllocObject
-	{
-	public:
-		MemoryProfiler();
-		~MemoryProfiler();
-		void RecordAllocation(const void *item, size_t askSize, size_t gotSize);
-		void RecordDeallocation(const void *item, size_t size);
-		void DumpFatties();
-		void DumpSimple();
-		const char *GetAllocationName(const void *obj);
-		StackTrace *GetAllocationTrace(const void *obj);
-		StackTrace *GetDeletionTrace(const void *obj);
-		StackTrace *GetStackTrace();
-		size_t GetAskSize(const void* item);
+    typedef GCHashtableBase<GCStackTraceHashtableKeyHandler,GCHashtableAllocHandler_VMPI> GCStackTraceHashtable_VMPI;
 
-	private:
-		StackTrace *GetStackTraceLocked();
-		StackTrace *GetAllocationTraceLocked(const void *obj);
+    class MemoryProfiler : public GCAllocObject
+    {
+    public:
+        MemoryProfiler();
+        ~MemoryProfiler();
+        void RecordAllocation(const void *item, size_t askSize, size_t gotSize);
+        void RecordDeallocation(const void *item, size_t size);
+        void DumpFatties();
+        void DumpSimple();
+        const char *GetAllocationName(const void *obj);
+        StackTrace *GetAllocationTrace(const void *obj);
+        StackTrace *GetDeletionTrace(const void *obj);
+        StackTrace *GetStackTrace();
+        size_t GetAskSize(const void* item);
 
-		const char *Intern(const char *name, size_t len);
-		const char *GetPackage(StackTrace *trace);
-		const char *GetAllocationNameFromTrace(StackTrace *trace);
-		const char *GetAllocationCategory(StackTrace *trace);
+    private:
+        StackTrace *GetStackTraceLocked();
+        StackTrace *GetAllocationTraceLocked(const void *obj);
 
-		// Note: it's important to use the VMPI variant of GCHashtable for all of these.
+        const char *Intern(const char *name, size_t len);
+        const char *GetPackage(StackTrace *trace);
+        const char *GetAllocationNameFromTrace(StackTrace *trace);
+        const char *GetAllocationCategory(StackTrace *trace);
 
-		// intern table of StackTrace*
-		GCStackTraceHashtable_VMPI stackTraceMap;
+        // Note: it's important to use the VMPI variant of GCHashtable for all of these.
 
-		// intern table of strings used by Profiler
-		GCStringHashtable_VMPI stringsTable;
+        // intern table of StackTrace*
+        GCStackTraceHashtable_VMPI stackTraceMap;
 
-		// hash table for address -> name lookup
-		GCHashtable_VMPI nameTable;
+        // intern table of strings used by Profiler
+        GCStringHashtable_VMPI stringsTable;
 
-		//table to store allocation specific information
-		GCHashtable_VMPI allocInfoTable;
+        // hash table for address -> name lookup
+        GCHashtable_VMPI nameTable;
 
-		vmpi_spin_lock_t lock;
-	};
+        //table to store allocation specific information
+        GCHashtable_VMPI allocInfoTable;
+
+        vmpi_spin_lock_t lock;
+    };
 
 #else // MMGC_MEMORY_PROFILER
 
@@ -134,38 +134,38 @@ namespace MMgc
 #define GetUserPointer(_x) _x
 #define DebugSize() 0
 
-#else 
+#else
 
-	/**
-	* How much extra size does DebugDecorate need?
-	*/
-	size_t DebugSize();
+    /**
+    * How much extra size does DebugDecorate need?
+    */
+    size_t DebugSize();
 
-	/**
-	* decorate memory with debug information, return pointer to memory to return to caller
-	*/
-	void DebugDecorate(const void *item, size_t size);
-	
-	/** 
-	* Given a pointer to user memory do debug checks and return pointer to real memory
-	*/
-	void *DebugFree(const void *item, int poison, size_t size, bool actualFree);		
+    /**
+    * decorate memory with debug information, return pointer to memory to return to caller
+    */
+    void DebugDecorate(const void *item, size_t size);
 
-	/**
-	* Given a user pointer back up to real beginning
-	*/
-	inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int32_t)); }
+    /**
+    * Given a pointer to user memory do debug checks and return pointer to real memory
+    */
+    void *DebugFree(const void *item, int poison, size_t size, bool actualFree);
 
-	/**
-	* Given a real pointer return pointer to user memory
-	*/
-	inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int32_t)); }
+    /**
+    * Given a user pointer back up to real beginning
+    */
+    inline void *GetRealPointer(const void *item) { return (void*)((uintptr_t) item -  2 * sizeof(int32_t)); }
 
-	/**
-	* Print errorr messsage and stack traces for allocation/free of memory
-	* that has been written over after being deleted
-	*/
-	void ReportDeletedMemoryWrite(const void* item);
+    /**
+    * Given a real pointer return pointer to user memory
+    */
+    inline void *GetUserPointer(const void *item) { return (void*)((uintptr_t) item +  2 * sizeof(int32_t)); }
+
+    /**
+    * Print errorr messsage and stack traces for allocation/free of memory
+    * that has been written over after being deleted
+    */
+    void ReportDeletedMemoryWrite(const void* item);
 
 #endif //MMGC_MEMORY_INFO
 

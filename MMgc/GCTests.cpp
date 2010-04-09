@@ -36,9 +36,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
- 
+
 #include "MMgc.h"
- 
+
 #ifdef _MSC_VER
 // "behavior change: an object of POD type constructed with an initializer of the form () will be default-initialized"
 #pragma warning(disable:4345) // b/c GCObject doesn't have a ctor
@@ -52,132 +52,132 @@
 
 namespace MMgc
 {
-	GC *gc;
+    GC *gc;
 
-	void collect()
-	{
-		gc->Collect();
-	}
+    void collect()
+    {
+        gc->Collect();
+    }
 
-	GCWeakRef* createWeakRef(int extra=0)
-	{
-		// Bogusly use up some extra stack.
-		//
-		// Certain compilers/platforms require this (at least gcc/MacIntel).
-		// A pointer to the temporary GCObject can be left on the stack, so
-		// far down that CleanStack doesn't dare touch it.  Leaving the
-		// pointer there causes the temporary to be marked, and not collected,
-		// which causes tests to fail with assertions.
-		///
-		// The extra 64 bytes here causes the temporary to end up higher on
-		// the stack (numerically lesser address, on Intel at least) where
-		// CleanStack will clobber it.
-		//
-		char buf[64];
-		VMPI_sprintf(buf, "%d", extra);  // don't optimize away buf
+    GCWeakRef* createWeakRef(int extra=0)
+    {
+        // Bogusly use up some extra stack.
+        //
+        // Certain compilers/platforms require this (at least gcc/MacIntel).
+        // A pointer to the temporary GCObject can be left on the stack, so
+        // far down that CleanStack doesn't dare touch it.  Leaving the
+        // pointer there causes the temporary to be marked, and not collected,
+        // which causes tests to fail with assertions.
+        ///
+        // The extra 64 bytes here causes the temporary to end up higher on
+        // the stack (numerically lesser address, on Intel at least) where
+        // CleanStack will clobber it.
+        //
+        char buf[64];
+        VMPI_sprintf(buf, "%d", extra);  // don't optimize away buf
 
-		return (new (gc, extra) GCObject())->GetWeakRef();
-	}
+        return (new (gc, extra) GCObject())->GetWeakRef();
+    }
 
-	void weakRefSweepSmall()
-	{
-		GCWeakRef *ref = createWeakRef();
-		collect();
-		gc->CleanStack(true);
-		collect();
-		(void)ref;
-		GCAssert(ref->get() == NULL);
-	}
+    void weakRefSweepSmall()
+    {
+        GCWeakRef *ref = createWeakRef();
+        collect();
+        gc->CleanStack(true);
+        collect();
+        (void)ref;
+        GCAssert(ref->get() == NULL);
+    }
 
-	void weakRefSweepLarge()
-	{
-		GCWeakRef *ref = createWeakRef(5000);
-		collect();
-		gc->CleanStack(true);
-		collect();
-		(void)ref;
-		GCAssert(ref->get() == NULL);
-	}
+    void weakRefSweepLarge()
+    {
+        GCWeakRef *ref = createWeakRef(5000);
+        collect();
+        gc->CleanStack(true);
+        collect();
+        (void)ref;
+        GCAssert(ref->get() == NULL);
+    }
 
-	void weakRefFreeSmall()
-	{
-		GCWeakRef *ref = createWeakRef();
-		delete ref->get();
-		GCAssert(ref->get() == NULL);
-	}
+    void weakRefFreeSmall()
+    {
+        GCWeakRef *ref = createWeakRef();
+        delete ref->get();
+        GCAssert(ref->get() == NULL);
+    }
 
-	void weakRefFreeLarge()
-	{
-		GCWeakRef *ref = createWeakRef(5000);
-		delete ref->get();
-		GCAssert(ref->get() == NULL);
-	}
+    void weakRefFreeLarge()
+    {
+        GCWeakRef *ref = createWeakRef(5000);
+        delete ref->get();
+        GCAssert(ref->get() == NULL);
+    }
 
-	class RCObjectAddRefInDtor : public RCObject
-	{
-	public:
-		RCObjectAddRefInDtor(RCObject ** _stackPinners, int _length) : rcs(_stackPinners), length(_length) {}
-		~RCObjectAddRefInDtor() 
-		{ 
-			// whack these, used create freelist
-			for(int i=0, n=length; i<n;i++)
-			{
-				r1 = rcs[i];
-			}
+    class RCObjectAddRefInDtor : public RCObject
+    {
+    public:
+        RCObjectAddRefInDtor(RCObject ** _stackPinners, int _length) : rcs(_stackPinners), length(_length) {}
+        ~RCObjectAddRefInDtor()
+        {
+            // whack these, used create freelist
+            for(int i=0, n=length; i<n;i++)
+            {
+                r1 = rcs[i];
+            }
 
-			// add/remove myself (this was the apollo bug)
-			r1 = this;
-			r1 = NULL;
-			rcs = NULL;
-			length = 0;
-		}
-		DRCWB(RCObject*) r1;
+            // add/remove myself (this was the apollo bug)
+            r1 = this;
+            r1 = NULL;
+            rcs = NULL;
+            length = 0;
+        }
+        DRCWB(RCObject*) r1;
 
-		// naked pointer so I can kick these pinners out out of the ZCT during reap
-		RCObject **rcs;
-		int length;
-	};
+        // naked pointer so I can kick these pinners out out of the ZCT during reap
+        RCObject **rcs;
+        int length;
+    };
 
-	GCWeakRef* createProblem(RCObject **stackPinners)
-	{
-		// now create one that causes some removes from the dtor
-		return (new (gc) RCObjectAddRefInDtor(stackPinners, 3))->GetWeakRef();
-	}
+    GCWeakRef* createProblem(RCObject **stackPinners)
+    {
+        // now create one that causes some removes from the dtor
+        return (new (gc) RCObjectAddRefInDtor(stackPinners, 3))->GetWeakRef();
+    }
 
-	/* see bug 182420 */
-	void drcApolloTest()
-	{
-		// prime ZCT with some pinners
-		RCObject *stackPinners[3];
-		VMPI_memset(stackPinners, 0, sizeof(stackPinners));
+    /* see bug 182420 */
+    void drcApolloTest()
+    {
+        // prime ZCT with some pinners
+        RCObject *stackPinners[3];
+        VMPI_memset(stackPinners, 0, sizeof(stackPinners));
 
-		GCWeakRef *wr = createProblem(stackPinners);
+        GCWeakRef *wr = createProblem(stackPinners);
 
-		stackPinners[0] = new (gc) RCObject();
-		stackPinners[1] = new (gc) RCObject();
-		stackPinners[2] = new (gc) RCObject();
+        stackPinners[0] = new (gc) RCObject();
+        stackPinners[1] = new (gc) RCObject();
+        stackPinners[2] = new (gc) RCObject();
 
-		// force ZCT
-		for(int i=0, n=1000;i<n; i++)
-		{
-			new (gc) RCObject();
-		}
+        // force ZCT
+        for(int i=0, n=1000;i<n; i++)
+        {
+            new (gc) RCObject();
+        }
 
-		// it may still be alive if we had a dirty stack
-		if(wr->get())
-			delete wr->get();
-	}
+        // it may still be alive if we had a dirty stack
+        if(wr->get())
+            delete wr->get();
+    }
 
-	// See comments in header file regarding what might happen if this is called.
-	void RunGCTests(GC *g)
-	{
-		gc = g;
-		weakRefSweepSmall();
-		weakRefSweepLarge();
-		weakRefFreeSmall();
-		weakRefFreeLarge();
-		drcApolloTest();
-	}
+    // See comments in header file regarding what might happen if this is called.
+    void RunGCTests(GC *g)
+    {
+        gc = g;
+        weakRefSweepSmall();
+        weakRefSweepLarge();
+        weakRefFreeSmall();
+        weakRefFreeLarge();
+        drcApolloTest();
+    }
 }
 
 #endif // _DEBUG

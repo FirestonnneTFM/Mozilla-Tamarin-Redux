@@ -40,6 +40,6 @@
 
 namespace MMgc
 {
-	void GCLog(const char* format, ...);
+    void GCLog(const char* format, ...);
 }
 #endif /* __GCLog_h__ */
