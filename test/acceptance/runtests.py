@@ -354,6 +354,8 @@ class AcceptanceRuntest(RuntestBase):
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s -- %s' % (self.avm, self.vmargs, extraVmArgs, testName, abcargs))
             else:
                 (f,err,exitcode) = self.run_pipe('%s %s %s %s' % (self.avm, self.vmargs, extraVmArgs, testName))
+        
+        # Test has been run, handle output
             
         if not self.verify:
             try:
@@ -390,20 +392,32 @@ class AcceptanceRuntest(RuntestBase):
             except:
                 print 'exception running avm'
                 raise
-            exitcodeExp=0
-            if isfile(root+".exitcode"):
+            expectedExitcode=0
+            if isfile(root+'.err'):
+                # .err file holds both the expected (non-catchable) error (usually a VerifyError) and the expected exitcode
+                expectedErr,expectedExitcode = self.loadExpectedErr(root+'.err')
+                # check the expectedErr - error is always the last (non-empty) line of output
+                actualErr = ''
+                for line in reversed(f):
+                    if line.strip():
+                        actualErr = self.getError(line.strip())
+                        break
+                if actualErr != expectedErr:
+                    outputCalls.append((self.fail,(testName, 'unexpected error message. expected: %s actual: %s' % (expectedErr, actualErr), self.failmsgs)))
+                    lfail += 1
+            elif isfile(root+".exitcode"):
                 try:
-                    exitcodeExp=int(open(root+".exitcode").read())
+                    expectedExitcode=int(open(root+".exitcode").read())
                 except:
                     print("ERROR: reading exit code file '%s' should contain an integer")
             res=dict_match(settings,'exitcode','expectedfail')
-            if exitcode!=exitcodeExp:
+            if exitcode!=expectedExitcode:
                 res2=dict_match(settings,'exitcode','skip')
                 if res2==None and res:
                     outputCalls.append((self.js_print,(testName, 'expected failure: exitcode reason: %s'%res,self.expfailmsgs)))
                     lexpfail += 1
                 elif res2==None:
-                    outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d Signal Name: %s FAILED!' % (exitcodeExp,exitcode,getSignalName(abs(exitcode))), self.failmsgs)))
+                    outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d Signal Name: %s FAILED!' % (expectedExitcode,exitcode,getSignalName(abs(exitcode))), self.failmsgs)))
                     outputCalls.append((self.fail,(testName, 'captured output: %s' % string.join([l.strip() for l in outputLines], ' | '), self.failmsgs)))
                     lfail+= 1
             elif err!=[]:
@@ -415,8 +429,8 @@ class AcceptanceRuntest(RuntestBase):
                     lexpfail += 1
                 else:
                     # test may not have any output but is still passing if a non-standard exitcode was expected (e.g. VerifyErrors)
-                    if exitcodeExp != 0 and exitcode==exitcodeExp:
-                        #outputCalls.append((self.js_print,('  Expected Exit Code: %s Actual Exit Code: %s PASSED' % (exitcodeExp, exitcode),)))
+                    if expectedExitcode != 0 and exitcode==expectedExitcode:
+                        #outputCalls.append((self.js_print,('  Expected Exit Code: %s Actual Exit Code: %s PASSED' % (expectedExitcode, exitcode),)))
                         lpass = 1
                     else:
                         lfail = 1
@@ -439,5 +453,35 @@ class AcceptanceRuntest(RuntestBase):
         
 
         return outputCalls
+    
+    def loadExpectedErr(self, file):
+        try:
+            f = open(file, 'r')
+            expectedErr = ''
+            expectedExitcode = 0
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    if line.lower().startswith('exitcode:'):
+                        try:
+                            expectedExitcode = int(line.split(':')[1].strip())
+                        except ValueError:
+                            pass
+                    else:
+                        # check to see if line is a number - if so set expectedExitcode
+                        try:
+                            expectedExitcode = int(line)
+                        except ValueError:
+                            expectedErr = line
+            return expectedErr, expectedExitcode
+        except:
+            return 'Error reading .err file: %s' % file, 0
+    
+    def getError(self, line):
+        # Parse out the error type and #, but strip the description
+        try:
+            return ':'.join(line.split(':')[0:2])
+        except:
+            return line
     
 runtest = AcceptanceRuntest()
