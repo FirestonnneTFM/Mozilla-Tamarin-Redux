@@ -137,7 +137,18 @@ REALLY_INLINE PoolObject::ConstantStrings::~ConstantStrings()
 REALLY_INLINE void PoolObject::ConstantStrings::setup(uint32_t size)
 {
     AvmAssert(data == NULL);
-    size *= sizeof(ConstantStringData);
+    // Always allocate slot 0 in the data array, which will be
+    // initialized to an empty String* in AbcParser::parseCpool().
+    // We also avoid invoking mmfx_alloc() with a size of zero,
+    // which will violate an assertion.
+    // TODO: If there are no strings, we should be able to set
+    // data = NULL, size = 0, and avoid calling the allocator.
+    // Slot 0 should never be accessed, and the code guards against
+    // such accesses generally, but there are presently exceptions.
+    // With the guards spread over much code, it is safer to do
+    // as we do here.  This problem extends to other constant pool
+    // entry types, and should be cleaned up.  See bug 557684. 
+    size = (size ? size : 1) * sizeof(ConstantStringData);
     data = (ConstantStringData*) mmfx_alloc(size);
     Set(data, size);
 }
