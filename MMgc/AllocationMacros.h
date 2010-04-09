@@ -35,50 +35,50 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
+
 #ifndef __ALLOCATIONMACROS__
 #define __ALLOCATIONMACROS__
 
 // The allocation macros. mmfx_? ones will have an alternative implementation of mapping to original new/delete implementations
 // the others are always on.
 
-namespace MMgc 
+namespace MMgc
 {
-	enum NewDummyOperand { kUseFixedMalloc };
+    enum NewDummyOperand { kUseFixedMalloc };
 }
 
 #ifndef MMGC_OVERRIDE_GLOBAL_NEW
 
 // Used for allocating/deallocating memory with MMgc's fixed allocator.
-// The memory allocated using these macros will be released when the MMgc aborts due to 
+// The memory allocated using these macros will be released when the MMgc aborts due to
 // an unrecoverable out of memory situation.
-#define mmfx_new(new_data)					new (MMgc::kUseFixedMalloc) new_data
-#define mmfx_new0(new_data)					new (MMgc::kUseFixedMalloc, MMgc::kZero) new_data
+#define mmfx_new(new_data)                  new (MMgc::kUseFixedMalloc) new_data
+#define mmfx_new0(new_data)                 new (MMgc::kUseFixedMalloc, MMgc::kZero) new_data
 
-#define mmfx_new_array(type, n)				::MMgcConstructTaggedArray((type*)NULL, n, MMgc::kNone)
+#define mmfx_new_array(type, n)             ::MMgcConstructTaggedArray((type*)NULL, n, MMgc::kNone)
 
-#define mmfx_new_opt(new_data, opts)		new (MMgc::kUseFixedMalloc, opts) new_data
-#define mmfx_new_array_opt(type, n, opts)	::MMgcConstructTaggedArray((type*)NULL, n, opts)
+#define mmfx_new_opt(new_data, opts)        new (MMgc::kUseFixedMalloc, opts) new_data
+#define mmfx_new_array_opt(type, n, opts)   ::MMgcConstructTaggedArray((type*)NULL, n, opts)
 
-#define mmfx_delete(p)						::MMgcDestructTaggedScalarChecked(p)
-#define mmfx_delete_array(p)				::MMgcDestructTaggedArrayChecked(p)
+#define mmfx_delete(p)                      ::MMgcDestructTaggedScalarChecked(p)
+#define mmfx_delete_array(p)                ::MMgcDestructTaggedArrayChecked(p)
 
-#define mmfx_alloc(_siz)					MMgc::AllocCall(_siz)
+#define mmfx_alloc(_siz)                    MMgc::AllocCall(_siz)
 #define mmfx_alloc_opt(_siz, opts)          MMgc::AllocCall(_siz, opts)
-#define mmfx_free(_ptr)						MMgc::DeleteCall(_ptr)
+#define mmfx_free(_ptr)                     MMgc::DeleteCall(_ptr)
 
 #else
 
-#define mmfx_new(new_data)					new new_data
-#define mmfx_new0(new_data)					new (MMgc::kZero) new_data
+#define mmfx_new(new_data)                  new new_data
+#define mmfx_new0(new_data)                 new (MMgc::kZero) new_data
 
-#define mmfx_new_array(type, n)				new type[n]
+#define mmfx_new_array(type, n)             new type[n]
 
-#define mmfx_new_opt(new_data, opts)		new (opts) new_data
-#define mmfx_new_array_opt(type, n, opts)	new (opts) type[n]
+#define mmfx_new_opt(new_data, opts)        new (opts) new_data
+#define mmfx_new_array_opt(type, n, opts)   new (opts) type[n]
 
-#define mmfx_delete(p)						delete p
-#define mmfx_delete_array(p)				delete[] p
+#define mmfx_delete(p)                      delete p
+#define mmfx_delete_array(p)                delete[] p
 
 #define mmfx_alloc(_siz)                    new char[_siz]
 #define mmfx_alloc_opt(_siz, opts)          new (opts) char[_siz]
@@ -88,9 +88,9 @@ namespace MMgc
 
 // Used to allocate memory from the system default operator new. The lifetime of these
 // allocations may exceed the lifetime of MMgc.
-#define system_new(new_data)				new new_data
-#define system_new_array(type, n)			new type[n]
-#define system_delete(p)					delete p
-#define system_delete_array(p)				delete[] p
+#define system_new(new_data)                new new_data
+#define system_new_array(type, n)           new type[n]
+#define system_delete(p)                    delete p
+#define system_delete_array(p)              delete[] p
 
 #endif // __ALLOCATIONMACROS__

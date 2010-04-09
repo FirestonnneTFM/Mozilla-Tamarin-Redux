@@ -40,24 +40,24 @@
 
 namespace MMgc
 {
-	void* GCAllocObject::operator new (size_t size)
-	{
-		return VMPI_alloc(size);
-	}
+    void* GCAllocObject::operator new (size_t size)
+    {
+        return VMPI_alloc(size);
+    }
 
-	void* GCAllocObject::operator new[] (size_t size)
-	{
-		return VMPI_alloc(size);
-	}
-	
-	void GCAllocObject::operator delete (void *ptr)
-	{
-		VMPI_free(ptr);
-	}
+    void* GCAllocObject::operator new[] (size_t size)
+    {
+        return VMPI_alloc(size);
+    }
 
-	void GCAllocObject::operator delete [] (void *ptr)
-	{
-		VMPI_free(ptr);
-	}
+    void GCAllocObject::operator delete (void *ptr)
+    {
+        VMPI_free(ptr);
+    }
+
+    void GCAllocObject::operator delete [] (void *ptr)
+    {
+        VMPI_free(ptr);
+    }
 }
 

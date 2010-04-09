@@ -41,154 +41,154 @@
 
 namespace MMgc
 {
-	/**
-	* simplified version of avmplus hashtable
-	*/
-	template <class KEYHANDLER, class ALLOCHANDLER>
-	class GCHashtableBase
-	{
-	public:
-		static uint32_t const kDefaultSize = 16;
+    /**
+    * simplified version of avmplus hashtable
+    */
+    template <class KEYHANDLER, class ALLOCHANDLER>
+    class GCHashtableBase
+    {
+    public:
+        static uint32_t const kDefaultSize = 16;
 
-		GCHashtableBase(uint32_t capacity = kDefaultSize);
-		~GCHashtableBase();
+        GCHashtableBase(uint32_t capacity = kDefaultSize);
+        ~GCHashtableBase();
 
-		void clear();
+        void clear();
 
-		REALLY_INLINE const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
-		REALLY_INLINE const void* get(intptr_t key) { return get((const void*)key); }
-		const void* remove(const void* key);
-		// updates value if present, adds and grows if necessary if not
-		void put(const void* key, const void* value);
-		REALLY_INLINE void add(const void* key, const void* value) { put(key, value); }
-		REALLY_INLINE void add(intptr_t key, const void* value) { put((const void*)key, value); }
-		REALLY_INLINE uint32_t count() const { return numValues - numDeleted; }
+        REALLY_INLINE const void* get(const void* key) { return table[find(key, table, tableSize)+1]; }
+        REALLY_INLINE const void* get(intptr_t key) { return get((const void*)key); }
+        const void* remove(const void* key);
+        // updates value if present, adds and grows if necessary if not
+        void put(const void* key, const void* value);
+        REALLY_INLINE void add(const void* key, const void* value) { put(key, value); }
+        REALLY_INLINE void add(intptr_t key, const void* value) { put((const void*)key, value); }
+        REALLY_INLINE uint32_t count() const { return numValues - numDeleted; }
 
-		int32_t nextIndex(int32_t index);
-		const void* keyAt(int32_t index) const { return table[index<<1]; }
-		const void* valueAt(int32_t index) const { return table[((index)<<1)+1]; }
+        int32_t nextIndex(int32_t index);
+        const void* keyAt(int32_t index) const { return table[index<<1]; }
+        const void* valueAt(int32_t index) const { return table[((index)<<1)+1]; }
 
-		class Iterator
-		{
-		public:
-			Iterator(GCHashtableBase* _ht) : ht(_ht), index(-2) {}
+        class Iterator
+        {
+        public:
+            Iterator(GCHashtableBase* _ht) : ht(_ht), index(-2) {}
 
-			const void* nextKey() 
-			{ 
-				do {
-					index += 2;
-				} while(index < (int32_t)ht->tableSize && ht->table[index] <= GCHashtableBase::DELETED);
+            const void* nextKey()
+            {
+                do {
+                    index += 2;
+                } while(index < (int32_t)ht->tableSize && ht->table[index] <= GCHashtableBase::DELETED);
 
-				return (index < (int32_t)ht->tableSize) ? ht->table[index] : NULL;
-			}
+                return (index < (int32_t)ht->tableSize) ? ht->table[index] : NULL;
+            }
 
-			const void* value() 
-			{ 
-				GCAssert(ht->table[index] != NULL); 
-				return ht->table[index+1]; 
-			}
+            const void* value()
+            {
+                GCAssert(ht->table[index] != NULL);
+                return ht->table[index+1];
+            }
 
-		private:
-			GCHashtableBase* volatile ht;
-			int32_t index;
-		};
+        private:
+            GCHashtableBase* volatile ht;
+            int32_t index;
+        };
 
-	private:
-		uint32_t find(const void* key, const void** table, uint32_t tableSize);
+    private:
+        uint32_t find(const void* key, const void** table, uint32_t tableSize);
 
-		void grow(bool isRemoval);
+        void grow(bool isRemoval);
 
-		static const void* const DELETED;// = (const void*)1;
-		static const void* EMPTY[4];// = { NULL, NULL, NULL, NULL };
+        static const void* const DELETED;// = (const void*)1;
+        static const void* EMPTY[4];// = { NULL, NULL, NULL, NULL };
 
-	protected:
-		const void** table;		// table elements
-		uint32_t tableSize;		// capacity
-		uint32_t numValues;		// size of table array
-		uint32_t numDeleted;	// number of delete items
-	};
+    protected:
+        const void** table;     // table elements
+        uint32_t tableSize;     // capacity
+        uint32_t numValues;     // size of table array
+        uint32_t numDeleted;    // number of delete items
+    };
 
-	// --------------------------------
-	
-	template <class KEYHANDLER, class ALLOCHANDLER>
-	/*static*/ const void* const GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::DELETED = (const void*)1;
+    // --------------------------------
 
-	template <class KEYHANDLER, class ALLOCHANDLER>
-	/*static*/ const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::EMPTY[4] = { NULL, NULL, NULL, NULL };
+    template <class KEYHANDLER, class ALLOCHANDLER>
+    /*static*/ const void* const GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::DELETED = (const void*)1;
 
-	// --------------------------------
-	
-	/*
-		Why do we need two allocator options?
+    template <class KEYHANDLER, class ALLOCHANDLER>
+    /*static*/ const void* GCHashtableBase<KEYHANDLER,ALLOCHANDLER>::EMPTY[4] = { NULL, NULL, NULL, NULL };
 
-		On some platforms FixedMalloc is known to be faster than the system (VMPI) allocator,
-		but really its about OOM: when we run out of memory we can shutdown in a
-		leak proof manner by zapping the GCHeap; if we use system memory we can't do
-		that (short of using a malloc zone). Also, it's about getting the right
-		profiler data: we want the WeakRef hashtable to show up in the memory profile
-		results.
-	*/
-	class GCHashtableAllocHandler_VMPI
-	{
-	public:
-		static void* alloc(size_t size, bool canFail);
-		static void free(void* ptr);
-	};
+    // --------------------------------
 
-	class GCHashtableAllocHandler_new
-	{
-	public:
-		static void* alloc(size_t size, bool canFail);
-		static void free(void* ptr);
-	};
-	
-	// --------------------------------
+    /*
+        Why do we need two allocator options?
 
-	class GCHashtableKeyHandler
-	{
-	public:
-		REALLY_INLINE static uint32_t hash(const void* k)
-		{
+        On some platforms FixedMalloc is known to be faster than the system (VMPI) allocator,
+        but really its about OOM: when we run out of memory we can shutdown in a
+        leak proof manner by zapping the GCHeap; if we use system memory we can't do
+        that (short of using a malloc zone). Also, it's about getting the right
+        profiler data: we want the WeakRef hashtable to show up in the memory profile
+        results.
+    */
+    class GCHashtableAllocHandler_VMPI
+    {
+    public:
+        static void* alloc(size_t size, bool canFail);
+        static void free(void* ptr);
+    };
+
+    class GCHashtableAllocHandler_new
+    {
+    public:
+        static void* alloc(size_t size, bool canFail);
+        static void free(void* ptr);
+    };
+
+    // --------------------------------
+
+    class GCHashtableKeyHandler
+    {
+    public:
+        REALLY_INLINE static uint32_t hash(const void* k)
+        {
             return uint32_t((uintptr_t(k)>>3) ^ (uintptr_t(k)<<29)); // move the low 3 bits higher up since they're often 0
-		}
+        }
 
-		REALLY_INLINE static bool equal(const void* k1, const void* k2)
-		{
-			return k1 == k2;
-		}
-	};
-	
-	typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_new> GCHashtable;
-	typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCHashtable_VMPI;
+        REALLY_INLINE static bool equal(const void* k1, const void* k2)
+        {
+            return k1 == k2;
+        }
+    };
 
-	// --------------------------------
+    typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_new> GCHashtable;
+    typedef GCHashtableBase<GCHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCHashtable_VMPI;
 
-	class GCStringHashtableKeyHandler
-	{
-	public:
-		REALLY_INLINE static uint32_t hash(const void* k)
-		{
-			uint32_t hash = 0;
-			const char* s = (const char*)k;
-			while (*s++) 
-			{
-				hash = (hash >> 28) ^ (hash << 4) ^ ((uintptr_t)*s << ((uintptr_t)s & 0x3));
-			}
-			return hash;
-		}
+    // --------------------------------
 
-		REALLY_INLINE static bool equal(const void* k1, const void* k2)
-		{
-			if (k1 == k2) 
-				return true;
-			if (k1 && k2)
-				return VMPI_strcmp((const char*)k1, (const char*)k2) == 0;
-			return false;
-		}
-	};
+    class GCStringHashtableKeyHandler
+    {
+    public:
+        REALLY_INLINE static uint32_t hash(const void* k)
+        {
+            uint32_t hash = 0;
+            const char* s = (const char*)k;
+            while (*s++)
+            {
+                hash = (hash >> 28) ^ (hash << 4) ^ ((uintptr_t)*s << ((uintptr_t)s & 0x3));
+            }
+            return hash;
+        }
 
-	typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_new> GCStringHashtable;
-	typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCStringHashtable_VMPI;
+        REALLY_INLINE static bool equal(const void* k1, const void* k2)
+        {
+            if (k1 == k2)
+                return true;
+            if (k1 && k2)
+                return VMPI_strcmp((const char*)k1, (const char*)k2) == 0;
+            return false;
+        }
+    };
+
+    typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_new> GCStringHashtable;
+    typedef GCHashtableBase<GCStringHashtableKeyHandler, GCHashtableAllocHandler_VMPI> GCStringHashtable_VMPI;
 }
 
 #endif

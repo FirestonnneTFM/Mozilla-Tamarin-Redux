@@ -46,76 +46,76 @@
 
 namespace MMgc
 {
-	// new improved weak ref
-	class GCWeakRef : public GCFinalizedObject
-	{
-		friend class GC;
-	public:
-		GCObject *get() { return (GCObject*)m_obj; }
-		~GCWeakRef() 
-		{ 
-			if(m_obj) {
-				GC::GetGC(this)->ClearWeakRef(m_obj); 
-			}
-		}
-	private:
-		/**
-		 * When allocating a GCWeakRef, tell the GC we don't contain pointers
-		 * (overriding the default base-class behavior).
-		 */
-		static void *operator new(size_t size, GC *gc)
-		{
-			return gc->Alloc(size, GC::kFinalize);
-		}
+    // new improved weak ref
+    class GCWeakRef : public GCFinalizedObject
+    {
+        friend class GC;
+    public:
+        GCObject *get() { return (GCObject*)m_obj; }
+        ~GCWeakRef()
+        {
+            if(m_obj) {
+                GC::GetGC(this)->ClearWeakRef(m_obj);
+            }
+        }
+    private:
+        /**
+         * When allocating a GCWeakRef, tell the GC we don't contain pointers
+         * (overriding the default base-class behavior).
+         */
+        static void *operator new(size_t size, GC *gc)
+        {
+            return gc->Alloc(size, GC::kFinalize);
+        }
 
-		// private, only GC can access
-		GCWeakRef(const void *obj) : m_obj(obj) 
-		{
+        // private, only GC can access
+        GCWeakRef(const void *obj) : m_obj(obj)
+        {
 #ifdef MMGC_MEMORY_INFO
-			obj_creation = obj;
+            obj_creation = obj;
 #endif
-		}
-		const void *m_obj;
+        }
+        const void *m_obj;
 #ifdef MMGC_MEMORY_INFO
-		const void* obj_creation;
+        const void* obj_creation;
 #endif
-	};
+    };
 
 #if 0
-	// something like this would be nice
-	template<class T> class GCWeakRefPtr 
-	{
-		
-	public:
-		GCWeakRefPtr() {}
-		GCWeakRefPtr(T t) {  set(t);}
-		~GCWeakRefPtr() { t = NULL;	}
+    // something like this would be nice
+    template<class T> class GCWeakRefPtr
+    {
 
-		T operator=(const GCWeakRefPtr<T>& wb)
-		{
-			return set(wb.t);	
-		}
+    public:
+        GCWeakRefPtr() {}
+        GCWeakRefPtr(T t) {  set(t);}
+        ~GCWeakRefPtr() { t = NULL; }
 
-		T operator=(T tNew)
-		{
-			return set(tNew);
-		}
+        T operator=(const GCWeakRefPtr<T>& wb)
+        {
+            return set(wb.t);
+        }
 
-		operator T() const { return (T) t->get(); }
+        T operator=(T tNew)
+        {
+            return set(tNew);
+        }
 
-		bool operator!=(T other) const { return other != t; }
+        operator T() const { return (T) t->get(); }
 
-		T operator->() const
-		{
-			return (T) t->get();
-		}
-	private:		
-		T set(const T tNew)
-		{
-			t = tNew->GetWeakRef();
-		}
-		GCWeakRef* t;
-	};
+        bool operator!=(T other) const { return other != t; }
+
+        T operator->() const
+        {
+            return (T) t->get();
+        }
+    private:
+        T set(const T tNew)
+        {
+            t = tNew->GetWeakRef();
+        }
+        GCWeakRef* t;
+    };
 #endif
 }
 

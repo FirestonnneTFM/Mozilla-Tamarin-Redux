@@ -43,145 +43,145 @@
 
 namespace MMgc
 {
-	/*static*/
-	REALLY_INLINE FixedMalloc* FixedMalloc::GetInstance() { return instance; }
+    /*static*/
+    REALLY_INLINE FixedMalloc* FixedMalloc::GetInstance() { return instance; }
 
-	/*static*/
-	REALLY_INLINE FixedMalloc* FixedMalloc::GetFixedMalloc() { return instance; }
+    /*static*/
+    REALLY_INLINE FixedMalloc* FixedMalloc::GetFixedMalloc() { return instance; }
 
-	REALLY_INLINE void* FixedMalloc::Alloc(size_t size, FixedMallocOpts flags)
-	{
-		// Observe that no size overflow check is needed for small allocations;
-		// the large-object allocator performs the necessary checking in that case.
+    REALLY_INLINE void* FixedMalloc::Alloc(size_t size, FixedMallocOpts flags)
+    {
+        // Observe that no size overflow check is needed for small allocations;
+        // the large-object allocator performs the necessary checking in that case.
 #ifdef _DEBUG
-		m_heap->CheckForOOMAbortAllocation();
+        m_heap->CheckForOOMAbortAllocation();
 #endif
 
-		if (size <= (size_t)kLargestAlloc) {
-			return FindSizeClass(size)->Alloc(size, flags);
-		} else {
-			return LargeAlloc(size, flags);
-		}
-	}
+        if (size <= (size_t)kLargestAlloc) {
+            return FindSizeClass(size)->Alloc(size, flags);
+        } else {
+            return LargeAlloc(size, flags);
+        }
+    }
 
-	REALLY_INLINE void *FixedMalloc::PleaseAlloc(size_t size)
-	{	
-		return OutOfLineAlloc(size, kCanFail);
-	}
+    REALLY_INLINE void *FixedMalloc::PleaseAlloc(size_t size)
+    {
+        return OutOfLineAlloc(size, kCanFail);
+    }
 
-	REALLY_INLINE void FixedMalloc::Free(void *item)
-	{
-		if(item == 0)
-			return;
+    REALLY_INLINE void FixedMalloc::Free(void *item)
+    {
+        if(item == 0)
+            return;
 
 #ifdef _DEBUG
-		EnsureFixedMallocMemory(item);
+        EnsureFixedMallocMemory(item);
 #endif
 
-		// small things are never allocated on the 4K boundary b/c the block
-		// header structure is stored there, large things always are		
-		if(IsLargeAlloc(item)) {
-			LargeFree(item);
-		} else {		
-			FixedAllocSafe::GetFixedAllocSafe(item)->Free(item);
-		}
-	}
+        // small things are never allocated on the 4K boundary b/c the block
+        // header structure is stored there, large things always are
+        if(IsLargeAlloc(item)) {
+            LargeFree(item);
+        } else {
+            FixedAllocSafe::GetFixedAllocSafe(item)->Free(item);
+        }
+    }
 
-	REALLY_INLINE size_t FixedMalloc::Size(const void *item)
-	{
-		size_t size;
-		if(IsLargeAlloc(item)) {
-			size = LargeSize(item);
-		} else {		
-			size = FixedAlloc::Size(item);
-		}
+    REALLY_INLINE size_t FixedMalloc::Size(const void *item)
+    {
+        size_t size;
+        if(IsLargeAlloc(item)) {
+            size = LargeSize(item);
+        } else {
+            size = FixedAlloc::Size(item);
+        }
 #ifdef MMGC_MEMORY_INFO
-		size -= DebugSize();
+        size -= DebugSize();
 #endif
-		return size;
-	}
+        return size;
+    }
 
-	REALLY_INLINE size_t FixedMalloc::GetBytesInUse()
-	{
-		size_t totalAskSize, totalAllocated;  
-		GetUsageInfo(totalAskSize, totalAllocated);
-		return totalAllocated;			
-	}
+    REALLY_INLINE size_t FixedMalloc::GetBytesInUse()
+    {
+        size_t totalAskSize, totalAllocated;
+        GetUsageInfo(totalAskSize, totalAllocated);
+        return totalAllocated;
+    }
 
-	/*static*/ 
-	REALLY_INLINE bool FixedMalloc::IsLargeAlloc(const void *item)
-	{
-		// space made in ctor
-		item = GetRealPointer(item);
-		return ((uintptr_t) item & 0xFFF) == 0;
-	}
+    /*static*/
+    REALLY_INLINE bool FixedMalloc::IsLargeAlloc(const void *item)
+    {
+        // space made in ctor
+        item = GetRealPointer(item);
+        return ((uintptr_t) item & 0xFFF) == 0;
+    }
 
-	REALLY_INLINE FixedAllocSafe* FixedMalloc::FindSizeClass(size_t size)
-	{
-		GCAssertMsg(size > 0, "cannot allocate a 0 sized block");
+    REALLY_INLINE FixedAllocSafe* FixedMalloc::FindSizeClass(size_t size)
+    {
+        GCAssertMsg(size > 0, "cannot allocate a 0 sized block");
 
 #ifdef _DEBUG
-		uint32_t const size8 = (uint32_t)((size+7)&~7); // round up to multiple of 8
-		GCAssert((size8 >> 3) < kMaxSizeClassIndex);
-		GCAssert(size8 <= (uint32_t)kLargestAlloc);
+        uint32_t const size8 = (uint32_t)((size+7)&~7); // round up to multiple of 8
+        GCAssert((size8 >> 3) < kMaxSizeClassIndex);
+        GCAssert(size8 <= (uint32_t)kLargestAlloc);
 #endif
 
-		// index is (conceptually) "(size8>>3)" but this allows
-		// us to skip the &~7 that is redundant for nondebug builds...
+        // index is (conceptually) "(size8>>3)" but this allows
+        // us to skip the &~7 that is redundant for nondebug builds...
 #ifdef MMGC_64BIT
-		unsigned const index = kSizeClassIndex[((size+7)>>3)];
+        unsigned const index = kSizeClassIndex[((size+7)>>3)];
 #else
-		// first bucket is 4 on 32-bit, so just special case that rather than
-		// double the size-class-index table
-		unsigned const index = (size <= 4) ? 0 : kSizeClassIndex[((size+7)>>3)];
+        // first bucket is 4 on 32-bit, so just special case that rather than
+        // double the size-class-index table
+        unsigned const index = (size <= 4) ? 0 : kSizeClassIndex[((size+7)>>3)];
 #endif
 
-		// assert that I fit
-		GCAssert(size <= m_allocs[index].GetItemSize());
+        // assert that I fit
+        GCAssert(size <= m_allocs[index].GetItemSize());
 
-		// assert that I don't fit (makes sure we don't waste space
-		GCAssert(index == 0 || size > m_allocs[index-1].GetItemSize());
+        // assert that I don't fit (makes sure we don't waste space
+        GCAssert(index == 0 || size > m_allocs[index-1].GetItemSize());
 
-		return &m_allocs[index];
-	}
+        return &m_allocs[index];
+    }
 
-	REALLY_INLINE size_t FixedMalloc::GetNumLargeChunks()
-	{
-		MMGC_LOCK(m_largeAllocInfoLock);
-		return numLargeChunks;
-	}
-	
-	REALLY_INLINE void FixedMalloc::UpdateLargeAllocStats(void* item, size_t blocksNeeded)
-	{
-		(void)item;
-		MMGC_LOCK(m_largeAllocInfoLock);
-		numLargeChunks += blocksNeeded;
-		
+    REALLY_INLINE size_t FixedMalloc::GetNumLargeChunks()
+    {
+        MMGC_LOCK(m_largeAllocInfoLock);
+        return numLargeChunks;
+    }
+
+    REALLY_INLINE void FixedMalloc::UpdateLargeAllocStats(void* item, size_t blocksNeeded)
+    {
+        (void)item;
+        MMGC_LOCK(m_largeAllocInfoLock);
+        numLargeChunks += blocksNeeded;
+
 #ifdef MMGC_HOOKS
-		if(m_heap->HooksEnabled()) {
+        if(m_heap->HooksEnabled()) {
 #ifdef MMGC_MEMORY_PROFILER
-		if(m_heap->GetProfiler()) 
-			totalAskSizeLargeAllocs += m_heap->GetProfiler()->GetAskSize(item);
+        if(m_heap->GetProfiler())
+            totalAskSizeLargeAllocs += m_heap->GetProfiler()->GetAskSize(item);
 #endif
-		}
+        }
 #endif
-	}
-	
-	REALLY_INLINE void FixedMalloc::UpdateLargeFreeStats(void* item, size_t blocksAllocated)
-	{
-		(void)item;
-		MMGC_LOCK(m_largeAllocInfoLock);
+    }
+
+    REALLY_INLINE void FixedMalloc::UpdateLargeFreeStats(void* item, size_t blocksAllocated)
+    {
+        (void)item;
+        MMGC_LOCK(m_largeAllocInfoLock);
 #ifdef MMGC_HOOKS
-		if(m_heap->HooksEnabled()) {
+        if(m_heap->HooksEnabled()) {
 #ifdef MMGC_MEMORY_PROFILER
-			if(m_heap->GetProfiler()) 
-				totalAskSizeLargeAllocs -= m_heap->GetProfiler()->GetAskSize(item);
+            if(m_heap->GetProfiler())
+                totalAskSizeLargeAllocs -= m_heap->GetProfiler()->GetAskSize(item);
 #endif
-		}
+        }
 #endif
-		numLargeChunks -= blocksAllocated;
-		
-	}
+        numLargeChunks -= blocksAllocated;
+
+    }
 
 }
 

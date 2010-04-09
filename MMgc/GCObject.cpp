@@ -36,21 +36,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
- 
+
 #include "MMgc.h"
- 
+
 namespace MMgc
 {
 #ifdef MMGC_RC_HISTORY
-	
-	void RCObject::DumpHistory()
-	{			
-		GCDebugMsg(false, "Ref count modification history for object 0x%x:\n", this);
-		for(uint32_t i=0, n=history.Count(); i<n; i++)
-		{
-			PrintStackTrace(history.Get(i));
-		}
-	}
+
+    void RCObject::DumpHistory()
+    {
+        GCDebugMsg(false, "Ref count modification history for object 0x%x:\n", this);
+        for(uint32_t i=0, n=history.Count(); i<n; i++)
+        {
+            PrintStackTrace(history.Get(i));
+        }
+    }
 
 #endif
 }

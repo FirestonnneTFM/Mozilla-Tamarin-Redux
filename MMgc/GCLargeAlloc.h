@@ -41,146 +41,146 @@
 
 namespace MMgc
 {
-	/**
-	 * This is a garbage collecting allocator for large memory blocks.
-	 */
-	class GCLargeAlloc : public GCAllocBase
-	{
-		friend class GC;
-		friend class GCLargeAllocIterator;
-	private:
-		enum {
-			kMarkFlag         = 0x1,
-			kQueuedFlag       = 0x2,
-			kFinalizeFlag     = 0x4,
-			kHasWeakRef       = 0x8,
-			kContainsPointers = 0x10,
-			kRCObject         = 0x20,
+    /**
+     * This is a garbage collecting allocator for large memory blocks.
+     */
+    class GCLargeAlloc : public GCAllocBase
+    {
+        friend class GC;
+        friend class GCLargeAllocIterator;
+    private:
+        enum {
+            kMarkFlag         = 0x1,
+            kQueuedFlag       = 0x2,
+            kFinalizeFlag     = 0x4,
+            kHasWeakRef       = 0x8,
+            kContainsPointers = 0x10,
+            kRCObject         = 0x20,
             kProtectedFlag    = 0x40    // protected from Free, see comments around GC::MarkItem
-		};
+        };
 
-	public:
-		GCLargeAlloc(GC* gc);
-		~GCLargeAlloc();
+    public:
+        GCLargeAlloc(GC* gc);
+        ~GCLargeAlloc();
 
 #if defined DEBUG || defined MMGC_MEMORY_PROFILER
-		void* Alloc(size_t originalSize, size_t requestSize, int flags);
+        void* Alloc(size_t originalSize, size_t requestSize, int flags);
 #else
-		void* Alloc(size_t requestSize, int flags);
+        void* Alloc(size_t requestSize, int flags);
 #endif
-		virtual void Free(const void *ptr);
+        virtual void Free(const void *ptr);
 
-		void Finalize();
-		void ClearMarks();
+        void Finalize();
+        void ClearMarks();
 
-		// not a hot method
-		static void SetHasWeakRef(const void *item, bool to);
+        // not a hot method
+        static void SetHasWeakRef(const void *item, bool to);
 
-		// not a hot method
-		static bool HasWeakRef(const void *item);
+        // not a hot method
+        static bool HasWeakRef(const void *item);
 
-		static bool IsLargeBlock(const void *item);
+        static bool IsLargeBlock(const void *item);
 
-		static bool SetMark(const void *item);
+        static bool SetMark(const void *item);
 
-		// Not a hot method but always inlining probably shrinks the code
-		static void SetFinalize(const void *item);
-		
-		static bool GetMark(const void *item);
+        // Not a hot method but always inlining probably shrinks the code
+        static void SetFinalize(const void *item);
+
+        static bool GetMark(const void *item);
 
 #ifdef _DEBUG
-		static bool IsWhite(const void *item);
+        static bool IsWhite(const void *item);
 #endif
-	
-		static bool IsMarkedThenMakeQueued(const void *item);
 
-		static bool IsQueued(const void *item);
+        static bool IsMarkedThenMakeQueued(const void *item);
+
+        static bool IsQueued(const void *item);
 
         static void ProtectAgainstFree(const void *item);
-        
+
         static void UnprotectAgainstFree(const void *item);
-        
-		static bool IsProtectedAgainstFree(const void *item);
-        
-		static void* FindBeginning(const void *item);
 
-		// not a hot method
-		static void ClearFinalized(const void *item);
+        static bool IsProtectedAgainstFree(const void *item);
 
-		// Not hot, because GC::MarkItem open-codes it
-		static bool ContainsPointers(const void *item);
-		
-		// not a hot method
-		static bool IsFinalized(const void *item);
+        static void* FindBeginning(const void *item);
 
-		// Can be hot - used by PinStackObjects
-		static bool IsRCObject(const void *item);
+        // not a hot method
+        static void ClearFinalized(const void *item);
 
-		//This method returns the number bytes allocated by FixedMalloc
-		size_t GetBytesInUse();
-		
-		//This method is for more fine grained allocation details
-		//It reports the total number of bytes requested (i.e. ask size) and
-		//the number of bytes actually allocated.  The latter is the same
-		//number as reported by GetBytesInUse()
-		void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
+        // Not hot, because GC::MarkItem open-codes it
+        static bool ContainsPointers(const void *item);
 
-	private:
-		struct LargeBlock : GCBlockHeader
-		{
-			uint32_t flags;
+        // not a hot method
+        static bool IsFinalized(const void *item);
+
+        // Can be hot - used by PinStackObjects
+        static bool IsRCObject(const void *item);
+
+        //This method returns the number bytes allocated by FixedMalloc
+        size_t GetBytesInUse();
+
+        //This method is for more fine grained allocation details
+        //It reports the total number of bytes requested (i.e. ask size) and
+        //the number of bytes actually allocated.  The latter is the same
+        //number as reported by GetBytesInUse()
+        void GetUsageInfo(size_t& totalAskSize, size_t& totalAllocated);
+
+    private:
+        struct LargeBlock : GCBlockHeader
+        {
+            uint32_t flags;
 #ifndef MMGC_64BIT
-			uint32_t padding;
+            uint32_t padding;
 #endif
-			int GetNumBlocks() const;
-		};
+            int GetNumBlocks() const;
+        };
 
-		static LargeBlock* GetLargeBlock(const void *addr);
-		
-		// not a hot method
-		static bool NeedsFinalize(LargeBlock *block);
-		
-		// not a hot method
-		static void ClearQueued(const void *item);
-		
-		// The list of chunk blocks
-		LargeBlock* m_blocks;
+        static LargeBlock* GetLargeBlock(const void *addr);
+
+        // not a hot method
+        static bool NeedsFinalize(LargeBlock *block);
+
+        // not a hot method
+        static void ClearQueued(const void *item);
+
+        // The list of chunk blocks
+        LargeBlock* m_blocks;
 #ifdef MMGC_MEMORY_PROFILER
-		size_t m_totalAskSize;
+        size_t m_totalAskSize;
 #endif
 
-		bool m_startedFinalize;
-		
+        bool m_startedFinalize;
+
 #ifdef _DEBUG
-		static bool ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
+        static bool ConservativeGetMark(const void *item, bool bogusPointerReturnValue);
 #endif
 
-	protected:
-		GC *m_gc;
+    protected:
+        GC *m_gc;
 
-	public:
-		static LargeBlock* Next(LargeBlock* b);
-	};
+    public:
+        static LargeBlock* Next(LargeBlock* b);
+    };
 
-	/**
-	 * A utility class used by the marker to handle mark stack overflow: it abstracts
-	 * iterating across marked, non-free objects in one allocator instance.
-	 *
-	 * No blocks must be added or removed during the iteration.  If an object's
-	 * bits are changed, those changes will visible to the iterator if the object has
-	 * not yet been reached by the iteration. 
-	 */
-	class GCLargeAllocIterator
-	{
-	public:
-		GCLargeAllocIterator(MMgc::GCLargeAlloc* alloc);
-		
-		bool GetNextMarkedObject(void*& out_ptr, uint32_t& out_size);
-		
-	private:
-		GCLargeAlloc* const alloc;
-		GCLargeAlloc::LargeBlock* block;
-	};
+    /**
+     * A utility class used by the marker to handle mark stack overflow: it abstracts
+     * iterating across marked, non-free objects in one allocator instance.
+     *
+     * No blocks must be added or removed during the iteration.  If an object's
+     * bits are changed, those changes will visible to the iterator if the object has
+     * not yet been reached by the iteration.
+     */
+    class GCLargeAllocIterator
+    {
+    public:
+        GCLargeAllocIterator(MMgc::GCLargeAlloc* alloc);
+
+        bool GetNextMarkedObject(void*& out_ptr, uint32_t& out_size);
+
+    private:
+        GCLargeAlloc* const alloc;
+        GCLargeAlloc::LargeBlock* block;
+    };
 }
 
 #endif /* __GCLargeAlloc__ */
