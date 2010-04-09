@@ -278,6 +278,11 @@ namespace avmplus
 #endif
 		void dispose();
 
+#ifdef DEBUGGER
+        /*override*/ uint64_t bytesUsed() const;
+        uint64_t bytesUsedShallow() const;
+#endif
+
 	public:
 		XMLObject(XMLClass *type, Stringp s=NULL, Namespace *defaultNamespace=NULL);
 		XMLObject(XMLClass *type, E4XNode *node);
