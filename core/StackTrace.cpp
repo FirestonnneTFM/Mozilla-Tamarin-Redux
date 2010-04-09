@@ -49,6 +49,10 @@ namespace avmplus
 			)
 	{
 		AvmAssert(env != NULL);
+
+        if (env->core())
+            env->core()->sampleCheck(); // Call sampler before modifying callstack
+
 		m_functionId	= 0;
 		m_core			= env->core();
 		m_env			= env;
@@ -79,7 +83,7 @@ namespace avmplus
 		m_traits		= NULL;
 		m_linenum		= 0;
 	}
-	
+
 	void CallStackNode::init(AvmCore* core, Stringp name)
 	{
 		// careful, core and/or name can be null
@@ -90,6 +94,9 @@ namespace avmplus
 		if (name)
 		{
 			AvmAssert(core != NULL);
+
+            core->sampleCheck(); // Call sampler before modifying callstack
+
 			m_core		= core;
 			m_next		= core->callStack; core->callStack = this;
 			m_depth		= m_next ? (m_next->m_depth + 1) : 1;
@@ -111,7 +118,9 @@ namespace avmplus
 	{
 		AvmAssert(core != NULL);
 		AvmAssert(functionId != 0);
-		
+
+        core->sampleCheck(); // Call sampler before modifying callstack
+
 		m_functionId	= functionId;
 		m_info			= NULL;
 		m_env			= NULL;
@@ -138,10 +147,10 @@ namespace avmplus
 		if (core)
 		{
 			AvmAssert(core != NULL);
+            core->sampleCheck(); // Call sampler before popping the callstack
 			core->callStack = m_next;
 			m_next = NULL;
 			m_core = NULL; // so the dtor doesn't pop again
-			core->sampleCheck();
 		}
 	}
 

@@ -158,6 +158,7 @@ namespace avmplus
 		samples(NULL),
 		currentSample(NULL),
 		lastAllocSample(NULL),
+		lastSampleCheckMicros(0),
 		callback(NULL),
 		timerHandle(0),
 		uids(1024),
@@ -197,10 +198,43 @@ namespace avmplus
 	void Sampler::sample()
 	{		
 		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
-		if(!samplingNow || !core->callStack || !sampleSpaceCheck())
+		if(!samplingNow)
 			return;	
-		writeRawSample(RAW_SAMPLE);
-		numSamples++;
+
+        uint64_t nowMicros = this->nowMicros();
+        const uint64_t sampleFrequencyMicros = SAMPLE_FREQUENCY_MILLIS * 1000;
+
+        if (takeSample)
+        {
+            if (core->callStack)
+            {
+                // We may want to write more than one sample.  E.g. if 5.5 milliseconds have
+                // passed, we'll write 5 samples.
+                int sampleCount = 0;
+                if (lastSampleCheckMicros != 0)
+                    sampleCount = (int) ((nowMicros - lastSampleCheckMicros) / sampleFrequencyMicros);
+                if (sampleCount <= 0)
+                    sampleCount = 1;
+                for (int sampleNum = sampleCount-1; sampleNum >= 0; sampleNum--)
+                {
+                    if (!sampleSpaceCheck())
+                        break;
+
+                    // We artificially manufacture a different time for each sample.
+                    uint64_t sampleTimeMicros = nowMicros - (sampleNum * sampleFrequencyMicros);
+                    writeRawSample(RAW_SAMPLE, sampleTimeMicros);
+                    numSamples++;
+                }
+            }
+        }
+
+        // Even if the callstack was empty, don't take another sample until the next timer tick.
+        takeSample = 0;
+
+        // Don't just set lastSampleCheckMicros equal to nowMicros -- we want to keep the
+        // sampling frequency as close to one per millisecond as we can.
+        uint64_t elapsed = nowMicros - lastSampleCheckMicros;
+        lastSampleCheckMicros += (elapsed / sampleFrequencyMicros * sampleFrequencyMicros);
 	}
 
 	int Sampler::sampleSpaceCheck(bool callback_ok)
@@ -250,12 +284,19 @@ namespace avmplus
 		return 1;
 	}
 
-	void Sampler::writeRawSample(SampleType sampleType)
+	uint64_t Sampler::nowMicros()
+	{
+		return GC::ticksToMicros(VMPI_getPerformanceCounter());
+	}
+
+	void Sampler::writeRawSample(SampleType sampleType, uint64_t sampleTimeMicros /* =0 */)
 	{
 		CallStackNode *csn = core->callStack;
 		uint32 depth = csn ? csn->depth() : 0;
 		byte *p = currentSample;
-		write(p, GC::ticksToMicros(VMPI_getPerformanceCounter()));
+		if (sampleTimeMicros == 0)
+			sampleTimeMicros = nowMicros();
+		write(p, sampleTimeMicros);
 		write(p, sampleType);
 		if(sampleType != DELETED_OBJECT_SAMPLE)
 		{
@@ -288,7 +329,6 @@ namespace avmplus
 		// padding to keep 8 byte alignment
 		align(p);
 		currentSample = p;
-		takeSample = 0;
 	}
 
 	void Sampler::readSample(byte *&p, Sample &s)
@@ -477,6 +517,7 @@ namespace avmplus
 		currentSample = samples;
         ptrSamples.clear();
 		numSamples = 0;
+		lastSampleCheckMicros = 0;
 	}
 
 	void Sampler::startSampling()
@@ -501,8 +542,9 @@ namespace avmplus
 		init(_sampling, autoStartSampling);
 		
 		samplingNow = true;
+        lastSampleCheckMicros = nowMicros();
 		if(timerHandle == 0)
-			timerHandle = OSDep::startIntWriteTimer(1, &takeSample);
+			timerHandle = OSDep::startIntWriteTimer(SAMPLE_FREQUENCY_MILLIS, &takeSample);
 	}
 
 	void Sampler::pauseSampling()
@@ -539,6 +581,7 @@ namespace avmplus
 
 		samplingNow = false;
 		numSamples = 0;
+		lastSampleCheckMicros = 0;
 		currentSample = NULL;
 	}
 
