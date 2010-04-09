@@ -2771,6 +2771,25 @@ namespace avmplus
 		m_node->dispose();
 	}
 
+#ifdef DEBUGGER
+    /*override*/ uint64_t XMLObject::bytesUsed() const
+    {
+        // FIXME As described in https://bugzilla.mozilla.org/show_bug.cgi?id=552307 ,
+        // this implementation can cause the same memory to be accounted for more
+        // than once in the profiler.  It is easy for the user to have multiple
+        // XMLLists and XMLs that point into the same tree of E4XNodes.  For now,
+        // there is not much we can do about this.  A possible fix is described in
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=558385
+
+        return bytesUsedShallow() + m_node->bytesUsed();
+    }
+
+    uint64_t XMLObject::bytesUsedShallow() const
+    {
+        return ScriptObject::bytesUsed();
+    }
+#endif
+
 	/////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////
