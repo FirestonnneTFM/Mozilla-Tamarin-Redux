@@ -250,6 +250,10 @@ namespace avmplus
 		XMLListObject* filter (Atom propertyName, Atom value);
 #endif
 
+#ifdef DEBUGGER
+        /*override*/ uint64_t bytesUsed() const;
+#endif
+
 	public:
 
 		XMLListObject(XMLListClass *type, Atom targetObject = nullObjectAtom, const Multiname* targetProperty = 0);

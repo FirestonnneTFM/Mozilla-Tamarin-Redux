@@ -1554,4 +1554,78 @@ namespace avmplus
 		return 0;
 	}
 
+#ifdef DEBUGGER
+    uint64_t XMLListObject::bytesUsed() const
+    {
+        // To calculate the memory used by an XMLList, we add the memory taken
+        // by each XML or E4XNode that we point to.
+        //
+        // FIXME As described in https://bugzilla.mozilla.org/show_bug.cgi?id=552307 ,
+        // this implementation can cause the same memory to be accounted for more
+        // than once in the profiler.  It is easy for the user to have multiple
+        // XMLLists and XMLs that point into the same tree of E4XNodes.  For now,
+        // there is not much we can do about this.  A possible fix is described in
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=558385
+
+        uint64_t size = ScriptObject::bytesUsed();
+        size += m_children.bytesUsed();
+
+        // It's possible -- likely, in fact -- that several XML elements in an
+        // XMLList will actually be pointers into the same tree of E4XNodes.
+        // We don't want to count their memory twice, so this hashtable keeps
+        // track of the root E4XNodes whose memory we have already accounted
+        // for.
+        HeapHashtable* seenXmlRoots = new (gc()) HeapHashtable(gc());
+
+        for (uint32 i=0, n=m_children.getLength(); i<n; ++i)
+        {
+            Atom child = m_children.getAt(i);
+
+            // list members can be either XMLObjects or E4XNodes
+            XMLObject* xmlobj = AvmCore::atomToXMLObject(child);
+            E4XNode* node;
+            if (xmlobj)
+                node = xmlobj->getNode();
+            else
+                node = (E4XNode*)AvmCore::atomToGenericObject(child);
+
+            if (node)
+            {
+                // find the root node of the tree
+                E4XNode* root = node;
+                while (root->getParent())
+                    root = root->getParent();
+
+                Atom atomizedRoot = AvmCore::genericObjectToAtom(root);
+
+                // Have we already seen that root node, as the root node of
+                // some other XML object in this list?
+                if (!seenXmlRoots->contains(atomizedRoot))
+                {
+                    seenXmlRoots->add(atomizedRoot, trueAtom);
+
+                    // Again, the XMLList might contain XMLObjects or it might
+                    // contain E4XNodes
+                    if (xmlobj)
+                        size += xmlobj->bytesUsed();
+                    else
+                        size += node->bytesUsed();
+                }
+                else
+                {
+                    // We have already accounted for the memory taken by the
+                    // tree of E4XNodes, but we still need to take into
+                    // account the small amount of memory taken by the XMLObject
+                    // that points to that tree.
+                    if (xmlobj)
+                        size += xmlobj->bytesUsedShallow();
+                }
+            }
+        }
+
+        delete seenXmlRoots;
+
+        return size;
+    }
+#endif
 }

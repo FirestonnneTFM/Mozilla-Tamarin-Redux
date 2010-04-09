@@ -125,6 +125,10 @@ namespace avmplus
 
 	public:
 		E4XNodeAux(Stringp s, Namespace* ns, FunctionObject* notify = NULL);
+
+#ifdef DEBUGGER
+        uint64_t bytesUsed() const;
+#endif
 	};
 
 	///////////////////////////////////////////////////
@@ -138,6 +142,8 @@ namespace avmplus
 	// All other nodes are 16 bytes
 	class E4XNode : public MMgc::GCObject
 	{
+        friend class ElementE4XNode;
+
 	protected:
 		/** Either null or an E4XNode, valid for all node types */
 		DWB(E4XNode*) m_parent; 
@@ -239,6 +245,17 @@ namespace avmplus
 		void dispose();
 
 		MMgc::GC *gc() const { return MMgc::GC::GetGC(this); }
+
+#ifdef DEBUGGER
+    public:
+        uint64_t bytesUsed() const;
+
+    protected:
+        // Internal helper function called by bytesUsed(), which calculates how much
+        // memory is used from this node on down to the bottom of the tree of E4XNodes;
+        // will not look "up" the tree at m_parent.
+        virtual uint64_t bytesUsedDown() const;
+#endif
 	};
 
 	class TextE4XNode : public E4XNode
@@ -251,6 +268,11 @@ namespace avmplus
 		int getClass() const { return kText; };
 		Stringp getValue() const { return m_value; };
 		void setValue (String *s) { m_value = s; }
+
+#ifdef DEBUGGER
+    protected:
+        virtual uint64_t bytesUsedDown() const { return E4XNode::bytesUsedDown() + m_value->bytesUsed(); }
+#endif
 	};
 
 	class CommentE4XNode : public E4XNode
@@ -263,6 +285,11 @@ namespace avmplus
 		int getClass() const { return kComment; };
 		Stringp getValue() const { return m_value; };
 		void setValue (String *s) { m_value = s; }
+
+#ifdef DEBUGGER
+    protected:
+        virtual uint64_t bytesUsedDown() const { return E4XNode::bytesUsedDown() + m_value->bytesUsed(); }
+#endif
 	};
 
 	class AttributeE4XNode : public E4XNode
@@ -275,6 +302,11 @@ namespace avmplus
 		int getClass() const { return kAttribute; };
 		Stringp getValue() const { return m_value; };
 		void setValue (String *s) { m_value = s; }
+
+#ifdef DEBUGGER
+    protected:
+        virtual uint64_t bytesUsedDown() const { return E4XNode::bytesUsedDown() + m_value->bytesUsed(); }
+#endif
 	};
 
 	class CDATAE4XNode : public E4XNode
@@ -287,6 +319,11 @@ namespace avmplus
 		int getClass() const { return kCDATA; };
 		Stringp getValue() const { return m_value; };
 		void setValue (String *s) { m_value = s; }
+
+#ifdef DEBUGGER
+    protected:
+        virtual uint64_t bytesUsedDown() const { return E4XNode::bytesUsedDown() + m_value->bytesUsed(); }
+#endif
 	};
 
 	class PIE4XNode : public E4XNode
@@ -300,6 +337,11 @@ namespace avmplus
 		int getClass() const { return kProcessingInstruction; };
 		Stringp getValue() const { return m_value; };
 		void setValue (String *s) { m_value = s; }
+
+#ifdef DEBUGGER
+    protected:
+        virtual uint64_t bytesUsedDown() const { return E4XNode::bytesUsedDown() + m_value->bytesUsed(); }
+#endif
 	};
 
 	// Currently this is 24-bytes in size
@@ -357,6 +399,11 @@ namespace avmplus
 		E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
 
 		void CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, Namespacep publicNS);
+
+#ifdef DEBUGGER
+    protected:
+        virtual uint64_t bytesUsedDown() const;
+#endif
 	};
 }
 #endif /* __avmplus_E4XNode__ */
