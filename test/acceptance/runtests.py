@@ -212,7 +212,7 @@ class AcceptanceRuntest(RuntestBase):
             return outputCalls
         
         # skip entire test if specified
-        if settings.has_key('.*') and settings['.*'].has_key('skip'):
+        if settings.has_key('.*') and settings['.*'].has_key('skip') and not settings['.*'].has_key('include'):
             outputCalls.append((self.js_print,('  skipping... reason: %s' % settings['.*']['skip'],)))
             self.allskips += 1
             outputCalls.insert(0,(self.js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
@@ -370,7 +370,8 @@ class AcceptanceRuntest(RuntestBase):
                     if len(line)>9:
                         testcase=line.strip()
                     skipTestDesc = dict_match(settings,testcase,'skip')
-                    if skipTestDesc:
+                    includeTestDesc = dict_match(settings, testcase, 'include')
+                    if skipTestDesc and not includeTestDesc:
                         outputCalls.append((self.js_print,('  skipping "%s" ... reason: %s' % (line.strip(),skipTestDesc),)))
                         self.allskips+=1
                         continue
