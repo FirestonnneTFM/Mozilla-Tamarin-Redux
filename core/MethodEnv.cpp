@@ -619,6 +619,13 @@ namespace avmplus
 		if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
 			profiler->sendFunctionExit();
 
+        if (s != 0)
+        {
+            // do this before popping the stack, so that the time slice
+            // gets attributed to the function that is exiting
+            s->sampleCheck();
+        }
+
 		core->callStack = callstack->next();
 
 		// trigger a faked "line number changed" since we exited the function and are now back on the old line (well, almost)
