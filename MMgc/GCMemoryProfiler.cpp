@@ -200,15 +200,19 @@ namespace MMgc
 		return cat;
 	}
 
-	void ChangeSize(StackTrace *trace, int delta)
-	{ 
-		trace->size += delta; 
-		trace->count += (delta > 0) ? 1 : -1;
-		GCAssert(trace->count != 0 || trace->size == 0);
-		if(delta > 0) {
-			trace->totalSize += delta; 
-			trace->totalCount++; 
-		}
+	void ChangeSize(StackTrace *trace, bool add, size_t delta)
+	{
+        if (add) {
+            trace->size += delta; 
+            trace->count++;
+            trace->totalSize += delta; 
+            trace->totalCount++; 
+        }
+        else {
+            trace->size -= delta; 
+            trace->count--;
+        }
+        GCAssert(trace->count != 0 || trace->size == 0);
 	}
 
 	void MemoryProfiler::RecordAllocation(const void *item, size_t askSize, size_t gotSize)
@@ -218,7 +222,7 @@ namespace MMgc
 
 		StackTrace *trace = GetStackTraceLocked();
 
-		ChangeSize(trace, (int)gotSize);
+		ChangeSize(trace, true, gotSize);
 
 		AllocInfo* info = (AllocInfo*) allocInfoTable.get(item);
 		if(!info)
@@ -252,7 +256,7 @@ namespace MMgc
 
 		GCAssert(info != NULL);
 
-		ChangeSize(info->allocTrace, -1 * int(size));
+		ChangeSize(info->allocTrace, false, size);
 		// FIXME: how to know this is a sweep?
 
 		// store deletion trace
