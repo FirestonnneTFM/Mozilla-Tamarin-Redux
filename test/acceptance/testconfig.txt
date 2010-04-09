@@ -37,7 +37,7 @@
 # commands are currently one of : asc.args, expectedfailure, skip, include
 #    expectedfailure - expects the test to fail, comments should provide bug number and a comment
 #    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
-#    include - includes a specific testcase even if the parent has been skipped
+#    include - includes a specific testcase even if the parent has been skipped - overrides any skip command defined for the same configuration
 #    ats_skip - don't generate an ATS swf as these files are not ATS compatible
 #    apiversioning - define test to require apiversioning in the vm
 #    verify_skip - skip test when doing a verify run
@@ -215,6 +215,8 @@ ecma3/Unicode/uE000_PrivateUseArea, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-d
 ecma3/Unicode/uAC00_HangulSyllables, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
 mops/mops, ((sparc-sol|x64-win|ppc-mac|ppc64-mac)-tvm-debug(|debugger)|.*-Dgreedy), skip, bug 499685 skip slow tests
 regress/bug_483783, .*, skip, skip slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+misc/catchableTimeout, .*, skip, skip slow tests
+misc/doubleTimeout, .*, skip, skip slow tests
 spidermonkey/js1_5/Array/regress-157652, .*, skip, skip slow tests
 spidermonkey/js1_5/Regress/regress-203278-1, .*, skip, skip slow tests
 spidermonkey/js1_5/Regress/regress-360969-0(5|6), .*, skip, skip slow tests
@@ -236,6 +238,8 @@ ecma3/Unicode/uAC00_HangulSyllables,.*deep, include, include slow tests in deep 
 # bug 505982
 mops/mops,^((?!ppc-mac-tvm-debug-).).*deep, include, include slow tests in deep phase
 regress/bug_483783, .*deep, include, include slow tests - https://bugzilla.mozilla.org/show_bug.cgi?id=483783
+misc/catchableTimeout, .*deep, include, include slow tests in deep phase
+misc/doubleTimeout, .*deep, include, include slow tests in deep phase
 spidermonkey/js1_5/Array/regress-157652, .*deep, include, include slow tests in deep phase
 spidermonkey/js1_5/Regress/regress-203278-1, .*deep, include, include slow tests in deep phase
 spidermonkey/js1_5/Regress/regress-360969-0(5|6), .*deep, include, include slow tests in deep phase
