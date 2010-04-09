@@ -162,14 +162,15 @@ namespace avmplus
     //  - On 64-bit systems an intptr_t is 64 bits wide so the value is actually constrained by
     //    the available bits in a double.  There are 53 bits of unsigned mantissa (including the
     //    hidden leading 1 bit), in addition to the sign bit, for a total of 54 bits, so the
-    //    range is -2^53 .. 2^53-1.
+    //    range is -2^53-1 .. 2^53-1.  Note the sign+magnitude representation causes the range to be
+    //    symmetric.
     //
     // atomSignExtendShift is the number of bits to shift an untagged intptr_t left and
     // then right in order to properly sign extend it.  (I don't like the 'atom' prefix but
     // it fits in with the pattern of the others.)
     
 #ifdef AVMPLUS_64BIT
-    const intptr_t atomMinIntValue = -(1LL<<53);
+    const intptr_t atomMinIntValue = -((1LL<<53)-1);
     const intptr_t atomMaxIntValue = (1LL<<53)-1;
     const intptr_t atomSignExtendShift = 10;         // 54 significant bits
 #else
