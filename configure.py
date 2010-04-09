@@ -165,7 +165,7 @@ elif config.getCompiler() == 'VS':
 	else:
 		APP_CXXFLAGS += "-fp:fast "
 		APP_CFLAGS += "-fp:fast "
-        OS_LDFLAGS += "-SAFESEH:NO -MAP "
+        OS_LDFLAGS += "-MAP "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
             DEBUG_CFLAGS = "-Od "
