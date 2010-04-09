@@ -165,6 +165,8 @@ namespace avmplus
 			NEW_AUX_SAMPLE=0xeeeeeeee
 		};
 		
+		enum { SAMPLE_FREQUENCY_MILLIS = 1 };
+
 		// should use opaque Cursor type instead of byte*
 		byte *getSamples(uint32 &num);
 		void readSample(byte *&p, Sample &s);
@@ -210,7 +212,12 @@ namespace avmplus
 
 		int sampleSpaceCheck(bool callback_ok = true);
 		
-		void writeRawSample(SampleType sampleType);
+		// sampleTimeMicros is the timestamp you want to have written to the sample,
+		// or 0 to use the current time.
+		void writeRawSample(SampleType sampleType, uint64_t sampleTimeMicros = 0);
+
+		// Returns the current time, as it should be written into samples.
+		static uint64_t nowMicros();
 
 	// ------------------------ DATA SECTION BEGIN
 	public:
@@ -224,6 +231,7 @@ namespace avmplus
 		uint8_t*			samples;
 		uint8_t*			currentSample;
 		uint8_t*			lastAllocSample;
+		uint64_t			lastSampleCheckMicros; // the last time we considered writing a timer sample
 		DRC(ScriptObject*)	callback;
 		uintptr_t			timerHandle;
 		MMgc::GCHashtable_VMPI		uids;		// important to use the VMPI variant for non-MMGC-based memory allocation.
