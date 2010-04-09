@@ -735,7 +735,8 @@ namespace avmshell
             printIP();
 
             core->console << "(asdb) ";
-            Platform::GetInstance()->getUserInput(commandLine, kMaxCommandLine);
+            if (Platform::GetInstance()->getUserInput(commandLine, kMaxCommandLine) == NULL)
+                Platform::GetInstance()->exit(0);
 
             commandLine[VMPI_strlen(commandLine)-1] = 0;
 

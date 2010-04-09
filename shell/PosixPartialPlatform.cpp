@@ -72,8 +72,11 @@ namespace avmshell
     char* PosixPartialPlatform::getUserInput(char* buffer, int bufferSize)
     {
         fflush(stdout);
-        if (!fgets(buffer, bufferSize, stdin))
+        if (fgets(buffer, bufferSize, stdin) == NULL) {
+            // EOF or error
             *buffer = 0;
+            return NULL;
+        }
         return buffer;
     }
 }

@@ -112,7 +112,11 @@ namespace avmshell
     char* WinPlatform::getUserInput(char* buffer, int bufferSize)
     {
         fflush(stdout);
-        fgets(buffer, bufferSize, stdin);
+        if (fgets(buffer, bufferSize, stdin) == NULL) {
+            // EOF or error
+            *buffer = 0;
+            return NULL;
+        }
         return buffer;
     }
 
