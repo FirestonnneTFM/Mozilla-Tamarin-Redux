@@ -117,6 +117,10 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		uint64_t bytesUsed() const { return sizeof(Namespace); }
+
+        // Like bytesUsed(), but also includes memory taken by the
+        // prefix and the uri.
+        uint64_t bytesUsedDeep() const;
 #endif
 
 //#ifdef AVMPLUS_VERBOSE

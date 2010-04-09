@@ -37,6 +37,8 @@
 
 #include "avmplus.h"
 
+using namespace MMgc;
+
 namespace avmplus
 {
 	extern wchar *stripPrefix (const wchar *str, const char *pre);
@@ -47,6 +49,24 @@ namespace avmplus
 		m_notification(notify)
 	{
 	}
+
+#ifdef DEBUGGER
+    uint64_t E4XNodeAux::bytesUsed() const
+    {
+        uint64_t size = GC::Size(this);
+
+        if (m_name)
+            size += m_name->bytesUsed();
+
+        if (m_ns)
+            size += m_ns->bytesUsedDeep();
+
+        if (m_notification)
+            size += m_notification->bytesUsed();
+
+        return size;
+    }
+#endif
 
 	AttributeE4XNode::AttributeE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
 	{
@@ -1049,5 +1069,62 @@ namespace avmplus
 			node->clearChildren();
 		}
 	}
+
+#ifdef DEBUGGER
+    uint64_t E4XNode::bytesUsed() const
+    {
+        // find the root node of the tree
+        const E4XNode* root = this;
+        while (root->m_parent)
+            root = root->m_parent;
+
+        // now find the size going down from there
+        return root->bytesUsedDown();
+    }
+
+    uint64_t E4XNode::bytesUsedDown() const
+    {
+        uint64_t size = GC::Size(this);
+
+        if (m_nameOrAux)
+        {
+            uintptr nameOrAux = m_nameOrAux;
+            if (AUXBIT & nameOrAux)
+            {
+                E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
+                size += aux->bytesUsed();
+            }
+            else
+            {
+                Stringp str = (String *)(nameOrAux);
+                size += str->bytesUsed();
+            }
+        }
+
+        return size;
+    }
+
+    uint64_t ElementE4XNode::bytesUsedDown() const
+    {
+        // Add up all the memory taken by this element plus all the namespaces,
+        // attributes, and elements under it.
+
+        uint64_t size = E4XNode::bytesUsedDown();
+
+        for (uint32 i=0, n=numNamespaces(); i<n; i++)
+        {
+            Namespace *ns1 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
+            size += ns1->bytesUsedDeep();
+        }
+
+        for (uint32 i=0, n=numAttributes(); i<n; ++i)
+            size += getAttribute(i)->bytesUsedDown();
+
+        for (uint32 i=0, n=_length(); i<n; ++i)
+            size += _getAt(i)->bytesUsedDown();
+
+        return size;
+    }
+#endif
 }
 
