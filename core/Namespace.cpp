@@ -147,5 +147,20 @@ namespace avmplus
 	{
 		return (Stringp)atomPtr(m_uri);
 	}
+
+#ifdef DEBUGGER
+    uint64_t Namespace::bytesUsedDeep() const
+    {
+        uint64_t size = bytesUsed();
+
+        Atom prefix = getPrefix();
+        if (AvmCore::isString(prefix))
+            size += AvmCore::atomToString(prefix)->bytesUsed();
+
+        size += getURI()->bytesUsed();
+
+        return size;
+    }
+#endif
 }
 
