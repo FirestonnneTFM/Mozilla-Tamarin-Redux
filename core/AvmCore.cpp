@@ -1371,17 +1371,9 @@ return the result of the comparison ToPrimitive(x) == y.
 
     void AvmCore::throwErrorV(ClassClosure *type, int errorID, Stringp arg1, Stringp arg2, Stringp arg3)
     {
+        AvmAssertMsg(type != NULL, "type should never be NULL - internal bootstrap error if it is.");
+        
         Stringp out = formatErrorMessageV( errorID, arg1, arg2, arg3);
-
-        #ifdef DEBUGGER
-        if (type == NULL)
-        {
-            // print the error message, because we're still bootstrapping
-            // and the exception type is not yet defined
-            console << out << "\n";
-        }
-        #endif
-
         Atom args[3] = { nullObjectAtom, out->atom(), intToAtom(errorID) };
         throwAtom(type->construct(2, args));
     }
