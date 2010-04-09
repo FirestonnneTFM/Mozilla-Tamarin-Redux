@@ -113,12 +113,12 @@ namespace avmshell
         virtual int logMessage(const char* message) = 0;
 
         /**
-        * Method to receive a NULL-terminated string of user data via console or other source
+        * Method to receive a NUL-terminated string of user data via console or other source
         * This method is useful while running shell in interactive mode and for debugging purposes
         * Currently the expected encoding of the data is Latin-1
         * @param buffer buffer for storing the input data
         * @param bufferSize size of the buffer being passed indicating the max number of bytes it can accept
-        * @return pointer to the beginning of input data
+        * @return pointer to the beginning of input data, NULL on end-of-file
         */
         virtual char* getUserInput(char* buffer, int bufferSize) = 0;
 
