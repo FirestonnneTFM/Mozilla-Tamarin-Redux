@@ -43,57 +43,57 @@
 
 namespace avmplus
 {
-	// runtime info associated with a pool
-	class AbcEnv : public MMgc::GCFinalizedObject
-	{
-		#if defined FEATURE_NANOJIT
-		friend class CodegenLIR;
+    // runtime info associated with a pool
+    class AbcEnv : public MMgc::GCFinalizedObject
+    {
+        #if defined FEATURE_NANOJIT
+        friend class CodegenLIR;
         friend class MopsRangeCheckFilter;
-		#endif
+        #endif
 
-	public:
-		AbcEnv(PoolObject* _pool, DomainEnv* _domainEnv, CodeContext * _codeContext);
+    public:
+        AbcEnv(PoolObject* _pool, DomainEnv* _domainEnv, CodeContext * _codeContext);
         ~AbcEnv();
 
-		PoolObject* pool() const;
-		DomainEnv* domainEnv() const;
-		CodeContext* codeContext() const;
+        PoolObject* pool() const;
+        DomainEnv* domainEnv() const;
+        CodeContext* codeContext() const;
 
-		MethodEnv* getMethod(uint32_t i) const;
-		void setMethod(uint32_t i, MethodEnv* env);
+        MethodEnv* getMethod(uint32_t i) const;
+        void setMethod(uint32_t i, MethodEnv* env);
 
 #ifdef DEBUGGER
-		uint64_t& invocationCount(uint32_t i);
+        uint64_t& invocationCount(uint32_t i);
 #endif
 
-		static size_t calcExtra(PoolObject* pool);
+        static size_t calcExtra(PoolObject* pool);
 
-		// these peek into the DomainEnv as appropriate
-		ScriptEnv* getScriptEnv(Stringp name, Namespacep ns);
-		ScriptEnv* getScriptEnv(const Multiname& m);
+        // these peek into the DomainEnv as appropriate
+        ScriptEnv* getScriptEnv(Stringp name, Namespacep ns);
+        ScriptEnv* getScriptEnv(const Multiname& m);
 
-		// these peek only into m_privateScriptEnvs
-		ScriptEnv* getPrivateScriptEnv(Stringp name) const;
-		ScriptEnv* getPrivateScriptEnv(Stringp name, Namespacep ns) const;
-		ScriptEnv* getPrivateScriptEnv(const Multiname& m) const;
+        // these peek only into m_privateScriptEnvs
+        ScriptEnv* getPrivateScriptEnv(Stringp name) const;
+        ScriptEnv* getPrivateScriptEnv(Stringp name, Namespacep ns) const;
+        ScriptEnv* getPrivateScriptEnv(const Multiname& m) const;
 
-		void addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv);
+        void addPrivateScriptEnv(Stringp name, Namespacep ns, ScriptEnv* scriptEnv);
 
-	// ------------------------ DATA SECTION BEGIN
-	private:
-		PoolObject* const			m_pool;
-		DomainEnv* const			m_domainEnv;
-		CodeContext* const			m_codeContext;
-		DWB(MultinameHashtable*)	m_privateScriptEnvs;
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        PoolObject* const           m_pool;
+        DomainEnv* const            m_domainEnv;
+        CodeContext* const          m_codeContext;
+        DWB(MultinameHashtable*)    m_privateScriptEnvs;
 #ifdef DEBUGGER
-		DWB(uint64_t*)				m_invocationCounts;	// actual size will hold pool->methodCount methods, only allocated if debugger exists
+        DWB(uint64_t*)              m_invocationCounts; // actual size will hold pool->methodCount methods, only allocated if debugger exists
 #endif
 #ifdef VMCFG_NANOJIT
         AvmCore* const              m_core;
 #endif
-		MethodEnv*					m_methods[1];		// actual size will hold pool->methodCount methods
-	// ------------------------ DATA SECTION END
-	};
+        MethodEnv*                  m_methods[1];       // actual size will hold pool->methodCount methods
+    // ------------------------ DATA SECTION END
+    };
 
 }
 

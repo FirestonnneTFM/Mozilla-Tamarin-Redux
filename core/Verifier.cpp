@@ -2505,7 +2505,7 @@ namespace avmplus
             v2.tryTo = tryTo;
             CodeWriter stubWriter;
 
-            // The second verification pass will presumably always throw an 
+            // The second verification pass will presumably always throw an
             // error, which we ignore.  But we /must/ catch it so that we can
             // clean up the verifier resources.  Cleanup happens automatically
             // when execution reaches the end of the block.

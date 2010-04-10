@@ -43,118 +43,118 @@
 
 namespace avmplus
 {
-	/**
-	 * class Error
-	 */
-	class ErrorClass : public ClassClosure
-	{
-	public:
-		ErrorClass(VTable* cvtable);
+    /**
+     * class Error
+     */
+    class ErrorClass : public ClassClosure
+    {
+    public:
+        ErrorClass(VTable* cvtable);
 
-		Atom call(int argc, Atom* argv)
-		{
-			return construct(argc, argv);
-		}
+        Atom call(int argc, Atom* argv)
+        {
+            return construct(argc, argv);
+        }
 
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+        ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
 
-		/**
-		 * throwError is a convenience function for throwing
-		 * an exception with a formatted error message,
-		 * printf-style
-		 */
-		void throwError(int errorID, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
+        /**
+         * throwError is a convenience function for throwing
+         * an exception with a formatted error message,
+         * printf-style
+         */
+        void throwError(int errorID, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
 
-		/** @name static methods */
-		/*@{*/
-		Stringp getErrorMessage(int errorID) const;
+        /** @name static methods */
+        /*@{*/
+        Stringp getErrorMessage(int errorID) const;
 #ifdef DEBUGGER
-		Atom getStackTrace(Atom thisAtom,
-						   Atom *argv,
-						   int argc);
+        Atom getStackTrace(Atom thisAtom,
+                           Atom *argv,
+                           int argc);
 #endif /* DEBUGGER */
 
-		DECLARE_SLOTS_ErrorClass;
-	};
+        DECLARE_SLOTS_ErrorClass;
+    };
 
-	/**
-	 * The ErrorObject class is the C++ implementation of the
-	 * Error class in the ECMA-262 Specification.
-	 *
-	 * The main difference between an ErrorObject and a regular
-	 * ScriptObject is the presence of the stack trace, which
-	 * can be retrieved with the getStackTrace method.
-	 */
-	class ErrorObject : public ScriptObject
-	{
-	public:
-		ErrorObject(VTable *vtable, ScriptObject *delegate);
-		~ErrorObject() {
+    /**
+     * The ErrorObject class is the C++ implementation of the
+     * Error class in the ECMA-262 Specification.
+     *
+     * The main difference between an ErrorObject and a regular
+     * ScriptObject is the presence of the stack trace, which
+     * can be retrieved with the getStackTrace method.
+     */
+    class ErrorObject : public ScriptObject
+    {
+    public:
+        ErrorObject(VTable *vtable, ScriptObject *delegate);
+        ~ErrorObject() {
 #ifdef DEBUGGER
-			stackTrace = 0; 
+            stackTrace = 0;
 #endif
-		}
+        }
 
-		Stringp getStackTrace() const;
+        Stringp getStackTrace() const;
 #ifdef DEBUGGER
-		StackTrace* getStackTraceObject() const { return stackTrace; }
+        StackTrace* getStackTraceObject() const { return stackTrace; }
 
-	private:
-		StackTrace* stackTrace;
+    private:
+        StackTrace* stackTrace;
 #endif /* DEBUGGER */
 
-		DECLARE_SLOTS_ErrorObject;
-	};
+        DECLARE_SLOTS_ErrorObject;
+    };
 
-	/**
-	 * NativeErrorClass
-	 *
-	 * This class exists primarily to override the [[Call]] entry point
-	 * to the class closure, so that it constructs an error object
-	 * instead of attempting a coercion.
-	 */
-	class NativeErrorClass : public ClassClosure
-	{
-	public:
-		NativeErrorClass(VTable* cvtable);
+    /**
+     * NativeErrorClass
+     *
+     * This class exists primarily to override the [[Call]] entry point
+     * to the class closure, so that it constructs an error object
+     * instead of attempting a coercion.
+     */
+    class NativeErrorClass : public ClassClosure
+    {
+    public:
+        NativeErrorClass(VTable* cvtable);
 
-		Atom call(int argc, Atom* argv)
-		{
-			return construct(argc, argv);
-		}
-	};
+        Atom call(int argc, Atom* argv)
+        {
+            return construct(argc, argv);
+        }
+    };
 
-	#define DECLARE_NATIVE_ERROR_CLASS(cls, obj)												\
-		class obj : public ErrorObject															\
-		{																						\
-		public:																					\
-			REALLY_INLINE obj(VTable *vtable, ScriptObject *delegate)							\
-				: ErrorObject(vtable, delegate) {}												\
-			DECLARE_SLOTS_##obj;																\
-		};																						\
-		class cls : public NativeErrorClass														\
-		{																						\
-		public:																					\
-			REALLY_INLINE cls(VTable* cvtable)													\
-				: NativeErrorClass(cvtable) {}													\
-			ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate)				\
-			{																					\
-				return new (ivtable->gc(), ivtable->getExtraSize()) obj(ivtable, delegate);		\
-			}																					\
-			DECLARE_SLOTS_##cls;																\
-		};
-	DECLARE_NATIVE_ERROR_CLASS(DefinitionErrorClass, DefinitionErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(EvalErrorClass, EvalErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(RangeErrorClass, RangeErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(ReferenceErrorClass, ReferenceErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(SecurityErrorClass, SecurityErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(SyntaxErrorClass, SyntaxErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(TypeErrorClass, TypeErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(URIErrorClass, URIErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(VerifyErrorClass, VerifyErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(UninitializedErrorClass, UninitializedErrorObject)
-	DECLARE_NATIVE_ERROR_CLASS(ArgumentErrorClass, ArgumentErrorObject)
+    #define DECLARE_NATIVE_ERROR_CLASS(cls, obj)                                                \
+        class obj : public ErrorObject                                                          \
+        {                                                                                       \
+        public:                                                                                 \
+            REALLY_INLINE obj(VTable *vtable, ScriptObject *delegate)                           \
+                : ErrorObject(vtable, delegate) {}                                              \
+            DECLARE_SLOTS_##obj;                                                                \
+        };                                                                                      \
+        class cls : public NativeErrorClass                                                     \
+        {                                                                                       \
+        public:                                                                                 \
+            REALLY_INLINE cls(VTable* cvtable)                                                  \
+                : NativeErrorClass(cvtable) {}                                                  \
+            ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate)               \
+            {                                                                                   \
+                return new (ivtable->gc(), ivtable->getExtraSize()) obj(ivtable, delegate);     \
+            }                                                                                   \
+            DECLARE_SLOTS_##cls;                                                                \
+        };
+    DECLARE_NATIVE_ERROR_CLASS(DefinitionErrorClass, DefinitionErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(EvalErrorClass, EvalErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(RangeErrorClass, RangeErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(ReferenceErrorClass, ReferenceErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(SecurityErrorClass, SecurityErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(SyntaxErrorClass, SyntaxErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(TypeErrorClass, TypeErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(URIErrorClass, URIErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(VerifyErrorClass, VerifyErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(UninitializedErrorClass, UninitializedErrorObject)
+    DECLARE_NATIVE_ERROR_CLASS(ArgumentErrorClass, ArgumentErrorObject)
 
 }
 

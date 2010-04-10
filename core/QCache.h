@@ -41,72 +41,72 @@
 #define __avmplus_QCache__
 
 #ifdef _DEBUG
-	#define QCACHE_DEBUG
+    #define QCACHE_DEBUG
 #endif
 
 #include "MathUtils.h"
 
 /*
-	QCache is a simple framework for maintaining a cache of items, with a random
-	eviction policy. The cache is limited by count of items, which can be set arbitrarily
-	(or allowed to grow to unlimited size).
-	
-	The recommended use case is to split a a data structure split into a small, frequently-used
-	chunk (owner), and a larger, less-frequently-used chunk (cacheditem) that can be reconstituted
-	from compressed data; e.g., the slot-binding tables for Traits, which are kept in memory in 
-	a highly compressed	form (the ABC bytecode), and expanded into convenient hashtable format
-	as a cacheditem.
-	
-	Important note: For proper use, the only "strong" ref to the cacheditem should be via
-	the QCache itself; the owner should keep a reference to the cacheditem via a GCWeakRef, which
-	will allow the cacheditem to be collected when it is evicted from the cache. (Naturally, the owner
-	must check the GCWeakRef for null before using it.)
-	
-	Cached items are stored in a singly-linked list; it's assumed that the cost
-	of building a new item to add to the cache is likely to dwarf the cost of walking
-	the list to evict an item (this is currently the case for all existing use cases).
+    QCache is a simple framework for maintaining a cache of items, with a random
+    eviction policy. The cache is limited by count of items, which can be set arbitrarily
+    (or allowed to grow to unlimited size).
+
+    The recommended use case is to split a a data structure split into a small, frequently-used
+    chunk (owner), and a larger, less-frequently-used chunk (cacheditem) that can be reconstituted
+    from compressed data; e.g., the slot-binding tables for Traits, which are kept in memory in
+    a highly compressed form (the ABC bytecode), and expanded into convenient hashtable format
+    as a cacheditem.
+
+    Important note: For proper use, the only "strong" ref to the cacheditem should be via
+    the QCache itself; the owner should keep a reference to the cacheditem via a GCWeakRef, which
+    will allow the cacheditem to be collected when it is evicted from the cache. (Naturally, the owner
+    must check the GCWeakRef for null before using it.)
+
+    Cached items are stored in a singly-linked list; it's assumed that the cost
+    of building a new item to add to the cache is likely to dwarf the cost of walking
+    the list to evict an item (this is currently the case for all existing use cases).
 */
 
 namespace avmplus
 {
-	class QCachedItem : public MMgc::GCObject
-	{
-		friend class QCache;
-	public:
-		inline QCachedItem() : next(NULL) { }
-	private:
-		QCachedItem*	next;	// written with explicit WB
-	};
+    class QCachedItem : public MMgc::GCObject
+    {
+        friend class QCache;
+    public:
+        inline QCachedItem() : next(NULL) { }
+    private:
+        QCachedItem*    next;   // written with explicit WB
+    };
 
-	class QCache : public MMgc::GCFinalizedObject
-	{
-	public:
+    class QCache : public MMgc::GCFinalizedObject
+    {
+    public:
 
-		QCache(uint32_t _max, MMgc::GC* _gc);
-		~QCache();
-		
-		inline uint32_t count() const { return m_count; }
-		inline uint32_t maxcount() const { return m_max; }	// sadly, "max" is a macro in some environments
-		inline QCachedItem* first() const { return m_head; }
-		inline QCachedItem* next(QCachedItem* gen) const { return gen->next; }
+        QCache(uint32_t _max, MMgc::GC* _gc);
+        ~QCache();
 
-		void flush();
-		void resize(uint32_t _max);
+        inline uint32_t count() const { return m_count; }
+        inline uint32_t maxcount() const { return m_max; }  // sadly, "max" is a macro in some environments
+        inline QCachedItem* first() const { return m_head; }
+        inline QCachedItem* next(QCachedItem* gen) const { return gen->next; }
 
-		QCachedItem* add(QCachedItem* gen);
-		
-	private:
-		#ifdef QCACHE_DEBUG
-		void validate() const;
-		#endif
-		
-	private:
-		MMgc::GC*				m_gc;
-		QCachedItem*			m_head;
-		uint32_t				m_count;
-		uint32_t				m_max;
-		TRandomFast				m_rand;
-	};
+        void flush();
+        void resize(uint32_t _max);
+
+        QCachedItem* add(QCachedItem* gen);
+
+    private:
+        #ifdef QCACHE_DEBUG
+        void validate() const;
+        #endif
+
+    private:
+        MMgc::GC*               m_gc;
+        QCachedItem*            m_head;
+        uint32_t                m_count;
+        uint32_t                m_max;
+        TRandomFast             m_rand;
+    };
 }
 
 #endif /* __avmplus_QCache__ */

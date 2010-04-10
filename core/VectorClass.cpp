@@ -46,419 +46,419 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	bool VectorBaseObject::hasAtomProperty(Atom name) const
-	{
-		uint32 index;
-		bool isNumber=false;
-		if (getVectorIndex(name, index, isNumber))
-		{
-			return index < m_length;
-		}
-		else
-		{
-			if(isNumber)
-			{
-				return false;
-			}
-			return ScriptObject::hasAtomProperty(name);
-		}
-	}
-	
-	// helper method
-	// sets index to the uint32 value of name, if it can be converted
-	// isNumber is set to true if name was a number (whether it was a uint32 value or not)
-	bool VectorBaseObject::getVectorIndex(Atom name, uint32& index, bool& isNumber) const
-	{
-		AvmCore* core = this->core();
-		isNumber = false;
-		if (AvmCore::getIndexFromAtom(name, &index))
-		{
-			isNumber = true;
-			return true;
-		}
-		else
-		{
-			if( AvmCore::isString(name) )
-			{
-				Stringp s = core->string(name);
-				const wchar c = s->charAt(0);
-				// Does it look like a number?
-				if( s->length() > 0 && c >= '0' && c <= '9' )
-				{
-					double index_d = s->toNumber();
-					if( !MathUtils::isNaN(index_d) )
-					{
-						isNumber = true;
-
-						// name is a string that looks like a number
-						int i = MathUtils::real2int(index_d);
-						if ((double)i == index_d)
-						{
-							// It's an indexed property name
-							index = i;
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	void VectorBaseObject::setAtomProperty(Atom name, Atom value)
-	{
-		uint32 index;
-		bool isNumber=false;
-		if (getVectorIndex(name, index, isNumber))
-		{
-			setUintProperty(index, value);
-		}
-		else
-		{
-			// NOTE use default public for message gen
-			Multiname mn(core()->getAnyPublicNamespace(), core()->string(name));
-
-			// Vector is sorta sealed, can only write to "indexed" properties
-			toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
-		}
-	}
-	
-	Atom VectorBaseObject::getAtomProperty(Atom name) const
-	{
-		uint32 index;
-		bool isNumber=false;
-		AvmCore* core = this->core();
-		if (getVectorIndex(name, index, isNumber))
-		{
-			return getUintProperty(index);
-		}
-		else
-		{
-			if(isNumber)
-			{
-				// Not a valid indexed name - has a decimal part
-				// NOTE use default public for message gen
-				Multiname mn(core->findPublicNamespace(), core->string(name));
-				toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
-			}
-			// Check the prototype chain - that will throw if there is no match
-			return getAtomPropertyFromProtoChain(name, getDelegate(), traits());
-		}
-	}
-
-	uint32 VectorBaseObject::get_length()
-	{
-		return m_length;
-	}
-	
-	void VectorBaseObject::set_length(uint32 newLength)
-	{
-		if( m_fixed )
-			toplevel()->throwRangeError(kVectorFixedError); 
-		if (newLength > m_capacity)
-		{
-			grow(newLength, true);
-		}
-		m_length = newLength;
-	}
-
-	bool VectorBaseObject::get_fixed()
-	{
-		return m_fixed;
-	}
-
-	void VectorBaseObject::set_fixed(bool fixed)
-	{
-		m_fixed = fixed;
-	}
-
-	// Iterator support - for in, for each
-	Atom VectorBaseObject::nextName(int index)
-	{
-		AvmAssert(index > 0);
-		if (((uint32)index) <= m_length)
-		{
-			AvmCore *core = this->core();
-			return core->intToAtom(index-1);
-		}
-		else
-		{
-			return nullStringAtom;
-		}
-	}
-	Atom VectorBaseObject::nextValue(int index)
-	{
-		AvmAssert(index > 0);
-		if (((uint32)index) <= m_length)
-		{
-			return getUintProperty(index-1);
-		}
-		else
-		{
-			return undefinedAtom;
-		}
-	}
-	int VectorBaseObject::nextNameIndex(int index)
-	{
-		if (((uint32)index) < m_length)
-		{
-			return index + 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	Atom VectorBaseObject::map (ScriptObject *callback, Atom thisObject)
-	{
-		AvmCore* core = this->core();
-		VectorBaseObject *r = newVector(m_length);
-
-		if (!callback)
-			return r->atom();
-
-		ScriptObject *d = this;
-		uint32 len = m_length;
-
-		for (uint32 i = 0; i < len; i++)
-		{
-			// If thisObject is null, the call function will substitute the global object 
-			// args are modified in place by callee
-			Atom args[4] = {
-				thisObject,
-				d->getUintProperty(i), // element
-				core->uintToAtom(i), // index
-				this->atom()
-			};
-			Atom result = callback->call(3, args);
-			r->setUintProperty (i, result);
-		}
-
-		return r->atom();
-	}
-
-	Atom VectorBaseObject::filter(ScriptObject *callback, Atom thisObject)
-	{
-		AvmCore* core = this->core();
-		VectorBaseObject *r = newVector();
-
-		if (!callback)
-			return r->atom();
-
-		ScriptObject *d = this;
-		uint32 len = m_length;
-
-		for (uint32 i = 0, k = 0; i < len; i++)
-		{
-			// If thisObject is null, the call function will substitute the global object 
-			// args are modified in place by callee
-			Atom element = d->getUintProperty(i);
-			Atom args[4] = {
-				thisObject,
-				element,
-				core->uintToAtom(i), // index
-				this->atom()
-			};
-			Atom result = callback->call(3, args);
-			if (result == trueAtom)
-				r->setUintProperty(k++, element);
-		}
-
-		return r->atom();
-	}
-
-	uint32 VectorBaseObject::AS3_push(Atom *argv, int argc)
-	{
-		if( m_fixed )
-			toplevel()->throwRangeError(kVectorFixedError);
-		grow(m_length + argc);
-		for (int i=0; i < argc; i++) {
-			setUintProperty(m_length, argv[i]);
-		}
-		return m_length;
-	}
-
-	//
-	// IntVectorClass
-	//
-
-	IntVectorClass::IntVectorClass(VTable *vtable)
-		: ClassClosure(vtable)
+    bool VectorBaseObject::hasAtomProperty(Atom name) const
     {
-		toplevel()->intVectorClass = this;
-        setPrototypePtr(toplevel()->objectClass->construct());
-	}
+        uint32 index;
+        bool isNumber=false;
+        if (getVectorIndex(name, index, isNumber))
+        {
+            return index < m_length;
+        }
+        else
+        {
+            if(isNumber)
+            {
+                return false;
+            }
+            return ScriptObject::hasAtomProperty(name);
+        }
+    }
 
-	ScriptObject* IntVectorClass::createInstance(VTable *ivtable,
-												 ScriptObject *prototype)
+    // helper method
+    // sets index to the uint32 value of name, if it can be converted
+    // isNumber is set to true if name was a number (whether it was a uint32 value or not)
+    bool VectorBaseObject::getVectorIndex(Atom name, uint32& index, bool& isNumber) const
+    {
+        AvmCore* core = this->core();
+        isNumber = false;
+        if (AvmCore::getIndexFromAtom(name, &index))
+        {
+            isNumber = true;
+            return true;
+        }
+        else
+        {
+            if( AvmCore::isString(name) )
+            {
+                Stringp s = core->string(name);
+                const wchar c = s->charAt(0);
+                // Does it look like a number?
+                if( s->length() > 0 && c >= '0' && c <= '9' )
+                {
+                    double index_d = s->toNumber();
+                    if( !MathUtils::isNaN(index_d) )
+                    {
+                        isNumber = true;
+
+                        // name is a string that looks like a number
+                        int i = MathUtils::real2int(index_d);
+                        if ((double)i == index_d)
+                        {
+                            // It's an indexed property name
+                            index = i;
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    void VectorBaseObject::setAtomProperty(Atom name, Atom value)
+    {
+        uint32 index;
+        bool isNumber=false;
+        if (getVectorIndex(name, index, isNumber))
+        {
+            setUintProperty(index, value);
+        }
+        else
+        {
+            // NOTE use default public for message gen
+            Multiname mn(core()->getAnyPublicNamespace(), core()->string(name));
+
+            // Vector is sorta sealed, can only write to "indexed" properties
+            toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
+        }
+    }
+
+    Atom VectorBaseObject::getAtomProperty(Atom name) const
+    {
+        uint32 index;
+        bool isNumber=false;
+        AvmCore* core = this->core();
+        if (getVectorIndex(name, index, isNumber))
+        {
+            return getUintProperty(index);
+        }
+        else
+        {
+            if(isNumber)
+            {
+                // Not a valid indexed name - has a decimal part
+                // NOTE use default public for message gen
+                Multiname mn(core->findPublicNamespace(), core->string(name));
+                toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
+            }
+            // Check the prototype chain - that will throw if there is no match
+            return getAtomPropertyFromProtoChain(name, getDelegate(), traits());
+        }
+    }
+
+    uint32 VectorBaseObject::get_length()
+    {
+        return m_length;
+    }
+
+    void VectorBaseObject::set_length(uint32 newLength)
+    {
+        if( m_fixed )
+            toplevel()->throwRangeError(kVectorFixedError);
+        if (newLength > m_capacity)
+        {
+            grow(newLength, true);
+        }
+        m_length = newLength;
+    }
+
+    bool VectorBaseObject::get_fixed()
+    {
+        return m_fixed;
+    }
+
+    void VectorBaseObject::set_fixed(bool fixed)
+    {
+        m_fixed = fixed;
+    }
+
+    // Iterator support - for in, for each
+    Atom VectorBaseObject::nextName(int index)
+    {
+        AvmAssert(index > 0);
+        if (((uint32)index) <= m_length)
+        {
+            AvmCore *core = this->core();
+            return core->intToAtom(index-1);
+        }
+        else
+        {
+            return nullStringAtom;
+        }
+    }
+    Atom VectorBaseObject::nextValue(int index)
+    {
+        AvmAssert(index > 0);
+        if (((uint32)index) <= m_length)
+        {
+            return getUintProperty(index-1);
+        }
+        else
+        {
+            return undefinedAtom;
+        }
+    }
+    int VectorBaseObject::nextNameIndex(int index)
+    {
+        if (((uint32)index) < m_length)
+        {
+            return index + 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    Atom VectorBaseObject::map (ScriptObject *callback, Atom thisObject)
+    {
+        AvmCore* core = this->core();
+        VectorBaseObject *r = newVector(m_length);
+
+        if (!callback)
+            return r->atom();
+
+        ScriptObject *d = this;
+        uint32 len = m_length;
+
+        for (uint32 i = 0; i < len; i++)
+        {
+            // If thisObject is null, the call function will substitute the global object
+            // args are modified in place by callee
+            Atom args[4] = {
+                thisObject,
+                d->getUintProperty(i), // element
+                core->uintToAtom(i), // index
+                this->atom()
+            };
+            Atom result = callback->call(3, args);
+            r->setUintProperty (i, result);
+        }
+
+        return r->atom();
+    }
+
+    Atom VectorBaseObject::filter(ScriptObject *callback, Atom thisObject)
+    {
+        AvmCore* core = this->core();
+        VectorBaseObject *r = newVector();
+
+        if (!callback)
+            return r->atom();
+
+        ScriptObject *d = this;
+        uint32 len = m_length;
+
+        for (uint32 i = 0, k = 0; i < len; i++)
+        {
+            // If thisObject is null, the call function will substitute the global object
+            // args are modified in place by callee
+            Atom element = d->getUintProperty(i);
+            Atom args[4] = {
+                thisObject,
+                element,
+                core->uintToAtom(i), // index
+                this->atom()
+            };
+            Atom result = callback->call(3, args);
+            if (result == trueAtom)
+                r->setUintProperty(k++, element);
+        }
+
+        return r->atom();
+    }
+
+    uint32 VectorBaseObject::AS3_push(Atom *argv, int argc)
+    {
+        if( m_fixed )
+            toplevel()->throwRangeError(kVectorFixedError);
+        grow(m_length + argc);
+        for (int i=0; i < argc; i++) {
+            setUintProperty(m_length, argv[i]);
+        }
+        return m_length;
+    }
+
+    //
+    // IntVectorClass
+    //
+
+    IntVectorClass::IntVectorClass(VTable *vtable)
+        : ClassClosure(vtable)
+    {
+        toplevel()->intVectorClass = this;
+        setPrototypePtr(toplevel()->objectClass->construct());
+    }
+
+    ScriptObject* IntVectorClass::createInstance(VTable *ivtable,
+                                                 ScriptObject *prototype)
     {
         return new (core()->GetGC(), ivtable->getExtraSize()) IntVectorObject(ivtable, prototype);
     }
 
-	Atom IntVectorClass::call(int argc, Atom* argv) 
-	{
-		if (argc != 1)
-		{
-			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
-		}
-		if( AvmCore::istype(argv[1], ivtable()->traits ) )
-			return argv[1];
-
-		IntVectorObject* v = (IntVectorObject*)createInstance(ivtable(), prototypePtr());
-
-		v->initWithObj(argv[1]);
-
-		return v->atom();
-	}
-
-	IntVectorObject* IntVectorClass::newVector(uint32 length)
-	{
-		VTable* ivtable = this->ivtable();
-		IntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			IntVectorObject(ivtable, prototypePtr());
-		v->set_length(length);
-		return v;
-	}
-
-
-	VectorBaseObject* IntVectorObject::newVector(uint32 length)
-	{
-		return toplevel()->intVectorClass->newVector(length);
-	}
-
-	//
-	// UIntVectorClass
-	//
-
-	UIntVectorClass::UIntVectorClass(VTable *vtable)
-		: ClassClosure(vtable)
+    Atom IntVectorClass::call(int argc, Atom* argv)
     {
-		toplevel()->uintVectorClass = this;
-        setPrototypePtr( toplevel()->objectClass->construct());
-	}
+        if (argc != 1)
+        {
+            toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+        }
+        if( AvmCore::istype(argv[1], ivtable()->traits ) )
+            return argv[1];
 
-	ScriptObject* UIntVectorClass::createInstance(VTable *ivtable,
-												 ScriptObject *prototype)
+        IntVectorObject* v = (IntVectorObject*)createInstance(ivtable(), prototypePtr());
+
+        v->initWithObj(argv[1]);
+
+        return v->atom();
+    }
+
+    IntVectorObject* IntVectorClass::newVector(uint32 length)
+    {
+        VTable* ivtable = this->ivtable();
+        IntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
+            IntVectorObject(ivtable, prototypePtr());
+        v->set_length(length);
+        return v;
+    }
+
+
+    VectorBaseObject* IntVectorObject::newVector(uint32 length)
+    {
+        return toplevel()->intVectorClass->newVector(length);
+    }
+
+    //
+    // UIntVectorClass
+    //
+
+    UIntVectorClass::UIntVectorClass(VTable *vtable)
+        : ClassClosure(vtable)
+    {
+        toplevel()->uintVectorClass = this;
+        setPrototypePtr( toplevel()->objectClass->construct());
+    }
+
+    ScriptObject* UIntVectorClass::createInstance(VTable *ivtable,
+                                                 ScriptObject *prototype)
     {
         return new (core()->GetGC(), ivtable->getExtraSize()) UIntVectorObject(ivtable, prototype);
     }
 
-	Atom UIntVectorClass::call(int argc, Atom* argv) 
-	{
-		if (argc != 1)
-		{
-			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
-		}
+    Atom UIntVectorClass::call(int argc, Atom* argv)
+    {
+        if (argc != 1)
+        {
+            toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+        }
 
-		if( AvmCore::istype(argv[1], ivtable()->traits ) )
-			return argv[1];
+        if( AvmCore::istype(argv[1], ivtable()->traits ) )
+            return argv[1];
 
-		UIntVectorObject* v = (UIntVectorObject*)createInstance(ivtable(), prototypePtr());
+        UIntVectorObject* v = (UIntVectorObject*)createInstance(ivtable(), prototypePtr());
 
-		v->initWithObj(argv[1]);
+        v->initWithObj(argv[1]);
 
-		return v->atom();
-	}
+        return v->atom();
+    }
 
-	UIntVectorObject* UIntVectorClass::newVector(uint32 length)
-	{
-		VTable* ivtable = this->ivtable();
-		UIntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-		UIntVectorObject(ivtable, prototypePtr());
-		v->set_length(length);
-		return v;
-	}
+    UIntVectorObject* UIntVectorClass::newVector(uint32 length)
+    {
+        VTable* ivtable = this->ivtable();
+        UIntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
+        UIntVectorObject(ivtable, prototypePtr());
+        v->set_length(length);
+        return v;
+    }
 
-	VectorBaseObject* UIntVectorObject::newVector(uint32 length)
-	{
-		return toplevel()->uintVectorClass->newVector(length);
-	}
+    VectorBaseObject* UIntVectorObject::newVector(uint32 length)
+    {
+        return toplevel()->uintVectorClass->newVector(length);
+    }
 
-	//
-	// DoubleVectorClass
-	//
+    //
+    // DoubleVectorClass
+    //
 
-	DoubleVectorClass::DoubleVectorClass(VTable *vtable)
-		: ClassClosure(vtable)
-	{
-		toplevel()->doubleVectorClass = this;
+    DoubleVectorClass::DoubleVectorClass(VTable *vtable)
+        : ClassClosure(vtable)
+    {
+        toplevel()->doubleVectorClass = this;
         setPrototypePtr( toplevel()->objectClass->construct());
-	}
+    }
 
-	ScriptObject* DoubleVectorClass::createInstance(VTable *ivtable,
-												   ScriptObject *prototype)
+    ScriptObject* DoubleVectorClass::createInstance(VTable *ivtable,
+                                                   ScriptObject *prototype)
     {
         return new (core()->GetGC(), ivtable->getExtraSize()) DoubleVectorObject(ivtable, prototype);
     }
 
-	Atom DoubleVectorClass::call(int argc, Atom* argv) 
-	{
-		if (argc != 1)
-		{
-			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
-		}
+    Atom DoubleVectorClass::call(int argc, Atom* argv)
+    {
+        if (argc != 1)
+        {
+            toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+        }
 
-		if( AvmCore::istype(argv[1], ivtable()->traits ) )
-			return argv[1];
+        if( AvmCore::istype(argv[1], ivtable()->traits ) )
+            return argv[1];
 
-		DoubleVectorObject* v = (DoubleVectorObject*)createInstance(ivtable(), prototypePtr());
+        DoubleVectorObject* v = (DoubleVectorObject*)createInstance(ivtable(), prototypePtr());
 
-		v->initWithObj(argv[1]);
+        v->initWithObj(argv[1]);
 
-		return v->atom();
-	}
+        return v->atom();
+    }
 
-	DoubleVectorObject* DoubleVectorClass::newVector(uint32 length)
-	{
-		VTable* ivtable = this->ivtable();
-		DoubleVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			DoubleVectorObject(ivtable, prototypePtr());
-		v->set_length(length);
-		return v;
-	}
+    DoubleVectorObject* DoubleVectorClass::newVector(uint32 length)
+    {
+        VTable* ivtable = this->ivtable();
+        DoubleVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
+            DoubleVectorObject(ivtable, prototypePtr());
+        v->set_length(length);
+        return v;
+    }
 
-	VectorBaseObject* DoubleVectorObject::newVector(uint32 length)
-	{
-		return toplevel()->doubleVectorClass->newVector(length);
-	}
+    VectorBaseObject* DoubleVectorObject::newVector(uint32 length)
+    {
+        return toplevel()->doubleVectorClass->newVector(length);
+    }
 
-	//
-	// VectorClass
-	//
+    //
+    // VectorClass
+    //
 
-	VectorClass::VectorClass(VTable *vtable)
-	: ClassClosure(vtable)
-	{
-		toplevel()->vectorClass = this;
-		setPrototypePtr( toplevel()->objectClass->construct());
-	}
+    VectorClass::VectorClass(VTable *vtable)
+    : ClassClosure(vtable)
+    {
+        toplevel()->vectorClass = this;
+        setPrototypePtr( toplevel()->objectClass->construct());
+    }
 
-	/*static*/ Stringp VectorClass::makeVectorClassName(AvmCore* core, Traits* t)
-	{
-		Stringp s = core->newConstantStringLatin1("Vector.<");
-		s = s->append(t->formatClassName());
-		s = s->append(core->newConstantStringLatin1(">"));
-		// all callers want it interned, so let's do it here
-		return core->internString(s);
-	}
+    /*static*/ Stringp VectorClass::makeVectorClassName(AvmCore* core, Traits* t)
+    {
+        Stringp s = core->newConstantStringLatin1("Vector.<");
+        s = s->append(t->formatClassName());
+        s = s->append(core->newConstantStringLatin1(">"));
+        // all callers want it interned, so let's do it here
+        return core->internString(s);
+    }
 
-	Atom VectorClass::applyTypeArgs(int argc, Atom* argv)
-	{
+    Atom VectorClass::applyTypeArgs(int argc, Atom* argv)
+    {
         Toplevel* toplevel = this->toplevel();
-        
-		//Vector only takes 1 type argument
-		AvmAssert(argc==1);
-		if (argc != 1)
-		{
-			toplevel->typeErrorClass()->throwError(kWrongTypeArgCountError, traits()->formatClassName(), core()->toErrorString(1), core()->toErrorString(argc));
-		}
 
-		Atom const typeAtom = argv[0];
+        //Vector only takes 1 type argument
+        AvmAssert(argc==1);
+        if (argc != 1)
+        {
+            toplevel->typeErrorClass()->throwError(kWrongTypeArgCountError, traits()->formatClassName(), core()->toErrorString(1), core()->toErrorString(argc));
+        }
+
+        Atom const typeAtom = argv[0];
 
         ClassClosure* parameterizedType;
         if (ISNULL(typeAtom))
@@ -512,287 +512,287 @@ namespace avmplus
         }
 
         return parameterizedType->atom();
-	}
+    }
 
-	Atom ObjectVectorClass::call(int argc, Atom* argv) 
-	{
-		if (argc != 1)
-		{
-			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
-		}
+    Atom ObjectVectorClass::call(int argc, Atom* argv)
+    {
+        if (argc != 1)
+        {
+            toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+        }
 
-		if( AvmCore::istype(argv[1], ivtable()->traits ) )
-			return argv[1];
+        if( AvmCore::istype(argv[1], ivtable()->traits ) )
+            return argv[1];
 
-		ObjectVectorObject* v = (ObjectVectorObject*)createInstance(ivtable(), prototypePtr());
+        ObjectVectorObject* v = (ObjectVectorObject*)createInstance(ivtable(), prototypePtr());
 
-		v->initWithObj(argv[1]);
+        v->initWithObj(argv[1]);
 
-		return v->atom();
-	}
-    
+        return v->atom();
+    }
+
     ScriptObject* VectorClass::createInstance(VTable * /*ivtable*/, ScriptObject * /*prototype*/)
     {
         toplevel()->throwTypeError(kConstructOfNonFunctionError);
         return 0;
-    }    
+    }
 
-	ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32 length)
-	{
-		Atom args[1] = {type->atom()};
-
-		ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(applyTypeArgs(1, args));
-		return vecclass->newVector(length);
-	}
-
-	//
-	// ObjectVectorClass
-	//
-
-	ObjectVectorClass::ObjectVectorClass(VTable *vtable)
-		: ClassClosure(vtable)
+    ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32 length)
     {
-		if( !toplevel()->objectVectorClass )
-			toplevel()->objectVectorClass = this;
+        Atom args[1] = {type->atom()};
+
+        ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(applyTypeArgs(1, args));
+        return vecclass->newVector(length);
+    }
+
+    //
+    // ObjectVectorClass
+    //
+
+    ObjectVectorClass::ObjectVectorClass(VTable *vtable)
+        : ClassClosure(vtable)
+    {
+        if( !toplevel()->objectVectorClass )
+            toplevel()->objectVectorClass = this;
         setPrototypePtr(toplevel()->objectClass->construct());
-	}
+    }
 
-	ScriptObject* ObjectVectorClass::createInstance(VTable *ivtable,
-												   ScriptObject *prototype)
+    ScriptObject* ObjectVectorClass::createInstance(VTable *ivtable,
+                                                   ScriptObject *prototype)
     {
-		ObjectVectorObject* v = new (core()->GetGC(), ivtable->getExtraSize()) ObjectVectorObject(ivtable, prototype);
-		v->set_type(index_type->atom());
+        ObjectVectorObject* v = new (core()->GetGC(), ivtable->getExtraSize()) ObjectVectorObject(ivtable, prototype);
+        v->set_type(index_type->atom());
         return v;
     }
 
-	ObjectVectorObject* ObjectVectorClass::newVector(uint32 length)
-	{
-		VTable* ivtable = this->ivtable();
-		ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			ObjectVectorObject(ivtable, prototypePtr());
-		v->set_type(this->index_type->atom());
-		v->set_length(length);
-		return v;
-	}
+    ObjectVectorObject* ObjectVectorClass::newVector(uint32 length)
+    {
+        VTable* ivtable = this->ivtable();
+        ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize())
+            ObjectVectorObject(ivtable, prototypePtr());
+        v->set_type(this->index_type->atom());
+        v->set_length(length);
+        return v;
+    }
 
-	Atom ObjectVectorObject::getUintProperty(uint32 index) const
-	{
-		return _getUintProperty(index);
-	}
-	Atom ObjectVectorObject::_getUintProperty(uint32 index) const
-	{
-		if (m_length <= index)
-		{
-			toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
-		}
-		else
-		{
-			return m_array[index];
-		}
-		return 0;
-	}
-	
-	void ObjectVectorObject::setUintProperty(uint32 index, Atom value)
-	{
-		return _setUintProperty(index, value);
-	}
-	void ObjectVectorObject::_setUintProperty(uint32 index, Atom value)
-	{
-		if (m_length <= index)
-		{
-			if( index > m_length || m_fixed )
-				toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
-			grow(index+1);
-			m_length = index+1;
-		}
-		WBATOM( MMgc::GC::GetGC(m_array), m_array, m_array + index, (t ? toplevel()->coerce(value, t->traits()->itraits) : value));
-	}			
+    Atom ObjectVectorObject::getUintProperty(uint32 index) const
+    {
+        return _getUintProperty(index);
+    }
+    Atom ObjectVectorObject::_getUintProperty(uint32 index) const
+    {
+        if (m_length <= index)
+        {
+            toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
+        }
+        else
+        {
+            return m_array[index];
+        }
+        return 0;
+    }
 
-	Atom ObjectVectorObject::_getIntProperty(int index) const
-	{
-		if (index >= 0) 
-		{
-			if (m_length <= (uint32)index)
-			{
-				toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
-			}
-			else
-			{
-				return m_array[index];
-			}
-		}
-		else 
-			toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
-		return 0;
-	}
+    void ObjectVectorObject::setUintProperty(uint32 index, Atom value)
+    {
+        return _setUintProperty(index, value);
+    }
+    void ObjectVectorObject::_setUintProperty(uint32 index, Atom value)
+    {
+        if (m_length <= index)
+        {
+            if( index > m_length || m_fixed )
+                toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
+            grow(index+1);
+            m_length = index+1;
+        }
+        WBATOM( MMgc::GC::GetGC(m_array), m_array, m_array + index, (t ? toplevel()->coerce(value, t->traits()->itraits) : value));
+    }
 
-	void ObjectVectorObject::_setIntProperty(int index, Atom value)
-	{
-		if (index >= 0) 
-			_setUintProperty(index, value);
-		else 
-			toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
-	}
+    Atom ObjectVectorObject::_getIntProperty(int index) const
+    {
+        if (index >= 0)
+        {
+            if (m_length <= (uint32)index)
+            {
+                toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
+            }
+            else
+            {
+                return m_array[index];
+            }
+        }
+        else
+            toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+        return 0;
+    }
 
-	// using VMPI_memset to clear an atom range to zero is not really right and will generate assertions in Box
-	// code. Let's set it to what we really want, a nullObjectAtom.
-	static void nullAtomRange(Atom* a, size_t count)
-	{
-		while (count--)
-			*a++ = nullObjectAtom;
-	}
+    void ObjectVectorObject::_setIntProperty(int index, Atom value)
+    {
+        if (index >= 0)
+            _setUintProperty(index, value);
+        else
+            toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+    }
 
-	void ObjectVectorObject::set_length(uint32 newLength)
-	{
-		if (newLength > m_length)
-		{
-			if( m_fixed )
-				toplevel()->throwRangeError(kVectorFixedError);
+    // using VMPI_memset to clear an atom range to zero is not really right and will generate assertions in Box
+    // code. Let's set it to what we really want, a nullObjectAtom.
+    static void nullAtomRange(Atom* a, size_t count)
+    {
+        while (count--)
+            *a++ = nullObjectAtom;
+    }
 
-			grow(newLength, true);
-		}
-		else if( newLength < m_length)
-		{
-			if( m_fixed )
-				toplevel()->throwRangeError(kVectorFixedError);
+    void ObjectVectorObject::set_length(uint32 newLength)
+    {
+        if (newLength > m_length)
+        {
+            if( m_fixed )
+                toplevel()->throwRangeError(kVectorFixedError);
 
-			nullAtomRange(m_array+newLength, (m_length-newLength));
-			//_spliceHelper (newLength, 0, (m_length - newLength), 0, 0);
-		}
-		m_length = newLength;
-	}
+            grow(newLength, true);
+        }
+        else if( newLength < m_length)
+        {
+            if( m_fixed )
+                toplevel()->throwRangeError(kVectorFixedError);
 
-	void ObjectVectorObject::set_type(Atom a)
-	{
-		this->t = (ClassClosure*)AvmCore::atomToScriptObject(a);
-	}
+            nullAtomRange(m_array+newLength, (m_length-newLength));
+            //_spliceHelper (newLength, 0, (m_length - newLength), 0, 0);
+        }
+        m_length = newLength;
+    }
 
-	Atom ObjectVectorObject::get_type()
-	{
-		return t->atom();
-	}
+    void ObjectVectorObject::set_type(Atom a)
+    {
+        this->t = (ClassClosure*)AvmCore::atomToScriptObject(a);
+    }
 
-	void ObjectVectorObject::grow(uint32 newCapacity, bool exact)
-	{
-		if (newCapacity > m_capacity)
-		{
-			if(!exact)
-				newCapacity = newCapacity + (newCapacity >>2);
-			//newCapacity = ((newCapacity+kGrowthIncr)/kGrowthIncr)*kGrowthIncr;
-			GC* gc = GC::GetGC(this);
-			Atom* newArray = (Atom*) gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers);
-			nullAtomRange(newArray, newCapacity);
-			Atom* oldAtoms = m_array;
-			if (!newArray)
-			{
-				toplevel()->throwError(kOutOfMemoryError);
-			}
-			if (m_array)
-			{
-				VMPI_memcpy(newArray, m_array, m_length * sizeof(Atom));
-				nullAtomRange(oldAtoms, m_length);
-				gc->Free(oldAtoms);
-			}
-			m_array = newArray;
-			m_capacity = newCapacity;
-		}
-	}
+    Atom ObjectVectorObject::get_type()
+    {
+        return t->atom();
+    }
 
-	VectorBaseObject* ObjectVectorObject::newVector(uint32 length)
-	{
+    void ObjectVectorObject::grow(uint32 newCapacity, bool exact)
+    {
+        if (newCapacity > m_capacity)
+        {
+            if(!exact)
+                newCapacity = newCapacity + (newCapacity >>2);
+            //newCapacity = ((newCapacity+kGrowthIncr)/kGrowthIncr)*kGrowthIncr;
+            GC* gc = GC::GetGC(this);
+            Atom* newArray = (Atom*) gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers);
+            nullAtomRange(newArray, newCapacity);
+            Atom* oldAtoms = m_array;
+            if (!newArray)
+            {
+                toplevel()->throwError(kOutOfMemoryError);
+            }
+            if (m_array)
+            {
+                VMPI_memcpy(newArray, m_array, m_length * sizeof(Atom));
+                nullAtomRange(oldAtoms, m_length);
+                gc->Free(oldAtoms);
+            }
+            m_array = newArray;
+            m_capacity = newCapacity;
+        }
+    }
+
+    VectorBaseObject* ObjectVectorObject::newVector(uint32 length)
+    {
         Atom args[1] = {t->atom()};
-        
-		ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(toplevel()->vectorClass->applyTypeArgs(1, args));
-		return vecclass->newVector(length);
-	}
 
-	void ObjectVectorObject::_spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)
-	{
-		long l_shiftAmount = (long)insertCount - (long) deleteCount; // long because result could be negative
+        ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(toplevel()->vectorClass->applyTypeArgs(1, args));
+        return vecclass->newVector(length);
+    }
 
-		grow(m_length + l_shiftAmount);
+    void ObjectVectorObject::_spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)
+    {
+        long l_shiftAmount = (long)insertCount - (long) deleteCount; // long because result could be negative
 
-		Atom *arr = m_array;
+        grow(m_length + l_shiftAmount);
 
-		ScriptObject* so_args = atomKind(args)==kObjectType ?  AvmCore::atomToScriptObject(args) : 0;
-		ObjectVectorObject* vec_args = isVector(args);
+        Atom *arr = m_array;
 
-		if (l_shiftAmount < 0) 
-		{
-			int numberBeingDeleted = -l_shiftAmount;
+        ScriptObject* so_args = atomKind(args)==kObjectType ?  AvmCore::atomToScriptObject(args) : 0;
+        ObjectVectorObject* vec_args = isVector(args);
 
-			// shift elements down
-			int toMove = m_length - insertPoint - deleteCount;
-			movePointers(arr, insertPoint + insertCount, insertPoint + deleteCount, toMove);
-			nullAtomRange(arr + m_length - numberBeingDeleted, numberBeingDeleted);
-		}
-		else if (l_shiftAmount > 0)
-		{
-			movePointers(arr, insertPoint + l_shiftAmount, insertPoint, m_length - insertPoint);
-			//clear for gc purposes
-			nullAtomRange(arr + insertPoint, l_shiftAmount);
-		}
+        if (l_shiftAmount < 0)
+        {
+            int numberBeingDeleted = -l_shiftAmount;
 
-		set_length(m_length + l_shiftAmount);
+            // shift elements down
+            int toMove = m_length - insertPoint - deleteCount;
+            movePointers(arr, insertPoint + insertCount, insertPoint + deleteCount, toMove);
+            nullAtomRange(arr + m_length - numberBeingDeleted, numberBeingDeleted);
+        }
+        else if (l_shiftAmount > 0)
+        {
+            movePointers(arr, insertPoint + l_shiftAmount, insertPoint, m_length - insertPoint);
+            //clear for gc purposes
+            nullAtomRange(arr + insertPoint, l_shiftAmount);
+        }
 
-		// Add the items to insert
-		if (insertCount)
-		{
-			if( vec_args && (offset+insertCount <= vec_args->m_length) )
-			{
-				Atom* a = vec_args->m_array;
-				for (uint32 i=0; i<insertCount; i++)
-				{
-					_setUintProperty(insertPoint+i, a[i+offset]);
-				}
-			}
-			else if( so_args )
-			{
-				for (uint32 i=0; i<insertCount; i++)
-				{
-					//setUintProperty(insertPoint+i, so_args->getUintProperty(i+offset));
-					_setUintProperty(insertPoint+i, so_args->getUintProperty(i+offset));
-				}
-			}
-		}
+        set_length(m_length + l_shiftAmount);
 
-		return;
-	}
+        // Add the items to insert
+        if (insertCount)
+        {
+            if( vec_args && (offset+insertCount <= vec_args->m_length) )
+            {
+                Atom* a = vec_args->m_array;
+                for (uint32 i=0; i<insertCount; i++)
+                {
+                    _setUintProperty(insertPoint+i, a[i+offset]);
+                }
+            }
+            else if( so_args )
+            {
+                for (uint32 i=0; i<insertCount; i++)
+                {
+                    //setUintProperty(insertPoint+i, so_args->getUintProperty(i+offset));
+                    _setUintProperty(insertPoint+i, so_args->getUintProperty(i+offset));
+                }
+            }
+        }
 
-	Atom ObjectVectorObject::AS3_pop()
-	{
-		if(m_fixed)
-			toplevel()->throwRangeError(kVectorFixedError);
-		if(m_length)
-		{
-			uint32 l = m_length-1;
-			Atom r = m_array[l];
-			set_length(m_length-1);
-			return r;
-		}
-		return undefinedAtom;
-	}
+        return;
+    }
 
-	uint32 ObjectVectorObject::AS3_unshift(Atom* argv, int argc)
-	{
-		// shift elements up by argc
-		// inserts args into initial spots
+    Atom ObjectVectorObject::AS3_pop()
+    {
+        if(m_fixed)
+            toplevel()->throwRangeError(kVectorFixedError);
+        if(m_length)
+        {
+            uint32 l = m_length-1;
+            Atom r = m_array[l];
+            set_length(m_length-1);
+            return r;
+        }
+        return undefinedAtom;
+    }
 
-		if( argc > 0 )
-		{
-			if( m_fixed )
-				toplevel()->throwRangeError(kVectorFixedError);
-			grow (m_length + argc);
-			Atom *arr = m_array;
-			movePointers(arr, argc, 0, m_length);
-			// clear moved element for RC purposes
-			nullAtomRange(arr, argc);
-			m_length += argc;
-			for(int i=0; i<argc; i++) {
-				_setUintProperty(i, argv[i]);
-			}
-		}
-		return m_length;
-	}
+    uint32 ObjectVectorObject::AS3_unshift(Atom* argv, int argc)
+    {
+        // shift elements up by argc
+        // inserts args into initial spots
+
+        if( argc > 0 )
+        {
+            if( m_fixed )
+                toplevel()->throwRangeError(kVectorFixedError);
+            grow (m_length + argc);
+            Atom *arr = m_array;
+            movePointers(arr, argc, 0, m_length);
+            // clear moved element for RC purposes
+            nullAtomRange(arr, argc);
+            m_length += argc;
+            for(int i=0; i<argc; i++) {
+                _setUintProperty(i, argv[i]);
+            }
+        }
+        return m_length;
+    }
 
 }

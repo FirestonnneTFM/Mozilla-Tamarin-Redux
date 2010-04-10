@@ -43,43 +43,43 @@
 
 namespace avmplus
 {
-	/**
-	 * class DateClass
-	 */
+    /**
+     * class DateClass
+     */
     class DateClass : public ClassClosure
     {
-	public:
-		DateClass(VTable* cvtable);
+    public:
+        DateClass(VTable* cvtable);
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom call(int argc, Atom* argv);
+        // this = argv[0]
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom call(int argc, Atom* argv);
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		/** @name instance methods */
-		/*@{*/
-		Atom get(Atom thisAtom, Atom *args, int argc, int index);
-		Atom set(Atom thisAtom, Atom *args, int argc, int index);
-		/*@}*/
+        /** @name instance methods */
+        /*@{*/
+        Atom get(Atom thisAtom, Atom *args, int argc, int index);
+        Atom set(Atom thisAtom, Atom *args, int argc, int index);
+        /*@}*/
 
-		/** @name static methods */
-		/*@{*/
-		double parse(Atom input);
-		double UTC(Atom year, Atom month, Atom date,
-				   Atom hours, Atom minutes, Atom seconds, Atom ms,
-				   Atom *args, int argc);
-		/*@}*/
+        /** @name static methods */
+        /*@{*/
+        double parse(Atom input);
+        double UTC(Atom year, Atom month, Atom date,
+                   Atom hours, Atom minutes, Atom seconds, Atom ms,
+                   Atom *args, int argc);
+        /*@}*/
 
-	private:
-		double		stringToDateDouble(Stringp s);
-        
-		DECLARE_SLOTS_DateClass;
-	};
+    private:
+        double      stringToDateDouble(Stringp s);
+
+        DECLARE_SLOTS_DateClass;
+    };
 }
 
 #endif /* __avmplus_DateClass__ */

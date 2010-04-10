@@ -41,223 +41,223 @@
 #define __avmplus_Exception__
 
 #ifdef VMCFG_AOT
-	extern "C" void llvm_unwind();
+    extern "C" void llvm_unwind();
 #endif
 
 namespace avmplus
 {
-	/**
-	 * The Exception class is used to throw all exceptions in
-	 * AVM+.  To throw an exception, an Exception object is
-	 * instantiated and passed to AvmCore::throwException.
-	 */
-	class Exception : public MMgc::GCObject
-	{
-	public:
-		Exception(AvmCore* core, Atom atom);
+    /**
+     * The Exception class is used to throw all exceptions in
+     * AVM+.  To throw an exception, an Exception object is
+     * instantiated and passed to AvmCore::throwException.
+     */
+    class Exception : public MMgc::GCObject
+    {
+    public:
+        Exception(AvmCore* core, Atom atom);
 
-		bool isValid();
-		enum
-		{
-			/**
-			 * An EXIT_EXCEPTION cannot be caught.  It indicates that
-			 * the VM is shutting down.
-			 */
-			EXIT_EXCEPTION = 1
+        bool isValid();
+        enum
+        {
+            /**
+             * An EXIT_EXCEPTION cannot be caught.  It indicates that
+             * the VM is shutting down.
+             */
+            EXIT_EXCEPTION = 1
 
 #ifdef DEBUGGER
-			/**
-			 * Indicates that this exception has already been passed to
-			 * the debugger.
-			 */
-			, SEEN_BY_DEBUGGER = 2
+            /**
+             * Indicates that this exception has already been passed to
+             * the debugger.
+             */
+            , SEEN_BY_DEBUGGER = 2
 #endif
-		};
+        };
 
 #ifdef DEBUGGER
-		StackTrace* getStackTrace() const { return stackTrace; }
+        StackTrace* getStackTrace() const { return stackTrace; }
 #endif /* DEBUGGER */
 
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		ATOM_WB				atom;
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        ATOM_WB             atom;
 #ifdef DEBUGGER
- 		DWB(StackTrace*)	stackTrace;
+        DWB(StackTrace*)    stackTrace;
 #endif
-		int32_t				flags;
+        int32_t             flags;
 
-	// ------------------------ DATA SECTION END
-	};
+    // ------------------------ DATA SECTION END
+    };
 
-	/**
-	 * ExceptionHandler is a single entry in the exceptions
-	 * table that accompanies a MethodInfo.  It describes:
-	 *
-	 * - the range of instructions that the exception handler
-	 *   applies to
-	 * - the location of the first instruction in the
-	 *   exception handler.
-	 * - the type of exceptions handled by this exception
-	 *   handler
-	 */
-	class ExceptionHandler
-	{
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		Traits* traits;			// The type of exceptions handled by this exception handler. 
-		Traits* scopeTraits;	// The exception scope traits. 
-		int32_t target;			// The target location to branch to when the exception occurs. 
-		int32_t from;			// Start of code range the exception applies to.  Inclusive. 
-		int32_t to;				// End of code range the exception applies to.  Exclusive. 
-	// ------------------------ DATA SECTION END
-	};
+    /**
+     * ExceptionHandler is a single entry in the exceptions
+     * table that accompanies a MethodInfo.  It describes:
+     *
+     * - the range of instructions that the exception handler
+     *   applies to
+     * - the location of the first instruction in the
+     *   exception handler.
+     * - the type of exceptions handled by this exception
+     *   handler
+     */
+    class ExceptionHandler
+    {
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        Traits* traits;         // The type of exceptions handled by this exception handler.
+        Traits* scopeTraits;    // The exception scope traits.
+        int32_t target;         // The target location to branch to when the exception occurs.
+        int32_t from;           // Start of code range the exception applies to.  Inclusive.
+        int32_t to;             // End of code range the exception applies to.  Exclusive.
+    // ------------------------ DATA SECTION END
+    };
 
-	/**
-	 * ExceptionHandlerTable is a table of ExceptionHandler objects.
-	 * The list of exception handlers in a MethodInfo entry in an
-	 * ABC file is parsed into an ExceptionHandlerTable object.
-	 */
-	class ExceptionHandlerTable : public MMgc::GCObject
-	{
-	public:
-		ExceptionHandlerTable(int exception_count);
+    /**
+     * ExceptionHandlerTable is a table of ExceptionHandler objects.
+     * The list of exception handlers in a MethodInfo entry in an
+     * ABC file is parsed into an ExceptionHandlerTable object.
+     */
+    class ExceptionHandlerTable : public MMgc::GCObject
+    {
+    public:
+        ExceptionHandlerTable(int exception_count);
 
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		int32_t exception_count;
-		ExceptionHandler exceptions[1];
-	// ------------------------ DATA SECTION END
-	};
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        int32_t exception_count;
+        ExceptionHandler exceptions[1];
+    // ------------------------ DATA SECTION END
+    };
 
-	/**
-	 * CatchAction indicates what the CATCH block for a given ExceptionFrame will
-	 * do if it gets invoked (that is, if an exception is raised from inside the
-	 * TRY block).
-	 *
-	 * This information is needed by the debugger, in order to decide whether to
-	 * suspend execution in the debugger, in order to let the user examine
-	 * variables etc., before executing the CATCH block.
-	 */
-	enum CatchAction
-	{
-		// It is not known what the CATCH block will do.  This should almost never be used.
-		kCatchAction_Unknown,
+    /**
+     * CatchAction indicates what the CATCH block for a given ExceptionFrame will
+     * do if it gets invoked (that is, if an exception is raised from inside the
+     * TRY block).
+     *
+     * This information is needed by the debugger, in order to decide whether to
+     * suspend execution in the debugger, in order to let the user examine
+     * variables etc., before executing the CATCH block.
+     */
+    enum CatchAction
+    {
+        // It is not known what the CATCH block will do.  This should almost never be used.
+        kCatchAction_Unknown,
 
-		// The CATCH block will silently consume any exception that occurs, and will not
-		// treat it as an error, so exceptions should not be reported to the debugger.
-		kCatchAction_Ignore,
+        // The CATCH block will silently consume any exception that occurs, and will not
+        // treat it as an error, so exceptions should not be reported to the debugger.
+        kCatchAction_Ignore,
 
-		// The CATCH block will treat any exception that occurs as an error -- probably by
-		// calling uncaughtException, but possibly by some other means.  So, exceptions
-		// should be reported to the debugger.
-		kCatchAction_ReportAsError,
+        // The CATCH block will treat any exception that occurs as an error -- probably by
+        // calling uncaughtException, but possibly by some other means.  So, exceptions
+        // should be reported to the debugger.
+        kCatchAction_ReportAsError,
 
-		// The CATCH block will rethrow any exception that occurs; so, we will 'continue',
-		// which will take us back to the 'for' loop to keep going up the exception stack,
-		// until we find a frame with some other value.
-		kCatchAction_Rethrow,
+        // The CATCH block will rethrow any exception that occurs; so, we will 'continue',
+        // which will take us back to the 'for' loop to keep going up the exception stack,
+        // until we find a frame with some other value.
+        kCatchAction_Rethrow,
 
-		// The CATCH block will walk up the stack of ActionScript exception frames, looking
-		// for an ActionScript try/catch block which will catch it.
-		kCatchAction_SearchForActionScriptExceptionHandler
-	};
+        // The CATCH block will walk up the stack of ActionScript exception frames, looking
+        // for an ActionScript try/catch block which will catch it.
+        kCatchAction_SearchForActionScriptExceptionHandler
+    };
 
-	/**
-	 * ExceptionFrame class is used to track stack frames that contain
-	 * exception handlers.
-	 */
-	class ExceptionFrame
-	{
-	public:
-		// The interpreter sometimes allocates the exception frame inside a larger data structure
-		// and needs the placement new operator.
-		void *operator new(size_t, void* p) { return p; }
-		
-		ExceptionFrame()
-		{
-			core = NULL;
-			this->catchAction = kCatchAction_Unknown;
+    /**
+     * ExceptionFrame class is used to track stack frames that contain
+     * exception handlers.
+     */
+    class ExceptionFrame
+    {
+    public:
+        // The interpreter sometimes allocates the exception frame inside a larger data structure
+        // and needs the placement new operator.
+        void *operator new(size_t, void* p) { return p; }
+
+        ExceptionFrame()
+        {
+            core = NULL;
+            this->catchAction = kCatchAction_Unknown;
 #ifdef DEBUG
-			this->contextExtra = 0;
+            this->contextExtra = 0;
 #endif
-		}
-		~ExceptionFrame() { endTry(); }
-		void beginTry(AvmCore* core);
+        }
+        ~ExceptionFrame() { endTry(); }
+        void beginTry(AvmCore* core);
 #ifdef VMCFG_AOT
-		void beginLlvmUnwindTry(AvmCore* core);
+        void beginLlvmUnwindTry(AvmCore* core);
 #endif
-		void endTry();
-		void beginCatch();
-		void throwException(Exception *exception);
+        void endTry();
+        void beginCatch();
+        void throwException(Exception *exception);
 
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		jmp_buf				jmpbuf;
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        jmp_buf             jmpbuf;
 #ifdef DEBUG
-		// save and restore additional state alongside jmpbuf 
-		uint32_t                        contextExtra;
+        // save and restore additional state alongside jmpbuf
+        uint32_t                        contextExtra;
 #endif
-		AvmCore*			core;
-		ExceptionFrame*		prevFrame;
-		MethodFrame*		savedMethodFrame;
-		void*				stacktop;
+        AvmCore*            core;
+        ExceptionFrame*     prevFrame;
+        MethodFrame*        savedMethodFrame;
+        void*               stacktop;
 #ifdef DEBUGGER
-		CallStackNode*		callStack;
+        CallStackNode*      callStack;
 #endif /* DEBUGGER */
-		CatchAction			catchAction;
+        CatchAction         catchAction;
 #ifdef VMCFG_AOT
-		int					llvmUnwindStyle;
+        int                 llvmUnwindStyle;
 #endif
-	// ------------------------ DATA SECTION END
+    // ------------------------ DATA SECTION END
 
-	};
+    };
 
-	class ExceptionFrameAutoPtr
-	{
-	private:
-		ExceptionFrame& ef;
-	public:
-		ExceptionFrameAutoPtr(ExceptionFrame& ef) : ef(ef) {}
-		~ExceptionFrameAutoPtr() { ef.~ExceptionFrame(); }
-	};
-	
-	/**
-	 * TRY, CATCH, and friends are macros for setting up exception try/catch
-	 * blocks.  This is similar to the TRY, CATCH, etc. macros in MFC.
-	 *
-	 * AVM+ uses its own exception handling mechanism implemented using
-	 * setjmp/longjmp.  Hosts of AVM+ can bridge these exceptions into
-	 * regular C++ exceptions by catching and re-throwing. 
-	 * 
-	 * TRY_UNLESS is to support the optimization that if there are no exception handlers
-	 * in this frame, we don't need to create the exception frame at all.  If expr
-	 * is true, the exception frame is not created.
-	 *
-	 * TRY_UNLESS_HEAPMEM is like TRY_UNLESS but the address at which to allocate
-	 * the ExceptionFrame is passed explicitly (it is inside some larger heap-allocated
-	 * block, useful for short-stack systems)
-	 */
+    class ExceptionFrameAutoPtr
+    {
+    private:
+        ExceptionFrame& ef;
+    public:
+        ExceptionFrameAutoPtr(ExceptionFrame& ef) : ef(ef) {}
+        ~ExceptionFrameAutoPtr() { ef.~ExceptionFrame(); }
+    };
 
-	#define TRY(core, CATCH_ACTION) { \
-		ExceptionFrame _ef; \
-		_ef.beginTry(core); \
-		_ef.catchAction = (CATCH_ACTION); \
-		int _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf); \
-		Exception* _ee = core->exceptionAddr; \
-		if (!_setjmpVal)
+    /**
+     * TRY, CATCH, and friends are macros for setting up exception try/catch
+     * blocks.  This is similar to the TRY, CATCH, etc. macros in MFC.
+     *
+     * AVM+ uses its own exception handling mechanism implemented using
+     * setjmp/longjmp.  Hosts of AVM+ can bridge these exceptions into
+     * regular C++ exceptions by catching and re-throwing.
+     *
+     * TRY_UNLESS is to support the optimization that if there are no exception handlers
+     * in this frame, we don't need to create the exception frame at all.  If expr
+     * is true, the exception frame is not created.
+     *
+     * TRY_UNLESS_HEAPMEM is like TRY_UNLESS but the address at which to allocate
+     * the ExceptionFrame is passed explicitly (it is inside some larger heap-allocated
+     * block, useful for short-stack systems)
+     */
 
-	#define TRY_UNLESS(core,expr,CATCH_ACTION) { \
-		ExceptionFrame _ef; \
-		Exception* _ee; \
-		int _setjmpVal = 0; \
-		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+    #define TRY(core, CATCH_ACTION) { \
+        ExceptionFrame _ef; \
+        _ef.beginTry(core); \
+        _ef.catchAction = (CATCH_ACTION); \
+        int _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf); \
+        Exception* _ee = core->exceptionAddr; \
+        if (!_setjmpVal)
 
-	#define TRY_UNLESS_HEAPMEM(mem, core, expr, CATCH_ACTION) { \
-		ExceptionFrame& _ef = *(new (mem) ExceptionFrame); \
-		ExceptionFrameAutoPtr _ef_ap(_ef); \
-		Exception* _ee; \
-		int _setjmpVal = 0; \
-		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+    #define TRY_UNLESS(core,expr,CATCH_ACTION) { \
+        ExceptionFrame _ef; \
+        Exception* _ee; \
+        int _setjmpVal = 0; \
+        if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+
+    #define TRY_UNLESS_HEAPMEM(mem, core, expr, CATCH_ACTION) { \
+        ExceptionFrame& _ef = *(new (mem) ExceptionFrame); \
+        ExceptionFrameAutoPtr _ef_ap(_ef); \
+        Exception* _ee; \
+        int _setjmpVal = 0; \
+        if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = VMPI_setjmpNoUnwind(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
 
     #define CATCH(x) else { _ef.beginCatch(); x = _ee;
     #define END_CATCH }

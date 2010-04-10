@@ -44,111 +44,111 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	// See E4X 13.2.2, pg 64
+    // See E4X 13.2.2, pg 64
     Namespace::Namespace(Atom prefix, Stringp uri, NamespaceType flags)
 #ifdef DEBUGGER
-		: AvmPlusScriptableObject(sotNamespace())
+        : AvmPlusScriptableObject(sotNamespace())
 #endif // DEBUGGER
-	{
-		// verify our parameters are interned strings
-		AvmAssert (uri->isInterned());
-		// prefix can be an interned string, undefined, or null
-		AvmAssert (AvmCore::isName(prefix) || AvmCore::isNullOrUndefined(prefix));
-		setPrefix(prefix);
-		setUri(uri, flags);
-	}
+    {
+        // verify our parameters are interned strings
+        AvmAssert (uri->isInterned());
+        // prefix can be an interned string, undefined, or null
+        AvmAssert (AvmCore::isName(prefix) || AvmCore::isNullOrUndefined(prefix));
+        setPrefix(prefix);
+        setUri(uri, flags);
+    }
 
-	Namespace::~Namespace()
-	{
-		WBATOM(MMgc::GC::GetGC(this), this, &m_prefix, 0);
-		setUri(NULL, NS_Public);
-		setAPI(0);
-	}
+    Namespace::~Namespace()
+    {
+        WBATOM(MMgc::GC::GetGC(this), this, &m_prefix, 0);
+        setUri(NULL, NS_Public);
+        setAPI(0);
+    }
 
-	void Namespace::setUri(Stringp uri, NamespaceType flags)
-	{
-		WBRC(GC::GetGC(this), this, &m_uri, (int32_t)flags | (uintptr) uri);
-	}
+    void Namespace::setUri(Stringp uri, NamespaceType flags)
+    {
+        WBRC(GC::GetGC(this), this, &m_uri, (int32_t)flags | (uintptr) uri);
+    }
 
-	void Namespace::setPrefix(Atom pre)
-	{
-		AvmAssert (AvmCore::isName(pre) || AvmCore::isNullOrUndefined(pre));
-		// ensure that if the incoming Atom is a string, that it's interned
-		AvmAssert(AvmCore::isString(pre) ? (AvmCore::atomToString(pre))->isInterned() : 1);
+    void Namespace::setPrefix(Atom pre)
+    {
+        AvmAssert (AvmCore::isName(pre) || AvmCore::isNullOrUndefined(pre));
+        // ensure that if the incoming Atom is a string, that it's interned
+        AvmAssert(AvmCore::isString(pre) ? (AvmCore::atomToString(pre))->isInterned() : 1);
 
-		WBATOM(MMgc::GC::GetGC(this), this, &m_prefix, pre);
-	}
+        WBATOM(MMgc::GC::GetGC(this), this, &m_prefix, pre);
+    }
 
-	bool Namespace::hasPrefix() const
-	{
-		return (AvmCore::isName(m_prefix) && AvmCore::atomToString(m_prefix)->length()>0);
-	}
+    bool Namespace::hasPrefix() const
+    {
+        return (AvmCore::isName(m_prefix) && AvmCore::atomToString(m_prefix)->length()>0);
+    }
 
-	bool Namespace::isPublic() const
-	{
-		Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
-		return getType() == Namespace::NS_Public && uri->isEmpty();
-	}
+    bool Namespace::isPublic() const
+    {
+        Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
+        return getType() == Namespace::NS_Public && uri->isEmpty();
+    }
 
-	bool Namespace::EqualTo(const Namespace* other) const
-	{
-		if (isPrivate() || other->isPrivate())
-		{
-			// one of these namespaces is private, so compare using object identity
-			return this == other;
-		}
-		else
-		{
-			// both are public, so compare using uri's.  they are intern'ed so we
-			// can do a fast pointer compare.
-			return m_uri == other->m_uri && m_api==other->m_api;
-		}
-	}
+    bool Namespace::EqualTo(const Namespace* other) const
+    {
+        if (isPrivate() || other->isPrivate())
+        {
+            // one of these namespaces is private, so compare using object identity
+            return this == other;
+        }
+        else
+        {
+            // both are public, so compare using uri's.  they are intern'ed so we
+            // can do a fast pointer compare.
+            return m_uri == other->m_uri && m_api==other->m_api;
+        }
+    }
 
-	// Iterator support - for in, for each
-	Atom Namespace::nextName(const AvmCore *core, int index)
-	{
-		// first return "uri" then "prefix"
-		if (index == 1)
-			return core->kuri->atom();
-		else if (index == 2)
-			return core->kprefix->atom();
-		else		{
-			return nullStringAtom;
-		}
-	}
+    // Iterator support - for in, for each
+    Atom Namespace::nextName(const AvmCore *core, int index)
+    {
+        // first return "uri" then "prefix"
+        if (index == 1)
+            return core->kuri->atom();
+        else if (index == 2)
+            return core->kprefix->atom();
+        else        {
+            return nullStringAtom;
+        }
+    }
 
-	Atom Namespace::nextValue(int index)
-	{
-		// first return uri then prefix
-		if (index == 1)
-			return this->getURI()->atom();
-		else if (index == 2)
-			return this->m_prefix;
-		else
-		{
-			return undefinedAtom;
-		}
-	}
+    Atom Namespace::nextValue(int index)
+    {
+        // first return uri then prefix
+        if (index == 1)
+            return this->getURI()->atom();
+        else if (index == 2)
+            return this->m_prefix;
+        else
+        {
+            return undefinedAtom;
+        }
+    }
 
-	int Namespace::nextNameIndex(int index)
-	{
-		if (index < 2)
-			return index + 1;
-		else 
-			return 0;
-	}
+    int Namespace::nextNameIndex(int index)
+    {
+        if (index < 2)
+            return index + 1;
+        else
+            return 0;
+    }
 
-	Stringp Namespace::format(AvmCore* core) const
-	{
-		(void) core;
-		return getURI();
-	}
+    Stringp Namespace::format(AvmCore* core) const
+    {
+        (void) core;
+        return getURI();
+    }
 
-	Stringp Namespace::getURI() const
-	{
-		return (Stringp)atomPtr(m_uri);
-	}
+    Stringp Namespace::getURI() const
+    {
+        return (Stringp)atomPtr(m_uri);
+    }
 
 #ifdef DEBUGGER
     uint64_t Namespace::bytesUsedDeep() const

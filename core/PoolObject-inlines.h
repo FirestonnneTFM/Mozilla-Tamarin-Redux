@@ -147,7 +147,7 @@ REALLY_INLINE void PoolObject::ConstantStrings::setup(uint32_t size)
     // such accesses generally, but there are presently exceptions.
     // With the guards spread over much code, it is safer to do
     // as we do here.  This problem extends to other constant pool
-    // entry types, and should be cleaned up.  See bug 557684. 
+    // entry types, and should be cleaned up.  See bug 557684.
     size = (size ? size : 1) * sizeof(ConstantStringData);
     data = (ConstantStringData*) mmfx_alloc(size);
     Set(data, size);

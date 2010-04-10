@@ -47,14 +47,14 @@ using namespace MMgc;
 namespace avmplus
 {
 #ifdef DEBUGGER
-	AvmPlusScriptableObject::AvmPlusScriptableObject(SamplerObjectType sot)
-	{
-		AvmCore* core = this->core();
-		Sampler* s = core->get_sampler();
-		if (s && s->sampling())
-		{
-			s->recordAllocationInfo(this, sot);
-		}		
-	}
+    AvmPlusScriptableObject::AvmPlusScriptableObject(SamplerObjectType sot)
+    {
+        AvmCore* core = this->core();
+        Sampler* s = core->get_sampler();
+        if (s && s->sampling())
+        {
+            s->recordAllocationInfo(this, sot);
+        }
+    }
 #endif
 }

@@ -43,33 +43,33 @@
 
 namespace avmplus
 {
-	/**
-	 * class Number
-	 */
+    /**
+     * class Number
+     */
     class NumberClass : public ClassClosure
     {
-	public:
-		NumberClass(VTable* cvtable);
+    public:
+        NumberClass(VTable* cvtable);
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom call(int argc, Atom* argv)
-		{
-			// Note: SpiderMonkey returns 0 for Number() with no args
-			return construct(argc,argv);
-		}
+        // this = argv[0]
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom call(int argc, Atom* argv)
+        {
+            // Note: SpiderMonkey returns 0 for Number() with no args
+            return construct(argc,argv);
+        }
 
-		Stringp _convert(double n, int precision, int mode);
-		Stringp _numberToString(double n, int radix);
-		double _minValue();
-        
-		DECLARE_SLOTS_NumberClass;
+        Stringp _convert(double n, int precision, int mode);
+        Stringp _numberToString(double n, int radix);
+        double _minValue();
+
+        DECLARE_SLOTS_NumberClass;
     };
 }
 

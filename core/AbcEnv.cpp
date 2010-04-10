@@ -41,62 +41,62 @@
 
 namespace avmplus
 {
-	AbcEnv::AbcEnv(PoolObject* _pool,
-		   DomainEnv* _domainEnv,
-		   CodeContext * _codeContext)
-		: m_pool(_pool),
-		  m_domainEnv(_domainEnv),
-		  m_codeContext(_codeContext),
-		  m_privateScriptEnvs(new(_pool->core->GetGC()) MultinameHashtable())
+    AbcEnv::AbcEnv(PoolObject* _pool,
+           DomainEnv* _domainEnv,
+           CodeContext * _codeContext)
+        : m_pool(_pool),
+          m_domainEnv(_domainEnv),
+          m_codeContext(_codeContext),
+          m_privateScriptEnvs(new(_pool->core->GetGC()) MultinameHashtable())
 #ifdef DEBUGGER
-		  , m_invocationCounts(NULL)
+          , m_invocationCounts(NULL)
 #endif
 #ifdef VMCFG_NANOJIT
-		  , m_core(_pool->core)
+          , m_core(_pool->core)
 #endif
-	{
+    {
 #ifdef DEBUGGER
-		if (_pool->core->debugger())
-		{
-			m_invocationCounts = (uint64_t*)_pool->core->GetGC()->Alloc(_pool->methodCount() * sizeof(uint64_t), MMgc::GC::kZero);
-		}
-#endif		
-	}
+        if (_pool->core->debugger())
+        {
+            m_invocationCounts = (uint64_t*)_pool->core->GetGC()->Alloc(_pool->methodCount() * sizeof(uint64_t), MMgc::GC::kZero);
+        }
+#endif
+    }
 
-	AbcEnv::~AbcEnv()
+    AbcEnv::~AbcEnv()
     {
         #ifdef VMCFG_NANOJIT
-        // if any AbcEnv goes away, we have to flush the BindingCache entries for all 
-        // extant pools. Since AvmCore keeps a list of all live pools, we just set a flag 
+        // if any AbcEnv goes away, we have to flush the BindingCache entries for all
+        // extant pools. Since AvmCore keeps a list of all live pools, we just set a flag
         // in AvmCore that triggers the flush in postsweep(). (Note that we can't rely on our pool
         // being valid here; it might have already been collected!)
         // the avmcore's lifetime is owned by the host and could be deleted so check for that first
         AvmCore *current = MMgc::GC::GetGC(this)->core();
-        if(current == m_core)   
+        if(current == m_core)
             m_core->flushBindingCachesNextSweep();
         #endif
     }
 
-	ScriptEnv* AbcEnv::getScriptEnv(Stringp name, Namespacep ns)
-	{		
-		if (ns->isPrivate())
-		{
-			return (ScriptEnv*)m_privateScriptEnvs->get(name, ns);
-		}
-		else
-		{
-			return (ScriptEnv*)m_domainEnv->getScriptInit(ns, name);
-		}
-	}
+    ScriptEnv* AbcEnv::getScriptEnv(Stringp name, Namespacep ns)
+    {
+        if (ns->isPrivate())
+        {
+            return (ScriptEnv*)m_privateScriptEnvs->get(name, ns);
+        }
+        else
+        {
+            return (ScriptEnv*)m_domainEnv->getScriptInit(ns, name);
+        }
+    }
 
-	ScriptEnv* AbcEnv::getScriptEnv(const Multiname& multiname)
-	{
-		ScriptEnv *se = (ScriptEnv*)m_domainEnv->getScriptInit(multiname);
-		if(!se)
-		{	
-			// check privates
-			se = (ScriptEnv*)m_privateScriptEnvs->getMulti(multiname);
-		}
-		return se;
-	}
+    ScriptEnv* AbcEnv::getScriptEnv(const Multiname& multiname)
+    {
+        ScriptEnv *se = (ScriptEnv*)m_domainEnv->getScriptInit(multiname);
+        if(!se)
+        {
+            // check privates
+            se = (ScriptEnv*)m_privateScriptEnvs->getMulti(multiname);
+        }
+        return se;
+    }
 }

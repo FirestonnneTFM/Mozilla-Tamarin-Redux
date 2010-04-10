@@ -43,104 +43,104 @@
 
 namespace avmplus
 {
-	/**
-	 * an instance of class Array.  constructed with "new Array" or
-	 * an array literal [...].   We need this class to support Array's
-	 * special "get" and "put" semantics and to maintain the virtual
-	 * "length" property.
-	 */
-	class ArrayObject : public ScriptObject
-	{
-	private:
-		friend class ArrayClass;
-		AtomArray m_denseArr;
+    /**
+     * an instance of class Array.  constructed with "new Array" or
+     * an array literal [...].   We need this class to support Array's
+     * special "get" and "put" semantics and to maintain the virtual
+     * "length" property.
+     */
+    class ArrayObject : public ScriptObject
+    {
+    private:
+        friend class ArrayClass;
+        AtomArray m_denseArr;
 
-		// We can NOT use 0xFFFFFFFF for this since x[0xFFFFFFFE] is a valid prop
-		// which would make our length 0xFFFFFFFF
-		static const uint32 NO_LOW_HTENTRY	= 0;
-		uint32 m_lowHTentry; // lowest numeric entry in our hash table
-		uint32 m_length;
-	public:
-		
-		ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32 capacity);
-		~ArrayObject()
-		{
-			m_lowHTentry = 0;
-			m_length = 0;
-		}
+        // We can NOT use 0xFFFFFFFF for this since x[0xFFFFFFFE] is a valid prop
+        // which would make our length 0xFFFFFFFF
+        static const uint32 NO_LOW_HTENTRY  = 0;
+        uint32 m_lowHTentry; // lowest numeric entry in our hash table
+        uint32 m_length;
+    public:
 
-		bool hasDense() const { return (m_denseArr.getLength() != 0); };
-		bool isSimpleDense() const { return (m_denseArr.getLength() == m_length); };
-		uint32 getDenseLength() const { return m_denseArr.getLength(); }
+        ArrayObject(VTable* ivtable, ScriptObject *delegate, uint32 capacity);
+        ~ArrayObject()
+        {
+            m_lowHTentry = 0;
+            m_length = 0;
+        }
 
-		// Non-virtual members for ActionScript method implementation
-		uint32 get_length() const;
-		void set_length(uint32 newLength);
+        bool hasDense() const { return (m_denseArr.getLength() != 0); };
+        bool isSimpleDense() const { return (m_denseArr.getLength() == m_length); };
+        uint32 getDenseLength() const { return m_denseArr.getLength(); }
 
-		// Virtual members so Array subclasses can treat length differently (in both C++ and AS3)
-		virtual uint32 getLength() const;
-		virtual void setLength(uint32 newLength);
+        // Non-virtual members for ActionScript method implementation
+        uint32 get_length() const;
+        void set_length(uint32 newLength);
 
-		virtual Atom getAtomProperty(Atom name) const;
-		virtual void setAtomProperty(Atom name, Atom value);
-		virtual bool deleteAtomProperty(Atom name);
-		virtual bool hasAtomProperty(Atom name) const;
+        // Virtual members so Array subclasses can treat length differently (in both C++ and AS3)
+        virtual uint32 getLength() const;
+        virtual void setLength(uint32 newLength);
 
-		// Faster versions that takes direct indices
-		virtual Atom getUintProperty(uint32 index) const
-		{
-			 return _getUintProperty(index);
-		}
-		virtual void setUintProperty(uint32 index, Atom value)
-		{
-			_setUintProperty(index, value);
-		}
-		virtual bool delUintProperty(uint32 index);
-		virtual bool hasUintProperty(uint32 i) const;
+        virtual Atom getAtomProperty(Atom name) const;
+        virtual void setAtomProperty(Atom name, Atom value);
+        virtual bool deleteAtomProperty(Atom name);
+        virtual bool hasAtomProperty(Atom name) const;
 
-		inline Atom getIntProperty(int index) const
-		{
-			return _getIntProperty(index);
-		}
-		inline void setIntProperty(int index, Atom value)
-		{
-			_setIntProperty(index, value);
-		}
+        // Faster versions that takes direct indices
+        virtual Atom getUintProperty(uint32 index) const
+        {
+             return _getUintProperty(index);
+        }
+        virtual void setUintProperty(uint32 index, Atom value)
+        {
+            _setUintProperty(index, value);
+        }
+        virtual bool delUintProperty(uint32 index);
+        virtual bool hasUintProperty(uint32 i) const;
 
-		virtual bool getAtomPropertyIsEnumerable(Atom name) const;
-		
-		Atom _getUintProperty(uint32 index) const;
-		void _setUintProperty(uint32 index, Atom value);
-		Atom _getIntProperty(int index) const;
-		void _setIntProperty(int index, Atom value);
+        inline Atom getIntProperty(int index) const
+        {
+            return _getIntProperty(index);
+        }
+        inline void setIntProperty(int index, Atom value)
+        {
+            _setIntProperty(index, value);
+        }
 
-		// Iterator support - for in, for each
-		virtual Atom nextName(int index);
-		virtual Atom nextValue(int index);
-		virtual int nextNameIndex(int index);
+        virtual bool getAtomPropertyIsEnumerable(Atom name) const;
 
-		// native methods
-		Atom AS3_pop(); // pop(...rest)
-		uint32 AS3_push(Atom *args, int argc); // push(...args):uint
-		uint32 AS3_unshift(Atom *args, int argc); // unshift(...args):
+        Atom _getUintProperty(uint32 index) const;
+        void _setUintProperty(uint32 index, Atom value);
+        Atom _getIntProperty(int index) const;
+        void _setIntProperty(int index, Atom value);
 
-		inline Atom pop() { return AS3_pop(); }
-		inline uint32 push(Atom *args, int argc) { return AS3_push(args, argc); }
-		inline uint32 unshift(Atom *args, int argc) { return AS3_unshift(args, argc); }
+        // Iterator support - for in, for each
+        virtual Atom nextName(int index);
+        virtual Atom nextValue(int index);
+        virtual int nextNameIndex(int index);
 
-		void checkForSparseToDenseConversion();
+        // native methods
+        Atom AS3_pop(); // pop(...rest)
+        uint32 AS3_push(Atom *args, int argc); // push(...args):uint
+        uint32 AS3_unshift(Atom *args, int argc); // unshift(...args):
+
+        inline Atom pop() { return AS3_pop(); }
+        inline uint32 push(Atom *args, int argc) { return AS3_push(args, argc); }
+        inline uint32 unshift(Atom *args, int argc) { return AS3_unshift(args, argc); }
+
+        void checkForSparseToDenseConversion();
 
 #ifdef DEBUGGER
-		virtual uint64_t bytesUsed() const;
+        virtual uint64_t bytesUsed() const;
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-	public:
-		Stringp format(AvmCore* core) const;
+    public:
+        Stringp format(AvmCore* core) const;
 #endif
 
-		DECLARE_SLOTS_ArrayObject;
-	};
+        DECLARE_SLOTS_ArrayObject;
+    };
 }
 
 #endif /* __avmplus_ArrayObject__ */

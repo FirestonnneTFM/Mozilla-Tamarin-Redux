@@ -60,63 +60,63 @@ namespace avmplus
         virtual bool removeSubscriber(GlobalMemorySubscriber* subscriber) = 0;
     };
 
-	class DomainEnv : public GlobalMemorySubscriber
-	{
+    class DomainEnv : public GlobalMemorySubscriber
+    {
         friend class MopsRangeCheckFilter;
     public:
-		DomainEnv(AvmCore *core, Domain *domain, DomainEnv* base);
+        DomainEnv(AvmCore *core, Domain *domain, DomainEnv* base);
         virtual ~DomainEnv();
-		
-		// these peek into base DomainEnv as appropriate
-		MethodEnv* getScriptInit(Namespacep ns, Stringp name) const;
-		MethodEnv* getScriptInit(const Multiname& multiname) const;
 
-		inline ScriptEnv* getNamedScript(Stringp name) const { return (ScriptEnv*)m_namedScripts->getName(name); }
-		inline ScriptEnv* getNamedScript(Stringp name, Namespacep ns) const { return (ScriptEnv*)m_namedScripts->get(name, ns); }
-		inline void addNamedScript(Stringp name, Namespacep ns, ScriptEnv* scriptEnv) { m_namedScripts->add(name, ns, Binding(scriptEnv)); }
+        // these peek into base DomainEnv as appropriate
+        MethodEnv* getScriptInit(Namespacep ns, Stringp name) const;
+        MethodEnv* getScriptInit(const Multiname& multiname) const;
 
-		inline Domain* domain() const { return m_domain; }
-		inline DomainEnv* base() const { return m_base; }
+        inline ScriptEnv* getNamedScript(Stringp name) const { return (ScriptEnv*)m_namedScripts->getName(name); }
+        inline ScriptEnv* getNamedScript(Stringp name, Namespacep ns) const { return (ScriptEnv*)m_namedScripts->get(name, ns); }
+        inline void addNamedScript(Stringp name, Namespacep ns, ScriptEnv* scriptEnv) { m_namedScripts->add(name, ns, Binding(scriptEnv)); }
 
-		/**
-		 * Allow caller to enumerate the named entries in the table.
-		 */
-		int scriptNext(int index) const;
-		Stringp scriptNameAt(int index) const;
-		Namespace* scriptNsAt(int index) const;
+        inline Domain* domain() const { return m_domain; }
+        inline DomainEnv* base() const { return m_base; }
 
-		Toplevel* toplevel() const;
-		void setToplevel(Toplevel *t) { m_toplevel = t; }
-		
-		/**
-		 * global memory access glue
-		 */
-		enum {
+        /**
+         * Allow caller to enumerate the named entries in the table.
+         */
+        int scriptNext(int index) const;
+        Stringp scriptNameAt(int index) const;
+        Namespace* scriptNsAt(int index) const;
+
+        Toplevel* toplevel() const;
+        void setToplevel(Toplevel *t) { m_toplevel = t; }
+
+        /**
+         * global memory access glue
+         */
+        enum {
             // Must be at least 8 [ie, largest single load/store op we provide]
             // But using larger values allows us to collapse a lot of range checks in the JIT
-			GLOBAL_MEMORY_MIN_SIZE = 1024
-		};
+            GLOBAL_MEMORY_MIN_SIZE = 1024
+        };
 
-		REALLY_INLINE uint8_t* globalMemoryBase() const { return m_globalMemoryBase; }
-		REALLY_INLINE uint32_t globalMemorySize() const { return m_globalMemorySize; }
+        REALLY_INLINE uint8_t* globalMemoryBase() const { return m_globalMemoryBase; }
+        REALLY_INLINE uint32_t globalMemorySize() const { return m_globalMemorySize; }
 
-		// global memory object accessor (will always be a ByteArray but
-		// ByteArray isn't part of AVMPlus proper so plumbing is a little
-		// weird...)
-		ScriptObject* get_globalMemory() const { return m_globalMemoryProviderObject; }
-		bool set_globalMemory(ScriptObject* providerObject);
+        // global memory object accessor (will always be a ByteArray but
+        // ByteArray isn't part of AVMPlus proper so plumbing is a little
+        // weird...)
+        ScriptObject* get_globalMemory() const { return m_globalMemoryProviderObject; }
+        bool set_globalMemory(ScriptObject* providerObject);
 
         // from GlobalMemorySubscriber
-		/*virtual*/ void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize);
+        /*virtual*/ void notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize);
 
-	private:
-		// subscribes to the memory object "mem" such that "mem" will call our
-		// notifyGlobalMemoryChanged when it moves
-		bool globalMemorySubscribe(ScriptObject* providerObject);
-		// stops "mem" from notifying us if it moves
-		bool globalMemoryUnsubscribe(ScriptObject* providerObject);
+    private:
+        // subscribes to the memory object "mem" such that "mem" will call our
+        // notifyGlobalMemoryChanged when it moves
+        bool globalMemorySubscribe(ScriptObject* providerObject);
+        // stops "mem" from notifying us if it moves
+        bool globalMemoryUnsubscribe(ScriptObject* providerObject);
 
-	private:
+    private:
 
         // allocate "scratch" as a struct to make it easier to allocate pre-zeroed
         struct Scratch
@@ -124,22 +124,22 @@ namespace avmplus
             uint8_t scratch[GLOBAL_MEMORY_MIN_SIZE];
         };
 
-	// ------------------------ DATA SECTION BEGIN
-	private:
-		Domain* const                   m_domain;		// Domain associated with this DomainEnv 
-		DomainEnv* const                m_base;			// Parent DomainEnv 
-		DWB(MultinameHashtable*)        m_namedScripts;	// table of named program init functions. (ns,name => MethodEnv) 
-		DWB(Toplevel*)                  m_toplevel;
-		// scratch memory to use if the memory object is NULL...
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        Domain* const                   m_domain;       // Domain associated with this DomainEnv
+        DomainEnv* const                m_base;         // Parent DomainEnv
+        DWB(MultinameHashtable*)        m_namedScripts; // table of named program init functions. (ns,name => MethodEnv)
+        DWB(Toplevel*)                  m_toplevel;
+        // scratch memory to use if the memory object is NULL...
         // allocated via mmfx_new, which is required by nanojit
         Scratch*                        m_globalMemoryScratch;
-		// backing store / current size for global memory
-		uint8_t*                        m_globalMemoryBase;
-		uint32_t                        m_globalMemorySize;
+        // backing store / current size for global memory
+        uint8_t*                        m_globalMemoryBase;
+        uint32_t                        m_globalMemorySize;
         // the actual memory object (can be NULL)
         DRCWB(ScriptObject*)            m_globalMemoryProviderObject;
-	// ------------------------ DATA SECTION END
-	};
+    // ------------------------ DATA SECTION END
+    };
 }
 
 #endif /* __avmplus_DomainEnv__ */

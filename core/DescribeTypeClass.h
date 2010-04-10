@@ -43,10 +43,10 @@
 
 namespace avmplus
 {
-	class DescribeTypeClass 
-	{
+    class DescribeTypeClass
+    {
     public:
-		static Atom describeTypeJSON(ScriptObject* self, Atom o, uint32_t flags);
+        static Atom describeTypeJSON(ScriptObject* self, Atom o, uint32_t flags);
         static Stringp getQualifiedClassName(ScriptObject* self, Atom v);
         static Stringp getQualifiedSuperclassName(ScriptObject* self, Atom v);
     };

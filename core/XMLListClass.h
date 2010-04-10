@@ -43,28 +43,28 @@
 
 namespace avmplus
 {
-	/**
-	 * class XMLListClass
-	 */
+    /**
+     * class XMLListClass
+     */
     class XMLListClass : public ClassClosure
     {
-	public:
-		XMLListClass(VTable* cvtable);
+    public:
+        XMLListClass(VTable* cvtable);
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom call(int argc, Atom* argv);
+        // this = argv[0]
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom call(int argc, Atom* argv);
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		Atom ToXMLList(Atom arg);
-        
-		DECLARE_SLOTS_XMLListClass;
-	};
+        Atom ToXMLList(Atom arg);
+
+        DECLARE_SLOTS_XMLListClass;
+    };
 }
 
 #endif /* __avmplus_XMLListClass__ */

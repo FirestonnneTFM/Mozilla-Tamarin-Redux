@@ -42,7 +42,7 @@
 
 namespace avmplus
 {
-	void AvmLog(const char* format, ...);
+    void AvmLog(const char* format, ...);
 }
 
 #endif /* __avmplus_AvmLog__ */

@@ -305,7 +305,7 @@ namespace avmplus
     {
         uint32 index = readU30(p);
         if (index == 0 || index >= pool->cpool_mn_offsets.size())
-            toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), 
+            toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index),
                                        core->toErrorString(pool->cpool_mn_offsets.size()));
         pool->resolveBindingNameNoCheck(index, m, toplevel);
 
@@ -647,7 +647,7 @@ namespace avmplus
             }
 #endif
         }
-        
+
         traits->verifyBindings(toplevel);
         return traits;
     }

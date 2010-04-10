@@ -138,9 +138,9 @@ namespace avmplus
 
     Traits* PoolObject::getTraits(Stringp name, Namespace* ns) const
     {
-        // look for class locally 
+        // look for class locally
         Traits* t = (Traits*) _namedTraits->get(name, ns);
-        
+
         // then in vm-wide table
         if (t == NULL)
             t = domain->getNamedTraits(name, ns);
@@ -687,7 +687,7 @@ range_error:
 
     void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, MethodInfo *script)
     {
-        // only add it if subsequent lookup wouldn't find it 
+        // only add it if subsequent lookup wouldn't find it
         Multiname mn(ns, name);
         if (!getNamedScript(&mn))
             _privateNamedScripts->add(name, ns, (Binding)script);
@@ -697,7 +697,7 @@ range_error:
     {
         MethodInfo* f = (MethodInfo*)_privateNamedScripts->getMulti(multiname);
         if (!f)
-            f = domain->getNamedScript(multiname); 
+            f = domain->getNamedScript(multiname);
         return f;
     }
 

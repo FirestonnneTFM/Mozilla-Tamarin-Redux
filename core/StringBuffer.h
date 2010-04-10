@@ -43,60 +43,60 @@
 
 namespace avmplus
 {
-	/**
-	 * StringOutputStream is an OutputStream subclass, where
-	 * any data written to the stream is accumulated into
-	 * an in-memory buffer.  The buffer can later be retrieved
-	 * using the c_str method.
-	 */
-	class StringOutputStream : public OutputStream
-	{
-	public:
-		StringOutputStream(MMgc::GC *gc);
-		~StringOutputStream();
+    /**
+     * StringOutputStream is an OutputStream subclass, where
+     * any data written to the stream is accumulated into
+     * an in-memory buffer.  The buffer can later be retrieved
+     * using the c_str method.
+     */
+    class StringOutputStream : public OutputStream
+    {
+    public:
+        StringOutputStream(MMgc::GC *gc);
+        ~StringOutputStream();
 
-		const char* c_str() { return m_buffer; }	// note, always in UTF8 form
-		int length() const { return m_length; }
-		void reset() { m_length=0; }
+        const char* c_str() { return m_buffer; }    // note, always in UTF8 form
+        int length() const { return m_length; }
+        void reset() { m_length=0; }
 
-		int write(const void *buffer, int count);
-		
-	private:
-		enum { kInitialCapacity = 256 };
-		
-		char* m_buffer;
-		int m_length;
+        int write(const void *buffer, int count);
 
-		void grow(int newLength);
-	};
+    private:
+        enum { kInitialCapacity = 256 };
 
-	/**
-	 * StringBuffer is a PrintWriter subclass which enables
-	 * easy, cout-like output of text to a string buffer
-	 * in memory.
-	 */
-	class StringBuffer : public PrintWriter
-	{
-	public:
-		StringBuffer(AvmCore* core) :
-			PrintWriter(core), m_stream(core->GetGC())
-		{
-			setOutputStream(&m_stream);
-		}
+        char* m_buffer;
+        int m_length;
 
-		StringBuffer(MMgc::GC *gc) :
-			PrintWriter(NULL), m_stream(gc)
-		{
-			setOutputStream(&m_stream);
-		}
+        void grow(int newLength);
+    };
 
-		const char* c_str() { return m_stream.c_str(); }	// note, always in UTF8 form
-		int length() const { return m_stream.length(); }
-		void reset() { m_stream.reset(); }
-		
-	private:
-		StringOutputStream m_stream;
-	};		
+    /**
+     * StringBuffer is a PrintWriter subclass which enables
+     * easy, cout-like output of text to a string buffer
+     * in memory.
+     */
+    class StringBuffer : public PrintWriter
+    {
+    public:
+        StringBuffer(AvmCore* core) :
+            PrintWriter(core), m_stream(core->GetGC())
+        {
+            setOutputStream(&m_stream);
+        }
+
+        StringBuffer(MMgc::GC *gc) :
+            PrintWriter(NULL), m_stream(gc)
+        {
+            setOutputStream(&m_stream);
+        }
+
+        const char* c_str() { return m_stream.c_str(); }    // note, always in UTF8 form
+        int length() const { return m_stream.length(); }
+        void reset() { m_stream.reset(); }
+
+    private:
+        StringOutputStream m_stream;
+    };
 }
-		
+
 #endif /* __avmplus_StringBuffer__ */

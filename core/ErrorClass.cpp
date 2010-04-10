@@ -43,78 +43,78 @@
 
 namespace avmplus
 {
-	ErrorClass::ErrorClass(VTable* cvtable)
-		: ClassClosure(cvtable)
-	{
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
+    ErrorClass::ErrorClass(VTable* cvtable)
+        : ClassClosure(cvtable)
+    {
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
 
-		setPrototypePtr(createInstance(ivtable(), toplevel()->objectClass->prototypePtr()));
-	}
-	
-	/**
-	 * ErrorObject
-	 */
-	ErrorObject::ErrorObject(VTable* vtable,
-							 ScriptObject *delegate)
-		: ScriptObject(vtable, delegate)
-	{
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorObject));
+        setPrototypePtr(createInstance(ivtable(), toplevel()->objectClass->prototypePtr()));
+    }
 
-		#ifdef DEBUGGER
-		AvmCore *core = this->core();
-		if (!core->debugger())
-			return;
-		// Copy the stack trace
-		stackTrace = core->newStackTrace();
-		#endif
-	}
+    /**
+     * ErrorObject
+     */
+    ErrorObject::ErrorObject(VTable* vtable,
+                             ScriptObject *delegate)
+        : ScriptObject(vtable, delegate)
+    {
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorObject));
 
-	void ErrorClass::throwError(int errorID, Stringp arg1, Stringp arg2, Stringp arg3)
-	{
-		core()->throwErrorV(this, errorID, arg1, arg2, arg3);
-	}
+        #ifdef DEBUGGER
+        AvmCore *core = this->core();
+        if (!core->debugger())
+            return;
+        // Copy the stack trace
+        stackTrace = core->newStackTrace();
+        #endif
+    }
 
-	Stringp ErrorObject::getStackTrace() const
-	{
-		#ifdef DEBUGGER
-		AvmCore* core = this->core();
-		if (!core->debugger())
-			return NULL;
+    void ErrorClass::throwError(int errorID, Stringp arg1, Stringp arg2, Stringp arg3)
+    {
+        core()->throwErrorV(this, errorID, arg1, arg2, arg3);
+    }
 
-		// getStackTrace returns the concatenation of the
-		// error message and the stack trace
-		Stringp buffer = core->string(atom());
-		buffer = core->concatStrings(buffer, core->newConstantStringLatin1("\n"));
+    Stringp ErrorObject::getStackTrace() const
+    {
+        #ifdef DEBUGGER
+        AvmCore* core = this->core();
+        if (!core->debugger())
+            return NULL;
 
-		if (stackTrace) {
-			buffer = core->concatStrings(buffer, stackTrace->format(core));
-		}
+        // getStackTrace returns the concatenation of the
+        // error message and the stack trace
+        Stringp buffer = core->string(atom());
+        buffer = core->concatStrings(buffer, core->newConstantStringLatin1("\n"));
 
-		return buffer;
-		#else
-		return NULL;
-		#endif
-	}
+        if (stackTrace) {
+            buffer = core->concatStrings(buffer, stackTrace->format(core));
+        }
 
-	Stringp ErrorClass::getErrorMessage(int errorID) const
-	{
-		return this->core()->getErrorMessage(errorID);
-	}
+        return buffer;
+        #else
+        return NULL;
+        #endif
+    }
 
-	ScriptObject* ErrorClass::createInstance(VTable *ivtable,
-											 ScriptObject *prototype)
-	{
-		return new (ivtable->gc(), ivtable->getExtraSize()) ErrorObject(ivtable, prototype);
-	}
+    Stringp ErrorClass::getErrorMessage(int errorID) const
+    {
+        return this->core()->getErrorMessage(errorID);
+    }
 
-	/**
-	 * NativeErrorClass
-	 */
+    ScriptObject* ErrorClass::createInstance(VTable *ivtable,
+                                             ScriptObject *prototype)
+    {
+        return new (ivtable->gc(), ivtable->getExtraSize()) ErrorObject(ivtable, prototype);
+    }
 
-	NativeErrorClass::NativeErrorClass(VTable* cvtable)
-		: ClassClosure(cvtable)
-	{
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
-		createVanillaPrototype();
-	}
+    /**
+     * NativeErrorClass
+     */
+
+    NativeErrorClass::NativeErrorClass(VTable* cvtable)
+        : ClassClosure(cvtable)
+    {
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
+        createVanillaPrototype();
+    }
 }

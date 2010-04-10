@@ -42,34 +42,34 @@
 
 namespace avmplus
 {
-	class Domain : public MMgc::GCObject
-	{
-	public:
-		Domain(AvmCore* core, Domain* base);
-		
-		Traits* getNamedTraits(Stringp name, Namespacep ns);
-		MethodInfo* getNamedScript(Stringp name, Namespacep ns) const;
-		MethodInfo* getNamedScript(const Multiname* mn) const;
-		
+    class Domain : public MMgc::GCObject
+    {
+    public:
+        Domain(AvmCore* core, Domain* base);
+
+        Traits* getNamedTraits(Stringp name, Namespacep ns);
+        MethodInfo* getNamedScript(Stringp name, Namespacep ns) const;
+        MethodInfo* getNamedScript(const Multiname* mn) const;
+
         Traits* addUniqueTrait(Stringp name, Namespace* ns, Traits* v) ;
-		MethodInfo* addUniqueScript(Stringp name, Namespace* ns, MethodInfo* v);
+        MethodInfo* addUniqueScript(Stringp name, Namespace* ns, MethodInfo* v);
 
         // returns NULL if the type doesn't exist yet.
-		ClassClosure* getParameterizedType(ClassClosure* type);
-		void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
+        ClassClosure* getParameterizedType(ClassClosure* type);
+        void addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType);
 
-		REALLY_INLINE Domain* base() const { return m_base; }
-		REALLY_INLINE AvmCore* core() const { return m_core; }
+        REALLY_INLINE Domain* base() const { return m_base; }
+        REALLY_INLINE AvmCore* core() const { return m_core; }
 
-	private:
-		Domain* const                   m_base;
-		AvmCore* const                  m_core;
-		/** The domain-wide traits table (type name => instance Traits) */
-		DWB(MultinameHashtable*)        m_namedTraits;
-		/** domain-wide type table of scripts, indexed by definition name */
-		DWB(MultinameHashtable*)        m_namedScripts;
-		DWB(HeapHashtable*)             m_parameterizedTypes;
-	};
+    private:
+        Domain* const                   m_base;
+        AvmCore* const                  m_core;
+        /** The domain-wide traits table (type name => instance Traits) */
+        DWB(MultinameHashtable*)        m_namedTraits;
+        /** domain-wide type table of scripts, indexed by definition name */
+        DWB(MultinameHashtable*)        m_namedScripts;
+        DWB(HeapHashtable*)             m_parameterizedTypes;
+    };
 
 }
 

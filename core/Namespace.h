@@ -43,25 +43,25 @@
 
 namespace avmplus
 {
-	/**
-	 * API is the type of an api bitmask
-	 */
-	typedef int32_t API;
+    /**
+     * API is the type of an api bitmask
+     */
+    typedef int32_t API;
 
-	/**
-	 * a namespace is a primitive value in the system, similar to String
-	 */
-	class Namespace : public AvmPlusScriptableObject
-	{
-	private:
-		friend class AvmCore;
-		friend class MultinameHashtable;
-		// Should these be Stringp's?
-		Atom m_prefix;
-		API m_api; 
-		uintptr m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
+    /**
+     * a namespace is a primitive value in the system, similar to String
+     */
+    class Namespace : public AvmPlusScriptableObject
+    {
+    private:
+        friend class AvmCore;
+        friend class MultinameHashtable;
+        // Should these be Stringp's?
+        Atom m_prefix;
+        API m_api;
+        uintptr m_uri;  // Uses 3 bits for flags, but otherwise is really a Stringp
 
-	public:
+    public:
         enum NamespaceType
         {
             NS_Public = 0,
@@ -69,56 +69,56 @@ namespace avmplus
             NS_PackageInternal = 2,
             NS_Private = 3,
             NS_Explicit = 4,
-			NS_StaticProtected = 5
+            NS_StaticProtected = 5
         };
-		Namespace(Atom prefix, Stringp uri, NamespaceType type);
-		~Namespace();
+        Namespace(Atom prefix, Stringp uri, NamespaceType type);
+        ~Namespace();
 
-		inline Atom getPrefix() const { return get_prefix(); }
-		Stringp getURI() const;
-		inline API getAPI() { return m_api; }
-		inline void setAPI(API api) { m_api = api; }
+        inline Atom getPrefix() const { return get_prefix(); }
+        Stringp getURI() const;
+        inline API getAPI() { return m_api; }
+        inline void setAPI(API api) { m_api = api; }
 
-		Atom get_prefix() const { return m_prefix; }
-		Stringp get_uri() const
-		{
-			return getURI();
-		}
+        Atom get_prefix() const { return m_prefix; }
+        Stringp get_uri() const
+        {
+            return getURI();
+        }
 
-		Atom  atom() const { return AtomConstants::kNamespaceType | (Atom)this; }
+        Atom  atom() const { return AtomConstants::kNamespaceType | (Atom)this; }
 
-		/**
-		 * virtual version of atom():
-		 */
-		virtual Atom toAtom() const { return atom(); }
+        /**
+         * virtual version of atom():
+         */
+        virtual Atom toAtom() const { return atom(); }
 
-		// This is called in ONE place in the XML code.  The URI of a namespace
-		// should never change but its prefix can change in this special case
-		void setPrefix (Atom pre);
+        // This is called in ONE place in the XML code.  The URI of a namespace
+        // should never change but its prefix can change in this special case
+        void setPrefix (Atom pre);
 
-		bool hasPrefix () const;
+        bool hasPrefix () const;
 
-		bool isPublic() const;
+        bool isPublic() const;
 
-		bool EqualTo(const Namespace* other) const;
+        bool EqualTo(const Namespace* other) const;
 
-		bool isPrivate() const 
-		{
-			return ISNULL(m_prefix);
-		}
+        bool isPrivate() const
+        {
+            return ISNULL(m_prefix);
+        }
 
         NamespaceType getType() const
         {
             return (NamespaceType)(((int32_t)m_uri)&7);
         }
 
-		// Iterator support - for in, for each
-		Atom nextName(const AvmCore *core, int index);
-		Atom nextValue(int index);
-		int nextNameIndex(int index);
+        // Iterator support - for in, for each
+        Atom nextName(const AvmCore *core, int index);
+        Atom nextValue(int index);
+        int nextNameIndex(int index);
 
 #ifdef DEBUGGER
-		uint64_t bytesUsed() const { return sizeof(Namespace); }
+        uint64_t bytesUsed() const { return sizeof(Namespace); }
 
         // Like bytesUsed(), but also includes memory taken by the
         // prefix and the uri.
@@ -126,12 +126,12 @@ namespace avmplus
 #endif
 
 //#ifdef AVMPLUS_VERBOSE
-	public:
-		Stringp format(AvmCore* core) const;
+    public:
+        Stringp format(AvmCore* core) const;
 //#endif
-	private:
-		void setUri(Stringp uri, NamespaceType flags);
-	};
+    private:
+        void setUri(Stringp uri, NamespaceType flags);
+    };
 }
 
 #endif /* __avmplus_Namespace__ */

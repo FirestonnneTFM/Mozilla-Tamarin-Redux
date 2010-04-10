@@ -42,35 +42,35 @@
 
 namespace avmplus
 {
-	/**
-	 * interpFPR/GPR() are stubs wrapping the main loop of the AVM+
-	 * interpreter: interpBoxed().
-	 *
-	 * The native code compiler is used by default
-	 * for executing AVM+ bytecode, since it is faster by
-	 * nature, but the AVM+ interpreter is used in some cases:
-	 *
-	 * - It is used to execute AVM+ code when the jit flag is
-	 *   set to false (-Dinterp in command-line shell)
-	 * - It is used when the target platform does not support
-	 *   the native code compiler.
-	 * - Used by default when the method is not likely to run
-	 *   more than once. e.g. script and static-init methods.
-	 *
-	 * @param methodEnv   The method to execute.
-	 * @param argc number of args
-	 * @param ap arg list
-	 * @return The return value of the method that was executed.
-	 * @throws Exception if the method throws an exception.
-	 */
-	uintptr_t interpGPR(MethodEnv* method, int argc, uint32 *ap); // returns Atom, int/uint, or a pointer
-	double interpFPR(MethodEnv* method, int argc, uint32 *ap); // really returns double
+    /**
+     * interpFPR/GPR() are stubs wrapping the main loop of the AVM+
+     * interpreter: interpBoxed().
+     *
+     * The native code compiler is used by default
+     * for executing AVM+ bytecode, since it is faster by
+     * nature, but the AVM+ interpreter is used in some cases:
+     *
+     * - It is used to execute AVM+ code when the jit flag is
+     *   set to false (-Dinterp in command-line shell)
+     * - It is used when the target platform does not support
+     *   the native code compiler.
+     * - Used by default when the method is not likely to run
+     *   more than once. e.g. script and static-init methods.
+     *
+     * @param methodEnv   The method to execute.
+     * @param argc number of args
+     * @param ap arg list
+     * @return The return value of the method that was executed.
+     * @throws Exception if the method throws an exception.
+     */
+    uintptr_t interpGPR(MethodEnv* method, int argc, uint32 *ap); // returns Atom, int/uint, or a pointer
+    double interpFPR(MethodEnv* method, int argc, uint32 *ap); // really returns double
 
-	// main interpreter method.  Signature should correspond to AtomMethodProc to allow tail calls to here
-	Atom interpBoxed(MethodEnv* method, int argc, Atom* ap);
+    // main interpreter method.  Signature should correspond to AtomMethodProc to allow tail calls to here
+    Atom interpBoxed(MethodEnv* method, int argc, Atom* ap);
 
 #ifdef VMCFG_DIRECT_THREADED
-	void** interpGetOpcodeLabels();
+    void** interpGetOpcodeLabels();
 #endif
 }
 

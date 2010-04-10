@@ -42,24 +42,24 @@
 
 namespace avmplus
 {
-	
+
 REALLY_INLINE ScriptObject* ClassClosure::prototypePtr()
 {
-	return prototype;
+    return prototype;
 }
 
 REALLY_INLINE VTable* ClassClosure::ivtable() const
 {
-	return vtable->ivtable;
+    return vtable->ivtable;
 }
 
 // Called from C++ to alloc a new instance.  Generated code calls createInstance directly.
-REALLY_INLINE ScriptObject* ClassClosure::newInstance() 
+REALLY_INLINE ScriptObject* ClassClosure::newInstance()
 {
-	VTable* ivtable = this->ivtable();
-	return ivtable->createInstance(this, ivtable);
+    VTable* ivtable = this->ivtable();
+    return ivtable->createInstance(this, ivtable);
 }
-	
+
 }
 
 #endif /* __avmplus_ClassClosure_inlines__ */

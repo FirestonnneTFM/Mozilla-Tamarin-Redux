@@ -796,18 +796,18 @@ function testDefined(feature) {
         s.push("#if !defined " + name);
         if (feature.default.length() == 0)
             fail("Tweak \"" + name + "\" is missing a 'default' clause.");
-	s.push("#  define " + name + " " + (feature["default"] == "true" ? 1 : 0));
-	s.push("#endif");
+    s.push("#  define " + name + " " + (feature["default"] == "true" ? 1 : 0));
+    s.push("#endif");
         s.push("#if " + name + " != 0 && " + name + " != 1");
-	s.push("#  error \"" + name + " must be defined and 0 or 1 (only).\"");
-	s.push("#endif");
+    s.push("#  error \"" + name + " must be defined and 0 or 1 (only).\"");
+    s.push("#endif");
     }
     else {
         if (feature.default.length() > 0)
             fail("Feature \"" + name + "\" must not have a 'default' clause: " + feature.default);
         s.push("#if !defined " + name + " || " + name + " != 0 && " + name + " != 1");
-	s.push("#  error \"" + name + " must be defined and 0 or 1 (only).\"");
-	s.push("#endif");
+    s.push("#  error \"" + name + " must be defined and 0 or 1 (only).\"");
+    s.push("#endif");
     }
     return s.join("\n") + "\n";
 }

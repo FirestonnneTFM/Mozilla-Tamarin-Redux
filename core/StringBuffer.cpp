@@ -41,42 +41,42 @@
 
 namespace avmplus
 {
-	using namespace MMgc;
+    using namespace MMgc;
 
-	StringOutputStream::StringOutputStream(GC *gc)
-	{
-		GCAssert(!gc->IsPointerToGCPage(this));
-		m_buffer = (char*) gc->Alloc(kInitialCapacity);
-		m_buffer[0] = 0;
-		m_length = 0;
-	}
+    StringOutputStream::StringOutputStream(GC *gc)
+    {
+        GCAssert(!gc->IsPointerToGCPage(this));
+        m_buffer = (char*) gc->Alloc(kInitialCapacity);
+        m_buffer[0] = 0;
+        m_length = 0;
+    }
 
-	StringOutputStream::~StringOutputStream()
-	{
-		if (m_buffer) {
-			GC* gc = MMgc::GC::GetGC(m_buffer);
-			gc->Free(m_buffer);
-		}
-	}
+    StringOutputStream::~StringOutputStream()
+    {
+        if (m_buffer) {
+            GC* gc = MMgc::GC::GetGC(m_buffer);
+            gc->Free(m_buffer);
+        }
+    }
 
-	int StringOutputStream::write(const void *buffer,
-								  int count)
-	{
-		if (m_length + count >= (int)GC::Size(m_buffer))
-		{
-			GC* gc = MMgc::GC::GetGC(m_buffer);
-			int newCapacity = (m_length+count+1)*2;
-			char* newBuffer = (char*) gc->Alloc(newCapacity);
-			if (!newBuffer) {
-				return 0;
-			}
-			VMPI_memcpy(newBuffer, m_buffer, m_length);
-			gc->Free(m_buffer);
-			m_buffer = newBuffer;
-		}
-		VMPI_memcpy(m_buffer+m_length, buffer, count);
-		m_length += count;
-		m_buffer[m_length] = 0;
-		return count;
-	}
+    int StringOutputStream::write(const void *buffer,
+                                  int count)
+    {
+        if (m_length + count >= (int)GC::Size(m_buffer))
+        {
+            GC* gc = MMgc::GC::GetGC(m_buffer);
+            int newCapacity = (m_length+count+1)*2;
+            char* newBuffer = (char*) gc->Alloc(newCapacity);
+            if (!newBuffer) {
+                return 0;
+            }
+            VMPI_memcpy(newBuffer, m_buffer, m_length);
+            gc->Free(m_buffer);
+            m_buffer = newBuffer;
+        }
+        VMPI_memcpy(m_buffer+m_length, buffer, count);
+        m_length += count;
+        m_buffer[m_length] = 0;
+        return count;
+    }
 }

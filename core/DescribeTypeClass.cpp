@@ -44,22 +44,22 @@
 
 namespace avmplus
 {
-	/*static*/ Atom DescribeTypeClass::describeTypeJSON(ScriptObject* self, Atom v, uint32_t flags)
-	{
-		TypeDescriber td(self->toplevel());
-		ScriptObject* o = td.describeType(v, flags);
-		return o ? o->atom() : nullObjectAtom;
-	}
+    /*static*/ Atom DescribeTypeClass::describeTypeJSON(ScriptObject* self, Atom v, uint32_t flags)
+    {
+        TypeDescriber td(self->toplevel());
+        ScriptObject* o = td.describeType(v, flags);
+        return o ? o->atom() : nullObjectAtom;
+    }
 
-	/*static*/ Stringp DescribeTypeClass::getQualifiedClassName(ScriptObject* self, Atom v)
-	{
-		TypeDescriber td(self->toplevel());
-		return td.getQualifiedClassName(v);
-	}
+    /*static*/ Stringp DescribeTypeClass::getQualifiedClassName(ScriptObject* self, Atom v)
+    {
+        TypeDescriber td(self->toplevel());
+        return td.getQualifiedClassName(v);
+    }
 
-	/*static*/ Stringp DescribeTypeClass::getQualifiedSuperclassName(ScriptObject* self, Atom v)
-	{
-		TypeDescriber td(self->toplevel());
-		return td.getQualifiedSuperclassName(v);
-	}
+    /*static*/ Stringp DescribeTypeClass::getQualifiedSuperclassName(ScriptObject* self, Atom v)
+    {
+        TypeDescriber td(self->toplevel());
+        return td.getQualifiedSuperclassName(v);
+    }
 }

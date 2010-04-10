@@ -80,9 +80,9 @@
  *
  * https://developer.mozilla.org/En/Tamarin
  */
- 
-#include "VMPI.h"			// also includes avmfeatures.h
-#include "avmbuild.h"			// old-style configuration, may disappear, handles a few things not yet handled by the feature system
+
+#include "VMPI.h"           // also includes avmfeatures.h
+#include "avmbuild.h"           // old-style configuration, may disappear, handles a few things not yet handled by the feature system
 
 #include "GCTypes.h"
 #include "avmplusVersion.h"
@@ -103,122 +103,122 @@ using namespace avmplus::ErrorConstants;
  */
 namespace avmplus
 {
-	class AbcGen;
-	class AbcEnv;
-	class AbcParser;
-	class Accessor;
-	class ArrayClass;
-	class ArrayObject;
-	class Atan2Method;
-	class AtomArray;
-	class AvmCore;
+    class AbcGen;
+    class AbcEnv;
+    class AbcParser;
+    class Accessor;
+    class ArrayClass;
+    class ArrayObject;
+    class Atan2Method;
+    class AtomArray;
+    class AvmCore;
     class AvmPlusScriptableObject;
-	class MethodFrame;
-	class BooleanClass;
-	class BuiltinTraits;
-	class CallStackNode;
-	class ClassClass;
-	class ClassClosure;
-	class Closure;
-	class CodeContext;	
-	class Console;
-	class Date;
-	class DateClass;
-	class DateObject;
-	class Debugger;
+    class MethodFrame;
+    class BooleanClass;
+    class BuiltinTraits;
+    class CallStackNode;
+    class ClassClass;
+    class ClassClosure;
+    class Closure;
+    class CodeContext;
+    class Console;
+    class Date;
+    class DateClass;
+    class DateObject;
+    class Debugger;
 #ifdef DEBUGGER
-	class DebuggerMethodInfo;
+    class DebuggerMethodInfo;
 #endif
-	class DescribeTypeClass;
-	class Domain;
-	class DomainEnv;
-	class E4XNode;
-	class ErrorClass;
-	class ErrorObject;
-	class Exception;
-	class ExceptionFrame;
-	class ExceptionHandler;
-	class ExceptionHandlerTable;
-	class FixedBitSet;
-	class FrameState;
+    class DescribeTypeClass;
+    class Domain;
+    class DomainEnv;
+    class E4XNode;
+    class ErrorClass;
+    class ErrorObject;
+    class Exception;
+    class ExceptionFrame;
+    class ExceptionHandler;
+    class ExceptionHandlerTable;
+    class FixedBitSet;
+    class FrameState;
     class GlobalMemoryProvider;
     class GlobalMemorySubscriber;
-	class HeapHashtable;
-	class HeapMultiname;
-	class InlineHashtable;
-	class IntVectorObject;
-	class DoubleVectorObject;
-	class UIntVectorObject;
-	class ObjectVectorObject;
-	class Java;
-	class MathClass;
-	class MathUtils;
-	class MethodClosure;
-	class MethodEnv;
-	class MethodInfo;
-	class MethodSignature;
-	class Multiname;
-	class Namespace;
-	class NamespaceSet;
-	class NamespaceClass;
-	class NativeInitializer;
-	struct NativeMethodInfo;
-	class NumberClass;
-	class IntClass;
-	class UIntClass;
-	class OSDep;
-	class ObjectClass;
-	class OutputStream;
-	class PoolObject;
-	class PrintWriter;
-	class Profiler;
-	class RegExpClass;
-	class RegExpObject;
-	class Sampler;
-	class ScopeChain;
-	class ScopeTypeChain;
-	class ScriptBuffer;
-	class ScriptEnv;
-	class ScriptObject;
-	class StackTrace;
-	class StringBuffer;
-	class StringClass;
-	class String;
-	class Toplevel;
-	class Traits;
-	class TraitsBindings;
-	class TraitsMetadata;
+    class HeapHashtable;
+    class HeapMultiname;
+    class InlineHashtable;
+    class IntVectorObject;
+    class DoubleVectorObject;
+    class UIntVectorObject;
+    class ObjectVectorObject;
+    class Java;
+    class MathClass;
+    class MathUtils;
+    class MethodClosure;
+    class MethodEnv;
+    class MethodInfo;
+    class MethodSignature;
+    class Multiname;
+    class Namespace;
+    class NamespaceSet;
+    class NamespaceClass;
+    class NativeInitializer;
+    struct NativeMethodInfo;
+    class NumberClass;
+    class IntClass;
+    class UIntClass;
+    class OSDep;
+    class ObjectClass;
+    class OutputStream;
+    class PoolObject;
+    class PrintWriter;
+    class Profiler;
+    class RegExpClass;
+    class RegExpObject;
+    class Sampler;
+    class ScopeChain;
+    class ScopeTypeChain;
+    class ScriptBuffer;
+    class ScriptEnv;
+    class ScriptObject;
+    class StackTrace;
+    class StringBuffer;
+    class StringClass;
+    class String;
+    class Toplevel;
+    class Traits;
+    class TraitsBindings;
+    class TraitsMetadata;
 #ifdef VMCFG_WORDCODE
-	class TranslatedCode;
-	class WordcodeTranslator;
-	class WordcodeEmitter;
+    class TranslatedCode;
+    class WordcodeTranslator;
+    class WordcodeEmitter;
 #endif
-	class UnicodeUtils;
-	class Value;
-	class Verifier; 
-	class VTable; 
-	class VoidClass;
-	class XMLClass;
-	class XMLListClass;
-	class XMLObject;
-	class XMLListObject;
-	class QNameClass;
-	class QNameObject;
-	class XMLParser;
-	class XMLTag;
+    class UnicodeUtils;
+    class Value;
+    class Verifier;
+    class VTable;
+    class VoidClass;
+    class XMLClass;
+    class XMLListClass;
+    class XMLObject;
+    class XMLListObject;
+    class QNameClass;
+    class QNameObject;
+    class XMLParser;
+    class XMLTag;
 
-	struct WordOpcodeAttr;
+    struct WordOpcodeAttr;
 
-	typedef Traits* Traitsp;
-	// Stringp and Namespacep should be const, but RCObject doens't allow it yet
-	typedef String* Stringp;
-	typedef Namespace* Namespacep;
-	typedef const NamespaceSet* NamespaceSetp;
-	typedef const TraitsBindings* TraitsBindingsp;
-	typedef const TraitsMetadata* TraitsMetadatap;
-	typedef const MethodSignature* MethodSignaturep;
-	
-	typedef struct FramePtr_* FramePtr;
+    typedef Traits* Traitsp;
+    // Stringp and Namespacep should be const, but RCObject doens't allow it yet
+    typedef String* Stringp;
+    typedef Namespace* Namespacep;
+    typedef const NamespaceSet* NamespaceSetp;
+    typedef const TraitsBindings* TraitsBindingsp;
+    typedef const TraitsMetadata* TraitsMetadatap;
+    typedef const MethodSignature* MethodSignaturep;
+
+    typedef struct FramePtr_* FramePtr;
 }
 
 #ifdef VMCFG_AOT
@@ -229,18 +229,18 @@ struct ABCInfo;
 
 namespace avmplus
 {
-	// conversion routines -- intended only for Tamarin internal use
-	// but, other the short term, clients may need to make use of them as
-	// they adapt to the new api
-	#define AVM_MAP(EXT, INT) \
-		inline avm::EXT avmTo##EXT(const avmplus::INT e) { return (avm::EXT)e; } \
-		inline avmplus::INT avmFrom##EXT(avm::EXT m) { return (avmplus::INT)m; } \
-	
-	AVM_MAP(Instance, AvmCore*)
-	AVM_MAP(Object, ScriptObject*)
-	AVM_MAP(CodeContext, CodeContext*)
-	
-	#undef AVM_MAP
+    // conversion routines -- intended only for Tamarin internal use
+    // but, other the short term, clients may need to make use of them as
+    // they adapt to the new api
+    #define AVM_MAP(EXT, INT) \
+        inline avm::EXT avmTo##EXT(const avmplus::INT e) { return (avm::EXT)e; } \
+        inline avmplus::INT avmFrom##EXT(avm::EXT m) { return (avmplus::INT)m; } \
+
+    AVM_MAP(Instance, AvmCore*)
+    AVM_MAP(Object, ScriptObject*)
+    AVM_MAP(CodeContext, CodeContext*)
+
+    #undef AVM_MAP
 }
 
 #include "MMgc.h"
@@ -355,4 +355,4 @@ namespace avmplus
 #include "Verifier-inlines.h"
 #include "VTable-inlines.h"
 
-#endif /* __avmplus__ */ 
+#endif /* __avmplus__ */

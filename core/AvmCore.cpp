@@ -89,9 +89,9 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
     #if defined FEATURE_NANOJIT
- 		const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0 & ~(nanojit::LC_FragProfile); // LC_FragProfile changes generated code!?!
- 	#else
- 	    const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0;
+        const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0 & ~(nanojit::LC_FragProfile); // LC_FragProfile changes generated code!?!
+    #else
+        const uint32_t AvmCore::DEFAULT_VERBOSE_ON = (uint32_t)~0;
     #endif
 
     static bool substrMatches(const char* pattern, const char* p, const char* e)
@@ -136,7 +136,7 @@ namespace avmplus
              else if (substrMatches("regs", p, e))
                  r |= VB_jit | LC_Assembly | LC_Activation | LC_RegAlloc;
 #endif /* FEATURE_NANOJIT */
-             else 
+             else
                  badFlag = (char*)p;
             if (*e < 32)
                 break;
@@ -1372,7 +1372,7 @@ return the result of the comparison ToPrimitive(x) == y.
     void AvmCore::throwErrorV(ClassClosure *type, int errorID, Stringp arg1, Stringp arg2, Stringp arg3)
     {
         AvmAssertMsg(type != NULL, "type should never be NULL - internal bootstrap error if it is.");
-        
+
         Stringp out = formatErrorMessageV( errorID, arg1, arg2, arg3);
         Atom args[3] = { nullObjectAtom, out->atom(), intToAtom(errorID) };
         throwAtom(type->construct(2, args));

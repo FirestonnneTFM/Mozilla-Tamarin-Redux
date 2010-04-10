@@ -45,7 +45,7 @@ namespace avmplus
 #ifdef DEBUGGER
 
     //
-    // Note that "SamplerObjectType" is atomlike, but is NOT an Atom: 
+    // Note that "SamplerObjectType" is atomlike, but is NOT an Atom:
     //
     // -- the lower three bits are SamplerObjectTypeKind
     // -- if kind is kSOT_Object, upper bits are a VTable*
@@ -56,7 +56,7 @@ namespace avmplus
     // (via sotSetToplevel), to avoid having String/Namespace ctors look up the proper Toplevel
     // when not sampling.
     //
-    // To reinforce the fact that this Isn't An Atom, it's now its own opaque type, with 
+    // To reinforce the fact that this Isn't An Atom, it's now its own opaque type, with
     // lovely little accessors. Please use them now, rather than casting to intptr and
     // dancing on the bits directly.
     //
@@ -126,136 +126,136 @@ namespace avmplus
         return (void*)(uintptr_t(sot) & ~7);
     }
 
-	// This structure is used to read/write data to the sample stream.
-	// The fields are written out to the sample stream as they are defined here.  
-	struct Sample
-	{
-		uint64_t micros;
-		uint32 sampleType;
-		union {
-			// not filled in for sampleType==DELETED_OBJECT_SAMPLE
-			struct {
-				// Number of StackTraceElements in the trace
-				uint32 depth;
-				// Beginning of an array of StackTraceElement.  Basically, an MethodInfo*, Stringp, Stringp, uint32 for each entry. 
-				void *trace; 
-			} stack;
-			// deleted object size record, instead of stack
-			uint64_t size; 
-		};
-		// filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
-		uint64_t id; 
+    // This structure is used to read/write data to the sample stream.
+    // The fields are written out to the sample stream as they are defined here.
+    struct Sample
+    {
+        uint64_t micros;
+        uint32 sampleType;
+        union {
+            // not filled in for sampleType==DELETED_OBJECT_SAMPLE
+            struct {
+                // Number of StackTraceElements in the trace
+                uint32 depth;
+                // Beginning of an array of StackTraceElement.  Basically, an MethodInfo*, Stringp, Stringp, uint32 for each entry.
+                void *trace;
+            } stack;
+            // deleted object size record, instead of stack
+            uint64_t size;
+        };
+        // filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
+        uint64_t id;
 
-		// Following three fields are only filled in for sampleType==NEW_OBJECT_SAMPLE or NEW_AUX_SAMPLE
-		// They are not present in the sample stream for other sample types
-		SamplerObjectType sot;
-		void *ptr;
-		uint64_t alloc_size; // size for new mem sample
-	};
+        // Following three fields are only filled in for sampleType==NEW_OBJECT_SAMPLE or NEW_AUX_SAMPLE
+        // They are not present in the sample stream for other sample types
+        SamplerObjectType sot;
+        void *ptr;
+        uint64_t alloc_size; // size for new mem sample
+    };
 
-	class Sampler : public MMgc::GCRoot
-	{
-	public:
-		Sampler(AvmCore*);
-		virtual ~Sampler();
+    class Sampler : public MMgc::GCRoot
+    {
+    public:
+        Sampler(AvmCore*);
+        virtual ~Sampler();
 
-		enum SampleType 
-		{ 
-			RAW_SAMPLE=0x55555555,
-			NEW_OBJECT_SAMPLE=0xaaaaaaaa, 
-			DELETED_OBJECT_SAMPLE=0xdddddddd,
-			NEW_AUX_SAMPLE=0xeeeeeeee
-		};
-		
-		enum { SAMPLE_FREQUENCY_MILLIS = 1 };
+        enum SampleType
+        {
+            RAW_SAMPLE=0x55555555,
+            NEW_OBJECT_SAMPLE=0xaaaaaaaa,
+            DELETED_OBJECT_SAMPLE=0xdddddddd,
+            NEW_AUX_SAMPLE=0xeeeeeeee
+        };
 
-		// should use opaque Cursor type instead of byte*
-		byte *getSamples(uint32 &num);
-		void readSample(byte *&p, Sample &s);
-		
-		void init(bool sampling, bool autoStart);
-		void sampleCheck() { if(takeSample) sample(); }
+        enum { SAMPLE_FREQUENCY_MILLIS = 1 };
 
-		uint64_t recordAllocationInfo(AvmPlusScriptableObject *obj, SamplerObjectType sot);
-		uint64_t recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true, bool forceWrite = false);
-		void recordDeallocationSample(const void* item, uint64_t size);
+        // should use opaque Cursor type instead of byte*
+        byte *getSamples(uint32 &num);
+        void readSample(byte *&p, Sample &s);
 
-		virtual void startSampling();
-		virtual void stopSampling();
-		virtual void clearSamples();
-		virtual void pauseSampling();
+        void init(bool sampling, bool autoStart);
+        void sampleCheck() { if(takeSample) sample(); }
 
-		void sampleInternalAllocs(bool b);
+        uint64_t recordAllocationInfo(AvmPlusScriptableObject *obj, SamplerObjectType sot);
+        uint64_t recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true, bool forceWrite = false);
+        void recordDeallocationSample(const void* item, uint64_t size);
 
-		void setCallback(ScriptObject* callback);
+        virtual void startSampling();
+        virtual void stopSampling();
+        virtual void clearSamples();
+        virtual void pauseSampling();
 
-		
-		// called by VM after initBuiltin's
-		void initSampling();
+        void sampleInternalAllocs(bool b);
 
-		void createFakeFunction(const char *name);
-		Stringp getFakeFunctionName(const char* name);
+        void setCallback(ScriptObject* callback);
 
-		void presweep();
-		void postsweep();
 
-		inline uint32_t sampleCount() const { return numSamples; }
-		inline bool activelySampling() { return samplingNow; }
-		inline bool sampling() const { return _sampling; }
+        // called by VM after initBuiltin's
+        void initSampling();
 
-	private:	
-		
-		void sample();
+        void createFakeFunction(const char *name);
+        Stringp getFakeFunctionName(const char* name);
 
-		void rewind(byte*&b, uint32 amount)
-		{
-			b -= amount;
-		}
+        void presweep();
+        void postsweep();
 
-		int sampleSpaceCheck(bool callback_ok = true);
-		
-		// sampleTimeMicros is the timestamp you want to have written to the sample,
-		// or 0 to use the current time.
-		void writeRawSample(SampleType sampleType, uint64_t sampleTimeMicros = 0);
+        inline uint32_t sampleCount() const { return numSamples; }
+        inline bool activelySampling() { return samplingNow; }
+        inline bool sampling() const { return _sampling; }
 
-		// Returns the current time, as it should be written into samples.
-		static uint64_t nowMicros();
+    private:
 
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		VTable*				sampleIteratorVTable;
-		VTable*				slotIteratorVTable;
-	protected:
-		AvmCore*			core;
-	private:
-		List<Stringp>		fakeMethodNames; 
-		uint64_t			allocId;
-		uint8_t*			samples;
-		uint8_t*			currentSample;
-		uint8_t*			lastAllocSample;
-		uint64_t			lastSampleCheckMicros; // the last time we considered writing a timer sample
-		DRC(ScriptObject*)	callback;
-		uintptr_t			timerHandle;
-		MMgc::GCHashtable_VMPI		uids;		// important to use the VMPI variant for non-MMGC-based memory allocation.
-		MMgc::GCHashtable_VMPI		ptrSamples;	// important to use the VMPI variant for non-MMGC-based memory allocation.
-		int32_t				takeSample;
-		uint32_t			numSamples;
-		uint32_t			samples_size;
-		bool				samplingNow;
-		bool				samplingAllAllocs;
-		bool				runningCallback;
-		bool				autoStartSampling;	// if true we call startSampling as early as possible during startup
-		bool				_sampling;			// are we sampling at all
-	// ------------------------ DATA SECTION END
-	};
+        void sample();
 
-	#define SAMPLE_FRAME(_strp, _core)	avmplus::CallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)
-	#define SAMPLE_CHECK()				__fcsn.sampleCheck();
+        void rewind(byte*&b, uint32 amount)
+        {
+            b -= amount;
+        }
+
+        int sampleSpaceCheck(bool callback_ok = true);
+
+        // sampleTimeMicros is the timestamp you want to have written to the sample,
+        // or 0 to use the current time.
+        void writeRawSample(SampleType sampleType, uint64_t sampleTimeMicros = 0);
+
+        // Returns the current time, as it should be written into samples.
+        static uint64_t nowMicros();
+
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        VTable*             sampleIteratorVTable;
+        VTable*             slotIteratorVTable;
+    protected:
+        AvmCore*            core;
+    private:
+        List<Stringp>       fakeMethodNames;
+        uint64_t            allocId;
+        uint8_t*            samples;
+        uint8_t*            currentSample;
+        uint8_t*            lastAllocSample;
+        uint64_t            lastSampleCheckMicros; // the last time we considered writing a timer sample
+        DRC(ScriptObject*)  callback;
+        uintptr_t           timerHandle;
+        MMgc::GCHashtable_VMPI      uids;       // important to use the VMPI variant for non-MMGC-based memory allocation.
+        MMgc::GCHashtable_VMPI      ptrSamples; // important to use the VMPI variant for non-MMGC-based memory allocation.
+        int32_t             takeSample;
+        uint32_t            numSamples;
+        uint32_t            samples_size;
+        bool                samplingNow;
+        bool                samplingAllAllocs;
+        bool                runningCallback;
+        bool                autoStartSampling;  // if true we call startSampling as early as possible during startup
+        bool                _sampling;          // are we sampling at all
+    // ------------------------ DATA SECTION END
+    };
+
+    #define SAMPLE_FRAME(_strp, _core)  avmplus::CallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)
+    #define SAMPLE_CHECK()              __fcsn.sampleCheck();
 
 #else
 
-	#define SAMPLE_FRAME(_x, _s) 
-	#define SAMPLE_CHECK()
+    #define SAMPLE_FRAME(_x, _s)
+    #define SAMPLE_CHECK()
 
 #endif // DEBUGGER
 }

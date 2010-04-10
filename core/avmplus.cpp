@@ -49,7 +49,7 @@
 // precompiled header.
 
 // avmplus.cpp has custom precompiled header settings to create
-// avmplus.pch by precompiling this file up until the 
+// avmplus.pch by precompiling this file up until the
 // #include "avmplus.h".
 
 // #include "avmplus.h" should be the first non-comment line in

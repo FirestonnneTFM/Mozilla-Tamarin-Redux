@@ -42,123 +42,123 @@
 
 namespace avmplus
 {
-	DomainEnv::DomainEnv(AvmCore *core, Domain* domain, DomainEnv* base)
-		: m_domain(domain),
-		  m_base(base),
-		  m_namedScripts(new (core->GetGC()) MultinameHashtable()),
+    DomainEnv::DomainEnv(AvmCore *core, Domain* domain, DomainEnv* base)
+        : m_domain(domain),
+          m_base(base),
+          m_namedScripts(new (core->GetGC()) MultinameHashtable()),
           m_globalMemoryScratch(mmfx_new0(Scratch)),
           m_globalMemoryBase(m_globalMemoryScratch->scratch),
           m_globalMemorySize(GLOBAL_MEMORY_MIN_SIZE)
-	{
-	}
-    
-	DomainEnv::~DomainEnv()
-	{
+    {
+    }
+
+    DomainEnv::~DomainEnv()
+    {
         mmfx_delete(m_globalMemoryScratch);
-	}
+    }
 
 
-	MethodEnv* DomainEnv::getScriptInit(Namespacep ns, Stringp name) const
-	{
-		MethodEnv *env = NULL;
-		if (m_base) {
-			env = m_base->getScriptInit(ns, name);
-		}
-		if (!env) {
-			env = (MethodEnv*) m_namedScripts->get(name, ns);
-		}
-		return env;
-	}	
+    MethodEnv* DomainEnv::getScriptInit(Namespacep ns, Stringp name) const
+    {
+        MethodEnv *env = NULL;
+        if (m_base) {
+            env = m_base->getScriptInit(ns, name);
+        }
+        if (!env) {
+            env = (MethodEnv*) m_namedScripts->get(name, ns);
+        }
+        return env;
+    }
 
-	MethodEnv* DomainEnv::getScriptInit(const Multiname& multiname) const
-	{
-		MethodEnv *env = NULL;
-		if (m_base) {
-			env = m_base->getScriptInit(multiname);
-		}
-		if (!env) {
-			env = (MethodEnv*) m_namedScripts->getMulti(multiname);
-		}
-		return env;
-	}
+    MethodEnv* DomainEnv::getScriptInit(const Multiname& multiname) const
+    {
+        MethodEnv *env = NULL;
+        if (m_base) {
+            env = m_base->getScriptInit(multiname);
+        }
+        if (!env) {
+            env = (MethodEnv*) m_namedScripts->getMulti(multiname);
+        }
+        return env;
+    }
 
-	int DomainEnv::scriptNext(int index) const
-	{
-		int v = m_namedScripts->next(index);
-		return v;
-	}
+    int DomainEnv::scriptNext(int index) const
+    {
+        int v = m_namedScripts->next(index);
+        return v;
+    }
 
-	Stringp DomainEnv::scriptNameAt(int index) const
-	{
-		Stringp s = m_namedScripts->keyAt(index);
-		return s;
-	}
+    Stringp DomainEnv::scriptNameAt(int index) const
+    {
+        Stringp s = m_namedScripts->keyAt(index);
+        return s;
+    }
 
-	Namespacep DomainEnv::scriptNsAt(int index) const
-	{
-		Namespacep ns = m_namedScripts->nsAt(index);
-		return ns;
-	}
-	
-	Toplevel* DomainEnv::toplevel() const
-	{
-		if(m_toplevel) return m_toplevel;
-		if(m_base) return m_base->toplevel();
-		AvmAssert(0);
-		return NULL;
-	}
+    Namespacep DomainEnv::scriptNsAt(int index) const
+    {
+        Namespacep ns = m_namedScripts->nsAt(index);
+        return ns;
+    }
 
-	bool DomainEnv::set_globalMemory(ScriptObject* providerObject)
-	{
-		if (!providerObject || !providerObject->getGlobalMemoryProvider())
-		{
-			// null obj -- use scratch
-			if (m_globalMemoryProviderObject) // unsubscribe from current if any
-				globalMemoryUnsubscribe(m_globalMemoryProviderObject);
-			// remember NULL obj
-			m_globalMemoryProviderObject = NULL;
-			// point at scratch mem
-			notifyGlobalMemoryChanged(m_globalMemoryScratch->scratch, GLOBAL_MEMORY_MIN_SIZE);
-		}
-		else if (!globalMemorySubscribe(providerObject))
-		{
-			// failed... do nothing
-			return false;
-		}
-		else
-		{
-			// success on globalMemorySubscribe would have led to notifyGlobalMemoryChanged
-			// success... unsubscribe from original
-			if (m_globalMemoryProviderObject)
-				globalMemoryUnsubscribe(m_globalMemoryProviderObject);
-			// remember the new one
-			m_globalMemoryProviderObject = providerObject;
-		}
-		return true;
-	}
+    Toplevel* DomainEnv::toplevel() const
+    {
+        if(m_toplevel) return m_toplevel;
+        if(m_base) return m_base->toplevel();
+        AvmAssert(0);
+        return NULL;
+    }
 
-	// memory changed so go through and update all reference to both the base
-	// and the size of the global memory
-	void DomainEnv::notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize)
-	{
-		AvmAssert(newBase != NULL); // real base address
-		AvmAssert(newSize >= GLOBAL_MEMORY_MIN_SIZE); // big enough
+    bool DomainEnv::set_globalMemory(ScriptObject* providerObject)
+    {
+        if (!providerObject || !providerObject->getGlobalMemoryProvider())
+        {
+            // null obj -- use scratch
+            if (m_globalMemoryProviderObject) // unsubscribe from current if any
+                globalMemoryUnsubscribe(m_globalMemoryProviderObject);
+            // remember NULL obj
+            m_globalMemoryProviderObject = NULL;
+            // point at scratch mem
+            notifyGlobalMemoryChanged(m_globalMemoryScratch->scratch, GLOBAL_MEMORY_MIN_SIZE);
+        }
+        else if (!globalMemorySubscribe(providerObject))
+        {
+            // failed... do nothing
+            return false;
+        }
+        else
+        {
+            // success on globalMemorySubscribe would have led to notifyGlobalMemoryChanged
+            // success... unsubscribe from original
+            if (m_globalMemoryProviderObject)
+                globalMemoryUnsubscribe(m_globalMemoryProviderObject);
+            // remember the new one
+            m_globalMemoryProviderObject = providerObject;
+        }
+        return true;
+    }
 
-		m_globalMemoryBase = newBase;
-		m_globalMemorySize = newSize;
-	}
+    // memory changed so go through and update all reference to both the base
+    // and the size of the global memory
+    void DomainEnv::notifyGlobalMemoryChanged(uint8_t* newBase, uint32_t newSize)
+    {
+        AvmAssert(newBase != NULL); // real base address
+        AvmAssert(newSize >= GLOBAL_MEMORY_MIN_SIZE); // big enough
 
- 	bool DomainEnv::globalMemorySubscribe(ScriptObject* providerObject) 
- 	{
+        m_globalMemoryBase = newBase;
+        m_globalMemorySize = newSize;
+    }
+
+    bool DomainEnv::globalMemorySubscribe(ScriptObject* providerObject)
+    {
         GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();
         return provider ? provider->addSubscriber(this) : false;
- 	}
- 
- 	bool DomainEnv::globalMemoryUnsubscribe(ScriptObject* providerObject)
- 	{
+    }
+
+    bool DomainEnv::globalMemoryUnsubscribe(ScriptObject* providerObject)
+    {
         GlobalMemoryProvider* provider = providerObject->getGlobalMemoryProvider();
         return provider ? provider->removeSubscriber(this) : false;
- 	}
+    }
 }
 
 
