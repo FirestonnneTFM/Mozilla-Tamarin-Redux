@@ -41,57 +41,57 @@
 
 namespace avm {
 
-	// you probably don't want to open this namespace.
-	// using namespace avmplus;
+    // you probably don't want to open this namespace.
+    // using namespace avmplus;
 
-	// -------- AvmObject --------
+    // -------- AvmObject --------
 
-	bool isFunction(Object o)
-	{
-		avmplus::ScriptObject* so = avmplus::avmFromObject(o);
-		return so && so->core()->isFunction(so->atom());
-	}
+    bool isFunction(Object o)
+    {
+        avmplus::ScriptObject* so = avmplus::avmFromObject(o);
+        return so && so->core()->isFunction(so->atom());
+    }
 
-	CodeContext getFunctionCodeContext(Object o)
-	{
-		if (!isFunction(o))
-		{
-			AvmAssert(!"Only Function is legal here.");
-			return NULL;
-		}
-		avmplus::ScriptObject* so = avmplus::avmFromObject(o);
-	//	avmplus::CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
-	// getFunctionCodeContext() has been temporarily relocated to ScriptObject, as AIR defines
-	// some classes that are subclasses of Function (in AS3) but not of FunctionObject (in C++)...
-		avmplus::CodeContext* cc = ((avmplus::ScriptObject*)so)->getFunctionCodeContext();
-		return avmToCodeContext(cc);
-	}
+    CodeContext getFunctionCodeContext(Object o)
+    {
+        if (!isFunction(o))
+        {
+            AvmAssert(!"Only Function is legal here.");
+            return NULL;
+        }
+        avmplus::ScriptObject* so = avmplus::avmFromObject(o);
+    //  avmplus::CodeContext* cc = ((avmplus::FunctionObject*)so)->getFunctionCodeContext();
+    // getFunctionCodeContext() has been temporarily relocated to ScriptObject, as AIR defines
+    // some classes that are subclasses of Function (in AS3) but not of FunctionObject (in C++)...
+        avmplus::CodeContext* cc = ((avmplus::ScriptObject*)so)->getFunctionCodeContext();
+        return avmToCodeContext(cc);
+    }
 
-	CodeContext getClassCodeContext(Object o)
-	{
-		if (!o)
-			return NULL;
-		avmplus::ScriptObject* so = avmplus::avmFromObject(o);
-		if (so->core()->isFunction(so->atom()))
-		{
-			AvmAssert(!"Function or MC is not legal here.");
-			return NULL;
-		}
-		avmplus::TraitsPosType t = so->traits()->posType();
-		if (t == avmplus::TRAITSTYPE_CATCH || t == avmplus::TRAITSTYPE_ACTIVATION)
-		{
-			AvmAssert(!"Activation and Catch objects are not legal here.");
-			return NULL;
-		}
-		avmplus::MethodEnv* init = so->vtable->init;
-		if (!init)
-		{
-			AvmAssert(!"init method is null, should not be possible.");
-			return NULL;
-		}
-		avmplus::CodeContext* cc = init->scope()->abcEnv()->codeContext();
-		return avmToCodeContext(cc);
-	}
+    CodeContext getClassCodeContext(Object o)
+    {
+        if (!o)
+            return NULL;
+        avmplus::ScriptObject* so = avmplus::avmFromObject(o);
+        if (so->core()->isFunction(so->atom()))
+        {
+            AvmAssert(!"Function or MC is not legal here.");
+            return NULL;
+        }
+        avmplus::TraitsPosType t = so->traits()->posType();
+        if (t == avmplus::TRAITSTYPE_CATCH || t == avmplus::TRAITSTYPE_ACTIVATION)
+        {
+            AvmAssert(!"Activation and Catch objects are not legal here.");
+            return NULL;
+        }
+        avmplus::MethodEnv* init = so->vtable->init;
+        if (!init)
+        {
+            AvmAssert(!"init method is null, should not be possible.");
+            return NULL;
+        }
+        avmplus::CodeContext* cc = init->scope()->abcEnv()->codeContext();
+        return avmToCodeContext(cc);
+    }
 
 } // namespace avm
 

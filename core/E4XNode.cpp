@@ -43,14 +43,14 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	extern wchar *stripPrefix (const wchar *str, const char *pre);
+    extern wchar *stripPrefix (const wchar *str, const char *pre);
 
-	E4XNodeAux::E4XNodeAux(Stringp s, Namespace *ns, FunctionObject* notify) :
-		m_name(s), 
-		m_ns(ns),
-		m_notification(notify)
-	{
-	}
+    E4XNodeAux::E4XNodeAux(Stringp s, Namespace *ns, FunctionObject* notify) :
+        m_name(s),
+        m_ns(ns),
+        m_notification(notify)
+    {
+    }
 
 #ifdef DEBUGGER
     uint64_t E4XNodeAux::bytesUsed() const
@@ -70,1007 +70,1007 @@ namespace avmplus
     }
 #endif
 
-	AttributeE4XNode::AttributeE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
-	{
-	}
+    AttributeE4XNode::AttributeE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
+    {
+    }
 
-	CDATAE4XNode::CDATAE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
-	{
-	}
+    CDATAE4XNode::CDATAE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
+    {
+    }
 
-	CommentE4XNode::CommentE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
-	{
-	}
+    CommentE4XNode::CommentE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
+    {
+    }
 
-	PIE4XNode::PIE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
-	{
-	}
+    PIE4XNode::PIE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
+    {
+    }
 
-	TextE4XNode::TextE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
-	{
-	}
+    TextE4XNode::TextE4XNode (E4XNode *parent, String *value) : E4XNode(parent), m_value(value)
+    {
+    }
 
-	ElementE4XNode::ElementE4XNode (E4XNode *parent) : E4XNode(parent)
-	{
-	}
+    ElementE4XNode::ElementE4XNode (E4XNode *parent) : E4XNode(parent)
+    {
+    }
 
-	// Fast append with no checks for type, etc.
-	void ElementE4XNode::_append (E4XNode *childNode)
-	{
-		childNode->setParent (this);
-		if (!m_children)
-		{
-			m_children = uintptr(childNode) | SINGLECHILDBIT;
-			return;
-		}
+    // Fast append with no checks for type, etc.
+    void ElementE4XNode::_append (E4XNode *childNode)
+    {
+        childNode->setParent (this);
+        if (!m_children)
+        {
+            m_children = uintptr(childNode) | SINGLECHILDBIT;
+            return;
+        }
 
-		if (m_children & SINGLECHILDBIT)
-		{
-			convertToAtomArray();
-		}
+        if (m_children & SINGLECHILDBIT)
+        {
+            convertToAtomArray();
+        }
 
-		AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-		aa->push (AvmCore::genericObjectToAtom(childNode));
-	}
+        AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+        aa->push (AvmCore::genericObjectToAtom(childNode));
+    }
 
-	uint32 ElementE4XNode::numChildren() const
-	{
-		if (!m_children)
-			return 0;
+    uint32 ElementE4XNode::numChildren() const
+    {
+        if (!m_children)
+            return 0;
 
-		if (m_children & SINGLECHILDBIT)
-			return 1;
-		else 
-		{
-			AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-			return aa->getLength();
-		}
-	}
+        if (m_children & SINGLECHILDBIT)
+            return 1;
+        else
+        {
+            AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+            return aa->getLength();
+        }
+    }
 
-	void ElementE4XNode::clearChildren()
-	{
-		if (m_children & ~SINGLECHILDBIT)
-		{
-			// !!@ delete our AtomArray
-		}
+    void ElementE4XNode::clearChildren()
+    {
+        if (m_children & ~SINGLECHILDBIT)
+        {
+            // !!@ delete our AtomArray
+        }
 
-		m_children = 0;
-	}
+        m_children = 0;
+    }
 
-	void ElementE4XNode::convertToAtomArray ()
-	{
-		if (m_children & SINGLECHILDBIT)
-		{
-			E4XNode *firstChild = (E4XNode *) (m_children & ~SINGLECHILDBIT);
-			AtomArray *aa = new (gc()) AtomArray(2);
-			aa->push (AvmCore::genericObjectToAtom(firstChild));
-			m_children = uintptr(aa);
-		}
-		else if (!m_children)
-		{
-			m_children = uintptr(new (gc()) AtomArray (1));
-		}
-	}
+    void ElementE4XNode::convertToAtomArray ()
+    {
+        if (m_children & SINGLECHILDBIT)
+        {
+            E4XNode *firstChild = (E4XNode *) (m_children & ~SINGLECHILDBIT);
+            AtomArray *aa = new (gc()) AtomArray(2);
+            aa->push (AvmCore::genericObjectToAtom(firstChild));
+            m_children = uintptr(aa);
+        }
+        else if (!m_children)
+        {
+            m_children = uintptr(new (gc()) AtomArray (1));
+        }
+    }
 
-	void ElementE4XNode::insertChild (uint32 i, E4XNode *x)
-	{
-		// m_children->insert (i, a)
-		convertToAtomArray();
-		AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-		aa->insert (i, AvmCore::genericObjectToAtom(x));
-	}
+    void ElementE4XNode::insertChild (uint32 i, E4XNode *x)
+    {
+        // m_children->insert (i, a)
+        convertToAtomArray();
+        AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+        aa->insert (i, AvmCore::genericObjectToAtom(x));
+    }
 
-	void ElementE4XNode::removeChild (uint32 i)
-	{
-		// m_children->removeAt (i)
-		convertToAtomArray();
-		AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-		aa->removeAt (i);
-	}
+    void ElementE4XNode::removeChild (uint32 i)
+    {
+        // m_children->removeAt (i)
+        convertToAtomArray();
+        AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+        aa->removeAt (i);
+    }
 
-	void ElementE4XNode::setChildAt (uint32 i, E4XNode *x)
-	{
-		if ((i == 0) && (m_children & SINGLECHILDBIT))
-		{
-			m_children = uintptr(x) | SINGLECHILDBIT;
-		}
-		else
-		{
-			convertToAtomArray();
-			AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-			aa->setAt (i, AvmCore::genericObjectToAtom(x));
-		}
-	}
+    void ElementE4XNode::setChildAt (uint32 i, E4XNode *x)
+    {
+        if ((i == 0) && (m_children & SINGLECHILDBIT))
+        {
+            m_children = uintptr(x) | SINGLECHILDBIT;
+        }
+        else
+        {
+            convertToAtomArray();
+            AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+            aa->setAt (i, AvmCore::genericObjectToAtom(x));
+        }
+    }
 
-	E4XNode *ElementE4XNode::_getAt(uint32 i) const
-	{
-		if (i >= _length())
-			return 0;
+    E4XNode *ElementE4XNode::_getAt(uint32 i) const
+    {
+        if (i >= _length())
+            return 0;
 
-		if (int(this->m_children) & SINGLECHILDBIT)
-		{
-			return (E4XNode *)(this->m_children & ~SINGLECHILDBIT);
-		}
-		else
-		{
-			AtomArray *aa = (AtomArray *)(uintptr)this->m_children;
-			E4XNode *x = (E4XNode *) AvmCore::atomToGenericObject(aa->getAt(i));
-			return x;
-		}
-	}
+        if (int(this->m_children) & SINGLECHILDBIT)
+        {
+            return (E4XNode *)(this->m_children & ~SINGLECHILDBIT);
+        }
+        else
+        {
+            AtomArray *aa = (AtomArray *)(uintptr)this->m_children;
+            E4XNode *x = (E4XNode *) AvmCore::atomToGenericObject(aa->getAt(i));
+            return x;
+        }
+    }
 
-	bool E4XNode::getQName(Multiname *mn, Namespacep publicNS) const
-	{
-		if (!m_nameOrAux)
-			return false;
+    bool E4XNode::getQName(Multiname *mn, Namespacep publicNS) const
+    {
+        if (!m_nameOrAux)
+            return false;
 
-		uintptr nameOrAux = m_nameOrAux;
-		if (AUXBIT & nameOrAux)
-		{
-			E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
-			// We can have a notification only aux which won't have a real name
-			if (aux->m_name)
-			{
-				mn->setName (aux->m_name);
-				mn->setNamespace (aux->m_ns);
-				mn->setQName();
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else
-		{
-			Stringp str = (String *)(nameOrAux);
-			mn->setName (str);
-			mn->setNamespace(publicNS);
-		}
+        uintptr nameOrAux = m_nameOrAux;
+        if (AUXBIT & nameOrAux)
+        {
+            E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
+            // We can have a notification only aux which won't have a real name
+            if (aux->m_name)
+            {
+                mn->setName (aux->m_name);
+                mn->setNamespace (aux->m_ns);
+                mn->setQName();
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            Stringp str = (String *)(nameOrAux);
+            mn->setName (str);
+            mn->setNamespace(publicNS);
+        }
 
-		if (getClass() == kAttribute)
-			mn->setAttr();
+        if (getClass() == kAttribute)
+            mn->setAttr();
 
-		return true;
-	}
+        return true;
+    }
 
-	void E4XNode::setQName (AvmCore *core, Stringp name, Namespace *ns)
-	{
+    void E4XNode::setQName (AvmCore *core, Stringp name, Namespace *ns)
+    {
         // name can be null!
         if (name && !name->isInterned())
             name = core->internString(name);
-            
-		// If we already have an aux, use it.  (It may have notification atom set)
-		uintptr nameOrAux = m_nameOrAux;
-		if (AUXBIT & nameOrAux)
-		{
-			E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
-			aux->m_name = name;
-			aux->m_ns = ns;
-			return;
-		}
 
-		if (!name && !ns)
-		{
-			m_nameOrAux = 0;
-			return;
-		}
+        // If we already have an aux, use it.  (It may have notification atom set)
+        uintptr nameOrAux = m_nameOrAux;
+        if (AUXBIT & nameOrAux)
+        {
+            E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
+            aux->m_name = name;
+            aux->m_ns = ns;
+            return;
+        }
 
-		if (!ns || ns->isPublic() || 
-			(ns->getPrefix() == core->kEmptyString->atom() && ns->getURI()->isEmpty()))
-		{
-			//m_nameOrAux = int (name);
-			WBRC(core->GetGC(), this, &m_nameOrAux, uintptr(name));
-			return;
-		}
+        if (!name && !ns)
+        {
+            m_nameOrAux = 0;
+            return;
+        }
 
-		E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (name, ns);
-		//m_nameOrAux = AUXBIT | int(aux);
-		WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
-	}
+        if (!ns || ns->isPublic() ||
+            (ns->getPrefix() == core->kEmptyString->atom() && ns->getURI()->isEmpty()))
+        {
+            //m_nameOrAux = int (name);
+            WBRC(core->GetGC(), this, &m_nameOrAux, uintptr(name));
+            return;
+        }
 
-	void E4XNode::setQName (AvmCore *core, const Multiname *mn)
-	{
-		if (!mn)
-		{
-			m_nameOrAux = 0;
-		}
-		else
-		{
-			setQName (core, mn->getName(), mn->getNamespace());
-		}
-	}
+        E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (name, ns);
+        //m_nameOrAux = AUXBIT | int(aux);
+        WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
+    }
 
-	// E4X 9.1.1.3, pg 20
-	void E4XNode::_addInScopeNamespace (AvmCore* /*core*/, Namespace* /*ns*/, Namespacep /*publicNS*/)
-	{
-		// do nothing for non-element nodes
-	}
+    void E4XNode::setQName (AvmCore *core, const Multiname *mn)
+    {
+        if (!mn)
+        {
+            m_nameOrAux = 0;
+        }
+        else
+        {
+            setQName (core, mn->getName(), mn->getNamespace());
+        }
+    }
 
-	void ElementE4XNode::_addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS)
-	{
-//		if (getClass() & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
-//			return; 
-		
-		if (!ns || (ns->getPrefix() == undefinedAtom))
-			return;
+    // E4X 9.1.1.3, pg 20
+    void E4XNode::_addInScopeNamespace (AvmCore* /*core*/, Namespace* /*ns*/, Namespacep /*publicNS*/)
+    {
+        // do nothing for non-element nodes
+    }
 
-		Multiname m;
-		getQName(&m, publicNS);
+    void ElementE4XNode::_addInScopeNamespace (AvmCore *core, Namespace *ns, Namespacep publicNS)
+    {
+//      if (getClass() & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
+//          return;
 
-		if ((ns->getPrefix() == core->kEmptyString->atom()) && 
-			(!m.isAnyNamespace()) && m.getNamespace()->getURI()->isEmpty())
-			return;
+        if (!ns || (ns->getPrefix() == undefinedAtom))
+            return;
 
-		// step 2b + 2c
-		int index = -1;
-		for (uint32 i = 0; i < numNamespaces(); i++)
-		{
-			Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
-			if (ns2->getPrefix() == ns->getPrefix())
-				index = i;
-		}
+        Multiname m;
+        getQName(&m, publicNS);
 
-		// step 2d
-		if (index != -1)
-		{
-			Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(index));
-			if (ns2->getURI() != ns->getURI())
-			{
-				// remove match from inscopenamespaces
-				m_namespaces->removeAt (index);
-			}
-		}
+        if ((ns->getPrefix() == core->kEmptyString->atom()) &&
+            (!m.isAnyNamespace()) && m.getNamespace()->getURI()->isEmpty())
+            return;
 
-		// step 2e - add namespace to inscopenamespaces
-		if (!m_namespaces)
-			m_namespaces = new (core->GetGC()) AtomArray(1);
+        // step 2b + 2c
+        int index = -1;
+        for (uint32 i = 0; i < numNamespaces(); i++)
+        {
+            Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
+            if (ns2->getPrefix() == ns->getPrefix())
+                index = i;
+        }
 
-		m_namespaces->push (ns->atom());
+        // step 2d
+        if (index != -1)
+        {
+            Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(index));
+            if (ns2->getURI() != ns->getURI())
+            {
+                // remove match from inscopenamespaces
+                m_namespaces->removeAt (index);
+            }
+        }
 
-		// step 2f
-		// If this nodes prefix == n prefix
-			// set this nodes prefix to undefined
-		if  (!m.isAnyNamespace() && (m.getNamespace()->getPrefix() == ns->getPrefix()))
-		{
-			setQName (core, m.getName(), core->newNamespace(m.getNamespace()->getURI()));
-		}
+        // step 2e - add namespace to inscopenamespaces
+        if (!m_namespaces)
+            m_namespaces = new (core->GetGC()) AtomArray(1);
 
-		// step 2g
-		// for all attributes
-		// if their nodes prefix == n.prefix
-		//     set the node prefix to undefined
-		for (unsigned int i = 0; i < numAttributes(); i++)
-		{
-			E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
-			Multiname ma;
-			curAttr->getQName(&ma, publicNS);
-			if (!ma.isAnyNamespace() && ma.getNamespace()->getPrefix() == ns->getPrefix())
-			{
-				curAttr->setQName (core, ma.getName(), core->newNamespace(ma.getNamespace()->getURI()));
-			}
-		}
+        m_namespaces->push (ns->atom());
 
-		return;
-	}
+        // step 2f
+        // If this nodes prefix == n prefix
+            // set this nodes prefix to undefined
+        if  (!m.isAnyNamespace() && (m.getNamespace()->getPrefix() == ns->getPrefix()))
+        {
+            setQName (core, m.getName(), core->newNamespace(m.getNamespace()->getURI()));
+        }
 
-	int E4XNode::FindMatchingNamespace (AvmCore *core, Namespace *ns)
-	{
-		for (uint32 i = 0; i < numNamespaces(); i++)
-		{
-			Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
-			if (ns2->getURI() == ns->getURI())
-			{
-				if (ns->getPrefix() == undefinedAtom)
-					return i;
+        // step 2g
+        // for all attributes
+        // if their nodes prefix == n.prefix
+        //     set the node prefix to undefined
+        for (unsigned int i = 0; i < numAttributes(); i++)
+        {
+            E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
+            Multiname ma;
+            curAttr->getQName(&ma, publicNS);
+            if (!ma.isAnyNamespace() && ma.getNamespace()->getPrefix() == ns->getPrefix())
+            {
+                curAttr->setQName (core, ma.getName(), core->newNamespace(ma.getNamespace()->getURI()));
+            }
+        }
 
-				if (ns2->getPrefix() == core->kEmptyString->atom())
-					return -1;
+        return;
+    }
 
-				if (ns2->getPrefix() == ns->getPrefix())
-					return i;
-			}
-		}
+    int E4XNode::FindMatchingNamespace (AvmCore *core, Namespace *ns)
+    {
+        for (uint32 i = 0; i < numNamespaces(); i++)
+        {
+            Namespace *ns2 = AvmCore::atomToNamespace (getNamespaces()->getAt(i));
+            if (ns2->getURI() == ns->getURI())
+            {
+                if (ns->getPrefix() == undefinedAtom)
+                    return i;
 
-		return -1;
-	}
+                if (ns2->getPrefix() == core->kEmptyString->atom())
+                    return -1;
 
-	Namespace *E4XNode::FindNamespace(AvmCore *core, Toplevel *toplevel, Stringp& tagName, bool bAttribute)
-	{
-		int32_t pos = tagName->indexOfLatin1(":", 1, 0);
-		// handle case of ":name"
-		if (pos == 0)
-			toplevel->throwTypeError(kXMLBadQName, tagName);
+                if (ns2->getPrefix() == ns->getPrefix())
+                    return i;
+            }
+        }
 
-		Stringp prefix = core->kEmptyString;
-		if (pos > 0)
-		{
-			prefix = core->internSubstring(tagName, 0, pos);
-			tagName = core->internSubstring(tagName, pos + 1, tagName->length());
-		}
+        return -1;
+    }
 
-		// An attribute without a prefix is unqualified and does not inherit a namespace
-		// from its parent.  
-		if (bAttribute && prefix == core->kEmptyString)
-			return 0;
+    Namespace *E4XNode::FindNamespace(AvmCore *core, Toplevel *toplevel, Stringp& tagName, bool bAttribute)
+    {
+        int32_t pos = tagName->indexOfLatin1(":", 1, 0);
+        // handle case of ":name"
+        if (pos == 0)
+            toplevel->throwTypeError(kXMLBadQName, tagName);
 
-		// search all in scope namespaces for a matching prefix.  If we find one
-		// return that prefix, otherwise we need to throw an error.
-		E4XNode *y = this;
-		while (y)
-		{
-			for (uint32 i = 0; i < y->numNamespaces(); i++)
-			{
-				Namespace *ns = AvmCore::atomToNamespace(y->getNamespaces()->getAt(i));
-				if (((prefix == core->kEmptyString) && !ns->hasPrefix()) ||
-					(prefix->atom() == ns->getPrefix()))
-				{
-					return ns;
-				}
-			}
+        Stringp prefix = core->kEmptyString;
+        if (pos > 0)
+        {
+            prefix = core->internSubstring(tagName, 0, pos);
+            tagName = core->internSubstring(tagName, pos + 1, tagName->length());
+        }
 
-			y = y->m_parent;
-		}
+        // An attribute without a prefix is unqualified and does not inherit a namespace
+        // from its parent.
+        if (bAttribute && prefix == core->kEmptyString)
+            return 0;
 
-		if (prefix == toplevel->xmlClass()->kXml)
-		{
-			Namespacep nsXML = core->newNamespace(core->kEmptyString->atom(), core->internConstantStringLatin1("http://www.w3.org/XML/1998/namespace")->atom()); 
-			return nsXML;
-		}
+        // search all in scope namespaces for a matching prefix.  If we find one
+        // return that prefix, otherwise we need to throw an error.
+        E4XNode *y = this;
+        while (y)
+        {
+            for (uint32 i = 0; i < y->numNamespaces(); i++)
+            {
+                Namespace *ns = AvmCore::atomToNamespace(y->getNamespaces()->getAt(i));
+                if (((prefix == core->kEmptyString) && !ns->hasPrefix()) ||
+                    (prefix->atom() == ns->getPrefix()))
+                {
+                    return ns;
+                }
+            }
 
-		// throw error because we didn't match this prefix
-		if (prefix != core->kEmptyString)
-		{
-			toplevel->throwTypeError(kXMLPrefixNotBound, prefix, tagName);
-		}
-		return 0;
-	}
+            y = y->m_parent;
+        }
 
-	void E4XNode::BuildInScopeNamespaceList (AvmCore* /*core*/, AtomArray *inScopeNS) const
-	{
-		const E4XNode *y = this;
-		while (y)
-		{
-			for (uint32 i = 0; i < y->numNamespaces(); i++)
-			{
-				Namespace *ns1 = AvmCore::atomToNamespace (y->getNamespaces()->getAt(i));
-				uint32 j;
-				for (j = 0; j < inScopeNS->getLength(); j++)
-				{
-					Namespace *ns2 = AvmCore::atomToNamespace (inScopeNS->getAt(j));
-					if (ns1->getPrefix() == undefinedAtom)
-					{
-						if (ns1->getURI() == ns2->getURI())
-							break;
-					}
-					else
-					{
-						if (ns1->getPrefix() == ns2->getPrefix())
-							break;
-					}
-				}
+        if (prefix == toplevel->xmlClass()->kXml)
+        {
+            Namespacep nsXML = core->newNamespace(core->kEmptyString->atom(), core->internConstantStringLatin1("http://www.w3.org/XML/1998/namespace")->atom());
+            return nsXML;
+        }
 
-				if (j == inScopeNS->getLength()) // no match
-				{
+        // throw error because we didn't match this prefix
+        if (prefix != core->kEmptyString)
+        {
+            toplevel->throwTypeError(kXMLPrefixNotBound, prefix, tagName);
+        }
+        return 0;
+    }
+
+    void E4XNode::BuildInScopeNamespaceList (AvmCore* /*core*/, AtomArray *inScopeNS) const
+    {
+        const E4XNode *y = this;
+        while (y)
+        {
+            for (uint32 i = 0; i < y->numNamespaces(); i++)
+            {
+                Namespace *ns1 = AvmCore::atomToNamespace (y->getNamespaces()->getAt(i));
+                uint32 j;
+                for (j = 0; j < inScopeNS->getLength(); j++)
+                {
+                    Namespace *ns2 = AvmCore::atomToNamespace (inScopeNS->getAt(j));
+                    if (ns1->getPrefix() == undefinedAtom)
+                    {
+                        if (ns1->getURI() == ns2->getURI())
+                            break;
+                    }
+                    else
+                    {
+                        if (ns1->getPrefix() == ns2->getPrefix())
+                            break;
+                    }
+                }
+
+                if (j == inScopeNS->getLength()) // no match
+                {
 #ifdef STRING_DEBUG
-					Stringp u = ns1->getURI();
-					Stringp p = core->string(ns1->getPrefix());
+                    Stringp u = ns1->getURI();
+                    Stringp p = core->string(ns1->getPrefix());
 #endif
-					inScopeNS->push (ns1->atom());
-				}
-			}
+                    inScopeNS->push (ns1->atom());
+                }
+            }
 
-			y = y->m_parent;
-		}
-	}
+            y = y->m_parent;
+        }
+    }
 
-	void E4XNode::addAttribute (E4XNode* /*x*/)
-	{
-		AvmAssert(0);
-	}
+    void E4XNode::addAttribute (E4XNode* /*x*/)
+    {
+        AvmAssert(0);
+    }
 
-	void ElementE4XNode::addAttribute (E4XNode *x)
-	{
-		if (!m_attributes)
-			m_attributes = new (gc()) AtomArray (1);
+    void ElementE4XNode::addAttribute (E4XNode *x)
+    {
+        if (!m_attributes)
+            m_attributes = new (gc()) AtomArray (1);
 
-		m_attributes->push (AvmCore::genericObjectToAtom(x));
-	}
+        m_attributes->push (AvmCore::genericObjectToAtom(x));
+    }
 
-	void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, Namespacep publicNS)
-	{
-		m_attributes = 0;
-		m_namespaces = 0;
+    void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, Namespacep publicNS)
+    {
+        m_attributes = 0;
+        m_namespaces = 0;
 
-		uint32 numAttr = 0;
-		int32_t len;
-		// We first handle namespaces because the a attribute tag can reference a namespace
-		// defined farther on in the same node...
-		// <ns2:table2 ns2:bar=\"last\" xmlns:ns2=\"http://www.macromedia.com/home\">...
-		uint32 index = 0;
-		Stringp attributeName, attributeValue;
-		while (tag.nextAttribute(index, attributeName, attributeValue))
-		{
-			Namespace *ns = NULL;
-			len = attributeName->length();
-			if (len >= 5)
-			{
-				// caseless match
-				if (attributeName->matchesLatin1_caseless("xmlns", 5, 0))
-				{
-					// a namespace xnlns:prefix="URI" or xmlns="URI"
-					if ((len > 5) && attributeName->charAt(5) == ':')
-					{
-						if (len == 6)
-							// xmlns:=uri -- throw exception because of badly formed XML???
-							toplevel->throwTypeError(kXMLBadQName, attributeName);
-						Stringp prefix = attributeName->substring (6, len);
-						ns = core->newNamespace(prefix->atom(), attributeValue->atom());
-					}
-					else if (len == 5) {
-						// xmlns=uri
-						ns = core->newNamespace(core->kEmptyString->atom(), attributeValue->atom());
-					}
+        uint32 numAttr = 0;
+        int32_t len;
+        // We first handle namespaces because the a attribute tag can reference a namespace
+        // defined farther on in the same node...
+        // <ns2:table2 ns2:bar=\"last\" xmlns:ns2=\"http://www.macromedia.com/home\">...
+        uint32 index = 0;
+        Stringp attributeName, attributeValue;
+        while (tag.nextAttribute(index, attributeName, attributeValue))
+        {
+            Namespace *ns = NULL;
+            len = attributeName->length();
+            if (len >= 5)
+            {
+                // caseless match
+                if (attributeName->matchesLatin1_caseless("xmlns", 5, 0))
+                {
+                    // a namespace xnlns:prefix="URI" or xmlns="URI"
+                    if ((len > 5) && attributeName->charAt(5) == ':')
+                    {
+                        if (len == 6)
+                            // xmlns:=uri -- throw exception because of badly formed XML???
+                            toplevel->throwTypeError(kXMLBadQName, attributeName);
+                        Stringp prefix = attributeName->substring (6, len);
+                        ns = core->newNamespace(prefix->atom(), attributeValue->atom());
+                    }
+                    else if (len == 5) {
+                        // xmlns=uri
+                        ns = core->newNamespace(core->kEmptyString->atom(), attributeValue->atom());
+                    }
 
-					// !!@ Don't intern these namespaces since the intern table ignores
-					// the prefix value of the namespace.
-					if (ns) // ns can be null if prefix is defined and attributeValue = ""
-						this->_addInScopeNamespace(core, ns, publicNS);
-				}
-			}
-			if (!ns)
-				numAttr++;
-		}
+                    // !!@ Don't intern these namespaces since the intern table ignores
+                    // the prefix value of the namespace.
+                    if (ns) // ns can be null if prefix is defined and attributeValue = ""
+                        this->_addInScopeNamespace(core, ns, publicNS);
+                }
+            }
+            if (!ns)
+                numAttr++;
+        }
 
-		if (!numAttr)
-			return;
+        if (!numAttr)
+            return;
 
-		m_attributes = new (core->GetGC()) AtomArray (numAttr);
+        m_attributes = new (core->GetGC()) AtomArray (numAttr);
 
-		// Now we read the attributes
-		index = 0;
-		while (tag.nextAttribute(index, attributeName, attributeValue))
-		{
-			len = attributeName->length();
-			// check for namespace declarations and ignore them
-			if (len >= 5)
-			{
-				// caseless match
-				if (attributeName->matchesLatin1_caseless("xmlns", 5, 0))
-				{
-					// a namespace xnlns:prefix="URI" or xmlns="URI"
-					if ((len == 5) || ((len > 5) && attributeName->charAt(5) == ':'))
-						continue;
-				}
-			}
+        // Now we read the attributes
+        index = 0;
+        while (tag.nextAttribute(index, attributeName, attributeValue))
+        {
+            len = attributeName->length();
+            // check for namespace declarations and ignore them
+            if (len >= 5)
+            {
+                // caseless match
+                if (attributeName->matchesLatin1_caseless("xmlns", 5, 0))
+                {
+                    // a namespace xnlns:prefix="URI" or xmlns="URI"
+                    if ((len == 5) || ((len > 5) && attributeName->charAt(5) == ':'))
+                        continue;
+                }
+            }
 
-			// !!@ intern our attributeValue??
-			E4XNode *attrObj = new(core->GetGC()) AttributeE4XNode(this, attributeValue);
+            // !!@ intern our attributeValue??
+            E4XNode *attrObj = new(core->GetGC()) AttributeE4XNode(this, attributeValue);
 
-			Namespace *ns = this->FindNamespace(core, toplevel, attributeName, true);
-			if (!ns)
-				ns = publicNS;
+            Namespace *ns = this->FindNamespace(core, toplevel, attributeName, true);
+            if (!ns)
+                ns = publicNS;
 
-			attrObj->setQName(core, attributeName, ns);
+            attrObj->setQName(core, attributeName, ns);
 
-			// check for a duplicate attribute here and throw a kXMLDuplicateAttribute if found
+            // check for a duplicate attribute here and throw a kXMLDuplicateAttribute if found
 
-			Multiname m2;
-			attrObj->getQName(&m2, publicNS);
-			for (unsigned int i = 0; i < numAttributes(); i++)
-			{
-				E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
-				Multiname m;
-				curAttr->getQName(&m, publicNS);
-				if (m.matches(&m2))
-				{
-					toplevel->typeErrorClass()->throwError(kXMLDuplicateAttribute, attributeName, tag.text, core->toErrorString(tag.text->length()));
-				}
-			}
+            Multiname m2;
+            attrObj->getQName(&m2, publicNS);
+            for (unsigned int i = 0; i < numAttributes(); i++)
+            {
+                E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGenericObject(m_attributes->getAt(i)));
+                Multiname m;
+                curAttr->getQName(&m, publicNS);
+                if (m.matches(&m2))
+                {
+                    toplevel->typeErrorClass()->throwError(kXMLDuplicateAttribute, attributeName, tag.text, core->toErrorString(tag.text->length()));
+                }
+            }
 
-			m_attributes->push(AvmCore::genericObjectToAtom(attrObj));
-		}
-	}
+            m_attributes->push(AvmCore::genericObjectToAtom(attrObj));
+        }
+    }
 
-	//////////////////////////////////////////////////////////////////////
-	// E4X Section 9.1.1
-	//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    // E4X Section 9.1.1
+    //////////////////////////////////////////////////////////////////////
 
-	// E4X 9.1.1.4, pg 15
-	void E4XNode::_deleteByIndex (uint32 i)
-	{
-		if (i < numChildren())
-		{
-			E4XNode *x = _getAt(i);
-			if (x)
-			{
-				x->m_parent = NULL;
-			}
+    // E4X 9.1.1.4, pg 15
+    void E4XNode::_deleteByIndex (uint32 i)
+    {
+        if (i < numChildren())
+        {
+            E4XNode *x = _getAt(i);
+            if (x)
+            {
+                x->m_parent = NULL;
+            }
 
-			removeChild (i);
-			AvmAssert(numChildren() ^ 0x80000000); // check for underflow
-		}
-	}
+            removeChild (i);
+            AvmAssert(numChildren() ^ 0x80000000); // check for underflow
+        }
+    }
 
-	// E4X 9.1.1.7, page 16
-	E4XNode *E4XNode::_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const
-	{
-		core->stackCheck(toplevel);
+    // E4X 9.1.1.7, page 16
+    E4XNode *E4XNode::_deepCopy (AvmCore *core, Toplevel *toplevel, Namespacep publicNS) const
+    {
+        core->stackCheck(toplevel);
 
-		E4XNode *x = 0;
-		switch (this->getClass())
-		{
-		case kAttribute:
-			x = new (core->GetGC()) AttributeE4XNode (0, getValue());
-			break;
-		case kText:
-			x = new (core->GetGC()) TextE4XNode (0, getValue());
-			break;
-		case kCDATA:
-			x = new (core->GetGC()) CDATAE4XNode (0, getValue());
-			break;
-		case kComment:
-			x = new (core->GetGC()) CommentE4XNode (0, getValue());
-			break;
-		case kProcessingInstruction:
-			x = new (core->GetGC()) PIE4XNode (0, getValue());
-			break;
-		case kElement:
-			x = new (core->GetGC()) ElementE4XNode (0);
-			break;
-		}
+        E4XNode *x = 0;
+        switch (this->getClass())
+        {
+        case kAttribute:
+            x = new (core->GetGC()) AttributeE4XNode (0, getValue());
+            break;
+        case kText:
+            x = new (core->GetGC()) TextE4XNode (0, getValue());
+            break;
+        case kCDATA:
+            x = new (core->GetGC()) CDATAE4XNode (0, getValue());
+            break;
+        case kComment:
+            x = new (core->GetGC()) CommentE4XNode (0, getValue());
+            break;
+        case kProcessingInstruction:
+            x = new (core->GetGC()) PIE4XNode (0, getValue());
+            break;
+        case kElement:
+            x = new (core->GetGC()) ElementE4XNode (0);
+            break;
+        }
 
-		Multiname m;
-		if (this->getQName(&m, publicNS))
-		{
-			x->setQName (core, &m); 
-		}
+        Multiname m;
+        if (this->getQName(&m, publicNS))
+        {
+            x->setQName (core, &m);
+        }
 
-		if (x->getClass() == kElement)
-		{
-			ElementE4XNode *y = (ElementE4XNode *) x;
+        if (x->getClass() == kElement)
+        {
+            ElementE4XNode *y = (ElementE4XNode *) x;
 
-			// step 2 - for each ns in inScopeNamespaces
-			if (numNamespaces())
-			{
-				y->m_namespaces = new (core->GetGC()) AtomArray (numNamespaces());
-				uint32 i;
-				for (i = 0; i < numNamespaces(); i++)
-				{
-					y->m_namespaces->push(getNamespaces()->getAt(i));
-				}
-			}
+            // step 2 - for each ns in inScopeNamespaces
+            if (numNamespaces())
+            {
+                y->m_namespaces = new (core->GetGC()) AtomArray (numNamespaces());
+                uint32 i;
+                for (i = 0; i < numNamespaces(); i++)
+                {
+                    y->m_namespaces->push(getNamespaces()->getAt(i));
+                }
+            }
 
-			// step 3 - duplicate attribute nodes
-			if (numAttributes())
-			{
-				y->m_attributes = new (core->GetGC()) AtomArray (numAttributes());
-				uint32 i;
-				for (i = 0; i < numAttributes(); i++)
-				{
-					E4XNode *ax = getAttribute (i);
-					E4XNode *bx = ax->_deepCopy(core, toplevel, publicNS);
-					bx->setParent(y);
-					y->addAttribute(bx);
-				}
-			}
+            // step 3 - duplicate attribute nodes
+            if (numAttributes())
+            {
+                y->m_attributes = new (core->GetGC()) AtomArray (numAttributes());
+                uint32 i;
+                for (i = 0; i < numAttributes(); i++)
+                {
+                    E4XNode *ax = getAttribute (i);
+                    E4XNode *bx = ax->_deepCopy(core, toplevel, publicNS);
+                    bx->setParent(y);
+                    y->addAttribute(bx);
+                }
+            }
 
-			// step 4 - duplicate children
-			if (numChildren())
-			{
-				AvmAssert(y->m_children == 0);
-				y->m_children = uintptr(new (core->GetGC()) AtomArray (numChildren()));
-				for (uint32 k = 0; k < _length(); k++)
-				{
-					E4XNode *child = _getAt(k);
-					if (((child->getClass() == E4XNode::kComment) && toplevel->xmlClass()->get_ignoreComments()) ||
-						((child->getClass() == E4XNode::kProcessingInstruction) && toplevel->xmlClass()->get_ignoreProcessingInstructions()))
-					{
-						continue;
-					}
+            // step 4 - duplicate children
+            if (numChildren())
+            {
+                AvmAssert(y->m_children == 0);
+                y->m_children = uintptr(new (core->GetGC()) AtomArray (numChildren()));
+                for (uint32 k = 0; k < _length(); k++)
+                {
+                    E4XNode *child = _getAt(k);
+                    if (((child->getClass() == E4XNode::kComment) && toplevel->xmlClass()->get_ignoreComments()) ||
+                        ((child->getClass() == E4XNode::kProcessingInstruction) && toplevel->xmlClass()->get_ignoreProcessingInstructions()))
+                    {
+                        continue;
+                    }
 
-					E4XNode *cx = child->_deepCopy (core, toplevel, publicNS);
-					cx->setParent (y);
-					//y->m_children->push (c);
-					y->_append (cx);
-				}
-			}
-		}
+                    E4XNode *cx = child->_deepCopy (core, toplevel, publicNS);
+                    cx->setParent (y);
+                    //y->m_children->push (c);
+                    y->_append (cx);
+                }
+            }
+        }
 
-		return x;
-	}
+        return x;
+    }
 
 #if 0
-	// E4X 9.1.1.8, page 17
-	Atom E4XNode::descendants(Atom P) const
-	{
-		Multiname m;
-		toplevel->ToXMLName (P, m);
-		return getDescendants (&m);
-	}
+    // E4X 9.1.1.8, page 17
+    Atom E4XNode::descendants(Atom P) const
+    {
+        Multiname m;
+        toplevel->ToXMLName (P, m);
+        return getDescendants (&m);
+    }
 #endif
 
-	// E4X 9.1.1.9, page 17
-	bool E4XNode::_equals(Toplevel* toplevel, AvmCore *core, E4XNode *v) const
-	{
-		core->stackCheck(toplevel);
-		
-		if (this == v)
-			return true;
+    // E4X 9.1.1.9, page 17
+    bool E4XNode::_equals(Toplevel* toplevel, AvmCore *core, E4XNode *v) const
+    {
+        core->stackCheck(toplevel);
 
-		if (this->getClass() != v->getClass())
-			return false;
-		
-		Multiname m;
-		Multiname m2;
-		Namespacep publicNS = core->findPublicNamespace();
-		if (this->getQName(&m, publicNS))
-		{
-			if (v->getQName(&m2, publicNS) == 0)
-				return false;
+        if (this == v)
+            return true;
 
-			// QName/AttributeName comparision here
-			if (!m.matches(&m2))
-				return false;
-		}
-		else if (v->getQName(&m2, publicNS) != 0)
-		{
-			return false;
-		}
+        if (this->getClass() != v->getClass())
+            return false;
 
-// Not enabled after discussion with JeffD.  If the namespaces are important, they're 
+        Multiname m;
+        Multiname m2;
+        Namespacep publicNS = core->findPublicNamespace();
+        if (this->getQName(&m, publicNS))
+        {
+            if (v->getQName(&m2, publicNS) == 0)
+                return false;
+
+            // QName/AttributeName comparision here
+            if (!m.matches(&m2))
+                return false;
+        }
+        else if (v->getQName(&m2, publicNS) != 0)
+        {
+            return false;
+        }
+
+// Not enabled after discussion with JeffD.  If the namespaces are important, they're
 // used in the node names themselves.
-#if 0 
-		// NOT part of the original spec.  Added in later (bug 144429)
-		if (this->numNamespaces() != v->numNamespaces())
-			return false;
+#if 0
+        // NOT part of the original spec.  Added in later (bug 144429)
+        if (this->numNamespaces() != v->numNamespaces())
+            return false;
 
-		// Order of namespaces does not matter
-		AtomArray *ns1 = getNamespaces();
-		AtomArray *ns2 = v->getNamespaces();
-		for (uint32 n1 = 0; n1 < numNamespaces(); n1++)
-		{
-			Namespace *namespace1 = core->atomToNamespace (ns1->getAt (n1));
-			for (uint32 n2 = 0; n2 < numNamespaces(); n2++)
-			{
-				Namespace *namespace2 = core->atomToNamespace (ns2->getAt (n2));
-				if (namespace1->EqualTo (namespace2))
-					break;
-			}
+        // Order of namespaces does not matter
+        AtomArray *ns1 = getNamespaces();
+        AtomArray *ns2 = v->getNamespaces();
+        for (uint32 n1 = 0; n1 < numNamespaces(); n1++)
+        {
+            Namespace *namespace1 = core->atomToNamespace (ns1->getAt (n1));
+            for (uint32 n2 = 0; n2 < numNamespaces(); n2++)
+            {
+                Namespace *namespace2 = core->atomToNamespace (ns2->getAt (n2));
+                if (namespace1->EqualTo (namespace2))
+                    break;
+            }
 
-			// A match was not found
-			if (n2 == numNamespaces())
-				return false;
-		}
+            // A match was not found
+            if (n2 == numNamespaces())
+                return false;
+        }
 #endif
 
-		if (this->numAttributes() != v->numAttributes())
-			return false;
+        if (this->numAttributes() != v->numAttributes())
+            return false;
 
-		if (this->numChildren() != v->numChildren())
-			return false;
+        if (this->numChildren() != v->numChildren())
+            return false;
 
-		if (this->getValue() != v->getValue() && 
-			(this->getValue()==NULL || v->getValue()==NULL || *getValue() != *v->getValue()))
-			return false;
+        if (this->getValue() != v->getValue() &&
+            (this->getValue()==NULL || v->getValue()==NULL || *getValue() != *v->getValue()))
+            return false;
 
-		// step 8
-		// for each a in x.attributes
-		// if v does not containing matching attribute, return failure
-		for (uint32 k1 = 0; k1 < numAttributes(); k1++)
-		{
-			E4XNode *x1 = getAttribute(k1);
-			bool bFoundMatch = false;
-			for (uint32 k2 = 0; k2 < v->numAttributes(); k2++)
-			{
-				if (x1->_equals(toplevel, core, v->getAttribute(k2)))
-				{
-					bFoundMatch = true;
-					break;
-				}
-			}
+        // step 8
+        // for each a in x.attributes
+        // if v does not containing matching attribute, return failure
+        for (uint32 k1 = 0; k1 < numAttributes(); k1++)
+        {
+            E4XNode *x1 = getAttribute(k1);
+            bool bFoundMatch = false;
+            for (uint32 k2 = 0; k2 < v->numAttributes(); k2++)
+            {
+                if (x1->_equals(toplevel, core, v->getAttribute(k2)))
+                {
+                    bFoundMatch = true;
+                    break;
+                }
+            }
 
-			if (!bFoundMatch)
-				return false;
-		}
+            if (!bFoundMatch)
+                return false;
+        }
 
-		// step 9
-		for (uint32 i = 0; i < _length(); i++)
-		{
-			E4XNode *x1 = _getAt(i);
-			E4XNode *x2 = v->_getAt(i);
-			if (!x1->_equals(toplevel, core, x2))
-				return false;
-		}
+        // step 9
+        for (uint32 i = 0; i < _length(); i++)
+        {
+            E4XNode *x1 = _getAt(i);
+            E4XNode *x2 = v->_getAt(i);
+            if (!x1->_equals(toplevel, core, x2))
+                return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	// E4X 9.1.1.11, page 18
-	void E4XNode::_insert (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*entry*/, Atom /*value*/)
-	{
-		return;
-	}
+    // E4X 9.1.1.11, page 18
+    void E4XNode::_insert (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*entry*/, Atom /*value*/)
+    {
+        return;
+    }
 
-	void ElementE4XNode::_insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value)
-	{
-//		//step 1
-//		if (m_class & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
-//			return; 
+    void ElementE4XNode::_insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value)
+    {
+//      //step 1
+//      if (m_class & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
+//          return;
 
-		// Spec says to throw a typeError if entry is not a number
-		// We handle that in callingn functions
+        // Spec says to throw a typeError if entry is not a number
+        // We handle that in callingn functions
 
-		uint32 n = 1;
-		XMLListObject *xl = AvmCore::atomToXMLList(value);
-		if (xl)
-		{
-			n = xl->_length();
-		}
-		else
-		{
-			E4XNode *x = AvmCore::atomToXML(value);
-			if (x)
-			{
-				E4XNode *n = this;
-				while (n)
-				{
-					if (x == n)
-						toplevel->throwTypeError(kXMLIllegalCyclicalLoop);
-					n = n->getParent();
-				}
+        uint32 n = 1;
+        XMLListObject *xl = AvmCore::atomToXMLList(value);
+        if (xl)
+        {
+            n = xl->_length();
+        }
+        else
+        {
+            E4XNode *x = AvmCore::atomToXML(value);
+            if (x)
+            {
+                E4XNode *n = this;
+                while (n)
+                {
+                    if (x == n)
+                        toplevel->throwTypeError(kXMLIllegalCyclicalLoop);
+                    n = n->getParent();
+                }
 
-			}
-		}
+            }
+        }
 
-		if (n == 0)
-			return; 
+        if (n == 0)
+            return;
 
-		if (!m_children)
-		{
-			m_children = uintptr(new (core->GetGC()) AtomArray (n));
-		}
+        if (!m_children)
+        {
+            m_children = uintptr(new (core->GetGC()) AtomArray (n));
+        }
 
-		if (xl)
-		{
-			// insert each element of our XMLList into our array
-			for (uint32 j = 0; j < xl->_length(); j++)
-			{
-				E4XNode *child = AvmCore::atomToXML(xl->_getAt(j)->atom());
+        if (xl)
+        {
+            // insert each element of our XMLList into our array
+            for (uint32 j = 0; j < xl->_length(); j++)
+            {
+                E4XNode *child = AvmCore::atomToXML(xl->_getAt(j)->atom());
 
-				// !!@ Not in spec but seems like a good idea
-				E4XNode *n = this;
-				while (n)
-				{
-					if (child == n)
-						toplevel->throwTypeError(kXMLIllegalCyclicalLoop);
-					n = n->getParent();
-				}
+                // !!@ Not in spec but seems like a good idea
+                E4XNode *n = this;
+                while (n)
+                {
+                    if (child == n)
+                        toplevel->throwTypeError(kXMLIllegalCyclicalLoop);
+                    n = n->getParent();
+                }
 
-				child->setParent(this);
+                child->setParent(this);
 
-				insertChild (entry + j, child);
-			}
-		}
-		else
-		{
-			insertChild (entry, 0); // make room for our replace
-			this->_replace (core, toplevel, entry, value);
-		}
+                insertChild (entry + j, child);
+            }
+        }
+        else
+        {
+            insertChild (entry, 0); // make room for our replace
+            this->_replace (core, toplevel, entry, value);
+        }
 
-		return;		
-	}
+        return;
+    }
 
-	// E4X 9.1.1.12, page 19
-	// Autoconverts V into an XML object 
-	E4XNode* E4XNode::_replace (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*i*/, Atom /*V*/, Atom /*pastValue*/)
-	{
-		return 0;
-	}
+    // E4X 9.1.1.12, page 19
+    // Autoconverts V into an XML object
+    E4XNode* E4XNode::_replace (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*i*/, Atom /*V*/, Atom /*pastValue*/)
+    {
+        return 0;
+    }
 
-	E4XNode* ElementE4XNode::_replace (AvmCore *core, Toplevel *toplevel, uint32 i, Atom V, Atom pastValue)
-	{
-		//step 1
-		//if (getClass() & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
-		//	return; 
+    E4XNode* ElementE4XNode::_replace (AvmCore *core, Toplevel *toplevel, uint32 i, Atom V, Atom pastValue)
+    {
+        //step 1
+        //if (getClass() & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
+        //  return;
 
-		// step 2 + 3
-		// API throws a typeError if entry is not a number
-		// This is always handled back in the caller.
+        // step 2 + 3
+        // API throws a typeError if entry is not a number
+        // This is always handled back in the caller.
 
-		// step 4
-		if (i >= _length())
-		{
-			i = _length();
-			// add a blank spot for this child
-			if (!m_children)
-				m_children = uintptr(new (core->GetGC()) AtomArray (1));
-			convertToAtomArray();
-			AtomArray *aa = ((AtomArray *)(uintptr)m_children);
-			aa->push (Atom(0));
-		}
-		
-		E4XNode *prior = _getAt(i);
+        // step 4
+        if (i >= _length())
+        {
+            i = _length();
+            // add a blank spot for this child
+            if (!m_children)
+                m_children = uintptr(new (core->GetGC()) AtomArray (1));
+            convertToAtomArray();
+            AtomArray *aa = ((AtomArray *)(uintptr)m_children);
+            aa->push (Atom(0));
+        }
 
-		// step 5
-		E4XNode *xml = AvmCore::atomToXML(V);
-		if (xml && (xml->getClass() & (kElement | kComment | kProcessingInstruction | kText | kCDATA)))
-		{
-			//a.	If V.[[Class]] is "element" and (V is x or an ancestor of x) throw an Error exception
-			if (xml->getClass() == kElement)
-			{
-				E4XNode *n = this;
-				while (n)
-				{
-					if (xml == n)
-						toplevel->throwTypeError(kXMLIllegalCyclicalLoop);
-					n = n->getParent();
-				}
-			}
+        E4XNode *prior = _getAt(i);
 
-			xml->setParent (this);
-			if (i < this->numChildren())
-			{ 
-				if (prior)
-				{
-					prior->setParent (NULL);
-				}
-			}
+        // step 5
+        E4XNode *xml = AvmCore::atomToXML(V);
+        if (xml && (xml->getClass() & (kElement | kComment | kProcessingInstruction | kText | kCDATA)))
+        {
+            //a.    If V.[[Class]] is "element" and (V is x or an ancestor of x) throw an Error exception
+            if (xml->getClass() == kElement)
+            {
+                E4XNode *n = this;
+                while (n)
+                {
+                    if (xml == n)
+                        toplevel->throwTypeError(kXMLIllegalCyclicalLoop);
+                    n = n->getParent();
+                }
+            }
 
-			this->setChildAt (i, xml);
-		}
-		else if (AvmCore::atomToXMLList(V))
-		{
-			_deleteByIndex (i);
-			_insert (core, toplevel, i, V);
-		}
-		else
-		{
-			Stringp s = core->string(V);
-			E4XNode *newXML = new (core->GetGC()) TextE4XNode(this, s);
-			// if this[i] is going away, clear its parent
-			if (prior)
-			{
-				prior->setParent (NULL);
-			}
+            xml->setParent (this);
+            if (i < this->numChildren())
+            {
+                if (prior)
+                {
+                    prior->setParent (NULL);
+                }
+            }
 
-			setChildAt (i, newXML);
+            this->setChildAt (i, xml);
+        }
+        else if (AvmCore::atomToXMLList(V))
+        {
+            _deleteByIndex (i);
+            _insert (core, toplevel, i, V);
+        }
+        else
+        {
+            Stringp s = core->string(V);
+            E4XNode *newXML = new (core->GetGC()) TextE4XNode(this, s);
+            // if this[i] is going away, clear its parent
+            if (prior)
+            {
+                prior->setParent (NULL);
+            }
 
-			if (XMLObject::notifyNeeded(newXML))
-			{
-				Atom detail = prior ? prior->getValue()->atom() : 0;
-				if (!detail)
-					detail = pastValue;
-				XMLObject* target = new (core->GetGC()) XMLObject(toplevel->xmlClass(), newXML);
-				target->nonChildChanges(toplevel->xmlClass()->kTextSet, newXML->getValue()->atom(), detail);
-			}
-		}
+            setChildAt (i, newXML);
 
-		return prior;
-	}
+            if (XMLObject::notifyNeeded(newXML))
+            {
+                Atom detail = prior ? prior->getValue()->atom() : 0;
+                if (!detail)
+                    detail = pastValue;
+                XMLObject* target = new (core->GetGC()) XMLObject(toplevel->xmlClass(), newXML);
+                target->nonChildChanges(toplevel->xmlClass()->kTextSet, newXML->getValue()->atom(), detail);
+            }
+        }
 
-	void ElementE4XNode::setNotification(AvmCore *core, FunctionObject* f, Namespacep publicNS)
-	{ 
-		uintptr nameOrAux = m_nameOrAux;
-		// We already have an aux structure
-		if (AUXBIT & nameOrAux)
-		{
-			E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
-			aux->m_notification = f;
-		}
-		// allocate one to hold our name and notification atom
-		else
-		{
-			Stringp str = (String *)(nameOrAux);
-			E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, publicNS, f);
-			//m_nameOrAux = AUXBIT | int(aux);
-			WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
-		}
-	}
+        return prior;
+    }
 
-	FunctionObject* ElementE4XNode::getNotification() const 
-	{ 
-		uintptr nameOrAux = m_nameOrAux;
-		if (AUXBIT & m_nameOrAux)
-		{
-			E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
-			return aux->m_notification;
-		}
+    void ElementE4XNode::setNotification(AvmCore *core, FunctionObject* f, Namespacep publicNS)
+    {
+        uintptr nameOrAux = m_nameOrAux;
+        // We already have an aux structure
+        if (AUXBIT & nameOrAux)
+        {
+            E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
+            aux->m_notification = f;
+        }
+        // allocate one to hold our name and notification atom
+        else
+        {
+            Stringp str = (String *)(nameOrAux);
+            E4XNodeAux *aux = new (core->GetGC()) E4XNodeAux (str, publicNS, f);
+            //m_nameOrAux = AUXBIT | int(aux);
+            WB(core->GetGC(), this, &m_nameOrAux, AUXBIT | uintptr(aux));
+        }
+    }
 
-		return 0; 
-	}
+    FunctionObject* ElementE4XNode::getNotification() const
+    {
+        uintptr nameOrAux = m_nameOrAux;
+        if (AUXBIT & m_nameOrAux)
+        {
+            E4XNodeAux *aux = (E4XNodeAux *)(nameOrAux & ~AUXBIT);
+            return aux->m_notification;
+        }
 
-	bool E4XNode::hasSimpleContent() const
-	{
-		if (getClass() & (E4XNode::kComment | E4XNode::kProcessingInstruction))
-			return false;
+        return 0;
+    }
 
-		// for each prop in x, if x.class == element, return false
-		for (uint32 i = 0; i < _length(); i++)
-		{
-			E4XNode *child = _getAt(i);
+    bool E4XNode::hasSimpleContent() const
+    {
+        if (getClass() & (E4XNode::kComment | E4XNode::kProcessingInstruction))
+            return false;
 
-			if (child->getClass() == E4XNode::kElement)
-			{
-				return false;
-			}
-		}
+        // for each prop in x, if x.class == element, return false
+        for (uint32 i = 0; i < _length(); i++)
+        {
+            E4XNode *child = _getAt(i);
 
-		return true;
-	}
+            if (child->getClass() == E4XNode::kElement)
+            {
+                return false;
+            }
+        }
 
-	bool E4XNode::hasComplexContent() const
-	{
-		if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
-			return false;
+        return true;
+    }
 
-		for (uint32 i = 0; i < _length(); i++)
-		{
-			E4XNode *child = _getAt(i);
+    bool E4XNode::hasComplexContent() const
+    {
+        if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
+            return false;
 
-			if (child->getClass() == E4XNode::kElement)
-			{
-				return true;
-			}
-		}
+        for (uint32 i = 0; i < _length(); i++)
+        {
+            E4XNode *child = _getAt(i);
 
-		return false;
-	}
+            if (child->getClass() == E4XNode::kElement)
+            {
+                return true;
+            }
+        }
 
-	int E4XNode::childIndex() const
-	{
-		if ((m_parent == NULL) || (getClass() == E4XNode::kAttribute))
-			return -1;
+        return false;
+    }
 
-		// find this child in parent's children list - return ordinal
+    int E4XNode::childIndex() const
+    {
+        if ((m_parent == NULL) || (getClass() == E4XNode::kAttribute))
+            return -1;
 
-		AvmAssert(m_parent->_length()); // this child's parent does not contain itself???
+        // find this child in parent's children list - return ordinal
 
-		for (uint32 i = 0; i < m_parent->_length(); i++)
-		{
-			E4XNode *x = m_parent->_getAt(i);
-			if (x == this)
-			{
-				return i;
-			}
-		}
+        AvmAssert(m_parent->_length()); // this child's parent does not contain itself???
 
-		// this child's parent does not contain itself???
-		AvmAssert(0);
-		return -1;
-	}
+        for (uint32 i = 0; i < m_parent->_length(); i++)
+        {
+            E4XNode *x = m_parent->_getAt(i);
+            if (x == this)
+            {
+                return i;
+            }
+        }
 
-	String *E4XNode::nodeKind(Toplevel* toplevel) const
-	{
-		switch (getClass())
-		{
-			case E4XNode::kAttribute:
-				return toplevel->xmlClass()->kAttribute;
-			case E4XNode::kText:
-			case E4XNode::kCDATA: 
-				return toplevel->xmlClass()->kText;
-			case E4XNode::kComment:
-				return toplevel->xmlClass()->kComment;
-			case E4XNode::kProcessingInstruction:
-				return toplevel->xmlClass()->kProcessingInstruction;
-			case E4XNode::kElement:
-				return toplevel->xmlClass()->kElement;
-			case E4XNode::kUnknown:
-			default:
-				AvmAssert(0);
-				return 0; 
-		}
-	}
-	
-	void E4XNode::dispose()
-	{
-		for(uint32_t i=0,n=numChildren();i < n; i++)
-		{
-			E4XNode *node = _getAt(i);
-			node->dispose();
-			node->setParent(NULL);
-			node->clearChildren();
-		}
-	}
+        // this child's parent does not contain itself???
+        AvmAssert(0);
+        return -1;
+    }
+
+    String *E4XNode::nodeKind(Toplevel* toplevel) const
+    {
+        switch (getClass())
+        {
+            case E4XNode::kAttribute:
+                return toplevel->xmlClass()->kAttribute;
+            case E4XNode::kText:
+            case E4XNode::kCDATA:
+                return toplevel->xmlClass()->kText;
+            case E4XNode::kComment:
+                return toplevel->xmlClass()->kComment;
+            case E4XNode::kProcessingInstruction:
+                return toplevel->xmlClass()->kProcessingInstruction;
+            case E4XNode::kElement:
+                return toplevel->xmlClass()->kElement;
+            case E4XNode::kUnknown:
+            default:
+                AvmAssert(0);
+                return 0;
+        }
+    }
+
+    void E4XNode::dispose()
+    {
+        for(uint32_t i=0,n=numChildren();i < n; i++)
+        {
+            E4XNode *node = _getAt(i);
+            node->dispose();
+            node->setParent(NULL);
+            node->clearChildren();
+        }
+    }
 
 #ifdef DEBUGGER
     uint64_t E4XNode::bytesUsed() const

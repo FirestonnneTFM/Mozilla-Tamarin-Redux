@@ -43,7 +43,7 @@
 
 namespace avmplus
 {
-    REALLY_INLINE InlineHashtable::InlineHashtable() : 
+    REALLY_INLINE InlineHashtable::InlineHashtable() :
         m_atomsAndFlags(0), m_size(0), m_logCapacity(0)
     {
         // nothing, here only for HeapHashtable, which explicitly calls initialize()
@@ -55,42 +55,42 @@ namespace avmplus
         // nothing, here only for HeapHashtable, which explicitly calls destroy()
     }
 
-	REALLY_INLINE void InlineHashtable::initializeWithDontEnumSupport(MMgc::GC* gc, int capacity)
-	{
+    REALLY_INLINE void InlineHashtable::initializeWithDontEnumSupport(MMgc::GC* gc, int capacity)
+    {
         initialize(gc, capacity);
-        m_atomsAndFlags |= kDontEnumBit; 
-    }
-    
-    REALLY_INLINE uint32_t InlineHashtable::getSize() const 
-    { 
-        return m_size; 
+        m_atomsAndFlags |= kDontEnumBit;
     }
 
-    REALLY_INLINE bool InlineHashtable::needsInitialize() const 
-    { 
-        return m_logCapacity == 0; 
+    REALLY_INLINE uint32_t InlineHashtable::getSize() const
+    {
+        return m_size;
     }
 
-    REALLY_INLINE uint32_t InlineHashtable::getCapacity() const 
-    { 
-        return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0; 
+    REALLY_INLINE bool InlineHashtable::needsInitialize() const
+    {
+        return m_logCapacity == 0;
     }
 
-    REALLY_INLINE uintptr_t InlineHashtable::hasDontEnumSupport() const 
-    { 
-        return (m_atomsAndFlags & kDontEnumBit); 
+    REALLY_INLINE uint32_t InlineHashtable::getCapacity() const
+    {
+        return m_logCapacity ? 1UL<<(m_logCapacity-1) : 0;
     }
-    
-    REALLY_INLINE Atom InlineHashtable::removeDontEnumMask(Atom a) const 
-    { 
-        return Atom(uintptr_t(a) & ~(m_atomsAndFlags & kDontEnumBit)); 
+
+    REALLY_INLINE uintptr_t InlineHashtable::hasDontEnumSupport() const
+    {
+        return (m_atomsAndFlags & kDontEnumBit);
     }
-    
-    REALLY_INLINE bool InlineHashtable::enumerable(Atom a) const 
-    { 
-        return a != EMPTY && a != DELETED && !(uintptr_t(a) & (m_atomsAndFlags & kDontEnumBit)); 
+
+    REALLY_INLINE Atom InlineHashtable::removeDontEnumMask(Atom a) const
+    {
+        return Atom(uintptr_t(a) & ~(m_atomsAndFlags & kDontEnumBit));
     }
-    
+
+    REALLY_INLINE bool InlineHashtable::enumerable(Atom a) const
+    {
+        return a != EMPTY && a != DELETED && !(uintptr_t(a) & (m_atomsAndFlags & kDontEnumBit));
+    }
+
 #ifdef DEBUGGER
     REALLY_INLINE uint64_t InlineHashtable::bytesUsed() const
     {
@@ -98,9 +98,9 @@ namespace avmplus
     }
 #endif
 
-    REALLY_INLINE uintptr_t InlineHashtable::hasDeletedItems() const 
-    { 
-        return (m_atomsAndFlags & kHasDeletedItems); 
+    REALLY_INLINE uintptr_t InlineHashtable::hasDeletedItems() const
+    {
+        return (m_atomsAndFlags & kHasDeletedItems);
     }
 
     REALLY_INLINE void InlineHashtable::reset()
@@ -116,8 +116,8 @@ namespace avmplus
         int const i = find(name, atoms, getCapacity());
         return isEmpty(atoms[i]) ? 0 : atoms[i+1];
     }
-    
-    REALLY_INLINE /*static*/ bool InlineHashtable::isEmpty(Atom a) 
+
+    REALLY_INLINE /*static*/ bool InlineHashtable::isEmpty(Atom a)
     {
         return a == 0; // can't use EMPTY unless you like link errors.
     }
@@ -128,29 +128,29 @@ namespace avmplus
         return removeDontEnumMask(atoms[find(name, atoms, getCapacity())]) == name;
     }
 
-    REALLY_INLINE int InlineHashtable::find(Atom x) const 
-    { 
-        return find(x, getAtoms(), getCapacity()); 
+    REALLY_INLINE int InlineHashtable::find(Atom x) const
+    {
+        return find(x, getAtoms(), getCapacity());
     }
 
-    REALLY_INLINE void InlineHashtable::setHasDeletedItems() 
-    { 
-        m_atomsAndFlags |= kHasDeletedItems; 
-    }
-    
-    REALLY_INLINE void InlineHashtable::clrHasDeletedItems() 
-    { 
-        m_atomsAndFlags &= ~kHasDeletedItems; 
+    REALLY_INLINE void InlineHashtable::setHasDeletedItems()
+    {
+        m_atomsAndFlags |= kHasDeletedItems;
     }
 
-    REALLY_INLINE Atom* InlineHashtable::getAtoms() 
-    { 
-        return (Atom*)(m_atomsAndFlags & ~kAtomFlags); 
+    REALLY_INLINE void InlineHashtable::clrHasDeletedItems()
+    {
+        m_atomsAndFlags &= ~kHasDeletedItems;
     }
-    
-    REALLY_INLINE const Atom* InlineHashtable::getAtoms() const 
-    { 
-        return (const Atom*)(m_atomsAndFlags & ~kAtomFlags); 
+
+    REALLY_INLINE Atom* InlineHashtable::getAtoms()
+    {
+        return (Atom*)(m_atomsAndFlags & ~kAtomFlags);
+    }
+
+    REALLY_INLINE const Atom* InlineHashtable::getAtoms() const
+    {
+        return (const Atom*)(m_atomsAndFlags & ~kAtomFlags);
     }
 
     REALLY_INLINE Atom InlineHashtable::keyAt(int i) const
@@ -192,8 +192,8 @@ namespace avmplus
         #endif
     #else
         // DBC - This gets rid of a compiler warning and matchs PPC results where value = 0
-        register int	result = ~0;
-        
+        register int    result = ~0;
+
         if (value)
         {
             asm (
@@ -241,107 +241,107 @@ namespace avmplus
     }
 
     REALLY_INLINE HeapHashtableRC::HeapHashtableRC(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)
-    { 
-        ht.initialize(gc, capacity); 
+    {
+        ht.initialize(gc, capacity);
     }
 
-    REALLY_INLINE void HeapHashtableRC::reset() 
-    { 
-        ht.reset(); 
+    REALLY_INLINE void HeapHashtableRC::reset()
+    {
+        ht.reset();
     }
-    
-    REALLY_INLINE uint32_t HeapHashtableRC::getSize() const 
-    { 
-        return ht.getSize(); 
+
+    REALLY_INLINE uint32_t HeapHashtableRC::getSize() const
+    {
+        return ht.getSize();
     }
-    
-    REALLY_INLINE int HeapHashtableRC::next(int index)  
-    { 
-        return ht.next(index); 
+
+    REALLY_INLINE int HeapHashtableRC::next(int index)
+    {
+        return ht.next(index);
     }
-    
-    REALLY_INLINE Atom HeapHashtableRC::keyAt(int index)  
-    { 
-        return ht.keyAt(index); 
+
+    REALLY_INLINE Atom HeapHashtableRC::keyAt(int index)
+    {
+        return ht.keyAt(index);
     }
-    
-    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::valueAt(int index)  
-    { 
-        return untagAtom(ht.valueAt(index)); 
+
+    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::valueAt(int index)
+    {
+        return untagAtom(ht.valueAt(index));
     }
-    
-    REALLY_INLINE void HeapHashtableRC::add(Atom name, MMgc::RCObject* value, Toplevel* toplevel /*=NULL*/)  
-    { 
-        ht.add(name, tagObject(value), toplevel); 
+
+    REALLY_INLINE void HeapHashtableRC::add(Atom name, MMgc::RCObject* value, Toplevel* toplevel /*=NULL*/)
+    {
+        ht.add(name, tagObject(value), toplevel);
     }
-    
-    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::get(Atom name)  
-    { 
-        return untagAtom(ht.get(name)); 
+
+    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::get(Atom name)
+    {
+        return untagAtom(ht.get(name));
     }
-    
-    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::remove(Atom name)  
-    { 
-        return untagAtom(ht.remove(name)); 
+
+    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::remove(Atom name)
+    {
+        return untagAtom(ht.remove(name));
     }
-    
-    REALLY_INLINE bool HeapHashtableRC::contains(Atom name) const  
-    { 
-        return ht.contains(name); 
+
+    REALLY_INLINE bool HeapHashtableRC::contains(Atom name) const
+    {
+        return ht.contains(name);
     }
-    
+
     // used by Flash
     REALLY_INLINE size_t HeapHashtableRC::getAllocatedSize() const
     {
         return ht.getCapacity() * sizeof(Atom);
     }
 
-    REALLY_INLINE Atom HeapHashtableRC::tagObject(MMgc::RCObject* obj)  
-    { 
-        return (Atom)obj | kObjectType; 
+    REALLY_INLINE Atom HeapHashtableRC::tagObject(MMgc::RCObject* obj)
+    {
+        return (Atom)obj | kObjectType;
     }
-    
-    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::untagAtom(Atom a)  
-    { 
-        return (MMgc::RCObject*)atomPtr(a); 
+
+    REALLY_INLINE MMgc::RCObject* HeapHashtableRC::untagAtom(Atom a)
+    {
+        return (MMgc::RCObject*)atomPtr(a);
     }
 
     REALLY_INLINE HeapHashtable::HeapHashtable(MMgc::GC* gc, int32_t capacity /*= InlineHashtable::kDefaultCapacity*/)
-    { 
-        ht.initialize(gc, capacity); 
+    {
+        ht.initialize(gc, capacity);
     }
 
-    REALLY_INLINE InlineHashtable* HeapHashtable::get_ht() 
-    { 
-        return &ht; 
+    REALLY_INLINE InlineHashtable* HeapHashtable::get_ht()
+    {
+        return &ht;
     }
 
-    REALLY_INLINE void HeapHashtable::reset() 
-    { 
-        ht.reset(); 
-    }
-    
-    REALLY_INLINE uint32_t HeapHashtable::getSize() const 
-    { 
-        return ht.getSize(); 
-    }
-    
-    REALLY_INLINE Atom HeapHashtable::keyAt(int index) 
-    { 
-        return ht.keyAt(index); 
-    }
-    
-    REALLY_INLINE Atom HeapHashtable::valueAt(int index) 
-    { 
-        return ht.valueAt(index); 
+    REALLY_INLINE void HeapHashtable::reset()
+    {
+        ht.reset();
     }
 
-    REALLY_INLINE WeakKeyHashtable::WeakKeyHashtable(MMgc::GC* _gc) : HeapHashtable(_gc) 
-    { 
+    REALLY_INLINE uint32_t HeapHashtable::getSize() const
+    {
+        return ht.getSize();
     }
 
-    REALLY_INLINE WeakValueHashtable::WeakValueHashtable(MMgc::GC* _gc) : HeapHashtable(_gc) 
-    { 
+    REALLY_INLINE Atom HeapHashtable::keyAt(int index)
+    {
+        return ht.keyAt(index);
+    }
+
+    REALLY_INLINE Atom HeapHashtable::valueAt(int index)
+    {
+        return ht.valueAt(index);
+    }
+
+    REALLY_INLINE WeakKeyHashtable::WeakKeyHashtable(MMgc::GC* _gc) : HeapHashtable(_gc)
+    {
+    }
+
+    REALLY_INLINE WeakValueHashtable::WeakValueHashtable(MMgc::GC* _gc) : HeapHashtable(_gc)
+    {
     }
 }
 

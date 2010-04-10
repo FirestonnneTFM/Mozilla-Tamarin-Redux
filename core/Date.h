@@ -42,95 +42,95 @@
 
 namespace avmplus
 {
-	int YearFromTime(double t);
+    int YearFromTime(double t);
 
-	/**
-	 * Date is used to provide the underpinnings for the Date class.
-	 * It is a layer over OS-specific date/time functionality.
-	 */
-	class Date
-	{
-	public:
-		enum {
-			kUTCFullYear,
-			kUTCMonth,
-			kUTCDate,
-			kUTCDay,
-			kUTCHours,
-			kUTCMinutes,
-			kUTCSeconds,
-			kUTCMilliseconds,
-			kFullYear,
-			kMonth,
-			kDate,
-			kDay,
-			kHours,
-			kMinutes,
-			kSeconds,
-			kMilliseconds,
-			kTimezoneOffset,
-			kTime
-		};
+    /**
+     * Date is used to provide the underpinnings for the Date class.
+     * It is a layer over OS-specific date/time functionality.
+     */
+    class Date
+    {
+    public:
+        enum {
+            kUTCFullYear,
+            kUTCMonth,
+            kUTCDate,
+            kUTCDay,
+            kUTCHours,
+            kUTCMinutes,
+            kUTCSeconds,
+            kUTCMilliseconds,
+            kFullYear,
+            kMonth,
+            kDate,
+            kDay,
+            kHours,
+            kMinutes,
+            kSeconds,
+            kMilliseconds,
+            kTimezoneOffset,
+            kTime
+        };
 
-		enum {
-			kToString,
-			kToDateString,
-			kToTimeString,
-			kToLocaleString,
-			kToLocaleDateString,
-			kToLocaleTimeString,
-			kToUTCString
-		};
+        enum {
+            kToString,
+            kToDateString,
+            kToTimeString,
+            kToLocaleString,
+            kToLocaleDateString,
+            kToLocaleTimeString,
+            kToUTCString
+        };
 
 #define kHalfTimeDomain   8.64e15
 
-		static inline double TimeClip(double t)
-		{
-			if (MathUtils::isInfinite(t) || MathUtils::isNaN(t) || ((t < 0 ? -t : t) > kHalfTimeDomain)) {
-				return MathUtils::kNaN;
-			}
-			return MathUtils::toInt(t) + (+0.);
-		}
+        static inline double TimeClip(double t)
+        {
+            if (MathUtils::isInfinite(t) || MathUtils::isNaN(t) || ((t < 0 ? -t : t) > kHalfTimeDomain)) {
+                return MathUtils::kNaN;
+            }
+            return MathUtils::toInt(t) + (+0.);
+        }
 
-			
-		Date();
-		Date(const Date& toCopy) {
-			m_time = toCopy.m_time;
-		}
-		Date& operator= (const Date& toCopy) {
-			m_time = toCopy.m_time;
-			return *this;
-		}
-		Date(double time) { m_time = TimeClip(time); }
-		Date(double year,
-			 double month,
-			 double date,
-			 double hours,
-			 double min,
-			 double sec,
-			 double msec,
-			 bool utcFlag);
-		~Date() { m_time = 0; }
-		double getDateProperty(int index);
-		double getTime() const { return m_time; }
-		void setDate(double year,
-					 double month,
-					 double date,
-					 bool utcFlag);
-		void setTime(double hours,
-					 double min,
-					 double sec,
-					 double msec,
-					 bool utcFlag);
-		void setTime(double value);
-		bool toString(wchar *buffer, int formatIndex, int &len) const;
-		
-	private:
-		double m_time;
-		void format(wchar *buffer,
-					const char *format, ...) const;
-	};
-	double GetTimezoneOffset(double t);
+
+        Date();
+        Date(const Date& toCopy) {
+            m_time = toCopy.m_time;
+        }
+        Date& operator= (const Date& toCopy) {
+            m_time = toCopy.m_time;
+            return *this;
+        }
+        Date(double time) { m_time = TimeClip(time); }
+        Date(double year,
+             double month,
+             double date,
+             double hours,
+             double min,
+             double sec,
+             double msec,
+             bool utcFlag);
+        ~Date() { m_time = 0; }
+        double getDateProperty(int index);
+        double getTime() const { return m_time; }
+        void setDate(double year,
+                     double month,
+                     double date,
+                     bool utcFlag);
+        void setTime(double hours,
+                     double min,
+                     double sec,
+                     double msec,
+                     bool utcFlag);
+        void setTime(double value);
+        bool toString(wchar *buffer, int formatIndex, int &len) const;
+
+    private:
+        double m_time;
+        void format(wchar *buffer,
+                    const char *format, ...) const;
+    };
+    double GetTimezoneOffset(double t);
 }
 
 #endif /* __avmplus_Date__ */

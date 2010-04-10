@@ -42,11 +42,11 @@
 #include "CdeclThunk.h"
 
 
-namespace avmplus 
+namespace avmplus
 {
 
 #define CDECL_VERBOSE 0
-    
+
 #define TODO AvmAssert(false)
 #define UNTESTED AvmAssert(false)
 
@@ -58,37 +58,37 @@ namespace avmplus
             enum { _align = 1 << _tagBits };
             char _buf[_align - 1 + sizeof(double)];
             Atom _a;
-            
+
             Atom dblAtom()
             {
                 return kDoubleType | (Atom)dblPtr();
             }
-            
+
             double* dblPtr()
             {
                 uintptr_t p = (uintptr_t)_buf;
                 p = (p + _align - 1) & ~(_align - 1);
                 return (double* )p;
             }
-            
+
         public:
             int kind()
             {
                 return atomKind(_a);
             }
-            
+
             Atom get(Toplevel* toplevel, Traits* t)
             {
                 AvmCore* core = toplevel->core();
-                
+
                 BuiltinType bt = Traits::getBuiltinType(t);
-                
+
                 if ((bt == BUILTIN_any || bt == BUILTIN_object) && _a == dblAtom())
                     _a = core->doubleToAtom(*dblPtr());
-                
+
                 // should not be in here if we want a void return type.
                 AvmAssert(bt != BUILTIN_void);
-                
+
                 switch(bt)
                 {
                 case BUILTIN_any:
@@ -113,12 +113,12 @@ namespace avmplus
                     return (Atom)AvmCore::atomToScriptObject(toplevel->coerce(_a, t));
                 }
             }
-            
+
             double getDouble()
             {
                 return AvmCore::number(_a);
             }
-            
+
             void set(Atom a, Traits* t)
             {
                 if (!t) {
@@ -159,7 +159,7 @@ namespace avmplus
                     }
                 }
             }
-            
+
             void setInt(intptr_t i)
             {
                 intptr_t iwt = i << _tagBits;
@@ -170,7 +170,7 @@ namespace avmplus
                     _a = dblAtom();
                 }
             }
-            
+
             void setUint(uintptr_t u)
             {
                 if (u & (~(static_cast<uintptr_t>(-1) >> (_tagBits + 1)))) {
@@ -180,14 +180,14 @@ namespace avmplus
                     _a = (u << 3) | kIntptrType;
                 }
             }
-            
+
             void setDouble(double d)
             {
                 *dblPtr() = d;
                 _a = dblAtom();
             }
         };
-    
+
 enum // we try to stick to 4 bits here instead of the 5 in BUILTIN_xxx
 {
   kVOID = 0,
@@ -257,7 +257,7 @@ static Traits* argTraitsFromType(const AvmCore* core, int32_t n)
     AvmAssert(false); // shouldn't happen...
     return NULL;
 }
-    
+
 // iterates over callee types for a method's signature
 class MethodSigArgDescIter
 {
@@ -293,7 +293,7 @@ public:
     {
         return true;
     }
-    
+
     bool isVarArg()
     {
         return false;
@@ -301,7 +301,7 @@ public:
 };
 
 typedef struct _APType* APType; // type doesn't matter.. just don't clash w/ va_list
-    
+
 class APArgDescIter : public MethodSigArgDescIter
 {
 protected:
@@ -314,13 +314,13 @@ public:
         if (argc >= 0 && !m_methSig->argcOk(argc))
         {
             AvmCore* core = m_methInfo->pool()->core;
-            
+
             core->console << "argc bad: " << m_methInfo->format(core) << " : " << argc << "\n";
         }
 #endif
         AvmAssert(argc < 0 || m_methSig->argcOk(argc));
     }
-    
+
     Traits* nextType()
     {
         AvmCore* core = m_methInfo->pool()->core;
@@ -354,7 +354,7 @@ public:
     {
         return false;
     }
-    
+
     bool isVarArg() // can just keep pushing atoms
     {
         return true;
@@ -366,10 +366,10 @@ class AtomvArgDescIter
 protected:
     AvmCore* m_core;
     int32_t m_argc;
-    
+
 public: // TODO is this counting right?
     AtomvArgDescIter(AvmCore* core, int argc = -2) : m_core(core), m_argc(argc) {}
-    
+
     Traits* nextType()
     {
         if (m_argc == -2)
@@ -382,22 +382,22 @@ public: // TODO is this counting right?
         AvmCore* core = m_core;
         return VOID_TYPE;
     }
-    
+
     bool hasRest()
     {
         return false;
     }
-    
+
     bool needArguments()
     {
         return false;
     }
-    
+
     bool needOptionalArgs()
     {
         return false;
     }
-    
+
     bool isVarArg()
     {
         return true;
@@ -432,7 +432,7 @@ public:
         m_argDesc <<= 4;
         return type;
     }
-    
+
     bool hasRest()
     {
         return false;
@@ -447,14 +447,14 @@ public:
     {
         return true;
     }
-    
+
     bool isVarArg()
     {
         return false;
     }
 };
 
-// read types out of an unsigned char*  
+// read types out of an unsigned char*
 class PtrArgDescIter
 {
 protected:
@@ -486,14 +486,14 @@ public:
             m_bitBuf = *m_p++;
             m_bits = 8;
         }
-        
+
         unsigned type = m_bitBuf >> 4;
-        
+
         m_bitBuf <<= 4;
         m_bits -= 4;
         return type;
     }
-    
+
     bool hasRest()
     {
         return false;
@@ -503,12 +503,12 @@ public:
     {
         return false;
     }
-    
+
     bool needOptionalArgs()
     {
         return true;
     }
-    
+
     bool isVarArg()
     {
         return false;
@@ -540,7 +540,7 @@ public:
         AvmAssert(!(15 & (uintptr_t)dst));
 #endif
     }
-    
+
     void* argEnd()
     {
 #ifdef AVMPLUS_ARM
@@ -585,11 +585,11 @@ template <class ARG_TYPE_ITER> static int32_t argDescSize(ARG_TYPE_ITER calleeTy
     for (;;)
     {
         Traits* t = calleeTypeIter.nextType();
-        
+
         BuiltinType bt = Traits::getBuiltinType(t);
-        
+
         if (bt == BUILTIN_void) break;
-        
+
         switch(Traits::getBuiltinType(t))
         {
         case BUILTIN_int:
@@ -617,16 +617,16 @@ template <class ARG_TYPE_ITER1, class ARG_TYPE_ITER2> static int32_t apArgDescSi
     for (;;)
     {
         Traits* t = calleeTypeIter.nextType();
-        
+
         BuiltinType bt = Traits::getBuiltinType(t);
-        
+
         // no more "regular" arguments? break out
         if (bt == BUILTIN_void) break;
-        
+
         // no more caller arguments? done
         if (callerTypeIter.nextType() == VOID_TYPE)
             return size;
-        
+
         switch(Traits::getBuiltinType(t))
         {
         case BUILTIN_int:
@@ -677,15 +677,15 @@ template <class ARG_TYPE_ITER1, class ARG_TYPE_ITER2> static int32_t apArgDescSi
 #define ASM_BP __asm__("stmdb sp!, {a1, a2, a3, a4}\n swi 0x80\n ldmia sp!, {a1, a2, a3, a4}")
 #define ASM_FUNC_BEGIN(R, N, A) \
     extern R N A; \
-    __asm__(".section	__TEXT,__text,regular,pure_instructions"); \
-    __asm__(".align	2"); \
-    __asm__(".globl	_"#N" "); \
+    __asm__(".section   __TEXT,__text,regular,pure_instructions"); \
+    __asm__(".align 2"); \
+    __asm__(".globl _"#N" "); \
     __asm__("_"#N": ");
 #define ASM_FUNC_END(N)
 #define ASM_REDIR(F) __asm__ ( "b _"#F" ");
 
 #endif
-    
+
 // prototype for an argument coercer
 // env is MethodEnv coercing for
 // callerArgDesc is an opaque description of the arguments to be found via callerArgDesc
@@ -693,7 +693,7 @@ template <class ARG_TYPE_ITER1, class ARG_TYPE_ITER2> static int32_t apArgDescSi
 // calleeArgDescBuf is the argument buffer into which coerced arguments are writter
 // returns a pointer to a function used for return value conversion or NULL is none is needed
 typedef void* (*ArgCoercer)(void* callee, MethodEnv* env, Traits* retTraits, uintptr_t callerArgDesc, void* callerAp, void* calleeArgDescBuf);
-    
+
 extern "C" {
 
 // core of the thunking mechanism...
@@ -720,7 +720,7 @@ ASM_FUNC_BEGIN(Atom, coerce32CdeclShim,
     __asm__("and sp, sp, #-8"); // double word align
     __asm__("mov v2, a3"); // save off argCoercer
     __asm__("mov v3, a4"); // save off env
-    
+
     // a1 stays callee
     __asm__("mov a2, a4"); // pass env
     __asm__("ldr a3, [v7, #20]"); // pass retTraits
@@ -812,7 +812,7 @@ ASM_FUNC_END(coerceNCdeclShim)
 Atom returnCoercerNImpl(double n, Traits* retTraits, MethodEnv* env)
 {
     AvmValue v;
-    
+
     v.setDouble(n);
     return v.get(env->toplevel(), retTraits);
 }
@@ -845,15 +845,15 @@ ASM1(       pop ebp)
 ASM1(       ret)
 ASM_FUNC_END(returnCoercerNPop)
 #endif
-    
+
 // something => Number
 double returnCoercerN32Impl(Atom a, Traits* retTraits, MethodEnv* env)
 {
     Traits* calleeRT = env->method->getMethodSignature()->returnTraits();
     AvmValue v;
-    
+
     v.set(a, calleeRT);
-    
+
     return v.getDouble();
 }
 
@@ -875,13 +875,13 @@ ASM1(       pop ebp)
 ASM1(       ret)
 #endif
 ASM_FUNC_END(returnCoercerN32)
-    
+
 // something => something
 Atom returnCoercer32Impl(Atom a, Traits* retTraits, MethodEnv* env)
 {
-    Traits* calleeRT = env->method->getMethodSignature()->returnTraits();   
+    Traits* calleeRT = env->method->getMethodSignature()->returnTraits();
     AvmValue v;
-    
+
     v.set(a, calleeRT);
     return v.get(env->toplevel(), retTraits);
 }
@@ -970,14 +970,14 @@ template <class ARG_ITER> static Atom coerceArgToAny(Toplevel* toplevel, ARG_ITE
 {
     AvmCore* core = toplevel->core();
     AvmValue v;
-    
+
     if (callerT == NUMBER_TYPE)
         v.setDouble(argN(ap));
     else
         v.set((Atom)arg32(ap), callerT);
     return v.get(toplevel, NULL);
 }
-    
+
 // coerces a single argument and writes it to an argument desc layout
 template <class ARG_ITER> static void coerceArg(Toplevel* toplevel, ArgDescLayout& l, Traits* calleeT, ARG_ITER& callerAp, Traits* callerT)
 {
@@ -1020,7 +1020,7 @@ static void coerceArgAtom(Toplevel* toplevel, ArgDescLayout& l, Traits* calleeT,
 static void coerceArg(Toplevel* toplevel, APType& ap, Traits* calleeT, va_list& callerAp, Traits* callerT)
 {
     AvmCore* core = toplevel->core();
-    
+
     if (calleeT == callerT && calleeT != OBJECT_TYPE) // OBJECT_TYPE might be a naked ScriptObject... let AvmValue handle it
     {
         if (calleeT == NUMBER_TYPE)
@@ -1092,7 +1092,7 @@ static int32_t argCoerceLoop(MethodEnv* env, ARG_TYPE_ITER1 callerTypeIter, ARG_
         ARG_TYPE_ITER1 callerTypeIterTemp = callerTypeIter;
         ARG_ITER callerApTemp = callerAp;
         Traits* callerT = callerTypeIterTemp.nextType();
-        
+
         AvmAssert(callerT != VOID_TYPE);
         Atom a = coerceArgToAny(toplevel, callerApTemp, callerT);
         args = env->createArguments(&a, 0);
@@ -1120,7 +1120,7 @@ static int32_t argCoerceLoop(MethodEnv* env, ARG_TYPE_ITER1 callerTypeIter, ARG_
         else
             core->console << " calleeT: *\n";
 #endif
-        
+
         // no more normal params for callee
         if (calleeT == VOID_TYPE)
         {
@@ -1229,11 +1229,11 @@ static void passBaseArgs(MethodEnv* env, APType& callerAp, ArgDescLayout& l)
 {
     (void)callerAp;
     (void)l;
-    
+
     // pass MethodEnv
     *l.ptrArg() = env;
 }
-    
+
 // coerces a set of variadic arguments to a cdecl arg description
 template <class ARG_TYPE_ITER, class AP_TYPE> static void* argCoercer(void* callee, MethodEnv* env, Traits* callerRT, ARG_TYPE_ITER callerTypeIter, AP_TYPE callerAp, void* calleeArgDescBuf)
 {
@@ -1267,7 +1267,7 @@ template <class ARG_TYPE_ITER, class AP_TYPE> static void* argCoercer(void* call
 static void* atomvArgDescCoercer(void* callee, MethodEnv* env, Traits* retTraits, uintptr_t callerArgDesc, void* callerAp, void* calleeArgDescBuf)
 {
     AtomvArgDescIter callerTypeIter(env->core(), (int32_t)callerArgDesc);
-    
+
     AvmAssert(false); // TESTME -- AtomvArgDescIter off by one error or not
     return argCoercer(callee, env, retTraits, callerTypeIter, (APType)callerAp, calleeArgDescBuf);
 }
@@ -1276,7 +1276,7 @@ static void* atomvArgDescCoercer(void* callee, MethodEnv* env, Traits* retTraits
 static void* apArgDescCoercer(void* callee, MethodEnv* env, Traits* retTraits, uintptr_t callerArgDesc, void* callerAp, void* calleeArgDescBuf)
 {
     APArgDescIter callerTypeIter((int32_t)callerArgDesc, env->method);
-    
+
     return argCoercer(callee, env, retTraits, callerTypeIter, (APType)callerAp, calleeArgDescBuf);
 }
 
@@ -1335,7 +1335,7 @@ Atom coerce32CdeclArgDescEnter(Traits* retTraits, MethodEnv* env, int argc, Atom
         (void*)info->handler_function(), argDescSize(info), atomvArgDescCoercer, env, retTraits, (uintptr_t)argc, (void*)argv);
     return result;
 }
-    
+
 Atom coerce32CdeclArgDescEnter(Traits* retTraits, MethodEnv* env, int argc, uint32_t* ap)
 {
     MethodInfo* info = env->method;
@@ -1343,7 +1343,7 @@ Atom coerce32CdeclArgDescEnter(Traits* retTraits, MethodEnv* env, int argc, uint
         (void*)info->handler_function(), argDescSize(info), apArgDescCoercer, env, retTraits, (uintptr_t)argc, (void*)ap);
     return result;
 }
-    
+
 // calls "env" with supplied variadic arguments described by the "immediate" flavor of argument
 // description in argDesc
 // returns a double value
@@ -1375,7 +1375,7 @@ double coerceNCdeclArgDescEnter(MethodEnv* env, int argc, Atom* argv)
 {
     MethodInfo* info = env->method;
     AvmCore* core = env->core();
-        
+
     double result = coerceNCdeclShim(
          (void*)info->handler_function(), argDescSize(info), atomvArgDescCoercer, env, NUMBER_TYPE, (uintptr_t)argc, (void*)argv);
     return result;
@@ -1388,7 +1388,7 @@ double coerceNCdeclArgDescEnter(MethodEnv* env, int argc, uint32_t* ap)
     double result = coerceNCdeclShim(
         (void*)info->handler_function(), argDescSize(info), apArgDescCoercer, env, NUMBER_TYPE, (uintptr_t)argc , (void*)ap);
     return result;
-}   
+}
 
 // calculate size needed for ap style argument block
 int32_t argDescApSize(uintptr_t argDesc, MethodEnv* env)
@@ -1397,7 +1397,7 @@ int32_t argDescApSize(uintptr_t argDesc, MethodEnv* env)
     ImmArgDescIter callerTypeIter(argDesc, env->core());
     return apArgDescSize(callerTypeIter, calleeTypeIter, env->core());
 }
-    
+
 int32_t argDescApSize(char* argDesc, MethodEnv* env)
 {
     APArgDescIter calleeTypeIter(-1, env->method);
@@ -1426,7 +1426,7 @@ int32_t argDescArgsToAp(void* calleeArgDescBuf, char* argDesc, MethodEnv* env, v
 template <class ARG_TYPE_ITER> static int32_t argDescArgCount(ARG_TYPE_ITER iter)
 {
     int32_t result = 0;
-    
+
     while (iter.nextTypeKind() != kVOID)
         result++;
     return result;
@@ -1444,7 +1444,7 @@ int32_t argDescArgCount(char* argDesc)
     PtrArgDescIter iter(argDesc, NULL);
     return argDescArgCount(iter);
 }
-    
+
 // convert arguments to Atoms
 void argDescArgsToAtomv(Atom* args, uintptr_t argDesc, MethodEnv* env, va_list ap)
 {
@@ -1463,7 +1463,7 @@ void argDescArgsToAtomv(Atom* args, char* argDesc, MethodEnv* env, va_list ap)
     APType dst = (APType)args;
     argCoerceLoop(env, callerTypeIter, ap, calleeTypeIter, dst);
 }
-    
+
 #ifdef VMCFG_AOT
 Atom aotThunker(MethodEnv* env, uint32_t argc, Atom* argv)
 {
@@ -1476,5 +1476,5 @@ double aotThunkerN(MethodEnv* env, uint32_t argc, Atom* argv)
     return coerceNCdeclArgDescEnter(env, argc, (uint32_t* )argv);
 }
 #endif
-    
+
 }

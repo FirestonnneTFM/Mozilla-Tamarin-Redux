@@ -43,132 +43,132 @@
 
 namespace avmplus
 {
-	/**
-	 * hexAddr is an operator that can be used with PrintWriter
-	 * to write out a dword/qword in hex
-	 */
-	class hexAddr
-	{
-	public:
-		hexAddr(uintptr _value) { this->value = _value; }
-		hexAddr(const hexAddr& toCopy) { value = toCopy.value; }
-		hexAddr& operator= (const hexAddr& toCopy) {
-			value = toCopy.value;
-			return *this;
-		}
-		uintptr getValue() const { return value; }
-		
-	private:
-		uintptr value;
-	};
-	
-	/**
-	 * tabstop is an operator that can be used with PrintWriter
-	 * to advance to the specified tabstop
-	 */
-	class tabstop
-	{
-	public:
-		tabstop(int _spaces) { this->spaces = _spaces; }
-		tabstop(const tabstop& toCopy) { spaces = toCopy.spaces; }
-		tabstop& operator= (const tabstop& toCopy) {
-			spaces = toCopy.spaces;
-			return *this;
-		}
-		int getSpaces() const { return spaces; }
-		
-	private:
-		int spaces;
-	};
-	
-	/**
-	 * percent is an operator that can be used with PrintWrtier
-	 * to output a number as a percentage
-	 */
-	class percent
-	{
-	public:
-		percent(double _value) { this->value = _value; }
-		percent(const percent& toCopy) { value = toCopy.value; }
-		percent& operator= (const percent& toCopy) {
-			value = toCopy.value;
-			return *this;
-		}
-		double getPercent() const { return value; }
-		
-	private:
-		double value;
-	};
+    /**
+     * hexAddr is an operator that can be used with PrintWriter
+     * to write out a dword/qword in hex
+     */
+    class hexAddr
+    {
+    public:
+        hexAddr(uintptr _value) { this->value = _value; }
+        hexAddr(const hexAddr& toCopy) { value = toCopy.value; }
+        hexAddr& operator= (const hexAddr& toCopy) {
+            value = toCopy.value;
+            return *this;
+        }
+        uintptr getValue() const { return value; }
 
-	/**
-	 * PrintWriter is a utility class for writing human-readable
-	 * text.  It has an interface similar to the C++ iostreams
-	 * library, overloading the "<<" operator to accept most
-	 * standard types used in the VM.
-	 */
-	class PrintWriter : public OutputStream
-	{
-	public:
-		PrintWriter(AvmCore* core) { m_core = core; m_stream = NULL; col = 0; }
-		PrintWriter(AvmCore* core, OutputStream *stream) { m_core = core; m_stream = stream; col = 0; }
-		~PrintWriter() {}
+    private:
+        uintptr value;
+    };
 
-		void setOutputStream(OutputStream *stream) { m_stream = stream; }
-		void setCore(AvmCore* core) { m_core = core; }
-		
-		int write(const void *buffer, int count);
+    /**
+     * tabstop is an operator that can be used with PrintWriter
+     * to advance to the specified tabstop
+     */
+    class tabstop
+    {
+    public:
+        tabstop(int _spaces) { this->spaces = _spaces; }
+        tabstop(const tabstop& toCopy) { spaces = toCopy.spaces; }
+        tabstop& operator= (const tabstop& toCopy) {
+            spaces = toCopy.spaces;
+            return *this;
+        }
+        int getSpaces() const { return spaces; }
 
-		PrintWriter& operator<< (const char *str);
-		PrintWriter& operator<< (const wchar *str);
-		PrintWriter& operator<< (char value);
-		PrintWriter& operator<< (wchar value);		
-		PrintWriter& operator<< (int32_t value);
-		PrintWriter& operator<< (uint32_t value);
-		PrintWriter& operator<< (uint64_t value);
-		PrintWriter& operator<< (int64_t value);
+    private:
+        int spaces;
+    };
+
+    /**
+     * percent is an operator that can be used with PrintWrtier
+     * to output a number as a percentage
+     */
+    class percent
+    {
+    public:
+        percent(double _value) { this->value = _value; }
+        percent(const percent& toCopy) { value = toCopy.value; }
+        percent& operator= (const percent& toCopy) {
+            value = toCopy.value;
+            return *this;
+        }
+        double getPercent() const { return value; }
+
+    private:
+        double value;
+    };
+
+    /**
+     * PrintWriter is a utility class for writing human-readable
+     * text.  It has an interface similar to the C++ iostreams
+     * library, overloading the "<<" operator to accept most
+     * standard types used in the VM.
+     */
+    class PrintWriter : public OutputStream
+    {
+    public:
+        PrintWriter(AvmCore* core) { m_core = core; m_stream = NULL; col = 0; }
+        PrintWriter(AvmCore* core, OutputStream *stream) { m_core = core; m_stream = stream; col = 0; }
+        ~PrintWriter() {}
+
+        void setOutputStream(OutputStream *stream) { m_stream = stream; }
+        void setCore(AvmCore* core) { m_core = core; }
+
+        int write(const void *buffer, int count);
+
+        PrintWriter& operator<< (const char *str);
+        PrintWriter& operator<< (const wchar *str);
+        PrintWriter& operator<< (char value);
+        PrintWriter& operator<< (wchar value);
+        PrintWriter& operator<< (int32_t value);
+        PrintWriter& operator<< (uint32_t value);
+        PrintWriter& operator<< (uint64_t value);
+        PrintWriter& operator<< (int64_t value);
 #if defined AVMPLUS_MAC && defined AVMPLUS_64BIT
-		PrintWriter& operator<< (ptrdiff_t value);
+        PrintWriter& operator<< (ptrdiff_t value);
 #endif
-		PrintWriter& operator<< (double value);
-		PrintWriter& operator<< (Stringp str);
-		PrintWriter& operator<< (tabstop tabs);
-		PrintWriter& operator<< (hexAddr tabs);
-		PrintWriter& operator<< (percent value);		
-		PrintWriter& operator<< (bool b);
-	#if VMCFG_METHOD_NAMES
-		PrintWriter& operator<< (const ScopeTypeChain* s);
-		PrintWriter& operator<< (const ScopeChain* s);
-	#endif
+        PrintWriter& operator<< (double value);
+        PrintWriter& operator<< (Stringp str);
+        PrintWriter& operator<< (tabstop tabs);
+        PrintWriter& operator<< (hexAddr tabs);
+        PrintWriter& operator<< (percent value);
+        PrintWriter& operator<< (bool b);
+    #if VMCFG_METHOD_NAMES
+        PrintWriter& operator<< (const ScopeTypeChain* s);
+        PrintWriter& operator<< (const ScopeChain* s);
+    #endif
 
-		void formatTypeName(Traits* t);
+        void formatTypeName(Traits* t);
 
-		void writeHexByte(uint8 value);
-		void writeHexWord(uint16_t value);
-		void writeHexAddr(uintptr value);
-		
-		#ifdef AVMPLUS_VERBOSE
-		void format(const char *format, ...);
-		void formatV(const char *format, va_list ap);
-		void formatP(const char* format, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
-		#endif
-		
-	private:
-		int col;
-		OutputStream *m_stream;
-		AvmCore *m_core;
+        void writeHexByte(uint8 value);
+        void writeHexWord(uint16_t value);
+        void writeHexAddr(uintptr value);
 
-		void writeHexNibble(uint8 value);	
+        #ifdef AVMPLUS_VERBOSE
+        void format(const char *format, ...);
+        void formatV(const char *format, va_list ap);
+        void formatP(const char* format, Stringp arg1=0, Stringp arg2=0, Stringp arg3=0);
+        #endif
 
-		// These are defined for not DEBUGGER builds but fire asserts
-	public:
-		PrintWriter& operator<< (ScriptObject* obj);
-		PrintWriter& operator<< (const Traits* obj);
-		PrintWriter& operator<< (const MethodInfo* obj);
-		PrintWriter& operator<< (const Multiname& obj);
-		PrintWriter& operator<< (Namespacep str);
-	private:
-		PrintWriter& operator<< (const Multiname* obj);	// not defined
-	};
+    private:
+        int col;
+        OutputStream *m_stream;
+        AvmCore *m_core;
+
+        void writeHexNibble(uint8 value);
+
+        // These are defined for not DEBUGGER builds but fire asserts
+    public:
+        PrintWriter& operator<< (ScriptObject* obj);
+        PrintWriter& operator<< (const Traits* obj);
+        PrintWriter& operator<< (const MethodInfo* obj);
+        PrintWriter& operator<< (const Multiname& obj);
+        PrintWriter& operator<< (Namespacep str);
+    private:
+        PrintWriter& operator<< (const Multiname* obj); // not defined
+    };
 }
 
 #endif /* __avmplus_PrintWriter__ */

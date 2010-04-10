@@ -43,154 +43,154 @@
 
 namespace avmplus
 {
-	FunctionClass::FunctionClass(VTable* cvtable)
-		: ClassClosure(cvtable)
-	{
-		Toplevel* toplevel = this->toplevel();
+    FunctionClass::FunctionClass(VTable* cvtable)
+        : ClassClosure(cvtable)
+    {
+        Toplevel* toplevel = this->toplevel();
 
-		toplevel->functionClass = this;
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(FunctionClass));
+        toplevel->functionClass = this;
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(FunctionClass));
 
-		setPrototypePtr(createEmptyFunction());
-		prototypePtr()->setDelegate(toplevel->objectClass->prototypePtr());
+        setPrototypePtr(createEmptyFunction());
+        prototypePtr()->setDelegate(toplevel->objectClass->prototypePtr());
 
-		//
-		// now that Object, Class, and Function are initialized, we
-		// can set up Object.prototype.  other classes will init normally.
-		// 
+        //
+        // now that Object, Class, and Function are initialized, we
+        // can set up Object.prototype.  other classes will init normally.
+        //
 
-		// init Object prototype
-		toplevel->objectClass->initPrototype();
-	}
+        // init Object prototype
+        toplevel->objectClass->initPrototype();
+    }
 
-	// Function called as constructor ... not supported from user code
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom FunctionClass::construct(int argc, Atom* /*argv*/)
-	{
-		// ISSUE do we need an exception here?
-		// cn: if argc is 0, this is harmless and we have to return an anonymous
-		// function that itself if its > 0, then we can't support it
+    // Function called as constructor ... not supported from user code
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom FunctionClass::construct(int argc, Atom* /*argv*/)
+    {
+        // ISSUE do we need an exception here?
+        // cn: if argc is 0, this is harmless and we have to return an anonymous
+        // function that itself if its > 0, then we can't support it
 
-		/*
-		from ECMA 327 5.1 Runtime Compilation
-		An implementation that does not support global eval() or calling Function as a function or constructor
-		SHALL throw an EvalError exception whenever global eval() (ES3 section 15.1.2.1), Function(p1,
-		p2, ..., pn, body) (ES3 section 15.3.1.1), or new Function(p1, p2, ..., pn, body) (ES3 section 15.3.2.1) is
-		called.
-		*/
+        /*
+        from ECMA 327 5.1 Runtime Compilation
+        An implementation that does not support global eval() or calling Function as a function or constructor
+        SHALL throw an EvalError exception whenever global eval() (ES3 section 15.1.2.1), Function(p1,
+        p2, ..., pn, body) (ES3 section 15.3.1.1), or new Function(p1, p2, ..., pn, body) (ES3 section 15.3.2.1) is
+        called.
+        */
 
-		if (argc != 0)
-		{
-			toplevel()->evalErrorClass()->throwError(kFunctionConstructorError);
-		}
+        if (argc != 0)
+        {
+            toplevel()->evalErrorClass()->throwError(kFunctionConstructorError);
+        }
 
-		return createEmptyFunction()->atom();
-	}
+        return createEmptyFunction()->atom();
+    }
 
-	ClassClosure* FunctionClass::createEmptyFunction()
-	{
-		// invoke AS3 private static function emptyCtor, which returns an empty function.
-		TraitsBindingsp t = traits()->getTraitsBindings();
-		Binding b = t->findBinding(core()->internConstantStringLatin1("emptyCtor"));
-		MethodEnv *f = vtable->methods[AvmCore::bindingToMethodId(b)];
-		return (ClassClosure*)AvmCore::atomToScriptObject(f->coerceEnter(this->atom()));
-	}
+    ClassClosure* FunctionClass::createEmptyFunction()
+    {
+        // invoke AS3 private static function emptyCtor, which returns an empty function.
+        TraitsBindingsp t = traits()->getTraitsBindings();
+        Binding b = t->findBinding(core()->internConstantStringLatin1("emptyCtor"));
+        MethodEnv *f = vtable->methods[AvmCore::bindingToMethodId(b)];
+        return (ClassClosure*)AvmCore::atomToScriptObject(f->coerceEnter(this->atom()));
+    }
 
-	/**
+    /**
      * Function.prototype.call()
      */
-	Atom FunctionObject::AS3_call(Atom thisArg, Atom *argv, int argc)
-	{
-		thisArg = get_coerced_receiver(thisArg);
-		return _call->coerceEnter(thisArg, argc, argv);
-	}
+    Atom FunctionObject::AS3_call(Atom thisArg, Atom *argv, int argc)
+    {
+        thisArg = get_coerced_receiver(thisArg);
+        return _call->coerceEnter(thisArg, argc, argv);
+    }
 
-	/**
+    /**
      * Function.prototype.apply()
      */
-	Atom FunctionObject::AS3_apply(Atom thisArg, Atom argArray)
-	{
-		thisArg = get_coerced_receiver(thisArg);
+    Atom FunctionObject::AS3_apply(Atom thisArg, Atom argArray)
+    {
+        thisArg = get_coerced_receiver(thisArg);
 
-		// when argArray == undefined or null, same as not being there at all
-		// see Function/e15_3_4_3_1.as 
-	
-		if (!AvmCore::isNullOrUndefined(argArray))
-		{
-			AvmCore* core = this->core();
+        // when argArray == undefined or null, same as not being there at all
+        // see Function/e15_3_4_3_1.as
 
-			// FIXME: why not declare argArray as Array in Function.as?
-			if (!AvmCore::istype(argArray, ARRAY_TYPE))
-				toplevel()->throwTypeError(kApplyError);
+        if (!AvmCore::isNullOrUndefined(argArray))
+        {
+            AvmCore* core = this->core();
 
-			return _call->coerceEnter(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
-		}
-		else
-		{
-			return _call->coerceEnter(thisArg);
-		}
-	}
+            // FIXME: why not declare argArray as Array in Function.as?
+            if (!AvmCore::istype(argArray, ARRAY_TYPE))
+                toplevel()->throwTypeError(kApplyError);
 
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom FunctionObject::construct(int argc, Atom* argv)
-	{
-		AvmAssert(argv != NULL); // need at least one arg spot passed in
+            return _call->coerceEnter(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
+        }
+        else
+        {
+            return _call->coerceEnter(thisArg);
+        }
+    }
 
-		ScriptObject* obj = newInstance();
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom FunctionObject::construct(int argc, Atom* argv)
+    {
+        AvmAssert(argv != NULL); // need at least one arg spot passed in
 
-		// this is a function
-		argv[0] = obj->atom(); // new object is receiver
-		Atom result = _call->coerceEnter(argc, argv);
+        ScriptObject* obj = newInstance();
 
-		// for E3 13.2.2 compliance, check result and return it if (Type(result) is Object)
+        // this is a function
+        argv[0] = obj->atom(); // new object is receiver
+        Atom result = _call->coerceEnter(argc, argv);
 
-		/* ISSUE does this apply to class constructors too?
+        // for E3 13.2.2 compliance, check result and return it if (Type(result) is Object)
 
-		answer: no.  from E4: A constructor may invoke a return statement as long as that 
-		statement does not supply a value; a constructor cannot return a value. The newly 
-		created object is returned automatically. A constructors return type must be omitted. 
-		A constructor always returns a new instance. */
+        /* ISSUE does this apply to class constructors too?
 
-		return AvmCore::isNull(result) || AvmCore::isObject(result) ? result : obj->atom();
-	}
- 
-	Atom FunctionObject::call(int argc, Atom* argv)
-	{
-		argv[0] = get_coerced_receiver(argv[0]);
-		return _call->coerceEnter(argc, argv);
-	}
+        answer: no.  from E4: A constructor may invoke a return statement as long as that
+        statement does not supply a value; a constructor cannot return a value. The newly
+        created object is returned automatically. A constructors return type must be omitted.
+        A constructor always returns a new instance. */
 
-	CodeContext* FunctionObject::getFunctionCodeContext() const 
-	{ 
-		return _call->scope()->abcEnv()->codeContext(); 
-	}
+        return AvmCore::isNull(result) || AvmCore::isObject(result) ? result : obj->atom();
+    }
 
-	int FunctionObject::get_length()
-	{
-		MethodSignaturep ms = _call->method->getMethodSignature();
-		return ms->param_count();
-	}
+    Atom FunctionObject::call(int argc, Atom* argv)
+    {
+        argv[0] = get_coerced_receiver(argv[0]);
+        return _call->coerceEnter(argc, argv);
+    }
 
-	Atom FunctionObject::get_coerced_receiver(Atom a)
-	{
-		if (AvmCore::isNullOrUndefined(a))
-		{
-			// use callee's global object as this.
-			// see E3 15.3.4.4
-			a = _call->scope()->getScope(0);
-		}
-		MethodSignaturep ms = _call->method->getMethodSignature();
-		return toplevel()->coerce(a, ms->paramTraits(0));
-	}
+    CodeContext* FunctionObject::getFunctionCodeContext() const
+    {
+        return _call->scope()->abcEnv()->codeContext();
+    }
 
-	Stringp FunctionObject::implToString() const
-	{
-		AvmCore* core = this->core();
-		Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(_call->method->method_id()));
-		return core->concatStrings(s, core->newConstantStringLatin1("]"));
-	}
+    int FunctionObject::get_length()
+    {
+        MethodSignaturep ms = _call->method->getMethodSignature();
+        return ms->param_count();
+    }
+
+    Atom FunctionObject::get_coerced_receiver(Atom a)
+    {
+        if (AvmCore::isNullOrUndefined(a))
+        {
+            // use callee's global object as this.
+            // see E3 15.3.4.4
+            a = _call->scope()->getScope(0);
+        }
+        MethodSignaturep ms = _call->method->getMethodSignature();
+        return toplevel()->coerce(a, ms->paramTraits(0));
+    }
+
+    Stringp FunctionObject::implToString() const
+    {
+        AvmCore* core = this->core();
+        Stringp s = core->concatStrings(core->newConstantStringLatin1("[object Function-"), core->intToString(_call->method->method_id()));
+        return core->concatStrings(s, core->newConstantStringLatin1("]"));
+    }
 }

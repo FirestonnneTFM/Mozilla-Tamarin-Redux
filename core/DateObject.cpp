@@ -43,85 +43,85 @@
 namespace avmplus
 {
 
-	Stringp DateObject::_toString(int index)
-	{
-		wchar buffer[256];
-		int len;
-		date.toString(buffer, index, len);
-		return core()->newStringUTF16(buffer, len);
-	}
+    Stringp DateObject::_toString(int index)
+    {
+        wchar buffer[256];
+        int len;
+        date.toString(buffer, index, len);
+        return core()->newStringUTF16(buffer, len);
+    }
 
-	double DateObject::AS3_valueOf()
-	{
-		return date.getTime();
-	}
+    double DateObject::AS3_valueOf()
+    {
+        return date.getTime();
+    }
 
-	double DateObject::_setTime(double value)
-	{
-		date.setTime(value);
-		return date.getTime();
-	}
+    double DateObject::_setTime(double value)
+    {
+        date.setTime(value);
+        return date.getTime();
+    }
 
-	double DateObject::_get(int index)
-	{
-		return date.getDateProperty(index);
-	}
+    double DateObject::_get(int index)
+    {
+        return date.getDateProperty(index);
+    }
 
-	double DateObject::_set(int index, Atom *argv, int argc)
-	{
-		double num[7];
-		int i;
+    double DateObject::_set(int index, Atom *argv, int argc)
+    {
+        double num[7];
+        int i;
 
-		for (i=0; i<7; i++) {
-			num[i] = MathUtils::kNaN;
-		}
-		bool utcFlag = (index < 0); 
-		index = (int)MathUtils::abs(index);
-		int j = index-1;
+        for (i=0; i<7; i++) {
+            num[i] = MathUtils::kNaN;
+        }
+        bool utcFlag = (index < 0);
+        index = (int)MathUtils::abs(index);
+        int j = index-1;
 
-		for (i=0; i<argc; i++) {
-			if (j >= 7) {
-				break;
-			}
-			num[j++] = AvmCore::number(argv[i]);
-			if (MathUtils::isNaN(num[j-1])) // actually specifying NaN results in a NaN date. Don't pass Nan, however, because we use 
-			{							    //  that value to denote that an optional arg was not supplied.
-				date.setTime(MathUtils::kNaN);
-				return date.getTime();
-			}
-		}
+        for (i=0; i<argc; i++) {
+            if (j >= 7) {
+                break;
+            }
+            num[j++] = AvmCore::number(argv[i]);
+            if (MathUtils::isNaN(num[j-1])) // actually specifying NaN results in a NaN date. Don't pass Nan, however, because we use
+            {                               //  that value to denote that an optional arg was not supplied.
+                date.setTime(MathUtils::kNaN);
+                return date.getTime();
+            }
+        }
 
-		const int minTimeSetterIndex = 4; // any setNames index >= 4 should call setTime() instead of setDate()
-										  //  setFullYear/setUTCFullYear/setMonth/setUTCMonth/setDay/setUTCDay are all in indices < 3
-		if (index < minTimeSetterIndex)
-		{
-			date.setDate(num[0],
-							num[1],
-							num[2],
-							utcFlag);
-		}
-		else
-		{
-			date.setTime(num[3],
-							num[4],
-							num[5],
-							num[6],
-							utcFlag); 
-		}
-		return date.getTime();
-	}
+        const int minTimeSetterIndex = 4; // any setNames index >= 4 should call setTime() instead of setDate()
+                                          //  setFullYear/setUTCFullYear/setMonth/setUTCMonth/setDay/setUTCDay are all in indices < 3
+        if (index < minTimeSetterIndex)
+        {
+            date.setDate(num[0],
+                            num[1],
+                            num[2],
+                            utcFlag);
+        }
+        else
+        {
+            date.setTime(num[3],
+                            num[4],
+                            num[5],
+                            num[6],
+                            utcFlag);
+        }
+        return date.getTime();
+    }
 
 #ifdef AVMPLUS_VERBOSE
-	Stringp DateObject::format(AvmCore* core) const
-	{
-		wchar buffer[256];
-		int len;
-		date.toString(buffer, Date::kToString, len);
-		Stringp result = core->newConstantStringLatin1("<");
-		result = String::concatStrings(result, core->newStringUTF16(buffer, len));
-		result = String::concatStrings(result, core->newConstantStringLatin1(">@"));
-		result = String::concatStrings(result, core->formatAtomPtr(atom()));
-		return result;
-	}
+    Stringp DateObject::format(AvmCore* core) const
+    {
+        wchar buffer[256];
+        int len;
+        date.toString(buffer, Date::kToString, len);
+        Stringp result = core->newConstantStringLatin1("<");
+        result = String::concatStrings(result, core->newStringUTF16(buffer, len));
+        result = String::concatStrings(result, core->newConstantStringLatin1(">@"));
+        result = String::concatStrings(result, core->formatAtomPtr(atom()));
+        return result;
+    }
 #endif
 }

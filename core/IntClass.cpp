@@ -42,36 +42,36 @@
 
 namespace avmplus
 {
-	IntClass::IntClass(VTable* cvtable) : ClassClosure(cvtable)
-	{
-		toplevel()->intClass = this;
-		// prototype objects are always vanilla objects.
-		createVanillaPrototype();
-	}
+    IntClass::IntClass(VTable* cvtable) : ClassClosure(cvtable)
+    {
+        toplevel()->intClass = this;
+        // prototype objects are always vanilla objects.
+        createVanillaPrototype();
+    }
 
-	Atom IntClass::construct(int argc, Atom* argv)
-	{
-		if (argc == 0)
-			return zeroIntAtom;   // yep this is zero atom
-		else
-			return core()->intAtom(argv[1]);
-		// TODO ArgumentError if argc > 1
-	}
+    Atom IntClass::construct(int argc, Atom* argv)
+    {
+        if (argc == 0)
+            return zeroIntAtom;   // yep this is zero atom
+        else
+            return core()->intAtom(argv[1]);
+        // TODO ArgumentError if argc > 1
+    }
 
-	UIntClass::UIntClass(VTable* cvtable) : ClassClosure(cvtable)
-	{
-		toplevel()->uintClass = this;
-		// prototype objects are always vanilla objects.
-		createVanillaPrototype();
-	}
+    UIntClass::UIntClass(VTable* cvtable) : ClassClosure(cvtable)
+    {
+        toplevel()->uintClass = this;
+        // prototype objects are always vanilla objects.
+        createVanillaPrototype();
+    }
 
-	Atom UIntClass::construct(int argc, Atom* argv)
-	{
-		if (argc == 0)
-			return zeroIntAtom;   // yep this is zero atom
-		else
-			return core()->uintAtom(argv[1]);
-		// TODO ArgumentError if argc > 1
-	}
+    Atom UIntClass::construct(int argc, Atom* argv)
+    {
+        if (argc == 0)
+            return zeroIntAtom;   // yep this is zero atom
+        else
+            return core()->uintAtom(argv[1]);
+        // TODO ArgumentError if argc > 1
+    }
 
 }

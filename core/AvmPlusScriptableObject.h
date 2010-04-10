@@ -50,34 +50,34 @@ namespace avmplus
     typedef struct SamplerObjectType_* SamplerObjectType;
 #endif
 
-	class AvmPlusScriptableObject : public MMgc::RCObject
-	{
-	public:
-		// used by WeakValueHashtable to correctly atom'ize a pointer to one of these
-		virtual Atom toAtom() const = 0;
+    class AvmPlusScriptableObject : public MMgc::RCObject
+    {
+    public:
+        // used by WeakValueHashtable to correctly atom'ize a pointer to one of these
+        virtual Atom toAtom() const = 0;
 
 #ifdef DEBUGGER
-		AvmPlusScriptableObject(SamplerObjectType sot);
+        AvmPlusScriptableObject(SamplerObjectType sot);
 
-		/**
-		 * Returns the number of bytes of memory taken by this object, that are not
-		 * also shared by any other objects.  For example, a dependent String would
-		 * include sizeof(String) but not the size of the buffer of the master string;
-		 * but a dynamic String would include both sizeof(String) and the size of
-		 * the buffer.
-		 *
-		 * Used by the profiler to tell the user the shallow size of the object.
-		 */
-		virtual uint64_t bytesUsed() const = 0;
+        /**
+         * Returns the number of bytes of memory taken by this object, that are not
+         * also shared by any other objects.  For example, a dependent String would
+         * include sizeof(String) but not the size of the buffer of the master string;
+         * but a dynamic String would include both sizeof(String) and the size of
+         * the buffer.
+         *
+         * Used by the profiler to tell the user the shallow size of the object.
+         */
+        virtual uint64_t bytesUsed() const = 0;
 
-		inline AvmCore* core() const
-		{
-			return (AvmCore*)MMgc::GC::GetGC(this)->GetGCContextVariable(MMgc::GC::GCV_AVMCORE);
-		}
+        inline AvmCore* core() const
+        {
+            return (AvmCore*)MMgc::GC::GetGC(this)->GetGCContextVariable(MMgc::GC::GCV_AVMCORE);
+        }
 
 #endif
 
-	};
+    };
 }
 
 #endif //__avmplus_AvmPlusScriptableObject__

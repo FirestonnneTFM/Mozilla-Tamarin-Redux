@@ -43,51 +43,51 @@
 
 namespace avmplus
 {
-	/**
-	 * class Function
-	 */
-	class FunctionClass : public ClassClosure
-	{
-	public:
-		FunctionClass(VTable* cvtable);
+    /**
+     * class Function
+     */
+    class FunctionClass : public ClassClosure
+    {
+    public:
+        FunctionClass(VTable* cvtable);
 
-		ClassClosure *createEmptyFunction();
+        ClassClosure *createEmptyFunction();
 
-		// Function called as constructor ... not supported from user code
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+        // Function called as constructor ... not supported from user code
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		Atom call(int argc, Atom* argv) 
-		{
-			return construct(argc,argv);
-		}
-        
-		DECLARE_SLOTS_FunctionClass;
-	};
+        Atom call(int argc, Atom* argv)
+        {
+            return construct(argc,argv);
+        }
 
-	class FunctionObject : public ClassClosure
-	{
-	public:
-		FunctionObject(VTable* cvtable, MethodEnv* call) : ClassClosure(cvtable), _call(call) { AvmAssert(_call != NULL); }
-		Atom AS3_call(Atom thisAtom, Atom *argv, int argc);
-		Atom AS3_apply(Atom thisAtom, Atom argArray);
+        DECLARE_SLOTS_FunctionClass;
+    };
+
+    class FunctionObject : public ClassClosure
+    {
+    public:
+        FunctionObject(VTable* cvtable, MethodEnv* call) : ClassClosure(cvtable), _call(call) { AvmAssert(_call != NULL); }
+        Atom AS3_call(Atom thisAtom, Atom *argv, int argc);
+        Atom AS3_apply(Atom thisAtom, Atom argArray);
 #if defined(DEBUGGER) || defined(VMCFG_AOT)
-		virtual MethodEnv* getCallMethodEnv() { return _call; }
+        virtual MethodEnv* getCallMethodEnv() { return _call; }
 #endif
-		virtual Atom construct(int argc, Atom* argv);
-		virtual Atom call(int argc, Atom* argv);
-		virtual CodeContext* getFunctionCodeContext() const;
-		int get_length();
-		virtual Stringp implToString() const;
-	protected:
-		virtual Atom get_coerced_receiver(Atom a);
-	protected:
-		DWB(MethodEnv*) _call;
-		
-		DECLARE_SLOTS_FunctionObject;
-	};
+        virtual Atom construct(int argc, Atom* argv);
+        virtual Atom call(int argc, Atom* argv);
+        virtual CodeContext* getFunctionCodeContext() const;
+        int get_length();
+        virtual Stringp implToString() const;
+    protected:
+        virtual Atom get_coerced_receiver(Atom a);
+    protected:
+        DWB(MethodEnv*) _call;
+
+        DECLARE_SLOTS_FunctionObject;
+    };
 }
 
 #endif /* __avmplus_FunctionClass__ */

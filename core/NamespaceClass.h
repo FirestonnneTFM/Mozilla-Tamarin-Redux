@@ -43,26 +43,26 @@
 
 namespace avmplus
 {
-	/**
-	 * class Namespace - the type of namespace objects
-	 */
-	class NamespaceClass : public ClassClosure
-	{
-	public:
-		NamespaceClass(VTable* cvtable);
+    /**
+     * class Namespace - the type of namespace objects
+     */
+    class NamespaceClass : public ClassClosure
+    {
+    public:
+        NamespaceClass(VTable* cvtable);
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom call (int argc, Atom* argv);
-        
-		DECLARE_SLOTS_NamespaceClass;
-	};
+        // this = argv[0]
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom call (int argc, Atom* argv);
+
+        DECLARE_SLOTS_NamespaceClass;
+    };
 }
 
 #endif /* __avmplus_NamespaceClass__ */

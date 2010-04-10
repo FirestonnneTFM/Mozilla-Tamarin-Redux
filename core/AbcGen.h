@@ -43,50 +43,50 @@
 
 namespace avmplus
 {
-	class AbcGen 
-	{
-	public:
-		/**
-		 * construct an abc code gen buffer with the given initial capacity
-		 */
-		AbcGen(MMgc::GC *gc, int initCapacity=128) : bytes(gc, initCapacity) {}
+    class AbcGen
+    {
+    public:
+        /**
+         * construct an abc code gen buffer with the given initial capacity
+         */
+        AbcGen(MMgc::GC *gc, int initCapacity=128) : bytes(gc, initCapacity) {}
 
-		List<byte>& getBytes() { return bytes; }
-		void construct_super() { bytes.add(OP_constructsuper); }
-		void pushnan() { bytes.add(OP_pushnan); }
-		void pushundefined() { bytes.add(OP_pushundefined); }
-		void pushnull() { bytes.add(OP_pushnull); }
-		void pushtrue() { bytes.add(OP_pushtrue); }
-		void pushconstant(CPoolKind kind, int index) 
-		{ 
-			// AbcParser should already ensure kind is legal value.
-			// commented out due to over-aggressive compiler warnings
-			//AvmAssert((int)kind >=0 && (int)kind <= CONSTANT_StaticProtectedNs && kindToPushOp[kind] != 0);
-			int op = kindToPushOp[kind];
-			bytes.add((byte)op);
-			if(opcodeInfo[op].operandCount > 0)
-				writeInt(index); 
-		}
-		void getlocalN(int N) { bytes.add((byte)(OP_getlocal0+N)); }
-		void setslot(int slot) { bytes.add(OP_setslot); writeInt(slot+1); }
-		void abs_jump(const uint8_t* pc, uint32_t code_length) 
-		{ 
-			bytes.add(OP_abs_jump); 
+        List<byte>& getBytes() { return bytes; }
+        void construct_super() { bytes.add(OP_constructsuper); }
+        void pushnan() { bytes.add(OP_pushnan); }
+        void pushundefined() { bytes.add(OP_pushundefined); }
+        void pushnull() { bytes.add(OP_pushnull); }
+        void pushtrue() { bytes.add(OP_pushtrue); }
+        void pushconstant(CPoolKind kind, int index)
+        {
+            // AbcParser should already ensure kind is legal value.
+            // commented out due to over-aggressive compiler warnings
+            //AvmAssert((int)kind >=0 && (int)kind <= CONSTANT_StaticProtectedNs && kindToPushOp[kind] != 0);
+            int op = kindToPushOp[kind];
+            bytes.add((byte)op);
+            if(opcodeInfo[op].operandCount > 0)
+                writeInt(index);
+        }
+        void getlocalN(int N) { bytes.add((byte)(OP_getlocal0+N)); }
+        void setslot(int slot) { bytes.add(OP_setslot); writeInt(slot+1); }
+        void abs_jump(const uint8_t* pc, uint32_t code_length)
+        {
+            bytes.add(OP_abs_jump);
 #ifdef AVMPLUS_64BIT
-			writeInt(uint32_t(uintptr_t(pc)));
-			writeInt(uint32_t(uintptr_t(pc) >> 32));
-#else			
-			writeInt(uint32_t(pc)); 
-#endif			
-			writeInt(code_length); 
-		}
-		void returnvoid() { bytes.add(OP_returnvoid); }
-		void writeBytes(List<byte>& b) { bytes.add(b); }
-		void writeInt(uint32_t n);
-		size_t size() { return bytes.size(); }
-	private:
-		List<byte> bytes;
-	};
+            writeInt(uint32_t(uintptr_t(pc)));
+            writeInt(uint32_t(uintptr_t(pc) >> 32));
+#else
+            writeInt(uint32_t(pc));
+#endif
+            writeInt(code_length);
+        }
+        void returnvoid() { bytes.add(OP_returnvoid); }
+        void writeBytes(List<byte>& b) { bytes.add(b); }
+        void writeInt(uint32_t n);
+        size_t size() { return bytes.size(); }
+    private:
+        List<byte> bytes;
+    };
 }
 
 #endif // __avmplus_MethodEnv__

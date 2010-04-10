@@ -45,73 +45,73 @@
 
 namespace avmplus
 {
-	RegExpClass::RegExpClass(VTable* cvtable)
-		: ClassClosure(cvtable)
-	{
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpClass));
+    RegExpClass::RegExpClass(VTable* cvtable)
+        : ClassClosure(cvtable)
+    {
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpClass));
 
-		AvmCore* core = this->core();
+        AvmCore* core = this->core();
 
-		ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
-		setPrototypePtr(new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype));
+        ScriptObject* object_prototype = toplevel()->objectClass->prototypePtr();
+        setPrototypePtr(new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype));
 
-		kindex = core->internConstantStringLatin1("index");
-		kinput = core->internConstantStringLatin1("input");
-	}
-	
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom RegExpClass::call(int argc, Atom* argv)
-	{
-		// ECMA-262 15.10.4.1: If pattern is RegExp and flags is undefined,
-		// return pattern unchanged.
-		if (argc > 0) {
-			Atom flagsAtom = (argc>1) ? argv[2] : undefinedAtom;
-			if (AvmCore::istype(argv[1], traits()->itraits) && flagsAtom == undefinedAtom) {
-				return argv[1];
-			}
-		}
+        kindex = core->internConstantStringLatin1("index");
+        kinput = core->internConstantStringLatin1("input");
+    }
 
-		// Otherwise, call the RegExp constructor.
-		return construct(argc, argv);
-	}
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom RegExpClass::call(int argc, Atom* argv)
+    {
+        // ECMA-262 15.10.4.1: If pattern is RegExp and flags is undefined,
+        // return pattern unchanged.
+        if (argc > 0) {
+            Atom flagsAtom = (argc>1) ? argv[2] : undefinedAtom;
+            if (AvmCore::istype(argv[1], traits()->itraits) && flagsAtom == undefinedAtom) {
+                return argv[1];
+            }
+        }
 
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom RegExpClass::construct(int argc, Atom* argv)
-	{
-		AvmCore* core = this->core();
-		Stringp pattern;
+        // Otherwise, call the RegExp constructor.
+        return construct(argc, argv);
+    }
 
-		Atom patternAtom = (argc>0) ? argv[1] : undefinedAtom;
-		Atom optionsAtom = (argc>1) ? argv[2] : undefinedAtom;
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom RegExpClass::construct(int argc, Atom* argv)
+    {
+        AvmCore* core = this->core();
+        Stringp pattern;
 
-		if (AvmCore::istype(patternAtom, traits()->itraits)) {
-			// Pattern is a RegExp object
-			if (optionsAtom != undefinedAtom) {
-				// ECMA 15.10.4.1 says to throw an error if flags specified
-				toplevel()->throwTypeError(kRegExpFlagsArgumentError);
-			}
-			// Return a clone of the RegExp object
-			RegExpObject* regExpObject = (RegExpObject*)AvmCore::atomToScriptObject(patternAtom);
-			return (new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(regExpObject))->atom();
-		} else {
-			if (patternAtom != undefinedAtom) {
-				pattern = core->string(argv[1]);
-			} else {
-				// cn:  disable this, breaking ecma3 tests.   was: todo look into this. it's what SpiderMonkey does.
-				pattern = core->kEmptyString; //core->newConstantStringLatin1("(?:)");
-			}
-		}
+        Atom patternAtom = (argc>0) ? argv[1] : undefinedAtom;
+        Atom optionsAtom = (argc>1) ? argv[2] : undefinedAtom;
 
-		Stringp options = NULL;
-		if (optionsAtom != undefinedAtom) {
-			options = core->string(optionsAtom);
-		}
+        if (AvmCore::istype(patternAtom, traits()->itraits)) {
+            // Pattern is a RegExp object
+            if (optionsAtom != undefinedAtom) {
+                // ECMA 15.10.4.1 says to throw an error if flags specified
+                toplevel()->throwTypeError(kRegExpFlagsArgumentError);
+            }
+            // Return a clone of the RegExp object
+            RegExpObject* regExpObject = (RegExpObject*)AvmCore::atomToScriptObject(patternAtom);
+            return (new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(regExpObject))->atom();
+        } else {
+            if (patternAtom != undefinedAtom) {
+                pattern = core->string(argv[1]);
+            } else {
+                // cn:  disable this, breaking ecma3 tests.   was: todo look into this. it's what SpiderMonkey does.
+                pattern = core->kEmptyString; //core->newConstantStringLatin1("(?:)");
+            }
+        }
 
-		RegExpObject* inst = new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this, pattern, options);
-		return inst->atom();
-	}
+        Stringp options = NULL;
+        if (optionsAtom != undefinedAtom) {
+            options = core->string(optionsAtom);
+        }
+
+        RegExpObject* inst = new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this, pattern, options);
+        return inst->atom();
+    }
 }

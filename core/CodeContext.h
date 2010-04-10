@@ -46,7 +46,7 @@ namespace avmplus
     // When an AS3 method is called, the AS3 method will ensure that core->codeContext() will return its context.
     class CodeContext : public MMgc::GCObject
     {
-    public:     
+    public:
         virtual ~CodeContext() {}
 #ifdef DEBUGGER
         virtual DomainEnv* domainEnv() const = 0;
@@ -57,7 +57,7 @@ namespace avmplus
     {
     public:
         EnterCodeContext() : m_core(NULL) {}  // support dynamic entry
-        
+
         explicit EnterCodeContext(AvmCore* core, CodeContext* new_cc) : m_core(NULL)
         {
             enter(core,new_cc);
@@ -65,11 +65,11 @@ namespace avmplus
         void enter(AvmCore* core, CodeContext* new_cc)
         {
             AvmAssert(core != NULL);
-            AvmAssert(m_core == NULL); // Don't permit multiple entry.            
+            AvmAssert(m_core == NULL); // Don't permit multiple entry.
             m_core = core;
             m_frame.enter(core, new_cc);
             // fix for https://bugzilla.mozilla.org/show_bug.cgi?id=537980
-            // ensure that dxns has a suitable default value for artifical MethodFrames 
+            // ensure that dxns has a suitable default value for artifical MethodFrames
             m_frame.setDxns(core->publicNamespace);
         }
         ~EnterCodeContext()

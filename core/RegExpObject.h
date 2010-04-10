@@ -42,77 +42,77 @@
 
 namespace avmplus
 {
-	/**
-	 * The RegExpObject class is the C++ implementation of instances
-	 * of the "RegExp" class, as defined in the ECMAScript standard.
-	 */
-	class RegExpObject : public ScriptObject
-	{
-	public:
-		/** This variant is used to create RegExp.prototype	*/
-		RegExpObject(RegExpClass *arrayClass, ScriptObject *delegate);
+    /**
+     * The RegExpObject class is the C++ implementation of instances
+     * of the "RegExp" class, as defined in the ECMAScript standard.
+     */
+    class RegExpObject : public ScriptObject
+    {
+    public:
+        /** This variant is used to create RegExp.prototype */
+        RegExpObject(RegExpClass *arrayClass, ScriptObject *delegate);
 
-		RegExpObject(RegExpClass *type,
-					 Stringp pattern,
-					 Stringp options);
-		
-		/* Copy constructor */			 
-		RegExpObject(RegExpObject *toCopy);
-		
-		~RegExpObject();
+        RegExpObject(RegExpClass *type,
+                     Stringp pattern,
+                     Stringp options);
 
-		// call is implicit exec
-		// atom[0] = this
-		// atom[1] = arg1
-		// atom[argc] = argN
-		Atom call(int argc, Atom* argv);
+        /* Copy constructor */
+        RegExpObject(RegExpObject *toCopy);
 
-		int search(Stringp subject);
-		ArrayObject* split(Stringp subject, uint32 limit);
-		ArrayObject* match(Stringp subject);
-		
-		Atom AS3_exec(Stringp subject);
-		Atom replace(Stringp subject, Stringp replacement);
-		Atom replace(Stringp subject, ScriptObject *replaceFunction);
+        ~RegExpObject();
 
-		Stringp get_source() const { return m_source; }
-		bool get_global() const { return m_global; }
-		int get_lastIndex() const { return m_lastIndex; }
-		void set_lastIndex(int newIndex) { m_lastIndex = newIndex; }
-		inline bool hasOption(int mask) { return (m_optionFlags&mask) != 0; }
-		bool get_ignoreCase();
-		bool get_multiline();
-		bool get_dotall();
-		bool get_extended();
-		
-	private:
-		DRCWB(Stringp) m_source;
-		bool           m_global;
-		int            m_lastIndex;
-		int            m_optionFlags;
-		bool           m_hasNamedGroups;
-		void*          m_pcreInst;
+        // call is implicit exec
+        // atom[0] = this
+        // atom[1] = arg1
+        // atom[argc] = argN
+        Atom call(int argc, Atom* argv);
 
-		Atom stringFromUTF8(const char *buffer, int len);
+        int search(Stringp subject);
+        ArrayObject* split(Stringp subject, uint32 limit);
+        ArrayObject* match(Stringp subject);
 
-		ArrayObject* _exec(Stringp subject, StIndexableUTF8String& utf8Subject);
-		
-		ArrayObject* _exec(Stringp subject,
-						  StIndexableUTF8String& utf8Subject,
-						  int startIndex,
-						  int& matchIndex,
-						  int& matchLen);
-		
-		void fixReplaceLastIndex(const char *src,
-								 int subjectLength,
-								 int matchLen,
-								 int& newLastIndex,
-								 StringBuffer& resultBuffer);
+        Atom AS3_exec(Stringp subject);
+        Atom replace(Stringp subject, Stringp replacement);
+        Atom replace(Stringp subject, ScriptObject *replaceFunction);
 
-		int numBytesInUtf8Character(const uint8 *in);
-		
-		DECLARE_SLOTS_RegExpObject;
-	};
+        Stringp get_source() const { return m_source; }
+        bool get_global() const { return m_global; }
+        int get_lastIndex() const { return m_lastIndex; }
+        void set_lastIndex(int newIndex) { m_lastIndex = newIndex; }
+        inline bool hasOption(int mask) { return (m_optionFlags&mask) != 0; }
+        bool get_ignoreCase();
+        bool get_multiline();
+        bool get_dotall();
+        bool get_extended();
+
+    private:
+        DRCWB(Stringp) m_source;
+        bool           m_global;
+        int            m_lastIndex;
+        int            m_optionFlags;
+        bool           m_hasNamedGroups;
+        void*          m_pcreInst;
+
+        Atom stringFromUTF8(const char *buffer, int len);
+
+        ArrayObject* _exec(Stringp subject, StIndexableUTF8String& utf8Subject);
+
+        ArrayObject* _exec(Stringp subject,
+                          StIndexableUTF8String& utf8Subject,
+                          int startIndex,
+                          int& matchIndex,
+                          int& matchLen);
+
+        void fixReplaceLastIndex(const char *src,
+                                 int subjectLength,
+                                 int matchLen,
+                                 int& newLastIndex,
+                                 StringBuffer& resultBuffer);
+
+        int numBytesInUtf8Character(const uint8 *in);
+
+        DECLARE_SLOTS_RegExpObject;
+    };
 }
 
 #endif /* __avmplus_RegExpObject__ */

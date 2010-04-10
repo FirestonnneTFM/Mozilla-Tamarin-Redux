@@ -43,36 +43,36 @@
 
 namespace avmplus
 {
-	/**
-	 * class Object
-	 * base class for all objects in ES4
-	 */
+    /**
+     * class Object
+     * base class for all objects in ES4
+     */
     class ObjectClass : public ClassClosure
     {
-	public:
-		ObjectClass(VTable* cvtable);
+    public:
+        ObjectClass(VTable* cvtable);
 
-		void initPrototype();
-		
-		ScriptObject* construct();
+        void initPrototype();
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
+        ScriptObject* construct();
+
+        // this = argv[0]
+        // arg1 = argv[1]
+        // argN = argv[argc]
         Atom call(int argc, Atom* argv);
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		// native methods
-		bool _hasOwnProperty(Atom thisAtom, Stringp name);
-		bool _isPrototypeOf(Atom thisAtom, Atom other);
-		bool _propertyIsEnumerable(Atom thisAtom, Stringp name);
-		void _setPropertyIsEnumerable(Atom thisAtom, Stringp name, bool enumerable);		
-		Stringp _toString(Atom thisAtom);
-        
+        // native methods
+        bool _hasOwnProperty(Atom thisAtom, Stringp name);
+        bool _isPrototypeOf(Atom thisAtom, Atom other);
+        bool _propertyIsEnumerable(Atom thisAtom, Stringp name);
+        void _setPropertyIsEnumerable(Atom thisAtom, Stringp name, bool enumerable);
+        Stringp _toString(Atom thisAtom);
+
         DECLARE_SLOTS_ObjectClass;
     };
 }

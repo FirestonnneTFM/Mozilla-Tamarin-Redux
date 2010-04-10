@@ -44,91 +44,91 @@
 namespace avmplus
 {
 #if defined FEATURE_NANOJIT
-	class ImtThunkEnv;
+    class ImtThunkEnv;
 
     typedef uintptr_t GprImtThunkProcRetType;
-	
-	typedef GprImtThunkProcRetType (*GprImtThunkProc)(ImtThunkEnv*, int, uint32*, uintptr_t);
+
+    typedef GprImtThunkProcRetType (*GprImtThunkProc)(ImtThunkEnv*, int, uint32*, uintptr_t);
 
 #endif
 
-	class VTable : public MMgc::GCObject
-	{
+    class VTable : public MMgc::GCObject
+    {
 #if defined FEATURE_NANOJIT
-		friend class CodegenLIR;
-		friend class ImtThunkEnv;
+        friend class CodegenLIR;
+        friend class ImtThunkEnv;
 #endif
-	private:
-		MethodEnv* makeMethodEnv(MethodInfo* method, ScopeChain* scope);
+    private:
+        MethodEnv* makeMethodEnv(MethodInfo* method, ScopeChain* scope);
 
 #if defined FEATURE_NANOJIT
-		void resolveImtSlot(uint32_t slot);
+        void resolveImtSlot(uint32_t slot);
 
-		// Helpers for resolveImtSlot
-		void resolveImtSlotFromBase(uint32_t slot);
-		bool resolveImtSlotSelf(uint32_t slot);
+        // Helpers for resolveImtSlot
+        void resolveImtSlotFromBase(uint32_t slot);
+        bool resolveImtSlotSelf(uint32_t slot);
 
-		// return uint64_t, not uintptr_t: see note for GprImtThunkProc
-		static GprImtThunkProcRetType resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
-		static GprImtThunkProcRetType dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
+        // return uint64_t, not uintptr_t: see note for GprImtThunkProc
+        static GprImtThunkProcRetType resolveImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
+        static GprImtThunkProcRetType dispatchImt(ImtThunkEnv* ite, int argc, uint32* ap, uintptr_t iid);
 
-	public:
+    public:
 #if defined FEATURE_NANOJIT
-		// choose a number that is relatively prime to sizeof(MethodInfo)/8
-		// since we use the MethodInfo pointer as the interface method id
-		// smaller = dense table, few large conflict stubs
-		// larger  = sparse table, many small conflict stubs 
+        // choose a number that is relatively prime to sizeof(MethodInfo)/8
+        // since we use the MethodInfo pointer as the interface method id
+        // smaller = dense table, few large conflict stubs
+        // larger  = sparse table, many small conflict stubs
 
-	#ifdef _DEBUG
-		enum { IMT_SIZE = 3 };  // good for testing all code paths
-	#else
-		enum { IMT_SIZE = 7 };  // good for performance
-	#endif
+    #ifdef _DEBUG
+        enum { IMT_SIZE = 3 };  // good for testing all code paths
+    #else
+        enum { IMT_SIZE = 7 };  // good for performance
+    #endif
 #endif // FEATURE_NANOJIT
 
 #endif
 
-	public:
-		VTable(Traits* traits, VTable* base, Toplevel* toplevel);
-		void resolveSignatures(ScopeChain* scope);
+    public:
+        VTable(Traits* traits, VTable* base, Toplevel* toplevel);
+        void resolveSignatures(ScopeChain* scope);
 
-		VTable* newParameterizedVTable(Traits* param_traits, Stringp fullname);
+        VTable* newParameterizedVTable(Traits* param_traits, Stringp fullname);
 
-		size_t getExtraSize() const;
-		MMgc::GC* gc() const;
-		AvmCore* core() const;
-		Toplevel* toplevel() const;
+        size_t getExtraSize() const;
+        MMgc::GC* gc() const;
+        AvmCore* core() const;
+        Toplevel* toplevel() const;
 
 #ifdef AVMPLUS_VERBOSE
-		Stringp format(AvmCore* core) const;
+        Stringp format(AvmCore* core) const;
 #endif
 
 #ifdef DEBUGGER
-		/**
-		 * Basically the same as AvmPlusScriptableObject::bytesUsed().
-		 */
-		uint64_t bytesUsed() const;
+        /**
+         * Basically the same as AvmPlusScriptableObject::bytesUsed().
+         */
+        uint64_t bytesUsed() const;
 #endif
-	
-	// ------------------------ DATA SECTION BEGIN
-	private:
-		Toplevel* const _toplevel;
-	public:
-		DWB(MethodEnv*) init;
-		DWB(VTable*) base;
-		DWB(VTable*) ivtable;
-		Traits* const traits;
-		ScriptObject* (*createInstance)(ClassClosure* cls, VTable* ivtable);
-		bool basecase;
-		bool linked;	// @todo -- surely there's a spare bit we can use for this.
-		bool pad[2];
+
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        Toplevel* const _toplevel;
+    public:
+        DWB(MethodEnv*) init;
+        DWB(VTable*) base;
+        DWB(VTable*) ivtable;
+        Traits* const traits;
+        ScriptObject* (*createInstance)(ClassClosure* cls, VTable* ivtable);
+        bool basecase;
+        bool linked;    // @todo -- surely there's a spare bit we can use for this.
+        bool pad[2];
 
 #if defined FEATURE_NANOJIT
-		ImtThunkEnv* imt[VTable::IMT_SIZE];
+        ImtThunkEnv* imt[VTable::IMT_SIZE];
 #endif
-		MethodEnv* methods[1]; // virtual method table
-	// ------------------------ DATA SECTION END
-	};
+        MethodEnv* methods[1]; // virtual method table
+    // ------------------------ DATA SECTION END
+    };
 }
 
 #endif // __avmplus_VTable__

@@ -43,62 +43,62 @@
 
 namespace avmplus
 {
-	/**
-	 * class Math
-	 */
-	class MathClass : public ClassClosure
-	{
-	public:
-		MathClass(VTable* cvtable);
-		~MathClass() 
-		{ 
-			seed.uValue = 0;
-			seed.uXorMask = 0;
-			seed.uSequenceLength = 0; 
-		}
+    /**
+     * class Math
+     */
+    class MathClass : public ClassClosure
+    {
+    public:
+        MathClass(VTable* cvtable);
+        ~MathClass()
+        {
+            seed.uValue = 0;
+            seed.uXorMask = 0;
+            seed.uSequenceLength = 0;
+        }
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);		
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
+        // this = argv[0]
+        // arg1 = argv[1]
+        // argN = argv[argc]
         Atom call(int argc, Atom* argv);
 
-		double abs(double x);
-		double acos(double x);
-		double asin(double x);
-		double atan(double x);
-		double atan2(double y, double x);
-		double ceil(double x);
-		double cos(double x);
-		double exp(double x);
-		double floor(double x);
-		double log(double x);
-		double pow(double x, double y);
-		double random();
-		double round(double x);
-		double sin(double x);
-		double sqrt(double x);
-		double tan(double x);
-		double _min(double x, double y);
-		double _max(double x, double y);
+        double abs(double x);
+        double acos(double x);
+        double asin(double x);
+        double atan(double x);
+        double atan2(double y, double x);
+        double ceil(double x);
+        double cos(double x);
+        double exp(double x);
+        double floor(double x);
+        double log(double x);
+        double pow(double x, double y);
+        double random();
+        double round(double x);
+        double sin(double x);
+        double sqrt(double x);
+        double tan(double x);
+        double _min(double x, double y);
+        double _max(double x, double y);
 
-		inline double min2(double x, double y) { return _min(x, y); }
-		inline double max2(double x, double y) { return _max(x, y); }
+        inline double min2(double x, double y) { return _min(x, y); }
+        inline double max2(double x, double y) { return _max(x, y); }
 
-		// cn:  max/min declared with rest args so we can implement ES3 spec'd length property of 2
-		//      and still allow any number of arguments.
-		double max(double x, double y, const Atom* argv, uint32_t argc);
-		double min(double x, double y, const Atom* argv, uint32_t argc);
+        // cn:  max/min declared with rest args so we can implement ES3 spec'd length property of 2
+        //      and still allow any number of arguments.
+        double max(double x, double y, const Atom* argv, uint32_t argc);
+        double min(double x, double y, const Atom* argv, uint32_t argc);
 
-	private:
-		TRandomFast seed;
-        
-		DECLARE_SLOTS_MathClass;
-	};
+    private:
+        TRandomFast seed;
+
+        DECLARE_SLOTS_MathClass;
+    };
 }
 
 #endif /* __avmplus_MathClass__ */

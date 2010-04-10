@@ -45,8 +45,8 @@
 namespace avmplus
 {
     using namespace MMgc;
-    
-	Debugger::Debugger(AvmCore *core, TraceLevel tracelevel)
+
+    Debugger::Debugger(AvmCore *core, TraceLevel tracelevel)
         : astrace_console(tracelevel)
         , astrace_callback(TRACE_OFF)
         , in_trace(false)
@@ -60,7 +60,7 @@ namespace avmplus
     Debugger::~Debugger()
     {
     }
-    
+
     void Debugger::stepInto()
     {
     }
@@ -106,7 +106,7 @@ namespace avmplus
     void Debugger::disableAllTracing()
     {
     }
-    
+
     void Debugger::traceMethod(MethodInfo* fnc, bool ignoreArgs)
     {
     }
@@ -145,7 +145,7 @@ namespace avmplus
 
     int AbcFile::sourceCount() const
     {
-        return 0; 
+        return 0;
     }
 
     SourceInfo* AbcFile::sourceAt(int index) const
@@ -153,9 +153,9 @@ namespace avmplus
         return NULL;
     }
 
-    int AbcFile::size() const 
-    { 
-        return 0; 
+    int AbcFile::size() const
+    {
+        return 0;
     }
 
     SourceFile* AbcFile::sourceNamed(Stringp name)
@@ -171,23 +171,23 @@ namespace avmplus
     {
     }
 
-    Stringp SourceFile::name() const 
-    { 
-        return NULL; 
+    Stringp SourceFile::name() const
+    {
+        return NULL;
     }
 
     void SourceFile::addLine(int linenum, MethodInfo* func, int offset)
     {
     }
 
-    int SourceFile::functionCount() const 
-    { 
+    int SourceFile::functionCount() const
+    {
         return 0;
     }
 
-    MethodInfo* SourceFile::functionAt(int index) const 
+    MethodInfo* SourceFile::functionAt(int index) const
     {
-        return NULL; 
+        return NULL;
     }
 
     bool SourceFile::setBreakpoint(int linenum)

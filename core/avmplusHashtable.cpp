@@ -53,111 +53,111 @@ using namespace MMgc;
 // WARNING:
 
 namespace avmplus
-{	
-	void InlineHashtable::initialize(GC *gc, int capacity)
-	{
-		MMGC_STATIC_ASSERT(sizeof(InlineHashtable) == (sizeof(void*) * 2));
+{
+    void InlineHashtable::initialize(GC *gc, int capacity)
+    {
+        MMGC_STATIC_ASSERT(sizeof(InlineHashtable) == (sizeof(void*) * 2));
 
         // isEmpty() requires this, so let's insure it...
-		MMGC_STATIC_ASSERT(EMPTY == 0);
-        
-		capacity = MathUtils::nextPowerOfTwo(capacity);
-		setCapacity(capacity*2);
-		AvmAssert(getCapacity());
-		MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
-		setAtoms((Atom *)gc->Calloc(getCapacity(), sizeof(Atom), GC::kContainsPointers|GC::kZero));
-	}
+        MMGC_STATIC_ASSERT(EMPTY == 0);
 
-	void InlineHashtable::destroy()
-	{
-		Atom* atoms = getAtoms();
-		if(atoms) {
-			GC *gc = GC::GetGC(atoms);
-			AvmCore::decrementAtomRegion(atoms, getCapacity());
-			gc->Free (atoms);
-		}
-		m_atomsAndFlags = 0;
-		m_size = 0;
-		m_logCapacity = 0;
-	}
+        capacity = MathUtils::nextPowerOfTwo(capacity);
+        setCapacity(capacity*2);
+        AvmAssert(getCapacity());
+        MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
+        setAtoms((Atom *)gc->Calloc(getCapacity(), sizeof(Atom), GC::kContainsPointers|GC::kZero));
+    }
 
-	void InlineHashtable::setAtoms(Atom *newAtoms)
-	{
-		GC *gc = GC::GetGC(newAtoms);
-		uintptr_t newVal = uintptr_t(newAtoms) | (m_atomsAndFlags & kAtomFlags);
-		WB(gc, gc->FindBeginningFast(this), &m_atomsAndFlags, (void*)newVal);
-	}
+    void InlineHashtable::destroy()
+    {
+        Atom* atoms = getAtoms();
+        if(atoms) {
+            GC *gc = GC::GetGC(atoms);
+            AvmCore::decrementAtomRegion(atoms, getCapacity());
+            gc->Free (atoms);
+        }
+        m_atomsAndFlags = 0;
+        m_size = 0;
+        m_logCapacity = 0;
+    }
 
-	void InlineHashtable::put(Atom name, Atom value)
-	{   
+    void InlineHashtable::setAtoms(Atom *newAtoms)
+    {
+        GC *gc = GC::GetGC(newAtoms);
+        uintptr_t newVal = uintptr_t(newAtoms) | (m_atomsAndFlags & kAtomFlags);
+        WB(gc, gc->FindBeginningFast(this), &m_atomsAndFlags, (void*)newVal);
+    }
+
+    void InlineHashtable::put(Atom name, Atom value)
+    {
         AvmAssert(name != EMPTY && value != EMPTY);
 
-		Atom* atoms = getAtoms();
-		int i = find(name, atoms, getCapacity());
-		GC *gc = GC::GetGC(atoms);
-		if (removeDontEnumMask(atoms[i]) != name) {
-			AvmAssert(!isFull());			
-			//atoms[i] = name;
-			WBATOM(gc, atoms, &atoms[i], name);
-			m_size++;
-		}
-		//atoms[i+1] = value;
-		WBATOM(gc, atoms, &atoms[i+1], value);
-	}
+        Atom* atoms = getAtoms();
+        int i = find(name, atoms, getCapacity());
+        GC *gc = GC::GetGC(atoms);
+        if (removeDontEnumMask(atoms[i]) != name) {
+            AvmAssert(!isFull());
+            //atoms[i] = name;
+            WBATOM(gc, atoms, &atoms[i], name);
+            m_size++;
+        }
+        //atoms[i+1] = value;
+        WBATOM(gc, atoms, &atoms[i+1], value);
+    }
 
     Atom InlineHashtable::get(Atom name) const
     {
-		int i;
-		const Atom* atoms = getAtoms();
-		return atoms[i = find(name, atoms, getCapacity())] == name ? atoms[i+1] : undefinedAtom;
+        int i;
+        const Atom* atoms = getAtoms();
+        return atoms[i = find(name, atoms, getCapacity())] == name ? atoms[i+1] : undefinedAtom;
     }
 
-	int InlineHashtable::find(Stringp x, const Atom *t, uint32_t tLen) const
-	{
-		AvmAssert(x != NULL);
-		return find(x->atom(), t, tLen);
-	}
+    int InlineHashtable::find(Stringp x, const Atom *t, uint32_t tLen) const
+    {
+        AvmAssert(x != NULL);
+        return find(x->atom(), t, tLen);
+    }
 
-	int InlineHashtable::find(Atom x, const Atom *t, uint32_t m) const
-	{
-		uintptr_t mask = ~(m_atomsAndFlags & kDontEnumBit);
-		x &= mask;
-		
-		#if 0 // debug code to print out the strings we're searching for
-		static int debug =0;
-		if (debug && AvmCore::isString(x))
-		{
-			Stringp s = AvmCore::atomToString(x);
-			AvmDebugMsg (s->c_str(), false);
-			AvmDebugMsg ("\n", false);
-		}
-		#endif
+    int InlineHashtable::find(Atom x, const Atom *t, uint32_t m) const
+    {
+        uintptr_t mask = ~(m_atomsAndFlags & kDontEnumBit);
+        x &= mask;
 
-		uintptr_t bitmask = (m - 1) & ~0x1;
+        #if 0 // debug code to print out the strings we're searching for
+        static int debug =0;
+        if (debug && AvmCore::isString(x))
+        {
+            Stringp s = AvmCore::atomToString(x);
+            AvmDebugMsg (s->c_str(), false);
+            AvmDebugMsg ("\n", false);
+        }
+        #endif
 
-		AvmAssert(x != EMPTY && x != DELETED);
+        uintptr_t bitmask = (m - 1) & ~0x1;
+
+        AvmAssert(x != EMPTY && x != DELETED);
         // this is a quadratic probe but we only hit even numbered slots since those hold keys.
         int n = 7 << 1;
-		#ifdef _DEBUG
-		uint32_t loopCount = 0;
-		#endif
-		// Note: Mask off MSB to avoid negative indices.  Mask off bottom
-		// 3 bits because it doesn't contribute to hash.  Double it
-		// because names, values stored adjacently.
-        uint32_t i = ((0x7FFFFFF8 & x)>>2) & bitmask;  
+        #ifdef _DEBUG
+        uint32_t loopCount = 0;
+        #endif
+        // Note: Mask off MSB to avoid negative indices.  Mask off bottom
+        // 3 bits because it doesn't contribute to hash.  Double it
+        // because names, values stored adjacently.
+        uint32_t i = ((0x7FFFFFF8 & x)>>2) & bitmask;
         Atom k;
         while ((k=t[i]&mask) != x && k != EMPTY)
-		{
-			i = (i + (n += 2)) & bitmask;		// quadratic probe
-			AvmAssert(loopCount++ < m);			// don't scan forever
-		}
-		AvmAssert(i <= ((m-1)&~0x1));
+        {
+            i = (i + (n += 2)) & bitmask;       // quadratic probe
+            AvmAssert(loopCount++ < m);         // don't scan forever
+        }
+        AvmAssert(i <= ((m-1)&~0x1));
         return i;
-	}
-		
-	void InlineHashtable::deletePairAt(int i)
-	{
-		Atom* atoms = getAtoms();
+    }
+
+    void InlineHashtable::deletePairAt(int i)
+    {
+        Atom* atoms = getAtoms();
         // decrement refcount as necessary.
         AvmCore::atomWriteBarrier_dtor(&atoms[i]);
         AvmCore::atomWriteBarrier_dtor(&atoms[i+1]);
@@ -165,24 +165,24 @@ namespace avmplus
         atoms[i] = DELETED;
         atoms[i+1] = DELETED;
         setHasDeletedItems();
-	}
+    }
 
-	Atom InlineHashtable::remove(Atom name)
-	{
-		Atom* atoms = getAtoms();
+    Atom InlineHashtable::remove(Atom name)
+    {
+        Atom* atoms = getAtoms();
         int i = find(name, atoms, getCapacity());
-		Atom val = undefinedAtom;
+        Atom val = undefinedAtom;
         if (removeDontEnumMask(atoms[i]) == name)
         {
-			val = atoms[i+1];
+            val = atoms[i+1];
             deletePairAt(i);
         }
-		return val;
-	}
+        return val;
+    }
 
     int InlineHashtable::rehash(const Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen) const
     {
-		int newSize = 0;
+        int newSize = 0;
         for (int i=0, n=oldlen; i < n; i += 2)
         {
             Atom oldAtom;
@@ -192,151 +192,151 @@ namespace avmplus
                 int j = find(oldAtom, newAtoms, newlen);
                 newAtoms[j] = oldAtom;
                 newAtoms[j+1] = oldAtoms[i+1];
-				newSize++;
-			}
+                newSize++;
+            }
         }
 
-		return newSize;
+        return newSize;
     }
 
-	/**
-		* load factor is 0.75 so we're full if size >= M*0.75
-		* where M = atoms.length/2<br>
+    /**
+        * load factor is 0.75 so we're full if size >= M*0.75
+        * where M = atoms.length/2<br>
         *     size >= M*3/4<br>
         *     4*size >= 3*M<br>
         *     4*size >= 3*atoms.length/2<br>
         *     8*size >= 3*atoms.length<br>
         *     size<<3 >= 3*atoms.length
-		*/
-	/**
-		* load factor is 0.9 so we're full if size >= M*0.9
-		* where M = atoms.length/2<br>
+        */
+    /**
+        * load factor is 0.9 so we're full if size >= M*0.9
+        * where M = atoms.length/2<br>
         *     size >= M*9/10<br>
         *     10*size >= 9*M<br>
         *     10*size >= 9*atoms.length/2<br>
         *     20*size >= 9*atoms.length<br>
-		*/
-	bool InlineHashtable::isFull() const 
-	{ 
-		// This seems to work very well and the Intel compiler converts both the multiplies
-		// into shift+add operations.
-		return uint32_t((5*(m_size+1))) >= uint32_t(2*getCapacity()); // 0.80
-		#if 0
-		//return ((size<<3)+1) >= 3*getCapacity(); // 0.75
-		//return ((40*size)+1) >= 19*getCapacity(); // 0.95
-		//return ((40*size)+1) >= 18*getCapacity(); // 0.90
-		//return ((40*size)+1) >= 17*getCapacity(); // 0.85
-		//return ((40*size)+1) >= 15*getCapacity(); // 0.75
-		//Edwins suggestion - if (size > max - max>>N)) grow  (N = 5, 4, 3, 2)
-		//#define SHIFTFACTOR 4
-		//NOT CORRECT
-		//return ( ( size << SHIFTFACTOR ) + size > (getCapacity() << (SHIFTFACTOR-1)) );
-		#endif
-	}
+        */
+    bool InlineHashtable::isFull() const
+    {
+        // This seems to work very well and the Intel compiler converts both the multiplies
+        // into shift+add operations.
+        return uint32_t((5*(m_size+1))) >= uint32_t(2*getCapacity()); // 0.80
+        #if 0
+        //return ((size<<3)+1) >= 3*getCapacity(); // 0.75
+        //return ((40*size)+1) >= 19*getCapacity(); // 0.95
+        //return ((40*size)+1) >= 18*getCapacity(); // 0.90
+        //return ((40*size)+1) >= 17*getCapacity(); // 0.85
+        //return ((40*size)+1) >= 15*getCapacity(); // 0.75
+        //Edwins suggestion - if (size > max - max>>N)) grow  (N = 5, 4, 3, 2)
+        //#define SHIFTFACTOR 4
+        //NOT CORRECT
+        //return ( ( size << SHIFTFACTOR ) + size > (getCapacity() << (SHIFTFACTOR-1)) );
+        #endif
+    }
 
-	void InlineHashtable::add(Atom name, Atom value, Toplevel* toplevel)
-	{
-		if (isFull())
+    void InlineHashtable::add(Atom name, Atom value, Toplevel* toplevel)
+    {
+        if (isFull())
             grow(toplevel);
-		put(name, value);
-	}
+        put(name, value);
+    }
 
-	void InlineHashtable::grow(Toplevel* toplevel)
-	{
-		// grow the table by 2N+1
-		//     new = 2*old+1 ; old == o.atoms.length/2
-		//         = 2*(o.atoms.length/2)+1
-		//         = o.atoms.length + 1
-		// If we have deleted slots, we don't grow our HT because our rehash will clear
-		// out spots for us. 
-		const uint32_t oldCapacity = getCapacity();
-		const uint32_t newCapacity = hasDeletedItems() ? oldCapacity : MathUtils::nextPowerOfTwo(oldCapacity+1);
-		if (newCapacity > MAX_CAPACITY)
-		{
+    void InlineHashtable::grow(Toplevel* toplevel)
+    {
+        // grow the table by 2N+1
+        //     new = 2*old+1 ; old == o.atoms.length/2
+        //         = 2*(o.atoms.length/2)+1
+        //         = o.atoms.length + 1
+        // If we have deleted slots, we don't grow our HT because our rehash will clear
+        // out spots for us.
+        const uint32_t oldCapacity = getCapacity();
+        const uint32_t newCapacity = hasDeletedItems() ? oldCapacity : MathUtils::nextPowerOfTwo(oldCapacity+1);
+        if (newCapacity > MAX_CAPACITY)
+        {
             if (toplevel != NULL)
                 toplevel->throwError(kOutOfMemoryError);
-            else 
+            else
                 GCHeap::SignalObjectTooLarge();
-		}
-		const Atom* atoms = getAtoms();
-		GC* gc = GC::GetGC(atoms);
-		MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
-		Atom* newAtoms = (Atom*)gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers|GC::kZero);
-		m_size = rehash(atoms, oldCapacity, newAtoms, newCapacity);
-		gc->Free(atoms);
-		setAtoms(newAtoms);
-		setCapacity(newCapacity);
-		clrHasDeletedItems();
-	}
-
-	// call this method using the previous value returned
-	// by this method starting with 0, until 0 is returned.
-	int InlineHashtable::next(int index)
-	{
-		if (index != 0) {
-			index = index<<1;
-		}
-		// Advance to first non-empty slot.
-		const Atom* atoms = getAtoms();
-		int cap = getCapacity();
-		while (index < cap) {
-			if (enumerable(atoms[index])) {
-				return (index>>1)+1;
-			}
-			index += 2;
-		}
-		return 0;
-	}
-
-	bool InlineHashtable::getAtomPropertyIsEnumerable(Atom name) const
-	{
-		if (hasDontEnumSupport())
-		{
-			const Atom* atoms = getAtoms();
-			int i = find(name, atoms, getCapacity());
-			if (Atom(atoms[i]&~kDontEnumBit) == name)
-			{
-				return (atoms[i]&kDontEnumBit) == 0;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else
-		{
-			return contains(name);
-		}
-	}
-
-	void InlineHashtable::setAtomPropertyIsEnumerable(Atom name, bool enumerable)
-	{
-		if (hasDontEnumSupport())
-		{
-			Atom* atoms = getAtoms();
-			int i = find(name, atoms, getCapacity());
-			if (Atom(atoms[i]&~kDontEnumBit) == name)
-			{
-				atoms[i] = (atoms[i]&~kDontEnumBit) | (enumerable ? 0 : kDontEnumBit);
-			}
-		}
-	}
-
-    /*virtual*/ HeapHashtableRC::~HeapHashtableRC() 
-    { 
-        ht.destroy(); 
+        }
+        const Atom* atoms = getAtoms();
+        GC* gc = GC::GetGC(atoms);
+        MMGC_MEM_TYPE(gc->FindBeginningGuarded(this));
+        Atom* newAtoms = (Atom*)gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+        m_size = rehash(atoms, oldCapacity, newAtoms, newCapacity);
+        gc->Free(atoms);
+        setAtoms(newAtoms);
+        setCapacity(newCapacity);
+        clrHasDeletedItems();
     }
-	
-    /*virtual*/ HeapHashtable::~HeapHashtable() 
-    { 
-        ht.destroy(); 
+
+    // call this method using the previous value returned
+    // by this method starting with 0, until 0 is returned.
+    int InlineHashtable::next(int index)
+    {
+        if (index != 0) {
+            index = index<<1;
+        }
+        // Advance to first non-empty slot.
+        const Atom* atoms = getAtoms();
+        int cap = getCapacity();
+        while (index < cap) {
+            if (enumerable(atoms[index])) {
+                return (index>>1)+1;
+            }
+            index += 2;
+        }
+        return 0;
     }
-    
+
+    bool InlineHashtable::getAtomPropertyIsEnumerable(Atom name) const
+    {
+        if (hasDontEnumSupport())
+        {
+            const Atom* atoms = getAtoms();
+            int i = find(name, atoms, getCapacity());
+            if (Atom(atoms[i]&~kDontEnumBit) == name)
+            {
+                return (atoms[i]&kDontEnumBit) == 0;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return contains(name);
+        }
+    }
+
+    void InlineHashtable::setAtomPropertyIsEnumerable(Atom name, bool enumerable)
+    {
+        if (hasDontEnumSupport())
+        {
+            Atom* atoms = getAtoms();
+            int i = find(name, atoms, getCapacity());
+            if (Atom(atoms[i]&~kDontEnumBit) == name)
+            {
+                atoms[i] = (atoms[i]&~kDontEnumBit) | (enumerable ? 0 : kDontEnumBit);
+            }
+        }
+    }
+
+    /*virtual*/ HeapHashtableRC::~HeapHashtableRC()
+    {
+        ht.destroy();
+    }
+
+    /*virtual*/ HeapHashtable::~HeapHashtable()
+    {
+        ht.destroy();
+    }
+
     /*virtual*/ int HeapHashtable::next(int index)
     {
-        return ht.next(index); 
+        return ht.next(index);
     }
-    
+
     /*virtual*/ void HeapHashtable::add(Atom name, Atom value, Toplevel* toplevel /*=NULL*/)
     {
         ht.add(name, value, toplevel);
@@ -394,133 +394,133 @@ namespace avmplus
         return true;
     }
 
-	Atom WeakKeyHashtable::getKey(Atom key) const
-	{
-		// this gets a weak ref number, ie double keys, okay I guess
-		if(AvmCore::isPointer(key)) {
-			// Don't know if key is GCObject or GCFinalizedObject so can't go via the
-			// GetWeakRef methods on those classes; go directly to GC
-			GCWeakRef *weakRef = GC::GetWeakRef(atomPtr(key));
-			key = AvmCore::genericObjectToAtom(weakRef);
-		}
-		return key;
-	}
-
-	/*virtual*/ void WeakKeyHashtable::add(Atom key, Atom value, Toplevel* toplevel)
-	{
-		if (ht.isFull()) {
-			prune();
-            ht.grow(toplevel);
-		}
-		ht.put(getKey(key), value);
-	}
-
-	void WeakKeyHashtable::prune()
-	{
-		Atom* atoms = ht.getAtoms();
-		for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
-			if(AvmCore::isGenericObject(atoms[i])) {
-				GCWeakRef *ref = (GCWeakRef*)AvmCore::atomToGenericObject(atoms[i]);
-				if(ref && ref->get() == NULL) {
-                    ht.deletePairAt(i);
-				}
-			}
-		}
-	}
-
-	/*virtual*/ int WeakKeyHashtable::next(int index)
+    Atom WeakKeyHashtable::getKey(Atom key) const
     {
-		if (index != 0) {
-			index = index<<1;
-		}
-		// Advance to first non-empty slot.
-		Atom* const atoms = ht.getAtoms();
-		int const cap = ht.getCapacity();
-		while (index < cap) 
+        // this gets a weak ref number, ie double keys, okay I guess
+        if(AvmCore::isPointer(key)) {
+            // Don't know if key is GCObject or GCFinalizedObject so can't go via the
+            // GetWeakRef methods on those classes; go directly to GC
+            GCWeakRef *weakRef = GC::GetWeakRef(atomPtr(key));
+            key = AvmCore::genericObjectToAtom(weakRef);
+        }
+        return key;
+    }
+
+    /*virtual*/ void WeakKeyHashtable::add(Atom key, Atom value, Toplevel* toplevel)
+    {
+        if (ht.isFull()) {
+            prune();
+            ht.grow(toplevel);
+        }
+        ht.put(getKey(key), value);
+    }
+
+    void WeakKeyHashtable::prune()
+    {
+        Atom* atoms = ht.getAtoms();
+        for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
+            if(AvmCore::isGenericObject(atoms[i])) {
+                GCWeakRef *ref = (GCWeakRef*)AvmCore::atomToGenericObject(atoms[i]);
+                if(ref && ref->get() == NULL) {
+                    ht.deletePairAt(i);
+                }
+            }
+        }
+    }
+
+    /*virtual*/ int WeakKeyHashtable::next(int index)
+    {
+        if (index != 0) {
+            index = index<<1;
+        }
+        // Advance to first non-empty slot.
+        Atom* const atoms = ht.getAtoms();
+        int const cap = ht.getCapacity();
+        while (index < cap)
         {
-			Atom const a = atoms[index];
-            if (AvmCore::isGenericObject(a)) 
+            Atom const a = atoms[index];
+            if (AvmCore::isGenericObject(a))
             {
                 GCWeakRef* weakRef = (GCWeakRef*)AvmCore::atomToGenericObject(a);
                 if (weakRef->get())
                     return (index>>1)+1;
-                
+
                 ht.deletePairAt(index);
-            } 
-			else if (ht.enumerable(a)) 
+            }
+            else if (ht.enumerable(a))
             {
-				return (index>>1)+1;
-			}
-			index += 2;
-		}
-		return 0;
-    }
-	
-	Atom WeakValueHashtable::getValue(Atom key, Atom value)
-	{
-		if(AvmCore::isGenericObject(value)) {
-			GCWeakRef *wr = (GCWeakRef*)AvmCore::atomToGenericObject(value);
-			if(wr->get() != NULL) {
-				// note wr could be a pointer to a double, that's what this is for
-				Atom* atoms = ht.getAtoms();
-				if(GC::GetGC(atoms)->IsRCObject(wr->get())) {
-					union {
-						GCObject* o;
-						AvmPlusScriptableObject* so;
-					};
-					o = wr->get();
-					value = so->toAtom();
-				} else {
-					AvmAssert(false);
-				}
-			} else {
-				remove(key);
-				value = undefinedAtom;
-			}
-		}
-		return value;
-	}
-
-	/*virtual*/ void WeakValueHashtable::add(Atom key, Atom value, Toplevel* toplevel)
-	{
-		if (ht.isFull()) {
-			prune();
-			ht.grow(toplevel);
-		}
-		if(AvmCore::isPointer(value)) {
-			// Don't know if value is GCObject or GCFinalizedObject so can't go via the
-			// GetWeakRef methods on those classes; go directly to GC
-			GCWeakRef *wf = GC::GetWeakRef(atomPtr(value));
-			value = AvmCore::genericObjectToAtom(wf);
-		}
-		ht.put(key, value);
-	}
-
-    /*virtual*/ Atom WeakValueHashtable::get(Atom key) 
-    { 
-        return getValue(key, ht.get(key)); 
-    }
-    
-    /*virtual*/ Atom WeakValueHashtable::remove(Atom key) 
-    { 
-        return getValue(key, ht.remove(key)); 
-    }
-    
-    /*virtual*/ bool WeakValueHashtable::weakValues() const 
-    { 
-        return true; 
+                return (index>>1)+1;
+            }
+            index += 2;
+        }
+        return 0;
     }
 
-	void WeakValueHashtable::prune()
-	{
-		Atom* atoms = ht.getAtoms();
-		for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
-			if(AvmCore::isPointer(atoms[i+1])) {
-				GCWeakRef *ref = (GCWeakRef*)atomPtr(atoms[i+1]);
-				if(ref && ref->get() == NULL) {
+    Atom WeakValueHashtable::getValue(Atom key, Atom value)
+    {
+        if(AvmCore::isGenericObject(value)) {
+            GCWeakRef *wr = (GCWeakRef*)AvmCore::atomToGenericObject(value);
+            if(wr->get() != NULL) {
+                // note wr could be a pointer to a double, that's what this is for
+                Atom* atoms = ht.getAtoms();
+                if(GC::GetGC(atoms)->IsRCObject(wr->get())) {
+                    union {
+                        GCObject* o;
+                        AvmPlusScriptableObject* so;
+                    };
+                    o = wr->get();
+                    value = so->toAtom();
+                } else {
+                    AvmAssert(false);
+                }
+            } else {
+                remove(key);
+                value = undefinedAtom;
+            }
+        }
+        return value;
+    }
+
+    /*virtual*/ void WeakValueHashtable::add(Atom key, Atom value, Toplevel* toplevel)
+    {
+        if (ht.isFull()) {
+            prune();
+            ht.grow(toplevel);
+        }
+        if(AvmCore::isPointer(value)) {
+            // Don't know if value is GCObject or GCFinalizedObject so can't go via the
+            // GetWeakRef methods on those classes; go directly to GC
+            GCWeakRef *wf = GC::GetWeakRef(atomPtr(value));
+            value = AvmCore::genericObjectToAtom(wf);
+        }
+        ht.put(key, value);
+    }
+
+    /*virtual*/ Atom WeakValueHashtable::get(Atom key)
+    {
+        return getValue(key, ht.get(key));
+    }
+
+    /*virtual*/ Atom WeakValueHashtable::remove(Atom key)
+    {
+        return getValue(key, ht.remove(key));
+    }
+
+    /*virtual*/ bool WeakValueHashtable::weakValues() const
+    {
+        return true;
+    }
+
+    void WeakValueHashtable::prune()
+    {
+        Atom* atoms = ht.getAtoms();
+        for(int i=0, n=ht.getCapacity(); i<n; i+=2) {
+            if(AvmCore::isPointer(atoms[i+1])) {
+                GCWeakRef *ref = (GCWeakRef*)atomPtr(atoms[i+1]);
+                if(ref && ref->get() == NULL) {
                     ht.deletePairAt(i);
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 }

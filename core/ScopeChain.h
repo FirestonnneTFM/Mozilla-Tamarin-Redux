@@ -41,96 +41,96 @@
 namespace avmplus
 {
 
-	/**
-	 * type descriptor for a captured scope chain
-	 *
-	 * Note: ScopeTypeChain is now immutable; once created it cannot be modified
-	 */
-	class ScopeTypeChain : public MMgc::GCObject
-	{
-	private:
-		ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits);
-		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra);
+    /**
+     * type descriptor for a captured scope chain
+     *
+     * Note: ScopeTypeChain is now immutable; once created it cannot be modified
+     */
+    class ScopeTypeChain : public MMgc::GCObject
+    {
+    private:
+        ScopeTypeChain(int32_t _size, int32_t _fullsize, Traits* traits);
+        static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra);
 
-	public:
+    public:
 
-		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra);
+        static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra);
 #ifdef VMCFG_AOT
-		static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra);
+        static const ScopeTypeChain* create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra);
 #endif
-		static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits);
+        static const ScopeTypeChain* createEmpty(MMgc::GC* gc, Traits* traits);
 
-		const ScopeTypeChain* cloneWithNewTraits(MMgc::GC* gc, Traits* traits) const;
-		Traits* traits() const;
-		Traits* getScopeTraitsAt(uint32_t i) const;
-		bool getScopeIsWithAt(uint32_t i) const;
+        const ScopeTypeChain* cloneWithNewTraits(MMgc::GC* gc, Traits* traits) const;
+        Traits* traits() const;
+        Traits* getScopeTraitsAt(uint32_t i) const;
+        bool getScopeIsWithAt(uint32_t i) const;
 
-		#if VMCFG_METHOD_NAMES
-		Stringp format(AvmCore* core) const;
-		#endif
-        
+        #if VMCFG_METHOD_NAMES
+        Stringp format(AvmCore* core) const;
+        #endif
+
         bool equals(const ScopeTypeChain* that) const;
 
-	private:
-		void setScopeAt(uint32_t i, Traits* t, bool w);
+    private:
+        void setScopeAt(uint32_t i, Traits* t, bool w);
 
-		// Traits are MMgc-allocated, thus always 8-byte-aligned, so the low 3 bits are available for us to use
-		static const uintptr_t ISWITH = 0x01;
+        // Traits are MMgc-allocated, thus always 8-byte-aligned, so the low 3 bits are available for us to use
+        static const uintptr_t ISWITH = 0x01;
 
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		const int32_t		size;
-		const int32_t		fullsize;
-	private:
-		Traits* const		_traits;
-		uintptr_t			_scopes[1];	// actual length = fullsize;
-	// ------------------------ DATA SECTION END
+    // ------------------------ DATA SECTION BEGIN
+    public:
+        const int32_t       size;
+        const int32_t       fullsize;
+    private:
+        Traits* const       _traits;
+        uintptr_t           _scopes[1]; // actual length = fullsize;
+    // ------------------------ DATA SECTION END
     };
 
-	/**
-	* a captured scope chain
-	*/
-	class ScopeChain : public MMgc::GCObject
-	{
-		ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns);
+    /**
+    * a captured scope chain
+    */
+    class ScopeChain : public MMgc::GCObject
+    {
+        ScopeChain(VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, Namespacep dxns);
 
-		#if defined FEATURE_NANOJIT
-		friend class CodegenLIR;
+        #if defined FEATURE_NANOJIT
+        friend class CodegenLIR;
         friend class MopsRangeCheckFilter;
-		#endif
+        #endif
 
-	public:
+    public:
 
-		/*
-			dxns is modelled as a variable on an activation object.  The activation
-			object will be in several scope chains, so we can't store dxns in the SC.
-			When it changes, it's new valuable is visible in all closures in scope.
-		*/
-		
-		static ScopeChain* create(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, const ScopeChain* outer, Namespacep dxns);
+        /*
+            dxns is modelled as a variable on an activation object.  The activation
+            object will be in several scope chains, so we can't store dxns in the SC.
+            When it changes, it's new valuable is visible in all closures in scope.
+        */
 
-		ScopeChain* cloneWithNewVTable(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits = NULL);
+        static ScopeChain* create(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, const ScopeChain* outer, Namespacep dxns);
 
-		VTable* vtable() const;
-		AbcEnv* abcEnv() const;
-		const ScopeTypeChain* scopeTraits() const;
-		int32_t getSize() const;
-		Atom getScope(int32_t i) const;
-		void setScope(MMgc::GC* gc, int32_t i, Atom value);
-		Namespacep getDefaultNamespace() const;
+        ScopeChain* cloneWithNewVTable(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits = NULL);
 
-		#if VMCFG_METHOD_NAMES
-		Stringp format(AvmCore* core) const;
-		#endif
+        VTable* vtable() const;
+        AbcEnv* abcEnv() const;
+        const ScopeTypeChain* scopeTraits() const;
+        int32_t getSize() const;
+        Atom getScope(int32_t i) const;
+        void setScope(MMgc::GC* gc, int32_t i, Atom value);
+        Namespacep getDefaultNamespace() const;
 
-	// ------------------------ DATA SECTION BEGIN
-	private:
-		VTable* const					_vtable;
-		AbcEnv* const					_abcEnv;
-		const ScopeTypeChain* const		_scopeTraits;
-		DRCWB(Namespacep) const			_defaultXmlNamespace;
-		Atom							_scopes[1];			// actual length == size
-	// ------------------------ DATA SECTION END
+        #if VMCFG_METHOD_NAMES
+        Stringp format(AvmCore* core) const;
+        #endif
+
+    // ------------------------ DATA SECTION BEGIN
+    private:
+        VTable* const                   _vtable;
+        AbcEnv* const                   _abcEnv;
+        const ScopeTypeChain* const     _scopeTraits;
+        DRCWB(Namespacep) const         _defaultXmlNamespace;
+        Atom                            _scopes[1];         // actual length == size
+    // ------------------------ DATA SECTION END
     };
-	
+
 }

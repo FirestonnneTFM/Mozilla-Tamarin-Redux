@@ -43,20 +43,20 @@
 
 namespace avmplus
 {
-	ClassClass::ClassClass(VTable* cvtable)
-		: ClassClosure(cvtable)
-	{
-		toplevel()->classClass = this;
+    ClassClass::ClassClass(VTable* cvtable)
+        : ClassClosure(cvtable)
+    {
+        toplevel()->classClass = this;
 
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(ClassClass));
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(ClassClass));
 
-		createVanillaPrototype();
-	}
+        createVanillaPrototype();
+    }
 
-	Atom ClassClass::construct(int /*argc*/, Atom* /*argv*/)
-	{
-		Multiname multiname(core()->getAnyPublicNamespace(), core()->internConstantStringLatin1("Class$"));
-		toplevel()->throwTypeError(kNotConstructorError, core()->toErrorString(&multiname));
-		return nullObjectAtom;
-	}
+    Atom ClassClass::construct(int /*argc*/, Atom* /*argv*/)
+    {
+        Multiname multiname(core()->getAnyPublicNamespace(), core()->internConstantStringLatin1("Class$"));
+        toplevel()->throwTypeError(kNotConstructorError, core()->toErrorString(&multiname));
+        return nullObjectAtom;
+    }
 }

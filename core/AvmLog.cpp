@@ -41,15 +41,15 @@
 
 namespace avmplus
 {
-	void AvmLog(const char* format, ...)
-	{
-		va_list args;
-		va_start(args, format);
+    void AvmLog(const char* format, ...)
+    {
+        va_list args;
+        va_start(args, format);
 
-		char buf[2048];
-		VMPI_vsnprintf(buf, sizeof(buf), format, args);
-		va_end(args);
+        char buf[2048];
+        VMPI_vsnprintf(buf, sizeof(buf), format, args);
+        va_end(args);
 
-		VMPI_log(buf);
-	}
+        VMPI_log(buf);
+    }
 }

@@ -43,29 +43,29 @@
 
 namespace avmplus
 {
-	/**
-	 * class Boolean
-	 */
-	class BooleanClass : public ClassClosure
-	{
-	public:
-		BooleanClass(VTable* vtable);
+    /**
+     * class Boolean
+     */
+    class BooleanClass : public ClassClosure
+    {
+    public:
+        BooleanClass(VTable* vtable);
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
 
-		// this = argv[0]
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom call(int argc, Atom* argv)
-		{
-			return construct(argc, argv);
-		}
-        
-		DECLARE_SLOTS_BooleanClass;
-	};
+        // this = argv[0]
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom call(int argc, Atom* argv)
+        {
+            return construct(argc, argv);
+        }
+
+        DECLARE_SLOTS_BooleanClass;
+    };
 }
 
 #endif /* __avmplus_BooleanClass__ */

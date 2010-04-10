@@ -43,22 +43,22 @@
 
 namespace avmplus
 {
-	/**
-	 * class Class - the builtin Class that defines the type of each user defined class
-	 * and all other builtin classes.  (not to be confused with a superclass).
-	 */
-	class ClassClass : public ClassClosure
-	{
-	public:
-		ClassClass(VTable* cvtable);
+    /**
+     * class Class - the builtin Class that defines the type of each user defined class
+     * and all other builtin classes.  (not to be confused with a superclass).
+     */
+    class ClassClass : public ClassClosure
+    {
+    public:
+        ClassClass(VTable* cvtable);
 
-		// this = argv[0] (ignored)
-		// arg1 = argv[1]
-		// argN = argv[argc]
-		Atom construct(int argc, Atom* argv);
-        
-		DECLARE_SLOTS_ClassClass;
-	};
+        // this = argv[0] (ignored)
+        // arg1 = argv[1]
+        // argN = argv[argc]
+        Atom construct(int argc, Atom* argv);
+
+        DECLARE_SLOTS_ClassClass;
+    };
 }
 
 #endif /* __avmplus_ClassClass__ */

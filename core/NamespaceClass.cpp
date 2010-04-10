@@ -43,49 +43,49 @@
 
 namespace avmplus
 {
-	NamespaceClass::NamespaceClass(VTable* cvtable)
-		: ClassClosure(cvtable)
-	{
-		toplevel()->namespaceClass = this;
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(NamespaceClass));
-		createVanillaPrototype();
-	}
+    NamespaceClass::NamespaceClass(VTable* cvtable)
+        : ClassClosure(cvtable)
+    {
+        toplevel()->namespaceClass = this;
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(NamespaceClass));
+        createVanillaPrototype();
+    }
 
 
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom NamespaceClass::construct(int argc, Atom* argv)
-	{
-		AvmCore* core = this->core();
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom NamespaceClass::construct(int argc, Atom* argv)
+    {
+        AvmCore* core = this->core();
 
-		// See E4X 13.2.2, pg 65
-		if (argc < 1)
-			return core->newNamespace(core->kEmptyString->atom())->atom();
-		else if (argc == 1)
-			return core->newNamespace(argv[1])->atom();
-		else
-		{
-			// Rhino throws an error when prefix is specified and uri is not a valid string
-			String *p = core->string (argv[1]);
-			String *u = core->string (argv[2]);
-			if (p->length() && !u->length())
-			{
-				toplevel()->throwTypeError(kXMLNamespaceWithPrefixAndNoURI, p);
-			}
+        // See E4X 13.2.2, pg 65
+        if (argc < 1)
+            return core->newNamespace(core->kEmptyString->atom())->atom();
+        else if (argc == 1)
+            return core->newNamespace(argv[1])->atom();
+        else
+        {
+            // Rhino throws an error when prefix is specified and uri is not a valid string
+            String *p = core->string (argv[1]);
+            String *u = core->string (argv[2]);
+            if (p->length() && !u->length())
+            {
+                toplevel()->throwTypeError(kXMLNamespaceWithPrefixAndNoURI, p);
+            }
 
-			return core->newNamespace(argv[1], argv[2])->atom();
-		}
-	}
+            return core->newNamespace(argv[1], argv[2])->atom();
+        }
+    }
 
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom NamespaceClass::call(int argc, Atom* argv)
-	{
-		if ((argc == 1) && (core()->isNamespace(argv[1])))
-			return argv[1];
-		else
-			return construct (argc, argv);
-	}
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom NamespaceClass::call(int argc, Atom* argv)
+    {
+        if ((argc == 1) && (core()->isNamespace(argv[1])))
+            return argv[1];
+        else
+            return construct (argc, argv);
+    }
 }

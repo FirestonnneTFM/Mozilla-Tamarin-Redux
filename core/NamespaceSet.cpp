@@ -42,42 +42,42 @@
 
 namespace avmplus
 {
-	/*static*/ NamespaceSet* NamespaceSet::_create(MMgc::GC* gc, uint32_t count)
-	{
+    /*static*/ NamespaceSet* NamespaceSet::_create(MMgc::GC* gc, uint32_t count)
+    {
         AvmAssert(count <= 0x7fffffff); // should be impossible since ABC only allow U30...
-		size_t extra = (count >= 1 ? count-1 : 0)*sizeof(Namespacep);
-		NamespaceSet* nsset = new (gc, extra) NamespaceSet;
+        size_t extra = (count >= 1 ? count-1 : 0)*sizeof(Namespacep);
+        NamespaceSet* nsset = new (gc, extra) NamespaceSet;
         nsset->_countAndFlags = count<<1;
         return nsset;
-	}
+    }
 
-	/*static*/ const NamespaceSet* NamespaceSet::create(MMgc::GC* gc, Namespacep ns)
-	{
-		NamespaceSet* nsset = new (gc) NamespaceSet;
+    /*static*/ const NamespaceSet* NamespaceSet::create(MMgc::GC* gc, Namespacep ns)
+    {
+        NamespaceSet* nsset = new (gc) NamespaceSet;
         nsset->_countAndFlags = (1<<1) | (ns->isPublic() ? 1 : 0);
         nsset->_namespaces[0] = ns;
         return nsset;
-	}
+    }
 
 //#ifdef AVMPLUS_VERBOSE
-	// Made available in non-AVMPLUS_VERBOSE builds for describeType
-	Stringp NamespaceSet::format(AvmCore* core) const
-	{
-		Stringp s = core->newConstantStringLatin1("{");
+    // Made available in non-AVMPLUS_VERBOSE builds for describeType
+    Stringp NamespaceSet::format(AvmCore* core) const
+    {
+        Stringp s = core->newConstantStringLatin1("{");
         bool comma = false;
-		for (NamespaceSetIterator iter(this); iter.hasNext();) 
-		{
+        for (NamespaceSetIterator iter(this); iter.hasNext();)
+        {
             if (comma)
-				s = core->concatStrings(s, core->newConstantStringLatin1(","));
+                s = core->concatStrings(s, core->newConstantStringLatin1(","));
             Namespacep ns = iter.next();
-			if (ns->isPublic())
-				s = core->concatStrings(s, core->newConstantStringLatin1("public"));
-			else
-				s = core->concatStrings(s, ns->getURI());
-			comma = true;
-		}
-		s = core->concatStrings(s, core->newConstantStringLatin1("}"));
-		return s;
-	}
+            if (ns->isPublic())
+                s = core->concatStrings(s, core->newConstantStringLatin1("public"));
+            else
+                s = core->concatStrings(s, ns->getURI());
+            comma = true;
+        }
+        s = core->concatStrings(s, core->newConstantStringLatin1("}"));
+        return s;
+    }
 //#endif
 }

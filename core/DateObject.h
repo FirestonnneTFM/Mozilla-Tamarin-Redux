@@ -43,85 +43,85 @@
 
 namespace avmplus
 {
-	/**
-	 * The DateObject class is the C++ implementation of instances
-	 * of the Date class in the ECMA-262 Specification.
-	 */
-	class DateObject : public ScriptObject
-	{
-	public:
-		Date date;
+    /**
+     * The DateObject class is the C++ implementation of instances
+     * of the Date class in the ECMA-262 Specification.
+     */
+    class DateObject : public ScriptObject
+    {
+    public:
+        Date date;
 
-		/**
-		 * This variant is only used for creating the prototype
-		 */
-		DateObject(DateClass *type, ScriptObject *objectPrototype)
-			: ScriptObject(type->ivtable(), objectPrototype)
-		{
-			SAMPLE_FRAME("Date", core());
-			AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
-			date.setTime(MathUtils::kNaN);  // Date.prototype should be the "Invalid Date"
-		}
+        /**
+         * This variant is only used for creating the prototype
+         */
+        DateObject(DateClass *type, ScriptObject *objectPrototype)
+            : ScriptObject(type->ivtable(), objectPrototype)
+        {
+            SAMPLE_FRAME("Date", core());
+            AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
+            date.setTime(MathUtils::kNaN);  // Date.prototype should be the "Invalid Date"
+        }
 
-		/**
-		 * This variant is used for creating all dates other
-		 * than Date.prototype
-		 */
-		DateObject(DateClass *type, const Date& date)
-			: ScriptObject(type->ivtable(), type->prototypePtr())
-		{
-			AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
-			this->date = date;
-		}
-		
-		// renamed to avoid hiding ScriptObject::toString
-		Stringp _toString(int index);
-		double AS3_valueOf();
-		double _setTime(double value);
-		double _get(int index);
-		double _set(int index, Atom* argv, int argc);
+        /**
+         * This variant is used for creating all dates other
+         * than Date.prototype
+         */
+        DateObject(DateClass *type, const Date& date)
+            : ScriptObject(type->ivtable(), type->prototypePtr())
+        {
+            AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
+            this->date = date;
+        }
 
-		double AS3_getUTCFullYear() { return _get(Date::kUTCFullYear); }
-		double AS3_getUTCMonth() { return _get(Date::kUTCMonth); }
-		double AS3_getUTCDate() { return _get(Date::kUTCDate); }
-		double AS3_getUTCDay() { return _get(Date::kUTCDay); }
-		double AS3_getUTCHours() { return _get(Date::kUTCHours); }
-		double AS3_getUTCMinutes() { return _get(Date::kUTCMinutes); }
-		double AS3_getUTCSeconds() { return _get(Date::kUTCSeconds); }
-		double AS3_getUTCMilliseconds() { return _get(Date::kUTCMilliseconds); }
-		double AS3_getFullYear() { return _get(Date::kFullYear); }
-		double AS3_getMonth() { return _get(Date::kMonth); }
-		double AS3_getDate() { return _get(Date::kDate); }
-		double AS3_getDay() { return _get(Date::kDay); }
-		double AS3_getHours() { return _get(Date::kHours); }
-		double AS3_getMinutes() { return _get(Date::kMinutes); }
-		double AS3_getSeconds() { return _get(Date::kSeconds); }
-		double AS3_getMilliseconds() { return _get(Date::kMilliseconds); }
-		double AS3_getTimezoneOffset() { return _get(Date::kTimezoneOffset); }
-		double AS3_getTime() { return _get(Date::kTime); }
+        // renamed to avoid hiding ScriptObject::toString
+        Stringp _toString(int index);
+        double AS3_valueOf();
+        double _setTime(double value);
+        double _get(int index);
+        double _set(int index, Atom* argv, int argc);
 
-		double _setUTCFullYear(Atom* argv, int argc) { return _set(-1, argv, argc); }
-		double _setUTCMonth(Atom* argv, int argc) { return _set(-2, argv, argc); }
-		double _setUTCDate(Atom* argv, int argc) { return _set(-3, argv, argc); }
-		double _setUTCHours(Atom* argv, int argc) { return _set(-4, argv, argc); }
-		double _setUTCMinutes(Atom* argv, int argc) { return _set(-5, argv, argc); }
-		double _setUTCSeconds(Atom* argv, int argc) { return _set(-6, argv, argc); }
-		double _setUTCMilliseconds(Atom* argv, int argc) { return _set(-7, argv, argc); }
+        double AS3_getUTCFullYear() { return _get(Date::kUTCFullYear); }
+        double AS3_getUTCMonth() { return _get(Date::kUTCMonth); }
+        double AS3_getUTCDate() { return _get(Date::kUTCDate); }
+        double AS3_getUTCDay() { return _get(Date::kUTCDay); }
+        double AS3_getUTCHours() { return _get(Date::kUTCHours); }
+        double AS3_getUTCMinutes() { return _get(Date::kUTCMinutes); }
+        double AS3_getUTCSeconds() { return _get(Date::kUTCSeconds); }
+        double AS3_getUTCMilliseconds() { return _get(Date::kUTCMilliseconds); }
+        double AS3_getFullYear() { return _get(Date::kFullYear); }
+        double AS3_getMonth() { return _get(Date::kMonth); }
+        double AS3_getDate() { return _get(Date::kDate); }
+        double AS3_getDay() { return _get(Date::kDay); }
+        double AS3_getHours() { return _get(Date::kHours); }
+        double AS3_getMinutes() { return _get(Date::kMinutes); }
+        double AS3_getSeconds() { return _get(Date::kSeconds); }
+        double AS3_getMilliseconds() { return _get(Date::kMilliseconds); }
+        double AS3_getTimezoneOffset() { return _get(Date::kTimezoneOffset); }
+        double AS3_getTime() { return _get(Date::kTime); }
 
-		double _setFullYear(Atom* argv, int argc) { return _set(1, argv, argc); }
-		double _setMonth(Atom* argv, int argc) { return _set(2, argv, argc); }
-		double _setDate(Atom* argv, int argc) { return _set(3, argv, argc); }
-		double _setHours(Atom* argv, int argc) { return _set(4, argv, argc); }
-		double _setMinutes(Atom* argv, int argc) { return _set(5, argv, argc); }
-		double _setSeconds(Atom* argv, int argc) { return _set(6, argv, argc); }
-		double _setMilliseconds(Atom* argv, int argc) { return _set(7, argv, argc); }
+        double _setUTCFullYear(Atom* argv, int argc) { return _set(-1, argv, argc); }
+        double _setUTCMonth(Atom* argv, int argc) { return _set(-2, argv, argc); }
+        double _setUTCDate(Atom* argv, int argc) { return _set(-3, argv, argc); }
+        double _setUTCHours(Atom* argv, int argc) { return _set(-4, argv, argc); }
+        double _setUTCMinutes(Atom* argv, int argc) { return _set(-5, argv, argc); }
+        double _setUTCSeconds(Atom* argv, int argc) { return _set(-6, argv, argc); }
+        double _setUTCMilliseconds(Atom* argv, int argc) { return _set(-7, argv, argc); }
+
+        double _setFullYear(Atom* argv, int argc) { return _set(1, argv, argc); }
+        double _setMonth(Atom* argv, int argc) { return _set(2, argv, argc); }
+        double _setDate(Atom* argv, int argc) { return _set(3, argv, argc); }
+        double _setHours(Atom* argv, int argc) { return _set(4, argv, argc); }
+        double _setMinutes(Atom* argv, int argc) { return _set(5, argv, argc); }
+        double _setSeconds(Atom* argv, int argc) { return _set(6, argv, argc); }
+        double _setMilliseconds(Atom* argv, int argc) { return _set(7, argv, argc); }
 
 #ifdef AVMPLUS_VERBOSE
-	public:
-		Stringp format(AvmCore* core) const;
+    public:
+        Stringp format(AvmCore* core) const;
 #endif
-		DECLARE_SLOTS_DateObject;
-	};
+        DECLARE_SLOTS_DateObject;
+    };
 }
 
 #endif /* __avmplus_DateObject__ */

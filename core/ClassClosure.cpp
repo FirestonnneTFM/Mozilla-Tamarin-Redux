@@ -42,116 +42,116 @@
 
 namespace avmplus
 {
-	ClassClosure::ClassClosure(VTable *cvtable)
-		: ScriptObject(cvtable, NULL)
-	{
-		AvmAssert(traits()->getSizeOfInstance() >= sizeof(ClassClosure));
+    ClassClosure::ClassClosure(VTable *cvtable)
+        : ScriptObject(cvtable, NULL)
+    {
+        AvmAssert(traits()->getSizeOfInstance() >= sizeof(ClassClosure));
 
-		// prototype will be set by caller
-		
-		// don't assert here any more: MethodClosure descends 
-		//AvmAssert(cvtable->traits->itraits != NULL);
-		//AvmAssert(ivtable() != NULL);
-	}
+        // prototype will be set by caller
 
-	void ClassClosure::createVanillaPrototype()
-	{
+        // don't assert here any more: MethodClosure descends
+        //AvmAssert(cvtable->traits->itraits != NULL);
+        //AvmAssert(ivtable() != NULL);
+    }
+
+    void ClassClosure::createVanillaPrototype()
+    {
         prototype = toplevel()->objectClass->construct();
-	}
+    }
 
-	Atom ClassClosure::get_prototype()
-	{
-		// Illegal to apply this getter to anything but instances of Class
-		// (verifier should ensure this)
-		return prototype ? prototype->atom() : undefinedAtom;
-	}
+    Atom ClassClosure::get_prototype()
+    {
+        // Illegal to apply this getter to anything but instances of Class
+        // (verifier should ensure this)
+        return prototype ? prototype->atom() : undefinedAtom;
+    }
 
-	void ClassClosure::set_prototype(Atom value)
-	{
-		// ISSUE can value be null/undefined?
+    void ClassClosure::set_prototype(Atom value)
+    {
+        // ISSUE can value be null/undefined?
 
-		if (AvmCore::isNullOrUndefined(value))
-		{
-			setPrototypePtr(NULL);
-		}
-		else
-		{
-			if (!AvmCore::isObject(value))
-			{
-				toplevel()->throwTypeError(kPrototypeTypeError);
-			}
+        if (AvmCore::isNullOrUndefined(value))
+        {
+            setPrototypePtr(NULL);
+        }
+        else
+        {
+            if (!AvmCore::isObject(value))
+            {
+                toplevel()->throwTypeError(kPrototypeTypeError);
+            }
 
-			// allow any prototype object.  if the object has methods or slots, so be it
-			setPrototypePtr(AvmCore::atomToScriptObject(value));
-		}
-	}
+            // allow any prototype object.  if the object has methods or slots, so be it
+            setPrototypePtr(AvmCore::atomToScriptObject(value));
+        }
+    }
 
-	void ClassClosure::setPrototypePtr(ScriptObject* p)
-	{
-		prototype = p;
-		if (p == NULL)
-			this->ivtable()->createInstance = ScriptObject::genericCreateInstance;
-	}
+    void ClassClosure::setPrototypePtr(ScriptObject* p)
+    {
+        prototype = p;
+        if (p == NULL)
+            this->ivtable()->createInstance = ScriptObject::genericCreateInstance;
+    }
 
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom ClassClosure::construct(int argc, Atom* argv)
-	{
-		VTable* ivtable = this->ivtable();
-		AvmAssert(ivtable != NULL);
-		AvmAssert(argv != NULL); // need at least one arg spot passed in
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom ClassClosure::construct(int argc, Atom* argv)
+    {
+        VTable* ivtable = this->ivtable();
+        AvmAssert(ivtable != NULL);
+        AvmAssert(argv != NULL); // need at least one arg spot passed in
 
-		ScriptObject* obj = newInstance();
-		AvmAssert(obj != NULL); //should never be null
-		Atom a = obj->atom();
-		argv[0] = a; // new object is receiver
-		ivtable->init->coerceEnter(argc, argv);
-		// this is a class. always return new instance.
-		return a;
-	}
+        ScriptObject* obj = newInstance();
+        AvmAssert(obj != NULL); //should never be null
+        Atom a = obj->atom();
+        argv[0] = a; // new object is receiver
+        ivtable->init->coerceEnter(argc, argv);
+        // this is a class. always return new instance.
+        return a;
+    }
 
-	// this = argv[0]
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom ClassClosure::call(int argc, Atom* argv)
-	{
-		Toplevel* toplevel = this->toplevel();
-		// explicit coercion of a class object.
-		if (argc != 1)
-		{
-			toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString(argc));
-		}
-		return toplevel->coerce(argv[1], (Traits*)ivtable()->traits);
-	}
+    // this = argv[0]
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    Atom ClassClosure::call(int argc, Atom* argv)
+    {
+        Toplevel* toplevel = this->toplevel();
+        // explicit coercion of a class object.
+        if (argc != 1)
+        {
+            toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString(argc));
+        }
+        return toplevel->coerce(argv[1], (Traits*)ivtable()->traits);
+    }
 
 #ifdef DEBUGGER
-	uint64_t ClassClosure::bytesUsed() const
-	{
-		uint64_t bytesUsed = ScriptObject::bytesUsed();
-		bytesUsed += vtable->bytesUsed();
-		return bytesUsed;
-	}
+    uint64_t ClassClosure::bytesUsed() const
+    {
+        uint64_t bytesUsed = ScriptObject::bytesUsed();
+        bytesUsed += vtable->bytesUsed();
+        return bytesUsed;
+    }
 #endif
 
 #ifdef AVMPLUS_VERBOSE
-	Stringp ClassClosure::format(AvmCore* core) const
-	{
-		if (traits()->name())
-		{
-			return traits()->format(core);
-		}
+    Stringp ClassClosure::format(AvmCore* core) const
+    {
+        if (traits()->name())
+        {
+            return traits()->format(core);
+        }
 
-		Stringp prefix = core->newConstantStringLatin1("CC{}@");
-		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
-	}
+        Stringp prefix = core->newConstantStringLatin1("CC{}@");
+        return core->concatStrings(prefix, core->formatAtomPtr(atom()));
+    }
 #endif
 
-	Stringp ClassClosure::implToString() const
-	{
-		AvmCore* core = this->core();
-		Traits* t = this->traits()->itraits;
-		Stringp s = core->concatStrings(core->newConstantStringLatin1("[class "), t->name());
-		return core->concatStrings(s, core->newConstantStringLatin1("]"));
-	}
+    Stringp ClassClosure::implToString() const
+    {
+        AvmCore* core = this->core();
+        Traits* t = this->traits()->itraits;
+        Stringp s = core->concatStrings(core->newConstantStringLatin1("[class "), t->name());
+        return core->concatStrings(s, core->newConstantStringLatin1("]"));
+    }
 }

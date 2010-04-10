@@ -1230,10 +1230,10 @@ namespace avmplus
                     }
                 }
             }
-            
+
             SlotSizeInfo _slotSizeInfo;
             SlotSizeInfo* slotSizeInfo = includeTypes ? &_slotSizeInfo : NULL;
-            
+
             uint32_t slotCount = 0;
             uint32_t methodCount = 0;
             buildBindings(basetb, bindings, slotCount, methodCount, slotSizeInfo, toplevel);
@@ -1424,7 +1424,7 @@ namespace avmplus
         // builtin Traits get called before a Toplevel is created, so they
         // get a free pass. Everyone else better pass a good value.
         AvmAssert(toplevel != NULL || pool->isBuiltin);
-       
+
 #ifdef DEBUG
         AvmAssert(!m_bindingsVerified);
         // make sure our supertypes have verified their bindings. (must be done before calling _buildTraitsBindings)
@@ -1457,9 +1457,9 @@ namespace avmplus
         // builtin Traits get called before a Toplevel is created, so they
         // get a free pass. Everyone else better pass a good value.
         AvmAssert(toplevel != NULL || pool->isBuiltin);
-       
+
         AvmAssert(m_bindingsVerified);
-            
+
 #ifdef DEBUG
         AvmAssert(!m_resolved);
         // make sure our supertypes are resolved. (must be done before calling _buildTraitsBindings)

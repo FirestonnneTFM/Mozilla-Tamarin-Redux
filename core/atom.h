@@ -153,7 +153,7 @@ namespace avmplus
     }
 
     // atomMinIntValue is the smallest negative (most negative) integer value representable
-    // in a native word, and atomMaxIntValue is the largest positive integer value thus 
+    // in a native word, and atomMaxIntValue is the largest positive integer value thus
     // representable, in both cases constrained such that interchanging the value to and
     // from a 'double' can be done without loss of precision.
     //
@@ -168,7 +168,7 @@ namespace avmplus
     // atomSignExtendShift is the number of bits to shift an untagged intptr_t left and
     // then right in order to properly sign extend it.  (I don't like the 'atom' prefix but
     // it fits in with the pattern of the others.)
-    
+
 #ifdef AVMPLUS_64BIT
     const intptr_t atomMinIntValue = -((1LL<<53)-1);
     const intptr_t atomMaxIntValue = (1LL<<53)-1;

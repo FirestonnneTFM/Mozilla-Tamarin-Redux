@@ -42,76 +42,76 @@
 
 namespace avmplus
 {
-	Domain::Domain(AvmCore* core, Domain* base) : 
+    Domain::Domain(AvmCore* core, Domain* base) :
         m_base(base),
         m_core(core),
         m_namedTraits(new (core->GetGC()) MultinameHashtable()),
         m_namedScripts(new (core->GetGC()) MultinameHashtable()),
-		m_parameterizedTypes(new (core->GetGC(), 0) HeapHashtable(core->GetGC()))
-	{
-	}
+        m_parameterizedTypes(new (core->GetGC(), 0) HeapHashtable(core->GetGC()))
+    {
+    }
 
-	Traits* Domain::getNamedTraits(Stringp name, Namespacep ns)
-	{
+    Traits* Domain::getNamedTraits(Stringp name, Namespacep ns)
+    {
         Traits* f = NULL;
         Domain* dom = this;
         do {
             f = (Traits*) dom->m_namedTraits->get(name, ns);
             dom = dom->m_base;
         } while (!f && dom);
-		return f;
-	}
+        return f;
+    }
 
-    Traits* Domain::addUniqueTrait(Stringp name, Namespace* ns, Traits* v) 
-    { 
+    Traits* Domain::addUniqueTrait(Stringp name, Namespace* ns, Traits* v)
+    {
         Traits* t = getNamedTraits(name, ns);
         if (t == NULL) {
-            m_namedTraits->add(name, ns, (Binding)v); 
+            m_namedTraits->add(name, ns, (Binding)v);
             t = v; // return trait that we'd get from a getNamedTrait() call.
         }
         return t;
     }
 
-	MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns) const
-	{
+    MethodInfo* Domain::getNamedScript(Stringp name, Namespacep ns) const
+    {
         MethodInfo* f = NULL;
         const Domain* dom = this;
         do {
             f = (MethodInfo*) dom->m_namedScripts->get(name, ns);
             dom = dom->m_base;
         } while (!f && dom);
-		return f;
-	}
+        return f;
+    }
 
-	MethodInfo* Domain::getNamedScript(const Multiname* mn) const
-	{
+    MethodInfo* Domain::getNamedScript(const Multiname* mn) const
+    {
         MethodInfo* f = NULL;
         const Domain* dom = this;
         do {
             f = (MethodInfo*) dom->m_namedScripts->getMulti(mn);
             dom = dom->m_base;
         } while (!f && dom);
-		return f;
-	}
+        return f;
+    }
 
-    MethodInfo* Domain::addUniqueScript(Stringp name, Namespace* ns, MethodInfo* v) 
-    { 
+    MethodInfo* Domain::addUniqueScript(Stringp name, Namespace* ns, MethodInfo* v)
+    {
         MethodInfo* t = getNamedScript(name, ns);
         if (t == NULL) {
-            m_namedScripts->add(name, ns, (Binding)v); 
+            m_namedScripts->add(name, ns, (Binding)v);
             t = v; // return script that we'd get from a getNamedScript() call.
         }
         return t;
     }
 
-    ClassClosure* Domain::getParameterizedType(ClassClosure* type) 
-    { 
+    ClassClosure* Domain::getParameterizedType(ClassClosure* type)
+    {
         AvmAssert(type != NULL);
         Atom a = type ? m_parameterizedTypes->get(type->atom()) : nullObjectAtom;
         return AvmCore::isObject(a) ? (ClassClosure*)AvmCore::atomToScriptObject(a) : NULL;
     }
 
-	void Domain::addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType)
+    void Domain::addParameterizedType(ClassClosure* type, ClassClosure* parameterizedType)
     {
         AvmAssert(type && parameterizedType);
         if (type && parameterizedType)

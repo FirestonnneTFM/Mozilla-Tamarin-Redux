@@ -45,7 +45,7 @@
 //
 // This string is used by QE, the build system replaces the string in this header file
 // with the correct value before compilation.  Do not change this.
-#define AVMPLUS_BUILD_CODE			"cyclone"
+#define AVMPLUS_BUILD_CODE          "cyclone"
 
 #ifdef DEBUGGER
 #define AVMPLUS_BIN_DEBUGGER_TAG "-debugger"
@@ -64,37 +64,37 @@
 // A possibly-obsolete build number, not used by the VM itself but
 // possibly by embedders.  It is supposed to count 1-n for development
 // builds, and restart at 1-n for release builds.
-#define AVMPLUS_BUILD_NUMBER		0
+#define AVMPLUS_BUILD_NUMBER        0
 
 // User-facing version numbering.
 //
 // AVMPLUS_MAJOR_VERSION and AVMPLUS_MINOR_VERSION track the engine generation
 // and release number within a generation, respectively.
-// 
+//
 // AVMPLUS_MAJOR_VERSION is updated when we think it is appropriate to do so
 // (major technology change, incompatible API changes maybe, new bytecodes
 // maybe).  The rules for this are not set in stone.  It signifies that
 // "something important just happened".  We have to just reach a consensus on
 // whether something should trigger a change.
-// 
+//
 // AVMPLUS_MINOR_VERSION is updated on /every/ merge from tamarin-redux
 // to tamarin-central and is therefore a serial number for the release.
 //
 // AVMPLUS_MAJOR_DATE and AVMPLUS_MINOR_DATE reflect the dates of the incrementing
 // of the major and minor version numbers, respectively, for the current code.
 
-#define AVMPLUS_MAJOR_VERSION		1				// original open source version
-#define AVMPLUS_MAJOR_DATE			"2007-04-01"	// close enough
-#define AVMPLUS_MINOR_VERSION		4
-#define AVMPLUS_MINOR_DATE			"2009-04-24"
+#define AVMPLUS_MAJOR_VERSION       1               // original open source version
+#define AVMPLUS_MAJOR_DATE          "2007-04-01"    // close enough
+#define AVMPLUS_MINOR_VERSION       4
+#define AVMPLUS_MINOR_DATE          "2009-04-24"
 
 // The simple user-facing version number
-#define AVMPLUS_VERSION_USER		avmplus_stringify(AVMPLUS_MAJOR_VERSION) "." avmplus_stringify(AVMPLUS_MINOR_VERSION)
+#define AVMPLUS_VERSION_USER        avmplus_stringify(AVMPLUS_MAJOR_VERSION) "." avmplus_stringify(AVMPLUS_MINOR_VERSION)
 
 // A more complex user-facing version number
-#define AVMPLUS_VERSION_STRING		avmplus_stringify(AVMPLUS_MAJOR_VERSION) "," avmplus_stringify(AVMPLUS_MINOR_VERSION) "," avmplus_stringify(AVMPLUS_BUILD_NUMBER) "," AVMPLUS_BUILD_CODE
+#define AVMPLUS_VERSION_STRING      avmplus_stringify(AVMPLUS_MAJOR_VERSION) "," avmplus_stringify(AVMPLUS_MINOR_VERSION) "," avmplus_stringify(AVMPLUS_BUILD_NUMBER) "," AVMPLUS_BUILD_CODE
 
 // Define Mac only resource change to 'vers' resource so that player installer will
 // replace previous player versions
-#define AVMPLUS_MAC_RESOURCE_MINOR_VERSION	0x00
+#define AVMPLUS_MAC_RESOURCE_MINOR_VERSION  0x00
 

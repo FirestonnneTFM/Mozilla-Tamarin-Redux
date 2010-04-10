@@ -45,88 +45,88 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	// [ed] why does the E4 semantics MethodClosure have a slot table?
-	// [jd] The slot table of a method closure is used to hold the value of the length
-	// property for the method. Dont know how important this is, but there you go.
-	// [ed] 9/15/04 we're implementing length as a getter instead of a slot.
+    // [ed] why does the E4 semantics MethodClosure have a slot table?
+    // [jd] The slot table of a method closure is used to hold the value of the length
+    // property for the method. Dont know how important this is, but there you go.
+    // [ed] 9/15/04 we're implementing length as a getter instead of a slot.
 
     MethodClosure::MethodClosure(VTable* cvtable, MethodEnv* call, Atom savedThis)
-		: FunctionObject(cvtable, call), _savedThis(savedThis)
+        : FunctionObject(cvtable, call), _savedThis(savedThis)
     {
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
-		AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
+        AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
     }
 
-	Atom MethodClosure::get_coerced_receiver(Atom /*a*/)
-	{
-		return _savedThis;
-	}
+    Atom MethodClosure::get_coerced_receiver(Atom /*a*/)
+    {
+        return _savedThis;
+    }
 
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
     Atom MethodClosure::construct(int /*argc*/, Atom* /*argv*/)
     {
         // can't invoke method closure as constructor:
         //     m = o.m;
         //     new m(); // error
-		toplevel()->throwTypeError(kCannotCallMethodAsConstructor, core()->toErrorString(_call->method));		
+        toplevel()->throwTypeError(kCannotCallMethodAsConstructor, core()->toErrorString(_call->method));
         return undefinedAtom;
     }
 
 #ifdef AVMPLUS_VERBOSE
     Stringp MethodClosure::format(AvmCore* core) const
     {
-		Stringp prefix = core->newConstantStringLatin1("MC{");
-		prefix = core->concatStrings(prefix, core->format(_savedThis));
-		prefix = core->concatStrings(prefix, core->newConstantStringLatin1(" "));
-		prefix = core->concatStrings(prefix, _call->method->format(core));
-		prefix = core->concatStrings(prefix, core->newConstantStringLatin1("}@"));
-		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
+        Stringp prefix = core->newConstantStringLatin1("MC{");
+        prefix = core->concatStrings(prefix, core->format(_savedThis));
+        prefix = core->concatStrings(prefix, core->newConstantStringLatin1(" "));
+        prefix = core->concatStrings(prefix, _call->method->format(core));
+        prefix = core->concatStrings(prefix, core->newConstantStringLatin1("}@"));
+        return core->concatStrings(prefix, core->formatAtomPtr(atom()));
     }
 #endif
 
-	MethodClosureClass::MethodClosureClass(VTable* cvtable)
-		: ClassClosure(cvtable)
-	{
-		Toplevel* toplevel = this->toplevel();
+    MethodClosureClass::MethodClosureClass(VTable* cvtable)
+        : ClassClosure(cvtable)
+    {
+        Toplevel* toplevel = this->toplevel();
 
-		toplevel->methodClosureClass = this;
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosureClass));
+        toplevel->methodClosureClass = this;
+        AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosureClass));
 
-		setPrototypePtr(toplevel->functionClass->createEmptyFunction());
-	}
+        setPrototypePtr(toplevel->functionClass->createEmptyFunction());
+    }
 
-	// Function called as constructor ... not supported from user code
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	MethodClosure* MethodClosureClass::create(MethodEnv* m, Atom obj)
-	{		
-		WeakKeyHashtable* mcTable = m->getMethodClosureTable();		
-		Atom mcWeakAtom = mcTable->get(obj);
-		GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(mcWeakAtom);
-		union {
-			GCObject* mc_o;
-			MethodClosure* mc;
-		};
+    // Function called as constructor ... not supported from user code
+    // this = argv[0] (ignored)
+    // arg1 = argv[1]
+    // argN = argv[argc]
+    MethodClosure* MethodClosureClass::create(MethodEnv* m, Atom obj)
+    {
+        WeakKeyHashtable* mcTable = m->getMethodClosureTable();
+        Atom mcWeakAtom = mcTable->get(obj);
+        GCWeakRef* ref = (GCWeakRef*)AvmCore::atomToGenericObject(mcWeakAtom);
+        union {
+            GCObject* mc_o;
+            MethodClosure* mc;
+        };
 
-		if (!ref || !ref->get())
-		{
-			VTable* ivtable = this->ivtable();
-			mc = (new (core()->GetGC(), ivtable->getExtraSize()) MethodClosure(ivtable, m, obj));
-			// since MC inherits from CC, we must explicitly set the prototype and delegate since the
-			// ctor will leave those null (and without delegate set, apply() and friends won't be found
-			// in pure ES3 code)
-			mc->setPrototypePtr(prototypePtr());
-			mc->setDelegate(prototypePtr());
-			mcWeakAtom = AvmCore::genericObjectToAtom(mc->GetWeakRef());
-			mcTable->add(obj, mcWeakAtom);
-		}
-		else
-		{
-			mc_o = ref->get();
-		}
-		return mc;
-	}
+        if (!ref || !ref->get())
+        {
+            VTable* ivtable = this->ivtable();
+            mc = (new (core()->GetGC(), ivtable->getExtraSize()) MethodClosure(ivtable, m, obj));
+            // since MC inherits from CC, we must explicitly set the prototype and delegate since the
+            // ctor will leave those null (and without delegate set, apply() and friends won't be found
+            // in pure ES3 code)
+            mc->setPrototypePtr(prototypePtr());
+            mc->setDelegate(prototypePtr());
+            mcWeakAtom = AvmCore::genericObjectToAtom(mc->GetWeakRef());
+            mcTable->add(obj, mcWeakAtom);
+        }
+        else
+        {
+            mc_o = ref->get();
+        }
+        return mc;
+    }
 }

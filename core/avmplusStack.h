@@ -43,67 +43,67 @@
 
 namespace avmplus
 {
-	/**
-	 * The Stack<T> template implements a simple stack, which can
-	 * be templated to support different types.
-	 */
-	template <class T>
-	class Stack
-	{
-	public:
-		enum { kInitialCapacity = 128 };
-		
-		Stack()
-		{
-			data = new T[kInitialCapacity];
-			len = 0;
-			max = kInitialCapacity;
-		}
-		virtual ~Stack()
-		{
-			delete [] data;
-		}
-		void add(T value)
-		{
-			if (len >= max) {
-				grow();
-			}
-			data[len++] = value;
-		}
-		bool isEmpty()
-		{
-			return len == 0;
-		}
-		T pop()
-		{
-			return data[--len];
-		}
-		void reset()
-		{
-			len = 0;
-		}
-		int size()
-		{
-			return len;
-		}
+    /**
+     * The Stack<T> template implements a simple stack, which can
+     * be templated to support different types.
+     */
+    template <class T>
+    class Stack
+    {
+    public:
+        enum { kInitialCapacity = 128 };
 
-	private:
-		T *data;
-		int len;
-		int max;
+        Stack()
+        {
+            data = new T[kInitialCapacity];
+            len = 0;
+            max = kInitialCapacity;
+        }
+        virtual ~Stack()
+        {
+            delete [] data;
+        }
+        void add(T value)
+        {
+            if (len >= max) {
+                grow();
+            }
+            data[len++] = value;
+        }
+        bool isEmpty()
+        {
+            return len == 0;
+        }
+        T pop()
+        {
+            return data[--len];
+        }
+        void reset()
+        {
+            len = 0;
+        }
+        int size()
+        {
+            return len;
+        }
 
-		void grow()
-		{
-			int newMax = max * 5 / 4;
-			T *newData = new T[newMax];
-			for (int i=0; i<len; i++) {
-				newData[i] = data[i];
-			}
-			delete [] data;
-			data = newData;
-			max = newMax;
-		}
-	};
+    private:
+        T *data;
+        int len;
+        int max;
+
+        void grow()
+        {
+            int newMax = max * 5 / 4;
+            T *newData = new T[newMax];
+            for (int i=0; i<len; i++) {
+                newData[i] = data[i];
+            }
+            delete [] data;
+            data = newData;
+            max = newMax;
+        }
+    };
 }
 
 #endif /* __avmplus_Stack__ */

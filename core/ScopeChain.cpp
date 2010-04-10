@@ -42,104 +42,104 @@
 
 namespace avmplus
 {
-	/* static */ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra)
-	{
-		const int32_t capture = nValues + (append ? 1 : 0);
-		const int32_t extraEntries = extra ? 1 : 0;
-		const int32_t outerSize = (outer ? outer->size : 0);
-		const int32_t pad = capture + extraEntries;
-		const size_t padSize = sizeof(uintptr_t) * (((pad > 0) ? (pad - 1) : 0) + outerSize);
-		ScopeTypeChain* nscope = new(gc, padSize) ScopeTypeChain(outerSize + capture, outerSize + capture + extraEntries, traits);
-		int32_t j = 0;
-		for (int32_t i = 0; i < outerSize; i++)
-		{
-			nscope->_scopes[j++] = outer->_scopes[i];
-		}
-		for (int32_t i = 0; i < nValues; i++)
-		{
-			const Value& v = values[i];
-			nscope->setScopeAt(j++, v.traits, v.isWith);
-		}
-		if (append)
-		{
-			nscope->setScopeAt(j++, append, false);
-		}
-		if (extra)
-		{
-			nscope->setScopeAt(j++, extra, false);
-		}
-		AvmAssert(j == nscope->fullsize);
-		return nscope;
-	}
-	
-	/*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra)
-	{
-		if (state && state->scopeDepth > 0)
-			return ScopeTypeChain::create(gc, traits, outer, &state->scopeValue(0), state->scopeDepth, append, extra);
-		else
-			return ScopeTypeChain::create(gc, traits, outer, 0, 0, append, extra);
-			
-	}
+    /* static */ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const Value* values, int32_t nValues, Traits* append, Traits* extra)
+    {
+        const int32_t capture = nValues + (append ? 1 : 0);
+        const int32_t extraEntries = extra ? 1 : 0;
+        const int32_t outerSize = (outer ? outer->size : 0);
+        const int32_t pad = capture + extraEntries;
+        const size_t padSize = sizeof(uintptr_t) * (((pad > 0) ? (pad - 1) : 0) + outerSize);
+        ScopeTypeChain* nscope = new(gc, padSize) ScopeTypeChain(outerSize + capture, outerSize + capture + extraEntries, traits);
+        int32_t j = 0;
+        for (int32_t i = 0; i < outerSize; i++)
+        {
+            nscope->_scopes[j++] = outer->_scopes[i];
+        }
+        for (int32_t i = 0; i < nValues; i++)
+        {
+            const Value& v = values[i];
+            nscope->setScopeAt(j++, v.traits, v.isWith);
+        }
+        if (append)
+        {
+            nscope->setScopeAt(j++, append, false);
+        }
+        if (extra)
+        {
+            nscope->setScopeAt(j++, extra, false);
+        }
+        AvmAssert(j == nscope->fullsize);
+        return nscope;
+    }
+
+    /*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, const FrameState* state, Traits* append, Traits* extra)
+    {
+        if (state && state->scopeDepth > 0)
+            return ScopeTypeChain::create(gc, traits, outer, &state->scopeValue(0), state->scopeDepth, append, extra);
+        else
+            return ScopeTypeChain::create(gc, traits, outer, 0, 0, append, extra);
+
+    }
 
 #ifdef VMCFG_AOT
     /*static*/ const ScopeTypeChain* ScopeTypeChain::create(MMgc::GC* gc, Traits* traits, const ScopeTypeChain* outer, Traits* const* stateTraits, uint32_t nStateTraits, uint32_t nStateWithTraits, Traits* append, Traits* extra)
     {
         MMgc::GC::AllocaAutoPtr valuesPtr;
-		Value *values = (Value *)VMPI_alloca_gc(gc, valuesPtr, sizeof(Value)*nStateTraits);
-		int32_t firstWith = nStateTraits - nStateWithTraits;
-		for (int32_t i = 0; i < nStateTraits; i++)
-		{
-			values[i].traits = stateTraits[i];
-			values[i].isWith = i >= firstWith;
-		}
-		return ScopeTypeChain::create(gc, traits, outer, values, nStateTraits, append, extra);
+        Value *values = (Value *)VMPI_alloca_gc(gc, valuesPtr, sizeof(Value)*nStateTraits);
+        int32_t firstWith = nStateTraits - nStateWithTraits;
+        for (int32_t i = 0; i < nStateTraits; i++)
+        {
+            values[i].traits = stateTraits[i];
+            values[i].isWith = i >= firstWith;
+        }
+        return ScopeTypeChain::create(gc, traits, outer, values, nStateTraits, append, extra);
     }
 #endif
 
-	const ScopeTypeChain* ScopeTypeChain::cloneWithNewTraits(MMgc::GC* gc, Traits* p_traits) const
-	{
-		if (p_traits == this->traits())
-			return this;
-			
-		const size_t padSize = sizeof(uintptr_t) * (this->fullsize ? this->fullsize-1 : 0);
-		ScopeTypeChain* nscope = new(gc, padSize) ScopeTypeChain(this->size, this->fullsize, p_traits);
-		for (int32_t i=0; i < this->fullsize; i ++)
-		{
-			nscope->_scopes[i] = this->_scopes[i];
-		}
-		return nscope;
-	}
+    const ScopeTypeChain* ScopeTypeChain::cloneWithNewTraits(MMgc::GC* gc, Traits* p_traits) const
+    {
+        if (p_traits == this->traits())
+            return this;
 
-	#if VMCFG_METHOD_NAMES
-	Stringp ScopeTypeChain::format(AvmCore* core) const
-	{
-		Stringp r = core->kEmptyString;
-		r = r->appendLatin1("STC:[traits=");
-		r = r->append(_traits->format(core));
-		r = r->appendLatin1(";");
-		for (int32_t i = 0; i < fullsize; i++)
-		{
-			if (i > 0)
-				r = r->appendLatin1(",");
-			Traits* t = getScopeTraitsAt(i);
-			bool b = getScopeIsWithAt(i);
-			r = r->append(t->format(core));
+        const size_t padSize = sizeof(uintptr_t) * (this->fullsize ? this->fullsize-1 : 0);
+        ScopeTypeChain* nscope = new(gc, padSize) ScopeTypeChain(this->size, this->fullsize, p_traits);
+        for (int32_t i=0; i < this->fullsize; i ++)
+        {
+            nscope->_scopes[i] = this->_scopes[i];
+        }
+        return nscope;
+    }
+
+    #if VMCFG_METHOD_NAMES
+    Stringp ScopeTypeChain::format(AvmCore* core) const
+    {
+        Stringp r = core->kEmptyString;
+        r = r->appendLatin1("STC:[traits=");
+        r = r->append(_traits->format(core));
+        r = r->appendLatin1(";");
+        for (int32_t i = 0; i < fullsize; i++)
+        {
+            if (i > 0)
+                r = r->appendLatin1(",");
+            Traits* t = getScopeTraitsAt(i);
+            bool b = getScopeIsWithAt(i);
+            r = r->append(t->format(core));
             if (b)
                 r = r->appendLatin1("(iswith)");
-		}
-		r = r->appendLatin1("]");
-		return r;
-	}
-	#endif
+        }
+        r = r->appendLatin1("]");
+        return r;
+    }
+    #endif
 
-	bool ScopeTypeChain::equals(const ScopeTypeChain* that) const
-	{
+    bool ScopeTypeChain::equals(const ScopeTypeChain* that) const
+    {
         if (this != that)
         {
-            if (!this || !that) 
+            if (!this || !that)
                 return false;
-                
-            if (this->size != that->size || 
+
+            if (this->size != that->size ||
                 this->fullsize != that->fullsize ||
                 this->_traits != that->_traits)
                 return false;
@@ -151,64 +151,64 @@ namespace avmplus
             }
         }
         return true;
-	}
+    }
 
-	/*static*/ ScopeChain* ScopeChain::create(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, const ScopeChain* outer, Namespacep dxns)
-	{
-		AvmAssert(vtable->traits == scopeTraits->traits());
-		const int32_t scopeTraitsSize = scopeTraits->size;
-		const int32_t outerSize = outer ? outer->_scopeTraits->size : 0;
+    /*static*/ ScopeChain* ScopeChain::create(MMgc::GC* gc, VTable* vtable, AbcEnv* abcEnv, const ScopeTypeChain* scopeTraits, const ScopeChain* outer, Namespacep dxns)
+    {
+        AvmAssert(vtable->traits == scopeTraits->traits());
+        const int32_t scopeTraitsSize = scopeTraits->size;
+        const int32_t outerSize = outer ? outer->_scopeTraits->size : 0;
         AvmAssert(scopeTraitsSize >= outerSize);
-		const size_t padSize = scopeTraitsSize > 0 ? sizeof(Atom) * (scopeTraitsSize-1) : 0;
-		ScopeChain* nscope = new(gc, padSize) ScopeChain(vtable, abcEnv, scopeTraits, dxns);
-		for (int32_t i=0; i < outerSize; i ++)
-		{
-			nscope->setScope(gc, i, outer->_scopes[i]);
-		}
-		return nscope;
-	}
+        const size_t padSize = scopeTraitsSize > 0 ? sizeof(Atom) * (scopeTraitsSize-1) : 0;
+        ScopeChain* nscope = new(gc, padSize) ScopeChain(vtable, abcEnv, scopeTraits, dxns);
+        for (int32_t i=0; i < outerSize; i ++)
+        {
+            nscope->setScope(gc, i, outer->_scopes[i]);
+        }
+        return nscope;
+    }
 
-	ScopeChain* ScopeChain::cloneWithNewVTable(MMgc::GC* gc, VTable* p_vtable, AbcEnv* p_abcEnv, const ScopeTypeChain* p_scopeTraits)
-	{
-		if (p_vtable == this->vtable() && p_abcEnv == this->abcEnv())
-			return this;
-		
-		const ScopeTypeChain* nstc = p_scopeTraits ? p_scopeTraits : _scopeTraits->cloneWithNewTraits(gc, p_vtable->traits);
-		AvmAssert(nstc->traits() == p_vtable->traits);
-		const int32_t scopeTraitsSize = nstc->size;
-		const size_t padSize = scopeTraitsSize > 0 ? sizeof(Atom) * (scopeTraitsSize-1) : 0;
-		ScopeChain* nscope = new(gc, padSize) ScopeChain(p_vtable, p_abcEnv, nstc, _defaultXmlNamespace);
-		for (int32_t i=0; i < nstc->size; i ++)
-		{
-			nscope->setScope(gc, i, this->_scopes[i]);
-		}
-		return nscope;
-	}
+    ScopeChain* ScopeChain::cloneWithNewVTable(MMgc::GC* gc, VTable* p_vtable, AbcEnv* p_abcEnv, const ScopeTypeChain* p_scopeTraits)
+    {
+        if (p_vtable == this->vtable() && p_abcEnv == this->abcEnv())
+            return this;
 
-	void ScopeChain::setScope(MMgc::GC* gc, int32_t i, Atom value)
-	{
-		AvmAssert(i >= 0 && i < _scopeTraits->size);
-		//scopes[i] = value;
-		WBATOM(gc, this, &_scopes[i], value);
-	}
+        const ScopeTypeChain* nstc = p_scopeTraits ? p_scopeTraits : _scopeTraits->cloneWithNewTraits(gc, p_vtable->traits);
+        AvmAssert(nstc->traits() == p_vtable->traits);
+        const int32_t scopeTraitsSize = nstc->size;
+        const size_t padSize = scopeTraitsSize > 0 ? sizeof(Atom) * (scopeTraitsSize-1) : 0;
+        ScopeChain* nscope = new(gc, padSize) ScopeChain(p_vtable, p_abcEnv, nstc, _defaultXmlNamespace);
+        for (int32_t i=0; i < nstc->size; i ++)
+        {
+            nscope->setScope(gc, i, this->_scopes[i]);
+        }
+        return nscope;
+    }
 
-	#if VMCFG_METHOD_NAMES
-	Stringp ScopeChain::format(AvmCore* core) const
-	{
-		Stringp r = core->kEmptyString;
-		r = r->appendLatin1("SC:{dxns=(");
-		r = r->append(_defaultXmlNamespace->format(core));
-		r = r->appendLatin1("),");
-		r = r->append(_scopeTraits->format(core));
-		r = r->appendLatin1(",V:[");
-		for (int32_t i = 0; i < _scopeTraits->size; i++)
-		{
-			if (i > 0)
-				r = r->appendLatin1(",");
-			r = r->append(core->format(_scopes[i]));
-		}
-		r = r->appendLatin1("]}");
-		return r;
-	}
-	#endif
+    void ScopeChain::setScope(MMgc::GC* gc, int32_t i, Atom value)
+    {
+        AvmAssert(i >= 0 && i < _scopeTraits->size);
+        //scopes[i] = value;
+        WBATOM(gc, this, &_scopes[i], value);
+    }
+
+    #if VMCFG_METHOD_NAMES
+    Stringp ScopeChain::format(AvmCore* core) const
+    {
+        Stringp r = core->kEmptyString;
+        r = r->appendLatin1("SC:{dxns=(");
+        r = r->append(_defaultXmlNamespace->format(core));
+        r = r->appendLatin1("),");
+        r = r->append(_scopeTraits->format(core));
+        r = r->appendLatin1(",V:[");
+        for (int32_t i = 0; i < _scopeTraits->size; i++)
+        {
+            if (i > 0)
+                r = r->appendLatin1(",");
+            r = r->append(core->format(_scopes[i]));
+        }
+        r = r->appendLatin1("]}");
+        return r;
+    }
+    #endif
 }

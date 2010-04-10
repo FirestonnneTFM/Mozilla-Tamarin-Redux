@@ -65,7 +65,7 @@
 // all x64, and all MacTel machines, always have sse2
 #if defined(AVMPLUS_AMD64) || (defined(AVMPLUS_MAC) && defined(AVMPLUS_IA32))
     #ifndef AVMPLUS_SSE2_ALWAYS
-	    #define AVMPLUS_SSE2_ALWAYS
+        #define AVMPLUS_SSE2_ALWAYS
     #endif
 #endif
 
@@ -78,11 +78,11 @@
 // This is here because it's not yet been refactored.
 // FIXME: refactor this.
 #ifndef VMCFG_METHOD_NAMES
-	#if defined AVMPLUS_VERBOSE || defined DEBUGGER
-		#define VMCFG_METHOD_NAMES 1
-	#else
-		#define VMCFG_METHOD_NAMES 0
-	#endif
+    #if defined AVMPLUS_VERBOSE || defined DEBUGGER
+        #define VMCFG_METHOD_NAMES 1
+    #else
+        #define VMCFG_METHOD_NAMES 0
+    #endif
 #endif
 
 // This is here because the conditional can't be expressed by the feature system (yet),
@@ -116,7 +116,7 @@
 #else
 # define PERFM_NVPROF(n,v)
 # define PERFM_NTPROF(n)
-# define PERFM_TPROF_END() 
+# define PERFM_TPROF_END()
 #endif
 
 // This is here for VM performance profiling.
@@ -170,10 +170,10 @@
 // in the code.  Embedding software /must/ instead use the common configuration system, see
 // core/avmfeatures.as and core/avmfeatures.h.
 #if defined(AVMPLUS_PORTING_API)
-	// The portapi_avmbuild.h file is used to override
-	// definitions in this file. E.g. turning off
-	// features, etc.
-	//#include "portapi_avmbuild.h"
+    // The portapi_avmbuild.h file is used to override
+    // definitions in this file. E.g. turning off
+    // features, etc.
+    //#include "portapi_avmbuild.h"
     #error "Obsolete define"
 #endif
 
