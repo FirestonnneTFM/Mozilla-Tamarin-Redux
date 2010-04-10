@@ -344,7 +344,6 @@ spidermonkey/js1_5/Regress/regress-191633, .*, skip, test builds very large stri
 spidermonkey/js1_5/Regress/regress-367561-01, .*, skip, need to build large test string
 spidermonkey/js1_5/Regress/regress-367561-03, .*, skip, need to build large test string
 spidermonkey/js1_5/Regress/regress-396684, .*, skip, need to build large test string
-spidermonkey/js1_5/Regress/regress-416628, .*, skip, need to build large test string
 spidermonkey/js1_5/String/regress-179068, .*,  skip, need to build large test string
 spidermonkey/js1_5/Expressions/regress-394673, .*, skip, need to figure out a way to evaluate a long long chain of && ||
 spidermonkey/js1_5/Regress/regress-290575, .*, skip, test evaluates function with 32768 arguments - need to convert to not use Function Body or eval
@@ -367,7 +366,6 @@ spidermonkey/js1_5/Regress/regress-247179:RegExp \\b.*, ^((?!diff).)*$, expected
 spidermonkey/js1_5/Regress/regress-248444:.*Section (4|5).*, ^((?!diff).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550987
 spidermonkey/js1_5/Regress/regress-252892:Section (5|7).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550990
 
-
 spidermonkey/js1_5/Regress/regress-271716-n, .*, skip, takes too long to run - tries to crash by doing while (1) a=new Array(a) - possibly run in deep?
 
 spidermonkey/js1_5/Regress/regress-274035:Array.prototype.(concat|splice).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551032
@@ -388,7 +386,6 @@ spidermonkey/js1_5/Scope/scope-004:Section (6|7).*, ^((?!diff).)*$, expectedfail
 # spidermonkey wordcode issues
 spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|jit).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|jit).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
-spidermonkey/js1_5/Array/regress-99120-02, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551845
 
 spidermonkey/js1_5/Array/regress-157652, arm.*, skip, test runs out of memory on devices
 spidermonkey/js1_5/Function/regress-338121-.*, arm.*, skip, test runs out of memory on devices
