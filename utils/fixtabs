@@ -9,7 +9,7 @@
 #
 
 for file in $*; do
-	cp $file $file.orig
-	expand -4 <$file.orig | perl -p -e 's/\s+\n$/\n/go;' >$file
-	rm $file.orig
+	cp $file $file.tmp
+	expand -4 <$file.tmp | perl -p -e 's/\s+\n$/\n/go;' >$file
+	rm $file.tmp
 done
