@@ -5659,7 +5659,7 @@ namespace avmplus
         }
     }
 
-    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, bool haveDebugger, DEBUGGER_ONLY(int dbg_framesize,)
+    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, DEBUGGER_ONLY(bool haveDebugger, int dbg_framesize,)
             nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
             nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
     {
@@ -5809,7 +5809,7 @@ namespace avmplus
                 CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
-                    analyze_call(i, catcher, vars, haveDebugger, DEBUGGER_ONLY(dbg_framesize,)
+                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
                             varlivein, varlabels, taglivein, taglabels);
                     break;
                 }
@@ -5958,7 +5958,7 @@ namespace avmplus
                 CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
-                    analyze_call(i, catcher, vars, haveDebugger, DEBUGGER_ONLY(dbg_framesize,)
+                    analyze_call(i, catcher, vars, DEBUGGER_ONLY(haveDebugger, dbg_framesize,)
                             varlivein, varlabels, taglivein, taglabels);
                     break;
             }
