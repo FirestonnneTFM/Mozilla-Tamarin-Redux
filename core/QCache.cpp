@@ -93,10 +93,7 @@ namespace avmplus
             for (QCachedItem* td = first(); td; td = next(td))
             {
                 if (!which--)
-                {
-                    evicted = td;
                     break;
-                }
                 evicted_prev = td;
             }
             if (evicted_prev)
