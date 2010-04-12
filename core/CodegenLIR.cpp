@@ -1623,13 +1623,16 @@ namespace avmplus
 #endif
         lirout = new (*alloc1) Specializer(lirout, core->config.njconfig);
 
-        #if defined(DEBUGGER) && defined(_DEBUG)
+        #ifdef DEBUGGER
+        dbg_framesize = state->verifier->local_count + state->verifier->max_scope;
+        #ifdef DEBUG
         DebuggerCheck *checker = NULL;
         if (haveDebugger) {
-            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, state->verifier->local_count + state->verifier->max_scope);
+            checker = new (*alloc1) DebuggerCheck(core, *alloc1, lirout, dbg_framesize);
             lirout = checker;
         }
-        #endif
+        #endif // DEBUG
+        #endif // DEBUGGER
 
         emitStart(*alloc1, prolog_buf, lirout);
 
@@ -5656,6 +5659,46 @@ namespace avmplus
         }
     }
 
+    void analyze_call(LIns* ins, LIns* catcher, LIns* vars, bool haveDebugger, DEBUGGER_ONLY(int dbg_framesize,)
+            nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
+            nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
+    {
+        if (!ins->callInfo()->_cse) {
+            if (catcher) {
+                // non-cse call is like a conditional forward branch to the catcher label.
+                // this could be made more precise by checking whether this call
+                // can really throw, and only processing edges to the subset of
+                // reachable catch blocks.  If we haven't seen the catch label yet then
+                // the call is to an exception handling helper (eg beginCatch())
+                // that won't throw.
+                nanojit::BitSet *varlset = varlabels.get(catcher);
+                if (varlset)
+                    varlivein.setFrom(*varlset);
+                nanojit::BitSet *taglset = taglabels.get(catcher);
+                if (taglset)
+                    taglivein.setFrom(*taglset);
+            }
+#ifdef DEBUGGER
+            if (haveDebugger) {
+                // all vars and scopes must be considered "read" by any call
+                // the debugger can stop in.  The debugger also will access varTraits[],
+                // but we dont analyze those stores, and it does not access tags[], so we
+                // don't need to mark them live due to the call.
+                for (int i = 0, n = dbg_framesize; i < n; i++)
+                    varlivein.set(i);
+            }
+#endif
+        }
+        else if (ins->callInfo() == FUNCTIONID(makeatom)) {
+            // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
+            LIns* varPtrArg = ins->arg(1);  // varPtrArg == vars, OR addp(vars, index)
+            if (varPtrArg == vars)
+                varlivein.set(0);
+            else if (varPtrArg->isop(LIR_piadd))
+                analyze_addp(varPtrArg, vars, varlivein);
+        }
+    }
+
     void CodegenLIR::deadvars_analyze(Allocator& alloc,
             nanojit::BitSet& varlivein, HashMap<LIns*, nanojit::BitSet*> &varlabels,
             nanojit::BitSet& taglivein, HashMap<LIns*, nanojit::BitSet*> &taglabels)
@@ -5766,28 +5809,8 @@ namespace avmplus
                 CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
-                    if (catcher && !i->isCse()) {
-                        // non-cse call is like a conditional forward branch to the catcher label.
-                        // this could be made more precise by checking whether this call
-                        // can really throw, and only processing edges to the subset of
-                        // reachable catch blocks.  If we haven't seen the catch label yet then
-                        // the call is to an exception handling helper (eg beginCatch())
-                        // that won't throw.
-                        nanojit::BitSet *varlset = varlabels.get(catcher);
-                        if (varlset)
-                            varlivein.setFrom(*varlset);
-                        nanojit::BitSet *taglset = taglabels.get(catcher);
-                        if (taglset)
-                            taglivein.setFrom(*taglset);
-                    }
-                    else if (i->callInfo() == FUNCTIONID(makeatom)) {
-                        // makeatom(core, &vars[index], tag[index]) => treat as load from &vars[index]
-                        LIns* varPtrArg = i->arg(1);  // varPtrArg == vars, OR addp(vars, index)
-                        if (varPtrArg == vars)
-                            varlivein.set(0);
-                        else if (varPtrArg->isop(LIR_addp))
-                            analyze_addp(varPtrArg, vars, varlivein);
-                    }
+                    analyze_call(i, catcher, vars, haveDebugger, DEBUGGER_ONLY(dbg_framesize,)
+                            varlivein, varlabels, taglivein, taglabels);
                     break;
                 }
             }
@@ -5935,32 +5958,8 @@ namespace avmplus
                 CASE64(LIR_qcall:)
                 case LIR_icall:
                 case LIR_fcall:
-                    if (catcher && !i->isCse()) {
-                        // non-cse call is like a conditional branch to the catcher label.
-                        // this could be made more precise by checking whether this call
-                        // can really throw, and only processing edges to the subset of
-                        // reachable catch blocks.
-
-                        nanojit::BitSet *var_lset = varlabels.get(catcher);
-                        AvmAssert(var_lset != 0); // this is a forward branch, we have seen the label.
-                        // the target LiveIn set (lset) is non-empty,
-                        // union it with fall-through set (live).
-                        varlivein.setFrom(*var_lset);
-
-                        nanojit::BitSet *tag_lset = taglabels.get(catcher);
-                        AvmAssert(tag_lset != 0); // this is a forward branch, we have seen the label.
-                        // the target LiveIn set (lset) is non-empty,
-                        // union it with fall-through set (live).
-                        taglivein.setFrom(*tag_lset);
-                    }
-                    else if (i->callInfo() == FUNCTIONID(makeatom)) {
-                        // makeatom(core, vars+offset, tag) => treat as load from vars+offset
-                        LIns* varPtrArg = i->arg(1);
-                        if (varPtrArg == vars)
-                            varlivein.set(0);
-                        else if (varPtrArg->isop(LIR_addp))
-                            analyze_addp(varPtrArg, vars, varlivein);
-                    }
+                    analyze_call(i, catcher, vars, haveDebugger, DEBUGGER_ONLY(dbg_framesize,)
+                            varlivein, varlabels, taglivein, taglabels);
                     break;
             }
             verbose_only(if (verbose) {
@@ -6037,14 +6036,7 @@ namespace avmplus
 
     void CodegenLIR::emitMD()
     {
-        // if debugging, don't eliminate vars.  this way the debugger sees the true
-        // variable state at each safe point.
-        if (haveDebugger) {
-            plive(tags);
-            plive(vars);
-        } else {
-            deadvars();  // deadvars_kill() will add live(vars) if necessary
-        }
+        deadvars();  // deadvars_kill() will add live(vars) or live(tags) if necessary
 
         // do this very last so it's after LIR_live(vars)
         frag->lastIns = plive(undefConst);
