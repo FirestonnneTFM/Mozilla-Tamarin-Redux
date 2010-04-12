@@ -1140,6 +1140,7 @@ package abcdump
                     //print("magic " + magic.toString(16))
                     //if (magic >= (46<<16|16))
                         var name = names[readU32()];
+                    infoPrint("exception method_id=" + i + " [" + from + ", " + to + "] " + type + " -> " + target)
                 }
                 parseTraits(m.activation = new Traits)
             }
