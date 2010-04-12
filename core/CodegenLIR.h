@@ -125,6 +125,17 @@ namespace avmplus
 
     class BindingCache;
 
+    class AvmLogControl : public LogControl
+    {
+    public:
+        virtual ~AvmLogControl() {} 
+#ifdef NJ_VERBOSE
+        void printf( const char* format, ... ) PRINTF_CHECK(2,3);
+
+        AvmCore* core; // access console via core dynamically since core may modify it.
+#endif
+    };
+
     /**
      * CodeMgr manages memory for compiled code, including the code itself
      * (in a nanojit::CodeAlloc), and any data with code lifetime
@@ -133,7 +144,7 @@ namespace avmplus
     class CodeMgr {
     public:
         CodeAlloc   codeAlloc;  // allocator for code memory
-        LogControl  log;        // controller for verbose output
+        AvmLogControl  log;        // controller for verbose output
         Allocator   allocator;  // data with same lifetime of this CodeMgr
         BindingCache* bindingCaches;    // head of linked list of all BindingCaches allocated by this codeMgr
                                         // (only for flushing... lifetime is still managed by codeAlloc)
@@ -390,7 +401,6 @@ namespace avmplus
        #endif /* VTUNE */
 
     private:
-        LogControl log;
         MethodInfo *info;
         const MethodSignaturep ms;
         PoolObject *pool;
