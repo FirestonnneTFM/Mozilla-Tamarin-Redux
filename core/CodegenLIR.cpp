@@ -712,12 +712,28 @@ namespace avmplus
             CodeMgr *mgr = mmfx_new( CodeMgr() );
             pool->codeMgr = mgr;
 #ifdef NJ_VERBOSE
-            if (pool->isVerbose(VB_jit))
-                mgr->log.lcbits = pool->verbose_vb;
+            mgr->log.core = pool->core;
+            mgr->log.lcbits = pool->verbose_vb;
 #endif
         }
         return pool->codeMgr;
     }
+
+#ifdef NJ_VERBOSE
+    void AvmLogControl::printf( const char* format, ... )
+    {
+        AvmAssert(core!=NULL);
+        
+        va_list vargs;
+        va_start(vargs, format);
+
+        char str[1024];
+        VMPI_vsnprintf(str, sizeof(str), format, vargs);
+        va_end(vargs);
+
+        core->console << str;
+    }
+#endif
 
     CodegenLIR::CodegenLIR(MethodInfo* i) :
         LirHelper(i->pool()),
@@ -1642,7 +1658,7 @@ namespace avmplus
         verbose_only(
             vbWriter = 0;
             if (verbose())
-                lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, vbNames, &log, "PROLOG");
+                lirout = vbWriter = new (*alloc1) VerboseWriter(*alloc1, lirout, vbNames, &pool->codeMgr->log, "PROLOG");
         )
         prolog = new (*alloc1) PrologWriter(lirout);
         redirectWriter = lirout = new (*lir_alloc) LirWriter(prolog);
@@ -1903,7 +1919,7 @@ namespace avmplus
             if (verbose()) {
                 AvmAssert(vbNames != NULL);
                 body_buf->printer = vbNames;
-                body = vbWriter = new (*alloc1) VerboseWriter(*alloc1, body, vbNames, &log);
+                body = vbWriter = new (*alloc1) VerboseWriter(*alloc1, body, vbNames, &pool->codeMgr->log);
             }
         )
         body->ins0(LIR_start);
@@ -6049,7 +6065,7 @@ namespace avmplus
 #endif
 
 #ifdef NJ_VERBOSE
-    void listing(const char* title, LogControl &log, Fragment* frag, LIns* prologLastIns)
+    void listing(const char* title, AvmLogControl &log, Fragment* frag, LIns* prologLastIns)
     {
         SeqReader seqReader(frag->lastIns, prologLastIns);
         Allocator lister_alloc;
