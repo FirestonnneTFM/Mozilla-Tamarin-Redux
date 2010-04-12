@@ -1250,6 +1250,8 @@
 				079DF9430F3A893C0031D1B4 /* NativePPC.h */,
 				079DF9460F3A893C0031D1B4 /* NativeX64.cpp */,
 				079DF9470F3A893C0031D1B4 /* NativeX64.h */,
+				D92373DC11222458006D8AA3 /* njconfig.cpp */,
+				D92373DD11222458006D8AA3 /* njconfig.h */,
 				079DF9480F3A893C0031D1B4 /* RegAlloc.cpp */,
 				079DF9490F3A893C0031D1B4 /* RegAlloc.h */,
 			);
@@ -1408,8 +1410,6 @@
 		079DFA860F3A965C0031D1B4 /* mmgc */ = {
 			isa = PBXGroup;
 			children = (
-				D92373DC11222458006D8AA3 /* njconfig.cpp */,
-				D92373DD11222458006D8AA3 /* njconfig.h */,
 				07D28FEA106CF00D0050C864 /* AllocationMacros.h */,
 				07C0F7BE0FDE897100B0E09A /* BasicList.h */,
 				079DFA890F3A96BD0031D1B4 /* FixedAlloc.cpp */,
