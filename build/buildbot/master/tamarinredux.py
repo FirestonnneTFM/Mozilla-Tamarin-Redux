@@ -1009,6 +1009,7 @@ class tamarinredux:
     windows_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     windows_test_factory.addStep(test_differential)
     windows_test_factory.addStep(util_process_clean)
+    windows_test_factory.addStep(util_clean_buildsdir)
     
     windows_test_builder = {
                 'name': "windows-test",
@@ -1032,6 +1033,7 @@ class tamarinredux:
     windows_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="", scriptargs=""))
     windows_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="", scriptargs=""))
     windows_64_test_factory.addStep(util_process_clean)
+    windows_64_test_factory.addStep(util_clean_buildsdir)
 
     windows_64_test_builder = {
                 'name': "windows64-test",
@@ -1056,6 +1058,7 @@ class tamarinredux:
     mac_intel_104_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_104", vmargs="", config="", scriptargs=""))
     mac_intel_104_test_factory.addStep(test_differential)
     mac_intel_104_test_factory.addStep(util_process_clean)
+    mac_intel_104_test_factory.addStep(util_clean_buildsdir)
 
     mac_intel_104_test_builder = {
                 'name': "mac-intel-10.4-test",
@@ -1080,6 +1083,7 @@ class tamarinredux:
     mac_intel_105_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     mac_intel_105_test_factory.addStep(test_differential)
     mac_intel_105_test_factory.addStep(util_process_clean)
+    mac_intel_105_test_factory.addStep(util_clean_buildsdir)
 
     mac_intel_105_test_builder = {
                 'name': "mac-intel-10.5-test",
@@ -1103,6 +1107,7 @@ class tamarinredux:
     mac_intel_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="", scriptargs=""))
     mac_intel_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="", scriptargs=""))
     mac_intel_64_test_factory.addStep(util_process_clean)
+    mac_intel_64_test_factory.addStep(util_clean_buildsdir)
 
     mac_intel_64_test_builder = {
                 'name': "mac64-intel-test",
@@ -1123,6 +1128,7 @@ class tamarinredux:
     mac_ppc_104a_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_104_ppc", vmargs="-Ojit", config="", scriptargs=""))
     mac_ppc_104a_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_104_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_104a_test_factory.addStep(util_process_clean)
+    mac_ppc_104a_test_factory.addStep(util_clean_buildsdir)
 
     mac_ppc_104a_test_builder = {
                 'name': "mac-ppc-10.4a-test",
@@ -1139,6 +1145,7 @@ class tamarinredux:
     mac_ppc_104b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_104_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_104b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_104_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_104b_test_factory.addStep(util_process_clean)
+    mac_ppc_104b_test_factory.addStep(util_clean_buildsdir)
 
     mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test",
@@ -1160,6 +1167,7 @@ class tamarinredux:
     mac_ppc_105a_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_ppc", vmargs="-Ojit", config="", scriptargs=""))
     mac_ppc_105a_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_105a_test_factory.addStep(util_process_clean)
+    mac_ppc_105a_test_factory.addStep(util_clean_buildsdir)
 
     mac_ppc_105a_test_builder = {
                 'name': "mac-ppc-10.5a-test",
@@ -1176,6 +1184,7 @@ class tamarinredux:
     mac_ppc_105b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_105b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_105b_test_factory.addStep(util_process_clean)
+    mac_ppc_105b_test_factory.addStep(util_clean_buildsdir)
 
     mac_ppc_105b_test_builder = {
                 'name': "mac-ppc-10.5b-test",
@@ -1199,6 +1208,7 @@ class tamarinredux:
     mac_ppc_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
     mac_ppc_64_test_factory.addStep(util_process_clean)
+    mac_ppc_64_test_factory.addStep(util_clean_buildsdir)
 
     mac_ppc_64_test_builder = {
                 'name': "mac64-ppc-test",
@@ -1231,6 +1241,7 @@ class tamarinredux:
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
     linux_test_factory.addStep(util_process_clean)
+    linux_test_factory.addStep(util_clean_buildsdir)
 
     linux_test_builder = {
                 'name': "linux-test",
@@ -1254,6 +1265,7 @@ class tamarinredux:
     linux_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="", scriptargs=""))
     linux_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="", scriptargs=""))
     linux_64_test_factory.addStep(util_process_clean)
+    linux_64_test_factory.addStep(util_clean_buildsdir)
 
     linux_64_test_builder = {
                 'name': "linux64-test",
@@ -1272,6 +1284,7 @@ class tamarinredux:
     winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
     winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
     winmobile_emulator_test_factory.addStep(util_process_clean)
+    winmobile_emulator_test_factory.addStep(util_clean_buildsdir)
 
     winmobile_emulator_test_builder = {
                 'name': "winmobile-emulator-test",
@@ -1295,6 +1308,7 @@ class tamarinredux:
     solaris_sparc_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     solaris_sparc_test_factory.addStep(util_process_clean)
+    solaris_sparc_test_factory.addStep(util_clean_buildsdir)
 
     solaris_sparc_test_builder = {
                 'name': "solaris-sparc-test",
@@ -1317,6 +1331,7 @@ class tamarinredux:
                 timeout=3600)
     )
     android_test_factory.addStep(util_process_clean)
+    android_test_factory.addStep(util_clean_buildsdir)
 
     android_test_builder = {
                 'name': "android-test",
@@ -1334,8 +1349,8 @@ class tamarinredux:
     linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
-    
     linux_arm_test_factory.addStep(util_process_clean)
+    linux_arm_test_factory.addStep(util_clean_buildsdir)
 
     linux_arm_test_builder = {
                 'name': "linux-arm-test",
@@ -1351,8 +1366,8 @@ class tamarinredux:
     linux_arm2_test_factory = factory.BuildFactory()
     linux_arm2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
     linux_arm2_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
-    
     linux_arm2_test_factory.addStep(util_process_clean)
+    linux_arm2_test_factory.addStep(util_clean_buildsdir)
 
     linux_arm2_test_builder = {
                 'name': "linux-arm2-test",
@@ -1385,6 +1400,7 @@ class tamarinredux:
     windows_performance_factory.addStep(perf_release_interp)
     windows_performance_factory.addStep(perf_release_jit)
     windows_performance_factory.addStep(util_process_clean)
+    windows_performance_factory.addStep(util_clean_buildsdir)
     windows_performance_factory.addStep(bb_lockrelease)
 
     windows_performance_builder = {
@@ -1409,6 +1425,7 @@ class tamarinredux:
     mac_performance_factory.addStep(perf_release_interp)
     mac_performance_factory.addStep(perf_release_jit)
     mac_performance_factory.addStep(util_process_clean)
+    mac_performance_factory.addStep(util_clean_buildsdir)    
     mac_performance_factory.addStep(bb_lockrelease)
 
     mac_performance_builder = {
@@ -1433,6 +1450,7 @@ class tamarinredux:
     mac_64_performance_factory.addStep(perf_release_interp)
     mac_64_performance_factory.addStep(perf_release_jit)
     mac_64_performance_factory.addStep(util_process_clean)
+    mac_64_performance_factory.addStep(util_clean_buildsdir)
     mac_64_performance_factory.addStep(bb_lockrelease)
 
     mac_64_performance_builder = {
@@ -1457,6 +1475,7 @@ class tamarinredux:
     mac_ppc_performance_factory.addStep(perf_release_interp)
     mac_ppc_performance_factory.addStep(perf_release_jit)
     mac_ppc_performance_factory.addStep(util_process_clean)
+    mac_ppc_performance_factory.addStep(util_clean_buildsdir)
     mac_ppc_performance_factory.addStep(bb_lockrelease)
 
     mac_ppc_performance_builder = {
@@ -1481,6 +1500,7 @@ class tamarinredux:
     linux_performance_factory.addStep(perf_release_interp)
     linux_performance_factory.addStep(perf_release_jit)
     linux_performance_factory.addStep(util_process_clean)
+    linux_performance_factory.addStep(util_clean_buildsdir)
     linux_performance_factory.addStep(bb_lockrelease)
 
     linux_performance_builder = {
@@ -1527,6 +1547,7 @@ class tamarinredux:
                 workdir="../repo/build/buildbot/slaves/scripts",
                 timeout=3600)
     )
+    android_performance_factory.addStep(util_clean_buildsdir)
 
     android_performance_builder = {
                 'name': "android-performance",
@@ -1548,6 +1569,7 @@ class tamarinredux:
     winmobile_performance_factory.addStep(perf_release_arm)
     winmobile_performance_factory.addStep(perf_release_arm_interp)
     winmobile_performance_factory.addStep(perf_release_arm_jit)
+    winmobile_performance_factory.addStep(util_clean_buildsdir)
     winmobile_performance_factory.addStep(bb_lockrelease)
 
     winmobile_performance_builder = {
@@ -1585,6 +1607,7 @@ class tamarinredux:
     windows_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     windows_deep_factory.addStep(util_process_clean)
+    windows_deep_factory.addStep(util_clean_buildsdir)
 
     windows_deep_builder = {
                 'name': "windows-deep",
@@ -1614,6 +1637,7 @@ class tamarinredux:
     windows_p3_deep_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     #windows_p3_deep_factory.addStep(test_differential)
     windows_p3_deep_factory.addStep(util_process_clean)
+    windows_p3_deep_factory.addStep(util_clean_buildsdir)
 
     windows_p3_deep_builder = {
                 'name': "windows-p3-deep",
@@ -1645,6 +1669,7 @@ class tamarinredux:
                 workdir="../scripts",
                 timeout=3600)
     )
+    windows_frr_factory.addStep(util_clean_buildsdir)
 
     windows_frr_builder = {
                 'name': "windows-frr",
@@ -1675,6 +1700,8 @@ class tamarinredux:
     mac_ppc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_ppc", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     mac_ppc_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     mac_ppc_deep_factory.addStep(util_process_clean)
+    mac_ppc_deep_factory.addStep(util_clean_buildsdir)
+
     mac_ppc_deep_builder = {
                 'name': "mac-ppc-deep",
                 'slavename': "asteammac10",
@@ -1700,6 +1727,8 @@ class tamarinredux:
     solaris_sparc_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     solaris_sparc_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     solaris_sparc_deep_factory.addStep(util_process_clean)
+    solaris_sparc_deep_factory.addStep(util_clean_buildsdir)
+
     solaris_sparc_deep_builder = {
                 'name': "solaris-sparc-deep",
                 'slavename': "asteamsol1",
@@ -1736,6 +1765,8 @@ class tamarinredux:
     windows_64_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell_64", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     windows_64_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd_64", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     windows_64_deep_factory.addStep(util_process_clean)
+    windows_64_deep_factory.addStep(util_clean_buildsdir)
+
     windows_64_deep_builder = {
                 'name': "windows64-deep",
                 'slavename': "asteamwin11",
@@ -1757,6 +1788,8 @@ class tamarinredux:
     winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="arm-winmobile-emulator-tvm-release-Dinterp-deep", scriptargs=""))
     winmobile_emulator_deep_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="arm-winmobile-emulator-tvm-release-Ojit-deep", scriptargs=""))
     winmobile_emulator_deep_factory.addStep(util_process_clean)
+    winmobile_emulator_deep_factory.addStep(util_clean_buildsdir)
+
     winmobile_emulator_deep_builder = {
                 'name': "winmobile-emulator-deep",
                 'slavename': "asteamwin20",
@@ -1788,6 +1821,8 @@ class tamarinredux:
     linux_deep_factory.addStep(test_generic(name="Release-Dgreedy", shellname="avmshell", vmargs="-Dgreedy", config="", scriptargs="--timeout=180 --random"))
     linux_deep_factory.addStep(test_generic(name="Release_Verify", shellname="avmshell_sd", vmargs="", config="", scriptargs="--verify --timeout=300 --random"))
     linux_deep_factory.addStep(util_process_clean)
+    linux_deep_factory.addStep(util_clean_buildsdir)
+
     linux_deep_builder = {
                 'name': "linux-deep",
                 'slavename': "asteamlin9",
@@ -1810,6 +1845,8 @@ class tamarinredux:
     linux_arm_deep_factory.addStep(test_generic(name="Release-deep", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="arm-lnx-tvm-release-deep", scriptargs=""))
     linux_arm_deep_factory.addStep(test_generic(name="Release-Dinterp-deep", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="arm-lnx-tvm-release-Dinterp-deep", scriptargs=""))
     linux_arm_deep_factory.addStep(util_process_clean)
+    linux_arm_deep_factory.addStep(util_clean_buildsdir)
+
     linux_arm_deep_builder = {
                 'name': "linux-arm-deep",
                 'slavename': "asteambeagleboard3",
