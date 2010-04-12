@@ -927,6 +927,7 @@ class sandbox:
     sb_windows_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     sb_windows_test_factory.addStep(test_differential)
     sb_windows_test_factory.addStep(util_process_clean)
+    sb_windows_test_factory.addStep(util_clean_buildsdir)
 
     sb_windows_test_builder = {
                 'name': "windows-test-sandbox",
@@ -949,6 +950,7 @@ class sandbox:
     sb_windows_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="", scriptargs=""))
     sb_windows_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="", scriptargs=""))
     sb_windows_64_test_factory.addStep(util_process_clean)
+    sb_windows_64_test_factory.addStep(util_clean_buildsdir)
 
     sb_windows_64_test_builder = {
                 'name': "windows64-test-sandbox",
@@ -973,6 +975,7 @@ class sandbox:
     sb_mac_intel_104_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_104", vmargs="", config="", scriptargs=""))
     sb_mac_intel_104_test_factory.addStep(test_differential)
     sb_mac_intel_104_test_factory.addStep(util_process_clean)
+    sb_mac_intel_104_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_intel_104_test_builder = {
                 'name': "mac-intel-10.4-test-sandbox",
@@ -998,6 +1001,7 @@ class sandbox:
     sb_mac_intel_105_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     sb_mac_intel_105_test_factory.addStep(test_differential)
     sb_mac_intel_105_test_factory.addStep(util_process_clean)
+    sb_mac_intel_105_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_intel_105_test_builder = {
                 'name': "mac-intel-10.5-test-sandbox",
@@ -1020,6 +1024,7 @@ class sandbox:
     sb_mac_intel_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="", scriptargs=""))
     sb_mac_intel_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="", scriptargs=""))
     sb_mac_intel_64_test_factory.addStep(util_process_clean)
+    sb_mac_intel_64_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_intel_64_test_builder = {
                 'name': "mac64-intel-test-sandbox",
@@ -1041,6 +1046,7 @@ class sandbox:
     sb_mac_ppc_104a_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_104_ppc", vmargs="-Ojit", config="", scriptargs=""))
     sb_mac_ppc_104a_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_104_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_104a_test_factory.addStep(util_process_clean)
+    sb_mac_ppc_104a_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_ppc_104a_test_builder = {
                 'name': "mac-ppc-10.4a-test-sandbox",
@@ -1057,6 +1063,7 @@ class sandbox:
     sb_mac_ppc_104b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_104_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_104b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_104_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_104b_test_factory.addStep(util_process_clean)
+    sb_mac_ppc_104b_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_ppc_104b_test_builder = {
                 'name': "mac-ppc-10.4b-test-sandbox",
@@ -1078,6 +1085,7 @@ class sandbox:
     sb_mac_ppc_105a_test_factory.addStep(test_generic(name="Release-jit", shellname="avmshell_ppc", vmargs="-Ojit", config="", scriptargs=""))
     sb_mac_ppc_105a_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_105a_test_factory.addStep(util_process_clean)
+    sb_mac_ppc_105a_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_ppc_105a_test_builder = {
                 'name': "mac-ppc-10.5a-test-sandbox",
@@ -1093,6 +1101,7 @@ class sandbox:
     sb_mac_ppc_105b_test_factory.addStep(test_generic(name="ReleaseDebugger", shellname="avmshell_s_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_105b_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_105b_test_factory.addStep(util_process_clean)
+    sb_mac_ppc_105b_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_ppc_105b_test_builder = {
                 'name': "mac-ppc-10.5b-test-sandbox",
@@ -1116,6 +1125,7 @@ class sandbox:
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64_ppc", vmargs="", config="", scriptargs=""))
     sb_mac_ppc_64_test_factory.addStep(util_process_clean)
+    sb_mac_ppc_64_test_factory.addStep(util_clean_buildsdir)
 
     sb_mac_ppc_64_test_builder = {
                 'name': "mac64-ppc-test-sandbox",
@@ -1148,6 +1158,7 @@ class sandbox:
                 workdir="../repo/build/buildbot/slaves/scripts")
     )
     sb_linux_test_factory.addStep(util_process_clean)
+    sb_linux_test_factory.addStep(util_clean_buildsdir)
 
     sb_linux_test_builder = {
                 'name': "linux-test-sandbox",
@@ -1171,6 +1182,7 @@ class sandbox:
     sb_linux_64_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d_64", vmargs="", config="", scriptargs=""))
     sb_linux_64_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd_64", vmargs="", config="", scriptargs=""))
     sb_linux_64_test_factory.addStep(util_process_clean)
+    sb_linux_64_test_factory.addStep(util_clean_buildsdir)
 
     sb_linux_64_test_builder = {
                 'name': "linux64-test-sandbox",
@@ -1188,6 +1200,7 @@ class sandbox:
     sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-wordcode-interp", shellname="avmshell_wordcode_arm", vmargs="-Dinterp", config="", scriptargs=""))
     sb_winmobile_emulator_test_factory.addStep(test_emulator_generic(name="Release-jit", shellname="avmshell_arm", vmargs="-Ojit", config="", scriptargs=""))
     sb_winmobile_emulator_test_factory.addStep(util_process_clean)
+    sb_winmobile_emulator_test_factory.addStep(util_clean_buildsdir)
 
     sb_winmobile_emulator_test_builder = {
                 'name': "winmobile-emulator-test-sandbox",
@@ -1211,6 +1224,7 @@ class sandbox:
     sb_solaris_sparc_test_factory.addStep(test_generic(name="Debug", shellname="avmshell_d", vmargs="", config="", scriptargs=""))
     sb_solaris_sparc_test_factory.addStep(test_generic(name="DebugDebugger", shellname="avmshell_sd", vmargs="", config="", scriptargs=""))
     sb_solaris_sparc_test_factory.addStep(util_process_clean)
+    sb_solaris_sparc_test_factory.addStep(util_clean_buildsdir)
 
     sb_solaris_sparc_test_builder = {
                 'name': "solaris-sparc-test-sandbox",
@@ -1233,6 +1247,7 @@ class sandbox:
                 timeout=3600)
     )
     sb_android_test_factory.addStep(util_process_clean)
+    sb_android_test_factory.addStep(util_clean_buildsdir)
 
     sb_android_test_builder = {
                 'name': "android-test-sandbox",
@@ -1249,8 +1264,8 @@ class sandbox:
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-softfloat", shellname="avmshell_neon_arm", vmargs="", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
     sb_linux_arm_test_factory.addStep(test_generic(name="Release-jit-vfp", shellname="avmshell_neon_arm", vmargs="-Darm_arch 7 -Darm_vfp -Ojit", config="", scriptargs=""))
-    
     sb_linux_arm_test_factory.addStep(util_process_clean)
+    sb_linux_arm_test_factory.addStep(util_clean_buildsdir)
 
     sb_linux_arm_test_builder = {
                 'name': "linux-arm-test-sandbox",
@@ -1266,8 +1281,8 @@ class sandbox:
     sb_linux_arm2_test_factory = factory.BuildFactory()
     sb_linux_arm2_test_factory.addStep(test_generic(name="Release-interp", shellname="avmshell_neon_arm", vmargs="-Dinterp", config="", scriptargs=""))
     sb_linux_arm2_test_factory.addStep(test_generic(name="Debug-vfp", shellname="avmshell_neon_arm_d", vmargs="-Darm_arch 7 -Darm_vfp", config="", scriptargs=""))
-    
     sb_linux_arm2_test_factory.addStep(util_process_clean)
+    sb_linux_arm2_test_factory.addStep(util_clean_buildsdir)
 
     sb_linux_arm2_test_builder = {
                 'name': "linux-arm2-test-sandbox",
