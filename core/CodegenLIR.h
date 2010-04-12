@@ -410,6 +410,9 @@ namespace avmplus
         LIns *setjmpResult;
         VarTracker *varTracker;
         int framesize;
+#ifdef DEBUGGER
+        int dbg_framesize; // count of locals & scopes visible to the debugger
+#endif
         int labelCount;
         LookupCacheBuilder finddef_cache_builder;
         CacheBuilder<CallCache> call_cache_builder;
