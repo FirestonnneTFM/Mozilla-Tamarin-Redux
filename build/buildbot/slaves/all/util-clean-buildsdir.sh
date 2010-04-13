@@ -43,4 +43,6 @@
 . ./environment.sh
 
 echo "Deleting all folders more than 7 days old under: $buildsdir"
-find $buildsdir -mtime +7 -delete
+# Bug 522525: this needs to be bullet proofed, being unable to delete a 
+# directory should NEVER fail the build.
+#find $buildsdir -mtime +7 -delete
