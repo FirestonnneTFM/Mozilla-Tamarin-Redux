@@ -2244,7 +2244,7 @@ namespace MMgc
     void GCHeap::SignalExternalFreeMemory(size_t minimumBytesToFree /*= kMaxObjectSize */)
     {
         GCHeap* heap = GetGCHeap();
-        GCAssertMsg(heap, "GCHeap not valid!");
+        GCAssertMsg(heap != NULL, "GCHeap not valid!");
 
         MMGC_LOCK_ALLOW_RECURSION(heap->m_spinlock, heap->m_notificationThread);
 

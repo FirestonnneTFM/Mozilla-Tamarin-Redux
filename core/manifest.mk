@@ -120,12 +120,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/instr.cpp \
   $(NULL)
 
-ifdef ENABLE_DEBUG
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/AvmDebug.cpp \
-  $(NULL)
-endif
-
 #  $(curdir)/avmplus.cpp \
 #  $(curdir)/AtomConstants.cpp \
 

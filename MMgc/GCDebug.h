@@ -44,26 +44,12 @@
 
 namespace MMgc
 {
-    void GCDebugMsg(bool debuggerBreak, const char* format, ...);
     void GCDebugIndent(size_t count);
 
-    #ifdef _DEBUG
-        inline void ___GCAssertMsg(int32_t assertion, const char* msg)
-        {
-            if (assertion == 0)
-                MMgc::GCDebugMsg(true, msg);
-        }
-
-        #define GCAssert(x)                 GCAssertMsg((x), "")
-        #define GCAssertMsg(x,y)            _GCAssertMsg((x), y, __LINE__,__FILE__)
-        #define _GCAssertMsg(x, msg, line_, file_)  __GCAssertMsg((x), msg, line_, file_)
-        #define __GCAssertMsg(x, msg_, line_, file_)    do { if ((x) == 0) MMgc::GCDebugMsg(true, "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ") %s", msg_); } while (0) /* no semi */
-
-    #else
-        #define GCAssertMsg(x,y)    do { } while (0) /* no semi */
-        #define GCAssert(x)         do { } while (0) /* no semi */
-    #endif
-
+    #define GCAssert         AvmAssert
+    #define GCAssertMsg      AvmAssertMsg
+    #define GCDebugMsg       avmplus::AvmDebugMsg
+    
 }
 
 #endif /* __GCDebug__ */

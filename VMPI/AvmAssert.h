@@ -38,8 +38,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#ifndef __AvmDebug__
-#define __AvmDebug__
+#ifndef __AvmAssert__
+#define __AvmAssert__
 
 // AVMPLUS_CUSTOM_ASSERTION_HANDLER not yet (now == Apr-2009) exposed as a feature;
 // awaiting cleanup of the debug code (merging MMgc and Avm debug macros, etc)
@@ -57,40 +57,44 @@ namespace avmplus
     void AvmDebugMsg(const char* msg, bool debuggerBreak);
     void AvmDebugMsg(const wchar* msg, bool debuggerBreak);
 
-    #ifdef _DEBUG
-        inline void AvmAssertFail(const char *message) {
-            #if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
-                AVMPlusCustomAssertionHandler(message);
-            #else
-                AvmDebugMsg(message, true);
-            #endif
-        }
-
-        inline void _AvmAssertMsg(int32 assertion, const char* message) {
-            if (!assertion)
-                AvmAssertFail(message);
-        }
-
-        #define AvmAssertMsg(x,y)               do { avmplus::_AvmAssertMsg((x), (y)); } while (0) /* no semi */
-
-        #define AvmAssert(x)                    _AvmAssert((x), __LINE__,__FILE__)
-        #define _AvmAssert(x, line_, file_)     __AvmAssert((x), line_, file_)
-        #define __AvmAssert(x, line_, file_)    do { AvmAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")\n"); } while (0) /* no semi */
-
-    #else
-        #define AvmAssertMsg(x,y)   do { } while (0) /* no semi */
-        #define AvmAssert(x)        do { } while (0) /* no semi */
-    #endif
-}
-
-#ifdef FEATURE_NANOJIT
-namespace nanojit {
-    #ifdef _DEBUG
-    inline void NanoAssertFail() {
-        avmplus::AvmAssertFail("");
+#if defined DEBUG || defined _DEBUG
+    
+    inline void AvmAssertFail(const char *message) {
+        #if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
+            AVMPlusCustomAssertionHandler(message);
+        #else
+            AvmDebugMsg(message, true);
+        #endif
     }
-    #endif
-}
-#endif
 
-#endif /* __AvmDebug__ */
+    inline void _AvmAssertMsg(int32_t condition, const char* message) {
+        if (!condition)
+            AvmAssertFail(message);
+    }
+
+    #define AvmAssert(condition) \
+        _AvmAssert((condition), __LINE__,__FILE__)
+
+    #define AvmAssertMsg(condition,message) \
+        do { avmplus::_AvmAssertMsg((condition), (message)); } while (0) /* no semi */
+
+    #define _AvmAssert(condition, line_, file_) \
+        __AvmAssert((condition), line_, file_)
+
+    #define __AvmAssert(condition, line_, file_) \
+        do { AvmAssertMsg((condition), \
+                          "Assertion failed: \"" #condition "\" (" #file_ ":" #line_ ")\n"); \
+        } while (0) /* no semi */
+
+#else
+    
+    #define AvmAssertMsg(condition,message) \
+        do { } while (0) /* no semi */
+
+    #define AvmAssert(condition) \
+        do { } while (0) /* no semi */
+
+#endif
+}
+
+#endif /* __AvmAssert__ */
