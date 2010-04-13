@@ -330,7 +330,15 @@ namespace avmplus
         }
         #endif
         coder->writePrologue(state, code_pos);
-        verifyBlock(coder, code_pos);
+        if (code_length > 0 && code_pos[0] == OP_label) {
+            // a reachable block starts at code_pos; explicitly create it,
+            // which puts it on the worklist.
+            checkTarget(code_pos-1, code_pos);
+        } else {
+            // inital sequence of code is only reachable from procedure
+            // entry, no block will be created, so verify it explicitly
+            verifyBlock(coder, code_pos);
+        }
         for (FrameState* succ = worklist; succ != NULL; succ = worklist) {
             worklist = succ->wl_next;
             succ->wl_pending = false;
@@ -363,9 +371,18 @@ namespace avmplus
         parseBodyHeader();          // reset code_pos & code_length
         checkParams();
         coder->writePrologue(state, code_pos);
-        verifyBlock(coder, code_pos);
-        for (int i=0, n=getBlockCount(); i < n; i++)
-            verifyBlock(coder, loadBlockState(blockStates->at(i)));
+        const byte* end_pos = code_pos;
+        // typically, first block is not in blockStates: verify it explicitly
+        if (!hasFrameState(0))
+            end_pos = verifyBlock(coder, code_pos);
+        // visit blocks in linear order (blockStates is sorted by abc address)
+        for (int i=0, n=getBlockCount(); i < n; i++) {
+            const byte* start_pos = loadBlockState(blockStates->at(i));
+            // overlapping blocks indicates a branch to the middle of an instruction
+            if (start_pos < end_pos)
+                verifyFailed(kInvalidBranchTargetError);
+            end_pos = verifyBlock(coder, start_pos);
+        }
         coder->writeEpilogue(state);
 
         } CATCH (Exception *exception) {
@@ -441,14 +458,15 @@ namespace avmplus
     // verify one superblock, return at the end.  The end of the block is when
     // we reach a terminal opcode (jump, lookupswitch, returnvalue, returnvoid,
     // or throw), or when we fall into the beginning of another block.
-    void Verifier::verifyBlock(CodeWriter *coder, const byte* start_pos)
+    // returns the address of the next instruction after the block end.
+    const byte* Verifier::verifyBlock(CodeWriter *coder, const byte* start_pos)
     {
         _nvprof("verify-block", 1);
         ExceptionHandlerTable* exTable = info->abc_exceptions();
-        const byte* nextpc;
         bool isLoopHeader = state->targetOfBackwardsBranch;
         state->targetOfBackwardsBranch = false;
-        for (const byte* pc = nextpc = start_pos, *code_end=code_pos+code_length; pc < code_end; pc = nextpc)
+        const byte* code_end = code_pos + code_length;
+        for (const byte *pc = start_pos, *nextpc = pc; pc < code_end; pc = nextpc)
         {
             // should we make a new sample frame in this method?
             // SAMPLE_CHECK();
@@ -466,7 +484,7 @@ namespace avmplus
             // test for the start of a new block
             if (pc != start_pos && (opcode == OP_label || hasFrameState(logical_pc))) {
                 checkTarget(pc-1, pc);
-                return;
+                return pc;
             }
 
             int sp = state->sp();
@@ -566,7 +584,7 @@ namespace avmplus
                 coder->writeOp1(state, pc, opcode, imm24);
                 checkTarget(pc, nextpc+imm24);  // target block;
                 coder->writeOpcodeVerified(state, pc, opcode);
-                return;
+                return nextpc;
 
             case OP_lookupswitch:
             {
@@ -585,7 +603,7 @@ namespace avmplus
                     nextpc += 3;
                 }
                 coder->writeOpcodeVerified(state, pc, opcode);
-                return;
+                return nextpc;
             }
 
             case OP_throw:
@@ -593,7 +611,7 @@ namespace avmplus
                 coder->write(state, pc, opcode);
                 state->pop();
                 coder->writeOpcodeVerified(state, pc, opcode);
-                return;
+                return nextpc;
 
             case OP_returnvalue:
                 checkStack(1,0);
@@ -601,13 +619,13 @@ namespace avmplus
                 coder->write(state, pc, opcode);
                 state->pop();
                 coder->writeOpcodeVerified(state, pc, opcode);
-                return;
+                return nextpc;
 
             case OP_returnvoid:
                 //checkStack(0,0)
                 coder->write(state, pc, opcode);
                 coder->writeOpcodeVerified(state, pc, opcode);
-                return;
+                return nextpc;
 
             case OP_pushnull:
                 checkStack(0,1);
@@ -1915,6 +1933,7 @@ namespace avmplus
         }
 
         verifyFailed(kCannotFallOffMethodError);
+        return code_end;
     }
 
     void Verifier::checkPropertyMultiname(uint32_t &depth, Multiname &multiname)
@@ -2526,6 +2545,10 @@ namespace avmplus
         AvmAssert(false);
     }
 
+    // Merge the current FrameState (this->state) with the target
+    // FrameState (getFrameState(target)), and report verify errors.
+    // Fixme: Bug 558876 - |current| must not be dereferenced, it could point
+    // outside the valid range of bytecodes.  Its only for back-edge detection.
     void Verifier::checkTarget(const byte* current, const byte* target)
     {
         int target_off = int(target - code_pos);
