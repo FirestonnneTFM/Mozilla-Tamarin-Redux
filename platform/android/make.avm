@@ -155,7 +155,6 @@ AVMPLUS_SRCS := \
 	ThreadsPosix.cpp \
 	SpyUtilsPosix.cpp \
 	PosixPortUtils.cpp \
-	AvmDebug.cpp \
 	AvmLog.cpp \
 	Coder.cpp \
     eval-abc.cpp \
