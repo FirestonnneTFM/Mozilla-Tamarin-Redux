@@ -455,7 +455,9 @@
     PUREFUNCTION(FUNCADDR(AvmCore::number), SIG1(F,A), number)
     METHOD(ENVADDR(MethodEnv::hasnextproto), SIG3(I,P,P,P), hasnextproto)
     METHOD(ENVADDR(MethodEnv::nullcheck), SIG2(V,P,A), nullcheck)
-    PUREMETHOD(TOPLEVELADDR(Toplevel::toVTable), SIG2(P,P,A), toVTable)
+
+    typedef VTable* (*toVTable_Toplevel)(Toplevel*, Atom);
+    PUREFUNCTION(FUNCADDR((toVTable_Toplevel)&toVTable<Toplevel*>), SIG2(P,P,A), toVTable)
 
     union AnyVal {
         Atom atom;              // SST_atom
