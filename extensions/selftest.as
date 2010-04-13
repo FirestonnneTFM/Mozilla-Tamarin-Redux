@@ -151,7 +151,7 @@ package selftest
 		var classname = null;
     }
 
-    function parse(lines) {
+    function parse(lines, filename) {
 		var st = new Selftest;
 		var i=0;
 		var l=lines.length;
@@ -229,6 +229,8 @@ package selftest
 						break;
 					vs++;
 					i++;
+					// The line number is the line number of the following line, not of the #line itself
+					t.push("#line " + i + " \"" + filename + "\"");
 					t.push("verifyPass(" + res[1] + ", \"" + quote(res[1]) + "\", __FILE__, __LINE__);");
 				}
 				if (vs == 0)
@@ -445,7 +447,7 @@ package selftest
     var selftests = [];
 
     function process(input, output) {
-		var st = parse(File.read(input).split("\n"));
+		var st = parse(File.read(input).split("\n"), input);
 		selftests.push(st);
 		File.write(output, formatSelftest(input, st));
     }
