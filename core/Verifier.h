@@ -117,7 +117,7 @@ namespace avmplus
         FrameState *state;
         bool emitPass;
         FrameState* getFrameState(int pc_off);
-        void verifyBlock(CodeWriter *, const byte*);
+        const byte* verifyBlock(CodeWriter *, const byte*);
         void identifyBlocks(const byte*, int);
         void dfsBlock(const byte*, int);
         const byte* loadBlockState(FrameState* blk);
