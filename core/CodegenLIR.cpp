@@ -124,7 +124,6 @@ namespace avmplus
         #define COREADDR(f) coreAddr((int (AvmCore::*)())(&f))
         #define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
         #define ENVADDR(f) envAddr((int (MethodEnv::*)())(&f))
-        #define TOPLEVELADDR(f) toplevelAddr((int (Toplevel::*)())(&f))
         #define ARRAYADDR(f) arrayAddr((int (ArrayObject::*)())(&f))
         #define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
         #define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
@@ -132,7 +131,6 @@ namespace avmplus
         #define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
         #define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
         #define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
-        #define CLASSCLOSUREADDR(f)   classClosureAddr((int (ClassClosure::*)())(&f))
         #define FUNCADDR(addr) (uintptr)addr
 
    #ifdef VTUNE
@@ -152,11 +150,6 @@ namespace avmplus
         intptr_t  envAddr( int (MethodEnv::*f)() )
         {
             RETURN_METHOD_PTR(MethodEnv, f);
-        }
-
-        intptr_t  toplevelAddr( int (Toplevel::*f)() )
-        {
-            RETURN_METHOD_PTR(Toplevel, f);
         }
 
     #ifdef DEBUGGER
@@ -193,10 +186,6 @@ namespace avmplus
         intptr_t efAddr( int (ExceptionFrame::*f)() )
         {
             RETURN_METHOD_PTR(ExceptionFrame, f);
-        }
-        intptr_t classClosureAddr(int (ClassClosure::*f)())
-        {
-            RETURN_METHOD_PTR(ClassClosure, f);
         }
 
     using namespace MMgc;
