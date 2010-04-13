@@ -1595,6 +1595,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\VMPI\AvmAssert.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\VMPI\AvmAssert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\avmshell.cpp"
 				>
 			</File>

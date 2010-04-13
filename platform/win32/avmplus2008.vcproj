@@ -1440,11 +1440,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AbcEnv.cpp"
+				RelativePath="..\..\core\AbcEnv-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AbcEnv-inlines.h"
+				RelativePath="..\..\core\AbcEnv.cpp"
 				>
 			</File>
 			<File
@@ -1460,11 +1460,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AbcParser.cpp"
+				RelativePath="..\..\core\AbcParser-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AbcParser-inlines.h"
+				RelativePath="..\..\core\AbcParser.cpp"
 				>
 			</File>
 			<File
@@ -1500,6 +1500,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\atom-inlines.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\atom.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\atom.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\AtomArray.cpp"
 				>
 			</File>
@@ -1508,23 +1520,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\atom.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\atom-inlines.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\atom.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\AtomWriteBarrier.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\avmbuild.h"
 				>
 			</File>
 			<File
@@ -1536,11 +1532,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AvmCore.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\AvmCore.h"
+				RelativePath="..\..\core\avmbuild.h"
 				>
 			</File>
 			<File
@@ -1548,11 +1540,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AvmDebug.cpp"
+				RelativePath="..\..\core\AvmCore.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AvmDebug.h"
+				RelativePath="..\..\core\AvmCore.h"
 				>
 			</File>
 			<File
@@ -1732,15 +1724,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\avmplusHashtable-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\avmplusHashtable.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\core\avmplusHashtable.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\avmplusHashtable-inlines.h"
 				>
 			</File>
 			<File
@@ -1804,11 +1796,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\CodegenLIR.cpp"
+				RelativePath="..\..\core\CodegenLIR-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\CodegenLIR-inlines.h"
+				RelativePath="..\..\core\CodegenLIR.cpp"
 				>
 			</File>
 			<File
@@ -1816,11 +1808,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Coder.cpp"
+				RelativePath="..\..\core\Coder-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Coder-inlines.h"
+				RelativePath="..\..\core\Coder.cpp"
 				>
 			</File>
 			<File
@@ -1916,11 +1908,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\FrameState.cpp"
+				RelativePath="..\..\core\FrameState-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\FrameState-inlines.h"
+				RelativePath="..\..\core\FrameState.cpp"
 				>
 			</File>
 			<File
@@ -1936,15 +1928,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\instr-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\instr.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\core\instr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\instr-inlines.h"
 				>
 			</File>
 			<File
@@ -1992,11 +1984,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\MethodEnv.cpp"
+				RelativePath="..\..\core\MethodEnv-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\MethodEnv-inlines.h"
+				RelativePath="..\..\core\MethodEnv.cpp"
 				>
 			</File>
 			<File
@@ -2004,11 +1996,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\MethodInfo.cpp"
+				RelativePath="..\..\core\MethodInfo-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\MethodInfo-inlines.h"
+				RelativePath="..\..\core\MethodInfo.cpp"
 				>
 			</File>
 			<File
@@ -2016,11 +2008,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Multiname.cpp"
+				RelativePath="..\..\core\Multiname-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Multiname-inlines.h"
+				RelativePath="..\..\core\Multiname.cpp"
 				>
 			</File>
 			<File
@@ -2028,11 +2020,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\MultinameHashtable.cpp"
+				RelativePath="..\..\core\MultinameHashtable-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\MultinameHashtable-inlines.h"
+				RelativePath="..\..\core\MultinameHashtable.cpp"
 				>
 			</File>
 			<File
@@ -2056,15 +2048,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\NamespaceSet-inlines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\NamespaceSet.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\core\NamespaceSet.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\NamespaceSet-inlines.h"
 				>
 			</File>
 			<File
@@ -2116,11 +2108,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\PoolObject.cpp"
+				RelativePath="..\..\core\PoolObject-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\PoolObject-inlines.h"
+				RelativePath="..\..\core\PoolObject.cpp"
 				>
 			</File>
 			<File
@@ -2164,11 +2156,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\ScopeChain.cpp"
+				RelativePath="..\..\core\ScopeChain-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\ScopeChain-inlines.h"
+				RelativePath="..\..\core\ScopeChain.cpp"
 				>
 			</File>
 			<File
@@ -2228,11 +2220,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Toplevel.cpp"
+				RelativePath="..\..\core\Toplevel-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Toplevel-inlines.h"
+				RelativePath="..\..\core\Toplevel.cpp"
 				>
 			</File>
 			<File
@@ -2240,11 +2232,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Traits.cpp"
+				RelativePath="..\..\core\Traits-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Traits-inlines.h"
+				RelativePath="..\..\core\Traits.cpp"
 				>
 			</File>
 			<File
@@ -2276,11 +2268,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Verifier.cpp"
+				RelativePath="..\..\core\Verifier-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Verifier-inlines.h"
+				RelativePath="..\..\core\Verifier.cpp"
 				>
 			</File>
 			<File
@@ -2292,11 +2284,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\VTable.cpp"
+				RelativePath="..\..\core\VTable-inlines.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\VTable-inlines.h"
+				RelativePath="..\..\core\VTable.cpp"
 				>
 			</File>
 			<File

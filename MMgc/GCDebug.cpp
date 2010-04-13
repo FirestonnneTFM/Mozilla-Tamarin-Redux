@@ -41,29 +41,6 @@
 
 namespace MMgc
 {
-    void GCDebugMsg(bool debuggerBreak, const char* format, ...)
-    {
-        // [ggrossman 09.24.04]
-        // Changed this to _DEBUG only because we don't link to
-        // CRT in Release builds, so vsprintf is unavailable!!
-    #ifdef _DEBUG
-        char buf[1024];
-        va_list args;
-        va_start(args, format);
-
-        int chars = VMPI_vsnprintf(buf, sizeof(buf)-2, format, args);
-        buf[chars] = '\n';
-        buf[chars+1] = '\0';
-        va_end(args);
-        VMPI_debugLog(buf);
-        if(debuggerBreak)
-            VMPI_debugBreak();
-    #else
-        (void)debuggerBreak;
-        (void)format;
-    #endif
-    }
-
     void GCDebugIndent(size_t count)
     {
 #ifdef _DEBUG

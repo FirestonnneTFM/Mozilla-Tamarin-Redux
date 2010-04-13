@@ -111,6 +111,7 @@
     #define MMGC_MEMORY_PROFILER_ARG(x)
 #endif
 
+#include "AvmAssert.h"
 #include "GCDebug.h"
 #include "GCLog.h"
 

@@ -54,6 +54,8 @@
 		072EA1030F4C1CE9009F11E6 /* eval-util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 072EA0E70F4C1CE9009F11E6 /* eval-util.cpp */; };
 		073AC651116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
 		073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */; };
+		0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0749E7721173EDC9002F7F64 /* AvmAssert.cpp */; };
+		0749E7751173EDC9002F7F64 /* AvmAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0749E7721173EDC9002F7F64 /* AvmAssert.cpp */; };
 		07689AA0101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		07689AA1101DC28000BC72AA /* ZCT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07689A9E101DC28000BC72AA /* ZCT.cpp */; };
 		078F536B0FA473C50064216F /* ShellCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 078F53690FA473C50064216F /* ShellCore.cpp */; };
@@ -347,9 +349,7 @@
 		3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BC80F54B223009A93FE /* PosixFile.cpp */; };
 		3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */; };
 		3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */; };
-		3FDDC5420F60A07400E29821 /* AvmDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */; };
 		3FDDC5430F60A07400E29821 /* AvmLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5400F60A07400E29821 /* AvmLog.cpp */; };
-		3FDDC5440F60A07400E29821 /* AvmDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */; };
 		3FDDC5450F60A07400E29821 /* AvmLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5400F60A07400E29821 /* AvmLog.cpp */; };
 		3FDDC5470F60A09D00E29821 /* GCDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5460F60A09D00E29821 /* GCDebug.cpp */; };
 		3FDDC5480F60A09D00E29821 /* GCDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3FDDC5460F60A09D00E29821 /* GCDebug.cpp */; };
@@ -460,6 +460,8 @@
 		072EA10A0F4C1D1B009F11E6 /* smoketest3.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = smoketest3.as; path = ../../../eval/smoketest3.as; sourceTree = SOURCE_ROOT; };
 		073AC64F116A5DC000215772 /* ST_mmgc_gcheap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_gcheap.cpp; path = ../../../extensions/ST_mmgc_gcheap.cpp; sourceTree = SOURCE_ROOT; };
 		073AC650116A5DC000215772 /* ST_mmgc_gcheap.st */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ST_mmgc_gcheap.st; path = ../../../extensions/ST_mmgc_gcheap.st; sourceTree = SOURCE_ROOT; };
+		0749E7721173EDC9002F7F64 /* AvmAssert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmAssert.cpp; path = ../../../VMPI/AvmAssert.cpp; sourceTree = SOURCE_ROOT; };
+		0749E7731173EDC9002F7F64 /* AvmAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmAssert.h; path = ../../../VMPI/AvmAssert.h; sourceTree = SOURCE_ROOT; };
 		075300A510C55E0700D67DA9 /* pcre_avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pcre_avmplus.h; path = ../../../pcre/pcre_avmplus.h; sourceTree = SOURCE_ROOT; };
 		07553E0D1099FB2800F72FB0 /* AbcEnv-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AbcEnv-inlines.h"; path = "../../../core/AbcEnv-inlines.h"; sourceTree = SOURCE_ROOT; };
 		075BA6EE1157D806000BDF13 /* GCHashtable-inlines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "GCHashtable-inlines.h"; path = "../../../MMgc/GCHashtable-inlines.h"; sourceTree = SOURCE_ROOT; };
@@ -847,8 +849,6 @@
 		3F5B2BCA0F54B223009A93FE /* PosixPartialPlatform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PosixPartialPlatform.cpp; path = ../../../shell/PosixPartialPlatform.cpp; sourceTree = SOURCE_ROOT; };
 		3F5B2BCB0F54B223009A93FE /* PosixPartialPlatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PosixPartialPlatform.h; path = ../../../shell/PosixPartialPlatform.h; sourceTree = SOURCE_ROOT; };
 		3F5B2BD30F54B271009A93FE /* avmshellMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmshellMac.cpp; path = ../../../shell/avmshellMac.cpp; sourceTree = SOURCE_ROOT; };
-		3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmDebug.cpp; path = ../../../core/AvmDebug.cpp; sourceTree = SOURCE_ROOT; };
-		3FDDC53F0F60A07400E29821 /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmDebug.h; path = ../../../core/AvmDebug.h; sourceTree = SOURCE_ROOT; };
 		3FDDC5400F60A07400E29821 /* AvmLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmLog.cpp; path = ../../../core/AvmLog.cpp; sourceTree = SOURCE_ROOT; };
 		3FDDC5410F60A07400E29821 /* AvmLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmLog.h; path = ../../../core/AvmLog.h; sourceTree = SOURCE_ROOT; };
 		3FDDC5460F60A09D00E29821 /* GCDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCDebug.cpp; path = ../../../MMgc/GCDebug.cpp; sourceTree = SOURCE_ROOT; };
@@ -1031,8 +1031,6 @@
 				079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */,
 				D9854B961090D05700F30404 /* AvmCore-inlines.h */,
 				079DF7C70F3A882D0031D1B4 /* AvmCore.h */,
-				3FDDC53E0F60A07400E29821 /* AvmDebug.cpp */,
-				3FDDC53F0F60A07400E29821 /* AvmDebug.h */,
 				0774945A0F8C9DA600230F6D /* avmfeatures.as */,
 				0774945B0F8C9DA600230F6D /* avmfeatures.h */,
 				079C96EF0F9EF0E900B2E653 /* avmfeatures.cpp */,
@@ -1588,6 +1586,8 @@
 			children = (
 				0709B6580F9734DF001A6E61 /* Non-Mac */,
 				079DF9C40F3A8BD90031D1B4 /* VMPI.h */,
+				0749E7721173EDC9002F7F64 /* AvmAssert.cpp */,
+				0749E7731173EDC9002F7F64 /* AvmAssert.h */,
 				D94236950F8ACAE400F97706 /* PosixPortUtils.cpp */,
 				D94236940F8ACAE400F97706 /* MMgcPortMac.cpp */,
 				D5AD1DAC0F979A4A002B2FE2 /* SpyUtilsPosix.cpp */,
@@ -1806,7 +1806,6 @@
 				072EA1020F4C1CE9009F11E6 /* eval-unicode.cpp in Sources */,
 				072EA1030F4C1CE9009F11E6 /* eval-util.cpp in Sources */,
 				0715396E0F507325004E398F /* eval-avmplus.cpp in Sources */,
-				3FDDC5440F60A07400E29821 /* AvmDebug.cpp in Sources */,
 				3FDDC5450F60A07400E29821 /* AvmLog.cpp in Sources */,
 				3FDDC5480F60A09D00E29821 /* GCDebug.cpp in Sources */,
 				3FDDC54C0F60A0B600E29821 /* GCLog.cpp in Sources */,
@@ -1835,6 +1834,7 @@
 				D92373DE11222458006D8AA3 /* njconfig.cpp in Sources */,
 				07E2E7AE114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC651116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
+				0749E7751173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1993,7 +1993,6 @@
 				3F5B2BCC0F54B223009A93FE /* PosixFile.cpp in Sources */,
 				3F5B2BCD0F54B223009A93FE /* PosixPartialPlatform.cpp in Sources */,
 				3F5B2BD40F54B271009A93FE /* avmshellMac.cpp in Sources */,
-				3FDDC5420F60A07400E29821 /* AvmDebug.cpp in Sources */,
 				3FDDC5430F60A07400E29821 /* AvmLog.cpp in Sources */,
 				3FDDC5470F60A09D00E29821 /* GCDebug.cpp in Sources */,
 				3FDDC54B0F60A0B600E29821 /* GCLog.cpp in Sources */,
@@ -2019,6 +2018,7 @@
 				D92373DF11222458006D8AA3 /* njconfig.cpp in Sources */,
 				07E2E7AF114EE67C00B3AFCD /* ST_mmgc_dependent.cpp in Sources */,
 				073AC652116A5DC000215772 /* ST_mmgc_gcheap.cpp in Sources */,
+				0749E7741173EDC9002F7F64 /* AvmAssert.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
