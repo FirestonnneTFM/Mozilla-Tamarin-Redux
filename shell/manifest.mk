@@ -73,14 +73,9 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/ST_mmgc_threads.cpp \
   $(curdir)/../extensions/ST_mmgc_543560.cpp \
   $(curdir)/../extensions/ST_mmgc_gcheap.cpp \
-  $(NULL)
-
-ifdef ENABLE_DEBUG
-shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../VMPI/AvmAssert.cpp \
   $(NULL)
-endif
-  
+
 ifeq (windows,$(TARGET_OS))
 shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/avmshellWin.cpp \
