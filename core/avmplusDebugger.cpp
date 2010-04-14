@@ -911,7 +911,7 @@ namespace avmplus
         bool worked = false;
         if (trace->framep() && trace->info())
         {
-            trace->info()->boxLocals(trace->framep(), 0, trace->traits(), &a, 0, 1); // pull framep[0] = [this]
+            trace->info()->boxLocals(trace->framep(), 0, trace->types(), &a, 0, 1); // pull framep[0] = [this]
             worked = true;
         }
         else
@@ -957,7 +957,7 @@ namespace avmplus
                 // pull the args into an array -- skip [0] which is [this]
                 ar = (Atom*) debugger->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
                 MethodInfo* info = trace->info();
-                info->boxLocals(trace->framep(), firstArgument, trace->traits(), ar, 0, count);
+                info->boxLocals(trace->framep(), firstArgument, trace->types(), ar, 0, count);
             }
         }
         else
@@ -980,7 +980,7 @@ namespace avmplus
             {
                 // copy the single arg over
                 MethodInfo* info = trace->info();
-                info->unboxLocals(&val, 0, trace->traits(), trace->framep(), firstArgument+which, 1);
+                info->unboxLocals(&val, 0, trace->types(), trace->framep(), firstArgument+which, 1);
                 worked = true;
             }
         }
@@ -1005,7 +1005,7 @@ namespace avmplus
                 // frame looks like [this][param0...paramN][local0...localN]
                 ar = (Atom*) debugger->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
                 MethodInfo* info = trace->info();
-                info->boxLocals(trace->framep(), firstLocal, trace->traits(), ar, 0, count);
+                info->boxLocals(trace->framep(), firstLocal, trace->types(), ar, 0, count);
 
                 // If NEED_REST or NEED_ARGUMENTS is set, and the jit is being used, then the first
                 // local is actually not an atom at all -- it is an ArrayObject*.  So, we need to
@@ -1050,7 +1050,7 @@ namespace avmplus
                 else
                 {
                     // copy the single arg over
-                    info->unboxLocals(&val, 0, trace->traits(), trace->framep(), firstLocal+which, 1);
+                    info->unboxLocals(&val, 0, trace->types(), trace->framep(), firstLocal+which, 1);
                     worked = true;
                 }
             }

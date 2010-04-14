@@ -462,44 +462,30 @@ namespace avmplus
 #ifdef DEBUGGER
     // note that the "local" can be a true local (0..local_count-1)
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-    static Atom nativeLocalToAtom(AvmCore* core, void* src, BuiltinType bt)
+    // FIXME: this is exactly the same as makeatom() in jit-calls.h,
+    // except for the decoding of unaligned doubles
+    static Atom nativeLocalToAtom(AvmCore* core, void* src, SlotStorageType sst)
     {
-        switch (bt)
+        switch (sst)
         {
-            case BUILTIN_number:
-            {
+            case SST_double:
                 return core->doubleToAtom(unpack_double(src));
-            }
-            case BUILTIN_int:
-            {
-                return core->intToAtom(*(const int32_t*)src);
-            }
-            case BUILTIN_uint:
-            {
-                return core->uintToAtom(*(const uint32_t*)src);
-            }
-            case BUILTIN_boolean:
-            {
-                return *(const int32_t*)src ? trueAtom : falseAtom;
-            }
-            case BUILTIN_any:
-            case BUILTIN_object:
-            case BUILTIN_void:
-            {
-                return *(const Atom*)src;
-            }
-            case BUILTIN_string:
-            {
-                return (*(const Stringp*)src)->atom();
-            }
-            case BUILTIN_namespace:
-            {
-                return (*(const Namespacep*)src)->atom();
-            }
             default:
-            {
+                AvmAssert(false);
+            case SST_int32:
+                return core->intToAtom(*(const int32_t*)src);
+            case SST_uint32:
+                return core->uintToAtom(*(const uint32_t*)src);
+            case SST_bool32:
+                return *(const int32_t*)src ? trueAtom : falseAtom;
+            case SST_atom:
+                return *(const Atom*)src;
+            case SST_string:
+                return (*(const Stringp*)src)->atom();
+            case SST_namespace:
+                return (*(const Namespacep*)src)->atom();
+            case SST_scriptobject:
                 return (*(ScriptObject**)src)->atom();
-            }
         }
     }
 #endif
@@ -683,18 +669,18 @@ namespace avmplus
 
     // note that the "local" can be a true local (0..local_count-1)
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-    Atom MethodInfo::boxOneLocal(FramePtr src, int32_t srcPos, Traits** traitArr)
+    Atom MethodInfo::boxOneLocal(FramePtr src, int32_t srcPos, const uint8_t* sstArr)
     {
-        // if we are running jit then the types are native and we need to box em.
+        // if we are running jit then the types are native and we need to box them.
         if (_flags & JIT_IMPL)
         {
             src = FramePtr(uintptr_t(src) + srcPos*8);
-            AvmAssert(traitArr != NULL);
-            return nativeLocalToAtom(this->pool()->core, src, Traits::getBuiltinType(traitArr[srcPos]));
+            AvmAssert(sstArr != NULL);
+            return nativeLocalToAtom(this->pool()->core, src, (SlotStorageType)sstArr[srcPos]);
         }
         else
         {
-            // note, traitArr is generally null for interpreted frames
+            AvmAssert(sstArr == NULL);
             src = FramePtr(uintptr_t(src) + srcPos*sizeof(Atom));
             return *(const Atom*)src;
         }
@@ -710,58 +696,56 @@ namespace avmplus
      *
      * If the method is interpreted then we just copy the Atom, no conversion is needed.
      */
-    void MethodInfo::boxLocals(FramePtr src, int32_t srcPos, Traits** traitArr, Atom* dest, int32_t destPos, int32_t length)
+    void MethodInfo::boxLocals(FramePtr src, int32_t srcPos, const uint8_t* sstArr, Atom* dest, int32_t destPos, int32_t length)
     {
-        for(int32_t i = srcPos, n = srcPos+length; i < n; i++)
+        for (int32_t i = srcPos, n = srcPos+length; i < n; i++)
         {
 #ifdef VMCFG_AOT
             AvmAssert(i >= 0 && (dmi() == NULL || i < local_count()));
 #else
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
 #endif
-            dest[destPos++] = boxOneLocal(src, i, traitArr);
+            dest[destPos++] = boxOneLocal(src, i, sstArr);
         }
     }
 
 
     // note that the "local" can be a true local (0..local_count-1)
     // or an entry on the scopechain (local_count...(local_count+max_scope)-1)
-    void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int32_t dstPos, Traits** traitArr)
+    void MethodInfo::unboxOneLocal(Atom src, FramePtr dst, int32_t dstPos, const uint8_t* sstArr)
     {
         if (_flags & JIT_IMPL)
         {
-            AvmAssert(traitArr != NULL);
+            AvmAssert(sstArr != NULL);
             dst = FramePtr(uintptr_t(dst) + dstPos*8);
-            switch (Traits::getBuiltinType(traitArr[dstPos]))
+            switch ((SlotStorageType)sstArr[dstPos])
             {
-                case BUILTIN_number:
+                case SST_double:
                 {
                     *(double*)dst = AvmCore::number_d(src);
                     break;
                 }
-                case BUILTIN_int:
+                case SST_int32:
                 {
                     *(int32_t*)dst = AvmCore::integer_i(src);
                     break;
                 }
-                case BUILTIN_uint:
+                case SST_uint32:
                 {
                     *(uint32_t*)dst = AvmCore::integer_u(src);
                     break;
                 }
-                case BUILTIN_boolean:
+                case SST_bool32:
                 {
                     *(int32_t*)dst = (int32_t)atomGetBoolean(src);
                     break;
                 }
-                case BUILTIN_any:
-                case BUILTIN_object:
-                case BUILTIN_void:
+                case SST_atom:
                 {
                     *(Atom*)dst = src;
                     break;
                 }
-                default:
+                default: // SST_string, SST_namespace, SST_scriptobject
                 {
                     // ScriptObject, String, Namespace, or Null
                     *(void**)dst = atomPtr(src);
@@ -771,7 +755,7 @@ namespace avmplus
         }
         else
         {
-            // note, traitArr is generally null for interpreted frames
+            AvmAssert(sstArr == NULL);
             dst = FramePtr(uintptr_t(dst) + dstPos*sizeof(Atom));
             *(Atom*)dst = src;
         }
@@ -786,7 +770,7 @@ namespace avmplus
      *
      * If the method is interpreted then we just copy the Atom, no conversion is needed.
      */
-    void MethodInfo::unboxLocals(const Atom* src, int32_t srcPos, Traits** traitArr, FramePtr dest, int32_t destPos, int32_t length)
+    void MethodInfo::unboxLocals(const Atom* src, int32_t srcPos, const uint8_t* sstArr, FramePtr dest, int32_t destPos, int32_t length)
     {
         for (int32_t i = destPos, n = destPos+length; i < n; i++)
         {
@@ -795,7 +779,7 @@ namespace avmplus
 #else
             AvmAssert(i >= 0 && i < getMethodSignature()->local_count());
 #endif
-            unboxOneLocal(src[srcPos++], dest, i, traitArr);
+            unboxOneLocal(src[srcPos++], dest, i, sstArr);
         }
     }
 

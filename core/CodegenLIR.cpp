@@ -591,12 +591,6 @@ namespace avmplus
 #endif
         lirout->insStorei(o, vars, i * 8, ACC_VARS);
         lirout->insStore(LIR_stb, InsConst(sst), tags, i, ACC_TAGS);
-        // note that this now updates traits for values on the scopechain as well as locals
-        DEBUGGER_ONLY(
-            if (haveDebugger && i < (state->verifier->local_count + state->verifier->max_scope)) {
-                lirout->insStorei(InsConstPtr(type), varTraits, i*sizeof(Traits*), ACC_OTHER);
-            }
-        )
     }
 
     LIns* CodegenLIR::atomToNativeRep(int i, LIns* atom)
@@ -702,7 +696,7 @@ namespace avmplus
     void AvmLogControl::printf( const char* format, ... )
     {
         AvmAssert(core!=NULL);
-        
+
         va_list vargs;
         va_start(vargs, format);
 
@@ -1344,82 +1338,80 @@ namespace avmplus
     // in the AS frame regions (i.e. 'vars').  In the interpreter this
     // is not an issues, since the region contains box values (i.e. Atoms)
     // and so the type information is self-contained.  With the jit, this is
-    // not the case, and thus 'varTraits' is used to track the type of each
+    // not the case, and thus 'tags' is used to track the type of each
     // variable in 'vars'.
-    // This filter watches stores to 'vars' and 'varTraits' and upon encountering
+    // This filter watches stores to 'vars' and 'tags' and upon encountering
     // debugline (i.e. place where debugger can halt), it ensures that the
-    // varTraits entry is consistent with the value stored in 'vars'
+    // tags entry is consistent with the value stored in 'vars'
     class DebuggerCheck : public LirWriter
     {
         AvmCore* core;
-        LInsp *tracker;
-        LInsp *traitsTracker;
+        LInsp *varTracker;
+        LInsp *tagTracker;
         LIns *vars;
-        LIns *traits;
+        LIns *tags;
         int nvar;
     public:
         DebuggerCheck(AvmCore* core, Allocator& alloc, LirWriter *out, int nvar)
-            : LirWriter(out), core(core), vars(NULL), traits(NULL), nvar(nvar)
+            : LirWriter(out), core(core), vars(NULL), tags(NULL), nvar(nvar)
         {
-            tracker = new (alloc) LInsp[nvar];
-            traitsTracker = new (alloc) LInsp[nvar];
+            varTracker = new (alloc) LInsp[nvar];
+            tagTracker = new (alloc) LInsp[nvar];
             clearState();
         }
 
-        void init(LIns *vars, LIns *traits) {
+        void init(LIns *vars, LIns *tags) {
             this->vars = vars;
-            this->traits = traits;
+            this->tags = tags;
         }
 
-        void trackStore(LIns *value, int d, bool traits) {
-            AvmAssert( (!traits && IS_ALIGNED(d, 8)) || (traits && IS_ALIGNED(d, sizeof(Traits*))));
-            int i = (traits) ? d / sizeof(Traits*) : d >> 3;
-            if (i>=nvar) return;
-            if (traits)  {
-                traitsTracker[i] = value;
-                value = !isValid(i) ? value : (LIns*)((intptr_t)value|1); // lower bit => validated
-                traitsTracker[i] = value;
-            }
-            else {
-                tracker[i] = value;
-            }
+        void trackVarStore(LIns *value, int d) {
+            AvmAssert(IS_ALIGNED(d, 8));
+            int i = d >> 3;
+            if (i >= nvar)
+                return;
+            varTracker[i] = value;
+        }
+
+        void trackTagStore(LIns *value, int d) {
+            int i = d; // 1 byte per tag
+            if (i >= nvar)
+                return;
+            tagTracker[i] = value;
+            checkValid(i);
+            tagTracker[i] = (LIns*)((intptr_t)value|1); // lower bit => validated;
         }
 
         void clearState() {
-            VMPI_memset(tracker, 0, nvar*sizeof(LInsp));
-            VMPI_memset(traitsTracker, 0, nvar*sizeof(LInsp));
+            VMPI_memset(varTracker, 0, nvar * sizeof(LInsp));
+            VMPI_memset(tagTracker, 0, nvar * sizeof(LInsp));
         }
 
-        bool isValid(int i) {
-            // @pre tracker[i] has been previously filled
-            LIns* val = tracker[i];
-            LIns* tra = traitsTracker[i];
+        void checkValid(int i) {
+            // @pre tagTracker[i] has been previously filled
+            LIns* val = varTracker[i];
+            LIns* tra = tagTracker[i];
             NanoAssert(val && tra);
 
-            Traits *t = (Traits*) tra->constvalp();
-            bool is = false;
-            if (t == NUMBER_TYPE)
-            {
-                is = val->isN64();
-                AvmAssert(is);
+            switch ((SlotStorageType) tra->imm32()) {
+            case SST_double:
+                AvmAssert(val->isN64());
+                break;
+            case SST_int32:
+            case SST_uint32:
+            case SST_bool32:
+                AvmAssert(val->isI32());
+                break;
+            default:
+                AvmAssert(val->isPtr());
+                break;
             }
-            else if (t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE)
-            {
-                is = val->isI32();
-                AvmAssert(is);
-            }
-            else
-            {
-                is = val->isPtr();
-                AvmAssert(is);
-            }
-            return is;
         }
 
         void checkState() {
-            for(int i=0; i<this->nvar; i++) {
-                LIns* val = tracker[i];
-                LIns* tra = traitsTracker[i];
+            for (int i=0; i < this->nvar; i++) {
+                LIns* val = varTracker[i];
+                LIns* tra = tagTracker[i];
                 AvmAssert(val && tra);
 
                 // isValid should have already been called on everything
@@ -1435,9 +1427,9 @@ namespace avmplus
 
         LIns *insStore(LOpcode op, LIns *value, LIns *base, int32_t d, AccSet accSet) {
             if (base == vars)
-                trackStore(value, d,false);
-            else if (base == traits)
-                trackStore(value, d,true);
+                trackVarStore(value, d);
+            else if (base == tags)
+                trackTagStore(value, d);
             return out->insStore(op, value, base, d, accSet);
         }
 
@@ -1581,9 +1573,6 @@ namespace avmplus
     // are elided by deadvars_analyze() and deadvars_kill().
     //
     // Locals for Debugger use, only present when Debugger is in use:
-    //
-    // varTraits (LIR_alloc, Traits**).  Array of Traits*, with the same ordering as
-    // vars.  Used by the debugger to enable decoding local variables in vars[].
     //
     // csn (LIR_alloc, CallStackNode).  extra information about this call frame
     // used by the debugger and also used for constructing human-readable stack traces.
@@ -1730,19 +1719,6 @@ namespace avmplus
         // to ensure it dominates all uses.
         undefConst = InsConstAtom(undefinedAtom);
 
-        #ifdef DEBUGGER
-        if (haveDebugger) {
-            // pointers to traits so that the debugger can decode the locals
-            // IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
-            // note that this now updates traits for values on the scopechain as well as locals
-            varTraits = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(Traits*));
-            verbose_only( if (vbNames) {
-                vbNames->lirNameMap->addName(varTraits, "varTraits");
-            })
-            debug_only( checker->init(vars,varTraits); )
-        }
-        #endif
-
         // whether this sequence is interruptable or not.
         interruptable = ! info->isNonInterruptible();
 
@@ -1763,6 +1739,9 @@ namespace avmplus
 
         #ifdef DEBUGGER
         if (haveDebugger) {
+            // tell the sanity checker about vars and tags
+            debug_only( checker->init(vars, tags); )
+
             // Allocate space for the call stack
             csn = InsAlloc(sizeof(CallStackNode));
             verbose_only( if (vbNames) {
@@ -1871,7 +1850,7 @@ namespace avmplus
 
             callIns(FUNCTIONID(debugEnter), 5,
                 env_param,
-                varTraits,
+                tags,
                 csn,
                 vars,
                 info->hasExceptions() ? _save_eip : InsConstPtr(0)
@@ -5205,10 +5184,8 @@ namespace avmplus
         if (prolog->env_toplevel)   plive(prolog->env_toplevel);
 
         #ifdef DEBUGGER
-        if (haveDebugger) {
+        if (haveDebugger)
             plive(csn);
-            plive(varTraits);
-        }
         #endif
 
         // extend live range of critical stuff
@@ -5701,11 +5678,11 @@ namespace avmplus
 #ifdef DEBUGGER
             if (haveDebugger) {
                 // all vars and scopes must be considered "read" by any call
-                // the debugger can stop in.  The debugger also will access varTraits[],
-                // but we dont analyze those stores, and it does not access tags[], so we
-                // don't need to mark them live due to the call.
-                for (int i = 0, n = dbg_framesize; i < n; i++)
+                // the debugger can stop in.  The debugger also will access tags[].
+                for (int i = 0, n = dbg_framesize; i < n; i++) {
                     varlivein.set(i);
+                    taglivein.set(i);
+                }
             }
 #endif
         }

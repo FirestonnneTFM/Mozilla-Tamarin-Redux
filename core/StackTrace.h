@@ -94,7 +94,7 @@ namespace avmplus
 
         void init(MethodEnv*                env
                     , FramePtr              framep
-                    , Traits**              frameTraits
+                    , const uint8_t*        frame_sst
                     , intptr_t volatile*    eip
                 );
 
@@ -110,11 +110,11 @@ namespace avmplus
          */
         inline explicit CallStackNode(MethodEnv*                env
                                         , FramePtr              framep
-                                        , Traits**              frameTraits
+                                        , const uint8_t*        frame_sst
                                         , intptr_t volatile*    eip
                                 )
         {
-            init(env, framep, frameTraits, eip);
+            init(env, framep, frame_sst, eip);
         }
 
         // ctor used for external script profiling
@@ -169,7 +169,7 @@ namespace avmplus
         inline intptr_t volatile* eip() const { return m_eip; }
         inline Stringp filename() const { return m_filename; }
         inline FramePtr framep() const { return m_framep; }
-        inline Traits** traits() const { return m_traits; }
+        inline const uint8_t* types() const { return m_frame_sst; }
         inline int32_t linenum() const { return m_linenum; }
 
         inline void set_filename(Stringp s) { m_filename = s; }
@@ -207,7 +207,7 @@ namespace avmplus
     private:    intptr_t volatile*  m_eip;          // ptr to where the current pc is stored
     private:    Stringp             m_filename;     // in the form "C:\path\to\package\root;package/package;filename"
     private:    FramePtr            m_framep;       // pointer to top of AS registers
-    private:    Traits**            m_traits;       // array of traits for AS registers and scopechain
+    private:    const uint8_t*      m_frame_sst;    // array of traits for AS registers and scopechain
     private:    int32_t             m_linenum;
     private:    int32_t             m_depth;
     // ------------------------ DATA SECTION END

@@ -46,7 +46,7 @@ namespace avmplus
     void CallStackNode::init(
                     MethodEnv*              env
                     , FramePtr              framep
-                    , Traits**              frameTraits
+                    , const uint8_t*        frame_sst
                     , intptr_t volatile*    eip
             )
     {
@@ -65,7 +65,7 @@ namespace avmplus
         m_eip           = eip;     // ptr to where the current instruction pointer is stored
         m_filename      = NULL;
         m_framep        = framep;
-        m_traits        = frameTraits;
+        m_frame_sst     = frame_sst;
         m_linenum       = 0;
     }
 
@@ -82,7 +82,7 @@ namespace avmplus
         m_eip           = NULL;
         m_filename      = NULL;
         m_framep        = NULL;
-        m_traits        = NULL;
+        m_frame_sst     = NULL;
         m_linenum       = 0;
     }
 
@@ -110,9 +110,9 @@ namespace avmplus
             m_depth     = 0;
         }
         m_eip           = 0;
-        m_filename      = 0;
-        m_framep        = 0;
-        m_traits        = 0;
+        m_filename      = NULL;
+        m_framep        = NULL;
+        m_frame_sst     = NULL;
         m_linenum       = 0;
     }
 
@@ -133,7 +133,7 @@ namespace avmplus
         m_eip           = NULL;
         m_filename      = NULL;
         m_framep        = NULL;
-        m_traits        = NULL;
+        m_frame_sst     = NULL;
         m_linenum       = lineno;
     }
 
@@ -176,7 +176,7 @@ namespace avmplus
 #endif
             for (int i = (max_scope + local_count - 1), n = local_count; i >= n; --i)
             {
-                Atom const scope = m_info->boxOneLocal(m_framep, i, m_traits);
+                Atom const scope = m_info->boxOneLocal(m_framep, i, m_frame_sst);
                 AvmAssert(atomKind(scope) != kUnusedAtomTag);
                 // go ahead and call addScope, even if null or undefined.
                 scb.addScope(scope);

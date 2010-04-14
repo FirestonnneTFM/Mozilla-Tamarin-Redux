@@ -128,7 +128,7 @@ namespace avmplus
     class AvmLogControl : public LogControl
     {
     public:
-        virtual ~AvmLogControl() {} 
+        virtual ~AvmLogControl() {}
 #ifdef NJ_VERBOSE
         void printf( const char* format, ... ) PRINTF_CHECK(2,3);
 
@@ -406,7 +406,7 @@ namespace avmplus
         PoolObject *pool;
         const FrameState *state;
         MopsRangeCheckFilter* mopsRangeCheckFilter;
-        LIns *vars, *tags, *varTraits;
+        LIns *vars, *tags;
         LIns *env_param, *argc_param, *ap_param;
         LIns *_save_eip, *_ef;
         LIns *methodFrame;
