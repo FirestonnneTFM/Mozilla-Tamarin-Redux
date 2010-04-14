@@ -201,16 +201,6 @@ namespace avmplus
 
     #include "../core/jit-calls.h"
 
-#if NJ_EXPANDED_LOADSTORE_SUPPORTED
-    static const size_t TAGSIZE = sizeof(uint8_t);  // 1 byte
-    static const LOpcode LIR_ST_TAG = LIR_stb;      // store byte
-    static const LOpcode LIR_LD_TAG = LIR_ldzb;     // load byte
-#else
-    static const size_t TAGSIZE = sizeof(uint32_t); // 1 int
-    static const LOpcode LIR_ST_TAG = LIR_sti;      // load int
-    static const LOpcode LIR_LD_TAG = LIR_ld;       // store int
-#endif
-
 #if NJ_EXPANDED_LOADSTORE_SUPPORTED && defined(VMCFG_UNALIGNED_INT_ACCESS) && defined(VMCFG_LITTLE_ENDIAN)
     #define VMCFG_MOPS_USE_EXPANDED_LOADSTORE_INT
 #endif
@@ -600,7 +590,7 @@ namespace avmplus
         jit_sst[i] = uint8_t(1 << sst);
 #endif
         lirout->insStorei(o, vars, i * 8, ACC_VARS);
-        lirout->insStore(LIR_ST_TAG, InsConst(sst), tags, i * TAGSIZE, ACC_TAGS);
+        lirout->insStore(LIR_stb, InsConst(sst), tags, i, ACC_TAGS);
         // note that this now updates traits for values on the scopechain as well as locals
         DEBUGGER_ONLY(
             if (haveDebugger && i < (state->verifier->local_count + state->verifier->max_scope)) {
@@ -1079,11 +1069,6 @@ namespace avmplus
             return offset >> 3;
         }
 
-        REALLY_INLINE int tagOffsetToIndex(int offset) {
-            AvmAssert(IS_ALIGNED(offset, TAGSIZE));
-            return offset / TAGSIZE;
-        }
-
         // keep track of the value stored in var d and update notnull
         void trackVarStore(LIns *value, int i) {
             varTracker[i] = value;
@@ -1123,7 +1108,7 @@ namespace avmplus
                 return val;
             }
             if (base == tags) {
-                int i = tagOffsetToIndex(d);
+                int i = d; // 1 byte per tag
                 LIns *tag = tagTracker[i];
                 if (!tag) {
                     tag = out->insLoad(op, base, d, accSet);
@@ -1140,7 +1125,7 @@ namespace avmplus
             if (base == vars)
                 trackVarStore(value, varOffsetToIndex(d));
             else if (base == tags)
-                trackTagStore(value, tagOffsetToIndex(d));
+                trackTagStore(value, d);
             return out->insStore(op, value, base, d, accSet);
         }
 
@@ -1232,7 +1217,7 @@ namespace avmplus
         } else {
             // more than one representation is possible: convert to atom using tag found at runtime.
             AvmAssert(bt(v.traits) == BUILTIN_any || bt(v.traits) == BUILTIN_object);
-            LIns* tag = lirout->insLoad(LIR_LD_TAG, tags, i * TAGSIZE, ACC_TAGS);
+            LIns* tag = lirout->insLoad(LIR_ldzb, tags, i, ACC_TAGS);
             LIns* varAddr = leaIns(i*8, vars);
             ins = callIns(FUNCTIONID(makeatom), 3, coreAddr, varAddr, tag);
         }
@@ -1714,7 +1699,7 @@ namespace avmplus
 
         // allocate room for our local variables
         vars = InsAlloc(framesize * 8);         // sizeof(double)=8 bytes per var
-        tags = InsAlloc(framesize * TAGSIZE);   // one tag per var
+        tags = InsAlloc(framesize);             // one tag byte per var
         prolog_buf->sp = vars;
         varTracker->init(vars, tags);
 
@@ -5765,7 +5750,7 @@ namespace avmplus
                         int d = i->disp() >> 3;
                         varlivein.clear(d);
                     } else if (i->oprnd2() == tags) {
-                        int d = i->disp() / TAGSIZE;
+                        int d = i->disp(); // 1 byte per tag
                         taglivein.clear(d);
                     }
                     break;
@@ -5782,7 +5767,7 @@ namespace avmplus
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
-                        int d = i->disp() / TAGSIZE;
+                        int d = i->disp(); // 1 byte per tag
                         taglivein.set(d);
                     }
                     break;
@@ -5920,7 +5905,7 @@ namespace avmplus
                         }
                     }
                     else if (i->oprnd2() == tags) {
-                        int d = i->disp() / TAGSIZE;
+                        int d = i->disp(); // 1 byte per tag
                         if (!taglivein.get(d)) {
                             verbose_only(if (verbose)
                                 AvmLog("- %s\n", printer->formatIns(&b, i));)
@@ -5950,7 +5935,7 @@ namespace avmplus
                         varlivein.set(d);
                     }
                     else if (i->oprnd1() == tags) {
-                        int d = i->disp() / TAGSIZE;
+                        int d = i->disp(); // 1 byte per tag
                         taglivein.set(d);
                     }
                     break;
