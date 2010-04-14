@@ -64,6 +64,9 @@ util/shell_ats, .*, skip, shell file for ats media creation
 # BUGS:
 # Grouped by feature or platform
 
+# This was reverted in TR because it needs versioning
+# https://bugzilla.mozilla.org/show_bug.cgi?id=538107
+regress/bug_538107 , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=538107
 
 # https://bugzilla.mozilla.org/show_bug.cgi?id=541358
 mmgc/outofmemory , .* , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=541358
@@ -109,7 +112,9 @@ abcasm/.*, .*diff, skip, trim down tests
 # avmdiff does not handle .exitcode
 ecma3/Exceptions/exception_011_rt , .*diff , expectedfail, known issue: avmdiff does not handle .exitcode
 regress/bug_515935, .*diff, skip, known issue: avmdiff does not handle .exitcode
-
+regress/bug_520888, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
+regress/bug_555102, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
+regress/bug_555705, .*diff, skip, stack trace not handled by avmdiff https://bugzilla.mozilla.org/show_bug.cgi?id=559227
 
 # specific skips when running differential testing between 32bit and 64bit shells
 as3/RuntimeErrors/Error1115NotAConstructor , .*3264-diff , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
@@ -155,7 +160,6 @@ as3/Array/forEach:If IsCallable\(callbackfn\) is false.*, .*, expectedfail, need
 mops/mops, arm-winmobile-tvm.*, skip, multiple abc files not supported on winmo devices
 abcasm/.*, arm-winmobile-tvm.*, skip, multiple abc files not supported on winmo devices
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
-regress/bug_515935, arm-winmobile.*-debug, skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544549
 ecma3/Expressions/e11_2_1_1, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
 ecma3/Expressions/e11_4_6, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
 ecma3/RegExp/eperlstress_001, arm-winmobile.*-debug, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=544862
@@ -342,7 +346,6 @@ spidermonkey/js1_5/Regress/regress-191633, .*, skip, test builds very large stri
 spidermonkey/js1_5/Regress/regress-367561-01, .*, skip, need to build large test string
 spidermonkey/js1_5/Regress/regress-367561-03, .*, skip, need to build large test string
 spidermonkey/js1_5/Regress/regress-396684, .*, skip, need to build large test string
-spidermonkey/js1_5/Regress/regress-416628, .*, skip, need to build large test string
 spidermonkey/js1_5/String/regress-179068, .*,  skip, need to build large test string
 spidermonkey/js1_5/Expressions/regress-394673, .*, skip, need to figure out a way to evaluate a long long chain of && ||
 spidermonkey/js1_5/Regress/regress-290575, .*, skip, test evaluates function with 32768 arguments - need to convert to not use Function Body or eval
@@ -365,7 +368,6 @@ spidermonkey/js1_5/Regress/regress-247179:RegExp \\b.*, ^((?!diff).)*$, expected
 spidermonkey/js1_5/Regress/regress-248444:.*Section (4|5).*, ^((?!diff).)*$ , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550987
 spidermonkey/js1_5/Regress/regress-252892:Section (5|7).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=550990
 
-
 spidermonkey/js1_5/Regress/regress-271716-n, .*, skip, takes too long to run - tries to crash by doing while (1) a=new Array(a) - possibly run in deep?
 
 spidermonkey/js1_5/Regress/regress-274035:Array.prototype.(concat|splice).*, ^((?!diff).)*$, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551032
@@ -386,7 +388,6 @@ spidermonkey/js1_5/Scope/scope-004:Section (6|7).*, ^((?!diff).)*$, expectedfail
 # spidermonkey wordcode issues
 spidermonkey/js1_5/Regress/regress-329383:.*atan2\(-0.*, .*(wordcode|jit).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
 spidermonkey/js1_5/Regress/regress-329383:.*1/-0.*, .*(wordcode|jit).*, expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=551587
-spidermonkey/js1_5/Array/regress-99120-02, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551845
 
 spidermonkey/js1_5/Array/regress-157652, arm.*, skip, test runs out of memory on devices
 spidermonkey/js1_5/Function/regress-338121-.*, arm.*, skip, test runs out of memory on devices
