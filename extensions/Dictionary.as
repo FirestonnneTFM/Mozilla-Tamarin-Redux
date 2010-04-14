@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -37,7 +39,7 @@
 
 package flash.utils
 {
-// 
+//
 // Dictionary
 //
 
@@ -51,12 +53,12 @@ package flash.utils
  * var obj = new Object();
  * var key:Object = new Object();
  * key.toString = function() { return "key" }
- *  
+ *
  * dict[key] = "Letters";
  * obj["key"] = "Letters";
- *  
+ *
  * dict[key] == "Letters"; // true
- * obj["key"] == "Letters"; // true 
+ * obj["key"] == "Letters"; // true
  * obj[key] == "Letters"; // true because key == "key" is true b/c key.toString == "key"
  * dict["key"] == "Letters"; // false because "key" === key is false
  * delete dict[key]; //removes the key
@@ -65,30 +67,30 @@ package flash.utils
  * @playerversion Flash 9
  * @langversion 3.0
  * @see ../../operators.html#strict_equality === (strict equality)
- * 
- *  
+ *
+ *
  *  @playerversion Lite 4
  */
 [native(cls="DictionaryClass", instance="DictionaryObject", methods="auto")]
 dynamic public class Dictionary
 {
-	private native function init(weakKeys:Boolean):void;
+    private native function init(weakKeys:Boolean):void;
 
-	/**
-	 * Creates a new Dictionary object. To remove a key from a Dictionary object, use the <code>delete</code> operator.
-  	 *
-  	 * @param weakKeys Instructs the Dictionary object to use "weak" references on object keys.
-  	 * If the only reference to an object is in the specified Dictionary object, the key is eligible for 
-  	 * garbage collection and is removed from the table when the object is collected.
-  	 *
-  	 * @playerversion Flash 9
- 	 * @langversion 3.0
- 	 *  
- 	 *  @playerversion Lite 4
- 	 */
-	public function Dictionary(weakKeys:Boolean=false)
-	{
-		init(weakKeys);
-	}
+    /**
+     * Creates a new Dictionary object. To remove a key from a Dictionary object, use the <code>delete</code> operator.
+     *
+     * @param weakKeys Instructs the Dictionary object to use "weak" references on object keys.
+     * If the only reference to an object is in the specified Dictionary object, the key is eligible for
+     * garbage collection and is removed from the table when the object is collected.
+     *
+     * @playerversion Flash 9
+     * @langversion 3.0
+     *
+     *  @playerversion Lite 4
+     */
+    public function Dictionary(weakKeys:Boolean=false)
+    {
+        init(weakKeys);
+    }
 };
 }

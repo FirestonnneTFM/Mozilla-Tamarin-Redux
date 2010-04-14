@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -38,18 +40,18 @@
 
 package avmplus
 {
-	[native(cls="JObjectClass", instance="JObject", methods="auto")]
-	public class JObject 
-	{
-		public native static function create(name:String, ...args):JObject;
-		public native static function createArray(type:JObject, size:int, fillWith:Array=null):JObject;
-		public native static function toArray(j:JObject):Array
-		
-		// diagnostic routines
-		public native static function constructorSignature(name:String, ...args):String;
-		public native static function methodSignature(j:JObject, name:String, ...args):String;
-		public native static function fieldSignature(j:JObject, name:String):String;
+    [native(cls="JObjectClass", instance="JObject", methods="auto")]
+    public class JObject
+    {
+        public native static function create(name:String, ...args):JObject;
+        public native static function createArray(type:JObject, size:int, fillWith:Array=null):JObject;
+        public native static function toArray(j:JObject):Array
 
-		//public native function toString():String;
-	}
+        // diagnostic routines
+        public native static function constructorSignature(name:String, ...args):String;
+        public native static function methodSignature(j:JObject, name:String, ...args):String;
+        public native static function fieldSignature(j:JObject, name:String):String;
+
+        //public native function toString():String;
+    }
 }
