@@ -48,13 +48,10 @@ namespace avmshell
      * is a String which is the command and the 2nd component is the
      * integer identifier for the command.
      *
-     * The StringIntArray object provides a convenient wrapper class
-     * that implements the List interface.
-     *
      * NOTE: order matters!  For the case of a single character
      *       match, we let the first hit act like an unambiguous match.
      */
-    DebugCLI::StringIntArray DebugCLI::commandArray[] =
+    DebugCLI::StringInt DebugCLI::commandArray[] =
     {
         { "break", CMD_BREAK },
         { "bt", INFO_STACK_CMD },
@@ -62,15 +59,14 @@ namespace avmshell
         { "delete", CMD_DELETE },
         { "finish", CMD_FINISH },
         { "help", CMD_HELP },
+        { "?", CMD_HELP },
         { "info", CMD_INFO },
         { "list", CMD_LIST },
         { "next", CMD_NEXT },
         { "print", CMD_PRINT },
-        { "pwd", CMD_PWD },
         { "quit", CMD_QUIT },
         { "step", CMD_STEP },
         { "set", CMD_SET },
-        { "show", CMD_SHOW },
         { "where", INFO_STACK_CMD },
         { NULL, 0 }
     };
@@ -78,7 +74,7 @@ namespace avmshell
     /**
      * Info sub-commands
      */
-    DebugCLI::StringIntArray DebugCLI::infoCommandArray[] =
+    DebugCLI::StringInt DebugCLI::infoCommandArray[] =
     {
         { "arguments", INFO_ARGS_CMD },
         { "breakpoints", INFO_BREAK_CMD },
@@ -86,18 +82,6 @@ namespace avmshell
         { "functions", INFO_FUNCTIONS_CMD },
         { "locals", INFO_LOCALS_CMD },
         { "stack", INFO_STACK_CMD },
-        { NULL, 0 }
-    };
-
-    /**
-     * Show sub-commands
-     */
-    DebugCLI::StringIntArray DebugCLI::showCommandArray[] =
-    {
-        { "break", SHOW_BREAK_CMD },
-        { "functions", SHOW_FUNC_CMD },
-        { "memory", SHOW_MEM_CMD },
-        { "variable", SHOW_VAR_CMD },
         { NULL, 0 }
     };
 
@@ -136,7 +120,7 @@ namespace avmshell
      * Attempt to match given the given string against our set of commands
      * @return the command code that was hit.
      */
-    int DebugCLI::determineCommand(DebugCLI::StringIntArray cmdList[],
+    int DebugCLI::determineCommand(DebugCLI::StringInt cmdList[],
                                    const char *input,
                                    int defCmd)
     {
@@ -199,7 +183,7 @@ namespace avmshell
         }
     }
 
-    const char* DebugCLI::commandNumberToCommandName(DebugCLI::StringIntArray cmdList[],
+    const char* DebugCLI::commandNumberToCommandName(DebugCLI::StringInt cmdList[],
                                                      int cmdNumber)
     {
         for (int i = 0; cmdList[i].text; i++)
@@ -277,6 +261,27 @@ namespace avmshell
         for(int k=0; k<frameCount; k++)
         {
                   printFrame(k);
+        }
+    }
+
+    void DebugCLI::help()
+    {
+        StringInt* cmd;
+
+        // "help info" shows sub-commands of the "info" command
+        char* next = nextToken();
+        if (next && commandFor(next) == CMD_INFO)
+            cmd = infoCommandArray;
+        else
+            cmd = commandArray;
+
+        while (cmd->text)
+        {
+            core->console << cmd->text;
+            if (cmd->id == CMD_INFO)
+                core->console << " (see 'help " << cmd->text << "' for sub-commands)";
+            core->console << '\n';
+            cmd++;
         }
     }
 
@@ -375,6 +380,12 @@ namespace avmshell
 
     void DebugCLI::breakpoint(char *location)
     {
+        if (!location)
+        {
+            core->console << "Bad format, should be: 'break [filename:]line'\n";
+            return;
+        }
+
         Stringp filename = currentFile;
         char *colon = VMPI_strchr(location, ':');
 
@@ -405,9 +416,8 @@ namespace avmshell
 
         int targetLine = VMPI_atoi(location);
 
-        int breakpointId = ++breakpointCount;
-
         if (breakpointSet(sourceFile, targetLine)) {
+            int breakpointId = ++breakpointCount;
             core->console << "Breakpoint " << breakpointId << ": file "
                           << filename
                           << ", " << (targetLine) << ".\n";
@@ -489,8 +499,9 @@ namespace avmshell
             for(int i=0; i<count; i++) {
                 // write out the name
                 Stringp nm = info->getLocalName(i);
+                core->console << i << ": ";
                 if (nm != core->kundefined)
-                    core->console <<  i << ": "  << nm;
+                    core->console << nm;
                 else
                     core->console << "<local_" << i << ">";
                 core->console << " = " << core->format(*ptr++) << "\n";
@@ -515,7 +526,7 @@ namespace avmshell
              return true;
          }
          return false;
-     }
+    }
 
     Atom DebugCLI::ease2Atom(const char* to, Atom baseline)
     {
@@ -611,12 +622,14 @@ namespace avmshell
             core->internStringLatin1(name)
         );
 
-        #if 0
+#if 0
         // rick fixme
         Atom objAtom = env->findproperty(outerScope, scopes, extraScopes, &mname, false);
         Atom valueAtom = env->getproperty(objAtom, &mname);
         core->console << core->string(valueAtom) << '\n';
-        #endif
+#else
+        core->console << "Command not implemented.\n";
+#endif
     }
 
     bool DebugCLI::filterException(Exception *exception, bool /*willBeCaught*/)
@@ -640,6 +653,9 @@ namespace avmshell
         switch (cmd) {
         case -1:
             // ambiguous, we already printed error message
+            break;
+        case INFO_ARGS_CMD:
+            arguments(0);
             break;
         case INFO_LOCALS_CMD:
             locals(0);
@@ -689,6 +705,8 @@ namespace avmshell
             case -1:
                 // ambiguous, we already printed error message
                 break;
+            case CMD_COMMENT:
+                break;
             case CMD_INFO:
                 info();
                 break;
@@ -721,6 +739,9 @@ namespace avmshell
             case CMD_FINISH:
                 stepOut();
                 return;
+            case CMD_HELP:
+                help();
+                break;
             case CMD_STEP:
                 stepInto();
                 return;

@@ -83,7 +83,7 @@ def run():
       'debugger break2',
       '%s -d testdata/debug.abc'%r.avmrd,
       input='break 45\ndelete 1\nbreak 1\nbreak 49\ninfo break\ncontinue\nquit\n',
-      expectedout=['Breakpoint 1 deleted.','3 at testdata.debug.as:49','Could not locate specified line.']
+      expectedout=['Breakpoint 1 deleted.','2 at testdata.debug.as:49','Could not locate specified line.']
     )
 
     r.run_test(
