@@ -445,7 +445,39 @@ namespace avmplus
          */
         AbcInfo* abcAt(int index) const;
 
+     public:
+          enum AutoVarKind { // C terminology
+               AUTO_LOCAL,
+               AUTO_ARGUMENT,
+               AUTO_THIS
+          };
+        
+        // The following are meant to be called interactively from a debugger.
+        /**
+         * Query the kind of the automatic variable.
+         * @see avmplus::AtomConstants
+         */
+        static Atom autoAtomKindAt(DebugFrame* frame, int autoIndex, AutoVarKind kind);
+        
+        // The following return the native type and rely the client
+        //  (i.e., most likely the debugger) to use the right variant.
+        // 
+        static ScriptObject* autoVarAsObject(DebugFrame* frame, int index, AutoVarKind kind);
+        static bool autoVarAsBoolean(DebugFrame* frame, int index, AutoVarKind kind);
+        static Stringp autoVarAsString(DebugFrame* frame, int index, AutoVarKind kind);
+         // returns double, cf AvmCore::number_d, ok for interactive use
+        static double autoVarAsInteger(DebugFrame* frame, int localIndex, AutoVarKind kind);
+        static double autoVarAsDouble(DebugFrame* frame, int localIndex, AutoVarKind kind);
+        static Stringp autoVarName(DebugStackFrame* frame, int index, AutoVarKind kind);
+        static int autoVarCount(DebugStackFrame* frame, AutoVarKind kind);
+        static Stringp methodNameAt(DebugStackFrame* frame);
+        static void printString(Stringp string);
+        static void printMethod(MethodInfo* method);
+        
     protected:
+        static MethodInfo* functionFor(SourceInfo* src, int line, DebugStackFrame* frame); // protected
+        static Atom autoAtomAt(DebugFrame* frame, int index, AutoVarKind kind);
+
         friend class AbcParser;
         friend class DebugStackFrame;
 

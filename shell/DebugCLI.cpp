@@ -470,77 +470,6 @@ namespace avmshell
         }
     }
 
-    Atom DebugCLI::autoAtomAt(DebugFrame* frame, int index, AutoVarKind kind) {
-        Atom* arr;
-        int count;
-        bool success;
-        switch (kind) {
-        case AUTO_LOCAL:
-            success = frame->locals(arr, count);
-            break;
-
-        case AUTO_ARGUMENT:
-            success = frame->arguments(arr, count);
-            break;
-        default:
-            AvmAssert(false);
-                        return unreachableAtom;
-        }
-        if (success) {
-            if (index >= 0 && index < count) {
-                return arr[index];
-            }
-        }
-        return unreachableAtom;
-    }
-
-    // interactive
-    Atom DebugCLI::autoAtomKindAt(int frameNumber, int autoIndex, AutoVarKind kind) {
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(frameNumber);
-        if (!frame) return unreachableAtom;
-        else return atomKind(autoAtomAt(frame, autoIndex, kind));
-    }
-
-    ScriptObject* DebugCLI::autoVarAsObject(int frameNumber, int index, AutoVarKind kind)
-    {
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(frameNumber);
-        if (!frame) return NULL; // should have tested for error earlier
-        return AvmCore::atomToScriptObject(autoAtomAt(frame, index, kind));
-    }
-
-    Stringp DebugCLI::autoVarAsString(int frameNumber, int index, AutoVarKind kind)
-    {
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(frameNumber);
-        if (!frame) return NULL; // should have tested for error earlier
-        return AvmCore::atomToString(autoAtomAt(frame, index, kind));
-    }
-
-    bool DebugCLI::autoVarAsBoolean(int frameNumber, int index, AutoVarKind kind)
-    {
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(frameNumber);
-        if (!frame) return false; // should have tested for error earlier
-        Atom value = autoAtomAt(frame, index, kind);
-        return value == trueAtom ? true : false;
-    }
-
-    double DebugCLI::autoVarAsInteger(int frameNumber, int index, AutoVarKind kind) {
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(frameNumber);
-        if (!frame) return MathUtils::kNaN; // should have tested for error earlier
-        return AvmCore::number_d(autoAtomAt(frame, index, kind));
-    }
-
-    double DebugCLI::autoVarAsDouble(int frameNumber, int index, AutoVarKind kind) {
-        AvmCore* core = AvmCore::getActiveCore();
-        DebugFrame* frame = core->debugger()->frameAt(frameNumber);
-        if (!frame) return MathUtils::kNaN; // should have tested for error earlier
-        return AvmCore::atomToDouble(autoAtomAt(frame, index, kind));
-    }
-
     bool DebugCLI::locals(int frameNumber)
     {
         Atom* ptr;
@@ -727,9 +656,14 @@ namespace avmshell
         }
     }
 
+    bool DebugCLI::debuggerInterruptOnEnter = false;
     void DebugCLI::enterDebugger()
     {
         setCurrentSource( (core->callStack) ? (core->callStack->filename()) : 0 );
+        if (debuggerInterruptOnEnter) {
+            VMPI_debugBreak();
+            return;
+        }
 
         for (;;) {
             printIP();
