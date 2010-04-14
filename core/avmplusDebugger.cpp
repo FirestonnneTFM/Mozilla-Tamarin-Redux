@@ -584,9 +584,9 @@ namespace avmplus
 
 
     Atom Debugger::autoAtomAt(DebugFrame* frame, int index, AutoVarKind kind) {
-        Atom* arr;
+        Atom* arr = NULL;
         Atom dhis;
-        int count;
+        int count = 0;
         bool success;
         switch (kind) {
         case AUTO_LOCAL:
