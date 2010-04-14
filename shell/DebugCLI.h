@@ -182,6 +182,7 @@ namespace avmshell
         static bool printFrame(int frameNumber);
         static bool locals(int frameNumber);
         static bool arguments(int frameNumber);
+        static bool debuggerInterruptOnEnter;
 
 
         void info();
@@ -192,25 +193,6 @@ namespace avmshell
         /*@}*/
 
         void activate() { activeFlag = true; }
-
-                // support for interaction with native debugger.
-
-        enum AutoVarKind { // C terminology
-            AUTO_LOCAL,
-            AUTO_ARGUMENT
-        };
-
-    private:
-        static Atom autoAtomAt(DebugFrame* frame, int index, AutoVarKind kind);
-    public:
-        static Atom autoAtomKindAt(int frameNumber, int autoIndex, AutoVarKind kind);
-        static ScriptObject* autoVarAsObject(int frameNumber, int index, AutoVarKind kind);
-        static bool autoVarAsBoolean(int frameNumber, int index, AutoVarKind kind);
-        static Stringp autoVarAsString(int frameNumber, int index, AutoVarKind kind);
-        // returns double, cf AvmCore::number_d, ok for interactive use
-        static double autoVarAsInteger(int frameNumber, int localIndex, AutoVarKind kind);
-        static double autoVarAsDouble(int frameNumber, int localIndex, AutoVarKind kind);
-
 
     private:
         bool activeFlag;
