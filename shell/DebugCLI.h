@@ -79,85 +79,42 @@ namespace avmshell
     public:
         /** @name command codes */
         /*@{*/
-        const static int CMD_UNKNOWN        = 0;
-        const static int CMD_QUIT           = 1;
-        const static int CMD_CONTINUE       = 2;
-        const static int CMD_STEP           = 3;
-        const static int CMD_NEXT           = 4;
-        const static int CMD_FINISH         = 5;
-        const static int CMD_BREAK          = 6;
-        const static int CMD_SET            = 7;
-        const static int CMD_LIST           = 8;
-        const static int CMD_PRINT          = 9;
-        const static int CMD_TUTORIAL       = 10;
-        const static int CMD_INFO           = 11;
-        const static int CMD_HOME           = 12;
-        const static int CMD_RUN            = 13;
-        const static int CMD_FILE           = 14;
-        const static int CMD_DELETE         = 15;
-        const static int CMD_SOURCE         = 16;
-        const static int CMD_COMMENT        = 17;
-        const static int CMD_CLEAR          = 18;
-        const static int CMD_HELP           = 19;
-        const static int CMD_SHOW           = 20;
-        const static int CMD_KILL           = 21;
-        const static int CMD_HANDLE         = 22;
-        const static int CMD_DISPLAY        = 25;
-        const static int CMD_UNDISPLAY      = 26;
-        const static int CMD_COMMANDS       = 27;
-        const static int CMD_PWD            = 28;
-        const static int CMD_CF             = 29;
-        const static int CMD_CONDITION      = 30;
-        const static int CMD_AWATCH         = 31;
-        const static int CMD_WATCH          = 32;
-        const static int CMD_RWATCH         = 33;
-        const static int CMD_WHAT           = 34;
-        const static int CMD_DISASSEMBLE    = 35;
-        const static int CMD_HALT           = 36;
-        const static int CMD_MCTREE         = 37;
-        const static int CMD_VIEW_SWF       = 38;
+        enum {
+            CMD_UNKNOWN = 0,
+            CMD_QUIT,
+            CMD_CONTINUE,
+            CMD_STEP,
+            CMD_NEXT,
+            CMD_FINISH,
+            CMD_BREAK,
+            CMD_SET,
+            CMD_LIST,
+            CMD_PRINT,
+            CMD_INFO,
+            CMD_DELETE,
+            CMD_COMMENT,
+            CMD_HELP,
+        };
         /*@}*/
 
         /** @name info sub commands */
         /*@{*/
-        const static int INFO_UNKNOWN_CMD   = 100;
-        const static int INFO_ARGS_CMD      = 101;
-        const static int INFO_BREAK_CMD     = 102;
-        const static int INFO_FILES_CMD     = 103;
-        const static int INFO_HANDLE_CMD    = 104;
-        const static int INFO_FUNCTIONS_CMD = 105;
-        const static int INFO_LOCALS_CMD    = 106;
-        const static int INFO_SOURCES_CMD   = 107;
-        const static int INFO_STACK_CMD     = 108;
-        const static int INFO_VARIABLES_CMD = 109;
-        const static int INFO_DISPLAY_CMD   = 110;
-        const static int INFO_TARGETS_CMD   = 111;
-        const static int INFO_SWFS_CMD      = 112;
-        /*@}*/
-
-        /** @name show subcommands */
-        /*@{*/
-        const static int SHOW_UNKNOWN_CMD   = 200;
-        const static int SHOW_NET_CMD       = 201;
-        const static int SHOW_FUNC_CMD      = 202;
-        const static int SHOW_URI_CMD       = 203;
-        const static int SHOW_PROPERTIES_CMD= 204;
-        const static int SHOW_FILES_CMD     = 205;
-        const static int SHOW_BREAK_CMD     = 206;
-        const static int SHOW_VAR_CMD       = 207;
-        const static int SHOW_MEM_CMD       = 208;
-        /*@}*/
-
-        /** @name misc subcommands */
-        /*@{*/
-        const static int ENABLE_ONCE_CMD    = 301;
+        enum {
+            INFO_UNKNOWN_CMD = 100,
+            INFO_ARGS_CMD,
+            INFO_BREAK_CMD,
+            INFO_FILES_CMD,
+            INFO_FUNCTIONS_CMD,
+            INFO_LOCALS_CMD,
+            INFO_STACK_CMD,
+        };
         /*@}*/
 
         /**
-         * StringIntArray is used to store the command arrays
+         * StringInt is used to store the command arrays
          * used to translate command strings into command codes
          */
-        struct StringIntArray
+        struct StringInt
         {
             const char *text;
             int id;
@@ -178,6 +135,7 @@ namespace avmshell
         void breakpoint(char *location);
         void deleteBreakpoint(char *idstr);
         void showBreakpoints();
+        void help();
         static void bt();
         static bool printFrame(int frameNumber);
         static bool locals(int frameNumber);
@@ -221,10 +179,10 @@ namespace avmshell
          * @name command name arrays and support code
          */
         /*@{*/
-        int determineCommand(StringIntArray cmdList[],
+        int determineCommand(StringInt cmdList[],
                              const char *input,
                              int defCmd);
-        const char* commandNumberToCommandName(StringIntArray cmdList[],
+        const char* commandNumberToCommandName(StringInt cmdList[],
                                                int cmdNumber);
         int commandFor(const char *input) {
             return determineCommand(commandArray, input, CMD_UNKNOWN);
@@ -233,9 +191,8 @@ namespace avmshell
             return determineCommand(infoCommandArray, input, INFO_UNKNOWN_CMD);
         }
 
-        static StringIntArray commandArray[];
-        static StringIntArray infoCommandArray[];
-        static StringIntArray showCommandArray[];
+        static StringInt commandArray[];
+        static StringInt infoCommandArray[];
         /*@}*/
     };
 }
