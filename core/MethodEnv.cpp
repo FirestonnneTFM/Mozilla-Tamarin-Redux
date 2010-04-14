@@ -568,14 +568,14 @@ namespace avmplus
     }
 
 #ifdef DEBUGGER
-    void MethodEnv::debugEnter( Traits** frameTraits,
+    void MethodEnv::debugEnter( const uint8_t* frame_sst,
                                 CallStackNode* callstack,
                                 FramePtr framep,
                                 volatile intptr_t *eip)
     {
         AvmAssert(this != 0);
         AvmAssert(callstack != 0);
-        callstack->init(this, framep, frameTraits, eip);
+        callstack->init(this, framep, frame_sst, eip);
         debugEnterInner();
     }
 

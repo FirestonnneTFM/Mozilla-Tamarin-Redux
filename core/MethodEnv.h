@@ -259,7 +259,7 @@ namespace avmplus
         void checkfilter(Atom obj);
 
 #ifdef DEBUGGER
-        void debugEnter(Traits** frameTraits,
+        void debugEnter(const uint8_t* frame_sst,
                         CallStackNode* callstack,
                         FramePtr framep,
                         volatile intptr_t *eip);

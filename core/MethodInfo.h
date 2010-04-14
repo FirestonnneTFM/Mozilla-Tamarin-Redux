@@ -262,11 +262,11 @@ namespace avmplus
         static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
         static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 
-        Atom boxOneLocal(FramePtr src, int32_t srcPos, Traits** traitArr);
-        void unboxOneLocal(Atom src, FramePtr dst, int32_t dstPos, Traits** traitArr);
+        Atom boxOneLocal(FramePtr src, int32_t srcPos, const uint8_t* sstArr);
+        void unboxOneLocal(Atom src, FramePtr dst, int32_t dstPos, const uint8_t* sstArr);
 
-        void boxLocals(FramePtr src, int32_t srcPos, Traits** traitArr, Atom* dest, int32_t destPos, int32_t length);
-        void unboxLocals(const Atom* src, int32_t srcPos, Traits** traitArr, FramePtr dest, int32_t destPos, int32_t length);
+        void boxLocals(FramePtr src, int32_t srcPos, const uint8_t* sstArr, Atom* dest, int32_t destPos, int32_t length);
+        void unboxLocals(const Atom* src, int32_t srcPos, const uint8_t* sstArr, FramePtr dest, int32_t destPos, int32_t length);
 
         void setFile(AbcFile* file);
         void setRegName(int32_t index, Stringp name);
