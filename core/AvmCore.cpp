@@ -1541,7 +1541,15 @@ return the result of the comparison ToPrimitive(x) == y.
             case kObjectType:
                 return intern(atomToScriptObject(atom)->toString());
             case kIntptrType:
+#ifdef AVMPLUS_64BIT
+                return atomCanBeInt32(atom) ?
+                        internInt((int32_t)atomGetIntptr(atom)) :
+                        internDouble((double)atomGetIntptr(atom));
+#else
+                // atomCanBeInt32() is always true for 32-bit;
+                // use explicit ifdef to avoid compiler warnings.
                 return internInt((int32_t)atomGetIntptr(atom));
+#endif
             case kDoubleType:
             default: // number
                 return internDouble(atomToDouble(atom));
