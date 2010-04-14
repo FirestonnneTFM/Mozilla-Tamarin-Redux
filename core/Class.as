@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -36,17 +38,17 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-package 
+package
 {
-	//pseudo-final - no user class can extend Class
-	[native(cls="ClassClass", instance="ClassClosure", methods="auto")]
-	public dynamic class Class
-	{
-		// {DontEnum,DontDelete,ReadOnly}
-		public native final function get prototype()
-		
-		// Class.length = 1 per ES3
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1;
-	}
+    //pseudo-final - no user class can extend Class
+    [native(cls="ClassClass", instance="ClassClosure", methods="auto")]
+    public dynamic class Class
+    {
+        // {DontEnum,DontDelete,ReadOnly}
+        public native final function get prototype()
+
+        // Class.length = 1 per ES3
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1;
+    }
 }

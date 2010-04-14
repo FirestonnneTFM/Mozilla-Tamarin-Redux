@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -37,29 +39,29 @@
 
 package __AS3__.vec
 {
-	[native(cls="VectorClass", instance="ObjectVectorObject", methods="auto")]
+    [native(cls="VectorClass", instance="ObjectVectorObject", methods="auto")]
     dynamic final public class Vector
     {
     }
 
-	[native(cls="ObjectVectorClass", instance="ObjectVectorObject", methods="auto")]
-	dynamic final class Vector$object
-	{
+    [native(cls="ObjectVectorClass", instance="ObjectVectorObject", methods="auto")]
+    dynamic final class Vector$object
+    {
         public function Vector$object(length:uint=0, fixed:Boolean=false)
         {
             this.length = length;
             this.fixed = fixed;
         }
-        
+
         private native function set type(t : Object):void;
         private native function get type():Object;
-        
+
         // Private helper methods.  These allow most of the implementation to be abstracted into
-        // a file that is included from the implementation of the different Vector types.  
+        // a file that is included from the implementation of the different Vector types.
         private static function castToThisType(item) : Vector$object {
             return item;
         }
-        
+
         private function newThisType(length:uint=0) : Vector$object {
             var v : Vector$object = new Vector.<type>(length);
             //v.type = this.type;
@@ -68,7 +70,7 @@ package __AS3__.vec
 
         // Include most of the vector implementation.
         include "VectorImpl.as";
-        
+
         // Methods with the specific type in their sig.  Can't be in the impl file since it doesn't
         // know what "type" vector this is (int, uint, Number, Object)
         // Most of these just call generic versions in impl, but some small ones are implemented here.
@@ -79,7 +81,7 @@ package __AS3__.vec
         AS3 function filter(checker : Function, thisObj: Object=null): Vector$object {
             return _filter(checker, thisObj);
         }
-        
+
         AS3 native function pop();
 
         AS3 function reverse() : Vector$object {
@@ -112,7 +114,7 @@ package __AS3__.vec
             return -1;
         }
 
-        AS3 function lastIndexOf(value:Object, from: Number=0x7fffffff): Number { 
+        AS3 function lastIndexOf(value:Object, from: Number=0x7fffffff): Number {
             var start:uint = clamp( from, length );
             if( start == length )
                 --start;
@@ -123,31 +125,31 @@ package __AS3__.vec
             return -1;
         }
 
-	}
-    
-	[native(cls="IntVectorClass", instance="IntVectorObject", methods="auto")]
-	dynamic final class Vector$int
-	{
-        
+    }
+
+    [native(cls="IntVectorClass", instance="IntVectorObject", methods="auto")]
+    dynamic final class Vector$int
+    {
+
         public function Vector$int(length:uint=0, fixed:Boolean=false)
         {
             this.length = length;
             this.fixed = fixed;
         }
-        
+
         // Private helper methods.  These allow most of the implementation to be abstracted into
-        // a file that is included from the implementation of the different Vector types.  
+        // a file that is included from the implementation of the different Vector types.
         private static function castToThisType(item) : Vector$int {
             return item;
         }
-        
+
         private static function newThisType(length:uint=0) : Vector$int {
             return new Vector$int(length);
         }
 
         // Include most of the vector implementation.
         include "VectorImpl.as";
-        
+
         // Methods with the specific type in their sig.  Can't be in the impl file since it doesn't
         // know what "type" vector this is (int, uint, Number, Object)
         // Most of these just call generic versions in impl, but some small ones are implemented here.
@@ -158,7 +160,7 @@ package __AS3__.vec
         AS3 function filter(checker:Function, thisObj: Object=null): Vector$int {
             return _filter(checker, thisObj);
         }
-        
+
         AS3 native function pop(): int ;
 
         AS3 function reverse() : Vector$int {
@@ -172,7 +174,7 @@ package __AS3__.vec
         AS3 function slice(start:Number=0, end:Number=0x7fffffff): Vector$int {
             return this._slice(start, end);
         }
-        
+
         AS3 function sort(comparefn): Vector$int {
             var a : Array = [comparefn];
             _sort(this, a);
@@ -190,7 +192,7 @@ package __AS3__.vec
             return -1;
         }
 
-        AS3 function lastIndexOf(value:int, from: Number=0x7fffffff): Number { 
+        AS3 function lastIndexOf(value:int, from: Number=0x7fffffff): Number {
             var start:uint = clamp( from, length );
             if( start == length )
                 --start;
@@ -200,13 +202,13 @@ package __AS3__.vec
             }
             return -1;
         }
-        
-	}
-    
-    
-	[native(cls="UIntVectorClass", instance="UIntVectorObject", methods="auto")]
-	dynamic final class Vector$uint
-	{
+
+    }
+
+
+    [native(cls="UIntVectorClass", instance="UIntVectorObject", methods="auto")]
+    dynamic final class Vector$uint
+    {
         public function Vector$uint(length:uint=0, fixed:Boolean=false)
         {
             this.length = length;
@@ -214,18 +216,18 @@ package __AS3__.vec
         }
 
         // Private helper methods.  These allow most of the implementation to be abstracted into
-        // a file that is included from the implementation of the different Vector types.  
+        // a file that is included from the implementation of the different Vector types.
         private static function castToThisType(item) : Vector$uint {
             return item;
         }
-        
+
         private static function newThisType(length:uint=0) : Vector$uint {
             return new Vector$uint(length);
         }
 
         // Include most of the vector implementation.
         include "VectorImpl.as";
-        
+
         // Methods with the specific type in their sig.  Can't be in the impl file since it doesn't
         // know what "type" vector this is (int, uint, Number, Object)
         // Most of these just call generic versions in impl, but some small ones are implemented here.
@@ -236,7 +238,7 @@ package __AS3__.vec
         AS3 function filter(checker:Function, thisObj: Object=null): Vector$uint {
             return _filter(checker, thisObj);
         }
-        
+
         AS3 native function pop(): uint ;
 
         AS3 function reverse() : Vector$uint {
@@ -269,7 +271,7 @@ package __AS3__.vec
             return -1;
         }
 
-        AS3 function lastIndexOf(value:uint, from: Number=0x7fffffff): Number { 
+        AS3 function lastIndexOf(value:uint, from: Number=0x7fffffff): Number {
             var start:uint = clamp( from, length );
             if( start == length )
                 --start;
@@ -280,11 +282,11 @@ package __AS3__.vec
             return -1;
         }
 
-	}
-    
-	[native(cls="DoubleVectorClass", instance="DoubleVectorObject", methods="auto")]
-	dynamic final class Vector$double
-	{
+    }
+
+    [native(cls="DoubleVectorClass", instance="DoubleVectorObject", methods="auto")]
+    dynamic final class Vector$double
+    {
         public function Vector$double(length:uint=0, fixed:Boolean=false)
         {
             this.length = length;
@@ -292,18 +294,18 @@ package __AS3__.vec
         }
 
         // Private helper methods.  These allow most of the implementation to be abstracted into
-        // a file that is included from the implementation of the different Vector types.  
+        // a file that is included from the implementation of the different Vector types.
         private static function castToThisType(item) : Vector$double {
             return item;
         }
-        
+
         private static function newThisType(length:uint=0) : Vector$double {
             return new Vector$double(length);
         }
 
         // Include most of the vector implementation.
         include "VectorImpl.as";
-        
+
         // Methods with the specific type in their sig.  Can't be in the impl file since it doesn't
         // know what "type" vector this is (int, uint, Number, Object)
         // Most of these just call generic versions in impl, but some small ones are implemented here.
@@ -314,7 +316,7 @@ package __AS3__.vec
         AS3 function filter(checker:Function, thisObj: Object=null): Vector$double {
             return _filter(checker, thisObj);
         }
-        
+
         AS3 native function pop(): Number ;
 
         AS3 function reverse() : Vector$double {
@@ -347,7 +349,7 @@ package __AS3__.vec
             return -1;
         }
 
-        AS3 function lastIndexOf(value:Number, from: Number=0x7fffffff): Number { 
+        AS3 function lastIndexOf(value:Number, from: Number=0x7fffffff): Number {
             var start:uint = clamp( from, length );
             if( start == length )
                 --start;
@@ -357,5 +359,5 @@ package __AS3__.vec
             }
             return -1;
         }
-	}
+    }
 }

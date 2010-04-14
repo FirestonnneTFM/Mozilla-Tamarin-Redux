@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -36,89 +38,89 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-package 
+package
 {
-	
-	/* 
-	AS3 implementation constraint:
-	Object cannot have any per-instance properties, because it is extended by Boolean, String,
-	Number, Namespace, int, and uint, which cannot hold inherited state from Object because
-	we represent these types more compactly than with ScriptObject.
-	*/
-	[native(cls="ObjectClass", methods="auto")]
-	public dynamic class Object
-	{
-		// Object.length = 1 per ES3
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
-		
-		private static native function _hasOwnProperty(o, V:String):Boolean
-		private static native function _propertyIsEnumerable(o, V:String):Boolean
-		protected static native function _setPropertyIsEnumerable(o, V:String, enumerable:Boolean):void
-		private static native function _isPrototypeOf(o, V):Boolean
-		private static native function _toString(o):String
-		
-		AS3 function isPrototypeOf(V=void 0):Boolean
-		{
-			return _isPrototypeOf(this,V)
-		}
-		
-		AS3 function hasOwnProperty(V=void 0):Boolean
-		{
-			return _hasOwnProperty(this,V)
-		}
 
-		AS3 function propertyIsEnumerable(V=void 0):Boolean
-		{
-			return _propertyIsEnumerable(this, V)
-		}
+    /*
+    AS3 implementation constraint:
+    Object cannot have any per-instance properties, because it is extended by Boolean, String,
+    Number, Namespace, int, and uint, which cannot hold inherited state from Object because
+    we represent these types more compactly than with ScriptObject.
+    */
+    [native(cls="ObjectClass", methods="auto")]
+    public dynamic class Object
+    {
+        // Object.length = 1 per ES3
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		protected static function _dontEnumPrototype(proto:Object):void
-		{
-			for (var name:String in proto)
-			{
-				_setPropertyIsEnumerable(proto, name, false);
-			}
-		}
-		// delay proto functions until class Function is initialized.
-		static function init()
-		{
-			prototype.hasOwnProperty =
-			function(V=void 0):Boolean
-			{
-				return this.AS3::hasOwnProperty(V)
-			}
+        private static native function _hasOwnProperty(o, V:String):Boolean
+        private static native function _propertyIsEnumerable(o, V:String):Boolean
+        protected static native function _setPropertyIsEnumerable(o, V:String, enumerable:Boolean):void
+        private static native function _isPrototypeOf(o, V):Boolean
+        private static native function _toString(o):String
 
-			prototype.propertyIsEnumerable = function(V=void 0)
-			{
-				return this.AS3::propertyIsEnumerable(V)
-			}
+        AS3 function isPrototypeOf(V=void 0):Boolean
+        {
+            return _isPrototypeOf(this,V)
+        }
 
-			prototype.setPropertyIsEnumerable = function(name:String,enumerable:Boolean):void
-			{
-				_setPropertyIsEnumerable(this, name, enumerable);
-			}
+        AS3 function hasOwnProperty(V=void 0):Boolean
+        {
+            return _hasOwnProperty(this,V)
+        }
 
-			prototype.isPrototypeOf = function(V=void 0):Boolean
-			{
-				return this.AS3::isPrototypeOf(V)
-			}
+        AS3 function propertyIsEnumerable(V=void 0):Boolean
+        {
+            return _propertyIsEnumerable(this, V)
+        }
 
-			prototype.toString = prototype.toLocaleString = 
-			function():String
-			{
-				return _toString(this)
-			}
+        protected static function _dontEnumPrototype(proto:Object):void
+        {
+            for (var name:String in proto)
+            {
+                _setPropertyIsEnumerable(proto, name, false);
+            }
+        }
+        // delay proto functions until class Function is initialized.
+        static function init()
+        {
+            prototype.hasOwnProperty =
+            function(V=void 0):Boolean
+            {
+                return this.AS3::hasOwnProperty(V)
+            }
 
-			prototype.valueOf = function()
-			{
-				return this
-			}
+            prototype.propertyIsEnumerable = function(V=void 0)
+            {
+                return this.AS3::propertyIsEnumerable(V)
+            }
 
-			_dontEnumPrototype(prototype);
-		}
-	}
+            prototype.setPropertyIsEnumerable = function(name:String,enumerable:Boolean):void
+            {
+                _setPropertyIsEnumerable(this, name, enumerable);
+            }
 
-	// dont create proto functions until after class Function is initialized
-	Object.init()
+            prototype.isPrototypeOf = function(V=void 0):Boolean
+            {
+                return this.AS3::isPrototypeOf(V)
+            }
+
+            prototype.toString = prototype.toLocaleString =
+            function():String
+            {
+                return _toString(this)
+            }
+
+            prototype.valueOf = function()
+            {
+                return this
+            }
+
+            _dontEnumPrototype(prototype);
+        }
+    }
+
+    // dont create proto functions until after class Function is initialized
+    Object.init()
 }

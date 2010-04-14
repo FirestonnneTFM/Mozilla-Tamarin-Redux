@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -36,47 +38,47 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-package 
+package
 {
-	[native(cls="NamespaceClass", instance="Namespace", methods="auto")]
-	public final class Namespace
-	{
-		// E262 {ReadOnly,DontDelete,DontEnum}
-		// E357 length = 2
-		public static const length = 2 
-		
-		// E357 {DontDelete, ReadOnly}
-		public native function get prefix()
+    [native(cls="NamespaceClass", instance="Namespace", methods="auto")]
+    public final class Namespace
+    {
+        // E262 {ReadOnly,DontDelete,DontEnum}
+        // E357 length = 2
+        public static const length = 2
 
-		// E357 {DontDelete, ReadOnly}
-		public native function get uri():String
+        // E357 {DontDelete, ReadOnly}
+        public native function get prefix()
 
-		AS3 function valueOf():String { return uri }
+        // E357 {DontDelete, ReadOnly}
+        public native function get uri():String
 
-		prototype.valueOf = function():String
-		{
-			if (this === prototype) return ""
-			var n:Namespace = this
-			return n.uri;
-		}
+        AS3 function valueOf():String { return uri }
 
-		AS3 function toString():String
-		{
-			return uri
-		}
-		
-		prototype.toString = function ():String
-		{
-			if (this === prototype) return ""
-			var n:Namespace = this
-			return n.AS3::toString();
-		}
+        prototype.valueOf = function():String
+        {
+            if (this === prototype) return ""
+            var n:Namespace = this
+            return n.uri;
+        }
+
+        AS3 function toString():String
+        {
+            return uri
+        }
+
+        prototype.toString = function ():String
+        {
+            if (this === prototype) return ""
+            var n:Namespace = this
+            return n.AS3::toString();
+        }
 
         // Dummy constructor function - This is neccessary so the compiler can do arg # checking for the ctor in strict mode
         // The code for the actual ctor is in NamespaceClass::construct in the avmplus
         public function Namespace(prefix = void 0, uri = void 0 )
         {}
-        
+
         _dontEnumPrototype(prototype);
-	}
+    }
 }

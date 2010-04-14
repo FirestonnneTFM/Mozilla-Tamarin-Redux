@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,57 +37,57 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package 
+package
 {
-	[native(cls="ErrorClass", instance="ErrorObject", methods="auto")]
-	public dynamic class Error
-	{
-		prototype.name = "Error"
-		prototype.message = "Error"
+    [native(cls="ErrorClass", instance="ErrorObject", methods="auto")]
+    public dynamic class Error
+    {
+        prototype.name = "Error"
+        prototype.message = "Error"
 
-		// Error.length = 1 per ES3
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+        // Error.length = 1 per ES3
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		// TODO mark message as String once compiler super() bug is fixed	
-		// E262 {}
-		/* enumerable */ public var message;
+        // TODO mark message as String once compiler super() bug is fixed
+        // E262 {}
+        /* enumerable */ public var message;
         public var name;
-		
-		// JS Error has these props:  
-		//	  message:String
-		//    fileName:String
-		//    lineNumber:String
-		//    stack:String
-		//    name:String
-		
-		function Error(message = "", id = 0)
-		{
-			this.message = message;
+
+        // JS Error has these props:
+        //    message:String
+        //    fileName:String
+        //    lineNumber:String
+        //    stack:String
+        //    name:String
+
+        function Error(message = "", id = 0)
+        {
+            this.message = message;
             this._errorID = id;
             this.name = prototype.name;
-		}
+        }
 
-		prototype.toString = function():String
-		{
+        prototype.toString = function():String
+        {
             var e:Error = this
             return e.message !== "" ? e.name + ": " + e.message : e.name;
-		}
-		_setPropertyIsEnumerable(prototype, "toString", false);
+        }
+        _setPropertyIsEnumerable(prototype, "toString", false);
 
-		// avm+ specific, works in debugger builds only
-		public native function getStackTrace():String;
-		public native static function getErrorMessage(index:int):String;
+        // avm+ specific, works in debugger builds only
+        public native function getStackTrace():String;
+        public native static function getErrorMessage(index:int):String;
 
-		// avm+ specific utility method
-		public static function throwError(type:Class, index:uint, ... rest)
-		{
+        // avm+ specific utility method
+        public static function throwError(type:Class, index:uint, ... rest)
+        {
             // This implements the same error string formatting as the native
             // method PrintWriter::formatP(...) any changes to this method should
             // also be made there to keep the two in sync.
-			var i=0;
-        	var f=function(match, pos, string) 
-            { 
+            var i=0;
+            var f=function(match, pos, string)
+            {
                 var arg_num = -1;
                 switch(match.charAt(1))
                 {
@@ -113,168 +115,168 @@ package
                 else
                     return "";
             }
-			throw new type(Error.getErrorMessage(index).replace(/%[0-9]/g, f), index);
-		}
+            throw new type(Error.getErrorMessage(index).replace(/%[0-9]/g, f), index);
+        }
 
         private var _errorID : int;
-        
+
         public function get errorID() : int
         {
             return this._errorID;
         }
-	}
+    }
 
-	[native(cls="DefinitionErrorClass", instance="DefinitionErrorObject", methods="auto")]
-	public dynamic class DefinitionError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="DefinitionErrorClass", instance="DefinitionErrorObject", methods="auto")]
+    public dynamic class DefinitionError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "DefinitionError"
-		function DefinitionError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "DefinitionError"
+        function DefinitionError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="EvalErrorClass", instance="EvalErrorObject", methods="auto")]
-	public dynamic class EvalError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="EvalErrorClass", instance="EvalErrorObject", methods="auto")]
+    public dynamic class EvalError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "EvalError"
-		function EvalError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "EvalError"
+        function EvalError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}
-	}
+        }
+    }
 
-	[native(cls="RangeErrorClass", instance="RangeErrorObject", methods="auto")]
-	public dynamic class RangeError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="RangeErrorClass", instance="RangeErrorObject", methods="auto")]
+    public dynamic class RangeError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "RangeError"
-		function RangeError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "RangeError"
+        function RangeError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="ReferenceErrorClass", instance="ReferenceErrorObject", methods="auto")]
-	public dynamic class ReferenceError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="ReferenceErrorClass", instance="ReferenceErrorObject", methods="auto")]
+    public dynamic class ReferenceError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "ReferenceError"
-		function ReferenceError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "ReferenceError"
+        function ReferenceError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}
-	}
+        }
+    }
 
-	[native(cls="SecurityErrorClass", instance="SecurityErrorObject", methods="auto")]
-	public dynamic class SecurityError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="SecurityErrorClass", instance="SecurityErrorObject", methods="auto")]
+    public dynamic class SecurityError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "SecurityError"
-		function SecurityError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "SecurityError"
+        function SecurityError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="SyntaxErrorClass", instance="SyntaxErrorObject", methods="auto")]
-	public dynamic class SyntaxError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="SyntaxErrorClass", instance="SyntaxErrorObject", methods="auto")]
+    public dynamic class SyntaxError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "SyntaxError"
-		function SyntaxError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "SyntaxError"
+        function SyntaxError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="TypeErrorClass", instance="TypeErrorObject", methods="auto")]
-	public dynamic class TypeError extends Error
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="TypeErrorClass", instance="TypeErrorObject", methods="auto")]
+    public dynamic class TypeError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "TypeError"
-		function TypeError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "TypeError"
+        function TypeError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="URIErrorClass", instance="URIErrorObject", methods="auto")]
-	public dynamic class URIError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="URIErrorClass", instance="URIErrorObject", methods="auto")]
+    public dynamic class URIError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "URIError"
-		function URIError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "URIError"
+        function URIError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="VerifyErrorClass", instance="VerifyErrorObject", methods="auto")]
-	public dynamic class VerifyError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="VerifyErrorClass", instance="VerifyErrorObject", methods="auto")]
+    public dynamic class VerifyError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "VerifyError"
-		function VerifyError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "VerifyError"
+        function VerifyError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="UninitializedErrorClass", instance="UninitializedErrorObject", methods="auto")]
-	public dynamic class UninitializedError	extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="UninitializedErrorClass", instance="UninitializedErrorObject", methods="auto")]
+    public dynamic class UninitializedError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "UninitializedError"
-		function UninitializedError(message = "", id = 0) 
-		{
-			super(message, id);
+        prototype.name = "UninitializedError"
+        function UninitializedError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 
-	[native(cls="ArgumentErrorClass", instance="ArgumentErrorObject", methods="auto")]
-	public dynamic class ArgumentError extends Error 
-	{
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="ArgumentErrorClass", instance="ArgumentErrorObject", methods="auto")]
+    public dynamic class ArgumentError extends Error
+    {
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		prototype.name = "ArgumentError"
-		function ArgumentError(message = "", id = 0)
-		{
-			super(message, id);
+        prototype.name = "ArgumentError"
+        function ArgumentError(message = "", id = 0)
+        {
+            super(message, id);
             this.name = prototype.name;
-		}	
-	}
+        }
+    }
 }

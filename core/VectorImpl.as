@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// This file is the implementation of the common vector methods for each of the different vector classes.  
+// This file is the implementation of the common vector methods for each of the different vector classes.
 // It is included in the body of the class of each of the different vector types.
 
 public native function get length():uint;
@@ -96,14 +98,14 @@ private function _concat(items:Array) {
     return v;
 }
 
-AS3 function every(checker:Function, thisObj: Object=null): Boolean { 
+AS3 function every(checker:Function, thisObj: Object=null): Boolean {
     return _every(this, checker, thisObj is Object ? thisObj : null);
 }
 
-AS3 function forEach(eacher:Function, thisObj: Object=null): void { 
+AS3 function forEach(eacher:Function, thisObj: Object=null): void {
     _forEach(this, eacher, (thisObj is Object ? thisObj : null));
 }
-AS3 function map(mapper:Function, thisObj:Object=null) { 
+AS3 function map(mapper:Function, thisObj:Object=null) {
     this.private::_map(mapper, thisObj is Object ? thisObj : null);
 }
 
@@ -111,8 +113,8 @@ AS3 native function push(...items:Array): uint;
 
 private native function _reverse() : void;
 
-AS3 function some(checker, thisObj: Object=null): Boolean { 
-    return _some(this, checker, thisObj is Object ? thisObj : null);    
+AS3 function some(checker, thisObj: Object=null): Boolean {
+    return _some(this, checker, thisObj is Object ? thisObj : null);
 }
 
 private function _slice(start: Number=0, end: Number=0x7fffffff) {
@@ -132,14 +134,14 @@ private function _splice(start, deleteCount, items : Array) {
     result.private::_spliceHelper(0, delcnt, 0, this, first);
 
     _spliceHelper(first, items.length, delcnt, items, 0);
-    
+
     return result;
 }
 
 private native function _spliceHelper(insertpoint:uint, insertcount:uint, deleteCount:uint, args:Object, offset:int):void;
 
 private function _shift() {
-    if( fixed ) 
+    if( fixed )
         Error.throwError(RangeError, 1126);
     if (length == 0)
         return undefined;
@@ -211,13 +213,13 @@ prototype.shift = function() {
 }
 
 prototype.slice = function(start=void 0, end=void 0){
-    return castToThisType(this)._slice(start == undefined ? 0 : Number(start), 
+    return castToThisType(this)._slice(start == undefined ? 0 : Number(start),
                           end == undefined ? 0x7fffffff : Number(end));
 }
 
 private static native function _some(o, callback:Function, thisObject):Boolean;
 prototype.some = function(checker, thisObj=void 0):Boolean{
-    return _some(castToThisType(this), checker, thisObj is Object ? thisObj : null);    
+    return _some(castToThisType(this), checker, thisObj is Object ? thisObj : null);
 }
 
 // Borrow the sort function from array
@@ -237,21 +239,21 @@ prototype.unshift = function(...items){
 
 private function clamp(val: Number, len: uint): uint {
     var result : uint;
-	if (val < 0.0) 
-	{
-		if (val + len < 0.0) 
-			result = 0;
-		else 
-			result = uint(val + len);
-	} 
-	else if (val > len) {
-		result = length;
+    if (val < 0.0)
+    {
+        if (val + len < 0.0)
+            result = 0;
+        else
+            result = uint(val + len);
     }
-	else if (val != val) {
-		result = 0;
+    else if (val > len) {
+        result = length;
     }
-	else {
-		result = uint(val);
+    else if (val != val) {
+        result = 0;
+    }
+    else {
+        result = uint(val);
     }
     return result;
 }

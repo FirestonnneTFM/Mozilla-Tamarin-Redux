@@ -1,3 +1,5 @@
+/* -*- c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -38,52 +40,52 @@
 
 package
 {
-	[native(cls="BooleanClass", instance="bool", methods="auto")]
-	public final class Boolean extends Object
-	{
-		// Boolean.length = 1 per ES3
-		// E262 {ReadOnly, DontDelete, DontEnum }
-		public static const length:int = 1
+    [native(cls="BooleanClass", instance="bool", methods="auto")]
+    public final class Boolean extends Object
+    {
+        // Boolean.length = 1 per ES3
+        // E262 {ReadOnly, DontDelete, DontEnum }
+        public static const length:int = 1
 
-		AS3 function toString():String {
-			return this ? "true" : "false"
-		}
+        AS3 function toString():String {
+            return this ? "true" : "false"
+        }
 
-		AS3 function valueOf():Boolean { return this }
+        AS3 function valueOf():Boolean { return this }
 
-		prototype.toString = function():String
-		{
-			if (this === prototype)
-				return "false"
+        prototype.toString = function():String
+        {
+            if (this === prototype)
+                return "false"
 
-			if (!(this is Boolean)) {
-				// cause TypeError if this is not a Boolean value
-				// kInvokeOnIncompatibleObjectError
-				Error.throwError( TypeError, 1004, "Boolean.prototype.toString" );
-			}
+            if (!(this is Boolean)) {
+                // cause TypeError if this is not a Boolean value
+                // kInvokeOnIncompatibleObjectError
+                Error.throwError( TypeError, 1004, "Boolean.prototype.toString" );
+            }
 
-			return this ? "true" : "false"
-		}
+            return this ? "true" : "false"
+        }
 
-		prototype.valueOf = function()
-		{
-			if (this === prototype)
-				return false
-				
-			if (!(this is Boolean)) {
-				// cause TypeError if this is not a Boolean value
-				// kInvokeOnIncompatibleObjectError
-				Error.throwError( TypeError, 1004, "Boolean.prototype.valueOf" );
-			}
-			
-			return this;
-		}
-        
+        prototype.valueOf = function()
+        {
+            if (this === prototype)
+                return false
+
+            if (!(this is Boolean)) {
+                // cause TypeError if this is not a Boolean value
+                // kInvokeOnIncompatibleObjectError
+                Error.throwError( TypeError, 1004, "Boolean.prototype.valueOf" );
+            }
+
+            return this;
+        }
+
         // Dummy constructor function - This is neccessary so the compiler can do arg # checking for the ctor in strict mode
         // The code for the actual ctor is in BooleanClass::construct in the avmplus
         public function Boolean(value = void 0)
         {}
 
-		_dontEnumPrototype(prototype);
-	}
+        _dontEnumPrototype(prototype);
+    }
 }
