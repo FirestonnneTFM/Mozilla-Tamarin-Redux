@@ -48,7 +48,7 @@ package {
     public function privfunc() {
         print("in privfunc()");
     }
-    public function locals() {
+    public function locals(arg1,arg2:int) {
         var local1;
         var local2:int=10;
         local2=15;
@@ -70,7 +70,7 @@ package {
 }
 import avmplus.System
 var d=new debug();
-d.locals();
+d.locals(110,115);
 d.pubfunc();
 d.accessor="set value";
 print(d.accessor);
