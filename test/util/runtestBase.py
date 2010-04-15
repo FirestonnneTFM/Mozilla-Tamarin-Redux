@@ -59,7 +59,7 @@ from itertools import count
 from time import time,sleep
 import shutil
 import which
-
+import traceback
 import threadpool
 
 # For Python 2.6 and above, use native subprocess.Popen
@@ -649,8 +649,9 @@ class RuntestBase:
                 for f in range(len(fields)):
                     fields[f]=fields[f].strip()
                 while len(fields)<4:
-                    fields.append('');
-                names=fields[0].split(':')
+                    fields.append('')
+                # only split first : - any : after the first one may be part of the testcase name
+                names=fields[0].split(':', 1)
                 if len(names)==1:
                     names.append('.*')
                 # remove any trailing extension if specified
@@ -1353,7 +1354,9 @@ class RuntestBase:
 
     # this will be called when an exception occurs within a thread
     def handle_exception(self, request, exc_info):
-        raise exc_info[1]
+        print traceback.print_tb(exc_info[2])
+        print exc_info[1]
+        sys.exit(1)
 
     def setTimestamp(self):
         if self.timestamps:
