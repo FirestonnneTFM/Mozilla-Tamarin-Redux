@@ -418,3 +418,9 @@ regress/bug_555102, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug
 regress/bug_555614, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=559583
 
 regress/bug_555705, (arm-android.*|.*-Darm_vfp), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559588
+
+#############################
+## Sampling failures on SPARC
+as3/sampling/Callback:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
+as3/sampling/FunctionEntry:.* ,  sparc-.*debugger.* ,  skip , https://bugzilla.mozilla.org/show_bug.cgi?id=551173
+
