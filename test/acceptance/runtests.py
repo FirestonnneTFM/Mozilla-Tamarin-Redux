@@ -360,36 +360,58 @@ class AcceptanceRuntest(RuntestBase):
         if not self.verify:
             try:
                 outputLines = []
-                for line in f+err:
-                    outputLines.append(line)
-                    outputCalls.append((self.verbose_print,(line.strip(),)))
-                    if 'Assertion failed:' in line:
-                        lassert += 1
-                        outputCalls.append((self.fail,(testName+extraVmArgs, line, self.assertmsgs)))
-                    testcase=''
-                    if len(line)>9:
-                        testcase=line.strip()
-                    skipTestDesc = dict_match(settings,testcase,'skip')
-                    includeTestDesc = dict_match(settings, testcase, 'include')
-                    if skipTestDesc and not includeTestDesc:
-                        outputCalls.append((self.js_print,('  skipping "%s" ... reason: %s' % (line.strip(),skipTestDesc),)))
-                        self.allskips+=1
-                        continue
-                    if 'PASSED!' in line:
-                        res=dict_match(settings,testcase,'expectedfail')
-                        if res:
-                            outputCalls.append((self.fail,(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, self.unpassmsgs)))
-                            lunpass += 1
-                        else:
+                if isfile(root+'.out'):
+                    # override standard runtests behavior, just compare the .out file with stdout+stderr
+                    actual = [line.strip() for line in f+err]
+                    try:
+                        outfile = open(root+'.out', 'r')
+                        expectedOut = [line.strip() for line in outfile.readlines()]
+                        outfile.close()
+                        outputCalls.append((self.verbose_print,('%s.out file (expected):' % root,)))
+                        outputCalls.append((self.verbose_print,(expectedOut,)))
+                        outputCalls.append((self.verbose_print,('\nactual output:',)))
+                        outputCalls.append((self.verbose_print,(actual,)))
+                        if actual == expectedOut:
                             lpass += 1
-                    if 'FAILED!' in line:
-                        res=dict_match(settings,testcase,'expectedfail')
-                        if res:
-                            outputCalls.append((self.fail,(testName, 'expected failure: ' + line.strip() + ' reason: '+res, self.expfailmsgs)))
-                            lexpfail += 1
                         else:
+                            outputCalls.append((self.fail,(testName,
+                                '.out file does not match output:\n%s.out file (expected):\n%s\nactual output:\n%s' % (root, expectedOut,actual),
+                                self.failmsgs)))
                             lfail += 1
-                            outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
+                    except IOError:
+                        outputLines.append((self.js_print,('Error opening %s.out' % root,)))
+                        lfail += 1    
+                else:   
+                    for line in f+err:
+                        outputLines.append(line)
+                        outputCalls.append((self.verbose_print,(line.strip(),)))
+                        if 'Assertion failed:' in line:
+                            lassert += 1
+                            outputCalls.append((self.fail,(testName+extraVmArgs, line, self.assertmsgs)))
+                        testcase=''
+                        if len(line)>9:
+                            testcase=line.strip()
+                        skipTestDesc = dict_match(settings,testcase,'skip')
+                        includeTestDesc = dict_match(settings, testcase, 'include')
+                        if skipTestDesc and not includeTestDesc:
+                            outputCalls.append((self.js_print,('  skipping "%s" ... reason: %s' % (line.strip(),skipTestDesc),)))
+                            self.allskips+=1
+                            continue
+                        if 'PASSED!' in line:
+                            res=dict_match(settings,testcase,'expectedfail')
+                            if res:
+                                outputCalls.append((self.fail,(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, self.unpassmsgs)))
+                                lunpass += 1
+                            else:
+                                lpass += 1
+                        if 'FAILED!' in line:
+                            res=dict_match(settings,testcase,'expectedfail')
+                            if res:
+                                outputCalls.append((self.fail,(testName, 'expected failure: ' + line.strip() + ' reason: '+res, self.expfailmsgs)))
+                                lexpfail += 1
+                            else:
+                                lfail += 1
+                                outputCalls.append((self.fail,(testName+extraVmArgs, line, self.failmsgs)))
             except:
                 print 'exception running avm'
                 raise
