@@ -408,6 +408,9 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 # End spidermonkey tests
 ####################
 
+regress/bug_558442a, arm.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559652
+as3/sampling/BackwardBranches, sparc-sol.*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=551173
+
 #############################
 ## Sampling failures on SPARC
 #############################
