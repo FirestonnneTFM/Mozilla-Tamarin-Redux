@@ -123,18 +123,7 @@
 #endif
 
 #ifndef AVMFEATURE_PROTECT_JITMEM
-  #if AVMSYSTEM_SPARC
-    // FIXME: bug 540929
-	// sparc systems are known to have 8k page sizes, and gcheap only supports
-	// 4k pages.  Sometimes, GCHeap::AllocCodeMemory returns 4K aligned regions.
-	// VMPI_setPageProtection() is too forgiving, and extends its region to 8k
-	// aligned areas, which later this causes segfaults when data is placed in
-	// the same 8k page as code (randomly).
-	// plan:  GCHeap::AllocCodeMemory must return memory aligned to system page size.
-    #define AVMFEATURE_PROTECT_JITMEM    0
-  #else
-    #define AVMFEATURE_PROTECT_JITMEM    1
-  #endif
+  #define AVMFEATURE_PROTECT_JITMEM    1
 #endif
 
 #ifndef AVMFEATURE_SHARED_GCHEAP
