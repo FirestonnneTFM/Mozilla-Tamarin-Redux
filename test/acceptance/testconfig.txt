@@ -404,4 +404,17 @@ spidermonkey/js1_6/Array/regress-304828, .*, skip, Array methods on String not s
 spidermonkey/js1_6/Array/regress-386030, .*, skip, https://bugs.adobe.com/jira/browse/ASL-55
 spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 
+####################
+# End spidermonkey tests
+####################
+
 regress/bug_558442a, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=558442
+regress/bug_557275:test1.*, x64.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=557275
+regress/bug_520888, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=559583
+regress/bug_555045, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=559583
+regress/bug_555048, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=559583
+regress/bug_555053, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=559583
+regress/bug_555102, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=559583
+regress/bug_555614, arm-android.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=559583
+
+regress/bug_555705, (arm-android.*|.*-Darm_vfp), skip, https://bugzilla.mozilla.org/show_bug.cgi?id=559588
