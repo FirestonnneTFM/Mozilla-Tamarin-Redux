@@ -410,8 +410,6 @@ spidermonkey/js1_5/Regress/regress-58116:Compute Daylight savings time correctly
 # End spidermonkey tests
 ####################
 
-regress/bug_557275:test1.*, x64.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=557275
-
 #############################
 ## Sampling failures on SPARC
 #############################
