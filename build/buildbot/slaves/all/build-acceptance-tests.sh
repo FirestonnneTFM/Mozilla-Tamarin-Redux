@@ -85,7 +85,7 @@ else
 fi
 
 # create zip of .abc files
-files=`find . -name "*.abc"`
+files=`find . -name "*.abc*"`
 zip -q -r acceptance-tests-abcs.zip $files
 
 exit 0
