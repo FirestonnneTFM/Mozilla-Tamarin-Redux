@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- Mode: Python; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*-
+# vi: set ts=4 sw=4 expandtab:
 
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -35,7 +37,7 @@
 # the provisions above, a recipient may use your version of this file under
 # the terms of any one of the MPL, the GPL or the LGPL.
 #
-# ***** END LICENSE BLOCK ***** 
+# ***** END LICENSE BLOCK *****
 
 import os
 import shutil
@@ -43,16 +45,16 @@ import sys
 
 classpath = os.environ.get('ASC')
 if classpath == None:
-	classpath = "../utils/asc.jar"
-	#print "ERROR: ASC environment variable must point to asc.jar"
-	#exit(1)
+    classpath = "../utils/asc.jar"
+    #print "ERROR: ASC environment variable must point to asc.jar"
+    #exit(1)
 
 def mv(oldfile, newfile):
-	shutil.copyfile(oldfile,newfile)
-	os.remove(oldfile)
+    shutil.copyfile(oldfile,newfile)
+    os.remove(oldfile)
 
 def rm(file):
-	os.remove(file)
+    os.remove(file)
 
 javacmd = "java -ea -DAS3 -DAVMPLUS -classpath "+classpath
 asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
