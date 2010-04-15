@@ -404,3 +404,4 @@ spidermonkey/js1_6/Array/regress-304828, .*, skip, Array methods on String not s
 spidermonkey/js1_6/Array/regress-386030, .*, skip, https://bugs.adobe.com/jira/browse/ASL-55
 spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 
+regress/bug_558442a, .*, skip, https://bugzilla.mozilla.org/show_bug.cgi?id=558442
