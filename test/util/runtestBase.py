@@ -147,6 +147,7 @@ class RuntestBase:
     rebuildtests = False
     runSource = False # Run the source file (.as, .js) instead of .abc, magically prepend included files
     show_time = False
+    summaryonly = False
     timestampcheck = True
     timestamps = True
     useShell = True
@@ -196,6 +197,8 @@ class RuntestBase:
         print ' -f --forcerebuild  force rebuild all test files'
         print ' -c --config        sets the config string [default OS-tvm]'
         print ' -q --quiet         display minimum output during testrun'
+        print ' -l --log           also log all output to given logfile'
+        print '    --summaryonly   only display final summary'
         print '    --rebuildtests  rebuild the tests only - do not run against VM'
         print '    --showtimes     shows the time for each test'
         print '    --ascargs       args to pass to asc on rebuild of test files'
@@ -214,13 +217,13 @@ class RuntestBase:
     def setOptions(self):
         '''set the valid command line options.
             When subclassing, call this method first, then append options to each list'''
-        self.options = 'vE:a:g:b:s:x:htfc:dq'
+        self.options = 'vE:a:g:b:s:x:htfc:dql:'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                    'aotsdk=', 'aotout=', 'aotargs=', 'remoteip=', 'remoteuser=',
                    'timeout=','testtimeout=', 'rebuildtests','quiet','notimecheck',
                    'showtimes','java=','html','random', 'seed=', 'playerglobalabc=', 'toplevelabc=',
-                   'javaargs='
+                   'javaargs=', 'summaryonly', 'log='
                    ]
 
     def parseOptions(self):
@@ -255,6 +258,7 @@ class RuntestBase:
                 self.timestamps = False
             elif o in ('-f', '--forcerebuild'):
                 self.forcerebuild = True
+                self.ascversion = self.getAscVersion(self.asc)
             elif o in ('-c', '--config'):
                 self.config = v
             elif o in ('--ascargs',):
@@ -272,10 +276,18 @@ class RuntestBase:
                 self.debug = True
             elif o in ('--rebuildtests',):
                 self.rebuildtests = True
+                self.ascversion = self.getAscVersion(self.asc)
                 if not pexpect:
                     print 'To get better performance out of --rebuildtests, please install the pexpect module: http://pexpect.sourceforge.net'
             elif o in ('-q', '--quiet'):
                 self.quiet = True
+            elif o in ('--summaryonly',):
+                self.summaryonly = True
+                self.quiet = True
+            elif o in ('-l', '--log'):
+                self.js_output = v
+                self.logFileType = 'txt'
+                self.createOutputFile()
             elif o in ('--html',):
                 self.htmlOutput = True
             elif o in ('--notimecheck',):
@@ -547,13 +559,15 @@ class RuntestBase:
         # set the output file name.  let's base its name on the date and platform,
         # and give it a sequence number.
         now = datetime.today()
-        for i in count(1):
-            self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
-            if not isfile(self.js_output):
-                break
+        if not self.js_output:
+            for i in count(1):
+                self.js_output = '%d-%s-%s.%d.%s' % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i, self.logFileType)
+                if not isfile(self.js_output):
+                    break
         
         print 'Writing results to %s' % self.js_output
         self.js_output_f = open(self.js_output, 'w')
+        self.js_output_f.close()
         
     def getTestsList(self, startDir):
         fileExtentions = (self.sourceExt,) + self.executableExtensions + self.otherTestExtensions
@@ -636,8 +650,7 @@ class RuntestBase:
                     fields[f]=fields[f].strip()
                 while len(fields)<4:
                     fields.append('');
-                # only split first : - any : after the first one may be part of the testcase name
-                names=fields[0].split(':', 1)
+                names=fields[0].split(':')
                 if len(names)==1:
                     names.append('.*')
                 # remove any trailing extension if specified
@@ -691,6 +704,7 @@ class RuntestBase:
         # csvOut - if False and if outputing csv, do not print out this line
         if self.quiet and not overrideQuiet:
             sys.stdout.write('.')
+            sys.stdout.flush()
         elif self.csv:
             if csvOut:
                 if csv:
@@ -703,11 +717,12 @@ class RuntestBase:
             print m
             sys.stdout.flush()
         if self.js_output:
+            self.js_output_f = open(self.js_output, 'a')
             if self.logFileType == 'html':
                 self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
             else:
                 self.js_output_f.write('%s\n' % m)
-            self.js_output_f.flush()
+            self.js_output_f.close()
 
     def printOutput(self,request, outputCalls=None):
         #execute the outputCalls
@@ -735,28 +750,28 @@ class RuntestBase:
         # compile the abc to an executable
         if self.aotsdk:
             try:
-				output = os.path.dirname(abcfile)
-				if self.aotout:
-					output = self.aotout
-				
-				outname = string.replace(abcfile, "./", "")
-				outname = string.replace(outname, ".abc", "")
-				outname = string.replace(outname, "/", ".")
-				outabc = os.path.join(output, outname + ".abc")
-				
-				shutil.copyfile(abcfile, outabc)
-				self.js_print('AOT compilation of %s' % (outabc))
+                output = os.path.dirname(abcfile)
+                if self.aotout:
+                    output = self.aotout
+                
+                outname = string.replace(abcfile, "./", "")
+                outname = string.replace(outname, ".abc", "")
+                outname = string.replace(outname, "/", ".")
+                outabc = os.path.join(output, outname + ".abc")
+                
+                shutil.copyfile(abcfile, outabc)
+                self.js_print('AOT compilation of %s' % (outabc))
         
-				t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
-				(f,err,exitcode) = self.run_pipe('python2.5 %s %s --output %s --name %s %s %s %s' % (
-					os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
-				
-				for line in f:
-					self.js_print(("file '%s'>>> " % abcfile) + line.strip())
-				for line in err:
-					self.js_print(("file '%s'>>> " % abcfile) + line.strip())
+                t = ("--timeout=%d" % self.testTimeOut) if self.testTimeOut > 0 else ""
+                (f,err,exitcode) = self.run_pipe('python2.5 %s %s --output %s --name %s %s %s %s' % (
+                    os.path.join(self.aotsdk, 'bin/compile.py'), t, output, outname, self.aotextraargs, " ".join(extraabcs), outabc))
+                
+                for line in f:
+                    self.js_print(("file '%s'>>> " % abcfile) + line.strip())
+                for line in err:
+                    self.js_print(("file '%s'>>> " % abcfile) + line.strip())
             except:
-				self.js_print('AOT compilation of %s FAILED' % (abcfile))
+                self.js_print('AOT compilation of %s FAILED' % (abcfile))
     
     def compile_test(self, as_file, extraArgs=[]):
         asc, builtinabc, shellabc, ascargs = self.asc, self.builtinabc, self.shellabc, self.ascargs
@@ -1127,8 +1142,6 @@ class RuntestBase:
         self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         if self.avmversion:
             self.js_print('avm version: %s' % self.avmversion)
-        if self.rebuildtests or self.forcerebuild:
-            self.ascversion = self.getAscVersion(self.asc)
         if self.ascversion:
             self.js_print('asc version: %s' % self.ascversion)
 
@@ -1203,8 +1216,8 @@ class RuntestBase:
     # cleanup
     #
     def cleanup(self):
-        # Turn off quiet to display summary
-        if self.quiet:
+        # Turn off quiet to display failure summary
+        if self.quiet and not self.summaryonly:
             self.quiet = False
         
         if self.failmsgs:
@@ -1226,6 +1239,10 @@ class RuntestBase:
             self.js_print('\nASSERTIONS:', '', '<br/>')
             for m in self.assertmsgs:
                 self.js_print('  %s' % m, '', '<br/>')
+        
+        
+        if self.quiet and self.summaryonly:
+            self.quiet = False    
         
         if self.rebuildtests:
             if self.ashErrors:
