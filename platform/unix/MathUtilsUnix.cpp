@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -39,106 +41,106 @@
 
 namespace avmplus
 {
-	// todo need asm versions from Player
-	
-	double MathUtils::abs(double value)
-	{
-		return ::fabs(value);
-	}
-	
-	double MathUtils::acos(double value)
-	{
-		return ::acos(value);
-	}
-	
-	double MathUtils::asin(double value)
-	{
-		return ::asin(value);
-	}
-	
-	double MathUtils::atan(double value)
-	{
-		return ::atan(value);
-	}
+    // todo need asm versions from Player
 
-	double MathUtils::atan2(double y, double x)
-	{
-		return ::atan2(y, x);
-	}
-	
-	double MathUtils::ceil(double value)
-	{
+    double MathUtils::abs(double value)
+    {
+        return ::fabs(value);
+    }
+
+    double MathUtils::acos(double value)
+    {
+        return ::acos(value);
+    }
+
+    double MathUtils::asin(double value)
+    {
+        return ::asin(value);
+    }
+
+    double MathUtils::atan(double value)
+    {
+        return ::atan(value);
+    }
+
+    double MathUtils::atan2(double y, double x)
+    {
+        return ::atan2(y, x);
+    }
+
+    double MathUtils::ceil(double value)
+    {
 // MacOS X Intel 10.5 incorrectly make ceil(-0.5) -> 0.0 instead of -0.0
 // special-case and correct.
 #if defined(AVMPLUS_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-		double r = ::ceil(value);
-		if (r == 0.0 && value < 0.0) r = -0.0;
-		return r;
+        double r = ::ceil(value);
+        if (r == 0.0 && value < 0.0) r = -0.0;
+        return r;
 #else
-		return ::ceil(value);
+        return ::ceil(value);
 #endif
-	}
+    }
 
-	double MathUtils::cos(double value)
-	{
+    double MathUtils::cos(double value)
+    {
 #if defined(VMCFG_TWEAK_SIN_COS_NONFINITE)
-		if (isNaN(value) || isInfinite(value))
-			return kNaN;
+        if (isNaN(value) || isInfinite(value))
+            return kNaN;
 #endif
-		return ::cos(value);
-	}
-	
-	double MathUtils::exp(double value)
-	{
-		return ::exp(value);
-	}
+        return ::cos(value);
+    }
 
-	double MathUtils::floor(double value)
-	{
-		return ::floor(value);
-	}
+    double MathUtils::exp(double value)
+    {
+        return ::exp(value);
+    }
 
-	uint64_t MathUtils::frexp(double value, int *eptr)
-	{
-		double fracMantissa = ::frexp(value, eptr);
+    double MathUtils::floor(double value)
+    {
+        return ::floor(value);
+    }
 
-		// correct mantissa and eptr to get integer values
-		//  for both
-		*eptr -= 53; // 52 mantissa bits + the hidden bit
-		return (uint64_t)(fracMantissa * (double)(1LL << 53));
-	}
-	
-	double MathUtils::log(double value)
-	{
-		return ::log(value);
-	}
+    uint64_t MathUtils::frexp(double value, int *eptr)
+    {
+        double fracMantissa = ::frexp(value, eptr);
 
-	double MathUtils::mod(double x, double y)
-	{
-		return ::fmod(x, y);
-	}
+        // correct mantissa and eptr to get integer values
+        //  for both
+        *eptr -= 53; // 52 mantissa bits + the hidden bit
+        return (uint64_t)(fracMantissa * (double)(1LL << 53));
+    }
 
-	double MathUtils::powInternal(double x, double y)
-	{
-		return ::pow(x, y);
-	}
-	
-	double MathUtils::sin(double value)
-	{
+    double MathUtils::log(double value)
+    {
+        return ::log(value);
+    }
+
+    double MathUtils::mod(double x, double y)
+    {
+        return ::fmod(x, y);
+    }
+
+    double MathUtils::powInternal(double x, double y)
+    {
+        return ::pow(x, y);
+    }
+
+    double MathUtils::sin(double value)
+    {
 #if defined(VMCFG_TWEAK_SIN_COS_NONFINITE)
-		if (isNaN(value) || isInfinite(value))
-			return kNaN;
+        if (isNaN(value) || isInfinite(value))
+            return kNaN;
 #endif
-		return ::sin(value);
-	}
+        return ::sin(value);
+    }
 
-	double MathUtils::sqrt(double value)
-	{
-		return ::sqrt(value);
-	}
+    double MathUtils::sqrt(double value)
+    {
+        return ::sqrt(value);
+    }
 
-	double MathUtils::tan(double value)
-	{
-		return ::tan(value);
-	}
+    double MathUtils::tan(double value)
+    {
+        return ::tan(value);
+    }
 }

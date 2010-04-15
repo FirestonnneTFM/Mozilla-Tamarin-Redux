@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -44,44 +46,44 @@ namespace avmplus
 {
 
 #ifdef DEBUGGER
-	struct IntWriteTimerData
-	{
-		uint32 interval; // in microseconds
-		pthread_t thread;
-		int *addr;
-	};
+    struct IntWriteTimerData
+    {
+        uint32 interval; // in microseconds
+        pthread_t thread;
+        int *addr;
+    };
 
-	void *timerThread(void *arg)
-	{
-		IntWriteTimerData *data = (IntWriteTimerData*)arg;
-		int *addr = data->addr;
-		uint32 interval = data->interval;
-		while(data->addr)
-		{
-			usleep(interval);
-			*addr = 1;
-		}
-		pthread_exit(NULL);
-		return NULL;
-	}
+    void *timerThread(void *arg)
+    {
+        IntWriteTimerData *data = (IntWriteTimerData*)arg;
+        int *addr = data->addr;
+        uint32 interval = data->interval;
+        while(data->addr)
+        {
+            usleep(interval);
+            *addr = 1;
+        }
+        pthread_exit(NULL);
+        return NULL;
+    }
 
-	uintptr OSDep::startIntWriteTimer(uint32 millis, int *addr)
-	{
-		pthread_t p;
-		IntWriteTimerData *data = mmfx_new( IntWriteTimerData() );
-		data->interval = millis*1000;
-		data->addr = addr;
-		pthread_create(&p, NULL, timerThread, data);
-		data->thread = p;		
-		return (uintptr)data;
-	}
+    uintptr OSDep::startIntWriteTimer(uint32 millis, int *addr)
+    {
+        pthread_t p;
+        IntWriteTimerData *data = mmfx_new( IntWriteTimerData() );
+        data->interval = millis*1000;
+        data->addr = addr;
+        pthread_create(&p, NULL, timerThread, data);
+        data->thread = p;
+        return (uintptr)data;
+    }
 
-	void OSDep::stopTimer(uintptr handle)
-	{
-		IntWriteTimerData *data = (IntWriteTimerData*) handle;
-		data->addr = NULL;
-		pthread_join(data->thread, NULL);
-		mmfx_delete( data );
-	}
+    void OSDep::stopTimer(uintptr handle)
+    {
+        IntWriteTimerData *data = (IntWriteTimerData*) handle;
+        data->addr = NULL;
+        pthread_join(data->thread, NULL);
+        mmfx_delete( data );
+    }
 #endif // DEBUGGER
 }

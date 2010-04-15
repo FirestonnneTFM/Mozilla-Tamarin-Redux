@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -46,113 +48,113 @@
 
 namespace avmplus
 {
-	// todo need asm versions from Player
-	
-	double MathUtils::abs(double value)
-	{
-		return ::fabs(value);
-	}
-	
-	double MathUtils::acos(double value)
-	{
-		double result = ::acos(value);
-		if(result == 0 && (value > 1 || value < -1)) {
-			return MathUtils::nan();
-		}
-		return result;
-	}
-	
-	double MathUtils::asin(double value)
-	{
-		double result = ::asin(value);
-		if(result == 0 && (value > 1 || value < -1)) {
-			return MathUtils::nan();
-		}
-		return result;
-	}
-	
-	double MathUtils::atan(double value)
-	{
-		return ::atan(value);
-	}
+    // todo need asm versions from Player
 
-	double MathUtils::atan2(double y, double x)
-	{
-		double result = ::atan2(y, x);
-		if(result !=0 )
-			return result;
+    double MathUtils::abs(double value)
+    {
+        return ::fabs(value);
+    }
 
-		if (MathUtils::isNegZero(y) && MathUtils::isNegZero(x))
-			return -PI;
-		else if(y == 0 && MathUtils::isNegZero(x))
-			return PI;
-		else if(x == 0 && MathUtils::isNegZero(y))
-			return y;
-		else if(x == 0 && y == 0)
-			return y;
-		return result;
-	}
-	
-	double MathUtils::ceil(double value)
-	{
-		return ::ceil(value);
-	}
+    double MathUtils::acos(double value)
+    {
+        double result = ::acos(value);
+        if(result == 0 && (value > 1 || value < -1)) {
+            return MathUtils::nan();
+        }
+        return result;
+    }
 
-	double MathUtils::cos(double value)
-	{
-		return ::cos(value);
-	}
-	
-	double MathUtils::exp(double value)
-	{
-		return ::exp(value);
-	}
+    double MathUtils::asin(double value)
+    {
+        double result = ::asin(value);
+        if(result == 0 && (value > 1 || value < -1)) {
+            return MathUtils::nan();
+        }
+        return result;
+    }
 
-	double MathUtils::floor(double value)
-	{
-		return ::floor(value);
-	}
+    double MathUtils::atan(double value)
+    {
+        return ::atan(value);
+    }
 
-	uint64_t MathUtils::frexp(double value, int *eptr)
-	{
-		double fracMantissa = ::frexp(value, eptr);
+    double MathUtils::atan2(double y, double x)
+    {
+        double result = ::atan2(y, x);
+        if(result !=0 )
+            return result;
 
-		// correct mantissa and eptr to get integer values
-		//  for both
-		*eptr -= 53; // 52 mantissa bits + the hidden bit
-		return (uint64_t)(fracMantissa * (double)(1LL << 53));
-	}
-	
-	double MathUtils::log(double value)
-	{
-		if( value >= 0 )
-			return ::log(value);
-		else
-			return MathUtils::nan();
-	}
+        if (MathUtils::isNegZero(y) && MathUtils::isNegZero(x))
+            return -PI;
+        else if(y == 0 && MathUtils::isNegZero(x))
+            return PI;
+        else if(x == 0 && MathUtils::isNegZero(y))
+            return y;
+        else if(x == 0 && y == 0)
+            return y;
+        return result;
+    }
 
-	double MathUtils::mod(double x, double y)
-	{
-		return ::fmod(x, y);
-	}
+    double MathUtils::ceil(double value)
+    {
+        return ::ceil(value);
+    }
 
-	double MathUtils::powInternal(double x, double y)
-	{
-		return ::pow(x, y);
-	}
-	
-	double MathUtils::sin(double value)
-	{
-		return ::sin(value);
-	}
+    double MathUtils::cos(double value)
+    {
+        return ::cos(value);
+    }
 
-	double MathUtils::sqrt(double value)
-	{
-		return ::sqrt(value);
-	}
+    double MathUtils::exp(double value)
+    {
+        return ::exp(value);
+    }
 
-	double MathUtils::tan(double value)
-	{
-		return ::tan(value);
-	}
+    double MathUtils::floor(double value)
+    {
+        return ::floor(value);
+    }
+
+    uint64_t MathUtils::frexp(double value, int *eptr)
+    {
+        double fracMantissa = ::frexp(value, eptr);
+
+        // correct mantissa and eptr to get integer values
+        //  for both
+        *eptr -= 53; // 52 mantissa bits + the hidden bit
+        return (uint64_t)(fracMantissa * (double)(1LL << 53));
+    }
+
+    double MathUtils::log(double value)
+    {
+        if( value >= 0 )
+            return ::log(value);
+        else
+            return MathUtils::nan();
+    }
+
+    double MathUtils::mod(double x, double y)
+    {
+        return ::fmod(x, y);
+    }
+
+    double MathUtils::powInternal(double x, double y)
+    {
+        return ::pow(x, y);
+    }
+
+    double MathUtils::sin(double value)
+    {
+        return ::sin(value);
+    }
+
+    double MathUtils::sqrt(double value)
+    {
+        return ::sqrt(value);
+    }
+
+    double MathUtils::tan(double value)
+    {
+        return ::tan(value);
+    }
 }

@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -80,7 +82,7 @@
   #if defined(__i386__) || defined(__i386)
     #define AVMSYSTEM_IA32   1
   #else
-    #define AVMSYSTEM_IA32   0 
+    #define AVMSYSTEM_IA32   0
   #endif
 
   #if defined(__x86_64__)
@@ -148,9 +150,9 @@
 
 #if AVMSYSTEM_SYMBIAN
 
-  #define AVMSYSTEM_PPC		0
-  #define AVMSYSTEM_AMD64	0
-  #define AVMSYSTEM_SPARC	0
+  #define AVMSYSTEM_PPC     0
+  #define AVMSYSTEM_AMD64   0
+  #define AVMSYSTEM_SPARC   0
   #define AVMSYSTEM_MIPS   0
 
   #if defined(__ARMCC__)
@@ -190,8 +192,8 @@
     #if AVMSYSTEM_MAC && AVMSYSTEM_ARM
         #include <machine/endian.h>
         #define __BYTE_ORDER BYTE_ORDER
-    #else 
-		#include <endian.h>
+    #else
+        #include <endian.h>
     #endif
     #if __BYTE_ORDER == LITTLE_ENDIAN
       #define AVMSYSTEM_LITTLE_ENDIAN   1
@@ -199,7 +201,7 @@
       #if __FLOAT_WORD_ORDER == BIG_ENDIAN
         #define AVMSYSTEM_DOUBLE_MSW_FIRST 1
       #endif
-	#else
+    #else
       #define AVMSYSTEM_LITTLE_ENDIAN   0
       #define AVMSYSTEM_BIG_ENDIAN      1
     #endif
@@ -236,9 +238,9 @@
   #define AVMSYSTEM_UNALIGNED_FP_ACCESS  1
 #elif AVMSYSTEM_ARM
   #if AVMSYSTEM_WEBOS
-    // At the time of this writing (Feb 2010), Palm's webOS deliberately enables software interrupts 
+    // At the time of this writing (Feb 2010), Palm's webOS deliberately enables software interrupts
     // for all unaligned accesses, apparently in the name of promoting "clean code", making unaligned
-    // accesses vastly slower than aligned (reportedly on the order of 1000x). Unless they change this 
+    // accesses vastly slower than aligned (reportedly on the order of 1000x). Unless they change this
     // policy (or give us a way to change it selectively) we will consider all webOS builds not to
     // support unaligned access, regardless of the processor variant.
     #define AVMSYSTEM_UNALIGNED_INT_ACCESS 0

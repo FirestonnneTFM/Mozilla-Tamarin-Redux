@@ -1,4 +1,5 @@
-/* -*- tab-width: 4 -*- */
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -39,41 +40,41 @@
 #ifndef __avmplus_mac_platform__
 #define __avmplus_mac_platform__
 
-#define VMPI_memcpy			::memcpy
-#define VMPI_memset 		::memset	
-#define VMPI_memcmp 		::memcmp	
-#define VMPI_memmove 		::memmove	
-#define VMPI_memchr			::memchr	
-#define VMPI_strcmp 		::strcmp
-#define VMPI_strcat 		::strcat
-#define VMPI_strchr 		::strchr
-#define VMPI_strrchr 		::strrchr
-#define VMPI_strcpy 		::strcpy
-#define VMPI_strlen 		::strlen
-#define VMPI_strncat 		::strncat
-#define VMPI_strncmp 		::strncmp
-#define VMPI_strncpy 		::strncpy
-#define VMPI_strtol			::strtol
-#define VMPI_strstr			::strstr
+#define VMPI_memcpy         ::memcpy
+#define VMPI_memset         ::memset
+#define VMPI_memcmp         ::memcmp
+#define VMPI_memmove        ::memmove
+#define VMPI_memchr         ::memchr
+#define VMPI_strcmp         ::strcmp
+#define VMPI_strcat         ::strcat
+#define VMPI_strchr         ::strchr
+#define VMPI_strrchr        ::strrchr
+#define VMPI_strcpy         ::strcpy
+#define VMPI_strlen         ::strlen
+#define VMPI_strncat        ::strncat
+#define VMPI_strncmp        ::strncmp
+#define VMPI_strncpy        ::strncpy
+#define VMPI_strtol         ::strtol
+#define VMPI_strstr         ::strstr
 
-#define VMPI_sprintf		::sprintf
-#define VMPI_snprintf		::snprintf
-#define VMPI_vsnprintf		::vsnprintf
-#define VMPI_sscanf			::sscanf
+#define VMPI_sprintf        ::sprintf
+#define VMPI_snprintf       ::snprintf
+#define VMPI_vsnprintf      ::vsnprintf
+#define VMPI_sscanf         ::sscanf
 
-#define VMPI_atoi	::atoi
-#define VMPI_tolower ::tolower	
-#define VMPI_islower ::islower	
-#define VMPI_toupper ::toupper	
-#define VMPI_isupper ::isupper	
-#define VMPI_isdigit ::isdigit	
-#define VMPI_isalnum ::isalnum	
-#define VMPI_isxdigit ::isxdigit	
-#define VMPI_isspace ::isspace	
-#define VMPI_isgraph ::isgraph	
-#define VMPI_isprint ::isprint	
-#define VMPI_ispunct ::ispunct	
-#define VMPI_iscntrl ::iscntrl	
+#define VMPI_atoi   ::atoi
+#define VMPI_tolower ::tolower
+#define VMPI_islower ::islower
+#define VMPI_toupper ::toupper
+#define VMPI_isupper ::isupper
+#define VMPI_isdigit ::isdigit
+#define VMPI_isalnum ::isalnum
+#define VMPI_isxdigit ::isxdigit
+#define VMPI_isspace ::isspace
+#define VMPI_isgraph ::isgraph
+#define VMPI_isprint ::isprint
+#define VMPI_ispunct ::ispunct
+#define VMPI_iscntrl ::iscntrl
 #define VMPI_isalpha ::isalpha
 #define VMPI_abort   ::abort
 #define VMPI_exit    ::exit
@@ -104,7 +105,7 @@
 #include <alloca.h>
 
 #if defined(AVMPLUS_MAC_CARBON) || defined(AVMPLUS_PPC)
-	#include <CoreServices/CoreServices.h>   // for MakeDataExecutable
+    #include <CoreServices/CoreServices.h>   // for MakeDataExecutable
 #endif
 #include <mach/mach.h>                   // for vm_protect()
 #include <AvailabilityMacros.h>
@@ -127,20 +128,20 @@ typedef void *maddr_ptr;
 
 #ifdef AVMPLUS_MAC_CARBON
     /**
-	 * On Mac Carbon, if you compile with Altivec support,
-	 * setjmp is redirected to __vec_setjmp and longjmp is redirected
-	 * to __vec_longjmp.  These routines do not gracefully degrade if
-	 * the CPU does not have Altivec... they just crash.
-	 *
-	 * We don't need Altivec support in the places where exceptions
-	 * are thrown and caught, so this code forces the setjmp/longjmp
-	 * implementation to be the old school, non-Altivec versions.
-	 */
+     * On Mac Carbon, if you compile with Altivec support,
+     * setjmp is redirected to __vec_setjmp and longjmp is redirected
+     * to __vec_longjmp.  These routines do not gracefully degrade if
+     * the CPU does not have Altivec... they just crash.
+     *
+     * We don't need Altivec support in the places where exceptions
+     * are thrown and caught, so this code forces the setjmp/longjmp
+     * implementation to be the old school, non-Altivec versions.
+     */
     typedef long *jmp_buf[70];
     extern "C"
     {
-    	int __setjmp(jmp_buf jmpbuf);
-    	void longjmp(jmp_buf jmpbuf, int value);
+        int __setjmp(jmp_buf jmpbuf);
+        void longjmp(jmp_buf jmpbuf, int value);
     }
 
     #define setjmp __setjmp
@@ -157,17 +158,17 @@ typedef void *maddr_ptr;
 #  endif
 // only define FASTCALL for x86-32; other gcc versions will spew warnings
 #  ifdef AVMPLUS_IA32
-#    ifndef VMCFG_AOT // Doesn't work with llvm compiler (need a better symbol for this, but don't know one) 
+#    ifndef VMCFG_AOT // Doesn't work with llvm compiler (need a better symbol for this, but don't know one)
 #      define FASTCALL __attribute__((fastcall))
 #    endif
 #  endif
 #endif // __GNUC__
 
 #if defined(__GNUC__)
-	#define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
-	#define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
+    #define AVMPLUS_ALIGN8(type) type __attribute__ ((aligned (8)))
+    #define AVMPLUS_ALIGN16(type) type __attribute__ ((aligned (16)))
 #else
-	#error "Unrecognized compiler"
+    #error "Unrecognized compiler"
 #endif
 
 // "verify" is a Mac thing, it gets in the way of our code
@@ -176,12 +177,12 @@ typedef void *maddr_ptr;
 #undef verify
 
 /**
-* Type defintion for an opaque data type representing platform-defined spin lock 
+* Type defintion for an opaque data type representing platform-defined spin lock
 * @see VMPI_lockInit(), VMPI_lockAcquire()
 */
 struct vmpi_spin_lock_t
 {
-	volatile OSSpinLock lock;
+    volatile OSSpinLock lock;
 #ifdef DEBUG
     pthread_t ownerThread;
 #endif
@@ -189,55 +190,55 @@ struct vmpi_spin_lock_t
 
 REALLY_INLINE void VMPI_lockInit(vmpi_spin_lock_t* lock)
 {
-	lock->lock = OS_SPINLOCK_INIT;
+    lock->lock = OS_SPINLOCK_INIT;
 #ifdef DEBUG
-	lock->ownerThread = NULL;
+    lock->ownerThread = NULL;
 #endif
 }
 
 REALLY_INLINE void VMPI_lockDestroy(vmpi_spin_lock_t* lock)
 {
-	lock->lock = OS_SPINLOCK_INIT;
+    lock->lock = OS_SPINLOCK_INIT;
 #ifdef DEBUG
-	lock->ownerThread = NULL;
+    lock->ownerThread = NULL;
 #endif
 }
 
 REALLY_INLINE bool VMPI_lockAcquire(vmpi_spin_lock_t* lock)
 {
 #ifdef DEBUG
-	if(!::OSSpinLockTry((OSSpinLock*)&lock->lock)) {
-		// deadlock assert
-		assert(lock->ownerThread != pthread_self());
-		::OSSpinLockLock((OSSpinLock*)&lock->lock);
-	}
-	lock->ownerThread = pthread_self();
+    if(!::OSSpinLockTry((OSSpinLock*)&lock->lock)) {
+        // deadlock assert
+        assert(lock->ownerThread != pthread_self());
+        ::OSSpinLockLock((OSSpinLock*)&lock->lock);
+    }
+    lock->ownerThread = pthread_self();
 #else
-	::OSSpinLockLock((OSSpinLock*)&lock->lock);
+    ::OSSpinLockLock((OSSpinLock*)&lock->lock);
 #endif
-	return true;
+    return true;
 }
 
 REALLY_INLINE bool VMPI_lockRelease(vmpi_spin_lock_t* lock)
 {
 #ifdef DEBUG
-	lock->ownerThread = NULL;
+    lock->ownerThread = NULL;
 #endif
-	::OSSpinLockUnlock((OSSpinLock*)&lock->lock);
-	return true;
+    ::OSSpinLockUnlock((OSSpinLock*)&lock->lock);
+    return true;
 }
 
 REALLY_INLINE bool VMPI_lockTestAndAcquire(vmpi_spin_lock_t* lock)
 {
-	if(::OSSpinLockTry((OSSpinLock*)&lock->lock))
-	{
+    if(::OSSpinLockTry((OSSpinLock*)&lock->lock))
+    {
 #ifdef DEBUG
-		assert(lock->ownerThread == NULL);
-		lock->ownerThread = pthread_self();
-#endif		
-		return true;
-	}
-	return false;
+        assert(lock->ownerThread == NULL);
+        lock->ownerThread = pthread_self();
+#endif
+        return true;
+    }
+    return false;
 }
 
 #endif // __avmplus_mac_platform__
