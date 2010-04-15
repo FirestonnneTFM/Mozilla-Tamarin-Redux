@@ -362,10 +362,10 @@ class AcceptanceRuntest(RuntestBase):
                 outputLines = []
                 if isfile(root+'.out'):
                     # override standard runtests behavior, just compare the .out file with stdout+stderr
-                    actual = [line.strip() for line in f+err]
+                    actual = [line.strip() for line in f+err if line.strip()]
                     try:
                         outfile = open(root+'.out', 'r')
-                        expectedOut = [line.strip() for line in outfile.readlines()]
+                        expectedOut = [line.strip() for line in outfile.readlines() if line.strip()]
                         outfile.close()
                         outputCalls.append((self.verbose_print,('%s.out file (expected):' % root,)))
                         outputCalls.append((self.verbose_print,(expectedOut,)))
