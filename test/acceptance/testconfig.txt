@@ -408,8 +408,6 @@ spidermonkey/js1_6/extensions/regress-312385-01, .*, skip, uses eval
 # End spidermonkey tests
 ####################
 
-regress/bug_557275:test1.*, x64.*-Dinterp , expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=557275
-
 #############################
 ## Sampling failures on SPARC
 #############################

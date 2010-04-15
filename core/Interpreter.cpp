@@ -2032,7 +2032,7 @@ namespace avmplus
 				{
 					*sp = toplevel->getproperty(*sp, multiname, toplevel->toVTable(*sp));
 				}
-				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
+				else if (!multiname->isRtns() && IS_INTEGER(*sp) && atomCanBeUint32(*sp) && AvmCore::isObject(sp[-1]))
 				{
 					a2 = *(sp--);	// key
 					*sp = AvmCore::atomToScriptObject(*sp)->getUintProperty(UINT32_VALUE(a2));
@@ -2061,7 +2061,7 @@ namespace avmplus
 					a3 = *(sp--);	// object
 					toplevel->setproperty(a3, multiname, a1, toplevel->toVTable(a3));
 				}
-				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
+				else if (!multiname->isRtns() && IS_INTEGER(*sp) && atomCanBeUint32(*sp) && AvmCore::isObject(sp[-1]))
 				{
 					a2 = *(sp--);		// key
 					a3 = *(sp--);		// object
@@ -2359,7 +2359,7 @@ namespace avmplus
 				{
 					sp[0] = env->delproperty(sp[0], multiname);
 				}
-				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
+				else if (!multiname->isRtns() && IS_INTEGER(*sp) && atomCanBeUint32(*sp) && AvmCore::isObject(sp[-1]))
 				{
 					a2 = *(sp--);	// key
 					*sp = AvmCore::atomToScriptObject(*sp)->delUintProperty(UINT32_VALUE(a2)) ? trueAtom : falseAtom;
